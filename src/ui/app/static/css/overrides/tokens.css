@@ -82,3 +82,69 @@ body {
     "WenQuanYi Micro Hei", sans-serif, "Apple Color Emoji", "Segoe UI Emoji",
     "Segoe UI Symbol";
 }
+
+/* ============================================================================
+   Density (SHL-6). `data-density` on <html> is set before first paint (base.html), default
+   "compact"; "comfortable" is the spacing the UI shipped with. Pages read these tokens, the
+   shell applies them to cards, table cells and the page gutters (kit-fidelity.css).
+   ========================================================================== */
+:root {
+  --bw-pad-card: 1.25rem;
+  --bw-pad-card-header: 1rem 1.25rem;
+  --bw-pad-tile: 1.125rem 1.375rem;
+  --bw-pad-cell: 0.782rem 1.25rem;
+  --bw-gap-grid: 1rem;
+  --bw-gap-section: 1.375rem;
+  --bw-content-pad-top: 1.75rem;
+  --bw-content-pad-x: 1.5rem;
+}
+:root[data-density="compact"] {
+  --bw-pad-card: 0.875rem 1rem;
+  --bw-pad-card-header: 0.75rem 1rem;
+  --bw-pad-tile: 0.75rem 1rem;
+  --bw-pad-cell: 0.5625rem 0.75rem;
+  --bw-gap-grid: 0.625rem;
+  --bw-gap-section: 0.875rem;
+  --bw-content-pad-top: 1.25rem;
+  --bw-content-pad-x: 1.5rem;
+}
+
+/* ============================================================================
+   Contrast (SHL-1). `data-contrast` on <html>: "high" (default) or "standard".
+   High clears RGAA 4.1.2: 4.5:1 for text, 3:1 for non-text UI, through tokens only, so no
+   component has to know about the mode. "standard" is the brand palette above, untouched.
+   --bw-border-quiet keeps the standard border for states that must NOT read as interactive
+   (disabled controls keep the non-contrast style).
+   ========================================================================== */
+:root {
+  --bw-border-quiet: #dbdee2;
+}
+[data-bs-theme="dark"] {
+  --bw-border-quiet: #29485a;
+}
+:root[data-contrast="high"] {
+  --bw-fg-2: #4d565f; /* 7.6:1 on white */
+  --bw-fg-3: #5d666e; /* 6.1:1 */
+  --bw-fg-4: #6b747c; /* 5.0:1 */
+  --bw-border: #858c93; /* 3.3:1 on a card, 3.1:1 on the page */
+  --bs-bw-green: #1d6b41;
+  --bs-success: #1d6b41;
+  --bs-warning: #8a5c00;
+  --bs-danger: #a5230f;
+  --bs-info: #0b5577;
+  --bs-secondary: #2c5f77;
+  --bs-secondary-rgb: 44, 95, 119;
+  --bs-link-hover-color: #1d6b41;
+}
+:root[data-contrast="high"][data-bs-theme="dark"] {
+  --bw-fg-2: #c4d0da;
+  --bw-fg-3: #adbac6;
+  --bw-fg-4: #98a6b3;
+  --bw-border: rgba(255, 255, 255, 0.46);
+  --bs-bw-green: #5fd894;
+  --bs-success: #5fd894;
+  --bs-warning: #ffc861;
+  --bs-danger: #ff8b76;
+  --bs-info: #7fd8f5;
+  --bs-link-hover-color: #5fd894;
+}

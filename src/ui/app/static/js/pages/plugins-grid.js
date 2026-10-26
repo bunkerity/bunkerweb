@@ -62,6 +62,11 @@ $(document).ready(function () {
     if (emptyState) emptyState.classList.toggle("d-none", visible !== 0);
   };
 
+  const tabsWrap = document.getElementById("plugin-tabs-wrap");
+  const tabsStrip = document.getElementById("plugin-filter-tabs");
+  const tabsSelect = document.getElementById("plugin-filter-select");
+  const tabButtons = Array.from(document.querySelectorAll(".plugin-filter"));
+
   const updateCounts = () => {
     const counts = {
       all: 0,
@@ -82,23 +87,65 @@ $(document).ready(function () {
       const key = el.dataset.filterCount;
       if (counts[key] !== undefined) el.textContent = counts[key];
     });
+    if (tabsSelect) {
+      Array.from(tabsSelect.options).forEach((opt) => {
+        if (counts[opt.value] === undefined) return;
+        opt.textContent = opt.textContent.replace(
+          /\s*\(\d+\)$/,
+          ` (${counts[opt.value]})`,
+        );
+      });
+    }
   };
 
-  document.querySelectorAll(".plugin-filter").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      document.querySelectorAll(".plugin-filter").forEach((b) => {
-        b.classList.toggle("active", b === btn);
-        b.setAttribute("aria-selected", b === btn ? "true" : "false");
-      });
-      activeFilter = btn.dataset.filter;
-      applyFilters();
+  const selectFilter = (value, focusTab) => {
+    activeFilter = value;
+    tabButtons.forEach((b) => {
+      const on = b.dataset.filter === value;
+      b.classList.toggle("active", on);
+      b.setAttribute("aria-selected", on ? "true" : "false");
+      b.tabIndex = on ? 0 : -1;
+      if (on && focusTab) b.focus();
+    });
+    if (tabsSelect) tabsSelect.value = value;
+    applyFilters();
+  };
+
+  tabButtons.forEach((btn) => {
+    btn.addEventListener("click", () => selectFilter(btn.dataset.filter));
+    // Roving focus: only the selected tab is in the tab order, arrows move and select.
+    btn.addEventListener("keydown", (event) => {
+      if (!["ArrowLeft", "ArrowRight"].includes(event.key)) return;
+      event.preventDefault();
+      const step = event.key === "ArrowRight" ? 1 : -1;
+      const next =
+        (tabButtons.indexOf(btn) + step + tabButtons.length) %
+        tabButtons.length;
+      selectFilter(tabButtons[next].dataset.filter, true);
     });
   });
+
+  if (tabsSelect)
+    tabsSelect.addEventListener("change", () => selectFilter(tabsSelect.value));
+
+  // When the strip no longer fits its row, the select takes over (same filter state).
+  const fitTabs = () => {
+    if (!tabsWrap || !tabsStrip || !tabsSelect) return;
+    tabsStrip.classList.remove("d-none");
+    tabsSelect.classList.add("d-none");
+    if (tabsStrip.scrollWidth > tabsStrip.clientWidth + 1) {
+      tabsStrip.classList.add("d-none");
+      tabsSelect.classList.remove("d-none");
+    }
+  };
+  if (tabsWrap && typeof ResizeObserver !== "undefined")
+    new ResizeObserver(fitTabs).observe(tabsWrap);
 
   if (searchInput) searchInput.addEventListener("input", applyFilters);
 
   updateCounts();
   applyFilters();
+  fitTabs();
 
   // --------------------------------------------------------------------------
   // Enable/disable switch -> submit the per-card form to /plugins/enable

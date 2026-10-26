@@ -19,6 +19,9 @@
     <link rel="stylesheet"
           href="{{ url_for('static', filename=rtl_sheet('libs/datatables/datatables.min.css')) }}"
           nonce="{{ style_nonce }}" />
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename=rtl_sheet('css/pages/operate.css')) }}"
+          nonce="{{ style_nonce }}" />
 {% endblock %}
 {% block content %}
     <!-- Content -->
@@ -40,19 +43,19 @@
     {% endfor %}
     <div class="row g-3 mb-4">
         <div class="col-6 col-md-3">
-            {{ tile(title="Total jobs", title_i18n="jobs.tile.total", value=jobs|length, color="primary", icon="bx-list-check") }}
+            {{ tile(title="Total jobs", title_i18n="jobs.tile.total", value=jobs|length, color="navy", icon="bx-list-check") }}
         </div>
         <div class="col-6 col-md-3">
             {{ tile(title="Reload required", title_i18n="jobs.tile.reload_required", value=stats.reload, color="warning", icon="bx-refresh") }}
         </div>
         <div class="col-6 col-md-3">
-            {{ tile(title="Asynchronous", title_i18n="jobs.tile.async", value=stats.async, color="secondary", icon="bx-shuffle") }}
+            {{ tile(title="Asynchronous", title_i18n="jobs.tile.async", value=stats.async, color="blue", icon="bx-shuffle") }}
         </div>
         <div class="col-6 col-md-3">
             {{ tile(title="Failed last run", title_i18n="jobs.tile.failed_last_run", value=stats.failed, color="danger", icon="bx-error-circle") }}
         </div>
     </div>
-    {% call card(classes="table-responsive text-nowrap p-4 min-vh-70") %}
+    {% call card(id="scheduled-jobs", classes="table-responsive text-nowrap min-vh-70", title="Scheduled jobs", title_key="jobs.card.title", subtitle="Run by the scheduler on their own interval, or on demand", subtitle_key="jobs.card.sub", icon="bx-task") %}
         {% call table_toolbar(id="jobs", columns_preferences_defaults=columns_preferences_defaults, columns_preferences=columns_preferences, loading_key="status.loading_jobs", loading_default="Loading jobs...", number=jobs|length, number_id="job_number") %}
             <thead>
                 <tr>
@@ -162,20 +165,12 @@
                                     <div id="job-{{ job }}-{{ job_data['plugin_id'] }}-history"
                                          class="visually-hidden mb-3">
                                         <ul class="list-group list-group-horizontal d-flex w-100">
-                                            <li class="list-group-item align-items-center text-center bg-secondary text-white"
-                                                style="flex: 1 1 0">
-                                                <div class="ms-2 me-auto">
-                                                    <div class="fw-bold">{{ _("job.history.start_date") }}</div>
-                                                </div>
-                                            </li>
-                                            <li class="list-group-item align-items-center text-center bg-secondary text-white"
-                                                style="flex: 1 1 0">
-                                                <div class="fw-bold">{{ _("job.history.end_date") }}</div>
-                                            </li>
-                                            <li class="list-group-item align-items-center text-center bg-secondary text-white"
-                                                style="flex: 1 1 0">
-                                                <div class="fw-bold">{{ _("job.history.success") }}</div>
-                                            </li>
+                                            {% for col in ("job.history.start_date", "job.history.end_date", "job.history.duration", "job.history.success", "job.history.error") %}
+                                                <li class="list-group-item align-items-center text-center bg-secondary text-white"
+                                                    style="flex: {{ '2 1 0' if loop.last else '1 1 0' }}">
+                                                    <div class="fw-bold">{{ _(col) }}</div>
+                                                </li>
+                                            {% endfor %}
                                         </ul>
                                         {% for history in job_data['history'] %}
                                             <ul class="list-group list-group-horizontal d-flex w-100">
@@ -183,18 +178,25 @@
                                                     style="flex: 1 1 0">{{ history['start_date'] }}</li>
                                                 <li class="list-group-item align-items-center history-end-date{% if loop.index == 1 and job_data['history']|length > 1 %} rounded-0{% endif %}"
                                                     style="flex: 1 1 0">{{ history['end_date'] }}</li>
+                                                <li class="list-group-item align-items-center text-center history-duration{% if loop.index == 1 and job_data['history']|length > 1 %} rounded-0{% endif %}"
+                                                    style="flex: 1 1 0">&mdash;</li>
                                                 <li class="list-group-item align-items-center text-center{% if loop.index == 1 and job_data['history']|length > 1 %} rounded-0{% endif %}"
                                                     style="flex: 1 1 0">
+                                                    {# Icon plus word, not a pill: this list is cloned by jobs.js before it is shown
+                                                       (jQuery clone without data and events), so nothing here may rely on a bound
+                                                       tooltip. The error text sits in its own column. #}
                                                     {% if history['success'] and history['error'] and history['error'].startswith(JOB_DEFERRAL_PREFIX) %}
-                                                        {# No tooltip here: this list is cloned by jobs.js before it's shown
-                                                           (jQuery .clone() without withDataAndEvents), and Bootstrap's
-                                                           tooltip instance is bound to the original node, not the clone --
-                                                           the icon+color distinction still renders on the clone either way. #}
-                                                        <i class="bx bx-time text-warning"></i>
+                                                        <i class="bx bx-time text-warning"></i><span class="ms-1">{{ _("status.deferred") }}</span>
+                                                    {% elif history['success'] %}
+                                                        <i class="bx bx-check text-success"></i><span class="ms-1">{{ _("status.success") }}</span>
                                                     {% else %}
-                                                        <i class="bx bx-{% if history['success'] %}check text-success{% else %}x text-danger{% endif %}"></i>
+                                                        <i class="bx bx-x text-danger"></i><span class="ms-1">{{ _("status.failed") }}</span>
                                                     {% endif %}
                                                 </li>
+                                                {# Error text goes through the template escaping; a deferral keeps its reason without the prefix. #}
+                                                <li class="list-group-item align-items-center history-error{% if loop.index == 1 and job_data['history']|length > 1 %} rounded-0{% endif %}"
+                                                    style="flex: 2 1 0"
+                                                    title="{{ (history['error'] or '')[JOB_DEFERRAL_PREFIX|length:] if history['success'] and history['error'] and history['error'].startswith(JOB_DEFERRAL_PREFIX) else (history['error'] or '') }}">{{ (history['error'] or '')[JOB_DEFERRAL_PREFIX|length:] if history['success'] and history['error'] and history['error'].startswith(JOB_DEFERRAL_PREFIX) else (history['error'] or '') }}</li>
                                             </ul>
                                         {% endfor %}
                                     </div>

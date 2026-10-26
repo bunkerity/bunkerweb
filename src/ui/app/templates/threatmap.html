@@ -16,6 +16,9 @@
     <link rel="stylesheet"
           href="{{ url_for('static', filename='css/pages/threatmap.css') }}"
           nonce="{{ style_nonce }}" />
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename=rtl_sheet('css/pages/operate.css')) }}"
+          nonce="{{ style_nonce }}" />
 {% endblock %}
 
 {% block content %}
@@ -52,18 +55,20 @@
             {{ alert(message="These figures have stopped updating. The metrics service is not answering.", message_key="threatmap.stale", variant="warning", icon="bx-error", classes="mb-0") }}
         </div>
 
+        {# Rolling 24 hours, same window the poll asks for: "today" would promise a calendar
+           day the query does not use. #}
         <div class="row row-cols-1 row-cols-sm-2 row-cols-xl-4 g-3 mb-4">
             <div class="col">
-                {{ tile(id="threatmap-tile-count", title="Attacks today", value="—", title_i18n="threatmap.attacks_today", color="", icon="bx-shield-x", icon_color="text-danger") }}
+                {{ tile(id="threatmap-tile-count", title="Blocked, last 24 hours", value="—", title_i18n="threatmap.attacks_24h", color="danger", icon="bx-shield-x", caption="Rolling window", caption_i18n="threatmap.rolling_window") }}
             </div>
             <div class="col">
-                {{ tile(id="threatmap-tile-countries", title="Countries of origin", value="—", title_i18n="threatmap.countries", color="", icon="bx-globe", icon_color="text-primary") }}
+                {{ tile(id="threatmap-tile-countries", title="Countries of origin", value="—", title_i18n="threatmap.countries", color="navy", icon="bx-globe", caption="—") }}
             </div>
             <div class="col">
-                {{ tile(id="threatmap-tile-target", title="Top target", value="—", title_i18n="threatmap.top_target", color="", icon="bx-crosshair", icon_color="text-primary") }}
+                {{ tile(id="threatmap-tile-target", title="Top target", value="—", title_i18n="threatmap.top_target", color="blue", icon="bx-crosshair", caption="—") }}
             </div>
             <div class="col">
-                {{ tile(id="threatmap-tile-reason", title="Top reason", value="—", title_i18n="threatmap.top_reason", color="", icon="bx-flag", icon_color="text-primary") }}
+                {{ tile(id="threatmap-tile-reason", title="Top reason", value="—", title_i18n="threatmap.top_reason", color="warning", icon="bx-flag", caption="—") }}
             </div>
         </div>
 
@@ -86,7 +91,21 @@
                        live region would make a screen reader re-read all fifty rows twice a
                        minute, forever, on a page meant to run for days. The same events are
                        reachable on the Reports page, which is built for reading. #}
-                    <ul class="threatmap-ticker list-unstyled mb-0" id="threatmap-ticker"></ul>
+                    <div class="table-responsive threatmap-ticker-wrap">
+                        <table class="table table-sm align-middle mb-0 threatmap-ticker">
+                            <caption class="visually-hidden">{{ _("threatmap.ticker_caption") }}</caption>
+                            <thead>
+                                <tr>
+                                    <th scope="col">{{ _("threatmap.col_time") }}</th>
+                                    <th scope="col">{{ _("threatmap.col_ip") }}</th>
+                                    <th scope="col">{{ _("threatmap.col_reason") }}</th>
+                                    <th scope="col">{{ _("threatmap.col_origin") }}</th>
+                                    <th scope="col">{{ _("threatmap.col_target") }}</th>
+                                </tr>
+                            </thead>
+                            <tbody id="threatmap-ticker"></tbody>
+                        </table>
+                    </div>
                 {% endcall %}
             </div>
             <div class="col-12 col-xl-6">

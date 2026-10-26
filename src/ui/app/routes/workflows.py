@@ -100,7 +100,13 @@ def workflows_editor(workflow_id):
         flash(translated("flash.could_not_fetch_resource_groups", message=exc.message) or f"Could not fetch resource groups: {exc.message}", "error")
         groups = {}
 
-    return render_template("workflow_editor.html", workflow=workflow, groups=groups)
+    try:
+        # Feeds the header's workflow switcher; a failure only costs the switcher its other options.
+        switcher = API_CLIENT.get_workflows(limit=500).get("workflows", [])
+    except (ApiClientError, ApiUnavailableError):
+        switcher = []
+
+    return render_template("workflow_editor.html", workflow=workflow, groups=groups, switcher=switcher)
 
 
 @workflows.route("/workflows/create", methods=["POST"])
@@ -238,6 +244,22 @@ def workflows_test(workflow_id):
     try:
         return jsonify(API_CLIENT.test_workflow(workflow_id, payload))
     except (ApiClientError, ApiUnavailableError) as exc:
+        return jsonify({"status": "error", "message": exc.message}), 502
+
+
+@workflows.route("/workflows/<string:workflow_id>/definition", methods=["GET"])
+@login_required
+@cors_required
+def workflows_definition(workflow_id):
+    """Read the canonical definition for export; API authorization remains authoritative."""
+    try:
+        result = API_CLIENT.get_workflow_definition(workflow_id)
+        response = jsonify({"definition": result["definition"]})
+        response.headers["Cache-Control"] = "no-store"
+        return response
+    except ApiClientError as exc:
+        return jsonify({"status": "error", "message": exc.message}), exc.status_code or 502
+    except ApiUnavailableError as exc:
         return jsonify({"status": "error", "message": exc.message}), 502
 
 

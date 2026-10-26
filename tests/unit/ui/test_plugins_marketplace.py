@@ -171,7 +171,7 @@ class TestGridRender:
     def test_core_always_on_locked_chip_no_switch(self):
         html = _render(plugins={"general": ALL_PLUGINS["general"]}, config=CONFIG)
         card = _card_slice(html, "general")
-        assert english("plugins.marketplace.always_on") in card
+        assert english("plugins.marketplace.always_on_badge") in card
         assert "plugin-switch" not in card  # no toggle for always-on core
 
     # S5: a core card reports activation and links to the shelf; it never writes it. Before S5
@@ -189,8 +189,8 @@ class TestGridRender:
         html = _render(plugins={"antibot": ALL_PLUGINS["antibot"], "country": ALL_PLUGINS["country"]}, config=CONFIG)
         active = _card_slice(html, "antibot")  # USE_ANTIBOT=yes
         inactive = _card_slice(html, "country")  # USE_COUNTRY=no
-        assert english("plugins.marketplace.active") in active
-        assert english("plugins.marketplace.inactive") in inactive
+        assert english("plugins.marketplace.enabled") in active and "bg-label-success" in active
+        assert english("plugins.marketplace.disabled") in inactive and "bg-label-danger" in inactive
         for plugin_id, card in (("antibot", active), ("country", inactive)):
             # `_url_for` collapses an endpoint to /<endpoint>, so the host part is the stub's,
             # not a real path; the fragment is what this test is about.
@@ -203,7 +203,7 @@ class TestGridRender:
         """There is nothing to manage: the plugin is on unconditionally, and a link into the shelf
         would land on a row that renders a locked chip rather than a control."""
         card = _card_slice(_render(plugins={"general": ALL_PLUGINS["general"]}, config=CONFIG), "general")
-        assert english("plugins.marketplace.always_on") in card
+        assert english("plugins.marketplace.always_on_badge") in card
         assert "plugin-activation-link" not in card
 
     def test_external_has_switch_without_setting(self):
@@ -241,11 +241,39 @@ class TestGridRender:
         card = _card_slice(html, "myext")
         assert "disabled" in card
 
+    def test_tier_chip_is_icon_only_with_a_hidden_label(self):
+        html = _render(plugins={k: ALL_PLUGINS[k] for k in ("general", "mypro", "myext", "myui")}, config=CONFIG)
+        for plugin_id, tier, icon in (
+            ("general", "core", "bx-cube"),
+            ("mypro", "pro", "bx-crown"),
+            ("myext", "community", "bx-group"),
+            ("myui", "community", "bx-group"),
+        ):
+            card = _card_slice(html, plugin_id)
+            assert f'data-tier-chip="{tier}"' in card and icon in card, plugin_id
+            assert "bw-tier is-icon" in card and 'class="bw-tier-l"' in card, plugin_id
+        assert english("plugins.tier.pro") in _card_slice(html, "mypro")
+
+    def test_cog_opens_global_settings_and_metrics_has_its_own_link(self):
+        html = _render(plugins={"antibot": ALL_PLUGINS["antibot"], "myui": ALL_PLUGINS["myui"], "myext": ALL_PLUGINS["myext"]}, config=CONFIG)
+        antibot = _card_slice(html, "antibot")  # core: a page and settings
+        assert re.search(r'class="[^"]*\bplugin-configure\b[^"]*"\s+href="/global_settings.global_settings_plugin_page"', antibot)
+        assert re.search(r'class="[^"]*\bplugin-metrics\b[^"]*"\s+href="/plugins/antibot"', antibot)
+        assert "plugin-activation-link" in antibot  # the activation link stays
+        myext = _card_slice(html, "myext")  # no page of its own: a cog, no Metrics link
+        assert "plugin-configure" in myext and "plugin-metrics" not in myext
+
+    def test_a_plugin_without_settings_gets_no_cog(self):
+        html = _render(plugins={"certificates": _plugin(name="Certificates", settings={})}, config=CONFIG)
+        assert "plugin-configure" not in _card_slice(html, "certificates")
+
     def test_filter_tabs_and_counts_present(self):
         html = _render(plugins=ALL_PLUGINS, config=CONFIG)
         for f in ("all", "enabled", "disabled", "core", "community", "pro"):
             assert f'data-filter="{f}"' in html
             assert f'data-filter-count="{f}"' in html
+            assert f'<option value="{f}"' in html  # the fit select mirrors the tabs
+        assert 'role="tablist"' in html and 'tabindex="-1"' in html  # roving focus: only "all" is tabbable
 
 
 class TestCardIcons:

@@ -83,7 +83,7 @@
     });
 
     const noResults = list.querySelector("[data-select-no-results]");
-    if (noResults) noResults.classList.toggle("d-none", !(q && !anyVisible));
+    if (noResults) noResults.classList.toggle("d-none", anyVisible);
   }
 
   document.addEventListener("click", function (e) {
@@ -121,9 +121,10 @@
   // static/js/pages/config_edit.js's "hidden.bs.dropdown" handler).
   $(document).on("shown.bs.dropdown", ".bw-select", function () {
     const search = this.querySelector(".bw-select-search");
-    if (!search) return;
-    search.value = "";
     filterOptions(this, "");
-    search.focus();
+    if (search) {
+      search.value = "";
+      search.focus();
+    }
   });
 })();

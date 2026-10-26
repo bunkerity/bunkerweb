@@ -1,0 +1,102 @@
+/* Overview / Configuration shell and the selected-workflow header, shared by /workflows and
+   /workflows/<id>. Colours come from the shell tokens so contrast and density follow the
+   toggles; nothing here hard-codes a hex. */
+.wfs-tabs-row {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: var(--bw-gap-section, 14px);
+  border-bottom: 1px solid var(--bw-border, var(--bs-border-color));
+}
+.wfs-tabs {
+  display: flex;
+  gap: 4px;
+}
+.wfs-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 40px;
+  margin-bottom: -1px;
+  padding: 8px 14px;
+  border-bottom: 2px solid transparent;
+  color: var(--bw-fg-2, var(--bs-secondary-color));
+  font-weight: 500;
+  text-decoration: none;
+}
+.wfs-tab:hover {
+  color: var(--bs-body-color);
+}
+.wfs-tab.is-active {
+  border-bottom-color: var(--bw-accent, var(--bs-primary));
+  color: var(--bw-accent, var(--bs-primary));
+}
+.wfs-tab.is-disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+/* Phones and narrow tablets trade the tab strip for a labelled View select. */
+.wfs-view {
+  display: none;
+  align-items: center;
+  gap: 8px;
+  padding-bottom: 8px;
+}
+@media (max-width: 767.98px) {
+  .wfs-tabs {
+    display: none;
+  }
+  .wfs-view {
+    display: flex;
+    width: 100%;
+  }
+  .wfs-view .form-select {
+    flex: 1 1 auto;
+  }
+  .wfs-tabs-row {
+    border-bottom: 0;
+  }
+}
+
+.wfs-head .card-body {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px;
+}
+.wfs-head-icon {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  background: var(--bs-primary-bg-subtle, rgba(var(--bs-primary-rgb), 0.12));
+  color: var(--bw-accent, var(--bs-primary));
+  font-size: 1.375rem;
+}
+.wfs-head-text {
+  flex: 1 1 280px;
+  min-width: 0;
+}
+.wfs-pick {
+  max-width: 420px;
+  font-weight: 600;
+}
+.wfs-head-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 12px;
+  margin-top: 8px;
+  color: var(--bw-fg-2, var(--bs-secondary-color));
+  font-size: 0.8125rem;
+}
+.wfs-head-meta .wfs-services {
+  overflow-wrap: anywhere;
+}
+.wfs-tab [hidden] {
+  display: none !important;
+}

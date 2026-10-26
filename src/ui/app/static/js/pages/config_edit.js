@@ -1,4 +1,70 @@
+// Shared by the console preview and the full editor; advisory, never a save gate.
+window.BWConfigLint = (code, configType) => {
+  if (/^(MODSEC|CRS)/i.test(configType)) return [];
+  const t = window.i18next?.t || ((key) => key);
+  const annotations = [];
+  const add = (row, key) =>
+    annotations.push({
+      row,
+      column: 0,
+      type: "warning",
+      text: t(`configs.console.lint_${key}`),
+    });
+  const braces = [];
+  let quote = "",
+    escaped = false,
+    quoteRow = 0;
+  code.split("\n").forEach((raw, row) => {
+    let line = "";
+    for (let i = 0; i < raw.length; i++) {
+      const char = raw[i];
+      if (escaped) {
+        escaped = false;
+        line += "x";
+        continue;
+      }
+      if (char === "\\") {
+        escaped = true;
+        continue;
+      }
+      if (quote) {
+        if (char === quote) quote = "";
+        continue;
+      }
+      if (char === "#") break;
+      if (char === '"' || char === "'") {
+        quote = char;
+        quoteRow = row;
+        line += "x";
+        continue;
+      }
+      if (char === "$" && raw[i + 1] === "{") {
+        const end = raw.indexOf("}", i + 2);
+        if (end !== -1) {
+          line += "x";
+          i = end;
+          continue;
+        }
+      }
+      line += char;
+      if (char === "{") braces.push(row);
+      if (char === "}") {
+        if (braces.length) braces.pop();
+        else add(row, "unexpected_brace");
+      }
+    }
+    // shortcut: line-ending heuristic, use nginx -t for authoritative multiline syntax checks.
+    if (line.trim() && !quote && !escaped && !/[;{}]$/.test(line.trim()))
+      add(row, "semicolon");
+    escaped = false;
+  });
+  if (quote) add(quoteRow, "quote");
+  braces.forEach((row) => add(row, "brace"));
+  return annotations;
+};
+
 $(document).ready(function () {
+  if (!$("#config-value").length) return;
   const isReadOnly = $("#is-read-only").val().trim() === "True";
   let selectedService = $("#selected-service").val().trim();
   const originalService = selectedService;
@@ -57,9 +123,7 @@ $(document).ready(function () {
     editor.session.setMode("ace/mode/text"); // Default mode if language is unrecognized
   }
 
-  const method = editorElement.data("method");
-  const template = editorElement.attr("data-template");
-  if (method !== "ui" && template === "") {
+  if (editorElement.attr("data-editable") === "no") {
     editor.setReadOnly(true);
   }
 
@@ -87,6 +151,28 @@ $(document).ready(function () {
 
   editorElement.removeClass("visually-hidden");
   $("#config-waiting").addClass("visually-hidden");
+
+  const lintConfig = () => {
+    const skipped = /^(MODSEC|CRS)/i.test(selectedType);
+    const annotations = window.BWConfigLint(editor.getValue(), selectedType);
+    editor.session.setAnnotations(annotations);
+    $("#config-lint-result").text(
+      t(
+        skipped
+          ? "configs.console.lint_skipped"
+          : annotations.length
+            ? "configs.console.lint_warnings"
+            : "configs.console.lint_clean",
+        { count: annotations.length },
+      ),
+    );
+  };
+  $("#config-lint").on("click", lintConfig);
+  editor.session.on("change", () => {
+    editor.session.clearAnnotations();
+    $("#config-lint-result").empty();
+  });
+  if (window.location.hash === "#lint") lintConfig();
 
   const $serviceSearch = $("#service-search");
   const $serviceDropdownMenu = $("#services-dropdown-menu");
@@ -276,6 +362,8 @@ $(document).ready(function () {
     selectedType = $(this).text().trim();
     $("#type-display").text(selectedType);
     enforceGlobalServiceForModsecCrs();
+    editor.session.clearAnnotations();
+    $("#config-lint-result").empty();
     // if (selectedType.startsWith("CRS") || selectedType.startsWith("MODSEC")) {
     //   editor.session.setMode("ace/mode/text"); // TODO: Support ModSecurity
     // } else {
@@ -286,7 +374,7 @@ $(document).ready(function () {
   const $draftToggle = $(".toggle-draft");
   const syncDraftToggle = () => {
     const icon = $draftToggle.find("i");
-    const label = $draftToggle.find("span[data-i18n]");
+    const label = $draftToggle.find(".draft-label");
     if (isDraft) {
       icon.attr("class", "bx bx-sm bx-file-blank");
       label.attr("data-i18n", "status.draft").text(t("status.draft", "Draft"));
@@ -313,7 +401,7 @@ $(document).ready(function () {
   });
 
   $(".save-config").on("click", function () {
-    if (isReadOnly) {
+    if (isReadOnly || editorElement.attr("data-editable") === "no") {
       alert(
         t("alert.readonly_mode", "This action is disabled in read-only mode."),
       );

@@ -11,6 +11,9 @@
     <link rel="stylesheet"
           href="{{ url_for('static', filename=rtl_sheet('css/pages/logs.css')) }}"
           nonce="{{ style_nonce }}" />
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename=rtl_sheet('css/pages/operate.css')) }}"
+          nonce="{{ style_nonce }}" />
 {% endblock %}
 {# The page-head band owns the breadcrumb + title, so drop the dashboard shell's
    legacy breadcrumb row for this page. #}
@@ -271,37 +274,34 @@
     {% endcall %}
     {% elif files.main %}
     {% call card(classes="p-3 min-vh-70 logs-live-card") %}
-        <div class="d-flex flex-wrap align-items-center gap-2 mb-3 logs-live-toolbar">
-            <span class="badge rounded-pill text-bg-primary d-inline-flex align-items-center gap-1">
-                <i class="bx bx-broadcast" aria-hidden="true"></i>
-                <span>{{ _("logs.all_sources") }}</span>
+        <div class="d-flex flex-wrap align-items-center gap-2 mb-3 logs-live-toolbar" role="toolbar" aria-label="{{ _('logs.live_title') }}">
+            <span class="btn btn-sm btn-light logs-tailing d-inline-flex align-items-center gap-2 pe-none">
+                <span class="status-dot status-dot-pulse text-success" aria-hidden="true"></span>
+                <span id="log-source-count">Tailing · {{ files.main | length }} sources</span>
             </span>
-            {{ native_select(id="log-level-filter",
-                             options=[{"value": "all", "text": "All logs", "i18n_key": "logs.level_all"},
-                                      {"value": "errors", "text": "Errors only", "i18n_key": "logs.level_errors_only"},
-                                      {"value": "security", "text": "Security only", "i18n_key": "logs.level_security_only"}],
-                             size="sm",
-                             select_classes="w-auto",
-                             aria_label="Filter logs by type") }}
-            <div class="input-group input-group-sm logs-live-search">
-                <span class="input-group-text"><i class="bx bx-search" aria-hidden="true"></i></span>
-                <input type="search"
-                       id="log-grep"
-                       class="form-control"
-                       placeholder="{{ _("logs.grep_placeholder") }}"
-                       aria-label="Filter log lines">
-            </div>
-            <div class="d-flex align-items-center gap-2 ms-auto">
-                <span class="btn btn-sm btn-light logs-tailing d-inline-flex align-items-center gap-2 pe-none">
-                    <span class="status-dot status-dot-pulse text-success" aria-hidden="true"></span>
-                    <span id="log-source-count">Tailing · {{ files.main | length }} sources</span>
-                </span>
-                <button type="button"
-                        id="log-expand"
-                        class="btn btn-sm btn-outline-secondary"
-                        aria-label="Expand log window">
-                    <i class="bx bx-expand" aria-hidden="true"></i>&nbsp;<span>{{ _("logs.expand") }}</span>
-                </button>
+            {# Default / tall / full: three states, kept on purpose (OPS-25). #}
+            <button type="button"
+                    id="log-expand"
+                    class="btn btn-sm btn-outline-secondary"
+                    aria-label="Expand log window">
+                <i class="bx bx-expand" aria-hidden="true"></i>&nbsp;<span>{{ _("logs.expand") }}</span>
+            </button>
+            <div class="d-flex flex-wrap align-items-center gap-2 ms-auto">
+                {{ native_select(id="log-level-filter",
+                                 options=[{"value": "all", "text": "All logs", "i18n_key": "logs.level_all"},
+                                          {"value": "errors", "text": "Errors only", "i18n_key": "logs.level_errors_only"},
+                                          {"value": "security", "text": "Security only", "i18n_key": "logs.level_security_only"}],
+                                 size="sm",
+                                 select_classes="w-auto",
+                                 aria_label="Filter logs by type") }}
+                <div class="input-group input-group-sm logs-live-search">
+                    <span class="input-group-text"><i class="bx bx-search" aria-hidden="true"></i></span>
+                    <input type="search"
+                           id="log-grep"
+                           class="form-control"
+                           placeholder="{{ _("logs.grep_placeholder") }}"
+                           aria-label="Filter log lines">
+                </div>
             </div>
         </div>
         <div id="log-stream"

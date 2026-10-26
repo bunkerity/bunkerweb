@@ -7,6 +7,22 @@
 {% from "components/selected-list.html" import selected_list %}
 {% from "components/page-head.html" import page_head %}
 {% from "components/empty-state.html" import empty_state %}
+{# Tier chip (kit .bw-tier, app.css:5593): an icon-only round chip. The type label stays in the DOM as
+   visually hidden text (the accessible name) and the tooltip carries the longer "CORE plugin" form.
+   Core is neutral, PRO is green, community (and `ui`) is muted. #}
+{% macro tier_chip(tier) -%}
+    {%- set meta = {
+        "core": ("bx-cube", "", "plugin.type.core", "plugins.tier.core"),
+        "pro": ("bx-crown", " green", "plugin.type.pro", "plugins.tier.pro"),
+        "community": ("bx-group", " muted", "plugins.marketplace.tab_community", "plugins.tier.community"),
+    }[tier] -%}
+    <span class="tag-chip{{ meta[1] }} bw-tier is-icon"
+          data-tier-chip="{{ tier }}"
+          tabindex="0"
+          data-bs-toggle="tooltip"
+          data-bs-placement="top"
+          data-bs-original-title="{{ _(meta[3]) }}"><i class="bx {{ meta[0] }}" aria-hidden="true"></i><span class="bw-tier-l">{{ _(meta[2]) }}</span></span>
+{%- endmacro %}
 {# page-head band owns the breadcrumb + H1, so drop the dashboard shell's legacy header row. #}
 {% block page_head %}{% endblock %}
 {% block head %}
@@ -28,32 +44,45 @@
         {% endif %}
     {% endcall %}
     <!-- Filters -->
-    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
-        <ul class="nav nav-pills plugin-filter-tabs gap-1" id="plugin-filter-tabs" role="tablist" aria-label="Plugin filters">
-            {% set filters = [
-                ("all", "All", "plugins.marketplace.tab_all"),
-                ("enabled", "Enabled", "plugins.marketplace.tab_enabled"),
-                ("disabled", "Disabled", "plugins.marketplace.tab_disabled"),
-                ("core", "Core", "plugin.type.core"),
-                ("community", "Community", "plugins.marketplace.tab_community"),
-                ("pro", "PRO", "plugin.type.pro"),
-            ] %}
-            {% if catalog_enabled and catalog_available %}
-                {% set filters = filters + [("catalog", "Available", "plugins.catalog.tab")] %}
-            {% endif %}
-            {% for value, label, key in filters %}
-                <li class="nav-item" role="presentation">
+    <div class="plugin-toolbar d-flex flex-wrap justify-content-between align-items-end gap-3 mb-4">
+        {% set filters = [
+            ("all", "All", "plugins.marketplace.tab_all"),
+            ("enabled", "Enabled", "plugins.marketplace.tab_enabled"),
+            ("disabled", "Disabled", "plugins.marketplace.tab_disabled"),
+            ("core", "Core", "plugin.type.core"),
+            ("community", "Community", "plugins.marketplace.tab_community"),
+            ("pro", "PRO", "plugin.type.pro"),
+        ] %}
+        {% if catalog_enabled and catalog_available %}
+            {% set filters = filters + [("catalog", "Available", "plugins.catalog.tab")] %}
+        {% endif %}
+        <div class="plugin-tabs-wrap flex-grow-1" id="plugin-tabs-wrap">
+            <div class="tabs plugin-filter-tabs"
+                 id="plugin-filter-tabs"
+                 role="tablist"
+                 aria-label="{{ _('plugins.marketplace.filter_label') }}">
+                {% for value, label, key in filters %}
                     <button type="button"
-                            class="nav-link plugin-filter{% if value == 'all' %} active{% endif %}"
+                            class="tab plugin-filter{% if value == 'all' %} active{% endif %}"
                             data-filter="{{ value }}"
                             role="tab"
+                            tabindex="{{ '0' if value == 'all' else '-1' }}"
                             aria-selected="{{ 'true' if value == 'all' else 'false' }}">
                         <span>{{ _(key) if key else label }}</span>
-                        <span class="badge rounded-pill bg-label-secondary ms-1 plugin-filter-count" data-filter-count="{{ value }}">0</span>
+                        <span class="bw-badge-xs plugin-filter-count" data-filter-count="{{ value }}">0</span>
                     </button>
-                </li>
-            {% endfor %}
-        </ul>
+                {% endfor %}
+            </div>
+            {# Takes over when the strip no longer fits (plugins-grid.js measures it); same filters,
+               same counts, and it drives the very same filter state as the tabs. #}
+            <select class="form-select plugin-tabs-select d-none"
+                    id="plugin-filter-select"
+                    aria-label="{{ _('navigation.plugins') }}">
+                {% for value, label, key in filters %}
+                    <option value="{{ value }}"{% if value == 'all' %} selected{% endif %}>{{ _(key) if key else label }} (0)</option>
+                {% endfor %}
+            </select>
+        </div>
         <div class="plugin-search-wrap" style="min-width: 240px">
             {{ search(id="plugin-search", placeholder="Search plugins...", i18n_key="plugins.marketplace.search", variant="merge") }}
         </div>
@@ -116,28 +145,23 @@
                             <i class="bx {{ icon }} bx-sm text-primary" aria-hidden="true"></i>
                         {% endif %}
                         <span class="fw-bold text-truncate" title="{{ pname }}">{{ pname }}</span>
-                        <span class="ms-auto">
-                            {% if tier == 'pro' %}
-                                {{ badge(text="PRO", i18n_key="plugin.type.pro", data_value="pro", variant="bw-green", icon="bx-crown") }}
-                            {% elif tier == 'core' %}
-                                {{ badge(text="Core", i18n_key="plugin.type.core", data_value="core", variant="secondary", icon="bx-shield") }}
-                            {% elif ptype == 'ui' %}
-                                {{ badge(text="UI", i18n_key="plugin.type.ui", data_value="ui", variant="secondary", icon="bx-cloud-upload") }}
-                            {% else %}
-                                {{ badge(text="Community", i18n_key="plugins.marketplace.tab_community", data_value="external", variant="secondary", icon="bx-plug") }}
-                            {% endif %}
-                        </span>
+                        <span class="ms-auto">{{ tier_chip(tier) }}</span>
                     </div>
                     <p class="text-muted small mb-3" style="min-height: 40px">{{ pdescription }}</p>
-                    <div class="d-flex align-items-center justify-content-between gap-2 mt-auto">
+                    <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mt-auto">
                         <div class="plugin-state">
                             {% if is_core and is_always %}
-                                {{ badge(text="Core / always on", i18n_key="plugins.marketplace.always_on", variant="secondary", icon="bx-lock-alt") }}
+                                <span tabindex="0"
+                                      data-bs-toggle="tooltip"
+                                      data-bs-placement="top"
+                                      data-bs-original-title="{{ _("plugins.marketplace.always_on_tip") }}">
+                                    {{ badge(text="Always on", i18n_key="plugins.marketplace.always_on_badge", variant="info", icon="bx-lock-alt", classes="plugin-state-badge") }}
+                                </span>
                             {% elif is_core %}
                                 {% if state_on %}
-                                    {{ badge(text="Active", i18n_key="plugins.marketplace.active", variant="success", icon="bx-check") }}
+                                    {{ badge(text="Enabled", i18n_key="plugins.marketplace.enabled", variant="success", icon="bx-check-circle", classes="plugin-state-badge") }}
                                 {% else %}
-                                    {{ badge(text="Inactive", i18n_key="plugins.marketplace.inactive", variant="secondary", icon="bx-minus") }}
+                                    {{ badge(text="Disabled", i18n_key="plugins.marketplace.disabled", variant="danger", icon="bx-minus-circle", classes="plugin-state-badge") }}
                                 {% endif %}
                             {% else %}
                                 <form method="POST"
@@ -198,12 +222,26 @@
                             {% endif %}
                             {% if is_core or has_page %}
                                 <a role="button"
-                                   class="btn btn-icon btn-outline-primary btn-sm plugin-configure"
+                                   class="btn btn-icon btn-outline-primary btn-sm plugin-metrics"
                                    href="{{ url_for('plugins') }}/{{ plugin }}"
                                    data-bs-toggle="tooltip"
                                    data-bs-placement="top"
-                                   data-bs-original-title="{{ _("tooltip.link.access_plugin_page", name=pname) }}"
-                                   aria-label="{{ _("tooltip.link.access_plugin_page", name=pname) }}">
+                                   data-bs-original-title="{{ _("plugins.card.metrics", name=pname) }}"
+                                   aria-label="{{ _("plugins.card.metrics", name=pname) }}">
+                                    <i class="bx bx-line-chart bx-xs" aria-hidden="true"></i>
+                                </a>
+                            {% endif %}
+                            {# The cog opens the plugin's settings page at global scope, for every installed
+                               plugin that declares settings: the same predicate as the activation link, so
+                               a plugin with nothing to configure does not link to an empty page. #}
+                            {% if get_filtered_settings(plugin_data.get('settings', {}), true) %}
+                                <a role="button"
+                                   class="btn btn-icon btn-outline-primary btn-sm plugin-configure"
+                                   href="{{ url_for('global_settings.global_settings_plugin_page', plugin=plugin) }}"
+                                   data-bs-toggle="tooltip"
+                                   data-bs-placement="top"
+                                   data-bs-original-title="{{ _("plugins.card.configure", name=pname) }}"
+                                   aria-label="{{ _("plugins.card.configure", name=pname) }}">
                                     <i class="bx bx-cog bx-xs" aria-hidden="true"></i>
                                 </a>
                             {% endif %}
@@ -225,11 +263,14 @@
                      data-tier="catalog"
                      data-plugin-id="{{ item.id }}"
                      data-value="catalog">
-                    {% call card(id="catalog-card-" ~ item.id, classes="h-100") %}
+                    {% call card(id="catalog-card-" ~ item.id, classes="h-100 p-3") %}
                         <div class="d-flex flex-column h-100">
                             <div class="d-flex align-items-start justify-content-between gap-2">
-                                <h6 class="mb-1">{{ item.name }}</h6>
-                                {{ badge(text="Community", i18n_key="plugins.marketplace.tab_community", variant="secondary") }}
+                                <h6 class="mb-1 d-flex align-items-center gap-2 text-truncate">
+                                    <i class="bx bx-plug bx-sm text-primary" aria-hidden="true"></i>
+                                    <span class="text-truncate" title="{{ item.name }}">{{ item.name }}</span>
+                                </h6>
+                                {{ tier_chip('community') }}
                             </div>
                             <p class="text-muted small mb-2">{{ item.description }}</p>
                             <div class="small text-muted mb-2">
@@ -239,13 +280,23 @@
                                whether the card may act on it. `managed` is anything the catalogue did
                                not write (core, pro, EXTERNAL_PLUGIN_URLS, a mounted folder). #}
                             {% if item.state == "installed" %}
-                                <div class="small text-success mb-2">{{ _("plugins.catalog.state_installed", version=item.installed_version) }}</div>
+                                <div class="mb-2">
+                                    <span class="badge rounded-pill bg-label-success d-inline-flex align-items-center text-wrap text-start">
+                                        <i class="bx bx-check-circle me-1" aria-hidden="true"></i><span>{{ _("plugins.catalog.state_installed", version=item.installed_version) }}</span>
+                                    </span>
+                                </div>
                             {% elif item.state == "update" %}
-                                <div class="small text-primary mb-2">
-                                    {{ _("plugins.catalog.state_update", installed=item.installed_version, version=item.version) }}
+                                <div class="mb-2">
+                                    <span class="badge rounded-pill bg-label-info d-inline-flex align-items-center text-wrap text-start">
+                                        <i class="bx bx-up-arrow-circle me-1" aria-hidden="true"></i><span>{{ _("plugins.catalog.state_update", installed=item.installed_version, version=item.version) }}</span>
+                                    </span>
                                 </div>
                             {% elif item.state == "managed" %}
-                                <div class="small text-muted mb-2">{{ _({"core": "plugins.catalog.state_managed_core", "external": "plugins.catalog.state_managed_external", "pro": "plugins.catalog.state_managed_pro", "ui": "plugins.catalog.state_managed_ui"}.get(item.installed_type, "plugins.catalog.state_managed")) }}</div>
+                                <div class="mb-2">
+                                    <span class="badge rounded-pill bg-label-secondary d-inline-flex align-items-center text-wrap text-start">
+                                        <i class="bx bx-lock-alt me-1" aria-hidden="true"></i><span>{{ _({"core": "plugins.catalog.state_managed_core", "external": "plugins.catalog.state_managed_external", "pro": "plugins.catalog.state_managed_pro", "ui": "plugins.catalog.state_managed_ui"}.get(item.installed_type, "plugins.catalog.state_managed")) }}</span>
+                                    </span>
+                                </div>
                             {% endif %}
                             {# `supported` is what the plugins repository's own COMPATIBILITY.json
                                declares for this release line. Under the PO rule (2026-09-25, see

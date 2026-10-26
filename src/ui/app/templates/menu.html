@@ -1,5 +1,7 @@
 <!-- Menu -->
-<aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme">
+<nav id="layout-menu"
+     class="layout-menu menu-vertical menu bg-menu-theme"
+     aria-label="{{ _("shell.main_navigation") }}">
     <div class="app-brand main mb-2">
         <a href="{{ url_for('home') }}" class="app-brand-link p-5">
             <span class="app-brand-logo main w-100">
@@ -16,59 +18,185 @@
                aria-hidden="true"></i>
         </button>
     </div>
-    {# Sidebar grouped like the design kit: Overview / Configure / Operate / System.
-       Groups mirror kit app.js:6-34; each item maps to an existing UI endpoint. #}
+    {# Sidebar grouped like the design: Overview / Configure / Operate / System.
+       Each item maps to an existing UI endpoint. The Plugins parent folds Overview and Global
+       settings; the plugin pages live in the "Plugin insights" parent below CrowdSec (CrowdSec
+       keeps its shipped place until the designer decides where it goes). The Services entry of
+       the design's Plugins parent waits for the plugin-usage page. #}
     {% set menu_groups = [
         {"header": "overview", "items": {
-            "home": {"url": url_for('home'), "icon": "bx-home-smile"},
+            "home": {"url": url_for('home'), "icon": "bxs-dashboard"},
             "instances": {"url": url_for('instances'), "icon": "bx-server"},
-            "services": {"url": url_for('services'), "icon": "bx-cube"},
+            "services": {"url": url_for('services'), "icon": "bx-grid-alt"},
             "bans": {"url": url_for('bans'), "icon": "bx-block"},
-            "certificates": {"url": url_for('certificates'), "icon": "bx-certification"},
-            "reports": {"url": url_for('reports'), "icon": "bxs-flag-checkered"},
-            "threatmap": {"url": url_for('threatmap.threatmap_page'), "icon": "bx-map-alt"},
+            "reports": {"url": url_for('reports'), "icon": "bx-line-chart"},
+            "threatmap": {"url": url_for('threatmap.threatmap_page'), "icon": "bx-target-lock"},
             "crowdsec": {"url": url_for('crowdsec.crowdsec_page'), "icon": "bx-radar"},
+            "insights": {"insights": true},
         }},
         {"header": "configure", "items": {
-            "global-settings": {"url": url_for('global_settings'), "icon": "bx-cog"},
-            "plugins": {"url": url_for('plugins'), "icon": "bx-extension"},
-            "configs": {"url": url_for('configs'), "icon": "bx-file-blank"},
-            "templates": {"url": url_for('templates.templates_page'), "icon": "bx-layout"},
             "groups": {"url": url_for('resource_groups'), "icon": "bx-collection"},
-            "redirects": {"url": url_for('redirects.redirects_page'), "icon": "bx-git-branch"},
-            "upstreams": {"url": url_for('upstreams.upstreams_page'), "icon": "bx-server"},
-            "workflows": {"url": url_for('workflows.workflows_page'), "icon": "bx-sitemap"},
+            "workflows": {"url": url_for('workflows.workflows_page'), "icon": "bx-git-commit"},
+            "plugins": {"icon": "bx-plug", "children": [
+                {"key": "plugins", "label": "navigation.plugins_overview", "url": url_for('plugins')},
+                {"key": "global-settings", "label": "navigation.global_settings", "url": url_for('global_settings')},
+            ]},
+            "configs": {"url": url_for('configs'), "icon": "bx-file-blank"},
+            "redirects": {"url": url_for('redirects.redirects_page'), "icon": "bx-directions"},
+            "upstreams": {"url": url_for('upstreams.upstreams_page'), "icon": "bx-share-alt"},
+            "templates": {"url": url_for('templates.templates_page'), "icon": "bx-code-alt"},
+            "certificates": {"url": url_for('certificates'), "icon": "bx-certification"},
         }},
         {"header": "operate", "items": {
-            "jobs": {"url": url_for('jobs'), "icon": "bx-task"},
-            "logs": {"url": url_for('logs'), "icon": "bx-notepad"},
+            "jobs": {"url": url_for('jobs'), "icon": "bx-timer"},
+            "logs": {"url": url_for('logs'), "icon": "bx-terminal"},
             "cache": {"url": url_for('cache'), "icon": "bx-data"},
-            "web-cache": {"url": url_for('web_cache'), "icon": "bx-cloud"},
+            "web-cache": {"url": url_for('web_cache'), "icon": "bx-bolt-circle"},
             "timings": {"url": url_for('timings.timings_page'), "icon": "bx-stopwatch"},
         }},
     ] %}
+    {% set menu_plugin_types = {
+        "core": {
+            "icon": "<i class=\"menu-icon tf-icons bx bx-shield me-0\" aria-hidden=\"true\"></i>"
+        },
+        "external": {
+            "icon": "<i class=\"menu-icon tf-icons bx bx-plug me-0\" aria-hidden=\"true\"></i>"
+        },
+        "ui": {
+            "icon": "<i class=\"menu-icon tf-icons bx bx-cloud-upload me-0\" aria-hidden=\"true\"></i>"
+        }
+    } %}
+    {# Plugin pages (same rule as before: a page of its own, no dedicated route, or a PRO plugin
+       shown as an upsell). Collected once so the parent can carry a count and open itself when
+       one of them is the current page. #}
+    {% set insights = [] %}
+    {% set insights_state = namespace(active=false) %}
+    {% for plugin, plugin_data in plugins.items() %}
+        {% if (not is_pro_version and plugin_data['type'] == "pro" or plugin_data['page']) and not endpoint_exists(plugin) %}
+            {% set _ignored = insights.append((plugin, plugin_data)) %}
+            {% if current_endpoint == plugin|lower %}{% set insights_state.active = true %}{% endif %}
+        {% endif %}
+    {% endfor %}
+    {% set insights_active = insights_state.active %}
     <ul class="menu-inner py-1">
         {% for group in menu_groups %}
             <li class="menu-header small text-uppercase">
                 <span class="menu-header-text">{{ _("navigation." ~ group.header) }}</span>
             </li>
             {% for endpoint, item in group['items'].items() %}
-                {% set is_active = endpoint == current_endpoint or endpoint != 'plugins' and endpoint == request.path.split('/')[1] %}
-                <li class="menu-item{% if is_active %} active{% endif %}">
-                    <a href="{{ item['url'] }}"
-                       class="menu-link"
-                       data-tour="nav-{{ endpoint }}"
-                       title="{{ _("navigation." ~ endpoint | replace('-', '_')) }}"
-                       {% if is_active %}aria-current="page"{% endif %}>
-                        <i class="menu-icon tf-icons bx {{ item['icon'] }}" aria-hidden="true"></i>
-                        <div class="text-truncate">{{ _("navigation." ~ endpoint | replace('-', '_')) }}</div>
-                    </a>
-                </li>
+                {% if endpoint == "insights" %}
+                    {% if insights %}
+                        {% set open_insights = insights_active %}
+                        <li class="menu-item menu-parent{% if insights_active %} has-active-child{% endif %}{% if open_insights %} is-open{% endif %}"
+                            data-menu-parent="insights">
+                            <button type="button"
+                                    class="menu-link menu-parent-toggle{% if not open_insights %} collapsed{% endif %}"
+                                    data-bs-toggle="collapse"
+                                    data-bs-target="#menu-sub-insights"
+                                    aria-expanded="{{ 'true' if open_insights else 'false' }}"
+                                    aria-controls="menu-sub-insights"
+                                    data-tour="nav-insights">
+                                <i class="menu-icon tf-icons bx bx-bar-chart-square" aria-hidden="true"></i>
+                                <div class="text-truncate">{{ _("navigation.plugin_insights") }}</div>
+                                <span class="badge-mini ms-auto">{{ insights | length }}</span>
+                                <i class="bx bx-chevron-down menu-caret" aria-hidden="true"></i>
+                            </button>
+                            <div class="menu-subitems collapse{% if open_insights %} show{% endif %}"
+                                 id="menu-sub-insights">
+                                <div class="menu-sub-filter">
+                                    <i class="bx bx-search" aria-hidden="true"></i>
+                                    <input type="search"
+                                           id="menu-insights-filter"
+                                           placeholder="{{ _("navigation.filter_plugins") }}"
+                                           aria-label="{{ _("navigation.filter_plugins") | replace("…", "") }}"
+                                           autocomplete="off"
+                                           spellcheck="false" />
+                                </div>
+                                <ul class="menu-sublist" id="menu-insights-list">
+                                    {% for plugin, plugin_data in insights %}
+                                        {% set not_pro_pro_plugin = not is_pro_version and plugin_data['type'] == "pro" %}
+                                        {% set plugin_label = plugin_text(plugin, 'meta.name', plugin_data['name']) %}
+                                        <li class="menu-subitem{% if current_endpoint == plugin|lower %} active{% endif %}"
+                                            data-label="{{ plugin_label | lower }}"
+                                            {% if not_pro_pro_plugin %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true" data-bs-original-title="<i class='bx bx-diamond bx-xs' aria-hidden='true'></i><span>{{ _('pro.overlay.pro_feature') }}</span>"{% endif %}>
+                                            <a href="{% if not_pro_pro_plugin %}{{ url_for('pro') }}{% else %}{{ url_for("plugins") }}/{{ plugin }}{% endif %}"
+                                               class="menu-link"
+                                               {% if current_endpoint == plugin|lower %}aria-current="page"{% endif %}>
+                                                {{ menu_plugin_types.get(plugin_data["type"], {}).get('icon', '<img src="' + pro_diamond_url + '" alt="" aria-hidden="true" width="20px" height="17.2px">') |safe }}
+                                                <div class="text-truncate pe-2{% if plugin_data['type'] == 'pro' %} text-primary shine shine-sm ps-3{% else %} ps-2{% endif %}">{{ plugin_label }}</div>
+                                            </a>
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                                <p class="menu-sub-empty" id="menu-insights-empty" hidden>{{ _("navigation.no_plugin_match") }}</p>
+                            </div>
+                        </li>
+                    {% endif %}
+                {% elif item.children %}
+                    {% set ns = namespace(active=false) %}
+                    {% for child in item.children %}
+                        {% if child.key == current_endpoint or child.key != 'plugins' and child.key == request.path.split('/')[1] %}
+                            {% set ns.active = true %}
+                        {% endif %}
+                    {% endfor %}
+                    {# Open on the first visit (the design opens the Plugins parent); a stored choice
+                       overrides that in main.js, except while one of its pages is current. #}
+                    <li class="menu-item menu-parent{% if ns.active %} has-active-child{% endif %} is-open"
+                        data-menu-parent="{{ endpoint }}">
+                        <button type="button"
+                                class="menu-link menu-parent-toggle"
+                                data-bs-toggle="collapse"
+                                data-bs-target="#menu-sub-{{ endpoint }}"
+                                aria-expanded="true"
+                                aria-controls="menu-sub-{{ endpoint }}"
+                                data-tour="nav-{{ endpoint }}">
+                            <i class="menu-icon tf-icons bx {{ item.icon }}" aria-hidden="true"></i>
+                            <div class="text-truncate">{{ _("navigation." ~ endpoint | replace('-', '_')) }}</div>
+                            <i class="bx bx-chevron-down menu-caret" aria-hidden="true"></i>
+                        </button>
+                        <ul class="menu-subitems collapse show"
+                            id="menu-sub-{{ endpoint }}">
+                            {% for child in item.children %}
+                                {% set child_active = child.key == current_endpoint or child.key != 'plugins' and child.key == request.path.split('/')[1] %}
+                                <li class="menu-subitem{% if child_active %} active{% endif %}">
+                                    <a href="{{ child.url }}"
+                                       class="menu-link"
+                                       data-tour="nav-{{ child.key }}"
+                                       {% if child_active %}aria-current="page"{% endif %}>
+                                        <span class="menu-subdot" aria-hidden="true"></span>
+                                        <div class="text-truncate">{{ _(child.label) }}</div>
+                                    </a>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </li>
+                {% else %}
+                    {% set is_active = endpoint == current_endpoint or endpoint != 'plugins' and endpoint == request.path.split('/')[1] %}
+                    <li class="menu-item{% if is_active %} active{% endif %}">
+                        <a href="{{ item['url'] }}"
+                           class="menu-link"
+                           data-tour="nav-{{ endpoint }}"
+                           title="{{ _("navigation." ~ endpoint | replace('-', '_')) }}"
+                           {% if is_active %}aria-current="page"{% endif %}>
+                            <i class="menu-icon tf-icons bx {{ item['icon'] }}" aria-hidden="true"></i>
+                            <div class="text-truncate">{{ _("navigation." ~ endpoint | replace('-', '_')) }}</div>
+                        </a>
+                    </li>
+                {% endif %}
             {% endfor %}
         {% endfor %}
         <!-- System -->
         <li class="menu-header small text-uppercase">
             <span class="menu-header-text">{{ _("navigation.system") }}</span>
+        </li>
+        <li class="menu-item{% if current_endpoint == 'profile' %} active{% endif %}">
+            <a href="{{ url_for('profile') }}"
+               class="menu-link"
+               data-tour="nav-profile"
+               {% if current_endpoint == 'profile' %}aria-current="page"{% endif %}>
+                <i class="menu-icon tf-icons bx bx-user-circle" aria-hidden="true"></i>
+                <div class="text-truncate">{{ _("navigation.profile") }}</div>
+            </a>
         </li>
         <li class="menu-item{% if current_endpoint == 'pro' %} active{% endif %}">
             <a href="{{ url_for('pro') }}"
@@ -98,17 +226,6 @@
                 <div class="text-truncate">{{ _("navigation.about") }}</div>
             </a>
         </li>
-        {% set menu_plugin_types = {
-            "core": {
-                "icon": "<i class=\"menu-icon tf-icons bx bx-shield me-0\" aria-hidden=\"true\"></i>"
-            },
-            "external": {
-                "icon": "<i class=\"menu-icon tf-icons bx bx-plug me-0\" aria-hidden=\"true\"></i>"
-            },
-            "ui": {
-                "icon": "<i class=\"menu-icon tf-icons bx bx-cloud-upload me-0\" aria-hidden=\"true\"></i>"
-            }
-        } %}
         {% set extra_plugin_lookup = {} %}
         {% for _pid, _pdata_raw in plugins.items() %}
             {# The records are keyed by id and carry none: keep it, the name is translated by id. #}
@@ -164,55 +281,34 @@
                 </div>
             </div>
         {% endif %}
-        <!-- Plugins Pages -->
-        <li class="menu-header text-uppercase align-items-center mb-0">
-            <span class="menu-header-text">{{ _("navigation.plugins_pages") }}</span>
-            <button class="btn btn-link menu-header-text p-0"
-                    type="button"
-                    data-bs-toggle="collapse"
-                    data-bs-target="#pluginsCollapse"
-                    aria-expanded="true"
-                    aria-controls="pluginsCollapse"
-                    aria-label="{{ _("aria.label.toggle_section", name=_("navigation.plugins_pages")) }}">
-                <i class="bx bx-chevron-right chevron-icon chevron-rotate" aria-hidden="true"></i>
-            </button>
-        </li>
-        <div class="collapse py-1 show" id="pluginsCollapse">
-            <div class="menu-inner">
-                {% for plugin, plugin_data in plugins.items() %}
-                    {% with not_pro_pro_plugin = not is_pro_version and plugin_data['type'] == "pro" %}
-                        {% if (not_pro_pro_plugin or plugin_data['page']) and not endpoint_exists(plugin) %}
-                            <li class="menu-item{% if current_endpoint == plugin|lower %} active{% endif %}"{% if not_pro_pro_plugin %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true" data-bs-original-title="<i class='bx bx-diamond bx-xs' aria-hidden='true'></i><span>{{ _('pro.overlay.pro_feature') }}</span>"
-                            {% endif %}
-                            >
-                            <a href="{% if not_pro_pro_plugin %}{{ url_for('pro') }}{% else %}{{ url_for("plugins") }}/{{ plugin }}{% endif %}"
-                               class="menu-link"
-                               {% if current_endpoint == plugin|lower %}aria-current="page"{% endif %}>
-                                {{ menu_plugin_types.get(plugin_data["type"], {}).get('icon', '<img src="' + pro_diamond_url + '"
- alt=""
- aria-hidden="true"
- width="20px"
- height="17.2px">') |safe }}
-                                <div class="text-truncate pe-2{% if plugin_data['type'] == 'pro' %} text-primary shine shine-sm ps-3{% else %} ps-2{% endif %}">
-                                    {{ plugin_text(plugin, 'meta.name', plugin_data['name']) }}
-                                </div>
-                            </a>
-                        </li>
-                    {% endif %}
-                {% endwith %}
-            {% endfor %}
-        </div>
-    </div>
-    <!-- / Plugins Pages -->
     </ul>
-    <!-- Sidebar footer: version + edition (kit .menu-footer, admin.css:99-104) -->
+    <!-- Sidebar footer: version, edition and GitHub stars, always visible at the bottom left -->
     <div class="menu-footer">
         <i class="bx bx-shield-quarter" aria-hidden="true"></i>
         {# Clicking your own version is where an operator looks for what changed in it, so the
            release notes hang off it rather than taking a line of their own in the nav. #}
-        <span><a href="{{ url_for('whats_new.whats_new_page') }}"
+        <span class="menu-footer-version"><a href="{{ url_for('whats_new.whats_new_page') }}"
    class="text-reset"
    aria-label="{{ _('breadcrumb.whats_new') }}">v{{ bw_version }}</a> · <span>{{ _("navigation.edition_pro" if is_pro_version else "navigation.edition_community") }}</span></span>
+        <a class="menu-footer-stars"
+           href="https://github.com/bunkerity/bunkerweb/?utm_campaign=self&utm_source=ui"
+           target="_blank"
+           rel="noopener"
+           aria-label="{% if github_stars %}{{ _("aria.label.github_stars", count=github_stars) }}{% else %}{{ _("shell.star_us") }}{% endif %}">
+            <i class="bx bxs-star" aria-hidden="true"></i>
+            {% if github_stars %}<span>{{ github_stars }}</span>{% endif %}
+        </a>
     </div>
-</aside>
+    {# Plugins the navbar search (Ctrl K) can open; their settings pages live under the
+       global-settings route. Built here because this template already reads `plugins` (the
+       payload test accounts for readers). Single-quoted tojson, as in base.html: tojson escapes
+       ' but not ", so a double-quoted attribute would break. #}
+    {% set plugin_search = [] %}
+    {% for plugin_id, plugin_data in plugins.items() %}
+        {% set _ignored = plugin_search.append({"id": plugin_id, "name": plugin_text(plugin_id, 'meta.name', plugin_data['name']), "url": url_for('global_settings') ~ "/plugins/" ~ (plugin_id | urlencode)}) %}
+    {% endfor %}
+    <input type="hidden"
+           id="admin-nav-search-plugins"
+           value='{{ plugin_search | tojson }}' />
+</nav>
 <!-- / Menu -->

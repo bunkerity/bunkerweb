@@ -86,3 +86,75 @@
     }
   });
 })();
+
+/* Look preferences: contrast and density.
+ *
+ * Per-browser, localStorage only (no server round trip, no DB column). base.html applies the
+ * stored value to <html> before the stylesheets load, so the first paint is already right;
+ * this file wires the two topbar toggles and keeps the attribute, the stored value and the
+ * button state in step. Defaults: high contrast, compact density.
+ *
+ *   data-contrast = "high" | "standard"      key: bw-contrast
+ *   data-density  = "compact" | "comfortable"  key: bw-density
+ */
+(function () {
+  const PREFS = {
+    contrast: { key: "bw-contrast", on: "high", off: "standard" },
+    density: { key: "bw-density", on: "compact", off: "comfortable" },
+  };
+
+  function read(name) {
+    const pref = PREFS[name];
+    const value = document.documentElement.getAttribute(`data-${name}`);
+    return value === pref.off ? pref.off : pref.on;
+  }
+
+  function reflect(name) {
+    const isOn = read(name) === PREFS[name].on;
+    document.querySelectorAll(`[data-bw-pref="${name}"]`).forEach((button) => {
+      button.setAttribute("aria-pressed", String(isOn));
+      button.classList.toggle("is-on", isOn);
+      if (name === "density") {
+        const icon = button.querySelector(".bx");
+        if (icon) {
+          icon.classList.toggle("bx-collapse-vertical", isOn);
+          icon.classList.toggle("bx-expand-vertical", !isOn);
+        }
+      }
+    });
+  }
+
+  function set(name, value) {
+    const pref = PREFS[name];
+    document.documentElement.setAttribute(`data-${name}`, value);
+    try {
+      localStorage.setItem(pref.key, value);
+    } catch (e) {
+      // Storage unavailable (private mode): the choice holds for this page only.
+    }
+    reflect(name);
+    // Charts and editors that read computed colours can listen for this.
+    document.dispatchEvent(
+      new CustomEvent("bw:ui-preference", { detail: { name, value } }),
+    );
+  }
+
+  window.bwUiPreferences = {
+    get: read,
+    set,
+    toggle: (name) =>
+      set(
+        name,
+        read(name) === PREFS[name].on ? PREFS[name].off : PREFS[name].on,
+      ),
+  };
+
+  document.addEventListener("click", (event) => {
+    const button = event.target.closest("[data-bw-pref]");
+    if (!button) return;
+    const name = button.getAttribute("data-bw-pref");
+    if (PREFS[name]) window.bwUiPreferences.toggle(name);
+  });
+
+  Object.keys(PREFS).forEach(reflect);
+})();

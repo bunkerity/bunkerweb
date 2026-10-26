@@ -1,5 +1,13 @@
 {% extends "dashboard.html" %}
+{% from "components/page-head.html" import page_head %}
+{% from "components/value-chips.html" import tag_chip %}
+{% block page_head %}{% endblock %}
 {% block content %}
+    {% set config_editable = config_template or not config_method or is_editable_method(config_method) %}
+    {% set title_key = 'configs.console.clone' if request.args.get('clone') else ('configs.console.new' if request.path.endswith('/new') else ('configs.console.view' if is_readonly or not config_editable else 'configs.console.edit')) %}
+    {% call page_head(title=_(title_key), breadcrumb=[("Configure", "navigation.configure", none), ("Configs", "navigation.configs", url_for('configs'))]) %}
+        <a class="btn btn-outline-secondary" href="{{ url_for('configs') }}">{{ _("button.cancel") }}</a>
+    {% endcall %}
     <!-- Content -->
     <input type="hidden"
            id="selected-service"
@@ -25,16 +33,16 @@
            name="csrf_token"
            value="{{ csrf_token() }}">
     {% set config_editable = config_template or not config_method or is_editable_method(config_method) %}
-    <div class="card p-1 mb-4 sticky-card">
-        <div class="d-flex flex-wrap justify-content-around align-items-center">
-            <div class="d-flex">
+    <div class="card p-4 mb-4">
+        <div class="d-flex flex-wrap gap-3 align-items-center">
+            <div class="d-flex flex-wrap gap-2">
                 {% if (not config_editable) or is_readonly %}
-                    <button type="button" class="btn btn-sm btn-secondary ms-2 disabled">
+                    <button type="button" class="btn btn-outline-secondary disabled">
                         <i class="bx bx-xs bx-cube" aria-hidden="true"></i>
-                        &nbsp;<span>{{ _("button.service") }}</span>: {{ config_service or "Global" }}
+                        &nbsp;<span>{{ _("button.service") }}</span>: {{ config_service if config_service and config_service != "global" else _("scope.global") }}
                     </button>
-                    <button type="button" class="btn btn-sm btn-secondary ms-2 disabled">
-                        <i class="bx bx-xs bx-window"></i>
+                    <button type="button" class="btn btn-outline-secondary disabled">
+                        <i class="bx bx-xs bx-window" aria-hidden="true"></i>
                         &nbsp;<span>{{ _("form.label.config_type") }}</span>: {{ type }}
                     </button>
                 {% else %}
@@ -45,14 +53,14 @@
                                 data-bs-toggle="dropdown"
                                 aria-haspopup="true"
                                 aria-expanded="false">
-                            <i class="bx bx-cube"></i>
-                            <span class="d-none d-md-inline">&nbsp;<span>{{ _("button.service") }}</span>: <span id="service-display">{{ config_service or "Global" }}</span></span>
+                            <i class="bx bx-cube" aria-hidden="true"></i>
+                            <span class="d-inline">&nbsp;<span>{{ _("button.service") }}</span>: <span id="service-display">{{ config_service if config_service and config_service != "global" else _("scope.global") }}</span></span>
                         </button>
                         <ul id="services-dropdown-menu"
                             class="dropdown-menu nav-pills max-vh-60 overflow-auto pt-0"
                             role="tablist">
                             <div class="input-group input-group-merge mb-2">
-                                <span class="input-group-text p-2 border-0 border-primary border-bottom shadow-none"><i class="bx fs-6 bx-search"></i></span>
+                                <span class="input-group-text p-2 border-0 border-primary border-bottom shadow-none"><i class="bx fs-6 bx-search" aria-hidden="true"></i></span>
                                 <input id="service-search"
                                        type="text"
                                        class="form-control border-0 border-primary border-bottom shadow-none"
@@ -89,8 +97,8 @@
                                 data-bs-toggle="dropdown"
                                 aria-haspopup="true"
                                 aria-expanded="false">
-                            <i class="bx bx-window"></i>
-                            <span class="d-none d-md-inline">&nbsp;<span>{{ _("form.label.config_type") }}</span>: <span id="type-display">{{ type if type else "HTTP" }}</span></span>
+                            <i class="bx bx-window" aria-hidden="true"></i>
+                            <span class="d-inline">&nbsp;<span>{{ _("form.label.config_type") }}</span>: <span id="type-display">{{ type if type else "HTTP" }}</span></span>
                         </button>
                         <ul id="types-dropdown-menu"
                             class="dropdown-menu nav-pills max-vh-60 overflow-auto pt-0"
@@ -107,7 +115,7 @@
                                             role="tab"
                                             data-bs-toggle="tab"
                                             {% if config_type == type or not type and loop.index == 1 %}aria-selected="true"{% endif %}>
-                                        <i class="bx bx-{% if config_type.startswith('CRS') %}shield-alt{% elif config_type == 'MODSEC_CRS' %}shield-quarter{% elif config_type == 'MODSEC' %}shield-alt-2{% elif 'STREAM' in config_type %}network-chart{% else %}window-alt{% endif %}"></i>&nbsp;{{ config_type }}
+                                        <i class="bx bx-{% if config_type.startswith('CRS') %}shield-alt{% elif config_type == 'MODSEC_CRS' %}shield-quarter{% elif config_type == 'MODSEC' %}shield-alt-2{% elif 'STREAM' in config_type %}network-chart{% else %}window-alt{% endif %}" aria-hidden="true"></i>&nbsp;{{ config_type }}
                                     </button>
                                 </li>
                             {% endfor %}
@@ -115,39 +123,39 @@
                     </div>
                 {% endif %}
                 {% if config_template %}
-                    <button type="button" class="btn btn-sm btn-secondary ms-2 disabled">
-                        <i class="bx bx-xs bx-spreadsheet"></i>
+                    <button type="button" class="btn btn-outline-secondary disabled">
+                        <i class="bx bx-xs bx-spreadsheet" aria-hidden="true"></i>
                         &nbsp;<span>{{ _("badge.from_template") }}</span>: {{ config_template }}
                     </button>
                 {% endif %}
             </div>
-            <div class="row align-items-end">
-                <div class="col form-floating input-group input-group-merge shadow-none">
+            <div class="flex-grow-1">
+                <div class="form-floating input-group input-group-merge">
                     <input id="config-name"
                            type="text"
-                           class="form-control form-control-sm border-0 border-primary border-bottom shadow-none"
+                           class="form-control"
                            placeholder="{{ _("form.placeholder.config_name") }}"
                            value="{{ name }}"
                            pattern="^[a-zA-Z0-9_\-]{1,255}$"
                            required
                            {% if (not config_editable) or is_readonly %}disabled{% endif %}
-                           {% if config_template %}readonly data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Renaming a template-based custom config is not allowed."{% endif %}>
+                           {% if config_template %}readonly data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="{{ _('configs.console.template_name_locked') }}"{% endif %}>
                     <label for="config-name">{{ _("form.label.configuration_name") }}</label>
-                    <span class="input-group-text border-0 border-primary border-bottom mt-2 pb-0 shadow-none"
+                    <span class="input-group-text"
                           id="config-name-suffix">.conf</span>
                 </div>
             </div>
-            <div class="d-flex justify-content-center">
-                {% set draft_toggle_disabled = config_name and not is_editable_method(config_method) %}
+            <div class="d-flex flex-wrap gap-2 align-items-center">
+                {% set draft_toggle_disabled = is_readonly or not config_editable %}
                 <div {% if draft_toggle_disabled %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="{{ _('tooltip.draft_toggle_disabled') }}"{% endif %}>
                     <button type="button"
-                            class="btn btn-sm btn-outline-secondary toggle-draft me-3 {% if draft_toggle_disabled %}disabled{% endif %}">
-                        <i class="bx bx-sm bx-{% if is_draft == 'yes' %}file-blank{% else %}globe{% endif %}"></i>
-                        <span class="d-none d-md-inline">&nbsp;
+                            class="btn btn-outline-secondary toggle-draft {% if draft_toggle_disabled %}disabled{% endif %}">
+                        <i class="bx bx-sm bx-{% if is_draft == 'yes' %}file-blank{% else %}globe{% endif %}" aria-hidden="true"></i>
+                        <span class="d-inline">&nbsp;
                             {% if is_draft == 'yes' %}
-                                <span>{{ _("status.draft") }}</span>
+                                <span class="draft-label">{{ _("status.draft") }}</span>
                             {% else %}
-                                <span>{{ _("status.online") }}</span>
+                                <span class="draft-label">{{ _("status.online") }}</span>
                             {% endif %}
                         </span>
                     </button>
@@ -155,16 +163,26 @@
                 </div>
                 <div {% if (not config_editable) or is_readonly %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="{{ _(save_tooltip_key, method=config_method) if save_tooltip_key else '' }}" {% endif %}>
                     <button type="button"
-                            class="btn btn-sm btn-bw-green px-3 save-config{% if (not config_editable) or is_readonly %} disabled{% endif %}">
-                        <i class="bx bx-save bx-sm"></i>
-                        <span class="d-none d-md-inline">&nbsp;<span>{{ _("button.save") }}</span></span>
+                            class="btn btn-primary don-jose px-3 save-config{% if (not config_editable) or is_readonly %} disabled{% endif %}">
+                        <i class="bx bx-save bx-sm" aria-hidden="true"></i>
+                        <span class="d-inline">&nbsp;<span>{{ _("button.save") }}</span></span>
                     </button>
                 </div>
             </div>
         </div>
     </div>
+    <p class="text-muted small">{{ _("configs.console.name_help") }}</p>
+    {% if config_method %}<p>{{ tag_chip(config_method) }}</p>{% endif %}
+    <div class="card mb-4">
+        <div class="card-header d-flex flex-wrap gap-2 align-items-center">
+            <i class="bx bx-code-alt" aria-hidden="true"></i>
+            <div class="flex-grow-1"><h2 class="h5 mb-1">{{ _("configs.console.editor_title") }}</h2>
+                <small>{{ _("configs.console.editor_help") }}</small></div>
+            <button type="button" id="config-lint" class="btn btn-outline-secondary"><i class="bx bx-check-double" aria-hidden="true"></i> {{ _("configs.console.lint") }}</button>
+        </div>
+        <div class="card-body border-bottom"><small>{{ _("configs.console.lint_help") }}</small><p id="config-lint-result" class="mb-0" role="status" aria-live="polite"></p></div>
     {% set editor_tooltip_key = 'tooltip.disabled_readonly' if user_readonly else ('tooltip.disabled_db_readonly' if is_readonly else ('tooltip.disabled_by_method' if not config_editable else '')) %}
-    <div class="card position-relative p-4 min-vh-70"
+    <div class="position-relative min-vh-70"
          {% if (not config_editable) or is_readonly %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="{{ _(editor_tooltip_key, method=config_method) if editor_tooltip_key else '' }}" {% endif %}>
         <p id="config-waiting"
            class="text-center position-relative w-100 p-2 text-primary rounded-3 fw-bold"
@@ -173,9 +191,12 @@
              data-language="{% if type and type.startswith(('CRS', 'MODSEC')) %}ModSecurity{% else %}NGINX{% endif %}"
              data-method="{{ config_method or 'ui' }}"
              data-template="{{ config_template }}"
+             data-editable="{{ 'yes' if config_editable and not is_readonly else 'no' }}"
+             aria-label="{{ _('form.label.configuration_name') }}"
              class="visually-hidden ace-editor border rounded position-absolute top-0 start-0 end-0 bottom-0 courier-prime">
             {{ config_value }}
         </div>
+    </div>
     </div>
     <!-- / Content -->
 {% endblock %}

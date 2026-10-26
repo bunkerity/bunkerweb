@@ -248,7 +248,6 @@ def test_resource_group_interactions_translate_dynamic_copy_and_restore_focus():
     locale = json.loads((ui_root / "static" / "locales" / "en.json").read_text(encoding="utf-8"))
     keys = {
         "clone_copy",
-        "collapse_all",
         "delete_confirm",
         "editor_edit",
         "editor_new",

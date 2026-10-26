@@ -8,10 +8,20 @@
 {# The page-head band owns the breadcrumb + title, so drop the dashboard shell's
    legacy breadcrumb row for this page. #}
 {% block page_head %}{% endblock %}
+{% block head %}
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename=rtl_sheet('css/pages/operate.css')) }}"
+          nonce="{{ style_nonce }}" />
+{% endblock %}
 {% block content %}
-    {{ page_head(title="Timings", title_i18n="breadcrumb.timings",
+    {% call page_head(title="Timings", title_i18n="breadcrumb.timings",
                  breadcrumb=[("Operate", "navigation.operate", none),
-                             ("Timings", "breadcrumb.timings", none)]) }}
+                             ("Timings", "breadcrumb.timings", none)]) %}
+        {# A plain GET of the same page: every figure is read on demand from the instances. #}
+        <a href="{{ url_for('timings.timings_page') }}" class="btn btn-outline-secondary d-flex align-items-center">
+            <i class="bx bx-refresh" aria-hidden="true"></i>&nbsp;<span>{{ _("button.refresh") }}</span>
+        </a>
+    {% endcall %}
     <p class="text-muted mb-4">{{ _("timings.subtitle") }}</p>
 
     {# Not persisted: what is on screen is what the instances hold right now, and it resets
@@ -24,54 +34,117 @@
 
     <div class="row row-cols-1 row-cols-sm-2 row-cols-xl-4 g-3 mb-4">
         <div class="col">
-            {{ tile(title="Reporting instances", value=reporting_count ~ "/" ~ total_instances, title_i18n="timings.reporting_instances", color="", icon="bx-server", icon_color="text-primary") }}
+            {{ tile(title="Reporting instances", value=reporting_count ~ "/" ~ total_instances, title_i18n="timings.reporting_instances", color="green", icon="bx-server") }}
         </div>
         <div class="col">
-            {{ tile(title="Requests measured", value=request_total.count if request_total else "—", title_i18n="timings.requests_measured", color="", icon="bx-transfer", icon_color="text-primary") }}
+            {{ tile(title="Requests measured", value=request_total.count if request_total else "—", title_i18n="timings.requests_measured", color="navy", icon="bx-transfer") }}
         </div>
         <div class="col">
-            {{ tile(title="Mean request", value=duration(request_total.mean) if request_total else "—", title_i18n="timings.mean_request", color="", icon="bx-time-five", icon_color="text-primary") }}
+            {{ tile(title="Mean request", value=duration(request_total.mean) if request_total else "—", title_i18n="timings.mean_request", color="blue", icon="bx-time-five") }}
         </div>
         <div class="col">
-            {{ tile(title="Slowest request", value=duration(request_total.max) if request_total else "—", title_i18n="timings.max_request", color="", icon="bx-trending-up", icon_color="text-primary") }}
+            {{ tile(title="Slowest request", value=duration(request_total.max) if request_total else "—", title_i18n="timings.max_request", color="warning", icon="bx-trending-up") }}
         </div>
     </div>
 
-    {% call card(classes="table-responsive p-4", title="Plugin phases", title_key="timings.phases", icon="bx-stopwatch") %}
+    {% call card(id="timings-card", classes="bw-timings-card", title="Plugin phases", title_key="timings.phases", subtitle="Time spent by each plugin in each phase", subtitle_key="timings.phases_sub", icon="bx-stopwatch", header_right='<span class="tag-chip" id="timings-count">' ~ (rows | length) ~ '</span>') %}
         {% if rows %}
-            <p class="text-muted small">{{ _("timings.share_help") }}</p>
-            <table class="table align-middle mb-0">
-                <thead>
-                    <tr>
-                        <th scope="col">{{ _("timings.plugin") }}</th>
-                        <th scope="col">{{ _("timings.phase") }}</th>
-                        <th scope="col" class="text-end">{{ _("timings.calls") }}</th>
-                        <th scope="col" class="text-end">{{ _("timings.mean") }}</th>
-                        <th scope="col" class="text-end">{{ _("timings.max") }}</th>
-                        <th scope="col" class="text-end">{{ _("timings.total") }}</th>
-                        <th scope="col" class="text-end">{{ _("timings.share") }}</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for row in rows %}
+                        {% set max_share = namespace(value=0) %}
+            {% for row in rows %}
+                {% if row.share is not none and row.share > max_share.value %}{% set max_share.value = row.share %}{% endif %}
+            {% endfor %}
+            {# Client toolbar over the rendered rows (timings.js): the data is already complete on
+               the page, so filtering, sorting and CSV export need no new route. Max stays in the
+               Columns menu and visible by default. #}
+            <div class="bw-timings-toolbar" role="toolbar" aria-label="{{ _('timings.toolbar') }}">
+                <div class="dropdown">
+                    <button type="button"
+                            class="btn btn-sm btn-outline-secondary"
+                            data-bs-toggle="dropdown"
+                            data-bs-auto-close="outside"
+                            aria-expanded="false">
+                        <i class="bx bx-columns" aria-hidden="true"></i><span class="d-none d-sm-inline ms-1">{{ _("timings.columns") }}</span>
+                    </button>
+                    <div class="dropdown-menu p-2" id="timings-columns">
+                        {% for col, label in (("calls", _("timings.calls")), ("mean", _("timings.mean")), ("max", _("timings.max")), ("total", _("timings.total")), ("share", _("timings.share"))) %}
+                            <label class="dropdown-item d-flex align-items-center gap-2 mb-0">
+                                <input type="checkbox" class="form-check-input mt-0" data-col="{{ col }}" checked />
+                                <span>{{ label }}</span>
+                            </label>
+                        {% endfor %}
+                    </div>
+                </div>
+                <button type="button" class="btn btn-sm btn-outline-secondary" id="timings-export">
+                    <i class="bx bx-download" aria-hidden="true"></i><span class="d-none d-sm-inline ms-1">{{ _("timings.export_csv") }}</span>
+                </button>
+                <label class="visually-hidden" for="timings-phase">{{ _("timings.phase") }}</label>
+                <select id="timings-phase" class="form-select form-select-sm bw-timings-phase">
+                    <option value="">{{ _("timings.all_phases") }}</option>
+                    {% for phase in rows | map(attribute="phase") | unique | sort %}<option value="{{ phase }}">{{ phase }}</option>{% endfor %}
+                </select>
+                <div class="bw-timings-search">
+                    <i class="bx bx-search" aria-hidden="true"></i>
+                    <input type="search"
+                           id="timings-search"
+                           class="form-control form-control-sm"
+                           placeholder="{{ _('timings.search_placeholder') }}"
+                           aria-label="{{ _('timings.search_placeholder') }}" />
+                </div>
+            </div>
+            <div class="table-responsive bw-table-scroll">
+                <table class="table align-middle mb-0 bw-timings-table" id="timings-table">
+                    <caption class="visually-hidden">{{ _("timings.caption") }}</caption>
+                    <thead>
                         <tr>
-                            <td><code>{{ row.plugin }}</code></td>
-                            <td><small class="text-muted">{{ row.phase }}</small></td>
-                            <td class="text-end">{{ row.count }}</td>
-                            <td class="text-end">{{ duration(row.mean) }}</td>
-                            <td class="text-end">{{ duration(row.max) }}</td>
-                            <td class="text-end">{{ duration(row.total) }}</td>
-                            <td class="text-end">
-                                {% if row.share is none %}
-                                    <span class="text-muted">—</span>
-                                {% else %}
-                                    {{ "%.1f" | format(row.share) }}%
-                                {% endif %}
-                            </td>
+                            <th scope="col" data-sort="plugin" aria-sort="none" tabindex="0">{{ _("timings.plugin") }}</th>
+                            <th scope="col" data-sort="phase" aria-sort="none" tabindex="0">{{ _("timings.phase") }}</th>
+                            <th scope="col" data-col="calls" data-sort="calls" aria-sort="none" tabindex="0" class="text-end">{{ _("timings.calls") }}</th>
+                            <th scope="col" data-col="mean" data-sort="mean" aria-sort="none" tabindex="0" class="text-end">{{ _("timings.mean") }}</th>
+                            <th scope="col" data-col="max" data-sort="max" aria-sort="none" tabindex="0" class="text-end">{{ _("timings.max") }}</th>
+                            <th scope="col" data-col="total" data-sort="total" aria-sort="descending" tabindex="0" class="text-end">{{ _("timings.total") }}</th>
+                            <th scope="col" data-col="share" data-sort="share" aria-sort="none" tabindex="0" class="text-end">{{ _("timings.share") }}</th>
                         </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody id="timings-body">
+                        {% for row in rows %}
+                            <tr data-plugin="{{ row.plugin }}"
+                                data-phase="{{ row.phase }}"
+                                data-calls="{{ row.count }}"
+                                data-mean="{{ row.mean }}"
+                                data-max="{{ row.max }}"
+                                data-total="{{ row.total }}"
+                                data-share="{{ '' if row.share is none else row.share }}">
+                                {# The id stays in a <code> inside the neutral chip: it is a plugin id, not a display name. #}
+                                <td><span class="tag-chip plugin-chip"><i class="bx bx-plug" aria-hidden="true"></i><code>{{ row.plugin }}</code></span></td>
+                                <td class="cell-mono">{{ row.phase }}</td>
+                                <td data-col="calls" class="text-end cell-mono">{{ "{:,}".format(row.count) }}</td>
+                                <td data-col="mean" class="text-end cell-mono">{{ duration(row.mean) }}</td>
+                                <td data-col="max" class="text-end cell-mono">{{ duration(row.max) }}</td>
+                                <td data-col="total" class="text-end cell-mono">{{ duration(row.total) }}</td>
+                                <td data-col="share" class="text-end">
+                                    {% if row.share is none %}
+                                        <span class="text-muted bw-timings-dash"
+                                              tabindex="0"
+                                              title="{{ _('timings.no_share_hint') }}">&mdash;</span>
+                                        <span class="visually-hidden">{{ _("timings.no_share") }}</span>
+                                    {% else %}
+                                        <div class="bw-share bw-timings-share">
+                                            <div class="bar" aria-hidden="true">
+                                                <i style="width: {{ [2, (row.share / max_share.value * 100) if max_share.value else 0] | max | round(1) }}%"></i>
+                                            </div>
+                                            <span class="cell-mono">{{ "%.1f" | format(row.share) }}%</span>
+                                        </div>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        <tr id="timings-nomatch" class="d-none">
+                            <td colspan="7" class="text-center text-muted py-4">{{ _("timings.no_match") }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <p class="bw-timings-foot text-muted small mb-0"><i class="bx bx-info-circle" aria-hidden="true"></i> <span>{{ _("timings.share_help") }}</span></p>
         {% elif not collecting %}
             {# The one empty state that is not "nothing happened yet": the feature is off, and
                an operator should be told that rather than left to conclude the fleet is idle. #}
@@ -82,4 +155,9 @@
             {{ empty_state(id="timings-empty", title_key="status.no_data") }}
         {% endif %}
     {% endcall %}
+{% endblock %}
+{% block scripts %}
+    <script src="{{ url_for('static', filename='js/pages/timings.js') }}"
+            nonce="{{ script_nonce }}"
+            defer></script>
 {% endblock %}

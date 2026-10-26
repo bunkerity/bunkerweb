@@ -2,6 +2,24 @@
 {% from "components/modal.html" import modal %}
 {% from "components/button.html" import button %}
 {% from "components/alert.html" import alert %}
+{# SET-6: same range-picker pills as global_settings.html, in the head row. The shell's floating small-screen menu is gone: the
+   pills fit at every width (labels collapse to icons under `sm`). The breadcrumb is the shell's own, unchanged. #}
+{% block head %}
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/pages/settings.css') }}"
+          nonce="{{ style_nonce }}" />
+{% endblock %}
+{% block page_head %}
+    {% set pane_blueprint = "services" %}
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-5">
+        {% include "breadcrumb.html" %}
+        {% set pill_ul_class = "bw-mode-pills" %}
+        {% set pill_first_li_class = "nav-item" %}
+        {% set pill_icon_size = "bx-xs" %}
+        {% set pill_label_class = "d-none d-sm-inline" %}
+        {% include "models/mode_pills.html" %}
+    </div>
+{% endblock %}
 {% block content %}
     <!-- Content -->
     {% set blacklisted_settings = get_blacklisted_settings() %}

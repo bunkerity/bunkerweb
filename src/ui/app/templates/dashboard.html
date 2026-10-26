@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% block page %}
+    <a class="skip-link" href="#main">{{ _("shell.skip_to_content") }}</a>
     <!-- Layout wrapper -->
     <div class="layout-wrapper layout-content-navbar">
         <div class="layout-container">
@@ -9,7 +10,7 @@
                 {% include "navbar.html" %}
                 <!-- Content wrapper -->
                 <div class="content-wrapper">
-                    <div class="flex-grow-1 container-p-y ps-6 pe-6">
+                    <main id="main" class="bw-content flex-grow-1 container-p-y ps-6 pe-6" tabindex="-1">
                         {# Legacy shell header: breadcrumb + mode-selection pills. Pages that adopt
                            components/page-head.html override this block (empty) and render their own
                            page-head band inside {% block content %} instead. Kept here so pages not
@@ -59,7 +60,7 @@
                         </div>
                         {% endblock %}
                         {% block content %}{% endblock %}
-                    </div>
+                    </main>
                     <!-- prettier-ignore -->
                     {% include "footer.html" %}
                     {% include "sidebar-notifications.html" %}

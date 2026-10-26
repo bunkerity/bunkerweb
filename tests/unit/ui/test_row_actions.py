@@ -13,8 +13,11 @@ byte for byte -- that's the binding "never delete working functionality" constra
 this pass.
 """
 
+import json
 import re
+from html import unescape
 from pathlib import Path
+from urllib.parse import unquote
 
 from _css import overrides_css
 from conftest import english  # what a converted template renders for a key
@@ -180,7 +183,7 @@ def test_the_row_object_never_reaches_search_or_sort():
     assert 'render: (data, type, row) => type === "display" ? renderRowActions(row) : ""' in " ".join(js.split())
 
 
-def test_the_draft_and_online_badge_stays_a_plain_badge():
+def test_the_draft_and_online_badge_keeps_its_value_hook_and_status_cue():
     """Rendered in `services.js` now that the rows arrive as JSON. `data-value` is not decoration:
     the bulk-conversion filter reads it off `#type-<name>` to skip services already in the target
     state, and the confirm list clones the badge out of the row."""
@@ -188,7 +191,7 @@ def test_the_draft_and_online_badge_stays_a_plain_badge():
     render_type = js[js.index("function renderType") : js.index("function renderSecurityMode")]  # noqa: E203
 
     assert 'id="type-${escapeAttr(idFor(name))}" data-value="${draft ? "draft" : "online"}"' in render_type
-    assert "status-dot" not in render_type
+    assert 'data-status-cue="${draft ? "warn" : "ok"}"' in render_type
 
 
 def test_services_actions_header_is_right_aligned():
@@ -324,15 +327,19 @@ def _configs_context(is_readonly=False, user_readonly=False, method="ui", is_dra
     )
 
 
-def test_configs_row_actions_use_icon_btn_and_keep_behavioral_hooks():
+def test_configs_row_action_menus_keep_behavioral_hooks():
     html = _render_dashboard_page("configs.html", **_configs_context())
 
-    assert 'class="row-actions"' in html
-    assert re.search(r'data-config-name="my-config"[^>]*class="icon-btn convert-config"', html)
-    assert re.search(r'class="icon-btn danger delete-config"', html)
-    assert re.search(r'class="icon-btn info export-config"', html)
-    assert 'data-config-name="my-config"' in html
-    assert 'data-config-type="http"' in html
+    for hook in ("convert-config", "delete-config", "export-config"):
+        tag = re.search(r'<(?:button|a)\b[^>]*class="[^"]*\b' + hook + r"\b[^>]*>", html).group(0)
+        assert "dropdown-item" in tag
+        if hook == "export-config":
+            href = unescape(re.search(r'href="([^"]+)"', tag).group(1))
+            assert json.loads(unquote(href.split("?configs=", 1)[1])) == [{"service": "app1.example.com", "type": "http", "name": "my-config"}]
+        else:
+            assert 'data-config-name="my-config"' in tag
+            assert 'data-config-type="http"' in tag
+            assert 'data-config-service="app1.example.com"' in tag
     assert "btn btn-primary btn-sm" not in html
     assert "btn-outline-secondary btn-sm" not in html
     assert "btn-outline-danger btn-sm" not in html
@@ -340,14 +347,13 @@ def test_configs_row_actions_use_icon_btn_and_keep_behavioral_hooks():
 
 
 def test_configs_page_still_has_its_title_header():
-    # The page header is now the shared page-head band (breadcrumb + bare H1), with the
-    # "Create custom config" CTA relocated from the DataTable toolbar into the band.
+    # Console copy and CTA live in the shared page-head band, not the DataTable toolbar.
     html = _render_dashboard_page("configs.html", **_configs_context())
 
-    assert re.search(r"<h1[^>]*>\s*Configs\s*</h1>", html)
+    assert re.search(r"<h1[^>]*>\s*" + re.escape(english("configs.console.title")) + r"\s*</h1>", html)
     assert "bw-page-head-title" in html
     assert english("navigation.configs") in html
-    assert english("button.create_config") in html
+    assert english("configs.console.new") in html
 
 
 # --------------------------------------------------------------------------------------

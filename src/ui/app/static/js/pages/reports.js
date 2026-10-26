@@ -225,10 +225,6 @@ $(document).ready(function () {
       search: true,
       buttons: [
         {
-          extend: "auto_refresh",
-          className: "btn btn-sm btn-outline-primary d-flex align-items-center",
-        },
-        {
           extend: "toggle_filters",
           className: "btn btn-sm btn-outline-primary toggle-filters",
         },
@@ -309,6 +305,10 @@ $(document).ready(function () {
           },
         },
       ],
+    },
+    {
+      extend: "auto_refresh",
+      className: "btn btn-sm btn-outline-primary ar-btn",
     },
     {
       extend: "collection",
@@ -470,32 +470,44 @@ $(document).ready(function () {
     }
   }
 
-  function toggleAutoRefresh() {
+  // The toggle button is rendered by DataTables after this file runs, so its state is applied
+  // from here whenever it may have appeared (after init and on every draw).
+  const liveRegion = document.getElementById("reports-live-status");
+  let live = null;
+  function syncAutoRefreshButton() {
+    $(".ar-btn")
+      .toggleClass("is-on", autoRefresh)
+      .attr("aria-pressed", autoRefresh ? "true" : "false");
+  }
+
+  function toggleAutoRefresh(silent = false) {
     autoRefresh = !autoRefresh;
     sessionStorage.setItem("reportsAutoRefresh", autoRefresh);
+    syncAutoRefreshButton();
     if (autoRefresh) {
       stopAutoRefreshInterval();
-      $(".bx-loader")
-        .addClass("bx-spin")
-        .closest(".btn")
-        .removeClass("btn-outline-primary")
-        .addClass("btn-primary");
       autoRefreshInterval = setInterval(() => {
         if (!autoRefresh) return;
+        if (live) live.arm();
+        $(".ar-btn").removeClass("is-tick");
         $("#reports").DataTable().ajax.reload(null, false);
-      }, 10000); // 10 seconds
+        $(".ar-btn").addClass("is-tick");
+      }, 10000); // 10 seconds (TBL-U15: the shipped interval stays)
     } else {
       stopAutoRefreshInterval();
-      $(".bx-loader")
-        .removeClass("bx-spin")
-        .closest(".btn")
-        .removeClass("btn-primary")
-        .addClass("btn-outline-primary");
+    }
+    if (liveRegion && !silent) {
+      liveRegion.textContent = autoRefresh
+        ? t("reports.live.on", "Auto-refresh on, every 10 seconds.")
+        : t("reports.live.off", "Auto-refresh paused.");
     }
   }
 
   $.fn.dataTable.ext.buttons.auto_refresh = {
-    text: '<span class="bx bx-loader bx-18px lh-1"></span>&nbsp;&nbsp;<span data-i18n="button.auto_refresh">Auto refresh</span>',
+    text: `<span class="ar-dot" aria-hidden="true"></span><span data-i18n="button.auto_refresh">${t(
+      "button.auto_refresh",
+      "Auto refresh",
+    )}</span>`,
     action: (e, dt, node, config) => {
       toggleAutoRefresh();
     },
@@ -519,6 +531,10 @@ $(document).ready(function () {
           },
           type: "ip-address",
           targets: 4,
+          render: (data, type) =>
+            type === "display" && data
+              ? `<span class="cell-ip">${escapeHtmlAttribute(data)}</span>`
+              : data,
         },
         {
           render: function (data, type, row) {
@@ -624,8 +640,8 @@ $(document).ready(function () {
           targets: 11,
           render: function (data) {
             return data === "_"
-              ? `<span data-i18n="status.default_server">default server</span>`
-              : data;
+              ? `<span class="svc-code" data-i18n="status.default_server">default server</span>`
+              : `<span class="svc-code">${escapeHtmlAttribute(data)}</span>`;
           },
         },
         {
@@ -699,17 +715,18 @@ $(document).ready(function () {
                     </a>`
                 : "";
               return `
-                <div class="d-flex justify-content-center align-items-center">
+                <div class="row-actions justify-content-center">
                   ${investigateLink}
                   <button type="button"
-                          class="btn btn-outline-danger btn-sm me-1 ban-single${readOnlyClass}"
+                          class="icon-btn ban ban-single${readOnlyClass}"
                           data-ip="${row.ip}"
                           data-server_name="${row.server_name}"
                           data-reason="${row.reason}"
+                          aria-label="${escapeHtmlAttribute(banTooltip)}"
                           data-bs-toggle="tooltip"
                           data-bs-placement="bottom"
                           data-bs-original-title="${banTooltip}">
-                    <i class="bx bx-block bx-xs"></i>
+                    <i class="bx bx-block" aria-hidden="true"></i>
                   </button>
                 </div>
               `;
@@ -1940,10 +1957,19 @@ $(document).ready(function () {
   }
 
   const dt = initializeDataTable(reports_config);
+  live = window.BWTableLive.attach(dt, {
+    rowKey: (row) =>
+      `${row.date}|${row.ip}|${row.server_name}|${row.url}|${row.status}`,
+    liveRegion,
+    message: (added) =>
+      t("reports.live.updated", "Reports updated: {{added}} new.", { added }),
+  });
+  syncAutoRefreshButton();
   dt.on("column-visibility.dt", function (e, settings, column, state) {
     updateHeaderTooltips(dt.table().header(), headers);
   });
   dt.on("draw.dt", function () {
+    syncAutoRefreshButton();
     // The rows are new: translate their [data-i18n] (country names, URL hints)
     applyTranslations();
     updateCountryTitles();
@@ -1973,7 +1999,7 @@ $(document).ready(function () {
   });
 
   if (sessionAutoRefresh === "true") {
-    toggleAutoRefresh();
+    toggleAutoRefresh(true);
   }
 
   const hashValue = location.hash;

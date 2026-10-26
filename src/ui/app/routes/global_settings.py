@@ -23,7 +23,7 @@ from app.raw_drafts import (
     metadata_raw_only,
     parse_raw_draft_settings,
 )
-from app.routes.services import postable_scope, postable_shelf_scope, resolve_plugin, resolve_save_mode, shelf_plugin_scope
+from app.routes.services import plugin_picker_options, postable_scope, postable_shelf_scope, resolve_plugin, resolve_save_mode, shelf_plugin_scope
 from app.utils import LOGGER, flash, get_activation_map, get_blacklisted_settings, is_readonly_request, plugin_settings_body, plugin_settings_body_script
 
 from app.routes.utils import extract_file_setting_names, handle_error, wait_applying, submit_config_task
@@ -367,7 +367,8 @@ def global_settings_plugin_page(plugin: str):
     # flash.html/sidebar-notifications.html render flashes with |safe, so an unvalidated value
     # here is a reflected injection on the trusted UI origin. Mirrors the same guard on
     # services_plugin_page in routes/services.py.
-    plugin_data = resolve_plugin(plugin, BW_CONFIG.get_plugins())
+    all_plugins = BW_CONFIG.get_plugins()
+    plugin_data = resolve_plugin(plugin, all_plugins)
     if not plugin_data:
         LOGGER.warning(f"Plugin not found on the global plugin page: {plugin!r}")
         return handle_error(translated("flash.plugin_not_found") or "Plugin not found", "global_settings")
@@ -437,6 +438,7 @@ def global_settings_plugin_page(plugin: str):
         config=redact_secrets(global_config, secret_setting_names(BW_CONFIG.get_plugins_settings())),
         service_id="",
         clone=None,
+        plugin_picker=plugin_picker_options(all_plugins, service_scope=False),
         # Same override body as the per-service page, same reasoning -- see services.py. Both
         # scopes get a plugin's custom form from one template; nothing here changes the writer.
         settings_body=plugin_settings_body(plugin),

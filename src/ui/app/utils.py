@@ -116,10 +116,10 @@ COLUMNS_PREFERENCES_DEFAULTS = {
     },
     "configs": {
         "3": True,
-        "4": True,
-        "5": True,
-        "6": True,
-        "7": True,
+        "4": False,
+        "5": False,
+        "6": False,
+        "7": False,
         "8": False,
     },
     "instances": {

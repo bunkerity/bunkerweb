@@ -98,6 +98,8 @@ document.addEventListener("DOMContentLoaded", () => {
         `Showing ${visible} of ${rows.length} certificates`,
         { visible, total: rows.length },
       );
+    syncSelection();
+    syncFilterCount();
   }
 
   search?.addEventListener("input", applyFilters);
@@ -314,4 +316,375 @@ document.addEventListener("DOMContentLoaded", () => {
       uploadError.hidden = false;
       document.querySelector("#certificate-upload-modal .is-invalid")?.focus();
     });
+  // --- Table toolbar: selection, columns, export, bulk actions, filters panel -------------------
+  // The page is a static table, not a DataTable, so these mirror the shared toolbar by hand and
+  // only call endpoints that already exist (/certificates/action, /certificates/<id>/download).
+  const table = document.querySelector(".certificates-table");
+  const announce = (text) => {
+    const region = document.getElementById("certificates-live");
+    if (region) region.textContent = text;
+  };
+  const baseUrl = window.location.pathname.replace(/\/+$/, "");
+  const selectAll = document.getElementById("certificates-select-all");
+  const actionsButton = document.getElementById("certificates-actions-btn");
+  const actionsWrap = document.getElementById("certificates-actions-wrap");
+  const actionsTip = actionsWrap
+    ? bootstrap.Tooltip.getOrCreateInstance(actionsWrap)
+    : null;
+
+  const isSelected = (row) =>
+    Boolean(row.querySelector(".certificate-select")?.checked);
+  const selectedCertificates = () =>
+    rows
+      .filter((row) => !row.hidden && isSelected(row))
+      .map((row) => certificates.get(row.dataset.certificateId))
+      .filter(Boolean);
+
+  function syncSelection() {
+    if (!selectAll) return;
+    const visible = rows.filter((row) => !row.hidden);
+    const chosen = visible.filter(isSelected);
+    selectAll.checked = visible.length > 0 && chosen.length === visible.length;
+    selectAll.indeterminate =
+      chosen.length > 0 && chosen.length < visible.length;
+    const none = chosen.length === 0;
+    actionsButton?.setAttribute("aria-disabled", String(none));
+    if (none) actionsTip?.enable();
+    else actionsTip?.disable();
+  }
+
+  // aria-disabled (not disabled) keeps the button focusable so its tooltip stays reachable.
+  actionsButton?.addEventListener("click", (event) => {
+    if (actionsButton.getAttribute("aria-disabled") === "true") {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+  });
+  selectAll?.addEventListener("change", () => {
+    rows
+      .filter((row) => !row.hidden)
+      .forEach((row) => {
+        const box = row.querySelector(".certificate-select");
+        if (box) box.checked = selectAll.checked;
+      });
+    syncSelection();
+  });
+  rows.forEach((row) =>
+    row
+      .querySelector(".certificate-select")
+      ?.addEventListener("change", syncSelection),
+  );
+
+  // Columns popover: every data column but the toggle, checkbox and actions cells.
+  const COLUMNS_KEY = "bw-certificates-columns";
+  const headCells = table ? Array.from(table.querySelectorAll("thead th")) : [];
+  const toggleable = headCells
+    .map((cell, index) => index)
+    .filter((index) => index >= 2 && index < headCells.length - 1);
+  let hiddenColumns = new Set();
+  try {
+    hiddenColumns = new Set(
+      JSON.parse(localStorage.getItem(COLUMNS_KEY) || "[]").filter((index) =>
+        toggleable.includes(index),
+      ),
+    );
+  } catch (error) {
+    hiddenColumns = new Set();
+  }
+  if (hiddenColumns.size >= toggleable.length) hiddenColumns = new Set();
+  const columnsList = document.getElementById("certificates-columns-list");
+
+  function applyColumns() {
+    rows.forEach((row) =>
+      toggleable.forEach((index) =>
+        row.cells[index]?.classList.toggle("d-none", hiddenColumns.has(index)),
+      ),
+    );
+    toggleable.forEach((index) =>
+      headCells[index].classList.toggle("d-none", hiddenColumns.has(index)),
+    );
+    try {
+      localStorage.setItem(COLUMNS_KEY, JSON.stringify([...hiddenColumns]));
+    } catch (error) {
+      // Private mode: the choice just does not persist.
+    }
+    if (!columnsList) return;
+    const visibleCount = toggleable.length - hiddenColumns.size;
+    document.getElementById("certificates-columns-count").textContent =
+      translate(
+        "table_system.column_count",
+        `${visibleCount} of ${toggleable.length}`,
+        {
+          visible: visibleCount,
+          total: toggleable.length,
+        },
+      );
+    columnsList.replaceChildren(
+      ...toggleable.map((index) => {
+        const label = document.createElement("label");
+        label.className = "dropdown-item d-flex align-items-center gap-2";
+        const box = document.createElement("input");
+        box.type = "checkbox";
+        box.checked = !hiddenColumns.has(index);
+        // At least one data column always stays visible.
+        box.disabled = box.checked && visibleCount === 1;
+        box.addEventListener("change", () => {
+          if (box.checked) hiddenColumns.delete(index);
+          else hiddenColumns.add(index);
+          applyColumns();
+        });
+        const text = document.createElement("span");
+        text.textContent = headCells[index].textContent.trim();
+        label.append(box, text);
+        return label;
+      }),
+    );
+  }
+  document
+    .getElementById("certificates-columns-all")
+    ?.addEventListener("click", () => {
+      hiddenColumns.clear();
+      applyColumns();
+    });
+  applyColumns();
+
+  // Export what is on screen: visible rows, visible columns.
+  function cellValue(row, index) {
+    const certificate = certificates.get(row.dataset.certificateId);
+    if (index === 2) return certificate?.name || "";
+    if (index === 8)
+      return (certificate?.attachments || [])
+        .map((attachment) => attachment.service_id)
+        .join(" ");
+    const cell = row.cells[index];
+    const time = cell?.querySelector("time");
+    return (time?.getAttribute("datetime") || cell?.textContent || "")
+      .replace(/\s+/g, " ")
+      .trim();
+  }
+  function exportMatrix() {
+    const columns = toggleable.filter((index) => !hiddenColumns.has(index));
+    return [
+      columns.map((index) => headCells[index].textContent.trim()),
+      ...rows
+        .filter((row) => !row.hidden)
+        .map((row) => columns.map((index) => cellValue(row, index))),
+    ];
+  }
+  document
+    .getElementById("certificates-export-csv")
+    ?.addEventListener("click", () => {
+      // A cell starting with = + - @ would be run as a formula by a spreadsheet.
+      const quote = (value) =>
+        `"${(/^[=+\-@\t\r]/.test(value) ? `'${value}` : value).replace(/"/g, '""')}"`;
+      const csv = exportMatrix()
+        .map((line) => line.map(quote).join(","))
+        .join("\r\n");
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(
+        new Blob(["\ufeff", csv], { type: "text/csv;charset=utf-8" }),
+      );
+      link.download = "bw_certificates.csv";
+      link.click();
+      setTimeout(() => URL.revokeObjectURL(link.href), 1000);
+    });
+  document
+    .getElementById("certificates-export-copy")
+    ?.addEventListener("click", async () => {
+      const text = exportMatrix()
+        .map((line) => line.join("\t"))
+        .join("\n");
+      try {
+        await navigator.clipboard.writeText(text);
+        announce(translate("toast.copied", "Copied!"));
+      } catch (error) {
+        console.error(error);
+      }
+    });
+
+  // Bulk actions follow the same per-source rules as the row buttons.
+  const actionForm = document.getElementById("certificate-action-form");
+  async function runBulk(
+    action,
+    eligible,
+    skipped,
+    confirmKey,
+    confirmFallback,
+  ) {
+    if (!eligible.length) {
+      announce(
+        translate(
+          "certificates.bulk.none_eligible",
+          "None of the selected certificates can take this action.",
+        ),
+      );
+      return;
+    }
+    const message = [
+      translate(confirmKey, confirmFallback, { count: eligible.length }),
+      skipped
+        ? translate(
+            "certificates.bulk.skipped",
+            `Selected certificates that cannot take this action, skipped: ${skipped}.`,
+            { skipped },
+          )
+        : "",
+    ]
+      .filter(Boolean)
+      .join(" ");
+    const confirmed = await window.BWConfirm.open({
+      title: translate(
+        "certificates.confirm_action",
+        "Confirm certificate action",
+      ),
+      message,
+      destructive: action === "delete",
+    });
+    if (!confirmed || !actionForm) return;
+    const token = actionForm.querySelector('input[name="csrf_token"]').value;
+    for (const certificate of eligible) {
+      try {
+        // One request per certificate on the existing endpoint; the redirect (and the flash it
+        // carries) is not followed, the page reloads once at the end.
+        await fetch(actionForm.action, {
+          method: "POST",
+          body: new URLSearchParams({
+            csrf_token: token,
+            action,
+            certificate_id: certificate.id,
+            source: certificate.source,
+          }),
+          credentials: "same-origin",
+          redirect: "manual",
+        });
+      } catch (error) {
+        console.error(error);
+        break;
+      }
+    }
+    window.location.reload();
+  }
+  document
+    .getElementById("certificates-bulk-renew")
+    ?.addEventListener("click", () => {
+      const chosen = selectedCertificates();
+      const eligible = chosen.filter((item) => item.source === "selfsigned");
+      runBulk(
+        "renew",
+        eligible,
+        chosen.length - eligible.length,
+        "certificates.bulk.confirm_renew",
+        `Self-signed certificates to renew: ${eligible.length}. Continue?`,
+      );
+    });
+  document
+    .getElementById("certificates-bulk-delete")
+    ?.addEventListener("click", () => {
+      const chosen = selectedCertificates();
+      const eligible = chosen.filter(
+        (item) => item.source !== "letsencrypt" && !item.attachments.length,
+      );
+      runBulk(
+        "delete",
+        eligible,
+        chosen.length - eligible.length,
+        "certificates.bulk.confirm_delete",
+        `Certificates to delete: ${eligible.length}. This cannot be undone. Continue?`,
+      );
+    });
+  document
+    .getElementById("certificates-bulk-download")
+    ?.addEventListener("click", async () => {
+      for (const certificate of selectedCertificates()) {
+        const link = document.createElement("a");
+        link.href = `${baseUrl}/${encodeURIComponent(certificate.id)}/download/chain`;
+        link.click();
+        // Browsers drop downloads fired in the same tick.
+        await new Promise((resolve) => setTimeout(resolve, 400));
+      }
+    });
+
+  // Filters panel: the three selects keep their ids and behavior; the button shows how many are set.
+  const filtersToggle = document.getElementById("certificates-filters-toggle");
+  const filtersPanel = document.getElementById("certificates-filters");
+  const filtersCount = document.getElementById("certificates-filters-count");
+  filtersToggle?.addEventListener("click", () => {
+    const open = filtersPanel.hidden;
+    filtersPanel.hidden = !open;
+    filtersToggle.setAttribute("aria-expanded", String(open));
+  });
+  function syncFilterCount() {
+    if (!filtersCount) return;
+    const active = [sourceFilter, statusFilter, serviceFilter].filter(
+      (filter) => filter?.value,
+    ).length;
+    filtersCount.hidden = active === 0;
+    filtersCount.textContent = String(active);
+    filtersToggle.setAttribute(
+      "aria-label",
+      active
+        ? translate(
+            "table_system.active_filters",
+            `Filters, ${active} active`,
+            {
+              count: active,
+            },
+          )
+        : translate("table_system.filters", "Filters"),
+    );
+  }
+  document
+    .getElementById("certificates-filters-reset")
+    ?.addEventListener("click", () => {
+      [sourceFilter, statusFilter, serviceFilter].forEach((filter) => {
+        if (filter) filter.value = "";
+      });
+      applyFilters();
+    });
+
+  // Top issuers: ranked table, Detail dialog holds the full list.
+  const issuersHost = document.getElementById("certificates-issuers");
+  if (issuersHost && window.BWTopTable) {
+    let issuers = [];
+    try {
+      issuers = JSON.parse(
+        document.getElementById("certificates-issuers-data")?.value || "[]",
+      );
+    } catch (error) {
+      issuers = [];
+    }
+    const total = issuers.reduce((sum, [, amount]) => sum + amount, 0);
+    const items = issuers.map(([issuer, amount]) => ({
+      label: issuer,
+      pct: total ? Math.round((amount / total) * 100) : 0,
+    }));
+    const options = {
+      head: {
+        label: translate("certificates.issuer", "Issuer"),
+        share: translate("tables.top.share", "Share"),
+      },
+      caption: translate("certificates.issuers", "Top issuers"),
+    };
+    window.BWTopTable.render($(issuersHost), {
+      ...options,
+      items: items.slice(0, 6),
+      detailLabel: translate("tables.top.detail", "Detail"),
+      onDetail: () =>
+        window.BWTopTable.openDetail({
+          ...options,
+          items,
+          title: options.caption,
+          meta: translate(
+            "certificates.issuers_meta",
+            `${total} certificates`,
+            {
+              count: total,
+            },
+          ),
+          closeLabel: translate("button.close", "Close"),
+        }),
+    });
+  }
+  syncSelection();
+  syncFilterCount();
 });

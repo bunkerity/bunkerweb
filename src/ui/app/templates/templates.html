@@ -8,6 +8,12 @@
 {% from "components/checkbox.html" import checkbox %}
 {% from "components/selected-list.html" import selected_list %}
 {% from "components/page-head.html" import page_head %}
+{% from "components/search.html" import search %}
+{% block head %}
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename=rtl_sheet('css/pages/groups.css')) }}"
+          nonce="{{ style_nonce }}" />
+{% endblock %}
 {# The page-head band now owns the breadcrumb + title, so suppress the dashboard shell's
    legacy breadcrumb/mode row for this page (kills the duplicated breadcrumb). #}
 {% block page_head %}{% endblock %}
@@ -56,6 +62,10 @@
                         action_icon="bx-plus",
                         action_href=url_for('templates.template_create_page') if not is_readonly else none) }}
     {% else %}
+        {# One search over what is on the page: the installed templates and the catalogue below. #}
+        <div class="mb-3 templates-search">
+            {{ search(id="templates-search", placeholder="Search templates...", i18n_key="templates.search", size="sm", clearable=true, clear_id="templates-search-clear") }}
+        </div>
         <div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-3" id="templates-grid">
             {% for template, template_data in templates.items() %}
                 {% set usage_count = template_usage.get(template, 0) %}
@@ -83,7 +93,15 @@
                 {% elif 'static' in tid or 'cdn' in tid or 's3' in tid or 'cloud' in tid %}{% set tpl_icon = 'bx-cloud' %}
                 {% elif 'admin' in tid %}{% set tpl_icon = 'bx-user-circle' %}
                 {% endif %}
-                <div class="col" data-template-id="{{ template }}">
+                {% set is_managed = template_data.method != 'ui' or template_data.plugin_id %}
+                {% set all_badges = visible_badges + overflow_badges %}
+                {% set template_description = (template|replace('-', ' ')|replace('_', ' ')|title) if is_custom_template else plugin_text(template_data.plugin_id, 'templates.' ~ template ~ '.name', template_data.name) %}
+                <div class="col"
+                     data-template-id="{{ template }}"
+                     data-template-title="{{ template_title }}"
+                     data-template-view-url="{{ url_for('templates.template_edit_page', template_id=template) }}"
+                     data-features='{{ all_badges | tojson }}'
+                     data-search="{{ (template ~ ' ' ~ template_title ~ ' ' ~ template_description ~ ' ' ~ (all_badges | map(attribute='text') | join(' '))) | lower }}">
                     {% call card(id="template-card-" ~ template, classes="h-100 bw-tpl-card") %}
                         <div class="bw-tpl-header d-flex align-items-center gap-2">
                             <div class="form-check template-select-check d-none flex-shrink-0 m-0">
@@ -95,13 +113,21 @@
                             </div>
                             <i class="bx {{ tpl_icon }} bw-tpl-icon flex-shrink-0" aria-hidden="true"></i>
                             <h6 class="bw-tpl-title mb-0 flex-grow-1">{{ template_title }}</h6>
+                            {% if is_managed %}
+                                <span class="tag-chip flex-shrink-0 template-managed"
+                                      title="{{ _('templates.managed_by', owner=template_data.plugin_id or template_data.method) }}"
+                                      tabindex="0"><i class="bx bx-lock-alt" aria-hidden="true"></i>{{ _("templates.read_only") }}</span>
+                            {% endif %}
                             <span class="tag-chip flex-shrink-0">{{ usage_count }}&nbsp;<span>{{ _("templates.gallery.svc_suffix") }}</span></span>
                         </div>
                         <div class="bw-tpl-body">
-                            {% set template_description = (template|replace('-', ' ')|replace('_', ' ')|title) if is_custom_template else plugin_text(template_data.plugin_id, 'templates.' ~ template ~ '.name', template_data.name) %}
                             <p class="bw-tpl-desc mb-3" title="{{ template_description }}">{{ template_description }}</p>
-                            {% if visible_badges %}
-                                <div class="d-flex flex-wrap gap-1 mb-3">
+                            {% if all_badges %}
+                                {# The badges and the +N are one control: it opens the grouped feature summary. #}
+                                <button type="button"
+                                        class="template-features-open d-flex flex-wrap gap-1 mb-3"
+                                        aria-haspopup="dialog"
+                                        aria-label="{{ _('templates.features_of', name=template_title) }}">
                                     {% for tag in visible_badges %}
                                         <span data-bs-toggle="tooltip"
                                               data-bs-placement="top"
@@ -113,7 +139,7 @@
                                         <span class="tag-chip muted"
                                               title="{{ overflow_badges | map(attribute='text') | join(', ') }}">+{{ overflow_badges|length }}</span>
                                     {% endif %}
-                                </div>
+                                </button>
                             {% endif %}
                             <div class="d-flex gap-2 flex-wrap align-items-center">
                                 {# Managed = the API refuses to change or delete it (`template_owner`):
@@ -123,7 +149,6 @@
                                    own readonly_method_plugin/readonly_method split) -- a bundled
                                    template can carry plugin_id with a non-"ui" method too, and the
                                    editor already names the plugin in that case. #}
-                                {% set is_managed = template_data.method != 'ui' or template_data.plugin_id %}
                                 {% set managed_by_plugin = template_data.plugin_id %}
                                 {% set managed_by = managed_by_plugin if managed_by_plugin else template_data.method %}
                                 {% set is_view = is_managed or is_readonly %}
@@ -140,30 +165,9 @@
                                    data-bs-original-title="{{ _("tooltip.link.view_template" if is_view else "tooltip.link.edit_template", template=template) }}">
                                     <i class="bx bx-{% if is_view %}show{% else %}edit{% endif %} bx-xs" aria-hidden="true"></i><span>{{ _("button.view" if is_view else "button.edit") }}</span>
                                 </a>
+                                {% set managed_tooltip_key = 'tooltip.disabled_by_plugin' if managed_by_plugin else 'tooltip.disabled_by_method' %}
+                                {% set delete_tooltip_key = 'tooltip.disabled_readonly' if user_readonly else ('tooltip.disabled_db_readonly' if is_readonly else (managed_tooltip_key if is_managed else 'tooltip.button.delete_template')) %}
                                 <div class="row-actions d-flex gap-1 ms-auto">
-                                    <div {% if is_readonly %}data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="{{ _('tooltip.disabled_readonly') }}"{% endif %}>
-                                        <a role="button"
-                                           class="btn btn-sm bw-icon-btn{% if is_readonly %} disabled{% endif %}"
-                                           href="{{ url_for("templates.template_create_page") }}?clone={{ template }}"
-                                           data-bs-toggle="tooltip"
-                                           data-bs-placement="bottom"
-                                           data-bs-original-title="{{ _("tooltip.link.clone_template", template=template) }}"
-                                           aria-label="{{ _("tooltip.link.clone_template", template=template) }}">
-                                            <i class="bx bx-copy-alt bx-xs"></i>
-                                        </a>
-                                    </div>
-                                    <a role="button"
-                                       class="btn btn-sm bw-icon-btn"
-                                       href="{{ url_for('templates.templates_export', template_id=template) }}"
-                                       download
-                                       data-bs-toggle="tooltip"
-                                       data-bs-placement="bottom"
-                                       data-bs-original-title="{{ _("tooltip.link.export_template", template=template) }}"
-                                       aria-label="{{ _("tooltip.link.export_template", template=template) }}">
-                                        <i class="bx bx-export bx-xs" aria-hidden="true"></i>
-                                    </a>
-                                    {% set managed_tooltip_key = 'tooltip.disabled_by_plugin' if managed_by_plugin else 'tooltip.disabled_by_method' %}
-                                    {% set delete_tooltip_key = 'tooltip.disabled_readonly' if user_readonly else ('tooltip.disabled_db_readonly' if is_readonly else (managed_tooltip_key if is_managed else 'tooltip.button.delete_template')) %}
                                     <div data-bs-toggle="tooltip"
                                          data-bs-placement="bottom"
                                          data-bs-original-title="{{ _(delete_tooltip_key, name=template, method=managed_by, plugin=managed_by_plugin) }}">
@@ -174,6 +178,35 @@
                                             <i class="bx bx-trash bx-xs"></i>
                                         </button>
                                     </div>
+                                    {# Clone and Export live in one compact menu; Delete stays a direct, danger-coloured control. #}
+                                    <div class="dropdown">
+                                        <button type="button"
+                                                class="btn btn-sm bw-icon-btn"
+                                                data-bs-toggle="dropdown"
+                                                aria-expanded="false"
+                                                aria-label="{{ _('templates.more_actions', name=template_title) }}"
+                                                title="{{ _('templates.more_actions', name=template_title) }}">
+                                            <i class="bx bx-dots-horizontal-rounded" aria-hidden="true"></i>
+                                        </button>
+                                        <ul class="dropdown-menu dropdown-menu-end">
+                                            <li>
+                                                <a class="dropdown-item{% if is_readonly %} disabled{% endif %}"
+                                                   href="{{ url_for("templates.template_create_page") }}?clone={{ template }}"
+                                                   title="{{ _("tooltip.link.clone_template", template=template) }}"
+                                                   {% if is_readonly %}aria-disabled="true" tabindex="-1"{% endif %}>
+                                                    <i class="bx bx-copy-alt bx-xs me-2" aria-hidden="true"></i>{{ _("button.clone") }}
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a class="dropdown-item"
+                                                   href="{{ url_for('templates.templates_export', template_id=template) }}"
+                                                   download
+                                                   title="{{ _("tooltip.link.export_template", template=template) }}">
+                                                    <i class="bx bx-export bx-xs me-2" aria-hidden="true"></i>{{ _("button.export") }}
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -182,12 +215,15 @@
             {% endfor %}
         </div>
     {% endif %}
+    <p id="templates-no-match" class="text-muted text-center my-4" hidden>{{ _("templates.no_match") }}</p>
     {% if catalog_enabled and catalog_available %}
         <h5 class="mt-5 mb-1" id="templates-catalog-heading">{{ _("templates.catalog.heading") }}</h5>
         <p class="text-muted small mb-3">{{ _("templates.catalog.subheading") }}</p>
         <div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-3" id="templates-catalog-grid">
             {% for item in catalog_items %}
-                <div class="col" data-catalog-template-id="{{ item.id }}">
+                <div class="col"
+                     data-catalog-template-id="{{ item.id }}"
+                     data-search="{{ (item.id ~ ' ' ~ item.name ~ ' ' ~ item.description) | lower }}">
                     {% call card(id="catalog-template-" ~ item.id, classes="h-100 bw-tpl-card") %}
                         <div class="d-flex flex-column h-100">
                             <div class="d-flex align-items-start justify-content-between gap-2">
@@ -278,6 +314,18 @@
             {% if catalog_stale %}<span class="text-warning d-block">{{ _("plugins.catalog.stale") }}</span>{% endif %}
         </p>
     {% endif %}
+    {% call modal(id="template-features-modal", title_key="templates.features_title", title="Template features", size="lg", static_backdrop=false, scrollable=true) %}
+        <div class="modal-body">
+            <p class="text-muted small">{{ _("templates.features_help") }}</p>
+            <div id="template-features-groups"></div>
+        </div>
+        <div class="modal-footer">
+            {{ button(label="Close", i18n_key="button.close", variant="outline-secondary", dismiss="modal") }}
+            <a id="template-features-open-editor" class="btn btn-primary don-jose" href="#">
+                <i class="bx bx-show bx-xs me-1" aria-hidden="true"></i><span>{{ _("templates.open_template") }}</span>
+            </a>
+        </div>
+    {% endcall %}
     <div id="feedback-toast"
          class="bs-toast toast fade bg-{% if theme == 'light' %}white{% else %}dark{% endif %} border"
          role="alert"

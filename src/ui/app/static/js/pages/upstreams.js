@@ -168,6 +168,147 @@ document.addEventListener("DOMContentLoaded", () => {
   createProtocol?.addEventListener("change", syncCreate);
   syncCreate();
 
+  function openAttach(pool, trigger) {
+    document.getElementById("upstream-attach-id").value = pool.id;
+    const hosts = (pool.servers || []).map((server) => server.host).join(", ");
+    document.getElementById("upstream-attach-copy").textContent = translate(
+      "upstreams.attach_copy",
+      `Attach ${pool.name} (${hosts}) to one or more services.`,
+      { name: pool.name, servers: hosts },
+    );
+    applyProtocol(
+      pool.protocol || "http",
+      "upstream-attach-services",
+      "upstream-attach-services-hidden",
+      "upstream-attach-path",
+    );
+    showModal("upstream-attach-modal", trigger);
+  }
+
+  const textCell = (row, text, className = "") => {
+    const cell = document.createElement("td");
+    if (className) cell.className = className;
+    cell.textContent = text;
+    row.append(cell);
+    return cell;
+  };
+
+  // Read-only view of the pool members: address, weight, max fails, fail timeout and the
+  // configured role (not live health: the page has no runtime data).
+  function openMembers(pool, trigger) {
+    const count = (pool.servers || []).length;
+    document.getElementById("upstream-members-copy").textContent = translate(
+      count === 1 ? "upstreams.members_copy" : "upstreams.members_copy_plural",
+      `${pool.name}: ${count} ${count === 1 ? "server" : "servers"}`,
+      { name: pool.name, count },
+    );
+    const body = document.getElementById("upstream-members-body");
+    body.replaceChildren();
+    (pool.servers || []).forEach((server) => {
+      const row = document.createElement("tr");
+      textCell(row, server.host || "", "res-mono");
+      textCell(row, String(server.weight ?? 1));
+      textCell(row, String(server.max_fails ?? 1));
+      textCell(row, server.fail_timeout || "10s");
+      textCell(
+        row,
+        server.down
+          ? translate("upstreams.role.down", "Down")
+          : server.backup
+            ? translate("upstreams.role.backup", "Backup")
+            : translate("upstreams.role.primary", "Primary"),
+      );
+      body.append(row);
+    });
+    showModal("upstream-members-modal", trigger);
+  }
+
+  // Attachments are per service AND path (a service can hold several paths of one pool), so
+  // each Detach carries the path it removes; Attach stays an explicit, separate operation.
+  function openServices(pool, trigger) {
+    const list = document.getElementById("upstream-services-list");
+    const attachButton = document.getElementById("upstream-services-attach");
+    const readonly = attachButton.disabled;
+    document.getElementById("upstream-services-copy").textContent = translate(
+      "upstreams.services_copy",
+      `${pool.name}: ${(pool.servers || []).map((server) => server.host).join(", ")}`,
+      {
+        name: pool.name,
+        servers: (pool.servers || []).map((server) => server.host).join(", "),
+      },
+    );
+    document.getElementById("upstream-services-shared").textContent = translate(
+      "upstreams.detach_shared",
+      "This upstream is shared. Detaching it removes it from that service and path only; the other attachments keep it.",
+    );
+    list.replaceChildren();
+    (pool.services || []).forEach((attachment) => {
+      const item = document.createElement("li");
+      item.className =
+        "list-group-item d-flex align-items-center justify-content-between gap-2 px-0";
+      const label = document.createElement("span");
+      const code = document.createElement("span");
+      code.className = "svc-code";
+      code.textContent = attachment.service_id;
+      label.append(code);
+      // A stream pool takes the whole service and has no location.
+      if (pool.protocol !== "stream" && attachment.match_path) {
+        const path = document.createElement("span");
+        path.className = "res-mono ms-2";
+        path.textContent = attachment.match_path;
+        label.append(path);
+      }
+      item.append(label);
+      if (!readonly) {
+        const form = document.createElement("form");
+        form.method = "post";
+        form.action = list.dataset.detachUrl;
+        [
+          ["csrf_token", list.dataset.csrf],
+          ["upstream_id", pool.id],
+          ["service_id", attachment.service_id],
+          ["match_path", attachment.match_path ?? ""],
+        ].forEach(([name, value]) => {
+          const input = document.createElement("input");
+          input.type = "hidden";
+          input.name = name;
+          input.value = value;
+          form.append(input);
+        });
+        const button = document.createElement("button");
+        button.type = "submit";
+        button.className = "btn btn-sm btn-outline-danger";
+        const ariaLabel = translate(
+          "aria.label.detach_from_service",
+          `Detach ${pool.name} from ${attachment.service_id}`,
+          { name: pool.name, service: attachment.service_id },
+        );
+        button.setAttribute("aria-label", ariaLabel);
+        button.title = ariaLabel;
+        const icon = document.createElement("i");
+        icon.className = "bx bx-unlink";
+        icon.setAttribute("aria-hidden", "true");
+        const text = document.createElement("span");
+        text.className = "ms-1";
+        text.textContent = translate("service.resources.detach", "Detach");
+        button.append(icon, text);
+        form.append(button);
+        item.append(form);
+      }
+      list.append(item);
+    });
+    attachButton.onclick = () => {
+      const services = modalFor("upstream-services-modal");
+      services?.element.addEventListener(
+        "hidden.bs.modal",
+        () => openAttach(pool, trigger),
+        { once: true },
+      );
+      services?.instance.hide();
+    };
+    showModal("upstream-services-modal", trigger);
+  }
+
   rows.forEach((row) => {
     const pool = upstreams.get(row.dataset.upstreamId);
     if (!pool) return;
@@ -179,24 +320,21 @@ document.addEventListener("DOMContentLoaded", () => {
 
     row
       .querySelector(".upstream-attach")
-      ?.addEventListener("click", (event) => {
-        document.getElementById("upstream-attach-id").value = pool.id;
-        const hosts = (pool.servers || [])
-          .map((server) => server.host)
-          .join(", ");
-        document.getElementById("upstream-attach-copy").textContent = translate(
-          "upstreams.attach_copy",
-          `Attach ${pool.name} (${hosts}) to one or more services.`,
-          { name: pool.name, servers: hosts },
-        );
-        applyProtocol(
-          pool.protocol || "http",
-          "upstream-attach-services",
-          "upstream-attach-services-hidden",
-          "upstream-attach-path",
-        );
-        showModal("upstream-attach-modal", event.currentTarget);
-      });
+      ?.addEventListener("click", (event) =>
+        openAttach(pool, event.currentTarget),
+      );
+
+    row
+      .querySelector(".upstream-members")
+      ?.addEventListener("click", (event) =>
+        openMembers(pool, event.currentTarget),
+      );
+
+    row
+      .querySelector(".upstream-services")
+      ?.addEventListener("click", (event) =>
+        openServices(pool, event.currentTarget),
+      );
 
     row
       .querySelector(".upstream-delete")
@@ -212,30 +350,38 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   const searchInput = document.getElementById("upstreams-search");
-  const serviceFilter = document.getElementById("upstreams-service-filter");
+  const protocolFilter = document.getElementById("upstreams-protocol-filter");
+  const tlsFilter = document.getElementById("upstreams-tls-filter");
+  const noMatch = document.getElementById("upstreams-no-match");
 
   function applyFilters() {
     const term = (searchInput?.value || "").trim().toLowerCase();
-    const service = serviceFilter?.value || "";
+    const protocol = protocolFilter?.value || "";
+    const tls = tlsFilter?.value || "";
+    let visible = 0;
     rows.forEach((row) => {
       const pool = upstreams.get(row.dataset.upstreamId) || {};
       const hosts = (pool.servers || [])
         .map((server) => server.host || "")
         .join(" ");
+      const paths = (pool.services || [])
+        .map((attachment) => attachment.match_path || "")
+        .join(" ");
       const haystack =
-        `${pool.name || ""} ${pool.description || ""} ${hosts}`.toLowerCase();
-      const matchesTerm = !term || haystack.includes(term);
-      const matchesService =
-        !service ||
-        (pool.services || []).some(
-          (attachment) => attachment.service_id === service,
-        );
-      row.hidden = !(matchesTerm && matchesService);
+        `${pool.name || ""} ${pool.description || ""} ${hosts} ${paths}`.toLowerCase();
+      const matches =
+        (!term || haystack.includes(term)) &&
+        (!protocol || pool.protocol === protocol) &&
+        (!tls || Boolean(pool.backend_ssl) === (tls === "yes"));
+      row.hidden = !matches;
+      if (matches) visible += 1;
     });
+    if (noMatch) noMatch.hidden = visible > 0 || rows.length === 0;
   }
 
   searchInput?.addEventListener("input", applyFilters);
-  serviceFilter?.addEventListener("change", applyFilters);
+  protocolFilter?.addEventListener("change", applyFilters);
+  tlsFilter?.addEventListener("change", applyFilters);
   document
     .getElementById("upstreams-search-clear")
     ?.addEventListener("click", () => {

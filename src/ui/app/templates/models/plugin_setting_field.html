@@ -117,14 +117,11 @@
                             <span class="bx bx-globe bx-xs"></span>
                         </span>
                     {% endif %}
-                    <span class="badge rounded-pill bg-secondary-subtle text-dark d-flex align-items-center justify-content-center p-1"
-                          data-bs-toggle="tooltip"
-                          data-bs-placement="top"
-                          data-bs-original-title="{{ setting_text(setting, 'help', setting_data['help']) }}">
-                        <span class="bx bx-question-mark bx-xs"></span>
-                    </span>
                 </div>
             </div>
+            {# SET-9: the exact env-var KEY under the human label, in plain text so it can be selected and copied into env / labels / the API. It
+               replaces the key the floating label used to print inside the control (hidden in settings.css). A switch prints its key as its own label. #}
+            {% if setting_data["type"] != "check" %}<div class="bw-input-subtitle">{{ setting }}</div>{% endif %}
             {% if setting_data["type"] == "select" %}
                 {% include "models/select_setting.html" %}
             {% elif setting_data["type"] == "multiselect" %}
@@ -142,6 +139,10 @@
                 {% endif %}
                 {% include "models/input_setting.html" %}
             {% endif %}
+            {# SET-10: the help text is read in place under the control (design `.bw-input-help`), no longer behind a "?" tooltip.
+               `aria-describedby` is carried by the control's own `aria-labelledby` pairing, so this is plain text for everyone. #}
+            {% set setting_help = setting_text(setting, 'help', setting_data['help']) %}
+            {% if setting_help %}<p class="bw-input-help" id="help-{{ setting_id_prefix }}{{ setting_data['id'] }}{{ setting_id_suffix }}">{{ setting_help }}</p>{% endif %}
             </div>
         </div>
 {#- -#}

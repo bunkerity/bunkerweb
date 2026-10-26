@@ -41,6 +41,9 @@
               href="{{ url_for('static', filename='libs/flatpickr/themes/airbnb.dark.css') }}"
               nonce="{{ style_nonce }}" />
     {% endif %}
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/pages/table-live.css') }}"
+          nonce="{{ style_nonce }}" />
 {% endblock %}
 {% block content %}
     <!-- Page head band (components/page-head.html; kit .page-head, admin.css:138-142) -->
@@ -116,10 +119,11 @@
             <input type="hidden" id="crowdsec-logo-url" value="{{ url_for('static', filename='img/brands/crowdsec.svg') }}" />
             {% call table_toolbar(id="reports", columns_preferences_defaults=columns_preferences_defaults, columns_preferences=columns_preferences, loading_key="status.loading_reports", loading_default="Loading reports...") %}
             {% endcall %}
+            <div id="reports-live-status" class="visually-hidden" role="status" aria-live="polite"></div>
             <div class="d-flex flex-column flex-sm-row align-items-center gap-3 mt-4 pt-3 border-top border-light-subtle small text-muted w-100">
                 <div class="flex-grow-1 text-center">
-                    <span class="badge rounded-pill bg-secondary">
-                        TZ:
+                    <span class="tag-chip">
+                        <i class="bx bx-time" aria-hidden="true"></i>TZ:
                         <script nonce="{{ script_nonce }}">document.write(Intl.DateTimeFormat().resolvedOptions().timeZone);</script>
                     </span>
                 </div>
@@ -171,6 +175,9 @@
             nonce="{{ script_nonce }}"
             defer></script>
     <script src="{{ url_for('static', filename='libs/apexcharts/apexcharts.min.js') }}"
+            nonce="{{ script_nonce }}"
+            defer></script>
+    <script src="{{ url_for('static', filename='js/components/table-live.js') }}"
             nonce="{{ script_nonce }}"
             defer></script>
     <script src="{{ url_for('static', filename='js/pages/reports.js') }}"

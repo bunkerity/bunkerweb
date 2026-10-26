@@ -115,9 +115,17 @@
                         class="btn btn-sm btn-primary don-jose compose-save"
                         {% if is_readonly %}disabled{% endif %}>
                     <i class="bx bx-save bx-sm"></i>
-                    <span class="d-none d-md-inline">&nbsp;<span>{{ _("button.save") }}</span></span>
+                    <span class="d-none d-md-inline">&nbsp;<span>{{ _("settings_page.save_reload") }}</span></span>
                 </button>
             </div>
+        </div>
+    </div>
+    {# SET-14: said once, statically. No instance / service counts: the settings routes do not load them. #}
+    <div class="alert alert-info bw-settings-note" role="status">
+        <i class="bx bx-info-circle" aria-hidden="true"></i>
+        <div>
+            <strong>{{ _("settings_page.reload_alert_title") }}</strong>
+            {{ _("settings_page.reload_alert_body") }}
         </div>
     </div>
     {% if not global_page and not service_id %}

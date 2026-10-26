@@ -155,6 +155,7 @@ NON_COPY_FILES = {
     "pages/ace-mode-bunkerweb_settings.js": "ACE syntax-highlighting grammar tokens",
 }
 NON_COPY_VALUES = {
+    "(max-width: 767px)": "CSS media query",
     "(prefers-color-scheme: dark)": "CSS media query",
     "(prefers-reduced-motion: reduce)": "CSS media query",
     "AbortError": "WebAuthn exception name",
@@ -300,7 +301,6 @@ NON_COPY = {
     ("pages/template-settings-page.js", "Invalid regex pattern:"): "console-only diagnostic prefix",
     ("pages/template-settings-page.js", "for input:"): "console-only diagnostic fragment",
     ("pages/template_edit.js", "input.form-check-input, select, textarea"): "form-control selector",
-    ("pages/threatmap.js", "threatmap-ticker__reason badge bg-label-danger"): "CSS class list",
     ("pages/threatmap.js", "threatmap-ticker__target text-muted"): "CSS class list",
     ("pages/threatmap.js", "session expired"): "internal thrown sentinel",
     ("pages/threatmap.js", "HTTP "): "protocol label prefix",

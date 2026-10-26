@@ -157,6 +157,7 @@
     // Which workflow this page edits, so a test result can tell this workflow's rules from
     // the other workflows attached to the same service.
     workflowId: "",
+    workflowName: "",
     // Last test result, or null. Pins the ladder's dimming and feeds the verdict chips.
     test: null,
     // "list" (the ladder) or "canvas" (the same order, drawn as a chain). Both edit the
@@ -165,6 +166,10 @@
     // Canvas only: the rule whose editors the inspector drawer is showing.
     inspect: null,
     zoom: 1,
+    // Display only: none of these touches the rules, their order or what gets saved.
+    filter: { q: "", state: "", action: "" },
+    simple: false,
+    limited: false,
   };
 
   var ladderEl, emptyEl, panelEl, liveEl, capEl;
@@ -413,6 +418,86 @@
 
   function isDirty() {
     return savedJson !== null && JSON.stringify(serialize()) !== savedJson;
+  }
+
+  /* ---- retained draft -------------------------------------------------------------
+     workflow_draft.js keeps ONE draft per browser tab so Overview and Configuration can be
+     swapped without losing rule edits. It is written whenever the ladder changes and when the
+     page is hidden, and dropped the moment the stored workflow matches it again. */
+  var draftApi = window.BWWorkflowDraft;
+  // True once the page has decided where it goes next, so pagehide cannot re-write a draft
+  // the operator just discarded.
+  var navigating = false;
+
+  function persistDraft() {
+    if (
+      !draftApi ||
+      navigating ||
+      STATE.readonly ||
+      STATE.loadFailed ||
+      !STATE.workflowId
+    )
+      return;
+    if (isDirty())
+      draftApi.write({
+        id: STATE.workflowId,
+        name: STATE.workflowName,
+        base: savedJson,
+        draft: JSON.stringify(serialize()),
+      });
+    else draftApi.clear(STATE.workflowId);
+  }
+
+  function clearDraft() {
+    if (draftApi && STATE.workflowId) draftApi.clear(STATE.workflowId);
+  }
+
+  function draftNotice(kind) {
+    var holder = document.getElementById("wf-draft-notice");
+    if (!holder) return;
+    var restored = kind === "restored";
+    var message = restored
+      ? translate(
+          "workflows.shell.draft_restored",
+          "Unsaved changes to this workflow were restored. Save to apply them, or switch workflow to discard them.",
+        )
+      : translate(
+          "workflows.shell.draft_stale",
+          "This workflow was saved elsewhere after your draft was started, so the draft was discarded.",
+        );
+    holder.innerHTML =
+      '<div class="alert alert-' +
+      (restored ? "info" : "warning") +
+      ' mb-0" role="alert"><i class="bx ' +
+      (restored ? "bx-history" : "bx-info-circle") +
+      ' me-1" aria-hidden="true"></i><span>' +
+      esc(message) +
+      "</span></div>";
+    say(message);
+  }
+
+  function restoreDraft() {
+    var record = draftApi && draftApi.read();
+    if (!record || record.id !== STATE.workflowId) return;
+    if (STATE.readonly) {
+      clearDraft();
+      return;
+    }
+    var restored = null;
+    if (record.base === savedJson) {
+      try {
+        restored = JSON.parse(record.draft).rules.map(fromSchemaRule);
+      } catch (error) {
+        restored = null;
+      }
+    }
+    if (restored) {
+      STATE.rules = restored;
+      draftNotice("restored");
+    } else {
+      clearDraft();
+      draftNotice("stale");
+    }
   }
 
   function isGroup(node) {
@@ -933,6 +1018,28 @@
         ? translate("workflows.tree.and", "and")
         : translate("workflows.tree.or", "or");
     var canNest = childDepth + 1 <= MAX_DEPTH;
+    // WF-06: Condition / Group / Remove group sit beside the combinator, the children come
+    // below them and the explanatory metadata closes the group.
+    var addRow = STATE.readonly
+      ? ""
+      : '<div class="bw-flow-addrow">' +
+        '<button type="button" class="bw-flow-add" data-wf-addpred="' +
+        node._k +
+        '">' +
+        '<i class="bx bx-plus" aria-hidden="true"></i><span data-i18n="workflows.tree.addCondition">Condition</span></button>' +
+        '<button type="button" class="bw-flow-add" data-wf-addgroup="' +
+        node._k +
+        '"' +
+        (canNest ? "" : " disabled") +
+        ">" +
+        '<i class="bx bx-layer-plus" aria-hidden="true"></i><span data-i18n="workflows.tree.addGroup">Group</span></button>' +
+        (depth > 1
+          ? '<button type="button" class="bw-flow-add" data-wf-rmnode="' +
+            node._k +
+            '">' +
+            '<i class="bx bx-trash" aria-hidden="true"></i><span data-i18n="workflows.tree.removeGroup">Remove group</span></button>'
+          : "") +
+        "</div>";
     return (
       '<div class="bw-flow-group' +
       (message ? " bw-flow-invalid" : "") +
@@ -947,9 +1054,8 @@
       ' tabindex="-1">' +
       '<div class="bw-flow-group-head">' +
       opButton +
-      '<span class="bw-flow-group-meta">' +
-      esc(meta) +
-      "</span></div>" +
+      addRow +
+      "</div>" +
       '<div class="bw-flow-kids">' +
       children
         .map(function (child, index) {
@@ -968,26 +1074,9 @@
         ? ""
         : '<div class="bw-flow-group-meta" data-i18n="workflows.tree.empty">Empty group — add a condition, it cannot be saved like this.</div>') +
       "</div>" +
-      (STATE.readonly
-        ? ""
-        : '<div class="bw-flow-addrow">' +
-          '<button type="button" class="bw-flow-add" data-wf-addpred="' +
-          node._k +
-          '">' +
-          '<i class="bx bx-plus" aria-hidden="true"></i><span data-i18n="workflows.tree.addCondition">Condition</span></button>' +
-          '<button type="button" class="bw-flow-add" data-wf-addgroup="' +
-          node._k +
-          '"' +
-          (canNest ? "" : " disabled") +
-          ">" +
-          '<i class="bx bx-layer-plus" aria-hidden="true"></i><span data-i18n="workflows.tree.addGroup">Group</span></button>' +
-          (depth > 1
-            ? '<button type="button" class="bw-flow-add" data-wf-rmnode="' +
-              node._k +
-              '">' +
-              '<i class="bx bx-trash" aria-hidden="true"></i><span data-i18n="workflows.tree.removeGroup">Remove group</span></button>'
-            : "") +
-          "</div>") +
+      '<div class="bw-flow-group-meta">' +
+      esc(meta) +
+      "</div>" +
       (message ? errBlock(path, message) : "") +
       "</div>"
     );
@@ -1167,19 +1256,38 @@
         );
       })
       .join("");
+    // One whole sentence per built-in action: a translated noun spliced into another
+    // sentence breaks gender and word order. A PRO-registered type uses the generic one.
+    var settingsTitle =
+      rule.action.type === "block"
+        ? translate("workflows.act_settings_block", "Block settings")
+        : rule.action.type === "redirect"
+          ? translate("workflows.act_settings_redirect", "Redirect settings")
+          : rule.action.type === "challenge"
+            ? translate(
+                "workflows.act_settings_challenge",
+                "Challenge settings",
+              )
+            : translate("workflows.act_settings_generic", "Action settings");
     return (
       '<div role="radiogroup" aria-label="' +
       esc(translate("workflows.aria.terminalAction", "Terminal action")) +
       '"><div class="bw-flow-acts">' +
       picks +
       "</div>" +
+      '<div class="bw-flow-params-card">' +
+      '<div class="bw-flow-params-hd"><i class="bx ' +
+      actionMeta(rule.action.type).icon +
+      '" aria-hidden="true"></i><span>' +
+      esc(settingsTitle) +
+      "</span></div>" +
       '<div class="bw-flow-params" data-wf-node="' +
       esc(path + ".action") +
       '"' +
       invalidAttrs(path + ".action", message) +
       ' tabindex="-1">' +
       actionParams(rule, path) +
-      "</div>" +
+      "</div></div>" +
       (message ? errBlock(path + ".action", message) : "") +
       '<div class="bw-flow-terminalnote"><i class="bx bx-stop-circle" aria-hidden="true"></i>' +
       '<span data-i18n="workflows.act_terminal">One action per rule, and it ends evaluation — there is no true / false path out of a rule.</span></div>' +
@@ -1215,6 +1323,209 @@
       esc(param) +
       "</span></span>"
     );
+  }
+
+  /* ---- WF-05: the rule's reading, built from the rule data ----------------------------
+     The server summary is English prose and is only used as the "has this rule been
+     validated" signal. The boundaries of IF and THEN come from the model, never from
+     splitting that text, so the keywords stay highlighted and localised in every language. */
+  function mono(value) {
+    return '<span class="m">' + esc(value) + "</span>";
+  }
+
+  // The fallbacks are written out per call so each one is a bare translate() default.
+  function leafWord(op) {
+    if (op === "ip") return translate("workflows.sum.leaf.ip", "IP");
+    if (op === "country")
+      return translate("workflows.sum.leaf.country", "country");
+    if (op === "asn") return translate("workflows.sum.leaf.asn", "ASN");
+    if (op === "method")
+      return translate("workflows.sum.leaf.method", "method");
+    return "";
+  }
+
+  function sumLeafLabel(node) {
+    if (node.op === "crowdsec")
+      return node.field === "source"
+        ? translate("workflows.sum.crowdsec_source", "CrowdSec source")
+        : translate(
+            "workflows.sum.crowdsec_remediation",
+            "CrowdSec remediation",
+          );
+    return leafWord(node.op) || esc(conditionSpec(node.op).label || node.op);
+  }
+
+  function conditionPhrase(node, depth) {
+    if (isGroup(node)) {
+      var parts = (node.nodes || [])
+        .map(function (child) {
+          return conditionPhrase(child, depth + 1);
+        })
+        .filter(Boolean);
+      if (!parts.length) return "";
+      var or = " " + esc(translate("workflows.tree.or", "or")) + " ";
+      if (node.op === "not")
+        return translate("workflows.sum.not", "not {{what}}", {
+          what: parts.length > 1 ? "(" + parts.join(or) + ")" : parts[0],
+        });
+      var joined = parts.join(
+        node.op === "all"
+          ? " " + esc(translate("workflows.tree.and", "and")) + " "
+          : or,
+      );
+      return depth > 0 && parts.length > 1 ? "(" + joined + ")" : joined;
+    }
+    if (node.op === "uri")
+      return translate("workflows.sum.uri", "URI {{match}} {{value}}", {
+        match: esc(URI_MATCHES[node.match] || node.match),
+        value: mono(node.value || ""),
+      });
+    if (node.op === "group")
+      return node.kind === "country"
+        ? translate(
+            "workflows.sum.group_country",
+            "country is in group {{name}}",
+            { name: mono(groupName(node.group_id)) },
+          )
+        : node.kind === "asn"
+          ? translate("workflows.sum.group_asn", "ASN is in group {{name}}", {
+              name: mono(groupName(node.group_id)),
+            })
+          : translate("workflows.sum.group_ip", "IP is in group {{name}}", {
+              name: mono(groupName(node.group_id)),
+            });
+    var values = node.values || [];
+    if (!values.length) return "";
+    return values.length === 1
+      ? translate("workflows.sum.isOne", "{{label}} is {{value}}", {
+          label: sumLeafLabel(node),
+          value: mono(values[0]),
+        })
+      : translate("workflows.sum.isOneOf", "{{label}} is one of {{values}}", {
+          label: sumLeafLabel(node),
+          values: values.map(mono).join(", "),
+        });
+  }
+
+  function actionPhrase(rule) {
+    var action = rule.action;
+    if (action.type === "challenge")
+      return translate(
+        "workflows.sum.challenge",
+        "show the {{provider}} challenge",
+        {
+          provider: mono(action.provider || ""),
+        },
+      );
+    if (action.type === "redirect")
+      return translate(
+        "workflows.sum.redirect",
+        "redirect to {{url}} ({{code}})",
+        {
+          url: mono(action.url || ""),
+          code: esc(action.status || 302),
+        },
+      );
+    if (action.type === "block")
+      return action.status
+        ? translate("workflows.sum.blockStatus", "block it with {{code}}", {
+            code: mono(action.status),
+          })
+        : translate("workflows.sum.block", "block it");
+    return esc(action.type);
+  }
+
+  function summaryHtml(rule) {
+    var cond =
+      conditionPhrase(rule.condition, 0) ||
+      esc(translate("workflows.sum.every", "every request"));
+    var gate = rule.threshold
+      ? ", " +
+        translate(
+          "workflows.sum.gate",
+          "over {{count}} requests per {{window}}s per IP",
+          {
+            count: mono(rule.threshold.count),
+            window: esc(rule.threshold.window),
+          },
+        )
+      : "";
+    return (
+      '<span class="sum-if"><span class="sum-kw is-if" data-i18n="workflows.rule.if">If</span> ' +
+      '<span class="sum-body">' +
+      cond +
+      gate +
+      "</span></span>" +
+      '<span class="sum-sep">, </span>' +
+      '<span class="sum-then"><span class="sum-kw is-then" data-i18n="workflows.action">Then</span> ' +
+      '<span class="sum-body">' +
+      actionPhrase(rule) +
+      "</span></span>"
+    );
+  }
+
+  /* One writer for both views and for paint(): the validated summary is the signal that the
+     rule is valid, the pending note stands in until the first successful validation. */
+  function paintSummary(host, rule) {
+    if (STATE.summaries[rule.id]) {
+      host.innerHTML = summaryHtml(rule);
+      host.title = host.textContent;
+      host.classList.remove("is-pending");
+    } else {
+      host.textContent = translate(
+        "workflows.not_validated",
+        "Not validated yet",
+      );
+      host.removeAttribute("title");
+      host.classList.add("is-pending");
+    }
+  }
+
+  /* WF-04: what happens when the rule matches, as one badge with its explanation instead of
+     a repeated footer row. */
+  function consequenceBadge(rule) {
+    var stop = rule.enabled;
+    var label = stop
+      ? translate("workflows.conseq.stop", "Stops the chain")
+      : translate("workflows.conseq.skip", "Never runs");
+    var tip = stop
+      ? translate("workflows.rule.onMatch", "If it matches") +
+        translate(
+          "workflows.rule.stopTail",
+          ", evaluation stops here — no rule below is reached.",
+        )
+      : translate(
+          "workflows.rule.skipped",
+          "Disabled — skipped entirely, as if it were not in the list.",
+        );
+    return (
+      '<span class="bw-flow-conseq ' +
+      (stop ? "is-stop" : "is-skip") +
+      '" role="note" tabindex="0" data-wf-tip="' +
+      esc(tip) +
+      '" aria-label="' +
+      esc(label + ". " + tip) +
+      '"><i class="bx ' +
+      (stop ? "bx-stop-circle" : "bx-minus-circle") +
+      '" aria-hidden="true"></i><span>' +
+      esc(label) +
+      "</span></span>"
+    );
+  }
+
+  function gateBadge(rule) {
+    return rule.threshold
+      ? '<span class="fc-gate" data-wf-tip="' +
+          esc(
+            translate(
+              "workflows.canvas.gateTip",
+              "A match gate, not an action: below the threshold the rule does not match and the next rule is evaluated.",
+            ),
+          ) +
+          '" tabindex="0"><i class="bx bx-filter" aria-hidden="true"></i>' +
+          esc(rule.threshold.count + "/" + rule.threshold.window + "s") +
+          "</span>"
+      : "";
   }
 
   /* The If / Then editors. The ladder renders them inline in an expanded card and the
@@ -1289,9 +1600,11 @@
       ) +
       '">' +
       '<i class="bx bx-chevron-down bw-flow-caret" aria-hidden="true"></i></button>';
+    // WF-04: one segmented control, top right: reorder (grip, up, down), a separator, then
+    // the rule's own actions (More, expand). A read-only database keeps only the expand button.
     var tools = STATE.readonly
       ? caret
-      : '<button type="button" class="bw-flow-grip" data-wf-grip="' +
+      : '<button type="button" class="bw-flow-grip bw-flow-iconbtn" data-wf-grip="' +
         esc(rule.id) +
         '" aria-hidden="true" tabindex="-1" title="' +
         esc(translate("workflows.aria.drag", "Drag to reorder")) +
@@ -1323,6 +1636,7 @@
           }),
         ) +
         '"><i class="bx bx-down-arrow-alt" aria-hidden="true"></i></button>' +
+        '<span class="bw-flow-tools-sep" aria-hidden="true"></span>' +
         '<button type="button" class="bw-flow-iconbtn" data-wf-menu="' +
         esc(rule.id) +
         '" aria-haspopup="menu" title="' +
@@ -1339,9 +1653,8 @@
         '"><i class="bx bx-dots-horizontal-rounded" aria-hidden="true"></i></button>' +
         caret;
 
-    var summary = STATE.summaries[rule.id];
     var head =
-      '<div class="bw-flow-head"><div class="bw-flow-head-main">' +
+      '<div class="bw-flow-head">' +
       '<div class="bw-flow-head-name">' +
       name +
       (rule.enabled
@@ -1352,28 +1665,33 @@
       esc(rule.id) +
       '"></span>' +
       "</div>" +
+      '<div class="bw-flow-tools" role="group" aria-label="' +
+      esc(
+        translate("workflows.aria.ruleTools", "Actions for rule {{n}}", {
+          n: position,
+        }),
+      ) +
+      '">' +
+      tools +
+      "</div>" +
       '<div class="bw-flow-head-sum' +
-      (summary ? "" : " is-pending") +
+      (STATE.summaries[rule.id] ? "" : " is-pending") +
       '" data-wf-summary="' +
       esc(rule.id) +
       '">' +
-      esc(summary || t("workflows.not_validated", "Not validated yet")) +
-      "</div></div>" +
+      (STATE.summaries[rule.id]
+        ? summaryHtml(rule)
+        : esc(translate("workflows.not_validated", "Not validated yet"))) +
+      "</div>" +
+      '<div class="bw-flow-head-foot">' +
       actionBadge(rule) +
-      '<div class="bw-flow-tools">' +
-      tools +
+      gateBadge(rule) +
+      consequenceBadge(rule) +
       "</div></div>";
 
     var body = open
       ? '<div class="bw-flow-body">' + clauses(rule, path) + "</div>"
       : "";
-
-    var foot = rule.enabled
-      ? '<div class="bw-flow-foot"><i class="bx bx-check-circle" aria-hidden="true"></i>' +
-        '<span><strong data-i18n="workflows.rule.onMatch">If it matches</strong>' +
-        '<span data-i18n="workflows.rule.stopTail">, evaluation stops here — no rule below is reached.</span></span></div>'
-      : '<div class="bw-flow-foot"><i class="bx bx-minus-circle" aria-hidden="true"></i>' +
-        '<span data-i18n="workflows.rule.skipped">Disabled — skipped entirely, as if it were not in the list.</span></div>';
 
     return (
       '<article class="' +
@@ -1398,7 +1716,6 @@
       '">' +
       head +
       body +
-      foot +
       "</article>"
     );
   }
@@ -1626,10 +1943,17 @@
         position +
         "</button>";
 
+    // WF-08: edit and More live in the top-right group of the header, not in a hover toolbar.
     var tools = STATE.readonly
       ? ""
-      : '<div class="fc-tools">' +
-        '<button type="button" data-wf-inspect="' +
+      : '<div class="fc-tools bw-flow-tools" role="group" aria-label="' +
+        esc(
+          translate("workflows.aria.ruleTools", "Actions for rule {{n}}", {
+            n: position,
+          }),
+        ) +
+        '">' +
+        '<button type="button" class="bw-flow-iconbtn" data-wf-inspect="' +
         esc(rule.id) +
         '" title="' +
         esc(translate("workflows.canvas.open", "Open rule")) +
@@ -1640,26 +1964,21 @@
           }),
         ) +
         '"><i class="bx bx-edit-alt" aria-hidden="true"></i></button>' +
-        '<button type="button" data-wf-menu="' +
+        '<button type="button" class="bw-flow-iconbtn" data-wf-menu="' +
         esc(rule.id) +
         '" aria-haspopup="menu" title="' +
         esc(translate("workflows.aria.more", "More")) +
-        '" aria-label="More actions for rule ' +
-        position +
-        '"><i class="bx bx-dots-horizontal-rounded" aria-hidden="true"></i></button></div>';
-
-    var gateChip = rule.threshold
-      ? '<span class="fc-gate" title="' +
+        '" aria-label="' +
         esc(
           translate(
-            "workflows.canvas.gateTip",
-            "A match gate, not an action: below the threshold the rule does not match and the next rule is evaluated.",
+            "workflows.aria.moreActionsForRule",
+            "More actions for rule {{n}}",
+            { n: position },
           ),
         ) +
-        '"><i class="bx bx-filter" aria-hidden="true"></i>' +
-        esc(rule.threshold.count + "/" + rule.threshold.window + "s") +
-        "</span>"
-      : "";
+        '"><i class="bx bx-dots-horizontal-rounded" aria-hidden="true"></i></button></div>';
+
+    var gateChip = gateBadge(rule);
 
     // The error count arrives from the API after the render, so paint() fills this — the
     // same contract as the tester's verdict chip beside it.
@@ -1682,7 +2001,6 @@
       '">' +
       '<span class="fc-port in" aria-hidden="true"></span>' +
       '<span class="fc-port out" aria-hidden="true"></span>' +
-      tools +
       '<header class="fc-node-hd">' +
       order +
       '<span class="fc-node-name">' +
@@ -1694,20 +2012,22 @@
       '<span data-wf-verdict="' +
       esc(rule.id) +
       '"></span>' +
+      tools +
       "</header>" +
       '<p class="fc-node-sum' +
       (summary ? "" : " is-pending") +
       '" data-wf-summary="' +
       esc(rule.id) +
       '">' +
-      esc(
-        summary || translate("workflows.not_validated", "Not validated yet"),
-      ) +
+      (summary
+        ? summaryHtml(rule)
+        : esc(translate("workflows.not_validated", "Not validated yet"))) +
       "</p>" +
       '<footer class="fc-node-ft">' +
+      actionBadge(rule) +
       gateChip +
       errChip +
-      actionBadge(rule) +
+      consequenceBadge(rule) +
       "</footer></article>"
     );
   }
@@ -1764,7 +2084,31 @@
         ? '<strong data-i18n="workflows.rule.onMatch">If it matches</strong>' +
           '<span data-i18n="workflows.canvas.stopTail">, evaluation stops here — no rule after it is reached.</span>'
         : '<span data-i18n="workflows.canvas.skipped">Disabled — skipped entirely, as if it were not in the chain.</span>') +
-      "</span></div></aside>"
+      "</span></div>" +
+      (STATE.readonly
+        ? ""
+        : '<div class="wf-drawer-actions">' +
+          '<button type="button" class="btn btn-sm btn-outline-secondary" data-wf-drawercancel="1" title="' +
+          esc(
+            translate(
+              "workflows.inspector.cancel_title",
+              "Cancel — restore the rule as it was when opened",
+            ),
+          ) +
+          '">' +
+          esc(translate("workflows.inspector.cancel", "Cancel")) +
+          "</button>" +
+          '<button type="button" class="btn btn-sm btn-primary" data-wf-drawerapply="1" title="' +
+          esc(
+            translate(
+              "workflows.inspector.apply_title",
+              "Apply — keep these edits in the draft; the page Save is what stores them",
+            ),
+          ) +
+          '">' +
+          esc(translate("workflows.inspector.apply", "Apply")) +
+          "</button></div>") +
+      "</aside>"
     );
   }
 
@@ -2009,7 +2353,206 @@
       regexes +
       " regex" +
       (regexes === 1 ? "" : "es") +
-      " in this workflow</span>"
+      " in this workflow</span>" +
+      // Two different limits, easily conflated: say which one refuses a write and which one
+      // only degrades a rule at runtime.
+      (regexes
+        ? '<span class="wf-cap-help" data-i18n="workflows.regex_help">' +
+          esc(
+            translate(
+              "workflows.regex_help",
+              "Two separate regex limits apply. Writing: the workflows attached to one service may hold at most 50 regex conditions in total, and a save or attach past that is refused. Running: each instance compiles at most WORKFLOWS_REGEX_BUDGET distinct regular expressions (default 512, shared by every workflow); a regex past that budget is not evaluated and answers UNKNOWN, so its rule cannot match.",
+            ),
+          ) +
+          "</span>"
+        : "")
+    );
+  }
+
+  // ---- display controls: filters, density, height ---------------------------------
+  /* Hiding a rule never renumbers or reorders anything: markers keep their original
+     positions, and every control that would change the order is paused while a filter hides
+     rules, so a move can never be computed against a partial list. */
+
+  function filtering() {
+    var f = STATE.filter;
+    return !!(f.q.trim() || f.state || f.action);
+  }
+
+  function ruleMatches(rule) {
+    var f = STATE.filter;
+    var q = f.q.trim().toLowerCase();
+    return (
+      (!q ||
+        String(rule.name || "")
+          .toLowerCase()
+          .indexOf(q) !== -1) &&
+      (!f.state || (f.state === "on") === !!rule.enabled) &&
+      (!f.action || rule.action.type === f.action)
+    );
+  }
+
+  function resetFilters() {
+    STATE.filter = { q: "", state: "", action: "" };
+    var name = document.getElementById("wf-filter-name");
+    var state = document.getElementById("wf-filter-state");
+    var action = document.getElementById("wf-filter-action");
+    if (name) name.value = "";
+    if (state) state.value = "";
+    if (action) action.value = "";
+  }
+
+  function toolbarLabel(id, text, icon) {
+    var button = document.getElementById(id);
+    if (!button) return;
+    var label = button.querySelector("span:not(.badge)");
+    if (label) label.textContent = text;
+    var glyph = button.querySelector(".bx");
+    if (glyph && icon) glyph.className = "bx " + icon;
+  }
+
+  // The action kinds the select currently lists, so it is only rebuilt when they change.
+  var actionKindsShown = null;
+
+  function applyDisplay() {
+    if (!ladderEl) return;
+    var canvas = STATE.view === "canvas";
+    var any = filtering();
+    var byId = {};
+    STATE.rules.forEach(function (rule) {
+      byId[rule.id] = rule;
+    });
+
+    // The action filter offers only what the workflow actually uses.
+    var actionSelect = document.getElementById("wf-filter-action");
+    if (actionSelect && actionSelect.options) {
+      var kinds = [];
+      STATE.rules.forEach(function (rule) {
+        if (kinds.indexOf(rule.action.type) === -1)
+          kinds.push(rule.action.type);
+      });
+      if (STATE.filter.action && kinds.indexOf(STATE.filter.action) === -1)
+        STATE.filter.action = "";
+      var signature = kinds.join("|");
+      if (actionKindsShown !== signature) {
+        actionKindsShown = signature;
+        actionSelect.options.length = 1;
+        kinds.forEach(function (kind) {
+          var option = document.createElement("option");
+          option.value = kind;
+          option.textContent = actionMeta(kind).label || kind;
+          actionSelect.appendChild(option);
+        });
+      }
+      actionSelect.value = STATE.filter.action;
+    }
+
+    var shown = 0;
+    Array.prototype.forEach.call(
+      ladderEl.querySelectorAll("[data-wf-item]"),
+      function (item) {
+        var rule = byId[item.dataset.wfItem];
+        var ok = !rule || ruleMatches(rule);
+        // The ladder drops hidden rules; the canvas dims them so every node keeps its place.
+        item.classList.toggle("wf-filtered-out", !ok && !canvas);
+        item.classList.toggle("wf-dimmed", !ok && canvas);
+        var link = ladderEl.querySelector(
+          '.bw-flow-link[data-wf-link="' + item.dataset.wfIndex + '"]',
+        );
+        if (link) link.classList.toggle("wf-filtered-out", !ok && !canvas);
+        if (ok) shown++;
+      },
+    );
+
+    var old = ladderEl.querySelector(".wf-no-match");
+    if (old) old.remove();
+    if (any && !shown && !canvas) {
+      var empty = document.createElement("p");
+      empty.className = "wf-no-match text-muted text-center py-4 mb-0";
+      empty.textContent = translate(
+        "workflows.toolbar.no_match",
+        "No rule matches these filters",
+      );
+      ladderEl.appendChild(empty);
+    }
+
+    var count = document.getElementById("wf-filter-count");
+    if (count)
+      count.textContent = any
+        ? translate(
+            "workflows.toolbar.n_of_m",
+            "{{shown}} of {{total}} rules",
+            {
+              shown: shown,
+              total: STATE.rules.length,
+            },
+          )
+        : "";
+    var badge = document.getElementById("wf-filter-badge");
+    if (badge) {
+      var active =
+        (STATE.filter.q.trim() ? 1 : 0) +
+        (STATE.filter.state ? 1 : 0) +
+        (STATE.filter.action ? 1 : 0);
+      badge.hidden = !active;
+      badge.textContent = String(active);
+    }
+
+    // Reordering is paused, not just hidden: the controls stay visible so the reason can be
+    // read, and the move handlers refuse as well (keyboard shortcuts bypass the buttons).
+    ladderEl.classList.toggle("wf-reorder-paused", any);
+    Array.prototype.forEach.call(
+      ladderEl.querySelectorAll("[data-wf-move], [data-wf-pos]"),
+      function (control) {
+        var move = (control.dataset.wfMove || "").split(":");
+        var index = STATE.rules.findIndex(function (rule) {
+          return rule.id === move[1];
+        });
+        control.disabled =
+          any ||
+          STATE.readonly ||
+          (move[0] === "up" && index === 0) ||
+          (move[0] === "down" && index === STATE.rules.length - 1);
+      },
+    );
+
+    ladderEl.classList.toggle("is-simple", STATE.simple);
+    ladderEl.classList.toggle("is-limited", STATE.limited && !canvas);
+    Array.prototype.forEach.call(
+      document.querySelectorAll("[data-wf-list-only]"),
+      function (button) {
+        button.hidden = canvas;
+      },
+    );
+    var simplify = document.getElementById("wf-simplify");
+    if (simplify) simplify.setAttribute("aria-pressed", String(STATE.simple));
+    toolbarLabel(
+      "wf-simplify",
+      STATE.simple
+        ? translate("workflows.toolbar.detailed", "Detailed")
+        : translate("workflows.toolbar.simplified", "Simplified"),
+      STATE.simple ? "bx-detail" : "bx-menu",
+    );
+    var height = document.getElementById("wf-height");
+    if (height) height.setAttribute("aria-pressed", String(STATE.limited));
+    toolbarLabel(
+      "wf-height",
+      STATE.limited
+        ? translate("workflows.toolbar.full_height", "Full height")
+        : translate("workflows.toolbar.limit_height", "Limit height"),
+      STATE.limited ? "bx-fullscreen" : "bx-exit-fullscreen",
+    );
+    var allOpen =
+      STATE.rules.length > 0 &&
+      STATE.rules.every(function (rule) {
+        return STATE.open.has(rule.id);
+      });
+    toolbarLabel(
+      "wf-expand-all",
+      allOpen
+        ? translate("workflows.toolbar.collapse_all", "Collapse all")
+        : translate("workflows.toolbar.expand_all", "Expand all"),
+      allOpen ? "bx-chevrons-up" : "bx-chevrons-down",
     );
   }
 
@@ -2028,6 +2571,7 @@
     paintViewToggle();
     runTranslations();
     if (canvas) mountCanvas();
+    applyDisplay();
     if (focusSelector) {
       var target = document.querySelector(focusSelector);
       if (target) target.focus({ preventScroll: true });
@@ -2246,12 +2790,8 @@
         '[data-wf-summary="' + CSS.escape(rule.id) + '"]',
       );
       if (!host) return;
-      var summary = STATE.summaries[rule.id];
-      // Server summaries are English by design (workflow_schema.summarize_rule); only the
-      // placeholder shown before the first validation is ours to translate.
-      host.textContent =
-        summary || translate("workflows.not_validated", "Not validated yet");
-      host.classList.toggle("is-pending", !summary);
+      // The server text only says "validated"; the markup is built from the rule itself.
+      paintSummary(host, rule);
     });
 
     paintCanvasErrors();
@@ -2282,6 +2822,8 @@
     if (!match) return;
     var rule = STATE.rules[parseInt(match[1], 10)];
     if (!rule) return;
+    // An error on a rule a filter is hiding would land on nothing: show everything first.
+    if (filtering() && !ruleMatches(rule)) resetFilters();
     STATE.open.add(rule.id);
     // On the canvas the offending node only exists once the inspector is showing that rule,
     // so opening the drawer is part of getting there — not a separate step for the operator.
@@ -2340,6 +2882,15 @@
   }
 
   function moveRule(id, to, how) {
+    if (filtering()) {
+      say(
+        translate(
+          "workflows.toolbar.reorder_paused",
+          "Reordering is paused while a filter hides rules.",
+        ),
+      );
+      return;
+    }
     var from = STATE.rules.findIndex(function (rule) {
       return rule.id === id;
     });
@@ -2396,6 +2947,15 @@
      on a chain the gap the operator clicked is the priority they mean. */
   function insertRule(index) {
     if (STATE.rules.length >= MAX_RULES) return;
+    if (filtering()) {
+      say(
+        translate(
+          "workflows.toolbar.reorder_paused",
+          "Reordering is paused while a filter hides rules.",
+        ),
+      );
+      return;
+    }
     var rule = newRule();
     index = Math.max(0, Math.min(STATE.rules.length, index));
     STATE.rules.splice(index, 0, rule);
@@ -2413,12 +2973,53 @@
 
   /* Opening the inspector is a view change, not an edit: it must not mark the page dirty or
      re-run validation, so it renders directly instead of going through touch(). */
+  /* The rule as it was when the inspector opened. Cancel, the close button and Escape put it
+     back; Apply keeps the edits in the draft. Neither saves: only the page Save persists. */
+  var inspectSnapshot = null;
+
+  function focusInspectOpener(id) {
+    var opener = ladderEl.querySelector(
+      '[data-wf-inspect="' + CSS.escape(id) + '"]',
+    );
+    if (opener) opener.focus({ preventScroll: true });
+  }
+
+  function cancelInspect() {
+    var snapshot = inspectSnapshot;
+    inspectSnapshot = null;
+    var at = snapshot
+      ? STATE.rules.findIndex(function (rule) {
+          return rule.id === snapshot.id;
+        })
+      : -1;
+    if (at !== -1 && JSON.stringify(STATE.rules[at]) !== snapshot.json) {
+      STATE.rules[at] = JSON.parse(snapshot.json);
+      STATE.inspect = null;
+      touch();
+      focusInspectOpener(snapshot.id);
+      say(
+        translate(
+          "workflows.inspector.cancelled",
+          "Edits to rule {{n}} were cancelled; the rule is back as it was when opened.",
+          { n: at + 1 },
+        ),
+      );
+      return;
+    }
+    inspect(null);
+  }
+
   function inspect(id) {
     if (STATE.inspect === id) return;
+    var previous = STATE.inspect;
+    var opening = id ? ruleById(id) : null;
+    inspectSnapshot = opening
+      ? { id: id, json: JSON.stringify(opening) }
+      : null;
     STATE.inspect = id;
     render();
     paint();
-    if (!id) return;
+    if (!id) return focusInspectOpener(previous);
     var drawer = ladderEl.querySelector(".wf-drawer");
     if (drawer) {
       var focusable = drawer.querySelector(
@@ -2553,7 +3154,14 @@
     });
     var rule = STATE.rules[index];
     var menu = menuElement({ rule: id });
+    menu.setAttribute(
+      "aria-label",
+      translate("workflows.menu.header", "Rule actions") + " " + (index + 1),
+    );
+    // WF-02: headed groups, dividers and a destructive item that is red at rest, the same
+    // anatomy as the shared dropdown menu.
     menu.innerHTML =
+      '<div class="bw-flow-menu-hd" role="presentation" data-i18n="workflows.menu.header">Rule actions</div>' +
       '<button type="button" role="menuitem" data-wf-act="toggle"><i class="bx ' +
       (rule.enabled ? "bx-pause-circle" : "bx-play-circle") +
       '" aria-hidden="true"></i>' +
@@ -2567,7 +3175,8 @@
       (STATE.rules.length >= MAX_RULES ? " disabled" : "") +
       ">" +
       '<i class="bx bx-duplicate" aria-hidden="true"></i><span data-i18n="workflows.menu.duplicate">Duplicate below</span></button>' +
-      '<div class="sep"></div>' +
+      '<div class="sep" role="separator"></div>' +
+      '<div class="bw-flow-menu-hd" role="presentation" data-i18n="workflows.menu.order">Order</div>' +
       '<button type="button" role="menuitem" data-wf-act="top"' +
       (index === 0 ? " disabled" : "") +
       ">" +
@@ -2576,10 +3185,11 @@
       (index === STATE.rules.length - 1 ? " disabled" : "") +
       ">" +
       '<i class="bx bx-chevrons-down" aria-hidden="true"></i><span data-i18n="workflows.menu.bottom">Run last</span></button>' +
-      '<div class="sep"></div>' +
+      '<div class="sep" role="separator"></div>' +
       '<button type="button" role="menuitem" class="danger" data-wf-act="delete">' +
       '<i class="bx bx-trash" aria-hidden="true"></i><span data-i18n="workflows.menu.delete">Delete rule</span></button>';
     placeMenu(menu, anchor, true);
+    runTranslations();
   }
 
   function opMenu(anchor, nodeKey) {
@@ -2688,6 +3298,7 @@
   }
 
   function scheduleValidate() {
+    persistDraft();
     if (validateTimer) window.clearTimeout(validateTimer);
     validateTimer = window.setTimeout(validate, 400);
   }
@@ -2750,14 +3361,23 @@
       });
   }
 
+  /* Resolves to {ok, message} so the Save / Discard / Cancel dialog can wait for it. */
   function save() {
     var button = document.getElementById("wf-save");
     if (STATE.loadFailed) {
       button.disabled = true;
-      return;
+      return Promise.resolve({ ok: false, message: "" });
     }
     button.disabled = true;
-    post(document.getElementById("wf-save-url").value, {
+    var failed = function (message) {
+      panelEl.innerHTML =
+        '<div class="alert alert-danger" role="alert">' +
+        esc(message) +
+        "</div>";
+      button.disabled = false;
+      return { ok: false, message: message };
+    };
+    return post(document.getElementById("wf-save-url").value, {
       definition: serialize(),
     })
       .then(function (body) {
@@ -2767,6 +3387,7 @@
              and every rule's open/closed state on every save. The API re-validates on save,
              so "success" means the client state IS the stored state. */
           markSaved();
+          clearDraft();
           panelEl.innerHTML = "";
           button.disabled = false;
           var savedMessage = translate(
@@ -2776,27 +3397,19 @@
           say(savedMessage);
           toastSuccess(savedMessage);
           validate();
-          return;
+          return { ok: true, message: "" };
         }
-        panelEl.innerHTML =
-          '<div class="alert alert-danger" role="alert">' +
-          esc(
-            body.message || translate("workflows.err.save", "Could not save"),
-          ) +
-          "</div>";
-        button.disabled = false;
+        return failed(
+          body.message || translate("workflows.err.save", "Could not save"),
+        );
       })
       .catch(function () {
-        panelEl.innerHTML =
-          '<div class="alert alert-danger" role="alert">' +
-          esc(
-            translate(
-              "workflows.err.saveUnreachable",
-              "Could not reach the save endpoint",
-            ),
-          ) +
-          "</div>";
-        button.disabled = false;
+        return failed(
+          translate(
+            "workflows.err.saveUnreachable",
+            "Could not reach the save endpoint",
+          ),
+        );
       });
   }
 
@@ -3229,7 +3842,9 @@
       if (insert && !STATE.readonly)
         return insertRule(parseInt(insert.dataset.wfInsert, 10));
 
-      if (hit("[data-wf-drawerclose]")) return inspect(null);
+      if (hit("[data-wf-drawerclose]") || hit("[data-wf-drawercancel]"))
+        return cancelInspect();
+      if (hit("[data-wf-drawerapply]")) return inspect(null);
 
       var inspectButton = hit("[data-wf-inspect]");
       if (inspectButton) return inspect(inspectButton.dataset.wfInspect);
@@ -3801,7 +4416,16 @@
         closeMenus();
     });
     document.addEventListener("keydown", function (event) {
-      if (event.key === "Escape") closeMenus();
+      if (event.key === "Escape") {
+        // A menu opened from the inspector closes first; the next Escape cancels the rule.
+        if (document.querySelector(".bw-flow-menu")) closeMenus();
+        else if (
+          STATE.inspect &&
+          event.target.closest &&
+          event.target.closest(".wf-drawer")
+        )
+          cancelInspect();
+      }
     });
   }
 
@@ -3874,15 +4498,38 @@
     }
     STATE.rules = (definition.rules || []).map(fromSchemaRule);
     markSaved();
+    var idInput = document.getElementById("wf-id");
+    var nameInput = document.getElementById("wf-name");
+    STATE.workflowId = idInput ? idInput.value : "";
+    STATE.workflowName = nameInput ? nameInput.value : "";
+    var tabs = document.querySelector("[data-wf-url]");
+    var workflowsUrl = tabs ? tabs.dataset.wfUrl : "";
+    restoreDraft();
+    if (draftApi) draftApi.setActive(STATE.workflowId);
 
     /* A ladder is a lot of work to lose to a stray click on the breadcrumb. Readonly pages
-       can never be dirty, so they never prompt. */
-    window.addEventListener("beforeunload", function (event) {
-      if (STATE.readonly || !isDirty()) return;
-      event.preventDefault();
-      // Browsers show their own wording; a non-empty returnValue is what triggers the prompt.
-      event.returnValue = "";
-      return "";
+       can never be dirty, so they never prompt. Moving between Overview and Configuration
+       keeps the draft (workflow_draft.js), so those links are exempt from the prompt. */
+    var leaveDirty = function () {
+      return (
+        !STATE.readonly &&
+        !navigating &&
+        !(draftApi && draftApi.sectionNav) &&
+        isDirty()
+      );
+    };
+    if (window.BWLeaveGuard) {
+      window.BWLeaveGuard.create({ isDirty: leaveDirty });
+    } else {
+      window.addEventListener("beforeunload", function (event) {
+        if (!leaveDirty()) return;
+        event.preventDefault();
+        event.returnValue = "";
+      });
+    }
+    window.addEventListener("pagehide", persistDraft);
+    document.addEventListener("visibilitychange", function () {
+      if (document.visibilityState === "hidden") persistDraft();
     });
 
     /* The view is a workspace preference, not part of the workflow, so it is remembered per
@@ -3899,6 +4546,17 @@
     if (STATE.loadFailed) paint();
     wireLadder(ladderEl);
     wireMenus();
+    // One delegated tooltip for every consequence / gate badge: the ladder is rebuilt on each
+    // change, so per-element instances would leak and a hover would not survive a render.
+    if (window.bootstrap && window.bootstrap.Tooltip)
+      new window.bootstrap.Tooltip(ladderEl, {
+        selector: "[data-wf-tip]",
+        container: "body",
+        trigger: ["hover", "focus"].join(" "),
+        title: function () {
+          return this.getAttribute("data-wf-tip");
+        },
+      });
 
     Array.prototype.forEach.call(
       document.querySelectorAll("[data-wf-view]"),
@@ -3939,22 +4597,98 @@
     );
 
     var addButton = document.getElementById("wf-add-rule");
-    if (addButton) {
-      addButton.addEventListener("click", function () {
-        if (STATE.rules.length >= MAX_RULES) return;
-        var rule = newRule();
-        STATE.rules.push(rule);
-        STATE.open.add(rule.id);
-        touch('[data-wf-rule="' + CSS.escape(rule.id) + '"]');
-        say(
-          translate(
-            "workflows.say.added",
-            "Rule added at position {{n}} — last, so every rule above it is checked first.",
-            { n: STATE.rules.length },
-          ),
-        );
+    var addRule = function () {
+      if (STATE.readonly || STATE.loadFailed || STATE.rules.length >= MAX_RULES)
+        return;
+      // A new rule is appended last; a filter that hides it would look like nothing happened.
+      if (filtering()) resetFilters();
+      var rule = newRule();
+      STATE.rules.push(rule);
+      STATE.open.add(rule.id);
+      touch('[data-wf-rule="' + CSS.escape(rule.id) + '"]');
+      say(
+        translate(
+          "workflows.say.added",
+          "Rule added at position {{n}} — last, so every rule above it is checked first.",
+          { n: STATE.rules.length },
+        ),
+      );
+    };
+    if (addButton) addButton.addEventListener("click", addRule);
+    var emptyAdd = document.getElementById("wf-empty-add");
+    if (emptyAdd) emptyAdd.addEventListener("click", addRule);
+
+    // Display controls. None of them touches the rules; they only change what is drawn.
+    var filterToggle = document.getElementById("wf-filter-toggle");
+    var filterPanel = document.getElementById("wf-filters");
+    if (filterToggle && filterPanel) {
+      filterToggle.addEventListener("click", function () {
+        var open = filterPanel.hidden;
+        filterPanel.hidden = !open;
+        filterToggle.setAttribute("aria-expanded", String(open));
+        if (open) document.getElementById("wf-filter-name").focus();
       });
     }
+    [
+      ["wf-filter-name", "input", "q"],
+      ["wf-filter-state", "change", "state"],
+      ["wf-filter-action", "change", "action"],
+    ].forEach(function (entry) {
+      var field = document.getElementById(entry[0]);
+      if (!field) return;
+      field.addEventListener(entry[1], function () {
+        STATE.filter[entry[2]] = field.value;
+        applyDisplay();
+      });
+    });
+    var filterReset = document.getElementById("wf-filter-reset");
+    if (filterReset)
+      filterReset.addEventListener("click", function () {
+        resetFilters();
+        applyDisplay();
+      });
+    var simplifyButton = document.getElementById("wf-simplify");
+    if (simplifyButton)
+      simplifyButton.addEventListener("click", function () {
+        STATE.simple = !STATE.simple;
+        applyDisplay();
+      });
+    var heightButton = document.getElementById("wf-height");
+    if (heightButton)
+      heightButton.addEventListener("click", function () {
+        STATE.limited = !STATE.limited;
+        applyDisplay();
+      });
+    var expandButton = document.getElementById("wf-expand-all");
+    if (expandButton)
+      expandButton.addEventListener("click", function () {
+        var every = STATE.rules.every(function (rule) {
+          return STATE.open.has(rule.id);
+        });
+        STATE.rules.forEach(function (rule) {
+          if (every) STATE.open["delete"](rule.id);
+          else STATE.open.add(rule.id);
+        });
+        render();
+        paint();
+      });
+    var topButton = document.getElementById("wf-top");
+    if (topButton) {
+      window.addEventListener(
+        "scroll",
+        function () {
+          topButton.hidden = window.scrollY < 600;
+        },
+        { passive: true },
+      );
+      topButton.addEventListener("click", function () {
+        var calm = window.matchMedia(
+          "(prefers-reduced-motion: reduce)",
+        ).matches;
+        window.scrollTo({ top: 0, behavior: calm ? "auto" : "smooth" });
+      });
+    }
+
     var saveButton = document.getElementById("wf-save");
     if (saveButton) {
       if (STATE.loadFailed) saveButton.disabled = true;
@@ -3962,6 +4696,7 @@
     }
     // Rules added on top of an unreadable definition could never be saved.
     if (addButton && STATE.loadFailed) addButton.disabled = true;
+    if (emptyAdd && STATE.loadFailed) emptyAdd.disabled = true;
 
     var testUrl = document.getElementById("wf-test-url");
     STATE.workflowId = testUrl
@@ -4020,6 +4755,74 @@
       };
       i18next.on("initialized", refresh);
       i18next.on("languageChanged", refresh);
+    }
+
+    /* Switching workflow with a draft open is Save / Discard / Cancel; Cancel puts the
+       select back on the workflow that holds the draft. */
+    var pick = document.getElementById("wf-pick");
+    var csrf = document.getElementById("wf-csrf").value;
+    if (pick) {
+      pick.addEventListener("change", function () {
+        var targetId = pick.value;
+        if (targetId === STATE.workflowId) return;
+        var go = function () {
+          navigating = true;
+          window.location.assign(
+            workflowsUrl + "/" + encodeURIComponent(targetId),
+          );
+        };
+        if (STATE.readonly || !isDirty()) {
+          go();
+          return;
+        }
+        draftApi
+          .choose({
+            title: translate(
+              "workflows.shell.draft_title",
+              "Unsaved changes in {{name}}",
+              { name: STATE.workflowName },
+            ),
+            message: translate(
+              "workflows.shell.draft_switch_message",
+              "Opening {{target}} would leave unsaved rule changes in {{name}}. Only one draft can be open at a time: save it, discard it, or stay.",
+              {
+                target: pick.options[pick.selectedIndex].text,
+                name: STATE.workflowName,
+              },
+            ),
+            onSave: save,
+          })
+          .then(function (choice) {
+            if (choice === "cancel") {
+              pick.value = STATE.workflowId;
+              return;
+            }
+            if (choice === "discard") {
+              navigating = true;
+              clearDraft();
+            }
+            go();
+          });
+      });
+    }
+
+    // A direct URL to a workflow while another one holds the draft asks the same question.
+    var foreign = draftApi && draftApi.read();
+    if (foreign && foreign.id !== STATE.workflowId) {
+      draftApi
+        .resolveForeign({
+          targetId: STATE.workflowId,
+          targetName: STATE.workflowName,
+          csrf: csrf,
+          workflowsUrl: workflowsUrl,
+        })
+        .then(function (proceed) {
+          if (proceed) return;
+          navigating = true;
+          window.location.replace(
+            workflowsUrl + "/" + encodeURIComponent(foreign.id),
+          );
+        });
     }
 
     if (STATE.rules.length) validate();

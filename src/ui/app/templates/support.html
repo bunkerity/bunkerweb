@@ -31,6 +31,55 @@
         </a>
     {% endcall %}
     <!-- Content -->
+    {# Where to ask, then what to attach: documentation and community first (OPS-52), the
+       permission-gated exports below. Links only; nothing here counts members or promises a reply time. #}
+    <div class="row g-3 mb-4">
+        <div class="col-12 col-md-6">
+            {% call card(classes="h-100", icon="bx-book-open", title="Documentation", title_key="support.card.docs.title") %}
+                <ul class="list-unstyled mb-0 d-flex flex-column gap-2">
+                    {% for label_key, path in (("support.docs.quickstart", "quickstart-guide/"), ("support.docs.web_ui", "web-ui/"), ("support.docs.troubleshooting", "troubleshooting/"), ("support.docs.upgrading", "upgrading/")) %}
+                        <li>
+                            <a class="fw-semibold d-inline-flex align-items-center gap-1"
+                               href="https://docs.bunkerweb.io/latest/{{ path }}?utm_campaign=self&utm_source=ui"
+                               target="_blank"
+                               rel="noopener">
+                                <span>{{ _(label_key) }}</span><i class="bx bx-link-external bx-xs" aria-hidden="true"></i>
+                            </a>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% endcall %}
+        </div>
+        <div class="col-12 col-md-6">
+            {% call card(classes="h-100", icon="bx-chat", title="Community", title_key="support.card.community.title") %}
+                <ul class="list-unstyled mb-0 d-flex flex-column gap-2">
+                    <li>
+                        <a class="fw-semibold d-inline-flex align-items-center gap-2"
+                           href="https://discord.bunkerity.com/?utm_campaign=self&utm_source=ui"
+                           target="_blank"
+                           rel="noopener"><i class="bx bxl-discord-alt" aria-hidden="true"></i><span>{{ _("support.community.discord") }}</span></a>
+                        <small class="d-block text-muted">{{ _("support.community.discord_help") }}</small>
+                    </li>
+                    <li>
+                        <a class="fw-semibold d-inline-flex align-items-center gap-2"
+                           href="https://github.com/bunkerity/bunkerweb/issues"
+                           target="_blank"
+                           rel="noreferrer"><i class="bx bxl-github" aria-hidden="true"></i><span>{{ _("support.community.github") }}</span></a>
+                        <small class="d-block text-muted">{{ _("support.community.github_help") }}</small>
+                    </li>
+                    <li>
+                        <a class="fw-semibold d-inline-flex align-items-center gap-2"
+                           href="https://www.reddit.com/r/BunkerWeb/"
+                           target="_blank"
+                           rel="noreferrer"><i class="bx bxl-reddit" aria-hidden="true"></i><span>{{ _("support.community.reddit") }}</span></a>
+                        <small class="d-block text-muted">{{ _("support.community.reddit_help") }}</small>
+                    </li>
+                </ul>
+            {% endcall %}
+        </div>
+    </div>
+    <h2 class="h5 mb-3">{{ _("support.attach_title") }}</h2>
+    <p class="text-muted small">{{ _("support.attach_help") }}</p>
     <div class="row g-3">
         <div class="col-6 col-xl-4">
             {% call card(classes="p-4 h-100", icon="bxs-file-txt", title="Download Logs", title_key="support.card.download_logs.title") %}

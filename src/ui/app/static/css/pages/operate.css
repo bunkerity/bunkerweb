@@ -1,0 +1,162 @@
+/* Operate pages (jobs, logs, cache, web cache, timings, threat map, home) -- the 2026-10-23
+   design pass. Shared across those pages only; page-specific rules stay in the page sheet.
+   Logical properties throughout so the RTL twin mirrors without hand edits. */
+
+/* OPS-2: card titles and their leading icon take the accent (kit cardTitle="highlight",
+   app.css:84). --bw-accent is the primary in light and a light blue in dark, so the same rule
+   reads in both themes and in high contrast. */
+.card-header .card-title,
+.card-header .bw-panel-title,
+[data-bs-theme="dark"] .card-header .bw-panel-title,
+.card-header > .d-flex > i.bx {
+  color: var(--bw-accent, var(--bs-primary));
+}
+
+/* OPS-2: category-tinted KPI labels and icons on the pages that do not load home.css. The
+   macro emits bw-kpi-tile-<color>; the label carries the icon, so both tint together. */
+.bw-kpi-tile-green .bw-kpi-label,
+.bw-kpi-tile-bw-green .bw-kpi-label {
+  color: var(--bs-bw-green-contrast);
+}
+.bw-kpi-tile-blue .bw-kpi-label,
+.bw-kpi-tile-navy .bw-kpi-label {
+  color: #246c8b;
+}
+.bw-kpi-tile-warning .bw-kpi-label,
+.bw-kpi-tile-orange .bw-kpi-label {
+  color: #8d6200;
+}
+.bw-kpi-tile-danger .bw-kpi-label {
+  color: var(--bs-danger-text-emphasis);
+}
+[data-bs-theme="dark"] .bw-kpi-tile-green .bw-kpi-label,
+[data-bs-theme="dark"] .bw-kpi-tile-bw-green .bw-kpi-label {
+  color: #b8f7d2;
+}
+[data-bs-theme="dark"] .bw-kpi-tile-blue .bw-kpi-label,
+[data-bs-theme="dark"] .bw-kpi-tile-navy .bw-kpi-label {
+  color: #9bd5f0;
+}
+[data-bs-theme="dark"] .bw-kpi-tile-warning .bw-kpi-label,
+[data-bs-theme="dark"] .bw-kpi-tile-orange .bw-kpi-label {
+  color: #ffd28a;
+}
+[data-bs-theme="dark"] .bw-kpi-tile-danger .bw-kpi-label {
+  color: #ffb1ba;
+}
+
+/* Ranked share row: a thin bar beside a mono percentage (kit .tm-share). Used by the timings
+   table, the home top-reasons card and the threat map facets. */
+.bw-share {
+  align-items: center;
+  display: flex;
+  gap: 0.625rem;
+  min-width: 7.5rem;
+}
+.bw-share .bar {
+  background: color-mix(in srgb, var(--bs-primary) 10%, transparent);
+  border-radius: 999px;
+  flex: 1;
+  height: 6px;
+  min-width: 2.5rem;
+  overflow: hidden;
+}
+.bw-share .bar > i {
+  background: var(--bw-accent, var(--bs-primary));
+  border-radius: inherit;
+  display: block;
+  height: 100%;
+}
+.bw-share .cell-mono {
+  flex: none;
+  text-align: end;
+  width: 3.25rem;
+}
+.cell-mono {
+  font-family: var(--bs-font-monospace);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Timings (OPS-48, OPS-49) */
+.plugin-chip code {
+  background: none;
+  color: inherit;
+  font-size: inherit;
+  padding: 0;
+}
+.bw-timings-toolbar {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+.bw-timings-phase {
+  width: auto;
+}
+.bw-timings-search {
+  margin-inline-start: auto;
+  position: relative;
+}
+.bw-timings-search > .bx {
+  color: var(--bw-fg-3);
+  inset-block-start: 50%;
+  inset-inline-start: 0.6rem;
+  position: absolute;
+  transform: translateY(-50%);
+}
+.bw-timings-search .form-control {
+  min-width: 14rem;
+  padding-inline-start: 2rem;
+}
+.bw-timings-table thead th[data-sort] {
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+}
+.bw-timings-table thead th[data-sort]::after {
+  content: "\ec1b"; /* bx-sort-alt-2 */
+  font-family: boxicons;
+  font-size: 0.85em;
+  margin-inline-start: 0.3rem;
+  opacity: 0.4;
+}
+.bw-timings-table thead th[aria-sort="ascending"]::after {
+  content: "\ec5d"; /* bx-up-arrow-alt */
+  opacity: 1;
+}
+.bw-timings-table thead th[aria-sort="descending"]::after {
+  content: "\eab7"; /* bx-down-arrow-alt */
+  opacity: 1;
+}
+.bw-timings-table thead th[data-sort]:focus-visible {
+  outline: 3px solid var(--bw-accent, var(--bs-primary));
+  outline-offset: -3px;
+}
+.bw-timings-dash {
+  cursor: help;
+}
+.bw-timings-share {
+  justify-content: flex-end;
+}
+.bw-timings-foot {
+  align-items: flex-start;
+  display: flex;
+  gap: 0.4rem;
+  margin-top: 0.75rem;
+}
+
+/* About: recent releases (OPS-54) */
+.bw-release-item {
+  border-inline-start: 2px solid var(--bw-border);
+  padding-block: 0.25rem 0.75rem;
+  padding-inline-start: 0.875rem;
+}
+.bw-release-item + .bw-release-item {
+  margin-top: 0.25rem;
+}
+
+/* OPS-3: dark tile values follow the foreground token instead of a fixed light blue. */
+[data-bs-theme="dark"] .bw-kpi-tile .bw-kpi-value {
+  color: var(--bw-fg-1);
+}

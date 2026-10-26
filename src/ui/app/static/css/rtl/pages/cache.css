@@ -11,7 +11,7 @@
   font-weight: 400;
   font-style: normal;
   content: "\eaf8"; /* bx-globe */
-  margin-left: 0.35em;
+  margin-inline-end: 0.35em;
   font-size: 0.95em;
   line-height: 1;
   vertical-align: -0.05em;
@@ -24,4 +24,4 @@
   font-weight: 500;
 }
 
-/* rtlcss@4.3.0 source=css/pages/cache.css sha256=ebf5ea0116af137dabd284d6788cc408f2cefdb092c1c1b1d46cafe4984f365d */
+/* rtlcss@4.3.0 source=css/pages/cache.css sha256=6c31950871c14b97825b92d8c1e622083139946a6780707a4880c90c98b9fe46 */

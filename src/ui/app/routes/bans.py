@@ -335,6 +335,8 @@ def bans_page():
 
 
 _BANS_STATS_TOP_REASONS = 5
+# The "Detail" dialog of the reason card asks for the whole ranked list (detail=1); the cap keeps the payload bounded.
+_BANS_STATS_DETAIL_REASONS = 200
 
 
 @bans.route("/bans/stats", methods=["POST"])
@@ -357,9 +359,9 @@ def bans_stats():
     permanent = sum(1 for ban in all_bans if ban.get("permanent", False))
 
     reason_counts = Counter(str(ban.get("reason") or "unknown") for ban in all_bans)
+    limit = _BANS_STATS_DETAIL_REASONS if request.form.get("detail") == "1" else _BANS_STATS_TOP_REASONS
     reason_breakdown = [
-        {"reason": reason, "count": count, "pct": round(count / active * 100) if active else 0}
-        for reason, count in reason_counts.most_common(_BANS_STATS_TOP_REASONS)
+        {"reason": reason, "count": count, "pct": round(count / active * 100) if active else 0} for reason, count in reason_counts.most_common(limit)
     ]
 
     return jsonify(

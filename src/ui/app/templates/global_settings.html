@@ -1,8 +1,23 @@
 {% extends "dashboard.html" %}
+{% from "components/page-head.html" import page_head %}
 {% block head %}
     <link rel="stylesheet"
           href="{{ url_for('static', filename='css/pages/settings.css') }}"
           nonce="{{ style_nonce }}" />
+{% endblock %}
+{# SET-6: the page owns its head. Compose / Raw stay real LINKS (models/mode_pills.html explains why a tab switch is forbidden:
+   it re-renders both panes from the database), restyled as the design's range-picker and placed in the head. #}
+{% block page_head %}
+    {% set pane_blueprint = "global_settings" %}
+    {% call page_head(title="Global settings", title_i18n="navigation.global_settings",
+                      breadcrumb=[("Configure", "navigation.configure", none),
+                                  ("Global settings", "navigation.global_settings", none)]) %}
+        {% set pill_ul_class = "bw-mode-pills" %}
+        {% set pill_first_li_class = "nav-item" %}
+        {% set pill_icon_size = "bx-xs" %}
+        {% set pill_label_class = "d-none d-sm-inline" %}
+        {% include "models/mode_pills.html" %}
+    {% endcall %}
 {% endblock %}
 {% block content %}
     <!-- Content -->

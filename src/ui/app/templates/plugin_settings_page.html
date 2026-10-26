@@ -1,4 +1,6 @@
 {% extends "dashboard.html" %}
+{% from "components/page-head.html" import page_head %}
+{% from "components/select.html" import select %}
 {# One plugin's settings for one service (or globally). The page posts ONLY this plugin's
    keys plus the control keys below; the route derives the scope and `restore_unowned_settings`
    preserves everything outside it.
@@ -35,42 +37,99 @@
        never "global-settings"/"global-config". The shared body partial keys its disabled/badge
        logic off the page identity, so restore that identity for the global page. #}
     {% set current_endpoint = "global-settings" if not service_id else current_endpoint %}
-    <form method="POST" action="" data-plugin-settings-form>
-        <input type="hidden" id="csrf_token" name="csrf_token" value="{{ csrf_token() }}">
-        <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-2">
-            <div>
-                <nav aria-label="breadcrumb">
-                    <ol class="breadcrumb mb-1">
-                        {% if service_id %}
-                            <li class="breadcrumb-item">
-                                <a href="{{ url_for('services.services_page') }}">{{ _("navigation.services") }}</a>
-                            </li>
-                            <li class="breadcrumb-item">
-                                <a href="{{ url_for('services.services_service_page', service=service_id) }}">{{ service_id }}</a>
-                            </li>
-                        {% else %}
-                            <li class="breadcrumb-item">
-                                <a href="{{ url_for('global_settings.global_settings_page') }}"
-                                  >{{ _("navigation.global_settings") }}</a>
-                            </li>
-                        {% endif %}
-                        <li class="breadcrumb-item active" aria-current="page">{{ plugin_text(plugin, 'meta.name', plugin_data["name"]) }}</li>
-                    </ol>
-                </nav>
-                <h5 class="mb-0 don-jose">{{ plugin_text(plugin, 'meta.name', plugin_data["name"]) }}&nbsp;－&nbsp;v{{ plugin_data["version"] }}</h5>
-                <p class="text-muted mb-0 courier-prime">{{ plugin_text(plugin, 'meta.description', plugin_data["description"]) }}</p>
+    {# The count templates keep their own `{{name}}` markers: plugin-settings-nav.js fills them as the search narrows, so the
+       server must hand the message its variables back verbatim (a bare `_()` call on a placeholder message raises). #}
+    {% set count_placeholders = {"count": "{" ~ "{count}" ~ "}", "shown": "{" ~ "{shown}" ~ "}", "total": "{" ~ "{total}" ~ "}"} %}
+    {% set plugin_name = plugin_text(plugin, 'meta.name', plugin_data["name"]) %}
+    {% set has_service_scope = (plugin_data["settings"] | default({})).values() | selectattr("context", "equalto", "multisite") | list | length > 0 %}
+    {% set type_icons = {"core": "bx-shield", "pro": "bx-diamond", "ui": "bx-cloud-upload"} %}
+    {# PLG-20 + SET-16: this page owns its head. The save button is outside the form on purpose (`form=` ties it back), so the
+       Plugin / Scope selectors below can sit between head and card without their hidden inputs ever being part of the POST. #}
+    {% call page_head(title=plugin_name,
+                      breadcrumb=([("Plugins", "navigation.plugins", url_for('plugins.plugins_page')),
+                                   ("Global settings", "navigation.global_settings", url_for('global_settings.global_settings_page')),
+                                   (plugin_name, none, none)] if not service_id else
+                                  [("Services", "navigation.services", url_for('services.services_page')),
+                                   (service_id, none, url_for('services.services_service_page', service=service_id)),
+                                   (plugin_name, none, none)])) %}
+        <a class="btn btn-outline-secondary btn-sm"
+           data-plugin-nav-back
+           href="{{ url_for('services.services_service_page', service=service_id) if service_id else url_for('global_settings.global_settings_page') }}">
+            <i class="bx bx-arrow-back bx-sm" aria-hidden="true"></i>
+            <span class="d-none d-md-inline">&nbsp;{{ _("settings_page.back_service") if service_id else _("settings_page.back_global") }}</span>
+        </a>
+        <span {% if is_readonly %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="{{ _("tooltip.disabled_readonly") if user_readonly else _("tooltip.disabled_db_readonly") }}"
+              {% endif %}>
+            <button type="submit"
+                    form="plugin-settings-form"
+                    class="btn btn-sm btn-primary don-jose save-settings{% if is_readonly %} disabled{% endif %}"
+                    {% if is_readonly %}disabled{% endif %}>
+                <i class="bx bx-save bx-sm" aria-hidden="true"></i>
+                <span class="d-none d-md-inline">&nbsp;<span>{{ _("settings_page.save_reload") }}</span></span>
+            </button>
+        </span>
+    {% endcall %}
+    {# PLG-22: the version and description stay, as small text under the head. #}
+    <p class="bw-plugin-meta">
+        <span class="fw-semibold">v{{ plugin_data["version"] }}</span>
+        <span>{{ plugin_text(plugin, 'meta.description', plugin_data["description"]) }}</span>
+    </p>
+    {% set scope_options = [{"value": "__global__", "text": _("settings_page.scope_global"), "icon": "bx-globe"}] %}
+    {% if service_id %}{% set _ignored = scope_options.append({"value": service_id, "text": service_id, "icon": "bx-server"}) %}{% endif %}
+    {% set plugin_options = [] %}
+    {% for option in (plugin_picker | default([])) %}
+        {% set _ignored = plugin_options.append({"value": option["id"], "text": option["name"], "icon": type_icons.get(option["type"], "bx-plug")}) %}
+    {% endfor %}
+    {# The selects are navigation only, so their hidden inputs lose the `name` the macro defaults to: even moved inside the form,
+       nothing here could be serialised into a settings POST. Every URL is built by the server (placeholders), nothing is derived from the path; the script
+       asks before leaving unsaved edits. Not inside the form, so nothing here can be posted. #}
+    <div class="bw-scope-bar"
+         data-plugin-scope-nav
+         data-plugin="{{ plugin }}"
+         data-scope="{{ service_id if service_id else '__global__' }}"
+         data-url-global="{{ url_for('global_settings.global_settings_plugin_page', plugin='__PLUGIN__') }}"
+         data-url-service="{{ url_for('services.services_plugin_page', service='__SERVICE__', plugin='__PLUGIN__') }}"
+         data-services-endpoint="{{ url_for('home.search_services') }}"
+         data-service-scope="{{ 'yes' if has_service_scope else 'no' }}">
+        {% if plugin_options %}
+            <div class="bw-scope-field">
+                <span class="bw-scope-cap" id="plugin-nav-plugin-cap">{{ _("settings_page.plugin") }}</span>
+                {{ select(id="plugin-nav-plugin", options=plugin_options, value=plugin, aria_label=_("settings_page.select_plugin_label")) | replace(' name="plugin-nav-plugin"', '') }}
             </div>
-            <div {% if is_readonly %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="{{ _("tooltip.disabled_readonly") if user_readonly else _("tooltip.disabled_db_readonly") }}"
-                 {% endif %}>
-                <button type="submit"
-                        class="btn btn-sm btn-primary don-jose save-settings{% if is_readonly %} disabled{% endif %}"
-                        {% if is_readonly %}disabled{% endif %}>
-                    <i class="bx bx-save bx-sm"></i>
-                    <span class="d-none d-md-inline">&nbsp;<span>{{ _("button.save") }}</span></span>
+        {% endif %}
+        <div class="bw-scope-field">
+            <span class="bw-scope-cap" id="plugin-nav-scope-cap">{{ _("settings_page.scope") }}</span>
+            {{ select(id="plugin-nav-scope", options=scope_options, value=(service_id if service_id else "__global__"), aria_label=_("settings_page.select_scope_label"), disabled=not has_service_scope) | replace(' name="plugin-nav-scope"', '') }}
+        </div>
+    </div>
+    <form method="POST" action="" id="plugin-settings-form" data-plugin-settings-form autocomplete="off">
+        <input type="hidden" id="csrf_token" name="csrf_token" value="{{ csrf_token() }}">
+        <div class="card bw-settings-card">
+            <div class="bw-settings-head">
+                <h2 class="bw-settings-title"><i class="bx bx-slider-alt" aria-hidden="true"></i><span>{{ _("settings_page.card_title") }}</span></h2>
+                <span class="bw-settings-count" id="plugin-settings-count" role="status" aria-live="polite" data-count-template="{{ _("settings_page.count", count=count_placeholders.count) }}" data-count-filtered-template="{{ _("settings_page.count_filtered", shown=count_placeholders.shown, total=count_placeholders.total) }}"></span>
+                <span class="bw-settings-spacer"></span>
+                <div class="bw-settings-search">
+                    <i class="bx bx-search" aria-hidden="true"></i>
+                    <input type="search"
+                           id="plugin-settings-search"
+                           class="form-control form-control-sm"
+                           placeholder="{{ _("settings_page.search") }}"
+                           aria-label="{{ _("settings_page.search_label") }}"
+                           autocomplete="off">
+                </div>
+                <button type="button"
+                        id="plugin-settings-revert"
+                        class="btn btn-sm btn-outline-secondary"
+                        data-bs-toggle="tooltip"
+                        data-bs-placement="top"
+                        data-bs-original-title="{{ _("settings_page.revert_message") }}"
+                        disabled>
+                    <i class="bx bx-revision bx-xs" aria-hidden="true"></i>
+                    <span class="d-none d-md-inline">&nbsp;{{ _("settings_page.revert") }}</span>
                 </button>
             </div>
-        </div>
-        <div class="card p-2">
+            <p class="bw-settings-empty d-none" id="plugin-settings-nomatch" role="status">{{ _("settings_page.no_match") }}</p>
             {# A plugin may ship a purpose-built body (app/utils.py:plugin_settings_body,
                templates/plugin_bodies/<id>.html). It replaces the LAYOUT only: the form, the
                control keys below, `postable_scope` and the writer are all unchanged, so there is
@@ -102,6 +161,23 @@
                 </div>
             {% endif %}
         </div>
+        {# PLG-24: what saving does at this scope. #}
+        <div class="alert alert-info bw-settings-note" role="status">
+            <i class="bx bx-info-circle" aria-hidden="true"></i>
+            <div>{{ _("settings_page.alert_service") if service_id else _("settings_page.alert_global") }}</div>
+        </div>
+        {# PLG-25: the whitelist and country pages point at the groups manager rather than embedding it. #}
+        {% if plugin in ("whitelist", "country") %}
+            <div class="bw-settings-groups-link">
+                <div>
+                    <strong>{{ _("navigation.groups") }}</strong>
+                    <div class="small text-muted">{{ _("settings_page.groups_link_hint") }}</div>
+                </div>
+                <a class="btn btn-sm btn-outline-secondary" href="{{ url_for('resource_groups.resource_groups_page') }}">
+                    <i class="bx bx-collection bx-sm" aria-hidden="true"></i>&nbsp;{{ _("settings_page.groups_link") }}
+                </a>
+            </div>
+        {% endif %}
         {% if service_id %}
             {# Always emitted, whatever the plugin declares -- see the note at the top of this
                file for why this must come after the body include and must not be guarded. #}
@@ -118,6 +194,13 @@
        (js/plugins-settings) alongside it: every handler in both files is
        document-delegated and would double-fire (one ADD click would clone twice). #}
     <script src="{{ url_for('static', filename='js/components/settings-widgets.js') }}"
+            nonce="{{ script_nonce }}"
+            defer></script>
+    {# Plugin / Scope selectors (select.js wires the combobox), the in-card search and count, Revert, and the leave guard. #}
+    <script src="{{ url_for('static', filename='js/components/select.js') }}"
+            nonce="{{ script_nonce }}"
+            defer></script>
+    <script src="{{ url_for('static', filename='js/components/plugin-settings-nav.js') }}"
             nonce="{{ script_nonce }}"
             defer></script>
     {# An override body's own behaviour script, by the same convention as its template:

@@ -4,6 +4,7 @@ from re import fullmatch
 
 from flask import Blueprint, Response, jsonify, redirect, render_template, request, url_for
 from flask_login import login_required
+from resource_group_resolver import RESOURCE_LIST_SETTINGS, RULE_SETTINGS, RULE_TERM_KINDS  # type: ignore
 
 from app.api_client import ApiClientError, ApiUnavailableError
 from app.dependencies import API_CLIENT
@@ -19,7 +20,46 @@ EDITABLE_METHODS = ("ui", "api", "wizard")
 MAX_ENTRIES = 5000
 MAX_VALUE_LENGTH = 8192
 MAX_COMMENT_LENGTH = 1000
+# Where a group came from (ResourceGroups.method). Access is separate: EDITABLE_METHODS decide whether this page may change it.
+ORIGIN_ICONS = {
+    "ui": "bx-window-alt",
+    "api": "bx-code-alt",
+    "wizard": "bx-magic-wand",
+    "manual": "bx-pencil",
+    "scheduler": "bx-time-five",
+    "autoconf": "bx-cog",
+    "download": "bx-cloud-download",
+}
+# Display names of the plugins that consume resource groups (the plugin id for a bare lowercase word is the label).
+PLUGIN_LABELS = {"realip": "Real IP", "dnsbl": "DNSBL", "antibot": "Antibot", "whitelist": "Whitelist", "blacklist": "Blacklist", "greylist": "Greylist"}
+_PLUGIN_BY_SETTING_PREFIX = (
+    ("REAL_IP", "realip"),
+    ("WHITELIST", "whitelist"),
+    ("BLACKLIST", "blacklist"),
+    ("GREYLIST", "greylist"),
+    ("DNSBL", "dnsbl"),
+    ("ANTIBOT", "antibot"),
+)
 RESERVED_ALIASES = frozenset({"ASEAN", "BENELUX", "DACH", "EEA", "EU", "FIVE_EYES", "G7", "GCC", "LATAM", "NORDICS", "SCHENGEN", "USMCA"})
+
+
+def kind_plugins():
+    """Plugins whose settings accept each kind of group, from the resolver's own registry.
+
+    This is compatibility (what the kind can be referenced from), not observed references: those are
+    the Usage column. The composite ``*_RULE`` settings take every kind, but only for the three lists.
+    """
+    mapping = {kind: [] for kind in RESOURCE_KINDS}
+    for setting, kind in RESOURCE_LIST_SETTINGS.items():
+        plugin = next((plugin for prefix, plugin in _PLUGIN_BY_SETTING_PREFIX if setting.startswith(prefix)), None)
+        if plugin and plugin not in mapping[kind]:
+            mapping[kind].append(plugin)
+    for rule_setting in RULE_SETTINGS:
+        plugin = rule_setting.split("_", 1)[0].lower()
+        for kind in set(RULE_TERM_KINDS.values()):
+            if plugin not in mapping[kind]:
+                mapping[kind].append(plugin)
+    return mapping
 
 
 def _redirect():
@@ -80,6 +120,10 @@ def resource_groups_page():
         resource_groups=rows,
         resource_kinds=RESOURCE_KINDS,
         editable_methods=EDITABLE_METHODS,
+        kind_plugins=kind_plugins(),
+        plugin_labels=PLUGIN_LABELS,
+        origin_icons=ORIGIN_ICONS,
+        origin_methods=tuple(ORIGIN_ICONS),
         form_retry=take_form_retry(),
     )
 

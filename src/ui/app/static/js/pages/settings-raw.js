@@ -620,6 +620,68 @@ $(document).ready(() => {
     refresh();
   };
 
+  // SET-7 tiles (templates/models/plugins_settings_raw.html): Modified and Problems follow the editor
+  // text. Both use the save-time parser (`parseRawSettings`), so what counts here is what the save
+  // would read: an entry is a line whose key is a known setting; any other non-blank row outside
+  // a multiline value is one the save silently drops, which is the Problems count.
+  // Display only, nothing here is posted.
+  const setupRawTiles = (editor) => {
+    const modified = document.getElementById("raw-tile-modified");
+    const problems = document.getElementById("raw-tile-problems");
+    const problemsWrap = document.getElementById("raw-tile-problems-wrap");
+    if (!modified || !problems) return;
+    const predicates = makeRawKeyPredicates();
+    const refresh = () => {
+      const text = editor.getValue();
+      const entries = parseRawSettings(text, predicates);
+      const covered = new Set();
+      entries.forEach((entry) => {
+        for (let row = entry.start; row <= entry.end; row++) covered.add(row);
+      });
+      let stray = 0;
+      text
+        .replace(/\r\n?/g, "\n")
+        .split("\n")
+        .forEach((line, row) => {
+          if (line.trim() && !covered.has(row)) stray += 1;
+        });
+      modified.textContent = entries.filter(
+        (entry) => entry.key !== "IS_DRAFT",
+      ).length;
+      problems.textContent = stray;
+      if (problemsWrap)
+        problemsWrap.classList.toggle("has-problems", stray > 0);
+    };
+    editor.on("change", refresh);
+    refresh();
+  };
+
+  // SET-7 search: the design's in-card search with previous / next, on top of ACE's own finder.
+  const setupRawSearch = (editor) => {
+    const input = document.getElementById("raw-config-search");
+    if (!input) return;
+    const prev = document.getElementById("raw-config-search-prev");
+    const next = document.getElementById("raw-config-search-next");
+    const find = (backwards, skipCurrent) => {
+      const needle = input.value;
+      if (!needle) return;
+      editor.find(needle, {
+        backwards,
+        wrap: true,
+        caseSensitive: false,
+        skipCurrent,
+      });
+    };
+    input.addEventListener("input", () => find(false, false));
+    input.addEventListener("keydown", (event) => {
+      if (event.key !== "Enter") return;
+      event.preventDefault();
+      find(event.shiftKey, true);
+    });
+    if (prev) prev.addEventListener("click", () => find(true, true));
+    if (next) next.addEventListener("click", () => find(false, true));
+  };
+
   $(".ace-editor").each(function () {
     const $editorElement = $(this);
     const sourceSelector = $editorElement.data("source");
@@ -771,6 +833,8 @@ $(document).ready(() => {
 
       setupRawDisabledHighlight(editor);
       setupRawDraftActions(editor);
+      setupRawTiles(editor);
+      setupRawSearch(editor);
     }
 
     if ($source && $source.length && $source.is("textarea, input")) {

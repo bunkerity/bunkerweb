@@ -5,7 +5,6 @@
 {% from "components/tile.html" import tile %}
 {% from "components/alert.html" import alert %}
 {% from "components/page-head.html" import page_head %}
-{% from "components/chart-area.html" import chart_area %}
 {% from "components/range-picker.html" import range_picker %}
 {# The page-head band now owns the breadcrumb + title, so suppress the dashboard shell's
    legacy breadcrumb/mode row for this page (kills the duplicated breadcrumb). #}
@@ -17,6 +16,9 @@
           as="style" />
     <link rel="stylesheet"
           href="{{ url_for('static', filename=rtl_sheet('libs/datatables/datatables.min.css')) }}"
+          nonce="{{ style_nonce }}" />
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/pages/table-live.css') }}"
           nonce="{{ style_nonce }}" />
     <!-- ApexCharts (bans timeline) -->
     <link rel="preload"
@@ -49,6 +51,21 @@
                                   ("Bans", "navigation.bans", none)]) %}
         <div{% if is_readonly %} data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="{{ _('tooltip.disabled_readonly' if user_readonly else 'tooltip.disabled_db_readonly') }}"{% endif %}>
             <button type="button"
+                    id="bans-clear-all-btn"
+                    class="btn btn-outline-danger btn-sm me-2{% if is_readonly %} disabled{% endif %}">
+                <i class="bx bx-trash bx-xs me-1" aria-hidden="true"></i><span>{{ _("bans.page.clear_all") }}</span>
+            </button>
+            <button type="button"
+                    id="bans-import-btn"
+                    class="btn btn-outline-secondary btn-sm me-2{% if is_readonly %} disabled{% endif %}">
+                <i class="bx bx-upload bx-xs me-1" aria-hidden="true"></i><span>{{ _("bans.page.import") }}</span>
+            </button>
+            <input type="file"
+                   id="bans-import-file"
+                   class="d-none"
+                   accept=".txt,.csv,.json,text/plain,text/csv,application/json"
+                   aria-label="{{ _("bans.page.import") }}" />
+            <button type="button"
                     id="bans-add-btn"
                     class="btn btn-primary btn-sm don-jose{% if is_readonly %} disabled{% endif %}">
                 <i class="bx bx-plus bx-xs me-1"></i><span>{{ _("button.add_ban_plural") }}</span>
@@ -64,11 +81,27 @@
     {# "Active bans per interval" (#3820). Occupancy, not creations: bw_bans keeps one row per
        (ip, scope, service) and a re-ban rewrites its created_at, so a "bans created" series would
        claim an event history the table cannot back -- the note under the chart says so. #}
-    <div class="d-flex justify-content-end mb-2">{{ range_picker(id="bans-range", active="24h") }}</div>
-    {{ chart_area(id="bans-timeseries-chart", title="Active bans per interval", title_key="bans.chart.timeseries.title", subtitle="Selected range", subtitle_key="bans.chart.timeseries.subtitle", uppercase=true, height=260, card_classes="mb-4") }}
+    <div class="row g-3 mb-2">
+        <div class="col-lg-8">
+            {# chart-area.html has no header slot: the range picker lives in this card's header (TBL-11). #}
+            {% call card(classes="h-100", title="Active bans per interval", title_key="bans.chart.timeseries.title", subtitle="Selected range", subtitle_key="bans.chart.timeseries.subtitle", uppercase=true, separator=false, header_right=range_picker(id="bans-range", active="24h")) %}
+                <div id="bans-timeseries-chart" class="w-100" data-chart-height="260"></div>
+                <div id="bans-timeseries-chart-data" class="visually-hidden">{}</div>
+            {% endcall %}
+        </div>
+        <div class="col-lg-4">
+            {% call card(classes="h-100", title="Bans by reason", title_key="bans.stats.card.by_reason", icon="bx-pie-chart-alt-2") %}
+                <div id="bans-reason-breakdown"></div>
+            {% endcall %}
+            {# The "bans expire on instance restart unless USE_REDIS" warning lived here. Bans are
+               stored in the database now and restored to the instances by the sync-bans job, so it
+               no longer applies whatever USE_REDIS is set to. #}
+        </div>
+    </div>
+    <div id="bans-live-status" class="visually-hidden" role="status" aria-live="polite"></div>
     <p class="text-muted small mb-4" id="bans-timeseries-note">{{ _("bans.chart.timeseries.note") }}</p>
     <div class="row g-3">
-        <div class="col-lg-8">
+        <div class="col-12">
             {% call card(classes="table-responsive text-nowrap p-4 pb-8 min-vh-70") %}
                 {% set base_flags_url = url_for('static', filename='img/flags') %}
                 <input type="hidden" id="base_flags_url" value="{{ base_flags_url }}" />
@@ -77,21 +110,13 @@
                 {% endcall %}
                 <div class="d-flex flex-column flex-sm-row align-items-center gap-3 mt-4 pt-3 border-top border-light-subtle small text-muted w-100">
                     <div class="flex-grow-1 text-center">
-                        <span class="badge rounded-pill bg-secondary">
-                            TZ:
+                        <span class="tag-chip">
+                            <i class="bx bx-time" aria-hidden="true"></i>TZ:
                             <script nonce="{{ script_nonce }}">document.write(Intl.DateTimeFormat().resolvedOptions().timeZone);</script>
                         </span>
                     </div>
                 </div>
             {% endcall %}
-        </div>
-        <div class="col-lg-4 d-flex flex-column gap-3">
-            {% call card(title="Bans by reason", title_key="bans.stats.card.by_reason", icon="bx-pie-chart-alt-2") %}
-                <div id="bans-reason-breakdown"></div>
-            {% endcall %}
-            {# The "bans expire on instance restart unless USE_REDIS" warning lived here. Bans are
-               stored in the database now and restored to the instances by the sync-bans job, so it
-               no longer applies whatever USE_REDIS is set to. #}
         </div>
     </div>
     {% if not is_readonly %}
@@ -402,10 +427,16 @@
     <script src="{{ url_for('static', filename='js/components/security-reason.js') }}"
             nonce="{{ script_nonce }}"
             defer></script>
+    <script src="{{ url_for('static', filename='js/components/table-live.js') }}"
+            nonce="{{ script_nonce }}"
+            defer></script>
     <script src="{{ url_for('static', filename='js/pages/bans.js') }}"
             nonce="{{ script_nonce }}"
             defer
             type="module"></script>
+    <script src="{{ url_for('static', filename='js/components/top-table.js') }}"
+            nonce="{{ script_nonce }}"
+            defer></script>
     <script src="{{ url_for('static', filename='js/pages/bans-stats.js') }}"
             nonce="{{ script_nonce }}"
             defer></script>

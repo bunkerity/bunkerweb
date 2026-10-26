@@ -7,6 +7,9 @@
 {% from "components/checkbox.html" import checkbox %}
 {% from "components/selected-list.html" import selected_list %}
 {% from "components/page-head.html" import page_head %}
+{% from "components/value-chips.html" import service_code, tag_chip %}
+{% from "components/status.html" import status %}
+{% from "components/empty-state.html" import empty_state %}
 {# page-head band owns the breadcrumb + H1, so drop the dashboard shell's legacy header row. #}
 {% block page_head %}{% endblock %}
 {% block head %}
@@ -21,19 +24,42 @@
 {% block content %}
     <!-- Page head band (components/page-head.html; kit .page-head, admin.css:138-142). The
          "Create custom config" action moves here from the DataTable toolbar as the navy CTA. -->
-    {% call page_head(title="Configs", title_i18n="navigation.configs",
+    {% call page_head(title="Custom configs", title_i18n="configs.console.title",
                       breadcrumb=[("Configure", "navigation.configure", none),
                                   ("Configs", "navigation.configs", none)]) %}
         <div{% if is_readonly %} data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="{{ _('tooltip.disabled_readonly' if user_readonly else 'tooltip.disabled_db_readonly') }}"{% endif %}>
             <a role="button"
-               class="btn btn-primary don-jose btn-sm{% if is_readonly %} disabled{% endif %}"
+               class="btn btn-primary don-jose{% if is_readonly %} disabled{% endif %}"
                href="{{ url_for('configs') }}/new">
-                <i class="bx bx-plus bx-xs me-1"></i><span>{{ _("button.create_config") }}</span>
+                <i class="bx bx-plus bx-xs me-1" aria-hidden="true"></i><span>{{ _("configs.console.new") }}</span>
             </a>
         </div>
     {% endcall %}
+    <div class="alert alert-info d-flex flex-wrap gap-3" role="note">
+        <span><i class="bx bx-globe" aria-hidden="true"></i> {{ _("configs.console.global_legend") }}</span>
+        <span><i class="bx bx-server" aria-hidden="true"></i> {{ _("configs.console.service_legend") }}</span>
+    </div>
+    <div class="d-flex flex-wrap gap-3 align-items-end mb-3">
+        <div class="d-none d-xl-flex flex-wrap gap-2 flex-grow-1" role="group" aria-label="{{ _('configs.console.types') }}">
+            {% for config_type in config_types %}
+                <button type="button" class="btn btn-outline-secondary btn-sm config-type-tab" data-type="{{ config_type }}" aria-pressed="false">
+                    {{ config_type }} <span class="badge bg-secondary config-type-count">{{ configs|selectattr('type', 'equalto', config_type|lower)|list|length }}</span>
+                </button>
+            {% endfor %}
+        </div>
+        <div class="d-xl-none flex-grow-1">
+            <label for="configs-type-select" class="form-label">{{ _('configs.console.types') }}</label>
+            <select id="configs-type-select" class="form-select">{% for config_type in config_types %}<option value="{{ config_type }}">{{ config_type }}</option>{% endfor %}</select>
+        </div>
+        <div class="btn-group btn-group-sm" role="group" aria-label="{{ _('table.header.service') }}">
+            <button type="button" class="btn btn-primary config-scope-tab" data-scope="all" aria-pressed="true"><i class="bx bx-list-ul bx-xs me-1" aria-hidden="true"></i>{{ _('configs.console.all_scopes') }}</button>
+            <button type="button" class="btn btn-outline-secondary config-scope-tab" data-scope="global" aria-pressed="false"><i class="bx bx-globe bx-xs me-1" aria-hidden="true"></i>{{ _('configs.console.global_only') }}</button>
+            <button type="button" class="btn btn-outline-secondary config-scope-tab" data-scope="service" aria-pressed="false"><i class="bx bx-server bx-xs me-1" aria-hidden="true"></i>{{ _('configs.console.service_only') }}</button>
+        </div>
+    </div>
+    <textarea id="configs-data" class="visually-hidden">{{ configs|tojson }}</textarea>
     <!-- Content -->
-    {% call card(classes="table-responsive text-nowrap p-4 pb-8 min-vh-70") %}
+    {% call card(classes="p-3 mb-4") %}
         <input type="hidden" id="services" value="{{ services }}" />
         <input type="hidden" id="templates" value="{{ db_templates }}" />
         <input type="hidden"
@@ -118,24 +144,25 @@
                     {% else %}
                         {% set config_icon = "window-alt" %}
                     {% endif %}
-                    <tr>
+                    <tr data-config-index="{{ loop.index0 }}" data-config-name="{{ config['name'] }}" data-config-type="{{ config['type'] }}" data-config-service="{{ service_id }}" data-config-status="{{ 'draft' if config.get('is_draft') else 'online' }}">
                         <td></td>
                         <td></td>
                         <td>
                             <a href="{{ url_for("configs") }}/{{ service_id }}/{{ config['type'] }}/{{ config['name'] }}"
-                               class="d-flex align-items-center"
+                               class="d-flex align-items-center config-preview"
                                data-bs-toggle="tooltip"
                                data-bs-placement="bottom"
-                               data-bs-original-title="{{ _("tooltip.link.view_config" if config['method'] != 'ui' and not config['template'] or is_readonly else "tooltip.link.edit_config", name=config['name']) }}"><i class="bx bx-{% if config['method'] != 'ui' and not config['template'] or is_readonly %}show{% else %}edit{% endif %} bx-xs"></i>&nbsp;{{ config["name"] }}</a>
+                               data-bs-original-title="{{ _("tooltip.link.view_config" if config['method'] != 'ui' and not config['template'] or is_readonly else "tooltip.link.edit_config", name=config['name']) }}"><i class="bx bx-{% if config['method'] != 'ui' and not config['template'] or is_readonly %}show{% else %}edit{% endif %} bx-xs" aria-hidden="true"></i>&nbsp;{{ config["name"] }}</a>
+                            <small class="d-flex align-items-center gap-1 mt-1"><i class="bx bx-{{ 'globe' if service_id == 'global' else 'server' }}" aria-hidden="true"></i>{{ service_code(_("scope.global") if service_id == 'global' else service_id, scope=service_id == 'global') }}</small>
                         </td>
                         <td id="type-{{ config_id }}">
                             <div class="d-flex align-items-center">
-                                <i class="bx bx-{{ config_icon }} me-1"></i>
+                                <i class="bx bx-{{ config_icon }} me-1" aria-hidden="true"></i>
                                 {{ config["type"]|upper }}
                             </div>
                         </td>
                         <td>
-                            {{ config["method"] }}
+                            {{ tag_chip(config["method"]) }}
                             {% if config["method"] == "scheduler" %}
                                 {# method="scheduler" custom configs are produced exclusively by
                                    src/common/gen/save_config.py parsing CUSTOM_CONF_* environment
@@ -153,16 +180,16 @@
                                    class="d-flex align-items-center"
                                    data-bs-toggle="tooltip"
                                    data-bs-placement="bottom"
-                                   data-bs-original-title="{{ _("tooltip.link.edit_service", service=config['service']) }}"><i class="bx bx-edit bx-xs"></i>&nbsp;{{ config['service'] }}</a>
+                                   data-bs-original-title="{{ _("tooltip.link.edit_service", service=config['service']) }}"><i class="bx bx-edit bx-xs" aria-hidden="true"></i>&nbsp;{{ config['service'] }}</a>
                             {% else %}
                                 {{ badge(text="Global", i18n_key="scope.global", data_value="global", variant="secondary") }}
                             {% endif %}
                         </td>
                         <td>
                             {% if config.get("is_draft") %}
-                                {{ badge(text="Draft", i18n_key="status.draft", variant="secondary", icon="bx-file-blank", id="status-" ~ config_id, data_value="draft") }}
+                                {{ status('loading', label=_("status.draft"), id="status-" ~ config_id, data_value="draft", pulse=false) }}
                             {% else %}
-                                {{ badge(text="Online", i18n_key="status.online", variant="primary", icon="bx-globe", id="status-" ~ config_id, data_value="online") }}
+                                {{ status('up', label=_("status.online"), id="status-" ~ config_id, data_value="online", pulse=false) }}
                             {% endif %}
                         </td>
                         <td>
@@ -178,68 +205,44 @@
                         </td>
                         <td>{{ config["checksum"] }}</td>
                         <td class="actions-col">
-                            <div class="row-actions">
-                                {% set can_edit_config = config['template'] or is_editable_method(config['method']) %}
-                                <a role="button"
-                                   class="icon-btn"
-                                   href="{{ url_for("configs") }}/{{ service_id }}/{{ config['type'] }}/{{ config['name'] }}"
-                                   data-bs-toggle="tooltip"
-                                   data-bs-placement="bottom"
-                                   data-bs-original-title="{{ _("tooltip.link.view_config" if not can_edit_config or is_readonly else "tooltip.link.edit_config", name=config['name']) }}">
-                                    <i class="bx bx-{% if not can_edit_config or is_readonly %}show{% else %}edit{% endif %}"></i>
-                                </a>
-                                <div {% if is_readonly %}data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="{{ _('tooltip.disabled_readonly') }}"{% endif %}>
-                                    <a role="button"
-                                       class="icon-btn{% if is_readonly %} disabled{% endif %}"
-                                       href="{{ url_for("configs") }}/new?clone={{ service_id }}/{{ config['type'] }}/{{ config['name'] }}"
-                                       data-bs-toggle="tooltip"
-                                       data-bs-placement="bottom"
-                                       data-bs-original-title="{{ _("tooltip.link.clone_config", name=config['name']) }}">
-                                        <i class="bx bx-copy-alt"></i>
-                                    </a>
-                                </div>
-                                {% set row_selection = [{"service": service_id, "type": config['type'], "name": config['name']}] | tojson %}
-                                <a role="button"
-                                   class="icon-btn info export-config"
-                                   href="{{ url_for("configs") }}/export?configs={{ row_selection | urlencode }}"
-                                   data-bs-toggle="tooltip"
-                                   data-bs-placement="bottom"
-                                   data-bs-original-title="{{ _("tooltip.link.export_config", name=config['name']) }}"
-                                   target="_blank"
-                                   rel="noreferrer">
-                                    <i class="bx bx-export"></i>
-                                </a>
-                                {% set delete_tooltip_key = 'tooltip.disabled_readonly' if user_readonly else ('tooltip.disabled_db_readonly' if is_readonly else ('tooltip.disabled_by_method' if not can_edit_config else 'tooltip.button.delete_config')) %}
-                                <div {% if is_readonly %}data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="{{ _('tooltip.disabled_readonly') }}"{% endif %}>
-                                    <button type="button"
-                                            data-config-name="{{ config['name'] }}"
-                                            data-config-type="{{ config['type'] }}"
-                                            data-config-service="{{ config['service'] }}"
-                                            data-value="{{ 'online' if config.get('is_draft') else 'draft' }}"
-                                            class="icon-btn convert-config{% if is_readonly %} disabled{% endif %}"
-                                            data-bs-toggle="tooltip"
-                                            data-bs-placement="bottom"
-                                            data-bs-original-title="{{ _("tooltip.button.convert_config_to_" ~ ('online' if config.get('is_draft') else 'draft'), name=config['name']) }}">
-                                        <i class="bx bx-transfer"></i>
-                                    </button>
-                                </div>
-                                <div data-bs-toggle="tooltip"
-                                     data-bs-placement="bottom"
-                                     data-bs-original-title="{{ _(delete_tooltip_key, name=config['name'], method=config['method']) }}">
-                                    <button type="button"
-                                            data-config-name="{{ config['name'] }}"
-                                            data-config-type="{{ config['type'] }}"
-                                            data-config-service="{{ config['service'] }}"
-                                            class="icon-btn danger delete-config{% if not can_edit_config or is_readonly %} disabled{% endif %}">
-                                        <i class="bx bx-trash"></i>
-                                    </button>
-                                </div>
+                            {% set can_edit_config = config['template'] or is_editable_method(config['method']) %}
+                            {% set row_selection = [{"service": service_id, "type": config['type'], "name": config['name']}] | tojson %}
+                            <div class="dropdown">
+                                <button type="button" class="btn btn-sm btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown" data-bs-boundary="viewport" aria-expanded="false" aria-label="{{ _('table.header.actions') }}" title="{{ _('table.header.actions') }}"><i class="bx bx-dots-horizontal-rounded" aria-hidden="true"></i></button>
+                                <ul class="dropdown-menu dropdown-menu-end">
+                                    <li><a class="dropdown-item" href="{{ url_for('configs') }}/{{ service_id }}/{{ config['type'] }}/{{ config['name'] }}">{{ _('configs.console.view' if not can_edit_config or is_readonly else 'configs.console.edit') }}</a></li>
+                                    <li><a class="dropdown-item{% if is_readonly %} disabled{% endif %}" href="{{ url_for('configs') }}/new?clone={{ service_id }}/{{ config['type'] }}/{{ config['name'] }}">{{ _('configs.console.clone') }}</a></li>
+                                    <li><a class="dropdown-item export-config" href="{{ url_for('configs') }}/export?configs={{ row_selection|urlencode }}" target="_blank" rel="noreferrer">{{ _('button.export') }}</a></li>
+                                    <li><button type="button" class="dropdown-item convert-config" data-config-name="{{ config['name'] }}" data-config-type="{{ config['type'] }}" data-config-service="{{ service_id }}" data-value="{{ 'online' if config.get('is_draft') else 'draft' }}" {% if is_readonly %}disabled{% endif %}>{{ _('button.convert_to_online' if config.get('is_draft') else 'button.convert_to_draft') }}</button></li>
+                                    <li><button type="button" class="dropdown-item text-danger delete-config" data-config-name="{{ config['name'] }}" data-config-type="{{ config['type'] }}" data-config-service="{{ service_id }}" {% if is_readonly or not can_edit_config %}disabled{% endif %}>{{ _('button.delete') }}</button></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><span class="dropdown-item-text text-break small">{{ _('table.header.method') }}: {{ config['method'] }}</span></li>
+                                    {% if config['method'] == 'scheduler' %}<li><code class="dropdown-item-text text-break small">{{ (service_id ~ '_' if service_id != 'global' else '') ~ 'CUSTOM_CONF_' ~ normalized_config_type|upper ~ '_' ~ config['name'] }}</code></li>{% endif %}
+                                    <li><span class="dropdown-item-text">{{ status('loading' if config.get('is_draft') else 'up', label=_("status.draft" if config.get('is_draft') else "status.online"), pulse=false) }}</span></li>
+                                    <li><span class="dropdown-item-text">{{ tag_chip(config['template'], href=url_for('templates') ~ '/' ~ config['template']) if config['template'] else _('badge.no_template') }}</span></li>
+                                    <li><span class="dropdown-item-text text-break small">{{ _('table.header.checksum') }}: {{ config['checksum'] }}</span></li>
+                                </ul>
                             </div>
                         </td>
                     </tr>
                 {% endfor %}
             </tbody>
         {% endcall %}
+        <section id="configs-preview" class="col-lg-8 d-none" aria-label="{{ _('configs.console.content') }}">
+            <div class="card h-100">
+                <div class="card-header d-flex flex-wrap gap-2 align-items-center">
+                    <i id="configs-preview-icon" class="bx bx-file" aria-hidden="true"></i>
+                    <h2 id="configs-preview-name" class="h5 mb-0 flex-grow-1 text-break"></h2>
+                    <button id="configs-preview-full" type="button" class="btn btn-sm btn-outline-secondary" aria-pressed="false">{{ _('configs.console.full_view') }}</button>
+                    <button id="configs-preview-lint" type="button" class="btn btn-sm btn-outline-secondary">{{ _('configs.console.lint') }}</button>
+                    <button id="configs-preview-download" type="button" class="btn btn-sm btn-outline-secondary">{{ _('configs.console.download') }}</button>
+                    <a id="configs-preview-edit" class="btn btn-sm btn-primary">{{ _('configs.console.edit') }}</a>
+                </div>
+                <div class="card-body border-bottom"><div id="configs-preview-meta" class="d-flex flex-wrap gap-2"></div><small>{{ _('configs.console.lint_help') }}</small><p id="configs-preview-lint-result" class="mb-0" role="status" aria-live="polite"></p></div>
+                <div id="configs-preview-empty">{{ empty_state(title=_("configs.console.select_file"), message=_("configs.console.no_files"), size="sm") }}</div>
+                <div id="configs-preview-editor" class="position-relative h-px-500" aria-label="{{ _('configs.console.content') }}"></div>
+            </div>
+        </section>
         <div id="feedback-toast"
              class="bs-toast toast fade bg-{% if theme == 'light' %}white{% else %}dark{% endif %} border border-warning d-none"
              role="alert"
@@ -247,7 +250,7 @@
              aria-atomic="true"
              data-bs-autohide="true">
             <div class="toast-header d-flex align-items-center text-warning">
-                <i class="d-block h-auto rounded tf-icons bx bx-xs bx-bell bx-tada me-2"></i>
+                <i class="d-block h-auto rounded tf-icons bx bx-xs bx-bell bx-tada me-2" aria-hidden="true"></i>
                 <span class="fw-medium me-auto">BunkerWeb Forever</span>
                 <small class="text-body-secondary">{{ _("flash.time.just_now") }}</small>
                 <button type="button"
@@ -365,6 +368,9 @@
     <script src="{{ url_for('static', filename='js/components/selected-list.js') }}"
             nonce="{{ script_nonce }}"
             defer></script>
+    <script src="{{ url_for('static', filename='libs/ace/src-min/ace.js') }}" nonce="{{ script_nonce }}" defer></script>
+    <script src="{{ url_for('static', filename='libs/ace/src-min/theme-cloud9_' ~ ('night' if theme == 'dark' else 'day') ~ '.js') }}" nonce="{{ script_nonce }}" defer></script>
+    <script src="{{ url_for('static', filename='js/pages/config_edit.js') }}" nonce="{{ script_nonce }}" defer></script>
     <script src="{{ url_for('static', filename='js/pages/configs.js') }}"
             nonce="{{ script_nonce }}"
             defer

@@ -364,6 +364,10 @@
 }
 .log-stream .lg-time {
   color: #7c9cb3;
+  font-variant-numeric: tabular-nums;
+}
+.log-stream .lg-level {
+  font-weight: 700;
 }
 /* Severity emphasis (security-ops palette): routine INFO is quiet grey so that
    WARN (amber) and DENY/ERROR (red) are the lines that visually pop. The kit
@@ -402,4 +406,4 @@
   }
 }
 
-/* rtlcss@4.3.0 source=css/pages/logs.css sha256=7cc5aac7541bfdb37e74baabc28700aacca812e57b85cb0488290cd9d8ff98e1 */
+/* rtlcss@4.3.0 source=css/pages/logs.css sha256=f6d0d57628b1b9131998effe7b0050f9c29fa1973f983244a04fb49d615646a9 */

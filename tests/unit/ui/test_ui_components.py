@@ -699,8 +699,11 @@ def test_configs_selected_list_contract_is_text_only():
     rows_builder = source.split("const buildConfigsRows", 1)[1].split("const renderSelectedConfigs", 1)[0]
 
     assert "safe: true" not in source
-    assert ".text().trim()" in rows_builder
-    assert ".html()" not in rows_builder
+    assert 'const configsData = JSON.parse($("#configs-data").val());' in source
+    assert "configsData[Number(node.dataset.configIndex)]" in source
+    assert "name: config.name" in rows_builder
+    assert "type: config.type.toUpperCase()" in rows_builder
+    assert ".html(" not in rows_builder
 
 
 def test_home_request_status_chart_declares_empty_state():

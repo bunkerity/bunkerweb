@@ -137,7 +137,21 @@ def test_every_service_picker_is_wired_to_the_shared_list():
     empty. Silent, and only on a page nobody opened during the change."""
     pickers = _service_pickers()
 
-    assert len(pickers) >= 12, f"only {len(pickers)} service pickers found; the scan is missing some"
+    # RES-14 removed redirects-service-filter and upstreams-service-filter, not modal pickers.
+    expected = {
+        ("certificates.html", "{{ id }}"),
+        ("certificates.html", "certificates-service-filter"),
+        ("certificates.html", "certificate-attach-service"),
+        ("redirects.html", "redirect-create-services"),
+        ("redirects.html", "redirect-attach-services"),
+        ("upstreams.html", "upstream-create-services"),
+        ("upstreams.html", "upstream-attach-services"),
+        ("workflows.html", "workflows-service-filter"),
+        ("workflows.html", "workflow-create-services"),
+        ("workflows.html", "workflow-attach-services"),
+    }
+    found = {(where.split(":", 1)[0], re.search(r'id="([^"]+)"', tag).group(1)) for where, tag, _, _ in pickers}
+    assert expected <= found, f"missing service pickers: {sorted(expected - found)}"
     unwired = [where for where, tag, _, _ in pickers if "data-bw-service-options" not in tag]
 
     assert not unwired, f"these service pickers are not filled by anything: {unwired}"

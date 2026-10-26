@@ -1,0 +1,48 @@
+{# usage: {% from "workflow_shell.html" import workflow_tabs %}
+   Overview / Configuration section strip shared by the workflows list and the editor.
+   The two sections stay separate documents with their own URLs; workflow_draft.js keeps the
+   one active draft across them. `config_id` is the workflow the Configuration tab opens
+   (the list page lets JS retarget it to the workflow holding the draft); none disables it
+   when there is no workflow yet. #}
+{% macro workflow_tabs(active, count, config_id=none) -%}
+    {% set overview_url = url_for("workflows.workflows_page") %}
+    {% set config_url = overview_url ~ "/" ~ config_id if config_id else "" %}
+    <div class="wfs-tabs-row" data-wf-url="{{ overview_url }}">
+        <nav class="wfs-tabs" aria-label="{{ _('workflows.shell.tabs_label') }}">
+            <a class="wfs-tab{% if active == 'overview' %} is-active{% endif %}"
+               href="{{ overview_url }}"
+               data-wf-section-link="overview"
+               {% if active == 'overview' %}aria-current="page"{% endif %}>
+                <span>{{ _("workflows.shell.tab_overview") }}</span>
+                <span class="badge rounded-pill bg-label-secondary">{{ count }}</span>
+            </a>
+            {% if config_id %}
+                <a class="wfs-tab{% if active == 'config' %} is-active{% endif %}"
+                   href="{{ config_url }}"
+                   data-wf-section-link="config"
+                   data-wf-config-tab
+                   {% if active == 'config' %}aria-current="page"{% endif %}>
+                    <span>{{ _("workflows.shell.tab_config") }}</span>
+                    <span class="badge bg-label-warning" data-wf-dirty-badge hidden>{{ _("workflows.shell.tab_unsaved") }}</span>
+                </a>
+            {% else %}
+                <span class="wfs-tab is-disabled"
+                      aria-disabled="true"
+                      title="{{ _('workflows.shell.config_needs_workflow') }}">
+                    <span>{{ _("workflows.shell.tab_config") }}</span>
+                </span>
+            {% endif %}
+        </nav>
+        <div class="wfs-view">
+            <label class="form-label small mb-0" for="wfs-view-select">{{ _("workflows.shell.view_label") }}</label>
+            <select class="form-select form-select-sm"
+                    id="wfs-view-select"
+                    data-wf-view-select>
+                <option value="{{ overview_url }}"{% if active == 'overview' %} selected{% endif %}>{{ _("workflows.shell.tab_overview") }}</option>
+                {% if config_id %}
+                    <option value="{{ config_url }}"{% if active == 'config' %} selected{% endif %}>{{ _("workflows.shell.tab_config") }}</option>
+                {% endif %}
+            </select>
+        </div>
+    </div>
+{%- endmacro %}

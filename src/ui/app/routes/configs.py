@@ -299,7 +299,8 @@ def configs_page():
     config_type = request.args.get("type", "")
     return render_template(
         "configs.html",
-        configs=API_CLIENT.get_configs(with_drafts=True),
+        configs=API_CLIENT.get_configs(with_drafts=True, with_data=True),
+        config_types=CONFIG_TYPES,
         services=BW_CONFIG.get_config(global_only=True, methods=False, with_drafts=True, filtered_settings=("SERVER_NAME",))["SERVER_NAME"],
         db_templates=" ".join([template for template in API_CLIENT.get_templates() if template != "ui"]),
         config_service=service,

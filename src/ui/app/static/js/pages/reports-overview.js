@@ -150,8 +150,17 @@ window.BWReportsDashboard = window.BWReportsDashboard || {};
       recent.forEach((o) => {
         $tbody.append(
           $("<tr>").append(
-            $("<td>").addClass("font-monospace").text(o.ip),
-            $("<td>").text(o.top_reason),
+            $("<td>").append($("<span>").addClass("cell-ip").text(o.ip)),
+            $("<td>").append(
+              $("<span>")
+                .addClass("tag-chip plugin-chip")
+                .append(
+                  $("<i>")
+                    .addClass("bx bx-shield-quarter")
+                    .attr("aria-hidden", "true"),
+                  $("<span>").text(o.top_reason),
+                ),
+            ),
             $("<td>").text(o.blocks),
             $("<td>")
               .addClass("text-muted small")

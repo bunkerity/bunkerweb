@@ -15,6 +15,8 @@
    client parser uses it to tell a real `KEY=value` line apart from a
    continuation line of a multiline value (PEM cert/key, base64 block). #}
 {% set known_keys = namespace(keys=[], bases=[], multiline=[], multiline_bases=[]) %}
+{# SET-7 tiles: how many plugins contribute at least one setting to this pane. Read only by the tiles below. #}
+{% set raw_tiles = namespace(plugins=0) %}
 {# `allowed_plugins` narrows this editor to a curated subset -- the reserved default server passes
    DEFAULT_SERVER_PLUGINS (routes/services.py). Same guard as models/compose_shelf.html, and needed
    for the same reason: without it the raw pane offers every refused plugin AND the SERVER_NAME
@@ -23,6 +25,7 @@
 {% for plugin, plugin_data in plugins.items() if (not allowed_plugins) or plugin in allowed_plugins %}
     {% set filtered_settings = get_filtered_settings(plugin_data["settings"], (current_endpoint == "global-config" or current_endpoint == "global-settings")) %}
     {% if filtered_settings %}
+        {% set raw_tiles.plugins = raw_tiles.plugins + 1 %}
         {% for setting, setting_data in filtered_settings.items() if not setting_data.get('multiple', false) and setting not in blacklisted_settings %}
             {% set setting_config = config.get(setting, {}) %}
             {% set setting_default = setting_data.get("default", "") %}
@@ -79,6 +82,7 @@
 {# Control keys that appear in the editor text (or are posted alongside it) but
    are not iterated as plugin settings above (IS_DRAFT is emitted at the top;
    the rest are defensive against future template changes). #}
+{% set raw_settings_total = known_keys.keys | unique | list | length %}
 {% for _control_key in ["IS_DRAFT", "SERVER_NAME", "OLD_SERVER_NAME", "USE_TEMPLATE", "OVERRIDE_NON_GLOBAL_SERVICES"] %}{% if known_keys.keys.append(_control_key) %}{% endif %}{% endfor %}
 <!-- Join the configuration lines with newlines -->
 {% set raw_config = config_lines | join('\r\n') %}
@@ -101,7 +105,27 @@
 <input type="hidden"
        id="raw-known-keys"
        value='{{ {"keys": known_keys.keys | unique | list, "bases": known_keys.bases | unique | list, "multiline": known_keys.multiline | unique | list, "multilineBases": known_keys.multiline_bases | unique | list} | tojson }}'>
-<div class="card raw-config-container border-0 shadow-sm mt-3 mt-lg-4">
+{# SET-7 (design global-raw.js:75-150): four tiles over the ACE editor. Settings and Plugins are fixed by what the page declares;
+   Modified and Problems are recomputed from the editor text (settings-raw.js `setupRawTiles`). Display only: nothing here posts. #}
+<div class="bw-raw-tiles mt-3 mt-lg-4" role="group" aria-label="{{ _("raw_page.tiles_label") }}">
+    <div class="bw-raw-tile">
+        <span class="bw-raw-tile-label">{{ _("raw_page.tile_settings") }}</span>
+        <span class="bw-raw-tile-value" id="raw-tile-settings">{{ raw_settings_total }}</span>
+    </div>
+    <div class="bw-raw-tile">
+        <span class="bw-raw-tile-label">{{ _("raw_page.tile_plugins") }}</span>
+        <span class="bw-raw-tile-value" id="raw-tile-plugins">{{ raw_tiles.plugins }}</span>
+    </div>
+    <div class="bw-raw-tile">
+        <span class="bw-raw-tile-label">{{ _("raw_page.tile_modified") }}</span>
+        <span class="bw-raw-tile-value" id="raw-tile-modified">{{ config_lines | length - (1 if (current_endpoint != "global-config" and current_endpoint != "global-settings") else 0) }}</span>
+    </div>
+    <div class="bw-raw-tile" id="raw-tile-problems-wrap">
+        <span class="bw-raw-tile-label">{{ _("raw_page.tile_problems") }}</span>
+        <span class="bw-raw-tile-value" id="raw-tile-problems" aria-live="polite">0</span>
+    </div>
+</div>
+<div class="card raw-config-container border-0 shadow-sm mt-3">
     <div class="card-header raw-config-toolbar d-flex flex-wrap justify-content-between align-items-start gap-3 border-0">
         <div class="raw-config-toolbar__title">
             <h5 class="mb-0 fw-semibold text-white"
@@ -113,6 +137,26 @@
             </div>
         </div>
         <div class="raw-config-toolbar__actions d-flex flex-wrap align-items-center gap-2">
+            <div class="raw-config-toolbar__action raw-config-search" role="search">
+                <input type="search"
+                       id="raw-config-search"
+                       class="form-control form-control-sm"
+                       placeholder="{{ _("raw_page.search") }}"
+                       aria-label="{{ _("raw_page.search_label") }}"
+                       autocomplete="off">
+                <button type="button"
+                        class="btn btn-sm btn-outline-light raw-config-action-btn"
+                        id="raw-config-search-prev"
+                        aria-label="{{ _("raw_page.search_prev") }}">
+                    <i class="bx bx-chevron-up bx-xs" aria-hidden="true"></i>
+                </button>
+                <button type="button"
+                        class="btn btn-sm btn-outline-light raw-config-action-btn"
+                        id="raw-config-search-next"
+                        aria-label="{{ _("raw_page.search_next") }}">
+                    <i class="bx bx-chevron-down bx-xs" aria-hidden="true"></i>
+                </button>
+            </div>
             <div class="raw-config-toolbar__action">
                 <button type="button"
                         class="btn btn-sm btn-outline-light raw-config-action-btn raw-config-fold-toggle"

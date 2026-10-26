@@ -23,7 +23,6 @@ $(document).ready(() => {
   const $saveSettingsButton = $(".save-settings");
   const $previousStepButton = $(".previous-step");
   const $nextStepButton = $(".next-step");
-  const $breadcrumbItems = $(".template-steps-container .breadcrumb-item");
   const $csrfTokenInput = $("#csrf_token");
 
   // PRO unlock effect state
@@ -320,6 +319,52 @@ $(document).ready(() => {
   };
 
   /**
+   * Opens one of the step 2 accordions (General / Advanced) and closes the other.
+   * Panes use `hidden`, which hides a field without ever removing it: the final submit reads
+   * every value by id, so a collapsed pane still posts what it holds.
+   * @param {string|null} name - "general", "advanced" or null to close both.
+   */
+  const openAccordion = (name) => {
+    $(".sw-acc-head").each(function () {
+      const on = $(this).data("acc") === name;
+      $(this).toggleClass("open", on).attr("aria-expanded", String(on));
+    });
+    $(".sw-acc-body").each(function () {
+      $(this).prop("hidden", $(this).data("pane") !== name);
+    });
+  };
+
+  /**
+   * Makes a field visible before it is focused: an invalid field inside a collapsed
+   * accordion pane would otherwise be flagged where nobody can see it.
+   * @param {jQuery} $field - The field to reveal.
+   */
+  const revealField = ($field) => {
+    const $pane = $field.closest(".sw-acc-body");
+    if ($pane.length && $pane.prop("hidden")) openAccordion($pane.data("pane"));
+  };
+
+  /**
+   * Keeps the Enabled / Disabled cue next to each switch in step with its state.
+   * The state also changes through `.prop("checked", ...)`, which fires no event, so the
+   * handlers that do that call this explicitly.
+   */
+  const syncSwitchText = () => {
+    $(".sw-toggle .form-check-input").each(function () {
+      let $text = $(this).siblings(".sw-switch-text");
+      if (!$text.length) {
+        $text = $('<span class="sw-switch-text" aria-hidden="true"></span>');
+        $(this).after($text);
+      }
+      $text.text(
+        this.checked
+          ? t("setup.switch.enabled", "Enabled")
+          : t("setup.switch.disabled", "Disabled"),
+      );
+    });
+  };
+
+  /**
    * Validates all inputs within the current step.
    * @param {jQuery} $currentStepContainer - The container of the current step.
    * @returns {boolean} True if the step is valid, else false.
@@ -371,8 +416,10 @@ $(document).ready(() => {
     });
 
     if (!isStepValid) {
-      // Focus the first invalid input
-      $currentStepContainer.find(".is-invalid").first().focus();
+      // Focus the first invalid input, opening its accordion pane first if it is folded
+      const $firstInvalid = $currentStepContainer.find(".is-invalid").first();
+      revealField($firstInvalid);
+      $firstInvalid.focus();
     }
 
     return isStepValid;
@@ -385,26 +432,27 @@ $(document).ready(() => {
   const navigateToStep = (newStep) => {
     const $newTabTrigger = $(`button[data-bs-target="#navs-steps-${newStep}"]`);
 
-    // Update breadcrumb UI
-    $breadcrumbItems.each(function () {
-      $(this)
-        .find("div.text-primary")
-        .removeClass("text-primary")
-        .addClass("text-muted");
-      $(this).find("button").addClass("disabled");
-    });
-
     // Activate the new tab
     const newTab = new bootstrap.Tab($newTabTrigger[0]);
     newTab.show();
 
-    // Update breadcrumb item
-    $newTabTrigger
-      .parent()
-      .find("div.text-muted")
-      .removeClass("text-muted")
-      .addClass("text-primary");
-    $newTabTrigger.removeClass("disabled");
+    // Stepper state: active, done (with a check) and not-yet-reachable steps
+    $(".sw-step").each(function (index) {
+      const number = index + 1;
+      const isActive = number === newStep;
+      const isDone = number < newStep;
+      $(this)
+        .toggleClass("active", isActive)
+        .toggleClass("done", isDone)
+        .attr("aria-selected", String(isActive));
+      if (isActive || isDone) $(this).removeAttr("aria-disabled");
+      else $(this).attr("aria-disabled", "true");
+      $(this)
+        .find(".sw-step-num")
+        .html(
+          isDone ? '<i class="bx bx-check" aria-hidden="true"></i>' : number,
+        );
+    });
 
     // Scroll into view
     $newTabTrigger[0].scrollIntoView({
@@ -415,6 +463,9 @@ $(document).ready(() => {
 
     currentStep = newStep;
 
+    // The newsletter box belongs to the first step only
+    $(".join-newsletter").toggleClass("visually-hidden", newStep !== 1);
+
     // Toggle button states based on the new step
     toggleButtonStates();
   };
@@ -423,11 +474,9 @@ $(document).ready(() => {
    * Toggles the visibility and state of navigation buttons based on the current step.
    */
   const toggleButtonStates = () => {
-    if (currentStep === 1) {
-      $previousStepButton.addClass("disabled");
-    } else {
-      $previousStepButton.removeClass("disabled");
-    }
+    $previousStepButton
+      .toggleClass("disabled", currentStep === 1)
+      .attr("aria-disabled", String(currentStep === 1));
 
     if (currentStep === 4) {
       $nextStepButton.addClass("d-none");
@@ -459,9 +508,9 @@ $(document).ready(() => {
 
       if (adminEmail) {
         $overviewEmail.val(adminEmail);
-        $overviewEmail.parent().removeClass("d-none");
+        $overviewEmail.closest(".sw-field").removeClass("d-none");
       } else {
-        $overviewEmail.parent().addClass("d-none");
+        $overviewEmail.closest(".sw-field").addClass("d-none");
       }
       $overviewUsername.val($("#username").val());
       $overviewPassword.val($("#password").val());
@@ -536,6 +585,8 @@ $(document).ready(() => {
           if (!$email.val().trim() && !$zerosslApiKey.val().trim()) {
             $zerosslApiKey.addClass("is-invalid");
             setFeedback($zerosslApiKey, zerosslValidationMessage);
+            revealField($zerosslApiKey);
+            $zerosslApiKey.focus();
             return;
           }
         }
@@ -549,6 +600,8 @@ $(document).ready(() => {
           if (!$letsEncryptProvider.find(":selected").val()) {
             $letsEncryptProvider.addClass("is-invalid");
             setFeedback($letsEncryptProvider, dnsRequiredMessage);
+            revealField($letsEncryptProvider);
+            $letsEncryptProvider.focus();
             return;
           }
 
@@ -558,6 +611,8 @@ $(document).ready(() => {
           if (!$letsEncryptCredentialItems.val()) {
             $letsEncryptCredentialItems.addClass("is-invalid");
             setFeedback($letsEncryptCredentialItems, dnsRequiredMessage);
+            revealField($letsEncryptCredentialItems);
+            $letsEncryptCredentialItems.focus();
             return;
           }
         }
@@ -587,9 +642,14 @@ $(document).ready(() => {
               $customSslKey.addClass("is-invalid");
               setFeedback($customSslKey, errorMsg);
             }
+            revealField($customSslCert);
             return;
           }
         }
+
+        // A field the pattern check already refused must not be waved through by a
+        // unique server name: the DNS answer used to overwrite that verdict.
+        if (!isStepValid) return;
 
         const result = await checkDNS();
         const modal = $("#modal-confirm-dns");
@@ -621,12 +681,6 @@ $(document).ready(() => {
       }
 
       if (!isStepValid) return;
-
-      if (newStep !== 1) {
-        $(".join-newsletter").addClass("visually-hidden");
-      } else {
-        $(".join-newsletter").removeClass("visually-hidden");
-      }
 
       currentStep = newStep;
       navigateToStep(newStep);
@@ -912,9 +966,20 @@ $(document).ready(() => {
     handleStepNavigation(isNext, confirmDNS);
   });
 
-  $("#advanced-settings-toggle").on("click", function () {
-    $(this).find("i").toggleClass("bx-chevron-down bx-chevron-up");
+  // General / Advanced accordions: exclusive, both can be folded
+  $(".sw-acc-head").on("click", function () {
+    const wasOpen = $(this).hasClass("open");
+    openAccordion(wasOpen ? null : $(this).data("acc"));
   });
+
+  // Steps already completed stay reachable from the stepper; later ones only through Next
+  $(document).on("click", ".sw-step.done", function (e) {
+    e.preventDefault();
+    const target = parseInt($(this).attr("aria-controls").split("-").pop(), 10);
+    if (target < currentStep) navigateToStep(target);
+  });
+
+  $(document).on("change", ".sw-toggle .form-check-input", syncSwitchText);
 
   $(document).on("keydown", ".plugin-setting", function (e) {
     if (e.key === "Enter" || e.keyCode === 13) {
@@ -1024,6 +1089,7 @@ $(document).ready(() => {
       $dnsCredentialItems.prop("disabled", false);
       resetTooltipState($dnsCredentialItemsParent);
     }
+    syncSwitchText();
   });
 
   $("#acme-server-tabs").on("click", "[data-acme-server]", function () {
@@ -1276,5 +1342,6 @@ $(document).ready(() => {
   }
 
   // Initialize the UI based on the initial step
+  syncSwitchText();
   toggleButtonStates();
 });

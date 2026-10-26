@@ -121,6 +121,13 @@
   // Fires before `beforeunload` on a native submit, so a Save must never warn.
   form.addEventListener("submit", () => (dirty = false));
 
+  // SET-17: BWLeaveGuard (W1 module) owns the native `beforeunload` guard AND adds the in-app
+  // "Leave without saving?" modal for same-tab links (the mode pills, the sidebar). Without the
+  // module (a throw while it loads) the plain native guard below keeps the old behaviour.
+  if (window.BWLeaveGuard) {
+    window.BWLeaveGuard.create({ isDirty: () => dirty });
+    return;
+  }
   window.addEventListener("beforeunload", (event) => {
     if (!dirty) return;
     // Both halves are required: `preventDefault()` is the modern spec, `returnValue` is what

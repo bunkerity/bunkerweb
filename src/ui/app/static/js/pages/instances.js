@@ -307,7 +307,7 @@ $(document).ready(function () {
         },
         {
           extend: "exec_form",
-          text: `<span class="tf-icons bx bx-stop bx-18px me-2"></span><span data-i18n="button.stop">${t(
+          text: `<span class="tf-icons bx bx-stop-circle bx-18px me-2"></span><span data-i18n="button.stop">${t(
             "button.stop",
             "Stop",
           )}</span>`,
@@ -364,7 +364,7 @@ $(document).ready(function () {
   $("#instances-create-btn").on("click", createInstanceAction);
 
   $.fn.dataTable.ext.buttons.ping_instances = {
-    text: `<span class="tf-icons bx bx-bell bx-18px me-2"></span><span data-i18n="button.ping">${t(
+    text: `<span class="tf-icons bx bx-broadcast bx-18px me-2"></span><span data-i18n="button.ping">${t(
       "button.ping",
       "Ping",
     )}</span>`,

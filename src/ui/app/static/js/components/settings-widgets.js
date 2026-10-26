@@ -1827,7 +1827,131 @@ $(document).ready(() => {
     updateMultiselectDisplay,
   });
 
+  // ---------------------------------------------------------------- SET-20 widgets
+  // The design's field widgets, layered over the native controls instead of replacing them: the
+  // native <select> / <input> STAYS in the DOM with its name, id, `data-original` / `data-default` /
+  // `data-method` and `.plugin-setting` class, so the POST, the per-field reset, the submit
+  // normalisation and every plugin body script see exactly what they saw before. The widget only
+  // draws, and writes back through the native control (value + a native `change`).
+  //
+  // Scope: single `<select>`s and passwords inside a `.bw-setting-frame` (the generic grid and the
+  // plugin bodies). `multiple` groups keep their native controls: they are cloned and renumbered by
+  // JS that assumes the native markup.
+  const initSelectBoxes = (root) => {
+    $(root)
+      .find(".bw-setting-frame select.plugin-setting")
+      .each(function () {
+        const select = this;
+        if (select.dataset.bwSelectBox === "1") return;
+        select.dataset.bwSelectBox = "1";
+
+        const wrapper = document.createElement("div");
+        wrapper.className = "dropdown bw-select bw-setting-select";
+        const trigger = document.createElement("button");
+        trigger.type = "button";
+        trigger.className =
+          "bw-setting-select-trigger form-select d-flex align-items-center text-start";
+        trigger.setAttribute("data-bs-toggle", "dropdown");
+        trigger.setAttribute("aria-haspopup", "listbox");
+        trigger.setAttribute("aria-expanded", "false");
+        const labelledBy = select.getAttribute("aria-labelledby");
+        if (labelledBy) trigger.setAttribute("aria-labelledby", labelledBy);
+        trigger.disabled = select.disabled;
+        const triggerLabel = document.createElement("span");
+        triggerLabel.className = "flex-grow-1 text-truncate";
+        trigger.appendChild(triggerLabel);
+
+        const list = document.createElement("ul");
+        list.className = "dropdown-menu bw-select-list";
+        list.setAttribute("role", "listbox");
+        if (labelledBy) list.setAttribute("aria-labelledby", labelledBy);
+
+        const optionButtons = [];
+        Array.from(select.options).forEach((option) => {
+          const item = document.createElement("li");
+          item.setAttribute("role", "presentation");
+          const button = document.createElement("button");
+          button.type = "button";
+          button.className = "dropdown-item text-truncate";
+          button.setAttribute("role", "option");
+          button.dataset.value = option.value;
+          button.textContent = option.textContent;
+          item.appendChild(button);
+          list.appendChild(item);
+          optionButtons.push(button);
+        });
+
+        const sync = () => {
+          const current = select.options[select.selectedIndex];
+          triggerLabel.textContent = current ? current.textContent : "";
+          optionButtons.forEach((button) => {
+            const on = current && button.dataset.value === current.value;
+            button.classList.toggle("active", Boolean(on));
+            button.setAttribute("aria-selected", on ? "true" : "false");
+          });
+        };
+
+        list.addEventListener("click", (event) => {
+          const button = event.target.closest("[role='option']");
+          if (!button || select.disabled) return;
+          if (select.value !== button.dataset.value) {
+            select.value = button.dataset.value;
+            select.dispatchEvent(new Event("change", { bubbles: true }));
+          }
+          sync();
+        });
+
+        select.parentNode.insertBefore(wrapper, select);
+        wrapper.append(trigger, list, select);
+        // Fixed positioning escapes the field's overflow-hidden wrapper.
+        new bootstrap.Dropdown(trigger, {
+          popperConfig: { strategy: "fixed" },
+        });
+        select.classList.add("bw-select-native");
+        select.tabIndex = -1;
+        select.setAttribute("aria-hidden", "true");
+        // The reset button and any body script move the value through jQuery or natively: both reach this.
+        $(select).on("change", sync);
+        sync();
+      });
+  };
+
+  // Password: copy next to the eye. Never copies the stored-secret placeholder, which is not the secret.
+  const initPasswordCopy = (root) => {
+    if (!navigator.clipboard || !window.isSecureContext) return;
+    $(root)
+      .find(".bw-setting-frame input.plugin-setting[type='password']")
+      .each(function () {
+        const input = this;
+        if (input.dataset.bwCopy === "1") return;
+        input.dataset.bwCopy = "1";
+        const toggle = input.parentElement.querySelector(".input-group-text");
+        if (!toggle) return;
+        const button = document.createElement("button");
+        button.type = "button";
+        // No `.cursor-pointer`: helpers.js binds the show/hide toggle to that class inside `.form-password-toggle`.
+        button.className = "input-group-text bw-input-copy";
+        const copyLabel = t("button.copy");
+        button.setAttribute("aria-label", copyLabel);
+        button.title = copyLabel;
+        const icon = document.createElement("i");
+        icon.className = "bx bx-copy";
+        icon.setAttribute("aria-hidden", "true");
+        button.appendChild(icon);
+        button.addEventListener("click", () => {
+          if (!input.value || input.value === "__BW_SECRET_UNCHANGED__") return;
+          navigator.clipboard.writeText(input.value).then(() => {
+            icon.className = "bx bx-check";
+            setTimeout(() => (icon.className = "bx bx-copy"), 1200);
+          });
+        });
+        toggle.insertAdjacentElement("beforebegin", button);
+      });
+  };
+
   // Last: see the ordering note above the submit listener.
   initMultivalues(document);
   initMultiselects(document);
+  initSelectBoxes(document);
+  initPasswordCopy(document);
 });

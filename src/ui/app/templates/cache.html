@@ -16,6 +16,9 @@
     <link rel="stylesheet"
           href="{{ url_for('static', filename=rtl_sheet('css/pages/cache.css')) }}"
           nonce="{{ style_nonce }}" />
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename=rtl_sheet('css/pages/operate.css')) }}"
+          nonce="{{ style_nonce }}" />
 {% endblock %}
 {# The page-head band owns the breadcrumb + title, so drop the dashboard shell's
    legacy breadcrumb row for this page. #}
@@ -42,17 +45,17 @@
     {% set cache_service_names = caches | selectattr('service', 'ne', 'global') | map(attribute='service') | unique | list %}
     <div class="row row-cols-1 row-cols-sm-3 g-3 mb-4">
         <div class="col">
-            {{ tile(title="Files", value=caches | length, title_i18n="cache.kpi_files", icon="bx-file-blank", caption="Across " ~ cache_plugin_count ~ " plugin" ~ ("s" if cache_plugin_count != 1 else "")) }}
+            {{ tile(title="Files", value=caches | length, title_i18n="cache.kpi_files", color="navy", icon="bx-file-blank", caption="Across " ~ cache_plugin_count ~ " plugin" ~ ("s" if cache_plugin_count != 1 else "")) }}
         </div>
         <div class="col">
-            {{ tile(title="Global", value=cache_global_count, title_i18n="scope.global", icon="bx-globe", caption="Shared across services") }}
+            {{ tile(title="Global", value=cache_global_count, title_i18n="scope.global", color="blue", icon="bx-globe", caption="Shared across services") }}
         </div>
         <div class="col">
-            {{ tile(title="Per-service", value=cache_service_count, title_i18n="cache.kpi_per_service", icon="bx-grid-alt", caption=(cache_service_names | length) ~ " service" ~ ("s" if cache_service_names | length != 1 else "")) }}
+            {{ tile(title="Per-service", value=cache_service_count, title_i18n="cache.kpi_per_service", color="green", icon="bx-grid-alt", caption=(cache_service_names | length) ~ " service" ~ ("s" if cache_service_names | length != 1 else "")) }}
         </div>
     </div>
     <!-- Content -->
-    {% call card(classes="table-responsive text-nowrap p-4 pb-8 min-vh-70") %}
+    {% call card(classes="table-responsive text-nowrap pb-8 min-vh-70", title="Cache files", title_key="cache.title", icon="bx-data") %}
         <input type="hidden" id="services" value="{{ services }}" />
         <input type="hidden"
                id="cache_service_selection"
@@ -121,19 +124,19 @@
                                class="d-flex align-items-center"
                                data-bs-toggle="tooltip"
                                data-bs-placement="bottom"
-                               data-bs-original-title="{{ _("tooltip.link.view_file", filename=cache['file_name']) }}"><i class="bx bx-show bx-xs"></i>&nbsp;{{ cache['file_name'] }}</a>
+                               data-bs-original-title="{{ _("tooltip.link.view_file", filename=cache['file_name']) }}"><i class="bx bx-file bx-xs" aria-hidden="true"></i>&nbsp;<span class="cell-mono">{{ cache['file_name'] }}</span></a>
                         </td>
-                        <td><span class="badge rounded-pill bg-label-secondary cache-job-pill">{{ cache['job_name'] }}</span></td>
-                        <td>{{ cache['plugin'] }}</td>
+                        <td><span class="tag-chip cache-job-pill">{{ cache['job_name'] }}</span></td>
+                        <td><span class="tag-chip plugin-chip"><i class="bx bx-plug" aria-hidden="true"></i>{{ cache['plugin'] }}</span></td>
                         <td id="service-{{ cache['job_name'] }}-{{ service_id.replace('.', '_') }}-{{ cache['file_name'].replace('.', '_') }}">
                             {% if cache['service'] != 'global' %}
                                 <a href="{{ url_for("services") }}/{{ cache['service'] }}"
-                                   class="badge rounded-pill bg-label-primary cache-scope-service d-inline-flex align-items-center"
+                                   class="svc-code cache-scope-service"
                                    data-bs-toggle="tooltip"
                                    data-bs-placement="bottom"
                                    data-bs-original-title="{{ _("tooltip.link.edit_service", service=cache['service']) }}"><i class="bx bx-edit bx-xs me-1" aria-hidden="true"></i>{{ cache['service'] }}</a>
                             {% else %}
-                                <span class="badge rounded-pill bg-label-secondary cache-scope-global">{{ _("scope.global") }}</span>
+                                <span class="svc-scope cache-scope-global">{{ _("scope.global") }}</span>
                             {% endif %}
                         </td>
                         <td class="cache-last-update-date">

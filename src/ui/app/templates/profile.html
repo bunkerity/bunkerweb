@@ -1,4 +1,5 @@
 {% extends "dashboard.html" %}
+{% from "components/page-head.html" import page_head %}
 {% from "components/card.html" import card %}
 {% from "components/avatar.html" import avatar %}
 {% from "components/badge.html" import badge %}
@@ -19,30 +20,38 @@
           href="{{ url_for('static', filename='css/pages/profile.css') }}"
           nonce="{{ style_nonce }}" />
 {% endblock %}
+{% block page_head %}{% endblock %}
 {% block content %}
     {% set profile_url = url_for('profile') %}
     {% set total_pages = (total_sessions // 3) + (1 if total_sessions % 3 > 0 else 0) %}
     {% set readonly_tooltip = "Disabled: The database is in read-only mode." %}
+    {% call page_head(title="Your profile", title_i18n="profile.title", breadcrumb=[("System", "navigation.system", none), ("Profile", "navigation.profile", none)]) %}
+        <a class="btn btn-outline-secondary d-inline-flex align-items-center gap-1"
+           href="{{ url_for('logout') }}">
+            <i class="bx bx-log-out" aria-hidden="true"></i>
+            <span>{{ _("navbar.dropdown.logout") }}</span>
+        </a>
+    {% endcall %}
     <p class="text-muted mb-4">{{ _("profile.subtitle") }}</p>
-    <!-- Profile header -->
-    <div class="d-flex flex-wrap align-items-center gap-3 mb-4">
-        {{ avatar(label=current_user.get_id(), src=avatar_url, shape="circle", size="lg", status="online") }}
+    <!-- Profile hero -->
+    <div class="pf-hero d-flex flex-wrap align-items-center gap-4 mb-4">
+        <div class="pf-avatar" aria-hidden="true">{{ (current_user.get_id() or "?")[:2] | upper }}</div>
         <div>
-            <h4 class="mb-0">{{ current_user.get_id() }}</h4>
-            <div class="d-flex flex-wrap align-items-center gap-3 text-muted small mt-1">
+            <h2 class="pf-name mb-0">{{ current_user.get_id() }}</h2>
+            <div class="pf-sub d-flex flex-wrap align-items-center gap-3 mt-1">
                 {% if current_user.email %}
-                    <span><i class="bx bx-envelope"></i> {{ current_user.email }}</span>
+                    <span><i class="bx bx-envelope" aria-hidden="true"></i> {{ current_user.email }}</span>
                 {% endif %}
                 {% if current_user.list_roles %}
-                    <span><i class="bx bx-shield"></i> {{ current_user.list_roles[0] }}</span>
+                    <span><i class="bx bx-shield" aria-hidden="true"></i> {{ current_user.list_roles[0] }}</span>
                 {% endif %}
             </div>
         </div>
         <div class="ms-md-auto">
             {% if is_totp %}
-                {{ badge(text="2FA Enabled", i18n_key="profile.badge.2fa_enabled", variant="success", icon="bx-check-shield") }}
+                <span class="pf-chip is-on"><i class="bx bx-check-shield" aria-hidden="true"></i> {{ _("profile.badge.2fa_enabled") }}</span>
             {% else %}
-                {{ badge(text="2FA Disabled", i18n_key="profile.badge.2fa_disabled", variant="secondary", icon="bx-shield") }}
+                <span class="pf-chip"><i class="bx bx-shield" aria-hidden="true"></i> {{ _("profile.badge.2fa_disabled") }}</span>
             {% endif %}
         </div>
     </div>
@@ -55,41 +64,9 @@
                            {"id": "security", "i18n": "profile.tab.security", "label": "Security", "icon": "bx-shield-quarter"},
                            {"id": "sessions", "i18n": "profile.tab.sessions", "label": "Sessions", "icon": "bx-desktop", "count": total_sessions}],
                     active="profile",
-                    vertical=True,
+                    classes="pf-tabs",
                     label="Profile sections") }}
         </div>
-        {% if total_pages > 1 %}
-            <div class="col-md-8 d-none">
-                <div class="tab-pane fade"
-                     id="navs-pills-sessions-pagination"
-                     role="tabpanel">
-                    <div id="sessions-current-page" class="visually-hidden">1</div>
-                    <ul class="pagination justify-content-center mt-1">
-                        <li class="page-item prev disabled">
-                            <button type="button" id="sessions-page-prev" class="page-link">
-                                <i class="tf-icon bx bx-chevrons-left bx-sm"></i>
-                            </button>
-                        </li>
-                        {% for x in range(1, total_pages + 1) %}
-                            <li class="page-item{% if loop.index == 1 %} active{% endif %}"
-                                data-page="{{ x }}">
-                                <button type="button"
-                                        id="sessions-page-{{ x }}"
-                                        class="page-link"
-                                        {% if loop.index== 1 %}aria-selected="true"{% endif %}>
-                                    {{ loop.index }}
-                                </button>
-                            </li>
-                        {% endfor %}
-                        <li class="page-item next">
-                            <button type="button" id="sessions-page-next" class="page-link">
-                                <i class="tf-icon bx bx-chevrons-right bx-sm"></i>
-                            </button>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        {% endif %}
     </div>
     <div class="tab-content p-0 position-relative">
         {% call tab_pane(id="profile", tabs_id="navs-pills", active=True) %}
@@ -460,61 +437,82 @@
             </div>
         {% endcall %}
         {% call tab_pane(id="sessions", tabs_id="navs-pills") %}
-            <div class="d-flex row g-2 justify-content-center">
-                <div class="col-md-4">
-                    {% call card(classes="mb-4", title="Sessions", title_key="profile.card.title.sessions", icon="bx-log-out") %}
-                        <p class="text-muted">
-                            {{ _("profile.session.wipe_help") }}
-                        </p>
-                        <div class="d-flex justify-content-center"
-                             {% if is_readonly %} data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="{{ _("tooltip.disabled_db_readonly") }}"{% endif %}>
-                            {{ button(id="wipe-sessions-trigger", label="Wipe other sessions", i18n_key="button.wipe_other_sessions", variant="danger", icon="bx-log-out", modal_target="wipe-sessions-confirm", disabled=is_readonly) }}
+            <div class="d-flex row g-4">
+                <div class="col-12">
+                    {% call card(classes="mb-0", title="Sessions", title_key="profile.card.title.sessions", icon="bx-log-out") %}
+                        <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+                            <p class="text-muted mb-0">{{ _("profile.session.wipe_help") }}</p>
+                            <div {% if is_readonly %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="{{ _("tooltip.disabled_db_readonly") }}"{% endif %}>
+                                {{ button(id="wipe-sessions-trigger", label="Wipe other sessions", i18n_key="button.wipe_other_sessions", variant="danger", icon="bx-log-out", modal_target="wipe-sessions-confirm", disabled=is_readonly) }}
+                            </div>
                         </div>
                     {% endcall %}
                 </div>
-                <div class="col-md-8">
-                    <div id="sessions-page-content"
-                         class="tab-content position-relative p-0 ps-md-2 pe-md-2">
-                        {% for session in last_sessions %}
-                            {% if session["current"] %}
-                                {% set card_classes = "border-primary border-1 position-relative" %}
-                                {% set card_icon = "bx-star text-warning" %}
-                                {% set items_classes = "text-primary" %}
-                                {% set session_badge = badge(text="Current Session", i18n_key="profile.session.current_session", variant="bw-green", icon="bx-user-check", classes="fs-6") %}
-                            {% else %}
-                                {% set card_classes = "border-secondary" %}
-                                {% set card_icon = "bx-history" %}
-                                {% set items_classes = "text-secondary" %}
-                                {% set session_badge = none %}
-                            {% endif %}
-                            {% call card(classes=card_classes ~ " shadow-sm mb-4 card-transition", icon=card_icon, title="Session", title_key="profile.session.title", header_right=session_badge) %}
-                                <div class="list-group list-group-flush">
-                                    <div class="list-group-item">
-                                        {{ text_group(top="Browser", top_i18n="profile.session.browser", bottom=session["browser"], icon="bx-window-alt", classes=items_classes) }}
-                                    </div>
-                                    <div class="list-group-item">
-                                        {{ text_group(top="Operating System", top_i18n="profile.session.os", bottom=session["os"], icon="bx-layer", classes=items_classes) }}
-                                    </div>
-                                    <div class="list-group-item">
-                                        {{ text_group(top="Device", top_i18n="profile.session.device", bottom=session["device"], icon="bx-devices", classes=items_classes) }}
-                                    </div>
-                                    <div class="list-group-item d-flex align-items-center gap-2">
-                                        <strong class="d-flex align-items-center gap-1 {{ items_classes }}">
-                                            <i class="bx bx-network-chart" aria-hidden="true"></i>
-                                            <span>{{ _("profile.session.ip_address") }}</span>:
-                                        </strong>
-                                        {{ secret_field(value=session['ip'], id="ip-" ~ loop.index0) }}
-                                    </div>
-                                    <div class="list-group-item">
-                                        {{ text_group(top="Creation date", top_i18n="profile.session.creation_date", bottom=session["creation_date"], icon="bx-time", classes=items_classes) }}
-                                    </div>
-                                    <div class="list-group-item">
-                                        {{ text_group(top="Last Activity", top_i18n="profile.session.last_activity", bottom=session["last_activity"], icon="bx-time", classes=items_classes) }}
-                                    </div>
+                <div class="col-12">
+                    {% call card(classes="mb-4", title="Recent sessions", title_key="profile.session.recent_title", icon="bx-desktop", header_right=('<span class="badge rounded-pill bg-label-secondary">' ~ total_sessions ~ '</span>')) %}
+                        <div class="table-responsive">
+                            <table class="table session-table align-middle mb-0">
+                                <caption class="visually-hidden">{{ _("profile.session.recent_title") }}</caption>
+                                <thead>
+                                    <tr>
+                                        <th scope="col">{{ _("profile.session.browser") }}</th>
+                                        <th scope="col">{{ _("profile.session.os") }}</th>
+                                        <th scope="col">{{ _("profile.session.device") }}</th>
+                                        <th scope="col">{{ _("profile.session.ip_address") }}</th>
+                                        <th scope="col">{{ _("profile.session.creation_date") }}</th>
+                                        <th scope="col">{{ _("profile.session.last_activity") }}</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="sessions-page-content">
+                                    {% for session in last_sessions %}
+                                        <tr class="{% if session['current'] %}session-current{% endif %}">
+                                            <td>
+                                                <span class="fw-semibold">{{ session["browser"] }}</span>
+                                                {% if session["current"] %}
+                                                    {{ badge(text="Current Session", i18n_key="profile.session.current_session", variant="bw-green", icon="bx-user-check", classes="ms-2") }}
+                                                {% endif %}
+                                            </td>
+                                            <td>{{ session["os"] }}</td>
+                                            <td>{{ session["device"] }}</td>
+                                            <td class="cell-ip">{{ secret_field(value=session['ip'], id="ip-" ~ loop.index0) }}</td>
+                                            <td>{{ session["creation_date"] }}</td>
+                                            <td>{{ session["last_activity"] }}</td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        {% if total_pages > 1 %}
+                            <div class="d-none pf-pagination">
+                                <div id="navs-pills-sessions-pagination">
+                                    <div id="sessions-current-page" class="visually-hidden">1</div>
+                                    <ul class="pagination justify-content-center mt-3 mb-0">
+                                        <li class="page-item prev disabled">
+                                            <button type="button" id="sessions-page-prev" class="page-link">
+                                                <i class="tf-icon bx bx-chevrons-left bx-sm"></i>
+                                            </button>
+                                        </li>
+                                        {% for x in range(1, total_pages + 1) %}
+                                            <li class="page-item{% if loop.index == 1 %} active{% endif %}"
+                                                data-page="{{ x }}">
+                                                <button type="button"
+                                                        id="sessions-page-{{ x }}"
+                                                        class="page-link"
+                                                        {% if loop.index== 1 %}aria-selected="true"{% endif %}>
+                                                    {{ loop.index }}
+                                                </button>
+                                            </li>
+                                        {% endfor %}
+                                        <li class="page-item next">
+                                            <button type="button" id="sessions-page-next" class="page-link">
+                                                <i class="tf-icon bx bx-chevrons-right bx-sm"></i>
+                                            </button>
+                                        </li>
+                                    </ul>
                                 </div>
-                            {% endcall %}
-                        {% endfor %}
-                    </div>
+                            </div>
+                        {% endif %}
+                    {% endcall %}
                 </div>
             </div>
         {% endcall %}

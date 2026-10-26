@@ -10,9 +10,14 @@
    The id scheme is frozen: `setting-<plugin>-<id>` and `multiple-setting-<plugin>-<id>-<suffix>`,
    inside a `.col-12` wrapper. The multiples cloner, file-type settings, validation anchoring and
    `.setting-highlight` all key off exactly those. #}
-<div class="card-body row g-2 gx-6 pb-0">
+{# SET-11: a container-query grid (settings.css `.bw-settings-grid`): one column, two from 640px of CARD width, three from
+   1100px, so a narrower card (side rail, small window) reflows by its own width and not the viewport's. `col-12` stays on every
+   cell because validation anchoring and `.setting-highlight` resolve through `.closest(".col-12")`; the textarea / file /
+   multivalue kinds take the full row, as the design's `is-wide`. #}
+<div class="card-body bw-settings-grid pb-0" id="plugin-settings-grid">
     {% for setting, setting_data in filtered_settings.items() if not setting_data.get('multiple', false) and setting not in blacklisted_settings and (not service_endpoint or setting_data['context'] == "multisite") %}
         {% set setting_id_prefix = "setting-" + plugin + "-" %}
+        {% set field_col_class = "col-12 bw-setting-cell pb-3" ~ (" is-wide" if setting_data['type'] in ("file", "multivalue", "textarea") else "") %}
         {% include "models/plugin_setting_field.html" %}
     {% endfor %}
 </div>

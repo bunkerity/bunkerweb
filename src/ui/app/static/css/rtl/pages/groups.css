@@ -67,4 +67,170 @@
   }
 }
 
-/* rtlcss@4.3.0 source=css/pages/groups.css sha256=389df7db488633cb22437a3b72721f9e7db99221a3b50aecd7552fc582dbfdfa */
+/* Shared by the Resources pages: groups, redirects, upstreams, templates. */
+.res-table th,
+.res-table td {
+  vertical-align: middle;
+}
+
+.res-mono {
+  font-family: var(--bs-font-monospace);
+  letter-spacing: 0;
+}
+
+.res-clip {
+  display: inline-block;
+  max-width: 22rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  vertical-align: bottom;
+  white-space: nowrap;
+}
+
+.res-desc .res-clip {
+  max-width: 18rem;
+}
+
+.res-to .res-clip {
+  max-width: 20rem;
+}
+
+/* A count that opens a viewer reads as a link, not as a chip competing with status badges. */
+.res-count-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--bs-link-color);
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+  white-space: nowrap;
+}
+
+button.res-count-link {
+  cursor: pointer;
+}
+
+.res-count-link:hover {
+  color: var(--bs-link-hover-color);
+}
+
+.res-count-link.is-none {
+  color: var(--bs-secondary-color);
+  text-decoration: none;
+}
+
+/* HTTP status code: outline badge, one colour per class; the meaning rides in the tooltip. */
+.http-code {
+  display: inline-block;
+  padding: 0.1rem 0.5rem;
+  border: 1px solid currentcolor;
+  border-radius: var(--bs-border-radius-pill);
+  font-family: var(--bs-font-monospace);
+  font-size: 0.8125rem;
+  line-height: 1.4;
+}
+
+.http-code.is-redirect {
+  color: var(--bs-warning);
+}
+
+/* Upstream editor: one aligned grid of server rows under shared column headings. */
+.upstream-server-grid {
+  display: grid;
+  grid-template-columns:
+    minmax(0, 2.4fr) minmax(0, 0.8fr) minmax(0, 0.8fr)
+    minmax(0, 1fr) minmax(0, 1.1fr) 2.5rem;
+  gap: 0.5rem;
+  align-items: end;
+}
+
+.upstream-server-head {
+  padding-bottom: 0.25rem;
+  color: var(--bs-secondary-color);
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+.upstream-servers {
+  display: grid;
+  gap: 0.5rem;
+  max-height: 18rem;
+  padding-block: 0.25rem;
+  overflow-y: auto;
+}
+
+@media (max-width: 991.98px) {
+  .upstream-server-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--bs-border-color);
+  }
+
+  .upstream-server-grid > :first-child {
+    grid-column: 1 / -1;
+  }
+
+  .upstream-server-grid > :last-child {
+    grid-column: 1 / -1;
+    text-align: end;
+  }
+}
+
+/* Values dialog: kind tabs on the left, filter + entries on the right. */
+.resource-values {
+  display: grid;
+  grid-template-columns: 14rem minmax(0, 1fr);
+  gap: 1.25rem;
+}
+
+.resource-values-kinds .nav-link {
+  text-align: start;
+}
+
+.resource-values-list {
+  display: grid;
+  gap: 0.35rem;
+  max-height: 24rem;
+  overflow: auto;
+}
+
+.resource-group-origin {
+  cursor: default;
+}
+
+.resource-group-values-open.btn-link {
+  text-decoration: none;
+}
+
+@media (max-width: 767.98px) {
+  .resource-values {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* Templates: the feature badges form one control that opens the grouped summary. */
+.template-features-open {
+  padding: 0;
+  border: 0;
+  background: none;
+  text-align: start;
+}
+
+.template-features-open:focus-visible {
+  border-radius: var(--bs-border-radius);
+  outline: 2px solid var(--bw-accent, var(--bs-primary));
+  outline-offset: 2px;
+}
+
+.template-managed {
+  gap: 0.25rem;
+}
+
+.template-feature-group > summary {
+  cursor: pointer;
+}
+
+/* rtlcss@4.3.0 source=css/pages/groups.css sha256=4efeac73103afeb30b5a3342d4ac8d41f6fc90616bdce8e2494aeedf26e93a3d */

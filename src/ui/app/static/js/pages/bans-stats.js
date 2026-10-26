@@ -6,7 +6,7 @@ window.BWBansStats = window.BWBansStats || {};
       ? i18next.t
       : (key, fallback) => fallback || key;
 
-  function fetchStats() {
+  function fetchStats(detail) {
     return $.ajax({
       url: `${window.location.pathname}/stats`,
       type: "POST",
@@ -14,6 +14,7 @@ window.BWBansStats = window.BWBansStats || {};
         csrf_token: $("#csrf_token").val(),
         // Set by bans.js once the instances report CrowdSec leases the database does not hold yet.
         ...(window.BWBansStats.runtimeLeases ? { runtime_leases: "1" } : {}),
+        ...(detail ? { detail: "1" } : {}),
       },
     });
   }
@@ -25,38 +26,47 @@ window.BWBansStats = window.BWBansStats || {};
       .text(t("status.no_data", "No data"));
   }
 
-  // Build rows as DOM nodes (jQuery .text()) rather than HTML-string interpolation --
-  // `reason` is untrusted free text (operator/rule/UA-derived), so it must go through
-  // an escaping sink instead of a raw-HTML setter.
-  function renderReasonBreakdown(reasons) {
+  function tableOptions(reasons) {
+    return {
+      items: reasons.map((r) => ({
+        label: r.reason,
+        pct: typeof r.pct === "number" ? r.pct : 0,
+      })),
+      head: {
+        label: t("bans.stats.reasons.head_reason", "Reason"),
+        share: t("tables.top.share", "Share"),
+      },
+      caption: t("bans.stats.card.by_reason", "Bans by reason"),
+    };
+  }
+
+  function openDetail(activeBans) {
+    fetchStats(true).done((data) => {
+      if (!data || !data.reason_breakdown || !data.reason_breakdown.length)
+        return;
+      window.BWTopTable.openDetail({
+        ...tableOptions(data.reason_breakdown),
+        title: t("bans.stats.card.by_reason", "Bans by reason"),
+        meta: t("bans.stats.reasons.meta", "{{count}} active bans", {
+          count: activeBans,
+        }),
+        closeLabel: t("button.close", "Close"),
+      });
+    });
+  }
+
+  // Labels are untrusted free text (operator/rule/UA-derived): BWTopTable builds every cell with
+  // jQuery .text(), never an HTML string.
+  function renderReasonBreakdown(reasons, activeBans) {
     const $body = $("#bans-reason-breakdown").empty();
     if (!reasons || !reasons.length) {
       $body.append(emptyStateNode());
       return;
     }
-    reasons.forEach((r) => {
-      const pct = typeof r.pct === "number" ? r.pct : 0;
-      $body.append(
-        $("<div>")
-          .addClass("d-flex justify-content-between align-items-center mb-1")
-          .append(
-            $("<span>").text(r.reason),
-            $("<span>")
-              .addClass("font-monospace small text-muted")
-              .text(`${pct}%`),
-          ),
-        $("<div>")
-          .addClass("progress mb-3")
-          .css("height", "6px")
-          .append(
-            $("<div>").addClass("progress-bar").css("width", `${pct}%`).attr({
-              role: "progressbar",
-              "aria-valuenow": pct,
-              "aria-valuemin": 0,
-              "aria-valuemax": 100,
-            }),
-          ),
-      );
+    window.BWTopTable.render($body, {
+      ...tableOptions(reasons),
+      detailLabel: t("tables.top.detail", "Detail"),
+      onDetail: () => openDetail(activeBans),
     });
   }
 
@@ -66,7 +76,7 @@ window.BWBansStats = window.BWBansStats || {};
     $("#bans-tile-expiring .bw-kpi-value").text(data.expiring_1h ?? 0);
     $("#bans-tile-countries .bw-kpi-value").text(data.countries ?? 0);
     $("#bans-tile-permanent .bw-kpi-value").text(data.permanent ?? 0);
-    renderReasonBreakdown(data.reason_breakdown);
+    renderReasonBreakdown(data.reason_breakdown, data.active ?? 0);
   }
 
   function refresh() {

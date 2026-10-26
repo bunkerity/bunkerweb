@@ -7,7 +7,15 @@
 {% from "components/modal.html" import modal %}
 {% from "components/search.html" import search %}
 {% from "components/page-head.html" import page_head %}
+{% from "workflow_shell.html" import workflow_tabs %}
 {% from "components/service-options.html" import service_options with context %}
+{% from "components/value-chips.html" import service_code %}
+{% block head %}
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/pages/workflow_shell.css') }}"
+          nonce="{{ style_nonce }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename=rtl_sheet('libs/datatables/datatables.min.css')) }}" nonce="{{ style_nonce }}" />
+{% endblock %}
 {# The page-head band owns the breadcrumb + title, so suppress the dashboard shell's
    legacy breadcrumb/mode row (same treatment as the redirects page). #}
 {% block page_head %}{% endblock %}
@@ -21,6 +29,8 @@
         {{ button(label="New workflow", i18n_key="workflows.new", size="sm", icon="bx-plus", modal_target="workflow-create-modal", disabled=readonly, classes="don-jose") }}
     {% endcall %}
 
+    {{ workflow_tabs("overview", total, workflows[0].id if workflows else none) }}
+
     {% if readonly %}
         {{ alert(message="The database is read-only. Workflows can be inspected but not changed.", message_key="workflows.readonly", variant="warning", icon="bx-lock-alt", classes="mb-4") }}
     {% endif %}
@@ -28,10 +38,18 @@
         {{ alert(message="Only the first 500 workflows are displayed. Narrow the list through the API for the complete result.", message_key="workflows.truncated", variant="warning", icon="bx-info-circle", classes="mb-4") }}
     {% endif %}
 
-    {% call card(classes="p-4 min-vh-70") %}
+    {% call card(classes="p-4 min-vh-70", title="Workflows", title_key="navigation.workflows", subtitle="Rules and attached services for every workflow", subtitle_key="workflows.port.list_subtitle", icon="bx-git-commit", header_right=badge(text=total | string, variant="secondary")) %}
         <div class="d-flex flex-wrap gap-2 align-items-end mb-4">
             <div class="flex-grow-1">
                 {{ search(id="workflows-search", placeholder="Search name or description...", i18n_key="workflows.search", size="sm", clearable=true, clear_id="workflows-search-clear") }}
+            </div>
+            <div>
+                <label class="form-label small" for="workflows-attachment-filter">{{ _("workflows.port.attachment") }}</label>
+                <select class="form-select form-select-sm" id="workflows-attachment-filter">
+                    <option value="">{{ _("workflows.port.attachment_any") }}</option>
+                    <option value="attached">{{ _("workflows.port.attachment_attached") }}</option>
+                    <option value="none">{{ _("workflows.not_attached") }}</option>
+                </select>
             </div>
             <div>
                 <label class="form-label small" for="workflows-service-filter">{{ _("table.header.service") }}</label>
@@ -42,13 +60,20 @@
         </div>
 
         {% if workflows %}
+            <textarea id="columns_preferences_defaults" class="visually-hidden">{"3":true,"4":true,"5":true,"6":true}</textarea>
+            <p id="workflows-export-status" class="small text-muted" role="status" aria-live="polite">{{ _("workflows.port.export_scope") }}</p>
             <div class="table-responsive">
-                <table class="table align-middle workflows-table">
+                <table id="workflows" class="table align-middle workflows-table w-100">
+                    <caption class="visually-hidden">{{ _("navigation.workflows") }}</caption>
                     <thead>
                         <tr>
+                            <th scope="col"><span class="visually-hidden">{{ _("workflows.port.row_details") }}</span></th>
+                            <th scope="col"><span class="visually-hidden">{{ _("workflows.port.select_workflows") }}</span></th>
                             <th>{{ _("table.header.name") }}</th>
                             <th>{{ _("workflows.rules") }}</th>
                             <th>{{ _("table.header.service") }}</th>
+                            <th>{{ _("workflows.port.created") }}</th>
+                            <th>{{ _("workflows.port.updated") }}</th>
                             <th class="text-end">{{ _("table.header.actions") }}</th>
                         </tr>
                     </thead>
@@ -57,49 +82,52 @@
                             <tr class="workflow-row"
                                 data-workflow-id="{{ flow.id }}"
                                 data-services="{{ flow.services | join(' ') }}">
+                                <td></td>
+                                <td></td>
                                 <td>
                                     <a class="fw-semibold" href="{{ workflows_url }}/{{ flow.id }}">{{ flow.name }}</a>
                                     {% if flow.description %}<div class="text-muted small text-truncate">{{ flow.description }}</div>{% endif %}
                                 </td>
                                 <td>
-                                    {{ flow.enabled_rules_count }}
-                                    {% if flow.rules_count != flow.enabled_rules_count %}
-                                        {# Disabled rules are stored but never compiled into the artefact. #}
-                                        <span class="text-muted small">/ {{ flow.rules_count }}</span>
-                                    {% endif %}
+                                    <div class="fw-semibold">{{ _("workflows.port.total_rules", count=flow.rules_count) }}</div>
+                                    <div class="text-muted small">{{ _("workflows.port.active_rules", count=flow.enabled_rules_count) }}</div>
                                 </td>
-                                <td>
+                                <td data-order="{{ flow.services | length }}"
+                                    data-search="{{ flow.services | join(' ') }}">
                                     {% if flow.services %}
-                                        <div class="d-flex flex-wrap gap-1">
-                                            {% for service_id in flow.services %}
-                                                <span class="badge bg-label-primary d-inline-flex align-items-center gap-1">
-                                                    {{ service_id }}
-                                                    {% if not readonly %}
-                                                        <form method="post" action="{{ workflows_url }}/detach" class="d-inline">
-                                                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
-                                                            <input type="hidden" name="workflow_id" value="{{ flow.id }}" />
-                                                            <input type="hidden" name="service_id" value="{{ service_id }}" />
-                                                            <button type="submit"
-                                                                    class="btn btn-link btn-sm p-0 lh-1 text-reset"
-                                                                    aria-label="{{ _('aria.label.detach_from_service', name=flow.name, service=service_id) }}">
-                                                                <i class="bx bx-x" aria-hidden="true"></i>
-                                                            </button>
-                                                        </form>
-                                                    {% endif %}
-                                                </span>
-                                            {% endfor %}
-                                        </div>
+                                        {# The names and the detach action live in the services dialog; the cell is its entry point. #}
+                                        <button type="button"
+                                                class="btn btn-sm btn-outline-secondary workflow-services d-inline-flex align-items-center gap-1"
+                                                aria-haspopup="dialog"
+                                                aria-label="{{ _('workflows.port.services_open', name=flow.name) }}"
+                                                title="{{ _('workflows.port.services_open', name=flow.name) }}">
+                                            <i class="bx bx-link" aria-hidden="true"></i>
+                                            <span>{{ _("workflows.port.services_count", count=flow.services | length) }}</span>
+                                        </button>
                                     {% else %}
                                         {# An unattached workflow renders nothing: no service enforces it. #}
                                         {{ badge(text="Not attached", i18n_key="workflows.not_attached", variant="secondary") }}
                                     {% endif %}
                                 </td>
+                                <td data-order="{{ flow.creation_date }}"><time datetime="{{ flow.creation_date }}" data-wf-date>{{ flow.creation_date }}</time></td>
+                                <td data-order="{{ flow.last_update }}"><time datetime="{{ flow.last_update }}" data-wf-date>{{ flow.last_update }}</time></td>
                                 <td class="text-end">
-                                    {{ button(label="", variant="outline-secondary", size="sm", icon="bx-edit-alt", icon_only=true, aria_label=_('tooltip.button.edit_workflow_rules', name=flow.name), classes="workflow-rules", tag="a", href=workflows_url ~ "/" ~ flow.id) }}
-                                    {{ button(label="", variant="outline-secondary", size="sm", icon="bx-rename", icon_only=true, aria_label=_('tooltip.button.edit_workflow_details', name=flow.name), classes="workflow-edit", disabled=readonly) }}
-                                    {{ button(label="", variant="outline-secondary", size="sm", icon="bx-link", icon_only=true, aria_label=_('tooltip.button.attach_workflow', name=flow.name), classes="workflow-attach", disabled=readonly) }}
-                                    {{ button(label="", variant="outline-secondary", size="sm", icon="bx-copy", icon_only=true, aria_label=_('tooltip.button.clone_workflow', name=flow.name), classes="workflow-clone", disabled=readonly) }}
-                                    {{ button(label="", variant="outline-danger", size="sm", icon="bx-trash", icon_only=true, aria_label=_('tooltip.button.delete_workflow', name=flow.name), classes="workflow-delete", disabled=readonly) }}
+                                  <div class="btn-group" role="group" aria-label="{{ _('tooltip.button.edit_workflow_rules', name=flow.name) }}">
+                                    {{ button(label="", variant="outline-secondary", size="sm", icon="bx-edit-alt", icon_only=true, aria_label=_('tooltip.button.edit_workflow_rules', name=flow.name), tooltip_text=_('tooltip.button.edit_workflow_rules', name=flow.name), classes="workflow-rules", tag="a", href=workflows_url ~ "/" ~ flow.id) }}
+                                    {{ button(label="", variant="outline-danger", size="sm", icon="bx-trash", icon_only=true, aria_label=_('tooltip.button.delete_workflow', name=flow.name), tooltip_text=_('tooltip.button.delete_workflow', name=flow.name), classes="workflow-delete", disabled=readonly) }}
+                                    <div class="btn-group">
+                                      <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="dropdown" aria-expanded="false" aria-label="{{ _('workflows.port.more', name=flow.name) }}" title="{{ _('workflows.port.more', name=flow.name) }}">
+                                        <i class="bx bx-dots-horizontal-rounded" aria-hidden="true"></i>
+                                      </button>
+                                      <div class="dropdown-menu dropdown-menu-end"><div class="d-grid">
+                                        <h6 class="dropdown-header">{{ flow.name }}</h6>
+                                        {{ button(label="Details", i18n_key="workflows.port.details", variant="link", size="sm", icon="bx-rename", classes="workflow-edit", disabled=readonly) }}
+                                        {{ button(label="Attach to services", i18n_key="workflows.attach", variant="link", size="sm", icon="bx-link", classes="workflow-attach", disabled=readonly) }}
+                                    <hr class="dropdown-divider" />
+                                        {{ button(label="Clone workflow", i18n_key="workflows.clone", variant="link", size="sm", icon="bx-copy", classes="workflow-clone", disabled=readonly) }}
+                                      </div></div>
+                                    </div>
+                                  </div>
                                 </td>
                             </tr>
                         {% endfor %}
@@ -112,7 +140,7 @@
     {% endcall %}
 
     {# The page JS reads the rows from here instead of re-parsing the table. #}
-    <input type="hidden" id="workflows-data" value='{{ workflows | tojson }}' />
+    <input type="hidden" id="workflows-data" value='{{ workflows | tojson }}' data-truncated="{{ 'yes' if truncated else 'no' }}" />
 
     {% call modal(id="workflow-create-modal", title_key="workflows.new", title="New workflow", size="lg") %}
         <form method="post" action="{{ workflows_url }}/create">
@@ -180,6 +208,23 @@
         </form>
     {% endcall %}
 
+    {# WF-22: the attached service names and the detach action, one dialog reachable from the row. #}
+    {% call modal(id="workflow-services-modal", title_key="workflows.port.services_title", title="Services attached to this workflow") %}
+        <div class="modal-body">
+            <p class="text-muted small" id="workflow-services-help">{{ _("workflows.port.services_help") }}</p>
+            <ul class="list-group" id="workflow-services-list" aria-describedby="workflow-services-help"></ul>
+            <p class="text-muted mb-0 d-none" id="workflow-services-empty">{{ _("workflows.port.services_none") }}</p>
+            <form method="post" action="{{ workflows_url }}/detach" id="workflow-services-detach" data-readonly="{{ 'yes' if readonly else 'no' }}" class="d-none">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                <input type="hidden" name="workflow_id" id="workflow-services-id" />
+                <input type="hidden" name="service_id" id="workflow-services-service" />
+            </form>
+        </div>
+        <div class="modal-footer">
+            {{ button(label="Close", i18n_key="button.close", variant="outline-secondary", dismiss="modal") }}
+        </div>
+    {% endcall %}
+
     {% call modal(id="workflow-clone-modal", title_key="workflows.clone", title="Clone workflow") %}
         <form method="post" action="{{ workflows_url }}/clone">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
@@ -202,6 +247,7 @@
             <input type="hidden" name="workflow_id" id="workflow-delete-id" />
             <div class="modal-body">
                 <p>{{ _("workflows.delete_confirm") }}</p>
+                <p class="text-muted">{{ _("workflows.port.detach_before_delete") }}</p>
                 <p class="fw-semibold" id="workflow-delete-name"></p>
             </div>
             <div class="modal-footer">
@@ -214,5 +260,8 @@
     {{ service_options(services) }}
 {% endblock %}
 {% block scripts %}
+    <script src="{{ url_for('static', filename='libs/datatables/datatables.min.js') }}" nonce="{{ script_nonce }}" defer></script>
+    <script src="{{ url_for('static', filename='js/dataTableInit.js') }}" nonce="{{ script_nonce }}" defer></script>
+    <script src="{{ url_for('static', filename='js/pages/workflow_draft.js') }}" nonce="{{ script_nonce }}" defer></script>
     <script src="{{ url_for('static', filename='js/pages/workflows.js') }}" nonce="{{ script_nonce }}" defer></script>
 {% endblock %}

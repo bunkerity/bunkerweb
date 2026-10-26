@@ -7,6 +7,8 @@
 {% from "components/file-upload.html" import file_upload %}
 {% from "components/modal.html" import modal %}
 {% from "components/search.html" import search %}
+{% from "components/status.html" import status %}
+{% from "components/value-chips.html" import service_code %}
 {% from "components/tile.html" import tile %}
 {% from "components/page-head.html" import page_head %}
 {% from "components/service-options.html" import service_options with context %}
@@ -81,7 +83,7 @@
     {% call page_head(title="Certificates", title_i18n="navigation.certificates",
                       breadcrumb=[("Overview", "navigation.overview", none),
                                   ("Certificates", "navigation.certificates", none)]) %}
-        {{ button(id="certificates-renew-due", label="Check/renew due", i18n_key="certificates.renew_due", variant="outline-secondary", size="sm", icon="bx-refresh", disabled=readonly) }}
+        {{ button(id="certificates-renew-due", label="Renew due", i18n_key="certificates.renew_due_short", variant="outline-secondary", size="sm", icon="bx-refresh", disabled=readonly) }}
         {{ button(label="Upload custom", i18n_key="certificates.upload_custom", variant="outline-primary", size="sm", icon="bx-upload", modal_target="certificate-upload-modal", disabled=readonly) }}
         {{ button(label="Schedule ACME", i18n_key="certificates.schedule_acme", variant="outline-primary", size="sm", icon="bx-cloud", modal_target="certificate-acme-modal", disabled=readonly) }}
         {{ button(label="New self-signed", i18n_key="certificates.new_selfsigned", size="sm", icon="bx-plus", modal_target="certificate-selfsigned-modal", disabled=readonly, classes="don-jose") }}
@@ -137,14 +139,9 @@
         <div class="col-12 col-xl-4">
             {% call card(title="Top issuers", title_key="certificates.issuers", icon="bx-pie-chart-alt", classes="h-100") %}
                 {% if issuer_counts %}
-                    <ul class="list-group list-group-flush">
-                        {% for issuer, count in issuer_counts[:6] %}
-                            <li class="list-group-item px-0 d-flex justify-content-between align-items-center">
-                                <span class="text-truncate me-2">{{ issuer }}</span>
-                                {{ badge(text=count, variant="secondary") }}
-                            </li>
-                        {% endfor %}
-                    </ul>
+                    {# Ranked table + Detail dialog are drawn by components/top-table.js (the labels are issuer-controlled text). #}
+                    <div id="certificates-issuers"></div>
+                    <textarea id="certificates-issuers-data" hidden readonly>{{ issuer_counts | tojson }}</textarea>
                 {% else %}
                     {{ empty_state(title="No issuer data", title_key="certificates.no_issuers", icon="bx-certification", size="sm") }}
                 {% endif %}
@@ -153,49 +150,138 @@
     </div>
 
     {% call card(classes="p-4 min-vh-70") %}
-        <div class="certificates-toolbar d-flex flex-wrap gap-2 align-items-end mb-4">
-            <div class="certificates-search">
-                {{ search(id="certificates-search", placeholder="Search name, common name, SAN, issuer, or fingerprint...", i18n_key="certificates.search", size="sm", clearable=true, clear_id="certificates-search-clear") }}
+        {% if certificates %}
+            <div class="certificates-toolbar d-flex flex-wrap gap-2 align-items-center mb-3">
+                <div class="dropdown">
+                    <button type="button"
+                            id="certificates-columns-btn"
+                            class="btn btn-minor btn-sm btn-light"
+                            data-bs-toggle="dropdown"
+                            data-bs-auto-close="outside"
+                            aria-expanded="false">
+                        <i class="bx bx-columns" aria-hidden="true"></i><span class="btn-label"> {{ _("button.columns") }}</span>
+                    </button>
+                    <div class="dropdown-menu p-2 certificates-columns-menu">
+                        <div class="d-flex align-items-center justify-content-between gap-3 px-2 pb-2 mb-1 border-bottom small">
+                            <span><strong>{{ _("table_system.visible_columns") }}</strong> <span id="certificates-columns-count" class="text-muted"></span></span>
+                            <button type="button" id="certificates-columns-all" class="btn btn-sm btn-link p-0">{{ _("table_system.show_all") }}</button>
+                        </div>
+                        <div id="certificates-columns-list" class="bw-checkbox"></div>
+                    </div>
+                </div>
+                <div class="dropdown">
+                    <button type="button"
+                            class="btn btn-minor btn-sm btn-light"
+                            data-bs-toggle="dropdown"
+                            aria-expanded="false">
+                        <i class="bx bx-export" aria-hidden="true"></i><span class="btn-label"> {{ _("button.export") }}</span>
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li>
+                            <button type="button" class="dropdown-item" id="certificates-export-copy">
+                                <i class="bx bx-copy me-2" aria-hidden="true"></i>{{ _("button.copy_visible") }}
+                            </button>
+                        </li>
+                        <li>
+                            <button type="button" class="dropdown-item" id="certificates-export-csv">
+                                <i class="bx bx-table me-2" aria-hidden="true"></i>CSV
+                            </button>
+                        </li>
+                    </ul>
+                </div>
+                <div class="dropdown" id="certificates-actions-wrap" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="{{ _("table_system.multiple_actions") }}">
+                    <button type="button"
+                            id="certificates-actions-btn"
+                            class="btn btn-minor btn-sm btn-light"
+                            data-bs-toggle="dropdown"
+                            aria-expanded="false"
+                            aria-disabled="true">
+                        <i class="bx bx-play" aria-hidden="true"></i><span class="btn-label"> {{ _("button.actions") }}</span>
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li>
+                            <button type="button" class="dropdown-item" id="certificates-bulk-renew"{% if readonly %} disabled{% endif %}>
+                                <i class="bx bx-refresh me-2" aria-hidden="true"></i>{{ _("certificates.bulk.renew") }}
+                            </button>
+                        </li>
+                        <li>
+                            <button type="button" class="dropdown-item" id="certificates-bulk-download">
+                                <i class="bx bx-download me-2" aria-hidden="true"></i>{{ _("certificates.bulk.download") }}
+                            </button>
+                        </li>
+                        <li>
+                            <button type="button" class="dropdown-item text-danger" id="certificates-bulk-delete"{% if readonly %} disabled{% endif %}>
+                                <i class="bx bx-trash me-2" aria-hidden="true"></i>{{ _("certificates.bulk.delete") }}
+                            </button>
+                        </li>
+                    </ul>
+                </div>
+                <span class="vr d-none d-md-block"></span>
+                <div class="certificates-search">
+                    {{ search(id="certificates-search", placeholder="Search name, common name, SAN, issuer, or fingerprint...", i18n_key="certificates.search", size="sm", clearable=true, clear_id="certificates-search-clear") }}
+                </div>
+                <button type="button"
+                        id="certificates-filters-toggle"
+                        class="btn btn-minor btn-sm btn-light"
+                        aria-expanded="false"
+                        aria-controls="certificates-filters">
+                    <i class="bx bx-filter-alt" aria-hidden="true"></i><span class="btn-label"> {{ _("table_system.filters") }}</span>
+                    <span id="certificates-filters-count" class="af-count ms-1" hidden></span>
+                </button>
             </div>
-            <div>
-                <label class="form-label small" for="certificates-source-filter">{{ _("certificates.source_label") }}</label>
-                <select class="form-select form-select-sm" id="certificates-source-filter">
-                    <option value="">{{ _("certificates.all") }}</option>
-                    {# Sources come from the plugins that declare one, so a pro or external provider is
-                       listed too. Only the built-ins carry a locale key; anything else falls back to the
-                       label the plugin declared, because gettext renders the raw key when it is missing. #}
-                    {% for source_id, source in (sources or {}) | dictsort %}
-                        {% if source_id in ["letsencrypt", "customcert", "selfsigned"] %}
-                            <option value="{{ source_id }}">{{ _("certificates.source." ~ source_id) }}</option>
-                        {% else %}
-                            <option value="{{ source_id }}">{{ source.label or source_id }}</option>
-                        {% endif %}
-                    {% endfor %}
-                </select>
+            <div class="adv-filters" id="certificates-filters" hidden>
+                <div class="adv-filters-head">
+                    <strong>{{ _("table_system.advanced_filters") }}</strong>
+                    <button type="button" id="certificates-filters-reset" class="btn btn-sm btn-outline-secondary">{{ _("button.reset") }}</button>
+                </div>
+                <div class="adv-filters-grid">
+                    <label class="adv-filter-field" for="certificates-source-filter">
+                        <span>{{ _("certificates.source_label") }}</span>
+                        <select class="form-select" id="certificates-source-filter">
+                            <option value="">{{ _("certificates.all") }}</option>
+                            {# Sources come from the plugins that declare one, so a pro or external provider is
+                               listed too. Only the built-ins carry a locale key; anything else falls back to the
+                               label the plugin declared, because gettext renders the raw key when it is missing. #}
+                            {% for source_id, source in (sources or {}) | dictsort %}
+                                {% if source_id in ["letsencrypt", "customcert", "selfsigned"] %}
+                                    <option value="{{ source_id }}">{{ _("certificates.source." ~ source_id) }}</option>
+                                {% else %}
+                                    <option value="{{ source_id }}">{{ source.label or source_id }}</option>
+                                {% endif %}
+                            {% endfor %}
+                        </select>
+                    </label>
+                    <label class="adv-filter-field" for="certificates-status-filter">
+                        <span>{{ _("table.header.status") }}</span>
+                        <select class="form-select" id="certificates-status-filter">
+                            <option value="">{{ _("certificates.all") }}</option>
+                            {% for status_key in ["valid", "expiring_soon", "expired", "not_yet_valid", "revoked"] %}
+                                <option value="{{ status_key }}">{{ _("certificates.status." ~ status_key) }}</option>
+                            {% endfor %}
+                        </select>
+                    </label>
+                    <label class="adv-filter-field" for="certificates-service-filter">
+                        <span>{{ _("table.header.service") }}</span>
+                        <select class="form-select" id="certificates-service-filter" data-bw-service-options>
+                            <option value="">{{ _("certificates.all") }}</option>
+                        </select>
+                    </label>
+                </div>
             </div>
-            <div>
-                <label class="form-label small" for="certificates-status-filter">{{ _("table.header.status") }}</label>
-                <select class="form-select form-select-sm" id="certificates-status-filter">
-                    <option value="">{{ _("certificates.all") }}</option>
-                    {% for status in ["valid", "expiring_soon", "expired", "not_yet_valid", "revoked"] %}
-                        <option value="{{ status }}">{{ _("certificates.status." ~ status) }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-            <div>
-                <label class="form-label small" for="certificates-service-filter">{{ _("table.header.service") }}</label>
-                <select class="form-select form-select-sm" id="certificates-service-filter" data-bw-service-options>
-                    <option value="">{{ _("certificates.all") }}</option>
-                </select>
-            </div>
-        </div>
+            <span id="certificates-live" class="visually-hidden" role="status" aria-live="polite"></span>
+        {% endif %}
 
         {% if certificates %}
-            <div class="table-responsive">
+            <div class="bw-table-scroll">
                 <table class="table align-middle certificates-table">
                     <thead>
                         <tr>
                             <th class="certificate-expand-column"><span class="visually-hidden">Details</span></th>
+                            <th class="certificate-select-column bw-checkbox">
+                                <input type="checkbox"
+                                       id="certificates-select-all"
+                                       aria-label="{{ _("certificates.select_all") }}" />
+                            </th>
                             <th>{{ _("table.header.name") }}</th>
                             <th>{{ _("certificates.common_name") }}</th>
                             <th>{{ _("certificates.issuer") }}</th>
@@ -216,6 +302,11 @@
                                 <td>
                                     {{ button(label="", variant="link", size="sm", icon="bx-chevron-right", icon_only=true, aria_label=_("aria.label.show_details", name=certificate.name), classes="certificate-toggle p-0") }}
                                 </td>
+                                <td class="bw-checkbox">
+                                    <input type="checkbox"
+                                           class="certificate-select"
+                                           aria-label="{{ _("datatable.select_row") }}: {{ certificate.name }}" />
+                                </td>
                                 <td>
                                     <div class="fw-semibold">{{ certificate.name }}</div>
                                     {# Same reason as the source filter: only the built-ins have a locale key,
@@ -233,10 +324,16 @@
                                 <td class="text-wrap">{{ certificate.issuer }}</td>
                                 <td><code>{{ certificate.key_type | upper }}</code></td>
                                 <td><time class="certificate-date font-monospace small" datetime="{{ certificate.valid_to }}">{{ certificate.valid_to }}</time></td>
-                                <td>{{ badge(text=certificate.status | replace("_", " ") | title, i18n_key="certificates.status." ~ certificate.status, variant=status_variants.get(certificate.status, "secondary")) }}</td>
+                                <td>{{ status(type=certificate.status, label=certificate.status | replace("_", " ") | title, i18n_key="certificates.status." ~ certificate.status, variant=status_variants.get(certificate.status, "secondary"), data_value=certificate.status) }}</td>
                                 <td>
                                     {% if certificate.attachments %}
-                                        {{ badge(text=certificate.attachments | length ~ " service" ~ ("s" if certificate.attachments | length != 1 else ""), variant="primary", icon="bx-server") }}
+                                        <div class="d-flex flex-wrap gap-1">
+                                            {% for attachment in certificate.attachments[:2] %}{{ service_code(attachment.service_id) }}{% endfor %}
+                                            {% if certificate.attachments | length > 2 %}
+                                                <span class="tag-chip"
+                                                      title="{{ certificate.attachments | map(attribute='service_id') | join(', ') }}">+{{ certificate.attachments | length - 2 }}</span>
+                                            {% endif %}
+                                        </div>
                                     {% else %}
                                         {{ badge(text="Unassigned", i18n_key="certificates.unassigned", variant="secondary", icon="bx-unlink") }}
                                     {% endif %}
@@ -256,7 +353,7 @@
                                 </td>
                             </tr>
                             <tr class="certificate-details" data-certificate-id="{{ certificate.id }}" hidden>
-                                <td colspan="9">
+                                <td colspan="10">
                                     <div class="row g-3 py-2">
                                         <div class="col-12 col-xl-7">
                                             <section class="certificate-detail-panel h-100" aria-label="{{ _('aria.label.certificate_public_details') }}">
@@ -483,6 +580,7 @@
 
 {% block scripts %}
     <script src="{{ url_for('static', filename='js/components/file-upload.js') }}" nonce="{{ script_nonce }}" defer></script>
+    <script src="{{ url_for('static', filename='js/components/top-table.js') }}" nonce="{{ script_nonce }}" defer></script>
     <script src="{{ url_for('static', filename='js/pages/certificates.js') }}" nonce="{{ script_nonce }}" defer></script>
     <script src="{{ url_for('static', filename='js/components/form-retry.js') }}" nonce="{{ script_nonce }}" defer></script>
 {% endblock %}

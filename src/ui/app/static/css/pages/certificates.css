@@ -3,8 +3,17 @@
   max-width: 36rem;
 }
 
-.certificates-toolbar > div:not(.certificates-search) {
-  min-width: 10rem;
+.certificate-select-column {
+  width: 2.25rem;
+}
+
+.certificates-columns-menu {
+  min-width: 16rem;
+}
+
+#certificates-actions-btn[aria-disabled="true"] {
+  cursor: default;
+  opacity: 0.55;
 }
 
 .certificate-expand-column {
@@ -71,7 +80,7 @@
     max-width: none;
   }
 
-  .certificates-toolbar > div {
+  .certificates-toolbar .certificates-search {
     flex: 1 1 100%;
   }
 }

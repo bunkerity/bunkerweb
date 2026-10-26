@@ -1,8 +1,8 @@
 {% from 'macros/docs_link.html' import docs_url with context %}
-{% from 'components/search.html' import search %}
 <!-- Navbar -->
 <nav class="layout-navbar navbar navbar-expand-xl navbar-detached align-items-center bg-navbar-theme"
-     id="layout-navbar">
+     id="layout-navbar"
+     aria-label="{{ _("shell.top_navigation") }}">
     <button type="button"
             class="layout-menu-toggle btn btn-sm btn-outline-secondary btn-icon me-3"
             aria-label="{{ _("navbar.aria.toggle_navigation") }}"
@@ -10,11 +10,31 @@
         <i class="bx bx-menu bx-md d-xl-none" aria-hidden="true"></i>
         <i class="bx bx-chevrons-left bx-sm d-none d-xl-inline" aria-hidden="true"></i>
     </button>
-    <div class="bw-navbar-search d-none d-xxl-block position-relative me-3">
-        {{ search(id="admin-nav-search", placeholder="Search...", variant="flat", classes="bg-body-tertiary rounded-3", attrs='aria-controls="admin-nav-search-results" aria-expanded="false"') }}
-        <div id="admin-nav-search-results"
-             class="list-group position-absolute top-100 start-0 end-0 mt-2 d-none shadow"
-             aria-live="polite"></div>
+    {# Global search (Ctrl K): pages, plugins and services. Listbox pattern: the input keeps focus
+       and points at the active option through aria-activedescendant. #}
+    <div class="bw-navbar-search bw-gs d-none d-lg-block position-relative me-3"
+         id="admin-nav-search-wrap">
+        <div class="gs-field">
+            <i class="bx bx-search" aria-hidden="true"></i>
+            <input id="admin-nav-search"
+                   type="search"
+                   role="combobox"
+                   aria-autocomplete="list"
+                   aria-expanded="false"
+                   aria-controls="admin-nav-search-results"
+                   aria-label="{{ _("shell.search.label") }}"
+                   placeholder="{{ _("shell.search.placeholder") }}"
+                   autocomplete="off"
+                   spellcheck="false"
+                   data-services-url="{{ url_for('services') }}" />
+            <kbd class="gs-kbd" id="admin-nav-search-kbd" aria-hidden="true">Ctrl K</kbd>
+        </div>
+        <ul id="admin-nav-search-results"
+            class="gs-list"
+            role="listbox"
+            aria-label="{{ _("shell.search.results") }}"
+            hidden></ul>
+        <span class="visually-hidden" id="admin-nav-search-status" aria-live="polite"></span>
     </div>
     <div class="navbar-collapse collapse navbar-nav-right d-flex align-items-center"
          id="navbar-collapse">
@@ -155,81 +175,134 @@
                     <i class="bx bx-news" aria-hidden="true"></i>
                 </button>
             </li>
-            <!-- Language selector (relocated from sidebar; keeps language-selector.html ids/hooks) -->
-            <li class="nav-item lh-1 me-2 me-md-3">{% include "language-selector.html" %}</li>
+            <!-- Language selector (icon-only globe; keeps language-selector.html ids/hooks) -->
+            <li class="nav-item navbar-dropdown dropdown lh-1 me-1 me-md-2">{% include "language-selector.html" %}</li>
             <!--/ Language selector -->
-            <!-- Theme toggle (relocated from sidebar; keeps #dark-mode-toggle + #csrf_token hooks) -->
-            <li class="nav-item lh-1 me-2 me-md-4">
+            {% set theme_mode_now = theme_mode or theme %}
+            <!-- Theme menu (Light / Dark / System). #dark-mode-toggle stays as a hidden bridge:
+                 page scripts redraw their charts and editors on its `change`, and utils.js
+                 fires it after a menu pick. #csrf_token and data-root-url are the write hooks. -->
+            <li class="nav-item navbar-dropdown dropdown lh-1 me-1 me-md-2"
+                data-theme-menu>
                 <input type="hidden"
                        id="csrf_token"
                        name="csrf_token"
                        value="{{ csrf_token() }}" />
-                <div class="d-flex align-items-center">
-                    <i class="dark-mode-toggle-icon bx bx-{% if theme == "light" %}sun{% else %}moon{% endif %} fs-5 me-2"
+                <input id="dark-mode-toggle"
+                       name="dark-mode-toggle"
+                       class="d-none"
+                       type="checkbox"
+                       hidden
+                       tabindex="-1"
+                       aria-hidden="true"
+                       data-root-url="{{ url_for('profile') }}"
+                       {% if theme == "dark" %}checked{% endif %} />
+                <button id="theme-menu-toggle"
+                        type="button"
+                        class="bw-topbar-btn"
+                        data-bs-toggle="dropdown"
+                        aria-haspopup="menu"
+                        aria-expanded="false"
+                        aria-label="{{ _("shell.theme.title") }}: {{ _("theme." ~ theme_mode_now) }}"
+                        title="{{ _("shell.theme.title") }}">
+                    <i class="theme-mode-icon bx bx-{% if theme_mode_now == "system" %}desktop{% elif theme_mode_now == "dark" %}moon{% else %}sun{% endif %}"
                        aria-hidden="true"></i>
-                    <label class="setting-checkbox-label mb-0 me-2 d-none d-lg-inline"
-                           for="dark-mode-toggle"
-                           >{{ _("theme.light") }}</label>
-                    <div class="form-check form-switch mb-0">
-                        <input id="dark-mode-toggle"
-                               name="dark-mode-toggle"
-                               class="form-check-input"
-                               type="checkbox"
-                               role="switch"
-                               aria-label="{{ _("aria.label.toggle_theme") }}"
-                               data-root-url="{{ url_for('profile') }}"
-                               {% if theme == "dark" %}checked{% endif %} />
-                    </div>
-                    <label class="setting-checkbox-label mb-0 d-none d-lg-inline"
-                           for="dark-mode-toggle"
-                           >{{ _("theme.dark") }}</label>
-                </div>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end bw-menu-radio"
+                    role="menu"
+                    aria-label="{{ _("shell.theme.title") }}">
+                    <li role="presentation">
+                        <h3 class="dropdown-header">{{ _("shell.theme.title") }}</h3>
+                    </li>
+                    {% for mode, mode_icon in [("light", "sun"), ("dark", "moon"), ("system", "desktop")] %}
+                        <li role="presentation">
+                            <button type="button"
+                                    class="dropdown-item d-flex align-items-center"
+                                    role="menuitemradio"
+                                    aria-checked="{{ 'true' if theme_mode_now == mode else 'false' }}"
+                                    data-theme-mode="{{ mode }}">
+                                <i class="bx bx-{{ mode_icon }}" aria-hidden="true"></i>
+                                <span>{{ _("theme." ~ mode) }}{% if mode == "system" %} <span class="menu-hint">{{ _("shell.theme.system_hint") }}</span>{% endif %}</span>
+                                <i class="bx bx-check menu-tick ms-auto" aria-hidden="true"></i>
+                            </button>
+                        </li>
+                    {% endfor %}
+                </ul>
             </li>
-            <!--/ Theme toggle -->
-            <!-- User -->
-            <li class="nav-item navbar-dropdown dropdown-user dropdown">
-                <a class="nav-link dropdown-toggle hide-arrow p-0 d-flex align-items-center"
-                   href="javascript:void(0);"
-                   data-bs-toggle="dropdown"
-                   data-tour="user-menu"
-                   aria-label="{{ _("aria.label.open_user_menu") }}"
-                   aria-expanded="false">
-                    <div class="avatar avatar-online">
-                        <img src="{{ avatar_url }}"
-                             alt="User Avatar"
-                             class="w-px-40 h-auto rounded-circle" />
-                    </div>
-                </a>
-                <ul class="dropdown-menu dropdown-menu-end">
-                    <li>
-                        <a class="dropdown-item" href="{{ url_for('profile') }}">
-                            <div class="d-flex align-items-center">
-                                <div class="flex-shrink-0 me-2 me-md-3">
-                                    <div class="avatar avatar-online">
-                                        <img src="{{ avatar_url }}"
-                                             alt="User Avatar"
-                                             class="w-px-40 h-auto rounded-circle" />
-                                    </div>
-                                </div>
-                                <div class="flex-grow-1">
-                                    <h6 class="mb-0 text-truncate">{{ current_user.get_id() |title }}</h6>
-                                    <small class="text-muted text-truncate">{{ current_user.list_roles[0] }}</small>
-                                </div>
+            <!--/ Theme menu -->
+            <!-- Look preferences: contrast (high by default) and density (compact by default).
+                 Per-browser, kept in localStorage by components/ui-preferences.js; the attribute
+                 on <html> is set before first paint (base.html). -->
+            <li class="nav-item lh-1 me-1 me-md-2">
+                <button id="contrast-toggle"
+                        type="button"
+                        class="bw-topbar-btn"
+                        data-bw-pref="contrast"
+                        aria-pressed="true"
+                        aria-label="{{ _("shell.contrast.toggle") }}"
+                        title="{{ _("shell.contrast.toggle") }}">
+                    <i class="bx bxs-adjust" aria-hidden="true"></i>
+                </button>
+            </li>
+            <li class="nav-item lh-1 me-2 me-md-3">
+                <button id="density-toggle"
+                        type="button"
+                        class="bw-topbar-btn"
+                        data-bw-pref="density"
+                        aria-pressed="true"
+                        aria-label="{{ _("shell.density.toggle") }}"
+                        title="{{ _("shell.density.toggle") }}">
+                    <i class="bx bx-collapse-vertical" aria-hidden="true"></i>
+                </button>
+            </li>
+            <!--/ Look preferences -->
+            <!-- Account menu -->
+            {% set account_name = current_user.get_id() or "" %}
+            {% set account_role = (current_user.list_roles or [""])[0] %}
+            <li class="nav-item navbar-dropdown dropdown dropdown-user">
+                <button type="button"
+                        class="bw-avatar"
+                        data-bs-toggle="dropdown"
+                        data-tour="user-menu"
+                        aria-haspopup="menu"
+                        aria-expanded="false"
+                        aria-label="{{ _("shell.account.current", name=account_name) }}"
+                        title="{{ account_name }}">{{ account_name[:2] | upper }}</button>
+                <ul class="dropdown-menu dropdown-menu-end bw-account-menu"
+                    role="menu"
+                    aria-label="{{ _("shell.account.title") }}">
+                    <li role="presentation">
+                        <div class="bw-account-head">
+                            <div class="bw-account-id">
+                                <span class="bw-avatar bw-avatar-sm" aria-hidden="true">{{ account_name[:2] | upper }}</span>
+                                <strong class="text-truncate">{{ account_name }}</strong>
                             </div>
+                            {% if current_user.email %}<small class="bw-account-mail text-truncate">{{ current_user.email }}</small>{% endif %}
+                            {% if account_role %}
+                                <span class="bw-account-role"><i class="bx bx-shield-quarter" aria-hidden="true"></i>{{ account_role }}</span>
+                            {% endif %}
+                        </div>
+                    </li>
+                    <li role="presentation">
+                        <a class="dropdown-item d-flex align-items-center"
+                           role="menuitem"
+                           href="{{ url_for('profile') }}">
+                            <i class="bx bx-user-circle" aria-hidden="true"></i><span>{{ _("navigation.profile") }}</span>
                         </a>
                     </li>
-                    <li>
-                        <div class="dropdown-divider my-1"></div>
+                    <li role="presentation">
+                        <hr class="dropdown-divider" role="separator">
                     </li>
-                    <li>
-                        <a class="dropdown-item d-flex align-items-center"
+                    <li role="presentation">
+                        <a class="dropdown-item d-flex align-items-center is-danger"
+                           role="menuitem"
                            href="{{ url_for('logout') }}">
-                            <i class="bx bx-power-off bx-sm me-2" aria-hidden="true"></i><span>{{ _("navbar.dropdown.logout") }}</span>
+                            <i class="bx bx-log-out" aria-hidden="true"></i><span>{{ _("navbar.dropdown.logout") }}</span>
                         </a>
                     </li>
                 </ul>
             </li>
-            <!--/ User -->
+            <!--/ Account menu -->
         </ul>
     </div>
 </nav>

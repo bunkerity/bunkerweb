@@ -228,6 +228,371 @@
   white-space: nowrap;
 }
 
+/* Shared table system: chrome stays outside the scrolling row viewport. */
+.bw-table-scroll {
+  max-height: calc(100vh - 112px);
+  overflow: auto;
+  overscroll-behavior: contain;
+  width: 100%;
+}
+
+.bw-table-scroll .table > thead > tr > th {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  background-color: var(--bw-bg-card);
+  box-shadow: inset 0 -1px 0 var(--bw-border);
+}
+
+.bw-data-table > .row:not(.dt-layout-table) {
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.bw-data-table .dt-buttons {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.bw-data-table .dt-buttons .btn-minor {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  border: 1px solid var(--bw-border);
+  border-radius: 0.4rem !important;
+  background: var(--bw-bg-card);
+  color: var(--bw-fg-1);
+  box-shadow: none;
+  margin: 0;
+}
+
+.bw-data-table .btn-minor > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.bw-data-table .btn-minor:hover:not(.disabled) {
+  border-color: var(--bw-fg-2);
+  background: var(--bw-bg-subtle, var(--bs-tertiary-bg));
+}
+
+.bw-data-table .action-button.disabled {
+  pointer-events: auto;
+  cursor: default;
+}
+
+.bw-data-table .search-mini {
+  border-inline-start: 1px solid var(--bw-border);
+  padding-inline-start: 0.75rem;
+  margin: 0;
+}
+
+.bw-data-table .search-mini input {
+  max-width: 16rem;
+  background: transparent;
+  border-color: var(--bw-border);
+}
+
+.bw-filter-engine {
+  display: none !important;
+}
+
+.adv-filters {
+  border: 1px solid var(--bw-border);
+  border-radius: 0.5rem;
+  background: var(--bw-bg-card);
+  margin-block: 0.5rem 1rem;
+}
+
+.adv-filters[hidden] {
+  display: none;
+}
+
+.adv-filters-head {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--bw-border);
+}
+
+.adv-filters-head strong {
+  margin-inline-end: auto;
+}
+
+.adv-filters-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px), 1fr));
+  gap: 1rem;
+  padding: 1rem;
+}
+
+.adv-filter-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  color: var(--bw-fg-2);
+  font-size: 0.8rem;
+  min-width: 0;
+}
+
+.adv-filter-field .form-select {
+  min-height: 40px;
+}
+
+.af-count {
+  border-radius: 1rem;
+  background: var(--bs-primary);
+  color: var(--bs-white);
+  min-width: 1.2rem;
+  padding: 0.1rem 0.3rem;
+  font-size: 0.7rem;
+}
+
+.col-pop {
+  position: fixed;
+  z-index: 1080;
+  width: min(320px, calc(100vw - 16px));
+  max-height: calc(100vh - 16px);
+  overflow: auto;
+  background: var(--bw-bg-card);
+  color: var(--bw-fg-1);
+  border: 1px solid var(--bw-border);
+  border-radius: 0.6rem;
+  box-shadow: var(--bw-shadow-md);
+}
+
+.col-pop-head,
+.col-pop-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+}
+
+.col-pop-head {
+  border-bottom: 1px solid var(--bw-border);
+  font-size: 0.8rem;
+}
+
+.col-pop-list {
+  max-height: min(320px, 55vh);
+  overflow: auto;
+  padding: 0.5rem;
+}
+
+.col-pop-item {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.5rem;
+  cursor: pointer;
+}
+
+.col-pop-foot {
+  border-top: 1px solid var(--bw-border);
+}
+
+.bw-checkbox input[type="checkbox"],
+.bw-table-scroll input.dt-select-checkbox {
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  flex: 0 0 16px;
+  border: 1.5px solid var(--bw-fg-2);
+  border-radius: 4px;
+  background: var(--bw-bg-card);
+  vertical-align: middle;
+  cursor: pointer;
+  position: relative;
+}
+
+.bw-checkbox input:checked,
+.bw-checkbox input:indeterminate,
+.bw-table-scroll input.dt-select-checkbox:checked,
+.bw-table-scroll input.dt-select-checkbox:indeterminate {
+  background: var(--bs-primary);
+  border-color: var(--bs-primary);
+}
+
+.bw-checkbox input:checked::before,
+.bw-table-scroll input.dt-select-checkbox:checked::before {
+  content: "";
+  position: absolute;
+  inset: 1px 4px 3px;
+  width: 5px;
+  height: 9px;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+.bw-checkbox input:indeterminate::before,
+.bw-table-scroll input.dt-select-checkbox:indeterminate::before {
+  content: "";
+  position: absolute;
+  inset: 6px 3px;
+  height: 2px;
+  background: white;
+}
+
+.bw-table-scroll input.dt-select-checkbox::after {
+  content: none;
+}
+
+.bw-checkbox input:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.col-pop :focus-visible,
+.bw-checkbox input:focus-visible,
+.bw-table-scroll input.dt-select-checkbox:focus-visible,
+.icon-btn:focus-visible {
+  outline: 2px solid var(--bw-fg-2);
+  outline-offset: 3px;
+}
+
+.dt-button-collection .dropdown-menu {
+  padding: 0.4rem;
+  border: 1px solid var(--bw-border);
+  border-radius: 0.6rem;
+  background: var(--bw-bg-card);
+}
+
+.dt-button-collection .dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  border-radius: 0.35rem;
+  color: var(--bw-fg-1);
+}
+
+.dt-button-collection .dropdown-item:has(.bx-trash),
+.dt-button-collection .dropdown-item:has(.bx-stop),
+.dt-button-collection .dropdown-item:has(.bx-stop-circle) {
+  color: var(--bs-danger);
+}
+
+.dt-button-collection .dropdown-item:has(.bx-refresh),
+.dt-button-collection .dropdown-item:has(.bx-play) {
+  color: var(--bs-success-text-emphasis);
+}
+
+.dt-button-collection .dropdown-item:has(.bx-export),
+.dt-button-collection .dropdown-item:has(.bx-download) {
+  color: var(--bs-info-text-emphasis);
+}
+
+.tag-chip,
+.svc-code {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  white-space: nowrap;
+  font-size: 0.8rem;
+  line-height: 18px;
+  padding: 2px 8px;
+  border: 1px solid var(--bw-border);
+  border-radius: 5px;
+  background: color-mix(in srgb, var(--bs-primary) 6%, var(--bw-bg-card));
+  color: var(--bw-fg-1);
+}
+
+.svc-code {
+  font-family: var(--bs-font-monospace);
+  font-weight: 500;
+  color: var(--bs-primary);
+  border-color: currentColor;
+  text-transform: none;
+}
+
+.svc-scope {
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--bw-fg-1);
+  white-space: nowrap;
+}
+
+.plugin-chip {
+  font-weight: 600;
+  text-transform: none;
+  border-radius: 6px;
+  background: var(--bw-bg-card);
+}
+
+.cell-ip {
+  font-family:
+    ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
+  letter-spacing: 0;
+  font-weight: 600;
+  color: var(--bw-fg-1);
+}
+
+.status-badge .status-dot,
+.status-badge .badge-dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  flex: 0 0 10px;
+  background: currentColor;
+  border-radius: 50%;
+  padding: 0;
+}
+
+.status-badge[data-status-cue="warn"] .status-dot,
+.badge-dot.warn {
+  clip-path: polygon(50% 0, 100% 100%, 0 100%);
+  border-radius: 0;
+}
+
+.status-badge[data-status-cue="off"] .status-dot,
+.badge-dot.off {
+  border-radius: 2px;
+}
+
+.bw-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2.75rem 1.5rem;
+  min-height: 180px;
+  color: var(--bw-fg-2);
+}
+
+.bw-empty.is-sm {
+  padding: 1.5rem 1rem;
+  min-height: 120px;
+}
+
+.bw-empty.is-lg {
+  padding: 4rem 2rem;
+  min-height: 260px;
+}
+
+.bw-empty-title {
+  color: var(--bw-fg-1);
+}
+
+[data-bs-theme="dark"] .svc-code {
+  color: #8fd0f0;
+}
+
+[data-bs-theme="dark"] .bw-checkbox input:checked,
+[data-bs-theme="dark"] .bw-checkbox input:indeterminate,
+[data-bs-theme="dark"] .bw-table-scroll input.dt-select-checkbox:checked,
+[data-bs-theme="dark"] .bw-table-scroll input.dt-select-checkbox:indeterminate {
+  background: var(--bs-secondary);
+  border-color: var(--bs-secondary);
+}
+
 /* KPI tile -- kit .mini-tile anatomy (app.css:259-262): uppercase muted label, plain
    navy Don Jose value, muted caption. The round-2 accent top-border + colour-coded
    value are gone; the bw-kpi-tile-<color> modifier classes the macro still emits are

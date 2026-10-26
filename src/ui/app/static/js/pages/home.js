@@ -81,30 +81,46 @@ $(async function () {
       body.textContent = "";
       const reasons = metrics.top_reasons || [];
       if (reasons.length) {
-        reasons.forEach((row) => {
+        // Rank, neutral chip, count, share and a relative bar (OPS-11). The reason string is the
+        // raw label the facet returned: no plugin attribution is invented for unknown reasons.
+        const biggest = Math.max(...reasons.map((row) => row.count), 1);
+        reasons.forEach((row, index) => {
           const tr = document.createElement("tr");
+          const rankTd = document.createElement("td");
+          rankTd.classList.add("home-reason-rank");
+          rankTd.textContent = String(index + 1);
           const nameTd = document.createElement("td");
+          const chip = document.createElement("span");
+          chip.classList.add("tag-chip", "plugin-chip");
           const icon = document.createElement("i");
-          icon.className = "bx bx-shield-quarter me-1 text-danger";
+          icon.classList.add("bx", "bx-shield-quarter");
           icon.setAttribute("aria-hidden", "true");
-          nameTd.append(icon, document.createTextNode(row.reason));
+          chip.append(icon, document.createTextNode(row.reason));
+          nameTd.appendChild(chip);
           const countTd = document.createElement("td");
-          countTd.className = "text-end font-monospace";
+          countTd.classList.add("text-end", "cell-mono");
           countTd.textContent = fmtCompact(row.count);
-          const pctTd = document.createElement("td");
-          pctTd.className = "text-end";
-          pctTd.style.width = "4.5rem";
-          const badge = document.createElement("span");
-          badge.className = "badge bg-label-secondary";
-          badge.textContent = `${row.pct}%`;
-          pctTd.appendChild(badge);
-          tr.append(nameTd, countTd, pctTd);
+          const shareTd = document.createElement("td");
+          const share = document.createElement("div");
+          share.classList.add("bw-share");
+          const bar = document.createElement("div");
+          bar.classList.add("bar");
+          bar.setAttribute("aria-hidden", "true");
+          const fill = document.createElement("i");
+          fill.style.width = Math.max(2, (row.count / biggest) * 100) + "%";
+          bar.appendChild(fill);
+          const pct = document.createElement("span");
+          pct.classList.add("cell-mono");
+          pct.textContent = `${row.pct}%`;
+          share.append(bar, pct);
+          shareTd.appendChild(share);
+          tr.append(rankTd, nameTd, countTd, shareTd);
           body.appendChild(tr);
         });
       } else {
         const tr = document.createElement("tr");
         const td = document.createElement("td");
-        td.colSpan = 3;
+        td.colSpan = 4;
         td.className = "text-muted text-center py-3";
         td.setAttribute("data-i18n", "status.no_data");
         td.textContent = i18nReady()
@@ -261,6 +277,76 @@ $(async function () {
 
   function formatNumber(value) {
     return window.bwChartLocale.number(value);
+  }
+
+  // ---- Donut legend / data table (OPS-9) --------------------------------------------------
+  // Beside the chart, a table of label, count and share. From DONUT_TWO_COL_MIN px of well width
+  // it is the visible legend (two columns); below that it stays in the DOM, visually hidden, so a
+  // screen reader still gets every slice as text. Built with DOM APIs only: labels are status
+  // names and client IPs.
+  const DONUT_TWO_COL_MIN = 340;
+
+  // Wrap the chart host once and decide the layout BEFORE ApexCharts measures it, otherwise it
+  // would bake the full-width size into a host that is about to lose its right-hand track.
+  function prepareDonutWell(selector) {
+    const host = document.querySelector(selector);
+    if (!host) return;
+    let well = host.closest(".donut-well");
+    if (!well) {
+      well = document.createElement("div");
+      well.classList.add("donut-well");
+      host.parentNode.insertBefore(well, host);
+      well.appendChild(host);
+    }
+    well.toggleAttribute("data-two", well.clientWidth >= DONUT_TWO_COL_MIN);
+  }
+
+  function mountDonutLegend(selector, caption, items, total) {
+    const host = document.querySelector(selector);
+    const well = host && host.closest(".donut-well");
+    if (!well) return;
+    well.querySelectorAll(".chart-data-table").forEach((node) => node.remove());
+    if (!items.length || !total) return;
+
+    const table = document.createElement("table");
+    table.classList.add("chart-data-table");
+    table.classList.add(
+      well.hasAttribute("data-two") ? "is-legend" : "visually-hidden",
+    );
+    const head = table.createCaption();
+    head.textContent = caption;
+    const headRow = table.createTHead().insertRow();
+    [
+      "dashboard.chart.legend.item",
+      "dashboard.chart.legend.count",
+      "dashboard.chart.legend.share",
+    ].forEach((key) => {
+      const cell = document.createElement("th");
+      cell.scope = "col";
+      cell.textContent = t(key);
+      headRow.appendChild(cell);
+    });
+    const body = table.createTBody();
+    items.forEach((item) => {
+      const row = body.insertRow();
+      const name = document.createElement("th");
+      name.scope = "row";
+      const swatch = document.createElement("span");
+      swatch.classList.add("chart-legend-swatch");
+      swatch.setAttribute("aria-hidden", "true");
+      swatch.style.background = item.color;
+      const text = document.createElement("span");
+      text.classList.add("chart-legend-name");
+      text.append(swatch, document.createTextNode(item.label));
+      name.appendChild(text);
+      if (item.title) name.title = item.title;
+      row.appendChild(name);
+      const count = row.insertCell();
+      count.textContent = formatNumber(item.value);
+      const share = row.insertCell();
+      share.textContent = ((item.value / total) * 100).toFixed(1) + "%";
+    });
+    well.appendChild(table);
   }
 
   function sanitizeDonutSliceEffects(chartSelector) {
@@ -964,11 +1050,23 @@ $(async function () {
       },
     };
 
+    prepareDonutWell("#requests-stats");
     requestsChart = new ApexCharts(
       document.querySelector("#requests-stats"),
       requestsOptions,
     );
     requestsChart.render();
+    // Each code keeps its own row and its raw count: nothing is regrouped or relabelled as blocked.
+    mountDonutLegend(
+      "#requests-stats",
+      t("dashboard.chart.request_status.title"),
+      requestStatusCodes.map((code, index) => ({
+        label: requestStatusLabels[index],
+        value: requestStatusSeries[index],
+        color: requestStatusColors[index],
+      })),
+      totalRequests,
+    );
     attachDonutSanitizer("#requests-stats");
     queueDonutSliceSanitize("#requests-stats");
   }
@@ -1166,11 +1264,22 @@ $(async function () {
       },
     };
 
+    prepareDonutWell("#requests-ips");
     ipsChart = new ApexCharts(
       document.querySelector("#requests-ips"),
       ipsOptions,
     );
     ipsChart.render();
+    mountDonutLegend(
+      "#requests-ips",
+      t("dashboard.chart.top_blocked_ips.title"),
+      topIpsLabels.map((label, index) => ({
+        label,
+        value: topIpsSeries[index],
+        color: topIpsColors[index],
+      })),
+      topBlockedTotal,
+    );
     attachDonutSanitizer("#requests-ips");
     queueDonutSliceSanitize("#requests-ips");
   }

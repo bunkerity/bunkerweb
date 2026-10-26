@@ -1,7 +1,13 @@
 // Live multi-source log dashboard (the /logs landing when no file is selected).
 // One merged EventSource → /logs/stream/multi. All DOM is built with
 // textContent (log lines carry attacker-influenced content — never innerHTML).
-import { levelOf, classifyLine, parseLeadingTs } from "./logs-classify.js";
+import {
+  levelOf,
+  classifyLine,
+  parseLeadingTs,
+  leadingTimestampLength,
+  levelTagSpan,
+} from "./logs-classify.js";
 
 (function () {
   const stream = document.getElementById("log-stream");
@@ -56,11 +62,33 @@ import { levelOf, classifyLine, parseLeadingTs } from "./logs-classify.js";
     return true;
   }
 
+  // The timestamp and the level tag get their own spans (OPS-24) so the terminal can dim the
+  // first and weigh the second. A line the classifiers cannot split stays one plain text node:
+  // every unknown format keeps rendering exactly as before. Text is only ever a text node.
   function lineEl(text) {
     const div = document.createElement("div");
     const cls = levelClass(text);
     if (cls) div.className = cls;
-    div.textContent = text; // NEVER innerHTML.
+    const stampLength = leadingTimestampLength(text);
+    const tag = levelTagSpan(text);
+    const cuts = [];
+    if (stampLength) cuts.push([0, stampLength, "lg-time"]);
+    if (tag && tag[0] >= stampLength) cuts.push([tag[0], tag[1], "lg-level"]);
+    if (!cuts.length) {
+      div.textContent = text; // NEVER innerHTML.
+      return div;
+    }
+    let at = 0;
+    for (const [start, length, name] of cuts) {
+      if (start > at)
+        div.append(document.createTextNode(text.slice(at, start)));
+      const span = document.createElement("span");
+      span.className = name;
+      span.textContent = text.slice(start, start + length);
+      div.append(span);
+      at = start + length;
+    }
+    if (at < text.length) div.append(document.createTextNode(text.slice(at)));
     return div;
   }
 

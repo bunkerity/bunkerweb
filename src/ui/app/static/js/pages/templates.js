@@ -73,6 +73,101 @@ $(document).ready(function () {
     actionLock = false; // Unlock after modal setup
   });
 
+  // Search over the installed templates and the catalogue: each card carries its own lowercase
+  // haystack (id, title, description, feature names), so the two sections filter the same way.
+  const searchInput = document.getElementById("templates-search");
+  const noMatch = document.getElementById("templates-no-match");
+  const applySearch = () => {
+    const term = (searchInput?.value || "").trim().toLowerCase();
+    let visible = 0;
+    let total = 0;
+    document
+      .querySelectorAll(
+        "#templates-grid > .col, #templates-catalog-grid > .col",
+      )
+      .forEach((card) => {
+        total += 1;
+        const matches = !term || (card.dataset.search || "").includes(term);
+        card.hidden = !matches;
+        if (matches) visible += 1;
+      });
+    const headings = [
+      document.getElementById("templates-catalog-heading"),
+      document.getElementById("templates-catalog-grid"),
+    ];
+    // A catalogue section with no match would be a bare heading: hide it with its cards.
+    const catalogVisible = Array.from(
+      document.querySelectorAll("#templates-catalog-grid > .col"),
+    ).some((card) => !card.hidden);
+    headings.forEach((element) => {
+      if (element) element.hidden = Boolean(term) && !catalogVisible;
+    });
+    if (noMatch) noMatch.hidden = visible > 0 || total === 0;
+  };
+  searchInput?.addEventListener("input", applySearch);
+  document
+    .getElementById("templates-search-clear")
+    ?.addEventListener("click", () => {
+      if (searchInput) searchInput.value = "";
+      applySearch();
+    });
+
+  // Feature summary: the badges (and the +N) of a card open every feature of the template,
+  // grouped by what supplies it. Read only; the template's own editor holds the settings.
+  const featureGroups = [
+    ["plugin", () => t("templates.features_plugins", "Plugins")],
+    ["config", () => t("templates.features_configs", "Custom configs")],
+    ["feature", () => t("templates.features_builtin", "Built-in features")],
+  ];
+  $(document).on("click", ".template-features-open", function () {
+    const card = this.closest("[data-template-id]");
+    if (!card) return;
+    let features = [];
+    try {
+      features = JSON.parse(card.dataset.features || "[]");
+    } catch (error) {
+      features = [];
+    }
+    document.getElementById("template-features-modal-title").textContent =
+      card.dataset.templateTitle || card.dataset.templateId;
+    document.getElementById("template-features-open-editor").href =
+      card.dataset.templateViewUrl;
+    const groups = document.getElementById("template-features-groups");
+    groups.replaceChildren();
+    featureGroups.forEach(([type, label]) => {
+      const items = features.filter((feature) => feature.type === type);
+      if (!items.length) return;
+      const details = document.createElement("details");
+      details.className = "template-feature-group mb-2";
+      details.open = true;
+      const summary = document.createElement("summary");
+      summary.className = "fw-semibold";
+      summary.textContent = `${label()} (${items.length})`;
+      const list = document.createElement("ul");
+      list.className =
+        "template-feature-list list-unstyled d-flex flex-wrap gap-1 mt-2 mb-0";
+      items.forEach((feature) => {
+        const item = document.createElement("li");
+        const chip = document.createElement("span");
+        chip.className = "tag-chip";
+        if (feature.icon) {
+          const icon = document.createElement("i");
+          icon.className = `bx ${feature.icon}`;
+          icon.setAttribute("aria-hidden", "true");
+          chip.append(icon);
+        }
+        chip.append(document.createTextNode(feature.text));
+        item.append(chip);
+        list.append(item);
+      });
+      details.append(summary, list);
+      groups.append(details);
+    });
+    new bootstrap.Modal(
+      document.getElementById("template-features-modal"),
+    ).show(this);
+  });
+
   // -- Bulk selection: "Select" toggle reveals per-card checkboxes, feeding
   // the same #modal-delete-templates + selected-list flow as the single-card
   // delete button above.

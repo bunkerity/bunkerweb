@@ -1,5 +1,6 @@
 {% from 'macros/docs_link.html' import docs_url with context %}
 {% from "components/page-head.html" import page_head %}
+{% from "components/empty-state.html" import empty_state %}
 {% extends "dashboard.html" %}
 {# page-head band owns the breadcrumb + plugin H1, so drop the dashboard shell's legacy header row. #}
 {% block page_head %}{% endblock %}
@@ -41,63 +42,33 @@
     {% set base_flags_url = url_for('static', filename='img/flags') %}
     <input type="hidden" id="base_flags_url" value="{{ base_flags_url }}" />
     {% if not is_used %}
-        <div class="d-flex align-items-center justify-content-center">
-            <div class="text-center text-primary">
-                <p class="text-center position-relative w-100 p-2 text-primary rounded-3 fw-bold"
-                  >
-                    {{ _("plugin.page.status.deactivated") }}
-                </p>
-            </div>
-        </div>
+        {# PLG-15: the shipped sentence stays as the text; the kit empty state adds the icon and a title.
+           The Global settings link only shows when the plugin declares settings, like the overview cog
+           (the global settings page lists every one of them, whatever its context). #}
+        {% set deactivated_title = _("plugin.page.empty.deactivated_heading") %}
+        {% if plugin.get('settings') %}
+            {% set settings_href = url_for('global_settings.global_settings_plugin_page', plugin=plugin['id']) %}
+            {{ empty_state(id="plugin-page-empty", icon="bx-unlink", bordered=true, classes="py-5", title=deactivated_title, message=_("plugin.page.status.deactivated"), action_label="Global settings", action_key="plugin.page.empty.global_settings", action_icon="bx-cog", action_href=settings_href) }}
+        {% else %}
+            {{ empty_state(id="plugin-page-empty", icon="bx-unlink", bordered=true, classes="py-5", title=deactivated_title, message=_("plugin.page.status.deactivated")) }}
+        {% endif %}
     {% elif not is_metrics %}
-        <div class="d-flex align-items-center justify-content-center">
-            <div class="text-center text-primary">
-                <p class="text-center position-relative w-100 p-2 text-primary rounded-3 fw-bold"
-                  >
-                    {{ _("plugin.page.status.metrics_deactivated") }}
-                </p>
-            </div>
-        </div>
+        {{ empty_state(id="plugin-page-empty", icon="bx-line-chart", bordered=true, classes="py-5", title=_("plugin.page.empty.metrics_title"), message=_("plugin.page.status.metrics_deactivated")) }}
     {% elif restricted %}
         {# Rendering a plugin-shipped page EXECUTES that plugin's code -- `pre_render` is loaded
            with SourceFileLoader and called with `app=current_app`, and template.html goes through
            a non-sandboxed Jinja environment. That is why the route only does it for an admin, and
            why this branch says so plainly rather than reusing `no_page`'s "restart the web UI"
            text, which would send a reader chasing a fault that does not exist. #}
-        <div class="d-flex align-items-center justify-content-center">
-            <div class="text-center text-primary">
-                <p class="text-center position-relative w-100 p-2 text-primary rounded-3 fw-bold"
-                  >
-                    {{ _("plugin.page.status.restricted_to_admins") }}
-                </p>
-            </div>
-        </div>
+        {{ empty_state(id="plugin-page-empty", icon="bx-lock-alt", bordered=true, classes="py-5", title=_("plugin.page.empty.restricted_title"), message=_("plugin.page.status.restricted_to_admins")) }}
     {% elif no_page %}
-        <div class="d-flex align-items-center justify-content-center">
-            <div class="text-center text-primary">
-                <p class="text-center position-relative w-100 p-2 text-primary rounded-3 fw-bold"
-                  >
-                    {% if blueprint_loaded %}
-                        {{ _("plugin.page.status.no_content") }}
-                    {% else %}
-                        {{ _("plugin.page.status.dedicated_page_unavailable") }}
-                    {% endif %}
-                </p>
-            </div>
-        </div>
+        {{ empty_state(id="plugin-page-empty", icon="bx-file-blank", bordered=true, classes="py-5", title=_("plugin.page.empty.no_page_title"), message=_("plugin.page.status.no_content") if blueprint_loaded else _("plugin.page.status.dedicated_page_unavailable")) }}
     {% elif plugin_page and "Plugin page uses old template" not in plugin_page %}
         {{
         plugin_page|safe }} {% elif pre_render.get("status") == "ko" or
         (pre_render.get("data") is mapping and "error" in pre_render.get("data")) %}
-        <div class="d-flex align-items-center justify-content-center">
-            <div class="text-center text-primary">
-                <p class="text-center position-relative w-100 p-2 text-primary rounded-3 fw-bold">
-                    <span>{{ _("plugin.page.status.pre_render_error") }}</span>
-                    {% set pre_render_detail = pre_render.get("data", {}).get("error") if pre_render.get("data") is mapping else none %}
-                    {% if pre_render_detail or pre_render.get("message") %}: {{ pre_render_detail or pre_render.get("message") }}{% endif %}
-                </p>
-            </div>
-        </div>
+        {% set pre_render_detail = pre_render.get("data", {}).get("error") if pre_render.get("data") is mapping else none %}
+        {{ empty_state(id="plugin-page-empty", state="error", bordered=true, classes="py-5", title=_("plugin.page.status.pre_render_error"), message=(pre_render_detail or pre_render.get("message")) or none) }}
     {% else %}
         {% if pre_render.get("status", "ko") == "ok" and
             pre_render.get("data") is mapping and "error" not in pre_render.get("data", {})
@@ -258,14 +229,7 @@
                 {% endfor %}
             </div>
         {% else %}
-            <div class="d-flex align-items-center justify-content-center">
-                <div class="text-center text-primary">
-                    <p class="text-center position-relative w-100 p-2 text-primary rounded-3 fw-bold"
-                      >
-                        {{ _("plugin.page.status.no_content") }}
-                    </p>
-                </div>
-            </div>
+            {{ empty_state(id="plugin-page-empty", icon="bx-file-blank", bordered=true, classes="py-5", title=_("plugin.page.empty.no_content_title"), message=_("plugin.page.status.no_content")) }}
         {% endif %}
     {% endif %}
     <!--/ Content -->

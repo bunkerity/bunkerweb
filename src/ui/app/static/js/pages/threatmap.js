@@ -291,6 +291,14 @@
     target.setAttribute("title", value);
   }
 
+  function setCaption(id, value) {
+    var node = document.getElementById(id);
+    var target = node && node.querySelector(".bw-kpi-caption");
+    if (!target) return;
+    target.textContent = value;
+    target.setAttribute("title", value);
+  }
+
   // A choropleth with no key is decoration: you can see that one country is darker, and nothing
   // else. The five swatches carry the actual counts each band stands for.
   function renderLegend() {
@@ -393,9 +401,18 @@
     var open = !!expanded[elementId];
     list.classList.toggle("threatmap-top--expanded", open);
     var shown = open ? facets : facets.slice(0, TOP_N);
-    shown.forEach(function (facet) {
+    // Share is against everything blocked in the window, so a capped facet list still reads
+    // honestly: its rows just do not add up to 100 %.
+    var grand = (lastPayload && lastPayload.count) || 0;
+    var biggest = (facets[0] && facets[0].count) || 1;
+    shown.forEach(function (facet, index) {
       var item = document.createElement("li");
       item.className = "threatmap-top__row";
+
+      var rank = document.createElement("span");
+      rank.className = "threatmap-top__rank";
+      rank.textContent = String(index + 1);
+
       var label = document.createElement("span");
       label.className = "threatmap-top__label";
       if (withFlag) {
@@ -409,15 +426,37 @@
           hint.textContent = t("threatmap.not_localised", "not localised");
           label.appendChild(hint);
         }
+      } else if (elementId === "threatmap-top-reason") {
+        label.appendChild(chip(facet.name || "—", "bx-flag"));
       } else {
         // Service names and block reasons are operator- and WAF-supplied strings; never innerHTML.
         label.textContent = facet.name || "—";
       }
+      label.setAttribute("title", withFlag ? "" : facet.name || "");
+
       var value = document.createElement("span");
-      value.className = "threatmap-top__count";
+      value.classList.add("threatmap-top__count", "cell-mono");
       value.textContent = facet.count.toLocaleString();
-      item.appendChild(label);
-      item.appendChild(value);
+
+      var share = document.createElement("span");
+      share.classList.add("bw-share", "threatmap-top__share");
+      var bar = document.createElement("span");
+      bar.className = "bar";
+      bar.setAttribute("aria-hidden", "true");
+      var fill = document.createElement("i");
+      fill.style.width = Math.max(2, (facet.count / biggest) * 100) + "%";
+      bar.appendChild(fill);
+      var pct = document.createElement("span");
+      pct.className = "cell-mono";
+      pct.textContent = grand
+        ? ((facet.count / grand) * 100).toFixed(1) + "%"
+        : "";
+      share.appendChild(bar);
+      share.appendChild(pct);
+
+      [rank, label, value, share].forEach(function (node) {
+        item.appendChild(node);
+      });
       list.appendChild(item);
     });
 
@@ -474,10 +513,17 @@
   }
 
   function emptyRow(list) {
-    var none = document.createElement("li");
-    none.className = "text-muted small";
-    none.setAttribute("data-i18n", "status.no_data");
-    none.textContent = t("status.no_data", "No data");
+    var inTable = list.matches("tbody");
+    var none = document.createElement(inTable ? "tr" : "li");
+    var cell = none;
+    if (inTable) {
+      cell = document.createElement("td");
+      cell.colSpan = 5;
+      none.appendChild(cell);
+    }
+    cell.className = "text-muted small";
+    cell.setAttribute("data-i18n", "status.no_data");
+    cell.textContent = t("status.no_data", "No data");
     list.appendChild(none);
   }
 
@@ -489,36 +535,53 @@
       emptyRow(list);
       return;
     }
+    // One table row per event: Time / IP / Reason / Origin / Target (OPS-43). Every value is
+    // set with textContent: reasons and server names are WAF- and operator-supplied strings.
     events.slice(0, CONFIG.recentLimit || 50).forEach(function (event) {
-      var item = document.createElement("li");
-      item.className = "threatmap-ticker__row";
+      var row = document.createElement("tr");
+      row.className = "threatmap-ticker__row";
 
-      var time = document.createElement("span");
+      var time = document.createElement("td");
       time.className = "threatmap-ticker__time";
       time.textContent = new Date(
         (event.date || 0) * 1000,
       ).toLocaleTimeString();
 
-      var country = countryCell(event.country);
-      country.className = "threatmap-ticker__country";
-
-      var ip = document.createElement("code");
-      ip.className = "threatmap-ticker__ip";
+      var ip = document.createElement("td");
+      ip.classList.add("threatmap-ticker__ip", "cell-ip");
       ip.textContent = event.ip || "—";
 
-      var reason = document.createElement("span");
-      reason.className = "threatmap-ticker__reason badge bg-label-danger";
-      reason.textContent = event.reason || "—";
+      var reasonCell = document.createElement("td");
+      reasonCell.className = "threatmap-ticker__reason";
+      reasonCell.appendChild(chip(event.reason || "—", "bx-flag"));
 
-      var target = document.createElement("span");
+      var origin = document.createElement("td");
+      origin.className = "threatmap-ticker__country";
+      origin.appendChild(countryCell(event.country));
+
+      var target = document.createElement("td");
       target.className = "threatmap-ticker__target text-muted";
       target.textContent = event.server_name || "—";
+      target.setAttribute("title", event.server_name || "");
 
-      [time, country, ip, reason, target].forEach(function (node) {
-        item.appendChild(node);
+      [time, ip, reasonCell, origin, target].forEach(function (node) {
+        row.appendChild(node);
       });
-      list.appendChild(item);
+      list.appendChild(row);
     });
+  }
+
+  // The neutral plugin/reason chip of the shared value vocabulary (W1-COMP): icon is decorative,
+  // the text is whatever the WAF reported.
+  function chip(text, icon) {
+    var span = document.createElement("span");
+    span.className = "tag-chip plugin-chip";
+    var glyph = document.createElement("i");
+    glyph.className = "bx " + icon;
+    glyph.setAttribute("aria-hidden", "true");
+    span.appendChild(glyph);
+    span.appendChild(document.createTextNode(text));
+    return span;
   }
 
   function show(id, visible) {
@@ -543,10 +606,35 @@
     thresholds = computeThresholds(painted);
     renderLegend();
 
-    setText("threatmap-tile-count", (payload.count || 0).toLocaleString());
+    var total = payload.count || 0;
+    setText("threatmap-tile-count", total.toLocaleString());
     setText("threatmap-tile-countries", String(Object.keys(counts).length));
-    setText("threatmap-tile-target", byServer.length ? byServer[0].name : "—");
-    setText("threatmap-tile-reason", byReason.length ? byReason[0].name : "—");
+    setCaption(
+      "threatmap-tile-countries",
+      byCountry.length && !isNA(byCountry[0].name)
+        ? String(byCountry[0].name).toUpperCase()
+        : "—",
+    );
+    // Target and reason lead with their number and name the thing beneath it; the raw label is
+    // the fallback so an unknown value never reads as an invented acronym.
+    setText(
+      "threatmap-tile-target",
+      byServer.length ? byServer[0].count.toLocaleString() : "—",
+    );
+    setCaption(
+      "threatmap-tile-target",
+      byServer.length ? byServer[0].name : "—",
+    );
+    setText(
+      "threatmap-tile-reason",
+      byReason.length && total
+        ? ((byReason[0].count / total) * 100).toFixed(1) + "%"
+        : "—",
+    );
+    setCaption(
+      "threatmap-tile-reason",
+      byReason.length ? byReason[0].name : "—",
+    );
 
     renderTops(payload);
     renderTicker(recent);

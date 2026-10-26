@@ -3,10 +3,9 @@
 
 {# Live-state indicator: a small pulsing/static dot + a "badge rounded-pill bg-label-<variant>"
    pill, for states that come FROM THE SERVER and can change under the user (an instance's health,
-   a job's last run outcome) -- as opposed to components/badge.html, which is for static labels,
-   tags and counts that don't represent a live/changing condition. Keep using badge.html for
-   things like the Draft/Online service toggle (services.html, config_edit.html) -- that's a
-   deliberately-set mode, not a live health signal, so it stays out of the `type` catalog below.
+   a job's last run outcome). Online/Draft and certificate states may use explicit label,
+   i18n_key and variant overrides. Plain method/template values use value-chips.html;
+   counts and exceptional labels retain components/badge.html.
 
    Superset of the hand-rolled instance-status pill duplicated in instances.html
    (`{% if instance.status == "up" %}<span id="status-{{ instance.hostname }}"
@@ -86,7 +85,8 @@
     {%- set _variant = variant or (t.variant if t else 'secondary') -%}
     {%- set _pulse = pulse if pulse is not none else (t.pulse if t else false) -%}
     <span{% if id %} id="{{ id }}"{% endif %}
-         class="badge rounded-pill bg-label-{{ _variant }} d-inline-flex align-items-center gap-1{% if classes %} {{ classes }}{% endif %}"
+         class="badge status-badge rounded-pill bg-label-{{ _variant }} d-inline-flex align-items-center gap-1{% if classes %} {{ classes }}{% endif %}"
+         data-status-cue="{{ 'warn' if type in ['loading', 'pending', 'warning', 'expiring', 'not_yet_valid'] or _variant == 'warning' else ('off' if type in ['down', 'failed', 'stopped', 'disabled', 'expired', 'revoked'] or _variant == 'danger' else 'ok') }}"
          {%- if live %} role="status"{% endif %}
          data-value="{{ data_value or type }}"
          {%- if tooltip %} data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="{{ _(tooltip_i18n) if tooltip_i18n else tooltip }}"{% endif %}>

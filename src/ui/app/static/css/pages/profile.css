@@ -19,3 +19,128 @@
 .placeholder-transition.fade-in {
   opacity: 1;
 }
+
+/* ---------- Hero (initials avatar, name, contact line, 2FA chip) ---------- */
+.pf-hero {
+  padding: 4px 0 0;
+}
+.pf-avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 84px;
+  height: 84px;
+  border-radius: 50%;
+  background: var(--bs-primary);
+  color: #fff;
+  font-family: var(--font-don-jose);
+  font-size: 30px;
+  letter-spacing: 1px;
+}
+[data-bs-theme="dark"] .pf-avatar {
+  background: var(--bw-accent);
+  color: #06212f;
+}
+.pf-name {
+  font-size: 1.6rem;
+  color: var(--bw-fg-1);
+}
+.pf-sub {
+  font-size: 13px;
+  color: var(--bw-fg-2);
+}
+.pf-sub .bx {
+  vertical-align: -2px;
+}
+.pf-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border: 1px solid var(--bw-border);
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--bw-fg-2);
+}
+.pf-chip.is-on {
+  color: var(--bs-bw-green-contrast, var(--bs-success));
+  border-color: currentColor;
+  background: color-mix(in srgb, var(--bs-bw-green) 10%, transparent);
+}
+
+/* ---------- Tabs: underline row instead of the pill column ---------- */
+#navs-pills.pf-tabs {
+  gap: 2px;
+  margin-bottom: 1.25rem !important;
+  padding: 0;
+  border-bottom: 1px solid var(--bw-border);
+  flex-wrap: wrap;
+}
+#navs-pills.pf-tabs .nav-item {
+  margin: 0 !important;
+}
+#navs-pills.pf-tabs .nav-link {
+  gap: 4px;
+  padding: 10px 16px;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--bw-fg-2);
+}
+#navs-pills.pf-tabs .nav-link:hover {
+  color: var(--bw-fg-1);
+}
+#navs-pills.pf-tabs .nav-link.active {
+  color: var(--bs-primary);
+  border-bottom-color: var(--bs-primary);
+  background: transparent;
+}
+[data-bs-theme="dark"] #navs-pills.pf-tabs .nav-link.active {
+  color: var(--bw-accent);
+  border-bottom-color: var(--bw-accent);
+}
+#navs-pills.pf-tabs .nav-link:focus-visible {
+  outline: 2px solid var(--bw-accent);
+  outline-offset: -2px;
+}
+#navs-pills.pf-tabs .tf-icons {
+  font-size: 16px;
+}
+
+/* ---------- Card headers: icon + title on one row ---------- */
+.tab-content .card-header {
+  padding-block: 0.85rem;
+}
+.tab-content .card-header .bx:first-child {
+  font-size: 1.2rem;
+  color: var(--bw-fg-2);
+}
+.tab-content .card-header .card-title {
+  font-size: 1rem;
+}
+
+/* ---------- Recent sessions table ---------- */
+.session-table th {
+  white-space: nowrap;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--bw-fg-2);
+}
+.session-table td {
+  vertical-align: middle;
+  font-size: 13.5px;
+}
+.session-table tr.session-current > td {
+  background: color-mix(in srgb, var(--bs-primary) 6%, transparent);
+}
+.session-table .cell-ip {
+  white-space: nowrap;
+}

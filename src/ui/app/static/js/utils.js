@@ -622,35 +622,144 @@ $(document).ready(() => {
     }
   }
 
-  var notificationsRead =
-    parseInt(sessionStorage.getItem("notificationsRead")) || 0;
+  // Notifications drawer: the session's flash history. Read state lives in this tab only
+  // (sessionStorage, keyed by message time + text); Clear all is a separate action that empties
+  // the history on the server.
+  const NOTIFICATIONS_READ_KEY = "bwNotificationsRead";
+  let notificationsFilter = "unread";
 
-  function updateNotificationsBadge() {
-    const $notificationsBadge = $("#unread-notifications");
-    let unreadNotifications = parseInt($notificationsBadge.text());
+  const notificationItems = () =>
+    Array.from(document.querySelectorAll("#notifications-list .nd-item"));
 
-    unreadNotifications = isNaN(unreadNotifications) ? 0 : unreadNotifications;
+  const notificationId = (item) =>
+    `${item.getAttribute("data-notif-time") || ""}|${(
+      item.querySelector(".nd-desc")?.textContent || ""
+    )
+      .trim()
+      .slice(0, 160)}`;
 
-    if ($notificationsBadge.length) {
-      const updatedUnread = unreadNotifications - notificationsRead;
-      if (updatedUnread > 0) {
-        $notificationsBadge.text(updatedUnread);
-        $notificationsBadge.removeClass("d-none");
-      } else {
-        $notificationsBadge.addClass("d-none");
+  const readNotificationIds = () => {
+    try {
+      return new Set(
+        JSON.parse(sessionStorage.getItem(NOTIFICATIONS_READ_KEY) || "[]"),
+      );
+    } catch (e) {
+      return new Set();
+    }
+  };
+
+  const writeNotificationIds = (ids) => {
+    try {
+      sessionStorage.setItem(NOTIFICATIONS_READ_KEY, JSON.stringify([...ids]));
+    } catch (e) {
+      // Storage unavailable (private mode): read state holds until the next page load.
+    }
+  };
+
+  const notificationGroup = (item) => {
+    const time = new Date(item.getAttribute("data-notif-time"));
+    if (isNaN(time)) return "earlier";
+    const startOfToday = new Date();
+    startOfToday.setHours(0, 0, 0, 0);
+    if (time >= startOfToday) return "today";
+    const startOfYesterday = new Date(startOfToday);
+    startOfYesterday.setDate(startOfYesterday.getDate() - 1);
+    return time >= startOfYesterday ? "yesterday" : "earlier";
+  };
+
+  function renderNotifications() {
+    const items = notificationItems();
+    const read = readNotificationIds();
+    const list = document.getElementById("notifications-list");
+    let unread = 0;
+
+    document
+      .querySelectorAll("#notifications-list .nd-group")
+      .forEach((group) => group.remove());
+
+    let lastGroup = null;
+    let visible = 0;
+    items.forEach((item) => {
+      const isRead = read.has(notificationId(item));
+      if (!isRead) unread += 1;
+      item.classList.toggle("is-unread", !isRead);
+      item.querySelector(".nd-unread-label")?.toggleAttribute("hidden", isRead);
+      item.querySelector(".nd-mark")?.toggleAttribute("hidden", isRead);
+      const shown = notificationsFilter === "all" || !isRead;
+      item.hidden = !shown;
+      if (!shown) return;
+      visible += 1;
+      const group = notificationGroup(item);
+      if (group !== lastGroup) {
+        lastGroup = group;
+        const heading = document.createElement("li");
+        heading.className = "nd-group";
+        heading.setAttribute("role", "presentation");
+        const title = document.createElement("h3");
+        title.className = "nd-group-title";
+        title.textContent = t(`shell.notifications.group_${group}`);
+        heading.append(title);
+        list.insertBefore(heading, item);
       }
+    });
+
+    const total = items.length;
+    const countLabel = document.getElementById("notifications-count");
+    if (countLabel) {
+      countLabel.textContent = !total
+        ? ""
+        : unread
+          ? t("shell.notifications.unread_count", {
+              count: unread,
+              interpolation: { escapeValue: false },
+            })
+          : t("shell.notifications.all_read");
+    }
+    const unreadBadge = document.getElementById("notifications-unread-count");
+    if (unreadBadge) {
+      unreadBadge.textContent = unread;
+      unreadBadge.hidden = !unread;
+    }
+    const markAll = document.getElementById("notifications-mark-all");
+    if (markAll) markAll.disabled = !unread;
+    document
+      .getElementById("notifications-none-unread")
+      ?.toggleAttribute("hidden", !total || visible > 0);
+    list?.toggleAttribute("hidden", !visible);
+
+    const $notificationsBadge = $("#unread-notifications");
+    if ($notificationsBadge.length) {
+      $notificationsBadge.contents().first()[0].textContent = ` ${unread} `;
+      $notificationsBadge.toggleClass("d-none", !unread);
     }
   }
 
-  updateNotificationsBadge();
+  renderNotifications();
 
-  $("#notifications-button").on("click", function () {
-    const readNotifications = $(
-      "#notifications-toast-container .bs-toast",
-    ).length;
-    notificationsRead = readNotifications;
-    sessionStorage.setItem("notificationsRead", notificationsRead);
-    updateNotificationsBadge();
+  $(document).on("click", "[data-nd-filter]", function () {
+    notificationsFilter = this.getAttribute("data-nd-filter");
+    document.querySelectorAll("[data-nd-filter]").forEach((button) => {
+      const active = button === this;
+      button.classList.toggle("on", active);
+      button.setAttribute("aria-pressed", String(active));
+    });
+    renderNotifications();
+  });
+
+  $(document).on("click", "[data-nd-read]", function () {
+    const item = this.closest(".nd-item");
+    if (!item) return;
+    const ids = readNotificationIds();
+    ids.add(notificationId(item));
+    writeNotificationIds(ids);
+    renderNotifications();
+  });
+
+  $(document).on("click", "#notifications-mark-all", function () {
+    const ids = readNotificationIds();
+    notificationItems().forEach((item) => ids.add(notificationId(item)));
+    writeNotificationIds(ids);
+    renderNotifications();
   });
 
   // Clear notifications logic (see saveTheme below: no debounce, keepalive request -- a
@@ -674,10 +783,14 @@ $(document).ready(() => {
         if (!response.ok) {
           throw new Error("Network response was not ok");
         }
-        $("#notifications-toast-container").empty();
-        sessionStorage.setItem("notificationsRead", 0);
-        updateNotificationsBadge();
-        $("#clear-notifications-btn").closest(".d-flex").hide();
+        $("#notifications-toast-container").empty().addClass("d-none");
+        try {
+          sessionStorage.removeItem(NOTIFICATIONS_READ_KEY);
+        } catch (e) {
+          // Storage unavailable (private mode): non-fatal.
+        }
+        renderNotifications();
+        $("#side-offcanvas-notifications .nd-bar").hide();
         $("#notifications-empty-state").removeClass("d-none").show();
       })
       .catch((error) => {
@@ -848,8 +961,46 @@ $(document).ready(() => {
     applyTheme(serverMode === "system" ? "system" : desiredTheme);
   }
 
+  // The navbar offers Light / Dark / System as a menu; #dark-mode-toggle stays in the page as a
+  // hidden checkbox because chart and editor scripts redraw on its `change`. That change is
+  // fired from the menu handler below, flagged so it does not apply the theme a second time.
+  // The login and setup pages still carry the visible switch.
+  let themeMenuBridge = false;
+
+  function syncThemeMenu(mode) {
+    const icons = { light: "bx-sun", dark: "bx-moon", system: "bx-desktop" };
+    $("[data-theme-mode]").each(function () {
+      $(this).attr(
+        "aria-checked",
+        String(this.getAttribute("data-theme-mode") === mode),
+      );
+    });
+    const $toggle = $("#theme-menu-toggle");
+    if (!$toggle.length) return;
+    $toggle
+      .find(".theme-mode-icon")
+      .attr("class", `theme-mode-icon bx ${icons[mode] || icons.light}`);
+    $toggle.attr(
+      "aria-label",
+      `${t("shell.theme.title")}: ${t(`theme.${mode}`)}`,
+    );
+  }
+
+  $(document).on("click", "[data-theme-mode]", function () {
+    const $bridge = $("#dark-mode-toggle");
+    applyTheme(
+      this.getAttribute("data-theme-mode"),
+      $bridge.data("root-url"),
+      true,
+    );
+    themeMenuBridge = true;
+    $bridge.trigger("change");
+    themeMenuBridge = false;
+  });
+
   // Explicit user choice -> always persist, even on anon pages.
   $("#dark-mode-toggle").on("change", function () {
+    if (themeMenuBridge) return;
     const darkMode = $(this).prop("checked");
     const theme = darkMode ? "dark" : "light";
     applyTheme(theme, $(this).data("root-url"), true);
@@ -937,6 +1088,7 @@ $(document).ready(() => {
     $("#theme").val(theme);
     $("[name='theme']").not("#theme-toggle").val(theme);
     $themeSelector.val(mode);
+    syncThemeMenu(mode);
     if (persist) {
       try {
         // In "system" mode the stored value is the mode itself: base.html's pre-paint script
@@ -986,9 +1138,11 @@ $(document).ready(() => {
     toast.show();
   });
 
-  i18next.on("languageChanged", () => {
-    if ($bannerText.length && newsItemsKeys.length > 0) {
-      updateBannerText(currentIndex); // Re-translate the current banner item
-    }
-  });
+  if (typeof i18next !== "undefined") {
+    i18next.on("languageChanged", () => {
+      if ($bannerText.length && newsItemsKeys.length > 0) {
+        updateBannerText(currentIndex); // Re-translate the current banner item
+      }
+    });
+  }
 });

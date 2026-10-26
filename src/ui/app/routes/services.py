@@ -1174,6 +1174,26 @@ def resolve_plugin(plugin: str, plugins_data: Dict[str, dict]) -> Optional[dict]
     return plugins_data.get(plugin)
 
 
+def plugin_picker_options(plugins_data: Dict[str, dict], *, service_scope: bool, allowed: Optional[Set[str]] = None) -> List[dict]:
+    """The plugins the settings page's plugin selector offers, sorted by name.
+
+    Only plugins with something to edit at this scope are listed (any declared setting globally,
+    a multisite one for a service), because choosing an entry navigates to that plugin's own page
+    and a page with no field would be an empty shell. Data only: the selector navigates, it posts nothing.
+    """
+    options = []
+    if not isinstance(plugins_data, dict):
+        return options
+    for plugin_id, data in plugins_data.items():
+        settings = data.get("settings") or {}
+        if allowed is not None and plugin_id not in allowed:
+            continue
+        if not any(not service_scope or setting.get("context") == "multisite" for setting in settings.values()):
+            continue
+        options.append({"id": plugin_id, "name": data.get("name") or plugin_id, "type": data.get("type", "core")})
+    return sorted(options, key=lambda option: option["name"].lower())
+
+
 def resolve_template(template: str, templates_data: Dict[str, dict]) -> Optional[dict]:
     """Look up a template id by membership in the real, installed template set.
 
@@ -2431,7 +2451,8 @@ def services_plugin_page(service: str, plugin: str):
     # flash.html/sidebar-notifications.html render flashes with |safe, so an unvalidated value
     # here is a reflected injection on the trusted UI origin. Membership is strictly tighter
     # than a regex (see resolve_plugin) and the warning below carries the raw value instead.
-    plugin_data = resolve_plugin(plugin, BW_CONFIG.get_plugins())
+    all_plugins = BW_CONFIG.get_plugins()
+    plugin_data = resolve_plugin(plugin, all_plugins)
     if not plugin_data:
         LOGGER.warning(f"Plugin not found on the service plugin page: {plugin!r}")
         return handle_error(translated("flash.plugin_not_found") or "Plugin not found", "services")
@@ -2521,6 +2542,7 @@ def services_plugin_page(service: str, plugin: str):
         config=redact_secrets(db_config, secret_setting_names(BW_CONFIG.get_plugins_settings())),
         service_id=service,
         clone=None,
+        plugin_picker=plugin_picker_options(all_plugins, service_scope=True, allowed=DEFAULT_SERVER_PLUGINS if _reserved_default_server(service) else None),
         # A purpose-built body for this plugin, or None for the generic grid. GET only -- the
         # POST arm above is untouched on purpose: an override body changes the LAYOUT, never the
         # save path, so `postable_scope` stays the single authority for what this form owns.

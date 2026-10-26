@@ -66,6 +66,95 @@ document.addEventListener("DOMContentLoaded", () => {
     updateSharedBanner(rule);
   }
 
+  function openAttach(rule, trigger) {
+    document.getElementById("redirect-attach-id").value = rule.id;
+    document.getElementById("redirect-attach-copy").textContent = translate(
+      "redirects.attach_copy",
+      `Attach ${rule.name} (${rule.from_path} → ${rule.to_url}) to one or more services.`,
+      { name: rule.name, from: rule.from_path, to: rule.to_url },
+    );
+    // Already-attached services would be refused as duplicates, so hide them.
+    const select = document.getElementById("redirect-attach-services");
+    Array.from(select.options).forEach((option) => {
+      option.hidden = (rule.services || []).includes(option.value);
+      if (option.hidden) option.selected = false;
+    });
+    showModal("redirect-attach-modal", trigger);
+  }
+
+  // The count in the Services column opens this viewer: every attachment stays an explicit
+  // Detach (its own POST, as before) and Attach, with the shared-impact warning beside them.
+  function openServices(rule, trigger) {
+    const list = document.getElementById("redirect-services-list");
+    const attachButton = document.getElementById("redirect-services-attach");
+    const readonly = attachButton.disabled;
+    document.getElementById("redirect-services-copy").textContent = translate(
+      "redirects.services_copy",
+      `${rule.name}: ${rule.from_path} → ${rule.to_url}`,
+      { name: rule.name, from: rule.from_path, to: rule.to_url },
+    );
+    document.getElementById("redirect-services-shared").textContent = translate(
+      "redirects.detach_shared",
+      "This redirect is shared. Detaching it removes it from that service only; the other services keep it.",
+    );
+    list.replaceChildren();
+    (rule.services || []).forEach((serviceId) => {
+      const item = document.createElement("li");
+      item.className =
+        "list-group-item d-flex align-items-center justify-content-between gap-2 px-0";
+      const code = document.createElement("span");
+      code.className = "svc-code";
+      code.textContent = serviceId;
+      item.append(code);
+      if (!readonly) {
+        const form = document.createElement("form");
+        form.method = "post";
+        form.action = list.dataset.detachUrl;
+        [
+          ["csrf_token", list.dataset.csrf],
+          ["redirect_id", rule.id],
+          ["service_id", serviceId],
+        ].forEach(([name, value]) => {
+          const input = document.createElement("input");
+          input.type = "hidden";
+          input.name = name;
+          input.value = value;
+          form.append(input);
+        });
+        const button = document.createElement("button");
+        button.type = "submit";
+        button.className = "btn btn-sm btn-outline-danger";
+        const label = translate(
+          "aria.label.detach_from_service",
+          `Detach ${rule.name} from ${serviceId}`,
+          { name: rule.name, service: serviceId },
+        );
+        button.setAttribute("aria-label", label);
+        button.title = label;
+        const icon = document.createElement("i");
+        icon.className = "bx bx-unlink";
+        icon.setAttribute("aria-hidden", "true");
+        const text = document.createElement("span");
+        text.className = "ms-1";
+        text.textContent = translate("service.resources.detach", "Detach");
+        button.append(icon, text);
+        form.append(button);
+        item.append(form);
+      }
+      list.append(item);
+    });
+    attachButton.onclick = () => {
+      const services = modalFor("redirect-services-modal");
+      services?.element.addEventListener(
+        "hidden.bs.modal",
+        () => openAttach(rule, trigger),
+        { once: true },
+      );
+      services?.instance.hide();
+    };
+    showModal("redirect-services-modal", trigger);
+  }
+
   rows.forEach((row) => {
     const rule = redirects.get(row.dataset.redirectId);
     if (!rule) return;
@@ -77,21 +166,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
     row
       .querySelector(".redirect-attach")
-      ?.addEventListener("click", (event) => {
-        document.getElementById("redirect-attach-id").value = rule.id;
-        document.getElementById("redirect-attach-copy").textContent = translate(
-          "redirects.attach_copy",
-          `Attach ${rule.name} (${rule.from_path} → ${rule.to_url}) to one or more services.`,
-          { name: rule.name, from: rule.from_path, to: rule.to_url },
-        );
-        // Already-attached services would be refused as duplicates, so hide them.
-        const select = document.getElementById("redirect-attach-services");
-        Array.from(select.options).forEach((option) => {
-          option.hidden = (rule.services || []).includes(option.value);
-          if (option.hidden) option.selected = false;
-        });
-        showModal("redirect-attach-modal", event.currentTarget);
-      });
+      ?.addEventListener("click", (event) =>
+        openAttach(rule, event.currentTarget),
+      );
+
+    row
+      .querySelector(".redirect-services")
+      ?.addEventListener("click", (event) =>
+        openServices(rule, event.currentTarget),
+      );
 
     row
       .querySelector(".redirect-delete")
@@ -107,24 +190,28 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   const searchInput = document.getElementById("redirects-search");
-  const serviceFilter = document.getElementById("redirects-service-filter");
+  const codeFilter = document.getElementById("redirects-status-filter");
+  const noMatch = document.getElementById("redirects-no-match");
 
   function applyFilters() {
     const term = (searchInput?.value || "").trim().toLowerCase();
-    const service = serviceFilter?.value || "";
+    const code = codeFilter?.value || "";
+    let visible = 0;
     rows.forEach((row) => {
       const rule = redirects.get(row.dataset.redirectId) || {};
       const haystack =
-        `${rule.name || ""} ${rule.from_path || ""} ${rule.to_url || ""}`.toLowerCase();
-      const matchesTerm = !term || haystack.includes(term);
-      const matchesService =
-        !service || (rule.services || []).includes(service);
-      row.hidden = !(matchesTerm && matchesService);
+        `${rule.name || ""} ${rule.description || ""} ${rule.from_path || ""} ${rule.to_url || ""}`.toLowerCase();
+      const matches =
+        (!term || haystack.includes(term)) &&
+        (!code || String(rule.status_code) === code);
+      row.hidden = !matches;
+      if (matches) visible += 1;
     });
+    if (noMatch) noMatch.hidden = visible > 0 || rows.length === 0;
   }
 
   searchInput?.addEventListener("input", applyFilters);
-  serviceFilter?.addEventListener("change", applyFilters);
+  codeFilter?.addEventListener("change", applyFilters);
   document
     .getElementById("redirects-search-clear")
     ?.addEventListener("click", () => {

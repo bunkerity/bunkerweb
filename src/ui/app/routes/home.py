@@ -4,17 +4,44 @@ from operator import itemgetter
 from flask import Blueprint, jsonify, render_template, request
 from flask_login import login_required
 
+from default_server import is_reserved_default_server  # type: ignore
+
 from app.dependencies import API_CLIENT, BW_INSTANCES_UTILS
 from app.i18n import translated
 from app.api_client import ApiClientError, ApiUnavailableError
 from app.system_memory import memory_state, read_memory
-from app.utils import LOGGER, flash
+from app.utils import LOGGER, flash, human_readable_number
 from app.routes.utils import cors_required
 
 home = Blueprint("home", __name__)
 
 # Number of "Top reasons for blocks" rows shown on the dashboard card.
 HOME_TOP_REASONS_LIMIT = 5
+
+
+@home.app_context_processor
+def inject_github_stars():
+    """The sidebar footer shows the star count on every page; `main.py` refreshes it hourly into DATA."""
+    # Imported late: a few unit tests load this module against a stub `app.dependencies` that has no DATA.
+    try:
+        from app.dependencies import DATA
+
+        stars = DATA.get("GITHUB_STARS")
+        return {"github_stars": human_readable_number(stars) if stars else None}
+    except (ImportError, TypeError, ValueError):
+        return {"github_stars": None}
+
+
+@home.route("/search/services", methods=["GET"])
+@login_required
+@cors_required
+def search_services():
+    """Service ids for the navbar search (Ctrl K); fetched once, the first time the search opens."""
+    try:
+        rows = API_CLIENT.get_services(with_drafts=True)
+    except (ApiClientError, ApiUnavailableError):
+        return jsonify({"services": []})
+    return jsonify({"services": [{"id": row["id"], "draft": bool(row.get("is_draft"))} for row in rows if not is_reserved_default_server(row)]})
 
 
 @home.route("/home", methods=["GET"])

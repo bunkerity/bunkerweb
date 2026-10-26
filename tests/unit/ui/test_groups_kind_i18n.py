@@ -113,11 +113,17 @@ def test_the_per_entry_row_template_select_is_also_translated():
     assert '<option value="ip">ip</option>' not in template_html
 
 
-def test_the_details_panel_badge_is_also_translated():
+def test_the_values_dialog_kind_labels_are_translated_and_text_only():
     html = _render([_group(kind="rdns", entries=1)])
+    script = (TEMPLATES.parent / "static/js/pages/groups.js").read_text(encoding="utf-8")
+    values = script.split("const kindLabel =", 1)[1].split("function openValues", 1)[0]
 
-    assert 'aria-label="rdns entries"' in html  # the raw id is fine as an aria-label, not as copy
+    assert 'id="resource-group-values-modal"' in html
     assert ">Reverse DNS<" in html
+    assert "translate(`resource_groups.kind_label.${kind}`, kind)" in values
+    assert "chip.textContent = kindLabel(entry.kind)" in values
+    assert "kindLabel(kind)" in values  # Kind tabs use the same translated labels.
+    assert ".innerHTML" not in values
 
 
 def test_the_bulk_import_select_shows_translated_text_but_keeps_the_raw_value():
@@ -140,21 +146,20 @@ def test_every_resource_kind_has_a_translated_label():
         assert labels[kind] and labels[kind] != kind
 
 
-def test_the_meta_line_pluralizes_each_count_independently():
-    singular = _render([_group(kind="ip", entries=1, usage_count=1)])
-    plural = _render([_group(kind="ip", entries=2, usage_count=0)])
-
-    meta_start = singular.index('class="d-block text-muted resource-group-meta"')
-    singular_meta = singular[meta_start : singular.index("</small>", meta_start)]
-    assert "1 kind ·" in singular_meta and "1 kinds" not in singular_meta
-    assert "1 value ·" in singular_meta
-    assert singular_meta.endswith("1 usage")
-
-    meta_start = plural.index('class="d-block text-muted resource-group-meta"')
-    plural_meta = plural[meta_start : plural.index("</small>", meta_start)]
-    assert "1 kind ·" in plural_meta  # one distinct kind across the 2 entries
-    assert "2 values ·" in plural_meta
-    assert plural_meta.endswith("0 usages")
+def test_compact_rows_keep_numeric_values_and_pluralized_reference_counts():
+    # RES-2 replaces the old meta sentence with Values and Usage columns.
+    for count in (0, 1, 2):
+        html = _render([_group(kind="ip", entries=count, usage_count=count)])
+        row = re.search(r'<tr class="resource-group-row".*?</tr>', html, re.DOTALL).group(0)
+        cells = re.findall(r"<td\b[^>]*>(.*?)</td>", row, re.DOTALL)
+        assert cells[1].strip() == str(count)
+        if count:
+            key = "resource_groups.reference_count" if count == 1 else "resource_groups.reference_count_plural"
+            assert _fake_gettext(key, count=count) in cells[5]
+            assert "resource-group-usage" in cells[5]
+        else:
+            assert "is-none" in cells[5]
+            assert _fake_gettext("resource_groups.no_references") in cells[5]
 
 
 def test_the_meta_line_never_uses_raw_string_concatenation_of_counts():

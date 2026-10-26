@@ -14,6 +14,14 @@
                 <span>{{ _("link.back_to_login") }}</span>
             </a>
             <div>{% include "language-selector.html" %}</div>
+            <button type="button"
+                    class="sw-top-btn sw-top-icon"
+                    data-bw-pref="contrast"
+                    aria-pressed="true"
+                    aria-label="{{ _("shell.contrast.toggle") }}"
+                    title="{{ _("shell.contrast.toggle") }}">
+                <i class="bx bxs-adjust" aria-hidden="true"></i>
+            </button>
             <div class="toggle-container d-flex align-items-center theme-toggle-pill p-3 rounded-pill shadow-lg">
                 <label class="setting-checkbox-label pe-2 mb-0 fw-bold text-secondary"
                        for="dark-mode-toggle"
@@ -37,14 +45,16 @@
                 <img class="bw-logo-light" src="{{ url_for('static', filename='img/logo-menu.png') }}" alt="BunkerWeb" />
                 <img class="bw-logo-dark" src="{{ url_for('static', filename='img/logo-menu-white.png') }}" alt="BunkerWeb" />
             </div>
-            <div class="sw-card-head">
+            <div class="sw-card-head sw-card-head-row">
                 <div>
+                    <h1 class="sw-title">{{ _("totp.title") }}</h1>
                     {% if is_totp %}
                         <p class="sw-subtitle">{{ _("totp.subtitle") }}</p>
                     {% else %}
                         <p class="sw-subtitle">{{ _("totp.subtitle_security_key") }}</p>
                     {% endif %}
                 </div>
+                <i class="bx bx-shield-quarter sw-wand" aria-hidden="true"></i>
             </div>
             <form method="POST" id="totp-form" class="totp-body">
                 <input type="hidden" id="csrf_token" name="csrf_token" value="{{ csrf_token() }}" />

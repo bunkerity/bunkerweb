@@ -83,33 +83,9 @@ $(document).ready(function () {
     const target = targetClass.substring(1).replace("navs-pills-pane-", "");
     const isProfileTab = target === "profile";
     const isSessionsTab = target === "sessions";
+    // The pager lives inside the sessions card: shown with that tab only
     const sessionsPagination = $("#navs-pills-sessions-pagination");
-
-    if (sessionsPagination.length) {
-      if (!isSessionsTab) {
-        sessionsPagination.removeClass("show active");
-        setTimeout(() => {
-          sessionsPagination.parent().addClass("d-none");
-          $(".nav-pills .tf-icons")
-            .parent()
-            .find("span")
-            .removeClass("d-xxxl-inline")
-            .addClass("d-sm-inline");
-          $(".nav-pills .tf-icons").closest("div").removeClass("col-md-4");
-        }, 200);
-      } else {
-        sessionsPagination.parent().removeClass("d-none");
-        setTimeout(() => {
-          sessionsPagination.addClass("show active");
-          $(".nav-pills .tf-icons")
-            .parent()
-            .find("span")
-            .removeClass("d-sm-inline")
-            .addClass("d-xxxl-inline");
-          $(".nav-pills .tf-icons").closest("div").addClass("col-md-4");
-        }, 200);
-      }
-    }
+    sessionsPagination.parent().toggleClass("d-none", !isSessionsTab);
 
     if (isProfileTab && window.location.hash) {
       history.pushState(
@@ -133,14 +109,9 @@ $(document).ready(function () {
     }
   }
 
-  // Pagination and session content handling
+  // Pagination and session content handling: the sessions table is swapped row by row,
+  // 3 sessions per page, from the JSON `/profile/sessions?page=N` already serves.
   const totalPages = $(".page-item").length - 2;
-  const currentCardClasses = "border-primary border-1 position-relative";
-  const currentCardIcon = "bx-star text-warning";
-  const currentItemsClasses = "text-primary";
-  const otherCardClasses = "border-secondary";
-  const otherCardIcon = "bx-history";
-  const otherItemsClasses = "text-secondary";
 
   let clickLock = false;
 
@@ -181,59 +152,14 @@ $(document).ready(function () {
   }
 
   function setPlaceholders(numPlaceholders) {
-    const placeholders = Array.from(
+    const cells = '<td><span class="placeholder col-8"></span></td>'.repeat(6);
+    const rows = Array.from(
       { length: numPlaceholders },
-      (_, i) => `
-      <div id="session-placeholder-${i}" class="card border-secondary shadow-sm mb-4 placeholder-transition">
-        <div class="card-header d-flex align-items-center justify-content-between placeholder-glow">
-          <div class="d-flex align-items-center gap-2 placeholder-glow">
-            <span class="placeholder col-2"></span>
-            <h5 class="card-title mb-0">Session</h5>
-          </div>
-          <span class="placeholder col-2"></span>
-        </div>
-        <div class="card-body">
-          <div class="list-group list-group-flush placeholder-glow">
-            ${generatePlaceholderItems()}
-          </div>
-        </div>
-      </div>
-    `,
+      (_, i) =>
+        `<tr id="session-placeholder-${i}" class="placeholder-glow placeholder-transition">${cells}</tr>`,
     ).join("");
 
-    $("#sessions-page-content").html(placeholders);
-  }
-
-  function generatePlaceholderItems() {
-    const items = [
-      "bx-window-alt",
-      t("profile.session.browser", "Browser"),
-      "bx-layer",
-      t("profile.session.os", "Operating System"),
-      "bx-devices",
-      t("profile.session.device", "Device"),
-      "bx-network-chart",
-      t("profile.session.ip_address", "IP Address"),
-      "bx-time",
-      t("profile.session.creation_date", "Creation Date"),
-      "bx-time",
-      t("profile.session.last_activity", "Last Activity"),
-    ];
-
-    return items
-      .map((icon, i) =>
-        i % 2 === 0
-          ? `
-      <div class="list-group-item d-flex align-items-center">
-        <strong><i class="bx ${icon} text-secondary"></i> ${
-          items[i + 1]
-        }:</strong>
-        &nbsp;<span class="placeholder col-4"></span>
-      </div>
-    `
-          : "",
-      )
-      .join("");
+    $("#sessions-page-content").html(rows);
   }
 
   function fadeInPlaceholders() {
@@ -252,7 +178,7 @@ $(document).ready(function () {
         return response.json(); // Parse the JSON data from the response
       })
       .then((data) => {
-        updateSessionContent(data); // Update the session content with the data
+        updateSessionContent(data); // Update the session rows with the data
         removeExtraPlaceholders(data.length); // Remove any extra placeholders
         clickLock = false; // Unlock the clickLock variable
       })
@@ -265,148 +191,93 @@ $(document).ready(function () {
 
   function updateSessionContent(sessions) {
     sessions.forEach((session, index) => {
-      const content = generateSessionContent(session, index);
-      const placeholder = $(`#session-placeholder-${index}`);
-
-      const sanitizedText = DOMPurify.sanitize(content);
-
-      placeholder
-        .html(sanitizedText)
-        .removeClass("placeholder-transition fade-in")
+      $(`#session-placeholder-${index}`)
+        .empty()
+        .append(generateSessionCells(session, index))
+        .removeClass("placeholder-transition fade-in placeholder-glow")
         .addClass("card-transition")
-        .toggleClass(currentCardClasses, session.current)
-        .toggleClass(otherCardClasses, !session.current);
+        .toggleClass("session-current", !!session.current);
     });
   }
 
-  // Mirrors components/card.html's header shape (icon + card-title, header_right slot)
-  // plus components/badge.html's pill markup for the "Current Session" tag, so paginated
-  // (AJAX-loaded) cards stay identical to the {% call card(...) %} block profile.html
-  // renders server-side for the first page.
-  function generateSessionContent(session, index) {
-    const icon = session.current ? currentCardIcon : otherCardIcon;
-    const badge = session.current
-      ? '<span class="badge rounded-pill bg-label-bw-green d-inline-flex align-items-center fs-6"><i class="bx bx-user-check me-1" aria-hidden="true"></i><span data-i18n="profile.session.current_session">Current Session</span></span>'
-      : "";
-    return `
-      <div class="card-header d-flex align-items-center justify-content-between">
-        <div class="d-flex align-items-center gap-2">
-          <i class="bx ${icon}" aria-hidden="true"></i>
-          <div class="d-flex flex-column">
-            <h5 class="card-title mb-0" data-i18n="profile.session.title">Session</h5>
-          </div>
-        </div>
-        ${badge}
-      </div>
-      <div class="card-body">
-        <div class="list-group list-group-flush">
-          ${generateSessionItems(session, index)}
-        </div>
-      </div>
-    `;
-  }
-
-  // Mirrors components/text-group.html's markup (label above, value below, colored
-  // icon) so paginated (AJAX-loaded) cards stay identical to the server-rendered ones.
-  function generateTextGroupItem(icon, label, i18nKey, value, itemsClasses) {
-    return `
-      <div class="list-group-item">
-        <div class="d-flex align-items-center gap-2 ${itemsClasses}">
-          <i class="bx ${icon}" aria-hidden="true"></i>
-          <div>
-            <div class="text-muted" data-i18n="${i18nKey}">${label}</div>
-            <div class="fw-semibold">${value}</div>
-          </div>
-        </div>
-      </div>
-    `;
+  // Mirrors the server-rendered row in profile.html. Values go in through `.text()` and
+  // `.attr()`, never as markup, so a hostile User-Agent string stays inert.
+  function generateSessionCells(session, index) {
+    const $browser = $("<td>").append(
+      $('<span class="fw-semibold">').text(session.browser),
+    );
+    if (session.current) {
+      $browser.append(
+        $(
+          '<span class="badge rounded-pill bg-label-bw-green d-inline-flex align-items-center ms-2"><i class="bx bx-user-check me-1" aria-hidden="true"></i></span>',
+        ).append(
+          $("<span>").text(
+            t("profile.session.current_session", "Current Session"),
+          ),
+        ),
+      );
+    }
+    return [
+      $browser,
+      $("<td>").text(session.os),
+      $("<td>").text(session.device),
+      $('<td class="cell-ip">').append(generateIpItem(session, index)),
+      $("<td>").text(session.creation_date),
+      $("<td>").text(session.last_activity),
+    ];
   }
 
   // Mirrors components/secret-field.html's masked-value markup (fixed-length mask,
   // reveal/copy buttons) -- static/js/components/secret-field.js is document-delegated
   // and idempotent, so it wires these buttons the same way whether rendered by Jinja
   // on first load or injected here on pagination.
-  function generateIpItem(session, index, itemsClasses) {
+  function generateIpItem(session, index) {
     const id = `ip-${index}`;
-    const mask = "•".repeat(16);
-    return `
-      <div class="list-group-item d-flex align-items-center gap-2">
-        <strong class="d-flex align-items-center gap-1 ${itemsClasses}">
-          <i class="bx bx-network-chart" aria-hidden="true"></i>
-          <span data-i18n="profile.session.ip_address">IP Address</span>:
-        </strong>
-        <div class="d-flex align-items-center gap-2">
-          <code id="${id}" class="secret-field courier-prime" data-secret="${session.ip}" data-secret-label="Secret value" data-mask-count="16" data-secret-shown="0" aria-label="Secret value (hidden)">${mask}</code>
-          <button type="button" class="btn btn-sm btn-outline-secondary p-1 lh-1 secret-toggle" data-secret-toggle="${id}" aria-controls="${id}" aria-pressed="false" aria-label="Reveal value" data-i18n="aria.label.reveal_value">
-            <i class="bx bx-show bx-xs" aria-hidden="true"></i>
-          </button>
-          <button type="button" class="btn btn-sm btn-outline-secondary p-1 lh-1 secret-copy" data-secret-copy="${id}" aria-label="Copy" data-i18n="button.copy">
-            <i class="bx bx-copy-alt bx-xs" aria-hidden="true"></i>
-          </button>
-        </div>
-      </div>
-    `;
-  }
-
-  function generateSessionItems(session, index) {
-    const itemsClasses = session.current
-      ? currentItemsClasses
-      : otherItemsClasses;
-
-    const head = [
-      [
-        "bx-window-alt",
-        t("profile.session.browser", "Browser"),
-        "profile.session.browser",
-        session.browser,
-      ],
-      [
-        "bx-layer",
-        t("profile.session.os", "Operating System"),
-        "profile.session.os",
-        session.os,
-      ],
-      [
-        "bx-devices",
-        t("profile.session.device", "Device"),
-        "profile.session.device",
-        session.device,
-      ],
-    ]
-      .map(([icon, label, i18nKey, value]) =>
-        generateTextGroupItem(icon, label, i18nKey, value, itemsClasses),
+    const $code = $(
+      '<code class="secret-field courier-prime" data-secret-shown="0" data-mask-count="16"></code>',
+    )
+      .attr("id", id)
+      .attr("data-secret", session.ip)
+      .attr("data-secret-label", t("aria.label.secret_value", "Secret value"))
+      .attr(
+        "aria-label",
+        t("aria.label.value_hidden", "{{name}} (hidden)", {
+          name: t("aria.label.secret_value", "Secret value"),
+        }),
       )
-      .join("");
-
-    const tail = [
-      [
-        "bx-time",
-        t("profile.session.creation_date", "Creation Date"),
-        "profile.session.creation_date",
-        session.creation_date,
-      ],
-      [
-        "bx-time",
-        t("profile.session.last_activity", "Last Activity"),
-        "profile.session.last_activity",
-        session.last_activity,
-      ],
-    ]
-      .map(([icon, label, i18nKey, value]) =>
-        generateTextGroupItem(icon, label, i18nKey, value, itemsClasses),
-      )
-      .join("");
-
-    return head + generateIpItem(session, index, itemsClasses) + tail;
+      .text("\u2022".repeat(16));
+    const $reveal = $(
+      '<button type="button" class="btn btn-sm btn-outline-secondary p-1 lh-1 secret-toggle" aria-pressed="false"><i class="bx bx-show bx-xs" aria-hidden="true"></i></button>',
+    )
+      .attr("data-secret-toggle", id)
+      .attr("aria-controls", id)
+      .attr("aria-label", t("aria.label.reveal_value", "Reveal value"));
+    const $copy = $(
+      '<button type="button" class="btn btn-sm btn-outline-secondary p-1 lh-1 secret-copy"><i class="bx bx-copy-alt bx-xs" aria-hidden="true"></i></button>',
+    )
+      .attr("data-secret-copy", id)
+      .attr("aria-label", t("button.copy", "Copy"));
+    return $('<div class="d-flex align-items-center gap-2">').append(
+      $code,
+      $reveal,
+      $copy,
+    );
   }
 
   function removeExtraPlaceholders(sessionCount) {
-    $(`#sessions-page-content .card:gt(${sessionCount - 1})`).remove();
+    $(`#sessions-page-content tr:gt(${sessionCount - 1})`).remove();
   }
 
   function handleError() {
-    $("#session-page-content").html(
-      "<p>Error loading data. Please try again.</p>",
+    $("#sessions-page-content").html(
+      $("<tr>").append(
+        $('<td colspan="6" class="text-center text-muted">').text(
+          t(
+            "profile.session.load_error",
+            "Error loading data. Please try again.",
+          ),
+        ),
+      ),
     );
   }
 

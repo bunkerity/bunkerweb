@@ -11,6 +11,14 @@
         <!-- Topbar: language selector + theme toggle (markup/ids/wiring unchanged) -->
         <header class="sw-topbar">
             <div>{% include "language-selector.html" %}</div>
+            <button type="button"
+                    class="sw-top-btn sw-top-icon"
+                    data-bw-pref="contrast"
+                    aria-pressed="true"
+                    aria-label="{{ _("shell.contrast.toggle") }}"
+                    title="{{ _("shell.contrast.toggle") }}">
+                <i class="bx bxs-adjust" aria-hidden="true"></i>
+            </button>
             <div class="toggle-container d-flex align-items-center theme-toggle-pill p-3 rounded-pill shadow-lg">
                 <label class="setting-checkbox-label pe-2 mb-0 fw-bold text-secondary"
                        for="dark-mode-toggle"

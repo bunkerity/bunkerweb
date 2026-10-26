@@ -26,6 +26,8 @@
       dir="{{ ui_locale_direction | default('ltr', true) }}"
       class="{{ theme }}-style layout-navbar-fixed layout-menu-fixed{% if theme == 'dark' %} dark{% endif %}"
       data-theme="theme-default"
+      data-contrast="high"
+      data-density="compact"
       data-bs-theme="{{ theme }}">
     <head>
         <meta charset="utf-8" />
@@ -34,6 +36,21 @@
         <meta http-equiv="X-UA-Compatible" content="IE=edge" />
         <meta name="description" content="BunkerWeb user interface" />
         <meta name="author" content="Bunkerity" />
+        {# Contrast and density are per-browser look preferences (localStorage, no server round
+           trip). Applied here, before the stylesheets, so the first paint already has them:
+           the markup above carries the defaults (high contrast, compact density) and this only
+           flips an attribute when the visitor stored the other value. #}
+        <script nonce="{{ script_nonce }}">
+          (function () {
+            var root = document.documentElement, contrast = "high", density = "compact";
+            try {
+              if (localStorage.getItem("bw-contrast") === "standard") contrast = "standard";
+              if (localStorage.getItem("bw-density") === "comfortable") density = "comfortable";
+            } catch (e) {}
+            root.setAttribute("data-contrast", contrast);
+            root.setAttribute("data-density", density);
+          })();
+        </script>
         <!-- Anti-FOUC: resolve theme before first paint on anonymous pages, and on logged-in
              pages whose theme mode is "system" -- there the DB column holds the value resolved
              at the LAST write, which the OS may have flipped since (#3820). An explicit
@@ -241,6 +258,13 @@
                 nonce="{{ script_nonce }}"></script>
         <script src="{{ url_for('static', filename='js/i18n.js') }}"
                 nonce="{{ script_nonce }}"></script>
+        {# Shared table-system modules (typed confirmation, leave-without-saving guard). #}
+        <script src="{{ url_for('static', filename='js/components/typed-confirm.js') }}"
+                nonce="{{ script_nonce }}"
+                defer></script>
+        <script src="{{ url_for('static', filename='js/components/leave-guard.js') }}"
+                nonce="{{ script_nonce }}"
+                defer></script>
         <!-- Page Specific JS -->
         {% block scripts %}{% endblock %}
         {# External scripts from DATA['EXTRA_SCRIPTS'] and plugin scripts hooks #}

@@ -4,6 +4,11 @@
 {# The page-head band now owns the breadcrumb + title, so suppress the dashboard shell's
    legacy breadcrumb/mode row for this page (kills the duplicated breadcrumb). #}
 {% block page_head %}{% endblock %}
+{% block head %}
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename=rtl_sheet('css/pages/operate.css')) }}"
+          nonce="{{ style_nonce }}" />
+{% endblock %}
 {% block content %}
     <!-- Page head band (components/page-head.html; kit .page-head, admin.css:138-142) -->
     {{ page_head(title="About BunkerWeb", title_i18n="about.title",
@@ -258,5 +263,70 @@
             {% endcall %}
         </div>
     </div>
+    {# Recent releases and environment facts (OPS-54, OPS-55). Both sit under the retained brand,
+       build, licence and social cards, so nothing the page showed before has moved out. #}
+    <div class="row g-3 mt-0">
+        {% if releases %}
+            <div class="col-12 col-xl-7">
+                {% call card(classes="h-100", title="Recent releases", title_key="about.releases.title", icon="bx-package", header_right='<a class="btn btn-sm btn-outline-primary" href="' ~ url_for('whats_new.whats_new_page') ~ '">' ~ _("about.releases.view_all") ~ '</a>') %}
+                    <ol class="list-unstyled mb-0 bw-release-timeline">
+                        {% for release in releases %}
+                            <li class="bw-release-item">
+                                <div class="d-flex align-items-baseline gap-2 flex-wrap">
+                                    <span class="tag-chip cell-mono">{{ release.version }}</span>
+                                    {% if release.display_date %}<small class="text-muted">{{ release.display_date }}</small>{% endif %}
+                                </div>
+                                <ul class="mb-0 mt-2 small">
+                                    {% for entry in release.entries[:3] %}<li>{{ entry.html }}</li>{% endfor %}
+                                </ul>
+                            </li>
+                        {% endfor %}
+                    </ol>
+                {% endcall %}
+            </div>
+        {% endif %}
+        {% if environment %}
+            <div class="col-12 col-xl-5">
+                {% call card(id="about-environment", classes="h-100", title="Environment", title_key="about.environment.title", icon="bx-chip", header_right='<button type="button" class="btn btn-sm btn-outline-secondary" id="about-copy-diagnostics"><i class="bx bx-copy" aria-hidden="true"></i><span class="ms-1">' ~ _("about.environment.copy") ~ '</span></button>') %}
+                    <p class="text-muted small">{{ _("about.environment.help") }}</p>
+                    <dl class="row mb-0 small" id="about-environment-facts">
+                        <dt class="col-5 text-muted fw-normal">{{ _("about.environment.scope_ui_host") }}</dt>
+                        <dd class="col-7 mb-1"></dd>
+                        <dt class="col-5 fw-normal ps-4">{{ _("about.environment.integration") }}</dt>
+                        <dd class="col-7 cell-mono mb-1">{{ environment.ui_host.integration }}</dd>
+                        <dt class="col-5 fw-normal ps-4">Python</dt>
+                        <dd class="col-7 cell-mono mb-1">{{ environment.ui_host.python }}</dd>
+                        <dt class="col-5 fw-normal ps-4">{{ _("about.environment.platform") }}</dt>
+                        <dd class="col-7 cell-mono mb-1">{{ environment.ui_host.platform }}</dd>
+                        <dt class="col-5 text-muted fw-normal mt-2">{{ _("about.environment.scope_control_plane") }}</dt>
+                        <dd class="col-7 mb-1 mt-2"></dd>
+                        <dt class="col-5 fw-normal ps-4">{{ _("about.environment.bunkerweb") }}</dt>
+                        <dd class="col-7 cell-mono mb-1">{{ environment.control_plane.version or "—" }}</dd>
+                        <dt class="col-5 fw-normal ps-4">{{ _("about.environment.database") }}</dt>
+                        <dd class="col-7 cell-mono mb-1">{{ environment.control_plane.database or "—" }}</dd>
+                        {% if environment.instances %}
+                            <dt class="col-5 text-muted fw-normal mt-2">{{ _("about.environment.scope_instances") }}</dt>
+                            <dd class="col-7 mb-1 mt-2"></dd>
+                            <dt class="col-5 fw-normal ps-4">{{ _("about.environment.registered") }}</dt>
+                            <dd class="col-7 cell-mono mb-1">{{ _("about.environment.instances_up", up=environment.instances.up, total=environment.instances.total) }}</dd>
+                        {% endif %}
+                    </dl>
+                    {% if current_user is defined and current_user.admin %}
+                        <a class="btn btn-sm btn-outline-secondary mt-3"
+                           href="{{ url_for('support') }}/ui_bundle"
+                           target="_blank"
+                           rel="noopener">
+                            <i class="bx bx-package" aria-hidden="true"></i><span class="ms-1">{{ _("support.card.ui_bundle.button") }}</span>
+                        </a>
+                    {% endif %}
+                {% endcall %}
+            </div>
+        {% endif %}
+    </div>
     <!--/ Content -->
+{% endblock %}
+{% block scripts %}
+    <script src="{{ url_for('static', filename='js/pages/about.js') }}"
+            nonce="{{ script_nonce }}"
+            defer></script>
 {% endblock %}

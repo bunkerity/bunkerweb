@@ -89,20 +89,20 @@
 ) -%}
 {%- set d = EMPTY_STATE_DEFAULTS[state] if state in EMPTY_STATE_DEFAULTS else EMPTY_STATE_DEFAULTS["empty"] -%}
 {%- set _title = title or d.title -%}
-{%- set _title_key = title_key or d.key -%}
+{%- set _title_key = title_key or (none if title else d.key) -%}
 {%- set _icon = icon if icon is not none else d.icon -%}
 {%- set _icon_size = "fs-3" if size == "sm" else ("fs-1 display-1" if size == "lg" else "fs-1") -%}
 <div{% if id %} id="{{ id }}"{% endif %}
-     class="text-center{{ ' border border-dashed rounded-3 p-4' if bordered else ' py-3' }}{% if classes %} {{ classes }}{% endif %}"
+     class="bw-empty is-{{ state }}{{ ' is-sm' if size == 'sm' else (' is-lg' if size == 'lg' else '') }}{{ ' is-bordered border border-dashed rounded-3' if bordered else '' }} text-center{% if classes %} {{ classes }}{% endif %}"
      data-state="{{ state }}"
      {%- if state == "loading" %} role="status" aria-live="polite" aria-busy="true"
      {%- elif state == "error" %} role="alert"{% endif %}>
     {%- if state == "loading" %}
         <span class="spinner-border{{ ' spinner-border-sm' if size == 'sm' else '' }} text-primary mb-2" aria-hidden="true"></span>
     {%- elif _icon != "none" %}
-        <i class="bx {{ _icon }} {{ _icon_size }} d-block mb-2 {{ 'text-danger' if state == 'error' else 'text-muted' }}" aria-hidden="true"></i>
+        <i class="bx {{ _icon }} bw-empty-icon {{ _icon_size }} d-block mb-2 {{ 'text-danger' if state == 'error' else 'text-muted' }}" aria-hidden="true"></i>
     {%- endif %}
-    <p class="fw-semibold mb-0">{{ _(_title_key) if _title_key else _title }}</p>
+    <p class="bw-empty-title fw-semibold mb-0">{{ _(_title_key) if _title_key else _title }}</p>
     {%- if message %}
         <p class="text-muted small mb-0 mt-1">{{ _(message_key) if message_key else message }}</p>
     {%- endif %}

@@ -1,0 +1,72 @@
+/* Auto-refresh toggle and changed-row flash for live tables (Bans, Reports).
+   Design source: ui_kits/admin/app.css .ar-btn / .ar-flash. Colors follow the shipped tokens, so
+   the high-contrast and dark values come with --bs-bw-green. */
+.ar-btn {
+  align-items: center;
+  display: inline-flex;
+  gap: 7px;
+  position: relative;
+}
+
+.ar-btn .ar-dot {
+  background: var(--bw-fg-3, #6c757d);
+  border-radius: 50%;
+  flex: 0 0 auto;
+  height: 7px;
+  width: 7px;
+}
+
+.ar-btn.is-on {
+  background: color-mix(in srgb, var(--bs-bw-green) 9%, var(--bw-bg-card));
+  border-color: color-mix(in srgb, var(--bs-bw-green) 55%, var(--bw-border));
+  color: var(--bs-bw-green);
+}
+
+.ar-btn.is-on .ar-dot {
+  animation: bw-ar-pulse 1.6s ease-out infinite;
+  background: var(--bs-bw-green);
+}
+
+.ar-btn.is-on.is-tick .ar-dot {
+  animation:
+    bw-ar-pulse 1.6s ease-out infinite,
+    bw-ar-tick 0.5s ease;
+}
+
+.ar-flash,
+tr.ar-flash > td {
+  animation: bw-ar-flash 1.6s ease;
+}
+
+@keyframes bw-ar-pulse {
+  0% {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--bs-bw-green) 55%, transparent);
+  }
+  100% {
+    box-shadow: 0 0 0 6px transparent;
+  }
+}
+
+@keyframes bw-ar-tick {
+  50% {
+    transform: scale(1.6);
+  }
+}
+
+@keyframes bw-ar-flash {
+  0% {
+    background-color: color-mix(in srgb, var(--bs-primary) 18%, transparent);
+  }
+  100% {
+    background-color: transparent;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ar-btn.is-on .ar-dot,
+  .ar-btn.is-on.is-tick .ar-dot,
+  .ar-flash,
+  tr.ar-flash > td {
+    animation: none;
+  }
+}

@@ -127,3 +127,24 @@ export function parseLeadingTs(line) {
     ).getTime();
   return NaN;
 }
+
+// Length of the leading timestamp (any of the three formats), or 0 when the line has none.
+export function leadingTimestampLength(line) {
+  for (const re of [TS_BRACKET, TS_PLAIN, TS_NGINX]) {
+    const m = re.exec(line);
+    if (m) return m[0].length;
+  }
+  return 0;
+}
+
+// [start, length] of the first level tag in the structured prefix, or null. Same guard as
+// levelOf: only the text before the first quote is searched, so a tag injected through a URL
+// or a user-agent is never picked.
+const LEVEL_TAG =
+  /\[\s*(?:CRITICAL|ERROR|WARNING|INFO|DEBUG)\s*\]|\[(?:emerg|alert|crit|error|warn|notice)\]/;
+export function levelTagSpan(line) {
+  const q = line.indexOf('"');
+  const head = q === -1 ? line : line.slice(0, q);
+  const m = LEVEL_TAG.exec(head);
+  return m ? [m.index, m[0].length] : null;
+}

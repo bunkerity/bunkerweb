@@ -175,7 +175,10 @@
                 </button>
             </li>
             {%- endfor %}
-            <li class="dropdown-item-text text-muted small d-none" data-select-no-results>{{ _("status.no_search_results") }}</li>
+            <li class="dropdown-item-text text-muted small{% if options %} d-none{% endif %}" data-select-no-results role="status">
+                <i class="bx bx-search" aria-hidden="true"></i>
+                {{ _("status.no_search_results") }}
+            </li>
         </ul>
         <input type="hidden"
                id="{{ id }}"

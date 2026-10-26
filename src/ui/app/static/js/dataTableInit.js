@@ -127,7 +127,7 @@ function bwCsvSafe(value) {
     if (!btn || typeof btn.action !== "function" || btn.__bwCsvSafePatched)
       return;
     const origAction = btn.action;
-    btn.action = function (e, dt, button, config) {
+    btn.action = function (e, dt, button, config, cb) {
       config = config || {};
       config.exportOptions = config.exportOptions || {};
 
@@ -169,7 +169,7 @@ function bwCsvSafe(value) {
           footer: stripThenEscape,
         },
       );
-      return origAction.call(this, e, dt, button, config);
+      return origAction.call(this, e, dt, button, config, cb);
     };
     btn.__bwCsvSafePatched = true;
   });
@@ -205,6 +205,7 @@ function initializeDataTable(config) {
     "reports",
     "services",
     "templates",
+    "workflows",
   ];
   const entityName = allowedNames.includes(tableName) ? tableName : "items";
 
@@ -223,7 +224,9 @@ function initializeDataTable(config) {
   const showFiltersSelector = `#${showFiltersId}`;
   const hideFiltersSelector = `#${hideFiltersId}`;
 
+  let advancedFilters;
   const syncFilterToggleUI = (isExpanded) => {
+    if (advancedFilters) advancedFilters.toggle(isExpanded);
     const $showFilters = $(showFiltersSelector);
     const $hideFilters = $(hideFiltersSelector);
     if (!$showFilters.length || !$hideFilters.length) return;
@@ -261,20 +264,11 @@ function initializeDataTable(config) {
 
   $.fn.dataTable.ext.buttons.toggle_filters = {
     // Use i18next.t for translatable parts
-    text: `<span class="tf-icons bx bx-filter bx-18px me-2"></span><span id="${showFiltersId}" data-i18n="button.show">${t(
-      "button.show",
-    )}</span><span id="${hideFiltersId}" class="d-none" data-i18n="button.hide">${t(
-      "button.hide",
-    )}</span><span class="d-none d-md-inline" data-i18n="button.filters_suffix">${t(
-      "button.filters_suffix",
-    )}</span>`, // Assuming 'filters_suffix' key exists for " filters"
+    text: `<i class="bx bx-filter" aria-hidden="true"></i><span class="d-none d-md-inline">${t("table_system.filters", "Filters")}</span><span class="af-count" hidden aria-hidden="true"></span>`,
     action: function (e, dt, node, config) {
-      const searchPanesContainer = dataTable.searchPanes.container();
-      if (!searchPanesContainer) return;
-      const $container = $(searchPanesContainer);
-      const willShow = !$container.is(":visible");
-      $container.slideToggle(); // Smoothly hide or show the container
-      syncFilterToggleUI(willShow);
+      if (!advancedFilters) return;
+      const willShow = !advancedFilters.isExpanded();
+      advancedFilters.toggle(willShow);
       localStorage.setItem(filterToggleStorageKey, willShow ? "true" : "false");
     },
   };
@@ -335,7 +329,36 @@ function initializeDataTable(config) {
     }
   };
 
+  bwPrepareTableButtons(safeDataTableOptions, t);
   const dataTable = new DataTable(tableSelector, safeDataTableOptions);
+  const tableContainer = dataTable.table().container();
+  tableContainer.classList.add("bw-data-table");
+  const tableNode = dataTable.table().node();
+  if (!tableNode.parentElement.classList.contains("bw-table-scroll")) {
+    $(tableNode).wrap('<div class="bw-table-scroll"></div>');
+  }
+  advancedFilters = bwAdvancedFilters(dataTable, t, filterToggleStorageKey);
+  $(tableContainer).find(".dt-search").addClass("search-mini");
+  $(tableContainer)
+    .find(".btn-minor")
+    .not(".action-button")
+    .each(function () {
+      if (!this.hasAttribute("aria-label"))
+        this.setAttribute("aria-label", this.textContent.trim());
+      bootstrap.Tooltip.getOrCreateInstance(this, {
+        title: () =>
+          window.matchMedia("(max-width: 767px)").matches
+            ? this.getAttribute("aria-label")
+            : "",
+      });
+    });
+  dataTable.on("destroy.dt", () => {
+    $(tableContainer)
+      .find(".btn-minor")
+      .each(function () {
+        bootstrap.Tooltip.getInstance(this)?.dispose();
+      });
+  });
   applyTranslations();
 
   // Rows are rebuilt on every draw, so per-trigger instances would be disposed and
@@ -363,13 +386,13 @@ function initializeDataTable(config) {
     );
   }
 
-  // Ensure toggle filter buttons keep the outline-primary styling
+  // Shared controls inherit the same neutral toolbar styling.
   const buttonsContainer = dataTable.buttons().container();
   if (buttonsContainer && $(buttonsContainer).length) {
     $(buttonsContainer)
       .find(".toggle-filters")
-      .removeClass("btn-secondary")
-      .addClass("btn btn-sm btn-outline-primary");
+      .removeClass("btn-secondary btn-outline-primary")
+      .addClass("btn btn-sm btn-light btn-minor");
   }
 
   const tableWrapperSelector =
@@ -385,13 +408,12 @@ function initializeDataTable(config) {
     if (i18nSuffix) $this.attr("data-i18n", `searchpane.${i18nSuffix}`);
   });
 
-  const searchPanesContainer = dataTable.searchPanes.container();
+  const searchPanesContainer = dataTable.searchPanes?.container?.();
   if (searchPanesContainer) {
     const $container = $(searchPanesContainer);
     const savedFiltersExpanded = localStorage.getItem(filterToggleStorageKey);
     const shouldShowFilters = savedFiltersExpanded === "true";
-    if (shouldShowFilters) $container.show();
-    else $container.hide();
+    $container.addClass("bw-filter-engine").attr("aria-hidden", "true");
     syncFilterToggleUI(shouldShowFilters);
   }
 
@@ -404,13 +426,32 @@ function initializeDataTable(config) {
 
   $(".dt-type-numeric").removeClass("dt-type-numeric");
 
-  if (!isReadOnly)
-    $(".action-button")
-      .parent()
-      .attr("data-bs-original-title", t("tooltip.table.select_rows_for_action"))
-      .attr("data-i18n", "tooltip.table.select_rows_for_action")
-      .attr("data-bs-placement", "top")
-      .tooltip();
+  const syncActionButton = () => {
+    if (isReadOnly) return;
+    const disabled = dataTable.rows({ selected: true }).count() === 0;
+    $(tableContainer)
+      .find(".action-button")
+      .each(function () {
+        bootstrap.Tooltip.getInstance(this)?.dispose();
+        $(this)
+          .toggleClass("disabled", disabled)
+          .attr("aria-disabled", String(disabled));
+        if (disabled) {
+          $(this)
+            .attr(
+              "data-bs-original-title",
+              t(
+                "table_system.multiple_actions",
+                "Multiple actions for selected items",
+              ),
+            )
+            .tooltip();
+        } else {
+          $(this).removeAttr("data-bs-original-title data-i18n");
+        }
+      });
+  };
+  syncActionButton();
 
   $(".dt-search label").addClass("visually-hidden");
   // Use i18next.t for the placeholder
@@ -536,7 +577,7 @@ function initializeDataTable(config) {
           });
         }
 
-        const searchPanesContainer = dataTable.searchPanes.container();
+        const searchPanesContainer = dataTable.searchPanes?.container?.();
         if (searchPanesContainer && $(searchPanesContainer).length) {
           updateFilterTranslations();
         }
@@ -552,9 +593,9 @@ function initializeDataTable(config) {
         return;
       }
       columnVisibility[column] = state;
-      const isDefault =
-        JSON.stringify(columnVisibility) ===
-        JSON.stringify(defaultColsVisibility);
+      const isDefault = Object.entries(defaultColsVisibility).every(
+        ([key, value]) => dataTable.column(key).visible() === value,
+      );
 
       if (isDefault) {
         localStorage.removeItem(`bw-${tableName}-columns`);
@@ -599,9 +640,9 @@ function initializeDataTable(config) {
         });
 
         // Sync localStorage to reflect default state
-        const isDefault =
-          JSON.stringify(columnVisibility) ===
-          JSON.stringify(defaultColsVisibility);
+        const isDefault = Object.entries(defaultColsVisibility).every(
+          ([key, value]) => dataTable.column(key).visible() === value,
+        );
         if (isDefault) {
           localStorage.removeItem(`bw-${tableName}-columns`);
         } else {
@@ -636,44 +677,7 @@ function initializeDataTable(config) {
     }
   });
 
-  dataTable.on("select", function (e, dt, type, indexes) {
-    const actionButton = $(".action-button");
-    if (!actionButton.length) return;
-
-    // Enable the actions button
-    // Strip data-i18n alongside the tooltip attrs: leaving it while
-    // data-bs-original-title is removed makes applyTranslations() fall through
-    // to .text() and overwrite the button content with the raw tooltip string.
-    actionButton
-      .removeClass("disabled")
-      .parent()
-      .attr("data-bs-toggle", null)
-      .attr("data-bs-original-title", null)
-      .attr("data-bs-placement", null)
-      .removeAttr("data-i18n")
-      .tooltip("dispose");
-  });
-
-  dataTable.on("deselect", function (e, dt, type, indexes) {
-    // If no rows are selected, disable the actions button
-    if (dataTable.rows({ selected: true }).count() === 0) {
-      const actionButton = $(".action-button");
-      if (!actionButton.length) return;
-
-      if (!isReadOnly)
-        actionButton
-          .addClass("disabled")
-          .parent()
-          .attr("data-bs-toggle", "tooltip")
-          .attr(
-            "data-bs-original-title",
-            t("tooltip.table.select_rows_for_action"),
-          )
-          .attr("data-i18n", "tooltip.table.select_rows_for_action")
-          .attr("data-bs-placement", "top")
-          .tooltip();
-    }
-  });
+  dataTable.on(`select deselect`, syncActionButton);
 
   // Cross-page selection affordance.
   // The header checkbox is configured (per-page) with `headerCheckbox: "select-page"`,
@@ -828,6 +832,359 @@ function initializeDataTable(config) {
   dataTable.columns.adjust().responsive.recalc();
 
   return dataTable;
+}
+
+// Keep page-owned actions/export callbacks intact; replace only shared chrome.
+function bwPrepareTableButtons(options, t) {
+  if (options.searchPanes) options.searchPanes.cascadePanes = false;
+  const prepare = (buttons, inCollection = false) =>
+    buttons
+      .filter((button) => {
+        const kind = typeof button === "string" ? button : button.extend;
+        return kind !== "colvisRestore";
+      })
+      .map((button) => {
+        if (typeof button === "string" && !$.fn.dataTable.ext.buttons[button])
+          return button;
+        const item = typeof button === "string" ? { extend: button } : button;
+        if (item.extend === "colvis") {
+          item.extend = undefined;
+          item.className = "btn btn-sm btn-light btn-minor bw-columns-button";
+          item.text = `<i class="bx bx-columns" aria-hidden="true"></i><span class="d-none d-md-inline">${t("button.columns", "Columns")}</span>`;
+          item.action = (e, dt, node) =>
+            bwColumnPopover(dt, node[0], item.columns, t);
+        } else if (
+          !inCollection &&
+          ["collection", "toggle_filters"].includes(item.extend)
+        ) {
+          item.className = `${item.className || ""} btn btn-sm btn-light btn-minor`;
+          item.className = item.className.replace(
+            /btn-outline-primary|btn-secondary/g,
+            "",
+          );
+        }
+        if (Array.isArray(item.buttons)) {
+          if (
+            item.extend === "collection" &&
+            item.autoClose === undefined &&
+            item.buttons.some((child) =>
+              [
+                "copy",
+                "csv",
+                "excel",
+                "copyHtml5",
+                "csvHtml5",
+                "excelHtml5",
+              ].includes(typeof child === "string" ? child : child.extend),
+            )
+          )
+            item.autoClose = true;
+          item.buttons = prepare(item.buttons, true);
+        }
+        return item;
+      });
+  Object.values(options.layout || {}).forEach((row) => {
+    if (row?.searchPanes) row.searchPanes.cascadePanes = false;
+    if (row && typeof row === "object" && Array.isArray(row.buttons)) {
+      row.buttons = prepare(row.buttons);
+    }
+  });
+}
+
+let bwCloseColumnPopover;
+function bwColumnPopover(dt, trigger, selector, t) {
+  if (bwCloseColumnPopover) {
+    const sameTrigger = trigger.getAttribute("aria-expanded") === "true";
+    bwCloseColumnPopover();
+    if (sameTrigger) return;
+  }
+  const indexes = dt.columns(selector).indexes().toArray();
+  if (indexes.length && !indexes.some((index) => dt.column(index).visible()))
+    dt.column(indexes[0]).visible(true);
+  const panel = document.createElement("div");
+  panel.className = "col-pop";
+  panel.id = `${dt.table().node().id}-columns-popover`;
+  panel.setAttribute("role", "dialog");
+  panel.setAttribute(
+    "aria-label",
+    t("table_system.visible_columns", "Visible columns"),
+  );
+  const head = document.createElement("div");
+  head.className = "col-pop-head";
+  const title = document.createElement("strong");
+  title.textContent = t("table_system.visible_columns", "Visible columns");
+  const count = document.createElement("span");
+  count.setAttribute("aria-live", "polite");
+  head.append(title, count);
+  const list = document.createElement("div");
+  list.className = "col-pop-list";
+  indexes.forEach((index) => {
+    const label = document.createElement("label");
+    label.className = "col-pop-item bw-checkbox";
+    const input = document.createElement("input");
+    input.type = "checkbox";
+    input.checked = dt.column(index).visible();
+    input.dataset.column = index;
+    label.append(
+      input,
+      document.createTextNode(dt.column(index).header().textContent.trim()),
+    );
+    list.append(label);
+  });
+  const sync = () => {
+    const boxes = [...list.querySelectorAll("input")];
+    const visible = indexes.filter((index) =>
+      dt.column(index).visible(),
+    ).length;
+    count.textContent = t(
+      "table_system.column_count",
+      "{{visible}} of {{total}}",
+      { visible, total: indexes.length },
+    );
+    boxes.forEach((box) => {
+      box.checked = dt.column(Number(box.dataset.column)).visible();
+      box.disabled = box.checked && visible === 1;
+    });
+  };
+  const footer = document.createElement("div");
+  footer.className = "col-pop-foot";
+  const showAll = document.createElement("button");
+  showAll.type = "button";
+  showAll.className = "btn btn-sm btn-light";
+  showAll.textContent = t("table_system.show_all", "Show all");
+  const reset = showAll.cloneNode();
+  reset.textContent = t("button.reset", "Reset");
+  showAll.addEventListener("click", () => {
+    indexes.forEach((index) => dt.column(index).visible(true, false));
+    dt.columns.adjust().draw(false);
+    sync();
+  });
+  reset.addEventListener("click", () => {
+    const defaults = JSON.parse(
+      document.getElementById("columns_preferences_defaults")?.value || "{}",
+    );
+    indexes.forEach((index) => {
+      if (Object.prototype.hasOwnProperty.call(defaults, index))
+        dt.column(index).visible(defaults[index], false);
+    });
+    if (!indexes.some((index) => dt.column(index).visible()) && indexes.length)
+      dt.column(indexes[0]).visible(true, false);
+    dt.columns.adjust().draw(false);
+    sync();
+  });
+  footer.append(showAll, reset);
+  panel.append(head, list, footer);
+  list.addEventListener("change", (event) => {
+    const box = event.target;
+    dt.column(Number(box.dataset.column)).visible(box.checked);
+    dt.columns.adjust().responsive.recalc();
+    sync();
+  });
+  document.body.append(panel);
+  const rect = trigger.getBoundingClientRect();
+  panel.style.top = `${Math.max(8, Math.min(rect.bottom + 6, window.innerHeight - panel.offsetHeight - 8))}px`;
+  panel.style.left = `${Math.max(8, Math.min(rect.left, window.innerWidth - panel.offsetWidth - 8))}px`;
+  trigger.setAttribute("aria-expanded", "true");
+  trigger.setAttribute("aria-haspopup", "dialog");
+  trigger.setAttribute("aria-controls", panel.id);
+  const outside = (event) => {
+    if (!panel.contains(event.target) && !trigger.contains(event.target))
+      close();
+  };
+  const close = () => {
+    panel.remove();
+    trigger.setAttribute("aria-expanded", "false");
+    document.removeEventListener("click", outside);
+    window.removeEventListener("resize", close);
+    dt.off("destroy.dt", close);
+    bwCloseColumnPopover = null;
+  };
+  panel.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") {
+      event.preventDefault();
+      close();
+      trigger.focus();
+    }
+  });
+  panel.addEventListener("focusout", (event) => {
+    if (event.relatedTarget && !panel.contains(event.relatedTarget)) close();
+  });
+  document.addEventListener("click", outside);
+  window.addEventListener("resize", close);
+  dt.on("destroy.dt", close);
+  bwCloseColumnPopover = close;
+  sync();
+  panel
+    .querySelector(".col-pop input:not(:disabled), .col-pop button")
+    ?.focus();
+}
+
+// SearchPanes remains the compatibility engine for predicate functions, saved state,
+// server-side searchPanes parameters, and existing page deep-link handlers. Its UI
+// is replaced by the single-select card, using the pane DataTables' public APIs.
+function bwAdvancedFilters(dt, t, storageKey) {
+  const engine = dt.searchPanes?.container?.();
+  if (!engine || !$(engine).length) return null;
+  const $engine = $(engine)
+    .addClass("bw-filter-engine")
+    .attr("aria-hidden", "true");
+  const card = document.createElement("section");
+  card.className = "adv-filters";
+  card.id = `${dt.table().node().id}-advanced-filters`;
+  card.setAttribute(
+    "aria-label",
+    t("table_system.advanced_filters", "Advanced filters"),
+  );
+  const head = document.createElement("div");
+  head.className = "adv-filters-head";
+  const title = document.createElement("strong");
+  title.textContent = t("table_system.advanced_filters", "Advanced filters");
+  const reset = document.createElement("button");
+  reset.type = "button";
+  reset.className = "btn btn-sm btn-light";
+  reset.textContent = t("button.reset", "Reset");
+  const apply = document.createElement("button");
+  apply.type = "button";
+  apply.className = "btn btn-sm btn-primary";
+  apply.textContent = t("table_system.filter", "Filter");
+  head.append(title, reset, apply);
+  const grid = document.createElement("div");
+  grid.className = "adv-filters-grid";
+  card.append(head, grid);
+  const wrapper = dt.table().container();
+  wrapper.querySelector(".bw-table-scroll").before(card);
+  const toggleButtons = $(wrapper).find(".toggle-filters");
+  const panes = [];
+  const labelText = (value) => {
+    const template = document.createElement("template");
+    template.innerHTML = String(value ?? "");
+    return template.content.textContent.trim();
+  };
+  const refresh = () => {
+    let active = 0;
+    const seen = new Set();
+    $engine.find("table").each(function () {
+      if (!$.fn.dataTable.isDataTable(this)) return;
+      const api = $(this).DataTable();
+      if (api.table().node() !== this) return;
+      seen.add(this);
+      let pane = panes.find((item) => item.table === this);
+      if (!pane) {
+        const label = document.createElement("label");
+        label.className = "adv-filter-field";
+        const caption = document.createElement("span");
+        const select = document.createElement("select");
+        select.className = "form-select";
+        label.append(caption, select);
+        grid.append(label);
+        pane = { table: this, api, select, caption };
+        panes.push(pane);
+      }
+      pane.api = api;
+      const header = this.closest(".dtsp-searchPane")?.querySelector(
+        ".dtsp-paneInputButton",
+      );
+      pane.caption.textContent =
+        header?.placeholder || header?.textContent || "";
+      let selected = api.rows({ selected: true }).indexes().toArray();
+      // Migrate legacy multi-value state to the single value shown by this select.
+      if (selected.length > 1) {
+        api.rows(selected.slice(1)).deselect();
+        selected = selected.slice(0, 1);
+      }
+      if (selected.length) active++;
+      // Preserve an unsubmitted draft while refreshing server-side counts.
+      const dirty = pane.select.dataset.dirty === "true";
+      pane.select.replaceChildren(new Option(t("table_system.any", "Any"), ""));
+      api.rows().every(function () {
+        const row = this.data();
+        const label = labelText(row.display);
+        const option = new Option(label, String(this.index()));
+        option.selected = dirty
+          ? row.filter === pane.draft
+          : selected.includes(this.index());
+        pane.select.add(option);
+      });
+      pane.select.onchange = () => {
+        pane.select.dataset.dirty = "true";
+        pane.draft =
+          pane.select.value === ""
+            ? undefined
+            : pane.api.row(Number(pane.select.value)).data().filter;
+      };
+    });
+    for (let index = panes.length - 1; index >= 0; index--) {
+      if (!seen.has(panes[index].table)) {
+        panes[index].select.parentElement.remove();
+        panes.splice(index, 1);
+      }
+    }
+    toggleButtons.each(function () {
+      this.setAttribute("aria-controls", card.id);
+      this.setAttribute(
+        "aria-label",
+        active
+          ? t("table_system.active_filters", "Filters, {{count}} active", {
+              count: active,
+            })
+          : t("table_system.filters", "Filters"),
+      );
+      const count = this.querySelector(".af-count");
+      if (count) {
+        count.textContent = active;
+        count.hidden = active === 0;
+      }
+    });
+  };
+  let applying = false;
+  let pending;
+  const schedule = () => {
+    if (applying) return;
+    clearTimeout(pending);
+    pending = setTimeout(refresh, 0);
+  };
+  $engine.on(`draw.dt select.dt deselect.dt`, schedule);
+  dt.on("draw.dt", schedule);
+  reset.addEventListener("click", () => {
+    panes.forEach((pane) => {
+      delete pane.select.dataset.dirty;
+    });
+    dt.searchPanes.clearSelections();
+    refresh();
+  });
+  apply.addEventListener("click", () => {
+    // Snapshot values before selecting: cascade redraws can replace pane rows.
+    const values = panes.map((pane) => ({
+      pane,
+      value:
+        pane.select.value === ""
+          ? undefined
+          : pane.api.row(Number(pane.select.value)).data().filter,
+    }));
+    applying = true;
+    dt.searchPanes.clearSelections();
+    values.forEach(({ pane, value }) => {
+      delete pane.select.dataset.dirty;
+      if (value === undefined) return;
+      pane.api.rows().every(function () {
+        if (this.data().filter === value) this.select();
+      });
+    });
+    applying = false;
+    refresh();
+  });
+  const toggle = (expanded) => {
+    card.hidden = !expanded;
+    toggleButtons.attr("aria-expanded", String(expanded));
+  };
+  toggle(localStorage.getItem(storageKey) === "true");
+  refresh();
+  dt.on("destroy.dt", () => {
+    clearTimeout(pending);
+    $engine.off(`draw.dt select.dt deselect.dt`, schedule);
+    card.remove();
+  });
+  return { toggle, isExpanded: () => !card.hidden, refresh };
 }
 
 /**

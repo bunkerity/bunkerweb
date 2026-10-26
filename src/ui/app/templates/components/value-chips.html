@@ -1,0 +1,17 @@
+{# Plain values use these chips; status.html is reserved for states. Labels and URLs
+   remain escaped. Use svc-scope for Global/All services rather than a service name. #}
+{% macro service_code(value, href=none, scope=false) -%}
+    {%- if href %}<a href="{{ href }}" class="{{ 'svc-scope' if scope else 'svc-code' }}">{{ value }}</a>
+    {%- else %}<span class="{{ 'svc-scope' if scope else 'svc-code' }}">{{ value }}</span>{% endif -%}
+{%- endmacro %}
+
+{% macro tag_chip(value, href=none, icon=none, i18n_key=none) -%}
+    {%- if href %}<a href="{{ href }}" class="tag-chip">{% else %}<span class="tag-chip">{% endif -%}
+    {%- if icon %}<i class="bx {{ icon }}" aria-hidden="true"></i>{% endif -%}
+    {{ _(i18n_key) if i18n_key else value }}
+    {%- if href %}</a>{% else %}</span>{% endif -%}
+{%- endmacro %}
+
+{% macro plugin_chip(value, icon="bx-plug") -%}
+    <span class="tag-chip plugin-chip"><i class="bx {{ icon }}" aria-hidden="true"></i>{{ value }}</span>
+{%- endmacro %}

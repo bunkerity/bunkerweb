@@ -27,9 +27,14 @@
   color: var(--bw-fg-2);
 }
 
-/* Lock / state chips: keep the pill shape consistent with the switch height. */
+/* Lock / state chips: keep the pill shape consistent with the switch height.
+   Every state badge carries an icon as well as its colour (Enabled / Disabled / Always on). */
 #plugin-grid .plugin-state .badge {
   border-radius: 999px;
+}
+#plugin-grid .plugin-state .plugin-state-badge {
+  gap: 0.1rem;
+  font-size: 0.75rem;
 }
 
 /* Card lifts a touch on hover so the grid feels interactive. */
@@ -42,4 +47,106 @@
 #plugin-grid .plugin-card-col .card:hover {
   border-color: var(--bw-fg-3);
   box-shadow: 0 4px 14px -8px rgba(0, 0, 0, 0.25);
+}
+
+/* ----------------------------------------------------------------------------
+   Filter tabs (kit .tabs underline row, app.css:670-675 / 1719-1738) with a
+   count badge per tab. The row is clipped, not scrolled: plugins-grid.js swaps it
+   for the select below when it no longer fits.
+   -------------------------------------------------------------------------- */
+.plugin-tabs-wrap {
+  flex: 1 1 12rem;
+  min-width: 0;
+}
+.plugin-filter-tabs {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 2px;
+  overflow: hidden;
+  border-bottom: 1px solid var(--bw-border);
+}
+.plugin-filter-tabs .tab {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  flex: 0 0 auto;
+  margin-bottom: -1px;
+  padding: 10px 16px;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  background: transparent;
+  color: var(--bw-fg-2);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+.plugin-filter-tabs .tab:hover:not(.active) {
+  color: var(--bw-fg-1);
+}
+.plugin-filter-tabs .tab.active {
+  color: var(--bw-accent);
+  border-bottom-color: var(--bw-accent);
+}
+.plugin-filter-tabs .tab:focus-visible {
+  outline: 2px solid var(--bw-accent);
+  outline-offset: -4px;
+  border-radius: 4px;
+}
+.plugin-filter-tabs .bw-badge-xs {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3px 8px;
+  border: 1px solid var(--bw-border);
+  border-radius: 999px;
+  background: var(--bw-bg-subtle);
+  color: var(--bw-fg-2);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+}
+.plugin-filter-tabs .tab.active .bw-badge-xs {
+  border-color: currentColor;
+  background: transparent;
+  color: var(--bw-accent);
+}
+.plugin-tabs-select {
+  max-width: 100%;
+}
+
+/* ----------------------------------------------------------------------------
+   Tier chip (kit .bw-tier.is-icon, app.css:5593-5596): icon-only round chip. The
+   type label stays in the DOM, visually hidden, as the accessible name.
+   -------------------------------------------------------------------------- */
+.bw-tier.is-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 28px;
+  height: 28px;
+  min-width: 28px;
+  gap: 0;
+  padding: 0;
+  border-radius: 50%;
+  box-sizing: border-box;
+  cursor: default;
+}
+.bw-tier.is-icon > .bx {
+  font-size: 16px;
+  line-height: 1;
+}
+.bw-tier.is-icon:focus-visible {
+  outline: 2px solid var(--bw-accent);
+  outline-offset: 2px;
+}
+.bw-tier .bw-tier-l {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
 }

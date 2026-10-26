@@ -69,7 +69,7 @@ $(document).ready(function () {
        data-bs-original-title="${escapeAttr(t(key, isReadOnly ? "View Service {{service}}" : "Edit Service {{service}}", { service: id }))}"><i class="bx bx-${icon} bx-xs"></i>&nbsp;${
          row && row.reserved
            ? escapeAttr(t("service.default_server.name", "Default server"))
-           : safeId
+           : `<span class="svc-code">${safeId}</span>`
        }</a>`;
     // Advisory badge: this service carries nothing the redirect-only allowlist forbids, so
     // declaring it `redirect_only` WILL take it off the PRO billable count once that billing is
@@ -100,7 +100,8 @@ $(document).ready(function () {
     // `id` and `data-value` are both load-bearing: this file reads `#type-<name>`'s `data-value`
     // when it filters a bulk conversion, and clones the element into the confirm list.
     return `<span id="type-${escapeAttr(idFor(name))}" data-value="${draft ? "draft" : "online"}"
-       class="badge rounded-pill bg-label-${draft ? "secondary" : "primary"} d-inline-flex align-items-center"><i class="bx ${draft ? "bx-file-blank" : "bx-globe"} me-1" aria-hidden="true"></i><span>${escapeAttr(t(draft ? "status.draft" : "status.online", draft ? "Draft" : "Online"))}</span></span>`;
+       data-status-cue="${draft ? "warn" : "ok"}"
+       class="badge status-badge rounded-pill bg-label-${draft ? "warning" : "bw-green"} d-inline-flex align-items-center gap-1"><span class="status-dot" aria-hidden="true"></span><span>${escapeAttr(t(draft ? "status.draft" : "status.online", draft ? "Draft" : "Online"))}</span></span>`;
   }
 
   function renderSecurityMode(mode) {
@@ -117,7 +118,7 @@ $(document).ready(function () {
     const readOnlyTemplate =
       isReadOnly || ["low", "medium", "high", "ui", "api"].includes(template);
     const icon = readOnlyTemplate ? "show" : "edit";
-    return `<a href="${templatesUrl}/${encodeURIComponent(template)}" class="d-flex align-items-center"
+    return `<a href="${templatesUrl}/${encodeURIComponent(template)}" class="tag-chip"
        data-bs-toggle="tooltip" data-bs-placement="bottom"
        data-bs-original-title="${escapeAttr(t(readOnlyTemplate ? "tooltip.link.view_template" : "tooltip.link.edit_template", readOnlyTemplate ? "View Template {{template}}" : "Edit Template {{template}}", { template: template }))}"><i class="bx bx-${icon} bx-xs"></i>&nbsp;${safe}</a>`;
   }
@@ -784,6 +785,10 @@ $(document).ready(function () {
             orderable: false,
           },
           targets: 4,
+          render: (data, type) =>
+            type === "display" && data
+              ? `<span class="tag-chip">${escapeAttr(data)}</span>`
+              : data,
           // A `<td>` id is not something a renderer can set — a renderer produces cell *content*.
           // `#method-<name>` is a hook into this table, so it needs the one callback DataTables
           // gives for the cell element itself.

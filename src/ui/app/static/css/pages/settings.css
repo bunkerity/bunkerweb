@@ -51,3 +51,405 @@
   min-width: 96px;
   justify-content: center;
 }
+
+/* ---- SET-11: settings grid driven by the CARD's width (design settings.css:9-25). ------------
+   `.bw-settings-card` is the query container, so a narrower card (a side rail, a small window)
+   reflows by its own width: 1 column, 2 from 640px, 3 from 1100px. Wide kinds span the row. */
+.bw-settings-card {
+  container: bwsettings / inline-size;
+}
+.bw-settings-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  column-gap: 1.5rem;
+  row-gap: 0;
+}
+.bw-settings-grid > .bw-setting-cell {
+  min-width: 0;
+  padding-inline: 0;
+}
+.bw-settings-grid > .bw-setting-cell.is-wide {
+  grid-column: 1 / -1;
+}
+@container bwsettings (min-width: 640px) {
+  .bw-settings-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@container bwsettings (min-width: 1100px) {
+  .bw-settings-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+/* ---- SET-10: help text read in place under the control (design `.bw-input-help`). -------- */
+.bw-setting-frame .bw-input-help {
+  margin: 0.5rem 0 0;
+  font-size: 0.72rem;
+  line-height: 1.4;
+  color: var(--bw-fg-3, var(--bs-secondary-color));
+}
+
+/* ---- SET-8 / PLG-21: card header with count + search (design configure.js:96-103). ---------- */
+.bw-settings-card .bw-settings-head {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem 0.75rem;
+  padding: var(--bw-pad-card-header, 0.9rem 1.25rem);
+  border-bottom: 1px solid var(--bw-border);
+}
+.bw-settings-head .bw-settings-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--bs-heading-color, inherit);
+}
+.bw-settings-head .bw-settings-count {
+  font-size: 0.8rem;
+  color: var(--bw-fg-3, var(--bs-secondary-color));
+}
+.bw-settings-head .bw-settings-spacer {
+  flex: 1 1 0;
+}
+.bw-settings-search {
+  position: relative;
+  min-width: 180px;
+  max-width: 100%;
+  flex: 0 1 260px;
+}
+.bw-settings-search .bx {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: 0.6rem;
+  display: flex;
+  align-items: center;
+  color: var(--bw-fg-3, var(--bs-secondary-color));
+  pointer-events: none;
+}
+.bw-settings-search input.form-control {
+  padding-inline-start: 2rem !important;
+}
+.bw-settings-empty {
+  padding: 1.25rem;
+  text-align: center;
+  color: var(--bw-fg-3, var(--bs-secondary-color));
+}
+
+/* ---- PLG-20: Plugin / Scope selectors above the card (design `.plugin-scope-bar`). --------- */
+.bw-scope-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 0.75rem 1rem;
+  margin-bottom: 1rem;
+}
+.bw-scope-bar > .bw-scope-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  flex: 1 1 220px;
+  max-width: 340px;
+  min-width: 0;
+}
+.bw-scope-bar .bw-scope-cap {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--bw-fg-3, var(--bs-secondary-color));
+}
+.bw-scope-bar .bw-select-list {
+  max-height: 320px;
+  overflow-y: auto;
+  min-width: 100%;
+}
+.bw-plugin-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.25rem 0.75rem;
+  margin: -0.25rem 0 1rem;
+  color: var(--bw-fg-3, var(--bs-secondary-color));
+}
+
+/* ---- PLG-24 / SET-14: the notes under the form. ----------------------------------------- */
+.bw-settings-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  margin-top: 1rem;
+  font-size: 0.875rem;
+}
+.bw-settings-note > .bx {
+  margin-top: 0.15rem;
+  flex: none;
+}
+.bw-settings-groups-link {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem 1rem;
+  margin-top: 1rem;
+  padding: 0.85rem 1.1rem;
+  border: 1px solid var(--bw-border);
+  border-radius: 8px;
+  background: var(--bw-bg-card);
+}
+
+/* ---- SET-6: Compose / Raw as the design's range-picker, in the page head. -------------------
+   Still links (models/mode_pills.html): `.nav-link.active` marks the mode on screen. */
+.bw-mode-pills {
+  display: inline-flex;
+  margin: 0;
+  padding: 3px;
+  gap: 2px;
+  list-style: none;
+  border: 1px solid var(--bw-border);
+  border-radius: 8px;
+  background: var(--bw-bg-card);
+}
+.bw-mode-pills .nav-item {
+  margin: 0;
+}
+.bw-mode-pills .nav-link {
+  gap: 0.35rem;
+  padding: 0.3rem 0.8rem;
+  border-radius: 6px !important;
+  border: 0;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--bw-fg-2, var(--bs-body-color));
+  background: transparent;
+}
+.bw-mode-pills .nav-link:hover {
+  color: var(--bs-body-color);
+  background: var(--bs-secondary-bg);
+}
+.bw-mode-pills .nav-link.active {
+  color: #fff;
+  background: var(--bs-primary);
+}
+[data-bs-theme="dark"] .bw-mode-pills .nav-link.active {
+  color: #06162a;
+  background: var(--bw-accent, #6ac1e0);
+}
+.bw-mode-pills .nav-link i {
+  margin: 0;
+}
+
+/* ---- SET-5: the compose shelf reads as the design's plugin table (rows only, markup untouched, so every
+   switch, picker and hidden fallback posts exactly as before). Loaded by global_settings.html and, since
+   SET-6, service_settings.html. ------------------------------------------------------------------ */
+#compose-shelf {
+  overflow: hidden;
+}
+#compose-shelf > .card-body {
+  padding: 0;
+}
+#compose-shelf > .card-body > div:first-child {
+  margin-bottom: 0 !important;
+  padding: var(--bw-pad-card-header, 0.9rem 1.25rem);
+  border-bottom: 1px solid var(--bw-border);
+}
+#compose-shelf #compose-shelf-rows {
+  --bs-list-group-border-width: 0;
+}
+#compose-shelf .shelf-row {
+  padding: var(--bw-pad-cell, 0.6rem 1.25rem) !important;
+  border-bottom: 1px solid var(--bw-border-quiet, var(--bw-border));
+  transition: background-color 0.12s ease;
+}
+#compose-shelf .shelf-row:last-child {
+  border-bottom: 0;
+}
+#compose-shelf .shelf-row:hover {
+  background: var(--bs-tertiary-bg);
+}
+#compose-shelf .shelf-glyph {
+  width: 1.75rem;
+  justify-content: center;
+  color: var(--bs-primary);
+}
+#compose-shelf .shelf-control {
+  min-width: 3.5rem;
+  justify-content: flex-end;
+}
+#compose-shelf .shelf-provenance {
+  min-width: 8rem;
+  display: inline-flex;
+  justify-content: flex-end;
+}
+#compose-shelf .shelf-chevron {
+  color: var(--bw-fg-3, var(--bs-secondary-color));
+}
+#compose-shelf #compose-shelf-show-more {
+  display: block;
+  margin: 0 !important;
+  padding: 0.75rem 1.25rem;
+  text-align: start;
+}
+
+/* ---- SET-7: raw editor tiles + in-card search (design global-raw.js:75-150). ----------------- */
+.bw-raw-tiles {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--bw-gap-grid, 0.75rem);
+}
+@media (max-width: 991.98px) {
+  .bw-raw-tiles {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 479.98px) {
+  .bw-raw-tiles {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+.bw-raw-tile {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  padding: var(--bw-pad-tile, 0.8rem 1rem);
+  border: 1px solid var(--bw-border);
+  border-radius: 8px;
+  background: var(--bw-bg-card);
+}
+.bw-raw-tile-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--bw-fg-3, var(--bs-secondary-color));
+}
+.bw-raw-tile-value {
+  font-size: 1.5rem;
+  font-weight: 600;
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
+}
+.bw-raw-tile.has-problems {
+  border-color: var(--bs-danger);
+}
+.bw-raw-tile.has-problems .bw-raw-tile-value {
+  color: var(--bs-danger);
+}
+.raw-config-search {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+.raw-config-search input {
+  min-width: 140px;
+  max-width: 220px;
+}
+
+/* ---- SET-9 / SET-20: the design's field look over the native controls (design settings.css .bw-input-field). --
+   The key is the subtitle, so the floating label (which printed it inside the control) is hidden: the controls
+   keep their title (`aria-labelledby` points at the card label, not at it). A fixed 40px control, no floating pad. */
+.bw-setting-frame .bw-input-subtitle {
+  margin: -0.15rem 0 0.5rem;
+  font-family: var(--bs-font-monospace);
+  font-size: 0.72rem;
+  line-height: 1.3;
+  color: var(--bw-fg-3, var(--bs-secondary-color));
+  overflow-wrap: anywhere;
+  user-select: all;
+}
+.bw-setting-frame .form-floating > label {
+  display: none;
+}
+.bw-setting-frame .form-floating > .form-control,
+.bw-setting-frame .form-floating > .form-select,
+.bw-setting-frame
+  .form-floating
+  > .bw-setting-select
+  > .bw-setting-select-trigger {
+  height: 40px;
+  min-height: 40px;
+  padding: 0.4rem 0.75rem;
+}
+.bw-setting-frame .form-floating > .form-control:not(:placeholder-shown),
+.bw-setting-frame .form-floating > .form-control:focus {
+  padding: 0.4rem 0.75rem;
+}
+.bw-setting-frame .form-floating {
+  min-height: 0;
+}
+.bw-setting-frame .input-group-merge .bw-input-copy {
+  cursor: pointer;
+}
+
+/* The design combobox (settings-widgets.js `initSelectBoxes`): the native <select> stays in the DOM as the
+   value that posts, visually hidden and out of the tab order. */
+.bw-setting-select {
+  width: 100%;
+}
+.bw-setting-select .bw-setting-select-trigger {
+  width: 100%;
+}
+.bw-select-native {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  border: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+.bw-setting-select .bw-select-list {
+  min-width: 100%;
+  max-height: 280px;
+  overflow-y: auto;
+}
+.bw-setting-select .dropdown-item.active {
+  background: var(--bs-primary);
+  color: #fff;
+}
+
+/* The select combobox trigger inherits Bootstrap's light `.form-select` colours; theme it (dark mode + contrast tokens). */
+.bw-select > .form-select {
+  color: var(--bs-body-color);
+  background-color: var(--bs-body-bg);
+  border-color: var(--bw-border);
+}
+.bw-select > .form-select:disabled {
+  color: var(--bs-secondary-color);
+  background-color: var(--bs-tertiary-bg);
+  border-color: var(--bw-border-quiet, var(--bw-border));
+}
+.bw-select .bw-select-list .dropdown-item {
+  color: var(--bs-body-color);
+}
+.bw-select .bw-select-list .dropdown-item:hover,
+.bw-select .bw-select-list .dropdown-item:focus {
+  background: var(--bs-tertiary-bg);
+}
+.bw-select .bw-select-list .dropdown-item.active {
+  color: #fff;
+  background: var(--bs-primary);
+}
+[data-bs-theme="dark"] .bw-select .bw-select-list .dropdown-item.active {
+  background: rgba(var(--bs-primary-rgb), 0.6);
+}
+
+/* The raw editor's toolbar painted itself transparent under the kit's `.card-header` rule (white text on a white card):
+   restore the navy band it has always had. */
+.raw-config-container > .raw-config-toolbar {
+  background-color: var(--raw-toolbar-base, #0b354a);
+  color: #fff;
+}
+[data-bs-theme="dark"] .raw-config-container > .raw-config-toolbar {
+  background-color: color-mix(
+    in srgb,
+    rgba(14, 25, 40, 0.94) 80%,
+    rgba(var(--bs-primary-rgb), 1) 20%
+  );
+}

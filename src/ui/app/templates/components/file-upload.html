@@ -60,7 +60,7 @@
      box_class          CSS class of the box. 'raw-config-dropzone' (default, template_edit.html's
                         primary-styled import box) | 'missing-configs-dropzone' (neutral/gray
                         variant, same file) | your own utility classes (plugins.html style).
-     icon_class         icon element classes. Default 'bx bx-file-import bx-lg mb-3 text-primary'
+     icon_class         icon element classes. Default 'bx bx-upload bx-lg mb-3 text-primary'
                         (raw-config-dropzone's icon) -- pass 'bx bx-cloud-upload bx-lg mb-2
                         text-primary' to match missing-configs-dropzone instead.
      hint / hint_class / hint_i18n_key           primary hint line. hint_class default 'mb-1'.
@@ -131,7 +131,7 @@
     input_id=none,
     multiple=false,
     box_class="raw-config-dropzone",
-    icon_class="bx bx-file-import bx-lg mb-3 text-primary",
+    icon_class="bx bx-upload bx-lg mb-3 text-primary",
     hint=none,
     hint_class="mb-1",
     hint_i18n_key=none,
@@ -245,9 +245,7 @@
      {%- if aria_label %} aria-label="{{ _(aria_label_i18n_key) if aria_label_i18n_key else aria_label }}"{% endif %}
      {%- if attrs %} {{ attrs | safe }}{% endif %}>
     <i class="{{ icon_class }}" aria-hidden="true"></i>
-    {%- if hint %}
-    <p class="{{ hint_class }}">{{ _(hint_i18n_key) if hint_i18n_key else hint }}</p>
-    {%- endif %}
+    <p class="{{ hint_class }}">{{ (_(hint_i18n_key) if hint_i18n_key else hint) if hint is not none else _("table_system.upload_hint") }}</p>
     {%- if sub_hint %}
     <p class="{{ sub_hint_class }}">{{ _(sub_hint_i18n_key) if sub_hint_i18n_key else sub_hint }}</p>
     {%- endif %}

@@ -207,25 +207,18 @@
 
 /* ── ticker + top panels ──────────────────────────────────────────────── */
 
-.threatmap-ticker {
+.threatmap-ticker-wrap {
   max-height: 22rem;
   overflow-y: auto;
   font-size: 0.85rem;
 }
 
-/* Wraps rather than clips: five columns do not fit a phone, and a row that overflows loses the
- * target name silently instead of moving it to a second line. */
-.threatmap-ticker__row {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.35rem 0.5rem;
-  padding: 0.35rem 0;
-  border-bottom: 1px solid var(--bw-border, rgba(0, 0, 0, 0.08));
-}
-
-.threatmap-ticker__row:last-child {
-  border-bottom: 0;
+.threatmap-ticker thead th {
+  background: var(--bw-bg-card, #fff);
+  position: sticky;
+  top: 0;
+  white-space: nowrap;
+  z-index: 1;
 }
 
 .threatmap-ticker__time {
@@ -234,48 +227,28 @@
   white-space: nowrap;
 }
 
-/* The <code> default (#e83e8c) measures 3.58:1 on the card — below the 4.5:1 AA floor at this
- * size. The body colour keeps the monospace treatment and passes. */
 .threatmap-ticker__ip {
-  font-size: 0.8rem;
-  color: var(--bw-fg-2, #566a7f);
+  white-space: nowrap;
 }
 
-/* margin-inline-start, not margin-left: the UI ships Arabic and Urdu and honours [dir="rtl"]
- * (see overrides.css), where "push to the far end" is the other side. */
 .threatmap-ticker__target {
-  margin-inline-start: auto;
+  max-width: 12rem;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  max-width: 12rem;
-}
-
-@media (max-width: 575.98px) {
-  /* Once wrapped, the target owns its own line — an auto margin on a wrapped flex line would
-     shove it off the edge instead. */
-  .threatmap-ticker__target {
-    margin-inline-start: 0;
-    max-width: 100%;
-    flex-basis: 100%;
-  }
-}
-
-/* The reason badge's bg-label-danger pairing measures 2.84:1 — an AA failure at 11.8px. Outlined
- * on the card background instead, which keeps the danger hue as the signal and passes. */
-.threatmap-ticker__reason.badge {
-  background: transparent !important;
-  border: 1px solid var(--bs-danger, #ff3e1d);
-  color: var(--bw-fg-1, #384551) !important;
-  font-weight: 500;
 }
 
 .threatmap-top__row {
-  display: flex;
   align-items: center;
-  justify-content: space-between;
+  display: grid;
   gap: 0.5rem;
+  grid-template-columns: 1.5rem minmax(0, 1fr) auto minmax(7rem, 38%);
   padding: 0.3rem 0;
+}
+
+.threatmap-top__rank {
+  color: var(--bw-fg-2, #566a7f);
+  font-variant-numeric: tabular-nums;
 }
 
 .threatmap-top__label {
@@ -315,15 +288,12 @@
  * String(256). The shared tile macro wraps, so a 108-character corporate hostname grew the whole
  * row from 110px to 346px and turned the two number tiles into voids. One line, ellipsised; the
  * full value is on the element's title attribute. Scoped to this page — the macro is shared. */
-#threatmap-tile-target .bw-kpi-value,
-#threatmap-tile-reason .bw-kpi-value {
+#threatmap-tile-target .bw-kpi-caption,
+#threatmap-tile-reason .bw-kpi-caption {
   display: block;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  /* The display face is sized for a 3-digit count; a hostname needs to stay legible instead. */
-  font-size: 1.25rem;
-  line-height: 1.6;
 }
 
 /* ── wall-display mode ────────────────────────────────────────────────── */

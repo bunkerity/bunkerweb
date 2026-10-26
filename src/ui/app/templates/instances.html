@@ -157,7 +157,7 @@
                             {% endif %}
                         </td>
                         <td>{{ instance.name }}</td>
-                        <td id="method-{{ instance.hostname }}">{{ instance.method }}</td>
+                        <td id="method-{{ instance.hostname }}"><span class="tag-chip">{{ instance.method }}</span></td>
                         <td>
                             {% if instance.status == "up" %}
                                 {{ status(type="up", id="status-" ~ instance.hostname, live=true) }}
@@ -190,7 +190,7 @@
                                         data-bs-toggle="tooltip"
                                         data-bs-placement="bottom"
                                         data-bs-original-title="{{ _("tooltip.button.ping_instance", hostname=instance['hostname']) }}">
-                                    <i class="bx bx-bell" aria-hidden="true"></i>
+                                    <i class="bx bx-broadcast" aria-hidden="true"></i>
                                 </button>
                                 {# Reload and Stop change the instance: same write gate as Enroll and Delete (H16). #}
                                 {% set write_tooltip_key = ('tooltip.disabled_readonly' if user_readonly else 'tooltip.disabled_db_readonly') if is_readonly else none %}
@@ -213,7 +213,7 @@
                                             class="icon-btn stop-instance{% if instance.status != 'up' or is_readonly %} disabled{% endif %}"
                                             aria-label="{{ _("tooltip.button.stop_instance", hostname=instance['hostname']) }}"
                                             data-instance="{{ instance['hostname'] }}">
-                                        <i class="bx bx-stop" aria-hidden="true"></i>
+                                        <i class="bx bx-stop-circle" aria-hidden="true"></i>
                                     </button>
                                 </div>
                                 {# Enrollment only applies to rows the control plane can own a credential on:
@@ -274,8 +274,8 @@
                 {% endfor %}
             </tbody>
         {% endcall %}
-        <span class="position-absolute bottom-0 start-50 translate-middle badge rounded-pill bg-secondary">
-            TZ: <script nonce="{{ script_nonce }}">document.write(Intl.DateTimeFormat().resolvedOptions().timeZone);</script>
+        <span class="tag-chip position-absolute bottom-0 start-50 translate-middle">
+            <i class="bx bx-time" aria-hidden="true"></i>TZ: <script nonce="{{ script_nonce }}">document.write(Intl.DateTimeFormat().resolvedOptions().timeZone);</script>
         </span>
     {% endcall %}
     <div id="feedback-toast"

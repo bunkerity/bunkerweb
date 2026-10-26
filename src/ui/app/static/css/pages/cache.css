@@ -11,7 +11,7 @@
   font-weight: 400;
   font-style: normal;
   content: "\eaf8"; /* bx-globe */
-  margin-right: 0.35em;
+  margin-inline-end: 0.35em;
   font-size: 0.95em;
   line-height: 1;
   vertical-align: -0.05em;

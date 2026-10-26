@@ -237,21 +237,26 @@
 .bw-flow-rule.is-off .bw-flow-head-name {
   color: var(--bw-fg-3);
 }
+/* WF-04: title row (name + one segmented control), separated prose, then the badges. The
+   summary stays visible while the rule is open: it is the plain reading of the editors. */
 .bw-flow-head {
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas:
+    "name tools"
+    "sum sum"
+    "foot foot";
   align-items: center;
-  gap: 12px;
-  padding: 11px 14px;
-}
-.bw-flow-head-main {
-  flex: 1;
-  min-width: 0;
+  column-gap: 12px;
+  padding: 12px 14px 14px;
 }
 .bw-flow-head-name {
+  grid-area: name;
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 13.5px;
+  min-width: 0;
+  font-size: 15px;
   font-weight: 600;
   color: var(--wf-accent);
 }
@@ -261,18 +266,130 @@
   color: var(--bw-fg-3);
 }
 .bw-flow-head-sum {
-  margin-top: 3px;
-  font-size: 12px;
-  line-height: 1.45;
+  grid-area: sum;
+  margin: 10px -14px 0;
+  padding: 10px 14px 0;
+  border-top: 1px solid var(--bw-border);
+  font-size: 13px;
+  line-height: 1.5;
   color: var(--bw-fg-2);
   text-wrap: pretty;
+  overflow-wrap: anywhere;
 }
 .bw-flow-head-sum.is-pending {
   color: var(--bw-fg-4);
   font-style: italic;
 }
-.bw-flow-rule.is-open .bw-flow-head-sum {
-  display: none;
+.bw-flow-head-foot {
+  grid-area: foot;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+/* WF-05: IF / THEN come from the rule data (.sum-kw), values are .m. */
+.sum-kw {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--wf-accent);
+}
+.sum-kw.is-then {
+  color: #137a4c;
+}
+[data-bs-theme="dark"] .sum-kw.is-then {
+  color: #8ce0a8;
+}
+.sum-if,
+.sum-then {
+  display: inline;
+}
+.bw-flow-head-sum .m,
+.fc-node-sum .m {
+  font-family: var(--font-courier-prime);
+  font-size: 12px;
+  color: var(--wf-accent);
+  background: color-mix(in srgb, var(--wf-accent) 8%, transparent);
+  padding: 0 3px;
+  border-radius: 3px;
+  overflow-wrap: anywhere;
+}
+/* WF-04: one top-right segmented control: reorder | rule actions. */
+.bw-flow-head > .bw-flow-tools {
+  grid-area: tools;
+  gap: 0;
+  padding: 2px;
+  border: 1px solid var(--bw-border);
+  border-radius: 8px;
+  background: var(--bw-bg-card);
+}
+.bw-flow-head > .bw-flow-tools .bw-flow-iconbtn {
+  width: 26px;
+  height: 26px;
+}
+.bw-flow-grip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.bw-flow-tools-sep {
+  width: 1px;
+  align-self: stretch;
+  margin: 3px 3px;
+  background: var(--bw-border);
+}
+/* WF-09: below the tablet width the tool group stacks above the title instead of squeezing it. */
+@media (max-width: 575.98px) {
+  .bw-flow-head {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      "tools"
+      "name"
+      "sum"
+      "foot";
+    row-gap: 8px;
+  }
+  .bw-flow-head > .bw-flow-tools {
+    justify-self: end;
+  }
+}
+/* The consequence replaces the repeated footer: one badge, its explanation as a tooltip. */
+.bw-flow-conseq,
+.fc-gate {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  flex-shrink: 0;
+  border: 1px solid var(--bw-border);
+  border-radius: 999px;
+  padding: 3px 10px;
+  font-size: 11.5px;
+  font-weight: 600;
+  line-height: 1.2;
+  color: var(--bw-fg-2);
+  cursor: help;
+}
+.bw-flow-conseq .bx {
+  font-size: 14px;
+}
+.bw-flow-conseq.is-stop {
+  color: color-mix(in srgb, var(--bs-warning) 55%, #000);
+  border-color: color-mix(in srgb, var(--bs-warning) 55%, transparent);
+  background: color-mix(in srgb, var(--bs-warning) 10%, transparent);
+}
+[data-bs-theme="dark"] .bw-flow-conseq.is-stop {
+  color: var(--bs-warning);
+}
+.bw-flow-conseq.is-skip {
+  color: var(--bw-fg-3);
+  border-style: dashed;
+}
+.bw-flow-conseq:focus-visible,
+.fc-gate:focus-visible {
+  outline: 2px solid var(--wf-accent);
+  outline-offset: 2px;
 }
 .bw-flow-tools {
   display: flex;
@@ -312,7 +429,7 @@
 .bw-flow-name-input {
   flex: 1;
   min-width: 0;
-  font-size: 13.5px;
+  font-size: 15px;
   font-weight: 600;
   color: var(--wf-accent);
   background: transparent;
@@ -378,34 +495,6 @@
 [data-bs-theme="dark"] .bw-flow-act.t-challenge {
   background: color-mix(in srgb, var(--bs-warning) 20%, transparent);
   color: var(--bs-warning);
-}
-
-/* rule outcome footer — the semantics, always visible */
-.bw-flow-foot {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  padding: 8px 14px;
-  border-top: 1px solid var(--bw-border);
-  font-size: 11.5px;
-  color: var(--bw-fg-2);
-  background: color-mix(in srgb, var(--wf-accent) 2%, transparent);
-}
-[data-bs-theme="dark"] .bw-flow-foot {
-  background: color-mix(in srgb, var(--wf-accent) 5%, transparent);
-}
-.bw-flow-foot .bx {
-  font-size: 14px;
-  color: var(--wf-accent);
-}
-.bw-flow-foot strong {
-  font-weight: 600;
-}
-.bw-flow-rule.is-off .bw-flow-foot {
-  color: var(--bw-fg-3);
-}
-.bw-flow-rule.is-off .bw-flow-foot .bx {
-  color: var(--bw-fg-4);
 }
 
 /* ---------- rule body: If / Then clauses ---------- */
@@ -478,8 +567,15 @@
   flex-wrap: wrap;
 }
 .bw-flow-group-meta {
-  font-size: 11px;
-  color: var(--bw-fg-3);
+  font-size: 12.5px;
+  color: var(--bw-fg-2);
+}
+/* WF-06: the add row shares the line with the combinator; children and metadata follow. */
+.bw-flow-group-head > .bw-flow-addrow {
+  margin-top: 0;
+}
+.bw-flow-group > .bw-flow-group-meta {
+  margin-top: 8px;
 }
 .bw-flow-op {
   display: inline-flex;
@@ -936,12 +1032,39 @@
   cursor: default;
   opacity: 0.7;
 }
-.bw-flow-params {
-  margin-top: 10px;
+/* WF-07: Block / Redirect / Challenge settings card, 40px controls, 3 -> 2 -> 1 columns. */
+.bw-flow-params-card {
+  margin-top: 12px;
+  border: 1px solid var(--bw-border);
+  border-radius: 10px;
+  background: var(--bw-bg-card);
+}
+.bw-flow-params-hd {
   display: flex;
-  align-items: flex-end;
-  gap: 10px;
-  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--bw-border);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--wf-accent);
+}
+.bw-flow-params-hd .bx {
+  font-size: 16px;
+}
+.bw-flow-params {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: end;
+  gap: 12px;
+  margin: 0;
+  padding: 12px 14px 14px;
+}
+.bw-flow-params > .bw-flow-field {
+  min-width: 0;
+}
+.bw-flow-params > .bw-flow-field:first-child:has(input.mono) {
+  grid-column: span 2;
 }
 .bw-flow-field {
   display: flex;
@@ -949,32 +1072,57 @@
   gap: 4px;
 }
 .bw-flow-field > label {
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 600;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: var(--bw-fg-3);
+  color: var(--bw-fg-1);
 }
 .bw-flow-field input,
 .bw-flow-field select {
-  font-size: 12.5px;
-  padding: 5px 8px;
+  box-sizing: border-box;
+  width: 100%;
+  height: 40px;
+  font-size: 14px;
+  padding: 8px 12px;
   border: 1px solid var(--bw-border);
   border-radius: 6px;
   background: var(--bw-bg-card);
   color: var(--bw-fg-1);
   font-family: inherit;
 }
+.bw-flow-field input:hover:not([disabled]),
+.bw-flow-field select:hover:not([disabled]) {
+  border-color: var(--bw-fg-3);
+}
 .bw-flow-field input.mono {
   font-family: var(--font-courier-prime);
   color: var(--wf-accent);
-  min-width: 280px;
 }
 .bw-flow-field input:focus-visible,
 .bw-flow-field select:focus-visible {
   outline: 0;
   border-color: var(--wf-accent);
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--wf-accent) 12%, transparent);
+}
+/* The card is as wide as the editor it sits in (list card or inspector), not the viewport. */
+.bw-flow-clause-main,
+.wf-drawer-body {
+  container-type: inline-size;
+}
+@container (max-width: 640px) {
+  .bw-flow-params {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .bw-flow-params > .bw-flow-field:first-child:has(input.mono) {
+    grid-column: 1 / -1;
+  }
+}
+@container (max-width: 420px) {
+  .bw-flow-params {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .bw-flow-acts {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 .bw-flow-terminalnote {
   display: flex;
@@ -1097,9 +1245,22 @@
   opacity: 0.45;
   cursor: default;
 }
-.bw-flow-menu button.danger:hover {
+/* WF-02: the destructive item is red at rest, not only on hover. */
+.bw-flow-menu button.danger,
+.bw-flow-menu button.danger .bx {
+  color: var(--bs-danger);
+}
+.bw-flow-menu button.danger:hover:not([disabled]) {
   background: color-mix(in srgb, var(--bs-danger) 10%, transparent);
   color: var(--bs-danger);
+}
+[data-bs-theme="dark"] .bw-flow-menu button.danger,
+[data-bs-theme="dark"] .bw-flow-menu button.danger .bx {
+  color: #ff8b76;
+}
+.bw-flow-menu-hd + button,
+.bw-flow-menu .sep + .bw-flow-menu-hd {
+  margin-top: 0;
 }
 .bw-flow-menu .sep {
   height: 1px;
@@ -1162,6 +1323,11 @@
   border-radius: 12px;
   padding: 16px 20px 20px;
 }
+/* The list stays plain and centred; only its measure is capped so long summaries stay readable. */
+.wf-canvas > .bw-flow {
+  max-width: 1064px;
+  margin-inline: auto;
+}
 .wf-legend {
   display: flex;
   align-items: center;
@@ -1181,12 +1347,24 @@
 }
 .wf-cap {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 6px;
   font-size: 11.5px;
   color: var(--bw-fg-3);
   margin-top: 12px;
   padding-left: 46px;
+}
+.wf-cap-help {
+  flex-basis: 100%;
+  padding-left: 20px;
+}
+.wf-drawer-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 10px 14px;
+  border-top: 1px solid var(--bw-border);
 }
 .wf-errors ol {
   margin: 8px 0 0;
@@ -1340,10 +1518,13 @@
   --wf-accent: var(--bs-primary);
   --fc-line: color-mix(in srgb, var(--wf-accent) 30%, transparent);
   --fc-dot: color-mix(in srgb, var(--wf-accent) 18%, transparent);
-  --fc-conn: 104px;
+  --fc-conn: 84px;
+  /* Height of the timeline rail above the cards: the markers sit on it, detached from the card. */
+  --fc-rail: 30px;
   position: relative;
   container-type: inline-size;
-  height: 424px;
+  /* WF-08: a taller board, so a 360px card with its summary and badges fits above the fold. */
+  height: 620px;
 }
 [data-bs-theme="dark"] .fc-host {
   --wf-accent: #82b8db;
@@ -1370,11 +1551,11 @@
 }
 .fc-board {
   display: inline-flex;
-  align-items: center;
+  align-items: flex-start;
   box-sizing: border-box;
   min-width: 100%;
   min-height: 100%;
-  padding: 56px 52px;
+  padding: 76px 52px 48px;
   zoom: var(--fc-z, 1);
   background-image: radial-gradient(
     circle at 1px 1px,
@@ -1385,7 +1566,7 @@
 }
 .fc-chain {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
 }
 
 /* ---------- connector: the single "no match" fall-through ---------- */
@@ -1394,6 +1575,7 @@
   flex: 0 0 var(--fc-conn);
   width: var(--fc-conn);
   height: 2px;
+  margin-top: 28px;
   background: var(--fc-line);
 }
 .fc-conn::after {
@@ -1474,9 +1656,10 @@
 
 /* ---------- terminals ---------- */
 .fc-term {
+  position: relative;
   flex: 0 0 auto;
   box-sizing: border-box;
-  width: 190px;
+  width: 220px;
   display: flex;
   align-items: center;
   gap: 10px;
@@ -1486,9 +1669,61 @@
   border: 1px solid color-mix(in srgb, var(--wf-accent) 16%, transparent);
 }
 .fc-term.is-exit {
-  width: 236px;
   border-style: dashed;
   background: var(--bw-bg-card);
+}
+/* WF-08: the timeline rail runs above the cards, one segment per item so it ends exactly on
+   the entry and exit dots whatever the board's width. */
+.fc-item {
+  position: relative;
+}
+.fc-item::before,
+.fc-board > .fc-conn::before,
+.fc-term::before {
+  content: "";
+  position: absolute;
+  height: 2px;
+  background: var(--fc-line);
+  pointer-events: none;
+}
+.fc-item::before {
+  left: 0;
+  right: 0;
+  top: -38px;
+}
+.fc-board > .fc-conn::before {
+  left: 0;
+  right: 0;
+  top: -66px;
+}
+.fc-term::before {
+  top: -38px;
+}
+.fc-term.is-entry::before {
+  left: 50%;
+  right: 0;
+}
+.fc-term.is-exit::before {
+  left: 0;
+  right: 50%;
+}
+.fc-term::after {
+  content: "";
+  position: absolute;
+  top: -43px;
+  left: 50%;
+  z-index: 1;
+  width: 12px;
+  height: 12px;
+  box-sizing: border-box;
+  border-radius: 50%;
+  transform: translateX(-50%);
+  background: var(--bw-bg-card);
+  border: 2px solid var(--wf-accent);
+  box-shadow: 0 0 0 4px var(--bw-bg-subtle);
+}
+.fc-term.is-exit::after {
+  background: var(--wf-accent);
 }
 .fc-term-ic {
   width: 30px;
@@ -1526,13 +1761,14 @@
 /* ---------- node ---------- */
 .fc-item {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
 }
 .fc-node {
   position: relative;
   box-sizing: border-box;
-  width: 276px;
-  height: 124px;
+  width: 360px;
+  min-height: 150px;
+  padding: 12px 14px 14px;
   display: flex;
   flex-direction: column;
   background: var(--bw-bg-card);
@@ -1566,48 +1802,55 @@
 .fc-vp[data-readonly] .fc-node {
   cursor: default;
 }
+/* Header: marker (detached, on the rail), title, verdict, then the top-right tool group. */
 .fc-node-hd {
   display: flex;
   align-items: center;
-  gap: 9px;
-  padding: 10px 12px 0;
+  gap: 8px;
+  min-width: 0;
 }
-/* The number is real text rather than a CSS counter, so it survives in static
-   output and stays addressable by the move-to-position menu. */
+/* The number is real text rather than a CSS counter, so it survives in static output and
+   stays addressable by the move-to-position menu. WF-08: it sits on the rail, above the
+   card and detached from it, like a stop on a timeline. */
 .fc-order {
-  width: 24px;
-  height: 24px;
-  flex-shrink: 0;
+  position: absolute;
+  top: -51px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2;
+  width: 28px;
+  height: 28px;
   padding: 0;
   border: 0;
-  border-radius: 8px;
+  border-radius: 50%;
   background: var(--wf-accent);
   color: #fff;
   font-family: var(--font-courier-prime);
-  font-size: 12px;
+  font-size: 12.5px;
   font-weight: 700;
   line-height: 1;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
+  box-shadow: 0 0 0 4px var(--bw-bg-subtle);
 }
 .fc-order:hover {
   background: var(--bs-bw-green);
 }
 .fc-order:focus-visible {
   outline: 2px solid var(--wf-accent);
-  outline-offset: 2px;
+  outline-offset: 4px;
 }
 .fc-node.is-off .fc-order {
-  background: transparent;
+  background: var(--bw-bg-card);
   color: var(--bw-fg-3);
-  border: 1.5px dashed var(--bw-border);
+  border: 2px dashed var(--bw-border);
 }
 .fc-node-name {
   flex: 1;
   min-width: 0;
-  font-size: 12.5px;
+  font-size: 15px;
   font-weight: 600;
   color: var(--wf-accent);
   overflow: hidden;
@@ -1618,16 +1861,28 @@
   color: var(--bw-fg-3);
 }
 .fc-node-sum {
-  margin: 7px 12px 0;
-  font-size: 11.5px;
-  line-height: 1.45;
+  margin: 10px -14px 0;
+  padding: 10px 14px 0;
+  border-top: 1px solid var(--bw-border);
+  font-size: 13px;
+  line-height: 1.5;
   color: var(--bw-fg-2);
-  max-height: 34px;
+  overflow-wrap: anywhere;
+}
+/* IF and THEN get a line each, clamped to two lines; the full text is the title. */
+.fc-node-sum .sum-sep {
+  display: none;
+}
+.fc-node-sum .sum-if,
+.fc-node-sum .sum-then {
   display: -webkit-box;
+  -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
   line-clamp: 2;
-  -webkit-box-orient: vertical;
   overflow: hidden;
+}
+.fc-node-sum .sum-then {
+  margin-top: 4px;
 }
 .fc-node-sum.is-pending {
   font-style: italic;
@@ -1635,29 +1890,23 @@
 }
 .fc-node-ft {
   margin-top: auto;
+  padding-top: 14px;
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 6px;
-  padding: 9px 12px 10px;
-  overflow: hidden;
 }
 .fc-gate {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  flex-shrink: 0;
-  font-size: 10.5px;
   font-family: var(--font-courier-prime);
   color: var(--bs-secondary);
-  border: 1px solid color-mix(in srgb, var(--bs-secondary) 40%, transparent);
-  border-radius: 999px;
-  padding: 2px 7px;
+  border-color: color-mix(in srgb, var(--bs-secondary) 40%, transparent);
 }
 .fc-gate .bx {
-  font-size: 12px;
+  font-size: 14px;
 }
-.fc-node-ft .bw-flow-act {
-  margin-left: auto;
+[data-bs-theme="dark"] .fc-gate {
+  color: var(--wf-accent);
+  border-color: color-mix(in srgb, var(--wf-accent) 45%, transparent);
 }
 .fc-errchip {
   display: inline-flex;
@@ -1702,51 +1951,24 @@
   border-color: var(--wf-accent);
 }
 
-/* ---------- hover toolbar ---------- */
+/* ---------- tool group (WF-08): top right of the header, always visible ---------- */
 .fc-tools {
-  position: absolute;
-  top: -32px;
-  right: 0;
   display: flex;
-  gap: 3px;
-  padding: 3px;
+  align-items: center;
+  flex-shrink: 0;
+  gap: 0;
+  padding: 2px;
   background: var(--bw-bg-card);
   border: 1px solid var(--bw-border);
   border-radius: 8px;
-  box-shadow: var(--bw-shadow-sm);
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.13s;
 }
-.fc-node:hover .fc-tools,
-.fc-node:focus-within .fc-tools {
-  opacity: 1;
-  pointer-events: auto;
+.fc-tools .bw-flow-iconbtn {
+  width: 26px;
+  height: 26px;
 }
 .fc-vp.is-dragging .fc-tools {
-  display: none;
+  pointer-events: none;
 }
-.fc-tools button {
-  width: 24px;
-  height: 24px;
-  padding: 0;
-  border: 0;
-  border-radius: 6px;
-  background: transparent;
-  color: var(--bw-fg-3);
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-}
-.fc-tools button:hover {
-  background: color-mix(in srgb, var(--wf-accent) 10%, transparent);
-  color: var(--wf-accent);
-}
-.fc-tools .bx {
-  font-size: 15px;
-}
-
 /* ---------- drag states (native DnD, same classes the ladder uses) ---------- */
 .fc-item.is-dragging .fc-node {
   opacity: 0.35;
@@ -1992,15 +2214,26 @@
   grid-template-columns: 46px 1fr;
 }
 
-/* ---------- view toggle (page chrome) ---------- */
-.wf-canvas-hd {
+/* ---------- Rule order toolbar (page chrome) ----------
+   Sticky below the fixed app header: 85px is the offset .sticky-card already uses on the
+   settings pages, so the two stay aligned if the header height is ever tuned. */
+.wf-toolbar {
+  position: sticky;
+  top: 85px;
+  z-index: 5;
+  margin: -4px -4px 14px;
+  padding: 8px 4px 10px;
+  border-bottom: 1px solid var(--bw-border);
+  background: var(--bw-bg-card);
+}
+.wf-toolbar-title {
   display: flex;
   align-items: center;
   gap: 10px;
   flex-wrap: wrap;
-  margin-bottom: 12px;
+  margin-bottom: 8px;
 }
-.wf-canvas-hd .title {
+.wf-toolbar-title .title {
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -2008,11 +2241,106 @@
   font-weight: 600;
   color: var(--bw-fg-1);
 }
-.wf-canvas-hd .aux {
+.wf-toolbar-title .aux,
+.wf-filter-count {
   font-size: 11.5px;
   color: var(--bw-fg-3);
 }
-.wf-canvas-hd .wf-vtoggle {
+.wf-filter-count {
+  margin-left: auto;
+}
+.wf-toolbar-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 12px;
+  flex-wrap: wrap;
+}
+.wf-toolbar-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+/* Bootstrap's .btn and .badge set display, which would beat the UA rule behind [hidden]. */
+.wf-toolbar [hidden],
+.wf-top[hidden] {
+  display: none !important;
+}
+.wf-toolbar .btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.wf-toolbar .btn .badge {
+  margin-left: 2px;
+}
+.wf-filters {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px 14px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+  padding: 10px 12px;
+  border: 1px solid var(--bw-border);
+  border-radius: 8px;
+  background: var(--bw-bg-subtle);
+}
+.wf-filters[hidden] {
+  display: none;
+}
+.wf-filter-field {
+  flex: 1 1 160px;
+  min-width: 140px;
+}
+.wf-filter-field .form-label {
+  margin-bottom: 2px;
+}
+/* A rule hidden by a filter keeps its place in the order; it is only not drawn. */
+.wf-filtered-out {
+  display: none !important;
+}
+/* Simplified: one line per rule, name and action only. */
+.is-simple .bw-flow-head-sum,
+.is-simple .fc-node-sum,
+.is-simple .fc-node-ft {
+  display: none;
+}
+.wf-dimmed {
+  opacity: 0.3;
+}
+.wf-reorder-paused .bw-flow-grip,
+.wf-reorder-paused .fc-plus {
+  pointer-events: none;
+  opacity: 0.35;
+}
+.wf-top {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  z-index: 20;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.wf-top[hidden] {
+  display: none;
+}
+/* Limited height: the list scrolls inside its own frame instead of the page. */
+.wf-canvas.is-limited {
+  max-height: 70vh;
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+@media (max-width: 767.98px) {
+  .wf-toolbar {
+    position: static;
+  }
+  .wf-filter-count {
+    margin-left: 0;
+  }
+}
+.wf-vtoggle {
   margin-left: auto;
 }
 .wf-vtoggle {
@@ -2059,8 +2387,7 @@
   .fc-item,
   .fc-term,
   .fc-conn,
-  .fc-plus,
-  .fc-tools {
+  .fc-plus {
     transition: none;
   }
 }

@@ -3,6 +3,11 @@ document.addEventListener("DOMContentLoaded", () => {
   const groups = new Map(
     JSON.parse(dataElement?.value || "[]").map((group) => [group.id, group]),
   );
+  const compat = JSON.parse(
+    document.getElementById("resource-groups-compat")?.value || "{}",
+  );
+  const kindPlugins = compat.kinds || {};
+  const pluginLabels = compat.labels || {};
   const rows = Array.from(document.querySelectorAll(".resource-group-row"));
   const editor = document.getElementById("resource-group-editor");
   const editorModal = editor
@@ -39,22 +44,6 @@ document.addEventListener("DOMContentLoaded", () => {
       );
     }
     modal.show(trigger);
-  }
-
-  function detailsFor(row) {
-    const details = row.nextElementSibling;
-    return details?.classList.contains("resource-group-details")
-      ? details
-      : null;
-  }
-
-  function setExpanded(row, expanded) {
-    const details = detailsFor(row);
-    const toggle = row.querySelector(".resource-group-toggle");
-    if (!details || !toggle) return;
-    details.hidden = !expanded;
-    toggle.setAttribute("aria-expanded", String(expanded));
-    toggle.querySelector("i")?.classList.toggle("bx-rotate-90", expanded);
   }
 
   function syncEntryEmpty() {
@@ -101,14 +90,166 @@ document.addEventListener("DOMContentLoaded", () => {
     showModal(editorModal, editor, trigger);
   }
 
-  rows.forEach((row) => {
-    setExpanded(row, false);
-    row
-      .querySelector(".resource-group-toggle")
-      ?.addEventListener("click", () => {
-        const details = detailsFor(row);
-        setExpanded(row, Boolean(details?.hidden));
+  // Values dialog: every entry of the group, one tab per kind, with its comment. Built from the
+  // same data the editor reads, with text nodes only (values are operator input).
+  const valuesModalElement = document.getElementById(
+    "resource-group-values-modal",
+  );
+  const valuesState = { group: null, kind: "all", query: "" };
+  const kindLabel = (kind) =>
+    translate(`resource_groups.kind_label.${kind}`, kind);
+
+  function renderValues() {
+    const { group, kind, query } = valuesState;
+    const list = document.getElementById("resource-values-list");
+    const entries = (group?.entries || []).filter(
+      (entry) =>
+        (kind === "all" || entry.kind === kind) &&
+        (!query ||
+          `${entry.value} ${entry.comment || ""}`
+            .toLocaleLowerCase()
+            .includes(query)),
+    );
+    list.replaceChildren();
+    entries.forEach((entry) => {
+      const item = document.createElement("li");
+      item.className = "d-flex flex-wrap align-items-baseline gap-2";
+      const value = document.createElement("code");
+      value.textContent = entry.value;
+      item.append(value);
+      if (kind === "all") {
+        const chip = document.createElement("span");
+        chip.className = "tag-chip";
+        chip.textContent = kindLabel(entry.kind);
+        item.append(chip);
+      }
+      if (entry.comment) {
+        const comment = document.createElement("span");
+        comment.className = "text-muted small";
+        comment.textContent = `— ${entry.comment}`;
+        item.append(comment);
+      }
+      list.append(item);
+    });
+    document.getElementById("resource-values-empty").hidden =
+      entries.length > 0;
+    const plugins = (kind === "all" ? kindsOf(group) : [kind]).flatMap(
+      (name) => kindPlugins[name] || [],
+    );
+    document.getElementById("resource-values-compat").textContent =
+      plugins.length
+        ? translate(
+            "resource_groups.values_compat",
+            `Compatible with: ${[...new Set(plugins)].join(", ")}`,
+            {
+              plugins: [...new Set(plugins)]
+                .map((plugin) => pluginLabels[plugin] || plugin)
+                .join(", "),
+            },
+          )
+        : "";
+  }
+
+  const kindsOf = (group) => [
+    ...new Set((group?.entries || []).map((entry) => entry.kind)),
+  ];
+
+  function renderKindTabs() {
+    const tabs = document.getElementById("resource-values-kinds");
+    tabs.replaceChildren();
+    const make = (kind, label, total) => {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = `nav-link d-flex justify-content-between gap-3${valuesState.kind === kind ? " active" : ""}`;
+      button.setAttribute("role", "tab");
+      button.setAttribute("aria-selected", String(valuesState.kind === kind));
+      const text = document.createElement("span");
+      text.textContent = label;
+      const number = document.createElement("span");
+      number.textContent = String(total);
+      button.append(text, number);
+      button.addEventListener("click", () => {
+        valuesState.kind = kind;
+        renderKindTabs();
+        renderValues();
       });
+      tabs.append(button);
+    };
+    const entries = valuesState.group?.entries || [];
+    make("all", translate("resource_groups.all_kinds", "All"), entries.length);
+    kindsOf(valuesState.group).forEach((kind) =>
+      make(
+        kind,
+        kindLabel(kind),
+        entries.filter((entry) => entry.kind === kind).length,
+      ),
+    );
+  }
+
+  function openValues(groupId, trigger) {
+    const group = groups.get(groupId);
+    if (!group || !valuesModalElement) return;
+    valuesState.group = group;
+    valuesState.kind = "all";
+    valuesState.query = "";
+    document.getElementById("resource-values-filter").value = "";
+    document.getElementById("resource-group-values-modal-title").textContent =
+      translate("resource_groups.values_title", `Values of @${group.name}`, {
+        name: `@${group.name}`,
+      });
+    renderKindTabs();
+    renderValues();
+    showModal(
+      bootstrap.Modal.getOrCreateInstance(valuesModalElement),
+      valuesModalElement,
+      trigger,
+    );
+  }
+
+  document
+    .getElementById("resource-values-filter")
+    ?.addEventListener("input", (event) => {
+      valuesState.query = event.target.value.trim().toLocaleLowerCase();
+      renderValues();
+    });
+  document
+    .getElementById("resource-values-copy")
+    ?.addEventListener("click", async (event) => {
+      const { group, kind, query } = valuesState;
+      const text = (group?.entries || [])
+        .filter(
+          (entry) =>
+            (kind === "all" || entry.kind === kind) &&
+            (!query || entry.value.toLocaleLowerCase().includes(query)),
+        )
+        .map((entry) => entry.value)
+        .join("\n");
+      const button = event.currentTarget;
+      try {
+        await navigator.clipboard.writeText(text);
+        const label = button.querySelector("span");
+        const previous = label?.textContent;
+        if (label)
+          label.textContent = translate(
+            "resource_groups.values_copied",
+            "Copied",
+          );
+        setTimeout(() => {
+          if (label && previous) label.textContent = previous;
+        }, 1500);
+      } catch (error) {
+        // Clipboard refused (insecure context): nothing to copy into, nothing to report.
+      }
+    });
+
+  rows.forEach((row) => {
+    row
+      .querySelectorAll(".resource-group-values-open")
+      .forEach((button) =>
+        button.addEventListener("click", (event) =>
+          openValues(row.dataset.groupId, event.currentTarget),
+        ),
+      );
     row
       .querySelector(".resource-group-edit")
       ?.addEventListener("click", (event) =>
@@ -188,28 +329,32 @@ document.addEventListener("DOMContentLoaded", () => {
             );
           payload.references.forEach((reference) => {
             const item = document.createElement("li");
-            item.className = "list-group-item px-0";
-            const setting = document.createElement("code");
-            setting.textContent =
-              reference.setting_id +
-              (reference.suffix ? `_${reference.suffix}` : "");
+            item.className =
+              "list-group-item px-0 d-flex flex-wrap align-items-center gap-2";
+            // Scope first (a service, a template or the global configuration), then the setting.
             const scope = document.createElement("span");
-            scope.className = "text-muted small ms-2";
             if (reference.scope === "service") {
+              scope.className = "svc-code";
               scope.textContent = reference.service_id;
             } else if (reference.scope === "template") {
+              scope.className = "svc-scope";
               scope.textContent = translate(
                 "resource_groups.template_configuration",
                 `Template ${reference.template_id}`,
                 { template: reference.template_id },
               );
             } else {
+              scope.className = "svc-scope";
               scope.textContent = translate(
                 "resource_groups.global_configuration",
                 "Global configuration",
               );
             }
-            item.append(setting, scope);
+            const setting = document.createElement("code");
+            setting.textContent =
+              reference.setting_id +
+              (reference.suffix ? `_${reference.suffix}` : "");
+            item.append(scope, setting);
             list.appendChild(item);
           });
           empty.hidden = Boolean(payload.references.length);
@@ -380,12 +525,15 @@ document.addEventListener("DOMContentLoaded", () => {
     const query = search.value.trim().toLocaleLowerCase();
     let visible = 0;
     rows.forEach((row) => {
-      const details = detailsFor(row);
-      const matches = `${row.textContent} ${details?.textContent || ""}`
+      const group = groups.get(row.dataset.groupId);
+      // Name, description and kinds are in the row; the values only live in the data.
+      const values = (group?.entries || [])
+        .map((entry) => `${entry.value} ${entry.comment || ""}`)
+        .join(" ");
+      const matches = `${row.textContent} ${values}`
         .toLocaleLowerCase()
         .includes(query);
       row.hidden = !matches;
-      if (!matches && details) details.hidden = true;
       if (matches) visible += 1;
     });
     if (count)
@@ -403,15 +551,4 @@ document.addEventListener("DOMContentLoaded", () => {
       filterRows();
       search.focus();
     });
-
-  const expandAll = document.getElementById("resource-groups-expand-all");
-  expandAll?.addEventListener("click", () => {
-    const visibleRows = rows.filter((row) => !row.hidden);
-    const shouldExpand = visibleRows.some((row) => detailsFor(row)?.hidden);
-    visibleRows.forEach((row) => setExpanded(row, shouldExpand));
-    expandAll.setAttribute("aria-pressed", String(shouldExpand));
-    expandAll.querySelector("span").textContent = shouldExpand
-      ? translate("resource_groups.collapse_all", "Collapse all")
-      : translate("resource_groups.expand_all", "Expand all");
-  });
 });

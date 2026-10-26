@@ -364,6 +364,10 @@
 }
 .log-stream .lg-time {
   color: #7c9cb3;
+  font-variant-numeric: tabular-nums;
+}
+.log-stream .lg-level {
+  font-weight: 700;
 }
 /* Severity emphasis (security-ops palette): routine INFO is quiet grey so that
    WARN (amber) and DENY/ERROR (red) are the lines that visually pop. The kit

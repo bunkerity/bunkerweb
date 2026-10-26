@@ -17,6 +17,8 @@ $(document).ready(function () {
     .toUpperCase();
   const isReadOnly = $("#is-read-only").val().trim() === "True";
   const userReadOnly = $("#user-read-only").val().trim() === "True";
+  const configsData = JSON.parse($("#configs-data").val());
+  const rowConfig = (node) => configsData[Number(node.dataset.configIndex)];
 
   const importDragArea = $("#configs-drag-area");
   const importFileInput = $("#configs-import-file");
@@ -100,11 +102,13 @@ $(document).ready(function () {
 
   const buildConfigsRows = (configs) =>
     configs.map((config) => {
-      const id = getConfigId(config);
       return {
         name: config.name,
-        type: $(`#type-${id}`).text().trim(),
-        service: $(`#service-${id}`).text().trim(),
+        type: config.type.toUpperCase(),
+        service:
+          config.service === "global"
+            ? t("scope.global", "Global")
+            : config.service,
       };
     });
 
@@ -185,7 +189,7 @@ $(document).ready(function () {
         viewTotal: true,
         cascadePanes: true,
         collapse: false,
-        columns: [3, 4, 5, 6, 7],
+        columns: [4, 5, 6, 7],
       },
     },
     topStart: {},
@@ -260,6 +264,7 @@ $(document).ready(function () {
             "Copy visible",
           )}</span>`,
           exportOptions: {
+            orthogonal: "export",
             columns: ":visible:not(:nth-child(-n+2)):not(:last-child)",
           },
         },
@@ -269,6 +274,7 @@ $(document).ready(function () {
           bom: true,
           filename: "bw_custom_configs",
           exportOptions: {
+            orthogonal: "export",
             modifier: { search: "none" },
             columns: ":not(:nth-child(-n+2)):not(:last-child)",
           },
@@ -278,6 +284,7 @@ $(document).ready(function () {
           text: `<span class="tf-icons bx bx-table bx-18px me-2"></span>Excel`,
           filename: "bw_custom_configs",
           exportOptions: {
+            orthogonal: "export",
             modifier: { search: "none" },
             columns: ":not(:nth-child(-n+2)):not(:last-child)",
           },
@@ -363,25 +370,12 @@ $(document).ready(function () {
       .nodes()
       .to$()
       .each(function () {
-        const $row = $(this);
-        const name = $row.find("td:eq(2)").find("a").text().trim();
-        const type = $row.find("td:eq(3)").text().trim();
-        let service;
-        const $serviceCell = $row.find("td:eq(5)");
-        const $serviceLink = $serviceCell.find("a");
-        if ($serviceLink.length > 0) {
-          service = $serviceLink.text().trim();
-        } else {
-          const $serviceSpan = $serviceCell.find("span[data-i18n]");
-          service = $serviceSpan.length
-            ? $serviceSpan.text().trim()
-            : $serviceCell.text().trim();
-        }
-
-        const normalizedService =
-          service === t("scope.global", "global") ? "global" : service;
-
-        configs.push({ name: name, type: type, service: normalizedService });
+        const config = rowConfig(this);
+        configs.push({
+          name: config.name,
+          type: config.type.toUpperCase(),
+          service: config.service,
+        });
       });
     return configs;
   };
@@ -480,7 +474,10 @@ $(document).ready(function () {
       }
 
       const filteredConfigs = configs.filter((cfg) => {
-        const statusValue = $(`#status-${getConfigId(cfg)}`).data("value");
+        const config = configsData.find(
+          (item) => getConfigId(item) === getConfigId(cfg),
+        );
+        const statusValue = config?.is_draft ? "draft" : "online";
         return statusValue !== conversionType;
       });
 
@@ -548,7 +545,13 @@ $(document).ready(function () {
         { orderable: false, className: "dtr-control", targets: 0 },
         { orderable: false, render: DataTable.render.select(), targets: 1 },
         { orderable: false, targets: -1 },
-        { visible: false, targets: 8 },
+        // The cell also shows the scope; sorting, filtering and exports keep using the bare name.
+        {
+          render: (data, type, row, meta) =>
+            type === "display" ? data : configsData[meta.row].name,
+          targets: 2,
+        },
+        { visible: false, targets: [4, 5, 6, 7, 8] },
         {
           searchPanes: {
             show: true,
@@ -722,21 +725,7 @@ $(document).ready(function () {
       return false;
     };
 
-    if (configTypeSelection) {
-      const typeSelector = "span.dtsp-name";
-      const $typeMatch = $container
-        .find(typeSelector)
-        .filter((_, el) => $(el).text().trim() === configTypeSelection)
-        .first();
-      if ($typeMatch.length) {
-        $typeMatch.trigger("click");
-      } else {
-        console.warn(
-          `Could not find search pane option for type: ${configTypeSelection}`,
-        );
-      }
-    }
-
+    // The type tabs own the type filter (setFilters); the Type search pane is not shown.
     if (configServiceSelection) {
       const isGlobal = configServiceSelection.toLowerCase() === "global";
       if (isGlobal) {
@@ -762,7 +751,221 @@ $(document).ready(function () {
   };
 
   const dt = initializeDataTable(configs_config);
+  // Keep the shared toolbar/filter/selection engine; its table becomes the file list.
+  const scroll = $(dt.table().container()).find(".bw-table-scroll");
+  scroll.wrap(
+    '<div class="row g-3 align-items-start"><div id="configs-files" class="col-lg-4"></div></div>',
+  );
+  const split = $("#configs-files").parent();
+  const preview = $("#configs-preview").removeClass("d-none").appendTo(split);
+  const editor = ace.edit("configs-preview-editor");
+  editor.setOptions({
+    readOnly: true,
+    showPrintMargin: false,
+    fontSize: "14px",
+    wrap: true,
+    tabSize: 2,
+  });
+  const setPreviewTheme = () =>
+    editor.setTheme(
+      `ace/theme/cloud9_${$("#theme").val() === "dark" ? "night" : "day"}`,
+    );
+  setPreviewTheme();
+  $("#dark-mode-toggle").on("change", () => setTimeout(setPreviewTheme, 30));
+  let currentConfig = null;
+  let currentType = "";
+  let currentScope = "all";
+  // Imported and env-origin names may already carry the suffix.
+  const fileName = (config) =>
+    config.name.endsWith(".conf") ? config.name : `${config.name}.conf`;
+  const normalizeType = (type) => type.replaceAll("-", "_").toUpperCase();
+  const showConfig = (config) => {
+    currentConfig = config;
+    $("#configs-preview-empty").toggleClass("d-none", !!config);
+    $("#configs-preview-editor").toggleClass("d-none", !config);
+    $(
+      "#configs-preview-full, #configs-preview-lint, #configs-preview-download",
+    ).prop("disabled", !config);
+    $("#configs-preview-edit").toggleClass("d-none", !config);
+    $("#configs-preview-name").text(
+      config ? fileName(config) : t("configs.console.files"),
+    );
+    $("#configs-preview-lint-result").empty();
+    $("#configs-preview-meta").empty();
+    $(dt.rows().nodes()).removeClass("table-active");
+    if (!config) {
+      editor.setValue("", -1);
+      return;
+    }
+    const node = dt
+      .rows()
+      .nodes()
+      .toArray()
+      .find((node) => rowConfig(node) === config);
+    $(node).addClass("table-active");
+    // Clone metadata only; no executable file content enters HTML.
+    const row = dt.row(node);
+    for (const index of [3, 4, 5, 6, 7]) {
+      const chip = document.createElement("span");
+      chip.innerHTML = row.data()[index];
+      // The row's own cells keep the ids; a copy would duplicate them.
+      $(chip).find("[id]").removeAttr("id");
+      $("#configs-preview-meta").append(chip);
+    }
+    $("#configs-preview-icon").attr(
+      "class",
+      `bx bx-${config.service === "global" ? "globe" : "server"}`,
+    );
+    $("#configs-preview-edit")
+      .attr(
+        "href",
+        `${window.location.pathname}/${[config.service, config.type, config.name].map(encodeURIComponent).join("/")}`,
+      )
+      .text(
+        t(
+          !isReadOnly &&
+            (config.template || ["ui", "api", "wizard"].includes(config.method))
+            ? "configs.console.edit"
+            : "configs.console.view",
+        ),
+      );
+    editor.session.setMode(
+      /^(MODSEC|CRS)/i.test(config.type) ? "ace/mode/text" : "ace/mode/nginx",
+    );
+    editor.setValue(config.data || "", -1);
+    editor.session.clearAnnotations();
+    editor.resize();
+  };
+  const syncPreview = () => {
+    const visible = dt
+      .rows({ search: "applied" })
+      .nodes()
+      .toArray()
+      .map(rowConfig);
+    showConfig(
+      visible.includes(currentConfig) ? currentConfig : visible[0] || null,
+    );
+  };
+  $(document).on("click", "a.config-preview", function (event) {
+    if (event.ctrlKey || event.metaKey || event.shiftKey || event.altKey)
+      return;
+    event.preventDefault();
+    showConfig(rowConfig($(this).closest("tr")[0]));
+  });
+  $("#configs-preview-lint").on("click", () => {
+    if (!currentConfig) return;
+    const annotations = window.BWConfigLint(
+      editor.getValue(),
+      currentConfig.type,
+    );
+    editor.session.setAnnotations(annotations);
+    $("#configs-preview-lint-result").text(
+      t(
+        /^(MODSEC|CRS)/i.test(currentConfig.type)
+          ? "configs.console.lint_skipped"
+          : annotations.length
+            ? "configs.console.lint_warnings"
+            : "configs.console.lint_clean",
+        { count: annotations.length },
+      ),
+    );
+  });
+  $("#configs-preview-download").on("click", () => {
+    if (!currentConfig) return;
+    const url = URL.createObjectURL(
+      new Blob([currentConfig.data || ""], {
+        type: "text/plain;charset=utf-8",
+      }),
+    );
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = fileName(currentConfig);
+    link.click();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  });
+  $("#configs-preview-full").on("click", function () {
+    const expanded = this.getAttribute("aria-pressed") !== "true";
+    $(this)
+      .attr("aria-pressed", String(expanded))
+      .text(
+        t(
+          expanded
+            ? "configs.console.restore_view"
+            : "configs.console.full_view",
+        ),
+      );
+    $("#configs-files").toggleClass("d-none", expanded);
+    preview.toggleClass("col-lg-8", !expanded).toggleClass("col-12", expanded);
+    editor.resize();
+  });
+  const knownTypes = $(".config-type-tab")
+    .map((_, el) => el.dataset.type)
+    .get();
+  const setFilters = ({ type = currentType, scope = currentScope } = {}) => {
+    currentType = type;
+    currentScope = scope;
+    $(".config-type-tab").each(function () {
+      const active = this.dataset.type === type;
+      $(this)
+        .toggleClass("btn-primary", active)
+        .toggleClass("btn-outline-secondary", !active)
+        .attr("aria-pressed", String(active));
+    });
+    $(".config-scope-tab").each(function () {
+      const active = this.dataset.scope === scope;
+      $(this)
+        .toggleClass("btn-primary", active)
+        .toggleClass("btn-outline-secondary", !active)
+        .attr("aria-pressed", String(active));
+    });
+    $("#configs-type-select").val(type);
+    dt.draw();
+    dt.rows({ search: "removed" }).deselect();
+  };
+  // Scope and type match the inventory ids, never the translated labels.
+  $.fn.dataTable.ext.search.push((settings, data, index) => {
+    if (settings.nTable.id !== "configs") return true;
+    const config = rowConfig(dt.row(index).node());
+    if (currentType && normalizeType(config.type) !== currentType) return false;
+    return (
+      currentScope === "all" ||
+      (currentScope === "global") === (config.service === "global")
+    );
+  });
+  $(".config-type-tab").on("click", function () {
+    setFilters({ type: this.dataset.type });
+  });
+  $("#configs-type-select").on("change", function () {
+    setFilters({ type: this.value });
+  });
+  $(".config-scope-tab").on("click", function () {
+    setFilters({ scope: this.dataset.scope });
+  });
+  $(".config-type-tab").each(function () {
+    $(this)
+      .find(".config-type-count")
+      .text(
+        configsData.filter(
+          (config) => normalizeType(config.type) === this.dataset.type,
+        ).length,
+      );
+  });
+  // The list sits in a clipping scroll box: fixed positioning lets the row menu escape it.
+  const fixMenus = () =>
+    $(".bw-table-scroll .dropdown-toggle").each(function () {
+      bootstrap.Dropdown.getOrCreateInstance(this, {
+        popperConfig: { strategy: "fixed" },
+      });
+    });
+  dt.on("draw.dt", fixMenus);
+  dt.on("draw.dt", syncPreview);
   applyInitialFilters(dt);
+  const initialType = normalizeType(configTypeSelection);
+  setFilters({
+    type: knownTypes.includes(initialType) ? initialType : knownTypes[0],
+  });
+  fixMenus();
+  dt.columns.adjust();
   // Show/hide filters based on initial selections
   if (configTypeSelection || configServiceSelection) {
     dt.searchPanes.container().show();

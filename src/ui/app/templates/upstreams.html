@@ -8,6 +8,13 @@
 {% from "components/search.html" import search %}
 {% from "components/page-head.html" import page_head %}
 {% from "components/service-options.html" import service_options with context %}
+{% from "components/tile.html" import tile %}
+{% from "components/value-chips.html" import tag_chip %}
+{% block head %}
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename=rtl_sheet('css/pages/groups.css')) }}"
+          nonce="{{ style_nonce }}" />
+{% endblock %}
 {# The page-head band owns the breadcrumb + title, so suppress the dashboard shell's
    legacy breadcrumb/mode row (same treatment as the redirects page). #}
 {% block page_head %}{% endblock %}
@@ -16,25 +23,25 @@
     {% set upstreams_url = url_for("upstreams.upstreams_page") %}
 
     {% macro server_row() -%}
-        <div class="row g-2 align-items-end upstream-server-row mb-2">
-            <div class="col-md-4">
-                <label class="form-label small">{{ _("upstreams.server_host") }}</label>
+        <div class="upstream-server-row upstream-server-grid">
+            <div>
+                <label class="form-label small d-lg-none">{{ _("upstreams.server_host") }}</label>
                 <input class="form-control form-control-sm" name="server_host" maxlength="256" placeholder="10.0.0.1:8080" pattern="{{ server_pattern }}" aria-label="{{ _('upstreams.server_host') }}" />
             </div>
-            <div class="col-md-2">
-                <label class="form-label small">{{ _("upstreams.server_weight") }}</label>
+            <div>
+                <label class="form-label small d-lg-none">{{ _("upstreams.server_weight") }}</label>
                 <input class="form-control form-control-sm" type="number" name="server_weight" min="1" max="1000" value="1" aria-label="{{ _('upstreams.server_weight') }}" />
             </div>
-            <div class="col-md-2">
-                <label class="form-label small">{{ _("upstreams.server_max_fails") }}</label>
+            <div>
+                <label class="form-label small d-lg-none">{{ _("upstreams.server_max_fails") }}</label>
                 <input class="form-control form-control-sm" type="number" name="server_max_fails" min="0" max="1000" value="1" aria-label="{{ _('upstreams.server_max_fails') }}" />
             </div>
-            <div class="col-md-2">
-                <label class="form-label small">{{ _("upstreams.server_fail_timeout") }}</label>
+            <div>
+                <label class="form-label small d-lg-none">{{ _("upstreams.server_fail_timeout") }}</label>
                 <input class="form-control form-control-sm" name="server_fail_timeout" maxlength="16" value="10s" pattern="{{ fail_timeout_pattern }}" aria-label="{{ _('upstreams.server_fail_timeout') }}" />
             </div>
-            <div class="col-md-1">
-                <label class="form-label small">{{ _("upstreams.server_role") }}</label>
+            <div>
+                <label class="form-label small d-lg-none">{{ _("upstreams.server_role") }}</label>
                 {# A select rather than checkboxes: every row must submit a value or the
                    parallel form lists shift onto the wrong server. #}
                 <select class="form-select form-select-sm" name="server_role" aria-label="{{ _('upstreams.server_role') }}">
@@ -43,7 +50,7 @@
                     <option value="down">{{ _("upstreams.role.down") }}</option>
                 </select>
             </div>
-            <div class="col-md-1 text-end">
+            <div class="text-end">
                 <button type="button" class="btn btn-outline-danger btn-sm upstream-server-remove" aria-label="{{ _('aria.label.remove_this_server') }}">
                     <i class="bx bx-trash" aria-hidden="true"></i>
                 </button>
@@ -54,7 +61,7 @@
     {% macro pool_fields(prefix) -%}
         <div class="row g-3">
             <div class="col-md-6">
-                <label class="form-label" for="{{ prefix }}-name">{{ _("table.header.name") }}</label>
+                <label class="form-label" for="{{ prefix }}-name">{{ _("table.header.name") }} <span class="text-danger" aria-hidden="true">*</span></label>
                 <input class="form-control"
                        id="{{ prefix }}-name"
                        name="name"
@@ -99,7 +106,15 @@
                 <textarea class="form-control" id="{{ prefix }}-description" name="description" maxlength="4000" rows="2"></textarea>
             </div>
             <div class="col-12">
-                <label class="form-label">{{ _("upstreams.servers") }}</label>
+                <label class="form-label">{{ _("upstreams.servers") }} <span class="text-danger" aria-hidden="true">*</span></label>
+                <div class="upstream-server-grid upstream-server-head d-none d-lg-grid" aria-hidden="true">
+                    <span>{{ _("upstreams.server_host") }}</span>
+                    <span>{{ _("upstreams.server_weight") }}</span>
+                    <span>{{ _("upstreams.server_max_fails") }}</span>
+                    <span>{{ _("upstreams.server_fail_timeout") }}</span>
+                    <span>{{ _("upstreams.server_role") }}</span>
+                    <span></span>
+                </div>
                 <div class="upstream-servers" id="{{ prefix }}-servers">{{ server_row() }}</div>
                 {{ button(label="Add server", i18n_key="upstreams.add_server", variant="outline-secondary", size="sm", icon="bx-plus", classes="upstream-server-add") }}
             </div>
@@ -119,87 +134,97 @@
         {{ alert(message="Only the first 500 upstreams are displayed. Narrow the list through the API for the complete result.", message_key="upstreams.truncated", variant="warning", icon="bx-info-circle", classes="mb-4") }}
     {% endif %}
 
-    {% call card(classes="p-4 min-vh-70") %}
+    {# Counts come from the loaded rows (`total` is the only whole-list figure). These are configured
+       values, not live health: a role is what the pool declares, TLS is what it is configured to speak. #}
+    {% set ns = namespace(primary=0, backup=0, down=0, tls=0, detached=0) %}
+    {% for pool in upstreams %}
+        {% if pool.backend_ssl %}{% set ns.tls = ns.tls + 1 %}{% endif %}
+        {% if not pool.services %}{% set ns.detached = ns.detached + 1 %}{% endif %}
+        {% for server in pool.servers %}
+            {% if server.down %}{% set ns.down = ns.down + 1 %}{% elif server.backup %}{% set ns.backup = ns.backup + 1 %}{% else %}{% set ns.primary = ns.primary + 1 %}{% endif %}
+        {% endfor %}
+    {% endfor %}
+    {% set attached_services = upstreams | map(attribute="services") | sum(start=[]) | map(attribute="service_id") | unique | list %}
+    {% set scope_note = _("upstreams.kpi_loaded_only", count=upstreams | length) if truncated else none %}
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-xl-4 g-3 mb-4">
+        <div class="col">{{ tile(title="Upstreams", title_i18n="navigation.upstreams", value=total, icon="bx-server", caption=scope_note or _("upstreams.kpi_not_attached", count=ns.detached)) }}</div>
+        <div class="col">{{ tile(title="Servers", title_i18n="upstreams.servers", value=ns.primary + ns.backup + ns.down, icon="bx-hdd", caption=_("upstreams.kpi_roles", primary=ns.primary, backup=ns.backup, down=ns.down)) }}</div>
+        <div class="col">{{ tile(title="Attached services", title_i18n="upstreams.kpi_services", value=attached_services | length, icon="bx-link", caption=scope_note or _("upstreams.kpi_services_caption")) }}</div>
+        <div class="col">{{ tile(title="TLS to backend", title_i18n="upstreams.kpi_tls", value=ns.tls, icon="bx-lock-alt", caption=scope_note or _("upstreams.kpi_tls_caption")) }}</div>
+    </div>
+
+    {% call card(classes="min-vh-70", title="Upstreams", title_key="navigation.upstreams", subtitle="Backend pools and the services that proxy to them", subtitle_key="upstreams.card_subtitle", icon="bx-server", header_right=tag_chip(_("upstreams.count_plural" if upstreams | length != 1 else "upstreams.count", count=upstreams | length))) %}
         <div class="d-flex flex-wrap gap-2 align-items-end mb-4">
             <div class="flex-grow-1">
-                {{ search(id="upstreams-search", placeholder="Search name, description, or server...", i18n_key="upstreams.search", size="sm", clearable=true, clear_id="upstreams-search-clear") }}
+                {{ search(id="upstreams-search", placeholder="Search name, description, server, or path...", i18n_key="upstreams.search", size="sm", clearable=true, clear_id="upstreams-search-clear") }}
             </div>
             <div>
-                <label class="form-label small" for="upstreams-service-filter">{{ _("table.header.service") }}</label>
-                <select class="form-select form-select-sm" id="upstreams-service-filter" data-bw-service-options>
-                    <option value="">{{ _("upstreams.all") }}</option>
+                <label class="form-label small" for="upstreams-protocol-filter">{{ _("upstreams.protocol") }}</label>
+                <select class="form-select form-select-sm" id="upstreams-protocol-filter">
+                    <option value="">{{ _("upstreams.all_protocols") }}</option>
+                    {% for value in protocols %}<option value="{{ value }}">{{ _("upstreams.protocols." ~ value) }}</option>{% endfor %}
+                </select>
+            </div>
+            <div>
+                <label class="form-label small" for="upstreams-tls-filter">{{ _("upstreams.tls") }}</label>
+                <select class="form-select form-select-sm" id="upstreams-tls-filter">
+                    <option value="">{{ _("upstreams.all_tls") }}</option>
+                    <option value="yes">{{ _("upstreams.tls_yes") }}</option>
+                    <option value="no">{{ _("upstreams.tls_no") }}</option>
                 </select>
             </div>
         </div>
 
         {% if upstreams %}
             <div class="table-responsive">
-                <table class="table align-middle upstreams-table">
+                <table class="table align-middle res-table upstreams-table">
+                    <caption class="visually-hidden">{{ _("navigation.upstreams") }}</caption>
                     <thead>
                         <tr>
-                            <th>{{ _("table.header.name") }}</th>
-                            <th>{{ _("upstreams.servers") }}</th>
-                            <th>{{ _("upstreams.method") }}</th>
-                            <th>{{ _("table.header.service") }}</th>
-                            <th class="text-end">{{ _("table.header.actions") }}</th>
+                            <th scope="col">{{ _("table.header.name") }}</th>
+                            <th scope="col">{{ _("table.header.description") }}</th>
+                            <th scope="col">{{ _("upstreams.protocol") }}</th>
+                            <th scope="col">{{ _("upstreams.method") }}</th>
+                            <th scope="col">{{ _("upstreams.keepalive") }}</th>
+                            <th scope="col">{{ _("upstreams.tls") }}</th>
+                            <th scope="col">{{ _("upstreams.servers") }}</th>
+                            <th scope="col">{{ _("table.header.service") }}</th>
+                            <th scope="col" class="text-end">{{ _("table.header.actions") }}</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for pool in upstreams %}
                             <tr class="upstream-row" data-upstream-id="{{ pool.id }}">
-                                <td>
-                                    <div class="fw-semibold">
-                                        {{ pool.name }}
-                                        {{ badge(text=pool.protocol, i18n_key="upstreams.protocols." ~ pool.protocol, variant="secondary", classes="ms-1") }}
-                                        {% if pool.backend_ssl %}{{ badge(text="TLS", variant="secondary", classes="ms-1") }}{% endif %}
-                                    </div>
-                                    {% if pool.description %}<div class="text-muted small text-truncate">{{ pool.description }}</div>{% endif %}
+                                <td class="fw-semibold">{{ pool.name }}</td>
+                                <td class="res-desc">
+                                    {% if pool.description %}<span class="res-clip" title="{{ pool.description }}" tabindex="0">{{ pool.description }}</span>{% else %}<span class="text-muted">—</span>{% endif %}
                                 </td>
+                                <td>{{ _("upstreams.protocols." ~ pool.protocol) if pool.protocol in protocols else pool.protocol }}</td>
+                                <td>{{ _("upstreams.balancing." ~ pool.method) if pool.method in methods else pool.method }}</td>
+                                <td>{% if pool.keepalive %}<span class="res-mono">{{ pool.keepalive }}</span>{% else %}<span class="text-muted">{{ _("upstreams.keepalive_off") }}</span>{% endif %}</td>
+                                <td>{{ _("status.yes") if pool.backend_ssl else _("status.no") }}</td>
                                 <td>
-                                    <div class="d-flex flex-column gap-1">
-                                        {% for server in pool.servers %}
-                                            <span>
-                                                <code>{{ server.host }}</code>
-                                                {% if server.backup %}{{ badge(text="backup", i18n_key="upstreams.role.backup", variant="secondary", classes="ms-1") }}{% endif %}
-                                                {% if server.down %}{{ badge(text="down", i18n_key="upstreams.role.down", variant="danger", classes="ms-1") }}{% endif %}
-                                            </span>
-                                        {% endfor %}
-                                    </div>
-                                </td>
-                                <td>
-                                    <code>{{ pool.method }}</code>
-                                    {% if pool.keepalive %}
-                                        {{ badge(text="keepalive " ~ pool.keepalive, variant="secondary", classes="ms-1") }}
-                                    {% endif %}
+                                    <button type="button"
+                                            class="res-count-link upstream-members"
+                                            aria-haspopup="dialog"
+                                            title="{{ pool.servers | map(attribute='host') | join(', ') }}">
+                                        <i class="bx bx-hdd" aria-hidden="true"></i> {{ _("upstreams.servers_count_plural" if pool.servers | length != 1 else "upstreams.servers_count", count=pool.servers | length) }}
+                                    </button>
                                 </td>
                                 <td>
                                     {% if pool.services %}
-                                        <div class="d-flex flex-wrap gap-1">
-                                            {% for attachment in pool.services %}
-                                                <span class="badge bg-label-primary d-inline-flex align-items-center gap-1">
-                                                    {{ attachment.service_id }}<code class="ms-1">{{ attachment.match_path }}</code>
-                                                    {% if not readonly %}
-                                                        <form method="post" action="{{ upstreams_url }}/detach" class="d-inline">
-                                                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
-                                                            <input type="hidden" name="upstream_id" value="{{ pool.id }}" />
-                                                            <input type="hidden" name="service_id" value="{{ attachment.service_id }}" />
-                                                            <input type="hidden" name="match_path" value="{{ attachment.match_path }}" />
-                                                            <button type="submit"
-                                                                    class="btn btn-link btn-sm p-0 lh-1 text-reset"
-                                                                    aria-label="{{ _('aria.label.detach_from_service', name=pool.name, service=attachment.service_id) }}">
-                                                                <i class="bx bx-x" aria-hidden="true"></i>
-                                                            </button>
-                                                        </form>
-                                                    {% endif %}
-                                                </span>
-                                            {% endfor %}
-                                        </div>
+                                        <button type="button"
+                                                class="res-count-link upstream-services"
+                                                aria-haspopup="dialog"
+                                                title="{{ pool.services | map(attribute='service_id') | join(', ') }}">
+                                            <i class="bx bx-link" aria-hidden="true"></i> {{ _("upstreams.services_count_plural" if pool.services | length != 1 else "upstreams.services_count", count=pool.services | length) }}
+                                        </button>
                                     {% else %}
                                         {# An unattached pool is never rendered into NGINX: it is stored but no service proxies to it. #}
-                                        {{ badge(text="Not attached", i18n_key="upstreams.not_attached", variant="secondary") }}
+                                        <span class="res-count-link is-none" title="{{ _('upstreams.not_attached') }}"><i class="bx bx-unlink" aria-hidden="true"></i> 0</span>
                                     {% endif %}
                                 </td>
-                                <td class="text-end">
+                                <td class="text-end text-nowrap">
                                     {{ button(label="", variant="outline-secondary", size="sm", icon="bx-link", icon_only=true, aria_label=_('tooltip.button.attach_upstream', name=pool.name), classes="upstream-attach", disabled=readonly) }}
                                     {{ button(label="", variant="outline-secondary", size="sm", icon="bx-edit", icon_only=true, aria_label=_('tooltip.button.edit_upstream', name=pool.name), classes="upstream-edit", disabled=readonly) }}
                                     {{ button(label="", variant="outline-danger", size="sm", icon="bx-trash", icon_only=true, aria_label=_('tooltip.button.delete_upstream', name=pool.name), classes="upstream-delete", disabled=readonly) }}
@@ -209,6 +234,7 @@
                     </tbody>
                 </table>
             </div>
+            <p id="upstreams-no-match" class="text-muted text-center my-4" hidden>{{ _("upstreams.no_match") }}</p>
         {% else %}
             {{ empty_state(title="No upstreams yet", title_key="upstreams.empty_title", message="An upstream is a named pool of backends you attach to one or more services at a reverse proxy path. Inline REVERSE_PROXY_HOST settings keep working alongside it.", message_key="upstreams.empty_text", icon="bx-server") }}
         {% endif %}
@@ -219,7 +245,7 @@
     <input type="hidden" id="upstreams-data" value='{{ upstreams | tojson }}' />
     <template id="upstream-server-template">{{ server_row() }}</template>
 
-    {% call modal(id="upstream-create-modal", title_key="upstreams.new", title="New upstream", size="lg") %}
+    {% call modal(id="upstream-create-modal", title_key="upstreams.new", title="New upstream", size="xl") %}
         <form method="post" action="{{ upstreams_url }}/create">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
             <div class="modal-body">
@@ -248,7 +274,7 @@
         </form>
     {% endcall %}
 
-    {% call modal(id="upstream-edit-modal", title_key="upstreams.edit", title="Edit upstream", size="lg") %}
+    {% call modal(id="upstream-edit-modal", title_key="upstreams.edit", title="Edit upstream", size="xl") %}
         <form method="post" action="{{ upstreams_url }}/update">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
             <input type="hidden" name="upstream_id" id="upstream-edit-id" />
@@ -284,6 +310,42 @@
                 {{ button(label="Attach", i18n_key="upstreams.attach", icon="bx-link", type="submit", classes="don-jose") }}
             </div>
         </form>
+    {% endcall %}
+
+    {% call modal(id="upstream-members-modal", title_key="upstreams.members_title", title="Servers in this upstream", size="lg", static_backdrop=false) %}
+        <div class="modal-body">
+            <p id="upstream-members-copy" class="text-muted"></p>
+            <div class="table-responsive">
+                <table class="table table-sm align-middle mb-0 res-table">
+                    <caption class="visually-hidden">{{ _("upstreams.servers") }}</caption>
+                    <thead>
+                        <tr>
+                            <th scope="col">{{ _("upstreams.server_host") }}</th>
+                            <th scope="col">{{ _("upstreams.server_weight") }}</th>
+                            <th scope="col">{{ _("upstreams.server_max_fails") }}</th>
+                            <th scope="col">{{ _("upstreams.server_fail_timeout") }}</th>
+                            <th scope="col">{{ _("upstreams.server_role") }}</th>
+                        </tr>
+                    </thead>
+                    <tbody id="upstream-members-body"></tbody>
+                </table>
+            </div>
+        </div>
+        <div class="modal-footer">
+            {{ button(label="Close", i18n_key="button.close", variant="outline-secondary", dismiss="modal") }}
+        </div>
+    {% endcall %}
+
+    {% call modal(id="upstream-services-modal", title_key="upstreams.services_title", title="Services using this upstream", static_backdrop=false) %}
+        <div class="modal-body">
+            <p id="upstream-services-copy" class="text-muted"></p>
+            <div id="upstream-services-shared" class="alert alert-info" role="note"></div>
+            <ul id="upstream-services-list" class="list-group list-group-flush" data-detach-url="{{ upstreams_url }}/detach" data-csrf="{{ csrf_token() }}"></ul>
+        </div>
+        <div class="modal-footer">
+            {{ button(label="Close", i18n_key="button.close", variant="outline-secondary", dismiss="modal") }}
+            {{ button(id="upstream-services-attach", label="Attach", i18n_key="upstreams.attach", icon="bx-link", disabled=readonly, classes="don-jose") }}
+        </div>
     {% endcall %}
 
     {% call modal(id="upstream-delete-modal", title_key="upstreams.delete_confirm_title", title="Delete this upstream?") %}

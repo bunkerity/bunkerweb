@@ -877,4 +877,93 @@
   }
 }
 
-/* rtlcss@4.3.0 source=css/pages/home.css sha256=ea1d7596588a1cad2c0aa772edeaca3acbdad289d67bd5fbb084d7a8be13794e */
+/* OPS-3: the caption highlights (kit cardSubtitle="stats") no longer paint every word. Counts that
+   mean trouble keep the danger hue; good, warn and info words fall back to the muted caption. */
+.bw-kpi-caption .hl-good,
+.bw-kpi-caption .hl-warn,
+.bw-kpi-caption .hl-info,
+[data-bs-theme="dark"] .bw-kpi-caption .hl-good,
+[data-bs-theme="dark"] .bw-kpi-caption .hl-warn,
+[data-bs-theme="dark"] .bw-kpi-caption .hl-info {
+  color: inherit;
+  font-weight: 400;
+}
+
+/* OPS-9: chart plus visible legend. The well is the grid; the table is the legend from 340 px
+   up and visually hidden (still read by assistive technology) below it. */
+.donut-well {
+  display: grid;
+  place-items: center;
+}
+.donut-well > div:first-child {
+  min-width: 0;
+  width: 100%;
+}
+.donut-well[data-two] {
+  align-items: center;
+  gap: 1rem;
+  grid-template-columns: minmax(130px, 1fr) minmax(170px, 1fr);
+}
+.donut-well[data-two] .apexcharts-legend {
+  display: none !important;
+}
+.donut-well .chart-data-table.is-legend {
+  border-collapse: collapse;
+  font-size: 0.78rem;
+  width: 100%;
+}
+.donut-well .chart-data-table.is-legend caption,
+.donut-well .chart-data-table.is-legend thead {
+  border: 0;
+  clip: rect(0 0 0 0);
+  height: 1px;
+  overflow: hidden;
+  position: absolute;
+  width: 1px;
+}
+.donut-well .chart-data-table.is-legend th[scope="row"] {
+  border-bottom: 1px solid var(--bw-border);
+  font-family: var(--bs-font-monospace);
+  font-weight: 500;
+  padding: 0.25rem 0 0.25rem 0.5rem;
+  text-align: start;
+}
+.donut-well .chart-data-table.is-legend tr:last-child th {
+  border-bottom: 0;
+}
+.chart-legend-name {
+  align-items: center;
+  display: inline-flex;
+  gap: 0.4rem;
+}
+.donut-well .chart-data-table.is-legend td {
+  border-bottom: 1px solid var(--bw-border);
+  color: var(--bw-fg-2);
+  font-family: var(--bs-font-monospace);
+  font-variant-numeric: tabular-nums;
+  padding: 0.25rem 0.5rem 0.25rem 0;
+  text-align: end;
+  white-space: nowrap;
+}
+.donut-well .chart-data-table.is-legend tr:last-child td {
+  border-bottom: 0;
+}
+.chart-legend-swatch {
+  border-radius: 50%;
+  display: inline-block;
+  flex: none;
+  height: 9px;
+  width: 9px;
+}
+
+/* OPS-11: top reasons as ranked rows (rank, chip, count, share bar). */
+#home-top-reasons-body td {
+  vertical-align: middle;
+}
+.home-reason-rank {
+  color: var(--bw-fg-2);
+  font-variant-numeric: tabular-nums;
+  width: 1.75rem;
+}
+
+/* rtlcss@4.3.0 source=css/pages/home.css sha256=5d308778a9ed20b473c383c49ad7be47e1160ba03a346996bf0c8b672440d76d */

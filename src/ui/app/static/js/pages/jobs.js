@@ -182,6 +182,27 @@ $(document).ready(function () {
     form.appendTo("body").submit();
   };
 
+  // Duration is derived from the stored start and end, before the cells are turned into local
+  // date strings. Intl formats the unit, so there is no English suffix to translate.
+  const formatDuration = (milliseconds) => {
+    const seconds = milliseconds / 1000;
+    const minutes = seconds >= 60;
+    return new Intl.NumberFormat(undefined, {
+      style: "unit",
+      unit: minutes ? "minute" : "second",
+      unitDisplay: "narrow",
+      maximumFractionDigits: 1,
+    }).format(minutes ? seconds / 60 : seconds);
+  };
+  $(".history-start-date").each(function () {
+    const start = new Date($(this).text().trim());
+    const end = new Date($(this).siblings(".history-end-date").text().trim());
+    const cell = $(this).siblings(".history-duration");
+    if (!isNaN(start) && !isNaN(end) && end >= start) {
+      cell.text(formatDuration(end - start));
+    }
+  });
+
   $(".history-start-date, .history-end-date").each(function () {
     const isoDateStr = $(this).text().trim();
 
@@ -256,6 +277,11 @@ $(document).ready(function () {
           targets: -1,
         },
         {
+          // The chip is display-only: filtering, sorting and the pane keep the plain plugin id.
+          render: (data, type) =>
+            type === "display"
+              ? `<span class="tag-chip plugin-chip"><i class="bx bx-plug" aria-hidden="true"></i>${data}</span>`
+              : data,
           searchPanes: {
             show: true,
             header: t("searchpane.plugin", "Plugin"),
