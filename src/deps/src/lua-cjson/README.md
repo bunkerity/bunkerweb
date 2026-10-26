@@ -17,6 +17,7 @@ Table of Contents
     * [encode_escape_forward_slash](#encode_escape_forward_slash)
     * [encode_skip_unsupported_value_types](#encode_skip_unsupported_value_types)
     * [encode_indent](#encode_indent)
+    * [encode_sort_keys](#encode_sort_keys)
     * [decode_array_with_array_mt](#decode_array_with_array_mt)
     * [decode_allow_comment](#decode_allow_comment)
 
@@ -225,6 +226,17 @@ print(cjson.encode({ a = 1, b = { c = 2 } }))
 --   }
 -- }
 ```
+
+[Back to TOC](#table-of-contents)
+
+encode_sort_keys
+---------------------------
+**syntax:** `cjson.encode_sort_keys(enabled)`
+
+**default:** false
+
+If enabled, keys in encoded objects will be sorted lexicographically before
+JSON string escaping is applied.
 
 [Back to TOC](#table-of-contents)
 

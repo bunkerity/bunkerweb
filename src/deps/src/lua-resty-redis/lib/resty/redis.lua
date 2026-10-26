@@ -3,6 +3,8 @@
 
 local sub = string.sub
 local byte = string.byte
+local str_fmt = string.format
+local floor = math.floor
 local tab_insert = table.insert
 local tab_remove = table.remove
 local tcp = ngx.socket.tcp
@@ -27,9 +29,11 @@ end
 
 local tab_pool_len = 0
 local tab_pool = new_tab(16, 0)
+-- Redis integers are 64-bit; larger values keep tostring()'s form
+local MAX_INT = 2^63
 local _M = new_tab(0, 55)
 
-_M._VERSION = '0.32'
+_M._VERSION = '0.34'
 
 
 local common_cmds = {
@@ -37,7 +41,7 @@ local common_cmds = {
     "del",      "incr",         "decr",                 -- Strings
     "llen",     "lindex",       "lpop",     "lpush",
     "lrange",   "linsert",                              -- Lists
-    "hexists",  "hget",         "hset",     "hmget",
+    "hexists",  "hget",         "hset",     --[[ "hmget", ]]
     --[[ "hmset", ]]            "hdel",                 -- Hashes
     "smembers", "sismember",    "sadd",     "srem",
     "sdiff",    "sinter",       "sunion",               -- Sets
@@ -62,6 +66,8 @@ local unsub_commands = {
 
 
 local mt = { __index = _M }
+
+local _do_cmd
 
 
 local function get_tab_from_pool()
@@ -92,6 +98,7 @@ function _M.new(self)
     end
     local redis = setmetatable({ _sock = sock,
                           _subscribed = false,
+                          _in_multi = false,
                           _n_channel = {
                             unsubscribe = 0,
                             punsubscribe = 0,
@@ -177,15 +184,63 @@ function _M.connect(self, host, port_or_opts, opts)
 
     end
 
+    if unix and port_or_opts ~= nil then
+        opts = port_or_opts
+    end
+
+    local db, username, password, tcp_keepalive
+    if opts then
+        db = opts.db
+        if db ~= nil then
+            local typ = type(db)
+            db = tonumber(db)
+            if db == nil then
+                error("bad option db: number expected, got " .. typ, 2)
+            end
+        end
+
+        tcp_keepalive = opts.tcp_keepalive
+
+        password = opts.password
+        if password == "" then
+            password = nil
+        end
+
+        username = opts.username
+        if not password or username == "" then
+            username = nil
+        end
+
+        if (db or username) and not opts.pool then
+            -- a pool per database / ACL user, otherwise a pooled connection
+            -- would carry its SELECT/AUTH state over to the next user (issue #53);
+            -- the numeric db comes first so that no user name can impersonate it
+            local pool = unix and host or (host .. ":" .. port_or_opts)
+            if db then
+                pool = pool .. "/db=" .. db
+            end
+            if username then
+                pool = pool .. "/user=" .. username
+            end
+
+            local copy = {}
+            for k, v in pairs(opts) do
+                copy[k] = v
+            end
+            copy.pool = pool
+            opts = copy
+        end
+    end
+
     self._subscribed = false
+    self._in_multi = false
 
     local ok, err
 
     if unix then
          -- second argument of sock:connect() cannot be nil
-         if port_or_opts ~= nil then
-             ok, err = sock:connect(host, port_or_opts)
-             opts = port_or_opts
+         if opts ~= nil then
+             ok, err = sock:connect(host, opts)
          else
              ok, err = sock:connect(host)
          end
@@ -204,6 +259,47 @@ function _M.connect(self, host, port_or_opts, opts)
         end
     end
 
+    if tcp_keepalive then
+        local res, kerr = sock:setoption("keepalive", true)
+        if not res then
+            sock:close()
+            return nil, "failed to enable tcp keepalive: " .. tostring(kerr)
+        end
+    end
+
+    if (password or db) and sock:getreusedtimes() == 0 then
+        -- send AUTH/SELECT directly even if a pipeline was opened before connect()
+        local reqs = rawget(self, "_reqs")
+        self._reqs = nil
+
+        local res, cerr
+        if password then
+            if username then
+                res, cerr = _do_cmd(self, "auth", username, password)
+            else
+                res, cerr = _do_cmd(self, "auth", password)
+            end
+
+            if not res then
+                self._reqs = reqs
+                sock:close()
+                return nil, "failed to authenticate: " .. tostring(cerr)
+            end
+        end
+
+        if db then
+            res, cerr = _do_cmd(self, "select", db)
+            if not res then
+                self._reqs = reqs
+                sock:close()
+                return nil, "failed to select database " .. tostring(db) .. ": "
+                            .. tostring(cerr)
+            end
+        end
+
+        self._reqs = reqs
+    end
+
     return ok, err
 end
 
@@ -216,6 +312,10 @@ function _M.set_keepalive(self, ...)
 
     if rawget(self, "_subscribed") then
         return nil, "subscribed state"
+    end
+
+    if rawget(self, "_in_multi") then
+        return nil, "in transaction"
     end
 
     return sock:setkeepalive(...)
@@ -340,7 +440,15 @@ local function _gen_req(args)
 
     for i = 1, nargs do
         local arg = args[i]
-        if type(arg) ~= "string" then
+        local typ = type(arg)
+        if typ == "number" and (arg >= 1e14 or arg <= -1e14)
+           and arg == floor(arg) and arg <= MAX_INT and arg >= -MAX_INT
+        then
+            -- tostring() uses %.14g, which turns integers of 15+ digits
+            -- into scientific notation (issue #135)
+            arg = str_fmt("%.0f", arg)
+
+        elseif typ ~= "string" then
             arg = tostring(arg)
         end
 
@@ -365,7 +473,7 @@ local function _check_msg(self, res)
 end
 
 
-local function _do_cmd(self, ...)
+_do_cmd = function (self, ...)
     local args = {...}
 
     local sock = rawget(self, "_sock")
@@ -643,13 +751,80 @@ function _M.hmset(self, hashname, ...)
 end
 
 
+function _M.hmget(self, hashname, ...)
+    if select("#", ...) == 1 and type((...)) == "table" then
+        return do_cmd(self, "hmget", hashname, unpack((...)))
+    end
+
+    return do_cmd(self, "hmget", hashname, ...)
+end
+
+
+-- the connection must not be put back into the pool while a transaction is
+-- open on the server (issue #176): MULTI marks it, and only a confirmed EXEC
+-- or DISCARD reply clears it. Pipelined commands are settled when their
+-- replies are read in commit_pipeline().
+local function update_multi_state(self, cmd, res)
+    if cmd == "multi" then
+        self._in_multi = true
+
+    elseif res then
+        self._in_multi = false
+    end
+end
+
+
+local function do_multi_cmd(self, cmd, ...)
+    -- Prefixed commands do not change Redis transaction state.
+    if rawget(self, "_module_prefix") then
+        return do_cmd(self, cmd, ...)
+    end
+
+    local reqs = rawget(self, "_reqs")
+    if reqs then
+        local res, err = do_cmd(self, cmd, ...)
+
+        local txn_reqs = rawget(self, "_txn_reqs")
+        if not txn_reqs then
+            txn_reqs = {}
+            self._txn_reqs = txn_reqs
+        end
+        txn_reqs[#reqs] = cmd
+
+        return res, err
+    end
+
+    local res, err = do_cmd(self, cmd, ...)
+    update_multi_state(self, cmd, res)
+
+    return res, err
+end
+
+
+function _M.multi(self, ...)
+    return do_multi_cmd(self, "multi", ...)
+end
+
+
+function _M.exec(self, ...)
+    return do_multi_cmd(self, "exec", ...)
+end
+
+
+function _M.discard(self, ...)
+    return do_multi_cmd(self, "discard", ...)
+end
+
+
 function _M.init_pipeline(self, n)
     self._reqs = new_tab(n or 4, 0)
+    self._txn_reqs = nil
 end
 
 
 function _M.cancel_pipeline(self)
     self._reqs = nil
+    self._txn_reqs = nil
 end
 
 
@@ -660,6 +835,9 @@ function _M.commit_pipeline(self)
     end
 
     self._reqs = nil
+
+    local txn_reqs = rawget(self, "_txn_reqs")
+    self._txn_reqs = nil
 
     local sock = rawget(self, "_sock")
     if not sock then
@@ -680,6 +858,10 @@ function _M.commit_pipeline(self)
     local vals = new_tab(nreqs, 0)
     for i = 1, nreqs do
         local res, err = _read_reply(self, sock)
+        if txn_reqs and txn_reqs[i] then
+            update_multi_state(self, txn_reqs[i], res)
+        end
+
         if res then
             nvals = nvals + 1
             vals[nvals] = res

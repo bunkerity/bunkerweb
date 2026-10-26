@@ -35,6 +35,10 @@
 - [DOCS] `greylist`: the criteria combine with OR, with an example.
 - [DEPS] Updated Brotli to v1.2.1
 - [DEPS] Updated lua-resty-dns to v0.24
+- [DEPS] Updated headers-more-nginx-module to v0.41
+- [DEPS] Updated lua-cjson to v2.1.0.20
+- [DEPS] Updated lua-resty-redis to v0.34
+- [DEPS] Updated LuaJIT to v2.1-20261023
 
 ## v1.6.17 - 2026/10/21
 

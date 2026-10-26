@@ -22,6 +22,7 @@ Table of Contents
     * [commit_pipeline](#commit_pipeline)
     * [cancel_pipeline](#cancel_pipeline)
     * [hmset](#hmset)
+    * [hmget](#hmget)
     * [array_to_hash](#array_to_hash)
     * [read_reply](#read_reply)
     * [add_commands](#add_commands)
@@ -30,6 +31,7 @@ Table of Contents
 * [Load Balancing and Failover](#load-balancing-and-failover)
 * [Debugging](#debugging)
 * [Automatic Error Logging](#automatic-error-logging)
+* [Error Handling and Connection Lifecycle](#error-handling-and-connection-lifecycle)
 * [Check List for Issues](#check-list-for-issues)
 * [Limitations](#limitations)
 * [Installation](#installation)
@@ -96,6 +98,9 @@ Synopsis
                 ok, err = red:set("dog", "an animal")
                 if not ok then
                     ngx.say("failed to set dog: ", err)
+                    -- the connection is closed automatically when the
+                    -- request ends, see "Error Handling and Connection
+                    -- Lifecycle" below
                     return
                 end
 
@@ -183,6 +188,16 @@ Similarly, the "LRANGE" redis command accepts three arguments, then you should c
 
 For example, "SET", "GET", "LRANGE", and "BLPOP" commands correspond to the methods "set", "get", "lrange", and "blpop".
 
+The methods are generated on demand, so every Redis command works this way, including commands newer than this library and multi-word commands (the sub-command is just the first argument):
+
+```lua
+    -- CLIENT SETNAME myapp
+    local res, err = red:client("setname", "myapp")
+
+    -- BITFIELD mykey GET u8 0
+    local res, err = red:bitfield("mykey", "get", "u8", 0)
+```
+
 Here are some more examples:
 
 ```lua
@@ -249,7 +264,25 @@ The optional `options_table` argument is a Lua table holding the following keys:
 
 * `pool`
 
-    Specifies a custom name for the connection pool being used. If omitted, then the connection pool name will be generated from the string template `<host>:<port>` or `<unix-socket-path>`.
+    Specifies a custom name for the connection pool being used. If omitted, then the connection pool name will be generated from the string template `<host>:<port>` or `<unix-socket-path>`, followed by `/db=<db>` when the `db` option is given and `/user=<username>` when the `username` option is in effect (for example `127.0.0.1:6379/db=1` or `127.0.0.1:6379/db=2/user=alice`), so that connections to different databases or ACL users never share a pool. The `password` is never part of the pool name: every caller sharing a pool must authenticate the same way, or specify its own `pool`.
+
+* `db`
+
+    Selects the given Redis database with the `SELECT` command right after a *new* connection is established. The value must be a number (or a numeric string); anything else raises a Lua error. Connections reused from the connection pool are left untouched, which is why such connections get their own pool (see `pool` above). Omit this option for the default database `0`. If `SELECT` fails, `connect` closes the connection and returns `nil` plus the error string `"failed to select database <db>: <err>"`.
+
+* `password`
+
+    Authenticates a *new* connection with the `AUTH` command before `SELECT` (if any). Connections reused from the connection pool are left untouched. An empty string means no authentication. If `AUTH` fails, `connect` closes the connection and returns `nil` plus the error string `"failed to authenticate: <err>"`. See also [Redis Authentication](#redis-authentication).
+
+* `username`
+
+    The Redis ACL user name to authenticate as (`AUTH <username> <password>`, Redis 6.0+). Only used together with `password`; an empty string means the default user.
+
+* `tcp_keepalive`
+
+    If set to true, enables TCP keepalive (`SO_KEEPALIVE`) on the connection, whether newly established or reused from the pool. This lets an idle connection, typically one blocked in [read_reply](#read_reply) for Pub/Sub messages, notice a silently dropped peer. Only `SO_KEEPALIVE` is set: the probe timing comes from the operating system (on Linux `net.ipv4.tcp_keepalive_time`, 7200 seconds by default), so tune those kernel parameters or send a periodic `PING` if you need faster detection. Requires the `setoption` cosocket method ([ngx_lua 0.10.18](https://github.com/openresty/lua-nginx-module/tags) with lua-resty-core, the default since OpenResty 1.15.8.1). If it cannot be enabled, `connect` closes the connection and returns `nil` plus the error string `"failed to enable tcp keepalive: <err>"`.
+
+Note that these keys are read from the whole `options_table`: a table that already carries a `db`, `password`, `username` or `tcp_keepalive` key for other purposes now has that meaning here.
 
 * `pool_size`
 
@@ -297,6 +330,8 @@ You can specify the max idle timeout (in ms) when the connection is in the pool 
 In case of success, returns `1`. In case of errors, returns `nil` with a string describing the error.
 
 Only call this method in the place you would have called the `close` method instead. Calling this method will immediately turn the current redis object into the `closed` state. Any subsequent operations other than `connect()` on the current object will return the `closed` error.
+
+A connection with an open transaction cannot be put into the pool: from the `multi` call until Redis has acknowledged an `exec` or `discard`, this method returns `nil` and the error string `"in transaction"` and the connection stays open. If `exec` or `discard` fails with a Redis error reply (for example `EXECABORT` or `NOPERM`), the connection is still considered to be in a transaction; `close` it. Pipelined `multi`, `exec` and `discard` take effect when their replies are read by [commit_pipeline](#commit_pipeline). Note that `WATCH` is not tracked: `unwatch` (or `close`) before keeping such a connection alive.
 
 [Back to TOC](#table-of-contents)
 
@@ -368,6 +403,19 @@ Special wrapper for the Redis "hmset" command.
 
 When there are only three arguments (including the "red" object
 itself), then the last argument must be a Lua table holding all the field/value pairs.
+
+[Back to TOC](#table-of-contents)
+
+hmget
+-----
+`syntax: res, err = red:hmget(myhash, field1, field2, ...)`
+
+`syntax: res, err = red:hmget(myhash, { field1, field2, ... })`
+
+Special wrapper for the Redis "hmget" command.
+
+When there are only three arguments (including the "red" object
+itself) and the last one is a Lua table, the table is taken as the list of fields. The values are returned as a Lua table in the same order as the fields, exactly as for the plain form.
 
 [Back to TOC](#table-of-contents)
 
@@ -519,7 +567,17 @@ password `foobared` in the `redis.conf` file:
 If the password specified is wrong, then the sample above will output the
 following to the HTTP client:
 
-    failed to authenticate: ERR invalid password
+    failed to authenticate: WRONGPASS invalid username-password pair or user is disabled.
+
+(`ERR invalid password` on Redis servers older than 6.0.)
+
+To authenticate as a Redis ACL user (Redis 6.0+), pass the user name first:
+
+```lua
+    local res, err = red:auth("alice", "foobared")
+```
+
+Instead of calling `auth` yourself on every new connection, you can also pass the `password` (and `username`) options to [connect](#connect), which runs `AUTH` only for connections that do not come from the connection pool.
 
 [Back to TOC](#table-of-contents)
 
@@ -574,6 +632,8 @@ Then the output will be
     set ans: "QUEUED"
     set ans: "QUEUED"
     exec ans: ["OK",[false,"ERR Operation against a key holding the wrong kind of value"]]
+
+A connection cannot be put back into the connection pool while a transaction is open, see [set_keepalive](#set_keepalive).
 
 [Back to TOC](#table-of-contents)
 
@@ -648,6 +708,24 @@ handling in your own Lua code, then you are recommended to disable this automati
 ```nginx
     lua_socket_log_errors off;
 ```
+
+[Back to TOC](#table-of-contents)
+
+Error Handling and Connection Lifecycle
+=======================================
+
+The two error shapes returned by the command methods mean different things:
+
+* `false, err` is a Redis error reply (for example `ERR wrong number of arguments`). The connection is fine and can still be used or put into the pool with [set_keepalive](#set_keepalive), unless Redis itself closed it, as it does after protocol errors or when `maxclients` is exceeded.
+* `nil, err` from a command method is a connection failure (`closed`, `timeout`, `connection reset by peer`, ...). Do not reuse the connection: call [close](#close) and connect again. After a read timeout this library has already closed the socket for you, so a subsequent [set_keepalive](#set_keepalive) returns `closed`; that is expected.
+
+Two exceptions to the second rule: a `timeout` from [read_reply](#read_reply) in subscribe mode is a normal polling result and the connection stays usable; after a timed-out `blpop`/`brpop` the connection must be closed and never kept alive, because the late reply would be read by the next user. Errors describing this library's own state (`in transaction`, `subscribed state`, `not subscribed`, `no pipeline`, `not initialized`) are not connection failures.
+
+A connection that is neither closed nor kept alive is closed automatically when the current request (or timer) finishes. This is not a leak, but the connection is not reused either; return early from error paths as in the [Synopsis](#synopsis) if that is acceptable to you.
+
+When setting the `max_idle_timeout` of [set_keepalive](#set_keepalive), keep it below the idle timeout of anything between NGINX and Redis (load balancers, NAT, firewalls) and below Redis' own `timeout` setting, otherwise pooled connections come back dead and the next command fails with `closed`, `connection reset by peer` or `timeout`. A `max_idle_timeout` of `0` means unlimited.
+
+The `pool_size` of [set_keepalive](#set_keepalive) (or of [connect](#connect)) bounds the number of *idle* connections kept in the pool, not the number of concurrent connections; use the `backlog` option of [connect](#connect) to limit the latter.
 
 [Back to TOC](#table-of-contents)
 

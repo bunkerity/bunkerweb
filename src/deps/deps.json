@@ -17,9 +17,9 @@
     },
     {
       "id": "headers-more-nginx-module",
-      "name": "headers-more-nginx-module v0.40",
+      "name": "headers-more-nginx-module v0.41",
       "url": "https://github.com/openresty/headers-more-nginx-module.git",
-      "commit": "0bf283ff92017acd616814b0e5153e0ccf93e2c9",
+      "commit": "21066f7eed72e4de4f6ec47b93e8d5f36c38b84a",
       "post_install": "rm -r src/deps/src/headers-more-nginx-module/t"
     },
     {
@@ -45,9 +45,9 @@
     },
     {
       "id": "lua-cjson",
-      "name": "lua-cjson v2.1.0.19",
+      "name": "lua-cjson v2.1.0.20",
       "url": "https://github.com/openresty/lua-cjson.git",
-      "commit": "5ce46a80b10ef9d380a45c9e6cff9ecffbe71ebb"
+      "commit": "5f53e878d0441e1555f53060178c61d161079e06"
     },
     {
       "id": "lua-ffi-zlib",
@@ -139,9 +139,9 @@
     },
     {
       "id": "lua-resty-redis",
-      "name": "lua-resty-redis v0.33",
+      "name": "lua-resty-redis v0.34",
       "url": "https://github.com/openresty/lua-resty-redis.git",
-      "commit": "3fdc727f176f565adca8c2b350a636bd74e93de2",
+      "commit": "0d014dd1c7ca16e2e7570e04d16421e3df0d3b36",
       "post_install": "rm -r src/deps/src/lua-resty-redis/t"
     },
     {
@@ -201,9 +201,9 @@
     },
     {
       "id": "luajit",
-      "name": "LuaJIT v2.1-20261021",
+      "name": "LuaJIT v2.1-20261023",
       "url": "https://github.com/openresty/luajit2.git",
-      "commit": "12379eb4fd2e3718387b421048307b4771fef79b",
+      "commit": "5d8d0a27bfa4595b24b8ed36123555fcd2bb2f8c",
       "post_install": "rm -r src/deps/src/luajit/t"
     },
     {
