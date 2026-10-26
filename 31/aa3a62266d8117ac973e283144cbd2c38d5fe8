@@ -1,0 +1,30 @@
+tests/unit/gen/test_ui_modsec_crs_exclusions.py
+  s_20b7a5ed3d719b::t_ccbd0271854c5f 50,58,77-79
+  s_20b7a5ed3d719b::t_f4e97e452e85e2 1-49,51-57,59-76,80-81
+src/common/core/ui/confs/http/ui.modsec-crs
+  s_3c7b8a04a40dae::t_f2c101e7b045e4 7-13
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "31aa3a62266d8117ac973e283144cbd2c38d5fe8",
+  "prompts": {},
+  "sessions": {
+    "s_20b7a5ed3d719b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "1ff5f57f-70c6-42de-a484-47b9c5ced9ac",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_3c7b8a04a40dae": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "d94cb216-0806-4bc0-99af-cb021ee068d3",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

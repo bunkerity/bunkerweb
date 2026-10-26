@@ -1,0 +1,48 @@
+src/common/core/antibot/files/mcaptcha.html
+  s_b4d92303adbe4a::t_f8bad3a8a4c311 158-159,169-170,254-260,333-355,357
+tests/unit/antibot/test_external_captcha_error_recovery.py
+  s_0364e1ca78574c::t_e545f3a61c664d 1-13,15-104,106-110,112-146,148-156,158-204,206-224,226-241
+  s_97829bd3b546d8::t_8ab309d6b4a65c 105,147,157,205,225
+  s_0364e1ca78574c::t_f8f5e35ec6e11b 111
+  s_0364e1ca78574c::t_041796edcc6936 14
+src/common/core/antibot/files/recaptcha.html
+  s_b4d92303adbe4a::t_f8bad3a8a4c311 173-184,273-279,292-293,351-375,381,385,403,418-423,429-430,434-436,439,446,460-461,468-476,480-489
+src/common/core/antibot/files/turnstile.html
+  s_b4d92303adbe4a::t_f8bad3a8a4c311 155-156,166-167,361-370,386-388,450,459-482,484-489
+src/common/core/antibot/files/hcaptcha.html
+  s_b4d92303adbe4a::t_f8bad3a8a4c311 158-159,169-170,252-258,321-343,354-356,360,365-371
+src/common/core/antibot/files/capjs.html
+  s_b4d92303adbe4a::t_f8bad3a8a4c311 134-145,247-253,324-334,347-348,360
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "e4d934f901e2895380fdee10ced8bacbae383962",
+  "prompts": {},
+  "sessions": {
+    "s_0364e1ca78574c": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "40edb64a-3d32-402a-9a23-f17648ad6d0e",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_97829bd3b546d8": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b2517ec2-7793-439c-a7d8-ce741cb4a2fd",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_b4d92303adbe4a": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "ee8e9e24-a1c8-48b4-8b3d-ce516a01ff2c",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

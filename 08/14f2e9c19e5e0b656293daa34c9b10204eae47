@@ -1,0 +1,56 @@
+src/deps/src/headers-more-nginx-module/src/ngx_http_headers_more_filter_module.c
+  s_f6ae8d3f1c0215::t_3c1b6c21c88073 119,129,136-137
+src/deps/src/headers-more-nginx-module/util/build.sh
+  s_f6ae8d3f1c0215::t_3c1b6c21c88073 10-15,19-21
+src/deps/src/headers-more-nginx-module/src/ngx_http_headers_more_headers_in.c
+  s_f6ae8d3f1c0215::t_3c1b6c21c88073 492,507,512-513,515-523
+src/deps/src/lua-resty-redis/README.markdown
+  s_f6ae8d3f1c0215::t_3c1b6c21c88073 25,34,101-103,191-200,267-285,334-335,409-421,570-580,636-637,714-728
+  s_f6ae8d3f1c0215::t_0a93722170c725 729-731
+src/deps/src/headers-more-nginx-module/src/ngx_http_headers_more_headers_out.h
+  s_f6ae8d3f1c0215::t_3c1b6c21c88073 17
+CHANGELOG.md
+  s_175dfb7646d720::t_d7cf8ac4e5aded 38-41
+src/deps/src/luajit/src/vm_ppc.dasc
+  s_f6ae8d3f1c0215::t_3c1b6c21c88073 3429-3449,3513,3517-3522,3524,3528-3551,3609,3615-3625,3633
+src/deps/src/lua-cjson/lua_cjson.c
+  s_f6ae8d3f1c0215::t_3c1b6c21c88073 97,162-203,218-221,232,557-577,585-586,629,700-701,714,716,725-738,873-874,877-878,888,893,922-1023,1029-1035,1043-1075,1077-1080,1082-1085,1088-1092,1094-1123,1125,1127-1165,1167-1169,1192,1297-1305,1314-1319,2012
+src/deps/deps.json
+  s_f6ae8d3f1c0215::t_93bb57bced3ccc 142,144
+  s_f6ae8d3f1c0215::t_727ed533d58548 48,50
+  s_f6ae8d3f1c0215::t_ae3c3c4ef7c702 204,206
+  s_f6ae8d3f1c0215::t_42c6a31d4beb02 20,22
+src/deps/src/headers-more-nginx-module/src/ngx_http_headers_more_headers_out.c
+  s_f6ae8d3f1c0215::t_3c1b6c21c88073 111,143-147,589
+src/deps/src/lua-cjson/runtests.sh
+  s_f6ae8d3f1c0215::t_3c1b6c21c88073 62-65,71-74
+src/deps/src/lua-cjson/README.md
+  s_f6ae8d3f1c0215::t_3c1b6c21c88073 20,232-239
+  s_f6ae8d3f1c0215::t_72c01b57c3d6bc 240-242
+src/deps/src/lua-resty-redis/lib/resty/redis.lua
+  s_f6ae8d3f1c0215::t_3c1b6c21c88073 6-7,32-33,36,44,70-71,101,187-234,236,242-243,262-302,317-320,443-451,476,754-818,821,827,839-841,861-864
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "0814f2e9c19e5e0b656293daa34c9b10204eae47",
+  "prompts": {},
+  "sessions": {
+    "s_175dfb7646d720": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "6287d9cf-9a0e-4d8a-a3c0-5a6e08f44cfe",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_f6ae8d3f1c0215": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "f98f1d97-ebaf-44f3-8efb-d863e37db116",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

@@ -1,0 +1,44 @@
+src/common/utils/ApiCaller.py
+  s_ff20fc71fc9551::t_8ab8248dccda44 32
+src/scheduler/main.py
+  s_ff20fc71fc9551::t_8ab8248dccda44 64,152-153,1627,1632,1637-1638,1689-1699,1707,1833
+  s_de7dd324ce7478::t_2d5cec55b2e932 1628-1631,1633,1649,1656
+src/ui/app/models/instance.py
+  s_ff20fc71fc9551::t_8ab8248dccda44 19,153-157
+src/common/core/letsencrypt/jobs/certbot-deploy.py
+  s_ff20fc71fc9551::t_8ab8248dccda44 14,74
+src/api/app/routers/instances.py
+  s_ff20fc71fc9551::t_8ab8248dccda44 5,36,71
+src/bw/lua/bunkerweb/api.lua
+  s_ff20fc71fc9551::t_8ab8248dccda44 310-311,313,563-591,594-610,619-621,626-628,643,648-650
+CHANGELOG.md
+  s_ff20fc71fc9551::t_c1871ec2506ef4 10,12
+src/scheduler/JobScheduler.py
+  s_ff20fc71fc9551::t_8ab8248dccda44 33,85,268,508-510
+src/common/confs/init-worker-lua.conf
+  s_ff20fc71fc9551::t_8ab8248dccda44 68-73
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "cd6807b334c1b64bbd43d49c91ae02c4479e9d98",
+  "prompts": {},
+  "sessions": {
+    "s_de7dd324ce7478": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a15fc1-8936-7371-a15b-dec800f24116",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_ff20fc71fc9551": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "162362c5-42b6-46e1-83a0-29f8b51592ba",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

@@ -1,0 +1,16 @@
+tests/terraform/k8s.tf
+  h_a33a1e80933106 7-15,19,27,37-38,55,62
+tests/terraform/templates/lb.yml.tftpl
+  h_a33a1e80933106 7-9
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "50dd41fb24e3ed43f36503e2778bc211820a3493",
+  "prompts": {},
+  "humans": {
+    "h_a33a1e80933106": {
+      "author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

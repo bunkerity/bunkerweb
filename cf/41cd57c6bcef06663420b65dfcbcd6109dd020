@@ -1,0 +1,91 @@
+src/ui/app/static/locales/tl.json
+  s_3fae9ae420580e::t_77c3c5ff0ac08a 1434-1435
+src/ui/app/static/locales/ko.json
+  s_3fae9ae420580e::t_77c3c5ff0ac08a 1434-1435
+src/ui/app/static/locales/en.json
+  s_3fae9ae420580e::t_77c3c5ff0ac08a 1434-1435
+src/ui/app/static/locales/it.json
+  s_3fae9ae420580e::t_77c3c5ff0ac08a 1434-1435
+src/ui/app/static/locales/fr.json
+  s_3fae9ae420580e::t_77c3c5ff0ac08a 1434-1435
+src/ui/app/static/locales/hi.json
+  s_3fae9ae420580e::t_77c3c5ff0ac08a 1434-1435
+src/ui/app/static/locales/ru.json
+  s_3fae9ae420580e::t_77c3c5ff0ac08a 1434-1435
+src/ui/app/static/js/pages/support.js
+  s_3fae9ae420580e::t_60b5d463663ec7 6-16
+src/ui/app/static/locales/zh.json
+  s_3fae9ae420580e::t_77c3c5ff0ac08a 1434-1435
+src/ui/app/static/locales/pt.json
+  s_3fae9ae420580e::t_77c3c5ff0ac08a 1434-1435
+src/ui/app/static/locales/br.json
+  s_3fae9ae420580e::t_77c3c5ff0ac08a 1434-1435
+src/ui/app/static/locales/de.json
+  s_3fae9ae420580e::t_77c3c5ff0ac08a 1434-1435
+src/ui/app/static/locales/id.json
+  s_3fae9ae420580e::t_77c3c5ff0ac08a 1434-1435
+src/ui/app/static/locales/pl.json
+  s_3fae9ae420580e::t_77c3c5ff0ac08a 1434-1435
+src/ui/app/static/locales/tr.json
+  s_3fae9ae420580e::t_77c3c5ff0ac08a 1434-1435
+src/ui/app/routes/support.py
+  s_0e4aa41f7c7039::t_ed792dfa885de7 93
+  s_5eff54979421d0::t_270ec4b7224704 91,96-99,102,110,113,119-122,124,126
+  s_0e4aa41f7c7039::t_099e8d283daf74 6,70-80,84-85,87-88,90,92,94-95,100-101,103-106,116-118,123,125
+  s_3fae9ae420580e::t_3b279c8ed1597f 68-69,81-83,86,89,107-109,111-112,114-115,127-129,134-135,142-143,149-150
+src/ui/app/static/locales/ar.json
+  s_3fae9ae420580e::t_77c3c5ff0ac08a 1434-1435
+src/ui/app/static/locales/bn.json
+  s_3fae9ae420580e::t_77c3c5ff0ac08a 1434-1435
+src/ui/app/static/locales/tw.json
+  s_3fae9ae420580e::t_77c3c5ff0ac08a 1434-1435
+src/ui/app/templates/support.html
+  s_3fae9ae420580e::t_60b5d463663ec7 49,83,92-105
+  s_3fae9ae420580e::t_6474dae01a721e 91
+src/ui/app/static/locales/ur.json
+  s_3fae9ae420580e::t_77c3c5ff0ac08a 1434-1435
+src/ui/app/static/locales/es.json
+  s_3fae9ae420580e::t_77c3c5ff0ac08a 1434-1435
+CHANGELOG.md
+  s_4600783926e6d7::t_ac2625f2f74e1d 8
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "cf41cd57c6bcef06663420b65dfcbcd6109dd020",
+  "prompts": {},
+  "sessions": {
+    "s_0e4aa41f7c7039": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "e82f3b5a-dc0f-4892-a99c-3b089a34d0d8",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_3fae9ae420580e": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "6da90c01-0c8f-4538-9e1e-2c29cba7a45b",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_4600783926e6d7": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "577228b8-9e99-4afb-b5b7-0fab1e1a53d0",
+        "model": "unknown"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_5eff54979421d0": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "8e6ab071-5e15-4434-8491-98b7201c33de",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

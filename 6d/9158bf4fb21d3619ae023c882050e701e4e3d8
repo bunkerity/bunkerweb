@@ -1,0 +1,31 @@
+src/common/core/backup/backup.py
+  s_e0fdc018f87553::t_5ed84ae07cea0f 157
+  s_e0fdc018f87553::t_89ada863166055 158
+  s_e0fdc018f87553::t_9ecf22ac5e7bc2 159
+CHANGELOG.md
+  s_14860294494f14::t_f9d5bf2b548da5 25
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "6d9158bf4fb21d3619ae023c882050e701e4e3d8",
+  "prompts": {},
+  "sessions": {
+    "s_14860294494f14": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0f6fc-30ea-7e71-9e25-1d02a99ee4ff",
+        "model": "unknown"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_e0fdc018f87553": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "516c2f4c-92e0-44c9-8252-467c6561feba",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

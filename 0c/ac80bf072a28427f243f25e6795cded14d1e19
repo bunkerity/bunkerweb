@@ -1,0 +1,21 @@
+CHANGELOG.md
+  s_ff20fc71fc9551::t_e52fce2af225b1 3
+publiccode.yml
+  s_ff20fc71fc9551::t_adee1d81d9c241 5
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "0cac80bf072a28427f243f25e6795cded14d1e19",
+  "prompts": {},
+  "sessions": {
+    "s_ff20fc71fc9551": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "162362c5-42b6-46e1-83a0-29f8b51592ba",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

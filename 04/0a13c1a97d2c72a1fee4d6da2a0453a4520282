@@ -1,0 +1,25 @@
+tests/ansible/linux_playbook
+  s_4b075fdbb90bf8::t_fad52c4d554855 22-30
+tests/ansible/autoconf_playbook
+  s_4b075fdbb90bf8::t_fad52c4d554855 22-30
+tests/ansible/docker_playbook
+  s_4b075fdbb90bf8::t_fad52c4d554855 22-30
+tests/ansible/swarm_playbook
+  s_4b075fdbb90bf8::t_fad52c4d554855 34-42
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "040a13c1a97d2c72a1fee4d6da2a0453a4520282",
+  "prompts": {},
+  "sessions": {
+    "s_4b075fdbb90bf8": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0ba16-521f-71c0-9e4b-3473bb424a04",
+        "model": "gpt-5.6-luna"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

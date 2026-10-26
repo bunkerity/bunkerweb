@@ -1,0 +1,208 @@
+docs/es/plugins.md
+  s_2479354394f918::t_9b42bf7a984c6e 72
+  s_dae16abf1a153e::t_2f38b126e6e6e3 74-76
+  s_3c7b8a04a40dae::t_e0967f4fb14729 71,73
+docs/de/plugins.md
+  s_3c7b8a04a40dae::t_e0967f4fb14729 71,73
+  s_2479354394f918::t_9b42bf7a984c6e 72
+  s_dae16abf1a153e::t_2f38b126e6e6e3 74-76
+src/common/core/crowdsec/README.es.md
+  s_dae16abf1a153e::t_316b05d3b6c77a 73-105
+docs/fr/troubleshooting.md
+  s_498655ca1802b8::t_ecea9e941c7661 827-828
+  s_dae16abf1a153e::t_2f38b126e6e6e3 170-171
+  s_3c7b8a04a40dae::t_b4398675162e94 6-21
+  s_dae16abf1a153e::t_8d5934e58b3039 172
+docs/es/features.md
+  s_4df45921f6cc66::t_1396686872acf5 398-399,1179-1180,1885,2454,2456-2457,2469-2471,2848,2851-2852,2855,2857,4014-4016,4019,4520,5903,5906,5911,6521,7021,7099-7101
+  s_dae16abf1a153e::t_873d64cb6fce4f 61-79,90,158-161,163-167,2156-2187,2458
+  s_dae16abf1a153e::t_a759c10f3fef15 2188
+docs/zh/web-ui.md
+  s_dae16abf1a153e::t_2f38b126e6e6e3 262,326,534-536
+docs/quickstart-guide.md
+  s_3c7b8a04a40dae::t_b4398675162e94 23-38
+src/common/core/crowdsec/README.fr.md
+  s_dae16abf1a153e::t_316b05d3b6c77a 73-105
+docs/es/web-ui.md
+  s_dae16abf1a153e::t_2f38b126e6e6e3 266,330,565-567
+docs/zh/plugins.md
+  s_dae16abf1a153e::t_2f38b126e6e6e3 74-76
+  s_3c7b8a04a40dae::t_e0967f4fb14729 71,73
+  s_2479354394f918::t_9b42bf7a984c6e 72
+docs/fr/api.md
+  s_dae16abf1a153e::t_9481d8cfc8dd33 194,455,458,529-557
+  s_dae16abf1a153e::t_164520ec13f036 558
+docs/zh/features.md
+  s_4df45921f6cc66::t_1396686872acf5 400-401,1124-1125,1805,2378,2380-2381,2393-2395,2768,2771-2772,2775,2777,3919-3921,3924,4414,5790,5793,5798,6392,6844,6922-6924
+  s_dae16abf1a153e::t_873d64cb6fce4f 63-81,92,160-163,165-169,2076-2107,2382
+  s_dae16abf1a153e::t_dca1d62408851c 2108
+docs/fr/web-ui.md
+  s_dae16abf1a153e::t_2f38b126e6e6e3 264,328,538-540
+docs/zh/quickstart-guide.md
+  s_3c7b8a04a40dae::t_b4398675162e94 23-38
+docs/upgrading.md
+  s_1bdf3786392d2d::t_7b4d5cba0e6006 10
+docs/de/features.md
+  s_4df45921f6cc66::t_1396686872acf5 399-400,1170-1171,1878,2439,2441-2442,2454-2456,2823,2826-2827,2830,2832,3976-3978,3981,4482,5863,5866,5871,6484,6988,7060-7062
+  s_dae16abf1a153e::t_873d64cb6fce4f 61-79,90,158-161,163-167,2139-2170,2443
+  s_dae16abf1a153e::t_381ec36af8acb2 2171
+docs/api.md
+  s_dae16abf1a153e::t_9481d8cfc8dd33 194,453,457,526-554
+  s_dae16abf1a153e::t_c2932ca1c9b415 555
+docs/fr/plugins.md
+  s_dae16abf1a153e::t_2f38b126e6e6e3 74-76
+  s_3c7b8a04a40dae::t_e0967f4fb14729 71,73
+  s_2479354394f918::t_9b42bf7a984c6e 72
+src/common/core/crowdsec/README.md
+  s_dae16abf1a153e::t_316b05d3b6c77a 73-105
+docs/de/upgrading.md
+  s_1bdf3786392d2d::t_24cf7093586a72 10
+docs/troubleshooting.md
+  s_3c7b8a04a40dae::t_b4398675162e94 6-21
+  s_498655ca1802b8::t_ecea9e941c7661 825-826
+  s_dae16abf1a153e::t_2f38b126e6e6e3 170-171
+  s_dae16abf1a153e::t_d081e04a973b7d 172
+docs/de/web-ui.md
+  s_dae16abf1a153e::t_2f38b126e6e6e3 266,330,619-621
+src/common/core/crowdsec/README.zh.md
+  s_dae16abf1a153e::t_316b05d3b6c77a 73-105
+docs/es/api.md
+  s_dae16abf1a153e::t_9481d8cfc8dd33 194,476,480,550-578
+  s_dae16abf1a153e::t_aa400237986e44 579
+docs/de/quickstart-guide.md
+  s_3c7b8a04a40dae::t_b4398675162e94 23-38
+docs/de/troubleshooting.md
+  s_3c7b8a04a40dae::t_b4398675162e94 6-21
+  s_498655ca1802b8::t_ecea9e941c7661 926-927
+  s_dae16abf1a153e::t_2f38b126e6e6e3 170-171
+  s_dae16abf1a153e::t_cdb2f0a82e2a13 172
+docs/plugins.md
+  s_3c7b8a04a40dae::t_e0967f4fb14729 74,76
+  s_2479354394f918::t_9b42bf7a984c6e 75
+  s_dae16abf1a153e::t_2f38b126e6e6e3 77-79
+docs/fr/upgrading.md
+  s_1bdf3786392d2d::t_7e4a39bcfe59cc 10
+docs/fr/quickstart-guide.md
+  s_3c7b8a04a40dae::t_b4398675162e94 23-38
+src/common/core/crowdsec/README.de.md
+  s_dae16abf1a153e::t_316b05d3b6c77a 73-105
+docs/de/api.md
+  s_dae16abf1a153e::t_9481d8cfc8dd33 194,457,462,535-563
+  s_dae16abf1a153e::t_3776f9c7b1dba8 564
+docs/es/upgrading.md
+  s_1bdf3786392d2d::t_8a9cd74867dbe3 10
+docs/fr/features.md
+  s_4df45921f6cc66::t_1396686872acf5 398-399,1162-1163,1816,2369,2371-2372,2384-2386,2749,2752-2753,2756,2758,3873-3875,3878,4368,5706,5709,5714,6303,6733,6805-6807
+  s_dae16abf1a153e::t_873d64cb6fce4f 61-79,90,158-161,163-167,2067-2098,2373
+  s_dae16abf1a153e::t_064127e1e24dee 2099
+CHANGELOG.md
+  s_1bdf3786392d2d::t_670e2dd1305b59 306
+  s_e8917a61014dbb::t_6c89dd1a6b984f 346
+  s_dae16abf1a153e::t_738f967237542d 313-334,336-345
+  s_92fe2ada98598b::t_75ddc68422d1e1 41
+  s_dae16abf1a153e::t_57084657a303ec 335
+  s_7340a406e75e46::t_481002266a9e73 347
+docs/zh/troubleshooting.md
+  s_3c7b8a04a40dae::t_b4398675162e94 6-21
+  s_dae16abf1a153e::t_2f38b126e6e6e3 170-171
+  s_498655ca1802b8::t_ecea9e941c7661 822-823
+  s_dae16abf1a153e::t_ea028109e91c77 172
+docs/zh/api.md
+  s_dae16abf1a153e::t_9481d8cfc8dd33 194,455,458,529-557
+  s_dae16abf1a153e::t_37a8dc7f79ac2f 558
+docs/web-ui.md
+  s_dae16abf1a153e::t_2f38b126e6e6e3 263,333,552-554
+docs/zh/upgrading.md
+  s_1bdf3786392d2d::t_2bd12b371418d0 10
+docs/es/troubleshooting.md
+  s_dae16abf1a153e::t_2f38b126e6e6e3 170-171
+  s_498655ca1802b8::t_ecea9e941c7661 915-916
+  s_3c7b8a04a40dae::t_b4398675162e94 6-21
+  s_dae16abf1a153e::t_42865d3eee114c 172
+docs/es/quickstart-guide.md
+  s_3c7b8a04a40dae::t_b4398675162e94 23-38
+docs/features.md
+  s_dae16abf1a153e::t_873d64cb6fce4f 61-79,90,229-232,234-237,2225-2256,2535
+  s_4df45921f6cc66::t_1396686872acf5 469-470,1241-1242,1952,2531,2533-2534,2546-2548,2923,2926-2927,2930,2932,4093-4095,4098,4589,5965,5968,5973,6568,6955,7033-7035
+  s_dae16abf1a153e::t_8c6a82cf368b7f 2257
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "6b6e21a33060d32a77bfa25619c67f87039f27d2",
+  "prompts": {},
+  "sessions": {
+    "s_1bdf3786392d2d": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "a7d3a464-0e9c-41fb-b125-94c63062f24b",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_2479354394f918": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "e9ac8971-b7d8-4c29-b518-2bccecde1fd9",
+        "model": "unknown"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_3c7b8a04a40dae": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "d94cb216-0806-4bc0-99af-cb021ee068d3",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_498655ca1802b8": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "e7e0d3ee-4b8a-4387-b044-edced6ed9aa1",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_4df45921f6cc66": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "27ef48b1-6813-4295-90df-7d875e1dc5f4",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_7340a406e75e46": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "8747470a-2e39-4821-ae34-c8c5ee0fe63b",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_92fe2ada98598b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "3edb07ed-44d3-4170-b29e-d68e31896fbd",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_dae16abf1a153e": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "958dd296-637f-49bd-8fa6-ab4e14d113fa",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_e8917a61014dbb": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "7ff350ad-bc0b-4556-8679-17b87e179e57",
+        "model": "unknown"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

@@ -1,0 +1,61 @@
+.github/workflows/rm-arm.yml
+  s_64f7165edc727a::t_86a3715e165cbe 23
+.github/workflows/create-arm.yml
+  s_64f7165edc727a::t_86a3715e165cbe 32
+.github/workflows/staging-delete-infra.yml
+  s_64f7165edc727a::t_86a3715e165cbe 21
+.github/workflows/doc-to-pdf.yml
+  s_64f7165edc727a::t_86a3715e165cbe 15
+.github/workflows/push-github.yml
+  s_64f7165edc727a::t_86a3715e165cbe 29
+.github/workflows/staging.yml
+  s_64f7165edc727a::t_86a3715e165cbe 105,150,183
+.github/workflows/push-doc.yml
+  s_64f7165edc727a::t_86a3715e165cbe 26
+.github/workflows/plumber.yml
+  s_64f7165edc727a::t_86a3715e165cbe 11
+.github/workflows/dev-update-mmdb.yml
+  s_64f7165edc727a::t_86a3715e165cbe 13
+.github/workflows/test-core.yml
+  s_64f7165edc727a::t_86a3715e165cbe 19
+.github/workflows/push-packagecloud.yml
+  s_64f7165edc727a::t_86a3715e165cbe 46
+.github/workflows/scorecards-analysis.yml
+  s_64f7165edc727a::t_86a3715e165cbe 15
+.github/workflows/staging-create-infra.yml
+  s_64f7165edc727a::t_86a3715e165cbe 20
+.github/workflows/codeql.yml
+  s_64f7165edc727a::t_86a3715e165cbe 11
+.github/workflows/dev.yml
+  s_64f7165edc727a::t_86a3715e165cbe 182
+.github/workflows/container-build.yml
+  s_64f7165edc727a::t_86a3715e165cbe 54
+.github/workflows/push-docker.yml
+  s_64f7165edc727a::t_86a3715e165cbe 35
+.github/workflows/linux-build.yml
+  s_64f7165edc727a::t_86a3715e165cbe 44
+.github/workflows/tests-ui.yml
+  s_64f7165edc727a::t_86a3715e165cbe 18
+.github/workflows/pullfrog.yml
+  s_64f7165edc727a::t_86a3715e165cbe 19
+.github/workflows/release.yml
+  s_64f7165edc727a::t_86a3715e165cbe 23,348,389,408
+.github/workflows/ui.yml
+  s_64f7165edc727a::t_86a3715e165cbe 68
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "602e60942dff4d83092529750157ad0040bd78f2",
+  "prompts": {},
+  "sessions": {
+    "s_64f7165edc727a": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a15870-1980-7771-a8f5-ab57e43809eb",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}
