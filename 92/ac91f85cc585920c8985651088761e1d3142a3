@@ -1,0 +1,21 @@
+docs/upgrading.md
+  s_795e2ccdb6801b::t_58223a498f1c8d 57,79
+src/linux/AGENTS.md
+  s_795e2ccdb6801b::t_f7acd823dbc238 51-60
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "92ac91f85cc585920c8985651088761e1d3142a3",
+  "prompts": {},
+  "sessions": {
+    "s_795e2ccdb6801b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "71804b16-900c-4824-8bbc-5e7434803315",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

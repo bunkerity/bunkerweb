@@ -1,0 +1,141 @@
+docs/upgrading.md
+  s_c5801cb3859fa2::t_203abe6c39bda4 252,254,257
+  s_795e2ccdb6801b::t_8cec8c81c0f8a9 253,256
+  s_c5801cb3859fa2::t_c4e7d93ad10641 255
+  s_c5801cb3859fa2::t_877380750eb384 91-93,95-98,101-102,105
+src/common/core/grpc/README.de.md
+  s_c5801cb3859fa2::t_fe7cbb765630c2 60
+  s_c5801cb3859fa2::t_95fd5325cb4eb3 23-26,30-59,61-73
+  s_4605296e4999ad::t_4385bad2103e73 132
+src/common/core/reverseproxy/README.de.md
+  s_c5801cb3859fa2::t_e7d5648f28f2a5 197,200
+  s_c5801cb3859fa2::t_ab3f7473f77075 43,45-46
+  s_c5801cb3859fa2::t_d60409aa5b45c0 139-142
+  s_c5801cb3859fa2::t_f1951d050ecc1b 151,155
+  s_5765503030423a::t_2b51febd329117 156
+docs/zh/plugins.md
+  s_c5801cb3859fa2::t_4a571e3d3849ef 411
+docs/de/plugins.md
+  s_c5801cb3859fa2::t_ae0ad88ae2d37b 410
+docs/es/plugins.md
+  s_c5801cb3859fa2::t_c36056772f9515 411
+src/common/core/grpc/README.md
+  s_c5801cb3859fa2::t_63b3d77fe75c7d 24-26,30-59,61-73
+  s_c5801cb3859fa2::t_c89395bfbeb41e 60
+  s_4605296e4999ad::t_ea263d311e3bc2 132
+src/common/core/grpc/README.fr.md
+  s_c5801cb3859fa2::t_5431e8b1bfcb63 24-26,30-59,61-73
+  s_c5801cb3859fa2::t_619c4072cdea7b 60
+  s_4605296e4999ad::t_5100b71240a679 132
+docs/zh/upgrading.md
+  s_c5801cb3859fa2::t_60d49b6009c38c 165
+  s_8d530aa343dd35::t_95ebefc26b40fd 163,166
+  s_c5801cb3859fa2::t_bf4768e414f689 67,70-71,74
+  s_c5801cb3859fa2::t_c8b58757ec1116 162,164,167
+  s_c5801cb3859fa2::t_54e93c21fb9b82 75
+docs/fr/upgrading.md
+  s_c5801cb3859fa2::t_ddf9faa528109b 195,197,200
+  s_c5801cb3859fa2::t_b630d1a76f7772 85-87,89-93,96-97,100
+  s_c5801cb3859fa2::t_75a1ea6bf53cb9 198
+  s_8d530aa343dd35::t_95ebefc26b40fd 196,199
+docs/es/upgrading.md
+  s_c5801cb3859fa2::t_6b4e1ff34b4541 86-93,96-97,100
+  s_c5801cb3859fa2::t_14a2ccafa415d9 264
+  s_c5801cb3859fa2::t_a1356d314c2e91 261,263,266
+  s_8d530aa343dd35::t_95ebefc26b40fd 262,265
+src/common/core/reverseproxy/README.fr.md
+  s_c5801cb3859fa2::t_f384d59ae3b9a6 151,155
+  s_c5801cb3859fa2::t_91cc7c6ebf8dac 139-142
+  s_c5801cb3859fa2::t_f19e40ed48fc7b 43,45-46
+  s_c5801cb3859fa2::t_d0331dd745b521 197,200
+  s_5765503030423a::t_f4d906f1f89b79 156
+src/common/core/reverseproxy/README.md
+  s_c5801cb3859fa2::t_b8e2c55c61b924 139-142
+  s_c5801cb3859fa2::t_33cf831ca6b9da 197,200
+  s_c5801cb3859fa2::t_f421720488f37e 43,45-46
+  s_c5801cb3859fa2::t_270afd0f91b2be 151,155
+  s_795e2ccdb6801b::t_2620592ff7757a 156
+docs/fr/concepts.md
+  s_c5801cb3859fa2::t_4765ec04186437 231-247
+docs/es/concepts.md
+  s_c5801cb3859fa2::t_c2293f6f75d075 239-255
+src/common/core/grpc/README.zh.md
+  s_c5801cb3859fa2::t_49e87507481f80 23-59,61-73
+  s_c5801cb3859fa2::t_d5a010558c0e08 60
+  s_4605296e4999ad::t_820a2e6a1cd181 132
+docs/de/upgrading.md
+  s_c5801cb3859fa2::t_16d60f16cf68e4 88-90,92-95,98-99,102
+  s_c5801cb3859fa2::t_1d48070261fa98 248,250,253
+  s_8d530aa343dd35::t_95ebefc26b40fd 249,252
+  s_c5801cb3859fa2::t_7965641e1745dd 251
+docs/fr/plugins.md
+  s_c5801cb3859fa2::t_15a2b65d1a1690 411
+src/common/core/reverseproxy/README.es.md
+  s_c5801cb3859fa2::t_667e3876a332e1 139-142
+  s_c5801cb3859fa2::t_84afc889f92fca 43,45-46
+  s_c5801cb3859fa2::t_ef4d9d134525af 197,200
+  s_c5801cb3859fa2::t_5e9fb0e67c4e66 151,155
+  s_5765503030423a::t_6ea567f601c71e 156
+src/common/core/reverseproxy/README.zh.md
+  s_c5801cb3859fa2::t_b0411269307cf9 139-142
+  s_c5801cb3859fa2::t_2ef261f241f0bc 151,155
+  s_c5801cb3859fa2::t_25fd06cad76d34 43,45-46
+  s_c5801cb3859fa2::t_2ce549b57d3f4d 197,200
+  s_5765503030423a::t_4b2d735bd0eaf0 156
+src/common/core/grpc/README.es.md
+  s_c5801cb3859fa2::t_95ce750460d800 60
+  s_c5801cb3859fa2::t_c1c4c12c10680b 24-59,61-73
+  s_4605296e4999ad::t_bde6b6ae05a18e 132
+docs/de/concepts.md
+  s_c5801cb3859fa2::t_4013c1bd83f24b 235-251
+docs/zh/concepts.md
+  s_c5801cb3859fa2::t_1d22dd1caf3d81 231-247
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "1c68bd5a06022b79e09679c39bd2817450f6c567",
+  "prompts": {},
+  "sessions": {
+    "s_4605296e4999ad": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "d1c790c5-a59f-4454-8f16-6735f9ac5d1a",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_5765503030423a": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "8115552a-34c2-4993-ba26-6ba9cf0ff251",
+        "model": "unknown"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_795e2ccdb6801b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "71804b16-900c-4824-8bbc-5e7434803315",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_8d530aa343dd35": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0c9b5-7e3e-74c0-9999-859085b7c9c7",
+        "model": "gpt-5.6-luna"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_c5801cb3859fa2": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "92a4d903-4440-4ecc-95aa-ad0b13fe7df3",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

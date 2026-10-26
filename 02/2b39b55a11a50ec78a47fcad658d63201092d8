@@ -1,0 +1,33 @@
+CHANGELOG.md
+  s_ece0b7db599386::t_b37305fa657104 5
+src/bw/lua/bunkerweb/utils.lua
+  s_b80b2f00fb3ccc::t_1602213d3d2309 471-491,519,562-563,568-569
+src/common/core/modsecurity/confs/http/modsecurity-rules-global-crs.conf.modsec
+  s_b80b2f00fb3ccc::t_44ec02b14ccd54 32,47,55
+src/common/core/modsecurity/confs/server-http/modsecurity-rules.conf.modsec
+  s_b80b2f00fb3ccc::t_369691524e5dab 96,111,119
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "022b39b55a11a50ec78a47fcad658d63201092d8",
+  "prompts": {},
+  "sessions": {
+    "s_b80b2f00fb3ccc": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a14428-4e2d-7500-ae0b-bad7b110d1f4",
+        "model": "unknown"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_ece0b7db599386": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "9ae7700f-1e09-430f-9d34-fdc016638720",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

@@ -1,0 +1,47 @@
+src/common/core/letsencrypt/letsencrypt.lua
+  s_2ad06a8466523a::t_6c2269efb286df 8,23,43-45,217-303,371,442,467-469,485-486,544-545,582-583,613-617,621-656,726-732,734,736,738,742-748,808-814
+src/bw/lua/bunkerweb/utils.lua
+  s_e1fbfd3163b991::t_7a758ff3d7623d 1448
+src/common/confs/partials/ssl-certificate-by-lua.conf
+  s_e1fbfd3163b991::t_5a30d1c21a13f0 47-67,69,71-84,86,88-94,99-100,104-109
+src/common/core/letsencrypt/README.de.md
+  s_e1fbfd3163b991::t_7350d1a31eb672 39-78
+src/common/core/letsencrypt/README.es.md
+  s_e1fbfd3163b991::t_9212a48cf35e1a 39-78
+src/common/core/letsencrypt/README.fr.md
+  s_e1fbfd3163b991::t_5a3fe4ab4e0829 39-78
+src/common/core/letsencrypt/README.md
+  s_e1fbfd3163b991::t_a39ae7f85f3b5f 39-78
+src/common/core/letsencrypt/README.zh.md
+  s_e1fbfd3163b991::t_2e620f7a46b863 39-78
+src/common/core/letsencrypt/jobs/certbot-new.py
+  s_e1fbfd3163b991::t_60c7eea6eb0241 17,138,141-142,148,153-155,159-256,380,556-560,562-569,600,799,1019-1020,1173-1176,1178-1183,1190
+src/common/core/letsencrypt/plugin.json
+  s_e1fbfd3163b991::t_f0ce5013495993 201
+src/common/core/order.json
+  s_e1fbfd3163b991::t_8e74f387a24d88 29
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "bd8d43d2393ac350917035aefbbe1897a7d6ce18",
+  "prompts": {},
+  "sessions": {
+    "s_2ad06a8466523a": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "8efabd41-58be-458f-9641-8ab672dc16b1",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_e1fbfd3163b991": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b779971c-c931-4dde-943d-eaa0f5fa2a64",
+        "model": "unknown"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

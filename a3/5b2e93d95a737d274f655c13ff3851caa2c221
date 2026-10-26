@@ -1,0 +1,29 @@
+src/ui/app/models/config.py
+  s_9806458169a5a7::t_cc947ef4d605f0 377
+CHANGELOG.md
+  s_4600783926e6d7::t_7491201c877be7 24-25
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "a35b2e93d95a737d274f655c13ff3851caa2c221",
+  "prompts": {},
+  "sessions": {
+    "s_4600783926e6d7": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "577228b8-9e99-4afb-b5b7-0fab1e1a53d0",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_9806458169a5a7": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "a9ae31c0-0618-4d79-951d-9087b21a228a",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

@@ -1,0 +1,29 @@
+src/bw/lua/bunkerweb/clusterstore.lua
+  s_c8c4225e59e442::t_69ebcaff3ebe66 331
+src/common/core/metrics/metrics.lua
+  s_c8c4225e59e442::t_1e925083194c31 123,125-126,129-130,132
+src/common/core/redis/plugin.json
+  s_c8c4225e59e442::t_6b1e455cf3783d 131
+src/bw/lua/bunkerweb/rediskeys.lua
+  s_c8c4225e59e442::t_1e925083194c31 12,30
+src/api/app/rate_limit.py
+  s_c8c4225e59e442::t_7f3fb2aa03fd27 438-453
+src/common/utils/redis_keys.py
+  s_c8c4225e59e442::t_1e925083194c31 22,26
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "d945177296b7bb9642c4ff171364951ec8b8d98a",
+  "prompts": {},
+  "sessions": {
+    "s_c8c4225e59e442": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0ed42-5c1b-7cd2-9e6c-235c447937ee",
+        "model": "gpt-6-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

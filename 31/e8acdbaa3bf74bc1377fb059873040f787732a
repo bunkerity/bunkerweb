@@ -1,0 +1,49 @@
+src/common/core/letsencrypt/README.de.md
+  s_57bbbce65613d1::t_704dcaf0709eb2 103
+docs/fr/features.md
+  s_57bbbce65613d1::t_704dcaf0709eb2 3371
+docs/es/features.md
+  s_57bbbce65613d1::t_704dcaf0709eb2 3471
+src/common/core/letsencrypt/README.md
+  s_57bbbce65613d1::t_704dcaf0709eb2 103
+src/common/core/letsencrypt/plugin.json
+  s_57bbbce65613d1::t_edd79ccb2fe684 220
+src/common/core/letsencrypt/README.es.md
+  s_57bbbce65613d1::t_704dcaf0709eb2 103
+docs/features.md
+  s_57bbbce65613d1::t_704dcaf0709eb2 3488
+src/common/core/letsencrypt/README.zh.md
+  s_57bbbce65613d1::t_704dcaf0709eb2 103
+CHANGELOG.md
+  s_4600783926e6d7::t_086777f8e4e868 27
+docs/de/features.md
+  s_57bbbce65613d1::t_704dcaf0709eb2 3418
+src/common/core/letsencrypt/README.fr.md
+  s_57bbbce65613d1::t_704dcaf0709eb2 103
+docs/zh/features.md
+  s_57bbbce65613d1::t_704dcaf0709eb2 3481
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "31e8acdbaa3bf74bc1377fb059873040f787732a",
+  "prompts": {},
+  "sessions": {
+    "s_4600783926e6d7": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "577228b8-9e99-4afb-b5b7-0fab1e1a53d0",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_57bbbce65613d1": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "5edd6846-7155-4899-925c-6905e2dc55a2",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

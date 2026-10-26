@@ -1,0 +1,16 @@
+misc/integrations/k8s.oracle.ui.yml
+  h_a33a1e80933106 12-14,332,358-359
+misc/integrations/k8s.oracle.yml
+  h_a33a1e80933106 23-25,230,332-333
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "fe43e6e771eaeb27e092da5ef53c1846f8afd49f",
+  "prompts": {},
+  "humans": {
+    "h_a33a1e80933106": {
+      "author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

@@ -1,0 +1,30 @@
+.github/workflows/unit-tests.yml
+  s_521235d82b8fbb::t_2146973bbbda4f 59-60,139-140
+tests/unit/ui/test_session_revocation_mirror.py
+  s_521235d82b8fbb::t_2146973bbbda4f 13,17-18,23
+  s_97829bd3b546d8::t_e1d4a47641ff11 24
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "fac9ceb18f060e84c029a570a601c3a47c239d3e",
+  "prompts": {},
+  "sessions": {
+    "s_521235d82b8fbb": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a143ef-e0df-7391-82b3-a569d79395ac",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_97829bd3b546d8": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b2517ec2-7793-439c-a7d8-ce741cb4a2fd",
+        "model": "unknown"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

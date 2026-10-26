@@ -1,0 +1,94 @@
+misc/integrations/k8s.postgres.ui.yml
+  s_06b2dbf2fe41ba::t_496873d5d8a194 15-17
+  s_06b2dbf2fe41ba::t_8761099fe2edc2 181-182
+src/autoconf/controllers/IngressController.py
+  s_d628e84ca7d8d0::t_9d656b68accca4 98
+  s_d628e84ca7d8d0::t_9bcdd16351e006 244-245,248-251,254,261-263
+  s_d628e84ca7d8d0::t_358c90989ed757 5,22-72,76-77,79-84
+src/autoconf/controllers/GatewayController.py
+  s_d628e84ca7d8d0::t_56a9d2a7043c6c 26-29
+  s_d628e84ca7d8d0::t_58d41da6057d9f 38-39
+  s_d628e84ca7d8d0::t_e96d7296357645 90-105,108-124
+  s_d628e84ca7d8d0::t_403c7727ed5a52 833-834
+  s_d628e84ca7d8d0::t_4812f8e2a2c17f 37
+  s_d628e84ca7d8d0::t_ef03ac4b1974fb 795-796
+  s_d628e84ca7d8d0::t_7c598a8cc99958 6
+  s_d628e84ca7d8d0::t_28a8db1683b9dc 176-178
+  s_d628e84ca7d8d0::t_e76c2404a03d86 154
+  s_d628e84ca7d8d0::t_34b67c84599517 125
+misc/integrations/k8s.postgres.yml
+  s_06b2dbf2fe41ba::t_7a0d5f65ecda1b 26-28
+  s_06b2dbf2fe41ba::t_cabe95d2d75646 191-192
+misc/integrations/k8s.oracle.yml
+  s_06b2dbf2fe41ba::t_966525f662c831 23-25
+  s_06b2dbf2fe41ba::t_62bd3820f935c8 188-189
+docs/fr/integrations.md
+  s_06b2dbf2fe41ba::t_18d0fc9bf4b449 3716-3717
+  s_06b2dbf2fe41ba::t_77236fc49d8a0a 2743-2745
+  s_06b2dbf2fe41ba::t_f990c5644d0628 3684-3685
+misc/integrations/k8s.mariadb.ui.yml
+  s_06b2dbf2fe41ba::t_d8da0add827ae7 181-182
+  s_06b2dbf2fe41ba::t_ff88e8b88c7f97 15-17
+docs/integrations.md
+  s_06b2dbf2fe41ba::t_b8997543a4d7b5 3873-3874
+  s_06b2dbf2fe41ba::t_dfe7f001c6dc90 3841-3842
+  s_06b2dbf2fe41ba::t_094f18ec7375c9 2855-2857
+misc/integrations/k8s.mysql.ui.yml
+  s_06b2dbf2fe41ba::t_bf240184e84964 15-17
+  s_06b2dbf2fe41ba::t_2aa11c5aa3f186 181-182
+docs/es/integrations.md
+  s_06b2dbf2fe41ba::t_beb9739a9632e7 2741-2743
+  s_06b2dbf2fe41ba::t_eace5879c00399 3717-3718
+  s_06b2dbf2fe41ba::t_b7fb09a28a7fbb 3749-3750
+misc/integrations/k8s.mariadb.yml
+  s_06b2dbf2fe41ba::t_2adf9317e36caa 191-192
+  s_06b2dbf2fe41ba::t_7e91dd3401ca52 26-28
+docs/zh/integrations.md
+  s_06b2dbf2fe41ba::t_d4bcaa41b44ba8 2740-2742
+  s_06b2dbf2fe41ba::t_a1a9cc32392fd6 3713-3714
+  s_06b2dbf2fe41ba::t_54bf99e2ebd42e 3745-3746
+CHANGELOG.md
+  s_ca05435d07af44::t_2ad085d24dcc55 16
+misc/integrations/k8s.mysql.yml
+  s_06b2dbf2fe41ba::t_e6db60b8620b3e 26-28
+  s_06b2dbf2fe41ba::t_d0f91389e4c943 191-192
+docs/de/integrations.md
+  s_06b2dbf2fe41ba::t_3b57caeb007ffd 3716-3717
+  s_06b2dbf2fe41ba::t_dc73a95fbde417 2739-2741
+  s_06b2dbf2fe41ba::t_6c7c5a942f08b3 3748-3749
+misc/integrations/k8s.oracle.ui.yml
+  s_06b2dbf2fe41ba::t_ed301d2316e18f 12-14
+  s_06b2dbf2fe41ba::t_f8c3bbb4f110b2 178-179
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "84f88569095f409b7ab62e7b63ed80077be7c834",
+  "prompts": {},
+  "sessions": {
+    "s_06b2dbf2fe41ba": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "9b27c2a9-f326-458f-8d3d-ac224faf5f42",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_ca05435d07af44": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "06005abd-6979-4317-af58-12b4f9b0427a",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_d628e84ca7d8d0": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "e942fa55-8271-4f80-bfce-3f6751e57d79",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

@@ -1,0 +1,2940 @@
+src/common/core/ssl/locales/ko.json
+  s_a10d63a4ae38b6::t_fd888085a42132 6-35
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,36-38
+src/common/core/grpc/locales/bn.json
+  s_9bb946752b57f2::t_7a257a40d487ca 6-167
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,168-170
+src/common/core/misc/locales/ar.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,106-108
+  s_9bb946752b57f2::t_eeccdfe6f0cf91 16-105
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-15
+src/common/core/mtls/locales/fr.json
+  s_57203c7f4181a0::t_a27e704f111a9f 6-35
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,36-38
+src/common/core/country/locales/de.json
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-11
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,34-36
+  s_01a39102d1fe48::t_2225d534490bdd 12-33
+src/common/core/cors/locales/ur.json
+  s_9c6aa8c20cecc6::t_caabe3c09fcbe7 12-57
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-11
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,58-60
+src/common/core/reversescan/locales/ar.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,20-22
+  s_9c6aa8c20cecc6::t_caabe3c09fcbe7 6-19
+src/common/core/badbehavior/locales/tr.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,32-34
+  s_26097c6b2b7b49::t_f58b7750667e3a 6-31
+src/common/core/ui/locales/ur.json
+  s_9c6aa8c20cecc6::t_caabe3c09fcbe7 6-15
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,16-18
+src/common/core/authbasic/locales/ur.json
+  s_9c6aa8c20cecc6::t_32fecee291bfd7 16-37
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-15
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,38-40
+src/common/core/dnsbl/locales/ko.json
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-11
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,38-40
+  s_4a279a8d942cc9::t_a33de36088ca20 12-37
+src/common/core/certificates/locales/ur.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-8
+src/common/core/pro/locales/it.json
+  s_57203c7f4181a0::t_49b525a696db0a 6-11
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,12-14
+src/common/core/whitelist/locales/tl.json
+  s_26097c6b2b7b49::t_52ba0028fefebf 7-68
+  s_64cfb60a50b415::t_d0b1bb305b09db 6,69-73
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,74-76
+src/common/core/country/locales/br.json
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-11
+  s_4a279a8d942cc9::t_e26afe44422967 12-33
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,34-36
+src/common/core/inject/locales/es.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,16-18
+  s_01a39102d1fe48::t_ec660d6959865c 6-15
+src/common/core/geoip/locales/bn.json
+  s_9c6aa8c20cecc6::t_caabe3c09fcbe7 6-31
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,32-34
+src/common/core/blacklist/locales/bn.json
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-27
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,142-144
+  s_9bb946752b57f2::t_08e28b0d156a56 28-141
+src/common/core/antibot/locales/es.json
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-11
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,154-156
+  s_01a39102d1fe48::t_61eae7120f0916 12-153
+src/common/core/reverseproxy/locales/id.json
+  s_508f1cd3c50447::t_b5e94ff419e77b 6-227
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,228-230
+src/common/core/misc/locales/es.json
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-16,21,25,29,33,37,41,45,49,53,57,61,65,69,73,77,81,85,89,93,97,101,105
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,106-108
+  s_9bb946752b57f2::t_112a5ea2b6b344 17-20,22-24,26-28,30-32,34-36,38-40,42-44,46-48,50-52,54-56,58-60,62-64,66-68,70-72,74-76,78-80,82-84,86-88,90-92,94-96,98-100,102-104
+src/common/core/misc/locales/de.json
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-16,21,25,29,33,37,41,45,49,53,57,61,65,69,73,77,81,85,89,93,97,101,105
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,106-108
+  s_9bb946752b57f2::t_6552242cea7e51 17-20,22-24,26-28,30-32,34-36,38-40,42-44,46-48,50-52,54-56,58-60,62-64,66-68,70-72,74-76,78-80,82-84,86-88,90-92,94-96,98-100,102-104
+src/common/core/bunkernet/locales/id.json
+  s_64cfb60a50b415::t_d0b1bb305b09db 6,25-34
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,35-37
+  s_26097c6b2b7b49::t_be1e8c8a68de92 7-24
+src/common/core/metrics/locales/ur.json
+  s_9bb946752b57f2::t_b14240873bbe17 6-71
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,72-74
+src/common/core/templates/locales/de.json
+  s_57203c7f4181a0::t_49b525a696db0a 193-198
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,199-201
+  s_373c9ba97f823a::t_5680ad8c42d794 6-192
+src/common/core/customcert/locales/tr.json
+  s_26097c6b2b7b49::t_d20d0a74ede61e 6-47
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,48-50
+src/common/core/reverseproxy/locales/pl.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,228-230
+  s_508f1cd3c50447::t_b5e94ff419e77b 6-227
+src/common/core/metrics/locales/pl.json
+  s_508f1cd3c50447::t_e287ee8bbafce4 6-71
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,72-74
+src/common/core/redirect/locales/fr.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,24-26
+  s_57203c7f4181a0::t_49b525a696db0a 6-23
+src/common/core/geoip/locales/es.json
+  s_01a39102d1fe48::t_2225d534490bdd 6-31
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,32-34
+src/common/core/backup/locales/tw.json
+  s_4a279a8d942cc9::t_6a252e7e56381a 11-32
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-10
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,33-35
+src/common/core/gzip/locales/fr.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,28-30
+  s_01a39102d1fe48::t_ec660d6959865c 6-27
+src/common/core/robotstxt/locales/ko.json
+  s_a10d63a4ae38b6::t_fc664fbc7307ea 6-51
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,52-54
+src/common/core/misc/locales/br.json
+  s_a10d63a4ae38b6::t_3e04b7f8edd836 16,106
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-15
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,107-108
+  s_a10d63a4ae38b6::t_49279dd21033ea 17-105
+src/common/core/grpc/locales/ar.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,168-170
+  s_9bb946752b57f2::t_7a257a40d487ca 6-167
+src/common/core/whitelist/locales/it.json
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-11
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,74-76
+  s_01a39102d1fe48::t_61ce150e895166 12-73
+src/common/core/greylist/locales/pt.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,74-76
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-11
+  s_01a39102d1fe48::t_6867cb923e019e 12-73
+src/common/core/errors/locales/tw.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,16-18
+  s_4a279a8d942cc9::t_a33de36088ca20 6-15
+src/common/core/modsecurity/locales/hi.json
+  s_9c6aa8c20cecc6::t_ebe685d8bf4afb 6-59
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,60-62
+src/common/core/db/locales/es.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,64-66
+  s_01a39102d1fe48::t_df1fdd31ec1051 6-63
+src/common/core/redis/locales/fr.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,81-83
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-14
+  s_57203c7f4181a0::t_b6d4bf70f3e8a0 15-80
+src/common/core/inject/locales/id.json
+  s_508f1cd3c50447::t_bf729576e953ab 6-15
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,16-18
+src/common/core/ssl/locales/zh.json
+  s_a10d63a4ae38b6::t_fd888085a42132 6-35
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,36-38
+src/common/core/customcert/locales/it.json
+  s_01a39102d1fe48::t_df1fdd31ec1051 6-47
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,48-50
+src/common/core/headers/locales/it.json
+  s_01a39102d1fe48::t_ec660d6959865c 6-59
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,60-62
+src/common/core/crowdsec/locales/br.json
+  s_4a279a8d942cc9::t_576e067a52f4e3 11-92
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,93-95
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-10
+src/common/core/inject/locales/tl.json
+  s_508f1cd3c50447::t_bf729576e953ab 6-15
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,16-18
+src/common/core/inject/locales/it.json
+  s_01a39102d1fe48::t_ec660d6959865c 6-15
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,16-18
+src/common/core/badbehavior/locales/tl.json
+  s_26097c6b2b7b49::t_f58b7750667e3a 6-31
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,32-34
+src/common/core/reversescan/locales/hi.json
+  s_9c6aa8c20cecc6::t_caabe3c09fcbe7 6-19
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,20-22
+src/common/core/geoip/locales/pl.json
+  s_26097c6b2b7b49::t_be1e8c8a68de92 6-31
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,32-34
+src/common/core/realip/locales/pt.json
+  s_57203c7f4181a0::t_a27e704f111a9f 6-31
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,32-34
+src/common/core/inject/locales/ko.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-18
+src/common/core/inject/locales/ru.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,16-18
+  s_508f1cd3c50447::t_bf729576e953ab 6-15
+src/common/core/bunkernet/locales/pt.json
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-16
+  s_01a39102d1fe48::t_8b62970fd64c69 17-34
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,35-37
+src/common/core/badbehavior/locales/zh.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,32-34
+  s_4a279a8d942cc9::t_6a252e7e56381a 6-31
+src/common/core/selfsigned/locales/it.json
+  s_57203c7f4181a0::t_49b525a696db0a 6-23
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,24-26
+src/common/core/ui/locales/bn.json
+  s_9c6aa8c20cecc6::t_caabe3c09fcbe7 6-15
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,16-18
+src/common/core/badbehavior/locales/ur.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,32-34
+  s_9c6aa8c20cecc6::t_32fecee291bfd7 6-31
+src/common/core/whitelist/locales/ru.json
+  s_26097c6b2b7b49::t_52ba0028fefebf 7-68
+  s_64cfb60a50b415::t_d0b1bb305b09db 6,69-73
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,74-76
+src/common/core/ui/locales/tr.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,16-18
+  s_508f1cd3c50447::t_bf729576e953ab 6-15
+src/common/core/inject/locales/zh.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-18
+src/common/core/realip/locales/br.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-34
+src/common/core/greylist/locales/br.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,74-76
+  s_4a279a8d942cc9::t_feb9d01887f820 12-73
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-11
+src/common/core/dnsbl/locales/tr.json
+  s_64cfb60a50b415::t_d0b1bb305b09db 6,33-37
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,38-40
+  s_26097c6b2b7b49::t_be1e8c8a68de92 7-32
+src/common/core/workflows/locales/id.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,12-14
+  s_508f1cd3c50447::t_bf729576e953ab 6-11
+src/common/core/inject/locales/tr.json
+  s_508f1cd3c50447::t_bf729576e953ab 6-15
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,16-18
+src/common/core/sessions/locales/id.json
+  s_508f1cd3c50447::t_2166864ccda977 6-39
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,40-42
+src/common/core/ui/locales/fr.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,16-18
+  s_57203c7f4181a0::t_49b525a696db0a 6-15
+src/common/core/country/ui/actions.py
+  s_5e613df1f72cb6::t_1047438127011d 14-15
+  s_373c9ba97f823a::t_8d5fdfabf22119 11,13
+src/common/core/customcert/locales/pt.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,48-50
+  s_01a39102d1fe48::t_df1fdd31ec1051 6-47
+src/common/core/sessions/locales/hi.json
+  s_9c6aa8c20cecc6::t_2ec36ca6521a7e 6-39
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,40-42
+src/common/core/greylist/locales/tr.json
+  s_26097c6b2b7b49::t_52ba0028fefebf 7-68
+  s_64cfb60a50b415::t_d0b1bb305b09db 6,69-73
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,74-76
+src/common/core/crowdsec/locales/tl.json
+  s_8d5911a0b4e448::t_69001c48d7d337 7-88
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,93-95
+  s_64cfb60a50b415::t_d0b1bb305b09db 6,89-92
+src/common/core/metrics/locales/es.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,72-74
+  s_57203c7f4181a0::t_42ed119f2197fa 6-71
+src/common/core/reverseproxy/locales/fr.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,228-230
+  s_57203c7f4181a0::t_9e39ecb62769dc 6-227
+src/common/core/ssl/locales/de.json
+  s_57203c7f4181a0::t_a27e704f111a9f 6-35
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,36-38
+src/common/core/certificates/locales/ko.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-8
+src/common/core/grpc/locales/hi.json
+  s_9bb946752b57f2::t_7a257a40d487ca 6-167
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,168-170
+src/common/core/reverseproxy/locales/hi.json
+  s_9bb946752b57f2::t_c658737b0bcf13 175-226
+  s_9bb946752b57f2::t_e2debc982666e4 6-174,227
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,228-230
+src/common/core/ssl/locales/bn.json
+  s_9c6aa8c20cecc6::t_2ec36ca6521a7e 6-35
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,36-38
+src/common/core/reversescan/locales/br.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-22
+src/common/core/workflows/locales/de.json
+  s_57203c7f4181a0::t_49b525a696db0a 6-11
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,12-14
+src/common/core/dnsbl/locales/ar.json
+  s_9c6aa8c20cecc6::t_caabe3c09fcbe7 12-37
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-11
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,38-40
+src/common/core/reverseproxy/locales/pt.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,228-230
+  s_57203c7f4181a0::t_9e39ecb62769dc 6-227
+src/common/core/metrics/locales/br.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,73-74
+  s_a10d63a4ae38b6::t_237e81eefb4ee9 6,72
+  s_a10d63a4ae38b6::t_49279dd21033ea 7-71
+src/common/core/cors/locales/pt.json
+  s_01a39102d1fe48::t_2225d534490bdd 12-57
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,58-60
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-11
+src/common/core/dnsbl/locales/bn.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,38-40
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-11
+  s_9c6aa8c20cecc6::t_caabe3c09fcbe7 12-37
+src/common/core/headers/locales/bn.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,60-62
+  s_9c6aa8c20cecc6::t_ebe685d8bf4afb 6-59
+src/common/core/bunkernet/locales/ar.json
+  s_9c6aa8c20cecc6::t_32fecee291bfd7 17-34
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,35-37
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-16
+src/common/core/letsencrypt/locales/ru.json
+  s_508f1cd3c50447::t_4fae91c13c50e3 6-99
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,100-102
+src/common/core/antibot/locales/ko.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,154-156
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-11
+  s_4a279a8d942cc9::t_128d8b0b8c6832 12-153
+src/common/core/antibot/ui/actions.py
+  s_373c9ba97f823a::t_d044f77787d0c3 11,13
+  s_5e613df1f72cb6::t_4333d6ff91187d 14-15
+src/common/core/redis/locales/tw.json
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-14
+  s_a10d63a4ae38b6::t_89d528a3df8c2c 15-80
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,81-83
+src/common/core/redis/locales/es.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,81-83
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-14
+  s_57203c7f4181a0::t_b6d4bf70f3e8a0 15-80
+src/common/core/misc/locales/fr.json
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-16,21,25,29,33,37,41,45,49,53,57,61,65,69,73,77,81,85,89,93,97,101,105
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,106-108
+  s_9bb946752b57f2::t_36ba7fd9476b5e 17-20,22-24,26-28,30-32,34-36,38-40,42-44,46-48,50-52,54-56,58-60,62-64,66-68,70-72,74-76,78-80,82-84,86-88,90-92,94-96,98-100,102-104
+src/common/core/misc/locales/it.json
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-16,21,25,29,33,37,41,45,49,53,57,61,65,69,73,77,81,85,89,93,97,101,105
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,106-108
+  s_9bb946752b57f2::t_13654981b3d6f4 17-20,22-24,26-28,30-32,34-36,38-40,42-44,46-48,50-52,54-56,58-60,62-64,66-68,70-72,74-76,78-80,82-84,86-88,90-92,94-96,98-100,102-104
+src/common/core/realip/locales/bn.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,32-34
+  s_9c6aa8c20cecc6::t_caabe3c09fcbe7 6-31
+src/common/core/badbehavior/locales/id.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,32-34
+  s_26097c6b2b7b49::t_f58b7750667e3a 6-31
+src/common/core/grpc/locales/fr.json
+  s_54b71f39931f47::t_e2d9b1b7d5511d 6-167
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,168-170
+src/common/core/securitytxt/locales/fr.json
+  s_57203c7f4181a0::t_fc64081114ba8a 6-51
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,52-54
+src/common/core/crowdsec/locales/bn.json
+  s_9c6aa8c20cecc6::t_6dcca8c3276a8d 11-92
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,93-95
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-10
+src/common/core/php/locales/zh.json
+  s_a10d63a4ae38b6::t_fb7a5412a2d7fe 6-27
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,28-30
+src/common/core/workflows/locales/ko.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-14
+src/common/core/ui/locales/ko.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-18
+src/common/core/greylist/locales/tw.json
+  s_4a279a8d942cc9::t_feb9d01887f820 12-73
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,74-76
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-11
+src/common/core/limit/locales/es.json
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-11
+  s_57203c7f4181a0::t_fb8f2752e1207b 12-53
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,54-56
+src/common/core/headers/locales/ru.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,60-62
+  s_508f1cd3c50447::t_2166864ccda977 6-59
+src/common/core/geoip/locales/it.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,32-34
+  s_01a39102d1fe48::t_2225d534490bdd 6-31
+src/common/core/realip/locales/es.json
+  s_57203c7f4181a0::t_a27e704f111a9f 6-31
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,32-34
+src/common/core/jobs/locales/tr.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-8
+src/common/core/greylist/locales/it.json
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-11
+  s_01a39102d1fe48::t_6867cb923e019e 12-73
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,74-76
+src/common/core/ui/locales/id.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,16-18
+  s_508f1cd3c50447::t_bf729576e953ab 6-15
+src/common/core/geoip/locales/ur.json
+  s_9c6aa8c20cecc6::t_caabe3c09fcbe7 6-31
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,32-34
+src/common/core/php/locales/es.json
+  s_57203c7f4181a0::t_49b525a696db0a 6-27
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,28-30
+src/common/core/modsecurity/locales/de.json
+  s_57203c7f4181a0::t_c34bcf1474237d 6-59
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,60-62
+src/common/core/redirect/locales/it.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,24-26
+  s_57203c7f4181a0::t_49b525a696db0a 6-23
+src/common/core/blacklist/locales/id.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,142-144
+  s_64cfb60a50b415::t_d0b1bb305b09db 6,121-141
+  s_26097c6b2b7b49::t_83403f6d158470 7-120
+src/common/core/gzip/locales/ko.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-30
+src/common/core/errors/locales/ar.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,16-18
+  s_9c6aa8c20cecc6::t_caabe3c09fcbe7 6-15
+src/common/core/db/locales/pl.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,64-66
+  s_26097c6b2b7b49::t_d20d0a74ede61e 6-63
+src/common/core/php/locales/tl.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,28-30
+  s_508f1cd3c50447::t_c7d5f0a9e0a178 6-27
+src/common/core/mtls/locales/id.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,36-38
+  s_508f1cd3c50447::t_c7d5f0a9e0a178 6-35
+src/common/core/country/locales/tr.json
+  s_26097c6b2b7b49::t_be1e8c8a68de92 7-28
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,34-36
+  s_64cfb60a50b415::t_d0b1bb305b09db 6,29-33
+src/common/core/backup/locales/fr.json
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-10
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,33-35
+  s_01a39102d1fe48::t_8b62970fd64c69 11-32
+src/common/core/clientcache/locales/ko.json
+  s_4a279a8d942cc9::t_e26afe44422967 6-23
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,24-26
+src/common/core/antibot/locales/tr.json
+  s_26097c6b2b7b49::t_514efefb7875f1 7-148
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,154-156
+  s_64cfb60a50b415::t_d0b1bb305b09db 6,149-153
+src/common/core/errors/locales/br.json
+  s_4a279a8d942cc9::t_a33de36088ca20 6-15
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,16-18
+src/common/core/crowdsec/locales/ru.json
+  s_64cfb60a50b415::t_d0b1bb305b09db 6,89-92
+  s_8d5911a0b4e448::t_69001c48d7d337 7-88
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,93-95
+src/common/core/country/locales/fr.json
+  s_01a39102d1fe48::t_2225d534490bdd 12-33
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-11
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,34-36
+src/common/core/badbehavior/locales/ar.json
+  s_9c6aa8c20cecc6::t_32fecee291bfd7 6-31
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,32-34
+src/common/core/backup/locales/es.json
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-10
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,33-35
+  s_01a39102d1fe48::t_8b62970fd64c69 11-32
+src/common/core/workflows/locales/pt.json
+  s_57203c7f4181a0::t_49b525a696db0a 6-11
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,12-14
+src/common/core/reversescan/locales/fr.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,20-22
+  s_57203c7f4181a0::t_49b525a696db0a 6-19
+src/common/core/country/locales/pt.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,34-36
+  s_01a39102d1fe48::t_2225d534490bdd 12-33
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-11
+src/common/core/antibot/locales/hi.json
+  s_9c6aa8c20cecc6::t_b47c30b71e1e6d 12-153
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,154-156
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-11
+src/common/core/blacklist/ui/actions.py
+  s_5e613df1f72cb6::t_6549d5de410cba 14-15
+  s_373c9ba97f823a::t_f7f9c1d49a297b 11,13,20,22,29,31,38,40,47,49
+src/common/core/reversescan/locales/bn.json
+  s_9c6aa8c20cecc6::t_caabe3c09fcbe7 6-19
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,20-22
+src/common/core/dnsbl/locales/ur.json
+  s_9c6aa8c20cecc6::t_caabe3c09fcbe7 12-37
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-11
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,38-40
+src/common/core/php/locales/ko.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,28-30
+  s_a10d63a4ae38b6::t_fb7a5412a2d7fe 6-27
+src/common/core/metrics/locales/tl.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,72-74
+  s_508f1cd3c50447::t_e287ee8bbafce4 6-71
+src/common/core/redirect/locales/pl.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,24-26
+  s_508f1cd3c50447::t_c7d5f0a9e0a178 6-23
+src/common/core/antibot/locales/tl.json
+  s_26097c6b2b7b49::t_514efefb7875f1 7-148
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,154-156
+  s_64cfb60a50b415::t_d0b1bb305b09db 6,149-153
+src/common/core/customcert/locales/zh.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,48-50
+  s_4a279a8d942cc9::t_576e067a52f4e3 6-47
+src/common/core/authbasic/locales/tr.json
+  s_64cfb60a50b415::t_d0b1bb305b09db 6,29-37
+  s_26097c6b2b7b49::t_f58b7750667e3a 7-28
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,38-40
+src/common/core/cors/locales/bn.json
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-11
+  s_9c6aa8c20cecc6::t_caabe3c09fcbe7 12-57
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,58-60
+src/common/core/workflows/locales/tr.json
+  s_508f1cd3c50447::t_bf729576e953ab 6-11
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,12-14
+src/common/core/db/locales/id.json
+  s_26097c6b2b7b49::t_d20d0a74ede61e 6-63
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,64-66
+src/common/core/ui/locales/pt.json
+  s_57203c7f4181a0::t_49b525a696db0a 6-15
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,16-18
+src/common/core/jobs/locales/es.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-8
+src/common/core/limit/locales/ko.json
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-11
+  s_a10d63a4ae38b6::t_34b3fbdc40fbf5 12-53
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,54-56
+src/common/core/backup/locales/tr.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,33-35
+  s_26097c6b2b7b49::t_f58b7750667e3a 7-28
+  s_64cfb60a50b415::t_d0b1bb305b09db 6,29-32
+src/common/core/letsencrypt/locales/bn.json
+  s_9bb946752b57f2::t_206825102b69f9 6-99
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,100-102
+src/common/core/realip/locales/tl.json
+  s_508f1cd3c50447::t_c7d5f0a9e0a178 6-31
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,32-34
+src/common/core/gzip/locales/pl.json
+  s_508f1cd3c50447::t_c7d5f0a9e0a178 6-27
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,28-30
+src/common/core/customcert/locales/br.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,48-50
+  s_4a279a8d942cc9::t_576e067a52f4e3 6-47
+src/common/core/mtls/locales/tl.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,36-38
+  s_508f1cd3c50447::t_c7d5f0a9e0a178 6-35
+src/common/core/metrics/locales/ru.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,72-74
+  s_508f1cd3c50447::t_e287ee8bbafce4 6-71
+src/common/core/antibot/locales/it.json
+  s_01a39102d1fe48::t_61eae7120f0916 12-153
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,154-156
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-11
+src/common/core/country/locales/ru.json
+  s_64cfb60a50b415::t_d0b1bb305b09db 6,29-33
+  s_26097c6b2b7b49::t_be1e8c8a68de92 7-28
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,34-36
+src/common/core/authbasic/locales/it.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,38-40
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-15
+  s_01a39102d1fe48::t_8b62970fd64c69 16-37
+src/common/core/certificates/locales/fr.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-8
+src/common/core/db/locales/it.json
+  s_01a39102d1fe48::t_df1fdd31ec1051 6-63
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,64-66
+src/common/core/brotli/locales/pt.json
+  s_01a39102d1fe48::t_8b62970fd64c69 6-23
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,24-26
+src/common/core/reverseproxy/locales/ur.json
+  s_9bb946752b57f2::t_e2debc982666e4 6-174,227
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,228-230
+  s_9bb946752b57f2::t_c658737b0bcf13 175-226
+src/common/core/db/locales/zh.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,64-66
+  s_4a279a8d942cc9::t_a33de36088ca20 6-63
+src/common/core/limit/locales/id.json
+  s_508f1cd3c50447::t_2166864ccda977 12-53
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-11
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,54-56
+src/common/core/mtls/locales/es.json
+  s_57203c7f4181a0::t_a27e704f111a9f 6-35
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,36-38
+src/common/core/antibot/locales/ru.json
+  s_26097c6b2b7b49::t_514efefb7875f1 7-148
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,154-156
+  s_64cfb60a50b415::t_d0b1bb305b09db 6,149-153
+src/common/core/reverseproxy/locales/tr.json
+  s_508f1cd3c50447::t_b5e94ff419e77b 6-227
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,228-230
+src/common/core/sessions/locales/pt.json
+  s_57203c7f4181a0::t_fb8f2752e1207b 6-39
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,40-42
+src/common/core/authbasic/ui/actions.py
+  s_373c9ba97f823a::t_3e541540a15a87 77,79,86,88
+  s_5e613df1f72cb6::t_ea6e3f183ea445 126
+  s_5e613df1f72cb6::t_f10dbc13f6db1e 89-90
+  s_5e613df1f72cb6::t_dadd20a0fd4922 80-81
+  s_5e613df1f72cb6::t_9249a6537a48b0 108
+src/common/core/jobs/locales/fr.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-8
+src/common/core/badbehavior/locales/de.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,32-34
+  s_01a39102d1fe48::t_8b62970fd64c69 6-31
+src/common/core/misc/locales/pl.json
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-15
+  s_508f1cd3c50447::t_f8d653be355b3f 16-105
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,106-108
+src/common/core/ui/locales/it.json
+  s_57203c7f4181a0::t_49b525a696db0a 6-15
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,16-18
+src/common/core/letsencrypt/locales/tr.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,100-102
+  s_508f1cd3c50447::t_4fae91c13c50e3 6-99
+src/common/core/antibot/locales/br.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,154-156
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-11
+  s_4a279a8d942cc9::t_8797c40289d236 12-153
+src/common/core/geoip/locales/tr.json
+  s_26097c6b2b7b49::t_be1e8c8a68de92 6-31
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,32-34
+src/common/core/badbehavior/locales/ko.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,32-34
+  s_4a279a8d942cc9::t_6a252e7e56381a 6-31
+src/common/core/limit/locales/tw.json
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-11
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,54-56
+  s_a10d63a4ae38b6::t_34b3fbdc40fbf5 12-53
+src/common/core/grpc/locales/ur.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,168-170
+  s_9bb946752b57f2::t_7a257a40d487ca 6-167
+src/common/core/geoip/locales/ru.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,32-34
+  s_26097c6b2b7b49::t_be1e8c8a68de92 6-31
+src/common/core/brotli/locales/zh.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,24-26
+  s_4a279a8d942cc9::t_6a252e7e56381a 6-23
+src/common/core/backup/locales/id.json
+  s_26097c6b2b7b49::t_f58b7750667e3a 7-28
+  s_64cfb60a50b415::t_d0b1bb305b09db 6,29-32
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,33-35
+src/common/core/modsecurity/locales/pl.json
+  s_508f1cd3c50447::t_2166864ccda977 6-59
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,60-62
+src/common/core/pro/locales/tl.json
+  s_508f1cd3c50447::t_bf729576e953ab 6-11
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,12-14
+src/common/core/sessions/locales/de.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,40-42
+  s_57203c7f4181a0::t_fb8f2752e1207b 6-39
+src/common/core/securitytxt/locales/ru.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,52-54
+  s_508f1cd3c50447::t_2166864ccda977 6-51
+src/common/core/brotli/locales/tr.json
+  s_26097c6b2b7b49::t_be1e8c8a68de92 6-23
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,24-26
+src/common/core/bunkernet/locales/de.json
+  s_01a39102d1fe48::t_8b62970fd64c69 17-34
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-16
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,35-37
+src/common/core/jobs/locales/de.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-8
+src/common/core/crowdsec/locales/pt.json
+  s_e3241353387257::t_a29b2715afa499 11-92
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-10
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,93-95
+src/common/core/mtls/locales/ar.json
+  s_9c6aa8c20cecc6::t_2ec36ca6521a7e 6-35
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,36-38
+src/common/core/ssl/locales/fr.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,36-38
+  s_57203c7f4181a0::t_a27e704f111a9f 6-35
+src/common/core/customcert/locales/ur.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,48-50
+  s_9c6aa8c20cecc6::t_2ec36ca6521a7e 6-47
+src/common/core/errors/locales/ru.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,16-18
+  s_508f1cd3c50447::t_bf729576e953ab 6-15
+src/common/core/sessions/locales/tl.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,40-42
+  s_508f1cd3c50447::t_2166864ccda977 6-39
+src/common/core/bunkernet/locales/ko.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,35-37
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-16
+  s_4a279a8d942cc9::t_6a252e7e56381a 17-34
+src/common/core/blacklist/locales/br.json
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-28,33,37,41,45,49,53,57,61,65,69,73,77,81,85,89,93,97,101,105,109,113,117,121,125,129,133,137,141
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,142-144
+  s_4a279a8d942cc9::t_b472ead5cca6f4 29-32,34-36,38-40,42-44,46-48,50-52,54-56,58-60,62-64,66-68,70-72,74-76,78-80,82-84,86-88,90-92,94-96,98-100,102-104,106-108,110-112,114-116,118-120,122-124,126-128,130-132,134-136,138-140
+src/common/core/grpc/locales/zh.json
+  s_a10d63a4ae38b6::t_49279dd21033ea 7-167
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,169-170
+  s_a10d63a4ae38b6::t_42498904ea1fd9 6,168
+src/common/core/geoip/locales/ar.json
+  s_9c6aa8c20cecc6::t_caabe3c09fcbe7 6-31
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,32-34
+src/common/core/bunkernet/ui/actions.py
+  s_373c9ba97f823a::t_c133491973f815 10,19,28
+  s_5e613df1f72cb6::t_ee4799f9c34447 64,67
+  s_5e613df1f72cb6::t_c55a57ad316dbe 80
+src/common/core/db/locales/br.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,64-66
+  s_4a279a8d942cc9::t_a33de36088ca20 6-63
+src/common/core/pro/locales/bn.json
+  s_9c6aa8c20cecc6::t_caabe3c09fcbe7 6-11
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,12-14
+src/common/core/templates/locales/en.json
+  s_9e0a6e0c0b33d2::t_7f8494e35a65bb 1-186
+src/common/core/whitelist/locales/hi.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,74-76
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-11
+  s_9c6aa8c20cecc6::t_6dcca8c3276a8d 12-73
+src/common/core/letsencrypt/locales/it.json
+  s_57203c7f4181a0::t_5b906670ec5bf0 6-99
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,100-102
+src/common/core/reverseproxy/locales/tl.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,228-230
+  s_508f1cd3c50447::t_b5e94ff419e77b 6-227
+src/common/core/dnsbl/ui/actions.py
+  s_5e613df1f72cb6::t_308fb82fa73c9b 14-15
+  s_373c9ba97f823a::t_7db05468ffa1dd 11,13
+src/common/core/greylist/locales/zh.json
+  s_4a279a8d942cc9::t_feb9d01887f820 12-73
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-11
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,74-76
+src/common/core/modsecurity/locales/tl.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,60-62
+  s_508f1cd3c50447::t_2166864ccda977 6-59
+src/common/core/pro/locales/ur.json
+  s_9c6aa8c20cecc6::t_caabe3c09fcbe7 6-11
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,12-14
+src/common/core/blacklist/locales/it.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,142-144
+  s_01a39102d1fe48::t_b50bdeabd9c0e0 28-141
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-27
+src/common/core/letsencrypt/locales/ko.json
+  s_a10d63a4ae38b6::t_49279dd21033ea 7-99
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,101-102
+  s_a10d63a4ae38b6::t_8572c301773df4 6,100
+src/common/core/clientcache/locales/de.json
+  s_01a39102d1fe48::t_8b62970fd64c69 6-23
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,24-26
+src/common/core/selfsigned/locales/fr.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,24-26
+  s_57203c7f4181a0::t_49b525a696db0a 6-23
+src/common/core/backup/locales/br.json
+  s_4a279a8d942cc9::t_6a252e7e56381a 11-32
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,33-35
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-10
+src/common/core/mtls/locales/tr.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,36-38
+  s_508f1cd3c50447::t_c7d5f0a9e0a178 6-35
+src/common/core/workflows/locales/tw.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-14
+src/common/core/redis/ui/actions.py
+  s_64cfb60a50b415::t_9ccefb7edf400c 10,18,20
+src/common/core/modsecurity/locales/bn.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,60-62
+  s_9c6aa8c20cecc6::t_ebe685d8bf4afb 6-59
+src/common/core/antibot/locales/bn.json
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-11
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,154-156
+  s_9c6aa8c20cecc6::t_b47c30b71e1e6d 12-153
+src/common/core/badbehavior/locales/hi.json
+  s_9c6aa8c20cecc6::t_32fecee291bfd7 6-31
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,32-34
+src/common/core/certificates/locales/bn.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-8
+src/common/core/whitelist/locales/zh.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,74-76
+  s_4a279a8d942cc9::t_feb9d01887f820 12-73
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-11
+src/common/core/metrics/locales/de.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,72-74
+  s_57203c7f4181a0::t_42ed119f2197fa 6-71
+src/common/core/sessions/locales/es.json
+  s_57203c7f4181a0::t_fb8f2752e1207b 6-39
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,40-42
+src/common/core/certificates/locales/tw.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-8
+src/common/core/bunkernet/locales/es.json
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-16
+  s_01a39102d1fe48::t_8b62970fd64c69 17-34
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,35-37
+src/common/core/reverseproxy/locales/ar.json
+  s_9bb946752b57f2::t_c658737b0bcf13 175-226
+  s_9bb946752b57f2::t_e2debc982666e4 6-174,227
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,228-230
+src/common/core/certificates/locales/hi.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-8
+src/common/core/greylist/locales/bn.json
+  s_9c6aa8c20cecc6::t_6dcca8c3276a8d 12-73
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-11
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,74-76
+src/common/core/workflows/locales/ar.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,12-14
+  s_9c6aa8c20cecc6::t_caabe3c09fcbe7 6-11
+src/common/core/workflows/locales/ur.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,12-14
+  s_9c6aa8c20cecc6::t_caabe3c09fcbe7 6-11
+src/common/core/redirect/locales/ar.json
+  s_9c6aa8c20cecc6::t_caabe3c09fcbe7 6-23
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,24-26
+src/common/core/redis/locales/tr.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,81-83
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-14
+  s_508f1cd3c50447::t_e287ee8bbafce4 15-80
+src/common/core/customcert/locales/fr.json
+  s_01a39102d1fe48::t_df1fdd31ec1051 6-47
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,48-50
+src/common/core/mtls/locales/bn.json
+  s_9c6aa8c20cecc6::t_2ec36ca6521a7e 6-35
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,36-38
+src/common/core/dnsbl/locales/tl.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,38-40
+  s_26097c6b2b7b49::t_be1e8c8a68de92 7-32
+  s_64cfb60a50b415::t_d0b1bb305b09db 6,33-37
+src/common/core/ssl/locales/es.json
+  s_57203c7f4181a0::t_a27e704f111a9f 6-35
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,36-38
+src/common/core/templates/locales/tl.json
+  s_508f1cd3c50447::t_bf729576e953ab 193-198
+  s_373c9ba97f823a::t_5680ad8c42d794 6-192
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,199-201
+src/common/core/greylist/locales/ar.json
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-11
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,74-76
+  s_9c6aa8c20cecc6::t_6dcca8c3276a8d 12-73
+src/common/core/errors/locales/ko.json
+  s_4a279a8d942cc9::t_a33de36088ca20 6-15
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,16-18
+src/common/core/pro/locales/ru.json
+  s_508f1cd3c50447::t_bf729576e953ab 6-11
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,12-14
+src/common/core/letsencrypt/locales/pt.json
+  s_57203c7f4181a0::t_5b906670ec5bf0 6-99
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,100-102
+src/common/core/securitytxt/locales/tr.json
+  s_508f1cd3c50447::t_2166864ccda977 6-51
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,52-54
+src/common/core/clientcache/locales/zh.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,24-26
+  s_4a279a8d942cc9::t_e26afe44422967 6-23
+src/common/core/headers/locales/es.json
+  s_01a39102d1fe48::t_ec660d6959865c 6-59
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,60-62
+src/common/core/clientcache/locales/ar.json
+  s_9c6aa8c20cecc6::t_32fecee291bfd7 6-23
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,24-26
+src/common/core/redis/locales/tl.json
+  s_508f1cd3c50447::t_e287ee8bbafce4 15-80
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,81-83
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-14
+src/common/core/sessions/locales/br.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,40-42
+  s_a10d63a4ae38b6::t_9a1d8ea7d9d64c 6-39
+src/common/core/redis/locales/hi.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,81-83
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-14
+  s_9c6aa8c20cecc6::t_ebe685d8bf4afb 15-80
+src/common/core/clientcache/locales/it.json
+  s_01a39102d1fe48::t_8b62970fd64c69 6-23
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,24-26
+src/common/core/certificates/locales/zh.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-8
+src/common/core/brotli/locales/it.json
+  s_01a39102d1fe48::t_8b62970fd64c69 6-23
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,24-26
+src/common/core/php/locales/ur.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,28-30
+  s_9c6aa8c20cecc6::t_caabe3c09fcbe7 6-27
+src/common/core/grpc/locales/es.json
+  s_54b71f39931f47::t_e2d9b1b7d5511d 6-167
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,168-170
+src/common/core/customcert/locales/tl.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,48-50
+  s_26097c6b2b7b49::t_d20d0a74ede61e 6-47
+src/common/core/redirect/locales/br.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-26
+src/common/core/cors/locales/id.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,58-60
+  s_26097c6b2b7b49::t_be1e8c8a68de92 7-52
+  s_64cfb60a50b415::t_d0b1bb305b09db 6,53-57
+src/common/core/backup/locales/ko.json
+  s_4a279a8d942cc9::t_6a252e7e56381a 11-32
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,33-35
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-10
+src/common/core/certificates/locales/de.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-8
+src/common/core/brotli/locales/ko.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,24-26
+  s_4a279a8d942cc9::t_6a252e7e56381a 6-23
+src/common/core/inject/locales/ar.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,16-18
+  s_9c6aa8c20cecc6::t_caabe3c09fcbe7 6-15
+src/common/core/templates/locales/pl.json
+  s_373c9ba97f823a::t_5680ad8c42d794 6-192
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,199-201
+  s_508f1cd3c50447::t_bf729576e953ab 193-198
+src/common/core/country/locales/hi.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,34-36
+  s_9c6aa8c20cecc6::t_32fecee291bfd7 12-33
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-11
+src/ui/app/i18n.py
+  s_373c9ba97f823a::t_4b8e69b4ad6bb0 216-222,224,228,235-238,254,257,260-261,266,278
+  s_9e0a6e0c0b33d2::t_74bafddf8037a7 798-808,815
+  s_74c5ef21e15b70::t_74d797cf402325 661-662
+  s_74c5ef21e15b70::t_869ce02d0f5bb8 24,30-31,89-90
+  s_74c5ef21e15b70::t_408c76f71c2416 704-707,716-729,733-737
+  s_74c5ef21e15b70::t_5702670609b686 630-641
+  s_98389909a16d3d::t_4669f16a7a9cfe 16
+  s_373c9ba97f823a::t_385ac582eaabef 209-215,223,225-227,233,239-246,255-256,258-259,262-265,267-277,279
+  s_98389909a16d3d::t_92430b3fe0f5bc 102
+  s_15b18a27866af7::t_a6040cfe9deda3 747-753
+  s_9e0a6e0c0b33d2::t_da9cf42e6b7101 761-762
+  s_63a943b05891e4::t_874713b1388ccb 811-814
+  s_55367ee0fa903d::t_540e868be371b2 809-810
+  s_74c5ef21e15b70::t_1dd611812cbe77 317-409
+  s_2c568de7a57961::t_73d792f6b6acc9 771-773,777
+  s_98389909a16d3d::t_46f18869dc89cb 120-124
+  s_9e0a6e0c0b33d2::t_e54ad93bd3db92 757-760
+  s_3ce8188eca6e56::t_6873eeeb5b3b6c 43-59,166-170,663
+  s_98389909a16d3d::t_4b3142bfb2a9dd 763-770,774-776,778-797
+  s_74c5ef21e15b70::t_30ac8b758e8cec 68-73,75,80-88
+  s_2c568de7a57961::t_9be48823706d01 91,125-127,171-172,229-230,234,410-411,738-739
+src/common/core/antibot/locales/tw.json
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-11
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,154-156
+  s_4a279a8d942cc9::t_4b78b79edfaf3c 12-153
+src/common/core/php/locales/ru.json
+  s_508f1cd3c50447::t_c7d5f0a9e0a178 6-27
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,28-30
+src/common/core/templates/locales/ar.json
+  s_9c6aa8c20cecc6::t_caabe3c09fcbe7 193-198
+  s_373c9ba97f823a::t_5680ad8c42d794 6-192
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,199-201
+src/common/core/realip/locales/hi.json
+  s_9c6aa8c20cecc6::t_caabe3c09fcbe7 6-31
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,32-34
+src/common/core/sessions/locales/ko.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,40-42
+  s_a10d63a4ae38b6::t_9a1d8ea7d9d64c 6-39
+src/common/core/badbehavior/locales/fr.json
+  s_01a39102d1fe48::t_8b62970fd64c69 6-31
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,32-34
+src/common/core/dnsbl/locales/zh.json
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-11
+  s_4a279a8d942cc9::t_a33de36088ca20 12-37
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,38-40
+src/common/core/whitelist/locales/id.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,74-76
+  s_64cfb60a50b415::t_d0b1bb305b09db 6,69-73
+  s_26097c6b2b7b49::t_52ba0028fefebf 7-68
+src/common/core/mtls/locales/tw.json
+  s_a10d63a4ae38b6::t_808660d4eba667 6-35
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,36-38
+src/common/core/dnsbl/locales/ru.json
+  s_26097c6b2b7b49::t_be1e8c8a68de92 7-32
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,38-40
+  s_64cfb60a50b415::t_d0b1bb305b09db 6,33-37
+src/common/core/gzip/locales/es.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,28-30
+  s_01a39102d1fe48::t_ec660d6959865c 6-27
+src/common/core/cors/locales/tl.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,58-60
+  s_64cfb60a50b415::t_d0b1bb305b09db 6,53-57
+  s_26097c6b2b7b49::t_be1e8c8a68de92 7-52
+src/common/core/backup/locales/it.json
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-10
+  s_01a39102d1fe48::t_8b62970fd64c69 11-32
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,33-35
+src/common/core/cors/locales/de.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,58-60
+  s_01a39102d1fe48::t_2225d534490bdd 12-57
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-11
+src/common/core/robotstxt/locales/tw.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,52-54
+  s_a10d63a4ae38b6::t_fc664fbc7307ea 6-51
+src/common/core/limit/locales/it.json
+  s_57203c7f4181a0::t_fb8f2752e1207b 12-53
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-11
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,54-56
+src/common/core/securitytxt/locales/tw.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,52-54
+  s_60e8abfe4dfe14::t_e805ecdfebf9fa 6-51
+src/common/core/selfsigned/locales/ur.json
+  s_9c6aa8c20cecc6::t_caabe3c09fcbe7 6-23
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,24-26
+src/common/core/authbasic/locales/es.json
+  s_01a39102d1fe48::t_8b62970fd64c69 16-37
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-15
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,38-40
+src/common/core/modsecurity/locales/id.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,60-62
+  s_508f1cd3c50447::t_2166864ccda977 6-59
+src/common/core/certificates/locales/ru.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-8
+src/common/core/customcert/locales/hi.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,48-50
+  s_9c6aa8c20cecc6::t_2ec36ca6521a7e 6-47
+src/common/core/templates/locales/ur.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,199-201
+  s_9c6aa8c20cecc6::t_caabe3c09fcbe7 193-198
+  s_373c9ba97f823a::t_5680ad8c42d794 6-192
+src/common/core/sessions/locales/ar.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,40-42
+  s_9c6aa8c20cecc6::t_2ec36ca6521a7e 6-39
+src/common/core/greylist/locales/ur.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,74-76
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-11
+  s_9c6aa8c20cecc6::t_6dcca8c3276a8d 12-73
+src/common/core/templates/locales/fr.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,199-201
+  s_57203c7f4181a0::t_49b525a696db0a 193-198
+  s_373c9ba97f823a::t_5680ad8c42d794 6-192
+src/common/core/robotstxt/locales/bn.json
+  s_9c6aa8c20cecc6::t_2ec36ca6521a7e 6-51
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,52-54
+src/common/core/jobs/locales/it.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-8
+src/common/core/sessions/locales/ru.json
+  s_508f1cd3c50447::t_2166864ccda977 6-39
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,40-42
+src/common/core/gzip/locales/tr.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,28-30
+  s_508f1cd3c50447::t_c7d5f0a9e0a178 6-27
+src/common/core/brotli/locales/ar.json
+  s_9c6aa8c20cecc6::t_32fecee291bfd7 6-23
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,24-26
+src/common/core/pro/locales/ar.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,12-14
+  s_9c6aa8c20cecc6::t_caabe3c09fcbe7 6-11
+src/common/core/bunkernet/locales/bn.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,35-37
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-16
+  s_9c6aa8c20cecc6::t_32fecee291bfd7 17-34
+src/common/core/errors/locales/pt.json
+  s_01a39102d1fe48::t_2225d534490bdd 6-15
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,16-18
+src/common/core/redirect/locales/tw.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-26
+src/common/core/mtls/locales/it.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,36-38
+  s_57203c7f4181a0::t_a27e704f111a9f 6-35
+src/common/core/limit/locales/tr.json
+  s_508f1cd3c50447::t_2166864ccda977 12-53
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-11
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,54-56
+src/common/core/redirect/locales/tl.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,24-26
+  s_508f1cd3c50447::t_c7d5f0a9e0a178 6-23
+src/common/core/misc/locales/ru.json
+  s_508f1cd3c50447::t_f8d653be355b3f 16-105
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-15
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,106-108
+src/common/core/brotli/locales/bn.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,24-26
+  s_9c6aa8c20cecc6::t_32fecee291bfd7 6-23
+src/common/core/redis/locales/it.json
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-14
+  s_57203c7f4181a0::t_b6d4bf70f3e8a0 15-80
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,81-83
+src/common/core/cors/locales/ko.json
+  s_4a279a8d942cc9::t_e26afe44422967 12-57
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-11
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,58-60
+src/common/core/gzip/locales/zh.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-30
+src/common/core/pro/locales/zh.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-14
+src/common/core/robotstxt/locales/es.json
+  s_57203c7f4181a0::t_fc64081114ba8a 6-51
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,52-54
+src/common/core/selfsigned/locales/tl.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,24-26
+  s_26097c6b2b7b49::t_be1e8c8a68de92 6-23
+src/common/core/misc/locales/hi.json
+  s_9bb946752b57f2::t_eeccdfe6f0cf91 16-105
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,106-108
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-15
+src/common/core/brotli/locales/id.json
+  s_26097c6b2b7b49::t_be1e8c8a68de92 6-23
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,24-26
+src/common/core/limit/locales/fr.json
+  s_57203c7f4181a0::t_fb8f2752e1207b 12-53
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,54-56
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-11
+src/common/core/jobs/locales/tl.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-8
+src/common/core/backup/locales/pt.json
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-10
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,33-35
+  s_01a39102d1fe48::t_8b62970fd64c69 11-32
+src/common/core/reverseproxy/locales/ru.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,228-230
+  s_508f1cd3c50447::t_b5e94ff419e77b 6-227
+src/common/core/greylist/locales/id.json
+  s_64cfb60a50b415::t_d0b1bb305b09db 6,69-73
+  s_26097c6b2b7b49::t_52ba0028fefebf 7-68
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,74-76
+src/common/core/brotli/locales/ru.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,24-26
+  s_26097c6b2b7b49::t_be1e8c8a68de92 6-23
+src/common/core/ui/locales/br.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-18
+src/common/core/reversescan/locales/pl.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,20-22
+  s_26097c6b2b7b49::t_be1e8c8a68de92 6-19
+src/common/core/grpc/locales/tw.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,169-170
+  s_a10d63a4ae38b6::t_42498904ea1fd9 6,168
+  s_a10d63a4ae38b6::t_49279dd21033ea 7-167
+src/common/core/customcert/locales/tw.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,48-50
+  s_4a279a8d942cc9::t_576e067a52f4e3 6-47
+src/common/core/whitelist/locales/ko.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,74-76
+  s_4a279a8d942cc9::t_feb9d01887f820 12-73
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-11
+src/common/core/securitytxt/locales/ur.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,52-54
+  s_9c6aa8c20cecc6::t_2ec36ca6521a7e 6-51
+src/common/core/php/locales/pl.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,28-30
+  s_508f1cd3c50447::t_c7d5f0a9e0a178 6-27
+src/common/core/customcert/locales/ar.json
+  s_9c6aa8c20cecc6::t_2ec36ca6521a7e 6-47
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,48-50
+src/common/core/ui/locales/es.json
+  s_57203c7f4181a0::t_49b525a696db0a 6-15
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,16-18
+src/common/core/blacklist/locales/fr.json
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-27
+  s_01a39102d1fe48::t_b50bdeabd9c0e0 28-141
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,142-144
+src/common/core/ssl/locales/tr.json
+  s_508f1cd3c50447::t_c7d5f0a9e0a178 6-35
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,36-38
+src/common/core/limit/locales/ur.json
+  s_9c6aa8c20cecc6::t_ebe685d8bf4afb 12-53
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,54-56
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-11
+src/common/core/geoip/locales/br.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,32-34
+  s_4a279a8d942cc9::t_a33de36088ca20 6-31
+src/common/core/antibot/locales/pl.json
+  s_26097c6b2b7b49::t_514efefb7875f1 7-148
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,154-156
+  s_64cfb60a50b415::t_d0b1bb305b09db 6,149-153
+src/common/core/ui/locales/hi.json
+  s_9c6aa8c20cecc6::t_caabe3c09fcbe7 6-15
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,16-18
+src/common/core/modsecurity/locales/it.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,60-62
+  s_57203c7f4181a0::t_c34bcf1474237d 6-59
+src/common/core/errors/locales/tl.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,16-18
+  s_508f1cd3c50447::t_bf729576e953ab 6-15
+src/common/core/jobs/locales/id.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-8
+src/common/core/grpc/locales/br.json
+  s_a10d63a4ae38b6::t_42498904ea1fd9 6,168
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,169-170
+  s_a10d63a4ae38b6::t_49279dd21033ea 7-167
+src/common/core/gzip/locales/hi.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,28-30
+  s_9c6aa8c20cecc6::t_caabe3c09fcbe7 6-27
+src/common/core/sessions/locales/it.json
+  s_57203c7f4181a0::t_fb8f2752e1207b 6-39
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,40-42
+src/common/core/limit/locales/br.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,54-56
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-11
+  s_a10d63a4ae38b6::t_34b3fbdc40fbf5 12-53
+src/common/core/customcert/locales/bn.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,48-50
+  s_9c6aa8c20cecc6::t_2ec36ca6521a7e 6-47
+src/common/core/securitytxt/locales/es.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,52-54
+  s_57203c7f4181a0::t_fc64081114ba8a 6-51
+src/common/core/sessions/locales/zh.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,40-42
+  s_a10d63a4ae38b6::t_9a1d8ea7d9d64c 6-39
+src/common/core/bunkernet/locales/tl.json
+  s_26097c6b2b7b49::t_be1e8c8a68de92 7-24
+  s_64cfb60a50b415::t_d0b1bb305b09db 6,25-34
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,35-37
+src/common/core/pro/locales/pl.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,12-14
+  s_508f1cd3c50447::t_bf729576e953ab 6-11
+src/common/core/gzip/locales/tl.json
+  s_508f1cd3c50447::t_c7d5f0a9e0a178 6-27
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,28-30
+src/common/core/limit/locales/hi.json
+  s_9c6aa8c20cecc6::t_ebe685d8bf4afb 12-53
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-11
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,54-56
+src/common/core/whitelist/locales/pl.json
+  s_64cfb60a50b415::t_d0b1bb305b09db 6,69-73
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,74-76
+  s_26097c6b2b7b49::t_52ba0028fefebf 7-68
+src/common/core/cors/locales/tw.json
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-11
+  s_4a279a8d942cc9::t_e26afe44422967 12-57
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,58-60
+src/common/core/redis/locales/pt.json
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-14
+  s_57203c7f4181a0::t_b6d4bf70f3e8a0 15-80
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,81-83
+src/common/core/redirect/locales/bn.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,24-26
+  s_9c6aa8c20cecc6::t_caabe3c09fcbe7 6-23
+src/common/core/authbasic/locales/de.json
+  s_01a39102d1fe48::t_8b62970fd64c69 16-37
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-15
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,38-40
+src/common/core/gzip/locales/tw.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-30
+src/common/core/redis/locales/br.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,81-83
+  s_a10d63a4ae38b6::t_89d528a3df8c2c 15-80
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-14
+src/common/core/jobs/locales/tw.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-8
+src/common/core/authbasic/locales/zh.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,38-40
+  s_4a279a8d942cc9::t_6a252e7e56381a 16-37
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-15
+src/common/core/blacklist/locales/hi.json
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-27
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,142-144
+  s_9bb946752b57f2::t_08e28b0d156a56 28-141
+src/common/core/php/locales/tw.json
+  s_a10d63a4ae38b6::t_fb7a5412a2d7fe 6-27
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,28-30
+src/common/core/php/locales/de.json
+  s_57203c7f4181a0::t_49b525a696db0a 6-27
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,28-30
+src/common/core/pro/locales/tw.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-14
+src/common/core/headers/locales/zh.json
+  s_a10d63a4ae38b6::t_b36dede68b74c0 6-59
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,60-62
+src/common/core/inject/locales/bn.json
+  s_9c6aa8c20cecc6::t_caabe3c09fcbe7 6-15
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,16-18
+src/common/core/jobs/locales/pt.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-8
+src/common/core/clientcache/locales/tw.json
+  s_4a279a8d942cc9::t_e26afe44422967 6-23
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,24-26
+src/common/core/country/locales/zh.json
+  s_4a279a8d942cc9::t_e26afe44422967 12-33
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,34-36
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-11
+src/common/core/gzip/locales/it.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,28-30
+  s_01a39102d1fe48::t_ec660d6959865c 6-27
+src/common/core/crowdsec/locales/ar.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,93-95
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-10
+  s_9c6aa8c20cecc6::t_6dcca8c3276a8d 11-92
+src/common/core/crowdsec/locales/id.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,93-95
+  s_64cfb60a50b415::t_d0b1bb305b09db 6,89-92
+  s_8d5911a0b4e448::t_69001c48d7d337 7-88
+src/common/core/ssl/locales/hi.json
+  s_9c6aa8c20cecc6::t_2ec36ca6521a7e 6-35
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,36-38
+src/common/core/backup/locales/pl.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,33-35
+  s_64cfb60a50b415::t_d0b1bb305b09db 6,29-32
+  s_26097c6b2b7b49::t_f58b7750667e3a 7-28
+src/common/core/headers/locales/id.json
+  s_508f1cd3c50447::t_2166864ccda977 6-59
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,60-62
+src/common/core/pro/locales/ko.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-14
+src/common/core/letsencrypt/locales/ur.json
+  s_9bb946752b57f2::t_206825102b69f9 6-99
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,100-102
+src/common/core/selfsigned/locales/ar.json
+  s_9c6aa8c20cecc6::t_caabe3c09fcbe7 6-23
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,24-26
+src/common/core/metrics/locales/hi.json
+  s_9bb946752b57f2::t_b14240873bbe17 6-71
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,72-74
+src/common/core/db/locales/ru.json
+  s_26097c6b2b7b49::t_d20d0a74ede61e 6-63
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,64-66
+src/common/core/grpc/locales/de.json
+  s_54b71f39931f47::t_e2d9b1b7d5511d 6-167
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,168-170
+src/common/core/grpc/locales/tr.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,168-170
+  s_508f1cd3c50447::t_1c811234bd8884 6-167
+src/common/core/reverseproxy/locales/tw.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,229-230
+  s_a10d63a4ae38b6::t_49279dd21033ea 7-227
+  s_a10d63a4ae38b6::t_231965b69e660e 6,228
+src/common/core/reversescan/locales/de.json
+  s_57203c7f4181a0::t_49b525a696db0a 6-19
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,20-22
+src/common/core/country/locales/ko.json
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-11
+  s_4a279a8d942cc9::t_e26afe44422967 12-33
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,34-36
+src/common/core/mtls/locales/ko.json
+  s_a10d63a4ae38b6::t_808660d4eba667 6-35
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,36-38
+src/common/core/bunkernet/locales/ru.json
+  s_26097c6b2b7b49::t_be1e8c8a68de92 7-24
+  s_64cfb60a50b415::t_d0b1bb305b09db 6,25-34
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,35-37
+src/common/core/reversescan/locales/tr.json
+  s_26097c6b2b7b49::t_be1e8c8a68de92 6-19
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,20-22
+src/common/core/securitytxt/locales/pt.json
+  s_57203c7f4181a0::t_fc64081114ba8a 6-51
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,52-54
+src/common/core/geoip/locales/tw.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,32-34
+  s_4a279a8d942cc9::t_a33de36088ca20 6-31
+src/common/core/reversescan/locales/it.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,20-22
+  s_57203c7f4181a0::t_49b525a696db0a 6-19
+src/common/core/misc/locales/tw.json
+  s_a10d63a4ae38b6::t_3e04b7f8edd836 16,106
+  s_a10d63a4ae38b6::t_49279dd21033ea 17-105
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,107-108
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-15
+src/common/core/crowdsec/locales/es.json
+  s_e3241353387257::t_a29b2715afa499 11-92
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,93-95
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-10
+src/common/core/limit/locales/ar.json
+  s_9c6aa8c20cecc6::t_ebe685d8bf4afb 12-53
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-11
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,54-56
+src/common/core/ssl/locales/tw.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,36-38
+  s_a10d63a4ae38b6::t_fd888085a42132 6-35
+src/common/core/geoip/locales/de.json
+  s_01a39102d1fe48::t_2225d534490bdd 6-31
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,32-34
+src/common/core/authbasic/locales/pt.json
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-15
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,38-40
+  s_01a39102d1fe48::t_8b62970fd64c69 16-37
+src/common/core/selfsigned/locales/ru.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,24-26
+  s_26097c6b2b7b49::t_be1e8c8a68de92 6-23
+src/common/core/geoip/locales/zh.json
+  s_4a279a8d942cc9::t_a33de36088ca20 6-31
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,32-34
+src/common/core/whitelist/locales/bn.json
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-11
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,74-76
+  s_9c6aa8c20cecc6::t_6dcca8c3276a8d 12-73
+src/common/core/workflows/locales/bn.json
+  s_9c6aa8c20cecc6::t_caabe3c09fcbe7 6-11
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,12-14
+src/common/core/selfsigned/locales/br.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-26
+src/common/core/jobs/locales/zh.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-8
+src/common/core/cors/locales/pl.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,58-60
+  s_26097c6b2b7b49::t_be1e8c8a68de92 7-52
+  s_64cfb60a50b415::t_d0b1bb305b09db 6,53-57
+src/common/core/redis/locales/ru.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,81-83
+  s_508f1cd3c50447::t_e287ee8bbafce4 15-80
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-14
+src/common/core/greylist/locales/de.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,74-76
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-11
+  s_01a39102d1fe48::t_6867cb923e019e 12-73
+src/common/core/reversescan/locales/ko.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-22
+.pre-commit-config.yaml
+  s_795e2ccdb6801b::t_29d3da6e1f8fb1 95
+src/common/core/authbasic/locales/id.json
+  s_26097c6b2b7b49::t_f58b7750667e3a 7-28
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,38-40
+  s_64cfb60a50b415::t_d0b1bb305b09db 6,29-37
+src/common/core/errors/locales/de.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,16-18
+  s_01a39102d1fe48::t_2225d534490bdd 6-15
+src/common/core/mtls/locales/br.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,36-38
+  s_a10d63a4ae38b6::t_808660d4eba667 6-35
+src/common/core/letsencrypt/locales/br.json
+  s_a10d63a4ae38b6::t_49279dd21033ea 7-99
+  s_a10d63a4ae38b6::t_8572c301773df4 6,100
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,101-102
+src/common/core/badbehavior/locales/ru.json
+  s_26097c6b2b7b49::t_f58b7750667e3a 6-31
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,32-34
+src/common/core/db/locales/ar.json
+  s_9c6aa8c20cecc6::t_ebe685d8bf4afb 6-63
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,64-66
+src/common/core/misc/locales/zh.json
+  s_a10d63a4ae38b6::t_49279dd21033ea 17-105
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,107-108
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-15
+  s_a10d63a4ae38b6::t_3e04b7f8edd836 16,106
+src/common/core/clientcache/locales/ur.json
+  s_9c6aa8c20cecc6::t_32fecee291bfd7 6-23
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,24-26
+src/common/core/robotstxt/locales/br.json
+  s_a10d63a4ae38b6::t_fc664fbc7307ea 6-51
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,52-54
+src/common/core/workflows/locales/tl.json
+  s_508f1cd3c50447::t_bf729576e953ab 6-11
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,12-14
+src/common/core/authbasic/locales/bn.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,38-40
+  s_9c6aa8c20cecc6::t_32fecee291bfd7 16-37
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-15
+src/common/core/ui/locales/pl.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,16-18
+  s_508f1cd3c50447::t_bf729576e953ab 6-15
+src/common/core/badbehavior/locales/tw.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,32-34
+  s_4a279a8d942cc9::t_6a252e7e56381a 6-31
+src/common/core/mtls/locales/zh.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,36-38
+  s_a10d63a4ae38b6::t_808660d4eba667 6-35
+src/common/core/backup/locales/zh.json
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-10
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,33-35
+  s_4a279a8d942cc9::t_6a252e7e56381a 11-32
+src/common/core/antibot/locales/zh.json
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-11
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,154-156
+  s_4a279a8d942cc9::t_adf86b48310612 12-153
+src/common/core/bunkernet/locales/pl.json
+  s_64cfb60a50b415::t_d0b1bb305b09db 6,25-34
+  s_26097c6b2b7b49::t_be1e8c8a68de92 7-24
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,35-37
+src/common/core/metrics/locales/pt.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,72-74
+  s_57203c7f4181a0::t_42ed119f2197fa 6-71
+src/common/core/certificates/locales/es.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-8
+src/common/core/realip/locales/ar.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,32-34
+  s_9c6aa8c20cecc6::t_caabe3c09fcbe7 6-31
+src/common/core/antibot/locales/fr.json
+  s_01a39102d1fe48::t_61eae7120f0916 12-153
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-11
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,154-156
+src/common/core/letsencrypt/locales/de.json
+  s_57203c7f4181a0::t_5b906670ec5bf0 6-99
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,100-102
+src/common/core/headers/locales/fr.json
+  s_01a39102d1fe48::t_ec660d6959865c 6-59
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,60-62
+src/common/core/selfsigned/locales/id.json
+  s_26097c6b2b7b49::t_be1e8c8a68de92 6-23
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,24-26
+src/common/core/pro/locales/hi.json
+  s_9c6aa8c20cecc6::t_caabe3c09fcbe7 6-11
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,12-14
+src/common/core/gzip/locales/de.json
+  s_01a39102d1fe48::t_ec660d6959865c 6-27
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,28-30
+src/common/core/modsecurity/locales/ko.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,60-62
+  s_a10d63a4ae38b6::t_8045b0c03a0e2d 6-59
+src/common/core/backup/locales/ar.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,33-35
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-10
+  s_9c6aa8c20cecc6::t_32fecee291bfd7 11-32
+src/common/core/workflows/locales/pl.json
+  s_508f1cd3c50447::t_bf729576e953ab 6-11
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,12-14
+src/common/core/reverseproxy/locales/it.json
+  s_57203c7f4181a0::t_9e39ecb62769dc 6-227
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,228-230
+src/common/core/modsecurity/locales/pt.json
+  s_57203c7f4181a0::t_c34bcf1474237d 6-59
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,60-62
+src/common/core/pro/locales/es.json
+  s_57203c7f4181a0::t_49b525a696db0a 6-11
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,12-14
+src/common/core/brotli/locales/de.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,24-26
+  s_01a39102d1fe48::t_8b62970fd64c69 6-23
+src/common/core/sessions/locales/ur.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,40-42
+  s_9c6aa8c20cecc6::t_2ec36ca6521a7e 6-39
+src/common/core/bunkernet/locales/hi.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,35-37
+  s_9c6aa8c20cecc6::t_32fecee291bfd7 17-34
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-16
+src/common/core/geoip/locales/ko.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,32-34
+  s_4a279a8d942cc9::t_a33de36088ca20 6-31
+src/common/core/letsencrypt/locales/tw.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,101-102
+  s_a10d63a4ae38b6::t_49279dd21033ea 7-99
+  s_a10d63a4ae38b6::t_8572c301773df4 6,100
+src/common/core/brotli/locales/pl.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,24-26
+  s_26097c6b2b7b49::t_be1e8c8a68de92 6-23
+src/common/core/whitelist/locales/tw.json
+  s_4a279a8d942cc9::t_feb9d01887f820 12-73
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,74-76
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-11
+src/common/core/workflows/locales/it.json
+  s_57203c7f4181a0::t_49b525a696db0a 6-11
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,12-14
+src/common/core/cors/ui/actions.py
+  s_373c9ba97f823a::t_4c01a489039fc0 11,13
+  s_5e613df1f72cb6::t_03bedf84905c62 14-15
+src/common/core/greylist/locales/ko.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,74-76
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-11
+  s_4a279a8d942cc9::t_feb9d01887f820 12-73
+src/common/core/robotstxt/locales/id.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,52-54
+  s_508f1cd3c50447::t_2166864ccda977 6-51
+src/common/core/whitelist/locales/de.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,74-76
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-11
+  s_01a39102d1fe48::t_61ce150e895166 12-73
+src/common/core/crowdsec/locales/ur.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,93-95
+  s_9c6aa8c20cecc6::t_6dcca8c3276a8d 11-92
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-10
+src/common/core/errors/locales/ur.json
+  s_9c6aa8c20cecc6::t_caabe3c09fcbe7 6-15
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,16-18
+src/common/core/backup/locales/tl.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,33-35
+  s_26097c6b2b7b49::t_f58b7750667e3a 7-28
+  s_64cfb60a50b415::t_d0b1bb305b09db 6,29-32
+src/common/core/realip/locales/ur.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,32-34
+  s_9c6aa8c20cecc6::t_caabe3c09fcbe7 6-31
+src/common/core/ssl/locales/it.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,36-38
+  s_57203c7f4181a0::t_a27e704f111a9f 6-35
+src/common/core/realip/locales/de.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,32-34
+  s_57203c7f4181a0::t_a27e704f111a9f 6-31
+src/common/core/realip/locales/ko.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-34
+src/common/core/greylist/locales/hi.json
+  s_9c6aa8c20cecc6::t_6dcca8c3276a8d 12-73
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-11
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,74-76
+src/common/core/blacklist/locales/pl.json
+  s_26097c6b2b7b49::t_83403f6d158470 7-120
+  s_64cfb60a50b415::t_d0b1bb305b09db 6,121-141
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,142-144
+src/common/core/clientcache/locales/ru.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,24-26
+  s_26097c6b2b7b49::t_be1e8c8a68de92 6-23
+src/common/core/templates/locales/tr.json
+  s_508f1cd3c50447::t_bf729576e953ab 193-198
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,199-201
+  s_373c9ba97f823a::t_5680ad8c42d794 6-192
+src/common/core/templates/locales/zh.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,199-201
+  s_373c9ba97f823a::t_5680ad8c42d794 6-193,198
+  s_4a279a8d942cc9::t_5403177a3bdaca 194-197
+src/common/core/redirect/locales/ur.json
+  s_9c6aa8c20cecc6::t_caabe3c09fcbe7 6-23
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,24-26
+src/common/core/dnsbl/locales/id.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,38-40
+  s_64cfb60a50b415::t_d0b1bb305b09db 6,33-37
+  s_26097c6b2b7b49::t_be1e8c8a68de92 7-32
+src/common/core/limit/locales/ru.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,54-56
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-11
+  s_508f1cd3c50447::t_2166864ccda977 12-53
+src/common/core/metrics/locales/bn.json
+  s_9bb946752b57f2::t_b14240873bbe17 6-71
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,72-74
+src/common/core/crowdsec/ui/actions.py
+  s_373c9ba97f823a::t_eab804ec8918a4 12
+src/common/core/inject/locales/pl.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,16-18
+  s_508f1cd3c50447::t_bf729576e953ab 6-15
+src/common/core/misc/locales/tl.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,106-108
+  s_508f1cd3c50447::t_f8d653be355b3f 16-105
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-15
+src/common/core/reversescan/locales/ru.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,20-22
+  s_26097c6b2b7b49::t_be1e8c8a68de92 6-19
+src/common/core/sessions/locales/tr.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,40-42
+  s_508f1cd3c50447::t_2166864ccda977 6-39
+src/common/core/greylist/ui/actions.py
+  s_373c9ba97f823a::t_3d37c29c225356 11,13
+  s_5e613df1f72cb6::t_5b3cb26d631ff5 14-15
+src/common/core/inject/locales/tw.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-18
+src/common/core/realip/locales/id.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,32-34
+  s_508f1cd3c50447::t_c7d5f0a9e0a178 6-31
+src/common/core/sessions/locales/fr.json
+  s_57203c7f4181a0::t_fb8f2752e1207b 6-39
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,40-42
+src/common/core/mtls/locales/ru.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,36-38
+  s_508f1cd3c50447::t_c7d5f0a9e0a178 6-35
+src/common/core/whitelist/locales/tr.json
+  s_26097c6b2b7b49::t_52ba0028fefebf 7-68
+  s_64cfb60a50b415::t_d0b1bb305b09db 6,69-73
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,74-76
+src/common/core/clientcache/locales/fr.json
+  s_01a39102d1fe48::t_8b62970fd64c69 6-23
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,24-26
+src/common/core/robotstxt/locales/zh.json
+  s_a10d63a4ae38b6::t_fc664fbc7307ea 6-51
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,52-54
+src/common/core/templates/locales/ko.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,199-201
+  s_373c9ba97f823a::t_5680ad8c42d794 6-193,198
+  s_4a279a8d942cc9::t_a79096b749e22e 194-197
+src/common/core/country/locales/bn.json
+  s_9c6aa8c20cecc6::t_32fecee291bfd7 12-33
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-11
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,34-36
+src/common/core/headers/locales/pl.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,60-62
+  s_508f1cd3c50447::t_2166864ccda977 6-59
+src/common/core/authbasic/locales/ko.json
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-15
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,38-40
+  s_4a279a8d942cc9::t_6a252e7e56381a 16-37
+src/common/core/selfsigned/locales/hi.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,24-26
+  s_9c6aa8c20cecc6::t_caabe3c09fcbe7 6-23
+src/common/core/blacklist/locales/ko.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,142-144
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-28,33,37,41,45,49,53,57,61,65,69,73,77,81,85,89,93,97,101,105,109,113,117,121,125,129,133,137,141
+  s_4a279a8d942cc9::t_1d4b2dc8e5ec50 29-32,34-36,38-40,42-44,46-48,50-52,54-56,58-60,62-64,66-68,70-72,74-76,78-80,82-84,86-88,90-92,94-96,98-100,102-104,106-108,110-112,114-116,118-120,122-124,126-128,130-132,134-136,138-140
+src/common/core/badbehavior/locales/it.json
+  s_01a39102d1fe48::t_8b62970fd64c69 6-31
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,32-34
+src/common/core/modsecurity/locales/br.json
+  s_a10d63a4ae38b6::t_8045b0c03a0e2d 6-59
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,60-62
+src/common/core/gzip/locales/ar.json
+  s_9c6aa8c20cecc6::t_caabe3c09fcbe7 6-27
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,28-30
+src/common/core/headers/locales/ko.json
+  s_a10d63a4ae38b6::t_b36dede68b74c0 6-59
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,60-62
+src/common/core/php/locales/hi.json
+  s_9c6aa8c20cecc6::t_caabe3c09fcbe7 6-27
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,28-30
+src/common/core/db/locales/ko.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,64-66
+  s_4a279a8d942cc9::t_a33de36088ca20 6-63
+src/common/core/db/locales/de.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,64-66
+  s_01a39102d1fe48::t_df1fdd31ec1051 6-63
+src/common/core/crowdsec/locales/tr.json
+  s_64cfb60a50b415::t_d0b1bb305b09db 6,89-92
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,93-95
+  s_8d5911a0b4e448::t_69001c48d7d337 7-88
+src/common/core/workflows/locales/ru.json
+  s_508f1cd3c50447::t_bf729576e953ab 6-11
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,12-14
+src/common/core/blacklist/locales/ur.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,142-144
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-27
+  s_9bb946752b57f2::t_08e28b0d156a56 28-141
+src/common/core/antibot/locales/id.json
+  s_64cfb60a50b415::t_d0b1bb305b09db 6,149-153
+  s_26097c6b2b7b49::t_514efefb7875f1 7-148
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,154-156
+src/common/core/reversescan/locales/zh.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-22
+src/common/core/redirect/locales/pt.json
+  s_57203c7f4181a0::t_49b525a696db0a 6-23
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,24-26
+src/common/core/metrics/locales/ko.json
+  s_a10d63a4ae38b6::t_237e81eefb4ee9 6,72
+  s_a10d63a4ae38b6::t_49279dd21033ea 7-71
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,73-74
+src/common/core/certificates/locales/id.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-8
+src/common/core/jobs/locales/ru.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-8
+src/common/core/grpc/locales/it.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,168-170
+  s_54b71f39931f47::t_e2d9b1b7d5511d 6-167
+src/common/core/redirect/locales/de.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,24-26
+  s_57203c7f4181a0::t_49b525a696db0a 6-23
+src/common/core/antibot/locales/ar.json
+  s_9c6aa8c20cecc6::t_b47c30b71e1e6d 12-153
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-11
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,154-156
+src/common/core/realip/locales/zh.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-34
+src/common/core/cors/locales/zh.json
+  s_4a279a8d942cc9::t_e26afe44422967 12-57
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-11
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,58-60
+src/common/core/metrics/locales/it.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,72-74
+  s_57203c7f4181a0::t_42ed119f2197fa 6-71
+src/common/core/sessions/locales/bn.json
+  s_9c6aa8c20cecc6::t_2ec36ca6521a7e 6-39
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,40-42
+src/common/core/errors/locales/tr.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,16-18
+  s_508f1cd3c50447::t_bf729576e953ab 6-15
+src/common/core/ui/locales/ar.json
+  s_9c6aa8c20cecc6::t_caabe3c09fcbe7 6-15
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,16-18
+src/common/core/errors/locales/id.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,16-18
+  s_508f1cd3c50447::t_bf729576e953ab 6-15
+src/common/core/brotli/locales/hi.json
+  s_9c6aa8c20cecc6::t_32fecee291bfd7 6-23
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,24-26
+src/common/core/blacklist/locales/tl.json
+  s_64cfb60a50b415::t_d0b1bb305b09db 6,121-141
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,142-144
+  s_26097c6b2b7b49::t_83403f6d158470 7-120
+src/common/core/mtls/locales/hi.json
+  s_9c6aa8c20cecc6::t_2ec36ca6521a7e 6-35
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,36-38
+src/common/core/robotstxt/locales/ur.json
+  s_9c6aa8c20cecc6::t_2ec36ca6521a7e 6-51
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,52-54
+src/common/core/blacklist/locales/tr.json
+  s_64cfb60a50b415::t_d0b1bb305b09db 6,121-141
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,142-144
+  s_26097c6b2b7b49::t_83403f6d158470 7-120
+src/common/core/robotstxt/locales/ar.json
+  s_9c6aa8c20cecc6::t_2ec36ca6521a7e 6-51
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,52-54
+src/common/core/misc/locales/id.json
+  s_508f1cd3c50447::t_f8d653be355b3f 16-105
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,106-108
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-15
+src/common/core/db/locales/pt.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,64-66
+  s_01a39102d1fe48::t_df1fdd31ec1051 6-63
+src/common/core/pro/locales/fr.json
+  s_57203c7f4181a0::t_49b525a696db0a 6-11
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,12-14
+src/ui/app/static/locales/README.md
+  s_64cfb60a50b415::t_4e476c6c142366 37-50
+src/common/core/db/locales/tw.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,64-66
+  s_4a279a8d942cc9::t_a33de36088ca20 6-63
+src/common/core/selfsigned/locales/es.json
+  s_57203c7f4181a0::t_49b525a696db0a 6-23
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,24-26
+src/common/core/redirect/locales/ru.json
+  s_508f1cd3c50447::t_c7d5f0a9e0a178 6-23
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,24-26
+src/common/core/ssl/locales/ur.json
+  s_9c6aa8c20cecc6::t_2ec36ca6521a7e 6-35
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,36-38
+src/common/core/cors/locales/fr.json
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-11
+  s_01a39102d1fe48::t_2225d534490bdd 12-57
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,58-60
+src/common/core/ssl/locales/br.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,36-38
+  s_a10d63a4ae38b6::t_fd888085a42132 6-35
+src/common/core/limit/locales/tl.json
+  s_508f1cd3c50447::t_2166864ccda977 12-53
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,54-56
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-11
+src/common/core/robotstxt/locales/tl.json
+  s_508f1cd3c50447::t_2166864ccda977 6-51
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,52-54
+src/common/core/crowdsec/locales/fr.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,93-95
+  s_e3241353387257::t_a29b2715afa499 11-92
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-10
+src/common/core/inject/locales/ur.json
+  s_9c6aa8c20cecc6::t_caabe3c09fcbe7 6-15
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,16-18
+src/common/core/modsecurity/locales/ar.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,60-62
+  s_9c6aa8c20cecc6::t_ebe685d8bf4afb 6-59
+src/common/core/customcert/locales/de.json
+  s_01a39102d1fe48::t_df1fdd31ec1051 6-47
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,48-50
+src/common/core/blacklist/locales/de.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,142-144
+  s_01a39102d1fe48::t_b50bdeabd9c0e0 28-141
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-27
+src/common/core/clientcache/locales/pl.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,24-26
+  s_26097c6b2b7b49::t_be1e8c8a68de92 6-23
+src/common/core/metrics/locales/tr.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,72-74
+  s_508f1cd3c50447::t_e287ee8bbafce4 6-71
+src/common/core/badbehavior/locales/es.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,32-34
+  s_01a39102d1fe48::t_8b62970fd64c69 6-31
+src/common/core/whitelist/locales/ar.json
+  s_9c6aa8c20cecc6::t_6dcca8c3276a8d 12-73
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,74-76
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-11
+src/common/core/blacklist/locales/pt.json
+  s_01a39102d1fe48::t_b50bdeabd9c0e0 28-141
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-27
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,142-144
+src/common/core/badbehavior/locales/pl.json
+  s_26097c6b2b7b49::t_f58b7750667e3a 6-31
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,32-34
+src/common/core/whitelist/locales/es.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,74-76
+  s_01a39102d1fe48::t_61ce150e895166 12-73
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-11
+src/common/core/errors/locales/es.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,16-18
+  s_01a39102d1fe48::t_2225d534490bdd 6-15
+src/common/core/robotstxt/locales/de.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,52-54
+  s_57203c7f4181a0::t_fc64081114ba8a 6-51
+src/common/core/brotli/locales/br.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,24-26
+  s_4a279a8d942cc9::t_6a252e7e56381a 6-23
+src/common/core/certificates/locales/ar.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-8
+src/common/core/authbasic/locales/fr.json
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-15
+  s_01a39102d1fe48::t_8b62970fd64c69 16-37
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,38-40
+src/common/core/blacklist/locales/ru.json
+  s_26097c6b2b7b49::t_83403f6d158470 7-120
+  s_64cfb60a50b415::t_d0b1bb305b09db 6,121-141
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,142-144
+src/common/core/ui/locales/de.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,16-18
+  s_57203c7f4181a0::t_49b525a696db0a 6-15
+src/common/core/certificates/locales/pl.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-8
+src/common/core/clientcache/locales/hi.json
+  s_9c6aa8c20cecc6::t_32fecee291bfd7 6-23
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,24-26
+src/common/core/pro/locales/id.json
+  s_508f1cd3c50447::t_bf729576e953ab 6-11
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,12-14
+src/common/core/misc/locales/bn.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,106-108
+  s_9bb946752b57f2::t_eeccdfe6f0cf91 16-105
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-15
+src/common/core/whitelist/ui/actions.py
+  s_5e613df1f72cb6::t_4cbf5d73e842d5 14
+  s_64cfb60a50b415::t_b2545b2d6c2d84 11,13
+src/common/core/grpc/locales/pl.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,168-170
+  s_508f1cd3c50447::t_1c811234bd8884 6-167
+src/common/core/misc/locales/tr.json
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-15
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,106-108
+  s_508f1cd3c50447::t_f8d653be355b3f 16-105
+src/common/core/brotli/locales/tw.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,24-26
+  s_4a279a8d942cc9::t_6a252e7e56381a 6-23
+src/common/core/crowdsec/locales/tw.json
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-10
+  s_4a279a8d942cc9::t_576e067a52f4e3 11-92
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,93-95
+src/common/core/letsencrypt/locales/es.json
+  s_57203c7f4181a0::t_5b906670ec5bf0 6-99
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,100-102
+src/common/core/blacklist/locales/tw.json
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-28,33,37,41,45,49,53,57,61,65,69,73,77,81,85,89,93,97,101,105,109,113,117,121,125,129,133,137,141
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,142-144
+  s_4a279a8d942cc9::t_4c54c9f358efe2 29-32,34-36,38-40,42-44,46-48,50-52,54-56,58-60,62-64,66-68,70-72,74-76,78-80,82-84,86-88,90-92,94-96,98-100,102-104,106-108,110-112,114-116,118-120,122-124,126-128,130-132,134-136,138-140
+src/common/core/limit/locales/de.json
+  s_57203c7f4181a0::t_fb8f2752e1207b 12-53
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,54-56
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-11
+src/common/core/modsecurity/locales/fr.json
+  s_57203c7f4181a0::t_c34bcf1474237d 6-59
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,60-62
+src/common/core/authbasic/locales/hi.json
+  s_9c6aa8c20cecc6::t_32fecee291bfd7 16-37
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-15
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,38-40
+src/common/core/ssl/locales/ar.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,36-38
+  s_9c6aa8c20cecc6::t_2ec36ca6521a7e 6-35
+src/common/core/securitytxt/locales/pl.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,52-54
+  s_508f1cd3c50447::t_2166864ccda977 6-51
+src/common/core/redis/locales/de.json
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-14
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,81-83
+  s_57203c7f4181a0::t_b6d4bf70f3e8a0 15-80
+src/common/core/bunkernet/locales/it.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,35-37
+  s_01a39102d1fe48::t_8b62970fd64c69 17-34
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-16
+src/common/core/robotstxt/locales/pl.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,52-54
+  s_508f1cd3c50447::t_2166864ccda977 6-51
+src/common/core/letsencrypt/locales/id.json
+  s_508f1cd3c50447::t_4fae91c13c50e3 6-99
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,100-102
+src/common/core/modsecurity/locales/es.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,60-62
+  s_57203c7f4181a0::t_c34bcf1474237d 6-59
+src/common/core/cors/locales/hi.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,58-60
+  s_9c6aa8c20cecc6::t_caabe3c09fcbe7 12-57
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-11
+src/common/core/redirect/locales/id.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,24-26
+  s_508f1cd3c50447::t_c7d5f0a9e0a178 6-23
+src/common/core/clientcache/locales/es.json
+  s_01a39102d1fe48::t_8b62970fd64c69 6-23
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,24-26
+src/common/core/country/locales/it.json
+  s_01a39102d1fe48::t_2225d534490bdd 12-33
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,34-36
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-11
+src/common/core/workflows/locales/br.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-14
+src/common/core/redirect/locales/tr.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,24-26
+  s_508f1cd3c50447::t_c7d5f0a9e0a178 6-23
+src/common/core/headers/locales/tr.json
+  s_508f1cd3c50447::t_2166864ccda977 6-59
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,60-62
+src/common/core/selfsigned/locales/tw.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-26
+src/common/core/bunkernet/locales/br.json
+  s_4a279a8d942cc9::t_6a252e7e56381a 17-34
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,35-37
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-16
+src/common/core/brotli/locales/tl.json
+  s_26097c6b2b7b49::t_be1e8c8a68de92 6-23
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,24-26
+src/common/core/grpc/locales/tl.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,168-170
+  s_508f1cd3c50447::t_1c811234bd8884 6-167
+src/common/core/headers/locales/pt.json
+  s_01a39102d1fe48::t_ec660d6959865c 6-59
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,60-62
+src/common/core/metrics/locales/ar.json
+  s_9bb946752b57f2::t_b14240873bbe17 6-71
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,72-74
+src/common/core/errors/locales/it.json
+  s_01a39102d1fe48::t_2225d534490bdd 6-15
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,16-18
+src/common/core/antibot/locales/ur.json
+  s_9c6aa8c20cecc6::t_b47c30b71e1e6d 12-153
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,154-156
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-11
+src/common/core/errors/locales/bn.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,16-18
+  s_9c6aa8c20cecc6::t_caabe3c09fcbe7 6-15
+src/common/core/customcert/locales/id.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,48-50
+  s_26097c6b2b7b49::t_d20d0a74ede61e 6-47
+src/common/core/sessions/locales/tw.json
+  s_a10d63a4ae38b6::t_9a1d8ea7d9d64c 6-39
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,40-42
+src/common/core/robotstxt/locales/tr.json
+  s_508f1cd3c50447::t_2166864ccda977 6-51
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,52-54
+src/common/core/db/locales/tr.json
+  s_26097c6b2b7b49::t_d20d0a74ede61e 6-63
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,64-66
+src/common/core/crowdsec/locales/de.json
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-10
+  s_e3241353387257::t_a29b2715afa499 11-92
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,93-95
+src/common/core/headers/locales/ur.json
+  s_9c6aa8c20cecc6::t_ebe685d8bf4afb 6-59
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,60-62
+src/common/core/realip/locales/ru.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,32-34
+  s_508f1cd3c50447::t_c7d5f0a9e0a178 6-31
+src/common/core/realip/locales/pl.json
+  s_508f1cd3c50447::t_c7d5f0a9e0a178 6-31
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,32-34
+src/common/core/db/locales/hi.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,64-66
+  s_9c6aa8c20cecc6::t_ebe685d8bf4afb 6-63
+src/common/core/templates/locales/id.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,199-201
+  s_508f1cd3c50447::t_bf729576e953ab 193-198
+  s_373c9ba97f823a::t_5680ad8c42d794 6-192
+src/common/core/backup/locales/ru.json
+  s_64cfb60a50b415::t_d0b1bb305b09db 6,29-32
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,33-35
+  s_26097c6b2b7b49::t_f58b7750667e3a 7-28
+src/common/core/inject/locales/pt.json
+  s_01a39102d1fe48::t_ec660d6959865c 6-15
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,16-18
+src/common/core/sessions/locales/pl.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,40-42
+  s_508f1cd3c50447::t_2166864ccda977 6-39
+src/common/core/modsecurity/locales/ru.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,60-62
+  s_508f1cd3c50447::t_2166864ccda977 6-59
+src/common/core/cors/locales/br.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,58-60
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-11
+  s_4a279a8d942cc9::t_e26afe44422967 12-57
+src/common/core/jobs/locales/ur.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-8
+src/common/core/robotstxt/locales/it.json
+  s_57203c7f4181a0::t_fc64081114ba8a 6-51
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,52-54
+src/common/core/php/locales/ar.json
+  s_9c6aa8c20cecc6::t_caabe3c09fcbe7 6-27
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,28-30
+src/common/core/country/locales/tw.json
+  s_4a279a8d942cc9::t_e26afe44422967 12-33
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-11
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,34-36
+src/common/core/cors/locales/es.json
+  s_01a39102d1fe48::t_2225d534490bdd 12-57
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,58-60
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-11
+src/common/core/authbasic/locales/br.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,38-40
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-15
+  s_4a279a8d942cc9::t_6a252e7e56381a 16-37
+src/common/core/securitytxt/locales/br.json
+  s_60e8abfe4dfe14::t_e805ecdfebf9fa 6-51
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,52-54
+src/common/core/geoip/locales/id.json
+  s_26097c6b2b7b49::t_be1e8c8a68de92 6-31
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,32-34
+src/common/core/realip/locales/it.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,32-34
+  s_57203c7f4181a0::t_a27e704f111a9f 6-31
+src/common/core/dnsbl/locales/hi.json
+  s_9c6aa8c20cecc6::t_caabe3c09fcbe7 12-37
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-11
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,38-40
+src/common/core/grpc/locales/pt.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,168-170
+  s_54b71f39931f47::t_e2d9b1b7d5511d 6-167
+src/common/core/limit/ui/actions.py
+  s_373c9ba97f823a::t_2645ab1381f0ee 12,14
+src/common/core/clientcache/locales/tl.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,24-26
+  s_26097c6b2b7b49::t_be1e8c8a68de92 6-23
+src/common/core/selfsigned/locales/de.json
+  s_57203c7f4181a0::t_49b525a696db0a 6-23
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,24-26
+src/common/core/country/locales/es.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,34-36
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-11
+  s_01a39102d1fe48::t_2225d534490bdd 12-33
+src/common/core/limit/locales/pt.json
+  s_57203c7f4181a0::t_fb8f2752e1207b 12-53
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-11
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,54-56
+src/common/core/inject/locales/hi.json
+  s_9c6aa8c20cecc6::t_caabe3c09fcbe7 6-15
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,16-18
+src/common/core/inject/locales/de.json
+  s_01a39102d1fe48::t_ec660d6959865c 6-15
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,16-18
+src/common/core/realip/locales/tr.json
+  s_508f1cd3c50447::t_c7d5f0a9e0a178 6-31
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,32-34
+src/common/core/certificates/locales/tr.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-8
+src/common/core/reversescan/locales/ur.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,20-22
+  s_9c6aa8c20cecc6::t_caabe3c09fcbe7 6-19
+src/common/core/cors/locales/it.json
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-11
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,58-60
+  s_01a39102d1fe48::t_2225d534490bdd 12-57
+src/common/core/whitelist/locales/pt.json
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-11
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,74-76
+  s_01a39102d1fe48::t_61ce150e895166 12-73
+src/common/core/limit/locales/zh.json
+  s_a10d63a4ae38b6::t_34b3fbdc40fbf5 12-53
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-11
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,54-56
+src/common/core/templates/locales/it.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,199-201
+  s_57203c7f4181a0::t_49b525a696db0a 193-198
+  s_373c9ba97f823a::t_5680ad8c42d794 6-192
+src/common/core/gzip/locales/bn.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,28-30
+  s_9c6aa8c20cecc6::t_caabe3c09fcbe7 6-27
+src/common/core/blacklist/locales/zh.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,142-144
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-28,33,37,41,45,49,53,57,61,65,69,73,77,81,85,89,93,97,101,105,109,113,117,121,125,129,133,137,141
+  s_4a279a8d942cc9::t_f86057d1347d81 29-32,34-36,38-40,42-44,46-48,50-52,54-56,58-60,62-64,66-68,70-72,74-76,78-80,82-84,86-88,90-92,94-96,98-100,102-104,106-108,110-112,114-116,118-120,122-124,126-128,130-132,134-136,138-140
+src/common/core/mtls/locales/ur.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,36-38
+  s_9c6aa8c20cecc6::t_2ec36ca6521a7e 6-35
+src/common/core/dnsbl/locales/pt.json
+  s_01a39102d1fe48::t_2225d534490bdd 12-37
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,38-40
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-11
+src/common/core/misc/locales/ko.json
+  s_a10d63a4ae38b6::t_49279dd21033ea 17-105
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,107-108
+  s_a10d63a4ae38b6::t_3e04b7f8edd836 16,106
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-15
+src/common/core/workflows/locales/hi.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,12-14
+  s_9c6aa8c20cecc6::t_caabe3c09fcbe7 6-11
+src/common/core/reverseproxy/locales/bn.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,228-230
+  s_9bb946752b57f2::t_e2debc982666e4 6-174,227
+  s_9bb946752b57f2::t_c658737b0bcf13 175-226
+src/common/core/ui/locales/tl.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,16-18
+  s_508f1cd3c50447::t_bf729576e953ab 6-15
+src/common/core/dnsbl/locales/pl.json
+  s_26097c6b2b7b49::t_be1e8c8a68de92 7-32
+  s_64cfb60a50b415::t_d0b1bb305b09db 6,33-37
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,38-40
+src/common/core/certificates/locales/it.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-8
+src/common/core/backup/locales/ur.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,33-35
+  s_9c6aa8c20cecc6::t_32fecee291bfd7 11-32
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-10
+src/common/core/misc/ui/actions.py
+  s_373c9ba97f823a::t_0e814ba55af1a7 11,13,20,22
+  s_5e613df1f72cb6::t_d701169808a2b8 14-15
+src/common/core/blacklist/locales/es.json
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-27
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,142-144
+  s_01a39102d1fe48::t_b50bdeabd9c0e0 28-141
+src/common/core/clientcache/locales/tr.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,24-26
+  s_26097c6b2b7b49::t_be1e8c8a68de92 6-23
+src/common/core/templates/locales/ru.json
+  s_373c9ba97f823a::t_5680ad8c42d794 6-192
+  s_508f1cd3c50447::t_bf729576e953ab 193-198
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,199-201
+src/common/core/letsencrypt/locales/hi.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,100-102
+  s_9bb946752b57f2::t_206825102b69f9 6-99
+src/common/core/securitytxt/locales/ar.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,52-54
+  s_9c6aa8c20cecc6::t_2ec36ca6521a7e 6-51
+src/common/core/bunkernet/locales/tw.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,35-37
+  s_4a279a8d942cc9::t_6a252e7e56381a 17-34
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-16
+src/common/core/crowdsec/locales/hi.json
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-10
+  s_9c6aa8c20cecc6::t_6dcca8c3276a8d 11-92
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,93-95
+src/common/core/reverseproxy/locales/de.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,228-230
+  s_57203c7f4181a0::t_9e39ecb62769dc 6-227
+src/common/core/ssl/locales/ru.json
+  s_508f1cd3c50447::t_c7d5f0a9e0a178 6-35
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,36-38
+src/common/core/modsecurity/locales/ur.json
+  s_9c6aa8c20cecc6::t_ebe685d8bf4afb 6-59
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,60-62
+src/common/core/reversescan/locales/tw.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-22
+src/common/core/php/locales/bn.json
+  s_9c6aa8c20cecc6::t_caabe3c09fcbe7 6-27
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,28-30
+src/common/core/redis/locales/ko.json
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-14
+  s_a10d63a4ae38b6::t_89d528a3df8c2c 15-80
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,81-83
+src/common/core/db/locales/bn.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,64-66
+  s_9c6aa8c20cecc6::t_ebe685d8bf4afb 6-63
+src/common/core/robotstxt/locales/ru.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,52-54
+  s_508f1cd3c50447::t_2166864ccda977 6-51
+src/common/core/greylist/locales/ru.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,74-76
+  s_26097c6b2b7b49::t_52ba0028fefebf 7-68
+  s_64cfb60a50b415::t_d0b1bb305b09db 6,69-73
+src/common/core/greylist/locales/fr.json
+  s_01a39102d1fe48::t_6867cb923e019e 12-73
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,74-76
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-11
+src/common/core/letsencrypt/locales/zh.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,101-102
+  s_a10d63a4ae38b6::t_49279dd21033ea 7-99
+  s_a10d63a4ae38b6::t_8572c301773df4 6,100
+src/common/core/country/locales/ar.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,34-36
+  s_9c6aa8c20cecc6::t_32fecee291bfd7 12-33
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-11
+src/common/core/clientcache/locales/id.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,24-26
+  s_26097c6b2b7b49::t_be1e8c8a68de92 6-23
+src/common/core/whitelist/locales/ur.json
+  s_9c6aa8c20cecc6::t_6dcca8c3276a8d 12-73
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,74-76
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-11
+src/common/core/headers/locales/de.json
+  s_01a39102d1fe48::t_ec660d6959865c 6-59
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,60-62
+src/common/core/reversescan/locales/es.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,20-22
+  s_57203c7f4181a0::t_49b525a696db0a 6-19
+src/common/core/redirect/locales/es.json
+  s_57203c7f4181a0::t_49b525a696db0a 6-23
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,24-26
+src/common/core/headers/locales/hi.json
+  s_9c6aa8c20cecc6::t_ebe685d8bf4afb 6-59
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,60-62
+src/common/core/templates/locales/bn.json
+  s_9c6aa8c20cecc6::t_caabe3c09fcbe7 193-198
+  s_373c9ba97f823a::t_5680ad8c42d794 6-192
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,199-201
+src/common/core/headers/locales/tl.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,60-62
+  s_508f1cd3c50447::t_2166864ccda977 6-59
+src/common/core/clientcache/locales/br.json
+  s_4a279a8d942cc9::t_e26afe44422967 6-23
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,24-26
+src/common/core/grpc/locales/ru.json
+  s_508f1cd3c50447::t_1c811234bd8884 6-167
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,168-170
+src/common/core/letsencrypt/locales/tl.json
+  s_508f1cd3c50447::t_4fae91c13c50e3 6-99
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,100-102
+src/common/core/errors/locales/zh.json
+  s_4a279a8d942cc9::t_a33de36088ca20 6-15
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,16-18
+src/common/core/badbehavior/locales/pt.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,32-34
+  s_01a39102d1fe48::t_8b62970fd64c69 6-31
+src/common/core/jobs/locales/ar.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-8
+src/common/core/modsecurity/locales/tw.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,60-62
+  s_a10d63a4ae38b6::t_8045b0c03a0e2d 6-59
+src/common/core/gzip/locales/id.json
+  s_508f1cd3c50447::t_c7d5f0a9e0a178 6-27
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,28-30
+src/common/core/clientcache/locales/pt.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,24-26
+  s_01a39102d1fe48::t_8b62970fd64c69 6-23
+src/common/core/bunkernet/locales/fr.json
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-16
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,35-37
+  s_01a39102d1fe48::t_8b62970fd64c69 17-34
+src/common/core/letsencrypt/locales/pl.json
+  s_508f1cd3c50447::t_4fae91c13c50e3 6-99
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,100-102
+src/common/core/php/locales/fr.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,28-30
+  s_57203c7f4181a0::t_49b525a696db0a 6-27
+src/common/core/reverseproxy/locales/ko.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,229-230
+  s_a10d63a4ae38b6::t_49279dd21033ea 7-227
+  s_a10d63a4ae38b6::t_cddcdf5309d900 6,228
+src/common/core/grpc/locales/ko.json
+  s_a10d63a4ae38b6::t_42498904ea1fd9 6,168
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,169-170
+  s_a10d63a4ae38b6::t_49279dd21033ea 7-167
+src/common/core/jobs/locales/bn.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-8
+src/common/core/selfsigned/locales/pt.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,24-26
+  s_57203c7f4181a0::t_49b525a696db0a 6-23
+src/common/core/securitytxt/locales/zh.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,52-54
+  s_60e8abfe4dfe14::t_e805ecdfebf9fa 6-51
+src/common/core/selfsigned/locales/tr.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,24-26
+  s_26097c6b2b7b49::t_be1e8c8a68de92 6-23
+src/common/core/greylist/locales/pl.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,74-76
+  s_64cfb60a50b415::t_d0b1bb305b09db 6,69-73
+  s_26097c6b2b7b49::t_52ba0028fefebf 7-68
+src/common/core/greylist/locales/tl.json
+  s_64cfb60a50b415::t_d0b1bb305b09db 6,69-73
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,74-76
+  s_26097c6b2b7b49::t_52ba0028fefebf 7-68
+tests/unit/ui/test_plugin_i18n.py
+  s_373c9ba97f823a::t_f47f64318c549c 522,528-560
+  s_74c5ef21e15b70::t_350d7afcaccd69 707
+  s_4f5130770130bb::t_e88959641dc945 125-126
+  s_74c5ef21e15b70::t_93f027dcf04f4d 492-521,523-527,561-689
+  s_74c5ef21e15b70::t_b16990dedf10ce 779-796
+  s_74c5ef21e15b70::t_dd6418a6011301 730-778
+  s_74c5ef21e15b70::t_1a8eac49879cb7 690-706,708-709,711-714,716,719,721-729
+  s_74c5ef21e15b70::t_c12fbf0c255d19 710,715,717-718,720
+src/common/core/modsecurity/locales/zh.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,60-62
+  s_a10d63a4ae38b6::t_8045b0c03a0e2d 6-59
+src/common/core/redis/locales/ur.json
+  s_9c6aa8c20cecc6::t_ebe685d8bf4afb 15-80
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,81-83
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-14
+src/common/core/ssl/locales/pt.json
+  s_57203c7f4181a0::t_a27e704f111a9f 6-35
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,36-38
+src/common/core/robotstxt/locales/pt.json
+  s_57203c7f4181a0::t_fc64081114ba8a 6-51
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,52-54
+src/common/core/geoip/locales/fr.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,32-34
+  s_01a39102d1fe48::t_2225d534490bdd 6-31
+src/common/core/crowdsec/locales/it.json
+  s_e3241353387257::t_a29b2715afa499 11-92
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,93-95
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-10
+src/common/core/securitytxt/locales/it.json
+  s_57203c7f4181a0::t_fc64081114ba8a 6-51
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,52-54
+src/common/core/pro/locales/br.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-14
+src/common/core/reverseproxy/locales/zh.json
+  s_a10d63a4ae38b6::t_49279dd21033ea 7-227
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,229-230
+  s_a10d63a4ae38b6::t_854b326a23f2de 6,228
+src/common/core/workflows/locales/es.json
+  s_57203c7f4181a0::t_49b525a696db0a 6-11
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,12-14
+src/common/core/php/locales/it.json
+  s_57203c7f4181a0::t_49b525a696db0a 6-27
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,28-30
+src/common/core/securitytxt/locales/de.json
+  s_57203c7f4181a0::t_fc64081114ba8a 6-51
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,52-54
+src/common/core/mtls/locales/pl.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,36-38
+  s_508f1cd3c50447::t_c7d5f0a9e0a178 6-35
+src/common/core/certificates/locales/pt.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-8
+src/common/core/reverseproxy/locales/br.json
+  s_a10d63a4ae38b6::t_49279dd21033ea 7-227
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,229-230
+  s_a10d63a4ae38b6::t_36ae59dc68d8cc 6,228
+src/common/core/php/locales/pt.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,28-30
+  s_57203c7f4181a0::t_49b525a696db0a 6-27
+src/common/core/securitytxt/locales/bn.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,52-54
+  s_9c6aa8c20cecc6::t_2ec36ca6521a7e 6-51
+src/common/core/realip/locales/fr.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,32-34
+  s_57203c7f4181a0::t_a27e704f111a9f 6-31
+src/common/core/authbasic/locales/tw.json
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-15
+  s_4a279a8d942cc9::t_6a252e7e56381a 16-37
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,38-40
+src/common/core/backup/locales/de.json
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-10
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,33-35
+  s_01a39102d1fe48::t_8b62970fd64c69 11-32
+src/common/core/robotstxt/locales/fr.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,52-54
+  s_57203c7f4181a0::t_fc64081114ba8a 6-51
+src/common/core/customcert/locales/pl.json
+  s_26097c6b2b7b49::t_d20d0a74ede61e 6-47
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,48-50
+src/common/core/authbasic/locales/pl.json
+  s_64cfb60a50b415::t_d0b1bb305b09db 6,29-37
+  s_26097c6b2b7b49::t_f58b7750667e3a 7-28
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,38-40
+src/common/core/jobs/locales/pl.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-8
+src/common/core/geoip/locales/pt.json
+  s_01a39102d1fe48::t_2225d534490bdd 6-31
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,32-34
+src/common/core/pro/locales/de.json
+  s_57203c7f4181a0::t_49b525a696db0a 6-11
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,12-14
+src/common/core/errors/locales/fr.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,16-18
+  s_01a39102d1fe48::t_2225d534490bdd 6-15
+src/common/core/whitelist/locales/br.json
+  s_4a279a8d942cc9::t_feb9d01887f820 12-73
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,74-76
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-11
+src/common/core/redirect/locales/ko.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-26
+src/common/core/dnsbl/locales/it.json
+  s_01a39102d1fe48::t_2225d534490bdd 12-37
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-11
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,38-40
+src/common/core/ssl/locales/id.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,36-38
+  s_508f1cd3c50447::t_c7d5f0a9e0a178 6-35
+src/common/core/jobs/locales/br.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-8
+src/common/core/redis/locales/id.json
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-14
+  s_508f1cd3c50447::t_e287ee8bbafce4 15-80
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,81-83
+src/common/core/reversescan/locales/id.json
+  s_26097c6b2b7b49::t_be1e8c8a68de92 6-19
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,20-22
+src/common/core/redis/locales/zh.json
+  s_a10d63a4ae38b6::t_89d528a3df8c2c 15-80
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-14
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,81-83
+src/common/core/selfsigned/locales/ko.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-26
+src/common/core/bunkernet/locales/tr.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,35-37
+  s_26097c6b2b7b49::t_be1e8c8a68de92 7-24
+  s_64cfb60a50b415::t_d0b1bb305b09db 6,25-34
+src/common/core/clientcache/locales/bn.json
+  s_9c6aa8c20cecc6::t_32fecee291bfd7 6-23
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,24-26
+src/common/core/dnsbl/locales/fr.json
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-11
+  s_01a39102d1fe48::t_2225d534490bdd 12-37
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,38-40
+src/common/core/metrics/locales/tw.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,73-74
+  s_a10d63a4ae38b6::t_49279dd21033ea 7-71
+  s_a10d63a4ae38b6::t_237e81eefb4ee9 6,72
+src/common/core/mtls/locales/pt.json
+  s_57203c7f4181a0::t_a27e704f111a9f 6-35
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,36-38
+src/common/core/headers/locales/br.json
+  s_a10d63a4ae38b6::t_b36dede68b74c0 6-59
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,60-62
+src/common/core/ui/locales/tw.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-18
+src/common/core/securitytxt/locales/ko.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,52-54
+  s_60e8abfe4dfe14::t_e805ecdfebf9fa 6-51
+src/common/core/backup/ui/actions.py
+  s_373c9ba97f823a::t_bf1f4fde020291 12
+src/common/core/misc/locales/pt.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,106-108
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-16,21,25,29,33,37,41,45,49,53,57,61,65,69,73,77,81,85,89,93,97,101,105
+  s_9bb946752b57f2::t_9a82183e4c777c 17-20,22-24,26-28,30-32,34-36,38-40,42-44,46-48,50-52,54-56,58-60,62-64,66-68,70-72,74-76,78-80,82-84,86-88,90-92,94-96,98-100,102-104
+src/common/core/cors/locales/tr.json
+  s_64cfb60a50b415::t_d0b1bb305b09db 6,53-57
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,58-60
+  s_26097c6b2b7b49::t_be1e8c8a68de92 7-52
+src/common/core/letsencrypt/locales/ar.json
+  s_9bb946752b57f2::t_206825102b69f9 6-99
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,100-102
+src/common/core/inject/locales/fr.json
+  s_01a39102d1fe48::t_ec660d6959865c 6-15
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,16-18
+src/common/core/selfsigned/locales/pl.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,24-26
+  s_26097c6b2b7b49::t_be1e8c8a68de92 6-23
+src/common/core/dnsbl/locales/de.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,38-40
+  s_01a39102d1fe48::t_2225d534490bdd 12-37
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-11
+src/common/core/php/locales/id.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,28-30
+  s_508f1cd3c50447::t_c7d5f0a9e0a178 6-27
+src/common/core/redirect/locales/zh.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-26
+src/common/core/crowdsec/locales/ko.json
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-10
+  s_4a279a8d942cc9::t_576e067a52f4e3 11-92
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,93-95
+src/common/core/antibot/locales/de.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,154-156
+  s_01a39102d1fe48::t_61eae7120f0916 12-153
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-11
+src/common/core/gzip/locales/ru.json
+  s_508f1cd3c50447::t_c7d5f0a9e0a178 6-27
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,28-30
+src/common/core/backup/locales/hi.json
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-10
+  s_9c6aa8c20cecc6::t_32fecee291bfd7 11-32
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,33-35
+src/common/core/pro/locales/pt.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,12-14
+  s_57203c7f4181a0::t_49b525a696db0a 6-11
+src/common/core/customcert/locales/es.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,48-50
+  s_01a39102d1fe48::t_df1fdd31ec1051 6-47
+src/common/core/country/locales/ur.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,34-36
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-11
+  s_9c6aa8c20cecc6::t_32fecee291bfd7 12-33
+src/common/core/securitytxt/locales/hi.json
+  s_9c6aa8c20cecc6::t_2ec36ca6521a7e 6-51
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,52-54
+src/common/core/dnsbl/locales/br.json
+  s_4a279a8d942cc9::t_a33de36088ca20 12-37
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,38-40
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-11
+src/common/core/grpc/locales/id.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,168-170
+  s_508f1cd3c50447::t_1c811234bd8884 6-167
+src/common/core/reversescan/locales/tl.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,20-22
+  s_26097c6b2b7b49::t_be1e8c8a68de92 6-19
+src/common/core/country/locales/pl.json
+  s_64cfb60a50b415::t_d0b1bb305b09db 6,29-33
+  s_26097c6b2b7b49::t_be1e8c8a68de92 7-28
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,34-36
+src/common/core/headers/locales/tw.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,60-62
+  s_a10d63a4ae38b6::t_b36dede68b74c0 6-59
+src/common/core/gzip/locales/br.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-30
+src/common/core/limit/locales/pl.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,54-56
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-11
+  s_508f1cd3c50447::t_2166864ccda977 12-53
+src/common/core/modsecurity/locales/tr.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,60-62
+  s_508f1cd3c50447::t_2166864ccda977 6-59
+src/common/core/workflows/locales/zh.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-14
+src/common/core/customcert/locales/ko.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,48-50
+  s_4a279a8d942cc9::t_576e067a52f4e3 6-47
+src/common/core/redis/locales/pl.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,81-83
+  s_508f1cd3c50447::t_e287ee8bbafce4 15-80
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-14
+src/common/core/bunkernet/locales/ur.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,35-37
+  s_9c6aa8c20cecc6::t_32fecee291bfd7 17-34
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-16
+src/common/core/jobs/locales/hi.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-8
+src/common/core/misc/locales/ur.json
+  s_9bb946752b57f2::t_eeccdfe6f0cf91 16-105
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-15
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,106-108
+src/common/core/customcert/locales/ru.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,48-50
+  s_26097c6b2b7b49::t_d20d0a74ede61e 6-47
+src/common/core/brotli/locales/es.json
+  s_01a39102d1fe48::t_8b62970fd64c69 6-23
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,24-26
+src/common/core/reverseproxy/locales/es.json
+  s_57203c7f4181a0::t_9e39ecb62769dc 6-227
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,228-230
+src/common/core/crowdsec/locales/pl.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,93-95
+  s_64cfb60a50b415::t_d0b1bb305b09db 6,89-92
+  s_8d5911a0b4e448::t_69001c48d7d337 7-88
+src/common/core/templates/locales/tw.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,199-201
+  s_373c9ba97f823a::t_5680ad8c42d794 6-193,198
+  s_4a279a8d942cc9::t_6b949fbc3a137b 194-197
+src/common/core/errors/locales/hi.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,16-18
+  s_9c6aa8c20cecc6::t_caabe3c09fcbe7 6-15
+src/common/core/redirect/locales/hi.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,24-26
+  s_9c6aa8c20cecc6::t_caabe3c09fcbe7 6-23
+src/common/core/metrics/locales/fr.json
+  s_57203c7f4181a0::t_42ed119f2197fa 6-71
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,72-74
+src/common/core/headers/locales/ar.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,60-62
+  s_9c6aa8c20cecc6::t_ebe685d8bf4afb 6-59
+src/common/core/letsencrypt/locales/fr.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,100-102
+  s_57203c7f4181a0::t_5b906670ec5bf0 6-99
+src/common/core/ui/locales/zh.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-18
+src/common/core/pro/locales/tr.json
+  s_508f1cd3c50447::t_bf729576e953ab 6-11
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,12-14
+src/common/core/authbasic/locales/ar.json
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-15
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,38-40
+  s_9c6aa8c20cecc6::t_32fecee291bfd7 16-37
+src/common/core/redis/locales/bn.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,81-83
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-14
+  s_9c6aa8c20cecc6::t_ebe685d8bf4afb 15-80
+src/common/core/cors/locales/ru.json
+  s_26097c6b2b7b49::t_be1e8c8a68de92 7-52
+  s_64cfb60a50b415::t_d0b1bb305b09db 6,53-57
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,58-60
+src/common/core/php/locales/br.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,28-30
+  s_a10d63a4ae38b6::t_fb7a5412a2d7fe 6-27
+src/common/core/selfsigned/locales/zh.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-26
+src/common/core/templates/locales/hi.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,199-201
+  s_373c9ba97f823a::t_5680ad8c42d794 6-192
+  s_9c6aa8c20cecc6::t_caabe3c09fcbe7 193-198
+src/common/core/backup/locales/bn.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,33-35
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-10
+  s_9c6aa8c20cecc6::t_32fecee291bfd7 11-32
+src/common/core/realip/locales/tw.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-34
+src/common/core/metrics/locales/id.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,72-74
+  s_508f1cd3c50447::t_e287ee8bbafce4 6-71
+src/common/core/jobs/locales/ko.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-8
+src/common/core/inject/locales/br.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-18
+src/common/core/templates/locales/es.json
+  s_373c9ba97f823a::t_5680ad8c42d794 6-192
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,199-201
+  s_57203c7f4181a0::t_49b525a696db0a 193-198
+src/common/core/crowdsec/locales/zh.json
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-10
+  s_4a279a8d942cc9::t_576e067a52f4e3 11-92
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,93-95
+src/common/core/blacklist/locales/ar.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,142-144
+  s_9bb946752b57f2::t_08e28b0d156a56 28-141
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-27
+src/common/core/badbehavior/locales/bn.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,32-34
+  s_9c6aa8c20cecc6::t_32fecee291bfd7 6-31
+src/common/core/redis/locales/ar.json
+  s_9c6aa8c20cecc6::t_ebe685d8bf4afb 15-80
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-14
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,81-83
+src/common/core/gzip/locales/ur.json
+  s_9c6aa8c20cecc6::t_caabe3c09fcbe7 6-27
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,28-30
+src/common/core/whitelist/locales/fr.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,74-76
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-11
+  s_01a39102d1fe48::t_61ce150e895166 12-73
+src/common/core/metrics/locales/zh.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,73-74
+  s_a10d63a4ae38b6::t_237e81eefb4ee9 6,72
+  s_a10d63a4ae38b6::t_49279dd21033ea 7-71
+src/common/core/workflows/locales/fr.json
+  s_57203c7f4181a0::t_49b525a696db0a 6-11
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,12-14
+src/common/core/ui/locales/ru.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,16-18
+  s_508f1cd3c50447::t_bf729576e953ab 6-15
+src/common/core/gzip/locales/pt.json
+  s_01a39102d1fe48::t_ec660d6959865c 6-27
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,28-30
+src/common/core/php/locales/tr.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,28-30
+  s_508f1cd3c50447::t_c7d5f0a9e0a178 6-27
+src/common/core/templates/locales/pt.json
+  s_57203c7f4181a0::t_49b525a696db0a 193-198
+  s_373c9ba97f823a::t_5680ad8c42d794 6-192
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,199-201
+src/common/core/selfsigned/locales/bn.json
+  s_9c6aa8c20cecc6::t_caabe3c09fcbe7 6-23
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,24-26
+src/common/core/geoip/locales/tl.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,32-34
+  s_26097c6b2b7b49::t_be1e8c8a68de92 6-31
+src/common/core/greylist/locales/es.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,74-76
+  s_01a39102d1fe48::t_6867cb923e019e 12-73
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-11
+src/common/core/authbasic/locales/tl.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,38-40
+  s_64cfb60a50b415::t_d0b1bb305b09db 6,29-37
+  s_26097c6b2b7b49::t_f58b7750667e3a 7-28
+src/common/core/bunkernet/locales/zh.json
+  s_4a279a8d942cc9::t_6a252e7e56381a 17-34
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-16
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,35-37
+src/common/core/certificates/locales/br.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-8
+src/common/core/antibot/locales/pt.json
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-11
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,154-156
+  s_01a39102d1fe48::t_61eae7120f0916 12-153
+src/common/core/dnsbl/locales/tw.json
+  s_4a279a8d942cc9::t_a33de36088ca20 12-37
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-11
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,38-40
+src/common/core/country/locales/tl.json
+  s_26097c6b2b7b49::t_be1e8c8a68de92 7-28
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,34-36
+  s_64cfb60a50b415::t_d0b1bb305b09db 6,29-33
+src/common/core/ssl/locales/tl.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,36-38
+  s_508f1cd3c50447::t_c7d5f0a9e0a178 6-35
+src/common/core/brotli/locales/ur.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,24-26
+  s_9c6aa8c20cecc6::t_32fecee291bfd7 6-23
+src/common/core/errors/locales/pl.json
+  s_508f1cd3c50447::t_bf729576e953ab 6-15
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,16-18
+src/common/core/badbehavior/locales/br.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,32-34
+  s_4a279a8d942cc9::t_6a252e7e56381a 6-31
+src/common/core/securitytxt/locales/id.json
+  s_508f1cd3c50447::t_2166864ccda977 6-51
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,52-54
+src/common/core/reversescan/locales/pt.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,20-22
+  s_57203c7f4181a0::t_49b525a696db0a 6-19
+src/common/core/db/locales/tl.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,64-66
+  s_26097c6b2b7b49::t_d20d0a74ede61e 6-63
+src/common/core/dnsbl/locales/es.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,38-40
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-11
+  s_01a39102d1fe48::t_2225d534490bdd 12-37
+src/common/core/db/locales/ur.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,64-66
+  s_9c6aa8c20cecc6::t_ebe685d8bf4afb 6-63
+src/common/core/authbasic/locales/ru.json
+  s_26097c6b2b7b49::t_f58b7750667e3a 7-28
+  s_64cfb60a50b415::t_d0b1bb305b09db 6,29-37
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,38-40
+src/common/core/cors/locales/ar.json
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-11
+  s_9c6aa8c20cecc6::t_caabe3c09fcbe7 12-57
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,58-60
+src/common/core/templates/locales/br.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,199-201
+  s_373c9ba97f823a::t_5680ad8c42d794 6-193,198
+  s_4a279a8d942cc9::t_2e404c025c949d 194-197
+src/common/core/geoip/locales/hi.json
+  s_9c6aa8c20cecc6::t_caabe3c09fcbe7 6-31
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,32-34
+src/common/core/mtls/locales/de.json
+  s_57203c7f4181a0::t_a27e704f111a9f 6-35
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,36-38
+src/common/core/certificates/locales/tl.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-8
+src/common/core/db/locales/fr.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,64-66
+  s_01a39102d1fe48::t_df1fdd31ec1051 6-63
+src/common/core/limit/locales/bn.json
+  s_9c6aa8c20cecc6::t_ebe685d8bf4afb 12-53
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,54-56
+  s_64cfb60a50b415::t_d0b1bb305b09db 6-11
+src/common/core/country/locales/id.json
+  s_64cfb60a50b415::t_d0b1bb305b09db 6,29-33
+  s_26097c6b2b7b49::t_be1e8c8a68de92 7-28
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,34-36
+src/common/core/robotstxt/locales/hi.json
+  s_9c6aa8c20cecc6::t_2ec36ca6521a7e 6-51
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,52-54
+src/common/core/brotli/locales/fr.json
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,24-26
+  s_01a39102d1fe48::t_8b62970fd64c69 6-23
+src/common/core/ssl/locales/pl.json
+  s_508f1cd3c50447::t_c7d5f0a9e0a178 6-35
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,36-38
+src/common/core/securitytxt/locales/tl.json
+  s_508f1cd3c50447::t_2166864ccda977 6-51
+  s_373c9ba97f823a::t_f75b9023ebf93f 1-5,52-54
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "5f7677eb3aec30fbef4563602fca4da9462e608a",
+  "prompts": {},
+  "sessions": {
+    "s_01a39102d1fe48": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "f27b97c7-35f7-4aaa-aa88-494d466df9ad",
+        "model": "unknown"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_15b18a27866af7": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "e3a4899e-35ce-439f-9c68-39bd34384c8f",
+        "model": "unknown"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_26097c6b2b7b49": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "4244342b-59fe-4324-8862-48e9b7d01768",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_2c568de7a57961": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "1cc9c6e5-7677-48bc-8f14-e54e908aed5d",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_373c9ba97f823a": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "e9b7ddb0-fc4e-4af5-943e-6d3c1c478a8b",
+        "model": "unknown"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_3ce8188eca6e56": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "9c9dcdc0-99cb-4aec-9695-bfd1b2e7c4b0",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_4a279a8d942cc9": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "32ee1902-acc4-4761-aa48-15aa7ff37cfe",
+        "model": "unknown"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_4f5130770130bb": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "7f082483-3d05-4381-a099-3854910ab321",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_508f1cd3c50447": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "d57f6a1a-a24a-40f6-b49d-4763670fb0c9",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_54b71f39931f47": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "721e6252-8f5c-4c68-a03a-dab424ad8ace",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_55367ee0fa903d": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0ebde-decd-7731-b52d-7c592500f4ae",
+        "model": "gpt-6-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_57203c7f4181a0": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "e44f7abe-6f16-46ae-9d89-eac4d6352b66",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_5e613df1f72cb6": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "0c8dd63a-2f2b-46e7-bbb8-c226ffed5b0e",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_60e8abfe4dfe14": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "28f18788-77e9-4b16-9ae2-4f76f457567a",
+        "model": "unknown"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_63a943b05891e4": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0ebe9-7263-7af2-b584-4d8f6a353519",
+        "model": "gpt-6-luna"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_64cfb60a50b415": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "7505ddbe-9848-4efc-8ddf-ab7448290dae",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_74c5ef21e15b70": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "94be8a57-8248-412d-a9b2-ce6d2fe94352",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_795e2ccdb6801b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "71804b16-900c-4824-8bbc-5e7434803315",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_8d5911a0b4e448": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "4c5db933-4812-450e-81fd-b1848f3c1830",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_98389909a16d3d": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "c731c3b8-904d-4696-a622-f368c8012356",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_9bb946752b57f2": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "12516a09-1553-4bc8-aa76-ccfaa1506169",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_9c6aa8c20cecc6": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "e2c2f7b5-e4d9-47fe-a4ae-588ce07cae5b",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_9e0a6e0c0b33d2": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "62a012af-66e0-44ec-8f43-29d8df67847e",
+        "model": "unknown"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_a10d63a4ae38b6": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "010fc771-0c98-4ae2-a2fd-e628a7914d41",
+        "model": "unknown"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_e3241353387257": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "ddac6bce-d837-4315-b1a1-54d4e9e1df14",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

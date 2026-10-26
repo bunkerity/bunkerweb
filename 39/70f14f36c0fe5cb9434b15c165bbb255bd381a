@@ -1,0 +1,53 @@
+src/common/confs/healthcheck.conf
+  s_fcedda97f11a1d::t_4d7d5e4b618632 14-16
+misc/integrations/k8s.mysql.yml
+  s_385ab5dd7f1b2c::t_6d93dd5eff797a 162
+misc/integrations/k8s.mariadb.yml
+  s_385ab5dd7f1b2c::t_6d93dd5eff797a 162
+misc/integrations/k8s.mysql.ui.yml
+  s_385ab5dd7f1b2c::t_6d93dd5eff797a 152
+misc/integrations/k8s.postgres.yml
+  s_385ab5dd7f1b2c::t_6d93dd5eff797a 162
+misc/integrations/k8s.oracle.yml
+  s_385ab5dd7f1b2c::t_6d93dd5eff797a 159
+CHANGELOG.md
+  s_5402ccc62cb205::t_951bfe09c62148 5
+misc/integrations/k8s.postgres.ui.yml
+  s_385ab5dd7f1b2c::t_6d93dd5eff797a 152
+misc/integrations/k8s.mariadb.ui.yml
+  s_385ab5dd7f1b2c::t_6d93dd5eff797a 152
+misc/integrations/k8s.oracle.ui.yml
+  s_385ab5dd7f1b2c::t_6d93dd5eff797a 149
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "3970f14f36c0fe5cb9434b15c165bbb255bd381a",
+  "prompts": {},
+  "sessions": {
+    "s_385ab5dd7f1b2c": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "09b84b31-04c8-4f2f-97e9-a7807dbc3bdf",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_5402ccc62cb205": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "1dd73966-3d90-4aa2-a07c-dc502a19b9fb",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_fcedda97f11a1d": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "194cf083-3100-46f9-9221-fe1539b218a7",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

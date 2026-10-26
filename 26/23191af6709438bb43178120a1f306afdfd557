@@ -1,0 +1,25 @@
+misc/integrations/k8s.oracle.ui.yml
+  s_3c7b8a04a40dae::t_468cbff8f9e818 12-14
+examples/joomla/docker-compose.yml
+  s_3c7b8a04a40dae::t_468cbff8f9e818 119
+misc/integrations/k8s.oracle.yml
+  s_3c7b8a04a40dae::t_468cbff8f9e818 23-25
+examples/joomla/autoconf.yml
+  s_3c7b8a04a40dae::t_468cbff8f9e818 15
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "2623191af6709438bb43178120a1f306afdfd557",
+  "prompts": {},
+  "sessions": {
+    "s_3c7b8a04a40dae": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "d94cb216-0806-4bc0-99af-cb021ee068d3",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

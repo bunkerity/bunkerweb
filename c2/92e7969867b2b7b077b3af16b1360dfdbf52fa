@@ -1,0 +1,49 @@
+CHANGELOG.md
+  s_ff20fc71fc9551::t_30a10e48bf8efc 12
+src/deps/deps.json
+  s_ff20fc71fc9551::t_3b89aeb3993ad0 204,206
+src/deps/src/luajit/doc/extensions.html
+  s_230d037f834d3a::t_439934d3006c70 429-430
+src/deps/src/luajit/src/lib_os.c
+  s_230d037f834d3a::t_d8802d6abefdea 79
+src/deps/src/luajit/src/lj_ccallback.c
+  s_230d037f834d3a::t_e04f084badff28 126,132
+src/deps/src/luajit/src/lj_errmsg.h
+  s_230d037f834d3a::t_9174b91d17115f 152
+src/deps/src/luajit/src/lj_lex.c
+  s_230d037f834d3a::t_6164617ce7da46 192,292-342,370-373,453-456,458,511-524
+src/deps/src/luajit/src/lj_lex.h
+  s_230d037f834d3a::t_afe2798e83def3 77
+src/deps/src/luajit/src/lj_mcode.c
+  s_230d037f834d3a::t_d82c8579a2c4de 300-302,304,329-336
+src/deps/src/luajit/src/lj_opt_fold.c
+  s_230d037f834d3a::t_70b374fcecdf31 2371-2382
+src/deps/src/luajit/src/lj_opt_mem.c
+  s_230d037f834d3a::t_e71afaf8d2f6b5 404,408-413
+src/deps/src/luajit/src/lj_parse.c
+  s_230d037f834d3a::t_295861bba4df35 147-148,155,205,208,433-438,455,1569,1578,1580,1707,1711,1996,2007-2012,2127,2654,2873,2951,3111,3117,3128-3129
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "c292e7969867b2b7b077b3af16b1360dfdbf52fa",
+  "prompts": {},
+  "sessions": {
+    "s_230d037f834d3a": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "5911d4d7-340c-48b7-b415-69ee883cdbf1",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_ff20fc71fc9551": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "162362c5-42b6-46e1-83a0-29f8b51592ba",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

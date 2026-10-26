@@ -1,0 +1,55 @@
+src/common/core/letsencrypt/letsencrypt.lua
+  s_b1a8411c08a190::t_3443f255376df8 264-286,292-316,740
+  s_b1a8411c08a190::t_d9a08eab2efd2f 317-326,739,741-742
+src/common/core/letsencrypt/plugin.json
+  s_b1a8411c08a190::t_ea1b5c0bc9ef8a 20
+tests/unit/letsencrypt/test_acme_passthrough.py
+  s_b1a8411c08a190::t_7d0da6829d2942 1-275
+tests/unit/letsencrypt/test_acme_passthrough_host_template.py
+  s_b1a8411c08a190::t_3678ecae939ce8 1-65,71-95
+  s_97829bd3b546d8::t_a319a5c1b69e9b 66-70
+src/common/core/letsencrypt/README.de.md
+  s_c4070041008a43::t_c98206c99df63b 71
+src/common/core/letsencrypt/README.es.md
+  s_c4070041008a43::t_efabbf9ce8e070 71
+src/common/core/letsencrypt/README.fr.md
+  s_c4070041008a43::t_78dd070afe472c 71
+src/common/core/letsencrypt/README.md
+  s_c4070041008a43::t_6cb7c8b70422b7 71
+src/common/core/letsencrypt/README.zh.md
+  s_c4070041008a43::t_cf06755e32fe25 71
+src/common/core/reverseproxy/confs/server-http/reverse-proxy.conf
+  s_b1a8411c08a190::t_2cc55a92aa6560 82-88,163
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "9223db403b5d4debee84fa6f2b5e1731f3d2a656",
+  "prompts": {},
+  "sessions": {
+    "s_97829bd3b546d8": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b2517ec2-7793-439c-a7d8-ce741cb4a2fd",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_b1a8411c08a190": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "f1ea583f-1a26-451c-ab8c-64d0ec4cec22",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_c4070041008a43": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "8ed3d00d-b7cc-486b-b0fa-cdd4d9e562f1",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

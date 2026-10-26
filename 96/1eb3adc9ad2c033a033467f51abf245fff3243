@@ -1,0 +1,29 @@
+CHANGELOG.md
+  s_ece0b7db599386::t_b37305fa657104 5
+src/bw/lua/bunkerweb/banlease.lua
+  s_b80b2f00fb3ccc::t_f0c16e53c32df0 235,278-286
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "961eb3adc9ad2c033a033467f51abf245fff3243",
+  "prompts": {},
+  "sessions": {
+    "s_b80b2f00fb3ccc": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a14428-4e2d-7500-ae0b-bad7b110d1f4",
+        "model": "unknown"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_ece0b7db599386": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "9ae7700f-1e09-430f-9d34-fdc016638720",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

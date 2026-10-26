@@ -1,0 +1,21 @@
+src/worker/app.py
+  s_795e2ccdb6801b::t_08d15e7270885b 86-89
+tests/unit/worker/test_app.py
+  s_795e2ccdb6801b::t_08d15e7270885b 110-118
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "06e093e07142b48981435ea29d3b869f2b60b3e1",
+  "prompts": {},
+  "sessions": {
+    "s_795e2ccdb6801b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "71804b16-900c-4824-8bbc-5e7434803315",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

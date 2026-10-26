@@ -1,0 +1,21 @@
+misc/requirements-mmdb.in
+  s_2d151f3ec4b564::t_677e941b45c628 2
+misc/requirements-mmdb.txt
+  s_2d151f3ec4b564::t_373331a508b8ff 112-115
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "d338f44bc102b603e6796cca0f6ff0cad14f4557",
+  "prompts": {},
+  "sessions": {
+    "s_2d151f3ec4b564": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "afa585be-2db9-4b55-9cfb-a88f0ddf913e",
+        "model": "unknown"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

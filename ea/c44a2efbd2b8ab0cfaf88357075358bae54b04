@@ -1,0 +1,73 @@
+tests/linux/Dockerfile-ubuntu
+  s_df7f7fb118b592::t_2a26664c62f67b 1
+tests/linux/Dockerfile-ubuntu-jammy
+  s_df7f7fb118b592::t_2a26664c62f67b 1
+tests/linux/Dockerfile-ubuntu-noble
+  s_df7f7fb118b592::t_2a26664c62f67b 1
+tests/linux/Dockerfile-rhel-10
+  s_df7f7fb118b592::t_2a26664c62f67b 1
+tests/linux/Dockerfile-rhel-8
+  s_df7f7fb118b592::t_2a26664c62f67b 1
+misc/migration/Dockerfile
+  s_109676dba34184::t_470191cf5c9e90 1
+src/all-in-one/Dockerfile
+  s_109676dba34184::t_e6258ea2658e9a 1,168
+src/api/Dockerfile
+  s_109676dba34184::t_1be9f321909dd7 1,31
+src/autoconf/Dockerfile
+  s_109676dba34184::t_c6297976fe969e 1,35
+src/bw/Dockerfile
+  s_109676dba34184::t_9a8dc7417beaa0 1,72
+src/linux/Dockerfile-debian-bookworm
+  s_109676dba34184::t_6cd4b5473f4ebb 1,152
+src/linux/Dockerfile-debian-trixie
+  s_109676dba34184::t_e7200eaf1c9ee7 1,147
+src/linux/Dockerfile-rhel-10
+  s_109676dba34184::t_e7f5c6f2f4ddd0 1,151
+src/linux/Dockerfile-rhel-8
+  s_109676dba34184::t_dd8b8880096dfa 1,148
+src/linux/Dockerfile-rhel-9
+  s_109676dba34184::t_13b4bd98681f68 1,149
+src/scheduler/Dockerfile
+  s_175dfb7646d720::t_c6f4d36a8d1fe6 1,48
+src/ui/Dockerfile
+  s_175dfb7646d720::t_b2717379d08b59 1,71
+tests/linux/Dockerfile-debian-bookworm
+  s_175dfb7646d720::t_9ffd8a7bb84126 1
+tests/linux/Dockerfile-debian-trixie
+  s_175dfb7646d720::t_76d17c2f9e9fd2 1
+tests/linux/Dockerfile-rhel-9
+  s_175dfb7646d720::t_4507682ba5162d 1
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "eac44a2efbd2b8ab0cfaf88357075358bae54b04",
+  "prompts": {},
+  "sessions": {
+    "s_109676dba34184": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "782190ae-b727-41ba-9bc7-cb02478efd4a",
+        "model": "unknown"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_175dfb7646d720": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "6287d9cf-9a0e-4d8a-a3c0-5a6e08f44cfe",
+        "model": "unknown"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_df7f7fb118b592": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a15d31-f797-7a20-922e-12d890580c3e",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

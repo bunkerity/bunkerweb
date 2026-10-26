@@ -1,0 +1,335 @@
+.github/ISSUE_TEMPLATE/bug_report.yml
+  s_2e9a7ee1a5448a::t_084ae5992e90ee 74
+CHANGELOG.md
+  s_2e9a7ee1a5448a::t_d4a0a993721b27 3
+README.md
+  s_e8917a61014dbb::t_87ed504ecd4d6d 2,88,108,113,115,142,177,183,216,219,227-232,262,271,302,312,326,331,342,347,354,359,366,371,374,376,381,386,388,392,396,398,406,425,442,466,482,505
+docs/advanced.md
+  s_e8917a61014dbb::t_0522d125e2337b 3,5,88,99,107,124,132,179,187,252,263,273,291,301,353,363,488-489,593,612,698,1135,1163,1174,1291,1331,1354,1397,1467,1713,1736,1751,1802,2032,2162,2206,2221,2315,2328,2343,2583,2682,2845,2858,2875,3047,3156,3167,3186,3229,3498,3503,4327,4331,4414
+docs/api.md
+  s_e8917a61014dbb::t_0ae09f49f0cd6d 45,58,80,147
+docs/concepts.md
+  s_e8917a61014dbb::t_9a40b9b962d9be 108,129
+docs/de/advanced.md
+  s_e8917a61014dbb::t_4045be60053dcb 3,5,88,99,107,124,132,179,187,252,263,273,291,301,353,363,488-489,591,610,696,1133,1161,1172,1289,1329,1352,1395,1465,1712,1735,1750,1801,2031,2161,2205,2220,2314,2327,2342,2582,2681,2844,2857,2874,3046,3155,3166,3185,3228,3497,3502,4326,4330,4413
+docs/de/api.md
+  s_e8917a61014dbb::t_da3688768374a4 45,58,80,147
+docs/de/concepts.md
+  s_e8917a61014dbb::t_4d17de2d1113f0 108,129
+docs/de/features.md
+  s_e8917a61014dbb::t_abda2f53267797 1959,1976
+docs/de/integrations.md
+  s_e8917a61014dbb::t_48e96d702904be 1271,1287,1365,1373,1460,1519,1541,1563,1602,1634,1640,1650,1660,1707,1728,1737,1755,1903,1916,1949,1962,2029-2030,2119,2186,2331,2336,2379,2384,2418,2423,2468,2473,2571,2585,2600,2615,2787,2823,2829,2902,3017,3187,3231,3513,3665,3846,3850,3858,3862,4484,4498,4527,4548,4700,4712
+docs/de/plugins.md
+  s_e8917a61014dbb::t_580c6cdef2e314 98,133,176,223,263,487,568
+docs/de/quickstart-guide.md
+  s_e8917a61014dbb::t_36e1a942756ee3 21,52,70-71,112,125,142,212,228,246,269,367,397,415,444,670,692
+docs/de/upgrading.md
+  s_e8917a61014dbb::t_dcd9f0e400d65a 22-23,107,110,113,116,172,183,192,231-232,309-310,313,316,319,322,402,428,900,903,906,909,944,970
+docs/de/web-ui.md
+  s_e8917a61014dbb::t_529558d5ae90eb 55,66,86
+docs/es/advanced.md
+  s_e8917a61014dbb::t_21aa04f157f544 3,5,88,99,107,124,132,179,187,252,263,273,291,301,353,363,488-489,591,610,696,1133,1161,1172,1289,1329,1352,1395,1465,1712,1735,1750,1801,2031,2161,2205,2220,2314,2327,2342,2582,2681,2844,2857,2874,3046,3155,3166,3185,3228,3497,3502,4326,4330,4413
+docs/es/api.md
+  s_e8917a61014dbb::t_22709ae5b791cf 45,58,80,147
+docs/es/concepts.md
+  s_e8917a61014dbb::t_1574fb62896206 108,129
+docs/es/features.md
+  s_e8917a61014dbb::t_3843dcdf5f0424 1982,1999
+docs/es/integrations.md
+  s_e8917a61014dbb::t_2fc4fa4d8a635d 1271,1287,1365,1373,1460,1520,1542,1564,1603,1635,1641,1651,1661,1708,1729,1738,1756,1904,1917,1950,1963,2030-2031,2120,2187,2332,2337,2380,2385,2419,2424,2469,2474,2573,2587,2602,2617,2789,2825,2831,2903,3018,3188,3232,3514,3666,3847,3851,3859,3863,4485,4499,4528,4549,4701,4713
+docs/es/plugins.md
+  s_e8917a61014dbb::t_184e6901c0b38f 98,134,177,224,264,569
+docs/es/quickstart-guide.md
+  s_e8917a61014dbb::t_9b3d2517d009c0 21,52,70-71,112,125,142,212,228,246,269,367,397,415,444,671,693
+docs/es/upgrading.md
+  s_e8917a61014dbb::t_1c235308bc448e 21-22,106,109,112,115,171,182,191,230-231,312-313,316,319,322,325,405,431,903,906,909,912,947,973
+docs/es/web-ui.md
+  s_e8917a61014dbb::t_f0a71d39232942 55,66,86
+docs/features.md
+  s_e8917a61014dbb::t_bbd54520edff26 1994,2011
+docs/fr/advanced.md
+  s_e8917a61014dbb::t_c74912f8af8339 3,5,88,99,107,124,132,179,187,252,263,273,291,301,353,363,488-489,591,610,696,1133,1161,1172,1289,1329,1352,1395,1465,1711,1734,1749,1800,2030,2160,2204,2219,2313,2326,2341,2581,2680,2843,2856,2873,3045,3154,3165,3184,3227,3496,3501,4325,4329,4412
+docs/fr/api.md
+  s_e8917a61014dbb::t_7f875a6a57500d 45,58,80,147
+docs/fr/concepts.md
+  s_e8917a61014dbb::t_35cf71b806d62e 108,129
+docs/fr/features.md
+  s_e8917a61014dbb::t_f8385ca04f2f32 1919,1936
+docs/fr/integrations.md
+  s_e8917a61014dbb::t_1a6969a9b4d8eb 1278,1293,1372,1380,1467,1527,1548,1570,1609,1643,1649,1659,1669,1716,1737,1746,1764,1912,1925,1958,1971,2038-2039,2125,2192,2334,2339,2382,2387,2421,2426,2471,2476,2575,2589,2604,2619,2791,2827,2833,2904,3019,3189,3233,3290,3516,3668,3849,3853,3861,3865,4486,4500,4529,4550,4702,4714
+docs/fr/plugins.md
+  s_e8917a61014dbb::t_976a5ae7d7e617 98,134,177,224,264,569
+docs/fr/quickstart-guide.md
+  s_e8917a61014dbb::t_5863332792ef4e 21,52,70-71,112,125,142,212,228,246,269,367,397,415,444,671,693
+docs/fr/upgrading.md
+  s_e8917a61014dbb::t_efa78e9b7fe0fb 21-22,106,109,112,115,171,182,191,230-231,312-313,316,319,322,325,405,431,903,906,909,912,947,973
+docs/fr/web-ui.md
+  s_e8917a61014dbb::t_e5c77b68848a46 55,66,86
+docs/integrations.md
+  s_e8917a61014dbb::t_ef931dfd1f0a53 1278,1305,1377,1385,1472,1532,1554,1576,1615,1649,1655,1665,1675,1722,1743,1752,1770,1918,1931,1964,1977,2044-2045,2138,2250,2446,2451,2494,2499,2533,2538,2583,2588,2687,2701,2716,2731,2902,2938,2944,3024,3141,3311,3355,3637,3789,3970,3974,3982,3986,4607,4621,4650,4671,4823,4835
+docs/plugins.md
+  s_e8917a61014dbb::t_dbd2ad213ab16b 98,134,177,224,264,572
+docs/quickstart-guide.md
+  s_e8917a61014dbb::t_28c4f1e18d8f58 21,52,70-71,112,125,142,212,228,246,269,367,397,415,444,671,693
+docs/upgrading.md
+  s_e8917a61014dbb::t_4c29fa081f8bf6 21-22,105,108,111,114,170,181,190,229-230,311-312,315,318,321,324,404,430,903,906,909,912,947,973
+docs/web-ui.md
+  s_e8917a61014dbb::t_8d9492bf3124ab 50,65,89
+docs/zh/advanced.md
+  s_e8917a61014dbb::t_32953902bd7054 3,5,88,99,107,124,132,179,187,252,263,273,291,301,353,363,488-489,591,610,696,1133,1161,1172,1289,1329,1352,1395,1465,1710,1733,1748,1799,2029,2159,2203,2218,2312,2325,2340,2580,2679,2841,2854,2871,3043,3152,3163,3182,3225,3494,3499,4323,4327,4410
+docs/zh/api.md
+  s_e8917a61014dbb::t_0f0b6bcaa2456b 45,58,80,147
+docs/zh/concepts.md
+  s_e8917a61014dbb::t_27726959c5fd57 108,129
+docs/zh/features.md
+  s_e8917a61014dbb::t_70005053e723b5 1992,2009
+docs/zh/integrations.md
+  s_e8917a61014dbb::t_e294125209d103 1271,1287,1365,1373,1460,1520,1542,1564,1603,1637,1643,1653,1663,1707,1728,1737,1755,1903,1916,1949,1962,2029-2030,2119,2186,2331,2336,2379,2384,2418,2423,2468,2473,2572,2586,2601,2616,2788,2824,2830,2899,3014,3184,3228,3510,3662,3843,3847,3855,3859,4481,4495,4524,4545,4694,4706
+docs/zh/plugins.md
+  s_e8917a61014dbb::t_296f30788cf07b 98,134,177,224,264,569
+docs/zh/quickstart-guide.md
+  s_e8917a61014dbb::t_d224125f67b5b6 21,52,70-71,112,125,142,212,228,246,269,367,397,415,444,671,693
+docs/zh/upgrading.md
+  s_e8917a61014dbb::t_ea1dbcbad124a4 21-22,105,108,111,114,170,181,190,229-230,311-312,315,318,321,324,404,430,902,905,908,911,946,972
+docs/zh/web-ui.md
+  s_e8917a61014dbb::t_ddb4ef9cc2ef2d 55,66,86
+examples/authelia/docker-compose.yml
+  s_2e9a7ee1a5448a::t_e2e0517638eccb 3,17
+examples/authentik/docker-compose.yml
+  s_2e9a7ee1a5448a::t_edff17e3f23ce5 3,17
+examples/behind-reverse-proxy/docker-compose.yml
+  s_2e9a7ee1a5448a::t_f37fdfc761e7f6 9,20
+examples/bigbluebutton/docker-compose.yml
+  s_2e9a7ee1a5448a::t_da2164adcd1d11 28,43
+examples/cors/docker-compose.yml
+  s_2e9a7ee1a5448a::t_b833e6670f1419 3,25
+examples/dns-cloudflare/docker-compose.yml
+  s_2e9a7ee1a5448a::t_093b943335a56b 3,17
+examples/dns-desec/docker-compose.yml
+  s_2e9a7ee1a5448a::t_9eeb2b5055d564 3,17
+examples/dns-digitalocean/docker-compose.yml
+  s_2e9a7ee1a5448a::t_1b18f0e334cc11 3,17
+examples/dns-dnsimple/docker-compose.yml
+  s_2e9a7ee1a5448a::t_aadc887023e0f8 3,17
+examples/dns-dnsmadeeasy/docker-compose.yml
+  s_2e9a7ee1a5448a::t_221de1f889cbad 3,17
+examples/dns-gehirn/docker-compose.yml
+  s_2e9a7ee1a5448a::t_a8a5fe891fe68e 3,17
+examples/dns-google/docker-compose.yml
+  s_2e9a7ee1a5448a::t_9769192661a64d 3,17
+examples/dns-linode/docker-compose.yml
+  s_2e9a7ee1a5448a::t_5342f46bb03f9f 3,17
+examples/dns-luadns/docker-compose.yml
+  s_2e9a7ee1a5448a::t_c8790ff3c5c9ec 3,17
+examples/dns-nsone/docker-compose.yml
+  s_2e9a7ee1a5448a::t_5826cec53ebc8c 3,17
+examples/dns-ovh/docker-compose.yml
+  s_2e9a7ee1a5448a::t_9636f3e85a6646 3,17
+examples/dns-rfc2136/docker-compose.yml
+  s_2e9a7ee1a5448a::t_bef2d99c588465 3,17
+examples/dns-route53/docker-compose.yml
+  s_2e9a7ee1a5448a::t_81bae1b633c6fd 3,17
+examples/dns-sakuracloud/docker-compose.yml
+  s_2e9a7ee1a5448a::t_7ea64621f6eca0 3,17
+examples/dns-scaleway/docker-compose.yml
+  s_2e9a7ee1a5448a::t_907e034d4e6a05 3,17
+examples/docker-configs/docker-compose.yml
+  s_2e9a7ee1a5448a::t_ba969295cccc5e 3,17
+examples/drupal/docker-compose.yml
+  s_2e9a7ee1a5448a::t_652ce8c13db4fc 3,17
+examples/ghost/docker-compose.yml
+  s_2e9a7ee1a5448a::t_e4edfaf7b2c2cb 3,17
+examples/gogs/docker-compose.yml
+  s_2e9a7ee1a5448a::t_2f581cc089dbc3 3,17
+examples/hardened/docker-compose.yml
+  s_2e9a7ee1a5448a::t_5870f3e5370402 3,36
+examples/jellyfin/docker-compose.yml
+  s_2e9a7ee1a5448a::t_6db13ebddd1146 3,17
+examples/joomla/docker-compose.yml
+  s_2e9a7ee1a5448a::t_9d35da52eae72c 3,17
+examples/load-balancer/docker-compose.yml
+  s_2e9a7ee1a5448a::t_0c4ccf6f832fe0 3,17
+examples/magento/docker-compose.yml
+  s_2e9a7ee1a5448a::t_ae96e76c29095d 3,17
+examples/mattermost/docker-compose.yml
+  s_2e9a7ee1a5448a::t_3ae15ceddcba79 3,17
+examples/mcp-stack/docker-compose.yml
+  s_2e9a7ee1a5448a::t_1e3ae18cc1800e 12,25,47
+examples/mongo-express/docker-compose.yml
+  s_2e9a7ee1a5448a::t_844271e189102a 3,17
+examples/moodle/docker-compose.yml
+  s_2e9a7ee1a5448a::t_8e8f04365c8510 3,17
+examples/nextcloud/docker-compose.yml
+  s_2e9a7ee1a5448a::t_23762412c60b1a 3,17
+examples/passbolt/docker-compose.yml
+  s_2e9a7ee1a5448a::t_f04b902dd0410d 3,17
+examples/php-cookie-flags/docker-compose.yml
+  s_2e9a7ee1a5448a::t_3c36ae32bb0383 3,25
+examples/php-multisite/docker-compose.yml
+  s_2e9a7ee1a5448a::t_468b1f73cea955 3,26
+examples/php-singlesite/docker-compose.yml
+  s_2e9a7ee1a5448a::t_e8cab64d2e31ca 3,25
+examples/prestashop/docker-compose.yml
+  s_2e9a7ee1a5448a::t_124803941f5c2b 3,17
+examples/proxy-protocol/docker-compose.yml
+  s_2e9a7ee1a5448a::t_d0c300f6f9b48d 11,22
+examples/radarr/docker-compose.yml
+  s_2e9a7ee1a5448a::t_8a526e62da08d3 3,17
+examples/redmine/docker-compose.yml
+  s_2e9a7ee1a5448a::t_120a923aec298b 3,17
+examples/reverse-proxy-multisite/docker-compose.yml
+  s_2e9a7ee1a5448a::t_0d4af7d64473fa 3,17
+examples/reverse-proxy-singlesite/docker-compose.yml
+  s_2e9a7ee1a5448a::t_f3c8c17b93ac9f 3,17
+examples/reverse-proxy-websocket/docker-compose.yml
+  s_2e9a7ee1a5448a::t_13560b72bb2139 3,17
+examples/stream-multisite/docker-compose.yml
+  s_2e9a7ee1a5448a::t_3b7b1ac0047b11 3,19
+examples/syslog/docker-compose.yml
+  s_2e9a7ee1a5448a::t_6aa3717bfaa6d0 3,24
+examples/tomcat/docker-compose.yml
+  s_2e9a7ee1a5448a::t_50b51fdb3b132e 3,17
+examples/tor-hidden-service/docker-compose.yml
+  s_2e9a7ee1a5448a::t_db2eab80995f68 13,24
+examples/web-ui/docker-compose.wizard.yml
+  s_2e9a7ee1a5448a::t_0887bcd060dabb 6,20,43
+examples/web-ui/docker-compose.yml
+  s_2e9a7ee1a5448a::t_190e0f8ec60a31 6,20,46
+examples/wordpress/docker-compose.yml
+  s_2e9a7ee1a5448a::t_19810089d082bf 3,17
+misc/install-bunkerweb.sh
+  s_e8917a61014dbb::t_d193bf91ad70a5 108
+misc/integrations/all-in-one.mariadb.ui.yml
+  s_2e9a7ee1a5448a::t_3ba3ee59b129ad 3
+misc/integrations/all-in-one.mariadb.yml
+  s_2e9a7ee1a5448a::t_e6d601d3e42da7 3
+misc/integrations/all-in-one.mysql.ui.yml
+  s_2e9a7ee1a5448a::t_e3de7c97f4bf31 3
+misc/integrations/all-in-one.mysql.yml
+  s_2e9a7ee1a5448a::t_3de8daf072604f 3
+misc/integrations/all-in-one.oracle.ui.yml
+  s_2e9a7ee1a5448a::t_0e217a44a25c26 3
+misc/integrations/all-in-one.oracle.yml
+  s_2e9a7ee1a5448a::t_a5c69045f49d49 3
+misc/integrations/all-in-one.postgres.ui.yml
+  s_2e9a7ee1a5448a::t_89f5a1fad7c723 3
+misc/integrations/all-in-one.postgres.yml
+  s_2e9a7ee1a5448a::t_2b0a6723029e97 3
+misc/integrations/all-in-one.yml
+  s_2e9a7ee1a5448a::t_02924ae2551980 3
+misc/integrations/autoconf.mariadb.ui.yml
+  s_2e9a7ee1a5448a::t_33a7c9fe023c1c 7,21,34,50
+misc/integrations/autoconf.mariadb.yml
+  s_2e9a7ee1a5448a::t_022de028275813 7,21,34
+misc/integrations/autoconf.mysql.ui.yml
+  s_2e9a7ee1a5448a::t_5dfef0bead671a 7,21,34,50
+misc/integrations/autoconf.mysql.yml
+  s_2e9a7ee1a5448a::t_5eb7f99f27306b 7,21,34
+misc/integrations/autoconf.oracle.ui.yml
+  s_2e9a7ee1a5448a::t_e6e6ef735581a3 7,21,34,50
+misc/integrations/autoconf.oracle.yml
+  s_2e9a7ee1a5448a::t_4bc23e142265e9 7,21,34
+misc/integrations/autoconf.postgres.ui.yml
+  s_2e9a7ee1a5448a::t_9fa092700a5072 7,21,34,50
+misc/integrations/autoconf.postgres.yml
+  s_2e9a7ee1a5448a::t_982d9fca65a4ba 7,21,34
+misc/integrations/docker.mariadb.ui.yml
+  s_2e9a7ee1a5448a::t_73c652de6208bb 6,20,44
+misc/integrations/docker.mariadb.yml
+  s_2e9a7ee1a5448a::t_fae2c2ec06f8f1 7,20
+misc/integrations/docker.mysql.ui.yml
+  s_2e9a7ee1a5448a::t_5420309da99568 6,20,44
+misc/integrations/docker.mysql.yml
+  s_2e9a7ee1a5448a::t_145fd20317f1f5 7,20
+misc/integrations/docker.oracle.ui.yml
+  s_2e9a7ee1a5448a::t_51788e651d766a 6,20,44
+misc/integrations/docker.oracle.yml
+  s_2e9a7ee1a5448a::t_be45f512022264 7,20
+misc/integrations/docker.postgres.ui.yml
+  s_2e9a7ee1a5448a::t_a6aab487a2c8cb 6,19,43
+misc/integrations/docker.postgres.yml
+  s_2e9a7ee1a5448a::t_2bb2a051cfceb9 7,20
+misc/integrations/docker.yml
+  s_2e9a7ee1a5448a::t_a5a74e758c9847 6,19
+misc/integrations/k8s.mariadb.ui.yml
+  s_2e9a7ee1a5448a::t_d280f25b6cd240 117,177,214,325
+misc/integrations/k8s.mariadb.yml
+  s_2e9a7ee1a5448a::t_a57fbee7e24c8e 127,187,224
+misc/integrations/k8s.mysql.ui.yml
+  s_2e9a7ee1a5448a::t_156f6a44aa7adb 117,177,214,325
+misc/integrations/k8s.mysql.yml
+  s_2e9a7ee1a5448a::t_b8394b5835f729 127,187,224
+misc/integrations/k8s.oracle.ui.yml
+  s_2e9a7ee1a5448a::t_d8414044ce3746 117,177,214,321
+misc/integrations/k8s.oracle.yml
+  s_2e9a7ee1a5448a::t_2d36d9cda326d1 127,187,224
+misc/integrations/k8s.postgres.ui.yml
+  s_2e9a7ee1a5448a::t_942518e91cf9f5 117,177,214,321
+misc/integrations/k8s.postgres.yml
+  s_2e9a7ee1a5448a::t_6ae8dbe497e1d7 127,187,224
+publiccode.yml
+  s_e8917a61014dbb::t_8939436655a9ac 4-6
+pyproject.toml
+  s_2e9a7ee1a5448a::t_97545691d8678e 4
+src/VERSION
+  s_2e9a7ee1a5448a::t_1f28c9a7d83ee7 1
+src/all-in-one/Dockerfile
+  s_2e9a7ee1a5448a::t_53feb8107a0000 255
+src/api/Dockerfile
+  s_2e9a7ee1a5448a::t_55af93417a74d5 68
+src/autoconf/Dockerfile
+  s_e8917a61014dbb::t_47ecf7099902c4 72
+src/bw/Dockerfile
+  s_2e9a7ee1a5448a::t_9153146a2bf720 120
+src/common/core/crowdsec/README.de.md
+  s_e8917a61014dbb::t_cea835341250eb 167,184
+src/common/core/crowdsec/README.es.md
+  s_e8917a61014dbb::t_dbdd33be30f954 163,180
+src/common/core/crowdsec/README.fr.md
+  s_e8917a61014dbb::t_e411683f6d30fc 167,184
+src/common/core/crowdsec/README.md
+  s_e8917a61014dbb::t_35d304d2bada4a 169,186
+src/common/core/crowdsec/README.zh.md
+  s_e8917a61014dbb::t_8415499d34fe48 167,184
+src/common/db/Database.py
+  s_2e9a7ee1a5448a::t_55e1d5fdd8cbaf 898,932
+src/common/db/alembic/mariadb_versions/bfc6c7ca7725_upgrade_to_version_1_6_17_rc2.py
+  s_2e9a7ee1a5448a::t_c0edd439e579cf 1-29
+src/common/db/alembic/mysql_versions/f4eacc8348f6_upgrade_to_version_1_6_17_rc2.py
+  s_2e9a7ee1a5448a::t_3a292b5ba29dd3 1-29
+src/common/db/alembic/postgresql_versions/b095e3ea89ee_upgrade_to_version_1_6_17_rc2.py
+  s_2e9a7ee1a5448a::t_7558b016452f63 1-29
+src/common/db/alembic/sqlite_versions/1cb16b07db79_upgrade_to_version_1_6_17_rc2.py
+  s_2e9a7ee1a5448a::t_ab9752d342f39f 1-29
+src/common/db/model.py
+  s_2e9a7ee1a5448a::t_ba95c4ba8cbdfd 374
+src/scheduler/Dockerfile
+  s_2e9a7ee1a5448a::t_e09a3c67132556 93
+src/ui/Dockerfile
+  s_e8917a61014dbb::t_6c3cdc489ae2a8 113
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "472564fbb29e1d519ae57bb18ae9314991fa024b",
+  "prompts": {},
+  "sessions": {
+    "s_2e9a7ee1a5448a": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a144bf-babd-7670-a7a9-49d6a5b186ce",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_e8917a61014dbb": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "7ff350ad-bc0b-4556-8679-17b87e179e57",
+        "model": "unknown"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

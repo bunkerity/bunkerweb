@@ -1,0 +1,29 @@
+src/ui/app/static/css/overrides.css
+  s_51e147f829f70b::t_6d71450bef972b 3135-3144
+CHANGELOG.md
+  s_4600783926e6d7::t_cdc9e55bda6af0 20
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "5ce99de815e62626423b20f7e48341a72f68661c",
+  "prompts": {},
+  "sessions": {
+    "s_4600783926e6d7": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "577228b8-9e99-4afb-b5b7-0fab1e1a53d0",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_51e147f829f70b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "24b77853-b14d-4c1d-a592-2681e9a0f60e",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}
