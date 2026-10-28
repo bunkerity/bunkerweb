@@ -44,4 +44,4 @@ requests==2.34.2
 schedule==1.2.2
 
 setuptools<81
-soupsieve<3
+soupsieve<4
