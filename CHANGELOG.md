@@ -42,11 +42,13 @@
 - [BUGFIX] `scheduler`: unchanged plugins are no longer reinstalled after their executable file permissions are normalized.
 - [BUGFIX] `ssl`: certificate providers initialize without crashing when there is no service.
 - [BUGFIX] `stream`: banned clients are let through in detect mode.
+- [BUGFIX] `ui`: plugin action modules are loaded in isolation, so a plugin without a method can no longer run another plugin's code.
 - [BUGFIX] `ui`: oversized timestamps in the Basic Authentication and Bad Behavior dashboards fall back to the numeric and text display.
 - [BUGFIX] `ui`: reading user permissions releases the role-query connection even when the user has no roles.
 - [BUGFIX] `whitelist`: cached URL lists are ignored once their URL setting is removed.
 - [MISC] `db`: UI, API and wizard saves now clear settings written by another of the three, which used to survive because only the saving method's own rows were cleaned.
 - [MISC] `plugins`: plugins with group or other write bits, or directories that are not `0755`, get a new checksum and may be refreshed once on upgrade.
+- [MISC] `ui`: plugin `ui/actions.py` modules no longer share one namespace, so a third-party plugin must import what it needs instead of using another plugin's functions.
 
 ## v1.6.18~rc1 - 2026/10/26
 
