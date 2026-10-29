@@ -64,6 +64,7 @@
 - [BUGFIX] `whitelist`: cached URL lists are ignored once their URL setting is removed.
 - [MISC] `db`: UI, API and wizard saves now clear settings written by another of the three, which used to survive because only the saving method's own rows were cleaned.
 - [MISC] `plugins`: plugins with group or other write bits, or directories that are not `0755`, get a new checksum and may be refreshed once on upgrade.
+- [MISC] `tests`: add the end-to-end integration test framework (Docker, Autoconf, All-in-one, Linux, Kubernetes) and run it in CI
 - [MISC] `ui`: plugin `ui/actions.py` modules no longer share one namespace, so a third-party plugin must import what it needs instead of using another plugin's functions.
 
 ## v1.6.18~rc1 - 2026/10/26

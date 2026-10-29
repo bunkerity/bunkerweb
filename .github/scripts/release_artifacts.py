@@ -1,4 +1,4 @@
-"""Bind release builds, integration tests and promotion to one immutable manifest."""
+"""Bind release builds and promotion to one immutable manifest."""
 
 from argparse import ArgumentParser
 from hashlib import sha256
@@ -239,23 +239,6 @@ def load_manifest(file, expected_hash):
     return manifest
 
 
-def prepare_tests(manifest, test_type, packages):
-    require(test_type in ("docker", "autoconf", "k8s", "linux"), "unknown integration type")
-    kind = "kubernetes" if test_type == "k8s" else test_type
-    suites = [loads(file.read_text()) for file in Path("examples").glob("*/tests.json")]
-    require(any(kind in suite["kinds"] and suite["tests"] for suite in suites), "empty integration suite")
-    with open(environ["GITHUB_ENV"], "a") as env:
-        for name in ("bunkerweb", "scheduler", "autoconf"):
-            ref = manifest["images"][name]["ref"]
-            env.write(f"{name.upper()}_IMAGE={ref}\n")
-            if test_type in ("docker", "autoconf"):
-                registry(["docker", "pull", "--platform", "linux/amd64", ref])
-                command(["docker", "tag", ref, f"local/{name}-tests:latest"])
-    if test_type == "linux":
-        for package in manifest["packages"]:
-            verify_package(package, Path(packages) / package["artifact"])
-
-
 def promote(manifest, image, tags):
     source = manifest["images"][image]["ref"]
     for tag in tags.replace("~", "-").split(","):
@@ -267,7 +250,7 @@ def promote(manifest, image, tags):
 
 def main():
     parser = ArgumentParser(description=__doc__)
-    parser.add_argument("operation", choices=("record-image", "record-package", "assemble", "verify", "prepare-tests", "promote", "gate"))
+    parser.add_argument("operation", choices=("record-image", "record-package", "assemble", "verify", "promote", "gate"))
     parser.add_argument("--manifest", default="release-manifest.json")
     parser.add_argument("--manifest-sha256", default=environ.get("MANIFEST_SHA256", ""))
     parser.add_argument("--directory", default=".")
@@ -276,7 +259,6 @@ def main():
     parser.add_argument("--platform", choices=PLATFORMS)
     parser.add_argument("--digest")
     parser.add_argument("--distro", choices=DISTROS)
-    parser.add_argument("--type")
     parser.add_argument("--tags")
     parser.add_argument("--artifact")
     args = parser.parse_args()
@@ -290,9 +272,7 @@ def main():
         if args.operation == "gate":
             require_success(loads(environ["NEEDS_JSON"]))
         manifest = load_manifest(args.manifest, args.manifest_sha256)
-        if args.operation == "prepare-tests":
-            prepare_tests(manifest, args.type, args.directory)
-        elif args.operation == "promote":
+        if args.operation == "promote":
             promote(manifest, args.image, args.tags)
         elif args.artifact:
             packages = [package for package in manifest["packages"] if package["artifact"] == args.artifact]

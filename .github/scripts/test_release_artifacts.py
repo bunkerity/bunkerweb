@@ -7,13 +7,12 @@ from json import dumps, loads
 from os import environ
 from pathlib import Path
 from shutil import copyfile
-from subprocess import CalledProcessError, run
+from subprocess import run
 from tempfile import TemporaryDirectory
 from unittest import TestCase, main
 from unittest.mock import call, patch
 
 import release_artifacts as release
-import release_integration as integration
 from release_smoke import compose_config, start_services
 from yaml import safe_load
 
@@ -93,10 +92,10 @@ class ReleaseArtifactsTest(TestCase):
     def test_publication_gate_rejects_failure_skipped_cancelled_and_missing(self):
         for state in ("failure", "skipped", "cancelled", ""):
             with self.assertRaises(ValueError):
-                release.require_success({"candidates": {"result": "success"}, "staging-tests": {"result": state}}, {"candidates", "staging-tests"})
+                release.require_success({"candidates": {"result": "success"}, "plumber": {"result": state}}, {"candidates", "plumber"})
         with self.assertRaises(ValueError):
-            release.require_success({}, {"staging-tests"})
-        release.require_success({"staging-tests": {"result": "success"}}, {"staging-tests"})
+            release.require_success({}, {"plumber"})
+        release.require_success({"plumber": {"result": "success"}}, {"plumber"})
 
     def test_copy_has_no_build_and_preserves_full_index(self):
         manifest = self.manifest()
@@ -203,24 +202,24 @@ class ReleaseArtifactsTest(TestCase):
             self.assertIn("validate-candidates", ancestors(name))
         for name in ("push-images", "push-packages"):
             self.assertEqual(jobs[name]["with"]["MANIFEST_SHA256"], "${{ needs.push-gh.outputs.manifest_sha256 }}")
-        # Integration suites and their cloud infrastructure belong to the staging branch only.
-        for name in ("create-infras", "staging-tests", "staging-tests-arm64", "delete-infras", "delete-infras-linux"):
-            self.assertNotIn(name, jobs)
+        # Integration suites belong to the staging and dev branches only.
+        self.assertEqual([name for name in jobs if name.startswith(("run-", "parse-tests-"))], [])
         staging = safe_load((root / "staging.yml").read_text())["jobs"]
+        suites = {
+            "run-Docker-tests-core",
+            "run-Autoconf-tests-core",
+            "run-Linux-tests-core",
+            "run-Kubernetes-tests-core",
+            "run-All-in-one-tests-core",
+            "run-Docker-tests-api",
+        }
         for name in ("push-images", "push-packages"):
             self.assertIn("smoke-images", staging[name]["needs"])
-            self.assertIn("staging-tests", staging[name]["needs"])
-        self.assertEqual(set(staging["staging-tests"]["strategy"]["matrix"]["type"]), {"docker", "autoconf", "k8s", "linux"})
-        self.assertEqual(set(staging["delete-infras"]["strategy"]["matrix"]["type"]), {"docker", "autoconf", "k8s", "linux"})
-        self.assertIn("always()", staging["delete-infras"]["if"])
+            self.assertTrue(suites <= set(staging[name]["needs"]), name)
         matrix = jobs["build-packages"]["strategy"]["matrix"]
         self.assertEqual(set(matrix["linux"]), set(release.DISTROS))
         self.assertEqual(set(matrix["platforms"]), set(release.PACKAGE_PLATFORMS))
         self.assertNotIn("build-push-action", (root / "push-docker.yml").read_text())
-        steps = safe_load((root / "staging-tests.yml").read_text())["jobs"]["tests"]["steps"]
-        for step in steps:
-            if "docker pull" in step.get("run", ""):
-                self.assertIn("inputs.MANIFEST_SHA256 == ''", step["if"])
         package_steps = safe_load((root / "push-packagecloud.yml").read_text())["jobs"]["push"]["steps"]
         yank = next(step for step in package_steps if step.get("name") == "Yank existing package")
         self.assertEqual(yank["if"], "inputs.MANIFEST_SHA256 == ''")
@@ -337,50 +336,6 @@ gh() {
         jobs = safe_load((Path(__file__).resolve().parents[1] / "workflows/release.yml").read_text())["jobs"]
         for job in ("prepare", "push-gh"):
             self.assertEqual(jobs[job]["permissions"]["contents"], "write", job)
-
-    def test_integration_cleanup_runs_even_when_init_child_exits(self):
-        for kind in ("docker", "autoconf", "kubernetes", "linux"):
-            with patch.object(integration, "run", side_effect=CalledProcessError(1, "tests/main.py")), patch.object(integration, "cleanup") as cleanup:
-                with self.assertRaises(CalledProcessError):
-                    integration.run_suite(kind, [], "ubuntu" if kind == "linux" else None)
-                cleanup.assert_called_once_with(kind, [], "ubuntu" if kind == "linux" else None)
-
-    def test_integration_platform_filter_selects_one_platform_and_refuses_an_empty_selection(self):
-        packages = [
-            {"distro": "ubuntu", "platform": "linux/amd64"},
-            {"distro": "ubuntu", "platform": "linux/arm64"},
-            {"distro": "rhel-9", "platform": "linux/arm64"},
-        ]
-        self.assertEqual(integration.select_packages(packages), packages)
-        self.assertEqual(integration.select_packages(packages, "linux/arm64"), packages[1:])
-        with self.assertRaises(ValueError):
-            integration.select_packages(packages, "linux/386")
-
-    def test_integration_cleanup_failure_does_not_hide_the_suite_failure(self):
-        with patch.object(integration, "run", side_effect=CalledProcessError(1, "tests/main.py")), patch.object(
-            integration, "cleanup", side_effect=ValueError("cleanup exploded")
-        ):
-            with self.assertRaises(CalledProcessError):
-                integration.run_suite("docker", [])
-
-    def test_integration_cleanup_is_scoped_to_selected_manifests_and_named_container(self):
-        suites = [{"name": "candidate-example", "kinds": ["docker", "autoconf", "kubernetes"]}, {"name": "unrelated", "kinds": []}]
-        with patch.object(Path, "is_file", return_value=True), patch.object(Path, "is_dir", return_value=False), patch.object(
-            integration, "run", return_value=Namespace(returncode=0)
-        ) as run:
-            integration.cleanup("autoconf", suites)
-            self.assertEqual(
-                [call.args[0][3] for call in run.call_args_list], ["/tmp/tests/candidate-example/autoconf.yml", "/tmp/autoconf/docker-compose.yml"]
-            )
-            run.reset_mock()
-            integration.cleanup("kubernetes", suites)
-            self.assertTrue(all("--ignore-not-found" in call.args[0] and "--all" not in call.args[0] for call in run.call_args_list))
-            self.assertEqual(len(run.call_args_list), 2)
-            run.reset_mock()
-            with patch.object(integration, "command", return_value=b"container-id\n") as command:
-                integration.cleanup("linux", suites, "ubuntu")
-                self.assertEqual(command.call_args.args[0][-1], "name=^/linux-ubuntu$")
-                run.assert_called_once_with(["docker", "rm", "--force", "container-id"], timeout=90, check=False)
 
 
 if __name__ == "__main__":
