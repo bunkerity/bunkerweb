@@ -41,9 +41,9 @@ jobs:
       packages: write
     strategy:
       matrix:
-        linux: [ubuntu]
+        linux: [ubuntu-noble]
         include:
-          - linux: ubuntu
+          - linux: ubuntu-noble
             package: deb
     uses: ./.github/workflows/linux-build.yml
     with:
