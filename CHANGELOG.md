@@ -16,6 +16,7 @@
 - [BUGFIX] `autoconf`: an Ingress naming a port on a Service without ports no longer blocks every apply, and the fallback to port 80 is logged.
 - [BUGFIX] `autoconf`: the Swarm controller keeps each instance id once instead of growing its list on every poll.
 - [BUGFIX] `backup`: the database lock is taken even when the scheduler cannot write the lock file.
+- [BUGFIX] `badbehavior`: banning or unbanning an IP now clears its counter, so a single new offence no longer re-bans it (Fixes #3818)
 - [BUGFIX] `bunkernet`: served challenges, captchas and redirects are no longer reported as attacks.
 - [BUGFIX] `core`: setting regexes are anchored and no longer backtrack exponentially on a short malformed value, and duration settings refuse non-ASCII digits.
 - [BUGFIX] `core`: stream listeners shared by several services emit `reuseport` once, and empty ports and directive arguments are omitted.
