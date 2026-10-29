@@ -41,6 +41,7 @@
 - [BUGFIX] `metrics`: blocked-request history survives the shared memory restore after a reload, and the configured memory retry limit applies to every write.
 - [BUGFIX] `modsecurity`: the global CRS mode loads the downloaded CRS plugins configured across services.
 - [BUGFIX] `plugins`: group and other write bits and directory modes no longer change plugin checksums, so a restored tree is not reinstalled again and again. (Refs #4024)
+- [BUGFIX] `redis`: the statistics endpoint returns an error when the key count is missing.
 - [BUGFIX] `scheduler`: the configuration is no longer rendered, pushed and reloaded a second time after the once-jobs when none of them changed anything. (Fixes #4106)
 - [BUGFIX] `scheduler`: job paths that escape the plugin jobs directory are rejected, and imported job modules are cleaned up after `sys.exit()`.
 - [BUGFIX] `scheduler`: unchanged plugins are no longer reinstalled after their executable file permissions are normalized.
