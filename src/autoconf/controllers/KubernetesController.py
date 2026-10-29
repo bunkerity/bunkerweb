@@ -66,6 +66,7 @@ class KubernetesController(Controller):
         self._pending_apply = False
         self._last_event_time = 0.0
         self._debounce_delay = 2  # seconds
+        self._apply_retry_at: Optional[float] = None
         self._event_summary = {}
         self._event_summary_max = 8
         self._event_loggable_kinds = {"Ingress", "Gateway", "HTTPRoute", "GRPCRoute", "TLSRoute", "TCPRoute", "UDPRoute", "ConfigMap", "Secret"}
@@ -910,10 +911,24 @@ class KubernetesController(Controller):
                             self._pending_backends.pop(key, None)
                     for namespace, service_name in give_up_keys:
                         self._logger.warning(f"Giving up on pending backend {namespace}/{service_name} after {self._pending_backends_max_attempts} attempts")
+
+                self._retry_deferred_apply()
             except BaseException as e:
                 self._logger.debug(format_exc())
                 self._logger.error(f"Error in pending backends worker: {e}")
             sleep(0.5)
+
+    def _retry_deferred_apply(self) -> None:
+        """Run the apply that _trigger_apply_if_idle put off because the scheduler was busy.
+
+        No watch thread waits for it: the flag it leaves behind is only consumed by a thread that
+        receives an event, so without this tick the change stays undeployed until some unrelated
+        event arrives (#4107)."""
+        retry_at = self._apply_retry_at
+        if retry_at is None or time() < retry_at:
+            return
+        self._apply_retry_at = None
+        self._trigger_apply_if_idle()
 
     def _trigger_apply_if_idle(self) -> None:
         """Kick off an immediate apply cycle from outside the watch loop.
@@ -938,9 +953,12 @@ class KubernetesController(Controller):
                     self._sync_status()
                     return
                 if self.have_to_wait():
-                    # Let the normal watch loop retry — don't busy-wait here.
+                    # Don't busy-wait under the lock: keep the apply pending and let the worker's next
+                    # ticks (_retry_deferred_apply) come back for it, since no watch loop is waiting on it.
                     self._pending_apply = True
                     self._last_event_time = time()
+                    self._apply_retry_at = time() + 1
+                    self._logger.debug("Backend retry worker: scheduler is already applying a configuration, retrying in 1 second ...")
                     return
                 self._logger.info("Backend retry worker: deploying recovered configuration...")
                 try:
