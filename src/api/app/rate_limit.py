@@ -542,6 +542,10 @@ def _make_limiter(storage: str, storage_options: Dict[str, Any], *, key_func, de
             strategy=strategy,
             headers_enabled=headers_enabled,
             key_prefix="bwapi-rl-",
+            # Without it a storage error at request time (bad Redis password, Redis down) is raised out of slowapi and every
+            # endpoint answers 500, /ping and /health included. With it slowapi logs once, keeps enforcing the same limits in
+            # process memory and re-checks the backend with a growing delay until it answers again.
+            in_memory_fallback_enabled=True,
         )
     except Exception as exc:
         # The message is left out: URI parser errors echo pieces of the credentials.
@@ -553,6 +557,7 @@ def _make_limiter(storage: str, storage_options: Dict[str, Any], *, key_func, de
             strategy=strategy,
             headers_enabled=headers_enabled,
             key_prefix="bwapi-rl-",
+            in_memory_fallback_enabled=True,
         )
 
 

@@ -11,6 +11,7 @@
 - [BUGFIX] `antibot`: the Cap.js frame loads `hashwx.wasm` from the Cap.js server, so a strict CSP no longer blocks it (needs Cap.js widget 0.1.58 or later).
 - [BUGFIX] `api`: cache files of a folder (Let's Encrypt `etc.tgz`) download again, and YAML files with lowercase setting names load.
 - [BUGFIX] `api`: a malformed stored bcrypt credential is refused instead of raising an authentication error.
+- [BUGFIX] `api`: rate limiting falls back to in-memory counters when Redis is unreachable or rejects the credentials, instead of answering 500
 - [BUGFIX] `autoconf`: the Kubernetes controller retries a configuration deferred while the scheduler was busy, so a new Ingress deploys without waiting for the next event. (Fixes #4107)
 - [BUGFIX] `autoconf`: the same services, instances or configs in another order, or an apply that changes nothing, no longer re-run the scheduler jobs on every poll.
 - [BUGFIX] `autoconf`: an Ingress naming a port on a Service without ports no longer blocks every apply, and the fallback to port 80 is logged.
