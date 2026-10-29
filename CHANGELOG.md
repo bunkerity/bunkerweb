@@ -21,6 +21,7 @@
 - [BUGFIX] `core`: stream listeners shared by several services emit `reuseport` once, and empty ports and directive arguments are omitted.
 - [BUGFIX] `core`: `variables.env` is replaced atomically, so a concurrent reader never sees a truncated file.
 - [BUGFIX] `core`: the Lua API recovers its credentials from disk when the internal store is unavailable, and refuses requests when the token state is unknown.
+- [BUGFIX] `core`: a DNS resolver outage is no longer cached as an empty answer for an hour, so lookups retry once the resolver is back.
 - [BUGFIX] `cors`: `Access-Control-Allow-Credentials` is sent on real responses as well as preflights, and removed even when sent by an upstream for disallowed origins or wildcard `Access-Control-Allow-Origin`.
 - [BUGFIX] `cors`: with `USE_CORS=yes`, a preflight request is no longer refused with a 405 when `ALLOWED_METHODS` does not list `OPTIONS`.
 - [BUGFIX] `db`: pruning job runs no longer fails with a conflict on MariaDB when a run is inserted meanwhile.

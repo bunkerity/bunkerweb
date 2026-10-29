@@ -871,6 +871,7 @@ utils.get_ips = function(fqdn, ipv6, ctx, pool, force_ipv6)
 	local res_answers = {}
 	local res_errors = {}
 	local ans_errors = {}
+	local has_answer = false
 	local answers
 	for _, qtype in ipairs(qtypes) do
 		-- Query FQDN
@@ -878,14 +879,30 @@ utils.get_ips = function(fqdn, ipv6, ctx, pool, force_ipv6)
 		local qtype_str = qtype == res.TYPE_AAAA and "AAAA" or "A"
 		if not answers then
 			res_errors[qtype_str] = err
-		elseif answers.errcode then
-			ans_errors[qtype_str] = answers.errstr
 		else
-			table.insert(res_answers, answers)
+			if answers.errcode then
+				ans_errors[qtype_str] = answers.errstr
+				if answers.errcode == 3 then
+					has_answer = true
+				else
+					ans_errors[qtype_str] = answers.errstr or tostring(answers.errcode)
+					logger:log(
+						ERR,
+						"error while doing " .. qtype_str .. " DNS query for " .. fqdn .. " : " .. ans_errors[qtype_str]
+					)
+				end
+			else
+				has_answer = true
+				table.insert(res_answers, answers)
+			end
 		end
 	end
 	for qtype, error in pairs(res_errors) do
 		logger:log(ERR, "error while doing " .. qtype .. " DNS query for " .. fqdn .. " : " .. error)
+	end
+	-- Resolver failures are not negative DNS answers and must be retried.
+	if not has_answer then
+		return false, encode(res_errors) .. " " .. encode(ans_errors)
 	end
 	-- Extract all IPs
 	local ips = {}
@@ -909,9 +926,8 @@ end
 -- For each PTR in rdns_list, if it ends with any suffix in suffix_list, the name is forward-resolved
 -- (A/AAAA via get_ips) and each result compared to remote_addr. Returns (matched_suffix, matched_rdns)
 -- only when a suffix match is forward-confirmed; returns nil otherwise.
--- Fail-closed: a suffix match that cannot be confirmed (resolver error, or empty/non-matching forward
--- result) returns nil and is logged as a possible spoof. An empty get_ips table needs no special case:
--- the inner loop runs zero times, so no match occurs and execution falls to the spoof branch.
+-- Fail-closed: resolver errors are logged and return nil. Empty/non-matching forward results
+-- cannot confirm the suffix and are logged as a possible spoof when a plugin logger is supplied.
 utils.rdns_forward_confirmed = function(rdns_list, suffix_list, ctx, remote_addr, plugin_logger)
 	if not rdns_list or not suffix_list then
 		return nil
