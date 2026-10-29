@@ -1,0 +1,285 @@
+name: Unit tests (pytest)
+
+# Fast, isolated pytest suite under tests/unit/ (complements the Docker integration
+# tests in integration-tests.yml). The SQLite job runs on every relevant push/PR; the full
+# multi-engine matrix (SQLite + PostgreSQL + MariaDB + MySQL) runs nightly / on demand so it
+# never slows PRs. See tests/unit/README.md.
+
+on:
+  push:
+    branches: [dev, master]
+    paths:
+      - "pyproject.toml"
+      - "src/**"
+      - "misc/install-bunkerweb.sh"
+      - "tests/unit/**"
+      - ".github/workflows/unit-tests.yml"
+  pull_request:
+    paths:
+      - "pyproject.toml"
+      - "src/**"
+      - "misc/install-bunkerweb.sh"
+      - "tests/unit/**"
+      - ".github/workflows/unit-tests.yml"
+  schedule:
+    - cron: "0 3 * * *" # nightly 03:00 UTC — runs the full engine matrix
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+concurrency:
+  group: unit-tests-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  sqlite:
+    name: Unit tests (SQLite)
+    runs-on: ubuntu-26.04
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.14"
+          cache: pip
+          cache-dependency-path: tests/unit/requirements.txt
+      # legacy/ runs dev's node:test scripts (test_*.cjs) and skips them without node
+      - name: Set up Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 22
+      # The antibot PoW regression test (tests/unit/common) runs the real html-minifier-terser and
+      # skips when src/deps/node_modules is missing; the directory is gitignored, so install it from
+      # the lockfile. --ignore-scripts: no locked package has an install script.
+      - name: Install the locked Node.js dependencies
+        run: npm ci --ignore-scripts --prefix src/deps
+      - name: Install unit-test dependencies
+        run: pip install --require-hashes -r tests/unit/requirements.txt
+      # The Lua-layer tests shell out to the interpreter and skip without it, so install it
+      # rather than let them silently pass by not running.
+      - name: Install the Lua interpreter
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends lua5.4 && sudo ln -sf "$(command -v lua5.4)" /usr/local/bin/lua
+      # `backup_database`/`restore_database` shell out to `sqlite3`, and the backup/restore round
+      # trip now FAILS rather than skips when an engine is present but its client is not -- so this
+      # job's one engine needs its client installed rather than assumed from the runner image.
+      - name: Install the SQLite client and Redis server
+        run: sudo apt-get install -y --no-install-recommends sqlite3 redis-server
+      - name: Run unit tests (SQLite, full suite incl. slow tier)
+        # faulthandler_timeout only prints a hung test's stack; timeout is what ends it (~4 min locally).
+        run: timeout -k 30 1500 pytest tests/unit -o faulthandler_timeout=120
+      # Three cases need the real resty.lrucache, so LuaJIT: the two walk-direction cases of
+      # metrics/test_lru_sync_loop.py and the zero-ttl premise of common/test_datastore_worker_lru_exptime.py.
+      # They skip under the Lua 5.4 above, so run them here with `lua` resolving to LuaJIT (the datastore probe
+      # runs `lua -e "require 'ffi'"`) and the vendored library on LUA_PATH. Each test defines its own
+      # ngx stub outside OpenResty, including the metrics availability probe. The step fails if any of them skips.
+      - name: Install LuaJIT
+        run: sudo apt-get install -y --no-install-recommends luajit
+      - name: Run the LuaJIT-only unit tests (real resty.lrucache)
+        shell: bash
+        env:
+          LUA_PATH: ${{ github.workspace }}/src/deps/src/lua-resty-lrucache/lib/?.lua;;
+        run: |
+          mkdir -p "$RUNNER_TEMP/luajit-bin"
+          ln -sf "$(command -v luajit)" "$RUNNER_TEMP/luajit-bin/lua"
+          export PATH="$RUNNER_TEMP/luajit-bin:$PATH"
+          lua -e 'assert(jit, "lua is not LuaJIT")'
+          timeout -k 30 300 pytest -rs -o faulthandler_timeout=120 -k "resty or real_lrucache" \
+            "tests/unit/metrics/test_lru_sync_loop.py::test_the_walk_direction_decides_which_key_dies" \
+            "tests/unit/common/test_datastore_worker_lru_exptime.py::test_the_real_lrucache_treats_a_zero_ttl_as_already_expired" | tee luajit.log
+          grep -q ' 3 passed' luajit.log
+          ! grep -qi 'skipped' luajit.log
+      # The api_app lane imports the API's `app` package, so it runs in its own invocation
+      # (tests/unit/api_app/README.md); the default run above ignores the directory.
+      - name: Install the api_app lane dependencies
+        run: pip install --require-hashes -r tests/unit/api_app/requirements.txt
+      - name: Run unit tests (api_app lane)
+        env:
+          BW_API_APP_LANE: "1"
+        run: timeout -k 30 300 pytest tests/unit/api_app -o faulthandler_timeout=120
+
+  coverage:
+    name: Python component coverage floors
+    if: github.event_name == 'push' || github.event_name == 'pull_request'
+    runs-on: ubuntu-26.04
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.14"
+          cache: pip
+          cache-dependency-path: |
+            tests/unit/requirements.txt
+            tests/unit/api_app/requirements.txt
+      # legacy/ runs dev's node:test scripts (test_*.cjs) and skips them without node
+      - name: Set up Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 22
+      # The antibot PoW regression test (tests/unit/common) runs the real html-minifier-terser and
+      # skips when src/deps/node_modules is missing; the directory is gitignored, so install it from
+      # the lockfile. --ignore-scripts: no locked package has an install script.
+      - name: Install the locked Node.js dependencies
+        run: npm ci --ignore-scripts --prefix src/deps
+      - name: Install unit-test dependencies
+        run: pip install --require-hashes -r tests/unit/requirements.txt
+      # The Lua-layer tests shell out to the interpreter and skip without it, so install it
+      # rather than let them silently pass by not running.
+      - name: Install the Lua interpreter
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends lua5.4 && sudo ln -sf "$(command -v lua5.4)" /usr/local/bin/lua
+      # `backup_database`/`restore_database` shell out to `sqlite3`, and the backup/restore round
+      # trip now FAILS rather than skips when an engine is present but its client is not -- so this
+      # job's one engine needs its client installed rather than assumed from the runner image.
+      - name: Install the SQLite client and Redis server
+        run: sudo apt-get install -y --no-install-recommends sqlite3 redis-server
+      - name: Prepare coverage output
+        run: mkdir -p .cache/unit-coverage
+      - name: Measure unit tests (SQLite and legacy subprocesses)
+        env:
+          COVERAGE_FILE: .cache/unit-coverage/sqlite
+        run: timeout -k 30 1500 python -m pytest tests/unit --cov --cov-report=
+      # The api_app lane imports the API's `app` package, so it runs in its own invocation
+      # (tests/unit/api_app/README.md); the default run above ignores the directory.
+      - name: Install the api_app lane dependencies
+        run: pip install --require-hashes -r tests/unit/api_app/requirements.txt
+      - name: Measure unit tests (api_app lane)
+        env:
+          BW_API_APP_LANE: "1"
+          COVERAGE_FILE: .cache/unit-coverage/api
+        run: timeout -k 30 300 python -m pytest tests/unit/api_app --cov --cov-report=
+      - name: Combine coverage
+        env:
+          COVERAGE_FILE: .cache/unit-coverage/combined
+        run: python -m coverage combine --keep .cache/unit-coverage/sqlite .cache/unit-coverage/api
+      - name: Enforce component coverage floors
+        run: python tests/unit/coverage_gate.py .cache/unit-coverage/combined --json .cache/unit-coverage/gate.json
+
+  matrix:
+    name: Unit tests (SQLite + PostgreSQL + MariaDB + MySQL)
+    # Heavy (spins up DB service containers) — keep it off the PR path.
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-26.04
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: bw
+          POSTGRES_PASSWORD: bw
+          POSTGRES_DB: bw_test
+        ports:
+          - 5433:5432
+        options: >-
+          --memory 1g
+          --health-cmd "pg_isready -U bw -d bw_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+      mariadb:
+        image: mariadb:11
+        env:
+          MARIADB_USER: bw
+          MARIADB_PASSWORD: bw
+          MARIADB_ROOT_PASSWORD: root
+          MARIADB_DATABASE: bw_test
+        ports:
+          - 3307:3306
+        options: >-
+          --memory 1g
+          --health-cmd "healthcheck.sh --connect --innodb_initialized"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+      mysql:
+        image: mysql:8.4
+        env:
+          MYSQL_USER: bw
+          MYSQL_PASSWORD: bw
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: bw_test
+        ports:
+          - 3308:3306
+        options: >-
+          --memory 1g
+          --health-cmd "mysqladmin ping -h 127.0.0.1 -uroot -proot"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0 # tests/unit/db/alembic_baseline.py reads schemas from release tags (git show vX.Y.Z:...)
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.14"
+          cache: pip
+          cache-dependency-path: tests/unit/requirements.txt
+      - name: Set up Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 22
+      # The antibot PoW regression test (tests/unit/common) runs the real html-minifier-terser and
+      # skips when src/deps/node_modules is missing; the directory is gitignored, so install it from
+      # the lockfile. --ignore-scripts: no locked package has an install script.
+      - name: Install the locked Node.js dependencies
+        run: npm ci --ignore-scripts --prefix src/deps
+      - name: Install unit-test dependencies
+        run: pip install --require-hashes -r tests/unit/requirements.txt
+      # The Lua-layer tests shell out to the interpreter and skip without it, so install it
+      # rather than let them silently pass by not running.
+      - name: Install the Lua interpreter
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends lua5.4 && sudo ln -sf "$(command -v lua5.4)" /usr/local/bin/lua
+      # Install database clients explicitly for the tests/unit suite below, including its
+      # backup and legacy tests; do not rely on clients preinstalled in the runner image.
+      #
+      # mariadb-client, NOT mysql-client: `mysql_client_command` prefers `mariadb-dump`/`mariadb`,
+      # and the service above is mariadb:11. Measured -- MySQL 8's mysqldump against a populated
+      # MariaDB 11 server exits 2 with "Unknown table 'COLUMN_STATISTICS' in information_schema
+      # (1109)", so mysql-client here would install a client that cannot dump this job's own
+      # database.
+      - name: Install the database clients and Redis server
+        run: sudo apt-get install -y --no-install-recommends sqlite3 postgresql-client mariadb-client redis-server
+      # tests/unit/test_db_cleanup_jobs_runs_excess.py needs REPEATABLE-READ with innodb_snapshot_isolation=1 to
+      # reproduce the MariaDB 1020 conflict, and skips (green) without it. The image cannot take server arguments
+      # as a service, so set the dynamic global before any test connects; new connections inherit it.
+      - name: Enable snapshot isolation on the MariaDB service
+        run: |
+          mariadb -h 127.0.0.1 -P 3307 -u root -proot -e "SET GLOBAL innodb_snapshot_isolation=1"
+          test "$(mariadb -h 127.0.0.1 -P 3307 -u root -proot -N -e 'SELECT @@global.innodb_snapshot_isolation')" = 1
+      - name: Run unit tests (all engines)
+        env:
+          BW_TEST_PG_URI: postgresql://bw:bw@127.0.0.1:5433/bw_test
+          BW_TEST_MARIA_URI: mariadb://bw:bw@127.0.0.1:3307/bw_test
+        # timeout ends a hang (~5 min locally); faulthandler_timeout prints its stack first.
+        run: timeout -k 30 1500 pytest tests/unit --db-engines=sqlite,postgresql,mariadb -o faulthandler_timeout=120
+      # MySQL runs the DB layer only (tests/unit/db: 440 passed, 15 skipped against mysql:8.4 locally, ~17 min); the ui,
+      # api and gen fixtures that also take an engine were not measured on it.
+      - name: Run the DB-layer unit tests (MySQL)
+        env:
+          BW_TEST_MYSQL_URI: mysql://bw:bw@127.0.0.1:3308/bw_test
+        run: timeout -k 30 2400 pytest tests/unit/db --db-engines=mysql -o faulthandler_timeout=120
+      # The run above executes that script in a legacy subprocess, where a skipTest still reads as green. Run the
+      # snapshot-isolation race case on its own and fail if it skipped.
+      - name: Run the MariaDB snapshot-isolation pruning race (must not skip)
+        shell: bash
+        env:
+          BW_TEST_MARIA_URI: mysql+pymysql://root:root@127.0.0.1:3307/bw_test
+        working-directory: tests/unit
+        run: |
+          timeout -k 30 300 python -m unittest -v test_db_cleanup_jobs_runs_excess.MariadbCleanupJobsRunsExcessTest.test_run_inserted_between_select_and_delete 2>&1 | tee race.log
+          grep -q '^OK' race.log
+          ! grep -qi 'skipped' race.log
