@@ -6,7 +6,6 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
     if deps_path not in sys_path:
         sys_path.append(deps_path)
 
-from bcrypt import checkpw
 from flask_login import AnonymousUserMixin, UserMixin
 
 from model import Users  # type: ignore
@@ -39,6 +38,6 @@ class UiUsers(Users, UserMixin):
         return self.username
 
     def check_password(self, password: str) -> bool:
-        # bcrypt 5.x raises ValueError on >72 bytes; hashing truncates to 72 (see
-        # app/utils.py:_bcrypt_secret), so truncate here too to keep verification symmetric.
-        return checkpw(password.encode("utf-8")[:72], self.password.encode("utf-8"))
+        from app.utils import check_password
+
+        return check_password(password, self.password.encode("utf-8"))
