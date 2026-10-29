@@ -14,6 +14,9 @@
 	<img src="https://img.shields.io/github/actions/workflow/status/bunkerity/bunkerweb/staging.yml?branch=staging&label=CI%2FCD%20staging" />
 	<a href="https://github.com/bunkerity/bunkerweb/actions/workflows/release.yml"><img src="https://img.shields.io/github/actions/workflow/status/bunkerity/bunkerweb/release.yml?label=CI%2FCD%20release" alt="Release workflow status" /></a>
 	<br />
+	<a href="https://github.com/bunkerity/bunkerweb/actions/workflows/unit-tests.yml?query=branch%3Adev"><img src="https://img.shields.io/github/actions/workflow/status/bunkerity/bunkerweb/unit-tests.yml?branch=dev&label=unit%20tests" alt="Unit tests status" /></a>
+	<a href="https://app.codecov.io/gh/bunkerity/bunkerweb/tree/dev"><img src="https://codecov.io/gh/bunkerity/bunkerweb/branch/dev/graph/badge.svg" alt="Codecov coverage" /></a>
+	<br />
 	<a href="https://www.bestpractices.dev/projects/8001">
 		<img src="https://www.bestpractices.dev/projects/8001/badge">
 	</a>

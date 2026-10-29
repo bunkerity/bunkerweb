@@ -162,6 +162,21 @@ jobs:
         env:
           COVERAGE_FILE: .cache/unit-coverage/combined
         run: python -m coverage combine --keep .cache/unit-coverage/sqlite .cache/unit-coverage/api
+      # Reporting only, for the README badge: the floors below stay the gate, and a failed upload (or a fork PR,
+      # which gets no secret) does not fail the job. fail_ci_if_error makes the action stop before running an
+      # uploader whose signature or checksum does not verify; continue-on-error keeps that from failing the job.
+      - name: Write the coverage XML report
+        env:
+          COVERAGE_FILE: .cache/unit-coverage/combined
+        run: python -m coverage xml -i -o .cache/unit-coverage/coverage.xml
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7.1.1
+        continue-on-error: true
+        with:
+          files: .cache/unit-coverage/coverage.xml
+          disable_search: true
+          fail_ci_if_error: true
+          token: ${{ secrets.CODECOV_TOKEN }}
       - name: Enforce component coverage floors
         run: python tests/unit/coverage_gate.py .cache/unit-coverage/combined --json .cache/unit-coverage/gate.json
 
