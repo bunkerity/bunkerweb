@@ -110,8 +110,12 @@ function whitelist:init()
 	local i = 0
 	for key in server_name:gmatch("%S+") do
 		for kind, _ in pairs(whitelists) do
-			local file_path = "/var/cache/bunkerweb/whitelist/" .. key .. "/" .. kind .. ".list"
-			local f = open(file_path, "r")
+			-- The download job can leave retired files in a concurrent config push.
+			local urls = get_variable("WHITELIST_" .. kind .. "_URLS", true, { bw = { server_name = key } })
+			local f
+			if urls and urls:match("%S") then
+				f = open("/var/cache/bunkerweb/whitelist/" .. key .. "/" .. kind .. ".list", "r")
+			end
 			if f then
 				for line in f:lines() do
 					if line ~= "" then
