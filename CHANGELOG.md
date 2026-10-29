@@ -21,6 +21,7 @@
 - [BUGFIX] `deps`: repeated post-install hooks for lua-nginx-module and lua-resty-core no longer fail on removed test directories or reapply patches.
 - [BUGFIX] `jobs`: an unreachable GitHub API skips the optional update check instead of failing the job, and malformed release entries are ignored.
 - [BUGFIX] `jobs`: a job run without an explicit path infers its calling script correctly.
+- [BUGFIX] `letsencrypt`: a ZeroSSL retry count or delay of `0` is kept, and domains matching a public suffix wildcard rule are rejected.
 - [BUGFIX] `linux`: package upgrades make an existing database lock file readable by nginx without replacing it.
 - [BUGFIX] `metrics`: blocked-request history survives the shared memory restore after a reload, and the configured memory retry limit applies to every write.
 - [BUGFIX] `modsecurity`: the global CRS mode loads the downloaded CRS plugins configured across services.
