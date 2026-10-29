@@ -5,6 +5,7 @@
 - [BREAKING] `reverseproxy`: stream upstream TLS settings (`REVERSE_PROXY_SSL_VERIFY=yes`, protocols, ciphers, cached client certificate) now turn on TLS to the backend instead of being ignored. Clear them for a plaintext backend.
 - [BREAKING] `core`: setting regexes are stricter: list values glued without a separator (`404500`) and all-space values are refused. `AUTH_BASIC_USER` is wider and takes any value without `:`.
 - [BREAKING] `core`: the Lua API disk fallback needs an explicit `API_TOKEN` line in `variables.env`; a file without one is refused.
+- [SECURITY] `antibot`, `country`: `ANTIBOT_IGNORE_URI` and `COUNTRY_IGNORE_URI` now match the normalized request path (alone, or joined with the query string) and no longer the raw path, so a client can no longer skip the check on a protected location with a path NGINX still routes there (`//x`, `/%78`, `/./x`) when the pattern is a negative lookahead such as `^/(?!search)`.
 - [SECURITY] `core`: archives over the extraction size or member limits are refused, so a hostile download source can no longer fill the scheduler disk.
 - [SECURITY] `jobs`: an empty JSON selector term in a list download is rejected instead of widening the IP trust lists.
 - [BUGFIX] `all-in-one`: NGINX and service log lines reach the container logs promptly.
