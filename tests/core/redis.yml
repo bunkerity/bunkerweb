@@ -15,11 +15,10 @@ actions:
     restart_stack: false
   check_keys:
     type: redis
-    # The plain path dials 127.0.0.1:<port>, and the container this spec inspects is the shared
-    # `redis` from tests/misc/docker/redis.yml -- which publishes 127.0.0.1:${TESTS_REDIS_PORT:-6390},
-    # NOT 6379, since the state store moved off the product's port. The action default 6379 is still
-    # correct on Linux (packaged redis-server, host network) and on All-in-one (6383, below), so the
-    # override is per-integration rather than a new default. Keep in step with TESTS_REDIS_PORT.
+    # The shared Redis fixture publishes 6390 on the runner (TESTS_REDIS_PORT); Linux uses
+    # the host network too. All-in-one uses its own Redis on 6383. See tests/misc/docker/redis.yml.
+    Linux:
+      port: 6390
     Docker:
       port: 6390
     Autoconf:
@@ -54,6 +53,8 @@ actions:
   check_counter_incremented:
     type: redis
     # Ports as in check_keys.
+    Linux:
+      port: 6390
     Docker:
       port: 6390
     Autoconf:
@@ -86,6 +87,8 @@ actions:
   check_counter_cleared_by_unban:
     type: redis
     # Ports as in check_keys.
+    Linux:
+      port: 6390
     Docker:
       port: 6390
     Autoconf:
@@ -104,11 +107,10 @@ actions:
       db: 0
   clear_keys:
     type: redis
-    # The plain path dials 127.0.0.1:<port>, and the container this spec inspects is the shared
-    # `redis` from tests/misc/docker/redis.yml -- which publishes 127.0.0.1:${TESTS_REDIS_PORT:-6390},
-    # NOT 6379, since the state store moved off the product's port. The action default 6379 is still
-    # correct on Linux (packaged redis-server, host network) and on All-in-one (6383, below), so the
-    # override is per-integration rather than a new default. Keep in step with TESTS_REDIS_PORT.
+    # The shared Redis fixture publishes 6390 on the runner (TESTS_REDIS_PORT); Linux uses
+    # the host network too. All-in-one uses its own Redis on 6383. See tests/misc/docker/redis.yml.
+    Linux:
+      port: 6390
     Docker:
       port: 6390
     Autoconf:
@@ -147,6 +149,8 @@ actions:
   check_keys_limit:
     type: redis
     # Ports as in check_keys.
+    Linux:
+      port: 6390
     Docker:
       port: 6390
     query: "keys *"
@@ -164,6 +168,8 @@ actions:
   clear_keys_limit:
     type: redis
     # Ports as in clear_keys.
+    Linux:
+      port: 6390
     Docker:
       port: 6390
     Autoconf:
@@ -196,6 +202,8 @@ actions:
   check_keys_session:
     type: redis
     # Ports as in check_keys.
+    Linux:
+      port: 6390
     Docker:
       port: 6390
     query: "keys sessions_:test:*"
@@ -212,6 +220,8 @@ actions:
   clear_keys_session:
     type: redis
     # Ports as in clear_keys.
+    Linux:
+      port: 6390
     Docker:
       port: 6390
     Autoconf:
@@ -241,11 +251,10 @@ actions:
     restart_stack: false
   check_keys_global_scope:
     type: redis
-    # The plain path dials 127.0.0.1:<port>, and the container this spec inspects is the shared
-    # `redis` from tests/misc/docker/redis.yml -- which publishes 127.0.0.1:${TESTS_REDIS_PORT:-6390},
-    # NOT 6379, since the state store moved off the product's port. The action default 6379 is still
-    # correct on Linux (packaged redis-server, host network) and on All-in-one (6383, below), so the
-    # override is per-integration rather than a new default. Keep in step with TESTS_REDIS_PORT.
+    # The shared Redis fixture publishes 6390 on the runner (TESTS_REDIS_PORT); Linux uses
+    # the host network too. All-in-one uses its own Redis on 6383. See tests/misc/docker/redis.yml.
+    Linux:
+      port: 6390
     Docker:
       port: 6390
     Autoconf:
@@ -265,11 +274,10 @@ actions:
       db: 0
   clear_keys_1:
     type: redis
-    # The plain path dials 127.0.0.1:<port>, and the container this spec inspects is the shared
-    # `redis` from tests/misc/docker/redis.yml -- which publishes 127.0.0.1:${TESTS_REDIS_PORT:-6390},
-    # NOT 6379, since the state store moved off the product's port. The action default 6379 is still
-    # correct on Linux (packaged redis-server, host network) and on All-in-one (6383, below), so the
-    # override is per-integration rather than a new default. Keep in step with TESTS_REDIS_PORT.
+    # The shared Redis fixture publishes 6390 on the runner (TESTS_REDIS_PORT); Linux uses
+    # the host network too. All-in-one uses its own Redis on 6383. See tests/misc/docker/redis.yml.
+    Linux:
+      port: 6390
     Docker:
       port: 6390
     Autoconf:
@@ -813,6 +821,11 @@ config:
   REDIS_SENTINEL_MASTER: "bw-master"
   REDIS_KEEPALIVE_IDLE: "30000"
   REDIS_KEEPALIVE_POOL: "10"
+
+# Linux resolves `redis` to loopback and reaches the shared fixture through its published port.
+Linux:
+  config:
+    REDIS_PORT: "6390"
 
 All-in-one:
   config:
