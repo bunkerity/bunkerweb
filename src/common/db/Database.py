@@ -4746,10 +4746,13 @@ class Database:
 
                             db_values = [
                                 (self._empty_if_none(select.value), select.order)
-                                for select in session.query(Selects).with_entities(Selects.value, Selects.order).filter_by(setting_id=setting)
+                                for select in session.query(Selects)
+                                .with_entities(Selects.value, Selects.order)
+                                .filter_by(setting_id=setting)
+                                .order_by(Selects.order)
                             ]
-                            select_values = enumerate(value.get("select", []), start=1)
-                            different_values = any(db_value != (value, order) for db_value, (value, order) in zip(db_values, select_values))
+                            select_values = [(self._empty_if_none(select), order) for order, select in enumerate(value.get("select", []), start=1)]
+                            different_values = db_values != select_values
 
                             if different_values:
                                 changes = True
@@ -4765,6 +4768,7 @@ class Database:
                                 for msel in session.query(Multiselects)
                                 .with_entities(Multiselects.option_id, Multiselects.label, Multiselects.value, Multiselects.order)
                                 .filter_by(setting_id=setting)
+                                .order_by(Multiselects.order)
                             ]
                             multiselect_values = [
                                 (msel.get("id", ""), msel.get("label", ""), self._empty_if_none(msel.get("value", "")), order)
@@ -4953,13 +4957,17 @@ class Database:
                             saved_templates.add(template_id)
 
                             db_ids = [step.id for step in session.query(Template_steps).with_entities(Template_steps.id).filter_by(template_id=template_id)]
-                            missing_ids = [x for x in range(1, len(template_data.get("steps", [])) + 1) if x not in db_ids]
+                            missing_ids = [x for x in db_ids if x > len(template_data.get("steps", []))]
 
                             if missing_ids:
                                 changes = True
-                                session.query(Template_settings).filter(Template_settings.step_id.in_(missing_ids)).delete()
-                                session.query(Template_custom_configs).filter(Template_custom_configs.step_id.in_(missing_ids)).delete()
-                                session.query(Template_steps).filter(Template_steps.id.in_(missing_ids)).delete()
+                                session.query(Template_settings).filter(
+                                    Template_settings.template_id == template_id, Template_settings.step_id.in_(missing_ids)
+                                ).delete()
+                                session.query(Template_custom_configs).filter(
+                                    Template_custom_configs.template_id == template_id, Template_custom_configs.step_id.in_(missing_ids)
+                                ).delete()
+                                session.query(Template_steps).filter(Template_steps.template_id == template_id, Template_steps.id.in_(missing_ids)).delete()
 
                             steps_settings = {}
                             steps_configs = {}
@@ -4984,7 +4992,7 @@ class Database:
 
                                     if updates:
                                         changes = True
-                                        session.query(Template_steps).filter(Template_steps.id == db_step.id).update(updates)
+                                        session.query(Template_steps).filter_by(id=db_step.id, template_id=template_id).update(updates)
 
                                 for setting in step.get("settings", []):
                                     if step_id not in steps_settings:
@@ -4996,14 +5004,16 @@ class Database:
                                         steps_configs[step_id] = []
                                     steps_configs[step_id].append(config)
 
-                            db_template_settings = [
-                                f"{template_setting.setting_id}_{template_setting.suffix}" if template_setting.suffix else template_setting.setting_id
+                            db_template_settings = {
+                                (
+                                    f"{template_setting.setting_id}_{template_setting.suffix}" if template_setting.suffix else template_setting.setting_id
+                                ): template_setting.id
                                 for template_setting in session.query(Template_settings)
                                 .with_entities(Template_settings.id, Template_settings.setting_id, Template_settings.suffix)
                                 .filter_by(template_id=template_id)
                                 .order_by(Template_settings.order)
-                            ]
-                            missing_ids = [setting for setting in template_data.get("settings", {}) if setting not in db_template_settings]
+                            }
+                            missing_ids = [row_id for setting, row_id in db_template_settings.items() if setting not in template_data.get("settings", {})]
 
                             if missing_ids:
                                 changes = True
@@ -5086,18 +5096,18 @@ class Database:
 
                                 order += 1
 
-                            db_template_configs = [
-                                f"{config.type.replace('_', '-')}/{config.name}.conf"
+                            db_template_configs = {
+                                f"{config.type.replace('_', '-')}/{config.name}.conf": config.id
                                 for config in session.query(Template_custom_configs)
-                                .with_entities(Template_custom_configs.type, Template_custom_configs.name)
+                                .with_entities(Template_custom_configs.id, Template_custom_configs.type, Template_custom_configs.name)
                                 .filter_by(template_id=template_id)
                                 .order_by(Template_custom_configs.order)
-                            ]
-                            missing_ids = [config for config in template_data.get("configs", {}) if config not in db_template_configs]
+                            }
+                            missing_ids = [row_id for config, row_id in db_template_configs.items() if config not in template_data.get("configs", [])]
 
                             if missing_ids:
                                 changes = True
-                                session.query(Template_custom_configs).filter(Template_custom_configs.name.in_(missing_ids)).delete()
+                                session.query(Template_custom_configs).filter(Template_custom_configs.id.in_(missing_ids)).delete()
 
                             order = 0
                             for config in template_data.get("configs", []):

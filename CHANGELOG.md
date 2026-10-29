@@ -21,6 +21,7 @@
 - [BUGFIX] `db`: saving multisite global settings no longer leaves a database session idle in a transaction.
 - [BUGFIX] `db`: refused or failed custom config saves are reported, incompatible-method edits are warned about, and templates resolve only from `USE_TEMPLATE`.
 - [BUGFIX] `db`: a removed job no longer leaves its cache and run history behind.
+- [BUGFIX] `db`: plugin updates no longer rewrite same-numbered steps of other templates, and drop removed steps, settings, custom configs and select options.
 - [BUGFIX] `deps`: repeated post-install hooks for lua-nginx-module and lua-resty-core no longer fail on removed test directories or reapply patches.
 - [BUGFIX] `jobs`: an unreachable GitHub API skips the optional update check instead of failing the job, and malformed release entries are ignored.
 - [BUGFIX] `jobs`: a job run without an explicit path infers its calling script correctly.
