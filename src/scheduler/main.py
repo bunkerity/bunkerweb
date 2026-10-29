@@ -881,6 +881,10 @@ def pre_push_configuration(env: Dict[str, Any], first_start: bool) -> Tuple[bool
     if not generate_configs():
         return False, False, True
 
+    if first_start:
+        # Startup generation may have run before any instance was reachable.
+        send_file_to_bunkerweb(CUSTOM_CONFIGS_PATH, "/custom_configs")
+
     futures = [
         SCHEDULER_TASKS_EXECUTOR.submit(send_file_to_bunkerweb, CONFIG_PATH, "/confs"),
         SCHEDULER_TASKS_EXECUTOR.submit(send_file_to_bunkerweb, CACHE_PATH, "/cache"),

@@ -51,6 +51,7 @@
 - [BUGFIX] `scheduler`: the configuration is no longer rendered, pushed and reloaded a second time after the once-jobs when none of them changed anything. (Fixes #4106)
 - [BUGFIX] `scheduler`: job paths that escape the plugin jobs directory are rejected, and imported job modules are cleaned up after `sys.exit()`.
 - [BUGFIX] `scheduler`: unchanged plugins are no longer reinstalled after their executable file permissions are normalized.
+- [BUGFIX] `scheduler`: on first start, custom configurations (a template's included) now reach an instance discovered after they were generated before its first reload, which no longer fails on a missing ModSecurity include and blocks reloads for five minutes.
 - [BUGFIX] `ssl`: certificate providers initialize without crashing when there is no service.
 - [BUGFIX] `stream`: banned clients are let through in detect mode.
 - [BUGFIX] `ui`: plugin action modules are loaded in isolation, so a plugin without a method can no longer run another plugin's code.
