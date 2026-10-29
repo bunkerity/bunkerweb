@@ -49,6 +49,7 @@
 - [BUGFIX] `ui`: setting inputs enforce their regex in the browser again, docs links work on pre-release builds, and 16 missing translation keys were added.
 - [BUGFIX] `ui`: oversized timestamps in the Basic Authentication and Bad Behavior dashboards fall back to the numeric and text display.
 - [BUGFIX] `ui`: reading user permissions releases the role-query connection even when the user has no roles.
+- [BUGFIX] `ui`: the temporary "BunkerWeb UI is starting" page no longer returns a 500 while the web UI starts.
 - [BUGFIX] `whitelist`: cached URL lists are ignored once their URL setting is removed.
 - [MISC] `db`: UI, API and wizard saves now clear settings written by another of the three, which used to survive because only the saving method's own rows were cleaned.
 - [MISC] `plugins`: plugins with group or other write bits, or directories that are not `0755`, get a new checksum and may be refreshed once on upgrade.
