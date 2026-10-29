@@ -168,13 +168,12 @@ def pre_render(app, *args, **kwargs):
         },
     }
 
-    root_folder = Path(sep, "var", "tmp", "bunkerweb", "ui")
+    folder_path = Path(sep, "var", "tmp", "bunkerweb", "ui").joinpath("letsencrypt", str(uuid4()))
     try:
         # ? Fetching Let's Encrypt cache files
         regular_cache_files = kwargs["db"].get_jobs_cache_files(job_name="certbot-renew")
 
         # ? Extracting cache files
-        folder_path = root_folder.joinpath("letsencrypt", str(uuid4()))
         regular_le_folder = folder_path.joinpath("regular")
         extract_cache(regular_le_folder, regular_cache_files)
 
@@ -185,7 +184,6 @@ def pre_render(app, *args, **kwargs):
         logger.error(f"Failed to get Let's Encrypt certificates: {e}")
         ret["error"] = str(e)
     finally:
-        if folder_path:
-            rmtree(root_folder, ignore_errors=True)
+        rmtree(folder_path, ignore_errors=True)
 
     return ret
