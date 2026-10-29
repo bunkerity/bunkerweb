@@ -325,6 +325,10 @@ def plugin_tar_filter(tarinfo):
         if p.name in _EXCLUDED_FILE_NAMES:
             return None
         tarinfo.mtime = 0
+        # Extraction drops group/other write and ignores directory modes.
+        tarinfo.mode &= ~0o022
+        if tarinfo.isdir():
+            tarinfo.mode = 0o755
         tarinfo.uid = 0
         tarinfo.gid = 0
         tarinfo.uname = "root"
