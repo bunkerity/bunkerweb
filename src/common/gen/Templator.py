@@ -633,6 +633,7 @@ class Templator:
     def _write_config(self) -> bool:
         """Write the configuration to a variables.env file. Returns whether it was written."""
         real_path = self._output / "variables.env"
+        tmp_path = real_path.with_name(".variables.env.tmp")
         try:
             real_path.parent.mkdir(parents=True, exist_ok=True)
             # Sorted so two runs over the same settings produce byte-identical output.
@@ -640,8 +641,11 @@ class Templator:
             # dict insertion order here varies between runs, which alone was enough to
             # make every /confs push look like a change.
             config_lines = [f"{k}={v}\n" for k, v in sorted(self._full_config.items())]
-            real_path.write_text("".join(config_lines))
+            tmp_path.write_text("".join(config_lines))
+            tmp_path.replace(real_path)
         except IOError as e:
+            with suppress(OSError):
+                tmp_path.unlink()
             logger.error(f"Error writing configuration to {real_path}: {e}")
             return False
         return True
