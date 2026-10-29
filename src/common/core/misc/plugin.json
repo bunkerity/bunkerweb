@@ -29,7 +29,7 @@
       "help": "Allowed HTTP and WebDAV methods, separated with pipes. Custom uppercase methods may include underscores and dashes.",
       "id": "allowed-methods",
       "label": "Allowed methods",
-      "regex": "^(?!\\|)(\\|?[A-Z][A-Z_-]{2,})+$",
+      "regex": "^[A-Z][A-Z_-]{2,}(\\|[A-Z][A-Z_-]{2,})*$",
       "type": "multivalue",
       "separator": "|"
     },
@@ -156,7 +156,7 @@
       "help": "List of external plugins URLs (direct download to .zip or .tar file) to download and install (URLs are separated with space).",
       "id": "external-plugin-urls",
       "label": "External plugin URLs",
-      "regex": "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*) *)*$",
+      "regex": "^(?! +$) *(?:(https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=][\\-\\w\\(\\)!@:%+.~#?&\\/=$]*(?: +|$))*$",
       "type": "multivalue"
     },
     "DENY_HTTP_STATUS": {

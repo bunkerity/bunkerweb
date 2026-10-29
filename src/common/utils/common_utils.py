@@ -42,7 +42,7 @@ import logging
 PLUGIN_TAR_COMPRESS_LEVEL: int = 3
 # Underscores are accepted because Docker/internal DNS commonly uses them in container names.
 _HOSTNAME_LABEL_RX = re_compile(r"^(?!-)[A-Za-z0-9_-]{1,63}(?<!-)$")
-_DURATION_RX = re_compile(r"^(\d+(?:\.\d+)?)(ms|[smhdwMy])?$")
+_DURATION_RX = re_compile(r"^([0-9]+(?:\.[0-9]+)?)(ms|[smhdwMy])?$")
 _DURATION_UNITS_MS = {"ms": 1, "s": 1000, "m": 60000, "h": 3600000, "d": 86400000, "w": 604800000, "M": 2592000000, "y": 31536000000}
 
 

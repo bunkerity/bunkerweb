@@ -2,7 +2,9 @@
 
 ## v1.6.18~rc2 - ????/??/??
 
+- [BREAKING] `core`: setting regexes are stricter: list values glued without a separator (`404500`) and all-space values are refused. `AUTH_BASIC_USER` is wider and takes any value without `:`.
 - [BUGFIX] `autoconf`: the Kubernetes controller retries a configuration deferred while the scheduler was busy, so a new Ingress deploys without waiting for the next event. (Fixes #4107)
+- [BUGFIX] `core`: setting regexes are anchored and no longer backtrack exponentially on a short malformed value, and duration settings refuse non-ASCII digits.
 - [BUGFIX] `cors`: `Access-Control-Allow-Credentials` is sent on real responses as well as preflights, and removed even when sent by an upstream for disallowed origins or wildcard `Access-Control-Allow-Origin`.
 - [BUGFIX] `cors`: with `USE_CORS=yes`, a preflight request is no longer refused with a 405 when `ALLOWED_METHODS` does not list `OPTIONS`.
 - [BUGFIX] `db`: pruning job runs no longer fails with a conflict on MariaDB when a run is inserted meanwhile.
