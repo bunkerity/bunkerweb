@@ -614,7 +614,9 @@ local function wait_reload(token, seconds, no_wait_reason)
 		if ngx.now() >= deadline then
 			break
 		end
-		ngx.sleep(math.min(RELOAD_POLL, deadline - ngx.now()))
+		-- Never the remaining time: ngx.sleep truncates to whole milliseconds, and a zero-delay timer does not
+		-- advance the cached clock, so a sub-millisecond remainder would spin until the swap lock expires.
+		ngx.sleep(RELOAD_POLL)
 	end
 	-- Keep the in-flight marker; normal completion or existing stale-marker recovery releases it.
 	local message = "reload signalled but readiness is unconfirmed: "
