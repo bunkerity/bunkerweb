@@ -47,6 +47,7 @@ from werkzeug.routing.exceptions import BuildError
 
 from common_utils import get_version, is_newer_version_available  # type: ignore
 
+from app.html_pattern import v_safe_pattern
 from app.models.biscuit import BiscuitMiddleware, _internal_error_response
 from app.models.reverse_proxied import ReverseProxied
 from app.models.session_cookie import use_per_request_cookie
@@ -871,6 +872,8 @@ with app.app_context():
             except BuildError as e:
                 LOGGER.debug(f"Couldn't build the URL for {endpoint}: {e}")
         return "#"
+
+    app.jinja_env.filters["v_safe_pattern"] = v_safe_pattern
 
     # Declare functions for jinja2
     app.jinja_env.globals.update(
