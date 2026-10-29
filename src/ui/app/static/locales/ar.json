@@ -13,7 +13,8 @@
     "no_changes_detected": "لم يتم اكتشاف أي تغييرات.",
     "notice": "تنويه",
     "ping_error": "حدث خطأ أثناء اختبار اتصال المثيلات.",
-    "readonly_mode": "هذا الإجراء معطل في وضع القراءة فقط."
+    "readonly_mode": "هذا الإجراء معطل في وضع القراءة فقط.",
+    "configs_import_invalid_file": "الرجاء تحميل ملف تصدير التكوينات المخصصة صالح (.json)."
   },
   "aria": {
     "label": {
@@ -1240,7 +1241,16 @@
     },
     "retention_notice": "التقارير مخزَّنة في ذاكرة مؤقتة دائرية داخل الذاكرة: تُحذف أقدم الإدخالات عند بلوغ الحد المُهيَّأ. وما لم يكن Redis مفعَّلاً، تُمحى التقارير أيضاً عند إعادة تشغيل BunkerWeb.",
     "security_incident": "حادث أمني",
-    "security_report_data": "بيانات تقرير الأمان"
+    "security_report_data": "بيانات تقرير الأمان",
+    "bad_behavior_no_details": "لم يتم التقاط أي تفاصيل حول النشاط غير اللائق لهذا التقرير.",
+    "bad_behavior_activity_detected": "تم اكتشاف نشاط غير لائق",
+    "bad_behavior_activity_explanation": "تم تجاوز هذه الطلبات الحد المسموح به من النشاط غير اللائق وتم تجميعها معًا.",
+    "bad_behavior_request_label": "طلب",
+    "bad_behavior_ip": "عنوان IP",
+    "bad_behavior_server": "الخادم",
+    "bad_behavior_url": "URL",
+    "bad_behavior_captured_at": "تم التقاط في",
+    "bad_behavior_request_id": "معرف الطلب"
   },
   "scope": {
     "all_services": "جميع الخدمات",
@@ -1427,7 +1437,8 @@
     "template_in_use_description": "لا يُسمح بإجراء تغييرات خارج القالب الحالي. يرجى إجراء التغييرات باستخدام القالب الحالي أو التبديل إلى الوضع المتقدم/الخام.",
     "unique_server_name": "اسم خادم فريد",
     "up": "قيد التشغيل",
-    "yes": "نعم"
+    "yes": "نعم",
+    "not_applicable": "غير متاح"
   },
   "step": {
     "next": "التالي",
@@ -1724,7 +1735,8 @@
       "show_selected_only": "إظهار المحددة فقط",
       "stop_instance": "إيقاف المثيل {{hostname}}",
       "unban_ip": "رفع الحظر عن {{ip}}",
-      "value_from_global": "قيمة من الإعدادات العامة"
+      "value_from_global": "قيمة من الإعدادات العامة",
+      "update_ban_duration": "تحديث مدة الحظر"
     },
     "cannot_delete_original_ban": "لا يمكن حذف إدخال الحظر الأصلي.",
     "cannot_remove_disabled": "لا يمكن الإزالة لأن إعدادًا واحدًا أو أكثر معطل.",
@@ -1962,7 +1974,8 @@
     "zerossl_api_retry": "عدد محاولات إعادة طلبات واجهة برمجة تطبيقات ZeroSSL (القيمة 0 تعطل إعادة المحاولة).",
     "zerossl_api_retry_delay": "التأخير بالثواني بين محاولات إعادة واجهة برمجة تطبيقات ZeroSSL.",
     "zerossl_api_connect_timeout": "مهلة الاتصال بالثواني لطلبات واجهة برمجة تطبيقات ZeroSSL.",
-    "zerossl_api_max_time": "الوقت الإجمالي الأقصى بالثواني لكل طلب واجهة برمجة تطبيقات ZeroSSL."
+    "zerossl_api_max_time": "الوقت الإجمالي الأقصى بالثواني لكل طلب واجهة برمجة تطبيقات ZeroSSL.",
+    "readonly_mode": "هذه العملية غير مسموح بها في وضع القراءة فقط."
   },
   "totp": {
     "prompt": "يرجى إدخال رمز TOTP الخاص بك."
@@ -1985,5 +1998,12 @@
     "required": "{{field}} مطلوب.",
     "service_required_for_ban": "يجب تحديد خدمة لحظر خاص بالخدمة.",
     "zerossl_email_or_api_key_required": "يتطلب ZeroSSL إما بريدًا إلكترونيًا أو مفتاح API لـ ZeroSSL."
+  },
+  "plugins": {
+    "multivalue": {
+      "show_less": "إظهار أقل",
+      "more_value": "قيمة أخرى",
+      "more_values": "قيم أخرى"
+    }
   }
 }

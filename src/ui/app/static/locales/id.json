@@ -13,7 +13,8 @@
     "no_changes_detected": "Tidak ada perubahan yang terdeteksi.",
     "notice": "Pemberitahuan",
     "ping_error": "Terjadi kesalahan saat melakukan ping ke instans.",
-    "readonly_mode": "Tindakan ini dinonaktifkan dalam mode hanya-baca."
+    "readonly_mode": "Tindakan ini dinonaktifkan dalam mode hanya-baca.",
+    "configs_import_invalid_file": "Unggah file ekspor konfigurasi khusus yang valid (.json)."
   },
   "aria": {
     "label": {
@@ -1240,7 +1241,16 @@
     },
     "retention_notice": "Laporan adalah buffer memori bergulir: entri terlama akan dihapus setelah batas yang dikonfigurasi tercapai. Kecuali Redis diaktifkan, laporan juga akan dihapus saat BunkerWeb dimulai ulang.",
     "security_incident": "Insiden Keamanan",
-    "security_report_data": "Data Laporan Keamanan"
+    "security_report_data": "Data Laporan Keamanan",
+    "bad_behavior_no_details": "Tidak ada detail perilaku buruk yang ditangkap untuk laporan ini.",
+    "bad_behavior_activity_detected": "Aktivitas perilaku buruk terdeteksi",
+    "bad_behavior_activity_explanation": "Permintaan ini melebihi ambang batas perilaku buruk dan dikelompokkan bersama.",
+    "bad_behavior_request_label": "Permintaan",
+    "bad_behavior_ip": "Alamat IP",
+    "bad_behavior_server": "Server",
+    "bad_behavior_url": "URL",
+    "bad_behavior_captured_at": "Ditangkap pada",
+    "bad_behavior_request_id": "ID Permintaan"
   },
   "scope": {
     "all_services": "Semua Layanan",
@@ -1427,7 +1437,8 @@
     "template_in_use_description": "Perubahan di luar template saat ini tidak diizinkan. Silakan buat perubahan menggunakan template saat ini atau beralih ke mode Lanjutan/Mentah.",
     "unique_server_name": "Nama Server Unik",
     "up": "Aktif",
-    "yes": "Ya"
+    "yes": "Ya",
+    "not_applicable": "T/A"
   },
   "step": {
     "next": "Berikutnya",
@@ -1724,7 +1735,8 @@
       "show_selected_only": "Tampilkan hanya yang dipilih",
       "stop_instance": "Hentikan Instans {{hostname}}",
       "unban_ip": "Batalkan larangan {{ip}}",
-      "value_from_global": "Nilai dari pengaturan global"
+      "value_from_global": "Nilai dari pengaturan global",
+      "update_ban_duration": "Perbarui durasi larangan"
     },
     "cannot_delete_original_ban": "Tidak dapat menghapus entri Larangan asli.",
     "cannot_remove_disabled": "Tidak dapat menghapus karena satu atau lebih pengaturan dinonaktifkan.",
@@ -1962,7 +1974,8 @@
     "zerossl_api_retry": "Jumlah percobaan ulang untuk permintaan API ZeroSSL (0 menonaktifkan percobaan ulang).",
     "zerossl_api_retry_delay": "Penundaan dalam detik antara percobaan ulang API ZeroSSL.",
     "zerossl_api_connect_timeout": "Batas waktu koneksi dalam detik untuk panggilan API ZeroSSL.",
-    "zerossl_api_max_time": "Waktu total maksimum dalam detik untuk setiap permintaan API ZeroSSL."
+    "zerossl_api_max_time": "Waktu total maksimum dalam detik untuk setiap permintaan API ZeroSSL.",
+    "readonly_mode": "Aksi ini tidak diizinkan dalam mode baca-saja."
   },
   "totp": {
     "prompt": "Silakan masukkan kode TOTP Anda."
@@ -1985,5 +1998,12 @@
     "required": "{{field}} diperlukan.",
     "service_required_for_ban": "Layanan harus dipilih untuk larangan spesifik layanan.",
     "zerossl_email_or_api_key_required": "ZeroSSL memerlukan email atau kunci API ZeroSSL."
+  },
+  "plugins": {
+    "multivalue": {
+      "show_less": "Tampilkan lebih sedikit",
+      "more_value": "nilai lagi",
+      "more_values": "nilai lagi"
+    }
   }
 }

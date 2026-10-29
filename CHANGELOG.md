@@ -46,6 +46,7 @@
 - [BUGFIX] `ui`: running jobs without a plugin no longer errors after scheduling, and missing form fields on instance, job, plugin and PRO license routes redirect with their message.
 - [BUGFIX] `ui`: deleting a plugin removes its stale routing state, so its former pages return 404 instead of 500.
 - [BUGFIX] `ui`: the template editor shows server messages as text, so a template id or name can no longer inject markup into the feedback banner.
+- [BUGFIX] `ui`: setting inputs enforce their regex in the browser again, docs links work on pre-release builds, and 16 missing translation keys were added.
 - [BUGFIX] `ui`: oversized timestamps in the Basic Authentication and Bad Behavior dashboards fall back to the numeric and text display.
 - [BUGFIX] `ui`: reading user permissions releases the role-query connection even when the user has no roles.
 - [BUGFIX] `whitelist`: cached URL lists are ignored once their URL setting is removed.

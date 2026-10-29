@@ -13,7 +13,8 @@
     "no_changes_detected": "Nenhuma alteração detectada.",
     "notice": "Aviso",
     "ping_error": "Ocorreu um erro ao fazer ping às instâncias.",
-    "readonly_mode": "Esta ação está desativada no modo somente leitura."
+    "readonly_mode": "Esta ação está desativada no modo somente leitura.",
+    "configs_import_invalid_file": "Por favor, carregue um ficheiro de exportação de configuração personalizado válido (.json)."
   },
   "aria": {
     "label": {
@@ -1240,7 +1241,16 @@
     },
     "retention_notice": "Os relatórios são um buffer circular em memória: as entradas mais antigas são descartadas quando o limite configurado é atingido. A menos que o Redis esteja ativado, também são apagados quando o BunkerWeb reinicia.",
     "security_incident": "Incidente de Segurança",
-    "security_report_data": "Dados do Relatório de Segurança"
+    "security_report_data": "Dados do Relatório de Segurança",
+    "bad_behavior_no_details": "Não foram capturadas informações sobre comportamento inadequado para este relatório.",
+    "bad_behavior_activity_detected": "Atividade de comportamento inadequado detetada",
+    "bad_behavior_activity_explanation": "Estes pedidos excederam o limite de comportamento inadequado e foram agrupados.",
+    "bad_behavior_request_label": "Pedido",
+    "bad_behavior_ip": "Endereço IP",
+    "bad_behavior_server": "Servidor",
+    "bad_behavior_url": "URL",
+    "bad_behavior_captured_at": "Capturado em",
+    "bad_behavior_request_id": "ID do pedido"
   },
   "scope": {
     "all_services": "Todos os Serviços",
@@ -1427,7 +1437,8 @@
     "template_in_use_description": "Não são permitidas alterações fora do modelo atual. Por favor, faça as alterações utilizando o modelo atual ou mude para o modo Avançado/Bruto.",
     "unique_server_name": "Nome do Servidor Único",
     "up": "Ativo",
-    "yes": "Sim"
+    "yes": "Sim",
+    "not_applicable": "N/D"
   },
   "step": {
     "next": "Próximo",
@@ -1724,7 +1735,8 @@
       "show_selected_only": "Mostrar apenas selecionados",
       "stop_instance": "Parar Instância {{hostname}}",
       "unban_ip": "Desbloquear {{ip}}",
-      "value_from_global": "Valor das configurações globais"
+      "value_from_global": "Valor das configurações globais",
+      "update_ban_duration": "Atualizar a duração do bloqueio"
     },
     "cannot_delete_original_ban": "Não é possível eliminar a entrada de bloqueio original.",
     "cannot_remove_disabled": "Não é possível remover porque uma ou mais configurações estão desabilitadas.",
@@ -1962,7 +1974,8 @@
     "zerossl_api_retry": "Número de tentativas para pedidos da API ZeroSSL (0 desativa as tentativas).",
     "zerossl_api_retry_delay": "Atraso em segundos entre tentativas da API ZeroSSL.",
     "zerossl_api_connect_timeout": "Tempo limite de ligação em segundos para chamadas da API ZeroSSL.",
-    "zerossl_api_max_time": "Tempo total máximo em segundos para cada pedido da API ZeroSSL."
+    "zerossl_api_max_time": "Tempo total máximo em segundos para cada pedido da API ZeroSSL.",
+    "readonly_mode": "Esta ação não é permitida no modo de leitura apenas."
   },
   "totp": {
     "prompt": "Por favor, insira seu código TOTP."
@@ -1985,5 +1998,12 @@
     "required": "{{field}} é obrigatório.",
     "service_required_for_ban": "Um serviço deve ser selecionado para um bloqueio específico do serviço.",
     "zerossl_email_or_api_key_required": "O ZeroSSL requer um email ou uma chave de API do ZeroSSL."
+  },
+  "plugins": {
+    "multivalue": {
+      "show_less": "Mostrar menos",
+      "more_value": "mais valor",
+      "more_values": "mais valores"
+    }
   }
 }
