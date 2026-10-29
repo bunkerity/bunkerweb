@@ -48,12 +48,14 @@ def delete_plugin():
     if not current_user.admin:
         return Response("Plugin management is restricted to administrators", 403)
 
-    verify_data_in_form(
+    ret = verify_data_in_form(
         data={"plugins": None},
         err_message="Missing plugins parameter on /plugins/delete.",
         redirect_url="plugins",
         next=True,
     )
+    if ret is not True:
+        return ret
     DATA.load_from_file()
 
     plugins = request.form["plugins"].split(",")
@@ -235,12 +237,14 @@ def plugins_refresh():
 
     tmp_ui_path = TMP_DIR.joinpath("ui")
 
-    verify_data_in_form(
+    ret = verify_data_in_form(
         data={"csrf_token": None},
         err_message="Missing csrf_token parameter on /plugins.",
         redirect_url="plugins",
         next=True,
     )
+    if ret is not True:
+        return ret
 
     # Upload plugins
     if not tmp_ui_path.exists() or not listdir(str(tmp_ui_path)):

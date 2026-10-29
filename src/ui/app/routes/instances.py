@@ -31,18 +31,22 @@ def instances_page():
 def instances_new():
     if DB.readonly:
         return handle_error("Database is in read-only mode", "instances")
-    verify_data_in_form(
+    ret = verify_data_in_form(
         data={"hostname": None},
         err_message="Missing instance hostname parameter on /instances/new.",
         redirect_url="instances",
         next=True,
     )
-    verify_data_in_form(
+    if ret is not True:
+        return ret
+    ret = verify_data_in_form(
         data={"name": None},
         err_message="Missing instance name parameter on /instances/new.",
         redirect_url="instances",
         next=True,
     )
+    if ret is not True:
+        return ret
 
     # Fetch API defaults, including new HTTPS-related settings
     db_config = BW_CONFIG.get_config(
@@ -111,12 +115,14 @@ def instances_action(action: Literal["ping", "reload", "stop", "delete"]):  # TO
     if DB.readonly:
         return handle_error("Database is in read-only mode", "instances")
 
-    verify_data_in_form(
+    ret = verify_data_in_form(
         data={"instances": None},
         err_message=f"Missing instances parameter on /instances/{action}.",
         redirect_url="instances",
         next=True,
     )
+    if ret is not True:
+        return ret
     instances = request.form["instances"].split(",")
     if not instances:
         return handle_error(f"No instance{'s' if len(instances) > 1 else ''} selected.", "instances", True)
