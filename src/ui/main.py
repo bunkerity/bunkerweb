@@ -632,27 +632,18 @@ def refresh_app_context():
     # Remove blueprints for deleted plugins
     for bp_name in list(app.blueprints.keys()):
         if bp_name not in plugin_blueprints and bp_name not in app.original_blueprints:
-            # Remove blueprint and clean up
-            app.blueprints.pop(bp_name, None)
-
             # Clean up sys.path
             if bp_name in app.plugin_sys_paths and app.plugin_sys_paths[bp_name] in sys_path:
                 sys_path.remove(app.plugin_sys_paths[bp_name])
                 del app.plugin_sys_paths[bp_name]
 
-            # Remove URL rules and endpoints
+            # Remove extra pages before the blueprint's rules are dropped.
             for rule in list(app.url_map.iter_rules()):
                 if rule.endpoint.startswith(f"{bp_name}."):
                     if str(rule) == f"/{bp_name}" and bp_name in app.config["EXTRA_PAGES"]:
                         app.config["EXTRA_PAGES"].remove(bp_name)
 
-                    with suppress(ValueError):
-                        app.url_map._rules.remove(rule)
-                        app.url_map._rules_by_endpoint.pop(rule.endpoint, None)
-
-            # Remove view functions
-            for endpoint in [ep for ep in app.view_functions if ep.startswith(f"{bp_name}.")]:
-                app.view_functions.pop(endpoint, None)
+            app._remove_blueprint(bp_name)
 
             LOGGER.debug(f"Blueprint '{bp_name}' was completely removed")
 
