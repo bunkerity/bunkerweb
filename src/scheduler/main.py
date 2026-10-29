@@ -74,10 +74,8 @@ SCHEDULER: Optional[JobScheduler] = None
 SCHEDULER_LOCK = Lock()
 
 CACHE_PATH = Path(sep, "var", "cache", "bunkerweb")
-CACHE_PATH.mkdir(parents=True, exist_ok=True)
 
 CUSTOM_CONFIGS_PATH = Path(sep, "etc", "bunkerweb", "configs")
-CUSTOM_CONFIGS_PATH.mkdir(parents=True, exist_ok=True)
 CUSTOM_CONFIGS_DIRS = (
     "http",
     "stream",
@@ -90,28 +88,37 @@ CUSTOM_CONFIGS_DIRS = (
     "crs-plugins-after",
 )
 
-for custom_config_dir in CUSTOM_CONFIGS_DIRS:
-    CUSTOM_CONFIGS_PATH.joinpath(custom_config_dir).mkdir(parents=True, exist_ok=True)
-
 CONFIG_PATH = Path(sep, "etc", "nginx")
 NGINX_VARIABLES_PATH = CONFIG_PATH.joinpath("variables.env")
 
 EXTERNAL_PLUGINS_PATH = Path(sep, "etc", "bunkerweb", "plugins")
-EXTERNAL_PLUGINS_PATH.mkdir(parents=True, exist_ok=True)
 
 PRO_PLUGINS_PATH = Path(sep, "etc", "bunkerweb", "pro", "plugins")
-PRO_PLUGINS_PATH.mkdir(parents=True, exist_ok=True)
 
 TMP_PATH = Path(sep, "var", "tmp", "bunkerweb")
-TMP_PATH.mkdir(parents=True, exist_ok=True)
 NGINX_TMP_VARIABLES_PATH = TMP_PATH.joinpath("variables.env")
 
 FAILOVER_PATH = TMP_PATH.joinpath("failover")
-FAILOVER_PATH.mkdir(parents=True, exist_ok=True)
 
 HEALTHY_PATH = TMP_PATH.joinpath("scheduler.healthy")
 
 DB_LOCK_FILE = Path(sep, "var", "lib", "bunkerweb", "db.lock")
+
+
+def ensure_runtime_dirs() -> None:
+    """Create the folders the scheduler writes to. Called first by main(), never at import."""
+    for path in (
+        CACHE_PATH,
+        CUSTOM_CONFIGS_PATH,
+        *(CUSTOM_CONFIGS_PATH.joinpath(d) for d in CUSTOM_CONFIGS_DIRS),
+        EXTERNAL_PLUGINS_PATH,
+        PRO_PLUGINS_PATH,
+        TMP_PATH,
+        FAILOVER_PATH,
+    ):
+        path.mkdir(parents=True, exist_ok=True)
+
+
 LOGGER = getLogger("SCHEDULER")
 PLUGIN_VALIDATOR: Optional[Configurator] = None
 
@@ -257,10 +264,6 @@ def handle_stop(signum, frame):
     stop(0)
 
 
-signal(SIGINT, handle_stop)
-signal(SIGTERM, handle_stop)
-
-
 # Function to catch SIGHUP and reload the scheduler
 def handle_reload(signum, frame):
     global RELOAD_SCAN_CONFIGS
@@ -296,7 +299,10 @@ def handle_reload(signum, frame):
         LOGGER.error(f"Exception while reloading scheduler : {e}")
 
 
-signal(SIGHUP, handle_reload)
+def install_signal_handlers() -> None:
+    signal(SIGINT, handle_stop)
+    signal(SIGTERM, handle_stop)
+    signal(SIGHUP, handle_reload)
 
 
 def stop(status):
@@ -1176,7 +1182,12 @@ def backup_failover():
         BACKING_UP_FAILOVER.clear()
 
 
-if __name__ == "__main__":
+def main() -> None:
+    global SCHEDULER, JOB, RELOAD_SCAN_CONFIGS
+
+    ensure_runtime_dirs()
+    install_signal_handlers()
+
     try:
         # Handle Docker secrets first
         docker_secrets = handle_docker_secrets()
@@ -2006,3 +2017,7 @@ if __name__ == "__main__":
     except:
         LOGGER.error(f"Exception while executing scheduler : {format_exc()}")
         stop(1)
+
+
+if __name__ == "__main__":
+    main()
