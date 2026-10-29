@@ -204,6 +204,11 @@ function bunkernet:log(bypass_checks)
 	if reason == "bunkernet" or reason == "modsecurity-body" then
 		return self:ret(true, "skipping report because the reason is " .. reason)
 	end
+	-- Served challenges and redirects do not establish that the client is an attacker.
+	local action = type(reason_data) == "table" and reason_data.action
+	if action == "challenge" or action == "captcha" or action == "redirect" then
+		return self:ret(true, "skipping report : the remediation was '" .. action .. "', the client was not blocked")
+	end
 
 	-- Check if IP is global
 	if not self.ctx.bw.ip_is_global then

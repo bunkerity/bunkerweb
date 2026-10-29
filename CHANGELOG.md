@@ -10,6 +10,7 @@
 - [BUGFIX] `all-in-one`: NGINX and service log lines reach the container logs promptly.
 - [BUGFIX] `autoconf`: the Kubernetes controller retries a configuration deferred while the scheduler was busy, so a new Ingress deploys without waiting for the next event. (Fixes #4107)
 - [BUGFIX] `backup`: the database lock is taken even when the scheduler cannot write the lock file.
+- [BUGFIX] `bunkernet`: served challenges, captchas and redirects are no longer reported as attacks.
 - [BUGFIX] `core`: setting regexes are anchored and no longer backtrack exponentially on a short malformed value, and duration settings refuse non-ASCII digits.
 - [BUGFIX] `core`: stream listeners shared by several services emit `reuseport` once, and empty ports and directive arguments are omitted.
 - [BUGFIX] `core`: `variables.env` is replaced atomically, so a concurrent reader never sees a truncated file.
