@@ -1,5 +1,11 @@
 # Changelog
 
+## v1.6.18~rc2 - ????/??/??
+
+- [BUGFIX] `cors`: `Access-Control-Allow-Credentials` is sent on real responses as well as preflights, and removed even when sent by an upstream for disallowed origins or wildcard `Access-Control-Allow-Origin`.
+- [BUGFIX] `cors`: with `USE_CORS=yes`, a preflight request is no longer refused with a 405 when `ALLOWED_METHODS` does not list `OPTIONS`.
+- [BUGFIX] `db`: pruning job runs no longer fails with a conflict on MariaDB when a run is inserted meanwhile.
+
 ## v1.6.18~rc1 - 2026/10/26
 
 - [SECURITY] `cors`: `CORS_ALLOW_ORIGIN=self` matches the `Origin` exactly, so look-alike origins are denied when `CORS_DENY_REQUEST=yes`.
@@ -19,8 +25,6 @@
 - [BUGFIX] `badbehavior`: a ban stores its evidence once, so reports stay small; the Reports page loads the events on demand.
 - [BUGFIX] `core`: a reload whose initialization is rejected is reported as failed and retried, instead of as applied.
 - [BUGFIX] `core`: a kept configuration (`KEEP_CONFIG_ON_RESTART=yes`) that fails to start falls back to the loading page instead of exiting.
-- [BUGFIX] `cors`: `Access-Control-Allow-Credentials` is sent on real responses as well as preflights, and removed even when sent by an upstream for disallowed origins or wildcard `Access-Control-Allow-Origin`.
-- [BUGFIX] `cors`: with `USE_CORS=yes`, a preflight request is no longer refused with a 405 when `ALLOWED_METHODS` does not list `OPTIONS`.
 - [BUGFIX] `crowdsec`: a reload in stream mode no longer leaves an orphaned decision set that fills the cache and stops new bans.
 - [BUGFIX] `crowdsec`: in stream mode, known bans stay enforced through Local API outages, reloads and restarts (see the plugin README).
 - [BUGFIX] `db`: upgrades on MariaDB or MySQL no longer crash when the `method` columns are `VARCHAR` instead of `ENUM`. (Fixes #4095)
