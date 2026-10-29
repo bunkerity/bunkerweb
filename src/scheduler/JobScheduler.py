@@ -230,7 +230,14 @@ class JobScheduler(ApiCaller):
                 continue
 
             name_valid = self.__compiled_regexes["name"].match(job["name"])
-            file_valid = self.__compiled_regexes["file"].match(job["file"])
+            job_file = Path(job["file"])
+            jobs_path = Path(plugin_file).parent.joinpath("jobs").resolve()
+            file_valid = (
+                self.__compiled_regexes["file"].match(job["file"])
+                and not job_file.is_absolute()
+                and ".." not in job_file.parts
+                and jobs_path.joinpath(job_file).resolve().is_relative_to(jobs_path)
+            )
             every_valid = job["every"] in ("once", "minute", "hour", "day", "week")
             reload_valid = isinstance(job.get("reload", False), bool)
             async_valid = isinstance(job.get("async", False), bool)
@@ -318,12 +325,11 @@ class JobScheduler(ApiCaller):
         module.__bw_qualified_name__ = qualified_name
         sys_modules[qualified_name] = module
 
-        # Execute the module
-        spec.loader.exec_module(module)
-
-        # Cache the module for reuse
+        # Track the module before execution: jobs commonly exit through SystemExit.
         with self.__module_cache_lock:
             self.__module_cache[module_key] = module
+
+        spec.loader.exec_module(module)
 
     def __job_wrapper(self, path: str, plugin: str, name: str, file: str) -> int:
         self.__logger.info(f"Executing job '{name}' from plugin '{plugin}'...")
