@@ -22,6 +22,7 @@
 - [BUGFIX] `jobs`: an unreachable GitHub API skips the optional update check instead of failing the job, and malformed release entries are ignored.
 - [BUGFIX] `jobs`: a job run without an explicit path infers its calling script correctly.
 - [BUGFIX] `linux`: package upgrades make an existing database lock file readable by nginx without replacing it.
+- [BUGFIX] `metrics`: blocked-request history survives the shared memory restore after a reload, and the configured memory retry limit applies to every write.
 - [BUGFIX] `modsecurity`: the global CRS mode loads the downloaded CRS plugins configured across services.
 - [BUGFIX] `plugins`: group and other write bits and directory modes no longer change plugin checksums, so a restored tree is not reinstalled again and again. (Refs #4024)
 - [BUGFIX] `scheduler`: the configuration is no longer rendered, pushed and reloaded a second time after the once-jobs when none of them changed anything. (Fixes #4106)
