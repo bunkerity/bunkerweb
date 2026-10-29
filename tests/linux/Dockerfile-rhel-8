@@ -17,5 +17,3 @@ COPY src/linux/nginx.repo /etc/yum.repos.d/nginx.repo
 RUN dnf install https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm -y && \
     dnf install php-fpm yum-utils -y && \
     dnf install -y https://nginx.org/packages/rhel/8/$(uname -m)/RPMS/nginx-${NGINX_VERSION}-1.el8.ngx.$(uname -m).rpm
-
-COPY ./package-rhel-8/*.rpm /opt

@@ -1,0 +1,183 @@
+integrations: "all"
+
+actions:
+  # USE_REVERSE_PROXY=no: no location is rendered, so the backend is never reached.
+  # Kubernetes is left out: the ingress rule always renders a reverse-proxy location of its own.
+  deactivated_serves_no_backend_content:
+    type: string
+    integrations: ["Docker", "Linux", "Autoconf", "All-in-one"]
+    url: "http://www.example.com/inspect/headers"
+    not_string: '"headers"'
+    raise_for_status: false
+    config:
+      USE_REVERSE_PROXY: "no"
+
+  # proxy_intercept_errors on: the backend 404 is replaced by BunkerWeb's error page
+  # (src/common/core/reverseproxy/confs/server-http/reverse-proxy.conf:58-62).
+  intercept_errors_yes_shows_bunkerweb_page:
+    type: string
+    url: "http://www.example.com/rp-missing-path"
+    string: "This website is protected with"
+    raise_for_status: false
+    config:
+      REVERSE_PROXY_INTERCEPT_ERRORS: "yes"
+    restart_stack: false
+  intercept_errors_yes_hides_backend_body:
+    type: string
+    url: "http://www.example.com/rp-missing-path"
+    not_string: '{"detail":"Not Found"}'
+    raise_for_status: false
+  intercept_errors_no_shows_backend_body:
+    type: string
+    url: "http://www.example.com/rp-missing-path"
+    string: '{"detail":"Not Found"}'
+    raise_for_status: false
+    config:
+      REVERSE_PROXY_INTERCEPT_ERRORS: "no"
+
+  # REVERSE_PROXY_HEADERS reach the backend. A custom header replaces a same-name generated default,
+  # matched case-insensitively (Fixes #3936): `x-forwarded-proto` here against the generated
+  # `X-Forwarded-Proto`, so the backend must see the custom value once and the default never.
+  # /inspect/raw-headers lists every header as received, where /inspect/headers folds duplicates.
+  headers_reach_backend:
+    type: string
+    url: "http://www.example.com/inspect/raw-headers"
+    string: "x-rp-test: bunkerweb"
+    config:
+      REVERSE_PROXY_HEADERS: "X-Rp-Test bunkerweb;x-forwarded-proto custom-proto;X-REAL-IP 203.0.113.9"
+    restart_stack: false
+  headers_custom_replaces_generated_default:
+    type: string
+    url: "http://www.example.com/inspect/raw-headers"
+    string: "x-forwarded-proto: custom-proto"
+    restart_stack: false
+  headers_generated_default_not_sent_alongside:
+    type: string
+    url: "http://www.example.com/inspect/raw-headers"
+    not_string: "x-forwarded-proto: http"
+    restart_stack: false
+  headers_custom_replaces_generated_real_ip:
+    type: string
+    url: "http://www.example.com/inspect/raw-headers"
+    string: "x-real-ip: 203.0.113.9"
+
+  # REVERSE_PROXY_HEADERS_CLIENT reach the client (add_header).
+  headers_client_reach_client:
+    type: header
+    url: "http://www.example.com/inspect/headers"
+    response_headers:
+      X-Rp-Client: "^bunkerweb-client$"
+    config:
+      REVERSE_PROXY_HEADERS_CLIENT: "X-Rp-Client bunkerweb-client"
+
+  # REVERSE_PROXY_CUSTOM_HOST replaces the Host and the X-Forwarded-Host the backend receives.
+  custom_host_backend_host:
+    type: string
+    url: "http://www.example.com/inspect/headers"
+    string: '"host":"backend.internal"'
+    config:
+      REVERSE_PROXY_CUSTOM_HOST: "backend.internal"
+    restart_stack: false
+  custom_host_backend_forwarded_host:
+    type: string
+    url: "http://www.example.com/inspect/headers"
+    string: '"x-forwarded-host":"backend.internal"'
+
+  # Without it the backend sees the request Host.
+  no_custom_host_backend_host:
+    type: string
+    url: "http://www.example.com/inspect/headers"
+    string: '"host":"www.example.com"'
+    config:
+      REVERSE_PROXY_CUSTOM_HOST: ""
+
+  # REVERSE_PROXY_HTTP_VERSION as the backend sees it (reverse-proxy.conf:166-171). With keepalive=yes
+  # the default 1.1 is rendered; with keepalive=no an explicit 1.0 is.
+  keepalive_yes_http_11:
+    type: string
+    url: "http://www.example.com/inspect/version"
+    string: "1.1"
+    config:
+      REVERSE_PROXY_KEEPALIVE: "yes"
+      REVERSE_PROXY_HTTP_VERSION: "1.1"
+  keepalive_no_http_10:
+    type: string
+    url: "http://www.example.com/inspect/version"
+    string: "1.0"
+    config:
+      REVERSE_PROXY_KEEPALIVE: "no"
+      REVERSE_PROXY_HTTP_VERSION: "1.0"
+
+  # REVERSE_PROXY_WS: a websocket echo through BunkerWeb; without it the upgrade is not forwarded.
+  websocket_echo_through_proxy:
+    type: script
+    script:
+      - "python3"
+      - "-c"
+      - "from websockets.sync.client import connect; ws = connect('ws://www.example.com/ws', open_timeout=10); ws.send('hello'); print(ws.recv(timeout=10)); ws.close()"
+    result: "echo:hello"
+    config:
+      REVERSE_PROXY_WS: "yes"
+  websocket_refused_when_disabled:
+    type: script
+    script:
+      - "python3"
+      - "-c"
+      - "from websockets.exceptions import InvalidStatus; from websockets.sync.client import connect\ntry:\n connect('ws://www.example.com/ws', open_timeout=10)\nexcept InvalidStatus as e:\n print('rejected', e.response.status_code)"
+    result: "rejected"
+    config:
+      REVERSE_PROXY_WS: "no"
+
+  # REVERSE_PROXY_AUTH_REQUEST on a second location (_2): the auth subrequest to /auth must not hit a
+  # location that carries auth_request itself, so it goes through the unsuffixed "/" location.
+  # /auth answers 200 only for `X-Auth-Token: bunkerweb`.
+  auth_request_allows_authorized_request:
+    type: string
+    url: "http://www.example.com/inspect/headers"
+    headers:
+      X-Auth-Token: "bunkerweb"
+    string: '"headers"'
+    config:
+      REVERSE_PROXY_HOST_2: "http://custom-api:8000"
+      REVERSE_PROXY_URL_2: "/inspect/"
+      REVERSE_PROXY_AUTH_REQUEST_2: "/auth"
+    Kubernetes:
+      config:
+        REVERSE_PROXY_HOST_2: "http://svc-custom-api.misc.svc.cluster.local:8000"
+    restart_stack: false
+  auth_request_refuses_unauthorized_request:
+    type: status
+    url: "http://www.example.com/inspect/headers"
+    status: 401
+  auth_request_signin_url_redirects_unauthorized_request:
+    type: header
+    url: "http://www.example.com/inspect/headers"
+    raise_for_status: false
+    response_headers:
+      Location: "^http://www\\.example\\.com/login$"
+    config:
+      REVERSE_PROXY_HOST_2: "http://custom-api:8000"
+      REVERSE_PROXY_URL_2: "/inspect/"
+      REVERSE_PROXY_AUTH_REQUEST_2: "/auth"
+      REVERSE_PROXY_AUTH_REQUEST_SIGNIN_URL_2: "http://www.example.com/login"
+    Kubernetes:
+      config:
+        REVERSE_PROXY_HOST_2: "http://svc-custom-api.misc.svc.cluster.local:8000"
+
+config:
+  USE_REVERSE_PROXY: "yes"
+  REVERSE_PROXY_HOST: "http://custom-api:8000"
+  USE_LIMIT_REQ: "no"
+  USE_BAD_BEHAVIOR: "no"
+
+Kubernetes:
+  config:
+    REVERSE_PROXY_HOST: "http://svc-custom-api.misc.svc.cluster.local:8000"
+
+# Kubernetes only (generate.py reads `annotations:` inside the Kubernetes branch alone). The
+# ingress always declares www.example.com -> svc-app1 and its path becomes the service's
+# REVERSE_PROXY_URL_1, while the unsuffixed REVERSE_PROXY_HOST above renders at REVERSE_PROXY_URL's
+# default "/". Both on "/" is `duplicate location "/"` and NGINX refuses the configuration.
+# Same workaround as mtls.yml: move the ingress off "/", do not blank the annotation.
+annotations:
+  bunkerweb.io/REVERSE_PROXY_URL: "/app1"

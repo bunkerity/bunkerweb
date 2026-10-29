@@ -1,0 +1,31 @@
+services:
+  bw-db:
+    image: mariadb:11@sha256:be1ef4fe5f14589325c08a41c76334097ce66c86264b75e1d28342c742782a61
+    container_name: bw-db
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_RANDOM_ROOT_PASSWORD: "yes"
+      MYSQL_DATABASE: "db"
+      MYSQL_USER: "bunkerweb"
+      MYSQL_PASSWORD: "secret"
+    volumes:
+      - bw-data:/var/lib/mysql
+    dns:
+      - 10.20.30.20
+    restart: "unless-stopped"
+    networks:
+      bw-db:
+        ipv4_address: 10.10.10.254
+
+volumes:
+  bw-data:
+    name: bw-data
+
+networks:
+  bw-db:
+    name: bw-db
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 10.10.10.0/24

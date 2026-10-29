@@ -1,0 +1,20 @@
+# Example-backed spec: the stack under test is examples/php-singlesite itself, deployed
+# as a user would deploy it. Keeping the assertions here rather than in the example keeps
+# that directory to what someone reading the documentation needs.
+example: php-singlesite
+
+integrations:
+  - Docker
+  # Not Linux: the example ships a setup-linux.sh, but the 1.6 tests.json never enrolled it and
+  # no 1.6 run has proven it on the systemd container.
+
+actions:
+  serves_the_php_app:
+    type: string
+    url: "https://www.example.com"
+    verify_ssl: false
+    # Exact case on purpose: the legacy harness casefolded both sides, this handler does
+    # not, and the page says "Hello World !".
+    string: "Hello World"
+    timeout: 120
+    delay: 60

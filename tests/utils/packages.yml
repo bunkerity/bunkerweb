@@ -1,0 +1,44 @@
+# `name` is the distro leg of linux-build.yml's build matrix (so `package-<name>-<arch>` is
+# the artefact the Linux arm downloads), and `package` is the archive type. The `separator`
+# and `suffix` fields lived here to rebuild the package FILENAME for a `docker cp` out of the
+# `<name>-tests` image; that copy is gone (integration-tests.yml globs the artefact instead),
+# and nothing else ever read them -- push-packagecloud.yml gets its own separator/suffix from
+# each channel workflow's matrix, not from here.
+packages_info:
+  # dev's `ubuntu` leg is Ubuntu 26.04 (Dockerfile-ubuntu is FROM ubuntu:resolute); noble is the
+  # separate `ubuntu-noble` leg.
+  ubuntu/resolute:
+    name: "ubuntu"
+    package: deb
+  ubuntu/noble:
+    name: "ubuntu-noble"
+    package: deb
+  ubuntu/jammy:
+    name: "ubuntu-jammy"
+    package: deb
+  debian/trixie:
+    name: "debian-trixie"
+    package: deb
+  debian/bookworm:
+    name: "debian-bookworm"
+    package: deb
+  el/10:
+    name: "rhel-10"
+    package: rpm
+  el/9:
+    name: "rhel-9"
+    package: rpm
+  el/8:
+    name: "rhel-8"
+    package: rpm
+  # fedora/42 was declared here after `a41583c35 drop fedora 42 support` deleted
+  # src/linux/Dockerfile-fedora-42. The CI workflows never referenced it; only this manifest did.
+  fedora/43:
+    name: "fedora-43"
+    package: rpm
+  fedora/44:
+    name: "fedora-44"
+    package: rpm
+# freebsd/13 and freebsd/14 lived here until the PO dropped FreeBSD packaging on 2026-08-20.
+# There is no `pkg` artefact to install any more, so a target named here would be a manifest
+# entry nothing can build -- a lie the next reader believes, and one nothing fails on.

@@ -1,0 +1,28 @@
+integrations: "all"
+
+# `USE_TEMPLATE` makes a shipped template (src/common/core/templates/templates/*.json) the default of
+# every setting it lists; a setting set explicitly still wins (Configurator.get_config).
+# The `api` template sets SERVE_FILES to "no" (root /nowhere, src/common/core/misc/confs/server-http/serve-files.conf),
+# so a page that is served without it is a 404 with it. USE_REVERSE_PROXY is set explicitly because the
+# template would otherwise proxy to bw-api.
+actions:
+  template_applies:
+    type: status
+    url: "http://www.example.com"
+    status: 404
+    config:
+      USE_TEMPLATE: "api"
+  explicit_setting_wins:
+    type: status
+    url: "http://www.example.com"
+    status: 200
+    config:
+      USE_TEMPLATE: "api"
+      SERVE_FILES: "yes"
+  no_template:
+    type: status
+    url: "http://www.example.com"
+    status: 200
+
+config:
+  USE_REVERSE_PROXY: "no"

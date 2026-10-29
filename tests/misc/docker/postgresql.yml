@@ -1,0 +1,35 @@
+services:
+  bw-db:
+    # Pinned to 17, not the latest major: the images' postgresql-client is v17, and pg_dump refuses a server newer than itself ("aborting
+    # because of server version mismatch"). BunkerWeb runs against an 18 server, but the
+    # backup plugin cannot dump it, so the suite tests the combination the images support.
+    # Bump this only together with the client in src/*/Dockerfile.
+    # tests/scripts/utils.sh sets BW_TESTS_POSTGRES_IMAGE to a 16 server for the Linux arm only (Ubuntu noble's client is 16).
+    image: ${BW_TESTS_POSTGRES_IMAGE:-postgres:17-alpine@sha256:d4bb0a8c1b7bb2e29f976d099e7bfb9a5d8858cffe9e46b35cd302cd1f1f8168}
+    container_name: bw-db
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: "db"
+      POSTGRES_USER: "bunkerweb"
+      POSTGRES_PASSWORD: "secret"
+    volumes:
+      - bw-data:/var/lib/postgresql
+    dns:
+      - 10.20.30.20
+    restart: "unless-stopped"
+    networks:
+      bw-db:
+        ipv4_address: 10.10.10.254
+
+volumes:
+  bw-data:
+    name: bw-data
+
+networks:
+  bw-db:
+    name: bw-db
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 10.10.10.0/24

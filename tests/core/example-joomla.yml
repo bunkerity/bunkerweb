@@ -1,0 +1,22 @@
+# Example-backed spec: the stack under test is examples/joomla itself,
+# deployed the way a user would deploy it. The assertions live here so that the
+# example directory holds only what someone reading the documentation needs.
+example: joomla
+
+integrations:
+  - "Docker"
+  - "Autoconf"
+  # Not Linux, though the example ships a setup-linux.sh: same blocker as `wordpress` and
+  # `nextcloud` — the framework's PHP for that integration is the `php:fpm-alpine` helper, with
+  # neither the extensions Joomla requires nor a database beside it.
+
+actions:
+  string_check:
+    type: string
+    url: "https://www.example.com"
+    verify_ssl: false
+    string: "joomla"
+    ignore_case: true
+    follow_redirects: true
+    timeout: 120
+    delay: 120

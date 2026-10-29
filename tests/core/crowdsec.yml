@@ -1,0 +1,265 @@
+integrations:
+  - "Linux"
+  - "Docker"
+  - "Autoconf"
+
+actions:
+  admin_interface_probe:
+    type: script
+    # cscli hub update refreshes this scenario, whose YAML has no version field, on every
+    # CrowdSec restart; the image digest does not pin it. The filter groups by source IP and
+    # counts distinct paths returning 403/404. Six list entries provide twice the current
+    # three-event overflow threshold and buffer upstream filter/capacity drift plus log loss.
+    script:
+      - "python3"
+      - "-c"
+      - |
+        from concurrent.futures import ThreadPoolExecutor
+        from http.client import HTTPConnection
+
+        paths = ("/admin", "/manager", "/phpmyadmin", "/pma", "/wp-admin", "/wp-login")
+        assert len(set(paths)) == len(paths)
+
+        def probe(path):
+            connection = HTTPConnection("127.0.0.1", timeout=5)
+            try:
+                connection.request("GET", path, headers={"Host": "www.example.com", "User-Agent": "LegitOne"})
+                response = connection.getresponse()
+                assert response.status in (403, 404), f"{path}: {response.status}"
+                response.read()
+            finally:
+                connection.close()
+
+        with ThreadPoolExecutor(max_workers=len(paths)) as executor:
+            list(executor.map(probe, paths))
+    restart_stack: false
+  blocked_live:
+    type: status
+    url: "http://www.example.com"
+    status: 403
+    # CrowdSec creates the decision asynchronously after the third qualifying access-log event.
+    delay: 5
+    retries: 1
+    # full_clean clears the decision this case created (CrowdSec database and the bouncer's
+    # crowdsec_cache shared dict, which SURVIVES reloads) before the stream arm starts.
+    full_clean: true
+
+  admin_interface_probe_stream:
+    type: script
+    # Same unpinned six-path, one-IP provocation as live mode.
+    script:
+      - "python3"
+      - "-c"
+      - |
+        from concurrent.futures import ThreadPoolExecutor
+        from http.client import HTTPConnection
+
+        paths = ("/admin", "/manager", "/phpmyadmin", "/pma", "/wp-admin", "/wp-login")
+        assert len(set(paths)) == len(paths)
+
+        def probe(path):
+            connection = HTTPConnection("127.0.0.1", timeout=5)
+            try:
+                connection.request("GET", path, headers={"Host": "www.example.com", "User-Agent": "LegitOne"})
+                response = connection.getresponse()
+                assert response.status in (403, 404), f"{path}: {response.status}"
+                response.read()
+            finally:
+                connection.close()
+
+        with ThreadPoolExecutor(max_workers=len(paths)) as executor:
+            list(executor.map(probe, paths))
+    config:
+      CROWDSEC_MODE: "stream"
+      # An hour away: nothing the bouncer does can interfere with the scan.
+      CROWDSEC_UPDATE_FREQUENCY: "3600"
+  blocked_stream:
+    type: status
+    url: "http://www.example.com"
+    status: 403
+    # `not_yet_blocked_stream` (a 200 right after the restart, before the first pull) was dropped: it
+    # asserts the 1.7 timing, where a reload leaves nothing to enforce until the bouncer's pull. Dev's
+    # bouncer keeps shared decisions across reloads (bouncer.lua `enforcement_state`), so the first
+    # request after the restart is already denied.
+    delay: 30
+    retries: 2
+
+  # The acquisition file is restored by `disable_appsec_bot_challenge` and by tests/scripts/after/crowdsec.sh;
+  # the AppSec bot-challenge cases (`enable_appsec_bot_challenge`, `challenged_by_appsec`) were 1.7-only
+  # (dev has no lib/challenge.lua) and are gone.
+  disable_appsec_bot_challenge:
+    type: script
+    # Restore the shipped acquisition file, so the ban non-regression below -- and any spec that
+    # runs after this one on the same checkout -- sees the default configuration again.
+    script:
+      - "cp"
+      - "tests/core/crowdsec/fixtures/appsec-default-only.yaml"
+      - "tests/misc/conf/appsec.yaml"
+    # The collection list is kept as it was when the bot-challenge cases existed; the next action
+    # restores the baseline, and the full_clean below wipes the install anyway.
+    crowdsec_config:
+      COLLECTIONS: "crowdsecurity/appsec-virtual-patching crowdsecurity/appsec-generic-rules bunkerity/bunkerweb crowdsecurity/appsec-bot-challenge"
+    full_clean: true
+  admin_interface_probe_after_challenge:
+    type: script
+    # Same six-path provocation as the live case, re-run after the collection change: a `ban` still
+    # has to end on BunkerWeb's own 403 page.
+    script:
+      - "python3"
+      - "-c"
+      - |
+        from concurrent.futures import ThreadPoolExecutor
+        from http.client import HTTPConnection
+
+        paths = ("/admin", "/manager", "/phpmyadmin", "/pma", "/wp-admin", "/wp-login")
+        assert len(set(paths)) == len(paths)
+
+        def probe(path):
+            connection = HTTPConnection("127.0.0.1", timeout=5)
+            try:
+                connection.request("GET", path, headers={"Host": "www.example.com", "User-Agent": "LegitOne"})
+                response = connection.getresponse()
+                assert response.status in (403, 404), f"{path}: {response.status}"
+                response.read()
+            finally:
+                connection.close()
+
+        with ThreadPoolExecutor(max_workers=len(paths)) as executor:
+            list(executor.map(probe, paths))
+    # Back to the spec's baseline collections. The recreation that applies this -- and the
+    # restored acquisition file -- is the one the previous action's `full_clean` triggers, before
+    # this script runs.
+    crowdsec_config:
+      COLLECTIONS: "crowdsecurity/appsec-virtual-patching crowdsecurity/appsec-generic-rules bunkerity/bunkerweb"
+    # Mirrors admin_interface_probe above: this flag governs the restart between the provocation
+    # and the assertion that follows it, and a restart there would re-arm timers and lose the
+    # calibration the `delay: 5, retries: 1` budget on banned_after_challenge is sized for.
+    restart_stack: false
+  banned_after_challenge:
+    type: status
+    url: "http://www.example.com"
+    status: 403
+    # Same asynchronous decision as blocked_live, same budget. No `full_clean` here: the flag
+    # governs the restart before the NEXT action and this is the last one, so setting it would
+    # only suggest a meaning it does not have.
+    delay: 5
+    retries: 1
+
+  # A stream-mode bouncer enforces from the decisions it pulled, every CROWDSEC_UPDATE_FREQUENCY seconds, so a
+  # decision made once the stack is up is only enforced after the next pull. The address (RFC 5737) reaches
+  # BunkerWeb in X-Forwarded-For, so no case above has touched it and no earlier decision or cache entry covers it.
+  # The first action runs on a stack the previous one restarted, which is what applies this configuration; the
+  # four share it (`restart_stack: false`) because a restart would pull again and hide the wait. The harness
+  # rewrites the configuration for every action from the spec's `config` plus that action's own, so the four
+  # repeat the same block: left out, the next action's write puts the spec's live mode back.
+  stream_pull_clean_address_is_served:
+    type: status
+    # A path that exists nowhere answers 404, never 403, so the ban in the third action cannot be mistaken for it.
+    url: "http://www.example.com/stream-pull-probe"
+    status: 404
+    headers:
+      X-Forwarded-For: "203.0.113.77"
+    config:
+      CROWDSEC_MODE: "stream"
+      CROWDSEC_UPDATE_FREQUENCY: "10"
+      USE_REAL_IP: "yes"
+      REAL_IP_FROM: "0.0.0.0/0"
+      REAL_IP_HEADER: "X-Forwarded-For"
+    restart_stack: false
+  # The pull timer starts at the first request and the first pull comes one CROWDSEC_UPDATE_FREQUENCY later. Until a
+  # pull has published its snapshot the bouncer asks the Local API about every address it has not seen, so a decision
+  # made in that window is enforced at once and proves nothing about the pull. This case waits the window out.
+  stream_pull_first_pull_published:
+    type: status
+    url: "http://www.example.com/stream-pull-probe"
+    status: 404
+    headers:
+      X-Forwarded-For: "203.0.113.77"
+    config:
+      CROWDSEC_MODE: "stream"
+      CROWDSEC_UPDATE_FREQUENCY: "10"
+      USE_REAL_IP: "yes"
+      REAL_IP_FROM: "0.0.0.0/0"
+      REAL_IP_HEADER: "X-Forwarded-For"
+    delay: 15
+    restart_stack: false
+  stream_pull_decision_made_after_startup:
+    type: script
+    script:
+      [
+        "docker",
+        "exec",
+        "crowdsec",
+        "cscli",
+        "decisions",
+        "add",
+        "--ip",
+        "203.0.113.77",
+        "--duration",
+        "1h",
+        "--type",
+        "ban",
+      ]
+    config:
+      CROWDSEC_MODE: "stream"
+      CROWDSEC_UPDATE_FREQUENCY: "10"
+      USE_REAL_IP: "yes"
+      REAL_IP_FROM: "0.0.0.0/0"
+      REAL_IP_HEADER: "X-Forwarded-For"
+    restart_stack: false
+  stream_pull_enforces_the_new_decision:
+    type: status
+    url: "http://www.example.com/stream-pull-probe"
+    status: 403
+    headers:
+      X-Forwarded-For: "203.0.113.77"
+    config:
+      CROWDSEC_MODE: "stream"
+      CROWDSEC_UPDATE_FREQUENCY: "10"
+      USE_REAL_IP: "yes"
+      REAL_IP_FROM: "0.0.0.0/0"
+      REAL_IP_HEADER: "X-Forwarded-For"
+    # One pull window is 10 s; the retry covers a pull that started just before the decision landed.
+    delay: 15
+    retries: 1
+
+config:
+  USE_MODSECURITY: "no"
+  USE_BAD_BEHAVIOR: "no"
+  USE_LIMIT_REQ: "no"
+  USE_LIMIT_CONN: "no"
+  USE_CROWDSEC: "yes"
+  CROWDSEC_API: "http://crowdsec:8080"
+  CROWDSEC_API_KEY: "s3cr3tb0unc3rk3y"
+  CROWDSEC_MODE: "live"
+  CROWDSEC_ENABLE_INTERNAL: "no"
+  CROWDSEC_REQUEST_TIMEOUT: "1000"
+  CROWDSEC_EXCLUDE_LOCATION: ""
+  CROWDSEC_CACHE_EXPIRATION: "1"
+  # CROWDSEC_UPDATE_FREQUENCY is deliberately absent here: it only means something in stream
+  # mode, and the two stream actions each set the value their own assertion depends on.
+  CROWDSEC_APPSEC_URL: "http://crowdsec:7422"
+  CROWDSEC_APPSEC_FAILURE_ACTION: "passthrough"
+  CROWDSEC_APPSEC_CONNECT_TIMEOUT: "100"
+  CROWDSEC_APPSEC_SEND_TIMEOUT: "100"
+  CROWDSEC_APPSEC_PROCESS_TIMEOUT: "100"
+  CROWDSEC_ALWAYS_SEND_TO_APPSEC: "no"
+  CROWDSEC_APPSEC_SSL_VERIFY: "no"
+
+All-in-one:
+  config:
+    CROWDSEC_API: null
+    CROWDSEC_API_KEY: null
+    CROWDSEC_APPSEC_URL: null
+    CROWDSEC_EXTRA_COLLECTIONS: null
+    CROWDSEC_DISABLE_PARSERS: "crowdsecurity/whitelists"
+
+crowdsec_config:
+  BOUNCER_KEY_bunkerweb: "s3cr3tb0unc3rk3y"
+  COLLECTIONS: "crowdsecurity/appsec-virtual-patching crowdsecurity/appsec-generic-rules bunkerity/bunkerweb"
+  DISABLE_PARSERS: "crowdsecurity/whitelists"
+
+Linux:
+  config:
+    # Follows the host port published in tests/misc/docker/crowdsec.yml.
+    CROWDSEC_API: "http://crowdsec:8889"

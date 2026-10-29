@@ -24,8 +24,6 @@ RUN dnf update -y && \
     dnf config-manager setopt updates-testing.enabled=1 && \
     dnf install nginx-${NGINX_VERSION} -y
 
-COPY ./package-fedora-43/*.rpm /opt
-
 VOLUME ["/sys/fs/cgroup"]
 
 CMD ["/usr/sbin/init"]
