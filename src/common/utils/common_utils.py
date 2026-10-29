@@ -1122,7 +1122,9 @@ def _json_select(node: Any, conditions: List[Tuple[str, str]], keys: Set[str]) -
 def _json_filtered_strings(documents: List[Any], url_filter: str) -> Iterator[str]:
     conditions: List[Tuple[str, str]] = []
     keys: Set[str] = set()
-    for term in filter(None, url_filter.split("&")):
+    for term in url_filter.split("&") if url_filter else ():
+        if not term:
+            return iter(())
         key, sep, wanted = term.partition("=")
         if sep:
             conditions.append((unquote(key), unquote(wanted)))
