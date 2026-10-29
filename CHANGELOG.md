@@ -6,6 +6,7 @@
 - [SECURITY] `core`: archives over the extraction size or member limits are refused, so a hostile download source can no longer fill the scheduler disk.
 - [SECURITY] `jobs`: an empty JSON selector term in a list download is rejected instead of widening the IP trust lists.
 - [BUGFIX] `autoconf`: the Kubernetes controller retries a configuration deferred while the scheduler was busy, so a new Ingress deploys without waiting for the next event. (Fixes #4107)
+- [BUGFIX] `backup`: the database lock is taken even when the scheduler cannot write the lock file.
 - [BUGFIX] `core`: setting regexes are anchored and no longer backtrack exponentially on a short malformed value, and duration settings refuse non-ASCII digits.
 - [BUGFIX] `cors`: `Access-Control-Allow-Credentials` is sent on real responses as well as preflights, and removed even when sent by an upstream for disallowed origins or wildcard `Access-Control-Allow-Origin`.
 - [BUGFIX] `cors`: with `USE_CORS=yes`, a preflight request is no longer refused with a 405 when `ALLOWED_METHODS` does not list `OPTIONS`.

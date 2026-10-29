@@ -10,6 +10,7 @@ from json import loads as json_loads
 import os
 from os import (
     O_CREAT,
+    O_RDONLY,
     O_RDWR,
     close as os_close,
     ftruncate,
@@ -669,7 +670,11 @@ def acquire_db_lock(path: Path, timeout: float = 30.0) -> int:
     no dead-owner reaper is needed here.
     """
     path.parent.mkdir(parents=True, exist_ok=True)
-    fd = os_open(str(path), O_RDWR | O_CREAT, 0o600)
+    try:
+        fd = os_open(str(path), O_RDWR | O_CREAT, 0o644)
+    except PermissionError:
+        # bwcli may create the file as root; flock needs no write access.
+        fd = os_open(str(path), O_RDONLY)
     deadline = monotonic() + timeout
     while True:
         try:
