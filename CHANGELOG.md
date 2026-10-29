@@ -4,6 +4,7 @@
 
 - [BREAKING] `reverseproxy`: stream upstream TLS settings (`REVERSE_PROXY_SSL_VERIFY=yes`, protocols, ciphers, cached client certificate) now turn on TLS to the backend instead of being ignored. Clear them for a plaintext backend.
 - [BREAKING] `core`: setting regexes are stricter: list values glued without a separator (`404500`) and all-space values are refused. `AUTH_BASIC_USER` is wider and takes any value without `:`.
+- [BREAKING] `core`: the Lua API disk fallback needs an explicit `API_TOKEN` line in `variables.env`; a file without one is refused.
 - [SECURITY] `core`: archives over the extraction size or member limits are refused, so a hostile download source can no longer fill the scheduler disk.
 - [SECURITY] `jobs`: an empty JSON selector term in a list download is rejected instead of widening the IP trust lists.
 - [BUGFIX] `all-in-one`: NGINX and service log lines reach the container logs promptly.
@@ -12,6 +13,7 @@
 - [BUGFIX] `core`: setting regexes are anchored and no longer backtrack exponentially on a short malformed value, and duration settings refuse non-ASCII digits.
 - [BUGFIX] `core`: stream listeners shared by several services emit `reuseport` once, and empty ports and directive arguments are omitted.
 - [BUGFIX] `core`: `variables.env` is replaced atomically, so a concurrent reader never sees a truncated file.
+- [BUGFIX] `core`: the Lua API recovers its credentials from disk when the internal store is unavailable, and refuses requests when the token state is unknown.
 - [BUGFIX] `cors`: `Access-Control-Allow-Credentials` is sent on real responses as well as preflights, and removed even when sent by an upstream for disallowed origins or wildcard `Access-Control-Allow-Origin`.
 - [BUGFIX] `cors`: with `USE_CORS=yes`, a preflight request is no longer refused with a 405 when `ALLOWED_METHODS` does not list `OPTIONS`.
 - [BUGFIX] `db`: pruning job runs no longer fails with a conflict on MariaDB when a run is inserted meanwhile.
