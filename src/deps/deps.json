@@ -31,9 +31,9 @@
     },
     {
       "id": "libinjection",
-      "name": "libinjection v4.0.0",
+      "name": "libinjection v4.0.1",
       "url": "https://github.com/libinjection/libinjection.git",
-      "commit": "211782219663f889f471650150df12b623c5766e",
+      "commit": "bd6fb4e97b433762436d9920c82a16c2b5d44c43",
       "post_install": "rm -r src/deps/src/libinjection/tests"
     },
     {

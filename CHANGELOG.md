@@ -109,6 +109,7 @@
 - [DEPS] Updated LuaJIT to v2.1-20261023
 - [DEPS] Updated DOMPurify to v3.4.17
 - [DEPS] Updated Go to v1.26.10 for the all-in-one CrowdSec build
+- [DEPS] Updated libinjection to v4.0.1
 
 ## v1.6.17 - 2026/10/21
 

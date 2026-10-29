@@ -23,4 +23,4 @@ typedef enum injection_result_t {
 }
 #endif
 
-#endif // LIBINJECTION_ERROR_H
+#endif /* LIBINJECTION_ERROR_H */

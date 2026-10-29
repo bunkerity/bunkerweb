@@ -37,7 +37,7 @@ enum lookup_type {
     LOOKUP_FINGERPRINT = 4
 };
 
-struct libinjection_sqli_token { // cppcheck-suppress syntaxError
+struct libinjection_sqli_token { /* cppcheck-suppress syntaxError */
 #ifdef SWIG
 %immutable;
 #endif
@@ -214,12 +214,6 @@ libinjection_is_sqli(struct libinjection_sqli_state *sql_state);
 void libinjection_sqli_callback(struct libinjection_sqli_state *sf,
                                 ptr_lookup_fn fn, void *userdata);
 
-/*
- * Resets state, but keeps initial string and callbacks
- */
-static void libinjection_sqli_reset(struct libinjection_sqli_state *sf,
-                                    int flags);
-
 /**
  *
  */
@@ -238,14 +232,6 @@ static void libinjection_sqli_reset(struct libinjection_sqli_state *sf,
 const char *
 libinjection_sqli_fingerprint(struct libinjection_sqli_state *sql_state,
                               int flags);
-
-/**
- * The default "word" to token-type or fingerprint function.  This
- * uses a ASCII case-insensitive binary tree.
- */
-static char
-libinjection_sqli_lookup_word(struct libinjection_sqli_state *sql_state,
-                              int lookup_type, const char *str, size_t len);
 
 /* Streaming tokenization interface.
  *
@@ -274,21 +260,6 @@ int libinjection_sqli_fold(struct libinjection_sqli_state *sf);
  */
 int libinjection_sqli_check_fingerprint(
     struct libinjection_sqli_state *sql_state);
-
-/* Given a pattern determine if it's a SQLi pattern.
- *
- * \return TRUE if sqli, false otherwise
- */
-static int
-libinjection_sqli_blacklist(struct libinjection_sqli_state *sql_state);
-
-/* Given a positive match for a pattern (i.e. pattern is SQLi), this function
- * does additional analysis to reduce false positives.
- *
- * \return TRUE if SQLi, false otherwise
- */
-static int
-libinjection_sqli_not_whitelist(struct libinjection_sqli_state *sql_state);
 
 #ifdef __cplusplus
 }

@@ -58,3 +58,5 @@ src/fuzz/corpus
 
 src/libinjection_sqli_data.h
 src/sqlparse_data.json
+build-aux/tap-driver.sh
+build-aux/test-driver

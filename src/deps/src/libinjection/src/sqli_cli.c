@@ -20,7 +20,7 @@ void print_var(stoken_t *t);
 void print_token(stoken_t *t);
 void usage(void);
 
-void print_string(stoken_t *t) { // cppcheck-suppress constParameterPointer
+void print_string(stoken_t *t) { /* cppcheck-suppress constParameterPointer */
     /* print opening quote */
     if (t->str_open != '\0') {
         printf("%c", t->str_open);
