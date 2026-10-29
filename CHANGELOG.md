@@ -2,6 +2,7 @@
 
 ## v1.6.18~rc2 - ????/??/??
 
+- [BREAKING] `reverseproxy`: stream upstream TLS settings (`REVERSE_PROXY_SSL_VERIFY=yes`, protocols, ciphers, cached client certificate) now turn on TLS to the backend instead of being ignored. Clear them for a plaintext backend.
 - [BREAKING] `core`: setting regexes are stricter: list values glued without a separator (`404500`) and all-space values are refused. `AUTH_BASIC_USER` is wider and takes any value without `:`.
 - [SECURITY] `core`: archives over the extraction size or member limits are refused, so a hostile download source can no longer fill the scheduler disk.
 - [SECURITY] `jobs`: an empty JSON selector term in a list download is rejected instead of widening the IP trust lists.
