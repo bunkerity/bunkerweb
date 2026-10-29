@@ -3262,7 +3262,10 @@ class Database:
                             f"unreadable custom configs folder for the manual method). Aborting "
                             f"save_custom_configs to prevent data loss."
                         )
-                        return message
+                        return (
+                            f"Refusing to save custom configs: the {method} payload is empty while {existing_count} "
+                            f"{method} custom config(s) exist. Nothing was changed."
+                        )
                 # Delete all the old config
                 session.query(Custom_configs).filter(Custom_configs.method == method).delete()
 
@@ -3332,6 +3335,15 @@ class Database:
                         custom_conf.method = method
                     custom_conf.is_draft = custom_config["is_draft"]
 
+                elif custom_config["checksum"] != custom_conf.checksum:
+                    # Repeated, unchanged projections stay silent; changed content must explain the refusal.
+                    self.logger.warning(
+                        f"Custom config {custom_config['type']}/{f'{service_id}/' if service_id else ''}{custom_config['name']} was submitted by "
+                        f"method {method!r} but the stored one is owned by method {custom_conf.method!r}: the submitted content is DROPPED "
+                        f"(submitted sha256={str(custom_config['checksum'])[:12]}, stored sha256={str(custom_conf.checksum)[:12]}). "
+                        f"Change it at its source (the CUSTOM_CONF_* variable or the orchestrator label)."
+                    )
+
             if disable_cleanup:
                 # Mark autoconf custom configs that are no longer emitted by the orchestrator as draft
                 # so they survive the removal and follow the service they belong to.
@@ -3351,7 +3363,8 @@ class Database:
                 session.add_all(to_put)
                 session.commit()
             except BaseException as e:
-                return f"{f'{message}{endl}' if message else ''}{e}"
+                reason = str(e) or type(e).__name__
+                return f"{f'{message}{endl}' if message else ''}{reason}"
 
         return message
 
@@ -3866,7 +3879,7 @@ class Database:
 
             for service_id in allowed_services:
                 for key, value in db_config.items():
-                    if key.startswith(f"{service_id}_"):
+                    if key == f"{service_id}_USE_TEMPLATE":
                         for template_config in (
                             session.query(Template_custom_configs)
                             .with_entities(*template_entities)
