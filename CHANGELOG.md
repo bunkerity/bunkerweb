@@ -8,6 +8,7 @@
 - [SECURITY] `core`: archives over the extraction size or member limits are refused, so a hostile download source can no longer fill the scheduler disk.
 - [SECURITY] `jobs`: an empty JSON selector term in a list download is rejected instead of widening the IP trust lists.
 - [BUGFIX] `all-in-one`: NGINX and service log lines reach the container logs promptly.
+- [BUGFIX] `api`: cache files of a folder (Let's Encrypt `etc.tgz`) download again, and YAML files with lowercase setting names load.
 - [BUGFIX] `autoconf`: the Kubernetes controller retries a configuration deferred while the scheduler was busy, so a new Ingress deploys without waiting for the next event. (Fixes #4107)
 - [BUGFIX] `backup`: the database lock is taken even when the scheduler cannot write the lock file.
 - [BUGFIX] `bunkernet`: served challenges, captchas and redirects are no longer reported as attacks.
