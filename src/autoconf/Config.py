@@ -121,16 +121,20 @@ class Config:
         configs = configs or {}
         extra_config = extra_config or {}
 
-        # Use sets for comparing lists of dictionaries
-        if set(map(str, self.__instances)) != set(map(str, instances)):
+        # Each comparison is the same one apply() makes on the same value. A difference update_needed
+        # sees but apply() cannot act on never converges: apply() is what stores the new value, so when
+        # it finds no change the stored content stays old and the next poll reports it again, forever.
+        # str() of a dict follows its insertion order, so the same services or configs rebuilt in another
+        # order (labels serialised differently by the daemon) read as a change through set(map(str, ...)).
+        if self.__instances != instances:
             self.__logger.debug(f"Instances changed: {self.__instances} -> {instances}")
             return True
 
-        if set(map(str, self.__services)) != set(map(str, services)):
+        if self.__services != services:
             self.__logger.debug(f"Services changed: {self.__services} -> {services}")
             return True
 
-        if set(map(str, self.__configs.items())) != set(map(str, configs.items())):
+        if self.__configs != configs:
             self.__logger.debug(f"Configs changed: {self.__configs} -> {configs}")
             return True
 
@@ -258,12 +262,14 @@ class Config:
                 success = False
                 self.__logger.error(f"Can't save autoconf custom configs in database: {err}, custom configs may not work as expected")
 
-        # update changes in db
-        ret = self._db.checked_changes(changes, plugins_changes=changed_plugins, value=True)
-        if ret:
-            self.__logger.error(f"An error occurred when setting the changes to checked in the database : {ret}")
+        # update changes in db, only when there is something to signal: Database.checked_changes() reads an
+        # empty list like None, i.e. every *_changed flag, which makes the scheduler redo its whole job batch
+        if changes:
+            ret = self._db.checked_changes(changes, plugins_changes=changed_plugins, value=True)
+            if ret:
+                self.__logger.error(f"An error occurred when setting the changes to checked in the database : {ret}")
 
-        self.__logger.info("Successfully saved new configuration 🚀")
+            self.__logger.info("Successfully saved new configuration 🚀")
 
         if success:
             # Record the settings baseline so the recheck worker only re-fires when the valid
