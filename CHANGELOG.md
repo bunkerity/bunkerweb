@@ -34,6 +34,7 @@
 - [BUGFIX] `ssl`: certificate providers initialize without crashing when there is no service.
 - [BUGFIX] `stream`: banned clients are let through in detect mode.
 - [BUGFIX] `ui`: oversized timestamps in the Basic Authentication and Bad Behavior dashboards fall back to the numeric and text display.
+- [BUGFIX] `ui`: reading user permissions releases the role-query connection even when the user has no roles.
 - [BUGFIX] `whitelist`: cached URL lists are ignored once their URL setting is removed.
 - [MISC] `plugins`: plugins with group or other write bits, or directories that are not `0755`, get a new checksum and may be refreshed once on upgrade.
 
