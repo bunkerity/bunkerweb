@@ -1546,7 +1546,13 @@ class Database:
                     to_update.append({"type": "job", "filter": {"plugin_id": jk[0], "name": jk[1]}, "data": new_j})
 
             for jk in old_job_keys - new_job_keys:
-                to_delete.append({"type": "job", "filter": {"plugin_id": jk[0], "name": jk[1]}})
+                to_delete.extend(
+                    (
+                        {"type": "job_cache", "filter": {"job_name": jk[1]}},
+                        {"type": "job_run", "filter": {"job_name": jk[1]}},
+                        {"type": "job", "filter": {"plugin_id": jk[0], "name": jk[1]}},
+                    )
+                )
 
             # PLUGIN PAGES
             old_page_ids = set(old_plugin_pages.keys())
