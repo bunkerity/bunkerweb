@@ -2851,25 +2851,26 @@ class Database:
                             executor.submit(process_service, service_name, service_config, db_ids) for service_name, service_config in service_configs.items()
                         ]
 
-                        # Process global settings in another thread or the main thread
-                        futures.append(executor.submit(process_global_settings, global_config))
+                        # Global settings stay on this thread: the scoped-session registry hands a pool thread
+                        # its own Session that nothing removes, left idle in transaction on bw_global_values.
+                        results = [process_global_settings(global_config)]
 
                         # Collect results from threads
                         for future in as_completed(futures):
                             try:
-                                ret_to_put, ret_to_update, ret_to_delete, ret_changed_plugins, ret_changed_services, ret_service_template_change = (
-                                    future.result()
-                                )
-                                to_put.extend(ret_to_put)
-                                to_update.extend(ret_to_update)
-                                to_delete.extend(ret_to_delete)
-                                changed_plugins.update(ret_changed_plugins)
-                                if not changed_services:
-                                    changed_services = ret_changed_services
-                                if not service_template_change:
-                                    service_template_change = ret_service_template_change
+                                results.append(future.result())
                             except Exception as e:
                                 self.logger.error(f"Thread raised an exception: {e}")
+
+                    for ret_to_put, ret_to_update, ret_to_delete, ret_changed_plugins, ret_changed_services, ret_service_template_change in results:
+                        to_put.extend(ret_to_put)
+                        to_update.extend(ret_to_update)
+                        to_delete.extend(ret_to_delete)
+                        changed_plugins.update(ret_changed_plugins)
+                        if not changed_services:
+                            changed_services = ret_changed_services
+                        if not service_template_change:
+                            service_template_change = ret_service_template_change
 
                 else:
                     # Non-multisite configuration
