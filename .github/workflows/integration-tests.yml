@@ -330,6 +330,11 @@ jobs:
       - name: Run Linux container
         if: needs.setup.outputs.integration == 'Linux'
         run: docker compose -f tests/linux/docker-compose.yml up -d
+      # dev and testing stamp the package version with the bare word, and dpkg refuses a version that
+      # does not start with a digit. The directive goes in the container: it is the dpkg that unpacks.
+      - name: Accept a version without a starting number
+        if: needs.setup.outputs.integration == 'Linux' && (inputs.RELEASE == 'testing' || inputs.RELEASE == 'dev') && (needs.setup.outputs.linux_name == 'ubuntu' || needs.setup.outputs.linux_name == 'ubuntu-noble' || needs.setup.outputs.linux_name == 'ubuntu-jammy' || needs.setup.outputs.linux_name == 'debian-bookworm' || needs.setup.outputs.linux_name == 'debian-trixie')
+        run: echo "force-bad-version" | docker exec -i -u 0 bunkerweb-linux tee -a /etc/dpkg/dpkg.cfg
       - name: Install deb file
         if: needs.setup.outputs.integration == 'Linux' && (needs.setup.outputs.linux_name == 'ubuntu' || needs.setup.outputs.linux_name == 'ubuntu-noble' || needs.setup.outputs.linux_name == 'ubuntu-jammy' || needs.setup.outputs.linux_name == 'debian-bookworm' || needs.setup.outputs.linux_name == 'debian-trixie')
         env:
