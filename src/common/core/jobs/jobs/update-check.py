@@ -86,10 +86,15 @@ try:
 
         return latest
 
-    latest_release = get_latest_stable_release()
+    try:
+        latest_release = get_latest_stable_release()
+    except RequestException:
+        LOGGER.debug(format_exc())
+        LOGGER.warning("Could not reach the GitHub API to check for a newer release, skipping this run")
+        sys_exit(0)
 
     if not latest_release:
-        status = 1
+        status = 2  # Exit 1 means changed data and triggers a fleet reload.
         LOGGER.error("Failed to fetch latest release information")
         sys_exit(status)
 
@@ -137,6 +142,8 @@ try:
         )
     else:
         LOGGER.info(f"No newer stable version available (current: {current_version}, latest stable: {latest_version})")
+except SystemExit:
+    raise
 except BaseException as e:
     status = 2
     LOGGER.debug(format_exc())

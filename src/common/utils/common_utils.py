@@ -772,7 +772,7 @@ def pick_latest_line_release(releases: List[Dict[str, Any]], current_version: st
 
     best = best_version = overall = overall_version = None
     for release in releases:
-        if release.get("prerelease") or release.get("draft"):
+        if not isinstance(release, dict) or release.get("prerelease") or release.get("draft"):
             continue
         try:
             version = Version(normalize_bunkerweb_version(release["tag_name"]))

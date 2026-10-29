@@ -11,6 +11,7 @@
 - [BUGFIX] `cors`: `Access-Control-Allow-Credentials` is sent on real responses as well as preflights, and removed even when sent by an upstream for disallowed origins or wildcard `Access-Control-Allow-Origin`.
 - [BUGFIX] `cors`: with `USE_CORS=yes`, a preflight request is no longer refused with a 405 when `ALLOWED_METHODS` does not list `OPTIONS`.
 - [BUGFIX] `db`: pruning job runs no longer fails with a conflict on MariaDB when a run is inserted meanwhile.
+- [BUGFIX] `jobs`: an unreachable GitHub API skips the optional update check instead of failing the job, and malformed release entries are ignored.
 - [BUGFIX] `jobs`: a job run without an explicit path infers its calling script correctly.
 - [BUGFIX] `linux`: package upgrades make an existing database lock file readable by nginx without replacing it.
 - [BUGFIX] `plugins`: group and other write bits and directory modes no longer change plugin checksums, so a restored tree is not reinstalled again and again. (Refs #4024)
