@@ -1,0 +1,35 @@
+src/scheduler/main.py
+  s_0acf78da78d316::t_cc67ed50f39677 110-118
+  s_0acf78da78d316::t_99072cec6d6d39 1187-1188
+  s_0acf78da78d316::t_f4ec60b7acb885 106-109,119-121,302-305,1185-1186
+  s_644999e3e74310::t_ce9b30a9ab3431 1189-1190,2020-2023
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "8cb82ef3e4c3984fec5cbd7943fcf4618ca9c8e3",
+  "prompts": {},
+  "humans": {
+    "h_a33a1e80933106": {
+      "author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  },
+  "sessions": {
+    "s_0acf78da78d316": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "af4926eb-0229-44fa-94ea-477e9b630b54",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_644999e3e74310": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a186aa-c7fc-71b2-86a3-ee50b58b93e6",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}
