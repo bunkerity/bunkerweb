@@ -1574,6 +1574,21 @@ function restart_stack () {
 
         sleep 5
     else
+        # Stop the scheduler BEFORE the logs are cleared, not as the first half of a restart. A scheduler
+        # stopped in its first apply round waits up to 30 s for it to end, and its job threads go on
+        # sending their reload meanwhile (run 40848748952: stop 10:00:55, `reload successful` and "BunkerWeb is
+        # ready" 10:01:00, new scheduler 10:01:35). With the logs already truncated, that line was the only
+        # one in error.log, so wait.sh found the stack healthy before the new scheduler had started and the
+        # action ran against the previous configuration. `systemctl stop` returns once the unit is down.
+        docker exec -u 0 bunkerweb-linux systemctl stop bunkerweb-scheduler
+        # shellcheck disable=SC2181
+        if [ $? -ne 0 ] ; then
+            log "UTILS" "❌" "🐧 Failed to stop BunkerWeb Scheduler service"
+            return 1
+        fi
+        # A scheduler killed instead of stopping cleanly leaves its marker behind; nothing writes it now.
+        docker exec -u 0 bunkerweb-linux rm -f /var/tmp/bunkerweb/scheduler.healthy
+
         docker exec -u 0 bunkerweb-linux journalctl --rotate --vacuum-time=1s
         docker exec -u 0 bunkerweb-linux truncate -s 0 /var/log/bunkerweb/error.log
         docker exec -u 0 bunkerweb-linux truncate -s 0 /var/log/bunkerweb/access.log

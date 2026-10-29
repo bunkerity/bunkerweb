@@ -155,7 +155,11 @@ else
                     break
                 fi
             else
-                if docker exec -u 0 bunkerweb-linux grep -q "BunkerWeb is ready" "/var/log/bunkerweb/error.log" ; then
+                # "BunkerWeb is ready" is written by every nginx reload, so alone it only says some
+                # configuration is loaded. The scheduler writes its marker once its first apply round
+                # has pushed and reloaded the configuration (src/scheduler/main.py, HEALTHY_PATH) and
+                # removes it when it stops, so it names the configuration of the scheduler that runs now.
+                if docker exec -u 0 bunkerweb-linux grep -q "BunkerWeb is ready" "/var/log/bunkerweb/error.log" && docker exec -u 0 bunkerweb-linux test -f /var/tmp/bunkerweb/scheduler.healthy ; then
                     # If a crowdsec container exists, ensure it is healthy before declaring success
                     if docker ps -a --format "{{.Names}}" | grep -q "^crowdsec$" ; then
                         cs_health=$(docker inspect --format "{{json .State.Health }}" crowdsec | grep -w "healthy")
