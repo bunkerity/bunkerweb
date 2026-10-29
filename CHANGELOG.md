@@ -30,6 +30,8 @@
 - [BUGFIX] `db`: a removed job no longer leaves its cache and run history behind.
 - [BUGFIX] `db`: plugin updates no longer rewrite same-numbered steps of other templates, and drop removed steps, settings, custom configs and select options.
 - [BUGFIX] `deps`: repeated post-install hooks for lua-nginx-module and lua-resty-core no longer fail on removed test directories or reapply patches.
+- [BUGFIX] `dnsbl`: the first blocked request from an IP is counted in the dashboard, and pending lookups stop once a server reports the IP.
+- [BUGFIX] `dnsbl`: a resolver outage no longer caches a clean verdict for 24 hours, so later requests retry the lookup.
 - [BUGFIX] `jobs`: an unreachable GitHub API skips the optional update check instead of failing the job, and malformed release entries are ignored.
 - [BUGFIX] `jobs`: a job run without an explicit path infers its calling script correctly.
 - [BUGFIX] `letsencrypt`: a ZeroSSL retry count or delay of `0` is kept, and domains matching a public suffix wildcard rule are rejected.
