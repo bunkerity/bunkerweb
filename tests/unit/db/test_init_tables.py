@@ -1,0 +1,74 @@
+"""Integration tier — DatabaseInitTablesMixin.init_tables (plugin/settings schema sync).
+
+High-risk method previously guarded only by misc/refactor/snapshot.sh. Here it's exercised
+end-to-end on every engine: create -> idempotent re-run -> update -> prune. Marked `slow`
+(deselect with `-m 'not slow'`).
+"""
+
+import pytest
+
+from sqlalchemy import select
+
+from fixtures.seed import FIXED_DT, make_core_plugin, session
+from model import Jobs_cache, Jobs_runs
+
+pytestmark = pytest.mark.slow
+
+
+class TestInitTables:
+    def test_creates_plugin_and_settings(self, db):
+        ok, err = db.init_tables([make_core_plugin("alpha")])
+        assert (ok, err) == (True, "")
+        alpha = next(p for p in db.get_plugins() if p["id"] == "alpha")
+        assert "ALPHA_GLOBAL" in alpha["settings"]
+        assert "ALPHA_MS" in alpha["settings"]
+
+    def test_idempotent_rerun_reports_no_changes(self, db):
+        # The bool is "changes applied", not "success": first run mutates, re-run is a no-op.
+        assert db.init_tables([make_core_plugin("alpha")]) == (True, "")
+        assert db.init_tables([make_core_plugin("alpha")]) == (False, "")
+        assert len([p for p in db.get_plugins() if p["id"] == "alpha"]) == 1
+
+    def test_version_update(self, db):
+        db.init_tables([make_core_plugin("alpha", version="1.0")])
+        db.init_tables([make_core_plugin("alpha", version="2.0")])
+        assert next(p for p in db.get_plugins() if p["id"] == "alpha")["version"] == "2.0"
+
+    def test_plugin_removal_prunes(self, db):
+        db.init_tables([make_core_plugin("alpha"), make_core_plugin("beta")])
+        assert {"alpha", "beta"} <= {p["id"] for p in db.get_plugins()}
+        db.init_tables([make_core_plugin("alpha")])  # beta dropped from desired
+        ids = {p["id"] for p in db.get_plugins()}
+        assert "alpha" in ids and "beta" not in ids
+
+    def _external_manual(self, plugin_id):
+        # An external, method="manual" plugin: the init-diff delete branch fires for method=="manual"
+        # rows, so this is exactly the shape whose FS dir vanishing on disable would trigger deletion.
+        p = make_core_plugin(plugin_id)
+        p["type"] = "external"
+        p["method"] = "manual"
+        return p
+
+    def test_enabled_plugin_absent_from_desired_still_deleted(self, db):
+        # Control: an ENABLED external/manual plugin dropped from desired is still pruned.
+        db.init_tables([make_core_plugin("alpha"), self._external_manual("extp")])
+        db.init_tables([make_core_plugin("alpha")])
+        assert "extp" not in {p["id"] for p in db.get_plugins()}
+
+    def test_jobs_created(self, db):
+        db.init_tables([make_core_plugin("alpha", jobs=[{"name": "alphajob", "file": "alphajob.py", "every": "hour", "reload": False}])])
+        assert "alphajob" in db.get_jobs()
+
+    def test_removed_job_prunes_cache_and_runs(self, db):
+        job = {"name": "alphajob", "file": "alphajob.py", "every": "hour", "reload": False}
+        db.init_tables([make_core_plugin("alpha", jobs=[job])])
+        with session(db) as s:
+            s.add(Jobs_cache(job_name="alphajob", file_name="legacy.key", data=b"secret"))
+            s.add(Jobs_runs(job_name="alphajob", success=True, start_date=FIXED_DT, end_date=FIXED_DT))
+
+        db.init_tables([make_core_plugin("alpha")])
+
+        assert "alphajob" not in db.get_jobs()
+        with session(db) as s:
+            assert s.scalar(select(Jobs_cache).filter_by(job_name="alphajob")) is None
+            assert s.scalar(select(Jobs_runs).filter_by(job_name="alphajob")) is None
