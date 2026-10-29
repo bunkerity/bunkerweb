@@ -1,0 +1,21 @@
+CHANGELOG.md
+  s_36cff8fad440d1::t_52b8b446e7a9e2 15
+src/linux/scripts/postinstall.sh
+  s_36cff8fad440d1::t_52b8b446e7a9e2 40-44
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "1b8b49679ab650c586884a255c0926df2871e50c",
+  "prompts": {},
+  "sessions": {
+    "s_36cff8fad440d1": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "9e7b0240-ab8b-4374-b9b3-c0f8bb66b3ef",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}
