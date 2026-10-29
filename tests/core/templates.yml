@@ -26,3 +26,8 @@ actions:
 
 config:
   USE_REVERSE_PROXY: "no"
+
+# An empty URL keeps the Kubernetes generator from building an ingress route to the app, which would make the
+# controller save a service-level USE_REVERSE_PROXY=yes over the global value above.
+annotations:
+  bunkerweb.io/REVERSE_PROXY_URL: ""
