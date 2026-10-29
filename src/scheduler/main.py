@@ -18,6 +18,7 @@ from stat import S_IRGRP, S_IRUSR, S_IWUSR, S_IXGRP, S_IXUSR
 from subprocess import run as subprocess_run, DEVNULL, STDOUT
 from sys import executable as sys_executable, path as sys_path
 from tarfile import open as tar_open
+from tarfile import TarError
 from threading import Event, Lock
 from time import monotonic, sleep
 from traceback import format_exc
@@ -477,6 +478,40 @@ def generate_custom_configs(configs: Optional[List[Dict[str, Any]]] = None, *, o
         send_file_to_bunkerweb(original_path, "/custom_configs")
 
 
+def installed_plugin_matches_archive(plugin_content: BytesIO, plugin: Dict[str, Any]) -> bool:
+    """Compare archive contents after accounting for scheduler-owned permission changes."""
+    data = plugin.get("data")
+    if not data or bytes_hash(data, algorithm="sha256") != plugin["checksum"]:
+        return False
+    try:
+        plugin_content.seek(0)
+        with tar_open(fileobj=plugin_content, mode="r:gz") as installed, tar_open(fileobj=BytesIO(data), mode="r:gz") as stored:
+            actual = {member.name: member for member in installed.getmembers()}
+            expected = {member.name: member for member in stored.getmembers()}
+            if actual.keys() != expected.keys():
+                return False
+            for name, member in expected.items():
+                current = actual[name]
+                parts = Path(name).parts[1:]
+                mode = member.mode & ~0o022
+                if member.isdir():
+                    mode = 0o755
+                elif member.isfile() and len(parts) > 1 and (parts[0] in ("jobs", "bwcli") or (parts[0] == "ui" and parts[-1].endswith(".py"))):
+                    mode = 0o750
+                if (current.type, current.mode, current.size) != (member.type, mode, member.size):
+                    return False
+                if member.isfile():
+                    current_file = installed.extractfile(current)
+                    stored_file = stored.extractfile(member)
+                    assert current_file is not None and stored_file is not None
+                    with current_file, stored_file:
+                        if current_file.read() != stored_file.read():
+                            return False
+            return True
+    except (OSError, TarError, ValueError):
+        return False
+
+
 def generate_external_plugins(original_path: Union[Path, str] = EXTERNAL_PLUGINS_PATH, *, send: bool = True):
     if not isinstance(original_path, Path):
         original_path = Path(original_path)
@@ -503,7 +538,9 @@ def generate_external_plugins(original_path: Union[Path, str] = EXTERNAL_PLUGINS
                     plugin_content = create_plugin_tar_gz(file, arc_root=file.name)
                 else:
                     continue
-                if bytes_hash(plugin_content, algorithm="sha256") == plugins[index]["checksum"]:
+                if bytes_hash(plugin_content, algorithm="sha256") == plugins[index]["checksum"] or installed_plugin_matches_archive(
+                    plugin_content, plugins[index]
+                ):
                     ignored_plugins.add(file.name)
                     continue
                 LOGGER.debug(f"Checksum of {file} has changed, removing it ...")
