@@ -2138,7 +2138,8 @@ class Database:
             # Collect global settings to delete
             global_settings_to_delete = []
             global_method_total = 0
-            for db_global_config in session.query(Global_values).filter_by(method=method).all():
+            cleanup_methods = EDITABLE_METHODS if method in EDITABLE_METHODS else {method}
+            for db_global_config in session.query(Global_values).filter(Global_values.method.in_(cleanup_methods)).all():
                 key = db_global_config.setting_id
                 if db_global_config.suffix:
                     key = f"{key}_{db_global_config.suffix}"
@@ -2192,7 +2193,9 @@ class Database:
             # Track per-service totals so we can detect would-wipe-the-whole-service deletions below.
             service_method_total: Dict[str, int] = defaultdict(int)
             service_method_to_delete: Dict[str, int] = defaultdict(int)
-            for db_service_config in [] if skip_service_management else session.query(Services_settings).filter_by(method=method).all():
+            for db_service_config in (
+                [] if skip_service_management else session.query(Services_settings).filter(Services_settings.method.in_(cleanup_methods)).all()
+            ):
                 # Preserve settings of services about to be drafted by the autoconf disable_cleanup path
                 # so they can be re-published when the orchestration object returns.
                 if db_service_config.service_id in drafted_service_ids:
