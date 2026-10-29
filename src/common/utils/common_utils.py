@@ -523,6 +523,23 @@ def _verify_tar_tree(path, links, destination, members):
         raise ValueError(f"Tar member {relative!r} could not be verified: {error}") from error
 
 
+# Local CRS, PRO and backup archives fit with at least 5x byte and 45x member headroom.
+MAX_ARCHIVE_EXTRACTED_BYTES = 1 << 30  # 1 GiB
+MAX_ARCHIVE_MEMBERS = 50_000
+
+
+def _enforce_archive_budget(kind: str, sizes) -> None:
+    """Check declared expansion before extraction writes any files."""
+    count = total = 0
+    for size in sizes:
+        count += 1
+        total += size
+        if count > MAX_ARCHIVE_MEMBERS:
+            raise ValueError(f"{kind} archive has more than {MAX_ARCHIVE_MEMBERS} members")
+        if total > MAX_ARCHIVE_EXTRACTED_BYTES:
+            raise ValueError(f"{kind} archive expands to more than {MAX_ARCHIVE_EXTRACTED_BYTES} bytes")
+
+
 def safe_tar_extractall(tar, path, *, links="none", **kwargs):
     """Extract a tar archive with runtime-independent path and link containment checks."""
     if links not in ("none", "contained"):
@@ -536,6 +553,7 @@ def safe_tar_extractall(tar, path, *, links="none", **kwargs):
     if kwargs:
         name = next(iter(kwargs))
         raise TypeError(f"safe_tar_extractall() got an unexpected keyword argument {name!r}")
+    _enforce_archive_budget("Tar", (member.size if member.isreg() else 0 for member in members))
     _validate_tar_members(members, links=links)
 
     destination = os.path.realpath(path)
@@ -605,8 +623,10 @@ def safe_tar_extractall(tar, path, *, links="none", **kwargs):
             raise ValueError(f"Tar member {member.name!r} could not be finalized: {error}") from error
 
 
-def safe_zip_extractall(zf, path):
-    """Extract a zip archive safely, rejecting members with absolute paths or path traversal."""
+def safe_zip_extractall(zf, path, *, capped=True):
+    """Extract a zip safely, validating paths and optionally enforcing the expansion budget."""
+    if capped:
+        _enforce_archive_budget("Zip", (info.file_size for info in zf.infolist()))
     dest = Path(path).resolve()
     for member in zf.namelist():
         member_path = (dest / member).resolve()
