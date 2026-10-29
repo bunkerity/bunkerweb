@@ -4,6 +4,7 @@ Each script sets its own sys.path and imports its own `app` package (UI or API),
 pytest's interpreter. The root conftest ignores them; this file runs them as they were written.
 """
 
+import os
 import shutil
 import subprocess
 import sys
@@ -37,7 +38,7 @@ def _cases():
 
 
 @pytest.mark.parametrize("path", list(_cases()))
-def test_legacy_script(path):
+def test_legacy_script(path, tmp_path):
     if path.name in NEEDS_REDIS and not shutil.which("redis-server"):
         pytest.skip("redis-server not installed")
     if path.suffix == ".py":
@@ -56,5 +57,8 @@ def test_legacy_script(path):
         cmd = [lua, str(path)]
     else:
         cmd = ["bash", str(path)]
-    proc = subprocess.run(cmd, cwd=ROOT, capture_output=True, text=True, timeout=300)
+    # the API's settings loader raises when /etc/bunkerweb/api.yml is missing (a CI runner has none): point it at an empty yaml
+    (tmp_path / "api.yml").touch()
+    env = {**os.environ, "SETTINGS_YAML_FILE": str(tmp_path / "api.yml"), "SETTINGS_ENV_FILE": str(tmp_path / "api.env")}
+    proc = subprocess.run(cmd, cwd=ROOT, env=env, capture_output=True, text=True, timeout=300)
     assert proc.returncode == 0, f"{path.name} exited {proc.returncode}\n{proc.stdout[-4000:]}\n{proc.stderr[-4000:]}"

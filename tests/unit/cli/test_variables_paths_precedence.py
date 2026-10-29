@@ -75,6 +75,9 @@ def test_the_operators_file_wins_over_the_loading_renders_default(monkeypatch):
     monkeypatch.setattr(CLI_MODULE, "OPERATOR_VARIABLES_PATHS", tuple(fake_path(*parts) for parts in real_operator))
     monkeypatch.setattr(CLI_MODULE, "GENERATED_VARIABLES_PATHS", tuple(fake_path(*parts) for parts in real_generated))
     monkeypatch.setattr(CLI_MODULE, "VARIABLES_PATHS", tuple(fake_path(*parts) for parts in real_order))
+    # resolve_variables binds the real path tuples as default arguments at def time, so patching the module attributes alone leaves it reading the host's files
+    real_resolve = CLI_MODULE.resolve_variables
+    monkeypatch.setattr(CLI_MODULE, "resolve_variables", lambda: real_resolve(CLI_MODULE.OPERATOR_VARIABLES_PATHS, CLI_MODULE.GENERATED_VARIABLES_PATHS))
     monkeypatch.setattr(CLI_MODULE, "handle_docker_secrets", lambda: {})
     monkeypatch.setattr(CLI_MODULE, "get_redis_client", lambda **kwargs: None)
 
