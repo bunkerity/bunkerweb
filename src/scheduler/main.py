@@ -897,6 +897,21 @@ def pre_push_deferral(pushed: bool, deferrals: int) -> Tuple[bool, int]:
     return True, deferrals + 1
 
 
+def once_jobs_republish(first_start: bool, pre_push_done: bool, pre_push_rendered: bool, jobs_changed: bool, readonly: bool) -> bool:
+    """Whether the iteration still has to render, push and reload after the once-jobs ran.
+
+    The pre-job push already delivered the configuration and reloaded the instances, so doing it again
+    is only worth it when a once-job reported a change (exit status 1 or 3: a file for the templates such
+    as api-server-cert.pem, a cache entry, ...). An unchanged second reload is pure cost: on Kubernetes
+    it lands while the workers of the first one are still draining and the instance holds the compiled
+    ruleset three times (#4106). The first start, a read-only database (the caches are only restored
+    locally) and IGNORE_FAIL_SENDING_CONFIG (a push nothing confirmed counts as taken) always publish.
+    """
+    if first_start or readonly or IGNORE_FAIL_SENDING_CONFIG or not (pre_push_done and pre_push_rendered):
+        return True
+    return jobs_changed
+
+
 def custom_configs_save_failed(err: str) -> bool:
     """Whether save_custom_configs refused the write, as opposed to reporting on it.
 
@@ -1509,6 +1524,7 @@ def main() -> None:
             pre_push_failed = False
             pre_push_rendered = False
             generation_failed = False
+            republish_after_jobs = True
             if CONFIG_NEED_GENERATION and RUN_JOBS_ONCE:
                 # A fault in here is a failed push, not a reason to leave: uncaught it reaches the
                 # outer handler, which turns it into stop(1).
@@ -1578,19 +1594,25 @@ def main() -> None:
                 # The once-jobs only record what they changed; this iteration publishes it below.
                 # Taking the flags here keeps the render/push/reload to exactly one per applied
                 # change instead of letting the first run_pending() rediscover and repeat it.
-                _, jobs_need_generation = SCHEDULER.consume_pending_publication()
+                jobs_changed, jobs_need_generation = SCHEDULER.consume_pending_publication()
                 if jobs_need_generation:
                     CONFIG_NEED_GENERATION = True
+                    jobs_changed = True
 
                 healthcheck_job_run = False
                 # Jobs may have created files needed by config templates (e.g. api-server-cert.pem),
                 # so undo the flag the push above cleared and let the normal path render again. Keyed
                 # on the render, not on the push succeeding: the jobs also run once the deferral has
                 # given way, and that render is the only thing that carries what they produced to the
-                # instances.
+                # instances. Only when a job reported a change though, otherwise the same configuration
+                # is pushed and reloaded a second time for nothing (#4106).
+                republish_after_jobs = once_jobs_republish(FIRST_START, pre_push_done, pre_push_rendered, jobs_changed, SCHEDULER.db.readonly)
                 if pre_push_rendered:
-                    LOGGER.info("Regenerating config after once-jobs to pick up files created by jobs (e.g. api-server-cert.pem)")
-                    CONFIG_NEED_GENERATION = True
+                    if republish_after_jobs:
+                        LOGGER.info("Regenerating config after once-jobs to pick up files created by jobs (e.g. api-server-cert.pem)")
+                        CONFIG_NEED_GENERATION = True
+                    else:
+                        LOGGER.info("No once-job changed anything since the configuration was pushed, skipping the second push and reload")
 
             # A generation that just failed in the pre-push, with the once-jobs held back, has nothing new
             # to try: the same inputs would only fail the same way a second time in this iteration.
@@ -1609,6 +1631,9 @@ def main() -> None:
                     # Nothing new reached the instances: a reload now would load the plugins and custom
                     # configs already pushed against the previous configuration, and report it as applied.
                     success = False
+                elif not republish_after_jobs:
+                    # The pre-job push is the configuration the instances run; its reload already succeeded.
+                    pass
                 elif SCHEDULER.apis:
                     # send cache
                     task_futures.append(SCHEDULER_TASKS_EXECUTOR.submit(send_file_to_bunkerweb, CACHE_PATH, "/cache"))

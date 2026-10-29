@@ -5,6 +5,7 @@
 - [BUGFIX] `cors`: `Access-Control-Allow-Credentials` is sent on real responses as well as preflights, and removed even when sent by an upstream for disallowed origins or wildcard `Access-Control-Allow-Origin`.
 - [BUGFIX] `cors`: with `USE_CORS=yes`, a preflight request is no longer refused with a 405 when `ALLOWED_METHODS` does not list `OPTIONS`.
 - [BUGFIX] `db`: pruning job runs no longer fails with a conflict on MariaDB when a run is inserted meanwhile.
+- [BUGFIX] `scheduler`: the configuration is no longer rendered, pushed and reloaded a second time after the once-jobs when none of them changed anything. (Fixes #4106)
 
 ## v1.6.18~rc1 - 2026/10/26
 
