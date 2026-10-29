@@ -33,6 +33,7 @@
 - [BUGFIX] `letsencrypt`: a ZeroSSL retry count or delay of `0` is kept, and domains matching a public suffix wildcard rule are rejected.
 - [BUGFIX] `letsencrypt`: the UI keeps concurrent requests' temporary files, reports the original database error and sorts certificates with missing dates.
 - [BUGFIX] `linux`: package upgrades make an existing database lock file readable by nginx without replacing it.
+- [BUGFIX] `linux`: the config saver refuses to stamp the installed version on a database whose migration has not run, so the migration is no longer skipped.
 - [BUGFIX] `metrics`: blocked-request history survives the shared memory restore after a reload, and the configured memory retry limit applies to every write.
 - [BUGFIX] `modsecurity`: the global CRS mode loads the downloaded CRS plugins configured across services.
 - [BUGFIX] `plugins`: group and other write bits and directory modes no longer change plugin checksums, so a restored tree is not reinstalled again and again. (Refs #4024)
