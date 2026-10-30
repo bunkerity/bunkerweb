@@ -7,6 +7,7 @@
 - [BUGFIX] `core`: stream services no longer abort NGINX init when an HTTP-only plugin (PRO included) is installed, a regression in 1.6.17.
 - [BUGFIX] `bunkernet`: reports now carry only a fixed set of request headers (User-Agent, Accept, Accept-Encoding, Accept-Language, Content-Type, Content-Length) and no longer include the values matched in request headers and cookies, also for reports queued before the upgrade; the plugin documentation lists exactly what a report contains.
 - [BUGFIX] `installer`: on Debian and Ubuntu, the installer warns that the distribution PostgreSQL client cannot back up a newer server and shows the PGDG commands to install a matching one.
+- [BUGFIX] `ui`: report and ban dates carry their UTC offset, so the browser no longer shifts them by the viewer's time zone. (Fixes #4118)
 
 ## v1.6.18~rc2 - 2026/10/30
 

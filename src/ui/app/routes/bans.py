@@ -72,7 +72,7 @@ def format_ban(ban):
     """One ban as a DataTable row. Defensive: some bans may lack some fields."""
     source = _lease_source(ban)
     return {
-        "date": datetime.fromtimestamp(floor(ban.get("date", 0))).isoformat() if ban.get("date") else "N/A",
+        "date": datetime.fromtimestamp(floor(ban.get("date", 0))).astimezone().isoformat() if ban.get("date") else "N/A",
         "ip": escape(str(ban.get("ip", "N/A"))),
         "country": escape(str(ban.get("country", "N/A"))),
         "reason": escape(str(ban.get("reason", "N/A"))),
