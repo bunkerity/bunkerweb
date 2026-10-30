@@ -20,6 +20,7 @@ import multiprocessing
 import random
 import re
 import time
+from ipaddress import IPv4Address, IPv6Address, IPv6Interface
 from pathlib import Path
 from re import _constants as C, _parser as P  # type: ignore[attr-defined]
 
@@ -55,6 +56,32 @@ _IP = (
     r"((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]Z{0,4}){0,4}%[0-9a-zA-Z]+|::(ffff(:0{1,4})?:)?((25[0-5]|(2[0-4]|1?\d)?\d)\.){3}"
     r"(25[0-5]|(2[0-4]|1?\d)?\d)|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1?\d)?\d)\.){3}(25[0-5]|(2[0-4]|1?\d)?\d))(\/(12[0-8]|1[01][0-9]|[0-9][0-9]?))?)"
 )
+_IP_IPV6_NEW = (
+    "(((\\b25[0-5]|\\b2[0-4]\\d|\\b[01]?\\d\\d?)(\\.(25[0-5]|2[0-4]\\d|[01]?\\d\\d?)){3})(\\/([1-2][0-9]?|3[0-2]?|[04-9]))?|(([0-9a-fA-F]{1,4}:){7}[0-9a-fA-"
+    "F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,"
+    "4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA"
+    "-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|::(ffff(:0{1,4})?:)?((25[0-5]|(2[0-4]|1?\\d)?\\d)\\.){3}(25[0-5]|(2[0-4]|1?\\d"
+    ")?\\d)|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1?\\d)?\\d)\\.){3}(25[0-5]|(2[0-4]|1?\\d)?\\d)|(([0-9a-fA-F]{1,4}:){6}|::([0-9a-fA-F]{1,4}:){0,5"
+    "}|(?!(?:[0-9a-fA-F]*:){7})([0-9a-fA-F]{1,4}:){1,5}:([0-9a-fA-F]{1,4}:){0,4})((25[0-5]|(2[0-4]|1?[0-9])?[0-9])\\.){3}(25[0-5]|(2[0-4]|1?[0-9])"
+    "?[0-9]))(\\/(12[0-8]|1[01][0-9]|[0-9][0-9]?))?)"
+)
+_URLS_IPV6_NEW = (
+    "^(?! +$) *(?:(?=(?:(https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=][\\-\\w\\(\\)!@:%+.~#?&\\/=$]*|https?:\\/\\/(?:[\\-\\w:%.+~#=]+@)?\\[(?:(?:[0-9a-fA-F]{1,4}:"
+    "){7}[0-9a-fA-F]{1,4}|(?:[0-9a-fA-F]{1,4}:){1,7}:|(?:[0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|(?:[0-9a-fA-F]{1,4}:){1,5}(?::[0-9a-fA-F]{1,4})"
+    "{1,2}|(?:[0-9a-fA-F]{1,4}:){1,4}(?::[0-9a-fA-F]{1,4}){1,3}|(?:[0-9a-fA-F]{1,4}:){1,3}(?::[0-9a-fA-F]{1,4}){1,4}|(?:[0-9a-fA-F]{1,4}:){1,2}(?"
+    "::[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:(?:(?::[0-9a-fA-F]{1,4}){1,6})|:(?:(?::[0-9a-fA-F]{1,4}){1,7}|:)|(?:(?:[0-9a-fA-F]{1,4}:){6}|::(?:"
+    "[0-9a-fA-F]{1,4}:){0,5}|(?!(?:[0-9a-fA-F]*:){7})(?:[0-9a-fA-F]{1,4}:){1,5}:(?:[0-9a-fA-F]{1,4}:){0,4})(?:(?:25[0-5]|(?:2[0-4]|1?[0-9])?[0-9]"
+    ")\\.){3}(?:25[0-5]|(?:2[0-4]|1?[0-9])?[0-9]))\\](?::[0-9]+)?(?:[/?#][\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)?)(?: |$))[^ \\n]+(?: +|$))*$"
+)
+_SIGNIN_IPV6_NEW = (
+    "^((https?|\\$[a-zA-Z0-9_]+):\\/\\/(?:[\\-\\w@:%.+~=$][\\-\\w\\(\\)!@:%+.~?&\\/=$]*|(?:[\\-\\w:%.+~=$]+@)?\\[(?:(?:[0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}|("
+    "?:[0-9a-fA-F]{1,4}:){1,7}:|(?:[0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|(?:[0-9a-fA-F]{1,4}:){1,5}(?::[0-9a-fA-F]{1,4}){1,2}|(?:[0-9a-fA-F]{1"
+    ",4}:){1,4}(?::[0-9a-fA-F]{1,4}){1,3}|(?:[0-9a-fA-F]{1,4}:){1,3}(?::[0-9a-fA-F]{1,4}){1,4}|(?:[0-9a-fA-F]{1,4}:){1,2}(?::[0-9a-fA-F]{1,4}){1,"
+    "5}|[0-9a-fA-F]{1,4}:(?:(?::[0-9a-fA-F]{1,4}){1,6})|:(?:(?::[0-9a-fA-F]{1,4}){1,7}|:)|(?:(?:[0-9a-fA-F]{1,4}:){6}|::(?:[0-9a-fA-F]{1,4}:){0,5"
+    "}|(?!(?:[0-9a-fA-F]*:){7})(?:[0-9a-fA-F]{1,4}:){1,5}:(?:[0-9a-fA-F]{1,4}:){0,4})(?:(?:25[0-5]|(?:2[0-4]|1?[0-9])?[0-9])\\.){3}(?:25[0-5]|(?:2"
+    "[0-4]|1?[0-9])?[0-9]))\\](?::[0-9]+)?(?:[/?][\\-\\w\\(\\)!@:%+.~?&\\/=$]*)?))?$"
+)
+
 _PORT = r"(\b((6553[0-5])|(655[0-2][0-9])|(65[0-4][0-9]{2})|(6[0-4][0-9]{3})|([1-5][0-9]{4})|([0-5]{0,5})|([0-9]{1,4}))\b)"
 _URL_OLD = r"[\-\w@:%.+~#=]+[\-\w\(\)!@:%+.~#?&\/=$]*"
 # The first class is a subset of the second, so `A+B*` is `AB*` without the quadratic split.
@@ -86,7 +113,7 @@ def _token(item: str) -> str:
 
 
 # old regex -> (new regex, kind or tuple of kinds, item regex for the "glued" kind)
-REWRITES: dict[str, tuple[str, str, str | None]] = {
+REWRITES: dict[str, tuple[str, str | tuple[str, ...], str | None]] = {
     # No end anchor: `re.search` accepted any suffix.
     r"^[\w\-]+": (r"^[^:]+$", "rfc7617", None),
     r"^.+": (r"^.+$", "same", None),
@@ -104,11 +131,15 @@ REWRITES: dict[str, tuple[str, str, str | None]] = {
     r"^( *([1-5]\d{2})=[^ ]+ *)*$": (_star_list(r"([1-5]\d{2})=[^ ]+"), "same", None),
     r"^(( *[\w\-]+ *)+|\*)?$": (r"^( *(?:[\w\-]+(?: +|$))+|\*)?$", "same", None),
     r"^( *(.*) *)*$": (r"^.*$", "same", None),
-    rf"^( *((https?:\/\/|file:\/\/\/){_URL_OLD}) *)*$": (_star_list(rf"(https?:\/\/|file:\/\/\/){_URL_NEW}"), "same", None),
-    rf"^( *{_IP} *)*$": (_star_list(_token(_IP)), "glued", _IP),
-    rf"^(?! )( *{_IP} *)*$": (rf"^(?:{_token(_IP)}(?: +|$))*$", "glued", _IP),
+    rf"^( *((https?:\/\/|file:\/\/\/){_URL_OLD}) *)*$": (_URLS_IPV6_NEW, "ipv6-url-list", None),
+    rf"^( *{_IP} *)*$": (_star_list(_token(_IP_IPV6_NEW)), ("glued", "ipv6-zone", "ipv6-mixed"), _IP),
+    rf"^(?! )( *{_IP} *)*$": (rf"^(?:{_token(_IP_IPV6_NEW)}(?: +|$))*$", ("glued", "ipv6-zone", "ipv6-mixed-unpadded"), _IP),
     # Same, and the duplicate check's backreference follows the IP group from \2 to \1.
-    rf"^(?! )( *{_IP}(?!.*\D\2([^\d\/]|$)) *)*$": (rf"^(?:{_token(_IP)}(?!.*\D\1([^\d\/]|$))(?: +|$))*$", "glued", _IP),
+    rf"^(?! )( *{_IP}(?!.*\D\2([^\d\/]|$)) *)*$": (
+        rf"^(?:{_token(_IP_IPV6_NEW)}(?!.*\D\1([^\d\/]|$))(?: +|$))*$",
+        ("glued", "ipv6-zone", "ipv6-mixed-unique"),
+        _IP,
+    ),
     rf"^( *({_PORT}) *)+$": (_plus_list(_token(_PORT)), "glued", _PORT),
     # `(sep? ITEM)*` with an optional separator: glued items split every way. Where two glued
     # items are themselves one item (every case below), requiring the separator changes nothing.
@@ -151,8 +182,8 @@ REWRITES: dict[str, tuple[str, str, str | None]] = {
     rf"^(https?:\/\/{_URL_OLD})?$": (rf"^(https?:\/\/{_URL_NEW})?$", "same", None),
     rf"^https?:\/\/{_URL_OLD}$": (rf"^https?:\/\/{_URL_NEW}$", "same", None),
     r"^((https?|\$[a-zA-Z0-9_]+):\/\/[\-\w@:%.+~=$]+[\-\w\(\)!@:%+.~?&\/=$]*)?$": (
-        r"^((https?|\$[a-zA-Z0-9_]+):\/\/[\-\w@:%.+~=$][\-\w\(\)!@:%+.~?&\/=$]*)?$",
-        "same",
+        _SIGNIN_IPV6_NEW,
+        "ipv6-signin",
         None,
     ),
     rf"^(?![ ])(,? ?([a-z0-9\-]+)=(\*|\(( ?(self|\u0022https?:\/\/{_URL_OLD}\u0022)(?=[ \)]))*\)))*$": (
@@ -183,6 +214,56 @@ def _cookie_entries(value: str) -> tuple[str, list[str]]:
     return ("" if value[:1].isspace() else (tokens[0] if tokens else "")), (tokens if value[:1].isspace() else tokens[1:])
 
 
+def _ipv6_url_change(value: str, *, signin: bool = False) -> bool:
+    fields = [value] if signin else value.split(" ")
+    changed = False
+    for index, field in enumerate(fields):
+        authority = re.match(r"^((?:https?|\$[a-zA-Z0-9_]+)://(?:[^@/\[\] ]+@)?)\[([^\[\]]+)\](?=:[0-9]+(?:[/?#]|$)|[/?#]|$)", field)
+        if not authority:
+            continue
+        address = authority[2]
+        if "%" in address:
+            return False
+        try:
+            IPv6Address(address)
+        except ValueError:
+            return False
+        end = authority.end()
+        fields[index] = authority[1] + "example.com" + field[end:]
+        changed = True
+    previous = r"^((https?|\$[a-zA-Z0-9_]+):\/\/[\-\w@:%.+~=$][\-\w\(\)!@:%+.~?&\/=$]*)?$" if signin else _star_list(rf"(https?:\/\/|file:\/\/\/){_URL_NEW}")
+    return changed and re.fullmatch(previous, " ".join(fields)) is not None
+
+
+def _ipv6_zone_change(value: str, item: str) -> bool:
+    fields = [field for field in value.split(" ") if field]
+    return any("%" in field for field in fields) and all(re.fullmatch(item, field) for field in fields)
+
+
+def _ipv6_mixed_change(value: str, item: str, previous: str) -> bool:
+    if "%" in value:
+        return False
+    fields = value.split(" ")
+    changed = False
+    for index, field in enumerate(fields):
+        if not field or re.fullmatch(item, field):
+            continue
+        address, slash, prefix = field.partition("/")
+        if "%" in address or "." not in address or ":" not in address:
+            return False
+        try:
+            IPv6Interface(field)
+            head, _, tail = address.rpartition(":")
+            ipv4 = int(IPv4Address(tail))
+        except ValueError:
+            return False
+        fields[index] = f"{head}:{ipv4 >> 16:x}:{ipv4 & 65535:x}" + slash + prefix
+        changed = True
+    # Changing only the dotted tail must restore the previous list grammar,
+    # including its leading-space and duplicate guards.
+    return changed and re.fullmatch(previous, " ".join(fields)) is not None
+
+
 # kind -> (reason, predicate(old_accepts, new_accepts, value, item))
 _EXPLAINED = {
     "same": ("no verdict may change", lambda old, new, value, item: False),
@@ -193,6 +274,30 @@ _EXPLAINED = {
     "ascii-digits": (
         "BROTLI_MIN_LENGTH/BAD_BEHAVIOR_COUNT_TIME: nginx and Lua tonumber() only read ASCII digits",
         lambda old, new, value, item: old and not new and bool(_NON_ASCII_DIGIT.search(value)),
+    ),
+    "ipv6-url-list": (
+        "URL lists: a valid bracketed IPv6 authority is accepted; replacing only that host restores the previous grammar",
+        lambda old, new, value, item: new and not old and _ipv6_url_change(value),
+    ),
+    "ipv6-signin": (
+        "sign-in URLs: a valid bracketed IPv6 authority is accepted, preserving scheme variables and previous character restrictions",
+        lambda old, new, value, item: new and not old and _ipv6_url_change(value, signin=True),
+    ),
+    "ipv6-zone": (
+        "IP lists: zone IDs previously accepted as individual IP tokens are refused",
+        lambda old, new, value, item: old and not new and _ipv6_zone_change(value, item),
+    ),
+    "ipv6-mixed": (
+        "IP lists: expanded, uppercase and mixed IPv6 with a dotted IPv4 tail are accepted without changing the list grammar",
+        lambda old, new, value, item: new and not old and _ipv6_mixed_change(value, item, _star_list(_token(_IP))),
+    ),
+    "ipv6-mixed-unpadded": (
+        "trusted IP lists: mixed IPv6 is accepted while retaining the leading-space restriction",
+        lambda old, new, value, item: new and not old and _ipv6_mixed_change(value, item, rf"^(?:{_token(_IP)}(?: +|$))*$"),
+    ),
+    "ipv6-mixed-unique": (
+        "API whitelist: mixed IPv6 is accepted while retaining the leading-space and duplicate restrictions",
+        lambda old, new, value, item: new and not old and _ipv6_mixed_change(value, item, rf"^(?:{_token(_IP)}(?!.*\D\1([^\d\/]|$))(?: +|$))*$"),
     ),
     "glued": (
         "two list items with no space between them ('404500', 'FRDE') were one field the list consumers never split",
@@ -423,6 +528,16 @@ def test_every_shipped_regex_rejects_a_near_miss_in_linear_time():
 
 _MUTANTS = [" ", "  ", ",", ", ", "|", ":", ";", "-", "_", ".", "/", "*", "@", "#", "=", "a", "A", "Z", "0", "9", "١", "é", "\t", "\n", '"', "(", ")"]
 _FIXED = ["", " ", "  ", "*", "a", "abc", "0", "404", "404500", "404 500", "FR", "FRDE", "FR DE", "@EU", "AS1234", "1.2.3.4", "::1", "10.0.0.0/8"]
+_FIXED += [
+    "http://[::1]/list",
+    "https://user:pass@[2001:db8::1]:8080/list#key=value",
+    "$scheme://[::1]/signin?rd=$request_uri",
+    "fe80::1%eth0",
+    "2001:db8::/32 fe80::1%eth0",
+    "::FFFF:192.0.2.1",
+    "0:0:0:0:0:ffff:192.0.2.1",
+    "2001:db8::ffff:192.0.2.1/128",
+]
 
 
 def _corpus(old: str, new: str, values) -> set[str]:

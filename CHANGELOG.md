@@ -13,6 +13,8 @@
 - [BUGFIX] `ui`: report and ban dates carry their UTC offset, so the browser no longer shifts them by the viewer's time zone. (Fixes #4118)
 - [BUGFIX] `redis`: Redis Cluster commands now follow ASK and MOVED redirections during slot migrations.
 - [BUGFIX] `reversescan`: scanning an IPv6 client now works, and a port that could not be tried is no longer cached as closed.
+- [BUGFIX] `settings`: URL settings (`*_URLS`, Cap.js, auth request sign-in) accept bracketed IPv6 hosts such as `http://[2001:db8::1]:8080/`.
+- [BUGFIX] `settings`: IP list settings accept expanded and IPv4-mapped IPv6 addresses and refuse zone identifiers (`fe80::1%eth0`).
 - [MISC] `release`: the floating `dev` and `testing` Linux packages and the `testing` GitHub release are no longer published, so package repositories stop offering a phantom upgrade; the installer refuses `--version dev` and `--version testing`.
 - [DOCS] `antibot`, `country`: the help and docs of `ANTIBOT_IGNORE_URI` and `COUNTRY_IGNORE_URI` now say patterns match the normalized path, alone or followed by `?` and the query string.
 - [DEPS] Updated resty-redis-cluster version to v1.7.0
