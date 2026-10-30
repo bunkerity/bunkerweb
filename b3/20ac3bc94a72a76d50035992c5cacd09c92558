@@ -1,0 +1,29 @@
+src/ui/app/static/js/pages/jobs.js
+  s_4c598b43672c44::t_6ae62a0681560e 315,322,340,347
+CHANGELOG.md
+  s_33aab499ae6cca::t_d2bbf655552dd2 27
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "b320ac3bc94a72a76d50035992c5cacd09c92558",
+  "prompts": {},
+  "sessions": {
+    "s_33aab499ae6cca": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a14390-a9be-7f23-a7a4-2e0528fc3bb0",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_4c598b43672c44": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a14381-5f81-76d2-8f19-7cc65e984b17",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

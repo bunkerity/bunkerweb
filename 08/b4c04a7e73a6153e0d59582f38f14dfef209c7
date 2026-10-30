@@ -1,0 +1,128 @@
+src/linux/fpm-rhel-9
+  s_b52af6dedf9eab::t_9ba34fd8f7806b 13
+CLAUDE.md
+  s_b52af6dedf9eab::t_9ba34fd8f7806b 23
+docs/concepts.md
+  s_b52af6dedf9eab::t_bd4634c2352e82 235-246,249-251
+  s_ba97bbc219ee9d::t_0929a40937166b 247-248
+src/all-in-one/AGENTS.md
+  s_795e2ccdb6801b::t_e7c08a06bda04b 102
+src/linux/scripts/postinstall.sh
+  s_e3e2d47f37b1f0::t_66151aed02c948 161
+  s_b52af6dedf9eab::t_9ba34fd8f7806b 159-160,165-171,181-186,190-195,421
+  s_b52af6dedf9eab::t_c1245703dc7126 123
+  s_e3e2d47f37b1f0::t_3d78731cc1947a 162-164
+tests/unit/linux/test_postinstall_topology.py
+  s_b52af6dedf9eab::t_c1245703dc7126 164,184,195,200,212
+  s_e3e2d47f37b1f0::t_b5158dc1c55e48 171
+  s_e3e2d47f37b1f0::t_42e0c474d132be 168-170,172-175
+  s_e3e2d47f37b1f0::t_ce9ab541e11cef 148,158
+  s_fa2a613aa7eef8::t_ff8f5e39732ea7 176-177
+src/linux/scripts/bunkerweb-worker.sh
+  s_b52af6dedf9eab::t_9ba34fd8f7806b 17-23,27,79,81-83,85-87,89
+  s_ba97bbc219ee9d::t_81449fae6f10d7 84,88,90
+src/linux/fpm-ubuntu-noble
+  s_b52af6dedf9eab::t_9ba34fd8f7806b 14
+src/linux/fpm-fedora-43
+  s_b52af6dedf9eab::t_9ba34fd8f7806b 13
+src/all-in-one/supervisor.d/worker.ini
+  s_b52af6dedf9eab::t_bd4634c2352e82 2
+  s_e3e2d47f37b1f0::t_9d6d2afbdcbb7c 25
+  s_ba97bbc219ee9d::t_0929a40937166b 35,42
+  s_b52af6dedf9eab::t_9ba34fd8f7806b 23-24,26-34,36-41
+  s_e3e2d47f37b1f0::t_db4f514f81c263 43-47
+tests/unit/linux/test_job_broker.py
+  s_ba97bbc219ee9d::t_a2f76b076e3f73 99-100,106,110-112
+misc/install-bunkerweb.sh
+  s_ba97bbc219ee9d::t_81449fae6f10d7 6008,6096,9141
+src/linux/fpm-debian-trixie
+  s_b52af6dedf9eab::t_9ba34fd8f7806b 13
+tests/unit/worker/test_entrypoint_lanes.py
+  s_ba97bbc219ee9d::t_66e0953c80a698 62,67
+  s_fa2a613aa7eef8::t_a52ef37c51792a 1-61,63-66,68-73
+src/worker/AGENTS.md
+  s_ba97bbc219ee9d::t_0d10af0225996b 129-132
+  s_b52af6dedf9eab::t_9ba34fd8f7806b 29,37
+  s_ba97bbc219ee9d::t_0929a40937166b 127
+src/linux/fpm-rhel-10
+  s_b52af6dedf9eab::t_9ba34fd8f7806b 13
+src/linux/fpm-ubuntu-jammy
+  s_b52af6dedf9eab::t_9ba34fd8f7806b 14
+src/linux/fpm-ubuntu
+  s_b52af6dedf9eab::t_9ba34fd8f7806b 14
+src/linux/fpm-debian-bookworm
+  s_b52af6dedf9eab::t_9ba34fd8f7806b 13
+docs/plugins.md
+  s_ba97bbc219ee9d::t_0929a40937166b 417
+  s_5765503030423a::t_8185a3787114f4 9-22,45
+src/linux/bunkerweb-worker-heavy.service
+  s_b52af6dedf9eab::t_9ba34fd8f7806b 1-12,16-29
+  s_ba97bbc219ee9d::t_81449fae6f10d7 13-14
+  s_795e2ccdb6801b::t_da0da78b394385 15
+src/linux/fpm-rhel-8
+  s_b52af6dedf9eab::t_9ba34fd8f7806b 13
+tests/unit/integrations/test_all_in_one_supervisor.py
+  s_e3e2d47f37b1f0::t_3d78731cc1947a 44,46-54,68-71,99-103
+  s_fa2a613aa7eef8::t_fd5aaf87fc2dbe 104-105
+src/worker/entrypoint.sh
+  s_b52af6dedf9eab::t_9ba34fd8f7806b 35-73,80,83-86
+  s_ba97bbc219ee9d::t_81449fae6f10d7 74-79,81-82
+src/linux/fpm-fedora-44
+  s_b52af6dedf9eab::t_9ba34fd8f7806b 13
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "08b4c04a7e73a6153e0d59582f38f14dfef209c7",
+  "prompts": {},
+  "sessions": {
+    "s_5765503030423a": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "8115552a-34c2-4993-ba26-6ba9cf0ff251",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_795e2ccdb6801b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "71804b16-900c-4824-8bbc-5e7434803315",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_b52af6dedf9eab": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0c93d-a041-7293-a084-b36ffb8f2bd4",
+        "model": "gpt-6-astra"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_ba97bbc219ee9d": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0c957-3cb7-7ce2-ad9e-96009259a0c5",
+        "model": "gpt-6-astra"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_e3e2d47f37b1f0": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0c96e-13c9-7250-b599-880ed756cddf",
+        "model": "gpt-5.6-terra"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_fa2a613aa7eef8": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0c958-85f4-76c1-9ec5-591d2e34acb4",
+        "model": "gpt-6-astra"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

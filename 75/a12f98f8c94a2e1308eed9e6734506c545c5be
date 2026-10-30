@@ -1,0 +1,16 @@
+CHANGELOG.md
+  h_a33a1e80933106 52
+src/ui/temp.py
+  h_a33a1e80933106 14,63
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "75a12f98f8c94a2e1308eed9e6734506c545c5be",
+  "prompts": {},
+  "humans": {
+    "h_a33a1e80933106": {
+      "author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

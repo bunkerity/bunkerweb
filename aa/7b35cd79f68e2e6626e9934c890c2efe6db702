@@ -1,0 +1,372 @@
+tests/unit/api/test_api_bans.py
+  s_ebde3d112a6087::t_443c76ba475b60 35-37,48,55,61,65,132,179,189
+src/api/app/routers/bans.py
+  s_33cd4587c25ea2::t_1d09a1245a5964 256
+  s_37a06fa33a9884::t_85ef778d87087c 282-284
+  s_33cd4587c25ea2::t_b642050aa66301 165
+  s_33cd4587c25ea2::t_68ec8f70528a46 173
+  s_33cd4587c25ea2::t_10e5e165068d9c 3,5,9-12,124-164,166-172,178,181-186,188-189,205-207,209,211-255,257-270,274,276,279-281,286-289
+  s_33cd4587c25ea2::t_8b75ffb4b2701c 1,174-175
+src/common/README.zh.md
+  s_dae16abf1a153e::t_316b05d3b6c77a 54-72
+  s_37a06fa33a9884::t_7a25c6f63c07cf 83
+src/common/db/db_methods/bans.py
+  s_7e6d66b0b67f26::t_d96f6a240e7dec 86-89
+  s_045c651f6891e7::t_e01ed216f5cfa7 76-85,90-93,95-118,120-125,129-136,138-159,163-165,193,214
+  s_7e6d66b0b67f26::t_7f87e9e6a31466 352
+  s_ebde3d112a6087::t_0824ce06502e2a 508
+  s_ebde3d112a6087::t_69cb16d0aa0638 160-162,515-537
+  s_2a41e2db317b4b::t_0423232161c101 94,493
+  s_ebde3d112a6087::t_02862f769a478a 137,166
+  s_ebde3d112a6087::t_2e57eceab0eb85 197-213,215-224,326-351,353-368,489-492,497,500,504,506-507,509-514,538-548,554,570,598
+src/common/README.de.md
+  s_37a06fa33a9884::t_7a25c6f63c07cf 81
+  s_dae16abf1a153e::t_316b05d3b6c77a 52-70
+tests/unit/common/test_ban_lease_lua.py
+  s_37a06fa33a9884::t_9b53bdc91b865d 1-90,92-115,117-305,307-314,316-319,321-327,329-332,334-341,343-346,348-350,352-360,362-370,372-375,377-384,386-389,391-394,396-413,415-434,436-439,441-448,450-453,455-461,463-466,468-480,482-485,487-492,494-498,500-510,512-518,520-526,528-531,533-539,541-546,548-551,553-556,558-559,561-564,566-567,570-573,575-581,583-586,588-597,599-602,604-607,609-615,617-621,623-626,628-635,637-640,642-645,647-651,653-658,660-663,665-670,672-674,733-754,756-777,779-782,784-789,791-794,796-801,803-806,810,812-838,840-848,850-853,855-859,861-862,864-867,869-872,874-1059
+  s_37a06fa33a9884::t_6175f05d978f8c 306,315,320,328,333,342,347,351,361,371,376,385,390,395,414,435,440,449,454,462,467,481,486,493,499,511,519,527,532,540,547,552,557,560,565,569,574,582,587,598,603,608,616,622,627,636,641,646,652,659,664,671,755,778,783,790,795,802,807,811,839,849,854,863,868,873
+  s_df722c705ff933::t_099b8f8ef08125 91,116,808-809,860
+  s_91ee36890cc7b0::t_45b5d376f9d8ad 675-732
+  s_2a41e2db317b4b::t_0423232161c101 568
+tests/unit/db/test_bans.py
+  s_7e6d66b0b67f26::t_cd3e4c52c3ed34 136-137,203-263
+  s_7e6d66b0b67f26::t_4329b19b5eb9fd 264-265
+tests/unit/api/test_api_bans_unban_lease.py
+  s_33cd4587c25ea2::t_1d09a1245a5964 270,342
+  s_33cd4587c25ea2::t_d224420731e4c3 1-144,159-187,194-269,271-341,343-424
+  s_37a06fa33a9884::t_85ef778d87087c 145-158,188-193
+src/common/confs/default-server-http.conf
+  s_37a06fa33a9884::t_67cb2675aadef3 131-137,160-163
+  s_37a06fa33a9884::t_b1dd3b54b86abd 164
+tests/unit/common/test_proxy_protocol_addr_patch.py
+  s_df722c705ff933::t_8c4bd43d97ea1d 83,105,115-133
+  s_df722c705ff933::t_a1145145d2113a 1-82,84-104,106-114
+tests/core/bans_tls_drop.yml
+  s_b5c2ecf70521b2::t_d2aa738aea3ff1 1-74
+src/ui/app/templates/bans.html
+  s_339b0c62d84ccf::t_02344423f7f31f 269-284,286-299
+  s_54941f21c470f5::t_1bf491488b4e95 285
+  s_dae16abf1a153e::t_a91120540dfd5d 268
+tests/unit/common/test_crowdsec_lease_lua.py
+  s_045c651f6891e7::t_054d280ff463f9 595,606
+  s_df722c705ff933::t_54dd8894c2d070 325,833,836,844-855
+  s_045c651f6891e7::t_9a3e78c2543c9a 519-537,539-541
+  s_045c651f6891e7::t_5ef9ab15aa0dca 572-590
+  s_045c651f6891e7::t_1eebee9cc2d6ea 1-324,326-518,542-571,619-832,834-835,837-843,856-881
+  s_045c651f6891e7::t_093e11f9f29086 538
+  s_e8917a61014dbb::t_2967fb232a0d9a 591-594,596-605,607-618
+src/common/README.fr.md
+  s_dae16abf1a153e::t_316b05d3b6c77a 52-70
+  s_37a06fa33a9884::t_7a25c6f63c07cf 81
+tests/unit/db/test_bans_lease.py
+  s_ebde3d112a6087::t_2b68138276034d 1-396,399-467
+  s_ebde3d112a6087::t_02862f769a478a 397-398
+tests/unit/api_app/test_bans_unban_authz.py
+  s_33cd4587c25ea2::t_1d09a1245a5964 102
+  s_4773e3fe6f577f::t_6222c48cd723ba 23-25
+  s_be02b82eefc527::t_a3ea7ab7dc54df 52
+  s_37a06fa33a9884::t_85ef778d87087c 59-62,72-80
+  s_33cd4587c25ea2::t_b3e182c7a56eaf 1-22,26-51,53-58,63-71,81-101,103-233
+src/common/cli/CLI.py
+  s_339b0c62d84ccf::t_295704094be2df 446-447,537-542
+  s_339b0c62d84ccf::t_a3f18b4a7bf1dd 417-445,448-523,525-536,545-549
+  s_18e1cfb5402ed1::t_310ac6b6f6d056 726-740,811,846
+  s_92fe2ada98598b::t_17f2b599a38017 543-544
+tests/unit/common/test_ban_lookup_single_eval_lua.py
+  s_37a06fa33a9884::t_7c65f9857d7eae 136-137
+tests/core/bans_tls_drop/probe.py
+  s_b5c2ecf70521b2::t_8a98a1c1673040 1-72
+src/ui/app/routes/bans.py
+  s_339b0c62d84ccf::t_1227e30845dd7c 15-17,55-105,109-111,123-125,129,411,455,644,689,704,706,814-821,987-1085
+  s_339b0c62d84ccf::t_eef1be7f88e645 137-139
+  s_339b0c62d84ccf::t_f043ce8de38319 1086-1088
+tests/unit/api/test_bans_timeseries.py
+  s_df722c705ff933::t_3466722be3454f 50,57,62
+src/bw/lua/bunkerweb/utils.lua
+  s_37a06fa33a9884::t_1f94fb606ab830 1446-1452,1515-1521,1616-1667
+  s_37a06fa33a9884::t_7d4da71127c5d3 910-913,918,950-955,990,1001-1002
+  s_37a06fa33a9884::t_ec42ea28211eb8 72-103,2053,2064,2067
+  s_37a06fa33a9884::t_bfc2c820dc06d0 1522,1700-1706,1728-1745,1755-1757,1772,1774-1780,1782,1789-1800,1985,1988,1991,1995,1998,2004,2011,2024-2026,2031,2045-2046,2048,2052,2057,2060,2065
+  s_91ee36890cc7b0::t_3f6c466cbcf16a 1532-1541,1547-1549,1551,1562-1564,1567-1570,1583-1593
+  s_91ee36890cc7b0::t_efe81673f827fd 133,135,1972-1984,1986-1987,1989-1990,1992-1994,1996-1997,1999-2003,2005-2010,2012-2023,2027-2030,2032-2044,2047,2049-2051,2054-2056,2058-2059,2061-2063,2066
+src/bw/lua/bunkerweb/tlsdrop.lua
+  s_37a06fa33a9884::t_197972d0d634a9 1-304
+src/common/utils/CrowdSec.py
+  s_33cd4587c25ea2::t_3269dfbd15804d 42,55-56,78
+  s_2a41e2db317b4b::t_d4da1595364786 64-77,80-83,119
+  s_33cd4587c25ea2::t_d9a05a598c957b 79
+src/common/core/crowdsec/crowdsec.lua
+  s_ebde3d112a6087::t_df1ce4a9c25998 11,20,28-30,306-317,320-413,416-417,422-424,426-427,432-433,436,438-439,447,450,454-503,505-529,531-629,631-637,801-806,878,888
+  s_045c651f6891e7::t_be75a45c20bc7d 318-319
+  s_045c651f6891e7::t_41a00d6219ae45 798-800
+  s_0702ce82ba2584::t_692c5f2a5eea23 530
+  s_045c651f6891e7::t_de79fd7147e18b 630
+  s_e8917a61014dbb::t_b54c6a51319cff 504
+  s_045c651f6891e7::t_2a96da5dd3e051 414-415,418-421,425,428-431,434-435,437,440-446,448-449,451-453
+tests/unit/cli/test_ban_reporting.py
+  s_339b0c62d84ccf::t_295704094be2df 34,46
+tests/unit/gen/test_ssl_certificate_partial.py
+  s_33cd4587c25ea2::t_b51dd7c765bba0 53-57
+tests/unit/common/test_crowdsec_refresh_ip_lua.py
+  s_045c651f6891e7::t_391cb0c7d1603b 1-54,56-58,62-249,262-420
+  s_045c651f6891e7::t_e3041941407e3d 59-60
+  s_045c651f6891e7::t_5dc305ea3d0180 55,250-261
+  s_7e6d66b0b67f26::t_7f87e9e6a31466 61
+src/common/settings.json
+  s_33cd4587c25ea2::t_4e1f2e513367e5 470-505
+src/ui/app/static/js/pages/bans.js
+  s_339b0c62d84ccf::t_02344423f7f31f 1844-1846,1856-1858,1868-1870,1890-1892,1919-1923,1954-1958,1987-1989,1993-1995,2009-2011
+  s_54941f21c470f5::t_1bf491488b4e95 1935-1937,1942,1944-1946,1980-1983
+  s_339b0c62d84ccf::t_a5ad3c88698430 9-11,25,850-851,857,913-918,1153,1194,1246-1252,1330-1342,1771-1798,1804-1843,1847-1855,1859-1867,1871-1889,1893-1918,1924-1934,1938-1941,1943,1947-1953,1959-1979,1984-1986,1990-1992,1996-2008,2012-2030,2053,2056-2057
+  s_b5c2ecf70521b2::t_49efcd0d95f9e3 1799-1803
+  s_54941f21c470f5::t_dce600c49f2205 2058-2060
+src/ui/app/api_client.py
+  s_339b0c62d84ccf::t_d7f7f022324bc1 3-4
+  s_339b0c62d84ccf::t_c194bf5d61192f 158-188
+  s_e8917a61014dbb::t_26e961b13b7170 189
+src/common/README.es.md
+  s_dae16abf1a153e::t_316b05d3b6c77a 52-70
+  s_37a06fa33a9884::t_7a25c6f63c07cf 81
+src/common/utils/crowdsec_unban.py
+  s_37a06fa33a9884::t_85ef778d87087c 281-291
+  s_33cd4587c25ea2::t_72422a5f1adad6 1-20,22-32,38-186,200-280,292-295,297-298,301,304-308,311-312,314-316,319-364,366-367,370-384,386-391,393-401
+  s_33cd4587c25ea2::t_8439f2fb93175e 187-189,193-199
+  s_ebde3d112a6087::t_3d04c2013f1b6b 299-300,302-303,310,365,368-369,385
+  s_33cd4587c25ea2::t_1d09a1245a5964 21,33-37,296,313,317-318,392
+  s_37a06fa33a9884::t_b74c8c16306a22 190-192
+  s_33cd4587c25ea2::t_1e39867a4c0bd9 309
+src/common/core/crowdsec/lib/bouncer.lua
+  s_ebde3d112a6087::t_69cb16d0aa0638 410,477-490,507,931-1021,1023
+src/common/README.md
+  s_37a06fa33a9884::t_7a25c6f63c07cf 81
+  s_dae16abf1a153e::t_31d7468d07d2e0 274
+  s_dae16abf1a153e::t_316b05d3b6c77a 52-70
+tests/unit/common/test_crowdsec_control_already_absent_lua.py
+  s_7e6d66b0b67f26::t_917f94e1d24638 1-200
+tests/core/bans_tls_drop/test.sh
+  s_b5c2ecf70521b2::t_986b29ab1365d8 1-227
+tests/unit/gen/test_bans_tls_drop_setting.py
+  s_37a06fa33a9884::t_c5165e8f0177c5 1-61
+src/common/core/jobs/jobs/sync-bans.py
+  s_ebde3d112a6087::t_62536a0d46e515 111-115,117-126,128
+  s_88325484405045::t_b06630a6fbad25 102-105,109-110,116,127,129-150,154-155,165-166,180-184,288-289
+  s_0c6a93cc6c6643::t_eacc8ffa590ff6 28,151-153,156-164,295-296
+tests/unit/gen/test_tls_drop_template.py
+  s_33cd4587c25ea2::t_b51dd7c765bba0 56
+  s_18e1cfb5402ed1::t_4a25061caaef57 83-84
+  s_37a06fa33a9884::t_421ba18e9aa40e 1-55,57-82,85-168
+tests/unit/common/test_ban_lease_replay.py
+  s_ebde3d112a6087::t_04e8dc906c0150 1-14,16-27,29-158,211-338,340-382
+  s_ebde3d112a6087::t_ced4557a9345a0 339
+  s_0c6a93cc6c6643::t_b59ba34bb91378 15,28,159-210
+src/common/cli/main.py
+  s_18e1cfb5402ed1::t_310ac6b6f6d056 29-33,124
+tests/core/crowdsec.yml
+  s_b5c2ecf70521b2::t_f0b7db1853abca 766-767
+  s_b5c2ecf70521b2::t_098ff5c26e3ea0 645-648,794-796
+  s_b5c2ecf70521b2::t_a721a881f03e82 754-758,761-764,769
+  s_b5c2ecf70521b2::t_bc12b7d43e8a86 436-635
+  s_b5c2ecf70521b2::t_4283c6beb1d824 740-741,743-744
+  s_b5c2ecf70521b2::t_d9f3b79471244e 636-644,649-739,742,745-753,759-760,765,768,770-793,797-838
+tests/unit/ui/test_bans_crowdsec_lease.py
+  s_339b0c62d84ccf::t_8362a250232524 1-219,221-363,370-509,511-524,527-531,533-634
+  s_339b0c62d84ccf::t_ef7541bf05d3c6 510
+  s_18e1cfb5402ed1::t_310ac6b6f6d056 220,364-369
+  s_339b0c62d84ccf::t_5fbf8fee01ab47 525-526,532
+tests/unit/common/test_default_server_certificate_phase_lua.py
+  s_33cd4587c25ea2::t_b51dd7c765bba0 44-48
+tests/unit/common/test_tlsdrop_lua.py
+  s_37a06fa33a9884::t_6175f05d978f8c 146,150,155,163,168,178,183,194,199,208,213,217,222,232,237,242,247,252,257,264,269,292,297,311,316,322,327,335,340,351,356,363,368,374,379,384,392,397,402,408,413,422,427,436,441,447,452,461,526,532,537,552,560,569,574,590,595,607
+  s_37a06fa33a9884::t_1d15edb382133c 1-145,147-149,151-154,156-162,164-167,169-177,179-182,184-193,195-198,200-207,209-212,214-216,218-221,223-231,233-236,238-241,243-246,248-251,253-256,258-263,265-268,270-291,293-296,298-310,312-315,317-321,323-326,328-334,336-339,341-350,352-355,357-362,364-367,369-373,375-378,380-383,385-391,393-396,398-401,403-407,409-412,414-421,423-426,428-435,437-440,442-446,448-451,453-460,462-525,527-531,533-536,538-551,553-559,561-568,570-573,575-589,591-594,596-606
+src/common/confs/server-http/ssl-certificate-lua.conf
+  s_37a06fa33a9884::t_67cb2675aadef3 71-77,79
+src/common/core/crowdsec/lib/decision_cache.lua
+  s_ebde3d112a6087::t_69cb16d0aa0638 76,105
+src/common/core/crowdsec/control.lua
+  s_33cd4587c25ea2::t_251fbfd8a24553 288-302,339,493-499,501-514,545
+tests/unit/common/test_crowdsec_client_lease.py
+  s_33cd4587c25ea2::t_458ae01598cd74 2,5-48,50-57,59-63,65-88
+  s_33cd4587c25ea2::t_8439f2fb93175e 1,3-4,49,58,64
+src/bw/lua/bunkerweb/cachestore.lua
+  s_37a06fa33a9884::t_e2f71e1607e5ee 131-141
+tests/unit/common/test_crowdsec_unban.py
+  s_33cd4587c25ea2::t_1d09a1245a5964 144
+  s_18e1cfb5402ed1::t_2d2dfcd5477f8a 571-593
+  s_37a06fa33a9884::t_85ef778d87087c 191-193,298-301,340-344,449-453,492-495
+  s_33cd4587c25ea2::t_5d791468131901 1-143,145-190,194-297,302-339,345-448,454-491,496-570,594-667,681
+  s_33cd4587c25ea2::t_a157975b8eefd6 668-680,682-688
+tests/unit/cli/test_unban_crowdsec_lease.py
+  s_339b0c62d84ccf::t_6e377e83ed4ded 1-409
+src/api/app/schemas.py
+  s_33cd4587c25ea2::t_10e5e165068d9c 93-95
+src/bw/lua/bunkerweb/api.lua
+  s_7e6d66b0b67f26::t_393a7adb4a0822 992-1008
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "aa7b35cd79f68e2e6626e9934c890c2efe6db702",
+  "prompts": {},
+  "sessions": {
+    "s_045c651f6891e7": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "bbc6d19b-feaf-4e93-a472-4a6baaf79059",
+        "model": "unknown"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_0702ce82ba2584": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "809d5db4-9bb0-42b4-bfd3-69362cac66a5",
+        "model": "unknown"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_0c6a93cc6c6643": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a13f35-3966-7a12-82ef-b11ed03600e8",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_18e1cfb5402ed1": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "087a9dfe-326f-41fb-b619-845867a497da",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_2a41e2db317b4b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "fdc045b0-ab34-425a-a9b2-1bb8bb9e66a4",
+        "model": "unknown"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_339b0c62d84ccf": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "be06cd4b-303a-4932-aa24-acc78604de4c",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_33cd4587c25ea2": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "01ac58e2-ebe6-42de-81c6-ec913cac3930",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_37a06fa33a9884": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "e75ef892-b60a-429b-9e90-80884887b09e",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_4773e3fe6f577f": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a13f11-e093-7af2-ab1d-61ca0b0559b4",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_54941f21c470f5": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a13f4e-9a3a-7b92-af39-2cfc6a32c42b",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_7e6d66b0b67f26": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a13eed-bd27-7cc0-b1e8-30a374610edb",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_88325484405045": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "3799c72c-0b5c-4b93-bd79-7c807a0d7e20",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_91ee36890cc7b0": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "63d9cb2f-05de-49a9-9f5e-7740f47ea44d",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_92fe2ada98598b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "3edb07ed-44d3-4170-b29e-d68e31896fbd",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_b5c2ecf70521b2": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "985ff295-ed0f-4011-886b-cf031f417e37",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_be02b82eefc527": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a13f71-81aa-73c0-96d8-767c982a98a0",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_dae16abf1a153e": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "958dd296-637f-49bd-8fa6-ab4e14d113fa",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_df722c705ff933": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a13eea-64d9-7e03-97d7-4bf92f5401c4",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_e8917a61014dbb": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "7ff350ad-bc0b-4556-8679-17b87e179e57",
+        "model": "unknown"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_ebde3d112a6087": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "f025c63b-8daa-400b-a24c-a8db4f764d8f",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

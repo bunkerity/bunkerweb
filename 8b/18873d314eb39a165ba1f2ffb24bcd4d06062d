@@ -1,0 +1,23 @@
+src/common/core/authbasic/ui/actions.py
+  s_36cff8fad440d1::t_11a85035148584 27,31
+CHANGELOG.md
+  s_36cff8fad440d1::t_11a85035148584 35
+src/common/core/badbehavior/ui/actions.py
+  s_36cff8fad440d1::t_11a85035148584 27,31
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "8b18873d314eb39a165ba1f2ffb24bcd4d06062d",
+  "prompts": {},
+  "sessions": {
+    "s_36cff8fad440d1": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "9e7b0240-ab8b-4374-b9b3-c0f8bb66b3ef",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

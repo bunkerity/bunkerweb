@@ -1,0 +1,19 @@
+tests/unit/backup/test_downgrade_hold.py
+  s_7de35856427106::t_217c2acd2bdc18 274-276
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "670293f52c3db4d5e0e09a31dd20cd60da14832a",
+  "prompts": {},
+  "sessions": {
+    "s_7de35856427106": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "3d936993-d4e4-4982-b1de-eb368913b1d2",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

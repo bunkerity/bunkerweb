@@ -1,0 +1,30 @@
+CHANGELOG.md
+  s_4600783926e6d7::t_ab18ab671389f4 12
+src/ui/app/static/js/i18n.js
+  s_b7afe40cc389fa::t_0c7bc66b78aae4 273-283
+  s_b7afe40cc389fa::t_061e4b90f1f100 8-10,268-272,284-288,314-318,328
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "bd5af8b0211f158f386982a21e7cb77fcb4d02ef",
+  "prompts": {},
+  "sessions": {
+    "s_4600783926e6d7": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "577228b8-9e99-4afb-b5b7-0fab1e1a53d0",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_b7afe40cc389fa": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "206a52e2-be84-463b-a5b4-d1ba278e69bf",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

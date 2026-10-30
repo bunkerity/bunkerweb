@@ -1,0 +1,19 @@
+src/common/core/letsencrypt/jobs/certbot-new.py
+  s_60628c795bd662::t_402e7115afa81b 372,835-836,1218-1221
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "2c2638e2a8d1de6e102442cc46f78fa78b86ebf9",
+  "prompts": {},
+  "sessions": {
+    "s_60628c795bd662": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1869d-2e49-7ff2-8e88-cfcf2fe9cb0c",
+        "model": "unknown"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

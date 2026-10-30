@@ -1,0 +1,31 @@
+src/ui/app/routes/plugins.py
+  s_236d0b9bda16cd::t_60dfc452979ba2 593,595-602
+src/ui/app/templates/plugin_page.html
+  s_236d0b9bda16cd::t_60dfc452979ba2 68-76
+CHANGELOG.md
+  s_4600783926e6d7::t_969ec3cb9d338d 18
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "3c3ce4d07ec607c24dd0d022cbef5a9de0238338",
+  "prompts": {},
+  "sessions": {
+    "s_236d0b9bda16cd": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "1e1db979-e753-4a7c-916b-5a314883b6c0",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_4600783926e6d7": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "577228b8-9e99-4afb-b5b7-0fab1e1a53d0",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

@@ -1,0 +1,23 @@
+tests/unit/cli/test_variables_paths_precedence.py
+  s_e75f342fdd8f8f::t_8f1479b8acc08e 78-80
+tests/unit/legacy/test_legacy_scripts.py
+  s_e75f342fdd8f8f::t_542824b6e79f0c 60-63
+  s_e75f342fdd8f8f::t_9c75d4b752e1e3 7
+  s_e75f342fdd8f8f::t_5e0349999341a7 41
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "68164ee657201fe9157fd3cd3a63d8b8b0b034f3",
+  "prompts": {},
+  "sessions": {
+    "s_e75f342fdd8f8f": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "f0182e8e-aee9-4bf8-8c8b-086308281884",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}
