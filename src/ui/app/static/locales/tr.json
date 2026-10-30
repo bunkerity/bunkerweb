@@ -13,7 +13,8 @@
     "no_changes_detected": "Değişiklik tespit edilmedi.",
     "notice": "Bildirim",
     "ping_error": "Instances pinglenirken bir hata oluştu.",
-    "readonly_mode": "Bu işlem salt okunur modda devre dışı."
+    "readonly_mode": "Bu işlem salt okunur modda devre dışı.",
+    "configs_import_invalid_file": "Lütfen geçerli özel yapılandırma dışı dosyasını (.json) yükleyin."
   },
   "aria": {
     "label": {
@@ -1240,7 +1241,16 @@
     },
     "retention_notice": "Raporlar bellekte tutulan dairesel bir arabellektir: yapılandırılan sınıra ulaşıldığında en eski kayıtlar silinir. Redis etkin değilse, BunkerWeb yeniden başlatıldığında da temizlenirler.",
     "security_incident": "Güvenlik Olayı",
-    "security_report_data": "Güvenlik Raporu Verisi"
+    "security_report_data": "Güvenlik Raporu Verisi",
+    "bad_behavior_no_details": "Bu rapor için herhangi bir kötü davranış detayı kaydedilmedi.",
+    "bad_behavior_activity_detected": "Kötü davranış aktivitesi tespit edildi",
+    "bad_behavior_activity_explanation": "Bu istekler, kötü davranış eşiğini aştı ve bir araya toplandı.",
+    "bad_behavior_request_label": "İstek",
+    "bad_behavior_ip": "IP adresi",
+    "bad_behavior_server": "Sunucu",
+    "bad_behavior_url": "URL",
+    "bad_behavior_captured_at": "Kaydedildi",
+    "bad_behavior_request_id": "İstek Kimliği"
   },
   "scope": {
     "all_services": "Tüm Servisler",
@@ -1427,7 +1437,8 @@
     "template_in_use_description": "Mevcut şablon dışında değişiklik yapılamaz. Lütfen değişiklikleri mevcut şablon üzerinden yapın veya Gelişmiş/Ham moda geçin.",
     "unique_server_name": "Benzersiz Sunucu Adı",
     "up": "Açık",
-    "yes": "Evet"
+    "yes": "Evet",
+    "not_applicable": "Yok"
   },
   "step": {
     "next": "İleri",
@@ -1724,7 +1735,8 @@
       "show_selected_only": "Yalnızca seçilenleri göster",
       "stop_instance": "Örneği Durdur: {{hostname}}",
       "unban_ip": "{{ip}} yasağını kaldır",
-      "value_from_global": "Genel ayarlardan gelen değer"
+      "value_from_global": "Genel ayarlardan gelen değer",
+      "update_ban_duration": "Yasak süresini güncelleyin"
     },
     "cannot_delete_original_ban": "Orijinal Yasaklama girdisi silinemez.",
     "cannot_remove_disabled": "Bir veya daha fazla ayar devre dışı olduğu için kaldırılamaz.",
@@ -1962,7 +1974,8 @@
     "zerossl_api_retry": "ZeroSSL API istekleri için yeniden deneme sayısı (0 yeniden denemeyi devre dışı bırakır).",
     "zerossl_api_retry_delay": "ZeroSSL API yeniden denemeleri arasındaki saniye cinsinden gecikme.",
     "zerossl_api_connect_timeout": "ZeroSSL API çağrıları için saniye cinsinden bağlantı zaman aşımı.",
-    "zerossl_api_max_time": "Her ZeroSSL API isteği için saniye cinsinden azami toplam süre."
+    "zerossl_api_max_time": "Her ZeroSSL API isteği için saniye cinsinden azami toplam süre.",
+    "readonly_mode": "Bu işlem, yalnızca okuma modunda izin verilmemiştir."
   },
   "totp": {
     "prompt": "Lütfen TOTP kodunuzu girin."
@@ -1985,5 +1998,12 @@
     "required": "{{field}} gereklidir.",
     "service_required_for_ban": "Servise özel bir yasaklama için bir servis seçilmelidir.",
     "zerossl_email_or_api_key_required": "ZeroSSL için e-posta veya ZeroSSL API anahtarından biri gereklidir."
+  },
+  "plugins": {
+    "multivalue": {
+      "show_less": "Daha az göster",
+      "more_value": "daha fazla değer",
+      "more_values": "daha fazla değer"
+    }
   }
 }

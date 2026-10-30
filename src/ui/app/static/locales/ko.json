@@ -13,7 +13,8 @@
     "no_changes_detected": "감지된 변경 사항이 없습니다.",
     "notice": "알림",
     "ping_error": "인스턴스 핑(Ping) 전송 중 오류가 발생했습니다.",
-    "readonly_mode": "읽기 전용 모드에서는 이 작업을 수행할 수 없습니다."
+    "readonly_mode": "읽기 전용 모드에서는 이 작업을 수행할 수 없습니다.",
+    "configs_import_invalid_file": "유효한 사용자 지정 구성 파일(.json)을 업로드하십시오."
   },
   "aria": {
     "label": {
@@ -1240,7 +1241,16 @@
     },
     "retention_notice": "보고서는 메모리에 저장되는 순환 버퍼입니다. 설정된 한도에 도달하면 가장 오래된 항목부터 삭제됩니다. Redis를 사용하지 않는 경우 BunkerWeb을 다시 시작할 때도 모두 삭제됩니다.",
     "security_incident": "보안 사고",
-    "security_report_data": "보안 보고서 데이터"
+    "security_report_data": "보안 보고서 데이터",
+    "bad_behavior_no_details": "이 보고서에 대한 비정상 활동 세부 정보는 캡처되지 않았습니다.",
+    "bad_behavior_activity_detected": "비정상 활동 감지",
+    "bad_behavior_activity_explanation": "이 요청은 비정상 활동 임계값을 초과하여 그룹화되었습니다.",
+    "bad_behavior_request_label": "요청",
+    "bad_behavior_ip": "IP 주소",
+    "bad_behavior_server": "서버",
+    "bad_behavior_url": "URL",
+    "bad_behavior_captured_at": "캡처됨",
+    "bad_behavior_request_id": "요청 ID"
   },
   "scope": {
     "all_services": "모든 서비스",
@@ -1427,7 +1437,8 @@
     "template_in_use_description": "현재 템플릿 외부에서의 변경은 허용되지 않습니다. 현재 템플릿을 사용하여 수정하거나 고급/원본 모드로 전환하세요.",
     "unique_server_name": "고유한 서버 이름",
     "up": "활성",
-    "yes": "예"
+    "yes": "예",
+    "not_applicable": "해당 없음"
   },
   "step": {
     "next": "다음",
@@ -1724,7 +1735,8 @@
       "show_selected_only": "선택한 항목만 표시",
       "stop_instance": "인스턴스 {{hostname}} 중지",
       "unban_ip": "{{ip}} 차단 해제",
-      "value_from_global": "전역 설정에서 가져온 값"
+      "value_from_global": "전역 설정에서 가져온 값",
+      "update_ban_duration": "금지 기간 업데이트"
     },
     "cannot_delete_original_ban": "원본 차단 항목은 삭제할 수 없습니다.",
     "cannot_remove_disabled": "하나 이상의 설정이 비활성화되어 있어 제거할 수 없습니다.",
@@ -1962,7 +1974,8 @@
     "zerossl_api_retry": "ZeroSSL API 요청의 재시도 횟수입니다 (0이면 재시도를 비활성화).",
     "zerossl_api_retry_delay": "ZeroSSL API 재시도 간 지연 시간(초)입니다.",
     "zerossl_api_connect_timeout": "ZeroSSL API 호출의 연결 시간 초과(초)입니다.",
-    "zerossl_api_max_time": "각 ZeroSSL API 요청의 최대 총 시간(초)입니다."
+    "zerossl_api_max_time": "각 ZeroSSL API 요청의 최대 총 시간(초)입니다.",
+    "readonly_mode": "이 작업은 읽기 전용 모드에서는 허용되지 않습니다."
   },
   "totp": {
     "prompt": "TOTP 코드를 입력해 주세요."
@@ -1985,5 +1998,12 @@
     "required": "{{field}} 필드는 필수입니다.",
     "service_required_for_ban": "서비스별 차단을 위해서는 서비스를 선택해야 합니다.",
     "zerossl_email_or_api_key_required": "ZeroSSL은 이메일 또는 ZeroSSL API 키가 필요합니다."
+  },
+  "plugins": {
+    "multivalue": {
+      "show_less": "덜 표시",
+      "more_value": "더 보기",
+      "more_values": "더 많은 값"
+    }
   }
 }

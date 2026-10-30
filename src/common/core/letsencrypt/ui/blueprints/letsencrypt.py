@@ -373,9 +373,9 @@ def letsencrypt_fetch():
                 value = cert.get(order_key)
                 if order_key in {"valid_from", "valid_to"}:
                     try:
-                        return datetime.fromisoformat(_normalize(value))
+                        return (False, datetime.fromisoformat(_normalize(value)))
                     except (TypeError, ValueError):
-                        return _normalize(value)
+                        return (True, "")
                 return _normalize(value)
 
             filtered_cert_list.sort(key=sort_value, reverse=reverse)

@@ -1,5 +1,75 @@
 # Changelog
 
+## v1.6.18~rc2 - 2026/10/30
+
+- [FEATURE] `tests`: a pytest unit test suite in `tests/unit/`, run in CI by `.github/workflows/unit-tests.yml`, with per-component coverage floors.
+- [FEATURE] `release`: images and Linux packages now come with signed build provenance, and the upgrading guide shows how to verify a release.
+- [BREAKING] `reverseproxy`: stream upstream TLS settings (`REVERSE_PROXY_SSL_VERIFY=yes`, protocols, ciphers, cached client certificate) now turn on TLS to the backend instead of being ignored. Clear them for a plaintext backend.
+- [BREAKING] `core`: setting regexes are stricter: list values glued without a separator (`404500`) and all-space values are refused. `AUTH_BASIC_USER` is wider and takes any value without `:`.
+- [BREAKING] `core`: the Lua API disk fallback needs an explicit `API_TOKEN` line in `variables.env`; a file without one is refused.
+- [SECURITY] `antibot`, `country`: `ANTIBOT_IGNORE_URI` and `COUNTRY_IGNORE_URI` now match the normalized request path (alone, or joined with the query string) and no longer the raw path, so a client can no longer skip the check on a protected location with a path NGINX still routes there (`//x`, `/%78`, `/./x`) when the pattern is a negative lookahead such as `^/(?!search)`.
+- [SECURITY] `core`: archives over the extraction size or member limits are refused, so a hostile download source can no longer fill the scheduler disk.
+- [SECURITY] `jobs`: an empty JSON selector term in a list download is rejected instead of widening the IP trust lists.
+- [BUGFIX] `all-in-one`: NGINX and service log lines reach the container logs promptly.
+- [BUGFIX] `antibot`: the Cap.js frame loads `hashwx.wasm` from the Cap.js server, so a strict CSP no longer blocks it (needs Cap.js widget 0.1.58 or later).
+- [BUGFIX] `api`: cache files of a folder (Let's Encrypt `etc.tgz`) download again, and YAML files with lowercase setting names load.
+- [BUGFIX] `api`: a malformed stored bcrypt credential is refused instead of raising an authentication error.
+- [BUGFIX] `api`: rate limiting falls back to in-memory counters when Redis is unreachable or rejects the credentials, instead of answering 500
+- [BUGFIX] `autoconf`: the Kubernetes controller retries a configuration deferred while the scheduler was busy, so a new Ingress deploys without waiting for the next event. (Fixes #4107)
+- [BUGFIX] `autoconf`: the same services, instances or configs in another order, or an apply that changes nothing, no longer re-run the scheduler jobs on every poll.
+- [BUGFIX] `autoconf`: an Ingress naming a port on a Service without ports no longer blocks every apply, and the fallback to port 80 is logged.
+- [BUGFIX] `autoconf`: the Swarm controller keeps each instance id once instead of growing its list on every poll.
+- [BUGFIX] `backup`: the database lock is taken even when the scheduler cannot write the lock file.
+- [BUGFIX] `badbehavior`: banning or unbanning an IP now clears its counter, so a single new offence no longer re-bans it (Fixes #3818)
+- [BUGFIX] `bunkernet`: served challenges, captchas and redirects are no longer reported as attacks.
+- [BUGFIX] `core`: setting regexes are anchored and no longer backtrack exponentially on a short malformed value, and duration settings refuse non-ASCII digits.
+- [BUGFIX] `core`: stream listeners shared by several services emit `reuseport` once, and empty ports and directive arguments are omitted.
+- [BUGFIX] `core`: `variables.env` is replaced atomically, so a concurrent reader never sees a truncated file.
+- [BUGFIX] `core`: the Lua API recovers its credentials from disk when the internal store is unavailable, and refuses requests when the token state is unknown.
+- [BUGFIX] `core`: a DNS resolver outage is no longer cached as an empty answer for an hour, so lookups retry once the resolver is back.
+- [BUGFIX] `core`: a reload waiting for the new workers no longer risks spinning on a zero-millisecond sleep near its deadline while it holds the swap lock.
+- [BUGFIX] `cors`: `Access-Control-Allow-Credentials` is sent on real responses as well as preflights, and removed even when sent by an upstream for disallowed origins or wildcard `Access-Control-Allow-Origin`.
+- [BUGFIX] `cors`: with `USE_CORS=yes`, a preflight request is no longer refused with a 405 when `ALLOWED_METHODS` does not list `OPTIONS`.
+- [BUGFIX] `db`: pruning job runs no longer fails with a conflict on MariaDB when a run is inserted meanwhile.
+- [BUGFIX] `db`: saving multisite global settings no longer leaves a database session idle in a transaction.
+- [BUGFIX] `db`: refused or failed custom config saves are reported, incompatible-method edits are warned about, and templates resolve only from `USE_TEMPLATE`.
+- [BUGFIX] `db`: a removed job no longer leaves its cache and run history behind.
+- [BUGFIX] `db`: plugin updates no longer rewrite same-numbered steps of other templates, and drop removed steps, settings, custom configs and select options.
+- [BUGFIX] `deps`: repeated post-install hooks for lua-nginx-module and lua-resty-core no longer fail on removed test directories or reapply patches.
+- [BUGFIX] `dnsbl`: the first blocked request from an IP is counted in the dashboard, and pending lookups stop once a server reports the IP.
+- [BUGFIX] `dnsbl`: a resolver outage no longer caches a clean verdict for 24 hours, so later requests retry the lookup.
+- [BUGFIX] `jobs`: an unreachable GitHub API skips the optional update check instead of failing the job, and malformed release entries are ignored.
+- [BUGFIX] `jobs`: a job run without an explicit path infers its calling script correctly.
+- [BUGFIX] `letsencrypt`: a ZeroSSL retry count or delay of `0` is kept, and domains matching a public suffix wildcard rule are rejected.
+- [BUGFIX] `letsencrypt`: the UI keeps concurrent requests' temporary files, reports the original database error and sorts certificates with missing dates.
+- [BUGFIX] `linux`: package upgrades make an existing database lock file readable by nginx without replacing it.
+- [BUGFIX] `linux`: the config saver refuses to stamp the installed version on a database whose migration has not run, so the migration is no longer skipped.
+- [BUGFIX] `metrics`: blocked-request history survives the shared memory restore after a reload, and the configured memory retry limit applies to every write.
+- [BUGFIX] `modsecurity`: the global CRS mode loads the downloaded CRS plugins configured across services.
+- [BUGFIX] `plugins`: group and other write bits and directory modes no longer change plugin checksums, so a restored tree is not reinstalled again and again. (Refs #4024)
+- [BUGFIX] `redis`: the statistics endpoint returns an error when the key count is missing.
+- [BUGFIX] `robotstxt`: a failed settings read while building the robots.txt rules is logged instead of silently ignored.
+- [BUGFIX] `scheduler`: the configuration is no longer rendered, pushed and reloaded a second time after the once-jobs when none of them changed anything. (Fixes #4106)
+- [BUGFIX] `scheduler`: job paths that escape the plugin jobs directory are rejected, and imported job modules are cleaned up after `sys.exit()`.
+- [BUGFIX] `scheduler`: unchanged plugins are no longer reinstalled after their executable file permissions are normalized.
+- [BUGFIX] `scheduler`: on first start, custom configurations (a template's included) now reach an instance discovered after they were generated before its first reload, which no longer fails on a missing ModSecurity include and blocks reloads for five minutes.
+- [BUGFIX] `ssl`: certificate providers initialize without crashing when there is no service.
+- [BUGFIX] `stream`: banned clients are let through in detect mode.
+- [BUGFIX] `ui`: plugin action modules are loaded in isolation, so a plugin without a method can no longer run another plugin's code.
+- [BUGFIX] `ui`: running jobs without a plugin no longer errors after scheduling, and missing form fields on instance, job, plugin and PRO license routes redirect with their message.
+- [BUGFIX] `ui`: deleting a plugin removes its stale routing state, so its former pages return 404 instead of 500.
+- [BUGFIX] `ui`: the template editor shows server messages as text, so a template id or name can no longer inject markup into the feedback banner.
+- [BUGFIX] `ui`: setting inputs enforce their regex in the browser again, docs links work on pre-release builds, and 16 missing translation keys were added.
+- [BUGFIX] `ui`: oversized timestamps in the Basic Authentication and Bad Behavior dashboards fall back to the numeric and text display.
+- [BUGFIX] `ui`: reading user permissions releases the role-query connection even when the user has no roles.
+- [BUGFIX] `ui`: the temporary "BunkerWeb UI is starting" page no longer returns a 500 while the web UI starts.
+- [BUGFIX] `ui`: a raw mode save no longer posts unchanged defaults, which ModSecurity blocked with a 403 on a UI behind BunkerWeb
+- [BUGFIX] `whitelist`: cached URL lists are ignored once their URL setting is removed.
+- [MISC] `db`: UI, API and wizard saves now clear settings written by another of the three, which used to survive because only the saving method's own rows were cleaned.
+- [MISC] `plugins`: plugins with group or other write bits, or directories that are not `0755`, get a new checksum and may be refreshed once on upgrade.
+- [MISC] `tests`: add the end-to-end integration test framework (Docker, Autoconf, All-in-one, Linux, Kubernetes) and run it in CI
+- [MISC] `ui`: plugin `ui/actions.py` modules no longer share one namespace, so a third-party plugin must import what it needs instead of using another plugin's functions.
+
 ## v1.6.18~rc1 - 2026/10/26
 
 - [SECURITY] `cors`: `CORS_ALLOW_ORIGIN=self` matches the `Origin` exactly, so look-alike origins are denied when `CORS_DENY_REQUEST=yes`.
@@ -41,6 +111,7 @@
 - [DEPS] Updated LuaJIT to v2.1-20261023
 - [DEPS] Updated DOMPurify to v3.4.17
 - [DEPS] Updated Go to v1.26.10 for the all-in-one CrowdSec build
+- [DEPS] Updated libinjection to v4.0.1
 
 ## v1.6.17 - 2026/10/21
 

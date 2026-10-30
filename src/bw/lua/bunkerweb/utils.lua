@@ -58,6 +58,18 @@ local other_datastore = other_dict and cdatastore:new(other_dict) or nil
 -- Short TTL for locally cached bans so unbans propagate from Redis within this window
 local BAN_LOCAL_CACHE_TTL = 30
 
+-- Bad Behavior's local per-IP abuse counters, purged by remove_ban along with the ban they produced
+-- (issue #3818). The Redis spelling of the same state is owned by rediskeys.badbehavior.
+-- ponytail: hard-coded because Bad Behavior is currently the only plugin with an accumulated abuse
+-- counter; move it to a plugin-declared registry as soon as a second one appears.
+--
+-- Known limitation: this purge cannot reach a Stream service's counter from the HTTP VM, so for a
+-- stream service running without Redis issue #3818 is NOT fixed. Bad Behavior's timer runs in the
+-- Stream VM too and keeps its own counter in `datastore_stream`, a zone the HTTP VM cannot address
+-- (`other_datastore` is nil there), and an unban only ever reaches the HTTP VM (bwcli, API, UI). With
+-- Redis it self-heals : the next hit overwrites the local counter with the Redis one.
+local BADBEHAVIOR_LOCAL_COUNTER_PREFIX = "plugin_badbehavior_count_"
+
 local utils = {}
 
 utils.parse_duration = require("bunkerweb.duration").parse_duration
@@ -871,6 +883,7 @@ utils.get_ips = function(fqdn, ipv6, ctx, pool, force_ipv6)
 	local res_answers = {}
 	local res_errors = {}
 	local ans_errors = {}
+	local has_answer = false
 	local answers
 	for _, qtype in ipairs(qtypes) do
 		-- Query FQDN
@@ -878,14 +891,30 @@ utils.get_ips = function(fqdn, ipv6, ctx, pool, force_ipv6)
 		local qtype_str = qtype == res.TYPE_AAAA and "AAAA" or "A"
 		if not answers then
 			res_errors[qtype_str] = err
-		elseif answers.errcode then
-			ans_errors[qtype_str] = answers.errstr
 		else
-			table.insert(res_answers, answers)
+			if answers.errcode then
+				ans_errors[qtype_str] = answers.errstr
+				if answers.errcode == 3 then
+					has_answer = true
+				else
+					ans_errors[qtype_str] = answers.errstr or tostring(answers.errcode)
+					logger:log(
+						ERR,
+						"error while doing " .. qtype_str .. " DNS query for " .. fqdn .. " : " .. ans_errors[qtype_str]
+					)
+				end
+			else
+				has_answer = true
+				table.insert(res_answers, answers)
+			end
 		end
 	end
 	for qtype, error in pairs(res_errors) do
 		logger:log(ERR, "error while doing " .. qtype .. " DNS query for " .. fqdn .. " : " .. error)
+	end
+	-- Resolver failures are not negative DNS answers and must be retried.
+	if not has_answer then
+		return false, encode(res_errors) .. " " .. encode(ans_errors)
 	end
 	-- Extract all IPs
 	local ips = {}
@@ -909,9 +938,8 @@ end
 -- For each PTR in rdns_list, if it ends with any suffix in suffix_list, the name is forward-resolved
 -- (A/AAAA via get_ips) and each result compared to remote_addr. Returns (matched_suffix, matched_rdns)
 -- only when a suffix match is forward-confirmed; returns nil otherwise.
--- Fail-closed: a suffix match that cannot be confirmed (resolver error, or empty/non-matching forward
--- result) returns nil and is logged as a possible spoof. An empty get_ips table needs no special case:
--- the inner loop runs zero times, so no match occurs and execution falls to the spoof branch.
+-- Fail-closed: resolver errors are logged and return nil. Empty/non-matching forward results
+-- cannot confirm the suffix and are logged as a possible spoof when a plugin logger is supplied.
 utils.rdns_forward_confirmed = function(rdns_list, suffix_list, ctx, remote_addr, plugin_logger)
 	if not rdns_list or not suffix_list then
 		return nil
@@ -1539,31 +1567,51 @@ local function remove_ban(ip, service, ban_scope)
 	-- Collect keys to delete and remove from local datastores FIRST.
 	-- This ensures unbans take effect locally even if Redis is unreachable.
 	local keys_to_delete = {}
+	-- Services whose Bad Behavior Redis counter a global unban deletes, named by the swept ban keys and counters.
+	local counter_services = {}
+	local seen_counter_services = {}
+	local function add_counter_service(name)
+		if name ~= "" and not seen_counter_services[name] then
+			seen_counter_services[name] = true
+			counter_services[#counter_services + 1] = name
+		end
+	end
 	if ban_scope == "service" and service then
 		local ban_key = "bans_service_" .. service .. "_ip_" .. ip
 		keys_to_delete[#keys_to_delete + 1] = ban_key
 		delete_local(ban_key)
+		delete_local(BADBEHAVIOR_LOCAL_COUNTER_PREFIX .. service .. "_" .. ip)
 	else
 		-- Delete global ban
 		local global_key = "bans_ip_" .. ip
 		keys_to_delete[#keys_to_delete + 1] = global_key
 		delete_local(global_key)
 
-		-- Delete all service-specific bans for this IP
+		-- Delete all service-specific bans for this IP. Bad Behavior counters go too, including the
+		-- per-service ones that never reached the threshold and so have no ban key. The counter prefix
+		-- ends with "_", so the global counter key matches counter_suffix as well.
 		local suffix = "_ip_" .. ip
-		for _, k in ipairs(datastore:keys()) do
-			if k:sub(1, 13) == "bans_service_" and k:sub(-#suffix) == suffix then
-				keys_to_delete[#keys_to_delete + 1] = k
-				delete_local(k)
-			end
-		end
-		if other_datastore then
-			for _, k in ipairs(other_datastore:keys()) do
+		local counter_suffix = "_" .. ip
+		local function sweep(store)
+			for _, k in ipairs(store:keys()) do
 				if k:sub(1, 13) == "bans_service_" and k:sub(-#suffix) == suffix then
 					keys_to_delete[#keys_to_delete + 1] = k
+					-- 13 = #"bans_service_", so the name starts at 14.
+					add_counter_service(k:sub(14, #k - #suffix))
+					delete_local(k)
+				elseif
+					k:sub(1, #BADBEHAVIOR_LOCAL_COUNTER_PREFIX) == BADBEHAVIOR_LOCAL_COUNTER_PREFIX
+					and k:sub(-#counter_suffix) == counter_suffix
+				then
+					-- Empty for the global counter key, which add_counter_service skips.
+					add_counter_service(k:sub(#BADBEHAVIOR_LOCAL_COUNTER_PREFIX + 1, #k - #counter_suffix))
 					delete_local(k)
 				end
 			end
+		end
+		sweep(datastore)
+		if other_datastore then
+			sweep(other_datastore)
 		end
 	end
 
@@ -1581,6 +1629,17 @@ local function remove_ban(ip, service, ban_scope)
 			local cluster = rediskeys.cluster_mode()
 			for _, key in ipairs(keys_to_delete) do
 				clusterstore:call("del", rediskeys.ban(key, cluster))
+			end
+			-- Bad Behavior's Redis counters. A global unban names the services from the swept ban keys and
+			-- local counters: increase() always writes the local counter, so a service still under the
+			-- threshold, with no ban key, is named too.
+			if ban_scope == "service" and service then
+				clusterstore:call("del", rediskeys.badbehavior(ip, service, cluster))
+			else
+				clusterstore:call("del", rediskeys.badbehavior(ip, nil, cluster))
+				for _, name in ipairs(counter_services) do
+					clusterstore:call("del", rediskeys.badbehavior(ip, name, cluster))
+				end
 			end
 			clusterstore:close()
 		end

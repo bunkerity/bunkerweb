@@ -23,6 +23,15 @@ function misc:access()
 	if not method or not regex_match(method, "^[A-Z][A-Z_-]{2,}$") then
 		return self:ret(true, "method is not valid", HTTP_BAD_REQUEST)
 	end
+	-- Let a CORS preflight through to the cors plugin, which answers it or denies its origin
+	if
+		method == "OPTIONS"
+		and self.ctx.bw.http_origin
+		and ngx.var.http_access_control_request_method
+		and get_variable("USE_CORS", true, self.ctx) == "yes"
+	then
+		return self:ret(true, "CORS preflight request is allowed")
+	end
 	-- Check if method is allowed
 	for allowed_method in self.variables["ALLOWED_METHODS"]:gmatch("[^|]+") do
 		if method == allowed_method then

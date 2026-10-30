@@ -1,0 +1,133 @@
+integrations:
+  - "Docker"
+  - "Autoconf"
+  - "All-in-one"
+  - "Kubernetes"
+
+actions:
+  from_latest_stable_sqlite:
+    type: status
+    url: "http://www.example.com"
+    status: 200
+    bw_version: "${BW_LATEST_STABLE}"
+    integrations: # ? For the other integrations, mariadb is the default database
+      - "Linux"
+      - "Docker"
+      - "All-in-one"
+    database: "sqlite"
+  to_latest_sqlite:
+    type: status
+    url: "http://www.example.com"
+    status: 200
+    not_log: "❌"
+    full_clean: true
+    integrations: # ? For the other integrations, mariadb is the default database
+      - "Linux"
+      - "Docker"
+      - "All-in-one"
+    database: "sqlite"
+
+  from_latest_non_stable_sqlite:
+    type: status
+    url: "http://www.example.com"
+    status: 200
+    bw_version: "${BW_LATEST_NON_STABLE}"
+    integrations: # ? For the other integrations, mariadb is the default database
+      - "Linux"
+      - "Docker"
+      - "All-in-one"
+    database: "sqlite"
+  to_latest_1_sqlite:
+    type: status
+    url: "http://www.example.com"
+    status: 200
+    not_log: "❌"
+    integrations: # ? For the other integrations, mariadb is the default database
+      - "Linux"
+      - "Docker"
+      - "All-in-one"
+    database: "sqlite"
+
+  # Upgrade matrix for MariaDB
+  from_latest_stable_mariadb:
+    type: status
+    url: "http://www.example.com"
+    status: 200
+    bw_version: "${BW_LATEST_STABLE}"
+    database: "mariadb"
+  to_latest_mariadb:
+    type: status
+    url: "http://www.example.com"
+    status: 200
+    not_log: "❌"
+    full_clean: true
+    database: "mariadb"
+
+  from_latest_non_stable_mariadb:
+    type: status
+    url: "http://www.example.com"
+    status: 200
+    bw_version: "${BW_LATEST_NON_STABLE}"
+    database: "mariadb"
+  to_latest_1_mariadb:
+    type: status
+    url: "http://www.example.com"
+    status: 200
+    not_log: "❌"
+    database: "mariadb"
+
+  # Upgrade matrix for MySQL
+  from_latest_stable_mysql:
+    type: status
+    url: "http://www.example.com"
+    status: 200
+    bw_version: "${BW_LATEST_STABLE}"
+    database: "mysql"
+  to_latest_mysql:
+    type: status
+    url: "http://www.example.com"
+    status: 200
+    not_log: "❌"
+    full_clean: true
+    database: "mysql"
+
+  from_latest_non_stable_mysql:
+    type: status
+    url: "http://www.example.com"
+    status: 200
+    bw_version: "${BW_LATEST_NON_STABLE}"
+    database: "mysql"
+  to_latest_1_mysql:
+    type: status
+    url: "http://www.example.com"
+    status: 200
+    not_log: "❌"
+    database: "mysql"
+
+  # Upgrade matrix for PostgreSQL
+  from_latest_stable_postgresql:
+    type: status
+    url: "http://www.example.com"
+    status: 200
+    bw_version: "${BW_LATEST_STABLE}"
+    database: "postgresql"
+  to_latest_postgresql:
+    type: status
+    url: "http://www.example.com"
+    status: 200
+    not_log: "❌"
+    full_clean: true
+    database: "postgresql"
+
+  from_latest_non_stable_postgresql:
+    type: status
+    url: "http://www.example.com"
+    status: 200
+    bw_version: "${BW_LATEST_NON_STABLE}"
+    database: "postgresql"
+  to_latest_1_postgresql:
+    type: status
+    url: "http://www.example.com"
+    status: 200
+    not_log: "❌"
+    database: "postgresql"

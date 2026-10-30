@@ -369,7 +369,7 @@ def is_domain_blacklisted(domain, psl):
             # Allow subdomains
         # Block if candidate matches a PSL wildcard rule
         if f"*.{candidate}" in psl["rules"]:
-            if len(labels[i:]) == 2:
+            if i == 1 or (i == 2 and labels[0] == "*"):
                 return True  # Block foo.bar and *.foo.bar
     return False
 
@@ -832,8 +832,8 @@ def certbot_new(
         if account_id:
             command.extend(["--account", account_id])
     else:
-        cmd_env["LETS_ENCRYPT_ZEROSSL_API_RETRY"] = str(config.get("zerossl_api_retry") or 3)
-        cmd_env["LETS_ENCRYPT_ZEROSSL_API_RETRY_DELAY"] = str(config.get("zerossl_api_retry_delay") or 2)
+        cmd_env["LETS_ENCRYPT_ZEROSSL_API_RETRY"] = str(3 if config.get("zerossl_api_retry") in (None, "") else config["zerossl_api_retry"])
+        cmd_env["LETS_ENCRYPT_ZEROSSL_API_RETRY_DELAY"] = str(2 if config.get("zerossl_api_retry_delay") in (None, "") else config["zerossl_api_retry_delay"])
         cmd_env["LETS_ENCRYPT_ZEROSSL_API_CONNECT_TIMEOUT"] = str(config.get("zerossl_api_connect_timeout") or 5)
         cmd_env["LETS_ENCRYPT_ZEROSSL_API_MAX_TIME"] = str(config.get("zerossl_api_max_time") or 20)
 
@@ -1215,8 +1215,10 @@ try:
                         zerossl_api_key = str(config.get("zerossl_api_key") or "")
                         if zerossl_api_key:
                             zerossl_env["LETS_ENCRYPT_ZEROSSL_API_KEY"] = zerossl_api_key
-                        zerossl_env["LETS_ENCRYPT_ZEROSSL_API_RETRY"] = str(config.get("zerossl_api_retry") or 3)
-                        zerossl_env["LETS_ENCRYPT_ZEROSSL_API_RETRY_DELAY"] = str(config.get("zerossl_api_retry_delay") or 2)
+                        zerossl_env["LETS_ENCRYPT_ZEROSSL_API_RETRY"] = str(3 if config.get("zerossl_api_retry") in (None, "") else config["zerossl_api_retry"])
+                        zerossl_env["LETS_ENCRYPT_ZEROSSL_API_RETRY_DELAY"] = str(
+                            2 if config.get("zerossl_api_retry_delay") in (None, "") else config["zerossl_api_retry_delay"]
+                        )
                         zerossl_env["LETS_ENCRYPT_ZEROSSL_API_CONNECT_TIMEOUT"] = str(config.get("zerossl_api_connect_timeout") or 5)
                         zerossl_env["LETS_ENCRYPT_ZEROSSL_API_MAX_TIME"] = str(config.get("zerossl_api_max_time") or 20)
                         break

@@ -31,9 +31,9 @@
     },
     {
       "id": "libinjection",
-      "name": "libinjection v4.0.0",
+      "name": "libinjection v4.0.1",
       "url": "https://github.com/libinjection/libinjection.git",
-      "commit": "211782219663f889f471650150df12b623c5766e",
+      "commit": "bd6fb4e97b433762436d9920c82a16c2b5d44c43",
       "post_install": "rm -r src/deps/src/libinjection/tests"
     },
     {
@@ -67,14 +67,14 @@
       "name": "lua-nginx-module v0.10.29R2",
       "url": "https://github.com/openresty/lua-nginx-module.git",
       "commit": "16612cb0a2eb71273fc5b50a4d98e3c05559178a",
-      "post_install": "rm -r src/deps/src/lua-nginx-module/t && patch --forward src/deps/src/lua-nginx-module/src/ngx_http_lua_ssl_certby.c src/deps/misc/lua-nginx-module-proxy-protocol-addr.patch || rm src/deps/src/lua-nginx-module/src/ngx_http_lua_ssl_certby.c.orig src/deps/src/lua-nginx-module/src/ngx_http_lua_ssl_certby.c.rej"
+      "post_install": "rm -rf src/deps/src/lua-nginx-module/t && if grep -q ngx_http_lua_ffi_ssl_proxy_protocol_addr src/deps/src/lua-nginx-module/src/ngx_http_lua_ssl_certby.c; then patch --reverse --dry-run --batch src/deps/src/lua-nginx-module/src/ngx_http_lua_ssl_certby.c src/deps/misc/lua-nginx-module-proxy-protocol-addr.patch; else patch --forward --batch src/deps/src/lua-nginx-module/src/ngx_http_lua_ssl_certby.c src/deps/misc/lua-nginx-module-proxy-protocol-addr.patch; fi"
     },
     {
       "id": "lua-resty-core",
       "name": "lua-resty-core v0.1.32R1",
       "url": "https://github.com/openresty/lua-resty-core.git",
       "commit": "3ad8ab4b01758c0a03b534026c31cbfa9fc203a5",
-      "post_install": "rm -r src/deps/src/lua-resty-core/t && patch --forward src/deps/src/lua-resty-core/lib/ngx/ssl.lua src/deps/misc/lua-resty-core-proxy-protocol-addr.patch || rm src/deps/src/lua-resty-core/lib/ngx/ssl.lua.orig src/deps/src/lua-resty-core/lib/ngx/ssl.lua.rej"
+      "post_install": "rm -rf src/deps/src/lua-resty-core/t && if grep -q ngx_http_lua_ffi_ssl_proxy_protocol_addr src/deps/src/lua-resty-core/lib/ngx/ssl.lua; then patch --reverse --dry-run --batch src/deps/src/lua-resty-core/lib/ngx/ssl.lua src/deps/misc/lua-resty-core-proxy-protocol-addr.patch; else patch --forward --batch src/deps/src/lua-resty-core/lib/ngx/ssl.lua src/deps/misc/lua-resty-core-proxy-protocol-addr.patch; fi"
     },
     {
       "id": "lua-resty-dns",

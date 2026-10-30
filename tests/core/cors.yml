@@ -1,0 +1,518 @@
+integrations: "all"
+
+actions:
+  deactivated:
+    type: status
+    url: "https://app2.example.com/accept_methods"
+    status: 200
+    verify_ssl: false
+    headers:
+      Origin: "https://app1.example.com"
+      Referer: "https://app1.example.com/"
+
+  activated:
+    type: status
+    url: "https://app2.example.com/accept_methods"
+    status: 403
+    verify_ssl: false
+    headers:
+      Origin: "https://app1.example.com"
+      Referer: "https://app1.example.com/"
+    config:
+      USE_CORS: "yes"
+  activated_allowed:
+    type: status
+    url: "https://app2.example.com/accept_methods"
+    status: 200
+    verify_ssl: false
+    headers:
+      Origin: "https://app1.example.com"
+      Referer: "https://app1.example.com/"
+    config:
+      USE_CORS: "yes"
+      CORS_ALLOW_ORIGIN: "*"
+
+  # ---------------------------------------------------------------------------------------------
+  # Credentials on real responses, preflights under the default ALLOWED_METHODS, deny and wildcard
+  # stages. Ported from the user's `tests/core/cors/` checks for 0fa4ccda9 (send credentials on
+  # real responses to allowed origins only, let preflights past ALLOWED_METHODS); the per-check
+  # map is in the E3 report. The topology is the one those checks always had: `www.example.com`
+  # and `app1.example.com` both served by PHP, `https://app1.example.com` the allowed origin, and
+  # `app1.example.com/credentials.php` an upstream that sends `Access-Control-Allow-Credentials:
+  # true` on its own. The reverse proxy to custom-api the actions above use cannot serve a PHP
+  # fixture, so these actions switch to REMOTE_PHP; Kubernetes has no PHP and is left out.
+  #
+  # `credentials.php` is expected at `$BW_TESTS_WWW/credentials.php` (php.conf roots every host at
+  # REMOTE_PHP_PATH, so `app1.example.com/credentials.php` is that file; the fixture is
+  # `tests/core/cors/www/app1.example.com/credentials.php`; the harness provisions only index.php
+  # and logo.png into the root and each host directory, see `provision_www_root` in
+  # tests/scripts/utils.sh). Without it the `upstream_fixture` actions answer 404.
+  #
+  # Each group is one stack: the first action carries the configuration and every action but the
+  # last sets `restart_stack: false`, so the whole group runs on that stack.
+  # ---------------------------------------------------------------------------------------------
+
+  # Stage "deactivated" (real response): no CORS, so no credentials header either.
+  credentials_absent_when_cors_is_off:
+    type: header
+    integrations: &php_arms
+      - "Docker"
+      - "Linux"
+      - "Autoconf"
+      - "All-in-one"
+    url: "https://www.example.com/"
+    method: "HEAD"
+    verify_ssl: false
+    headers:
+      Origin: "https://app1.example.com"
+    response_headers:
+      Access-Control-Allow-Origin: null
+      Access-Control-Allow-Credentials: null
+    config: &php_config
+      SERVER_NAME: "www.example.com app1.example.com"
+      USE_REVERSE_PROXY: "no"
+      REMOTE_PHP: "php-fpm"
+      REMOTE_PHP_PATH: "/var/www/html"
+      USE_CORS: "no"
+      CORS_ALLOW_CREDENTIALS: "yes"
+    Linux: &php_linux
+      config:
+        REMOTE_PHP: null
+        REMOTE_PHP_PATH: null
+        LOCAL_PHP: "/run/php/php-fpm.sock"
+        LOCAL_PHP_PATH: "/var/www/html"
+
+  # Stage "activated": CORS on, any origin, credentials off.
+  credentials_absent_with_wildcard_origin_and_credentials_off:
+    type: header
+    integrations: *php_arms
+    url: "https://www.example.com/"
+    method: "HEAD"
+    verify_ssl: false
+    headers:
+      Origin: "https://app1.example.com"
+    response_headers:
+      Access-Control-Allow-Origin: '^\*$'
+      Access-Control-Allow-Credentials: null
+    config:
+      <<: *php_config
+      USE_CORS: "yes"
+      CORS_ALLOW_ORIGIN: "*"
+      CORS_ALLOW_CREDENTIALS: "no"
+    Linux: *php_linux
+
+  # Stage "allow_origin": one origin allowed, credentials off.
+  credentials_absent_with_specific_origin_and_credentials_off:
+    type: header
+    integrations: *php_arms
+    url: "https://www.example.com/"
+    method: "HEAD"
+    verify_ssl: false
+    headers:
+      Origin: "https://app1.example.com"
+    response_headers:
+      Access-Control-Allow-Origin: '^https://app1\.example\.com$'
+      Access-Control-Allow-Credentials: null
+    config:
+      <<: *php_config
+      USE_CORS: "yes"
+      CORS_ALLOW_ORIGIN: '^https://app1\.example\.com$'
+      CORS_ALLOW_CREDENTIALS: "no"
+    Linux: *php_linux
+
+  # Stage "tweaked_settings": credentials on. The real response carries them (browsers need them
+  # there, not only on the preflight) and still none of the preflight-only headers.
+  credentials_sent_on_the_real_response:
+    type: header
+    integrations: *php_arms
+    url: "https://www.example.com/"
+    method: "HEAD"
+    verify_ssl: false
+    headers:
+      Origin: "https://app1.example.com"
+    response_headers:
+      Access-Control-Allow-Origin: '^https://app1\.example\.com$'
+      Access-Control-Allow-Credentials: "^true$"
+      Access-Control-Expose-Headers: "^X-Test$"
+      Access-Control-Max-Age: null
+      Access-Control-Allow-Methods: null
+      Access-Control-Allow-Headers: null
+    config:
+      <<: *php_config
+      USE_CORS: "yes"
+      CORS_ALLOW_ORIGIN: '^https://app1\.example\.com$'
+      CORS_ALLOW_CREDENTIALS: "yes"
+      CORS_ALLOW_METHODS: "GET, HEAD, POST, OPTIONS"
+      CORS_ALLOW_HEADERS: "X-Test"
+      CORS_EXPOSE_HEADERS: "X-Test"
+      CORS_MAX_AGE: "3600"
+    Linux: *php_linux
+
+  # Stage "credentials" (CORS_DENY_REQUEST=yes), ALLOWED_METHODS without OPTIONS.
+  credentials_allowed_origin_real_response:
+    type: header
+    integrations: *php_arms
+    url: "https://www.example.com/"
+    verify_ssl: false
+    headers:
+      Origin: "https://app1.example.com"
+    response_headers:
+      Access-Control-Allow-Origin: '^https://app1\.example\.com$'
+      Access-Control-Allow-Credentials: "^true$"
+    restart_stack: false
+    config: &credentials_config
+      <<: *php_config
+      ALLOWED_METHODS: "GET|POST|HEAD|QUERY"
+      USE_CORS: "yes"
+      CORS_ALLOW_ORIGIN: '^https://app1\.example\.com$'
+      CORS_ALLOW_CREDENTIALS: "yes"
+      CORS_ALLOW_METHODS: "GET, HEAD, POST, OPTIONS"
+      CORS_EXPOSE_HEADERS: "X-Test"
+      CORS_MAX_AGE: "3600"
+      CORS_DENY_REQUEST: "yes"
+    Linux: *php_linux
+  credentials_preflight_passes_allowed_methods:
+    type: status
+    integrations: *php_arms
+    url: "https://www.example.com/"
+    method: "OPTIONS"
+    verify_ssl: false
+    status: 204
+    headers:
+      Origin: "https://app1.example.com"
+      Access-Control-Request-Method: "POST"
+    restart_stack: false
+  credentials_preflight_headers:
+    type: header
+    integrations: *php_arms
+    url: "https://www.example.com/"
+    method: "OPTIONS"
+    verify_ssl: false
+    headers:
+      Origin: "https://app1.example.com"
+      Access-Control-Request-Method: "POST"
+    response_headers:
+      Access-Control-Allow-Methods: "^GET, HEAD, POST, OPTIONS$"
+      Access-Control-Allow-Credentials: "^true$"
+    restart_stack: false
+  credentials_plain_options_is_405:
+    type: status
+    integrations: *php_arms
+    url: "https://www.example.com/"
+    method: "OPTIONS"
+    verify_ssl: false
+    status: 405
+    restart_stack: false
+  credentials_options_with_origin_but_no_request_method_is_405:
+    type: status
+    integrations: *php_arms
+    url: "https://www.example.com/"
+    method: "OPTIONS"
+    verify_ssl: false
+    status: 405
+    headers:
+      Origin: "https://app1.example.com"
+    restart_stack: false
+  credentials_disallowed_origin_is_denied:
+    type: status
+    integrations: *php_arms
+    url: "https://www.example.com/"
+    verify_ssl: false
+    status: 403
+    headers:
+      Origin: "https://evil.example.net"
+    restart_stack: false
+  credentials_disallowed_preflight_is_denied:
+    type: status
+    integrations: *php_arms
+    url: "https://www.example.com/"
+    method: "OPTIONS"
+    verify_ssl: false
+    status: 403
+    headers:
+      Origin: "https://evil.example.net"
+      Access-Control-Request-Method: "POST"
+    restart_stack: false
+  # The next four actions assert only the credentials header for a disallowed origin: cors.lua header()
+  # sets Access-Control-Allow-Origin to the request origin on every response, denied or not, and
+  # only Access-Control-Allow-Credentials is gated on the origin check (0fa4ccda9). The original
+  # checks only asserted the credentials header here.
+  credentials_disallowed_origin_gets_no_credentials:
+    type: header
+    integrations: *php_arms
+    url: "https://www.example.com/"
+    verify_ssl: false
+    raise_for_status: false
+    headers:
+      Origin: "https://evil.example.net"
+    response_headers:
+      Access-Control-Allow-Credentials: null
+    restart_stack: false
+  credentials_disallowed_preflight_gets_no_credentials:
+    type: header
+    integrations: *php_arms
+    url: "https://www.example.com/"
+    method: "OPTIONS"
+    verify_ssl: false
+    raise_for_status: false
+    headers:
+      Origin: "https://evil.example.net"
+      Access-Control-Request-Method: "POST"
+    response_headers:
+      Access-Control-Allow-Credentials: null
+    restart_stack: false
+  credentials_upstream_fixture_is_served:
+    type: string
+    integrations: *php_arms
+    url: "https://app1.example.com/credentials.php"
+    verify_ssl: false
+    string: "Upstream credentials fixture"
+    headers:
+      Origin: "https://app1.example.com"
+    restart_stack: false
+  credentials_upstream_fixture_keeps_credentials_for_the_allowed_origin:
+    type: header
+    integrations: *php_arms
+    url: "https://app1.example.com/credentials.php"
+    verify_ssl: false
+    headers:
+      Origin: "https://app1.example.com"
+    response_headers:
+      Access-Control-Allow-Credentials: "^true$"
+    restart_stack: false
+  credentials_upstream_fixture_is_denied_to_a_disallowed_origin:
+    type: status
+    integrations: *php_arms
+    url: "https://app1.example.com/credentials.php"
+    verify_ssl: false
+    status: 403
+    headers:
+      Origin: "https://evil.example.net"
+    restart_stack: false
+  # The browser half of the stage: a credentialed fetch, simple and preflighted, from a page of
+  # the allowed origin. Needs Firefox and geckodriver on the runner, like the `xpath` actions.
+  # The page is the upstream fixture, not `/`: tests/misc/index.php sends its own CSP with
+  # `connect-src 'self'`, which blocks any fetch to another origin before it leaves the browser.
+  credentials_browser_credentialed_fetch:
+    type: script
+    integrations: *php_arms
+    script:
+      - "python3"
+      - "tests/core/cors/browser_credentials.py"
+      - "https://app1.example.com/credentials.php"
+      - "https://www.example.com/"
+    result: "cors browser credentials: both fetches succeeded"
+    timeout: 180
+
+  # Stage "credentials_no_deny": CORS_DENY_REQUEST=no serves a disallowed origin without any CORS
+  # header, and an upstream's own credentials header must not leak to it.
+  no_deny_disallowed_origin_is_served:
+    type: status
+    integrations: *php_arms
+    url: "https://www.example.com/"
+    verify_ssl: false
+    status: 200
+    headers:
+      Origin: "https://evil.example.net"
+    restart_stack: false
+    config:
+      <<: *credentials_config
+      CORS_DENY_REQUEST: "no"
+    Linux: *php_linux
+  no_deny_disallowed_origin_gets_no_credentials:
+    type: header
+    integrations: *php_arms
+    url: "https://www.example.com/"
+    verify_ssl: false
+    headers:
+      Origin: "https://evil.example.net"
+    response_headers:
+      Access-Control-Allow-Credentials: null
+    restart_stack: false
+  no_deny_disallowed_preflight_gets_no_credentials:
+    type: header
+    integrations: *php_arms
+    url: "https://www.example.com/"
+    method: "OPTIONS"
+    verify_ssl: false
+    raise_for_status: false
+    headers:
+      Origin: "https://evil.example.net"
+      Access-Control-Request-Method: "POST"
+    response_headers:
+      Access-Control-Allow-Credentials: null
+    restart_stack: false
+  no_deny_upstream_fixture_is_served_to_a_disallowed_origin:
+    type: string
+    integrations: *php_arms
+    url: "https://app1.example.com/credentials.php"
+    verify_ssl: false
+    string: "Upstream credentials fixture"
+    headers:
+      Origin: "https://evil.example.net"
+    restart_stack: false
+  no_deny_upstream_credentials_are_stripped_for_a_disallowed_origin:
+    type: header
+    integrations: *php_arms
+    url: "https://app1.example.com/credentials.php"
+    verify_ssl: false
+    headers:
+      Origin: "https://evil.example.net"
+    response_headers:
+      Access-Control-Allow-Credentials: null
+    restart_stack: false
+  no_deny_upstream_credentials_are_kept_for_the_allowed_origin:
+    type: header
+    integrations: *php_arms
+    url: "https://app1.example.com/credentials.php"
+    verify_ssl: false
+    headers:
+      Origin: "https://app1.example.com"
+    response_headers:
+      Access-Control-Allow-Credentials: "^true$"
+
+  # Stage "credentials_wildcard": a wildcard origin never carries credentials, not even an
+  # upstream's own.
+  wildcard_allowed_origin_real_response:
+    type: header
+    integrations: *php_arms
+    url: "https://www.example.com/"
+    verify_ssl: false
+    headers:
+      Origin: "https://app1.example.com"
+    response_headers:
+      Access-Control-Allow-Origin: '^\*$'
+      Access-Control-Allow-Credentials: null
+    restart_stack: false
+    config:
+      <<: *credentials_config
+      CORS_ALLOW_ORIGIN: "*"
+      CORS_DENY_REQUEST: "no"
+    Linux: *php_linux
+  wildcard_preflight_passes_allowed_methods:
+    type: status
+    integrations: *php_arms
+    url: "https://www.example.com/"
+    method: "OPTIONS"
+    verify_ssl: false
+    status: 204
+    headers:
+      Origin: "https://app1.example.com"
+      Access-Control-Request-Method: "POST"
+    restart_stack: false
+  wildcard_preflight_has_no_credentials:
+    type: header
+    integrations: *php_arms
+    url: "https://www.example.com/"
+    method: "OPTIONS"
+    verify_ssl: false
+    headers:
+      Origin: "https://app1.example.com"
+      Access-Control-Request-Method: "POST"
+    response_headers:
+      Access-Control-Allow-Methods: "^GET, HEAD, POST, OPTIONS$"
+      Access-Control-Allow-Credentials: null
+    restart_stack: false
+  wildcard_plain_options_is_405:
+    type: status
+    integrations: *php_arms
+    url: "https://www.example.com/"
+    method: "OPTIONS"
+    verify_ssl: false
+    status: 405
+    restart_stack: false
+  wildcard_options_with_origin_but_no_request_method_is_405:
+    type: status
+    integrations: *php_arms
+    url: "https://www.example.com/"
+    method: "OPTIONS"
+    verify_ssl: false
+    status: 405
+    headers:
+      Origin: "https://app1.example.com"
+    restart_stack: false
+  wildcard_any_origin_gets_a_star_and_no_credentials:
+    type: header
+    integrations: *php_arms
+    url: "https://www.example.com/"
+    verify_ssl: false
+    headers:
+      Origin: "https://evil.example.net"
+    response_headers:
+      Access-Control-Allow-Origin: '^\*$'
+      Access-Control-Allow-Credentials: null
+    restart_stack: false
+  wildcard_upstream_fixture_is_served:
+    type: string
+    integrations: *php_arms
+    url: "https://app1.example.com/credentials.php"
+    verify_ssl: false
+    string: "Upstream credentials fixture"
+    headers:
+      Origin: "https://app1.example.com"
+    restart_stack: false
+  wildcard_upstream_credentials_are_stripped_for_the_allowed_origin:
+    type: header
+    integrations: *php_arms
+    url: "https://app1.example.com/credentials.php"
+    verify_ssl: false
+    headers:
+      Origin: "https://app1.example.com"
+    response_headers:
+      Access-Control-Allow-Credentials: null
+    restart_stack: false
+  wildcard_upstream_credentials_are_stripped_for_any_origin:
+    type: header
+    integrations: *php_arms
+    url: "https://app1.example.com/credentials.php"
+    verify_ssl: false
+    headers:
+      Origin: "https://evil.example.net"
+    response_headers:
+      Access-Control-Allow-Credentials: null
+
+config:
+  SERVER_NAME: "app1.example.com app2.example.com"
+  MULTISITE: "yes"
+  USE_REVERSE_PROXY: "yes"
+  REVERSE_PROXY_HOST: "http://custom-api:8000"
+  USE_LIMIT_REQ: "no"
+  USE_BAD_BEHAVIOR: "no"
+  USE_CORS: "no"
+  CORS_ALLOW_ORIGIN: "self"
+  CORS_ALLOW_METHODS: "GET, POST, OPTIONS"
+  CORS_ALLOW_HEADERS: "DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range"
+  CORS_ALLOW_CREDENTIALS: "no"
+  CORS_EXPOSE_HEADERS: "Content-Length,Content-Range"
+  CROSS_ORIGIN_OPENER_POLICY: "same-origin"
+  CROSS_ORIGIN_EMBEDDER_POLICY: "require-corp"
+  CROSS_ORIGIN_RESOURCE_POLICY: "same-site"
+  CORS_MAX_AGE: "86400"
+  CORS_DENY_REQUEST: "yes"
+
+Kubernetes:
+  config:
+    # Same key the base config sets, not a neighbouring one: `custom-api` is the Docker compose
+    # name and resolves, inside a pod, to the dnsmasq address 10.20.30.30, which nothing there
+    # can reach -- the request hangs until the client gives up (499, "while connecting to
+    # upstream"). This line used to override BLACKLIST_IP_URLS, a setting this spec never sets,
+    # so the k8s arm kept proxying to the Docker name and `activated_allowed` timed out.
+    # `svc-custom-api.misc.svc.cluster.local` must stay literal here: tests/scripts/build.sh
+    # greps the spec for it to decide whether to deploy tests/misc/k8s/custom-api.yml.
+    REVERSE_PROXY_HOST: "http://svc-custom-api.misc.svc.cluster.local:8000"
+
+# Kubernetes only (generate.py reads `annotations:` inside the Kubernetes branch alone). The
+# ingress always declares www.example.com -> svc-app1 and its path becomes that service's
+# REVERSE_PROXY_URL_1, while the unsuffixed REVERSE_PROXY_HOST above renders at
+# REVERSE_PROXY_URL's default "/". Both on "/" is `duplicate location "/"` and NGINX refuses the
+# configuration -- silently, since tests/utils/config.yml:15 sets DISABLE_CONFIGURATION_TESTING
+# for the whole suite, so the API still reports "reload successful" and only the scheduler's own
+# push (which lands before the controller's) ever takes effect. This spec asserts against
+# app1.example.com/app2.example.com, never www.example.com, so moving the ingress off "/" costs
+# it nothing.
+# Do NOT "simplify" this to the `bunkerweb.io/REVERSE_PROXY_URL: ""` other specs use (brotli,
+# clientcache, gzip, redirect, securitytxt): an empty value makes generate.py skip the ingress
+# rule entirely -- no rule, no /tmp/services.yml, no app1 -- and it drops the readiness gate in
+# tests/core.py:135 from two "BunkerWeb is ready" lines to one. A real path keeps both.
+annotations:
+  bunkerweb.io/REVERSE_PROXY_URL: "/app1"

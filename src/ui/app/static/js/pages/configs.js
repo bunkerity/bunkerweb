@@ -179,8 +179,8 @@ $(document).ready(function () {
 
     const alertTextKey =
       configs.length > 1
-        ? "modal.body.delete_confirmation_alert_plural"
-        : "modal.body.delete_confirmation_alert";
+        ? "modal.body.confirm_configs_deletion_alert_plural"
+        : "modal.body.confirm_configs_deletion_alert";
     delete_modal
       .find(".alert")
       .text(

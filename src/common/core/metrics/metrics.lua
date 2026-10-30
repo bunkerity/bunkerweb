@@ -832,6 +832,10 @@ function metrics:init_workers()
 	if max_lru_history ~= DEFAULT_MAX_LRU_HISTORY then
 		local new_lru, err = lrucache.new(max_lru_history)
 		if new_lru then
+			local requests = lru:get("requests")
+			if requests then
+				new_lru:set("requests", requests)
+			end
 			lru = new_lru
 			message = "metrics LRU sized to " .. max_lru_history .. " slots"
 		else
@@ -840,16 +844,14 @@ function metrics:init_workers()
 		end
 	end
 	local wid = tostring(worker_id())
-	-- Restore SHM once, leaving counters/requests already touched by log() intact.
+	-- Restore SHM once, merging requests already touched by log().
 	-- Do not evict live slots just to prefill a cache: later misses recover lazily.
 	local budget = lru:capacity() - #lru:get_keys()
 	for _, key in ipairs(self.metrics_datastore:keys()) do
-		if budget <= 0 then
-			break
-		end
 		if key:match("_" .. wid .. "$") then
 			local name = key:gsub("_" .. wid .. "$", "")
-			if name ~= "setup" and lru:get(name) == nil then
+			local live = lru:get(name)
+			if name ~= "setup" and ((live == nil and budget > 0) or (name == "requests" and type(live) == "table")) then
 				local value = self.metrics_datastore:get(key)
 				if value then
 					local ok, decoded = pcall(decode, value)
@@ -866,9 +868,32 @@ function metrics:init_workers()
 								request.redis_retry_json = request.redis_retry_json or encode(request)
 							end
 						end
+						for _, request in ipairs(live or {}) do
+							table_insert(value, request)
+						end
+						-- Newest occurrence wins, including its sync state; keep the FIFO cap.
+						local requests, seen = {}, {}
+						local max_requests = parse_count(self.variables["METRICS_MAX_BLOCKED_REQUESTS"]) or 1000
+						for i = #value, 1, -1 do
+							if #requests >= max_requests then
+								break
+							end
+							local request = value[i]
+							local id = type(request) == "table" and request.id or encode(request)
+							if not seen[id] then
+								seen[id] = true
+								table_insert(requests, request)
+							end
+						end
+						value = {}
+						for i = #requests, 1, -1 do
+							table_insert(value, requests[i])
+						end
 					end
 					lru:set(name, value)
-					budget = budget - 1
+					if live == nil then
+						budget = budget - 1
+					end
 				end
 			end
 		end
@@ -1101,6 +1126,7 @@ function metrics:timer()
 	local ret = true
 	local ret_err = "metrics updated"
 	local wid = tostring(worker_id())
+	local max_retries = tonumber(self.variables["METRICS_MEMORY_MAX_RETRIES"]) or 5
 
 	self.redis_ok = nil
 	local ttl = parse_duration(self.variables["METRICS_REDIS_TTL"], "s")
@@ -1306,7 +1332,7 @@ function metrics:timer()
 			end
 			-- Push to dict (with LRU eviction if needed)
 			local ok
-			ok, err = self.metrics_datastore:set_with_retries(key .. "_" .. wid, value)
+			ok, err = self.metrics_datastore:set_with_retries(key .. "_" .. wid, value, nil, max_retries)
 			-- Shed the oldest half rather than the whole history: set_with_retries already
 			-- force-evicted, so "no memory" means the dict is undersized, and dropping every
 			-- stored entry to make one write fit loses far more than needed. The halving is
@@ -1329,7 +1355,7 @@ function metrics:timer()
 						.. #live
 						.. " entries : raise METRICS_MEMORY_SIZE"
 				)
-				ok, err = self.metrics_datastore:set_with_retries(key .. "_" .. wid, encode(live))
+				ok, err = self.metrics_datastore:set_with_retries(key .. "_" .. wid, encode(live), nil, max_retries)
 			end
 			if not ok then
 				-- Nothing left to shed : drop the key so the next cycle starts clean

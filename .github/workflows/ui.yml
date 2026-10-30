@@ -41,9 +41,9 @@ jobs:
       packages: write
     strategy:
       matrix:
-        linux: [ubuntu]
+        linux: [ubuntu-noble]
         include:
-          - linux: ubuntu
+          - linux: ubuntu-noble
             package: deb
     uses: ./.github/workflows/linux-build.yml
     with:
@@ -63,37 +63,49 @@ jobs:
       contents: read
       security-events: write
 
-  # UI tests
-  prepare-tests-ui:
-    runs-on: ubuntu-26.04
+  # UI tests: driven by the framework's ui specs (tests/ui/*.yml) through integration-tests.yml.
+  parse-tests-ui:
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - id: set-matrix
+      - name: Set up Python 3.13
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.13"
+      - id: parse_tests
+        name: Parse ui tests
         run: |
-          tests=$(find ./tests/ui/ -name "*_page.py" -type f -printf "%f\n" | jq -c --raw-input --slurp 'split("\n")| .[0:-1]')
-          echo "tests=$tests" >> $GITHUB_OUTPUT
+          pip install --require-hashes -r tests/requirements.txt
+          python3 tests/parse.py "ui" --dev
+          echo "Docker_tests=$(cat /tmp/tests/Docker_tests.json || echo "[]")" >> $GITHUB_OUTPUT
+          echo "Linux_tests=$(cat /tmp/tests/Linux_tests.json || echo "[]")" >> $GITHUB_OUTPUT
     outputs:
-      tests: ${{ steps.set-matrix.outputs.tests }}
-  tests-ui:
-    needs: [prepare-tests-ui, build-containers]
+      Docker_tests: ${{ steps.parse_tests.outputs.Docker_tests }}
+      Linux_tests: ${{ steps.parse_tests.outputs.Linux_tests }}
+
+  run-Docker-tests-ui:
+    needs: [parse-tests-ui, build-containers]
     strategy:
       fail-fast: false
       matrix:
-        test: ${{ fromJson(needs.prepare-tests-ui.outputs.tests) }}
-    uses: ./.github/workflows/tests-ui.yml
+        test: ${{ fromJson(needs.parse-tests-ui.outputs.Docker_tests) }}
+    uses: ./.github/workflows/integration-tests.yml
     with:
+      TYPE: ui
       TEST: ${{ matrix.test }}
       RELEASE: ui
-  tests-ui-linux:
-    needs: [prepare-tests-ui, build-packages]
+
+  run-Linux-tests-ui:
+    needs: [parse-tests-ui, build-packages]
     strategy:
       fail-fast: false
       matrix:
-        test: ${{ fromJson(needs.prepare-tests-ui.outputs.tests) }}
-    uses: ./.github/workflows/tests-ui-linux.yml
+        test: ${{ fromJson(needs.parse-tests-ui.outputs.Linux_tests) }}
+    uses: ./.github/workflows/integration-tests.yml
     with:
+      TYPE: ui
       TEST: ${{ matrix.test }}
       RELEASE: ui

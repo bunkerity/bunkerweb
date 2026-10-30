@@ -13,7 +13,8 @@
     "no_changes_detected": "未检测到任何更改。",
     "notice": "注意",
     "ping_error": "Ping 实例时发生错误。",
-    "readonly_mode": "此操作在只读模式下被禁用。"
+    "readonly_mode": "此操作在只读模式下被禁用。",
+    "configs_import_invalid_file": "请上传一个有效的自定义配置导出文件 (.json)。"
   },
   "aria": {
     "label": {
@@ -1240,7 +1241,16 @@
     },
     "retention_notice": "报告存储在内存中的循环缓冲区内：达到配置的上限后，最早的记录会被丢弃。除非启用 Redis，否则重启 BunkerWeb 时报告也会被清空。",
     "security_incident": "安全事件",
-    "security_report_data": "安全报告数据"
+    "security_report_data": "安全报告数据",
+    "bad_behavior_no_details": "此报告未捕获任何异常行为详情。",
+    "bad_behavior_activity_detected": "检测到异常行为",
+    "bad_behavior_activity_explanation": "这些请求超过了异常行为阈值，并被组合在一起。",
+    "bad_behavior_request_label": "请求",
+    "bad_behavior_ip": "IP地址",
+    "bad_behavior_server": "服务器",
+    "bad_behavior_url": "URL",
+    "bad_behavior_captured_at": "捕获时间",
+    "bad_behavior_request_id": "请求 ID"
   },
   "scope": {
     "all_services": "所有服务",
@@ -1427,7 +1437,8 @@
     "template_in_use_description": "不允许在当前模板之外进行更改。请使用当前模板进行更改或切换到高级/原始模式。",
     "unique_server_name": "唯一服务器名称",
     "up": "运行中",
-    "yes": "是"
+    "yes": "是",
+    "not_applicable": "不适用"
   },
   "step": {
     "next": "下一步",
@@ -1724,7 +1735,8 @@
       "show_selected_only": "仅显示所选项",
       "stop_instance": "停止实例 {{hostname}}",
       "unban_ip": "解禁 {{ip}}",
-      "value_from_global": "来自全局设置的值"
+      "value_from_global": "来自全局设置的值",
+      "update_ban_duration": "更新禁令时长"
     },
     "cannot_delete_original_ban": "无法删除原始封禁条目。",
     "cannot_remove_disabled": "无法移除，因为一个或多个设置被禁用。",
@@ -1962,7 +1974,8 @@
     "zerossl_api_retry": "ZeroSSL API 请求的重试次数（0 表示禁用重试）。",
     "zerossl_api_retry_delay": "ZeroSSL API 重试之间的延迟秒数。",
     "zerossl_api_connect_timeout": "ZeroSSL API 调用的连接超时秒数。",
-    "zerossl_api_max_time": "每个 ZeroSSL API 请求的最大总时长（秒）。"
+    "zerossl_api_max_time": "每个 ZeroSSL API 请求的最大总时长（秒）。",
+    "readonly_mode": "此操作在只读模式下不允许。"
   },
   "totp": {
     "prompt": "请输入您的 TOTP 代码。"
@@ -1985,5 +1998,12 @@
     "required": "{{field}} 是必填项。",
     "service_required_for_ban": "对于特定于服务的封禁，必须选择一个服务。",
     "zerossl_email_or_api_key_required": "ZeroSSL 需要邮箱或 ZeroSSL API 密钥。"
+  },
+  "plugins": {
+    "multivalue": {
+      "show_less": "显示较少",
+      "more_value": "更多值",
+      "more_values": "更多值"
+    }
   }
 }

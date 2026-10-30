@@ -13,7 +13,8 @@
     "no_changes_detected": "Walang nakitang pagbabago.",
     "notice": "Paunawa",
     "ping_error": "May naganap na error habang pina-ping ang mga instance.",
-    "readonly_mode": "Ang aksyong ito ay hindi pinagana sa read-only na mode."
+    "readonly_mode": "Ang aksyong ito ay hindi pinagana sa read-only na mode.",
+    "configs_import_invalid_file": "Mangyaring i-upload ang isang valid na file ng custom na configuration (.json)."
   },
   "aria": {
     "label": {
@@ -1240,7 +1241,16 @@
     },
     "retention_notice": "Ang mga ulat ay isang rolling in-memory buffer: inaalis ang pinakalumang mga entry kapag naabot na ang nakatakdang limitasyon. Maliban kung naka-enable ang Redis, nabubura rin ang mga ito kapag nag-restart ang BunkerWeb.",
     "security_incident": "Insidente ng Seguridad",
-    "security_report_data": "Data ng Ulat ng Seguridad"
+    "security_report_data": "Data ng Ulat ng Seguridad",
+    "bad_behavior_no_details": "Walang detalye ng hindi kanais-nais na aktibidad na nakuhang para sa ulat na ito.",
+    "bad_behavior_activity_detected": "Natukoy ang hindi kanais-nais na aktibidad",
+    "bad_behavior_activity_explanation": "Ang mga kahilingang ito ay lumampas sa limitasyon ng hindi kanais-nais na aktibidad at pinagsama-sama.",
+    "bad_behavior_request_label": "Kahilingan",
+    "bad_behavior_ip": "Address ng IP",
+    "bad_behavior_server": "Server",
+    "bad_behavior_url": "URL",
+    "bad_behavior_captured_at": "Nakuha sa",
+    "bad_behavior_request_id": "ID ng Kahilingan"
   },
   "scope": {
     "all_services": "Lahat ng Serbisyo",
@@ -1427,7 +1437,8 @@
     "template_in_use_description": "Ang mga pagbabago sa labas ng kasalukuyang template ay hindi pinapayagan. Mangyaring gumawa ng mga pagbabago gamit ang kasalukuyang template o lumipat sa Advanced/Raw mode.",
     "unique_server_name": "Natatanging Pangalan ng Server",
     "up": "Aktibo",
-    "yes": "Oo"
+    "yes": "Oo",
+    "not_applicable": "Hindi Naaangkop"
   },
   "step": {
     "next": "Susunod",
@@ -1724,7 +1735,8 @@
       "show_selected_only": "Ipakita ang mga napili lamang",
       "stop_instance": "Itigil ang Instance na {{hostname}}",
       "unban_ip": "I-unban ang {{ip}}",
-      "value_from_global": "Value mula sa mga pandaigdigang setting"
+      "value_from_global": "Value mula sa mga pandaigdigang setting",
+      "update_ban_duration": "Baguhin ang tagal ng pagbabawal"
     },
     "cannot_delete_original_ban": "Hindi mabura ang orihinal na entry ng Ban.",
     "cannot_remove_disabled": "Hindi maaaring alisin dahil ang isa o higit pang setting ay hindi pinagana.",
@@ -1962,7 +1974,8 @@
     "zerossl_api_retry": "Bilang ng mga ulit para sa mga kahilingan ng ZeroSSL API (0 ang nagdi-disable ng mga ulit).",
     "zerossl_api_retry_delay": "Pagkaantala sa segundo sa pagitan ng mga ulit ng ZeroSSL API.",
     "zerossl_api_connect_timeout": "Connection timeout sa segundo para sa mga tawag ng ZeroSSL API.",
-    "zerossl_api_max_time": "Maximum na kabuuang oras sa segundo para sa bawat kahilingan ng ZeroSSL API."
+    "zerossl_api_max_time": "Maximum na kabuuang oras sa segundo para sa bawat kahilingan ng ZeroSSL API.",
+    "readonly_mode": "Hindi pinapayagan ang aksyong ito sa mode na \"read-only\"."
   },
   "totp": {
     "prompt": "Mangyaring ipasok ang iyong TOTP code."
@@ -1985,5 +1998,12 @@
     "required": "Kailangan ang {{field}}.",
     "service_required_for_ban": "Kailangan ng serbisyo para sa isang ban na tukoy sa serbisyo.",
     "zerossl_email_or_api_key_required": "Nangangailangan ang ZeroSSL ng email o ZeroSSL API key."
+  },
+  "plugins": {
+    "multivalue": {
+      "show_less": "Ipakita ang mas kaunti",
+      "more_value": "mas maraming halaga",
+      "more_values": "mas maraming halaga"
+    }
   }
 }

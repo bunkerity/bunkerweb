@@ -422,6 +422,12 @@ function badbehavior:timer()
 					ret = false
 					ret_err = "can't save ban : " .. err
 				else
+					-- The ban is in place, so the counter that produced it is dead weight: log() returns
+					-- early on a banned IP and the timer skips it before increase(), so nothing reads this
+					-- key again until the ban ends, and that is when issue #3818 wants it at zero (an unban
+					-- is covered by utils.remove_ban, a lapsed ban by nothing else). Deliberately inside the
+					-- success branch: deleting after a FAILED ban would reset the attacker's progress.
+					self:delete_counter(data.ip, data.server_name, data.ban_scope, data.use_redis)
 					local ban_duration = ban_time == 0 and "permanently" or "for " .. ban_time .. "s"
 					self.logger:log(
 						WARN,
@@ -528,6 +534,29 @@ function badbehavior:increase(
 			.. ")"
 	)
 	return counter, "success"
+end
+
+-- Bad Behavior owns this counter, so it deletes it itself, in the VM that holds it: a Stream service's
+-- counter lives in datastore_stream, out of the HTTP-side unban's reach. Deleting an absent key is a
+-- no-op, so the overlap with utils.remove_ban is free.
+function badbehavior:delete_counter(ip, server_name, ban_scope, use_redis)
+	local key_suffix = ip
+	if ban_scope == "service" then
+		key_suffix = server_name .. "_" .. ip
+	end
+	self.datastore:delete("plugin_badbehavior_count_" .. key_suffix)
+	-- Not optional: increase() prefers the Redis counter and overwrites the local one with it, so
+	-- clearing the local key alone re-bans on the first request after the ban ends.
+	if use_redis then
+		local ok, err = self:redis_delete_counter(ip, server_name, ban_scope)
+		if not ok then
+			self:log_throttled(
+				ERR,
+				"redis_delete_counter",
+				"(delete_counter) can't delete redis counter : " .. tostring(err)
+			)
+		end
+	end
 end
 
 function badbehavior:decrease(ip, count_time, threshold, use_redis, server_name, status, old_counter, ban_scope)
@@ -690,6 +719,26 @@ function badbehavior:redis_decrease(ip, count_time, server_name, ban_scope)
 	end
 	self.clusterstore:close()
 	return counter
+end
+
+function badbehavior:redis_delete_counter(ip, server_name, ban_scope)
+	-- Same key redis_increase and redis_decrease use, hash-tagged in cluster mode
+	local counter_key =
+		rediskeys.badbehavior(ip, ban_scope == "service" and server_name or nil, rediskeys.cluster_mode())
+
+	-- Connect to server
+	local ok, err = self.clusterstore:connect()
+	if not ok then
+		return false, err
+	end
+	-- A plain DEL: nothing to floor or re-expire. It answers 0 for an absent key, which is truthy in Lua
+	-- and not a failure.
+	local deleted, del_err = self.clusterstore:call("del", counter_key)
+	self.clusterstore:close()
+	if not deleted then
+		return false, del_err
+	end
+	return true
 end
 
 return badbehavior

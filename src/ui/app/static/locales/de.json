@@ -13,7 +13,8 @@
     "no_changes_detected": "Keine Änderungen festgestellt.",
     "notice": "Hinweis",
     "ping_error": "Beim Pingen der Instanzen ist ein Fehler aufgetreten.",
-    "readonly_mode": "Diese Aktion ist im schreibgeschützten Modus deaktiviert."
+    "readonly_mode": "Diese Aktion ist im schreibgeschützten Modus deaktiviert.",
+    "configs_import_invalid_file": "Bitte eine gültige benutzerdefinierte Konfigurationsexportdatei (.json) hochladen."
   },
   "aria": {
     "label": {
@@ -1240,7 +1241,16 @@
     },
     "retention_notice": "Berichte sind ein rollierender Puffer im Arbeitsspeicher: Die ältesten Einträge werden verworfen, sobald das konfigurierte Limit erreicht ist. Sofern Redis nicht aktiviert ist, werden sie zudem bei einem Neustart von BunkerWeb gelöscht.",
     "security_incident": "Sicherheitsvorfall",
-    "security_report_data": "Daten des Sicherheitsberichts"
+    "security_report_data": "Daten des Sicherheitsberichts",
+    "bad_behavior_no_details": "Für diesen Bericht wurden keine Details zu unerwünschtem Verhalten erfasst.",
+    "bad_behavior_activity_detected": "Erkennung von unerwünschtem Verhalten",
+    "bad_behavior_activity_explanation": "Diese Anfragen überschritten den Schwellenwert für unerwünschtes Verhalten und wurden zusammengefasst.",
+    "bad_behavior_request_label": "Anfrage",
+    "bad_behavior_ip": "IP-Adresse",
+    "bad_behavior_server": "Server",
+    "bad_behavior_url": "URL",
+    "bad_behavior_captured_at": "Erfasst bei",
+    "bad_behavior_request_id": "Anfrage-ID"
   },
   "scope": {
     "all_services": "Alle Dienste",
@@ -1427,7 +1437,8 @@
     "template_in_use_description": "Änderungen außerhalb der aktuellen Vorlage sind nicht erlaubt. Bitte nehmen Sie Änderungen mit der aktuellen Vorlage vor oder wechseln Sie in den Erweitert/Roh-Modus.",
     "unique_server_name": "Eindeutiger Servername",
     "up": "Aktiv",
-    "yes": "Ja"
+    "yes": "Ja",
+    "not_applicable": "N/A"
   },
   "step": {
     "next": "Weiter",
@@ -1724,7 +1735,8 @@
       "show_selected_only": "Nur ausgewählte anzeigen",
       "stop_instance": "Instanz {{hostname}} stoppen",
       "unban_ip": "{{ip}} entsperren",
-      "value_from_global": "Wert aus globalen Einstellungen"
+      "value_from_global": "Wert aus globalen Einstellungen",
+      "update_ban_duration": "Aktualisieren Sie die Sperrdauer"
     },
     "cannot_delete_original_ban": "Der ursprüngliche Sperreintrag kann nicht gelöscht werden.",
     "cannot_remove_disabled": "Kann nicht entfernt werden, da eine oder mehrere Einstellungen deaktiviert sind.",
@@ -1962,7 +1974,8 @@
     "zerossl_api_retry": "Anzahl der Wiederholungen für ZeroSSL-API-Anfragen (0 deaktiviert Wiederholungen).",
     "zerossl_api_retry_delay": "Verzögerung in Sekunden zwischen ZeroSSL-API-Wiederholungen.",
     "zerossl_api_connect_timeout": "Verbindungs-Timeout in Sekunden für ZeroSSL-API-Aufrufe.",
-    "zerossl_api_max_time": "Maximale Gesamtzeit in Sekunden pro ZeroSSL-API-Anfrage."
+    "zerossl_api_max_time": "Maximale Gesamtzeit in Sekunden pro ZeroSSL-API-Anfrage.",
+    "readonly_mode": "Diese Aktion ist in Read-Only-Modus nicht erlaubt."
   },
   "totp": {
     "prompt": "Bitte geben Sie Ihren TOTP-Code ein."
@@ -1985,5 +1998,12 @@
     "required": "{{field}} ist erforderlich.",
     "service_required_for_ban": "Für eine dienstspezifische Sperre muss ein Dienst ausgewählt werden.",
     "zerossl_email_or_api_key_required": "ZeroSSL erfordert entweder eine E-Mail-Adresse oder einen ZeroSSL-API-Schlüssel."
+  },
+  "plugins": {
+    "multivalue": {
+      "show_less": "Weniger anzeigen",
+      "more_value": "mehr Wert",
+      "more_values": "mehr Werte"
+    }
   }
 }

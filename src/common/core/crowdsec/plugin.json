@@ -75,7 +75,7 @@
       "help": "Timeout in milliseconds for the HTTP requests done by the bouncer to query CrowdSec local API. Accepts a time suffix (ms, s, m, h, d, w, M, y); a bare number is milliseconds.",
       "id": "crowdsec-request-timeout",
       "label": "CrowdSec live request timeout",
-      "regex": "^\\d+(ms?|[shdwMy])?$",
+      "regex": "^[0-9]+(ms?|[shdwMy])?$",
       "type": "text"
     },
     "CROWDSEC_EXCLUDE_LOCATION": {
@@ -112,7 +112,7 @@
       "help": "The cache expiration, in second, for IPs that the bouncer store in cache in live mode. Accepts a time suffix (ms, s, m, h, d, w, M, y); a bare number is seconds.",
       "id": "crowdsec-cache-expiration",
       "label": "CrowdSec cache-expiration",
-      "regex": "^\\d+(ms?|[shdwMy])?$",
+      "regex": "^[0-9]+(ms?|[shdwMy])?$",
       "type": "text"
     },
     "CROWDSEC_UPDATE_FREQUENCY": {
@@ -121,7 +121,7 @@
       "help": "The frequency of update, in second, to pull new/old IPs from the CrowdSec local API. Accepts a time suffix (ms, s, m, h, d, w, M, y); a bare number is seconds.",
       "id": "crowdsec-update-frequency",
       "label": "CrowdSec request timeout",
-      "regex": "^\\d+(ms?|[shdwMy])?$",
+      "regex": "^[0-9]+(ms?|[shdwMy])?$",
       "type": "text"
     },
     "CROWDSEC_BAN_REFRESH": {
@@ -158,7 +158,7 @@
       "help": "The timeout in milliseconds of the connection between the remediation component and AppSec Component. Accepts a time suffix (ms, s, m, h, d, w, M, y); a bare number is milliseconds.",
       "id": "crowdsec-appsec-connect-timeout",
       "label": "AppSec connect timeout",
-      "regex": "^\\d+(ms?|[shdwMy])?$",
+      "regex": "^[0-9]+(ms?|[shdwMy])?$",
       "type": "text"
     },
     "CROWDSEC_APPSEC_SEND_TIMEOUT": {
@@ -167,7 +167,7 @@
       "help": "The timeout in milliseconds to send data from the remediation component to the AppSec Component. Accepts a time suffix (ms, s, m, h, d, w, M, y); a bare number is milliseconds.",
       "id": "crowdsec-appsec-send-timeout",
       "label": "AppSec send timeout",
-      "regex": "^\\d+(ms?|[shdwMy])?$",
+      "regex": "^[0-9]+(ms?|[shdwMy])?$",
       "type": "text"
     },
     "CROWDSEC_APPSEC_PROCESS_TIMEOUT": {
@@ -176,7 +176,7 @@
       "help": "The timeout in milliseconds to process the request from the remediation component to the AppSec Component. Accepts a time suffix (ms, s, m, h, d, w, M, y); a bare number is milliseconds.",
       "id": "crowdsec-appsec-process-timeout",
       "label": "AppSec process timeout",
-      "regex": "^\\d+(ms?|[shdwMy])?$",
+      "regex": "^[0-9]+(ms?|[shdwMy])?$",
       "type": "text"
     },
     "CROWDSEC_ALWAYS_SEND_TO_APPSEC": {

@@ -37,6 +37,11 @@ echo "Setting ownership for all necessary directories to nginx user and group...
 do_and_check_cmd chown -R root:nginx /usr/share/bunkerweb
 do_and_check_cmd chown -R nginx:nginx /var/cache/bunkerweb /var/lib/bunkerweb /etc/bunkerweb /var/tmp/bunkerweb /var/run/bunkerweb /var/log/bunkerweb
 
+# Repair locks created as 0600 by older root-run bwcli commands without replacing the inode.
+if [ -f /var/lib/bunkerweb/db.lock ]; then
+    do_and_check_cmd chmod 0644 /var/lib/bunkerweb/db.lock
+fi
+
 chmod 755 /var/log/bunkerweb
 chmod 770 /var/cache/bunkerweb/ /var/tmp/bunkerweb/ /var/run/bunkerweb/
 # Ensure temp dir enforces group inheritance and no access for others

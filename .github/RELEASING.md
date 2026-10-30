@@ -61,7 +61,15 @@ pushed, not the tag object's own signature, so it does not replace the guard in
 4. On approval the **draft GitHub release is created first**, before any image
    or package publishes. That draft is what stops a force-pushed tag from
    republishing later, so it has to exist before the artifacts, not after.
-5. Publish the draft release by hand when you are ready.
+5. Images and packages are attested (`attest-images`, `attest-packages`) before
+   any registry or packagecloud receives them: an artifact with no attestation
+   is never published. Publish the draft release by hand only after
+   `verify-release` and `attach-provenance` are green: the first verified the
+   attestation of every image digest (Docker Hub, ghcr, GitLab) and every
+   package file, the second added `bunkerweb-<version>.intoto.jsonl` (their <!-- codespell:ignore intoto -->
+   bundles) to the draft, and the docs are pushed only after both. Check that
+   asset is on the draft before publishing: OpenSSF Scorecard reads only
+   release assets, and a red job means do not publish.
 
 ## Channels
 
@@ -94,6 +102,11 @@ caches and the version-stamping branches.
 - a GitHub release already exists for the tag (no republishing over a
   force-pushed tag);
 - `CHANGELOG.md` has no `## v<version>` section.
+
+After approval, the run also stops, before publishing, when an image or package
+cannot be attested by this workflow (`attest-images`, `attest-packages`),
+`verify-release` fails when a published image or package has no such attestation,
+and `attach-provenance` fails when a bundle cannot be downloaded or uploaded.
 
 ## Things that will bite you
 

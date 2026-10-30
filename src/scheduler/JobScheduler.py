@@ -19,7 +19,7 @@ from typing import Any, Callable, Dict, List, Optional, Tuple
 import schedule
 from sys import path as sys_path
 from threading import Lock
-from stat import S_ISDIR, S_ISLNK, S_IMODE
+from stat import S_ISDIR, S_ISLNK, S_ISREG, S_IMODE
 
 # Add dependencies to sys.path
 for deps_path in [os.path.join(os.sep, "usr", "share", "bunkerweb", *paths) for paths in (("utils",), ("db",))]:
@@ -27,7 +27,7 @@ for deps_path in [os.path.join(os.sep, "usr", "share", "bunkerweb", *paths) for 
         sys_path.append(deps_path)
 
 from cache_restore import cache_tree  # type: ignore
-from common_utils import effective_cpu_count, parse_duration  # type: ignore
+from common_utils import effective_cpu_count, file_hash, parse_duration  # type: ignore
 from Database import Database, DEFAULT_POOL_MAX_OVERFLOW, DEFAULT_POOL_SIZE  # type: ignore
 from logger import getLogger  # type: ignore
 from ApiCaller import ApiCaller, MIN_RELOAD_TIMEOUT, folder_push_timeout  # type: ignore
@@ -95,6 +95,7 @@ class JobScheduler(ApiCaller):
         self.__module_cache: Dict[str, Any] = {}  # Cache for loaded job modules
         self.__module_cache_lock = Lock()  # Lock for module cache access
         self.__cache_permissions_updated = False  # Track if permissions were updated
+        self.__cache_state: Dict[Path, Tuple[Any, str]] = {}
         self.update_jobs()
 
     def __resolve_max_workers(self) -> int:
@@ -229,7 +230,14 @@ class JobScheduler(ApiCaller):
                 continue
 
             name_valid = self.__compiled_regexes["name"].match(job["name"])
-            file_valid = self.__compiled_regexes["file"].match(job["file"])
+            job_file = Path(job["file"])
+            jobs_path = Path(plugin_file).parent.joinpath("jobs").resolve()
+            file_valid = (
+                self.__compiled_regexes["file"].match(job["file"])
+                and not job_file.is_absolute()
+                and ".." not in job_file.parts
+                and jobs_path.joinpath(job_file).resolve().is_relative_to(jobs_path)
+            )
             every_valid = job["every"] in ("once", "minute", "hour", "day", "week")
             reload_valid = isinstance(job.get("reload", False), bool)
             async_valid = isinstance(job.get("async", False), bool)
@@ -317,12 +325,11 @@ class JobScheduler(ApiCaller):
         module.__bw_qualified_name__ = qualified_name
         sys_modules[qualified_name] = module
 
-        # Execute the module
-        spec.loader.exec_module(module)
-
-        # Cache the module for reuse
+        # Track the module before execution: jobs commonly exit through SystemExit.
         with self.__module_cache_lock:
             self.__module_cache[module_key] = module
+
+        spec.loader.exec_module(module)
 
     def __job_wrapper(self, path: str, plugin: str, name: str, file: str) -> int:
         self.__logger.info(f"Executing job '{name}' from plugin '{plugin}'...")
@@ -548,6 +555,28 @@ class JobScheduler(ApiCaller):
         with self.__thread_lock:
             return self.__failed_jobs.copy()
 
+    def __cache_snapshot(self) -> Optional[Dict[Path, str]]:
+        """Reuse content hashes while cache metadata is unchanged, including across batches."""
+        state = {}
+        try:
+            for path in cache_tree(Path(os.sep, "var", "cache", "bunkerweb")):
+                info = path.lstat()
+                if S_ISLNK(info.st_mode):
+                    signature: Tuple[Any, ...] = ("link", str(path.readlink()))
+                    digest = f"link:{signature[1]}"
+                elif S_ISREG(info.st_mode):
+                    signature = ("file", info.st_size, info.st_mtime_ns, info.st_ctime_ns, info.st_ino)
+                    previous = self.__cache_state.get(path)
+                    digest = previous[1] if previous and previous[0] == signature else file_hash(path)
+                else:
+                    continue
+                state[path] = (signature, digest)
+        except Exception as error:
+            self.__logger.warning(f"Couldn't snapshot job cache; requesting publication: {error}")
+            return None
+        self.__cache_state = state
+        return {path: digest for path, (_, digest) in state.items()}
+
     def run_once(self, plugins: Optional[List[str]] = None, ignore_plugins: Optional[List[str]] = None) -> bool:
         if self.try_database_readonly():
             self.__logger.error("Database is in read-only mode, jobs will not be executed")
@@ -558,6 +587,7 @@ class JobScheduler(ApiCaller):
             self.__failed_jobs = []
 
         plugins = plugins or []
+        cache_before = self.__cache_snapshot()
 
         try:
             futures = []
@@ -589,6 +619,12 @@ class JobScheduler(ApiCaller):
 
             return self.__job_success
         finally:
+            # Jobs can delete or rewrite cache files and still exit 0 (e.g. disabling CrowdSec).
+            cache_after = self.__cache_snapshot()
+            if cache_before is None or cache_after is None or cache_before != cache_after:
+                with self.__thread_lock:
+                    self.__job_reload = True
+
             # Reset flag for next batch
             self.__cache_permissions_updated = False
 

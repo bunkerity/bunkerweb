@@ -13,7 +13,8 @@
     "no_changes_detected": "کوئی تبدیلی نہیں ملی۔",
     "notice": "نوٹس",
     "ping_error": "انسٹینسز کو پنگ کرتے وقت خرابی پیش آئی۔",
-    "readonly_mode": "یہ عمل صرف پڑھنے کے موڈ میں غیر فعال ہے۔"
+    "readonly_mode": "یہ عمل صرف پڑھنے کے موڈ میں غیر فعال ہے۔",
+    "configs_import_invalid_file": "براہ کرم ایک معتبر سفارشی کنفیگریشنز کی تصدیر فائل (.json) اپ لوڈ کریں۔"
   },
   "aria": {
     "label": {
@@ -1240,7 +1241,16 @@
     },
     "retention_notice": "رپورٹس میموری میں ایک رولنگ بفر کے طور پر محفوظ ہوتی ہیں: مقررہ حد تک پہنچنے پر سب سے پرانی اندراجات حذف کر دی جاتی ہیں۔ جب تک Redis فعال نہ ہو، BunkerWeb کے دوبارہ شروع ہونے پر بھی یہ صاف ہو جاتی ہیں۔",
     "security_incident": "سیکیورٹی واقعہ",
-    "security_report_data": "سیکیورٹی رپورٹ ڈیٹا"
+    "security_report_data": "سیکیورٹی رپورٹ ڈیٹا",
+    "bad_behavior_no_details": "اس رپورٹ کے لیے کوئی برے سلوک کی تفصیلات ریکارڈ نہیں کی گئیں ہیں۔",
+    "bad_behavior_activity_detected": "برے سلوک کی نشاندہی",
+    "bad_behavior_activity_explanation": "یہ درخواستیں برے سلوک کی حد سے تجاوز کر گئیں تھیں اور انہیں ملایا گیا ہے۔",
+    "bad_behavior_request_label": "درخواست",
+    "bad_behavior_ip": "آئی پی ایڈریس",
+    "bad_behavior_server": "سرور",
+    "bad_behavior_url": "URL",
+    "bad_behavior_captured_at": "جس وقت ریکارڈ کیا گیا",
+    "bad_behavior_request_id": "ریکویسٹ آئی ڈی"
   },
   "scope": {
     "all_services": "تمام خدمات",
@@ -1427,7 +1437,8 @@
     "template_in_use_description": "موجودہ ٹیمپلیٹ سے باہر تبدیلیاں کرنے کی اجازت نہیں ہے۔ براہ کرم موجودہ ٹیمپلیٹ کا استعمال کرتے ہوئے تبدیلیاں کریں یا اعلی درجے/خام موڈ پر سوئچ کریں۔",
     "unique_server_name": "منفرد سرور نام",
     "up": "فعال",
-    "yes": "ہاں"
+    "yes": "ہاں",
+    "not_applicable": "لاگو نہیں"
   },
   "step": {
     "next": "اگلا",
@@ -1724,7 +1735,8 @@
       "show_selected_only": "صرف منتخب دکھائیں",
       "stop_instance": "انسٹینس {{hostname}} روکیں",
       "unban_ip": "{{ip}} سے پابندی ہٹائیں",
-      "value_from_global": "عالمی سیٹنگز سے قدر"
+      "value_from_global": "عالمی سیٹنگز سے قدر",
+      "update_ban_duration": "پابندی کی مدت اپ ڈیٹ کریں"
     },
     "cannot_delete_original_ban": "اصل پابندی اندراج کو حذف نہیں کیا جا سکتا۔",
     "cannot_remove_disabled": "ہٹایا نہیں جا سکتا کیونکہ ایک یا زیادہ سیٹنگز غیر فعال ہیں۔",
@@ -1962,7 +1974,8 @@
     "zerossl_api_retry": "ZeroSSL API درخواستوں کے لیے دوبارہ کوششوں کی تعداد (0 دوبارہ کوشش غیر فعال کرتا ہے)۔",
     "zerossl_api_retry_delay": "ZeroSSL API کی دوبارہ کوششوں کے درمیان سیکنڈ میں تاخیر۔",
     "zerossl_api_connect_timeout": "ZeroSSL API کالز کے لیے سیکنڈ میں کنکشن ٹائم آؤٹ۔",
-    "zerossl_api_max_time": "ہر ZeroSSL API درخواست کے لیے سیکنڈ میں زیادہ سے زیادہ کل وقت۔"
+    "zerossl_api_max_time": "ہر ZeroSSL API درخواست کے لیے سیکنڈ میں زیادہ سے زیادہ کل وقت۔",
+    "readonly_mode": "صرف پڑھنے کے موڈ میں اس کارروائی کی اجازت نہیں۔"
   },
   "totp": {
     "prompt": "براہ کرم اپنا TOTP کوڈ درج کریں۔"
@@ -1985,5 +1998,12 @@
     "required": "{{field}} درکار ہے۔",
     "service_required_for_ban": "سروس-مخصوص پابندی کے لیے ایک سروس منتخب کرنی ضروری ہے۔",
     "zerossl_email_or_api_key_required": "ZeroSSL کے لیے ای میل یا ZeroSSL API کلید میں سے ایک درکار ہے۔"
+  },
+  "plugins": {
+    "multivalue": {
+      "show_less": "کم دکھائیں",
+      "more_value": "مزید",
+      "more_values": "مزید"
+    }
   }
 }

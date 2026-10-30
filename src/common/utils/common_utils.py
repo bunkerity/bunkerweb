@@ -10,6 +10,7 @@ from json import loads as json_loads
 import os
 from os import (
     O_CREAT,
+    O_RDONLY,
     O_RDWR,
     close as os_close,
     ftruncate,
@@ -42,7 +43,7 @@ import logging
 PLUGIN_TAR_COMPRESS_LEVEL: int = 3
 # Underscores are accepted because Docker/internal DNS commonly uses them in container names.
 _HOSTNAME_LABEL_RX = re_compile(r"^(?!-)[A-Za-z0-9_-]{1,63}(?<!-)$")
-_DURATION_RX = re_compile(r"^(\d+(?:\.\d+)?)(ms|[smhdwMy])?$")
+_DURATION_RX = re_compile(r"^([0-9]+(?:\.[0-9]+)?)(ms|[smhdwMy])?$")
 _DURATION_UNITS_MS = {"ms": 1, "s": 1000, "m": 60000, "h": 3600000, "d": 86400000, "w": 604800000, "M": 2592000000, "y": 31536000000}
 
 
@@ -325,6 +326,10 @@ def plugin_tar_filter(tarinfo):
         if p.name in _EXCLUDED_FILE_NAMES:
             return None
         tarinfo.mtime = 0
+        # Extraction drops group/other write and ignores directory modes.
+        tarinfo.mode &= ~0o022
+        if tarinfo.isdir():
+            tarinfo.mode = 0o755
         tarinfo.uid = 0
         tarinfo.gid = 0
         tarinfo.uname = "root"
@@ -519,6 +524,23 @@ def _verify_tar_tree(path, links, destination, members):
         raise ValueError(f"Tar member {relative!r} could not be verified: {error}") from error
 
 
+# Local CRS, PRO and backup archives fit with at least 5x byte and 45x member headroom.
+MAX_ARCHIVE_EXTRACTED_BYTES = 1 << 30  # 1 GiB
+MAX_ARCHIVE_MEMBERS = 50_000
+
+
+def _enforce_archive_budget(kind: str, sizes) -> None:
+    """Check declared expansion before extraction writes any files."""
+    count = total = 0
+    for size in sizes:
+        count += 1
+        total += size
+        if count > MAX_ARCHIVE_MEMBERS:
+            raise ValueError(f"{kind} archive has more than {MAX_ARCHIVE_MEMBERS} members")
+        if total > MAX_ARCHIVE_EXTRACTED_BYTES:
+            raise ValueError(f"{kind} archive expands to more than {MAX_ARCHIVE_EXTRACTED_BYTES} bytes")
+
+
 def safe_tar_extractall(tar, path, *, links="none", **kwargs):
     """Extract a tar archive with runtime-independent path and link containment checks."""
     if links not in ("none", "contained"):
@@ -532,6 +554,7 @@ def safe_tar_extractall(tar, path, *, links="none", **kwargs):
     if kwargs:
         name = next(iter(kwargs))
         raise TypeError(f"safe_tar_extractall() got an unexpected keyword argument {name!r}")
+    _enforce_archive_budget("Tar", (member.size if member.isreg() else 0 for member in members))
     _validate_tar_members(members, links=links)
 
     destination = os.path.realpath(path)
@@ -601,8 +624,10 @@ def safe_tar_extractall(tar, path, *, links="none", **kwargs):
             raise ValueError(f"Tar member {member.name!r} could not be finalized: {error}") from error
 
 
-def safe_zip_extractall(zf, path):
-    """Extract a zip archive safely, rejecting members with absolute paths or path traversal."""
+def safe_zip_extractall(zf, path, *, capped=True):
+    """Extract a zip safely, validating paths and optionally enforcing the expansion budget."""
+    if capped:
+        _enforce_archive_budget("Zip", (info.file_size for info in zf.infolist()))
     dest = Path(path).resolve()
     for member in zf.namelist():
         member_path = (dest / member).resolve()
@@ -645,7 +670,11 @@ def acquire_db_lock(path: Path, timeout: float = 30.0) -> int:
     no dead-owner reaper is needed here.
     """
     path.parent.mkdir(parents=True, exist_ok=True)
-    fd = os_open(str(path), O_RDWR | O_CREAT, 0o600)
+    try:
+        fd = os_open(str(path), O_RDWR | O_CREAT, 0o644)
+    except PermissionError:
+        # bwcli may create the file as root; flock needs no write access.
+        fd = os_open(str(path), O_RDONLY)
     deadline = monotonic() + timeout
     while True:
         try:
@@ -743,7 +772,7 @@ def pick_latest_line_release(releases: List[Dict[str, Any]], current_version: st
 
     best = best_version = overall = overall_version = None
     for release in releases:
-        if release.get("prerelease") or release.get("draft"):
+        if not isinstance(release, dict) or release.get("prerelease") or release.get("draft"):
             continue
         try:
             version = Version(normalize_bunkerweb_version(release["tag_name"]))
@@ -1098,7 +1127,9 @@ def _json_select(node: Any, conditions: List[Tuple[str, str]], keys: Set[str]) -
 def _json_filtered_strings(documents: List[Any], url_filter: str) -> Iterator[str]:
     conditions: List[Tuple[str, str]] = []
     keys: Set[str] = set()
-    for term in filter(None, url_filter.split("&")):
+    for term in url_filter.split("&") if url_filter else ():
+        if not term:
+            return iter(())
         key, sep, wanted = term.partition("=")
         if sep:
             conditions.append((unquote(key), unquote(wanted)))

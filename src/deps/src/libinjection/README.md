@@ -14,9 +14,6 @@ SQL / SQLI tokenizer parser analyzer. For
 * [Java](https://github.com/jeonglee/Libinjection) (external port)
 * [LuaJIT/FFI](https://github.com/p0pr0ck5/lua-ffi-libinjection) (external port)
 
-See [https://www.client9.com/](https://www.client9.com/)
-for details and presentations.
-
 Simple example:
 
 ```c
@@ -99,6 +96,85 @@ typedef enum injection_result_t {
 **Backward Compatibility:** The enum values `LIBINJECTION_RESULT_FALSE` (0) and `LIBINJECTION_RESULT_TRUE` (1) maintain backward compatibility with code that checks for true/false values. However, applications should be updated to handle `LIBINJECTION_RESULT_ERROR` (-1) to prevent treating parser errors as benign input.
 
 **Migration:** See [MIGRATION.md](MIGRATION.md) for guidance on updating existing code.
+
+HOW DETECTION WORKS, AND WHAT IT MISSES
+=======================================
+
+libinjection is a heuristic, not a SQL parser. It tokenizes the input, folds the
+token stream, and looks up the result in a table of known-bad token patterns
+called fingerprints. Two properties of that design are worth understanding
+before you rely on it.
+
+**Only the first five folded tokens are examined.** `LIBINJECTION_SQLI_MAX_TOKENS`
+is 5, so a fingerprint describes the *beginning* of an input, not all of it. Text
+placed before a payload can push that payload out of the window:
+
+```
+0); set @q=0x53…            ->  1  )  ;  E(set)   v(@q)         ->  1);Ev   detected
+0); show warnings; set @q=…  ->  1  )  ;  n(show)  n(warnings)  ->  1);nn   missed
+```
+
+The filler need not be meaningful. `flush logs`, `reset query` and `help help`
+all work the same way. This is the limitation behind issues such as #26 and #61,
+and it is not something a new fingerprint can generally close.
+
+**Length is not the axis.** An input is parsed in up to five contexts, stopping
+at the first one whose fingerprint matches:
+
+```
+FLAG_QUOTE_NONE   | FLAG_SQL_ANSI     always
+FLAG_QUOTE_NONE   | FLAG_SQL_MYSQL    only if the input used a # or /*! comment
+FLAG_QUOTE_SINGLE | FLAG_SQL_ANSI     only if the input contains '
+FLAG_QUOTE_SINGLE | FLAG_SQL_MYSQL    only if it contains ' and used # or /*!
+FLAG_QUOTE_DOUBLE | FLAG_SQL_MYSQL    only if the input contains "
+```
+
+The quoted contexts re-read the input as though it began inside a string
+literal, so everything before the first quote becomes a single token, and a long
+prefix costs one slot rather than many:
+
+```
+plain-asni :  nnnnn   <- 1760 characters of filler exhausts the window
+single-ansi:  s&1c    <- same input, the filler collapses to one `s`, payload intact
+```
+
+A 5 KB input carrying a quoted payload is detected; the 58-byte example above is
+not. Note that the example has no quote in it at all, so only the two unquoted
+contexts ever run and no prefix collapsing is available to it.
+
+Do not gate calls to libinjection on input length. Doing so skips detections that
+would otherwise be made, and does not skip the inputs that are actually missed.
+
+> [!WARNING]
+> **Do not raise `LIBINJECTION_SQLI_MAX_TOKENS`.** It is not a tuning knob. The
+> fingerprint database is built from fingerprints that are at most five folded tokens long, and several internal buffers assume that size (for example `char fp2[8]` in `src/libinjection_sqli.c` and `fingerprint[8]` / `tokenvec[8]` in `src/libinjection_sqli.h`). Raising the value makes detection *worse* and then unsafe:
+>
+> | value | result for `0); set @q=0x41; prepare stmt from @q; execute stmt;#` |
+> |-------|--------------------------------------------------------------------|
+> | 5     | `1);Ev` — detected |
+> | 6     | `1);Ev;` — **silently missed**, no error |
+> | 7     | crash (stack buffer overflow in fingerprint conversion) |
+> | 8     | crash (out-of-bounds access to `tokenvec`) |
+>
+> At 6 every fingerprint in the database stops matching the inputs it was written
+> for (the extra token changes the fingerprint length), so detection degrades
+> with no diagnostic. Widening the window would mean regenerating the entire
+> fingerprint database and resizing these buffers, not editing one `#define`.
+
+**Fingerprints are a deliberate tradeoff against false positives.** Some genuinely
+malicious patterns are left undetected because the fingerprint that would catch
+them also matches ordinary text. An unquoted `or 1=1` folds to `&1`, which is far
+too generic to flag. Conversely, prose that happens
+to tokenize like SQL does get flagged — `total (5); tax included` folds to `f(1);`
+and is reported as an injection.
+
+Neither property is a bug to be fixed in isolation. Both follow from choosing a
+fast, allocation-free heuristic over a real parser.
+
+**What this means in practice:** treat a libinjection hit as one signal among
+several rather than a verdict, and do not treat a miss as proof that input is
+safe. Deployments such as the OWASP CRS combine it with independent rules at
+higher paranoia levels for this reason.
 
 QUALITY AND DIAGNOSITICS
 ========================

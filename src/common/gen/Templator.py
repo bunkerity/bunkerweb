@@ -432,6 +432,8 @@ class Templator:
 
         self._categorized_templates = self._categorize_templates()
 
+        self._stream_reuseport_ports = self._stream_reuseport_owners()
+
         self._base_template_vars = {
             "is_custom_conf": Templator.is_custom_conf,
             "has_variable": Templator.has_variable,
@@ -631,6 +633,7 @@ class Templator:
     def _write_config(self) -> bool:
         """Write the configuration to a variables.env file. Returns whether it was written."""
         real_path = self._output / "variables.env"
+        tmp_path = real_path.with_name(".variables.env.tmp")
         try:
             real_path.parent.mkdir(parents=True, exist_ok=True)
             # Sorted so two runs over the same settings produce byte-identical output.
@@ -638,8 +641,11 @@ class Templator:
             # dict insertion order here varies between runs, which alone was enough to
             # make every /confs push look like a change.
             config_lines = [f"{k}={v}\n" for k, v in sorted(self._full_config.items())]
-            real_path.write_text("".join(config_lines))
+            tmp_path.write_text("".join(config_lines))
+            tmp_path.replace(real_path)
         except IOError as e:
+            with suppress(OSError):
+                tmp_path.unlink()
             logger.error(f"Error writing configuration to {real_path}: {e}")
             return False
         return True
@@ -665,6 +671,35 @@ class Templator:
             filtered_config["SERVER_NAME"] = server
 
         return filtered_config
+
+    def _stream_reuseport_owners(self) -> Dict[str, set]:
+        """Elect one loaded stream block per socket; unloaded blocks keep their output."""
+        server_name = self._config.get("SERVER_NAME", "").strip()
+        if self._config.get("MULTISITE", "no") == "yes":
+            services = {
+                server: self._get_server_config(server, self._global_only_full_config, self._server_specific_full_config.get(server, {}))
+                for server in server_name.split()
+            }
+        else:
+            services = {server_name: self._full_config} if server_name else {}
+
+        owners = {}
+        claimed = set()
+        for server, config in services.items():
+            tokens = {
+                f"{proto}:{port}"
+                for key, port in config.items()
+                if key.startswith("LISTEN_STREAM_PORT") and not key.startswith("LISTEN_STREAM_PORT_SSL") and port
+                for proto, setting, default in (("tcp", "USE_TCP", "yes"), ("udp", "USE_UDP", "no"))
+                if config.get(setting, default) == "yes"
+            }
+            if config.get("LISTEN_STREAM", "yes") != "yes":
+                tokens = set()
+            owners[server] = tokens
+            if config.get("SERVER_TYPE", "http") == "stream":
+                owners[server] = tokens - claimed
+                claimed.update(tokens)
+        return owners
 
     def _render_global(self) -> List[str]:
         """Render global templates. Returns what failed."""
@@ -733,6 +768,8 @@ class Templator:
         template_vars = self._base_template_vars.copy()
         template_vars["all"] = full_config
         template_vars.update(config)
+        # Derived ownership cannot be shadowed by a setting.
+        template_vars["STREAM_REUSEPORT_PORTS"] = self._stream_reuseport_ports.get(server, set())
 
         failures = []
         for template in templates:

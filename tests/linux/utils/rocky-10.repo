@@ -1,0 +1,13 @@
+[rocky10-base]
+name = Rocky Linux 10 Base OS
+baseurl = https://dl.rockylinux.org/pub/rocky/10/BaseOS/%ARCH%/os/
+gpgcheck = 1
+enabled = 1
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-Rocky-10
+
+[rocky10-devel]
+name = Rocky Linux 10 Devel
+baseurl = https://dl.rockylinux.org/pub/rocky/10/devel/%ARCH%/os/
+gpgcheck = 1
+enabled = 1
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-Rocky-10

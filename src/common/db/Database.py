@@ -903,7 +903,7 @@ class Database:
                 metadata = session.query(Metadata).with_entities(Metadata.version).filter_by(id=1).first()
                 if metadata:
                     return metadata.version
-                return "1.6.18~rc1"
+                return "1.6.18~rc2"
             except BaseException as e:
                 return f"Error: {e}"
 
@@ -937,7 +937,7 @@ class Database:
             "last_instances_change": None,
             "reload_ui_plugins": False,
             "integration": "unknown",
-            "version": "1.6.18~rc1",
+            "version": "1.6.18~rc2",
             "database_version": "Unknown",  # ? Extracted from the database
             "default": True,  # ? Extra field to know if the returned data is the default one
         }
@@ -1546,7 +1546,13 @@ class Database:
                     to_update.append({"type": "job", "filter": {"plugin_id": jk[0], "name": jk[1]}, "data": new_j})
 
             for jk in old_job_keys - new_job_keys:
-                to_delete.append({"type": "job", "filter": {"plugin_id": jk[0], "name": jk[1]}})
+                to_delete.extend(
+                    (
+                        {"type": "job_cache", "filter": {"job_name": jk[1]}},
+                        {"type": "job_run", "filter": {"job_name": jk[1]}},
+                        {"type": "job", "filter": {"plugin_id": jk[0], "name": jk[1]}},
+                    )
+                )
 
             # PLUGIN PAGES
             old_page_ids = set(old_plugin_pages.keys())
@@ -2132,7 +2138,8 @@ class Database:
             # Collect global settings to delete
             global_settings_to_delete = []
             global_method_total = 0
-            for db_global_config in session.query(Global_values).filter_by(method=method).all():
+            cleanup_methods = EDITABLE_METHODS if method in EDITABLE_METHODS else {method}
+            for db_global_config in session.query(Global_values).filter(Global_values.method.in_(cleanup_methods)).all():
                 key = db_global_config.setting_id
                 if db_global_config.suffix:
                     key = f"{key}_{db_global_config.suffix}"
@@ -2186,7 +2193,9 @@ class Database:
             # Track per-service totals so we can detect would-wipe-the-whole-service deletions below.
             service_method_total: Dict[str, int] = defaultdict(int)
             service_method_to_delete: Dict[str, int] = defaultdict(int)
-            for db_service_config in [] if skip_service_management else session.query(Services_settings).filter_by(method=method).all():
+            for db_service_config in (
+                [] if skip_service_management else session.query(Services_settings).filter(Services_settings.method.in_(cleanup_methods)).all()
+            ):
                 # Preserve settings of services about to be drafted by the autoconf disable_cleanup path
                 # so they can be re-published when the orchestration object returns.
                 if db_service_config.service_id in drafted_service_ids:
@@ -2851,25 +2860,26 @@ class Database:
                             executor.submit(process_service, service_name, service_config, db_ids) for service_name, service_config in service_configs.items()
                         ]
 
-                        # Process global settings in another thread or the main thread
-                        futures.append(executor.submit(process_global_settings, global_config))
+                        # Global settings stay on this thread: the scoped-session registry hands a pool thread
+                        # its own Session that nothing removes, left idle in transaction on bw_global_values.
+                        results = [process_global_settings(global_config)]
 
                         # Collect results from threads
                         for future in as_completed(futures):
                             try:
-                                ret_to_put, ret_to_update, ret_to_delete, ret_changed_plugins, ret_changed_services, ret_service_template_change = (
-                                    future.result()
-                                )
-                                to_put.extend(ret_to_put)
-                                to_update.extend(ret_to_update)
-                                to_delete.extend(ret_to_delete)
-                                changed_plugins.update(ret_changed_plugins)
-                                if not changed_services:
-                                    changed_services = ret_changed_services
-                                if not service_template_change:
-                                    service_template_change = ret_service_template_change
+                                results.append(future.result())
                             except Exception as e:
                                 self.logger.error(f"Thread raised an exception: {e}")
+
+                    for ret_to_put, ret_to_update, ret_to_delete, ret_changed_plugins, ret_changed_services, ret_service_template_change in results:
+                        to_put.extend(ret_to_put)
+                        to_update.extend(ret_to_update)
+                        to_delete.extend(ret_to_delete)
+                        changed_plugins.update(ret_changed_plugins)
+                        if not changed_services:
+                            changed_services = ret_changed_services
+                        if not service_template_change:
+                            service_template_change = ret_service_template_change
 
                 else:
                     # Non-multisite configuration
@@ -3261,7 +3271,10 @@ class Database:
                             f"unreadable custom configs folder for the manual method). Aborting "
                             f"save_custom_configs to prevent data loss."
                         )
-                        return message
+                        return (
+                            f"Refusing to save custom configs: the {method} payload is empty while {existing_count} "
+                            f"{method} custom config(s) exist. Nothing was changed."
+                        )
                 # Delete all the old config
                 session.query(Custom_configs).filter(Custom_configs.method == method).delete()
 
@@ -3331,6 +3344,15 @@ class Database:
                         custom_conf.method = method
                     custom_conf.is_draft = custom_config["is_draft"]
 
+                elif custom_config["checksum"] != custom_conf.checksum:
+                    # Repeated, unchanged projections stay silent; changed content must explain the refusal.
+                    self.logger.warning(
+                        f"Custom config {custom_config['type']}/{f'{service_id}/' if service_id else ''}{custom_config['name']} was submitted by "
+                        f"method {method!r} but the stored one is owned by method {custom_conf.method!r}: the submitted content is DROPPED "
+                        f"(submitted sha256={str(custom_config['checksum'])[:12]}, stored sha256={str(custom_conf.checksum)[:12]}). "
+                        f"Change it at its source (the CUSTOM_CONF_* variable or the orchestrator label)."
+                    )
+
             if disable_cleanup:
                 # Mark autoconf custom configs that are no longer emitted by the orchestrator as draft
                 # so they survive the removal and follow the service they belong to.
@@ -3350,7 +3372,8 @@ class Database:
                 session.add_all(to_put)
                 session.commit()
             except BaseException as e:
-                return f"{f'{message}{endl}' if message else ''}{e}"
+                reason = str(e) or type(e).__name__
+                return f"{f'{message}{endl}' if message else ''}{reason}"
 
         return message
 
@@ -3865,7 +3888,7 @@ class Database:
 
             for service_id in allowed_services:
                 for key, value in db_config.items():
-                    if key.startswith(f"{service_id}_"):
+                    if key == f"{service_id}_USE_TEMPLATE":
                         for template_config in (
                             session.query(Template_custom_configs)
                             .with_entities(*template_entities)
@@ -4248,7 +4271,12 @@ class Database:
                 records_to_delete = session.query(Jobs_runs.id).order_by(Jobs_runs.end_date.asc()).limit(rows_count - max_runs).all()
                 ids_to_delete = [record.id for record in records_to_delete]
                 if ids_to_delete:
-                    result = session.query(Jobs_runs).filter(Jobs_runs.id.in_(ids_to_delete)).delete(synchronize_session=False)
+                    # One DELETE per primary key, like _blob_drop: a ranged DELETE fails with 1020 under MariaDB snapshot
+                    # isolation when a job run is inserted between the SELECT above and this statement.
+                    table = Jobs_runs.__table__
+                    result = session.execute(
+                        table.delete().where(table.c.id == bindparam("delete_id")), [{"delete_id": record_id} for record_id in ids_to_delete]
+                    ).rowcount
 
                 try:
                     session.commit()
@@ -4718,10 +4746,13 @@ class Database:
 
                             db_values = [
                                 (self._empty_if_none(select.value), select.order)
-                                for select in session.query(Selects).with_entities(Selects.value, Selects.order).filter_by(setting_id=setting)
+                                for select in session.query(Selects)
+                                .with_entities(Selects.value, Selects.order)
+                                .filter_by(setting_id=setting)
+                                .order_by(Selects.order)
                             ]
-                            select_values = enumerate(value.get("select", []), start=1)
-                            different_values = any(db_value != (value, order) for db_value, (value, order) in zip(db_values, select_values))
+                            select_values = [(self._empty_if_none(select), order) for order, select in enumerate(value.get("select", []), start=1)]
+                            different_values = db_values != select_values
 
                             if different_values:
                                 changes = True
@@ -4737,6 +4768,7 @@ class Database:
                                 for msel in session.query(Multiselects)
                                 .with_entities(Multiselects.option_id, Multiselects.label, Multiselects.value, Multiselects.order)
                                 .filter_by(setting_id=setting)
+                                .order_by(Multiselects.order)
                             ]
                             multiselect_values = [
                                 (msel.get("id", ""), msel.get("label", ""), self._empty_if_none(msel.get("value", "")), order)
@@ -4925,13 +4957,17 @@ class Database:
                             saved_templates.add(template_id)
 
                             db_ids = [step.id for step in session.query(Template_steps).with_entities(Template_steps.id).filter_by(template_id=template_id)]
-                            missing_ids = [x for x in range(1, len(template_data.get("steps", [])) + 1) if x not in db_ids]
+                            missing_ids = [x for x in db_ids if x > len(template_data.get("steps", []))]
 
                             if missing_ids:
                                 changes = True
-                                session.query(Template_settings).filter(Template_settings.step_id.in_(missing_ids)).delete()
-                                session.query(Template_custom_configs).filter(Template_custom_configs.step_id.in_(missing_ids)).delete()
-                                session.query(Template_steps).filter(Template_steps.id.in_(missing_ids)).delete()
+                                session.query(Template_settings).filter(
+                                    Template_settings.template_id == template_id, Template_settings.step_id.in_(missing_ids)
+                                ).delete()
+                                session.query(Template_custom_configs).filter(
+                                    Template_custom_configs.template_id == template_id, Template_custom_configs.step_id.in_(missing_ids)
+                                ).delete()
+                                session.query(Template_steps).filter(Template_steps.template_id == template_id, Template_steps.id.in_(missing_ids)).delete()
 
                             steps_settings = {}
                             steps_configs = {}
@@ -4956,7 +4992,7 @@ class Database:
 
                                     if updates:
                                         changes = True
-                                        session.query(Template_steps).filter(Template_steps.id == db_step.id).update(updates)
+                                        session.query(Template_steps).filter_by(id=db_step.id, template_id=template_id).update(updates)
 
                                 for setting in step.get("settings", []):
                                     if step_id not in steps_settings:
@@ -4968,14 +5004,16 @@ class Database:
                                         steps_configs[step_id] = []
                                     steps_configs[step_id].append(config)
 
-                            db_template_settings = [
-                                f"{template_setting.setting_id}_{template_setting.suffix}" if template_setting.suffix else template_setting.setting_id
+                            db_template_settings = {
+                                (
+                                    f"{template_setting.setting_id}_{template_setting.suffix}" if template_setting.suffix else template_setting.setting_id
+                                ): template_setting.id
                                 for template_setting in session.query(Template_settings)
                                 .with_entities(Template_settings.id, Template_settings.setting_id, Template_settings.suffix)
                                 .filter_by(template_id=template_id)
                                 .order_by(Template_settings.order)
-                            ]
-                            missing_ids = [setting for setting in template_data.get("settings", {}) if setting not in db_template_settings]
+                            }
+                            missing_ids = [row_id for setting, row_id in db_template_settings.items() if setting not in template_data.get("settings", {})]
 
                             if missing_ids:
                                 changes = True
@@ -5058,18 +5096,18 @@ class Database:
 
                                 order += 1
 
-                            db_template_configs = [
-                                f"{config.type.replace('_', '-')}/{config.name}.conf"
+                            db_template_configs = {
+                                f"{config.type.replace('_', '-')}/{config.name}.conf": config.id
                                 for config in session.query(Template_custom_configs)
-                                .with_entities(Template_custom_configs.type, Template_custom_configs.name)
+                                .with_entities(Template_custom_configs.id, Template_custom_configs.type, Template_custom_configs.name)
                                 .filter_by(template_id=template_id)
                                 .order_by(Template_custom_configs.order)
-                            ]
-                            missing_ids = [config for config in template_data.get("configs", {}) if config not in db_template_configs]
+                            }
+                            missing_ids = [row_id for config, row_id in db_template_configs.items() if config not in template_data.get("configs", [])]
 
                             if missing_ids:
                                 changes = True
-                                session.query(Template_custom_configs).filter(Template_custom_configs.name.in_(missing_ids)).delete()
+                                session.query(Template_custom_configs).filter(Template_custom_configs.id.in_(missing_ids)).delete()
 
                             order = 0
                             for config in template_data.get("configs", []):

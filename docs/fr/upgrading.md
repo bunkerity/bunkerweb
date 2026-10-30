@@ -18,8 +18,8 @@ Mettez à niveau toutes les répliques de l'interface web en même temps : la pr
 
         ```bash
         # Téléchargez le script et sa somme de contrôle
-        curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.18-rc1/install-bunkerweb.sh
-        curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.18-rc1/install-bunkerweb.sh.sha256
+        curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.18-rc2/install-bunkerweb.sh
+        curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.18-rc2/install-bunkerweb.sh.sha256
 
         # Vérifiez la somme de contrôle
         sha256sum -c install-bunkerweb.sh.sha256
@@ -103,16 +103,16 @@ Mettez à niveau toutes les répliques de l'interface web en même temps : la pr
                     ```yaml
                     services:
                         bunkerweb:
-                            image: bunkerity/bunkerweb:1.6.18-rc1
+                            image: bunkerity/bunkerweb:1.6.18-rc2
                             ...
                         bw-scheduler:
-                            image: bunkerity/bunkerweb-scheduler:1.6.18-rc1
+                            image: bunkerity/bunkerweb-scheduler:1.6.18-rc2
                             ...
                         bw-autoconf:
-                            image: bunkerity/bunkerweb-autoconf:1.6.18-rc1
+                            image: bunkerity/bunkerweb-autoconf:1.6.18-rc2
                             ...
                         bw-ui:
-                            image: bunkerity/bunkerweb-ui:1.6.18-rc1
+                            image: bunkerity/bunkerweb-ui:1.6.18-rc2
                             ...
                     ```
 
@@ -168,7 +168,7 @@ Mettez à niveau toutes les répliques de l'interface web en même temps : la pr
 
             4. **Téléchargez la nouvelle image** :
                 ```bash
-                docker pull bunkerity/bunkerweb-all-in-one:1.6.18-rc1
+                docker pull bunkerity/bunkerweb-all-in-one:1.6.18-rc2
                 ```
 
             5. **Recréez le conteneur** avec les mêmes options, en réutilisant le même volume `/data`, les mêmes ports et les mêmes variables d'environnement qu'avant :
@@ -179,7 +179,7 @@ Mettez à niveau toutes les répliques de l'interface web en même temps : la pr
                 -p 80:8080/tcp \
                 -p 443:8443/tcp \
                 -p 443:8443/udp \
-                bunkerity/bunkerweb-all-in-one:1.6.18-rc1
+                bunkerity/bunkerweb-all-in-one:1.6.18-rc2
                 ```
 
         === "Docker Compose"
@@ -188,7 +188,7 @@ Mettez à niveau toutes les répliques de l'interface web en même temps : la pr
                 ```yaml
                 services:
                     bunkerweb-aio:
-                        image: bunkerity/bunkerweb-all-in-one:1.6.18-rc1
+                        image: bunkerity/bunkerweb-all-in-one:1.6.18-rc2
                         ...
                 ```
 
@@ -227,8 +227,8 @@ Mettez à niveau toutes les répliques de l'interface web en même temps : la pr
 
             ```bash
             # Download the script and its checksum
-            curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.18-rc1/install-bunkerweb.sh
-            curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.18-rc1/install-bunkerweb.sh.sha256
+            curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.18-rc2/install-bunkerweb.sh
+            curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.18-rc2/install-bunkerweb.sh.sha256
 
             # Verify the checksum
             sha256sum -c install-bunkerweb.sh.sha256
@@ -309,20 +309,20 @@ Mettez à niveau toutes les répliques de l'interface web en même temps : la pr
             Exemples:
 
             ```bash
-            # Upgrade to 1.6.18~rc1 interactively (will prompt for backup)
-            sudo ./install-bunkerweb.sh --version 1.6.18~rc1
+            # Upgrade to 1.6.18~rc2 interactively (will prompt for backup)
+            sudo ./install-bunkerweb.sh --version 1.6.18~rc2
 
             # Non-interactive upgrade with automatic backup to custom directory
-            sudo ./install-bunkerweb.sh -v 1.6.18~rc1 --backup-dir /var/backups/bw-2025-01 -y
+            sudo ./install-bunkerweb.sh -v 1.6.18~rc2 --backup-dir /var/backups/bw-2025-01 -y
 
             # Silent unattended upgrade (logs suppressed) – relies on default auto-backup
-            sudo ./install-bunkerweb.sh -v 1.6.18~rc1 -y -q
+            sudo ./install-bunkerweb.sh -v 1.6.18~rc2 -y -q
 
             # Perform a dry run (plan) without applying changes
-            sudo ./install-bunkerweb.sh -v 1.6.18~rc1 --dry-run
+            sudo ./install-bunkerweb.sh -v 1.6.18~rc2 --dry-run
 
             # Upgrade skipping automatic backup (NOT recommended)
-            sudo ./install-bunkerweb.sh -v 1.6.18~rc1 --no-auto-backup -y
+            sudo ./install-bunkerweb.sh -v 1.6.18~rc2 --no-auto-backup -y
             ```
 
             !!! warning "Sauter les sauvegardes"
@@ -402,7 +402,7 @@ Mettez à niveau toutes les répliques de l'interface web en même temps : la pr
 
                         ```shell
                         sudo apt update && \
-                        sudo apt install -y --allow-downgrades bunkerweb=1.6.18~rc1
+                        sudo apt install -y --allow-downgrades bunkerweb=1.6.18~rc2
                         ```
 
                         Pour empêcher le paquet BunkerWeb d'être mis à niveau lors de l'exécution de `apt upgrade`, vous pouvez utiliser la commande suivante :
@@ -428,7 +428,7 @@ Mettez à niveau toutes les répliques de l'interface web en même temps : la pr
 
                         ```shell
                         sudo dnf makecache && \
-                        sudo dnf install -y --allowerasing bunkerweb-1.6.18~rc1
+                        sudo dnf install -y --allowerasing bunkerweb-1.6.18~rc2
                         ```
 
                         Pour empêcher le paquet BunkerWeb d'être mis à niveau lors de l'exécution de `dnf upgrade`, vous pouvez utiliser la commande suivante :
@@ -900,16 +900,16 @@ Nous avons ajouté une fonctionnalité d**'espace de noms** aux intégrations au
                 ```yaml
                 services:
                     bunkerweb:
-                        image: bunkerity/bunkerweb:1.6.18-rc1
+                        image: bunkerity/bunkerweb:1.6.18-rc2
                         ...
                     bw-scheduler:
-                        image: bunkerity/bunkerweb-scheduler:1.6.18-rc1
+                        image: bunkerity/bunkerweb-scheduler:1.6.18-rc2
                         ...
                     bw-autoconf:
-                        image: bunkerity/bunkerweb-autoconf:1.6.18-rc1
+                        image: bunkerity/bunkerweb-autoconf:1.6.18-rc2
                         ...
                     bw-ui:
-                        image: bunkerity/bunkerweb-ui:1.6.18-rc1
+                        image: bunkerity/bunkerweb-ui:1.6.18-rc2
                         ...
                 ```
 
@@ -944,7 +944,7 @@ Nous avons ajouté une fonctionnalité d**'espace de noms** aux intégrations au
 
                     ```shell
                     sudo apt update && \
-                    sudo apt install -y --allow-downgrades bunkerweb=1.6.18~rc1
+                    sudo apt install -y --allow-downgrades bunkerweb=1.6.18~rc2
                     ```
 
                     Pour empêcher le paquet BunkerWeb d'être mis à niveau lors de l'exécution de `apt upgrade`, vous pouvez utiliser la commande suivante :
@@ -970,7 +970,7 @@ Nous avons ajouté une fonctionnalité d**'espace de noms** aux intégrations au
 
                     ```shell
                     sudo dnf makecache && \
-                    sudo dnf install -y --allowerasing bunkerweb-1.6.18~rc1
+                    sudo dnf install -y --allowerasing bunkerweb-1.6.18~rc2
                     ```
 
                     Pour empêcher le paquet BunkerWeb d'être mis à niveau lors de l'exécution de `dnf upgrade`, vous pouvez utiliser la commande suivante :
@@ -1186,3 +1186,78 @@ Nous avons ajouté une fonctionnalité d**'espace de noms** aux intégrations au
 
     8. **Rétrograder BunkerWeb**.
         - Rétrogradez BunkerWeb vers la version précédente en suivant les mêmes étapes que lors de la mise à niveau de BunkerWeb dans la [page d'intégration Linux](integrations.md#linux)
+
+## Vérifier une version
+
+Vérifiez ce que vous téléchargez avant d'installer ou de mettre à niveau. Une version est signée à trois niveaux :
+
+- le tag Git est signé avec la clé GPG d'un responsable de publication, et le workflow de publication refuse de construire un tag que GitHub ne peut pas vérifier ;
+- les images de conteneur et les paquets Linux portent une attestation de provenance de build signée, créée par le workflow de publication lui-même ;
+- la release GitHub liste la somme de contrôle SHA-256 de chaque paquet.
+
+Les attestations sont sans clé : elles reposent sur [Sigstore](https://www.sigstore.dev/) et sur l'identité du workflow GitHub Actions, si bien qu'aucune clé de signature privée n'existe nulle part. Le vérificateur contrôle que l'artefact a été construit par `.github/workflows/release.yml` de `bunkerity/bunkerweb`, pour le tag de la version, à partir du commit taggé.
+
+!!! info "Les attestations commencent avec la version 1.6.18 rc2"
+    Les versions antérieures n'ont qu'un tag signé. Les commandes ci-dessous nécessitent la [GitHub CLI](https://cli.github.com/) 2.68 ou ultérieure, connectée avec `gh auth login`.
+
+Les commandes partagent deux variables. Définissez-les pour la version à vérifier :
+
+```bash
+VERSION=1.6.18~rc2
+TAG="v${VERSION//\~/-}"
+```
+
+### Signature du tag
+
+Les clés publiques des responsables de publication sont publiées sur leurs comptes GitHub. Un avertissement GPG indiquant que la clé n'est pas certifiée est normal : comparez plutôt l'empreinte affichée avec les deux ci-dessous.
+
+```bash
+curl -fsSL https://github.com/TheophileDiot.gpg | gpg --import
+curl -fsSL https://github.com/fl0ppy-d1sk.gpg | gpg --import
+
+git init -q bunkerweb-verify && cd bunkerweb-verify
+git fetch --depth 1 https://github.com/bunkerity/bunkerweb.git tag "$TAG"
+git verify-tag "$TAG"
+```
+
+La sortie doit contenir `Good signature` et l'empreinte de la clé primaire du responsable de publication qui a créé le tag : `4821 439D 531B 030E 5DCC  F1F7 7C44 E4D7 7426 28F8` pour Théophile Diot, `BBB2 5DF4 31F9 C568 D56C  748D D34B 4FF9 11F7 40D1` pour Florian Pitance.
+
+### Images de conteneur
+
+L'attestation est liée au digest de l'index de l'image : elle est donc identique sur Docker Hub, sur GitHub Container Registry et sur le miroir GitLab. Affichez le digest de l'image que vous avez téléchargée, puis vérifiez-le :
+
+```bash
+docker buildx imagetools inspect "bunkerity/bunkerweb:${TAG#v}" --format '{{json .Manifest.Digest}}'
+
+gh attestation verify "oci://docker.io/bunkerity/bunkerweb:${TAG#v}" \
+  --repo bunkerity/bunkerweb \
+  --signer-workflow bunkerity/bunkerweb/.github/workflows/release.yml \
+  --source-ref "refs/tags/$TAG"
+```
+
+`Verification succeeded!` signifie que le digest a été signé par le workflow de publication pour ce tag. La commande échoue si l'image n'a pas d'attestation ou si un autre workflow ou dépôt l'a signée. Remplacez le nom de l'image pour contrôler `bunkerweb-scheduler`, `bunkerweb-autoconf`, `bunkerweb-ui`, `bunkerweb-api` ou `bunkerweb-all-in-one`, et utilisez `ghcr.io/bunkerity/...` ou `registry.gitlab.com/bunkerity/bunkerweb/...` pour les autres registres. Utilisez `oci://docker.io/bunkerity/bunkerweb@sha256:<digest>` pour vérifier exactement l'image que vous exécutez.
+
+### Paquets Linux
+
+Les paquets sont publiés sur packagecloud. Téléchargez le fichier `.deb` ou `.rpm` que vous comptez installer et vérifiez-le :
+
+```bash
+gh attestation verify ./bunkerweb_${VERSION}-1_amd64.deb \
+  --repo bunkerity/bunkerweb \
+  --signer-workflow bunkerity/bunkerweb/.github/workflows/release.yml \
+  --source-ref "refs/tags/$TAG"
+```
+
+La release liste aussi la somme de contrôle SHA-256 de chaque paquet dans `release-manifest.json`. Vérifiez le manifeste avec sa propre somme de contrôle, puis le paquet avec le manifeste, en choisissant l'entrée de votre distribution (`ubuntu`, `ubuntu-noble`, `ubuntu-jammy`, `debian-bookworm`, `debian-trixie`, `fedora-43`, `fedora-44`, `rhel-8`, `rhel-9` ou `rhel-10`) et de votre plateforme (`linux/amd64` ou `linux/arm64`) :
+
+```bash
+curl -fsSL -O "https://github.com/bunkerity/bunkerweb/releases/download/${TAG}/release-manifest.json" \
+  -O "https://github.com/bunkerity/bunkerweb/releases/download/${TAG}/release-manifest.json.sha256"
+sha256sum -c release-manifest.json.sha256
+
+jq -r '.packages[] | select(.distro == "debian-bookworm" and .platform == "linux/amd64") | "\(.sha256)  \(.filename)"' release-manifest.json | sha256sum -c
+```
+
+Exécutez la dernière commande dans le répertoire qui contient le paquet. Le manifeste ne liste que des sommes de contrôle : c'est l'attestation qui prouve qui a construit le paquet.
+
+La version GitHub contient aussi `bunkerweb-${TAG#v}.intoto.jsonl`, les lots d'attestations de chaque image et de chaque paquet. `gh attestation verify <fichier> --bundle bunkerweb-${TAG#v}.intoto.jsonl --repo bunkerity/bunkerweb` vérifie un paquet téléchargé à partir de ce fichier, sans récupérer son attestation auprès de GitHub.

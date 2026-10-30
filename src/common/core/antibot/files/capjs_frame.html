@@ -10,6 +10,9 @@
     {-raw-}
     <script nonce="{*nonce_script*}">
       window.CAP_CUSTOM_WASM_URL = "{*capjs_url*}/assets/cap_wasm_bg.wasm";
+      // Self-host the hashwx wasm too, else the widget fetches it from a CDN the CSP blocks (read by
+      // cap.js widget >= 0.1.58, ignored by older ones).
+      window.CAP_CUSTOM_HASHWX_URL = "{*capjs_url*}/assets/hashwx.wasm";
       // Nonce the widget's injected <style> and inline <script> (needs cap.js widget >= 0.1.48).
       window.CAP_CSS_NONCE = "{*nonce_style*}";
       window.CAP_SCRIPT_NONCE = "{*nonce_script*}";

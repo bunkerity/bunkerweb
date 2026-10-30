@@ -1,0 +1,71 @@
+# Unit-test dependencies for tests/unit/ (DB-layer milestone 1).
+#
+# DB libraries under test — pinned to match src/common/db/requirements.in so the
+# tests run the exact library versions BunkerWeb ships.
+alembic==1.20.1
+backports-zstd==1.8.0 ; python_version < "3.14"
+
+# UI-layer import deps: importing UIDatabase pulls app.utils + app.models.models,
+# which require Flask/bcrypt/etc. Pinned to src/ui/requirements.txt.
+bcrypt==5.0.0
+# Real Biscuit middleware tests need the same implementation shipped by the UI.
+https://github.com/eclipse-biscuit/biscuit-python/archive/c0fa69824a3e601da86cf5cecde09f75ea8df4d7.zip#egg=biscuit-python # 0.4.1
+brotli==1.2.1
+# app.models.resilient_session (tests/unit/ui/test_resilient_redis_session.py) drives the real
+# Flask-Session interface, its cachelib fallback store and the msgspec serializer. Pinned to
+# src/ui/requirements.txt.
+cachelib==0.17.0
+cryptography==50.0.2
+defusedcsv==3.0.0
+# tests/unit/backup/test_downgrade_hold.py imports src/api/app/routers/system.py, which pulls
+# fastapi — pinned to the same version as src/api/requirements.in so the router under test
+# behaves like the shipped one.
+fastapi==0.161.1
+flask==3.1.3
+flask-babel==4.0.0
+
+# Response-compression tests need the libraries shipped by the UI.
+flask-compress==1.25
+flask-login==0.6.3
+flask-session==0.8.0
+# fastapi's TestClient (tests/unit/api/test_rate_limit_once.py) needs httpx. It is not an API
+# dependency, so it is pinned to the current release.
+httpx==0.28.1
+# gen/Templator import (jinja2) + scheduler/JobScheduler import (schedule). Pinned to src.
+jinja2==3.1.6
+kubernetes==37.0.1  # test_autoconf_k8s_request_timeout.py (+5 autoconf/gateway/ingress scripts)
+# slowapi + limits: the real rate limiter that test_rate_limit_once.py drives. Pinned to src/api/requirements.in.
+limits==5.8.0
+msgspec==0.22.0
+openpyxl==3.1.5  # test_ui_bans_leases.py, test_ui_bans_pane_values.py, test_ui_reports_pane_values.py
+# Pillow: tests/unit/ui/routes/test_routes_helpers.py::test_the_qr_helper_returns_a_base64_png renders a real PNG
+# and skips without it. Pinned to src/ui/requirements.in.
+pillow==13.0.0
+psycopg[binary,pool]==3.3.6
+pydantic==2.14.1
+pydantic-settings==2.16.1  # test_api_bans_crowdsec_unban.py (+4 test_api_* scripts)
+PyMySQL==1.2.3
+
+# Test framework. pytest pinned to the version used by the e2e repo
+# (~/dev/bunkerweb-tests). pytest-randomly surfaces inter-test state leakage.
+pytest==9.1.1
+pytest-cov==7.1.0
+pytest-randomly==5.0.0
+# tests/unit/integrations/test_wait_config_async_jobs.py exec_module()s tests/wait_config.py,
+# which reads variables.env through dotenv_values — so the CI venv needs it too.
+python-dotenv==1.2.4
+python-multipart==0.0.32  # api/test_crowdsec_router.py, test_api_config_move_authorization.py
+# tests/unit/integrations/test_spec_default_expectations.py reads tests/core/*.yml at test
+# time (the anti-drift guard) — module-level `import yaml`, so the CI venv needs it too.
+pyyaml==6.0.3
+qrcode==8.2  # test_ui_bans_leases.py (+4 test_ui_* scripts)
+# The redis client the resilient session test (and flask-session's Redis interface) uses. Pinned to
+# src/common/gen/requirements.in.
+redis==8.1.0
+regex==2026.9.29
+requests==2.34.2
+schedule==1.2.2
+slowapi==0.1.10
+SQLAlchemy==2.1.6
+# WebAuthn ceremonies (app.models.webauthn). Pinned to src/ui/requirements.in.
+webauthn==3.0.1

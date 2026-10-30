@@ -421,7 +421,7 @@ class UIDatabase(Database):
     def get_ui_user_permissions(self, username: str) -> List[str]:
         """Get ui user permissions."""
         with self._db_session() as session:
-            query = session.query(RolesUsers).with_entities(RolesUsers.role_name).filter_by(user_name=username)
+            query = session.query(RolesUsers).with_entities(RolesUsers.role_name).filter_by(user_name=username).all()
 
         permissions = []
         for role in query:

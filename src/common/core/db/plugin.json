@@ -48,7 +48,7 @@
       "help": "The maximum age in days for UI user sessions before they are purged. Accepts a time suffix (ms, s, m, h, d, w, M, y); a bare number is days.",
       "id": "database-max-session-age-days",
       "label": "The maximum age in days for UI user sessions",
-      "regex": "^\\d+(ms?|[shdwMy])?$",
+      "regex": "^[0-9]+(ms?|[shdwMy])?$",
       "type": "text"
     },
     "DATABASE_POOL_SIZE": {
@@ -75,7 +75,7 @@
       "help": "The number of seconds to wait before giving up on getting a connection from the pool. Accepts a time suffix (ms, s, m, h, d, w, M, y); a bare number is seconds.",
       "id": "database-pool-timeout",
       "label": "Database pool timeout",
-      "regex": "^\\d+(ms?|[shdwMy])?$",
+      "regex": "^[0-9]+(ms?|[shdwMy])?$",
       "type": "text"
     },
     "DATABASE_POOL_RECYCLE": {
@@ -84,7 +84,7 @@
       "help": "The number of seconds after which a connection is automatically recycled. Set to -1 to disable. Accepts a time suffix (ms, s, m, h, d, w, M, y); a bare number is seconds.",
       "id": "database-pool-recycle",
       "label": "Database pool recycle",
-      "regex": "^(-1|\\d+(ms?|[shdwMy])?)$",
+      "regex": "^(-1|[0-9]+(ms?|[shdwMy])?)$",
       "type": "text"
     },
     "DATABASE_POOL_PRE_PING": {
@@ -112,7 +112,7 @@
       "help": "The maximum number of seconds to wait for the database to be available on startup. Accepts a time suffix (ms, s, m, h, d, w, M, y); a bare number is seconds.",
       "id": "database-retry-timeout",
       "label": "Database retry timeout",
-      "regex": "^\\d+(ms?|[shdwMy])?$",
+      "regex": "^[0-9]+(ms?|[shdwMy])?$",
       "type": "text"
     },
     "DATABASE_CONNECT_TIMEOUT": {
@@ -148,7 +148,7 @@
       "help": "The delay in seconds between retry attempts for transient database errors. Accepts a time suffix (ms, s, m, h, d, w, M, y); a bare number is seconds.",
       "id": "database-request-retry-delay",
       "label": "Database request retry delay",
-      "regex": "^\\d+(\\.\\d+)?(ms?|[shdwMy])?$",
+      "regex": "^[0-9]+(\\.[0-9]+)?(ms?|[shdwMy])?$",
       "type": "text"
     }
   },

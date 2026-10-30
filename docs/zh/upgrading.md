@@ -18,8 +18,8 @@
 
         ```bash
         # 下载脚本及其校验和
-        curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.18-rc1/install-bunkerweb.sh
-        curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.18-rc1/install-bunkerweb.sh.sha256
+        curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.18-rc2/install-bunkerweb.sh
+        curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.18-rc2/install-bunkerweb.sh.sha256
 
         # 验证校验和
         sha256sum -c install-bunkerweb.sh.sha256
@@ -102,16 +102,16 @@
                     ```yaml
                     services:
                         bunkerweb:
-                            image: bunkerity/bunkerweb:1.6.18-rc1
+                            image: bunkerity/bunkerweb:1.6.18-rc2
                             ...
                         bw-scheduler:
-                            image: bunkerity/bunkerweb-scheduler:1.6.18-rc1
+                            image: bunkerity/bunkerweb-scheduler:1.6.18-rc2
                             ...
                         bw-autoconf:
-                            image: bunkerity/bunkerweb-autoconf:1.6.18-rc1
+                            image: bunkerity/bunkerweb-autoconf:1.6.18-rc2
                             ...
                         bw-ui:
-                            image: bunkerity/bunkerweb-ui:1.6.18-rc1
+                            image: bunkerity/bunkerweb-ui:1.6.18-rc2
                             ...
                     ```
 
@@ -167,7 +167,7 @@
 
             4.  **拉取新镜像**：
                 ```bash
-                docker pull bunkerity/bunkerweb-all-in-one:1.6.18-rc1
+                docker pull bunkerity/bunkerweb-all-in-one:1.6.18-rc2
                 ```
 
             5.  **用相同选项重新创建容器**，复用与之前相同的 `/data` 卷、端口和环境变量：
@@ -178,7 +178,7 @@
                 -p 80:8080/tcp \
                 -p 443:8443/tcp \
                 -p 443:8443/udp \
-                bunkerity/bunkerweb-all-in-one:1.6.18-rc1
+                bunkerity/bunkerweb-all-in-one:1.6.18-rc2
                 ```
 
         === "Docker Compose"
@@ -187,7 +187,7 @@
                 ```yaml
                 services:
                     bunkerweb-aio:
-                        image: bunkerity/bunkerweb-all-in-one:1.6.18-rc1
+                        image: bunkerity/bunkerweb-all-in-one:1.6.18-rc2
                         ...
                 ```
 
@@ -226,8 +226,8 @@
 
             ```bash
             # Download the script and its checksum
-            curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.18-rc1/install-bunkerweb.sh
-            curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.18-rc1/install-bunkerweb.sh.sha256
+            curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.18-rc2/install-bunkerweb.sh
+            curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.18-rc2/install-bunkerweb.sh.sha256
 
             # Verify the checksum
             sha256sum -c install-bunkerweb.sh.sha256
@@ -308,20 +308,20 @@
             示例：
 
             ```bash
-            # 交互式升级到 1.6.18~rc1（会提示备份）
-            sudo ./install-bunkerweb.sh --version 1.6.18~rc1
+            # 交互式升级到 1.6.18~rc2（会提示备份）
+            sudo ./install-bunkerweb.sh --version 1.6.18~rc2
 
             # 使用自动备份到自定义目录的非交互式升级
-            sudo ./install-bunkerweb.sh -v 1.6.18~rc1 --backup-dir /var/backups/bw-2025-01 -y
+            sudo ./install-bunkerweb.sh -v 1.6.18~rc2 --backup-dir /var/backups/bw-2025-01 -y
 
             # 静默无人值守升级（抑制日志）– 依赖默认的自动备份
-            sudo ./install-bunkerweb.sh -v 1.6.18~rc1 -y -q
+            sudo ./install-bunkerweb.sh -v 1.6.18~rc2 -y -q
 
             # 执行一次空运行（计划）而不应用更改
-            sudo ./install-bunkerweb.sh -v 1.6.18~rc1 --dry-run
+            sudo ./install-bunkerweb.sh -v 1.6.18~rc2 --dry-run
 
             # 跳过自动备份进行升级（不推荐）
-            sudo ./install-bunkerweb.sh -v 1.6.18~rc1 --no-auto-backup -y
+            sudo ./install-bunkerweb.sh -v 1.6.18~rc2 --no-auto-backup -y
             ```
 
             !!! warning "跳过备份"
@@ -401,7 +401,7 @@
 
                         ```shell
                         sudo apt update && \
-                        sudo apt install -y --allow-downgrades bunkerweb=1.6.18~rc1
+                        sudo apt install -y --allow-downgrades bunkerweb=1.6.18~rc2
                         ```
 
                         为了防止在执行 `apt upgrade` 时升级 BunkerWeb 软件包，您可以使用以下命令：
@@ -427,7 +427,7 @@
 
                         ```shell
                         sudo dnf makecache && \
-                        sudo dnf install -y --allowerasing bunkerweb-1.6.18~rc1
+                        sudo dnf install -y --allowerasing bunkerweb-1.6.18~rc2
                         ```
 
                         为了防止在执行 `dnf upgrade` 时升级 BunkerWeb 软件包，您可以使用以下命令：
@@ -899,16 +899,16 @@
                 ```yaml
                 services:
                     bunkerweb:
-                        image: bunkerity/bunkerweb:1.6.18-rc1
+                        image: bunkerity/bunkerweb:1.6.18-rc2
                         ...
                     bw-scheduler:
-                        image: bunkerity/bunkerweb-scheduler:1.6.18-rc1
+                        image: bunkerity/bunkerweb-scheduler:1.6.18-rc2
                         ...
                     bw-autoconf:
-                        image: bunkerity/bunkerweb-autoconf:1.6.18-rc1
+                        image: bunkerity/bunkerweb-autoconf:1.6.18-rc2
                         ...
                     bw-ui:
-                        image: bunkerity/bunkerweb-ui:1.6.18-rc1
+                        image: bunkerity/bunkerweb-ui:1.6.18-rc2
                         ...
                 ```
 
@@ -943,7 +943,7 @@
 
                     ```shell
                     sudo apt update && \
-                    sudo apt install -y --allow-downgrades bunkerweb=1.6.18~rc1
+                    sudo apt install -y --allow-downgrades bunkerweb=1.6.18~rc2
                     ```
 
                     为了防止在执行 `apt upgrade` 时升级 BunkerWeb 软件包，您可以使用以下命令：
@@ -969,7 +969,7 @@
 
                     ```shell
                     sudo dnf makecache && \
-                    sudo dnf install -y --allowerasing bunkerweb-1.6.18~rc1
+                    sudo dnf install -y --allowerasing bunkerweb-1.6.18~rc2
                     ```
 
                     为了防止在执行 `dnf upgrade` 时升级 BunkerWeb 软件包，您可以使用以下命令：
@@ -1185,3 +1185,78 @@
 
     8.  **降级 BunkerWeb**。
         -   按照[Linux 集成页面](integrations.md#linux)中升级 BunkerWeb 的相同步骤，将 BunkerWeb 降级到以前的版本。
+
+## 验证发行版
+
+在安装或升级之前，请先检查所下载的内容。发行版在三个层面上签名：
+
+- Git 标签由发布负责人的 GPG 密钥签名，GitHub 无法验证的标签，发布工作流会拒绝构建；
+- 容器镜像和 Linux 软件包带有已签名的构建来源证明（attestation），由发布工作流自身创建；
+- GitHub Release 列出了每个软件包的 SHA-256 校验和。
+
+证明采用无密钥方式：使用 [Sigstore](https://www.sigstore.dev/) 和 GitHub Actions 工作流的身份，因此任何地方都不存在私有签名密钥。验证方会检查该制品是否由 `bunkerity/bunkerweb` 的 `.github/workflows/release.yml` 针对该发布标签、基于被标记的提交构建。
+
+!!! info "证明从 1.6.18 rc2 开始提供"
+    更早的版本只有已签名的标签。以下命令需要 [GitHub CLI](https://cli.github.com/) 2.68 或更高版本，并已通过 `gh auth login` 登录。
+
+这些命令共用两个变量。请将它们设置为要验证的版本：
+
+```bash
+VERSION=1.6.18~rc2
+TAG="v${VERSION//\~/-}"
+```
+
+### 标签签名
+
+发布负责人的公钥发布在他们的 GitHub 账户上。GPG 提示该密钥未经认证属于正常现象：请改为将其输出的指纹与下面的两个指纹进行比对。
+
+```bash
+curl -fsSL https://github.com/TheophileDiot.gpg | gpg --import
+curl -fsSL https://github.com/fl0ppy-d1sk.gpg | gpg --import
+
+git init -q bunkerweb-verify && cd bunkerweb-verify
+git fetch --depth 1 https://github.com/bunkerity/bunkerweb.git tag "$TAG"
+git verify-tag "$TAG"
+```
+
+输出必须包含 `Good signature`，以及创建该标签的发布负责人的主密钥指纹：Théophile Diot 为 `4821 439D 531B 030E 5DCC  F1F7 7C44 E4D7 7426 28F8`，Florian Pitance 为 `BBB2 5DF4 31F9 C568 D56C  748D D34B 4FF9 11F7 40D1`。
+
+### 容器镜像
+
+证明与镜像索引的摘要（digest）绑定，因此在 Docker Hub、GitHub Container Registry 和 GitLab 镜像站上完全一致。先输出您所拉取镜像的摘要，再进行验证：
+
+```bash
+docker buildx imagetools inspect "bunkerity/bunkerweb:${TAG#v}" --format '{{json .Manifest.Digest}}'
+
+gh attestation verify "oci://docker.io/bunkerity/bunkerweb:${TAG#v}" \
+  --repo bunkerity/bunkerweb \
+  --signer-workflow bunkerity/bunkerweb/.github/workflows/release.yml \
+  --source-ref "refs/tags/$TAG"
+```
+
+`Verification succeeded!` 表示该摘要由发布工作流针对此标签签名。如果镜像没有证明，或由其他工作流或仓库签名，命令会失败。更换镜像名称即可检查 `bunkerweb-scheduler`、`bunkerweb-autoconf`、`bunkerweb-ui`、`bunkerweb-api` 或 `bunkerweb-all-in-one`；检查其他镜像仓库时请使用 `ghcr.io/bunkerity/...` 或 `registry.gitlab.com/bunkerity/bunkerweb/...`。使用 `oci://docker.io/bunkerity/bunkerweb@sha256:<digest>` 可精确验证您正在运行的镜像。
+
+### Linux 软件包
+
+软件包发布在 packagecloud 上。下载您要安装的 `.deb` 或 `.rpm` 文件并验证：
+
+```bash
+gh attestation verify ./bunkerweb_${VERSION}-1_amd64.deb \
+  --repo bunkerity/bunkerweb \
+  --signer-workflow bunkerity/bunkerweb/.github/workflows/release.yml \
+  --source-ref "refs/tags/$TAG"
+```
+
+Release 还在 `release-manifest.json` 中列出了每个软件包的 SHA-256 校验和。先用清单自带的校验和检查清单，再用清单检查软件包，并选择与您的发行版（`ubuntu`、`ubuntu-noble`、`ubuntu-jammy`、`debian-bookworm`、`debian-trixie`、`fedora-43`、`fedora-44`、`rhel-8`、`rhel-9` 或 `rhel-10`）和平台（`linux/amd64` 或 `linux/arm64`）对应的条目：
+
+```bash
+curl -fsSL -O "https://github.com/bunkerity/bunkerweb/releases/download/${TAG}/release-manifest.json" \
+  -O "https://github.com/bunkerity/bunkerweb/releases/download/${TAG}/release-manifest.json.sha256"
+sha256sum -c release-manifest.json.sha256
+
+jq -r '.packages[] | select(.distro == "debian-bookworm" and .platform == "linux/amd64") | "\(.sha256)  \(.filename)"' release-manifest.json | sha256sum -c
+```
+
+请在包含该软件包的目录中运行最后一条命令。清单只列出校验和：证明才是确认软件包由谁构建的依据。
+
+GitHub 发行版还附带 `bunkerweb-${TAG#v}.intoto.jsonl`，其中包含每个镜像和每个软件包的证明包。`gh attestation verify <文件> --bundle bunkerweb-${TAG#v}.intoto.jsonl --repo bunkerity/bunkerweb` 可依据该文件验证已下载的软件包，无需从 GitHub 获取其证明。

@@ -1,12 +1,12 @@
 from html import escape
-from importlib.machinery import SourceFileLoader
+from importlib.util import module_from_spec, spec_from_file_location
 from io import BytesIO
 from json import JSONDecodeError, loads as json_loads
 from os import listdir
 from os.path import basename, dirname, isabs, join, sep
 from pathlib import Path
 from shutil import move, rmtree
-from sys import path as sys_path
+from sys import modules as sys_modules, path as sys_path
 from tarfile import CompressionError, HeaderError, ReadError, TarError, open as tar_open
 from time import time
 from typing import List, Optional, Union
@@ -48,12 +48,14 @@ def delete_plugin():
     if not current_user.admin:
         return Response("Plugin management is restricted to administrators", 403)
 
-    verify_data_in_form(
+    ret = verify_data_in_form(
         data={"plugins": None},
         err_message="Missing plugins parameter on /plugins/delete.",
         redirect_url="plugins",
         next=True,
     )
+    if ret is not True:
+        return ret
     DATA.load_from_file()
 
     plugins = request.form["plugins"].split(",")
@@ -159,8 +161,16 @@ def run_action(plugin: str, function_name: str = "", *, tmp_dir: Optional[Path] 
             return {"status": "ko", "code": 404, "message": "The plugin does not have an action file"}
 
         sys_path.append(tmp_dir.as_posix())
-        loader = SourceFileLoader("actions", action_file.as_posix())
-        actions = loader.load_module()
+        spec = spec_from_file_location(f"bw_ui_actions_{plugin}", action_file)
+        if not spec or not spec.loader:
+            raise ImportError(f"Could not load actions from {action_file}")
+        actions = module_from_spec(spec)
+        sys_modules[spec.name] = actions
+        try:
+            spec.loader.exec_module(actions)
+        except BaseException:
+            sys_modules.pop(spec.name, None)
+            raise
     except BaseException as e:
         sys_path.pop()
         if function_name != "pre_render" and not str(tmp_dir).startswith((str(EXTERNAL_PLUGINS_PATH), str(PRO_PLUGINS_PATH))):
@@ -186,7 +196,6 @@ def run_action(plugin: str, function_name: str = "", *, tmp_dir: Optional[Path] 
         res = method(app=current_app, db=DB, bw_instances_utils=BW_INSTANCES_UTILS, args=queries, data=data)
     except AttributeError as e:
         if function_name == "pre_render":
-            sys_path.pop()
             return {"status": "ok", "code": 200, "message": "The plugin does not have a pre_render method"}
 
         message = "The plugin does not have a method"
@@ -228,12 +237,14 @@ def plugins_refresh():
 
     tmp_ui_path = TMP_DIR.joinpath("ui")
 
-    verify_data_in_form(
+    ret = verify_data_in_form(
         data={"csrf_token": None},
         err_message="Missing csrf_token parameter on /plugins.",
         redirect_url="plugins",
         next=True,
     )
+    if ret is not True:
+        return ret
 
     # Upload plugins
     if not tmp_ui_path.exists() or not listdir(str(tmp_ui_path)):

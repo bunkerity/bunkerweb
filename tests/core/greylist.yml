@@ -1,0 +1,154 @@
+integrations: "all"
+
+actions:
+  good_ip:
+    type: status
+    url: "http://www.example.com"
+    status: 200
+    config:
+      GREYLIST_IP: "0.0.0.0/0"
+  bad_ip:
+    type: status
+    url: "http://www.example.com"
+    status: 403
+    config:
+      GREYLIST_IP: "192.0.0.0/32"
+  ip_urls:
+    type: status
+    url: "http://www.example.com"
+    status: 200
+    headers:
+      X-Forwarded-For: "192.168.0.254"
+    config:
+      GREYLIST_IP: "192.0.0.0/32"
+      GREYLIST_IP_URLS: "http://custom-api:8000/list/ip"
+    Kubernetes:
+      config:
+        GREYLIST_IP_URLS: "http://svc-custom-api.misc.svc.cluster.local:8000/list/ip"
+
+  rdns:
+    type: status
+    url: "http://www.example.com"
+    status: 403
+    retries: 1
+    headers:
+      X-Forwarded-For: "192.168.0.254"
+    config:
+      GREYLIST_RDNS: ".bw-services"
+  rdns_local:
+    type: status
+    url: "http://www.example.com"
+    status: 200
+    retries: 1
+    headers:
+      X-Forwarded-For: "192.168.0.254"
+    config:
+      GREYLIST_RDNS_GLOBAL: "no"
+      GREYLIST_RDNS: ".bw-services"
+  rdns_urls:
+    type: status
+    url: "http://www.example.com"
+    status: 403
+    retries: 1
+    headers:
+      X-Forwarded-For: "192.168.0.254"
+    config:
+      GREYLIST_RDNS_URLS: "http://custom-api:8000/list/rdns"
+    Kubernetes:
+      config:
+        GREYLIST_RDNS_URLS: "http://svc-custom-api.misc.svc.cluster.local:8000/list/rdns"
+  rdns_urls_local:
+    type: status
+    url: "http://www.example.com"
+    status: 200
+    retries: 1
+    headers:
+      X-Forwarded-For: "192.168.0.254"
+    config:
+      GREYLIST_RDNS_GLOBAL: "no"
+      GREYLIST_RDNS_URLS: "http://custom-api:8000/list/rdns"
+    Kubernetes:
+      config:
+        GREYLIST_RDNS_URLS: "http://svc-custom-api.misc.svc.cluster.local:8000/list/rdns"
+
+  asn:
+    type: status
+    url: "http://www.example.com"
+    status: 200
+    headers:
+      X-Forwarded-For: "8.0.0.3"
+    config:
+      GREYLIST_ASN: "3356"
+  bad_asn:
+    type: status
+    url: "http://www.example.com"
+    status: 403
+    config:
+      GREYLIST_ASN: "3356"
+  asn_urls:
+    type: status
+    url: "http://www.example.com"
+    status: 200
+    headers:
+      X-Forwarded-For: "8.0.0.3"
+    config:
+      GREYLIST_ASN_URLS: "http://custom-api:8000/list/asn"
+    Kubernetes:
+      config:
+        GREYLIST_ASN_URLS: "http://svc-custom-api.misc.svc.cluster.local:8000/list/asn"
+
+  user_agent:
+    type: status
+    url: "http://www.example.com"
+    status: 200
+    headers:
+      User-Agent: "BunkerBot"
+    config:
+      GREYLIST_USER_AGENT: "BunkerBot"
+  bad_user_agent:
+    type: status
+    url: "http://www.example.com"
+    status: 403
+    config:
+      GREYLIST_USER_AGENT: "BunkerBot"
+  user_agent_urls:
+    type: status
+    url: "http://www.example.com"
+    status: 200
+    headers:
+      User-Agent: "BunkerBot"
+    config:
+      GREYLIST_USER_AGENT_URLS: "http://custom-api:8000/list/user_agent"
+    Kubernetes:
+      config:
+        GREYLIST_USER_AGENT_URLS: "http://svc-custom-api.misc.svc.cluster.local:8000/list/user_agent"
+
+  uri:
+    type: status
+    url: "http://www.example.com/admin"
+    status: 404
+    config:
+      GREYLIST_URI: "/admin"
+    Kubernetes:
+      status: 200
+  bad_uri:
+    type: status
+    url: "http://www.example.com"
+    status: 403
+    config:
+      GREYLIST_URI: "/admin"
+  uri_urls:
+    type: status
+    url: "http://www.example.com/admin"
+    status: 404
+    config:
+      GREYLIST_URI_URLS: "http://custom-api:8000/list/uri"
+    Kubernetes:
+      status: 200
+      config:
+        GREYLIST_URI_URLS: "http://svc-custom-api.misc.svc.cluster.local:8000/list/uri"
+
+config:
+  USE_GREYLIST: "yes"
+  USE_REAL_IP: "yes"
+  REAL_IP_FROM: "0.0.0.0/0"

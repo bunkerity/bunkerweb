@@ -13,7 +13,8 @@
     "no_changes_detected": "No changes detected.",
     "notice": "Notice",
     "ping_error": "An error occurred while pinging the instances.",
-    "readonly_mode": "This action is disabled in read-only mode."
+    "readonly_mode": "This action is disabled in read-only mode.",
+    "configs_import_invalid_file": "Please upload a valid custom configurations export file (.json)."
   },
   "aria": {
     "label": {
@@ -1240,7 +1241,16 @@
     },
     "retention_notice": "Reports are a rolling in-memory buffer: the oldest entries are dropped once the configured limit is reached. Unless Redis is enabled, they are also cleared when BunkerWeb restarts.",
     "security_incident": "Security Incident",
-    "security_report_data": "Security Report Data"
+    "security_report_data": "Security Report Data",
+    "bad_behavior_no_details": "No bad behavior details were captured for this report.",
+    "bad_behavior_activity_detected": "Bad behavior activity detected",
+    "bad_behavior_activity_explanation": "These requests exceeded the bad behavior threshold and were grouped together.",
+    "bad_behavior_request_label": "Request",
+    "bad_behavior_ip": "IP address",
+    "bad_behavior_server": "Server",
+    "bad_behavior_url": "URL",
+    "bad_behavior_captured_at": "Captured at",
+    "bad_behavior_request_id": "Request ID"
   },
   "scope": {
     "all_services": "All Services",
@@ -1427,7 +1437,8 @@
     "template_in_use_description": "Changes outside the current template are not allowed. Please make changes using the current template or switch to Advanced/Raw mode.",
     "unique_server_name": "Unique Server Name",
     "up": "Up",
-    "yes": "Yes"
+    "yes": "Yes",
+    "not_applicable": "N/A"
   },
   "step": {
     "next": "Next",
@@ -1724,7 +1735,8 @@
       "show_selected_only": "Show selected only",
       "stop_instance": "Stop Instance {{hostname}}",
       "unban_ip": "Unban {{ip}}",
-      "value_from_global": "Value from global settings"
+      "value_from_global": "Value from global settings",
+      "update_ban_duration": "Update ban duration"
     },
     "cannot_delete_original_ban": "Cannot delete the original Ban entry.",
     "cannot_remove_disabled": "Cannot remove because one or more settings are disabled.",
@@ -1962,7 +1974,8 @@
     "zerossl_api_retry": "Number of retries for ZeroSSL API requests (0 disables retries).",
     "zerossl_api_retry_delay": "Delay in seconds between ZeroSSL API retries.",
     "zerossl_api_connect_timeout": "Connection timeout in seconds for ZeroSSL API calls.",
-    "zerossl_api_max_time": "Maximum total time in seconds for each ZeroSSL API request."
+    "zerossl_api_max_time": "Maximum total time in seconds for each ZeroSSL API request.",
+    "readonly_mode": "This action is not allowed in read-only mode."
   },
   "totp": {
     "prompt": "Please enter your TOTP code."
@@ -1985,5 +1998,12 @@
     "required": "{{field}} is required.",
     "service_required_for_ban": "A service must be selected for a service-specific ban.",
     "zerossl_email_or_api_key_required": "ZeroSSL requires either an email or a ZeroSSL API key."
+  },
+  "plugins": {
+    "multivalue": {
+      "show_less": "Show less",
+      "more_value": "more value",
+      "more_values": "more values"
+    }
   }
 }

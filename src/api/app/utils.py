@@ -115,4 +115,10 @@ def bcrypt_cost(value: str) -> int:
 
 
 def check_password(password: str, hashed: bytes) -> bool:
-    return checkpw(_bcrypt_secret(password), hashed)
+    try:
+        return checkpw(_bcrypt_secret(password), hashed)
+    except ValueError:
+        LOGGER.warning("Stored bcrypt hash is unusable, credential check refused")
+        # Spend the normal cost-13 verification work even when the stored salt is invalid.
+        checkpw(_bcrypt_secret(password), b"$2b$13$sVeBUZx0Jw7D4gGJQf7k7O5Wh2tJReLrfhp/SdAkh7AaQ.PuzvAmC")
+        return False

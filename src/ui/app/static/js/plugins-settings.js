@@ -1341,9 +1341,20 @@ $(document).ready(() => {
         }
       });
 
+      // Keys stored by the "default" method at their default value are left out,
+      // like easy and advanced mode do: posting them sends every default of the
+      // page, and some (PERMISSIONS_POLICY) trip the CRS on a protected UI.
+      const rawUnchangedDefaults = new Set(
+        JSON.parse($("#raw-unchanged-defaults").val() || "[]"),
+      );
+
       // Append original values if they are not already in the form and not skipped
       Object.entries(entireconfigOriginals).forEach(([key, value]) => {
-        if (!formKeys.has(key) && !skippedKeys.has(key)) {
+        if (
+          !formKeys.has(key) &&
+          !skippedKeys.has(key) &&
+          !rawUnchangedDefaults.has(key)
+        ) {
           appendHiddenInput(
             form,
             key,

@@ -47,6 +47,7 @@ from werkzeug.routing.exceptions import BuildError
 
 from common_utils import get_version, is_newer_version_available  # type: ignore
 
+from app.html_pattern import v_safe_pattern
 from app.models.biscuit import BiscuitMiddleware, _internal_error_response
 from app.models.reverse_proxied import ReverseProxied
 from app.models.session_cookie import use_per_request_cookie
@@ -632,27 +633,18 @@ def refresh_app_context():
     # Remove blueprints for deleted plugins
     for bp_name in list(app.blueprints.keys()):
         if bp_name not in plugin_blueprints and bp_name not in app.original_blueprints:
-            # Remove blueprint and clean up
-            app.blueprints.pop(bp_name, None)
-
             # Clean up sys.path
             if bp_name in app.plugin_sys_paths and app.plugin_sys_paths[bp_name] in sys_path:
                 sys_path.remove(app.plugin_sys_paths[bp_name])
                 del app.plugin_sys_paths[bp_name]
 
-            # Remove URL rules and endpoints
+            # Remove extra pages before the blueprint's rules are dropped.
             for rule in list(app.url_map.iter_rules()):
                 if rule.endpoint.startswith(f"{bp_name}."):
                     if str(rule) == f"/{bp_name}" and bp_name in app.config["EXTRA_PAGES"]:
                         app.config["EXTRA_PAGES"].remove(bp_name)
 
-                    with suppress(ValueError):
-                        app.url_map._rules.remove(rule)
-                        app.url_map._rules_by_endpoint.pop(rule.endpoint, None)
-
-            # Remove view functions
-            for endpoint in [ep for ep in app.view_functions if ep.startswith(f"{bp_name}.")]:
-                app.view_functions.pop(endpoint, None)
+            app._remove_blueprint(bp_name)
 
             LOGGER.debug(f"Blueprint '{bp_name}' was completely removed")
 
@@ -880,6 +872,8 @@ with app.app_context():
             except BuildError as e:
                 LOGGER.debug(f"Couldn't build the URL for {endpoint}: {e}")
         return "#"
+
+    app.jinja_env.filters["v_safe_pattern"] = v_safe_pattern
 
     # Declare functions for jinja2
     app.jinja_env.globals.update(

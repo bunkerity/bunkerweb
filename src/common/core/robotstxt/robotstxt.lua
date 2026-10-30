@@ -55,12 +55,14 @@ function robotstxt:initialize(ctx)
 			"ROBOTSTXT_IGNORE_RULE",
 		})
 		if variables == nil then
-			return self:ret(false, err)
+			self.logger:log(ERR, err)
+			return
 		end
 
 		local multisite, err = get_variable("MULTISITE", false)
 		if not multisite then
-			return self:ret(false, "can't get MULTISITE variable : " .. err)
+			self.logger:log(ERR, "can't get MULTISITE variable : " .. err)
+			return
 		end
 		if multisite == "no" then
 			server_name = "global"

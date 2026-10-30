@@ -48,6 +48,7 @@ local kill = rsignal.kill
 local get_master_pid = process.get_master_pid
 local execute = os.execute
 local open = io.open
+local VARIABLES_PATH = "/etc/nginx/variables.env"
 local read_body = ngx_req.read_body
 local get_body_data = ngx_req.get_body_data
 local get_body_file = ngx_req.get_body_file
@@ -121,13 +122,48 @@ function api:is_allowed_token()
 	return true, "ok"
 end
 
+local function control_plane_variables_from_disk()
+	local file = open(VARIABLES_PATH, "r")
+	if not file then
+		return {}
+	end
+	local contents = file:read("*a")
+	file:close()
+	-- Rendered files end with a newline; a partial final line is not a credential snapshot.
+	if not contents or contents:sub(-1) ~= "\n" then
+		return {}
+	end
+	local found = {}
+	for line in contents:gmatch("([^\n]*)\n") do
+		local key, raw = line:match("^([^=]+)=(.*)$")
+		if key == "API_WHITELIST_IP" or key == "API_TOKEN" then
+			found[key] = raw
+		end
+	end
+	return found
+end
+
 function api:initialize(ctx)
 	self.ctx = ctx
 	local data, err = get_variable("API_WHITELIST_IP", false)
+	local tok = get_variable("API_TOKEN", false)
+	if not data then
+		local recovered = control_plane_variables_from_disk()
+		if tok == nil then
+			tok = recovered.API_TOKEN
+		end
+		-- Missing token state must not turn recovery into a tokenless control plane.
+		if tok ~= nil then
+			data = recovered.API_WHITELIST_IP
+		end
+		if data then
+			logger:log(ERR, "API_WHITELIST_IP is missing from the internalstore, falling back to " .. VARIABLES_PATH)
+		end
+	end
 	self.ips = {}
 	self.api_token = nil
 	if not data then
-		logger:log(ERR, "can't get API_WHITELIST_IP variable : " .. err)
+		logger:log(ERR, "can't get API_WHITELIST_IP variable : " .. tostring(err))
 	else
 		for ip in data:gmatch("%S+") do
 			table.insert(self.ips, ip)
@@ -135,7 +171,6 @@ function api:initialize(ctx)
 	end
 
 	-- Load optional API token (from internalstore variables, same pattern as whitelist)
-	local tok = get_variable("API_TOKEN", false)
 	if tok and tok ~= "" then
 		self.api_token = tok
 	end
@@ -579,7 +614,9 @@ local function wait_reload(token, seconds, no_wait_reason)
 		if ngx.now() >= deadline then
 			break
 		end
-		ngx.sleep(math.min(RELOAD_POLL, deadline - ngx.now()))
+		-- Never the remaining time: ngx.sleep truncates to whole milliseconds, and a zero-delay timer does not
+		-- advance the cached clock, so a sub-millisecond remainder would spin until the swap lock expires.
+		ngx.sleep(RELOAD_POLL)
 	end
 	-- Keep the in-flight marker; normal completion or existing stale-marker recovery releases it.
 	local message = "reload signalled but readiness is unconfirmed: "
