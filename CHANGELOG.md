@@ -4,6 +4,7 @@
 
 - [SECURITY] `api`: when `API_LISTEN_HTTPS=yes`, the scheduler, UI, API service and `bwcli` check that an instance presents the generated API certificate (SHA-256 pin) instead of trusting any. A mismatch is logged and the call still falls back to HTTP.
 - [SECURITY] `ui`: failed logins (password, TOTP or recovery code) are counted per client IP and per username in the database, and five in 15 minutes lock that IP or username for 15 minutes (`LOGIN_THROTTLE`, `LOGIN_MAX_ATTEMPTS`, `LOGIN_WINDOW_MINUTES`, `LOGIN_LOCKOUT_MINUTES`).
+- [BUGFIX] `core`: stream services no longer abort NGINX init when an HTTP-only plugin (PRO included) is installed, a regression in 1.6.17.
 
 ## v1.6.18~rc2 - 2026/10/30
 

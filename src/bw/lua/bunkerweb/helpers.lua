@@ -57,6 +57,12 @@ helpers.load_plugin = function(json)
 	if #missing_fields > 0 then
 		return false, "missing field(s) " .. encode(missing_fields) .. " for JSON at " .. json
 	end
+	-- The stream VM runs no code of a plugin without stream support (an HTTP-only module may raise at require time on
+	-- the stream ngx_lua version), but its settings still have to load for the stream variables.
+	if subsystem == "stream" and plugin.stream == "no" then
+		plugin.phases = {}
+		return true, plugin
+	end
 	-- Try require
 	local plugin_lua, err = helpers.require_plugin(plugin.id)
 	if plugin_lua == false then
