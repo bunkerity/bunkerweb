@@ -3,7 +3,7 @@ The BunkerNet plugin enables collective threat intelligence sharing between Bunk
 **How it works:**
 
 1. Your BunkerWeb instance automatically registers with the BunkerNet API to receive a unique identifier.
-2. When your instance detects and blocks a malicious IP address or behavior, it anonymously reports the threat to BunkerNet.
+2. When your instance detects and blocks a malicious IP address or behavior, it reports the threat to BunkerNet. The fields of a report are listed in the "What a report contains" note below.
 3. BunkerNet aggregates threat intelligence from all participating instances and distributes the consolidated database.
 4. Your instance regularly downloads an updated database of known threats from BunkerNet.
 5. This collective intelligence allows your instance to proactively block IP addresses that have exhibited malicious behavior on other BunkerWeb instances.
@@ -12,9 +12,9 @@ The BunkerNet plugin enables collective threat intelligence sharing between Bunk
 
       1. **Collective Defense:** Leverage the security findings from thousands of other BunkerWeb instances globally.
       2. **Proactive Protection:** Block malicious actors before they can target your site based on their behavior elsewhere.
-      3. **Community Contribution:** Help protect other BunkerWeb users by sharing anonymized threat data about attackers.
+      3. **Community Contribution:** Help protect other BunkerWeb users by sharing threat data about attackers.
       4. **Zero Configuration:** Works out of the box with sensible defaults, requiring minimal setup.
-      5. **Privacy Focused:** Only shares necessary threat information without compromising your or your users' privacy.
+      5. **Limited Sharing:** A report carries a fixed set of fields and only a short allowlist of request headers, described below.
 
 ### How to Use
 
@@ -36,8 +36,15 @@ Follow these steps to configure and use the BunkerNet feature:
 !!! tip "Network Protection"
     When BunkerNet detects that an IP address has been involved in malicious activity across multiple BunkerWeb instances, it adds that IP to a collective blacklist. This provides a proactive defense layer, protecting your site from threats before they can target you directly.
 
-!!! info "Anonymous Reporting"
-    When reporting threat information to BunkerNet, your instance only shares the necessary data to identify the threat: the IP address, the reason for blocking, and minimal contextual data. No personal information about your users or sensitive details about your site is shared.
+!!! info "What a report contains"
+    Each report sent to BunkerNet carries these fields, and nothing else:
+
+    - the client IP address, the reason for blocking and the date;
+    - the HTTP method, the URL **including its query string**, and the service name (`server_name`);
+    - the request headers `User-Agent`, `Accept`, `Accept-Encoding`, `Accept-Language`, `Content-Type` and `Content-Length`, with their values. No other header is sent: cookies, `Authorization` and custom headers stay on your instance;
+    - the details attached to the blocking reason. Depending on the plugin that blocked the client, they can include the IDs and messages of the ModSecurity rules that matched together with the request values that matched them (parts of arguments or body, each cut to 512 bytes; values matched in headers and cookies are never sent, only the variable name), or, for Bad Behavior, the method and URL of the recent requests that led to the ban.
+
+    The URL and the matched argument and body values come from the request, so they contain whatever the client sent. Set `USE_BUNKERNET` to `no` on services whose URLs carry sensitive values.
 
 ### Example Configurations
 

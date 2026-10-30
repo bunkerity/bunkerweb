@@ -1320,7 +1320,7 @@ Le plugin BunkerNet permet le partage collectif de renseignements sur les menace
 **Comment ça marche :**
 
 1. Votre instance BunkerWeb s'enregistre automatiquement auprès de l'API BunkerNet afin de recevoir un identifiant unique.
-2. Lorsque votre instance détecte et bloque une adresse IP ou un comportement malveillant, elle signale anonymement la menace à BunkerNet.
+2. Lorsque votre instance détecte et bloque une adresse IP ou un comportement malveillant, elle signale la menace à BunkerNet. Les champs d'un signalement sont listés dans la note « Contenu d'un signalement » ci-dessous.
 3. BunkerNet agrège les renseignements sur les menaces provenant de toutes les instances participantes et distribue la base consolidée.
 4. Votre instance télécharge régulièrement une base mise à jour des menaces connues depuis BunkerNet.
 5. Cette intelligence collective permet à votre instance de bloquer proactivement des adresses IP ayant eu un comportement malveillant sur d'autres instances BunkerWeb.
@@ -1328,9 +1328,9 @@ Le plugin BunkerNet permet le partage collectif de renseignements sur les menace
 !!! success "Avantages clés"
     1. **Défense collective :** Exploitez les détections de sécurité de milliers d'autres instances BunkerWeb dans le monde.
     2. **Protection proactive :** Bloquez les acteurs malveillants avant qu'ils ne ciblent votre site, d'après leur comportement ailleurs.
-    3. **Contribution communautaire :** Aidez à protéger les autres utilisateurs BunkerWeb en partageant des données anonymisées sur les attaquants.
+    3. **Contribution communautaire :** Aidez à protéger les autres utilisateurs BunkerWeb en partageant des données sur les attaquants.
     4. **Zéro configuration :** Fonctionne immédiatement avec des valeurs par défaut adaptées et très peu de configuration.
-    5. **Respect de la vie privée :** Ne partage que les informations de menace nécessaires, sans compromettre votre confidentialité ni celle de vos utilisateurs.
+    5. **Partage limité :** Un signalement contient un ensemble fixe de champs et seulement une courte liste autorisée d'en-têtes de requête, décrits ci-dessous.
 
 ### Comment l'utiliser
 
@@ -1352,8 +1352,15 @@ Suivez ces étapes pour configurer et utiliser la fonctionnalité BunkerNet :
 !!! tip "Protection réseau"
     Lorsque BunkerNet détecte qu'une adresse IP a été impliquée dans une activité malveillante sur plusieurs instances BunkerWeb, il ajoute cette IP à une blacklist collective. Cela fournit une couche de défense proactive, protégeant votre site contre les menaces avant qu'elles ne vous ciblent directement.
 
-!!! info "Signalement anonyme"
-    Lors du signalement d'informations de menace à BunkerNet, votre instance ne partage que les données nécessaires pour identifier la menace : l'adresse IP, la raison du blocage et un minimum de contexte. Aucune information personnelle sur vos utilisateurs ni aucun détail sensible sur votre site n'est partagé.
+!!! info "Contenu d'un signalement"
+    Chaque signalement envoyé à BunkerNet contient ces champs, et rien d'autre :
+
+    - l'adresse IP du client, la raison du blocage et la date ;
+    - la méthode HTTP, l'URL **y compris sa chaîne de requête** et le nom du service (`server_name`) ;
+    - les en-têtes de requête `User-Agent`, `Accept`, `Accept-Encoding`, `Accept-Language`, `Content-Type` et `Content-Length`, avec leurs valeurs. Aucun autre en-tête n'est envoyé : les cookies, `Authorization` et les en-têtes personnalisés restent sur votre instance ;
+    - les détails associés à la raison du blocage. Selon le plugin qui a bloqué le client, ils peuvent inclure les ID et messages des règles ModSecurity déclenchées avec les valeurs de la requête qui les ont déclenchées (parties d'arguments ou du corps, chacune tronquée à 512 octets ; les valeurs trouvées dans les en-têtes et les cookies ne sont jamais envoyées, seul le nom de la variable l'est) ou, pour Bad Behavior, la méthode et l'URL des requêtes récentes qui ont mené au bannissement.
+
+    L'URL et les valeurs d'arguments et de corps déclenchantes proviennent de la requête : elles contiennent tout ce que le client a envoyé. Définissez `USE_BUNKERNET` sur `no` pour les services dont les URL portent des valeurs sensibles.
 
 ### Exemples de configuration
 
