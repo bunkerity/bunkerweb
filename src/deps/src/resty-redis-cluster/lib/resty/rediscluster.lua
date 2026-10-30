@@ -168,6 +168,23 @@ end
 -- shortcut: fixed five-second window; make configurable if operators need tuning.
 local NODE_DOWN_SECONDS = 5
 
+-- BW edit: Redis advertises bare IPv6, but ngx cosockets require brackets.
+local function socket_host(host)
+    if host and string_find(host, ":", 1, true) and string_sub(host, 1, 1) ~= "[" then
+        return "[" .. host .. "]"
+    end
+    return host
+end
+
+-- NODES and redirects join a host (possibly bare IPv6) and a numeric port.
+local function parse_endpoint(address)
+    local host, port = string.match(address, "^(.*):(%d+)$")
+    if host then
+        host = string.match(host, "^%[(.+)%]$") or host
+    end
+    return host, port
+end
+
 local function connect_with_pool(redis_client, ip, port, config)
     local node = "down:" .. tostring(ip) .. ":" .. tostring(port)
     local dict = ngx.shared[config.dict_name or DEFAULT_SHARED_DICT_NAME]
@@ -188,7 +205,7 @@ local function connect_with_pool(redis_client, ip, port, config)
     -- while `connect` waits on the network.
     redis_client.pool_base = config.base_pool
 
-    local ok, err = redis_client:connect(ip, port, connect_opts)
+    local ok, err = redis_client:connect(socket_host(ip), port, connect_opts)
     if not ok and dict then
         dict:set(node, true, NODE_DOWN_SECONDS)
     end
@@ -406,10 +423,13 @@ local function parse_masters(self, redis_client)
             if is_master then
                 -- 172.26.0.21:6379
                 local ip_port_str = split(node_info[2], "@")[1]
-                local ip_port = split(ip_port_str, ":")
+                local ip, port = parse_endpoint(ip_port_str)
+                if not ip then
+                    return nil, "invalid cluster node address: " .. ip_port_str
+                end
                 table_insert(master_list, {
-                    ip = ip_port[1],
-                    port = tonumber(ip_port[2])
+                    ip = ip,
+                    port = tonumber(port)
                 })
             end
         end
@@ -973,25 +993,16 @@ local function pick_node(self, serv_list, slot, magic_random_seed, ip_host_index
 end
 
 
-local ask_host_and_port = {}
 local function parse_ask_signal(res)
     --ask signal sample:ASK 12191 127.0.0.1:7008, so we need to parse and get 127.0.0.1, 7008
     if res ~= ngx.null then
         if type(res) == "string" and string_sub(res, 1, 3) == "ASK" then
-            local matched = re_match(res, [[^ASK [^ ]+ ([^:]+):([^ ]+)]], "jo", nil, ask_host_and_port)
-            if not matched then
-                return nil, nil
-            end
-            return matched[1], matched[2]
+            return parse_endpoint(string.match(res, "^ASK %d+ (.+)$") or "")
         end
         if type(res) == "table" then
             for i = 1, #res do
                 if type(res[i]) == "string" and string_sub(res[i], 1, 3) == "ASK" then
-                    local matched = re_match(res[i], [[^ASK [^ ]+ ([^:]+):([^ ]+)]], "jo", nil, ask_host_and_port)
-                    if not matched then
-                        return nil, nil
-                    end
-                    return matched[1], matched[2]
+                    return parse_endpoint(string.match(res[i], "^ASK %d+ (.+)$") or "")
                 end
             end
         end
@@ -1153,8 +1164,8 @@ local function handle_command_with_retry(self, target_ip, target_port, asking, c
                     target_ip = nil
                     target_port = nil
                     asking = false
-                    local _, _, moved_ip, moved_port = string_find(err, "MOVED %d+ ([%w%.%-_]+):(%d+)")
-                    if moved_ip == ip and moved_port == tostring(port) then
+                    local moved_ip, moved_port = parse_endpoint(string.match(err, "^MOVED %d+ (.+)$") or "")
+                    if socket_host(moved_ip) == socket_host(ip) and moved_port == tostring(port) then
                         ngx_log(NGX_DEBUG, "nested moved redirection detected, refreshing slots ...")
                     end
                     redis_client:close()

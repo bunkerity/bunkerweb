@@ -19,6 +19,8 @@
 - [BUGFIX] `core`, `api`, `ui`: IPv6 values of `API_LISTEN_IP`, `API_LISTEN_ADDR` and `UI_LISTEN_ADDR` now produce valid listeners.
 - [BUGFIX] `logging`: a bracketed IPv6 syslog address such as `udp://[2001:db8::1]:514` is now used instead of being ignored.
 - [BUGFIX] `ui`: the setup wizard no longer proposes a truncated server name when opened through an IPv6 address.
+- [BUGFIX] `redis`: IPv6 Redis, Sentinel and Cluster hosts, bare or bracketed, now work in the core, sessions, jobs and the API rate limiter.
+- [BUGFIX] `redis`: Redis Cluster now handles IPv6 nodes in slot discovery and in ASK and MOVED redirections.
 - [MISC] `release`: the floating `dev` and `testing` Linux packages and the `testing` GitHub release are no longer published, so package repositories stop offering a phantom upgrade; the installer refuses `--version dev` and `--version testing`.
 - [DOCS] `antibot`, `country`: the help and docs of `ANTIBOT_IGNORE_URI` and `COUNTRY_IGNORE_URI` now say patterns match the normalized path, alone or followed by `?` and the query string.
 - [DEPS] Updated resty-redis-cluster version to v1.7.0

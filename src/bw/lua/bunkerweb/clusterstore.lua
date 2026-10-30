@@ -2,6 +2,7 @@ local ngx = ngx
 local class = require "middleclass"
 local clogger = require "bunkerweb.logger"
 local rc = require "resty.redis.connector"
+local redisendpoints = require "bunkerweb.redisendpoints"
 local rediskeys = require "bunkerweb.rediskeys"
 local resty_redis = require "resty.redis"
 local utils = require "bunkerweb.utils"
@@ -116,7 +117,7 @@ function clusterstore:initialize(pool)
 			ssl = self.variables["REDIS_SSL"] == "yes",
 			ssl_verify = self.variables["REDIS_SSL_VERIFY"] == "yes",
 		},
-		host = self.variables["REDIS_HOST"],
+		host = redisendpoints.socket_host(self.variables["REDIS_HOST"]),
 		port = tonumber(self.variables["REDIS_PORT"]),
 		db = tonumber(self.variables["REDIS_DATABASE"]),
 		username = self.variables["REDIS_USERNAME"],
@@ -133,12 +134,7 @@ function clusterstore:initialize(pool)
 	end
 	if self.variables["REDIS_SENTINEL_HOSTS"] ~= "" then
 		for sentinel_host in self.variables["REDIS_SENTINEL_HOSTS"]:gmatch("%S+") do
-			local shost, sport = sentinel_host:match("([^:]+):?(%d*)")
-			if sport == "" then
-				sport = 26379
-			else
-				sport = tonumber(sport)
-			end
+			local shost, sport = redisendpoints.parse_endpoint(sentinel_host, 26379)
 			local data = { host = shost, port = sport }
 			if options.sentinel_username ~= "" then
 				data.username = options.sentinel_username
@@ -271,7 +267,7 @@ local function node_client(self, host, port)
 	red:set_timeouts(self.options.connect_timeout, self.options.send_timeout, self.options.read_timeout)
 	-- No keepalive pool: DBSIZE is rare, and a pooled socket would skip AUTH after a
 	-- credential or TLS change.
-	local ok, err = red:connect(host, port, {
+	local ok, err = red:connect(redisendpoints.socket_host(host), port, {
 		ssl = self.options.connect_opts.ssl,
 		ssl_verify = self.options.connect_opts.ssl_verify,
 	})
