@@ -81,7 +81,7 @@
       "name": "lua-resty-dns v0.24",
       "url": "https://github.com/openresty/lua-resty-dns.git",
       "commit": "b68eaecbf7997ac71c08ba56032b1f45438bd758",
-      "post_install": "rm -r src/deps/src/lua-resty-dns/t"
+      "post_install": "rm -r src/deps/src/lua-resty-dns/t && patch --forward src/deps/src/lua-resty-dns/lib/resty/dns/resolver.lua src/deps/misc/lua-resty-dns-arpa-mapped.patch || rm src/deps/src/lua-resty-dns/lib/resty/dns/resolver.lua.orig src/deps/src/lua-resty-dns/lib/resty/dns/resolver.lua.rej"
     },
     {
       "id": "lua-resty-env",

@@ -1,0 +1,39 @@
+--- a/lib/resty/dns/resolver.lua
++++ b/lib/resty/dns/resolver.lua
+@@ -89,17 +89,6 @@
+ local mt = { __index = _M }
+ 
+ 
+-local arpa_tmpl = new_tab(72, 0)
+-
+-for i = 1, #IP6_ARPA do
+-    arpa_tmpl[64 + i] = byte(IP6_ARPA, i)
+-end
+-
+-for i = 2, 64, 2 do
+-    arpa_tmpl[i] = DOT_CHAR
+-end
+-
+-
+ local function udp_socks_close(self)
+     if self.socks == nil then
+         return
+@@ -999,7 +988,18 @@
+ 
+ function _M.arpa_str(addr)
+     if find(addr, ":", 1, true) then
++        -- An embedded IPv4 tail occupies two IPv6 groups.
++        addr = gsub(addr, "(%d+)%.(%d+)%.(%d+)%.(%d+)$", function(a, b, c, d)
++            return format("%02x%02x:%02x%02x", a, b, c, d)
++        end)
+         addr = _expand_ipv6_addr(addr)
++        local arpa_tmpl = new_tab(72, 0)
++        for i = 1, #IP6_ARPA do
++            arpa_tmpl[64 + i] = byte(IP6_ARPA, i)
++        end
++        for i = 2, 64, 2 do
++            arpa_tmpl[i] = DOT_CHAR
++        end
+         local idx, hidx, addrlen = 1, 1, #addr
+ 
+         for i = addrlen, 0, -1 do
