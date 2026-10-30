@@ -25,6 +25,7 @@
 - [MISC] `release`: the floating `dev` and `testing` Linux packages and the `testing` GitHub release are no longer published, so package repositories stop offering a phantom upgrade; the installer refuses `--version dev` and `--version testing`.
 - [DOCS] `antibot`, `country`: the help and docs of `ANTIBOT_IGNORE_URI` and `COUNTRY_IGNORE_URI` now say patterns match the normalized path, alone or followed by `?` and the query string.
 - [DEPS] Updated resty-redis-cluster version to v1.7.0
+- [DEPS] Updated the web UI libraries: i18next to v26.5.11, i18next-http-backend to v4.0.6, i18next-browser-languagedetector to v8.2.3, ipaddr.js to v2.5.0 and Ace to v1.45.2
 
 ## v1.6.18~rc2 - 2026/10/30
 
