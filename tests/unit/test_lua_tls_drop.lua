@@ -400,8 +400,8 @@ it("proxy protocol: an IPv6 client is printed the way nginx prints $remote_addr"
 	assert(verdict == "drop" and seen == "2001:db8::1", tostring(seen))
 end)
 
--- The PROXY address must come out byte for byte as nginx's ngx_inet6_ntop prints $remote_addr (a mapped address stays
--- IPv6 there), or the ban and whitelist lookups of the ClientHello drop use a different key than the access phase
+-- The PROXY address must come out as the access phase keys it, or the ClientHello drop looks up another ban and
+-- whitelist key: ngx_inet6_ntop spelling for IPv6, and (decision 1) an IPv4-mapped IPv6 address is its IPv4 address
 local function proxy_key(text)
 	set_reasons("crowdsec")
 	pp_addr, seen_ip = text, nil
@@ -409,20 +409,20 @@ local function proxy_key(text)
 	return seen_ip
 end
 
-it("proxy protocol: IPv4-mapped address keeps its IPv6 spelling", function()
+it("proxy protocol: IPv4-mapped address is its IPv4 address", function()
 	for _, text in ipairs({ "::ffff:9.9.9.9", "::ffff:0909:0909", "::FFFF:9.9.9.9", "0:0:0:0:0:ffff:9.9.9.9" }) do
-		assert(proxy_key(text) == "::ffff:9.9.9.9", text .. " -> " .. tostring(proxy_key(text)))
+		assert(proxy_key(text) == "9.9.9.9", text .. " -> " .. tostring(proxy_key(text)))
 	end
-	bans["::ffff:9.9.9.9"] = { reason = "crowdsec", rank = 4 }
-	assert(behind_proxy("1.2.3.4") == "drop", "the ban keyed on nginx's $remote_addr is found")
+	bans["9.9.9.9"] = { reason = "crowdsec", rank = 4 }
+	assert(behind_proxy("1.2.3.4") == "drop", "the ban keyed on the IPv4 address is found")
 	wl = true
-	assert(behind_proxy("1.2.3.4") == nil, "a whitelist entry for the IPv6 spelling lifts the drop")
-	assert(wl_args.ip == "::ffff:9.9.9.9", tostring(wl_args.ip))
+	assert(behind_proxy("1.2.3.4") == nil, "a whitelist entry for the IPv4 address lifts the drop")
+	assert(wl_args.ip == "9.9.9.9", tostring(wl_args.ip))
 end)
 
 it("proxy protocol: leading zeros in an embedded IPv4 tail are read the way ngx_inet6_addr reads them", function()
 	for _, text in ipairs({ "::ffff:009.009.009.009", "::ffff:9.9.9.009", "0:0:0:0:0:ffff:09.9.9.9", "::ffff:9..9.9" }) do
-		local want = text == "::ffff:9..9.9" and "::ffff:9.0.9.9" or "::ffff:9.9.9.9"
+		local want = text == "::ffff:9..9.9" and "9.0.9.9" or "9.9.9.9"
 		assert(proxy_key(text) == want, text .. " -> " .. tostring(proxy_key(text)))
 	end
 	for _, text in ipairs({
@@ -442,7 +442,7 @@ it("proxy protocol: IPv4-compatible and other dotted-tail addresses follow ngx_i
 	assert(proxy_key("::9.9.9.9") == "::9.9.9.9", tostring(proxy_key("::9.9.9.9")))
 	assert(proxy_key("::0909:0909") == "::9.9.9.9")
 	assert(proxy_key("::1.2.3.4") == "::1.2.3.4")
-	assert(proxy_key("::ffff:0:1") == "::ffff:0.0.0.1")
+	assert(proxy_key("::ffff:0:1") == "0.0.0.1")
 	assert(proxy_key("::1") == "::1")
 	assert(proxy_key("::2") == "::2")
 	assert(proxy_key("::") == "::")
@@ -532,13 +532,14 @@ it("detect mode: detect, never drop", function()
 	assert(d() == "detect")
 end)
 
-it("IPv4-mapped client keeps the IPv6 spelling nginx prints for $remote_addr", function()
+-- decision 1: an IPv4-mapped IPv6 address is its IPv4 address
+it("IPv4-mapped client is looked up as its IPv4 address", function()
 	set_reasons("crowdsec")
 	local_ban("crowdsec", 4)
 	raw = string.rep("\0", 10) .. "\255\255\1\2\3\4"
 	fam = "inet6"
-	assert(d() == nil, "the IPv4 ban is not the key nginx looks up for this peer")
-	assert(seen_ip == "::ffff:1.2.3.4", tostring(seen_ip))
+	assert(d() == "drop", "the IPv4 ban is the key looked up for this mapped peer")
+	assert(seen_ip == "1.2.3.4", tostring(seen_ip))
 end)
 
 it("unsupported address: no drop", function()

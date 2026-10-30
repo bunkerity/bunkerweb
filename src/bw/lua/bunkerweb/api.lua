@@ -25,8 +25,7 @@ local logger = clogger:new("API")
 local get_country = utils.get_country
 local get_variable = utils.get_variable
 local is_ip_in_networks = utils.is_ip_in_networks
-local is_ipv4 = utils.is_ipv4
-local is_ipv6 = utils.is_ipv6
+local normalize_ip = utils.normalize_ip
 
 local RESERVED_SERVICE_NAMES = {
 	["unknown"] = true,
@@ -873,10 +872,12 @@ api.global.POST["^/unban$"] = function(self)
 		return self:response(HTTP_INTERNAL_SERVER_ERROR, "error", "can't decode JSON : " .. ip)
 	end
 
-	-- Validate IP address
-	if not ip["ip"] or (not is_ipv4(ip["ip"]) and not is_ipv6(ip["ip"])) then
+	-- Validate IP address and keep its canonical spelling: one address is one ban
+	local canonical_ip = type(ip) == "table" and normalize_ip(ip["ip"])
+	if not canonical_ip then
 		return self:response(HTTP_BAD_REQUEST, "error", "invalid IP address")
 	end
+	ip["ip"] = canonical_ip
 
 	local ban_scope = ip["ban_scope"] or "global"
 	local service = ip["service"]
@@ -925,7 +926,8 @@ local function read_lease_args(self)
 		return nil, self:response(HTTP_BAD_REQUEST, "error", "can't decode JSON")
 	end
 	local ip, ban_scope, service = body["ip"], body["ban_scope"] or "global", body["service"]
-	if type(ip) ~= "string" or (not is_ipv4(ip) and not is_ipv6(ip)) then
+	ip = normalize_ip(ip)
+	if not ip then
 		return nil, self:response(HTTP_BAD_REQUEST, "error", "invalid IP address")
 	end
 	if ban_scope ~= "global" and ban_scope ~= "service" then
@@ -1019,10 +1021,12 @@ api.global.POST["^/ban$"] = function(self)
 		ban.ban_scope = ip["ban_scope"]
 	end
 
-	-- Validate IP address
-	if not ban.ip or (not is_ipv4(ban.ip) and not is_ipv6(ban.ip)) then
+	-- Validate IP address and keep its canonical spelling: one address is one ban
+	ban.ip = normalize_ip(ban.ip)
+	if not ban.ip then
 		return self:response(HTTP_BAD_REQUEST, "error", "invalid IP address")
 	end
+	ip["ip"] = ban.ip
 
 	-- Validate expiration
 	if ban.exp and (type(ban.exp) ~= "number" or ban.exp < 0) then

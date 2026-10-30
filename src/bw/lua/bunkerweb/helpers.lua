@@ -2,6 +2,7 @@ local ngx = ngx
 local base = require "resty.core.base"
 local bwctx = require "bunkerweb.ctx"
 local cjson = require "cjson"
+local ip_key = require("bunkerweb.ipaddr").key
 local utils = require "bunkerweb.utils"
 
 local open = io.open
@@ -310,7 +311,9 @@ helpers.fill_ctx = function(no_ref)
 			if subsystem == "stream" then
 				data.kind = "stream"
 			end
-			data.remote_addr = var.remote_addr
+			-- Canonical identity of the client: an IPv4-mapped IPv6 address is its IPv4 address, so every plugin that
+			-- keys on the client (rate limits, bad behavior, country, DNSBL, reverse scan...) sees one address.
+			data.remote_addr = ip_key(var.remote_addr)
 			data.server_name = var.server_name
 			data.time_local = var.time_local
 			if data.kind == "http" then

@@ -81,7 +81,7 @@ function reversescan:access()
 			break
 		end
 		-- Wait for first thread
-		local ok, open, port = wait(unpack(wait_threads))
+		local ok, open, port, scan_err = wait(unpack(wait_threads))
 		-- Error case
 		if not ok then
 			ret_threads = false
@@ -96,7 +96,12 @@ function reversescan:access()
 		if open then
 			result = "open"
 		end
-		results[port] = result
+		if scan_err then
+			-- the port was never tried: nothing is cached, so the next request tries again
+			self.logger:log(ngx.WARN, "could not scan port " .. port .. " : " .. scan_err)
+		else
+			results[port] = result
+		end
 		-- Port is opened
 		if open then
 			ret_threads = true
@@ -136,15 +141,23 @@ function reversescan:preread()
 	return self:access()
 end
 
+-- Returns open, port and, when the port could not be tried at all (an address the socket layer refuses, no route...),
+-- the error. A refused or timed out connection is a real answer ("closed"); anything else proves nothing about the
+-- port, so the caller must not remember it as closed.
 function reversescan.scan(ip, port, timeout)
 	local tcpsock = ngx_socket.tcp()
 	tcpsock:settimeout(timeout)
-	local ok, _ = tcpsock:connect(ip, port)
+	-- the socket layer reads "host:port" like a URL, an IPv6 literal needs its brackets
+	local host = ip:find(":", 1, true) and ("[" .. ip .. "]") or ip
+	local ok, err = tcpsock:connect(host, port)
 	tcpsock:close()
-	if not ok then
+	if ok then
+		return true, port
+	end
+	if err == "connection refused" or err == "timeout" then
 		return false, port
 	end
-	return true, port
+	return false, port, err or "unknown error"
 end
 
 function reversescan:is_in_cache(ip_port)

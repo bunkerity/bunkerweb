@@ -208,6 +208,9 @@ return function(root)
 			end
 			return value
 		end,
+		normalize_ip = function(ip)
+			return require("bunkerweb.ipaddr").normalize(ip)
+		end,
 		is_ipv4 = function(ip)
 			return type(ip) == "string" and ip:match("^%d+%.%d+%.%d+%.%d+$") ~= nil
 		end,

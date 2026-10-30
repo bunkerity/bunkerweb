@@ -173,6 +173,7 @@ Every first-party Lua module, relative to `src/bw/lua/` and `src/common/core/` (
 | `bunkerweb/datastore.lua` | `common/test_datastore_worker_lru_exptime.py` | pytest, module |
 | `bunkerweb/duration.lua` | `common/test_duration_parser.py`, `common/test_duration_regex_parity.py` | pytest, module |
 | `bunkerweb/helpers.lua` | `test_lua_init_store_order.lua` | standalone |
+| `bunkerweb/ipaddr.lua` | `test_lua_ipaddr.lua`, `test_lua_ipv6_ban_identity.lua` | standalone |
 | `bunkerweb/logger.lua` | `common/test_bw_logger_lua.py` | pytest, module |
 | `bunkerweb/mmdb.lua` | `common/test_bw_mmdb_lua.py` | pytest, module |
 | `bunkerweb/plugin.lua` | `common/test_bw_plugin_lua.py` | pytest, module |
@@ -201,7 +202,7 @@ Every first-party Lua module, relative to `src/bw/lua/` and `src/common/core/` (
 | `misc/misc.lua` | `common/test_misc_behaviour_lua.py` (L1) | pytest, module |
 | `mtls/mtls.lua` | `common/test_mtls_behaviour_lua.py` (L1) | pytest, module |
 | `redis/redis.lua` | `common/test_redis_behaviour_lua.py` | pytest, module |
-| `reversescan/reversescan.lua` | `common/test_duration_readers_lua.py` | pytest, module |
+| `reversescan/reversescan.lua` | `common/test_duration_readers_lua.py`, `common/test_ipv6_reversescan_lua.py` | pytest, module |
 | `robotstxt/robotstxt.lua` | `common/test_robotstxt_behaviour_lua.py` (L3) | pytest, module |
 | `securitytxt/securitytxt.lua` | `common/test_securitytxt_behaviour_lua.py` (L1) | pytest, module |
 | `selfsigned/selfsigned.lua` | `common/test_init_empty_server_name_guards_lua.py` | pytest, module (`init`) |

@@ -51,6 +51,7 @@ def is_ip_whitelisted_source() -> str:
 # question here is which service table an answer comes from, not how a shared dict behaves.
 PREAMBLE = r"""
 local utils = {}
+local ip_key = require("bunkerweb.ipaddr").key
 local var = { server_name = "" }
 
 VARIABLES = {}

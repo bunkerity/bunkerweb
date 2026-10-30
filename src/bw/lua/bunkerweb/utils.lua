@@ -2,6 +2,7 @@ local ngx = ngx
 local banlease = require "bunkerweb.banlease"
 local cdatastore = require "bunkerweb.datastore"
 local clogger = require "bunkerweb.logger"
+local ipaddr = require "bunkerweb.ipaddr"
 local mmdb = require "bunkerweb.mmdb"
 local rediskeys = require "bunkerweb.rediskeys"
 
@@ -26,6 +27,7 @@ local subsystem = ngx.config.subsystem
 local get_phase = ngx.get_phase
 local kill = ngx.thread.kill
 local ipmatcher_new = ipmatcher.new
+local ip_key = ipaddr.key
 local parse_ipv4 = ipmatcher.parse_ipv4
 local parse_ipv6 = ipmatcher.parse_ipv6
 local open = io.open
@@ -340,11 +342,17 @@ utils.is_ipv4 = function(ip)
 	return parse_ipv4(ip)
 end
 
+-- Canonical identity of a client address: RFC 5952 text for IPv6, plain IPv4 for an IPv4-mapped IPv6 address.
+-- nil when `ip` is not an address. Every ban, lease, counter and rate-limit key goes through it.
+utils.normalize_ip = ipaddr.normalize
+
 utils.is_ipv6 = function(ip)
 	return parse_ipv6(ip)
 end
 
 utils.ip_is_global = function(ip)
+	-- An IPv4-mapped IPv6 address is judged as the IPv4 address it carries
+	ip = ip_key(ip)
 	-- Reserved, non public IPs
 	local reserved_ips = {
 		"0.0.0.0/8",
@@ -365,7 +373,7 @@ utils.ip_is_global = function(ip)
 		"255.255.255.255/32",
 		"::/128",
 		"::1/128",
-		"::ffff:0:0/96",
+		-- ::ffff:0:0/96 is absent: an IPv4-mapped address is judged as the IPv4 address it carries
 		"::ffff:0:0:0/96",
 		"64:ff9b::/96",
 		"64:ff9b:1::/48",
@@ -595,7 +603,7 @@ utils.get_reason = function(ctx)
 	else
 		ip = var.remote_addr
 	end
-	local banned, _ = datastore:get("bans_ip_" .. ip)
+	local banned, _ = datastore:get("bans_ip_" .. ip_key(ip))
 	if banned then
 		local ok, ban_data = pcall(decode, banned)
 		if ok then
@@ -645,6 +653,7 @@ utils.is_ip_whitelisted = function(ip, server_name, opts)
 	if not ip then
 		return nil, "ip is nil"
 	end
+	ip = ip_key(ip)
 	-- Allow caller to provide service name; otherwise use current server_name
 	if not local_only and (not server_name or server_name == "") then
 		server_name = var.server_name
@@ -786,6 +795,7 @@ utils.get_resolvers = function()
 end
 
 utils.get_rdns = function(ip, ctx, pool)
+	ip = ip_key(ip)
 	-- Check cache
 	local cachestore = utils.new_cachestore(ctx, pool)
 	local ok, value = cachestore:get("rdns_" .. ip)
@@ -944,6 +954,7 @@ utils.rdns_forward_confirmed = function(rdns_list, suffix_list, ctx, remote_addr
 	if not rdns_list or not suffix_list then
 		return nil
 	end
+	remote_addr = ip_key(remote_addr)
 	local log_logger = plugin_logger or logger
 	for _, rdns in ipairs(rdns_list) do
 		for _, suffix in ipairs(suffix_list) do
@@ -975,6 +986,7 @@ utils.rdns_forward_confirmed = function(rdns_list, suffix_list, ctx, remote_addr
 end
 
 utils.get_country = function(ip)
+	ip = ip_key(ip)
 	-- Check if mmdb is loaded
 	if not mmdb.country_db then
 		return false, "mmdb country not loaded"
@@ -991,6 +1003,7 @@ utils.get_country = function(ip)
 end
 
 utils.get_asn = function(ip)
+	ip = ip_key(ip)
 	-- Check if mmdp is loaded
 	if not mmdb.asn_db then
 		return false, "mmdb asn not loaded"
@@ -1168,6 +1181,7 @@ local function lease_copy_valid(ip, ban_data)
 end
 
 utils.is_banned = function(ip, server_name, ctx)
+	ip = ip_key(ip)
 	-- Get Redis config once
 	local use_redis, err = utils.get_variable("USE_REDIS", false)
 	if not use_redis then
@@ -1435,6 +1449,7 @@ end
 -- Local-only twin of is_banned for the ClientHello: same precedence and lease epoch rule, dict reads only.
 -- Returns banned, reason, rank. banned is nil on a dict error, reason then holds the error.
 utils.is_banned_local = function(ip, service)
+	ip = ip_key(ip)
 	local keys, ranks = ban_keys(ip, service, true)
 	for i, key in ipairs(keys) do
 		local value, err = datastore:get(key)
@@ -1463,8 +1478,9 @@ local function bump_markers(ip)
 end
 
 local function add_ban(ip, reason, ttl, service, country, ban_scope, reason_data)
-	-- Validate IP address
-	if not ip or (not utils.is_ipv4(ip) and not utils.is_ipv6(ip)) then
+	-- Validate the address and store the ban under its canonical identity, whatever spelling it came in
+	ip = ipaddr.normalize(ip)
+	if not ip then
 		return false, "invalid IP address"
 	end
 
@@ -1539,6 +1555,7 @@ local function add_ban(ip, reason, ttl, service, country, ban_scope, reason_data
 end
 
 utils.add_ban = function(ip, reason, ttl, service, country, ban_scope, reason_data)
+	ip = ip_key(ip)
 	bump_markers(ip)
 	local ok, msg = add_ban(ip, reason, ttl, service, country, ban_scope, reason_data)
 	bump_markers(ip)
@@ -1546,8 +1563,9 @@ utils.add_ban = function(ip, reason, ttl, service, country, ban_scope, reason_da
 end
 
 local function remove_ban(ip, service, ban_scope)
-	-- Validate IP address
-	if not ip or (not utils.is_ipv4(ip) and not utils.is_ipv6(ip)) then
+	-- Validate the address and unban its canonical identity, whatever spelling it came in
+	ip = ipaddr.normalize(ip)
+	if not ip then
 		return false, "invalid IP address"
 	end
 
@@ -1576,11 +1594,34 @@ local function remove_ban(ip, service, ban_scope)
 			counter_services[#counter_services + 1] = name
 		end
 	end
+	-- Bans stored by an older version under another spelling of this address (expanded, upper case, mapped) are
+	-- the same ban: the sweep below names them by what they normalize to, so they go too, locally and in Redis.
+	-- A legacy spelling that only lives in Redis cannot be listed from here and stays until its TTL expires.
+	local function same_ip(spelling)
+		return spelling == ip or (spelling:find(":", 1, true) ~= nil and ip_key(spelling) == ip)
+	end
 	if ban_scope == "service" and service then
 		local ban_key = "bans_service_" .. service .. "_ip_" .. ip
 		keys_to_delete[#keys_to_delete + 1] = ban_key
 		delete_local(ban_key)
 		delete_local(BADBEHAVIOR_LOCAL_COUNTER_PREFIX .. service .. "_" .. ip)
+		local service_prefix = "bans_service_" .. service .. "_ip_"
+		local function sweep_service(store)
+			for _, k in ipairs(store:keys()) do
+				if
+					k:sub(1, #service_prefix) == service_prefix
+					and k ~= ban_key
+					and same_ip(k:sub(#service_prefix + 1))
+				then
+					keys_to_delete[#keys_to_delete + 1] = k
+					delete_local(k)
+				end
+			end
+		end
+		sweep_service(datastore)
+		if other_datastore then
+			sweep_service(other_datastore)
+		end
 	else
 		-- Delete global ban
 		local global_key = "bans_ip_" .. ip
@@ -1590,15 +1631,22 @@ local function remove_ban(ip, service, ban_scope)
 		-- Delete all service-specific bans for this IP. Bad Behavior counters go too, including the
 		-- per-service ones that never reached the threshold and so have no ban key. The counter prefix
 		-- ends with "_", so the global counter key matches counter_suffix as well.
-		local suffix = "_ip_" .. ip
 		local counter_suffix = "_" .. ip
 		local function sweep(store)
 			for _, k in ipairs(store:keys()) do
-				if k:sub(1, 13) == "bans_service_" and k:sub(-#suffix) == suffix then
-					keys_to_delete[#keys_to_delete + 1] = k
-					-- 13 = #"bans_service_", so the name starts at 14.
-					add_counter_service(k:sub(14, #k - #suffix))
-					delete_local(k)
+				if k:sub(1, 8) == "bans_ip_" then
+					if k ~= global_key and same_ip(k:sub(9)) then
+						keys_to_delete[#keys_to_delete + 1] = k
+						delete_local(k)
+					end
+				elseif k:sub(1, 13) == "bans_service_" then
+					-- Greedy: the IP never contains "_ip_", a service name might.
+					local name, spelling = k:match("^bans_service_(.*)_ip_(.+)$")
+					if name and same_ip(spelling) then
+						keys_to_delete[#keys_to_delete + 1] = k
+						add_counter_service(name)
+						delete_local(k)
+					end
 				elseif
 					k:sub(1, #BADBEHAVIOR_LOCAL_COUNTER_PREFIX) == BADBEHAVIOR_LOCAL_COUNTER_PREFIX
 					and k:sub(-#counter_suffix) == counter_suffix
@@ -1649,6 +1697,7 @@ local function remove_ban(ip, service, ban_scope)
 end
 
 utils.remove_ban = function(ip, service, ban_scope)
+	ip = ip_key(ip)
 	bump_markers(ip)
 	local ok, msg = remove_ban(ip, service, ban_scope)
 	bump_markers(ip)

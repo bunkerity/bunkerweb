@@ -2,7 +2,6 @@ from collections import defaultdict
 from contextlib import suppress
 from datetime import datetime
 from io import BytesIO, StringIO
-from ipaddress import ip_address as validate_ip_address
 from json import JSONDecodeError, loads
 from math import floor
 from time import time
@@ -28,6 +27,7 @@ from app.routes.utils import (
 )
 from CrowdSec import CrowdSecClient, CrowdSecError  # type: ignore
 from crowdsec_unban import apply as crowdsec_apply, preview as crowdsec_preview_data, revalidate as crowdsec_revalidate  # type: ignore
+from ip_identity import normalize_ip  # type: ignore
 from redis_keys import ban_ip, unescape as redis_unescape  # type: ignore
 
 bans = Blueprint("bans", __name__)
@@ -790,7 +790,7 @@ def bans_ban():
 
         # Validate IP address
         try:
-            validate_ip_address(ip)
+            ip = normalize_ip(ip)  # one address is one ban, whatever its spelling
         except ValueError:
             flash(f"Invalid IP address: {ip}", "error")
             continue
@@ -823,7 +823,7 @@ def _normalize_target(ip, ban_scope, service):
     """(ip, ban_scope, service) of a CrowdSec ban as the instances store it. Raises ValueError on a malformed target."""
     if not isinstance(ip, str):
         raise ValueError("Invalid IP address")
-    validate_ip_address(ip)
+    ip = normalize_ip(ip)
     if service is not None and not isinstance(service, str):
         raise ValueError("Invalid service")
     if ban_scope not in ("global", "service"):
@@ -986,7 +986,7 @@ def bans_unban():
 
         # Validate IP address
         try:
-            validate_ip_address(ip)
+            ip = normalize_ip(ip)  # one address is one ban, whatever its spelling
         except ValueError:
             flash(f"Invalid IP address: {ip}", "error")
             continue
@@ -1097,7 +1097,7 @@ def bans_update_duration():
 
         # Validate IP address
         try:
-            validate_ip_address(ip)
+            ip = normalize_ip(ip)  # one address is one ban, whatever its spelling
         except ValueError:
             flash(f"Invalid IP address: {ip}", "error")
             continue

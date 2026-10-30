@@ -30,6 +30,9 @@ uri_rx = re_compile(rb"^/")
 
 def check_line(kind: str, line: bytes) -> Tuple[bool, bytes]:
     if kind == "IP":
+        # a zone id ("fe80::1%eth0") names an interface of the downloading host, not an address the matcher can load
+        if b"%" in line:
+            return False, b""
         if b"/" in line:
             with suppress(ValueError):
                 ip_network(line.decode("utf-8"))

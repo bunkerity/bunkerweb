@@ -4,11 +4,15 @@
 
 - [SECURITY] `api`: when `API_LISTEN_HTTPS=yes`, the scheduler, UI, API service and `bwcli` check that an instance presents the generated API certificate (SHA-256 pin) instead of trusting any. A mismatch is logged and the call still falls back to HTTP.
 - [SECURITY] `ui`: failed logins (password, TOTP or recovery code) are counted per client IP and per username in the database, and five in 15 minutes lock that IP or username for 15 minutes (`LOGIN_THROTTLE`, `LOGIN_MAX_ATTEMPTS`, `LOGIN_WINDOW_MINUTES`, `LOGIN_LOCKOUT_MINUTES`).
+- [SECURITY] `core`: an IPv6 address is now one ban whatever its spelling (expanded, upper case or IPv4-mapped), in every ban, unban and lookup path.
+- [SECURITY] `core`: an IPv4-mapped IPv6 client (`::ffff:a.b.c.d`) now matches the IPv4 rules of IP lists, trusted proxies, bans and rate limits.
+- [SECURITY] `core`: an invalid or zone-id entry in an IP list is now skipped instead of disabling the whole list.
 - [BUGFIX] `core`: stream services no longer abort NGINX init when an HTTP-only plugin (PRO included) is installed, a regression in 1.6.17.
 - [BUGFIX] `bunkernet`: reports now carry only a fixed set of request headers (User-Agent, Accept, Accept-Encoding, Accept-Language, Content-Type, Content-Length) and no longer include the values matched in request headers and cookies, also for reports queued before the upgrade; the plugin documentation lists exactly what a report contains.
 - [BUGFIX] `installer`: on Debian and Ubuntu, the installer warns that the distribution PostgreSQL client cannot back up a newer server and shows the PGDG commands to install a matching one.
 - [BUGFIX] `ui`: report and ban dates carry their UTC offset, so the browser no longer shifts them by the viewer's time zone. (Fixes #4118)
 - [BUGFIX] `redis`: Redis Cluster commands now follow ASK and MOVED redirections during slot migrations.
+- [BUGFIX] `reversescan`: scanning an IPv6 client now works, and a port that could not be tried is no longer cached as closed.
 - [MISC] `release`: the floating `dev` and `testing` Linux packages and the `testing` GitHub release are no longer published, so package repositories stop offering a phantom upgrade; the installer refuses `--version dev` and `--version testing`.
 - [DOCS] `antibot`, `country`: the help and docs of `ANTIBOT_IGNORE_URI` and `COUNTRY_IGNORE_URI` now say patterns match the normalized path, alone or followed by `?` and the query string.
 - [DEPS] Updated resty-redis-cluster version to v1.7.0

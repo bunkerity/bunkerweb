@@ -54,6 +54,7 @@ VAR = {}
 ngx = { var = VAR, status = 200 }
 local var = VAR
 local utils = {}
+local ip_key = require("bunkerweb.ipaddr").key
 utils.get_security_mode = function() return "block" end
 utils.get_deny_status = function() return 403 end
 local decode = function(s) return {} end

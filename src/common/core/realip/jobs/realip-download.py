@@ -23,6 +23,9 @@ from jobs import Job  # type: ignore
 
 
 def check_line(line):
+    # A zone id ("fe80::1%eth0") names an interface of the downloading host, not an address NGINX can load
+    if b"%" in line:
+        return False, b""
     with suppress(ValueError):
         if b"/" in line:
             ip_network(line.decode())
