@@ -37,11 +37,17 @@ package.loaded["resty.redis"] = {
 	end,
 }
 local lock_keys = {}
+local lock_timeouts = {}
+local lock_error
 package.loaded["resty.lock"] = {
-	new = function()
+	new = function(_, _, opts)
+		lock_timeouts[#lock_timeouts + 1] = opts.timeout
 		return {
 			lock = function(_, key)
 				lock_keys[#lock_keys + 1] = key
+				if lock_error then
+					return nil, lock_error
+				end
 				return 0
 			end,
 			unlock = function()
@@ -165,7 +171,38 @@ it("slot cache init lock is per worker", function()
 		max_connection_attempts = 1,
 	})
 	assert(#lock_keys >= 1, "init_slots never took the lock")
-	assert(lock_keys[1] == "redis_cluster_slot_bw_lock_key_test4242", "lock key: " .. tostring(lock_keys[1]))
+	-- Upstream 1.7.0 scopes by worker id, with a pid fallback outside workers.
+	assert(lock_keys[1] == "redis_cluster_slot_bw_lock_key_test_0", "lock key: " .. tostring(lock_keys[1]))
+	local worker_id = ngx.worker.id
+	ngx.worker.id = function()
+		return 1
+	end
+	rc:new({ name = "bw_lock_key_test", serv_list = { { ip = "10.0.0.1", port = 7000 } }, max_connection_attempts = 1 })
+	assert(lock_keys[2] == "redis_cluster_slot_bw_lock_key_test_1", "lock key: " .. tostring(lock_keys[2]))
+	ngx.worker.id = function()
+		return nil
+	end
+	rc:new({ name = "bw_lock_key_test", serv_list = { { ip = "10.0.0.1", port = 7000 } }, max_connection_attempts = 1 })
+	ngx.worker.id = worker_id
+	assert(lock_keys[3] == "redis_cluster_slot_bw_lock_key_test_p4242", "lock key: " .. tostring(lock_keys[3]))
+end)
+it("slot cache init lock defaults to connect timeout in seconds", function()
+	lock_timeouts = {}
+	rc:new({ name = "bw_lock_timeout_test", serv_list = { { ip = "10.0.0.1", port = 7000 } }, connect_timeout = 250 })
+	assert(lock_timeouts[1] == 0.25, "lock timeout: " .. tostring(lock_timeouts[1]))
+end)
+it("slot cache init lock keeps explicit timeout", function()
+	lock_timeouts = {}
+	rc:new({ name = "bw_lock_override_test", serv_list = { { ip = "10.0.0.1", port = 7000 } }, lock_timeout = 2 })
+	assert(lock_timeouts[1] == 2, "lock timeout: " .. tostring(lock_timeouts[1]))
+end)
+it("slot refresh never waits behind another refresh", function()
+	lock_timeouts = {}
+	lock_error = "timeout"
+	local ok, err = rc.refresh_slots({ config = { name = "bw_refresh_test" } })
+	lock_error = nil
+	assert(ok == nil and err == "slot refresh already in progress", "refresh error: " .. tostring(err))
+	assert(lock_timeouts[1] == 0, "refresh timeout: " .. tostring(lock_timeouts[1]))
 end)
 
 os.exit(failures == 0 and 0 or 1)

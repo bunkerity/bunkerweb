@@ -132,6 +132,62 @@ else
 end
 ```
 
+`auth_config_reconfigurer` is optional. The library calls it when Redis rejects the credentials,
+for example when the error contains `WRONGPASS` or `invalid password`. It does not call it for a
+dead connection or a socket error, because a new secret cannot fix those. When the configuration
+has no credential, the library does not call it either. When given, it **must** update
+`config.auth`, `config.username` or `config.password` and return `true`. The library then repeats
+AUTH once on the same connection. Any other return value, including `false`, `nil`, `0` and `""`,
+keeps the original AUTH error. AUTH fails before the library sends a command, so no command runs
+twice.
+
+To disable the hook, pass `nil`, `false` or `ngx.null`. Any other non-function value makes `new()`
+return an error.
+
+The function runs once for each rejected connection. Do not put credentials in the error message;
+the library logs that message.
+
+Keep the caller side in mind:
+
+- **Update both configurations.** `new()` copies `username` and `password` from the source
+  configuration. The hook must update that source and `self.config`. When it updates only
+  `self.config`, every new request fails AUTH once, calls the hook again, and does not pool the
+  connection.
+- **Keep the hook short.** The first `new()` and a slot refresh hold a lock while the hook runs.
+  Other requests in the same worker wait for `lock_timeout`, which is 5 seconds by default. Other
+  workers do not wait for the initial slot fetch. Each worker fetches the slots once, so N workers
+  make N slot queries at cold start.
+- **Throttle the reads.** The library does not rate-limit the hook. Add a cooldown, or the secret
+  store sees one read for each rejected connection.
+- **Do not send commands from the hook.** A command on the same instance can fail AUTH again, and
+  the hook runs again.
+- **Update `auth` when you set it.** `auth` wins over `username` and `password`.
+
+When the function updates the credentials, the library does not return that connection to the pool
+named after the previous password. The next connection uses the new name. The library changes
+`config.base_pool` only; it never changes the `connect_opts` values that you set.
+
+The pool name contains the secret that the library sends: `auth` for the legacy option, or
+`username` and `password` for Redis 6. When you set `connect_opts.pool`, you own the pool name and
+the isolation between credentials.
+
+```lua
+local config = {
+    -- ...
+    auth_config_reconfigurer = function(self, err)
+        -- Read the current credentials from your store, then update both places.
+        local password = read_password()
+        if not password then
+            return false
+        end
+
+        self.config.password = password   -- this client
+        config.password = password        -- the source that the next new() copies
+        return true
+    end,
+}
+```
+
 3. Use pipeline
 
 ```lua
@@ -349,6 +405,12 @@ else
 end
 ```
 
+### Flush commands
+
+`flushall` and `flushdb` run on every master. When a master fails, the command continues on the
+other masters and returns an error that lists the failed nodes. Both commands are idempotent, so a
+later call can finish the work.
+
 ### Limitation
 
 1. Doesn't support MSET, MGET operations yet
@@ -362,15 +424,31 @@ end
 5. Limitation only for turn on enable slave read: If slave -> master link is down(maybe still under sync and recovery), resty-redis-cluster will not filter these nodes out. Thus, read from slave may return unexpected response. Suggest always catch the response parsing exception while enable slave read.
    This is because client depends on cluster slots command.
 
+6. An instance is not reentrant for pipelines. `init_pipeline()` stores the queue on the instance, and every command on that instance joins the queue until `commit_pipeline()` or `cancel_pipeline()`. Do not let two coroutines start a pipeline on the same instance. Simple commands are safe to run from several coroutines on one instance while no pipeline is active on it.
+
+7. The client reads the IP of a node from `CLUSTER SLOTS`, which lists only the nodes that hold a slot. When a slot moves to a new node that holds no slot yet, the client reaches the ASK target by hostname only.
+
+8. The client reads an `ASK` or `MOVED` address as `host:port`. An IPv6 literal such as `[::1]:6379` does not parse.
+
 ### Compatibilty
 
-Currently, this library is fully tested with Redis `6.x` and `7.x`.
+Currently, this library is tested with Redis `6.2` and `7.2`. CI runs the same suite on both versions. It leaves out only `t/z-recover.t`, which starts its own fixture.
 
 ### Changelog
 
 #### Unreleased
 
 1. TBD
+
+#### 1.7.0
+
+1. Add the `auth_config_reconfigurer` option. When Redis rejects AUTH, the library calls it and repeats AUTH once on the same connection after it updates the credentials.
+2. Return normal connections to the pool. A connection that replaced its credentials is closed instead. A caller pool name is the exception: when you set `connect_opts.pool`, you own the name and the isolation between credentials.
+3. Include the `auth` value in the pool name. A configuration that uses the legacy `auth` option gets a new pool name after the upgrade, so its idle connections are not reused once. The `config.base_pool` value changes with it.
+4. Follow ASK and MOVED redirects for a single command, and for a pipeline that receives ASK.
+5. Run `flushall` and `flushdb` on every master and list the failed nodes in the error.
+6. Remove the pool name from the DEBUG log. The name contains a hash of the credential.
+7. Use one slot fetch lock for each worker. A slow auth hook in one worker no longer blocks the others.
 
 #### 1.6.1
 

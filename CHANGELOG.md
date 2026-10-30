@@ -8,8 +8,10 @@
 - [BUGFIX] `bunkernet`: reports now carry only a fixed set of request headers (User-Agent, Accept, Accept-Encoding, Accept-Language, Content-Type, Content-Length) and no longer include the values matched in request headers and cookies, also for reports queued before the upgrade; the plugin documentation lists exactly what a report contains.
 - [BUGFIX] `installer`: on Debian and Ubuntu, the installer warns that the distribution PostgreSQL client cannot back up a newer server and shows the PGDG commands to install a matching one.
 - [BUGFIX] `ui`: report and ban dates carry their UTC offset, so the browser no longer shifts them by the viewer's time zone. (Fixes #4118)
+- [BUGFIX] `redis`: Redis Cluster commands now follow ASK and MOVED redirections during slot migrations.
 - [MISC] `release`: the floating `dev` and `testing` Linux packages and the `testing` GitHub release are no longer published, so package repositories stop offering a phantom upgrade; the installer refuses `--version dev` and `--version testing`.
 - [DOCS] `antibot`, `country`: the help and docs of `ANTIBOT_IGNORE_URI` and `COUNTRY_IGNORE_URI` now say patterns match the normalized path, alone or followed by `?` and the query string.
+- [DEPS] Updated resty-redis-cluster version to v1.7.0
 
 ## v1.6.18~rc2 - 2026/10/30
 
