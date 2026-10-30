@@ -1,0 +1,27 @@
+CHANGELOG.md
+  s_60628c795bd662::t_d68d6ba6b9cb34 46
+src/ui/app/routes/instances.py
+  s_60628c795bd662::t_e65edba8b68675 34,40-42,48-49,118,124-125
+src/ui/app/routes/jobs.py
+  s_60628c795bd662::t_879a28bb30ec38 25,31-32,41-42
+src/ui/app/routes/plugins.py
+  s_60628c795bd662::t_7f66035f8c69e3 51,57-58,240,246-247
+src/ui/app/routes/pro.py
+  s_60628c795bd662::t_c454b74ec84b50 56,62-63
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "0c928acf80c3edc40b87a7cdc4f4903ac33b5219",
+  "prompts": {},
+  "sessions": {
+    "s_60628c795bd662": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1869d-2e49-7ff2-8e88-cfcf2fe9cb0c",
+        "model": "unknown"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

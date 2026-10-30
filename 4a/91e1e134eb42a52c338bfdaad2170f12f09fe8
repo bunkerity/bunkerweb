@@ -1,0 +1,175 @@
+src/common/utils/support_common.py
+  s_ac9a490b8e8f11::t_88525c19c9e56f 1-9,11-180,182,189-202,205-209,224-264,336-337
+  s_ac9a490b8e8f11::t_4318498b6c3096 265-335
+  s_ca30216f606eb3::t_82f26a38b0b6a2 476-477
+  s_ca30216f606eb3::t_52b1ddb890611b 10,442-449,478-481,484-492,494,496-497,504-506,508,513,515,517-518,528-530
+  s_ac9a490b8e8f11::t_d71c8a17799136 181,183-188,203-204,210-223
+  s_ac9a490b8e8f11::t_b8dc7d20cd5e39 338-441,452-469,472-473,482-483,493,495,498-503,507,509-512,514,516,519
+  s_ac9a490b8e8f11::t_6dcf169a52abb7 533
+  s_6ccd2f99db4007::t_f89646a4cb5530 450-451
+  s_ac9a490b8e8f11::t_ca702a894493c7 470-471,474-475,520-527,531-532,534-536
+docs/de/troubleshooting.md
+  s_ac9a490b8e8f11::t_f51df5f7810eb7 726-727,729-737
+  s_6d0dff8264600c::t_00b6c439a3af30 728
+CHANGELOG.md
+  s_6ccd2f99db4007::t_ce191c9e35eacd 7
+  s_ac9a490b8e8f11::t_b1f53221945275 8
+docs/fr/troubleshooting.md
+  s_6d0dff8264600c::t_a43a6210f3e38b 728
+  s_ac9a490b8e8f11::t_f51df5f7810eb7 726-727,729-737
+src/common/cli/CLI.py
+  s_421bbb8a0bceaa::t_9553b932b19d09 150-159,161-164
+  s_ca30216f606eb3::t_7724b7f20c2216 247-248,293,1043-1055,1057,1059-1061,1121,1172,1174-1175,1198-1199,1201
+  s_4ae424c736af23::t_67eaab090bfb37 11,250,253
+  s_404f616f75f5b1::t_e8257c61728482 74-76
+  s_ca30216f606eb3::t_82f26a38b0b6a2 1173
+  s_ac9a490b8e8f11::t_489d74f0f40b98 3,5-6,26,31-33,35,37-42,44-48,81-83,105-126,1018-1024,1026-1038,1041-1042,1056,1058,1062-1070,1072-1093,1103,1107,1109,1111-1120,1122-1171,1176-1184,1188-1197,1200,1202-1223,1226-1234
+  s_fb03baedcb77e6::t_d685b279a1bd66 87-98,346-348
+  s_6ccd2f99db4007::t_f0befd44271168 341,349,351,354-373
+  s_9a4c3bfbe93c51::t_c3f5d7b4332ac9 267
+  s_6ccd2f99db4007::t_f095a21cdfc16a 1039-1040
+  s_404f616f75f5b1::t_73eb106ea8c875 1071
+  s_ac9a490b8e8f11::t_c8417070999eaf 99,1104-1106,1185-1187
+  s_6ccd2f99db4007::t_5ef00ff9c781de 84-85,100-101,224-232,234-242,244-246,256,261-263,270-272,277,279,281-282,286-291
+  s_6d0dff8264600c::t_5d74d127d3b197 13
+  s_ac9a490b8e8f11::t_62cc083e1cc930 34
+  s_6d0dff8264600c::t_f664d1856704ba 71-73
+  s_421bbb8a0bceaa::t_60bd04ac035538 77-80
+  s_4ae424c736af23::t_ff4b4d0b82caa9 104,249,251-252,254-255,266,280,283-285
+  s_ca30216f606eb3::t_ce19de57aa6257 322,334
+  s_9a4c3bfbe93c51::t_bf9a78c590b1e7 337,342-345,350,353
+  s_f4be642fd3942d::t_09a5daf09cf8eb 68-70,336
+  s_9a4c3bfbe93c51::t_b4869b40e1a792 86
+  s_ca30216f606eb3::t_86f56dd2b1bbbd 12,36,43,102-103
+  s_ac9a490b8e8f11::t_929b326cb9c66d 14,1025,1094-1102,1108,1110,1224-1225
+  s_404f616f75f5b1::t_4bfda18e2cabf4 127-134,138,140-141,143-149,165
+  s_9a4c3bfbe93c51::t_274131984ad71a 219-223,233,243,257-260,264-265,268-269
+  s_421bbb8a0bceaa::t_947998096f8c7b 160
+  s_6d0dff8264600c::t_481718cbe3450b 135-137,139,142,167-168
+  s_6ccd2f99db4007::t_f46b9ced34e74b 273-276,278
+  s_175dfb7646d720::t_065f383ce65da9 166,292
+src/ui/app/routes/support.py
+  s_ac9a490b8e8f11::t_510a81b43afd11 13-16,18,20,23,29,33,71
+  s_ac9a490b8e8f11::t_1f78a10e8c030c 11-12,17,19
+src/common/cli/main.py
+  s_6d0dff8264600c::t_dd53a104405ee0 84-89
+  s_6d0dff8264600c::t_0df33c18519480 15
+  s_ac9a490b8e8f11::t_c8417070999eaf 73-75
+  s_ca30216f606eb3::t_10abc78484973d 91-92
+  s_ac9a490b8e8f11::t_489d74f0f40b98 71-72,76-77,102-103
+  s_175dfb7646d720::t_ccc15b6b12a901 90
+docs/troubleshooting.md
+  s_ac9a490b8e8f11::t_f51df5f7810eb7 726-727,729-737
+  s_6d0dff8264600c::t_d68ed5741457b8 728
+docs/zh/troubleshooting.md
+  s_6d0dff8264600c::t_6af3f9749f35b0 727
+  s_ac9a490b8e8f11::t_f51df5f7810eb7 725-726,728-736
+src/common/db/Database.py
+  s_9a4c3bfbe93c51::t_61d320a0b4e921 92-95,221-229,231,271-275,283,311,329,332,419,421,426,490
+  s_9a4c3bfbe93c51::t_3d89cf822fb63c 20
+  s_9a4c3bfbe93c51::t_6dc193807c858c 270,458-459,461,469,488-489,491
+  s_9a4c3bfbe93c51::t_f75f4cca64a396 456-457
+src/ui/app/support_bundle.py
+  s_ac9a490b8e8f11::t_6dcf169a52abb7 7-8,10-11,13-18,21-25,157
+  s_ac9a490b8e8f11::t_1f78a10e8c030c 12,19-20
+  s_ac9a490b8e8f11::t_d5641e43fb7692 3
+docs/es/troubleshooting.md
+  s_ac9a490b8e8f11::t_f51df5f7810eb7 726-727,729-737
+  s_6d0dff8264600c::t_6b9084fc0c87f3 728
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "4a91e1e134eb42a52c338bfdaad2170f12f09fe8",
+  "prompts": {},
+  "sessions": {
+    "s_175dfb7646d720": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "6287d9cf-9a0e-4d8a-a3c0-5a6e08f44cfe",
+        "model": "unknown"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_404f616f75f5b1": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "6d9cfd37-516b-49b0-beba-67fa28ba05ad",
+        "model": "unknown"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_421bbb8a0bceaa": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "63aa0f9a-f146-4ed6-b5e6-b06607579d68",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_4ae424c736af23": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "d8b240e4-19f2-45a8-879e-95ec8900b549",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_6ccd2f99db4007": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b5c2bf18-74f7-4932-ad5b-644a666794cc",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_6d0dff8264600c": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "79381841-782a-447e-8378-57f959fc8752",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_9a4c3bfbe93c51": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "f5023044-a53f-4c17-99de-7b9dbfa3ea63",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_ac9a490b8e8f11": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "bb1a5268-f6ed-4696-88a3-9f2bbfa8c915",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_ca30216f606eb3": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "a1488ef3-f99a-40f5-82b3-cb11877301cb",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_f4be642fd3942d": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "e5d25ae7-c0f8-4db7-a56c-c31e241cb3ce",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_fb03baedcb77e6": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a16829-e52f-7661-9a83-e00e9dd3a1c5",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

@@ -1,0 +1,370 @@
+examples/dns-cloudflare/docker-compose.yml
+  s_6fa209cafe93d5::t_757780979521fc 13,27,64,78
+examples/reverse-proxy-singlesite/docker-compose.yml
+  s_6fa209cafe93d5::t_757780979521fc 13,27,57,71
+examples/dns-desec/docker-compose.yml
+  s_6fa209cafe93d5::t_757780979521fc 13,27,64,78
+misc/integrations/docker.oracle.yml
+  s_6fa209cafe93d5::t_757780979521fc 10,26,41,52
+examples/moodle/docker-compose.yml
+  s_6fa209cafe93d5::t_757780979521fc 13,27,51,65
+.github/workflows/release.yml
+  s_6fa209cafe93d5::t_757780979521fc 98
+docs/de/concepts.md
+  s_6fa209cafe93d5::t_757780979521fc 128,149
+docs/web-ui.md
+  s_6fa209cafe93d5::t_757780979521fc 54,70,81,131,153
+examples/reverse-proxy-websocket/docker-compose.yml
+  s_6fa209cafe93d5::t_757780979521fc 13,27,51,65
+docs/de/api.md
+  s_6fa209cafe93d5::t_757780979521fc 45,58,80,147
+misc/integrations/swarm.postgres.yml
+  s_6fa209cafe93d5::t_757780979521fc 37,73,90,110,123
+misc/integrations/all-in-one.mariadb.ui.yml
+  s_6fa209cafe93d5::t_757780979521fc 3
+misc/integrations/autoconf.mariadb.yml
+  s_6fa209cafe93d5::t_757780979521fc 10,27,41,58,69
+misc/integrations/swarm.mysql.yml
+  s_6fa209cafe93d5::t_757780979521fc 37,73,90,110,123
+misc/integrations/docker.yml
+  s_6fa209cafe93d5::t_757780979521fc 14,30,44,61
+misc/integrations/k8s.oracle.ui.yml
+  s_6fa209cafe93d5::t_757780979521fc 58,114,170,219,254,379
+misc/integrations/swarm.mysql.ui.yml
+  s_6fa209cafe93d5::t_757780979521fc 37,73,90,110,123,148
+examples/dns-dnsimple/docker-compose.yml
+  s_6fa209cafe93d5::t_757780979521fc 13,27,64,78
+src/common/core/crowdsec/README.zh.md
+  s_6fa209cafe93d5::t_757780979521fc 144,161,418
+.github/workflows/push-github.yml
+  s_6fa209cafe93d5::t_757780979521fc 71-72,102
+tests/core/upgrade.yml
+  s_6fa209cafe93d5::t_757780979521fc 42
+tests/unit/linux/test_install_downgrade_and_backup_uri.py
+  s_6fa209cafe93d5::t_757780979521fc 82
+examples/jellyfin/docker-compose.yml
+  s_6fa209cafe93d5::t_757780979521fc 13,27,64,78
+docs/fr/web-ui.md
+  s_6fa209cafe93d5::t_757780979521fc 55,71,82,132,154
+src/bw/Dockerfile
+  s_6fa209cafe93d5::t_757780979521fc 157
+src/common/core/backup/downgrade-manifest.json
+  s_6fa209cafe93d5::t_757780979521fc 37,60,81,105,126,161,196,219,241,265,288,323
+misc/integrations/all-in-one.postgres.ui.yml
+  s_6fa209cafe93d5::t_757780979521fc 3
+examples/dns-rfc2136/docker-compose.yml
+  s_6fa209cafe93d5::t_757780979521fc 13,27,69,83
+examples/passbolt/docker-compose.yml
+  s_6fa209cafe93d5::t_757780979521fc 13,27,58,72
+misc/integrations/swarm.oracle.ui.yml
+  s_6fa209cafe93d5::t_757780979521fc 37,73,90,110,123,148
+misc/integrations/k8s.oracle.yml
+  s_6fa209cafe93d5::t_757780979521fc 69,125,181,230,265
+.github/ISSUE_TEMPLATE/bug_report.yml
+  s_6fa209cafe93d5::t_757780979521fc 74
+src/common/core/crowdsec/README.de.md
+  s_6fa209cafe93d5::t_757780979521fc 144,161,416
+misc/integrations/all-in-one.mysql.yml
+  s_6fa209cafe93d5::t_757780979521fc 3
+misc/integrations/swarm.mariadb.ui.yml
+  s_6fa209cafe93d5::t_757780979521fc 37,73,90,110,123,148
+examples/dns-google/docker-compose.yml
+  s_6fa209cafe93d5::t_757780979521fc 13,27,69,83
+misc/integrations/docker.oracle.ui.yml
+  s_6fa209cafe93d5::t_757780979521fc 9,26,51,62,81
+misc/integrations/autoconf.mysql.yml
+  s_6fa209cafe93d5::t_757780979521fc 10,27,41,58,69
+docs/zh/web-ui.md
+  s_6fa209cafe93d5::t_757780979521fc 54,70,81,131,153
+examples/php-multisite/docker-compose.yml
+  s_6fa209cafe93d5::t_757780979521fc 13,36,60,74
+docs/api.md
+  s_6fa209cafe93d5::t_757780979521fc 45,58,80,147
+docs/zh/plugins.md
+  s_6fa209cafe93d5::t_757780979521fc 110,146,184,231,271,635
+docs/de/advanced.md
+  s_6fa209cafe93d5::t_757780979521fc 3,5,88,99,107,124,132,174,182,247,258,268,286,296,343,353,478-479,581,600,689,994,1022,1033,1157,1197,1220,1263,1333,1583,1606,1621,1672,1897,2027,2071,2086,2180,2193,2208,2443,2542,2705,2718,2735,2907,3016,3027,3046,3084,3383,3388,4242,4246,4329
+docs/es/api.md
+  s_6fa209cafe93d5::t_757780979521fc 45,58,80,147
+src/api/Dockerfile
+  s_6fa209cafe93d5::t_757780979521fc 94
+misc/integrations/all-in-one.postgres.yml
+  s_6fa209cafe93d5::t_757780979521fc 3
+docs/features.md
+  s_6fa209cafe93d5::t_757780979521fc 2226,2243,2502
+docs/fr/integrations.md
+  s_6fa209cafe93d5::t_757780979521fc 1278,1293,1377,1385,1480,1539,1560,1586,1608,1647,1681,1687,1697,1707,1751,1772,1781,1799,1981,1994,2020,2036,2052,2066,2083,2183-2184,2257,2369,2566,2571,2614,2619,2650,2655,2700,2705,2798,2804,2816,2833,2847,2864,2875,3080,3116,3122,3170,3197,3312,3405,3449,3500,3720,3872,4047,4051,4059,4063,4681,4685,4703,4739,4756,4776,4789,4987,4999
+examples/nextcloud/docker-compose.yml
+  s_6fa209cafe93d5::t_757780979521fc 13,27,61,75
+misc/integrations/autoconf.postgres.ui.yml
+  s_6fa209cafe93d5::t_757780979521fc 10,27,41,58,69,87
+docs/fr/concepts.md
+  s_6fa209cafe93d5::t_757780979521fc 124,145
+docs/es/quickstart-guide.md
+  s_6fa209cafe93d5::t_757780979521fc 21,36,54-55,96,112,130,141,190,269,287,305,318,329,387,646,668
+examples/tor-hidden-service/docker-compose.yml
+  s_6fa209cafe93d5::t_757780979521fc 23,34,62,76
+examples/php-cookie-flags/docker-compose.yml
+  s_6fa209cafe93d5::t_757780979521fc 13,35,57,71
+src/all-in-one/Dockerfile
+  s_6fa209cafe93d5::t_757780979521fc 301
+misc/integrations/all-in-one.mariadb.yml
+  s_6fa209cafe93d5::t_757780979521fc 3
+tests/unit/backup/test_downgrade_manifest.py
+  s_6fa209cafe93d5::t_757780979521fc 336-337,368,384,396
+docs/fr/plugins.md
+  s_6fa209cafe93d5::t_757780979521fc 110,146,184,231,271,637
+examples/bigbluebutton/docker-compose.yml
+  s_6fa209cafe93d5::t_757780979521fc 37,52,74,87
+examples/dns-nsone/docker-compose.yml
+  s_6fa209cafe93d5::t_757780979521fc 13,27,64,78
+docs/integrations.md
+  s_6fa209cafe93d5::t_757780979521fc 1278,1307,1379,1387,1482,1541,1563,1589,1611,1650,1684,1690,1700,1710,1754,1775,1784,1802,1996,2009,2035,2051,2067,2081,2098,2198-2199,2279,2391,2615,2620,2663,2668,2699,2704,2749,2754,2847,2853,2865,2882,2896,2913,2924,3128,3164,3170,3225,3265,3382,3475,3519,3571,3790,3942,4117,4121,4129,4133,4751,4755,4773,4809,4826,4846,4859,5056,5068
+misc/integrations/all-in-one.mysql.ui.yml
+  s_6fa209cafe93d5::t_757780979521fc 3
+examples/authentik/docker-compose.yml
+  s_6fa209cafe93d5::t_757780979521fc 13,27,84,98
+examples/mattermost/docker-compose.yml
+  s_6fa209cafe93d5::t_757780979521fc 13,27,70,84
+src/common/db/model.py
+  s_6fa209cafe93d5::t_757780979521fc 819
+docs/de/integrations.md
+  s_6fa209cafe93d5::t_757780979521fc 1271,1287,1366,1374,1480,1539,1561,1587,1609,1648,1680,1686,1696,1706,1750,1771,1780,1798,1991,2004,2031,2050,2066,2080,2097,2197-2198,2285,2406,2624,2629,2672,2677,2708,2713,2758,2763,2856,2863,2878,2895,2909,2926,2937,3142,3178,3184,3237,3271,3386,3479,3523,3575,3794,3946,4121,4125,4133,4137,4756,4760,4778,4814,4831,4851,4864,5062,5074
+misc/integrations/docker.postgres.yml
+  s_6fa209cafe93d5::t_757780979521fc 10,26,41,52
+docs/es/web-ui.md
+  s_6fa209cafe93d5::t_757780979521fc 55,71,82,132,154
+docs/zh/features.md
+  s_6fa209cafe93d5::t_757780979521fc 2078,2095,2352
+src/common/core/crowdsec/README.md
+  s_6fa209cafe93d5::t_757780979521fc 146,163,422
+src/VERSION
+  s_6fa209cafe93d5::t_757780979521fc 1
+src/scheduler/Dockerfile
+  s_6fa209cafe93d5::t_757780979521fc 84,162
+misc/integrations/all-in-one.yml
+  s_6fa209cafe93d5::t_757780979521fc 3
+misc/integrations/docker.mariadb.yml
+  s_6fa209cafe93d5::t_757780979521fc 10,26,41,52
+docs/es/features.md
+  s_6fa209cafe93d5::t_757780979521fc 2147,2164,2421
+docs/fr/quickstart-guide.md
+  s_6fa209cafe93d5::t_757780979521fc 21,36,54-55,96,112,130,141,190,269,287,305,318,329,387,646,668
+examples/php-singlesite/docker-compose.yml
+  s_6fa209cafe93d5::t_757780979521fc 13,35,55,69
+docs/zh/concepts.md
+  s_6fa209cafe93d5::t_757780979521fc 124,145
+misc/integrations/all-in-one.oracle.yml
+  s_6fa209cafe93d5::t_757780979521fc 3
+examples/docker-configs/docker-compose.yml
+  s_6fa209cafe93d5::t_757780979521fc 13,27,76,90
+docs/fr/api.md
+  s_6fa209cafe93d5::t_757780979521fc 45,58,80,147
+docs/fr/upgrading.md
+  s_6fa209cafe93d5::t_757780979521fc 106,457,468,477,600-601,604,607,610,613,695,721,1195,1198,1201,1204,1241,1267
+examples/reverse-proxy-multisite/docker-compose.yml
+  s_6fa209cafe93d5::t_757780979521fc 13,27,53,67
+docs/es/concepts.md
+  s_6fa209cafe93d5::t_757780979521fc 132,153
+examples/behind-reverse-proxy/docker-compose.yml
+  s_6fa209cafe93d5::t_757780979521fc 16,27,49,63
+examples/joomla/docker-compose.yml
+  s_6fa209cafe93d5::t_757780979521fc 13,27,54,68
+tests/unit/linux/test_install_docker_upgrade_verification.py
+  s_6fa209cafe93d5::t_757780979521fc 160,200,202,247
+examples/dns-ovh/docker-compose.yml
+  s_6fa209cafe93d5::t_757780979521fc 13,27,66,80
+examples/mcp-stack/docker-compose.yml
+  s_6fa209cafe93d5::t_757780979521fc 12,25,48,64
+tests/unit/backup/test_downgrade_preflight.py
+  s_6fa209cafe93d5::t_757780979521fc 64,72-73,336
+examples/radarr/docker-compose.yml
+  s_6fa209cafe93d5::t_757780979521fc 13,27,62,76
+examples/dns-route53/docker-compose.yml
+  s_6fa209cafe93d5::t_757780979521fc 13,27,65,79
+examples/hardened/docker-compose.yml
+  s_6fa209cafe93d5::t_757780979521fc 13,46,69,83
+README.md
+  s_6fa209cafe93d5::t_757780979521fc 2,44,64,69,71,98,133,139,172,175,183-188,218,227,258,268,282,287,300,305,312,317,324,329,332,334,339,344,346,350,354,356,364,383,400,424,440,463,467,471
+pyproject.toml
+  s_6fa209cafe93d5::t_757780979521fc 4
+examples/gogs/docker-compose.yml
+  s_6fa209cafe93d5::t_757780979521fc 13,27,54,68
+examples/dns-dnsmadeeasy/docker-compose.yml
+  s_6fa209cafe93d5::t_757780979521fc 13,27,65,79
+misc/integrations/all-in-one.oracle.ui.yml
+  s_6fa209cafe93d5::t_757780979521fc 3
+misc/integrations/swarm.mariadb.yml
+  s_6fa209cafe93d5::t_757780979521fc 37,73,90,110,123
+examples/load-balancer/docker-compose.yml
+  s_6fa209cafe93d5::t_757780979521fc 13,27,56,70
+publiccode.yml
+  s_6fa209cafe93d5::t_757780979521fc 4,6
+src/common/core/crowdsec/README.fr.md
+  s_6fa209cafe93d5::t_757780979521fc 144,161,418
+src/common/db/db_methods/metadata.py
+  s_6fa209cafe93d5::t_757780979521fc 132,294
+examples/wordpress/docker-compose.yml
+  s_6fa209cafe93d5::t_757780979521fc 13,27,51,65
+misc/integrations/autoconf.mariadb.ui.yml
+  s_6fa209cafe93d5::t_757780979521fc 10,27,41,58,69,87
+tests/unit/backup/test_downgrade_execute.py
+  s_6fa209cafe93d5::t_757780979521fc 99,115,135,216,235,253,394,449
+src/ui/Dockerfile
+  s_6fa209cafe93d5::t_757780979521fc 147
+examples/dns-scaleway/docker-compose.yml
+  s_6fa209cafe93d5::t_757780979521fc 13,27,64,78
+src/worker/Dockerfile
+  s_6fa209cafe93d5::t_757780979521fc 124
+misc/install-bunkerweb.sh
+  s_6fa209cafe93d5::t_757780979521fc 108
+examples/web-ui/docker-compose.yml
+  s_6fa209cafe93d5::t_757780979521fc 10,24,49,61,109
+examples/redmine/docker-compose.yml
+  s_6fa209cafe93d5::t_757780979521fc 13,27,50,64
+docs/de/upgrading.md
+  s_6fa209cafe93d5::t_757780979521fc 121,535,546,555,678-679,682,685,688,691,773,799,1273,1276,1279,1282,1319,1345
+examples/dns-sakuracloud/docker-compose.yml
+  s_6fa209cafe93d5::t_757780979521fc 13,27,65,79
+docs/plugins.md
+  s_6fa209cafe93d5::t_757780979521fc 113,149,187,234,274,642
+misc/integrations/k8s.mysql.yml
+  s_6fa209cafe93d5::t_757780979521fc 72,128,184,233,268
+examples/prestashop/docker-compose.yml
+  s_6fa209cafe93d5::t_757780979521fc 13,27,54,68
+examples/stream-multisite/docker-compose.yml
+  s_6fa209cafe93d5::t_757780979521fc 16,37,110,123
+examples/magento/docker-compose.yml
+  s_6fa209cafe93d5::t_757780979521fc 13,27,54,68
+docs/es/plugins.md
+  s_6fa209cafe93d5::t_757780979521fc 110,146,184,231,271,637
+examples/proxy-protocol/docker-compose.yml
+  s_6fa209cafe93d5::t_757780979521fc 18,29,52,66
+misc/integrations/k8s.postgres.ui.yml
+  s_6fa209cafe93d5::t_757780979521fc 61,117,173,222,257,382
+misc/integrations/docker.mysql.yml
+  s_6fa209cafe93d5::t_757780979521fc 10,26,41,52
+src/common/core/crowdsec/README.es.md
+  s_6fa209cafe93d5::t_757780979521fc 140,157,414
+examples/syslog/docker-compose.yml
+  s_6fa209cafe93d5::t_757780979521fc 13,34,61,75
+misc/integrations/k8s.mariadb.ui.yml
+  s_6fa209cafe93d5::t_757780979521fc 61,117,173,222,257,386
+.github/workflows/push-packagecloud.yml
+  s_6fa209cafe93d5::t_757780979521fc 96,98,102
+docs/upgrading.md
+  s_6fa209cafe93d5::t_757780979521fc 124,511,522,531,654-655,658,661,664,667,749,775,1250,1253,1256,1259,1296,1322
+docs/de/features.md
+  s_6fa209cafe93d5::t_757780979521fc 2135,2152,2407
+misc/integrations/autoconf.oracle.yml
+  s_6fa209cafe93d5::t_757780979521fc 10,27,41,58,69
+docs/es/upgrading.md
+  s_6fa209cafe93d5::t_757780979521fc 118,544,555,564,687-688,691,694,697,700,782,808,1282,1285,1288,1291,1328,1354
+examples/mongo-express/docker-compose.yml
+  s_6fa209cafe93d5::t_757780979521fc 13,27,52,66
+examples/cors/docker-compose.yml
+  s_6fa209cafe93d5::t_757780979521fc 13,35,64,78
+docs/zh/advanced.md
+  s_6fa209cafe93d5::t_757780979521fc 3,5,88,99,107,124,132,174,182,247,258,268,286,296,343,353,478-479,581,600,689,994,1022,1033,1157,1197,1220,1263,1333,1581,1604,1619,1670,1895,2025,2069,2084,2178,2191,2206,2441,2540,2702,2715,2732,2904,3013,3024,3043,3081,3380,3385,4239,4243,4326
+examples/dns-gehirn/docker-compose.yml
+  s_6fa209cafe93d5::t_757780979521fc 13,27,65,79
+misc/integrations/docker.mariadb.ui.yml
+  s_6fa209cafe93d5::t_757780979521fc 9,26,51,62,81
+examples/ghost/docker-compose.yml
+  s_6fa209cafe93d5::t_757780979521fc 13,27,50,64
+docs/zh/upgrading.md
+  s_6fa209cafe93d5::t_757780979521fc 80,398,409,418,541-542,545,548,551,554,636,662,1136,1139,1142,1145,1182,1208
+examples/web-ui/docker-compose.wizard.yml
+  s_6fa209cafe93d5::t_757780979521fc 6,20,43
+docs/zh/integrations.md
+  s_6fa209cafe93d5::t_757780979521fc 1271,1287,1366,1374,1469,1528,1550,1576,1598,1637,1671,1677,1687,1697,1738,1759,1768,1786,1968,1981,2007,2023,2039,2053,2070,2170-2171,2247,2358,2552,2557,2600,2605,2636,2641,2686,2691,2784,2790,2802,2819,2833,2850,2861,3066,3102,3108,3156,3181,3296,3389,3433,3485,3704,3856,4031,4035,4043,4047,4666,4670,4688,4724,4741,4761,4774,4969,4981
+examples/dns-luadns/docker-compose.yml
+  s_6fa209cafe93d5::t_757780979521fc 13,27,65,79
+docs/quickstart-guide.md
+  s_6fa209cafe93d5::t_757780979521fc 21,36,54-55,96,112,130,141,190,269,287,305,318,329,387,646,668
+docs/de/plugins.md
+  s_6fa209cafe93d5::t_757780979521fc 110,145,183,230,270,555,636
+docs/concepts.md
+  s_6fa209cafe93d5::t_757780979521fc 128,149
+examples/drupal/docker-compose.yml
+  s_6fa209cafe93d5::t_757780979521fc 13,27,54,68
+examples/dns-linode/docker-compose.yml
+  s_6fa209cafe93d5::t_757780979521fc 13,27,65,79
+examples/dns-digitalocean/docker-compose.yml
+  s_6fa209cafe93d5::t_757780979521fc 13,27,64,78
+misc/integrations/swarm.oracle.yml
+  s_6fa209cafe93d5::t_757780979521fc 37,73,90,110,123
+docs/es/advanced.md
+  s_6fa209cafe93d5::t_757780979521fc 3,5,88,99,107,124,132,174,182,247,258,268,286,296,343,353,478-479,581,600,689,994,1022,1033,1157,1197,1220,1263,1333,1583,1606,1621,1672,1897,2027,2071,2086,2180,2193,2208,2443,2542,2705,2718,2735,2907,3016,3027,3046,3084,3383,3388,4242,4246,4329
+docs/de/web-ui.md
+  s_6fa209cafe93d5::t_757780979521fc 57,73,84,134,156
+CHANGELOG.md
+  s_6fa209cafe93d5::t_757780979521fc 3
+  s_795e2ccdb6801b::t_458033b34f38bf 52
+docs/zh/api.md
+  s_6fa209cafe93d5::t_757780979521fc 45,58,80,147
+misc/integrations/docker.postgres.ui.yml
+  s_6fa209cafe93d5::t_757780979521fc 9,26,51,62,81
+misc/integrations/autoconf.oracle.ui.yml
+  s_6fa209cafe93d5::t_757780979521fc 10,27,41,58,69,87
+misc/integrations/swarm.postgres.ui.yml
+  s_6fa209cafe93d5::t_757780979521fc 37,73,90,110,123,148
+tests/unit/db/test_upgrade_schema_parity.py
+  s_795e2ccdb6801b::t_458033b34f38bf 655
+docs/es/integrations.md
+  s_6fa209cafe93d5::t_757780979521fc 1271,1287,1366,1374,1479,1538,1560,1586,1608,1647,1679,1685,1695,1705,1749,1770,1779,1797,1990,2003,2029,2048,2064,2078,2095,2195-2196,2272,2339,2508,2513,2556,2561,2592,2597,2642,2647,2740,2746,2761,2778,2792,2809,2820,3025,3061,3067,3120,3151,3266,3359,3403,3455,3674,3826,4000,4004,4012,4016,4635,4639,4657,4693,4710,4730,4743,4941,4953
+docs/de/quickstart-guide.md
+  s_6fa209cafe93d5::t_757780979521fc 21,36,54-55,96,112,130,141,190,269,287,305,318,329,387,645,667
+examples/authelia/docker-compose.yml
+  s_6fa209cafe93d5::t_757780979521fc 13,27,73,87
+misc/integrations/autoconf.postgres.yml
+  s_6fa209cafe93d5::t_757780979521fc 10,27,41,58,69
+examples/tomcat/docker-compose.yml
+  s_6fa209cafe93d5::t_757780979521fc 13,27,49,63
+tests/unit/ui/test_changelog.py
+  s_6fa209cafe93d5::t_757780979521fc 5
+misc/integrations/k8s.postgres.yml
+  s_6fa209cafe93d5::t_757780979521fc 72,128,184,233,268
+docs/fr/advanced.md
+  s_6fa209cafe93d5::t_757780979521fc 3,5,88,99,107,124,132,174,182,247,258,268,286,296,343,353,478-479,581,600,689,994,1022,1033,1157,1197,1220,1263,1333,1582,1605,1620,1671,1896,2026,2070,2085,2179,2192,2207,2442,2541,2704,2717,2734,2906,3015,3026,3045,3083,3382,3387,4241,4245,4328
+docs/advanced.md
+  s_6fa209cafe93d5::t_757780979521fc 3,5,88,99,107,124,132,174,182,247,258,268,286,296,343,353,478-479,583,602,691,996,1024,1035,1159,1199,1222,1265,1335,1591,1614,1629,1680,1905,2035,2079,2094,2188,2201,2216,2451,2550,2718,2731,2748,2920,3029,3040,3059,3097,3396,3401,4255,4259,4342
+docs/zh/quickstart-guide.md
+  s_6fa209cafe93d5::t_757780979521fc 21,36,54-55,96,112,130,141,190,269,287,305,318,329,387,646,668
+misc/integrations/docker.mysql.ui.yml
+  s_6fa209cafe93d5::t_757780979521fc 9,26,51,62,81
+misc/integrations/k8s.mariadb.yml
+  s_6fa209cafe93d5::t_757780979521fc 72,128,184,233,268
+docs/fr/features.md
+  s_6fa209cafe93d5::t_757780979521fc 2063,2080,2337
+misc/integrations/k8s.mysql.ui.yml
+  s_6fa209cafe93d5::t_757780979521fc 61,117,173,222,257,386
+src/autoconf/Dockerfile
+  s_6fa209cafe93d5::t_757780979521fc 83
+misc/integrations/autoconf.mysql.ui.yml
+  s_6fa209cafe93d5::t_757780979521fc 10,27,41,58,69,87
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "d7854901d2347c064f17ed273ac420a50be78657",
+  "prompts": {},
+  "sessions": {
+    "s_6fa209cafe93d5": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "d4619c4b-067a-4616-b03a-9123dcf93ec5",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_795e2ccdb6801b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "71804b16-900c-4824-8bbc-5e7434803315",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

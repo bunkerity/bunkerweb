@@ -1,0 +1,69 @@
+docs/Dockerfile
+  s_c2cb361870e43f::t_cd8849b5596c1b 1
+misc/migration/Dockerfile
+  s_c2cb361870e43f::t_8d6927599b2532 1
+src/all-in-one/Dockerfile
+  s_2a8b7e6e55d236::t_a7d5c785660686 1,168
+src/api/Dockerfile
+  s_2a8b7e6e55d236::t_656d49adbf89af 1,31
+src/autoconf/Dockerfile
+  s_2a8b7e6e55d236::t_fe55c01dbc077f 1,35
+src/bw/Dockerfile
+  s_2a8b7e6e55d236::t_89f7396f7a4387 1,72
+src/linux/Dockerfile-debian-bookworm
+  s_c2cb361870e43f::t_ee257140c1261e 1,152
+src/linux/Dockerfile-debian-trixie
+  s_c2cb361870e43f::t_2a841b5941cb72 1,147
+src/linux/Dockerfile-rhel-8
+  s_c2cb361870e43f::t_28ac38a953d572 1,148
+src/linux/Dockerfile-rhel-9
+  s_c2cb361870e43f::t_01fee7f7ca7516 1,149
+src/linux/Dockerfile-ubuntu
+  s_c2cb361870e43f::t_9ca37335ce4a76 1,146
+src/linux/Dockerfile-ubuntu-jammy
+  s_c2cb361870e43f::t_b2a7589846e758 1,151
+src/linux/Dockerfile-ubuntu-noble
+  s_c2cb361870e43f::t_3181bb86a6781e 1,151
+src/scheduler/Dockerfile
+  s_2a8b7e6e55d236::t_a1e0ca935b195d 1,48
+src/ui/Dockerfile
+  s_2a8b7e6e55d236::t_cba40735c759ab 1,71
+tests/linux/Dockerfile-debian-bookworm
+  s_c2cb361870e43f::t_c2f66b333c43ec 1
+tests/linux/Dockerfile-debian-trixie
+  s_c2cb361870e43f::t_17e58c40f617e8 1
+tests/linux/Dockerfile-rhel-8
+  s_c2cb361870e43f::t_40e3521b216838 1
+tests/linux/Dockerfile-rhel-9
+  s_c2cb361870e43f::t_fa122411003408 1
+tests/linux/Dockerfile-ubuntu
+  s_c2cb361870e43f::t_1eaff9626affce 1
+tests/linux/Dockerfile-ubuntu-jammy
+  s_c2cb361870e43f::t_09542f11dbe2c8 1
+tests/linux/Dockerfile-ubuntu-noble
+  s_c2cb361870e43f::t_2be1ad0fbe3c2f 1
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "4f409c295922fcf98d04b9bab888b1e2df147ee9",
+  "prompts": {},
+  "sessions": {
+    "s_2a8b7e6e55d236": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "7240790c-8d8a-404e-a61a-9f904953ed68",
+        "model": "unknown"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_c2cb361870e43f": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "3d1a16da-4c54-425f-9906-a876fbc75839",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

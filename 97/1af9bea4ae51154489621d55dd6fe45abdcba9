@@ -1,0 +1,63 @@
+src/ui/app/routes/pro.py
+  s_287a3026e97021::t_ee24f1a58ff4a7 100,102
+  s_287a3026e97021::t_5efbcfad0209e4 5-6
+src/ui/app/routes/utils.py
+  s_f641ca9dfa8212::t_fa781c4536194b 8,73-74
+  s_287a3026e97021::t_af69b64f18fbc3 14,56-57,60-69,76-79,81-83
+  s_287a3026e97021::t_7d36b61eb0cd32 84-85
+  s_9819dd2172866d::t_6eb61c5941debe 29-53
+  s_9819dd2172866d::t_47b44767c60ee1 28,54-55,58-59,70-72,75,80
+src/ui/app/routes/global_settings.py
+  s_287a3026e97021::t_5efbcfad0209e4 7
+  s_287a3026e97021::t_af69b64f18fbc3 18,236
+CHANGELOG.md
+  s_4600783926e6d7::t_b043760f9d6c69 26
+src/ui/app/routes/configs.py
+  s_287a3026e97021::t_5efbcfad0209e4 13
+  s_287a3026e97021::t_ee24f1a58ff4a7 16,360,424,534,806
+src/ui/app/routes/services.py
+  s_287a3026e97021::t_af69b64f18fbc3 25,165,252,801,1089
+  s_287a3026e97021::t_5efbcfad0209e4 14
+src/ui/main.py
+  s_f641ca9dfa8212::t_c43e56af7277a9 88,1598,1608,1611-1613
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "971af9bea4ae51154489621d55dd6fe45abdcba9",
+  "prompts": {},
+  "sessions": {
+    "s_287a3026e97021": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "9d0cac5e-3c18-4d7e-bc22-58798cc1b7df",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_4600783926e6d7": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "577228b8-9e99-4afb-b5b7-0fab1e1a53d0",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_9819dd2172866d": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "ef9beaf0-8fc5-45b0-9346-ca3da8c8ab38",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_f641ca9dfa8212": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "8d844855-7e61-4b98-91fa-04ea88378d88",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

@@ -1,0 +1,26 @@
+CHANGELOG.md
+  s_458ecfbdf3ece2::t_41af7d8a895d1c 3,10-12
+  s_458ecfbdf3ece2::t_c2afdf0e310f26 5
+  s_458ecfbdf3ece2::t_7d235844758881 256,342,1689,1751,1766
+  s_458ecfbdf3ece2::t_caec6973894d6e 14,298,374,605,784,860,963,1145,1251,1264,1288,1455,1468
+  s_458ecfbdf3ece2::t_6af1ffaf0d0243 13
+src/common/core/metrics/metrics.lua
+  s_458ecfbdf3ece2::t_2184abf68592af 431-435,438-439,441-443
+  s_458ecfbdf3ece2::t_024139e0c49fdd 440
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "eadd1b8ff337fc8662549514d0a5637f397a7bd1",
+  "prompts": {},
+  "sessions": {
+    "s_458ecfbdf3ece2": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "e84551e7-a4af-407f-98d9-9bd21929e0fc",
+        "model": "claude-opus-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

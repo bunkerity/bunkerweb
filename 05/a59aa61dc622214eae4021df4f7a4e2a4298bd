@@ -1,0 +1,19 @@
+tests/core/redis.yml
+  s_36cff8fad440d1::t_296ce62ba5c051 18-21,56-57,90-91,110-113,152-153,171-172,205-206,223-224,254-257,277-280,825-829
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "05a59aa61dc622214eae4021df4f7a4e2a4298bd",
+  "prompts": {},
+  "sessions": {
+    "s_36cff8fad440d1": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "9e7b0240-ab8b-4374-b9b3-c0f8bb66b3ef",
+        "model": "unknown"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

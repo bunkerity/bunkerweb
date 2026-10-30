@@ -1,0 +1,41 @@
+src/common/core/metrics/metrics.lua
+  s_91852f98db3943::t_638dabb39a3a4e 1205-1209
+tests/unit/common/test_modsecurity_body_reason_lua.py
+  s_91852f98db3943::t_638dabb39a3a4e 154,156-157,167-170
+  s_91852f98db3943::t_4b500e892229d7 149-153,155,158-166,171-195
+  s_91852f98db3943::t_0e75e0c63590ef 84,97,101,107,112,116,121
+  s_91852f98db3943::t_6b9efd78e8789d 72,88,99,110,119
+  s_91852f98db3943::t_89a63d3f5be3f1 1-71,73-83,85-87,89-96,98,100,102-106,108-109,111,113-115,117-118,120,122-148
+src/bw/lua/bunkerweb/utils.lua
+  s_91852f98db3943::t_37630bd05242a3 801-808
+src/common/core/bunkernet/bunkernet.lua
+  s_91852f98db3943::t_7ec5be857404e1 204-205
+src/common/core/modsecurity/confs/server-http/modsecurity-rules-global-crs.conf.modsec
+  s_91852f98db3943::t_c5acfffca18826 62,72-73,78-79
+src/common/core/modsecurity/confs/server-http/modsecurity-rules.conf.modsec
+  s_78010ae9d8b28f::t_816c55183d4feb 74,84-85,90-91
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "d28408064a0ea21bdfeddfe26894e5ec1582f34b",
+  "prompts": {},
+  "sessions": {
+    "s_78010ae9d8b28f": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "4328f5d7-e404-4e39-9b3c-55daa5aa1cff",
+        "model": "unknown"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_91852f98db3943": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "17069026-a557-42df-ba34-695ea9e50f88",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

@@ -1,0 +1,34 @@
+src/api/app/routers/services.py
+  s_691a0407d066ea::t_c1f8e540e8e5b3 110-112
+src/ui/app/routes/services.py
+  s_691a0407d066ea::t_1316b1cbc6785a 798,801
+  s_691a0407d066ea::t_c2764159adc560 683-684
+src/ui/app/models/config.py
+  s_691a0407d066ea::t_6fda601effd4e6 243-248
+src/common/gen/Configurator.py
+  s_691a0407d066ea::t_a8ca5665465f05 183
+  s_691a0407d066ea::t_beb7dec9d9641e 405-407
+src/ui/app/routes/setup.py
+  s_691a0407d066ea::t_ec61a7bf378259 193-195
+CHANGELOG.md
+  s_691a0407d066ea::t_640184764cc3fd 6
+src/common/db/Database.py
+  s_691a0407d066ea::t_561075dc8304c7 3446-3448
+  s_691a0407d066ea::t_553fc3d94c7073 3234-3245
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "cea19bc67e7e264b26e562edae568d96b1cdc30d",
+  "prompts": {},
+  "sessions": {
+    "s_691a0407d066ea": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "f1c405bf-b632-4596-9128-c3b61426b04e",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

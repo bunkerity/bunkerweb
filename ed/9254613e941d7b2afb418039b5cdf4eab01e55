@@ -1,0 +1,21 @@
+CHANGELOG.md
+  s_60628c795bd662::t_6a03045cb53052 44
+src/common/core/redis/redis.lua
+  s_60628c795bd662::t_92c6459a5a8d4d 114
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "ed9254613e941d7b2afb418039b5cdf4eab01e55",
+  "prompts": {},
+  "sessions": {
+    "s_60628c795bd662": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1869d-2e49-7ff2-8e88-cfcf2fe9cb0c",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}
