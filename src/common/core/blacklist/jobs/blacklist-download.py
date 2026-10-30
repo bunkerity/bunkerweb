@@ -213,7 +213,7 @@ try:
         sys_exit(0)
 
     urls = set()
-    failed_urls = set()
+    failed_urls = set()  # (kind, url) pairs: a failure while handling one kind must not skip another kind
     processed_urls = set()  # Track which URLs have been processed globally
     # Initialize aggregation per kind with service tracking
     aggregated_recap = {
@@ -258,7 +258,7 @@ try:
                         aggregated_recap[kind]["total_urls"] += 1
 
                     # If the URL has recently been downloaded, use cache
-                    if url in failed_urls:
+                    if (kind, url) in failed_urls:
                         if url not in processed_urls:
                             aggregated_recap[kind]["failed_count"] += 1
                     elif (
@@ -288,7 +288,7 @@ try:
                                 status = 2
                                 LOGGER.debug(format_exc())
                                 LOGGER.error(f"Error while opening file {download_url[7:]} : {e}")
-                                failed_urls.add(url)
+                                failed_urls.add((kind, url))
                                 if url_file not in urls:
                                     aggregated_recap[kind]["failed_count"] += 1
                                 failed = True
@@ -324,7 +324,7 @@ try:
                                 status = 2
                                 LOGGER.error(f"Got status code {resp.status_code}, skipping...")
                                 resp.close()
-                                failed_urls.add(url)
+                                failed_urls.add((kind, url))
                                 if url_file not in urls:
                                     aggregated_recap[kind]["failed_count"] += 1
                                 failed = True
@@ -378,7 +378,7 @@ try:
                     status = 2
                     LOGGER.debug(format_exc())
                     LOGGER.error(f"Exception while getting {service} blacklist from {url} :\n{e}")
-                    failed_urls.add(url)
+                    failed_urls.add((kind, url))
                     if url not in processed_urls:
                         aggregated_recap[kind]["failed_count"] += 1
                 finally:
@@ -387,7 +387,7 @@ try:
                     urls.add(url_file)
 
                 # Keep a failed URL's last downloaded entries, so the list is not rebuilt without them
-                if url in failed_urls and isinstance(cached_url, dict) and cached_url.get("data"):
+                if (kind, url) in failed_urls and isinstance(cached_url, dict) and cached_url.get("data"):
                     LOGGER.warning(f"Using the last cached {kind} entries from {url} until it can be downloaded again")
                     unique_entries.update(iter_cached_entries(cached_url["data"]))
 

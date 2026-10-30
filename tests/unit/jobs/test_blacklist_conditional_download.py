@@ -223,6 +223,23 @@ def test_legacy_sha1_url_file_is_removed(url_server, tmp_path, monkeypatch):
     assert not (tmp_path / legacy).exists()
 
 
+def test_failure_for_one_kind_does_not_skip_another_kind(url_server, tmp_path, monkeypatch):
+    url_server.routes["/mixed"] = (200, b"/admin\n", {})
+    url = url_server.http("/mixed")
+    ip_url_file = f"{sha256(f'IP:{url}'.encode()).hexdigest()}.list"
+
+    class FailingIpCache(Cache):
+        def cache_file(self, name, data, service_id="", **kwargs):
+            if name == ip_url_file:
+                raise OSError("disk full")
+            return super().cache_file(name, data, service_id, **kwargs)
+
+    cache = FailingIpCache(tmp_path)
+    # IP runs first (KINDS order): its cache write fails, URI must still download and publish its list
+    assert run_job(cache, monkeypatch, BLACKLIST_IP_URLS=url, BLACKLIST_URI_URLS=url) == 2
+    assert cache.data["lists.example", "URI.list"] == b"/admin\n"
+
+
 def test_same_url_under_two_kinds_keeps_entries_apart(url_server, tmp_path, monkeypatch):
     seen = []
     url_server.routes["/mixed"] = conditional_route(seen, body=b"/admin\n")
