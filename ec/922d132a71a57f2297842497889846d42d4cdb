@@ -1,0 +1,45 @@
+tests/unit/test_ipv6_dns_arpa.lua
+  s_22e21e4e11abe7::t_a915427ccc13d0 1,3-36,38,40-68
+  s_22e21e4e11abe7::t_d0799d5192e33f 2
+  s_22e21e4e11abe7::t_596a06e4a28f13 37,39
+CHANGELOG.md
+  s_069d588794c2c2::t_eaa25b9f840a11 18
+src/deps/deps.json
+  s_80f1da85912d1b::t_6e0f880c340520 84
+src/deps/src/lua-resty-dns/lib/resty/dns/resolver.lua
+  s_22e21e4e11abe7::t_97dfe08fc716b1 991-994,996-1002
+src/deps/misc/lua-resty-dns-arpa-mapped.patch
+  s_80f1da85912d1b::t_6e0f880c340520 1-39
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "ec922d132a71a57f2297842497889846d42d4cdb",
+  "prompts": {},
+  "sessions": {
+    "s_069d588794c2c2": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "84fe7cda-2bca-4767-bd4f-5fd51bba09cf",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_22e21e4e11abe7": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a18d53-51cc-79a1-baa6-24c5e26a73d1",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_80f1da85912d1b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "48f28331-3ce2-4fa3-b959-69d5d1238c0a",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}
