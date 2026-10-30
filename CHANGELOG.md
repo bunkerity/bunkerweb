@@ -1,5 +1,9 @@
 # Changelog
 
+## v1.6.18~rc3 - ????/??/??
+
+- [SECURITY] `api`: when `API_LISTEN_HTTPS=yes`, the scheduler, UI, API service and `bwcli` check that an instance presents the generated API certificate (SHA-256 pin) instead of trusting any. A mismatch is logged and the call still falls back to HTTP.
+
 ## v1.6.18~rc2 - 2026/10/30
 
 - [FEATURE] `tests`: a pytest unit test suite in `tests/unit/`, run in CI by `.github/workflows/unit-tests.yml`, with per-component coverage floors.

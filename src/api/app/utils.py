@@ -29,9 +29,11 @@ def get_db(*, log: bool = True) -> Database:
     """
     global _DB_INSTANCE
     if _DB_INSTANCE is None or getattr(_DB_INSTANCE, "sql_engine", None) is None:  # type: ignore[attr-defined]
+        from API import API  # type: ignore
         from Database import Database  # type: ignore
 
         _DB_INSTANCE = Database(LOGGER, log=log)  # type: ignore
+        API.pin_from_database(_DB_INSTANCE)
     return _DB_INSTANCE  # type: ignore
 
 

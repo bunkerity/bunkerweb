@@ -418,6 +418,7 @@ class CLI(ApiCaller):
         self.__api_token = api_token
 
         if self.__db:
+            API.pin_from_database(self.__db)
             for db_instance in self.__db.get_instances():
                 try:
                     # Centralized builder handles scheme/port/host
