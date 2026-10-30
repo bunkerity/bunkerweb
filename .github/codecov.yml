@@ -8,3 +8,42 @@ coverage:
     patch:
       default:
         informational: true
+
+component_management:
+  default_rules:
+    statuses:
+      - type: project
+        informational: true
+  individual_components:
+    - component_id: gen
+      name: src/common/gen
+      paths: ["src/common/gen/**"]
+    - component_id: db
+      name: src/common/db
+      paths: ["src/common/db/**"]
+    - component_id: utils_cli
+      name: src/common/utils + src/common/cli
+      paths: ["src/common/utils/**", "src/common/cli/**", "src/common/api/**"]
+    - component_id: api
+      name: src/api
+      paths: ["src/api/**"]
+    - component_id: ui
+      name: src/ui
+      paths: ["src/ui/**"]
+    - component_id: autoconf
+      name: src/autoconf
+      paths: ["src/autoconf/**"]
+    - component_id: scheduler
+      name: src/scheduler
+      paths: ["src/scheduler/**"]
+    - component_id: core_jobs
+      name: src/common/core/*/jobs
+      paths:
+        [
+          "src/common/core/*/jobs/**",
+          "src/common/core/backup/*.py",
+          "src/common/core/backup/bwcli/**",
+        ]
+    - component_id: core_ui
+      name: src/common/core/*/ui
+      paths: ["src/common/core/*/ui/**"]

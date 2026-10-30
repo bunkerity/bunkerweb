@@ -61,6 +61,9 @@ jobs:
         run: npm ci --ignore-scripts --prefix src/deps
       - name: Install unit-test dependencies
         run: pip install --require-hashes -r tests/unit/requirements.txt
+      - name: Run release-tooling tests
+        # PyYAML is hash-pinned in the unit-test requirements installed above.
+        run: PYTHONPATH=.github/scripts python -m unittest test_release_artifacts test_release_claim
       # The Lua-layer tests shell out to the interpreter and skip without it, so install it
       # rather than let them silently pass by not running.
       - name: Install the Lua interpreter
@@ -174,6 +177,7 @@ jobs:
         continue-on-error: true
         with:
           files: .cache/unit-coverage/coverage.xml
+          flags: python
           disable_search: true
           fail_ci_if_error: true
           token: ${{ secrets.CODECOV_TOKEN }}

@@ -34,6 +34,7 @@ markers = [
 filterwarnings = ["ignore::sqlalchemy.exc.SAWarning"]
 
 [tool.coverage.run]
+branch = true
 source = ["src"]
 omit = [
     "src/deps/**",
