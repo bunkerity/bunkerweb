@@ -21,9 +21,9 @@ typedef enum { MODE_SQLI, MODE_XSS } detect_mode_t;
 
 static void usage(const char *program_name);
 size_t modp_rtrim(char *str, size_t len);
-void modp_toprint(char *str, size_t len);
-void test_positive(FILE *fd, const char *fname, detect_mode_t mode,
-                   int flag_invert, int flag_true, int flag_quiet);
+static void modp_toprint(char *str, size_t len);
+static void test_positive(FILE *fd, const char *fname, detect_mode_t mode,
+                          int flag_invert, int flag_true, int flag_quiet);
 
 int urlcharmap(char ch);
 size_t modp_url_decode(char *dest, const char *s, size_t len);
@@ -109,7 +109,7 @@ size_t modp_url_decode(char *dest, const char *s, size_t len) {
     return (size_t)(dest - deststart); /* compute "strlen" of dest */
 }
 
-void modp_toprint(char *str, size_t len) {
+static void modp_toprint(char *str, size_t len) {
     size_t i;
     for (i = 0; i < len; ++i) {
         if (str[i] < 32 || str[i] > 126) {
@@ -130,8 +130,8 @@ size_t modp_rtrim(char *str, size_t len) {
     return len;
 }
 
-void test_positive(FILE *fd, const char *fname, detect_mode_t mode,
-                   int flag_invert, int flag_true, int flag_quiet) {
+static void test_positive(FILE *fd, const char *fname, detect_mode_t mode,
+                          int flag_invert, int flag_true, int flag_quiet) {
     char linebuf[8192];
     int issqli = 0;
     int linenum = 0;
@@ -293,11 +293,14 @@ int main(int argc, const char *argv[]) {
         for (j = 0; j < flag_slow; ++j) {
             for (i = offset; i < argc; ++i) {
                 FILE *fd = fopen(argv[i], "r");
-                if (fd) {
-                    test_positive(fd, argv[i], mode, flag_invert, flag_true,
-                                  flag_quiet);
-                    fclose(fd);
+                if (fd == NULL) {
+                    /* TAP bail-out, so a bad path can't pass as 0 matches */
+                    printf("Bail out! could not open file: %s\n", argv[i]);
+                    return 1;
                 }
+                test_positive(fd, argv[i], mode, flag_invert, flag_true,
+                              flag_quiet);
+                fclose(fd);
             }
         }
     }
@@ -318,11 +321,8 @@ int main(int argc, const char *argv[]) {
         count = g_test_fail;
     }
 
-    if (count > max) {
-        printf("\nThreshold is %d, got %d, failing.\n", max, count);
-        return 1;
-    } else {
-        printf("\nThreshold is %d, got %d, passing.\n", max, count);
-        return 0;
-    }
+    /* TAP (https://testanything.org) result for the test harness */
+    printf("1..1\n%s 1 - threshold is %d, got %d\n",
+           count > max ? "not ok" : "ok", max, count);
+    return count > max;
 }

@@ -7,7 +7,7 @@
 
 ##!+ i
 
-##!$ $
+##!$ ['"]?$
 
 ##!> assemble
   ##!> include unix-shell-evasion-prefix-start-of-string

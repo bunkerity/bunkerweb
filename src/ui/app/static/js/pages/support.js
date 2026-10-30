@@ -3,6 +3,17 @@ $(document).ready(function () {
   const $serviceDropdownMenu = $("#services-dropdown-menu");
   const $serviceDropdownItems = $("#services-dropdown-menu li.nav-item");
 
+  // Unchecked asks the server for clear values (admin only, the server enforces it)
+  $("#mask-passwords").on("change", function () {
+    const mask = this.checked;
+    $(".support-config-link").each(function () {
+      const url = new URL(this.getAttribute("href"), window.location.origin);
+      if (mask) url.searchParams.delete("mask_passwords");
+      else url.searchParams.set("mask_passwords", "no");
+      this.setAttribute("href", url.pathname + url.search);
+    });
+  });
+
   $("#select-service").on("click", () => $serviceSearch.focus());
 
   $serviceSearch.on(

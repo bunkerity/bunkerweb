@@ -1,0 +1,71 @@
+##! Please refer to the documentation at
+##! https://coreruleset.org/docs/development/regex_assembly/.
+
+##! Rule 941250: IE XSS Filters - detects XSS via META http-equiv attribute.
+##! Matches <META http-equiv="X"> where X starts with c (content-type),
+##! r (refresh), or s (set-cookie), including HTML entity encoded variants.
+
+##!+ i
+
+##! HTML entity codes for 'c'/'C': 67=C dec, 43=C hex, 99=c dec, 63=c hex
+##!> assemble
+  67
+  43
+  99
+  63
+  ##!=< c-entity-codes
+##!<
+
+##! HTML entity codes for 'r'/'R': 82=R dec, 52=R hex, 114=r dec, 72=r hex
+##!> assemble
+  82
+  52
+  114
+  72
+  ##!=< r-entity-codes
+##!<
+
+##! HTML entity codes for 's'/'S': 83=S dec, 53=S hex, 115=s dec, 73=s hex
+##!> assemble
+  83
+  53
+  115
+  73
+  ##!=< s-entity-codes
+##!<
+
+##! Main pattern: <META http-equiv="[c|r|s]..."
+##! Each letter (c, r, s) can appear literally or as an HTML entity
+##!> assemble
+  <META[\s/+].*?http-equiv[\s/+]*=[\s/+]*["'`]?
+  ##!=>
+  ##!> assemble
+    ##! Letter 'c' literal or as HTML entity
+    ##!> assemble
+      c
+      ##!> assemble
+        &#x?0*
+        ##!=> c-entity-codes
+        ;?
+      ##!<
+    ##!<
+    ##! Letter 'r' literal or as HTML entity
+    ##!> assemble
+      r
+      ##!> assemble
+        &#x?0*
+        ##!=> r-entity-codes
+        ;?
+      ##!<
+    ##!<
+    ##! Letter 's' literal or as HTML entity
+    ##!> assemble
+      s
+      ##!> assemble
+        &#x?0*
+        ##!=> s-entity-codes
+        ;?
+      ##!<
+    ##!<
+  ##!<
+##!<

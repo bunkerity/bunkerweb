@@ -1,25 +1,27 @@
 [
   {
-    "enabled":1,
-    "version_min":300000,
-    "title":"Testing JSON request body parser 1/2",
-    "expected":{
-      "debug_log": "Target value: \"bar\" \\(Variable: ARGS:json.foo\\)"
+    "enabled": 1,
+    "version_min": 300000,
+    "title": "Testing JSON request body parser 1/2",
+    "client": {
+      "ip": "200.249.12.31",
+      "port": 123
     },
-    "client":{
-      "ip":"200.249.12.31",
-      "port":123
+    "server": {
+      "ip": "200.249.12.31",
+      "port": 80
     },
-    "request":{
-      "headers":{
-        "Host":"localhost",
-        "User-Agent":"curl/7.38.0",
-        "Accept":"*/*",
+    "request": {
+      "headers": {
+        "Host": "localhost",
+        "User-Agent": "curl/7.38.0",
+        "Accept": "*/*",
         "Cookie": "PHPSESSID=rAAAAAAA2t5uvjq435r4q7ib3vtdjq120",
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
+        "Content-Length": "39"
       },
-      "uri":"/?key=value&key=other_value",
-      "method":"POST",
+      "uri": "/?key=value&key=other_value",
+      "method": "POST",
       "body": [
         "{",
         "       \"foo\":\"bar\",",
@@ -27,38 +29,48 @@
         "}"
       ]
     },
-    "server":{
-      "ip":"200.249.12.31",
-      "port":80
+    "response": {
+      "headers": {
+        "Content-Length": "0"
+      },
+      "body": [
+        ""
+      ]
     },
-    "rules":[
-        "SecRuleEngine On",
-        "SecRequestBodyAccess On",
-        "SecRule REQUEST_HEADERS:Content-Type \"application/json\" \"id:'200001',phase:1,t:none,t:lowercase,pass,nolog,ctl:requestBodyProcessor=JSON\"",
-        "SecRule ARGS:json.foo \"bar\" \"id:'200441',phase:3,log\""
+    "expected": {
+      "debug_log": "Target value: \"bar\" \\(Variable: ARGS:json.foo\\)",
+      "http_code": 200
+    },
+    "rules": [
+      "SecRuleEngine On",
+      "SecRequestBodyAccess On",
+      "SecRule REQUEST_HEADERS:Content-Type \"application/json\" \"id:'200001',phase:1,t:none,t:lowercase,pass,nolog,ctl:requestBodyProcessor=JSON\"",
+      "SecRule ARGS:json.foo \"bar\" \"id:'200441',phase:3,log\""
     ]
   },
   {
-    "enabled":1,
-    "version_min":300000,
-    "title":"Testing JSON request body parser 2/2",
-    "expected":{
-      "debug_log": "Target value: \"bar\" \\(Variable: ARGS:json.first_level.first_key\\)"
+    "enabled": 1,
+    "version_min": 300000,
+    "title": "Testing JSON request body parser 2/2",
+    "client": {
+      "ip": "200.249.12.31",
+      "port": 123
     },
-    "client":{
-      "ip":"200.249.12.31",
-      "port":123
+    "server": {
+      "ip": "200.249.12.31",
+      "port": 80
     },
-    "request":{
-      "headers":{
-        "Host":"localhost",
-        "User-Agent":"curl/7.38.0",
-        "Accept":"*/*",
+    "request": {
+      "headers": {
+        "Host": "localhost",
+        "User-Agent": "curl/7.38.0",
+        "Accept": "*/*",
         "Cookie": "PHPSESSID=rAAAAAAA2t5uvjq435r4q7ib3vtdjq120",
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
+        "Content-Length": "68"
       },
-      "uri":"/?key=value&key=other_value",
-      "method":"POST",
+      "uri": "/?key=value&key=other_value",
+      "method": "POST",
       "body": [
         "{",
         "\"first_level\":",
@@ -69,108 +81,138 @@
         "}"
       ]
     },
-    "server":{
-      "ip":"200.249.12.31",
-      "port":80
-    },
-    "rules":[
-        "SecRuleEngine On",
-        "SecRequestBodyAccess On",
-        "SecRule REQUEST_HEADERS:Content-Type \"application/json\" \"id:'200001',phase:1,t:none,t:lowercase,pass,nolog,ctl:requestBodyProcessor=JSON\"",
-        "SecRule ARGS \"bar\" \"id:'200441',phase:3,log\""
-    ]
-  },
-  {
-    "enabled":1,
-    "version_min":300000,
-    "title":"Testing JSON request body parser - issue #1822 (1/2)",
-    "expected":{
-      "debug_log": "Target value: \"0\" .Variable: REQBODY_ERROR."
-    },
-    "client":{
-      "ip":"200.249.12.31",
-      "port":123
-    },
-    "request":{
-      "headers":{
-        "Host":"localhost",
-        "User-Agent":"curl/7.38.0",
-        "Accept":"*/*",
-        "Cookie": "PHPSESSID=rAAAAAAA2t5uvjq435r4q7ib3vtdjq120",
-        "Content-Type": "application/json"
+    "response": {
+      "headers": {
+        "Content-Length": "0"
       },
-      "uri":"/?key=value&key=other_value",
-      "method":"POST",
       "body": [
+        ""
       ]
     },
-    "server":{
-      "ip":"200.249.12.31",
-      "port":80
+    "expected": {
+      "debug_log": "Target value: \"bar\" \\(Variable: ARGS:json.first_level.first_key\\)",
+      "http_code": 200
     },
-    "rules":[
-        "SecRuleEngine On",
-        "SecRequestBodyAccess On",
-        "SecRule REQUEST_HEADERS:Content-Type \"application/json\" \"id:'200001',phase:1,t:none,t:lowercase,pass,nolog,ctl:requestBodyProcessor=JSON\"",
-        "SecRule REQBODY_ERROR \"0\" \"id:'200441',phase:3,log\""
+    "rules": [
+      "SecRuleEngine On",
+      "SecRequestBodyAccess On",
+      "SecRule REQUEST_HEADERS:Content-Type \"application/json\" \"id:'200001',phase:1,t:none,t:lowercase,pass,nolog,ctl:requestBodyProcessor=JSON\"",
+      "SecRule ARGS \"bar\" \"id:'200441',phase:3,log\""
     ]
   },
   {
-    "enabled":1,
-    "version_min":300000,
-    "title":"Testing JSON request body parser - issue #1822 (2/2)",
-    "expected":{
-      "debug_log": "Target value: \"1\" .Variable: REQBODY_ERROR."
+    "enabled": 1,
+    "version_min": 300000,
+    "title": "Testing JSON request body parser - issue #1822 (1/2)",
+    "client": {
+      "ip": "200.249.12.31",
+      "port": 123
     },
-    "client":{
-      "ip":"200.249.12.31",
-      "port":123
+    "server": {
+      "ip": "200.249.12.31",
+      "port": 80
     },
-    "request":{
-      "headers":{
-        "Host":"localhost",
-        "User-Agent":"curl/7.38.0",
-        "Accept":"*/*",
+    "request": {
+      "headers": {
+        "Host": "localhost",
+        "User-Agent": "curl/7.38.0",
+        "Accept": "*/*",
         "Cookie": "PHPSESSID=rAAAAAAA2t5uvjq435r4q7ib3vtdjq120",
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
+        "Content-Length": "0"
       },
-      "uri":"/?key=value&key=other_value",
-      "method":"POST",
+      "uri": "/?key=value&key=other_value",
+      "method": "POST",
+      "body": [
+        ""
+      ]
+    },
+    "response": {
+      "headers": {
+        "Content-Length": "0"
+      },
+      "body": [
+        ""
+      ]
+    },
+    "expected": {
+      "debug_log": "Target value: \"0\" .Variable: REQBODY_ERROR.",
+      "http_code": 200
+    },
+    "rules": [
+      "SecRuleEngine On",
+      "SecRequestBodyAccess On",
+      "SecRule REQUEST_HEADERS:Content-Type \"application/json\" \"id:'200001',phase:1,t:none,t:lowercase,pass,nolog,ctl:requestBodyProcessor=JSON\"",
+      "SecRule REQBODY_ERROR \"0\" \"id:'200441',phase:3,log\""
+    ]
+  },
+  {
+    "enabled": 1,
+    "version_min": 300000,
+    "title": "Testing JSON request body parser - issue #1822 (2/2)",
+    "client": {
+      "ip": "200.249.12.31",
+      "port": 123
+    },
+    "server": {
+      "ip": "200.249.12.31",
+      "port": 80
+    },
+    "request": {
+      "headers": {
+        "Host": "localhost",
+        "User-Agent": "curl/7.38.0",
+        "Accept": "*/*",
+        "Cookie": "PHPSESSID=rAAAAAAA2t5uvjq435r4q7ib3vtdjq120",
+        "Content-Type": "application/json",
+        "Content-Length": "1"
+      },
+      "uri": "/?key=value&key=other_value",
+      "method": "POST",
       "body": [
         "a"
       ]
     },
-    "server":{
-      "ip":"200.249.12.31",
-      "port":80
+    "response": {
+      "headers": {
+        "Content-Length": "0"
+      },
+      "body": [
+        ""
+      ]
     },
-    "rules":[
-        "SecRuleEngine On",
-        "SecRequestBodyAccess On",
-        "SecRule REQUEST_HEADERS:Content-Type \"application/json\" \"id:'200001',phase:1,t:none,t:lowercase,pass,nolog,ctl:requestBodyProcessor=JSON\"",
-        "SecRule REQBODY_ERROR \"0\" \"id:'200441',phase:3,log\""
+    "expected": {
+      "debug_log": "Target value: \"1\" .Variable: REQBODY_ERROR.",
+      "http_code": 200
+    },
+    "rules": [
+      "SecRuleEngine On",
+      "SecRequestBodyAccess On",
+      "SecRule REQUEST_HEADERS:Content-Type \"application/json\" \"id:'200001',phase:1,t:none,t:lowercase,pass,nolog,ctl:requestBodyProcessor=JSON\"",
+      "SecRule REQBODY_ERROR \"0\" \"id:'200441',phase:3,log\""
     ]
   },
   {
-    "enabled":1,
-    "version_min":300000,
-    "title":"Testing JSON request body parser - depth not over limit",
-    "client":{
-      "ip":"200.249.12.31",
-      "port":123
+    "enabled": 1,
+    "version_min": 300000,
+    "title": "Testing JSON request body parser - depth not over limit",
+    "client": {
+      "ip": "200.249.12.31",
+      "port": 123
     },
-    "server":{
-      "ip":"200.249.12.31",
-      "port":80
+    "server": {
+      "ip": "200.249.12.31",
+      "port": 80
     },
-    "request":{
-      "headers":{
-        "Host":"localhost",
-        "User-Agent":"curl/7.38.0",
-        "Content-Type":"application/json"
+    "request": {
+      "headers": {
+        "Host": "localhost",
+        "User-Agent": "curl/7.38.0",
+        "Content-Type": "application/json",
+        "Content-Length": "70"
       },
-      "uri":"/?foo=bar",
-      "method":"POST",
+      "uri": "/?foo=bar",
+      "method": "POST",
       "body": [
         "{",
         "   \"key1\":",
@@ -185,11 +227,19 @@
         "}}}}}"
       ]
     },
-    "expected":{
-      "debug_log": "json.key1.key2.key3.key4.key5",
-      "http_code":200
+    "response": {
+      "headers": {
+        "Content-Length": "0"
+      },
+      "body": [
+        ""
+      ]
     },
-    "rules":[
+    "expected": {
+      "debug_log": "json.key1.key2.key3.key4.key5",
+      "http_code": 200
+    },
+    "rules": [
       "SecRuleEngine On",
       "SecRequestBodyJsonDepthLimit 5",
       "SecRule REQUEST_HEADERS:Content-Type \"application/json\" \"id:'200001',phase:1,t:none,pass,nolog,ctl:requestBodyProcessor=JSON\"",
@@ -197,25 +247,26 @@
     ]
   },
   {
-    "enabled":1,
-    "version_min":300000,
-    "title":"Testing JSON request body parser - depth over limit",
-    "client":{
-      "ip":"200.249.12.31",
-      "port":123
+    "enabled": 1,
+    "version_min": 300000,
+    "title": "Testing JSON request body parser - depth over limit",
+    "client": {
+      "ip": "200.249.12.31",
+      "port": 123
     },
-    "server":{
-      "ip":"200.249.12.31",
-      "port":80
+    "server": {
+      "ip": "200.249.12.31",
+      "port": 80
     },
-    "request":{
-      "headers":{
-        "Host":"localhost",
-        "User-Agent":"curl/7.38.0",
-        "Content-Type":"application/json"
+    "request": {
+      "headers": {
+        "Host": "localhost",
+        "User-Agent": "curl/7.38.0",
+        "Content-Type": "application/json",
+        "Content-Length": "70"
       },
-      "uri":"/?foo=bar",
-      "method":"POST",
+      "uri": "/?foo=bar",
+      "method": "POST",
       "body": [
         "{",
         "   \"key1\":",
@@ -230,11 +281,19 @@
         "}}}}}"
       ]
     },
-    "expected":{
-      "debug_log": "Failed to parse request body",
-      "http_code":403
+    "response": {
+      "headers": {
+        "Content-Length": "0"
+      },
+      "body": [
+        ""
+      ]
     },
-    "rules":[
+    "expected": {
+      "debug_log": "Failed to parse request body",
+      "http_code": 403
+    },
+    "rules": [
       "SecRuleEngine On",
       "SecRequestBodyJsonDepthLimit 4",
       "SecRule REQUEST_HEADERS:Content-Type \"application/json\" \"id:'200001',phase:1,t:none,pass,nolog,ctl:requestBodyProcessor=JSON\"",

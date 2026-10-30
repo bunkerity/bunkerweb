@@ -71,12 +71,6 @@ bool ValidateSchema::evaluate(Transaction *transaction,
         (xmlSchemaValidityErrorFunc)error_load,
         (xmlSchemaValidityWarningFunc)warn_load, &m_err);
 
-    xmlThrDefSetGenericErrorFunc(parserCtx,
-        null_error);
-
-    xmlSetGenericErrorFunc(parserCtx,
-        null_error);
-
     xmlSchemaPtr schema = xmlSchemaParse(parserCtx);
     if (schema == NULL) {
         std::stringstream err;

@@ -27,9 +27,18 @@ repos:
       files: '\.ya?ml$'
 - repo: local
   hooks:
-    - id: run-crs-toolchain
-      name: run-crs-toolchain
+    - id: regex-update
+      name: update-regex-assembly-files
       entry: crs-toolchain regex update --all -l error
+      additional_dependencies: ['github.com/coreruleset/crs-toolchain/v2@v2.4.0']
+      language: golang
+      pass_filenames: false
+      files: '^regex-assembly/'
+- repo: local
+  hooks:
+    - id: regex-format
+      name: format-regex-assembly-files
+      entry: crs-toolchain regex format --all -l error
       additional_dependencies: ['github.com/coreruleset/crs-toolchain/v2@v2.4.0']
       language: golang
       pass_filenames: false

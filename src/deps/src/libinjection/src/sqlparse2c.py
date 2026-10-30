@@ -122,7 +122,10 @@ static size_t parse_bword(sfilter * sf);
 
         print("    {\"%s\", '%s'}," % (k, keywords[k]))
     print("};")
-    print("static const size_t sql_keywords_sz = %d;" % (len(keywords),))
+    # derived from the array, so a hand-merged header cannot carry a stale
+    # count that hides keywords or makes the bsearch read past the end
+    print("static const size_t sql_keywords_sz =")
+    print("    sizeof(sql_keywords) / sizeof(sql_keywords[0]);")
 
     print("#endif")
     return 0

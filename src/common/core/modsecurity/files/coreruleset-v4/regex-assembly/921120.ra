@@ -1,0 +1,21 @@
+##! Please refer to the documentation at
+##! https://coreruleset.org/docs/development/regex_assembly/.
+
+##! Detects HTTP Response Splitting by looking for CR/LF characters
+##! followed by HTTP response header names (content-type, content-length,
+##! set-cookie, location).
+
+##! HTTP response header names
+##!> assemble
+  content-type
+  content-length
+  set-cookie
+  location
+  ##!=< response-headers
+##!<
+
+##!> assemble
+  [\r\n]\W*?
+  ##!=> response-headers
+  :\s*\w
+##!<

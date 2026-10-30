@@ -39,17 +39,19 @@ Siga estos pasos para configurar y usar la función de Cabeceras:
 | `STRICT_TRANSPORT_SECURITY`           | `max-age=63072000; includeSubDomains; preload`                                                      | multisite | no       | **HSTS:** Impone conexiones HTTPS seguras, reduciendo los riesgos de ataques de intermediario (man-in-the-middle).                                              |
 | `CONTENT_SECURITY_POLICY`             | `object-src 'none'; form-action 'self'; frame-ancestors 'self';`                                    | multisite | no       | **CSP:** Restringe la carga de recursos a fuentes de confianza, mitigando los ataques de cross-site scripting e inyección de datos.                             |
 | `CONTENT_SECURITY_POLICY_REPORT_ONLY` | `no`                                                                                                | multisite | no       | **Modo de Informe CSP:** Informa de las violaciones sin bloquear el contenido, ayudando a probar las políticas de seguridad mientras se capturan los registros. |
-| `X_FRAME_OPTIONS`                     | `SAMEORIGIN`                                                                                        | multisite | no       | **X-Frame-Options:** Previene el clickjacking controlando si su sitio puede ser enmarcado (framed).                                                             |
-| `X_CONTENT_TYPE_OPTIONS`              | `nosniff`                                                                                           | multisite | no       | **X-Content-Type-Options:** Evita que los navegadores realicen "MIME-sniffing", protegiendo contra ataques de descarga no autorizada (drive-by download).       |
-| `X_DNS_PREFETCH_CONTROL`              | `off`                                                                                               | multisite | no       | **X-DNS-Prefetch-Control:** Regula la captación previa de DNS para reducir las solicitudes de red no intencionadas y mejorar la privacidad.                     |
+| `X_FRAME_OPTIONS`                     | `SAMEORIGIN`                                                                                        | multisite | no       | **X-Frame-Options:** Previene el clickjacking controlando si su sitio puede ser enmarcado (framed). Valores permitidos: `DENY`, `SAMEORIGIN`; un valor vacío elimina esta cabecera. |
+| `X_CONTENT_TYPE_OPTIONS`              | `nosniff`                                                                                           | multisite | no       | **X-Content-Type-Options:** Evita que los navegadores realicen "MIME-sniffing", protegiendo contra ataques de descarga no autorizada (drive-by download). Valores permitidos: `nosniff`; un valor vacío elimina esta cabecera. |
+| `X_DNS_PREFETCH_CONTROL`              | `off`                                                                                               | multisite | no       | **X-DNS-Prefetch-Control:** Regula la captación previa de DNS para reducir las solicitudes de red no intencionadas y mejorar la privacidad. Valores permitidos: `on`, `off`. |
 | `REFERRER_POLICY`                     | `strict-origin-when-cross-origin`                                                                   | multisite | no       | **Política de Referencia:** Controla la cantidad de información de referencia enviada, salvaguardando la privacidad del usuario.                                |
-| `PERMISSIONS_POLICY`                  | `accelerometer=(), ambient-light-sensor=(), attribution-reporting=(), autoplay=(), battery=(), ...` | multisite | no       | **Política de Permisos:** Restringe el acceso a las funciones del navegador, reduciendo los posibles vectores de ataque.                                        |
-| `KEEP_UPSTREAM_HEADERS`               | `Content-Security-Policy Permissions-Policy X-Frame-Options`                                        | multisite | no       | **Conservar Cabeceras:** Preserva las cabeceras de origen seleccionadas, ayudando a la integración con sistemas heredados mientras se mantiene la seguridad.    |
+| `PERMISSIONS_POLICY`                  | `accelerometer=(), ambient-light-sensor=(), attribution-reporting=(), autoplay=(), bluetooth=(), ...` | multisite | no       | **Política de Permisos:** Restringe el acceso a las funciones del navegador, reduciendo los posibles vectores de ataque.                                        |
+| `KEEP_UPSTREAM_HEADERS`               | `Content-Security-Policy Content-Security-Policy-Report-Only Permissions-Policy X-Frame-Options`                                        | multisite | no       | **Conservar Cabeceras:** Preserva las cabeceras de origen seleccionadas, ayudando a la integración con sistemas heredados mientras se mantiene la seguridad.    |
 
     !!! tip "Mejores Prácticas"
         - Revise y actualice regularmente sus cabeceras de seguridad para alinearse con los estándares de seguridad en evolución.
         - Use herramientas como [Mozilla Observatory](https://observatory.mozilla.org/) para validar la configuración de sus cabeceras.
         - Pruebe el CSP en modo `Report-Only` antes de aplicarlo para evitar romper la funcionalidad.
+        - En modo `Report-Only`, una cabecera `Content-Security-Policy` o `Content-Security-Policy-Report-Only` enviada por el origen se conserva de forma predeterminada (`KEEP_UPSTREAM_HEADERS`); elimine el nombre de la cabecera de ese ajuste para que la propia política de BunkerWeb tenga prioridad.
+        - La `PERMISSIONS_POLICY` predeterminada también bloquea los client hints (directivas `ch-*`); si un servicio depende de `Accept-CH` (por ejemplo, imágenes responsivas basadas en client hints o la detección del modo oscuro mediante `Sec-CH-Prefers-Color-Scheme`), anule `PERMISSIONS_POLICY` para volver a permitir las funciones `ch-*` necesarias (por ejemplo, `ch-dpr=(self)`).
 
 === "Configuración de Cookies"
 
@@ -69,8 +71,16 @@ Siga estos pasos para configurar y usar la función de Cabeceras:
 
     !!! tip "Mejores Prácticas"
         - Use `SameSite=Strict` para cookies sensibles para prevenir el acceso entre orígenes.
+        - Use `SameSite=None` solo cuando las cookies deban enviarse en contextos entre sitios (p. ej., callbacks de SSO o contenido incrustado); los navegadores exigen el indicador `Secure` junto con él, así que mantenga `COOKIE_AUTO_SECURE_FLAG` activado o añada `Secure` explícitamente.
+        - Si la respuesta del upstream ya define otro valor de `SameSite`, BunkerWeb añade el valor configurado en lugar de reemplazarlo; los navegadores aplican el último atributo `SameSite`, por lo que prevalece el valor de `COOKIE_FLAGS`.
         - Audite regularmente la configuración de sus cookies para asegurar el cumplimiento con las regulaciones de seguridad y privacidad.
         - Evite establecer cookies sin el indicador `Secure` en entornos de producción.
+
+    !!! example "SameSite=None para cookies entre sitios"
+        ```yaml
+        COOKIE_FLAGS: "* HttpOnly SameSite=None"
+        COOKIE_AUTO_SECURE_FLAG: "yes"
+        ```
 
 === "Cabeceras Personalizadas"
 
@@ -117,7 +127,7 @@ Siga estos pasos para configurar y usar la función de Cabeceras:
     ```yaml
     COOKIE_FLAGS: "* HttpOnly SameSite=Strict"
     COOKIE_FLAGS_2: "session_cookie Secure HttpOnly SameSite=Strict"
-    COOKIE_FLAGS_3: "auth_cookie Secure HttpOnly SameSite=Strict Max-Age=3600"
+    COOKIE_FLAGS_3: "auth_cookie Secure HttpOnly SameSite=Strict"
     COOKIE_AUTO_SECURE_FLAG: "yes"
     ```
 

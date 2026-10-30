@@ -32,10 +32,9 @@ from magic import Magic
 from requests import get
 from requests.exceptions import ConnectionError
 
-from common_utils import bytes_hash, add_dir_to_tar_safely  # type: ignore
+from common_utils import bytes_hash, create_plugin_tar_gz, safe_tar_extractall, safe_zip_extractall, strip_plugin_write_bits  # type: ignore
 from Database import Database  # type: ignore
 from logger import getLogger  # type: ignore
-
 
 EXTERNAL_PLUGINS_DIR = Path(sep, "etc", "bunkerweb", "plugins")
 TMP_DIR = Path(sep, "var", "tmp", "bunkerweb", "plugins")
@@ -54,15 +53,13 @@ def _set_plugin_permissions(plugin_path: Path) -> None:
         for executable_file in plugin_path.joinpath(subdir).rglob(pattern):
             if executable_file.stat().st_mode & 0o777 != desired_perms:
                 executable_file.chmod(desired_perms)
+    strip_plugin_write_bits(plugin_path)
 
 
 def _plugin_checksum_matches_database(plugin_path: Path, checksum: str) -> bool:
     try:
-        with BytesIO() as plugin_content:
-            with tar_open(fileobj=plugin_content, mode="w:gz", compresslevel=3) as tar:
-                add_dir_to_tar_safely(tar, plugin_path, arc_root=plugin_path.name)
-            plugin_content.seek(0)
-            return bytes_hash(plugin_content, algorithm="sha256") == checksum
+        plugin_content = create_plugin_tar_gz(plugin_path, arc_root=plugin_path.name)
+        return bytes_hash(plugin_content, algorithm="sha256") == checksum
     except BaseException as e:
         LOGGER.debug(format_exc())
         LOGGER.warning(f"Could not verify plugin {plugin_path.name} integrity before skipping reinstall: {e}")
@@ -225,7 +222,7 @@ try:
                 if file_type == "application/zip" or plugin_url.endswith(".zip"):
                     try:
                         with ZipFile(content) as zf:
-                            zf.extractall(path=temp_dir)
+                            safe_zip_extractall(zf, temp_dir)
                         LOGGER.info(f"Successfully extracted ZIP file to {temp_dir}")
                     except BadZipFile as e:
                         LOGGER.debug(format_exc())
@@ -245,10 +242,7 @@ try:
                             tar_mode = "r:xz"
 
                         with tar_open(fileobj=content, mode=tar_mode) as tar:
-                            try:
-                                tar.extractall(path=temp_dir, filter="fully_trusted")
-                            except TypeError:
-                                tar.extractall(path=temp_dir)
+                            safe_tar_extractall(tar, temp_dir)
                         LOGGER.info(f"Successfully extracted TAR file to {temp_dir}")
                     except TarError as e:
                         LOGGER.debug(format_exc())
@@ -289,24 +283,21 @@ try:
             rmtree(plugin_path, ignore_errors=True)
             continue
 
-        with BytesIO() as plugin_content:
-            with tar_open(fileobj=plugin_content, mode="w:gz", compresslevel=3) as tar:
-                add_dir_to_tar_safely(tar, plugin_path, arc_root=plugin_path.name)
-            plugin_content.seek(0, 0)
+        plugin_content = create_plugin_tar_gz(plugin_path, arc_root=plugin_path.name)
 
-            with plugin_path.joinpath("plugin.json").open("r", encoding="utf-8") as f:
-                plugin_data = json_load(f)
+        with plugin_path.joinpath("plugin.json").open("r", encoding="utf-8") as f:
+            plugin_data = json_load(f)
 
-            checksum = bytes_hash(plugin_content, algorithm="sha256")
-            plugin_data.update(
-                {
-                    "type": "external",
-                    "page": plugin_path.joinpath("ui").is_dir(),
-                    "method": "scheduler",
-                    "data": plugin_content.getvalue(),
-                    "checksum": checksum,
-                }
-            )
+        checksum = bytes_hash(plugin_content, algorithm="sha256")
+        plugin_data.update(
+            {
+                "type": "external",
+                "page": plugin_path.joinpath("ui").is_dir(),
+                "method": "scheduler",
+                "data": plugin_content.getvalue(),
+                "checksum": checksum,
+            }
+        )
 
         external_plugins.append(plugin_data)
         external_plugins_ids.append(plugin_data["id"])

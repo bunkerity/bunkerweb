@@ -1,7 +1,7 @@
 local ffi = require "ffi"
 
 require "resty.openssl.include.ossl_typ"
-local OPENSSL_3X = require("resty.openssl.version").OPENSSL_3X
+local OPENSSL_3_UP = require("resty.openssl.version").OPENSSL_3_UP
 
 ffi.cdef [[
   int EVP_DigestInit_ex(EVP_MD_CTX *ctx, const EVP_MD *type,
@@ -28,7 +28,7 @@ ffi.cdef [[
   const EVP_MD *EVP_get_digestbyname(const char *name);
 ]]
 
-if OPENSSL_3X then
+if OPENSSL_3_UP then
   require "resty.openssl.include.provider"
 
   ffi.cdef [[

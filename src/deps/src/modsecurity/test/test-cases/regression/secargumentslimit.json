@@ -1,24 +1,25 @@
 [
   {
-    "enabled":1,
-    "version_min":300000,
-    "title":"Testing SecArgumentLimit not over limit (1/1)",
-    "client":{
-      "ip":"200.249.12.31",
-      "port":123
+    "enabled": 1,
+    "version_min": 300000,
+    "title": "Testing SecArgumentLimit not over limit (1/1)",
+    "client": {
+      "ip": "200.249.12.31",
+      "port": 123
     },
-    "server":{
-      "ip":"200.249.12.31",
-      "port":80
+    "server": {
+      "ip": "200.249.12.31",
+      "port": 80
     },
-    "request":{
-      "headers":{
-        "Host":"localhost",
-        "User-Agent":"curl/7.38.0",
-        "Content-Type":"application/json"
+    "request": {
+      "headers": {
+        "Host": "localhost",
+        "User-Agent": "curl/7.38.0",
+        "Content-Type": "application/json",
+        "Content-Length": "86"
       },
-      "uri":"/?foo=bar",
-      "method":"POST",
+      "uri": "/?foo=bar",
+      "method": "POST",
       "body": [
         "{",
         "       \"k1\":\"v1\",",
@@ -29,11 +30,19 @@
         "}"
       ]
     },
-    "expected":{
-      "debug_log": " Running action deny",
-      "http_code":403
+    "response": {
+      "headers": {
+        "Content-Length": "0"
+      },
+      "body": [
+        ""
+      ]
     },
-    "rules":[
+    "expected": {
+      "debug_log": " Running action deny",
+      "http_code": 403
+    },
+    "rules": [
       "SecRuleEngine On",
       "SecArgumentsLimit 6",
       "SecRule REQUEST_HEADERS:Content-Type \"^application/json\" \"id:'200001',phase:1,t:none,pass,nolog,ctl:requestBodyProcessor=JSON\"",
@@ -42,25 +51,26 @@
     ]
   },
   {
-    "enabled":1,
-    "version_min":300000,
-    "title":"Testing SecArgumentLimit over limit (2/2)",
-    "client":{
-      "ip":"200.249.12.31",
-      "port":123
+    "enabled": 1,
+    "version_min": 300000,
+    "title": "Testing SecArgumentLimit over limit (2/2)",
+    "client": {
+      "ip": "200.249.12.31",
+      "port": 123
     },
-    "server":{
-      "ip":"200.249.12.31",
-      "port":80
+    "server": {
+      "ip": "200.249.12.31",
+      "port": 80
     },
-    "request":{
-      "headers":{
-        "Host":"localhost",
-        "User-Agent":"curl/7.38.0",
-        "Content-Type":"application/json"
+    "request": {
+      "headers": {
+        "Host": "localhost",
+        "User-Agent": "curl/7.38.0",
+        "Content-Type": "application/json",
+        "Content-Length": "86"
       },
-      "uri":"/?foo=bar",
-      "method":"POST",
+      "uri": "/?foo=bar",
+      "method": "POST",
       "body": [
         "{",
         "       \"k1\":\"v1\",",
@@ -71,11 +81,19 @@
         "}"
       ]
     },
-    "expected":{
-      "debug_log": "Skipping request argument, over limit",
-      "http_code":400
+    "response": {
+      "headers": {
+        "Content-Length": "0"
+      },
+      "body": [
+        ""
+      ]
     },
-    "rules":[
+    "expected": {
+      "debug_log": "Skipping request argument, over limit",
+      "http_code": 400
+    },
+    "rules": [
       "SecRuleEngine On",
       "SecArgumentsLimit 5",
       "SecRule REQUEST_HEADERS:Content-Type \"^application/json\" \"id:'200001',phase:1,t:none,pass,nolog,ctl:requestBodyProcessor=JSON\"",

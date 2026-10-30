@@ -4,7 +4,7 @@ from os import chmod, getenv, sep, replace
 from os.path import join
 from pathlib import Path
 from stat import S_IRUSR, S_IWUSR
-from subprocess import DEVNULL, run, PIPE
+from subprocess import DEVNULL, CalledProcessError, run, PIPE
 from sys import exit as sys_exit, path as sys_path
 from traceback import format_exc
 from tempfile import NamedTemporaryFile
@@ -14,11 +14,25 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
     if deps_path not in sys_path:
         sys_path.append(deps_path)
 
+from common_utils import bytes_hash  # type: ignore
 from logger import getLogger  # type: ignore
 from jobs import Job  # type: ignore
 
 LOGGER = getLogger("DEFAULT-SERVER-CERT")
 status = 0
+
+
+def pair_matches(cert: Optional[bytes], key: Optional[bytes]) -> bool:
+    """Check that the certificate and the private key share the same public key."""
+    if not cert or not key:
+        return False
+    try:
+        cert_pub = run(["openssl", "x509", "-noout", "-pubkey"], input=cert, stdout=PIPE, stderr=DEVNULL, check=True).stdout
+        key_pub = run(["openssl", "pkey", "-pubout"], input=key, stdout=PIPE, stderr=DEVNULL, check=True).stdout
+    except (OSError, CalledProcessError):
+        return False
+    return bool(cert_pub) and cert_pub == key_pub
+
 
 try:
     JOB = Job(LOGGER, __file__)
@@ -28,7 +42,14 @@ try:
     key_file = cert_path.joinpath("default-server-cert.key")
     certs_exist_locally = cert_file.is_file() and key_file.is_file()
 
-    if not JOB.is_cached_file("default-server-cert.pem", "month") or not JOB.is_cached_file("default-server-cert.key", "month") or not certs_exist_locally:
+    regenerate = (
+        not JOB.is_cached_file("default-server-cert.pem", "month") or not JOB.is_cached_file("default-server-cert.key", "month") or not certs_exist_locally
+    )
+    if not regenerate and not pair_matches(JOB.get_cache("default-server-cert.pem"), JOB.get_cache("default-server-cert.key")):  # type: ignore
+        LOGGER.warning("The default server certificate and its private key do not match, regenerating both")
+        regenerate = True
+
+    if regenerate:
         LOGGER.info("Generating self-signed certificate for default server")
         cert_path.mkdir(parents=True, exist_ok=True)
         tmp_key_path: Optional[Path] = None
@@ -101,6 +122,9 @@ DNS.1 = www.example.org
                 LOGGER.error("Self-signed certificate generation failed for default server")
                 LOGGER.error(f"OpenSSL error output: {result.stderr}")
                 status = 2
+            elif not pair_matches(tmp_cert_path.read_bytes(), tmp_key_path.read_bytes()):
+                LOGGER.error("The generated certificate and private key do not match, keeping the existing files")
+                status = 2
             else:
                 LOGGER.info("Successfully generated self-signed certificate for default server")
                 replace(tmp_key_path, cert_path.joinpath("default-server-cert.key"))
@@ -111,17 +135,25 @@ DNS.1 = www.example.org
                     LOGGER.error(f"Error setting permissions on default-server-cert.key: {e}")
                 status = 1
 
-                cached, err = JOB.cache_file("default-server-cert.pem", cert_path.joinpath("default-server-cert.pem"), overwrite_file=False)
-                if not cached:
-                    LOGGER.error(f"Error while saving default-server-cert default-server-cert.pem file to db cache : {err}")
+                # One transaction: two separate ones can leave the database with a certificate and a key from different generations.
+                entries = [
+                    {
+                        "job_name": JOB.job_name,
+                        "service_id": "",
+                        "file_name": name,
+                        "data": data,
+                        "checksum": bytes_hash(data),
+                    }
+                    for name, data in (
+                        ("default-server-cert.pem", cert_path.joinpath("default-server-cert.pem").read_bytes()),
+                        ("default-server-cert.key", cert_path.joinpath("default-server-cert.key").read_bytes()),
+                    )
+                ]
+                err = JOB.db.upsert_job_caches(entries)
+                if err:
+                    LOGGER.error(f"Error while saving default-server-cert pem and key files to db cache : {err}")
                 else:
-                    LOGGER.info("Successfully saved default-server-cert default-server-cert.pem file to db cache")
-
-                cached, err = JOB.cache_file("default-server-cert.key", cert_path.joinpath("default-server-cert.key"), overwrite_file=False)
-                if not cached:
-                    LOGGER.error(f"Error while saving default-server-cert default-server-cert.key file to db cache : {err}")
-                else:
-                    LOGGER.info("Successfully saved default-server-cert default-server-cert.key file to db cache")
+                    LOGGER.info("Successfully saved default-server-cert pem and key files to db cache")
         finally:
             # Clean up the temporary config file
             try:

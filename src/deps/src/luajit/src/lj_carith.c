@@ -120,7 +120,7 @@ static int carith_ptr(lua_State *L, CTState *cts, CDArith *ca, MMS mm)
 	/* All valid pointer differences on x64 are in (-2^47, +2^47),
 	** which fits into a double without loss of precision.
 	*/
-	setintptrV(L->top-1, (int32_t)diff);
+	setintptrV(L->top-1, diff);
 	return 1;
       } else if (mm == MM_lt) {  /* Pointer comparison (unsigned). */
 	setboolV(L->top-1, ((uintptr_t)pp < (uintptr_t)pp2));
@@ -135,7 +135,7 @@ static int carith_ptr(lua_State *L, CTState *cts, CDArith *ca, MMS mm)
       return 0;
     lj_cconv_ct_ct(cts, ctype_get(cts, CTID_INT_PSZ), ca->ct[1],
 		   (uint8_t *)&idx, ca->p[1], 0);
-    if (mm == MM_sub) idx = -idx;
+    if (mm == MM_sub) idx = (ptrdiff_t)(~(uintptr_t)idx+1u);
   } else if (mm == MM_add && ctype_isnum(ctp->info) &&
       (ctype_isptr(ca->ct[1]->info) || ctype_isrefarray(ca->ct[1]->info))) {
     /* Swap pointer and index. */
@@ -350,6 +350,37 @@ uint64_t lj_carith_check64(lua_State *L, int narg, CTypeID *id)
     return (uint32_t)intV(o);
   } else {
     return (uint32_t)lj_num2bit(numV(o));
+  }
+}
+
+/* Check bit operator arguments. No coercion from strings. */
+uint64_t lj_carith_checkbit64(lua_State *L, cTValue *o, CTypeID *id)
+{
+  if (tviscdata(o)) {
+    CTState *cts = ctype_cts(L);
+    uint8_t *sp = (uint8_t *)cdataptr(cdataV(o));
+    CTypeID sid = cdataV(o)->ctypeid;
+    CType *s = ctype_get(cts, sid);
+    uint64_t x;
+    if (ctype_isref(s->info)) {
+      sp = *(void **)sp;
+      sid = ctype_cid(s->info);
+    }
+    s = ctype_raw(cts, sid);
+    if (ctype_isenum(s->info)) s = ctype_child(cts, s);
+    if ((s->info & (CTMASK_NUM|CTF_BOOL|CTF_FP|CTF_UNSIGNED)) ==
+	CTINFO(CT_NUM, CTF_UNSIGNED) && s->size == 8)
+      *id = CTID_UINT64;  /* Use uint64_t, since it has the highest rank. */
+    else if (!*id)
+      *id = CTID_INT64;  /* Use int64_t, unless already set. */
+    lj_cconv_ct_ct(cts, ctype_get(cts, *id), s,
+		   (uint8_t *)&x, sp, 0);
+    return x;
+  } else if (LJ_LIKELY(tvisint(o))) {
+    return (uint64_t)intV(o);  /* Sign-extended. */
+  } else {
+    if (!tvisnum(o)) lj_err_optype(L, o, LJ_ERR_OPARITH);
+    return (uint64_t)lj_num2bit(numV(o));  /* Sign-extended. */
   }
 }
 

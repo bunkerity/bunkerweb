@@ -17,11 +17,12 @@
 
 #include <iostream>
 #include <sstream>
-#include <unordered_map>
 #include <map>
 #include <vector>
 #include <string>
 #include <utility>
+#include <optional>
+#include <memory>
 
 #ifndef TEST_REGRESSION_REGRESSION_TEST_H_
 #define TEST_REGRESSION_REGRESSION_TEST_H_
@@ -31,7 +32,7 @@ namespace modsecurity_test {
 
 class RegressionTest {
  public:
-    static RegressionTest *from_yajl_node(const yajl_val &);
+    static std::unique_ptr<RegressionTest> from_yajl_node(const yajl_val &node);
 
     static std::string print();
     std::string filename;
@@ -41,10 +42,10 @@ class RegressionTest {
     std::string rules;
 
     std::string url;
-    int enabled;
-    int version_min;
-    int version_max;
-    int github_issue;
+    int enabled = 0;
+    int version_min = 0;
+    std::optional<int> version_max;
+    std::optional<int> github_issue;
 
     std::vector<std::pair<std::string, std::string>> request_headers;
     std::vector<std::pair<std::string, std::string>> response_headers;
@@ -59,8 +60,8 @@ class RegressionTest {
 
     std::string clientIp;
     std::string serverIp;
-    int clientPort;
-    int serverPort;
+    int clientPort = 0;
+    int serverPort = 0;
     std::string hostname;
 
     std::string method;
@@ -74,10 +75,36 @@ class RegressionTest {
     static inline std::vector<std::pair<std::string, std::string>>
         yajl_array_to_map(const yajl_val &node);
 
-    int http_code;
+    int http_code = 0;
     std::string redirect_url;
+
+    // fields for formatting JSON
+
+    std::vector<std::string> request_body_lines;
+    std::vector<std::string> response_body_lines;
+    std::vector<std::string> rules_lines;
+    void update_content_lengths();
+
+private:
+   void update_client_from_yajl_node(const yajl_val &val);
+   void update_server_from_yajl_node(const yajl_val &val);
+   void update_request_from_yajl_node(const yajl_val &val);
+   void update_response_from_yajl_node(const yajl_val &val);
+   void update_expected_from_yajl_node(const yajl_val &val);
+   void update_rules_from_yajl_node(const yajl_val &val);
 };
 
+class RegressionTests {
+ public:
+    static std::unique_ptr<RegressionTests> from_yajl_node(const yajl_val &node);
+    void update_content_lengths();
+    std::string toJSON() const;
+
+    std::string filename;
+    std::string name;
+
+    std::vector<std::unique_ptr<RegressionTest>> tests;
+};
 
 class RegressionTestResult {
  public:

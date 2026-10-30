@@ -35,17 +35,9 @@ $(document).ready(function () {
   };
 
   if (jobNumber > 10) {
-    const menu = [10];
-    if (jobNumber > 25) {
-      menu.push(25);
-    }
-    if (jobNumber > 50) {
-      menu.push(50);
-    }
-    if (jobNumber > 100) {
-      menu.push(100);
-    }
-    menu.push({ label: t("datatable.length_all", "All"), value: -1 });
+    const menu = [10, 25, 50, 100];
+    if (jobNumber > 100) menu.push(500);
+    if (jobNumber > 500) menu.push(1000);
     layout.bottomStart = {
       pageLength: {
         menu: menu,
@@ -148,12 +140,18 @@ $(document).ready(function () {
 
   const getSelectedJobs = () => {
     const jobs = [];
-    $("tr.selected").each(function () {
-      const $this = $(this);
-      const name = $this.find("td:eq(1)").text().trim();
-      const plugin = $this.find("td:eq(2)").text().trim();
-      jobs.push({ name: name, plugin: plugin });
-    });
+    if (!$.fn.dataTable.isDataTable("#jobs")) return jobs;
+    $("#jobs")
+      .DataTable()
+      .rows({ selected: true })
+      .nodes()
+      .to$()
+      .each(function () {
+        const $this = $(this);
+        const name = $this.find("td:eq(1)").text().trim();
+        const plugin = $this.find("td:eq(2)").text().trim();
+        jobs.push({ name: name, plugin: plugin });
+      });
     return jobs;
   };
 
@@ -314,14 +312,14 @@ $(document).ready(function () {
                   "status.no",
                   "No",
                 )}</span>`,
-                value: (rowData) => rowData[5].includes("bx-x"),
+                value: (rowData) => rowData[5]["@data-order"] === "0",
               },
               {
                 label: `<i class=\"bx bx-xs bx-check text-success\"></i>&nbsp;<span data-i18n="status.yes">${t(
                   "status.yes",
                   "Yes",
                 )}</span>`,
-                value: (rowData) => rowData[5].includes("bx-check"),
+                value: (rowData) => rowData[5]["@data-order"] === "1",
               },
             ],
             combiner: "or",
@@ -339,14 +337,14 @@ $(document).ready(function () {
                   "status.no",
                   "No",
                 )}</span>`,
-                value: (rowData) => rowData[6].includes("bx-x"),
+                value: (rowData) => rowData[6]["@data-order"] === "0",
               },
               {
                 label: `<i class=\"bx bx-xs bx-check text-success\"></i>&nbsp;<span data-i18n="status.yes">${t(
                   "status.yes",
                   "Yes",
                 )}</span>`,
-                value: (rowData) => rowData[6].includes("bx-check"),
+                value: (rowData) => rowData[6]["@data-order"] === "1",
               },
             ],
             combiner: "or",
@@ -386,7 +384,7 @@ $(document).ready(function () {
       select: {
         style: "multi+shift",
         selector: "td:nth-child(2)",
-        headerCheckbox: true,
+        headerCheckbox: "select-page",
       },
       layout: layout,
       initComplete: function (settings, json) {
@@ -411,8 +409,8 @@ $(document).ready(function () {
 
   $(document).on("click", ".show-history", function () {
     const historyModal = $("#modal-job-history");
-    const job = $(this).data("job");
-    const plugin = $(this).data("plugin");
+    const job = $(this).attr("data-job");
+    const plugin = $(this).attr("data-plugin");
 
     const history = $(`#job-${job}-${plugin}-history`).clone();
     const historyCount = history.find("ul").length - 1;
@@ -447,8 +445,8 @@ $(document).ready(function () {
       return;
     }
     const job = {
-      name: $(this).data("job"),
-      plugin: $(this).data("plugin"),
+      name: $(this).attr("data-job"),
+      plugin: $(this).attr("data-plugin"),
     };
     executeForm([job]);
   });

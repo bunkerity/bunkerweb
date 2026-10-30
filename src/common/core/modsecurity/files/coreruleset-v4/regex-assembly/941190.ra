@@ -1,0 +1,65 @@
+##! Please refer to the documentation at
+##! https://coreruleset.org/docs/development/regex_assembly/.
+
+##! IE XSS Filters - detects XSS within <style> tags.
+##! Matches a style tag followed by either:
+##!   - a CSS at-rule (@i or @\)
+##!   - a colon/equals (or HTML entity equivalent) followed by
+##!     a paren/backslash (or HTML entity equivalent)
+
+##!+ i
+
+##! HTML entity codes for colon (:) and equals (=)
+##! 58 = ':' decimal, 3A = ':' hex, 61 = '=' decimal, 3D = '=' hex
+##!> assemble
+  58
+  3A
+  61
+  3D
+  ##!=< colon-equals-entity-codes
+##!<
+
+##! HTML entity codes for open paren and backslash
+##! 40 = '(' decimal, 28 = '(' hex, 92 = '\' decimal, 5C = '\' hex
+##!> assemble
+  40
+  28
+  92
+  5C
+  ##!=< paren-backslash-entity-codes
+##!<
+
+##! colon or equals, literal or as HTML entity
+##!> assemble
+  [:=]
+  ##!> assemble
+    &#x?0*
+    ##!=> colon-equals-entity-codes
+    ;?
+  ##!<
+  ##!=< colon-or-equals
+##!<
+
+##! open paren or backslash, literal or as HTML entity
+##!> assemble
+  [(\x5c]
+  ##!> assemble
+    &#x?0*
+    ##!=> paren-backslash-entity-codes
+    ;?
+  ##!<
+  ##!=< paren-or-backslash
+##!<
+
+##! CSS at-rule pattern: @i or @\
+##!> assemble
+  <style.*?>.*?@[i\x5c]
+##!<
+
+##! assignment pattern: colon/equals ... paren/backslash
+##!> assemble
+  <style.*?>.*?
+  ##!=> colon-or-equals
+  .*?
+  ##!=> paren-or-backslash
+##!<

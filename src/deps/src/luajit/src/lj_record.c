@@ -17,6 +17,7 @@
 #include "lj_frame.h"
 #if LJ_HASFFI
 #include "lj_ctype.h"
+#include "lj_crecord.h"
 #endif
 #include "lj_bc.h"
 #include "lj_ff.h"
@@ -446,9 +447,9 @@ static void rec_for_check(jit_State *J, IRType t, int dir,
 			  TRef stop, TRef step, int init)
 {
   if (!tref_isk(step)) {
-    /* Non-constant step: need a guard for the direction. */
+    /* Non-constant step: need a guard for the direction (excluding +-0). */
     TRef zero = (t == IRT_INT) ? lj_ir_kint(J, 0) : lj_ir_knum_zero(J);
-    emitir(IRTG(dir ? IR_GE : IR_LT, t), step, zero);
+    emitir(IRTG(dir ? IR_GT : IR_LT, t), step, zero);
     /* Add hoistable overflow checks for a narrowed FORL index. */
     if (init && t == IRT_INT) {
       if (tref_isk(stop)) {
@@ -529,8 +530,9 @@ static LoopEvent rec_for(jit_State *J, const BCIns *fori, int isforl)
   /* Avoid semantic mismatches and always failing guards. */
   if ((tvisnum(&tv[FORL_IDX]) && tvisnan(&tv[FORL_IDX])) ||
       (tvisnum(&tv[FORL_STOP]) && tvisnan(&tv[FORL_STOP])) ||
-      (tvisnum(&tv[FORL_STEP]) && tvisnan(&tv[FORL_STEP])) ||
-      tvismzero(&tv[FORL_STEP]))
+      (tvisnum(&tv[FORL_STEP]) &&
+       (tvisnan(&tv[FORL_STEP]) || tviszero(&tv[FORL_STEP]))) ||
+      (tvisint(&tv[FORL_STEP]) && intV(&tv[FORL_STEP]) == 0))
     lj_trace_err(J, LJ_TRERR_GFAIL);
   if (isforl) {  /* Handle FORL/JFORL opcodes. */
     TRef idx = tr[FORL_IDX];
@@ -2265,6 +2267,8 @@ void lj_record_ins(jit_State *J)
       {
 	BCReg s;
 	TValue *tv = J->L->base;
+	ptrdiff_t delta = J->L->top - tv;
+	if (J->maxslot > (BCReg)delta) J->maxslot = (BCReg)delta;
 	for (s = 0; s < J->maxslot; s++)  /* Constify stack slots (if any). */
 	  if (J->base[s] == TREF_NIL && !tvisnil(&tv[s]))
 	    J->base[s] = lj_record_constify(J, &tv[s]);
@@ -2504,6 +2508,45 @@ void lj_record_ins(jit_State *J)
     else
       rc = rec_mm_arith(J, &ix, MM_pow);
     break;
+
+  /* -- Bit operators ----------------------------------------------------- */
+
+  case BC_BNOT:
+#if LJ_HASFFI
+    if (tref_iscdata(rc)) {
+      rc = recff_bit64_bitop(J, rc, 0, rcv, NULL, IR_BNOT);
+      break;
+    }
+#endif
+    rc = lj_opt_narrow_tobit(J, rc);
+    rc = emitir(IRTI(IR_BNOT), rc, 0);
+    break;
+
+  case BC_BAND: case BC_BOR: case BC_BXOR:
+#if LJ_HASFFI
+    if (tref_iscdata(rb) || tref_iscdata(rc)) {
+      rc = recff_bit64_bitop(J, rb, rc, rbv, rcv, (int)op - (int)BC_BAND + (int)IR_BAND);
+      break;
+    }
+#endif
+  recbit:
+    rb = lj_opt_narrow_tobit(J, rb);
+    rc = lj_opt_narrow_tobit(J, rc);
+    rc = emitir(IRTI((int)op - (int)BC_BAND + (int)IR_BAND), rb, rc);
+    break;
+
+  case BC_BSHL: case BC_BSHR: case BC_BSAR:
+#if LJ_HASFFI
+    {
+      TRef xrb = rb, xrc = rc;
+      if (recff_bit64_shift(J, &xrb, &xrc, rbv, rcv, (int)op - (int)BC_BSHL + (int)IR_BSHL)) {
+	rc = xrb;
+	break;
+      }
+      rc = xrc;  /* Shift amount may have been converted. */
+    }
+#endif
+    goto recbit;
 
   /* -- Miscellaneous ops ------------------------------------------------- */
 

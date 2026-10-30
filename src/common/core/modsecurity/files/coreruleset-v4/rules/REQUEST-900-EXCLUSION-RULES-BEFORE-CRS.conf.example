@@ -1,5 +1,5 @@
 # ------------------------------------------------------------------------
-# OWASP CRS ver.4.24.0
+# OWASP CRS ver.4.30.0
 # Copyright (c) 2006-2020 Trustwave and contributors. All rights reserved.
 # Copyright (c) 2021-2026 CRS project. All rights reserved.
 #
@@ -72,6 +72,23 @@
 # SecRuleUpdateTargetByMsg  -> place in RESPONSE-999-EXCLUSION-RULES-AFTER-CRS
 # SecRuleUpdateTargetByTag  -> place in RESPONSE-999-EXCLUSION-RULES-AFTER-CRS
 #
+# Rule ID ranges (e.g. 942100-942999) are only expanded by directives/actions
+# that remove a whole rule on ModSecurity v2 and v3; they are NOT expanded by
+# directives/actions that modify or remove a rule's target on those engines.
+# Coraza is the exception: it expands ranges correctly everywhere.
+#
+#                            | v2 + Apache | v3 + libModSecurity | Coraza
+# SecRuleRemoveById          | range OK    | range OK            | range OK
+# ctl:ruleRemoveById         | range OK    | range OK            | range OK
+# SecRuleUpdateTargetById    | range OK    | single ID only      | range OK
+# ctl:ruleRemoveTargetById   | range OK    | single ID only      | range OK
+#
+# On v2 and v3, giving SecRuleUpdateTargetById or ctl:ruleRemoveTargetById a
+# range silently affects only the first rule ID in the range; the rest of the
+# range's rules are still fully inspected. Use ruleRemoveTargetByTag/ByMsg or
+# SecRuleUpdateTargetByTag/ByMsg instead if you need to affect several rules
+# at once on those engines.
+#
 #
 # What follows are a group of examples that show you how to perform rule
 # exclusions.
@@ -102,6 +119,9 @@
 # This rule shows how to conditionally exclude the "password"
 # parameter for rule 942100 when the REQUEST_URI is /index.php
 # ModSecurity Rule Exclusion: 942100 SQL Injection Detected via libinjection
+#
+# NOTE: ctl:ruleRemoveTargetById does not support rule ranges on ModSecurity
+# v3 (see rule-range support matrix above).
 #
 # SecRule REQUEST_URI "@beginsWith /index.php" \
 #     "id:1001,\
@@ -149,11 +169,9 @@
 #
 # This rule illustrates that we can remove a rule range via a ctl action.
 # This uses the fact, that rules are grouped by topic in rule files covering
-# a certain id range.
-# IMPORTANT: ModSecurity v3, aka libModSecurity, does not currently support the
-# use of rule ranges in a ruleRemoveById ctl action (this feature has been
-# planned for v3.1). Consider using ruleRemoveByTag as a workaround, if
-# appropriate.
+# a certain id range. Unlike ctl:ruleRemoveTargetById, ctl:ruleRemoveById
+# supports rule ranges on both ModSecurity v2 and v3 (see rule-range support
+# matrix above).
 #
 # ModSecurity Rule Exclusion: Disable all SQLi and XSS rules
 # SecRule REQUEST_FILENAME "@beginsWith /admin" \

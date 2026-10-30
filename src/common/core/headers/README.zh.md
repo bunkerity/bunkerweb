@@ -39,17 +39,19 @@
     | `STRICT_TRANSPORT_SECURITY`           | `max-age=63072000; includeSubDomains; preload`                                                      | multisite | 否   | **HSTS：** 强制执行安全的 HTTPS 连接，降低中间人攻击的风险。                      |
     | `CONTENT_SECURITY_POLICY`             | `object-src 'none'; form-action 'self'; frame-ancestors 'self';`                                    | multisite | 否   | **CSP：** 将资源加载限制在受信任的来源，减轻跨站脚本和数据注入攻击。              |
     | `CONTENT_SECURITY_POLICY_REPORT_ONLY` | `no`                                                                                                | multisite | 否   | **CSP 报告模式：** 报告违规行为而不阻止内容，有助于在测试安全策略的同时捕获日志。 |
-    | `X_FRAME_OPTIONS`                     | `SAMEORIGIN`                                                                                        | multisite | 否   | **X-Frame-Options：** 通过控制您的网站是否可以被框架化来防止点击劫持。            |
-    | `X_CONTENT_TYPE_OPTIONS`              | `nosniff`                                                                                           | multisite | 否   | **X-Content-Type-Options：** 防止浏览器进行 MIME 嗅探，防止路过式下载攻击。       |
-    | `X_DNS_PREFETCH_CONTROL`              | `off`                                                                                               | multisite | 否   | **X-DNS-Prefetch-Control：** 调节 DNS 预取以减少无意的网络请求并增强隐私。        |
+    | `X_FRAME_OPTIONS`                     | `SAMEORIGIN`                                                                                        | multisite | 否   | **X-Frame-Options：** 通过控制您的网站是否可以被框架化来防止点击劫持。 允许值：`DENY`、`SAMEORIGIN`；留空会移除此响应头。 |
+    | `X_CONTENT_TYPE_OPTIONS`              | `nosniff`                                                                                           | multisite | 否   | **X-Content-Type-Options：** 防止浏览器进行 MIME 嗅探，防止路过式下载攻击。 允许值：`nosniff`；留空会移除此响应头。 |
+    | `X_DNS_PREFETCH_CONTROL`              | `off`                                                                                               | multisite | 否   | **X-DNS-Prefetch-Control：** 调节 DNS 预取以减少无意的网络请求并增强隐私。 允许值：`on`、`off`。 |
     | `REFERRER_POLICY`                     | `strict-origin-when-cross-origin`                                                                   | multisite | 否   | **Referrer Policy：** 控制发送的引荐来源信息的数量，保护用户隐私。                |
-    | `PERMISSIONS_POLICY`                  | `accelerometer=(), ambient-light-sensor=(), attribution-reporting=(), autoplay=(), battery=(), ...` | multisite | 否   | **Permissions Policy：** 限制浏览器功能访问，减少潜在的攻击向量。                 |
-    | `KEEP_UPSTREAM_HEADERS`               | `Content-Security-Policy Permissions-Policy X-Frame-Options`                                        | multisite | 否   | **保留标头：** 保留选定的上游标头，在保持安全性的同时帮助旧版集成。               |
+    | `PERMISSIONS_POLICY`                  | `accelerometer=(), ambient-light-sensor=(), attribution-reporting=(), autoplay=(), bluetooth=(), ...` | multisite | 否   | **Permissions Policy：** 限制浏览器功能访问，减少潜在的攻击向量。                 |
+    | `KEEP_UPSTREAM_HEADERS`               | `Content-Security-Policy Content-Security-Policy-Report-Only Permissions-Policy X-Frame-Options`                                        | multisite | 否   | **保留标头：** 保留选定的上游标头，在保持安全性的同时帮助旧版集成。               |
 
     !!! tip "最佳实践"
         -   定期审查和更新您的安全标头，以与不断发展的安全标准保持一致。
         -   使用像 [Mozilla Observatory](https://observatory.mozilla.org/) 这样的工具来验证您的标头配置。
         -   在强制执行 CSP 之前，在 `Report-Only` 模式下进行测试，以避免破坏功能。
+        -   在 `Report-Only` 模式下，上游发送的 `Content-Security-Policy` 或 `Content-Security-Policy-Report-Only` 标头默认会被保留（`KEEP_UPSTREAM_HEADERS`）；从该设置中移除相应的标头名称，BunkerWeb 自身的策略才会生效。
+        -   默认的 `PERMISSIONS_POLICY` 也会阻止客户端提示（`ch-*` 指令）；如果某个服务依赖 `Accept-CH`（例如基于客户端提示的响应式图片或通过 `Sec-CH-Prefers-Color-Scheme` 进行的深色模式检测），请覆盖 `PERMISSIONS_POLICY` 以重新允许所需的 `ch-*` 功能（例如 `ch-dpr=(self)`）。
 
 === "Cookie 设置"
 
@@ -69,8 +71,16 @@
 
     !!! tip "最佳实践"
         -   对敏感 cookie 使用 `SameSite=Strict` 以防止跨源访问。
+        -   仅在 cookie 必须在跨站场景中发送时（例如 SSO 回调或嵌入内容）使用 `SameSite=None`；浏览器要求同时设置 `Secure` 标志，因此请保持 `COOKIE_AUTO_SECURE_FLAG` 启用或显式添加 `Secure`。
+        -   如果上游响应已设置了不同的 `SameSite` 值，BunkerWeb 会追加配置的值而不是替换它；浏览器以最后一个 `SameSite` 属性为准，因此 `COOKIE_FLAGS` 中的值生效。
         -   定期审计您的 cookie 设置，以确保符合安全和隐私法规。
         -   避免在生产环境中设置没有 Secure 标志的 cookie。
+
+    !!! example "跨站 cookie 使用 SameSite=None"
+        ```yaml
+        COOKIE_FLAGS: "* HttpOnly SameSite=None"
+        COOKIE_AUTO_SECURE_FLAG: "yes"
+        ```
 
 === "自定义头"
 
@@ -117,7 +127,7 @@
     ```yaml
     COOKIE_FLAGS: "* HttpOnly SameSite=Strict"
     COOKIE_FLAGS_2: "session_cookie Secure HttpOnly SameSite=Strict"
-    COOKIE_FLAGS_3: "auth_cookie Secure HttpOnly SameSite=Strict Max-Age=3600"
+    COOKIE_FLAGS_3: "auth_cookie Secure HttpOnly SameSite=Strict"
     COOKIE_AUTO_SECURE_FLAG: "yes"
     ```
 

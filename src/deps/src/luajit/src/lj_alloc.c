@@ -219,7 +219,7 @@ static int CALL_MUNMAP(void *ptr, size_t size)
 
 #if LJ_ALLOC_MMAP_PROBE
 
-#ifdef MAP_TRYFIXED
+#if defined(MAP_TRYFIXED) && !defined(__DragonFly__)
 #define MMAP_FLAGS_PROBE	(MMAP_FLAGS|MAP_TRYFIXED)
 #else
 #define MMAP_FLAGS_PROBE	MMAP_FLAGS

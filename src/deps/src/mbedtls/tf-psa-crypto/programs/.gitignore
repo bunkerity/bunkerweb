@@ -1,0 +1,14 @@
+fuzz/fuzz_privkey
+fuzz/fuzz_pubkey
+psa/aead_demo
+psa/crypto_examples
+psa/hmac_demo
+psa/key_ladder_demo
+psa/psa_constant_names
+psa/psa_hash
+test/benchmark
+test/which_aes
+
+###START_GENERATED_FILES###
+# Generated source files
+psa/psa_constant_names_generated.c

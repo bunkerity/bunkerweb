@@ -1,6 +1,7 @@
 # Python package requirements for Mbed TLS testing.
 
 -r driver.requirements.txt
+-r ../framework/scripts/ci.requirements.txt
 
 # The dependencies below are only used in scripts that we run on the Linux CI.
 
@@ -17,12 +18,8 @@ pylint == 2.4.4; platform_system == 'Linux'
 # mypy 0.942 is the version in Ubuntu 22.04.
 mypy == 0.942; platform_system == 'Linux'
 
-# At the time of writing, only needed for tests/scripts/audit-validity-dates.py.
-# It needs >=35.0.0 for correct operation, and that requires Python >=3.6.
-# >=35.0.0 also requires Rust to build from source, which we are forced to do on
-# FreeBSD, since PyPI doesn't carry binary wheels for the BSDs.
-cryptography >= 35.0.0; platform_system == 'Linux'
-
-# For building `framework/data_files/server9-bad-saltlen.crt` and check python
-# files.
-asn1crypto; platform_system == 'Linux'
+# More requirements for scripts in the framework that might not work in
+# older versions of Python. Note that requirements that are not available
+# in the oldest version of Python on our CI must be annodated with
+# "python >= ...".
+-r ../framework/util/requirements.txt

@@ -1,6 +1,6 @@
-from contextlib import suppress
 from datetime import datetime
 from typing import Any, Dict, List, Optional
+from urllib.parse import quote
 
 from fastapi import APIRouter, Depends, Query
 from fastapi.responses import JSONResponse, Response
@@ -8,7 +8,6 @@ from ..schemas import CacheFilesDeleteRequest, CacheFileKey
 
 from ..auth.guard import guard
 from ..utils import get_db
-
 
 router = APIRouter(prefix="/cache", tags=["cache"])
 
@@ -70,9 +69,11 @@ def list_cache(
 
 
 def _transform_filename(path_token: str) -> str:
-    # UI uses a special encoding for folders: prefix "folder:" and replace '_' with '/'
+    # UI uses a special encoding for folders: prefix "folder:" and replace '_' with '/'. The prefix
+    # is kept: `cache_dir` stores `file_name` with it included and the DB lookup matches that column
+    # exactly, so stripping it made every folder-backed cache file 404.
     if path_token.startswith("folder:"):
-        return path_token.replace("_", "/")[len("folder:") :]  # noqa: E203
+        return path_token.replace("_", "/")
     return path_token
 
 
@@ -106,7 +107,7 @@ def fetch_cache_file(
         content = data.get("data") if isinstance(data, dict) else data
         if not isinstance(content, (bytes, bytearray)):
             content = b""
-        headers = {"Content-Disposition": f"attachment; filename={fname}"}
+        headers = {"Content-Disposition": f'attachment; filename="{quote(fname, safe="")}"'}
         return Response(status_code=200, content=content, media_type="application/octet-stream", headers=headers)
     # Return printable content only
     content = data.get("data") if isinstance(data, dict) else data
@@ -130,19 +131,15 @@ def fetch_cache_file(
     )
 
 
-@router.delete("", dependencies=[Depends(guard)])
-def delete_cache_files(payload: CacheFilesDeleteRequest) -> JSONResponse:
-    """Delete multiple cache files.
-
-    Args:
-        payload: Request containing list of cache files to delete
-    """
+def _delete_cache_files(payload: CacheFilesDeleteRequest, *, single: bool = False) -> JSONResponse:
+    """Delete cache files and report whether each requested row existed."""
     items = payload.cache_files
 
     db = get_db()
     deleted = 0
     errors: List[str] = []
     changed_plugins: set[str] = set()
+    not_found_errors = 0
     for it in items:
         fname = _transform_filename(it.fileName)
         job = it.jobName
@@ -150,23 +147,46 @@ def delete_cache_files(payload: CacheFilesDeleteRequest) -> JSONResponse:
         plug = it.plugin
         if not fname or not job:
             continue
-        err = db.delete_job_cache(fname, job_name=job, service_id=svc)
-        if err:
+        err = db.delete_job_cache(fname, job_name=job, service_id=svc, plugin_id=plug)
+        if err is None:
+            not_found_errors += 1
+            errors.append(f"{fname}: Cache file not found")
+        elif err:
             errors.append(f"{fname}: {err}")
         else:
             changed_plugins.add(plug)
             deleted += 1
 
     # Notify scheduler to apply changes for affected plugins
-    with suppress(Exception):
-        db.checked_changes(changes=["config"], plugins_changes=list(changed_plugins), value=True)
+    if changed_plugins:
+        try:
+            ret = db.checked_changes(changes=["config"], plugins_changes=list(changed_plugins), value=True)
+        except Exception as e:
+            ret = str(e)
+        if ret:
+            errors.append(f"Scheduler was not notified of the deletion: {ret}")
 
-    status_code = 207 if errors and deleted else (400 if errors and not deleted else 200)
+    if errors and deleted:
+        status_code = 207
+    elif errors:
+        status_code = 404 if single and not_found_errors == len(errors) else 400
+    else:
+        status_code = 200
     body: Dict[str, Any] = {"status": "success" if deleted and not errors else ("partial" if deleted else "error")}
     body["deleted"] = deleted
     if errors:
         body["errors"] = errors
     return JSONResponse(status_code=status_code, content=body)
+
+
+@router.delete("", dependencies=[Depends(guard)])
+def delete_cache_files(payload: CacheFilesDeleteRequest) -> JSONResponse:
+    """Delete multiple cache files.
+
+    Args:
+        payload: Request containing list of cache files to delete
+    """
+    return _delete_cache_files(payload)
 
 
 @router.delete("/{service}/{plugin_id}/{job_name}/{file_name}", dependencies=[Depends(guard)])
@@ -180,4 +200,4 @@ def delete_cache_file(service: str, plugin_id: str, job_name: str, file_name: st
         file_name: File name
     """
     req = CacheFilesDeleteRequest(cache_files=[CacheFileKey(service=service, plugin=plugin_id, jobName=job_name, fileName=file_name)])
-    return delete_cache_files(req)
+    return _delete_cache_files(req, single=True)

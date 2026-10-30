@@ -43,6 +43,9 @@ Siga estos pasos para configurar y usar la función de Lista Gris:
     | `GREYLIST_IP`      |                   | multisite | no       | **Lista Gris de IP:** Lista de direcciones IP o redes (en notación CIDR) para incluir en la lista gris, separadas por espacios.         |
     | `GREYLIST_IP_URLS` |                   | multisite | no       | **URLs de Lista Gris de IP:** Lista de URLs que contienen direcciones IP o redes para incluir en la lista gris, separadas por espacios. |
 
+    !!! info "Formatos de lista"
+        Las listas de URL pueden contener una entrada por línea (las líneas que empiezan por `#` o `;` son comentarios y solo se lee la primera palabra de cada línea), CSV, un documento JSON o JSON Lines. En las listas de IP, las comas también separan campos y las listas JSON conservan todas las cadenas que sean direcciones IP o redes. Añada un fragmento para conservar solo una parte de una lista JSON: `#key` conserva los valores bajo `key`, `#key=value` conserva los objetos cuya propiedad `key` es igual a `value` o contiene `value`, y `&` combina términos. Ejemplo: `https://ip-ranges.amazonaws.com/ip-ranges.json#service=CLOUDFRONT`. Una URL con un fragmento conserva solo lo que este selecciona, por lo que no conserva nada si la lista no es JSON.
+
 === "DNS Inverso"
     **Qué hace esto:** Incluye en la lista gris a los visitantes según su nombre de dominio (en inverso). Útil para permitir el acceso condicional a visitantes de organizaciones o redes específicas.
 
@@ -51,6 +54,9 @@ Siga estos pasos para configurar y usar la función de Lista Gris:
     | `GREYLIST_RDNS`        |                   | multisite | no       | **Lista Gris de rDNS:** Lista de sufijos de DNS inverso para incluir en la lista gris, separados por espacios.                            |
     | `GREYLIST_RDNS_GLOBAL` | `yes`             | multisite | no       | **Solo rDNS Global:** Realiza comprobaciones de la lista gris de rDNS solo en direcciones IP globales cuando se establece en `yes`.       |
     | `GREYLIST_RDNS_URLS`   |                   | multisite | no       | **URLs de Lista Gris de rDNS:** Lista de URLs que contienen sufijos de DNS inverso para incluir en la lista gris, separadas por espacios. |
+
+    !!! info "DNS inverso confirmado hacia delante (FCrDNS)"
+        Los sufijos de `GREYLIST_RDNS` se confirman hacia delante: el nombre de host PTR coincidente se resuelve de nuevo a una IP y la concesión de la lista gris solo se aplica cuando coincide con la IP del cliente. Un PTR que no se puede confirmar hacia delante se trata como una posible suplantación y no se concede el acceso. Esto evita que un atacante que controle su propio registro PTR lo establezca en un sufijo incluido en la lista gris para obtener acceso.
 
 === "ASN"
     **Qué hace esto:** Incluye en la lista gris a los visitantes de proveedores de red específicos utilizando Números de Sistema Autónomo. Los ASN identifican a qué proveedor u organización pertenece una IP.
@@ -75,6 +81,20 @@ Siga estos pasos para configurar y usar la función de Lista Gris:
     | ------------------- | ----------------- | --------- | -------- | --------------------------------------------------------------------------------------------------------------------------------- |
     | `GREYLIST_URI`      |                   | multisite | no       | **Lista Gris de URI:** Lista de patrones de URI (expresión regular PCRE) para incluir en la lista gris, separados por espacios.   |
     | `GREYLIST_URI_URLS` |                   | multisite | no       | **URLs de Lista Gris de URI:** Lista de URLs que contienen patrones de URI para incluir en la lista gris, separadas por espacios. |
+
+    !!! tip "Ancle un patrón de ruta para cubrir todo lo que hay por debajo"
+        Escriba `^/admin(/|$)` en lugar de `^/admin$`. Un patrón anclado a una única ruta exacta no coincide con `/admin/`, `/admin%2f` ni `/admin;foo`, mientras que su aplicación puede seguir sirviendo el mismo recurso en esas rutas. La coincidencia se hace sobre la ruta decodificada y normalizada, así que `/a/../admin` y `//admin` ya están cubiertos.
+
+=== "Cabecera"
+    **Qué hace esto:** Pone en la lista gris las peticiones que llevan una cabecera concreta, comprobada por nombre y, opcionalmente, por una expresión regular PCRE sobre su valor.
+
+    | Ajuste                  | Valor por defecto | Contexto  | Múltiple | Descripción                                                                                                                                                   |
+    | ----------------------- | ----------------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+    | `GREYLIST_HEADER_NAME`  |                   | multisite | sí       | **Nombre de cabecera:** Nombre de una cabecera de petición que hace que la petición incluirla en la lista gris. Pares numerados: `_NAME_1` va con `_VALUE_1`. |
+    | `GREYLIST_HEADER_VALUE` |                   | multisite | sí       | **Valor de cabecera:** Expresión regular PCRE que debe coincidir con el valor de la cabecera. Déjelo vacío para comprobar solo su presencia.                  |
+
+    !!! warning "Una regla de cabecera es un secreto compartido"
+        Cualquier cliente puede enviar una cabecera, así que una regla de cabecera es un token portador, no un control de red. Sírvala solo por HTTPS, ancle la expresión regular con `^` y `$` (la búsqueda no está anclada por defecto, así que `abc` también coincide con `xabcx`) y rote el valor. Si BunkerWeb está detrás de un proxy, ese proxy debe sobrescribir cualquier copia de la cabecera enviada por el cliente. Estas reglas son solo para HTTP: un servicio de stream no lleva cabeceras de petición, así que allí no coincide nada.
 
 !!! info "Soporte de Formato de URL"
     Todos los ajustes `*_URLS` admiten URLs HTTP/HTTPS así como rutas de archivos locales usando el prefijo `file:///`. Se admite la autenticación básica usando el formato `http://usuario:contraseña@url`.
@@ -128,13 +148,22 @@ Siga estos pasos para configurar y usar la función de Lista Gris:
 
 === "Acceso Selectivo a la API"
 
-    Una configuración que permite el acceso a puntos finales específicos de la API:
+    Una configuración que permite a una red asociada acceder a todo y a cualquier cliente acceder a un endpoint público:
 
     ```yaml
     USE_GREYLIST: "yes"
-    GREYLIST_URI: "^/api/v1/public/ ^/api/v1/status"
-    GREYLIST_IP: "203.0.113.0/24"  # Red del socio externo
+    GREYLIST_IP: "203.0.113.0/24"
+    GREYLIST_URI: "^/api/foo$"
     ```
+
+    Los criterios de la Greylist son alternativas: una solicitud pasa la Greylist cuando cualquiera de ellos coincide. Aquí la red indicada puede acceder a todas las rutas y cualquier cliente puede acceder a la ruta exacta `/api/foo`. Los demás clientes son denegados en las demás rutas. Las demás comprobaciones de seguridad activadas se siguen aplicando a cada solicitud. Use `^/api/foo(/|$)` para un subárbol público. La coincidencia usa la ruta normalizada, sin la cadena de consulta. No se pueden expresar listas de IP distintas para rutas distintas, ni exigir que coincidan a la vez una IP y una ruta.
+
+    | Cliente | Ruta | Resultado |
+    | --- | --- | --- |
+    | En `203.0.113.0/24` | `/api/foo` | Pasa |
+    | En `203.0.113.0/24` | cualquier otra ruta | Pasa |
+    | Fuera de `203.0.113.0/24` | `/api/foo` | Pasa |
+    | Fuera de `203.0.113.0/24` | cualquier otra ruta | Denegado |
 
 ### Trabajar con archivos de listas locales
 

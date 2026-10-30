@@ -23,9 +23,6 @@ def upgrade() -> None:
         op.create_unique_constraint(None, "bw_plugin_pages", ["plugin_id"])
 
     with suppress(Exception):
-        op.drop_index("id", table_name="bw_settings")
-
-    with suppress(Exception):
         op.create_unique_constraint(None, "bw_settings", ["name"])
 
     # Update the version in bw_metadata

@@ -27,13 +27,82 @@ CrowdSec est un moteur de sécurité moderne et open-source qui détecte et bloq
 - L’accès aux journaux d’accès de BunkerWeb (`/var/log/bunkerweb/access.log` par défaut) pour que l’agent CrowdSec puisse analyser les requêtes.
 - L’accès à `cscli` sur l’hôte CrowdSec afin d’enregistrer la clé du bouncer BunkerWeb.
 
+!!! warning "Démarrage explicite en tout-en-un"
+    L’agent CrowdSec intégré démarre uniquement si le conteneur tout-en-un reçoit la variable d’environnement sans préfixe `USE_CROWDSEC=yes` et une `CROWDSEC_API` locale (`http://127.0.0.1:8000` par défaut). Activer CrowdSec uniquement pour un service ne démarre pas l’agent intégré. Avec une API locale externe, démarrez et configurez l’agent séparément.
+
 ### Parcours d’intégration
 
 1. Préparer l’agent CrowdSec pour ingérer les journaux BunkerWeb.
 2. Configurer BunkerWeb pour interroger l’API locale CrowdSec.
 3. Valider le lien via l’API `/crowdsec/ping` ou la carte CrowdSec dans l’interface d’administration.
 
+    Ce contrôle effectue une requête de lecture authentifiée auprès de chaque API locale configurée. Il échoue si une API est inaccessible, refuse la clé, renvoie une réponse invalide ou si le bouncer d’un service n’a pas pu être chargé. Pour les services utilisant uniquement AppSec, il confirme le chargement de la configuration ; il ne teste ni la connexion ni l’inspection AppSec.
+
 Les sections suivantes détaillent chacune de ces étapes.
+
+### Investigation et suppression des décisions
+
+Ouvrez **Pages supplémentaires → CrowdSec** dans l’interface Web pour consulter chaque connexion configurée, le service concerné, la connectivité à l’API locale et la synchronisation des décisions. La carte d’état du plugin CrowdSec et les actions **Examiner l’IP** des pages Rapports et Bannissements ouvrent cette même page. Les liens d’investigation préremplissent l’adresse. Sélectionnez la connexion lorsque plusieurs services ou instances utilisent CrowdSec.
+
+Une investigation regroupe les décisions CrowdSec actuelles, les alertes CrowdSec disponibles, les rapports BunkerWeb conservés et les bannissements locaux de BunkerWeb. Les décisions actuelles et les éléments capturés dans les rapports sont présentés séparément. Les nouveaux rapports CrowdSec conservent les identifiants de décision, origines, scénarios, cibles, mesures de remédiation et dates d’expiration disponibles, même après l’expiration ou la suppression des décisions. Les rejets AppSec et les blocages dus à une politique de gestion des échecs AppSec ont des sources distinctes. L’historique suit les paramètres existants de conservation des rapports ; les anciens rapports et les métadonnées facultatives évincées du cache peuvent ne contenir aucun détail supplémentaire. La consultation des alertes expose des métadonnées d’événement limitées, sans corps de requête brut, cookies ni en-têtes d’authentification.
+
+Les rapports locaux et les bannissements propres à un service sont limités au périmètre de la connexion sélectionnée ; les bannissements globaux de BunkerWeb sont également inclus. Si ce périmètre ne peut plus être établi à partir de la configuration chargée par l’instance, l’investigation s’arrête pour éviter de renvoyer les données d’autres services. Les rapports conservés restent accessibles lorsque l’API locale est indisponible et que la configuration de la connexion est toujours chargée.
+
+La section **Listes d’autorisation CrowdSec** affiche les listes natives du moteur, leurs entrées, commentaires, dates d’expiration et leur mode de gestion, local ou via la Console CrowdSec. Les investigations IP vérifient l’état actuel des listes d’autorisation du moteur et affichent le motif de correspondance. Leur lecture et leur vérification nécessitent les identifiants de gestion décrits ci-dessous. Une vérification indisponible est distinguée d’une IP absente des listes. Ces exceptions s’appliquent à l’ensemble du moteur CrowdSec ; elles ne suppriment pas les bannissements locaux de BunkerWeb. CrowdSec 1.8.0 expose les opérations de lecture et de vérification via la LAPI, tandis que les modifications natives nécessitent `cscli` sur son hôte ou un accès de gestion distinct à la Console.
+
+Le paramètre existant `CROWDSEC_API_KEY` est une **clé de bouncer** : il permet de lire les décisions, mais pas de les supprimer ni de consulter les alertes. Pour activer ces opérations, enregistrez une machine dédiée sur le moteur CrowdSec concerné et configurez ces deux paramètres multisites facultatifs :
+
+- `CROWDSEC_MANAGEMENT_LOGIN` : l’identifiant de la machine dédiée.
+- `CROWDSEC_MANAGEMENT_PASSWORD` : le mot de passe de cette machine.
+
+Enregistrez la machine en suivant la [procédure d’authentification à l’API locale](https://doc.crowdsec.net/docs/local_api/authentication/) de CrowdSec. Conservez les identifiants de manière confidentielle. Si l’un des deux paramètres reste vide, la gestion demeure indisponible. La même configuration s’applique aux moteurs intégrés et externes : les requêtes passent par l’instance BunkerWeb sélectionnée, ce qui permet à une API locale intégrée de continuer à écouter sur localhost. Les requêtes HTTPS de gestion vérifient le certificat du serveur avec la configuration de confiance TLS de BunkerWeb, indépendamment du paramètre de vérification AppSec.
+
+L’action **Supprimer la décision CrowdSec** est distincte du débannissement BunkerWeb. Dans l’interface Web, elle nécessite un administrateur disposant d’un accès en écriture, des identifiants de gestion configurés, une base de données de l’interface accessible en écriture et la confirmation de la décision sélectionnée. Supprimer une décision portant sur une plage affecte toute cette plage. Sur un moteur partagé, la suppression affecte aussi les autres bouncers qui consomment cette décision. L’identifiant, la portée, la cible et la mesure de remédiation sélectionnés sont vérifiés de nouveau avant la suppression ; les autres décisions et les bannissements locaux sont conservés.
+
+Une réponse réussie confirme la suppression dans l’API locale et affiche les décisions correspondantes restantes. Les bouncers prennent en compte le changement lors de leur actualisation du flux ou à l’expiration de leur cache en mode live ; l’interface indique que la propagation est en attente, sans affirmer que tous les clients sont déjà autorisés. Une autre décision, un bannissement local, une nouvelle détection ou une règle AppSec peut encore bloquer une requête. Le résultat de chaque suppression est journalisé avec l’acteur authentifié, la connexion et la décision sélectionnées.
+
+L’API publique expose les mêmes opérations :
+
+- `GET /crowdsec` : connexions, état de synchronisation et erreurs par instance.
+- `GET /crowdsec/{connection_id}/decisions` : filtrage par `ip`, `origin` ou `scenario` ; pagination avec `offset` et `limit` (200 au maximum).
+- `GET /crowdsec/{connection_id}/ips/{ip}` : investigation comprenant jusqu’à 200 décisions, 50 alertes et 50 rapports, avec les totaux ou limites et des sections explicitement signalées comme indisponibles.
+- `GET /crowdsec/{connection_id}/alerts/{alert_id}` : détails d’alerte filtrés pour exclure les données sensibles.
+- `GET /crowdsec/{connection_id}/allowlists` : listes d’autorisation natives, avec pagination par `offset` et `limit` ; jusqu’à 200 entrées par liste, avec affichage du nombre total d’entrées.
+- `GET /crowdsec/{connection_id}/allowlists/check?ip={ip}` : présence actuelle dans une liste d’autorisation native et motif de correspondance.
+- `DELETE /crowdsec/{connection_id}/decisions/{decision_id}` : inclure les valeurs sélectionnées de `scope`, `value` et `decision_type` dans le corps JSON.
+
+Utilisez l’identifiant de connexion renvoyé sans le modifier. Il inclut l’identité de l’instance, afin de distinguer les URL localhost identiques sur des instances différentes. Les administrateurs de l’API peuvent utiliser ces opérations. Les utilisateurs délégués de l’API doivent disposer de la permission indépendante `crowdsec_read` ou `crowdsec_delete` sous la ressource existante `bans`, pour un identifiant de connexion renvoyé ou `*`. Une permission ordinaire `ban_delete` n’autorise pas la suppression CrowdSec. Aucune migration de base de données n’est nécessaire.
+
+Le moteur d’exécution conserve les décisions individuelles par cible : en supprimer une ne peut donc pas effacer un autre bannissement sur la même IP ou plage. Les métadonnées facultatives des rapports utilisent un cache distinct de 5 Mio (`CROWDSEC_METADATA_CACHE_SIZE=5m`) et ne peuvent pas évincer les entrées servant au blocage. Les actualisations du flux utilisent un verrou de processus non bloquant dans `/var/run/bunkerweb`, conservé jusqu’à la publication de la mise à jour et libéré automatiquement si le worker s’arrête.
+
+Le mode stream conserve au plus deux emplacements d’instantané et ne bascule qu’après le stockage complet du nouvel instantané. Un rechargement nginx sans changement conserve l’instantané et demande les différences. Un instantané absent, une configuration de décisions modifiée, un démarrage incomplet ou une dernière synchronisation réussie plus ancienne que le maximum de 300 secondes et de 30 fois `CROWDSEC_UPDATE_FREQUENCY` impose un instantané complet. Les échecs produisent au plus une erreur par minute et par préfixe de cache, puis une notification de rétablissement. Si le cache des décisions est plein, augmentez `CROWDSEC_CACHE_SIZE` pour contenir deux instantanés et rechargez BunkerWeb. Redimensionner la zone des décisions lors d’un rechargement crée une zone vide et déclenche une synchronisation complète ; redimensionner seulement celle des métadonnées efface les métadonnées facultatives.
+
+Lors d’une mise à niveau sur place depuis une version antérieure, les anciennes entrées actives conservent leur TTL initial pour que les anciens workers en cours d’arrêt les appliquent encore, même si le nouveau délai d’arrêt est plus court. Les générations obsolètes sont libérées avant d’allouer un instantané. Prévoyez de la place pour ces entrées en plus des deux emplacements ; si l’allocation échoue, la protection précédente reste active et la synchronisation signale une erreur. Dimensionnez le cache des décisions avec ces chiffres, mesurés avec des cibles IPv4 distinctes synthétiques et un TTL d’une heure : prévoyez environ 1,1 Kio par décision en régime établi (deux emplacements d’instantané) et environ 1,4 Kio par décision pendant une mise à niveau tant que des entrées anciennes sont actives, arrondis au supérieur pour garder de la marge. Par exemple, 100 000 décisions demandent environ `120m` en régime établi et `150m` pendant une mise à niveau. Avec ces chiffres, la valeur par défaut `100m` permet de contenir environ 90 000 décisions en régime établi et environ 70 000 pendant une mise à niveau. D’autres types de cibles, comme IPv6 ou les plages, peuvent consommer davantage ; réglez donc `CROWDSEC_CACHE_SIZE` selon la taille de votre liste, idéalement avant la mise à niveau.
+
+Une requête de flux interrompue ou échouée impose un instantané complet au prochain sondage. Une réconciliation complète intervient aussi après 3600 secondes depuis la dernière synchronisation complète réussie. Pendant l’amorçage, les réponses directes de l’API locale utilisent un cache distinct par identifiants et politique effectifs. Si une recherche échoue, seule cette politique suspend ses recherches pendant `CROWDSEC_UPDATE_FREQUENCY` ; les IP inconnues sont autorisées pendant la panne. Les bannissements et captchas connus restent appliqués jusqu’à leur propre expiration. Ni les réponses d’amorçage ni les décisions restaurées ne remplacent un instantané publié plus récent.
+
+Le mode stream sauvegarde chaque instantané complet et chaque différence modifiée dans `/var/lib/bunkerweb/crowdsec-state-*.json`, avec l’expiration absolue des décisions et les associations de services dans `crowdsec-binding-*.json`. Ces fichiers survivent aux envois du cache du scheduler, aux redimensionnements, aux changements de politique (dont la rotation d’URL ou de clé API), aux rechargements nginx et aux redémarrages du même conteneur conservant son système de fichiers. Jusqu’à la publication du nouvel instantané, l’ancien instantané publié ou sa sauvegarde restaurée reste appliqué. La restauration s’effectue à l’initialisation. Les workers partagent une révision de sauvegarde ; un worker dont la copie est obsolète la relit dans une tâche planifiée avant de l’utiliser pendant une panne. Les écritures passent aussi uniquement par ces tâches. Si une sauvegarde ne peut pas être lue ou est corrompue, y compris au démarrage d’un worker ou après une mise à jour interrompue, le contrôle de secours refuse les requêtes jusqu’à ce qu’elle redevienne lisible ou qu’une synchronisation réussie la réécrive. Les sauvegardes sont immédiates, mais un plantage pendant une écriture peut faire perdre la sauvegarde, y compris lors d’une coupure de courant. Une sauvegarde appartenant à une autre configuration est ignorée ; les deux cas sont signalés par des erreurs limitées en fréquence. Recréer un conteneur avec un système de fichiers neuf démarre sans décisions ; les IP inconnues restent autorisées si LAPI est indisponible.
+
+### Bannissements CrowdSec
+
+Par défaut, BunkerWeb interroge CrowdSec à chaque requête. Définissez `CROWDSEC_BAN_REFRESH` sur une durée, par exemple `5m`, pour transformer un blocage CrowdSec en **bannissement CrowdSec** : un bannissement BunkerWeb court, renouvelé tant que la décision CrowdSec dure. Les requêtes suivantes de l’IP sont arrêtées à la vérification des bannissements, avant les autres plugins et avant la consultation de CrowdSec. Le bannissement apparaît sur la page Bannissements comme une ligne distincte, avec l’action **Examiner l’IP**. La valeur par défaut `0` conserve le comportement précédent et ne crée aucun bannissement.
+
+- **Quand un bannissement est créé :** uniquement lorsque BunkerWeb a bloqué lui-même la requête à cause d’une décision `ban` de l’API locale, avec `SECURITY_MODE` sur `block` et une décision non expirée. Les rejets AppSec et les autres remédiations, comme un captcha, ne créent jamais de bannissement.
+- **Sa durée :** la plus courte de `CROWDSEC_BAN_REFRESH` et de la durée restante de la décision. Quand le bannissement se termine, la requête suivante est de nouveau vérifiée auprès de CrowdSec, et un nouveau bannissement est créé si la décision s’applique toujours.
+- **Fraîcheur :** lorsqu’une décision est supprimée directement dans CrowdSec (avec `cscli`, dans la Console, par une actualisation de liste ou par une liste d’autorisation), l’IP est laissée passer au plus tard après la somme de `CROWDSEC_BAN_REFRESH`, du délai de cache CrowdSec (`CROWDSEC_UPDATE_FREQUENCY` en mode stream, `CROWDSEC_CACHE_EXPIRATION` en mode live) et, si Redis est activé, de 30 secondes au plus pour les copies locales des autres instances. En mode stream, aucun nouveau bannissement n’est créé tant que la dernière synchronisation réussie date de plus de deux fois `CROWDSEC_UPDATE_FREQUENCY`.
+- **Emplacements exclus :** tout `CROWDSEC_EXCLUDE_LOCATION` sur un service désactive les bannissements CrowdSec pour ce service, car un bannissement bloquerait aussi les chemins exclus. CrowdSec continue d’y vérifier chaque requête. Il en va de même lorsque le plugin exclut son propre emplacement de défi.
+- **Portée :** un bannissement créé depuis la connexion CrowdSec propre à un service s’applique à ce service uniquement, et un bannissement créé depuis une connexion globale s’applique à tous les services. Un bannissement CrowdSec global s’applique aussi aux services TCP/UDP, mais seulement avec Redis activé, via une copie locale qui dure 30 secondes au plus. Sans Redis, les services TCP/UDP ne voient jamais les bannissements CrowdSec.
+- **Mémoire :** les bannissements utilisent la zone de mémoire partagée `bans_meta`, toujours déclarée avec une taille de 10 MiB. Sa mémoire n’est utilisée que lorsque `CROWDSEC_BAN_REFRESH` ou `BANS_TLS_DROP_REASONS` est défini.
+
+**Débannissement et CrowdSec.** Supprimer un bannissement CrowdSec supprime aussi les décisions CrowdSec qui le sous-tendent, car l’IP serait sinon bannie de nouveau à la vérification suivante. L’interface Web, l’API et `bwcli unban` suivent le même déroulement :
+
+- Il nécessite les identifiants de gestion (`CROWDSEC_MANAGEMENT_LOGIN` et `CROWDSEC_MANAGEMENT_PASSWORD`) de chaque connexion où se trouve une décision sélectionnée. Avec l’API, il faut en plus la permission `crowdsec_delete` sur chaque connexion concernée, en complément de `ban_delete`.
+- Vous devez confirmer la liste des décisions (IP ou plage, type, origine et scénario) avant la suppression de toute décision CrowdSec. `bwcli unban` utilise `-confirm` pour cela : sans cette option, la commande affiche seulement la liste et ne modifie rien dans CrowdSec. Le bannissement explicite de la même IP ne fait pas partie de cette confirmation : `bwcli unban` le supprime en premier, avant l’aperçu et même sans `-confirm`. La commande ne fonctionne que sur un hôte ayant accès à la base de données, en général l’hôte du scheduler. Ailleurs, utilisez l’interface Web ou l’API.
+- Si l’instance qui a vu le blocage est indisponible, le débannissement est refusé. Le bannissement expire de lui-même dans le délai `CROWDSEC_BAN_REFRESH`.
+- Si une décision ne peut pas être supprimée, les autres décisions sélectionnées sont tout de même supprimées, mais les étapes restantes sont ignorées et le bannissement BunkerWeb est conservé. Le résultat est signalé comme partiel et liste les décisions supprimées et celles qui ont échoué. L’IP reste bloquée tant que les décisions en échec ne sont pas supprimées. Si certaines connexions CrowdSec ne peuvent pas être vérifiées, le débannissement a quand même lieu sur les connexions qui ont répondu : leurs décisions sont supprimées et le bannissement BunkerWeb est retiré sur les instances disponibles. Le résultat est alors signalé comme partiel et indique ce qui n’a pas pu être vérifié, et l’IP peut rester bloquée par ces connexions jusqu’à la fin de leurs décisions. Réessayer est sans risque.
+- Les décisions issues de la Central API ou de listes (les origines `CAPI` et `lists`) peuvent revenir à la prochaine actualisation. Créez une liste d’autorisation CrowdSec pour une exception permanente.
+- Supprimer une décision de plage affecte toute la plage. Les bannissements CrowdSec déjà créés pour d’autres IP de cette plage restent jusqu’à la fin de leur durée, au plus `CROWDSEC_BAN_REFRESH`.
+- Un bannissement CrowdSec et un bannissement explicite sur la même IP sont deux lignes distinctes, supprimées chacune séparément. La durée d’un bannissement CrowdSec ne peut pas être modifiée.
 
 ### Étape&nbsp;1 – Préparer CrowdSec à ingérer les journaux BunkerWeb
 
@@ -103,7 +172,7 @@ Les sections suivantes détaillent chacune de ces étapes.
     services:
       bunkerweb:
         # C'est le nom qui sera utilisé pour identifier l'instance dans le planificateur
-        image: bunkerity/bunkerweb:1.6.9-rc2
+        image: bunkerity/bunkerweb:1.6.18-rc2
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -120,7 +189,7 @@ Les sections suivantes détaillent chacune de ces étapes.
             syslog-address: "udp://10.20.30.254:514" # L'adresse IP du service syslog
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.9-rc2
+        image: bunkerity/bunkerweb-scheduler:1.6.18-rc2
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Assurez-vous de définir le nom correct de l'instance
@@ -154,7 +223,7 @@ Les sections suivantes détaillent chacune de ces étapes.
           - bw-db
 
       crowdsec:
-        image: crowdsecurity/crowdsec:v1.7.6 # Utilisez la dernière version mais épinglez toujours la version pour une meilleure stabilité/sécurité
+        image: crowdsecurity/crowdsec:v1.8.0 # Utilisez la dernière version mais épinglez toujours la version pour une meilleure stabilité/sécurité
         volumes:
           - cs-data:/var/lib/crowdsec/data # Pour persister les données de CrowdSec
           - bw-logs:/var/log:ro # Les journaux de BunkerWeb à analyser par CrowdSec
@@ -283,7 +352,7 @@ Les sections suivantes détaillent chacune de ces étapes.
     sudo systemctl reload bunkerweb
     ```
 
-=== "All-in-one"
+=== "Tout-en-un"
 
     L'image Docker BunkerWeb All-In-One (AIO) est livrée avec CrowdSec entièrement intégré. Vous n'avez pas besoin de configurer une instance CrowdSec séparée ou de configurer manuellement les fichiers d'acquisition pour les journaux de BunkerWeb lorsque vous utilisez l'agent CrowdSec interne.
 
@@ -291,33 +360,55 @@ Les sections suivantes détaillent chacune de ces étapes.
 
 ### Étape&nbsp;2 – Configurer les paramètres de BunkerWeb
 
-Appliquez les variables d’environnement suivantes (ou leurs équivalents via le scheduler) pour permettre à votre instance BunkerWeb de communiquer avec l’API locale CrowdSec. Au minimum, `USE_CROWDSEC`, `CROWDSEC_API` et une clé valide générée avec `cscli bouncers add` sont nécessaires.
+Appliquez les variables d’environnement suivantes (ou leurs équivalents via le scheduler) pour permettre à votre instance BunkerWeb de communiquer avec l’API locale CrowdSec. Au minimum, `USE_CROWDSEC`, `CROWDSEC_API` et `CROWDSEC_API_KEY` avec une clé valide générée via `cscli bouncers add` sont nécessaires.
 
-| Paramètre                   | Valeur par défaut      | Contexte  | Multiple | Description                                                                                                                                    |
-| --------------------------- | ---------------------- | --------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
-| `USE_CROWDSEC`              | `no`                   | multisite | no       | **Activer CrowdSec :** Mettre à `yes` pour activer le bouncer CrowdSec.                                                                        |
-| `CROWDSEC_API`              | `http://crowdsec:8080` | global    | no       | **URL de l'API CrowdSec :** L'adresse du service de l'API locale de CrowdSec.                                                                  |
-| `CROWDSEC_API_KEY`          |                        | global    | no       | **Clé API CrowdSec :** La clé API pour s'authentifier auprès de l'API CrowdSec, obtenue avec `cscli bouncers add`.                             |
-| `CROWDSEC_MODE`             | `live`                 | global    | no       | **Mode de fonctionnement :** Soit `live` (interroge l'API pour chaque requête) ou `stream` (met en cache périodiquement toutes les décisions). |
-| `CROWDSEC_ENABLE_INTERNAL`  | `no`                   | global    | no       | **Trafic interne :** Mettre à `yes` pour vérifier le trafic interne par rapport aux décisions de CrowdSec.                                     |
-| `CROWDSEC_REQUEST_TIMEOUT`  | `1000`                 | global    | no       | **Délai d'attente de la requête :** Délai d'attente en millisecondes pour les requêtes HTTP vers l'API locale de CrowdSec en mode live.        |
-| `CROWDSEC_EXCLUDE_LOCATION` |                        | global    | no       | **Emplacements exclus :** Liste d'emplacements (URI) séparés par des virgules à exclure des vérifications de CrowdSec.                         |
-| `CROWDSEC_CACHE_EXPIRATION` | `1`                    | global    | no       | **Expiration du cache :** Le temps d'expiration du cache en secondes pour les décisions IP en mode live.                                       |
-| `CROWDSEC_UPDATE_FREQUENCY` | `10`                   | global    | no       | **Fréquence de mise à jour :** À quelle fréquence (en secondes) récupérer les décisions nouvelles/expirées de l'API CrowdSec en mode stream.   |
+Les paramètres de connexion sont `multisite` : une valeur sans préfixe s’applique à tous les services, et un préfixe de nom de serveur la remplace pour ce service. `CROWDSEC_CACHE_SIZE` et `CROWDSEC_METADATA_CACHE_SIZE` sont `global` ; définissez-les sans préfixe de serveur.
+
+| Paramètre                      | Valeur par défaut      | Contexte  | Multiple | Description                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| ------------------------------ | ---------------------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `USE_CROWDSEC`                 | `no`                   | multisite | no       | **Activer CrowdSec :** Mettre à `yes` pour activer le bouncer CrowdSec.                                                                                                                                                                                                                                                                                                                                                                           |
+| `CROWDSEC_API`                 | `http://crowdsec:8080` | multisite | no       | **URL de l'API CrowdSec :** L'adresse du service de l'API locale de CrowdSec.                                                                                                                                                                                                                                                                                                                                                                     |
+| `CROWDSEC_API_KEY`             |                        | multisite | no       | **Clé API CrowdSec :** La clé API pour s'authentifier auprès de l'API CrowdSec, obtenue avec `cscli bouncers add`.                                                                                                                                                                                                                                                                                                                                |
+| `CROWDSEC_MODE`                | `live`                 | multisite | no       | **Mode de fonctionnement :** Soit `live` (interroge l'API pour chaque requête) ou `stream` (met en cache périodiquement toutes les décisions).                                                                                                                                                                                                                                                                                                    |
+| `CROWDSEC_ENABLE_INTERNAL`     | `no`                   | multisite | no       | **Trafic interne :** Mettre à `yes` pour vérifier le trafic interne par rapport aux décisions de CrowdSec.                                                                                                                                                                                                                                                                                                                                        |
+| `CROWDSEC_REQUEST_TIMEOUT`     | `1s`                   | multisite | no       | **Délai d'attente de la requête :** Délai d'attente en millisecondes pour les requêtes HTTP vers l'API locale de CrowdSec en mode live. Accepte un suffixe de durée (ms, s, m, h, d, w, M, y) ; un nombre sans suffixe est en millisecondes.                                                                                                                                                                                                      |
+| `CROWDSEC_EXCLUDE_LOCATION`    |                        | multisite | no       | **Emplacements exclus :** Liste d'emplacements (URI) séparés par des virgules à exclure des vérifications de CrowdSec.                                                                                                                                                                                                                                                                                                                            |
+| `CROWDSEC_CACHE_SIZE`          | `100m`                 | global    | no       | **Taille du cache des décisions :** Mémoire partagée entre services ; deux instantanés en mode stream. Mégaoctets entiers positifs (`m`/`M`), minimum `1m`. Un redimensionnement vide la zone ; les décisions connues sont restaurées jusqu’à réconciliation. Les IP inconnues interrogent LAPI et sont autorisées en cas de panne.                                                                                                               |
+| `CROWDSEC_METADATA_CACHE_SIZE` | `5m`                   | global    | no       | **Taille du cache des métadonnées :** Mémoire partagée distincte pour les métadonnées facultatives des rapports de tous les services. Nombre entier positif de mégaoctets (`m`/`M`), minimum `1m`. Le redimensionnement au rechargement efface ces métadonnées.                                                                                                                                                                                   |
+| `CROWDSEC_CACHE_EXPIRATION`    | `1s`                   | multisite | no       | **Expiration du cache :** Le temps d'expiration du cache en secondes pour les décisions IP en mode live. Accepte un suffixe de durée (ms, s, m, h, d, w, M, y) ; un nombre sans suffixe est en secondes.                                                                                                                                                                                                                                          |
+| `CROWDSEC_UPDATE_FREQUENCY`    | `10s`                  | multisite | no       | **Fréquence de mise à jour :** À quelle fréquence (en secondes) récupérer les décisions nouvelles/expirées de l'API CrowdSec en mode stream. Accepte un suffixe de durée (ms, s, m, h, d, w, M, y) ; un nombre sans suffixe est en secondes.                                                                                                                                                                                                      |
+| `CROWDSEC_BAN_REFRESH`         | `0`                    | multisite | no       | **Renouvellement des bannissements :** Transforme les blocages CrowdSec en bannissements BunkerWeb courts, renouvelés tant que la décision CrowdSec dure. La valeur est la durée maximale d’un bannissement avant de réinterroger CrowdSec. `0` le désactive. Un service ayant un `CROWDSEC_EXCLUDE_LOCATION` ne reçoit jamais de bannissements CrowdSec. Accepte un suffixe de durée (ms, s, m, h, d, w, M, y) ; un nombre seul est en secondes. |
 
 #### Paramètres du composant de sécurité applicative
 
 | Paramètre                         | Valeur par défaut | Contexte | Multiple | Description                                                                                                                      |
 | --------------------------------- | ----------------- | -------- | -------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| `CROWDSEC_APPSEC_URL`             |                   | global   | no       | **URL AppSec :** L'URL du composant de sécurité applicative de CrowdSec. Laisser vide pour désactiver AppSec.                    |
-| `CROWDSEC_APPSEC_FAILURE_ACTION`  | `passthrough`     | global   | no       | **Action en cas d'échec :** Action à entreprendre lorsque AppSec renvoie une erreur. Peut être `passthrough` ou `deny`.          |
-| `CROWDSEC_APPSEC_CONNECT_TIMEOUT` | `100`             | global   | no       | **Délai de connexion :** Le délai d'attente en millisecondes pour se connecter au composant AppSec.                              |
-| `CROWDSEC_APPSEC_SEND_TIMEOUT`    | `100`             | global   | no       | **Délai d'envoi :** Le délai d'attente en millisecondes pour envoyer des données au composant AppSec.                            |
-| `CROWDSEC_APPSEC_PROCESS_TIMEOUT` | `500`             | global   | no       | **Délai de traitement :** Le délai d'attente en millisecondes pour traiter la requête dans le composant AppSec.                  |
-| `CROWDSEC_ALWAYS_SEND_TO_APPSEC`  | `no`              | global   | no       | **Toujours envoyer :** Mettre à `yes` pour toujours envoyer les requêtes à AppSec, même s'il y a une décision au niveau de l'IP. |
-| `CROWDSEC_APPSEC_SSL_VERIFY`      | `no`              | global   | no       | **Vérification SSL :** Mettre à `yes` pour vérifier le certificat SSL du composant AppSec.                                       |
+| `CROWDSEC_APPSEC_URL`             |                   | multisite   | no       | **URL AppSec :** L'URL du composant de sécurité applicative de CrowdSec. Laisser vide pour désactiver AppSec.                    |
+| `CROWDSEC_APPSEC_FAILURE_ACTION`  | `passthrough`     | multisite   | no       | **Action en cas d'échec :** Action à entreprendre lorsque AppSec renvoie une erreur. Peut être `passthrough` ou `deny`.          |
+| `CROWDSEC_APPSEC_CONNECT_TIMEOUT` | `100ms`           | multisite | no       | **Délai de connexion :** Le délai d'attente en millisecondes pour se connecter au composant AppSec. Accepte un suffixe de durée (ms, s, m, h, d, w, M, y) ; un nombre sans suffixe est en millisecondes. |
+| `CROWDSEC_APPSEC_SEND_TIMEOUT`    | `100ms`           | multisite | no       | **Délai d'envoi :** Le délai d'attente en millisecondes pour envoyer des données au composant AppSec. Accepte un suffixe de durée (ms, s, m, h, d, w, M, y) ; un nombre sans suffixe est en millisecondes. |
+| `CROWDSEC_APPSEC_PROCESS_TIMEOUT` | `500ms`           | multisite | no       | **Délai de traitement :** Le délai d'attente en millisecondes pour traiter la requête dans le composant AppSec. Accepte un suffixe de durée (ms, s, m, h, d, w, M, y) ; un nombre sans suffixe est en millisecondes. |
+| `CROWDSEC_ALWAYS_SEND_TO_APPSEC`  | `no`              | multisite   | no       | **Toujours envoyer :** Mettre à `yes` pour toujours envoyer les requêtes à AppSec, même s'il y a une décision au niveau de l'IP. |
+| `CROWDSEC_APPSEC_SSL_VERIFY`      | `no`              | multisite   | no       | **Vérification SSL :** Mettre à `yes` pour vérifier le certificat SSL du composant AppSec.                                       |
 
-!!! info "À propos des modes de fonctionnement" - Le **mode Live** interroge l'API CrowdSec pour chaque requête entrante, offrant une protection en temps réel au prix d'une latence plus élevée. - Le **mode Stream** télécharge périodiquement toutes les décisions de l'API CrowdSec et les met en cache localement, réduisant la latence avec un léger retard dans l'application des nouvelles décisions.
+!!! info "À propos des modes de fonctionnement"
+    - Le **mode Live** interroge l'API CrowdSec pour chaque requête entrante, offrant une protection en temps réel au prix d'une latence plus élevée.
+    - Le **mode Stream** télécharge un instantané initial, puis interroge les décisions nouvelles et supprimées pour actualiser son cache local, réduisant la latence avec un léger retard dans l'application des nouvelles décisions.
+
+#### Points de terminaison par service
+
+Comme les points de terminaison sont `multisite`, les services d'une même instance peuvent utiliser des composants CrowdSec différents, ou seulement certains d'entre eux. Les deux fonctionnalités sont indépendantes :
+
+- Les **recherches de décisions** sont actives lorsque `CROWDSEC_API` est défini. Définissez-le sur une chaîne vide pour qu'un service ignore entièrement la Local API.
+- L'**inspection AppSec** est active lorsque `CROWDSEC_APPSEC_URL` est défini. Définissez-le sur une chaîne vide pour qu'un service ignore l'inspection approfondie des requêtes.
+
+Un service avec `USE_CROWDSEC` à `yes` et les deux URL vides ne vérifie rien, et l'instance consigne qu'aucun point de terminaison n'est défini.
+
+!!! warning "Un cache de décisions par instance"
+    Les décisions mises en cache résident dans une seule zone de mémoire partagée pour toute l'instance, indexée par la Local API dont elles proviennent. Les services pointant vers la même `CROWDSEC_API` réutilisent les décisions mises en cache les uns des autres, ce qui garde la recherche peu coûteuse. Les services pointant vers des Local API différentes ne voient jamais les décisions les unes des autres. Le dimensionnement de cette zone est à l'échelle de l'instance, donc une flotte avec de nombreuses Local API distinctes et de longues listes de décisions partage un même budget.
+
+!!! info "Clé de bouncer par Local API"
+    `CROWDSEC_API_KEY` est résolu par service comme tout autre paramètre. Lorsque des services ciblent des Local API différentes, attribuez à chacun la clé enregistrée avec `cscli bouncers add` sur son propre hôte CrowdSec, sinon les recherches sont rejetées comme non authentifiées.
 
 ### Exemples de configurations
 
@@ -349,6 +440,38 @@ Appliquez les variables d’environnement suivantes (ou leurs équivalents via l
     CROWDSEC_APPSEC_FAILURE_ACTION: "deny"
     CROWDSEC_ALWAYS_SEND_TO_APPSEC: "yes"
     CROWDSEC_APPSEC_SSL_VERIFY: "yes"
+    ```
+
+=== "Configuration par service"
+
+    AppSec sur chaque service public, recherches de décisions sur un sous-ensemble, et un service entièrement exclu. Les valeurs sans préfixe constituent la base commune à toute la flotte, et chaque service ne surcharge que ce qui diffère :
+
+    ```yaml
+    MULTISITE: "yes"
+    SERVER_NAME: "app1.example.com app2.example.com intranet.example.com"
+
+    # Base commune pour chaque service
+    USE_CROWDSEC: "yes"
+    CROWDSEC_APPSEC_URL: "http://crowdsec:7422"
+    CROWDSEC_API: "" # Pas de recherche de décisions sauf si un service en fait la demande
+    CROWDSEC_API_KEY: ""
+
+    # app1 ajoute la recherche de décisions de la Local API en plus d'AppSec
+    app1.example.com_CROWDSEC_API: "http://crowdsec:8080"
+    app1.example.com_CROWDSEC_API_KEY: "your-api-key-here"
+
+    # app2 conserve uniquement AppSec, héritant de la base CROWDSEC_API vide
+
+    # intranet n'est pas vérifié du tout
+    intranet.example.com_USE_CROWDSEC: "no"
+    ```
+
+    Un service peut aussi pointer vers un hôte CrowdSec entièrement différent, avec sa propre clé de bouncer :
+
+    ```yaml
+    app2.example.com_CROWDSEC_API: "http://crowdsec-dmz:8080"
+    app2.example.com_CROWDSEC_API_KEY: "dmz-bouncer-key"
+    app2.example.com_CROWDSEC_APPSEC_URL: "http://crowdsec-dmz:7422"
     ```
 
 ### Étape&nbsp;3 – Valider l’intégration

@@ -56,7 +56,7 @@
 ##!<
 
 \d{{quotes}}\s+{{quotes}}\s+\d
-^admin\s*?{{quotes}}
+^(?:json\.)?admin\s*?{{quotes}}
 [\"'`\(\s]\s*?glob\W+[\w\"'`(]
 \sis\s*?0\W
 where\s[\s\w\.,-]+\s=

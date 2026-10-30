@@ -20,6 +20,7 @@ local LJBC_PREFIX = "luaJIT_BC_"
 local type, assert = type, assert
 local format = string.format
 local tremove, tconcat = table.remove, table.concat
+local bswap = bit.bswap
 
 ------------------------------------------------------------------------------
 
@@ -115,7 +116,7 @@ local map_os = {
 local function checkarg(str, map, err)
   str = str:lower()
   local s = check(map[str], "unknown ", err)
-  return type(s) == "string" and s or str
+  return type(s) == "string" ? s : str
 end
 
 local function detecttype(str)
@@ -146,7 +147,7 @@ end
 
 local function bcsave_tail(fp, output, s)
   local ok, err = fp:write(s)
-  if ok and output ~= "-" then ok, err = fp:close() end
+  if ok and output != "-" then ok, err = fp:close() end
   check(ok, "cannot write ", output, ": ", err)
 end
 
@@ -183,12 +184,12 @@ static const unsigned char %s%s[] = {
   local t, n, m = {}, 0, 0
   for i=1,#s do
     local b = tostring(string.byte(s, i))
-    m = m + #b + 1
+    m += #b + 1
     if m > 78 then
       fp:write(tconcat(t, ",", 1, n), ",\n")
       n, m = 0, #b + 1
     end
-    n = n + 1
+    n += 1
     t[n] = b
   end
   bcsave_tail(fp, output, tconcat(t, ",", 1, n).."\n};\n")
@@ -252,19 +253,19 @@ typedef struct {
   -- Handle different host/target endianess.
   local function f32(x) return x end
   local f16, fofs = f32, f32
-  if ffi.abi("be") ~= isbe then
-    f32 = bit.bswap
-    function f16(x) return bit.rshift(bit.bswap(x), 16) end
+  if ffi.abi("be") != isbe then
+    f32 = bswap
+    function f16(x) return bswap(x) >> 16 end
     if is64 then
       local two32 = ffi.cast("int64_t", 2^32)
-      function fofs(x) return bit.bswap(x)*two32 end
+      function fofs(x) return bswap(x)*two32 end
     else
       fofs = f32
     end
   end
 
   -- Create ELF object and fill in header.
-  local o = ffi.new(is64 and "ELF64obj" or "ELF32obj")
+  local o = ffi.new(is64 ? "ELF64obj" : "ELF32obj")
   local hdr = o.hdr
   if ctx.os == "bsd" or ctx.os == "other" then -- Determine native hdr.eosabi.
     local bf = assert(io.open("/bin/ls", "rb"))
@@ -276,8 +277,8 @@ typedef struct {
     hdr.emagic = "\127ELF"
     hdr.eosabi = ({ freebsd=9, netbsd=2, openbsd=12, solaris=6 })[ctx.os] or 0
   end
-  hdr.eclass = is64 and 2 or 1
-  hdr.eendian = isbe and 2 or 1
+  hdr.eclass = is64 ? 2 : 1
+  hdr.eendian = isbe ? 2 : 1
   hdr.eversion = 1
   hdr.type = f16(1)
   hdr.machine = f16(ai.m)
@@ -298,7 +299,7 @@ typedef struct {
     sect.align = fofs(1)
     sect.name = f32(ofs)
     ffi.copy(o.space+ofs, name)
-    ofs = ofs + #name+1
+    ofs += #name+1
   end
   o.sect[1].type = f32(2) -- .symtab
   o.sect[1].link = f32(3)
@@ -318,7 +319,7 @@ typedef struct {
   o.sect[3].ofs = fofs(sofs + ofs)
   o.sect[3].size = fofs(#symname+2)
   ffi.copy(o.space+ofs+1, symname)
-  ofs = ofs + #symname + 2
+  ofs += #symname + 2
   o.sect[4].type = f32(1) -- .rodata
   o.sect[4].flags = fofs(2)
   o.sect[4].ofs = fofs(sofs + ofs)
@@ -385,8 +386,8 @@ typedef struct {
   local function f32(x) return x end
   local f16 = f32
   if ffi.abi("be") then
-    f32 = bit.bswap
-    function f16(x) return bit.rshift(bit.bswap(x), 16) end
+    f32 = bswap
+    function f16(x) return bswap(x) >> 16 end
   end
 
   -- Create PE object and fill in header.
@@ -426,7 +427,7 @@ typedef struct {
   o.strtabsize = f32(ofs + 4)
   o.sect[0].ofs = f32(ffi.offsetof(o, "space") + ofs)
   ffi.copy(o.space + ofs, symexport)
-  ofs = ofs + #symexport
+  ofs += #symexport
   o.sect[1].ofs = f32(ffi.offsetof(o, "space") + ofs)
 
   -- Write PE object file.
@@ -479,11 +480,11 @@ typedef struct {
 ]]
   local symname = '_'..LJBC_PREFIX..ctx.modname
   local cputype, cpusubtype = 0x01000007, 3
-  if ctx.arch ~= "x64" then
+  if ctx.arch != "x64" then
     check(ctx.arch == "arm64", "unsupported architecture for OSX")
     cputype, cpusubtype = 0x0100000c, 0
   end
-  local function aligned(v, a) return bit.band(v+a-1, -a) end
+  local function aligned(v, a) return v+a-1 & -a end
 
   -- Create Mach-O object and fill in header.
   local o = ffi.new("mach_obj_64")
@@ -584,7 +585,7 @@ local function docmd(...)
   local gc64 = ""
   while n <= #arg do
     local a = arg[n]
-    if type(a) == "string" and a:sub(1, 1) == "-" and a ~= "-" then
+    if type(a) == "string" and a:sub(1, 1) == "-" and a != "-" then
       tremove(arg, n)
       if a == "--" then break end
       for m=2,#a do
@@ -603,9 +604,9 @@ local function docmd(...)
 	elseif opt == "d" then
 	  ctx.mode = ctx.mode .. opt
 	else
-	  if arg[n] == nil or m ~= #a then usage() end
+	  if arg[n] == nil or m != #a then usage() end
 	  if opt == "e" then
-	    if n ~= 1 then usage() end
+	    if n != 1 then usage() end
 	    ctx.string = true
 	  elseif opt == "n" then
 	    ctx.modname = checkmodname(tremove(arg, n))
@@ -623,7 +624,7 @@ local function docmd(...)
 	end
       end
     else
-      n = n + 1
+      n += 1
     end
   end
   ctx.mode = ctx.mode .. strip .. gc64
@@ -631,7 +632,7 @@ local function docmd(...)
     if #arg == 0 or #arg > 2 then usage() end
     bclist(ctx, arg[1], arg[2] or "-", lineinfo)
   else
-    if #arg ~= 2 then usage() end
+    if #arg != 2 then usage() end
     bcsave(ctx, arg[1], arg[2])
   end
 end

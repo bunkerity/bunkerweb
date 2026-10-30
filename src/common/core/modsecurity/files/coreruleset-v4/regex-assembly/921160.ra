@@ -1,0 +1,42 @@
+##! Please refer to the documentation at
+##! https://coreruleset.org/docs/development/regex_assembly/.
+
+##! Detects HTTP Header Injection via CR/LF followed by known
+##! header names in GET parameters.
+
+##! header names to detect after CR/LF
+##!> assemble
+  ##! whitespace (blank header)
+  \s
+  ##! standard response headers
+  location
+  refresh
+  ##! cookie headers
+  cookie
+  set-cookie
+  ##! proxy-related headers
+  forwarded-for
+  forwarded-host
+  forwarded-server
+  host
+  via
+  remote-ip
+  remote-addr
+  originating-IP
+  ##! x-prefixed proxy-related headers
+  x-forwarded-for
+  x-forwarded-host
+  x-forwarded-server
+  x-host
+  x-via
+  x-remote-ip
+  x-remote-addr
+  x-originating-IP
+  ##!=< header-names
+##!<
+
+##!> assemble
+  [\n\r]+
+  ##!=> header-names
+  \s*:
+##!<

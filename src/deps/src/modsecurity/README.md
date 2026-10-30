@@ -47,36 +47,51 @@ Keeping these connectors separated allows each project to have different release
 
 # Compilation
 
-Before starting the compilation process, make sure that you have all the
-dependencies in place. Read the subsection “Dependencies”  for further
-information.
+Before starting the compilation process, make sure that all required dependencies are installed.  
+See the [Dependencies](#dependencies) and [Git submodules](#Git-submodules) section for further information.
 
-After the compilation make sure that there are no issues on your
-build/platform. We strongly recommend the utilization of the unit tests and
-regression tests. These test utilities are located under the subfolder ‘tests’.
+After compilation, make sure that there are no issues on your build/platform.  
+We strongly recommend running the unit tests and regression tests. These test utilities are located in the [`tests/`](#testing-your-patch) subfolder.
 
-As a dynamic library, don’t forget that libmodsecurity must be installed to a location (folder) where you OS will be looking for dynamic libraries.
+As a dynamic library, `libmodsecurity` must be installed in a location where your operating system can find dynamic libraries.
 
+### Unix (Linux, macOS, FreeBSD, …)
 
+On Unix-like systems, the project uses autotools for the compilation process.
 
-### Unix (Linux, MacOS, FreeBSD, …)
+If you are working with a git checkout, make sure to clone the repository recursively or initialize all submodules before building.  
+See also the [Git submodules](#git-submodules) section.
 
-On unix the project uses autotools to help the compilation process. Please note that if you are working with `git`, don't forget to initialize and update the submodules. Here's a quick how-to:
-```shell
-$ git clone --recursive https://github.com/owasp-modsecurity/ModSecurity ModSecurity
-$ cd ModSecurity
+```sh
+git clone https://github.com/owasp-modsecurity/ModSecurity ModSecurity
+cd ModSecurity
+````
+
+This repository uses git submodules. After cloning, make sure to initialize and fetch all submodules:
+
+```sh
+git submodule update --init --recursive
 ```
+
+You can verify that all submodules are properly initialized with:
+
+```sh
+git submodule status
+```
+
+Submodules that are correctly initialized show a commit hash.
+A leading `-` indicates that the submodule has not been initialized.
 
 You can then start the build process:
 
-```shell
-$ ./build.sh
-$ ./configure
-$ make
-$ sudo make install
+```sh
+./build.sh
+./configure
+make
+sudo make install
 ```
 
-Details on distribution specific builds can be found in our Wiki:
+Details on distribution-specific builds can be found in our Wiki:
 [Compilation Recipes](https://github.com/owasp-modsecurity/ModSecurity/wiki/Compilation-recipes)
 
 ### Windows
@@ -85,15 +100,110 @@ Windows build information can be found [here](build/win32/README.md).
 
 ## Dependencies
 
-This library is written in C++ using the C++17 standards. It also uses Flex
-and Yacc to produce the “Sec Rules Language” parser. Other, mandatory dependencies include YAJL, as ModSecurity uses JSON for producing logs and its testing framework, libpcre (not yet mandatory) for processing regular expressions in SecRules, and libXML2 (not yet mandatory) which is used for parsing XML requests.
+* This library is written in C++ using the C++17 standard.
+* It uses Flex and Bison (Yacc) to produce the “Sec Rules Language” parser.
+* Mandatory dependencies include YAJL, as ModSecurity uses JSON for logging and its testing framework.
+* libXML2 (optional) is used for parsing XML requests.
 
-All others dependencies are related to operators specified within SecRules or configuration directives and may not be required for compilation. A short list of such dependencies is as follows:
+### Regular expression engine (PCRE2 / PCRE)
 
-* libinjection is needed for the operator @detectXSS and @detectSQL
-* curl is needed for the directive SecRemoteRules.
+* Regular expression processing in SecRules is implemented via the `Regex` utility (`src/utils/regex.*`).
+* By default, ModSecurity uses **PCRE2** for regex handling.
+* This is used by operators such as `@rx`, `@rxGlobal`, and `@verifyCC`.
+* Build-time behavior:
 
-If those libraries are missing ModSecurity will be compiled without the support for the operator @detectXSS and the configuration directive SecRemoteRules.
+  * **Default:** PCRE2 is detected and used.
+  * **Fallback:** legacy PCRE can be used if `--with-pcre` is explicitly provided (`WITH_PCRE`).
+* In other words, current builds expect PCRE2 unless explicitly configured otherwise.
+
+All other dependencies are related to operators specified within SecRules or configuration directives and may not be required for compilation.
+
+### Operator-related dependencies
+
+* `libinjection` is required for the operators `@detectXSS` and `@detectSQL`.
+* `curl` is required for the directive `SecRemoteRules`.
+
+If those libraries are missing, ModSecurity will be compiled without support for the respective operators or directives.
+
+### Git-submodules
+
+The repository includes the following submodules:
+
+* `others/libinjection` – used by `@detectSQLi` and `@detectXSS` operators.
+
+* `others/mbedtls` (TF-PSA-Crypto subset) – used for cryptographic functions and helpers (e.g. hashing, base64).
+
+  **Note:** The newer mbedTLS v4 layout is not compatible with the older v3 structure.
+  The internal structure has changed significantly, and many components have been moved into submodules (e.g. TF-PSA-Crypto).
+
+  After merging PR #3532, it is required to run:
+
+  ```sh
+  git submodule update --init --recursive
+  ```
+
+  This ensures that all required submodules are fetched. Without this step, the project will not build successfully.
+
+  You can verify that all submodules are properly initialized with:
+
+  ```sh
+  git submodule status
+  ```
+
+  Example output:
+
+  ```sh
+  bc625d5... bindings/python
+  2117822... others/libinjection (v4.0.0)
+  0fe989b... others/mbedtls (v4.1.0)
+  a3d4405... test/test-cases/secrules-language-tests
+  ```
+
+  If a submodule is missing, it will be shown with a leading `-`, for example:
+
+  ```sh
+  -bc625d5... bindings/python
+  ```
+
+  A leading `-` indicates that the submodule has not been initialized or fetched.
+
+* `test/test-cases/secrules-language-tests` – shared SecRules conformance and regression test suite used by `make check`.
+
+* `bindings/python` – Python bindings for ModSecurity (not required for core library compilation).
+
+`others/libinjection` and `others/mbedtls` are effectively required for source builds and must be initialized before building.
+
+### Optional external dependencies
+
+Several external libraries are optional and enable additional features, including:
+
+* `libcurl` – required for `SecRemoteRules`
+
+* LMDB – persistent storage support
+
+* Lua – scripting support
+
+* XML libraries – extended XML processing
+
+* **GeoIP (legacy) / MaxMind**
+
+  The legacy **GeoIP C API** (libGeoIP) is **deprecated and no longer maintained** by MaxMind.
+  The upstream repository has been archived and should not be used for new deployments.
+
+  Instead, ModSecurity supports the modern **MaxMind DB API (libmaxminddb)**, which is actively maintained.
+
+  During configuration you may see something like:
+
+  ```sh
+  + GeoIP/MaxMind                                 ....found
+      * (MaxMind) v1.12.2
+         -lmaxminddb , -I/usr/include/x86_64-linux-gnu
+  ```
+
+  This indicates that **libmaxminddb** is being used (recommended).
+
+  It is strongly recommended to use MaxMind DB instead of the legacy GeoIP library.
+
 
 # Library documentation
 
@@ -217,10 +327,8 @@ the utilities, follow the commands listed below:
 
 ```shell
 $ cd /path/to/your/ModSecurity
-$ git submodule foreach git pull
-$ cd test
-$ ./regression-tests
-$ ./unit-tests
+$ git submodule update --init --recursive
+$ make check
  ```
 
 ### Debugging

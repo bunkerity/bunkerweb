@@ -4,7 +4,7 @@ Comment ça marche :
 
 1. À l’accès d’un visiteur, BunkerWeb vérifie si une redirection est définie.
 2. Si activée, il redirige vers l’URL de destination.
-3. Vous pouvez préserver le chemin d’origine (`REDIRECT_TO_REQUEST_URI: yes`).
+3. Vous pouvez préserver le chemin d’origine en activant l’option correspondante.
 4. Le code HTTP peut être `301` (permanent) ou `302` (temporaire).
 5. Idéal pour migrations, canonicals, URLs obsolètes.
 
@@ -14,6 +14,7 @@ Comment ça marche :
 2. Destination : `REDIRECT_TO`.
 3. Type : `REDIRECT_TO_REQUEST_URI` pour conserver le chemin.
 4. Code : `REDIRECT_TO_STATUS_CODE` (`301` ou `302`).
+5. Laisser BunkerWeb faire le reste : une fois configurées, les redirections sont appliquées automatiquement à vos visiteurs.
 
 ### Paramètres
 
@@ -32,7 +33,7 @@ Comment ça marche :
     - **`308` (Permanent Redirect) :** Redirection permanente qui préserve la méthode HTTP. Pour migrations d'API permanentes.
 
 !!! info "Conservation du chemin"
-    Avec `REDIRECT_TO_REQUEST_URI: yes`, `/blog/post-1` vers `https://new.com` devient `https://new.com/blog/post-1`.
+    Avec le paramètre `REDIRECT_TO_REQUEST_URI` défini à `yes`, `/blog/post-1` vers `https://new.com` devient `https://new.com/blog/post-1`.
 
 ### Exemples
 

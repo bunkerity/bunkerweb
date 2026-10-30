@@ -1,0 +1,20 @@
+##! Please refer to the documentation at
+##! https://coreruleset.org/docs/development/regex_assembly/.
+
+##! Rule 942250: Detects MATCH AGAINST, MERGE and EXECUTE IMMEDIATE injections
+##!
+##! SQL injection patterns for:
+##!   - SQL MERGE...USING (ANSI SQL)
+##!   - EXECUTE IMMEDIATE with string literal (Oracle/PL/SQL)
+##!   - MySQL MATCH...AGAINST full-text search
+
+##!+ i
+
+##! SQL MERGE statement with USING clause
+merge.*?using\s*?\(
+
+##! Oracle EXECUTE IMMEDIATE with string delimiter
+execute\s*?immediate\s*?["'`]
+
+##! MySQL MATCH...AGAINST full-text search
+match\s*?[\w(),+-]+\s*?against\s*?\(

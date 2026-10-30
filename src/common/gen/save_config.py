@@ -4,7 +4,7 @@ from argparse import ArgumentParser
 from os import R_OK, X_OK, access, environ, getenv, sep
 from os.path import join
 from pathlib import Path
-from re import compile as re_compile
+from re import compile as re_compile, sub as re_sub
 from urllib.parse import urlsplit
 from sys import exit as sys_exit, path as sys_path
 from traceback import format_exc
@@ -14,6 +14,7 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
         sys_path.append(deps_path)
 
 from common_utils import get_integration, get_version  # type: ignore
+from env_file import parse_env_file  # type: ignore
 from logger import getLogger  # type: ignore
 from Database import Database  # type: ignore
 from Configurator import Configurator
@@ -22,12 +23,28 @@ from API import API  # type: ignore
 CUSTOM_CONF_RX = re_compile(
     r"^(?P<service>[0-9a-z\.-]*)_?CUSTOM_CONF_(?P<type>HTTP|SERVER_STREAM|STREAM|DEFAULT_SERVER_HTTP|SERVER_HTTP|MODSEC_CRS|MODSEC|CRS_PLUGINS_BEFORE|CRS_PLUGINS_AFTER)_(?P<name>.+)$"
 )
-BUNKERWEB_STATIC_INSTANCES_RX = re_compile(r"(https?://)?(?P<hostname>(?<![:])\b[^:\s]+\b)(:(?P<port>\d+))?")
-
 LOGGER = getLogger("GENERATOR.SAVE_CONFIG")
+ALEMBIC_PATH = Path(__file__).resolve().parents[1].joinpath("db", "alembic")
+
+
+def migration_pending(stored_version: str, installed_version: str, database: str) -> bool:
+    """Whether the database schema still has to be migrated to the installed version.
+
+    The migration is the only thing allowed to move bw_metadata.version forward: each revision writes its own
+    version. A save_config.py launched after the package files were swapped (by a scheduler that is still the old
+    one, so no migration ran) reads the new VERSION, and stamping it on the old schema makes the next scheduler
+    start skip the migration and crash on the missing columns. The lookup mirrors the entrypoint: a release
+    without a revision of its own has no schema change to wait for.
+    """
+    if stored_version == installed_version:
+        return False
+    normalized = re_sub(r"[.~-]", "_", installed_version)
+    return any(ALEMBIC_PATH.joinpath(f"{database}_versions").glob(f"*_upgrade_to_version_{normalized}.py"))
 
 
 if __name__ == "__main__":
+    config_saved = False
+
     try:
         # Parse arguments
         parser = ArgumentParser(description="BunkerWeb config saver")
@@ -66,8 +83,7 @@ if __name__ == "__main__":
         if args.variables:
             variables_path = Path(args.variables)
             LOGGER.info(f"Variables : {variables_path}")
-            with variables_path.open() as f:
-                dotenv_env = dict(line.strip().split("=", 1) for line in f if line.strip() and not line.startswith("#") and "=" in line)
+            dotenv_env = parse_env_file(variables_path)
 
         # Check existences and permissions
         LOGGER.info("Checking arguments ...")
@@ -126,6 +142,14 @@ if __name__ == "__main__":
         db_metadata = db.get_metadata()
         db_initialized = not isinstance(db_metadata, str) and db_metadata["is_initialized"]
 
+        installed_version = get_version()
+        if db_initialized and migration_pending(db_metadata["version"], installed_version, db.database_uri.split(":")[0].split("+")[0]):
+            LOGGER.error(
+                f"The database is at version {db_metadata['version']} but version {installed_version} is installed: "
+                "the migration has not run, refusing to touch it. Restart the scheduler so that it migrates the database first."
+            )
+            sys_exit(1)
+
         if not db_initialized:
             LOGGER.info("Database not initialized, initializing ...")
             ret, err = db.init_tables([config.get_settings(), config.get_plugins("core"), config.get_plugins("external"), config.get_plugins("pro")])
@@ -151,7 +175,7 @@ if __name__ == "__main__":
             else:
                 LOGGER.info("Database tables successfully updated")
 
-        err = db.initialize_db(version=get_version(), integration=integration)
+        err = db.initialize_db(version=installed_version, integration=integration)
 
         if err:
             LOGGER.error(f"Can't {'initialize' if not db_initialized else 'update'} database metadata : {err}")
@@ -168,32 +192,31 @@ if __name__ == "__main__":
         apis = []
         hostnames = set()
         for bw_instance in settings.get("BUNKERWEB_INSTANCES", "").split():
-            match = BUNKERWEB_STATIC_INSTANCES_RX.search(bw_instance)
-            if match:
-                if match.group("hostname") in hostnames:
-                    LOGGER.warning(f"Duplicate BunkerWeb instance hostname {match.group('hostname')}, skipping it")
-
-                hostnames.add(match.group("hostname"))
-                # Use API builder to compute scheme and port from URL or parts
+            try:
                 endpoint = API.build_endpoint(
                     bw_instance,
                     port=settings.get("API_HTTP_PORT"),
                     listen_https=(settings.get("API_LISTEN_HTTPS", "no") or "no").lower() == "yes",
                     https_port=settings.get("API_HTTPS_PORT"),
                 )
-                apis.append(API(endpoint, host=settings.get("API_SERVER_NAME", "bwapi")))
-            else:
-                LOGGER.warning(
-                    f"Invalid BunkerWeb instance {bw_instance}, it should match the following regex: (http(s)://)<hostname>(:<port>) ({BUNKERWEB_STATIC_INSTANCES_RX.pattern}), skipping it"
-                )
+            except ValueError as e:
+                LOGGER.warning(f"Invalid BunkerWeb instance {bw_instance}: {e}, skipping it")
+                continue
+            hostname = urlsplit(endpoint).hostname
+            if hostname in hostnames:
+                LOGGER.warning(f"Duplicate BunkerWeb instance hostname {hostname}, skipping it")
+                continue
+            hostnames.add(hostname)
+            apis.append(API(endpoint, host=settings.get("API_SERVER_NAME", "bwapi")))
 
         changes = []
         changed_plugins = set()
-        err = db.save_config(settings, args.method, changed=False)
+        err = db.save_config(settings, args.method, changed=False, explicit_keys=config.explicit_keys)
 
         if isinstance(err, str):
-            LOGGER.warning(f"Couldn't save config to database : {err}, config may not work as expected")
+            LOGGER.error(f"Couldn't save config to database : {err}, config may not work as expected")
         else:
+            config_saved = True
             changed_plugins = err
             changes.append("config")
             LOGGER.info("Config successfully saved to database")
@@ -250,6 +273,12 @@ if __name__ == "__main__":
         sys_exit(e.code)
     except:
         LOGGER.error(f"Exception while executing config saver : {format_exc()}")
+        sys_exit(1)
+
+    # A failed save leaves the caller running on defaults for every setting it sent. Exiting 0 here
+    # made that indistinguishable from success: the scheduler's returncode check never fired and the
+    # log ended on "successfully executed".
+    if not config_saved:
         sys_exit(1)
 
     # We're done

@@ -1,0 +1,30 @@
+##! Please refer to the documentation at
+##! https://coreruleset.org/docs/development/regex_assembly/.
+
+##! Shared payload pattern for SQLi bypass via tick-enclosed content.
+##! Used by 942510 (backticks, PL2) and 942511 (single quotes, PL3).
+##!
+##! Matches either:
+##!   - SQL-like characters (2-29 chars)
+##!   - base64-encoded content with optional padding
+
+##!> define b64 [A-Za-z0-9+/]
+
+##! base64 padding variants
+##!> assemble
+  {{b64}}{2}==
+  {{b64}}{3}=
+  ##!=< base64-padding
+##!<
+
+##!> assemble
+  ##! SQL-like characters (2-29 chars)
+  (?:[\w\s=_\-+{}()<@]){2,29}
+  ##! base64 blocks without padding
+  (?:{{b64}}{4})+
+  ##! base64 blocks with padding
+  ##!> assemble
+    (?:{{b64}}{4})+
+    ##!=> base64-padding
+  ##!<
+##!<

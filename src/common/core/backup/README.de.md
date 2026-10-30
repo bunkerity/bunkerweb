@@ -6,7 +6,7 @@ Das Backup-Plugin bietet eine automatisierte Backup-Lösung zum Schutz Ihrer Bun
 2.  Backups werden in einem angegebenen Verzeichnis auf Ihrem System gespeichert.
 3.  Vor jedem Backup wird der verfügbare Speicherplatz geprüft.
 4.  Jede Backup-ZIP enthält den SQL-Dump und eine SHA-256-Prüfsummendatei (`.sha256`) zur Integritätsprüfung.
-5.  Alte Backups werden automatisch rotiert. Der Modus `hanoi` verwendet die Türme-von-Hanoi-Rotation (24 Dateien, ~85 Tage Abdeckung).
+5.  Alte Backups werden automatisch rotiert. Der Modus `hanoi` verwendet die Türme-von-Hanoi-Rotation (24–34 Dateien, 64–85 Tage Abdeckung).
 6.  Beim Wiederherstellen wird die Prüfsumme verifiziert, bevor die aktive Datenbank verändert wird.
 7.  Sie können jederzeit manuell Backups erstellen, auflisten, prüfen oder wiederherstellen.
 8.  Vor jeder Wiederherstellung wird der aktuelle Zustand als Sicherheitsmaßnahme automatisch gesichert.
@@ -24,7 +24,7 @@ Das Backup-Plugin bietet eine automatisierte Backup-Lösung zum Schutz Ihrer Bun
 | Einstellung        | Standard                     | Kontext | Mehrfach | Beschreibung                                                                                                                                               |
 | ------------------ | ---------------------------- | ------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `USE_BACKUP`       | `yes`                        | global  | nein     | **Backup aktivieren:** Auf `yes` setzen, um automatische Backups zu aktivieren.                                                                            |
-| `BACKUP_SCHEDULE`  | `daily`                      | global  | nein     | **Backup-Frequenz:** `daily`, `weekly`, `monthly` oder `hanoi` (stündlich mit Türme-von-Hanoi-Rotation, ~85 Tage Abdeckung).                               |
+| `BACKUP_SCHEDULE`  | `daily`                      | global  | nein     | **Backup-Frequenz:** `daily`, `weekly`, `monthly` oder `hanoi` (stündlich mit Türme-von-Hanoi-Rotation, 64–85 Tage Abdeckung).                               |
 | `BACKUP_ROTATION`  | `7`                          | global  | nein     | **Backup-Aufbewahrung:** Anzahl der aufzubewahrenden Backup-Dateien. Wird bei `hanoi` ignoriert (Rotation wird automatisch verwaltet).                     |
 | `BACKUP_DIRECTORY` | `/var/lib/bunkerweb/backups` | global  | nein     | **Backup-Speicherort:** Das Verzeichnis, in dem die Backup-Dateien gespeichert werden.                                                                     |
 | `BACKUP_IGNORE_CHECKSUM_ERROR_ON_DB_RESTORE` | `no` | global | nein | **Prüfsummenfehler ignorieren:** Bei `yes` wird ein fehlgeschlagener SHA-256-Check die Wiederherstellung nicht abbrechen. Nur als letztes Mittel verwenden. |
@@ -60,7 +60,7 @@ bwcli plugin backup restore /pfad/zum/backup/backup-sqlite-2023-08-15_12-34-56.z
     Jede ZIP enthält eine SHA-256-Prüfsummendatei. Die Prüfsumme wird automatisch vor jeder Wiederherstellung verifiziert. Verwenden Sie `bwcli plugin backup check`, um alle Backups jederzeit zu prüfen.
 
 !!! warning "Datenbankkompatibilität"
-    Das Backup-Plugin unterstützt SQLite, MySQL/MariaDB und PostgreSQL-Datenbanken. Oracle-Datenbanken werden derzeit nicht unterstützt.
+    Das Backup-Plugin unterstützt SQLite, MySQL/MariaDB und PostgreSQL-Datenbanken. Oracle-Datenbanken werden derzeit für Backup- und Wiederherstellungsvorgänge nicht unterstützt. Eine Wiederherstellung lehnt ein Backup aus einer anderen Datenbank-Engine ab (MariaDB und MySQL gelten als verschiedene Engines), bevor etwas geändert wird.
 
 ### Beispielkonfigurationen
 
@@ -75,9 +75,9 @@ bwcli plugin backup restore /pfad/zum/backup/backup-sqlite-2023-08-15_12-34-56.z
     BACKUP_DIRECTORY: "/var/lib/bunkerweb/backups"
     ```
 
-=== "Türme von Hanoi (~85 Tage)"
+=== "Türme von Hanoi (64–85 Tage)"
 
-    Stündliche Ausführung mit Türme-von-Hanoi-Rotation. Hält 24 Dateien mit ~85 Tagen Abdeckung. `BACKUP_ROTATION` wird ignoriert:
+    Stündliche Ausführung mit Türme-von-Hanoi-Rotation. Hält 24–34 Dateien mit 64–85 Tagen Abdeckung. `BACKUP_ROTATION` wird ignoriert:
 
     ```yaml
     USE_BACKUP: "yes"

@@ -297,7 +297,11 @@ static void *mcode_alloc(jit_State *J, size_t sz)
   uintptr_t hint;
   int i = 0, j;
   if (!J->mcmin)  /* Place initial range near the interpreter code. */
+#if LJ_TARGET_OSX
+    goto newrange;  /* But macOS doesn't give us enough space there. */
+#else
     mcode_setrange(J, (uintptr_t)(void *)lj_vm_exit_handler);
+#endif
   else if (!J->mcmax)  /* Switch to a new range (already flushed). */
     goto newrange;
   /* First try a contiguous area below the last one (if in range). */
@@ -322,6 +326,14 @@ fail:
   if (!J->mcarea) {  /* Switch to a new range now. */
     void *p;
   newrange:
+#if LJ_TARGET_OSX
+    /* Start at a random address guaranteed to be elsewhere. */
+    hint = ((uintptr_t)(void *)lj_vm_exit_handler & U64x(00000fff,ffff0000)) ^
+	   (lj_prng_u64(&J2G(J)->prng) & U64x(000000ff,ffff0000)) ^
+	   U64x(00004c4a,00000000);
+    p = mcode_alloc_at(hint, sz, MCPROT_GEN);
+    if (!p)  /* If this fails, then anywhere. */
+#endif
     p = mcode_alloc_at(0, sz, MCPROT_GEN);
     if (p) {
       mcode_setrange(J, (uintptr_t)p + (sz >> 1));

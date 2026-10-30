@@ -194,6 +194,11 @@ echo "ℹ️ Installing lua-resty-redis-connector"
 export CHANGE_DIR="/tmp/bunkerweb/deps/src/lua-resty-redis-connector"
 do_and_check_cmd make PREFIX=/usr/share/bunkerweb/deps LUA_LIB_DIR=/usr/share/bunkerweb/deps/lib/lua install
 
+# Installing resty-redis-cluster
+echo "ℹ️ Installing resty-redis-cluster"
+export CHANGE_DIR="/tmp/bunkerweb/deps/src/resty-redis-cluster"
+do_and_check_cmd cp lib/resty/rediscluster.lua lib/resty/xmodem.lua /usr/share/bunkerweb/deps/lib/lua/resty/
+
 # Patch modsec module
 export CHANGE_DIR="/tmp/bunkerweb/deps/misc"
 do_and_check_cmd bash -c "mv ngx_http_modsecurity_access.c /tmp/bunkerweb/deps/src/modsecurity-nginx/src/"
@@ -218,7 +223,8 @@ fi
 # Set CFALGS
 export CFLAGS="$CFLAGS -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=1"
 
-export CHANGE_DIR="/tmp/bunkerweb/deps/src/nginx"
+NGINX_SRC_DIR="/tmp/bunkerweb/deps/src/nginx"
+export CHANGE_DIR="$NGINX_SRC_DIR"
 do_and_check_cmd mv auto/configure ./
 echo '#!/bin/bash' > "${CHANGE_DIR}/configure-fix.sh"
 echo "./configure $CONFARGS --add-dynamic-module=/tmp/bunkerweb/deps/src/headers-more-nginx-module --add-dynamic-module=/tmp/bunkerweb/deps/src/nginx_cookie_flag_module --add-dynamic-module=/tmp/bunkerweb/deps/src/lua-nginx-module --add-dynamic-module=/tmp/bunkerweb/deps/src/ngx_brotli --add-dynamic-module=/tmp/bunkerweb/deps/src/ngx_devel_kit --add-dynamic-module=/tmp/bunkerweb/deps/src/stream-lua-nginx-module" --add-dynamic-module=/tmp/bunkerweb/deps/src/modsecurity-nginx --add-dynamic-module=/tmp/bunkerweb/deps/src/lua-upstream-nginx-module >> "${CHANGE_DIR}/configure-fix.sh"

@@ -93,6 +93,34 @@
 .light-style .authentication-wrapper .authentication-bg {
   background-color: #fff;
 }
+
+/* Auth/anon page chrome, keyed on the <html> style class so the pre-paint head
+   script controls these surfaces before first render (no flash). */
+.theme-toggle-pill {
+  background-color: #fff;
+}
+.dark-style .theme-toggle-pill {
+  background-color: var(--bw-dark-surface, #0c283a);
+}
+
+/* core's `.app-brand-logo img{display:block}` (0,1,1) outranks a bare
+   `.bw-logo-*{display:none}`; scope to .app-brand-logo so hide (0,2,0) and
+   show (0,3,0) win without !important. */
+.app-brand-logo .bw-logo-light,
+.app-brand-logo .bw-logo-dark {
+  display: none;
+}
+.light-style .app-brand-logo .bw-logo-light,
+.dark-style .app-brand-logo .bw-logo-dark {
+  display: block;
+}
+
+.theme-bg-surface {
+  background-color: var(--bs-light-bg-subtle, rgba(244, 245, 245, 0.55));
+}
+.dark-style .theme-bg-surface {
+  background-color: var(--bs-dark-bg-subtle, rgba(13, 47, 69, 0.55));
+}
 /* .light-style
   .authentication-wrapper.authentication-basic
   .authentication-inner:not(.loading):after {

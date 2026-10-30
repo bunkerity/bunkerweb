@@ -1,34 +1,40 @@
-LT_CURRENT=3
-LT_REVISION=9
-LT_AGE=2
+LT_CURRENT=4
+LT_REVISION=0
+LT_AGE=0
 
 CPPCHECK=@CPPCHECK@
+CLANG_FORMAT=@CLANG_FORMAT@
 CPPCHECK_FLAGS=--quiet --enable=all --inconclusive --error-exitcode=2 \
+        --inline-suppr \
+        --suppress=normalCheckLevelMaxBranches \
+        --disable=missingInclude \
         --std=c89 --std=c++11 \
         --suppress=variableScope  \
-        --template '{file}:{line} {severity} {id} {message}'
+        --template='{file}:{line} {severity} {id} {message}'
 
 fingerprints.txt: make_parens.py
 	./make_parens.py < fingerprints.txt > fingerprints2.txt
 	mv fingerprints2.txt fingerprints.txt
 
-fingerprints:
-	./make_parens.py < fingerprints.txt > fingerprints2.txt
-	mv fingerprints2.txt fingerprints.txt
-.PHONY: fingerprints
-
-sqlparse_data.json: sqlparse_map.py fingerprints
+sqlparse_data.json: sqlparse_map.py fingerprints.txt
 	./sqlparse_map.py > sqlparse_data.json
 
 libinjection_sqli_data.h: sqlparse2c.py sqlparse_data.json
 	./sqlparse2c.py < sqlparse_data.json > libinjection_sqli_data.h
+	@if test -n "$(CLANG_FORMAT)"; then $(CLANG_FORMAT) -i libinjection_sqli_data.h; \
+	else echo "warning: clang-format not found, libinjection_sqli_data.h left unformatted"; fi
 
-check: reader testdriver testspeedxss testspeedsqli teststackxss
-	@./test-driver.sh test-unit.sh
-	@./test-driver.sh test-samples-sqli-negative.sh
-	@./test-driver.sh test-samples-sqli-positive.sh
-	@./test-driver.sh test-samples-xss-positive.sh
-	@./test-driver.sh teststackxss
+# `make check` uses automake's parallel test harness; every test emits TAP.
+# Run a subset with: make check TESTS='test-unit.sh'
+TESTS = test-unit.sh test-samples-sqli-negative.sh \
+	test-samples-sqli-positive.sh test-samples-xss-positive.sh \
+	teststackxss testerrorhandling
+LOG_DRIVER = env AM_TAP_AWK='$(AWK)' $(SHELL) $(top_srcdir)/build-aux/tap-driver.sh
+EXTRA_DIST = test-unit.sh test-samples-sqli-negative.sh \
+	test-samples-sqli-positive.sh test-samples-xss-positive.sh
+# Inputs of the libinjection_sqli_data.h rules, plus the valgrind suppressions
+EXTRA_DIST += fingerprints.txt make_parens.py sqlparse_map.py sqlparse2c.py \
+	sqlparse_data.json alpine.supp
 
 analyze:
 	$(RM) /tmp/libinjection-analyze.txt
@@ -63,9 +69,9 @@ libinjection_la_LDFLAGS = -rpath '$(libdir)' -version-info $(LT_CURRENT):$(LT_RE
 
 libinjection_la_SOURCES = libinjection_sqli_data.h libinjection_sqli.c libinjection_html5.c libinjection_xss.c
 
-include_HEADERS= libinjection.h libinjection_sqli.h libinjection_sqli_data.h libinjection_html5.h libinjection_xss.h
+include_HEADERS= libinjection.h libinjection_error.h libinjection_sqli.h libinjection_sqli_data.h libinjection_html5.h libinjection_xss.h
 
-noinst_PROGRAMS = html5 sqli fptool reader testdriver testspeedxss testspeedsqli teststackxss
+noinst_PROGRAMS = html5 sqli fptool reader testdriver testspeedxss testspeedsqli teststackxss testerrorhandling
 
 # Samples
 html5_SOURCES = html5_cli.c
@@ -87,3 +93,5 @@ testspeedsqli_LDADD = libinjection.la
 teststackxss_SOURCES = test_stack_xss.c
 teststackxss_LDADD = libinjection.la
 teststackxss_CFLAGS = -O0
+testerrorhandling_SOURCES = test_error_handling.c
+testerrorhandling_LDADD = libinjection.la

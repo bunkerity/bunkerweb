@@ -60,10 +60,13 @@
     | -------------------------- | ------------------------------------- | --------- | ---- | ----------------------------------------------------------------------- |
     | `BLACKLIST_IP`             |                                       | multisite | 否   | **IP 黑名单：** 要阻止的 IP 地址或网络（CIDR 表示法）列表，以空格分隔。 |
     | `BLACKLIST_IGNORE_IP`      |                                       | multisite | 否   | **IP 忽略列表：** 应绕过 IP 黑名单检查的 IP 地址或网络列表。            |
-    | `BLACKLIST_IP_URLS`        | `https://www.dan.me.uk/torlist/?exit` | multisite | 否   | **IP 黑名单 URL：** 包含要阻止的 IP 地址或网络的 URL 列表，以空格分隔。 |
+    | `BLACKLIST_IP_URLS`        |                                       | multisite | 否   | **IP 黑名单 URL：** 包含要阻止的 IP 地址或网络的 URL 列表，以空格分隔。 |
     | `BLACKLIST_IGNORE_IP_URLS` |                                       | multisite | 否   | **IP 忽略列表 URL：** 包含要忽略的 IP 地址或网络的 URL 列表。           |
 
-    默认的 `BLACKLIST_IP_URLS` 设置包含一个提供**已知 Tor 出口节点列表**的 URL。这是恶意流量的常见来源，对于许多网站来说是一个很好的起点。
+    !!! info "列表格式"
+        URL 列表可以包含每行一个条目（以 `#` 或 `;` 开头的行是注释，每行只读取第一个词）、CSV、JSON 文档或 JSON Lines。IP 列表中，逗号也用于分隔字段；JSON 列表会保留每个值为 IP 地址或网络的字符串。添加片段可筛选 JSON 列表的一部分：`#key` 保留 `key` 下的值，`#key=value` 保留 `key` 等于或包含 `value` 的对象，`&` 用于组合条件。例如：`https://ip-ranges.amazonaws.com/ip-ranges.json#service=CLOUDFRONT`。URL 带有片段时只保留片段选中的内容；如果列表不是 JSON 格式，则不会保留任何内容。
+
+    默认情况下，`BLACKLIST_COMMUNITY_LISTS` 包含 `ip:danmeuk-tor-exit`，因此会加入 Tor 出口节点列表；`BLACKLIST_IP_URLS` 默认为空，除非您配置它。
 
 === "反向 DNS"
     **这是做什么的：** 根据访问者的反向域名阻止访问。这对于根据其组织域名阻止已知的扫描器和爬虫非常有用。
@@ -77,6 +80,9 @@
     | `BLACKLIST_IGNORE_RDNS_URLS` |                         | multisite | 否   | **rDNS 忽略列表 URL：** 包含要忽略的反向 DNS 后缀的 URL 列表。           |
 
     默认的 `BLACKLIST_RDNS` 设置包括常见的扫描器域名，如 **Shodan** 和 **Censys**。这些通常被安全研究人员和扫描器用来识别易受攻击的网站。
+
+    !!! info "正向确认反向 DNS (FCrDNS)"
+        `BLACKLIST_IGNORE_RDNS` 后缀会经过正向确认：匹配的 PTR 主机名会被解析回一个 IP，只有当它与客户端 IP 匹配时，该绕过才会生效。无法通过正向确认的 PTR 会被视为可能的伪造，因此不会授予绕过。这可以防止控制自己 PTR 记录的攻击者将其设置为被忽略的后缀（例如 `.googlebot.com`）来跳过 rDNS 黑名单检查。
 
 === "ASN"
     **这是做什么的：** 阻止来自特定网络提供商的访问者。ASN 就像互联网的邮政编码——它们标识一个 IP 属于哪个提供商或组织。
@@ -95,10 +101,10 @@
     | ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ | --------- | ---- | ------------------------------------------------------------------------------ |
     | `BLACKLIST_USER_AGENT`             |                                                                                                                                | multisite | 否   | **用户代理黑名单：** 要阻止的用户代理模式（PCRE 正则表达式）列表，以空格分隔。 |
     | `BLACKLIST_IGNORE_USER_AGENT`      |                                                                                                                                | multisite | 否   | **用户代理忽略列表：** 应绕过用户代理黑名单检查的用户代理模式列表。            |
-    | `BLACKLIST_USER_AGENT_URLS`        | `https://raw.githubusercontent.com/mitchellkrogza/nginx-ultimate-bad-bot-blocker/master/_generator_lists/bad-user-agents.list` | multisite | 否   | **用户代理黑名单 URL：** 包含要阻止的用户代理模式的 URL 列表。                 |
+    | `BLACKLIST_USER_AGENT_URLS`        |                                                                                                                                | multisite | 否   | **用户代理黑名单 URL：** 包含要阻止的用户代理模式的 URL 列表。                 |
     | `BLACKLIST_IGNORE_USER_AGENT_URLS` |                                                                                                                                | multisite | 否   | **用户代理忽略列表 URL：** 包含要忽略的用户代理模式的 URL 列表。               |
 
-    默认的 `BLACKLIST_USER_AGENT_URLS` 设置包含一个提供**已知恶意用户代理列表**的 URL。这些通常被恶意机器人和扫描器用来识别易受攻击的网站。
+    默认情况下，`BLACKLIST_COMMUNITY_LISTS` 包含 `ua:mitchellkrogza-bad-user-agents`，因此会加入恶意用户代理列表；`BLACKLIST_USER_AGENT_URLS` 默认为空，除非您配置它。
 
 === "URI"
     **这是做什么的：** 阻止对您网站上特定 URL 的请求。这对于阻止尝试访问管理页面、登录表单或其他可能成为攻击目标的敏感区域非常有用。
@@ -109,6 +115,22 @@
     | `BLACKLIST_IGNORE_URI`      |        | multisite | 否   | **URI 忽略列表：** 应绕过 URI 黑名单检查的 URI 模式列表。               |
     | `BLACKLIST_URI_URLS`        |        | multisite | 否   | **URI 黑名单 URL：** 包含要阻止的 URI 模式的 URL 列表，以空格分隔。     |
     | `BLACKLIST_IGNORE_URI_URLS` |        | multisite | 否   | **URI 忽略列表 URL：** 包含要忽略的 URI 模式的 URL 列表。               |
+
+    !!! tip "锚定路径模式时要覆盖其下的所有内容"
+        请写 `^/admin(/|$)` 而不是 `^/admin$`。只锚定单一精确路径的模式不会匹配 `/admin/`、`/admin%2f` 或 `/admin;foo`，而你的应用仍可能在这些路径上提供同一资源。匹配基于解码并规范化后的路径，因此 `/a/../admin` 和 `//admin` 已被覆盖。
+
+=== "请求头"
+    **功能说明：** 根据指定请求头拦截请求，或反过来豁免请求；按名称匹配，并可选地用 PCRE 正则匹配其值。忽略规则优先于任何黑名单命中，包括缓存的判定结果。
+
+    | 设置                              | 默认值 | 上下文       | 多选  | 描述                                                        |
+    | ------------------------------- | --- | --------- | --- | --------------------------------------------------------- |
+    | `BLACKLIST_HEADER_NAME`         |     | multisite | 是   | **请求头名称：** 使请求加入黑名单的请求头名称。成对编号：`_NAME_1` 与 `_VALUE_1` 配对。 |
+    | `BLACKLIST_HEADER_VALUE`        |     | multisite | 是   | **请求头值：** 请求头值必须匹配的 PCRE 正则表达式。留空则仅检查该请求头是否存在。            |
+    | `BLACKLIST_IGNORE_HEADER_NAME`  |     | multisite | 是   | **请求头名称：** 使请求绕过黑名单的请求头名称。成对编号：`_NAME_1` 与 `_VALUE_1` 配对。 |
+    | `BLACKLIST_IGNORE_HEADER_VALUE` |     | multisite | 是   | **请求头值：** 请求头值必须匹配的 PCRE 正则表达式。留空则仅检查该请求头是否存在。            |
+
+    !!! warning "请求头规则是共享密钥"
+        任何客户端都能发送请求头，因此请求头规则是一种持有者令牌，而非网络层控制。请仅通过 HTTPS 提供，用 `^` 和 `$` 锚定正则（默认不锚定，`abc` 也会匹配 `xabcx`），并定期轮换其值。若 BunkerWeb 位于代理之后，该代理必须覆盖客户端自行发送的同名请求头。 这些规则仅适用于 HTTP：stream 服务不携带请求头，因此在那里不会有任何匹配。
 
 !!! info "URL 格式支持"
     所有 `*_URLS` 设置都支持 HTTP/HTTPS URL 以及使用 `file:///` 前缀的本地文件路径。使用 `http://user:pass@url` 格式支持基本身份验证。
@@ -147,7 +169,7 @@
     BLACKLIST_RDNS: ".shodan.io .censys.io .scanner.com"
     BLACKLIST_ASN: "16509 14618"  # AWS 和 Amazon 的 ASN
     BLACKLIST_USER_AGENT: "(?:\b)SemrushBot(?:\b) (?:\b)AhrefsBot(?:\b)"
-    BLACKLIST_URI: "^/wp-login\.php$ ^/administrator/"
+    BLACKLIST_URI: "^/wp-login\.php(/|$) ^/administrator/"
 
     # 自定义忽略规则
     BLACKLIST_IGNORE_IP: "192.168.1.200 203.0.113.42"

@@ -30,13 +30,14 @@
 #include "ngx_stream_lua_semaphore.h"
 #include "ngx_stream_lua_ssl_client_helloby.h"
 #include "ngx_stream_lua_ssl_certby.h"
-
-#ifdef HAVE_PROXY_SSL_PATCH
 #include "ngx_stream_lua_proxy_ssl_verifyby.h"
-#endif
-
 
 #include "ngx_stream_lua_prereadby.h"
+
+
+#if !defined(OPENSSL_VERSION_NUMBER) || OPENSSL_VERSION_NUMBER > 0x101010afL
+#define HAVE_SSL_KEY_LOG 1
+#endif
 
 
 static void *ngx_stream_lua_create_main_conf(ngx_conf_t *cf);
@@ -53,11 +54,13 @@ static char *ngx_stream_lua_lowat_check(ngx_conf_t *cf, void *post, void *data);
 #if (NGX_STREAM_SSL)
 static ngx_int_t ngx_stream_lua_set_ssl(ngx_conf_t *cf,
     ngx_stream_lua_loc_conf_t *llcf);
+#ifdef HAVE_SSL_KEY_LOG
 static void key_log_callback(const ngx_ssl_conn_t *ssl_conn,
     const char *line);
 static void ngx_stream_lua_ssl_cleanup_key_log(void *data);
 static ngx_int_t ngx_stream_lua_ssl_key_log(ngx_conf_t *cf, ngx_ssl_t *ssl,
     ngx_str_t *file);
+#endif
 #if (nginx_version >= 1019004)
 static char *ngx_stream_lua_ssl_conf_command_check(ngx_conf_t *cf, void *post,
     void *data);
@@ -426,7 +429,7 @@ static ngx_command_t ngx_stream_lua_cmds[] = {
       0,
       (void *) ngx_stream_lua_ssl_cert_handler_file },
 
-#ifdef HAVE_PROXY_SSL_PATCH
+#if HAVE_LUA_PROXY_SSL_VERIFY
     /* same context as proxy_pass directive */
     { ngx_string("proxy_ssl_verify_by_lua_block"),
       NGX_STREAM_SRV_CONF|NGX_CONF_BLOCK|NGX_CONF_NOARGS,
@@ -1021,7 +1024,6 @@ ngx_stream_lua_merge_srv_conf(ngx_conf_t *cf, void *parent, void *child)
 
     ngx_conf_merge_str_value(conf->ssl_ciphers, prev->ssl_ciphers,
                              "DEFAULT");
-
     ngx_conf_merge_uint_value(conf->ssl_verify_depth,
                               prev->ssl_verify_depth, 1);
     ngx_conf_merge_ptr_value(conf->ssl_certificates,
@@ -1037,7 +1039,7 @@ ngx_stream_lua_merge_srv_conf(ngx_conf_t *cf, void *parent, void *child)
                              NULL);
 #endif
 
-#ifdef HAVE_PROXY_SSL_PATCH
+#if HAVE_LUA_PROXY_SSL_VERIFY
     if (conf->ups.proxy_ssl_verify_src.len == 0) {
         conf->ups.proxy_ssl_verify_src = prev->ups.proxy_ssl_verify_src;
         conf->ups.proxy_ssl_verify_handler = prev->ups.proxy_ssl_verify_handler;
@@ -1179,11 +1181,13 @@ ngx_stream_lua_set_ssl(ngx_conf_t *cf, ngx_stream_lua_srv_conf_t *lscf)
         return NGX_ERROR;
     }
 
+#ifdef HAVE_SSL_KEY_LOG
     if (ngx_stream_lua_ssl_key_log(cf, lscf->ssl, &lscf->ssl_key_log)
         != NGX_OK)
     {
         return NGX_ERROR;
     }
+#endif
 
 #if (nginx_version >= 1019004)
     if (ngx_ssl_conf_commands(cf, lscf->ssl, lscf->ssl_conf_commands)
@@ -1197,6 +1201,7 @@ ngx_stream_lua_set_ssl(ngx_conf_t *cf, ngx_stream_lua_srv_conf_t *lscf)
 }
 
 
+#ifdef HAVE_SSL_KEY_LOG
 static void
 key_log_callback(const ngx_ssl_conn_t *ssl_conn, const char *line)
 {
@@ -1290,6 +1295,7 @@ ngx_stream_lua_ssl_key_log(ngx_conf_t *cf, ngx_ssl_t *ssl, ngx_str_t *file)
 
     return NGX_OK;
 }
+#endif
 
 
 #if (nginx_version >= 1019004)

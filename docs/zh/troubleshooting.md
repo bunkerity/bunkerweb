@@ -3,6 +3,22 @@
 !!! info "BunkerWeb 面板"
     如果您无法解决您的问题，您可以通过我们的面板[直接联系我们](https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc)。这里集中了与 BunkerWeb 解决方案相关的所有请求。
 
+## 使用 AI 智能体排查问题
+
+### skills.sh 上的 BunkerWeb 技能
+
+[skills.sh 上的官方 BunkerWeb 故障排除技能](https://skills.sh/bunkerity/bunkerweb-skills/bunkerweb-troubleshooting)可以帮助 AI 编程智能体诊断请求被拦截、IP 被封禁、上游错误、证书问题和配置问题。请按照适用于您所用智能体的[安装说明](https://github.com/bunkerity/bunkerweb-skills#installation)操作。
+
+### 通过 Context7 获取 BunkerWeb 文档
+
+如果您的智能体支持 [Context7](https://context7.com/docs)，可以连接它来获取 [BunkerWeb 文档](https://context7.com/bunkerity/bunkerweb)。请在提示中注明您的 BunkerWeb 版本、集成方式、相关设置和日志，并在分享前删除密码、API 令牌和其他敏感信息。
+
+提示示例：
+
+```text
+请帮我诊断使用 <集成方式> 的 BunkerWeb <版本> 中的这个问题。以下是相关设置和已删除敏感信息的日志：<详细信息>。use context7
+```
+
 ## 日志
 
 在进行故障排除时，日志是您最好的朋友。我们尽力提供用户友好的日志，以帮助您了解正在发生的事情。
@@ -331,7 +347,7 @@ BunkerWeb 会将已知实例存储在 `bw_instances` 表中（主键：`hostname
     LIMIT 50;
     ```
 
-=== "MariaDB / MySQL"
+=== "MySQL/MariaDB"
 
     ```sql
     SELECT hostname, name, server_name, method, status, creation_date, last_seen
@@ -366,7 +382,7 @@ BunkerWeb 会将已知实例存储在 `bw_instances` 表中（主键：`hostname
     COMMIT;
     ```
 
-=== "MariaDB / MySQL"
+=== "MySQL/MariaDB"
 
     ```sql
     START TRANSACTION;
@@ -411,7 +427,7 @@ BunkerWeb 会在 `bw_metadata` 表中跟踪实例变更
     WHERE id = 1;
     ```
 
-=== "MariaDB / MySQL"
+=== "MySQL/MariaDB"
 
     ```sql
     UPDATE bw_metadata
@@ -434,7 +450,7 @@ BunkerWeb 会在 `bw_metadata` 表中跟踪实例变更
     VACUUM (ANALYZE);
     ```
 
-=== "MariaDB / MySQL"
+=== "MySQL/MariaDB"
 
     ```sql
     OPTIMIZE TABLE bw_instances;
@@ -444,7 +460,10 @@ BunkerWeb 会在 `bw_metadata` 表中跟踪实例变更
 
 如果您忘记了 UI 凭据或遇到 2FA 问题，您可以连接到数据库以重新获得访问权限。
 
-### 访问数据库
+!!! warning "重建容器后 2FA 失效"
+    解密 TOTP 秘钥的密钥保存在 UI 容器的 `/var/lib/bunkerweb/.totp_encryption_keys.json`，也就是镜像中的 `/data/lib`。若重建 `bw-ui` 容器时没有挂载 `/data` 持久卷，就会生成一组新密钥：数据库中保存的秘钥再也无法解密，管理员绑定会被删除，其他账户需要用下面的 SQL 重置。请挂载卷到 `/data`（参见 [Web UI 文档](web-ui.md)）以保留密钥，或自行提供 `TOTP_ENCRYPTION_KEYS`。
+
+### 访问数据库 {#access-database}
 
 === "SQLite"
 
@@ -512,7 +531,7 @@ BunkerWeb 会在 `bw_metadata` 表中跟踪实例变更
     sqlite>
     ```
 
-=== "MariaDB / MySQL"
+=== "MySQL/MariaDB"
 
     !!! note "仅限 MariaDB / MySQL"
         以下步骤仅适用于 MariaDB / MySQL 数据库。如果您正在使用其他数据库，请参阅您数据库的文档。
@@ -702,6 +721,18 @@ BunkerWeb 会在 `bw_metadata` 表中跟踪实例变更
     - 选择范围：导出全局设置或选择特定服务。
     - 点击下载所选范围的配置存档。
     - 可选地下载日志：导出的日志会自动匿名化（所有 IP 地址和域名都被屏蔽）。
+
+=== "使用 bwcli 导出支持包"
+
+    在调度器运行的位置（调度器容器、all-in-one 镜像或 Linux 主机）运行 `bwcli support`，生成一个提供给 BunkerWeb 支持团队的压缩包：版本和环境、配置、插件、作业、实例健康状态、自定义配置的元数据、日志以及生成的 NGINX 配置。在 BunkerWeb 实例、autoconf 控制器或 Linux worker 主机上，该命令会拒绝执行，并提示改在调度器上运行。
+
+    ```shell
+    docker exec <scheduler container> bwcli support -o - > bundle.zip
+    ```
+
+    - 不使用 `-o` 时，压缩包 `bunkerweb-support-<UTC 时间戳>.zip` 会写入当前目录。`-o -` 会将其写入 stdout。
+    - 凭据始终会被屏蔽。IP 地址和服务域名会被匿名化：添加 `--no-anonymize` 可保留它们。
+    - 无法读取的部分会列在 `manifest.json` 中，其余内容仍会写入支持包。如果日志输出到 stdout，清单会给出获取它们的命令（`docker logs`、`kubectl logs`、`journalctl`）。
 
 ### 上传插件
 

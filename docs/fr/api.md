@@ -18,6 +18,7 @@ L’API BunkerWeb est le plan de contrôle pour gérer instances, services, bans
 
 - Réseau : gardez le trafic interne ; liez sur loopback ou interface interne et restreignez les IP sources avec `API_WHITELIST_IPS` (activé par défaut).
 - Auth présente : définissez `API_USERNAME`/`API_PASSWORD` (admin) et, si besoin, `API_ACL_BOOTSTRAP_FILE` pour d’autres utilisateurs/ACL ; conservez un `API_TOKEN` uniquement pour le break-glass.
+- Portées ACL : les permissions d’**écriture** sur config, service, plugin et global settings sont équivalentes admin (leur contenu est rendu tel quel en NGINX/Lua, donc exécution de code) : ne les accordez qu’à des utilisateurs pleinement fiables. `instances_create` et `instances_update` le sont aussi, par une autre voie : tout appel vers une instance enregistrée transporte l’override admin `API_TOKEN`, et le scheduler pousse la configuration générée et le cache (clés privées TLS comprises) vers chaque instance enregistrée. Voir [Permissions et ACL](#permissions-et-acl).
 - Masquage de chemin : en reverse proxy, choisissez un `API_ROOT_PATH` peu devinable et reflétez-le côté proxy.
 - Rate limiting : laissez activé sauf si une autre couche impose des limites équivalentes ; `/auth` est toujours limité.
 - TLS : terminez au proxy ou activez `API_SSL_ENABLED=yes` avec chemins de cert/clé.
@@ -41,7 +42,7 @@ Choisissez la saveur adaptée à votre environnement.
     services:
       bunkerweb:
         # Nom utilisé par le scheduler pour identifier l’instance
-        image: bunkerity/bunkerweb:1.6.9-rc2
+        image: bunkerity/bunkerweb:1.6.18-rc2
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -54,7 +55,7 @@ Choisissez la saveur adaptée à votre environnement.
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.9-rc2
+        image: bunkerity/bunkerweb-scheduler:1.6.18-rc2
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Assurez-vous de mettre le bon nom d’instance
@@ -76,7 +77,7 @@ Choisissez la saveur adaptée à votre environnement.
           - bw-db
 
       bw-api:
-        image: bunkerity/bunkerweb-api:1.6.9-rc2
+        image: bunkerity/bunkerweb-api:1.6.18-rc2
         environment:
           <<: *bw-env
           API_USERNAME: "admin"
@@ -108,7 +109,7 @@ Choisissez la saveur adaptée à votre environnement.
         command: >
           redis-server
           --maxmemory 256mb
-          --maxmemory-policy allkeys-lru
+          --maxmemory-policy volatile-lru
           --save 60 1000
           --appendonly yes
         volumes:
@@ -135,7 +136,7 @@ Choisissez la saveur adaptée à votre environnement.
         name: bw-db
     ```
 
-=== "All-in-One"
+=== "Tout-en-un"
 
     ```bash
     docker run -d \
@@ -143,7 +144,7 @@ Choisissez la saveur adaptée à votre environnement.
       -e SERVICE_API=yes \
       -e API_WHITELIST_IPS="127.0.0.0/8" \
       -p 80:8080/tcp -p 443:8443/tcp -p 443:8443/udp \
-      bunkerity/bunkerweb-all-in-one:1.6.9-rc2
+      bunkerity/bunkerweb-all-in-one:1.6.18-rc2
     ```
 
 === "Linux"
@@ -177,10 +178,10 @@ Choisissez la saveur adaptée à votre environnement.
 
 - Rôle grossier : GET/HEAD/OPTIONS requièrent `read` ; les verbes d’écriture requièrent `write`.
 - L’ACL fine s’applique quand les routes déclarent des permissions ; `admin(true)` contourne les vérifications.
-- Types de ressources : `instances`, `global_settings`, `services`, `configs`, `plugins`, `cache`, `bans`, `jobs`.
+- Types de ressources : `instances`, `global_config`, `services`, `configs`, `plugins`, `cache`, `bans`, `jobs`.
 - Noms de permissions :
   - `instances_*` : `instances_read`, `instances_update`, `instances_delete`, `instances_create`, `instances_execute`
-  - `global_settings_*` : `global_settings_read`, `global_settings_update`
+  - `global_config` : `global_config_read`, `global_config_update`
   - `services` : `service_read`, `service_create`, `service_update`, `service_delete`, `service_convert`, `service_export`
   - `configs` : `configs_read`, `config_read`, `config_create`, `config_update`, `config_delete`
   - `plugins` : `plugin_read`, `plugin_create`, `plugin_delete`
@@ -188,7 +189,33 @@ Choisissez la saveur adaptée à votre environnement.
   - `bans` : `ban_read`, `ban_update`, `ban_delete`, `ban_created`
   - `jobs` : `job_read`, `job_run`
 - `resource_id` est généralement le deuxième composant de chemin (ex. `/services/{id}`) ; "*" donne un accès global.
-- Bootstrap des utilisateurs non admin et des permissions via `API_ACL_BOOTSTRAP_FILE` ou un `/var/lib/bunkerweb/api_acl_bootstrap.json` monté. Mots de passe en clair ou en hash bcrypt.
+- Bootstrap des utilisateurs non admin et des permissions via `API_ACL_BOOTSTRAP_FILE` ou un `/var/lib/bunkerweb/api_acl_bootstrap.json` monté. Chaque utilisateur prend un `password` en clair ou un `password_hash`/`password_bcrypt` pré-haché (voir l'astuce ci-dessous).
+
+!!! danger "Ces autorisations d’écriture équivalent à des droits d’administrateur"
+    Accorder l’une des autorisations suivantes revient à accorder un accès administratif complet. Le contenu qu’elles écrivent — configurations personnalisées, variables de service (par ex. `REVERSE_PROXY_URL`), plugins téléversés et paramètres globaux — est rendu **tel quel** en configuration brute NGINX / OpenResty Lua, exécutée sur les workers et le scheduler BunkerWeb. Un jeton qui en détient une peut donc exécuter du code arbitraire avec les droits du processus BunkerWeb. Les permissions d’écriture sur les instances sont équivalentes aux droits d’administrateur pour une autre raison : chaque appel à une instance enregistrée utilise le contournement administrateur `API_TOKEN`, et le scheduler transmet la configuration générée et le cache (clés privées TLS comprises) à chaque instance de la base de données ; enregistrer un seul endpoint permet donc de tout récupérer :
+
+    - `instances`: `instances_create`, `instances_update`
+    - `configs`: `config_create`, `config_update`, `config_delete` (and `POST /configs/upload`)
+    - `services`: `service_create`, `service_update`, `service_convert`
+    - `plugins`: `plugin_create`
+    - `global_config`: `global_config_update`
+
+    Traitez-les comme des droits d’administrateur : **ne les accordez jamais à un tiers auquel vous ne feriez pas confiance en tant qu’administrateur.** Réservez les droits de lecture (`*_read`, `service_export`, `cache_read`, …) aux jetons limités ou d’automatisation. L’attribution de l’une de ces permissions à un utilisateur non administrateur génère un avertissement dans les journaux de l’API.
+
+!!! tip "Mots de passe de bootstrap pré-hachés"
+    Remplacez le `password` en clair d'un utilisateur par un **hash bcrypt** via `password_hash` (ou `password_bcrypt`) afin que les identifiants ne figurent jamais en clair dans le fichier. Le hash doit être un hash bcrypt valide (`$2a$`/`$2b$`/`$2y$`) dont le coût est d'au moins `10` (`12`+ recommandé). Un hash mal formé ou trop faible est **ignoré** : le chargeur se rabat sur le `password` en clair de l'utilisateur s'il est présent ; sinon, un nouvel utilisateur reçoit un mot de passe aléatoire sécurisé que vous ne connaîtrez pas, et un utilisateur existant conserve le sien. Un `password` en clair fait l'objet d'un contrôle de robustesse (8 caractères ou plus avec majuscule/minuscule/chiffre/caractère spécial). La variable d'environnement `API_PASSWORD` de l'admin accepte uniquement du texte en clair — le pré-hachage s'applique à ces utilisateurs de l'ACL.
+
+    Générer un hash :
+
+    ```bash
+    python3 -c "import bcrypt; print(bcrypt.hashpw(b'Str0ng&P@ss!', bcrypt.gensalt(rounds=13)).decode())"
+    ```
+
+    Utilisez-le ensuite dans le fichier de bootstrap à la place de `password` :
+
+    ```json
+    "password_hash": "$2b$13$replace-with-the-hash-printed-above"
+    ```
 
 ??? example "Bootstrap ACL minimal"
     ```json
@@ -252,9 +279,9 @@ Plus de détails et compromis : [https://limits.readthedocs.io/en/stable/strateg
 
 ### Runtime et fuseau horaire
 
-| Setting | Description                                                                                                      | Valeurs acceptées                                     | Défaut                                          |
-| ------- | ---------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------- | ----------------------------------------------- |
-| `TZ`    | Fuseau horaire pour les logs API et les claims basés sur le temps (ex. TTL Biscuit et horodatages de logs)       | Nom de la base TZ (ex. `UTC`, `Europe/Paris`)         | unset (défaut conteneur, généralement UTC)      |
+| Setting | Description                                                                                                | Valeurs acceptées                             | Défaut                                     |
+| ------- | ---------------------------------------------------------------------------------------------------------- | --------------------------------------------- | ------------------------------------------ |
+| `TZ`    | Fuseau horaire pour les logs API et les claims basés sur le temps (ex. TTL Biscuit et horodatages de logs) | Nom de la base TZ (ex. `UTC`, `Europe/Paris`) | unset (défaut conteneur, généralement UTC) |
 
 Désactivez docs ou schéma en mettant leurs URLs à `off|disabled|none|false|0`. Activez `API_SSL_ENABLED=yes` avec `API_SSL_CERTFILE` et `API_SSL_KEYFILE` pour terminer TLS dans l’API. En reverse proxy, fixez `API_FORWARDED_ALLOW_IPS` aux IPs du proxy pour que Gunicorn fasse confiance aux `X-Forwarded-*`.
 
@@ -262,83 +289,84 @@ Désactivez docs ou schéma en mettant leurs URLs à `off|disabled|none|false|0`
 
 #### Surface & docs
 
-| Setting                                            | Description                                                                                  | Valeurs acceptées           | Défaut                             |
-| -------------------------------------------------- | -------------------------------------------------------------------------------------------- | --------------------------- | ---------------------------------- |
-| `API_DOCS_URL`, `API_REDOC_URL`, `API_OPENAPI_URL` | Chemins Swagger, ReDoc et schéma OpenAPI ; mettre `off/disabled/none/false/0` pour désactiver | Chemin ou `off`             | `/docs`, `/redoc`, `/openapi.json` |
-| `API_ROOT_PATH`                                    | Préfixe de montage en reverse proxy                                                          | Chemin (ex. `/api`)         | vide                               |
-| `API_FORWARDED_ALLOW_IPS`                          | IPs proxy de confiance pour `X-Forwarded-*`                                                  | IPs/CIDR séparées par virgule | `127.0.0.1,::1` (défaut paquet)        |
-| `API_PROXY_ALLOW_IPS`                              | IPs proxy de confiance pour le protocole PROXY                                               | IPs/CIDR séparées par virgule | `FORWARDED_ALLOW_IPS`              |
+| Setting                                            | Description                                                                                   | Valeurs acceptées             | Défaut                             |
+| -------------------------------------------------- | --------------------------------------------------------------------------------------------- | ----------------------------- | ---------------------------------- |
+| `API_DOCS_URL`, `API_REDOC_URL`, `API_OPENAPI_URL` | Chemins Swagger, ReDoc et schéma OpenAPI ; mettre `off/disabled/none/false/0` pour désactiver | Chemin ou `off`               | `/docs`, `/redoc`, `/openapi.json` |
+| `API_ROOT_PATH`                                    | Préfixe de montage en reverse proxy                                                           | Chemin (ex. `/api`)           | vide                               |
+| `API_FORWARDED_ALLOW_IPS`                          | IPs proxy de confiance pour `X-Forwarded-*`                                                   | IPs/CIDR séparées par virgule | `127.0.0.1,::1` (défaut paquet)    |
+| `API_PROXY_ALLOW_IPS`                              | IPs proxy de confiance pour le protocole PROXY                                                | IPs/CIDR séparées par virgule | `FORWARDED_ALLOW_IPS`              |
 
 #### Auth, ACL, Biscuit
 
-| Setting                                     | Description                                  | Valeurs acceptées                                                  | Défaut                  |
-| ------------------------------------------- | -------------------------------------------- | ------------------------------------------------------------------ | ----------------------- |
-| `API_USERNAME`, `API_PASSWORD`              | Utilisateur admin initial                    | Chaînes ; mot de passe fort requis hors debug                      | unset                   |
-| `OVERRIDE_API_CREDS`                        | Réappliquer les creds admin au démarrage     | `yes/no/on/off/true/false/0/1`                                      | `no`                    |
-| `API_TOKEN`                                 | Bearer d’override admin                      | Chaîne opaque                                                     | unset                   |
-| `API_ACL_BOOTSTRAP_FILE`                    | Chemin JSON pour utilisateurs/permissions    | Chemin ou `/var/lib/bunkerweb/api_acl_bootstrap.json` monté         | unset                   |
-| `BISCUIT_PRIVATE_KEY`, `BISCUIT_PUBLIC_KEY` | Clés Biscuit (hex) si pas de fichiers        | Chaînes hex                                                       | auto-générées/persistées |
-| `API_BISCUIT_TTL_SECONDS`                   | Durée de vie du token ; `0/off` désactive    | Secondes entières ou `off/disabled`                                | `3600`                  |
-| `CHECK_PRIVATE_IP`                          | Lier le Biscuit à l’IP cliente (hors privées) | `yes/no/on/off/true/false/0/1`                                     | `yes`                   |
+| Setting                                     | Description                                   | Valeurs acceptées                                           | Défaut                   |
+| ------------------------------------------- | --------------------------------------------- | ----------------------------------------------------------- | ------------------------ |
+| `API_USERNAME`, `API_PASSWORD`              | Utilisateur admin initial                     | Chaînes ; mot de passe fort requis hors debug               | unset                    |
+| `OVERRIDE_API_CREDS`                        | Réappliquer les creds admin au démarrage      | `yes/no/on/off/true/false/0/1`                              | `no`                     |
+| `API_TOKEN`                                 | Bearer d’override admin                       | Chaîne opaque                                               | unset                    |
+| `API_ACL_BOOTSTRAP_FILE`                    | Chemin JSON pour utilisateurs/permissions     | Chemin ou `/var/lib/bunkerweb/api_acl_bootstrap.json` monté | unset                    |
+| `BISCUIT_PRIVATE_KEY`, `BISCUIT_PUBLIC_KEY` | Clés Biscuit (hex) si pas de fichiers         | Chaînes hex                                                 | auto-générées/persistées |
+| `API_BISCUIT_TTL_SECONDS`                   | Durée de vie du token ; `0/off` désactive     | Secondes entières ou `off/disabled`                         | `3600`                   |
+| `CHECK_PRIVATE_IP`                          | Lier le Biscuit à l’IP cliente (hors privées) | `yes/no/on/off/true/false/0/1`                              | `yes`                    |
 
 #### Liste blanche
 
-| Setting                 | Description                               | Valeurs acceptées                | Défaut                 |
-| ----------------------- | ----------------------------------------- | -------------------------------- | ---------------------- |
-| `API_WHITELIST_ENABLED` | Activer/désactiver le middleware d’IP     | `yes/no/on/off/true/false/0/1`   | `yes`                  |
-| `API_WHITELIST_IPS`     | IPs/CIDR séparées par espace/virgule      | IPs/CIDR                         | Plages RFC1918 en code |
+| Setting                 | Description                           | Valeurs acceptées              | Défaut                 |
+| ----------------------- | ------------------------------------- | ------------------------------ | ---------------------- |
+| `API_WHITELIST_ENABLED` | Activer/désactiver le middleware d’IP | `yes/no/on/off/true/false/0/1` | `yes`                  |
+| `API_WHITELIST_IPS`     | IPs/CIDR séparées par espace/virgule  | IPs/CIDR                       | Plages RFC1918 en code |
 
 #### Limitation
 
-| Setting                          | Description                                   | Valeurs acceptées                                           | Défaut        |
-| -------------------------------- | --------------------------------------------- | ----------------------------------------------------------- | ------------- |
-| `API_RATE_LIMIT`                 | Limite globale (chaîne style NGINX)           | `3r/s`, `100/minute`, `500 per 30 minutes`                  | `100r/m`      |
-| `API_RATE_LIMIT_AUTH`            | Limite de `/auth` (ou `off`)                  | idem ou `off/disabled/none/false/0`                         | `10r/m`       |
-| `API_RATE_LIMIT_ENABLED`         | Activer le limiteur                           | `yes/no/on/off/true/false/0/1`                              | `yes`         |
-| `API_RATE_LIMIT_HEADERS_ENABLED` | Injecter les headers de limite                | idem                                                        | `yes`         |
-| `API_RATE_LIMIT_RULES`           | Règles par chemin (CSV/JSON/YAML ou fichier)  | Chaîne ou chemin                                            | unset         |
-| `API_RATE_LIMIT_STRATEGY`        | Algorithme                                    | `fixed-window`, `moving-window`, `sliding-window-counter`   | `fixed-window`|
-| `API_RATE_LIMIT_KEY`             | Sélectionneur de clé                          | `ip`, `header:<Name>`                                       | `ip`          |
-| `API_RATE_LIMIT_EXEMPT_IPS`      | Exempter ces IPs/CIDR des limites             | Séparées par espace/virgule                                 | unset         |
-| `API_RATE_LIMIT_STORAGE_OPTIONS` | JSON fusionné dans la config de stockage      | Chaîne JSON                                                 | unset         |
+| Setting                          | Description                                  | Valeurs acceptées                                         | Défaut         |
+| -------------------------------- | -------------------------------------------- | --------------------------------------------------------- | -------------- |
+| `API_RATE_LIMIT`                 | Limite globale (chaîne style NGINX)          | `3r/s`, `100/minute`, `500 per 30 minutes`                | `100r/m`       |
+| `API_RATE_LIMIT_AUTH`            | Limite de `/auth` (ou `off`)                 | idem ou `off/disabled/none/false/0`                       | `10r/m`        |
+| `API_RATE_LIMIT_ENABLED`         | Activer le limiteur                          | `yes/no/on/off/true/false/0/1`                            | `yes`          |
+| `API_RATE_LIMIT_HEADERS_ENABLED` | Injecter les headers de limite               | idem                                                      | `yes`          |
+| `API_RATE_LIMIT_RULES`           | Règles par chemin (CSV/JSON/YAML ou fichier) | Chaîne ou chemin                                          | unset          |
+| `API_RATE_LIMIT_STRATEGY`        | Algorithme                                   | `fixed-window`, `moving-window`, `sliding-window-counter` | `fixed-window` |
+| `API_RATE_LIMIT_KEY`             | Sélectionneur de clé                         | `ip`, `header:<Name>`                                     | `ip`           |
+| `API_RATE_LIMIT_EXEMPT_IPS`      | Exempter ces IPs/CIDR des limites            | Séparées par espace/virgule                               | unset          |
+| `API_RATE_LIMIT_STORAGE_OPTIONS` | JSON fusionné dans la config de stockage     | Chaîne JSON                                               | unset          |
 
 #### Redis/Valkey (pour les limites)
 
-| Setting                                              | Description               | Valeurs acceptées                | Défaut             |
-| ---------------------------------------------------- | ------------------------ | -------------------------------- | ------------------ |
-| `USE_REDIS`                                          | Activer le backend Redis | `yes/no/on/off/true/false/0/1`   | `no`               |
-| `REDIS_HOST`, `REDIS_PORT`, `REDIS_DATABASE`         | Détails de connexion     | Host, int, int                   | unset, `6379`, `0` |
-| `REDIS_USERNAME`, `REDIS_PASSWORD`                   | Auth                     | Chaînes                          | unset              |
-| `REDIS_SSL`, `REDIS_SSL_VERIFY`                      | TLS et vérification      | `yes/no/on/off/true/false/0/1`   | `no`, `yes`        |
-| `REDIS_TIMEOUT`                                      | Timeout (ms)             | Entier                           | `1000`             |
-| `REDIS_KEEPALIVE_POOL`                               | Keepalive du pool        | Entier                           | `10`               |
-| `REDIS_SENTINEL_HOSTS`                               | Hôtes Sentinel           | `host:port` séparés par espace   | unset              |
-| `REDIS_SENTINEL_MASTER`                              | Nom du master Sentinel   | Chaîne                           | unset              |
-| `REDIS_SENTINEL_USERNAME`, `REDIS_SENTINEL_PASSWORD` | Auth Sentinel            | Chaînes                          | unset              |
+| Setting                                              | Description              | Valeurs acceptées              | Défaut             |
+| ---------------------------------------------------- | ------------------------ | ------------------------------ | ------------------ |
+| `USE_REDIS`                                          | Activer le backend Redis | `yes/no/on/off/true/false/0/1` | `no`               |
+| `REDIS_HOST`, `REDIS_PORT`, `REDIS_DATABASE`         | Détails de connexion     | Host, int, int                 | unset, `6379`, `0` |
+| `REDIS_USERNAME`, `REDIS_PASSWORD`                   | Auth                     | Chaînes                        | unset              |
+| `REDIS_SSL`, `REDIS_SSL_VERIFY`                      | TLS et vérification      | `yes/no/on/off/true/false/0/1` | `no`, `yes`        |
+| `REDIS_TIMEOUT`                                      | Timeout (ms)             | Entier                         | `1000`             |
+| `REDIS_KEEPALIVE_POOL`                               | Keepalive du pool        | Entier                         | `10`               |
+| `REDIS_SENTINEL_HOSTS`                               | Hôtes Sentinel           | `host:port` séparés par espace | unset              |
+| `REDIS_SENTINEL_MASTER`                              | Nom du master Sentinel   | Chaîne                         | unset              |
+| `REDIS_SENTINEL_USERNAME`, `REDIS_SENTINEL_PASSWORD` | Auth Sentinel            | Chaînes                        | unset              |
 
 !!! info "Redis fourni par la BD"
     Si la configuration BunkerWeb en base contient Redis/Valkey, l’API la réutilise automatiquement pour le rate limiting même sans `USE_REDIS` dans l’environnement. Surcharger via variables d’environnement si nécessaire.
 
 #### Listener & TLS
 
-| Setting                               | Description                      | Valeurs acceptées                | Défaut                               |
-| ------------------------------------- | -------------------------------- | -------------------------------- | ------------------------------------ |
-| `API_LISTEN_ADDR`, `API_LISTEN_PORT`  | Adresse/port de bind pour Gunicorn | IP ou hostname, int             | `127.0.0.1`, `8888` (script paquet)  |
-| `API_SSL_ENABLED`                     | Activer TLS dans l’API           | `yes/no/on/off/true/false/0/1`   | `no`                                 |
-| `API_SSL_CERTFILE`, `API_SSL_KEYFILE` | Certificat et clé PEM            | Chemins de fichier               | unset                                |
-| `API_SSL_CA_CERTS`                    | CA/chaîne optionnelle            | Chemin de fichier                | unset                                |
+| Setting                               | Description                        | Valeurs acceptées              | Défaut                              |
+| ------------------------------------- | ---------------------------------- | ------------------------------ | ----------------------------------- |
+| `API_LISTEN_ADDR`, `API_LISTEN_PORT`  | Adresse/port de bind pour Gunicorn | IP ou hostname, int            | `127.0.0.1`, `8888` (script paquet) |
+| `API_SSL_ENABLED`                     | Activer TLS dans l’API             | `yes/no/on/off/true/false/0/1` | `no`                                |
+| `API_SSL_CERTFILE`, `API_SSL_KEYFILE` | Certificat et clé PEM              | Chemins de fichier             | unset                               |
+| `API_SSL_CA_CERTS`                    | CA/chaîne optionnelle              | Chemin de fichier              | unset                               |
 
 #### Logging & runtime (défauts paquet)
 
-| Setting                         | Description                                                                       | Valeurs acceptées                                 | Défaut                                                             |
-| ------------------------------- | --------------------------------------------------------------------------------- | ------------------------------------------------- | ------------------------------------------------------------------ |
-| `LOG_LEVEL`, `CUSTOM_LOG_LEVEL` | Niveau de base / override                                                          | `debug`, `info`, `warning`, `error`, `critical`   | `info`                                                             |
-| `LOG_TYPES`                     | Destinations                                                                      | `stderr`/`file`/`syslog` séparés par espaces       | `stderr`                                                           |
-| `LOG_FILE_PATH`                 | Chemin du log (utilisé si `LOG_TYPES` contient `file` ou `CAPTURE_OUTPUT=yes`)     | Chemin de fichier                                 | `/var/log/bunkerweb/api.log` si file/capture, sinon unset          |
-| `LOG_SYSLOG_ADDRESS`            | Cible syslog (`udp://host:514`, `tcp://host:514`, socket)                         | Host:port, host préfixé protocole ou socket       | unset                                                              |
-| `LOG_SYSLOG_TAG`                | Tag syslog                                                                        | Chaîne                                           | `bw-api`                                                           |
-| `MAX_WORKERS`, `MAX_THREADS`    | Workers/threads Gunicorn                                                          | Entier ou unset pour auto                        | unset                                                              |
-| `CAPTURE_OUTPUT`                | Rediriger stdout/stderr Gunicorn vers les handlers configurés                     | `yes` ou `no`                                    | `no`                                                               |
+| Setting                         | Description                                                                    | Valeurs acceptées                               | Défaut                                                    |
+| ------------------------------- | ------------------------------------------------------------------------------ | ----------------------------------------------- | --------------------------------------------------------- |
+| `LOG_LEVEL`, `CUSTOM_LOG_LEVEL` | Niveau de base / override                                                      | `debug`, `info`, `warning`, `error`, `critical` | `info`                                                    |
+| `LOG_TYPES`                     | Destinations                                                                   | `stderr`/`file`/`syslog` séparés par espaces    | `stderr`                                                  |
+| `LOG_FILE_PATH`                 | Chemin du log (utilisé si `LOG_TYPES` contient `file` ou `CAPTURE_OUTPUT=yes`) | Chemin de fichier                               | `/var/log/bunkerweb/api.log` si file/capture, sinon unset |
+| `LOG_SYSLOG_ADDRESS`            | Cible syslog (`udp://host:514`, `tcp://host:514`, socket)                      | Host:port, host préfixé protocole ou socket     | unset                                                     |
+| `LOG_SYSLOG_TAG`                | Tag syslog                                                                     | Chaîne                                          | `bw-api`                                                  |
+| `MAX_WORKERS`, `MAX_THREADS`    | Workers/threads Gunicorn                                                       | Entier ou unset pour auto                       | unset                                                     |
+| `MAX_REQUESTS`                  | Requêtes avant recyclage du worker Gunicorn (évite la fuite mémoire)           | Entier                                          | `1000`                                                    |
+| `CAPTURE_OUTPUT`                | Rediriger stdout/stderr Gunicorn vers les handlers configurés                  | `yes` ou `no`                                   | `no`                                                      |
 
 ## Surface API (carte des capacités)
 
@@ -366,13 +394,13 @@ Désactivez docs ou schéma en mettant leurs URLs à `off|disabled|none|false|0`
   - `GET /configs` : lister les snippets (service par défaut `global`) ; `with_data=true` intègre le contenu imprimable.
   - `POST /configs`, `POST /configs/upload` : créer des snippets via JSON ou upload de fichier.
   - `GET /configs/{service}/{type}/{name}` : récupérer un snippet ; `with_data=true` pour le contenu.
-  - `PATCH /configs/{service}/{type}/{name}`, `PATCH .../upload` : mettre à jour ou déplacer les snippets gérés par l’API.
+  - `PATCH /configs/{service}/{type}/{name}`, `PATCH .../upload` : mettre à jour ou déplacer les snippets gérés par l’API. Un déplacement exige aussi `config_update` sur le service de destination (`global` compte comme un service) ; un corps JSON sans `service` conserve le service actuel.
   - `DELETE /configs` ou `DELETE /configs/{service}/{type}/{name}` : supprimer les snippets gérés par l’API ; ceux gérés par template sont ignorés.
   - Types supportés : `http`, `server_http`, `default_server_http`, `modsec`, `modsec_crs`, `stream`, `server_stream`, hooks CRS/plugin.
 - **Bans**
   - `GET /bans` : agréger les bans actifs depuis les instances.
   - `POST /bans` ou `/bans/ban` : appliquer un ou plusieurs bans ; le payload peut être objet, tableau ou JSON sérialisé.
-  - `POST /bans/unban` ou `DELETE /bans` : lever les bans globalement ou par service.
+  - `POST /bans/unban` ou `DELETE /bans` : lever les bans globalement ou par service. Pour un ban CrowdSec (`kind: "crowdsec_lease"`), envoyez aussi `remove_crowdsec_decisions: true`, `confirmed: true` et `decision_keys` (les clés de l'aperçu `409`) pour supprimer les décisions CrowdSec qui en sont à l'origine ; l'appel exige `crowdsec_delete` sur chaque connexion concernée, répond `409` si la sélection a changé et `502` en cas de résultat partiel.
 - **Plugins (UI)**
   - `GET /plugins` : lister les plugins ; `with_data=true` inclut les bytes packagés quand dispo.
   - `POST /plugins/upload` : installer des plugins UI depuis `.zip`, `.tar.gz`, `.tar.xz`.
@@ -380,7 +408,7 @@ Désactivez docs ou schéma en mettant leurs URLs à `off|disabled|none|false|0`
 - **Cache (artefacts de jobs)**
   - `GET /cache` : lister les fichiers de cache avec filtres (`service`, `plugin`, `job_name`) ; `with_data=true` intègre le contenu imprimable.
   - `GET /cache/{service}/{plugin}/{job}/{file}` : récupérer/télécharger un fichier de cache spécifique (`download=true`).
-  - `DELETE /cache` ou `DELETE /cache/{service}/{plugin}/{job}/{file}` : supprimer des fichiers de cache et notifier le scheduler.
+  - `DELETE /cache` ou `DELETE /cache/{service}/{plugin}/{job}/{file}` : supprimer des fichiers de cache. Le scheduler n’est notifié que pour un plugin dont une ligne a réellement été supprimée ; un `plugin` qui ne possède pas le job est refusé et rien n’est supprimé.
 - **Jobs**
   - `GET /jobs` : lister jobs, plannings et résumés de cache.
   - `POST /jobs/run` : marquer des plugins comme modifiés pour déclencher les jobs associés.

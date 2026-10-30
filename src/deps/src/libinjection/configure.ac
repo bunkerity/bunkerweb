@@ -8,10 +8,11 @@ AC_INIT(
     [https://github.com/libinjection/libinjection])
 
 AC_CONFIG_AUX_DIR([build-aux])
+AC_REQUIRE_AUX_FILE([tap-driver.sh])
 AC_CONFIG_MACRO_DIR([build-aux/m4])
 AC_CANONICAL_HOST
 
-AM_INIT_AUTOMAKE([1.11 check-news foreign silent-rules subdir-objects
+AM_INIT_AUTOMAKE([1.13 foreign silent-rules subdir-objects
     -Wall -Werror])
 AM_MAINTAINER_MODE
 
@@ -101,6 +102,7 @@ LT_INIT
 AC_SUBST([LIBTOOL_DEPS])
 
 AC_PATH_TOOL(CLANG, clang)
+AC_PATH_TOOL(CLANG_FORMAT, clang-format)
 AC_PATH_TOOL(GCOV, gcov)
 AC_PATH_PROG(LCOV, lcov)
 AC_PATH_PROG(GENHTML, genhtml)
@@ -157,6 +159,7 @@ AM_CONDITIONAL([FUZZERS], [test x"$enable_fuzzers" = "xyes"])
 if test "$enable_fuzzers" = yes; then
   AX_CHECK_COMPILE_FLAG([-fsanitize=fuzzer],,[AC_MSG_ERROR("Fuzzing not supported by the compiler; you must use clang")])
   LIB_FUZZING_ENGINE=-fsanitize=fuzzer
+  fuzzers_flags="-fsanitize=fuzzer-no-link"
   BUILD_FUZZTARGETS=1
 fi
 AM_CONDITIONAL([BUILD_FUZZTARGETS], [test "x$enable_fuzzers" = "xyes"])

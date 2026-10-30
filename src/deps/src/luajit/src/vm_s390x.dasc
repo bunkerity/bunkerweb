@@ -70,7 +70,7 @@
 |.define SAVE_GPRS_P,	48(sp)  // Save area for r6-r15 (10*8 bytes) in prologue (before stack frame is allocated).
 |
 |// Argument save area.
-|.define SAVE_ERRF,	280(sp) // Argument 4, in r5.
+|.define SAVE_ERRF,	280(sp) // Argument 4, in r5. Size is 4-bytes.
 |.define SAVE_NRES,	272(sp)	// Argument 3, in r4. Size is 4-bytes.
 |.define SAVE_CFRAME,	264(sp)	// Argument 2, in r3.
 |.define SAVE_L,	256(sp)	// Argument 1, in r2.
@@ -407,14 +407,15 @@ static void build_subroutines(BuildCtx *ctx)
   |  j <3
   |
   |->vm_unwind_yield:
-  |  lghi CRET1, LUA_YIELD
+  |  lghi RB, LUA_YIELD
   |  j ->vm_unwind_c_eh
   |
   |->vm_unwind_c:			// Unwind C stack, return from vm_pcall.
   |  // (void *cframe, int errcode)
   |  lgr sp, CARG1
-  |  lgfr CARG2, CRET1			// Error return status for vm_pcall.
+  |  lgfr RB, CARG2			// Error return status for vm_pcall.
   |->vm_unwind_c_eh:			// Landing pad for external unwinder.
+  |  lgr CRET1, RB			// Move return status into ABI reg.
   |  lg L:RB, SAVE_L
   |  lg GL:RB, L:RB->glref
   |  lghi TMPR1, ~LJ_VMST_C
@@ -495,7 +496,7 @@ static void build_subroutines(BuildCtx *ctx)
   |  stg RD, SAVE_PC			// Any value outside of bytecode is ok.
   |  stg RD, SAVE_CFRAME
   |  st RD, SAVE_NRES
-  |  stg RD, SAVE_ERRF
+  |  st RD, SAVE_ERRF
   |  stg KBASE, L:RB->cframe
   |  clm RD, 1, L:RB->status
   |  je >2				// Initial resume (like a call).
@@ -520,8 +521,7 @@ static void build_subroutines(BuildCtx *ctx)
   |  // (lua_State *L, TValue *base, int nres1, ptrdiff_t ef)
   |  saveregs
   |  lghi PC, FRAME_CP
-  |  llgfr CARG4, CARG4
-  |  stg CARG4, SAVE_ERRF
+  |  st CARG4, SAVE_ERRF
   |  j >1
   |
   |->vm_call:				// Setup C frame and enter VM.
@@ -574,7 +574,7 @@ static void build_subroutines(BuildCtx *ctx)
   |  sg KBASE, L:RB->top
   |   lg DISPATCH, L:RB->glref	// Setup pointer to dispatch table.
   |  lghi TMPR0, 0
-  |  stg TMPR0, SAVE_ERRF		// No error function.
+  |  st TMPR0, SAVE_ERRF		// No error function.
   |  st KBASE, SAVE_NRES		// Neg. delta means cframe w/o frame.
   |   aghi DISPATCH, GG_G2DISP
   |  // Handler may change cframe_nres(L->cframe) or cframe_errfunc(L->cframe).
@@ -970,6 +970,22 @@ static void build_subroutines(BuildCtx *ctx)
 #else
   |  j ->vmeta_binop			// Binop call for compatibility.
 #endif
+  |
+  |//-- Bit operator metamethods -------------------------------------------
+  |
+  |->vmeta_bnot:
+  |  lgr RB, RC
+  |
+  |->vmeta_bitop:
+  |  la CARG2, 0(RA, BASE)
+  |  la CARG3, 0(RB, BASE)
+  |  la CARG4, 0(RC, BASE)
+  |  lgr CARG5, OP
+  |  lg L:CARG1, SAVE_L
+  |  stg BASE, L:CARG1->base
+  |  stg PC, SAVE_PC
+  |  brasl r14, extern lj_meta_bitop	// (lua_State *L, TValue *ra,*rb,*rc, BCReg op)
+  |  j ->cont_nop
   |
   |//-- Call metamethod ----------------------------------------------------
   |
@@ -2614,15 +2630,18 @@ static void build_ins(BuildCtx *ctx, BCOp op, int defop)
     |  sllg RA, RA, 3
     |  sllg RD, RD, 3
     |  lg RB, 0(RD, BASE)
-    |  checkint RB, >3
-    |  lcr RB, RB; jo >2
+    |  checkint RB, >4
+    |  lcr RB, RB; je >2; jo >3
     |1:
     |  stg RB, 0(RA, BASE)
     |  ins_next
     |2:
-    |  llihh RB, 0x41e0 // (double)2^31
+    |  llihh RB, 0x8000 // (double)-0
     |  j <1
     |3:
+    |  llihh RB, 0x41e0 // (double)2^31
+    |  j <1
+    |4:
     |  jh ->vmeta_unm
     |  // Toggle sign bit.
     |  llihh TMPR0, 0x8000
@@ -2846,6 +2865,57 @@ static void build_ins(BuildCtx *ctx, BCOp op, int defop)
     |  lg RC, 0(RB, BASE)
     |  stg RC, 0(RA, BASE)
     |  ins_next
+    break;
+
+  /* -- Bit ops ----------------------------------------------------------- */
+
+  case BC_BNOT:
+    |  ins_A_C  // RA = dst, RC = src
+    |  sllg RA, RA, 3
+    |  sllg RC, RC, 3
+    |  lg TMPR0, 0(RC, BASE)
+    |  checkint TMPR0, ->vmeta_bnot
+    |  xilf TMPR0, -1
+    |  stg CARG1, 0(RA, BASE)
+    |  ins_next
+    break;
+
+    |.macro ins_bitop, ins, shop
+    |  ins_ABC  // RA = dst, RB = src1, RC = src2
+    |  sllg RA, RA, 3
+    |  sllg RB, RB, 3
+    |  sllg RC, RC, 3
+    |  lg TMPR0, 0(RB, BASE)
+    |  checkint TMPR0, ->vmeta_bitop
+    |  lg TMPR1, 0(RC, BASE)
+    |  checkint TMPR1, ->vmeta_bitop
+    |.if shop == 1
+    |  nill TMPR1, 0x1f
+    |  ins TMPR0, 0(TMPR1)
+    |.else
+    |  ins TMPR0, TMPR1
+    |.endif
+    |  stg TMPR0, 0(RA, BASE)
+    |  ins_next
+    |.endmacro
+
+  case BC_BAND:
+    |  ins_bitop nr, 0
+    break;
+  case BC_BOR:
+    |  ins_bitop or, 0
+    break;
+  case BC_BXOR:
+    |  ins_bitop xr, 0
+    break;
+  case BC_BSHL:
+    |  ins_bitop sll, 1
+    break;
+  case BC_BSHR:
+    |  ins_bitop srl, 1
+    break;
+  case BC_BSAR:
+    |  ins_bitop sra, 1
     break;
 
   /* -- Constant ops ------------------------------------------------------ */

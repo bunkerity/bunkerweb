@@ -1,0 +1,185 @@
+integrations: "all"
+
+actions:
+  generate:
+    type: bwcli
+    command: "plugin backup save"
+    result: "created successfully"
+    repeat: 6 # ? One extra backup will be generated in Autoconf and Kubernetes
+    cooldown: 1
+    Linux:
+      repeat: 7
+    Docker:
+      repeat: 7
+    All-in-one:
+      repeat: 7
+    restart_stack: false
+  check:
+    type: bwcli
+    command: "plugin backup list"
+    result: "Found 8 backups"
+  rotation:
+    type: bwcli
+    command: "plugin backup list"
+    result: "Found 7 backups"
+  custom_rotation:
+    type: bwcli
+    command: "plugin backup list"
+    result: "Found 5 backups"
+    config:
+      BACKUP_ROTATION: "5"
+  restore_1:
+    type: database
+    query: "UPDATE bw_metadata SET integration = 'Unknown'"
+    result: null
+    restart_stack: false
+  restore_2:
+    type: bwcli
+    command: "plugin backup save"
+    result: "created successfully"
+    restart_stack: false
+  restore_3:
+    type: database
+    query: "UPDATE bw_metadata SET integration = 'Windows'"
+    result: null
+    restart_stack: false
+  restore_4:
+    type: bwcli
+    command: "plugin backup restore"
+    result: "restored successfully"
+    restart_stack: false
+  restore_5:
+    type: database
+    query: "SELECT integration FROM bw_metadata"
+    result: "Unknown"
+    full_clean: true
+  # Prepare: set a known value before backup
+  prepare_mariadb_1:
+    type: database
+    integrations: # ? For the other integrations, mariadb is the default database
+      - "Linux"
+      - "Docker"
+      - "All-in-one"
+    query: "UPDATE bw_metadata SET integration = 'Unknown'"
+    result: null
+    database: "mariadb"
+    restart_stack: false
+  generate_mariadb:
+    type: bwcli
+    integrations: # ? For the other integrations, mariadb is the default database
+      - "Linux"
+      - "Docker"
+      - "All-in-one"
+    command: "plugin backup save"
+    result: "created successfully"
+    database: "mariadb"
+    restart_stack: false
+  prepare_mariadb_2:
+    type: database
+    integrations: # ? For the other integrations, mariadb is the default database
+      - "Linux"
+      - "Docker"
+      - "All-in-one"
+    query: "UPDATE bw_metadata SET integration = 'Windows'"
+    result: null
+    database: "mariadb"
+    restart_stack: false
+  restore_mariadb:
+    type: bwcli
+    integrations: # ? For the other integrations, mariadb is the default database
+      - "Linux"
+      - "Docker"
+      - "All-in-one"
+    command: "plugin backup restore"
+    result: "restored successfully"
+    database: "mariadb"
+    restart_stack: false
+  check_mariadb:
+    type: database
+    integrations: # ? For the other integrations, mariadb is the default database
+      - "Linux"
+      - "Docker"
+      - "All-in-one"
+    query: "SELECT integration FROM bw_metadata"
+    result: "Unknown"
+    database: "mariadb"
+    full_clean: true
+  # Prepare: set a known value before backup (MySQL)
+  prepare_mysql_1:
+    type: database
+    query: "UPDATE bw_metadata SET integration = 'Unknown'"
+    result: null
+    database: "mysql"
+    restart_stack: false
+  generate_mysql:
+    type: bwcli
+    command: "plugin backup save"
+    result: "created successfully"
+    database: "mysql"
+    restart_stack: false
+  prepare_mysql_2:
+    type: database
+    query: "UPDATE bw_metadata SET integration = 'Windows'"
+    result: null
+    database: "mysql"
+    restart_stack: false
+  restore_mysql:
+    type: bwcli
+    command: "plugin backup restore"
+    result: "restored successfully"
+    database: "mysql"
+    restart_stack: false
+  check_mysql:
+    type: database
+    query: "SELECT integration FROM bw_metadata"
+    result: "Unknown"
+    database: "mysql"
+    full_clean: true
+  prepare_postgresql_1:
+    type: database
+    query: "UPDATE bw_metadata SET integration = 'Unknown'"
+    result: null
+    database: "postgresql"
+    restart_stack: false
+  generate_postgresql:
+    type: bwcli
+    command: "plugin backup save"
+    result: "created successfully"
+    database: "postgresql"
+    restart_stack: false
+  prepare_postgresql_2:
+    type: database
+    query: "UPDATE bw_metadata SET integration = 'Windows'"
+    result: null
+    database: "postgresql"
+    restart_stack: false
+  restore_postgresql:
+    type: bwcli
+    command: "plugin backup restore"
+    result: "restored successfully"
+    restart_stack: false
+    database: "postgresql"
+  check_postgresql:
+    type: database
+    query: "SELECT integration FROM bw_metadata"
+    result: "Unknown"
+    database: "postgresql"
+    full_clean: true
+  # generate_oracle:
+  #   type: bwcli
+  #   command: "plugin backup save"
+  #   result: "not supported"
+  #   database: "oracle"
+  #   restart_stack: false
+  # restore_oracle:
+  #   type: bwcli
+  #   command: "plugin backup restore"
+  #   result: "not supported"
+  #   full_clean: true
+  #   database: "oracle"
+
+config:
+  USE_BACKUP: "yes"
+  BACKUP_SCHEDULE: "daily"
+  BACKUP_ROTATION: "7"
+  BACKUP_DIRECTORY: "/var/lib/bunkerweb/backups"

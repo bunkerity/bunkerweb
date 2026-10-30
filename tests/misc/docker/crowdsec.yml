@@ -1,0 +1,41 @@
+services:
+  crowdsec:
+    # 1.8.0 is the floor for the bot-detection scenario in tests/core/crowdsec.yml: the
+    # `challenge` remediation does not exist before it, so no collection can produce one.
+    image: crowdsecurity/crowdsec:v1.8.0@sha256:99eb4df235527e978595ef5ebb30182831686dc875521de67ef39b7659a86897
+    container_name: crowdsec
+    ports:
+      # Not 8888: an `api` run's bw-api publishes 127.0.0.1:8888, and docker refuses to start
+      # CrowdSec with "port is already allocated".
+      - "8889:8080"
+      - "7422:7422"
+    volumes:
+      - "${BW_TESTS_LOG:?use tests/scripts}:/var/log/bunkerweb:ro"
+      - cs-data:/var/lib/crowdsec/data
+      - ../conf/acquis.yaml:/etc/crowdsec/acquis.yaml
+      - ../conf/appsec.yaml:/etc/crowdsec/acquis.d/appsec.yaml
+      - ../scripts/healthcheck-crowdsec.sh:/usr/local/bin/healthcheck-crowdsec.sh
+    env_file:
+      - path: /tmp/crowdsec.env
+        required: true
+    networks:
+      bw-universe:
+        ipv4_address: 10.20.30.60
+    healthcheck:
+      test: ["CMD", "bash", "/usr/local/bin/healthcheck-crowdsec.sh"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 30s
+
+volumes:
+  cs-data:
+    name: cs-data
+
+networks:
+  bw-universe:
+    name: bw-universe
+    ipam:
+      driver: default
+      config:
+        - subnet: 10.20.30.0/24

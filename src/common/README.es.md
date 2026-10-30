@@ -49,6 +49,20 @@ El ajuste `SECURITY_MODE` determina cómo BunkerWeb maneja las amenazas detectad
 
 Cambiar al modo `detect` puede ayudarte a identificar y resolver posibles falsos positivos sin interrumpir a los clientes legítimos. Una vez que estos problemas se resuelvan, puedes volver con confianza al modo `block` para una protección completa.
 
+### Descartar baneos en el handshake TLS {#bans-tls-drop}
+
+Un cliente baneado normalmente completa el handshake TLS y después recibe la página de baneo (403). `BANS_TLS_DROP_REASONS` enumera los motivos de baneo para los que BunkerWeb cierra la conexión al comienzo del handshake, antes de cualquier trabajo de certificado o de intercambio de claves. El cliente ve un error TLS, no una página. Esto ahorra CPU cuando las direcciones baneadas se reconectan sin parar.
+
+El valor es una lista de motivos separados por espacios, entre `crowdsec`, `bad_behavior`, `manual`, `ui` y `api`. El valor por defecto está vacío, lo que mantiene la página 403 para todos los baneos. Recomendamos `crowdsec`.
+
+- Solo cuenta el motivo del baneo que se aplica. Para una IP con un baneo `manual` y un baneo de CrowdSec, indicar solo `crowdsec` no descarta nada y el cliente recibe la página 403.
+- El descarte se omite, y la página 403 se mantiene, cuando `USE_REAL_IP` es `yes` con un origen basado en cabecera, o cuando `USE_PROXY_PROTOCOL` es `yes` sin que `USE_REAL_IP` sea `yes` y `REAL_IP_HEADER` sea `proxy_protocol`, porque en ese momento no se conoce la dirección del cliente. Con los tres definidos, el descarte usa la dirección del protocolo PROXY cuando el par que se conecta está en `REAL_IP_FROM`, y la dirección del par en caso contrario. También se omite para las IP permitidas por una whitelist local.
+- Con Redis activado, un handshake se descarta solo después de que una solicitud de la IP baneada haya pasado por la comprobación de baneos habitual, por lo que la primera solicitud sigue recibiendo la página 403.
+- Con `SECURITY_MODE` en `detect`, el handshake continúa y se registra una advertencia.
+- Las conexiones HTTP/3 (QUIC) nunca se descartan. Reciben la página 403.
+- Cada descarte se contabiliza por motivo en las métricas.
+- El estado de esta función y de los baneos de CrowdSec vive en la zona de memoria compartida `bans_meta`. Siempre se declara con 10 MiB, pero su memoria solo se utiliza cuando se define `BANS_TLS_DROP_REASONS` o `CROWDSEC_BAN_REFRESH`.
+
 ### Ajustes de Configuración
 
 === "Ajustes Principales"
@@ -59,6 +73,7 @@ Cambiar al modo `detect` puede ayudarte a identificar y resolver posibles falsos
     | `BUNKERWEB_INSTANCES` | `127.0.0.1`       | global    | No       | **Instancias de BunkerWeb:** Lista de instancias de BunkerWeb separadas por espacios.                                           |
     | `MULTISITE`           | `no`              | global    | No       | **Múltiples Sitios:** Establécelo en `yes` para permitir el alojamiento de múltiples sitios web con diferentes configuraciones. |
     | `SECURITY_MODE`       | `block`           | multisite | No       | **Nivel de Seguridad:** Controla el nivel de aplicación de la seguridad. Opciones: `detect` o `block`.                          |
+    | `BANS_TLS_DROP_REASONS` | | multisite | No | **Baneos descartados en TLS:** Motivos de baneo (`crowdsec`, `bad_behavior`, `manual`, `ui`, `api`, separados por espacios) cuyas IP baneadas se descartan en el handshake TLS en lugar de recibir la página 403. Se omite con IP real basada en cabecera y tras el protocolo PROXY, salvo que `REAL_IP_HEADER` sea `proxy_protocol`. Nunca se aplica a HTTP/3. |
     | `SERVER_TYPE`         | `http`            | multisite | No       | **Tipo de Servidor:** Define si el servidor es de tipo `http` o `stream`.                                                       |
 
 === "Ajustes de la API"
@@ -92,34 +107,35 @@ Cambiar al modo `detect` puede ayudarte a identificar y resolver posibles falsos
 
 === "Ajustes de Red y Puertos"
 
-    | Parámetro               | Valor por defecto | Contexto | Múltiple | Descripción                                                                 |
-    | ----------------------- | ----------------- | -------- | -------- | --------------------------------------------------------------------------- |
-    | `HTTP_PORT`             | `8080`            | global   | Sí       | **Puerto HTTP:** Número de puerto para el tráfico HTTP. Dejar vacío para desactivar la escucha HTTP.                     |
-    | `HTTPS_PORT`            | `8443`            | global   | Sí       | **Puerto HTTPS:** Número de puerto para el tráfico HTTPS. Dejar vacío para desactivar la escucha HTTPS.                   |
-    | `USE_IPV6`              | `no`              | global   | No       | **Soporte IPv6:** Habilita la conectividad IPv6.                            |
-    | `DNS_RESOLVERS`         | `127.0.0.11`      | global   | No       | **Resolutores DNS:** Direcciones DNS de los resolutores a usar.             |
-    | `CLIENT_BODY_TIMEOUT`   | `10s`             | global   | No       | **Timeout del cuerpo del cliente:** Tiempo límite para leer el cuerpo de la solicitud del cliente. |
+    | Parámetro               | Valor por defecto | Contexto | Múltiple | Descripción                                                                                              |
+    | ----------------------- | ----------------- | -------- | -------- | -------------------------------------------------------------------------------------------------------- |
+    | `HTTP_PORT`             | `8080`            | global   | Sí       | **Puerto HTTP:** Número de puerto para el tráfico HTTP. Dejar vacío para desactivar la escucha HTTP.     |
+    | `HTTPS_PORT`            | `8443`            | global   | Sí       | **Puerto HTTPS:** Número de puerto para el tráfico HTTPS. Dejar vacío para desactivar la escucha HTTPS.  |
+    | `USE_IPV6`              | `no`              | global   | No       | **Soporte IPv6:** Habilita la conectividad IPv6.                                                         |
+    | `DNS_RESOLVERS`         | `127.0.0.11`      | global   | No       | **Resolutores DNS:** Direcciones DNS de los resolutores a usar.                                          |
+    | `CLIENT_BODY_TIMEOUT`   | `10s`             | global   | No       | **Timeout del cuerpo del cliente:** Tiempo límite para leer el cuerpo de la solicitud del cliente.       |
     | `CLIENT_HEADER_TIMEOUT` | `10s`             | global   | No       | **Timeout de cabeceras del cliente:** Tiempo límite para leer las cabeceras de la solicitud del cliente. |
-    | `KEEPALIVE_TIMEOUT`     | `15s`             | global   | No       | **Timeout keepalive:** Tiempo límite para conexiones keepalive del cliente. |
-    | `SEND_TIMEOUT`          | `10s`             | global   | No       | **Timeout de envío:** Tiempo límite para transmitir una respuesta al cliente. |
+    | `KEEPALIVE_TIMEOUT`     | `15s`             | global   | No       | **Timeout keepalive:** Tiempo límite para conexiones keepalive del cliente.                              |
+    | `SEND_TIMEOUT`          | `10s`             | global   | No       | **Timeout de envío:** Tiempo límite para transmitir una respuesta al cliente.                            |
 
 === "Ajustes del Servidor de Stream"
 
-    | Parámetro                | Valor por defecto | Contexto  | Múltiple | Descripción                                                           |
-    | ------------------------ | ----------------- | --------- | -------- | --------------------------------------------------------------------- |
-    | `LISTEN_STREAM`          | `yes`             | multisite | No       | **Escucha de Stream:** Habilita la escucha para no-ssl (passthrough). |
-    | `LISTEN_STREAM_PORT`     | `1337`            | multisite | Sí       | **Puerto de Stream:** Puerto de escucha para no-ssl (passthrough). Dejar vacío para desactivar la escucha stream non-SSL.    |
-    | `LISTEN_STREAM_PORT_SSL` | `4242`            | multisite | Sí       | **Puerto SSL de Stream:** Puerto de escucha para ssl (passthrough). Dejar vacío para desactivar la escucha stream SSL.   |
-    | `USE_TCP`                | `yes`             | multisite | No       | **Escucha TCP:** Habilita la escucha TCP (stream).                    |
-    | `USE_UDP`                | `no`              | multisite | No       | **Escucha UDP:** Habilita la escucha UDP (stream).                    |
+    | Parámetro                | Valor por defecto | Contexto  | Múltiple | Descripción                                                                                                               |
+    | ------------------------ | ----------------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------- |
+    | `LISTEN_STREAM`          | `yes`             | multisite | No       | **Escucha de Stream:** Habilita la escucha para no-ssl (passthrough).                                                     |
+    | `LISTEN_STREAM_PORT`     | `1337`            | multisite | Sí       | **Puerto de Stream:** Puerto de escucha para no-ssl (passthrough). Dejar vacío para desactivar la escucha stream non-SSL. |
+    | `LISTEN_STREAM_PORT_SSL` | `4242`            | multisite | Sí       | **Puerto SSL de Stream:** Puerto de escucha para ssl (passthrough). Dejar vacío para desactivar la escucha stream SSL.    |
+    | `USE_TCP`                | `yes`             | multisite | No       | **Escucha TCP:** Habilita la escucha TCP (stream).                                                                        |
+    | `USE_UDP`                | `no`              | multisite | No       | **Escucha UDP:** Habilita la escucha UDP (stream).                                                                        |
 
 === "Ajustes de Workers"
 
-    | Parámetro              | Valor por defecto | Contexto | Múltiple | Descripción                                                                                              |
-    | ---------------------- | ----------------- | -------- | -------- | -------------------------------------------------------------------------------------------------------- |
-    | `WORKER_PROCESSES`     | `auto`            | global   | No       | **Procesos Worker:** Número de procesos worker. Establécelo en `auto` para usar los núcleos disponibles. |
-    | `WORKER_CONNECTIONS`   | `1024`            | global   | No       | **Conexiones por Worker:** Número máximo de conexiones por worker.                                       |
-    | `WORKER_RLIMIT_NOFILE` | `2048`            | global   | No       | **Límite de Descriptores de Archivo:** Número máximo de archivos abiertos por worker.                    |
+    | Parámetro                 | Valor por defecto | Contexto | Múltiple | Descripción                                                                                                                                                                                            |
+    | ------------------------- | ----------------- | -------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+    | `WORKER_PROCESSES`        | `auto`            | global   | No       | **Procesos Worker:** Número de procesos worker. Establécelo en `auto` para usar los núcleos disponibles.                                                                                               |
+    | `WORKER_CONNECTIONS`      | `1024`            | global   | No       | **Conexiones por Worker:** Número máximo de conexiones por worker.                                                                                                                                     |
+    | `WORKER_RLIMIT_NOFILE`    | `2048`            | global   | No       | **Límite de Descriptores de Archivo:** Número máximo de archivos abiertos por worker.                                                                                                                  |
+    | `WORKER_SHUTDOWN_TIMEOUT` | `30s`             | global   | No       | **Tiempo de espera de apagado de Workers:** Tiempo de espera para el apagado ordenado de los procesos worker. Los workers antiguos se terminan forzosamente después de este plazo durante una recarga. |
 
 === "Ajustes de Memoria"
 
@@ -127,10 +143,12 @@ Cambiar al modo `detect` puede ayudarte a identificar y resolver posibles falsos
     | ------------------------------ | ----------------- | -------- | -------- | -------------------------------------------------------------------------------------------------- |
     | `WORKERLOCK_MEMORY_SIZE`       | `48k`             | global   | No       | **Tamaño de Memoria de Workerlock:** Tamaño de lua_shared_dict para los workers de inicialización. |
     | `DATASTORE_MEMORY_SIZE`        | `64m`             | global   | No       | **Tamaño de Memoria del Datastore:** Tamaño del datastore interno.                                 |
+    | `DATASTORE_LRU_SIZE`           | `1k`              | global   | No       | **Tamaño del LRU del Datastore:** Número de ranuras del LRU del datastore compartido por worker. Acepta un entero o los sufijos `k`/`m` (por ejemplo `1k`, `10k`, `1m`). |
     | `CACHESTORE_MEMORY_SIZE`       | `64m`             | global   | No       | **Tamaño de Memoria del Cachestore:** Tamaño del cachestore interno.                               |
     | `CACHESTORE_IPC_MEMORY_SIZE`   | `16m`             | global   | No       | **Tamaño de Memoria IPC del Cachestore:** Tamaño del cachestore interno (ipc).                     |
     | `CACHESTORE_MISS_MEMORY_SIZE`  | `16m`             | global   | No       | **Tamaño de Memoria de Fallos del Cachestore:** Tamaño del cachestore interno (fallos).            |
     | `CACHESTORE_LOCKS_MEMORY_SIZE` | `16m`             | global   | No       | **Tamaño de Memoria de Bloqueos del Cachestore:** Tamaño del cachestore interno (bloqueos).        |
+    | `SESSIONS_REVOCATION_MEMORY_SIZE` | `16m`          | global   | No       | **Tamaño de Memoria de Revocación de Sesiones:** Tamaño del almacén de identificadores de sesión de cookie revocados. |
 
 === "Ajustes de Registro"
 
@@ -148,13 +166,12 @@ Cambiar al modo `detect` puede ayudarte a identificar y resolver posibles falsos
 
 === "Ajustes de Integración"
 
-    | Parámetro         | Valor por defecto | Contexto  | Múltiple | Descripción                                                                                                                 |
-    | ----------------- | ----------------- | --------- | -------- | --------------------------------------------------------------------------------------------------------------------------- |
-    | `AUTOCONF_MODE`   | `no`              | global    | No       | **Modo Autoconf:** Habilita la integración con Docker Autoconf.                                                             |
-    | `SWARM_MODE`      | `no`              | global    | No       | **Modo Swarm:** Habilita la integración con Docker Swarm.                                                                   |
-    | `KUBERNETES_MODE` | `no`              | global    | No       | **Modo Kubernetes:** Habilita la integración con Kubernetes.                                                                |
-    | `KEEP_CONFIG_ON_RESTART` | `no` | global | No | **Mantener Configuración al Reiniciar:** Mantener la configuración al reiniciar. Establecer a 'yes' para evitar el restablecimiento de la configuración al reiniciar. |
-    | `USE_TEMPLATE`    |                   | multisite | No       | **Usar Plantilla:** Plantilla de configuración a usar que sobrescribirá los valores predeterminados de ajustes específicos. |
+    | Parámetro                | Valor por defecto | Contexto  | Múltiple | Descripción                                                                                                                                                           |
+    | ------------------------ | ----------------- | --------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+    | `AUTOCONF_MODE`          | `no`              | global    | No       | **Modo Autoconf:** Habilita la integración con Docker Autoconf.                                                                                                       |
+    | `SWARM_MODE`             | `no`              | global    | No       | **Modo Swarm:** Habilita la integración con Docker Swarm.                                                                                                             |
+    | `KUBERNETES_MODE`        | `no`              | global    | No       | **Modo Kubernetes:** Habilita la integración con Kubernetes.                                                                                                          |
+    | `USE_TEMPLATE`           |                   | multisite | No       | **Usar Plantilla:** Plantilla de configuración que sobrescribe los valores predeterminados de ajustes específicos; un valor definido en el servicio prevalece sobre la plantilla.                                           |
 
 === "Ajustes de Nginx"
 
@@ -212,4 +229,26 @@ Cambiar al modo `detect` puede ayudarte a identificar y resolver posibles falsos
     LISTEN_STREAM_PORT: "1337"
     USE_TCP: "yes"
     USE_UDP: "no"
+    ```
+
+=== "Desactivar modos de escucha"
+
+    Puede desactivar modos de escucha específicos dejando vacíos los ajustes de puerto:
+
+    ```yaml
+    # Desactivar la escucha HTTP (solo HTTPS)
+    HTTP_PORT: ""
+    HTTPS_PORT: "8443"
+
+    # Desactivar la escucha HTTPS (solo HTTP)
+    HTTP_PORT: "8080"
+    HTTPS_PORT: ""
+
+    # Stream: desactivar la escucha no SSL (solo SSL)
+    LISTEN_STREAM_PORT: ""
+    LISTEN_STREAM_PORT_SSL: "4242"
+
+    # Stream: desactivar la escucha SSL (solo no SSL)
+    LISTEN_STREAM_PORT: "1337"
+    LISTEN_STREAM_PORT_SSL: ""
     ```

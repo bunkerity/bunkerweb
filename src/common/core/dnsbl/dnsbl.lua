@@ -21,6 +21,9 @@ local kill_all_threads = utils.kill_all_threads
 local deduplicate_list = utils.deduplicate_list
 local get_variable = utils.get_variable
 local ipmatcher_new = ipmatcher.new
+local get_header_rules = utils.get_header_rules
+local match_header_rules = utils.match_header_rules
+local pick_header_rules = utils.pick_header_rules
 
 local is_in_dnsbl = function(addr, server)
 	local request = arpa_str(addr):gsub("%.in%-addr%.arpa", ""):gsub("%.ip6%.arpa", "") .. "." .. server
@@ -70,6 +73,8 @@ function dnsbl:initialize(ctx)
 			end
 			self.lists[kind] = deduplicate_list(self.lists[kind])
 		end
+		local header_rules = self.internalstore:get("plugin_dnsbl_header_rules", true)
+		self.header_rules = pick_header_rules(header_rules, self.ctx.bw.server_name)
 	end
 end
 
@@ -134,6 +139,14 @@ function dnsbl:init()
 		i = 0
 		lists = { ["IGNORE_IP"] = {} }
 	end
+	local header_rules, header_err = get_header_rules("DNSBL_IGNORE_HEADER")
+	if not header_rules then
+		return self:ret(false, header_err)
+	end
+	local header_ok, header_store_err = self.internalstore:set("plugin_dnsbl_header_rules", header_rules, nil, true)
+	if not header_ok then
+		return self:ret(false, header_store_err)
+	end
 	return self:ret(true, "successfully loaded DNSBL IGNORE_IP lists")
 end
 
@@ -184,6 +197,13 @@ function dnsbl:access()
 	-- Don't go further if IP is not global
 	if not self.ctx.bw.ip_is_global then
 		return self:ret(true, "client IP is not global, skipping DNSBL check")
+	end
+
+	-- Never cached : dnsbl caches by client IP, so a cached hit here would exempt every later
+	-- request from that IP, header or not.
+	local ignored_header = match_header_rules(self.ctx, self.header_rules, "DNSBL_IGNORE_HEADER_VALUE")
+	if ignored_header then
+		return self:ret(true, "header " .. ignored_header .. " is ignored for DNSBL checks")
 	end
 
 	-- Ignore specific IPs/networks if configured
@@ -237,6 +257,7 @@ function dnsbl:access()
 	local ret_threads = nil
 	local ret_err = nil
 	local ret_server = nil
+	local has_answer = false
 	while true do
 		-- Compute threads to wait
 		local wait_threads = {}
@@ -261,6 +282,8 @@ function dnsbl:access()
 		-- DNS error
 		if result == nil then
 			self.logger:log(ERR, "error while sending DNS request to " .. server .. " : " .. err)
+		else
+			has_answer = true
 		end
 		-- IP is in DNSBL
 		if result then
@@ -272,7 +295,7 @@ function dnsbl:access()
 	end
 	if ret_threads ~= nil then
 		-- Kill other threads
-		if #threads > 0 then
+		if next(threads) then
 			local wait_threads = {}
 			for _, thread in pairs(threads) do
 				table.insert(wait_threads, thread)
@@ -285,6 +308,7 @@ function dnsbl:access()
 			if not ok then
 				return self:ret(false, "error while adding element to cache : " .. err)
 			end
+			self:set_metric("counters", "failed_dnsbl", 1)
 			return self:ret(
 				true,
 				"IP is blacklisted by " .. ret_server,
@@ -297,9 +321,11 @@ function dnsbl:access()
 		return self:ret(false, ret_err)
 	end
 	-- IP is not in DNSBL
-	local ok, err = self:add_to_cache(self.ctx.bw.remote_addr, "ok")
-	if not ok then
-		return self:ret(false, "IP is not in DNSBL (error = " .. err .. ")")
+	if has_answer then
+		local ok, err = self:add_to_cache(self.ctx.bw.remote_addr, "ok")
+		if not ok then
+			return self:ret(false, "IP is not in DNSBL (error = " .. err .. ")")
+		end
 	end
 	return self:ret(true, "IP is not in DNSBL")
 end

@@ -21,6 +21,7 @@ LJ_FUNC uint64_t lj_carith_ror64(uint64_t x, int32_t sh);
 #endif
 LJ_FUNC uint64_t lj_carith_shift64(uint64_t x, int32_t sh, int op);
 LJ_FUNC uint64_t lj_carith_check64(lua_State *L, int narg, CTypeID *id);
+LJ_FUNC uint64_t lj_carith_checkbit64(lua_State *L, cTValue *o, CTypeID *id);
 
 #if LJ_32 && LJ_HASJIT
 LJ_FUNC int64_t lj_carith_mul64(int64_t x, int64_t k);

@@ -512,7 +512,7 @@ static void gc_call_finalizer(global_State *g, lua_State *L,
   TValue *top;
   lj_trace_abort(g);
   hook_entergc(g);  /* Disable hooks and new traces during __gc. */
-  if (LJ_HASPROFILE && (oldh & HOOK_PROFILE)) lj_dispatch_update(g);
+  if (LJ_HASPROFILE && (oldh & HOOK_PROFILE)) lj_dispatch_update(g, 0);
   g->gc.threshold = LJ_MAX_MEM;  /* Prevent GC steps. */
   top = VL->top;
   copyTV(VL, top++, mo);
@@ -522,13 +522,15 @@ static void gc_call_finalizer(global_State *g, lua_State *L,
   errcode = lj_vm_pcall(VL, top, 1+0, -1);  /* Stack: |mo|o| -> | */
   setgcref(g->cur_L, obj2gco(L));
   hook_restore(g, oldh);
-  if (LJ_HASPROFILE && (oldh & HOOK_PROFILE)) lj_dispatch_update(g);
+  if (LJ_HASPROFILE && (oldh & HOOK_PROFILE)) lj_dispatch_update(g, 0);
   g->gc.threshold = oldt;  /* Restore GC threshold. */
   if (errcode) {
+    TValue tmp;
+    copyTV(VL, &tmp, VL->top-1);
+    VL->top--;
     lj_vmevent_send(g, ERRFIN,
-      copyTV(V, V->top++, L->top-1);
+      copyTV(V, V->top++, &tmp);
     );
-    L->top--;
   }
 }
 
@@ -627,6 +629,10 @@ static void atomic(global_State *g, lua_State *L)
   setgcrefnull(g->gc.weak);
   lj_assertG(!iswhite(obj2gco(mainthread(g))), "main thread turned white");
   gc_markobj(g, L);  /* Mark running thread. */
+#if LJ_HASFFI
+  if (ctype_ctsG(g) && ctype_ctsG(g)->L)  /* Mark cts->L thread. */
+    gc_markobj(g, ctype_ctsG(g)->L);
+#endif
   gc_traverse_curtrace(g);  /* Traverse current trace. */
   gc_mark_gcroot(g);  /* Mark GC roots (again). */
   gc_propagate_gray(g);  /* Propagate all of the above. */

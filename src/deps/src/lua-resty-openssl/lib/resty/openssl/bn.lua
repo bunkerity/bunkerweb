@@ -371,7 +371,7 @@ for _, op in ipairs({ "add", "sub" , "mul", "exp" }) do
 end
 
 function _M.mod_sqr(...)
-  local r, a, m = check_args("mod_sub", ...)
+  local r, a, m = check_args("mod_sqr", ...)
   if C.BN_mod_sqr(r.ctx, a, m, bn_ctx_tmp) == 0 then
     error("BN_mod_sqr() failed")
   end
@@ -401,7 +401,7 @@ _M.lshift = mt.__shl
 function mt.__shr(a, b)
   local r, a = check_args("rshift", a)
   if C.BN_rshift(r.ctx, a, b) == 0 then
-    error("BN_lshift() failed")
+    error("BN_rshift() failed")
   end
   return r
 end

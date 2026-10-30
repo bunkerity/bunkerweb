@@ -11,9 +11,9 @@ So funktioniert es:
 
 Befolgen Sie diese Schritte, um Antibot zu aktivieren und zu konfigurieren:
 
-1. Wählen Sie einen Herausforderungstyp: Entscheiden Sie sich für den zu verwendenden Mechanismus (z. B. [captcha](#__tabbed_3_3), [hcaptcha](#__tabbed_3_5), [javascript](#__tabbed_3_2)).
+1. Wählen Sie einen Herausforderungstyp: Entscheiden Sie sich für den zu verwendenden Mechanismus (z. B. [captcha](#__tabbed_3_3), [hcaptcha](#__tabbed_3_5), [capjs](#__tabbed_3_8), [javascript](#__tabbed_3_2)).
 2. Aktivieren Sie die Funktion: Setzen Sie den Parameter `USE_ANTIBOT` in Ihrer BunkerWeb-Konfiguration auf den gewählten Typ.
-3. Konfigurieren Sie die Einstellungen: Passen Sie bei Bedarf andere `ANTIBOT_*`-Parameter an. Für reCAPTCHA, hCaptcha, Turnstile und mCaptcha erstellen Sie ein Konto beim gewählten Dienst und erhalten Sie API-Schlüssel.
+3. Konfigurieren Sie die Einstellungen: Passen Sie bei Bedarf andere `ANTIBOT_*`-Parameter an. Für reCAPTCHA, hCaptcha und Turnstile erstellen Sie ein Konto beim gewählten Dienst und erhalten Sie API-Schlüssel. Für mCaptcha und Cap.js können Sie den Anbieter selbst hosten oder einen gehosteten Dienst nutzen und anschließend den erforderlichen Site-Schlüssel und Geheimschlüssel konfigurieren.
 4. Wichtig: Stellen Sie sicher, dass `ANTIBOT_URI` eine eindeutige URL Ihrer Website ist und nirgendwo anders verwendet wird.
 
 !!! important "Über den Parameter `ANTIBOT_URI`"
@@ -29,38 +29,53 @@ Die folgenden Parameter werden von allen Herausforderungsmechanismen gemeinsam g
 | Parameter              | Standardwert | Kontext   | Mehrfach | Beschreibung                                                                                                                                                                       |
 | :--------------------- | :----------- | :-------- | :------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `ANTIBOT_URI`          | `/challenge` | Multisite | nein     | Herausforderungs-URL: Die URL, zu der Benutzer umgeleitet werden, um die Herausforderung abzuschließen. Stellen Sie sicher, dass diese URL nicht für andere Zwecke verwendet wird. |
-| `ANTIBOT_TIME_RESOLVE` | `60`         | Multisite | nein     | Herausforderungs-Timeout: Maximale Zeit (in Sekunden) zum Abschließen der Herausforderung. Danach wird eine neue Herausforderung generiert.                                        |
-| `ANTIBOT_TIME_VALID`   | `86400`      | Multisite | nein     | Herausforderungs-Gültigkeit: Dauer (in Sekunden), für die eine erfolgreiche Herausforderung gültig bleibt. Nach dieser Zeit wird eine neue Herausforderung erforderlich sein.      |
+| `ANTIBOT_TIME_RESOLVE` | `1m`         | Multisite | nein     | Herausforderungs-Timeout: Maximale Zeit (in Sekunden) zum Abschließen der Herausforderung. Danach wird eine neue Herausforderung generiert. Akzeptiert ein Zeitsuffix (ms, s, m, h, d, w, M, y); eine Zahl ohne Suffix gilt in Sekunden. |
+| `ANTIBOT_TIME_VALID`   | `1d`         | Multisite | nein     | Herausforderungs-Gültigkeit: Dauer (in Sekunden), für die eine erfolgreiche Herausforderung gültig bleibt. Nach dieser Zeit wird eine neue Herausforderung erforderlich sein. Akzeptiert ein Zeitsuffix (ms, s, m, h, d, w, M, y); eine Zahl ohne Suffix gilt in Sekunden. |
+| `ANTIBOT_SUCCESS_URI`  |              | Multisite | nein     | Erfolgs-Weiterleitungs-URL: Eine feste URL, zu der Benutzer nach erfolgreichem Lösen der Herausforderung weitergeleitet werden, anstatt zur ursprünglich angeforderten Seite. Leer lassen, um Benutzer zu ihrem ursprünglichen Ziel zurückzuleiten.      |
 
 ### Ausschließen von Traffic von Herausforderungen
 
 BunkerWeb ermöglicht es, bestimmte Benutzer, IPs oder Anfragen anzugeben, die die Antibot-Herausforderung vollständig umgehen sollen. Nützlich für vertrauenswürdige Dienste, interne Netzwerke oder Seiten, die immer zugänglich sein sollen:
 
-| Parameter                   | Standard | Kontext   | Mehrfach | Beschreibung                                                                                                                                                                              |
-| :-------------------------- | :------- | :-------- | :------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `ANTIBOT_IGNORE_URI`        |          | Multisite | nein     | Ausgeschlossene URLs: Eine durch Leerzeichen getrennte Liste von URI-Regulären Ausdrücken, die die Herausforderung umgehen sollen.                                                        |
-| `ANTIBOT_IGNORE_IP`         |          | Multisite | nein     | Ausgeschlossene IPs: Eine durch Leerzeichen getrennte Liste von IP-Adressen oder CIDR-Bereichen, die die Herausforderung umgehen sollen.                                                  |
-| `ANTIBOT_IGNORE_RDNS`       |          | Multisite | nein     | Ausgeschlossene rDNS: Eine durch Leerzeichen getrennte Liste von Reverse-DNS-Suffixen, die die Herausforderung umgehen sollen.                                                            |
-| `ANTIBOT_RDNS_GLOBAL`       | `yes`    | Multisite | nein     | Nur öffentliche IPs: Wenn `yes`, werden rDNS-Prüfungen nur für öffentliche IPs durchgeführt.                                                                                              |
-| `ANTIBOT_IGNORE_ASN`        |          | Multisite | nein     | Ausgeschlossene ASNs: Eine durch Leerzeichen getrennte Liste von ASN-Nummern, die die Herausforderung umgehen sollen.                                                                     |
-| `ANTIBOT_IGNORE_USER_AGENT` |          | Multisite | nein     | Ausgeschlossene User-Agents: Eine durch Leerzeichen getrennte Liste von User-Agent-Regex-Mustern, die die Herausforderung umgehen sollen.                                                 |
-| `ANTIBOT_IGNORE_COUNTRY`    |          | Multisite | nein     | Ausgeschlossene Länder: Eine durch Leerzeichen getrennte Liste von ISO-3166-1-Alpha-2-Ländercodes, die die Herausforderung umgehen sollen.                                                |
-| `ANTIBOT_ONLY_COUNTRY`      |          | Multisite | nein     | Nur Herausforderungs-Länder: Eine durch Leerzeichen getrennte Liste von ISO-3166-1-Alpha-2-Ländercodes, die die Herausforderung erhalten müssen. Alle anderen Länder werden übersprungen. |
+| Parameter                     | Standard | Kontext   | Mehrfach | Beschreibung                                                                                                                                                                                                               |
+| ----------------------------- | -------- | --------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `ANTIBOT_IGNORE_URI`          |          | Multisite | nein     | Ausgeschlossene URLs: Eine durch Leerzeichen getrennte Liste von URI-Regulären Ausdrücken, die die Herausforderung umgehen sollen. Muster werden gegen den Pfad und die vollständige Request-URI mit Query-String geprüft. |
+| `ANTIBOT_IGNORE_IP`           |          | Multisite | nein     | Ausgeschlossene IPs: Eine durch Leerzeichen getrennte Liste von IP-Adressen oder CIDR-Bereichen, die die Herausforderung umgehen sollen.                                                                                   |
+| `ANTIBOT_IGNORE_RDNS`         |          | Multisite | nein     | Ausgeschlossene rDNS: Eine durch Leerzeichen getrennte Liste von Reverse-DNS-Suffixen, die die Herausforderung umgehen sollen.                                                                                             |
+| `ANTIBOT_RDNS_GLOBAL`         | `yes`    | Multisite | nein     | Nur öffentliche IPs: Wenn `yes`, werden rDNS-Prüfungen nur für öffentliche IPs durchgeführt.                                                                                                                               |
+| `ANTIBOT_IGNORE_ASN`          |          | Multisite | nein     | Ausgeschlossene ASNs: Eine durch Leerzeichen getrennte Liste von ASN-Nummern, die die Herausforderung umgehen sollen.                                                                                                      |
+| `ANTIBOT_IGNORE_USER_AGENT`   |          | Multisite | nein     | Ausgeschlossene User-Agents: Eine durch Leerzeichen getrennte Liste von User-Agent-Regex-Mustern, die die Herausforderung umgehen sollen.                                                                                  |
+| `ANTIBOT_IGNORE_HEADER_NAME`  |          | multisite | ja       | **Header-Name:** Name eines Request-Headers, der es der Anfrage erlaubt, die Antibot-Challenge zu umgehen. Nummerierte Paare: `_NAME_1` gehört zu `_VALUE_1`.                                                              |
+| `ANTIBOT_IGNORE_HEADER_VALUE` |          | multisite | ja       | **Header-Wert:** PCRE-Regex, dem der Header-Wert entsprechen muss. Leer lassen, um nur auf das Vorhandensein des Headers zu prüfen.                                                                                        |
+| `ANTIBOT_IGNORE_COUNTRY`      |          | Multisite | nein     | Ausgeschlossene Länder: Eine durch Leerzeichen getrennte Liste von ISO-3166-1-Alpha-2-Ländercodes, die die Herausforderung umgehen sollen.                                                                                 |
+| `ANTIBOT_ONLY_COUNTRY`        |          | Multisite | nein     | Nur Herausforderungs-Länder: Eine durch Leerzeichen getrennte Liste von ISO-3166-1-Alpha-2-Ländercodes, die die Herausforderung erhalten müssen. Alle anderen Länder werden übersprungen.                                  |
+
+!!! warning "Eine Header-Regel ist ein gemeinsames Geheimnis"
+    Jeder Client kann einen Header senden, eine Header-Regel ist daher ein Bearer-Token und keine Netzwerkkontrolle. Nur über HTTPS ausliefern, die Regex mit `^` und `$` verankern (die Suche ist standardmäßig nicht verankert, `abc` passt also auch auf `xabcx`) und den Wert rotieren. Steht BunkerWeb hinter einem Proxy, muss dieser jede vom Client gesendete Kopie des Headers überschreiben. Diese Regeln gelten nur für HTTP: ein Stream-Dienst überträgt keine Request-Header, dort greift also nichts.
 
 !!! note "Verhalten der länderspezifischen Einstellungen"
       - Wenn sowohl `ANTIBOT_IGNORE_COUNTRY` als auch `ANTIBOT_ONLY_COUNTRY` gesetzt sind, hat die Ignore-Liste Vorrang – Länder, die in beiden Listen stehen, umgehen die Herausforderung.
       - Private oder unbekannte IP-Adressen umgehen die Herausforderung, wenn `ANTIBOT_ONLY_COUNTRY` gesetzt ist, da kein Ländercode ermittelt werden kann.
+
+!!! tip "Challenge-Zustand über Subdomains hinweg teilen"
+    Der Antibot-Zustand (einschließlich `turnstile`, `hcaptcha`, `recaptcha`, `mcaptcha`, `captcha`, `javascript` und `cookie`) wird im BunkerWeb-[Sitzungs-Cookie](#sessions) gespeichert. Standardmäßig ist dieses Cookie auf genau den Host beschränkt, der es gesetzt hat. Das bedeutet: Wenn ein Benutzer die Herausforderung auf `a.example.com` löst, muss er sie auf `b.example.com` erneut lösen. Damit die Herausforderung einmal für alle gleichrangigen Subdomains derselben registrierbaren Domain gelöst werden kann, setzen Sie [`SESSIONS_DOMAIN`](#sessions) **für jeden relevanten Server** auf die Parent-Domain (zum Beispiel `example.com`). `SESSIONS_DOMAIN` ist eine Multisite-Einstellung – konfigurieren Sie sie pro Server, damit nicht verwandte Mandanten auf derselben BunkerWeb-Instanz niemals ein mandantenübergreifendes `Domain`-Attribut erhalten.
 
 Beispiele:
 
 - `ANTIBOT_IGNORE_URI: "^/api/ ^/webhook/ ^/assets/"`
   Schließt alle URIs aus, die mit `/api/`, `/webhook/` oder `/assets/` beginnen.
 
+- `ANTIBOT_IGNORE_URI: "^/index[.]php[?]a=b&c=d$"`
+  Schließt exakt die Anfrage `/index.php?a=b&c=d` von der Antibot-Herausforderung aus.
+
 - `ANTIBOT_IGNORE_IP: "192.168.1.0/24 10.0.0.1"`
   Schließt das interne Netzwerk `192.168.1.0/24` und die spezifische IP `10.0.0.1` aus.
 
 - `ANTIBOT_IGNORE_RDNS: ".googlebot.com .bingbot.com"`
   Schließt Anfragen von Hosts aus, deren Reverse-DNS auf `googlebot.com` oder `bingbot.com` endet.
+
+!!! info "Vorwärts-bestätigtes Reverse-DNS (FCrDNS)"
+    `ANTIBOT_IGNORE_RDNS`-Suffixe werden vorwärts bestätigt: Der passende PTR-Hostname wird zurück zu einer IP-Adresse aufgelöst, und die Herausforderung wird nur dann übersprungen, wenn diese mit der Client-IP übereinstimmt. Ein PTR-Eintrag, der nicht vorwärts bestätigt werden kann, wird als möglicher Spoofing-Versuch behandelt, und die Herausforderung wird weiterhin erzwungen. Dies verhindert, dass ein Angreifer, der seinen eigenen PTR-Eintrag kontrolliert, diesen auf ein ignoriertes Suffix (zum Beispiel `.googlebot.com`) setzt, um die Herausforderung zu umgehen.
 
 - `ANTIBOT_IGNORE_ASN: "15169 8075"`
   Schließt Anfragen von den ASNs 15169 (Google) und 8075 (Microsoft) aus.
@@ -92,6 +107,8 @@ Beispiele:
     | :------------ | :------- | :-------- | :------- | :---------------------------------------------------------------------------- |
     | `USE_ANTIBOT` | `no`     | Multisite | nein     | Antibot aktivieren: Auf `cookie` setzen, um diesen Mechanismus zu aktivieren. |
 
+    Weitere Optionen finden Sie in den [Allgemeinen Parametern](#allgemeine-parameter).
+
 === "JavaScript"
 
     Die JavaScript-Herausforderung fordert den Client auf, eine Rechenaufgabe mithilfe von JavaScript zu lösen. Dieser Mechanismus stellt sicher, dass der Client JavaScript aktiviert hat und den erforderlichen Code ausführen kann, was für die meisten Bots in der Regel nicht möglich ist.
@@ -107,11 +124,16 @@ Beispiele:
     - Die Herausforderung generiert dynamisch eine einzigartige Aufgabe für jeden Client.
     - Die Rechenaufgabe beinhaltet ein Hashing mit spezifischen Bedingungen (z. B. das Finden eines Hashes mit einem bestimmten Präfix).
 
+    Die Kosten der Herausforderung werden über `ANTIBOT_JAVASCRIPT_DIFFICULTY` festgelegt, in führenden Null-Bits (16 bis 28, Standard 16); jedes zusätzliche Bit verdoppelt die durchschnittliche Lösungszeit. Wenn Sie PRO-eigene JavaScript-Herausforderungsseiten verwenden, regenerieren Sie diese, bevor Sie diese Einstellung über den Standardwert hinaus erhöhen, sonst belegen sie weiterhin die alte, niedrigere Schwierigkeit und werden abgelehnt.
+
     **Parameter:**
 
-    | Parameter     | Standard | Kontext   | Mehrfach | Beschreibung                                                                      |
-    | :------------ | :------- | :-------- | :------- | :-------------------------------------------------------------------------------- |
-    | `USE_ANTIBOT` | `no`     | Multisite | nein     | Antibot aktivieren: Auf `javascript` setzen, um diesen Mechanismus zu aktivieren. |
+    | Parameter                        | Standard | Kontext   | Mehrfach | Beschreibung                                                                      |
+    | :-------------------------------- | :------- | :-------- | :------- | :-------------------------------------------------------------------------------- |
+    | `USE_ANTIBOT`                     | `no`     | Multisite | nein     | Antibot aktivieren: Auf `javascript` setzen, um diesen Mechanismus zu aktivieren. |
+    | `ANTIBOT_JAVASCRIPT_DIFFICULTY`   | `16`     | Multisite | nein     | JavaScript-Schwierigkeit: Proof-of-Work-Schwierigkeit in führenden Null-Bits (16 bis 28). |
+
+    Weitere Optionen finden Sie in den [Allgemeinen Parametern](#allgemeine-parameter).
 
 === "Captcha"
 
@@ -146,6 +168,8 @@ Beispiele:
     | `USE_ANTIBOT`              | `no`                                                   | Multisite | nein     | **Antibot aktivieren:** Auf `captcha` setzen, um diesen Mechanismus zu aktivieren.                                                                                                                                                                        |
     | `ANTIBOT_CAPTCHA_ALPHABET` | `abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ` | Multisite | nein     | **Captcha-Alphabet:** Eine Zeichenkette, die zur Generierung des CAPTCHAs verwendet werden soll. Unterstützte Zeichen: alle Buchstaben (a-z, A-Z), die Ziffern 2-9 (schließt 0 und 1 aus) und die Sonderzeichen: ```+-/=%"'&_(),.;:?!§`^ÄÖÜßäöüé''‚""„``` |
 
+    Weitere Optionen finden Sie in den [Allgemeinen Parametern](#allgemeine-parameter).
+
 === "reCAPTCHA"
 
     Googles reCAPTCHA bietet eine Benutzervalidierung, die im Hintergrund (v3) ausgeführt wird, um eine Verhaltensbewertung zuzuweisen. Eine Bewertung unterhalb des konfigurierten Schwellenwerts löst eine zusätzliche Überprüfung aus oder blockiert die Anfrage. Bei sichtbaren Herausforderungen (v2) müssen Benutzer mit dem reCAPTCHA-Widget interagieren, bevor sie fortfahren können.
@@ -171,6 +195,8 @@ Beispiele:
     | `ANTIBOT_RECAPTCHA_JA4`        |          | Multisite | nein     | Optionaler JA4 TLS-Fingerabdruck, der in Enterprise-Bewertungen enthalten sein soll.                                             |
     | `ANTIBOT_RECAPTCHA_SCORE`      | `0.7`    | Multisite | nein     | Mindestpunktzahl, die zum Bestehen erforderlich ist (gilt für klassische v3 und die neue Version).                               |
 
+    Weitere Optionen finden Sie in den [Allgemeinen Parametern](#allgemeine-parameter).
+
 === "hCaptcha"
 
     Wenn aktiviert, bietet hCaptcha eine effektive Alternative zu reCAPTCHA, indem es Benutzerinteraktionen überprüft, ohne auf einen Bewertungsmechanismus angewiesen zu sein. Es fordert Benutzer mit einem einfachen, interaktiven Test heraus, um ihre Legitimität zu bestätigen.
@@ -185,6 +211,8 @@ Beispiele:
     | `ANTIBOT_HCAPTCHA_SITEKEY` |          | Multisite | nein     | hCaptcha Site-Schlüssel.                                                        |
     | `ANTIBOT_HCAPTCHA_SECRET`  |          | Multisite | nein     | hCaptcha Geheimschlüssel.                                                       |
 
+    Weitere Optionen finden Sie in den [Allgemeinen Parametern](#allgemeine-parameter).
+
 === "Turnstile"
 
     Turnstile ist ein moderner, datenschutzfreundlicher Herausforderungsmechanismus, der auf der Technologie von Cloudflare basiert, um automatisierten Traffic zu erkennen und zu blockieren. Er validiert Benutzerinteraktionen transparent und im Hintergrund, wodurch die Reibung für legitime Benutzer reduziert und Bots effektiv abgeschreckt werden.
@@ -198,6 +226,8 @@ Beispiele:
     | `USE_ANTIBOT`               | `no`     | Multisite | nein     | Antibot aktivieren: Auf `turnstile` setzen, um diesen Mechanismus zu aktivieren. |
     | `ANTIBOT_TURNSTILE_SITEKEY` |          | Multisite | nein     | Turnstile Site-Schlüssel (Cloudflare).                                           |
     | `ANTIBOT_TURNSTILE_SECRET`  |          | Multisite | nein     | Turnstile Geheimschlüssel (Cloudflare).                                          |
+
+    Weitere Optionen finden Sie in den [Allgemeinen Parametern](#allgemeine-parameter).
 
 === "mCaptcha"
 
@@ -216,7 +246,32 @@ Beispiele:
     | `ANTIBOT_MCAPTCHA_SECRET`  |                             | Multisite | nein     | mCaptcha Geheimschlüssel.                                                       |
     | `ANTIBOT_MCAPTCHA_URL`     | `https://demo.mcaptcha.org` | Multisite | nein     | Zu verwendende Domain für mCaptcha.                                             |
 
-    Siehe Allgemeine Parameter für zusätzliche Optionen.
+    Weitere Optionen finden Sie in den [Allgemeinen Parametern](#allgemeine-parameter).
+
+=== "Cap.js"
+
+    [Cap.js](https://capjs.js.org/) ist ein selbst gehostetes, quelloffenes, datenschutzfreundliches Proof-of-Work-CAPTCHA. Statt die Überprüfung an einen Drittanbieter auszulagern, betreiben Sie den Cap.js-Server selbst; BunkerWeb prüft die Tokens gegen diesen Server.
+
+    Verwenden Sie die Frontend-URL für den browserseitig erreichbaren Endpunkt, der das Widget ausliefert. Wenn BunkerWeb den Cap.js-Server über eine interne Adresse erreicht, setzen Sie die Backend-URL auf diesen internen Endpunkt; andernfalls lassen Sie sie leer, und BunkerWeb nutzt die Frontend-URL für `/siteverify`.
+
+    **Parameter:**
+
+    | Parameter                    | Standard | Kontext   | Mehrfach | Beschreibung                                                                                                         |
+    | :--------------------------- | :------- | :-------- | :------- | :------------------------------------------------------------------------------------------------------------------- |
+    | `USE_ANTIBOT`                | `no`     | Multisite | nein     | Antibot aktivieren: Auf `capjs` setzen, um diesen Mechanismus zu aktivieren.                                         |
+    | `ANTIBOT_CAPJS_FRONTEND_URL` |          | Multisite | nein     | Browserseitig erreichbare URL des Cap.js-Servers, der das Widget ausliefert.                                         |
+    | `ANTIBOT_CAPJS_BACKEND_URL`  |          | Multisite | nein     | Optionale interne URL, die BunkerWeb für `/siteverify` nutzt; fällt auf die Frontend-URL zurück, wenn sie leer ist.  |
+    | `ANTIBOT_CAPJS_SITEKEY`      |          | Multisite | nein     | Cap.js Site-Schlüssel.                                                                                               |
+    | `ANTIBOT_CAPJS_SECRET`       |          | Multisite | nein     | Cap.js Geheimschlüssel, mit dem BunkerWeb Tokens überprüft.                                                          |
+
+    !!! note "Anforderungen an den Betrieb"
+        - Verwenden Sie in Produktion HTTPS für `ANTIBOT_CAPJS_FRONTEND_URL`. Der Browser-Worker benötigt `crypto.subtle` in einem sicheren Kontext, und HTTPS verhindert MITM-Manipulationen am Widget.
+        - Konfigurieren Sie CORS für den Cap.js-Site-Schlüssel, damit der geschützte Origin erlaubt ist.
+        - Setzen Sie `ANTIBOT_CAPJS_FRONTEND_URL` und `ANTIBOT_CAPJS_BACKEND_URL` nur auf den Origin: Schema, Host und optionaler Port, ohne Pfad.
+        - Verwenden Sie das Cap.js-Widget **0.1.48 oder neuer**. BunkerWeb liefert eine strikte, nonce-basierte CSP aus; ältere Widgets brechen Instrumentierungs-Challenges, weil das eingebettete `<script>` im isolierten `srcdoc`-iframe den Nonce nicht weitergibt. Wenn Sie `tiago2/cap` selbst hosten, pinnen Sie ein aktuelles Tag (z. B. `tiago2/cap:3.1.2` oder neuer) oder setzen Sie `WIDGET_VERSION` auf `0.1.48` oder neuer.
+        - Cap.js-**Instrumentierungs-Challenges** (standardmäßig aktiv) führen vom Server geliefertes JavaScript über `eval` aus, das ein Nonce nicht autorisieren kann. BunkerWeb führt das Widget in einem isolierten, gleichdomänigen iframe aus, das das nötige `'unsafe-eval'` trägt, sodass die Haupt-Challenge-Seite eine strikte, eval-freie CSP behält — keine Konfiguration erforderlich.
+
+    Weitere Optionen finden Sie in den [Allgemeinen Parametern](#allgemeine-parameter).
 
 ### Konfigurationsbeispiele
 
@@ -313,6 +368,19 @@ Beispiele:
     ANTIBOT_MCAPTCHA_SITEKEY: "your-site-key"
     ANTIBOT_MCAPTCHA_SECRET: "your-secret-key"
     ANTIBOT_MCAPTCHA_URL: "https://demo.mcaptcha.org"
+    ANTIBOT_URI: "/challenge"
+    ANTIBOT_TIME_RESOLVE: "60"
+    ANTIBOT_TIME_VALID: "86400"
+    ```
+
+=== "Cap.js-Herausforderung"
+
+    ```yaml
+    USE_ANTIBOT: "capjs"
+    ANTIBOT_CAPJS_FRONTEND_URL: "https://cap.example.com"
+    ANTIBOT_CAPJS_BACKEND_URL: "http://cap-server:3000"
+    ANTIBOT_CAPJS_SITEKEY: "your-site-key"
+    ANTIBOT_CAPJS_SECRET: "your-secret-key"
     ANTIBOT_URI: "/challenge"
     ANTIBOT_TIME_RESOLVE: "60"
     ANTIBOT_TIME_VALID: "86400"

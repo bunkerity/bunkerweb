@@ -1,9 +1,12 @@
+from ipaddress import ip_address
 from pydantic import BaseModel, Field, field_validator, RootModel, BeforeValidator
 from typing import Optional, List, Dict, Union, Literal, Annotated
 from re import compile as re_compile
 
 # Shared helpers for Configs
-NAME_RX = re_compile(r"^[\w_-]{1,255}$")
+# \Z, not $: Python's $ also matches before a trailing newline, so "name\n" passed and
+# became a filename that breaks the line-based directory listing used when pushing configs.
+NAME_RX = re_compile(r"^[\w_-]{1,255}\Z")
 
 
 def normalize_config_type(t: str) -> str:
@@ -12,7 +15,7 @@ def normalize_config_type(t: str) -> str:
 
 def validate_config_name(name: str) -> Optional[str]:
     if not name or not NAME_RX.match(name):
-        return "Invalid name: must match ^[\\w_-]{1,255}$"
+        return "Invalid name: must match ^[\\w_-]{1,255}\\Z (letters, digits, underscore and hyphen only)"
     return None
 
 
@@ -78,10 +81,35 @@ class BanRequest(BaseModel):
     reason: str = Field("api", description="Reason for ban")
     service: Optional[str] = Field(None, description="Service name if service-specific ban")
 
+    @field_validator("ip")
+    @classmethod
+    def validate_ip(cls, v):
+        v = v.strip()
+        ip_address(v)  # Raises ValueError for invalid IPs
+        return v
+
+    @field_validator("exp")
+    @classmethod
+    def validate_exp(cls, v):
+        if v < 0:
+            raise ValueError("exp must be non-negative")
+        return v
+
 
 class UnbanRequest(BaseModel):
     ip: str
     service: Optional[str] = Field(None, description="Service name if service-specific unban")
+    kind: Literal["ban", "crowdsec_lease"] = Field("ban", description="Row kind being unbanned: an explicit ban or a CrowdSec lease")
+    remove_crowdsec_decisions: bool = Field(False, description="CrowdSec lease only: also delete the CrowdSec decisions behind the ban")
+    confirmed: bool = Field(False, description="CrowdSec lease only: the caller reviewed the decisions that will be deleted")
+    decision_keys: Optional[List[str]] = Field(None, description="CrowdSec lease only: keys of the reviewed decisions, as returned by the preview")
+
+    @field_validator("ip")
+    @classmethod
+    def validate_ip(cls, v):
+        v = v.strip()
+        ip_address(v)  # Raises ValueError for invalid IPs
+        return v
 
 
 # Instances
@@ -93,6 +121,13 @@ class InstanceCreateRequest(BaseModel):
     https_port: Optional[int] = Field(None, description="API HTTPS port; defaults from settings if omitted")
     server_name: Optional[str] = Field(None, description="API server_name/Host header; defaults if omitted")
     method: Optional[str] = Field("ui", description='Source method tag (defaults to "ui")')
+
+    @field_validator("hostname")
+    @classmethod
+    def validate_hostname(cls, value: str) -> str:
+        if "@" in value:
+            raise ValueError("hostname must not contain '@'")
+        return value
 
 
 class InstancesDeleteRequest(BaseModel):
@@ -125,7 +160,7 @@ class ServiceUpdateRequest(BaseModel):
 class ConfigCreateRequest(BaseModel):
     service: Optional[str] = Field(None, description='Service id; use "global" or leave empty for global')
     type: ConfigType = Field(..., description="Config type")
-    name: str = Field(..., description=r"Config name (^[\\w_-]{1,255}$)")
+    name: str = Field(..., description=r"Config name (^[\w_-]{1,255}\Z)")
     data: str = Field(..., description="Config content as UTF-8 string")
     is_draft: bool = Field(False, description="Mark custom config as draft")
 

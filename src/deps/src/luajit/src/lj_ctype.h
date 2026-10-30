@@ -51,7 +51,7 @@ LJ_STATIC_ASSERT(((int)CT_STRUCT & (int)CT_ARRAY) == CT_STRUCT);
 ** |FUNC      ....VS.. cc   cid | nargs  | field | name? | name? |
 ** |TYPEDEF                 cid |        |       | name  | name  |
 ** |ATTRIB        attrnum   cid | attr   | sib?  | type? |       |
-** |FIELD                   cid | offset | field |       | name? |
+** |FIELD               A   cid | offset | field |       | name? |
 ** |BITFIELD  B.cvU csz bsz pos | offset | field |       | name? |
 ** |CONSTVAL    c           cid | value  | const | name  | name  |
 ** |EXTERN                  cid |        | sib?  | name  | name  |

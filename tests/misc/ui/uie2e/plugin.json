@@ -1,0 +1,8 @@
+{
+  "id": "uie2e",
+  "name": "UI E2E",
+  "description": "Plugin uploaded by the UI end-to-end specs.",
+  "version": "1.0",
+  "stream": "no",
+  "settings": {}
+}

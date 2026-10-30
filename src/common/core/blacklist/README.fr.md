@@ -60,10 +60,13 @@ Suivez ces étapes pour configurer et utiliser la fonctionnalité Blacklist :
     | -------------------------- | ------------------------------------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------- |
     | `BLACKLIST_IP`             |                                       | multisite | non      | **Liste noire d’IP :** Liste d’adresses IP ou de réseaux (notation CIDR) à bloquer, séparés par des espaces.                    |
     | `BLACKLIST_IGNORE_IP`      |                                       | multisite | non      | **Liste d’ignorance d’IP :** Liste d’adresses IP ou de réseaux qui doivent contourner les vérifications de la liste noire d’IP. |
-    | `BLACKLIST_IP_URLS`        | `https://www.dan.me.uk/torlist/?exit` | multisite | non      | **URL de listes noires d’IP :** Liste d’URL contenant des adresses IP ou des réseaux à bloquer, séparés par des espaces.        |
+    | `BLACKLIST_IP_URLS`        |                                       | multisite | non      | **URL de listes noires d’IP :** Liste d’URL contenant des adresses IP ou des réseaux à bloquer, séparés par des espaces.        |
     | `BLACKLIST_IGNORE_IP_URLS` |                                       | multisite | non      | **URL de listes d’ignorance d’IP :** Liste d’URL contenant des adresses IP ou des réseaux à ignorer.                            |
 
-    Le paramètre par défaut `BLACKLIST_IP_URLS` inclut une URL qui fournit une **liste des nœuds de sortie Tor connus**. C’est une source courante de trafic malveillant et un bon point de départ pour de nombreux sites.
+    !!! info "Formats des listes"
+        Les listes d’URL peuvent contenir une entrée par ligne (les lignes commençant par `#` ou `;` sont des commentaires et seul le premier mot de chaque ligne est lu), du CSV, un document JSON ou du JSON Lines. Dans les listes d’IP, les virgules séparent aussi les champs, et les listes JSON conservent chaque chaîne qui correspond à une adresse IP ou à un réseau. Ajoutez un fragment pour ne conserver qu’une partie d’une liste JSON : `#key` conserve les valeurs sous `key`, `#key=value` conserve les objets dont la propriété `key` est égale à `value` ou contient `value`, et `&` combine les termes. Exemple : `https://ip-ranges.amazonaws.com/ip-ranges.json#service=CLOUDFRONT`. Une URL avec un fragment ne conserve que les éléments sélectionnés par celui-ci ; si la liste n’est pas au format JSON, elle ne conserve rien.
+
+    Par défaut, `BLACKLIST_COMMUNITY_LISTS` inclut `ip:danmeuk-tor-exit`, qui ajoute la liste des nœuds de sortie Tor ; `BLACKLIST_IP_URLS` reste vide sauf si vous le configurez.
 
 === "Reverse DNS"
     **Ce que ça fait :** Bloque les visiteurs en fonction de leur nom de domaine inversé. C’est utile pour bloquer les scanners et les crawlers connus en se basant sur les domaines de leur organisation.
@@ -77,6 +80,9 @@ Suivez ces étapes pour configurer et utiliser la fonctionnalité Blacklist :
     | `BLACKLIST_IGNORE_RDNS_URLS` |                         | multisite | non      | **URL de listes d’ignorance rDNS :** Liste d’URL contenant des suffixes de DNS inversé à ignorer.                              |
 
     Le paramètre par défaut `BLACKLIST_RDNS` inclut des domaines de scanners courants comme **Shodan** et **Censys**. Ils sont souvent utilisés par des chercheurs en sécurité et des scanners pour identifier des sites vulnérables.
+
+    !!! info "DNS inversé confirmé (FCrDNS)"
+        Les suffixes `BLACKLIST_IGNORE_RDNS` sont confirmés par résolution directe : le nom d’hôte PTR correspondant est résolu à nouveau en une IP et le contournement ne s’applique que lorsqu’elle correspond à l’IP du client. Un PTR qui ne peut pas être confirmé par résolution directe est considéré comme une possible usurpation et le contournement n’est pas accordé. Cela empêche un attaquant qui contrôle son propre enregistrement PTR de le définir sur un suffixe ignoré (par exemple `.googlebot.com`) pour contourner les vérifications de la liste noire rDNS.
 
 === "ASN"
     **Ce que ça fait :** Bloque les visiteurs provenant de fournisseurs de réseaux spécifiques. Les ASN sont comme des codes postaux pour Internet—ils identifient à quel fournisseur ou organisation une IP appartient.
@@ -95,10 +101,10 @@ Suivez ces étapes pour configurer et utiliser la fonctionnalité Blacklist :
     | ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ | --------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
     | `BLACKLIST_USER_AGENT`             |                                                                                                                                | multisite | non      | **Liste noire de User-Agent :** Liste de motifs de User-Agent (regex PCRE) à bloquer, séparés par des espaces.                                |
     | `BLACKLIST_IGNORE_USER_AGENT`      |                                                                                                                                | multisite | non      | **Liste d’ignorance de User-Agent :** Liste de motifs de User-Agent qui doivent contourner les vérifications de la liste noire de User-Agent. |
-    | `BLACKLIST_USER_AGENT_URLS`        | `https://raw.githubusercontent.com/mitchellkrogza/nginx-ultimate-bad-bot-blocker/master/_generator_lists/bad-user-agents.list` | multisite | non      | **URL de listes noires de User-Agent :** Liste d’URL contenant des motifs de User-Agent à bloquer.                                            |
+    | `BLACKLIST_USER_AGENT_URLS`        |                                                                                                                                | multisite | non      | **URL de listes noires de User-Agent :** Liste d’URL contenant des motifs de User-Agent à bloquer.                                            |
     | `BLACKLIST_IGNORE_USER_AGENT_URLS` |                                                                                                                                | multisite | non      | **URL de listes d’ignorance de User-Agent :** Liste d’URL contenant des motifs de User-Agent à ignorer.                                       |
 
-    Le paramètre par défaut `BLACKLIST_USER_AGENT_URLS` inclut une URL qui fournit une **liste de user agents malveillants connus**. Ils sont souvent utilisés par des bots et des scanners malveillants pour identifier des sites vulnérables.
+    Par défaut, `BLACKLIST_COMMUNITY_LISTS` inclut `ua:mitchellkrogza-bad-user-agents`, qui ajoute la liste des User-Agents malveillants ; `BLACKLIST_USER_AGENT_URLS` reste vide sauf si vous le configurez.
 
 === "URI"
     **Ce que ça fait :** Bloque les requêtes vers des URL spécifiques de votre site. C’est utile pour bloquer les tentatives d’accès aux pages d’administration, aux formulaires de connexion ou à d’autres zones sensibles qui pourraient être ciblées.
@@ -109,6 +115,22 @@ Suivez ces étapes pour configurer et utiliser la fonctionnalité Blacklist :
     | `BLACKLIST_IGNORE_URI`      |        | multisite | non      | **Liste d’ignorance d’URI :** Liste de motifs d’URI qui doivent contourner les vérifications de la liste noire d’URI. |
     | `BLACKLIST_URI_URLS`        |        | multisite | non      | **URL de listes noires d’URI :** Liste d’URL contenant des motifs d’URI à bloquer.                                    |
     | `BLACKLIST_IGNORE_URI_URLS` |        | multisite | non      | **URL de listes d’ignorance d’URI :** Liste d’URL contenant des motifs d’URI à ignorer.                               |
+
+    !!! tip "Ancrez un motif de chemin pour couvrir tout ce qui est en dessous"
+        Écrivez `^/admin(/|$)` plutôt que `^/admin$`. Un motif ancré sur un seul chemin exact ne correspond ni à `/admin/`, ni à `/admin%2f`, ni à `/admin;foo`, alors que votre application peut toujours y servir la même ressource. La correspondance se fait sur le chemin décodé et normalisé, donc `/a/../admin` et `//admin` sont déjà couverts.
+
+=== "En-tête"
+    **Ce que cela fait :** Bloque, ou au contraire exempte, les requêtes portant un en-tête donné, identifié par son nom et, éventuellement, par une regex PCRE sur sa valeur. Une règle d’exclusion l’emporte sur toute correspondance de liste noire, y compris celles servies par le cache.
+
+    | Paramètre                       | Défaut | Contexte  | Multiple | Description                                                                                                                                         |
+    | ------------------------------- | ------ | --------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+    | `BLACKLIST_HEADER_NAME`         |        | multisite | oui      | Nom d’en-tête : nom d’un en-tête de requête permettant à la requête de être mise en liste noire. Paires numérotées : `_NAME_1` va avec `_VALUE_1`.  |
+    | `BLACKLIST_HEADER_VALUE`        |        | multisite | oui      | Valeur d’en-tête : expression régulière PCRE que la valeur de l’en-tête doit satisfaire. Laisser vide pour ne tester que la présence de l’en-tête.  |
+    | `BLACKLIST_IGNORE_HEADER_NAME`  |        | multisite | oui      | Nom d’en-tête : nom d’un en-tête de requête permettant à la requête de contourner la liste noire. Paires numérotées : `_NAME_1` va avec `_VALUE_1`. |
+    | `BLACKLIST_IGNORE_HEADER_VALUE` |        | multisite | oui      | Valeur d’en-tête : expression régulière PCRE que la valeur de l’en-tête doit satisfaire. Laisser vide pour ne tester que la présence de l’en-tête.  |
+
+    !!! warning "Une règle d’en-tête est un secret partagé"
+        N’importe quel client peut envoyer un en-tête : une règle d’en-tête est donc un jeton porteur, pas un contrôle réseau. À servir uniquement en HTTPS, avec une regex ancrée par `^` et `$` (la recherche n’est pas ancrée par défaut, `abc` correspond aussi à `xabcx`), et une valeur à faire tourner. Si BunkerWeb est derrière un proxy, ce proxy doit écraser toute copie de l’en-tête envoyée par le client. Ces règles ne valent qu’en HTTP : un service stream ne transporte aucun en-tête de requête, rien n’y correspond donc.
 
 !!! info "Support des formats d’URL"
     Tous les paramètres `*_URLS` supportent les URL HTTP/HTTPS ainsi que les chemins de fichiers locaux en utilisant le préfixe `file:///`. L’authentification basique est supportée en utilisant le format `http://user:pass@url`.
@@ -147,7 +169,7 @@ Suivez ces étapes pour configurer et utiliser la fonctionnalité Blacklist :
     BLACKLIST_RDNS: ".shodan.io .censys.io .scanner.com"
     BLACKLIST_ASN: "16509 14618"  # ASN d'AWS et d'Amazon
     BLACKLIST_USER_AGENT: "(?:\b)SemrushBot(?:\b) (?:\b)AhrefsBot(?:\b)"
-    BLACKLIST_URI: "^/wp-login\.php$ ^/administrator/"
+    BLACKLIST_URI: "^/wp-login\.php(/|$) ^/administrator/"
 
     # Règles d'ignorance personnalisées
     BLACKLIST_IGNORE_IP: "192.168.1.200 203.0.113.42"

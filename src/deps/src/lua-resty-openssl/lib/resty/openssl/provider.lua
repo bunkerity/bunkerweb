@@ -5,10 +5,10 @@ require "resty.openssl.include.provider"
 local param_lib = require "resty.openssl.param"
 local ctx_lib = require "resty.openssl.ctx"
 local null = require("resty.openssl.auxiliary.ctypes").null
-local OPENSSL_3X = require("resty.openssl.version").OPENSSL_3X
+local OPENSSL_3_UP = require("resty.openssl.version").OPENSSL_3_UP
 local format_error = require("resty.openssl.err").format_error
 
-if not OPENSSL_3X then
+if not OPENSSL_3_UP then
   error("provider is only supported since OpenSSL 3.0")
 end
 

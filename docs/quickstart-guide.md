@@ -18,7 +18,23 @@ This quickstart guide will help you to quickly install BunkerWeb and secure a we
 
 Protecting existing web applications already accessible with the HTTP(S) protocol is the main goal of BunkerWeb: it will act as a classical [reverse proxy](https://en.wikipedia.org/wiki/Reverse_proxy) with extra security features.
 
-See the [examples folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.9-rc2/examples) of the repository to get real-world examples.
+See the [examples folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.18-rc2/examples) of the repository to get real-world examples.
+
+## Using an AI agent
+
+### BunkerWeb skills on skills.sh
+
+If you use an AI coding agent, install the official [BunkerWeb skill on skills.sh](https://skills.sh/bunkerity/bunkerweb-skills/bunkerweb) for deployment and configuration guidance. Follow the [installation instructions](https://github.com/bunkerity/bunkerweb-skills#installation) for your agent.
+
+### BunkerWeb documentation with Context7
+
+You can also connect your agent to [Context7](https://context7.com/docs) to fetch [BunkerWeb documentation](https://context7.com/bunkerity/bunkerweb) during setup. Include your BunkerWeb version and integration in your prompt so the agent uses the relevant settings and examples.
+
+Example prompt:
+
+```text
+Help me configure BunkerWeb <version> with <integration> to protect my application. use context7
+```
 
 ## Basic setup
 
@@ -33,7 +49,7 @@ See the [examples folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.9-rc2
       -p 80:8080/tcp \
       -p 443:8443/tcp \
       -p 443:8443/udp \
-      bunkerity/bunkerweb-all-in-one:1.6.9-rc2
+      bunkerity/bunkerweb-all-in-one:1.6.18-rc2
     ```
 
     By default, the container exposes:
@@ -51,8 +67,8 @@ See the [examples folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.9-rc2
 
     ```bash
     # Download the script and its checksum
-    curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.9-rc2/install-bunkerweb.sh
-    curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.9-rc2/install-bunkerweb.sh.sha256
+    curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.18-rc2/install-bunkerweb.sh
+    curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.18-rc2/install-bunkerweb.sh.sha256
 
     # Verify the checksum
     sha256sum -c install-bunkerweb.sh.sha256
@@ -68,10 +84,13 @@ See the [examples folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.9-rc2
     #### Easy Install Highlights
 
     - Detects your Linux distribution and CPU architecture up front and warns if you are outside the supported matrix before making any change.
-    - The interactive flow lets you pick the installation profile (full stack, manager, worker, etc.); manager mode always exposes the API on `0.0.0.0`, disables the setup wizard, and asks for the whitelist IP (pass it with `--manager-ip` for non-interactive runs), while worker mode requires the manager IPs for its whitelist.
+    - Interactive prompts use an inline TUI via [gum](https://github.com/charmbracelet/gum) — arrow-key menus with a `❯` cursor, masked password fields. On first interactive run the installer downloads the official `gum` binary from the [GitHub release](https://github.com/charmbracelet/gum/releases) (SHA256-pinned, with optional cosign signature verification when cosign is installed), runs it from a tempdir, and removes the tempdir on exit — **no system package is installed, no apt/dnf source is added, no binary is left behind**. If gum cannot be obtained, the installer uses any pre-installed `whiptail` for boxed dialogs; if neither is available it falls back to plain text prompts.
+    - TUI behavior is controlled by two flags: `--no-tui` (or `BW_INSTALL_TUI=no`) skips every TUI tier and uses plain text prompts; `--tui` requires a working TUI and aborts if gum cannot be fetched and no existing whiptail is available.
+    - When the installer is piped (`curl … | bash`) or stdin is not a TTY, it exits with a clear error instead of falling through every default. Use `--yes` together with the appropriate `--*` flags / `*_INPUT` env vars for non-interactive installs.
+    - The interactive flow lets you pick the installation profile (Full Stack, Manager, Worker, etc.); Manager mode binds the internal API listener to `0.0.0.0`, disables the setup wizard, and asks for the whitelist IP (pass it with `--manager-ip` for non-interactive runs), while Worker mode requires the Manager IPs for its whitelist.
     - Manager installations can still decide whether the Web UI service should start even though the wizard remains disabled.
     - The summary now shows whether the FastAPI service will run so you can intentionally enable or disable it with `--api` / `--no-api`.
-    - CrowdSec options are only available for full-stack installs; manager/worker modes skip them automatically so the workflow stays focused on remote control.
+    - CrowdSec is prompted interactively for Full Stack installs. On the CLI, `--crowdsec` and `--crowdsec-appsec` are valid for Full Stack and Manager installs; Worker, Scheduler-only, UI-only, and API-only modes reject them.
 
     For advanced installation methods (package manager, installation types, non-interactive flags, CrowdSec integration, etc.), see the [Linux Integration](integrations.md#linux).
 
@@ -90,7 +109,7 @@ See the [examples folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.9-rc2
     services:
       bunkerweb:
         # This is the name that will be used to identify the instance in the Scheduler
-        image: bunkerity/bunkerweb:1.6.9-rc2
+        image: bunkerity/bunkerweb:1.6.18-rc2
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -103,7 +122,7 @@ See the [examples folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.9-rc2
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.9-rc2
+        image: bunkerity/bunkerweb-scheduler:1.6.18-rc2
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Make sure to set the correct instance name
@@ -120,9 +139,11 @@ See the [examples folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.9-rc2
           - bw-db
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.6.9-rc2
+        image: bunkerity/bunkerweb-ui:1.6.18-rc2
         environment:
           <<: *bw-env
+        volumes:
+          - bw-ui-data:/data # This is used to persist the UI secrets (Flask secret, TOTP encryption keys, Biscuit keys)
         restart: "unless-stopped"
         networks:
           - bw-universe
@@ -148,7 +169,7 @@ See the [examples folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.9-rc2
         command: >
           redis-server
           --maxmemory 256mb
-          --maxmemory-policy allkeys-lru
+          --maxmemory-policy volatile-lru
           --save 60 1000
           --appendonly yes
         volumes:
@@ -161,6 +182,7 @@ See the [examples folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.9-rc2
       bw-data:
       bw-storage:
       redis-data:
+      bw-ui-data:
 
     networks:
       bw-universe:
@@ -187,7 +209,7 @@ See the [examples folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.9-rc2
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.9-rc2
+        image: bunkerity/bunkerweb:1.6.18-rc2
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -203,7 +225,7 @@ See the [examples folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.9-rc2
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.9-rc2
+        image: bunkerity/bunkerweb-scheduler:1.6.18-rc2
         environment:
           <<: *bw-ui-env
           BUNKERWEB_INSTANCES: ""
@@ -221,7 +243,7 @@ See the [examples folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.9-rc2
           - bw-db
 
       bw-autoconf:
-        image: bunkerity/bunkerweb-autoconf:1.6.9-rc2
+        image: bunkerity/bunkerweb-autoconf:1.6.18-rc2
         depends_on:
           - bw-docker
         environment:
@@ -244,10 +266,12 @@ See the [examples folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.9-rc2
           - bw-docker
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.6.9-rc2
+        image: bunkerity/bunkerweb-ui:1.6.18-rc2
         environment:
           <<: *bw-ui-env
-          TOTP_ENCRYPTION_KEYS: "mysecret" # Remember to set a stronger secret key (see the Prerequisites section)
+          # TOTP_ENCRYPTION_KEYS: "changeme" # Optional: generated in the bw-ui-data volume when unset; a key must be 43 characters
+        volumes:
+          - bw-ui-data:/data # This is used to persist the UI secrets (Flask secret, TOTP encryption keys, Biscuit keys)
         restart: "unless-stopped"
         networks:
           - bw-universe
@@ -273,7 +297,7 @@ See the [examples folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.9-rc2
         command: >
           redis-server
           --maxmemory 256mb
-          --maxmemory-policy allkeys-lru
+          --maxmemory-policy volatile-lru
           --save 60 1000
           --appendonly yes
         volumes:
@@ -286,6 +310,7 @@ See the [examples folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.9-rc2
       bw-data:
       bw-storage:
       redis-data:
+      bw-ui-data:
 
     networks:
       bw-universe:
@@ -319,7 +344,7 @@ See the [examples folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.9-rc2
     Once installed, you can get the IP address of the `LoadBalancer` to set up your domains:
 
     ```shell
-    kubectl -n bunkerweb get svc mybw-external -o=jsonpath='{.status.loadBalancer.ingress[0].ip}'
+    kubectl -n bunkerweb get svc mybw-bunkerweb-external -o=jsonpath='{.status.loadBalancer.ingress[0].ip}'
     ```
 
 === "Swarm"
@@ -339,7 +364,7 @@ See the [examples folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.9-rc2
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.9-rc2
+        image: bunkerity/bunkerweb:1.6.18-rc2
         ports:
           - published: 80
             target: 8080
@@ -369,7 +394,7 @@ See the [examples folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.9-rc2
             - "bunkerweb.INSTANCE=yes"
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.9-rc2
+        image: bunkerity/bunkerweb-scheduler:1.6.18-rc2
         environment:
           <<: *bw-ui-env
           BUNKERWEB_INSTANCES: ""
@@ -387,7 +412,7 @@ See the [examples folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.9-rc2
           - bw-db
 
       bw-autoconf:
-        image: bunkerity/bunkerweb-autoconf:1.6.9-rc2
+        image: bunkerity/bunkerweb-autoconf:1.6.18-rc2
         environment:
           <<: *bw-ui-env
           DOCKER_HOST: "tcp://bw-docker:2375"
@@ -416,10 +441,12 @@ See the [examples folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.9-rc2
               - "node.role == manager"
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.6.9-rc2
+        image: bunkerity/bunkerweb-ui:1.6.18-rc2
         environment:
           <<: *bw-ui-env
-          TOTP_ENCRYPTION_KEYS: "mysecret" # Remember to set a stronger secret key (see the Prerequisites section)
+          # TOTP_ENCRYPTION_KEYS: "changeme" # Optional: generated in the bw-ui-data volume when unset; a key must be 43 characters
+        volumes:
+          - bw-ui-data:/data # This is used to persist the UI secrets (Flask secret, TOTP encryption keys, Biscuit keys)
         restart: "unless-stopped"
         networks:
           - bw-universe
@@ -448,6 +475,7 @@ See the [examples folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.9-rc2
     volumes:
       bw-data:
       bw-storage:
+      bw-ui-data:
 
     networks:
       bw-universe:
@@ -602,6 +630,8 @@ You can now log in with the administrator account you created during the setup w
           <figcaption>Web interface create service RAW</figcaption>
         </figure>
 
+        At the start of a setting line, press `#` to toggle its draft state. Draft entries show a muted visual `#` prefix; press **Backspace** at the start of the line to activate them again. The prefix is editor metadata and does not alter the setting value. Click **Save** to persist the change. While a setting is draft, its inherited or default value applies. Draft settings are managed only in RAW mode and are preserved when saving in Simple or Advanced mode. This is separate from making the whole service a draft. Locked settings and service identity controls cannot be drafted.
+
         * Once you're done configuring the service, you can click on the `💾 Save` button to save the configuration.
 
     🚀 Once you've saved the configuration, you should see your new service in the list of services.
@@ -638,7 +668,7 @@ You can now log in with the administrator account you created during the setup w
       -e "www.example.com_REVERSE_PROXY_HOST=http://myapp:8080" \
       -e "www.example.com_REVERSE_PROXY_URL=/" \
       # --- Include any other existing environment variables for UI, Redis, CrowdSec, etc. ---
-      bunkerity/bunkerweb-all-in-one:1.6.9-rc2
+      bunkerity/bunkerweb-all-in-one:1.6.18-rc2
     ```
 
     Your application container (`myapp`) and the `bunkerweb-aio` container must be on the same Docker network for BunkerWeb to reach it using the hostname `myapp`.
@@ -660,7 +690,7 @@ You can now log in with the administrator account you created during the setup w
       -p 443:8443/tcp \
       -p 443:8443/udp \
     #   ... (all other relevant environment variables as shown in the main example above) ...
-      bunkerity/bunkerweb-all-in-one:1.6.9-rc2
+      bunkerity/bunkerweb-all-in-one:1.6.18-rc2
     ```
 
     Make sure to replace `myapp` with the actual name or IP of your application container and `http://myapp:8080` with its correct address and port.

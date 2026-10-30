@@ -1,0 +1,234 @@
+integrations: "all"
+
+actions:
+  ip:
+    type: status
+    url: "http://www.example.com"
+    status: 403
+    config:
+      BLACKLIST_IP: "0.0.0.0/0"
+  ignored_ip:
+    type: status
+    url: "http://www.example.com"
+    status: 200
+    headers:
+      X-Forwarded-For: "192.168.0.254"
+    config:
+      BLACKLIST_IP: "0.0.0.0/0"
+      BLACKLIST_IGNORE_IP: "192.168.0.254"
+  ip_urls:
+    type: status
+    url: "http://www.example.com"
+    status: 403
+    headers:
+      X-Forwarded-For: "192.168.0.254"
+    config:
+      BLACKLIST_IP_URLS: "http://custom-api:8000/list/ip"
+    Kubernetes:
+      config:
+        BLACKLIST_IP_URLS: "http://svc-custom-api.misc.svc.cluster.local:8000/list/ip"
+  ignored_ip_urls:
+    type: status
+    url: "http://www.example.com"
+    status: 200
+    headers:
+      X-Forwarded-For: "192.168.0.254"
+    config:
+      BLACKLIST_IP: "0.0.0.0/0"
+      BLACKLIST_IGNORE_IP_URLS: "http://custom-api:8000/list/ip"
+    Kubernetes:
+      config:
+        BLACKLIST_IGNORE_IP_URLS: "http://svc-custom-api.misc.svc.cluster.local:8000/list/ip"
+
+  rdns:
+    type: status
+    url: "http://www.example.com"
+    status: 200
+    retries: 1
+    headers:
+      X-Forwarded-For: "192.168.0.254"
+    config:
+      BLACKLIST_RDNS: ".bw-services"
+  rdns_local:
+    type: status
+    url: "http://www.example.com"
+    status: 403
+    retries: 1
+    headers:
+      X-Forwarded-For: "192.168.0.254"
+    config:
+      BLACKLIST_RDNS_GLOBAL: "no"
+      BLACKLIST_RDNS: ".bw-services"
+  ignored_rdns_local:
+    type: status
+    url: "http://www.example.com"
+    status: 200
+    retries: 1
+    headers:
+      X-Forwarded-For: "192.168.0.254"
+    config:
+      BLACKLIST_RDNS_GLOBAL: "no"
+      BLACKLIST_RDNS: ".bw-services"
+      BLACKLIST_IGNORE_RDNS: ".bw-services"
+  rdns_urls_local:
+    type: status
+    url: "http://www.example.com"
+    status: 403
+    retries: 1
+    headers:
+      X-Forwarded-For: "192.168.0.254"
+    config:
+      BLACKLIST_RDNS_GLOBAL: "no"
+      BLACKLIST_RDNS_URLS: "http://custom-api:8000/list/rdns"
+    Kubernetes:
+      config:
+        BLACKLIST_RDNS_URLS: "http://svc-custom-api.misc.svc.cluster.local:8000/list/rdns"
+  ignored_rdns_urls_local:
+    type: status
+    url: "http://www.example.com"
+    status: 200
+    retries: 1
+    headers:
+      X-Forwarded-For: "192.168.0.254"
+    config:
+      BLACKLIST_RDNS_GLOBAL: "no"
+      BLACKLIST_RDNS: ".bw-services"
+      BLACKLIST_IGNORE_RDNS_URLS: "http://custom-api:8000/list/rdns"
+    Kubernetes:
+      config:
+        BLACKLIST_IGNORE_RDNS_URLS: "http://svc-custom-api.misc.svc.cluster.local:8000/list/rdns"
+
+  asn:
+    type: status
+    url: "http://www.example.com"
+    status: 403
+    headers:
+      X-Forwarded-For: "8.0.0.3"
+    config:
+      BLACKLIST_ASN: "3356"
+  ignored_asn:
+    type: status
+    url: "http://www.example.com"
+    status: 200
+    headers:
+      X-Forwarded-For: "8.0.0.3"
+    config:
+      BLACKLIST_ASN: "3356"
+      BLACKLIST_IGNORE_ASN: "3356"
+  asn_urls:
+    type: status
+    url: "http://www.example.com"
+    status: 403
+    headers:
+      X-Forwarded-For: "8.0.0.3"
+    config:
+      BLACKLIST_ASN_URLS: "http://custom-api:8000/list/asn"
+    Kubernetes:
+      config:
+        BLACKLIST_ASN_URLS: "http://svc-custom-api.misc.svc.cluster.local:8000/list/asn"
+  ignored_asn_urls:
+    type: status
+    url: "http://www.example.com"
+    status: 200
+    headers:
+      X-Forwarded-For: "8.0.0.3"
+    config:
+      BLACKLIST_ASN: "3356"
+      BLACKLIST_IGNORE_ASN_URLS: "http://custom-api:8000/list/asn"
+    Kubernetes:
+      config:
+        BLACKLIST_IGNORE_ASN_URLS: "http://svc-custom-api.misc.svc.cluster.local:8000/list/asn"
+
+  user_agent:
+    type: status
+    url: "http://www.example.com"
+    status: 403
+    headers:
+      User-Agent: "BunkerBot"
+    config:
+      BLACKLIST_USER_AGENT: "BunkerBot"
+  ignored_user_agent:
+    type: status
+    url: "http://www.example.com"
+    status: 200
+    headers:
+      User-Agent: "BunkerBot"
+    config:
+      BLACKLIST_USER_AGENT: "BunkerBot"
+      BLACKLIST_IGNORE_USER_AGENT: "BunkerBot"
+  user_agent_urls:
+    type: status
+    url: "http://www.example.com"
+    status: 403
+    headers:
+      User-Agent: "BunkerBot"
+    config:
+      BLACKLIST_USER_AGENT_URLS: "http://custom-api:8000/list/user_agent"
+    Kubernetes:
+      config:
+        BLACKLIST_USER_AGENT_URLS: "http://svc-custom-api.misc.svc.cluster.local:8000/list/user_agent"
+  ignored_user_agent_urls:
+    type: status
+    url: "http://www.example.com"
+    status: 200
+    headers:
+      User-Agent: "BunkerBot"
+    config:
+      BLACKLIST_USER_AGENT: "BunkerBot"
+      BLACKLIST_IGNORE_USER_AGENT_URLS: "http://custom-api:8000/list/user_agent"
+    Kubernetes:
+      config:
+        BLACKLIST_IGNORE_USER_AGENT_URLS: "http://svc-custom-api.misc.svc.cluster.local:8000/list/user_agent"
+
+  uri:
+    type: status
+    url: "http://www.example.com/admin"
+    status: 403
+    config:
+      BLACKLIST_URI: "/admin"
+  ignored_uri:
+    type: status
+    url: "http://www.example.com/admin"
+    status: 404
+    config:
+      BLACKLIST_URI: "/admin"
+      BLACKLIST_IGNORE_URI: "/admin"
+    Kubernetes:
+      status: 200
+  uri_urls:
+    type: status
+    url: "http://www.example.com/admin"
+    status: 403
+    config:
+      BLACKLIST_URI_URLS: "http://custom-api:8000/list/uri"
+    Kubernetes:
+      config:
+        BLACKLIST_URI_URLS: "http://svc-custom-api.misc.svc.cluster.local:8000/list/uri"
+  ignored_uri_urls:
+    type: status
+    url: "http://www.example.com/admin"
+    status: 404
+    config:
+      BLACKLIST_URI: "/admin"
+      BLACKLIST_IGNORE_URI_URLS: "http://custom-api:8000/list/uri"
+    Kubernetes:
+      status: 200
+      config:
+        BLACKLIST_IGNORE_URI_URLS: "http://svc-custom-api.misc.svc.cluster.local:8000/list/uri"
+
+  community:
+    type: status
+    url: "http://www.example.com"
+    status: 403
+    headers:
+      X-Forwarded-For: "${COMMUNITY_DUGGYTUXY_IP}"
+    config:
+      BLACKLIST_COMMUNITY_LISTS: "ip:laurent-minne-data-shield-aggressive"
+
+config:
+  USE_BLACKLIST: "yes"
+  BLACKLIST_COMMUNITY_LISTS: ""
+  BLACKLIST_IP_URLS: ""
+  BLACKLIST_USER_AGENT_URLS: ""
+  USE_REAL_IP: "yes"
+  REAL_IP_FROM: "0.0.0.0/0"

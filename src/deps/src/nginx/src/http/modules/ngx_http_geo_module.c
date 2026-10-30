@@ -63,6 +63,7 @@ typedef struct {
     unsigned                         allow_binary_include:1;
     unsigned                         binary_include:1;
     unsigned                         proxy_recursive:1;
+    unsigned                         no_cacheable:1;
 } ngx_http_geo_conf_ctx_t;
 
 
@@ -463,6 +464,7 @@ ngx_http_geo_block(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
                   + sizeof(ngx_http_variable_value_t)
                   + 0x10000 * sizeof(ngx_http_geo_range_t *);
     ctx.allow_binary_include = 1;
+    ctx.no_cacheable = 0;
 
     save = *cf;
     cf->pool = pool;
@@ -476,6 +478,10 @@ ngx_http_geo_block(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
 
     if (rv != NGX_CONF_OK) {
         goto failed;
+    }
+
+    if (ctx.no_cacheable) {
+        var->flags |= NGX_HTTP_VAR_NOCACHEABLE;
     }
 
     geo->proxies = ctx.proxies;
@@ -623,6 +629,12 @@ ngx_http_geo(ngx_conf_t *cf, ngx_command_t *dummy, void *conf)
             rv = NGX_CONF_OK;
             goto done;
         }
+
+        else if (ngx_strcmp(value[0].data, "volatile") == 0) {
+            ctx->no_cacheable = 1;
+            rv = NGX_CONF_OK;
+            goto done;
+        }
     }
 
     if (cf->args->nelts != 2) {
@@ -633,7 +645,12 @@ ngx_http_geo(ngx_conf_t *cf, ngx_command_t *dummy, void *conf)
 
     if (ngx_strcmp(value[0].data, "include") == 0) {
 
-        rv = ngx_http_geo_include(cf, ctx, &value[1]);
+        if (strpbrk((char *) value[1].data, "*?[") == NULL) {
+            rv = ngx_http_geo_include(cf, ctx, &value[1]);
+
+        } else {
+            rv = ngx_conf_include(cf, dummy, conf);
+        }
 
         goto done;
 
@@ -1406,7 +1423,6 @@ ngx_http_geo_include_binary_base(ngx_conf_t *cf, ngx_http_geo_conf_ctx_t *ctx,
     time_t                      mtime;
     size_t                      size, len;
     ssize_t                     n;
-    uint32_t                    crc32;
     ngx_err_t                   err;
     ngx_int_t                   rc;
     ngx_uint_t                  i;
@@ -1501,24 +1517,45 @@ ngx_http_geo_include_binary_base(ngx_conf_t *cf, ngx_http_geo_conf_ctx_t *ctx,
         goto failed;
     }
 
-    ngx_crc32_init(crc32);
+    /*
+     * the base is walked below without bounds checking, so make sure
+     * it is intact first: the checksum in the header is computed over
+     * the entire body, which the walk covers contiguously
+     */
+
+    if (size < sizeof(ngx_http_geo_header_t)
+               + sizeof(ngx_http_variable_value_t)
+               + 0x10000 * sizeof(ngx_http_geo_range_t *))
+    {
+        ngx_conf_log_error(NGX_LOG_WARN, cf, 0,
+                           "truncated binary geo range base \"%s\"",
+                           name->data);
+        goto failed;
+    }
+
+    if (ngx_crc32_long(base + sizeof(ngx_http_geo_header_t),
+                       size - sizeof(ngx_http_geo_header_t))
+        != header->crc32)
+    {
+        ngx_conf_log_error(NGX_LOG_WARN, cf, 0,
+                           "CRC32 mismatch in binary geo range base \"%s\"",
+                           name->data);
+        goto failed;
+    }
 
     vv = (ngx_http_variable_value_t *) (base + sizeof(ngx_http_geo_header_t));
 
     while (vv->data) {
         len = ngx_align(sizeof(ngx_http_variable_value_t) + vv->len,
                         sizeof(void *));
-        ngx_crc32_update(&crc32, (u_char *) vv, len);
         vv->data += (size_t) base;
         vv = (ngx_http_variable_value_t *) ((u_char *) vv + len);
     }
-    ngx_crc32_update(&crc32, (u_char *) vv, sizeof(ngx_http_variable_value_t));
     vv++;
 
     ranges = (ngx_http_geo_range_t **) vv;
 
     for (i = 0; i < 0x10000; i++) {
-        ngx_crc32_update(&crc32, (u_char *) &ranges[i], sizeof(void *));
         if (ranges[i]) {
             ranges[i] = (ngx_http_geo_range_t *)
                             ((u_char *) ranges[i] + (size_t) base);
@@ -1529,22 +1566,11 @@ ngx_http_geo_include_binary_base(ngx_conf_t *cf, ngx_http_geo_conf_ctx_t *ctx,
 
     while ((u_char *) range < base + size) {
         while (range->value) {
-            ngx_crc32_update(&crc32, (u_char *) range,
-                             sizeof(ngx_http_geo_range_t));
             range->value = (ngx_http_variable_value_t *)
                                ((u_char *) range->value + (size_t) base);
             range++;
         }
-        ngx_crc32_update(&crc32, (u_char *) range, sizeof(void *));
         range = (ngx_http_geo_range_t *) ((u_char *) range + sizeof(void *));
-    }
-
-    ngx_crc32_final(crc32);
-
-    if (crc32 != header->crc32) {
-        ngx_conf_log_error(NGX_LOG_WARN, cf, 0,
-                  "CRC32 mismatch in binary geo range base \"%s\"", name->data);
-        goto failed;
     }
 
     ngx_conf_log_error(NGX_LOG_NOTICE, cf, 0,

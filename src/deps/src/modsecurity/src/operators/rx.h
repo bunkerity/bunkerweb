@@ -42,6 +42,9 @@ class Rx : public Operator {
             m_couldContainsMacro = true;
         }
 
+    Rx(const Rx&) = delete;
+    Rx& operator=(const Rx&) = delete;
+
     ~Rx() override {
         if (m_string->m_containsMacro == false && m_re != NULL) {
             delete m_re;

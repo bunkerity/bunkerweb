@@ -56,6 +56,15 @@ static const ASMFunction dispatch_got[] = {
 #undef GOTFUNC
 #endif
 
+#if LJ_TARGET_PPC && LJ_32
+#include <math.h>
+#define GOTFUNC(name)	(ASMFunction)name,
+static const ASMFunction dispatch_got[] = {
+  GOTDEF(GOTFUNC)
+};
+#undef GOTFUNC
+#endif
+
 /* Initialize instruction dispatch table and hot counters. */
 void lj_dispatch_init(GG_State *GG)
 {
@@ -76,7 +85,7 @@ void lj_dispatch_init(GG_State *GG)
   GG->g.bc_cfunc_ext = GG->g.bc_cfunc_int = BCINS_AD(BC_FUNCC, LUA_MINSTACK, 0);
   for (i = 0; i < GG_NUM_ASMFF; i++)
     GG->bcff[i] = BCINS_AD(BC__MAX+i, 0, 0);
-#if LJ_TARGET_MIPS
+#if LJ_TARGET_MIPS || (LJ_TARGET_PPC && LJ_32)
   memcpy(GG->got, dispatch_got, LJ_GOT__MAX*sizeof(ASMFunction *));
 #endif
 }
@@ -103,8 +112,11 @@ void lj_dispatch_init_hotcount(global_State *g)
 #define DISPMODE_PROF	0x40	/* Profiling active. */
 
 /* Update dispatch table depending on various flags. */
-void lj_dispatch_update(global_State *g)
+void LJ_FASTCALL lj_dispatch_update(global_State *g, int nolock)
 {
+#if LJ_HASPROFILE && !LJ_PROFILE_SIGPROF
+  int profile_locked = nolock ? 0 : lj_profile_lock();
+#endif
   uint8_t oldmode = g->dispatchmode;
   uint8_t mode = 0;
 #if LJ_HASJIT
@@ -208,6 +220,11 @@ void lj_dispatch_update(global_State *g)
       lj_dispatch_init_hotcount(g);
 #endif
   }
+#if LJ_HASPROFILE && !LJ_PROFILE_SIGPROF
+  if (profile_locked) lj_profile_unlock();
+#else
+  UNUSED(nolock);
+#endif
 }
 
 /* -- JIT mode setting ---------------------------------------------------- */
@@ -260,7 +277,7 @@ int luaJIT_setmode(lua_State *L, int idx, int mode)
 	G2J(g)->flags &= ~(uint32_t)JIT_F_ON;
       else
 	G2J(g)->flags |= (uint32_t)JIT_F_ON;
-      lj_dispatch_update(g);
+      lj_dispatch_update(g, 0);
     }
     break;
   case LUAJIT_MODE_FUNC:
@@ -335,7 +352,7 @@ LUA_API int lua_sethook(lua_State *L, lua_Hook func, int mask, int count)
   g->hookcount = g->hookcstart = (int32_t)count;
   g->hookmask = (uint8_t)((g->hookmask & ~HOOK_EVENTMASK) | mask);
   lj_trace_abort(g);  /* Abort recording on any hook change. */
-  lj_dispatch_update(g);
+  lj_dispatch_update(g, 0);
   return 1;
 }
 

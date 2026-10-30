@@ -1,0 +1,39 @@
+--- a/src/ngx_http_modsecurity_rewrite.c
++++ b/src/ngx_http_modsecurity_rewrite.c
+@@ -178,6 +178,11 @@
+                 http_version = "2.0";
+                 break;
+ #endif
++#if defined(nginx_version) && nginx_version >= 1025000
++            case NGX_HTTP_VERSION_30 :
++                http_version = "3.0";
++                break;
++#endif
+             default :
+                 http_version = ngx_str_to_char(r->http_protocol, r->pool);
+                 if (http_version == (char*)-1) {
+@@ -215,6 +220,24 @@
+          * Since incoming request headers are already in place, lets send it to ModSecurity
+          *
+          */
++
++#if defined(nginx_version) && nginx_version >= 1025000
++        /*
++         * HTTP/3 uses the :authority pseudo-header instead of Host.
++         * NGINX parses :authority into r->headers_in.server but does not
++         * add a Host entry to r->headers_in.headers, so ModSecurity never
++         * sees it.  Synthesize Host from :authority here.
++         */
++        if (r->http_version == NGX_HTTP_VERSION_30
++            && r->headers_in.host == NULL
++            && r->headers_in.server.len > 0) {
++            msc_add_n_request_header(ctx->modsec_transaction,
++                (const unsigned char *)"Host", 4,
++                (const unsigned char *)r->headers_in.server.data,
++                r->headers_in.server.len);
++        }
++#endif
++
+         ngx_list_part_t *part = &r->headers_in.headers.part;
+         ngx_table_elt_t *data = part->elts;
+         ngx_uint_t i = 0;

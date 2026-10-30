@@ -1,0 +1,13 @@
+$TTL 60
+@       IN  SOA ns.bwtest.lan. admin.bwtest.lan. (
+                1          ; serial
+                60         ; refresh
+                60         ; retry
+                600        ; expire
+                60 )       ; minimum
+@       IN  NS  ns.bwtest.lan.
+ns      IN  A   10.30.55.53
+app1    IN  A   10.30.55.10
+app2    IN  A   10.30.55.10
+app3    IN  A   10.30.55.10
+app4    IN  A   10.30.55.10

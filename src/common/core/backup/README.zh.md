@@ -6,7 +6,7 @@
 2.  备份存储在您系统上的指定目录中。
 3.  每次备份前会检查可用磁盘空间。
 4.  每个备份 ZIP 包含 SQL 转储文件和 SHA-256 校验和文件（`.sha256`），用于完整性验证。
-5.  旧备份会自动轮换。`hanoi` 模式采用汉诺塔轮换算法（保留 24 个文件，覆盖约 85 天）。
+5.  旧备份会自动轮换。`hanoi` 模式采用汉诺塔轮换算法（保留 24–34 个文件，覆盖 64–85 天）。
 6.  恢复时，在修改活动数据库之前会自动验证校验和。
 7.  您可以随时手动创建、列出、验证或从备份中恢复。
 8.  在任何恢复操作之前，当前状态都会自动备份作为安全措施。
@@ -24,7 +24,7 @@
 | 设置               | 默认值                       | 上下文 | 多个 | 描述                                                                                                          |
 | ------------------ | ---------------------------- | ------ | ---- | ------------------------------------------------------------------------------------------------------------- |
 | `USE_BACKUP`       | `yes`                        | 全局   | 否   | **启用备份：** 设置为 `yes` 以启用自动备份。                                                                  |
-| `BACKUP_SCHEDULE`  | `daily`                      | 全局   | 否   | **备份频率：** `daily`、`weekly`、`monthly` 或 `hanoi`（每小时执行，采用汉诺塔轮换，覆盖约 85 天）。          |
+| `BACKUP_SCHEDULE`  | `daily`                      | 全局   | 否   | **备份频率：** `daily`、`weekly`、`monthly` 或 `hanoi`（每小时执行，采用汉诺塔轮换，覆盖 64–85 天）。          |
 | `BACKUP_ROTATION`  | `7`                          | 全局   | 否   | **备份保留：** 要保留的备份文件数量。使用 `hanoi` 时忽略（轮换由算法自动管理）。                              |
 | `BACKUP_DIRECTORY` | `/var/lib/bunkerweb/backups` | 全局   | 否   | **备份位置：** 备份文件将存储的目录。                                                                         |
 | `BACKUP_IGNORE_CHECKSUM_ERROR_ON_DB_RESTORE` | `no` | 全局 | 否 | **忽略恢复时的校验和错误：** 设为 `yes` 时，SHA-256 校验失败不会中止恢复操作。仅在备份文件部分损坏时作为最后手段使用。 |
@@ -58,7 +58,7 @@ bwcli plugin backup restore /path/to/backup/backup-sqlite-2023-08-15_12-34-56.zi
     每个 ZIP 包含一个 SHA-256 校验和文件。在任何恢复操作之前会自动验证校验和。使用 `bwcli plugin backup check` 随时检查所有备份。
 
 !!! warning "数据库兼容性"
-    备份插件支持 SQLite、MySQL/MariaDB 和 PostgreSQL 数据库。目前不支持 Oracle 数据库的备份和恢复操作。
+    备份插件支持 SQLite、MySQL/MariaDB 和 PostgreSQL 数据库。目前不支持 Oracle 数据库的备份和恢复操作。恢复操作会在修改任何内容之前拒绝来自其他数据库引擎的备份（MariaDB 和 MySQL 视为不同的引擎）。
 
 ### 示例配置
 
@@ -71,9 +71,9 @@ bwcli plugin backup restore /path/to/backup/backup-sqlite-2023-08-15_12-34-56.zi
     BACKUP_DIRECTORY: "/var/lib/bunkerweb/backups"
     ```
 
-=== "汉诺塔轮换（约 85 天）"
+=== "汉诺塔轮换（64–85 天）"
 
-    每小时执行，采用汉诺塔轮换算法。保留 24 个文件，覆盖约 85 天。`BACKUP_ROTATION` 被忽略：
+    每小时执行，采用汉诺塔轮换算法。保留 24–34 个文件，覆盖 64–85 天。`BACKUP_ROTATION` 被忽略：
 
     ```yaml
     USE_BACKUP: "yes"

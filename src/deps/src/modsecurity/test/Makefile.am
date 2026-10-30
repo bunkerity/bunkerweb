@@ -72,7 +72,8 @@ unit_tests_LDFLAGS = \
 
 unit_tests_CPPFLAGS = \
 	-Icommon \
-	-I../ \
+	-I$(top_srcdir)/ \
+	-I$(top_srcdir)/others \
 	-g \
 	-I$(top_builddir)/headers \
 	$(CURL_CFLAGS) \
@@ -127,7 +128,7 @@ regression_tests_LDFLAGS = \
 
 regression_tests_CPPFLAGS = \
 	-Icommon \
-	-I../ \
+	-I$(top_srcdir) \
 	-g \
 	-I$(top_builddir)/headers \
 	$(CURL_CFLAGS) \
@@ -179,7 +180,7 @@ rules_optimization_LDFLAGS = \
 
 rules_optimization_CPPFLAGS = \
 	-Icommon \
-	-I../ \
+	-I$(top_srcdir)/ \
 	-g \
 	-I$(top_builddir)/headers \
 	$(CURL_CFLAGS) \

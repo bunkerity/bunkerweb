@@ -1,0 +1,52 @@
+# Authentik Helm chart values for the BunkerWeb forward-auth demo.
+# Chart: https://github.com/goauthentik/helm
+#
+# Replace the secrets below before using this outside of a local demo.
+
+authentik:
+  log_level: info
+  # Generate with: openssl rand -base64 60 | tr -d '\n'
+  secret_key: "changeme-authentik-secret-key"
+  error_reporting:
+    enabled: false
+  postgresql:
+    password: "changeme-pg-pass"
+
+# Bootstrap the built-in admin user + token so the blueprint and the
+# Authentik API can be used out of the box. These env vars are read by both
+# the server and the worker containers (see AUTHENTIK_BOOTSTRAP_* docs).
+server:
+  env:
+    - name: AUTHENTIK_BOOTSTRAP_PASSWORD
+      value: "changeme-bootstrap-password"
+    - name: AUTHENTIK_BOOTSTRAP_TOKEN
+      value: "changeme-bootstrap-token"
+    - name: AUTHENTIK_COOKIE_DOMAIN
+      value: "example.com"
+worker:
+  env:
+    - name: AUTHENTIK_BOOTSTRAP_PASSWORD
+      value: "changeme-bootstrap-password"
+    - name: AUTHENTIK_BOOTSTRAP_TOKEN
+      value: "changeme-bootstrap-token"
+    - name: AUTHENTIK_COOKIE_DOMAIN
+      value: "example.com"
+
+# Auto-provision the forward-auth providers, applications, and the embedded
+# outpost binding from the blueprint shipped in ./blueprints/bunkerweb.yaml.
+# The ConfigMap itself is created by setup-kubernetes.sh before `helm install`
+# so the worker can mount and discover it at pod creation time.
+blueprints:
+  configMaps:
+    - authentik-blueprint-bunkerweb
+
+# Bundled PostgreSQL subchart (Bitnami) — Authentik 2026.2+ uses PostgreSQL for
+# cache and channel layers, so no Redis is needed.
+postgresql:
+  enabled: true
+  auth:
+    password: "changeme-pg-pass"
+
+# Redis subchart is no longer required and is disabled.
+redis:
+  enabled: false

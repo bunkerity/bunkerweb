@@ -8,7 +8,7 @@ require "resty.openssl.include.stack"
 
 local asn1_macro = require "resty.openssl.include.asn1"
 
-local OPENSSL_3X = require("resty.openssl.version").OPENSSL_3X
+local OPENSSL_3_UP = require("resty.openssl.version").OPENSSL_3_UP
 
 asn1_macro.declare_asn1_functions("X509_REQ", asn1_macro.has_new_ex)
 
@@ -51,7 +51,7 @@ ffi.cdef [[
   int X509_REQ_get_signature_nid(const X509_REQ *crl);
 ]]
 
-if OPENSSL_3X then
+if OPENSSL_3_UP then
   ffi.cdef [[
     // int X509_REQ_verify_ex(X509_REQ *a, EVP_PKEY *pkey, OSSL_LIB_CTX *libctx,
     //                       const char *propq);

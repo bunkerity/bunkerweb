@@ -2,8 +2,8 @@
   "id": "mtls",
   "name": "Mutual TLS",
   "description": "Require client certificates using mutual TLS (mTLS).",
-  "version": "1.0",
-  "stream": "yes",
+  "version": "1.1",
+  "stream": "partial",
   "settings": {
     "USE_MTLS": {
       "context": "multisite",
@@ -14,24 +14,54 @@
       "regex": "^(yes|no)$",
       "type": "check"
     },
+    "MTLS_CA_CERTIFICATE_PRIORITY": {
+      "context": "multisite",
+      "default": "file",
+      "help": "Source of the client CA bundle: file path or base64/PEM data (file or data).",
+      "id": "mtls-ca-certificate-priority",
+      "label": "Client CA bundle priority",
+      "regex": "^(file|data)$",
+      "type": "select",
+      "select": ["file", "data"]
+    },
     "MTLS_CA_CERTIFICATE": {
       "context": "multisite",
       "default": "",
-      "help": "Absolute path to the trusted client CA bundle (PEM). Required when MTLS_VERIFY_CLIENT is set to on or optional.",
+      "help": "Path to the trusted client CA bundle (PEM), readable by the Scheduler, which validates it, caches it, and distributes it to every instance (priority 'file'). Required when MTLS_VERIFY_CLIENT is set to on or optional.",
       "id": "mtls-ca-certificate",
       "label": "Client CA bundle",
       "regex": "^(/[\\w. \\-]+)*/?$",
       "type": "text"
     },
+    "MTLS_CA_CERTIFICATE_DATA": {
+      "context": "multisite",
+      "default": "",
+      "help": "Client CA bundle as base64 or plaintext PEM (priority 'data').",
+      "id": "mtls-ca-certificate-data",
+      "label": "Client CA bundle data (base64/plaintext)",
+      "regex": "^.*$",
+      "type": "file",
+      "accept": ".pem,.crt,.cer,.txt"
+    },
     "MTLS_VERIFY_CLIENT": {
       "context": "multisite",
       "default": "on",
-      "help": "Client verification mode. 'on' requires a valid certificate, 'optional' lets requests through when no certificate is presented, and 'optional_no_ca' skips CA validation.",
+      "help": "Client verification mode. 'on' requires a valid certificate, 'optional' lets requests through when no certificate is presented, and 'optional_no_ca' skips CA validation (diagnostics only, not real protection).",
       "id": "mtls-verify-client",
       "label": "Verify client mode",
       "regex": "^(on|optional|optional_no_ca)$",
       "type": "select",
       "select": ["on", "optional", "optional_no_ca"]
+    },
+    "MTLS_URL": {
+      "context": "multisite",
+      "default": "",
+      "help": "Regex matched against the request URI to require a valid client certificate only on matching paths (HTTP only). Set MTLS_VERIFY_CLIENT to optional so the handshake completes for non-matching paths; enforcement runs per-request in Lua. An invalid regex fails closed (matching requests are denied and logged) instead of being silently allowed. Use numbered slots for several paths (MTLS_URL_1, MTLS_URL_2). Leave empty to enforce mTLS on the whole site.",
+      "id": "mtls-url",
+      "label": "mTLS URL",
+      "regex": "^.*$",
+      "type": "text",
+      "multiple": "mtls"
     },
     "MTLS_VERIFY_DEPTH": {
       "context": "multisite",
@@ -45,7 +75,7 @@
     "MTLS_FORWARD_CLIENT_HEADERS": {
       "context": "multisite",
       "default": "yes",
-      "help": "Forward verification results to upstream backends using X-SSL-Client-* headers.",
+      "help": "Forward verification results to upstream backends using X-SSL-Client-* headers. Client-supplied X-SSL-* headers are always stripped on ingress, so these values cannot be spoofed.",
       "id": "mtls-forward-client-headers",
       "label": "Forward client headers",
       "regex": "^(yes|no)$",
@@ -54,11 +84,40 @@
     "MTLS_CRL": {
       "context": "multisite",
       "default": "",
-      "help": "Optional absolute path to a certificate revocation list (PEM). Leave empty to skip CRL checks.",
+      "help": "Optional path to a certificate revocation list (PEM), readable by the Scheduler, which validates it, caches it, and distributes it to every instance (priority 'file'). Leave empty to skip CRL checks.",
       "id": "mtls-crl",
       "label": "Client CRL path",
       "regex": "^$|^(/[\\w. \\-]+)+/?$",
       "type": "text"
+    },
+    "MTLS_CRL_PRIORITY": {
+      "context": "multisite",
+      "default": "file",
+      "help": "Source of the CRL: file path or base64/PEM data (file or data).",
+      "id": "mtls-crl-priority",
+      "label": "Client CRL priority",
+      "regex": "^(file|data)$",
+      "type": "select",
+      "select": ["file", "data"]
+    },
+    "MTLS_CRL_DATA": {
+      "context": "multisite",
+      "default": "",
+      "help": "CRL as base64 or plaintext PEM (priority 'data').",
+      "id": "mtls-crl-data",
+      "label": "Client CRL data (base64/plaintext)",
+      "regex": "^.*$",
+      "type": "file",
+      "accept": ".pem,.crl,.txt"
     }
-  }
+  },
+  "jobs": [
+    {
+      "name": "client-cert",
+      "file": "client-cert.py",
+      "every": "day",
+      "reload": true,
+      "async": true
+    }
+  ]
 }

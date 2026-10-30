@@ -34,6 +34,24 @@
       "type": "text",
       "multiple": "limit-req"
     },
+    "USE_LIMIT_REQ_GLOBAL": {
+      "context": "multisite",
+      "default": "no",
+      "help": "Activate global rate limit : one aggregate quota for the whole service, counting all clients and URLs together (protects origin capacity, independent from per-IP/per-URL limit requests).",
+      "id": "use-limit-req-global",
+      "label": "Activate global limit requests",
+      "regex": "^(yes|no)$",
+      "type": "check"
+    },
+    "LIMIT_REQ_GLOBAL_RATE": {
+      "context": "multisite",
+      "default": "1000r/s",
+      "help": "Maximum aggregate rate for the whole service, all clients and URLs combined (s for second, m for minute, h for hour and d for day).",
+      "id": "limit-req-global-rate",
+      "label": "Global limit request rate",
+      "regex": "^\\d+r/[smhd]$",
+      "type": "text"
+    },
     "USE_LIMIT_CONN": {
       "context": "multisite",
       "default": "yes",

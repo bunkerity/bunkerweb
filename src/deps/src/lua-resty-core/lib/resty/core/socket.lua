@@ -21,6 +21,7 @@ local ffi_gc  = ffi.gc
 local get_string_buf = base.get_string_buf
 local get_size_ptr   = base.get_size_ptr
 local get_request    = base.get_request
+local errmsg         = base.get_errmsg_ptr()
 
 local co_yield = coroutine._yield
 
@@ -31,12 +32,15 @@ local option_index = {
     ["tcp-nodelay"] = 3,
     ["sndbuf"]      = 4,
     ["rcvbuf"]      = 5,
-    ["ip-transparent"] = 6,
+    ["keepintvl"]   = 6,
+    ["keepcnt"]     = 7,
 }
 
 
 local ngx_lua_ffi_socket_tcp_getoption
 local ngx_lua_ffi_socket_tcp_setoption
+local ngx_lua_ffi_socket_getfd
+
 if subsystem == 'http' then
 ffi.cdef[[
 typedef struct ngx_http_lua_socket_tcp_upstream_s
@@ -71,6 +75,7 @@ ngx_http_lua_ffi_socket_tcp_getfd(ngx_http_request_t *r,
 
 ngx_lua_ffi_socket_tcp_getoption = C.ngx_http_lua_ffi_socket_tcp_getoption
 ngx_lua_ffi_socket_tcp_setoption = C.ngx_http_lua_ffi_socket_tcp_setoption
+ngx_lua_ffi_socket_getfd = C.ngx_http_lua_ffi_socket_tcp_getfd
 
 elseif subsystem == 'stream' then
 
@@ -84,10 +89,15 @@ ngx_stream_lua_ffi_socket_tcp_getoption(ngx_stream_lua_socket_tcp_upstream_t *u,
 int
 ngx_stream_lua_ffi_socket_tcp_setoption(ngx_stream_lua_socket_tcp_upstream_t *u,
     int opt, int val, unsigned char *err, size_t *errlen);
+int
+ngx_stream_lua_ffi_socket_tcp_getfd(ngx_stream_lua_request_t *r,
+   ngx_stream_lua_socket_tcp_upstream_t *u,
+   char **errmsg);
 ]]
 
 ngx_lua_ffi_socket_tcp_getoption = C.ngx_stream_lua_ffi_socket_tcp_getoption
 ngx_lua_ffi_socket_tcp_setoption = C.ngx_stream_lua_ffi_socket_tcp_setoption
+ngx_lua_ffi_socket_getfd = C.ngx_stream_lua_ffi_socket_tcp_getfd
 end
 
 
@@ -181,8 +191,28 @@ local function setoption(cosocket, option, value)
 end
 
 
+local function getfd(cosocket)
+    if not cosocket then
+        error("ngx.socket getfd: expecting the cosocket object, but seen none")
+    end
+
+    local r = get_request()
+    if not r then
+        error("no request found")
+    end
+
+    local u = get_tcp_socket(cosocket)
+
+    local fd = ngx_lua_ffi_socket_getfd(r, u, errmsg)
+    if (fd < 0) then
+        return nil, ffi_str(errmsg[0])
+    end
+
+    return fd;
+end
+
+
 if subsystem == 'http' then
-local errmsg             = base.get_errmsg_ptr()
 local session_ptr        = ffi_new("void *[1]")
 local server_name_str    = ffi_new("ngx_str_t[1]")
 local openssl_error_code = ffi_new("int[1]")
@@ -306,27 +336,6 @@ local function sslhandshake(cosocket, reused_session, server_name, ssl_verify,
 end
 
 
-local function getfd(cosocket)
-    if not cosocket then
-        error("ngx.socket getfd: expecting the cosocket object, but seen none")
-    end
-
-    local r = get_request()
-    if not r then
-        error("no request found")
-    end
-
-    local u = get_tcp_socket(cosocket)
-
-    local fd = C.ngx_http_lua_ffi_socket_tcp_getfd(r, u, errmsg)
-    if (fd < 0) then
-        return nil, ffi_str(errmsg[0])
-    end
-
-    return fd;
-end
-
-
 do
     local method_table = registry.__tcp_cosocket_mt
     method_table.getoption = getoption
@@ -334,17 +343,29 @@ do
     method_table.setclientcert = setclientcert
     method_table.sslhandshake  = sslhandshake
     method_table.getfd = getfd
+    method_table.getoption = getoption
+    method_table.setoption = setoption
 
     method_table = registry.__tcp_req_cosocket_mt
     method_table.getfd = getfd
+    method_table.getoption = getoption
+    method_table.setoption = setoption
 
     method_table = registry.__tcp_raw_req_cosocket_mt
     method_table.getfd = getfd
+    method_table.getoption = getoption
+    method_table.setoption = setoption
 end
 
 elseif subsystem == 'stream' then
 do
     local method_table = registry.__tcp_cosocket_mt
+    method_table.getoption = getoption
+    method_table.setoption = setoption
+    method_table.getfd = getfd
+
+    method_table = registry.__tcp_raw_req_cosocket_mt
+    method_table.getfd = getfd
     method_table.getoption = getoption
     method_table.setoption = setoption
 end

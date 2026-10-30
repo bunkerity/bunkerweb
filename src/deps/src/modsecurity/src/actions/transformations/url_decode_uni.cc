@@ -35,7 +35,7 @@ static inline bool inplace(std::string &value,
     const auto input_len = value.length();
 
     std::string::size_type i, count, fact, j, xv;
-    int Code, hmap = -1;
+    int hmap = -1;
 
     i = count = 0;
     while (i < input_len) {
@@ -50,13 +50,16 @@ static inline bool inplace(std::string &value,
                         (VALID_HEX(input[i + 3])) &&
                         (VALID_HEX(input[i + 4])) &&
                         (VALID_HEX(input[i + 5]))) {
-                        Code = 0;
+
                         fact = 1;
 
                         if (t
                             && t->m_rules->m_unicodeMapTable.m_set == true
                             && t->m_rules->m_unicodeMapTable.m_unicodeMapTable != NULL
                             && t->m_rules->m_unicodeMapTable.m_unicodeCodePage > 0)  {
+
+                            int Code = 0;
+
                             for (j = 5; j >= 2; j--) {
                                 if (isxdigit((input[i+j]))) {
                                     if (input[i+j] >= 97) {

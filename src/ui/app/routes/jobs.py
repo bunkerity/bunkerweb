@@ -22,12 +22,14 @@ def jobs_run():
     if DB.readonly:
         return handle_error("Database is in read-only mode", "jobs")
 
-    verify_data_in_form(
+    ret = verify_data_in_form(
         data={"jobs": None},
         err_message="Missing jobs parameter on /jobs/run.",
         redirect_url="jobs",
         next=True,
     )
+    if ret is not True:
+        return ret
     jobs = request.form["jobs"]
     if not jobs:
         return handle_error("No jobs selected.", "jobs", True)
@@ -36,7 +38,8 @@ def jobs_run():
     except JSONDecodeError:
         return handle_error("Invalid jobs parameter on /jobs/run.", "jobs", True)
 
-    ret = DB.checked_changes(["config"], [job.get("plugin") for job in jobs if job.get("plugin")], True)
+    jobs = [job for job in jobs if job.get("plugin")]
+    ret = DB.checked_changes(["config"], [job.get("plugin") for job in jobs], True)
     if ret:
         return handle_error(ret, "jobs", True)
 

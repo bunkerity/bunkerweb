@@ -6,7 +6,7 @@ El complemento de copia de seguridad proporciona una solución de respaldo autom
 2.  Las copias de seguridad se almacenan en un directorio específico de su sistema.
 3.  Antes de cada copia de seguridad se verifica el espacio libre en disco disponible.
 4.  Cada ZIP contiene el volcado SQL y un archivo de suma de verificación SHA-256 (`.sha256`) para verificar la integridad.
-5.  Las copias de seguridad antiguas se rotan automáticamente. El modo `hanoi` aplica la rotación Torres de Hanói (24 archivos, ~85 días de cobertura).
+5.  Las copias de seguridad antiguas se rotan automáticamente. El modo `hanoi` aplica la rotación Torres de Hanói (24–34 archivos, 64–85 días de cobertura).
 6.  Al restaurar, la suma de verificación se comprueba antes de modificar la base de datos activa.
 7.  Puede crear, listar, verificar y restaurar copias de seguridad manualmente en cualquier momento.
 8.  Antes de cualquier operación de restauración, el estado actual se respalda automáticamente como medida de seguridad.
@@ -24,7 +24,7 @@ El complemento de copia de seguridad proporciona una solución de respaldo autom
 | Ajuste             | Valor por defecto            | Contexto | Múltiple | Descripción                                                                                                                                                              |
 | ------------------ | ---------------------------- | -------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `USE_BACKUP`       | `yes`                        | global   | no       | **Habilitar copia de seguridad:** Establezca en `yes` para habilitar las copias automáticas.                                                                             |
-| `BACKUP_SCHEDULE`  | `daily`                      | global   | no       | **Frecuencia:** `daily`, `weekly`, `monthly` o `hanoi` (horaria con rotación Torres de Hanói, ~85 días de cobertura).                                                   |
+| `BACKUP_SCHEDULE`  | `daily`                      | global   | no       | **Frecuencia:** `daily`, `weekly`, `monthly` o `hanoi` (horaria con rotación Torres de Hanói, 64–85 días de cobertura).                                                   |
 | `BACKUP_ROTATION`  | `7`                          | global   | no       | **Retención:** Número de archivos a conservar. Se ignora con `hanoi` (la rotación se gestiona automáticamente).                                                          |
 | `BACKUP_DIRECTORY` | `/var/lib/bunkerweb/backups` | global   | no       | **Ubicación:** El directorio donde se almacenarán los archivos de copia de seguridad.                                                                                    |
 | `BACKUP_IGNORE_CHECKSUM_ERROR_ON_DB_RESTORE` | `no` | global | no | **Ignorar error de suma de verificación:** Si `yes`, un error SHA-256 no cancelará la restauración. Úselo solo como último recurso para backups parcialmente corruptos. |
@@ -58,7 +58,7 @@ bwcli plugin backup restore /ruta/a/copia/backup-sqlite-2023-08-15_12-34-56.zip
     Cada ZIP contiene un archivo SHA-256. La suma se verifica automáticamente antes de cualquier restauración. Use `bwcli plugin backup check` para comprobar todas las copias en cualquier momento.
 
 !!! warning "Compatibilidad de la base de datos"
-    El complemento es compatible con SQLite, MySQL/MariaDB y PostgreSQL. Las bases de datos Oracle no son compatibles actualmente.
+    El complemento de copia de seguridad es compatible con las bases de datos SQLite, MySQL/MariaDB y PostgreSQL. Las bases de datos de Oracle no son compatibles actualmente para las operaciones de copia de seguridad y restauración. La restauración rechaza una copia de seguridad procedente de otro motor de base de datos (MariaDB y MySQL cuentan como motores distintos) antes de modificar nada.
 
 ### Configuraciones de ejemplo
 
@@ -73,9 +73,9 @@ bwcli plugin backup restore /ruta/a/copia/backup-sqlite-2023-08-15_12-34-56.zip
     BACKUP_DIRECTORY: "/var/lib/bunkerweb/backups"
     ```
 
-=== "Torres de Hanói (~85 días)"
+=== "Torres de Hanói (64–85 días)"
 
-    Ejecución horaria con rotación Torres de Hanói. Conserva 24 archivos con ~85 días de cobertura. `BACKUP_ROTATION` se ignora:
+    Ejecución horaria con rotación Torres de Hanói. Conserva 24–34 archivos con 64–85 días de cobertura. `BACKUP_ROTATION` se ignora:
 
     ```yaml
     USE_BACKUP: "yes"

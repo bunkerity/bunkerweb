@@ -1,0 +1,23 @@
+{
+    "prefix":       "pqcp",
+    "type":         "transparent",
+    "mbedtls/h_condition":   "defined(TF_PSA_CRYPTO_PQCP_MLDSA_ENABLED)",
+    "headers":      [
+        "../drivers/pqcp/src/psa_crypto_mldsa.h"
+    ],
+    "capabilities": [
+        {
+            "mbedtls/c_condition": "defined(TF_PSA_CRYPTO_PQCP_MLDSA_ENABLED)",
+            "_comment_entry_points": "This is not the complete list of entry points supported by this driver, only those that are currently supported in JSON. See docs/psa-driver-example-and-guide.md",
+            "entry_points": [],
+            "algorithms": [
+                "PSA_ALG_DETERMINISTIC_ML_DSA"
+            ],
+            "key_types": [
+                "PSA_KEY_TYPE_ML_DSA_KEY_PAIR",
+                "PSA_KEY_TYPE_ML_DSA_PUBLIC_KEY"
+            ],
+            "fallback": false
+        }
+    ]
+}

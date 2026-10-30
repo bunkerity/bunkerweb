@@ -1,0 +1,15 @@
+##! Please refer to the documentation at
+##! https://coreruleset.org/docs/development/regex_assembly/.
+
+##!+ i
+
+##!$ =(?:file|ftps?|https?)://
+
+\binclude\s*\([^)]*
+mosConfig_absolute_path
+_CONF\[path\]
+_SERVER\[DOCUMENT_ROOT\]
+GALLERY_BASEDIR
+path\[docroot\]
+appserv_root
+config\[root_dir\]

@@ -14,12 +14,15 @@ from fastapi.responses import JSONResponse
 from ..auth.guard import guard
 from ..utils import get_db
 
-from common_utils import bytes_hash  # type: ignore
-
+from common_utils import bytes_hash, create_plugin_tar_gz, strip_plugin_write_bits  # type: ignore
 
 router = APIRouter(prefix="/plugins", tags=["plugins"])
 
-_PLUGIN_ID_RX = re_compile(r"^[\w.-]{4,64}$")
+# \Z, not $: Python's $ also matches before a trailing newline, so an id ending in one
+# passed and became a directory name in the pushed plugin tree. The ".bw-" prefix is the
+# instance-side swap's own bookkeeping namespace: an entry carrying it is exempt from the
+# stale-entry sweep, so a plugin named that way survives its own deletion.
+_PLUGIN_ID_RX = re_compile(r"^(?!\.bw-)[\w.-]{4,64}\Z")
 _RECOGNIZED_TYPES = {"all", "external", "ui", "pro"}
 
 TMP_UI_ROOT = Path(sep, "var", "tmp", "bunkerweb", "ui")
@@ -31,7 +34,7 @@ def _safe_member_path(root: Path, member_name: str) -> Optional[Path]:
         if member_name.startswith("/"):
             return None
         target = (root / member_name).resolve()
-        if not str(target).startswith(str(root.resolve())):
+        if not target.is_relative_to(root.resolve()):
             return None
         return target
     except Exception:
@@ -213,11 +216,9 @@ async def upload_plugins(files: List[UploadFile] = File(...), method: str = Form
                             _extract_plugin_from_zip(zipf, root, dest)
 
                             # Package full plugin dir to tar.gz bytes
-                            with BytesIO() as buf:
-                                with tar_open(fileobj=buf, mode="w:gz", compresslevel=9) as tf:
-                                    tf.add(dest, arcname=dest.name, recursive=True)
-                                buf.seek(0)
-                                blob = buf.getvalue()
+                            strip_plugin_write_bits(dest)
+                            buf = create_plugin_tar_gz(dest, arc_root=dest.name)
+                            blob = buf.getvalue()
                             checksum = bytes_hash(BytesIO(blob), algorithm="sha256")
 
                             # Compute flags and call DB update
@@ -269,11 +270,9 @@ async def upload_plugins(files: List[UploadFile] = File(...), method: str = Form
                         dest.mkdir(parents=True, exist_ok=True)
                         _extract_plugin_from_tar(tarf, root, dest)
 
-                        with BytesIO() as buf:
-                            with tar_open(fileobj=buf, mode="w:gz", compresslevel=9) as tf:
-                                tf.add(dest, arcname=dest.name, recursive=True)
-                            buf.seek(0)
-                            blob = buf.getvalue()
+                        strip_plugin_write_bits(dest)
+                        buf = create_plugin_tar_gz(dest, arc_root=dest.name)
+                        blob = buf.getvalue()
                         checksum = bytes_hash(BytesIO(blob), algorithm="sha256")
 
                         page = dest.joinpath("ui").is_dir()

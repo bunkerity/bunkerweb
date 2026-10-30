@@ -3,7 +3,7 @@ local ffi = require "ffi"
 require "resty.openssl.include.ossl_typ"
 require "resty.openssl.include.stack"
 
-local OPENSSL_3X = require("resty.openssl.version").OPENSSL_3X
+local OPENSSL_3_UP = require("resty.openssl.version").OPENSSL_3_UP
 
 ffi.cdef [[
   // hack by changing char* to const char* here
@@ -19,7 +19,7 @@ ffi.cdef [[
   PKCS12 *d2i_PKCS12_bio(BIO *bp, PKCS12 **a);
 ]]
 
-if OPENSSL_3X then
+if OPENSSL_3_UP then
   ffi.cdef [[
     PKCS12 *PKCS12_create_ex(const char *pass, const char *name, EVP_PKEY *pkey,
                               X509 *cert,

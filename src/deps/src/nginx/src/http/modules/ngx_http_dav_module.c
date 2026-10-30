@@ -535,19 +535,20 @@ ngx_http_dav_mkcol_handler(ngx_http_request_t *r, ngx_http_dav_loc_conf_t *dlcf)
 static ngx_int_t
 ngx_http_dav_copy_move_handler(ngx_http_request_t *r)
 {
-    u_char                   *p, *host, *last, ch;
-    size_t                    len, root;
-    ngx_err_t                 err;
-    ngx_int_t                 rc, depth;
-    ngx_uint_t                overwrite, slash, dir, flags;
-    ngx_str_t                 path, uri, duri, args;
-    ngx_tree_ctx_t            tree;
-    ngx_copy_file_t           cf;
-    ngx_file_info_t           fi;
-    ngx_table_elt_t          *dest, *over;
-    ngx_ext_rename_file_t     ext;
-    ngx_http_dav_copy_ctx_t   copy;
-    ngx_http_dav_loc_conf_t  *dlcf;
+    u_char                    *p, *host, *last, ch;
+    size_t                     len, root, alias;
+    ngx_err_t                  err;
+    ngx_int_t                  rc, depth;
+    ngx_uint_t                 overwrite, slash, dir, flags;
+    ngx_str_t                  path, uri, duri, args;
+    ngx_tree_ctx_t             tree;
+    ngx_copy_file_t            cf;
+    ngx_file_info_t            fi;
+    ngx_table_elt_t           *dest, *over;
+    ngx_ext_rename_file_t      ext;
+    ngx_http_dav_copy_ctx_t    copy;
+    ngx_http_dav_loc_conf_t   *dlcf;
+    ngx_http_core_loc_conf_t  *clcf;
 
     if (r->headers_in.content_length_n > 0 || r->headers_in.chunked) {
         ngx_log_error(NGX_LOG_ERR, r->connection->log, 0,
@@ -642,6 +643,22 @@ destination_done:
                       "should be either collections or non-collections",
                       &r->uri, &dest->value);
         return NGX_HTTP_CONFLICT;
+    }
+
+    clcf = ngx_http_get_module_loc_conf(r, ngx_http_core_module);
+    alias = clcf->alias;
+
+    if (alias && alias != NGX_MAX_SIZE_T_VALUE && r->valid_location) {
+
+        if (alias > duri.len
+            || ngx_filename_cmp(duri.data, r->uri.data, alias) != 0)
+        {
+            ngx_log_error(NGX_LOG_ERR, r->connection->log, 0,
+                          "\"Destination\" URI \"%V\" must be "
+                          "within location prefix when using \"alias\"",
+                          &dest->value);
+            return NGX_HTTP_BAD_REQUEST;
+        }
     }
 
     depth = ngx_http_dav_depth(r, NGX_HTTP_DAV_INFINITY_DEPTH);

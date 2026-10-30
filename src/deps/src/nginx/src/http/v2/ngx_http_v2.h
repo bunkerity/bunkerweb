@@ -80,6 +80,7 @@ typedef struct {
     ngx_uint_t                       sid;
     size_t                           length;
     size_t                           padding;
+    ssize_t                          window_delta;
     unsigned                         flags:8;
 
     unsigned                         incomplete:1;
@@ -213,6 +214,7 @@ struct ngx_http_v2_stream_s {
 
     ngx_pool_t                      *pool;
 
+    unsigned                         initialized:1;
     unsigned                         waiting:1;
     unsigned                         blocked:1;
     unsigned                         exhausted:1;

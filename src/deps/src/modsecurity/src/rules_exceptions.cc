@@ -58,7 +58,7 @@ bool RulesExceptions::loadUpdateActionById(double id,
 
 
 bool RulesExceptions::loadRemoveRuleByMsg(const std::string &msg,
-    std::string *error) {
+    const std::string *error) {
     m_remove_rule_by_msg.push_back(msg);
 
     return true;
@@ -66,7 +66,7 @@ bool RulesExceptions::loadRemoveRuleByMsg(const std::string &msg,
 
 
 bool RulesExceptions::loadRemoveRuleByTag(const std::string &msg,
-    std::string *error) {
+    const std::string *error) {
     m_remove_rule_by_tag.push_back(msg);
 
     return true;

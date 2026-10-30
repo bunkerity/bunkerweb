@@ -1,0 +1,57 @@
+integrations: "all"
+
+actions:
+  save_ci:
+    type: export
+    url: "http://127.0.0.1:8888/auth"
+    method: POST
+    status: 200
+    auth:
+      - "ci"
+      - "Str0ng&P@ss!"
+    exports:
+      API_TOKEN: "token"
+    restart_stack: false
+  authorized:
+    type: status
+    url: "http://127.0.0.1:8888/services"
+    status: 200
+    headers:
+      Authorization: "Bearer ${API_TOKEN}"
+    restart_stack: false
+  not_authorized:
+    type: status
+    url: "http://127.0.0.1:8888/configs"
+    status: 403
+    headers:
+      Authorization: "Bearer ${API_TOKEN}"
+    restart_stack: false
+
+  save_ops:
+    type: export
+    url: "http://127.0.0.1:8888/auth"
+    method: POST
+    status: 200
+    auth:
+      - "ops"
+      - "Bunkerity123!"
+    exports:
+      API_TOKEN: "token"
+    restart_stack: false
+  authorized_1:
+    type: status
+    url: "http://127.0.0.1:8888/instances"
+    status: 200
+    headers:
+      Authorization: "Bearer ${API_TOKEN}"
+    restart_stack: false
+  not_authorized_1:
+    type: status
+    url: "http://127.0.0.1:8888/services"
+    status: 403
+    headers:
+      Authorization: "Bearer ${API_TOKEN}"
+    restart_stack: false
+
+api:
+  API_ACL_BOOTSTRAP_FILE: "/tmp/output/acl.json"

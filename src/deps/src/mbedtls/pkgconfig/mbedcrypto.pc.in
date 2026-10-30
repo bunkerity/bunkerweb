@@ -7,4 +7,4 @@ Description: @PKGCONFIG_PROJECT_DESCRIPTION@
 URL: @PKGCONFIG_PROJECT_HOMEPAGE_URL@
 Version: @PROJECT_VERSION@
 Cflags: -I"${includedir}"
-Libs: -L"${libdir}" -lmbedcrypto
+Libs: -L"${libdir}" -ltfpsacrypto

@@ -58,7 +58,7 @@ local DEFAULT_TABLE = "sessions"
 local DEFAULT_CHARSET = "ascii"
 
 
-local SET = "INSERT INTO %s (sid, name, data, exp) VALUES ('%s', '%s', '%s', FROM_UNIXTIME(%d)) AS new ON DUPLICATE KEY UPDATE data = new.data"
+local SET = "INSERT INTO %s (sid, name, data, exp) VALUES ('%s', '%s', '%s', FROM_UNIXTIME(%d)) AS new ON DUPLICATE KEY UPDATE data = new.data, exp = new.exp"
 local SET_META_PREFIX = "INSERT INTO %s (aud, sub, sid) VALUES "
 local SET_META_VALUES = "('%s', '%s', '%s')"
 local SET_META_SUFFIX = " ON DUPLICATE KEY UPDATE sid = sid"
@@ -193,12 +193,12 @@ function metatable:get(name, key, current_time) -- luacheck: ignore
 
   local row = res[1]
   if not row then
-    return nil, "session not found"
+    return nil
   end
 
   local data = row.data
   if not row.data then
-    return nil, "session not found"
+    return nil
   end
 
   return data

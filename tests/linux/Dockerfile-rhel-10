@@ -1,6 +1,6 @@
-FROM redhat/ubi10-init:10.1@sha256:dfa781f8b52ae2144816cad25b721476cfea40491437161a0b00c88f6b57b984
+FROM redhat/ubi10-init:10.2@sha256:dc12c9d0e52b5a253f701de2c7dd45607ffab19889dd40d108ffed81f696a49d
 
-ENV NGINX_VERSION=1.28.2
+ENV NGINX_VERSION=1.30.6
 
 # Copy rocky repo
 COPY src/linux/rocky-10.repo /etc/yum.repos.d/rocky.repo
@@ -17,5 +17,3 @@ COPY src/linux/nginx.repo /etc/yum.repos.d/nginx.repo
 RUN dnf install https://dl.fedoraproject.org/pub/epel/epel-release-latest-10.noarch.rpm -y && \
     dnf install php-fpm yum-utils -y && \
     dnf install -y https://nginx.org/packages/rhel/10/$(uname -m)/RPMS/nginx-${NGINX_VERSION}-1.el10.ngx.$(uname -m).rpm
-
-COPY ./package-rhel-10/*.rpm /opt

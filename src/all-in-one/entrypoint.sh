@@ -94,6 +94,39 @@ function trap_exit() {
 }
 trap trap_exit TERM INT QUIT
 
+# Longest a reload waits for a generator that installs, in seconds
+reload_lock_timeout=300
+
+# Updates the supervisord configuration and stops every service while holding the lock a generator
+# takes for its install (/var/tmp/bunkerweb/generating), so no generator is killed part way through
+# an install and a generator that starts meanwhile waits instead. The lock sits on a descriptor of
+# this subshell only and is dropped when it exits, before the services start again: nothing is left
+# to kill by then, and a first generation of the restarted services waits for that lock for 30 s at
+# most, so holding it through their start could only make it give up. The busybox flock has no wait
+# option, hence the polling.
+# Returns 0 when the services are stopped, 1 when the lock stayed held for the whole timeout, 2 when
+# the lock file cannot be opened, 3 when the supervisord configuration update failed.
+# shellcheck disable=SC2329
+function stop_services_between_installs() {
+	local lock_file="/var/tmp/bunkerweb/generating"
+	# shellcheck disable=SC2317
+	[ -e "$lock_file" ] || ( umask 022 ; : >> "$lock_file" ) 2>/dev/null
+	# shellcheck disable=SC2317
+	(
+		exec 9< "$lock_file" || exit 2
+		waited=0
+		until flock -n -x 9 ; do
+			# A missing flock or an unusable descriptor never succeeds either
+			[ "$waited" -ge "$reload_lock_timeout" ] && exit 1
+			sleep 1
+			waited=$((waited+1))
+		done
+		supervisorctl update all || exit 3
+		supervisorctl stop all
+		exit 0
+	)
+}
+
 # trap SIGHUP
 # shellcheck disable=SC2329
 function trap_reload() {
@@ -103,18 +136,31 @@ function trap_reload() {
 	# Check if supervisord is running before attempting reload
 	# shellcheck disable=SC2317
 	if pgrep -f "supervisord" > /dev/null; then
-		# Reload supervisord configuration
+		# Reload the supervisord configuration and stop the services once no generator installs
 		# shellcheck disable=SC2317
-		if supervisorctl update all; then
-			# Restart all services to apply changes
-			# shellcheck disable=SC2317
-			supervisorctl restart all
-			# shellcheck disable=SC2317
-			log "ENTRYPOINT" "✅" "Reload successful"
-		else
-			# shellcheck disable=SC2317
-			log "ENTRYPOINT" "❌" "Failed to update supervisord configuration"
-		fi
+		stop_services_between_installs
+		# shellcheck disable=SC2317
+		case $? in
+			0)
+				# Start the services again to apply changes
+				# shellcheck disable=SC2317
+				supervisorctl start all
+				# shellcheck disable=SC2317
+				log "ENTRYPOINT" "✅" "Reload successful"
+				;;
+			1)
+				# shellcheck disable=SC2317
+				log "ENTRYPOINT" "❌" "A configuration generation is still installing after ${reload_lock_timeout} seconds, keeping the running services"
+				;;
+			2)
+				# shellcheck disable=SC2317
+				log "ENTRYPOINT" "❌" "Couldn't open /var/tmp/bunkerweb/generating, keeping the running services"
+				;;
+			*)
+				# shellcheck disable=SC2317
+				log "ENTRYPOINT" "❌" "Failed to update supervisord configuration"
+				;;
+		esac
 	else
 		# shellcheck disable=SC2317
 		log "ENTRYPOINT" "❌" "Supervisord is not running"
@@ -275,10 +321,26 @@ if [ "${USE_CROWDSEC}" = "yes" ] && [[ "${CROWDSEC_API:-http://127.0.0.1:8000}" 
 	cscli hub update
 	log "ENTRYPOINT" "ℹ️" "[CROWDSEC] Updated CrowdSec hub."
 
-	if [ ! -s /var/lib/crowdsec/online_api_credentials.yaml ]; then
-		log "ENTRYPOINT" "ℹ️" "[CROWDSEC] No Central API credentials found. Registering machine..."
-		cscli capi register
-		log "ENTRYPOINT" "✅" "[CROWDSEC] Machine registered successfully."
+	# Same name as the official CrowdSec images, which drop the online_client block rather
+	# than emptying the credentials file.
+	if [[ "${DISABLE_ONLINE_API,,}" == "true" || "${DISABLE_ONLINE_API,,}" == "yes" ]]; then
+		if [ ! -f /etc/crowdsec/config.yaml.capi ]; then
+			cp /etc/crowdsec/config.yaml /etc/crowdsec/config.yaml.capi
+			sed -i '/^    online_client:$/,+1d' /etc/crowdsec/config.yaml
+		fi
+		rm -f /var/lib/crowdsec/online_api_credentials.yaml
+		log "ENTRYPOINT" "ℹ️" "[CROWDSEC] Central API disabled, skipping registration. No signal will be sent to CrowdSec and no community blocklist will be pulled."
+	else
+		# /etc/crowdsec survives a restart, so put the block back if a previous run removed it.
+		if [ -f /etc/crowdsec/config.yaml.capi ]; then
+			mv /etc/crowdsec/config.yaml.capi /etc/crowdsec/config.yaml
+			log "ENTRYPOINT" "ℹ️" "[CROWDSEC] Central API re-enabled, restored the previous configuration."
+		fi
+		if [ ! -s /var/lib/crowdsec/online_api_credentials.yaml ]; then
+			log "ENTRYPOINT" "ℹ️" "[CROWDSEC] No Central API credentials found. Registering machine..."
+			cscli capi register
+			log "ENTRYPOINT" "✅" "[CROWDSEC] Machine registered successfully."
+		fi
 	fi
 
 	if [ ! -f /var/lib/crowdsec/local_api_credentials.yaml ] || ! grep -q "login" /var/lib/crowdsec/local_api_credentials.yaml; then
@@ -383,6 +445,59 @@ if [ "${USE_REDIS}" = "yes" ] && { [ "${REDIS_HOST:-127.0.0.1}" = "127.0.0.1" ] 
 		fi
 	fi
 	export REDIS_HOST="${REDIS_HOST:-127.0.0.1}"
+
+	# Build the runtime Redis config: /etc/redis.conf (bundled or mounted) wins;
+	# env-driven directives only fill the gaps for tunables the operator did not
+	# specify themselves. This keeps a mounted custom redis.conf authoritative.
+	# Target lives under /var/lib/bunkerweb (nginx-writable, persisted per container).
+	RUNTIME_REDIS_CONF="/var/lib/bunkerweb/redis-runtime.conf"
+	cp /etc/redis.conf "${RUNTIME_REDIS_CONF}"
+
+	_redis_conf_has() {
+		grep -Eq "^[[:space:]]*${1}([[:space:]]|$)" /etc/redis.conf
+	}
+
+	_redis_conf_has maxmemory || printf 'maxmemory %s\n' "${REDIS_MAXMEMORY:-256mb}" >> "${RUNTIME_REDIS_CONF}"
+	_redis_conf_has maxmemory-policy || printf 'maxmemory-policy %s\n' "${REDIS_MAXMEMORY_POLICY:-volatile-lru}" >> "${RUNTIME_REDIS_CONF}"
+	_redis_conf_has appendonly || printf 'appendonly %s\n' "${REDIS_APPENDONLY:-yes}" >> "${RUNTIME_REDIS_CONF}"
+
+	if ! _redis_conf_has save; then
+		_save_emitted=0
+		# Base REDIS_SAVE (no suffix). Treat empty as explicit "disable RDB".
+		if [ -n "${REDIS_SAVE+x}" ]; then
+			if [ -z "${REDIS_SAVE}" ]; then
+				printf 'save ""\n' >> "${RUNTIME_REDIS_CONF}"
+			else
+				printf 'save %s\n' "${REDIS_SAVE}" >> "${RUNTIME_REDIS_CONF}"
+			fi
+			_save_emitted=1
+		fi
+		# Numeric-suffixed siblings REDIS_SAVE_0, REDIS_SAVE_1, ... applied in order.
+		while IFS= read -r _save_var; do
+			_save_val="${!_save_var}"
+			if [ -z "${_save_val}" ]; then
+				printf 'save ""\n' >> "${RUNTIME_REDIS_CONF}"
+			else
+				printf 'save %s\n' "${_save_val}" >> "${RUNTIME_REDIS_CONF}"
+			fi
+			_save_emitted=1
+		done < <(compgen -v | grep -E '^REDIS_SAVE_[0-9]+$' | sort -t_ -k3 -n)
+		if [ "${_save_emitted}" -eq 0 ]; then
+			printf 'save 900 1\nsave 300 10\nsave 60 10000\n' >> "${RUNTIME_REDIS_CONF}"
+		fi
+		unset _save_emitted _save_var _save_val
+	fi
+
+	if [ -n "${REDIS_PASSWORD}" ] && ! _redis_conf_has requirepass; then
+		printf 'requirepass %s\n' "${REDIS_PASSWORD}" >> "${RUNTIME_REDIS_CONF}"
+		log "ENTRYPOINT" "🔒" "Embedded Redis: requirepass enabled via REDIS_PASSWORD"
+	fi
+
+	chmod 600 "${RUNTIME_REDIS_CONF}"
+	log "ENTRYPOINT" "ℹ️" "Built ${RUNTIME_REDIS_CONF} (env overrides applied only where /etc/redis.conf was silent)"
+	unset RUNTIME_REDIS_CONF
+	unset -f _redis_conf_has
+
 	# Enable autorestart for Redis service
 	sed -i 's/autorestart=false/autorestart=true/' /etc/supervisor.d/redis.ini
 	log "ENTRYPOINT" "✅" "Enabled autorestart for Redis service"
@@ -390,6 +505,17 @@ else
 	sed -i 's/autostart=true/autostart=false/' /etc/supervisor.d/redis.ini
 	log "ENTRYPOINT" "ℹ️" "Redis service is disabled, autostart not enabled"
 fi
+
+# Clean orphaned NGINX temp files from previous runs
+for dir in client_temp proxy_temp fastcgi_temp uwsgi_temp scgi_temp; do
+	target="/var/tmp/bunkerweb/$dir"
+	if [ -d "$target" ] && [ ! -L "$target" ]; then
+		if [ -n "$(find "$target" -mindepth 1 -maxdepth 1 -print -quit 2>/dev/null)" ]; then
+			log "ENTRYPOINT" "ℹ️" "Cleaning orphaned temp files from $dir"
+		fi
+		find "$target" -mindepth 1 -delete 2>/dev/null || true
+	fi
+done
 
 # start supervisord in foreground
 log "ENTRYPOINT" "ℹ️" "Starting services ..."
@@ -399,7 +525,9 @@ pid="$!"
 # wait while supervisor is running
 wait "$pid"
 while [ -f "/var/run/bunkerweb/supervisord.pid" ] ; do
-	wait "$pid"
+	# Break if the process is no longer alive (e.g. killed by OOM without cleaning up the PID file)
+	kill -0 "$pid" 2>/dev/null || { rm -f "/var/run/bunkerweb/supervisord.pid" ; break ; }
+	sleep 1
 done
 
 log "ENTRYPOINT" "ℹ️" "BunkerWeb AIO stopped"

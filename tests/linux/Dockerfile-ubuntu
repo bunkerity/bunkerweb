@@ -1,10 +1,10 @@
-FROM ubuntu:noble@sha256:c35e29c9450151419d9448b0fd75374fec4fff364a27f176fb458d472dfc9e54
+FROM ubuntu:resolute@sha256:6a06111c3b0a8600feadb270aec771dc239bf407b25625f93f44ab00e11f4d3c
 
 ENV container=docker
 ENV LC_ALL=C
 ENV DEBIAN_FRONTEND=noninteractive
 ENV OS=ubuntu
-ENV NGINX_VERSION=1.28.2
+ENV NGINX_VERSION=1.30.6
 ENV EXPECTED_FPR=573BFD6B3D8FBC641079A6ABABF5BD827BD9BF62
 
 RUN apt-get update \
@@ -33,8 +33,6 @@ RUN apt update && \
     echo "deb [signed-by=/usr/share/keyrings/nginx-archive-keyring.gpg] https://nginx.org/packages/${OS} ${VERSION_CODENAME} nginx" | tee /etc/apt/sources.list.d/nginx.list && \
     apt-get update && \
     apt-get install -y --no-install-recommends nginx=${NGINX_VERSION}-1~${VERSION_CODENAME}
-
-COPY ./package-ubuntu/*.deb /opt
 
 VOLUME ["/sys/fs/cgroup"]
 

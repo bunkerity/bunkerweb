@@ -1,0 +1,33 @@
+##! Please refer to the documentation at
+##! https://coreruleset.org/docs/development/regex_assembly/.
+
+##! Detects HTTP Request Smuggling by looking for HTTP/WebDAV method names
+##! followed by a URI and an HTTP version string (e.g., "GET /foo HTTP/1").
+
+##!> assemble
+  ##! HTTP methods
+  get
+  post
+  head
+  options
+  connect
+  put
+  delete
+  trace
+  track
+  patch
+  ##! WebDAV methods
+  propfind
+  propatch
+  mkcol
+  copy
+  move
+  lock
+  unlock
+  ##!=< http-methods
+##!<
+
+##!> assemble
+  ##!=> http-methods
+  \s+[^\s]+\s+http/\d
+##!<

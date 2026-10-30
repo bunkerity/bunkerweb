@@ -7,8 +7,25 @@
 ##! optional quotes
 ##!^ ['\"]*
 
-##! match comments: `/*...*/`, `//...`, `#...`
-##!$ (?:/\*.*?\*/|//[^\r\n]*|#[^\r\n]*
+##! Comments and whitespace allowed between the command and its argument
+##! list. The branches are kept mutually unambiguous (no two branches can
+##! match the same character) to avoid exponential backtracking (ReDoS).
+##!
+##! Block comment, written using the "unrolling-the-loop" technique
+##! (Jeffrey Friedl, "Mastering Regular Expressions", O'Reilly) instead of
+##! the ambiguous `/\*.*\*/`:
+##!   /\*                 literal `/*` opener
+##!   [^*]*               run of non-`*` characters
+##!   \*+                 one or more `*`
+##!   (?:[^/*][^*]*\*+)*   repeat: a character that is neither `/` nor `*`
+##!                       (so not the closer), then more non-`*`, then `*`s
+##!   /                   literal `/` closer
+##!
+##! Line comments (`#` and `//`) must terminate at a line break (`[\r\n]`):
+##! everything from `#`/`//` up to the newline is the comment body, so only
+##! across a newline can the following tokens (quotes, the argument
+##! parentheses) be matched.
+##!$ (?:/\*[^*]*\*+(?:[^/*][^*]*\*+)*/|(?:#|//)[^\r\n]*[\r\n]
 ##! match white space and quotes
 ##!$ |\s|\")*
 

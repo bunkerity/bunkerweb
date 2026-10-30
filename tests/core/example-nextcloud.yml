@@ -1,0 +1,30 @@
+# Example-backed spec: the stack under test is examples/nextcloud itself,
+# deployed the way a user would deploy it. The assertions live here so that the
+# example directory holds only what someone reading the documentation needs.
+example: nextcloud
+
+integrations:
+  - "Docker"
+  - "Autoconf"
+  - "Kubernetes"
+  # Still not Linux, and not for the reason this comment used to give: the Linux images now
+  # carry mariadb-server and a php-fpm mysql extension (tests/linux/Dockerfile-*), and
+  # setup-linux.sh now provisions the database. What is left blocks the arm on its own:
+  # `unzip` is not in any Linux image (setup-linux.sh unzips the download); Nextcloud's own
+  # `OC_Util::checkServer()` hard-requires several PHP extensions php-fpm alone does not ship
+  # (dom, SimpleXML, xmlreader, xmlwriter, zip, gd, curl, mbstring); and, unlike wordpress,
+  # examples/nextcloud/variables.env sets neither LOCAL_PHP nor LOCAL_PHP_PATH -- the Linux
+  # integration never hands index.php to php-fpm at all today, since the Docker/Autoconf/
+  # Kubernetes arms all reach php-fpm through the example's own reverse-proxied container
+  # instead. Closing this needs all three, not just a database.
+
+actions:
+  string_check:
+    type: string
+    url: "https://www.example.com"
+    verify_ssl: false
+    string: "nextcloud"
+    ignore_case: true
+    follow_redirects: true
+    timeout: 120
+    delay: 60

@@ -1,0 +1,13 @@
+# Dependencies for the api_app lane only -- deliberately NOT folded into
+# tests/unit/requirements.in.
+#
+# This lane runs in its own pytest invocation because it imports the API's `app` package, and
+# `tests/unit/ui/conftest.py` relies on `import app` resolving uniquely to `src/ui/app`. Keeping
+# the pins separate too means the main unit suite's install is unchanged: a runner that never
+# invokes this lane never installs these.
+#
+# Versions match src/api/requirements.in so the tests run what the API ships.
+https://github.com/eclipse-biscuit/biscuit-python/archive/c0fa69824a3e601da86cf5cecde09f75ea8df4d7.zip#egg=biscuit-python # 0.4.1
+fastapi==0.161.1
+pydantic-settings==2.16.1
+python-multipart==0.0.32

@@ -629,9 +629,18 @@ static ngx_str_t ngx_http_uwsgi_hide_headers[] = {
 };
 
 
+static ngx_keyval_t  ngx_http_uwsgi_headers[] = {
+    { ngx_string("HTTP_HOST"),
+      ngx_string("$host$is_request_port$request_port") },
+    { ngx_null_string, ngx_null_string }
+};
+
+
 #if (NGX_HTTP_CACHE)
 
 static ngx_keyval_t  ngx_http_uwsgi_cache_headers[] = {
+    { ngx_string("HTTP_HOST"),
+      ngx_string("$host$is_request_port$request_port") },
     { ngx_string("HTTP_IF_MODIFIED_SINCE"),
       ngx_string("$upstream_cache_last_modified") },
     { ngx_string("HTTP_IF_UNMODIFIED_SINCE"), ngx_string("") },
@@ -857,7 +866,7 @@ static ngx_int_t
 ngx_http_uwsgi_create_request(ngx_http_request_t *r)
 {
     u_char                        ch, sep, *lowcase_key;
-    size_t                        key_len, val_len, len, allocated;
+    size_t                        key_len, val_len, len, params_len, allocated;
     ngx_uint_t                    i, n, hash, skip_empty, header_params;
     ngx_buf_t                    *b;
     ngx_chain_t                  *cl, *body;
@@ -870,6 +879,7 @@ ngx_http_uwsgi_create_request(ngx_http_request_t *r)
     ngx_http_script_len_code_pt   lcode;
 
     len = 0;
+    params_len = 0;
     header_params = 0;
     ignored = NULL;
 
@@ -907,8 +917,10 @@ ngx_http_uwsgi_create_request(ngx_http_request_t *r)
                 continue;
             }
 
-            len += 2 + key_len + 2 + val_len;
+            params_len += 2 + key_len + 2 + val_len;
         }
+
+        len += params_len;
     }
 
     if (uwcf->upstream.pass_request_headers) {
@@ -1040,6 +1052,7 @@ ngx_http_uwsgi_create_request(ngx_http_request_t *r)
 
         e.ip = params->values->elts;
         e.pos = b->last;
+        e.end = b->last + params_len;
         e.request = r;
         e.flushed = 1;
 
@@ -1072,11 +1085,23 @@ ngx_http_uwsgi_create_request(ngx_http_request_t *r)
                 continue;
             }
 
+            if (ngx_http_script_check_length(&e, 2) != NGX_OK) {
+                return NGX_ERROR;
+            }
+
             *e.pos++ = (u_char) (key_len & 0xff);
             *e.pos++ = (u_char) ((key_len >> 8) & 0xff);
 
             code = *(ngx_http_script_code_pt *) e.ip;
             code((ngx_http_script_engine_t *) &e);
+
+            if (e.status) {
+                return NGX_ERROR;
+            }
+
+            if (ngx_http_script_check_length(&e, 2) != NGX_OK) {
+                return NGX_ERROR;
+            }
 
             *e.pos++ = (u_char) (val_len & 0xff);
             *e.pos++ = (u_char) ((val_len >> 8) & 0xff);
@@ -1086,12 +1111,22 @@ ngx_http_uwsgi_create_request(ngx_http_request_t *r)
                 code((ngx_http_script_engine_t *) &e);
             }
 
+            if (e.status) {
+                return NGX_ERROR;
+            }
+
             e.ip += sizeof(uintptr_t);
 
             ngx_log_debug4(NGX_LOG_DEBUG_HTTP, r->connection->log, 0,
                            "uwsgi param: \"%*s: %*s\"",
                            key_len, e.pos - (key_len + 2 + val_len),
                            val_len, e.pos - val_len);
+        }
+
+        if (e.pos != e.end) {
+            ngx_log_error(NGX_LOG_ALERT, r->connection->log, 0,
+                          "uwsgi request length mismatch");
+            return NGX_ERROR;
         }
 
         b->last = e.pos;
@@ -1258,6 +1293,10 @@ ngx_http_uwsgi_process_status_line(ngx_http_request_t *r)
 
     u = r->upstream;
 
+    if (r->state == 0) {
+        r->header_name_start = u->buffer.pos;
+    }
+
     rc = ngx_http_parse_status_line(r, &u->buffer, status);
 
     if (rc == NGX_AGAIN) {
@@ -1266,6 +1305,8 @@ ngx_http_uwsgi_process_status_line(ngx_http_request_t *r)
 
     if (rc == NGX_ERROR) {
         u->process_header = ngx_http_uwsgi_process_header;
+        u->buffer.pos = r->header_name_start;
+        r->state = 0;
         return ngx_http_uwsgi_process_header(r);
     }
 
@@ -1995,7 +2036,8 @@ ngx_http_uwsgi_merge_loc_conf(ngx_conf_t *cf, void *parent, void *child)
         conf->params_source = prev->params_source;
     }
 
-    rc = ngx_http_uwsgi_init_params(cf, conf, &conf->params, NULL);
+    rc = ngx_http_uwsgi_init_params(cf, conf, &conf->params,
+                                    ngx_http_uwsgi_headers);
     if (rc != NGX_OK) {
         return NGX_CONF_ERROR;
     }

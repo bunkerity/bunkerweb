@@ -22,8 +22,7 @@ namespace modsecurity::actions::transformations {
 
 
 bool Sha1::transform(std::string &value, const Transaction *trans) const {
-    value = Utils::Sha1::digest(value);
-    return true;
+    return Utils::Sha1::digestReplace(&value);
 }
 
 

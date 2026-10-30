@@ -1,7 +1,7 @@
 [project]
 name = "BunkerWeb"
 description = "Make your web services secure by default !"
-version = "1.6.9~rc2"
+version = "1.6.18~rc2"
 authors = [
     { name = "Bunkerity", email = "contact@bunkerity.com" }
 ]
@@ -17,3 +17,31 @@ exclude = '''
   | env
 )/
 '''
+
+[tool.pytest.ini_options]
+minversion = "8.4"
+addopts = "-ra --strict-markers"
+testpaths = ["tests/unit"]
+# Prints the stack of a hung test; the outer timeout ends it.
+faulthandler_timeout = 120
+markers = [
+    "sqlite: test exercises the SQLite engine",
+    "postgresql: test exercises PostgreSQL",
+    "mariadb: test exercises MariaDB",
+    "multiengine: parametrized across all selected DB engines",
+    "slow: heavier tests (init_tables / large seeds); deselect with -m 'not slow'",
+]
+filterwarnings = ["ignore::sqlalchemy.exc.SAWarning"]
+
+[tool.coverage.run]
+source = ["src"]
+omit = [
+    "src/deps/**",
+    "src/common/db/alembic/**",
+    "**/gunicorn.conf.py",
+    "src/common/core/modsecurity/files/**", # Vendored CRS tooling.
+]
+patch = ["subprocess"]
+
+[tool.coverage.report]
+include_namespace_packages = true

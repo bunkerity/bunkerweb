@@ -5,6 +5,202 @@
   or the CRS Google Group at
 * https://groups.google.com/a/owasp.org/g/modsecurity-core-rule-set-project
 
+## Version 4.30.0 - 2026-10-02
+
+## What's Changed
+
+### 🔒 Security
+* fix: inspect `REQUEST_FILENAME` in RCE (932) rules to close path-based command injection bypass — https://github.com/coreruleset/coreruleset/security/advisories/GHSA-575j-qr6p-9763
+* fix: lowercase the `charset` parameter name so mixed-case `CHARSET=` cannot skip the allow-list (920480) — https://github.com/coreruleset/coreruleset/security/advisories/GHSA-89h9-2j8h-9gp2
+* fix: collect every `_charset_` value so a second value cannot shadow a disallowed charset (922100) — https://github.com/coreruleset/coreruleset/security/advisories/GHSA-qmx4-jfcv-fgww
+### ⭐ Important changes
+* fix:  Skip Checking Responses feature is broken by @azurit in https://github.com/coreruleset/coreruleset/pull/4807
+### 🆕 New features and detections 🎉
+* feat(932380): detect Active Directory DS command-line tools by @fzipi in https://github.com/coreruleset/coreruleset/pull/4768
+* feat(934200): detect Velocity and FreeMarker directive syntax by @Yeagerist0 in https://github.com/coreruleset/coreruleset/pull/4774
+* feat(unix): detect common selinux command usage by @EsadCetiner in https://github.com/coreruleset/coreruleset/pull/4724
+* feat: Add Mozilla/6.0 used by scanner tools by @HackingRepo in https://github.com/coreruleset/coreruleset/pull/4784
+* feat: Add .claude into restricted files by @azurit in https://github.com/coreruleset/coreruleset/pull/4809
+* feat: Expand Restricted Files data (v3) by @HackingRepo in https://github.com/coreruleset/coreruleset/pull/4816
+### 🪦 Rule removals
+* feat: refactoring of response rules skipping by @azurit in https://github.com/coreruleset/coreruleset/pull/4806
+### 🧰 Other Changes
+* fix(913100): substring false positive with veganism.social user-agent by @EsadCetiner in https://github.com/coreruleset/coreruleset/pull/4777
+* fix(932270): require boundary before tilde expansion patterns by @zoutjebot in https://github.com/coreruleset/coreruleset/pull/4596
+* fix(956100): FP with keyword 'EOFError' inside RESPONSE_BODY by @azurit in https://github.com/coreruleset/coreruleset/pull/4752
+* fix(951230): FP with too broad regex for RESPONSE_BODY by @azurit in https://github.com/coreruleset/coreruleset/pull/4747
+* fix: close trailing-slash bypass of upload extension check (V29-260924) by @fzipi in https://github.com/coreruleset/coreruleset/pull/4815
+* fix(932180): enforce boundaries for high-risk false positives entries by @EsadCetiner in https://github.com/coreruleset/coreruleset/pull/4632
+* feat: allow application/*+json and AWS JSON content types by default by @fzipi in https://github.com/coreruleset/coreruleset/pull/4775
+* fix(901370): allow + inside the subtype before the +json suffix by @fzipi in https://github.com/coreruleset/coreruleset/pull/4828
+* fix(libmodsecurity3/coraza): substring false positive with json key named profiledata by @EsadCetiner in https://github.com/coreruleset/coreruleset/pull/4812
+
+## New Contributors
+* @Yeagerist0 made their first contribution in https://github.com/coreruleset/coreruleset/pull/4774
+
+**Full Changelog**: https://github.com/coreruleset/coreruleset/compare/v4.29.0...v4.30.0
+
+## Version 4.29.0 - 2026-08-17
+
+## What's Changed
+
+### 🆕 New features and detections 🎉
+* fix(932): add backslash-prefix evasion to shell command detection by @zoutjebot in https://github.com/coreruleset/coreruleset/pull/4599
+* feat(unix): detect basic quote evasion attempts against known unix commands by @EsadCetiner in https://github.com/coreruleset/coreruleset/pull/4649
+* feat(unix): detect stat command at pl-2+ by @EsadCetiner in https://github.com/coreruleset/coreruleset/pull/4735
+* feat: Expand web shells (v1) by @HackingRepo in https://github.com/coreruleset/coreruleset/pull/4626
+### 🧰 Other Changes
+* fix: allow optional json. prefix in rule 932171 ARGS_NAMES pattern by @fzipi in https://github.com/coreruleset/coreruleset/pull/4703
+* fix(942190): require operator or quote after '!' to cut natural-language FPs by @fzipi in https://github.com/coreruleset/coreruleset/pull/4704
+* fix(942200): tighten comma branch to cut UA/Referer false positives by @fzipi in https://github.com/coreruleset/coreruleset/pull/4665
+* fix(942390): remove bypassable length bound on quoted/unary literals by @fzipi in https://github.com/coreruleset/coreruleset/pull/4713
+* fix(953100): more FPs related to RESPONSE_BODY ("(inclusive)" and "must be a valid") by @azurit in https://github.com/coreruleset/coreruleset/pull/4697
+* fix(932): remove w from Unix no-arguments command list by @zoutjebot in https://github.com/coreruleset/coreruleset/pull/4592
+* fix(932): require arguments for base64, lastlog, lastlogin by @zoutjebot in https://github.com/coreruleset/coreruleset/pull/4593
+* fix(953100): FP with '> in all' in RESPONSE_BODY by @azurit in https://github.com/coreruleset/coreruleset/pull/4736
+* feat(930120): restore node_modules coverage by @Prateeksaini12 in https://github.com/coreruleset/coreruleset/pull/4681
+* fix(942190): Fix the message to reflect that the rule applies to all SQL DBs by @aryehb in https://github.com/coreruleset/coreruleset/pull/4671
+
+
+**Full Changelog**: https://github.com/coreruleset/coreruleset/compare/v4.28.0...v4.29.0
+
+## Version 4.28.0 - 2026-07-01
+
+## What's Changed
+
+### 🔒 Security
+* fix: inspect XML attribute values across attack-detection rules — https://github.com/coreruleset/coreruleset/security/advisories/GHSA-6jp8-c2w2-x7wr
+* fix: remove catastrophic backtracking in unix-shell-evasion prefix — https://github.com/coreruleset/coreruleset/security/advisories/GHSA-f5qm-3h4p-8qhg
+### 🆕 New features and detections 🎉
+* feat: enable crs_validate_utf8_encoding by default by @fzipi in https://github.com/coreruleset/coreruleset/pull/4647
+* feat: added detection for quote evasion by @Xhoenix in https://github.com/coreruleset/coreruleset/pull/3813
+* feat(934): detect ORM lookup operator injection by @fzipi in https://github.com/coreruleset/coreruleset/pull/4659
+* fix(932): detect uninitialized variable spacer in RCE evasion prefix by @fzipi in https://github.com/coreruleset/coreruleset/pull/4652
+### 🧰 Other Changes
+* refactor: create 941170 `.ra` file by @fzipi in https://github.com/coreruleset/coreruleset/pull/4493
+* fix: Update restricted-files.data to include NPM subdirectories without causing FPs by @HackingRepo in https://github.com/coreruleset/coreruleset/pull/4653
+* fix: remove exponential backtracking in 933160/933161 comment suffix by @fzipi in https://github.com/coreruleset/coreruleset/pull/4666
+* fix(941140): remove exponential backtracking in CSS url(javascript) detection by @fzipi in https://github.com/coreruleset/coreruleset/pull/4670
+* fix(933180): remove exponential backtracking in variable-function noise suffix by @fzipi in https://github.com/coreruleset/coreruleset/pull/4669
+* fix(942390): move to regex-assembly by @fzipi in https://github.com/coreruleset/coreruleset/pull/4011
+* feat(crs-setup): add default actions for phases 3-5 by @Prateeksaini12 in https://github.com/coreruleset/coreruleset/pull/4675
+* fix(942522): avoid excessive backtracking by @EsadCetiner in https://github.com/coreruleset/coreruleset/pull/4676
+* fix: 4RI-250413 by @EsadCetiner in https://github.com/coreruleset/coreruleset/pull/4672
+* fix: FPs related to RESPONSE_BODY by @azurit in https://github.com/coreruleset/coreruleset/pull/4684
+
+## New Contributors
+* @Prateeksaini12 made their first contribution in https://github.com/coreruleset/coreruleset/pull/4661
+
+**Full Changelog**: https://github.com/coreruleset/coreruleset/compare/v4.27.0...v4.28.0
+
+## Version 4.27.0 - 2026-06-01
+
+## What's Changed
+### 🧰 Other Changes
+* fix(920240, 920400): don't rely on content-type header by @EsadCetiner in https://github.com/coreruleset/coreruleset/pull/4639
+
+## Version 4.26.0 - 2026-05-03
+
+## What's Changed
+### 🆕 New features and detections 🎉
+* feat: Add WhatWAF to the scanner list by @HackingRepo in https://github.com/coreruleset/coreruleset/pull/4566
+* feat: Add ghauri to scanner list by @HackingRepo in https://github.com/coreruleset/coreruleset/pull/4570
+* feat: Expand Scanner User Agents List (v2) by @HackingRepo in https://github.com/coreruleset/coreruleset/pull/4572
+* feat: Expanded os files list by @HackingRepo in https://github.com/coreruleset/coreruleset/pull/4536
+* feat(933100): all HTTP headers should be checked by @touchweb-vincent in https://github.com/coreruleset/coreruleset/pull/4603
+* fix(lfi-os-files): add .dockerenv, .DS_Store, META-INF/, WEB-INF/ by @zoutjebot in https://github.com/coreruleset/coreruleset/pull/4601
+* feat(934200): detect Server-Side Template Injection (SSTI) attacks by @zoutjebot in https://github.com/coreruleset/coreruleset/pull/4600
+### 🧰 Other Changes
+* fix(lfi-os-files): require path prefix for .profile by @zoutjebot in https://github.com/coreruleset/coreruleset/pull/4586
+* fix(933150): remove is_int from PHP function names list by @zoutjebot in https://github.com/coreruleset/coreruleset/pull/4585
+* fix(932370): remove url from Windows LOLBIN command list by @zoutjebot in https://github.com/coreruleset/coreruleset/pull/4587
+* fix(920539): prefer a bypass on a named rule rather than n+1 bypass by @touchweb-vincent in https://github.com/coreruleset/coreruleset/pull/4610
+* fix(942290): add word boundary to MongoDB operator detection by @zoutjebot in https://github.com/coreruleset/coreruleset/pull/4588
+* fix: false positive with parameter name `.history` by @EsadCetiner in https://github.com/coreruleset/coreruleset/pull/4614
+* fix(942410): use common exceptions instead of rule by @fzipi in https://github.com/coreruleset/coreruleset/pull/4617
+* fix(942200): reduce false positives on payloads with comments by @EsadCetiner in https://github.com/coreruleset/coreruleset/pull/4608
+* fix(unix): exclude `pg` command from pl-1 by @EsadCetiner in https://github.com/coreruleset/coreruleset/pull/4613
+* fix(930130): comment out false positive prone entries by @EsadCetiner in https://github.com/coreruleset/coreruleset/pull/4607
+* fix(920100): drop HTTP/0.9 GET support from request line validation by @fzipi in https://github.com/coreruleset/coreruleset/pull/4621
+* fix: Update restricted files to include Perl subdirectories by @HackingRepo in https://github.com/coreruleset/coreruleset/pull/4620
+
+## New Contributors
+* @zoutjebot made their first contribution in https://github.com/coreruleset/coreruleset/pull/4586
+
+**Full Changelog**: https://github.com/coreruleset/coreruleset/compare/v4.25.0...v4.26.0
+
+## Version 4.25.0 - 2026-03-28 - LTS Release
+
+## What's Changed
+### 🆕 New features and detections 🎉
+* feat(930130,930140): expand AI-based paths by @Elnadrion in https://github.com/coreruleset/coreruleset/pull/4540
+* feat: add aws security agent in scanners-user-agents.data by @S0obi in https://github.com/coreruleset/coreruleset/pull/4562
+* feat(932390): add shell fork bomb detection rule at PL2 by @fzipi in https://github.com/coreruleset/coreruleset/pull/4563
+### 🧰 Other Changes
+* refactor: create 941250 `.ra` file by @fzipi in https://github.com/coreruleset/coreruleset/pull/4520
+* refactor: create 942220 .ra file by @fzipi in https://github.com/coreruleset/coreruleset/pull/4511
+* refactor: create rule 931100 and 931110 `.ra` files by @Xhoenix in https://github.com/coreruleset/coreruleset/pull/4489
+* feat: Adding critical ai dirs that previously not exist by @HackingRepo in https://github.com/coreruleset/coreruleset/pull/4535
+* refactor: create 933140 and 933180 `.ra` files by @Xhoenix in https://github.com/coreruleset/coreruleset/pull/4488
+* fix(944110,944120,944130,944150,944151,944200,944210,..): don't inspect cookies twice by @touchweb-vincent in https://github.com/coreruleset/coreruleset/pull/4526
+* refactor: create 943120 `.ra` file by @fzipi in https://github.com/coreruleset/coreruleset/pull/4506
+* fix: false negative 932236 by @franbuehler in https://github.com/coreruleset/coreruleset/pull/4544
+* fix(933111): prevent whitespace padding bypass in PHP double-extension upload by @fzipi in https://github.com/coreruleset/coreruleset/pull/4547
+* fix(933110): prevent whitespace padding bypass in PHP upload detection by @fzipi in https://github.com/coreruleset/coreruleset/pull/4546
+* fix(944140): prevent whitespace padding bypass in JSP file upload detection by @fzipi in https://github.com/coreruleset/coreruleset/pull/4548
+* feat: update list of unix commands by @EsadCetiner in https://github.com/coreruleset/coreruleset/pull/4446
+* fix(932180): prevent whitespace padding bypass in restricted file upload detection by @fzipi in https://github.com/coreruleset/coreruleset/pull/4549
+* fix: harden GitHub Actions workflows by @fzipi in https://github.com/coreruleset/coreruleset/pull/4553
+* refactor: create 941310 `.ra` files by @fzipi in https://github.com/coreruleset/coreruleset/pull/4522
+* docs: update README by @fzipi in https://github.com/coreruleset/coreruleset/pull/4556
+* refactor: create 941120 `.ra` file by @fzipi in https://github.com/coreruleset/coreruleset/pull/4498
+* fix(920540): allow rule exclusions for specific targets by @EsadCetiner in https://github.com/coreruleset/coreruleset/pull/4405
+* fix(931130): ensure correct target is logged by @EsadCetiner in https://github.com/coreruleset/coreruleset/pull/4577
+
+**Full Changelog**: https://github.com/coreruleset/coreruleset/compare/v4.24.1...v4.25.0
+
+## Version 4.24.1 - 2026-03-09
+
+## What's Changed
+### 🆕 New features and detections 🎉
+* feat(930140): add AI coding assistant artifact protection by @etiennemunnich in https://github.com/coreruleset/coreruleset/pull/4519
+* feat: Expand Scanner Agents by @HackingRepo in https://github.com/coreruleset/coreruleset/pull/4532
+
+## Fixes
+* fix(942480): don't inspect cookies twice by @touchweb-vincent in https://github.com/coreruleset/coreruleset/pull/4524
+* fix(942200): prevent matches against user agent strings by @theseion in https://github.com/coreruleset/coreruleset/pull/4537
+
+### 🧰 Other Changes
+* refactor: create 934130 `.ra` file by @Xhoenix in https://github.com/coreruleset/coreruleset/pull/4487
+* refactor: create 941330 `.ra` file by @fzipi in https://github.com/coreruleset/coreruleset/pull/4492
+* refactor: create 944300 `.ra` file by @fzipi in https://github.com/coreruleset/coreruleset/pull/4490
+* refactor: create 941320 `.ra` file by @fzipi in https://github.com/coreruleset/coreruleset/pull/4491
+* refactor: create 921160 `.ra` file by @fzipi in https://github.com/coreruleset/coreruleset/pull/4497
+* refactor: create 921120 `.ra` file by @fzipi in https://github.com/coreruleset/coreruleset/pull/4496
+* refactor: create 921110 `.ra` file by @fzipi in https://github.com/coreruleset/coreruleset/pull/4495
+* feat: move 930110 to regex-assembly by @fzipi in https://github.com/coreruleset/coreruleset/pull/4494
+* refactor: create 941190 .ra file by @fzipi in https://github.com/coreruleset/coreruleset/pull/4499
+* refactor: create 941400 `.ra` file by @fzipi in https://github.com/coreruleset/coreruleset/pull/4517
+* refactor: create 942250 .ra file by @fzipi in https://github.com/coreruleset/coreruleset/pull/4512
+* refactor: create 941370 `.ra` file by @fzipi in https://github.com/coreruleset/coreruleset/pull/4518
+* refactor: create 944260 .ra file by @fzipi in https://github.com/coreruleset/coreruleset/pull/4510
+* feat: move 943100 to regex-assembly by @fzipi in https://github.com/coreruleset/coreruleset/pull/4504
+* refactor: create 944120 .ra file by @fzipi in https://github.com/coreruleset/coreruleset/pull/4508
+* refactor: create 942450 .ra file by @fzipi in https://github.com/coreruleset/coreruleset/pull/4513
+* refactor: create 942510 and 942511 .ra files with shared include by @fzipi in https://github.com/coreruleset/coreruleset/pull/4516
+* refactor: create 944240 .ra file by @fzipi in https://github.com/coreruleset/coreruleset/pull/4509
+* docs: comment on threshold should be more alarming by @touchweb-vincent in https://github.com/coreruleset/coreruleset/pull/4330
+* chore: add missing regex-assembly comment blocks to rules by @fzipi in https://github.com/coreruleset/coreruleset/pull/4523
+* fix(913100): adding OWASP Nettacker to known scanners list by @securestep9 in https://github.com/coreruleset/coreruleset/pull/4529
+* refactor: create 941300 `.ra` file by @fzipi in https://github.com/coreruleset/coreruleset/pull/4521
+
+## New Contributors
+* @etiennemunnich made their first contribution in https://github.com/coreruleset/coreruleset/pull/4519
+* @securestep9 made their first contribution in https://github.com/coreruleset/coreruleset/pull/4529
+* @HackingRepo made their first contribution in https://github.com/coreruleset/coreruleset/pull/4532
+
+**Full Changelog**: https://github.com/coreruleset/coreruleset/compare/v4.24.0...v4.24.1
+
 ## Version 4.24.0 - 2026-02-28
 
 ## What's Changed

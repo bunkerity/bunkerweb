@@ -1,199 +1,224 @@
 [
   {
-    "enabled":1,
-    "version_min":300000,
-    "title":"SecRuleUpdateTargetById - exclude whole collection",
-    "client":{
-      "ip":"200.249.12.31",
-      "port":123
+    "enabled": 1,
+    "version_min": 300000,
+    "title": "SecRuleUpdateTargetById - exclude whole collection",
+    "client": {
+      "ip": "200.249.12.31",
+      "port": 123
     },
-    "server":{
-      "ip":"200.249.12.31",
-      "port":80
+    "server": {
+      "ip": "200.249.12.31",
+      "port": 80
     },
-    "request":{
-      "headers":{
-        "Host":"localhost",
-        "User-Agent":"curl/7.38.0",
-        "Accept":"*/*"
+    "request": {
+      "headers": {
+        "Host": "localhost",
+        "User-Agent": "curl/7.38.0",
+        "Accept": "*/*",
+        "Content-Length": "0"
       },
-      "uri":"/?key=value&key=other_value",
-      "method":"GET"
+      "uri": "/?key=value&key=other_value",
+      "method": "GET",
+      "body": [
+        ""
+      ]
     },
-    "response":{
-      "headers":{
-        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
-        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
-        "Content-Type":"text/html"
+    "response": {
+      "headers": {
+        "Date": "Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified": "Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type": "text/html",
+        "Content-Length": "8"
       },
-      "body":[
+      "body": [
         "no need."
       ]
     },
-    "expected":{
+    "expected": {
       "http_code": 200
     },
-    "rules":[
+    "rules": [
       "SecRuleEngine On",
       "SecRuleUpdateTargetById 1 !ARGS",
       "SecRule ARGS \"@contains value\" \"id:1,pass,t:trim,tag:'test',deny\""
     ]
   },
   {
-    "enabled":1,
-    "version_min":300000,
-    "title":"SecRuleUpdateTargetById - exclude using regex",
-    "client":{
-      "ip":"200.249.12.31",
-      "port":123
+    "enabled": 1,
+    "version_min": 300000,
+    "title": "SecRuleUpdateTargetById - exclude using regex",
+    "client": {
+      "ip": "200.249.12.31",
+      "port": 123
     },
-    "server":{
-      "ip":"200.249.12.31",
-      "port":80
+    "server": {
+      "ip": "200.249.12.31",
+      "port": 80
     },
-    "request":{
-      "headers":{
-        "Host":"localhost",
-        "User-Agent":"curl/7.38.0",
-        "Accept":"*/*"
+    "request": {
+      "headers": {
+        "Host": "localhost",
+        "User-Agent": "curl/7.38.0",
+        "Accept": "*/*",
+        "Content-Length": "0"
       },
-      "uri":"/?mixpanel=value&mixpanel=other_value",
-      "method":"GET"
+      "uri": "/?mixpanel=value&mixpanel=other_value",
+      "method": "GET",
+      "body": [
+        ""
+      ]
     },
-    "response":{
-      "headers":{
-        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
-        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
-        "Content-Type":"text/html"
+    "response": {
+      "headers": {
+        "Date": "Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified": "Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type": "text/html",
+        "Content-Length": "8"
       },
-      "body":[
+      "body": [
         "no need."
       ]
     },
-    "expected":{
+    "expected": {
       "http_code": 200
     },
-    "rules":[
+    "rules": [
       "SecRuleEngine On",
       "SecRuleUpdateTargetById 1 !ARGS:/mixpanel$/",
       "SecRule ARGS \"@contains value\" \"id:1,pass,t:trim,tag:'test',deny\""
     ]
   },
   {
-    "enabled":1,
-    "version_min":300000,
-    "title":"SecRuleUpdateTargetById - exclude using full name",
-    "client":{
-      "ip":"200.249.12.31",
-      "port":123
+    "enabled": 1,
+    "version_min": 300000,
+    "title": "SecRuleUpdateTargetById - exclude using full name",
+    "client": {
+      "ip": "200.249.12.31",
+      "port": 123
     },
-    "server":{
-      "ip":"200.249.12.31",
-      "port":80
+    "server": {
+      "ip": "200.249.12.31",
+      "port": 80
     },
-    "request":{
-      "headers":{
-        "Host":"localhost",
-        "User-Agent":"curl/7.38.0",
-        "Accept":"*/*"
+    "request": {
+      "headers": {
+        "Host": "localhost",
+        "User-Agent": "curl/7.38.0",
+        "Accept": "*/*",
+        "Content-Length": "0"
       },
-      "uri":"/?mixpanel=value",
-      "method":"GET"
+      "uri": "/?mixpanel=value",
+      "method": "GET",
+      "body": [
+        ""
+      ]
     },
-    "response":{
-      "headers":{
-        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
-        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
-        "Content-Type":"text/html"
+    "response": {
+      "headers": {
+        "Date": "Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified": "Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type": "text/html",
+        "Content-Length": "8"
       },
-      "body":[
+      "body": [
         "no need."
       ]
     },
-    "expected":{
+    "expected": {
       "http_code": 200
     },
-    "rules":[
+    "rules": [
       "SecRuleEngine On",
       "SecRuleUpdateTargetById 1 !ARGS:mixpanel",
       "SecRule ARGS \"@contains value\" \"id:1,t:trim,tag:'test',deny\""
     ]
   },
   {
-    "enabled":1,
-    "version_min":300000,
-    "title":"SecRuleUpdateTargetById - exclude from ARGS_NAMES using regex (match)",
-    "client":{
-      "ip":"200.249.12.31",
-      "port":123
+    "enabled": 1,
+    "version_min": 300000,
+    "title": "SecRuleUpdateTargetById - exclude from ARGS_NAMES using regex (match)",
+    "client": {
+      "ip": "200.249.12.31",
+      "port": 123
     },
-    "server":{
-      "ip":"200.249.12.31",
-      "port":80
+    "server": {
+      "ip": "200.249.12.31",
+      "port": 80
     },
-    "request":{
-      "headers":{
-        "Host":"localhost",
-        "User-Agent":"curl/7.38.0",
-        "Accept":"*/*"
+    "request": {
+      "headers": {
+        "Host": "localhost",
+        "User-Agent": "curl/7.38.0",
+        "Accept": "*/*",
+        "Content-Length": "0"
       },
-      "uri":"/?xxxyyy=value",
-      "method":"GET"
+      "uri": "/?xxxyyy=value",
+      "method": "GET",
+      "body": [
+        ""
+      ]
     },
-    "response":{
-      "headers":{
-        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
-        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
-        "Content-Type":"text/html"
+    "response": {
+      "headers": {
+        "Date": "Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified": "Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type": "text/html",
+        "Content-Length": "8"
       },
-      "body":[
+      "body": [
         "no need."
       ]
     },
-    "expected":{
+    "expected": {
       "http_code": 200
     },
-    "rules":[
+    "rules": [
       "SecRuleEngine On",
       "SecRuleUpdateTargetById 1 \"!ARGS:/xxx/\"",
       "SecRule ARGS_NAMES \"@contains yyy\" \"id:1,phase:2,deny,status:403\""
     ]
   },
   {
-    "enabled":1,
-    "version_min":300000,
-    "title":"SecRuleUpdateTargetById - exclude from ARGS_NAMES using regex (no match)",
-    "client":{
-      "ip":"200.249.12.31",
-      "port":123
+    "enabled": 1,
+    "version_min": 300000,
+    "title": "SecRuleUpdateTargetById - exclude from ARGS_NAMES using regex (no match)",
+    "client": {
+      "ip": "200.249.12.31",
+      "port": 123
     },
-    "server":{
-      "ip":"200.249.12.31",
-      "port":80
+    "server": {
+      "ip": "200.249.12.31",
+      "port": 80
     },
-    "request":{
-      "headers":{
-        "Host":"localhost",
-        "User-Agent":"curl/7.38.0",
-        "Accept":"*/*"
+    "request": {
+      "headers": {
+        "Host": "localhost",
+        "User-Agent": "curl/7.38.0",
+        "Accept": "*/*",
+        "Content-Length": "0"
       },
-      "uri":"/?xxyyy=value",
-      "method":"GET"
+      "uri": "/?xxyyy=value",
+      "method": "GET",
+      "body": [
+        ""
+      ]
     },
-    "response":{
-      "headers":{
-        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
-        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
-        "Content-Type":"text/html"
+    "response": {
+      "headers": {
+        "Date": "Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified": "Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type": "text/html",
+        "Content-Length": "8"
       },
-      "body":[
+      "body": [
         "no need."
       ]
     },
-    "expected":{
+    "expected": {
       "http_code": 403
     },
-    "rules":[
+    "rules": [
       "SecRuleEngine On",
       "SecRuleUpdateTargetById 1 \"!ARGS:/xxx/\"",
       "SecRule ARGS_NAMES \"@contains yyy\" \"id:1,phase:2,deny,status:403\""

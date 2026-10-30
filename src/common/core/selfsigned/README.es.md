@@ -29,7 +29,7 @@ Siga estos pasos para configurar y usar la función de Certificado Autofirmado:
 | --------------------------- | ---------------------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `GENERATE_SELF_SIGNED_SSL`  | `no`                   | multisite | no       | **Habilitar autofirmado:** Establezca en `yes` para habilitar la generación automática de certificados autofirmados.                             |
 | `SELF_SIGNED_SSL_ALGORITHM` | `ec-prime256v1`        | multisite | no       | **Algoritmo del certificado:** Algoritmo utilizado para la generación de certificados: `ec-prime256v1`, `ec-secp384r1`, `rsa-2048` o `rsa-4096`. |
-| `SELF_SIGNED_SSL_EXPIRY`    | `365`                  | multisite | no       | **Validez del certificado:** Número de días que el certificado autofirmado debe ser válido (predeterminado: 1 año).                              |
+| `SELF_SIGNED_SSL_EXPIRY`    | `1y`                   | multisite | no       | **Validez del certificado:** Número de días que el certificado autofirmado debe ser válido (predeterminado: 1 año). Acepta un sufijo de tiempo (ms, s, m, h, d, w, M, y); un número sin sufijo se interpreta en días. |
 | `SELF_SIGNED_SSL_SUBJ`      | `/CN=www.example.com/` | multisite | no       | **Sujeto del certificado:** Campo de sujeto para el certificado que identifica el dominio.                                                       |
 
 !!! tip "Entornos de Desarrollo"

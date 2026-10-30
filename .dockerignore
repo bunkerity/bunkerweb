@@ -6,6 +6,7 @@
 env/
 src/deps/tmp_venv/
 tests/
+src/api/tests/
 **/Dockerfile
 src/common/README*.md
 src/common/core/*/README*.md

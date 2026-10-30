@@ -48,6 +48,7 @@ do
   name="$(echo "$repo" | jq -r .name)"
   url="$(echo "$repo" | jq -r .url)"
   commit="$(echo "$repo" | jq -r .commit)"
+  submodules="$(echo "$repo" | jq -r '.submodules // false')"
   post_install="$(echo "$repo" | jq -r .post_install)"
 
   echo "ℹ️ Clone ${name} from $url at commit/version $commit"
@@ -56,14 +57,36 @@ do
     rm -rf "src/deps/src/$id"
   fi
 
+  # Keep the clone's git dir outside the vendored tree: a tool watching the
+  # repository (an editor's git integration, a file watcher) can write into
+  # the clone's .git while it is being removed and make `rm -rf` fail. With a
+  # gitfile in its place, dropping .git is a single `rm -f` nothing can race.
+  gitdir="$(mktemp -d -t bw-init-deps.XXXXXX)"
   do_and_check_cmd mkdir -p "src/deps/src/$id"
-  do_and_check_cmd git -C "src/deps/src/$id" init
+  do_and_check_cmd git init --separate-git-dir "$gitdir" "src/deps/src/$id"
   do_and_check_cmd git -C "src/deps/src/$id" remote add origin "$url"
   do_and_check_cmd git -C "src/deps/src/$id" fetch origin "$commit"
   do_and_check_cmd git -C "src/deps/src/$id" checkout FETCH_HEAD
 
-  if [ -d "src/deps/src/$id/.git" ] ; then
-    do_and_check_cmd rm -rf "src/deps/src/$id/.git"
+  if [ "$submodules" = "true" ] && [ -f "src/deps/src/$id/.gitmodules" ] ; then
+    echo "ℹ️ Fetching submodules for ${name}"
+    do_and_check_cmd git -C "src/deps/src/$id" submodule update --init --recursive
+  fi
+
+  if [ -e "src/deps/src/$id/.git" ] ; then
+    do_and_check_cmd rm -f "src/deps/src/$id/.git"
+    do_and_check_cmd rm -rf "src/deps/src/$id/.github"
+  fi
+  rm -rf "$gitdir" 2>/dev/null || true
+  # Submodules leave dangling `.git` pointer files (gitdir -> parent
+  # .git/modules/...) and nested .gitmodules that break IDE source control
+  # once the parent .git is gone. Only scrub these for submodule-enabled
+  # deps so we don't preempt post_install scripts that expect to remove
+  # `.gitmodules` themselves (e.g. modsecurity, ngx_brotli).
+  if [ "$submodules" = "true" ] ; then
+    do_and_check_cmd find "src/deps/src/$id" -depth \
+      \( -name ".git" -o -name ".github" -o -name ".gitmodules" \) \
+      -exec rm -rf {} +
   fi
 
   if [ "$post_install" != "null" ]; then

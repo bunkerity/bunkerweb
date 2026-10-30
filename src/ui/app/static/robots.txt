@@ -1,0 +1,3 @@
+# BunkerWeb web UI
+User-agent: *
+Disallow: /

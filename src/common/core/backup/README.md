@@ -6,7 +6,7 @@ The Backup plugin provides an automated backup solution to protect your BunkerWe
 2. Backups are stored in a specified directory on your system.
 3. Before each backup a disk-space pre-flight check is performed to ensure sufficient free space.
 4. Each backup ZIP contains the SQL dump and a SHA-256 checksum file (`.sha256`) for integrity verification.
-5. Old backups are automatically rotated based on your retention settings. The `hanoi` schedule uses Towers of Hanoi rotation (24 files, ~85 days of coverage) instead of a simple count.
+5. Old backups are automatically rotated based on your retention settings. The `hanoi` schedule uses Towers of Hanoi rotation (24–34 files, 64–85 days of coverage) instead of a simple count.
 6. When restoring, the checksum is verified before the live database is touched.
 7. You can manually create, list, verify, or restore backups at any time.
 8. Before any restore operation, the current state is automatically backed up as a safety measure.
@@ -26,7 +26,7 @@ Follow these steps to configure and use the Backup feature:
 | Setting            | Default                      | Context | Multiple | Description                                                                                                                                                       |
 | ------------------ | ---------------------------- | ------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `USE_BACKUP`       | `yes`                        | global  | no       | **Enable Backup:** Set to `yes` to enable automatic backups.                                                                                                      |
-| `BACKUP_SCHEDULE`  | `daily`                      | global  | no       | **Backup Frequency:** How often to perform backups. Options: `daily`, `weekly`, `monthly`, or `hanoi` (hourly with Towers of Hanoi rotation, ~85 days coverage). |
+| `BACKUP_SCHEDULE`  | `daily`                      | global  | no       | **Backup Frequency:** How often to perform backups. Options: `daily`, `weekly`, `monthly`, or `hanoi` (hourly with Towers of Hanoi rotation, 64–85 days coverage). |
 | `BACKUP_ROTATION`  | `7`                          | global  | no       | **Backup Retention:** Number of backup files to keep. Ignored when `BACKUP_SCHEDULE=hanoi` (rotation is managed automatically by the Hanoi algorithm).            |
 | `BACKUP_DIRECTORY` | `/var/lib/bunkerweb/backups` | global  | no       | **Backup Location:** The directory where backup files will be stored.                                                                                             |
 | `BACKUP_IGNORE_CHECKSUM_ERROR_ON_DB_RESTORE` | `no` | global | no | **Ignore checksum error on restore:** If `yes`, a failed SHA-256 checksum will not abort the restore. Use only as a last resort for partially corrupted backups. |
@@ -62,7 +62,7 @@ bwcli plugin backup restore /path/to/backup/backup-sqlite-2023-08-15_12-34-56.zi
     Every backup ZIP contains a SHA-256 checksum file alongside the SQL dump. The checksum is automatically verified before any restore. Use `bwcli plugin backup check` to verify all backups at any time.
 
 !!! warning "Database Compatibility"
-    The Backup plugin supports SQLite, MySQL/MariaDB, and PostgreSQL databases. Oracle databases are not currently supported for backup and restore operations.
+    The Backup plugin supports SQLite, MySQL/MariaDB, and PostgreSQL databases. Oracle databases are not currently supported for backup and restore operations. A restore refuses a backup taken from a different database engine (MariaDB and MySQL count as different engines) before changing anything.
 
 ### Example Configurations
 
@@ -77,9 +77,9 @@ bwcli plugin backup restore /path/to/backup/backup-sqlite-2023-08-15_12-34-56.zi
     BACKUP_DIRECTORY: "/var/lib/bunkerweb/backups"
     ```
 
-=== "Towers of Hanoi (~85 days coverage)"
+=== "Towers of Hanoi (64–85 days coverage)"
 
-    Runs hourly and applies Towers of Hanoi rotation. Keeps 24 files covering approximately 85 days. `BACKUP_ROTATION` is ignored:
+    Runs hourly and applies Towers of Hanoi rotation. Keeps 24–34 files covering 64–85 days. `BACKUP_ROTATION` is ignored:
 
     ```yaml
     USE_BACKUP: "yes"

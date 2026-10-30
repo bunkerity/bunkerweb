@@ -1,0 +1,23 @@
+# Copyright (c) The mlkem-native project authors
+# Copyright (c) The mldsa-native project authors
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+
+# Emitted when running CBMC proofs
+**/logs
+**/gotos
+**/report
+**/html
+output
+
+# Emitted by CBMC Viewer
+TAGS-*
+
+# Emitted by litani
+.ninja_deps
+.ninja_log
+.litani_cache_dir
+
+# These files should be overwritten whenever prepare.py runs
+cbmc-batch.yaml
+
+__pycache__/

@@ -6,7 +6,6 @@ Create Date: 2025-02-19 13:43:57.912879
 
 """
 
-from contextlib import suppress
 from typing import Sequence, Union
 
 from alembic import op
@@ -19,27 +18,15 @@ branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
 
-def execute_with_new_transaction(connection, statement):
-    """Execute SQL statement in a separate transaction."""
-    try:
-        # Create a new connection from the engine
-        engine = connection.engine
-        with engine.begin() as new_connection:
-            new_connection.execute(statement)
-    except Exception as e:
-        print(f"Ignoring error: {e}", flush=True)
-
-
 def upgrade() -> None:
     # Get database connection
     connection = op.get_bind()
 
-    # Execute each operation with its own transaction
-    execute_with_new_transaction(connection, sa.text("ALTER TABLE bw_jobs DROP CONSTRAINT IF EXISTS bw_jobs_name_plugin_id_key"))
+    # Use Alembic's transaction so earlier revisions cannot block a second connection.
+    connection.execute(sa.text("ALTER TABLE bw_jobs DROP CONSTRAINT IF EXISTS bw_jobs_name_plugin_id_key"))
 
     # Check if constraint exists before adding it
-    execute_with_new_transaction(
-        connection,
+    connection.execute(
         sa.text(
             "DO $$ "
             "BEGIN "
@@ -52,8 +39,7 @@ def upgrade() -> None:
     )
 
     # Check if constraint exists before adding it
-    execute_with_new_transaction(
-        connection,
+    connection.execute(
         sa.text(
             "DO $$ "
             "BEGIN "
@@ -64,8 +50,20 @@ def upgrade() -> None:
         ),
     )
 
+    # Fresh 1.5.6-1.5.12 schemas lack the setting-name uniqueness required by 1.6.
+    connection.execute(
+        sa.text(
+            "DO $$ "
+            "BEGIN "
+            "  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conrelid = 'bw_settings'::regclass AND conname = 'bw_settings_name_key') THEN "
+            "    ALTER TABLE bw_settings ADD CONSTRAINT bw_settings_name_key UNIQUE (name); "
+            "  END IF; "
+            "END $$;"
+        ),
+    )
+
     # Update the version in bw_metadata
-    execute_with_new_transaction(connection, sa.text("UPDATE bw_metadata SET version = '1.6.1-rc1' WHERE id = 1"))
+    connection.execute(sa.text("UPDATE bw_metadata SET version = '1.6.1-rc1' WHERE id = 1"))
 
 
 def downgrade() -> None:

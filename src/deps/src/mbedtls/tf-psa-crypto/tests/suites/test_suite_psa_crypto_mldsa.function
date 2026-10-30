@@ -1,0 +1,488 @@
+/* BEGIN_HEADER */
+
+/* Test the MLDSA driver based on mldsa-native.
+ *
+ * We generally assume that the underlying implementation is functionally
+ * correct. The main objective of this test suite is to cover parameter
+ * validation.
+ */
+
+#include <psa_crypto_mldsa.h>
+
+/* END_HEADER */
+
+/* BEGIN_DEPENDENCIES
+ * depends_on:TF_PSA_CRYPTO_PQCP_MLDSA_ENABLED:MBEDTLS_PSA_CRYPTO_C
+ * END_DEPENDENCIES */
+
+/* BEGIN_CASE */
+void export_public_key(int type_arg, int bits_arg,
+                       data_t *seed,
+                       data_t *expected_public_key,
+                       psa_status_t expected_status)
+{
+    psa_key_attributes_t attributes = PSA_KEY_ATTRIBUTES_INIT;
+    uint8_t *public_key = NULL;
+
+    PSA_INIT();
+
+    psa_set_key_type(&attributes, type_arg);
+    psa_set_key_bits(&attributes, bits_arg);
+
+    /* Export into an exact-size buffer */
+    size_t public_key_size = expected_public_key->len;
+    TEST_CALLOC(public_key, public_key_size);
+    size_t public_key_length = SIZE_MAX;
+    TEST_EQUAL(tf_psa_crypto_mldsa_export_public_key(&attributes,
+                                                     seed->x, seed->len,
+                                                     public_key,
+                                                     public_key_size,
+                                                     &public_key_length),
+               expected_status);
+    if (expected_status == PSA_SUCCESS) {
+        TEST_MEMORY_COMPARE(public_key, public_key_length,
+                            expected_public_key->x, expected_public_key->len);
+    } else {
+        /* Check that the reported length is non-risky even on failure */
+        TEST_LE_U(public_key_length, public_key_size);
+    }
+    mbedtls_free(public_key);
+    public_key = NULL;
+
+    /* Export into a larger buffer */
+    public_key_size = expected_public_key->len + 1;
+    TEST_CALLOC(public_key, public_key_size);
+    public_key_length = SIZE_MAX;
+    TEST_EQUAL(tf_psa_crypto_mldsa_export_public_key(&attributes,
+                                                     seed->x, seed->len,
+                                                     public_key,
+                                                     public_key_size,
+                                                     &public_key_length),
+               expected_status);
+    if (expected_status == PSA_SUCCESS) {
+        TEST_MEMORY_COMPARE(public_key, public_key_length,
+                            expected_public_key->x, expected_public_key->len);
+    } else {
+        /* Check that the reported length is non-risky even on failure */
+        TEST_LE_U(public_key_length, public_key_size);
+    }
+    mbedtls_free(public_key);
+    public_key = NULL;
+
+    /* Try exporting into a buffer that's too small */
+    if (expected_status == PSA_SUCCESS) {
+        public_key_size = expected_public_key->len - 1;
+        TEST_CALLOC(public_key, public_key_size);
+        public_key_length = SIZE_MAX;
+        TEST_EQUAL(tf_psa_crypto_mldsa_export_public_key(&attributes,
+                                                         seed->x, seed->len,
+                                                         public_key,
+                                                         public_key_size,
+                                                         &public_key_length),
+                   PSA_ERROR_BUFFER_TOO_SMALL);
+        /* Check that the reported length is non-risky even on failure */
+        TEST_LE_U(public_key_length, public_key_size);
+        mbedtls_free(public_key);
+        public_key = NULL;
+    }
+
+exit:
+    mbedtls_free(public_key);
+    psa_reset_key_attributes(&attributes);
+    PSA_DONE();
+}
+/* END_CASE */
+
+/* BEGIN_CASE */
+void sign_deterministic_pure(int type_arg, int bits_arg, int alg_arg,
+                             data_t *seed,
+                             data_t *message,
+                             data_t *expected_signature,
+                             psa_status_t expected_status)
+{
+    psa_key_attributes_t attributes = PSA_KEY_ATTRIBUTES_INIT;
+    uint8_t *signature = NULL;
+
+    PSA_INIT();
+
+    psa_set_key_type(&attributes, type_arg);
+    psa_set_key_bits(&attributes, bits_arg);
+
+    /* Sign into an exact-size buffer */
+    size_t signature_size = expected_signature->len;
+    TEST_CALLOC(signature, signature_size);
+    size_t signature_length = SIZE_MAX;
+    TEST_EQUAL(tf_psa_crypto_mldsa_sign_message(&attributes,
+                                                seed->x, seed->len,
+                                                alg_arg,
+                                                message->x, message->len,
+                                                signature, signature_size,
+                                                &signature_length),
+               expected_status);
+    if (expected_status == PSA_SUCCESS) {
+        TEST_MEMORY_COMPARE(signature, signature_length,
+                            expected_signature->x, expected_signature->len);
+    } else {
+        /* Check that the reported length is non-risky even on failure */
+        TEST_LE_U(signature_length, signature_size);
+    }
+    mbedtls_free(signature);
+    signature = NULL;
+
+    /* Sign into a larger buffer */
+    signature_size = expected_signature->len + 1;
+    TEST_CALLOC(signature, signature_size);
+    signature_length = SIZE_MAX;
+    TEST_EQUAL(tf_psa_crypto_mldsa_sign_message(&attributes,
+                                                seed->x, seed->len,
+                                                alg_arg,
+                                                message->x, message->len,
+                                                signature, signature_size,
+                                                &signature_length),
+               expected_status);
+    if (expected_status == PSA_SUCCESS) {
+        TEST_MEMORY_COMPARE(signature, signature_length,
+                            expected_signature->x, expected_signature->len);
+    } else {
+        /* Check that the reported length is non-risky even on failure */
+        TEST_LE_U(signature_length, signature_size);
+    }
+    mbedtls_free(signature);
+    signature = NULL;
+
+    if (expected_status == PSA_SUCCESS) {
+        signature_size = expected_signature->len - 1;
+        TEST_CALLOC(signature, signature_size);
+        signature_length = SIZE_MAX;
+        TEST_EQUAL(tf_psa_crypto_mldsa_sign_message(&attributes,
+                                                    seed->x, seed->len,
+                                                    alg_arg,
+                                                    message->x, message->len,
+                                                    signature, signature_size,
+                                                    &signature_length),
+                   PSA_ERROR_BUFFER_TOO_SMALL);
+        /* Check that the reported length is non-risky even on failure */
+        TEST_LE_U(signature_length, signature_size);
+        mbedtls_free(signature);
+        signature = NULL;
+    }
+
+exit:
+    mbedtls_free(signature);
+    psa_reset_key_attributes(&attributes);
+    PSA_DONE();
+}
+/* END_CASE */
+
+/* BEGIN_CASE */
+void verify_pure(int type_arg, int bits_arg, int alg_arg,
+                 data_t *public_key,
+                 data_t *message,
+                 data_t *signature,
+                 psa_status_t expected_status)
+{
+    psa_key_attributes_t attributes = PSA_KEY_ATTRIBUTES_INIT;
+    uint8_t *buf = NULL;
+
+    PSA_INIT();
+
+    psa_set_key_type(&attributes, type_arg);
+    psa_set_key_bits(&attributes, bits_arg);
+
+    TEST_EQUAL(tf_psa_crypto_mldsa_verify_message(&attributes,
+                                                  public_key->x, public_key->len,
+                                                  alg_arg,
+                                                  message->x, message->len,
+                                                  signature->x, signature->len),
+               expected_status);
+
+    if (expected_status == PSA_SUCCESS) {
+        /* Try verifying a signature whose last byte is wrong */
+        TEST_CALLOC(buf, signature->len);
+        memcpy(buf, signature->x, signature->len);
+        buf[signature->len - 1] ^= 1;
+        TEST_EQUAL(tf_psa_crypto_mldsa_verify_message(
+                       &attributes,
+                       public_key->x, public_key->len,
+                       alg_arg,
+                       message->x, message->len,
+                       buf, signature->len),
+                   PSA_ERROR_INVALID_SIGNATURE);
+        mbedtls_free(buf);
+        buf  = NULL;
+
+        /* Try verifying a signature that's too short */
+        TEST_CALLOC(buf, signature->len - 1);
+        memcpy(buf, signature->x, signature->len - 1);
+        TEST_EQUAL(tf_psa_crypto_mldsa_verify_message(
+                       &attributes,
+                       public_key->x, public_key->len,
+                       alg_arg,
+                       message->x, message->len,
+                       buf, signature->len - 1),
+                   PSA_ERROR_INVALID_SIGNATURE);
+        mbedtls_free(buf);
+        buf  = NULL;
+
+        /* Try verifying a signature that's too long */
+        TEST_CALLOC(buf, signature->len + 1);
+        memcpy(buf, signature->x, signature->len);
+        TEST_EQUAL(tf_psa_crypto_mldsa_verify_message(
+                       &attributes,
+                       public_key->x, public_key->len,
+                       alg_arg,
+                       message->x, message->len,
+                       buf, signature->len + 1),
+                   PSA_ERROR_INVALID_SIGNATURE);
+        mbedtls_free(buf);
+        buf = NULL;
+    }
+
+exit:
+    PSA_DONE();
+    mbedtls_free(buf);
+}
+/* END_CASE */
+
+/* BEGIN_CASE */
+void sign_setup(int type_arg, int bits_arg, int alg_arg,
+                data_t *seed,
+                psa_status_t expected_status)
+{
+    psa_key_attributes_t attributes = PSA_KEY_ATTRIBUTES_INIT;
+    tf_psa_crypto_mldsa_operation_t operation;
+    memset(&operation, 0, sizeof(operation));
+
+    PSA_INIT();
+
+    psa_set_key_type(&attributes, type_arg);
+    psa_set_key_bits(&attributes, bits_arg);
+
+    TEST_EQUAL(tf_psa_crypto_mldsa_sign_setup(&operation,
+                                              &attributes,
+                                              seed->x, seed->len,
+                                              alg_arg),
+               expected_status);
+
+    PSA_ASSERT(tf_psa_crypto_mldsa_abort(&operation));
+
+exit:
+    tf_psa_crypto_mldsa_abort(&operation);
+    PSA_DONE();
+}
+/* END_CASE */
+
+/* BEGIN_CASE */
+void verify_setup(int type_arg, int bits_arg, int alg_arg,
+                  data_t *public_key,
+                  psa_status_t expected_status)
+{
+    psa_key_attributes_t attributes = PSA_KEY_ATTRIBUTES_INIT;
+    tf_psa_crypto_mldsa_operation_t operation;
+    memset(&operation, 0, sizeof(operation));
+
+    PSA_INIT();
+
+    psa_set_key_type(&attributes, type_arg);
+    psa_set_key_bits(&attributes, bits_arg);
+
+    TEST_EQUAL(tf_psa_crypto_mldsa_verify_setup(&operation,
+                                                &attributes,
+                                                public_key->x, public_key->len,
+                                                alg_arg),
+               expected_status);
+
+    PSA_ASSERT(tf_psa_crypto_mldsa_abort(&operation));
+
+exit:
+    tf_psa_crypto_mldsa_abort(&operation);
+    PSA_DONE();
+}
+/* END_CASE */
+
+/* BEGIN_CASE */
+void sign_deterministic_multipart(
+    int type, int bits, int alg, data_t *seed,
+    int n_chunks, data_t *chunk1, data_t *chunk2, data_t *chunk3,
+    data_t *expected_signature, int expected_finish_status)
+{
+    psa_key_attributes_t attributes = PSA_KEY_ATTRIBUTES_INIT;
+    tf_psa_crypto_mldsa_operation_t operation;
+    memset(&operation, 0, sizeof(operation));
+    const size_t signature_size = expected_signature->len;
+    size_t signature_length = SIZE_MAX;
+    uint8_t *signature = NULL;
+
+    PSA_INIT();
+    TEST_CALLOC(signature, signature_size);
+
+    psa_set_key_type(&attributes, type);
+    psa_set_key_bits(&attributes, bits);
+
+    PSA_ASSERT(tf_psa_crypto_mldsa_sign_setup(&operation,
+                                              &attributes,
+                                              seed->x, seed->len,
+                                              alg));
+    if (n_chunks >= 1) {
+        PSA_ASSERT(tf_psa_crypto_mldsa_update(&operation,
+                                              chunk1->x, chunk1->len));
+    }
+    if (n_chunks >= 2) {
+        PSA_ASSERT(tf_psa_crypto_mldsa_update(&operation,
+                                              chunk2->x, chunk2->len));
+    }
+    if (n_chunks >= 3) {
+        PSA_ASSERT(tf_psa_crypto_mldsa_update(&operation,
+                                              chunk3->x, chunk3->len));
+    }
+    TEST_EQUAL(tf_psa_crypto_mldsa_sign_finish(&operation,
+                                               seed->x, seed->len,
+                                               signature, signature_size,
+                                               &signature_length),
+               expected_finish_status);
+    if (expected_finish_status == PSA_SUCCESS) {
+        TEST_MEMORY_COMPARE(expected_signature->x, expected_signature->len,
+                            signature, signature_length);
+    }
+
+exit:
+    tf_psa_crypto_mldsa_abort(&operation);
+    PSA_DONE();
+    mbedtls_free(signature);
+}
+/* END_CASE */
+
+/* BEGIN_CASE */
+void sign_deterministic_multipart_finish(
+    int type, int bits, int alg, data_t *seed,
+    data_t *message,
+    data_t *expected_signature, int signature_size_delta,
+    int expected_finish_status)
+{
+    psa_key_attributes_t attributes = PSA_KEY_ATTRIBUTES_INIT;
+    tf_psa_crypto_mldsa_operation_t operation;
+    memset(&operation, 0, sizeof(operation));
+    const size_t signature_size = PSA_MLDSA_SIGNATURE_SIZE(bits) + signature_size_delta;
+    size_t signature_length = SIZE_MAX;
+    uint8_t *signature = NULL;
+
+    PSA_INIT();
+    TEST_CALLOC(signature, signature_size);
+
+    psa_set_key_type(&attributes, type);
+    psa_set_key_bits(&attributes, bits);
+
+    PSA_ASSERT(tf_psa_crypto_mldsa_sign_setup(&operation,
+                                              &attributes,
+                                              seed->x, seed->len,
+                                              alg));
+    PSA_ASSERT(tf_psa_crypto_mldsa_update(&operation,
+                                          message->x, message->len));
+    TEST_EQUAL(tf_psa_crypto_mldsa_sign_finish(&operation,
+                                               seed->x, seed->len,
+                                               signature, signature_size,
+                                               &signature_length),
+               expected_finish_status);
+    if (expected_finish_status == PSA_SUCCESS) {
+        TEST_MEMORY_COMPARE(expected_signature->x, expected_signature->len,
+                            signature, signature_length);
+    }
+
+exit:
+    tf_psa_crypto_mldsa_abort(&operation);
+    PSA_DONE();
+    mbedtls_free(signature);
+}
+/* END_CASE */
+
+/* BEGIN_CASE */
+void verify_multipart(
+    int type, int bits, int alg, data_t *public_key,
+    int n_chunks, data_t *chunk1, data_t *chunk2, data_t *chunk3,
+    data_t *signature, int expected_verify_status)
+{
+    psa_key_attributes_t attributes = PSA_KEY_ATTRIBUTES_INIT;
+    tf_psa_crypto_mldsa_operation_t operation;
+    memset(&operation, 0, sizeof(operation));
+
+    PSA_INIT();
+
+    psa_set_key_type(&attributes, type);
+    psa_set_key_bits(&attributes, bits);
+
+    PSA_ASSERT(tf_psa_crypto_mldsa_verify_setup(&operation,
+                                                &attributes,
+                                                public_key->x, public_key->len,
+                                                alg));
+    if (n_chunks >= 1) {
+        PSA_ASSERT(tf_psa_crypto_mldsa_update(&operation,
+                                              chunk1->x, chunk1->len));
+    }
+    if (n_chunks >= 2) {
+        PSA_ASSERT(tf_psa_crypto_mldsa_update(&operation,
+                                              chunk2->x, chunk2->len));
+    }
+    if (n_chunks >= 3) {
+        PSA_ASSERT(tf_psa_crypto_mldsa_update(&operation,
+                                              chunk3->x, chunk3->len));
+    }
+    TEST_EQUAL(tf_psa_crypto_mldsa_verify_finish(&operation,
+                                                 public_key->x, public_key->len,
+                                                 signature->x, signature->len),
+               expected_verify_status);
+
+exit:
+    tf_psa_crypto_mldsa_abort(&operation);
+    PSA_DONE();
+}
+/* END_CASE */
+
+/* BEGIN_CASE */
+void verify_multipart_finish(
+    int type, int bits, int alg,
+    data_t *setup_public_key, data_t *finish_public_key,
+    data_t *message,
+    data_t *signature, int expected_verify_status)
+{
+    psa_key_attributes_t attributes = PSA_KEY_ATTRIBUTES_INIT;
+    tf_psa_crypto_mldsa_operation_t operation;
+    memset(&operation, 0, sizeof(operation));
+    /* Temporary copy of the public key which is freed as soon as the
+     * library function returns. This lets us validate that the
+     * library doesn't rely on the key pointer remaining valid
+     * throughout the operation. */
+    uint8_t *public_key = NULL;
+
+    PSA_INIT();
+
+    psa_set_key_type(&attributes, type);
+    psa_set_key_bits(&attributes, bits);
+
+    TEST_CALLOC(public_key, setup_public_key->len);
+    memcpy(public_key, setup_public_key->x, setup_public_key->len);
+    PSA_ASSERT(tf_psa_crypto_mldsa_verify_setup(&operation,
+                                                &attributes,
+                                                public_key, setup_public_key->len,
+                                                alg));
+    mbedtls_free(public_key);
+    public_key = NULL;
+
+    PSA_ASSERT(tf_psa_crypto_mldsa_update(&operation, message->x, message->len));
+
+    TEST_CALLOC(public_key, finish_public_key->len);
+    if (finish_public_key->len != 0) {
+        memcpy(public_key, finish_public_key->x, finish_public_key->len);
+    }
+    TEST_EQUAL(tf_psa_crypto_mldsa_verify_finish(&operation,
+                                                 public_key, finish_public_key->len,
+                                                 signature->x, signature->len),
+               expected_verify_status);
+    mbedtls_free(public_key);
+    public_key = NULL;
+
+exit:
+    tf_psa_crypto_mldsa_abort(&operation);
+    PSA_DONE();
+    mbedtls_free(public_key);
+}
+/* END_CASE */

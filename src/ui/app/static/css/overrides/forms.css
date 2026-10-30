@@ -1,0 +1,388 @@
+.col.form-floating > .form-control-sm,
+.col-auto.form-floating > .form-select.form-select-sm {
+  height: calc(1.9em + 0.9rem + 1px);
+  min-height: calc(1.9em + 0.9rem + 1px);
+  font-size: 0.85rem;
+  line-height: 1;
+}
+
+.form-floating > .form-control:focus ~ label {
+  transform: scale(0.8) translateY(-0.7rem) translateX(0.15rem);
+}
+
+.col.form-floating > label,
+.col-auto.form-floating > label {
+  padding: 0.8rem 0.9375rem;
+  font-size: 0.8rem;
+}
+
+.form-floating > .form-select:focus {
+  padding-top: 1.2rem;
+}
+
+.col-auto.form-floating > .form-select.form-select-sm,
+.col-auto.form-floating > .form-select.form-select-sm:focus {
+  padding-top: calc(-2px + 1.2rem);
+}
+
+.form-floating > .form-control.form-control-sm:focus {
+  padding-top: 1.1rem !important;
+}
+
+.form-floating > :disabled ~ label::after,
+.form-floating > .form-control:disabled ~ label::after {
+  background-color: transparent;
+}
+
+.multiple-container:not(:first-child) {
+  border-top: 1px solid var(--bs-primary);
+}
+
+.setting-checkbox-label {
+  font-size: calc(var(--bs-body-font-size) * 0.85);
+}
+
+.setting-highlight {
+  background-color: rgba(var(--bs-bw-green-rgb), 0.5);
+  transition:
+    background-color 2s ease,
+    opacity 2s ease;
+  opacity: 1;
+}
+
+.setting-highlight-fade {
+  background-color: transparent;
+  opacity: 1; /* You can set this to 0 if you want it to fade out */
+}
+
+.form-floating > .form-control:focus,
+.form-floating > .form-control:not(:placeholder-shown),
+.form-floating > .form-control-plaintext:focus,
+.form-floating > .form-control-plaintext:not(:placeholder-shown) {
+  padding-top: 1.625rem !important;
+  padding-bottom: 0.625rem !important;
+}
+
+#plugins-dropdown-menu .input-group-text,
+#plugins-dropdown-menu .form-control,
+#services-dropdown-menu .input-group-text,
+#services-dropdown-menu .form-control,
+#templates-dropdown-menu .input-group-text,
+#templates-dropdown-menu .form-control,
+#language-dropdown-menu .input-group-text,
+#language-dropdown-menu .form-control {
+  border-radius: 0;
+}
+
+#plugins-dropdown-menu .input-group:focus-within,
+#services-dropdown-menu .input-group:focus-within,
+#templates-dropdown-menu .input-group:focus-within,
+#language-dropdown-menu .input-group:focus-within {
+  box-shadow: none;
+}
+
+/* Subtle animation for validation errors */
+
+@keyframes pulse-error {
+  0% {
+    box-shadow: 0 0 0 0 rgba(var(--bs-danger-rgb), 0.2);
+  }
+  70% {
+    box-shadow: 0 0 0 4px rgba(var(--bs-danger-rgb), 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(var(--bs-danger-rgb), 0);
+  }
+}
+
+/* Reset setting button styling */
+
+.reset-setting {
+  position: absolute !important;
+  right: 2.5rem;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  z-index: 2;
+  margin: 0 !important;
+  padding: 0.25rem 0.5rem 0.25rem 0.25rem !important;
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    opacity 0.2s ease,
+    visibility 0.2s ease !important;
+  border-radius: 0.25rem;
+  color: #ff7f50 !important;
+}
+
+/* Dark mode reset button styling */
+
+.dark-style .reset-setting {
+  color: #ff7f50 !important;
+}
+
+span.cursor-pointer ~ .reset-setting {
+  right: 3rem !important;
+}
+
+/* Show reset button on parent container hover */
+
+.form-floating:hover .reset-setting:not(.text-muted),
+.form-check:hover .reset-setting:not(.text-muted) {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Adjust position when near validation feedback */
+
+.is-invalid ~ .reset-setting:where(.invalid-feedback ~ *) {
+  top: calc(50% - 10px) !important;
+}
+
+.reset-setting.text-muted {
+  cursor: not-allowed;
+  pointer-events: none;
+  opacity: 0 !important;
+  visibility: hidden !important;
+}
+
+.reset-setting:hover:not(.text-muted) {
+  transform: translateY(-50%) scale(1.05) !important;
+  color: #ff4500 !important;
+}
+
+.dark-style .reset-setting:hover:not(.text-muted) {
+  color: #ff4500 !important;
+}
+
+/* Add more space for select arrows and reset button */
+
+.form-select.plugin-setting,
+.form-select.plugin-setting:focus {
+  background-position: right 0.75rem center;
+  padding-right: 4rem !important;
+  transition: background-position 0.2s ease;
+}
+
+/* Move arrow when reset button is visible (on hover) */
+
+.form-floating:hover .form-select.plugin-setting:not(.text-muted) {
+  background-position: right 3rem center;
+}
+
+.was-validated .form-select.plugin-setting:valid,
+.form-select.plugin-setting.is-valid {
+  background-position:
+    right 0.75rem center,
+    center right 1.5rem;
+  padding-right: 4rem !important;
+  transition: background-position 0.2s ease;
+}
+
+/* Move arrow and validation icon when reset button is visible (on hover) */
+
+.form-floating:hover
+  .was-validated
+  .form-select.plugin-setting:valid:not(.text-muted),
+.form-floating:hover .form-select.plugin-setting.is-valid:not(.text-muted) {
+  background-position:
+    right 3rem center,
+    center right 4.5rem;
+}
+
+/* Adjust input text padding to avoid overlap with reset button */
+
+.form-control.plugin-setting {
+  padding-right: 3.5rem !important;
+}
+
+.plugin-setting-file-upload-container {
+  --bw-file-button-width: 7.25rem;
+  --bw-file-toggle-width: 3.25rem;
+}
+
+.plugin-setting-file-upload-display {
+  position: absolute;
+  top: 50%;
+  left: calc(var(--bw-file-button-width) + 0.35rem);
+  right: calc(var(--bw-file-toggle-width) + 0.4rem);
+  transform: translateY(-50%);
+  z-index: 2;
+  pointer-events: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 0.95rem;
+}
+
+.plugin-setting-file-upload.has-persisted-name {
+  color: transparent;
+}
+
+.plugin-setting-file-upload.has-persisted-name::file-selector-button {
+  color: var(--bs-body-color);
+}
+
+.dark-style
+  .plugin-setting-file-upload.has-persisted-name::file-selector-button {
+  color: #d7dee3;
+}
+
+.form-check .form-check-label {
+  padding-right: 3rem !important;
+}
+
+.was-validated .form-check-input:valid:checked,
+.form-check-input.is-valid:checked {
+  background-color: #0b354a;
+}
+
+/* Keep plugin headers stable when descriptions are long */
+
+.plugin-settings-header-content {
+  min-width: 0;
+}
+
+.plugin-settings-description {
+  max-width: 100%;
+  margin-bottom: 0;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 767.98px) {
+  .plugin-settings-actions {
+    width: 100%;
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.advanced-settings-toggle {
+  cursor: pointer;
+}
+
+.advanced-settings-toggle i {
+  transition: transform 0.3s ease;
+}
+
+.dark-style .input-group:focus-within .form-control,
+.dark-style .input-group:focus-within .input-group-text {
+  border-color: #fff !important;
+}
+
+.dark-style .form-floating > .form-control:focus ~ label,
+.dark-style
+  .form-floating
+  > .form-control:focus:not(:placeholder-shown)
+  ~ label,
+.dark-style .form-floating > .form-select:focus ~ label,
+.dark-style
+  .form-floating
+  > .form-select:focus:not(:placeholder-shown)
+  ~ label {
+  color: #fff;
+}
+
+.dark-style .form-select {
+  --bs-form-select-bg-img: url('data:image/svg+xml,%3csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 22" fill="none"%3e%3cpath d="M10.9999 12.0743L15.5374 7.53676L16.8336 8.83292L10.9999 14.6666L5.16626 8.83292L6.46243 7.53676L10.9999 12.0743Z" fill="%23ffffff" fill-opacity="0.9"/%3e%3c/svg%3e');
+  background-color: #0c283a;
+}
+
+.dark-style .form-control:focus,
+.dark-style .form-select:focus {
+  border-color: #fff !important;
+}
+
+.dark-style .form-check-label {
+  color: #fff;
+}
+
+.dark-style .was-validated .input-group .form-control:invalid:focus,
+.input-group .form-control.is-invalid:focus {
+  border-color: var(--bs-form-invalid-color) !important;
+}
+
+.dark-style
+  .was-validated
+  .input-group
+  .form-control:invalid:focus
+  ~ .input-group-text,
+.dark-style .input-group .form-control.is-invalid:focus ~ .input-group-text {
+  border-color: var(--bs-form-invalid-color) !important;
+}
+
+.dark-style .was-validated .input-group .form-control:valid:focus,
+.dark-style .input-group .form-control.is-valid:focus {
+  border-color: var(--bs-form-valid-color) !important;
+}
+
+.dark-style .form-floating > :disabled ~ label,
+.dark-style .form-floating > .form-control:disabled ~ label {
+  color: #9caeb7;
+}
+
+.dark-style .form-switch .form-check-input {
+  background-color: #484d50;
+}
+
+.dark-style .form-check-input:checked {
+  background-color: #186285;
+}
+
+.dark-style .form-control:disabled {
+  background-color: #133044;
+}
+
+.setting-row .setting-meta {
+  color: var(--bs-secondary-color);
+  font-size: 0.875rem;
+}
+
+.setting-row .setting-meta .badge {
+  font-weight: 600;
+}
+
+.setting-value-wrapper {
+  width: 100%;
+}
+
+.setting-value-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.setting-value-container .form-control,
+.setting-value-container .form-select {
+  min-height: 2.5rem;
+}
+
+.setting-value-container .form-check-input {
+  cursor: pointer;
+}
+
+.setting-password-group .btn {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
+.setting-actions {
+  gap: 0.75rem;
+  align-self: flex-start;
+}
+
+@media (max-width: 991.98px) {
+  .setting-actions {
+    justify-content: flex-start;
+    margin-top: 0.25rem;
+  }
+}

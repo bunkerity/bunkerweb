@@ -1,11 +1,17 @@
 #!/bin/bash
 
-if [ $# -ne 1 ] ; then
-    echo "Missing version argument"
+if [ $# -lt 1 ] || [ $# -gt 2 ] ; then
+    echo "Usage: $0 <new-version> [old-version]"
+    echo "  old-version defaults to the contents of src/VERSION."
     exit 1
 fi
 
-OLD_VERSION="$(tr -d '\n' < src/VERSION | sed 's/\./\\./g' | sed 's/\-/\\-/g' | sed 's/~/\\~/g')"
+# Most rewrites below are literal substitutions of the old version, so they only
+# fire while src/VERSION still holds it. A bump applied by hand moves src/VERSION
+# first, which makes every one of them a no-op and silently leaves the rest of the
+# tree behind. Pass the previous version explicitly to repair that state.
+OLD_RAW="${2:-$(tr -d '\n' < src/VERSION)}"
+OLD_VERSION="$(echo -n "$OLD_RAW" | sed 's/\./\\./g' | sed 's/\-/\\-/g' | sed 's/~/\\~/g')"
 NEW_VERSION="$(echo -n "$1" | sed 's/\./\\./g' | sed 's/\-/\\-/g' | sed 's/~/\\~/g')"
 
 # Docker tag versions: replace ~ with - for valid Docker/GHCR tag names
@@ -58,15 +64,6 @@ sed -i "s@github.com/bunkerity/bunkerweb/raw/v${OLD_DOCKER_VERSION}@github.com/b
 # README - other version references keep ~
 sed -i "s@${OLD_VERSION}@${NEW_VERSION}@g" README.md
 sed -i "s@${OLD_VERSION}@${NEW_VERSION}@g" src/common/core/*/README*.md
-# tests (uses Docker image tags only)
-sed -i "s@bunkerity/\([^:]*\):${OLD_DOCKER_VERSION}@bunkerity/\1:${NEW_DOCKER_VERSION}@g" tests/ui/docker-compose.yml
-shopt -s globstar
-for test in tests/core/* ; do
-    if [ -d "$test" ] ; then
-        sed -i "s@bunkerity/\([^:]*\):${OLD_DOCKER_VERSION}@bunkerity/\1:${NEW_DOCKER_VERSION}@g" "$test/docker-compose.yml"
-    fi
-done
-shopt -u globstar
 # linux
 sed -i "s@${OLD_VERSION}@${NEW_VERSION}@g" src/linux/scripts/beforeInstall.sh
 # db

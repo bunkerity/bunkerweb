@@ -24,6 +24,12 @@ namespace modsecurity::utils {
 
 bool urldecode_nonstrict_inplace(std::string &val,
     int &invalid_count) {
+    return urldecode_nonstrict_inplace_ext(val, true, invalid_count);
+}
+
+bool urldecode_nonstrict_inplace_ext(std::string &val,
+    bool plus_to_space,
+    int &invalid_count) {
     unsigned char *d = (unsigned char *)val.data();
     unsigned char *s = d;
     const unsigned char *e = s + val.size();
@@ -57,7 +63,7 @@ bool urldecode_nonstrict_inplace(std::string &val,
             }
         } else {
             /* Character is not a percent sign. */
-            if (*s == '+') {
+            if (plus_to_space && *s == '+') {
                 *d++ = ' ';
                 changed = true;
             } else {

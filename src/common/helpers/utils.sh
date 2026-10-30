@@ -45,7 +45,7 @@ function get_python_bin() {
 		fi
 	fi
 
-	for version in 3.13 3.12 3.11 3.10 3.9; do
+	for version in 3.14 3.13 3.12 3.11 3.10; do
 		if resolved_python=$(resolve_python_cmd "python${version}"); then
 			echo "$resolved_python"
 			return
@@ -120,39 +120,46 @@ function get_nginx_conf_dir() {
 	echo "/etc/nginx"
 }
 
-# Export key/value pairs from a simple env file (KEY=VALUE lines).
+# Export shell-compatible key/value pairs from a simple env file (KEY=VALUE lines).
 function export_env_file() {
 	local env_file=$1
 	[ -f "$env_file" ] || return 0
 	while IFS='=' read -r key value; do
 		[[ -z "$key" || "$key" =~ ^# ]] && continue
 		key=$(echo "$key" | xargs)
-		[[ -z "$key" ]] && continue
+		[[ "$key" =~ ^[A-Za-z_][A-Za-z0-9_]*$ ]] || continue
 		export "$key=$value"
 	done < "$env_file"
 }
 
 # Execute a command as the nginx user using the safest available helper
 function run_as_nginx() {
+	# None of the helpers below reset HOME: setpriv and runuser leave the environment
+	# alone, sudo -E and su -m preserve it on purpose. The services run as root, so the
+	# nginx-uid process would inherit HOME=/root and anything resolving a dotfile from it
+	# fails on permissions, libpq looking up $HOME/.postgresql/postgresql.crt being the
+	# one that breaks database connections.
+	local nginx_home="/var/lib/bunkerweb"
+
 	if command -v setpriv >/dev/null 2>&1; then
-		setpriv --reuid=nginx --regid=nginx --init-groups --inh-caps=-all -- "$@"
+		setpriv --reuid=nginx --regid=nginx --init-groups --inh-caps=-all -- env "HOME=$nginx_home" "$@"
 		return $?
 	fi
 
 	if command -v runuser >/dev/null 2>&1; then
-		runuser -u nginx -- "$@"
+		runuser -u nginx -- env "HOME=$nginx_home" "$@"
 		return $?
 	fi
 
 	if command -v sudo >/dev/null 2>&1; then
-		sudo -n -E -u nginx -g nginx -- "$@"
+		sudo -n -E -u nginx -g nginx -- env "HOME=$nginx_home" "$@"
 		return $?
 	fi
 
 	if command -v su >/dev/null 2>&1; then
 		local cmd_escaped
 		cmd_escaped=$(printf "%q " "$@")
-		su -m nginx -c "$cmd_escaped"
+		su -m nginx -c "env HOME=$(printf "%q" "$nginx_home") $cmd_escaped"
 		return $?
 	fi
 
@@ -189,6 +196,47 @@ function spaces_to_lua() {
 		fi
 	done
 	echo "$result"
+}
+
+# convert size value (bytes or human-readable) to bytes
+# supported units: B, K, KB, KiB, M, MB, MiB, G, GB, GiB, T, TB, TiB
+function parse_size_to_bytes() {
+	local raw_value="$1"
+	local normalized number unit multiplier bytes
+
+	normalized=$(echo "$raw_value" | tr -d '[:space:]')
+	[ -n "$normalized" ] || return 1
+
+	if [[ ! "$normalized" =~ ^([0-9]+([.][0-9]+)?)([A-Za-z]*)$ ]]; then
+		return 1
+	fi
+
+	number="${BASH_REMATCH[1]}"
+	unit=$(echo "${BASH_REMATCH[3]}" | tr '[:upper:]' '[:lower:]')
+
+	case "$unit" in
+		"" | "b") multiplier=1 ;;
+		"k" | "kb" | "ki" | "kib") multiplier=1024 ;;
+		"m" | "mb" | "mi" | "mib") multiplier=$((1024 * 1024)) ;;
+		"g" | "gb" | "gi" | "gib") multiplier=$((1024 * 1024 * 1024)) ;;
+		"t" | "tb" | "ti" | "tib") multiplier=$((1024 * 1024 * 1024 * 1024)) ;;
+		*) return 1 ;;
+	esac
+
+	bytes=$(awk -v value="$number" -v factor="$multiplier" 'BEGIN {
+		result = value * factor
+		if (result <= 0) {
+			print 0
+		} else {
+			printf "%d", result
+		}
+	}')
+
+	if [[ ! "$bytes" =~ ^[0-9]+$ ]] || [ "$bytes" -le 0 ]; then
+		return 1
+	fi
+
+	echo "$bytes"
 }
 
 # check if at least one env var (global or multisite) has a specific value

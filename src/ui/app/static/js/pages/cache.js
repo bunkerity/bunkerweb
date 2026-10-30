@@ -162,17 +162,9 @@ $(document).ready(function () {
   };
 
   if (cacheNumber > 10) {
-    const menu = [10];
-    if (cacheNumber > 25) {
-      menu.push(25);
-    }
-    if (cacheNumber > 50) {
-      menu.push(50);
-    }
-    if (cacheNumber > 100) {
-      menu.push(100);
-    }
-    menu.push({ label: t("datatable.length_all", "All"), value: -1 });
+    const menu = [10, 25, 50, 100];
+    if (cacheNumber > 100) menu.push(500);
+    if (cacheNumber > 500) menu.push(1000);
     layout.bottomStart = {
       pageLength: {
         menu: menu,
@@ -184,47 +176,53 @@ $(document).ready(function () {
 
   const getSelectedCacheFiles = () => {
     const cacheFiles = [];
-    $("#cache tbody tr.selected").each(function () {
-      const $row = $(this);
-      const fileNameHtml = $row.find("td:eq(2)").html();
-      const jobNameHtml = $row.find("td:eq(3)").html();
-      const pluginHtml = $row.find("td:eq(4)").html();
-      const serviceHtml = $row.find("td:eq(5)").html();
+    if (!$.fn.dataTable.isDataTable("#cache")) return cacheFiles;
+    $("#cache")
+      .DataTable()
+      .rows({ selected: true })
+      .nodes()
+      .to$()
+      .each(function () {
+        const $row = $(this);
+        const fileNameHtml = $row.find("td:eq(2)").html();
+        const jobNameHtml = $row.find("td:eq(3)").html();
+        const pluginHtml = $row.find("td:eq(4)").html();
+        const serviceHtml = $row.find("td:eq(5)").html();
 
-      // Also get text content for backend submission
-      const fileName = $row.find("td:eq(2)").find("a").text().trim();
-      const jobName = $row.find("td:eq(3)").text().trim();
-      const plugin = $row.find("td:eq(4)").text().trim();
-      let service;
-      const $serviceCell = $row.find("td:eq(5)");
-      const $serviceLink = $serviceCell.find("a");
-      if ($serviceLink.length > 0) {
-        service = $serviceLink.text().trim();
-      } else {
-        const $serviceSpan = $serviceCell.find("span");
-        if (
-          $serviceSpan.length &&
-          $serviceSpan.attr("data-i18n") === "scope.global"
-        ) {
-          service = "global"; // Normalize translated global to actual value
+        // Also get text content for backend submission
+        const fileName = $row.find("td:eq(2)").find("a").text().trim();
+        const jobName = $row.find("td:eq(3)").text().trim();
+        const plugin = $row.find("td:eq(4)").text().trim();
+        let service;
+        const $serviceCell = $row.find("td:eq(5)");
+        const $serviceLink = $serviceCell.find("a");
+        if ($serviceLink.length > 0) {
+          service = $serviceLink.text().trim();
         } else {
-          service = $serviceSpan.length
-            ? $serviceSpan.text().trim()
-            : $serviceCell.text().trim();
+          const $serviceSpan = $serviceCell.find("span");
+          if (
+            $serviceSpan.length &&
+            $serviceSpan.attr("data-i18n") === "scope.global"
+          ) {
+            service = "global"; // Normalize translated global to actual value
+          } else {
+            service = $serviceSpan.length
+              ? $serviceSpan.text().trim()
+              : $serviceCell.text().trim();
+          }
         }
-      }
 
-      cacheFiles.push({
-        fileName,
-        jobName,
-        plugin,
-        service,
-        fileNameHtml,
-        jobNameHtml,
-        pluginHtml,
-        serviceHtml,
+        cacheFiles.push({
+          fileName,
+          jobName,
+          plugin,
+          service,
+          fileNameHtml,
+          jobNameHtml,
+          pluginHtml,
+          serviceHtml,
+        });
       });
-    });
     return cacheFiles;
   };
 
@@ -461,7 +459,7 @@ $(document).ready(function () {
       select: {
         style: "multi+shift",
         selector: "td:nth-child(2)",
-        headerCheckbox: true,
+        headerCheckbox: "select-page",
       },
       layout: layout,
       initComplete: function (settings, json) {

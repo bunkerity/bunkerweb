@@ -17,7 +17,7 @@
     "BACKUP_SCHEDULE": {
       "context": "global",
       "default": "daily",
-      "help": "The frequency of the backup. 'hanoi' runs hourly and applies Towers of Hanoi rotation (24 files, ~85 days coverage).",
+      "help": "The frequency of the backup. 'hanoi' runs hourly and applies Towers of Hanoi rotation (24 to 34 files, 64 to 85 days of coverage).",
       "id": "backup-schedule",
       "label": "Backup schedule",
       "regex": "^(daily|weekly|monthly|hanoi)$",

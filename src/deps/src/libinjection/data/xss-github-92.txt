@@ -1,0 +1,11 @@
+# https://github.com/libinjection/libinjection/issues/92
+# a 0xFF byte where the tokenizer skips whitespace must not end the tag scan
+
+# before attribute name
+<input %FF onfocus=alert(1) autofocus>
+
+# after attribute name
+<input x %FF onfocus=alert(1) autofocus>
+
+# before attribute value
+<a href= %FF onfocus=alert(1)>

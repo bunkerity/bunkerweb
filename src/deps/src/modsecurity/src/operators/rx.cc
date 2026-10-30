@@ -30,6 +30,12 @@ namespace operators {
 bool Rx::init(const std::string &arg, std::string *error) {
     if (m_string->m_containsMacro == false) {
         m_re = new Regex(m_param);
+        if (m_re->hasError()) {
+            if (error) {
+                *error = "Invalid regular expression: " + m_param;
+            }
+            return false;
+        }
     }
 
     return true;
@@ -38,7 +44,8 @@ bool Rx::init(const std::string &arg, std::string *error) {
 
 bool Rx::evaluate(Transaction *transaction, RuleWithActions *rule,
     const std::string& input, RuleMessage &ruleMessage) {
-    Regex *re;
+    const Regex* re = nullptr;
+    std::unique_ptr<Regex> re_ptr;
 
     if (m_param.empty() && !m_string->m_containsMacro) {
         return true;
@@ -46,13 +53,17 @@ bool Rx::evaluate(Transaction *transaction, RuleWithActions *rule,
 
     if (m_string->m_containsMacro) {
         std::string eparam(m_string->evaluate(transaction));
-        re = new Regex(eparam);
+        re_ptr = std::make_unique<Regex>(eparam);
+        re = re_ptr.get();
     } else {
         re = m_re;
     }
 
     if (re->hasError()) {
-        ms_dbg_a(transaction, 3, "Error with regular expression: \"" + re->pattern + "\"");
+        if (transaction) {
+            ms_dbg_a(transaction, 1, "Error with regular expression: \"" + re->pattern + "\"");
+            transaction->m_variableMscPcreError.set("1", transaction->m_variableOffset);
+        }
         return false;
     }
 
@@ -68,18 +79,19 @@ bool Rx::evaluate(Transaction *transaction, RuleWithActions *rule,
 
     // FIXME: DRY regex error reporting. This logic is currently duplicated in other operators.
     if (regex_result != Utils::RegexResult::Ok) {
-        transaction->m_variableMscPcreError.set("1", transaction->m_variableOffset);
+        if (transaction) {
+            transaction->m_variableMscPcreError.set("1", transaction->m_variableOffset);
 
-        std::string regex_error_str = "OTHER";
-        if (regex_result == Utils::RegexResult::ErrorMatchLimit) {
-            regex_error_str = "MATCH_LIMIT";
-            transaction->m_variableMscPcreLimitsExceeded.set("1", transaction->m_variableOffset);
-            transaction->m_collections.m_tx_collection->storeOrUpdateFirst("MSC_PCRE_LIMITS_EXCEEDED", "1");
-            ms_dbg_a(transaction, 7, "Set TX.MSC_PCRE_LIMITS_EXCEEDED to 1");
+            std::string regex_error_str = "OTHER";
+            if (regex_result == Utils::RegexResult::ErrorMatchLimit) {
+                regex_error_str = "MATCH_LIMIT";
+                transaction->m_variableMscPcreLimitsExceeded.set("1", transaction->m_variableOffset);
+                transaction->m_collections.m_tx_collection->storeOrUpdateFirst("MSC_PCRE_LIMITS_EXCEEDED", "1");
+                ms_dbg_a(transaction, 7, "Set TX.MSC_PCRE_LIMITS_EXCEEDED to 1");
+            }
+
+            ms_dbg_a(transaction, 1, "rx: regex error '" + regex_error_str + "' for pattern '" + re->pattern + "'");
         }
-
-        ms_dbg_a(transaction, 1, "rx: regex error '" + regex_error_str + "' for pattern '" + re->pattern + "'");
-
 
         return false;
     }
@@ -97,10 +109,6 @@ bool Rx::evaluate(Transaction *transaction, RuleWithActions *rule,
 
     for (const auto & capture : captures) {
         logOffset(ruleMessage, capture.m_offset, capture.m_length);
-    }
-
-    if (m_string->m_containsMacro) {
-        delete re;
     }
 
     if (!captures.empty()) {

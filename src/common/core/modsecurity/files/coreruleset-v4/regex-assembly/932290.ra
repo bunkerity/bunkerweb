@@ -1,0 +1,9 @@
+##! Please refer to the documentation at
+##! https://coreruleset.org/docs/development/regex_assembly/.
+
+##! Detection for Bash Quote Evasion
+
+'\w+'\w+\b
+"\w+"\w+\b
+\w+'\w+'
+\w+"\w+"

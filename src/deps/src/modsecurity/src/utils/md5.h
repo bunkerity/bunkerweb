@@ -17,13 +17,12 @@
 #define SRC_UTILS_MD5_H_
 
 #include "src/utils/sha1.h"
-#include "mbedtls/md5.h"
 #include <string>
 
 namespace modsecurity::Utils {
 
 
-class Md5 : public DigestImpl<&mbedtls_md5, 16> {
+class Md5 : public DigestImpl<MBEDTLS_MD_MD5, 16> {
 };
 
 

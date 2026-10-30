@@ -1,0 +1,37 @@
+[
+  {
+    "type": "tfn",
+    "name": "sha1",
+    "input": "abc",
+    "ret": 1,
+    "output": "\\xa9\\x99\\x3e\\x36\\x47\\x06\\x81\\x6a\\xba\\x3e\\x25\\x71\\x78\\x50\\xc2\\x6c\\x9c\\xd0\\xd8\\x9d"
+  },
+  {
+    "type": "tfn",
+    "name": "md5",
+    "input": "abc",
+    "ret": 1,
+    "output": "\\x90\\x01\\x50\\x98\\x3c\\xd2\\x4f\\xb0\\xd6\\x96\\x3f\\x7d\\x28\\xe1\\x7f\\x72"
+  },
+  {
+    "type": "tfn",
+    "name": "base64Encode",
+    "input": "hello",
+    "ret": 1,
+    "output": "aGVsbG8="
+  },
+  {
+    "type": "tfn",
+    "name": "base64Decode",
+    "input": "aGVsbG8=",
+    "ret": 1,
+    "output": "hello"
+  },
+  {
+    "type": "tfn",
+    "name": "base64Decode",
+    "input": "!!!!",
+    "ret": 1,
+    "output": "!!!!"
+  }
+]

@@ -51,7 +51,7 @@ test 21 <script>Object.__noSuchMethod__ = Function,[{}][0].constructor._('alert(
 
 test 22 <input onblur=focus() autofocus><input>
 
-test 23 <form id=test onforminput=alert(1)><input></form><button form=test onformchange=alert(2)>X</button>
+test 23 <form id=test oninput=alert(1)><input></form><button form=test onchange=alert(2)>X</button>
 
 test 24 1<set/xmlns=`urn:schemas-microsoft-com:time` style=`beh&#x41vior:url(#default#time2)` attributename=`innerhtml` to=`&lt;img/src=&quot;x&quot;onerror=alert(1)&gt;`>
 
@@ -173,7 +173,7 @@ test 62_5 <! "='foo'><x foo="><img src=x onerror=alert(2)//">
 # bonus - use of backquotes
 test 62_5 <! `='foo'><x foo=`><img src=x onerror=alert(2)//`>
 
-# bonus 
+# bonus
 <!-- "='foo'><x -->"><img src=x onerror=alert(1)//">
 <!-- "=foo><x -->"><img src=x onerror=alert(1)//">
 <!-- "foo><x -->"><img src=x onerror=alert(1)//">

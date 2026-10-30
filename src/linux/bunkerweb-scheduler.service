@@ -1,6 +1,6 @@
 [Unit]
 Description=BunkerWeb Scheduler service
-Documentation=https://docs.bunkerweb.io
+Documentation=https://docs.bunkerweb.io/1.6/
 After=network.target
 
 [Service]

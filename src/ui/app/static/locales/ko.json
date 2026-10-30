@@ -13,12 +13,28 @@
     "no_changes_detected": "감지된 변경 사항이 없습니다.",
     "notice": "알림",
     "ping_error": "인스턴스 핑(Ping) 전송 중 오류가 발생했습니다.",
-    "readonly_mode": "읽기 전용 모드에서는 이 작업을 수행할 수 없습니다."
+    "readonly_mode": "읽기 전용 모드에서는 이 작업을 수행할 수 없습니다.",
+    "configs_import_invalid_file": "유효한 사용자 지정 구성 파일(.json)을 업로드하십시오."
   },
   "aria": {
     "label": {
       "close": "닫기",
-      "raw_configuration": "원본 설정"
+      "copy": "로그 복사",
+      "download_log": "이 로그 파일 다운로드",
+      "follow": "따라가기",
+      "select_file": "파일 선택",
+      "select_page": "페이지 선택",
+      "issue_count": "오류 및 경고 수",
+      "level_filter": "수준별 로그 줄 필터링",
+      "local_time": "타임스탬프를 현지 시간으로 표시",
+      "collapse_multiline": "여러 줄 항목 접기",
+      "next_issue": "다음 오류 또는 경고",
+      "prev_issue": "이전 오류 또는 경고",
+      "search_logs": "로그 검색",
+      "toggle_wrap": "줄 바꿈 전환",
+      "configs_dropzone": "사용자 지정 설정 내보내기 파일을 선택하거나 여기에 놓으세요",
+      "raw_configuration": "원본 설정",
+      "services_dropzone": "서비스 내보내기 파일을 선택하거나 여기에 놓으세요"
     }
   },
   "badge": {
@@ -42,7 +58,9 @@
     "bans": "차단 목록",
     "cache": "캐시",
     "configs": "설정",
+    "crowdsec": "CrowdSec",
     "extra_pages": "추가 페이지",
+    "global_config": "전역 설정",
     "global_settings": "전역 설정",
     "home": "홈",
     "instances": "인스턴스",
@@ -68,6 +86,7 @@
     "add_ban_plural": "차단 추가",
     "add_plugin_plural": "플러그인 추가",
     "add_plugins": "플러그인 추가",
+    "apply_all_services": "모든 서비스에 적용",
     "auto_refresh": "자동 새로고침",
     "ban": "차단",
     "ban_selected": "선택 항목 차단",
@@ -94,10 +113,8 @@
     "enable_totp": "TOTP 활성화",
     "entire_config": "전체 설정",
     "export": "내보내기",
-    "export_csv_all": "CSV (전체)",
-    "export_csv_visible": "CSV (표시된 항목)",
-    "export_excel_all": "Excel (전체)",
-    "export_excel_visible": "Excel (표시된 항목)",
+    "export_csv": "CSV",
+    "export_excel": "Excel",
     "fetch_global": "전역 설정 가져오기",
     "filters_suffix": " 필터",
     "follow": "추적",
@@ -107,6 +124,7 @@
     "go_back": "뒤로 가기",
     "hide": "숨기기",
     "history": "기록",
+    "import_configs": "사용자 지정 설정 가져오기",
     "import_services": "서비스 가져오기",
     "login": "로그인",
     "multiple_add": "추가",
@@ -122,6 +140,7 @@
     "plugin_page": "플러그인 페이지",
     "proceed": "계속",
     "refresh_recovery_codes": "복구 코드 갱신",
+    "refresh_ui_plugins": "UI 플러그인 새로 고침",
     "reload": "새로고침",
     "reset": "초기화",
     "reset_columns": "열 초기화",
@@ -130,6 +149,10 @@
     "run_selected_jobs": "선택한 작업 실행",
     "save": "저장",
     "save_changes": "변경 사항 저장",
+    "local_time": "현지 시간",
+    "collapse_multiline": "접기",
+    "search": "검색",
+    "wrap": "줄 바꿈",
     "select_file": "파일 선택",
     "select_page": "페이지 선택",
     "service": "서비스",
@@ -148,7 +171,164 @@
     "upload_photo": "새 사진 업로드",
     "view_details": "상세 보기",
     "view_raw_data": "원본 데이터 보기",
-    "wipe_other_sessions": "다른 세션 로그아웃"
+    "wipe_other_sessions": "다른 세션 로그아웃",
+    "ban_all_filtered": "일치하는 모든 보고서 차단",
+    "filtered_actions": "필터링된 작업",
+    "unban_all_filtered": "일치하는 모든 차단 해제",
+    "update_duration_all_filtered": "일치하는 모든 차단의 기간 업데이트",
+    "validate_certificate": "인증서 검증"
+  },
+  "crowdsec": {
+    "alert": {
+      "id": "Alert ID",
+      "load": "Load full evidence",
+      "started": "Started",
+      "stopped": "Stopped"
+    },
+    "captured_history": "Captured history",
+    "captured_history_help": "Captured report data describes what was observed at request time; it does not prove the current decision state.",
+    "connection": {
+      "appsec": "Last AppSec observation",
+      "choose": "Choose a connection",
+      "connected": "Connected",
+      "connection_error": "Connection error",
+      "configured": "Configured",
+      "global": "all services",
+      "help": "Each instance and service scope is a separate connection.",
+      "label": "CrowdSec connection",
+      "last_sync": "Last successful sync",
+      "local_api": "Local API",
+      "management": "Management",
+      "mode": "Mode",
+      "none": "No usable CrowdSec connection was found. Check the instance errors and plugin configuration.",
+      "read_only": "Read only",
+      "required": "Choose a CrowdSec connection first.",
+      "sync": "Decision sync",
+      "sync_current": "Up to date",
+      "sync_not_synchronized": "Not synchronized yet",
+      "sync_stale": "Stale",
+      "selected": "선택한 연결",
+      "scope_help": "선택한 연결은 아래의 결정, 허용 목록 및 IP 조사에 적용됩니다."
+    },
+    "current_state": "Current state",
+    "current_state_help": "Current state may change after this observation.",
+    "decision": {
+      "duration": "Duration",
+      "expires": "Expires",
+      "id": "Decision ID",
+      "origin": "Origin",
+      "scenario": "Scenario",
+      "scope": "Scope",
+      "target": "Target",
+      "type": "Type"
+    },
+    "decisions": {
+      "count": "Showing {{start}}–{{end}} of {{total}}",
+      "help": "This is current state read directly from the selected CrowdSec engine.",
+      "none": "No active decisions match these filters.",
+      "pagination": "Decision pages",
+      "title": "Active decisions"
+    },
+    "error": {
+      "request": "The CrowdSec request failed."
+    },
+    "investigation": {
+      "alerts": "Available CrowdSec alert evidence",
+      "current_decisions": "Current CrowdSec decisions",
+      "help": "Current CrowdSec decisions are checked alongside local bans and captured reports.",
+      "ip": "IP address",
+      "local_bans": "Current local BunkerWeb bans",
+      "no_alerts": "No alert evidence is available.",
+      "no_bans": "No current local ban was found.",
+      "no_decisions": "No current CrowdSec decision was found.",
+      "no_reports": "No recent captured report was found.",
+      "placeholder": "192.0.2.10",
+      "reports": "Recent BunkerWeb reports",
+      "result": "Investigation for {{ip}}",
+      "submit": "Investigate",
+      "title": "Investigate an IP",
+      "truncated": "Showing {{shown}} of {{total}} results (source limit: {{limit}}).",
+      "unavailable": "Unavailable: {{error}}",
+      "summary": "Evidence found for this IP",
+      "summary_help": "This covers the selected CrowdSec connection and BunkerWeb's own bans. Other protections are not checked here, and evidence that could not be read is no proof that this IP is permitted.",
+      "summary_decisions": "CrowdSec decisions",
+      "summary_bans": "Local BunkerWeb bans",
+      "summary_alerts": "CrowdSec alert evidence",
+      "summary_reports": "BunkerWeb reports",
+      "summary_active": "{{total}} active",
+      "summary_available": "{{total}} available",
+      "summary_captured": "{{total}} captured",
+      "summary_none": "None found",
+      "summary_unreadable": "Could not be read"
+    },
+    "local_ban": {
+      "expires": "Expires",
+      "reason": "Reason",
+      "service": "Service"
+    },
+    "next": "Next",
+    "observed_at": "Observed {{time}}",
+    "previous": "Previous",
+    "refresh": "Refresh status",
+    "remove": {
+      "action": "Remove",
+      "confirm": "I understand and want to remove this decision.",
+      "impact": "This removes the decision at the shared CrowdSec engine and affects every connected bouncer. Cached decisions, another range, local bans, or AppSec may still block the target.",
+      "selection": "Remove {{scope}} {{value}} ({{type}}), scenario {{scenario}}, origin {{origin}}, from {{source}} ({{engine}})?",
+      "submit": "Remove decision",
+      "success": "Removed at the CrowdSec source. Propagation is {{status}} ({{mode}}, interval {{interval}}). {{remaining}} other matching decision(s) remain; local bans or AppSec may still block.",
+      "title": "Remove CrowdSec decision"
+    },
+    "report": {
+      "captured": "Captured at",
+      "date": "Report time",
+      "decisions": "Captured decisions",
+      "entry": "Security report",
+      "matched_target": "Matched target",
+      "metadata": "Decision metadata",
+      "metadata_complete": "Complete",
+      "metadata_incomplete": "Incomplete",
+      "metadata_unavailable": "CrowdSec snapshot metadata is unavailable for this older report.",
+      "metadata_warning": "Some captured decision metadata was unavailable at request time.",
+      "reason": "Reason",
+      "remediation": "Captured remediation",
+      "scope": "Captured service scope",
+      "service": "Service",
+      "source": "Captured source",
+      "identifier": "Report identifier"
+    },
+    "subtitle": "Inspect each configured CrowdSec engine and investigate an IP across current and captured evidence.",
+    "title": "CrowdSec operator",
+    "unknown": "Unknown",
+    "allowlists": {
+      "title": "CrowdSec allowlists",
+      "help": "Trusted IPs and networks for the selected engine. These exceptions apply across its connected services and bouncers.",
+      "refresh": "Refresh allowlists",
+      "pages": "Allowlist pages",
+      "empty": "No allowlists were found on this engine.",
+      "console": "Console managed",
+      "local": "Locally managed",
+      "no_entries": "No active entries.",
+      "never": "Never",
+      "comment": "Comment",
+      "unknown": "Allowlist status is unavailable.",
+      "not_allowed": "This IP does not match a CrowdSec allowlist.",
+      "allowed": "Allowlisted by CrowdSec",
+      "impact": "This is an engine-wide exception. Local BunkerWeb bans, other protections, or cached decisions can still block this IP.",
+      "guide": {
+        "intro": "You can browse allowlists and check IPs here. To add or remove entries, use cscli on the CrowdSec engine.",
+        "title": "How to manage trusted IPs and networks",
+        "where": "Requires CrowdSec 1.7 or later. Run these commands on the host or inside the container running the selected engine's Local API (LAPI), with access to its CrowdSec configuration and database. Replace the example list name, IP and network with your own.",
+        "create": "Create a list once, or use an existing locally managed list.",
+        "add": "Add trusted IPs or CIDR networks.",
+        "expiration": "This example expires after 24 hours. Omit --expiration for an entry that does not expire. IPv4 and IPv6 are supported.",
+        "inspect": "Inspect the list and its expiry dates.",
+        "remove": "Remove an exception when it is no longer needed.",
+        "refresh": "After a change, refresh allowlists and investigate the IP again. Removing an exception permits future CrowdSec decisions; it does not create a ban. Local BunkerWeb bans and other protections remain separate.",
+        "console": "Edit Console-managed lists in the CrowdSec Console.",
+        "docs": "CrowdSec allowlist documentation"
+      }
+    }
   },
   "country": {
     "AD": "안도라",
@@ -469,11 +649,16 @@
       "no_data": "데이터 없음"
     },
     "window": {
+      "all_time": "전체 기간",
       "last_days": "지난 {{days}}일",
       "title": "대시보드 창"
     }
   },
   "datatable": {
+    "bulk_select_all_filtered": "일치하는 {{entity}} {{count}}개 모두 선택",
+    "bulk_select_all_done": "일치하는 {{entity}} {{count}}개가 모두 선택되었습니다.",
+    "bulk_select_clear": "선택 지우기",
+    "bulk_select_page": "이 페이지의 {{entity}} {{count}}개가 모두 선택되었습니다.",
     "info_bans": "{{total}}개의 차단 항목 중 {{start}}~{{end}} 표시 중",
     "info_cache": "{{total}}개의 캐시 파일 중 {{start}}~{{end}} 표시 중",
     "info_configs": "{{total}}개의 사용자 정의 설정 중 {{start}}~{{end}} 표시 중",
@@ -605,6 +790,8 @@
     "easter_egg": "이 글을 보고 계신다면 호기심이 많으시군요! 👀",
     "error": "오류",
     "message": "정보",
+    "pro": "BunkerWeb PRO",
+    "pro_services_exceeded": "PRO 라이선스에서 허용하는 것보다 많은 서비스가 있습니다. 라이선스를 업그레이드하거나 일부 서비스를 초안(Draft) 모드로 전환하여 PRO 라이선스를 활성화하세요.",
     "time": {
       "just_now": "방금 전"
     },
@@ -620,6 +807,8 @@
   },
   "form": {
     "checkbox": {
+      "include_attached_configs": "첨부된 사용자 지정 설정 포함",
+      "overwrite_existing_configs": "기존 UI/API 사용자 지정 설정 덮어쓰기",
       "remember_me": "로그인 상태 유지"
     },
     "help": {
@@ -660,7 +849,7 @@
       "ip_address": "IP 주소",
       "keywords": "키워드",
       "lets_encrypt_custom_profile": "Let's Encrypt 사용자 정의 프로필",
-      "lets_encrypt_disable_public_suffixes": "공용 접미사(PSL) 비활성화",
+      "lets_encrypt_disable_public_suffixes": "공용 접미사 목록 검사 건너뛰기",
       "lets_encrypt_dns_credential_items": "Let's Encrypt DNS 인증 정보",
       "lets_encrypt_profile": "Let's Encrypt 프로필",
       "license_key": "라이선스 키",
@@ -692,11 +881,11 @@
       "use_real_ip": "실제 IP 사용",
       "username": "사용자 이름",
       "wildcard_certificates": "와일드카드 인증서",
-      "zerossl_api_connect_timeout": "ZeroSSL API 연결 시간 초과",
       "zerossl_api_key": "ZeroSSL API 키",
-      "zerossl_api_max_time": "ZeroSSL API 최대 시간",
       "zerossl_api_retry": "ZeroSSL API 재시도 횟수",
-      "zerossl_api_retry_delay": "ZeroSSL API 재시도 지연"
+      "zerossl_api_retry_delay": "ZeroSSL API 재시도 지연",
+      "zerossl_api_connect_timeout": "ZeroSSL API 연결 시간 초과",
+      "zerossl_api_max_time": "ZeroSSL API 최대 시간"
     },
     "placeholder": {
       "2fa_code": "코드 입력",
@@ -741,7 +930,8 @@
   },
   "legend": {
     "locked_settings_annotation": "잠금됨 ({{method}})",
-    "locked_settings_hint": "잠금된 설정은 강조 표시됩니다"
+    "locked_settings_hint": "잠금된 설정은 강조 표시됩니다",
+    "raw_setting_drafts": "설정의 시작 부분에서 #을 누르면 초안을 전환하고, Backspace를 누르면 활성화합니다. 저장하면 적용됩니다. 초안은 값을 유지하며, 상속된 값이나 기본값이 적용됩니다."
   },
   "link": {
     "back_to_login": "로그인으로 돌아가기",
@@ -755,16 +945,32 @@
     "upgrade": "업그레이드하시겠습니까?"
   },
   "logs": {
-    "eventsource_failed": "EventSource 연결 실패",
-    "parse_error": "스트림 데이터 파싱 실패: {{error}}",
-    "stream_error": "스트림 오류: {{message}}",
-    "stream_init": "스트림 초기화됨, 파일 크기: {{size}}",
-    "stream_initialized": "새로고침과 함께 스트림 초기화됨, 파일 크기: {{size}}",
+    "annotation_error": "오류",
+    "annotation_warning": "경고",
+    "filter_levels": "수준",
+    "letsencrypt_logs": "Let's Encrypt 로그",
+    "main_logs": "기본 로그",
+    "new_lines_sr": "{{count}}개의 새 로그 줄",
+    "issue_summary": "오류 {{errors}}개, 경고 {{warnings}}개",
+    "level_critical": "치명적",
+    "level_debug": "디버그",
+    "level_error": "오류",
+    "level_info": "정보",
+    "level_notice": "알림",
+    "level_warning": "경고",
+    "lines_all": "전체",
+    "lines_label": "줄",
+    "meta": "{{size}} · {{lines}}줄 · 수정됨 {{when}}",
+    "new_lines": "새 줄",
+    "showing_all": "{{total}}줄",
+    "showing_some": "{{total}}개 중 {{shown}}개 표시",
     "trimmed_notice": "--- 성능을 위해 {{count}}개의 오래된 로그 라인을 제거했습니다 ---"
   },
   "modal": {
     "body": {
       "add_plugin_dropzone": "플러그인 압축 파일을 여기에 드래그하거나 클릭하여 파일을 선택하세요.",
+      "apply_all_services": "이번 저장에서 변경한 전역 설정이 각 서비스 또는 템플릿에서 지정한 값을 대체합니다. 변경하지 않은 설정은 유지됩니다.",
+      "apply_all_services_count": "업데이트될 수 있는 모든 등록 서비스({{count}}개):",
       "confirm_cache_deletion_alert": "선택한 캐시 파일을 삭제하시겠습니까?",
       "confirm_cache_deletion_alert_plural": "선택한 캐시 파일들을 삭제하시겠습니까?",
       "confirm_configs_conversion": "선택한 사용자 정의 설정을 전환하시겠습니까?",
@@ -776,7 +982,10 @@
       "confirm_plugin_deletion": "선택한 플러그인을 삭제하시겠습니까?",
       "confirm_plugin_deletion_plural": "선택한 플러그인들을 삭제하시겠습니까?",
       "confirm_template_deletion": "템플릿 {{name}}을(를) 삭제하시겠습니까?",
+      "confirm_templates_deletion_alert": "선택한 템플릿을 삭제하시겠습니까?",
+      "confirm_templates_deletion_alert_plural": "선택한 템플릿들을 삭제하시겠습니까?",
       "confirmation_instance_deletion": "선택한 인스턴스를 삭제하시겠습니까?",
+      "delete_cache_confirmation_alert": "선택한 캐시 파일들을 삭제하시겠습니까?",
       "delete_confirmation_alert": "선택한 인스턴스를 삭제하시겠습니까?",
       "delete_confirmation_alert_plural": "선택한 인스턴스들을 삭제하시겠습니까?",
       "delete_confirmation_template_used": "선택한 템플릿 중 하나 이상이 서비스(총 {{services_count}}개)에 할당되어 있습니다. 템플릿을 삭제하면 할당이 취소됩니다. 계속하시겠습니까?",
@@ -789,6 +998,9 @@
       "fetch_global_settings_point_1": "이 템플릿에 존재하는 설정만 업데이트됩니다.",
       "fetch_global_settings_point_2": "기본값과 동일한 값은 무시됩니다.",
       "fetch_global_settings_point_3": "SERVER_NAME은 재정의되지 않습니다.",
+      "export_services_intro": "선택한 서비스가 내보내집니다. 아래 옵션을 활성화하면 첨부된 사용자 지정 설정을 .zip 아카이브에 함께 묶습니다.",
+      "import_configs_dropzone": "사용자 지정 설정 내보내기 파일을 여기로 끌어다 놓거나 클릭하여 파일을 선택하세요.",
+      "import_configs_warning": "scheduler, autoconf 또는 templates에서 만든 사용자 지정 설정은 항상 보존됩니다. UI/API 설정만 덮어쓸 수 있습니다.",
       "import_services_dropzone": "서비스 내보내기 파일을 이곳에 드래그 앤 드롭하거나 클릭하여 선택하세요.",
       "import_services_warning": "서비스를 가져오면 내보내기 파일로부터 새로운 UI 서비스가 생성됩니다. 이미 존재하는 서비스는 건너뜁니다.",
       "instance_creation_alert": "포트나 서버 이름을 입력할 필요가 없습니다. 인스턴스 설정에는 `API_HTTP_PORT`, `API_LISTEN_HTTPS`, `API_HTTPS_PORT`, `API_SERVER_NAME`의 값이 사용됩니다.",
@@ -796,10 +1008,21 @@
       "recovery_codes_save_alert": "이 복구 코드를 안전한 장소(비밀번호 관리자 등)에 저장하세요. 인증 기기를 분실했을 때 계정에 접근하는 데 필요합니다.",
       "recovery_codes_shown_once_alert": "이 복구 코드는 한 번만 표시됩니다. 반드시 안전하게 저장해 주세요.",
       "reset_template_alert": "현재 템플릿 설정과 사용자 정의 설정을 초기화하시겠습니까?",
+      "services_conversion_confirmation": "선택한 서비스를 전환하시겠습니까?",
       "services_deletion_confirmation": "선택한 서비스를 삭제하시겠습니까?",
       "unban_confirmation_alert": "선택한 IP 주소의 차단을 해제하시겠습니까?",
       "unban_confirmation_alert_plural": "선택한 IP 주소들의 차단을 해제하시겠습니까?",
-      "update_duration_alert": "선택한 차단 항목에 대해 새로운 기간을 선택하세요:"
+      "update_duration_alert": "선택한 차단 항목에 대해 새로운 기간을 선택하세요:",
+      "ban_filtered_confirmation": "일치하는 {{count}}개 보고서의 모든 IP를 차단하시겠습니까? 중복된 대상은 한 번만 적용됩니다.",
+      "unban_filtered_confirmation": "일치하는 {{count}}개 차단을 모두 해제하시겠습니까?",
+      "crowdsec_unban_intro": "차단을 해제하면 다음 CrowdSec 결정도 함께 제거됩니다:",
+      "crowdsec_unban_list_warning": "일부 결정은 CrowdSec 목록에서 가져온 것이라 다시 생길 수 있습니다. 이 IP를 영구적으로 허용하려면 CrowdSec 허용 목록을 사용하세요.",
+      "crowdsec_unban_range_warning": "일부 결정은 IP 범위에 적용됩니다. 해당 범위의 다른 IP는 차단이 끝날 때까지 계속 차단됩니다.",
+      "crowdsec_unban_confirm": "이 CrowdSec 결정이 제거된다는 점을 이해합니다",
+      "crowdsec_unban_error": "{{ip}}의 CrowdSec 결정을 불러오지 못했습니다",
+      "crowdsec_unban_management_missing": "다음 항목에 CrowdSec 관리 자격 증명이 없습니다: {{connections}}",
+      "crowdsec_unban_unavailable": "다음 CrowdSec 연결을 확인하지 못했습니다: {{connections}}",
+      "update_filtered_duration_alert": "일치하는 {{count}}개 차단 모두에 대해 새로운 기간을 선택하세요:"
     },
     "button": {
       "fetch_global_settings_confirm": "전역 설정 적용",
@@ -813,6 +1036,7 @@
     "title": {
       "add_bans": "차단 추가",
       "add_plugins": "플러그인 추가",
+      "apply_all_services": "모든 서비스에 적용하시겠습니까?",
       "confirm_conversion": "전환 확인",
       "confirm_deletion": "삭제 확인",
       "confirm_unban": "차단 해제 확인",
@@ -823,8 +1047,10 @@
       "delete_template": "템플릿 삭제",
       "edit_template": "템플릿 수정: {{name}}",
       "fetch_global_settings": "전역 설정을 적용하시겠습니까?",
+      "export_services": "서비스 내보내기",
       "from_plugin": "플러그인 원본:",
       "full_url": "전체 URL",
+      "import_configs": "사용자 지정 설정 가져오기",
       "import_services": "서비스 가져오기",
       "job_history": "최근 10회 작업 실행 기록",
       "job_history_count": "최근 {{count}}회 작업 실행 기록",
@@ -856,6 +1082,7 @@
     "bans": "차단 목록",
     "cache": "캐시",
     "configs": "설정",
+    "crowdsec": "CrowdSec",
     "extra_pages": "추가 페이지",
     "global_settings": "전역 설정",
     "home": "홈",
@@ -897,7 +1124,10 @@
       "status": {
         "deactivated": "플러그인이 비활성화되어 정보를 표시할 수 없습니다.",
         "metrics_deactivated": "메트릭 플러그인이 활성화되지 않아 정보를 표시할 수 없습니다.",
-        "not_available": "베타 단계에서는 플러그인 페이지를 사용할 수 없습니다."
+        "not_available": "베타 단계에서는 플러그인 페이지를 사용할 수 없습니다.",
+        "pre_render_error": "사전 렌더링 오류",
+        "no_content": "이 플러그인은 내장 페이지를 제공하지 않습니다.",
+        "dedicated_page_unavailable": "이 플러그인은 아직 로드되지 않은 전용 페이지에서 관리됩니다. 접근하려면 웹 UI를 다시 시작하세요."
       }
     },
     "type": {
@@ -994,8 +1224,33 @@
     }
   },
   "reports": {
+    "bad_behavior_total_requests": "의심스러운 요청",
+    "bad_behavior_stored_events": "저장된 이벤트",
+    "bad_behavior_evidence_missing": "차단 근거를 더 이상 사용할 수 없습니다.",
+    "crowdsec": {
+      "source_lapi": "로컬 API 결정",
+      "source_appsec": "AppSec 검사",
+      "source_failure_policy": "AppSec 실패 정책",
+      "appsec_help": "AppSec이 이 요청을 검사했습니다. 로컬 API 결정이 없을 수 있습니다.",
+      "failure_policy_help": "AppSec 오류 후 구성된 실패 정책이 적용되었습니다.",
+      "no_decisions": "이 요청에 대해 기록된 결정 세부 정보가 없습니다.",
+      "technical_details": "기술 세부 정보",
+      "connection_id": "연결 ID",
+      "instance": "인스턴스",
+      "appsec_action": "AppSec 동작"
+    },
+    "retention_notice": "보고서는 메모리에 저장되는 순환 버퍼입니다. 설정된 한도에 도달하면 가장 오래된 항목부터 삭제됩니다. Redis를 사용하지 않는 경우 BunkerWeb을 다시 시작할 때도 모두 삭제됩니다.",
     "security_incident": "보안 사고",
-    "security_report_data": "보안 보고서 데이터"
+    "security_report_data": "보안 보고서 데이터",
+    "bad_behavior_no_details": "이 보고서에 대한 비정상 활동 세부 정보는 캡처되지 않았습니다.",
+    "bad_behavior_activity_detected": "비정상 활동 감지",
+    "bad_behavior_activity_explanation": "이 요청은 비정상 활동 임계값을 초과하여 그룹화되었습니다.",
+    "bad_behavior_request_label": "요청",
+    "bad_behavior_ip": "IP 주소",
+    "bad_behavior_server": "서버",
+    "bad_behavior_url": "URL",
+    "bad_behavior_captured_at": "캡처됨",
+    "bad_behavior_request_id": "요청 ID"
   },
   "scope": {
     "all_services": "모든 서비스",
@@ -1031,6 +1286,7 @@
     "last_run": "마지막 실행 상태",
     "last_seen": "마지막 감지",
     "last_update": "마지막 업데이트",
+    "loading": "검색 창을 로드하는 중...",
     "method": "방식",
     "next_24h": "향후 24시간",
     "next_30d": "향후 30일",
@@ -1095,9 +1351,9 @@
       "section": {
         "custom_certificate": "사용자 정의 인증서",
         "lets_encrypt": "Let's Encrypt",
+        "zerossl": "ZeroSSL",
         "real_ip": "실제 IP",
-        "reverse_proxy": "리버스 프록시",
-        "zerossl": "ZeroSSL"
+        "reverse_proxy": "리버스 프록시"
       },
       "subtitle": "Web UI 전용 설정을 구성합니다.",
       "title": "UI 설정"
@@ -1181,7 +1437,8 @@
     "template_in_use_description": "현재 템플릿 외부에서의 변경은 허용되지 않습니다. 현재 템플릿을 사용하여 수정하거나 고급/원본 모드로 전환하세요.",
     "unique_server_name": "고유한 서버 이름",
     "up": "활성",
-    "yes": "예"
+    "yes": "예",
+    "not_applicable": "해당 없음"
   },
   "step": {
     "next": "다음",
@@ -1194,10 +1451,17 @@
         "title": "로그 다운로드"
       },
       "extract_config": {
+        "hide_passwords": "비밀번호 숨기기",
+        "hide_passwords_warning": "숨기지 않은 내보내기에는 자격 증명이 포함됩니다. 비공개 지원 채널을 통해서만 공유하세요.",
         "title": "설정 추출"
       },
       "support_link": {
         "title": "기술 지원 링크"
+      },
+      "ui_bundle": {
+        "button": "번들 다운로드",
+        "help": "로그, 플러그인 버전, 환경 및 최근 오류. 개인 정보는 익명 처리됩니다.",
+        "title": "웹 UI 진단"
       }
     }
   },
@@ -1252,9 +1516,6 @@
       "url": "URL",
       "user_agent": "User-Agent",
       "version": "버전"
-    },
-    "services": {
-      "security_mode": "서비스의 보안 모드 (차단 또는 감지)"
     }
   },
   "template": {
@@ -1329,8 +1590,8 @@
       "raw_configs_title": "사용자 정의 설정 가져오기",
       "raw_configs_upload": "설정 파일 업로드 (.conf, .cfg, .txt)",
       "raw_configs_upload_failed": "선택한 파일 중 하나를 읽을 수 없습니다.",
-      "raw_editor_aria": "원시 템플릿 JSON 편집기",
       "raw_editor_drop_hint": "현재 내용을 교체하려면 템플릿 JSON 파일(.json 전용)을 여기에 끌어다 놓으세요.",
+      "raw_editor_aria": "원시 템플릿 JSON 편집기",
       "raw_editor_help": "전체 템플릿 정의를 JSON으로 편집합니다. 간편 모드로 돌아가면 시각적 에디터가 유효성 검사 후 다시 로드됩니다.",
       "raw_editor_import_success": "템플릿 JSON을 성공적으로 가져왔습니다.",
       "raw_editor_override_body": "이 파일을 가져오면 현재 템플릿 JSON이 완전히 교체됩니다. 에디터에서 수정한 내용은 손실됩니다. 계속하시겠습니까?",
@@ -1448,6 +1709,7 @@
     "ip_unbanned": "IP 주소 차단이 성공적으로 해제되었습니다!"
   },
   "tooltip": {
+    "apply_all_services": "이번 저장에서 변경한 전역 설정만 모든 서비스에 적용하며, 서비스 또는 템플릿에서 지정한 값을 대체합니다.",
     "auto_lets_encrypt": "Let's Encrypt 인증서를 자동으로 요청할지 여부입니다.",
     "button": {
       "ban_ip": "이 IP 주소 차단",
@@ -1455,6 +1717,7 @@
       "convert_config_to_online": "설정 {{name}}을(를) 온라인으로 전환",
       "convert_service_to_draft": "서비스 {{name}}을(를) 초안으로 전환",
       "convert_service_to_online": "서비스 {{name}}을(를) 온라인으로 전환",
+      "crowdsec_unban_unavailable": "CrowdSec 관리 자격 증명이 없거나 소스 인스턴스를 사용할 수 없습니다",
       "delete_config": "사용자 정의 설정 {{name}} 삭제",
       "delete_file": "캐시 파일 삭제: {{filename}}",
       "delete_instance": "인스턴스 {{hostname}} 삭제",
@@ -1464,6 +1727,7 @@
       "force_check": "확인 일정을 예약합니다. 업데이트가 있을 때만 다운로드합니다.",
       "force_update": "확인을 건너뛰고 PRO 플러그인을 강제로 다운로드합니다. 실패 시 현재 상태를 유지합니다.",
       "ping_instance": "인스턴스 {{hostname}}에 핑 보내기",
+      "refresh_ui_plugins": "웹 UI에 이미 있는 PRO 플러그인을 아무것도 내려받지 않고 다시 불러옵니다.",
       "reload_instance": "인스턴스 {{hostname}} 새로고침",
       "reset_default": "기본값으로 초기화",
       "reset_global": "전역 설정값으로 초기화",
@@ -1471,7 +1735,8 @@
       "show_selected_only": "선택한 항목만 표시",
       "stop_instance": "인스턴스 {{hostname}} 중지",
       "unban_ip": "{{ip}} 차단 해제",
-      "value_from_global": "전역 설정에서 가져온 값"
+      "value_from_global": "전역 설정에서 가져온 값",
+      "update_ban_duration": "금지 기간 업데이트"
     },
     "cannot_delete_original_ban": "원본 차단 항목은 삭제할 수 없습니다.",
     "cannot_remove_disabled": "하나 이상의 설정이 비활성화되어 있어 제거할 수 없습니다.",
@@ -1517,9 +1782,9 @@
     "instance_not_up": "인스턴스 {{hostname}} 가 현재 응답하지 않습니다 ('up' 상태 아님).",
     "latest_version_installed": "최신 버전을 사용 중입니다.",
     "lets_encrypt_custom_profile": "Let's Encrypt에 사용할 사용자 정의 프로필입니다 (예: 'my_custom_profile').",
-    "lets_encrypt_disable_public_suffixes": "공용 접미사 목록(PSL)과 일치하는 도메인에 대한 인증서 요청을 비활성화합니다(권장).",
-    "lets_encrypt_profile": "Let's Encrypt에 사용할 프로필 (classic, tlsserver, shortlived)입니다.",
+    "lets_encrypt_disable_public_suffixes": "활성화하면(기본값) 도메인을 공용 접미사 목록과 대조하지 않습니다. 공용 접미사와 일치하는 도메인(예: co.uk)의 인증서 요청을 거부하려면 비활성화하세요.",
     "lets_encrypt_server": "공급자별 설정을 표시하려면 인증서 공급자를 선택하세요.",
+    "lets_encrypt_profile": "Let's Encrypt에 사용할 프로필 (classic, tlsserver, shortlived)입니다.",
     "license_key": "BunkerWeb PRO 라이선스 키입니다.",
     "link": {
       "access_plugin_page": "{{name}} 페이지 접근",
@@ -1531,6 +1796,7 @@
       "edit_config": "사용자 정의 설정 {{name}} 수정",
       "edit_service": "서비스 {{service}} 수정",
       "edit_template": "템플릿 {{template}} 수정",
+      "export_config": "사용자 지정 설정 {{name}} 내보내기",
       "export_service": "서비스 {{service}} 설정 내보내기",
       "view_config": "사용자 정의 설정 {{name}} 보기",
       "view_file": "{{filename}} 보기",
@@ -1558,6 +1824,16 @@
     "real_ip_recursive": "헤더에 포함된 IP 주소에 대해 재귀 검색을 수행합니다.",
     "remove_ban_entry": "목록에서 이 차단 항목을 제거합니다.",
     "reset_template_settings": "현재 템플릿 뷰의 모든 세팅을 기본값으로 초기화합니다.",
+    "download_log": "이 로그 파일 다운로드",
+    "issue_count": "이 보기의 오류와 경고",
+    "local_time": "타임스탬프를 사용자 현지 시간으로 표시",
+    "collapse_multiline": "여러 줄 항목 접기(트레이스백, 페이로드)",
+    "collapse_raw_values": "여러 줄 값 접기(인증서, 키)",
+    "next_issue": "다음 오류 또는 경고로 이동",
+    "prev_issue": "이전 오류 또는 경고로 이동",
+    "search_logs": "로그 검색(Ctrl+F)",
+    "toggle_level": "{{level}} 줄 표시 / 숨기기",
+    "toggle_wrap": "줄 바꿈 전환",
     "select_file_to_follow": "추적 모드를 활성화할 파일을 선택하세요.",
     "server_name": "이 서비스의 주 도메인 이름 또는 서버 이름입니다.",
     "stream_support": {
@@ -1694,16 +1970,24 @@
     "view_full_url": "클릭하여 전체 URL 보기",
     "wildcard_certificates": "와일드카드 인증서(*.domain.com)를 생성합니다. DNS 챌린지가 필요합니다.",
     "wildcard_dns_only": "와일드카드 인증서는 DNS 챌린지 유형에서만 지원됩니다.",
-    "zerossl_api_connect_timeout": "ZeroSSL API 호출의 연결 시간 초과(초)입니다.",
     "zerossl_api_key": "zerossl-bot에서 사용하는 선택적 ZeroSSL API 키입니다.",
-    "zerossl_api_max_time": "각 ZeroSSL API 요청의 최대 총 시간(초)입니다.",
     "zerossl_api_retry": "ZeroSSL API 요청의 재시도 횟수입니다 (0이면 재시도를 비활성화).",
-    "zerossl_api_retry_delay": "ZeroSSL API 재시도 간 지연 시간(초)입니다."
+    "zerossl_api_retry_delay": "ZeroSSL API 재시도 간 지연 시간(초)입니다.",
+    "zerossl_api_connect_timeout": "ZeroSSL API 호출의 연결 시간 초과(초)입니다.",
+    "zerossl_api_max_time": "각 ZeroSSL API 요청의 최대 총 시간(초)입니다.",
+    "readonly_mode": "이 작업은 읽기 전용 모드에서는 허용되지 않습니다."
   },
   "totp": {
     "prompt": "TOTP 코드를 입력해 주세요."
   },
   "validation": {
+    "certificate_checking": "확인 중 ...",
+    "certificate_expires_in": "{{days}}일 후 만료",
+    "certificate_failed": "검증 요청이 실패했습니다.",
+    "certificate_file_mode": "여기서는 붙여넣거나 업로드한 데이터만 확인할 수 있습니다. 인증서 경로는 스케줄러가 읽으며, 웹 UI는 이에 접근할 수 없습니다.",
+    "certificate_missing": "먼저 인증서와 키를 모두 입력하세요.",
+    "certificate_subject": "제목:",
+    "certificate_valid": "인증서와 키가 일치합니다.",
     "default_field_name": "이 필드",
     "invalid_date": "유효하지 않은 날짜입니다.",
     "ip_global_duplicate": "이 IP 주소는 이미 전역 차단 목록에 있습니다.",
@@ -1714,5 +1998,12 @@
     "required": "{{field}} 필드는 필수입니다.",
     "service_required_for_ban": "서비스별 차단을 위해서는 서비스를 선택해야 합니다.",
     "zerossl_email_or_api_key_required": "ZeroSSL은 이메일 또는 ZeroSSL API 키가 필요합니다."
+  },
+  "plugins": {
+    "multivalue": {
+      "show_less": "덜 표시",
+      "more_value": "더 보기",
+      "more_values": "더 많은 값"
+    }
   }
 }

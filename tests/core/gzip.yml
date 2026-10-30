@@ -1,0 +1,48 @@
+integrations: "all"
+
+actions:
+  deactivated:
+    type: header
+    url: "http://www.example.com/logo.png"
+    follow_redirects: true
+    response_headers:
+      Content-Encoding: null
+    headers:
+      Accept-Encoding: "gzip"
+    config:
+      USE_GZIP: "no"
+  activated:
+    type: header
+    url: "http://www.example.com/logo.png"
+    follow_redirects: true
+    response_headers:
+      Content-Encoding: "^gzip$"
+    headers:
+      Accept-Encoding: "gzip"
+  big_size:
+    type: header
+    url: "http://www.example.com/logo.png"
+    follow_redirects: true
+    response_headers:
+      Content-Encoding: null
+    headers:
+      Accept-Encoding: "gzip"
+    config:
+      GZIP_MIN_LENGTH: "100000"
+  tweaked_types_present:
+    type: header
+    url: "http://www.example.com/logo.png"
+    follow_redirects: true
+    response_headers:
+      Content-Encoding: null
+    headers:
+      Accept-Encoding: "gzip"
+    config:
+      GZIP_TYPES: "text/html"
+
+config:
+  USE_GZIP: "yes"
+  GZIP_TYPES: "image/png"
+
+annotations:
+  bunkerweb.io/REVERSE_PROXY_URL: ""

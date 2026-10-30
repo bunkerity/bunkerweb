@@ -14,6 +14,7 @@ multithread_LDADD = \
 	$(MAXMIND_LDADD) \
 	$(LUA_LDADD) \
 	$(PCRE_LDADD) \
+	$(PCRE2_LDADD) \
 	$(SSDEEP_LDADD) \
 	$(YAJL_LDADD)
 
@@ -46,10 +47,15 @@ multithread_CPPFLAGS = \
 	$(LMDB_CFLAGS) \
 	$(LUA_CFLAGS) \
 	$(PCRE_CFLAGS) \
+	$(PCRE2_CFLAGS) \
 	$(LIBXML2_CFLAGS)
 
 
 MAINTAINERCLEANFILES = \
 	Makefile.in
 
+EXTRA_DIST = \
+	basic_rules.conf \
+	inspectfile_rules.conf \
+	inspectfile_helper.sh
 

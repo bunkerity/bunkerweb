@@ -10,34 +10,47 @@ from json import dumps, loads
 from operator import itemgetter
 from os import getenv, getpid, sep
 from os.path import abspath, join
+from re import fullmatch, split as resplit
 from secrets import token_urlsafe
 from signal import SIGINT, signal, SIGTERM
 from sys import path as sys_path, modules as sys_modules
 from threading import Lock
 from time import time
 from traceback import format_exc
-from warnings import filterwarnings
 
 for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("utils",), ("api",), ("db",))]:
     if deps_path not in sys_path:
         sys_path.append(deps_path)
 
-# Suppress passlib's pkg_resources deprecation warning
-# This is a known issue in passlib that will be fixed in future versions
-filterwarnings("ignore", message=r".*pkg_resources is deprecated.*", category=UserWarning, module="passlib")
+from app.models.safe_session_cache import SafeFileSystemCache
+from flask import Blueprint, Flask, Response, g, jsonify, make_response, redirect, render_template, request, session, url_for
 
-from cachelib import FileSystemCache
-from flask import Blueprint, Flask, Response, flash as flask_flash, jsonify, make_response, redirect, render_template, request, session, url_for
-from flask_login import current_user, LoginManager, login_required
+try:
+    from flask_compress import Compress
+except ModuleNotFoundError as e:  # Alpine's python3 is built without _zstd; Flask-Compress imports it on 3.14+ and the UI only uses br and gzip
+    if e.name != "_zstd":
+        raise
+    from types import ModuleType
+
+    # Stub only while Flask-Compress loads, so later importers (urllib3) still see zstd as unavailable
+    sys_modules["compression.zstd"] = ModuleType("compression.zstd")
+    try:
+        from flask_compress import Compress
+    finally:
+        del sys_modules["compression.zstd"]
+from markupsafe import Markup
+from flask_login import current_user, LoginManager, login_required, logout_user
 from flask_session import Session
 from flask_wtf.csrf import CSRFProtect, CSRFError
 from jinja2 import ChoiceLoader, FileSystemLoader
 from werkzeug.routing.exceptions import BuildError
 
-from common_utils import get_redis_client as get_common_redis_client  # type: ignore
+from common_utils import get_version, is_newer_version_available  # type: ignore
 
-from app.models.biscuit import BiscuitMiddleware
+from app.html_pattern import v_safe_pattern
+from app.models.biscuit import BiscuitMiddleware, _internal_error_response
 from app.models.reverse_proxied import ReverseProxied
+from app.models.session_cookie import use_per_request_cookie
 
 from app.dependencies import BW_CONFIG, DATA, DB, CORE_PLUGINS_PATH, EXTERNAL_PLUGINS_PATH, PRO_PLUGINS_PATH, safe_reload_plugins
 from app.models.models import AnonymousUser
@@ -46,33 +59,38 @@ from app.utils import (
     COLUMNS_PREFERENCES_DEFAULTS,
     LIB_DIR,
     LOGGER,
+    is_static_path,
     _sanitize_internal_next,
     flash,
     get_blacklisted_settings,
     get_filtered_settings,
     get_latest_stable_release,
+    can_delete_service,
     get_multiples,
     handle_stop,
     human_readable_number,
     is_editable_method,
     is_plugin_active,
+    is_session_revoked,
     is_ui_api_method,
     stop,
     restart_workers,
 )
 from app.lang_config import SUPPORTED_LANGUAGES
+from app.support_bundle import read_plugin_version
 
 from app.routes.about import about
 from app.routes.bans import bans
 from app.routes.cache import cache
 from app.routes.configs import configs
+from app.routes.crowdsec import crowdsec
 from app.routes.global_settings import global_settings
 from app.routes.home import home
 from app.routes.instances import instances
 from app.routes.jobs import jobs
 from app.routes.login import login
 from app.routes.logout import logout, logout_page
-from app.routes.logs import logs
+from app.routes.logs import _list_log_files, logs
 from app.routes.plugins import plugins
 from app.routes.pro import pro
 from app.routes.profile import profile
@@ -82,6 +100,7 @@ from app.routes.setup import setup
 from app.routes.totp import totp
 from app.routes.support import support
 from app.routes.templates import templates as templates_bp
+from app.routes.utils import active_config_tasks, get_redis_client as get_ui_redis_client, session_storage_due
 
 BLUEPRINTS = (
     about,
@@ -89,6 +108,7 @@ BLUEPRINTS = (
     profile,
     jobs,
     reports,
+    crowdsec,
     totp,
     home,
     logout,
@@ -149,6 +169,7 @@ DB_CHECK_STALE_INTERVAL_SECONDS = 30.0
 DB_CHECK_LAST_RUN_KEY = "DB_STATE_CHECK_LAST_RUN"
 DB_CHECK_RUNNING_KEY = "DB_STATE_CHECK_RUNNING"
 
+# Flask serves app/static/* at the URL root (static_url_path="/"); before_request short-circuits these.
 # Shared thread pool executors for background tasks to prevent thread spawning on every request
 _db_check_executor = ThreadPoolExecutor(max_workers=1, thread_name_prefix="bw-ui-db-check")
 _periodic_tasks_executor = ThreadPoolExecutor(max_workers=2, thread_name_prefix="bw-ui-periodic")
@@ -159,6 +180,21 @@ _db_check_lock = Lock()
 _db_check_future = None
 _db_check_next_allowed = 0.0
 
+_SESSION_CLEANUP_INTERVAL_SECONDS = 3600.0
+_session_cleanup_last_run = 0.0
+
+_restart_workers_lock = Lock()
+_restart_workers_future = None
+_restart_workers_next_allowed = 0.0
+RESTART_WORKERS_MIN_INTERVAL_SECONDS = 10.0
+BW_VERSION = get_version()
+
+
+def _static_cache_control(version_arg: str | None, version: str) -> str | None:
+    if version_arg == version:
+        return "public, max-age=31536000, immutable"
+    return None
+
 
 def _shutdown_executors():
     """Shutdown all thread pool executors on application exit."""
@@ -166,12 +202,82 @@ def _shutdown_executors():
     _periodic_tasks_executor.shutdown(wait=False)
     _user_access_executor.shutdown(wait=False)
     _config_tasks_executor.shutdown(wait=False)
+    with suppress(Exception):
+        DB.close()
 
 
 register(_shutdown_executors)
 
 
+SIZE_MULTIPLIERS = {
+    "": 1,
+    "b": 1,
+    "k": 1024,
+    "kb": 1024,
+    "ki": 1024,
+    "kib": 1024,
+    "m": 1024**2,
+    "mb": 1024**2,
+    "mi": 1024**2,
+    "mib": 1024**2,
+    "g": 1024**3,
+    "gb": 1024**3,
+    "gi": 1024**3,
+    "gib": 1024**3,
+    "t": 1024**4,
+    "tb": 1024**4,
+    "ti": 1024**4,
+    "tib": 1024**4,
+}
+
+
+def parse_size_to_bytes(size: str) -> int:
+    """
+    Parse a size string to bytes.
+
+    Examples:
+    - "52428800"
+    - "50M", "50MB", "50 MiB"
+    - "1G", "1GiB"
+    """
+    match = fullmatch(r"\s*(\d+(?:\.\d+)?)\s*([a-zA-Z]*)\s*", size)
+    if not match:
+        raise ValueError("invalid format")
+
+    value = float(match.group(1))
+    unit = match.group(2).lower()
+    multiplier = SIZE_MULTIPLIERS.get(unit)
+    if multiplier is None:
+        raise ValueError("invalid unit")
+
+    bytes_value = int(value * multiplier)
+    if bytes_value <= 0:
+        raise ValueError("non-positive size")
+    return bytes_value
+
+
+def should_replace_blueprint(existing, new):
+    """Tell whether `new` takes the place of the already registered blueprint `existing` of the same name.
+
+    plugin_priority arbitrates between sources: PRO plugin (2) over external plugin (1) over core plugin and the
+    built-in UI blueprints (0). Equal priorities only replace each other when both were loaded from a plugin
+    folder (`import_path` is set by refresh_app_context): that is a reload of the plugin after an update, and the
+    caller picks one blueprint per name, so the new one is the current one. A built-in UI blueprint is never
+    replaced at its own priority.
+    """
+    existing_priority = getattr(existing, "plugin_priority", 0)
+    new_priority = getattr(new, "plugin_priority", 0)
+    if new_priority != existing_priority:
+        return new_priority > existing_priority
+    return hasattr(existing, "import_path") and hasattr(new, "import_path")
+
+
 class DynamicFlask(Flask):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # blueprint name -> (url rules, view function endpoints) added while registering it
+        self._blueprint_owned = {}
+
     def create_global_jinja_loader(self):
         """
         Override Flask's default template loader creation so that
@@ -213,33 +319,108 @@ class DynamicFlask(Flask):
         LOGGER.debug("Global jinja loader created successfully")
         return final_loader
 
+    def _remove_blueprint(self, name):
+        """Drop a registered blueprint with the URL rules, view functions and per-blueprint handlers it added."""
+        prefix = f"{name}."
+        del self.blueprints[name]
+        # A blueprint can also add rules outside its own namespace from a record_once callback (a bare `/<name>` alias
+        # whose endpoint is the plain blueprint name), so drop what its registration recorded, not only `<name>.*`.
+        owned_rules, owned_endpoints = self._blueprint_owned.pop(name, ([], set()))
+        owned_rule_ids = {id(rule) for rule in owned_rules}
+        by_endpoint = self.url_map._rules_by_endpoint
+        for endpoint in list(by_endpoint):
+            by_endpoint[endpoint] = [rule for rule in by_endpoint[endpoint] if id(rule) not in owned_rule_ids and not endpoint.startswith(prefix)]
+            if not by_endpoint[endpoint]:
+                del by_endpoint[endpoint]
+        # Werkzeug has no way to remove a rule from its matcher, so rebuild it from the rules that are left
+        # (a stale rule would still match and send the request to a view function that no longer exists).
+        self.url_map._matcher = type(self.url_map._matcher)(self.url_map.merge_slashes)
+        for rule in self.url_map.iter_rules():
+            if not rule.build_only:
+                self.url_map._matcher.add(rule)
+        self.url_map._remap = True
+        for endpoint in [endpoint for endpoint in self.view_functions if endpoint in owned_endpoints or endpoint.startswith(prefix)]:
+            del self.view_functions[endpoint]
+        # Flask appends a blueprint's handlers to these on every registration, so a replacement would run them twice
+        for handlers in (
+            self.before_request_funcs,
+            self.after_request_funcs,
+            self.teardown_request_funcs,
+            self.url_default_functions,
+            self.url_value_preprocessors,
+            self.template_context_processors,
+            self.error_handler_spec,
+        ):
+            for key in [key for key in handlers if key == name or (isinstance(key, str) and key.startswith(prefix))]:
+                del handlers[key]
+
     def register_blueprint(self, blueprint, **options):
         # Check if a blueprint with this name is already registered.
         if blueprint.name in self.blueprints:
             existing_bp = self.blueprints[blueprint.name]
-            existing_priority = getattr(existing_bp, "plugin_priority", 0)
-            new_priority = getattr(blueprint, "plugin_priority", 0)
-            if new_priority > existing_priority:
-                LOGGER.debug(f"Overriding blueprint '{blueprint.name}': new priority {new_priority} over {existing_priority}")
-                # Remove the existing blueprint.
-                del self.blueprints[blueprint.name]
-                # Also remove all URL rules associated with the existing blueprint.
-                rules_to_remove = [rule for rule in list(self.url_map.iter_rules()) if rule.endpoint.startswith(blueprint.name + ".")]
-                for rule in rules_to_remove:
-                    self.url_map._rules.remove(rule)
-                    self.url_map._rules_by_endpoint.pop(rule.endpoint, None)
+            if should_replace_blueprint(existing_bp, blueprint):
+                LOGGER.debug(
+                    f"Replacing blueprint '{blueprint.name}': priority {getattr(blueprint, 'plugin_priority', 0)} over {getattr(existing_bp, 'plugin_priority', 0)}"
+                )
+                self._remove_blueprint(blueprint.name)
             else:
-                LOGGER.debug(f"Skipping blueprint '{blueprint.name}' with priority {new_priority} " f"(existing priority {existing_priority})")
-                return  # Do not register a lower- or equal-priority blueprint.
+                LOGGER.debug(
+                    f"Skipping blueprint '{blueprint.name}' with priority {getattr(blueprint, 'plugin_priority', 0)} "
+                    f"(existing priority {getattr(existing_bp, 'plugin_priority', 0)})"
+                )
+                return  # Do not register a lower-priority blueprint, nor an equal-priority one that is not a reload of a plugin.
 
         # Allow registration even after first request by temporarily resetting the flag.
         original_got_first = self._got_first_request
         self._got_first_request = False
+        rules_before = {id(rule) for rule in self.url_map.iter_rules()}
+        endpoints_before = set(self.view_functions)
         try:
             result = super().register_blueprint(blueprint, **options)
         finally:
             self._got_first_request = original_got_first
+            self._blueprint_owned[blueprint.name] = (
+                [rule for rule in self.url_map.iter_rules() if id(rule) not in rules_before],
+                set(self.view_functions) - endpoints_before,
+            )
         return result
+
+
+def register_plugin_blueprints(app, blueprint_registry):
+    """Register the blueprints picked by refresh_app_context, replacing the ones already registered when the priority allows it."""
+    for bp_name, bp in blueprint_registry.items():
+        # Check if we should replace existing blueprint (DynamicFlask.register_blueprint removes the old one)
+        if bp_name in app.blueprints and not should_replace_blueprint(app.blueprints[bp_name], bp):
+            LOGGER.debug(
+                f"Skipping registration for '{bp_name}' (priority {getattr(bp, 'plugin_priority', 0)}, existing {getattr(app.blueprints[bp_name], 'plugin_priority', 0)})"
+            )
+            continue
+
+        # Register the blueprint
+        app.register_blueprint(bp)
+        LOGGER.debug(f"Registered blueprint '{bp_name}' with priority {getattr(bp, 'plugin_priority', 0)}")
+
+        # Add to extra pages if it has a root route
+        for rule in app.url_map.iter_rules():
+            if rule.endpoint.startswith(f"{bp_name}.") and str(rule) == f"/{bp_name}" and bp_name not in app.config["EXTRA_PAGES"]:
+                app.config["EXTRA_PAGES"].append(bp_name)
+                break
+
+    # Reset Jinja2 environment to apply template changes
+    app.jinja_env.cache = {}
+    app.jinja_env.loader = app.create_global_jinja_loader()
+
+
+def deny_plugin_requests(module_name):
+    """When a plugin's hooks fail to load, deny every request instead of serving without them: they may be an authorization check."""
+
+    def fail_closed_before_request():
+        LOGGER.error(f"Hooks of plugin module {module_name} failed to load, denying the request")
+        return _internal_error_response()
+
+    # Distinct module name so the dedupe of refresh_app_context keeps one stub per plugin
+    fail_closed_before_request.__module__ = module_name
+    app.config.setdefault(HOOKS["before_request"]["key"], []).append(fail_closed_before_request)
 
 
 def refresh_app_context():
@@ -281,7 +462,7 @@ def refresh_app_context():
 
         active_plugin_paths.add(py_file.parent.parent.parent)
         # Namespace the module name with the plugin directory to avoid collisions
-        plugin_root = py_file.parents[2] if len(py_file.parents) >= 3 else py_file.parent
+        plugin_root = py_file.parents[1] if len(py_file.parents) >= 2 else py_file.parent
         module_name = f"bw_ui_hooks_{plugin_root.name}_{py_file.stem}"
         active_hook_modules.add(module_name)
         hook_dir = str(py_file.parent)
@@ -310,6 +491,7 @@ def refresh_app_context():
                 # Restore any prior 'hooks' module
                 if prev_hooks_mod is not None:
                     sys_modules["hooks"] = prev_hooks_mod
+                deny_plugin_requests(module_name)
                 continue
 
             hook_module = module_from_spec(spec)
@@ -323,6 +505,7 @@ def refresh_app_context():
                 else:
                     # Ensure we don't keep a plugin-specific 'hooks' leaked
                     sys_modules.pop("hooks", None)
+                deny_plugin_requests(module_name)
                 continue
 
             # Restore any prior 'hooks' module (avoid leaking current plugin 'hooks' globally)
@@ -343,6 +526,7 @@ def refresh_app_context():
                 app.hook_sys_paths.pop(module_name, None)
         except Exception as exc:
             LOGGER.error(f"Error loading potential hooks from {py_file}: {exc}")
+            deny_plugin_requests(module_name)
             # Best-effort cleanup of 'hooks'
             with suppress(Exception):
                 if "hooks" in sys_modules:
@@ -424,6 +608,7 @@ def refresh_app_context():
                         plugin_blueprints.add(bp_name)
 
                         bp.plugin_priority = priority
+                        bp.plugin_version = read_plugin_version(plugin_root)
                         bp.import_path = blueprint_dir
                         app.plugin_sys_paths[bp_name] = blueprint_dir
 
@@ -448,27 +633,18 @@ def refresh_app_context():
     # Remove blueprints for deleted plugins
     for bp_name in list(app.blueprints.keys()):
         if bp_name not in plugin_blueprints and bp_name not in app.original_blueprints:
-            # Remove blueprint and clean up
-            app.blueprints.pop(bp_name, None)
-
             # Clean up sys.path
             if bp_name in app.plugin_sys_paths and app.plugin_sys_paths[bp_name] in sys_path:
                 sys_path.remove(app.plugin_sys_paths[bp_name])
                 del app.plugin_sys_paths[bp_name]
 
-            # Remove URL rules and endpoints
+            # Remove extra pages before the blueprint's rules are dropped.
             for rule in list(app.url_map.iter_rules()):
                 if rule.endpoint.startswith(f"{bp_name}."):
                     if str(rule) == f"/{bp_name}" and bp_name in app.config["EXTRA_PAGES"]:
                         app.config["EXTRA_PAGES"].remove(bp_name)
 
-                    with suppress(ValueError):
-                        app.url_map._rules.remove(rule)
-                        app.url_map._rules_by_endpoint.pop(rule.endpoint, None)
-
-            # Remove view functions
-            for endpoint in [ep for ep in app.view_functions if ep.startswith(f"{bp_name}.")]:
-                app.view_functions.pop(endpoint, None)
+            app._remove_blueprint(bp_name)
 
             LOGGER.debug(f"Blueprint '{bp_name}' was completely removed")
 
@@ -478,40 +654,7 @@ def refresh_app_context():
             app.register_blueprint(bp)
             LOGGER.debug(f"Re-registered original blueprint '{bp_name}'")
 
-    # Register new and updated plugin blueprints
-    for bp_name, bp in blueprint_registry.items():
-        # Check if we should replace existing blueprint
-        if bp_name in app.blueprints:
-            existing_bp = app.blueprints[bp_name]
-            existing_priority = getattr(existing_bp, "plugin_priority", 0)
-            new_priority = getattr(bp, "plugin_priority", 0)
-
-            if new_priority <= existing_priority:
-                LOGGER.debug(f"Skipping registration for '{bp_name}' (priority {new_priority} <= {existing_priority})")
-                continue
-
-            # Remove existing blueprint before registering the new one
-            for rule in list(app.url_map.iter_rules()):
-                if rule.endpoint.startswith(f"{bp_name}."):
-                    app.url_map._rules.remove(rule)
-                    app.url_map._rules_by_endpoint.pop(rule.endpoint, None)
-
-            for endpoint in [ep for ep in app.view_functions if ep.startswith(f"{bp_name}.")]:
-                app.view_functions.pop(endpoint, None)
-
-        # Register the blueprint
-        app.register_blueprint(bp)
-        LOGGER.debug(f"Registered blueprint '{bp_name}' with priority {getattr(bp, 'plugin_priority', 0)}")
-
-        # Add to extra pages if it has a root route
-        for rule in app.url_map.iter_rules():
-            if rule.endpoint.startswith(f"{bp_name}.") and str(rule) == f"/{bp_name}" and bp_name not in app.config["EXTRA_PAGES"]:
-                app.config["EXTRA_PAGES"].append(bp_name)
-                break
-
-    # Reset Jinja2 environment to apply template changes
-    app.jinja_env.cache = {}
-    app.jinja_env.loader = app.create_global_jinja_loader()
+    register_plugin_blueprints(app, blueprint_registry)
 
     # Remove other legacy flags
     if "NEEDS_CONTEXT_REFRESH" in DATA:
@@ -535,22 +678,45 @@ with app.app_context():
 
     app.config["BISCUIT_PUBLIC_KEY_PATH"] = BISCUIT_PUBLIC_KEY_FILE.as_posix()
 
-    app.config["ENV"] = {}
-
     app.config["CHECK_PRIVATE_IP"] = getenv("CHECK_PRIVATE_IP", "yes").lower() == "yes"
     app.config["SECRET_KEY"] = FLASK_SECRET
+
+    # Host header allowlist (defense-in-depth). Space/comma separated list of allowed
+    # Host values (wildcards like "*.example.com" supported). Empty = disabled/permissive.
+    _raw_allowed_hosts = getenv("UI_ALLOWED_HOSTS", "").strip()
+    app.config["ALLOWED_HOSTS"] = [h for h in resplit(r"[\s,]+", _raw_allowed_hosts) if h] if _raw_allowed_hosts else []
+    if app.config["ALLOWED_HOSTS"]:
+        LOGGER.info(f"UI Host header allowlist enabled: {app.config['ALLOWED_HOSTS']}")
 
     app.config["SESSION_COOKIE_PATH"] = "/"
     app.config["SESSION_COOKIE_HTTPONLY"] = True
     app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
 
-    app.config["REMEMBER_COOKIE_PATH"] = "/"
-    app.config["REMEMBER_COOKIE_HTTPONLY"] = True
-    app.config["REMEMBER_COOKIE_SAMESITE"] = "Lax"
+    # Strict defaults; the session interface below picks the real name and Secure flag per request
+    app.config["SESSION_COOKIE_NAME"] = "__Host-bw_ui_session"
+    app.config["SESSION_COOKIE_SECURE"] = True
+
+    # The Flask-Login remember cookie is disabled. It carried only the username, HMAC'd with a
+    # static secret, for 365 days, touched no server-side state, and so outlived logout, password
+    # change and session revocation. "Remember me" is now session.permanent (login.py), bounded by
+    # SESSION_LIFETIME_HOURS / SESSION_ABSOLUTE_HOURS and revocable like any other session.
+    # Pointing REMEMBER_COOKIE_NAME at a name no browser will ever send keeps has_cookie in
+    # flask_login's _load_user permanently False, so a legacy token already sitting in a browser is
+    # dead on the first request after upgrade rather than getting one free authenticated request.
+    # The name deliberately has no __Host- prefix: strong session protection can still emit a
+    # deletion header for it, which is inert unprefixed but would be rejected outright by the UA
+    # if prefixed.
+    app.config["REMEMBER_COOKIE_NAME"] = "bw_ui_remember_disabled"
 
     app.config["SEND_FILE_MAX_AGE_DEFAULT"] = 86400
-    app.config["MAX_CONTENT_LENGTH"] = 50 * 1024 * 1024  # 50 MB
-    app.config["SCRIPT_NONCE"] = ""
+    default_max_content_length = 50 * 1024 * 1024  # 50 MB
+    raw_max_content_length = getenv("UI_MAX_CONTENT_LENGTH", getenv("MAX_CONTENT_LENGTH", str(default_max_content_length)))
+    try:
+        max_content_length = parse_size_to_bytes(raw_max_content_length)
+    except ValueError:
+        max_content_length = default_max_content_length
+        LOGGER.warning(f"Invalid MAX_CONTENT_LENGTH value ({raw_max_content_length}), defaulting to {default_max_content_length} bytes (50 MB)")
+    app.config["MAX_CONTENT_LENGTH"] = max_content_length
 
     # Session management
     try:
@@ -559,62 +725,113 @@ with app.app_context():
         session_lifetime_hours = 12.0
         LOGGER.warning("Invalid SESSION_LIFETIME_HOURS, defaulting to 12h")
 
+    try:
+        session_absolute_hours = float(getenv("SESSION_ABSOLUTE_HOURS", "168"))
+    except ValueError:
+        session_absolute_hours = 168.0
+        LOGGER.warning("Invalid SESSION_ABSOLUTE_HOURS, defaulting to 168h (7 days)")
+    if session_absolute_hours < session_lifetime_hours:
+        LOGGER.warning(
+            "SESSION_ABSOLUTE_HOURS (%s) is lower than SESSION_LIFETIME_HOURS (%s); clamping to the latter", session_absolute_hours, session_lifetime_hours
+        )
+        session_absolute_hours = session_lifetime_hours
+
+    try:
+        session_rolling_hours = float(getenv("SESSION_ROLLING_HOURS", "0"))
+    except ValueError:
+        session_rolling_hours = 0.0
+        LOGGER.warning("Invalid SESSION_ROLLING_HOURS, defaulting to 0 (disabled)")
+    if session_rolling_hours < 0:
+        session_rolling_hours = 0.0
+
     app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(hours=session_lifetime_hours)
+    app.config["SESSION_REFRESH_EACH_REQUEST"] = True
+    app.config["SESSION_ABSOLUTE_SECONDS"] = int(session_absolute_hours * 3600)
+    app.config["SESSION_ROLLING_SECONDS"] = int(session_rolling_hours * 3600)
     app.config["SESSION_ID_LENGTH"] = 64
 
     session_cache_dir = LIB_DIR.joinpath("ui_sessions_cache")
     session_timeout = int(app.config["PERMANENT_SESSION_LIFETIME"].total_seconds())
 
-    redis_settings = BW_CONFIG.get_config(
-        global_only=True,
-        methods=False,
-        filtered_settings=(
-            "USE_REDIS",
-            "REDIS_HOST",
-            "REDIS_PORT",
-            "REDIS_DATABASE",
-            "REDIS_TIMEOUT",
-            "REDIS_KEEPALIVE_POOL",
-            "REDIS_SSL",
-            "REDIS_USERNAME",
-            "REDIS_PASSWORD",
-            "REDIS_SENTINEL_HOSTS",
-            "REDIS_SENTINEL_USERNAME",
-            "REDIS_SENTINEL_PASSWORD",
-            "REDIS_SENTINEL_MASTER",
-        ),
-    )
-
-    redis_client = None
-    if redis_settings.get("USE_REDIS", "no").lower() == "yes":
-        redis_client = get_common_redis_client(
-            use_redis=True,
-            redis_host=redis_settings.get("REDIS_HOST"),
-            redis_port=redis_settings.get("REDIS_PORT", "6379"),
-            redis_db=redis_settings.get("REDIS_DATABASE", "0"),
-            redis_timeout=redis_settings.get("REDIS_TIMEOUT", "1000.0"),
-            redis_keepalive_pool=redis_settings.get("REDIS_KEEPALIVE_POOL", "10"),
-            redis_ssl=redis_settings.get("REDIS_SSL", "no") == "yes",
-            redis_username=redis_settings.get("REDIS_USERNAME") or None,
-            redis_password=redis_settings.get("REDIS_PASSWORD") or None,
-            redis_sentinel_hosts=redis_settings.get("REDIS_SENTINEL_HOSTS", []),
-            redis_sentinel_username=redis_settings.get("REDIS_SENTINEL_USERNAME") or None,
-            redis_sentinel_password=redis_settings.get("REDIS_SENTINEL_PASSWORD") or None,
-            redis_sentinel_master=redis_settings.get("REDIS_SENTINEL_MASTER", ""),
-        )
-        if redis_client:
-            LOGGER.debug("Using Redis as session backend")
-            app.config["SESSION_TYPE"] = "redis"
-            app.config["SESSION_REDIS"] = redis_client
-            app.config["SESSION_KEY_PREFIX"] = "bunkerweb_ui_session:"
-        else:
+    # Same helper the routes use, so the worker ends up with one memoised client and one
+    # connection pool instead of a session pool plus a per-request one.
+    redis_client = get_ui_redis_client()
+    session_fallback_cache = None
+    if redis_client:
+        LOGGER.debug("Using Redis as session backend")
+        app.config["SESSION_TYPE"] = "redis"
+        app.config["SESSION_REDIS"] = redis_client
+        app.config["SESSION_KEY_PREFIX"] = "bunkerweb_ui_session:"
+        session_fallback_cache = SafeFileSystemCache(cache_dir=session_cache_dir, threshold=0, default_timeout=session_timeout)
+    else:
+        # get_redis_client returns None for both "disabled" and "unreachable"; only the second
+        # is worth a WARNING, because this worker is now pinned to file sessions for its life.
+        if BW_CONFIG.get_config(global_only=True, methods=False, filtered_settings=("USE_REDIS",)).get("USE_REDIS", "no") == "yes":
             LOGGER.warning("Redis configured but unavailable for sessions, falling back to FileSystemCache")
-
-    if not redis_client:
+        LOGGER.debug("Using FileSystemCache as session backend")
         app.config["SESSION_TYPE"] = "cachelib"
-        app.config["SESSION_CACHELIB"] = FileSystemCache(threshold=500, default_timeout=session_timeout, cache_dir=session_cache_dir)
+        app.config["SESSION_CACHELIB"] = SafeFileSystemCache(cache_dir=session_cache_dir, threshold=0, default_timeout=session_timeout)
     sess = Session()
     sess.init_app(app)
+
+    app.config.update(
+        COMPRESS_ALGORITHM=["br", "gzip"],
+        # Static files are streamed responses and use this list; its default has no gzip.
+        COMPRESS_ALGORITHM_STREAMING=["br", "gzip"],
+        COMPRESS_BR_LEVEL=4,
+        COMPRESS_LEVEL=6,
+        COMPRESS_MIN_SIZE=1024,
+        # Do not compress authenticated HTML: it carries CSRF tokens and echoed user input.
+        COMPRESS_MIMETYPES=[
+            "text/css",
+            "text/javascript",
+            "application/javascript",
+            "application/json",
+            "application/geo+json",
+            "image/svg+xml",
+            "font/woff",
+            "font/woff2",
+            "font/ttf",
+            "application/vnd.ms-fontobject",
+            "text/plain",
+        ],
+    )
+    Compress(app)
+
+    # Flask-Session picks the backend from SESSION_TYPE and never revisits it, so a Redis that
+    # dies or fills up after this point makes every request raise. Same parameters as the
+    # interface it replaces, plus the local cache it falls back to.
+    if session_fallback_cache is not None:
+        # Imported here rather than at module scope so booting the UI never hard-depends on the
+        # redis package, the same way common_utils treats it. This branch only runs once a Redis
+        # client exists.
+        from app.models.resilient_session import ResilientRedisSessionInterface
+
+        app.session_interface = ResilientRedisSessionInterface(
+            app,
+            client=redis_client,
+            fallback=session_fallback_cache,
+            logger=LOGGER,
+            key_prefix=app.config["SESSION_KEY_PREFIX"],
+            use_signer=app.config.get("SESSION_USE_SIGNER", False),
+            permanent=app.config.get("SESSION_PERMANENT", True),
+            sid_length=app.config["SESSION_ID_LENGTH"],
+            serialization_format=app.config.get("SESSION_SERIALIZATION_FORMAT", "msgpack"),
+        )
+
+    # SESSION_REFRESH_EACH_REQUEST makes flask-session's should_set_storage return True on
+    # every request, so an untouched session is rewritten to the store even for a static
+    # asset. Throttle the expiry-only refreshes; a modified session still writes at once,
+    # which leaves login, logout and _rotate_session_id untouched.
+    _session_lifetime_seconds = app.config["PERMANENT_SESSION_LIFETIME"].total_seconds()
+
+    def _throttled_should_set_storage(flask_app, flask_session) -> bool:
+        return session_storage_due(flask_session, _session_lifetime_seconds)
+
+    app.session_interface.should_set_storage = _throttled_should_set_storage
+
+    # Reached through BunkerWeb and directly over HTTP, the same worker needs both cookie flavours
+    use_per_request_cookie(app.session_interface)
 
     biscuit = BiscuitMiddleware(app)
 
@@ -627,20 +844,36 @@ with app.app_context():
     # CSRF protection
     app.config["WTF_CSRF_METHODS"] = ("POST",)
     app.config["WTF_CSRF_SSL_STRICT"] = False
+    # Align the CSRF token lifetime with the session so a form left open is not rejected before the session expires
+    app.config["WTF_CSRF_TIME_LIMIT"] = int(app.config["PERMANENT_SESSION_LIFETIME"].total_seconds())
     csrf = CSRFProtect()
     csrf.init_app(app)
 
-    app.config["EXTRA_PAGES"] = []
+    def lift_form_field_limit():
+        # Flask caps a single non-file form field at 500 kB, below MAX_CONTENT_LENGTH (Easy Resolve posts more).
+        # Only signed-in users get the larger cap, so the login form keeps the default.
+        if request.method == "POST" and current_user.is_authenticated:
+            request.max_form_memory_size = app.config["MAX_CONTENT_LENGTH"]
+
+    # Must run before CSRFProtect's hook, which parses the form
+    app.before_request_funcs.setdefault(None, []).insert(0, lift_form_field_limit)
+
+    app.config["EXTRA_PAGES"] = ["crowdsec"]
 
     def custom_url_for(endpoint, **values):
         if endpoint:
             try:
+                # A directory base (img/flags) gets file names appended in JS, so it must stay query-free
+                if endpoint == "static" and not app.debug and "." in values.get("filename", "").rstrip("/").rsplit("/", 1)[-1]:
+                    values.setdefault("v", BW_VERSION)
                 if endpoint not in ("static", "index", "loading", "check", "check_reloading") and not endpoint.endswith("_page"):
                     return url_for(f"{endpoint}.{endpoint}_page", **values)
                 return url_for(endpoint, **values)
             except BuildError as e:
                 LOGGER.debug(f"Couldn't build the URL for {endpoint}: {e}")
         return "#"
+
+    app.jinja_env.filters["v_safe_pattern"] = v_safe_pattern
 
     # Declare functions for jinja2
     app.jinja_env.globals.update(
@@ -653,17 +886,19 @@ with app.app_context():
         url_for=custom_url_for,
         is_plugin_active=is_plugin_active,
         is_ui_api_method=is_ui_api_method,
+        can_delete_service=can_delete_service,
     )
 
     app.config.update({hook_info["key"]: [] for hook_info in HOOKS.values()})
 
+    DATA.load_from_file()
     DATA.update({"FORCE_RELOAD_PLUGIN": False, "IS_RELOADING_PLUGINS": False})
     refresh_app_context()
 
 
 @app.context_processor
 def inject_variables():
-    app_env = app.config["ENV"].copy()
+    app_env = getattr(g, "_env", {}).copy()
     for hook in app.config["CONTEXT_PROCESSOR_HOOKS"]:
         try:
             resp = hook()
@@ -734,7 +969,7 @@ def inject_variables():
     app_env["extra_styles"] = extra_styles
     app_env["custom_css"] = custom_css
 
-    app.config["ENV"] = app_env
+    g._env = app_env
 
     return app_env
 
@@ -761,12 +996,13 @@ def load_user(username):
             and session.get("totp_validated", False)
             and not ui_user.list_recovery_codes
         ):
-            flask_flash(
-                f"""The two-factor authentication is enabled but no recovery codes are available, please refresh them:
+            flash(
+                Markup("""The two-factor authentication is enabled but no recovery codes are available, please refresh them:
 <div class="mt-2 pt-2 border-top border-white">
-    <a role='button' class='btn btn-sm btn-dark d-flex align-items-center' aria-pressed='true' href='{url_for('profile.profile_page')}'>here</a>
-</div>""",
+    <a role='button' class='btn btn-sm btn-dark d-flex align-items-center' aria-pressed='true' href='{}'>here</a>
+</div>""").format(url_for("profile.profile_page")),
                 "error",
+                save=False,
             )
 
     return ui_user
@@ -781,11 +1017,23 @@ def handle_csrf_error(_):
     :return: A template with the error message and a 401 status code.
     """
     LOGGER.debug(format_exc())
-    LOGGER.error(f"CSRF token is missing or invalid for {request.path} by {current_user.get_id()}")
-    if not current_user:
-        return redirect(url_for("setup.setup_page"), 303)
+    try:
+        user_id = current_user.get_id()
+    except (AssertionError, RuntimeError):
+        user_id = "unknown"
+    LOGGER.error(f"CSRF token is missing or invalid for {request.path} by {user_id}")
     response = logout_page()
     response.status_code = 303
+    if not DB.get_ui_user():
+        # No admin exists yet (e.g. mid-setup-wizard): there is no usable login page for
+        # this reason to land on, so hand it to /setup directly instead.
+        response.headers["Location"] = url_for("setup.setup_page", reason="session_expired")
+    elif request.method == "POST":
+        # A submitted form dies here rather than at the login check, because the CSRF
+        # token lives in the session that just went away. logout_page() clears the
+        # session and the response tells the browser to drop its cookies, so a flash
+        # would not survive: the reason has to travel in the URL.
+        response.headers["Location"] = url_for("login.login_page", reason="session_expired")
     return response
 
 
@@ -903,50 +1151,169 @@ def schedule_database_state_check(request_method: str, request_path: str):
         _db_check_next_allowed = now + DB_CHECK_MIN_INTERVAL_SECONDS
 
 
+def schedule_restart_workers():
+    global _restart_workers_future, _restart_workers_next_allowed
+    with _restart_workers_lock:
+        now = time()
+        if now < _restart_workers_next_allowed:
+            return
+        if _restart_workers_future and not _restart_workers_future.done():
+            return
+        _restart_workers_future = _periodic_tasks_executor.submit(restart_workers)
+        _restart_workers_next_allowed = now + RESTART_WORKERS_MIN_INTERVAL_SECONDS
+
+
+def _delete_session_store_entry(sid: str) -> None:
+    """Best-effort delete of a session store entry (Redis key or filesystem cache)."""
+    if not sid:
+        return
+    interface = app.session_interface
+    try:
+        # The interface's own delete already covers whichever store backs it, including the
+        # local one a failing Redis falls back to.
+        interface._delete_session(interface._get_store_id(sid))
+    except Exception:
+        LOGGER.exception("Failed to delete session store entry during rotation/expiry")
+
+
+def _rotate_session_id() -> None:
+    """Mirror lua-resty-session rolling_timeout: generate a fresh session ID and drop the old store entry."""
+    interface = app.session_interface
+    regenerate = getattr(interface, "regenerate", None)
+    if callable(regenerate):
+        try:
+            regenerate(session)
+            session.modified = True
+            return
+        except Exception:
+            LOGGER.exception("Failed to regenerate session id via session_interface; falling back to manual rotation")
+
+    old_sid = getattr(session, "sid", None)
+    new_sid = token_urlsafe(app.config.get("SESSION_ID_LENGTH", 64))
+    _delete_session_store_entry(old_sid)
+    try:
+        session.sid = new_sid  # type: ignore[attr-defined]
+    except Exception:
+        LOGGER.exception("Failed to assign new session id during rotation; aborting rotation")
+        return
+    session.modified = True
+
+
+def _enforce_session_lifetime() -> bool:
+    """Mirror lua-resty-session absolute/rolling timeouts. Returns True if the session was invalidated."""
+    if not current_user.is_authenticated:
+        return False
+
+    creation_date = session.get("creation_date")
+    if not isinstance(creation_date, datetime):
+        return False
+
+    now = datetime.now().astimezone()
+    absolute_seconds = app.config.get("SESSION_ABSOLUTE_SECONDS", 0)
+    if absolute_seconds > 0 and (now - creation_date).total_seconds() > absolute_seconds:
+        LOGGER.info("UI session for user %s exceeded SESSION_ABSOLUTE_HOURS, forcing logout", current_user.get_id())
+        old_sid = getattr(session, "sid", None)
+        logout_user()
+        session.clear()
+        _delete_session_store_entry(old_sid)
+        return True
+
+    rolling_seconds = app.config.get("SESSION_ROLLING_SECONDS", 0)
+    if rolling_seconds > 0:
+        last_rotated_at = session.get("last_rotated_at", creation_date)
+        if isinstance(last_rotated_at, datetime) and (now - last_rotated_at).total_seconds() > rolling_seconds:
+            _rotate_session_id()
+            session["last_rotated_at"] = now
+            session.permanent = True  # ensure the new id inherits the sliding TTL
+
+    return False
+
+
+def _host_allowed(host: str, allowed: list) -> bool:
+    """Return True if the request Host matches the configured allowlist.
+
+    Supports exact matches and "*.example.com" wildcards (which also match the bare
+    domain). The port, if present, is ignored for comparison.
+    """
+    if not host:
+        return False
+    hostname = host.split(":", 1)[0].strip().lower()
+    for entry in allowed:
+        e = entry.strip().lower()
+        if not e:
+            continue
+        if e == "*":
+            return True
+        e = e.split(":", 1)[0]
+        if e.startswith("*."):
+            base = e[2:]
+            if hostname == base or hostname.endswith("." + base):
+                return True
+        elif hostname == e:
+            return True
+    return False
+
+
 @app.before_request
 def before_request():
+    # Skip the per-request lifecycle (UIData lock, CSP nonce, get_metadata) for static assets;
+    # returning None lets the static view still serve the file (after_request supplies the nonce).
+    if is_static_path(request.path):
+        return
+
+    # Defense-in-depth: reject unexpected Host headers when an allowlist is configured.
+    allowed_hosts = app.config.get("ALLOWED_HOSTS") or []
+    if allowed_hosts and not _host_allowed(request.host, allowed_hosts):
+        LOGGER.warning(f"Blocking UI request with disallowed Host header: {request.host!r}")
+        return make_response(jsonify({"message": "Invalid host"}), 400)
+
     DATA.load_from_file()
     if DATA.get("SERVER_STOPPING", False):
         response = make_response(jsonify({"message": "Server is shutting down, try again later."}), 503)
         response.headers["Retry-After"] = 30  # Clients should retry after 30 seconds # type: ignore
         return response
 
-    if request.environ.get("HTTP_X_FORWARDED_FOR") is not None:
-        # Requests from the reverse proxy
-        app.config["SESSION_COOKIE_NAME"] = "__Host-bw_ui_session"
-        app.config["SESSION_COOKIE_SECURE"] = True
-        app.config["REMEMBER_COOKIE_NAME"] = "__Host-bw_ui_remember_token"
-        app.config["REMEMBER_COOKIE_SECURE"] = True
-    else:
-        # Requests from other sources
-        app.config["SESSION_COOKIE_NAME"] = "bw_ui_session"
-        app.config["SESSION_COOKIE_SECURE"] = False
-        app.config["SESSION_COOKIE_DOMAIN"] = None
-        app.config["REMEMBER_COOKIE_NAME"] = "bw_ui_remember_token"
-        app.config["REMEMBER_COOKIE_SECURE"] = False
-        app.config["REMEMBER_COOKIE_DOMAIN"] = None
-
     metadata = None
-    app.config["SCRIPT_NONCE"] = token_urlsafe(32)
+    g.script_nonce = token_urlsafe(32)
 
-    if not request.path.startswith(("/css/", "/img/", "/js/", "/json/", "/fonts/", "/libs/", "/locales/")):
+    if not is_static_path(request.path):
         metadata = DB.get_metadata()
 
         # Plugin reload trigger
         if not DATA.get("RELOADING", False) and metadata.get("reload_ui_plugins", False):
-            safe_reload_plugins()
-            _periodic_tasks_executor.submit(restart_workers)
+            if DB.readonly:
+                LOGGER.warning("reload_ui_plugins is set but database is read-only, skipping plugin reload to prevent infinite loop")
+            else:
+                # The flag is cleared before the plugins are read, so new workers after the SIGHUP see it cleared;
+                # None means another worker is mid-reload and the flag stays set so the update is not lost
+                err = safe_reload_plugins()
+                if err:
+                    LOGGER.error(f"Plugin reload failed: {err}, skipping worker restart to prevent loop")
+                elif err is not None:
+                    schedule_restart_workers()
 
         if datetime.now().astimezone() - datetime.fromisoformat(DATA.get("LATEST_VERSION_LAST_CHECK", "1970-01-01T00:00:00")).astimezone() > timedelta(hours=1):
             DATA["LATEST_VERSION_LAST_CHECK"] = datetime.now().astimezone().isoformat()
             _periodic_tasks_executor.submit(update_latest_stable_release)
 
+        # Periodic expired session file cleanup (FileSystemCache only, where _prune is disabled via threshold=0).
+        # Covers the Redis fallback cache too, which fills up during an outage and prunes no more than the other.
+        session_file_cache = (
+            app.config["SESSION_CACHELIB"] if app.config.get("SESSION_TYPE") == "cachelib" else getattr(app.session_interface, "fallback", None)
+        )
+        if session_file_cache is not None:
+            global _session_cleanup_last_run
+            now_ts = time()
+            if now_ts - _session_cleanup_last_run > _SESSION_CLEANUP_INTERVAL_SECONDS:
+                _session_cleanup_last_run = now_ts
+                _periodic_tasks_executor.submit(session_file_cache._remove_expired, now_ts)
+
         schedule_database_state_check(request.method, request.path)
 
-        DB.readonly = DATA.get("READONLY_MODE", False)
+        DB.readonly = DATA.get("READONLY_MODE", DB.readonly) or not DB.database_uri
 
         if not request.path.startswith(("/check", "/loading", "/login", "/totp")) and DB.readonly and current_user.is_authenticated:
-            flask_flash("Database connection is in read-only mode : no modifications possible.", "error")
+            flash("Database connection is in read-only mode : no modifications possible.", "error", save=False)
 
         if current_user.is_authenticated:
             passed = True
@@ -958,14 +1325,20 @@ def before_request():
                 session["ip"] = request.remote_addr
             if "user_agent" not in session:
                 session["user_agent"] = request.headers.get("User-Agent")
+            if "last_rotated_at" not in session:
+                session["last_rotated_at"] = session["creation_date"]
+
+            # Enforce absolute and rolling session lifetimes (mirrors lua-resty-session)
+            if _enforce_session_lifetime():
+                return redirect(url_for("login.login_page"))
 
             # Case not login page, keep on 2FA before any other access
-            if not session.get("totp_validated", False) and bool(current_user.totp_secret) and "/totp" not in request.path:
+            if not session.get("totp_validated", False) and bool(current_user.totp_secret) and request.endpoint != "totp.totp_page":
                 if not request.path.endswith("/login"):
                     raw_next = request.values.get("next")
                     try:
                         safe_next = _sanitize_internal_next(raw_next, url_for("home.home_page"))
-                    except Exception:
+                    except ValueError:
                         safe_next = url_for("home.home_page")
 
                     return redirect(url_for("totp.totp_page", next=safe_next))
@@ -976,7 +1349,7 @@ def before_request():
             elif session["user_agent"] != request.headers.get("User-Agent"):
                 LOGGER.warning(f"User {current_user.get_id()} tried to access his session with a different User-Agent.")
                 passed = False
-            elif "session_id" in session and session["session_id"] in DATA.get("REVOKED_SESSIONS", []):
+            elif "session_id" in session and is_session_revoked(session["session_id"]):
                 LOGGER.warning(f"User {current_user.get_id()} tried to access a revoked session.")
                 passed = False
 
@@ -988,14 +1361,14 @@ def before_request():
     language_value = current_user.language if current_user.is_authenticated else "en"
     base_env = dict(
         current_endpoint=current_endpoint,
-        script_nonce=app.config["SCRIPT_NONCE"],
+        script_nonce=g.script_nonce,
         supported_languages=SUPPORTED_LANGUAGES,
         theme=theme_value,
         language=language_value,
     )
 
     if request.path.startswith(("/check", "/setup", "/loading", "/login", "/totp")):
-        app.config["ENV"] = base_env
+        g._env = base_env
     else:
         if not metadata:
             metadata = DB.get_metadata()
@@ -1011,16 +1384,26 @@ def before_request():
 
         if not request.path.startswith("/loading") and current_user.is_authenticated:
             if not changes_ongoing and metadata["failover"]:
-                flask_flash(
-                    "<p class='p-0 m-0 fst-italic'>The last changes could not be applied because it creates a configuration error on NGINX, please check BunkerWeb's logs for more information. The configuration fell back to the last working one.</p>",
+                # Preselect error.log only when the Logs page lists it, otherwise the link would 404
+                logs_args = {}
+                with suppress(OSError):
+                    if "error.log" in _list_log_files()["main"]:
+                        logs_args["file"] = "error.log"
+                logs_url = url_for("logs.logs_page", **logs_args)
+                flash(
+                    Markup(
+                        "<p class='p-0 m-0 fst-italic'>The last changes could not be applied because it creates a configuration error on NGINX, please check <a href='{}' class='text-reset text-decoration-underline'>BunkerWeb's logs</a> for more information. The configuration fell back to the last working one.</p>"
+                    ).format(logs_url),
                     "error",
+                    save=False,
                 )
-                flask_flash(
-                    f"""<div class='d-flex flex-column'>
+                flash(
+                    Markup("""<div class='d-flex flex-column'>
                         <h6 class='fw-bold mb-1'>Failover Message:</h6>
-                        <p class='p-0 m-0 fst-italic'>{metadata['failover_message']}</p>
-                    </div>""",
+                        <p class='p-0 m-0 fst-italic'>{}</p>
+                    </div>""").format(metadata["failover_message"]),
                     "error",
+                    save=False,
                 )
             elif not changes_ongoing and not metadata["failover"] and DATA.get("CONFIG_CHANGED", False):
                 flash("The last changes have been applied successfully.")
@@ -1030,6 +1413,9 @@ def before_request():
         fetch_mode = request.headers.get("Sec-Fetch-Mode")
         x_requested_with = request.headers.get("X-Requested-With")
         is_cors = fetch_mode == "cors" or (x_requested_with and x_requested_with.lower() == "xmlhttprequest")
+
+        # Default to the scheduler-computed flag; refined to a live count below on real page requests.
+        pro_overlapped = metadata["pro_overlapped"]
 
         if not is_cors and current_user.is_authenticated:
             seen = set()
@@ -1041,21 +1427,35 @@ def before_request():
                 flash(content, f["type"], save=f.get("save", True))
             DATA["TO_FLASH"] = []
 
+            # Live, every-request overlap check — the metadata flag is only refreshed daily by the scheduler.
+            if metadata["is_pro"] and metadata["pro_services"]:
+                pro_overlapped = len(DB.get_services()) > metadata["pro_services"]
+                if pro_overlapped and current_endpoint != "pro":
+                    flash(
+                        "You have more services than allowed by your pro license. "
+                        "Upgrade your license or move some services to draft mode to unlock your pro license.",
+                        "pro",
+                        i18n_key="flash.pro_services_exceeded",
+                        save=False,  # transient toast; keep it out of the notification history
+                    )
+
         data = dict(
             current_endpoint=current_endpoint,
-            script_nonce=app.config["SCRIPT_NONCE"],
+            script_nonce=g.script_nonce,
             bw_version=metadata["version"],
             latest_version=DATA.get("LATEST_VERSION", "unknown"),
+            new_version_available=is_newer_version_available(metadata["version"], DATA.get("LATEST_VERSION", "unknown")),
             is_pro_version=metadata["is_pro"],
             pro_status=metadata["pro_status"],
             pro_services=metadata["pro_services"],
             pro_expire=metadata["pro_expire"].strftime("%Y/%m/%d") if isinstance(metadata["pro_expire"], datetime) else "Unknown",
-            pro_overlapped=metadata["pro_overlapped"],
-            plugins=BW_CONFIG.get_plugins(),
+            pro_overlapped=pro_overlapped,
+            plugins=BW_CONFIG.get_plugins(metadata=metadata),
             flash_messages=session.get("flash_messages", []),
             is_readonly=DATA.get("READONLY_MODE", False) or ("write" not in current_user.list_permissions and not request.path.startswith("/profile")),
             db_readonly=DATA.get("READONLY_MODE", False),
             user_readonly="write" not in current_user.list_permissions,
+            user_admin=current_user.admin,
             theme=theme_value,
             language=language_value,
             supported_languages=SUPPORTED_LANGUAGES,
@@ -1069,15 +1469,17 @@ def before_request():
         if current_endpoint in COLUMNS_PREFERENCES_DEFAULTS:
             data["columns_preferences"] = DB.get_ui_user_columns_preferences(current_user.get_id(), current_endpoint)
 
-        app.config["ENV"] = data
+        g._env = data
 
+    # A hook that raises denies the request: it may be an authorization check
     for hook in app.config["BEFORE_REQUEST_HOOKS"]:
         try:
             resp = hook()
-            if resp:
-                return resp
         except Exception:
             LOGGER.exception("Error in before_request hook")
+            return _internal_error_response()
+        if resp:
+            return resp
 
 
 def mark_user_access(user, session_id):
@@ -1093,12 +1495,16 @@ def mark_user_access(user, session_id):
 @app.after_request
 def set_security_headers(response):
     """Set the security headers."""
+    # Ensure script_nonce is available even if before_request didn't complete
+    # (e.g., when CSRF validation fails before our before_request runs)
+    script_nonce = getattr(g, "script_nonce", None) or token_urlsafe(32)
+
     # * Content-Security-Policy header to prevent XSS attacks
     response.headers["Content-Security-Policy"] = (
         "object-src 'none';"
         + " frame-ancestors 'self';"
         + " default-src https: http: 'self' https://www.bunkerweb.io https://assets.bunkerity.com https://bunkerity.us1.list-manage.com https://api.github.com;"
-        + f" script-src https: http: 'self' 'nonce-{app.config['SCRIPT_NONCE']}' 'strict-dynamic' 'unsafe-inline';"
+        + f" script-src https: http: 'self' 'nonce-{script_nonce}' 'strict-dynamic' 'unsafe-inline';"
         + " style-src 'self' 'unsafe-inline';"
         + " img-src 'self' data: blob: https://www.bunkerweb.io https://assets.bunkerity.com https://*.tile.openstreetmap.org;"
         + " font-src 'self' data:;"
@@ -1128,29 +1534,57 @@ def set_security_headers(response):
     response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
 
     # * Permissions-Policy header to prevent unwanted behavior
+    # Must stay byte-identical to the PERMISSIONS_POLICY default in src/common/core/headers/plugin.json.
     response.headers["Permissions-Policy"] = (
-        "accelerometer=(), ambient-light-sensor=(), attribution-reporting=(), autoplay=(), battery=(), bluetooth=(), browsing-topics=(), camera=(), compute-pressure=(), display-capture=(), encrypted-media=(), execution-while-not-rendered=(), execution-while-out-of-viewport=(), fullscreen=(), gamepad=(), geolocation=(), gyroscope=(), hid=(), identity-credentials-get=(), idle-detection=(), local-fonts=(), magnetometer=(), microphone=(), midi=(), otp-credentials=(), payment=(), picture-in-picture=(), publickey-credentials-create=(), publickey-credentials-get=(), screen-wake-lock=(), serial=(), speaker-selection=(), storage-access=(), usb=(), web-share=(), window-management=(), xr-spatial-tracking=(), interest-cohort=()"
+        "accelerometer=(), ambient-light-sensor=(), aria-notify=(), attribution-reporting=(), autoplay=(), bluetooth=(), browsing-topics=(), camera=(), captured-surface-control=(), ch-device-memory=(), ch-downlink=(), ch-dpr=(), ch-ect=(), ch-prefers-color-scheme=(), ch-prefers-reduced-motion=(), ch-prefers-reduced-transparency=(), ch-rtt=(), ch-save-data=(), ch-ua-arch=(), ch-ua-bitness=(), ch-ua-form-factors=(), ch-ua-full-version-list=(), ch-ua-full-version=(), ch-ua-high-entropy-values=(), ch-ua-mobile=(), ch-ua-model=(), ch-ua-platform-version=(), ch-ua-platform=(), ch-ua-wow64=(), ch-ua=(), ch-viewport-height=(), ch-viewport-width=(), ch-width=(), compute-pressure=(), cross-origin-isolated=(), deferred-fetch-minimal=(), deferred-fetch=(), device-attributes=(), digital-credentials-create=(), digital-credentials-get=(), display-capture=(), encrypted-media=(), execution-while-not-rendered=(), execution-while-out-of-viewport=(), focus-without-user-activation=(), fullscreen=(), gamepad=(), geolocation=(), gyroscope=(), haptics=(), hid=(), identity-credentials-get=(), idle-detection=(), interest-cohort=(), keyboard-map=(), language-detector=(), language-model=(), local-fonts=(), local-network-access=(), local-network=(), loopback-network=(), magnetometer=(), manual-text=(), media-playback-while-not-visible=(), microphone=(), midi=(), on-device-speech-recognition=(), otp-credentials=(), payment=(), picture-in-picture=(), private-state-token-issuance=(), private-state-token-redemption=(), proofreader=(), publickey-credentials-create=(), publickey-credentials-get=(), publickey-credentials-remote-client-data-json=(), rewriter=(), screen-wake-lock=(), serial=(), speaker-selection=(), storage-access=(), summarizer=(), tools=(), translator=(), unbounded-element=(), unload=(), usb=(), vertical-scroll=(), web-app-installation=(), web-share=(), webnn=(), window-management=(), writer=(), xr-spatial-tracking=()"
     )
+
+    # * X-Robots-Tag header to stay out of search indexes: robots.txt stops crawling, not the
+    # indexing of a URL discovered elsewhere.
+    response.headers["X-Robots-Tag"] = "noindex, nofollow"
+
+    # * Cross-origin headers to sever the opener relationship and refuse cross-origin embedding.
+    # COEP is left out on purpose: it would break the third-party resources the CSP allows.
+    response.headers["Cross-Origin-Opener-Policy"] = "same-origin"
+    response.headers["Cross-Origin-Resource-Policy"] = "same-origin"
+
+    # * Cache-Control to keep authenticated pages out of the browser cache, so the back button
+    # cannot render the panel after a logout. Static assets keep theirs, and a route that already
+    # set its own value wins.
+    cache_control = _static_cache_control(request.args.get("v"), BW_VERSION) if is_static_path(request.path) else None
+    if cache_control:
+        response.headers["Cache-Control"] = cache_control
+    elif not is_static_path(request.path):
+        response.headers.setdefault("Cache-Control", "no-store")
 
     for hook in app.config["AFTER_REQUEST_HOOKS"]:
         try:
             resp = hook(response)
-            if resp:
-                return resp
+            if resp is not None:
+                response = resp
         except Exception:
             LOGGER.exception("Error in after_request hook")
+
+    # Evict a pre-upgrade Flask-Login remember token still sitting in a browser. It is already
+    # inert (REMEMBER_COOKIE_NAME points at a sentinel), so this is hygiene, not the fix itself.
+    # Done directly rather than through flask_login's _clear_cookie, which now targets the
+    # sentinel name and so cannot reach these two, and which omits secure= -- werkzeug's
+    # delete_cookie defaults it to False and a __Host- deletion without Secure is rejected by
+    # the UA. Skipped on static paths so no Set-Cookie lands on a cacheable response.
+    # ponytail: hard-coded name list; drop this block once no issued token can still be live.
+    if not is_static_path(request.path):
+        for legacy_cookie in ("__Host-bw_ui_remember_token", "bw_ui_remember_token"):
+            if legacy_cookie in request.cookies:
+                response.delete_cookie(legacy_cookie, path="/", secure=legacy_cookie.startswith("__Host-"))
 
     return response
 
 
 @app.teardown_request
 def teardown_request(teardown):
-    if (
-        not request.path.startswith(("/css/", "/img/", "/js/", "/json/", "/fonts/", "/libs/", "/locales/"))
-        and current_user.is_authenticated
-        and "session_id" in session
-    ):
-        _user_access_executor.submit(mark_user_access, current_user, session["session_id"])
+    with suppress(AssertionError, RuntimeError):
+        if not is_static_path(request.path) and current_user.is_authenticated and "session_id" in session:
+            _user_access_executor.submit(mark_user_access, current_user, session["session_id"])
 
     for hook in app.config["TEARDOWN_REQUEST_HOOKS"]:
         try:
@@ -1191,6 +1625,40 @@ def check():
     return Response(status=200, headers={"Access-Control-Allow-Origin": "*"}, response=dumps({"message": "ok"}), content_type="application/json")
 
 
+@app.route("/.well-known/security.txt", methods=["GET"])
+def security_txt():
+    # Expires is mandatory and must stay fresh, so it is generated per request instead of
+    # being shipped as a static file like robots.txt.
+    expires = (datetime.now().astimezone() + timedelta(days=365)).replace(microsecond=0).isoformat()
+    fields = [
+        "Contact: mailto:security@bunkerity.com",
+        "Contact: https://github.com/bunkerity/bunkerweb/security/advisories/new",
+        f"Expires: {expires}",
+        "Acknowledgments: https://github.com/bunkerity/bunkerweb/security/advisories",
+        "Preferred-Languages: en, fr",
+        "Policy: https://github.com/bunkerity/bunkerweb/blob/master/.github/SECURITY.md",
+    ]
+
+    # Canonical is derived from the request, so it is only emitted once the Host header has been
+    # vetted against a real allowlist: this path skips the before_request check, and "*" vets nothing.
+    allowed_hosts = app.config.get("ALLOWED_HOSTS") or []
+    if allowed_hosts and "*" not in allowed_hosts and _host_allowed(request.host, allowed_hosts):
+        fields.append(f"Canonical: {url_for('security_txt', _external=True)}")
+
+    return Response(content_type="text/plain; charset=utf-8", response="\n".join(fields) + "\n")
+
+
+@app.route("/security.txt", methods=["GET"])
+def security_txt_redirect():
+    return redirect(url_for("security_txt"), 301)
+
+
+@app.route("/.well-known/change-password", methods=["GET"])
+def change_password_redirect():
+    # Not permanent on purpose: the page holding the password form may move.
+    return redirect(url_for("profile.profile_page"))
+
+
 if getenv("ENABLE_HEALTHCHECK", "no").lower() == "yes":
 
     @app.route("/healthcheck", methods=["GET"])
@@ -1210,6 +1678,7 @@ if getenv("ENABLE_HEALTHCHECK", "no").lower() == "yes":
 def check_reloading():
     DATA.load_from_file()
     current_time = time()
+    tasks_active = active_config_tasks() > 0
 
     db_metadata = DB.get_metadata()
     if (
@@ -1219,13 +1688,17 @@ def check_reloading():
             if k in ("custom_configs_changed", "external_plugins_changed", "pro_plugins_changed", "plugins_config_changed", "instances_changed")
         )
         and DATA.get("LAST_RELOAD", 0) + 2 < current_time
+        and not tasks_active
     ):
         DATA["RELOADING"] = False
+    elif tasks_active and not DATA.get("RELOADING", False):
+        # a finished task body cleared RELOADING while another save has not committed yet
+        DATA["RELOADING"] = True
 
     if not DATA.get("RELOADING", False) or DATA.get("LAST_RELOAD", 0) + 60 < current_time:
         if DATA.get("RELOADING", False):
             LOGGER.warning("Reloading took too long, forcing the state to be reloaded")
-            flask_flash("Forced the status to be reloaded", "error")
+            flash("Forced the status to be reloaded", "error", save=False)
             DATA["RELOADING"] = False
 
     return jsonify({"reloading": DATA.get("RELOADING", False)})

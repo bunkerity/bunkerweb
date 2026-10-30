@@ -17,13 +17,21 @@
 
 #include "src/utils/base64.h"
 
+#include <utility>
+
 
 namespace modsecurity::actions::transformations {
 
 
 bool Base64Decode::transform(std::string &value, const Transaction *trans) const {
     if (value.empty()) return false;
-    value = Utils::Base64::decode(value);
+
+    std::string transformedValue;
+    if (!Utils::Base64::decode(value, &transformedValue)) {
+        return false;
+    }
+
+    value = std::move(transformedValue);
     return true;
 }
 

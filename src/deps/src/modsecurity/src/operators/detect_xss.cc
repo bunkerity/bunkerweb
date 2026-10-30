@@ -18,36 +18,60 @@
 #include <string>
 
 #include "src/operators/operator.h"
-#include "libinjection/src/libinjection.h"
+#include "src/operators/libinjection_utils.h"
+#include "src/operators/libinjection_adapter.h"
+#include "src/utils/string.h"
+#include "libinjection/src/libinjection_error.h"
 
-
-namespace modsecurity {
-namespace operators {
-
+namespace modsecurity::operators {
 
 bool DetectXSS::evaluate(Transaction *t, RuleWithActions *rule,
     const std::string& input, RuleMessage &ruleMessage) {
-    int is_xss;
+#ifndef NO_LOGS
+    const std::string loggable_input =
+        utils::string::limitTo(80, utils::string::toHexIfNeeded(input));
+#endif
 
-    is_xss = libinjection_xss(input.c_str(), input.length());
+    const injection_result_t xss_result =
+        runLibinjectionXSS(input.c_str(), input.length());
 
-    if (t) {
-        if (is_xss) {
-            ms_dbg_a(t, 5, "detected XSS using libinjection.");
-            if (rule && rule->hasCaptureAction()) {
-                t->m_collections.m_tx_collection->storeOrUpdateFirst(
-                    "0", std::string(input));
-                ms_dbg_a(t, 7, "Added DetectXSS match TX.0: " + \
-                    std::string(input));
-            }
-        } else {
-            ms_dbg_a(t, 9, "libinjection was not able to " \
-                "find any XSS in: " + input);
-            }
+    if (t == nullptr) {
+        return isMaliciousLibinjectionResult(xss_result);
     }
-    return is_xss != 0;
+
+    switch (xss_result) {
+        case LIBINJECTION_RESULT_TRUE:
+            ms_dbg_a(t, 5, std::string("detected XSS using libinjection."));
+            if (rule != nullptr && rule->hasCaptureAction()) {
+                t->m_collections.m_tx_collection->storeOrUpdateFirst("0", input);
+                ms_dbg_a(t, 7, std::string("Added DetectXSS match TX.0: ") + input);
+            }
+            break;
+
+        case LIBINJECTION_RESULT_ERROR:
+#ifndef NO_LOGS
+            ms_dbg_a(t, 4,
+                std::string("libinjection parser error during XSS analysis (")
+                + libinjectionResultToString(xss_result)
+                + "); treating as match (fail-safe). Input: "
+                + loggable_input);
+#endif
+            if (rule != nullptr && rule->hasCaptureAction()) {
+                t->m_collections.m_tx_collection->storeOrUpdateFirst("0", input);
+                ms_dbg_a(t, 7, std::string("Added DetectXSS error input TX.0: ") + input);
+            }
+            break;
+
+        case LIBINJECTION_RESULT_FALSE:
+#ifndef NO_LOGS
+            ms_dbg_a(t, 9,
+                std::string("libinjection was not able to find any XSS in: ")
+                + loggable_input);
+#endif
+            break;
+    }
+
+    return isMaliciousLibinjectionResult(xss_result);
 }
 
-
-}  // namespace operators
-}  // namespace modsecurity
+}  // namespace modsecurity::operators

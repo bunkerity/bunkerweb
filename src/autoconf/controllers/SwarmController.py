@@ -20,6 +20,8 @@ class SwarmController(Controller):
         super().__init__("swarm")
         self.__client = DockerClient(base_url=docker_host)
         self.__internal_lock = Lock()
+        # Protected alias so the base-class settings recheck worker shares the same lock object.
+        self._internal_lock = self.__internal_lock
         self.__swarm_instances = []
         self.__swarm_services = []
         self.__swarm_configs = []
@@ -67,7 +69,7 @@ class SwarmController(Controller):
             services: List[Service] = self.__client.services.list(filters={"label": label_key})
         except DockerException as e:
             self._logger.error(f"Failed to retrieve services with label '{label_key}': {e}")
-            return []
+            raise
 
         namespace_set = set(self._namespaces or [])
         valid_services = []
@@ -103,7 +105,9 @@ class SwarmController(Controller):
         """
         Fetch Swarm services labeled as 'bunkerweb.INSTANCE'.
         """
-        return self._get_controller_swarm_services(label_key="bunkerweb.INSTANCE")
+        services = self._get_controller_swarm_services(label_key="bunkerweb.INSTANCE")
+        self.__swarm_instances = list(dict.fromkeys(service.id for service in services))
+        return services
 
     def _get_controller_services(self) -> List[Service]:
         """
@@ -112,10 +116,12 @@ class SwarmController(Controller):
         return self._get_controller_swarm_services(label_key="bunkerweb.SERVER_NAME")
 
     def _to_instances(self, controller_instance) -> List[dict]:
-        self.__swarm_instances.append(controller_instance.id)
         instances = []
         instance_env = {}
-        for env in controller_instance.attrs["Spec"]["TaskTemplate"]["ContainerSpec"]["Env"]:
+        container_spec = controller_instance.attrs.get("Spec", {}).get("TaskTemplate", {}).get("ContainerSpec", {}) or {}
+        for env in container_spec.get("Env") or []:
+            if "=" not in env:
+                continue
             variable, value = env.split("=", 1)
             instance_env[variable] = value
 
@@ -177,12 +183,13 @@ class SwarmController(Controller):
             self.__swarm_configs.append(config.id)
         return configs
 
-    def apply_config(self) -> bool:
+    def apply_config(self, force: bool = False) -> bool:
         return self.apply(
             self._instances,
             self._services,
             configs=self._configs,
             first=not self._loaded,
+            force=force,
         )
 
     def __process_event(self, event):
@@ -266,7 +273,6 @@ class SwarmController(Controller):
                     self.__pending_apply = False
 
                     try:
-                        to_apply = False
                         while not applied:
                             waiting = self.have_to_wait()
                             self._update_settings()
@@ -274,14 +280,13 @@ class SwarmController(Controller):
                             self._services = self.get_services()
                             self._configs = self.get_configs()
 
-                            if not to_apply and not self.update_needed(self._instances, self._services, configs=self._configs):
+                            if not self.update_needed(self._instances, self._services, configs=self._configs):
                                 if locked:
                                     self.__internal_lock.release()
                                     locked = False
                                 applied = True
                                 continue
 
-                            to_apply = True
                             if waiting:
                                 sleep(1)
                                 continue
@@ -314,7 +319,7 @@ class SwarmController(Controller):
                     sleep(10)
 
     def process_events(self):
-        self._set_autoconf_load_db()
+        self._start_settings_recheck_worker()
         event_types = ("service", "config")
         threads = [Thread(target=self.__event, args=(event_type,)) for event_type in event_types]
         for thread in threads:

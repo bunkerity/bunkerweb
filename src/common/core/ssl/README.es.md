@@ -7,7 +7,11 @@ El complemento SSL proporciona capacidades robustas de cifrado SSL/TLS para sus 
 3.  Los parámetros de sesión SSL optimizados mejoran el rendimiento de la conexión sin sacrificar la seguridad.
 4.  La presentación de certificados se configura de acuerdo con las mejores prácticas para garantizar la compatibilidad y la seguridad.
 
-!!! success "Beneficios de Seguridad" - **Protección de Datos:** Cifra los datos en tránsito, previniendo la interceptación y los ataques de intermediario (man-in-the-middle). - **Autenticación:** Verifica la identidad de su servidor a los clientes. - **Integridad:** Asegura que los datos no han sido manipulados durante la transmisión. - **Estándares Modernos:** Configurado para cumplir con las mejores prácticas y los estándares de seguridad de la industria.
+!!! success "Beneficios de Seguridad"
+    - **Protección de Datos:** Cifra los datos en tránsito, previniendo la interceptación y los ataques de intermediario (man-in-the-middle).
+    - **Autenticación:** Verifica la identidad de su servidor a los clientes.
+    - **Integridad:** Asegura que los datos no han sido manipulados durante la transmisión.
+    - **Estándares Modernos:** Configurado para cumplir con las mejores prácticas y los estándares de seguridad de la industria.
 
 ### Cómo usar
 

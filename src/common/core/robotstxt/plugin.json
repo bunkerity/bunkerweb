@@ -41,7 +41,7 @@
       "help": "List of URLs, separated with spaces, containing robots.txt rules. Also supports file:// URLs and and auth basic using http://user:pass@url scheme.",
       "id": "robotstxt-urls",
       "label": "Robots.txt URLs",
-      "regex": "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*) *)*$",
+      "regex": "^(?! +$) *(?:(https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=][\\-\\w\\(\\)!@:%+.~#?&\\/=$]*(?: +|$))*$",
       "type": "multivalue"
     },
     "ROBOTSTXT_RULE": {
