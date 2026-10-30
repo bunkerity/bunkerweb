@@ -1,0 +1,35 @@
+integrations: "all"
+
+# The scheduler caches a folder (the failover copy of /etc/nginx) as a `folder:` row of the `failover-backup` job
+# after the first configuration it applies, so every stack has one. The UI names such a file with `_` for `/`.
+actions:
+  list:
+    type: string
+    url: "http://127.0.0.1:8888/cache?job_name=failover-backup&plugin=jobs"
+    string: '"file_name":"folder:/var/tmp/bunkerweb/failover.tgz"'
+    retries: 1
+    # The scheduler runs `failover-backup` a few seconds after the stack reports healthy.
+    delay: 60
+    headers:
+      Authorization: "Bearer secret"
+    restart_stack: false
+  # src/api/app/routers/cache.py: the `folder:` prefix is part of the stored name, and the download
+  # header carries it percent-encoded.
+  download_folder:
+    type: header
+    url: "http://127.0.0.1:8888/cache/global/jobs/failover-backup/folder:_var_tmp_bunkerweb_failover.tgz?download=true"
+    response_headers:
+      Content-Disposition: 'attachment; filename="folder%3A%2Fvar%2Ftmp%2Fbunkerweb%2Ffailover\.tgz"'
+      Content-Type: "application/octet-stream"
+    headers:
+      Authorization: "Bearer secret"
+    restart_stack: false
+  unknown_file:
+    type: status
+    url: "http://127.0.0.1:8888/cache/global/jobs/failover-backup/folder:_var_tmp_bunkerweb_nothing.tgz?download=true"
+    status: 404
+    headers:
+      Authorization: "Bearer secret"
+
+api:
+  API_TOKEN: "secret"

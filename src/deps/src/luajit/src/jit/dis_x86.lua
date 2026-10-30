@@ -421,21 +421,21 @@ local function putop(ctx, text, operands)
   local hmax = ctx.hexdump
   if hmax > 0 then
     for i=ctx.start,pos-1 do
-      hex = hex..format("%02X", byte(code, i, i))
+      hex ..= format("%02X", byte(code, i))
     end
     if #hex > hmax then hex = sub(hex, 1, hmax)..". "
-    else hex = hex..rep(" ", hmax-#hex+2) end
+    else hex ..= rep(" ", hmax-#hex+2) end
   end
   if operands then text = text.." "..operands end
   if ctx.o16 then text = "o16 "..text; ctx.o16 = false end
   if ctx.a32 then text = "a32 "..text; ctx.a32 = false end
   if ctx.rep then text = ctx.rep.." "..text; ctx.rep = false end
   if ctx.rex then
-    local t = (ctx.rexw and "w" or "")..(ctx.rexr and "r" or "")..
-	      (ctx.rexx and "x" or "")..(ctx.rexb and "b" or "")..
-	      (ctx.vexl and "l" or "")
-    if ctx.vexv and ctx.vexv ~= 0 then t = t.."v"..ctx.vexv end
-    if t ~= "" then text = ctx.rex.."."..t.." "..gsub(text, "^ ", "")
+    local t = (ctx.rexw ? "w" : "")..(ctx.rexr ? "r" : "")..
+	      (ctx.rexx ? "x" : "")..(ctx.rexb ? "b" : "")..
+	      (ctx.vexl ? "l" : "")
+    if ctx.vexv and ctx.vexv != 0 then t = t.."v"..ctx.vexv end
+    if t != "" then text = ctx.rex.."."..t.." "..gsub(text, "^ ", "")
     elseif ctx.rex == "vex" then text = gsub("v"..text, "^v ", "") end
     ctx.rexw = false; ctx.rexr = false; ctx.rexx = false; ctx.rexb = false
     ctx.rex = false; ctx.vexl = false; ctx.vexv = false
@@ -483,7 +483,7 @@ local function getimm(ctx, pos, n)
   if pos+n-1 > ctx.stop then return incomplete(ctx) end
   local code = ctx.code
   if n == 1 then
-    local b1 = byte(code, pos, pos)
+    local b1 = byte(code, pos)
     return b1
   elseif n == 2 then
     local b1, b2 = byte(code, pos, pos+1)
@@ -521,41 +521,41 @@ local function putpat(ctx, name, pat)
       if sz == "X" and vexl then sz = "Y"; ctx.vexl = false end
       regs = map_regs[sz]
     elseif p == "P" then
-      sz = ctx.o16 and "X" or "M"; ctx.o16 = false
+      sz = ctx.o16 ? "X" : "M"; ctx.o16 = false
       if sz == "X" and vexl then sz = "Y"; ctx.vexl = false end
       regs = map_regs[sz]
     elseif p == "H" then
-      name = name..(ctx.rexw and "d" or "s")
+      name ..= ctx.rexw ? "d" : "s"
       ctx.rexw = false
     elseif p == "S" then
-      name = name..lower(sz)
+      name ..= lower(sz)
     elseif p == "s" then
       local imm = getimm(ctx, pos, 1); if not imm then return end
-      x = imm <= 127 and format("+0x%02x", imm)
-		     or format("-0x%02x", 256-imm)
-      pos = pos+1
+      x = imm <= 127 ? format("+0x%02x", imm)
+		     : format("-0x%02x", 256-imm)
+      pos += 1
     elseif p == "u" then
       local imm = getimm(ctx, pos, 1); if not imm then return end
       x = format("0x%02x", imm)
-      pos = pos+1
+      pos += 1
     elseif p == "b" then
       local imm = getimm(ctx, pos, 1); if not imm then return end
       x = regs[imm/16+1]
-      pos = pos+1
+      pos += 1
     elseif p == "w" then
       local imm = getimm(ctx, pos, 2); if not imm then return end
       x = format("0x%x", imm)
-      pos = pos+2
+      pos += 2
     elseif p == "o" then -- [offset]
       if ctx.x64 then
 	local imm1 = getimm(ctx, pos, 4); if not imm1 then return end
 	local imm2 = getimm(ctx, pos+4, 4); if not imm2 then return end
 	x = format("[0x%08x%08x]", imm2, imm1)
-	pos = pos+8
+	pos += 8
       else
 	local imm = getimm(ctx, pos, 4); if not imm then return end
 	x = format("[0x%08x]", imm)
-	pos = pos+4
+	pos += 4
       end
     elseif p == "i" or p == "I" then
       local n = map_sz2n[sz]
@@ -568,21 +568,21 @@ local function putpat(ctx, name, pat)
 	local imm = getimm(ctx, pos, n); if not imm then return end
 	if sz == "Q" and (imm < 0 or imm > 0x7fffffff) then
 	  imm = (0xffffffff+1)-imm
-	  x = format(imm > 65535 and "-0x%08x" or "-0x%x", imm)
+	  x = format(imm > 65535 ? "-0x%08x" : "-0x%x", imm)
 	else
-	  x = format(imm > 65535 and "0x%08x" or "0x%x", imm)
+	  x = format(imm > 65535 ? "0x%08x" : "0x%x", imm)
 	end
       end
-      pos = pos+n
+      pos += n
     elseif p == "j" then
       local n = map_sz2n[sz]
       if n == 8 then n = 4 end
       local imm = getimm(ctx, pos, n); if not imm then return end
-      if sz == "B" and imm > 127 then imm = imm-256
-      elseif imm > 2147483647 then imm = imm-4294967296 end
-      pos = pos+n
+      if sz == "B" and imm > 127 then imm -= 256
+      elseif imm > 2147483647 then imm -= 4294967296 end
+      pos += n
       imm = imm + pos + ctx.addr
-      if imm > 4294967295 and not ctx.x64 then imm = imm-4294967296 end
+      if imm > 4294967295 and not ctx.x64 then imm -= 4294967296 end
       ctx.imm = imm
       if sz == "W" then
 	x = format("word 0x%04x", imm%65536)
@@ -593,8 +593,8 @@ local function putpat(ctx, name, pat)
 	x = "0x"..tohex(imm)
       end
     elseif p == "R" then
-      local r = byte(code, pos-1, pos-1)%8
-      if ctx.rexb then r = r + 8; ctx.rexb = false end
+      local r = byte(code, pos-1) & 7
+      if ctx.rexb then r += 8; ctx.rexb = false end
       x = regs[r+1]
     elseif p == "a" then x = regs[1]
     elseif p == "c" then x = "cl"
@@ -605,25 +605,25 @@ local function putpat(ctx, name, pat)
 	mode = ctx.mrm
 	if not mode then
 	  if pos > stop then return incomplete(ctx) end
-	  mode = byte(code, pos, pos)
-	  pos = pos+1
+	  mode = byte(code, pos)
+	  pos += 1
 	end
-	rm = mode%8; mode = (mode-rm)/8
-	sp = mode%8; mode = (mode-sp)/8
+	rm = mode & 7; mode >>= 3
+	sp = mode & 7; mode >>= 3
 	sdisp = ""
 	if mode < 3 then
 	  if rm == 4 then
 	    if pos > stop then return incomplete(ctx) end
-	    sc = byte(code, pos, pos)
-	    pos = pos+1
-	    rm = sc%8; sc = (sc-rm)/8
-	    rx = sc%8; sc = (sc-rx)/8
-	    if ctx.rexx then rx = rx + 8; ctx.rexx = false end
+	    sc = byte(code, pos)
+	    pos += 1
+	    rm = sc & 7; sc >>= 3
+	    rx = sc & 7; sc >>= 3
+	    if ctx.rexx then rx += 8; ctx.rexx = false end
 	    if rx == 4 then rx = nil end
 	  end
 	  if mode > 0 or rm == 5 then
 	    local dsz = mode
-	    if dsz ~= 1 then dsz = 4 end
+	    if dsz != 1 then dsz = 4 end
 	    local disp = getimm(ctx, pos, dsz); if not disp then return end
 	    if mode == 0 then rm = nil end
 	    if rm or rx or (not sc and ctx.x64 and not ctx.a32) then
@@ -637,26 +637,26 @@ local function putpat(ctx, name, pat)
 	    else
 	      sdisp = format(ctx.x64 and not ctx.a32 and
 		not (disp >= 0 and disp <= 0x7fffffff)
-		and "0xffffffff%08x" or "0x%08x", disp)
+		? "0xffffffff%08x" : "0x%08x", disp)
 	    end
-	    pos = pos+dsz
+	    pos += dsz
 	  end
 	end
-	if rm and ctx.rexb then rm = rm + 8; ctx.rexb = false end
-	if ctx.rexr then sp = sp + 8; ctx.rexr = false end
+	if rm and ctx.rexb then rm += 8; ctx.rexb = false end
+	if ctx.rexr then sp += 8; ctx.rexr = false end
       end
       if p == "m" then
 	if mode == 3 then x = regs[rm+1]
 	else
-	  local aregs = ctx.a32 and map_regs.D or ctx.aregs
+	  local aregs = ctx.a32 ? map_regs.D : ctx.aregs
 	  local srm, srx = "", ""
 	  if rm then srm = aregs[rm+1]
 	  elseif not sc and ctx.x64 and not ctx.a32 then srm = "rip" end
 	  ctx.a32 = false
 	  if rx then
-	    if rm then srm = srm.."+" end
+	    if rm then srm ..= "+" end
 	    srx = aregs[rx+1]
-	    if sc > 0 then srx = srx.."*"..(2^sc) end
+	    if sc > 0 then srx = srx.."*"..(1 << sc) end
 	  end
 	  x = format("[%s%s%s]", srm, srx, sdisp)
 	end
@@ -686,7 +686,7 @@ local function putpat(ctx, name, pat)
 	error("bad pattern `"..pat.."'")
       end
     end
-    if x then operands = operands and operands..", "..x or x end
+    if x then operands = operands ? operands..", "..x : x end
   end
   ctx.pos = pos
   return putop(ctx, name, operands)
@@ -701,8 +701,8 @@ local function getmrm(ctx)
   if not mrm then
     local pos = ctx.pos
     if pos > ctx.stop then return nil end
-    mrm = byte(ctx.code, pos, pos)
-    ctx.pos = pos+1
+    mrm = byte(ctx.code, pos)
+    ctx.pos = pos + 1
     ctx.mrm = mrm
   end
   return mrm
@@ -714,7 +714,7 @@ local function dispatch(ctx, opat, patgrp)
   if match(opat, "%|") then -- MMX/SSE variants depending on prefix.
     local p
     if ctx.rep then
-      p = ctx.rep=="rep" and "%|([^%|]*)" or "%|[^%|]*%|[^%|]*%|([^%|]*)"
+      p = ctx.rep == "rep" ? "%|([^%|]*)" : "%|[^%|]*%|[^%|]*%|([^%|]*)"
       ctx.rep = false
     elseif ctx.o16 then p = "%|[^%|]*%|([^%|]*)"; ctx.o16 = false
     else p = "^[^%|]*" end
@@ -726,7 +726,7 @@ local function dispatch(ctx, opat, patgrp)
   end
   if match(opat, "%$") then -- reg$mem variants.
     local mrm = getmrm(ctx); if not mrm then return incomplete(ctx) end
-    opat = match(opat, mrm >= 192 and "^[^%$]*" or "%$(.*)")
+    opat = match(opat, mrm >= 192 ? "^[^%$]*" : "%$(.*)")
     if opat == "" then return unknown(ctx) end
   end
   if opat == "" then return unknown(ctx) end
@@ -738,9 +738,8 @@ end
 -- Get a pattern from an opcode map and dispatch to handler.
 local function dispatchmap(ctx, opcmap)
   local pos = ctx.pos
-  local opat = opcmap[byte(ctx.code, pos, pos)]
-  pos = pos + 1
-  ctx.pos = pos
+  local opat = opcmap[byte(ctx.code, pos)]
+  ctx.pos = pos + 1
   return dispatch(ctx, opat)
 end
 
@@ -760,7 +759,7 @@ map_act = {
 
   -- Collect prefixes.
   [":"] = function(ctx, name, pat)
-    ctx[pat == ":" and name or sub(pat, 2)] = name
+    ctx[pat == ":" ? name : sub(pat, 2)] = name
     if ctx.pos - ctx.start > 5 then return unknown(ctx) end -- Limit #prefixes.
   end,
 
@@ -772,7 +771,7 @@ map_act = {
   -- Use named subtable for opcode group.
   ["!"] = function(ctx, name, pat)
     local mrm = getmrm(ctx); if not mrm then return incomplete(ctx) end
-    return dispatch(ctx, map_opcgroup[name][((mrm-(mrm%8))/8)%8+1], sub(pat, 2))
+    return dispatch(ctx, map_opcgroup[name][((mrm >> 3) & 7)+1], sub(pat, 2))
   end,
 
   -- o16,o32[,o64] variants.
@@ -825,9 +824,9 @@ map_act = {
   -- Floating point opcode dispatch.
   fp = function(ctx, name, pat)
     local mrm = getmrm(ctx); if not mrm then return incomplete(ctx) end
-    local rm = mrm%8
-    local idx = pat*8 + ((mrm-rm)/8)%8
-    if mrm >= 192 then idx = idx + 64 end
+    local rm = mrm & 7
+    local idx = ((byte(pat) - 0x30) << 3) | ((mrm >> 3) & 7)
+    if mrm >= 192 then idx += 64 end
     local opat = map_opcfp[idx]
     if type(opat) == "table" then opat = opat[rm+1] end
     return dispatch(ctx, opat)
@@ -847,23 +846,21 @@ map_act = {
     local pos = ctx.pos
     if ctx.mrm then
       ctx.mrm = nil
-      pos = pos-1
+      pos -= 1
     end
-    local b = byte(ctx.code, pos, pos)
+    local b = byte(ctx.code, pos)
     if not b then return incomplete(ctx) end
-    pos = pos+1
+    pos += 1
     if b < 128 then ctx.rexr = true end
     local m = 1
     if pat == "3" then
-      m = b%32; b = (b-m)/32
-      local nb = b%2; b = (b-nb)/2
-      if nb == 0 then ctx.rexb = true end
-      local nx = b%2
-      if nx == 0 then ctx.rexx = true end
-      b = byte(ctx.code, pos, pos)
+      m = b & 0x1f
+      if b & 0x20 == 0 then ctx.rexb = true end
+      if b & 0x40 == 0 then ctx.rexx = true end
+      b = byte(ctx.code, pos)
       if not b then return incomplete(ctx) end
-      pos = pos+1
-      if b >= 128 then ctx.rexw = true end
+      pos += 1
+      if b & 0x80 then ctx.rexw = true end
     end
     ctx.pos = pos
     local map
@@ -871,24 +868,23 @@ map_act = {
     elseif m == 2 then map = map_opc3["38"]
     elseif m == 3 then map = map_opc3["3a"]
     else return unknown(ctx) end
-    local p = b%4; b = (b-p)/4
+    local p = b & 3
     if p == 1 then ctx.o16 = "o16"
     elseif p == 2 then ctx.rep = "rep"
     elseif p == 3 then ctx.rep = "repne" end
-    local l = b%2; b = (b-l)/2
-    if l ~= 0 then ctx.vexl = true end
-    ctx.vexv = (-1-b)%16
+    if b & 4 != 0 then ctx.vexl = true end
+    ctx.vexv = ~(b >> 3) & 15
     return dispatchmap(ctx, map)
   end,
 
   -- Special case for nop with REX prefix.
   nop = function(ctx, name, pat)
-    return dispatch(ctx, ctx.rex and pat or "nop")
+    return dispatch(ctx, ctx.rex ? pat : "nop")
   end,
 
   -- Special case for 0F 77.
   emms = function(ctx, name, pat)
-    if ctx.rex ~= "vex" then
+    if ctx.rex != "vex" then
       return putop(ctx, "emms")
     elseif ctx.vexl then
       ctx.vexl = false
@@ -904,8 +900,8 @@ map_act = {
 -- Disassemble a block of code.
 local function disass_block(ctx, ofs, len)
   if not ofs then ofs = 0 end
-  local stop = len and ofs+len or #ctx.code
-  ofs = ofs + 1
+  local stop = len ? ofs+len : #ctx.code
+  ofs += 1
   ctx.start = ofs
   ctx.pos = ofs
   ctx.stop = stop
@@ -913,7 +909,7 @@ local function disass_block(ctx, ofs, len)
   ctx.mrm = false
   clearprefixes(ctx)
   while ctx.pos <= stop do dispatchmap(ctx, ctx.map1) end
-  if ctx.pos ~= ctx.start then incomplete(ctx) end
+  if ctx.pos != ctx.start then incomplete(ctx) end
 end
 
 -- Extended API: create a disassembler context. Then call ctx:disass(ofs, len).

@@ -3,6 +3,22 @@
 !!! info "Panel de BunkerWeb"
     Si no puedes resolver tu problema, puedes [contactarnos directamente a través de nuestro panel](https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc). Esto centraliza todas las solicitudes relacionadas con la solución BunkerWeb.
 
+## Solucionar problemas con un agente de IA
+
+### Habilidades de BunkerWeb en skills.sh
+
+La [habilidad oficial de solución de problemas de BunkerWeb en skills.sh](https://skills.sh/bunkerity/bunkerweb-skills/bunkerweb-troubleshooting) ayuda a los agentes de programación con IA a diagnosticar solicitudes bloqueadas, bloqueos de IP, errores del servidor de origen y problemas de certificados o configuración. Sigue las [instrucciones de instalación](https://github.com/bunkerity/bunkerweb-skills#installation) de tu agente.
+
+### Documentación de BunkerWeb con Context7
+
+Si tu agente admite [Context7](https://context7.com/docs), conéctalo para consultar la [documentación de BunkerWeb](https://context7.com/bunkerity/bunkerweb). Incluye tu versión de BunkerWeb, la integración, los ajustes y los registros relevantes en tu consulta, y elimina contraseñas, tokens de API y otros secretos antes de compartirlos.
+
+Ejemplo de consulta:
+
+```text
+Ayúdame a diagnosticar este problema con BunkerWeb <versión> en <integración>. Estos son los ajustes y los registros relevantes sin secretos: <detalles>. use context7
+```
+
 ## Registros
 
 Al solucionar problemas, los registros son tus mejores amigos. Hacemos nuestro mejor esfuerzo para proporcionar registros fáciles de usar para ayudarte a entender lo que está sucediendo.
@@ -331,7 +347,7 @@ Elige una ventana de retención (ejemplo: 90 días) y revisa qué se eliminaría
     LIMIT 50;
     ```
 
-=== "MariaDB / MySQL"
+=== "MySQL/MariaDB"
 
     ```sql
     SELECT hostname, name, server_name, method, status, creation_date, last_seen
@@ -366,7 +382,7 @@ Una vez verificado, elimina las filas.
     COMMIT;
     ```
 
-=== "MariaDB / MySQL"
+=== "MySQL/MariaDB"
 
     ```sql
     START TRANSACTION;
@@ -412,7 +428,7 @@ puedes forzar una actualización del “marcador de cambios”:
     WHERE id = 1;
     ```
 
-=== "MariaDB / MySQL"
+=== "MySQL/MariaDB"
 
     ```sql
     UPDATE bw_metadata
@@ -435,7 +451,7 @@ puedes forzar una actualización del “marcador de cambios”:
     VACUUM (ANALYZE);
     ```
 
-=== "MariaDB / MySQL"
+=== "MySQL/MariaDB"
 
     ```sql
     OPTIMIZE TABLE bw_instances;
@@ -445,7 +461,10 @@ puedes forzar una actualización del “marcador de cambios”:
 
 En caso de que hayas olvidado tus credenciales de la interfaz de usuario o estés experimentando problemas con la 2FA, puedes conectarte a la base de datos para recuperar el acceso.
 
-### Acceder a la base de datos
+!!! warning "La 2FA dejó de funcionar tras recrear el contenedor"
+    Las claves que descifran los secretos TOTP se guardan en el contenedor de la UI, en `/var/lib/bunkerweb/.totp_encryption_keys.json`, es decir `/data/lib` dentro de la imagen. Recrear el contenedor `bw-ui` sin un volumen persistente en `/data` genera un juego nuevo de claves: los secretos guardados en la base de datos ya no se pueden descifrar, la inscripción del admin se elimina y las demás cuentas deben reiniciarse con el SQL de abajo. Monta un volumen en `/data` (consulta la [documentación de la interfaz web](web-ui.md)) para conservar las claves, o aporta tus propias `TOTP_ENCRYPTION_KEYS`.
+
+### Acceder a la base de datos {#access-database}
 
 === "SQLite"
 
@@ -513,7 +532,7 @@ En caso de que hayas olvidado tus credenciales de la interfaz de usuario o esté
     sqlite>
     ```
 
-=== "MariaDB / MySQL"
+=== "MySQL/MariaDB"
 
     !!! note "Solo MariaDB / MySQL"
         Los siguientes pasos solo son válidos para bases de datos MariaDB / MySQL. Si estás utilizando otra base de datos, por favor consulta la documentación de tu base de datos.
@@ -703,6 +722,18 @@ En caso de que hayas olvidado tus credenciales de la interfaz de usuario o esté
     - Elige el alcance: exporta los ajustes globales o selecciona un Servicio específico.
     - Haz clic para descargar el archivo de configuración para el alcance elegido.
     - Opcionalmente descarga los registros: los registros exportados se anonimizan automáticamente (todas las direcciones IP y dominios están enmascarados).
+
+=== "Exportar un paquete de soporte con bwcli"
+
+    Ejecuta `bwcli support` donde se ejecuta el scheduler (contenedor del scheduler, imagen all-in-one o host Linux) para generar un único archivo para el soporte de BunkerWeb: versión y entorno, configuración, plugins, jobs, estado de las instancias, metadatos de las configuraciones personalizadas, registros y la configuración de NGINX generada. En una instancia de BunkerWeb, en el controlador autoconf o en un host Linux worker el comando se niega a ejecutarse y remite al scheduler.
+
+    ```shell
+    docker exec <scheduler container> bwcli support -o - > bundle.zip
+    ```
+
+    - Sin `-o`, el archivo `bunkerweb-support-<marca de tiempo UTC>.zip` se escribe en el directorio actual. `-o -` lo escribe en stdout.
+    - Las credenciales siempre se ocultan. Las direcciones IP y los dominios de los servicios se anonimizan: añade `--no-anonymize` para conservarlos.
+    - Una sección que no se puede leer se indica en `manifest.json` y el resto del paquete se escribe igualmente. Cuando los registros van a stdout, el manifiesto indica el comando para obtenerlos (`docker logs`, `kubectl logs`, `journalctl`).
 
 ### Cargar plugin
 

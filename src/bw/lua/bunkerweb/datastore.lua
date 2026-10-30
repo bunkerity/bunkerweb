@@ -7,12 +7,114 @@ local datastore = class("datastore")
 local logger = clogger:new("DATASTORE")
 
 local ERR = ngx.ERR
+local WARN = ngx.WARN
 local subsystem = ngx.config.subsystem
 local shared = ngx.shared
+local match = string.match
 
-local lru, err_lru = lrucache.new(100000)
+-- Default slot count for the per-worker LRU shared by all datastore instances.
+-- Overridden via the DATASTORE_LRU_SIZE global setting on the first worker-LRU
+-- read/write once the variables store has been populated (lazy: utils.get_variable
+-- depends on this very module so resolution is deferred to first call).
+local DEFAULT_DATASTORE_LRU = 1000
+
+-- Setting that sizes each shared dict, so an eviction warning can name the knob to turn: this
+-- module serves zones sized by three different settings and "the zone size" names none of them.
+-- Built by identity, skipping the dicts the running subsystem does not declare, so an absent one
+-- cannot be matched by a nil lookup.
+local DICT_SIZE_SETTING = {}
+for name, setting in pairs({
+	metrics_datastore = "METRICS_MEMORY_SIZE",
+	metrics_datastore_stream = "METRICS_MEMORY_SIZE",
+	internalstore = "INTERNALSTORE_MEMORY_SIZE",
+	internalstore_stream = "INTERNALSTORE_MEMORY_SIZE",
+}) do
+	if shared[name] then
+		DICT_SIZE_SETTING[shared[name]] = setting
+	end
+end
+
+local lru, err_lru = lrucache.new(DEFAULT_DATASTORE_LRU)
 if not lru then
 	logger:log(ERR, "failed to instantiate LRU cache : " .. err_lru)
+end
+
+-- Parse a count value with optional SI shorthand suffix: "1000", "1k", "10K", "1m".
+-- k/K = x1000, m/M = x1_000_000. Returns the integer count, or nil if value is
+-- missing or unparsable.
+local function parse_count(value)
+	if value == nil or value == "" then
+		return nil
+	end
+	local num_str, suffix = match(tostring(value), "^(%d+)([kKmM]?)$")
+	if not num_str then
+		return nil
+	end
+	local num = tonumber(num_str)
+	if not num then
+		return nil
+	end
+	if suffix == "k" or suffix == "K" then
+		return num * 1000
+	elseif suffix == "m" or suffix == "M" then
+		return num * 1000000
+	end
+	return num
+end
+
+-- Migrate every live entry from the old LRU into a freshly-sized one, preserving
+-- per-entry user_flags. The only entries present at resize time are the permanent
+-- bootstrap keys (variables/plugins/plugin_*/plugins_order) written during
+-- init_by_lua before any request-time TTL cache exists, so re-inserting with
+-- ttl=nil keeps them permanent. get_keys/get are direct lrucache calls (no
+-- datastore re-entry), so the lru_configuring guard is unaffected.
+local function migrate_lru(old_lru, new_lru)
+	for _, key in ipairs(old_lru:get_keys(0)) do
+		local value, _, flags = old_lru:get(key)
+		if value ~= nil then
+			new_lru:set(key, value, nil, flags)
+		end
+	end
+	return new_lru
+end
+
+local lru_configured = false
+local lru_configuring = false
+local function ensure_lru_sized()
+	if lru_configured or lru_configuring then
+		return
+	end
+	lru_configuring = true
+	-- Lazy require to avoid circular load (utils requires this module at the top).
+	local ok_utils, utils = pcall(require, "bunkerweb.utils")
+	if not ok_utils or type(utils.get_variable) ~= "function" then
+		lru_configuring = false
+		return
+	end
+	-- utils.get_variable reads internalstore via the worker LRU, which re-enters
+	-- this module; the lru_configuring guard short-circuits the recursion.
+	local value = utils.get_variable("DATASTORE_LRU_SIZE", false)
+	lru_configuring = false
+	if value == nil then
+		-- Variables not yet populated; retry on next call.
+		return
+	end
+	lru_configured = true
+	local size = parse_count(value)
+	-- Only ever grow the shared bootstrap LRU. A size at or below the default could
+	-- LRU-evict the init-time bootstrap entries (variables/plugins/...) and deadlock
+	-- startup (bug #3618), so sizes <= default keep the safe default-sized cache.
+	if not size or size <= DEFAULT_DATASTORE_LRU then
+		return
+	end
+	local new_lru, err = lrucache.new(size)
+	if not new_lru then
+		logger:log(ERR, "failed to resize datastore LRU to " .. size .. " : " .. err)
+		return
+	end
+	-- Carry existing entries over before swapping so init-time bootstrap data
+	-- (written into the old LRU during init_by_lua) survives the resize.
+	lru = lru and migrate_lru(lru, new_lru) or new_lru
 end
 
 function datastore:initialize(dict)
@@ -23,17 +125,24 @@ function datastore:initialize(dict)
 	else
 		self.dict = shared.datastore_stream
 	end
+	self.size_setting = (self.dict and DICT_SIZE_SETTING[self.dict]) or "DATASTORE_MEMORY_SIZE"
 end
 
 function datastore:get(key, worker)
 	-- luacheck: ignore 431
 	local value, err
 	if worker then
+		ensure_lru_sized()
 		if not lru then
 			return nil, "lru is not instantiated"
 		end
-		value, err = lru:get(key)
-		return value, err or "not found"
+		-- lru:get returns value, stale_value, flags : an expired entry is a miss, and its
+		-- stale value must not be returned as the error (callers concatenate it).
+		value = lru:get(key)
+		if value == nil then
+			return nil, "not found"
+		end
+		return value, "success"
 	end
 	value, err = self.dict:get(key)
 	if not value and not err then
@@ -44,8 +153,16 @@ end
 
 function datastore:set(key, value, exptime, worker)
 	if worker then
+		ensure_lru_sized()
 		if not lru then
 			return false, "lru is not instantiated"
+		end
+		-- Same convention as the shared dict below : no exptime, zero or a negative one means no
+		-- expiry. Zero has to be normalised too : the shared dict reads it as no expiry, while
+		-- lrucache reads it as already expired, so passing it through would make the very next
+		-- get() a miss.
+		if exptime and exptime <= 0 then
+			exptime = nil
 		end
 		lru:set(key, value, exptime)
 		return true, "success"
@@ -57,18 +174,42 @@ function datastore:set(key, value, exptime, worker)
 	end
 end
 
+-- Last time an eviction warning was emitted, per zone. A zone that has reached capacity
+-- force-evicts on every single write, and the metrics zone is written for every live key on
+-- every timer tick, so anything finer than per-zone turns a saturated zone into a permanent
+-- log stream. The zone size is the only fix, so the zone is also the only useful granularity.
+local forcible_warned = {}
+local FORCIBLE_WARN_INTERVAL = 60
+
+local function warn_forcible(setting, key)
+	local now = ngx.time()
+	local last = forcible_warned[setting]
+	if last and now - last < FORCIBLE_WARN_INTERVAL then
+		return
+	end
+	forcible_warned[setting] = now
+	logger:log(WARN, "shared dict is full : writing " .. key .. " evicted an unexpired entry, raise " .. setting)
+end
+
 function datastore:set_with_retries(key, value, exptime, max_retries)
 	max_retries = max_retries or 5
-	local success, err
+	local success, err, forcible
 	-- Try multiple times if we need to make room for the new value
 	for _ = 1, max_retries do
 		if exptime == nil or exptime < 0 then
-			success, err = self.dict:set(key, value)
+			success, err, forcible = self.dict:set(key, value)
 		else
-			success, err = self.dict:set(key, value, exptime)
+			success, err, forcible = self.dict:set(key, value, exptime)
 		end
 		-- Ok case
 		if success then
+			-- The write succeeded by evicting an unexpired entry. This zone also holds active
+			-- bans, so a silent eviction can drop one; the caller only ever sees success, hence
+			-- the warning here. Throttled per zone: a zone at capacity force-evicts on every
+			-- write, and its size is the only thing the operator can act on.
+			if forcible then
+				warn_forcible(self.size_setting, key)
+			end
 			return true, "success"
 		end
 		-- Unknown error, can't do nothing
@@ -96,7 +237,7 @@ function datastore:keys(worker)
 		if not lru then
 			return false, "lru is not instantiated"
 		end
-		return lru:keys(0)
+		return lru:get_keys(0)
 	end
 	return self.dict:get_keys(0)
 end
@@ -122,13 +263,17 @@ function datastore:delete_all(pattern, worker)
 		if not lru then
 			return false, "lru is not instantiated"
 		end
-		keys = lru:keys(0)
+		keys = lru:get_keys(0)
 	else
 		keys = self.dict:get_keys(0)
 	end
 	for _, key in ipairs(keys) do
 		if key:match(pattern) then
-			self.dict:delete(key)
+			if worker then
+				lru:delete(key)
+			else
+				self.dict:delete(key)
+			end
 		end
 	end
 	return true, "success"
@@ -140,24 +285,22 @@ function datastore:flush_lru()
 		return false, "lru is not instantiated"
 	end
 	lru:flush_all()
+	return true, "success"
 end
 
 function datastore:safe_rpush(key, value)
 	local length, err = self.dict:rpush(key, value)
-	if not length and err == "no memory" then
-		local i = 0
-		while i < 5 do
-			local val
-			val, err = self.dict:lpop(key)
-			if not val then
-				return val, err
-			end
-			length, err = self.dict:rpush(key, value)
-			if not length and err ~= "no memory" then
-				return length, err
-			end
-			i = i + 1
+	-- Dict is full : evict this key's oldest entries one by one and retry, up to 5 times.
+	local i = 0
+	while not length and err == "no memory" and i < 5 do
+		local val
+		val, err = self.dict:lpop(key)
+		if not val then
+			-- lpop returns nil, nil on an empty or absent list
+			return nil, err or "no memory (dict is full and key has nothing to evict)"
 		end
+		length, err = self.dict:rpush(key, value)
+		i = i + 1
 	end
 	return length, err
 end

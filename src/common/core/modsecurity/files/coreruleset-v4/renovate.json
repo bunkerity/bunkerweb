@@ -5,9 +5,6 @@
     "schedule:weekly"
   ],
   "ignorePaths": [],
-  "enabledManagers": [
-    "docker-compose"
-  ],
   "packageRules": [
     {
       "matchUpdateTypes": [

@@ -21,11 +21,11 @@
 
 #include "src/operators/operator.h"
 
-#ifndef WITH_PCRE2
+#ifdef WITH_PCRE
 #if PCRE_HAVE_JIT
 #define pcre_study_opt PCRE_STUDY_JIT_COMPILE
 #else
-#define pcre_study_opt 0
+constexpr int pcre_study_opt = 0;
 #endif
 #endif
 
@@ -34,20 +34,20 @@ namespace modsecurity {
 namespace operators {
 
 VerifyCC::~VerifyCC() {
-#if WITH_PCRE2
+#ifndef WITH_PCRE
     pcre2_code_free(m_pc);
 #else
-    if (m_pc != NULL) {
+    if (m_pc != nullptr) {
         pcre_free(m_pc);
-        m_pc = NULL;
+        m_pc = nullptr;
     }
-    if (m_pce != NULL) {
+    if (m_pce != nullptr) {
 #if PCRE_HAVE_JIT
         pcre_free_study(m_pce);
 #else
         pcre_free(m_pce);
 #endif
-        m_pce = NULL;
+        m_pce = nullptr;
     }
 #endif
 }
@@ -94,33 +94,33 @@ int VerifyCC::luhnVerify(const char *ccnumber, int len) {
 
 
 bool VerifyCC::init(const std::string &param2, std::string *error) {
-#ifdef WITH_PCRE2
+#ifndef WITH_PCRE
     PCRE2_SPTR pcre2_pattern = reinterpret_cast<PCRE2_SPTR>(m_param.c_str());
     uint32_t pcre2_options = (PCRE2_DOTALL|PCRE2_MULTILINE);
     int errornumber = 0;
     PCRE2_SIZE erroroffset = 0;
     m_pc = pcre2_compile(pcre2_pattern, PCRE2_ZERO_TERMINATED,
-        pcre2_options, &errornumber, &erroroffset, NULL);
-    if (m_pc == NULL) {
+        pcre2_options, &errornumber, &erroroffset, nullptr);
+    if (m_pc == nullptr) {
         return false;
     }
     m_pcje = pcre2_jit_compile(m_pc, PCRE2_JIT_COMPLETE);
 #else
-    const char *errptr = NULL;
+    const char *errptr = nullptr;
     int erroffset = 0;
 
     m_pc = pcre_compile(m_param.c_str(), PCRE_DOTALL|PCRE_MULTILINE,
-        &errptr, &erroffset, NULL);
-    if (m_pc == NULL) {
+        &errptr, &erroffset, nullptr);
+    if (m_pc == nullptr) {
         error->assign(errptr);
         return false;
     }
 
     m_pce = pcre_study(m_pc, pcre_study_opt, &errptr);
-    if (m_pce == NULL) {
-        if (errptr == NULL) {
+    if (m_pce == nullptr) {
+        if (errptr == nullptr) {
             /*
-             * Per pcre_study(3) m_pce == NULL && errptr == NULL means
+             * Per pcre_study(3) m_pce == nullptr && errptr == nullptr means
              * that no addional information is found, so no need to study
              */
             return true;
@@ -136,21 +136,21 @@ bool VerifyCC::init(const std::string &param2, std::string *error) {
 
 bool VerifyCC::evaluate(Transaction *t, RuleWithActions *rule,
     const std::string& i, RuleMessage &ruleMessage) {
-#ifdef WITH_PCRE2
+#ifndef WITH_PCRE
     PCRE2_SIZE offset = 0;
     size_t target_length = i.length();
     PCRE2_SPTR pcre2_i = reinterpret_cast<PCRE2_SPTR>(i.c_str());
-    pcre2_match_data *match_data = pcre2_match_data_create_from_pattern(m_pc, NULL);
+    pcre2_match_data *match_data = pcre2_match_data_create_from_pattern(m_pc, nullptr);
 
     int ret;
     for (offset = 0; offset < target_length; offset++) {
 
         if (m_pcje == 0) {
-            ret = pcre2_jit_match(m_pc, pcre2_i, target_length, offset, 0, match_data, NULL);
+            ret = pcre2_jit_match(m_pc, pcre2_i, target_length, offset, 0, match_data, nullptr);
         }
         
         if (m_pcje != 0 || ret == PCRE2_ERROR_JIT_STACKLIMIT) {
-            ret = pcre2_match(m_pc, pcre2_i, target_length, offset, PCRE2_NO_JIT, match_data, NULL);
+            ret = pcre2_match(m_pc, pcre2_i, target_length, offset, PCRE2_NO_JIT, match_data, nullptr);
         }
 
         /* If there was no match, then we are done. */
@@ -192,7 +192,7 @@ bool VerifyCC::evaluate(Transaction *t, RuleWithActions *rule,
                         "\" at " + i + ". [offset " +
                         std::to_string(offset) + "]");
                 }
-#ifdef WITH_PCRE2
+#ifndef WITH_PCRE
                 pcre2_match_data_free(match_data);
 #endif
                 return true;
@@ -200,7 +200,7 @@ bool VerifyCC::evaluate(Transaction *t, RuleWithActions *rule,
         }
     }
 
-#ifdef WITH_PCRE2
+#ifndef WITH_PCRE
     pcre2_match_data_free(match_data);
 #endif
 

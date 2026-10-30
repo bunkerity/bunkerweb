@@ -453,9 +453,18 @@ static ngx_str_t ngx_http_scgi_hide_headers[] = {
 };
 
 
+static ngx_keyval_t  ngx_http_scgi_headers[] = {
+    { ngx_string("HTTP_HOST"),
+      ngx_string("$host$is_request_port$request_port") },
+    { ngx_null_string, ngx_null_string }
+};
+
+
 #if (NGX_HTTP_CACHE)
 
 static ngx_keyval_t  ngx_http_scgi_cache_headers[] = {
+    { ngx_string("HTTP_HOST"),
+      ngx_string("$host$is_request_port$request_port") },
     { ngx_string("HTTP_IF_MODIFIED_SINCE"),
       ngx_string("$upstream_cache_last_modified") },
     { ngx_string("HTTP_IF_UNMODIFIED_SINCE"), ngx_string("") },
@@ -634,7 +643,7 @@ ngx_http_scgi_create_request(ngx_http_request_t *r)
 {
     off_t                         content_length_n;
     u_char                        ch, sep, *key, *val, *lowcase_key;
-    size_t                        len, key_len, val_len, allocated;
+    size_t                        len, params_len, key_len, val_len, allocated;
     ngx_buf_t                    *b;
     ngx_str_t                     content_length;
     ngx_uint_t                    i, n, hash, skip_empty, header_params;
@@ -649,11 +658,9 @@ ngx_http_scgi_create_request(ngx_http_request_t *r)
     u_char                        buffer[NGX_OFF_T_LEN];
 
     content_length_n = 0;
-    body = r->upstream->request_bufs;
 
-    while (body) {
-        content_length_n += ngx_buf_size(body->buf);
-        body = body->next;
+    if (r->headers_in.content_length_n > 0) {
+        content_length_n = r->headers_in.content_length_n;
     }
 
     content_length.data = buffer;
@@ -661,6 +668,7 @@ ngx_http_scgi_create_request(ngx_http_request_t *r)
 
     len = sizeof("CONTENT_LENGTH") + content_length.len + 1;
 
+    params_len = 0;
     header_params = 0;
     ignored = NULL;
 
@@ -698,8 +706,10 @@ ngx_http_scgi_create_request(ngx_http_request_t *r)
                 continue;
             }
 
-            len += key_len + val_len + 1;
+            params_len += key_len + val_len + 1;
         }
+
+        len += params_len;
     }
 
     if (scf->upstream.pass_request_headers) {
@@ -814,6 +824,7 @@ ngx_http_scgi_create_request(ngx_http_request_t *r)
 
         e.ip = params->values->elts;
         e.pos = b->last;
+        e.end = b->last + params_len;
         e.request = r;
         e.flushed = 1;
 
@@ -852,6 +863,10 @@ ngx_http_scgi_create_request(ngx_http_request_t *r)
             code = *(ngx_http_script_code_pt *) e.ip;
             code((ngx_http_script_engine_t *) &e);
 
+            if (e.status) {
+                return NGX_ERROR;
+            }
+
 #if (NGX_DEBUG)
             val = e.pos;
 #endif
@@ -859,11 +874,26 @@ ngx_http_scgi_create_request(ngx_http_request_t *r)
                 code = *(ngx_http_script_code_pt *) e.ip;
                 code((ngx_http_script_engine_t *) &e);
             }
+
+            if (e.status) {
+                return NGX_ERROR;
+            }
+
+            if (ngx_http_script_check_length(&e, 1) != NGX_OK) {
+                return NGX_ERROR;
+            }
+
             *e.pos++ = '\0';
             e.ip += sizeof(uintptr_t);
 
             ngx_log_debug2(NGX_LOG_DEBUG_HTTP, r->connection->log, 0,
                            "scgi param: \"%s: %s\"", key, val);
+        }
+
+        if (e.pos != e.end) {
+            ngx_log_error(NGX_LOG_ALERT, r->connection->log, 0,
+                          "scgi request length mismatch");
+            return NGX_ERROR;
         }
 
         b->last = e.pos;
@@ -1021,6 +1051,10 @@ ngx_http_scgi_process_status_line(ngx_http_request_t *r)
 
     u = r->upstream;
 
+    if (r->state == 0) {
+        r->header_name_start = u->buffer.pos;
+    }
+
     rc = ngx_http_parse_status_line(r, &u->buffer, status);
 
     if (rc == NGX_AGAIN) {
@@ -1029,6 +1063,8 @@ ngx_http_scgi_process_status_line(ngx_http_request_t *r)
 
     if (rc == NGX_ERROR) {
         u->process_header = ngx_http_scgi_process_header;
+        u->buffer.pos = r->header_name_start;
+        r->state = 0;
         return ngx_http_scgi_process_header(r);
     }
 
@@ -1675,7 +1711,8 @@ ngx_http_scgi_merge_loc_conf(ngx_conf_t *cf, void *parent, void *child)
         conf->params_source = prev->params_source;
     }
 
-    rc = ngx_http_scgi_init_params(cf, conf, &conf->params, NULL);
+    rc = ngx_http_scgi_init_params(cf, conf, &conf->params,
+                                   ngx_http_scgi_headers);
     if (rc != NGX_OK) {
         return NGX_CONF_ERROR;
     }

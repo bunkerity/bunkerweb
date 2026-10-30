@@ -37,6 +37,8 @@
 \n
 ##! ;\rifconfig
 \r
+##! \ifconfig (backslash-prefix evasion at start of value)
+^\x5c
 ##! $(ifconfig)
 \$\(
 ##! $((1+2)) arithmetic expansion
@@ -62,17 +64,26 @@
 ##!=>
 
 ##! commands prefix
+##! Each branch carries its own trailing whitespace and no branch begins with
+##! whitespace, so a run of whitespace between prefix tokens is consumed in
+##! exactly one place. Writing the parenthesis branch as `\s*\(\s*` (whitespace
+##! on both sides) inside this `*`-quantified group let consecutive iterations
+##! claim the same whitespace, causing catastrophic backtracking. See the
+##! Each branch carries its own trailing whitespace and no branch begins with
+##! whitespace, so a run of whitespace between prefix tokens is consumed in
+##! exactly one place. Potentially preceding white space is already captured by
+##! the preceding `\s*` before this group starts.
+##! See also the catastrophic-backtracking guidance in CONTRIBUTING.md.
 ##!> assemble
   ##! { ifconfig }
-  \{
   ##! ( ifconfig )
-  \s*\(\s*
-  ##! VARNAME=xyz ifconfig
-  \w+=(?:[^\s]*|\$.*|\$.*|<.*|>.*|\'[^\']*\'|\"[^\"]*\")\s+
   ##! ! ifconfig
-  !\s*
   ##! $ifconfig
-  \$
+  [{(!$]\s*
+  ##! VARNAME=xyz ifconfig
+  \w+=\S+\s+
+  ##! $a ifconfig (uninitialized variable used as a spacer; expands to the empty string)
+  \$\w+\s+
 ##!<
 ##!=>
 

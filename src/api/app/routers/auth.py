@@ -5,7 +5,7 @@ from typing import Optional, Tuple
 from fastapi import APIRouter, HTTPException, Request, Depends
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from fastapi.responses import JSONResponse
-from biscuit_auth import BiscuitBuilder, PrivateKey
+from biscuit_auth import BiscuitBuilder, Fact, PrivateKey
 
 from common_utils import get_version  # type: ignore
 from ..utils import LOGGER
@@ -13,7 +13,6 @@ from ..utils import LOGGER
 from ..utils import BISCUIT_PRIVATE_KEY_FILE, check_password, get_api_db
 from ..config import api_config
 from ..auth.common import get_auth_header
-
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 security = HTTPBasic(auto_error=False)
@@ -117,35 +116,44 @@ async def login(request: Request, credentials: HTTPBasicCredentials | None = Dep
         raise HTTPException(status_code=500, detail="Authentication service unavailable")
 
     client_ip = request.client.host if request.client else "0.0.0.0"
-    host = request.headers.get("host", "bwapi")
+    # Clamp the attacker-controlled Host header to a sane length so it cannot bloat the signed token.
+    host = (request.headers.get("host", "bwapi") or "bwapi")[:255]
+    token_user = (user.get("username") if isinstance(user, dict) else username) or "user"
+    # Build the token block through the biscuit parameter API so untrusted values
+    # (Host header, client IP, username) are bound as typed terms and cannot inject
+    # additional signed Datalog facts.
     builder = BiscuitBuilder(
-        f"""
-        user("{(user.get('username') if isinstance(user, dict) else username) or 'user'}");
-        time({datetime.now(timezone.utc).isoformat()});
-        client_ip("{client_ip}");
-        domain("{host}");
-        version("{get_version()}");
         """
+        user({user});
+        time({time});
+        client_ip({client_ip});
+        domain({domain});
+        version({version});
+        """,
+        {
+            "user": token_user,
+            "time": datetime.now(timezone.utc),
+            "client_ip": client_ip,
+            "domain": host,
+            "version": get_version(),
+        },
     )
 
     # API has no role logic; encode read/write under a fixed role name.
     role_name = "api_user"
     if "read" in perms and "write" in perms:
-        builder.add_code(f'role("{role_name}", ["read", "write"]);')
+        builder.add_code('role({role}, ["read", "write"]);', {"role": role_name})
     elif "read" in perms:
-        builder.add_code(f'role("{role_name}", ["read"]);')
+        builder.add_code('role({role}, ["read"]);', {"role": role_name})
     else:
         raise HTTPException(status_code=403, detail="No permissions assigned to user")
 
-    # Embed fine-grained permissions as facts
-    def _esc(val: str) -> str:
-        return val.replace("\\", "\\\\").replace('"', '\\"')
-
+    # Embed fine-grained permissions as facts (DB-sourced values, bound as parameters)
     if is_admin:
         builder.add_code("admin(true);")
     else:
         for rtype, rid, pname in fine_grained:
-            builder.add_code(f'api_perm("{_esc(rtype)}", "{_esc(rid)}", "{_esc(pname)}");')
+            builder.add_fact(Fact("api_perm({rtype}, {rid}, {pname})", {"rtype": rtype, "rid": rid, "pname": pname}))
 
     token = builder.build(private_key)
     return JSONResponse(status_code=200, content={"token": token.to_base64()})

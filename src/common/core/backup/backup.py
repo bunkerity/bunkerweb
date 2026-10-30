@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+from contextlib import closing
 from datetime import datetime
 import re
 from json import dumps, loads
@@ -8,18 +9,21 @@ from os.path import join, sep
 from pathlib import Path
 from subprocess import PIPE, run
 from shutil import which
+from sqlite3 import connect as sqlite_connect
 from sys import exit as sys_exit, path as sys_path
-from time import sleep
+from tempfile import TemporaryDirectory
 from typing import Literal
-from zipfile import ZIP_DEFLATED, ZipFile
+from zipfile import BadZipFile, ZIP_DEFLATED, ZipFile
+from zlib import error as zlib_error
 
 for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("utils",), ("db",))]:
     if deps_path not in sys_path:
         sys_path.append(deps_path)
 
+from sqlalchemy import inspect
 from sqlalchemy.engine.url import make_url
 
-from common_utils import bytes_hash  # type: ignore
+from common_utils import acquire_db_lock as _acquire_db_lock, bytes_hash, DatabaseLockBusy, release_db_lock, safe_zip_extractall  # type: ignore  # noqa: F401
 from Database import Database  # type: ignore
 from logger import getLogger  # type: ignore
 from model import Base  # type: ignore
@@ -27,17 +31,52 @@ from model import Base  # type: ignore
 LOGGER = getLogger("BACKUP")
 
 BACKUP_DIR = Path(getenv("BACKUP_DIRECTORY", "/var/lib/bunkerweb/backups"))
+# Write probes (Database.py) create and drop test_<uuid4 hex>; they are not user data and can vanish or linger mid-dump
+TEST_TABLE_PATTERN = re.compile(r"test_[0-9a-f]{32}")
+# The same shape as a psql pattern, so a user table with a 32-character name after "test_" is still dumped
+POSTGRESQL_TEST_TABLE_PATTERN = "test_" + "[0-9a-f]" * 32
+DUMP_ATTEMPTS = 5
 DB_LOCK_FILE = Path(sep, "var", "lib", "bunkerweb", "db.lock")
 
 
-def acquire_db_lock():
-    """Acquire the database lock to prevent concurrent access to the database."""
-    current_time = datetime.now().astimezone()
-    while DB_LOCK_FILE.is_file() and DB_LOCK_FILE.stat().st_ctime + 30 > current_time.timestamp():
-        LOGGER.warning("Database is locked, waiting for it to be unlocked (timeout: 30s) ...")
-        sleep(1)
-    DB_LOCK_FILE.unlink(missing_ok=True)
-    DB_LOCK_FILE.touch()
+def mysql_client_command(operation: Literal["dump", "restore"]) -> tuple[str, bool]:
+    mariadb_command = "mariadb-dump" if operation == "dump" else "mariadb"
+    if which(mariadb_command):
+        return mariadb_command, True
+    return ("mysqldump" if operation == "dump" else "mysql"), False
+
+
+def mysql_connection_args(query_args, mariadb_client: bool) -> list[str]:
+    args = []
+    ssl = query_args.get("ssl")
+    if isinstance(ssl, tuple):
+        ssl = ssl[-1]
+    ssl = str(ssl).lower() if ssl is not None else None
+
+    if ssl == "true":
+        args.append("--ssl")
+    elif ssl == "false":
+        args.append("--skip-ssl")
+    elif mariadb_client:
+        # MariaDB clients verify opportunistic TLS by default. MySQL's generated
+        # certificate is self-signed, so keep encryption but skip verification
+        # unless DATABASE_URI explicitly requests SSL.
+        args.append("--skip-ssl-verify-server-cert")
+
+    charset = query_args.get("charset")
+    if isinstance(charset, tuple):
+        charset = charset[-1]
+    if charset:
+        args.extend(["--default-character-set", str(charset)])
+    return args
+
+
+def acquire_db_lock(timeout: float = 30.0) -> int:
+    """Acquire the database lock (fcntl.flock, real mutual exclusion) to prevent concurrent
+    access to the database. Returns a handle to pass to release_db_lock(). Raises
+    DatabaseLockBusy if the lock is still held by another process after `timeout` seconds.
+    """
+    return _acquire_db_lock(DB_LOCK_FILE, timeout=timeout)
 
 
 def update_cache_file(db: Database, backup_dir: Path) -> str:
@@ -64,27 +103,33 @@ def backup_database(current_time: datetime, db: Database = None, backup_dir: Pat
     database: Literal["sqlite", "mariadb", "mysql", "postgresql", "oracle"] = database_url.drivername.split("+")[0]
     backup_file = backup_dir.joinpath(f"backup-{database}-{current_time.strftime('%Y-%m-%d_%H-%M-%S')}.zip")
     LOGGER.debug(f"Backup file path: {backup_file}")
-    stderr = "Table 'db.test_"
-    current_time = datetime.now().astimezone()
 
     # Get table names from the SQLAlchemy model
     model_tables = list(Base.metadata.tables.keys())
     LOGGER.info(f"Backing up {len(model_tables)} tables defined in the model")
 
-    while "Table 'db.test_" in stderr and (datetime.now().astimezone() - current_time).total_seconds() < 10:
+    for attempt in range(1, DUMP_ATTEMPTS + 1):
         if database == "sqlite":
             db_path = Path(database_url.database)
 
             LOGGER.info("Creating a backup for the SQLite database ...")
 
-            # Full SQLite database dump
-            proc = run(
-                ["sqlite3", db_path.as_posix()],
-                input=".dump\n".encode(),
-                stdout=PIPE,
-                stderr=PIPE,
-                env={"PATH": getenv("PATH", ""), "PYTHONPATH": getenv("PYTHONPATH", "")},
-            )
+            # sqlite3 .dump takes no exclusion and a table list drops indexes, views, triggers and sequences:
+            # dump a consistent snapshot of the whole database after removing the write probes from it
+            with TemporaryDirectory() as tmp_dir:
+                snapshot = Path(tmp_dir, "snapshot.sqlite3")
+                with closing(sqlite_connect(db_path.as_posix())) as source, closing(sqlite_connect(snapshot.as_posix())) as copy:
+                    source.backup(copy)
+                    for (table,) in copy.execute("SELECT name FROM sqlite_master WHERE type = 'table'").fetchall():
+                        if TEST_TABLE_PATTERN.fullmatch(table):
+                            copy.execute(f'DROP TABLE "{table}"')
+                    copy.commit()
+                proc = run(
+                    ["sqlite3", snapshot.as_posix(), ".dump"],
+                    stdout=PIPE,
+                    stderr=PIPE,
+                    env={"PATH": getenv("PATH", ""), "PYTHONPATH": getenv("PYTHONPATH", "")},
+                )
         else:
             url = make_url(db.database_uri)
             db_user = url.username or ""
@@ -97,7 +142,8 @@ def backup_database(current_time: datetime, db: Database = None, backup_dir: Pat
             if database in ("mariadb", "mysql"):
                 LOGGER.info("Creating a backup for the MariaDB/MySQL database ...")
 
-                dump_bin = "mariadb-dump" if which("mariadb-dump") else "mysqldump"
+                dump_bin, mariadb_client = mysql_client_command("dump")
+                inspector = inspect(db.sql_engine)
                 cmd = [
                     dump_bin,
                     "-h",
@@ -105,6 +151,9 @@ def backup_database(current_time: datetime, db: Database = None, backup_dir: Pat
                     "-u",
                     db_user,
                     db_database_name,
+                    # Name the tables and views to dump: a write probe listed by the server can be dropped before the dump reads it.
+                    # Triggers, and routines and events where requested below, are still dumped with them.
+                    *(name for name in (*inspector.get_table_names(), *inspector.get_view_names()) if not TEST_TABLE_PATTERN.fullmatch(name)),
                 ]
                 if db_port:
                     cmd.extend(["-P", db_port])
@@ -113,9 +162,9 @@ def backup_database(current_time: datetime, db: Database = None, backup_dir: Pat
                 cmd.extend(
                     [
                         "--single-transaction",  # Consistent backup for InnoDB
-                        "--routines",  # Include stored procedures and functions
                         "--triggers",  # Include triggers
                         "--events",  # Include events
+                        "--no-tablespaces",  # Avoid requiring the global PROCESS privilege
                         "--max_allowed_packet=2147483648",  # 2GB max packet size
                         "--quick",  # Retrieve rows one at a time
                         "--lock-tables=false",  # Don't lock tables
@@ -125,14 +174,12 @@ def backup_database(current_time: datetime, db: Database = None, backup_dir: Pat
                     ]
                 )
 
+                if database == "mariadb":
+                    cmd.append("--routines")  # Include stored procedures and functions (MariaDB only, mariadb-dump sends MariaDB-only queries to MySQL)
+
                 # Avoid --set-gtid-purged for broad compatibility (MariaDB variant doesn't support it)
 
-                # Apply additional arguments from query parameters
-                for key, value in db_query_args.items():
-                    if key == "ssl" and value == "true":
-                        cmd.append("--ssl")
-                    elif key == "charset":
-                        cmd.extend(["--default-character-set", value])
+                cmd.extend(mysql_connection_args(db_query_args, mariadb_client))
 
                 proc = run(
                     cmd,
@@ -164,6 +211,7 @@ def backup_database(current_time: datetime, db: Database = None, backup_dir: Pat
                         "--no-owner",  # Skip ownership commands
                         "--no-privileges",  # Skip privilege commands
                         "--format=plain",  # Plain text format
+                        f"--exclude-table={POSTGRESQL_TEST_TABLE_PATTERN}",  # Skip the write probes
                         "--verbose",  # Verbose output for debugging
                     ]
                 )
@@ -185,14 +233,14 @@ def backup_database(current_time: datetime, db: Database = None, backup_dir: Pat
                 LOGGER.warning("Creating a database backup for Oracle is not supported")
                 return db
 
-        stderr = proc.stderr.decode() if hasattr(proc, "stderr") and proc.stderr else ""
-        if "Table 'db.test_" not in stderr and proc.returncode != 0:
+        if proc.returncode == 0:
+            break
+
+        # A write probe dropped between the table listing and its dump is the only transient failure worth retrying
+        stderr = proc.stderr.decode(errors="replace") if proc.stderr else ""
+        if attempt == DUMP_ATTEMPTS or not TEST_TABLE_PATTERN.search(stderr):
             LOGGER.error(f"Failed to dump the database: {stderr}")
             sys_exit(1)
-
-    if (datetime.now().astimezone() - current_time).total_seconds() >= 10:
-        LOGGER.error("Failed to dump the database: Timeout reached")
-        sys_exit(1)
 
     with ZipFile(backup_file, "w", compression=ZIP_DEFLATED) as zipf:
         zipf.writestr(backup_file.with_suffix(".sql").name, proc.stdout)
@@ -203,12 +251,43 @@ def backup_database(current_time: datetime, db: Database = None, backup_dir: Pat
     return db, backup_file
 
 
+def check_backup_engine(backup_file: Path, database: str) -> str:
+    """Return why the archive cannot be restored into `database`, or an empty string when it can.
+
+    A dump is only valid for the engine that wrote it (backup-<engine>-<date>.zip holding backup-<engine>-<date>.sql),
+    and this must be known before the tables are dropped.
+    """
+    stem = backup_file.stem.split("-")
+    source = stem[1] if len(stem) > 2 and stem[0] == "backup" else ""
+    if source != database:
+        return f"it was taken from {source or 'an unknown'} database engine, not {database}"
+
+    sql_name = backup_file.with_suffix(".sql").name
+    try:
+        with ZipFile(backup_file, "r") as zipf:
+            if sql_name not in zipf.namelist():
+                return f"it does not contain {sql_name}"
+            # Reads every member: a damaged payload must be found before the tables are dropped
+            corrupted = zipf.testzip()
+            if corrupted:
+                return f"its member {corrupted} is corrupted"
+    except (BadZipFile, OSError, EOFError, zlib_error) as e:
+        return f"it cannot be read: {e}"
+    return ""
+
+
 def restore_database(backup_file: Path, db: Database = None) -> Database:
     """Restore the database from a backup."""
     db = db or Database(LOGGER)
-    Base.metadata.drop_all(db.sql_engine)
     database_url = make_url(db.database_uri)
     database: Literal["sqlite", "mariadb", "mysql", "postgresql", "oracle"] = database_url.drivername.split("+")[0]
+
+    refusal = check_backup_engine(backup_file, database)
+    if refusal:
+        LOGGER.error(f"Refusing to restore {backup_file}, {refusal}. The database was left untouched")
+        sys_exit(1)
+
+    Base.metadata.drop_all(db.sql_engine)
 
     if database == "sqlite":
         db_path = Path(database_url.database)
@@ -225,7 +304,9 @@ def restore_database(backup_file: Path, db: Database = None) -> Database:
 
         tmp_file = Path(sep, "var", "tmp", "bunkerweb", backup_file.with_suffix(".sql").name)
         with ZipFile(backup_file, "r") as zipf:
-            zipf.extractall(path=tmp_file.parent)
+            # Uncapped: the database is already cleared, so refusing a large (legitimate) dump here
+            # would lose it. The file is a local backup, not a download or an upload.
+            safe_zip_extractall(zipf, tmp_file.parent, capped=False)
 
         proc = run(
             ["sqlite3", db_path.as_posix(), f".read {tmp_file.as_posix()}"],
@@ -246,16 +327,12 @@ def restore_database(backup_file: Path, db: Database = None) -> Database:
         if database in ("mariadb", "mysql"):
             LOGGER.info("Restoring the MariaDB/MySQL database ...")
 
-            cmd = ["mysql", "-h", db_host, "-u", db_user, db_database_name]
+            restore_bin, mariadb_client = mysql_client_command("restore")
+            cmd = [restore_bin, "-h", db_host, "-u", db_user, db_database_name]
             if db_port:
                 cmd.extend(["-P", db_port])
 
-            # Apply additional arguments from query parameters
-            for key, value in db_query_args.items():
-                if key == "ssl" and value == "true":
-                    cmd.append("--ssl")
-                elif key == "charset":
-                    cmd.extend(["--default-character-set", value])
+            cmd.extend(mysql_connection_args(db_query_args, mariadb_client))
 
             with ZipFile(backup_file, "r") as zipf:
                 proc = run(

@@ -7,6 +7,12 @@ So funktioniert's:
 3.  Optimierte Sitzungsparameter verbessern die Leistung, ohne die Sicherheit zu beeinträchtigen.
 4.  Die Präsentation der Zertifikate folgt Best Practices für Kompatibilität und Sicherheit.
 
+!!! success "Sicherheitsvorteile"
+    - **Datenschutz:** Verschlüsselt Daten während der Übertragung und verhindert Abhören sowie Man-in-the-Middle-Angriffe.
+    - **Authentifizierung:** Bestätigt Clients die Identität Ihres Servers.
+    - **Integrität:** Stellt sicher, dass Daten während der Übertragung nicht manipuliert wurden.
+    - **Moderne Standards:** Auf bewährte Verfahren und Sicherheitsstandards der Branche ausgerichtet.
+
 ### Verwendung
 
 1.  **Protokolle**: Wählen Sie die Versionen über `SSL_PROTOCOLS`.

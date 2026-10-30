@@ -1,0 +1,23 @@
+##! Please refer to the documentation at
+##! https://coreruleset.org/docs/development/regex_assembly/.
+
+##! Detect shell fork bomb patterns.
+##! A fork bomb defines a function whose body recursively calls itself
+##! via a pipe or background operator, causing exponential process
+##! creation. The structural pattern is:
+##!   <name>() { <name call> <| or &> <name call> <optional &> }; <name call>
+##!
+##! The function name can be any identifier including special bash
+##! builtins like : (colon) or . (dot).
+##!
+##! Either pipe (|) or background (&) is sufficient for a fork bomb:
+##!   :(){ :|:& };:         — classic (pipe + background)
+##!   f(){ f & f; };f       — background only
+##!   f(){ f() | f(); };f   — pipe with explicit calls
+##!   f(){ f() & f(); };f   — background with explicit calls
+
+##! Function name: word chars plus : and . (bash builtins)
+##!> define func-name [\w:.]+
+
+##! Match: name() { ... (| or &) ... }
+{{func-name}}\s*\(\s*\)\s*\{[^}]+[|&][^}]+\}

@@ -2,7 +2,7 @@ local ffi = require "ffi"
 local C = ffi.C
 
 require "resty.openssl.include.ossl_typ"
-local OPENSSL_3X = require("resty.openssl.version").OPENSSL_3X
+local OPENSSL_3_UP = require("resty.openssl.version").OPENSSL_3_UP
 
 ffi.cdef [[
   typedef struct ASN1_VALUE_st ASN1_VALUE;
@@ -42,7 +42,7 @@ local function declare_asn1_functions(typ, has_ex)
     %s *%s_dup(%s *a);
   ]], unpack(t)))
 
-  if OPENSSL_3X and has_ex then
+  if OPENSSL_3_UP and has_ex then
     ffi.cdef(string.format([[
       %s *%s_new_ex(OSSL_LIB_CTX *libctx, const char *propq);
     ]], typ, typ))

@@ -43,6 +43,9 @@ Führen Sie die folgenden Schritte aus, um die Greylist-Funktion zu konfiguriere
     | `GREYLIST_IP`      |          | multisite | nein     | **IP-Greylist:** Liste von IP-Adressen oder Netzwerken (in CIDR-Notation), die auf die Greylist gesetzt werden sollen, getrennt durch Leerzeichen.      |
     | `GREYLIST_IP_URLS` |          | multisite | nein     | **IP-Greylist-URLs:** Liste von URLs, die IP-Adressen oder Netzwerke enthalten, die auf die Greylist gesetzt werden sollen, getrennt durch Leerzeichen. |
 
+    !!! info "Listenformate"
+        URL-Listen können einen Eintrag pro Zeile enthalten (Zeilen, die mit `#` oder `;` beginnen, sind Kommentare; von jeder Zeile wird nur das erste Wort gelesen), CSV, ein JSON-Dokument oder JSON Lines. In IP-Listen trennen Kommas ebenfalls Felder, und JSON-Listen behalten jede Zeichenfolge bei, die eine IP-Adresse oder ein Netzwerk darstellt. Fügen Sie ein Fragment hinzu, um nur einen Teil einer JSON-Liste zu behalten: `#key` behält die Werte unter `key`, `#key=value` behält Objekte, bei denen `key` gleich `value` ist oder `value` enthält, und `&` verbindet die Bedingungen. Beispiel: `https://ip-ranges.amazonaws.com/ip-ranges.json#service=CLOUDFRONT`. Eine URL mit Fragment behält nur die ausgewählten Einträge; ist die Liste kein JSON, bleibt sie leer.
+
 === "Reverse DNS"
     **Was dies bewirkt:** Setzt Besucher basierend auf ihrem Domainnamen (in umgekehrter Reihenfolge) auf die Greylist. Nützlich, um Besuchern von bestimmten Organisationen oder Netzwerken bedingten Zugriff zu gewähren.
 
@@ -51,6 +54,9 @@ Führen Sie die folgenden Schritte aus, um die Greylist-Funktion zu konfiguriere
     | `GREYLIST_RDNS`        |          | multisite | nein     | **rDNS-Greylist:** Liste von Reverse-DNS-Suffixen, die auf die Greylist gesetzt werden sollen, getrennt durch Leerzeichen.                         |
     | `GREYLIST_RDNS_GLOBAL` | `yes`    | multisite | nein     | **Nur globales rDNS:** Führt rDNS-Greylist-Prüfungen nur für globale IP-Adressen durch, wenn auf `yes` gesetzt.                                    |
     | `GREYLIST_RDNS_URLS`   |          | multisite | nein     | **rDNS-Greylist-URLs:** Liste von URLs, die Reverse-DNS-Suffixe enthalten, die auf die Greylist gesetzt werden sollen, getrennt durch Leerzeichen. |
+
+    !!! info "Forward-bestätigtes Reverse DNS (FCrDNS)"
+        `GREYLIST_RDNS`-Suffixe werden forward-bestätigt: Der übereinstimmende PTR-Hostname wird zu einer IP zurückaufgelöst, und die Greylist-Freigabe gilt nur, wenn dieser mit der Client-IP übereinstimmt. Ein PTR, der nicht forward-bestätigt werden kann, wird als möglicher Spoofing-Versuch behandelt, und der Zugriff wird nicht gewährt. Dies verhindert, dass ein Angreifer, der seinen eigenen PTR-Eintrag kontrolliert, diesen auf ein auf die Greylist gesetztes Suffix setzt, um Zugriff zu erlangen.
 
 === "ASN"
     **Was dies bewirkt:** Setzt Besucher von bestimmten Netzwerkanbietern mithilfe von Autonomen Systemnummern auf die Greylist. ASNs identifizieren, zu welchem Anbieter oder welcher Organisation eine IP gehört.
@@ -75,6 +81,20 @@ Führen Sie die folgenden Schritte aus, um die Greylist-Funktion zu konfiguriere
     | ------------------- | -------- | --------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
     | `GREYLIST_URI`      |          | multisite | nein     | **URI-Greylist:** Liste von URI-Mustern (PCRE-Regex), die auf die Greylist gesetzt werden sollen, getrennt durch Leerzeichen.            |
     | `GREYLIST_URI_URLS` |          | multisite | nein     | **URI-Greylist-URLs:** Liste von URLs, die URI-Muster enthalten, die auf die Greylist gesetzt werden sollen, getrennt durch Leerzeichen. |
+
+    !!! tip "Verankern Sie ein Pfadmuster so, dass alles darunter erfasst wird"
+        Schreiben Sie `^/admin(/|$)` statt `^/admin$`. Ein Muster, das auf genau einen Pfad verankert ist, trifft weder `/admin/` noch `/admin%2f` oder `/admin;foo`, während Ihre Anwendung dort dieselbe Ressource ausliefern kann. Abgeglichen wird der dekodierte und normalisierte Pfad, daher sind `/a/../admin` und `//admin` schon abgedeckt.
+
+=== "Header"
+    **Was dies bewirkt:** Setzt Anfragen mit einem bestimmten Request-Header auf die Greylist, geprüft über den Namen und optional über eine PCRE-Regex auf den Wert.
+
+    | Einstellung             | Standard | Kontext   | Mehrfach | Beschreibung                                                                                                                                            |
+    | ----------------------- | -------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+    | `GREYLIST_HEADER_NAME`  |          | multisite | ja       | **Header-Name:** Name eines Request-Headers, der es der Anfrage erlaubt, auf die Greylist zu setzen. Nummerierte Paare: `_NAME_1` gehört zu `_VALUE_1`. |
+    | `GREYLIST_HEADER_VALUE` |          | multisite | ja       | **Header-Wert:** PCRE-Regex, dem der Header-Wert entsprechen muss. Leer lassen, um nur auf das Vorhandensein des Headers zu prüfen.                     |
+
+    !!! warning "Eine Header-Regel ist ein gemeinsames Geheimnis"
+        Jeder Client kann einen Header senden, eine Header-Regel ist daher ein Bearer-Token und keine Netzwerkkontrolle. Nur über HTTPS ausliefern, die Regex mit `^` und `$` verankern (die Suche ist standardmäßig nicht verankert, `abc` passt also auch auf `xabcx`) und den Wert rotieren. Steht BunkerWeb hinter einem Proxy, muss dieser jede vom Client gesendete Kopie des Headers überschreiben. Diese Regeln gelten nur für HTTP: ein Stream-Dienst überträgt keine Request-Header, dort greift also nichts.
 
 !!! info "Unterstützung von URL-Formaten"
     Alle `*_URLS`-Einstellungen unterstützen HTTP/HTTPS-URLs sowie lokale Dateipfade mit dem Präfix `file:///`. Die Basisauthentifizierung wird im Format `http://user:pass@url` unterstützt.
@@ -128,13 +148,22 @@ Führen Sie die folgenden Schritte aus, um die Greylist-Funktion zu konfiguriere
 
 === "Selektiver API-Zugriff"
 
-    Eine Konfiguration, die den Zugriff auf bestimmte API-Endpunkte erlaubt:
+    Eine Konfiguration, die einem Partnernetzwerk Zugriff auf alles gewährt und jedem Client Zugriff auf einen öffentlichen Endpunkt:
 
     ```yaml
     USE_GREYLIST: "yes"
-    GREYLIST_URI: "^/api/v1/public/ ^/api/v1/status"
-    GREYLIST_IP: "203.0.113.0/24"  # Externes Partnernetzwerk
+    GREYLIST_IP: "203.0.113.0/24"
+    GREYLIST_URI: "^/api/foo$"
     ```
+
+    Die Greylist-Kriterien sind Alternativen: Eine Anfrage passiert die Greylist, sobald eines davon zutrifft. Hier darf das aufgeführte Netzwerk alle Pfade erreichen, und jeder Client darf den exakten Pfad `/api/foo` erreichen. Andere Clients werden auf anderen Pfaden abgewiesen. Andere aktivierte Sicherheitsprüfungen gelten weiterhin für jede Anfrage. Verwenden Sie `^/api/foo(/|$)` für einen öffentlichen Teilbaum. Der Abgleich verwendet den normalisierten Pfad ohne Query-String. Es lassen sich weder unterschiedliche IP-Listen für unterschiedliche Pfade ausdrücken noch verlangen, dass sowohl eine IP als auch ein Pfad zutreffen.
+
+    | Client | Pfad | Ergebnis |
+    | --- | --- | --- |
+    | In `203.0.113.0/24` | `/api/foo` | Zugelassen |
+    | In `203.0.113.0/24` | jeder andere Pfad | Zugelassen |
+    | Außerhalb von `203.0.113.0/24` | `/api/foo` | Zugelassen |
+    | Außerhalb von `203.0.113.0/24` | jeder andere Pfad | Abgewiesen |
 
 ### Arbeiten mit lokalen Listendateien
 

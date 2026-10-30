@@ -1,0 +1,22 @@
+# SCHEDULER CHANGE CLAIM: a configuration write that lands while the once-jobs of the previous write
+# are still running must get its own job cycle (the scheduler claims a change before rendering it,
+# it does not acknowledge everything at the end of the cycle). The case needs two writes seconds
+# apart on a running scheduler, which the framework's restart-per-action model cannot express, so
+# the asserting code is `tests/core/scheduler_change_claim/test.sh`. It installs the `slowjob`
+# plugin from the same directory (a once-job that sleeps 25 s), starts a standalone API on the
+# stack's database because a `core` run has none, and drives both writes through it.
+#
+# Docker only: the script reaches the scheduler and the instance with `docker exec`.
+integrations:
+  - "Docker"
+
+config:
+  MULTISITE: "yes"
+  # The services under test are created through the API; the boot service stays out of the way.
+  SERVER_NAME: ""
+
+actions:
+  a_write_during_a_job_cycle_gets_its_own_cycle:
+    type: script
+    script: ["./tests/core/scheduler_change_claim/test.sh", "docker"]
+    result: "scheduler_change_claim: all checks passed"

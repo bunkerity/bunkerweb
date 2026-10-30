@@ -1,0 +1,233 @@
+--- /tmp/rediscluster.lua.orig
++++ src/deps/src/resty-redis-cluster/lib/resty/rediscluster.lua
+@@ -106,6 +106,13 @@
+ 
+ 
+ local function set_base_pool_name(conf)
++  -- BW edit: set_poolname rewrites connect_opts.pool on every connect; a second new() on the
++  -- same options table would otherwise read that string back as the user's base pool and
++  -- prefix it again. Compute the base once per options table.
++  if conf.base_pool then
++    return true
++  end
++
+   if not conf.connect_opts then
+     conf.connect_opts = {}
+   end
+@@ -143,6 +150,27 @@
+ end
+ 
+ 
++-- BW edit: remember, across workers, the nodes that just failed to connect. While a node is
++-- down every command on its slots, and every slot refresh that reaches it, would otherwise wait
++-- out the full connect timeout, once per worker, and one request makes several Redis calls.
++-- ponytail: fixed window, make it a setting if operators need to tune it.
++local NODE_DOWN_SECONDS = 5
++
++local function connect_node(self, redis_client, ip, port)
++    local node = "down:" .. tostring(ip) .. ":" .. tostring(port)
++    local dict = ngx.shared[self.config.dict_name or DEFAULT_SHARED_DICT_NAME]
++    if dict and dict:get(node) then
++        return nil, "node marked down"
++    end
++    set_poolname(ip, port, self.config)
++    local ok, err = redis_client:connect(ip, port, self.config.connect_opts)
++    if not ok and dict then
++        dict:set(node, true, NODE_DOWN_SECONDS)
++    end
++    return ok, err
++end
++
++
+ -- According to the Redis documentation, the hash tag is found only if the '{' and '}'
+ -- are exist in the key, or it should use the whole key to calculate the slot.
+ -- See: https://redis.io/docs/latest/operate/oss_and_stack/reference/cluster-spec/#hash-tags
+@@ -493,10 +521,12 @@
+         -- Kong currently does not configure 'max_connection_attempts'
+         for k = 1, config.max_connection_attempts or DEFAULT_MAX_CONNECTION_ATTEMPTS do
+             -- for each ip:port pair, we try at least once before check total timeout
+-            set_poolname(ip, port, self.config)
+-            ok, err = redis_client:connect(ip, port, self.config.connect_opts)
++            ok, err = connect_node(self, redis_client, ip, port)
+             if ok then break end
+-            ngx_log(NGX_ERR, "unable to connect ip:port ", ip, ":", port, ", attempt ", k, ", error: ", err)
++            -- BW edit: the failure that marked the node down was already logged.
++            if err ~= "node marked down" then
++                ngx_log(NGX_ERR, "unable to connect ip:port ", ip, ":", port, ", attempt ", k, ", error: ", err)
++            end
+             table_insert(errors, err)
+ 
+             -- Kong currently does not configure 'max_connection_timeout'
+@@ -619,7 +649,9 @@
+ 
+ function _M.refresh_slots(self)
+     local lock, err, elapsed
+-    lock, err = resty_lock:new(self.config.dict_name or DEFAULT_SHARED_DICT_NAME, { timeout = 5 })
++    -- BW edit: never queue behind another refresh of this worker. A request that fails during
++    -- an outage must not wait up to 5 s on the lock; the refresh already running covers it.
++    lock, err = resty_lock:new(self.config.dict_name or DEFAULT_SHARED_DICT_NAME, { timeout = 0 })
+     if not lock then
+         ngx_log(NGX_ERR, "failed to create lock in refreshing slot cache: ", err)
+         return nil, err
+@@ -629,6 +661,9 @@
+     local refresh_lock_key = (self.config.refresh_lock_key or DEFAULT_REFRESH_DICT_NAME) .. worker_id
+     elapsed, err = lock:lock(refresh_lock_key)
+     if not elapsed then
++        if err == "timeout" then
++            return nil, "slot refresh already in progress"
++        end
+         ngx_log(NGX_ERR, "failed to acquire the lock in refreshing slot cache: ", err)
+         return nil,  err
+     end
+@@ -648,14 +683,20 @@
+     end
+ 
+     local lock, elapsed, err, err_msg
+-    lock, err = resty_lock:new(self.config.dict_name or DEFAULT_SHARED_DICT_NAME, { timeout = self.config.lock_timeout })
++    -- BW edit: lua-resty-session's cluster backend never sets lock_timeout, so an unset
++    -- value defaulted to resty.lock's own 5s timeout and every waiter serialized behind it.
++    -- Default it to the connect timeout instead (resty.lock wants seconds, connect_timeout is ms).
++    local lock_timeout = self.config.lock_timeout or (self.config.connect_timeout or DEFAULT_CONNECTION_TIMEOUT) / 1000
++    lock, err = resty_lock:new(self.config.dict_name or DEFAULT_SHARED_DICT_NAME, { timeout = lock_timeout })
+     if not lock then
+         err_msg = "failed to create lock in initializing slot cache: " .. tostring(err)
+         ngx_log(NGX_ERR, err_msg)
+         return nil, err_msg
+     end
+ 
+-    elapsed, err = lock:lock("redis_cluster_slot_" .. self.config.name)
++    -- BW edit: slot_cache is per worker, so a lock shared by every worker only made each
++    -- worker wait for the others to fill their own caches after a reload.
++    elapsed, err = lock:lock("redis_cluster_slot_" .. self.config.name .. ngx.worker.pid())
+     if not elapsed then
+         err_msg = "failed to acquire the lock in initializing slot cache: " .. tostring(err)
+         ngx_log(NGX_ERR, err_msg)
+@@ -881,7 +922,7 @@
+         slots = nil -- luacheck: ignore
+ 
+         local ip, port, slave, err
+-        local ok, connerr
++        local ok, connerr, first_ip
+ 
+         local redis_client = redis:new()
+         redis_client:set_timeouts(config.connect_timeout or DEFAULT_CONNECTION_TIMEOUT,
+@@ -892,8 +933,7 @@
+             -- asking redirection should only happens at master nodes
+             ip, port, slave = target_ip, target_port, false
+ 
+-            set_poolname(ip, port, self.config)
+-            ok, connerr = redis_client:connect(ip, port, self.config.connect_opts)
++            ok, connerr = connect_node(self, redis_client, ip, port)
+             if ok then break end
+         else
+             -- Redis 7: try IP first and then hostname as IP does not suffer from stale DNS cache
+@@ -905,10 +945,12 @@
+                     self:refresh_slots()
+                     return nil, err
+                 end
++                first_ip = first_ip or ip
+ 
+-                set_poolname(ip, port, self.config)
+-                ok, connerr = redis_client:connect(ip, port, self.config.connect_opts)
+-                if ok then break end
++                ok, connerr = connect_node(self, redis_client, ip, port)
++                -- BW edit: the hostname names the same node, so after a timeout it would only
++                -- wait out a second connect timeout.
++                if ok or connerr == "timeout" or connerr == "node marked down" then break end
+             end
+         end
+ 
+@@ -1001,9 +1043,13 @@
+         else
+             --There might be node fail, we should also refresh slot cache
+             self:refresh_slots()
+-            if k == loop_counter then
+-                -- only return after allowing for `loop_counter` attempts
+-                return nil, "tried " .. loop_counter .. " times: " .. connerr
++            -- BW edit: retry only when the refresh moved the slot to another node. Retrying the
++            -- same dead node doubled the connect timeout of every command during an outage.
++            local fresh = slot_cache[self.config.name]
++            local owner = fresh and fresh[slot] and fresh[slot].serv_list[1]
++            fresh = nil -- luacheck: ignore
++            if k == loop_counter or target_ip or not owner or owner.ip == first_ip then
++                return nil, "tried " .. k .. " times: " .. connerr
+             end
+         end
+     end
+@@ -1191,8 +1237,7 @@
+             redis_client:set_timeouts(config.connect_timeout or DEFAULT_CONNECTION_TIMEOUT,
+                                       config.send_timeout or DEFAULT_SEND_TIMEOUT,
+                                       config.read_timeout or DEFAULT_READ_TIMEOUT)
+-            set_poolname(ip, port, self.config)
+-            ok, err = redis_client:connect(ip, port, self.config.connect_opts)
++            ok, err = connect_node(self, redis_client, ip, port)
+             if ok then break end
+             table_insert(errors, ip .. ":" .. port .. " " .. err)
+         end
+@@ -1260,26 +1305,58 @@
+ end
+ 
+ 
++-- BW edit: expose the cached primaries for keyless per-node commands such as DBSIZE.
++function _M.masters(self)
++    local list = master_nodes[self.config.name .. "master_list"]
++    if not list then
++        return nil, "no master list cached"
++    end
++    local copy = {}
++    for i, master in ipairs(list) do
++        copy[i] = { ip = master.ip, port = master.port }
++    end
++    return copy
++end
++
+ function _M.cancel_pipeline(self)
+     self._reqs = nil
+ end
+ 
+ 
++-- BW edit: a multi-key EVAL is valid in Redis Cluster when every key hashes to one slot
++-- (hash tags). Reject cross-slot key sets before sending instead of refusing all of them,
++-- and route by the first key while forwarding the full key list.
++local function eval_route_key(keys_num, ...)
++    if type(keys_num) ~= "number" or keys_num < 0 or keys_num % 1 ~= 0 then
++        return nil, "Cannot execute eval without a valid keys number"
++    end
++    if select("#", ...) < keys_num then
++        return nil, "Cannot execute eval: fewer keys than keys number"
++    end
++    if keys_num == 0 then
++        return "no_key"
++    end
++    local first = ...
++    local slot = redis_slot(tostring(first))
++    for i = 2, keys_num do
++        if redis_slot(tostring((select(i, ...)))) ~= slot then
++            return nil, "CROSSSLOT Keys in request don't hash to the same slot"
++        end
++    end
++    return first
++end
++_M.eval_route_key = eval_route_key
++
+ local function _do_eval_cmd(self, cmd, ...)
+ --[[
+ eval command usage:
+ eval(script, 1, key, arg1, arg2 ...)
+ eval(script, 0, arg1, arg2 ...)
+ ]]
+-    local args = {...}
+-    local keys_num = args[2]
+-    if type(keys_num) ~= "number" then
+-        return nil, "Cannot execute eval without keys number"
+-    end
+-    if keys_num > 1 then
+-        return nil, "Cannot execute eval with more than one keys for redis cluster"
++    local key, err = eval_route_key(select(2, ...), select(3, ...))
++    if not key then
++        return nil, err
+     end
+-    local key = args[3] or "no_key"
+     return _do_cmd(self, cmd, key, ...)
+ end
+ -- dynamic cmd

@@ -1,0 +1,244 @@
+table.dataTable tbody tr:hover > td {
+  background-color: rgba(var(--bs-primary-rgb), 0.1);
+}
+
+table.table.dataTable > tbody > tr.selected:hover > td {
+  background-color: rgba(var(--bs-primary-rgb), 0.16);
+}
+
+table.table.dataTable > tbody > tr.selected > * {
+  color: initial !important;
+}
+
+table.table.dataTable > tbody > tr.selected a.btn-outline-secondary {
+  color: var(--bs-secondary) !important;
+}
+
+table.table.dataTable > tbody > tr.selected a.btn-outline-primary {
+  color: var(--bs-primary) !important;
+}
+
+table.table.dataTable > tbody > tr.selected a.btn-outline-secondary:hover {
+  color: #fff !important;
+}
+
+table.table.dataTable > tbody > tr.selected a.btn-outline-primary:hover {
+  color: #fff !important;
+}
+
+table.table.dataTable > tbody > tr.selected a.btn-primary {
+  color: #fff !important;
+}
+
+.dark-style table.table.dataTable > tbody > tr.selected a.btn-primary {
+  color: #0b354a !important;
+}
+
+table.table.dataTable > tbody > tr.selected > * {
+  box-shadow: inset 0 0 0 9999px rgb(var(--bs-primary-rgb), 0.06) !important;
+  color: var(--bs-body-color) !important;
+}
+
+.dark-style table.table.dataTable > tbody > tr.selected > * {
+  color: #fff !important;
+}
+
+table.table.dataTable > tbody > tr.selected a {
+  color: var(--bs-link-color) !important;
+}
+
+.dark-style table.table.dataTable > tbody > tr.selected a {
+  color: #fff !important;
+}
+
+div.dtsp-panesContainer {
+  width: 100%;
+}
+
+table.dataTable input.dt-select-checkbox {
+  width: 14px;
+  height: 14px;
+  margin-bottom: 3.3px;
+}
+
+table.dataTable input.dt-select-checkbox:indeterminate:after {
+  top: 4px;
+  left: 4px;
+}
+
+table.dataTable input.dt-select-checkbox:checked:after {
+  margin-top: -5px;
+}
+
+:not(.btn-group):not(.input-group)
+  > .btn-group.dt-buttons
+  > .btn:not([class*="btn-outline-"]):first-child.disabled {
+  border-left-color: var(--bs-btn-disabled-border-color) !important;
+}
+
+.dtsp-searchPanes
+  :not(.btn-group):not(.input-group)
+  > .btn-group
+  > .btn:not([class*="btn-outline-"]):last-of-type {
+  border-left-color: rgb(206, 212, 218) !important;
+  border-right-color: rgb(206, 212, 218) !important;
+}
+
+.dtsp-nameCont,
+.dtsp-name {
+  display: flex !important;
+  align-items: center !important;
+}
+
+div.dtsp-panesContainer
+  div.dtsp-searchPane
+  div.dt-container
+  div.dtsp-nameCont
+  span.badge {
+  margin-top: 0;
+}
+
+.dt-scroll-body {
+  height: 150px !important;
+  max-height: 150px !important;
+}
+
+.dark-style div.dt-button-collection,
+.dark-style .dt-button-collection.dropdown-menu,
+[data-bs-theme="dark"] div.dt-button-collection,
+[data-bs-theme="dark"] .dt-button-collection.dropdown-menu {
+  background-color: #0c283a !important;
+  border-color: rgba(255, 255, 255, 0.18) !important;
+  color: #fff !important;
+}
+
+.dark-style div.dt-button-collection .dt-button,
+.dark-style div.dt-button-collection .dropdown-item,
+[data-bs-theme="dark"] div.dt-button-collection .dt-button,
+[data-bs-theme="dark"] div.dt-button-collection .dropdown-item {
+  color: #fff !important;
+}
+
+.dark-style
+  div.dt-button-collection
+  .dt-button:not(.disabled):not(:disabled):hover,
+.dark-style
+  div.dt-button-collection
+  .dropdown-item:not(.disabled):not(:disabled):hover,
+[data-bs-theme="dark"]
+  div.dt-button-collection
+  .dt-button:not(.disabled):not(:disabled):hover,
+[data-bs-theme="dark"]
+  div.dt-button-collection
+  .dropdown-item:not(.disabled):not(:disabled):hover {
+  background-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+.dark-style div.dt-button-collection .dt-button.disabled,
+.dark-style div.dt-button-collection .dt-button:disabled,
+.dark-style div.dt-button-collection .dropdown-item.disabled,
+[data-bs-theme="dark"] div.dt-button-collection .dt-button.disabled,
+[data-bs-theme="dark"] div.dt-button-collection .dt-button:disabled,
+[data-bs-theme="dark"] div.dt-button-collection .dropdown-item.disabled {
+  color: rgba(255, 255, 255, 0.45) !important;
+}
+
+div.dt-button-collection .dt-button.text-danger:not(.disabled):not(:disabled),
+div.dt-button-collection
+  .dt-button.text-danger:not(.disabled):not(:disabled)
+  > a.dropdown-item,
+div.dt-button-collection
+  .dropdown-item.text-danger:not(.disabled):not(:disabled) {
+  color: var(--bs-danger) !important;
+}
+
+div.dt-button-collection
+  .dt-button.text-danger:not(.disabled):not(:disabled)
+  span,
+div.dt-button-collection
+  .dt-button.text-danger:not(.disabled):not(:disabled)
+  > a.dropdown-item
+  span,
+div.dt-button-collection
+  .dropdown-item.text-danger:not(.disabled):not(:disabled)
+  span,
+div.dt-button-collection .dt-button.text-danger:not(.disabled):not(:disabled) i,
+div.dt-button-collection
+  .dt-button.text-danger:not(.disabled):not(:disabled)
+  > a.dropdown-item
+  i,
+div.dt-button-collection
+  .dropdown-item.text-danger:not(.disabled):not(:disabled)
+  i {
+  color: inherit !important;
+}
+
+div.dt-button-background {
+  background: rgba(0, 0, 0, 0.45) !important;
+}
+
+.dark-style .table th {
+  color: #fff;
+}
+
+.dark-style .table > :not(caption) > * > * {
+  color: #fff;
+}
+
+.dark-style div.dts div.dt-scroll-body table,
+.dark-style div.dts div.dataTables_scrollBody table {
+  background-color: #0c283a;
+}
+
+html.dark-style div.dts div.dt-scroll-body table,
+html.dark-style div.dts div.dataTables_scrollBody table {
+  background-color: #0c283a;
+}
+
+.dark-style .pagination {
+  --bs-pagination-color: #fff;
+  --bs-pagination-bg: rgba(34, 48, 62, 0.06);
+  --bs-pagination-border-color: #ced1d5;
+  --bs-pagination-hover-color: #fff;
+  --bs-pagination-hover-bg: rgba(145, 155, 165, 0.06);
+  --bs-pagination-hover-border-color: #ced1d5;
+  --bs-pagination-hover-color: #fff;
+  --bs-pagination-hover-bg: rgba(145, 155, 165, 0.06);
+  --bs-pagination-active-color: #fff;
+  --bs-pagination-active-bg: #696cff;
+  --bs-pagination-active-border-color: #696cff;
+  --bs-pagination-disabled-color: #384551;
+  --bs-pagination-disabled-bg: rgba(34, 48, 62, 0.06);
+  --bs-pagination-disabled-border-color: #ced1d5;
+}
+
+.dark-style thead,
+.dark-style tbody,
+.dark-style tfoot,
+.dark-style tr,
+.dark-style td,
+.dark-style th {
+  border-color: #384551;
+}
+
+.dark-style div.dt-processing > div:last-child > div {
+  background-color: #fff;
+}
+
+/* DataTables toolbars: the start group (actions) and the end group (search,
+   filters) wrap as whole units. When both do not fit, the end group drops to
+   its own row aligned with the first one, instead of floating right under an
+   action group that split itself. Independent of label length. */
+
+.dt-container > .row {
+  row-gap: 0.5rem;
+}
+
+.dt-container > .row > .dt-layout-start + .dt-layout-end {
+  margin-left: 0 !important;
+}
+
+.dt-container > .row > .dt-layout-start .dt-buttons,
+.dt-container > .row > .dt-layout-end .dt-buttons {
+  row-gap: 0.5rem;
+}

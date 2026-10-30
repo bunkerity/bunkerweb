@@ -1,7 +1,5 @@
 # Random seed file created by test scripts and sample programs
 seedfile
-# MBEDTLS_PSA_INJECT_ENTROPY seed file created by the test framework
-00000000ffffff52.psa_its
 # Log files created by all.sh to reduce the logs in case a component runs
 # successfully
 quiet-make.*

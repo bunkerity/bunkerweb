@@ -65,3 +65,9 @@
     ```yaml
     INTERCEPTED_ERROR_CODES: "404 500"
     ```
+
+### 保留上游 API 的错误响应体
+
+默认情况下，BunkerWeb 会用自己的错误页面替换上游返回的 400 响应，这可能会破坏 JSON API 或 OIDC 客户端。要为某个服务放行上游错误，可以从该服务的列表中移除相应状态码，例如 `app.example.com_INTERCEPTED_ERROR_CODES=401 403 404 405 413 429 500 501 502 503 504`（保留您仍希望拦截的状态码），或者设置 `app.example.com_REVERSE_PROXY_INTERCEPT_ERRORS=no` 以放行所有上游错误。由 BunkerWeb 自身生成的错误（例如 WAF 拒绝）仍由 BunkerWeb 处理。
+
+若只想在某个 location 中保留上游错误，请创建一个内容为 `proxy_intercept_errors off;` 的文件，并将其列入该 location 的 `REVERSE_PROXY_INCLUDES` 设置中（例如 `app.example.com_REVERSE_PROXY_INCLUDES=/opt/keep-errors.conf`，数字后缀与该 location 的 `REVERSE_PROXY_HOST` 相同）。该文件必须存在于 BunkerWeb 容器内。该服务的其他 location 仍会拦截错误。

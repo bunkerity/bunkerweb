@@ -108,7 +108,7 @@ static ngx_http_headers_more_set_header_t ngx_http_headers_more_set_handlers[]
 
 ngx_int_t
 ngx_http_headers_more_exec_cmd(ngx_http_request_t *r,
-    ngx_http_headers_more_cmd_t *cmd)
+    ngx_http_headers_more_cmd_t *cmd, ngx_str_t *initial_charset)
 {
     ngx_str_t                                   value;
     ngx_http_headers_more_header_val_t         *h;
@@ -138,6 +138,11 @@ ngx_http_headers_more_exec_cmd(ngx_http_request_t *r,
         if (value.len) {
             value.len--;  /* remove the trailing '\0' added by
                              ngx_http_headers_more_parse_header */
+        }
+
+        if (h[i].handler == ngx_http_set_content_type_header) {
+            /* Preserve the source charset used by the charset filter. */
+            r->headers_out.charset = *initial_charset;
         }
 
         if (h[i].handler(r, &h[i], &value) != NGX_OK) {
@@ -275,6 +280,9 @@ append:
 
     h->key = hv->key;
     h->value = *value;
+#if defined(nginx_version) && nginx_version >= 1023000
+    h->next = NULL;
+#endif
 
     h->lowcase_key = ngx_pnalloc(r->pool, h->key.len);
     if (h->lowcase_key == NULL) {
@@ -450,13 +458,15 @@ ngx_http_set_content_type_header(ngx_http_request_t *r,
 
         last = p;
 
-        while (*++p == ' ') { /* void */ }
+        while (++p < end && *p == ' ') { /* void */ }
 
         if (p == end) {
             break;
         }
 
-        if (ngx_strncasecmp(p, (u_char *) "charset=", 8) != 0) {
+        if (end - p < 8
+            || ngx_strncasecmp(p, (u_char *) "charset=", 8) != 0)
+        {
             continue;
         }
 
@@ -464,7 +474,7 @@ ngx_http_set_content_type_header(ngx_http_request_t *r,
 
         r->headers_out.content_type_len = last - value->data;
 
-        if (*p == '"') {
+        if (p < end && *p == '"') {
             p++;
         }
 
@@ -576,7 +586,7 @@ ngx_http_headers_more_check_type(ngx_http_request_t *r, ngx_array_t *types)
         dd("...comparing with type [%.*s]", (int) t[i].len, t[i].data);
 
         if (r->headers_out.content_type_len == t[i].len
-            && ngx_strncmp(r->headers_out.content_type.data,
+            && ngx_strncasecmp(r->headers_out.content_type.data,
                            t[i].data, t[i].len) == 0)
         {
             return 1;
@@ -621,7 +631,7 @@ ngx_http_headers_more_parse_directive(ngx_conf_t *cf, ngx_command_t *ngx_cmd,
     ngx_str_t                          *cmd_name;
     ngx_int_t                           rc;
     ngx_flag_t                          append = 0;
-    ngx_flag_t                          is_builtin_header = 0;
+    ngx_flag_t                          is_builtin_header;
     ngx_http_headers_more_header_val_t *h;
     ngx_http_headers_more_set_header_t *handlers;
 
@@ -768,6 +778,7 @@ ngx_http_headers_more_parse_directive(ngx_conf_t *cf, ngx_command_t *ngx_cmd,
         h = cmd->headers->elts;
         for (i = 0; i < cmd->headers->nelts; i++) {
             h[i].append = 0;
+            is_builtin_header = 0;
 
             handlers = ngx_http_headers_more_set_handlers;
 

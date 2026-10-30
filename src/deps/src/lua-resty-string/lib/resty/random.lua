@@ -9,7 +9,7 @@ local C = ffi.C
 --local error = error
 
 
-local _M = { _VERSION = '0.16' }
+local _M = { _VERSION = '0.17' }
 
 
 ffi.cdef[[
@@ -24,8 +24,8 @@ function _M.bytes(len, strong)
     end
     local buf = ffi_new("char[?]", len)
     if strong then
-        if C.RAND_bytes(buf, len) == 0 then
-            return nil
+        if C.RAND_bytes(buf, len) ~= 1 then
+            return nil, "RAND_bytes failed"
         end
     else
         C.RAND_pseudo_bytes(buf,len)

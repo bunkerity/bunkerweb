@@ -2,6 +2,8 @@
 
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from contextlib import suppress
+from ctypes import CDLL, c_char_p, c_int, c_long, c_void_p
+from ctypes.util import find_library
 from functools import lru_cache
 from importlib import import_module
 from glob import glob
@@ -12,6 +14,8 @@ from pathlib import Path
 from random import choice
 from ssl import PROTOCOL_TLS_SERVER, SSLContext
 from string import ascii_letters, digits
+from re import search as re_search, escape as re_escape
+from subprocess import run
 from sys import path as sys_path
 from time import perf_counter
 from typing import Any, Dict, List, Optional, Type
@@ -26,22 +30,98 @@ from logger import getLogger  # type: ignore
 from jinja2 import Environment, FileSystemBytecodeCache, FileSystemLoader, Undefined
 
 logger = getLogger("TEMPLATOR")
+_ssl_ecdh_curve_resolution_logged = False
 
 
-@lru_cache(maxsize=32)
-def _supports_tls_group(name: str) -> bool:
+@lru_cache(maxsize=1)
+def _set1_groups_list_probe():
+    """Return a callable(group)->bool using the SAME call nginx makes for ssl_ecdh_curve
+    (SSL_CTX_set1_groups_list), or None if libssl can't be bound. Faithful oracle:
+    ssl.set_ecdh_curve() uses a different name table and ignores provider/FIPS policy, so it
+    can pass a group nginx then refuses; set1_groups_list mirrors the active provider exactly.
+    """
     try:
+        SSL_CTRL_SET_GROUPS_LIST = 92  # == SSL_CTRL_SET_CURVES_LIST
+
+        # find_library() returns None on musl/Alpine and slim images often lack the unversioned
+        # libssl.so, so try the versioned sonames too.
+        lib = None
+        for _cand in (find_library("ssl"), "libssl.so.3", "libssl.so", "libssl.so.1.1"):
+            if not _cand:
+                continue
+            try:
+                lib = CDLL(_cand)
+                break
+            except OSError:
+                continue
+        if lib is None:
+            logger.warning(
+                "ssl_ecdh_curve: could not bind libssl for the faithful set1_groups_list probe; "
+                "falling back to the looser ssl.set_ecdh_curve detection (FIPS-blind)"
+            )
+            return None
+        lib.TLS_server_method.restype = c_void_p
+        lib.SSL_CTX_new.restype = c_void_p
+        lib.SSL_CTX_new.argtypes = [c_void_p]
+        lib.SSL_CTX_ctrl.restype = c_long
+        lib.SSL_CTX_ctrl.argtypes = [c_void_p, c_int, c_long, c_char_p]
+        lib.SSL_CTX_free.argtypes = [c_void_p]
+
+        def _probe(group: str) -> bool:
+            try:
+                method = lib.TLS_server_method()
+                ctx = lib.SSL_CTX_new(method) if method else None
+                if not ctx:
+                    return False
+                try:
+                    return lib.SSL_CTX_ctrl(ctx, SSL_CTRL_SET_GROUPS_LIST, 0, group.encode("ascii")) == 1
+                finally:
+                    lib.SSL_CTX_free(ctx)
+            except BaseException:
+                return False
+
+        # Smoke test: a real group must pass and a bogus one fail, else the binding is wrong.
+        if not _probe("prime256v1") or _probe("bunkerweb-not-a-real-group"):
+            logger.warning(
+                "ssl_ecdh_curve: set1_groups_list smoke test failed (unexpected libssl/ctrl); "
+                "falling back to the looser ssl.set_ecdh_curve detection (FIPS-blind)"
+            )
+            return None
+        return _probe
+    except BaseException:
+        logger.warning("ssl_ecdh_curve: faithful set1_groups_list probe unavailable; using ssl.set_ecdh_curve (FIPS-blind)")
+        return None
+
+
+@lru_cache(maxsize=64)
+def _supports_tls_group(name: str) -> bool:
+    probe = _set1_groups_list_probe()
+    if probe is not None:
+        return probe(name)
+
+    # Degraded fallback (libssl unbindable): looser, FIPS-blind, but better than nothing.
+    with suppress(BaseException):
         ctx = SSLContext(PROTOCOL_TLS_SERVER)
         ctx.set_ecdh_curve(name)
         return True
+
+    # set_ecdh_curve() misses PQC hybrids (e.g. X25519MLKEM768); try the CLI listing last.
+    try:
+        result = run(["openssl", "list", "-kem-algorithms"], capture_output=True, text=True, timeout=5)
+        if result.returncode == 0 and re_search(r"\b" + re_escape(name) + r"\b", result.stdout):
+            return True
     except BaseException:
-        return False
+        logger.debug(f"OpenSSL CLI fallback failed for TLS group '{name}'")
+
+    return False
 
 
 @lru_cache(maxsize=1)
 def _best_ssl_ecdh_curve() -> Optional[str]:
-    preferred = ("X25519MLKEM768", "X25519", "prime256v1", "secp384r1")
-    aliases = {"prime256v1": ("P-256",), "secp384r1": ("P-384",)}
+    # PQC-hybrid first, then classical CFRG/NIST. Keep every probed-supported group, so a
+    # FIPS OpenSSL (rejects X25519/X448) lands on its NIST subset automatically.
+    preferred = ("X25519MLKEM768", "X25519", "prime256v1", "secp384r1", "secp521r1", "X448")
+    aliases = {"prime256v1": ("P-256",), "secp384r1": ("P-384",), "secp521r1": ("P-521",)}
 
     selected = []
     for name in preferred:
@@ -59,14 +139,22 @@ def _best_ssl_ecdh_curve() -> Optional[str]:
     return ":".join(selected)
 
 
-def resolve_ssl_ecdh_curve(value: str, fallback: str = "X25519:prime256v1:secp384r1") -> str:
+def resolve_ssl_ecdh_curve(value: str, fallback: str = "prime256v1:secp384r1") -> str:
+    global _ssl_ecdh_curve_resolution_logged
+
     if value and value != "auto":
         return value
 
     best_curve = _best_ssl_ecdh_curve()
     if best_curve:
+        if not _ssl_ecdh_curve_resolution_logged:
+            logger.debug(f"Resolved ssl_ecdh_curve (auto-detect): {best_curve}")
+            _ssl_ecdh_curve_resolution_logged = True
         return best_curve
 
+    if not _ssl_ecdh_curve_resolution_logged:
+        logger.warning(f"Resolved ssl_ecdh_curve (fallback): {fallback}")
+        _ssl_ecdh_curve_resolution_logged = True
     return fallback
 
 
@@ -344,24 +432,39 @@ class Templator:
 
         self._categorized_templates = self._categorize_templates()
 
+        self._stream_reuseport_ports = self._stream_reuseport_owners()
+
         self._base_template_vars = {
             "is_custom_conf": Templator.is_custom_conf,
             "has_variable": Templator.has_variable,
+            "has_service_with": Templator.has_service_with,
             "random": Templator.random,
             "read_lines": Templator.read_lines,
             "import": import_module,
             "resolve_ssl_ecdh_curve": resolve_ssl_ecdh_curve,
+            "normalize_memory_size": Templator._normalize_memory_size,
         }
 
         self._server_env_cache: Dict[str, Environment] = {}
 
-    def render(self) -> None:
-        """Render the templates based on the provided configuration."""
+    def render(self) -> List[str]:
+        """Render the templates based on the provided configuration.
+
+        Returns:
+            List[str]: What failed to render. An empty list means the output is complete.
+        """
+        global _ssl_ecdh_curve_resolution_logged
+
         _ensure_fork_start_method()
-        self._render_global()
-        servers = [self._config.get("SERVER_NAME", "www.example.com").strip()]
+        _ssl_ecdh_curve_resolution_logged = False
+        if self._uses_auto_ssl_ecdh_curve():
+            resolve_ssl_ecdh_curve("auto")
+        failures = self._render_global()
+        server_name = self._config.get("SERVER_NAME", "www.example.com").strip()
+        # an empty SERVER_NAME renders no server at all, like multisite already does, instead of an empty server_name directive
+        servers = [server_name] if server_name else []
         if self._config.get("MULTISITE", "no") == "yes":
-            servers = self._config.get("SERVER_NAME", "www.example.com").strip().split()
+            servers = server_name.split()
 
         effective_cpus = effective_cpu_count()
         if len(servers) >= effective_cpus * 2:
@@ -382,12 +485,14 @@ class Templator:
             completed_servers = 0
             show_progress = len(servers) >= 100
             for future in as_completed(future_to_batch):
-                future.result()  # Raise any exceptions
+                failures.extend(future.result())
                 completed_servers += future_to_batch[future]
                 if show_progress:
                     progress_pct = (completed_servers / len(servers)) * 100
                     elapsed = perf_counter() - server_start
                     logger.info(f"Progress: {completed_servers}/{len(servers)} servers ({progress_pct:.1f}%) in {elapsed:.1f}s")
+
+        return failures
 
     def __getstate__(self) -> Dict[str, Any]:
         state = self.__dict__.copy()
@@ -413,6 +518,41 @@ class Templator:
                 if base in self._global_templates:
                     self._template_basename_map[template] = base
 
+    @staticmethod
+    def _is_auto_ssl_ecdh_curve(value: Any) -> bool:
+        return not value or value == "auto"
+
+    def _uses_auto_ssl_ecdh_curve(self) -> bool:
+        global_value = self._config.get("SSL_ECDH_CURVE", self._default_config.get("SSL_ECDH_CURVE"))
+        if Templator._is_auto_ssl_ecdh_curve(global_value):
+            return True
+
+        if self._config.get("MULTISITE", "no") != "yes":
+            return False
+
+        global_default = self._global_only_config.get("SSL_ECDH_CURVE", self._global_only_default_config.get("SSL_ECDH_CURVE"))
+        for server_config in self._server_specific_config.values():
+            if Templator._is_auto_ssl_ecdh_curve(server_config.get("SSL_ECDH_CURVE", global_default)):
+                return True
+
+        return False
+
+    @staticmethod
+    def _normalize_memory_size(value: str) -> str:
+        """Convert g/G suffix to megabytes for NGINX lua_shared_dict compatibility.
+
+        NGINX's ngx_parse_size() only supports k/m suffixes. The g/G suffix is only
+        supported by ngx_parse_offset() (used for file/body sizes, not memory allocations).
+
+        Uses ``float()`` so the converter still works if the upstream regex is ever
+        relaxed to accept decimal values (e.g. ``1.5g``); the result is rounded down
+        to an integer megabyte count because NGINX's ``m`` suffix requires an integer.
+        """
+        value = value.strip()
+        if value.endswith(("g", "G")):
+            return f"{int(float(value[:-1]) * 1024)}m"
+        return value
+
     def _load_jinja_env(self) -> Environment:
         """Load the Jinja2 environment with the appropriate search paths.
 
@@ -421,7 +561,7 @@ class Templator:
         """
         searchpath = [self._templates]
         searchpath.extend(p.as_posix() for p in (*self._core.glob("*/confs"), *self._plugins.glob("*/confs"), *self._pro_plugins.glob("*/confs")) if p.is_dir())
-        return Environment(
+        return Environment(  # nosec B701 - rendering NGINX config files (not HTML); HTML autoescape would corrupt valid NGINX syntax.
             loader=FileSystemLoader(searchpath=searchpath),
             lstrip_blocks=True,
             trim_blocks=True,
@@ -490,15 +630,25 @@ class Templator:
         self._template_path_cache[cache_key] = result
         return result
 
-    def _write_config(self) -> None:
-        """Write the configuration to a variables.env file."""
+    def _write_config(self) -> bool:
+        """Write the configuration to a variables.env file. Returns whether it was written."""
         real_path = self._output / "variables.env"
+        tmp_path = real_path.with_name(".variables.env.tmp")
         try:
             real_path.parent.mkdir(parents=True, exist_ok=True)
-            config_lines = [f"{k}={v}\n" for k, v in self._full_config.items()]
-            real_path.write_text("".join(config_lines))
+            # Sorted so two runs over the same settings produce byte-identical output.
+            # Instances skip a push whose archive matches the one already applied, and
+            # dict insertion order here varies between runs, which alone was enough to
+            # make every /confs push look like a change.
+            config_lines = [f"{k}={v}\n" for k, v in sorted(self._full_config.items())]
+            tmp_path.write_text("".join(config_lines))
+            tmp_path.replace(real_path)
         except IOError as e:
+            with suppress(OSError):
+                tmp_path.unlink()
             logger.error(f"Error writing configuration to {real_path}: {e}")
+            return False
+        return True
 
     def _get_server_config(self, server: str, global_only_config: Dict[str, Any], server_specific_config: Dict[str, Any]) -> Dict[str, Any]:
         """Get the configuration for a specific server.
@@ -522,11 +672,40 @@ class Templator:
 
         return filtered_config
 
-    def _render_global(self) -> None:
-        """Render global templates."""
+    def _stream_reuseport_owners(self) -> Dict[str, set]:
+        """Elect one loaded stream block per socket; unloaded blocks keep their output."""
+        server_name = self._config.get("SERVER_NAME", "").strip()
+        if self._config.get("MULTISITE", "no") == "yes":
+            services = {
+                server: self._get_server_config(server, self._global_only_full_config, self._server_specific_full_config.get(server, {}))
+                for server in server_name.split()
+            }
+        else:
+            services = {server_name: self._full_config} if server_name else {}
+
+        owners = {}
+        claimed = set()
+        for server, config in services.items():
+            tokens = {
+                f"{proto}:{port}"
+                for key, port in config.items()
+                if key.startswith("LISTEN_STREAM_PORT") and not key.startswith("LISTEN_STREAM_PORT_SSL") and port
+                for proto, setting, default in (("tcp", "USE_TCP", "yes"), ("udp", "USE_UDP", "no"))
+                if config.get(setting, default) == "yes"
+            }
+            if config.get("LISTEN_STREAM", "yes") != "yes":
+                tokens = set()
+            owners[server] = tokens
+            if config.get("SERVER_TYPE", "http") == "stream":
+                owners[server] = tokens - claimed
+                claimed.update(tokens)
+        return owners
+
+    def _render_global(self) -> List[str]:
+        """Render global templates. Returns what failed."""
         global_start = perf_counter()
 
-        self._write_config()
+        failures = [] if self._write_config() else ["variables.env"]
         templates = self._find_templates(
             [
                 "global",
@@ -541,20 +720,24 @@ class Templator:
         template_vars.update(self._config)
 
         for template in templates:
-            self._render_template(template, template_vars)
+            if not self._render_template(template, template_vars):
+                failures.append(template)
         logger.debug(f"Global rendering completed in {perf_counter() - global_start:.3f}s")
+        return failures
 
-    def _render_server_batch(self, servers: List[str]) -> None:
-        """Render templates for a batch of servers.
+    def _render_server_batch(self, servers: List[str]) -> List[str]:
+        """Render templates for a batch of servers. Returns what failed.
 
         Args:
             servers (List[str]): List of server names to render.
         """
+        failures = []
         for server in servers:
-            self._render_server(server)
+            failures.extend(self._render_server(server))
+        return failures
 
-    def _render_server(self, server: str) -> None:
-        """Render templates for a specific server.
+    def _render_server(self, server: str) -> List[str]:
+        """Render templates for a specific server. Returns what failed.
 
         Args:
             server (str): Server name.
@@ -585,10 +768,15 @@ class Templator:
         template_vars = self._base_template_vars.copy()
         template_vars["all"] = full_config
         template_vars.update(config)
+        # Derived ownership cannot be shadowed by a setting.
+        template_vars["STREAM_REUSEPORT_PORTS"] = self._stream_reuseport_ports.get(server, set())
 
+        failures = []
         for template in templates:
             name = basename(template) if any(template.endswith(root_conf) for root_conf in self._global_templates) else None
-            self._render_template(template, template_vars, subpath=subpath, name=name, custom_undefined=server_custom_undefined)
+            if not self._render_template(template, template_vars, subpath=subpath, name=name, custom_undefined=server_custom_undefined):
+                failures.append(join(server, template))
+        return failures
 
     def _render_template(
         self,
@@ -597,8 +785,8 @@ class Templator:
         subpath: Optional[str] = None,
         name: Optional[str] = None,
         custom_undefined: Optional[Type[Undefined]] = None,
-    ) -> None:
-        """Render a single template.
+    ) -> bool:
+        """Render a single template. Returns whether it was rendered.
 
         Args:
             template (str): Template name.
@@ -611,15 +799,17 @@ class Templator:
             if custom_undefined:
                 cache_key = "server_env"
                 if cache_key not in self._server_env_cache:
-                    self._server_env_cache[cache_key] = Environment(
-                        loader=self._jinja_env.loader,
-                        lstrip_blocks=True,
-                        trim_blocks=True,
-                        keep_trailing_newline=True,
-                        bytecode_cache=self._jinja_env.bytecode_cache,
-                        auto_reload=False,
-                        cache_size=-1,
-                        undefined=custom_undefined,
+                    self._server_env_cache[cache_key] = (
+                        Environment(  # nosec B701 - rendering NGINX config files (not HTML); HTML autoescape would corrupt valid NGINX syntax.
+                            loader=self._jinja_env.loader,
+                            lstrip_blocks=True,
+                            trim_blocks=True,
+                            keep_trailing_newline=True,
+                            bytecode_cache=self._jinja_env.bytecode_cache,
+                            auto_reload=False,
+                            cache_size=-1,
+                            undefined=custom_undefined,
+                        )
                     )
                 jinja_template = self._server_env_cache[cache_key].get_template(template)
             else:
@@ -631,6 +821,8 @@ class Templator:
             real_path.write_text(rendered_content)
         except Exception as e:
             logger.error(f"Error rendering template {template}: {e}")
+            return False
+        return True
 
     @staticmethod
     def is_custom_conf(path: str) -> bool:
@@ -664,6 +856,30 @@ class Templator:
                 if all_vars.get(f"{server_name}_{variable}") == value:
                     return True
         return False
+
+    @staticmethod
+    def has_service_with(all_vars: Dict[str, Any], conditions: Dict[str, Any]) -> bool:
+        """Check if at least one service matches every condition at once.
+
+        `has_variable` answers each setting independently over the whole fleet, so ANDing several of
+        its calls mixes services: one service can satisfy a condition another one fails. A fleet-wide
+        template that needs the conditions to hold together has to evaluate them service by service.
+
+        Args:
+            all_vars (Dict[str, Any]): Configuration variables.
+            conditions (Dict[str, Any]): Setting names mapped to the value each one must have.
+
+        Returns:
+            bool: True if one service, or the global config in single-site mode, matches them all.
+                A multisite fleet with no service yet yields False: the global values never stand in
+                for a missing service here, unlike `has_variable`.
+        """
+        if all_vars.get("MULTISITE", "no") != "yes":
+            return all(all_vars.get(setting) == value for setting, value in conditions.items())
+        return any(
+            all(all_vars.get(f"{server_name}_{setting}", all_vars.get(setting)) == value for setting, value in conditions.items())
+            for server_name in all_vars.get("SERVER_NAME", "").strip().split()
+        )
 
     @staticmethod
     def random(nb: int, characters: str = ascii_letters + digits) -> str:

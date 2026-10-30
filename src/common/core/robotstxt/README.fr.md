@@ -4,23 +4,27 @@ Comment ça marche :
 
 Activé, BunkerWeb génère dynamiquement `/robots.txt` à la racine. Les règles sont agrégées dans l’ordre :
 
-1. DarkVisitors (si `ROBOTSTXT_DARKVISITORS_TOKEN`) : bloque des bots/IA connus selon `ROBOTSTXT_DARKVISITORS_AGENT_TYPES` et `ROBOTSTXT_DARKVISITORS_DISALLOW`.
+1. [DarkVisitors](https://darkvisitors.com/) (si `ROBOTSTXT_DARKVISITORS_TOKEN`) : bloque des bots/IA connus selon les types d’agents et chemins interdits configurés.
 2. Listes communautaires (`ROBOTSTXT_COMMUNITY_LISTS`).
 3. URLs personnalisées (`ROBOTSTXT_URLS`).
-4. Règles manuelles (`ROBOTSTXT_RULE[_N]`).
+4. Règles manuelles définies via les variables `ROBOTSTXT_RULE`.
 
 Ensuite, les règles à ignorer (`ROBOTSTXT_IGNORE_RULE[_N]`, PCRE) sont filtrées. S’il ne reste rien, un `User-agent: *` + `Disallow: /` par défaut est appliqué. Des sitemaps (`ROBOTSTXT_SITEMAP[_N]`) peuvent être ajoutés.
 
-### DarkVisitors
+### Contournement dynamique des bots avec l’API DarkVisitors
 
-[DarkVisitors](https://darkvisitors.com/) fournit un `robots.txt` dynamique pour bloquer des bots/IA. Inscrivez‑vous et obtenez un bearer token.
+[DarkVisitors](https://darkvisitors.com/) fournit un `robots.txt` dynamique pour bloquer des bots/IA. Inscrivez‑vous sur [darkvisitors.com](https://darkvisitors.com/docs/robots-txt) et obtenez un bearer token.
 
 ### Comment l’utiliser
 
-1. Activer : `USE_ROBOTSTXT: yes`.
-2. Règles : via DarkVisitors, listes communautaires, URLs ou variables `ROBOTSTXT_RULE`.
-3. Filtrer (optionnel) : `ROBOTSTXT_IGNORE_RULE_N`.
-4. Sitemaps (optionnel) : `ROBOTSTXT_SITEMAP_N`.
+1. Activer : mettez le paramètre `USE_ROBOTSTXT` à `yes`.
+2. Règles : choisissez une ou plusieurs méthodes pour définir vos règles `robots.txt` :
+    - **API DarkVisitors :** fournissez `ROBOTSTXT_DARKVISITORS_TOKEN` et, si nécessaire, `ROBOTSTXT_DARKVISITORS_AGENT_TYPES` et `ROBOTSTXT_DARKVISITORS_DISALLOW`.
+    - **Listes communautaires :** indiquez `ROBOTSTXT_COMMUNITY_LISTS` (IDs séparés par des espaces).
+    - **URLs personnalisées :** fournissez `ROBOTSTXT_URLS` (URLs séparées par des espaces).
+    - **Règles manuelles :** utilisez `ROBOTSTXT_RULE` pour une règle individuelle (plusieurs règles peuvent être précisées avec `ROBOTSTXT_RULE_N`).
+3. Filtrer (optionnel) : utilisez `ROBOTSTXT_IGNORE_RULE` (ou `ROBOTSTXT_IGNORE_RULE_N`) pour ignorer des règles selon un motif PCRE.
+4. Sitemaps (optionnel) : utilisez `ROBOTSTXT_SITEMAP` (ou `ROBOTSTXT_SITEMAP_N`) pour ajouter des URLs de sitemap.
 5. Accès : `http(s)://votre-domaine/robots.txt`.
 
 ### Paramètres

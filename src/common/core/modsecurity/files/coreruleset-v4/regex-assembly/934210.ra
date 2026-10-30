@@ -1,0 +1,25 @@
+##! Please refer to the documentation at
+##! https://coreruleset.org/docs/development/regex_assembly/.
+
+##! Detects ORM lookup-operator injection (ref Y4H-260326): request
+##! parameter names ending in a Django/ORM lookup operator preceded by
+##! the `__` separator, e.g. `username__startswith` or nested relationship
+##! traversal like `created_by__departments__user__username__startswith`.
+##!
+##! Two targets are covered with one pattern:
+##!   - ARGS_NAMES: the operator ends the parameter name        -> `__op$`
+##!   - REQUEST_BODY: a JSON key ends in the operator and is     -> `__op"\s*:`
+##!     followed by a colon (covers JSON sent with a non-JSON
+##!     Content-Type that ModSecurity does not parse into ARGS).
+##! The colon anchor distinguishes a JSON key from a value, so an operator
+##! string appearing in a value does not match.
+##!
+##! NOTE: these are also valid django-filter / DRF query patterns, hence
+##! this is a PL3 rule (expect tuning on apps that expose ORM-style filters).
+
+##!^ __
+##!$ (?:$|"\s*:)
+
+##!> assemble
+  ##!> include orm-lookup-operators
+##!<

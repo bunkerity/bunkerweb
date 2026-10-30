@@ -1,0 +1,316 @@
+#!/bin/bash
+
+# shellcheck disable=SC1091
+source tests/scripts/utils.sh
+
+integration="${1^}"
+type="${2:-}"
+release="${3:-}"
+category="${4:-}"
+
+if [ -z "$release" ] ; then
+    log "RUN" "❌" "Please provide a release as 3rd argument"
+    exit 1
+elif [ -z "$category" ] ; then
+    log "RUN" "❌" "Please provide a category as 4th argument"
+    exit 1
+fi
+
+if redis_cli ping | grep -q "PONG" ; then
+    log "RUN" "ℹ️ " "💽 Redis server is healthy ✅"
+else
+    log "RUN" "❌" "💽 Redis server is not healthy"
+    exit 1
+fi
+
+redis_cli set end 0 > /dev/null
+# shellcheck disable=SC2181
+if [ $? -ne 0 ] ; then
+    log "RUN" "❌" "💽 Failed to set end flag in redis server"
+    exit 1
+fi
+
+redis_cli set full_clean 0 > /dev/null
+# shellcheck disable=SC2181
+if [ $? -ne 0 ] ; then
+    log "RUN" "❌" "💽 Failed to set full_clean flag in redis server"
+    exit 1
+fi
+
+redis_cli set restart_stack 1 > /dev/null
+# shellcheck disable=SC2181
+if [ $? -ne 0 ] ; then
+    log "RUN" "❌" "💽 Failed to set restart_stack flag in redis server"
+    exit 1
+fi
+
+redis_cli set restart_whole_stack 0 > /dev/null
+# shellcheck disable=SC2181
+if [ $? -ne 0 ] ; then
+    log "RUN" "❌" "💽 Failed to set restart_whole_stack flag in redis server"
+    exit 1
+fi
+
+redis_cli set restart_services 0 > /dev/null
+# shellcheck disable=SC2181
+if [ $? -ne 0 ] ; then
+    log "RUN" "❌" "💽 Failed to set restart_services flag in redis server"
+    exit 1
+fi
+
+redis_cli set need_socket 0 > /dev/null
+# shellcheck disable=SC2181
+if [ $? -ne 0 ] ; then
+    log "RUN" "❌" "💽 Failed to set need_socket flag in redis server"
+    exit 1
+fi
+
+# Clear previous version tracking to start fresh
+redis_cli del previous_bw_version > /dev/null
+# shellcheck disable=SC2181
+if [ $? -ne 0 ] ; then
+    log "RUN" "❌" "💽 Failed to clear previous_bw_version in redis server"
+    exit 1
+fi
+
+redis_cli del previous_api_token > /dev/null
+# shellcheck disable=SC2181
+if [ $? -ne 0 ] ; then
+    log "RUN" "❌" "💽 Failed to clear previous_api_token in redis server"
+    exit 1
+fi
+
+first_run=true
+restart_stack=1
+full_clean=0
+
+if [[ "$category" =~ ";" ]] ; then
+    category=$(echo "$category" | cut -d ";" -f 1)
+fi
+
+if [ "$integration" == "Linux" ] ; then
+    cleanup_stack
+    # shellcheck disable=SC2181
+    if [ $? -ne 0 ] ; then
+        exit 1
+    fi
+fi
+
+tests=$(redis_cli lrange tests 0 -1)
+# shellcheck disable=SC2181
+if [ $? -ne 0 ] ; then
+    log "RUN" "❌" "💽 Failed to get tests from redis server"
+    exit 1
+fi
+
+# The loop below iterates whatever is in that list, so an empty one used to fall straight through
+# to test.sh's "All tests passed" -- a run that executed nothing reported as green. Every path
+# that fills the list (parse.py, and build.sh's own lpush for a `category;action` argument) is
+# supposed to have failed loudly first; if one did not, this is the last place that can tell.
+if [ -z "$tests" ] ; then
+    log "RUN" "❌" "✂ No test to run for \"$category\" on $integration — zero tests is a failure, not a pass"
+    exit 1
+fi
+
+run_before=false
+
+for test in $tests ; do
+    log "RUN" "ℹ️ " "🧑‍🔧 Generating test \"$test\" ..."
+
+    if [ "$integration" == "Linux" ] ; then
+        docker exec -u 0 bunkerweb-linux chmod 777 /etc/bunkerweb/variables.env
+    fi
+
+    if [ -f "tests/scripts/before/$category.sh" ] && ! $run_before ; then
+        log "RUN" "ℹ️ " "🔧 Running before script for \"$category\" and importing variables ..."
+
+        chmod +x "tests/scripts/before/$category.sh"
+
+        # The before-script runs in this shell so its `export`s reach the run, which also means any
+        # `set -euo pipefail` it declares (before/upgrade.sh) would stay armed for the rest of run.sh,
+        # including the EXIT trap, and turn every tolerated non-zero status in utils.sh into an abort.
+        # Snapshot the shell options and restore them right after. `set +o` never reports `errexit`
+        # (bash clears it inside command substitutions), so this restores nounset/pipefail only;
+        # errexit is off here to begin with.
+        _before_opts=$(set +o)
+        # shellcheck disable=SC1090
+        source ./tests/scripts/before/"$category".sh "$integration" "$release" "$category"
+        _before_ret=$?
+        eval "$_before_opts"
+        if [ "$_before_ret" -ne 0 ] ; then
+            exit 1
+        fi
+        run_before=true
+    fi
+
+    if [ "$release" == "dev" ] ; then
+        python3 tests/generate.py "$integration" "$type" "$test" --dev
+    else
+        python3 tests/generate.py "$integration" "$type" "$test"
+    fi
+
+    # shellcheck disable=SC2181
+    if [ $? -ne 0 ] ; then
+        log "RUN" "❌" "🧑‍🔧 Failed to generate test \"$test\""
+        exit 1
+    fi
+
+    retries=$(redis_cli get retries)
+    # shellcheck disable=SC2181
+    if [ $? -ne 0 ] || [ -z "$retries" ] ; then
+        log "RUN" "❌" "💽 Failed to get retries from redis server"
+        exit 1
+    fi
+
+    # `retries: N` in a spec means N retries AFTER the first attempt, so N+1 attempts in all.
+    # Counting attempts rather than juggling a "first try" flag against a counter that was also
+    # decremented before it was tested is what fixes the off-by-one: `retries: 1` used to spend
+    # its only retry on the decrement and exit immediately, so every action carrying it -- all
+    # four whitelist rdns* ones, among others -- never retried at all.
+    attempts=$((retries + 1))
+
+    while [ "$attempts" -gt 0 ] ; do
+        # Regenerate before every retry. `generate.py` runs once per action, above, and writes
+        # /tmp/services.yml -- but a full_clean attempt ends in `cleanup_stack`, which deletes
+        # that file (utils.sh), and `start.sh` only deploys the application when it exists
+        # (`elif [ -f /tmp/services.yml ]`). Without this, every retry of a full_clean action
+        # brings up a stack with no application at all: the assertion then fails on something
+        # else entirely ("cookie not found in page", "String ... not found in response") and
+        # overwrites the real error, so those retries can never pass and never measured anything.
+        # Seen in Autoconf;headers, where check_cookie_flags_ssl's three retries all reported an
+        # absent cookie while the controller was saving {'SERVER_NAME': '', 'MULTISITE': 'yes'}.
+        if [ "$attempts" -le "$retries" ] ; then
+            # Same reason as before the first generation: the package's services own
+            # variables.env once they have run, and generate.py rewrites it from scratch.
+            if [ "$integration" == "Linux" ] ; then
+                docker exec -u 0 bunkerweb-linux chmod 777 /etc/bunkerweb/variables.env
+            fi
+
+            if [ "$release" == "dev" ] ; then
+                python3 tests/generate.py "$integration" "$type" "$test" --dev
+            else
+                python3 tests/generate.py "$integration" "$type" "$test"
+            fi
+
+            # shellcheck disable=SC2181
+            if [ $? -ne 0 ] ; then
+                log "RUN" "❌" "🧑‍🔧 Failed to regenerate test \"$test\" for the retry"
+                exit 1
+            fi
+        fi
+
+        if [ "$restart_stack" -eq 1 ] ; then
+            if $first_run || [ "$full_clean" -eq 1 ] ; then
+                ./tests/scripts/start.sh "$integration" "$type"
+                ret=$?
+                # shellcheck disable=SC2181
+                if [ $ret -ne 0 ] ; then
+                    exit $ret
+                fi
+            else
+                restart_stack
+                # shellcheck disable=SC2181
+                if [ $? -ne 0 ] ; then
+                    exit 1
+                fi
+            fi
+
+            ./tests/scripts/wait.sh "$integration" "$type"
+            ret=$?
+            # shellcheck disable=SC2181
+            if [ $ret -ne 0 ] ; then
+                exit $ret
+            fi
+
+            # A category may ship an extra instance that joins the stack once it is up --
+            # `instances` adds a second BunkerWeb for the UI to register. It cannot be started
+            # from the before hook: that runs before generate.py writes variables.env and before
+            # start.sh creates bw-universe, so on a host where neither exists yet compose refuses
+            # it ("env file .../variables.env not found") and the category dies before its first
+            # step. It only ever worked because an earlier category in the same session had left
+            # both behind, which made `instances` unrunnable as the first thing on a clean host.
+            # `up -d` is idempotent, so repeating it after every stack restart also brings the
+            # instance back when cleanup took it down along with the network.
+            if [ "$integration" == "Kubernetes" ] ; then
+                if [ -f "tests/scripts/before/$category.yml" ] ; then
+                    kubectl apply -f "tests/scripts/before/$category.yml"
+                    # shellcheck disable=SC2181
+                    if [ $? -ne 0 ] ; then
+                        log "RUN" "❌" "🧑‍🔧 Failed to start the extra instance for \"$category\""
+                        exit 1
+                    fi
+                fi
+            elif [ -f "tests/scripts/before/docker-$category.yml" ] ; then
+                docker compose -f "tests/scripts/before/docker-$category.yml" up -d
+                # shellcheck disable=SC2181
+                if [ $? -ne 0 ] ; then
+                    log "RUN" "❌" "🧑‍🔧 Failed to start the extra instance for \"$category\""
+                    exit 1
+                fi
+            fi
+        fi
+
+        python3 "tests/$type.py" "$test" "$integration"
+        # shellcheck disable=SC2181
+        if [ $? -ne 0 ] ; then
+            log "RUN" "❌" "Test \"$test\" failed"
+            attempts=$((attempts - 1))
+            if [ "$attempts" -gt 0 ] ; then
+                log "RUN" "⚠️" "Retrying test \"$test\" ($attempts attempt(s) left)"
+            else
+                exit 1
+            fi
+        else
+            attempts=0
+        fi
+
+        if [[ -n ${DEBUG:-} ]] ; then
+            log_stack
+        fi
+
+        restart_stack=$(redis_cli get restart_stack)
+        # shellcheck disable=SC2181
+        if [ $? -ne 0 ] || [ -z "$restart_stack" ] ; then
+            log "RUN" "❌" "💽 Failed to get restart_stack from redis server"
+            exit 1
+        fi
+
+        full_clean=$(redis_cli get full_clean)
+        # shellcheck disable=SC2181
+        if [ $? -ne 0 ] || [ -z "$full_clean" ] ; then
+            log "RUN" "❌" "💽 Failed to get full_clean from redis server"
+            exit 1
+        fi
+
+        first_run=false
+
+        if [ "$restart_stack" -eq 1 ] ; then
+            if [ "$full_clean" -eq 1 ] ; then
+                cleanup_stack
+                # shellcheck disable=SC2181
+                if [ $? -ne 0 ] ; then
+                    exit 1
+                fi
+            fi
+
+            redis_cli set last_test "$(date '+%Y-%m-%dT%H:%M:%S%z')" > /dev/null
+            # shellcheck disable=SC2181
+            if [ $? -ne 0 ] ; then
+                log "UTILS" "❌" "💽 Failed to set last test date to redis server"
+                exit 1
+            fi
+        fi
+    done
+
+    log "RUN" "ℹ️ " "Test \"$test\" passed ✅"
+    echo " "
+done
+
+log "RUN" "ℹ️ " "All tests passed ✅"
+
+redis_cli set end 1 > /dev/null
+# shellcheck disable=SC2181
+if [ $? -ne 0 ] ; then
+    log "RUN" "❌" "💽 Failed to set end flag in redis server"
+    exit 1
+fi

@@ -24,9 +24,17 @@ HTML 注入插件允许您无缝地将自定义 HTML 代码添加到您网站页
 | `INJECT_HEAD` |        | multisite | 否   | **头部 HTML 代码：** 在 `</head>` 标签前注入的 HTML 代码。 |
 | `INJECT_BODY` |        | multisite | 否   | **主体 HTML 代码：** 在 `</body>` 标签前注入的 HTML 代码。 |
 
-!!! tip "最佳实践" - 出于性能考虑，请将 JavaScript 文件放在 body 的末尾，以防止渲染阻塞。- 将 CSS 和关键的 JavaScript 放在 head 部分，以避免出现无样式内容的闪烁。- 请谨慎处理可能破坏您网站功能的注入内容。
+!!! tip "最佳实践"
+    - 出于性能考虑，请将 JavaScript 文件放在 body 的末尾，以防止渲染阻塞。
+    - 将 CSS 和关键的 JavaScript 放在 head 部分，以避免出现无样式内容的闪烁。
+    - 请谨慎处理可能破坏您网站功能的注入内容。
 
-!!! info "常见用例" - 添加分析脚本（如 Google Analytics, Matomo）- 集成聊天小部件或客户支持工具 - 为营销活动添加跟踪像素 - 添加自定义 CSS 样式或 JavaScript 功能 - 无需修改应用程序代码即可引入第三方库
+!!! info "常见用例"
+    - 添加分析脚本（如 Google Analytics、Matomo）
+    - 集成聊天小部件或客户支持工具
+    - 为营销活动添加跟踪像素
+    - 添加自定义 CSS 样式或 JavaScript 功能
+    - 无需修改应用程序代码即可引入第三方库
 
 ### 配置示例
 

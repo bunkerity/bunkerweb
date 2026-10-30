@@ -85,8 +85,8 @@ strbuf_t *strbuf_new(size_t len)
 static inline void debug_stats(strbuf_t *s)
 {
     if (s->debug) {
-        fprintf(stderr, "strbuf(%lx) reallocs: %d, length: %zd, size: %zd\n",
-                (long)s, s->reallocs, s->length, s->size);
+        fprintf(stderr, "strbuf(%p) reallocs: %d, length: %zd, size: %zd\n",
+                (void *) s, s->reallocs, s->length, s->size);
     }
 }
 
@@ -164,8 +164,8 @@ void strbuf_resize(strbuf_t *s, size_t len)
     newsize = calculate_new_size(s, len);
 
     if (s->debug > 1) {
-        fprintf(stderr, "strbuf(%lx) resize: %zd => %zd\n",
-                (long)s, s->size, newsize);
+        fprintf(stderr, "strbuf(%p) resize: %zd => %zd\n",
+                (void *) s, s->size, newsize);
     }
 
     s->size = newsize;

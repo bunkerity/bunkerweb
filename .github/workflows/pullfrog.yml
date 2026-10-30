@@ -1,0 +1,35 @@
+name: Pullfrog
+run-name: ${{ inputs.name || github.workflow }}
+
+permissions:
+  contents: read
+
+on:
+  workflow_dispatch:
+    inputs:
+      prompt:
+        type: string
+        description: Agent prompt
+      name:
+        type: string
+        description: Run name
+
+jobs:
+  pullfrog:
+    runs-on: ubuntu-26.04
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+      - name: Run agent
+        uses: pullfrog/pullfrog@ad4283a862b8377cb525a0f5bf30f17c023b18ea # v0.1.98
+        with:
+          prompt: ${{ inputs.prompt }}
+          progress_comments: disabled
+          push: restricted
+          shell: restricted

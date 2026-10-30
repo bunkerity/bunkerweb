@@ -17,7 +17,7 @@ local json = require "resty.openssl.auxiliary.compat".json
 local ctypes = require "resty.openssl.auxiliary.ctypes"
 local format_error = require "resty.openssl.err".format_error
 
-local OPENSSL_3X = require("resty.openssl.version").OPENSSL_3X
+local OPENSSL_3_UP = require("resty.openssl.version").OPENSSL_3_UP
 
 local _M = {}
 
@@ -505,7 +505,7 @@ function _M.load_jwk_ex(txt, ptyp, properties)
   return ctx[0]
 end
 
-if OPENSSL_3X then
+if OPENSSL_3_UP then
   _M.load_jwk = _M.load_jwk_ex
 end
 

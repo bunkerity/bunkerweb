@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 
 from argparse import ArgumentParser
-from glob import glob
-from os import R_OK, W_OK, X_OK, access, getenv, sep
+from contextlib import suppress
+from os import R_OK, W_OK, X_OK, access, getenv, getpid, sep
 from os.path import join
 from pathlib import Path
+from re import sub as re_sub
 from shutil import rmtree
 from sys import exit as sys_exit, path as sys_path
 from traceback import format_exc
@@ -14,9 +15,12 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
     if deps_path not in sys_path:
         sys_path.append(deps_path)
 
+from env_file import parse_env_file  # type: ignore
 from logger import getLogger  # type: ignore
 from Configurator import Configurator
 from Templator import Templator
+from modsecurity_audit import validate_audit_log_settings
+from sync_tree import RESERVED_PREFIX, InstallBlocked, install_guard, pid_alive, sync_tree
 
 DB_PATH = Path(sep, "usr", "share", "bunkerweb", "db")
 
@@ -72,8 +76,7 @@ if __name__ == "__main__":
         if args.variables:
             variables_path = Path(args.variables)
             LOGGER.info(f"Variables : {variables_path}")
-            with variables_path.open() as f:
-                dotenv_env = dict(line.strip().split("=", 1) for line in f if line.strip() and not line.startswith("#") and "=" in line)
+            dotenv_env = parse_env_file(variables_path)
 
         db = None
         if DB_PATH.is_dir():
@@ -127,30 +130,60 @@ if __name__ == "__main__":
             default_config = {setting: data["default"] for setting, data in full_config.items()}
             full_config = {setting: data["value"] for setting, data in full_config.items()}
 
-        # Remove old files
-        LOGGER.info("Removing old files ...")
-        files = glob(join(args.output, "*"))
-        for file in files:
-            file = Path(file)
-            if file.is_symlink() or file.is_file():
-                file.unlink()
-            elif file.is_dir():
+        # Database-backed candidates bypass Configurator. Reject them before removing working files.
+        validate_audit_log_settings(full_config)
+
+        # Render beside the output, then sync it in. The output is shared with nginx on all-in-one and
+        # Linux, and emptying it first leaves variables.env missing for as long as a render takes.
+        staging_path = output_path.joinpath(f"{RESERVED_PREFIX}gen.{getpid()}")
+        LOGGER.info("Removing stale staging files ...")
+        staging_prefix = f"{RESERVED_PREFIX}gen."
+        for file in output_path.iterdir():
+            owner = file.name[len(staging_prefix) :]  # noqa: E203
+            # The staging of a generator that is still rendering is not stale.
+            if file.name.startswith(staging_prefix) and not (owner.isdigit() and int(owner) != getpid() and pid_alive(int(owner))):
                 rmtree(file.as_posix(), ignore_errors=True)
+        staging_path.mkdir()
+
+        # The applied-digest marker for a pushed destination lives outside it, keyed by path.
+        # Changing the content the instance last acknowledged makes a marker left behind answer
+        # "already applied" to the next push of that same content, and the instance keeps serving
+        # what this run overwrote. Keep the key in step with pushswap.applied_path.
+        # A marker this process cannot remove costs one redundant push; aborting the render would
+        # cost the configuration. A render that changes nothing keeps it: the next push is then a no-op.
+        def drop_applied_marker() -> None:
+            with suppress(OSError):
+                Path(sep, "var", "tmp", "bunkerweb", "pushswap", f"{re_sub(r'[^A-Za-z0-9]+', '_', output_path.as_posix())}.applied").unlink(missing_ok=True)
 
         # Render the templates
         LOGGER.info("Rendering templates ...")
-        templator = Templator(
-            templates_path.as_posix(),
-            core_path.as_posix(),
-            plugins_path.as_posix(),
-            pro_plugins_path.as_posix(),
-            output_path.as_posix(),
-            target_path.as_posix(),
-            config,
-            default_config,
-            full_config,
-        )
-        templator.render()
+        try:
+            templator = Templator(
+                templates_path.as_posix(),
+                core_path.as_posix(),
+                plugins_path.as_posix(),
+                pro_plugins_path.as_posix(),
+                staging_path.as_posix(),
+                target_path.as_posix(),
+                config,
+                default_config,
+                full_config,
+            )
+            failures = templator.render()
+            if failures:
+                # An incomplete render would install over, and delete, the files it failed to produce.
+                LOGGER.error(f"Failed to render {', '.join(failures)}, keeping the current configuration")
+                sys_exit(1)
+
+            LOGGER.info("Installing rendered files ...")
+            try:
+                with install_guard(LOGGER):
+                    sync_tree(staging_path, output_path, drop_applied_marker)
+            except InstallBlocked as e:
+                LOGGER.error(str(e))
+                sys_exit(1)
+        finally:
+            rmtree(staging_path.as_posix(), ignore_errors=True)
     except SystemExit as e:
         raise e
     except:

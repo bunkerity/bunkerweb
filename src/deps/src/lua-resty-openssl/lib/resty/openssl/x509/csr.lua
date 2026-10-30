@@ -20,7 +20,7 @@ local txtnid2nid = require("resty.openssl.objects").txtnid2nid
 local find_sigid_algs = require("resty.openssl.objects").find_sigid_algs
 local format_error = require("resty.openssl.err").format_error
 local version = require("resty.openssl.version")
-local OPENSSL_3X = version.OPENSSL_3X
+local OPENSSL_3_UP = version.OPENSSL_3_UP
 
 local accessors = {}
 
@@ -53,7 +53,7 @@ local x509_extensions_gc = stack_lib.gc_of("X509_EXTENSION")
 function _M.new(csr, fmt, properties)
   local ctx
   if not csr then
-    if OPENSSL_3X then
+    if OPENSSL_3_UP then
       ctx = C.X509_REQ_new_ex(ctx_lib.get_libctx(), properties)
     else
       ctx = C.X509_REQ_new()

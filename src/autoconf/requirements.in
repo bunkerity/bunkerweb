@@ -1,4 +1,5 @@
-docker==7.1.0
-kubernetes==35.0.0
-pytz==2025.2
-redis[hiredis]==7.2.0
+docker==7.2.0
+kubernetes==37.0.1
+packaging==26.3
+pytz==2026.5
+redis[hiredis]==8.1.0

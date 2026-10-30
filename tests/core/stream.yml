@@ -1,0 +1,83 @@
+# SERVER_TYPE=stream services, which no other spec has. Every case is a script because the outcome is a raw TCP
+# exchange (no `status` action speaks it) and because a ban has to be placed, probed and lifted around it. The
+# asserting code is `tests/misc/stream/probe.py`; it dials the BunkerWeb container on bw-universe, since the
+# harness publishes no stream port, and bans through `bwcli` in the scheduler.
+#
+# The services (see `config`): `www.example.com` is an HTTP service, kept for the TLS case below; `s1` and `s2`
+# both listen on 10000, `s2` also on 20000, and all of them proxy to the nginx-hello `app1` fixture; `tls` listens
+# on 30000 and proxies to BunkerWeb's own HTTPS listener.
+#
+# One action per configuration: the stack is restarted before an action only when the previous one leaves
+# `restart_stack` at its default, so the first two share a stack and each later one names the setting it needs.
+integrations:
+  - "Docker"
+
+actions:
+  # Two services on one listen port used to both emit `reuseport`, which NGINX rejects: the stack never came up.
+  # Every SSL port is set empty, which must emit no listener at all.
+  services_sharing_a_listen_port_load_and_answer:
+    type: script
+    script: ["python3", "tests/misc/stream/probe.py", "shared"]
+    result: "stream shared: all checks passed"
+    restart_stack: false
+
+  # Upstream TLS settings on a stream service now switch `proxy_ssl on`; they were ignored, so a TLS backend
+  # received plaintext. The backend here is BunkerWeb's own HTTPS listener, which answers a plaintext client with
+  # a 400.
+  upstream_tls_settings_reach_a_tls_backend:
+    type: script
+    script: ["python3", "tests/misc/stream/probe.py", "tls"]
+    result: "stream tls: all checks passed"
+
+  # A ban reaches a stream service in the preread phase: detect mode logs it and proxies, block mode closes the
+  # connection (the control for the first).
+  detect_mode_lets_a_banned_client_through:
+    type: script
+    script: ["python3", "tests/misc/stream/probe.py", "detect"]
+    result: "stream detect: all checks passed"
+    config:
+      SECURITY_MODE: "detect"
+
+  block_mode_refuses_the_banned_client:
+    type: script
+    script: ["python3", "tests/misc/stream/probe.py", "block"]
+    result: "stream block: all checks passed"
+    config:
+      SECURITY_MODE: "block"
+
+config:
+  SERVER_NAME: "www.example.com s1.example.com s2.example.com tls.example.com"
+  MULTISITE: "yes"
+  GENERATE_SELF_SIGNED_SSL: "yes"
+  # Nothing but the manual ban may act on the runner's address.
+  USE_BAD_BEHAVIOR: "no"
+  USE_LIMIT_REQ: "no"
+  USE_LIMIT_CONN: "no"
+  USE_MODSECURITY: "no"
+  # The ban API writes into the HTTP worker's datastore, which a stream block cannot read: a stream service only
+  # sees a ban through Redis.
+  USE_REDIS: "yes"
+  REDIS_HOST: "redis"
+  REDIS_PORT: "6379"
+  REDIS_DATABASE: "1"
+  REDIS_SSL: "no"
+  REDIS_SSL_VERIFY: "no"
+  REDIS_TIMEOUT: "1000"
+  REDIS_USERNAME: ""
+  s1.example.com_SERVER_TYPE: "stream"
+  s1.example.com_USE_REVERSE_PROXY: "yes"
+  s1.example.com_REVERSE_PROXY_HOST: "192.168.0.254:8080"
+  s1.example.com_LISTEN_STREAM_PORT: "10000"
+  s1.example.com_LISTEN_STREAM_PORT_SSL: ""
+  s2.example.com_SERVER_TYPE: "stream"
+  s2.example.com_USE_REVERSE_PROXY: "yes"
+  s2.example.com_REVERSE_PROXY_HOST: "192.168.0.254:8080"
+  s2.example.com_LISTEN_STREAM_PORT: "10000"
+  s2.example.com_LISTEN_STREAM_PORT_1: "20000"
+  s2.example.com_LISTEN_STREAM_PORT_SSL: ""
+  tls.example.com_SERVER_TYPE: "stream"
+  tls.example.com_USE_REVERSE_PROXY: "yes"
+  tls.example.com_REVERSE_PROXY_HOST: "127.0.0.1:443"
+  tls.example.com_REVERSE_PROXY_SSL_PROTOCOLS: "TLSv1.2 TLSv1.3"
+  tls.example.com_LISTEN_STREAM_PORT: "30000"
+  tls.example.com_LISTEN_STREAM_PORT_SSL: ""

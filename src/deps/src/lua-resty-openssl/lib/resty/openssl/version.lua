@@ -6,7 +6,7 @@ local log_debug = require "resty.openssl.auxiliary.compat".log_debug
 
 local libcrypto_name
 local lib_patterns = {
-  "%s", "%s.so.3", "%s.so.1.1", "%s.so.1.0"
+  "%s", "%s.so.4", "%s.so.3", "%s.so.1.1", "%s.so.1.0"
 }
 
 local function load_library()
@@ -101,11 +101,17 @@ return setmetatable({
       return ffi_str(version_func(t))
     end,
     info = function(t)
-      return ffi_str(info_func(t))
+      local info = info_func(t)
+      if info == nil then
+        return nil
+      end
+      return ffi_str(info)
     end,
-    -- the following has implict upper bound of 4.x
+    -- exact major-version checks remain bounded; provider-era checks are open-ended
     OPENSSL_30 = version_num >= 0x30000000 and version_num < 0x30100000,
     OPENSSL_3X = version_num >= 0x30000000 and version_num < 0x40000000,
+    OPENSSL_4X = version_num >= 0x40000000 and version_num < 0x50000000,
+    OPENSSL_3_UP = version_num >= 0x30000000,
     OPENSSL_111 = version_num >= 0x10101000 and version_num < 0x10200000,
   }, {
     __index = types_table,

@@ -1,13 +1,17 @@
 local ngx = ngx
 local ngx_req = ngx.req
 local shared = ngx.shared
+local banlease = require "bunkerweb.banlease"
 local bit = require "bit"
 local cdatastore = require "bunkerweb.datastore"
 local cjson = require "cjson"
 local class = require "middleclass"
 local clogger = require "bunkerweb.logger"
+local ffi = require "ffi"
 local helpers = require "bunkerweb.helpers"
 local process = require "ngx.process"
+local pushswap = require "bunkerweb.pushswap"
+local reslock = require "resty.lock"
 local rsignal = require "resty.signal"
 local upload = require "resty.upload"
 local utils = require "bunkerweb.utils"
@@ -21,17 +25,30 @@ local logger = clogger:new("API")
 local get_country = utils.get_country
 local get_variable = utils.get_variable
 local is_ip_in_networks = utils.is_ip_in_networks
+local is_ipv4 = utils.is_ipv4
+local is_ipv6 = utils.is_ipv6
+
+local RESERVED_SERVICE_NAMES = {
+	["unknown"] = true,
+	["Web UI"] = true,
+	["bwcli"] = true,
+	["default server"] = true,
+	[""] = true,
+}
 -- local run = shell.run
 local NOTICE = ngx.NOTICE
 local ERR = ngx.ERR
 local HTTP_OK = ngx.HTTP_OK
 local HTTP_INTERNAL_SERVER_ERROR = ngx.HTTP_INTERNAL_SERVER_ERROR
 local HTTP_BAD_REQUEST = ngx.HTTP_BAD_REQUEST
+local HTTP_BAD_GATEWAY = ngx.HTTP_BAD_GATEWAY
+local HTTP_SERVICE_UNAVAILABLE = ngx.HTTP_SERVICE_UNAVAILABLE
 local HTTP_NOT_FOUND = ngx.HTTP_NOT_FOUND
 local kill = rsignal.kill
 local get_master_pid = process.get_master_pid
 local execute = os.execute
 local open = io.open
+local VARIABLES_PATH = "/etc/nginx/variables.env"
 local read_body = ngx_req.read_body
 local get_body_data = ngx_req.get_body_data
 local get_body_file = ngx_req.get_body_file
@@ -93,7 +110,7 @@ function api:is_allowed_token()
 	if not self.api_token or self.api_token == "" then
 		return true, "ok"
 	end
-	local headers = ngx_req.get_headers()
+	local headers = ngx_req.get_headers(tonumber((get_variable("MAX_HEADERS", false))) or 100)
 	local auth = headers["authorization"] or headers["Authorization"]
 	local provided = auth and auth:match("^[Bb]earer%s+(.+)$") or nil
 	if not provided then
@@ -105,13 +122,48 @@ function api:is_allowed_token()
 	return true, "ok"
 end
 
+local function control_plane_variables_from_disk()
+	local file = open(VARIABLES_PATH, "r")
+	if not file then
+		return {}
+	end
+	local contents = file:read("*a")
+	file:close()
+	-- Rendered files end with a newline; a partial final line is not a credential snapshot.
+	if not contents or contents:sub(-1) ~= "\n" then
+		return {}
+	end
+	local found = {}
+	for line in contents:gmatch("([^\n]*)\n") do
+		local key, raw = line:match("^([^=]+)=(.*)$")
+		if key == "API_WHITELIST_IP" or key == "API_TOKEN" then
+			found[key] = raw
+		end
+	end
+	return found
+end
+
 function api:initialize(ctx)
 	self.ctx = ctx
 	local data, err = get_variable("API_WHITELIST_IP", false)
+	local tok = get_variable("API_TOKEN", false)
+	if not data then
+		local recovered = control_plane_variables_from_disk()
+		if tok == nil then
+			tok = recovered.API_TOKEN
+		end
+		-- Missing token state must not turn recovery into a tokenless control plane.
+		if tok ~= nil then
+			data = recovered.API_WHITELIST_IP
+		end
+		if data then
+			logger:log(ERR, "API_WHITELIST_IP is missing from the internalstore, falling back to " .. VARIABLES_PATH)
+		end
+	end
 	self.ips = {}
 	self.api_token = nil
 	if not data then
-		logger:log(ERR, "can't get API_WHITELIST_IP variable : " .. err)
+		logger:log(ERR, "can't get API_WHITELIST_IP variable : " .. tostring(err))
 	else
 		for ip in data:gmatch("%S+") do
 			table.insert(self.ips, ip)
@@ -119,7 +171,6 @@ function api:initialize(ctx)
 	end
 
 	-- Load optional API token (from internalstore variables, same pattern as whitelist)
-	local tok = get_variable("API_TOKEN", false)
 	if tok and tok ~= "" then
 		self.api_token = tok
 	end
@@ -176,20 +227,332 @@ api.global.GET["^/health$"] = function(self)
 	end
 
 	-- Check if reload indicator file exists
-	local f = open("/var/tmp/bunkerweb_reloading", "r")
+	local f = open("/var/tmp/bunkerweb/reloading", "r")
 	if f then
 		f:close()
 		return self:response(HTTP_OK, "success", "reloading")
 	end
 
+	f = open(api.NEEDS_CONFIG_PATH, "r")
+	if f then
+		f:close()
+		return self:response(HTTP_OK, "success", "needs_config")
+	end
+
 	return self:response(HTTP_OK, "success", "ok")
 end
 
-api.global.POST["^/reload"] = function(self)
-	-- Get test argument
-	local args = ngx.req.get_uri_args()
-	local test_arg = args.test or "yes"
+-- A restart that kept its configuration keeps enforcing it and asks for the latest one by
+-- leaving this file behind (entrypoint.sh, start.sh). Unlike the loading state, every access
+-- control stays active, so it is reported on its own.
+api.NEEDS_CONFIG_PATH = "/var/tmp/bunkerweb_needs_config"
 
+-- Only a pushed main configuration answers that request. The other trees share the /confs
+-- handler and arrive in parallel with it, so they must leave the file alone.
+function api.clear_needs_config(uri)
+	if uri ~= "/confs" then
+		return false
+	end
+	local removed, err = os.remove(api.NEEDS_CONFIG_PATH)
+	if not removed then
+		if err and not err:find("No such file", 1, true) then
+			logger:log(ERR, "can't remove " .. api.NEEDS_CONFIG_PATH .. " : " .. err)
+		end
+		return false
+	end
+	return true
+end
+
+-- Both the swap and the reload path take one instance-wide lock: "nginx -t" and the master's
+-- reconfiguration both re-read the pushed trees, and a rename sequence that is part way through
+-- exposes a tree that is neither the old one nor the new one.
+--
+-- resty.lock over a shared dict, not a lock file: exclusion across workers is what a shared dict
+-- gives by construction, and the entry expires on its own if a worker dies holding it. A file
+-- lock has to hand-roll both, and a stale-file break cannot be made atomic with the shell.
+--
+-- A wait spends the caller's budget and only ever bounds the loser, which never performs the
+-- work: it answers 503, and the scheduler retries that. So the wait has to stay under the budget,
+-- because a caller that runs out instead records a failure and marks the instance down for a swap
+-- that is running, and it should sit as close under it as request overhead allows, because the
+-- wait is what the retries have to cover. A reload is called with
+-- max(RELOAD_MIN_TIMEOUT, 3 * services), five seconds by default, and the retry is three attempts
+-- two seconds apart, so a lock held longer than 3 * wait + 4 seconds is a reload that is given up
+-- on: thirteen seconds at a wait of three, seven at a wait of one. That retry belongs to the
+-- scheduler's caller alone; a reload driven straight through the API client reads the 503 as a
+-- failed reload. A push carries the folder budget, which is sized for the archive rather than for
+-- a config test, so it can afford to queue longer.
+--
+-- The expiry is the other way round, and it is the one number here that has to be generous.
+-- resty.lock releases by deleting the key without checking who owns it, so a critical section
+-- that outlives the expiry releases the lock of whoever took it next, and two swaps run at once.
+-- The critical section is renames, one "nginx -t" on the reload path, and on the first push after
+-- a container start a copy of whatever overlayfs refuses to rename out of the image layer. No
+-- caller measures that, so this is a ceiling and not a derivation: fifteen minutes is past any
+-- swap that is still making progress. Overshooting costs availability, and only after a worker
+-- was killed holding the lock: pushes and reloads answer 503 until the key expires while the
+-- instance keeps serving the configuration it already has.
+local SWAP_LOCK_KEY = "pushswap"
+local SWAP_LOCK_EXPTIME = 900
+local RELOAD_LOCK_WAIT = 3
+local PUSH_LOCK_WAIT = 10
+
+local function acquire_swap_lock(seconds)
+	local lock, err = reslock:new("worker_lock", { timeout = seconds, exptime = SWAP_LOCK_EXPTIME })
+	if not lock then
+		logger:log(ERR, "cannot create the swap lock: " .. tostring(err))
+		return nil
+	end
+	local elapsed
+	elapsed, err = lock:lock(SWAP_LOCK_KEY)
+	if not elapsed then
+		logger:log(ERR, "cannot take the swap lock: " .. tostring(err))
+		return nil
+	end
+	return lock
+end
+
+local function check_audit_storage(variables_path)
+	-- Only called with our fixed config path or the internally generated staging path.
+	local handle = io.popen("python3 /usr/share/bunkerweb/utils/modsecurity_audit.py '" .. variables_path .. "' 2>&1")
+	if not handle then
+		return false, "cannot run ModSecurity audit preflight"
+	end
+	local result = handle:read("*a")
+	handle:close()
+	return result == "ModSecurity audit preflight successful\n", result
+end
+
+-- The generator installs a rendered configuration into /etc/nginx file by file, and a reload
+-- reads the routing and the variables at different moments, so a reload that starts part way
+-- through an install loads a mix of two generations. The two take turns, and each publishes its
+-- own flag before it looks for the other's: the generator locks /var/tmp/bunkerweb/generating
+-- (flock, so the kernel drops it with the process) and then looks for the reloading marker, the
+-- reload creates the marker and then probes the lock. Whoever goes second sees the other one and
+-- backs off. A reload that cannot publish its marker, or cannot tell whether a generator is
+-- installing, does not go on. Keep the paths in step with gen/sync_tree.py.
+--
+-- One reload is in flight at a time, from its signal to the moment its new workers are up. The
+-- marker is created exclusively and holds a token; the master keeps the token of the reload that
+-- signalled it (init-lua.conf), and only the workers of that reload remove the marker (and only
+-- while it still holds their token). A reload that finds a marker waits for it to go instead of
+-- sharing it: the master takes signals one after another, so a second reload's parse would
+-- otherwise run after the first one's workers had cleared the marker. A marker that never goes
+-- belongs to a reload the master rejected after it parsed the configuration, and then reloads and
+-- generations wait for it to clear; an orphan with a monotonic stamp is removed after five minutes.
+local RELOADING_PATH = "/var/tmp/bunkerweb/reloading"
+local GENERATING_PATH = "/var/tmp/bunkerweb/generating"
+-- Queue separately from readiness: workers publish it from a timer delayed by five seconds.
+-- Scheduler callers allow at least fifteen seconds for both waits and the configuration test.
+local RELOAD_WAIT = 4
+local RELOAD_READY_WAIT = 10
+local RELOAD_POLL = 0.1
+local RELOAD_MARKER_MAX_AGE = 300
+
+ffi.cdef [[
+typedef struct _IO_FILE FILE;
+FILE *fopen(const char *pathname, const char *mode);
+int fileno(FILE *stream);
+int fclose(FILE *stream);
+int fputs(const char *s, FILE *stream);
+int flock(int fd, int operation);
+int fchmod(int fd, unsigned int mode);
+]]
+local ENOENT = 2
+-- errno of a lock held by someone else: EAGAIN is 11 on Linux and 35 on the BSDs and macOS
+local EWOULDBLOCK = (ffi.os == "BSD" or ffi.os == "OSX") and 35 or 11
+local EEXIST = 17
+local LOCK_SH_NB = 5 -- LOCK_SH | LOCK_NB
+local LOCK_EX_NB = 6 -- LOCK_EX | LOCK_NB
+local LOCK_UN = 8
+
+-- Whether a generator holds its lock: true or false, or nil and a message when that cannot be told.
+-- A shared lock that is taken and given back at once, so the generator never waits on this probe
+-- for longer than it takes to run.
+local function generator_running()
+	-- Close-on-exec ("e"): the file must not leak into the processes this worker starts
+	local file = ffi.C.fopen(GENERATING_PATH, "re")
+	if file == nil then
+		local errno = ffi.errno()
+		if errno == ENOENT then
+			return false
+		end
+		return nil, "cannot open " .. GENERATING_PATH .. " (errno " .. errno .. ")"
+	end
+	local fd = ffi.C.fileno(file)
+	local running, err
+	if ffi.C.flock(fd, LOCK_SH_NB) == 0 then
+		ffi.C.flock(fd, LOCK_UN)
+		running = false
+	else
+		local errno = ffi.errno()
+		if errno == EWOULDBLOCK then
+			running = true
+		else
+			err = "cannot lock " .. GENERATING_PATH .. " (errno " .. errno .. ")"
+		end
+	end
+	ffi.C.fclose(file)
+	return running, err
+end
+
+-- AIO and Linux generate and receive pushes into the same tree. Both writers must hold this
+-- flock; the swap lock is always taken first, as it is for the reload's flock probe.
+local function acquire_generating_lock()
+	local file = ffi.C.fopen(GENERATING_PATH, "re")
+	if file == nil and ffi.errno() == ENOENT then
+		file = ffi.C.fopen(GENERATING_PATH, "wxe")
+		if file ~= nil then
+			-- Match the generator's 0644 creation mode, independent of this worker's umask.
+			ffi.C.fchmod(ffi.C.fileno(file), 420)
+		elseif ffi.errno() == EEXIST then
+			-- Another user may have created it meanwhile; open without O_CREAT.
+			file = ffi.C.fopen(GENERATING_PATH, "re")
+		end
+	end
+	if file == nil then
+		return nil, HTTP_INTERNAL_SERVER_ERROR, "cannot open " .. GENERATING_PATH .. " (errno " .. ffi.errno() .. ")"
+	end
+	local deadline = ngx.now() + PUSH_LOCK_WAIT
+	while ffi.C.flock(ffi.C.fileno(file), LOCK_EX_NB) ~= 0 do
+		local errno = ffi.errno()
+		if errno ~= EWOULDBLOCK then
+			ffi.C.fclose(file)
+			return nil, HTTP_INTERNAL_SERVER_ERROR, "cannot lock " .. GENERATING_PATH .. " (errno " .. errno .. ")"
+		end
+		if ngx.now() >= deadline then
+			ffi.C.fclose(file)
+			return nil, HTTP_SERVICE_UNAVAILABLE, "a configuration generation is in progress"
+		end
+		ngx.sleep(RELOAD_POLL)
+	end
+	return file
+end
+
+-- Creates the reloading marker, which must not exist, holding token. "wx" is O_CREAT | O_EXCL, "e"
+-- keeps the file out of the processes this worker starts. Returns true, or nil and the reason: the
+-- boolean false when the marker is already there.
+local function create_marker(token)
+	local file = ffi.C.fopen(RELOADING_PATH, "wxe")
+	if file == nil then
+		local errno = ffi.errno()
+		if errno == EEXIST then
+			return nil, false
+		end
+		return nil, "cannot create " .. RELOADING_PATH .. " (errno " .. errno .. ")"
+	end
+	local written = ffi.C.fputs(token, file)
+	if ffi.C.fclose(file) ~= 0 or written < 0 then
+		os.remove(RELOADING_PATH)
+		return nil, "cannot write " .. RELOADING_PATH
+	end
+	return true
+end
+
+-- A directory opens for reading but is no marker: reading it fails
+local function marker_is_file()
+	local existing = open(RELOADING_PATH, "r")
+	if not existing then
+		return true
+	end
+	local _, read_err = existing:read(0)
+	existing:close()
+	return not read_err
+end
+
+local function read_reload_uptime()
+	local file = open("/proc/uptime", "r")
+	if not file then
+		return nil
+	end
+	local content = file:read("*l")
+	file:close()
+	return content and tonumber(content:match("^(%d+)%.%d+%s"))
+end
+
+local function read_marker()
+	local marker = open(RELOADING_PATH, "r")
+	if not marker then
+		return nil
+	end
+	local token = marker:read("*a")
+	marker:close()
+	return token
+end
+
+-- Called under the reload's existing swap lock.
+local function clear_stale_reload_marker()
+	local token = read_marker()
+	if not token then
+		return
+	end
+	local created = tonumber(token:match("^%d+%.%d+%.(%d+)$"))
+	local now = read_reload_uptime()
+	if not created or not now or now - created <= RELOAD_MARKER_MAX_AGE then
+		return
+	end
+	-- ponytail: two removers and a fresh publisher can still race between this comparison and unlink.
+	if read_marker() == token and os.remove(RELOADING_PATH) then
+		logger:log(ngx.WARN, "Removing orphaned reload marker " .. RELOADING_PATH .. " older than 5 minutes")
+	end
+end
+
+-- Creates the reloading marker and returns its token when no reload is in flight and no generator
+-- is installing. Otherwise nil, an HTTP status and a message: 503 after RELOAD_WAIT seconds of
+-- either, 500 when the marker cannot be published or the lock cannot be probed, in which case nginx
+-- must not be signalled. A marker is only ever created here, so the one that exists after a
+-- success is ours.
+local function begin_reload()
+	local token = string.format("%d.%d", os.time(), math.random(1, 2147483647))
+	local uptime = read_reload_uptime()
+	if uptime then
+		token = token .. string.format(".%d", uptime)
+	end
+	local deadline = ngx.req.start_time() + RELOAD_WAIT
+	local blocker
+	while true do
+		clear_stale_reload_marker()
+		local created, err = create_marker(token)
+		if created then
+			local running, probe_err = generator_running()
+			if running == false then
+				return token
+			end
+			os.remove(RELOADING_PATH)
+			if running == nil then
+				logger:log(ERR, probe_err)
+				return nil, HTTP_INTERNAL_SERVER_ERROR, "reload refused: " .. probe_err
+			end
+			blocker = "a configuration generation is in progress"
+		elseif err == false then
+			if not marker_is_file() then
+				-- Without a marker a generator cannot know a reload is coming
+				logger:log(ERR, "Failed to create reload indicator file: " .. RELOADING_PATH .. " is not a file")
+				return nil, HTTP_INTERNAL_SERVER_ERROR, "reload refused: " .. RELOADING_PATH .. " is not a file"
+			end
+			blocker = "a reload is in progress ("
+				.. RELOADING_PATH
+				.. " exists). If none is running, the last one was rejected after its configuration was parsed:"
+				.. " a marker with a monotonic stamp is cleared automatically once it is older than 5 minutes;"
+				.. " restart BunkerWeb or remove that file to clear it sooner"
+		else
+			-- Without the marker a generator cannot know a reload is coming
+			logger:log(ERR, "Failed to create reload indicator file: " .. err)
+			return nil, HTTP_INTERNAL_SERVER_ERROR, "reload refused: " .. err
+		end
+		if ngx.now() >= deadline then
+			logger:log(ERR, "reload not started: " .. blocker)
+			return nil, HTTP_SERVICE_UNAVAILABLE, blocker
+		end
+		ngx.sleep(RELOAD_POLL)
+	end
+end
+
+local function reload_checked(test_arg)
+	local valid, validation_error = check_audit_storage("/etc/nginx/variables.env")
+	if not valid then
+		return HTTP_INTERNAL_SERVER_ERROR, "error", validation_error
+	end
 	if test_arg ~= "no" then
 		-- Check Nginx configuration
 		logger:log(NOTICE, "Checking Nginx configuration")
@@ -210,7 +573,7 @@ api.global.POST["^/reload"] = function(self)
 		then
 			logger:log(NOTICE, "Nginx configuration syntax is valid (non-root permission warnings ignored)")
 		else
-			return self:response(HTTP_INTERNAL_SERVER_ERROR, "error", "config check failed: " .. result)
+			return HTTP_INTERNAL_SERVER_ERROR, "error", "config check failed: " .. result
 		end
 	end
 
@@ -223,22 +586,105 @@ api.global.POST["^/reload"] = function(self)
 		if err == "Operation not permitted" then
 			local rc = execute("sudo -n /usr/sbin/service bunkerweb reload >/dev/null 2>&1")
 			if rc == 0 or rc == true then
-				return self:response(HTTP_OK, "success", "reload successful")
+				return HTTP_OK, "success", "reload successful"
 			end
 		end
-		return self:response(HTTP_INTERNAL_SERVER_ERROR, "error", "err = " .. err)
+		return HTTP_INTERNAL_SERVER_ERROR, "error", "err = " .. err
 	end
 
-	-- Create temporary file to indicate reconfiguration
-	local file, err = open("/var/tmp/bunkerweb_reloading", "w")
-	if file then
-		file:write(tostring(os.time()))
-		file:close()
+	return HTTP_OK, "success", "reload successful"
+end
+
+local function wait_reload(token, seconds, no_wait_reason)
+	local ready_key = "misc_ready_" .. token
+	-- The blocking configuration test does not refresh nginx's cached clock.
+	ngx.update_time()
+	local deadline = ngx.now() + seconds
+	while seconds > 0 do
+		if internalstore:get(ready_key) == "ok" then
+			return HTTP_OK, "success", "reload successful", true
+		end
+		if read_marker() ~= token then
+			-- A worker can publish readiness between the first read and the marker's removal.
+			if internalstore:get(ready_key) == "ok" then
+				return HTTP_OK, "success", "reload successful", true
+			end
+			return HTTP_INTERNAL_SERVER_ERROR, "error", "reload failed: initialization did not confirm readiness"
+		end
+		if ngx.now() >= deadline then
+			break
+		end
+		-- Never the remaining time: ngx.sleep truncates to whole milliseconds, and a zero-delay timer does not
+		-- advance the cached clock, so a sub-millisecond remainder would spin until the swap lock expires.
+		ngx.sleep(RELOAD_POLL)
+	end
+	-- Keep the in-flight marker; normal completion or existing stale-marker recovery releases it.
+	local message = "reload signalled but readiness is unconfirmed: "
+		.. (no_wait_reason or "timed out waiting for new workers")
+	logger:log(ngx.WARN, message)
+	return HTTP_OK, "success", message, false
+end
+
+-- The body returns response values instead of sending them, so the wrapper has one
+-- place to release the swap lock whichever way the reload ends.
+local function reload_locked(test_arg)
+	local shutdown_timeout = get_variable("WORKER_SHUTDOWN_TIMEOUT", false)
+	if shutdown_timeout and match(shutdown_timeout, "^%d+$") then
+		shutdown_timeout = shutdown_timeout .. "s"
+	end
+	shutdown_timeout = utils.parse_duration(shutdown_timeout, "ms")
+	-- Zero disables forced shutdown; otherwise leave a second to send the response before it closes this request.
+	local ready_wait, no_wait_reason
+	if not shutdown_timeout then
+		ready_wait, no_wait_reason = 0, "invalid or unreadable WORKER_SHUTDOWN_TIMEOUT"
+	elseif shutdown_timeout == 0 then
+		ready_wait = RELOAD_READY_WAIT
 	else
-		logger:log(ERR, "Failed to create reload indicator file: " .. err)
+		ready_wait = math.max(0, math.min(RELOAD_READY_WAIT, shutdown_timeout / 1000 - 1))
+		if ready_wait == 0 then
+			no_wait_reason = "WORKER_SHUTDOWN_TIMEOUT leaves no time to confirm readiness"
+		end
 	end
+	local started, status, failure = begin_reload()
+	if not started then
+		-- begin_reload took back what it published; the values are then the HTTP status and the message
+		return status, "error", failure
+	end
+	local ran, code, level, message = pcall(reload_checked, test_arg)
+	-- The marker stands for a reload that signalled nginx; the new workers remove it.
+	if not ran or level ~= "success" then
+		if read_marker() == started then
+			os.remove(RELOADING_PATH)
+		end
+	end
+	if not ran then
+		error(code, 0)
+	end
+	if level == "success" then
+		return wait_reload(started, ready_wait, no_wait_reason)
+	end
+	return code, level, message
+end
 
-	return self:response(HTTP_OK, "success", "reload successful")
+api.global.POST["^/reload"] = function(self)
+	-- Get test argument
+	local args = ngx.req.get_uri_args()
+	local test_arg = args.test or "yes"
+
+	local lock = acquire_swap_lock(RELOAD_LOCK_WAIT)
+	if not lock then
+		return self:response(HTTP_SERVICE_UNAVAILABLE, "error", "a push swap is in progress")
+	end
+	-- pcall so an error inside the section still releases the lock: leaving it held costs every
+	-- later push and reload until it expires.
+	local ran, status, level, message, confirmed = pcall(reload_locked, test_arg)
+	lock:unlock()
+	if not ran then
+		return self:response(HTTP_INTERNAL_SERVER_ERROR, "error", "reload failed: " .. tostring(status))
+	end
+	local http_status, response = self:response(status, level, message)
+	response.confirmed = confirmed
+	return http_status, response
 end
 
 api.global.POST["^/stop$"] = function(self)
@@ -251,7 +697,12 @@ api.global.POST["^/stop$"] = function(self)
 end
 
 api.global.POST["^/confs$"] = function(self)
-	local tmp = "/var/tmp/bunkerweb/api_" .. self.ctx.bw.uri:sub(2) .. ".tar.gz"
+	-- Everything this request owns on disk carries the worker and the connection. A name built
+	-- from the URI alone is shared by every push to that URI, and two of them then write into one
+	-- file: the scheduler retries a push while the first attempt may still be uploading, and a
+	-- second scheduler or the UI reaches the same instance on its own.
+	local request_id = tostring(ngx.worker.pid()) .. "." .. tostring(ngx.var.connection)
+	local tmp = "/var/tmp/bunkerweb/api_" .. self.ctx.bw.uri:sub(2) .. "." .. request_id .. ".tar.gz"
 	local destination = "/usr/share/bunkerweb/" .. self.ctx.bw.uri:sub(2)
 	if self.ctx.bw.uri == "/confs" then
 		destination = "/etc/nginx"
@@ -279,7 +730,11 @@ api.global.POST["^/confs$"] = function(self)
 		-- luacheck: ignore 421
 		local typ, res, err = form:read()
 		if not typ then
+			-- A body that stops mid-upload leaves a partial archive under a name only this
+			-- request uses, so nothing later truncates it: it has to go now or every aborted
+			-- push adds one file to the directory Nginx also writes its client bodies into.
 			file:close()
+			os.remove(tmp)
 			return self:response(HTTP_BAD_REQUEST, "error", err)
 		end
 		if typ == "eof" then
@@ -291,18 +746,101 @@ api.global.POST["^/confs$"] = function(self)
 	end
 	file:flush()
 	file:close()
-	local cmds = {
-		"rm -rf " .. destination .. "/*",
-		"tar xzf " .. tmp .. " -C " .. destination,
-		-- Remove the temporary archive once extracted
-		"rm -f " .. tmp,
-	}
-	for _, cmd in ipairs(cmds) do
-		local status = execute(cmd)
-		if status ~= 0 then
-			return self:response(HTTP_INTERNAL_SERVER_ERROR, "error", "exit status = " .. tostring(status))
+	-- An unchanged push is the common case: the scheduler sends these directories on
+	-- every start whether or not their content changed. Skipping it means a live
+	-- worker never loses its plugin tree for a push that would change nothing.
+	local digest = pushswap.digest_file(tmp)
+	if digest and pushswap.read_applied(destination) == digest then
+		os.remove(tmp)
+		api.clear_needs_config(self.ctx.bw.uri)
+		return self:response(HTTP_OK, "success", "already applied at " .. destination)
+	end
+
+	-- Extract into a staging area inside the destination first: it validates the
+	-- archive before anything is touched, and keeps every later rename on the same
+	-- filesystem even when the destination is a mount point.
+	--
+	-- The name carries the worker and the connection because the scheduler pushes several
+	-- folders to one instance at the same time, and a shared staging path means one push
+	-- extracts into, and deletes, another one's tree. The reserved prefix keeps it out of the
+	-- stale-entry sweep. Connection numbers do not repeat, so a directory left behind by a
+	-- worker that died mid-push is never reused: the swap clears it on the normal failure paths,
+	-- and where the archived source is the destination the archive does carry it back, but the
+	-- swap skips reserved names on the way in so it is never placed again. A killed worker still
+	-- leaks one directory.
+	local staging = destination .. "/" .. pushswap.RESERVED_PREFIX .. "staging." .. request_id
+	local extract = "rm -rf '"
+		.. staging
+		.. "' && mkdir -p '"
+		.. staging
+		.. "' && tar xzf '"
+		.. tmp
+		.. "' -C '"
+		.. staging
+		.. "'"
+	if execute(extract) ~= 0 then
+		execute("rm -rf '" .. staging .. "'")
+		os.remove(tmp)
+		return self:response(HTTP_INTERNAL_SERVER_ERROR, "error", "cannot extract archive")
+	end
+
+	if destination == "/etc/nginx" then
+		local ran, valid, validation_error = pcall(check_audit_storage, staging .. "/variables.env")
+		if not ran or not valid then
+			execute("rm -rf '" .. staging .. "'")
+			os.remove(tmp)
+			return self:response(HTTP_INTERNAL_SERVER_ERROR, "error", ran and validation_error or tostring(valid))
 		end
 	end
+	-- Extraction only added this request's own staging directory, which nothing else reads or
+	-- writes. The destructive part starts here, so this is where the lock has to be held.
+	local lock = acquire_swap_lock(PUSH_LOCK_WAIT)
+	if not lock then
+		execute("rm -rf '" .. staging .. "'")
+		os.remove(tmp)
+		return self:response(HTTP_SERVICE_UNAVAILABLE, "error", "another push swap is in progress")
+	end
+	local generating
+	if destination == "/etc/nginx" then
+		local status, failure
+		generating, status, failure = acquire_generating_lock()
+		if not generating then
+			lock:unlock()
+			execute("rm -rf '" .. staging .. "'")
+			os.remove(tmp)
+			return self:response(status, "error", failure)
+		end
+	end
+
+	-- pcall so an error inside the section still releases the lock: leaving it held costs every
+	-- later push and reload until it expires.
+	local ran, ok, err = pcall(pushswap.swap, destination, staging)
+	if ran and ok and digest then
+		local recorded, written, write_err = pcall(pushswap.write_applied, destination, digest)
+		if not recorded or not written then
+			-- Only costs a redundant push next loop, but it is invisible otherwise.
+			logger:log(
+				ERR,
+				"cannot record the applied digest for "
+					.. destination
+					.. ": "
+					.. tostring(recorded and write_err or written)
+			)
+		end
+	end
+	if generating then
+		ffi.C.fclose(generating)
+	end
+	lock:unlock()
+	os.remove(tmp)
+	if not ran then
+		return self:response(HTTP_INTERNAL_SERVER_ERROR, "error", "swap failed: " .. tostring(ok))
+	end
+	if not ok then
+		return self:response(HTTP_INTERNAL_SERVER_ERROR, "error", err)
+	end
+
+	api.clear_needs_config(self.ctx.bw.uri)
 	return self:response(HTTP_OK, "success", "saved data at " .. destination)
 end
 
@@ -335,6 +873,11 @@ api.global.POST["^/unban$"] = function(self)
 		return self:response(HTTP_INTERNAL_SERVER_ERROR, "error", "can't decode JSON : " .. ip)
 	end
 
+	-- Validate IP address
+	if not ip["ip"] or (not is_ipv4(ip["ip"]) and not is_ipv6(ip["ip"])) then
+		return self:response(HTTP_BAD_REQUEST, "error", "invalid IP address")
+	end
+
 	local ban_scope = ip["ban_scope"] or "global"
 	local service = ip["service"]
 	local response_msg = "ip " .. ip["ip"] .. " unbanned"
@@ -347,7 +890,7 @@ api.global.POST["^/unban$"] = function(self)
 
 	-- For service-specific unbans, validate the service
 	if ban_scope == "service" then
-		if not service or service == "unknown" or service == "Web UI" or service == "bwcli" or service == "" then
+		if not service or RESERVED_SERVICE_NAMES[service] then
 			logger:log(ERR, "Invalid service name for service-specific unban, defaulting to global unban")
 			ban_scope = "global"
 			service = nil
@@ -363,6 +906,75 @@ api.global.POST["^/unban$"] = function(self)
 	end
 
 	return self:response(HTTP_OK, "success", response_msg)
+end
+
+-- Parses and validates the body of a lease request: returns ip, ban_scope and service, or nil plus an error response
+local function read_lease_args(self)
+	read_body()
+	local data = get_body_data()
+	if not data then
+		local data_file = get_body_file()
+		local file = data_file and open(data_file)
+		if file then
+			data = file:read("*a")
+			file:close()
+		end
+	end
+	local ok, body = pcall(decode, data)
+	if not ok or type(body) ~= "table" then
+		return nil, self:response(HTTP_BAD_REQUEST, "error", "can't decode JSON")
+	end
+	local ip, ban_scope, service = body["ip"], body["ban_scope"] or "global", body["service"]
+	if type(ip) ~= "string" or (not is_ipv4(ip) and not is_ipv6(ip)) then
+		return nil, self:response(HTTP_BAD_REQUEST, "error", "invalid IP address")
+	end
+	if ban_scope ~= "global" and ban_scope ~= "service" then
+		return nil, self:response(HTTP_BAD_REQUEST, "error", "invalid ban scope")
+	end
+	if ban_scope == "service" then
+		if type(service) ~= "string" then
+			return nil, self:response(HTTP_BAD_REQUEST, "error", "service is required for a service ban scope")
+		elseif RESERVED_SERVICE_NAMES[service] then
+			ban_scope, service = "global", nil
+		end
+	else
+		service = nil
+	end
+	return ip, ban_scope, service
+end
+
+-- The status line of a response that carries data (do_api_call drops a table msg without array items)
+local function response_with_data(self, http_status, api_status, msg, data)
+	local status, resp = self:response(http_status, api_status, msg)
+	resp["data"] = data
+	return status, resp
+end
+
+api.global.POST["^/lease_lookup$"] = function(self)
+	local ip, ban_scope, service = read_lease_args(self)
+	if not ip then
+		return ban_scope, service
+	end
+	local row, err, redis_checked = banlease.lookup_lease(ip, service, ban_scope)
+	if err then
+		return self:response(HTTP_BAD_GATEWAY, "error", err)
+	end
+	if row then
+		return response_with_data(self, HTTP_OK, "success", "success", { found = true, row = row })
+	end
+	return response_with_data(self, HTTP_OK, "success", "success", { found = false, redis_checked = redis_checked })
+end
+
+api.global.POST["^/remove_lease$"] = function(self)
+	local ip, ban_scope, service = read_lease_args(self)
+	if not ip then
+		return ban_scope, service
+	end
+	local ok, detail = banlease.remove_lease(ip, service, ban_scope)
+	if not ok then
+		return self:response(HTTP_BAD_GATEWAY, "error", "failed to remove lease: " .. tostring(detail))
+	end
+	return response_with_data(self, HTTP_OK, "success", "success", detail)
 end
 
 api.global.POST["^/ban$"] = function(self)
@@ -407,6 +1019,16 @@ api.global.POST["^/ban$"] = function(self)
 		ban.ban_scope = ip["ban_scope"]
 	end
 
+	-- Validate IP address
+	if not ban.ip or (not is_ipv4(ban.ip) and not is_ipv6(ban.ip)) then
+		return self:response(HTTP_BAD_REQUEST, "error", "invalid IP address")
+	end
+
+	-- Validate expiration
+	if ban.exp and (type(ban.exp) ~= "number" or ban.exp < 0) then
+		return self:response(HTTP_BAD_REQUEST, "error", "exp must be a non-negative number")
+	end
+
 	-- Validate ban scope
 	if ban.ban_scope ~= "global" and ban.ban_scope ~= "service" then
 		logger:log(ERR, "Invalid ban scope: " .. ban.ban_scope .. ", defaulting to global")
@@ -415,7 +1037,7 @@ api.global.POST["^/ban$"] = function(self)
 
 	-- Validate service name for service-specific bans
 	if ban.ban_scope == "service" then
-		if ban.service == "unknown" or ban.service == "Web UI" or ban.service == "bwcli" or ban.service == "" then
+		if RESERVED_SERVICE_NAMES[ban.service] then
 			logger:log(ERR, "Invalid service name: " .. ban.service .. ", defaulting to global ban")
 			ban.ban_scope = "global"
 			ban.service = "unknown"
@@ -441,91 +1063,64 @@ api.global.POST["^/ban$"] = function(self)
 	return self:response(HTTP_OK, "success", "ip " .. ip["ip"] .. " banned " .. scope_text .. " " .. duration_text)
 end
 
+-- kind, ip and service of a datastore key that holds a ban or a lease. The service group is greedy: it splits at the
+-- last "_ip_", since an IP never contains it and a service name might.
+local function parse_ban_key(key)
+	if key:find("^bans_ip_") then
+		return "ban", key:sub(9)
+	elseif key:find("^bans_cs_ip_") then
+		return "crowdsec_lease", key:sub(12)
+	end
+	local service, ip = key:match("^bans_service_(.+)_ip_(.+)$")
+	if service then
+		return "ban", ip, service
+	end
+	service, ip = key:match("^bans_cs_service_(.+)_ip_(.+)$")
+	if service then
+		return "crowdsec_lease", ip, service
+	end
+end
+
+-- Value and TTL of a ban key. A key that is gone (a lease lives for seconds) gives nothing and no error.
+local function read_ban(key)
+	local value, err = datastore:get(key)
+	if not value then
+		return nil, nil, err ~= "not found" and err or nil
+	end
+	local ok, ttl = datastore:ttl(key)
+	if not ok then
+		return nil, nil, ttl ~= "not found" and ttl or nil
+	end
+	return value, ttl
+end
+
 api.global.GET["^/bans$"] = function(self)
 	local data = {}
-	-- Get system-wide bans
 	for _, k in ipairs(datastore:keys()) do
-		if k:find("^bans_ip_") then
-			local result, err = datastore:get(k)
+		local kind, ip, service = parse_ban_key(k)
+		if kind then
+			local value, ttl, err = read_ban(k)
 			if err then
 				return self:response(
 					HTTP_INTERNAL_SERVER_ERROR,
 					"error",
-					"can't access " .. k .. " from datastore : " .. result
+					"can't access " .. k .. " from datastore : " .. tostring(err)
 				)
 			end
-			local ok, ttl = datastore:ttl(k)
-			if not ok then
-				return self:response(
-					HTTP_INTERNAL_SERVER_ERROR,
-					"error",
-					"can't access ttl " .. k .. " from datastore : " .. ttl
-				)
-			end
-			local ban_data
-			ok, ban_data = pcall(decode, result)
-			if not ok then
-				ban_data = { reason = result, service = "unknown", date = 0, ban_scope = "global" }
-			end
-
-			-- Check for permanent ban flag and override TTL if set
-			if ban_data["permanent"] then
-				ttl = 0
-			end
-
-			table.insert(data, {
-				ip = k:sub(9, #k),
-				reason = ban_data["reason"],
-				service = ban_data["service"],
-				date = ban_data["date"],
-				country = ban_data["country"],
-				ban_scope = ban_data["ban_scope"] or "global",
-				exp = math.floor(ttl),
-				permanent = ban_data["permanent"] or false,
-			})
-		elseif k:find("^bans_service_") then
-			-- Service-specific ban (format: bans_service_<servicename>_ip_<ipaddress>)
-			local result, err = datastore:get(k)
-			if err then
-				return self:response(
-					HTTP_INTERNAL_SERVER_ERROR,
-					"error",
-					"can't access " .. k .. " from datastore : " .. result
-				)
-			end
-			local ok, ttl = datastore:ttl(k)
-			if not ok then
-				return self:response(
-					HTTP_INTERNAL_SERVER_ERROR,
-					"error",
-					"can't access ttl " .. k .. " from datastore : " .. ttl
-				)
-			end
-
-			-- Extract service and IP from the key
-			local service, ip = k:match("^bans_service_(.-)_ip_(.+)$")
-			if service and ip then
-				local ban_data
-				ok, ban_data = pcall(decode, result)
-				if not ok then
-					ban_data = { reason = result, service = service, date = 0, ban_scope = "service" }
+			if value then
+				local ban_scope = service and "service" or "global"
+				local ok, ban_data = pcall(decode, value)
+				if not ok or type(ban_data) ~= "table" then
+					ban_data = { reason = value, service = service or "unknown", date = 0, ban_scope = ban_scope }
 				end
-
-				-- Check for permanent ban flag and override TTL if set
-				if ban_data["permanent"] then
-					ttl = 0
+				if not service then
+					ban_scope = ban_data["ban_scope"] or "global"
 				end
-
-				table.insert(data, {
-					ip = ip,
-					reason = ban_data["reason"],
-					service = service,
-					date = ban_data["date"],
-					country = ban_data["country"],
-					ban_scope = "service",
-					exp = math.floor(ttl),
-					permanent = ban_data["permanent"] or false,
-				})
+				-- A lease copy of an older epoch counts as absent
+				local epoch = banlease.lease_epoch(ip, false)
+				if kind == "ban" or (epoch ~= nil and ban_data["lease_epoch"] == epoch) then
+					table.insert(data, banlease.ban_row(kind, ip, service, ban_scope, ban_data, ttl))
+				end
 			end
 		end
 	end
@@ -591,6 +1186,9 @@ function api:do_api_call()
 							resp["status"] = "error"
 						end
 						resp["msg"] = ret.msg
+						if ret.data ~= nil then
+							resp["data"] = ret.data
+						end
 						return ret.status == HTTP_OK, resp["status"], ret.status, encode(resp)
 					end
 				end

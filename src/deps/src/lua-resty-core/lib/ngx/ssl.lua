@@ -28,6 +28,7 @@ local ngx_lua_ffi_ssl_raw_server_addr
 local ngx_lua_ffi_ssl_server_port
 local ngx_lua_ffi_ssl_server_name
 local ngx_lua_ffi_ssl_raw_client_addr
+local ngx_lua_ffi_ssl_proxy_protocol_addr
 local ngx_lua_ffi_cert_pem_to_der
 local ngx_lua_ffi_priv_key_pem_to_der
 local ngx_lua_ffi_ssl_get_tls1_version
@@ -44,8 +45,14 @@ local ngx_lua_ffi_ssl_client_random
 local ngx_lua_ffi_ssl_export_keying_material
 local ngx_lua_ffi_ssl_export_keying_material_early
 local ngx_lua_ffi_get_req_ssl_pointer
+local ngx_lua_ffi_get_upstream_ssl_pointer
 local ngx_lua_ffi_req_shared_ssl_ciphers
 
+
+ffi.cdef[[
+typedef struct SSL SSL;
+int SSL_session_reused(const SSL *ssl);
+]]
 
 if subsystem == 'http' then
     ffi.cdef[[
@@ -69,6 +76,9 @@ if subsystem == 'http' then
     int ngx_http_lua_ffi_ssl_raw_client_addr(ngx_http_request_t *r, char **addr,
         size_t *addrlen, int *addrtype, char **err);
 
+    int ngx_http_lua_ffi_ssl_proxy_protocol_addr(ngx_http_request_t *r,
+        char **addr, size_t *addrlen, char **err);
+
     int ngx_http_lua_ffi_cert_pem_to_der(const unsigned char *pem,
         size_t pem_len, unsigned char *der, char **err);
 
@@ -91,7 +101,11 @@ if subsystem == 'http' then
     void *ngx_http_lua_ffi_parse_der_priv_key(const char *data, size_t len,
         char **err) ;
 
-    void *ngx_http_lua_ffi_get_req_ssl_pointer(void *r, char **err);
+    void *ngx_http_lua_ffi_get_req_ssl_pointer(ngx_http_request_t *r,
+        char **err);
+
+    void *ngx_http_lua_ffi_get_upstream_ssl_pointer(
+        ngx_http_request_t *r, char **err);
 
     int ngx_http_lua_ffi_set_cert(void *r, void *cdata, char **err);
 
@@ -131,6 +145,8 @@ if subsystem == 'http' then
     ngx_lua_ffi_ssl_server_port = C.ngx_http_lua_ffi_ssl_server_port
     ngx_lua_ffi_ssl_server_name = C.ngx_http_lua_ffi_ssl_server_name
     ngx_lua_ffi_ssl_raw_client_addr = C.ngx_http_lua_ffi_ssl_raw_client_addr
+    ngx_lua_ffi_ssl_proxy_protocol_addr =
+        C.ngx_http_lua_ffi_ssl_proxy_protocol_addr
     ngx_lua_ffi_cert_pem_to_der = C.ngx_http_lua_ffi_cert_pem_to_der
     ngx_lua_ffi_priv_key_pem_to_der = C.ngx_http_lua_ffi_priv_key_pem_to_der
     ngx_lua_ffi_ssl_get_tls1_version = C.ngx_http_lua_ffi_ssl_get_tls1_version
@@ -149,6 +165,8 @@ if subsystem == 'http' then
     ngx_lua_ffi_ssl_export_keying_material_early =
         C.ngx_http_lua_ffi_ssl_export_keying_material_early
     ngx_lua_ffi_get_req_ssl_pointer = C.ngx_http_lua_ffi_get_req_ssl_pointer
+    ngx_lua_ffi_get_upstream_ssl_pointer
+        = C.ngx_http_lua_ffi_get_upstream_ssl_pointer
     ngx_lua_ffi_req_shared_ssl_ciphers =
         C.ngx_http_lua_ffi_req_shared_ssl_ciphers
 
@@ -197,7 +215,11 @@ elseif subsystem == 'stream' then
     void *ngx_stream_lua_ffi_parse_der_priv_key(const unsigned char *der,
         size_t der_len, char **err);
 
-    void *ngx_stream_lua_ffi_get_req_ssl_pointer(void *r, char **err);
+    void *ngx_stream_lua_ffi_get_req_ssl_pointer(ngx_stream_lua_request_t *r,
+       char **err);
+
+    void *ngx_stream_lua_ffi_get_upstream_ssl_pointer(
+        ngx_stream_lua_request_t *r, char **err);
 
     int ngx_stream_lua_ffi_set_cert(void *r, void *cdata, char **err);
 
@@ -242,6 +264,8 @@ elseif subsystem == 'stream' then
     ngx_lua_ffi_ssl_verify_client = C.ngx_stream_lua_ffi_ssl_verify_client
     ngx_lua_ffi_ssl_client_random = C.ngx_stream_lua_ffi_ssl_client_random
     ngx_lua_ffi_get_req_ssl_pointer = C.ngx_stream_lua_ffi_get_req_ssl_pointer
+    ngx_lua_ffi_get_upstream_ssl_pointer
+        = C.ngx_stream_lua_ffi_get_upstream_ssl_pointer
     ngx_lua_ffi_req_shared_ssl_ciphers =
         C.ngx_stream_lua_ffi_req_shared_ssl_ciphers
 end
@@ -412,6 +436,31 @@ function _M.raw_client_addr()
     end
 
     return nil, nil, ffi_str(errmsg[0])
+end
+
+
+function _M.proxy_protocol_addr()
+    if not ngx_lua_ffi_ssl_proxy_protocol_addr then
+        return nil, "not supported in the " .. subsystem .. " subsystem"
+    end
+
+    local r = get_request()
+    if not r then
+        error("no request found")
+    end
+
+    local sizep = get_size_ptr()
+
+    local rc = ngx_lua_ffi_ssl_proxy_protocol_addr(r, charpp, sizep, errmsg)
+    if rc == FFI_OK then
+        return ffi_str(charpp[0], sizep[0])
+    end
+
+    if rc == FFI_DECLINED then
+        return nil
+    end
+
+    return nil, ffi_str(errmsg[0])
 end
 
 
@@ -613,6 +662,32 @@ function _M.get_req_ssl_pointer()
 
     return ssl
 end
+
+
+function _M.get_upstream_ssl_pointer()
+    local r = get_request()
+    if not r then
+        error("no request found")
+    end
+
+    local ssl = ngx_lua_ffi_get_upstream_ssl_pointer(r, errmsg)
+    if not ssl then
+        return nil, ffi_str(errmsg[0])
+    end
+
+    return ssl
+end
+
+
+function _M.ssl_session_reused(ssl)
+    if not ssl or type(ssl) ~= "cdata"  then
+        return nil, "bad ssl"
+    end
+
+    local reused = C.SSL_session_reused(ssl)
+    return tonumber(reused) == 1 and true or false
+end
+
 
 do
     _M.SSL3_VERSION = 0x0300

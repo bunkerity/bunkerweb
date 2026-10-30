@@ -382,8 +382,8 @@ static uint64_t kfold_int64arith(jit_State *J, uint64_t k1, uint64_t k2,
   case IR_BSAR: k1 = (uint64_t)((int64_t)k1 >> (k2 & 63)); break;
   case IR_BROL: k1 = lj_rol(k1, (k2 & 63)); break;
   case IR_BROR: k1 = lj_ror(k1, (k2 & 63)); break;
-  default: lj_assertJ(0, "bad IR op %d", op); break;
 #endif
+  default: lj_assertJ(0, "bad IR op %d", op); break;
   }
   return k1;
 }
@@ -1091,6 +1091,8 @@ LJFOLD(MUL NEG NEG)
 LJFOLD(DIV NEG NEG)
 LJFOLDF(simplify_nummuldiv_negneg)
 {
+  if (fins->o == IR_DIV && (irt_isu32(fins->t) || irt_isu64(fins->t)))
+    return NEXTFOLD;
   PHIBARRIER(fleft);
   PHIBARRIER(fright);
   fins->op1 = fleft->op1;  /* (-a) o (-b) ==> a o b */
@@ -1144,14 +1146,10 @@ LJFOLDF(simplify_conv_i64_num)
     fins->op2 = ((IRT_I64<<5)|IRT_INT|IRCONV_SEXT);
     return RETRYFOLD;
   } else if ((fleft->op2 & IRCONV_SRCMASK) == IRT_U32) {
-#if LJ_TARGET_X64
-    return fleft->op1;
-#else
     /* Reduce to a zero-extension. */
     fins->op1 = fleft->op1;
     fins->op2 = (IRT_I64<<5)|IRT_U32;
     return RETRYFOLD;
-#endif
   }
   return NEXTFOLD;
 }
@@ -2370,8 +2368,18 @@ LJFOLD(FLOAD CNEWI IRFL_CDATA_INT)
 LJFOLD(FLOAD CNEWI IRFL_CDATA_INT64)
 LJFOLDF(fload_cdata_ptr_int64_cnew)
 {
-  if (LJ_LIKELY(J->flags & JIT_F_OPT_FOLD))
-    return fleft->op2;  /* Fold even across PHI to avoid allocations. */
+  /* Fold even across PHI to avoid allocations. */
+  if (LJ_LIKELY(J->flags & JIT_F_OPT_FOLD)) {
+    IRRef ref = fleft->op2;
+    IRType1 st = IR(ref)->t, dt = fins->t;
+    if (fins->op2 == IRFL_CDATA_PTR || irt_sametype(st, dt))
+      return ref;
+    /* Add I32/U32 or I64/U64 conversion to preserve the destination type. */
+    fins->o = IR_CONV;
+    fins->op1 = ref;
+    fins->op2 = (irt_type(dt)<<5)|irt_type(st);
+    return RETRYFOLD;
+  }
   return NEXTFOLD;
 }
 

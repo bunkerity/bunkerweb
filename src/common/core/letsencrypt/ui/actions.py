@@ -10,9 +10,28 @@ from traceback import format_exc
 from typing import Tuple
 from uuid import uuid4
 
+from common_utils import safe_tar_extractall  # type: ignore
 from cryptography import x509
-from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import hashes
+
+
+def _is_allowed_member(member):
+    """Filter tar members to only extract live/, archive/, renewal/ dirs.
+
+    SAFE to use here because extract_cache() targets a per-request tmp UUID dir
+    that is rmtree'd in pre_render's finally block — the filtered state never
+    flows back into the canonical DB cache row. DO NOT reuse this filter on any
+    path that re-tars and writes back to the cache: dropping accounts/ from the
+    snapshot poisons renewals with certbot AccountNotFound. The canonical
+    restore lives in blueprints/letsencrypt.py:download_certificates() and is
+    intentionally unfiltered.
+    """
+    parts = Path(member.name).parts
+    if member.name == ".":
+        return True
+    if parts and parts[0] == ".":
+        parts = parts[1:]
+    return bool(parts) and parts[0] in ("live", "archive", "renewal")
 
 
 def extract_cache(folder_path, cache_files):
@@ -21,10 +40,8 @@ def extract_cache(folder_path, cache_files):
     for cache_file in cache_files:
         if cache_file["file_name"].endswith(".tgz") and cache_file["file_name"].startswith("folder:"):
             with tar_open(fileobj=BytesIO(cache_file["data"]), mode="r:gz") as tar:
-                try:
-                    tar.extractall(folder_path, filter="fully_trusted")
-                except TypeError:
-                    tar.extractall(folder_path)
+                members = [m for m in tar.getmembers() if _is_allowed_member(m)]
+                safe_tar_extractall(tar, folder_path, links="contained", members=members)
 
 
 def retrieve_certificates_info(folder_paths: Tuple[Path, Path]) -> dict:
@@ -38,6 +55,7 @@ def retrieve_certificates_info(folder_paths: Tuple[Path, Path]) -> dict:
         "serial_number": [],
         "fingerprint": [],
         "version": [],
+        "preferred_profile": [],
         "challenge": [],
         "authenticator": [],
         "key_type": [],
@@ -66,7 +84,10 @@ def retrieve_certificates_info(folder_paths: Tuple[Path, Path]) -> dict:
 
             # * Parsing the certificate
             try:
-                cert = x509.load_pem_x509_certificate(cert_file.read_bytes(), default_backend())
+                certs = x509.load_pem_x509_certificates(cert_file.read_bytes())
+                if not certs:
+                    raise ValueError(f"No certificates found in {cert_file}")
+                cert = certs[0]
 
                 # ? Getting the subject
                 subject = cert.subject.get_attributes_for_oid(x509.NameOID.COMMON_NAME)
@@ -79,8 +100,8 @@ def retrieve_certificates_info(folder_paths: Tuple[Path, Path]) -> dict:
                     cert_info["issuer"] = issuer[0].value
 
                 # ? Getting the validity period
-                cert_info["valid_from"] = cert.not_valid_before.strftime("%d-%m-%Y %H:%M:%S UTC")
-                cert_info["valid_to"] = cert.not_valid_after.strftime("%d-%m-%Y %H:%M:%S UTC")
+                cert_info["valid_from"] = cert.not_valid_before_utc.strftime("%d-%m-%Y %H:%M:%S UTC")
+                cert_info["valid_to"] = cert.not_valid_after_utc.strftime("%d-%m-%Y %H:%M:%S UTC")
 
                 # ? Getting the serial number
                 cert_info["serial_number"] = str(cert.serial_number)
@@ -147,13 +168,12 @@ def pre_render(app, *args, **kwargs):
         },
     }
 
-    root_folder = Path(sep, "var", "tmp", "bunkerweb", "ui")
+    folder_path = Path(sep, "var", "tmp", "bunkerweb", "ui").joinpath("letsencrypt", str(uuid4()))
     try:
         # ? Fetching Let's Encrypt cache files
         regular_cache_files = kwargs["db"].get_jobs_cache_files(job_name="certbot-renew")
 
         # ? Extracting cache files
-        folder_path = root_folder.joinpath("letsencrypt", str(uuid4()))
         regular_le_folder = folder_path.joinpath("regular")
         extract_cache(regular_le_folder, regular_cache_files)
 
@@ -164,7 +184,6 @@ def pre_render(app, *args, **kwargs):
         logger.error(f"Failed to get Let's Encrypt certificates: {e}")
         ret["error"] = str(e)
     finally:
-        if folder_path:
-            rmtree(root_folder, ignore_errors=True)
+        rmtree(folder_path, ignore_errors=True)
 
     return ret

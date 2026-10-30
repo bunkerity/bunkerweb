@@ -2,6 +2,7 @@
 %module libinjection
 %{
 #include "libinjection.h"
+#include "libinjection_error.h"
 #include "libinjection_sqli.h"
 #include <stddef.h>
 
@@ -77,5 +78,6 @@ for (i = 0; i < $1_dim0; i++) {
         $2 = $input;
     }
 }
+%include "libinjection_error.h"
 %include "libinjection.h"
 %include "libinjection_sqli.h"

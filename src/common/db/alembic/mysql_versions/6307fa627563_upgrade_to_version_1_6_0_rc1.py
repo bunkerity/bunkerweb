@@ -65,25 +65,21 @@ def upgrade() -> None:
     # Add the new order column to bw_template_settings and set initial values
     op.add_column("bw_template_settings", sa.Column("order", sa.Integer(), nullable=False, server_default="0"))
     op.execute("SET @row_number = 0")
-    op.execute(
-        """
+    op.execute("""
         UPDATE bw_template_settings
         SET `order` = (@row_number:=@row_number + 1)
         ORDER BY template_id, setting_id
-    """
-    )
+    """)
     op.create_unique_constraint(None, "bw_template_settings", ["template_id", "setting_id", "order"])
 
     # Add the new order column to bw_template_custom_configs
     op.add_column("bw_template_custom_configs", sa.Column("order", sa.Integer(), nullable=False))
     op.execute("SET @row_number = 0")
-    op.execute(
-        """
+    op.execute("""
         UPDATE bw_template_settings
         SET `order` = (@row_number:=@row_number + 1)
         ORDER BY template_id, setting_id
-    """
-    )
+    """)
     op.create_unique_constraint(None, "bw_template_custom_configs", ["template_id", "order"])
 
     # Update version in bw_metadata

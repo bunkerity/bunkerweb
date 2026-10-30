@@ -1,17 +1,15 @@
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from re import compile as re_compile
 from time import time
 from typing import Literal
-from urllib.parse import urlsplit
 from flask import Blueprint, jsonify, redirect, render_template, request, url_for
 from flask_login import login_required
 
+from common_utils import parse_host  # type: ignore
 from app.dependencies import BW_CONFIG, BW_INSTANCES_UTILS, CONFIG_TASKS_EXECUTOR, DATA, DB
 from app.utils import flash, is_ui_api_method
 
 from app.models.instance import Instance
 from app.routes.utils import handle_error, verify_data_in_form
-
 
 instances = Blueprint("instances", __name__)
 
@@ -33,18 +31,22 @@ def instances_page():
 def instances_new():
     if DB.readonly:
         return handle_error("Database is in read-only mode", "instances")
-    verify_data_in_form(
+    ret = verify_data_in_form(
         data={"hostname": None},
         err_message="Missing instance hostname parameter on /instances/new.",
         redirect_url="instances",
         next=True,
     )
-    verify_data_in_form(
+    if ret is not True:
+        return ret
+    ret = verify_data_in_form(
         data={"name": None},
         err_message="Missing instance name parameter on /instances/new.",
         redirect_url="instances",
         next=True,
     )
+    if ret is not True:
+        return ret
 
     # Fetch API defaults, including new HTTPS-related settings
     db_config = BW_CONFIG.get_config(
@@ -55,17 +57,12 @@ def instances_new():
 
     # Parse provided hostname, optional scheme and port (robustly)
     raw_input = request.form["hostname"].strip()
-    # Allow parsing host[:port] by prefixing // when no scheme is provided
-    to_parse = raw_input if "://" in raw_input else f"//{raw_input}"
-    parts = urlsplit(to_parse)
-    explicit_scheme = bool(parts.scheme)
-    scheme_https = parts.scheme.lower() == "https"
-    hostname = (parts.hostname or "").lower()
-    provided_port = parts.port  # int | None
-
-    domain_pattern = re_compile(r"^(?!.*\.\.)[^\s\/:]{1,256}$")
-    if not domain_pattern.match(hostname):
-        return handle_error(f"Invalid hostname: {hostname}. Please enter a valid domain.", "instances", True)
+    try:
+        scheme, hostname, provided_port = parse_host(raw_input)
+    except ValueError as e:
+        return handle_error(f"{e}.", "instances", True)
+    explicit_scheme = bool(scheme)
+    scheme_https = scheme == "https"
 
     # Derive defaults
     default_http_port = str(db_config.get("API_HTTP_PORT", "5000"))
@@ -118,12 +115,14 @@ def instances_action(action: Literal["ping", "reload", "stop", "delete"]):  # TO
     if DB.readonly:
         return handle_error("Database is in read-only mode", "instances")
 
-    verify_data_in_form(
+    ret = verify_data_in_form(
         data={"instances": None},
         err_message=f"Missing instances parameter on /instances/{action}.",
         redirect_url="instances",
         next=True,
     )
+    if ret is not True:
+        return ret
     instances = request.form["instances"].split(",")
     if not instances:
         return handle_error(f"No instance{'s' if len(instances) > 1 else ''} selected.", "instances", True)

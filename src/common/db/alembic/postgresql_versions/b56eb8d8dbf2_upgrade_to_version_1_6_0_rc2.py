@@ -24,8 +24,7 @@ def upgrade() -> None:
     op.add_column("bw_selects", sa.Column("order", sa.Integer(), nullable=True))
 
     # Step 2: Populate default values
-    op.execute(
-        """
+    op.execute("""
         UPDATE bw_selects
         SET "order" = subquery.row_number
         FROM (
@@ -33,8 +32,7 @@ def upgrade() -> None:
             FROM bw_selects
         ) as subquery
         WHERE bw_selects.value = subquery.value
-    """
-    )
+    """)
 
     # Step 3: Alter column to NOT NULL
     op.alter_column("bw_selects", "order", nullable=False)

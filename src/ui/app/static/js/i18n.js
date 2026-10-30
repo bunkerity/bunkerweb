@@ -5,6 +5,9 @@ function getAlpha2(lang) {
 
 // Apply translations to elements with [data-i18n] attribute
 function applyTranslations() {
+  // Before the resources are loaded i18next.t() returns the raw key, which would
+  // overwrite the readable server-rendered text.
+  if (!i18next.isInitialized) return;
   const elements = $("[data-i18n]");
   elements.each(function () {
     const element = $(this);
@@ -22,11 +25,7 @@ function applyTranslations() {
         );
       }
     }
-    // Prevent i18next from escaping single quotes to HTML entities
-    const translation = i18next.t(key, {
-      ...options,
-      interpolation: { escapeValue: false },
-    });
+    const translation = i18next.t(key, options);
     if (element.is("[placeholder]")) {
       element.attr("placeholder", translation);
     } else if (element.is("[title]")) {
@@ -94,7 +93,7 @@ function updateLanguageSelector(lang) {
   }
   const flagSrc = $flagSelector
     .attr("src")
-    .replace(/\/[a-z]{2}\.svg$/, `/${flagCode}.svg`);
+    .replace(/\/[a-z]{2}\.svg(?=\?|$)/, `/${flagCode}.svg`);
   $flagSelector.attr("src", flagSrc);
   $("#current-lang-text").text(
     langNames[alpha2] || langNames["en"] || "English",
@@ -125,9 +124,12 @@ function saveLanguage(rootUrl, language) {
   data.append("language", language);
   data.append("csrf_token", csrfToken);
 
+  // keepalive: the request must survive a navigation started right after the
+  // language is picked, otherwise the preference never reaches the database.
   fetch(rootUrl, {
     method: "POST",
     body: data,
+    keepalive: true,
   })
     .then((response) => {
       if (!response.ok) {
@@ -138,18 +140,6 @@ function saveLanguage(rootUrl, language) {
       console.error("Error saving language preference to server:", error);
     });
 }
-
-// Debounce function to prevent multiple rapid requests
-function debounce(func, wait) {
-  let timeout;
-  return function (...args) {
-    const context = this;
-    clearTimeout(timeout);
-    timeout = setTimeout(() => func.apply(context, args), wait);
-  };
-}
-
-const debouncedSaveLanguage = debounce(saveLanguage, 1000);
 
 // Check if language preference exists in localStorage
 const savedLang = localStorage.getItem("language");
@@ -218,8 +208,9 @@ function changeLanguage(lang) {
     .trim()
     .replace(/\/home$/, "/set_language");
 
-  // Save language preference to server
-  debouncedSaveLanguage(rootUrl, alpha2);
+  // Save language preference to server (sent immediately: a debounce here was
+  // dropped whenever the user navigated within a second of picking a language)
+  saveLanguage(rootUrl, alpha2);
 }
 
 // Helper to update DataTable language and translations for a given table
@@ -274,7 +265,27 @@ function updateFilterTranslations() {
   );
 }
 
-$(document).ready(function () {
+// Page scripts are loaded after this file: hold their jQuery ready callbacks
+// until the first translation pass is done, so tables and toolbars are built
+// with translations available. i18n itself starts on DOMContentLoaded, which
+// a ready hold does not delay.
+$.holdReady(true);
+let i18nReadyReleased = false;
+function releaseI18nReady() {
+  if (i18nReadyReleased) return;
+  i18nReadyReleased = true;
+  $.holdReady(false);
+  // Most page scripts only start their table when window.i18nextReady is still
+  // false in their ready callback and poll for it. Ready callbacks run in
+  // registration order, so this one runs after all of theirs.
+  $(function () {
+    window.i18nextReady = true;
+  });
+}
+// Never block the page for good if the locale files cannot be fetched.
+setTimeout(releaseI18nReady, 8000);
+
+document.addEventListener("DOMContentLoaded", function () {
   i18next
     .use(i18nextHttpBackend)
     .use(i18nextBrowserLanguageDetector)
@@ -282,6 +293,9 @@ $(document).ready(function () {
       {
         fallbackLng: "en",
         debug: false,
+        // Translations are inserted as text, never as HTML: escaping here only
+        // turns characters like / and ' into visible entities.
+        interpolation: { escapeValue: false },
         ns: ["messages"],
         defaultNS: "messages",
         backend: {
@@ -297,7 +311,13 @@ $(document).ready(function () {
         supportedLngs: supportedLngs,
       },
       function (err) {
-        if (err) return console.error("Error initializing i18next:", err);
+        if (err) {
+          console.error("Error initializing i18next:", err);
+          releaseI18nReady();
+          return;
+        }
+
+        document.documentElement.lang = i18next.language;
 
         loadPluginTranslations(i18next.language).then(function () {
           applyTranslations();
@@ -305,10 +325,12 @@ $(document).ready(function () {
           updateDocumentationLinks(i18next.language);
           $("[name='language']").val(i18next.language);
           $("#newsletter-locale").val(i18next.language);
+          releaseI18nReady();
         });
 
         i18next.on("languageChanged", function (lng) {
           i18next.language = getAlpha2(lng);
+          document.documentElement.lang = i18next.language;
           loadPluginTranslations(i18next.language).then(function () {
             applyTranslations();
             updateLanguageSelector(lng);
@@ -323,8 +345,6 @@ $(document).ready(function () {
           const lang = $(this).data("lang");
           changeLanguage(lang);
         });
-
-        window.i18nextReady = true;
       },
     );
 

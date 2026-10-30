@@ -1,6 +1,7 @@
 /*
  * ModSecurity, http://www.modsecurity.org/
  * Copyright (c) 2015 - 2021 Trustwave Holdings, Inc. (http://www.trustwave.com/)
+ *               2026 OWASP (https://owasp.org)
  *
  * You may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
@@ -35,6 +36,7 @@
 
 #include <stdlib.h>
 #include <stddef.h>
+#include <stdint.h>
 
 #ifndef __cplusplus
 typedef struct ModSecurity_t ModSecurity;
@@ -80,14 +82,13 @@ typedef struct Rules_t RulesSet;
 
 #define LOGFY_ADD(a, b) \
     yajl_gen_string(g, reinterpret_cast<const unsigned char*>(a), strlen(a)); \
-    if (b == NULL) { \
+    if (b.data() == NULL) { \
       yajl_gen_string(g, reinterpret_cast<const unsigned char*>(""), \
           strlen("")); \
     } else { \
-      yajl_gen_string(g, reinterpret_cast<const unsigned char*>(b), \
-          strlen(b)); \
+      yajl_gen_string(g, reinterpret_cast<const unsigned char*>(b.data()), \
+          b.length()); \
     }
-
 
 #define LOGFY_ADD_INT(a, b) \
     yajl_gen_string(g, reinterpret_cast<const unsigned char*>(a), strlen(a)); \
@@ -143,6 +144,7 @@ class TransactionAnchoredVariables {
         m_variableMultipartCrlfLFLines(t, "MULTIPART_CRLF_LF_LINES"),
         m_variableMultipartDataAfter(t, "MULTIPART_DATA_AFTER"),
         m_variableMultipartDataBefore(t, "MULTIPART_DATA_BEFORE"),
+        m_variableMultipartDuplicatePartHeader(t, "MULTIPART_DUPLICATE_PART_HEADER"),
         m_variableMultipartFileLimitExceeded(t,
             "MULTIPART_FILE_LIMIT_EXCEEDED"),
         m_variableMultipartHeaderFolding(t, "MULTIPART_HEADER_FOLDING"),
@@ -194,6 +196,8 @@ class TransactionAnchoredVariables {
         m_variableFilesNames(t, "FILES_NAMES"),
         m_variableFilesTmpContent(t, "FILES_TMP_CONTENT"),
         m_variableMultipartFileName(t, "MULTIPART_FILENAME"),
+        m_variableMultipartFileNameCharset(t, "MULTIPART_FILENAME_CHARSET"),
+        m_variableMultipartFileNameLanguage(t, "MULTIPART_FILENAME_LANGUAGE"),
         m_variableMultipartName(t, "MULTIPART_NAME"),
         m_variableMatchedVarsNames(t, "MATCHED_VARS_NAMES"),
         m_variableMatchedVars(t, "MATCHED_VARS"),
@@ -229,6 +233,7 @@ class TransactionAnchoredVariables {
     AnchoredVariable m_variableMultipartCrlfLFLines;
     AnchoredVariable m_variableMultipartDataAfter;
     AnchoredVariable m_variableMultipartDataBefore;
+    AnchoredVariable m_variableMultipartDuplicatePartHeader;
     AnchoredVariable m_variableMultipartFileLimitExceeded;
     AnchoredVariable m_variableMultipartHeaderFolding;
     AnchoredVariable m_variableMultipartInvalidHeaderFolding;
@@ -278,6 +283,8 @@ class TransactionAnchoredVariables {
     AnchoredSetVariable m_variableFilesNames;
     AnchoredSetVariable m_variableFilesTmpContent;
     AnchoredSetVariable m_variableMultipartFileName;
+    AnchoredSetVariable m_variableMultipartFileNameCharset;
+    AnchoredSetVariable m_variableMultipartFileNameLanguage;
     AnchoredSetVariable m_variableMultipartName;
     AnchoredSetVariable m_variableMatchedVarsNames;
     AnchoredSetVariable m_variableMatchedVars;
@@ -405,14 +412,14 @@ class Transaction : public TransactionAnchoredVariables, public TransactionSecMa
     size_t getRequestBodyLength();
 
 #ifndef NO_LOGS
-    void debug(int, const std::string &) const;
+    void debug(int level, const std::string& message) const;
 #endif
     void serverLog(const RuleMessage &rm);
 
     int getRuleEngineState() const;
 
     std::string toJSON(int parts);
-    std::string toOldAuditLogFormat(int parts, const std::string &trailer);
+    std::string toOldAuditLogFormat(int parts, const std::string &trailer, const std::string &header);
     std::string toOldAuditLogFormatIndex(const std::string &filename,
         double size, const std::string &md5);
 
@@ -595,6 +602,14 @@ class Transaction : public TransactionAnchoredVariables, public TransactionSecMa
     ModSecurityIntervention m_it;
 
     /**
+     * Sticky flag: set to true the first time the connector consumes a
+     * disruptive intervention via Transaction::intervention(). Unlike
+     * m_it.disruptive, this is NOT cleared by intervention::reset(), so
+     * it remains a reliable signal at audit-log time.
+     */
+    bool m_isInterrupted = false;
+
+    /**
      * Holds the creation time stamp, using std::time.
      *
      * TODO: m_timeStamp and m_creationTimeStamp may be merged into a single
@@ -619,6 +634,7 @@ class Transaction : public TransactionAnchoredVariables, public TransactionSecMa
     RequestBodyProcessor::JSON *m_json;
 
     int m_secRuleEngine;
+    int m_secXMLParseXmlIntoArgs;
 
     std::string m_variableDuration;
     std::map<std::string, std::string> m_variableEnvs;
@@ -740,7 +756,14 @@ int msc_update_status_code(Transaction *transaction, int status);
 int msc_set_request_hostname(Transaction *transaction, const unsigned char *hostname);
 
 /** @ingroup ModSecurity_C_API */
-const char *msc_get_transaction_variable(Transaction *transaction, const char *var_name);
+size_t msc_get_rules_messages_size(const Transaction *transaction);
+
+/** @ingroup ModSecurity_C_API */
+size_t msc_get_rules_messages_rule_ids(const Transaction *transaction,
+    int64_t *ids, size_t ids_len);
+
+/** @ingroup ModSecurity_C_API */
+int msc_get_transaction_variable(Transaction *transaction, const char *var_name, char *buf, size_t *buf_len);
 
 #ifdef __cplusplus
 }

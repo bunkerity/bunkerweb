@@ -43,6 +43,9 @@ Follow these steps to configure and use the Greylist feature:
     | `GREYLIST_IP`      |         | multisite | no       | **IP Greylist:** List of IP addresses or networks (in CIDR notation) to greylist, separated by spaces.   |
     | `GREYLIST_IP_URLS` |         | multisite | no       | **IP Greylist URLs:** List of URLs containing IP addresses or networks to greylist, separated by spaces. |
 
+    !!! info "List formats"
+        URL lists can hold one entry per line (lines starting with `#` or `;` are comments, and only the first word of a line is read), CSV, a JSON document, or JSON lines. In IP lists, commas also separate fields, and JSON lists keep every string that is an IP or network. Add a fragment to keep only part of a JSON list: `#key` keeps the values under `key`, `#key=value` keeps the objects whose `key` equals or contains `value`, and `&` combines terms. Example: `https://ip-ranges.amazonaws.com/ip-ranges.json#service=CLOUDFRONT`. A URL with a fragment keeps only what the fragment selects, so it keeps nothing if the list is not JSON.
+
 === "Reverse DNS"
     **What this does:** Greylist visitors based on their domain name (in reverse). Useful for allowing conditional access to visitors from specific organizations or networks.
 
@@ -51,6 +54,9 @@ Follow these steps to configure and use the Greylist feature:
     | `GREYLIST_RDNS`        |         | multisite | no       | **rDNS Greylist:** List of reverse DNS suffixes to greylist, separated by spaces.                      |
     | `GREYLIST_RDNS_GLOBAL` | `yes`   | multisite | no       | **rDNS Global Only:** Only perform rDNS greylist checks on global IP addresses when set to `yes`.      |
     | `GREYLIST_RDNS_URLS`   |         | multisite | no       | **rDNS Greylist URLs:** List of URLs containing reverse DNS suffixes to greylist, separated by spaces. |
+
+    !!! info "Forward-confirmed reverse DNS (FCrDNS)"
+        `GREYLIST_RDNS` suffixes are forward-confirmed: the matching PTR hostname is resolved back to an IP and the greylist grant only applies when it matches the client IP. A PTR that cannot be forward-confirmed is treated as a possible spoof and access is not granted. This prevents an attacker who controls their own PTR record from setting it to a greylisted suffix to gain access.
 
 === "ASN"
     **What this does:** Greylist visitors from specific network providers using Autonomous System Numbers. ASNs identify which provider or organization an IP belongs to.
@@ -75,6 +81,20 @@ Follow these steps to configure and use the Greylist feature:
     | ------------------- | ------- | --------- | -------- | --------------------------------------------------------------------------------------------- |
     | `GREYLIST_URI`      |         | multisite | no       | **URI Greylist:** List of URI patterns (PCRE regex) to greylist, separated by spaces.         |
     | `GREYLIST_URI_URLS` |         | multisite | no       | **URI Greylist URLs:** List of URLs containing URI patterns to greylist, separated by spaces. |
+
+    !!! tip "Anchor a path pattern to cover everything below it"
+        Write `^/admin(/|$)` rather than `^/admin$`. A pattern anchored on a single exact path does not match `/admin/`, `/admin%2f` or `/admin;foo`, and your application may still serve the same resource on those. Matching runs on the decoded, dot-resolved path, so `/a/../admin` and `//admin` are already covered.
+
+=== "Header"
+    **What this does:** Greylists requests carrying a given request header, matched by name and, optionally, by a PCRE regex on its value.
+
+    | Setting                 | Default | Context   | Multiple | Description                                                                                                                      |
+    | ----------------------- | ------- | --------- | -------- | -------------------------------------------------------------------------------------------------------------------------------- |
+    | `GREYLIST_HEADER_NAME`  |         | multisite | yes      | **Header name:** Name of a request header that makes the request be greylisted. Numbered pairs: `_NAME_1` goes with `_VALUE_1`.  |
+    | `GREYLIST_HEADER_VALUE` |         | multisite | yes      | **Header value:** PCRE regex the header value must match. Leave empty to match on the header being present, whatever it carries. |
+
+    !!! warning "A header rule is a shared secret"
+        Any client can send a header, so a header rule is a bearer token, not a network control. Serve it over HTTPS only, anchor the regex with `^` and `$` (the match is not anchored by default, so `abc` also matches `xabcx`), and rotate the value. When BunkerWeb sits behind a proxy, that proxy must overwrite any client-supplied copy of the header. These rules are HTTP only: a stream service carries no request headers, so nothing matches there.
 
 !!! info "URL Format Support"
     All `*_URLS` settings support HTTP/HTTPS URLs as well as local file paths using the `file:///` prefix. Basic authentication is supported using the `http://user:pass@url` format.
@@ -129,13 +149,22 @@ Follow these steps to configure and use the Greylist feature:
 
 === "Selective API Access"
 
-    A configuration allowing access to specific API endpoints:
+    A configuration that lets a partner network reach everything and lets every client reach one public endpoint:
 
     ```yaml
     USE_GREYLIST: "yes"
-    GREYLIST_URI: "^/api/v1/public/ ^/api/v1/status"
-    GREYLIST_IP: "203.0.113.0/24"  # External partner network
+    GREYLIST_IP: "203.0.113.0/24"
+    GREYLIST_URI: "^/api/foo$"
     ```
+
+    Greylist criteria are alternatives: a request passes the Greylist when any one of them matches. Here the listed network may reach every path, and any client may reach the exact path `/api/foo`. Other clients are denied on other paths. Other enabled security checks still apply to every request. Use `^/api/foo(/|$)` for a public subtree. The match uses the normalized path, without the query string. This cannot express different IP lists for different paths, or require both an IP and a path to match.
+
+    | Client | Path | Result |
+    | --- | --- | --- |
+    | In `203.0.113.0/24` | `/api/foo` | Passes |
+    | In `203.0.113.0/24` | any other path | Passes |
+    | Outside `203.0.113.0/24` | `/api/foo` | Passes |
+    | Outside `203.0.113.0/24` | any other path | Denied |
 
 ### Working with local list files
 

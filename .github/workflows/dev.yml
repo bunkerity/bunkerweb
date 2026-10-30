@@ -5,13 +5,22 @@ permissions: read-all
 on:
   push:
     branches: [dev]
+  workflow_dispatch:
 
 jobs:
+  plumber:
+    uses: ./.github/workflows/plumber.yml
+    permissions:
+      contents: read
+      security-events: write
+      id-token: write
+
   # Containers
   build-containers:
     permissions:
       contents: read
       packages: write
+      security-events: write # Trivy SARIF upload
     strategy:
       fail-fast: false
       matrix:
@@ -52,15 +61,18 @@ jobs:
             ubuntu,
             debian-bookworm,
             debian-trixie,
-            fedora-42,
             fedora-43,
+            fedora-44,
             rhel-8,
             rhel-9,
             rhel-10,
+            ubuntu-noble,
             ubuntu-jammy,
           ]
         include:
           - linux: ubuntu
+            package: deb
+          - linux: ubuntu-noble
             package: deb
           - linux: ubuntu-jammy
             package: deb
@@ -68,9 +80,9 @@ jobs:
             package: deb
           - linux: debian-trixie
             package: deb
-          - linux: fedora-42
-            package: rpm
           - linux: fedora-43
+            package: rpm
+          - linux: fedora-44
             package: rpm
           - linux: rhel-8
             package: rpm
@@ -96,78 +108,110 @@ jobs:
       contents: read
       security-events: write
 
-  # UI tests
-  # prepare-tests-ui: # TODO: Uncomment when UI tests are back
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: Checkout repository
-  #       uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
-  #     - id: set-matrix
-  #       run: |
-  #         tests=$(find ./tests/ui/ -name "*_page.py" -type f -printf "%f\n" | jq -c --raw-input --slurp 'split("\n")| .[0:-1]')
-  #         echo "tests=$tests" >> $GITHUB_OUTPUT
-  #   outputs:
-  #     tests: ${{ steps.set-matrix.outputs.tests }}
-  # tests-ui:
-  #   needs: [prepare-tests-ui, build-containers]
-  #   strategy:
-  #     fail-fast: false
-  #     matrix:
-  #       test: ${{ fromJson(needs.prepare-tests-ui.outputs.tests) }}
-  #   uses: ./.github/workflows/tests-ui.yml
-  #   with:
-  #     TEST: ${{ matrix.test }}
-  #     RELEASE: dev
-  # tests-ui-linux:
-  #   needs: [prepare-tests-ui, build-packages]
-  #   strategy:
-  #     fail-fast: false
-  #     matrix:
-  #       test: ${{ fromJson(needs.prepare-tests-ui.outputs.tests) }}
-  #   uses: ./.github/workflows/tests-ui-linux.yml
-  #   with:
-  #     TEST: ${{ matrix.test }}
-  #     RELEASE: dev
+  # Integration tests: the framework lives in tests/ and is driven by integration-tests.yml.
+  # `tests/parse.py --dev` reads the `dev:` block of tests/utils/integrations.yml (one Linux
+  # distro per package family) and writes one matrix file per integration.
+  parse-tests-core:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Set up Python 3.13
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.13"
+      - id: parse_tests
+        name: Parse core tests
+        run: |
+          pip install --require-hashes -r tests/requirements.txt
+          python3 tests/parse.py "core" --dev
+          echo "Linux_tests=$(cat /tmp/tests/Linux_tests.json || echo "[]")" >> $GITHUB_OUTPUT
+          echo "Docker_tests=$(cat /tmp/tests/Docker_tests.json || echo "[]")" >> $GITHUB_OUTPUT
+          echo "Autoconf_tests=$(cat /tmp/tests/Autoconf_tests.json || echo "[]")" >> $GITHUB_OUTPUT
+          echo "Kubernetes_tests=$(cat /tmp/tests/Kubernetes_tests.json || echo "[]")" >> $GITHUB_OUTPUT
+          echo "All_in_one_tests=$(cat /tmp/tests/All_in_one_tests.json || echo "[]")" >> $GITHUB_OUTPUT
+    outputs:
+      Linux_tests: ${{ steps.parse_tests.outputs.Linux_tests }}
+      Docker_tests: ${{ steps.parse_tests.outputs.Docker_tests }}
+      Autoconf_tests: ${{ steps.parse_tests.outputs.Autoconf_tests }}
+      Kubernetes_tests: ${{ steps.parse_tests.outputs.Kubernetes_tests }}
+      All_in_one_tests: ${{ steps.parse_tests.outputs.All_in_one_tests }}
 
-  # Core tests
-  # prepare-tests-core:
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: Checkout repository
-  #       uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
-  #     - id: set-matrix
-  #       run: |
-  #         tests=$(find ./tests/core/ -maxdepth 1 -mindepth 1 -type d -printf "%f\n" | jq -c --raw-input --slurp 'split("\n")| .[0:-1]')
-  #         echo "tests=$tests" >> $GITHUB_OUTPUT
-  #   outputs:
-  #     tests: ${{ steps.set-matrix.outputs.tests }}
-  # tests-core:
-  #   needs: [build-containers, prepare-tests-core]
-  #   strategy:
-  #     fail-fast: false
-  #     matrix:
-  #       test: ${{ fromJson(needs.prepare-tests-core.outputs.tests) }}
-  #   uses: ./.github/workflows/test-core.yml
-  #   with:
-  #     TEST: ${{ matrix.test }}
-  #     RELEASE: dev
-  # tests-core-linux:
-  #   needs: [build-packages, prepare-tests-core]
-  #   strategy:
-  #     fail-fast: false
-  #     matrix:
-  #       test: ${{ fromJson(needs.prepare-tests-core.outputs.tests) }}
-  #   uses: ./.github/workflows/test-core-linux.yml
-  #   with:
-  #     TEST: ${{ matrix.test }}
-  #     RELEASE: dev
-  #   secrets: inherit
+  run-Docker-tests-core:
+    needs: [build-containers, parse-tests-core]
+    strategy:
+      fail-fast: false
+      matrix:
+        test: ${{ fromJson(needs.parse-tests-core.outputs.Docker_tests) }}
+    uses: ./.github/workflows/integration-tests.yml
+    with:
+      TYPE: core
+      TEST: ${{ matrix.test }}
+      RELEASE: dev
+
+  run-Autoconf-tests-core:
+    needs: [build-containers, parse-tests-core]
+    strategy:
+      fail-fast: false
+      matrix:
+        test: ${{ fromJson(needs.parse-tests-core.outputs.Autoconf_tests) }}
+    uses: ./.github/workflows/integration-tests.yml
+    with:
+      TYPE: core
+      TEST: ${{ matrix.test }}
+      RELEASE: dev
+
+  run-Linux-tests-core:
+    needs: [build-packages, parse-tests-core]
+    strategy:
+      fail-fast: false
+      matrix:
+        test: ${{ fromJson(needs.parse-tests-core.outputs.Linux_tests) }}
+    uses: ./.github/workflows/integration-tests.yml
+    with:
+      TYPE: core
+      TEST: ${{ matrix.test }}
+      RELEASE: dev
+
+  run-Kubernetes-tests-core:
+    needs: [build-containers, parse-tests-core]
+    strategy:
+      fail-fast: false
+      matrix:
+        test: ${{ fromJson(needs.parse-tests-core.outputs.Kubernetes_tests) }}
+    uses: ./.github/workflows/integration-tests.yml
+    with:
+      TYPE: core
+      TEST: ${{ matrix.test }}
+      RELEASE: dev
+
+  run-All-in-one-tests-core:
+    needs: [build-containers, parse-tests-core]
+    strategy:
+      fail-fast: false
+      matrix:
+        test: ${{ fromJson(needs.parse-tests-core.outputs.All_in_one_tests) }}
+    uses: ./.github/workflows/integration-tests.yml
+    with:
+      TYPE: core
+      TEST: ${{ matrix.test }}
+      RELEASE: dev
 
   # Push with dev tag
   push-dev:
-    # needs: [tests-ui, tests-core] # TODO: Uncomment when tests are back
-    needs: [build-containers]
-    runs-on: ubuntu-latest
+    needs:
+      [
+        plumber,
+        build-containers,
+        run-Docker-tests-core,
+        run-Autoconf-tests-core,
+        run-Linux-tests-core,
+        run-Kubernetes-tests-core,
+        run-All-in-one-tests-core,
+      ]
+    runs-on: ubuntu-26.04
     permissions:
       contents: read
       packages: write
@@ -188,23 +232,37 @@ jobs:
             to: bunkerweb-all-in-one
     steps:
       - name: Login to Docker Hub
-        uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3.7.0
+        uses: docker/login-action@371161bbe7024a29a25c5e19bfcbc0804fe9ad2c # v4.5.2
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_TOKEN }}
       - name: Login to ghcr
-        uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3.7.0
+        uses: docker/login-action@371161bbe7024a29a25c5e19bfcbc0804fe9ad2c # v4.5.2
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Login to GitLab registry
+        uses: docker/login-action@371161bbe7024a29a25c5e19bfcbc0804fe9ad2c # v4.5.2
+        with:
+          registry: registry.gitlab.com
+          username: ${{ secrets.GITLAB_REGISTRY_USER }}
+          password: ${{ secrets.GITLAB_REGISTRY_TOKEN }}
       - name: Push ${{ matrix.image.from }} to ${{ matrix.image.to }}
-        run: docker pull ghcr.io/bunkerity/${{ matrix.image.from }}-tests:dev && docker tag ghcr.io/bunkerity/${{ matrix.image.from }}-tests:dev bunkerity/${{ matrix.image.to }}:dev && docker tag ghcr.io/bunkerity/${{ matrix.image.from }}-tests:dev ghcr.io/bunkerity/${{ matrix.image.to }}:dev && docker push bunkerity/${{ matrix.image.to }}:dev && docker push ghcr.io/bunkerity/${{ matrix.image.to }}:dev
+        run: |
+          SRC="ghcr.io/bunkerity/${{ matrix.image.from }}-tests:dev"
+          docker pull "$SRC"
+          for DST in \
+            "bunkerity/${{ matrix.image.to }}:dev" \
+            "ghcr.io/bunkerity/${{ matrix.image.to }}:dev" \
+            "registry.gitlab.com/bunkerity/bunkerweb/${{ matrix.image.to }}:dev"; do
+            docker tag "$SRC" "$DST"
+            docker push "$DST"
+          done
 
-  # Push Linux packages
+  # Push Linux packages (not gated on the integration matrix, same as 1.7)
   push-packages:
-    # needs: [tests-ui-linux, tests-core-linux] # TODO: Uncomment when tests are back
-    needs: [build-packages]
+    needs: [plumber, build-packages]
     strategy:
       matrix:
         linux:
@@ -212,11 +270,12 @@ jobs:
             ubuntu,
             debian-bookworm,
             debian-trixie,
-            fedora-42,
             fedora-43,
+            fedora-44,
             el-8,
             el-9,
             el-10,
+            ubuntu-noble,
             ubuntu-jammy,
           ]
         arch: [amd64]
@@ -227,7 +286,7 @@ jobs:
             package_arch: amd64
             separator: _
             suffix: ""
-            version: noble
+            version: resolute
             package: deb
           - linux: debian-bookworm
             package_arch: amd64
@@ -241,17 +300,17 @@ jobs:
             suffix: ""
             version: trixie
             package: deb
-          - linux: fedora-42
-            package_arch: x86_64
-            separator: "-"
-            suffix: "1."
-            version: 42
-            package: rpm
           - linux: fedora-43
             package_arch: x86_64
             separator: "-"
             suffix: "1."
             version: 43
+            package: rpm
+          - linux: fedora-44
+            package_arch: x86_64
+            separator: "-"
+            suffix: "1."
+            version: 44
             package: rpm
           - linux: el-8
             package_arch: x86_64
@@ -271,6 +330,12 @@ jobs:
             suffix: "1."
             version: 10
             package: rpm
+          - linux: ubuntu-noble
+            package_arch: amd64
+            separator: _
+            suffix: ""
+            version: noble
+            package: deb
           - linux: ubuntu-jammy
             package_arch: amd64
             separator: _

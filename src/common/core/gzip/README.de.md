@@ -6,10 +6,11 @@ Der GZIP-Plugin komprimiert HTTP-Antworten mit dem GZIP-Algorithmus, um die Band
 2. Falls ja, wird die Antwort auf dem konfigurierten Niveau komprimiert.
 3. Die Header zeigen die Verwendung von GZIP an.
 4. Der Browser dekomprimiert vor der Anzeige.
+5. Bandbreite und Ladezeiten werden reduziert, wodurch sich die Gesamtleistung der Website verbessert.
 
 ### Verwendung
 
-1. Aktivieren: `USE_GZIP: yes` (standardmäßig deaktiviert).
+1. Aktivieren: Setzen Sie den Parameter `USE_GZIP` auf `yes` (standardmäßig deaktiviert).
 2. MIME-Typen: `GZIP_TYPES` definieren.
 3. Mindestgröße: `GZIP_MIN_LENGTH`, um sehr kleine Dateien zu vermeiden.
 4. Kompressionsstufe: `GZIP_COMP_LEVEL` (1–9).
@@ -27,6 +28,12 @@ Der GZIP-Plugin komprimiert HTTP-Antworten mit dem GZIP-Algorithmus, um die Band
 
 !!! tip "Kompressionsstufe"
     `5` ist ein guter Kompromiss. Statisch/CPU verfügbar: 7–9. Dynamisch/CPU begrenzt: 1–3.
+
+!!! info "Browser-Unterstützung"
+    GZIP wird von allen modernen Browsern unterstützt und ist seit vielen Jahren die Standardmethode für die Komprimierung von HTTP-Antworten, was eine sehr gute Kompatibilität über Geräte und Browser hinweg sicherstellt.
+
+!!! warning "Komprimierung vs. CPU-Nutzung"
+    GZIP-Komprimierung reduziert Bandbreite und Ladezeiten, höhere Komprimierungsstufen verbrauchen jedoch mehr CPU-Ressourcen. Für stark frequentierte Websites sollten Sie das richtige Gleichgewicht zwischen Komprimierungseffizienz und Serverleistung finden.
 
 ### Beispiele
 

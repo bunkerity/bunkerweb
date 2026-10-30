@@ -10,13 +10,15 @@ local ngx = ngx
 local ERR = ngx.ERR
 local INFO = ngx.INFO
 local OK = ngx.OK
-local WARN = ngx.WARN
 local get_phase = ngx.get_phase
 local has_variable = utils.has_variable
-local get_ips = utils.get_ips
 local get_rdns = utils.get_rdns
+local rdns_forward_confirmed = utils.rdns_forward_confirmed
 local get_asn = utils.get_asn
 local regex_match = utils.regex_match
+local get_header_rules = utils.get_header_rules
+local match_header_rules = utils.match_header_rules
+local pick_header_rules = utils.pick_header_rules
 local get_variable = utils.get_variable
 local deduplicate_list = utils.deduplicate_list
 local ipmatcher_new = ipmatcher.new
@@ -62,6 +64,8 @@ function whitelist:initialize(ctx)
 			end
 			self.lists[kind] = deduplicate_list(self.lists[kind])
 		end
+		local header_rules = self.internalstore:get("plugin_whitelist_header_rules", true)
+		self.header_rules = pick_header_rules(header_rules, self.ctx.bw.server_name)
 	end
 end
 
@@ -106,8 +110,12 @@ function whitelist:init()
 	local i = 0
 	for key in server_name:gmatch("%S+") do
 		for kind, _ in pairs(whitelists) do
-			local file_path = "/var/cache/bunkerweb/whitelist/" .. key .. "/" .. kind .. ".list"
-			local f = open(file_path, "r")
+			-- The download job can leave retired files in a concurrent config push.
+			local urls = get_variable("WHITELIST_" .. kind .. "_URLS", true, { bw = { server_name = key } })
+			local f
+			if urls and urls:match("%S") then
+				f = open("/var/cache/bunkerweb/whitelist/" .. key .. "/" .. kind .. ".list", "r")
+			end
 			if f then
 				for line in f:lines() do
 					if line ~= "" then
@@ -116,6 +124,16 @@ function whitelist:init()
 					end
 				end
 				f:close()
+			end
+			-- Merge the manually configured entries. The stored lists are what
+			-- utils.is_ip_whitelisted and the default server read, and without this they
+			-- only ever contain what the URL download job wrote.
+			local setting = get_variable("WHITELIST_" .. kind, true, { bw = { server_name = key } })
+			if setting then
+				for data in setting:gmatch("%S+") do
+					table.insert(whitelists[kind], data)
+					i = i + 1
+				end
 			end
 			whitelists[kind] = deduplicate_list(whitelists[kind])
 		end
@@ -141,6 +159,14 @@ function whitelist:init()
 			["URI"] = {},
 		}
 	end
+	local header_rules, header_err = get_header_rules("WHITELIST_HEADER")
+	if not header_rules then
+		return self:ret(false, header_err)
+	end
+	local header_ok, header_store_err = self.internalstore:set("plugin_whitelist_header_rules", header_rules, nil, true)
+	if not header_ok then
+		return self:ret(false, header_store_err)
+	end
 	return self:ret(true, "successfully loaded all IP/network/rDNS/ASN/User-Agent/URI")
 end
 
@@ -164,6 +190,16 @@ function whitelist:set()
 		env_set("is_whitelisted", "yes")
 		return self:ret(true, err)
 	end
+	-- The ModSecurity kill switch tests ENV:is_whitelisted in phase 1, which runs before the
+	-- access phase. Every other kind reaches it through the cache; the header decision is never
+	-- cached, so it has to be taken here as well or a whitelisted probe still trips the CRS.
+	local matched_header = match_header_rules(self.ctx, self.header_rules, "WHITELIST_HEADER_VALUE")
+	if matched_header then
+		ngx_var.is_whitelisted = "yes"
+		self.ctx.bw.is_whitelisted = "yes"
+		env_set("is_whitelisted", "yes")
+		return self:ret(true, "header " .. matched_header .. " is whitelisted")
+	end
 	return self:ret(true, "not in whitelist cache")
 end
 
@@ -183,6 +219,16 @@ function whitelist:access()
 		env_set("is_whitelisted", "yes")
 		self:set_metric("counters", "passed_whitelist", 1)
 		return self:ret(true, err, OK)
+	end
+	-- Header rules are matched per request and never cached : the cache is keyed by a client
+	-- attribute, so a cached hit would also cover later requests carrying no header at all.
+	local matched_header = match_header_rules(self.ctx, self.header_rules, "WHITELIST_HEADER_VALUE")
+	if matched_header then
+		ngx_var.is_whitelisted = "yes"
+		self.ctx.bw.is_whitelisted = "yes"
+		env_set("is_whitelisted", "yes")
+		self:set_metric("counters", "passed_whitelist", 1)
+		return self:ret(true, "header " .. matched_header .. " is whitelisted", OK)
 	end
 	-- Perform checks
 	local ok
@@ -300,7 +346,7 @@ function whitelist:is_whitelisted_ip()
 	end
 
 	-- Check if rDNS is needed
-	local check_rdns = true
+	local check_rdns = self.lists["RDNS"] and #self.lists["RDNS"] > 0
 	if self.variables["WHITELIST_RDNS_GLOBAL"] == "yes" and not self.ctx.bw.ip_is_global then
 		check_rdns = false
 	end
@@ -310,35 +356,10 @@ function whitelist:is_whitelisted_ip()
 		local rdns_list, err = get_rdns(self.ctx.bw.remote_addr, self.ctx, true)
 		-- Check if rDNS is in whitelist
 		if rdns_list then
-			local forward_check = nil
-			local rdns_suffix = nil
-			for _, rdns in ipairs(rdns_list) do
-				for _, suffix in ipairs(self.lists["RDNS"]) do
-					if rdns:sub(-#suffix) == suffix then
-						forward_check = rdns
-						rdns_suffix = suffix
-						break
-					end
-				end
-				if forward_check then
-					break
-				end
-			end
-			if forward_check then
-				local ip_list, err = get_ips(forward_check, nil, self.ctx, true)
-				if ip_list then
-					for _, ip in ipairs(ip_list) do
-						if ip == self.ctx.bw.remote_addr then
-							return true, "rDNS " .. rdns_suffix
-						end
-					end
-					self.logger:log(
-						WARN,
-						"IP " .. self.ctx.bw.remote_addr .. " may spoof reverse DNS " .. forward_check
-					)
-				else
-					self.logger:log(ERR, "error while getting rdns (forward check) : " .. err)
-				end
+			local rdns_suffix =
+				rdns_forward_confirmed(rdns_list, self.lists["RDNS"], self.ctx, self.ctx.bw.remote_addr, self.logger)
+			if rdns_suffix then
+				return true, "rDNS " .. rdns_suffix
 			end
 		else
 			self.logger:log(ERR, "error while getting rdns : " .. err)
@@ -366,7 +387,7 @@ end
 function whitelist:is_whitelisted_uri()
 	-- Check if URI is in whitelist
 	for _, uri in ipairs(self.lists["URI"]) do
-		if regex_match(self.ctx.bw.uri, uri) then
+		if regex_match(self.ctx.bw.uri, uri, nil, "WHITELIST_URI(_URLS)") then
 			return true, "URI " .. uri
 		end
 	end
@@ -377,7 +398,7 @@ end
 function whitelist:is_whitelisted_ua()
 	-- Check if UA is in whitelist
 	for _, ua in ipairs(self.lists["USER_AGENT"]) do
-		if regex_match(self.ctx.bw.http_user_agent, ua) then
+		if regex_match(self.ctx.bw.http_user_agent, ua, nil, "WHITELIST_USER_AGENT(_URLS)") then
 			return true, "UA " .. ua
 		end
 	end

@@ -6,6 +6,7 @@ copyright: Copyright &copy; <script>document.write(new Date().getFullYear())</sc
 
 exclude_docs: |
   node_modules/**
+  superpowers/**
 
 nav: # language-agnostic structure (same file names in each locale folder)
   - Introduction: "index.md"
@@ -32,8 +33,16 @@ theme:
     - navigation.tracking
     - navigation.tabs
     - navigation.tabs.sticky
+    # one back-to-top button for pages like advanced.md, which builds to 545 KB
+    - navigation.top
+    # a reader who picks Linux once gets every other Linux tab on the site, which
+    # is 23 of them on advanced.md alone; the choice is remembered between visits
+    - content.tabs.link
     - toc.integrate
     - content.code.copy
+    # marks the matched terms on the page, which is what lets extra.js open the
+    # content tab a search hit landed in
+    - search.highlight
   custom_dir: docs/overrides
 
 extra_css:
@@ -44,6 +53,7 @@ extra_javascript:
   - https://chatbot.bunkerweb.io/static/js/chatbot.js
   - assets/preserve-version-on-language-switch.js
   - assets/toc-dropdown.js
+  - assets/webmcp.js
 
 markdown_extensions:
   - attr_list
@@ -53,6 +63,9 @@ markdown_extensions:
   - pymdownx.details
   - toc:
       toc_depth: 3
+      # without this no heading on the site is linkable, so a section of a long
+      # page cannot be shared at all
+      permalink: true
   - pymdownx.superfences:
       custom_fences:
         - name: mermaid
@@ -65,6 +78,8 @@ markdown_extensions:
       emoji_generator: !!python/name:material.extensions.emoji.to_svg
 
 extra:
+  # Chrome origin-trials console supplies this token; empty emits no tag.
+  webmcp_origin_trial_token: ""
   version:
     provider: mike
     version: latest
@@ -166,5 +181,10 @@ plugins:
       cards_layout_options:
         background_color: "#0b5577"
         color: "white"
+        logo: docs/assets/social-logo.svg
   - mike:
       canonical_version: latest
+  - optimize
+
+hooks:
+  - docs/hooks/llmstxt.py

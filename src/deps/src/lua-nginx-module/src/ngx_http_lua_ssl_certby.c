@@ -38,7 +38,9 @@ static ngx_int_t ngx_http_lua_ssl_cert_by_chunk(lua_State *L,
     ngx_http_request_t *r);
 
 #ifndef OPENSSL_IS_BORINGSSL
+#if defined(OPENSSL_VERSION_NUMBER) && OPENSSL_VERSION_NUMBER > 0x101010afL
 static int ngx_http_lua_is_grease_cipher(uint16_t cipher_id);
+#endif
 #endif
 
 
@@ -457,6 +459,7 @@ ngx_http_lua_log_ssl_cert_error(ngx_log_t *log, u_char *buf, size_t len)
 
 
 #ifndef OPENSSL_IS_BORINGSSL
+#if defined(OPENSSL_VERSION_NUMBER) && OPENSSL_VERSION_NUMBER > 0x101010afL
 static int
 ngx_http_lua_is_grease_cipher(uint16_t cipher_id)
 {
@@ -465,6 +468,7 @@ ngx_http_lua_is_grease_cipher(uint16_t cipher_id)
     /* Check if both bytes follow ?A pattern and high nibbles match */
     return (cipher_id & 0x0F0F) == 0x0A0A;
 }
+#endif
 #endif
 
 
@@ -864,7 +868,11 @@ ngx_http_lua_ffi_req_shared_ssl_ciphers(ngx_http_request_t *r,
     *err = "BoringSSL is not supported for SSL cipher operations";
     return NGX_ERROR;
 
+#elif OPENSSL_VERSION_NUMBER < 0x101010afL
+    *err = "OpenSSL < 1.1.1a is not supported for SSL cipher operations";
+    return NGX_ERROR;
 #else
+
     ngx_ssl_conn_t         *ssl_conn;
     STACK_OF(SSL_CIPHER)   *sk, *ck;
     int                     sn, cn, i, n;
@@ -1052,6 +1060,39 @@ ngx_http_lua_ffi_ssl_raw_client_addr(ngx_http_request_t *r, char **addr,
         *addrtype = NGX_HTTP_LUA_ADDR_TYPE_INET;
         break;
     }
+
+    return NGX_OK;
+}
+
+
+int
+ngx_http_lua_ffi_ssl_proxy_protocol_addr(ngx_http_request_t *r, char **addr,
+    size_t *addrlen, char **err)
+{
+    ngx_ssl_conn_t      *ssl_conn;
+    ngx_connection_t    *c;
+
+    if (r->connection == NULL || r->connection->ssl == NULL) {
+        *err = "bad request";
+        return NGX_ERROR;
+    }
+
+    ssl_conn = r->connection->ssl->connection;
+    if (ssl_conn == NULL) {
+        *err = "bad ssl conn";
+        return NGX_ERROR;
+    }
+
+    c = ngx_ssl_get_connection(ssl_conn);
+
+    if (c->proxy_protocol == NULL || c->proxy_protocol->src_addr.data == NULL
+        || c->proxy_protocol->src_addr.len == 0)
+    {
+        return NGX_DECLINED;
+    }
+
+    *addr = (char *) c->proxy_protocol->src_addr.data;
+    *addrlen = c->proxy_protocol->src_addr.len;
 
     return NGX_OK;
 }

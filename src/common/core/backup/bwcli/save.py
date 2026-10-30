@@ -10,12 +10,17 @@ deps_path = join(sep, "usr", "share", "bunkerweb", "core", "backup")
 if deps_path not in sys_path:
     sys_path.append(deps_path)
 
-from backup import acquire_db_lock, backup_database, BACKUP_DIR, DB_LOCK_FILE, LOGGER, update_cache_file
+from backup import acquire_db_lock, backup_database, BACKUP_DIR, DatabaseLockBusy, LOGGER, release_db_lock, update_cache_file
 
 status = 0
+db_lock = None
 
 try:
-    acquire_db_lock()
+    try:
+        db_lock = acquire_db_lock()
+    except DatabaseLockBusy as e:
+        LOGGER.error(str(e))
+        sys_exit(2)
 
     # Global parser
     parser = ArgumentParser(description="BunkerWeb's backup plugin save command line interface")
@@ -54,6 +59,7 @@ except BaseException as e:
     LOGGER.error(f"Error while executing backup save command: {e}")
     status = 1
 finally:
-    DB_LOCK_FILE.unlink(missing_ok=True)
+    if db_lock is not None:
+        release_db_lock(db_lock)
 
 sys_exit(status)

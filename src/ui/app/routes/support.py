@@ -1,16 +1,36 @@
+from datetime import datetime, timezone
 from io import BytesIO
 from json import dumps
-from os import sep
+from os import environ, getpid, sep
 from pathlib import Path
-from re import compile as re_compile, escape
 from zipfile import ZipFile
-from flask import Blueprint, render_template, request, send_file
-from flask_login import login_required
+from flask import Blueprint, abort, current_app, render_template, request, send_file
+from flask_login import current_user, login_required
 
-from app.dependencies import BW_CONFIG, DB
+from common_utils import get_integration  # type: ignore
+from support_common import (  # type: ignore  # noqa: F401  (REDACTED, mask_uri and setting_names are re-exported)
+    REDACTED,
+    Anonymizer,
+    alembic_revision as db_alembic_revision,
+    build_environment,
+    mask_config as mask_settings,
+    mask_uri,
+    service_domains as config_service_domains,
+    setting_names,
+)
 
+from app.dependencies import BW_CONFIG, CORE_PLUGINS_PATH, DB, EXTERNAL_PLUGINS_PATH, PRO_PLUGINS_PATH
+from app.support_bundle import RING_HANDLER, build_plugins_report, build_support_bundle
 
 support = Blueprint("support", __name__)
+
+
+def service_domains() -> set:
+    return config_service_domains(BW_CONFIG.get_config(methods=False, with_drafts=True, filtered_settings=("SERVER_NAME",)))
+
+
+def alembic_revision():
+    return db_alembic_revision(DB)
 
 
 @support.route("/support")
@@ -31,16 +51,7 @@ def support_logs():
     if not any(logs_path.glob("*.log")):
         return "No log files found", 404
 
-    # Get services once
-    db_services = BW_CONFIG.get_config(methods=False, with_drafts=True, filtered_settings=("SERVER_NAME",))
-    services = {domain for key, value in db_services.items() if key.endswith("_SERVER_NAME") for domain in value.split()}
-
-    # Compile regex patterns for IPv4, IPv6, and domain names
-    ipv4_pattern = r"(?:\d{1,3}\.){3}\d{1,3}"
-    ipv6_pattern = r"(?:[0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}"
-    domains_pattern = "|".join(map(escape, services))
-
-    pattern = re_compile(rf"\b(?:(?P<domain>{domains_pattern})|(?P<ipv4>{ipv4_pattern})|(?P<ipv6>{ipv6_pattern}))\b")
+    anonymizer = Anonymizer(service_domains())
 
     # Create zip buffer
     zip_buffer = BytesIO()
@@ -49,33 +60,86 @@ def support_logs():
             if file.is_file():
                 # Process file line by line to reduce memory usage
                 with file.open("rb") as f:
-                    content = []
-                    for line in f:
-                        line = line.decode("utf-8", errors="replace")
-                        line = pattern.sub(
-                            lambda m: "[ANONYMIZED_DOMAIN]" if m.group("domain") else ("[ANONYMIZED_IPv4]" if m.group("ipv4") else "[ANONYMIZED_IPv6]"),
-                            line,
-                        )
-                        content.append(line)
+                    content = [anonymizer.redact(line.decode("utf-8", errors="replace")) for line in f]
                     zip_file.writestr(file.name, "".join(content))
 
     zip_buffer.seek(0)
     return send_file(zip_buffer, mimetype="application/zip", as_attachment=True, download_name="logs.zip")
 
 
+def mask_config(config: dict) -> dict:
+    return mask_settings(config, BW_CONFIG.get_plugins_settings())
+
+
 @support.route("/support/config")
 @login_required
 def support_config():
     service = request.args.get("service")
+    # Only an admin can ask for the clear values, everyone else always gets the masked export
+    mask = not (current_user.admin and request.args.get("mask_passwords") == "no")
 
     if service:
         if service not in BW_CONFIG.get_config(global_only=True, methods=False, with_drafts=True, filtered_settings=("SERVER_NAME",))["SERVER_NAME"].split():
             return "Service not found", 404
 
         service_config = DB.get_config(methods=True, with_drafts=True, service=service)
+        if mask:
+            mask_config(service_config)
         return send_file(
             BytesIO(dumps(service_config, indent=2).encode()), mimetype="application/json", as_attachment=True, download_name=f"{service}_config.json"
         )
 
     db_config = DB.get_config(methods=True, with_drafts=True)
+    if mask:
+        mask_config(db_config)
     return send_file(BytesIO(dumps(db_config, indent=2).encode()), mimetype="application/json", as_attachment=True, download_name="bunkerweb_config.json")
+
+
+@support.route("/support/ui_bundle")
+@login_required
+def support_ui_bundle():
+    # The PRO user manager does not know /support/*, so this check is the only gate
+    if not current_user.admin:
+        abort(403)
+
+    worker = {"pid": getpid(), "started": RING_HANDLER.started.isoformat()}
+    integration = get_integration()
+    plugins = build_plugins_report(
+        DB.get_plugins(_type="all"),
+        {"core": CORE_PLUGINS_PATH, "external": EXTERNAL_PLUGINS_PATH, "pro": PRO_PLUGINS_PATH},
+        [
+            {
+                "name": blueprint.name,
+                "plugin_priority": getattr(blueprint, "plugin_priority", None),
+                "root_path": blueprint.root_path,
+                "import_path": blueprint.import_path,
+                "plugin_version": getattr(blueprint, "plugin_version", None),
+            }
+            for blueprint in current_app.blueprints.values()
+            if getattr(blueprint, "import_path", None)
+        ],
+        worker,
+    )
+    environment = build_environment(
+        metadata=DB.get_metadata(),
+        integration=integration,
+        instances=DB.get_instances(),
+        service_count=len(DB.get_services()),
+        db_dialect=DB.sql_engine.dialect.name,
+        db_revision=alembic_revision(),
+        worker=worker,
+    )
+    bundle = build_support_bundle(
+        domains=service_domains(),
+        environ=environ,
+        integration=integration,
+        ring=RING_HANDLER.snapshot(),
+        plugins=plugins,
+        environment=environment,
+    )
+    return send_file(
+        BytesIO(bundle),
+        mimetype="application/zip",
+        as_attachment=True,
+        download_name=f"bunkerweb-ui-support-{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%SZ')}.zip",
+    )

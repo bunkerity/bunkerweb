@@ -2,6 +2,12 @@ const controlRegistry = new WeakMap();
 
 const normalizeDefaultValue = (entry, rawValue) => {
   if (typeof rawValue === "undefined" || rawValue === null || rawValue === "") {
+    // For multiselect and multivalue, empty string is a valid value meaning
+    // "no options selected" — do not fall back to the default.
+    const type = (entry?.type || "").toLowerCase();
+    if (rawValue === "" && (type === "multiselect" || type === "multivalue")) {
+      return "";
+    }
     if (Object.prototype.hasOwnProperty.call(entry || {}, "default")) {
       const fallback = entry.default;
       if (typeof fallback === "string") return fallback;
@@ -26,6 +32,150 @@ const parseMultivalueItems = (value, separator) => {
     .split(/\s+/)
     .map((item) => item.trim())
     .filter(Boolean);
+};
+
+// A plugin regex is Python; the browser compiles `pattern` with the `v` flag and silently
+// ignores a pattern it refuses (a bare `-` or `{` in a class, `\"` outside one...). This
+// respells the literals only, or gives "" when it cannot keep the same meaning. Twin of
+// v_safe_pattern in src/ui/app/html_pattern.py: tests/unit/ui/test_setting_patterns_v_flag.py
+// checks both give the same output, so change them together.
+const V_SYNTAX = new Set("^$\\.*+?()[]{}|/");
+const V_CLASS_ESCAPED = new Set("()[]{}/-\\|&!#%,:;<=>@`~^$.*+?");
+const V_CLASS_SETS = new Set("dDwWsS");
+const V_KEPT = /[dDwWsSbBnrtfv]|x[0-9A-Fa-f]{2}|u[0-9A-Fa-f]{4}/y;
+const V_BACKREF = /[1-9][0-9]?/y;
+const V_QUANTIFIER = /\{([0-9]*)(,([0-9]*))?\}/y;
+const V_GROUP_NAME = /P<([A-Za-z_][A-Za-z0-9_]*)>/y;
+const V_GROUP_OPENERS = ["(?:", "(?=", "(?!", "(?<=", "(?<!"];
+const V_UNSUPPORTED = new Error();
+
+const vMatchAt = (sticky, text, index) => {
+  sticky.lastIndex = index;
+  return sticky.exec(text);
+};
+
+const vClassLiteral = (char) =>
+  V_CLASS_ESCAPED.has(char) ? `\\${char}` : char;
+
+const vEscape = (regex, index, inClass) => {
+  const char = regex.charAt(index + 1);
+  if (!char) throw V_UNSUPPORTED;
+  if (!/[A-Za-z0-9]/.test(char)) {
+    if (inClass) return [vClassLiteral(char), index + 2, "char"];
+    return [V_SYNTAX.has(char) ? `\\${char}` : char, index + 2, "char"];
+  }
+  const kept = vMatchAt(V_KEPT, regex, index + 1);
+  if (kept && !(inClass && char === "B")) {
+    const kind = V_CLASS_SETS.has(char) ? "set" : "char";
+    return [`\\${kept[0]}`, index + 1 + kept[0].length, kind];
+  }
+  const backref = inClass ? null : vMatchAt(V_BACKREF, regex, index + 1);
+  if (backref)
+    return [`\\${backref[0]}`, index + 1 + backref[0].length, "char"];
+  throw V_UNSUPPORTED;
+};
+
+const vClass = (regex, start) => {
+  const out = ["["];
+  let index = start + 1;
+  if (regex.charAt(index) === "^") {
+    out.push("^");
+    index += 1;
+  }
+  let first = true;
+  let last = "";
+  for (;;) {
+    if (index >= regex.length) throw V_UNSUPPORTED;
+    const char = regex[index];
+    if (char === "]" && !first) {
+      out.push("]");
+      return [out.join(""), index + 1];
+    }
+    first = false;
+    const next = regex.charAt(index + 1);
+    if (
+      char === "-" &&
+      (last === "char" || last === "set") &&
+      next &&
+      next !== "]"
+    ) {
+      if (last === "set") throw V_UNSUPPORTED;
+      let end;
+      if (next === "\\") {
+        let kind;
+        [end, index, kind] = vEscape(regex, index + 1, true);
+        if (kind !== "char") throw V_UNSUPPORTED;
+      } else {
+        end = vClassLiteral(next);
+        index += 2;
+      }
+      out.push(`-${end}`);
+      last = "range";
+    } else if (char === "\\") {
+      let text;
+      [text, index, last] = vEscape(regex, index, true);
+      out.push(text);
+    } else {
+      out.push(vClassLiteral(char));
+      last = "char";
+      index += 1;
+    }
+  }
+};
+
+export const vSafePattern = (regex) => {
+  if (typeof regex !== "string" || !regex || /[\uD800-\uDFFF]/.test(regex))
+    return "";
+  const out = [];
+  let index = 0;
+  let quantified = false;
+  try {
+    while (index < regex.length) {
+      const char = regex[index];
+      const wasQuantified = quantified;
+      quantified = false;
+      if (char === "\\") {
+        let text;
+        [text, index] = vEscape(regex, index, false);
+        out.push(text);
+      } else if (char === "[") {
+        let text;
+        [text, index] = vClass(regex, index);
+        out.push(text);
+      } else if (char === "(" && regex.charAt(index + 1) === "?") {
+        const name = vMatchAt(V_GROUP_NAME, regex, index + 2);
+        const opener = name
+          ? `(?<${name[1]}>`
+          : V_GROUP_OPENERS.find((item) => regex.startsWith(item, index));
+        if (!opener) throw V_UNSUPPORTED;
+        out.push(opener);
+        index = name ? index + 2 + name[0].length : index + opener.length;
+      } else if (char === "{") {
+        const bounds = vMatchAt(V_QUANTIFIER, regex, index);
+        if (bounds && bounds[0] !== "{}") {
+          const upper = bounds[2] ? `,${bounds[3]}` : "";
+          out.push(`{${bounds[1] || "0"}${upper}}`);
+          index += bounds[0].length;
+          quantified = true;
+        } else {
+          out.push("\\{");
+          index += 1;
+        }
+      } else if (char === "}" || char === "]") {
+        out.push(`\\${char}`);
+        index += 1;
+      } else {
+        if (char === "+" && wasQuantified) throw V_UNSUPPORTED;
+        out.push(char);
+        quantified = char === "*" || char === "+" || char === "?";
+        index += 1;
+      }
+    }
+  } catch (error) {
+    if (error === V_UNSUPPORTED) return "";
+    throw error;
+  }
+  return out.join("");
 };
 
 class SettingControl {
@@ -103,7 +253,8 @@ class SettingControl {
     input.dataset.settingType = inputType;
     if (inputType === "number") input.inputMode = "decimal";
     input.value = value;
-    if (this.entry?.regex) input.setAttribute("pattern", this.entry.regex);
+    const pattern = vSafePattern(this.entry?.regex);
+    if (pattern) input.setAttribute("pattern", pattern);
     this.root.append(input);
     this.primary = input;
     this.valueGetter = () => input.value.trim();
@@ -119,7 +270,8 @@ class SettingControl {
     input.dataset.settingType = "password";
     input.autocomplete = "new-password";
     input.value = value;
-    if (this.entry?.regex) input.setAttribute("pattern", this.entry.regex);
+    const pattern = vSafePattern(this.entry?.regex);
+    if (pattern) input.setAttribute("pattern", pattern);
 
     const toggle = document.createElement("button");
     toggle.type = "button";
@@ -392,19 +544,11 @@ class SettingControl {
           });
         }
       });
-      if (entries.length === 0) {
-        this.setContent(
-          toggleLabel,
-          "template.editor.multiselect_placeholder",
-          "Select options",
-        );
-      } else {
-        toggleLabel.textContent = entries
-          .map((entry) => entry.label)
-          .join(", ");
-        toggleLabel.removeAttribute("data-i18n");
-        toggleLabel.removeAttribute("data-i18n-options");
-      }
+      this.setContent(
+        toggleLabel,
+        "template.editor.multiselect_placeholder",
+        "Select options",
+      );
       toggleBadge.textContent = entries.length;
       if (footerText) {
         this.setContent(
@@ -498,7 +642,21 @@ class SettingControl {
 
     queueMicrotask(() => {
       if (typeof bootstrap !== "undefined" && bootstrap.Dropdown) {
-        bootstrap.Dropdown.getOrCreateInstance(toggle);
+        new bootstrap.Dropdown(toggle, {
+          autoClose: "outside",
+          popperConfig: {
+            strategy: "fixed",
+            modifiers: [
+              {
+                name: "preventOverflow",
+                options: {
+                  boundary: "viewport",
+                  padding: { top: 80 },
+                },
+              },
+            ],
+          },
+        });
       }
       if (typeof bootstrap !== "undefined" && bootstrap.Tooltip) {
         // Use a dynamic title function so applyTranslations() updates to
@@ -562,7 +720,8 @@ class SettingControl {
       const input = document.createElement("input");
       input.type = "text";
       input.className = "form-control setting-multivalue-input";
-      if (this.entry?.regex) input.setAttribute("pattern", this.entry.regex);
+      const pattern = vSafePattern(this.entry?.regex);
+      if (pattern) input.setAttribute("pattern", pattern);
       input.value = initial;
 
       const removeBtn = document.createElement("button");
@@ -618,7 +777,8 @@ class SettingControl {
     hidden.className = "d-none setting-value";
     hidden.dataset.settingType = "file";
     hidden.value = value;
-    if (this.entry?.regex) hidden.setAttribute("pattern", this.entry.regex);
+    const pattern = vSafePattern(this.entry?.regex);
+    if (pattern) hidden.setAttribute("pattern", pattern);
 
     const upload = document.createElement("input");
     upload.type = "file";

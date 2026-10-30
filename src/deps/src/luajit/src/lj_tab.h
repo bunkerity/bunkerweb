@@ -53,7 +53,7 @@ static LJ_AINLINE Node *hashmask(const GCtab *t, uint32_t hash)
 #define hsize2hbits(s)	((s) ? ((s)==1 ? 1 : 1+lj_fls((uint32_t)((s)-1))) : 0)
 
 LJ_FUNCA GCtab *lj_tab_new(lua_State *L, uint32_t asize, uint32_t hbits);
-LJ_FUNC GCtab *lj_tab_new_ah(lua_State *L, int32_t a, int32_t h);
+LJ_FUNC GCtab *lj_tab_new_ah(lua_State *L, uint32_t a, uint32_t h);
 #if LJ_HASJIT
 LJ_FUNC GCtab * LJ_FASTCALL lj_tab_new1(lua_State *L, uint32_t ahsize);
 #endif

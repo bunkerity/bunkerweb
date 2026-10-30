@@ -21,7 +21,7 @@ env:
     - LUAJIT_INC=$LUAJIT_PREFIX/include/luajit-2.1
     - LD_LIBRARY_PATH=$LUAJIT_LIB:$LD_LIBRARY_PATH
   matrix:
-    - NGINX_VERSION=1.27.0
+    - NGINX_VERSION=1.29.4
 
 install:
   - sudo apt-get install -qq -y cpanminus axel

@@ -2,9 +2,10 @@ from logging import (
     CRITICAL,
     DEBUG,
     ERROR,
-    INFO,
-    WARNING,
     FileHandler,
+    INFO,
+    NOTSET,
+    WARNING,
     Logger,
     StreamHandler,
     _nameToLevel,
@@ -32,7 +33,8 @@ class BWLogger(Logger):
     """Custom logger class inheriting from the standard Logger."""
 
     def __init__(self, name, level=INFO):
-        super().__init__(name, level)
+        # SQLAlchemy loggers inherit DATABASE_LOG_LEVEL from the "sqlalchemy" logger, whatever their class names
+        super().__init__(name, NOTSET if name.startswith("sqlalchemy.") else level)
 
 
 # Set the custom logger class as the default
@@ -49,7 +51,10 @@ if "file" in env_log_types:
     log_file_path = getenv(
         "LOG_FILE_PATH", join(sep, "var", "log", "bunkerweb", "scheduler.log") if getenv("SCHEDULER_LOG_TO_FILE", "no") == "yes" else ""
     ).strip()
-    if match(FILE_PATH_PATTERN, log_file_path):
+    # Reject path-traversal segments explicitly — the char-class regex below allows `..`
+    # between slashes, which would let an operator set `LOG_FILE_PATH=/var/log/bunkerweb/../etc/passwd`.
+    has_traversal = ".." in log_file_path.split("/")
+    if not has_traversal and match(FILE_PATH_PATTERN, log_file_path):
         log_types["file"] = {
             "handler": FileHandler(log_file_path),
             "file_path": log_file_path,
@@ -70,37 +75,33 @@ if "syslog" in env_log_types:
             socktype = SOCK_STREAM
             address = syslog_address[6:]  # Remove "tcp://"
 
-        # Check if it's a network address (host:port) or socket path
+        # Resolve the handler address: network (host, port) or Unix socket path
         if ":" in address and not address.startswith("/"):
             host, port = address.rsplit(":", 1)
+            handler_address = (host, int(port))
+        elif not address.startswith("/"):
+            # No port given and it's a hostname (not a socket path): default to UDP port 514
+            if socktype is None:
+                socktype = SOCK_DGRAM  # Default to UDP
+            handler_address = (address, 514)
+        else:
+            handler_address = address
+
+        # Building the handler can fail if the syslog target is unreachable or its hostname
+        # does not resolve (Python 3.14's SysLogHandler resolves DNS eagerly in __init__).
+        # Degrade gracefully to the stderr fallback below instead of crashing the process.
+        try:
             log_types["syslog"] = {
-                "handler": SysLogHandler(address=(host, int(port)), socktype=socktype),
-                "address": (host, int(port)),
+                "handler": SysLogHandler(address=handler_address, socktype=socktype),
+                "address": handler_address,
                 "socktype": socktype,
             }
-        else:
-            # If no port is given and it's a hostname (not a socket path), default to UDP port 514
-            if not address.startswith("/"):
-                host = address
-                default_port = 514
-                if socktype is None:
-                    socktype = SOCK_DGRAM  # Default to UDP
-                log_types["syslog"] = {
-                    "handler": SysLogHandler(address=(host, default_port), socktype=socktype),
-                    "address": (host, default_port),
-                    "socktype": socktype,
-                }
-            else:
-                log_types["syslog"] = {
-                    "handler": SysLogHandler(address=address, socktype=socktype),
-                    "address": address,
-                    "socktype": socktype,
-                }
-
-        # Set syslog ident for service differentiation
-        syslog_ident = getenv("LOG_SYSLOG_TAG", "app")
-        log_types["syslog"]["ident"] = f"{syslog_ident}: "
-        log_types["syslog"]["handler"].ident = f"{syslog_ident}: "
+            # Set syslog ident for service differentiation
+            syslog_ident = getenv("LOG_SYSLOG_TAG", "app")
+            log_types["syslog"]["ident"] = f"{syslog_ident}: "
+            log_types["syslog"]["handler"].ident = f"{syslog_ident}: "
+        except OSError as e:
+            warnings.append(f"Failed to set up syslog logging to '{syslog_address}': {e}. Logs will not be sent to syslog.")
     else:
         warnings.append(f"The syslog address '{syslog_address}' is invalid. Logs will not be sent to syslog.")
 
@@ -111,18 +112,9 @@ if not log_types or "stderr" in env_log_types:
 
 basicConfig(format=LOG_FORMAT, datefmt=DATE_FORMAT, level=default_level, handlers=[handler["handler"] for handler in log_types.values()], force=True)
 
-# Set the default logging level for specific SQLAlchemy components
+# Set the default logging level for every SQLAlchemy logger (BWLogger leaves their children at NOTSET)
 database_default_level = _nameToLevel.get(getenv("DATABASE_LOG_LEVEL", "WARNING").upper(), WARNING)
-sqlalchemy_loggers = (
-    "sqlalchemy.orm.mapper.Mapper",
-    "sqlalchemy.orm.relationships.RelationshipProperty",
-    "sqlalchemy.orm.strategies.LazyLoader",
-    "sqlalchemy.pool.impl.QueuePool",
-    "sqlalchemy.pool.impl.SingletonThreadPool",
-    "sqlalchemy.engine.Engine",
-)
-for logger_name in sqlalchemy_loggers:
-    logging_getLogger(logger_name).setLevel(database_default_level)
+logging_getLogger("sqlalchemy").setLevel(database_default_level)
 
 # Customize log level names with emojis
 addLevelName(CRITICAL, "🚨")

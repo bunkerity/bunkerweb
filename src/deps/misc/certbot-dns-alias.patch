@@ -1,0 +1,84 @@
+Subject: [PATCH] dns_common: add --<plugin>-domain-aliases-file for CNAME delegation
+
+Adds a generic flag on the DNSAuthenticator base class that accepts a JSON
+file mapping {domain: alias_target}. During perform() and cleanup(), each
+achall's identifier is looked up in the map; if present, the alias target
+is used as `domain` (so validation_domain_name becomes
+"_acme-challenge.<alias_target>" and the plugin talks to the zone that
+actually owns <alias_target>). Domains not in the map behave exactly as
+before, so the flag is fully backward-compatible when absent.
+
+Applied at build time in BunkerWeb against certbot==5.5.0. Target file
+inside site-packages: certbot/plugins/dns_common.py.
+
+Apply with:   patch -p1 -d <site-packages> < certbot-dns-alias.patch
+
+--- a/certbot/plugins/dns_common.py
++++ b/certbot/plugins/dns_common.py
+@@ -1,5 +1,6 @@
+ """Common code for DNS Authenticator Plugins."""
+ import abc
++import json
+ import logging
+ from time import sleep
+ from typing import Callable
+@@ -43,6 +44,11 @@
+             type=int,
+             help='The number of seconds to wait for DNS to propagate before asking the ACME server '
+                  'to verify the DNS record.')
++        add('domain-aliases-file',
++            default='',
++            type=str,
++            help='Path to a JSON file mapping cert domains to alias targets '
++                 '(for DNS-01 CNAME delegation). Domains not listed are unchanged.')
+
+     def auth_hint(self, failed_achalls: list[achallenges.AnnotatedChallenge]) -> str:
+         """See certbot.plugins.common.Plugin.auth_hint."""
+@@ -63,15 +69,34 @@
+     def more_info(self) -> str:  # pylint: disable=missing-function-docstring
+         raise NotImplementedError()
+
++    def _load_domain_aliases(self) -> dict:
++        """Load the {domain: alias_target} map from --<plugin>-domain-aliases-file, if set."""
++        path = self.conf('domain-aliases-file')
++        if not path:
++            return {}
++        try:
++            with open(path, 'r', encoding='utf-8') as fh:
++                data = json.load(fh)
++        except (OSError, ValueError) as e:
++            raise errors.PluginError(
++                'Failed to read domain-aliases-file {0}: {1}'.format(path, e))
++        if not isinstance(data, dict):
++            raise errors.PluginError(
++                'domain-aliases-file {0} must contain a JSON object'.format(path))
++        return {str(k): str(v) for k, v in data.items() if v}
++
+     def perform(self, achalls: list[achallenges.AnnotatedChallenge]
+                 ) -> list[challenges.ChallengeResponse]: # pylint: disable=missing-function-docstring
+         self._setup_credentials()
+
+         self._attempt_cleanup = True
+
++        aliases = self._load_domain_aliases()
++
+         responses = []
+         for achall in achalls:
+-            domain = achall.identifier.value
++            identifier = achall.identifier.value
++            domain = aliases.get(identifier, identifier)
+             validation_domain_name = achall.validation_domain_name(domain)
+             validation = achall.validation(achall.account_key)
+
+@@ -89,8 +114,10 @@
+
+     def cleanup(self, achalls: list[achallenges.AnnotatedChallenge]) -> None:  # pylint: disable=missing-function-docstring
+         if self._attempt_cleanup:
++            aliases = self._load_domain_aliases()
+             for achall in achalls:
+-                domain = achall.identifier.value
++                identifier = achall.identifier.value
++                domain = aliases.get(identifier, identifier)
+                 validation_domain_name = achall.validation_domain_name(domain)
+                 validation = achall.validation(achall.account_key)
+

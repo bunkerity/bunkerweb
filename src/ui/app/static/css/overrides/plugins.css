@@ -1,0 +1,353 @@
+.template-steps-container {
+  --bs-breadcrumb-divider: url("../../img/bxs-chevron-right.svg");
+}
+
+.template-steps-container .breadcrumb-item + .breadcrumb-item::before {
+  padding: 0 1rem 0 1rem;
+}
+
+/* Service field transition effects */
+
+.service-field {
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  margin: 0;
+  padding: 0;
+  transition: all 0.3s ease-in-out;
+}
+
+.service-field.show {
+  max-height: 120px; /* Adjust based on content size */
+  opacity: 1;
+  margin-bottom: 1rem;
+  padding-top: 0.5rem;
+}
+
+/* Template Steps Navigation Styles */
+
+.step-navigation-list {
+  max-height: calc(100vh - 200px);
+  overflow-y: auto;
+  border-radius: 0.375rem;
+}
+
+.step-navigation-item {
+  border-left: 3px solid transparent;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.step-navigation-item.active {
+  border-left-color: var(--bs-primary);
+  background-color: rgba(var(--bs-primary-rgb), 0.05);
+  box-shadow: 0 0 0 1px rgba(var(--bs-primary-rgb), 0.1);
+}
+
+.step-navigation-item:hover:not(.active) {
+  background-color: rgba(var(--bs-primary-rgb), 0.03);
+  border-left-color: rgba(var(--bs-primary-rgb), 0.3);
+}
+
+.step-navigation-item .step-number {
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease-in-out;
+}
+
+.step-navigation-item:not(.active) .step-number:hover {
+  opacity: 0.8;
+}
+
+.step-content-wrapper {
+  max-height: calc(100vh - 220px);
+  overflow-y: auto;
+  overflow-x: hidden;
+  scroll-behavior: smooth;
+  padding-right: 0.5rem;
+}
+
+/* Ensure proper Bootstrap tab behavior */
+
+.template-steps-content .tab-pane {
+  display: none;
+}
+
+.template-steps-content .tab-pane.active {
+  display: block;
+}
+
+.template-steps-content .tab-pane.show.active {
+  display: block;
+}
+
+/* Always hide inactive tab panes regardless of fade classes */
+
+.template-steps-content .tab-pane:not(.active) {
+  display: none !important;
+}
+
+/* Step validation styles */
+
+.step-navigation-item.has-validation-error {
+  border-left-color: var(--bs-danger);
+  background-color: rgba(var(--bs-danger-rgb), 0.05);
+}
+
+/* Adjust dark mode styles for validation */
+
+.dark-style .step-navigation-item.has-validation-error {
+  background-color: rgba(var(--bs-danger-rgb), 0.15);
+}
+
+.step-navigation-item.has-validation-error .fw-bold {
+  color: var(--bs-danger) !important;
+}
+
+.step-navigation-item.has-validation-error:hover {
+  background-color: rgba(var(--bs-danger-rgb), 0.1);
+}
+
+.dark-style .step-navigation-item.has-validation-error:hover {
+  background-color: rgba(var(--bs-danger-rgb), 0.2);
+}
+
+.step-number.btn-danger {
+  background-color: var(--bs-danger);
+  border-color: var(--bs-danger);
+}
+
+.step-number.btn-danger,
+.step-number.btn-outline-danger {
+  animation: pulse-error 1.5s 1;
+}
+
+.steps-nav-container {
+  top: 95px;
+}
+
+/* Plugin navigation item styles */
+
+.plugin-navigation-item {
+  border-left: 3px solid transparent;
+  transition: all 0.25s ease;
+  margin-bottom: 0.5rem;
+  border-radius: 0.375rem;
+}
+
+.plugin-navigation-item.active {
+  border-left-color: var(--bs-primary);
+  background-color: rgba(var(--bs-primary-rgb), 0.08);
+  box-shadow: 0 2px 6px rgba(var(--bs-primary-rgb), 0.15);
+}
+
+.plugin-navigation-item:hover:not(.active) {
+  background-color: rgba(var(--bs-primary-rgb), 0.05);
+  border-left-color: rgba(var(--bs-primary-rgb), 0.4);
+}
+
+.plugin-navigation-item .step-number {
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s ease-in-out;
+}
+
+.plugin-navigation-item.active .step-number {
+  transform: scale(1.1);
+}
+
+.plugin-navigation-item:hover .step-number:not(.active) {
+  transform: scale(1.05);
+}
+
+.plugin-navigation-item .step-details {
+  transition: all 0.25s ease;
+}
+
+.plugin-navigation-item.active .step-details .fw-bold {
+  color: var(--bs-primary) !important;
+}
+
+.plugin-navigation-item small.text-muted {
+  transition: opacity 0.2s ease;
+  opacity: 0.7;
+}
+
+.plugin-navigation-item:hover small.text-muted,
+.plugin-navigation-item.active small.text-muted {
+  opacity: 1;
+}
+
+/* Fade effect for plugin tab panes */
+
+.plugin-tab-pane {
+  opacity: 0;
+  transition: opacity 0.2s;
+  display: none;
+}
+
+.plugin-tab-pane.show {
+  display: block;
+}
+
+.plugin-tab-pane.fade-in {
+  opacity: 1;
+}
+
+.template-summary-column {
+  position: sticky;
+  top: 10.3rem;
+  z-index: 1020;
+  margin-bottom: 1rem !important;
+}
+
+@media (max-width: 1200px) {
+  .template-summary-column {
+    position: static;
+    top: auto;
+    z-index: auto;
+    margin-bottom: 0 !important;
+  }
+}
+
+.step-settings-list,
+.step-configs-list {
+  min-height: 2.5rem;
+  border: 1px dashed transparent;
+  transition:
+    border-color 0.2s ease,
+    background-color 0.2s ease;
+}
+
+.step-settings-list.step-list-dragover,
+.step-configs-list.step-list-dragover {
+  border-color: var(--bs-primary);
+  background-color: rgba(var(--bs-primary-rgb), 0.05);
+}
+
+.step-item {
+  transition: background-color 0.2s ease;
+}
+
+.step-item-handle {
+  cursor: grab;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+}
+
+.step-item-handle i {
+  font-size: 1.25rem;
+}
+
+.step-item-handle:active {
+  cursor: grabbing;
+}
+
+.step-item.dragging {
+  opacity: 0.65;
+}
+
+@media (max-width: 576px) {
+  .step-item {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .step-item .step-item-handle {
+    justify-content: center;
+    width: 100%;
+  }
+
+  .step-item .step-item-move-group {
+    justify-content: center;
+  }
+}
+
+.setting-selector-results {
+  max-height: 20rem;
+  overflow-y: auto;
+}
+
+.setting-selector-modal .modal-dialog {
+  max-width: 34rem;
+}
+
+.setting-selector-modal .modal-body {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.setting-selector-results .setting-selector-option {
+  border: 1px solid var(--bs-border-color);
+  border-radius: 0.75rem;
+  margin-bottom: 0.75rem;
+  padding: 0.9rem;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.15s ease;
+}
+
+.setting-selector-results .setting-selector-option:hover,
+.setting-selector-results .setting-selector-option:focus {
+  border-color: rgba(var(--bs-primary-rgb), 0.35);
+  box-shadow: 0 0.25rem 0.75rem rgba(var(--bs-primary-rgb), 0.08);
+  transform: translateY(-1px);
+}
+
+.setting-selector-results .setting-selector-option.active {
+  border-color: rgba(var(--bs-primary-rgb), 0.6);
+  box-shadow: 0 0.35rem 1rem rgba(var(--bs-primary-rgb), 0.15);
+}
+
+.setting-selector-results .setting-selector-option.disabled {
+  cursor: not-allowed;
+  border-style: dashed;
+}
+
+.setting-remove-btn {
+  width: 100%;
+}
+
+@media (min-width: 992px) {
+  .setting-remove-btn {
+    width: auto;
+  }
+}
+
+.setting-selector-toolbar {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.setting-selector-helper {
+  margin-bottom: 0;
+}
+
+.setting-remove-btn {
+  min-height: 2.25rem;
+  padding-inline: 0.85rem;
+}
+
+.setting-remove-btn i {
+  font-size: 1.1rem;
+}
+
+@media (max-width: 991.98px) {
+  .setting-remove-btn {
+    width: 100%;
+    justify-content: center;
+  }
+}

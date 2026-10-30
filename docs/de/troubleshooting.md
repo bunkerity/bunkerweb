@@ -3,6 +3,22 @@
 !!! info "BunkerWeb Panel"
     Wenn Sie Ihr Problem nicht lösen können, können Sie [uns direkt über unser Panel kontaktieren](https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc). Dies zentralisiert alle Anfragen zur BunkerWeb-Lösung.
 
+## Fehlerbehebung mit einem KI-Agenten
+
+### BunkerWeb-Skills auf skills.sh
+
+Der offizielle [BunkerWeb-Skill zur Fehlerbehebung auf skills.sh](https://skills.sh/bunkerity/bunkerweb-skills/bunkerweb-troubleshooting) hilft KI-Programmieragenten bei der Diagnose blockierter Anfragen, IP-Sperren, Upstream-Fehler, Zertifikats- und Konfigurationsprobleme. Folgen Sie den [Installationsanweisungen](https://github.com/bunkerity/bunkerweb-skills#installation) für Ihren Agenten.
+
+### BunkerWeb-Dokumentation mit Context7
+
+Wenn Ihr Agent [Context7](https://context7.com/docs) unterstützt, verbinden Sie ihn damit, um die [BunkerWeb-Dokumentation](https://context7.com/bunkerity/bunkerweb) abzurufen. Geben Sie Ihre BunkerWeb-Version, Integration, relevante Einstellungen und Protokolle in Ihrer Anfrage an und entfernen Sie Passwörter, API-Tokens und andere Geheimnisse, bevor Sie diese teilen.
+
+Beispielanfrage:
+
+```text
+Helfen Sie mir, dieses Problem mit BunkerWeb <Version> unter <Integration> zu diagnostizieren. Hier sind die relevanten Einstellungen und bereinigten Protokolle: <Details>. use context7
+```
+
 ## Protokolle
 
 Bei der Fehlerbehebung sind Protokolle Ihre besten Freunde. Wir geben unser Bestes, um benutzerfreundliche Protokolle bereitzustellen, damit Sie verstehen, was passiert.
@@ -29,7 +45,7 @@ Hier erfahren Sie, wie Sie je nach Integration auf die Protokolle zugreifen kön
     docker-compose logs bunkerweb
     ```
 
-=== "Docker Autoconf"
+=== "Docker autoconf"
 
     !!! tip "Container auflisten"
         Um die laufenden Container aufzulisten, können Sie den folgenden Befehl verwenden:
@@ -331,7 +347,7 @@ Wähle ein Aufbewahrungsfenster (Beispiel: 90 Tage) und prüfe, was gelöscht w�
     LIMIT 50;
     ```
 
-=== "MariaDB / MySQL"
+=== "MySQL/MariaDB"
 
     ```sql
     SELECT hostname, name, server_name, method, status, creation_date, last_seen
@@ -366,7 +382,7 @@ Nach der Prüfung kannst du die Zeilen löschen.
     COMMIT;
     ```
 
-=== "MariaDB / MySQL"
+=== "MySQL/MariaDB"
 
     ```sql
     START TRANSACTION;
@@ -412,7 +428,7 @@ kannst du ein „Change Marker“-Update erzwingen:
     WHERE id = 1;
     ```
 
-=== "MariaDB / MySQL"
+=== "MySQL/MariaDB"
 
     ```sql
     UPDATE bw_metadata
@@ -435,7 +451,7 @@ kannst du ein „Change Marker“-Update erzwingen:
     VACUUM (ANALYZE);
     ```
 
-=== "MariaDB / MySQL"
+=== "MySQL/MariaDB"
 
     ```sql
     OPTIMIZE TABLE bw_instances;
@@ -445,7 +461,10 @@ kannst du ein „Change Marker“-Update erzwingen:
 
 Falls Sie Ihre UI-Anmeldeinformationen vergessen haben oder Probleme mit 2FA haben, können Sie sich mit der Datenbank verbinden, um wieder Zugriff zu erhalten.
 
-### Auf die Datenbank zugreifen
+!!! warning "2FA funktioniert nach dem Neuerstellen des Containers nicht mehr"
+    Die Schlüssel zum Entschlüsseln der TOTP-Secrets liegen im UI-Container unter `/var/lib/bunkerweb/.totp_encryption_keys.json`, im Image also in `/data/lib`. Wird der Container `bw-ui` ohne persistentes Volume auf `/data` neu erstellt, entsteht ein neuer Schlüsselsatz: die in der Datenbank gespeicherten Secrets sind nicht mehr entschlüsselbar, die Admin-Registrierung wird entfernt und die übrigen Konten müssen mit dem SQL unten zurückgesetzt werden. Binden Sie ein Volume auf `/data` ein (siehe [Dokumentation der Weboberfläche](web-ui.md)), damit die Schlüssel erhalten bleiben, oder geben Sie eigene `TOTP_ENCRYPTION_KEYS` vor.
+
+### Auf die Datenbank zugreifen {#access-database}
 
 === "SQLite"
 
@@ -513,7 +532,7 @@ Falls Sie Ihre UI-Anmeldeinformationen vergessen haben oder Probleme mit 2FA hab
     sqlite>
     ```
 
-=== "MariaDB / MySQL"
+=== "MySQL/MariaDB"
 
     !!! note "Nur MariaDB / MySQL"
         Die folgenden Schritte sind nur für MariaDB / MySQL-Datenbanken gültig. Wenn Sie eine andere Datenbank verwenden, lesen Sie bitte die Dokumentation Ihrer Datenbank.
@@ -703,6 +722,18 @@ Falls Sie Ihre UI-Anmeldeinformationen vergessen haben oder Probleme mit 2FA hab
     - Wählen Sie den Geltungsbereich: Exportieren Sie die globalen Einstellungen oder wählen Sie einen bestimmten Dienst aus.
     - Klicken Sie, um das Konfigurationsarchiv für den ausgewählten Geltungsbereich herunterzuladen.
     - Laden Sie optional Protokolle herunter: Die exportierten Protokolle werden automatisch anonymisiert (alle IP-Adressen und Domains werden maskiert).
+
+=== "Support-Paket mit bwcli exportieren"
+
+    Führen Sie `bwcli support` dort aus, wo der Scheduler läuft (Scheduler-Container, All-in-One-Image oder Linux-Host), um ein einziges Archiv für den BunkerWeb-Support zu erstellen: Version und Umgebung, Konfiguration, Plugins, Jobs, Zustand der Instanzen, Metadaten der benutzerdefinierten Konfigurationen, Protokolle und die generierte NGINX-Konfiguration. Auf einer BunkerWeb-Instanz, dem Autoconf-Controller oder einem Linux-Worker-Host verweigert der Befehl die Ausführung und verweist auf den Scheduler.
+
+    ```shell
+    docker exec <scheduler container> bwcli support -o - > bundle.zip
+    ```
+
+    - Ohne `-o` wird das Archiv `bunkerweb-support-<UTC-Zeitstempel>.zip` im aktuellen Verzeichnis erstellt. `-o -` schreibt es nach stdout.
+    - Zugangsdaten werden immer geschwärzt. IP-Adressen und Domains der Services werden anonymisiert: Mit `--no-anonymize` bleiben sie erhalten.
+    - Ein Abschnitt, der nicht gelesen werden kann, wird in `manifest.json` aufgeführt, und der Rest des Pakets wird trotzdem geschrieben. Wenn die Protokolle nach stdout gehen, nennt das Manifest den Befehl zum Abrufen (`docker logs`, `kubectl logs`, `journalctl`).
 
 ### Plugin hochladen
 

@@ -1,0 +1,32 @@
+services:
+  bw-scheduler:
+    image: bunkerity/bunkerweb-scheduler:${BW_VERSION}
+    container_name: bw-scheduler
+    volumes:
+      - bw-storage:/data
+      - "${BW_TESTS_WWW:?use tests/scripts}:/var/www/html"
+      - /tmp/output:/tmp/output
+    env_file:
+      - path: ${BW_TESTS_ETC:?use tests/scripts}/variables.env
+        required: true
+    dns:
+      - 10.20.30.20
+    restart: "unless-stopped"
+    networks:
+      # Fixed: a spec that narrows API_WHITELIST_IP has to keep the scheduler inside it, or the
+      # stack never reports healthy and the assertion never runs. 10.20.30.1 stays out of any
+      # such list -- that is the gateway the runner's own requests come from.
+      bw-universe:
+        ipv4_address: 10.20.30.24
+      bw-db:
+        ipv4_address: 10.10.10.24
+
+volumes:
+  bw-storage:
+    name: bw-storage
+
+networks:
+  bw-universe:
+    external: true
+  bw-db:
+    external: true

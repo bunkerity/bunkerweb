@@ -154,7 +154,7 @@ int Lua::run(Transaction *t, const std::string &str) { // cppcheck-suppress cons
             case LUA_ERRMEM:
                 e.assign("Memory error. ");
                 break;
-#if !defined(WITH_LUA_5_1) and !defined(WITH_LUA_5_4)
+#if !defined(WITH_LUA_5_1) and !defined(WITH_LUA_5_4) and !defined(WITH_LUA_5_5)
             case LUA_ERRGCMM:
                 e.assign("Garbage Collector error. ");
                 break;

@@ -27,13 +27,82 @@ CrowdSec 是一种现代的开源安全引擎，它基于行为分析和社区�
 - 访问 BunkerWeb 访问日志（默认路径 `/var/log/bunkerweb/access.log`），以便 CrowdSec 代理分析请求。
 - 在 CrowdSec 主机上可使用 `cscli`，用于注册 BunkerWeb 的 bouncer 密钥。
 
+!!! warning "显式启动一体化容器中的代理"
+    只有一体化容器设置了不带服务前缀的环境变量 `USE_CROWDSEC=yes`，并使用本机 `CROWDSEC_API`（默认为 `http://127.0.0.1:8000`）时，才会启动内置 CrowdSec 代理。仅为某个服务启用 CrowdSec 不会启动内置代理。使用外部本地 API 时，需要单独启动并配置该代理。
+
 ### 集成流程
 
 1. 准备 CrowdSec 代理，使其能够摄取 BunkerWeb 日志。
 2. 配置 BunkerWeb，以便查询 CrowdSec 本地 API。
 3. 通过 `/crowdsec/ping` API 或管理界面中的 CrowdSec 卡片验证连接。
 
+    此检查会向每个已配置的本地 API 发送经过身份验证的只读请求。如果 API 无法访问、凭据被拒绝、响应无效或某个服务的 bouncer 无法加载，检查将失败。对于仅使用 AppSec 的服务，此检查只确认配置已加载，不验证 AppSec 连接或检测功能。
+
 以下各节将依次说明这些步骤。
+
+### IP 调查与决策移除
+
+在 Web 界面中打开 **附加页面 → CrowdSec**，查看各个已配置的连接、受影响的服务、本地 API 连通性和决策同步状态。CrowdSec 插件状态卡片以及报告和封禁页面中的 **调查 IP** 操作都会打开同一页面。调查链接会预先填入 IP 地址。当多个服务或实例使用 CrowdSec 时，请选择相应连接。
+
+调查结果汇总当前 CrowdSec 决策、可用的 CrowdSec 告警、保留的 BunkerWeb 报告和 BunkerWeb 本地封禁。当前决策与报告中捕获的证据分开展示。新的 CrowdSec 报告会保留可用的决策 ID、来源、场景、目标、处置措施和到期时间，即使相关决策已到期或被移除。AppSec 拒绝与 AppSec 故障策略导致的拒绝使用不同的来源标识。历史证据遵循现有的报告保留设置；旧报告和已从缓存中逐出的可选元数据可能没有额外详情。告警查看功能仅展示有限的事件元数据，不暴露原始请求正文、Cookie 或认证标头。
+
+本地报告和服务专属封禁仅限于所选连接的服务范围；BunkerWeb 全局封禁也会包含在结果中。如果无法再从实例已加载的配置中确定该范围，调查将停止，以免返回其他服务的证据。当本地 API 不可用但连接配置仍已加载时，保留的报告依然可以访问。
+
+**CrowdSec 允许列表** 部分展示引擎的原生允许列表、条目、备注、到期时间，以及列表由本地还是 CrowdSec Console 管理。IP 调查会检查引擎当前的允许列表状态，并显示匹配原因。读取和检查允许列表需要下文所述的管理凭据。界面会区分检查不可用和 IP 不在允许列表中这两种情况。允许列表例外适用于整个 CrowdSec 引擎，不会移除 BunkerWeb 本地封禁。CrowdSec 1.8.0 通过 LAPI 提供读取和检查操作；修改原生允许列表则需要在其主机上使用 `cscli`，或通过独立的 Console 管理权限完成。
+
+现有的 `CROWDSEC_API_KEY` 是 **bouncer 密钥**，支持读取决策，但不能移除决策或查看告警。要启用这些操作，请在相应的 CrowdSec 引擎上注册专用机器，并配置以下两个可选的多站点设置：
+
+- `CROWDSEC_MANAGEMENT_LOGIN`：专用机器的登录名。
+- `CROWDSEC_MANAGEMENT_PASSWORD`：该机器的密码。
+
+按照 CrowdSec 的[本地 API 认证流程](https://doc.crowdsec.net/docs/local_api/authentication/)注册机器，并妥善保管凭据。任一设置为空时，管理功能均不可用。内置引擎和外部引擎使用相同配置：请求经由所选 BunkerWeb 实例发送，因此内置本地 API 可以继续仅监听 localhost。管理操作的 HTTPS 请求使用 BunkerWeb 的 TLS 信任配置验证服务器证书，与 AppSec 的验证设置相互独立。
+
+**移除 CrowdSec 决策** 与解除 BunkerWeb 封禁是不同的操作。在 Web 界面中移除决策需要具有写入权限的管理员、已配置的管理凭据、可写的界面数据库，以及对所选决策的确认。移除针对地址范围的决策会影响整个范围。在共享引擎上移除决策也会影响使用该决策的其他 bouncer。移除前会再次核对所选 ID、范围、目标和处置措施；其他决策和本地封禁会被保留。
+
+成功响应会确认决策已从本地 API 移除，并显示仍然匹配的决策。Bouncer 会在配置的流刷新或 live 模式缓存到期后获取变化；界面会将传播状态标记为待完成，而不会声称所有客户端都已获准访问。其他决策、本地封禁、新检测结果或 AppSec 规则仍可能阻止请求。移除结果会记录到日志中，同时包含已认证的操作者及所选连接和决策。
+
+公共 API 提供相同的操作：
+
+- `GET /crowdsec`：连接、同步状态和各实例的错误。
+- `GET /crowdsec/{connection_id}/decisions`：按 `ip`、`origin` 或 `scenario` 筛选；使用 `offset` 和 `limit` 分页（上限为 200）。
+- `GET /crowdsec/{connection_id}/ips/{ip}`：调查结果，最多包含 200 条决策、50 条告警和 50 份报告，并显示总数或上限，以及明确标记为不可用的部分。
+- `GET /crowdsec/{connection_id}/alerts/{alert_id}`：已过滤敏感数据的告警详情。
+- `GET /crowdsec/{connection_id}/allowlists`：原生允许列表，使用 `offset` 和 `limit` 分页；每个列表最多返回 200 个条目，同时显示完整的条目总数。
+- `GET /crowdsec/{connection_id}/allowlists/check?ip={ip}`：当前是否匹配原生允许列表，以及匹配原因。
+- `DELETE /crowdsec/{connection_id}/decisions/{decision_id}`：在 JSON 请求体中包含所选的 `scope`、`value` 和 `decision_type`。
+
+请原样使用返回的连接 ID。它包含实例身份，因此不同实例上相同的 localhost URL 仍会被区分。API 管理员可以使用这些操作。委派的 API 用户需要在现有 `bans` 资源下获得独立的 `crowdsec_read` 或 `crowdsec_delete` 权限，权限范围为返回的连接 ID 或 `*`。普通的 `ban_delete` 权限不允许移除 CrowdSec 决策。无需进行数据库迁移。
+
+运行时按目标保留各条独立决策，因此移除一条决策不会抹去同一 IP 或范围上的其他封禁。可选的报告元数据使用独立的 5 MiB (`CROWDSEC_METADATA_CACHE_SIZE=5m`) 缓存，不会逐出用于执行封禁的条目。流刷新使用 `/var/run/bunkerweb` 中的非阻塞进程锁，锁会一直保持到更新发布完成，并在 worker 退出时自动释放。
+
+流模式最多保留两个快照槽位，仅在完整快照存储成功后切换。配置未变的 nginx 重载会保留当前快照并请求增量更新。快照缺失、决策配置改变、上次启动未完成，或距离上次成功同步超过 300 秒与 `CROWDSEC_UPDATE_FREQUENCY` 的 30 倍两者中的较大值时，会强制获取完整快照。每个缓存前缀每分钟最多记录一次同步错误，恢复后记录一次通知。决策缓存已满时，请增大 `CROWDSEC_CACHE_SIZE` 以容纳两个快照并重载 BunkerWeb。重载时调整决策内存区大小会创建空缓存并触发完整同步；仅调整元数据内存区大小会清空可选元数据。
+
+从早期版本原地升级时，旧版本的有效记录保留原始 TTL，因此即使新的关闭超时更短，正在退出的旧工作进程仍可继续执行这些决策。分配快照前会清理过时的代际记录。除两个快照槽位外，还应为这些旧记录预留缓存空间；分配失败时保留原有防护，并报告同步错误。请按以下数据确定决策缓存大小，这些数据使用合成的互不相同的 IPv4 目标和一小时 TTL 测得：稳定状态（两个快照槽位）下约为每条决策 1.1 KiB，升级期间旧记录仍有效时约为每条决策 1.4 KiB，二者均已向上取整以留有余量。例如，100,000 条决策在稳定状态下约需 `120m`，升级期间约需 `150m`。按这些数据，默认值 `100m` 在稳定状态下可容纳约 90,000 条决策，升级期间约 70,000 条。IPv6 或网段等其他目标类型可能占用更多，因此请按列表规模设置 `CROWDSEC_CACHE_SIZE`，最好在升级前完成。
+
+流请求被中断或失败后，下次轮询会强制获取完整快照。距离上次成功完整同步超过 3600 秒时，也会执行一次完整校准。初始化期间，本地 API 的直接查询结果按有效凭据和策略使用独立缓存。查询失败后，仅该策略暂停查询 `CROWDSEC_UPDATE_FREQUENCY`；故障期间未知 IP 会被放行。已知的封禁和验证码决策仍执行至各自到期。初始化查询结果和恢复的决策都不会覆盖更新的已发布快照。
+
+流模式将每个完整快照和有变更的增量保存至 `/var/lib/bunkerweb/crowdsec-state-*.json`，记录各决策的绝对到期时间，并在 `crowdsec-binding-*.json` 中保存服务关联。这些文件不受调度器缓存推送影响，可在缓存区调整大小、策略变更（包括 API URL 或密钥轮换）、nginx 重载，以及保留文件系统的同一容器重启后继续使用。新快照发布前，继续使用旧的已发布快照或恢复的检查点执行决策。初始化时恢复检查点。工作进程共享检查点版本；版本过期的工作进程会先通过定时器重新读取文件，再用于故障期间的回退。文件写入也仅在定时器中进行。若检查点无法读取或已损坏（包括工作进程启动时或更新被中断之后），回退检查会拒绝请求，直到其重新可读或成功同步将其重写。变更立即保存，但写入期间发生崩溃（包括断电）可能导致检查点丢失。属于其他配置的检查点会被忽略；两种情况都会记录限频错误。使用全新文件系统重新创建容器时，初始决策为空；若 LAPI 不可用，未知 IP 仍会被放行。
+
+### CrowdSec 封禁
+
+默认情况下，BunkerWeb 会针对每个请求查询 CrowdSec。将 `CROWDSEC_BAN_REFRESH` 设置为一个时长（例如 `5m`），即可把 CrowdSec 的拦截转换为 **CrowdSec 封禁**：一个短时的 BunkerWeb 封禁，只要 CrowdSec 决策仍然有效就会持续续期。该 IP 之后的请求会在封禁检查处被拦下，早于其他插件，也早于 CrowdSec 查询。该封禁会作为独立的一行显示在封禁页面中，并带有 **调查 IP** 操作。默认值 `0` 保持原有行为，不创建任何封禁。
+
+- **何时创建封禁：** 仅当 BunkerWeb 自身因本地 API 的 `ban` 决策拦截了请求，且 `SECURITY_MODE` 为 `block`、决策尚未过期时。AppSec 拒绝以及其他处置方式（例如验证码）从不创建封禁。
+- **持续多久：** 取 `CROWDSEC_BAN_REFRESH` 与决策剩余有效期中较短的一个。封禁结束后，下一个请求会再次接受 CrowdSec 检查，如果决策仍然适用，则会创建新的封禁。
+- **时效性：** 当决策直接在 CrowdSec 中被移除时（通过 `cscli`、Console、列表刷新或允许列表），该 IP 最迟在以下各项之和之后被放行：`CROWDSEC_BAN_REFRESH`、CrowdSec 缓存延迟（stream 模式下为 `CROWDSEC_UPDATE_FREQUENCY`，live 模式下为 `CROWDSEC_CACHE_EXPIRATION`），以及启用 Redis 时其他实例上本地副本的最多 30 秒。在 stream 模式下，只要最近一次成功同步早于 `CROWDSEC_UPDATE_FREQUENCY` 的两倍，就不会创建新的封禁。
+- **排除的位置：** 服务上的任何 `CROWDSEC_EXCLUDE_LOCATION` 都会为该服务关闭 CrowdSec 封禁，因为封禁也会拦截被排除的路径。CrowdSec 仍会在那里检查每个请求。插件排除自身的挑战位置时同样如此。
+- **作用范围：** 由服务自身的 CrowdSec 连接创建的封禁只适用于该服务，由全局连接创建的封禁适用于所有服务。全局 CrowdSec 封禁也适用于 TCP/UDP 服务，但仅在启用 Redis 时通过最多保留 30 秒的本地副本生效。没有 Redis 时，TCP/UDP 服务永远看不到 CrowdSec 封禁。
+- **内存：** 封禁使用共享内存区域 `bans_meta`，该区域始终以 10 MiB 的大小声明。只有设置了 `CROWDSEC_BAN_REFRESH` 或 `BANS_TLS_DROP_REASONS` 后才会使用其内存。
+
+**解封与 CrowdSec。** 移除 CrowdSec 封禁时也会移除其背后的 CrowdSec 决策，否则该 IP 会在下一次检查时再次被封禁。Web 界面、API 和 `bwcli unban` 遵循相同的流程：
+
+- 需要每个包含所选决策的连接的管理凭据（`CROWDSEC_MANAGEMENT_LOGIN` 和 `CROWDSEC_MANAGEMENT_PASSWORD`）。使用 API 时，除 `ban_delete` 外，还需要对每个涉及的连接拥有 `crowdsec_delete` 权限。
+- 在移除任何 CrowdSec 决策之前，必须确认决策列表（IP 或范围、类型、来源和场景）。`bwcli unban` 使用 `-confirm` 完成确认：不带该选项时，命令只打印列表，不会更改 CrowdSec 中的任何内容。同一 IP 的显式封禁不属于这次确认：`bwcli unban` 会先移除它，早于预览，且不带 `-confirm` 时也会移除。该命令只能在可访问数据库的主机上运行，通常是 scheduler 所在主机。其他情况请使用 Web 界面或 API。
+- 如果看到该拦截的实例不可用，解封会被拒绝。封禁会在 `CROWDSEC_BAN_REFRESH` 内自行过期。
+- 如果某个决策无法移除，其他已选决策仍会被删除，但会跳过其余步骤，并保留 BunkerWeb 封禁。结果会报告为部分成功，并列出已删除和失败的决策。在失败的决策被移除之前，该 IP 仍会被封锁。如果部分 CrowdSec 连接无法检查，解封仍会在已响应的连接上执行：删除这些连接上的决策，并在可用实例上移除 BunkerWeb 封禁。结果会报告为部分成功，并列出无法检查的内容；在这些连接上的决策结束之前，该 IP 可能仍被它们拦截。重试是安全的。
+- 来自 Central API 或列表的决策（`CAPI` 和 `lists` 来源）可能在下一次刷新时重新出现。如需永久例外，请创建 CrowdSec 允许列表。
+- 移除范围决策会影响整个范围。已为该范围内其他 IP 创建的 CrowdSec 封禁会保留到其时长结束，最长为 `CROWDSEC_BAN_REFRESH`。
+- 同一 IP 的 CrowdSec 封禁与显式封禁是两行独立记录，各自单独移除。CrowdSec 封禁的时长不可编辑。
 
 ### 第&nbsp;1&nbsp;步 – 准备 CrowdSec 摄取 BunkerWeb 日志
 
@@ -103,7 +172,7 @@ CrowdSec 是一种现代的开源安全引擎，它基于行为分析和社区�
     services:
       bunkerweb:
         # 这是将用于在调度器中识别实例的名称
-        image: bunkerity/bunkerweb:1.6.9-rc2
+        image: bunkerity/bunkerweb:1.6.18-rc2
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -120,7 +189,7 @@ CrowdSec 是一种现代的开源安全引擎，它基于行为分析和社区�
             syslog-address: "udp://10.20.30.254:514" # syslog 服务的 IP 地址
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.9-rc2
+        image: bunkerity/bunkerweb-scheduler:1.6.18-rc2
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb" # 确保设置正确的实例名称
@@ -154,7 +223,7 @@ CrowdSec 是一种现代的开源安全引擎，它基于行为分析和社区�
           - bw-db
 
       crowdsec:
-        image: crowdsecurity/crowdsec:v1.7.6 # 使用最新版本，但为了更好的稳定性和安全性，请始终固定版本
+        image: crowdsecurity/crowdsec:v1.8.0 # 使用最新版本，但为了更好的稳定性和安全性，请始终固定版本
         volumes:
           - cs-data:/var/lib/crowdsec/data # 持久化 CrowdSec 数据
           - bw-logs:/var/log:ro # BunkerWeb 的日志，供 CrowdSec 解析
@@ -291,33 +360,55 @@ CrowdSec 是一种现代的开源安全引擎，它基于行为分析和社区�
 
 ### 第&nbsp;2&nbsp;步 – 配置 BunkerWeb 参数
 
-应用以下环境变量（或通过调度器设置的值），让 BunkerWeb 实例能够与 CrowdSec 本地 API 通信。至少需要设置 `USE_CROWDSEC`、`CROWDSEC_API` 以及通过 `cscli bouncers add` 生成的有效密钥。
+应用以下环境变量（或通过调度器设置的值），让 BunkerWeb 实例能够与 CrowdSec 本地 API 通信。至少需要设置 `USE_CROWDSEC`、`CROWDSEC_API` 和 `CROWDSEC_API_KEY`，并使用通过 `cscli bouncers add` 生成的有效密钥。
 
-| 设置                        | 默认值                 | 上下文    | 多个 | 描述                                                                                                  |
-| --------------------------- | ---------------------- | --------- | ---- | ----------------------------------------------------------------------------------------------------- |
-| `USE_CROWDSEC`              | `no`                   | multisite | 否   | **启用 CrowdSec：** 设置为 `yes` 以启用 CrowdSec 拦截器。                                             |
-| `CROWDSEC_API`              | `http://crowdsec:8080` | global    | 否   | **CrowdSec API URL：** CrowdSec 本地 API 服务的地址。                                                 |
-| `CROWDSEC_API_KEY`          |                        | global    | 否   | **CrowdSec API 密钥：** 用于向 CrowdSec API 进行身份验证的 API 密钥，使用 `cscli bouncers add` 获取。 |
-| `CROWDSEC_MODE`             | `live`                 | global    | 否   | **操作模式：** `live`（为每个请求查询 API）或 `stream`（定期缓存所有决策）。                          |
-| `CROWDSEC_ENABLE_INTERNAL`  | `no`                   | global    | 否   | **内部流量：** 设置为 `yes` 以根据 CrowdSec 决策检查内部流量。                                        |
-| `CROWDSEC_REQUEST_TIMEOUT`  | `1000`                 | global    | 否   | **请求超时：** 在实时模式下向 CrowdSec 本地 API 发出 HTTP 请求的超时时间（以毫秒为单位）。            |
-| `CROWDSEC_EXCLUDE_LOCATION` |                        | global    | 否   | **排除的位置：** 从 CrowdSec 检查中排除的位置（URI）列表，以逗号分隔。                                |
-| `CROWDSEC_CACHE_EXPIRATION` | `1`                    | global    | 否   | **缓存过期时间：** 在实时模式下，IP 决策的缓存过期时间（以秒为单位）。                                |
-| `CROWDSEC_UPDATE_FREQUENCY` | `10`                   | global    | 否   | **更新频率：** 在流模式下，从 CrowdSec API 拉取新的/过期的决策的频率（以秒为单位）。                  |
+连接设置为 `multisite`：无前缀的值适用于所有服务，带服务器名前缀的值仅覆盖该服务。`CROWDSEC_CACHE_SIZE` 和 `CROWDSEC_METADATA_CACHE_SIZE` 为 `global`，请勿添加服务器名前缀。
+
+| 设置                           | 默认值                 | 上下文    | 多个 | 描述                                                                                                                                                                                                                                                                                     |
+| ------------------------------ | ---------------------- | --------- | ---- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `USE_CROWDSEC`                 | `no`                   | multisite | 否   | **启用 CrowdSec：** 设置为 `yes` 以启用 CrowdSec 拦截器。                                                                                                                                                                                                                                |
+| `CROWDSEC_API`                 | `http://crowdsec:8080` | multisite | 否   | **CrowdSec API URL：** CrowdSec 本地 API 服务的地址。                                                                                                                                                                                                                                    |
+| `CROWDSEC_API_KEY`             |                        | multisite | 否   | **CrowdSec API 密钥：** 用于向 CrowdSec API 进行身份验证的 API 密钥，使用 `cscli bouncers add` 获取。                                                                                                                                                                                    |
+| `CROWDSEC_MODE`                | `live`                 | multisite | 否   | **操作模式：** `live`（为每个请求查询 API）或 `stream`（定期缓存所有决策）。                                                                                                                                                                                                             |
+| `CROWDSEC_ENABLE_INTERNAL`     | `no`                   | multisite | 否   | **内部流量：** 设置为 `yes` 以根据 CrowdSec 决策检查内部流量。                                                                                                                                                                                                                           |
+| `CROWDSEC_REQUEST_TIMEOUT`     | `1s`                   | multisite | 否   | **请求超时：** 在实时模式下向 CrowdSec 本地 API 发出 HTTP 请求的超时时间（以毫秒为单位）。 支持时间后缀（ms、s、m、h、d、w、M、y）；无后缀的数字单位为毫秒。                                                                                                                             |
+| `CROWDSEC_EXCLUDE_LOCATION`    |                        | multisite | 否   | **排除的位置：** 从 CrowdSec 检查中排除的位置（URI）列表，以逗号分隔。                                                                                                                                                                                                                   |
+| `CROWDSEC_CACHE_SIZE`          | `100m`                 | global    | 否   | **决策缓存大小：** 所有服务共享的内存；流模式需要两个快照。使用正整数兆字节（`m`/`M`），最小 `1m`。调整大小会清空缓存区；已知决策从磁盘恢复并执行至完成校准。未知 IP 查询 LAPI，故障时放行未知 IP。                                                                                      |
+| `CROWDSEC_METADATA_CACHE_SIZE` | `5m`                   | global    | 否   | **元数据缓存大小：** 所有服务的可选报告元数据使用的独立共享内存。使用正整数兆字节（`m`/`M`），最小值为 `1m`；重载时调整大小会清空此内存区。                                                                                                                                              |
+| `CROWDSEC_CACHE_EXPIRATION`    | `1s`                   | multisite | 否   | **缓存过期时间：** 在实时模式下，IP 决策的缓存过期时间（以秒为单位）。 支持时间后缀（ms、s、m、h、d、w、M、y）；无后缀的数字单位为秒。                                                                                                                                                   |
+| `CROWDSEC_UPDATE_FREQUENCY`    | `10s`                  | multisite | 否   | **更新频率：** 在流模式下，从 CrowdSec API 拉取新的/过期的决策的频率（以秒为单位）。 支持时间后缀（ms、s、m、h、d、w、M、y）；无后缀的数字单位为秒。                                                                                                                                     |
+| `CROWDSEC_BAN_REFRESH`         | `0`                    | multisite | 否   | **封禁刷新：** 将 CrowdSec 拦截转换为短时的 BunkerWeb 封禁，只要 CrowdSec 决策有效就会续期。该值是封禁在再次询问 CrowdSec 之前最长持续的时间。`0` 表示禁用。设置了 `CROWDSEC_EXCLUDE_LOCATION` 的服务永远不会产生 CrowdSec 封禁。支持时间后缀（ms、s、m、h、d、w、M、y）；纯数字表示秒。 |
 
 #### 应用程序安全组件设置
 
 | 设置                              | 默认值        | 上下文 | 多个 | 描述                                                                              |
 | --------------------------------- | ------------- | ------ | ---- | --------------------------------------------------------------------------------- |
-| `CROWDSEC_APPSEC_URL`             |               | global | 否   | **AppSec URL：** CrowdSec 应用程序安全组件的 URL。留空以禁用 AppSec。             |
-| `CROWDSEC_APPSEC_FAILURE_ACTION`  | `passthrough` | global | 否   | **失败操作：** 当 AppSec 返回错误时要采取的操作。可以是 `passthrough` 或 `deny`。 |
-| `CROWDSEC_APPSEC_CONNECT_TIMEOUT` | `100`         | global | 否   | **连接超时：** 连接到 AppSec 组件的超时时间（以毫秒为单位）。                     |
-| `CROWDSEC_APPSEC_SEND_TIMEOUT`    | `100`         | global | 否   | **发送超时：** 向 AppSec 组件发送数据的超时时间（以毫秒为单位）。                 |
-| `CROWDSEC_APPSEC_PROCESS_TIMEOUT` | `500`         | global | 否   | **处理超时：** 在 AppSec 组件中处理请求的超时时间（以毫秒为单位）。               |
-| `CROWDSEC_ALWAYS_SEND_TO_APPSEC`  | `no`          | global | 否   | **始终发送：** 设置为 `yes` 以始终将请求发送到 AppSec，即使存在 IP 级别的决策。   |
-| `CROWDSEC_APPSEC_SSL_VERIFY`      | `no`          | global | 否   | **SSL 验证：** 设置为 `yes` 以验证 AppSec 组件的 SSL 证书。                       |
+| `CROWDSEC_APPSEC_URL`             |               | multisite | 否   | **AppSec URL：** CrowdSec 应用程序安全组件的 URL。留空以禁用 AppSec。             |
+| `CROWDSEC_APPSEC_FAILURE_ACTION`  | `passthrough` | multisite | 否   | **失败操作：** 当 AppSec 返回错误时要采取的操作。可以是 `passthrough` 或 `deny`。 |
+| `CROWDSEC_APPSEC_CONNECT_TIMEOUT` | `100ms`       | multisite | 否   | **连接超时：** 连接到 AppSec 组件的超时时间（以毫秒为单位）。 支持时间后缀（ms、s、m、h、d、w、M、y）；无后缀的数字单位为毫秒。 |
+| `CROWDSEC_APPSEC_SEND_TIMEOUT`    | `100ms`       | multisite | 否   | **发送超时：** 向 AppSec 组件发送数据的超时时间（以毫秒为单位）。 支持时间后缀（ms、s、m、h、d、w、M、y）；无后缀的数字单位为毫秒。 |
+| `CROWDSEC_APPSEC_PROCESS_TIMEOUT` | `500ms`       | multisite | 否   | **处理超时：** 在 AppSec 组件中处理请求的超时时间（以毫秒为单位）。 支持时间后缀（ms、s、m、h、d、w、M、y）；无后缀的数字单位为毫秒。 |
+| `CROWDSEC_ALWAYS_SEND_TO_APPSEC`  | `no`          | multisite | 否   | **始终发送：** 设置为 `yes` 以始终将请求发送到 AppSec，即使存在 IP 级别的决策。   |
+| `CROWDSEC_APPSEC_SSL_VERIFY`      | `no`          | multisite | 否   | **SSL 验证：** 设置为 `yes` 以验证 AppSec 组件的 SSL 证书。                       |
 
-!!! info "关于操作模式" - **实时模式**会为每个传入的请求查询 CrowdSec API，提供实时的保护，但会增加延迟。- **流模式**会定期从 CrowdSec API 下载所有决策并将其本地缓存，从而减少延迟，但应用新决策会略有延迟。
+!!! info "关于操作模式"
+    - **实时模式**会为每个传入的请求查询 CrowdSec API，提供实时的保护，但会增加延迟。
+    - **流模式**先下载初始快照，再轮询新增和删除的决策以更新本地缓存，从而减少延迟，但应用新决策会略有延迟。
+
+#### 按服务的端点
+
+由于这些端点是 `multisite` 的，同一实例上的不同服务可以使用不同的 CrowdSec 组件，或只使用其中一部分。这两个功能相互独立：
+
+- 当设置了 `CROWDSEC_API` 时，**决策查询**处于活动状态。将其设为空字符串可让某个服务完全跳过 Local API。
+- 当设置了 `CROWDSEC_APPSEC_URL` 时，**AppSec 检测**处于活动状态。将其设为空字符串可让某个服务跳过深度请求检测。
+
+如果某个服务的 `USE_CROWDSEC` 设为 `yes` 但两个 URL 都为空，则该服务不会进行任何检查，实例会记录未定义任何端点。
+
+!!! warning "每个实例一个决策缓存"
+    缓存的决策存放在整个实例共用的单个共享内存区中，按其来源的 Local API 建立索引。指向同一个 `CROWDSEC_API` 的服务会相互复用缓存的决策，这也是查询保持低成本的原因。指向不同 Local API 的服务永远看不到彼此的决策。该区域的大小是实例级别的，因此拥有多个不同 Local API 和大型决策列表的集群会共用同一份预算。
+
+!!! info "每个 Local API 一个 Bouncer 密钥"
+    `CROWDSEC_API_KEY` 与其他设置一样按服务解析。当服务指向不同的 Local API 时，请为每个服务分配在其各自 CrowdSec 主机上通过 `cscli bouncers add` 注册的密钥，否则查询会因未通过身份验证而被拒绝。
 
 ### 示例配置
 
@@ -349,6 +440,38 @@ CrowdSec 是一种现代的开源安全引擎，它基于行为分析和社区�
     CROWDSEC_APPSEC_FAILURE_ACTION: "deny"
     CROWDSEC_ALWAYS_SEND_TO_APPSEC: "yes"
     CROWDSEC_APPSEC_SSL_VERIFY: "yes"
+    ```
+
+=== "按服务配置"
+
+    在每个公开服务上启用 AppSec，在一部分服务上启用决策查询，并完全排除一个服务。不带前缀的值是整个集群的基线，每个服务只覆盖与基线不同的部分：
+
+    ```yaml
+    MULTISITE: "yes"
+    SERVER_NAME: "app1.example.com app2.example.com intranet.example.com"
+
+    # 每个服务的基线
+    USE_CROWDSEC: "yes"
+    CROWDSEC_APPSEC_URL: "http://crowdsec:7422"
+    CROWDSEC_API: "" # 除非某个服务需要，否则不进行决策查询
+    CROWDSEC_API_KEY: ""
+
+    # app1 在 AppSec 之上增加 Local API 决策查询
+    app1.example.com_CROWDSEC_API: "http://crowdsec:8080"
+    app1.example.com_CROWDSEC_API_KEY: "your-api-key-here"
+
+    # app2 仅保留 AppSec，继承空的 CROWDSEC_API 基线
+
+    # intranet 完全不进行检查
+    intranet.example.com_USE_CROWDSEC: "no"
+    ```
+
+    服务也可以指向完全不同的 CrowdSec 主机，并使用自己的 bouncer 密钥：
+
+    ```yaml
+    app2.example.com_CROWDSEC_API: "http://crowdsec-dmz:8080"
+    app2.example.com_CROWDSEC_API_KEY: "dmz-bouncer-key"
+    app2.example.com_CROWDSEC_APPSEC_URL: "http://crowdsec-dmz:7422"
     ```
 
 ### 第&nbsp;3&nbsp;步 – 验证集成

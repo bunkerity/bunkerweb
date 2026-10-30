@@ -425,7 +425,7 @@ static int lj_cf_package_loader_preload(lua_State *L)
 
 /* ------------------------------------------------------------------------ */
 
-#define KEY_SENTINEL	(U64x(80000000,00000000)|'s')
+#define KEY_SENTINEL	(U64x(81000000,00000000)|'s')
 
 static int lj_cf_package_require(lua_State *L)
 {

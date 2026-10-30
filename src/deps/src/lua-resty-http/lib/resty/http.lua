@@ -62,6 +62,22 @@ local EXPECTING_BODY = {
 }
 
 
+-- ngx.var is only readable in request-bearing phases. Reading it from a
+-- request-less phase (init, init_worker, timer, etc.) raises an error, so we
+-- gate any ngx.var access on being in one of these phases.
+local NGX_VAR_PHASES = {
+    set            = true,
+    rewrite        = true,
+    server_rewrite = true,
+    access         = true,
+    content        = true,
+    header_filter  = true,
+    body_filter    = true,
+    log            = true,
+    precontent     = true,
+}
+
+
 -- Reimplemented coroutine.wrap, returning "nil, err" if the coroutine cannot
 -- be resumed. This protects user code from infinite loops when doing things like
 -- repeat
@@ -106,7 +122,7 @@ end
 
 
 local _M = {
-    _VERSION = '0.17.2',
+    _VERSION = '0.18.0',
 }
 _M._USER_AGENT = "lua-resty-http/" .. _M._VERSION .. " (Lua) ngx_lua/" .. ngx.config.ngx_lua_version
 
@@ -706,7 +722,8 @@ function _M.send_request(self, params)
                 headers["Content-Length"] = length
 
             elseif body == nil and EXPECTING_BODY[str_upper(params.method)] then
-                headers["Content-Length"] = 0
+                return nil, "Request body is nil but " .. str_upper(params.method)
+                    .. " method expects a body. Use an empty string \"\" if you want to send an empty body."
 
             elseif body ~= nil then
                 headers["Content-Length"] = #tostring(body)
@@ -737,6 +754,13 @@ function _M.send_request(self, params)
     end
     if params.version == 1.0 and not headers["Connection"] then
         headers["Connection"] = "Keep-Alive"
+    end
+    -- W3C trace context support with NGINX tracer.
+    -- Only read ngx.var in request-bearing phases; doing so during
+    -- init/init_worker/timer (config preload, background jobs) raises an error.
+    if NGX_VAR_PHASES[ngx.get_phase()]
+        and not headers["traceparent"] and ngx.var.http_traceparent then
+      headers["traceparent"] = ngx.var.http_traceparent
     end
 
     params.headers = headers
@@ -794,15 +818,16 @@ function _M.read_response(self, params)
     end
 
     -- keepalive is true by default. Determine if this is correct or not.
-    local ok, connection = pcall(str_lower, res_headers["Connection"])
-    if ok then
-        if (version == 1.1 and str_find(connection, "close", 1, true)) or
-           (version == 1.0 and not str_find(connection, "keep-alive", 1, true)) then
+    local connection = res_headers["Connection"]
+    if type(connection) ~= "string" then
+        -- no connection header (or duplicated as a table)
+        if version == 1.0 then
             self.keepalive = false
         end
     else
-        -- no connection header
-        if version == 1.0 then
+        connection = str_lower(connection)
+        if (version == 1.1 and str_find(connection, "close", 1, true)) or
+           (version == 1.0 and not str_find(connection, "keep-alive", 1, true)) then
             self.keepalive = false
         end
     end
@@ -968,7 +993,7 @@ function _M.request_uri(self, uri, params)
 end
 
 
-function _M.get_client_body_reader(_, chunksize, sock)
+function _M.get_client_body_reader(_, chunksize, sock, headers)
     chunksize = chunksize or 65536
 
     if not sock then
@@ -988,8 +1013,11 @@ function _M.get_client_body_reader(_, chunksize, sock)
         end
     end
 
-    local headers = ngx_req_get_headers()
-    local length = headers.content_length
+    if not headers then
+        headers = ngx_req_get_headers()
+    end
+
+    local length = headers["Content-Length"]
     if length then
         return _body_reader(sock, tonumber(length), chunksize)
     elseif transfer_encoding_is_chunked(headers) then

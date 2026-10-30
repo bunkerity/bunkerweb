@@ -4,7 +4,7 @@
     "version_min": 209000,
     "version_max": -1,
     "title": "Override the default status code if not suitable to redirect action",
-    "url": "https:\/\/github.com\/SpiderLabs\/ModSecurity\/issues\/1850",
+    "url": "https://github.com/SpiderLabs/ModSecurity/issues/1850",
     "client": {
       "ip": "200.249.12.31",
       "port": 2313
@@ -17,7 +17,7 @@
       "headers": {
         "Host": "net.tutsplus.com",
         "User-Agent": "",
-        "Accept": "text\/html,application\/xhtml+xml,application\/xml;q=0.9,*\/*;q=0.8",
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
         "Accept-Language": "en-us,en;q=0.5",
         "Accept-Encoding": "gzip,deflate",
         "Accept-Charset": "ISO-8859-1,utf-8;q=0.7,*;q=0.7",
@@ -25,18 +25,24 @@
         "Connection": "keep-alive",
         "Cookie": "PHPSESSID=r2t5uvjq435r4q7ib3vtdjq120",
         "Pragma": "no-cache",
-        "Cache-Control": "no-cache"
+        "Cache-Control": "no-cache",
+        "Content-Length": "0"
       },
-      "uri": "\/test.pl?foo=£&bar=%C2%A3",
+      "uri": "/test.pl?foo=£&bar=%C2%A3",
       "method": "GET",
       "http_version": 1.1,
-      "body": ""
+      "body": [
+        ""
+      ]
     },
     "response": {
       "headers": {
-        "Content-Type": "text\/xml; charset=utf-8\n\r",
-        "Content-Length": "length\n\r"
-      }
+        "Content-Type": "text/xml; charset=utf-8\n\r",
+        "Content-Length": "0"
+      },
+      "body": [
+        ""
+      ]
     },
     "expected": {
       "http_code": 302

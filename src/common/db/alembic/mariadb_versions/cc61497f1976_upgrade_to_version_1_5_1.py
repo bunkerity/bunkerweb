@@ -29,8 +29,7 @@ def upgrade() -> None:
         batch_op.add_column(sa.Column("instances_changed", sa.Boolean(), nullable=True))
 
     # Update all new columns and version in a single statement
-    op.execute(
-        """
+    op.execute("""
         UPDATE bw_metadata
         SET scheduler_first_start = false,
             custom_configs_changed = false,
@@ -39,8 +38,7 @@ def upgrade() -> None:
             instances_changed = false,
             version = '1.5.1'
         WHERE id = 1
-    """
-    )
+    """)
 
 
 def downgrade() -> None:

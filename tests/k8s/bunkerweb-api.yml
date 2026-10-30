@@ -1,0 +1,76 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bunkerweb-api
+  namespace: bunkerweb
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: bunkerweb-api
+  template:
+    metadata:
+      labels:
+        app: bunkerweb-api
+    spec:
+      dnsConfig:
+        options:
+          - name: ndots
+            value: "1"
+      serviceAccountName: sa-bunkerweb
+      containers:
+        - name: bunkerweb-api
+          image: localhost:5000/bunkerity/bunkerweb-api:tests
+          imagePullPolicy: Always
+          envFrom:
+            - secretRef:
+                name: bw-api-secret
+          livenessProbe:
+            exec:
+              command:
+                - /usr/share/bunkerweb/helpers/healthcheck-api.sh
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 1
+            failureThreshold: 30
+          readinessProbe:
+            exec:
+              command:
+                - /usr/share/bunkerweb/helpers/healthcheck-api.sh
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 1
+            failureThreshold: 30
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: svc-bunkerweb-api
+  namespace: bunkerweb
+spec:
+  type: ClusterIP
+  selector:
+    app: bunkerweb-api
+  ports:
+    - name: http
+      protocol: TCP
+      port: 8888
+      targetPort: 8888
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: svc-bunkerweb-api-nodeport
+  namespace: bunkerweb
+spec:
+  type: NodePort
+  selector:
+    app: bunkerweb-api
+  ports:
+    - name: http
+      protocol: TCP
+      port: 8888
+      targetPort: 8888
+      nodePort: 30088

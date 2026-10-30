@@ -16,6 +16,12 @@ from API import API  # type: ignore
 LOGGER = getLogger("LETS-ENCRYPT.CLEANUP")
 status = 0
 
+
+def describe_api_error(http_status, resp) -> str:
+    detail = f"status = {resp.get('status')}, msg = {resp.get('msg')}" if isinstance(resp, dict) else f"body = {str(resp)[:200]!r}"
+    return f"HTTP {http_status}, {detail}"
+
+
 try:
     # Get env vars
     token = getenv("CERTBOT_TOKEN", "")
@@ -25,13 +31,13 @@ try:
     LOGGER.info(f"Cleaning challenge from {len(instances)} instances")
     for instance in instances:
         api = API.from_instance(instance)
-        sent, err, status, resp = api.request("DELETE", "/lets-encrypt/challenge", data={"token": token})
+        sent, err, http_status, resp = api.request("DELETE", "/lets-encrypt/challenge", data={"token": token})
         if not sent:
             status = 1
             LOGGER.error(f"Can't send API request to {api.endpoint}/lets-encrypt/challenge : {err}")
-        elif status != 200:
+        elif http_status != 200:
             status = 1
-            LOGGER.error(f"Error while sending API request to {api.endpoint}/lets-encrypt/challenge : status = {resp['status']}, msg = {resp['msg']}")
+            LOGGER.error(f"Error while sending API request to {api.endpoint}/lets-encrypt/challenge : {describe_api_error(http_status, resp)}")
         else:
             LOGGER.info(f"Successfully sent API request to {api.endpoint}/lets-encrypt/challenge")
 except BaseException as e:

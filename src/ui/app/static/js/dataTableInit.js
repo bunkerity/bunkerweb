@@ -1,5 +1,173 @@
 // dataTableInit.js
 
+function collectDataTableSearchPaneEntries(requestData) {
+  if (!requestData || typeof requestData !== "object") return [];
+
+  const entries = Object.keys(requestData)
+    .filter((key) => key.startsWith("searchPanes["))
+    .map((key) => [key, String(requestData[key] || "")]);
+
+  const flatten = (value, path) => {
+    if (value === null || typeof value === "undefined") return;
+
+    if (Array.isArray(value)) {
+      value.forEach((item, index) => flatten(item, `${path}[${index}]`));
+      return;
+    }
+
+    if (typeof value === "object") {
+      Object.keys(value)
+        .sort((a, b) => a.localeCompare(b))
+        .forEach((key) => flatten(value[key], `${path}[${String(key)}]`));
+      return;
+    }
+
+    entries.push([path, String(value)]);
+  };
+
+  if (requestData.searchPanes && typeof requestData.searchPanes === "object") {
+    flatten(requestData.searchPanes, "searchPanes");
+  }
+
+  const seen = new Set();
+  return entries
+    .filter(([key, value]) => {
+      const signature = `${key}=${value}`;
+      if (seen.has(signature)) return false;
+      seen.add(signature);
+      return true;
+    })
+    .sort((a, b) => a[0].localeCompare(b[0]));
+}
+
+function getDataTableStateParams(dataTable) {
+  const params = dataTable.ajax.params() || {};
+  const state = {
+    search: params.search ? params.search.value : "",
+    order_column:
+      params.order && params.order.length > 0
+        ? params.columns[params.order[0].column].data
+        : "",
+    order_dir:
+      params.order && params.order.length > 0 ? params.order[0].dir : "",
+  };
+
+  collectDataTableSearchPaneEntries(params).forEach(([key, value]) => {
+    state[key] = value;
+  });
+
+  return state;
+}
+
+function appendDataTableParamsInputs(form, params, inputClass = "") {
+  Object.entries(params).forEach(([name, value]) => {
+    form.append(
+      $("<input>", {
+        type: "hidden",
+        name: name,
+        value: value,
+        class: inputClass,
+      }),
+    );
+  });
+}
+
+function appendDataTableStateInputs(form, dataTable) {
+  appendDataTableParamsInputs(form, getDataTableStateParams(dataTable));
+}
+
+/**
+ * Escape a single cell value against spreadsheet formula injection (CWE-1236).
+ *
+ * Mirrors the Python ``defusedcsv`` ``_escape`` logic used by the server-side
+ * exports in ``app.utils.csv_writer`` / ``app.utils.csv_safe``: prefix a leading
+ * single quote when the first character is one of ``= + - @ | %`` (and the value
+ * is not a number / numeric-looking string), and additionally backslash-escape
+ * embedded ``|`` characters. ``null``/``undefined`` and numeric values pass
+ * through unchanged.
+ *
+ * Applied globally to every DataTables Buttons CSV / Excel / clipboard export
+ * via the patch immediately below — every ``extend: "csv" | "excel" | "copy"``
+ * button on every page picks this up automatically.
+ *
+ * @param {*} value Raw cell value coming from a DataTables row.
+ * @returns {*} Escaped value safe for CSV / XLSX / clipboard targets.
+ */
+function bwCsvSafe(value) {
+  if (value === null || value === undefined) return value;
+  if (typeof value === "number") return value;
+  let s = String(value);
+  if (s && /^[@+\-=|%\t\r]/.test(s) && !/^-?[0-9,.]+$/.test(s)) {
+    s = s.replace(/\\/g, "\\\\");
+    s = s.replace(/\|/g, "\\|");
+    s = "'" + s;
+  }
+  return s;
+}
+
+(function patchDataTablesButtonsForFormulaInjection() {
+  if (typeof $ === "undefined" || !$.fn || !$.fn.dataTable) return;
+  const ext = $.fn.dataTable.ext;
+  if (!ext || !ext.buttons) return;
+
+  // Built-in HTML5 export buttons: ``extend: "csv" | "excel" | "copy"`` resolve
+  // to these via DataTables' button alias chain. We patch the per-button
+  // ``action`` instead of ``exportOptions`` defaults because DataTables Buttons'
+  // ``_resolveExtends`` does **not** deep-merge ``exportOptions`` from defaults
+  // when the per-page config supplies its own ``exportOptions`` block, so any
+  // ``format`` we put on the default object gets dropped.
+  //
+  // Wrapping ``action`` lets us mutate the resolved ``config`` immediately
+  // before the export pipeline runs, which is the same call site every export
+  // button (CSV / Excel / clipboard copy) goes through. The mutation is
+  // idempotent because reassigning ``format.body`` to the same ``bwCsvSafe``
+  // reference is a no-op on subsequent clicks.
+  ["csvHtml5", "excelHtml5", "copyHtml5"].forEach(function (name) {
+    const btn = ext.buttons[name];
+    if (!btn || typeof btn.action !== "function" || btn.__bwCsvSafePatched)
+      return;
+    const origAction = btn.action;
+    btn.action = function (e, dt, button, config) {
+      config = config || {};
+      config.exportOptions = config.exportOptions || {};
+
+      // Buttons' own default formatters are what call ``stripData``, which is what
+      // removes the markup from a cell. Replacing them outright therefore exported raw
+      // ``innerHTML`` (badges, links, icons) into every CSV / XLSX / clipboard payload,
+      // so compose with it instead of overwriting it.
+      //
+      // ``stripData`` reads its flags from the second argument and treats a *present*
+      // object with a falsy ``stripHtml`` as "do not strip", so the library defaults have
+      // to be restated here; passing ``exportOptions`` alone would silently disable it
+      // again. Anything the page sets explicitly still wins.
+      const stripConfig = $.extend(
+        {
+          stripHtml: true,
+          stripNewlines: true,
+          decodeEntities: true,
+          trim: true,
+        },
+        config.exportOptions,
+      );
+      const stripThenEscape = function (value) {
+        return bwCsvSafe($.fn.dataTable.Buttons.stripData(value, stripConfig));
+      };
+
+      config.exportOptions.format = $.extend(
+        {},
+        config.exportOptions.format || {},
+        {
+          body: stripThenEscape,
+          header: stripThenEscape,
+          footer: stripThenEscape,
+        },
+      );
+      return origAction.call(this, e, dt, button, config);
+    };
+    btn.__bwCsvSafePatched = true;
+  });
+})();
+
 /**
  * Initialize a DataTable with i18n and user preferences.
  * @param {Object} config - Configuration object for the DataTable.
@@ -15,6 +183,7 @@ function initializeDataTable(config) {
     tableSelector,
     tableName,
     columnVisibilityCondition,
+    delegatedTooltips,
     dataTableOptions,
   } = config;
 
@@ -106,9 +275,15 @@ function initializeDataTable(config) {
   // Check for saved pageLength in localStorage
   const savedPageLength = localStorage.getItem(`bw-${tableName}-pageLength`);
   if (savedPageLength !== null) {
+    // Migrate old "All" (-1) to 100
+    const parsedPageLength = parseInt(savedPageLength, 10);
+    if (parsedPageLength === -1) {
+      localStorage.setItem(`bw-${tableName}-pageLength`, "100");
+    }
     // Apply saved pageLength to the options if it exists
     if (dataTableOptions.pageLength === undefined) {
-      dataTableOptions.pageLength = parseInt(savedPageLength, 10);
+      dataTableOptions.pageLength =
+        parsedPageLength === -1 ? 100 : parsedPageLength;
     }
   }
 
@@ -142,8 +317,74 @@ function initializeDataTable(config) {
   // Automatically enable state saving for DataTable
   safeDataTableOptions.stateSave = true;
 
+  // Migrate stale "All" (-1) page length from DataTables' own saved state
+  const existingStateLoadParams = safeDataTableOptions.stateLoadParams;
+  safeDataTableOptions.stateLoadParams = function (settings, data) {
+    if (data.length === -1) {
+      data.length = 100;
+    }
+    if (typeof existingStateLoadParams === "function") {
+      existingStateLoadParams.call(this, settings, data);
+    }
+  };
+
   const dataTable = new DataTable(tableSelector, safeDataTableOptions);
   applyTranslations();
+
+  // Headers given as `columns[].title` markup would otherwise be read out as that markup in the
+  // sort button's accessible name: use the rendered header text instead.
+  const markupHeaderColumns = new Set(
+    dataTable
+      .settings()[0]
+      .aoColumns.filter((column) => /</.test(column.ariaTitle || "")),
+  );
+  const syncHeaderAriaTitles = () => {
+    dataTable.settings()[0].aoColumns.forEach((column, index) => {
+      if (!markupHeaderColumns.has(column)) return;
+      const text = $(dataTable.column(index).header())
+        .find(".dt-column-title")
+        .text()
+        .replace(/\s+/g, " ")
+        .trim();
+      if (!text) return;
+      const sortButton = $(dataTable.column(index).header()).find(
+        ".dt-column-order[aria-label]",
+      );
+      if (sortButton.length) {
+        sortButton.attr(
+          "aria-label",
+          sortButton.attr("aria-label").replace(column.ariaTitle, () => text),
+        );
+      }
+      column.ariaTitle = text;
+    });
+  };
+  syncHeaderAriaTitles();
+
+  // Rows are rebuilt on every draw, so per-trigger instances would be disposed and
+  // recreated (and leaked) each time. One delegated tooltip builds an instance on
+  // first hover instead; the row instances are dropped with the rows.
+  if (delegatedTooltips && typeof bootstrap !== "undefined") {
+    new bootstrap.Tooltip(dataTable.table().container(), {
+      selector: '[data-bs-toggle="tooltip"]',
+    });
+    const disposeTooltips = (root) => () => {
+      $(root())
+        .find('[data-bs-toggle="tooltip"]')
+        .each(function () {
+          const instance = bootstrap.Tooltip.getInstance(this);
+          if (instance) instance.dispose();
+        });
+    };
+    dataTable.on(
+      "preDraw.dt",
+      disposeTooltips(() => dataTable.table().body()),
+    );
+    dataTable.on(
+      "column-visibility.dt",
+      disposeTooltips(() => dataTable.table().node()),
+    );
+  }
 
   // Ensure toggle filter buttons keep the outline-primary styling
   const buttonsContainer = dataTable.buttons().container();
@@ -211,22 +452,46 @@ function initializeDataTable(config) {
     const defaultColsVisibility = JSON.parse(
       $columnsPreferenceDefaults.val().trim(),
     );
-    originalColumnsPreferences = JSON.parse($columnsPreference.val().trim());
+    // A saved mapping can name a column a release later removed, or miss one it added:
+    // the server answers 400 to unknown keys, so keep exactly the default keys.
+    const normalizeColumnsPreferences = (saved) => {
+      const source = saved && typeof saved === "object" ? saved : {};
+      return Object.fromEntries(
+        Object.entries(defaultColsVisibility).map(([key, value]) => [
+          key,
+          typeof source[key] === "boolean" ? source[key] : value,
+        ]),
+      );
+    };
+    originalColumnsPreferences = normalizeColumnsPreferences(
+      JSON.parse($columnsPreference.val().trim()),
+    );
 
     // Handle column visibility preferences
-    let columnVisibility = localStorage.getItem(`bw-${tableName}-columns`);
-    if (columnVisibility === null) {
-      columnVisibility = { ...originalColumnsPreferences };
-    } else {
-      columnVisibility = JSON.parse(columnVisibility);
+    let savedColumnVisibility = null;
+    try {
+      savedColumnVisibility = JSON.parse(
+        localStorage.getItem(`bw-${tableName}-columns`),
+      );
+    } catch (e) {
+      // Corrupt browser storage: fall back to the server preferences
     }
+    const columnVisibility = savedColumnVisibility
+      ? normalizeColumnsPreferences(savedColumnVisibility)
+      : { ...originalColumnsPreferences };
 
+    // Without the second argument every call re-measures the whole table; the
+    // adjust() at the end of this function does it once.
     Object.entries(columnVisibility).forEach(([key, value]) => {
-      dataTable.column(key).visible(value);
+      dataTable.column(key).visible(value, false);
     });
 
-    // Save column preferences
-    const saveColumnsPreferences = debounce(() => {
+    // Save column preferences. The debounce batches a run of column toggles, so
+    // a pending write is flushed on pagehide -- otherwise navigating within a
+    // second of the last toggle silently discarded it.
+    let columnsPreferencesPending = false;
+    const postColumnsPreferences = () => {
+      columnsPreferencesPending = false;
       const data = new FormData();
       data.append("csrf_token", $("#csrf_token").val().trim());
       data.append("table_name", tableName);
@@ -240,6 +505,7 @@ function initializeDataTable(config) {
       fetch(savePreferencesUrl, {
         method: "POST",
         body: data,
+        keepalive: true,
       })
         .then((response) => {
           if (!response.ok) {
@@ -249,7 +515,21 @@ function initializeDataTable(config) {
         .catch((error) => {
           console.error("There was a problem with the fetch operation:", error);
         });
-    }, 1000);
+    };
+
+    const debouncedPostColumnsPreferences = debounce(
+      postColumnsPreferences,
+      1000,
+    );
+
+    const saveColumnsPreferences = () => {
+      columnsPreferencesPending = true;
+      debouncedPostColumnsPreferences();
+    };
+
+    $(window).on("pagehide", () => {
+      if (columnsPreferencesPending) postColumnsPreferences();
+    });
 
     if (typeof i18next !== "undefined") {
       i18next.on("languageChanged", (lng) => {
@@ -297,6 +577,8 @@ function initializeDataTable(config) {
           });
         }
 
+        syncHeaderAriaTitles();
+
         const searchPanesContainer = dataTable.searchPanes.container();
         if (searchPanesContainer && $(searchPanesContainer).length) {
           updateFilterTranslations();
@@ -307,8 +589,9 @@ function initializeDataTable(config) {
     // Column visibility event
     dataTable.on("column-visibility.dt", function (e, settings, column, state) {
       if (
-        typeof columnVisibilityCondition === "function" &&
-        !columnVisibilityCondition(column)
+        (typeof columnVisibilityCondition === "function" &&
+          !columnVisibilityCondition(column)) ||
+        !(column in defaultColsVisibility)
       ) {
         return;
       }
@@ -397,44 +680,21 @@ function initializeDataTable(config) {
     }
   });
 
-  if (dataTable.responsive) dataTable.responsive.recalc();
-
-  dataTable.on("mouseenter", "td", function () {
-    if (dataTable.cell(this).index() === undefined) return;
-    const rowIdx = dataTable.cell(this).index().row;
-
-    dataTable
-      .cells()
-      .nodes()
-      .each((el) => el.classList.remove("highlight"));
-
-    dataTable
-      .cells()
-      .nodes()
-      .each(function (el) {
-        if (dataTable.cell(el).index().row === rowIdx)
-          el.classList.add("highlight");
-      });
-  });
-
-  dataTable.on("mouseleave", "td", function () {
-    dataTable
-      .cells()
-      .nodes()
-      .each((el) => el.classList.remove("highlight"));
-  });
-
   dataTable.on("select", function (e, dt, type, indexes) {
     const actionButton = $(".action-button");
     if (!actionButton.length) return;
 
     // Enable the actions button
+    // Strip data-i18n alongside the tooltip attrs: leaving it while
+    // data-bs-original-title is removed makes applyTranslations() fall through
+    // to .text() and overwrite the button content with the raw tooltip string.
     actionButton
       .removeClass("disabled")
       .parent()
       .attr("data-bs-toggle", null)
       .attr("data-bs-original-title", null)
       .attr("data-bs-placement", null)
+      .removeAttr("data-i18n")
       .tooltip("dispose");
   });
 
@@ -458,6 +718,152 @@ function initializeDataTable(config) {
           .tooltip();
     }
   });
+
+  // Cross-page selection affordance.
+  // The header checkbox is configured (per-page) with `headerCheckbox: "select-page"`,
+  // so by default it selects only rows on the current page. When more matching rows
+  // exist on other pages, surface a banner that lets the user opt-in to selecting
+  // the entire filtered set — and, once opted in, opt out via "Clear selection".
+  //
+  // Skipped for `serverSide: true` tables (bans, reports): DataTables only holds
+  // the current page client-side, so `rows({ search: "applied" }).select()` would
+  // not actually select off-page rows. A correct cross-page bulk action on a
+  // server-side table requires submitting the active filter to the server-side
+  // endpoint instead of an explicit row-id list — out of scope for this banner.
+  const isServerSide = !!(
+    dataTable.settings &&
+    dataTable.settings()[0] &&
+    dataTable.settings()[0].oFeatures &&
+    dataTable.settings()[0].oFeatures.bServerSide
+  );
+  const $tableWrapper = $(`#${tableName}_wrapper`);
+  if ($tableWrapper.length && !isServerSide) {
+    const $bulkBanner = $(
+      '<div class="dt-bulk-select-banner alert alert-primary py-2 px-3 mb-2 d-none align-items-center" role="status">' +
+        '<i class="bx bx-info-circle me-2" aria-hidden="true"></i>' +
+        '<span class="dt-bulk-select-message flex-grow-1"></span>' +
+        '<button type="button" class="btn btn-sm btn-link p-0 ms-2 dt-bulk-select-action"></button>' +
+        "</div>",
+    );
+    $tableWrapper.prepend($bulkBanner);
+
+    const setBannerVisible = (visible) => {
+      $bulkBanner
+        .toggleClass("d-none", !visible)
+        .toggleClass("d-flex", visible);
+    };
+
+    const updateBulkBanner = () => {
+      const pageCount = dataTable.rows({ page: "current" }).count();
+      const filteredCount = dataTable.rows({ search: "applied" }).count();
+      const selectedCount = dataTable.rows({ selected: true }).count();
+      const selectedOnPage = dataTable
+        .rows({ page: "current", selected: true })
+        .count();
+
+      // Only meaningful when filtered set spans more than one page
+      if (filteredCount <= pageCount) {
+        setBannerVisible(false);
+        return;
+      }
+
+      const $msg = $bulkBanner.find(".dt-bulk-select-message");
+      const $action = $bulkBanner.find(".dt-bulk-select-action");
+
+      if (
+        selectedOnPage === pageCount &&
+        pageCount > 0 &&
+        selectedCount < filteredCount
+      ) {
+        const msgKey = "datatable.bulk_select_page";
+        const actionKey = "datatable.bulk_select_all_filtered";
+        const msgOpts = { count: selectedOnPage, entity: entityName };
+        const actionOpts = { count: filteredCount, entity: entityName };
+        $msg
+          .attr("data-i18n", msgKey)
+          .attr("data-i18n-options", JSON.stringify(msgOpts))
+          .text(
+            t(
+              msgKey,
+              `All ${selectedOnPage} ${entityName} on this page are selected.`,
+              msgOpts,
+            ),
+          );
+        $action
+          .attr("data-i18n", actionKey)
+          .attr("data-i18n-options", JSON.stringify(actionOpts))
+          .data("action", "select-all-filtered")
+          .text(
+            t(
+              actionKey,
+              `Select all ${filteredCount} matching ${entityName}`,
+              actionOpts,
+            ),
+          );
+        setBannerVisible(true);
+        return;
+      }
+
+      if (selectedCount >= filteredCount && filteredCount > 0) {
+        const msgKey = "datatable.bulk_select_all_done";
+        const actionKey = "datatable.bulk_select_clear";
+        const msgOpts = { count: filteredCount, entity: entityName };
+        $msg
+          .attr("data-i18n", msgKey)
+          .attr("data-i18n-options", JSON.stringify(msgOpts))
+          .text(
+            t(
+              msgKey,
+              `All ${filteredCount} matching ${entityName} are selected.`,
+              msgOpts,
+            ),
+          );
+        $action
+          .attr("data-i18n", actionKey)
+          .removeAttr("data-i18n-options")
+          .data("action", "clear")
+          .text(t(actionKey, "Clear selection"));
+        setBannerVisible(true);
+        return;
+      }
+
+      setBannerVisible(false);
+    };
+
+    $bulkBanner.on("click", ".dt-bulk-select-action", function () {
+      const action = $(this).data("action");
+      if (action === "select-all-filtered") {
+        dataTable.rows({ search: "applied" }).select();
+      } else if (action === "clear") {
+        dataTable.rows().deselect();
+      }
+    });
+
+    // Coalesce updates: bulk select operations (e.g.
+    // `dataTable.rows({ search: "applied" }).select()` on a 5k-row table) emit
+    // one `select` event per row. Without batching we'd run `updateBulkBanner`
+    // 5k times in a single tick. A single pending flag plus rAF collapses the
+    // burst to one render per frame.
+    let bulkBannerPending = false;
+    const scheduleBulkBannerUpdate = () => {
+      if (bulkBannerPending) return;
+      bulkBannerPending = true;
+      const flush = () => {
+        bulkBannerPending = false;
+        updateBulkBanner();
+      };
+      if (typeof window.requestAnimationFrame === "function") {
+        window.requestAnimationFrame(flush);
+      } else {
+        setTimeout(flush, 0);
+      }
+    };
+    dataTable.on(
+      "select deselect draw page length search",
+      scheduleBulkBannerUpdate,
+    );
+    scheduleBulkBannerUpdate();
+  }
 
   // Note: colvisRestore handling moved earlier to respect defaults
 

@@ -6,24 +6,25 @@ from contextlib import contextmanager, suppress
 from copy import deepcopy
 from datetime import datetime, timedelta
 from functools import wraps
-from io import BytesIO
+from hashlib import sha256
 from json import JSONDecodeError, loads
 from logging import Logger
+from math import ceil
 from os import _exit, getenv, sep
 from os.path import join as os_join
 from pathlib import Path
-from re import DOTALL, Match, compile as re_compile, escape, error as RegexError, search
+from re import DOTALL, IGNORECASE, Match, compile as re_compile, escape, error as RegexError, search
 from sys import argv, path as sys_path
-from tarfile import open as tar_open
 from threading import Lock
 from traceback import format_exc
-from typing import Any, Callable, Dict, List, Literal, Optional, Set, Tuple, TypeVar, Union
+from typing import Any, Callable, Dict, List, Literal, NoReturn, Optional, Sequence, Set, Tuple, TypeVar, Union
 from time import sleep
 from uuid import uuid4
 from warnings import filterwarnings
 
 from model import (
     Base,
+    Blob_chunks,
     Instances,
     Plugins,
     Settings,
@@ -51,14 +52,16 @@ for deps_path in [os_join(sep, "usr", "share", "bunkerweb", *paths) for paths in
     if deps_path not in sys_path:
         sys_path.append(deps_path)
 
-from common_utils import bytes_hash  # type: ignore
+from common_utils import bytes_hash, create_plugin_tar_gz, is_valid_host, parse_duration  # type: ignore
 
 from pymysql import install_as_MySQLdb
-from sqlalchemy import case, create_engine, event, MetaData as sql_metadata, func, join, select as db_select, text
+from sqlalchemy import and_, bindparam, case, create_engine, event, MetaData as sql_metadata, func, join, select as db_select, text
 from sqlalchemy.engine import Engine
+from sqlalchemy.engine.url import make_url
 from sqlalchemy.exc import (
     ArgumentError,
     DatabaseError,
+    IntegrityError,
     OperationalError,
     ProgrammingError,
     SAWarning,
@@ -86,6 +89,36 @@ filterwarnings("ignore", category=SAWarning, message="DELETE statement on table 
 T = TypeVar("T")
 
 
+class DatabaseInitError(Exception):
+    """Raised instead of exiting the process by Database(exit_on_error=False)"""
+
+
+# DATABASE_POOL_* env-var defaults. Exported so callers (e.g. JobScheduler.py) reuse the
+# same fallback values and stay aligned if these change.
+DEFAULT_POOL_SIZE = 40
+DEFAULT_POOL_MAX_OVERFLOW = 20
+DEFAULT_POOL_TIMEOUT = 5
+DEFAULT_POOL_RECYCLE = 1800
+DEFAULT_POOL_PRE_PING = True
+
+# Driver-level timeouts, in seconds. Without them a connection whose peer vanishes without a reset blocks the caller forever.
+DEFAULT_CONNECT_TIMEOUT = 10
+DEFAULT_READ_TIMEOUT = 300
+
+# A blob larger than one statement can carry on MySQL/MariaDB (max_allowed_packet, which a non-SUPER user
+# cannot raise) is stored in bw_blob_chunks and its owner column holds this marker followed by the sha256.
+BLOB_CHUNK_MARKER = b"\x00bw-blob-chunks\x00"
+BLOB_CHUNK_MAX = 4 * 1024 * 1024
+
+# Methods that mean "a human edited this through a first-class interface". They overwrite
+# one another freely. "wizard" belongs here: the setup wizard creates its service with that
+# method and then writes the service's settings as "ui", so the two must be interchangeable
+# or every later edit of that service is silently dropped. What makes the wizard service
+# special is that it cannot be deleted, which is enforced separately and deliberately not
+# by this set.
+EDITABLE_METHODS = frozenset({"ui", "api", "wizard"})
+
+
 def retry_on_transient_db_errors(func: Callable[..., T]) -> Callable[..., T]:
     @wraps(func)
     def wrapper(self: "Database", *args, **kwargs) -> T:
@@ -108,6 +141,60 @@ def retry_on_transient_db_errors(func: Callable[..., T]) -> Callable[..., T]:
     return wrapper
 
 
+# Greedy to the last "@" of the authority so an unencoded "@" inside the password is
+# covered too, but stopping at "/", "?" and "#" so an "@" in the path or query does not
+# drag the host into the mask. The username class is SQLAlchemy's own, "@" and whitespace
+# included: this pass also runs on RAW text, where the username is not percent-encoded, and a
+# username the class rejects makes the whole match fail and leaves the password in the log.
+DB_URI_PASSWORD_RX = re_compile(r"(://[^:/]*:)[^\s/?#]*@")
+
+# The same span SQLAlchemy's own parser uses: a username that stops at the first ":" and a password
+# that stops at the first "@". Both classes are its classes character for character, so every DSN it
+# parses is one this matches. Narrowing either of them, by whitespace or by anything else, is a DSN
+# that parses, fails the round trip, then matches nothing and reaches the log in cleartext. Only
+# used once make_url has confirmed there is a password, so the wide classes cannot drag a host into
+# the mask the way they would on arbitrary text.
+DB_URI_AUTHORITY_PASSWORD_RX = re_compile(r"(://[^:/]*:)[^@]*@")
+
+# Several drivers take the credential in the query string instead of the authority
+# (`?password=`, `?sslpassword=`, `?token=`), where render_as_string(hide_password=True) leaves
+# it untouched. Matched on the parameter NAME so a driver-specific spelling is covered too, and
+# the value is cut at the next separator so the rest of the DSN survives the mask.
+DB_URI_QUERY_SECRET_RX = re_compile(r"([?&][^=&\s]*(?:password|passwd|pwd|secret|token|api[-_]?key)[^=&\s]*=)[^&#\s]*", IGNORECASE)
+
+
+def mask_db_uri(db_string: str) -> str:
+    """Return a database URI, or any text that may embed one, safe to log.
+
+    Callers reach this on malformed input, which make_url() either rejects outright
+    or, worse, parses wrongly, so the regexes have to be able to stand on their own. Driver
+    exceptions are passed through here for the same reason: they quote the DSN they failed on.
+    """
+    if not db_string:
+        return db_string
+    masked = db_string
+    with suppress(BaseException):
+        url = make_url(db_string)
+        # make_url anchors at the start and its query group stops at the first newline, so a driver
+        # message that merely BEGINS with a URI parses, and rendering it back would drop the failure
+        # reason the operator needs (these call sites exit right after logging). Only let it rewrite
+        # a string it reproduces exactly; anything else keeps its own text and is masked by regex.
+        if url.render_as_string(hide_password=False) == db_string:
+            masked = url.render_as_string(hide_password=True)
+        elif url.password:
+            # A password carrying "/", "?" or "#" does not survive the round trip (render_as_string
+            # percent-encodes it) and is outside DB_URI_PASSWORD_RX's class as well, so without
+            # this neither masker fires and the credential reaches the log verbatim.
+            # `openssl rand -base64` produces "/" routinely. Matched by span rather than by the
+            # value of url.password, which is percent-DECODED and so does not occur in the text
+            # being masked whenever the operator escaped a delimiter.
+            masked = DB_URI_AUTHORITY_PASSWORD_RX.sub(r"\1***@", masked, count=1)
+    # Second pass on purpose: given an unencoded "@" in the password, make_url takes only
+    # the part before it for the password and hides that, leaving the rest to reach the log.
+    masked = DB_URI_PASSWORD_RX.sub(r"\1***@", masked)
+    return DB_URI_QUERY_SECRET_RX.sub(r"\1***", masked)
+
+
 class Database:
     DB_STRING_RX = re_compile(r"^(?P<database>(mariadb|mysql)(\+pymysql)?|sqlite(\+pysqlite)?|postgresql(\+psycopg)?|oracle(\+oracledb)?):/+(?P<path>/[^\s]+)")
     READONLY_ERROR = ("readonly", "read-only", "command denied", "Access denied")
@@ -124,12 +211,24 @@ class Database:
     )
     RESTRICTED_TEMPLATE_SETTINGS = ("USE_TEMPLATE", "IS_DRAFT")
     MULTISITE_CUSTOM_CONFIG_TYPES = ("server_http", "modsec_crs", "modsec", "server_stream", "crs_plugins_before", "crs_plugins_after")
+    GLOBAL_CRS_SERVICE_SCOPED_MODSEC_CRS_ERROR = (
+        "Service-scoped modsec-crs configs are not supported when USE_MODSECURITY_GLOBAL_CRS is enabled. "
+        "Create a global modsec-crs config and scope it with a Host rule instead."
+    )
     SUFFIX_RX = re_compile(r"(?P<setting>.+)_(?P<suffix>\d+)$")
 
     def __init__(
-        self, logger: Logger, sqlalchemy_string: Optional[str] = None, *, external: bool = False, pool: Optional[bool] = None, log: bool = True, **kwargs
+        self,
+        logger: Logger,
+        sqlalchemy_string: Optional[str] = None,
+        *,
+        external: bool = False,
+        pool: Optional[bool] = None,
+        log: bool = True,
+        exit_on_error: bool = True,
+        **kwargs,
     ) -> None:
-        """Initialize the database"""
+        """Initialize the database. A failure exits the process, or raises DatabaseInitError without retrying a connection error when exit_on_error is False."""
         self.logger = logger
         self.readonly = False
         self.last_connection_retry = None
@@ -145,7 +244,7 @@ class Database:
 
         request_retry_delay = getenv("DATABASE_REQUEST_RETRY_DELAY", "0.25")
         try:
-            self._request_retry_delay = max(0.0, float(request_retry_delay))
+            self._request_retry_delay = max(0.0, parse_duration(request_retry_delay, "s"))
         except ValueError:
             self.logger.warning(f"Invalid DATABASE_REQUEST_RETRY_DELAY value: {request_retry_delay}, using default value (0.25)")
 
@@ -168,6 +267,12 @@ class Database:
                 if log:
                     self.logger.warning("The database connection is set to read-only, the changes will not be saved")
 
+        def fail(message: str) -> NoReturn:
+            self.logger.error(message)
+            if not exit_on_error:
+                raise DatabaseInitError(message)
+            _exit(1)
+
         def validate_and_update_db_string(db_string: str) -> Tuple[str, Optional[Match]]:
             """Validate and update database connection string."""
             if not db_string:
@@ -175,8 +280,7 @@ class Database:
 
             match = self.DB_STRING_RX.search(db_string)
             if not match:
-                self.logger.error(f"Invalid database string provided: {db_string}, exiting...")
-                _exit(1)
+                fail(f"Invalid database string provided: {mask_db_uri(db_string)}, exiting...")
 
             db_type = match.group("database")
             db_path = match.group("path")
@@ -193,13 +297,21 @@ class Database:
                     path.parent.mkdir(parents=True, exist_ok=True)
                 return db_string, match
 
-            # Add recommended drivers for MySQL/MariaDB and PostgreSQL
-            if db_type.startswith("m") and not db_type.endswith("+pymysql"):
-                return db_string.replace(db_type, f"{db_type}+pymysql"), match
-            elif db_type.startswith("postgresql") and not db_type.endswith("+psycopg"):
-                return db_string.replace(db_type, f"{db_type}+psycopg"), match
-            elif db_type.startswith("oracle") and not db_type.endswith("+oracledb"):
-                return db_string.replace(db_type, f"{db_type}+oracledb"), match
+            # Inject the recommended driver via SQLAlchemy's URL parser so only the drivername component is rewritten.
+            recommended_driver = {
+                "postgresql": "psycopg",
+                "mysql": "pymysql",
+                "mariadb": "pymysql",
+                "oracle": "oracledb",
+            }.get(db_type)
+            if recommended_driver is not None:
+                try:
+                    url = make_url(db_string)
+                except ArgumentError:
+                    fail(f"Invalid database string provided: {mask_db_uri(db_string)}, exiting...")
+                if "+" not in url.drivername:
+                    url = url.set(drivername=f"{url.drivername}+{recommended_driver}")
+                    return url.render_as_string(hide_password=False), match
 
             return db_string, match
 
@@ -209,58 +321,124 @@ class Database:
 
         self.database_uri = "" if sqlalchemy_string == sqlalchemy_string_readonly else sqlalchemy_string
         self.database_uri_readonly = sqlalchemy_string_readonly
-        error = False
-
         match = main_match
         if self.database_uri_readonly and not self.database_uri and readonly_match:
             match = readonly_match
 
         if main_match and main_match.group("database") == "oracle":
-            self.logger.error("Oracle database is not supported yet")
-            _exit(1)
+            fail("Oracle database is not supported yet")
 
         if readonly_match and readonly_match.group("database") == "oracle":
-            self.logger.error("Oracle database is not supported yet")
-            _exit(1)
+            fail("Oracle database is not supported yet")
+
+        # Pool size
+        pool_size = getenv("DATABASE_POOL_SIZE", str(DEFAULT_POOL_SIZE))
+        if pool_size.isdigit() and int(pool_size) >= 0:
+            pool_size = int(pool_size)
+        else:
+            self.logger.warning(f"Invalid DATABASE_POOL_SIZE value: {pool_size}, using default value ({DEFAULT_POOL_SIZE})")
+            pool_size = DEFAULT_POOL_SIZE
+
+        # Max overflow
+        max_overflow = getenv("DATABASE_POOL_MAX_OVERFLOW", str(DEFAULT_POOL_MAX_OVERFLOW))
+        try:
+            max_overflow = int(max_overflow)
+        except ValueError:
+            self.logger.warning(f"Invalid DATABASE_POOL_MAX_OVERFLOW value: {max_overflow}, using default value ({DEFAULT_POOL_MAX_OVERFLOW})")
+            max_overflow = DEFAULT_POOL_MAX_OVERFLOW
+
+        # Pool timeout
+        pool_timeout = getenv("DATABASE_POOL_TIMEOUT", str(DEFAULT_POOL_TIMEOUT))
+        try:
+            pool_timeout = parse_duration(pool_timeout, "s")
+            if pool_timeout < 0:
+                raise ValueError("negative")
+        except ValueError:
+            self.logger.warning(f"Invalid DATABASE_POOL_TIMEOUT value: {pool_timeout}, using default value ({DEFAULT_POOL_TIMEOUT})")
+            pool_timeout = DEFAULT_POOL_TIMEOUT
+
+        # Pool recycle
+        pool_recycle = getenv("DATABASE_POOL_RECYCLE", str(DEFAULT_POOL_RECYCLE))
+        if pool_recycle.strip() == "-1":
+            pool_recycle = -1
+        else:
+            try:
+                pool_recycle = parse_duration(pool_recycle, "s")
+            except ValueError:
+                self.logger.warning(f"Invalid DATABASE_POOL_RECYCLE value: {pool_recycle}, using default value ({DEFAULT_POOL_RECYCLE})")
+                pool_recycle = DEFAULT_POOL_RECYCLE
+
+        # Pool pre-ping
+        pool_pre_ping = getenv("DATABASE_POOL_PRE_PING", "yes" if DEFAULT_POOL_PRE_PING else "no").lower() in ("yes", "true", "1")
+
+        # Driver timeouts: the drivers reject a zero connect timeout, so only the read timeout can be 0 (disabled)
+        driver_timeouts = {}
+        for env_name, default, minimum in (
+            ("DATABASE_CONNECT_TIMEOUT", DEFAULT_CONNECT_TIMEOUT, 1),
+            ("DATABASE_READ_TIMEOUT", DEFAULT_READ_TIMEOUT, 0),
+        ):
+            value = getenv(env_name, str(default))
+            try:
+                driver_timeouts[env_name] = ceil(parse_duration(value, "s"))
+                if driver_timeouts[env_name] < minimum:
+                    raise ValueError("too low")
+            except ValueError:
+                self.logger.warning(f"Invalid {env_name} value: {value}, using default value ({default})")
+                driver_timeouts[env_name] = default
+        self._connect_timeout = driver_timeouts["DATABASE_CONNECT_TIMEOUT"]
+        self._read_timeout = driver_timeouts["DATABASE_READ_TIMEOUT"]
+
+        self.logger.debug(
+            f"Database pool configuration: pool_size={pool_size}, max_overflow={max_overflow}, pool_timeout={pool_timeout}, pool_recycle={pool_recycle}, pool_pre_ping={pool_pre_ping}"
+        )
 
         self._engine_kwargs = {
             "future": True,
             "poolclass": QueuePool,
-            "pool_pre_ping": True,
-            "pool_recycle": 1800,
-            "pool_size": 40,
-            "max_overflow": 20,
-            "pool_timeout": 5,
+            "pool_pre_ping": pool_pre_ping,
+            "pool_recycle": pool_recycle,
+            "pool_size": pool_size,
+            "max_overflow": max_overflow,
+            "pool_timeout": pool_timeout,
         } | kwargs
 
+        if "pool_reset_on_return" not in kwargs:
+            default_pool_reset = "rollback"
+            configured_pool_reset = getenv("DATABASE_POOL_RESET_ON_RETURN", "").strip().lower() or default_pool_reset
+            if configured_pool_reset in ("none", "null", "off", "false", "no"):
+                self._engine_kwargs["pool_reset_on_return"] = None
+            elif configured_pool_reset in ("rollback", "commit"):
+                self._engine_kwargs["pool_reset_on_return"] = configured_pool_reset
+            else:
+                self.logger.warning(f"Invalid DATABASE_POOL_RESET_ON_RETURN value: {configured_pool_reset}, using default value ({default_pool_reset})")
+                self._engine_kwargs["pool_reset_on_return"] = default_pool_reset
+
         try:
-            self.sql_engine = create_engine(sqlalchemy_string, **self._engine_kwargs)
+            self.sql_engine = self._create_engine(sqlalchemy_string)
         except ArgumentError:
-            self.logger.error(f"Invalid database URI: {sqlalchemy_string}")
-            error = True
+            fail(f"Invalid database URI: {mask_db_uri(sqlalchemy_string)}")
         except SQLAlchemyError as e:
-            self.logger.error(f"Error when trying to create the engine: {e}")
-            error = True
-        finally:
-            if error:
-                _exit(1)
+            fail(f"Error when trying to create the engine: {mask_db_uri(str(e))}")
 
         try:
             assert self.sql_engine is not None
         except AssertionError:
-            self.logger.error("The database engine is not initialized")
-            _exit(1)
+            fail("The database engine is not initialized")
 
         DATABASE_RETRY_TIMEOUT = getenv("DATABASE_RETRY_TIMEOUT", "60")
-        if not DATABASE_RETRY_TIMEOUT.isdigit():
+        try:
+            DATABASE_RETRY_TIMEOUT = parse_duration(DATABASE_RETRY_TIMEOUT, "s")
+        except ValueError:
             self.logger.warning(f"Invalid DATABASE_RETRY_TIMEOUT value: {DATABASE_RETRY_TIMEOUT}, using default value (60)")
-            DATABASE_RETRY_TIMEOUT = "60"
-
-        DATABASE_RETRY_TIMEOUT = int(DATABASE_RETRY_TIMEOUT)
+            DATABASE_RETRY_TIMEOUT = 60
 
         current_time = datetime.now().astimezone()
         not_connected = True
         fallback = False
+        # The retry line named neither the target nor the reason, so nothing actionable was
+        # logged until DATABASE_RETRY_TIMEOUT expired, 60 seconds later by default.
+        connection_target = mask_db_uri(sqlalchemy_string)
+        reason_logged = False
 
         while not_connected:
             try:
@@ -270,40 +448,53 @@ class Database:
                 else:
                     with self.sql_engine.connect() as conn:
                         table_name = uuid4().hex
-                        conn.execute(text(f"CREATE TABLE IF NOT EXISTS test_{table_name} (id INT)"))
+                        conn.execute(text(f"CREATE TABLE IF NOT EXISTS test_{table_name} (id INT PRIMARY KEY)"))
                         conn.execute(text(f"DROP TABLE IF EXISTS test_{table_name}"))
 
                 not_connected = False
             except (OperationalError, DatabaseError) as e:
-                if (datetime.now().astimezone() - current_time).total_seconds() > DATABASE_RETRY_TIMEOUT:
+                # Without exit_on_error only a first read-only error is worth waiting for: the engine is switched to read-only below
+                give_up = not exit_on_error and (self.readonly or not any(error in str(e) for error in (*self.READONLY_ERROR, "Unknown table")))
+                waited = f" after {DATABASE_RETRY_TIMEOUT} seconds" if exit_on_error else ""
+                if give_up or (datetime.now().astimezone() - current_time).total_seconds() > DATABASE_RETRY_TIMEOUT:
                     if not fallback and self.database_uri_readonly:
-                        self.logger.error(f"Can't connect to database after {DATABASE_RETRY_TIMEOUT} seconds. Falling back to read-only database connection")
+                        self.logger.error(f"Can't connect to database {connection_target}{waited}. Falling back to read-only database connection")
                         self.sql_engine.dispose(close=True)
-                        self.sql_engine = create_engine(self.database_uri_readonly, **self._engine_kwargs)
+                        self.sql_engine = self._create_engine(self.database_uri_readonly)
                         self.readonly = True
                         fallback = True
+                        connection_target = mask_db_uri(self.database_uri_readonly)
+                        reason_logged = False
                         continue
-                    self.logger.error(f"Can't connect to database after {DATABASE_RETRY_TIMEOUT} seconds: {e}")
-                    _exit(1)
+                    fail(f"Can't connect to database {connection_target}{waited}: {mask_db_uri(str(e))}")
 
                 if any(error in str(e) for error in self.READONLY_ERROR):
                     if log:
                         self.logger.warning("The database is read-only. Retrying in read-only mode in 5 seconds ...")
                     self.sql_engine.dispose(close=True)
-                    self.sql_engine = create_engine(sqlalchemy_string, **self._engine_kwargs)
+                    self.sql_engine = self._create_engine(sqlalchemy_string)
                     self.readonly = True
                 if "Unknown table" in str(e):
                     not_connected = False
                     continue
                 elif log:
-                    self.logger.warning("Can't connect to database, retrying in 5 seconds ...")
+                    # Reason once, then the terse line: repeating the exception every 5 seconds is
+                    # noise, but withholding it for the whole window leaves nothing to act on.
+                    detail = "" if reason_logged else f" : {mask_db_uri(str(e))}"
+                    reason_logged = True
+                    self.logger.warning(f"Can't connect to database {connection_target}, retrying in 5 seconds ...{detail}")
                 sleep(5)
             except BaseException as e:
-                self.logger.error(f"Error when trying to connect to the database: {e}")
+                message = f"Error when trying to connect to the database: {mask_db_uri(str(e))}"
+                self.logger.error(message)
+                if not exit_on_error and isinstance(e, Exception):
+                    raise DatabaseInitError(message) from e
                 exit(1)
 
         if log:
             self.logger.info(f"✅ Database connection established{'' if not self.readonly else ' in read-only mode'}")
+
+        self._session_factory = scoped_session(sessionmaker(bind=self.sql_engine, autoflush=True, expire_on_commit=False))
 
         if match.group("database").startswith("sqlite"):
             db_path = Path(match.group("path"))
@@ -314,13 +505,19 @@ class Database:
             except (OSError, IOError) as e:
                 self.logger.warning(f"Could not set file permissions on {db_path}: {e}")
 
-    def __del__(self) -> None:
-        """Close the database"""
-        if self._session_factory:
-            self._session_factory.close_all()
+    def close(self) -> None:
+        """Explicitly close all sessions and dispose the engine pool.
+        Only call during controlled shutdown when no other threads are using this instance."""
+        if getattr(self, "_session_factory", None):
+            self._session_factory.remove()
 
-        if self.sql_engine:
-            self.sql_engine.dispose()
+        if getattr(self, "sql_engine", None):
+            self.sql_engine.dispose(close=True)
+
+    def __del__(self) -> None:
+        """Best-effort close on GC so reloaded jobs still send COM_QUIT."""
+        with suppress(Exception):
+            self.close()
 
     def _empty_if_none(self, value: Any) -> Any:
         """Return an empty string if the value is None or convert None values in collections"""
@@ -360,11 +557,16 @@ class Database:
         return f"{cfg_type}/{cfg_name}.conf"
 
     @staticmethod
-    def _methods_are_compatible(new_method: Optional[str], current_method: Optional[str]) -> bool:
+    def _methods_are_compatible(new_method: Optional[str], current_method: Optional[str], *, allow_scheduler_override: bool = False) -> bool:
         """
-        Determine whether two configuration methods should be considered compatible for updates.
-
-        UI and API updates are treated as interchangeable, while autoconf keeps its special behavior.
+        Compatibility rules for overwriting a setting's existing method:
+        - autoconf wins over everything (and only autoconf overwrites autoconf).
+        - ui, api and wizard are interchangeable (see EDITABLE_METHODS).
+        - scheduler (env-var origin) overwrites those only when the caller asserts the
+          setting was explicitly declared in the environment (allow_scheduler_override),
+          so config-as-code stays authoritative without default-filled scheduler passes
+          wiping UI/API customizations; the reverse stays blocked to protect in-session
+          UI edits.
         """
         if new_method is None:
             return True
@@ -374,8 +576,10 @@ class Database:
             return True
         if current_method == "autoconf":
             return new_method == "autoconf"
-        if {new_method, current_method} <= {"ui", "api"}:
+        if {new_method, current_method} <= EDITABLE_METHODS:
             return True
+        if new_method == "scheduler" and current_method in EDITABLE_METHODS:
+            return allow_scheduler_override
         return new_method == current_method
 
     def _is_transient_connection_error(self, error: BaseException) -> bool:
@@ -395,6 +599,100 @@ class Database:
 
         return any(hint in error_text for hint in self.TRANSIENT_CONNECTION_ERROR_HINTS)
 
+    def _blob_chunk_size(self, session: scoped_session) -> Optional[int]:
+        """Largest blob one statement can carry, or None when the backend has no practical limit."""
+        if self.sql_engine.dialect.name not in ("mysql", "mariadb"):
+            return None
+        packet = int(session.execute(text("SELECT @@max_allowed_packet")).scalar())
+        # PyMySQL >= 1.2.1 sends bytes as a hex literal, so a blob costs twice its size on the wire.
+        return max(16 * 1024, min(BLOB_CHUNK_MAX, (packet - 64 * 1024) // 3))
+
+    def _blob_store(self, session: scoped_session, owner: str, data: Optional[bytes]) -> Optional[bytes]:
+        """Return what to write in the owner's data column: the data itself when it fits one statement,
+        otherwise a marker, the data going to bw_blob_chunks one row per statement. Drops the owner's
+        other chunk sets in the same transaction, so a reader sees the old blob or the new one."""
+        size = self._blob_chunk_size(session)
+        value = data
+        checksum = ""
+        if data is not None and size and len(data) > size:
+            checksum = sha256(data).hexdigest()
+            value = BLOB_CHUNK_MARKER + checksum.encode()
+            if not session.query(Blob_chunks.idx).filter_by(owner=owner, checksum=checksum).first():
+                for idx, start in enumerate(range(0, len(data), size)):
+                    end = start + size
+                    session.add(Blob_chunks(owner=owner, checksum=checksum, idx=idx, data=data[start:end]))
+                    session.flush()
+        self._blob_drop(session, Blob_chunks.owner == owner, Blob_chunks.checksum != checksum)
+        return value
+
+    @staticmethod
+    def _blob_drop(session: scoped_session, *conditions: Any) -> None:
+        """Delete chunk rows one primary key at a time, after a non-locking look for them. A ranged DELETE
+        takes next-key locks and, under MariaDB's snapshot isolation, fails with 1020 as soon as a
+        concurrent job has touched a neighbouring chunk row."""
+        keys = [
+            {"o": row.owner, "c": row.checksum, "i": row.idx}
+            for row in session.query(Blob_chunks.owner, Blob_chunks.checksum, Blob_chunks.idx).filter(*conditions)
+        ]
+        if keys:
+            table = Blob_chunks.__table__
+            session.execute(
+                table.delete().where(and_(table.c.owner == bindparam("o"), table.c.checksum == bindparam("c"), table.c.idx == bindparam("i"))), keys
+            )
+
+    @staticmethod
+    def _blob_matches(value: Optional[bytes], data: Optional[bytes]) -> bool:
+        """Compare a stored column value, marker or not, with plain data."""
+        if value and value.startswith(BLOB_CHUNK_MARKER):
+            return data is not None and value.removeprefix(BLOB_CHUNK_MARKER) == sha256(data).hexdigest().encode()
+        return value == data
+
+    def _blob_load(
+        self, session: scoped_session, owner: str, value: Optional[bytes], reread: Optional[Callable[[], Optional[bytes]]] = None
+    ) -> Optional[bytes]:
+        """Resolve a data column value: plain data is returned as is, a marker is reassembled from its chunks.
+
+        A writer may commit between the read of the marker and the read of the chunks (READ COMMITTED on
+        PostgreSQL, autocommit reads on SQLite), leaving the old chunk set gone. `reread` fetches the owner's
+        column again so the newer marker is followed instead."""
+        for _ in range(3):
+            if not value or not value.startswith(BLOB_CHUNK_MARKER):
+                return value
+            checksum = value.removeprefix(BLOB_CHUNK_MARKER).decode()
+            data = b"".join(row.data for row in session.query(Blob_chunks.data).filter_by(owner=owner, checksum=checksum).order_by(Blob_chunks.idx))
+            if sha256(data).hexdigest() == checksum:
+                return data
+            if reread is None:
+                break
+            value = reread()
+        self.logger.error(f"Stored blob {owner} is incomplete, its chunks are missing or corrupted")
+        return None
+
+    def _blob_sweep(self, session: scoped_session) -> None:
+        """Delete chunk sets whose owner row is gone or no longer points at them (owner rows deleted in bulk or by cascade)."""
+        # Read the sets once, before the live markers: a set committed after this read is never a deletion candidate.
+        sets = session.query(Blob_chunks.owner, Blob_chunks.checksum).distinct().all()
+        if not sets:
+            return
+        owners = {owner for owner, _ in sets}
+        live = set()
+        for table, key, column in (
+            ("bw_plugins", Plugins.id, Plugins.data),
+            ("bw_plugin_pages", Plugin_pages.plugin_id, Plugin_pages.data),
+            ("bw_jobs_cache", Jobs_cache.id, Jobs_cache.data),
+        ):
+            ids = [owner.split(":", 1)[1] for owner in owners if owner.startswith(f"{table}:")]
+            if not ids:
+                continue
+            if key.type.python_type is int:
+                ids = [int(i) for i in ids if i.isdigit()]
+            for row in session.query(key, column).filter(key.in_(ids), func.length(column) == len(BLOB_CHUNK_MARKER) + 64):
+                if row[1].startswith(BLOB_CHUNK_MARKER):
+                    live.add((f"{table}:{row[0]}", row[1].removeprefix(BLOB_CHUNK_MARKER).decode()))
+        for owner, checksum in sets:
+            if (owner, checksum) not in live:
+                self._blob_drop(session, Blob_chunks.owner == owner, Blob_chunks.checksum == checksum)
+
     def test_read(self):
         """Test the read access to the database"""
         self.logger.debug("Testing read access to the database ...")
@@ -406,9 +704,37 @@ class Database:
         self.logger.debug("Testing write access to the database ...")
         with self._db_session() as session:
             table_name = uuid4().hex
-            session.execute(text(f"CREATE TABLE IF NOT EXISTS test_{table_name} (id INT)"))
+            session.execute(text(f"CREATE TABLE IF NOT EXISTS test_{table_name} (id INT PRIMARY KEY)"))
             session.execute(text(f"DROP TABLE IF EXISTS test_{table_name}"))
             session.commit()
+
+    def _driver_connect_args(self, uri: str) -> Dict[str, Any]:
+        """Driver timeouts for a network database, leaving out any option the URI query string already sets"""
+        url = make_url(uri)
+        backend = url.get_backend_name()
+        if backend in ("mysql", "mariadb"):
+            defaults = {"connect_timeout": self._connect_timeout, "read_timeout": self._read_timeout, "write_timeout": self._read_timeout}
+        elif backend == "postgresql":
+            defaults = {
+                "connect_timeout": self._connect_timeout,
+                "keepalives": 1,
+                "keepalives_idle": 30,
+                "keepalives_interval": 10,
+                "keepalives_count": 3,
+                "tcp_user_timeout": 60000,
+            }
+        else:
+            return {}
+        # A zero read timeout means "do not set it": the drivers reject a zero timeout and wait forever when none is set.
+        return {key: value for key, value in defaults.items() if value and key not in url.query}
+
+    def _create_engine(self, uri: str, **kwargs) -> Engine:
+        """Create an engine from the shared kwargs, with driver timeout defaults a caller's own connect_args override"""
+        options = self._engine_kwargs | kwargs
+        connect_args = self._driver_connect_args(uri)
+        if connect_args:
+            options["connect_args"] = connect_args | options.get("connect_args", {})
+        return create_engine(uri, **options)
 
     def retry_connection(self, *, readonly: bool = False, fallback: bool = False, log: bool = True, **kwargs) -> None:
         """Retry the connection to the database"""
@@ -423,7 +749,12 @@ class Database:
             raise ValueError("The fallback parameter is set to True but the read-only database URI is not set")
 
         self.sql_engine.dispose(close=True)
-        self.sql_engine = create_engine(self.database_uri_readonly if fallback else self.database_uri, **self._engine_kwargs | kwargs)
+        self.sql_engine = self._create_engine(self.database_uri_readonly if fallback else self.database_uri, **kwargs)
+
+        with LOCK:
+            if self._session_factory is not None:
+                self._session_factory.remove()
+            self._session_factory = scoped_session(sessionmaker(bind=self.sql_engine, autoflush=True, expire_on_commit=False))
 
         if fallback or readonly:
             with self.sql_engine.connect() as conn:
@@ -432,7 +763,7 @@ class Database:
 
         table_name = uuid4().hex
         with self.sql_engine.connect() as conn:
-            conn.execute(text(f"CREATE TABLE IF NOT EXISTS test_{table_name} (id INT)"))
+            conn.execute(text(f"CREATE TABLE IF NOT EXISTS test_{table_name} (id INT PRIMARY KEY)"))
             conn.execute(text(f"DROP TABLE IF EXISTS test_{table_name}"))
 
     @contextmanager
@@ -443,18 +774,18 @@ class Database:
             self.logger.error("The database engine is not initialized")
             _exit(1)
 
-        with LOCK:
-            session = None
-            try:
-                session_factory = sessionmaker(bind=self.sql_engine, autoflush=True, expire_on_commit=False)
-                session = scoped_session(session_factory)
-                yield session
-            except BaseException as e:
-                if session:
+        session = None
+        try:
+            session = self._session_factory
+            yield session
+        except BaseException as e:
+            if session:
+                with suppress(Exception):
                     session.rollback()
 
-                if any(error in str(e) for error in self.READONLY_ERROR):
-                    self.logger.warning("The database is read-only, retrying in read-only mode ...")
+            if any(error in str(e) for error in self.READONLY_ERROR):
+                self.logger.warning("The database is read-only, retrying in read-only mode ...")
+                with LOCK:
                     try:
                         self.retry_connection(readonly=True, pool_timeout=1)
                         self.retry_connection(readonly=True, log=False)
@@ -465,15 +796,17 @@ class Database:
                                 self.retry_connection(fallback=True, pool_timeout=1)
                             self.retry_connection(fallback=True, log=False)
                     self.readonly = True
-                elif isinstance(e, (ConnectionRefusedError, OperationalError)) and self.database_uri_readonly:
-                    self.logger.warning("Can't connect to the database, falling back to read-only one ...")
+            elif isinstance(e, (ConnectionRefusedError, OperationalError)) and self.database_uri_readonly:
+                self.logger.warning("Can't connect to the database, falling back to read-only one ...")
+                with LOCK:
                     with suppress(OperationalError, DatabaseError):
                         self.retry_connection(fallback=True, pool_timeout=1)
                         self.retry_connection(fallback=True, log=False)
                         self.readonly = True
-                raise
-            finally:
-                if session:
+            raise
+        finally:
+            if session:
+                with suppress(Exception):
                     session.remove()
 
     def is_valid_setting(
@@ -570,7 +903,7 @@ class Database:
                 metadata = session.query(Metadata).with_entities(Metadata.version).filter_by(id=1).first()
                 if metadata:
                     return metadata.version
-                return "1.6.9~rc2"
+                return "1.6.18~rc2"
             except BaseException as e:
                 return f"Error: {e}"
 
@@ -604,7 +937,7 @@ class Database:
             "last_instances_change": None,
             "reload_ui_plugins": False,
             "integration": "unknown",
-            "version": "1.6.9~rc2",
+            "version": "1.6.18~rc2",
             "database_version": "Unknown",  # ? Extracted from the database
             "default": True,  # ? Extra field to know if the returned data is the default one
         }
@@ -667,8 +1000,13 @@ class Database:
         plugins_changes: Optional[Union[Literal["all"], Set[str], List[str], Tuple[str]]] = None,
         value: Optional[bool] = False,
     ) -> str:
-        """Set changed bit for config, custom configs, instances and plugins"""
-        changes = changes or ["config", "custom_configs", "external_plugins", "pro_plugins", "instances", "ui_plugins"]
+        """Set changed bit for config, custom configs, instances and plugins.
+
+        ``ui_plugins`` is part of the default list only when setting (``value`` true), so a restore or an
+        import still asks the Web UI to reload its plugins. The flag belongs to the Web UI, which clears it
+        itself with an explicit list, so a default-list acknowledgement by the scheduler must not drop it.
+        """
+        changes = changes or ["config", "custom_configs", "external_plugins", "pro_plugins", "instances"] + (["ui_plugins"] if value else [])
         plugins_changes = plugins_changes or set()
         with self._db_session() as session:
             if self.readonly:
@@ -734,7 +1072,11 @@ class Database:
         while error:
             try:
                 meta_cls = sql_metadata()
-                meta_cls.reflect(self.sql_engine)
+                # Reflect only our own tables. An unfiltered reflect() walks every table in the
+                # schema, so a single unreadable one -- an orphaned test_<uuid> probe whose InnoDB
+                # tablespace was lost, for instance -- makes SHOW CREATE TABLE raise and takes the
+                # whole init down. Nothing below reads a table outside Base.metadata anyway.
+                meta_cls.reflect(self.sql_engine, only=lambda table_name, _: table_name in Base.metadata.tables)
                 error = False
             except Exception as e:
                 if (datetime.now().astimezone() - current_time).total_seconds() > timeout_seconds:
@@ -743,11 +1085,16 @@ class Database:
 
         assert isinstance(meta_cls, sql_metadata)
 
-        # Fetch old data
+        # Fetch old data (skip bw_plugin_pages data column to avoid loading large binary blobs)
         old_data = {}
         with self._db_session() as session:
             for table_name in Base.metadata.tables.keys():
-                old_data[table_name] = session.query(meta_cls.tables[table_name]).all()
+                if table_name == "bw_plugin_pages":
+                    old_data[table_name] = session.query(Plugin_pages).with_entities(Plugin_pages.plugin_id, Plugin_pages.checksum).all()
+                elif table_name == "bw_blob_chunks":
+                    continue
+                else:
+                    old_data[table_name] = session.query(meta_cls.tables[table_name]).all()
 
         # Prepare structures to track changes
         to_put = []
@@ -932,15 +1279,15 @@ class Database:
                     )
                     path_ui = plugin_path.joinpath("ui")
                     if path_ui.is_dir():
-                        with BytesIO() as plugin_page_content:
-                            with tar_open(fileobj=plugin_page_content, mode="w:gz", compresslevel=9) as tar:
-                                tar.add(path_ui, arcname=path_ui.name, recursive=True)
-                            plugin_page_content.seek(0)
+                        try:
+                            plugin_page_content = create_plugin_tar_gz(path_ui)
                             checksum = bytes_hash(plugin_page_content, algorithm="sha256")
                             desired_plugin_pages[base_plugin["id"]] = {
                                 "data": plugin_page_content.getvalue(),
                                 "checksum": checksum,
                             }
+                        except (FileNotFoundError, OSError) as e:
+                            self.logger.warning(f"Some files in {path_ui} could not be archived: {e}")
 
             for plugins in default_plugins:
                 if not isinstance(plugins, list):
@@ -1093,15 +1440,21 @@ class Database:
             # Plugins to create
             for pid in new_plugin_ids - old_plugin_ids:
                 p = desired_plugins[pid]
-                to_put.append(Plugins(**p))
+                to_put.append(Plugins(**p | {"data": self._blob_store(session, f"bw_plugins:{pid}", p.get("data"))}))
 
             # Plugins to update
             for pid in old_plugin_ids & new_plugin_ids:
                 old_p = old_plugins[pid]
                 new_p = desired_plugins[pid]
-                attrs_to_check = ("name", "description", "version", "stream", "type", "method", "data", "checksum")
-                if any(getattr(old_p, attr, None) != new_p.get(attr) for attr in attrs_to_check) and old_p.method == new_p.get("method", "manual"):
-                    to_update.append({"type": "plugin", "filter": {"id": pid}, "data": {k: new_p[k] for k in attrs_to_check if k in new_p}})
+                attrs_to_check = ("name", "description", "version", "stream", "type", "method", "checksum")
+                data_changed = not self._blob_matches(getattr(old_p, "data", None), new_p.get("data"))
+                if (data_changed or any(getattr(old_p, attr, None) != new_p.get(attr) for attr in attrs_to_check)) and old_p.method == new_p.get(
+                    "method", "manual"
+                ):
+                    update_data = {k: new_p[k] for k in attrs_to_check if k in new_p}
+                    if "data" in new_p:
+                        update_data["data"] = self._blob_store(session, f"bw_plugins:{pid}", new_p["data"])
+                    to_update.append({"type": "plugin", "filter": {"id": pid}, "data": update_data})
 
             # Plugins to delete
             for pid in old_plugin_ids - new_plugin_ids:
@@ -1193,7 +1546,13 @@ class Database:
                     to_update.append({"type": "job", "filter": {"plugin_id": jk[0], "name": jk[1]}, "data": new_j})
 
             for jk in old_job_keys - new_job_keys:
-                to_delete.append({"type": "job", "filter": {"plugin_id": jk[0], "name": jk[1]}})
+                to_delete.extend(
+                    (
+                        {"type": "job_cache", "filter": {"job_name": jk[1]}},
+                        {"type": "job_run", "filter": {"job_name": jk[1]}},
+                        {"type": "job", "filter": {"plugin_id": jk[0], "name": jk[1]}},
+                    )
+                )
 
             # PLUGIN PAGES
             old_page_ids = set(old_plugin_pages.keys())
@@ -1201,13 +1560,14 @@ class Database:
 
             for pid in new_page_ids - old_page_ids:
                 pp = desired_plugin_pages[pid]
-                to_put.append(Plugin_pages(plugin_id=pid, data=pp["data"], checksum=pp["checksum"]))
+                to_put.append(Plugin_pages(plugin_id=pid, data=self._blob_store(session, f"bw_plugin_pages:{pid}", pp["data"]), checksum=pp["checksum"]))
 
             for pid in old_page_ids & new_page_ids:
                 old_pp = old_plugin_pages[pid]
                 new_pp = desired_plugin_pages[pid]
                 if old_pp.checksum != new_pp["checksum"]:
-                    to_update.append({"type": "plugin_page", "filter": {"plugin_id": pid}, "data": {"data": new_pp["data"], "checksum": new_pp["checksum"]}})
+                    data = self._blob_store(session, f"bw_plugin_pages:{pid}", new_pp["data"])
+                    to_update.append({"type": "plugin_page", "filter": {"plugin_id": pid}, "data": {"data": data, "checksum": new_pp["checksum"]}})
 
             for pid in old_page_ids - new_page_ids:
                 to_delete.append({"type": "plugin_page", "filter": {"plugin_id": pid}})
@@ -1463,8 +1823,10 @@ class Database:
 
                 if to_put_by_type["jobs"]:
                     session.add_all(to_put_by_type["jobs"])
-                if to_put_by_type["plugin_pages"]:
-                    session.add_all(to_put_by_type["plugin_pages"])
+                # One page per flush: MariaDB's INSERT ... RETURNING otherwise batches every page into one statement.
+                for page in to_put_by_type["plugin_pages"]:
+                    session.add(page)
+                    session.flush()
                 if to_put_by_type["cli_commands"]:
                     session.add_all(to_put_by_type["cli_commands"])
                 if to_put_by_type["other"]:
@@ -1496,6 +1858,7 @@ class Database:
                     elif t == "service_setting":
                         session.query(Services_settings).filter_by(**update["filter"]).update(update["data"])
 
+                self._blob_sweep(session)
                 session.commit()
             except SQLAlchemyError as e:
                 self.logger.debug(format_exc())
@@ -1527,13 +1890,83 @@ class Database:
             return False, ""
         return True, ""
 
+    def _warn_shared_server_names(self, config: Dict[str, Any]) -> None:
+        """Warn when two services of the incoming config declare the same server name (nginx serves only the first)."""
+        services = config.get("SERVER_NAME", "")
+        if isinstance(services, str):
+            services = services.split()
+        owners: Dict[str, str] = {}
+        for service in dict.fromkeys(s for s in services if s):
+            names = config.get(f"{service}_SERVER_NAME") or service
+            for name in dict.fromkeys(names.split() if isinstance(names, str) else names):
+                owner = owners.setdefault(name, service)
+                if owner != service:
+                    self.logger.warning(f"Server name {name} is used by both services {owner} and {service}, nginx will only serve it for one of them")
+
     def save_config(
-        self, config: Dict[str, Any], method: str, changed: Optional[bool] = True, file_names: Optional[Dict[str, str]] = None
+        self,
+        config: Dict[str, Any],
+        method: str,
+        changed: Optional[bool] = True,
+        file_names: Optional[Dict[str, str]] = None,
+        *,
+        skip_service_management: bool = False,
+        disable_cleanup: bool = False,
+        explicit_keys: Optional[Set[str]] = None,
+        draft_settings: Optional[Dict[str, Optional[bool]]] = None,
+        retry_on_conflict: bool = True,
+        rename: Optional[Tuple[str, str]] = None,
+        custom_config_changes: Optional[List[Dict[str, Any]]] = None,
     ) -> Union[str, Set[str]]:
-        """Save the config in the database"""
+        """Save the config in the database.
+
+        Args:
+            skip_service_management: When True, the entire service-management block is
+                                     skipped — service settings cleanup, the SERVER_NAME
+                                     reconciliation that adds/draftifies/deletes Services
+                                     rows, and the multisite per-service settings pass.
+                                     Use this when the caller only intends to update
+                                     global settings and must not touch any service rows.
+                                     The historical name was ``global_only`` which was
+                                     misleading: it does not restrict input to global
+                                     settings, it only disables the service-management
+                                     side-effects.
+            explicit_keys: Raw environment/variables keys explicitly declared by the
+                           caller (e.g. Configurator.explicit_keys), service-prefixed
+                           and suffixed forms included. Only consulted when
+                           method == "scheduler": a scheduler pass may overwrite or
+                           delete-to-default a ui/api-owned row only for keys in this
+                           set. None or empty means the scheduler never touches
+                           ui/api-owned rows (the incoming config is treated as
+                           default-filled, not user-declared).
+            draft_settings: Explicit raw-editor state changes keyed by the unprefixed
+                             global setting id or the full ``<service>_<setting>`` key.
+                             ``True``/``False`` updates the row state; ``None`` explicitly
+                             deletes an existing draft row. A missing map preserves the
+                             existing per-setting draft state.
+            rename: Move a service and its dependent rows inside this save transaction.
+            custom_config_changes: Optional custom config edits to apply in the same
+                                   transaction as a rename.
+            retry_on_conflict: Recompute and save once more when the flush hits a unique
+                               violation because another writer inserted the same rows
+                               between our read and our flush. Set False on the retry
+                               itself so a genuine conflict cannot loop.
+        """
+        # The pass below pops as it goes (DATABASE_URI, then every `<service>_IS_DRAFT` marker),
+        # so it drains whatever dict it is handed. Two things went wrong with that: the conflict
+        # retry replayed the drained dict and published services the caller had marked as drafts,
+        # and a caller that keeps its payload (autoconf hands over its long-lived config) saw it
+        # come back short and read the difference as a configuration change on the next pass.
+        # Drain a copy and leave the caller's dict, which is also what the retry replays. Shallow
+        # on purpose: this carries every setting of every service, and only its own keys are ever
+        # removed, never a value mutated in place.
+        retry_config = config
+        config = config.copy()
+        draft_settings = {key: value for key, value in (draft_settings or {}).items() if isinstance(key, str) and (isinstance(value, bool) or value is None)}
         to_put = []
         to_update = []
         to_delete = []
+        conflict = None
         changed_plugins = set()
         changed_services = False
         service_template_change = False
@@ -1543,6 +1976,39 @@ class Database:
             db_config = self.get_non_default_settings(with_drafts=True)
 
         normalized_file_names = {k: ("" if v is None else v.strip()) for k, v in (file_names or {}).items()}
+
+        # A value that opens a PEM block and never closes it is a multi-line setting that lost
+        # everything past its first line on the way through a variables file, never something an
+        # operator declared. Saving it replaces a working certificate with its own header and
+        # hands the setting to whichever method is writing, so drop those keys entirely and keep
+        # what is already stored.
+        truncated_pem_keys = {k for k, v in config.items() if isinstance(v, str) and "-----BEGIN" in v and "-----END" not in v}
+        if truncated_pem_keys:
+            self.logger.error(f"Ignoring truncated PEM value for {', '.join(sorted(truncated_pem_keys))}, keeping the stored one")
+            config = {k: v for k, v in config.items() if k not in truncated_pem_keys}
+            explicit_keys = {k for k in explicit_keys if k not in truncated_pem_keys} if explicit_keys else explicit_keys
+
+        explicit_env_keys = frozenset(explicit_keys or ())
+        protected_draft_setting_ids = frozenset({"SERVER_NAME", "MULTISITE", "IS_DRAFT", "USE_TEMPLATE", "DATABASE_URI"})
+
+        def draft_state_for(full_key: str, setting_id: str) -> Optional[bool]:
+            """Return an explicitly posted setting-draft state, excluding structural keys."""
+            if setting_id in protected_draft_setting_ids:
+                return None
+            return draft_settings.get(full_key)
+
+        def draft_state_is_posted(full_key: str, setting_id: str) -> bool:
+            """Return whether a raw map explicitly addresses this non-structural key."""
+            return setting_id not in protected_draft_setting_ids and full_key in draft_settings
+
+        def scheduler_can_override(full_key: str, incoming_value: Any) -> bool:
+            if full_key not in explicit_env_keys:
+                return False
+            # The Linux dummy variables.env ships "SERVER_NAME=" — an explicitly-declared
+            # but EMPTY SERVER_NAME must not clobber a ui/api-owned service list.
+            if full_key == "SERVER_NAME" and not str(incoming_value).strip():
+                return False
+            return True
 
         def get_setting_file_name(setting_type: str, original_key: str, value_changed: bool, current_file_name: str = "") -> Tuple[Optional[str], bool]:
             if setting_type != "file":
@@ -1600,15 +2066,90 @@ class Database:
             if self.readonly:
                 return "The database is read-only, the changes will not be saved"
 
+            if rename:
+                try:
+                    rename_error = self._rename_service_rows(session, *rename)
+                except BaseException as e:
+                    session.rollback()
+                    return str(e)
+                if rename_error:
+                    return rename_error
+
+            if custom_config_changes:
+                if not rename:
+                    return "Custom config changes require a service rename"
+
+                for change in custom_config_changes:
+                    config_type = str(change["type"]).strip().replace("-", "_").lower()
+                    name = str(change["name"])
+                    service_id = rename[1]
+                    custom_config = session.query(Custom_configs).filter_by(service_id=service_id, type=config_type, name=name).first()
+                    config_data = change["config"]
+                    data = config_data["data"].encode("utf-8") if isinstance(config_data["data"], str) else config_data["data"]
+                    checksum = config_data.get("checksum") or bytes_hash(data, algorithm="sha256")
+                    if custom_config is None:
+                        session.add(
+                            Custom_configs(
+                                service_id=service_id,
+                                type=config_type,
+                                name=name,
+                                data=data,
+                                checksum=checksum,
+                                method=config_data["method"],
+                                is_draft=bool(config_data.get("is_draft", False)),
+                            )
+                        )
+                    else:
+                        custom_config.data = data
+                        custom_config.checksum = checksum
+                        custom_config.method = config_data["method"]
+                        custom_config.is_draft = bool(config_data.get("is_draft", False))
+
+            def aborted_save():
+                # A data-loss guard below returns the changed set without committing, and the
+                # session teardown rolls the flushed rename back: report that as an error instead of
+                # a success-shaped result when a rename was requested.
+                if rename:
+                    return f"Configuration save aborted, service {rename[0]} was not renamed"
+                return changed_plugins
+
             self.logger.debug(f"Saving config for method {method}")
+
+            if method not in ("ui", "api") and not skip_service_management:
+                self._warn_shared_server_names(config)
+
+            # When the autoconf disable_cleanup flag is on, precompute the set of existing
+            # autoconf services missing from the incoming SERVER_NAME so the services_settings
+            # cleanup pass below leaves their rows in place (the service itself will be flipped
+            # to is_draft=True further down instead of being deleted).
+            drafted_service_ids: Set[str] = set()
+            if disable_cleanup and method == "autoconf" and not skip_service_management:
+                server_name_value = config.get("SERVER_NAME", "")
+                if isinstance(server_name_value, str):
+                    incoming_service_ids = {s for s in server_name_value.strip().split() if s}
+                elif isinstance(server_name_value, list):
+                    incoming_service_ids = {s for s in server_name_value if s}
+                else:
+                    incoming_service_ids = set()
+                existing_autoconf_services = session.query(Services.id).filter_by(method="autoconf").all()
+                drafted_service_ids = {row.id for row in existing_autoconf_services if row.id not in incoming_service_ids}
 
             self.logger.debug(f"Cleaning up {method} old global settings")
             # Collect global settings to delete
             global_settings_to_delete = []
-            for db_global_config in session.query(Global_values).filter_by(method=method).all():
+            global_method_total = 0
+            cleanup_methods = EDITABLE_METHODS if method in EDITABLE_METHODS else {method}
+            for db_global_config in session.query(Global_values).filter(Global_values.method.in_(cleanup_methods)).all():
                 key = db_global_config.setting_id
                 if db_global_config.suffix:
                     key = f"{key}_{db_global_config.suffix}"
+
+                # Draft rows are retained across normal effective-config saves. An explicit
+                # state map is also a declaration that the row is being handled below, so the
+                # cleanup pass must not delete it before that state update is applied.
+                if db_global_config.is_draft or key in draft_settings:
+                    continue
+                global_method_total += 1
 
                 try:
                     # Check if the setting should be deleted based on key presence
@@ -1630,13 +2171,44 @@ class Database:
                     self.logger.warning(f"Error processing global config {db_global_config.setting_id}: {e}")
                     continue
 
+            # Data-loss guard (mirror of the SERVER_NAME guard below): refuse the cleanup pass
+            # when it would wipe every single existing global value for this method. A 100% wipe
+            # is almost always a transient state issue — an empty or partially-loaded variables.env
+            # at scheduler startup, a race with the plugin download jobs, or a caller that forgot
+            # to include the current config in its payload — rather than a legitimate intent to
+            # purge everything. Callers that really want to clear all scheduler-method globals
+            # can do so explicitly by deleting individual rows or using the admin API.
+            if method == "scheduler" and global_method_total > 0 and len(global_settings_to_delete) == global_method_total:
+                self.logger.warning(
+                    f"Refusing to delete all {global_method_total} scheduler-method global setting(s) via "
+                    f"save_config — the incoming config would wipe every existing row for method {method!r}. "
+                    f"This almost always indicates a transient variables.env or environment race at scheduler "
+                    f"startup. Aborting save_config to prevent data loss."
+                )
+                return aborted_save()
+
             self.logger.debug(f"Cleaning up {method} old services settings")
-            # Collect service settings to delete
+            # Collect service settings to delete (skip entirely when skip_service_management to avoid deleting service settings)
             service_settings_to_delete = []
-            for db_service_config in session.query(Services_settings).filter_by(method=method).all():
+            # Track per-service totals so we can detect would-wipe-the-whole-service deletions below.
+            service_method_total: Dict[str, int] = defaultdict(int)
+            service_method_to_delete: Dict[str, int] = defaultdict(int)
+            for db_service_config in (
+                [] if skip_service_management else session.query(Services_settings).filter(Services_settings.method.in_(cleanup_methods)).all()
+            ):
+                # Preserve settings of services about to be drafted by the autoconf disable_cleanup path
+                # so they can be re-published when the orchestration object returns.
+                if db_service_config.service_id in drafted_service_ids:
+                    continue
                 key = f"{db_service_config.service_id}_{db_service_config.setting_id}"
                 if db_service_config.suffix:
                     key = f"{key}_{db_service_config.suffix}"
+
+                # See the global cleanup guard above: a stored setting draft must survive a
+                # default-filled round-trip, while a map entry is handled explicitly later.
+                if db_service_config.is_draft or key in draft_settings:
+                    continue
+                service_method_total[db_service_config.service_id] += 1
 
                 try:
                     # Check if the setting should be deleted based on key presence
@@ -1644,6 +2216,7 @@ class Database:
 
                     if should_delete:
                         service_settings_to_delete.append(db_service_config)
+                        service_method_to_delete[db_service_config.service_id] += 1
                         # Get plugin ID with safer query and null checking
                         plugin_query = session.query(Settings).with_entities(Settings.plugin_id).filter_by(id=db_service_config.setting_id).first()
                         if plugin_query:
@@ -1660,81 +2233,184 @@ class Database:
                     self.logger.warning(f"Error processing service config {db_service_config.setting_id}: {e}")
                     continue
 
+            # Data-loss guard (mirror of the scheduler global guard above): refuse the cleanup
+            # when a ui/api save_config would wipe every method-owned row of an existing service
+            # while the service itself is still listed in SERVER_NAME. A 100% wipe with the
+            # service still alive almost always means the caller submitted an incomplete config
+            # (Advanced-mode form post missing keys, JS form rebuild race, plugin tab that failed
+            # to render). Genuine service deletion drops the id from SERVER_NAME and flows
+            # through the removal path further down, so this guard never blocks legitimate deletes.
+            if method in ("ui", "api") and service_method_to_delete and not skip_service_management:
+                incoming_server_name = config.get("SERVER_NAME", "")
+                if isinstance(incoming_server_name, str):
+                    incoming_service_ids = {s for s in incoming_server_name.strip().split() if s}
+                elif isinstance(incoming_server_name, list):
+                    incoming_service_ids = {s for s in incoming_server_name if s}
+                else:
+                    incoming_service_ids = set()
+
+                refused_service_ids = sorted(
+                    sid
+                    for sid, total in service_method_total.items()
+                    if total > 0 and service_method_to_delete.get(sid, 0) == total and sid in incoming_service_ids
+                )
+                if refused_service_ids:
+                    self.logger.warning(
+                        f"Refusing save_config: incoming method={method!r} payload would wipe every "
+                        f"{method}-method setting row for service(s) {refused_service_ids} while the "
+                        f"service(s) are still present in SERVER_NAME. This indicates the caller "
+                        f"submitted an incomplete config (e.g. an Advanced-mode form post missing keys). "
+                        f"Aborting save_config to prevent data loss."
+                    )
+                    return aborted_save()
+
             if config:
                 config.pop("DATABASE_URI", None)
 
-                self.logger.debug("Checking if the services have changed")
-                db_services = session.query(Services).with_entities(Services.id, Services.method, Services.is_draft).all()
-                db_ids: Dict[str, dict] = {service.id: {"method": service.method, "is_draft": service.is_draft} for service in db_services}
-                missing_ids = []
-                services = config.get("SERVER_NAME", [])
-
-                if isinstance(services, str):
-                    services = services.strip().split()
-
-                services = [service for service in services if service]  # Clean up empty strings
-
-                if db_services:
-                    missing_ids = [
-                        service.id
-                        for service in db_services
-                        if (service.method == method or (service.method in ("ui", "api") and method in ("ui", "api"))) and service.id not in services
-                    ]
-
-                    if missing_ids:
-                        self.logger.debug(f"Removing {len(missing_ids)} services that are no longer in the list")
-                        # Remove services that are no longer in the list
-                        session.query(Services).filter(Services.id.in_(missing_ids)).delete(synchronize_session=False)
-                        session.query(Services_settings).filter(Services_settings.service_id.in_(missing_ids)).delete(synchronize_session=False)
-                        session.query(Custom_configs).filter(Custom_configs.service_id.in_(missing_ids)).delete(synchronize_session=False)
-                        session.query(Jobs_cache).filter(Jobs_cache.service_id.in_(missing_ids)).delete(synchronize_session=False)
-                        session.query(Metadata).filter_by(id=1).update(
-                            {Metadata.custom_configs_changed: True, Metadata.last_custom_configs_change: datetime.now().astimezone()}
-                        )
-                        changed_services = True
-                        if any(config.get(f"{sid}_USE_TEMPLATE", "") for sid in missing_ids):
-                            service_template_change = True
-
-                self.logger.debug("Checking if the drafts have changed")
-                drafts = {service for service in services if config.pop(f"{service}_IS_DRAFT", "no") == "yes"}
-                db_drafts = {service.id for service in db_services if service.is_draft}
-
-                if db_drafts:
-                    missing_drafts = [
-                        service.id
-                        for service in db_services
-                        if (service.method == method or (service.method in ("ui", "api") and method in ("ui", "api")))
-                        and service.id not in drafts
-                        and service.id not in missing_ids
-                    ]
-
-                    if missing_drafts:
-                        self.logger.debug(f"Removing {len(missing_drafts)} drafts that are no longer in the list")
-                        # Update services to remove draft status
-                        session.query(Services).filter(Services.id.in_(missing_drafts)).update({Services.is_draft: False}, synchronize_session=False)
-                        changed_services = True
-
-                for draft in drafts:
-                    if draft not in db_drafts:
-                        current_time = datetime.now().astimezone()
-                        if draft not in db_ids:
-                            self.logger.debug(f"Adding draft {draft}")
-                            to_put.append(Services(id=draft, method=method, is_draft=True, creation_date=current_time, last_update=current_time))
-                            db_ids[draft] = {"method": method, "is_draft": True}
-                        elif db_ids[draft]["method"] == method or (db_ids[draft]["method"] in ("ui", "api") and method in ("ui", "api")):
-                            self.logger.debug(f"Updating draft {draft}")
-                            to_update.append({"model": Services, "filter": {"id": draft}, "values": {"is_draft": True, "last_update": current_time}})
-                            changed_services = True
-
                 template = config.get("USE_TEMPLATE", "")
 
-                if config.get("MULTISITE", "no") == "yes":
+                if not skip_service_management:
+                    self.logger.debug("Checking if the services have changed")
+                    db_services = session.query(Services).with_entities(Services.id, Services.method, Services.is_draft).all()
+                    db_ids: Dict[str, dict] = {service.id: {"method": service.method, "is_draft": service.is_draft} for service in db_services}
+                    missing_ids = []
+                    services = config.get("SERVER_NAME", [])
+
+                    if isinstance(services, str):
+                        services = services.strip().split()
+
+                    services = [service for service in services if service]  # Clean up empty strings
+
+                    # Only meaningful for the autoconf method.
+                    disable_cleanup = disable_cleanup and method == "autoconf"
+
+                    if db_services:
+                        # Guard: if an empty services list is received but DB has services for this method,
+                        # abort the entire save_config to prevent catastrophic data loss.
+                        # For autoconf: only guard when existing DB services were created by a *different*
+                        # method (ui/api/manual). If every existing service was itself created by autoconf,
+                        # an empty SERVER_NAME is a legitimate "all ingresses removed" signal and clearing
+                        # those services is the correct behaviour. Without this relaxation, tearing down
+                        # the last Ingress and re-applying a new one gets stuck with stale services in the DB.
+                        # For other methods: protects against callers that omit SERVER_NAME entirely
+                        # (e.g. a global-only config update that forgot to set skip_service_management=True).
+                        method_services = [s for s in db_services if s.method == method or (s.method in ("ui", "api") and method in ("ui", "api"))]
+                        if not services and method_services and (method == "autoconf" or "SERVER_NAME" not in config):
+                            if method == "autoconf":
+                                foreign_services = [s for s in db_services if s.method not in ("autoconf", "scheduler")]
+                                if not foreign_services:
+                                    self.logger.debug(
+                                        f"Received empty SERVER_NAME for autoconf and all {len(method_services)} existing service(s) are autoconf-owned; "
+                                        "proceeding with removal"
+                                    )
+                                    missing_ids = [service.id for service in method_services]
+                                else:
+                                    self.logger.warning(
+                                        f"Received empty SERVER_NAME for method 'autoconf' but database has {len(foreign_services)} non-autoconf service(s), "
+                                        "skipping entire config save to prevent data loss"
+                                    )
+                                    return aborted_save()
+                            else:
+                                self.logger.warning(
+                                    f"Received empty SERVER_NAME for method '{method}' but database has {len(method_services)} existing service(s), "
+                                    "skipping entire config save to prevent data loss"
+                                )
+                                return aborted_save()
+                        else:
+                            missing_ids = [
+                                service.id
+                                for service in db_services
+                                if (service.method == method or (service.method in ("ui", "api") and method in ("ui", "api"))) and service.id not in services
+                            ]
+
+                        if missing_ids:
+                            # When AUTOCONF_DISABLE_CLEANUP is on, convert removed autoconf services to draft
+                            # instead of hard-deleting them so that settings / custom configs / job caches
+                            # survive and the service can be republished by bringing the orchestration object
+                            # back. Services owned by other methods (shouldn't happen when method=autoconf but
+                            # kept defensively) still follow the legacy cascade-delete path.
+                            draftable_ids = [sid for sid in missing_ids if db_ids.get(sid, {}).get("method") == "autoconf"] if disable_cleanup else []
+                            hard_delete_ids = [sid for sid in missing_ids if sid not in draftable_ids]
+
+                            if draftable_ids:
+                                self.logger.debug(f"Converting {len(draftable_ids)} autoconf services to draft instead of deleting them")
+                                session.query(Services).filter(Services.id.in_(draftable_ids)).update(
+                                    {Services.is_draft: True, Services.last_update: datetime.now().astimezone()},
+                                    synchronize_session=False,
+                                )
+                                session.query(Custom_configs).filter(Custom_configs.service_id.in_(draftable_ids)).update(
+                                    {Custom_configs.is_draft: True}, synchronize_session=False
+                                )
+                                session.query(Metadata).filter_by(id=1).update(
+                                    {Metadata.custom_configs_changed: True, Metadata.last_custom_configs_change: datetime.now().astimezone()}
+                                )
+                                changed_services = True
+                                if any(config.get(f"{sid}_USE_TEMPLATE", "") for sid in draftable_ids):
+                                    service_template_change = True
+
+                            if hard_delete_ids:
+                                self.logger.debug(f"Removing {len(hard_delete_ids)} services that are no longer in the list")
+                                # Their settings are bulk-deleted below; deleting the loaded objects later can
+                                # delete new rows when SQLite reuses the freed integer primary keys.
+                                service_settings_to_delete = [row for row in service_settings_to_delete if row.service_id not in hard_delete_ids]
+                                # Remove services that are no longer in the list
+                                session.query(Services).filter(Services.id.in_(hard_delete_ids)).delete(synchronize_session=False)
+                                session.query(Services_settings).filter(Services_settings.service_id.in_(hard_delete_ids)).delete(synchronize_session=False)
+                                session.query(Custom_configs).filter(Custom_configs.service_id.in_(hard_delete_ids)).delete(synchronize_session=False)
+                                session.query(Jobs_cache).filter(Jobs_cache.service_id.in_(hard_delete_ids)).delete(synchronize_session=False)
+                                self._blob_sweep(session)
+                                session.query(Metadata).filter_by(id=1).update(
+                                    {Metadata.custom_configs_changed: True, Metadata.last_custom_configs_change: datetime.now().astimezone()}
+                                )
+                                changed_services = True
+                                if any(config.get(f"{sid}_USE_TEMPLATE", "") for sid in hard_delete_ids):
+                                    service_template_change = True
+
+                    self.logger.debug("Checking if the drafts have changed")
+                    drafts = {service for service in services if config.pop(f"{service}_IS_DRAFT", "no") == "yes"}
+                    db_drafts = {service.id for service in db_services if service.is_draft}
+
+                    if db_drafts:
+                        missing_drafts = [
+                            service.id
+                            for service in db_services
+                            if (service.method == method or (service.method in ("ui", "api") and method in ("ui", "api")))
+                            and service.id not in drafts
+                            and service.id not in missing_ids
+                        ]
+
+                        if missing_drafts:
+                            self.logger.debug(f"Removing {len(missing_drafts)} drafts that are no longer in the list")
+                            # Update services to remove draft status
+                            session.query(Services).filter(Services.id.in_(missing_drafts)).update({Services.is_draft: False}, synchronize_session=False)
+                            changed_services = True
+
+                    for draft in drafts:
+                        if draft not in db_drafts:
+                            current_time = datetime.now().astimezone()
+                            if draft not in db_ids:
+                                self.logger.debug(f"Adding draft {draft}")
+                                to_put.append(Services(id=draft, method=method, is_draft=True, creation_date=current_time, last_update=current_time))
+                                db_ids[draft] = {"method": method, "is_draft": True}
+                            elif db_ids[draft]["method"] == method or (db_ids[draft]["method"] in ("ui", "api") and method in ("ui", "api")):
+                                self.logger.debug(f"Updating draft {draft}")
+                                to_update.append({"model": Services, "filter": {"id": draft}, "values": {"is_draft": True, "last_update": current_time}})
+                                changed_services = True
+
+                if not skip_service_management and config.get("MULTISITE", "no") == "yes":
                     self.logger.debug("Checking if the multisite settings have changed")
 
                     service_configs = defaultdict(dict)
                     global_config = {}
 
                     services_set = set(services)
+                    # Supplement with DB-resident, non-draft services so that
+                    # multisite-prefixed keys for services created out-of-band
+                    # (UI/API/autoconf) aren't mis-classified as global settings
+                    # when the caller's SERVER_NAME payload hasn't yet been rebuilt
+                    # to include them. Mirrors the DB-supplement done in
+                    # Configurator.get_config() (with_drafts=False).
+                    services_set.update(sid for sid, meta in db_ids.items() if not meta.get("is_draft"))
 
                     for key, value in config.items():
                         matched = False
@@ -1754,8 +2430,11 @@ class Database:
                             global_config[key] = value
 
                     # Collect necessary data before threading
-                    settings_data = session.query(Settings.id, Settings.default, Settings.plugin_id, Settings.type).all()
-                    settings_dict = {s.id: {"default": self._empty_if_none(s.default), "plugin_id": s.plugin_id, "type": s.type} for s in settings_data}
+                    settings_data = session.query(Settings.id, Settings.default, Settings.plugin_id, Settings.type, Settings.multiple).all()
+                    settings_dict = {
+                        s.id: {"default": self._empty_if_none(s.default), "plugin_id": s.plugin_id, "type": s.type, "multiple": s.multiple}
+                        for s in settings_data
+                    }
 
                     # Collect existing service settings
                     existing_service_settings = session.query(
@@ -1765,26 +2444,83 @@ class Database:
                         Services_settings.value,
                         Services_settings.file_name,
                         Services_settings.method,
+                        Services_settings.is_draft,
                     ).all()
                     existing_service_settings_dict = {
                         (s.service_id, s.setting_id, s.suffix or 0): {
                             "value": self._empty_if_none(s.value),
                             "file_name": self._empty_if_none(s.file_name),
                             "method": s.method,
+                            "is_draft": bool(s.is_draft),
                         }
                         for s in existing_service_settings
                     }
 
-                    # Collect template settings
+                    # Collect template settings. NB: use a distinct loop variable — reusing `template` here would
+                    # clobber the config's USE_TEMPLATE id (set above) with a row object, silently breaking the
+                    # service-template fallback and every `templates.get(template, ...)` lookup below.
                     templates = {}
-                    for template in (
+                    for template_row in (
                         session.query(Template_settings)
                         .with_entities(Template_settings.template_id, Template_settings.setting_id, Template_settings.suffix, Template_settings.default)
                         .order_by(Template_settings.order)
                     ):
-                        if template.template_id not in templates:
-                            templates[template.template_id] = {}
-                        templates[template.template_id][(template.setting_id, template.suffix or 0)] = template.default
+                        if template_row.template_id not in templates:
+                            templates[template_row.template_id] = {}
+                        templates[template_row.template_id][(template_row.setting_id, template_row.suffix or 0)] = template_row.default
+
+                    def compute_anchored_slots(cfg: Dict[str, str], cfg_template: str) -> set:
+                        # A multiple-group slot (group, suffix>=1) is "anchored" when at least one of its members in
+                        # the incoming config differs from its (template-or-plugin) default. get_config re-materialises
+                        # EVERY member of a detected slot at its default, so the config round-trip re-ingests those
+                        # default siblings; an anchored slot survives on its non-default member's row, so its default
+                        # siblings are spurious material and may be dropped (persisting them locks the field in the UI).
+                        # A slot with NO anchor is a user-declared all-default slot that must be kept, else it vanishes.
+                        anchored = set()
+                        for anchor_key, anchor_value in cfg.items():
+                            anchor_suffix = 0
+                            anchor_base = anchor_key
+                            if self.SUFFIX_RX.search(anchor_base):
+                                anchor_suffix = int(anchor_base.split("_")[-1])
+                                anchor_base = anchor_base[: -len(str(anchor_suffix)) - 1]
+                            if anchor_suffix == 0:
+                                continue
+                            anchor_setting = settings_dict.get(anchor_base)
+                            if not anchor_setting or not anchor_setting.get("multiple"):
+                                continue
+                            anchor_default = templates.get(cfg_template, {}).get((anchor_base, anchor_suffix)) if cfg_template else None
+                            if anchor_default is None:
+                                anchor_default = anchor_setting["default"]
+                            if anchor_value != anchor_default:
+                                anchored.add((anchor_setting["multiple"], anchor_suffix))
+                        return anchored
+
+                    def compute_template_slots(cfg_template: str) -> set:
+                        # A slot is ALSO kept alive by a template that defines ANY member at that suffix: get_config
+                        # rebuilds such a slot from Template_settings with no row, so its default members must NOT be
+                        # persisted (they would become spurious, field-locking rows). Keyed per (group, suffix) to also
+                        # cover the partial-template case (a template's HOST_1 keeps its sibling TIMEOUT_1's slot alive).
+                        slots = set()
+                        for member_id, member_suffix in templates.get(cfg_template, {}):
+                            if member_suffix and member_suffix > 0:
+                                member_setting = settings_dict.get(member_id)
+                                if member_setting and member_setting.get("multiple"):
+                                    slots.add((member_setting["multiple"], member_suffix))
+                        return slots
+
+                    def slot_flags(setting: dict, suffix: int, value: str, template_setting_default: Optional[str], alive_slots: set) -> Tuple[bool, bool]:
+                        # (is_spurious_default_sibling, is_anchorless_multiple_member) for a suffixed multiple member.
+                        # alive_slots = slots kept alive by an anchor row OR a template definition.
+                        #  - spurious   : a default-valued member of a KEPT-ALIVE slot -> drop it (stays editable; the
+                        #                 slot survives via its anchor member or its template).
+                        #  - anchorless : a member of a slot kept alive by NOTHING -> must be persisted even at its
+                        #                 default, else the whole user-declared all-default slot would vanish.
+                        group = setting.get("multiple")
+                        if suffix <= 0 or group is None:
+                            return False, False
+                        slot_default = template_setting_default if template_setting_default is not None else setting["default"]
+                        alive = (group, suffix) in alive_slots
+                        return (value == slot_default and alive), (not alive)
 
                     def process_service(server_name: str, service_config: Dict[str, str], db_ids: Dict[str, dict]):
                         local_to_put = []
@@ -1795,6 +2531,7 @@ class Database:
                         local_service_template_change = False
 
                         service_template = service_config.get("USE_TEMPLATE", template)
+                        alive_slots = compute_anchored_slots(service_config, service_template) | compute_template_slots(service_template)
 
                         for original_key, value in service_config.items():
                             suffix = 0
@@ -1821,10 +2558,54 @@ class Database:
                                     local_changed_services = True
 
                             service_setting = existing_service_settings_dict.get((server_name, key, suffix))
+                            full_key = f"{server_name}_{original_key}"
+                            draft_state_posted = draft_state_is_posted(full_key, key)
+                            explicit_draft_state = draft_state_for(full_key, key)
+
+                            # ``None`` is an explicit raw-editor deletion. It may remove only
+                            # an already-drafted row owned by a compatible method; it must not
+                            # create a row or turn an effective value into a draft.
+                            if draft_state_posted and explicit_draft_state is None:
+                                if (
+                                    service_setting
+                                    and service_setting["is_draft"]
+                                    and self._methods_are_compatible(
+                                        method,
+                                        service_setting["method"],
+                                        allow_scheduler_override=scheduler_can_override(full_key, value),
+                                    )
+                                ):
+                                    local_to_delete.append(
+                                        {"model": Services_settings, "filter": {"service_id": server_name, "setting_id": key, "suffix": suffix}}
+                                    )
+                                    local_changed_plugins.add(setting["plugin_id"])
+                                continue
+
+                            # Effective-config callers receive the stored value through the
+                            # normal fallback path. Keep an existing setting draft completely
+                            # opaque to those callers; only the raw editor's explicit map may
+                            # activate, deactivate, or rewrite it.
+                            if service_setting and service_setting["is_draft"] and explicit_draft_state is None:
+                                continue
+
+                            desired_is_draft = (
+                                explicit_draft_state if explicit_draft_state is not None else bool(service_setting and service_setting["is_draft"])
+                            )
                             current_file_name = service_setting["file_name"] if service_setting else ""
                             value_changed = bool(service_setting and service_setting["value"] != value)
-                            should_update_value = (value_changed and self._methods_are_compatible(method, service_setting["method"])) or (
+                            method_can_update = bool(
+                                service_setting
+                                and self._methods_are_compatible(
+                                    method,
+                                    service_setting["method"],
+                                    allow_scheduler_override=scheduler_can_override(full_key, value),
+                                )
+                            )
+                            should_update_value = (value_changed and method_can_update) or (
                                 bool(service_setting) and method == "autoconf" and service_setting["method"] != "autoconf"
+                            )
+                            state_changed = bool(
+                                service_setting and explicit_draft_state is not None and desired_is_draft != service_setting["is_draft"] and method_can_update
                             )
                             target_file_name, file_name_changed = get_setting_file_name(setting["type"], original_key, value_changed, current_file_name)
 
@@ -1833,9 +2614,32 @@ class Database:
                                 template_setting_default = templates.get(service_template, {}).get((key, suffix))
                                 local_service_template_change = True
 
+                            is_spurious_default_sibling, is_anchorless_multiple_member = slot_flags(
+                                setting, suffix, value, template_setting_default, alive_slots
+                            )
+                            # A default sibling of a kept-alive slot (anchor row or template) is spurious round-trip
+                            # material: drop it (and clean any stale row) so the field stays editable; the slot survives.
+                            if is_spurious_default_sibling and not desired_is_draft:
+                                if service_setting and self._methods_are_compatible(
+                                    method, service_setting["method"], allow_scheduler_override=scheduler_can_override(full_key, value)
+                                ):
+                                    self.logger.debug(f"Removing spurious default multiple-group setting {key}_{suffix} for service {server_name}")
+                                    local_to_delete.append(
+                                        {"model": Services_settings, "filter": {"service_id": server_name, "setting_id": key, "suffix": suffix}}
+                                    )
+                                    if value_changed:
+                                        local_changed_plugins.add(setting["plugin_id"])
+                                continue
+
                             # Determine if we need to add, update, or delete
                             if not service_setting:
-                                if check_value(key, value, setting, template_setting_default, suffix):
+                                # A member of an ANCHORLESS slot must be persisted even at its default value, otherwise
+                                # the entire user-declared all-default slot would never materialise (vanish).
+                                if (
+                                    check_value(key, value, setting, template_setting_default, suffix)
+                                    and not is_anchorless_multiple_member
+                                    and not desired_is_draft
+                                ):
                                     continue
 
                                 self.logger.debug(f"Adding setting {key} for service {server_name}")
@@ -1848,6 +2652,7 @@ class Database:
                                         file_name=target_file_name if setting["type"] == "file" else None,
                                         suffix=suffix,
                                         method=method,
+                                        is_draft=desired_is_draft,
                                     )
                                 )
                                 # Update Services.last_update
@@ -1856,20 +2661,36 @@ class Database:
                                 )
                                 if key == "SERVER_NAME":
                                     local_changed_services = True
-                            elif should_update_value or file_name_changed:
+                            elif should_update_value or file_name_changed or state_changed:
                                 if should_update_value:
                                     local_changed_plugins.add(setting["plugin_id"])
+                                if state_changed:
+                                    local_changed_plugins.add(setting["plugin_id"])
 
-                                if should_update_value and check_value(key, value, setting, template_setting_default, suffix):
+                                # Editing a value down to its default removes the row (defaults are implicit) —
+                                # EXCEPT for a member of an anchorless slot, where dropping the last rows would vanish
+                                # the whole user-declared slot; there we persist the default value instead.
+                                if (
+                                    (should_update_value or state_changed)
+                                    and check_value(key, value, setting, template_setting_default, suffix)
+                                    and not is_anchorless_multiple_member
+                                    and not desired_is_draft
+                                ):
                                     self.logger.debug(f"Removing setting {key} for service {server_name}")
                                     local_to_delete.append(
                                         {"model": Services_settings, "filter": {"service_id": server_name, "setting_id": key, "suffix": suffix}}
                                     )
+                                    local_to_update.append(
+                                        {"model": Services, "filter": {"id": server_name}, "values": {"last_update": datetime.now().astimezone()}}
+                                    )
                                     continue
 
                                 self.logger.debug(f"Updating setting {key} for service {server_name}")
-                                setting_values = {"value": self._empty_if_none(value), "method": method}
-                                if setting["type"] == "file" and (file_name_changed or value_changed):
+                                persisted_is_draft = desired_is_draft if not draft_state_posted or method_can_update else service_setting["is_draft"]
+                                setting_values = {"is_draft": persisted_is_draft}
+                                if should_update_value:
+                                    setting_values.update({"value": self._empty_if_none(value), "method": method})
+                                if setting["type"] == "file" and method_can_update and (file_name_changed or value_changed):
                                     setting_values["file_name"] = target_file_name
                                 local_to_update.extend(
                                     [
@@ -1893,6 +2714,8 @@ class Database:
                         local_changed_plugins = set()
                         local_service_template_change = False
 
+                        alive_slots = compute_anchored_slots(global_config, template) | compute_template_slots(template)
+
                         for original_key, value in global_config.items():
                             suffix = 0
                             key = deepcopy(original_key)
@@ -1906,14 +2729,51 @@ class Database:
                                 continue
 
                             global_value = (
-                                session.query(Global_values.value, Global_values.file_name, Global_values.method)
+                                session.query(Global_values.value, Global_values.file_name, Global_values.method, Global_values.is_draft)
                                 .filter_by(setting_id=key, suffix=suffix)
                                 .first()
                             )
+                            draft_state_posted = draft_state_is_posted(original_key, key)
+                            explicit_draft_state = draft_state_for(original_key, key)
+
+                            # ``None`` explicitly deletes a saved draft and never acts as a
+                            # request to save the fallback value that accompanied the form post.
+                            if draft_state_posted and explicit_draft_state is None:
+                                if (
+                                    global_value
+                                    and global_value.is_draft
+                                    and self._methods_are_compatible(
+                                        method,
+                                        global_value.method,
+                                        allow_scheduler_override=scheduler_can_override(original_key, value),
+                                    )
+                                ):
+                                    local_to_delete.append({"model": Global_values, "filter": {"setting_id": key, "suffix": suffix}})
+                                    local_changed_plugins.add(setting["plugin_id"])
+                                continue
+
+                            # A draft global value must not be rewritten by the effective
+                            # configuration pass. It is only visible to the raw editor, which
+                            # supplies an explicit state map when it intends to edit the row.
+                            if global_value and global_value.is_draft and explicit_draft_state is None:
+                                continue
+
+                            desired_is_draft = explicit_draft_state if explicit_draft_state is not None else bool(global_value and global_value.is_draft)
                             current_file_name = self._empty_if_none(global_value.file_name) if global_value else ""
                             value_changed = bool(global_value and global_value.value != value)
-                            should_update_value = (value_changed and self._methods_are_compatible(method, global_value.method)) or (
+                            method_can_update = bool(
+                                global_value
+                                and self._methods_are_compatible(
+                                    method,
+                                    global_value.method,
+                                    allow_scheduler_override=scheduler_can_override(original_key, value),
+                                )
+                            )
+                            should_update_value = (value_changed and method_can_update) or (
                                 bool(global_value) and method == "autoconf" and global_value.method != "autoconf"
+                            )
+                            state_changed = bool(
+                                global_value and explicit_draft_state is not None and desired_is_draft != bool(global_value.is_draft) and method_can_update
                             )
                             target_file_name, file_name_changed = get_setting_file_name(setting["type"], original_key, value_changed, current_file_name)
 
@@ -1922,8 +2782,29 @@ class Database:
                                 template_setting_default = templates.get(template, {}).get((key, suffix))
                                 local_service_template_change = True
 
+                            is_spurious_default_sibling, is_anchorless_multiple_member = slot_flags(
+                                setting, suffix, value, template_setting_default, alive_slots
+                            )
+                            # A default sibling of a kept-alive global multiple slot (anchor row or template) is
+                            # spurious round-trip material: drop it so the field stays editable on the global page.
+                            if is_spurious_default_sibling and not desired_is_draft:
+                                if global_value and self._methods_are_compatible(
+                                    method, global_value.method, allow_scheduler_override=scheduler_can_override(original_key, value)
+                                ):
+                                    self.logger.debug(f"Removing spurious default global multiple-group setting {key}_{suffix}")
+                                    local_to_delete.append({"model": Global_values, "filter": {"setting_id": key, "suffix": suffix}})
+                                    if value_changed:
+                                        local_changed_plugins.add(setting["plugin_id"])
+                                continue
+
                             if not global_value:
-                                if check_value(key, value, setting, template_setting_default, suffix, True):
+                                # A member of an ANCHORLESS slot must be persisted even at its default value, otherwise
+                                # the entire user-declared all-default slot would never materialise (vanish).
+                                if (
+                                    check_value(key, value, setting, template_setting_default, suffix, True)
+                                    and not is_anchorless_multiple_member
+                                    and not desired_is_draft
+                                ):
                                     continue
 
                                 self.logger.debug(f"Adding global setting {key}")
@@ -1935,20 +2816,33 @@ class Database:
                                         file_name=target_file_name if setting["type"] == "file" else None,
                                         suffix=suffix,
                                         method=method,
+                                        is_draft=desired_is_draft,
                                     )
                                 )
-                            elif should_update_value or file_name_changed:
+                            elif should_update_value or file_name_changed or state_changed:
                                 if should_update_value:
                                     local_changed_plugins.add(setting["plugin_id"])
+                                if state_changed:
+                                    local_changed_plugins.add(setting["plugin_id"])
 
-                                if should_update_value and check_value(key, value, setting, template_setting_default, suffix, True):
+                                # Editing a value down to its default removes the row — except for a member of an
+                                # anchorless slot, where that would vanish the whole user-declared slot; persist instead.
+                                if (
+                                    (should_update_value or state_changed)
+                                    and check_value(key, value, setting, template_setting_default, suffix, True)
+                                    and not is_anchorless_multiple_member
+                                    and not desired_is_draft
+                                ):
                                     self.logger.debug(f"Removing global setting {key}")
                                     local_to_delete.append({"model": Global_values, "filter": {"setting_id": key, "suffix": suffix}})
                                     continue
 
                                 self.logger.debug(f"Updating global setting {key}")
-                                setting_values = {"value": self._empty_if_none(value), "method": method}
-                                if setting["type"] == "file" and (file_name_changed or value_changed):
+                                persisted_is_draft = desired_is_draft if not draft_state_posted or method_can_update else bool(global_value.is_draft)
+                                setting_values = {"is_draft": persisted_is_draft}
+                                if should_update_value:
+                                    setting_values.update({"value": self._empty_if_none(value), "method": method})
+                                if setting["type"] == "file" and method_can_update and (file_name_changed or value_changed):
                                     setting_values["file_name"] = target_file_name
                                 local_to_update.append(
                                     {
@@ -1966,50 +2860,86 @@ class Database:
                             executor.submit(process_service, service_name, service_config, db_ids) for service_name, service_config in service_configs.items()
                         ]
 
-                        # Process global settings in another thread or the main thread
-                        futures.append(executor.submit(process_global_settings, global_config))
+                        # Global settings stay on this thread: the scoped-session registry hands a pool thread
+                        # its own Session that nothing removes, left idle in transaction on bw_global_values.
+                        results = [process_global_settings(global_config)]
 
                         # Collect results from threads
                         for future in as_completed(futures):
                             try:
-                                ret_to_put, ret_to_update, ret_to_delete, ret_changed_plugins, ret_changed_services, ret_service_template_change = (
-                                    future.result()
-                                )
-                                to_put.extend(ret_to_put)
-                                to_update.extend(ret_to_update)
-                                to_delete.extend(ret_to_delete)
-                                changed_plugins.update(ret_changed_plugins)
-                                if not changed_services:
-                                    changed_services = ret_changed_services
-                                if not service_template_change:
-                                    service_template_change = ret_service_template_change
+                                results.append(future.result())
                             except Exception as e:
                                 self.logger.error(f"Thread raised an exception: {e}")
+
+                    for ret_to_put, ret_to_update, ret_to_delete, ret_changed_plugins, ret_changed_services, ret_service_template_change in results:
+                        to_put.extend(ret_to_put)
+                        to_update.extend(ret_to_update)
+                        to_delete.extend(ret_to_delete)
+                        changed_plugins.update(ret_changed_plugins)
+                        if not changed_services:
+                            changed_services = ret_changed_services
+                        if not service_template_change:
+                            service_template_change = ret_service_template_change
 
                 else:
                     # Non-multisite configuration
                     self.logger.debug("Checking if non-multisite settings have changed")
 
-                    server_name = config.get("SERVER_NAME", None)
-                    if template and server_name is None:
-                        server_name = (
+                    if not skip_service_management:
+                        server_name = config.get("SERVER_NAME", None)
+                        if template and server_name is None:
+                            template_row = session.query(Template_settings.default).filter_by(template_id=template, setting_id="SERVER_NAME", suffix=0).first()
+                            server_name = template_row.default if template_row else None
+
+                        if server_name is None or server_name:
+                            server_name = server_name or "www.example.com"
+                            first_server = server_name.split(" ")[0]
+
+                            if not session.query(Services).with_entities(Services.id).filter_by(id=first_server).first():
+                                self.logger.debug(f"Adding service {first_server}")
+                                current_time = datetime.now().astimezone()
+                                to_put.append(
+                                    Services(
+                                        id=first_server,
+                                        method=method,
+                                        is_draft=first_server in drafts,
+                                        creation_date=current_time,
+                                        last_update=current_time,
+                                    )
+                                )
+                                changed_services = True
+
+                    # Anchor-awareness for multiple-group slots (mirrors compute_anchored_slots in the multisite
+                    # branch): a slot whose members are ALL at their default has no "anchor" row, so its default
+                    # members must still be persisted here, otherwise the whole user-declared slot would vanish.
+                    # Assumes multiple-setting defaults are non-NULL strings (true for all core plugins); a NULL
+                    # default would need _empty_if_none normalization to match the per-key check below.
+                    nm_multiple = {
+                        s.id: (self._empty_if_none(s.default), s.multiple) for s in session.query(Settings.id, Settings.default, Settings.multiple).all()
+                    }
+                    nm_template_defaults = {}
+                    nm_template_slots = set()  # (group, suffix) kept alive by the template -> must not be persisted
+                    if template:
+                        for ts in (
                             session.query(Template_settings)
-                            .with_entities(Template_settings.value)
-                            .filter_by(template_id=template, setting_id="SERVER_NAME")
-                            .first()
-                        )
-
-                    if server_name is None or server_name:
-                        server_name = server_name or "www.example.com"
-                        first_server = server_name.split(" ")[0]
-
-                        if not session.query(Services).with_entities(Services.id).filter_by(id=first_server).first():
-                            self.logger.debug(f"Adding service {first_server}")
-                            current_time = datetime.now().astimezone()
-                            to_put.append(
-                                Services(id=first_server, method=method, is_draft=first_server in drafts, creation_date=current_time, last_update=current_time)
-                            )
-                            changed_services = True
+                            .with_entities(Template_settings.setting_id, Template_settings.suffix, Template_settings.default)
+                            .filter_by(template_id=template)
+                        ):
+                            nm_template_defaults[(ts.setting_id, ts.suffix or 0)] = ts.default
+                            if ts.suffix and ts.suffix > 0 and ts.setting_id in nm_multiple and nm_multiple[ts.setting_id][1]:
+                                nm_template_slots.add((nm_multiple[ts.setting_id][1], ts.suffix))
+                    nm_anchored_slots = set()
+                    for anchor_key, anchor_value in config.items():
+                        anchor_suffix = 0
+                        anchor_base = anchor_key
+                        if self.SUFFIX_RX.search(anchor_base):
+                            anchor_suffix = int(anchor_base.split("_")[-1])
+                            anchor_base = anchor_base[: -len(str(anchor_suffix)) - 1]
+                        if anchor_suffix == 0 or anchor_base not in nm_multiple or not nm_multiple[anchor_base][1]:
+                            continue
+                        anchor_default = nm_template_defaults.get((anchor_base, anchor_suffix), nm_multiple[anchor_base][0])
+                        if anchor_value != anchor_default:
+                            nm_anchored_slots.add((nm_multiple[anchor_base][1], anchor_suffix))
 
                     for original_key, value in config.items():
                         key = deepcopy(original_key)
@@ -2025,13 +2955,44 @@ class Database:
 
                         global_value = (
                             session.query(Global_values)
-                            .with_entities(Global_values.value, Global_values.file_name, Global_values.method)
+                            .with_entities(Global_values.value, Global_values.file_name, Global_values.method, Global_values.is_draft)
                             .filter_by(setting_id=key, suffix=suffix)
                             .first()
                         )
+                        draft_state_posted = draft_state_is_posted(original_key, key)
+                        explicit_draft_state = draft_state_for(original_key, key)
+                        if draft_state_posted and explicit_draft_state is None:
+                            if (
+                                global_value
+                                and global_value.is_draft
+                                and self._methods_are_compatible(
+                                    method,
+                                    global_value.method,
+                                    allow_scheduler_override=scheduler_can_override(original_key, value),
+                                )
+                            ):
+                                to_delete.append({"model": Global_values, "filter": {"setting_id": key, "suffix": suffix}})
+                                changed_plugins.add(setting.plugin_id)
+                            continue
+
+                        if global_value and global_value.is_draft and explicit_draft_state is None:
+                            continue
+
+                        desired_is_draft = explicit_draft_state if explicit_draft_state is not None else bool(global_value and global_value.is_draft)
                         current_file_name = self._empty_if_none(global_value.file_name) if global_value else ""
                         value_changed = bool(global_value and global_value.value != value)
-                        should_update_value = bool(global_value and self._methods_are_compatible(method, global_value.method) and value_changed)
+                        method_can_update = bool(
+                            global_value
+                            and self._methods_are_compatible(
+                                method,
+                                global_value.method,
+                                allow_scheduler_override=scheduler_can_override(original_key, value),
+                            )
+                        )
+                        should_update_value = bool(global_value and method_can_update and value_changed)
+                        state_changed = bool(
+                            global_value and explicit_draft_state is not None and desired_is_draft != bool(global_value.is_draft) and method_can_update
+                        )
                         target_file_name, file_name_changed = get_setting_file_name(setting.type, original_key, value_changed, current_file_name)
 
                         template_setting = None
@@ -2044,8 +3005,15 @@ class Database:
                             )
                             service_template_change = True
 
+                        nm_mult = nm_multiple.get(key, (None, None))[1]
+                        nm_is_anchorless = (
+                            suffix > 0 and nm_mult is not None and (nm_mult, suffix) not in nm_anchored_slots and (nm_mult, suffix) not in nm_template_slots
+                        )
+                        nm_default = template_setting.default if template_setting is not None else setting.default
+
                         if not global_value:
-                            if value == (template_setting.default if template_setting is not None else setting.default):
+                            # An anchorless slot's default member must be persisted, else the whole slot vanishes.
+                            if value == nm_default and not nm_is_anchorless and not desired_is_draft:
                                 continue
 
                             self.logger.debug(f"Adding global setting {key}")
@@ -2057,20 +3025,26 @@ class Database:
                                     file_name=target_file_name if setting.type == "file" else None,
                                     suffix=suffix,
                                     method=method,
+                                    is_draft=desired_is_draft,
                                 )
                             )
-                        elif should_update_value or file_name_changed:
+                        elif should_update_value or file_name_changed or state_changed:
                             if should_update_value:
                                 changed_plugins.add(setting.plugin_id)
+                            if state_changed:
+                                changed_plugins.add(setting.plugin_id)
 
-                            if should_update_value and value == (template_setting.default if template_setting is not None else setting.default):
+                            if (should_update_value or state_changed) and value == nm_default and not nm_is_anchorless and not desired_is_draft:
                                 self.logger.debug(f"Removing global setting {key}")
                                 to_delete.append({"model": Global_values, "filter": {"setting_id": key, "suffix": suffix}})
                                 continue
 
                             self.logger.debug(f"Updating global setting {key}")
-                            setting_values = {"value": self._empty_if_none(value), "method": method}
-                            if setting.type == "file" and (file_name_changed or value_changed):
+                            persisted_is_draft = desired_is_draft if not draft_state_posted or method_can_update else bool(global_value.is_draft)
+                            setting_values = {"is_draft": persisted_is_draft}
+                            if should_update_value:
+                                setting_values.update({"value": self._empty_if_none(value), "method": method})
+                            if setting.type == "file" and method_can_update and (file_name_changed or value_changed):
                                 setting_values["file_name"] = target_file_name
                             to_update.append(
                                 {
@@ -2079,6 +3053,44 @@ class Database:
                                     "values": setting_values,
                                 }
                             )
+
+            # A removed RAW line is represented by ``None`` and may not be present in the
+            # effective payload. Resolve only those explicit deletions here; True/False states
+            # are handled alongside their unchanged posted values in the save branches above.
+            draft_deletion_keys = {key for key, state in draft_settings.items() if state is None}
+            if draft_deletion_keys:
+                for target_row in session.query(Global_values).filter(Global_values.is_draft == True):  # noqa: E712
+                    row_key = target_row.setting_id + (f"_{target_row.suffix}" if target_row.suffix else "")
+                    if row_key not in draft_deletion_keys or target_row.setting_id in protected_draft_setting_ids:
+                        continue
+                    if not self._methods_are_compatible(
+                        method,
+                        target_row.method,
+                        allow_scheduler_override=scheduler_can_override(row_key, target_row.value),
+                    ):
+                        continue
+                    to_delete.append({"model": Global_values, "filter": {"setting_id": target_row.setting_id, "suffix": target_row.suffix}})
+                    changed_plugins.add(session.query(Settings.plugin_id).filter_by(id=target_row.setting_id).scalar())
+
+                for target_row in session.query(Services_settings).filter(Services_settings.is_draft == True):  # noqa: E712
+                    row_key = f"{target_row.service_id}_{target_row.setting_id}"
+                    if target_row.suffix:
+                        row_key = f"{row_key}_{target_row.suffix}"
+                    if row_key not in draft_deletion_keys or target_row.setting_id in protected_draft_setting_ids:
+                        continue
+                    if not self._methods_are_compatible(
+                        method,
+                        target_row.method,
+                        allow_scheduler_override=scheduler_can_override(row_key, target_row.value),
+                    ):
+                        continue
+                    to_delete.append(
+                        {
+                            "model": Services_settings,
+                            "filter": {"service_id": target_row.service_id, "setting_id": target_row.setting_id, "suffix": target_row.suffix},
+                        }
+                    )
+                    changed_plugins.add(session.query(Settings.plugin_id).filter_by(id=target_row.setting_id).scalar())
 
             if changed_services:
                 changed_plugins = set(plugin.id for plugin in session.query(Plugins).with_entities(Plugins.id).all())
@@ -2117,11 +3129,92 @@ class Database:
                     session.delete(service_setting)
 
                 session.commit()
+            except IntegrityError as e:
+                session.rollback()
+                if not retry_on_conflict:
+                    return str(e)
+                conflict = str(e)
             except BaseException as e:
                 session.rollback()
                 return str(e)
 
+        if conflict is not None:
+            # Another writer inserted rows we had read as missing, between our read and our flush —
+            # the scheduler's first-run save against autoconf applying its initial configuration on
+            # a fresh database is the common one. Dropping the batch loses every setting the other
+            # writer does not send: they stay at their defaults, and the per-service rows a later
+            # save materialises from them then shadow the globals. Recompute against the committed
+            # state instead. Outside the session block: retrying inside it would nest one scoped
+            # session in another.
+            self.logger.debug(f"Concurrent write while saving the config ({conflict}), recomputing and retrying once ...")
+            return self.save_config(
+                retry_config,
+                method,
+                changed,
+                file_names,
+                skip_service_management=skip_service_management,
+                disable_cleanup=disable_cleanup,
+                explicit_keys=explicit_keys,
+                draft_settings=draft_settings,
+                retry_on_conflict=False,
+                rename=rename,
+                custom_config_changes=custom_config_changes,
+            )
+
         return changed_plugins
+
+    def delete_custom_configs(
+        self, keys: Set[Tuple[Optional[str], str, str]]
+    ) -> Tuple[str, Set[Tuple[Optional[str], str, str]], Set[Tuple[Optional[str], str, str]]]:
+        """Delete exact UI/API custom config keys."""
+        for key in keys:
+            if not isinstance(key, tuple) or len(key) != 3:
+                return "Invalid custom config key: expected (service, type, name)", set(), set()
+            service_id, config_type, name = key
+            if (
+                (service_id is not None and not isinstance(service_id, str))
+                or not isinstance(config_type, str)
+                or not config_type
+                or not isinstance(name, str)
+                or not name
+            ):
+                return "Invalid custom config key: service must be a string or None; type and name must be non-empty strings", set(), set()
+
+        normalized_keys = {
+            (None if service_id in (None, "", "global") else service_id, config_type.strip().replace("-", "_").lower(), name)
+            for service_id, config_type, name in keys
+        }
+        deleted_keys: Set[Tuple[Optional[str], str, str]] = set()
+        protected_keys: Set[Tuple[Optional[str], str, str]] = set()
+
+        with self._db_session() as session:
+            if self.readonly:
+                return "The database is read-only, the changes will not be saved", deleted_keys, protected_keys
+
+            try:
+                for key in normalized_keys:
+                    service_id, config_type, name = key
+                    filters = {"service_id": service_id, "type": config_type, "name": name}
+                    deleted = (
+                        session.query(Custom_configs).filter_by(**filters).filter(Custom_configs.method.in_(("ui", "api"))).delete(synchronize_session=False)
+                    )
+                    if deleted:
+                        deleted_keys.add(key)
+                    elif session.query(Custom_configs.id).filter_by(**filters).first():
+                        protected_keys.add(key)
+
+                if deleted_keys:
+                    metadata = session.get(Metadata, 1)
+                    if metadata is not None:
+                        metadata.custom_configs_changed = True
+                        metadata.last_custom_configs_change = datetime.now().astimezone()
+
+                session.commit()
+            except BaseException as e:
+                session.rollback()
+                return str(e), set(), set()
+
+        return "", deleted_keys, protected_keys
 
     def save_custom_configs(
         self,
@@ -2142,15 +3235,50 @@ class Database:
         ],
         method: str,
         changed: Optional[bool] = True,
+        *,
+        disable_cleanup: bool = False,
     ) -> str:
         """Save the custom configs in the database"""
         message = ""
+        # Materialize once: callers may pass dict_values or a generator, and the
+        # data-loss guard below needs to count items before the for-loop consumes them.
+        custom_configs = [*custom_configs]
         with self._db_session() as session:
             if self.readonly:
                 return "The database is read-only, the changes will not be saved"
 
-            # Delete all the old config
-            session.query(Custom_configs).filter(Custom_configs.method == method).delete()
+            # Only meaningful for the autoconf method.
+            disable_cleanup = disable_cleanup and method == "autoconf"
+
+            if not disable_cleanup:
+                # Data-loss guard (mirror of the save_config guards above): refuse the
+                # cleanup when a ui/api/manual save_custom_configs call would wipe every
+                # method-owned custom config row while supplying nothing to replace
+                # them. An empty incoming list with existing rows almost always means
+                # the caller built an incomplete payload (route exception, form rebuild
+                # race, missing in-memory state) or, for the manual method, a configs
+                # folder that is missing or unreadable at scan time. Genuine "remove all
+                # custom configs" actions delete rows individually through the UI/API, so
+                # by the time an empty payload reaches save_custom_configs there is
+                # nothing left to wipe and this guard is a no-op.
+                if method in ("ui", "api", "manual") and not custom_configs:
+                    existing_count = session.query(Custom_configs).filter(Custom_configs.method == method).count()
+                    if existing_count > 0:
+                        self.logger.warning(
+                            f"Refusing save_custom_configs: incoming method={method!r} payload is empty while {existing_count} "
+                            f"{method}-method custom config row(s) exist in the database. This indicates the caller submitted "
+                            f"an incomplete payload (e.g. a service edit that lost its in-memory custom-config map, or an "
+                            f"unreadable custom configs folder for the manual method). Aborting "
+                            f"save_custom_configs to prevent data loss."
+                        )
+                        return (
+                            f"Refusing to save custom configs: the {method} payload is empty while {existing_count} "
+                            f"{method} custom config(s) exist. Nothing was changed."
+                        )
+                # Delete all the old config
+                session.query(Custom_configs).filter(Custom_configs.method == method).delete()
+
+            expected_keys: Set[Tuple[str, str, Optional[str]]] = set()
 
             to_put = []
             endl = "\n"
@@ -2182,7 +3310,7 @@ class Database:
                 custom_config["type"] = custom_config["type"].strip().replace("-", "_").lower()  # type: ignore
                 custom_config["is_draft"] = bool(custom_config.get("is_draft", False))
                 custom_config["data"] = custom_config["data"].encode("utf-8") if isinstance(custom_config["data"], str) else custom_config["data"]
-                custom_config["checksum"] = custom_config.get("checksum", bytes_hash(custom_config["data"], algorithm="sha256"))  # type: ignore
+                custom_config["checksum"] = custom_config.get("checksum") or bytes_hash(custom_config["data"], algorithm="sha256")  # type: ignore
 
                 service_id = custom_config.get("service_id") or None
                 filters = {
@@ -2190,6 +3318,7 @@ class Database:
                     "name": custom_config["name"],
                     "service_id": service_id,
                 }
+                expected_keys.add((custom_config["type"], custom_config["name"], service_id))
 
                 custom_conf = session.query(Custom_configs).filter_by(**filters).first()
 
@@ -2202,7 +3331,10 @@ class Database:
                         custom_conf.checksum = custom_config["checksum"]
                     if custom_conf.is_draft != custom_config["is_draft"] or should_update_data:
                         custom_conf.is_draft = custom_config["is_draft"]
-                elif self._methods_are_compatible(method, custom_conf.method):
+                # Scheduler-method custom configs only ever originate from explicit
+                # CUSTOM_CONF_* environment variables, so the scheduler override is
+                # legitimate here (no default-filled pass exists for custom configs).
+                elif self._methods_are_compatible(method, custom_conf.method, allow_scheduler_override=True):
                     should_update_data = custom_config["checksum"] != custom_conf.checksum
                     if should_update_data:
                         custom_conf.data = custom_config["data"]
@@ -2211,6 +3343,24 @@ class Database:
                         custom_conf.is_draft = custom_config["is_draft"]
                         custom_conf.method = method
                     custom_conf.is_draft = custom_config["is_draft"]
+
+                elif custom_config["checksum"] != custom_conf.checksum:
+                    # Repeated, unchanged projections stay silent; changed content must explain the refusal.
+                    self.logger.warning(
+                        f"Custom config {custom_config['type']}/{f'{service_id}/' if service_id else ''}{custom_config['name']} was submitted by "
+                        f"method {method!r} but the stored one is owned by method {custom_conf.method!r}: the submitted content is DROPPED "
+                        f"(submitted sha256={str(custom_config['checksum'])[:12]}, stored sha256={str(custom_conf.checksum)[:12]}). "
+                        f"Change it at its source (the CUSTOM_CONF_* variable or the orchestrator label)."
+                    )
+
+            if disable_cleanup:
+                # Mark autoconf custom configs that are no longer emitted by the orchestrator as draft
+                # so they survive the removal and follow the service they belong to.
+                orphan_configs = session.query(Custom_configs).filter(Custom_configs.method == "autoconf", Custom_configs.is_draft.is_(False)).all()
+                for orphan in orphan_configs:
+                    if (orphan.type, orphan.name, orphan.service_id) not in expected_keys:
+                        orphan.is_draft = True
+
             if changed:
                 with suppress(ProgrammingError, OperationalError):
                     metadata = session.query(Metadata).get(1)
@@ -2222,7 +3372,8 @@ class Database:
                 session.add_all(to_put)
                 session.commit()
             except BaseException as e:
-                return f"{f'{message}{endl}' if message else ''}{e}"
+                reason = str(e) or type(e).__name__
+                return f"{f'{message}{endl}' if message else ''}{reason}"
 
         return message
 
@@ -2237,6 +3388,7 @@ class Database:
         service: Optional[str] = None,
         original_config: Optional[Dict[str, Any]] = None,
         original_multisite: Optional[Set[str]] = None,
+        with_setting_drafts: bool = False,
     ) -> Dict[str, Any]:
         """Get the config from the database"""
         filtered_settings = set(filtered_settings or [])
@@ -2247,6 +3399,9 @@ class Database:
         with self._db_session() as session:
             config = original_config or {}
             multisite = original_multisite or set()
+            # Keep a separate effective global map while optionally exposing draft rows in
+            # ``config``. Service fallback values must never inherit a global setting draft.
+            effective_global_config = {key: value for key, value in config.items() if isinstance(value, dict) and value.get("global", True)}
 
             # Define the join operation
             j = join(Settings, Global_values, Settings.id == Global_values.setting_id)
@@ -2263,6 +3418,7 @@ class Database:
                     Global_values.file_name,
                     Global_values.suffix,
                     Global_values.method,
+                    Global_values.is_draft,
                 )
                 .select_from(j)
                 .order_by(Settings.order)
@@ -2270,6 +3426,8 @@ class Database:
 
             if filtered_settings:
                 stmt = stmt.where(Settings.id.in_(filtered_settings))
+            if not with_setting_drafts:
+                stmt = stmt.where(Global_values.is_draft == False)  # noqa: E712
 
             # Execute the query and fetch all results
             results = session.execute(stmt).fetchall()
@@ -2283,7 +3441,11 @@ class Database:
                     "method": global_value.method,
                     "default": self._empty_if_none(global_value.default),
                     "template": None,
+                    "is_draft": bool(global_value.is_draft),
                 }
+
+                if not global_value.is_draft:
+                    effective_global_config[setting_id] = config[setting_id]
 
                 if global_value.context == "multisite":
                     multisite.add(setting_id)
@@ -2315,7 +3477,18 @@ class Database:
 
                 # Pre-build multisite defaults mapping for efficient lookup
                 # Share the same dictionary objects instead of creating copies
-                multisite_defaults = {key: config[key] for key in multisite if key in config}
+                # Use the effective global map, rather than the optionally raw-visible
+                # config, so a global draft's stored value is never inherited by services
+                # while the setting still receives its ordinary global/default fallback.
+                multisite_defaults = {
+                    key: (
+                        effective_global_config[key] | {"is_draft": False}
+                        if with_setting_drafts and isinstance(effective_global_config[key], dict)
+                        else effective_global_config[key]
+                    )
+                    for key in multisite
+                    if key in effective_global_config
+                }
 
                 # Populate service-specific entries using shared references
                 # This is still O(services * multisite_settings) but avoids deepcopy overhead
@@ -2323,6 +3496,18 @@ class Database:
                     for key, value in multisite_defaults.items():
                         # Keep already-materialized service values (notably *_IS_DRAFT from bw_services).
                         config.setdefault(f"{service_id}_{key}", value)
+                    # A service without its own SERVER_NAME row is named by its id. Inheriting the global
+                    # list instead renders "server_name ;" when that list is empty (the Linux variables.env
+                    # ships "SERVER_NAME="), and nginx then rejects the whole configuration.
+                    config[f"{service_id}_SERVER_NAME"] = {
+                        "value": service_id,
+                        "file_name": "",
+                        "global": False,
+                        "method": "default",
+                        "default": service_id,
+                        "template": None,
+                        "is_draft": False,
+                    }
 
                 # Define the join operation
                 j = join(Services, Services_settings, Services.id == Services_settings.service_id)
@@ -2340,6 +3525,7 @@ class Database:
                         Services_settings.file_name,
                         Services_settings.suffix,
                         Services_settings.method,
+                        Services_settings.is_draft,
                     )
                     .select_from(j)
                     .order_by(Services.id, Settings.order)
@@ -2347,6 +3533,8 @@ class Database:
 
                 if not with_drafts:
                     stmt = stmt.where(Services.is_draft == False)  # noqa: E712
+                if not with_setting_drafts:
+                    stmt = stmt.where(Services_settings.is_draft == False)  # noqa: E712
 
                 if filtered_settings:
                     stmt = stmt.where(Settings.id.in_(filtered_settings))
@@ -2369,11 +3557,35 @@ class Database:
                         "file_name": self._empty_if_none(result.file_name) if result.type == "file" else "",
                         "global": False,
                         "method": result.method,
-                        "default": self._empty_if_none(config.get(result.setting_id, {"value": self._empty_if_none(result.default)})["value"]),
+                        "default": self._empty_if_none(effective_global_config.get(result.setting_id, {"value": self._empty_if_none(result.default)})["value"]),
                         "template": None,
+                        "is_draft": bool(result.is_draft),
                     }
             else:
                 servers = " ".join(db_service.id for db_service in services)
+                if servers:
+
+                    def stored_global(setting_id: str) -> Optional[str]:
+                        # The caller's filter may have left the setting out, so fall back to the stored, non-draft row.
+                        if setting_id in effective_global_config:
+                            entry = effective_global_config[setting_id]
+                            return self._empty_if_none(entry["value"]) if entry.get("method", "default") != "default" else None
+                        row = session.query(Global_values.value).filter_by(setting_id=setting_id, suffix=0, is_draft=False).first()
+                        return self._empty_if_none(row.value) if row else None
+
+                    if not is_multisite and stored_global("MULTISITE") != "yes":
+                        global_names = stored_global("SERVER_NAME")
+                        if global_names is None:  # no stored value: a template may provide the names
+                            template_id = stored_global("USE_TEMPLATE")
+                            row = (
+                                session.query(Template_settings.default).filter_by(template_id=template_id, setting_id="SERVER_NAME", suffix=0).first()
+                                if template_id
+                                else None
+                            )
+                            global_names = self._empty_if_none(row.default) if row else ""
+                        # Single-site: the one service is named after the first SERVER_NAME entry, the other entries are its aliases.
+                        if global_names.split()[:1] == [servers]:
+                            servers = global_names
 
             config["SERVER_NAME"] = {
                 "value": servers,
@@ -2408,6 +3620,7 @@ class Database:
         filtered_settings: Optional[Union[List[str], Set[str], Tuple[str]]] = None,
         *,
         service: Optional[str] = None,
+        with_setting_drafts: bool = False,
     ) -> Dict[str, Any]:
         """Get the config from the database"""
         filtered_settings = set(filtered_settings or [])
@@ -2454,6 +3667,7 @@ class Database:
             service=service,
             original_config=config,
             original_multisite=multisite,
+            with_setting_drafts=with_setting_drafts,
         )
 
         template_used = config.get("USE_TEMPLATE", {"value": ""})["value"]
@@ -2517,6 +3731,9 @@ class Database:
                         tmpl_settings = template_settings_map.get(tmpl_id, [])
                         for service_id in service_ids:
                             for setting in tmpl_settings:
+                                # A template cannot name a service: its placeholder would replace the service's id.
+                                if setting.setting_id == "SERVER_NAME":
+                                    continue
                                 key = f"{service_id}_{setting.setting_id}" + (f"_{setting.suffix}" if setting.suffix > 0 else "")
                                 if key in config and config[key]["method"] != "default" and not config[key]["global"]:
                                     continue
@@ -2533,16 +3750,20 @@ class Database:
         services = config["SERVER_NAME"]["value"].split()
         services_set = set(services)  # O(1) lookup for service prefix matching
 
+        if service:
+            # Strip the prefix in one pass. Stripping inside the loop below popped every key and
+            # re-inserted the stripped one, so an un-prefixed key later in the same snapshot popped
+            # the value that had just been renamed onto it and dropped it on the `continue`. A
+            # globally declared template writes exactly such keys (the block above fills the
+            # un-prefixed name whenever no global row shadows it), so every setting the service set
+            # for itself disappeared from its own configuration.
+            prefix = f"{service}_"
+            config = {key[len(prefix) :]: data for key, data in config.items() if key.startswith(prefix)}  # noqa: E203
+
         # Process config items - use list(items()) which is more memory efficient than copy().items()
         # for large dicts since it creates a list of tuples, not a full dict copy
         for key, data in list(config.items()):
-            new_value = None
-            if service:
-                data = config.pop(key)
-                if not key.startswith(f"{service}_"):
-                    continue
-                key = key.replace(f"{service}_", "")
-                new_value = data
+            new_value = data if service else None
 
             if not methods:
                 new_value = data["value"]
@@ -2667,7 +3888,7 @@ class Database:
 
             for service_id in allowed_services:
                 for key, value in db_config.items():
-                    if key.startswith(f"{service_id}_"):
+                    if key == f"{service_id}_USE_TEMPLATE":
                         for template_config in (
                             session.query(Template_custom_configs)
                             .with_entities(*template_entities)
@@ -2675,9 +3896,12 @@ class Database:
                             .order_by(Template_custom_configs.order)
                         ):
                             config_type = template_config.type.replace("_", "-").replace(".conf", "").strip()
+                            # Real custom_configs rows use the underscore enum form while config_type is hyphenated here;
+                            # normalize both sides so an overriding row correctly suppresses the template-provided config.
+                            normalized_config_type = config_type.replace("-", "_")
                             if not any(
                                 custom_config["service_id"] == service_id
-                                and custom_config["type"] == config_type
+                                and custom_config["type"].replace("-", "_") == normalized_config_type
                                 and custom_config["name"] == template_config.name
                                 for custom_config in custom_configs
                             ):
@@ -2759,6 +3983,20 @@ class Database:
 
         return custom_config
 
+    def get_custom_config_compatibility_error(self, config_type: str, *, service_id: Optional[str] = None, with_drafts: bool = True) -> str:
+        """Return a validation error when a custom config is incompatible with current global settings."""
+        normalized_type = config_type.strip().replace("-", "_").lower()
+        if normalized_type != "modsec_crs" or service_id in (None, "", "global"):
+            return ""
+
+        use_global_crs = self.get_config(global_only=True, methods=False, with_drafts=with_drafts, filtered_settings=("USE_MODSECURITY_GLOBAL_CRS",)).get(
+            "USE_MODSECURITY_GLOBAL_CRS", "no"
+        )
+        if isinstance(use_global_crs, dict):
+            use_global_crs = use_global_crs.get("value", "no")
+
+        return self.GLOBAL_CRS_SERVICE_SCOPED_MODSEC_CRS_ERROR if use_global_crs == "yes" else ""
+
     def upsert_custom_config(self, config_type: str, name: str, config: Dict[str, Any], *, service_id: Optional[str] = None, new: bool = False) -> str:
         """Update or insert a custom config in the database"""
         with self._db_session() as session:
@@ -2774,7 +4012,7 @@ class Database:
             custom_config = session.query(Custom_configs).filter_by(**filters).first()
 
             data = config["data"].encode("utf-8") if isinstance(config["data"], str) else config["data"]
-            checksum = config.get("checksum", bytes_hash(data, algorithm="sha256"))
+            checksum = config.get("checksum") or bytes_hash(data, algorithm="sha256")
             is_draft = bool(config.get("is_draft", False))
 
             if not custom_config:
@@ -2876,6 +4114,14 @@ class Database:
 
             db_services = query.all()
 
+            # A service with no row of its own inherits the global value, and for USE_TEMPLATE that
+            # template is in force at render time (get_config materialises {service}_USE_TEMPLATE
+            # for every service). Reporting the missing row as "no template" told the operator the
+            # opposite of what the generator does.
+            inherited = dict(
+                session.query(Global_values.setting_id, Global_values.value).filter(Global_values.setting_id.in_(("USE_TEMPLATE", "SECURITY_MODE"))).all()
+            )
+
         for service in db_services:
             services.append(
                 {
@@ -2884,12 +4130,123 @@ class Database:
                     "is_draft": service.is_draft,
                     "creation_date": service.creation_date,
                     "last_update": service.last_update,
-                    "template": service.template or "",
-                    "security_mode": service.security_mode or "block",
+                    "template": service.template if service.template is not None else inherited.get("USE_TEMPLATE") or "",
+                    "security_mode": service.security_mode or inherited.get("SECURITY_MODE") or "block",
                 }
             )
 
         return services
+
+    @retry_on_transient_db_errors
+    def delete_services(self, service_ids: List[str]) -> str:
+        """Hard-delete services and all their related rows (settings, custom configs, job caches).
+
+        Bypasses the method-based protection in ``save_config`` and is intended for callers
+        that have already authorised the deletion (e.g. the UI deleting a drafted autoconf
+        service). Returns an empty string on success, or an error message.
+        """
+        if not service_ids:
+            return ""
+        with self._db_session() as session:
+            if self.readonly:
+                return "The database is read-only, the changes will not be saved"
+
+            session.query(Services_settings).filter(Services_settings.service_id.in_(service_ids)).delete(synchronize_session=False)
+            session.query(Custom_configs).filter(Custom_configs.service_id.in_(service_ids)).delete(synchronize_session=False)
+            session.query(Jobs_cache).filter(Jobs_cache.service_id.in_(service_ids)).delete(synchronize_session=False)
+            session.query(Services).filter(Services.id.in_(service_ids)).delete(synchronize_session=False)
+            self._blob_sweep(session)
+
+            with suppress(ProgrammingError, OperationalError):
+                metadata = session.query(Metadata).get(1)
+                if metadata is not None:
+                    now = datetime.now().astimezone()
+                    metadata.custom_configs_changed = True
+                    metadata.last_custom_configs_change = now
+
+            try:
+                session.commit()
+            except BaseException as e:
+                return str(e)
+        return ""
+
+    def _rename_service_rows(self, session: scoped_session, old_name: str, new_name: str) -> str:
+        """Move a service and its dependent rows inside an existing transaction."""
+        old_name = old_name.strip()
+        new_name = new_name.strip()
+        if not old_name or not new_name:
+            return "Both the current and new service names are required"
+
+        service = session.query(Services).get(old_name)
+        if service is None:
+            return f"Service {old_name} doesn't exist"
+
+        if session.query(Services).get(new_name) is not None:
+            return f"Service {new_name} already exists"
+
+        # Rename the parent row first so a backend that enforces ON UPDATE CASCADE
+        # cascades dependent rows immediately; the explicit updates catch backends
+        # that do not enforce foreign keys.
+        service.id = new_name
+        service.last_update = datetime.now().astimezone()
+        session.flush()
+
+        session.query(Services_settings).filter_by(service_id=old_name).update({Services_settings.service_id: new_name}, synchronize_session=False)
+        session.query(Custom_configs).filter_by(service_id=old_name).update({Custom_configs.service_id: new_name}, synchronize_session=False)
+        session.query(Jobs_cache).filter_by(service_id=old_name).update({Jobs_cache.service_id: new_name}, synchronize_session=False)
+
+        with suppress(ProgrammingError, OperationalError):
+            metadata = session.query(Metadata).get(1)
+            if metadata is not None:
+                now = datetime.now().astimezone()
+                metadata.custom_configs_changed = True
+                metadata.last_custom_configs_change = now
+
+        return ""
+
+    def rename_service(self, old_name: str, new_name: str) -> str:
+        """Rename a service, moving every service-owned row along with it in one transaction.
+
+        Renaming a service must change only its identity, never its content: the
+        ``bw_services`` primary key and the ``service_id`` foreign key of its
+        dependent rows (per-service settings, custom configs, job cache) are all
+        updated in a single database transaction, so a caller renaming a service
+        can never end up with the old service gone and its custom configs or job
+        cache orphaned/deleted (as happens if a rename is done by rewriting
+        SERVER_NAME-prefixed keys through ``save_config``: the old service id
+        disappears from the incoming config, which save_config treats as a
+        deletion, cascading away its custom configs and job cache).
+
+        Nothing but ``service_id``/``id`` values move: setting values, methods,
+        checksums, ``is_draft`` and job cache data/checksums are left untouched.
+
+        Returns an empty string on success, or a human-readable error message on
+        failure. On failure nothing is written: the pre-checks below run before any
+        statement is issued, and if ``commit()`` itself raises, SQLAlchemy has
+        already rolled back the transaction (nothing was flushed to disk).
+        """
+        old_name = old_name.strip()
+        new_name = new_name.strip()
+        if not old_name or not new_name:
+            return "Both the current and new service names are required"
+        if old_name == new_name:
+            return ""
+
+        with self._db_session() as session:
+            if self.readonly:
+                return "The database is read-only, the changes will not be saved"
+
+            try:
+                err = self._rename_service_rows(session, old_name, new_name)
+                if err:
+                    return err
+
+                session.commit()
+            except BaseException as e:
+                with suppress(Exception):
+                    session.rollback()
+                return str(e)
+        return ""
 
     def add_job_run(self, job_name: str, success: bool, start_date: datetime, end_date: Optional[datetime] = None) -> str:
         """Add a job run."""
@@ -2914,7 +4271,12 @@ class Database:
                 records_to_delete = session.query(Jobs_runs.id).order_by(Jobs_runs.end_date.asc()).limit(rows_count - max_runs).all()
                 ids_to_delete = [record.id for record in records_to_delete]
                 if ids_to_delete:
-                    result = session.query(Jobs_runs).filter(Jobs_runs.id.in_(ids_to_delete)).delete(synchronize_session=False)
+                    # One DELETE per primary key, like _blob_drop: a ranged DELETE fails with 1020 under MariaDB snapshot
+                    # isolation when a job run is inserted between the SELECT above and this statement.
+                    table = Jobs_runs.__table__
+                    result = session.execute(
+                        table.delete().where(table.c.id == bindparam("delete_id")), [{"delete_id": record_id} for record_id in ids_to_delete]
+                    ).rowcount
 
                 try:
                     session.commit()
@@ -2939,7 +4301,10 @@ class Database:
 
         return f"Removed {deleted} expired UI user sessions"
 
-    def delete_job_cache(self, file_name: str, *, job_name: Optional[str] = None, service_id: Optional[str] = None) -> str:
+    def delete_job_cache(
+        self, file_name: str, *, job_name: Optional[str] = None, service_id: Optional[str] = None, plugin_id: Optional[str] = None
+    ) -> Optional[str]:
+        """Delete a job cache file: None means no matching row, an empty string means success, and other strings are errors."""
         job_name = job_name or argv[0].replace(".py", "")
         filters = {"file_name": file_name, "service_id": service_id or None}
         if job_name:
@@ -2949,9 +4314,15 @@ class Database:
             if self.readonly:
                 return "The database is read-only, the changes will not be saved"
 
-            session.query(Jobs_cache).filter_by(**filters).delete(synchronize_session=False)
+            if plugin_id is not None and not session.query(Jobs).filter_by(name=job_name, plugin_id=plugin_id).first():
+                return None
+
+            deleted = session.query(Jobs_cache).filter_by(**filters).delete(synchronize_session=False)
+            if not deleted:
+                return None
 
             try:
+                self._blob_sweep(session)
                 session.commit()
             except BaseException as e:
                 return str(e)
@@ -2968,35 +4339,53 @@ class Database:
         checksum: Optional[str] = None,
     ) -> str:
         """Update the plugin cache in the database"""
-        job_name = job_name or argv[0].replace(".py", "")
-        service_id = service_id or None
-        with self._db_session() as session:
-            if self.readonly:
-                return "The database is read-only, the changes will not be saved"
+        return self.upsert_job_caches(
+            [{"job_name": job_name or argv[0].replace(".py", ""), "service_id": service_id, "file_name": file_name, "data": data, "checksum": checksum}]
+        )
 
-            cache = session.query(Jobs_cache).filter_by(job_name=job_name, service_id=service_id, file_name=file_name).first()
+    def upsert_job_caches(self, entries: List[Dict[str, Any]], *, deletions: Sequence[Dict[str, Any]] = ()) -> str:
+        """Save and delete cache files in one transaction, or roll back the whole set."""
+        if not entries and not deletions:
+            return ""
+        if self.readonly:
+            return "The database is read-only, the changes will not be saved"
 
-            if not cache:
-                session.add(
-                    Jobs_cache(
-                        job_name=job_name,
-                        service_id=service_id,
-                        file_name=file_name,
-                        data=data,
-                        last_update=datetime.now().astimezone(),
-                        checksum=checksum,
-                    )
-                )
-            else:
-                cache.data = data
-                cache.last_update = datetime.now().astimezone()
-                cache.checksum = checksum
+        # A caller malformed against this contract is not a database outage: check the keys here so
+        # the two are distinguishable, and keep the redaction below for driver errors only.
+        for entry in entries:
+            missing = {"job_name", "service_id", "file_name", "data", "checksum"}.difference(entry)
+            if missing:
+                return f"Malformed job cache entry, missing {', '.join(sorted(missing))}"
+        for entry in deletions:
+            missing = {"job_name", "service_id", "file_name"}.difference(entry)
+            if missing:
+                return f"Malformed job cache deletion, missing {', '.join(sorted(missing))}"
 
-            try:
+        try:
+            with self._db_session() as session:
+                for entry in entries:
+                    key = {"job_name": entry["job_name"], "service_id": entry["service_id"] or None, "file_name": entry["file_name"]}
+                    cache = session.query(Jobs_cache).filter_by(**key).first()
+                    if cache is None:
+                        # Flushed empty first: the chunks, when needed, are keyed by the row id.
+                        cache = Jobs_cache(**key, data=b"", checksum=entry["checksum"])
+                        session.add(cache)
+                        session.flush()
+                        cache.data = self._blob_store(session, f"bw_jobs_cache:{cache.id}", entry["data"])
+                    elif entry["checksum"] is None or cache.checksum != entry["checksum"]:
+                        cache.data = self._blob_store(session, f"bw_jobs_cache:{cache.id}", entry["data"])
+                        cache.checksum = entry["checksum"]
+                    # Unchanged data still refreshes the expiry window.
+                    cache.last_update = datetime.now().astimezone()
+                for entry in deletions:
+                    key = {"job_name": entry["job_name"], "service_id": entry["service_id"] or None, "file_name": entry["file_name"]}
+                    session.query(Jobs_cache).filter_by(**key).delete(synchronize_session=False)
+                self._blob_sweep(session)
                 session.commit()
-            except BaseException as e:
-                return str(e)
-
+        except Exception as e:
+            # Driver exceptions can embed the cache payload or connection credentials.
+            self.logger.error(f"Failed to save job caches ({type(e).__name__})")
+            return "An error occurred while saving job caches"
         return ""
 
     def update_external_plugins(
@@ -3007,6 +4396,7 @@ class Database:
         delete_missing: bool = True,
         only_clear_metadata: bool = False,
         per_plugin_commit: bool = True,
+        preserve_ids: Optional[Set[str]] = None,
     ) -> str:
         """Update external plugins from the database"""
         to_put = []
@@ -3083,8 +4473,10 @@ class Database:
 
                 if buckets["jobs"]:
                     session.add_all(buckets["jobs"])
-                if buckets["plugin_pages"]:
-                    session.add_all(buckets["plugin_pages"])
+                # One page per flush: MariaDB's INSERT ... RETURNING otherwise batches every page into one statement.
+                for page in buckets["plugin_pages"]:
+                    session.add(page)
+                    session.flush()
                 if buckets["cli_commands"]:
                     session.add_all(buckets["cli_commands"])
                 if buckets["other"]:
@@ -3096,9 +4488,39 @@ class Database:
             if delete_missing and db_plugins:
                 db_ids = [plugin.id for plugin in db_plugins]
                 ids = [plugin["id"] for plugin in plugins]
-                missing_ids = [plugin for plugin in db_ids if plugin not in ids]
+                missing_ids = [plugin for plugin in db_ids if plugin not in ids and plugin not in (preserve_ids or ())]
+
+                # Never cascade-delete a pro plugin just because it's absent from the incoming list
+                # (a transient disk/glob gap during re-ingest); that wipes UI-set values via
+                # Plugins -> Settings -> Global_values. Pro removal only happens via only_clear_metadata.
+                if missing_ids and _type == "pro" and not only_clear_metadata:
+                    self.logger.warning(
+                        f"Refusing to cascade-delete {len(missing_ids)} pro plugin(s) absent from the incoming list "
+                        f"(likely a transient disk/glob gap); preserving their settings and user values. "
+                        f"missing={sorted(missing_ids)}"
+                    )
+                    missing_ids = []
 
                 if missing_ids:
+                    # Data-loss guard: refuse the destructive plugin-wide cascade (Settings +
+                    # Global_values + Services_settings + Jobs + Templates + Plugin_pages) when
+                    # the incoming plugins list is entirely empty. An empty list almost always
+                    # signals a transient failure at the caller — a filesystem glob race during
+                    # `check_plugin_changes`, a read-only database window that returned no data,
+                    # a download job that failed after a `clean_pro_plugins` call — rather than a
+                    # legitimate mass-uninstall. Callers that genuinely want to wipe everything
+                    # should use `only_clear_metadata=True`, which is the explicit clean-up path
+                    # and is not affected by this guard.
+                    if not only_clear_metadata and not ids:
+                        self.logger.warning(
+                            f"Refusing to cascade-delete {len(missing_ids)} {_type} plugin(s) via "
+                            f"delete_missing=True because the incoming plugins list is empty. "
+                            f"Aborting update_external_plugins to prevent catastrophic data loss. "
+                            f"Use only_clear_metadata=True for explicit wipe operations. "
+                            f"missing_ids={sorted(missing_ids)}"
+                        )
+                        return ""
+
                     changes = True
                     # Remove plugins that are no longer in the list
                     if not only_clear_metadata:
@@ -3125,6 +4547,11 @@ class Database:
                             session.query(Templates).filter(Templates.id == plugin_template.id).delete()
                     else:
                         session.query(Plugins).filter(Plugins.id.in_(missing_ids)).update({Plugins.data: None, Plugins.checksum: None})
+                        # Pro license loss/downgrade: drop the custom UI page so the stale DB blob
+                        # (template.html + actions.py) can no longer be served or executed.
+                        # Settings, Global_values, Services_settings, Jobs, Jobs_cache and Templates
+                        # are deliberately preserved so user values survive a re-license.
+                        session.query(Plugin_pages).filter(Plugin_pages.plugin_id.in_(missing_ids)).delete()
 
                     if per_plugin_commit:
                         try:
@@ -3188,7 +4615,7 @@ class Database:
 
                     if plugin.get("checksum") != db_plugin.checksum:
                         updates[Plugins.checksum] = plugin.get("checksum")
-                        updates[Plugins.data] = plugin.get("data")
+                        updates[Plugins.data] = self._blob_store(session, f"bw_plugins:{plugin['id']}", plugin.get("data"))
 
                     if plugin.get("type") != db_plugin.type:
                         updates[Plugins.type] = plugin.get("type")
@@ -3202,14 +4629,37 @@ class Database:
                     missing_ids = [setting for setting in db_ids if setting not in setting_ids]
 
                     if missing_ids:
-                        changes = True
-                        # Remove settings that are no longer in the list
-                        session.query(Settings).filter(Settings.id.in_(missing_ids)).delete()
-                        session.query(Selects).filter(Selects.setting_id.in_(missing_ids)).delete()
-                        session.query(Multiselects).filter(Multiselects.setting_id.in_(missing_ids)).delete()
-                        session.query(Services_settings).filter(Services_settings.setting_id.in_(missing_ids)).delete()
-                        session.query(Global_values).filter(Global_values.setting_id.in_(missing_ids)).delete()
-                        session.query(Template_settings).filter(Template_settings.setting_id.in_(missing_ids)).delete()
+                        # Data-loss guard: same-content reinstalls must never wipe user-set values.
+                        # We detect them by comparing the freshly-computed plugin checksum against
+                        # the one currently stored in the database. Identical checksums mean the
+                        # plugin archive is byte-for-byte the same as what we already have — i.e. a
+                        # spurious re-ingest (non-deterministic tar false positive, idempotent
+                        # re-upload, download-plugins re-run, etc.). A genuine plugin update always
+                        # changes the archive bytes, which flips the checksum and lets the cleanup
+                        # proceed to prune settings that have been truly removed from plugin.json.
+                        # The check is method-agnostic on purpose: checksum equality is a stronger
+                        # signal than any caller-supplied method/version string.
+                        incoming_checksum = plugin.get("checksum")
+                        db_checksum = db_plugin.checksum
+                        preserve_missing = bool(incoming_checksum) and bool(db_checksum) and incoming_checksum == db_checksum
+
+                        if preserve_missing:
+                            missing_preview = sorted(missing_ids)[:10]
+                            overflow = f" ... (+{len(missing_ids) - 10} more)" if len(missing_ids) > 10 else ""
+                            self.logger.info(
+                                f"Plugin {plugin['id']!r} re-ingested with an identical checksum; "
+                                f"preserving {len(missing_ids)} existing setting(s) to avoid data loss "
+                                f"(missing from plugin.json: {missing_preview}{overflow})"
+                            )
+                        else:
+                            changes = True
+                            # Remove settings that are no longer in the list
+                            session.query(Settings).filter(Settings.id.in_(missing_ids)).delete()
+                            session.query(Selects).filter(Selects.setting_id.in_(missing_ids)).delete()
+                            session.query(Multiselects).filter(Multiselects.setting_id.in_(missing_ids)).delete()
+                            session.query(Services_settings).filter(Services_settings.setting_id.in_(missing_ids)).delete()
+                            session.query(Global_values).filter(Global_values.setting_id.in_(missing_ids)).delete()
+                            session.query(Template_settings).filter(Template_settings.setting_id.in_(missing_ids)).delete()
 
                     order = 0
                     plugin_settings = set()
@@ -3296,10 +4746,13 @@ class Database:
 
                             db_values = [
                                 (self._empty_if_none(select.value), select.order)
-                                for select in session.query(Selects).with_entities(Selects.value, Selects.order).filter_by(setting_id=setting)
+                                for select in session.query(Selects)
+                                .with_entities(Selects.value, Selects.order)
+                                .filter_by(setting_id=setting)
+                                .order_by(Selects.order)
                             ]
-                            select_values = enumerate(value.get("select", []), start=1)
-                            different_values = any(db_value != (value, order) for db_value, (value, order) in zip(db_values, select_values))
+                            select_values = [(self._empty_if_none(select), order) for order, select in enumerate(value.get("select", []), start=1)]
+                            different_values = db_values != select_values
 
                             if different_values:
                                 changes = True
@@ -3315,6 +4768,7 @@ class Database:
                                 for msel in session.query(Multiselects)
                                 .with_entities(Multiselects.option_id, Multiselects.label, Multiselects.value, Multiselects.order)
                                 .filter_by(setting_id=setting)
+                                .order_by(Multiselects.order)
                             ]
                             multiselect_values = [
                                 (msel.get("id", ""), msel.get("label", ""), self._empty_if_none(msel.get("value", "")), order)
@@ -3384,7 +4838,6 @@ class Database:
 
                             if updates:
                                 changes = True
-                                updates[Jobs.last_run] = None
                                 session.query(Jobs_runs).filter(Jobs_runs.job_name == job["name"]).delete()
                                 session.query(Jobs_cache).filter(Jobs_cache.job_name == job["name"]).delete()
                                 session.query(Jobs).filter(Jobs.name == job["name"]).update(updates)
@@ -3406,24 +4859,24 @@ class Database:
                     remove = not path_ui.is_dir() and db_plugin_page
 
                     if path_ui.is_dir():
-                        remove = True
-                        with BytesIO() as plugin_page_content:
-                            with tar_open(fileobj=plugin_page_content, mode="w:gz", compresslevel=9) as tar:
-                                tar.add(path_ui, arcname=path_ui.name, recursive=True)
-                            plugin_page_content.seek(0)
+                        try:
+                            plugin_page_content = create_plugin_tar_gz(path_ui)
                             checksum = bytes_hash(plugin_page_content, algorithm="sha256")
                             content = plugin_page_content.getvalue()
+                        except (FileNotFoundError, OSError) as e:
+                            self.logger.warning(f"Some files in {path_ui} could not be archived: {e}")
+                            continue
 
                         if not db_plugin_page:
                             changes = True
+                            content = self._blob_store(session, f"bw_plugin_pages:{plugin['id']}", content)
                             local_to_put.append(Plugin_pages(plugin_id=plugin["id"], data=content, checksum=checksum))
-                            remove = False
                         elif checksum != db_plugin_page.checksum:
                             changes = True
+                            content = self._blob_store(session, f"bw_plugin_pages:{plugin['id']}", content)
                             session.query(Plugin_pages).filter(Plugin_pages.plugin_id == plugin["id"]).update(
                                 {Plugin_pages.data: content, Plugin_pages.checksum: checksum}
                             )
-                            remove = False
 
                     if db_plugin_page and remove:
                         changes = True
@@ -3504,13 +4957,17 @@ class Database:
                             saved_templates.add(template_id)
 
                             db_ids = [step.id for step in session.query(Template_steps).with_entities(Template_steps.id).filter_by(template_id=template_id)]
-                            missing_ids = [x for x in range(1, len(template_data.get("steps", [])) + 1) if x not in db_ids]
+                            missing_ids = [x for x in db_ids if x > len(template_data.get("steps", []))]
 
                             if missing_ids:
                                 changes = True
-                                session.query(Template_settings).filter(Template_settings.step_id.in_(missing_ids)).delete()
-                                session.query(Template_custom_configs).filter(Template_custom_configs.step_id.in_(missing_ids)).delete()
-                                session.query(Template_steps).filter(Template_steps.id.in_(missing_ids)).delete()
+                                session.query(Template_settings).filter(
+                                    Template_settings.template_id == template_id, Template_settings.step_id.in_(missing_ids)
+                                ).delete()
+                                session.query(Template_custom_configs).filter(
+                                    Template_custom_configs.template_id == template_id, Template_custom_configs.step_id.in_(missing_ids)
+                                ).delete()
+                                session.query(Template_steps).filter(Template_steps.template_id == template_id, Template_steps.id.in_(missing_ids)).delete()
 
                             steps_settings = {}
                             steps_configs = {}
@@ -3535,7 +4992,7 @@ class Database:
 
                                     if updates:
                                         changes = True
-                                        session.query(Template_steps).filter(Template_steps.id == db_step.id).update(updates)
+                                        session.query(Template_steps).filter_by(id=db_step.id, template_id=template_id).update(updates)
 
                                 for setting in step.get("settings", []):
                                     if step_id not in steps_settings:
@@ -3547,14 +5004,16 @@ class Database:
                                         steps_configs[step_id] = []
                                     steps_configs[step_id].append(config)
 
-                            db_template_settings = [
-                                f"{template_setting.setting_id}_{template_setting.suffix}" if template_setting.suffix else template_setting.setting_id
+                            db_template_settings = {
+                                (
+                                    f"{template_setting.setting_id}_{template_setting.suffix}" if template_setting.suffix else template_setting.setting_id
+                                ): template_setting.id
                                 for template_setting in session.query(Template_settings)
                                 .with_entities(Template_settings.id, Template_settings.setting_id, Template_settings.suffix)
                                 .filter_by(template_id=template_id)
                                 .order_by(Template_settings.order)
-                            ]
-                            missing_ids = [setting for setting in template_data.get("settings", {}) if setting not in db_template_settings]
+                            }
+                            missing_ids = [row_id for setting, row_id in db_template_settings.items() if setting not in template_data.get("settings", {})]
 
                             if missing_ids:
                                 changes = True
@@ -3637,18 +5096,18 @@ class Database:
 
                                 order += 1
 
-                            db_template_configs = [
-                                f"{config.type.replace('_', '-')}/{config.name}.conf"
+                            db_template_configs = {
+                                f"{config.type.replace('_', '-')}/{config.name}.conf": config.id
                                 for config in session.query(Template_custom_configs)
-                                .with_entities(Template_custom_configs.type, Template_custom_configs.name)
+                                .with_entities(Template_custom_configs.id, Template_custom_configs.type, Template_custom_configs.name)
                                 .filter_by(template_id=template_id)
                                 .order_by(Template_custom_configs.order)
-                            ]
-                            missing_ids = [config for config in template_data.get("configs", {}) if config not in db_template_configs]
+                            }
+                            missing_ids = [row_id for config, row_id in db_template_configs.items() if config not in template_data.get("configs", [])]
 
                             if missing_ids:
                                 changes = True
-                                session.query(Template_custom_configs).filter(Template_custom_configs.name.in_(missing_ids)).delete()
+                                session.query(Template_custom_configs).filter(Template_custom_configs.id.in_(missing_ids)).delete()
 
                             order = 0
                             for config in template_data.get("configs", []):
@@ -3767,7 +5226,7 @@ class Database:
                         stream=plugin["stream"],
                         type=_type,
                         method=plugin["method"],
-                        data=plugin.get("data"),
+                        data=self._blob_store(session, f"bw_plugins:{plugin['id']}", plugin.get("data")),
                         checksum=plugin.get("checksum"),
                     )
                 )
@@ -3828,13 +5287,13 @@ class Database:
                 if page:
                     path_ui = plugin_path.joinpath("ui")
                     if path_ui.is_dir():
-                        with BytesIO() as plugin_page_content:
-                            with tar_open(fileobj=plugin_page_content, mode="w:gz", compresslevel=9) as tar:
-                                tar.add(path_ui, arcname=path_ui.name, recursive=True)
-                            plugin_page_content.seek(0)
+                        try:
+                            plugin_page_content = create_plugin_tar_gz(path_ui)
                             checksum = bytes_hash(plugin_page_content, algorithm="sha256")
-
-                            local_to_put.append(Plugin_pages(plugin_id=plugin["id"], data=plugin_page_content.getvalue(), checksum=checksum))
+                            content = self._blob_store(session, f"bw_plugin_pages:{plugin['id']}", plugin_page_content.getvalue())
+                            local_to_put.append(Plugin_pages(plugin_id=plugin["id"], data=content, checksum=checksum))
+                        except (FileNotFoundError, OSError) as e:
+                            self.logger.warning(f"Some files in {path_ui} could not be archived: {e}")
 
                 for command, file_name in commands.items():
                     if not plugin_path.joinpath("bwcli", file_name).is_file():
@@ -4015,6 +5474,7 @@ class Database:
             try:
                 if not per_plugin_commit and to_put:
                     _add_ordered(to_put)
+                self._blob_sweep(session)
                 session.commit()
             except BaseException as e:
                 session.rollback()
@@ -4066,6 +5526,7 @@ class Database:
                             metadata.reload_ui_plugins = True
 
             try:
+                self._blob_sweep(session)
                 session.commit()
             except BaseException as e:
                 return str(e)
@@ -4136,7 +5597,7 @@ class Database:
 
             # Assemble the plugin data.
             result = []
-            for plugin in query:
+            for plugin in query.all():
                 plugin_data: Dict[str, Any] = {
                     "id": plugin.id,
                     "stream": plugin.stream,
@@ -4150,7 +5611,12 @@ class Database:
                     "checksum": plugin.checksum,
                 }
                 if with_data:
-                    plugin_data["data"] = plugin.data
+                    plugin_data["data"] = self._blob_load(
+                        session,
+                        f"bw_plugins:{plugin.id}",
+                        plugin.data,
+                        lambda plugin_id=plugin.id: session.query(Plugins.data).filter_by(id=plugin_id).scalar(),
+                    )
 
                 for setting in settings_map.get(plugin.id, []):
                     setting_data = {
@@ -4248,7 +5714,7 @@ class Database:
         if with_info:
             entities.extend([Jobs_cache.last_update, Jobs_cache.checksum])
         if with_data:
-            entities.append(Jobs_cache.data)
+            entities.extend([Jobs_cache.id, Jobs_cache.data])
 
         filters = {"job_name": job_name, "file_name": file_name, "service_id": service_id or None}
 
@@ -4258,69 +5724,63 @@ class Database:
                 if not job:
                     return None
             data = session.query(Jobs_cache).with_entities(*entities).filter_by(**filters).first()
+            if data and with_data:
+                blob = self._blob_load(session, f"bw_jobs_cache:{data.id}", data.data, lambda: session.query(Jobs_cache.data).filter_by(id=data.id).scalar())
 
         if not data:
             return None
         elif with_data and not with_info:
-            return data.data
+            return blob
 
         ret_data = {}
         if with_info:
             ret_data["last_update"] = data.last_update.timestamp() if data.last_update is not None else "Never"
             ret_data["checksum"] = data.checksum
         if with_data:
-            ret_data["data"] = data.data
+            ret_data["data"] = blob
         return ret_data
 
-    def get_jobs_cache_files(self, *, with_data: bool = True, job_name: str = "", plugin_id: str = "") -> List[Dict[str, Any]]:
-        """Get jobs cache files."""
+    def get_jobs_cache_files(self, *, with_data: bool = True, job_name: str = "", plugin_id: str = "", data_job_name: str = "") -> List[Dict[str, Any]]:
+        """Get jobs cache files, filtered in the database. With data_job_name, only that job's rows carry their data."""
         with self._db_session() as session:
-            filters = {}
-            entities = [Jobs_cache.job_name, Jobs_cache.service_id, Jobs_cache.file_name, Jobs_cache.last_update, Jobs_cache.checksum]
+            entities = [
+                Jobs_cache.id,
+                Jobs_cache.job_name,
+                Jobs_cache.service_id,
+                Jobs_cache.file_name,
+                Jobs_cache.last_update,
+                Jobs_cache.checksum,
+                Jobs.plugin_id,
+            ]
             if with_data:
-                entities.append(Jobs_cache.data)
-            query = session.query(Jobs_cache).with_entities(*entities)
+                # One query for every row, so paired files (CA and CRL, manifest and archive) come from the same read.
+                data = Jobs_cache.data if not data_job_name else case((Jobs_cache.job_name == data_job_name, Jobs_cache.data), else_=None)
+                entities.append(data.label("data"))
+            query = session.query(Jobs_cache).with_entities(*entities).join(Jobs, Jobs.name == Jobs_cache.job_name)
 
             if job_name:
-                query = query.filter_by(job_name=job_name)
-                filters["name"] = job_name
-
-            db_cache = query.all()
-
-            if not db_cache:
-                return []
-
+                query = query.filter(Jobs_cache.job_name == job_name)
             if plugin_id:
-                filters["plugin_id"] = plugin_id
-
-            query = session.query(Jobs).with_entities(Jobs.name, Jobs.plugin_id)
-
-            if filters:
-                query = query.filter_by(**filters)
-
-            jobs = {}
-            for job in query:
-                jobs[job.name] = job.plugin_id
-
-            if not jobs:
-                return []
+                query = query.filter(Jobs.plugin_id == plugin_id)
 
             cache_files = []
-            for cache in db_cache:
-                if cache.job_name not in jobs:
-                    continue
-                cache_files.append(
-                    {
-                        "plugin_id": jobs[cache.job_name],
-                        "job_name": cache.job_name,
-                        "service_id": cache.service_id,
-                        "file_name": cache.file_name,
-                        "last_update": cache.last_update if cache.last_update is not None else "Never",
-                        "checksum": cache.checksum,
-                    }
-                )
-                if with_data:
-                    cache_files[-1]["data"] = cache.data
+            for cache in query.all():
+                cache_file = {
+                    "plugin_id": cache.plugin_id,
+                    "job_name": cache.job_name,
+                    "service_id": cache.service_id,
+                    "file_name": cache.file_name,
+                    "last_update": cache.last_update if cache.last_update is not None else "Never",
+                    "checksum": cache.checksum,
+                }
+                if with_data and (not data_job_name or cache.job_name == data_job_name):
+                    cache_file["data"] = self._blob_load(
+                        session,
+                        f"bw_jobs_cache:{cache.id}",
+                        cache.data,
+                        lambda cache_id=cache.id: session.query(Jobs_cache.data).filter_by(id=cache_id).scalar(),
+                    )
+                cache_files.append(cache_file)
 
             return cache_files
 
@@ -4337,6 +5797,9 @@ class Database:
         https_port: int = 5443,
     ) -> str:
         """Add instance."""
+        if not is_valid_host(hostname):
+            return f"Invalid instance hostname: {hostname}"
+
         with self._db_session() as session:
             if self.readonly:
                 return "The database is read-only, the changes will not be saved"
@@ -4432,10 +5895,24 @@ class Database:
 
     def update_instances(self, instances: List[Dict[str, Any]], method: str, changed: Optional[bool] = True) -> str:
         """Update instances."""
+        for instance in instances:
+            hostname = instance.get("hostname")
+            if hostname is not None and not is_valid_host(hostname):
+                return f"Invalid instance hostname: {hostname}"
+
         to_put = []
         with self._db_session() as session:
             if self.readonly:
                 return "The database is read-only, the changes will not be saved"
+
+            if not instances and method == "autoconf":
+                existing_count = session.query(Instances).filter(Instances.method == method).count()
+                if existing_count > 0:
+                    self.logger.warning(
+                        f"Received empty instances list for method 'autoconf' but database has {existing_count} existing instance(s), "
+                        "skipping deletion to prevent data loss"
+                    )
+                    return ""
 
             session.query(Instances).filter(Instances.method == method).delete()
 
@@ -4496,16 +5973,17 @@ class Database:
             if self.readonly:
                 return "The database is read-only, the changes will not be saved"
 
-            db_instance = session.query(Instances).filter_by(hostname=hostname).first()
-
-            if db_instance is None:
-                return f"Instance {hostname} does not exist, will not be updated."
-
-            db_instance.status = status
+            # Use a direct UPDATE to avoid race conditions with concurrent threads
+            update_values: dict = {"status": status}
             if status != "down":
-                db_instance.last_seen = datetime.now().astimezone()
+                update_values["last_seen"] = datetime.now().astimezone()
 
             try:
+                result = session.query(Instances).filter_by(hostname=hostname).update(update_values, synchronize_session=False)
+
+                if result == 0:
+                    return f"Instance {hostname} does not exist, will not be updated."
+
                 session.commit()
             except BaseException as e:
                 return f"An error occurred while updating the instance {hostname}.\n{e}"
@@ -4529,31 +6007,32 @@ class Database:
             if self.readonly:
                 return "The database is read-only, the changes will not be saved"
 
-            db_instance = session.query(Instances).filter_by(hostname=hostname).first()
-            if db_instance is None:
-                return f"Instance {hostname} does not exist, will not be updated."
-
+            # Use a direct UPDATE to avoid race conditions with concurrent threads
+            # (MariaDB error 1020: "Record has changed since last read")
+            update_values: dict = {}
             if name is not None:
-                db_instance.name = name
+                update_values["name"] = name
             if port is not None:
-                db_instance.port = port
+                update_values["port"] = port
             if listen_https is not None:
-                db_instance.listen_https = listen_https
+                update_values["listen_https"] = listen_https
             if https_port is not None:
-                db_instance.https_port = https_port
+                update_values["https_port"] = https_port
             if server_name is not None:
-                db_instance.server_name = server_name
+                update_values["server_name"] = server_name
             if method is not None:
-                db_instance.method = method
-
-            if changed:
-                with suppress(ProgrammingError, OperationalError):
-                    metadata = session.query(Metadata).get(1)
-                    if metadata is not None:
-                        metadata.instances_changed = True
-                        metadata.last_instances_change = datetime.now().astimezone()
+                update_values["method"] = method
 
             try:
+                if update_values:
+                    result = session.query(Instances).filter_by(hostname=hostname).update(update_values, synchronize_session=False)
+                    if result == 0:
+                        return f"Instance {hostname} does not exist, will not be updated."
+
+                if changed:
+                    with suppress(ProgrammingError, OperationalError):
+                        session.query(Metadata).filter_by(id=1).update({"instances_changed": True, "last_instances_change": datetime.now().astimezone()})
+
                 session.commit()
             except BaseException as e:
                 return f"An error occurred while updating the instance {hostname}.\n{e}"
@@ -4619,7 +6098,9 @@ class Database:
             if not page:
                 return None
 
-            return page.data
+            return self._blob_load(
+                session, f"bw_plugin_pages:{plugin_id}", page.data, lambda: session.query(Plugin_pages.data).filter_by(plugin_id=plugin_id).scalar()
+            )
 
     def get_templates(self, plugin: Optional[str] = None) -> Dict[str, dict]:
         """Get templates."""
@@ -5123,6 +6604,12 @@ class Database:
                 {Plugins.config_changed: True}, synchronize_session=False
             )
 
+            with suppress(ProgrammingError, OperationalError):
+                metadata = session.query(Metadata).get(1)
+                if metadata is not None:
+                    metadata.custom_configs_changed = True
+                    metadata.last_custom_configs_change = datetime.now().astimezone()
+
             try:
                 session.commit()
             except BaseException as e:
@@ -5154,12 +6641,39 @@ class Database:
                 {Plugins.config_changed: True}, synchronize_session=False
             )
 
+            with suppress(ProgrammingError, OperationalError):
+                metadata = session.query(Metadata).get(1)
+                if metadata is not None:
+                    metadata.custom_configs_changed = True
+                    metadata.last_custom_configs_change = datetime.now().astimezone()
+
             try:
                 session.commit()
             except BaseException as e:
                 return f"An error occurred while deleting template {template_id}.\n{e}"
 
         return ""
+
+    def use_ui_user_totp(self, username: str, totp_secret: str, counter: int) -> bool:
+        """Consume a counter once, across replicas, only for the user's current secret."""
+        if self.readonly or not totp_secret or type(counter) is not int or counter < 0:
+            return False
+        try:
+            with self._db_session() as session:
+                updated = (
+                    session.query(Users)
+                    .filter(
+                        Users.username == username,
+                        Users.totp_secret == totp_secret,
+                        (Users.totp_last_counter.is_(None)) | (Users.totp_last_counter < counter),
+                    )
+                    .update({Users.totp_last_counter: counter}, synchronize_session=False)
+                )
+                session.commit()
+                return updated == 1
+        except Exception as e:
+            self.logger.error(f"Failed to consume TOTP counter ({type(e).__name__})")
+            return False
 
     def get_ui_users(self, *, as_dict: bool = False) -> Union[str, List[Union[Users, dict]]]:
         """Get ui users."""

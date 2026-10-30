@@ -5,7 +5,6 @@ from json import dumps, loads
 from traceback import format_exc
 from html import escape
 from io import StringIO, BytesIO
-import csv
 from time import monotonic
 
 
@@ -15,9 +14,10 @@ from openpyxl import Workbook
 from openpyxl.styles import Font, PatternFill
 
 from app.dependencies import BW_CONFIG, BW_INSTANCES_UTILS
-from app.utils import LOGGER
+from app.utils import LOGGER, csv_safe, csv_writer
 
-from app.routes.utils import cors_required
+from app.models.instance import encode_search_panes
+from app.routes.utils import cors_required, get_default_ban_time, parse_search_panes_dict
 
 reports = Blueprint("reports", __name__)
 REPORTS_FILTERS_CACHE_TTL_SECONDS = 5.0
@@ -70,7 +70,7 @@ def build_search_panes_options(pane_counts_backend: dict) -> dict:
                 search_panes_options["server_name"].append(
                     {
                         "label": f'<code class="language-dns">{escape("default server" if name == "_" else name)}</code>',
-                        "value": escape(name),
+                        "value": name,
                         "total": counts["total"],
                         "count": counts["count"],
                     }
@@ -79,7 +79,7 @@ def build_search_panes_options(pane_counts_backend: dict) -> dict:
             search_panes_options[field] = [
                 {
                     "label": escape(str(value)),
-                    "value": escape(str(value)),
+                    "value": str(value),
                     "total": counts["total"],
                     "count": counts["count"],
                 }
@@ -111,24 +111,10 @@ def reports_fetch():
     except Exception:
         db_config = {}
 
-    def get_default_ban_time(server_name: str) -> int:
-        try:
-            if not db_config:
-                return 86400
-            # Prefer service-specific value when available
-            if server_name and server_name not in ("_", ""):
-                service_key = f"{server_name}_BAD_BEHAVIOR_BAN_TIME"
-                if service_key in db_config:
-                    return int(db_config[service_key])
-            # Fallback to global default from config, or plugin default (24h)
-            return int(db_config.get("BAD_BEHAVIOR_BAN_TIME", 86400))
-        except Exception:
-            return 86400
-
     # Extract DataTables parameters
     draw = int(request.form.get("draw", 1))
-    start = int(request.form.get("start", 0))
-    length = int(request.form.get("length", 10))
+    start = max(0, int(request.form.get("start", 0)))
+    length = max(1, min(int(request.form.get("length", 10)), 1000))
     search_value = request.form.get("search[value]", "").lower()
 
     # DataTables includes two leading non-data columns (details-control and select)
@@ -165,8 +151,8 @@ def reports_fetch():
         "actions",  # actions column for row buttons
     ]
 
-    # Build search panes string for backend (format: field1:value1,value2;field2:value3)
-    search_panes_str = ";".join(f"{field}:{','.join(values)}" for field, values in search_panes.items()) if search_panes else ""
+    # Build search panes string for backend (format: field1:value1,value2;field2:value3, values percent-encoded)
+    search_panes_str = encode_search_panes(search_panes)
     include_pane_counts = False
 
     # Determine order column name
@@ -220,6 +206,14 @@ def reports_fetch():
             else:
                 has_data = data_field is not None
 
+            summary = None
+            if isinstance(data_field, dict) and data_field.get("ban_id"):
+                summary = {
+                    key: data_field[key]
+                    for key in ("ban_id", "counter", "threshold", "count_time", "ban_time", "event_count", "ban_scope", "server_name")
+                    if key in data_field
+                }
+
             request_id = str(report.get("id", "N/A"))
             server_name = str(report.get("server_name", "N/A"))
 
@@ -236,11 +230,11 @@ def reports_fetch():
                 "reason": escape(str(report.get("reason", "N/A"))),
                 "server_name": escape(server_name),
                 # Keep payloads light; details are lazy-loaded by request_id.
-                "data": "available" if has_data else "",
+                "data": summary if summary is not None else "available" if has_data else "",
                 "has_data": has_data,
                 "security_mode": escape(str(report.get("security_mode", "N/A"))),
                 # default ban duration in seconds for quick-ban action
-                "ban_default_exp": get_default_ban_time(server_name),
+                "ban_default_exp": get_default_ban_time(db_config, server_name),
                 # Placeholder for UI actions column
                 "actions": "",
             }
@@ -290,7 +284,7 @@ def reports_filters():
             field = key.split("[")[1].split("]")[0]
             search_panes[field].append(value)
 
-    search_panes_str = ";".join(f"{field}:{','.join(sorted(values))}" for field, values in sorted(search_panes.items())) if search_panes else ""
+    search_panes_str = encode_search_panes({field: sorted(values) for field, values in sorted(search_panes.items())})
     has_active_panes = any(values for values in search_panes.values())
 
     force_refresh = request.form.get("force", "").strip().lower() in ("1", "true", "yes")
@@ -391,6 +385,7 @@ def reports_export_csv():
         search_value = request.args.get("search", "").lower()
         order_column = request.args.get("order_column", "date")
         order_dir = request.args.get("order_dir", "desc")
+        search_panes_str = encode_search_panes(parse_search_panes_dict(request.args))
 
         # Get all reports (no pagination)
         if BW_INSTANCES_UTILS:
@@ -400,7 +395,7 @@ def reports_export_csv():
                 search=search_value,
                 order_column=order_column,
                 order_dir=order_dir,
-                search_panes="",
+                search_panes=search_panes_str,
                 count_only=False,
                 include_pane_counts=False,
             )
@@ -410,7 +405,7 @@ def reports_export_csv():
 
         # Create CSV in memory
         output = StringIO()
-        writer = csv.writer(output)
+        writer = csv_writer(output)
 
         # Write header
         writer.writerow(
@@ -483,6 +478,7 @@ def reports_export_excel():
         search_value = request.args.get("search", "").lower()
         order_column = request.args.get("order_column", "date")
         order_dir = request.args.get("order_dir", "desc")
+        search_panes_str = encode_search_panes(parse_search_panes_dict(request.args))
 
         # Get all reports (no pagination)
         if BW_INSTANCES_UTILS:
@@ -492,7 +488,7 @@ def reports_export_excel():
                 search=search_value,
                 order_column=order_column,
                 order_dir=order_dir,
-                search_panes="",
+                search_panes=search_panes_str,
                 count_only=False,
                 include_pane_counts=False,
             )
@@ -545,18 +541,18 @@ def reports_export_excel():
 
             ws.append(
                 [
-                    datetime.fromtimestamp(report.get("date", 0)).isoformat() if report.get("date") else "N/A",
-                    str(report.get("id", "N/A")),
-                    str(report.get("ip", "N/A")),
-                    str(report.get("country", "N/A")),
-                    str(report.get("method", "N/A")),
-                    str(report.get("url", "N/A")),
-                    str(report.get("status", "N/A")),
-                    str(report.get("user_agent", "N/A")),
-                    str(report.get("reason", "N/A")),
-                    str(report.get("server_name", "N/A")),
-                    data_output,
-                    str(report.get("security_mode", "N/A")),
+                    csv_safe(datetime.fromtimestamp(report.get("date", 0)).isoformat() if report.get("date") else "N/A"),
+                    csv_safe(report.get("id", "N/A")),
+                    csv_safe(report.get("ip", "N/A")),
+                    csv_safe(report.get("country", "N/A")),
+                    csv_safe(report.get("method", "N/A")),
+                    csv_safe(report.get("url", "N/A")),
+                    csv_safe(report.get("status", "N/A")),
+                    csv_safe(report.get("user_agent", "N/A")),
+                    csv_safe(report.get("reason", "N/A")),
+                    csv_safe(report.get("server_name", "N/A")),
+                    csv_safe(data_output),
+                    csv_safe(report.get("security_mode", "N/A")),
                 ]
             )
 

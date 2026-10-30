@@ -78,9 +78,6 @@ class ValidateDTD : public Operator {
     }
 
 
-    static void null_error(void *, const char *, ...) { // cppcheck-suppress[constParameterPointer,constParameterCallback]
-    }
-
  private:
     std::string m_resource;
 #endif

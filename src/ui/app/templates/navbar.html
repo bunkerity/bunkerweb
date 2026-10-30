@@ -112,15 +112,15 @@
                 <a role="button"
                    class="btn btn-sm btn-outline-{% if current_user.theme == 'light' %}dark{% else %}light{% endif %} px-2 px-md-3 position-relative"
                    aria-pressed="true"
-                   href="https://github.com/bunkerity/bunkerweb/releases/latest"
+                   href="https://github.com/bunkerity/bunkerweb/releases/{% if latest_version and latest_version != 'unknown' %}tag/v{{ latest_version }}{% else %}latest{% endif %}"
                    target="_blank"
                    rel="noreferrer"
                    data-bs-toggle="tooltip"
                    data-bs-placement="bottom"
                    data-bs-original-title="..."
-                   data-i18n="{% if bw_version != latest_version %}tooltip.new_version_available{% else %}tooltip.latest_version_installed{% endif %}">
+                   data-i18n="{% if new_version_available %}tooltip.new_version_available{% else %}tooltip.latest_version_installed{% endif %}">
                     <span data-i18n="navbar.version">Version</span>: {{ bw_version }}
-                    <span class="badge-dot position-absolute top-0 start-100 translate-middle bg-{% if bw_version != latest_version %}danger{% else %}success{% endif %} border border-light rounded-circle">
+                    <span class="badge-dot position-absolute top-0 start-100 translate-middle bg-{% if new_version_available %}danger{% else %}success{% endif %} border border-light rounded-circle">
                         <span class="visually-hidden" data-i18n="badge.new_version">New version</span>
                     </span>
                 </a>

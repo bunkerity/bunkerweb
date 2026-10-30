@@ -58,17 +58,11 @@ static inline int inplace(std::string &value) {
                 && (input[i + 1] == '/')) {
                 incomment = false;
                 i += 2;
-                input[j] = input[i];
-                i++;
-                j++;
             } else if ((input[i] == '-') && (i + 1 < input_len)
                 && (input[i + 1] == '-') && (i + 2 < input_len)
                 && (input[i+2] == '>'))   {
                 incomment = false;
                 i += 3;
-                input[j] = input[i];
-                i++;
-                j++;
             } else {
                 i++;
             }

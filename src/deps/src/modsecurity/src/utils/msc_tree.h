@@ -38,7 +38,7 @@ typedef struct TreeRoot TreeRoot;
 
 #define TREE_CHECK(x, y) ((x) & (y))
 #define MASK_BITS(x) ((x + 1) * 8)
-#define SHIFT_LEFT_MASK(x) ((-1) << (x))
+#define SHIFT_LEFT_MASK(x) ((int)(~0U << (x)))
 #define SHIFT_RIGHT_MASK(x,y) ((x) >> (y))
 
 #define NETMASK_256 0x100

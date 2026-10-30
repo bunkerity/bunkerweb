@@ -131,7 +131,7 @@
 #define LJ_TARGET_POSIX		(LUAJIT_OS > LUAJIT_OS_WINDOWS)
 #define LJ_TARGET_DLOPEN	LJ_TARGET_POSIX
 
-#if defined(TARGET_OS_IPHONE) && TARGET_OS_IPHONE
+#if (defined(TARGET_OS_IPHONE) && TARGET_OS_IPHONE) || LUAJIT_TARGET_IPHONE
 #define LJ_TARGET_IOS		1
 #else
 #define LJ_TARGET_IOS		0
@@ -498,7 +498,9 @@
 #define LJ_ARCH_BITS		64
 #define LJ_ARCH_ENDIAN		LUAJIT_BE
 #define LJ_TARGET_S390X		1
-#define LJ_TARGET_EHRETREG	0xe
+/* On s390x, _Unwind_SetGR can only be used with call-saved registers.
+   Use %r7 as EH return register; value will be moved into %r2 by the handler.  */
+#define LJ_TARGET_EHRETREG	7
 #define LJ_TARGET_JUMPRANGE	32	/* +-2^32 = +-4GB (32-bit, halfword aligned) */
 #define LJ_TARGET_MASKSHIFT	1
 #define LJ_TARGET_MASKROT	1

@@ -34,6 +34,7 @@ Table of Contents
     * [get_client_random](#get_client_random)
     * [get_shared_ssl_ciphers](#get_shared_ssl_ciphers)
     * [get_req_ssl_pointer](#get_req_ssl_pointer)
+    * [get_upstream_ssl_pointer](#get_upstream_ssl_pointer)
 * [Community](#community)
     * [English Mailing List](#english-mailing-list)
     * [Chinese Mailing List](#chinese-mailing-list)
@@ -665,6 +666,36 @@ If you need to retain the pointer beyond the current phase then you will need to
 If you do, ensure that your reference is released with `SSL_free`.
 
 This function was first added in version `0.1.16`.
+
+[Back to TOC](#table-of-contents)
+
+get_upstream_ssl_pointer
+------------
+**syntax:** *ssl_ptr, err = ssl.get_upstream_ssl_pointer()*
+
+**context:** *any*
+
+Retrieves the OpenSSL `SSL*` object for the current upstream connection.
+
+Returns an FFI pointer on success, or a `nil` value and a string describing the error otherwise.
+
+If you need to retain the pointer beyond the current phase then you will need to use OpenSSL's `SSL_up_ref` to increase the reference count.
+If you do, ensure that your reference is released with `SSL_free`.
+
+This function was first added in version `0.1.33`.
+
+[Back to TOC](#table-of-contents)
+
+ssl_session_reused
+------------
+**syntax:** *reused, err = ssl.ssl_session_reused(ssl)*
+
+**context:** *any*
+
+Get the session reused state of the SSL object return by `get_req_ssl_pointer` or `get_upstream_ssl_pointer`.
+Returns true if the session is reused, false otherwise.
+
+This function was first added in version `0.1.33`.
 
 [Back to TOC](#table-of-contents)
 

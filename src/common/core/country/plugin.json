@@ -11,7 +11,7 @@
       "help": "Deny access if the country of the client is in the list (ISO 3166-1 alpha-2 format separated with spaces). You can also use group tokens like @EU, @SCHENGEN, @EEA, @USMCA, @FIVE_EYES, @ASEAN, @GCC, @G7, @LATAM, @NORDICS, @DACH and @BENELUX.",
       "id": "country-blacklist",
       "label": "Country blacklist",
-      "regex": "^( *([A-Z]{2}|@[A-Z0-9_]+) *)*$",
+      "regex": "^(?! +$) *(?:([A-Z]{2}|@[A-Z0-9_]+)(?: +|$))*$",
       "type": "multiselect",
       "multiselect": [
         { "id": "@EU", "label": "European Union group (@EU)", "value": "@EU" },
@@ -194,6 +194,7 @@
         { "id": "KI", "label": "Kiribati (KI)", "value": "KI" },
         { "id": "KP", "label": "Korea, North (KP)", "value": "KP" },
         { "id": "KR", "label": "Korea, South (KR)", "value": "KR" },
+        { "id": "XK", "label": "Kosovo (XK)", "value": "XK" },
         { "id": "KW", "label": "Kuwait (KW)", "value": "KW" },
         { "id": "KG", "label": "Kyrgyzstan (KG)", "value": "KG" },
         { "id": "LA", "label": "Laos (LA)", "value": "LA" },
@@ -341,13 +342,42 @@
         { "id": "ZW", "label": "Zimbabwe (ZW)", "value": "ZW" }
       ]
     },
+    "COUNTRY_IGNORE_URI": {
+      "context": "multisite",
+      "default": "",
+      "help": "List of PCRE regex patterns (separated by spaces) for URIs that should be excluded from country checks. Patterns are checked against the path and the full request URI with query string.",
+      "id": "country-ignore-uri",
+      "label": "Ignored URI",
+      "regex": "^.*$",
+      "type": "multivalue"
+    },
+    "COUNTRY_IGNORE_HEADER_NAME": {
+      "context": "multisite",
+      "default": "",
+      "help": "Name of a request header that exempts the request from the country check. Any client can send this header : treat it as a shared secret, only over HTTPS.",
+      "id": "country-ignore-header-name",
+      "label": "Ignored header name",
+      "regex": "^([\\w\\-]+)?$",
+      "type": "text",
+      "multiple": "country-ignore-header"
+    },
+    "COUNTRY_IGNORE_HEADER_VALUE": {
+      "context": "multisite",
+      "default": "",
+      "help": "Value (PCRE regex) the header must match to exempt the request from the country check. Leave empty to match on the header being present. Anchor it with ^ and $ : the match is not anchored by default.",
+      "id": "country-ignore-header-value",
+      "label": "Ignored header value",
+      "regex": "^.*$",
+      "type": "password",
+      "multiple": "country-ignore-header"
+    },
     "WHITELIST_COUNTRY": {
       "context": "multisite",
       "default": "",
       "help": "Deny access if the country of the client is not in the list (ISO 3166-1 alpha-2 format separated with spaces). You can also use group tokens like @EU, @SCHENGEN, @EEA, @USMCA, @FIVE_EYES, @ASEAN, @GCC, @G7, @LATAM, @NORDICS, @DACH and @BENELUX.",
       "id": "country-whitelist",
       "label": "Country whitelist",
-      "regex": "^( *([A-Z]{2}|@[A-Z0-9_]+) *)*$",
+      "regex": "^(?! +$) *(?:([A-Z]{2}|@[A-Z0-9_]+)(?: +|$))*$",
       "type": "multiselect",
       "multiselect": [
         { "id": "@EU", "label": "European Union group (@EU)", "value": "@EU" },
@@ -530,6 +560,7 @@
         { "id": "KI", "label": "Kiribati (KI)", "value": "KI" },
         { "id": "KP", "label": "Korea, North (KP)", "value": "KP" },
         { "id": "KR", "label": "Korea, South (KR)", "value": "KR" },
+        { "id": "XK", "label": "Kosovo (XK)", "value": "XK" },
         { "id": "KW", "label": "Kuwait (KW)", "value": "KW" },
         { "id": "KG", "label": "Kyrgyzstan (KG)", "value": "KG" },
         { "id": "LA", "label": "Laos (LA)", "value": "LA" },

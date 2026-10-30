@@ -59,21 +59,19 @@ rm -rf tests/cjson{,.so}
 
 if [ -z "$SKIP_CMAKE" ]; then
     echo "===== Testing Cmake build ====="
-    mkdir build
-    cd build
-    cmake ..
-    make
-    cd ..
+    make clean
+    rm -fr build
+    cmake -S . -B build
+    cmake --build build
     cp -r lua/cjson build/cjson.so tests
     do_tests
     rm -rf build tests/cjson{,.so}
 
     echo "===== Testing Cmake fpconv build ====="
-    mkdir build
-    cd build
-    cmake -DUSE_INTERNAL_FPCONV=1 ..
-    make
-    cd ..
+    make clean
+    rm -fr build
+    cmake -S . -B build -DUSE_INTERNAL_FPCONV=1
+    cmake --build build
     cp -r lua/cjson build/cjson.so tests
     do_tests
     rm -rf build tests/cjson{,.so}

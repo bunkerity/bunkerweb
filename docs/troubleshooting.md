@@ -3,6 +3,22 @@
 !!! info "BunkerWeb Panel"
     If you are unable to resolve your issue, you can [contact us directly via our panel](https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc). This centralizes all requests related to the BunkerWeb solution.
 
+## Troubleshooting with an AI agent
+
+### BunkerWeb skills on skills.sh
+
+The official [BunkerWeb troubleshooting skill on skills.sh](https://skills.sh/bunkerity/bunkerweb-skills/bunkerweb-troubleshooting) helps AI coding agents diagnose blocked requests, bans, upstream errors, certificate issues and configuration problems. Follow the [installation instructions](https://github.com/bunkerity/bunkerweb-skills#installation) for your agent.
+
+### BunkerWeb documentation with Context7
+
+If your agent supports [Context7](https://context7.com/docs), connect it to fetch [BunkerWeb documentation](https://context7.com/bunkerity/bunkerweb). Include your BunkerWeb version, integration, relevant settings and logs in your prompt, and remove passwords, API tokens and other secrets before sharing them.
+
+Example prompt:
+
+```text
+Help me diagnose this issue with BunkerWeb <version> on <integration>. Here are the relevant settings and redacted logs: <details>. use context7
+```
+
 ## Logs
 
 When troubleshooting, logs are your best friends. We try our best to provide user-friendly logs to help you understand what's happening.
@@ -331,7 +347,7 @@ Pick a retention window (example: 90 days) and review what would be deleted.
     LIMIT 50;
     ```
 
-=== "MariaDB / MySQL"
+=== "MySQL/MariaDB"
 
     ```sql
     SELECT hostname, name, server_name, method, status, creation_date, last_seen
@@ -366,7 +382,7 @@ Once verified, delete the rows.
     COMMIT;
     ```
 
-=== "MariaDB / MySQL"
+=== "MySQL/MariaDB"
 
     ```sql
     START TRANSACTION;
@@ -412,7 +428,7 @@ you can force a “change marker” update:
     WHERE id = 1;
     ```
 
-=== "MariaDB / MySQL"
+=== "MySQL/MariaDB"
 
     ```sql
     UPDATE bw_metadata
@@ -435,7 +451,7 @@ you can force a “change marker” update:
     VACUUM (ANALYZE);
     ```
 
-=== "MariaDB / MySQL"
+=== "MySQL/MariaDB"
 
     ```sql
     OPTIMIZE TABLE bw_instances;
@@ -444,6 +460,9 @@ you can force a “change marker” update:
 ## Web UI {#web-ui}
 
 In case you forgot your UI credentials or are experiencing 2FA issues, you can connect to the database to regain access.
+
+!!! warning "2FA stopped working after recreating the container"
+    The keys that decrypt the TOTP secrets are stored in the UI container at `/var/lib/bunkerweb/.totp_encryption_keys.json`, which is `/data/lib` inside the image. Recreating the `bw-ui` container without a persistent volume on `/data` generates a new set of keys, so the secrets kept in the database can no longer be decrypted: the admin enrollment is dropped and the other accounts have to be reset with the SQL below. Mount a volume on `/data` (see the [Web UI documentation](web-ui.md)) so the keys survive, or provide your own `TOTP_ENCRYPTION_KEYS`.
 
 ### Access database
 
@@ -513,7 +532,7 @@ In case you forgot your UI credentials or are experiencing 2FA issues, you can c
     sqlite>
     ```
 
-=== "MariaDB / MySQL"
+=== "MySQL/MariaDB"
 
     !!! note "MariaDB / MySQL only"
         The following steps are only valid for MariaDB / MySQL databases. If you are using another database, please refer to the documentation of your database.
@@ -703,6 +722,18 @@ In case you forgot your UI credentials or are experiencing 2FA issues, you can c
     - Choose the scope: export the global settings or select a specific Service.
     - Click to download the configuration archive for the chosen scope.
     - Optionally download logs: the exported logs are automatically anonymized (all IP addresses and domains are masked).
+
+=== "Export a support bundle with bwcli"
+
+    Run `bwcli support` where the scheduler runs (scheduler container, all-in-one image or Linux host) to build one archive for BunkerWeb support: version and environment, configuration, plugins, jobs, instance health, custom config metadata, logs and the generated NGINX configuration. On a BunkerWeb instance, the autoconf controller or a Linux worker host the command refuses and points to the scheduler.
+
+    ```shell
+    docker exec <scheduler container> bwcli support -o - > bundle.zip
+    ```
+
+    - Without `-o`, the archive `bunkerweb-support-<UTC timestamp>.zip` is written in the current directory. `-o -` writes it to stdout.
+    - Credentials are always redacted. IP addresses and service domains are anonymized: add `--no-anonymize` to keep them.
+    - A section that cannot be read is listed in `manifest.json` and the rest of the bundle is still written. Where the logs go to stdout, the manifest gives the command to collect them (`docker logs`, `kubectl logs`, `journalctl`).
 
 ### Upload plugin
 

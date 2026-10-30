@@ -1,5 +1,116 @@
 #requests-map {
   min-height: 600px;
+  border-radius: 0.75rem;
+  overflow: hidden;
+}
+
+/* Ocean = flat brand-tinted surface. Zero tiles, zero OSM chrome. */
+#requests-map.leaflet-container {
+  background: var(--bw-map-ocean);
+  font-family: inherit;
+  outline: none;
+}
+
+#requests-map .leaflet-control-attribution {
+  display: none;
+}
+
+#requests-map .leaflet-bar {
+  border: 1px solid rgba(11, 53, 74, 0.18);
+  box-shadow: 0 4px 10px rgba(11, 53, 74, 0.08);
+}
+
+#requests-map .leaflet-bar a {
+  background: rgba(255, 255, 255, 0.96);
+  color: var(--bs-primary);
+  border-bottom-color: rgba(11, 53, 74, 0.1);
+}
+
+#requests-map .leaflet-bar a:hover {
+  background: #ffffff;
+  color: var(--bs-bw-blue);
+}
+
+.dark-style #requests-map .leaflet-bar {
+  border-color: rgba(130, 184, 219, 0.22);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+}
+
+.dark-style #requests-map .leaflet-bar a {
+  background: rgba(15, 30, 42, 0.94);
+  color: #dbe6ef;
+  border-bottom-color: rgba(130, 184, 219, 0.14);
+}
+
+.dark-style #requests-map .leaflet-bar a:hover {
+  background: rgba(20, 40, 56, 1);
+  color: #ffffff;
+}
+
+/* Cursor-anchored tooltip — replaces the old top-right pinned card. */
+.leaflet-tooltip.bw-map-tooltip {
+  background: rgba(255, 255, 255, 0.97);
+  border: 1px solid rgba(11, 53, 74, 0.18);
+  border-radius: 10px;
+  box-shadow: 0 12px 24px rgba(11, 53, 74, 0.18);
+  color: #14303f;
+  padding: 0.55rem 0.7rem;
+  min-width: 160px;
+  backdrop-filter: blur(6px);
+  font-family: inherit;
+  line-height: 1.3;
+}
+
+.leaflet-tooltip.bw-map-tooltip::before {
+  border-top-color: rgba(255, 255, 255, 0.97);
+}
+
+.bw-map-tooltip__name {
+  font-weight: 600;
+  font-size: 0.86rem;
+  margin-bottom: 0.3rem;
+  color: var(--bs-primary);
+}
+
+.bw-map-tooltip__row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.6rem;
+}
+
+.bw-map-tooltip__label {
+  font-size: 0.66rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #607684;
+}
+
+.bw-map-tooltip__value {
+  font-weight: 700;
+  font-size: 1rem;
+  color: var(--bs-primary);
+  font-variant-numeric: tabular-nums;
+}
+
+.dark-style .leaflet-tooltip.bw-map-tooltip {
+  background: rgba(12, 24, 34, 0.96);
+  border-color: rgba(130, 184, 219, 0.26);
+  color: #e5eef5;
+  box-shadow: 0 14px 26px rgba(0, 0, 0, 0.45);
+}
+
+.dark-style .leaflet-tooltip.bw-map-tooltip::before {
+  border-top-color: rgba(12, 24, 34, 0.96);
+}
+
+.dark-style .bw-map-tooltip__name,
+.dark-style .bw-map-tooltip__value {
+  color: #cfe4f3;
+}
+
+.dark-style .bw-map-tooltip__label {
+  color: #8ba6b8;
 }
 
 .home-chart-tooltip {
@@ -177,109 +288,77 @@
   }
 }
 
-.info {
-  max-width: 220px;
-}
-
-.info .card,
-.info .alert {
-  border-radius: 10px;
-  background: rgba(255, 255, 255, 0.92);
-  backdrop-filter: blur(6px);
-}
-
-.info .map-hover-card {
-  border: 1px solid rgba(27, 94, 142, 0.2);
-  box-shadow: 0 10px 24px rgba(17, 54, 85, 0.18);
-}
-
-.info .map-hover-empty {
-  border: 1px solid rgba(27, 94, 142, 0.2);
-  margin: 0;
-}
-
-.dark-style .info .card,
-.dark-style .info .alert {
-  background: rgba(15, 30, 42, 0.9);
-  color: #e5eef5;
-}
-
-.dark-style .info .map-hover-card,
-.dark-style .info .map-hover-empty {
-  border-color: rgba(128, 187, 226, 0.26);
-}
-
+/* Compact choropleth legend — title + one row per bucket. The old
+   gradient bar + min/max ticks + range list collapsed into a single
+   swatches column. */
 .legend.map-legend {
   color: #21313c;
-  background: rgba(255, 255, 255, 0.94);
-  padding: 12px 14px;
-  border-radius: 14px;
-  min-width: 220px;
-  border: 1px solid rgba(16, 79, 116, 0.18);
-  box-shadow: 0 8px 18px rgba(11, 53, 74, 0.18);
+  background: rgba(255, 255, 255, 0.96);
+  padding: 0.7rem 0.85rem;
+  border-radius: 0.7rem;
+  min-width: 156px;
+  border: 1px solid rgba(16, 79, 116, 0.16);
+  box-shadow: 0 8px 18px rgba(11, 53, 74, 0.16);
   backdrop-filter: blur(6px);
+  font-family: inherit;
 }
 
 .dark-style .legend.map-legend {
-  background: rgba(10, 22, 32, 0.9);
+  background: rgba(10, 22, 32, 0.92);
   color: #dbe6ef;
   border-color: rgba(130, 184, 219, 0.22);
-  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.35);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.38);
 }
 
 .map-legend__title {
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  font-size: 11px;
-  margin-bottom: 8px;
+  font-size: 10px;
+  margin-bottom: 0.5rem;
+  color: var(--bs-primary);
+}
+
+.dark-style .map-legend__title {
+  color: #9fc3dc;
 }
 
 .map-legend__swatches {
   display: grid;
-  gap: 6px;
-  margin-bottom: 10px;
-  font-size: 12px;
+  gap: 0.28rem;
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
 }
 
 .map-legend__swatch {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 0.5rem;
+}
+
+.map-legend__swatch--muted {
+  opacity: 0.8;
+  padding-bottom: 0.28rem;
+  margin-bottom: 0.12rem;
+  border-bottom: 1px dashed rgba(16, 79, 116, 0.18);
+}
+
+.dark-style .map-legend__swatch--muted {
+  border-bottom-color: rgba(130, 184, 219, 0.2);
 }
 
 .map-legend__chip {
   width: 14px;
-  height: 14px;
-  border-radius: 4px;
-  border: 1px solid rgba(15, 30, 42, 0.2);
+  height: 10px;
+  border-radius: 2px;
+  flex-shrink: 0;
+  box-shadow: inset 0 0 0 1px rgba(15, 30, 42, 0.12);
 }
 
 .dark-style .map-legend__chip {
-  border-color: rgba(255, 255, 255, 0.2);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12);
 }
 
-.map-legend__gradient {
-  height: 8px;
-  border-radius: 999px;
-  border: 1px solid rgba(15, 30, 42, 0.2);
-  margin-bottom: 6px;
-}
-
-.dark-style .map-legend__gradient {
-  border-color: rgba(255, 255, 255, 0.2);
-}
-
-.map-legend__ticks {
-  display: flex;
-  justify-content: space-between;
-  font-size: 11px;
-  opacity: 0.8;
-  margin-bottom: 6px;
-}
-
-.map-legend__ranges {
-  font-size: 11px;
-  line-height: 1.4;
-  opacity: 0.75;
+.map-legend__range {
+  font-variant-numeric: tabular-nums;
 }

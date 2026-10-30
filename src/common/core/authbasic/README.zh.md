@@ -27,6 +27,9 @@ Auth Basic 插件提供 HTTP 基本认证来保护您的网站或特定资源。
 | `AUTH_BASIC_PASSWORD` | `changeme`        | multisite | 是   | **密码：** 身份验证所需的密码。密码使用 scrypt 哈希以实现最大安全性。                                                                                           |
 | `AUTH_BASIC_TEXT`     | `Restricted area` | multisite | 否   | **提示文本：** 显示给用户的身份验证提示中的消息。                                                                                                               |
 
+!!! tip "锚定受保护路径时要覆盖其下的所有内容"
+    像 `/admin` 这样的普通路径是前缀匹配，因此也会保护 `/admin/`、`/admin/users` 以及规范化后落入其中的编码变体。`=` 修饰符会让匹配变为精确匹配，于是 `= /admin` 会让 `/admin/` 失去保护，而你的应用仍可能在那里提供同一资源。除非你确实只想匹配一个路径，否则请保留前缀形式。
+
 !!! warning "安全注意事项"
     HTTP 基本认证以 Base64 编码（非加密）传输凭据。虽然在通过 HTTPS 使用时这是可以接受的，但在普通 HTTP 上不应被认为是安全的。使用基本身份验证时，请务必启用 SSL/TLS。
 

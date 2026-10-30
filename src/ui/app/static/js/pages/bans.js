@@ -8,8 +8,23 @@ $(document).ready(function () {
   var actionLock = false;
   let addBanNumber = 1;
   const baseFlagsUrl = $("#base_flags_url").val().trim();
+  const crowdsecUrl = $("#crowdsec-url").val().trim();
   const isReadOnly = $("#is-read-only").val().trim() === "True";
   const userReadOnly = $("#user-read-only").val().trim() === "True";
+
+  // Build the server-side export URL, forwarding the current search,
+  // ordering, and any active SearchPanes selections so the file matches
+  // what the user sees in the table (all columns, all matching rows).
+  const buildBansExportUrl = (dt, format) => {
+    const exportParams = {
+      ...getDataTableStateParams(dt),
+      csrf_token: $("#csrf_token").val(),
+    };
+
+    return `${window.location.pathname}/export/${format}?${$.param(
+      exportParams,
+    )}`;
+  };
 
   const headers = [
     {
@@ -58,25 +73,6 @@ $(document).ready(function () {
       i18n: "tooltip.table.bans.actions",
     },
   ];
-
-  // Batch update tooltips
-  const updateCountryTooltips = () => {
-    $("[data-country]").each(function () {
-      const $elem = $(this);
-      const countryCode = $elem.data("country");
-
-      const countryName = t(
-        countryCode === "unknown" || countryCode === "local"
-          ? "country.not_applicable"
-          : `country.${countryCode}`,
-        "Unknown",
-      );
-      if (countryName && countryName !== "country.not_applicable") {
-        $elem.attr("data-bs-original-title", countryName);
-      }
-    });
-    $('[data-bs-toggle="tooltip"]').tooltip("dispose").tooltip();
-  };
 
   // Utility functions
   function addDays(date, days) {
@@ -176,8 +172,243 @@ $(document).ready(function () {
     });
   };
 
+  const LEASE_KIND = "crowdsec_lease";
+  const isLease = (ban) => ban && ban.kind === LEASE_KIND;
+
+  // CrowdSec connections, fetched once: a lease whose source has no
+  // connection at all cannot be unbanned from here
+  let crowdsecConnections = null;
+  let crowdsecConnectionsRequest = null;
+
+  const loadCrowdsecConnections = () => {
+    if (!crowdsecConnectionsRequest) {
+      crowdsecConnectionsRequest = fetch(`${crowdsecUrl}/connections`, {
+        headers: { Accept: "application/json" },
+        credentials: "same-origin",
+      })
+        .then((response) =>
+          response.ok ? response.json() : Promise.reject(response),
+        )
+        .then((payload) => {
+          crowdsecConnections = Array.isArray(payload.connections)
+            ? payload.connections
+            : [];
+          return crowdsecConnections;
+        })
+        .catch(() => null);
+    }
+    return crowdsecConnectionsRequest;
+  };
+
+  const applyLeaseAvailability = () => {
+    if (!crowdsecConnections) return;
+    $(`#bans .unban-single[data-kind="${LEASE_KIND}"]`).each(function () {
+      const node = this.getAttribute("data-cs-node");
+      const connection = this.getAttribute("data-cs-connection");
+      const found = crowdsecConnections.some(
+        (item) => item.node === node && item.local_id === connection,
+      );
+      if (found) return;
+      const text = t(
+        "tooltip.button.crowdsec_unban_unavailable",
+        "CrowdSec management credentials are missing or the source instance is unavailable",
+      );
+      $(this)
+        .addClass("disabled")
+        .attr({ "aria-disabled": "true", "data-bs-original-title": text });
+      const tooltip =
+        typeof bootstrap !== "undefined"
+          ? bootstrap.Tooltip.getInstance(this)
+          : null;
+      if (tooltip) tooltip.setContent({ ".tooltip-inner": text });
+    });
+  };
+
+  // State of the CrowdSec part of the unban modal; `id` drops stale responses
+  const crowdsecUnban = { id: 0, refresh: () => {} };
+
+  const setupCrowdsecUnban = (leases) => {
+    const $section = $("#crowdsec-unban-section");
+    const $previews = $("#crowdsec-unban-previews").empty();
+    const $warnings = $("#crowdsec-unban-warnings").empty();
+    const $confirm = $("#crowdsec-unban-confirm")
+      .prop("checked", false)
+      .prop("disabled", true);
+    const $submit = $("#unban-submit");
+    const $confirmed = $("#crowdsec-unban-confirmed").val("");
+    const $selection = $("#crowdsec-unban-selection").val("");
+    const requestId = ++crowdsecUnban.id;
+
+    if (!leases.length) {
+      $section.addClass("d-none");
+      $submit.prop("disabled", false);
+      crowdsecUnban.refresh = () => {};
+      return;
+    }
+
+    $section.removeClass("d-none");
+    $submit.prop("disabled", true);
+
+    const state = {
+      pending: leases.length,
+      blocked: false,
+      selection: {},
+      listOrigin: false,
+      range: false,
+      management: new Set(),
+      unavailable: new Set(),
+    };
+
+    const refresh = () => {
+      const ready = state.pending === 0 && !state.blocked;
+      $confirm.prop("disabled", !ready);
+      if (!ready) $confirm.prop("checked", false);
+      const confirmed = ready && $confirm.is(":checked");
+      $submit.prop("disabled", !confirmed);
+      $confirmed.val(confirmed ? "yes" : "");
+      $selection.val(ready ? JSON.stringify(state.selection) : "");
+    };
+    crowdsecUnban.refresh = refresh;
+
+    const addAlert = (level, key, fallback, options = {}) => {
+      $("<div>")
+        .addClass(`alert alert-${level} mb-2`)
+        .attr({ role: "alert", "data-i18n": key })
+        .text(t(key, fallback, options))
+        .appendTo($warnings);
+    };
+
+    const renderPreview = (ban, preview) => {
+      const $block = $("<div>").addClass("mb-2");
+      $("<div>").addClass("fw-bold").text(ban.ip).appendTo($block);
+      const $table = $("<table>").addClass("table table-sm mb-0");
+      const $head = $("<tr>").appendTo($("<thead>").appendTo($table));
+      [
+        ["crowdsec.decision.target", "Target"],
+        ["crowdsec.decision.type", "Type"],
+        ["crowdsec.decision.origin", "Origin"],
+        ["crowdsec.decision.scenario", "Scenario"],
+      ].forEach(([key, fallback]) => {
+        $("<th>").attr("data-i18n", key).text(t(key, fallback)).appendTo($head);
+      });
+      const $body = $("<tbody>").appendTo($table);
+      (preview.decisions || []).forEach((decision) => {
+        const $row = $("<tr>").appendTo($body);
+        ["value", "type", "origin", "scenario"].forEach((field) => {
+          $("<td>")
+            .text(decision[field] == null ? "-" : String(decision[field]))
+            .appendTo($row);
+        });
+      });
+      $table.appendTo($block);
+      $block.appendTo($previews);
+    };
+
+    leases.forEach((ban) => {
+      const failed = (message) => {
+        state.blocked = true;
+        $("<div>")
+          .addClass("alert alert-danger mb-2")
+          .attr("role", "alert")
+          .text(
+            `${t(
+              "modal.body.crowdsec_unban_error",
+              "Could not load the CrowdSec decisions for {{ip}}",
+              { ip: ban.ip },
+            )}${message ? `: ${message}` : ""}`,
+          )
+          .appendTo($warnings);
+      };
+
+      fetch(`${window.location.pathname}/crowdsec_preview`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRFToken": $("#csrf_token").val(),
+        },
+        credentials: "same-origin",
+        body: JSON.stringify({
+          ip: ban.ip,
+          ban_scope: ban.ban_scope,
+          service: ban.service,
+        }),
+      })
+        .then((response) =>
+          response
+            .json()
+            .catch(() => ({}))
+            .then((payload) => ({ ok: response.ok, payload })),
+        )
+        .then(({ ok, payload }) => {
+          if (requestId !== crowdsecUnban.id) return;
+          if (!ok) {
+            failed(payload.error);
+          } else {
+            renderPreview(ban, payload);
+            state.selection[
+              `${ban.ip}|${ban.ban_scope}|${ban.service || "_"}`
+            ] = (payload.decisions || []).map((decision) => decision.key);
+            state.listOrigin =
+              state.listOrigin || Boolean(payload.warnings?.list_origin);
+            state.range = state.range || Boolean(payload.warnings?.range);
+            (payload.management_missing || []).forEach((id) =>
+              state.management.add(id),
+            );
+            (payload.unavailable || []).forEach((id) =>
+              state.unavailable.add(id),
+            );
+          }
+        })
+        .catch(() => {
+          if (requestId === crowdsecUnban.id) failed("");
+        })
+        .finally(() => {
+          if (requestId !== crowdsecUnban.id) return;
+          state.pending -= 1;
+          if (state.pending === 0) {
+            if (state.listOrigin)
+              addAlert(
+                "warning",
+                "modal.body.crowdsec_unban_list_warning",
+                "Some decisions come from CrowdSec lists and may come back. Use a CrowdSec allowlist to let this IP through for good.",
+              );
+            if (state.range)
+              addAlert(
+                "warning",
+                "modal.body.crowdsec_unban_range_warning",
+                "Some decisions cover a range. Other IPs of that range stay banned until their ban ends.",
+              );
+            if (state.unavailable.size)
+              addAlert(
+                "warning",
+                "modal.body.crowdsec_unban_unavailable",
+                "Could not check these CrowdSec connections: {{connections}}",
+                { connections: [...state.unavailable].join(", ") },
+              );
+            if (state.management.size) {
+              state.blocked = true;
+              addAlert(
+                "danger",
+                "modal.body.crowdsec_unban_management_missing",
+                "CrowdSec management credentials are missing on: {{connections}}",
+                { connections: [...state.management].join(", ") },
+              );
+            }
+          }
+          refresh();
+        });
+    });
+  };
+
+  $(document).on("change", "#crowdsec-unban-confirm", () =>
+    crowdsecUnban.refresh(),
+  );
+  $("#modal-unban-ips").on("hidden.bs.modal", () => {
+    crowdsecUnban.id += 1;
+  });
+
   // Function to set up the unban modal
-  const setupUnbanModal = (bans) => {
+  const setupUnbanModal = (bans, filteredState = null) => {
     const $modalBody = $("#selected-ips-unban");
     $modalBody.empty(); // Clear previous content
 
@@ -238,31 +469,49 @@ $(document).ready(function () {
 
     // Show the modal
     const $unbanModal = $("#modal-unban-ips");
+    const $form = $unbanModal.find("form");
+    $form.find(".filtered-selection-input").remove();
+    if (filteredState) {
+      $modalBody.empty();
+      appendDataTableParamsInputs(
+        $form,
+        filteredState.params,
+        "filtered-selection-input",
+      );
+      appendDataTableParamsInputs(
+        $form,
+        { selection_mode: "filtered", source: "bans" },
+        "filtered-selection-input",
+      );
+    }
     const modalInstance = new bootstrap.Modal($unbanModal[0]);
 
-    // Update the alert text using i18next (assuming keys exist)
-    const alertTextKey =
-      bans.length > 1
+    const alertTextKey = filteredState
+      ? "modal.body.unban_filtered_confirmation"
+      : bans.length > 1
         ? "modal.body.unban_confirmation_alert_plural"
         : "modal.body.unban_confirmation_alert";
+    const alertFallback = filteredState
+      ? "Are you sure you want to unban all {{count}} matching bans?"
+      : "Are you sure you want to unban the selected IP address(es)?";
     $unbanModal
       .find(".alert")
       .attr("data-i18n", alertTextKey)
-      .text(
-        t(
-          alertTextKey,
-          "Are you sure you want to unban the selected IP address(es)?",
-        ),
-      );
+      .text(t(alertTextKey, alertFallback, { count: filteredState?.count }));
 
     modalInstance.show();
 
     // Set the hidden input value
-    $("#selected-ips-input-unban").val(JSON.stringify(bans));
+    $("#selected-ips-input-unban").val(
+      filteredState ? "" : JSON.stringify(bans),
+    );
+
+    // A filtered unban skips CrowdSec bans server side: nothing to preview
+    setupCrowdsecUnban(filteredState ? [] : bans.filter(isLease));
   };
 
   // Function to set up the update duration modal
-  const setupUpdateDurationModal = (bans) => {
+  const setupUpdateDurationModal = (bans, filteredState = null) => {
     const $modalBody = $("#selected-ips-update-duration");
     $modalBody.empty(); // Clear previous content
 
@@ -323,11 +572,27 @@ $(document).ready(function () {
 
     // Show the modal
     const $updateDurationModal = $("#modal-update-duration");
+    if (filteredState) {
+      $modalBody.empty();
+    }
+    $updateDurationModal.data("filtered-state", filteredState);
+    const alertTextKey = filteredState
+      ? "modal.body.update_filtered_duration_alert"
+      : "modal.body.update_duration_alert";
+    const alertFallback = filteredState
+      ? "Select a new duration for all {{count}} matching bans:"
+      : "Select a new duration for the selected bans:";
+    $updateDurationModal
+      .find(".alert")
+      .attr("data-i18n", alertTextKey)
+      .text(t(alertTextKey, alertFallback, { count: filteredState?.count }));
     const modalInstance = new bootstrap.Modal($updateDurationModal[0]);
     modalInstance.show();
 
     // Set the hidden input value
-    $("#selected-ips-input-update-duration").val(JSON.stringify(bans));
+    $("#selected-ips-input-update-duration").val(
+      filteredState ? "" : JSON.stringify(bans),
+    );
 
     // Initialize flatpickr for custom duration after modal is shown
     const customEndDateInput = $("#custom-end-date");
@@ -364,6 +629,45 @@ $(document).ready(function () {
     e.preventDefault();
 
     const duration = $("#duration-select").val();
+    const filteredState = $("#modal-update-duration").data("filtered-state");
+    const customEndDate = $("#custom-end-date").val();
+    if (duration === "custom" && !customEndDate) {
+      alert(
+        t("alert.custom_end_date_required", "Please select a custom end date."),
+      );
+      return;
+    }
+
+    if (filteredState) {
+      const form = $("<form>", {
+        method: "POST",
+        action: `${window.location.pathname}/update_duration`,
+        class: "visually-hidden",
+      });
+      appendDataTableParamsInputs(form, filteredState.params);
+      appendDataTableParamsInputs(form, {
+        csrf_token: $("#csrf_token").val(),
+        selection_mode: "filtered",
+        source: "bans",
+        duration: duration,
+      });
+      if (duration === "custom") {
+        const customEndDateWithOffset = `${customEndDate}${getTimeZoneOffset()}`;
+        appendDataTableParamsInputs(form, {
+          end_date: customEndDateWithOffset,
+          custom_exp: Math.max(
+            0,
+            Math.floor(
+              new Date(customEndDateWithOffset).getTime() / 1000 -
+                Date.now() / 1000,
+            ),
+          ),
+        });
+      }
+      form.appendTo("body").submit();
+      return;
+    }
+
     const bansData = JSON.parse($("#selected-ips-input-update-duration").val());
 
     // Prepare updates array
@@ -378,16 +682,6 @@ $(document).ready(function () {
 
         // Add custom duration data if applicable
         if (duration === "custom") {
-          const customEndDate = $("#custom-end-date").val();
-          if (!customEndDate) {
-            alert(
-              t(
-                "alert.custom_end_date_required",
-                "Please select a custom end date.",
-              ),
-            );
-            return null;
-          }
           const customEndDateWithOffset = `${customEndDate}${getTimeZoneOffset()}`;
           update.end_date = customEndDateWithOffset;
           update.custom_exp = Math.max(
@@ -456,7 +750,7 @@ $(document).ready(function () {
     },
     bottomStart: {
       pageLength: {
-        menu: [10, 25, 50, 100, { label: "All", value: -1 }],
+        menu: [10, 25, 50, 100, 500, 1000],
       },
       info: true,
     },
@@ -515,22 +809,17 @@ $(document).ready(function () {
           },
         },
         {
-          extend: "csv",
           text: `<span class="tf-icons bx bx-table bx-18px me-2"></span>CSV`,
-          bom: true,
-          filename: "bw_bans",
-          exportOptions: {
-            modifier: { search: "none" },
-            columns: ":not(:nth-child(-n+2)):not(:last-child)",
+          className: "buttons-csv",
+          action: function (e, dt, button, config) {
+            window.location.href = buildBansExportUrl(dt, "csv");
           },
         },
         {
-          extend: "excel",
           text: `<span class="tf-icons bx bx-table bx-18px me-2"></span>Excel`,
-          filename: "bw_bans",
-          exportOptions: {
-            modifier: { search: "none" },
-            columns: ":not(:nth-child(-n+2)):not(:last-child)",
+          className: "buttons-excel",
+          action: function (e, dt, button, config) {
+            window.location.href = buildBansExportUrl(dt, "excel");
           },
         },
       ],
@@ -613,6 +902,28 @@ $(document).ready(function () {
         },
       ],
     },
+    {
+      extend: "collection",
+      text: `<span class="tf-icons bx bx-filter-alt bx-18px me-md-2" aria-hidden="true"></span><span class="d-none d-md-inline" data-i18n="button.filtered_actions">${t(
+        "button.filtered_actions",
+        "Filtered actions",
+      )}</span>`,
+      className: "btn btn-sm btn-outline-primary filtered-action-button",
+      buttons: [
+        { extend: "unban_filtered_bans", className: "text-danger" },
+        { extend: "update_filtered_bans", className: "text-warning" },
+      ],
+      init: function (dt, node) {
+        const updateState = () => {
+          const hasMatches = dt.page.info().recordsDisplay > 0;
+          $(node)
+            .toggleClass("disabled", isReadOnly || !hasMatches)
+            .prop("disabled", isReadOnly || !hasMatches);
+        };
+        dt.on("draw.filteredBanActions", updateState);
+        updateState();
+      },
+    },
   ];
 
   let autoRefresh = false;
@@ -657,11 +968,13 @@ $(document).ready(function () {
   $("#modal-unban-ips").on("hidden.bs.modal", function () {
     $("#selected-ips-unban").empty();
     $("#selected-ips-input-unban").val("");
+    $(this).find(".filtered-selection-input").remove();
   });
 
   $("#modal-update-duration").on("hidden.bs.modal", function () {
     $("#selected-ips-update-duration").empty();
     $("#selected-ips-input-update-duration").val("");
+    $(this).removeData("filtered-state");
     // Reset form
     $("#duration-select").val("1h");
     $("#custom-duration-fields").hide();
@@ -723,39 +1036,47 @@ $(document).ready(function () {
 
   const getSelectedBans = () => {
     const bans = [];
-    $("tr.selected").each(function () {
-      const $row = $(this);
-      const ip = $row.find("td:eq(3)").text().trim();
-      const time_remaining = $row.find("td:eq(9)").text().trim();
-      const scopeHtml = $row.find("td:eq(6)").html();
-      const serviceHtml = $row.find("td:eq(7)").html();
+    if (!$.fn.dataTable.isDataTable("#bans")) return bans;
+    $("#bans")
+      .DataTable()
+      .rows({ selected: true })
+      .every(function () {
+        const $row = $(this.node());
+        const rowData = this.data() || {};
+        const ip = $row.find("td:eq(3)").text().trim();
+        const time_remaining = $row.find("td:eq(9)").text().trim();
+        const scopeHtml = $row.find("td:eq(6)").html();
+        const serviceHtml = $row.find("td:eq(7)").html();
 
-      // Extract scope text, handling potential badge structure
-      const scopeText = $(scopeHtml).find("span[data-i18n]").length
-        ? $(scopeHtml).find("span[data-i18n]").text().trim()
-        : $(scopeHtml).text().trim();
+        // Extract scope text, handling potential badge structure
+        const scopeText = $(scopeHtml).find("span[data-i18n]").length
+          ? $(scopeHtml).find("span[data-i18n]").text().trim()
+          : $(scopeHtml).text().trim();
 
-      // Extract service text, handling potential links or static text
-      const serviceText = $(serviceHtml).find("strong").length
-        ? $(serviceHtml).find("strong").text().trim()
-        : $(serviceHtml).find("span[data-i18n]").length
-          ? $(serviceHtml).find("span[data-i18n]").text().trim()
-          : $(serviceHtml).text().trim();
+        // Extract service text, handling potential links or static text
+        const serviceText = $(serviceHtml).find("strong").length
+          ? $(serviceHtml).find("strong").text().trim()
+          : $(serviceHtml).find("span[data-i18n]").length
+            ? $(serviceHtml).find("span[data-i18n]").text().trim()
+            : $(serviceHtml).text().trim();
 
-      const ban_scope =
-        scopeText === t("scope.global", "Global") ? "global" : "service";
-      const service =
-        serviceText === t("scope.all_services", "All services")
-          ? null
-          : serviceText;
+        const ban_scope =
+          scopeText === t("scope.global", "Global") ? "global" : "service";
+        const service =
+          serviceText === t("scope.all_services", "All services")
+            ? null
+            : serviceText;
 
-      bans.push({
-        ip: ip,
-        time_remaining: time_remaining,
-        ban_scope: ban_scope,
-        service: service,
+        bans.push({
+          ip: ip,
+          time_remaining: time_remaining,
+          ban_scope: ban_scope,
+          service: service,
+          kind: rowData.kind || "ban",
+          cs_node: rowData.cs_node || "",
+          cs_connection: rowData.cs_connection || "",
+        });
       });
-    });
     return bans;
   };
 
@@ -820,9 +1141,57 @@ $(document).ready(function () {
     },
   };
 
+  $.fn.dataTable.ext.buttons.unban_filtered_bans = {
+    text: `<span class="tf-icons bx bxs-buoy bx-18px me-2" aria-hidden="true"></span><span data-i18n="button.unban_all_filtered">${t(
+      "button.unban_all_filtered",
+      "Unban all matching bans",
+    )}</span>`,
+    action: function (e, dt) {
+      if (isReadOnly) {
+        alert(
+          t(
+            "alert.readonly_mode",
+            "This action is not allowed in read-only mode.",
+          ),
+        );
+        return;
+      }
+      const count = dt.page.info().recordsDisplay;
+      if (count === 0) return;
+      $(".dt-button-background").click();
+      setupUnbanModal([], { count, params: getDataTableStateParams(dt) });
+    },
+  };
+
+  $.fn.dataTable.ext.buttons.update_filtered_bans = {
+    text: `<span class="tf-icons bx bx-timer bx-18px me-2" aria-hidden="true"></span><span data-i18n="button.update_duration_all_filtered">${t(
+      "button.update_duration_all_filtered",
+      "Update duration for all matching bans",
+    )}</span>`,
+    action: function (e, dt) {
+      if (isReadOnly) {
+        alert(
+          t(
+            "alert.readonly_mode",
+            "This action is not allowed in read-only mode.",
+          ),
+        );
+        return;
+      }
+      const count = dt.page.info().recordsDisplay;
+      if (count === 0) return;
+      $(".dt-button-background").click();
+      setupUpdateDurationModal([], {
+        count,
+        params: getDataTableStateParams(dt),
+      });
+    },
+  };
+
   const bans_config = {
     tableSelector: "#bans",
     tableName: "bans",
+    delegatedTooltips: true,
     columnVisibilityCondition: (column) => column > 2 && column < 11,
     dataTableOptions: {
       columnDefs: [
@@ -986,7 +1355,10 @@ $(document).ready(function () {
                     "tooltip.readonly_mode",
                     "This action is not allowed in read-only mode.",
                   )
-                : t("tooltip.button.unban_ip", "Unban this IP address");
+                : t("tooltip.button.unban_ip", {
+                    defaultValue: "Unban {{ip}}",
+                    ip: row.ip,
+                  });
               const updateTooltip = isReadOnly
                 ? t(
                     "tooltip.readonly_mode",
@@ -996,19 +1368,30 @@ $(document).ready(function () {
                     "tooltip.button.update_ban_duration",
                     "Update ban duration",
                   );
+              // Same rule as the reports: only a CrowdSec ban has CrowdSec evidence to investigate
+              const isCrowdsecBan =
+                String(row.reason || "")
+                  .trim()
+                  .toLowerCase() === "crowdsec";
+              const investigateLink = isCrowdsecBan
+                ? `<a class="btn btn-outline-primary btn-sm me-1"
+                     href="${crowdsecUrl}?ip=${encodeURIComponent(
+                       String(row.ip || ""),
+                     )}"
+                     data-bs-toggle="tooltip"
+                     data-bs-placement="bottom"
+                     data-bs-original-title="${t(
+                       "crowdsec.investigation.submit",
+                       "Investigate",
+                     )}">
+                    <i class="bx bx-search-alt bx-xs" aria-hidden="true"></i>
+                  </a>`
+                : "";
 
-              return `
-                <div class="d-flex justify-content-evenly">
-                  <button type="button"
-                          class="btn btn-outline-danger btn-sm me-1 unban-single${readOnlyClass}"
-                          data-ip="${row.ip}"
-                          data-scope="${row.scope}"
-                          data-service="${row.service}"
-                          data-bs-toggle="tooltip"
-                          data-bs-placement="bottom"
-                          data-bs-original-title="${unbanTooltip}">
-                    <i class="bx bxs-buoy bx-xs"></i>
-                  </button>
+              // CrowdSec bans follow their CrowdSec decision: no duration edit
+              const updateButton = isLease(row)
+                ? ""
+                : `
                   <button type="button"
                           class="btn btn-outline-warning btn-sm me-1 update-duration-single${readOnlyClass}"
                           data-ip="${row.ip}"
@@ -1019,7 +1402,24 @@ $(document).ready(function () {
                           data-bs-placement="bottom"
                           data-bs-original-title="${updateTooltip}">
                     <i class="bx bx-timer bx-xs"></i>
-                  </button>
+                  </button>`;
+
+              return `
+                <div class="d-flex justify-content-evenly">
+                  ${investigateLink}
+                  <button type="button"
+                          class="btn btn-outline-danger btn-sm me-1 unban-single${readOnlyClass}"
+                          data-ip="${row.ip}"
+                          data-scope="${row.scope}"
+                          data-service="${row.service}"
+                          data-kind="${row.kind || "ban"}"
+                          data-cs-node="${row.cs_node || ""}"
+                          data-cs-connection="${row.cs_connection || ""}"
+                          data-bs-toggle="tooltip"
+                          data-bs-placement="bottom"
+                          data-bs-original-title="${unbanTooltip}">
+                    <i class="bx bxs-buoy bx-xs"></i>
+                  </button>${updateButton}
                 </div>
               `;
             }
@@ -1033,7 +1433,7 @@ $(document).ready(function () {
       select: {
         style: "multi+shift",
         selector: "td:nth-child(2)",
-        headerCheckbox: true,
+        headerCheckbox: "select-page",
       },
       layout: layout,
       processing: true,
@@ -1127,10 +1527,9 @@ $(document).ready(function () {
             .attr("data-bs-placement", "right")
             .tooltip();
         }
-        throttle(updateCountryTooltips, 200);
       },
       headerCallback: function (thead) {
-        throttle(updateHeaderTooltips, 200, thead, headers);
+        updateHeaderTooltips(thead, headers);
       },
     },
   };
@@ -1164,20 +1563,25 @@ $(document).ready(function () {
       waitForI18next(resolve);
     }).then(() => {
       const dt = initializeDataTable(bans_config);
+      const refreshLeaseAvailability = () => {
+        if (dt.rows().data().toArray().some(isLease)) {
+          loadCrowdsecConnections().then(applyLeaseAvailability);
+        }
+      };
       dt.on("draw.dt", function () {
-        throttle(updateCountryTooltips, 200);
-        throttle(updateHeaderTooltips, 200, dt.table().header(), headers);
-        $(".tooltip").remove();
+        // The rows are new: translate their [data-i18n] (country names)
+        applyTranslations();
+        refreshLeaseAvailability();
         // Hide waiting message and show table
         $("#bans-waiting").addClass("visually-hidden");
         $("#bans").removeClass("d-none");
       });
+      dt.on("responsive-display.dt", applyLeaseAvailability);
       dt.on("column-visibility.dt", function (e, settings, column, state) {
-        throttle(updateHeaderTooltips, 200, dt.table().header(), headers);
-        $(".tooltip").remove();
+        updateHeaderTooltips(dt.table().header(), headers);
       });
       // Ensure tooltips are set after initialization
-      throttle(updateHeaderTooltips, 200, dt.table().header(), headers);
+      updateHeaderTooltips(dt.table().header(), headers);
       // Hide waiting message and show table
       $("#bans-waiting").addClass("visually-hidden");
       $("#bans").removeClass("d-none");
@@ -1187,10 +1591,12 @@ $(document).ready(function () {
 
   // Utility function to manage header tooltips
   function updateHeaderTooltips(selector, headers) {
+    let changed = false;
     $(selector)
       .find("th")
       .each((index, element) => {
         const $th = $(element);
+        if ($th.attr("data-bs-toggle") === "tooltip") return;
         // Try to get the data-i18n attribute from the header's span
         const i18nKey =
           $th.find("[data-i18n]").data("i18n") || $th.data("i18n");
@@ -1205,13 +1611,13 @@ $(document).ready(function () {
               "data-bs-toggle": "tooltip",
               "data-bs-placement": "bottom",
               "data-i18n": header.i18n,
-              title: header.tooltip,
+              "data-bs-original-title": header.tooltip,
             });
+            changed = true;
           }
         }
       });
-    applyTranslations();
-    $('[data-bs-toggle="tooltip"]').tooltip("dispose").tooltip();
+    if (changed) applyTranslations();
   }
 
   $("#add-ban").on("click", function () {
@@ -1595,6 +2001,7 @@ $(document).ready(function () {
 
   // Event handlers for individual row actions
   $(document).on("click", ".unban-single", function () {
+    if ($(this).hasClass("disabled")) return;
     if (isReadOnly) {
       alert(
         t(
@@ -1609,13 +2016,16 @@ $(document).ready(function () {
 
     const ip = $(this).data("ip");
     const scope = $(this).data("scope");
-    const service = $(this).data("service");
+    const service = $(this).attr("data-service");
 
     const ban = {
       ip: ip,
       ban_scope: scope,
       service: service === "_" ? null : service,
       time_remaining: "N/A", // Not needed for unban
+      kind: $(this).attr("data-kind") || "ban",
+      cs_node: $(this).attr("data-cs-node") || "",
+      cs_connection: $(this).attr("data-cs-connection") || "",
     };
 
     setupUnbanModal([ban]);
@@ -1637,7 +2047,7 @@ $(document).ready(function () {
 
     const ip = $(this).data("ip");
     const scope = $(this).data("scope");
-    const service = $(this).data("service");
+    const service = $(this).attr("data-service");
     const isPermanent = $(this).data("permanent");
 
     const ban = {

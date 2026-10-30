@@ -1,0 +1,259 @@
+{% extends "dashboard.html" %}
+{% block head %}
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/pages/crowdsec.css') }}"
+          nonce="{{ style_nonce }}" />
+{% endblock %}
+{% block content %}
+    <textarea id="crowdsec-urls" class="visually-hidden">{{ {
+        "connections": url_for("crowdsec") + "/connections",
+        "decisions": url_for("crowdsec") + "/decisions",
+        "allowlists": url_for("crowdsec") + "/allowlists",
+        "investigate": url_for("crowdsec") + "/investigate",
+        "alert": url_for("crowdsec") + "/alerts",
+        "unban": url_for("crowdsec") + "/unban"
+    }|tojson }}</textarea>
+    <input type="hidden" id="crowdsec-csrf-token" value="{{ csrf_token() }}" />
+
+    <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mb-4">
+        <div>
+            <h4 class="mb-1" data-i18n="crowdsec.title">CrowdSec operator</h4>
+            <p class="text-muted mb-0" data-i18n="crowdsec.subtitle">Inspect each configured CrowdSec engine and investigate an IP across current and captured evidence.</p>
+        </div>
+        <button type="button" id="crowdsec-refresh" class="btn btn-outline-primary align-self-start">
+            <i class="bx bx-refresh me-1" aria-hidden="true"></i><span data-i18n="crowdsec.refresh">Refresh status</span>
+        </button>
+    </div>
+
+    <div id="crowdsec-message" class="alert d-none" role="alert"></div>
+    <div id="crowdsec-instance-errors" class="mb-4" aria-live="polite"></div>
+    <fieldset class="mb-4" aria-describedby="crowdsec-connection-help">
+        <legend class="h6 mb-3" data-i18n="crowdsec.connection.label">CrowdSec connection</legend>
+        <div id="crowdsec-connections" class="row g-3" aria-live="polite"></div>
+        <p id="crowdsec-connection-help" class="form-text text-muted mt-3 mb-0" data-i18n="crowdsec.connection.scope_help">The selected connection applies to decisions, allowlists and IP investigation below.</p>
+    </fieldset>
+
+    <div class="row g-4 mb-4">
+        <div class="col-12 col-xl-4">
+            <section class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-1" data-i18n="crowdsec.investigation.title">Investigate an IP</h5>
+                    <p class="card-subtitle text-muted" data-i18n="crowdsec.investigation.help">Current CrowdSec decisions are checked alongside local bans and captured reports.</p>
+                </div>
+                <div class="card-body">
+                    <form id="crowdsec-investigate-form">
+                        <div class="form-floating mb-3">
+                            <input id="crowdsec-ip"
+                                   class="form-control"
+                                   type="text"
+                                   inputmode="text"
+                                   autocomplete="off"
+                                   maxlength="45"
+                                   required
+                                   placeholder="192.0.2.10"
+                                   data-i18n="crowdsec.investigation.placeholder" />
+                            <label for="crowdsec-ip" data-i18n="crowdsec.investigation.ip">IP address</label>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100 don-jose">
+                            <i class="bx bx-search-alt me-1" aria-hidden="true"></i><span data-i18n="crowdsec.investigation.submit">Investigate</span>
+                        </button>
+                    </form>
+                </div>
+            </section>
+        </div>
+        <div class="col-12 col-xl-8">
+            <section class="card h-100">
+                <div class="card-header">
+                    <h5 class="card-title mb-1" data-i18n="crowdsec.decisions.title">Active decisions</h5>
+                    <p class="card-subtitle text-muted" data-i18n="crowdsec.decisions.help">This is current state read directly from the selected CrowdSec engine.</p>
+                </div>
+                <div class="card-body">
+                    <form id="crowdsec-decision-filters" class="row g-2 align-items-end mb-3">
+                        <div class="col-12 col-lg-4">
+                            <label for="crowdsec-filter-ip" class="form-label" data-i18n="crowdsec.investigation.ip">IP address</label>
+                            <input id="crowdsec-filter-ip" class="form-control" type="text" maxlength="45" />
+                        </div>
+                        <div class="col-12 col-lg-3">
+                            <label for="crowdsec-filter-origin" class="form-label" data-i18n="crowdsec.decision.origin">Origin</label>
+                            <input id="crowdsec-filter-origin" class="form-control" type="text" maxlength="512" />
+                        </div>
+                        <div class="col-12 col-lg-3">
+                            <label for="crowdsec-filter-scenario" class="form-label" data-i18n="crowdsec.decision.scenario">Scenario</label>
+                            <input id="crowdsec-filter-scenario" class="form-control" type="text" maxlength="512" />
+                        </div>
+                        <div class="col-12 col-lg-2">
+                            <button type="submit" class="btn btn-outline-primary w-100" data-i18n="button.search">Search</button>
+                        </div>
+                    </form>
+                    <div class="table-responsive crowdsec-table-wrap">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead>
+                                <tr>
+                                    <th data-i18n="crowdsec.decision.target">Target</th>
+                                    <th data-i18n="crowdsec.decision.type">Type</th>
+                                    <th data-i18n="crowdsec.decision.origin">Origin</th>
+                                    <th data-i18n="crowdsec.decision.scenario">Scenario</th>
+                                    <th data-i18n="crowdsec.decision.duration">Duration</th>
+                                    <th data-i18n="table.header.actions">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="crowdsec-decisions-body"></tbody>
+                        </table>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center gap-2 mt-3">
+                        <small id="crowdsec-decisions-count" class="text-muted"></small>
+                        <div class="btn-group btn-group-sm" role="group" aria-label="Decision pages" data-i18n="crowdsec.decisions.pagination">
+                            <button type="button" id="crowdsec-decisions-prev" class="btn btn-outline-secondary" data-i18n="crowdsec.previous">Previous</button>
+                            <button type="button" id="crowdsec-decisions-next" class="btn btn-outline-secondary" data-i18n="crowdsec.next">Next</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <section id="crowdsec-investigation" class="card mb-4 d-none" aria-live="polite">
+        <div class="card-header border-start border-4 border-warning">
+            <div class="d-flex flex-wrap justify-content-between gap-2">
+                <div>
+                    <span class="badge bg-warning text-dark mb-2" data-i18n="crowdsec.current_state">Current state</span>
+                    <h5 id="crowdsec-investigation-title" class="card-title mb-1"></h5>
+                    <p class="card-subtitle text-muted mb-0" data-i18n="crowdsec.current_state_help">Current state may change after this observation.</p>
+                </div>
+                <small id="crowdsec-observed-at" class="text-muted"></small>
+            </div>
+        </div>
+        <div class="card-body">
+            <div id="crowdsec-investigation-errors"></div>
+            <div id="crowdsec-investigation-allowlist" class="mb-4"></div>
+            <div id="crowdsec-investigation-summary"
+                 class="row row-cols-1 row-cols-sm-2 row-cols-xl-4 g-2"
+                 role="tablist"
+                 aria-label="Evidence found for this IP"
+                 data-i18n="crowdsec.investigation.summary"></div>
+            <p class="small text-muted mt-3 mb-4" data-i18n="crowdsec.investigation.summary_help">This covers the selected CrowdSec connection and BunkerWeb's own bans. Other protections are not checked here, and evidence that could not be read is no proof that this IP is permitted.</p>
+            <div class="tab-content">
+                <div class="tab-pane fade show active"
+                     id="crowdsec-pane-decisions"
+                     role="tabpanel"
+                     aria-labelledby="crowdsec-tab-decisions"
+                     tabindex="0">
+                    <h6 class="mb-3" data-i18n="crowdsec.investigation.current_decisions">Current CrowdSec decisions</h6>
+                    <div id="crowdsec-investigation-decisions"></div>
+                </div>
+                <div class="tab-pane fade"
+                     id="crowdsec-pane-bans"
+                     role="tabpanel"
+                     aria-labelledby="crowdsec-tab-bans"
+                     tabindex="0">
+                    <h6 class="mb-3" data-i18n="crowdsec.investigation.local_bans">Current local BunkerWeb bans</h6>
+                    <div id="crowdsec-investigation-bans"></div>
+                </div>
+                <div class="tab-pane fade"
+                     id="crowdsec-pane-alerts"
+                     role="tabpanel"
+                     aria-labelledby="crowdsec-tab-alerts"
+                     tabindex="0">
+                    <h6 class="mb-3" data-i18n="crowdsec.investigation.alerts">Available CrowdSec alert evidence</h6>
+                    <div id="crowdsec-investigation-alerts"></div>
+                </div>
+                <div class="tab-pane fade"
+                     id="crowdsec-pane-reports"
+                     role="tabpanel"
+                     aria-labelledby="crowdsec-tab-reports"
+                     tabindex="0">
+                    <h6 class="mb-3" data-i18n="crowdsec.investigation.reports">Recent BunkerWeb reports</h6>
+                    <p class="small text-muted" data-i18n="crowdsec.captured_history_help">Captured report data describes what was observed at request time; it does not prove the current decision state.</p>
+                    <div id="crowdsec-investigation-reports"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="card mb-4" aria-labelledby="crowdsec-allowlists-title">
+        <div class="card-header d-flex flex-wrap justify-content-between gap-2">
+            <div>
+                <h5 id="crowdsec-allowlists-title" class="card-title mb-1" data-i18n="crowdsec.allowlists.title">CrowdSec allowlists</h5>
+                <p class="card-subtitle text-muted" data-i18n="crowdsec.allowlists.help">Trusted IPs and networks for the selected engine. These exceptions apply across its connected services and bouncers.</p>
+            </div>
+            <button id="crowdsec-allowlists-refresh" type="button" class="btn btn-outline-primary align-self-start" data-i18n="crowdsec.allowlists.refresh">Refresh allowlists</button>
+        </div>
+        <div class="card-body">
+            <p class="small text-muted" data-i18n="crowdsec.allowlists.guide.intro">You can browse allowlists and check IPs here. To add or remove entries, use cscli on the CrowdSec engine.</p>
+            <details id="crowdsec-allowlist-guide" class="border rounded p-3 mb-4">
+                <summary class="fw-semibold text-primary" data-i18n="crowdsec.allowlists.guide.title">How to manage trusted IPs and networks</summary>
+                <p class="mt-3" data-i18n="crowdsec.allowlists.guide.where">Requires CrowdSec 1.7 or later. Run these commands on the host or inside the container running the selected engine's Local API (LAPI), with access to its CrowdSec configuration and database. Replace the example list name, IP and network with your own.</p>
+                <ol class="ps-3 mb-3">
+                    <li>
+                        <p class="fw-semibold mb-2" data-i18n="crowdsec.allowlists.guide.create">Create a list once, or use an existing locally managed list.</p>
+                        <pre class="bg-body-tertiary rounded p-3 text-wrap"><code>cscli allowlists create bunkerweb-trusted --description "Trusted IPs"</code></pre>
+                    </li>
+                    <li>
+                        <p class="fw-semibold mb-2" data-i18n="crowdsec.allowlists.guide.add">Add trusted IPs or CIDR networks.</p>
+                        <pre class="bg-body-tertiary rounded p-3 text-wrap"><code>cscli allowlists add bunkerweb-trusted 203.0.113.42 203.0.113.128/25 --expiration 24h --comment "Temporary access"</code></pre>
+                        <p class="small text-muted" data-i18n="crowdsec.allowlists.guide.expiration">This example expires after 24 hours. Omit --expiration for an entry that does not expire. IPv4 and IPv6 are supported.</p>
+                    </li>
+                    <li>
+                        <p class="fw-semibold mb-2" data-i18n="crowdsec.allowlists.guide.inspect">Inspect the list and its expiry dates.</p>
+                        <pre class="bg-body-tertiary rounded p-3 text-wrap"><code>cscli allowlists inspect bunkerweb-trusted</code></pre>
+                    </li>
+                    <li>
+                        <p class="fw-semibold mb-2" data-i18n="crowdsec.allowlists.guide.remove">Remove an exception when it is no longer needed.</p>
+                        <pre class="bg-body-tertiary rounded p-3 text-wrap"><code>cscli allowlists remove bunkerweb-trusted 203.0.113.42 203.0.113.128/25</code></pre>
+                    </li>
+                </ol>
+                <p data-i18n="crowdsec.allowlists.guide.refresh">After a change, refresh allowlists and investigate the IP again. Removing an exception permits future CrowdSec decisions; it does not create a ban. Local BunkerWeb bans and other protections remain separate.</p>
+                <p data-i18n="crowdsec.allowlists.guide.console">Edit Console-managed lists in the CrowdSec Console.</p>
+                <a href="https://doc.crowdsec.net/docs/local_api/centralized_allowlists/"
+                   target="_blank"
+                   rel="noopener noreferrer"
+                   data-i18n="crowdsec.allowlists.guide.docs">CrowdSec allowlist documentation</a>
+            </details>
+            <div id="crowdsec-allowlists" aria-live="polite"></div>
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mt-3">
+                <small id="crowdsec-allowlists-count" class="text-muted"></small>
+                <div class="btn-group" role="group" aria-label="Allowlist pages" data-i18n="crowdsec.allowlists.pages">
+                    <button type="button" id="crowdsec-allowlists-prev" class="btn btn-outline-secondary" disabled data-i18n="crowdsec.previous">Previous</button>
+                    <button type="button" id="crowdsec-allowlists-next" class="btn btn-outline-secondary" disabled data-i18n="crowdsec.next">Next</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+    <div class="modal fade"
+         id="crowdsec-unban-modal"
+         tabindex="-1"
+         aria-labelledby="crowdsec-unban-modal-title"
+         aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="crowdsec-unban-modal-title" data-i18n="crowdsec.remove.title">Remove CrowdSec decision</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" data-i18n="aria.label.close"></button>
+                </div>
+                <form id="crowdsec-unban-form">
+                    <div class="modal-body">
+                        <div class="alert alert-warning" role="alert">
+                            <p id="crowdsec-unban-selection" class="mb-2"></p>
+                            <p class="mb-0" data-i18n="crowdsec.remove.impact">This removes the decision at the shared CrowdSec engine and affects every connected bouncer. Cached decisions, another range, local bans, or AppSec may still block the target.</p>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="crowdsec-unban-confirm" />
+                            <label class="form-check-label" for="crowdsec-unban-confirm" data-i18n="crowdsec.remove.confirm">I understand and want to remove this decision.</label>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" data-i18n="button.cancel">Cancel</button>
+                        <button type="submit" id="crowdsec-unban-submit" class="btn btn-danger don-jose" disabled data-i18n="crowdsec.remove.submit">Remove decision</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+{% block scripts %}
+    <script src="{{ url_for('static', filename='js/pages/crowdsec.js') }}"
+            nonce="{{ script_nonce }}"
+            defer></script>
+{% endblock %}

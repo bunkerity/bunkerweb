@@ -17,7 +17,7 @@
 #include <utility>
 #include <string>
 #include <vector>
-#include <unordered_map>
+#include <map>
 
 #ifndef TEST_COMMON_MODSECURITY_TEST_H_
 #define TEST_COMMON_MODSECURITY_TEST_H_
@@ -29,27 +29,25 @@ extern std::string default_test_path;
 namespace modsecurity_test {
 
 template <class T> class ModSecurityTest :
-    public std::unordered_map<std::string, std::vector<std::unique_ptr<T>>> {
+    public std::map<std::string, std::vector<std::unique_ptr<T>>> {
  public:
-    ModSecurityTest()
-        : m_test_number(0),
-        m_automake_output(false),
-        m_count_all(false),
-        m_test_multithreaded(false) { }
+    ModSecurityTest() = default;
 
     std::string header();
-    void cmd_options(int, char **);
+    void cmd_options(int argc, char** argv);
     void load_tests();
     void load_tests(const std::string &path);
     bool load_test_json(const std::string &file);
 
     std::string target;
-    bool verbose = false;
-    bool color = false;
-    int m_test_number;
-    bool m_automake_output;
-    bool m_count_all;
-    bool m_test_multithreaded;
+    bool verbose{false};
+    bool color{false};
+    int m_test_number{0};
+    bool m_automake_output{false};
+    bool m_count_all{false};
+    bool m_test_multithreaded{false};
+    bool m_format{false};
+    bool m_update_content_length{false};
 };
 
 }  // namespace modsecurity_test

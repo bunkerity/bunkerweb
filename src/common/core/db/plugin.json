@@ -44,12 +44,112 @@
     },
     "DATABASE_MAX_SESSION_AGE_DAYS": {
       "context": "global",
-      "default": "14",
-      "help": "The maximum age in days for UI user sessions before they are purged.",
+      "default": "14d",
+      "help": "The maximum age in days for UI user sessions before they are purged. Accepts a time suffix (ms, s, m, h, d, w, M, y); a bare number is days.",
       "id": "database-max-session-age-days",
       "label": "The maximum age in days for UI user sessions",
+      "regex": "^[0-9]+(ms?|[shdwMy])?$",
+      "type": "text"
+    },
+    "DATABASE_POOL_SIZE": {
+      "context": "global",
+      "default": "40",
+      "help": "The number of connections to keep in the database connection pool.",
+      "id": "database-pool-size",
+      "label": "Database pool size",
       "regex": "^\\d+$",
       "type": "number"
+    },
+    "DATABASE_POOL_MAX_OVERFLOW": {
+      "context": "global",
+      "default": "20",
+      "help": "The maximum number of connections to create above the pool size.",
+      "id": "database-pool-max-overflow",
+      "label": "Database pool max overflow",
+      "regex": "^-?\\d+$",
+      "type": "number"
+    },
+    "DATABASE_POOL_TIMEOUT": {
+      "context": "global",
+      "default": "5s",
+      "help": "The number of seconds to wait before giving up on getting a connection from the pool. Accepts a time suffix (ms, s, m, h, d, w, M, y); a bare number is seconds.",
+      "id": "database-pool-timeout",
+      "label": "Database pool timeout",
+      "regex": "^[0-9]+(ms?|[shdwMy])?$",
+      "type": "text"
+    },
+    "DATABASE_POOL_RECYCLE": {
+      "context": "global",
+      "default": "30m",
+      "help": "The number of seconds after which a connection is automatically recycled. Set to -1 to disable. Accepts a time suffix (ms, s, m, h, d, w, M, y); a bare number is seconds.",
+      "id": "database-pool-recycle",
+      "label": "Database pool recycle",
+      "regex": "^(-1|[0-9]+(ms?|[shdwMy])?)$",
+      "type": "text"
+    },
+    "DATABASE_POOL_PRE_PING": {
+      "context": "global",
+      "default": "yes",
+      "help": "Whether to test connections for liveness upon each checkout from the pool.",
+      "id": "database-pool-pre-ping",
+      "label": "Database pool pre-ping",
+      "regex": "^(yes|no)$",
+      "type": "check"
+    },
+    "DATABASE_POOL_RESET_ON_RETURN": {
+      "context": "global",
+      "default": "",
+      "help": "How the connection should be reset when returned to the pool. Leave empty for auto (none for MySQL/MariaDB, rollback for others). Possible values: rollback, commit, none.",
+      "id": "database-pool-reset-on-return",
+      "label": "Database pool reset on return",
+      "regex": "^(rollback|commit|none)?$",
+      "type": "select",
+      "select": ["", "rollback", "commit", "none"]
+    },
+    "DATABASE_RETRY_TIMEOUT": {
+      "context": "global",
+      "default": "1m",
+      "help": "The maximum number of seconds to wait for the database to be available on startup. Accepts a time suffix (ms, s, m, h, d, w, M, y); a bare number is seconds.",
+      "id": "database-retry-timeout",
+      "label": "Database retry timeout",
+      "regex": "^[0-9]+(ms?|[shdwMy])?$",
+      "type": "text"
+    },
+    "DATABASE_CONNECT_TIMEOUT": {
+      "context": "global",
+      "default": "10s",
+      "help": "The maximum time to wait when opening a connection to a MySQL, MariaDB or PostgreSQL server. It must be greater than 0: the drivers cannot run without one, and 0 falls back to the default with a warning. A timeout set in the DATABASE_URI query string takes precedence. Accepts a time suffix (ms, s, m, h, d, w, M, y); a bare number is seconds.",
+      "id": "database-connect-timeout",
+      "label": "Database connect timeout",
+      "regex": "^\\d+(ms?|[shdwMy])?$",
+      "type": "text"
+    },
+    "DATABASE_READ_TIMEOUT": {
+      "context": "global",
+      "default": "5m",
+      "help": "The maximum time to wait for a MySQL or MariaDB server to answer or accept data before the call fails, so that a vanished peer cannot block forever. PostgreSQL relies on TCP keepalives instead. Set to 0 to disable. A timeout set in the DATABASE_URI query string takes precedence. Accepts a time suffix (ms, s, m, h, d, w, M, y); a bare number is seconds.",
+      "id": "database-read-timeout",
+      "label": "Database read timeout",
+      "regex": "^\\d+(ms?|[shdwMy])?$",
+      "type": "text"
+    },
+    "DATABASE_REQUEST_RETRY_ATTEMPTS": {
+      "context": "global",
+      "default": "2",
+      "help": "The number of retry attempts for transient database errors.",
+      "id": "database-request-retry-attempts",
+      "label": "Database request retry attempts",
+      "regex": "^\\d+$",
+      "type": "number"
+    },
+    "DATABASE_REQUEST_RETRY_DELAY": {
+      "context": "global",
+      "default": "250ms",
+      "help": "The delay in seconds between retry attempts for transient database errors. Accepts a time suffix (ms, s, m, h, d, w, M, y); a bare number is seconds.",
+      "id": "database-request-retry-delay",
+      "label": "Database request retry delay",
+      "regex": "^[0-9]+(\\.[0-9]+)?(ms?|[shdwMy])?$",
+      "type": "text"
     }
   },
   "jobs": [

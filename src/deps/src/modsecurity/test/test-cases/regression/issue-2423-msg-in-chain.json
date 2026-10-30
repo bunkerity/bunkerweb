@@ -1,124 +1,172 @@
 [
   {
-    "enabled":1,
-    "version_min":300000,
-    "title":"Test match variable (1/n)",
+    "enabled": 1,
+    "version_min": 300000,
+    "title": "Test match variable (1/n)",
     "github_issue": 2423,
-    "expected":{
-        "http_code": 437,
-        "error_log": "against variable `REQUEST_HEADERS:Transfer-Encoding' .Value: `deflate'"
+    "client": {
+      "ip": "200.249.12.31",
+      "port": 123
     },
-    "client":{
-      "ip":"200.249.12.31",
-      "port":123
+    "server": {
+      "ip": "200.249.12.31",
+      "port": 80
     },
-    "request":{
-      "headers":{
-        "Host":"localhost",
+    "request": {
+      "headers": {
+        "Host": "localhost",
+        "Content-Length": "0",
         "Transfer-Encoding": "deflate"
       },
-      "uri":"/match-this",
-      "method":"GET"
+      "uri": "/match-this",
+      "method": "GET",
+      "body": [
+        ""
+      ]
     },
-    "server":{
-      "ip":"200.249.12.31",
-      "port":80
+    "response": {
+      "headers": {
+        "Content-Length": "0"
+      },
+      "body": [
+        ""
+      ]
     },
-    "rules":[
+    "expected": {
+      "error_log": "against variable `REQUEST_HEADERS:Transfer-Encoding' .Value: `deflate'",
+      "http_code": 437
+    },
+    "rules": [
       "SecRuleEngine On",
       "SecRule REQUEST_URI \"^.*$\" \"phase:2,deny,capture,id:1,msg:'MatchedVar On Msg: [%{MATCHED_VAR}]',logdata:'MatchedVar On LogData %{MATCHED_VAR}',chain\"",
       "SecRule REQUEST_HEADERS \"^.*$\" \"status:437\""
     ]
   },
   {
-    "enabled":1,
-    "version_min":300000,
-    "title":"Test match variable (2/n)",
+    "enabled": 1,
+    "version_min": 300000,
+    "title": "Test match variable (2/n)",
     "github_issue": 2423,
-    "expected":{
-        "http_code": 437,
-        "error_log": "MatchedVar On Msg: .deflate."
+    "client": {
+      "ip": "200.249.12.31",
+      "port": 123
     },
-    "client":{
-      "ip":"200.249.12.31",
-      "port":123
+    "server": {
+      "ip": "200.249.12.31",
+      "port": 80
     },
-    "request":{
-      "headers":{
-        "Host":"localhost",
+    "request": {
+      "headers": {
+        "Host": "localhost",
+        "Content-Length": "0",
         "Transfer-Encoding": "deflate"
       },
-      "uri":"/match-this",
-      "method":"GET"
+      "uri": "/match-this",
+      "method": "GET",
+      "body": [
+        ""
+      ]
     },
-    "server":{
-      "ip":"200.249.12.31",
-      "port":80
+    "response": {
+      "headers": {
+        "Content-Length": "0"
+      },
+      "body": [
+        ""
+      ]
     },
-    "rules":[
+    "expected": {
+      "error_log": "MatchedVar On Msg: .deflate.",
+      "http_code": 437
+    },
+    "rules": [
       "SecRuleEngine On",
       "SecRule REQUEST_URI \"^.*$\" \"phase:2,deny,capture,id:1,msg:'MatchedVar On Msg: [%{MATCHED_VAR}]',logdata:'MatchedVar On LogData %{MATCHED_VAR}',chain\"",
       "SecRule REQUEST_HEADERS \"^.*$\" \"status:437\""
     ]
   },
   {
-    "enabled":1,
-    "version_min":300000,
-    "title":"Test match variable (3/n)",
+    "enabled": 1,
+    "version_min": 300000,
+    "title": "Test match variable (3/n)",
     "github_issue": 2423,
-    "expected":{
-        "http_code": 437,
-        "error_log": "MatchedVar On LogData: deflate"
+    "client": {
+      "ip": "200.249.12.31",
+      "port": 123
     },
-    "client":{
-      "ip":"200.249.12.31",
-      "port":123
+    "server": {
+      "ip": "200.249.12.31",
+      "port": 80
     },
-    "request":{
-      "headers":{
-        "Host":"localhost",
+    "request": {
+      "headers": {
+        "Host": "localhost",
+        "Content-Length": "0",
         "Transfer-Encoding": "deflate"
       },
-      "uri":"/match-this",
-      "method":"GET"
+      "uri": "/match-this",
+      "method": "GET",
+      "body": [
+        ""
+      ]
     },
-    "server":{
-      "ip":"200.249.12.31",
-      "port":80
+    "response": {
+      "headers": {
+        "Content-Length": "0"
+      },
+      "body": [
+        ""
+      ]
     },
-    "rules":[
+    "expected": {
+      "error_log": "MatchedVar On LogData: deflate",
+      "http_code": 437
+    },
+    "rules": [
       "SecRuleEngine On",
       "SecRule REQUEST_URI \"^.*$\" \"phase:2,deny,capture,id:1,msg:'MatchedVar On Msg: [%{MATCHED_VAR}]',logdata:'MatchedVar On LogData: %{MATCHED_VAR}',chain\"",
       "SecRule REQUEST_HEADERS \"^.*$\" \"status:437\""
     ]
   },
   {
-    "enabled":1,
-    "version_min":300000,
-    "title":"Test match variable (4/n)",
+    "enabled": 1,
+    "version_min": 300000,
+    "title": "Test match variable (4/n)",
     "github_issue": 2423,
-    "expected":{
-        "http_code": 437,
-        "error_log": "msg \"Illegal header \\[/restricted/\\]\""
+    "client": {
+      "ip": "200.249.12.31",
+      "port": 123
     },
-    "client":{
-      "ip":"200.249.12.31",
-      "port":123
+    "server": {
+      "ip": "200.249.12.31",
+      "port": 80
     },
-    "request":{
-      "headers":{
-        "Host":"localhost",
-        "Restricted":"attack",
-	      "Other": "Value"
+    "request": {
+      "headers": {
+        "Host": "localhost",
+        "Restricted": "attack",
+        "Other": "Value",
+        "Content-Length": "0"
       },
-      "uri":"/",
-      "method":"GET"
+      "uri": "/",
+      "method": "GET",
+      "body": [
+        ""
+      ]
     },
-    "server":{
-      "ip":"200.249.12.31",
-      "port":80
+    "response": {
+      "headers": {
+        "Content-Length": "0"
+      },
+      "body": [
+        ""
+      ]
     },
-    "rules":[
+    "expected": {
+      "error_log": "msg \"Illegal header \\[/restricted/\\]\"",
+      "http_code": 437
+    },
+    "rules": [
       "SecRuleEngine On",
       "SecRule REQUEST_HEADERS_NAMES \"^.*$\" \"phase:2,setvar:'tx.header_name_%{TX.0}=/%{TX.0}/',deny,t:lowercase,capture,id:500065,msg:'Illegal header [%{MATCHED_VAR}]',logdata:'Restricted header detected: %{MATCHED_VAR}',chain\"",
       "SecRule TX:/^header_name_/ \"@within /name1/restricted/name3/\" \"status:437\""

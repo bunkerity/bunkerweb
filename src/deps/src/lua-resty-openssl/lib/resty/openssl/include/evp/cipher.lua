@@ -1,7 +1,7 @@
 local ffi = require "ffi"
 
 require "resty.openssl.include.ossl_typ"
-local OPENSSL_3X = require("resty.openssl.version").OPENSSL_3X
+local OPENSSL_3_UP = require("resty.openssl.version").OPENSSL_3_UP
 
 ffi.cdef [[
   EVP_CIPHER_CTX *EVP_CIPHER_CTX_new(void);
@@ -44,7 +44,7 @@ ffi.cdef [[
 ]]
 
 
-if OPENSSL_3X then
+if OPENSSL_3_UP then
   require "resty.openssl.include.provider"
 
   ffi.cdef [[

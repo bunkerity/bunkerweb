@@ -36,7 +36,7 @@ function securitytxt:initialize(ctx)
 	-- Call parent initialize
 	plugin.initialize(self, "securitytxt", ctx)
 	-- Load data from internalstore if needed
-	if get_phase() ~= "init" then
+	if get_phase() ~= "init" and self.ctx.bw.uri == self.variables["SECURITYTXT_URI"] then
 		-- Get security policies from internalstore
 		local security_policies, err = self.internalstore:get("plugin_securitytxt_security_policies", true)
 		if not security_policies then
@@ -148,7 +148,7 @@ function securitytxt:content()
 	end
 
 	local data = {
-		scheme = self.ctx.bw.scheme,
+		server_name = self.ctx.bw.server_name,
 	}
 
 	for k, v in pairs(self.security_policies) do
@@ -160,9 +160,20 @@ function securitytxt:content()
 		end
 	end
 
-	-- If expires isn't set, set it to 1 year in the future and make it a ISO.8601-1 and ISO.8601-2 date
+	-- If expires isn't set, reuse a cached auto-generated value so the file stays stable across requests.
+	-- Regenerate 30 days before expiry so the cached value always remains RFC 9116 §2.5.5 compliant.
 	if data["expires"] == "" then
-		data["expires"] = os.date("%Y-%m-%dT%H:%M:%S", os.time() + 31536000)
+		local cache_key = "plugin_securitytxt_auto_expires_" .. (self.ctx.bw.server_name or "")
+		local cached = self.internalstore:get(cache_key)
+		if cached and cached ~= "" then
+			data["expires"] = cached
+		else
+			data["expires"] = os.date("!%Y-%m-%dT%H:%M:%SZ", os.time() + 31536000)
+			local ok, err = self.internalstore:set(cache_key, data["expires"], 31536000 - 30 * 86400)
+			if not ok then
+				self.logger:log(ERR, "failed to cache auto-generated expires: " .. (err or "unknown"))
+			end
+		end
 	end
 
 	-- Render content

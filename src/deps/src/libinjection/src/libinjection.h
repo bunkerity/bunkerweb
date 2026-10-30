@@ -26,6 +26,10 @@ LIBINJECTION_BEGIN_DECLS
 #include <string.h>
 
 /*
+ * Pull in injection_result_t
+ */
+#include "libinjection_error.h"
+/*
  * Version info.
  *
  * This is moved into a function to allow SWIG and other auto-generated
@@ -47,7 +51,8 @@ const char *libinjection_version(void);
  * buffer of 8+ characters.  c-string, \return 1 if SQLi, 0 if benign.
  * fingerprint will be set or set to empty string.
  */
-int libinjection_sqli(const char *s, size_t slen, char fingerprint[]);
+injection_result_t libinjection_sqli(const char *s, size_t slen,
+                                     char fingerprint[]);
 
 /** ALPHA version of xss detector.
  *
@@ -58,7 +63,7 @@ int libinjection_sqli(const char *s, size_t slen, char fingerprint[]);
  * if benign
  *
  */
-int libinjection_xss(const char *s, size_t slen);
+injection_result_t libinjection_xss(const char *s, size_t slen);
 
 LIBINJECTION_END_DECLS
 

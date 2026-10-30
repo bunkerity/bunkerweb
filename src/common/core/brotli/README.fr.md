@@ -5,17 +5,18 @@ Par rapport à gzip, Brotli atteint généralement de meilleurs taux de compress
 Comment ça marche :
 
 1. À la requête d’un client, BunkerWeb vérifie si le navigateur supporte Brotli.
-2. Si oui, la réponse est compressée au niveau configuré (`BROTLI_COMP_LEVEL`).
+2. Si oui, la réponse est compressée au niveau configuré.
 3. Les en‑têtes appropriés indiquent la compression Brotli.
 4. Le navigateur décompresse avant affichage.
 5. Bande passante et temps de chargement diminuent.
 
 ### Comment l’utiliser
 
-1. Activer : `USE_BROTLI: yes` (désactivé par défaut).
+1. Activer : mettez le paramètre `USE_BROTLI` à `yes` (désactivé par défaut).
 2. Types MIME : définir les contenus à compresser via `BROTLI_TYPES`.
 3. Taille minimale : `BROTLI_MIN_LENGTH` pour éviter de compresser les petites réponses.
 4. Niveau de compression : `BROTLI_COMP_LEVEL` pour l’équilibre vitesse/ratio.
+5. Laisser BunkerWeb faire le reste : une fois configurée, la compression s’applique automatiquement aux réponses éligibles.
 
 ### Paramètres
 
@@ -28,6 +29,9 @@ Comment ça marche :
 
 !!! tip "Niveau de compression"
     `6` offre un bon compromis. Pour du statique et CPU disponible : 9–11. Pour du dynamique ou CPU contraint : 4–5.
+
+!!! info "Compatibilité navigateurs"
+    Brotli est pris en charge par tous les navigateurs modernes. Les clients qui ne prennent pas en charge Brotli recevront des réponses non compressées ou un autre encodage disponible.
 
 ### Exemples
 

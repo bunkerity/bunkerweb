@@ -32,7 +32,9 @@ function redis:init_worker()
 	if not ok then
 		return self:ret(false, "redis ping command failed")
 	end
-	self.logger:log(NOTICE, "connectivity with redis server " .. self.variables["REDIS_HOST"] .. " is successful")
+	local target = self.variables["REDIS_CLUSTER_NODES"] ~= "" and ("cluster " .. self.variables["REDIS_CLUSTER_NODES"])
+		or ("server " .. self.variables["REDIS_HOST"])
+	self.logger:log(NOTICE, "connectivity with redis " .. target .. " is successful")
 	return self:ret(true, "success")
 end
 
@@ -109,7 +111,7 @@ function redis:api()
 				HTTP_INTERNAL_SERVER_ERROR
 			)
 		end
-		if not ok then
+		if not nb_keys then
 			return self:ret(true, "redis dbsize command failed", HTTP_INTERNAL_SERVER_ERROR)
 		end
 		-- Return data

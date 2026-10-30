@@ -5,6 +5,7 @@ from datetime import datetime, timedelta
 from ipaddress import ip_address, ip_network
 from os import getenv, sep
 from os.path import join, normpath
+from pathlib import Path
 from re import compile as re_compile
 from sys import exit as sys_exit, path as sys_path
 from time import sleep
@@ -18,7 +19,7 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
 from requests import get
 from requests.exceptions import ConnectionError
 
-from common_utils import bytes_hash  # type: ignore
+from common_utils import bytes_hash, iter_list_entries, split_list_url  # type: ignore
 from logger import getLogger  # type: ignore
 from jobs import Job  # type: ignore
 
@@ -271,17 +272,17 @@ try:
                         old_cached_data = cached_url.get("data", b"") if isinstance(cached_url, dict) else b""
                         etag = ""
                         last_modified = ""
-                        iterable = []
                         resp = None
                         LOGGER.info(f"Downloading blacklist data from {url} ...")
-                        if url.startswith("file://"):
+                        download_url, url_filter = split_list_url(url)
+                        content_type = ""
+                        if download_url.startswith("file://"):
                             try:
-                                with open(normpath(url[7:]), "rb") as f:
-                                    iterable = f.readlines()
+                                body = Path(normpath(download_url[7:])).read_bytes()
                             except OSError as e:
                                 status = 2
                                 LOGGER.debug(format_exc())
-                                LOGGER.error(f"Error while opening file {url[7:]} : {e}")
+                                LOGGER.error(f"Error while opening file {download_url[7:]} : {e}")
                                 failed_urls.add(url)
                                 if url_file not in urls:
                                     aggregated_recap[kind]["failed_count"] += 1
@@ -300,7 +301,7 @@ try:
                             retry_count = 0
                             while retry_count < max_retries:
                                 try:
-                                    resp = get(url, stream=True, timeout=10, headers=req_headers or None)
+                                    resp = get(download_url, stream=True, timeout=10, headers=req_headers or None)
                                     break
                                 except ConnectionError as e:
                                     retry_count += 1
@@ -311,10 +312,11 @@ try:
 
                             if resp is None:
                                 failed = True
-                            elif resp.status_code == 304:
+                            elif resp.status_code == 304 and old_cached_data:
                                 resp.close()
                                 handle_304 = True
                             elif resp.status_code != 200:
+                                # Also catches a 304 with nothing cached to fall back on
                                 status = 2
                                 LOGGER.error(f"Got status code {resp.status_code}, skipping...")
                                 resp.close()
@@ -323,46 +325,49 @@ try:
                                     aggregated_recap[kind]["failed_count"] += 1
                                 failed = True
                             else:
-                                etag = resp.headers.get("ETag", "")
-                                last_modified = resp.headers.get("Last-Modified", "")
-                                iterable = resp.iter_lines()
+                                try:
+                                    etag = resp.headers.get("ETag", "")
+                                    last_modified = resp.headers.get("Last-Modified", "")
+                                    content_type = resp.headers.get("Content-Type", "")
+                                    body = resp.content
+                                finally:
+                                    resp.close()
 
                         if not failed:
                             if handle_304:
                                 LOGGER.info(f"URL {url} returned 304 Not Modified, using cached data.")
                                 if url not in processed_urls:
                                     aggregated_recap[kind]["not_modified"] += 1
-                                if old_cached_data:
-                                    # Re-save to bump last_update timestamp so the 1-hour check stays fresh
-                                    cached, err = JOB.cache_file(url_file, old_cached_data)
-                                    if not cached:
-                                        LOGGER.error(f"Error while refreshing cache for {url}: {err}")
-                                    for line in old_cached_data.split(b"\n"):
-                                        line = line.strip()
-                                        if not line or line.startswith(b"#"):
-                                            continue
-                                        unique_entries.add(line)
+                                # Re-save to bump last_update timestamp so the 1-hour check stays fresh
+                                cached, err = JOB.cache_file(url_file, old_cached_data)
+                                if not cached:
+                                    LOGGER.error(f"Error while refreshing cache for {url}: {err}")
+                                for line in old_cached_data.split(b"\n"):
+                                    line = line.strip()
+                                    if not line or line.startswith(b"#"):
+                                        continue
+                                    unique_entries.add(line)
                             else:
                                 if url not in processed_urls:
                                     aggregated_recap[kind]["downloaded_urls"] += 1
 
                                 url_content = b""
                                 count_lines = 0
-                                try:
-                                    for line in iterable:
-                                        line = line.strip()
-                                        if not line or line.startswith((b"#", b";")):
-                                            continue
-                                        elif kind != "USER_AGENT":
-                                            line = line.split(b" ")[0]
-                                        ok, data = check_line(kind, line)
-                                        if ok:
-                                            unique_entries.add(data)
-                                            url_content += data + b"\n"
-                                            count_lines += 1
-                                finally:
-                                    if resp is not None:
-                                        resp.close()
+                                for line in iter_list_entries(
+                                    body,
+                                    content_type=content_type,
+                                    url_filter=url_filter,
+                                    ip_list=kind in ("IP", "IGNORE_IP"),
+                                    whole_line=kind in ("USER_AGENT", "IGNORE_USER_AGENT"),
+                                    logger=LOGGER,
+                                ):
+                                    ok, data = check_line(kind, line)
+                                    if ok:
+                                        unique_entries.add(data)
+                                        url_content += data + b"\n"
+                                        count_lines += 1
+                                if not count_lines:
+                                    LOGGER.warning(f"No valid {kind} entry found in {url} (Content-Type: {content_type or 'unknown'})")
                                 if url not in processed_urls:
                                     aggregated_recap[kind]["total_lines"] += count_lines
 

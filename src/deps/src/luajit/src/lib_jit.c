@@ -406,11 +406,12 @@ LJLIB_CF(jit_util_tracek)
   return 0;
 }
 
-/* local snap = jit.util.tracesnap(tr, sn) */
+/* local snap = jit.util.tracesnap(tr, sn[, getpos]) */
 LJLIB_CF(jit_util_tracesnap)
 {
   GCtrace *T = jit_checktrace(L);
   SnapNo sn = (SnapNo)lj_lib_checkint(L, 2);
+  int getpos = (L->base+2 < L->top && tvistruecond(L->base+2));
   if (T && sn < T->nsnap) {
     SnapShot *snap = &T->snap[sn];
     SnapEntry *map = &T->snapmap[snap->mapofs];
@@ -423,6 +424,12 @@ LJLIB_CF(jit_util_tracesnap)
     for (n = 0; n < nent; n++)
       setintV(lj_tab_setint(L, t, (int32_t)(n+2)), (int32_t)map[n]);
     setintV(lj_tab_setint(L, t, (int32_t)(nent+2)), (int32_t)SNAP(255, 0, 0));
+    if (getpos) {
+      const BCIns *pc = snap_pc(&map[nent]), *startpc = pc;
+      while (bc_op(*startpc) < BC_FUNCF) startpc--;
+      setintV(L->top++, (int)(pc - startpc));
+      return 2;
+    }
     return 1;
   }
   return 0;
@@ -601,8 +608,8 @@ LJLIB_CF(jit_opt_start)
 
 /* Not loaded by default, use: local profile = require("jit.profile") */
 
-#define KEY_PROFILE_THREAD	(U64x(80000000,00000000)|'t')
-#define KEY_PROFILE_FUNC	(U64x(80000000,00000000)|'f')
+#define KEY_PROFILE_THREAD	(U64x(81000000,00000000)|'t')
+#define KEY_PROFILE_FUNC	(U64x(81000000,00000000)|'f')
 
 static void jit_profile_callback(lua_State *L2, lua_State *L, int samples,
 				 int vmstate)
@@ -716,6 +723,12 @@ static uint32_t jit_cpudetect(void)
   uint32_t features[4];
   if (lj_vm_cpuid(0, vendor) && lj_vm_cpuid(1, features)) {
     flags |= ((features[2] >> 0)&1) * JIT_F_SSE3;
+#if LJ_TARGET_X86
+    if (flags) {
+      lj_vm_num2i64_ptr = lj_vm_num2i64_sse3;
+      lj_vm_num2u64_ptr = lj_vm_num2u64_sse3;
+    }
+#endif
     flags |= ((features[2] >> 19)&1) * JIT_F_SSE4_1;
     if (vendor[0] >= 7) {
       uint32_t xfeatures[4];
@@ -793,7 +806,7 @@ static void jit_init(lua_State *L)
 #if LJ_TARGET_UNALIGNED
   G(L)->tmptv.u64 = U64x(0000504d,4d500000);
 #endif
-  lj_dispatch_update(G(L));
+  lj_dispatch_update(G(L), 0);
 #if LJ_TARGET_UNALIGNED
   /* If you get a crash below then your toolchain indicates unaligned
   ** accesses are OK, but your kernel disagrees. I.e. fix your toolchain.

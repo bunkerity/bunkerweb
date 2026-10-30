@@ -2089,7 +2089,8 @@ static void asm_bitshift(ASMState *as, IRIns *ir, MIPSIns mi, MIPSIns mik)
 {
   Reg dest = ra_dest(as, ir, RSET_GPR);
   if (irref_isk(ir->op2)) {  /* Constant shifts. */
-    uint32_t shift = (uint32_t)IR(ir->op2)->i;
+    IRIns *irr = IR(ir->op2);
+    uint32_t shift = (uint32_t)(LJ_32 || irr->o == IR_KINT) ? (uint32_t)irr->i : (uint32_t)ir_kint64(irr)->u64;
     if (LJ_64 && irt_is64(ir->t)) mik |= (shift & 32) ? MIPSI_D32 : MIPSI_D;
     emit_dta(as, mik, dest, ra_hintalloc(as, ir->op1, dest, RSET_GPR),
 	     (shift & 31));

@@ -362,7 +362,13 @@ function _M.new(name, shm, opts)
             end
 
             self.poll = function(timeout)
-                return ipc:poll(timeout)
+                local ok, poll_err = ipc:poll(timeout)
+                if ipc.events_lost then
+                    -- Lost invalidations are safe only after discarding L1.
+                    rebuild_lru(self)
+                    ipc.events_lost = nil
+                end
+                return ok, poll_err
             end
 
             self.ipc = ipc

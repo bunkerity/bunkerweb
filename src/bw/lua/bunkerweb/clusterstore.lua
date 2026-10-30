@@ -2,6 +2,8 @@ local ngx = ngx
 local class = require "middleclass"
 local clogger = require "bunkerweb.logger"
 local rc = require "resty.redis.connector"
+local rediskeys = require "bunkerweb.rediskeys"
+local resty_redis = require "resty.redis"
 local utils = require "bunkerweb.utils"
 
 local clusterstore = class("clusterstore")
@@ -9,12 +11,17 @@ local clusterstore = class("clusterstore")
 local logger = clogger:new("CLUSTERSTORE")
 
 local get_variable = utils.get_variable
+local parse_duration = utils.parse_duration
 local is_cosocket_available = utils.is_cosocket_available
+local is_connection_error = utils.is_connection_error
 local ERR = ngx.ERR
 local WARN = ngx.WARN
 local INFO = ngx.INFO
 local tonumber = tonumber
 local tostring = tostring
+local subsystem = ngx.config.subsystem
+-- Loaded on first cluster use only, so a missing library never breaks standalone or Sentinel.
+local rediscluster
 
 -- Helper function to get timer log level with validation
 local function get_timer_log_level()
@@ -44,6 +51,7 @@ function clusterstore:initialize(pool)
 		["REDIS_SENTINEL_USERNAME"] = "",
 		["REDIS_SENTINEL_PASSWORD"] = "",
 		["REDIS_SENTINEL_MASTER"] = "",
+		["REDIS_CLUSTER_NODES"] = "",
 	}
 	-- Set them for later use
 	self.variables = {}
@@ -58,12 +66,51 @@ function clusterstore:initialize(pool)
 	if self.variables["USE_REDIS"] ~= "yes" then
 		return
 	end
+	self.config_error = rediskeys.cluster_config_error(
+		self.variables["REDIS_CLUSTER_NODES"],
+		self.variables["REDIS_SENTINEL_HOSTS"],
+		self.variables["REDIS_DATABASE"]
+	)
+	if self.config_error then
+		-- connect() reports it, so every caller takes its usual Redis-down fallback.
+		return
+	end
+	if rediskeys.nodes_value(self.variables["REDIS_CLUSTER_NODES"]) then
+		local timeout = parse_duration(self.variables["REDIS_TIMEOUT"], "ms")
+		self.pool = pool == nil or pool
+		self.cluster_mode = true
+		self.options = {
+			name = "bw",
+			serv_list = rediskeys.parse_nodes(self.variables["REDIS_CLUSTER_NODES"]),
+			dict_name = subsystem == "stream" and "redis_cluster_locks_stream" or "redis_cluster_locks",
+			refresh_lock_key = "bw_refresh_",
+			lock_timeout = timeout / 1000,
+			connect_timeout = timeout,
+			send_timeout = timeout,
+			read_timeout = timeout,
+			keepalive_timeout = parse_duration(self.variables["REDIS_KEEPALIVE_IDLE"], "ms"),
+			keepalive_cons = tonumber(self.variables["REDIS_KEEPALIVE_POOL"]),
+			max_redirection = 2,
+			max_connection_attempts = 1,
+			max_connection_timeout = timeout,
+			enable_slave_read = false,
+			-- The client sends AUTH for any string, an empty one included.
+			username = self.variables["REDIS_USERNAME"] ~= "" and self.variables["REDIS_USERNAME"] or nil,
+			password = self.variables["REDIS_PASSWORD"] ~= "" and self.variables["REDIS_PASSWORD"] or nil,
+			connect_opts = {
+				ssl = self.variables["REDIS_SSL"] == "yes",
+				ssl_verify = self.variables["REDIS_SSL_VERIFY"] == "yes",
+				pool_size = tonumber(self.variables["REDIS_KEEPALIVE_POOL"]),
+			},
+		}
+		return
+	end
 	-- Compute options
 	local options = {
-		connect_timeout = tonumber(self.variables["REDIS_TIMEOUT"]),
-		read_timeout = tonumber(self.variables["REDIS_TIMEOUT"]),
-		send_timeout = tonumber(self.variables["REDIS_TIMEOUT"]),
-		keepalive_timeout = tonumber(self.variables["REDIS_KEEPALIVE_IDLE"]),
+		connect_timeout = parse_duration(self.variables["REDIS_TIMEOUT"], "ms"),
+		read_timeout = parse_duration(self.variables["REDIS_TIMEOUT"], "ms"),
+		send_timeout = parse_duration(self.variables["REDIS_TIMEOUT"], "ms"),
+		keepalive_timeout = parse_duration(self.variables["REDIS_KEEPALIVE_IDLE"], "ms"),
 		keepalive_poolsize = tonumber(self.variables["REDIS_KEEPALIVE_POOL"]),
 		connection_options = {
 			ssl = self.variables["REDIS_SSL"] == "yes",
@@ -115,6 +162,23 @@ function clusterstore:initialize(pool)
 end
 
 function clusterstore:connect(readonly)
+	if self.config_error then
+		return false, "invalid redis configuration : " .. self.config_error
+	end
+	if self.cluster_mode then
+		-- Reads go to primaries in cluster mode, readonly is ignored.
+		if not is_cosocket_available() then
+			return false, "cosocket is not available"
+		end
+		rediscluster = rediscluster or require "resty.rediscluster"
+		local client, err = rediscluster:new(self.options)
+		self.redis_client = client
+		self.healthy = client ~= nil
+		if not client then
+			return false, "error while getting redis cluster client : " .. tostring(err)
+		end
+		return true, "success", 1
+	end
 	-- Check if connector is created
 	if not self.redis_connector then
 		return false, "connector is not instantiated"
@@ -142,6 +206,7 @@ function clusterstore:connect(readonly)
 		redis_client, err, previous_errors = self.redis_connector:connect()
 	end
 	self.redis_client = redis_client
+	self.healthy = redis_client ~= nil
 	if not self.redis_client then
 		if previous_errors then
 			err = err .. " ( previous errors : "
@@ -156,6 +221,7 @@ function clusterstore:connect(readonly)
 	local times
 	times, err = self.redis_client:get_reused_times()
 	if times == nil then
+		self.healthy = false
 		self:close()
 		return false, "error while getting reused times : " .. err
 	end
@@ -165,6 +231,11 @@ function clusterstore:connect(readonly)
 end
 
 function clusterstore:close()
+	if self.cluster_mode then
+		-- The cluster client returns every socket to its pool after each command.
+		self.redis_client = nil
+		return true
+	end
 	-- Check if connected is created
 	if not self.redis_connector then
 		return false, "connector is not instantiated"
@@ -173,19 +244,125 @@ function clusterstore:close()
 	if not self.redis_client then
 		return false, "client is not instantiated"
 	end
-	-- Pool case
+	-- Only return healthy connections to the keepalive pool.
+	-- Unhealthy connections (or non-pooled) are closed directly to avoid
+	-- the unnecessary DISCARD command that the connector sends before keepalive.
 	local ok, err
-	if self.pool then
+	if self.pool and self.healthy then
 		ok, err = self.redis_connector:set_keepalive(self.redis_client)
-		-- No pool
+		-- If keepalive fails (e.g., socket already closed at the C level),
+		-- fall back to a hard close so the socket is fully released.
+		if not ok then
+			logger:log(WARN, "set_keepalive failed: " .. (err or "unknown") .. ", closing connection")
+			self.redis_client:close()
+		end
 	else
 		ok, err = self.redis_client:close()
 	end
 	self.redis_client = nil
-	if err then
+	if not ok and err then
 		logger:log(ERR, "error while closing redis_client : " .. err)
 	end
 	return ok ~= nil, err
+end
+
+local function node_client(self, host, port)
+	local red = resty_redis:new()
+	red:set_timeouts(self.options.connect_timeout, self.options.send_timeout, self.options.read_timeout)
+	-- No keepalive pool: DBSIZE is rare, and a pooled socket would skip AUTH after a
+	-- credential or TLS change.
+	local ok, err = red:connect(host, port, {
+		ssl = self.options.connect_opts.ssl,
+		ssl_verify = self.options.connect_opts.ssl_verify,
+	})
+	if not ok then
+		return nil, err
+	end
+	if self.options.password then
+		if self.options.username then
+			ok, err = red:auth(self.options.username, self.options.password)
+		else
+			ok, err = red:auth(self.options.password)
+		end
+		if not ok then
+			red:close()
+			return nil, err
+		end
+	end
+	return red
+end
+
+-- Keyless commands have no slot to route by: PING means "every slot is served",
+-- DBSIZE is summed over primaries.
+local function cluster_keyless(self, method)
+	if method == "ping" then
+		local info, err = self.redis_client:cluster("info")
+		if not info then
+			return nil, err
+		end
+		if not info:find("cluster_state:ok", 1, true) then
+			return nil, "cluster_state is not ok"
+		end
+		return "PONG"
+	end
+	local masters, err = self.redis_client:masters()
+	if not masters then
+		return nil, err
+	end
+	local total = 0
+	for _, master in ipairs(masters) do
+		local red, conn_err = node_client(self, master.ip, master.port)
+		if not red then
+			return nil, master.ip .. ":" .. tostring(master.port) .. " " .. tostring(conn_err)
+		end
+		local count, cmd_err = red:dbsize()
+		if not count then
+			red:close()
+			return nil, cmd_err
+		end
+		red:close()
+		total = total + count
+	end
+	return total
+end
+
+-- Cluster only: up to limit keys matching pattern, from every primary. SCAN walks a single node,
+-- so each primary gets its own connection. The walk per primary is bounded like a plain SCAN loop.
+-- limit caps keys globally and scan work per primary; total scan work can reach limit times primary count.
+function clusterstore:scan_primaries(pattern, limit)
+	if not self.cluster_mode or not self.redis_client then
+		return nil, "not connected to a cluster"
+	end
+	local masters, err = self.redis_client:masters()
+	if not masters then
+		return nil, err
+	end
+	local keys = {}
+	for _, master in ipairs(masters) do
+		local red, conn_err = node_client(self, master.ip, master.port)
+		if not red then
+			return nil, master.ip .. ":" .. tostring(master.port) .. " " .. tostring(conn_err)
+		end
+		local cursor, scanned = "0", 0
+		repeat
+			local page, scan_err = red:scan(cursor, "MATCH", pattern, "COUNT", 100)
+			if type(page) ~= "table" or type(page[2]) ~= "table" then
+				red:close()
+				return nil, scan_err or "unexpected SCAN reply"
+			end
+			cursor = page[1]
+			scanned = scanned + math.max(100, #page[2])
+			for _, key in ipairs(page[2]) do
+				keys[#keys + 1] = key
+				if #keys >= limit then
+					red:close()
+					return keys
+				end
+			end
+		until cursor == "0" or scanned >= limit
+		red:close()
+	end
+	return keys
 end
 
 function clusterstore:call(method, ...)
@@ -193,38 +370,18 @@ function clusterstore:call(method, ...)
 	if not self.redis_client then
 		return false, "client is not instantiated"
 	end
-	-- Call method
-	return self.redis_client[method](self.redis_client, ...)
-end
-
-function clusterstore:multi(calls)
-	-- Check if client is created
-	if not self.redis_client then
-		return false, "client is not instantiated"
-	end
-	-- Start transaction
-	local ok, err = self.redis_client:multi()
-	if not ok then
-		return false, "multi() failed : " .. err
-	end
-	-- Loop on calls
-	for _, call in ipairs(calls) do
-		local method = call[1]
-		local args = unpack(call[2])
-		ok, err = self.redis_client[method](self.redis_client, args)
-		if not ok then
-			return false, method .. "() failed : " .. err
+	if self.cluster_mode then
+		if method == "ping" or method == "dbsize" then
+			return cluster_keyless(self, method)
 		end
+		return self.redis_client[method](self.redis_client, ...)
 	end
-	-- Exec transaction
-	local exec, err = self.redis_client:exec()
-	if not exec then
-		return false, "exec() failed : " .. err
+	-- Call method (res is nil for socket errors, false for Redis RESP errors)
+	local res, err = self.redis_client[method](self.redis_client, ...)
+	if res == nil and is_connection_error(err) then
+		self.healthy = false
 	end
-	if type(exec) ~= "table" then
-		return false, "exec() result is not a table"
-	end
-	return true, "success", exec
+	return res, err
 end
 
 return clusterstore

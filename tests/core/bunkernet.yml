@@ -1,0 +1,98 @@
+integrations:
+  - "Linux"
+  - "Docker"
+  - "Autoconf"
+  - "Kubernetes"
+
+actions:
+  # Runner-side URLs use the PUBLISHED port on loopback, never the `custom-api` name. The suite
+  # assumes the runner resolves container names through its dnsmasq; a workstation resolves them
+  # through its own resolver, and a bare name there picks up the host's DNS `search` domains -- on
+  # this machine `custom-api` resolved to a PUBLIC address and the request left the box and timed
+  # out after 10s. tests/misc/docker/custom-api.yml publishes 8000:8000, so loopback needs no name
+  # resolution at all. `BUNKERNET_SERVER` below is deliberately NOT changed: that one is resolved
+  # inside the container network, where `custom-api` is correct.
+  setup:
+    type: status
+    url: "http://www.example.com/?id=/etc/passwd"
+    status: 403
+    restart_stack: false
+
+  check_registered:
+    type: status
+    url: "http://127.0.0.1:8000/bunkernet/instance_id"
+    delay: 0.0
+    status: 200
+    restart_stack: false
+  # `type: string` is substring containment, and this endpoint answers
+  # `{"result":"ok","data":<n>}`. A bare "0" therefore matched `"data":100` as readily as
+  # `"data":0` -- and 100 is precisely the value this spec expects a few actions later, so the
+  # assertion could not tell "nothing has been reported yet" from "everything was reported
+  # early". Anchored on the field and its closing brace, which only the intended value produces.
+  check_report:
+    type: string
+    url: "http://127.0.0.1:8000/bunkernet/report_num"
+    delay: 0.0
+    string: '"data":0}'
+    restart_stack: false
+
+  global_403:
+    type: status
+    url: "http://www.example.com/?id=/etc/passwd"
+    status: 403
+    headers:
+      X-Forwarded-For: "random"
+    repeat: 199
+
+  check_report_second:
+    type: string
+    url: "http://127.0.0.1:8000/bunkernet/report_num"
+    delay: 0.0
+    string: '"data":100}'
+    restart_stack: false
+  reset_api:
+    type: status
+    url: "http://127.0.0.1:8000/bunkernet/reset"
+    method: POST
+    delay: 0.0
+    status: 200
+
+  setup_deactivated:
+    type: status
+    url: "http://www.example.com/?id=/etc/passwd"
+    status: 403
+    headers:
+      X-Forwarded-For: "8.0.0.3"
+    config:
+      USE_BUNKERNET: "no"
+    restart_stack: false
+
+  check_registered_deactivated:
+    type: status
+    url: "http://127.0.0.1:8000/bunkernet/instance_id"
+    delay: 0.0
+    status: 404
+    config:
+      USE_BUNKERNET: "no"
+    restart_stack: false
+  # Same substring trap as check_report, and it matters more here: this is the assertion that
+  # proves a DEACTIVATED BunkerNet reports nothing. A bare "0" passed even if it had reported 100.
+  check_report_deactivated:
+    type: string
+    url: "http://127.0.0.1:8000/bunkernet/report_num"
+    delay: 0.0
+    string: '"data":0}'
+    config:
+      USE_BUNKERNET: "no"
+
+config:
+  USE_BUNKERNET: "yes"
+  BUNKERNET_SERVER: "http://custom-api:8000/bunkernet"
+  USE_REAL_IP: "yes"
+  REAL_IP_FROM: "0.0.0.0/0"
+  USE_LIMIT_REQ: "no"
+  USE_LIMIT_CONN: "no"
+
+Kubernetes:
+  config:
+    BUNKERNET_SERVER: "http://svc-custom-api.misc.svc.cluster.local:8000/bunkernet"

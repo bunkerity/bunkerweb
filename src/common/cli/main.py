@@ -10,8 +10,9 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
     if deps_path not in sys_path:
         sys_path.append(deps_path)
 
+from common_utils import parse_duration_int  # type: ignore
 from logger import getLogger  # type: ignore
-from CLI import CLI
+from CLI import CLI, support_refusal
 
 if __name__ == "__main__":
     logger = getLogger("CLI")
@@ -25,15 +26,16 @@ if __name__ == "__main__":
         parser_unban = subparsers.add_parser("unban", help="remove a ban from the cache")
         parser_unban.add_argument("ip", type=str, help="IP address to unban")
         parser_unban.add_argument("-service", type=str, help="service to unban from (default: unban globally)", default=None)
+        parser_unban.add_argument("-confirm", action="store_true", help="apply the unban of a CrowdSec ban after reviewing its preview")
 
         # Ban subparser
         parser_ban = subparsers.add_parser("ban", help="add a ban to the cache")
         parser_ban.add_argument("ip", type=str, help="IP address to ban")
 
-        ban_time = getenv("BAD_BEHAVIOR_BAN_TIME", "86400")
-        if not ban_time.isdigit():
-            ban_time = "86400"
-        ban_time = int(ban_time)
+        try:
+            ban_time = parse_duration_int(getenv("BAD_BEHAVIOR_BAN_TIME", "1d"), "s")
+        except ValueError:
+            ban_time = 86400
 
         parser_ban.add_argument(
             "-exp",
@@ -66,23 +68,39 @@ if __name__ == "__main__":
         parser_plugin.add_argument("plugin_command", type=str, help="the command to execute on the plugin")
         parser_plugin.add_argument("-d", "--debug", action="store_true", help="sets the LOG_LEVEL env variable to DEBUG")
 
+        # Support subparser
+        parser_support = subparsers.add_parser("support", help="export a support bundle (version, configuration, plugins, jobs, logs) for BunkerWeb support")
+        parser_support.add_argument(
+            "-o", "--output", type=str, help="zip path (default: bunkerweb-support-<UTC timestamp>.zip, - writes it to stdout)", default=None
+        )
+        parser_support.add_argument("--no-anonymize", action="store_true", help="keep IP addresses and service domains, credentials are always redacted")
+
         # Parse args
         args, unknown_args = parser.parse_known_args()
 
         logger.debug(f"args : {args}")
         logger.debug(f"unknown_args : {unknown_args}")
 
-        # Instantiate CLI
-        cli = CLI()
+        # The bundle needs the scheduler's code and database access, which only the scheduler host ships and runs
+        if args.command == "support":
+            refusal = support_refusal()
+            if refusal:
+                logger.error(refusal)
+                sys_exit(1)
+
+        # Instantiate CLI, support still writes a bundle when the database has no schema
+        cli = CLI(tolerant_db=args.command == "support")
 
         # Execute command
         ret, err = False, "unknown command"
         if args.command == "unban":
-            ret, err = cli.unban(args.ip, args.service)
+            ret, err = cli.unban(args.ip, args.service, args.confirm)
         elif args.command == "ban":
             ret, err = cli.ban(args.ip, args.exp, args.reason, args.service)
         elif args.command == "bans":
             ret, err = cli.bans()
+        elif args.command == "support":
+            ret, err = cli.support(args.output, not args.no_anonymize)
         elif args.command == "plugin_list":
             ret, err = cli.plugin_list()
         elif args.command == "plugin":

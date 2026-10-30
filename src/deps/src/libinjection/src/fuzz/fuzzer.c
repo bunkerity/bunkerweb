@@ -6,6 +6,7 @@
 
 int LLVMFuzzerTestOneInput(const u_int8_t *data, size_t size);
 
+/* cppcheck-suppress[unusedFunction,unmatchedSuppression] */
 int LLVMFuzzerTestOneInput(const u_int8_t *data, size_t size) {
     char fingerprint[8];
 

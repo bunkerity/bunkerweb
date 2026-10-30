@@ -3,6 +3,8 @@ local get_socket_ssl, get_socket_ssl_ctx
 
 local pok, nginx_c = pcall(require, "resty.openssl.auxiliary.nginx_c")
 
+local stream_lua_supported
+
 if pok and not os.getenv("CI_SKIP_NGINX_C") then
   get_req_ssl = nginx_c.get_req_ssl
   get_req_ssl_ctx = nginx_c.get_req_ssl_ctx
@@ -43,10 +45,11 @@ else
   local ngx_configure = ngx.config.nginx_configure()
   local ngx_has_http_v3 = ngx_configure and ngx_configure:find("--with-http_v3_module", 1, true)
   -- https://github.com/nginx/nginx/blob/master/src/core/ngx_connection.h
-  if ngx_version == 1017008 or ngx_version == 1019003 or ngx_version == 1019009 
+  if ngx_version == 1017008 or ngx_version == 1019003 or ngx_version == 1019009
     or ngx_version == 1021004
-    or (not ngx_has_http_v3 and (ngx_version == 1025003 or ngx_version == 1027001)) then
-    -- 1.17.8, 1.19.3, 1.19.9, 1.21.4, 1.25.3
+    or (not ngx_has_http_v3 and (ngx_version == 1025003 or ngx_version == 1027001
+                                 or ngx_version == 1029002 or ngx_version == 1031001)) then
+    -- 1.17.8, 1.19.3, 1.19.9, 1.21.4, 1.25.3, 1.27.1, 1.29.2, 1.31.1
     ffi.cdef [[
     typedef struct ngx_proxy_protocol_s ngx_proxy_protocol_t;
 
@@ -83,8 +86,9 @@ else
       // trimmed
     } ngx_connection_s;
   ]]
-  elseif ngx_has_http_v3 and (ngx_version == 1025003 or ngx_version == 1027001) then
-    -- 1.25.3
+  elseif ngx_has_http_v3 and (ngx_version == 1025003 or ngx_version == 1027001
+                              or ngx_version == 1029002 or ngx_version == 1031001) then
+    -- 1.25.3, 1.27.1, 1.29.2, 1.31.1
     ffi.cdef [[
     typedef struct ngx_proxy_protocol_s ngx_proxy_protocol_t;
     typedef struct ngx_quic_stream_s ngx_quic_stream_t;
@@ -247,6 +251,10 @@ else
       void                    *cleanup;
       void                    *request;
 
+      void                    *sockaddr; // 0.0.18
+      socklen_t               socklen; // 0.0.18
+      void                    *log; // 0.0.18
+
       ngx_peer_connection_s            peer;
       // trimmed
     } ngx_stream_lua_socket_tcp_upstream_s;
@@ -256,7 +264,9 @@ else
         ngx.config.ngx_lua_version and
         ngx.config.ngx_lua_version
 
-  if ngx_lua_version >= 10019 and ngx_lua_version <= 10028 then
+  stream_lua_supported = ngx_lua_version >= 10031 -- can't get stream lua version, use ngx_lua_version for a guess
+
+  if ngx_lua_version >= 10019 and ngx_lua_version <= 10031 then
     -- https://github.com/openresty/lua-nginx-module/blob/master/src/ngx_http_lua_socket_tcp.h
     ffi.cdef[[
       typedef struct {
@@ -310,6 +320,9 @@ else
     end
 
     if ngx.config.subsystem == "stream" then
+      if not stream_lua_supported then
+        return nil, "stream lua module earlier than 0.0.18 is not supported"
+      end
       u = ffi.cast("ngx_stream_lua_socket_tcp_upstream_s*", u)
     else -- http
       u = ffi.cast("ngx_http_lua_socket_tcp_upstream_s*", u)

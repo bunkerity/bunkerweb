@@ -116,8 +116,9 @@ class YamlConfigSettingsSource(DotEnvSettingsSource):
             yaml_config_section=settings_cls.model_config.get("yaml_config_section"),  # type: ignore[attr-defined]
         )  # type: ignore
 
-        for k, v in self._yaml_data.items():
-            self._yaml_data[k.upper()] = v
+        # Snapshot keys only: live values preserve precedence when aliases collide.
+        for k in list(self._yaml_data):
+            self._yaml_data[k.upper()] = self._yaml_data[k]
 
         super().__init__(settings_cls, env_file, env_file_encoding, case_sensitive, env_prefix, env_nested_delimiter)  # type: ignore
 

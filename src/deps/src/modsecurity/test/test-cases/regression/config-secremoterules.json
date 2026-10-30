@@ -1,95 +1,134 @@
 [
   {
-    "enabled":1,
-    "version_min":300000,
+    "enabled": 1,
+    "version_min": 300000,
+    "title": "Include remote rules",
     "resource": "curl",
-    "title":"Include remote rules",
-    "client":{
-      "ip":"200.249.12.31",
-      "port":123
+    "client": {
+      "ip": "200.249.12.31",
+      "port": 123
     },
-    "server":{
-      "ip":"200.249.12.31",
-      "port":80
+    "server": {
+      "ip": "200.249.12.31",
+      "port": 80
     },
-    "request":{
-      "headers":{
-        "Host":"localhost",
-        "User-Agent":"curl/7.38.0",
-        "Accept":"*/*"
+    "request": {
+      "headers": {
+        "Host": "localhost",
+        "User-Agent": "curl/7.38.0",
+        "Accept": "*/*",
+        "Content-Length": "0"
       },
-      "uri":"/?key=value&key=other_value",
-      "method":"GET"
+      "uri": "/?key=value&key=other_value",
+      "method": "GET",
+      "body": [
+        ""
+      ]
     },
-    "response":{
-      "headers":{
-        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
-        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
-        "Content-Type":"text/html"
+    "response": {
+      "headers": {
+        "Date": "Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified": "Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type": "text/html",
+        "Content-Length": "8"
       },
-      "body":[
+      "body": [
         "no need."
       ]
     },
-    "expected":{
-      "debug_log":"Executing operator \"PmFromFile\" with param \".*\" against REQUEST_FILENAME"
+    "expected": {
+      "debug_log": "Executing operator \"PmFromFile\" with param \".*\" against REQUEST_FILENAME",
+      "http_code": 200
     },
-    "rules":[
+    "rules": [
       "SecRuleEngine On",
       "SecRemoteRules key https://raw.githubusercontent.com/owasp-modsecurity/ModSecurity/refs/heads/v3/master/test/modsecurity-regression-rules.txt",
       "SecRule ARGS \"@contains somethingelse\" \"id:9,pass,t:trim\""
     ]
   },
   {
-    "enabled":1,
+    "enabled": 1,
+    "version_min": 300000,
+    "title": "Include remote rules - failed download (Abort)",
     "resource": "curl",
-    "version_min":300000,
-    "title":"Include remote rules - failed download (Abort)",
-    "expected":{
+    "client": {
+      "ip": "",
+      "port": 0
+    },
+    "server": {
+      "ip": "",
+      "port": 0
+    },
+    "request": {
+      "headers": {
+        "Content-Length": "0"
+      },
+      "uri": "",
+      "method": "",
+      "body": [
+        ""
+      ]
+    },
+    "response": {
+      "headers": {
+        "Content-Length": "0"
+      },
+      "body": [
+        ""
+      ]
+    },
+    "expected": {
+      "http_code": 200,
       "parser_error": "Failed to download"
     },
-    "rules":[
+    "rules": [
       "SecRuleEngine On",
       "SecRemoteRulesFailAction Abort",
       "SecRemoteRules key https://gist.githubusercontent.com/zimmerle/a4c1ec028999f7df71d0cc80f4f271ca/raw/4c74363bf4eae974180f1a82007196e58729dd16/modsecurity-regression-test-secremoterules-bonga.txt"
     ]
   },
   {
-    "enabled":1,
+    "enabled": 1,
+    "version_min": 300000,
+    "title": "Include remote rules - failed download (Warn)",
     "resource": "curl",
-    "version_min":300000,
-    "title":"Include remote rules - failed download (Warn)",
-   "client":{
-      "ip":"200.249.12.31",
-      "port":123
+    "client": {
+      "ip": "200.249.12.31",
+      "port": 123
     },
-    "server":{
-      "ip":"200.249.12.31",
-      "port":80
+    "server": {
+      "ip": "200.249.12.31",
+      "port": 80
     },
-    "request":{
-      "headers":{
-        "Host":"localhost",
-        "User-Agent":"curl/7.38.0",
-        "Accept":"*/*"
+    "request": {
+      "headers": {
+        "Host": "localhost",
+        "User-Agent": "curl/7.38.0",
+        "Accept": "*/*",
+        "Content-Length": "0"
       },
-      "uri":"/?key=value&key=other_value",
-      "method":"GET"
+      "uri": "/?key=value&key=other_value",
+      "method": "GET",
+      "body": [
+        ""
+      ]
     },
-    "response":{
-      "headers":{
-        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
-        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
-        "Content-Type":"text/html"
+    "response": {
+      "headers": {
+        "Date": "Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified": "Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type": "text/html",
+        "Content-Length": "8"
       },
-      "body":[
+      "body": [
         "no need."
       ]
     },
-    "expected":{
-      "debug_log":"Executing operator \"Contains\" with param \"somethingelse\" against ARGS."
+    "expected": {
+      "debug_log": "Executing operator \"Contains\" with param \"somethingelse\" against ARGS.",
+      "http_code": 200
     },
-    "rules":[
+    "rules": [
       "SecRuleEngine On",
       "SecRemoteRulesFailAction Warn",
       "SecRemoteRules key https://gist.githubusercontent.com/zimmerle/a4c1ec028999f7df71d0cc80f4f271ca/raw/4c74363bf4eae974180f1a82007196e58729dd16/modsecurity-regression-test-secremoterules-bonga.txt",

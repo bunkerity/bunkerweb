@@ -24,20 +24,30 @@ int main(void) {
 
 static void test_data_pool_new(void) {
     {
-        MMDB_data_pool_s *const pool = data_pool_new(0);
+        MMDB_data_pool_s *const pool = data_pool_new(0, 512);
         ok(!pool, "size 0 is not valid");
     }
 
     {
-        MMDB_data_pool_s *const pool = data_pool_new(SIZE_MAX - 10);
+        MMDB_data_pool_s *const pool = data_pool_new(SIZE_MAX - 10, SIZE_MAX);
         ok(!pool, "very large size is not valid");
     }
 
     {
-        MMDB_data_pool_s *const pool = data_pool_new(512);
+        MMDB_data_pool_s *const pool = data_pool_new(512, 1024);
         ok(pool != NULL, "size 512 is valid");
         cmp_ok(pool->size, "==", 512, "size is 512");
         cmp_ok(pool->used, "==", 0, "used size is 0");
+        cmp_ok(pool->capacity, "==", 512, "capacity is 512");
+        cmp_ok(pool->max_size, "==", 1024, "maximum size is 1024");
+        data_pool_destroy(pool);
+    }
+
+    {
+        MMDB_data_pool_s *const pool = data_pool_new(512, 10);
+        ok(pool != NULL, "maximum smaller than initial size is valid");
+        cmp_ok(pool->size, "==", 10, "initial size is clamped to maximum");
+        cmp_ok(pool->capacity, "==", 10, "capacity is clamped to maximum");
         data_pool_destroy(pool);
     }
 }
@@ -48,7 +58,7 @@ static void test_data_pool_destroy(void) {
     }
 
     {
-        MMDB_data_pool_s *const pool = data_pool_new(512);
+        MMDB_data_pool_s *const pool = data_pool_new(512, 512);
         ok(pool != NULL, "created pool");
         data_pool_destroy(pool);
     }
@@ -56,7 +66,7 @@ static void test_data_pool_destroy(void) {
 
 static void test_data_pool_alloc(void) {
     {
-        MMDB_data_pool_s *const pool = data_pool_new(1);
+        MMDB_data_pool_s *const pool = data_pool_new(1, 3);
         ok(pool != NULL, "created pool");
         cmp_ok(pool->used, "==", 0, "used size starts at 0");
 
@@ -75,6 +85,12 @@ static void test_data_pool_alloc(void) {
         cmp_ok(pool->size, "==", 2, "size is 2 (new block)");
         cmp_ok(pool->used, "==", 1, "used size is 1 in current block");
 
+        MMDB_entry_data_list_s *const entry3 = data_pool_alloc(pool);
+        ok(entry3 != NULL, "got the final allowed entry");
+        ok(data_pool_alloc(pool) == NULL,
+           "allocation past maximum capacity is rejected");
+        cmp_ok(pool->capacity, "==", 3, "capacity does not exceed maximum");
+
         ok(entry1->entry_data.offset == 123,
            "accessing the original entry's memory is ok");
 
@@ -83,7 +99,8 @@ static void test_data_pool_alloc(void) {
 
     {
         size_t const initial_size = 10;
-        MMDB_data_pool_s *const pool = data_pool_new(initial_size);
+        MMDB_data_pool_s *const pool =
+            data_pool_new(initial_size, initial_size * 3);
         ok(pool != NULL, "created pool");
 
         MMDB_entry_data_list_s *entry1 = NULL;
@@ -124,12 +141,35 @@ static void test_data_pool_alloc(void) {
 
         data_pool_destroy(pool);
     }
+
+    {
+        size_t const maximum_size = 65536;
+        MMDB_data_pool_s *const pool = data_pool_new(64, maximum_size);
+        ok(pool != NULL, "created a decoder-sized pool");
+        for (size_t i = 0; i < maximum_size; i++) {
+            MMDB_entry_data_list_s *const entry = data_pool_alloc(pool);
+            assert(entry != NULL);
+            (void)entry;
+        }
+        cmp_ok(pool->capacity,
+               "==",
+               maximum_size,
+               "final block is clamped to the remaining capacity");
+        cmp_ok(pool->sizes[pool->index],
+               "==",
+               64,
+               "the clamped final block reserves only 64 entries");
+        ok(data_pool_alloc(pool) == NULL,
+           "decoder-sized pool refuses a 65,537th entry");
+        data_pool_destroy(pool);
+    }
 }
 
 static void test_data_pool_to_list(void) {
     {
         size_t const initial_size = 16;
-        MMDB_data_pool_s *const pool = data_pool_new(initial_size);
+        MMDB_data_pool_s *const pool =
+            data_pool_new(initial_size, initial_size);
         ok(pool != NULL, "created pool");
 
         MMDB_entry_data_list_s *const entry1 = data_pool_alloc(pool);
@@ -162,7 +202,8 @@ static void test_data_pool_to_list(void) {
 
     {
         size_t const initial_size = 1;
-        MMDB_data_pool_s *const pool = data_pool_new(initial_size);
+        MMDB_data_pool_s *const pool =
+            data_pool_new(initial_size, initial_size);
         ok(pool != NULL, "created pool");
 
         MMDB_entry_data_list_s *const entry1 = data_pool_alloc(pool);
@@ -180,7 +221,8 @@ static void test_data_pool_to_list(void) {
 
     {
         size_t const initial_size = 2;
-        MMDB_data_pool_s *const pool = data_pool_new(initial_size);
+        MMDB_data_pool_s *const pool =
+            data_pool_new(initial_size, initial_size);
         ok(pool != NULL, "created pool");
 
         MMDB_entry_data_list_s *const entry1 = data_pool_alloc(pool);
@@ -271,7 +313,11 @@ static void test_data_pool_to_list(void) {
 // this frequently.
 static bool create_and_check_list(size_t const initial_size,
                                   size_t const element_count) {
-    MMDB_data_pool_s *const pool = data_pool_new(initial_size);
+    size_t max_size = initial_size;
+    if (element_count > initial_size) {
+        max_size = element_count;
+    }
+    MMDB_data_pool_s *const pool = data_pool_new(initial_size, max_size);
     assert(pool != NULL);
 
     assert(pool->used == 0);

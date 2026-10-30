@@ -6,10 +6,11 @@
                type="hidden"
                class="plugin-setting plugin-setting-file-text"
                aria-labelledby="label-{{ setting_id_prefix }}{{ setting_data['id'] }}{{ setting_id_suffix }}"
-               pattern="{{ setting_data['regex'] }}"
+               pattern="{{ setting_data['regex'] | v_safe_pattern }}"
                value="{{ setting_value }}"
                data-original="{% if current_endpoint != 'new' %}{{ setting_value }}{% else %}{{ setting_default }}{% endif %}"
                data-default="{{ setting_default }}"
+               data-method="{{ setting_method }}"
                data-file-name="{{ setting_file_name }}"
                data-original-file-name="{% if current_endpoint != 'new' %}{{ setting_file_name }}{% endif %}"
                data-default-file-name=""
@@ -89,10 +90,11 @@
                type="{{ setting_data['type'] }}"
                class="form-control plugin-setting"
                aria-labelledby="label-{{ setting_id_prefix }}{{ setting_data['id'] }}{{ setting_id_suffix }}"
-               pattern="{{ setting_data['regex'] }}"
+               pattern="{{ setting_data['regex'] | v_safe_pattern }}"
                value="{{ setting_value }}"
                data-original="{% if current_endpoint != 'new' %}{{ setting_value }}{% else %}{{ setting_default }}{% endif %}"
                data-default="{{ setting_default }}"
+               data-method="{{ setting_method }}"
                {% if setting_data['type'] == 'password' %}autocomplete="off"{% endif %}
                {% if disabled %}disabled{% endif %}
                {% if setting == 'SERVER_NAME' or required %}required{% endif %}

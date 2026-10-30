@@ -10,8 +10,6 @@ from contextlib import suppress
 from typing import Sequence, Union
 
 from alembic import op
-import sqlalchemy as sa
-from sqlalchemy.dialects import mysql
 
 # revision identifiers, used by Alembic.
 revision: str = "0600f2ed826f"
@@ -23,9 +21,6 @@ depends_on: Union[str, Sequence[str], None] = None
 def upgrade() -> None:
     with suppress(Exception):
         op.create_unique_constraint(None, "bw_plugin_pages", ["plugin_id"])
-
-    with suppress(Exception):
-        op.drop_index("id", table_name="bw_settings")
 
     with suppress(Exception):
         op.create_unique_constraint(None, "bw_settings", ["name"])

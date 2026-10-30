@@ -1,0 +1,12 @@
+# postive samples for data contains 1.e(E),
+1' or 1.e(1)
+abc or 2 1.e%2
+1' or 2 1.E/1
+1' or 2 1.e%1
+1' or 2 1.E^1
+1' or 2 1.e|1
+1' or 2 1.e*1
+1' or 2 1.e&1
+1' or 2 1.e/id
+a select char 10.2E(id 2.e)
+1 or 1.e(1)

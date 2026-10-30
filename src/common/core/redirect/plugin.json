@@ -11,7 +11,7 @@
       "help": "Path to redirect from.",
       "id": "redirect-from",
       "label": "Redirect from",
-      "regex": "^.+",
+      "regex": "^(?!(?:~\\*|~|\\^~|=)$)(?:(?:~\\*|~|\\^~|=) )?[^\\s;{}]+$",
       "type": "text",
       "multiple": "redirect"
     },
@@ -21,7 +21,7 @@
       "help": "Redirect a whole site to another one.",
       "id": "redirect-to",
       "label": "Redirect to",
-      "regex": "^(https?:\\/\\/[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)?$",
+      "regex": "^(https?:\\/\\/[\\-\\w@:%.+~#=][\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)?$",
       "type": "text",
       "multiple": "redirect"
     },

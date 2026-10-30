@@ -5,7 +5,7 @@ local bit = require("bit")
 require "resty.openssl.include.ossl_typ"
 require "resty.openssl.include.err"
 require "resty.openssl.include.objects"
-local OPENSSL_3X = require("resty.openssl.version").OPENSSL_3X
+local OPENSSL_3_UP = require("resty.openssl.version").OPENSSL_3_UP
 
 ffi.cdef [[
   /* KDF */
@@ -19,7 +19,7 @@ ffi.cdef [[
     unsigned char *key, size_t keylen);
 ]]
 
-if OPENSSL_3X then
+if OPENSSL_3_UP then
   require "resty.openssl.include.provider"
 
   ffi.cdef [[
@@ -49,16 +49,16 @@ local _M = {
   EVP_CTRL_AEAD_SET_TAG = 0x11,
 
   -- remove EVP_PKEY_OP_* and EVP_PKEY_CTRL_* after openssl 1.1.1 support is dropped
-  EVP_PKEY_OP_PARAMGEN =  not OPENSSL_3X      and bit.lshift(1, 1)  or nil,
-  EVP_PKEY_OP_KEYGEN =  not OPENSSL_3X        and bit.lshift(1, 2)  or nil,
-  EVP_PKEY_OP_SIGN = not OPENSSL_3X           and bit.lshift(1, 3)  or nil,
-  EVP_PKEY_OP_VERIFY = not OPENSSL_3X         and bit.lshift(1, 4)  or nil,
-  EVP_PKEY_OP_VERIFYRECOVER = not OPENSSL_3X  and bit.lshift(1, 5)  or nil,
-  EVP_PKEY_OP_SIGNCTX = not OPENSSL_3X        and bit.lshift(1, 6)  or nil,
-  EVP_PKEY_OP_VERIFYCTX = not OPENSSL_3X      and bit.lshift(1, 7)  or nil,
-  EVP_PKEY_OP_ENCRYPT = not OPENSSL_3X        and bit.lshift(1, 8)  or nil,
-  EVP_PKEY_OP_DECRYPT = not OPENSSL_3X        and bit.lshift(1, 9)  or nil,
-  EVP_PKEY_OP_DERIVE = not OPENSSL_3X         and bit.lshift(1, 10) or nil,
+  EVP_PKEY_OP_PARAMGEN =  not OPENSSL_3_UP      and bit.lshift(1, 1)  or nil,
+  EVP_PKEY_OP_KEYGEN =  not OPENSSL_3_UP        and bit.lshift(1, 2)  or nil,
+  EVP_PKEY_OP_SIGN = not OPENSSL_3_UP           and bit.lshift(1, 3)  or nil,
+  EVP_PKEY_OP_VERIFY = not OPENSSL_3_UP         and bit.lshift(1, 4)  or nil,
+  EVP_PKEY_OP_VERIFYRECOVER = not OPENSSL_3_UP  and bit.lshift(1, 5)  or nil,
+  EVP_PKEY_OP_SIGNCTX = not OPENSSL_3_UP        and bit.lshift(1, 6)  or nil,
+  EVP_PKEY_OP_VERIFYCTX = not OPENSSL_3_UP      and bit.lshift(1, 7)  or nil,
+  EVP_PKEY_OP_ENCRYPT = not OPENSSL_3_UP        and bit.lshift(1, 8)  or nil,
+  EVP_PKEY_OP_DECRYPT = not OPENSSL_3_UP        and bit.lshift(1, 9)  or nil,
+  EVP_PKEY_OP_DERIVE = not OPENSSL_3_UP         and bit.lshift(1, 10) or nil,
 
   EVP_PKEY_ALG_CTRL = EVP_PKEY_ALG_CTRL,
 
@@ -99,7 +99,7 @@ local OSSL_KEYMGMT_SELECT_ALL_PARAMETERS = OSSL_KEYMGMT_SELECT_DOMAIN_PARAMETERS
 -- local OSSL_KEYMGMT_SELECT_ALL = OSSL_KEYMGMT_SELECT_KEYPAIR + 
 --                                 OSSL_KEYMGMT_SELECT_ALL_PARAMETERS
 
-if not OPENSSL_3X then
+if not OPENSSL_3_UP then
   _M.EVP_PKEY_OP_CRYPT = _M.EVP_PKEY_OP_ENCRYPT + _M.EVP_PKEY_OP_DECRYPT
   _M.EVP_PKEY_OP_SIG = _M.EVP_PKEY_OP_SIGN + _M.EVP_PKEY_OP_VERIFY + _M.EVP_PKEY_OP_VERIFYRECOVER +
                       _M.EVP_PKEY_OP_SIGNCTX + _M.EVP_PKEY_OP_VERIFYCTX

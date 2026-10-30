@@ -59,7 +59,6 @@ class RuleWithOperator : public RuleWithActions {
 
     static void updateMatchedVars(Transaction *trasn, const std::string &key,
         const std::string &value);
-    static void cleanMatchedVars(Transaction *trasn);
 
 
     const std::string& getOperatorName() const;

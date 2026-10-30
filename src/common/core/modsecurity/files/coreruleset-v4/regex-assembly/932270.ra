@@ -4,6 +4,17 @@
 ##! Bash - Tilde Expansion
 ##! Detects the following patterns which are common in Unix shell scripts and one-liners
 
+##! Bash only expands a tilde-prefix at the start of a word, so require
+##! start-of-string or a character that can precede one. This drops FPs on
+##! values like "cookie=abc~+1", which bash leaves alone, while keeping
+##! shell-chained commands like "cmd;~+1", "cmd|~+1" and "$(~+1)".
+##!
+##! '=' and ':' are included because bash also expands tilde-prefixes in
+##! words that look like variable assignments, even as plain command
+##! arguments: `echo x=~+1` and `echo c=/tmp:~+1` both expand.
+
+##!^ (?:^|[\s;|&`$(<>=:])
+
 ~\+$
 ~\+\d+
 ~-$

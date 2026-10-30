@@ -58,7 +58,7 @@ local SECTION_AR  = 3
 
 
 local _M = {
-    _VERSION    = '0.22',
+    _VERSION    = '0.23',
     TYPE_A      = TYPE_A,
     TYPE_NS     = TYPE_NS,
     TYPE_CNAME  = TYPE_CNAME,
@@ -285,6 +285,10 @@ local function _decode_name(buf, pos)
 
         else
             -- being a label
+            if p + fst > #buf then
+                return nil, "truncated"
+            end
+
             local label = sub(buf, p + 1, p + fst)
             insert(labels, label)
 
@@ -296,6 +300,10 @@ local function _decode_name(buf, pos)
                 pos = p
             end
         end
+    end
+
+    if nptrs == 128 then
+        return nil, "too many compression pointers"
     end
 
     return concat(labels, "."), pos
@@ -368,6 +376,10 @@ local function parse_section(answers, section, buf, start_pos, size,
 
         -- print("name: ", name)
 
+        if pos + 9 > #buf then
+            return nil, "truncated"
+        end
+
         local type_hi = byte(buf, pos)
         local type_lo = byte(buf, pos + 1)
         local typ = lshift(type_hi, 8) + type_lo
@@ -400,12 +412,19 @@ local function parse_section(answers, section, buf, start_pos, size,
         -- print("record len: ", len)
 
         pos = pos + 10
+        local last = pos + len - 1
+        if typ == TYPE_A and len ~= 4 then
+            return nil, "bad A record value length: " .. len
+
+        elseif typ == TYPE_AAAA and len ~= 16 then
+            return nil, "bad AAAA record value length: " .. len
+        end
+
+        if last > #buf then
+            return nil, "truncated"
+        end
 
         if typ == TYPE_A then
-
-            if len ~= 4 then
-                return nil, "bad A record value length: " .. len
-            end
 
             local addr_bytes = { byte(buf, pos, pos + 3) }
             local addr = concat(addr_bytes, ".")
@@ -419,7 +438,7 @@ local function parse_section(answers, section, buf, start_pos, size,
 
             local cname, p = _decode_name(buf, pos)
             if not cname then
-                return nil, pos
+                return nil, p
             end
 
             if p - pos ~= len then
@@ -434,10 +453,6 @@ local function parse_section(answers, section, buf, start_pos, size,
             ans.cname = cname
 
         elseif typ == TYPE_AAAA then
-
-            if len ~= 16 then
-                return nil, "bad AAAA record value length: " .. len
-            end
 
             local addr_bytes = { byte(buf, pos, pos + 15) }
             local flds = {}
@@ -474,7 +489,7 @@ local function parse_section(answers, section, buf, start_pos, size,
 
             local host, p = _decode_name(buf, pos + 2)
             if not host then
-                return nil, pos
+                return nil, p
             end
 
             if p - pos ~= len then
@@ -505,7 +520,7 @@ local function parse_section(answers, section, buf, start_pos, size,
 
             local name, p = _decode_name(buf, pos + 6)
             if not name then
-                return nil, pos
+                return nil, p
             end
 
             if p - pos ~= len then
@@ -521,7 +536,7 @@ local function parse_section(answers, section, buf, start_pos, size,
 
             local name, p = _decode_name(buf, pos)
             if not name then
-                return nil, pos
+                return nil, p
             end
 
             if p - pos ~= len then
@@ -539,10 +554,13 @@ local function parse_section(answers, section, buf, start_pos, size,
 
             local key = (typ == TYPE_TXT) and "txt" or "spf"
 
+            if len == 0 then
+                return nil, "bad " .. key .. " record value length: 0"
+            end
+
             local slen = byte(buf, pos)
             if slen + 1 > len then
-                -- truncate the over-run TXT record data
-                slen = len
+                return nil, "bad " .. key .. " record string length"
             end
 
             -- print("slen: ", len)
@@ -562,8 +580,7 @@ local function parse_section(answers, section, buf, start_pos, size,
                 repeat
                     local slen = byte(buf, pos)
                     if pos + slen + 1 > last then
-                        -- truncate the over-run TXT record data
-                        slen = last - pos - 1
+                        return nil, "bad " .. key .. " record string length"
                     end
 
                     val[idx] = sub(buf, pos + 1, pos + slen)
@@ -579,7 +596,7 @@ local function parse_section(answers, section, buf, start_pos, size,
 
             local name, p = _decode_name(buf, pos)
             if not name then
-                return nil, pos
+                return nil, p
             end
 
             if p - pos ~= len then
@@ -596,16 +613,20 @@ local function parse_section(answers, section, buf, start_pos, size,
         elseif typ == TYPE_SOA then
             local name, p = _decode_name(buf, pos)
             if not name then
-                return nil, pos
+                return nil, p
             end
             ans.mname = name
 
             pos = p
             name, p = _decode_name(buf, pos)
             if not name then
-                return nil, pos
+                return nil, p
             end
             ans.rname = name
+
+            if p + 19 ~= last then
+                return nil, "bad SOA record value length: " .. len
+            end
 
             for _, field in ipairs(soa_int32_fields) do
                 local byte_1, byte_2, byte_3, byte_4 = byte(buf, p, p + 3)

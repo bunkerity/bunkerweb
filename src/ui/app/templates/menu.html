@@ -105,6 +105,28 @@
                     <div class="text-truncate" data-i18n="navigation.support">Support</div>
                 </a>
             </li>
+            {% set menu_plugin_types = {
+                "core": {
+                    "icon": "<i class=\"menu-icon tf-icons bx bx-shield me-0\"></i>"
+                },
+                "external": {
+                    "icon": "<i class=\"menu-icon tf-icons bx bx-plug me-0\"></i>"
+                },
+                "ui": {
+                    "icon": "<i class=\"menu-icon tf-icons bx bx-cloud-upload me-0\"></i>"
+                }
+            } %}
+            {% set extra_plugin_lookup = {} %}
+            {% for _pid, _pdata in plugins.items() %}
+                {% set _ = extra_plugin_lookup.update({_pid: _pdata}) %}
+                {% set _ = extra_plugin_lookup.update({_pid | lower: _pdata}) %}
+                {% set _ = extra_plugin_lookup.update({_pid | replace('-', '_') | lower: _pdata}) %}
+                {% set _ = extra_plugin_lookup.update({_pid | replace('_', '-') | lower: _pdata}) %}
+                {% if _pdata.get('name') %}
+                    {% set _ = extra_plugin_lookup.update({_pdata['name'] | replace(' ', '_') | lower: _pdata}) %}
+                    {% set _ = extra_plugin_lookup.update({_pdata['name'] | replace(' ', '-') | lower: _pdata}) %}
+                {% endif %}
+            {% endfor %}
             {% if extra_pages %}
                 <!-- Extra Pages -->
                 <li class="menu-header text-uppercase align-items-center mb-0">
@@ -121,10 +143,21 @@
                 <div class="collapse py-1 show" id="extraPagesCollapse">
                     <div class="menu-inner">
                         {% for page in extra_pages %}
-                            <li class="menu-item{% if current_endpoint == page|lower %} active{% endif %}">
+                            {% set extra_plugin_data = extra_plugin_lookup.get(page) or extra_plugin_lookup.get(page | lower) or extra_plugin_lookup.get(page | replace('-', '_') | lower) or extra_plugin_lookup.get(page | replace('_', '-') | lower) %}
+                            <li class="menu-item{% if current_endpoint == page|lower %} active{% endif %}"{% if extra_plugin_data and not is_pro_version and extra_plugin_data['type'] == "pro" %} data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true" data-bs-original-title="<i class='bx bx-diamond bx-xs'></i><span data-i18n='pro.overlay.pro_feature'>Pro feature</span>"{% endif %}>
                                 <a href="{{ url_for(page) }}" class="menu-link">
-                                    <i class="menu-icon tf-icons bx bx-extension"></i>
-                                    <div class="text-truncate">{{ page | replace('-', ' ') | replace('_', ' ') |title }}</div>
+                                    {% if extra_plugin_data %}
+                                        {{ menu_plugin_types.get(extra_plugin_data["type"], {}).get('icon', '<img src="' + pro_diamond_url + '"
+     alt="Pro plugin"
+     width="20px"
+     height="17.2px">') |safe }}
+                                        <div class="text-truncate pe-2{% if extra_plugin_data['type'] == 'pro' %} text-primary shine shine-sm ps-3{% else %} ps-2{% endif %}">
+                                            {{ extra_plugin_data['name'] }}
+                                        </div>
+                                    {% else %}
+                                        <i class="menu-icon tf-icons bx bx-extension"></i>
+                                        <div class="text-truncate">{{ page | replace('-', ' ') | replace('_', ' ') |title }}</div>
+                                    {% endif %}
                                 </a>
                             </li>
                         {% endfor %}
@@ -143,17 +176,6 @@
                     <i class="bx bx-chevron-right chevron-icon chevron-rotate"></i>
                 </button>
             </li>
-            {% set menu_plugin_types = {
-                "core": {
-                    "icon": "<i class=\"menu-icon tf-icons bx bx-shield me-0\"></i>"
-                },
-                "external": {
-                    "icon": "<i class=\"menu-icon tf-icons bx bx-plug me-0\"></i>"
-                },
-                "ui": {
-                    "icon": "<i class=\"menu-icon tf-icons bx bx-cloud-upload me-0\"></i>"
-                }
-            } %}
             <div class="collapse py-1 show" id="pluginsCollapse">
                 <div class="menu-inner">
                     {% for plugin, plugin_data in plugins.items() %}

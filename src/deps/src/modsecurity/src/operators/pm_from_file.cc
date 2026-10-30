@@ -20,7 +20,9 @@
 #include "src/operators/operator.h"
 #include "src/utils/https_client.h"
 #include "src/utils/system.h"
+#include "src/utils/string.h"
 
+using namespace modsecurity::utils::string;
 
 namespace modsecurity {
 namespace operators {
@@ -44,39 +46,44 @@ bool PmFromFile::isComment(const std::string &s) {
 }
 
 bool PmFromFile::init(const std::string &config, std::string *error) {
-    std::istream *iss;
+    std::vector<std::string> tokens = split(m_param, ' ');
 
-    if (m_param.compare(0, 8, "https://") == 0) {
-        Utils::HttpsClient client;
-        bool ret = client.download(m_param);
-        if (ret == false) {
-            error->assign(client.error);
-            return false;
+    for (const auto& token : tokens) {
+        if (token.empty()) {
+            continue;
         }
-        iss = new std::stringstream(client.content);
-    } else {
-        std::string err;
-        std::string resource = utils::find_resource(m_param, config, &err);
-        iss = new std::ifstream(resource, std::ios::in);
 
-        if (((std::ifstream *)iss)->is_open() == false) {
-            error->assign("Failed to open file: " + m_param + ". " + err);
-            delete iss;
-            return false;
+        std::unique_ptr<std::istream> iss;
+
+        if (token.compare(0, 8, "https://") == 0) {
+            Utils::HttpsClient client;
+            bool ret = client.download(token);
+            if (ret == false) {
+                error->assign(client.error);
+                return false;
+            }
+            iss = std::make_unique<std::stringstream>(client.content);
+        } else {
+            std::string err;
+            std::string resource = utils::find_resource(token, config, &err);
+            auto file = std::make_unique<std::ifstream>(resource, std::ios::in);
+            if (file->is_open() == false) {
+                error->assign("Failed to open file: '" + token + "'. " + err);
+                return false;
+            }
+            iss = std::move(file);
         }
-    }
-
-    for (std::string line; std::getline(*iss, line); ) {
-        if (isComment(line) == false) {
-            acmp_add_pattern(m_p, line.c_str(), NULL, NULL, line.length());
-	}
+        for (std::string line; std::getline(*iss, line); ) {
+            if (isComment(line) == false) {
+                acmp_add_pattern(m_p, line.c_str(), NULL, NULL, line.length());
+            }
+        }
     }
 
     while (m_p->is_failtree_done == 0) {
         acmp_prepare(m_p);
     }
 
-    delete iss;
     return true;
 }
 

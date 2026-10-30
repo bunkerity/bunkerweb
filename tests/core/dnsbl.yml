@@ -1,0 +1,56 @@
+integrations: "all"
+
+actions:
+  activated:
+    type: status
+    url: "http://www.example.com"
+    status: 403
+    full_clean: true
+    headers:
+      X-Forwarded-For: "2.254.254.254"
+
+  ignored:
+    type: status
+    url: "http://www.example.com"
+    status: 200
+    headers:
+      X-Forwarded-For: "2.254.254.254"
+    config:
+      DNSBL_IGNORE_IP: "2.254.254.254"
+  ignored_urls:
+    type: status
+    url: "http://www.example.com"
+    status: 200
+    headers:
+      X-Forwarded-For: "2.254.254.254"
+    config:
+      DNSBL_IGNORE_IP_URLS: "http://custom-api:8000/list/ip"
+    Kubernetes:
+      config:
+        DNSBL_IGNORE_IP_URLS: "http://svc-custom-api.misc.svc.cluster.local:8000/list/ip"
+
+  deactivated:
+    type: status
+    url: "http://www.example.com"
+    status: 200
+    headers:
+      X-Forwarded-For: "2.254.254.254"
+    config:
+      USE_DNSBL: "no"
+
+  no_list:
+    type: status
+    url: "http://www.example.com"
+    status: 200
+    headers:
+      X-Forwarded-For: "2.254.254.254"
+    config:
+      DNSBL_LIST: ""
+
+config:
+  USE_DNSBL: "yes"
+  DNSBL_LIST: "example.com"
+  DNSBL_IGNORE_IP: ""
+  DNSBL_IGNORE_IP_URLS: ""
+  USE_REAL_IP: "yes"
+  REAL_IP_FROM: "0.0.0.0/0"

@@ -1,0 +1,43 @@
+/* Generic dark-mode rules for Bootstrap components with no light override in these files.
+   Loaded last on purpose: they must win over the component rules in the earlier parts. */
+
+.dark-style .card {
+  background-color: #0c283a;
+  border-color: #0c283a;
+  color: #fff;
+}
+
+.dark-style h6,
+.dark-style .h6,
+.dark-style h5,
+.dark-style .h5,
+.dark-style h4,
+.dark-style .h4,
+.dark-style h3,
+.dark-style .h3,
+.dark-style h2,
+.dark-style .h2,
+.dark-style h1,
+.dark-style .h1 {
+  color: #fff;
+}
+
+.dark-style .text-primary {
+  color: var(--bs-primary) !important;
+}
+
+.dark-style .dropdown-item {
+  color: #fff;
+}
+
+.dark-style .bg-secondary {
+  color: #fff;
+}
+
+.dark-style a:hover {
+  color: #fff;
+}
+
+.dark-style .bg-bw-green {
+  background-color: var(--bs-bw-green);
+}

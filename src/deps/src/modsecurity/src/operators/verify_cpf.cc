@@ -112,13 +112,12 @@ bool VerifyCPF::evaluate(Transaction *t, RuleWithActions *rule,
     const std::string& input, RuleMessage &ruleMessage) {
     std::list<SMatch> matches;
     bool is_cpf = false;
-    int i;
 
     if (m_param.empty()) {
         return false;
     }
 
-    for (i = 0; i < input.size() - 1 && is_cpf == false; i++) {
+    for (size_t i = 0; i + 1 < input.size() && !is_cpf; i++) {
         matches = m_re->searchAll(input.substr(i, input.size()));
         for (const auto & m : matches) {
             is_cpf = verify(m.str().c_str(), m.str().size());

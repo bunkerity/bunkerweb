@@ -226,13 +226,11 @@ def upgrade():
         batch_op.add_column(sa.Column("data", sa.LargeBinary(length=(2**32) - 1), nullable=True))
         batch_op.add_column(sa.Column("checksum", sa.String(128), nullable=True))
 
-    op.execute(
-        """
+    op.execute("""
         UPDATE bw_plugin_pages
         SET data = template_file, checksum = template_checksum
         WHERE template_file IS NOT NULL
-        """
-    )
+        """)
 
     with op.batch_alter_table("bw_plugin_pages") as batch_op:
         batch_op.alter_column("data", existing_type=sa.LargeBinary(length=(2**32) - 1), nullable=False)
@@ -315,13 +313,11 @@ def downgrade():
         sa.ForeignKeyConstraint(["plugin_id"], ["bw_plugins.id"], onupdate="CASCADE", ondelete="CASCADE"),
     )
 
-    op.execute(
-        """
+    op.execute("""
         INSERT INTO bw_plugin_pages_old (id, plugin_id, template_file, template_checksum, actions_file, actions_checksum)
         SELECT id, plugin_id, NULL, '', NULL, ''
         FROM bw_plugin_pages
-        """
-    )
+        """)
 
     op.drop_table("bw_plugin_pages")
     op.rename_table("bw_plugin_pages_old", "bw_plugin_pages")
@@ -337,13 +333,11 @@ def downgrade():
         sa.Column("method", sa.String(16), nullable=False, server_default="manual"),
     )
 
-    op.execute(
-        """
+    op.execute("""
         INSERT INTO bw_ui_users_old (id, username, password, is_two_factor_enabled, secret_token, method)
         SELECT 1, username, password, '0', NULL, 'manual'
         FROM bw_ui_users
-        """
-    )
+        """)
 
     op.drop_table("bw_ui_users")
     op.rename_table("bw_ui_users_old", "bw_ui_users")
