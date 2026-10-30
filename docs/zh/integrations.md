@@ -2354,13 +2354,6 @@ sudo ./install-bunkerweb.sh --yes --api
     sudo apt install -y --allow-downgrades nginx=1.30.6-1~$(lsb_release -cs)
     ```
 
-    !!! warning "测试/开发版本"
-        如果您使用 `testing` 或 `dev` 版本，您需要在安装 BunkerWeb 之前将 `force-bad-version` 指令添加到您的 `/etc/dpkg/dpkg.cfg` 文件中。
-
-        ```shell
-        echo "force-bad-version" | sudo tee -a /etc/dpkg/dpkg.cfg
-        ```
-
     !!! example "禁用设置向导"
         如果您不希望在安装 BunkerWeb 时使用 Web UI 的设置向导，请导出以下变量：
 
@@ -2401,13 +2394,6 @@ sudo ./install-bunkerweb.sh --yes --api
     sudo apt update && \
     sudo apt install -y --allow-downgrades nginx=1.30.6-1~$(lsb_release -cs)
     ```
-
-    !!! warning "测试/开发版本"
-        如果您使用 `testing` 或 `dev` 版本，您需要在安装 BunkerWeb 之前将 `force-bad-version` 指令添加到您的 `/etc/dpkg/dpkg.cfg` 文件中。
-
-        ```shell
-        echo "force-bad-version" | sudo tee -a /etc/dpkg/dpkg.cfg
-        ```
 
     !!! example "禁用设置向导"
         如果您不希望在安装 BunkerWeb 时使用 Web UI 的设置向导，请导出以下变量：

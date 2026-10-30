@@ -2355,13 +2355,6 @@ Asegúrate de tener **NGINX 1.30.6 instalado antes de instalar BunkerWeb**. Para
     sudo apt install -y --allow-downgrades nginx=1.30.6-1~$(lsb_release -cs)
     ```
 
-    !!! warning "Versión de prueba/desarrollo"
-        Si usas la versión `testing` o `dev`, necesitarás añadir la directiva `force-bad-version` a tu archivo `/etc/dpkg/dpkg.cfg` antes de instalar BunkerWeb.
-
-        ```shell
-        echo "force-bad-version" | sudo tee -a /etc/dpkg/dpkg.cfg
-        ```
-
     !!! example "Deshabilitar el asistente de configuración"
         Si no quieres usar el asistente de configuración de la interfaz de usuario web cuando se instale BunkerWeb, exporta la siguiente variable:
 
@@ -2402,13 +2395,6 @@ Asegúrate de tener **NGINX 1.30.6 instalado antes de instalar BunkerWeb**. Para
     sudo apt update && \
     sudo apt install -y --allow-downgrades nginx=1.30.6-1~$(lsb_release -cs)
     ```
-
-    !!! warning "Versión de prueba/desarrollo"
-        Si usas la versión `testing` o `dev`, necesitarás añadir la directiva `force-bad-version` a tu archivo `/etc/dpkg/dpkg.cfg` antes de instalar BunkerWeb.
-
-        ```shell
-        echo "force-bad-version" | sudo tee -a /etc/dpkg/dpkg.cfg
-        ```
 
     !!! example "Deshabilitar el asistente de configuración"
         Si no quieres usar el asistente de configuración de la interfaz de usuario web cuando se instale BunkerWeb, exporta la siguiente variable:

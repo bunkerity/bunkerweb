@@ -2469,13 +2469,6 @@ Please ensure that you have **NGINX 1.30.6 installed before installing BunkerWeb
     sudo apt install -y --allow-downgrades nginx=1.30.6-1~$(lsb_release -cs)
     ```
 
-    !!! warning "Testing/dev version"
-        If you use the `testing` or `dev` version, you will need to add the `force-bad-version` directive to your `/etc/dpkg/dpkg.cfg` file before installing BunkerWeb.
-
-        ```shell
-        echo "force-bad-version" | sudo tee -a /etc/dpkg/dpkg.cfg
-        ```
-
     !!! example "Disable the setup wizard"
         If you don't want to use the setup wizard of the web UI when BunkerWeb is installed, export the following variable:
 
@@ -2516,13 +2509,6 @@ Please ensure that you have **NGINX 1.30.6 installed before installing BunkerWeb
     sudo apt update && \
     sudo apt install -y --allow-downgrades nginx=1.30.6-1~$(lsb_release -cs)
     ```
-
-    !!! warning "Testing/dev version"
-        If you use the `testing` or `dev` version, you will need to add the `force-bad-version` directive to your `/etc/dpkg/dpkg.cfg` file before installing BunkerWeb.
-
-        ```shell
-        echo "force-bad-version" | sudo tee -a /etc/dpkg/dpkg.cfg
-        ```
 
     !!! example "Disable the setup wizard"
         If you don't want to use the setup wizard of the web UI when BunkerWeb is installed, export the following variable:

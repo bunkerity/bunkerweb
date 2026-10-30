@@ -42,3 +42,23 @@ def test_dry_run_resolves_nginx_version(version, nginx):
         env=os.environ | {"NO_COLOR": "1"},
     )
     assert f"NGINX version: {nginx}" in result.stdout
+
+
+def _run_dry(*args):
+    return subprocess.run(
+        ["bash", str(SCRIPT), "--dry-run", "--yes", "--no-tui", *args, "--full"],
+        capture_output=True,
+        text=True,
+        env=os.environ | {"NO_COLOR": "1"},
+    )
+
+
+@pytest.mark.parametrize("version", ["dev", "testing", "1.7-dev"])
+def test_floating_package_versions_are_refused(version):
+    result = _run_dry("--version", version)
+    assert result.returncode == 1
+    assert f"No '{version}' package is published" in result.stdout + result.stderr
+
+
+def test_testing_docker_tag_is_still_accepted():
+    assert _run_dry("--docker", "--image-tag", "testing").returncode == 0

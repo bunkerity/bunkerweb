@@ -6624,23 +6624,8 @@ EOF
     print_status "NGINX $NGINX_VERSION installed successfully"
 }
 
-# testing/dev channels carry non-standard version strings that dpkg flags as a
-# "bad version number"; allow them so the install/upgrade is not rejected. Both
-# the fresh-install AND the upgrade path call this (an upgrade stable -> testing/dev
-# fails otherwise). Idempotent: append the directive only when absent so re-runs
-# never duplicate the line.
-_dpkg_allow_testing_dev_version() {
-    [[ "$BUNKERWEB_VERSION" =~ (testing|dev) ]] || return 0
-    if ! grep -qxF "force-bad-version" /etc/dpkg/dpkg.cfg 2>/dev/null; then
-        print_status "Adding force-bad-version directive for testing/dev version"
-        echo "force-bad-version" >> /etc/dpkg/dpkg.cfg
-    fi
-}
-
 install_bunkerweb_debian() {
     print_step "Installing BunkerWeb on Debian/Ubuntu"
-
-    _dpkg_allow_testing_dev_version
 
     if [ "$ENABLE_WIZARD" = "no" ]; then
         export UI_WIZARD=no
@@ -8739,6 +8724,16 @@ if [ "$DOCKER_SYSLOG_EXPLICIT" = "yes" ]; then
     exit 1
 fi
 
+# The floating dev/testing (and 1.7-dev) builds are no longer published to the package
+# repository: only versioned packages are. Docker images keep their testing tag.
+case "$BUNKERWEB_VERSION" in
+    dev|testing|*-dev|*-testing)
+        print_error "No '$BUNKERWEB_VERSION' package is published: floating dev/testing builds are no longer shipped to the package repository."
+        print_error "Install a published version instead, e.g. --version $DEFAULT_BUNKERWEB_VERSION (release candidates are published too), or use --docker --image-tag testing."
+        exit 1
+        ;;
+esac
+
 # Force wizard off for manager installations
 if [ "$INSTALL_TYPE" = "manager" ]; then
     if [ "$ENABLE_WIZARD" = "yes" ]; then
@@ -9399,9 +9394,6 @@ to /etc/bunkerweb and the database schema."
     print_step "Upgrading BunkerWeb package"
     case "$DISTRO_ID" in
         debian|ubuntu)
-            # Upgrading stable -> testing/dev needs the same dpkg allowance as a
-            # fresh install, else apt rejects the non-standard version string.
-            _dpkg_allow_testing_dev_version
             run_cmd apt update
             run_cmd apt install -y --allow-downgrades "bunkerweb=$BUNKERWEB_VERSION"
             run_cmd apt-mark hold bunkerweb nginx

@@ -395,116 +395,9 @@ jobs:
             docker push "$DST"
           done
 
-  # Push Linux packages
-  push-packages:
-    needs:
-      [
-        codeql,
-        run-Docker-tests-core,
-        run-Autoconf-tests-core,
-        run-Linux-tests-core,
-        run-Kubernetes-tests-core,
-        run-All-in-one-tests-core,
-        run-Docker-tests-api,
-        run-Docker-tests-ui,
-        smoke-images,
-      ]
-    strategy:
-      matrix:
-        linux:
-          [
-            ubuntu,
-            debian-bookworm,
-            debian-trixie,
-            fedora-43,
-            fedora-44,
-            el-8,
-            el-9,
-            el-10,
-            ubuntu-noble,
-            ubuntu-jammy,
-          ]
-        arch: [amd64]
-        include:
-          - release: testing
-            repo: bunkerweb
-          - linux: ubuntu
-            package_arch: amd64
-            separator: _
-            suffix: ""
-            version: resolute
-            package: deb
-          - linux: ubuntu-noble
-            package_arch: amd64
-            separator: _
-            suffix: ""
-            version: noble
-            package: deb
-          - linux: debian-bookworm
-            package_arch: amd64
-            separator: _
-            suffix: ""
-            version: bookworm
-            package: deb
-          - linux: debian-trixie
-            package_arch: amd64
-            separator: _
-            suffix: ""
-            version: trixie
-            package: deb
-          - linux: fedora-43
-            package_arch: x86_64
-            separator: "-"
-            suffix: "1."
-            version: 43
-            package: rpm
-          - linux: fedora-44
-            package_arch: x86_64
-            separator: "-"
-            suffix: "1."
-            version: 44
-            package: rpm
-          - linux: el-8
-            package_arch: x86_64
-            separator: "-"
-            suffix: "1."
-            version: 8
-            package: rpm
-          - linux: el-9
-            package_arch: x86_64
-            separator: "-"
-            suffix: "1."
-            version: 9
-            package: rpm
-          - linux: el-10
-            package_arch: x86_64
-            separator: "-"
-            suffix: "1."
-            version: 10
-            package: rpm
-          - linux: ubuntu-jammy
-            package_arch: amd64
-            separator: _
-            suffix: ""
-            version: jammy
-            package: deb
-    uses: ./.github/workflows/push-packagecloud.yml
-    with:
-      SEPARATOR: ${{ matrix.separator }}
-      SUFFIX: ${{ matrix.suffix }}
-      REPO: ${{ matrix.repo }}
-      LINUX: ${{ matrix.linux }}
-      VERSION: ${{ matrix.version }}
-      PACKAGE: ${{ matrix.package }}
-      BW_VERSION: ${{ matrix.release }}
-      PACKAGE_ARCH: ${{ matrix.package_arch }}
-      ARCH: ${{ matrix.arch }}
-    secrets:
-      PACKAGECLOUD_TOKEN: ${{ secrets.PACKAGECLOUD_TOKEN }}
-
   # Push doc
   push-doc:
-    needs: [push-images, push-packages]
+    needs: [push-images]
     permissions:
       contents: write
     uses: ./.github/workflows/push-doc.yml
@@ -513,15 +406,3 @@ jobs:
       ALIAS: unstable
     secrets:
       BUNKERBOT_TOKEN: ${{ secrets.BUNKERBOT_TOKEN }}
-
-  # Push on GH
-  push-gh:
-    needs: [push-doc]
-    permissions:
-      contents: write
-      discussions: write
-      actions: read
-    uses: ./.github/workflows/push-github.yml
-    with:
-      VERSION: testing
-      PRERELEASE: true

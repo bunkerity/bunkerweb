@@ -59,7 +59,7 @@ jobs:
           MANIFEST_SHA256: ${{ inputs.MANIFEST_SHA256 }}
         run: |
           case "$VERSION" in
-            dev|testing|ui|1.5) ;;
+            ui|1.5) ;;
             *) test -n "$MANIFEST_SHA256" ;;
           esac
       - name: Download candidate manifest

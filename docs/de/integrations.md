@@ -2354,13 +2354,6 @@ Bitte stellen Sie sicher, dass Sie **NGINX 1.30.6 installiert haben, bevor Sie B
     sudo apt install -y --allow-downgrades nginx=1.30.6-1~$(lsb_release -cs)
     ```
 
-    !!! warning "Testing/dev-Version"
-        Wenn Sie die `testing`- oder `dev`-Version verwenden, müssen Sie die Direktive `force-bad-version` zu Ihrer `/etc/dpkg/dpkg.cfg`-Datei hinzufügen, bevor Sie BunkerWeb installieren.
-
-        ```shell
-        echo "force-bad-version" | sudo tee -a /etc/dpkg/dpkg.cfg
-        ```
-
     !!! example "Einrichtungsassistenten deaktivieren"
         Wenn Sie den Einrichtungsassistenten der Web-UI bei der Installation von BunkerWeb nicht verwenden möchten, exportieren Sie die folgende Variable:
 
@@ -2401,13 +2394,6 @@ Bitte stellen Sie sicher, dass Sie **NGINX 1.30.6 installiert haben, bevor Sie B
     sudo apt update && \
     sudo apt install -y --allow-downgrades nginx=1.30.6-1~$(lsb_release -cs)
     ```
-
-    !!! warning "Testing/dev-Version"
-        Wenn Sie die `testing`- oder `dev`-Version verwenden, müssen Sie die Direktive `force-bad-version` zu Ihrer `/etc/dpkg/dpkg.cfg`-Datei hinzufügen, bevor Sie BunkerWeb installieren.
-
-        ```shell
-        echo "force-bad-version" | sudo tee -a /etc/dpkg/dpkg.cfg
-        ```
 
     !!! example "Einrichtungsassistenten deaktivieren"
         Wenn Sie den Einrichtungsassistenten der Web-UI bei der Installation von BunkerWeb nicht verwenden möchten, exportieren Sie die folgende Variable:
