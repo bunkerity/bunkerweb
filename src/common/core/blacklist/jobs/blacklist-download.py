@@ -239,7 +239,10 @@ try:
             unique_entries = set()
             content = b""
             for url in urls_list:
-                url_file = f"{bytes_hash(url, algorithm='sha1')}.list"
+                # Key by kind too: cached entries are already transformed by check_line for that kind
+                # SHA-256 instead of SHA-1; TODO: switch the other list downloaders (greylist, whitelist,
+                # realip, dnsbl, robotstxt) to the same SHA-256 url_file key, they still use SHA-1
+                url_file = f"{bytes_hash(f'{kind}:{url}', algorithm='sha256')}.list"
                 cached_url = JOB.get_cache(url_file, with_info=True, with_data=True)
                 try:
                     # Only count URLs that haven't been processed globally
@@ -272,10 +275,10 @@ try:
                         old_cached_data = cached_url.get("data", b"") if isinstance(cached_url, dict) else b""
                         etag = ""
                         last_modified = ""
-                        resp = None
                         LOGGER.info(f"Downloading blacklist data from {url} ...")
                         download_url, url_filter = split_list_url(url)
                         content_type = ""
+                        body = b""
                         if download_url.startswith("file://"):
                             try:
                                 body = Path(normpath(download_url[7:])).read_bytes()
@@ -299,7 +302,8 @@ try:
 
                             max_retries = 3
                             retry_count = 0
-                            while retry_count < max_retries:
+                            # Leaves only by break (resp assigned) or by re-raising on the last attempt
+                            while True:
                                 try:
                                     resp = get(download_url, stream=True, timeout=10, headers=req_headers or None)
                                     break
@@ -310,9 +314,7 @@ try:
                                     LOGGER.warning(f"Connection refused, retrying in 3 seconds... ({retry_count}/{max_retries})")
                                     sleep(3)
 
-                            if resp is None:
-                                failed = True
-                            elif resp.status_code == 304 and old_cached_data:
+                            if resp.status_code == 304 and old_cached_data:
                                 resp.close()
                                 handle_304 = True
                             elif resp.status_code != 200:
