@@ -6,6 +6,7 @@ from os import environ, getenv
 # from string import ascii_letters, digits
 from re import escape, match
 from time import sleep
+from urllib.parse import urlsplit
 
 from flask import Blueprint, Response, redirect, render_template, request, url_for
 from flask_login import current_user
@@ -296,9 +297,13 @@ def setup_page():
         value for key, value in chain(db_config.items(), environ.items()) if key.startswith("LETS_ENCRYPT_DNS_CREDENTIAL_ITEM")
     ]
 
-    server_name = request.headers.get("Host", "").split(":")[0]
-    if not server_name:
-        server_name = "www.example.com"
+    try:
+        server_name = urlsplit("//" + request.headers.get("Host", "")).hostname or "www.example.com"
+    except ValueError:
+        server_name = ""
+    # IPv6 literal service names are not supported yet.
+    if ":" in server_name:
+        server_name = ""
 
     notice = SETUP_NOTICES.get(request.args.get("reason", ""))
 
