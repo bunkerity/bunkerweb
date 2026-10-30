@@ -157,6 +157,7 @@ class _FakeBackup(ModuleType):
         self.restore_database = lambda *args, **kwargs: None
         self.sorted_backups = lambda *args, **kwargs: []
         self.rotate_backups = lambda *args, **kwargs: None
+        self.hanoi_rotation = lambda *args, **kwargs: []
 
     def acquire_db_lock(self, *args, **kwargs):
         if self.busy:
