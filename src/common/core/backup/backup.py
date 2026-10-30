@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from contextlib import closing
+from contextlib import closing, suppress
 from datetime import datetime, timedelta
 from hashlib import sha256
 import re
@@ -153,6 +153,21 @@ HANOI_TIERS: List[Tuple[int, timedelta]] = [
 ]
 
 
+def backup_taken_at(backup_file: Path, local: datetime) -> datetime:
+    """When a backup was taken, from the naive local time in its name.
+
+    In the hour a DST change repeats, that name stands for two instants: take the one closest to the
+    file's modification time, which is written when the backup is taken.
+    """
+    first, second = local.replace(fold=0).astimezone(), local.replace(fold=1).astimezone()
+    if first == second:
+        return first
+    with suppress(OSError):
+        mtime = backup_file.stat().st_mtime
+        return min((first, second), key=lambda instant: abs(instant.timestamp() - mtime))
+    return first
+
+
 def hanoi_rotation(backup_files: List[Path], now: datetime) -> List[Path]:
     """Return the list of files to DELETE under Towers-of-Hanoi rotation.
 
@@ -164,14 +179,13 @@ def hanoi_rotation(backup_files: List[Path], now: datetime) -> List[Path]:
 
     Keeps 24 to 34 files (a tier's age range can touch one bucket more than its count); the oldest is
     64 to 85 days old, depending on where the buckets fall.
-    Backups dated in the future (clock change) are kept.
+    Backups dated in the future (clock change) are kept, and see backup_taken_at() for the hour a DST change repeats.
     """
     timed: List[Tuple[datetime, Path]] = []
     for f in backup_files:
         m = re.search(r"backup-\w+-(\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2})", f.name)
         if m:
-            dt = datetime.strptime(m.group(1), "%Y-%m-%d_%H-%M-%S").astimezone()
-            timed.append((dt, f))
+            timed.append((backup_taken_at(f, datetime.strptime(m.group(1), "%Y-%m-%d_%H-%M-%S")), f))
 
     timed.sort(reverse=True)  # newest first
 
