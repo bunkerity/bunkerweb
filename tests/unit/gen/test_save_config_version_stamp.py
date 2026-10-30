@@ -19,7 +19,7 @@ import pytest
 
 REPO = Path(__file__).resolve().parents[3]
 SCRIPT = Path(os.environ.get("SAVE_CONFIG_PY", REPO / "src" / "common" / "gen" / "save_config.py"))
-LATEST_REVISION_VERSION = "1.6.18~rc1"  # has a revision in sqlite_versions
+LATEST_REVISION_VERSION = "1.6.18~rc2"  # has a revision in sqlite_versions
 PREVIOUS_VERSION = "1.6.17"
 
 RUNNER = textwrap.dedent("""

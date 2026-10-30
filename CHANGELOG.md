@@ -1,6 +1,6 @@
 # Changelog
 
-## v1.6.18~rc2 - ????/??/??
+## v1.6.18~rc2 - 2026/10/30
 
 - [FEATURE] `tests`: a pytest unit test suite in `tests/unit/`, run in CI by `.github/workflows/unit-tests.yml`, with per-component coverage floors.
 - [BREAKING] `reverseproxy`: stream upstream TLS settings (`REVERSE_PROXY_SSL_VERIFY=yes`, protocols, ciphers, cached client certificate) now turn on TLS to the backend instead of being ignored. Clear them for a plaintext backend.

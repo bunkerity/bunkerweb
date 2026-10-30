@@ -18,7 +18,7 @@ import save_config
 
 def test_pending_migration_exits_before_any_database_write(db, tmp_path, monkeypatch):
     assert db.initialize_db("1.6.17", "Docker") == ""
-    installed = "1.6.18~rc1"
+    installed = "1.6.18~rc2"
     assert save_config.migration_pending("1.6.17", installed, "sqlite")
     monkeypatch.setattr(common_utils, "get_version", lambda: installed)
     monkeypatch.setattr(common_utils, "get_integration", lambda: "Docker")
