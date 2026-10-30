@@ -3,6 +3,7 @@
 ## v1.6.18~rc2 - 2026/10/30
 
 - [FEATURE] `tests`: a pytest unit test suite in `tests/unit/`, run in CI by `.github/workflows/unit-tests.yml`, with per-component coverage floors.
+- [FEATURE] `release`: images and Linux packages now come with signed build provenance, and the upgrading guide shows how to verify a release.
 - [BREAKING] `reverseproxy`: stream upstream TLS settings (`REVERSE_PROXY_SSL_VERIFY=yes`, protocols, ciphers, cached client certificate) now turn on TLS to the backend instead of being ignored. Clear them for a plaintext backend.
 - [BREAKING] `core`: setting regexes are stricter: list values glued without a separator (`404500`) and all-space values are refused. `AUTH_BASIC_USER` is wider and takes any value without `:`.
 - [BREAKING] `core`: the Lua API disk fallback needs an explicit `API_TOKEN` line in `variables.env`; a file without one is refused.

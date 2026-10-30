@@ -3,11 +3,14 @@
 from copy import deepcopy
 from argparse import Namespace
 from hashlib import sha256
+from contextlib import chdir, redirect_stdout
+from io import StringIO
 from json import dumps, loads
 from os import environ
 from pathlib import Path
+from re import fullmatch
 from shutil import copyfile
-from subprocess import run
+from subprocess import CalledProcessError, run
 from tempfile import TemporaryDirectory
 from unittest import TestCase, main
 from unittest.mock import call, patch
@@ -329,6 +332,250 @@ gh() {
                 self.assertNotEqual(execute(overrides).returncode, 0, overrides)
             changelog.write_text("## v1.6.15~rc20\nWrong version.\n")
             self.assertNotEqual(execute({}).returncode, 0)
+
+    def test_attestation_subjects_cover_every_image_and_package(self):
+        manifest = self.manifest()
+        subjects = release.image_subjects(manifest)
+        self.assertEqual(len(subjects), len(release.IMAGES) * len(release.REGISTRIES))
+        self.assertIn(("docker.io/bunkerity/bunkerweb-scheduler", "sha256:" + "b" * 64), subjects)
+        self.assertIn(("registry.gitlab.com/bunkerity/bunkerweb/bunkerweb-all-in-one", "sha256:" + "b" * 64), subjects)
+        lines = release.package_checksums(manifest)
+        self.assertEqual(len(lines), len(release.DISTROS) * len(release.PACKAGE_PLATFORMS))
+        self.assertIn(f"{sha256(b'package').hexdigest()}  package-ubuntu-amd64/bunkerweb_1.6.15~rc2-1_amd64.deb", lines)
+        # Every manifest entry needs a subject: a missing image, a bad digest, a short or blank package list all stop the release.
+        mutations = [
+            lambda m: m["images"].pop("api"),
+            lambda m: m["images"]["ui"].update(ref="ghcr.io/bunkerity/ui-tests:testing"),
+            lambda m: m["images"]["ui"].update(ref="ghcr.io/bunkerity/ui-tests@sha256:short"),
+            lambda m: m["packages"].pop(),
+            lambda m: m["packages"][0].update(sha256=""),
+        ]
+        for mutate in mutations:
+            changed = deepcopy(manifest)
+            mutate(changed)
+            with self.assertRaises(ValueError):
+                release.image_subjects(changed)
+                release.package_checksums(changed)
+        with self.assertRaises(ValueError):
+            release.image_digest(manifest, "unknown")
+
+    def test_image_subject_prints_github_output_lines(self):
+        manifest = self.manifest()
+        stdout = StringIO()
+        with patch.object(release, "load_manifest", return_value=manifest), patch(
+            "sys.argv", ["release_artifacts.py", "image-subject", "--image", "scheduler"]
+        ), redirect_stdout(stdout):
+            release.main()
+        self.assertEqual(
+            stdout.getvalue().splitlines(),
+            [
+                "digest=sha256:" + "b" * 64,
+                "docker_io=docker.io/bunkerity/bunkerweb-scheduler",
+                "ghcr_io=ghcr.io/bunkerity/bunkerweb-scheduler",
+                "gitlab=registry.gitlab.com/bunkerity/bunkerweb/bunkerweb-scheduler",
+            ],
+        )
+        with TemporaryDirectory() as tmp, patch.object(release, "load_manifest", return_value=manifest):
+            for output in ("release-manifest.json", str(Path(tmp) / "packages.checksums")):
+                with patch("sys.argv", ["release_artifacts.py", "package-checksums", "--output", output]):
+                    if output == "release-manifest.json":
+                        # The default output is the manifest itself: never overwrite it with checksums.
+                        with self.assertRaises(ValueError):
+                            release.main()
+                    else:
+                        release.main()
+                        self.assertEqual(len(Path(output).read_text().splitlines()), 20)
+
+    def test_attestation_verification_fails_closed_on_missing_or_foreign_attestation(self):
+        manifest = self.manifest()
+        verify = lambda: release.verify_attestations(manifest, "packages")  # noqa: E731
+        calls = []
+
+        def gh(missing):
+            def run_gh(args):
+                calls.append(args)
+                if args[3] in missing:
+                    raise CalledProcessError(1, args, b"", b"no attestations found")
+                return b""
+
+            return run_gh
+
+        with patch.object(release, "sleep") as pause:
+            with patch.object(release, "command", gh(set())):
+                targets = verify()
+            self.assertEqual(len(targets), 18 + 20)
+            self.assertEqual(len(calls), 38)
+            for args in calls:
+                self.assertEqual(args[:3], ["gh", "attestation", "verify"])
+                self.assertEqual(args[args.index("--repo") + 1], "bunkerity/bunkerweb")
+                self.assertEqual(args[args.index("--signer-workflow") + 1], "bunkerity/bunkerweb/.github/workflows/release.yml")
+                self.assertEqual(args[args.index("--source-ref") + 1], "refs/tags/v1.6.15-rc2")
+                self.assertEqual(args[args.index("--source-digest") + 1], "a" * 40)
+                self.assertIn("--deny-self-hosted-runners", args)
+            self.assertEqual(sum(args[3].startswith("oci://") for args in calls), 18)
+            self.assertIn("packages/package-rhel-9-x86_64/bunkerweb-1.6.15~rc2-1.x86_64.rpm", [args[3] for args in calls])
+            pause.assert_not_called()
+            # One image on one registry, then one package file, never attested (or attested by another identity): each stops the release.
+            for missing in (f"oci://docker.io/bunkerity/bunkerweb-ui@sha256:{'b' * 64}", "packages/package-ubuntu-amd64/bunkerweb_1.6.15~rc2-1_amd64.deb"):
+                calls.clear()
+                with patch.object(release, "command", gh({missing})), self.assertRaisesRegex(ValueError, "missing or foreign attestation"):
+                    verify()
+                self.assertEqual(len(calls), 38 + (release.REGISTRY_ATTEMPTS - 1))
+            # An attestation that shows up late is accepted, only the missing target is asked again.
+            attempts = []
+
+            def late(args):
+                attempts.append(args[3])
+                if args[3].startswith("oci://ghcr.io") and attempts.count(args[3]) < 2:
+                    raise CalledProcessError(1, args, b"", b"not yet")
+                return b""
+
+            pause.reset_mock()
+            with patch.object(release, "command", late):
+                verify()
+            self.assertEqual(len(attempts), 38 + 6)
+            pause.assert_called_once_with(release.REGISTRY_DELAY)
+        incomplete = deepcopy(manifest)
+        incomplete["packages"].pop()
+        with patch.object(release, "command", gh(set())), self.assertRaises(ValueError):
+            release.verify_attestations(incomplete, "packages")
+
+    def test_provenance_bundle_gathers_every_attested_subject(self):
+        manifest = self.manifest()
+        for index, image in enumerate(manifest["images"].values()):
+            image["ref"] = f"ghcr.io/bunkerity/x-tests@sha256:{index:064x}"
+        for package in manifest["packages"]:
+            package["sha256"] = sha256(package["artifact"].encode()).hexdigest()
+        expected = [f"{index:064x}" for index in range(len(release.IMAGES))] + [package["sha256"] for package in manifest["packages"]]
+        calls = []
+
+        def download(missing=None, content=None):
+            def run_gh(args, cwd=None):
+                calls.append(args)
+                # gh writes the bundles of the subject digest to <alg>:<hex>.jsonl in its working directory, and nothing (exit 0) when there are none.
+                hexdigest = args[3].rpartition("sha256:")[2] if args[3].startswith("oci://") else sha256(Path(args[3]).read_bytes()).hexdigest()
+                if hexdigest != missing:
+                    (Path(cwd) / f"sha256:{hexdigest}.jsonl").write_text(content if content is not None else dumps({"subject": hexdigest}) + "\n")
+                return b""
+
+            return run_gh
+
+        with TemporaryDirectory() as tmp:
+            packages = Path(tmp) / "packages"
+            for package in manifest["packages"]:
+                file = packages / package["artifact"] / package["filename"]
+                file.parent.mkdir(parents=True, exist_ok=True)
+                file.write_bytes(package["artifact"].encode())
+            output = Path(tmp) / "out.intoto.jsonl"  # codespell:ignore intoto
+            with patch.object(release, "command", download()):
+                self.assertEqual(release.provenance_bundle(manifest, packages, output), len(expected))
+            # One bundle per line, one per attested subject: the 6 image index digests and the 20 package files.
+            self.assertEqual(sorted(loads(line)["subject"] for line in output.read_text().splitlines()), sorted(expected))
+            self.assertEqual(len(calls), 26)
+            for args in calls:
+                self.assertEqual(args[:3], ["gh", "attestation", "download"])
+                self.assertEqual(args[args.index("--repo") + 1], "bunkerity/bunkerweb")
+                self.assertEqual(args[args.index("--predicate-type") + 1], "https://slsa.dev/provenance/v1")
+            self.assertEqual(sum(args[3].startswith("oci://ghcr.io/bunkerity/bunkerweb") for args in calls), 6)
+            # A subject with no bundle (no file, an empty file, a non-JSON line, a non-object line) or a failed download stops the release.
+            for missing, content in ((expected[0], None), (None, ""), (None, "not json\n"), (None, "[1]\n")):
+                output.unlink(missing_ok=True)
+                with patch.object(release, "command", download(missing, content)), self.assertRaises(ValueError):
+                    release.provenance_bundle(manifest, packages, output)
+                self.assertFalse(output.exists())
+            with patch.object(release, "command", side_effect=CalledProcessError(1, "gh")), self.assertRaises(CalledProcessError):
+                release.provenance_bundle(manifest, packages, output)
+            (packages / manifest["packages"][3]["artifact"] / manifest["packages"][3]["filename"]).unlink()
+            with patch.object(release, "command", download()), self.assertRaisesRegex(ValueError, "package file missing"):
+                release.provenance_bundle(manifest, packages, output)
+        self.assertEqual(release.provenance_name(manifest), "bunkerweb-1.6.15-rc2.intoto.jsonl")  # codespell:ignore intoto
+
+    def test_provenance_bundle_cli_writes_the_release_asset_name(self):
+        manifest = self.manifest()
+        stdout = StringIO()
+        with TemporaryDirectory() as tmp, patch.object(release, "load_manifest", return_value=manifest), patch.object(
+            release, "provenance_bundle", return_value=26
+        ) as gather, patch("sys.argv", ["release_artifacts.py", "provenance-bundle", "--directory", "packages"]), redirect_stdout(stdout), chdir(tmp):
+            release.main()
+        # The name is derived from the manifest, never from --output (whose default is the release manifest itself).
+        gather.assert_called_once_with(manifest, "packages", Path("bunkerweb-1.6.15-rc2.intoto.jsonl"))  # codespell:ignore intoto
+        self.assertEqual(stdout.getvalue().splitlines(), ["file=bunkerweb-1.6.15-rc2.intoto.jsonl"])  # codespell:ignore intoto
+
+    def test_workflow_attaches_provenance_after_verification_and_before_docs(self):
+        jobs = safe_load((Path(__file__).resolve().parents[1] / "workflows/release.yml").read_text())["jobs"]
+
+        def ancestors(job):
+            needs = jobs[job].get("needs", [])
+            return set(needs).union(*(ancestors(need) for need in needs))
+
+        job = jobs["attach-provenance"]
+        # The asset is gathered once the attestations verified, and the docs wait for it: the release is complete before a human publishes it.
+        self.assertTrue({"prepare", "push-gh", "verify-release"} <= set(job["needs"]))
+        self.assertIn("gate", ancestors("attach-provenance"))
+        self.assertIn("attach-provenance", jobs["push-doc"]["needs"])
+        # Only this job gains contents: write (to upload to the draft); it reads attestations and signs nothing.
+        self.assertEqual(job["permissions"], {"contents": "write", "attestations": "read"})
+        self.assertEqual(
+            {name for name, other in jobs.items() if other.get("permissions", {}).get("contents") == "write"},
+            {"prepare", "push-gh", "push-doc", "attach-provenance"},
+        )
+        self.assertEqual(jobs["verify-release"]["permissions"], {"contents": "read", "attestations": "read"})
+        steps = {step.get("name", ""): step for step in job["steps"]}
+        gather = next(step for name, step in steps.items() if "provenance" in name.lower() and "gather" in name.lower())
+        self.assertIn("provenance-bundle", gather["run"])
+        upload = next(step for step in job["steps"] if "gh release upload" in step.get("run", ""))
+        # One file, this tag, overwritten on a rerun: no glob, no other asset is touched.
+        command = upload["run"]
+        self.assertIn('gh release upload "$TAG" "$FILE" --clobber', command)
+        self.assertNotIn("*", command)
+        self.assertNotIn("gh release delete", command)
+        for step in job["steps"]:
+            self.assertNotIn("continue-on-error", step)
+            if "uses" in step:
+                self.assertTrue(fullmatch(r"[\w./-]+@[0-9a-f]{40}", step["uses"]), step["uses"])
+                self.assertFalse(step["uses"].startswith(("actions/attest", "docker/login-action")))
+
+    def test_workflow_attests_before_publication_and_verifies_before_docs(self):
+        root = Path(__file__).resolve().parents[1] / "workflows"
+        jobs = safe_load((root / "release.yml").read_text())["jobs"]
+
+        def ancestors(job):
+            needs = jobs[job].get("needs", [])
+            return set(needs).union(*(ancestors(need) for need in needs))
+
+        # Images and packages are attested before any registry or packagecloud receives them; docs wait for the verification of everything published.
+        self.assertIn("attest-packages", jobs["push-packages"]["needs"])
+        self.assertIn("attest-images", jobs["push-images"]["needs"])
+        self.assertNotIn("push-images", ancestors("attest-images"))
+        self.assertTrue({"push-images", "push-packages", "attest-images", "attest-packages"} <= set(jobs["verify-release"]["needs"]))
+        self.assertIn("verify-release", jobs["push-doc"]["needs"])
+        # Only an approved candidate gets attested: both attest jobs descend from the human gate, like the publication they guard.
+        for name in ("attest-images", "attest-packages", "verify-release"):
+            self.assertIn("gate", ancestors(name))
+        self.assertTrue(set(jobs["attest-images"]["needs"]) >= {"prepare", "candidates", "push-gh"})
+        # Least privilege: only the attesting jobs may sign, and the verifier only reads.
+        signers = {name for name, job in jobs.items() if job.get("permissions", {}).get("attestations") == "write"}
+        self.assertEqual(signers, {"attest-images", "attest-packages"})
+        for name in signers:
+            self.assertEqual(jobs[name]["permissions"], {"contents": "read", "id-token": "write", "attestations": "write"}, name)
+            for step in jobs[name]["steps"]:
+                if "uses" in step:
+                    self.assertTrue(fullmatch(r"[\w./-]+@[0-9a-f]{40}", step["uses"]), step["uses"])
+                    # Attestations live only in GitHub's store: no bundle goes to a registry, and no registry login exists here.
+                    self.assertFalse(step["uses"].startswith("docker/login-action"), name)
+                    if step["uses"].startswith("actions/attest"):
+                        self.assertNotIn("push-to-registry", step.get("with", {}), name)
+        self.assertEqual(jobs["verify-release"]["permissions"], {"contents": "read", "attestations": "read"})
+        self.assertEqual(set(jobs["attest-images"]["strategy"]["matrix"]["image"]), set(release.IMAGES))
+        verify = next(step for step in jobs["verify-release"]["steps"] if step.get("name", "").startswith("Verify the attestations"))
+        self.assertIn("verify-attestations", verify["run"])
+        self.assertNotIn("continue-on-error", verify)
+        # The names and registries the attestations pin are the ones the promotion publishes.
+        include = {entry["source"]: entry["image"] for entry in jobs["push-images"]["strategy"]["matrix"]["include"] if "source" in entry}
+        self.assertEqual(include, release.PUBLISHED)
+        promotion = (root / "push-docker.yml").read_text()
+        for prefix in release.REGISTRIES.values():
+            self.assertIn(prefix, promotion)
 
     def test_release_lookup_jobs_keep_push_access(self):
         # GitHub's release listing omits drafts for tokens without push access instead of

@@ -8,6 +8,7 @@ from pathlib import Path
 from re import fullmatch
 from subprocess import CalledProcessError, run
 from sys import stderr
+from tempfile import TemporaryDirectory
 from time import sleep
 
 IMAGES = ("bunkerweb", "scheduler", "autoconf", "ui", "api", "all-in-one")
@@ -26,6 +27,21 @@ DISTROS = {
     "rhel-10": "rpm",
 }
 REQUIRED_JOBS = {"prepare", "plumber", "codeql", "candidates"}
+# Published repository names, and the registries every image is promoted to (push-docker.yml).
+PUBLISHED = {
+    "bunkerweb": "bunkerweb",
+    "scheduler": "bunkerweb-scheduler",
+    "autoconf": "bunkerweb-autoconf",
+    "ui": "bunkerweb-ui",
+    "api": "bunkerweb-api",
+    "all-in-one": "bunkerweb-all-in-one",
+}
+REGISTRIES = {"docker_io": "docker.io/bunkerity", "ghcr_io": "ghcr.io/bunkerity", "gitlab": "registry.gitlab.com/bunkerity/bunkerweb"}
+# Attestations are keyless: the identity a verifier pins is this repository's release workflow.
+REPOSITORY = "bunkerity/bunkerweb"
+SIGNER_WORKFLOW = f"{REPOSITORY}/.github/workflows/release.yml"
+# What actions/attest-build-provenance signs; the release asset keeps only these bundles.
+PROVENANCE_PREDICATE = "https://slsa.dev/provenance/v1"
 REGISTRY_ATTEMPTS = 4
 REGISTRY_DELAY = 10
 
@@ -35,8 +51,8 @@ def require(condition, message):
         raise ValueError(message)
 
 
-def command(args):
-    result = run(args, capture_output=True)
+def command(args, cwd=None):
+    result = run(args, capture_output=True, cwd=cwd)
     if result.returncode:
         # check=True leaves the tool's own message in an attribute nothing prints, so a rejected
         # push reads as an exit code and costs another release run to explain.
@@ -248,9 +264,98 @@ def promote(manifest, image, tags):
         require(actual == source.split("@")[1], f"published digest mismatch: {tag}")
 
 
+def image_digest(manifest, image):
+    require(image in PUBLISHED and image in manifest["images"], f"image absent from candidate manifest: {image}")
+    return digest(manifest["images"][image]["ref"].rpartition("@")[2])
+
+
+def image_subjects(manifest):
+    """Every published image reference with the index digest that must carry an attestation."""
+    return [(f"{prefix}/{name}", image_digest(manifest, image)) for image, name in PUBLISHED.items() for prefix in REGISTRIES.values()]
+
+
+def package_checksums(manifest):
+    """Checksum-file lines (the actions/attest subject-checksums format) for every package the manifest lists."""
+    require(len(manifest["packages"]) == len(DISTROS) * len(PACKAGE_PLATFORMS), "incomplete package inventory")
+    return [f"{digest('sha256:' + package['sha256'])[7:]}  {package['artifact']}/{package['filename']}" for package in manifest["packages"]]
+
+
+def attested(target, policy):
+    try:
+        command(["gh", "attestation", "verify", target, *policy, "--deny-self-hosted-runners"])
+    except CalledProcessError:
+        return False
+    return True
+
+
+def verify_attestations(manifest, directory):
+    """Fail unless every published image digest and package file carries an attestation signed by this release run."""
+    ref = "refs/tags/v" + manifest["version"].replace("~", "-")
+    policy = ["--repo", REPOSITORY, "--signer-workflow", SIGNER_WORKFLOW, "--source-ref", ref, "--source-digest", manifest["source_sha"]]
+    targets = [f"oci://{name}@{index}" for name, index in image_subjects(manifest)]
+    targets += [str(Path(directory) / package["artifact"] / package["filename"]) for package in manifest["packages"]]
+    require(len(targets) == len(PUBLISHED) * len(REGISTRIES) + len(DISTROS) * len(PACKAGE_PLATFORMS), "incomplete attestation targets")
+    pending = targets
+    # GitHub lists an attestation a few seconds after the attest step; retry only the targets still missing.
+    for attempt in range(REGISTRY_ATTEMPTS):
+        pending = [target for target in pending if not attested(target, policy)]
+        if not pending:
+            return targets
+        if attempt + 1 < REGISTRY_ATTEMPTS:
+            sleep(REGISTRY_DELAY)
+    raise ValueError("missing or foreign attestation: " + ", ".join(pending))
+
+
+def provenance_name(manifest):
+    """Name of the release asset that carries the attestation bundles."""
+    # OpenSSF Scorecard's Signed-Releases check only counts a release asset with this suffix as provenance.
+    return f"bunkerweb-{manifest['version'].replace('~', '-')}.intoto.jsonl"  # codespell:ignore intoto
+
+
+def provenance_bundle(manifest, directory, output):
+    """Write the attestation bundle of every attested subject to `output`, one bundle per line; return how many."""
+    subjects = [(f"oci://{name}@{index}", index) for name, index in image_subjects(manifest) if name.startswith(REGISTRIES["ghcr_io"] + "/")]
+    subjects += [
+        (str((Path(directory) / package["artifact"] / package["filename"]).resolve()), digest("sha256:" + package["sha256"]))
+        for package in manifest["packages"]
+    ]
+    require(len(subjects) == len(PUBLISHED) + len(DISTROS) * len(PACKAGE_PLATFORMS), "incomplete provenance subjects")
+    bundles = []
+    for target, subject in subjects:
+        require(target.startswith("oci://") or Path(target).is_file(), f"package file missing: {target}")
+        # gh writes <alg>:<hex>.jsonl (one bundle per line) to its working directory, and exits 0 without writing
+        # anything when the subject has no attestation, so a fresh directory per subject tells the two apart.
+        with TemporaryDirectory() as work:
+            command(["gh", "attestation", "download", target, "--repo", REPOSITORY, "--predicate-type", PROVENANCE_PREDICATE], cwd=work)
+            files = list(Path(work).glob("*.jsonl"))
+            require(len(files) == 1, f"no attestation bundle downloaded for {subject}")
+            lines = [line for line in files[0].read_text().splitlines() if line.strip()]
+        require(lines, f"empty attestation bundle for {subject}")
+        for line in lines:
+            require(isinstance(loads(line), dict), f"invalid attestation bundle for {subject}")
+            if line not in bundles:
+                bundles.append(line)
+    Path(output).write_text("\n".join(bundles) + "\n")
+    return len(bundles)
+
+
 def main():
     parser = ArgumentParser(description=__doc__)
-    parser.add_argument("operation", choices=("record-image", "record-package", "assemble", "verify", "promote", "gate"))
+    parser.add_argument(
+        "operation",
+        choices=(
+            "record-image",
+            "record-package",
+            "assemble",
+            "verify",
+            "promote",
+            "gate",
+            "image-subject",
+            "package-checksums",
+            "verify-attestations",
+            "provenance-bundle",
+        ),
+    )
     parser.add_argument("--manifest", default="release-manifest.json")
     parser.add_argument("--manifest-sha256", default=environ.get("MANIFEST_SHA256", ""))
     parser.add_argument("--directory", default=".")
@@ -274,6 +379,21 @@ def main():
         manifest = load_manifest(args.manifest, args.manifest_sha256)
         if args.operation == "promote":
             promote(manifest, args.image, args.tags)
+        elif args.operation == "image-subject":
+            # GITHUB_OUTPUT lines: the index digest and the repository each attestation names, per registry.
+            print(f"digest={image_digest(manifest, args.image)}")
+            for key, prefix in REGISTRIES.items():
+                print(f"{key}={prefix}/{PUBLISHED[args.image]}")
+        elif args.operation == "package-checksums":
+            require(args.output != args.manifest, "name a checksums file, not the release manifest")
+            Path(args.output).write_text("\n".join(package_checksums(manifest)) + "\n")
+        elif args.operation == "verify-attestations":
+            print(f"{len(verify_attestations(manifest, args.directory))} attestations verified")
+        elif args.operation == "provenance-bundle":
+            # GITHUB_OUTPUT line. The name comes from the manifest: --output defaults to the release manifest itself.
+            name = provenance_name(manifest)
+            provenance_bundle(manifest, args.directory, Path(name))
+            print(f"file={name}")
         elif args.artifact:
             packages = [package for package in manifest["packages"] if package["artifact"] == args.artifact]
             require(len(packages) == 1, "package absent from candidate manifest")

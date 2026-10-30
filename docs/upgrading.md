@@ -1186,3 +1186,78 @@ We added a **namespace** feature to the autoconf integrations. Namespaces allow 
 
     8. **Downgrade BunkerWeb**.
         - Downgrade BunkerWeb to the previous version by following the same steps as when upgrading BunkerWeb in the [integration Linux page](integrations.md#linux)
+
+## Verify a release
+
+Check what you download before you install or upgrade. A release is signed at three levels:
+
+- the Git tag is signed with the GPG key of a release owner, and the release workflow refuses to build a tag GitHub cannot verify;
+- the container images and the Linux packages carry a signed build provenance attestation, created by the release workflow itself;
+- the GitHub release lists the SHA-256 checksum of every package.
+
+Attestations are keyless: they use [Sigstore](https://www.sigstore.dev/) and the identity of the GitHub Actions workflow, so no private signing key exists anywhere. A verifier checks that the artifact was built by `.github/workflows/release.yml` of `bunkerity/bunkerweb`, for the release tag, from the tagged commit.
+
+!!! info "Attestations start with 1.6.18 rc2"
+    Earlier releases only have a signed tag. The commands below need the [GitHub CLI](https://cli.github.com/) 2.68 or later, signed in with `gh auth login`.
+
+The commands share two variables. Set them to the release you want to verify:
+
+```bash
+VERSION=1.6.18~rc2
+TAG="v${VERSION//\~/-}"
+```
+
+### Tag signature
+
+The public keys of the release owners are published on their GitHub accounts. A GPG warning that the key is not certified is expected: compare the fingerprint it prints with the two below instead.
+
+```bash
+curl -fsSL https://github.com/TheophileDiot.gpg | gpg --import
+curl -fsSL https://github.com/fl0ppy-d1sk.gpg | gpg --import
+
+git init -q bunkerweb-verify && cd bunkerweb-verify
+git fetch --depth 1 https://github.com/bunkerity/bunkerweb.git tag "$TAG"
+git verify-tag "$TAG"
+```
+
+The output must contain `Good signature` and the primary key fingerprint of the release owner who cut the tag: `4821 439D 531B 030E 5DCC  F1F7 7C44 E4D7 7426 28F8` for Théophile Diot, `BBB2 5DF4 31F9 C568 D56C  748D D34B 4FF9 11F7 40D1` for Florian Pitance.
+
+### Container images
+
+The attestation belongs to the image index digest, so it is the same on Docker Hub, GitHub Container Registry and the GitLab mirror. Print the digest of the image you pulled, then verify it:
+
+```bash
+docker buildx imagetools inspect "bunkerity/bunkerweb:${TAG#v}" --format '{{json .Manifest.Digest}}'
+
+gh attestation verify "oci://docker.io/bunkerity/bunkerweb:${TAG#v}" \
+  --repo bunkerity/bunkerweb \
+  --signer-workflow bunkerity/bunkerweb/.github/workflows/release.yml \
+  --source-ref "refs/tags/$TAG"
+```
+
+`Verification succeeded!` means the digest was signed by the release workflow for this tag. The command fails when the image has no attestation or when another workflow or repository signed it. Replace the image name to check `bunkerweb-scheduler`, `bunkerweb-autoconf`, `bunkerweb-ui`, `bunkerweb-api` or `bunkerweb-all-in-one`, and use `ghcr.io/bunkerity/...` or `registry.gitlab.com/bunkerity/bunkerweb/...` for the other registries. Pin `oci://docker.io/bunkerity/bunkerweb@sha256:<digest>` to verify exactly the image you run.
+
+### Linux packages
+
+Packages are published on packagecloud. Download the `.deb` or `.rpm` file you intend to install and verify it:
+
+```bash
+gh attestation verify ./bunkerweb_${VERSION}-1_amd64.deb \
+  --repo bunkerity/bunkerweb \
+  --signer-workflow bunkerity/bunkerweb/.github/workflows/release.yml \
+  --source-ref "refs/tags/$TAG"
+```
+
+The release also lists the SHA-256 checksum of every package in `release-manifest.json`. Check the manifest against its own checksum, then the package against the manifest, choosing the entry of your distribution (`ubuntu`, `ubuntu-noble`, `ubuntu-jammy`, `debian-bookworm`, `debian-trixie`, `fedora-43`, `fedora-44`, `rhel-8`, `rhel-9` or `rhel-10`) and platform (`linux/amd64` or `linux/arm64`):
+
+```bash
+curl -fsSL -O "https://github.com/bunkerity/bunkerweb/releases/download/${TAG}/release-manifest.json" \
+  -O "https://github.com/bunkerity/bunkerweb/releases/download/${TAG}/release-manifest.json.sha256"
+sha256sum -c release-manifest.json.sha256
+
+jq -r '.packages[] | select(.distro == "debian-bookworm" and .platform == "linux/amd64") | "\(.sha256)  \(.filename)"' release-manifest.json | sha256sum -c
+```
+
+Run the last command in the directory that holds the package. The manifest only lists checksums: the attestation is what proves who built the package.
+
+The GitHub release also carries `bunkerweb-${TAG#v}.intoto.jsonl`, the attestation bundles of every image and package. `gh attestation verify <file> --bundle bunkerweb-${TAG#v}.intoto.jsonl --repo bunkerity/bunkerweb` verifies a downloaded package against it without fetching its attestation from GitHub. <!-- codespell:ignore intoto -->

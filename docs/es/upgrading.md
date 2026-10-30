@@ -1186,3 +1186,78 @@ Hemos añadido una característica de **espacio de nombres** a las integraciones
 
     8. **Retrocede la versión de BunkerWeb**.
         - Retrocede BunkerWeb a la versión anterior siguiendo los mismos pasos que al actualizar BunkerWeb en la [página de integración con Linux](integrations.md#linux)
+
+## Verificar una versión
+
+Compruebe lo que descarga antes de instalar o actualizar. Una versión está firmada en tres niveles:
+
+- la etiqueta de Git está firmada con la clave GPG de un responsable de publicación, y el workflow de publicación se niega a construir una etiqueta que GitHub no pueda verificar;
+- las imágenes de contenedor y los paquetes de Linux llevan una atestación firmada de procedencia de la compilación, creada por el propio workflow de publicación;
+- la release de GitHub lista la suma de comprobación SHA-256 de cada paquete.
+
+Las atestaciones no usan claves: se basan en [Sigstore](https://www.sigstore.dev/) y en la identidad del workflow de GitHub Actions, por lo que no existe ninguna clave de firma privada. El verificador comprueba que el artefacto fue construido por `.github/workflows/release.yml` de `bunkerity/bunkerweb`, para la etiqueta de la versión y a partir del commit etiquetado.
+
+!!! info "Las atestaciones comienzan con la versión 1.6.18 rc2"
+    Las versiones anteriores solo tienen una etiqueta firmada. Los comandos siguientes requieren la [GitHub CLI](https://cli.github.com/) 2.68 o posterior, con la sesión iniciada mediante `gh auth login`.
+
+Los comandos comparten dos variables. Defínalas con la versión que desea verificar:
+
+```bash
+VERSION=1.6.18~rc2
+TAG="v${VERSION//\~/-}"
+```
+
+### Firma de la etiqueta
+
+Las claves públicas de los responsables de publicación están publicadas en sus cuentas de GitHub. Es normal que GPG avise de que la clave no está certificada: compare en su lugar la huella que muestra con las dos que aparecen abajo.
+
+```bash
+curl -fsSL https://github.com/TheophileDiot.gpg | gpg --import
+curl -fsSL https://github.com/fl0ppy-d1sk.gpg | gpg --import
+
+git init -q bunkerweb-verify && cd bunkerweb-verify
+git fetch --depth 1 https://github.com/bunkerity/bunkerweb.git tag "$TAG"
+git verify-tag "$TAG"
+```
+
+La salida debe contener `Good signature` y la huella de la clave primaria de quien creó la etiqueta: `4821 439D 531B 030E 5DCC  F1F7 7C44 E4D7 7426 28F8` para Théophile Diot, `BBB2 5DF4 31F9 C568 D56C  748D D34B 4FF9 11F7 40D1` para Florian Pitance.
+
+### Imágenes de contenedor
+
+La atestación pertenece al digest del índice de la imagen, por lo que es la misma en Docker Hub, en GitHub Container Registry y en el espejo de GitLab. Muestre el digest de la imagen que descargó y verifíquelo:
+
+```bash
+docker buildx imagetools inspect "bunkerity/bunkerweb:${TAG#v}" --format '{{json .Manifest.Digest}}'
+
+gh attestation verify "oci://docker.io/bunkerity/bunkerweb:${TAG#v}" \
+  --repo bunkerity/bunkerweb \
+  --signer-workflow bunkerity/bunkerweb/.github/workflows/release.yml \
+  --source-ref "refs/tags/$TAG"
+```
+
+`Verification succeeded!` significa que el workflow de publicación firmó el digest para esta etiqueta. El comando falla si la imagen no tiene atestación o si la firmó otro workflow u otro repositorio. Cambie el nombre de la imagen para comprobar `bunkerweb-scheduler`, `bunkerweb-autoconf`, `bunkerweb-ui`, `bunkerweb-api` o `bunkerweb-all-in-one`, y use `ghcr.io/bunkerity/...` o `registry.gitlab.com/bunkerity/bunkerweb/...` para los otros registros. Use `oci://docker.io/bunkerity/bunkerweb@sha256:<digest>` para verificar exactamente la imagen que ejecuta.
+
+### Paquetes de Linux
+
+Los paquetes se publican en packagecloud. Descargue el archivo `.deb` o `.rpm` que va a instalar y verifíquelo:
+
+```bash
+gh attestation verify ./bunkerweb_${VERSION}-1_amd64.deb \
+  --repo bunkerity/bunkerweb \
+  --signer-workflow bunkerity/bunkerweb/.github/workflows/release.yml \
+  --source-ref "refs/tags/$TAG"
+```
+
+La release también lista la suma de comprobación SHA-256 de cada paquete en `release-manifest.json`. Compruebe el manifiesto con su propia suma de comprobación y después el paquete con el manifiesto, eligiendo la entrada de su distribución (`ubuntu`, `ubuntu-noble`, `ubuntu-jammy`, `debian-bookworm`, `debian-trixie`, `fedora-43`, `fedora-44`, `rhel-8`, `rhel-9` o `rhel-10`) y de su plataforma (`linux/amd64` o `linux/arm64`):
+
+```bash
+curl -fsSL -O "https://github.com/bunkerity/bunkerweb/releases/download/${TAG}/release-manifest.json" \
+  -O "https://github.com/bunkerity/bunkerweb/releases/download/${TAG}/release-manifest.json.sha256"
+sha256sum -c release-manifest.json.sha256
+
+jq -r '.packages[] | select(.distro == "debian-bookworm" and .platform == "linux/amd64") | "\(.sha256)  \(.filename)"' release-manifest.json | sha256sum -c
+```
+
+Ejecute el último comando en el directorio que contiene el paquete. El manifiesto solo lista sumas de comprobación: la atestación es lo que demuestra quién construyó el paquete.
+
+La release de GitHub incluye también `bunkerweb-${TAG#v}.intoto.jsonl`, los bundles de atestaciones de cada imagen y cada paquete. `gh attestation verify <archivo> --bundle bunkerweb-${TAG#v}.intoto.jsonl --repo bunkerity/bunkerweb` verifica un paquete descargado con ese archivo, sin obtener su atestación de GitHub.
