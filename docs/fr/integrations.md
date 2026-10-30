@@ -2291,6 +2291,32 @@ Cela permet une intégration transparente et prête à l'emploi pour une préven
 
     Ceci est nécessaire pour que le Scheduler de BunkerWeb puisse se connecter à votre base de données externe.
 
+#### Sauvegardes PostgreSQL sur Debian/Ubuntu {#debian-ubuntu-postgresql-backups}
+
+!!! warning "Version majeure du client PostgreSQL"
+    Debian 12 (Bookworm) fournit le client PostgreSQL 15 ; Debian 13 (Trixie), 17 ; Ubuntu 22.04 (Jammy), 14 ; Ubuntu 24.04 (Noble), 16 ; Ubuntu 26.04 (Resolute), 18. Si la version majeure du serveur PostgreSQL externe est plus récente, les sauvegardes planifiées et `bwcli plugin backup save` échouent avec `server version mismatch` de `pg_dump`. Installez manuellement le client `postgresql-client-<N>` correspondant depuis le [dépôt officiel PGDG pour Debian](https://www.postgresql.org/download/linux/debian/) ou [Ubuntu](https://www.postgresql.org/download/linux/ubuntu/) sur la machine exécutant le Scheduler ou la commande de sauvegarde. Définissez `PG_MAJOR` ci-dessous sur la version majeure du serveur (`18` est un exemple) ; ces commandes installent uniquement le client, pas le serveur de base de données.
+
+    ```bash
+    sudo apt install curl ca-certificates
+    sudo install -d /usr/share/postgresql-common/pgdg
+    sudo curl -o /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc --fail https://www.postgresql.org/media/keys/ACCC4CF8.asc
+    . /etc/os-release
+    sudo tee /etc/apt/sources.list.d/pgdg.sources > /dev/null <<EOF
+    Types: deb
+    URIs: https://apt.postgresql.org/pub/repos/apt
+    Suites: ${VERSION_CODENAME}-pgdg
+    Architectures: $(dpkg --print-architecture)
+    Components: main
+    Signed-By: /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc
+    EOF
+    sudo apt update
+    PG_MAJOR=18
+    sudo apt install "postgresql-client-${PG_MAJOR}"
+    pg_dump --version
+    ```
+
+    Vérifiez que `pg_dump --version` indique le client correspondant avant les sauvegardes. Le programme d’installation affiche uniquement cet avertissement ; il ne configure pas PGDG et n’installe pas de client plus récent.
+
 #### Après l'installation
 
 En fonction de vos choix lors de l'installation :

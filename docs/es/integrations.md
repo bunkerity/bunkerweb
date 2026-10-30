@@ -2289,6 +2289,32 @@ Esto proporciona una integración perfecta y lista para usar para una potente pr
 
     Esto es necesario para que el Programador de BunkerWeb se conecte a tu base de datos externa.
 
+#### Copias de seguridad de PostgreSQL en Debian/Ubuntu {#debian-ubuntu-postgresql-backups}
+
+!!! warning "Versión principal del cliente PostgreSQL"
+    Debian 12 (Bookworm) incluye el cliente PostgreSQL 15; Debian 13 (Trixie), 17; Ubuntu 22.04 (Jammy), 14; Ubuntu 24.04 (Noble), 16; Ubuntu 26.04 (Resolute), 18. Si la versión principal del servidor PostgreSQL externo es más reciente, las copias programadas y `bwcli plugin backup save` fallan con `server version mismatch` de `pg_dump`. Instala manualmente el cliente `postgresql-client-<N>` correspondiente desde el [repositorio oficial PGDG para Debian](https://www.postgresql.org/download/linux/debian/) o [Ubuntu](https://www.postgresql.org/download/linux/ubuntu/) en el equipo que ejecuta el Programador o el comando de copia. Configura `PG_MAJOR` abajo con la versión principal del servidor (`18` es un ejemplo); estos comandos solo instalan el cliente, no un servidor de base de datos.
+
+    ```bash
+    sudo apt install curl ca-certificates
+    sudo install -d /usr/share/postgresql-common/pgdg
+    sudo curl -o /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc --fail https://www.postgresql.org/media/keys/ACCC4CF8.asc
+    . /etc/os-release
+    sudo tee /etc/apt/sources.list.d/pgdg.sources > /dev/null <<EOF
+    Types: deb
+    URIs: https://apt.postgresql.org/pub/repos/apt
+    Suites: ${VERSION_CODENAME}-pgdg
+    Architectures: $(dpkg --print-architecture)
+    Components: main
+    Signed-By: /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc
+    EOF
+    sudo apt update
+    PG_MAJOR=18
+    sudo apt install "postgresql-client-${PG_MAJOR}"
+    pg_dump --version
+    ```
+
+    Comprueba que `pg_dump --version` indique el cliente correspondiente antes de realizar copias. El instalador solo muestra esta advertencia; no configura PGDG ni instala un cliente más reciente.
+
 #### Después de la instalación
 
 Dependiendo de tus elecciones durante la instalación:

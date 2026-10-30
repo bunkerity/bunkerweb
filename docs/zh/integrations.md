@@ -2288,6 +2288,32 @@ sudo ./install-bunkerweb.sh --yes --api
 
     这是 BunkerWeb 调度器连接到您的外部数据库所必需的。
 
+#### Debian/Ubuntu 上的 PostgreSQL 备份 {#debian-ubuntu-postgresql-backups}
+
+!!! warning "PostgreSQL 客户端主版本"
+    Debian 12（Bookworm）提供 PostgreSQL 客户端 15；Debian 13（Trixie）为 17；Ubuntu 22.04（Jammy）为 14；Ubuntu 24.04（Noble）为 16；Ubuntu 26.04（Resolute）为 18。如果外部 PostgreSQL 服务器的主版本更新，计划备份和 `bwcli plugin backup save` 会因 `pg_dump` 的 `server version mismatch` 错误而失败。请在运行调度器或备份命令的主机上，从 [Debian 的 PGDG 官方仓库](https://www.postgresql.org/download/linux/debian/)或 [Ubuntu 的 PGDG 官方仓库](https://www.postgresql.org/download/linux/ubuntu/)手动安装匹配的 `postgresql-client-<N>`。将下方的 `PG_MAJOR` 设置为服务器的主版本（`18` 仅为示例）；这些命令只安装客户端，不安装数据库服务器。
+
+    ```bash
+    sudo apt install curl ca-certificates
+    sudo install -d /usr/share/postgresql-common/pgdg
+    sudo curl -o /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc --fail https://www.postgresql.org/media/keys/ACCC4CF8.asc
+    . /etc/os-release
+    sudo tee /etc/apt/sources.list.d/pgdg.sources > /dev/null <<EOF
+    Types: deb
+    URIs: https://apt.postgresql.org/pub/repos/apt
+    Suites: ${VERSION_CODENAME}-pgdg
+    Architectures: $(dpkg --print-architecture)
+    Components: main
+    Signed-By: /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc
+    EOF
+    sudo apt update
+    PG_MAJOR=18
+    sudo apt install "postgresql-client-${PG_MAJOR}"
+    pg_dump --version
+    ```
+
+    运行备份前，请检查 `pg_dump --version` 是否显示匹配的客户端版本。安装脚本仅显示此警告，不会配置 PGDG 或安装更新的客户端。
+
 #### 安装后
 
 根据您在安装过程中的选择：

@@ -172,7 +172,7 @@ BunkerWeb 将其当前配置安全地存储在后端数据库中，该数据库�
 
 !!! info "说明"
     - **PostgreSQL**: 基于 Alpine 的镜像（包括 all-in-one）现已包含 `v18` 客户端，因此默认支持 `v18` 及更早版本。
-    - **Linux**: 支持情况取决于您的发行版软件包。如果需要，您可以从供应商仓库手动安装数据库客户端（RHEL 通常需要这样做）。
+    - **Linux**: 支持情况取决于您的发行版软件包。如果需要，您可以从供应商仓库手动安装数据库客户端（RHEL 通常需要这样做）。 如果 PostgreSQL 服务器的主版本比 Linux `pg_dump` 客户端更新，备份会因 `server version mismatch` 而失败；请从 [PGDG 仓库](integrations.md#debian-ubuntu-postgresql-backups)安装匹配的客户端。
     - **SQLite**: 随软件包一起提供，可立即使用。
 
 有助于安装数据库客户端的外部资源：

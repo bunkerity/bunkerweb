@@ -6,6 +6,7 @@
 - [SECURITY] `ui`: failed logins (password, TOTP or recovery code) are counted per client IP and per username in the database, and five in 15 minutes lock that IP or username for 15 minutes (`LOGIN_THROTTLE`, `LOGIN_MAX_ATTEMPTS`, `LOGIN_WINDOW_MINUTES`, `LOGIN_LOCKOUT_MINUTES`).
 - [BUGFIX] `core`: stream services no longer abort NGINX init when an HTTP-only plugin (PRO included) is installed, a regression in 1.6.17.
 - [BUGFIX] `bunkernet`: reports now carry only a fixed set of request headers (User-Agent, Accept, Accept-Encoding, Accept-Language, Content-Type, Content-Length) and no longer include the values matched in request headers and cookies, also for reports queued before the upgrade; the plugin documentation lists exactly what a report contains.
+- [BUGFIX] `installer`: on Debian and Ubuntu, the installer warns that the distribution PostgreSQL client cannot back up a newer server and shows the PGDG commands to install a matching one.
 
 ## v1.6.18~rc2 - 2026/10/30
 

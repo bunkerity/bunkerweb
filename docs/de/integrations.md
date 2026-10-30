@@ -2288,6 +2288,32 @@ Dies bietet eine nahtlose, sofort einsatzbereite Integration für einen leistung
 
     Dies ist erforderlich, damit der BunkerWeb-Scheduler eine Verbindung zu Ihrer externen Datenbank herstellen kann.
 
+#### PostgreSQL-Sicherungen unter Debian/Ubuntu {#debian-ubuntu-postgresql-backups}
+
+!!! warning "Hauptversion des PostgreSQL-Clients"
+    Debian 12 (Bookworm) liefert PostgreSQL-Client 15; Debian 13 (Trixie), 17; Ubuntu 22.04 (Jammy), 14; Ubuntu 24.04 (Noble), 16; Ubuntu 26.04 (Resolute), 18. Ist die Hauptversion des externen PostgreSQL-Servers neuer, schlagen geplante Sicherungen und `bwcli plugin backup save` mit `server version mismatch` von `pg_dump` fehl. Installieren Sie den passenden `postgresql-client-<N>` manuell aus dem [offiziellen PGDG-Repository für Debian](https://www.postgresql.org/download/linux/debian/) oder [Ubuntu](https://www.postgresql.org/download/linux/ubuntu/) auf dem Host, der den Scheduler oder den Sicherungsbefehl ausführt. Setzen Sie `PG_MAJOR` unten auf die Hauptversion Ihres Servers (`18` ist ein Beispiel); diese Befehle installieren nur den Client, keinen Datenbankserver.
+
+    ```bash
+    sudo apt install curl ca-certificates
+    sudo install -d /usr/share/postgresql-common/pgdg
+    sudo curl -o /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc --fail https://www.postgresql.org/media/keys/ACCC4CF8.asc
+    . /etc/os-release
+    sudo tee /etc/apt/sources.list.d/pgdg.sources > /dev/null <<EOF
+    Types: deb
+    URIs: https://apt.postgresql.org/pub/repos/apt
+    Suites: ${VERSION_CODENAME}-pgdg
+    Architectures: $(dpkg --print-architecture)
+    Components: main
+    Signed-By: /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc
+    EOF
+    sudo apt update
+    PG_MAJOR=18
+    sudo apt install "postgresql-client-${PG_MAJOR}"
+    pg_dump --version
+    ```
+
+    Prüfen Sie vor Sicherungen, ob `pg_dump --version` den passenden Client meldet. Das Installationsskript zeigt nur diesen Hinweis an; es richtet weder PGDG ein noch installiert es einen neueren Client.
+
 #### Nach der Installation
 
 Abhängig von Ihren Entscheidungen während der Installation:

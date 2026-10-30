@@ -5623,6 +5623,59 @@ This is required for the BunkerWeb Scheduler to connect to your database."
     fi
 }
 
+# Debian/Ubuntu ship a fixed PostgreSQL client major; newer servers need PGDG for backups.
+show_debian_database_warning() {
+    if [ "$DISTRO_FAMILY" = "debian" ]; then
+        local client_major
+        local pgdg_url="https://www.postgresql.org/download/linux/ubuntu/"
+        if [ "$DISTRO_ID" = "debian" ]; then
+            pgdg_url="https://www.postgresql.org/download/linux/debian/"
+        fi
+        case "$DISTRO_ID:$DISTRO_VERSION" in
+            debian:12) client_major=15 ;;
+            debian:13) client_major=17 ;;
+            ubuntu:22.04) client_major=14 ;;
+            ubuntu:24.04) client_major=16 ;;
+            ubuntu:26.04) client_major=18 ;;
+            *) client_major="(distribution default)" ;;
+        esac
+        local msg="Your distribution's postgresql-client package ships PostgreSQL ${client_major}.
+If your external PostgreSQL server has a newer major version, scheduled backups and
+bwcli plugin backup save fail with a server version mismatch from pg_dump.
+Install a matching postgresql-client-<N> from the official PGDG repository manually.
+Set PG_MAJOR below to your server's major version (18 is an example):
+
+sudo apt install curl ca-certificates
+sudo install -d /usr/share/postgresql-common/pgdg
+sudo curl -o /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc --fail https://www.postgresql.org/media/keys/ACCC4CF8.asc
+. /etc/os-release
+sudo tee /etc/apt/sources.list.d/pgdg.sources > /dev/null <<EOF
+Types: deb
+URIs: https://apt.postgresql.org/pub/repos/apt
+Suites: \${VERSION_CODENAME}-pgdg
+Architectures: \$(dpkg --print-architecture)
+Components: main
+Signed-By: /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc
+EOF
+sudo apt update
+PG_MAJOR=18
+sudo apt install \"postgresql-client-\${PG_MAJOR}\"
+pg_dump --version
+
+Check that pg_dump --version reports the matching client before running backups.
+Repository instructions: ${pgdg_url}"
+        if [ "$INTERACTIVE_MODE" = "yes" ]; then
+            tui_msgbox "Debian/Ubuntu PostgreSQL Backup Client" "$msg"
+        else
+            print_warning "Important information for Debian/Ubuntu PostgreSQL backups:"
+            echo
+            echo "$msg"
+            echo
+            print_status "Continuing installation..."
+        fi
+    fi
+}
+
 # Echo the base NGINX version (no distro suffix) that BunkerWeb $BUNKERWEB_VERSION
 # was built against, applying the Fedora exceptions. Versions not in the dictionary
 # (current-default line, pre-1.6, or newer-than-this-script) fall back to
@@ -9428,6 +9481,7 @@ main() {
         # an upgrade; running this as a non-upgrade fresh install is correct.
         print_status "Starting a fresh installation over the interrupted one."
         show_rhel_database_warning
+        show_debian_database_warning
         ask_user_preferences
         check_ports
     elif [ "$_BW_RESUMING" = "yes" ]; then
@@ -9445,6 +9499,7 @@ main() {
         fi
 
         [ "$DOCKER_MODE" != "yes" ] && show_rhel_database_warning
+        [ "$DOCKER_MODE" != "yes" ] && show_debian_database_warning
         ask_user_preferences
         check_ports
     fi

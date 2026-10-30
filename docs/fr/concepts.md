@@ -172,7 +172,7 @@ En spécifiant l'URI de base de données appropriée dans la configuration, vous
 
 !!! info "Remarques"
     - **PostgreSQL** : les images basées sur Alpine, y compris all-in-one, incluent désormais le client `v18` ; `v18` et les versions antérieures sont donc pris en charge par défaut.
-    - **Linux** : La prise en charge dépend des paquets de votre distribution. Si nécessaire, vous pouvez installer les clients de base de données manuellement à partir des dépôts des fournisseurs (cela est généralement nécessaire pour RHEL).
+    - **Linux** : La prise en charge dépend des paquets de votre distribution. Si nécessaire, vous pouvez installer les clients de base de données manuellement à partir des dépôts des fournisseurs (cela est généralement nécessaire pour RHEL). Si la version majeure du serveur PostgreSQL est plus récente que celle du client Linux `pg_dump`, les sauvegardes échouent avec `server version mismatch` ; installez un client correspondant depuis le [dépôt PGDG](integrations.md#debian-ubuntu-postgresql-backups).
     - **SQLite** : Est livré avec les paquets et est prêt à l'emploi.
 
 Ressources externes utiles pour installer les clients de bases de données :
