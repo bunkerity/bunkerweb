@@ -85,27 +85,61 @@ def conditional_route(seen, etag=ETAG, body=ENTRIES):
     return route
 
 
-def test_validators_stored_then_replayed_and_304_reuses_entries(url_server, tmp_path, monkeypatch):
+@pytest.mark.parametrize("etag", (pytest.param(ETAG, id="strong-etag"), pytest.param('W/"v1"', id="weak-etag")))
+def test_validators_stored_then_replayed_and_304_reuses_entries(etag, url_server, tmp_path, monkeypatch, caplog):
+    caplog.set_level(logging.INFO)
     seen = []
-    url_server.routes["/ips"] = conditional_route(seen)
+    url_server.routes["/ips"] = conditional_route(seen, etag=etag)
     url = url_server.http("/ips")
     cache = Cache(tmp_path)
 
     assert run_job(cache, monkeypatch, BLACKLIST_IP_URLS=url) == 1
     assert seen == [(None, None)]
-    assert list(cache.url_files().values()) == [f"# Downloaded from {url}\n# ETag: {ETAG}\n# Last-Modified: {LAST_MODIFIED}\n".encode() + ENTRIES]
+    assert list(cache.url_files().values()) == [f"# Downloaded from {url}\n# ETag: {etag}\n# Last-Modified: {LAST_MODIFIED}\n".encode() + ENTRIES]
 
     # Within the hour: no request, and the header lines are not read back as entries
     assert run_job(cache, monkeypatch, BLACKLIST_IP_URLS=url) == 0
     assert len(seen) == 1
     assert cache.data["lists.example", "IP.list"] == ENTRIES
 
-    # Past the hour: both validators replayed, 304 keeps the entries and restarts the hour
+    # Past the hour: both validators replayed as stored, 304 keeps the entries and restarts the hour
+    cache.age()
+    caplog.clear()
+    assert run_job(cache, monkeypatch, BLACKLIST_IP_URLS=url) == 0
+    assert seen[-1] == (etag, LAST_MODIFIED)
+    assert cache.data["lists.example", "IP.list"] == ENTRIES
+    assert all(time() - updated < 60 for (service_id, _), updated in cache.updated.items() if not service_id)
+    assert "Not modified: 1" in caplog.text
+
+
+def test_304_on_header_only_cache_writes_no_list(url_server, tmp_path, monkeypatch):
+    seen = []
+    url_server.routes["/ips"] = conditional_route(seen, body=b"# no entries yet\n")
+    url = url_server.http("/ips")
+    cache = Cache(tmp_path)
+    assert run_job(cache, monkeypatch, BLACKLIST_IP_URLS=url) == 0
+    assert list(cache.url_files().values()) == [f"# Downloaded from {url}\n# ETag: {ETAG}\n# Last-Modified: {LAST_MODIFIED}\n".encode()]
+
     cache.age()
     assert run_job(cache, monkeypatch, BLACKLIST_IP_URLS=url) == 0
     assert seen[-1] == (ETAG, LAST_MODIFIED)
-    assert cache.data["lists.example", "IP.list"] == ENTRIES
-    assert all(time() - updated < 60 for (service_id, _), updated in cache.updated.items() if not service_id)
+    assert ("lists.example", "IP.list") not in cache.data
+
+
+def test_failed_url_keeps_its_last_cached_entries(url_server, tmp_path, monkeypatch, caplog):
+    url_server.routes["/a"] = (200, b"192.0.2.1\n", {})
+    url_server.routes["/b"] = (200, b"198.51.100.1\n", {})
+    urls = f"{url_server.http('/a')} {url_server.http('/b')}"
+    cache = Cache(tmp_path)
+    assert run_job(cache, monkeypatch, BLACKLIST_IP_URLS=urls) == 1
+
+    # /b goes down and /a changes: /a's update lands, /b's last good entries stay
+    url_server.routes["/a"] = (200, b"192.0.2.2\n", {})
+    url_server.routes["/b"] = (503, b"down", {})
+    cache.age()
+    assert run_job(cache, monkeypatch, BLACKLIST_IP_URLS=urls) == 2
+    assert cache.data["lists.example", "IP.list"] == b"192.0.2.2\n198.51.100.1\n"
+    assert "Using the last cached IP entries" in caplog.text
 
 
 def test_changed_validator_downloads_new_entries(url_server, tmp_path, monkeypatch):

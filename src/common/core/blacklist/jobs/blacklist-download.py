@@ -75,6 +75,14 @@ def parse_http_metadata(cached_data: bytes) -> dict:
     return meta
 
 
+def iter_cached_entries(cached_data: bytes):
+    """Yield the entries of a per-URL cache file, skipping its comment header lines."""
+    for line in cached_data.split(b"\n"):
+        line = line.strip()
+        if line and not line.startswith(b"#"):
+            yield line
+
+
 def build_cache_header(url: str, etag: str = "", last_modified: str = "") -> bytes:
     """Build cache file header bytes with URL and optional HTTP metadata."""
     header = b"# Downloaded from " + url.encode("utf-8") + b"\n"
@@ -262,13 +270,7 @@ try:
                         if url not in processed_urls:
                             aggregated_recap[kind]["skipped_urls"] += 1
                         # Process cached data and add to unique_entries
-                        cached_data = cached_url.get("data", b"")
-                        if cached_data:
-                            for line in cached_data.split(b"\n"):
-                                line = line.strip()
-                                if not line or line.startswith(b"#"):
-                                    continue
-                                unique_entries.add(line)
+                        unique_entries.update(iter_cached_entries(cached_url.get("data") or b""))
                     else:
                         failed = False
                         handle_304 = False
@@ -344,11 +346,7 @@ try:
                                 cached, err = JOB.cache_file(url_file, old_cached_data)
                                 if not cached:
                                     LOGGER.error(f"Error while refreshing cache for {url}: {err}")
-                                for line in old_cached_data.split(b"\n"):
-                                    line = line.strip()
-                                    if not line or line.startswith(b"#"):
-                                        continue
-                                    unique_entries.add(line)
+                                unique_entries.update(iter_cached_entries(old_cached_data))
                             else:
                                 if url not in processed_urls:
                                     aggregated_recap[kind]["downloaded_urls"] += 1
@@ -387,6 +385,11 @@ try:
                     # Mark URL as processed to avoid double counting
                     processed_urls.add(url)
                     urls.add(url_file)
+
+                # Keep a failed URL's last downloaded entries, so the list is not rebuilt without them
+                if url in failed_urls and isinstance(cached_url, dict) and cached_url.get("data"):
+                    LOGGER.warning(f"Using the last cached {kind} entries from {url} until it can be downloaded again")
+                    unique_entries.update(iter_cached_entries(cached_url["data"]))
 
             # Build final content from unique entries, sorted for consistency
             content = b"\n".join(sorted(unique_entries)) + b"\n" if unique_entries else b""
