@@ -21,6 +21,7 @@
 - [BUGFIX] `ui`: the setup wizard no longer proposes a truncated server name when opened through an IPv6 address.
 - [BUGFIX] `redis`: IPv6 Redis, Sentinel and Cluster hosts, bare or bracketed, now work in the core, sessions, jobs and the API rate limiter.
 - [BUGFIX] `redis`: Redis Cluster now handles IPv6 nodes in slot discovery and in ASK and MOVED redirections.
+- [BUGFIX] `autoconf`: Kubernetes pods with an IPv6 address now get a valid instance DNS name.
 - [MISC] `release`: the floating `dev` and `testing` Linux packages and the `testing` GitHub release are no longer published, so package repositories stop offering a phantom upgrade; the installer refuses `--version dev` and `--version testing`.
 - [DOCS] `antibot`, `country`: the help and docs of `ANTIBOT_IGNORE_URI` and `COUNTRY_IGNORE_URI` now say patterns match the normalized path, alone or followed by `?` and the query string.
 - [DEPS] Updated resty-redis-cluster version to v1.7.0

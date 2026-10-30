@@ -409,7 +409,9 @@ class KubernetesController(Controller):
         instance = {
             "name": pod_name,
             "hostname": (
-                f"{(pod_ip.replace('.', '-') if pod_ip else pod_name)}.{namespace}.pod.{self._domain_name}" if self._use_fqdn else (pod_ip or pod_name)
+                f"{(pod_ip.replace('.', '-').replace(':', '-') if pod_ip else pod_name)}.{namespace}.pod.{self._domain_name}"
+                if self._use_fqdn
+                else (pod_ip or pod_name)
             ),
             "health": False,
             "type": "pod",
