@@ -1,6 +1,6 @@
 # Features
 
-This section contains the full list of settings supported by BunkerWeb. If you are not yet familiar with BunkerWeb, you should first read the [concepts](https://docs.bunkerweb.io/1.6.18~rc1/concepts/) section of the documentation. Please follow the instructions for your own [integration](https://docs.bunkerweb.io/1.6.18~rc1/integrations/) on how to apply the settings.
+This section contains the full list of settings supported by BunkerWeb. If you are not yet familiar with BunkerWeb, you should first read the [concepts](https://docs.bunkerweb.io/1.6.18~rc2/concepts/) section of the documentation. Please follow the instructions for your own [integration](https://docs.bunkerweb.io/1.6.18~rc2/integrations/) on how to apply the settings.
 
 ## Global settings
 
@@ -263,7 +263,7 @@ The value is a list of reasons separated by spaces, among `crowdsec`, `bad_behav
 
 ## ACME  (PRO)
 
-For a more detailed guide, see the [advanced usages](https://docs.bunkerweb.io/1.6.18~rc1/advanced/#acme) documentation.
+For a more detailed guide, see the [advanced usages](https://docs.bunkerweb.io/1.6.18~rc2/advanced/#acme) documentation.
 
 STREAM support :white_check_mark:
 
@@ -312,7 +312,7 @@ Advanced ACME certificate management with custom CA support, certificate monitor
 
 ## Anti DDoS  (PRO)
 
-For a more detailed guide, see the [advanced usages](https://docs.bunkerweb.io/1.6.18~rc1/advanced/#anti-ddos-pro) documentation.
+For a more detailed guide, see the [advanced usages](https://docs.bunkerweb.io/1.6.18~rc2/advanced/#anti-ddos-pro) documentation.
 
 STREAM support :x:
 
@@ -1071,7 +1071,7 @@ Follow these steps to configure and use the Blacklist feature:
 2. **Configure block rules:** Define which IPs, networks, rDNS patterns, ASNs, User-Agents, or URIs should be blocked.
 3. **Set up ignore rules:** Specify any exceptions that should bypass the blacklist checks.
 4. **Add external sources:** Configure URLs for automatically downloading and updating blacklist data.
-5. **Monitor effectiveness:** Check the [web UI](https://docs.bunkerweb.io/1.6.18~rc1/web-ui/) to see statistics on blocked requests.
+5. **Monitor effectiveness:** Check the [web UI](https://docs.bunkerweb.io/1.6.18~rc2/web-ui/) to see statistics on blocked requests.
 
 !!! info "stream mode"
     When using stream mode, only IP, rDNS, and ASN checks will be performed.
@@ -1378,7 +1378,7 @@ Follow these steps to configure and use the BunkerNet feature:
 2. **Initial registration:** Upon first startup, your instance will automatically register with the BunkerNet API and receive a unique identifier.
 3. **Automatic updates:** Your instance will automatically download the latest threat database on a regular schedule.
 4. **Automatic reporting:** When your instance blocks a malicious IP address, it will automatically contribute this data to the community.
-5. **Monitor protection:** Check the [web UI](https://docs.bunkerweb.io/1.6.18~rc1/web-ui/) to see statistics on threats blocked by BunkerNet intelligence.
+5. **Monitor protection:** Check the [web UI](https://docs.bunkerweb.io/1.6.18~rc2/web-ui/) to see statistics on threats blocked by BunkerNet intelligence.
 
 ### Configuration Settings
 
@@ -1465,7 +1465,7 @@ Pro tip: When viewing your alerts, click the "columns" option and check the "con
 
 ## Cache  (PRO)
 
-For a more detailed guide, see the [advanced usages](https://docs.bunkerweb.io/1.6.18~rc1/advanced/#cache-pro) documentation.
+For a more detailed guide, see the [advanced usages](https://docs.bunkerweb.io/1.6.18~rc2/advanced/#cache-pro) documentation.
 
 STREAM support :x:
 
@@ -1712,7 +1712,7 @@ Follow these steps to configure and use the Country feature:
 1. **Define your strategy:** Decide whether you want to use a whitelist approach (allow only specific countries) or a blacklist approach (block specific countries).
 2. **Configure countries or groups:** Add ISO 3166-1 alpha-2 country codes (two-letter codes like US, GB, FR) and/or supported group tokens (like `@EU`, `@SCHENGEN`) to either the `WHITELIST_COUNTRY` or `BLACKLIST_COUNTRY` setting.
 3. **Apply settings:** Once configured, the country-based restrictions will apply to all visitors to your site.
-4. **Monitor effectiveness:** Check the [web UI](https://docs.bunkerweb.io/1.6.18~rc1/web-ui/) to see statistics on blocked requests by country.
+4. **Monitor effectiveness:** Check the [web UI](https://docs.bunkerweb.io/1.6.18~rc2/web-ui/) to see statistics on blocked requests by country.
 
 ### Configuration Settings
 
@@ -1974,7 +1974,7 @@ Follow one of the environment-specific guides below so the CrowdSec agent ingest
     services:
       bunkerweb:
         # This is the name that will be used to identify the instance in the Scheduler
-        image: bunkerity/bunkerweb:1.6.18-rc1
+        image: bunkerity/bunkerweb:1.6.18-rc2
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -1991,7 +1991,7 @@ Follow one of the environment-specific guides below so the CrowdSec agent ingest
             syslog-address: "udp://10.20.30.254:514" # The IP address of the syslog service
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.18-rc1
+        image: bunkerity/bunkerweb-scheduler:1.6.18-rc2
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Make sure to set the correct instance name
@@ -2158,7 +2158,7 @@ Follow one of the environment-specific guides below so the CrowdSec agent ingest
 
     The BunkerWeb All-In-One (AIO) Docker image comes with CrowdSec fully integrated. You don't need to set up a separate CrowdSec instance or manually configure acquisition files for BunkerWeb logs when using the internal CrowdSec agent.
 
-    Refer to the [All-In-One (AIO) Image integration documentation](https://docs.bunkerweb.io/1.6.18~rc1/integrations/#crowdsec-integration).
+    Refer to the [All-In-One (AIO) Image integration documentation](https://docs.bunkerweb.io/1.6.18~rc2/integrations/#crowdsec-integration).
 
 ### Step&nbsp;2 – Configure BunkerWeb settings
 
@@ -2285,7 +2285,7 @@ A service with `USE_CROWDSEC` set to `yes` and both URLs empty checks nothing, a
 
 ## Custom Pages  (PRO)
 
-For a more detailed guide, see the [advanced usages](https://docs.bunkerweb.io/1.6.18~rc1/advanced/#custom-pages-pro) documentation.
+For a more detailed guide, see the [advanced usages](https://docs.bunkerweb.io/1.6.18~rc2/advanced/#custom-pages-pro) documentation.
 
 STREAM support :x:
 
@@ -2496,7 +2496,7 @@ Follow these steps to configure and use the DNSBL feature:
 1. **Control the feature:** DNSBL is enabled by default. Set `USE_DNSBL` to `no` to disable it.
 2. **Configure DNSBL servers:** Add the domain names of the DNSBL services you want to use to the `DNSBL_LIST` setting.
 3. **Apply settings:** Once configured, BunkerWeb will automatically check incoming connections against the specified DNSBL servers.
-4. **Monitor effectiveness:** Check the [web UI](https://docs.bunkerweb.io/1.6.18~rc1/web-ui/) to see statistics on requests blocked by DNSBL checks.
+4. **Monitor effectiveness:** Check the [web UI](https://docs.bunkerweb.io/1.6.18~rc2/web-ui/) to see statistics on requests blocked by DNSBL checks.
 
 ### Configuration Settings
 
@@ -2597,7 +2597,7 @@ Follow these steps to configure and use the DNSBL feature:
 
 <p align='center'></p>
 
-For a more detailed guide, see the [advanced usages](https://docs.bunkerweb.io/1.6.18~rc1/advanced/#easy-resolve-pro) documentation.
+For a more detailed guide, see the [advanced usages](https://docs.bunkerweb.io/1.6.18~rc2/advanced/#easy-resolve-pro) documentation.
 
 STREAM support :x:
 
@@ -2703,7 +2703,7 @@ Follow these steps to configure and use the Greylist feature:
 1. **Enable the feature:** The Greylist feature is disabled by default. Set the `USE_GREYLIST` setting to `yes` to enable it.
 2. **Configure greylist rules:** Define which IPs, networks, rDNS patterns, ASNs, User-Agents, or URIs should be greylisted.
 3. **Add external sources:** Optionally, configure URLs for automatically downloading and updating greylist data.
-4. **Monitor access:** Check the [web UI](https://docs.bunkerweb.io/1.6.18~rc1/web-ui/) to see which visitors are being allowed or denied.
+4. **Monitor access:** Check the [web UI](https://docs.bunkerweb.io/1.6.18~rc2/web-ui/) to see which visitors are being allowed or denied.
 
 !!! tip "Access Control Behavior"
     When the greylist feature is enabled with the `USE_GREYLIST` setting set to `yes`:
@@ -3369,7 +3369,7 @@ Follow these steps to configure and use the HTML Injection feature:
 
 ## LDAP SSO  (PRO)
 
-For a more detailed guide, see the [advanced usages](https://docs.bunkerweb.io/1.6.18~rc1/advanced/#ldap-sso-pro) documentation.
+For a more detailed guide, see the [advanced usages](https://docs.bunkerweb.io/1.6.18~rc2/advanced/#ldap-sso-pro) documentation.
 
 STREAM support :x:
 
@@ -3696,7 +3696,7 @@ The Limit plugin in BunkerWeb provides robust capabilities to enforce limiting p
 2. **Enable Global Rate Limiting:** Use `USE_LIMIT_REQ_GLOBAL` to cap the total aggregate request rate for a service, independent of client IP or URL, when protecting origin capacity matters more than per-client fairness.
 3. **Enable Connection Limiting:** Use `USE_LIMIT_CONN` to enable connection limiting and set the maximum number of concurrent connections for different protocols.
 4. **Apply Granular Control:** Create multiple rate limit rules for different URLs to provide varying levels of protection across your site.
-5. **Monitor Effectiveness:** Use the [web UI](https://docs.bunkerweb.io/1.6.18~rc1/web-ui/) to view statistics on limited requests and connections.
+5. **Monitor Effectiveness:** Use the [web UI](https://docs.bunkerweb.io/1.6.18~rc2/web-ui/) to view statistics on limited requests and connections.
 
 ### Configuration Settings
 
@@ -3848,7 +3848,7 @@ When `SECURITY_MODE` is `detect`, connection limits are evaluated and logged (`l
 
 <p align='center'></p>
 
-For a more detailed guide, see the [advanced usages](https://docs.bunkerweb.io/1.6.18~rc1/advanced/#load-balancer-pro) documentation.
+For a more detailed guide, see the [advanced usages](https://docs.bunkerweb.io/1.6.18~rc2/advanced/#load-balancer-pro) documentation.
 
 STREAM support :x:
 
@@ -3880,7 +3880,7 @@ Provides load balancing feature to group of upstreams with optional healthchecks
 
 ## Maintenance  (PRO)
 
-For a more detailed guide, see the [advanced usages](https://docs.bunkerweb.io/1.6.18~rc1/advanced/#maintenance-pro) documentation.
+For a more detailed guide, see the [advanced usages](https://docs.bunkerweb.io/1.6.18~rc2/advanced/#maintenance-pro) documentation.
 
 STREAM support :x:
 
@@ -3902,7 +3902,7 @@ The Metrics plugin provides comprehensive monitoring and data collection capabil
 2. These metrics include counters for blocked requests, performance measurements, and various security-related statistics.
 3. The data is stored efficiently in memory, with configurable limits to prevent excessive resource usage.
 4. For multi-instance setups, Redis can be used to centralize and aggregate metrics data.
-5. The collected metrics can be accessed through the API or visualized in the [web UI](https://docs.bunkerweb.io/1.6.18~rc1/web-ui/).
+5. The collected metrics can be accessed through the API or visualized in the [web UI](https://docs.bunkerweb.io/1.6.18~rc2/web-ui/).
 6. This information helps you identify security threats, troubleshoot issues, and optimize your configuration.
 
 ### Technical Implementation
@@ -3923,7 +3923,7 @@ Follow these steps to configure and use the Metrics feature:
 1. **Enable the feature:** Metrics collection is enabled by default. You can control this with the `USE_METRICS` setting.
 2. **Configure memory allocation:** Set the amount of memory to allocate for metrics storage using the `METRICS_MEMORY_SIZE` setting.
 3. **Set storage limits:** Define how many blocked requests to store per worker and in Redis with the respective settings.
-4. **Access the data:** View the collected metrics through the [web UI](https://docs.bunkerweb.io/1.6.18~rc1/web-ui/) or API endpoints.
+4. **Access the data:** View the collected metrics through the [web UI](https://docs.bunkerweb.io/1.6.18~rc2/web-ui/) or API endpoints.
 5. **Analyze the information:** Use the gathered data to identify patterns, detect security issues, and optimize your configuration.
 
 ### Collected Metrics
@@ -4061,7 +4061,7 @@ For example, `/metrics/requests` returns information about blocked requests.
 
 ## Migration  (PRO)
 
-For a more detailed guide, see the [advanced usages](https://docs.bunkerweb.io/1.6.18~rc1/advanced/#migration-pro) documentation.
+For a more detailed guide, see the [advanced usages](https://docs.bunkerweb.io/1.6.18~rc2/advanced/#migration-pro) documentation.
 
 STREAM support :white_check_mark:
 
@@ -4265,7 +4265,7 @@ Whether you need to restrict HTTP methods, manage request sizes, optimize file c
         - Verify plugin integrity using checksums when available.
         - Regularly review and update plugins to ensure security and compatibility.
 
-        For more details, refer to the [Plugins documentation](https://docs.bunkerweb.io/1.6.18~rc1/plugins/).
+        For more details, refer to the [Plugins documentation](https://docs.bunkerweb.io/1.6.18~rc2/plugins/).
 
     | Setting                 | Default | Context | Multiple | Description                                                                    |
     | ----------------------- | ------- | ------- | -------- | ------------------------------------------------------------------------------ |
@@ -4399,7 +4399,7 @@ Follow these steps to configure and use ModSecurity:
 1. **Enable the feature:** ModSecurity is enabled by default. This can be controlled using the `USE_MODSECURITY` setting.
 2. **Select a CRS version:** Choose a version of the OWASP Core Rule Set (v3 or v4).
 3. **Add plugins:** Optionally activate CRS plugins to enhance rule coverage.
-4. **Monitor and tune:** Use logs and the [web UI](https://docs.bunkerweb.io/1.6.18~rc1/web-ui/) to identify false positives and adjust settings.
+4. **Monitor and tune:** Use logs and the [web UI](https://docs.bunkerweb.io/1.6.18~rc2/web-ui/) to identify false positives and adjust settings.
 
 ### Configuration Settings
 
@@ -4762,7 +4762,7 @@ The Scheduler validates the whole candidate CA bundle and every CRL before repla
 
 <p align='center'></p>
 
-For a more detailed guide, see the [advanced usages](https://docs.bunkerweb.io/1.6.18~rc1/advanced/#openapi-validator-pro) documentation.
+For a more detailed guide, see the [advanced usages](https://docs.bunkerweb.io/1.6.18~rc2/advanced/#openapi-validator-pro) documentation.
 
 STREAM support :x:
 
@@ -4783,7 +4783,7 @@ Validates incoming HTTP requests against an OpenAPI / Swagger specification.
 
 <p align='center'></p>
 
-For a more detailed guide, see the [advanced usages](https://docs.bunkerweb.io/1.6.18~rc1/advanced/#openid-connect-pro) documentation.
+For a more detailed guide, see the [advanced usages](https://docs.bunkerweb.io/1.6.18~rc2/advanced/#openid-connect-pro) documentation.
 
 STREAM support :x:
 
@@ -4953,7 +4953,7 @@ Follow these steps to configure and use the Pro features:
 1. **Obtain a license key:** Purchase a Pro license from the [BunkerWeb Panel](https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc).
 2. **Configure your license key:** Use the `PRO_LICENSE_KEY` setting to configure your license.
 3. **Let BunkerWeb handle the rest:** Once configured with a valid license, Pro plugins are automatically downloaded and activated.
-4. **Monitor your Pro status:** Check the health indicators in the [web UI](https://docs.bunkerweb.io/1.6.18~rc1/web-ui/) to confirm your Pro subscription status.
+4. **Monitor your Pro status:** Check the health indicators in the [web UI](https://docs.bunkerweb.io/1.6.18~rc2/web-ui/) to confirm your Pro subscription status.
 
 ### Configuration Settings
 
@@ -5869,7 +5869,7 @@ Follow these steps to configure and use the Reverse Scan feature:
 1. **Enable the feature:** Set the `USE_REVERSE_SCAN` setting to `yes` to enable client port scanning.
 2. **Configure ports to scan:** Customize the `REVERSE_SCAN_PORTS` setting to specify which client ports should be checked.
 3. **Set scan timeout:** Adjust the `REVERSE_SCAN_TIMEOUT` to balance thorough scanning with performance.
-4. **Monitor scan activity:** Check logs and the [web UI](https://docs.bunkerweb.io/1.6.18~rc1/web-ui/) to review scan results and potential security incidents.
+4. **Monitor scan activity:** Check logs and the [web UI](https://docs.bunkerweb.io/1.6.18~rc2/web-ui/) to review scan results and potential security incidents.
 
 ### Configuration Settings
 
@@ -6029,7 +6029,7 @@ For more information, see the [robots.txt documentation](https://www.robotstxt.o
 
 ## SAML  (PRO)
 
-For a more detailed guide, see the [advanced usages](https://docs.bunkerweb.io/1.6.18~rc1/advanced/#saml-pro) documentation.
+For a more detailed guide, see the [advanced usages](https://docs.bunkerweb.io/1.6.18~rc2/advanced/#saml-pro) documentation.
 
 STREAM support :x:
 
@@ -6496,7 +6496,7 @@ Integrate easily the BunkerWeb UI.
 
 ## UI Single Sign-On  (PRO)
 
-For a more detailed guide, see the [advanced usages](https://docs.bunkerweb.io/1.6.18~rc1/advanced/#ui-single-sign-on-pro) documentation.
+For a more detailed guide, see the [advanced usages](https://docs.bunkerweb.io/1.6.18~rc2/advanced/#ui-single-sign-on-pro) documentation.
 
 STREAM support :x:
 
@@ -6527,7 +6527,7 @@ Enable SSO authentication for the BunkerWeb web interface by reading headers set
 
 <p align='center'></p>
 
-For a more detailed guide, see the [advanced usages](https://docs.bunkerweb.io/1.6.18~rc1/advanced/#user-manager-pro) documentation.
+For a more detailed guide, see the [advanced usages](https://docs.bunkerweb.io/1.6.18~rc2/advanced/#user-manager-pro) documentation.
 
 STREAM support :x:
 
@@ -6561,7 +6561,7 @@ Follow these steps to configure and use the Whitelist feature:
 1. **Enable the feature:** Whitelist is enabled by default (`USE_WHITELIST=yes`), with preset rDNS suffixes and ASN `32934`. Review these trusted sources; set `USE_WHITELIST=no` to disable it.
 2. **Configure allow rules:** Define which IPs, networks, rDNS patterns, ASNs, User-Agents, or URIs should be whitelisted.
 3. **Add external sources:** Configure URLs for automatically downloading and updating whitelist data.
-4. **Monitor access:** Check the [web UI](https://docs.bunkerweb.io/1.6.18~rc1/web-ui/) to see which visitors are being allowed or denied.
+4. **Monitor access:** Check the [web UI](https://docs.bunkerweb.io/1.6.18~rc2/web-ui/) to see which visitors are being allowed or denied.
 
 !!! info "stream mode"
     When using stream mode, only IP, rDNS, and ASN checks are performed.
@@ -6734,7 +6734,7 @@ TrustedMonitor/\d+\.\d+
 
 ## Wildcard  (PRO)
 
-For a more detailed guide, see the [advanced usages](https://docs.bunkerweb.io/1.6.18~rc1/advanced/#wildcard-pro) documentation.
+For a more detailed guide, see the [advanced usages](https://docs.bunkerweb.io/1.6.18~rc2/advanced/#wildcard-pro) documentation.
 
 STREAM support :x:
 

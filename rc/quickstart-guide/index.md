@@ -2,7 +2,7 @@
 
 !!! info "Prerequisites"
 
-    We expect that you're already familiar with the [core concepts](https://docs.bunkerweb.io/1.6.18~rc1/concepts/) and have followed the [integrations instructions](https://docs.bunkerweb.io/1.6.18~rc1/integrations/) for your environment.
+    We expect that you're already familiar with the [core concepts](https://docs.bunkerweb.io/1.6.18~rc2/concepts/) and have followed the [integrations instructions](https://docs.bunkerweb.io/1.6.18~rc2/integrations/) for your environment.
 
     This quickstart guide assumes that BunkerWeb is accessible from the Internet and that you have configured at least two domains: one for the web UI and one for your web service.
 
@@ -12,13 +12,13 @@
 
     For production environments with many services to protect, we recommend at least 4 (v)CPUs and 16 GB of RAM. Resources should be adjusted based on your use case, network traffic, and potential DDoS attacks you may face.
 
-    It is highly recommended to enable global loading of CRS rules (by setting the `USE_MODSECURITY_GLOBAL_CRS` parameter to `yes`) if you are in environments with limited RAM or in production with many services. More details can be found in the [advanced usages](https://docs.bunkerweb.io/1.6.18~rc1/advanced/#running-many-services-in-production) section of the documentation.
+    It is highly recommended to enable global loading of CRS rules (by setting the `USE_MODSECURITY_GLOBAL_CRS` parameter to `yes`) if you are in environments with limited RAM or in production with many services. More details can be found in the [advanced usages](https://docs.bunkerweb.io/1.6.18~rc2/advanced/#running-many-services-in-production) section of the documentation.
 
 This quickstart guide will help you to quickly install BunkerWeb and secure a web service using the web User Interface.
 
 Protecting existing web applications already accessible with the HTTP(S) protocol is the main goal of BunkerWeb: it will act as a classical [reverse proxy](https://en.wikipedia.org/wiki/Reverse_proxy) with extra security features.
 
-See the [examples folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.18-rc1/examples) of the repository to get real-world examples.
+See the [examples folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.18-rc2/examples) of the repository to get real-world examples.
 
 ## Using an AI agent
 
@@ -49,7 +49,7 @@ Help me configure BunkerWeb <version> with <integration> to protect my applicati
       -p 80:8080/tcp \
       -p 443:8443/tcp \
       -p 443:8443/udp \
-      bunkerity/bunkerweb-all-in-one:1.6.18-rc1
+      bunkerity/bunkerweb-all-in-one:1.6.18-rc2
     ```
 
     By default, the container exposes:
@@ -59,7 +59,7 @@ Help me configure BunkerWeb <version> with <integration> to protect my applicati
     * 8443/udp for QUIC
     * 7000/tcp for the web UI access without BunkerWeb in front (not recommended for production)
 
-    The All-In-One image comes with several built-in services, which can be controlled using environment variables. See the [All-In-One (AIO) Image section](https://docs.bunkerweb.io/1.6.18~rc1/integrations/#all-in-one-aio-image) of the integrations page for more details.
+    The All-In-One image comes with several built-in services, which can be controlled using environment variables. See the [All-In-One (AIO) Image section](https://docs.bunkerweb.io/1.6.18~rc2/integrations/#all-in-one-aio-image) of the integrations page for more details.
 
 === "Linux"
 
@@ -67,8 +67,8 @@ Help me configure BunkerWeb <version> with <integration> to protect my applicati
 
     ```bash
     # Download the script and its checksum
-    curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.18-rc1/install-bunkerweb.sh
-    curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.18-rc1/install-bunkerweb.sh.sha256
+    curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.18-rc2/install-bunkerweb.sh
+    curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.18-rc2/install-bunkerweb.sh.sha256
 
     # Verify the checksum
     sha256sum -c install-bunkerweb.sh.sha256
@@ -92,7 +92,7 @@ Help me configure BunkerWeb <version> with <integration> to protect my applicati
     - The summary now shows whether the FastAPI service will run so you can intentionally enable or disable it with `--api` / `--no-api`.
     - CrowdSec is prompted interactively for Full Stack installs. On the CLI, `--crowdsec` and `--crowdsec-appsec` are valid for Full Stack and Manager installs; Worker, Scheduler-only, UI-only, and API-only modes reject them.
 
-    For advanced installation methods (package manager, installation types, non-interactive flags, CrowdSec integration, etc.), see the [Linux Integration](https://docs.bunkerweb.io/1.6.18~rc1/integrations/#linux).
+    For advanced installation methods (package manager, installation types, non-interactive flags, CrowdSec integration, etc.), see the [Linux Integration](https://docs.bunkerweb.io/1.6.18~rc2/integrations/#linux).
 
 === "Docker"
 
@@ -109,7 +109,7 @@ Help me configure BunkerWeb <version> with <integration> to protect my applicati
     services:
       bunkerweb:
         # This is the name that will be used to identify the instance in the Scheduler
-        image: bunkerity/bunkerweb:1.6.18-rc1
+        image: bunkerity/bunkerweb:1.6.18-rc2
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -122,7 +122,7 @@ Help me configure BunkerWeb <version> with <integration> to protect my applicati
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.18-rc1
+        image: bunkerity/bunkerweb-scheduler:1.6.18-rc2
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Make sure to set the correct instance name
@@ -139,7 +139,7 @@ Help me configure BunkerWeb <version> with <integration> to protect my applicati
           - bw-db
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.6.18-rc1
+        image: bunkerity/bunkerweb-ui:1.6.18-rc2
         environment:
           <<: *bw-env
         volumes:
@@ -209,7 +209,7 @@ Help me configure BunkerWeb <version> with <integration> to protect my applicati
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.18-rc1
+        image: bunkerity/bunkerweb:1.6.18-rc2
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -225,7 +225,7 @@ Help me configure BunkerWeb <version> with <integration> to protect my applicati
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.18-rc1
+        image: bunkerity/bunkerweb-scheduler:1.6.18-rc2
         environment:
           <<: *bw-ui-env
           BUNKERWEB_INSTANCES: ""
@@ -243,7 +243,7 @@ Help me configure BunkerWeb <version> with <integration> to protect my applicati
           - bw-db
 
       bw-autoconf:
-        image: bunkerity/bunkerweb-autoconf:1.6.18-rc1
+        image: bunkerity/bunkerweb-autoconf:1.6.18-rc2
         depends_on:
           - bw-docker
         environment:
@@ -266,7 +266,7 @@ Help me configure BunkerWeb <version> with <integration> to protect my applicati
           - bw-docker
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.6.18-rc1
+        image: bunkerity/bunkerweb-ui:1.6.18-rc2
         environment:
           <<: *bw-ui-env
           # TOTP_ENCRYPTION_KEYS: "changeme" # Optional: generated in the bw-ui-data volume when unset; a key must be 43 characters
@@ -350,9 +350,9 @@ Help me configure BunkerWeb <version> with <integration> to protect my applicati
 === "Swarm"
 
     !!! warning "Deprecated"
-        The Swarm integration is deprecated and will be removed in a future release. Please consider using the [Kubernetes integration](https://docs.bunkerweb.io/1.6.18~rc1/integrations/#kubernetes) instead.
+        The Swarm integration is deprecated and will be removed in a future release. Please consider using the [Kubernetes integration](https://docs.bunkerweb.io/1.6.18~rc2/integrations/#kubernetes) instead.
 
-        **More information can be found in the [Swarm integration documentation](https://docs.bunkerweb.io/1.6.18~rc1/integrations/#swarm).**
+        **More information can be found in the [Swarm integration documentation](https://docs.bunkerweb.io/1.6.18~rc2/integrations/#swarm).**
 
     Here is the full docker compose stack file that you can use; please note that we will later connect the web service to the `bw-services` network:
 
@@ -364,7 +364,7 @@ Help me configure BunkerWeb <version> with <integration> to protect my applicati
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.18-rc1
+        image: bunkerity/bunkerweb:1.6.18-rc2
         ports:
           - published: 80
             target: 8080
@@ -394,7 +394,7 @@ Help me configure BunkerWeb <version> with <integration> to protect my applicati
             - "bunkerweb.INSTANCE=yes"
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.18-rc1
+        image: bunkerity/bunkerweb-scheduler:1.6.18-rc2
         environment:
           <<: *bw-ui-env
           BUNKERWEB_INSTANCES: ""
@@ -412,7 +412,7 @@ Help me configure BunkerWeb <version> with <integration> to protect my applicati
           - bw-db
 
       bw-autoconf:
-        image: bunkerity/bunkerweb-autoconf:1.6.18-rc1
+        image: bunkerity/bunkerweb-autoconf:1.6.18-rc2
         environment:
           <<: *bw-ui-env
           DOCKER_HOST: "tcp://bw-docker:2375"
@@ -441,7 +441,7 @@ Help me configure BunkerWeb <version> with <integration> to protect my applicati
               - "node.role == manager"
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.6.18-rc1
+        image: bunkerity/bunkerweb-ui:1.6.18-rc2
         environment:
           <<: *bw-ui-env
           # TOTP_ENCRYPTION_KEYS: "changeme" # Optional: generated in the bw-ui-data volume when unset; a key must be 43 characters
@@ -517,7 +517,7 @@ Once you're on the setup page, you can enter the **administrator username, email
 
     The next step will ask you to enter the **server name** (domain/FQDN) that the web UI will use.
 
-    You can also choose to enable [Let's Encrypt](https://docs.bunkerweb.io/1.6.18~rc1/features/#lets-encrypt)
+    You can also choose to enable [Let's Encrypt](https://docs.bunkerweb.io/1.6.18~rc2/features/#lets-encrypt)
 
     
 
@@ -525,13 +525,13 @@ Once you're on the setup page, you can enter the **administrator username, email
 
     The next step will ask you to enter the **server name** (domain/FQDN) that the web UI will use.
 
-    You can also choose to enable [Let's Encrypt](https://docs.bunkerweb.io/1.6.18~rc1/features/#lets-encrypt).
+    You can also choose to enable [Let's Encrypt](https://docs.bunkerweb.io/1.6.18~rc2/features/#lets-encrypt).
 
     If you expand the `Advanced settings` section, you can also configure the following options:
 
     * **Reverse Proxy**: Tweak the Reverse Proxy settings for your administrator interface (e.g., if you want to use a path).
-    * [**Real IP**](https://docs.bunkerweb.io/1.6.18~rc1/features/#real-ip): Configure the Real IP settings to properly identify the client's IP address (e.g., if you are behind a load balancer or a CDN).
-    * [**Custom Certificate**](https://docs.bunkerweb.io/1.6.18~rc1/features/#custom-ssl-certificate): Upload a custom TLS certificate if you don't want to use Let's Encrypt.
+    * [**Real IP**](https://docs.bunkerweb.io/1.6.18~rc2/features/#real-ip): Configure the Real IP settings to properly identify the client's IP address (e.g., if you are behind a load balancer or a CDN).
+    * [**Custom Certificate**](https://docs.bunkerweb.io/1.6.18~rc2/features/#custom-ssl-certificate): Upload a custom TLS certificate if you don't want to use Let's Encrypt.
 
     
 
@@ -625,7 +625,7 @@ You can now log in with the administrator account you created during the setup w
       -e "www.example.com_REVERSE_PROXY_HOST=http://myapp:8080" \
       -e "www.example.com_REVERSE_PROXY_URL=/" \
       # --- Include any other existing environment variables for UI, Redis, CrowdSec, etc. ---
-      bunkerity/bunkerweb-all-in-one:1.6.18-rc1
+      bunkerity/bunkerweb-all-in-one:1.6.18-rc2
     ```
 
     Your application container (`myapp`) and the `bunkerweb-aio` container must be on the same Docker network for BunkerWeb to reach it using the hostname `myapp`.
@@ -647,7 +647,7 @@ You can now log in with the administrator account you created during the setup w
       -p 443:8443/tcp \
       -p 443:8443/udp \
     #   ... (all other relevant environment variables as shown in the main example above) ...
-      bunkerity/bunkerweb-all-in-one:1.6.18-rc1
+      bunkerity/bunkerweb-all-in-one:1.6.18-rc2
     ```
 
     Make sure to replace `myapp` with the actual name or IP of your application container and `http://myapp:8080` with its correct address and port.
@@ -816,9 +816,9 @@ You can now log in with the administrator account you created during the setup w
 === "Swarm labels"
 
     !!! warning "Deprecated"
-        The Swarm integration is deprecated and will be removed in a future release. Please consider using the [Kubernetes integration](https://docs.bunkerweb.io/1.6.18~rc1/integrations/#kubernetes) instead.
+        The Swarm integration is deprecated and will be removed in a future release. Please consider using the [Kubernetes integration](https://docs.bunkerweb.io/1.6.18~rc2/integrations/#kubernetes) instead.
 
-        **More information can be found in the [Swarm integration documentation](https://docs.bunkerweb.io/1.6.18~rc1/integrations/#swarm).**
+        **More information can be found in the [Swarm integration documentation](https://docs.bunkerweb.io/1.6.18~rc2/integrations/#swarm).**
 
     We assume that you followed the [Basic setup](#__tabbed_1_5) and that the Swarm stack is running on your cluster and connected to a network called `bw-services` so that you can connect your existing application and configure BunkerWeb with labels:
 
@@ -850,5 +850,5 @@ Congratulations! You have just installed BunkerWeb and secured your first web se
 
 - Join the Bunker community: [Discord](https://discord.com/invite/fTf46FmtyD), [LinkedIn](https://www.linkedin.com/company/bunkerity/), [GitHub](https://github.com/bunkerity), [X (Formerly Twitter)](https://x.com/bunkerity)
 - Check out the [official blog](https://www.bunkerweb.io/blog?utm_campaign=self&utm_source=doc)
-- Explore [advanced use cases](https://docs.bunkerweb.io/1.6.18~rc1/advanced/) in the documentation
+- Explore [advanced use cases](https://docs.bunkerweb.io/1.6.18~rc2/advanced/) in the documentation
 - [Get in touch with us](https://panel.bunkerweb.io/contact.php?utm_campaign=self&utm_source=doc) to discuss your organization's needs

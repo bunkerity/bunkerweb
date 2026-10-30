@@ -4,7 +4,7 @@
 
 ### Two-factor authentication replay protection
 
-Upgrade every Web UI replica together: replay protection for two-factor codes is now stored in the shared database and only covers replicas running this version. During the migration, an already displayed authentication code may be rejected for up to 33 seconds; use a newer code after that interval. Keep the existing TOTP encryption keys available to every UI replica, as described in [Web UI troubleshooting](https://docs.bunkerweb.io/1.6.18~rc1/troubleshooting/#web-ui). The replay counter does not replace those keys. While the database is read-only, codes are accepted without replay protection until it becomes writable again.
+Upgrade every Web UI replica together: replay protection for two-factor codes is now stored in the shared database and only covers replicas running this version. During the migration, an already displayed authentication code may be rejected for up to 33 seconds; use a newer code after that interval. Keep the existing TOTP encryption keys available to every UI replica, as described in [Web UI troubleshooting](https://docs.bunkerweb.io/1.6.18~rc2/troubleshooting/#web-ui). The replay counter does not replace those keys. While the database is read-only, codes are accepted without replay protection until it becomes writable again.
 
 ### Procedure
 
@@ -18,8 +18,8 @@ Upgrade every Web UI replica together: replay protection for two-factor codes is
 
         ```bash
         # Download the script and its checksum
-        curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.18-rc1/install-bunkerweb.sh
-        curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.18-rc1/install-bunkerweb.sh.sha256
+        curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.18-rc2/install-bunkerweb.sh
+        curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.18-rc2/install-bunkerweb.sh.sha256
 
         # Verify the checksum
         sha256sum -c install-bunkerweb.sh.sha256
@@ -102,16 +102,16 @@ Upgrade every Web UI replica together: replay protection for two-factor codes is
                     ```yaml
                     services:
                         bunkerweb:
-                            image: bunkerity/bunkerweb:1.6.18-rc1
+                            image: bunkerity/bunkerweb:1.6.18-rc2
                             ...
                         bw-scheduler:
-                            image: bunkerity/bunkerweb-scheduler:1.6.18-rc1
+                            image: bunkerity/bunkerweb-scheduler:1.6.18-rc2
                             ...
                         bw-autoconf:
-                            image: bunkerity/bunkerweb-autoconf:1.6.18-rc1
+                            image: bunkerity/bunkerweb-autoconf:1.6.18-rc2
                             ...
                         bw-ui:
-                            image: bunkerity/bunkerweb-ui:1.6.18-rc1
+                            image: bunkerity/bunkerweb-ui:1.6.18-rc2
                             ...
                     ```
 
@@ -131,7 +131,7 @@ Upgrade every Web UI replica together: replay protection for two-factor codes is
 
 === "All-in-one"
 
-    The [All-In-One image](https://docs.bunkerweb.io/1.6.18~rc1/integrations/#all-in-one-aio-image) bundles BunkerWeb, the Scheduler, the Web UI and (optionally) the API, Redis and CrowdSec in a **single container** named `bunkerweb-aio` by default. All persistent state — the SQLite database, cache, custom configs, plugins, backups, and the Redis/CrowdSec data — lives in the `/data` volume, so upgrading is a matter of replacing the container while keeping that volume.
+    The [All-In-One image](https://docs.bunkerweb.io/1.6.18~rc2/integrations/#all-in-one-aio-image) bundles BunkerWeb, the Scheduler, the Web UI and (optionally) the API, Redis and CrowdSec in a **single container** named `bunkerweb-aio` by default. All persistent state — the SQLite database, cache, custom configs, plugins, backups, and the Redis/CrowdSec data — lives in the `/data` volume, so upgrading is a matter of replacing the container while keeping that volume.
 
     1. **Prerequisites**:
 
@@ -167,7 +167,7 @@ Upgrade every Web UI replica together: replay protection for two-factor codes is
 
             4. **Pull the new image**:
                 ```bash
-                docker pull bunkerity/bunkerweb-all-in-one:1.6.18-rc1
+                docker pull bunkerity/bunkerweb-all-in-one:1.6.18-rc2
                 ```
 
             5. **Re-create the container** with the same options, reusing the same `/data` volume, ports and environment variables as before:
@@ -178,7 +178,7 @@ Upgrade every Web UI replica together: replay protection for two-factor codes is
                 -p 80:8080/tcp \
                 -p 443:8443/tcp \
                 -p 443:8443/udp \
-                bunkerity/bunkerweb-all-in-one:1.6.18-rc1
+                bunkerity/bunkerweb-all-in-one:1.6.18-rc2
                 ```
 
         === "Docker Compose"
@@ -187,7 +187,7 @@ Upgrade every Web UI replica together: replay protection for two-factor codes is
                 ```yaml
                 services:
                     bunkerweb-aio:
-                        image: bunkerity/bunkerweb-all-in-one:1.6.18-rc1
+                        image: bunkerity/bunkerweb-all-in-one:1.6.18-rc2
                         ...
                 ```
 
@@ -226,8 +226,8 @@ Upgrade every Web UI replica together: replay protection for two-factor codes is
 
             ```bash
             # Download the script and its checksum
-            curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.18-rc1/install-bunkerweb.sh
-            curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.18-rc1/install-bunkerweb.sh.sha256
+            curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.18-rc2/install-bunkerweb.sh
+            curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.18-rc2/install-bunkerweb.sh.sha256
 
             # Verify the checksum
             sha256sum -c install-bunkerweb.sh.sha256
@@ -308,20 +308,20 @@ Upgrade every Web UI replica together: replay protection for two-factor codes is
             Examples:
 
             ```bash
-            # Upgrade to 1.6.18~rc1 interactively (will prompt for backup)
-            sudo ./install-bunkerweb.sh --version 1.6.18~rc1
+            # Upgrade to 1.6.18~rc2 interactively (will prompt for backup)
+            sudo ./install-bunkerweb.sh --version 1.6.18~rc2
 
             # Non-interactive upgrade with automatic backup to custom directory
-            sudo ./install-bunkerweb.sh -v 1.6.18~rc1 --backup-dir /var/backups/bw-2025-01 -y
+            sudo ./install-bunkerweb.sh -v 1.6.18~rc2 --backup-dir /var/backups/bw-2025-01 -y
 
             # Silent unattended upgrade (logs suppressed) – relies on default auto-backup
-            sudo ./install-bunkerweb.sh -v 1.6.18~rc1 -y -q
+            sudo ./install-bunkerweb.sh -v 1.6.18~rc2 -y -q
 
             # Perform a dry run (plan) without applying changes
-            sudo ./install-bunkerweb.sh -v 1.6.18~rc1 --dry-run
+            sudo ./install-bunkerweb.sh -v 1.6.18~rc2 --dry-run
 
             # Upgrade skipping automatic backup (NOT recommended)
-            sudo ./install-bunkerweb.sh -v 1.6.18~rc1 --no-auto-backup -y
+            sudo ./install-bunkerweb.sh -v 1.6.18~rc2 --no-auto-backup -y
             ```
 
             !!! warning "Skipping backups"
@@ -401,7 +401,7 @@ Upgrade every Web UI replica together: replay protection for two-factor codes is
 
                         ```shell
                         sudo apt update && \
-                        sudo apt install -y --allow-downgrades bunkerweb=1.6.18~rc1
+                        sudo apt install -y --allow-downgrades bunkerweb=1.6.18~rc2
                         ```
 
                         To prevent the BunkerWeb package from upgrading when executing `apt upgrade`, you can use the following command :
@@ -410,7 +410,7 @@ Upgrade every Web UI replica together: replay protection for two-factor codes is
                         sudo apt-mark hold bunkerweb nginx
                         ```
 
-                        More details in the [integration Linux page](https://docs.bunkerweb.io/1.6.18~rc1/integrations/#__tabbed_1_1).
+                        More details in the [integration Linux page](https://docs.bunkerweb.io/1.6.18~rc2/integrations/#__tabbed_1_1).
 
                     === "Fedora/RedHat"
 
@@ -427,7 +427,7 @@ Upgrade every Web UI replica together: replay protection for two-factor codes is
 
                         ```shell
                         sudo dnf makecache && \
-                        sudo dnf install -y --allowerasing bunkerweb-1.6.18~rc1
+                        sudo dnf install -y --allowerasing bunkerweb-1.6.18~rc2
                         ```
 
                         To prevent the BunkerWeb package from upgrading when executing `dnf upgrade`, you can use the following command :
@@ -437,7 +437,7 @@ Upgrade every Web UI replica together: replay protection for two-factor codes is
                         sudo dnf versionlock add nginx
                         ```
 
-                        More details in the [integration Linux page](https://docs.bunkerweb.io/1.6.18~rc1/integrations/#__tabbed_1_3).
+                        More details in the [integration Linux page](https://docs.bunkerweb.io/1.6.18~rc2/integrations/#__tabbed_1_3).
 
                 3. **Start the services**:
                         ```bash
@@ -709,7 +709,7 @@ Upgrade every Web UI replica together: replay protection for two-factor codes is
         ```
 
     8. **Downgrade BunkerWeb**.
-        - Downgrade BunkerWeb to the previous version by following the same steps as when upgrading BunkerWeb in the [integration Linux page](https://docs.bunkerweb.io/1.6.18~rc1/integrations/#linux)
+        - Downgrade BunkerWeb to the previous version by following the same steps as when upgrading BunkerWeb in the [integration Linux page](https://docs.bunkerweb.io/1.6.18~rc2/integrations/#linux)
 
 ## Upgrade from 1.5.X
 
@@ -735,7 +735,7 @@ In other words, the new system is fully agnostic and generic: the scheduler is i
 
     **The instances will be automatically fetched by the controller**. You can also add custom instances to the list that may not be picked up by the controller.
 
-Since the `1.6`, the Scheduler also have a new [built-in healthcheck system](https://docs.bunkerweb.io/1.6.18~rc1/concepts/), that will check the health of the instances. If an instance becomes unhealthy, the scheduler will stop sending the configuration to it. If the instance becomes healthy again, the scheduler will start sending the configuration to it again.
+Since the `1.6`, the Scheduler also have a new [built-in healthcheck system](https://docs.bunkerweb.io/1.6.18~rc2/concepts/), that will check the health of the instances. If an instance becomes unhealthy, the scheduler will stop sending the configuration to it. If the instance becomes healthy again, the scheduler will start sending the configuration to it again.
 
 #### BunkerWeb container
 
@@ -749,19 +749,19 @@ While the settings are now declared on the Scheduler container, **you'll still n
 
 #### Default values and new settings
 
-We tried our best not to change default value but we have added many other settings. It's highly recommended to read the [security tuning](https://docs.bunkerweb.io/1.6.18~rc1/advanced/#security-tuning) and [settings](https://docs.bunkerweb.io/1.6.18~rc1/features/) sections of the documentation.
+We tried our best not to change default value but we have added many other settings. It's highly recommended to read the [security tuning](https://docs.bunkerweb.io/1.6.18~rc2/advanced/#security-tuning) and [settings](https://docs.bunkerweb.io/1.6.18~rc2/features/) sections of the documentation.
 
 #### Templates
 
-We added a new feature called **templates**. Templates provide a structured and standardized approach to defining settings and custom configurations, check the [concepts/templates](https://docs.bunkerweb.io/1.6.18~rc1/concepts/#templates) section for more information.
+We added a new feature called **templates**. Templates provide a structured and standardized approach to defining settings and custom configurations, check the [concepts/templates](https://docs.bunkerweb.io/1.6.18~rc2/concepts/#templates) section for more information.
 
 #### Autoconf namespaces
 
 We added a **namespace** feature to the autoconf integrations. Namespaces allow you to group your instances and apply settings only to them. Check the following sections according to your Integration for more information:
 
-- [Autoconf/namespaces](https://docs.bunkerweb.io/1.6.18~rc1/integrations/#namespaces)
-- [Kubernetes/namespaces](https://docs.bunkerweb.io/1.6.18~rc1/integrations/#namespaces_1)
-- [Swarm/namespaces](https://docs.bunkerweb.io/1.6.18~rc1/integrations/#namespaces_2)
+- [Autoconf/namespaces](https://docs.bunkerweb.io/1.6.18~rc2/integrations/#namespaces)
+- [Kubernetes/namespaces](https://docs.bunkerweb.io/1.6.18~rc2/integrations/#namespaces_1)
+- [Swarm/namespaces](https://docs.bunkerweb.io/1.6.18~rc2/integrations/#namespaces_2)
 
 ### Procedure
 
@@ -899,16 +899,16 @@ We added a **namespace** feature to the autoconf integrations. Namespaces allow 
                 ```yaml
                 services:
                     bunkerweb:
-                        image: bunkerity/bunkerweb:1.6.18-rc1
+                        image: bunkerity/bunkerweb:1.6.18-rc2
                         ...
                     bw-scheduler:
-                        image: bunkerity/bunkerweb-scheduler:1.6.18-rc1
+                        image: bunkerity/bunkerweb-scheduler:1.6.18-rc2
                         ...
                     bw-autoconf:
-                        image: bunkerity/bunkerweb-autoconf:1.6.18-rc1
+                        image: bunkerity/bunkerweb-autoconf:1.6.18-rc2
                         ...
                     bw-ui:
-                        image: bunkerity/bunkerweb-ui:1.6.18-rc1
+                        image: bunkerity/bunkerweb-ui:1.6.18-rc2
                         ...
                 ```
 
@@ -943,7 +943,7 @@ We added a **namespace** feature to the autoconf integrations. Namespaces allow 
 
                     ```shell
                     sudo apt update && \
-                    sudo apt install -y --allow-downgrades bunkerweb=1.6.18~rc1
+                    sudo apt install -y --allow-downgrades bunkerweb=1.6.18~rc2
                     ```
 
                     To prevent the BunkerWeb package from upgrading when executing `apt upgrade`, you can use the following command :
@@ -952,7 +952,7 @@ We added a **namespace** feature to the autoconf integrations. Namespaces allow 
                     sudo apt-mark hold bunkerweb nginx
                     ```
 
-                    More details in the [integration Linux page](https://docs.bunkerweb.io/1.6.18~rc1/integrations/#__tabbed_1_1).
+                    More details in the [integration Linux page](https://docs.bunkerweb.io/1.6.18~rc2/integrations/#__tabbed_1_1).
 
                 === "Fedora/RedHat"
 
@@ -969,7 +969,7 @@ We added a **namespace** feature to the autoconf integrations. Namespaces allow 
 
                     ```shell
                     sudo dnf makecache && \
-                    sudo dnf install -y --allowerasing bunkerweb-1.6.18~rc1
+                    sudo dnf install -y --allowerasing bunkerweb-1.6.18~rc2
                     ```
 
                     To prevent the BunkerWeb package from upgrading when executing `dnf upgrade`, you can use the following command :
@@ -979,7 +979,7 @@ We added a **namespace** feature to the autoconf integrations. Namespaces allow 
                     sudo dnf versionlock add nginx
                     ```
 
-                    More details in the [integration Linux page](https://docs.bunkerweb.io/1.6.18~rc1/integrations/#__tabbed_1_3).
+                    More details in the [integration Linux page](https://docs.bunkerweb.io/1.6.18~rc2/integrations/#__tabbed_1_3).
 
             5. **Start the services**:
                     ```bash
@@ -1183,4 +1183,79 @@ We added a **namespace** feature to the autoconf integrations. Namespaces allow 
         ```
 
     8. **Downgrade BunkerWeb**.
-        - Downgrade BunkerWeb to the previous version by following the same steps as when upgrading BunkerWeb in the [integration Linux page](https://docs.bunkerweb.io/1.6.18~rc1/integrations/#linux)
+        - Downgrade BunkerWeb to the previous version by following the same steps as when upgrading BunkerWeb in the [integration Linux page](https://docs.bunkerweb.io/1.6.18~rc2/integrations/#linux)
+
+## Verify a release
+
+Check what you download before you install or upgrade. A release is signed at three levels:
+
+- the Git tag is signed with the GPG key of a release owner, and the release workflow refuses to build a tag GitHub cannot verify;
+- the container images and the Linux packages carry a signed build provenance attestation, created by the release workflow itself;
+- the GitHub release lists the SHA-256 checksum of every package.
+
+Attestations are keyless: they use [Sigstore](https://www.sigstore.dev/) and the identity of the GitHub Actions workflow, so no private signing key exists anywhere. A verifier checks that the artifact was built by `.github/workflows/release.yml` of `bunkerity/bunkerweb`, for the release tag, from the tagged commit.
+
+!!! info "Attestations start with 1.6.18 rc2"
+    Earlier releases only have a signed tag. The commands below need the [GitHub CLI](https://cli.github.com/) 2.68 or later, signed in with `gh auth login`.
+
+The commands share two variables. Set them to the release you want to verify:
+
+```bash
+VERSION=1.6.18~rc2
+TAG="v${VERSION//\~/-}"
+```
+
+### Tag signature
+
+The public keys of the release owners are published on their GitHub accounts. A GPG warning that the key is not certified is expected: compare the fingerprint it prints with the two below instead.
+
+```bash
+curl -fsSL https://github.com/TheophileDiot.gpg | gpg --import
+curl -fsSL https://github.com/fl0ppy-d1sk.gpg | gpg --import
+
+git init -q bunkerweb-verify && cd bunkerweb-verify
+git fetch --depth 1 https://github.com/bunkerity/bunkerweb.git tag "$TAG"
+git verify-tag "$TAG"
+```
+
+The output must contain `Good signature` and the primary key fingerprint of the release owner who cut the tag: `4821 439D 531B 030E 5DCC  F1F7 7C44 E4D7 7426 28F8` for Théophile Diot, `BBB2 5DF4 31F9 C568 D56C  748D D34B 4FF9 11F7 40D1` for Florian Pitance.
+
+### Container images
+
+The attestation belongs to the image index digest, so it is the same on Docker Hub, GitHub Container Registry and the GitLab mirror. Print the digest of the image you pulled, then verify it:
+
+```bash
+docker buildx imagetools inspect "bunkerity/bunkerweb:${TAG#v}" --format '{{json .Manifest.Digest}}'
+
+gh attestation verify "oci://docker.io/bunkerity/bunkerweb:${TAG#v}" \
+  --repo bunkerity/bunkerweb \
+  --signer-workflow bunkerity/bunkerweb/.github/workflows/release.yml \
+  --source-ref "refs/tags/$TAG"
+```
+
+`Verification succeeded!` means the digest was signed by the release workflow for this tag. The command fails when the image has no attestation or when another workflow or repository signed it. Replace the image name to check `bunkerweb-scheduler`, `bunkerweb-autoconf`, `bunkerweb-ui`, `bunkerweb-api` or `bunkerweb-all-in-one`, and use `ghcr.io/bunkerity/...` or `registry.gitlab.com/bunkerity/bunkerweb/...` for the other registries. Pin `oci://docker.io/bunkerity/bunkerweb@sha256:<digest>` to verify exactly the image you run.
+
+### Linux packages
+
+Packages are published on packagecloud. Download the `.deb` or `.rpm` file you intend to install and verify it:
+
+```bash
+gh attestation verify ./bunkerweb_${VERSION}-1_amd64.deb \
+  --repo bunkerity/bunkerweb \
+  --signer-workflow bunkerity/bunkerweb/.github/workflows/release.yml \
+  --source-ref "refs/tags/$TAG"
+```
+
+The release also lists the SHA-256 checksum of every package in `release-manifest.json`. Check the manifest against its own checksum, then the package against the manifest, choosing the entry of your distribution (`ubuntu`, `ubuntu-noble`, `ubuntu-jammy`, `debian-bookworm`, `debian-trixie`, `fedora-43`, `fedora-44`, `rhel-8`, `rhel-9` or `rhel-10`) and platform (`linux/amd64` or `linux/arm64`):
+
+```bash
+curl -fsSL -O "https://github.com/bunkerity/bunkerweb/releases/download/${TAG}/release-manifest.json" \
+  -O "https://github.com/bunkerity/bunkerweb/releases/download/${TAG}/release-manifest.json.sha256"
+sha256sum -c release-manifest.json.sha256
+
+jq -r '.packages[] | select(.distro == "debian-bookworm" and .platform == "linux/amd64") | "\(.sha256)  \(.filename)"' release-manifest.json | sha256sum -c
+```
+
+Run the last command in the directory that holds the package. The manifest only lists checksums: the attestation is what proves who built the package.
+
+The GitHub release also carries `bunkerweb-${TAG#v}.intoto.jsonl`, the attestation bundles of every image and package. `gh attestation verify <file> --bundle bunkerweb-${TAG#v}.intoto.jsonl --repo bunkerity/bunkerweb` verifies a downloaded package against it without fetching its attestation from GitHub. <!-- codespell:ignore intoto -->

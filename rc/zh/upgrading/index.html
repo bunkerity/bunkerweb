@@ -1062,6 +1062,56 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#_10" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        验证发行版
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="验证发行版">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_11" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        标签签名
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_12" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        容器镜像
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#linux" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Linux 软件包
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -1213,8 +1263,8 @@
 <code>docker-compose.yml</code> 和 <code>.env</code> 的目录中运行它（或使用 <code>--compose-dir</code>
 指定该目录）：</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># 下载脚本及其校验和</span>
-curl<span class="w"> </span>-fsSL<span class="w"> </span>-O<span class="w"> </span>https://github.com/bunkerity/bunkerweb/releases/download/v1.6.18-rc1/install-bunkerweb.sh
-curl<span class="w"> </span>-fsSL<span class="w"> </span>-O<span class="w"> </span>https://github.com/bunkerity/bunkerweb/releases/download/v1.6.18-rc1/install-bunkerweb.sh.sha256
+curl<span class="w"> </span>-fsSL<span class="w"> </span>-O<span class="w"> </span>https://github.com/bunkerity/bunkerweb/releases/download/v1.6.18-rc2/install-bunkerweb.sh
+curl<span class="w"> </span>-fsSL<span class="w"> </span>-O<span class="w"> </span>https://github.com/bunkerity/bunkerweb/releases/download/v1.6.18-rc2/install-bunkerweb.sh.sha256
 
 <span class="c1"># 验证校验和</span>
 sha256sum<span class="w"> </span>-c<span class="w"> </span>install-bunkerweb.sh.sha256
@@ -1349,16 +1399,16 @@ sudo<span class="w"> </span>./install-bunkerweb.sh<span class="w"> </span>--dock
 <li><strong>更新 Docker Compose 文件</strong>：更新 Docker Compose 文件以使用新版本的 BunkerWeb 镜像。
     <div class="highlight"><pre><span></span><code><span class="nt">services</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">bunkerweb</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.18-rc1</span>
+<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.18-rc2</span>
 <span class="w">        </span><span class="l l-Scalar l-Scalar-Plain">...</span>
 <span class="w">    </span><span class="nt">bw-scheduler</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.18-rc1</span>
+<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.18-rc2</span>
 <span class="w">        </span><span class="l l-Scalar l-Scalar-Plain">...</span>
 <span class="w">    </span><span class="nt">bw-autoconf</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-autoconf:1.6.18-rc1</span>
+<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-autoconf:1.6.18-rc2</span>
 <span class="w">        </span><span class="l l-Scalar l-Scalar-Plain">...</span>
 <span class="w">    </span><span class="nt">bw-ui</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-ui:1.6.18-rc1</span>
+<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-ui:1.6.18-rc2</span>
 <span class="w">        </span><span class="l l-Scalar l-Scalar-Plain">...</span>
 </code></pre></div></li>
 </ol>
@@ -1426,7 +1476,7 @@ docker<span class="w"> </span>rm<span class="w"> </span>bunkerweb-aio
 </li>
 <li>
 <p><strong>拉取新镜像</strong>：
-    <div class="highlight"><pre><span></span><code>docker<span class="w"> </span>pull<span class="w"> </span>bunkerity/bunkerweb-all-in-one:1.6.18-rc1
+    <div class="highlight"><pre><span></span><code>docker<span class="w"> </span>pull<span class="w"> </span>bunkerity/bunkerweb-all-in-one:1.6.18-rc2
 </code></pre></div></p>
 </li>
 <li>
@@ -1437,7 +1487,7 @@ docker<span class="w"> </span>rm<span class="w"> </span>bunkerweb-aio
 -p<span class="w"> </span><span class="m">80</span>:8080/tcp<span class="w"> </span><span class="se">\</span>
 -p<span class="w"> </span><span class="m">443</span>:8443/tcp<span class="w"> </span><span class="se">\</span>
 -p<span class="w"> </span><span class="m">443</span>:8443/udp<span class="w"> </span><span class="se">\</span>
-bunkerity/bunkerweb-all-in-one:1.6.18-rc1
+bunkerity/bunkerweb-all-in-one:1.6.18-rc2
 </code></pre></div></p>
 </li>
 </ol>
@@ -1448,7 +1498,7 @@ bunkerity/bunkerweb-all-in-one:1.6.18-rc1
 <p><strong>更新 Docker Compose 文件</strong>：更新 Docker Compose 文件以使用新版 All-In-One 镜像。
     <div class="highlight"><pre><span></span><code><span class="nt">services</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">bunkerweb-aio</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-all-in-one:1.6.18-rc1</span>
+<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-all-in-one:1.6.18-rc2</span>
 <span class="w">        </span><span class="l l-Scalar l-Scalar-Plain">...</span>
 </code></pre></div></p>
 </li>
@@ -1493,8 +1543,8 @@ docker<span class="w"> </span>compose<span class="w"> </span>up<span class="w"> 
 <p><strong>快速开始</strong>：</p>
 <p>要开始使用，请下载安装脚本及其校验和，然后在运行前验证脚本的完整性。</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># Download the script and its checksum</span>
-curl<span class="w"> </span>-fsSL<span class="w"> </span>-O<span class="w"> </span>https://github.com/bunkerity/bunkerweb/releases/download/v1.6.18-rc1/install-bunkerweb.sh
-curl<span class="w"> </span>-fsSL<span class="w"> </span>-O<span class="w"> </span>https://github.com/bunkerity/bunkerweb/releases/download/v1.6.18-rc1/install-bunkerweb.sh.sha256
+curl<span class="w"> </span>-fsSL<span class="w"> </span>-O<span class="w"> </span>https://github.com/bunkerity/bunkerweb/releases/download/v1.6.18-rc2/install-bunkerweb.sh
+curl<span class="w"> </span>-fsSL<span class="w"> </span>-O<span class="w"> </span>https://github.com/bunkerity/bunkerweb/releases/download/v1.6.18-rc2/install-bunkerweb.sh.sha256
 
 <span class="c1"># Verify the checksum</span>
 sha256sum<span class="w"> </span>-c<span class="w"> </span>install-bunkerweb.sh.sha256
@@ -1625,20 +1675,20 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
 </tbody>
 </table>
 <p>示例：</p>
-<div class="highlight"><pre><span></span><code><span class="c1"># 交互式升级到 1.6.18~rc1（会提示备份）</span>
-sudo<span class="w"> </span>./install-bunkerweb.sh<span class="w"> </span>--version<span class="w"> </span><span class="m">1</span>.6.18~rc1
+<div class="highlight"><pre><span></span><code><span class="c1"># 交互式升级到 1.6.18~rc2（会提示备份）</span>
+sudo<span class="w"> </span>./install-bunkerweb.sh<span class="w"> </span>--version<span class="w"> </span><span class="m">1</span>.6.18~rc2
 
 <span class="c1"># 使用自动备份到自定义目录的非交互式升级</span>
-sudo<span class="w"> </span>./install-bunkerweb.sh<span class="w"> </span>-v<span class="w"> </span><span class="m">1</span>.6.18~rc1<span class="w"> </span>--backup-dir<span class="w"> </span>/var/backups/bw-2025-01<span class="w"> </span>-y
+sudo<span class="w"> </span>./install-bunkerweb.sh<span class="w"> </span>-v<span class="w"> </span><span class="m">1</span>.6.18~rc2<span class="w"> </span>--backup-dir<span class="w"> </span>/var/backups/bw-2025-01<span class="w"> </span>-y
 
 <span class="c1"># 静默无人值守升级（抑制日志）– 依赖默认的自动备份</span>
-sudo<span class="w"> </span>./install-bunkerweb.sh<span class="w"> </span>-v<span class="w"> </span><span class="m">1</span>.6.18~rc1<span class="w"> </span>-y<span class="w"> </span>-q
+sudo<span class="w"> </span>./install-bunkerweb.sh<span class="w"> </span>-v<span class="w"> </span><span class="m">1</span>.6.18~rc2<span class="w"> </span>-y<span class="w"> </span>-q
 
 <span class="c1"># 执行一次空运行（计划）而不应用更改</span>
-sudo<span class="w"> </span>./install-bunkerweb.sh<span class="w"> </span>-v<span class="w"> </span><span class="m">1</span>.6.18~rc1<span class="w"> </span>--dry-run
+sudo<span class="w"> </span>./install-bunkerweb.sh<span class="w"> </span>-v<span class="w"> </span><span class="m">1</span>.6.18~rc2<span class="w"> </span>--dry-run
 
 <span class="c1"># 跳过自动备份进行升级（不推荐）</span>
-sudo<span class="w"> </span>./install-bunkerweb.sh<span class="w"> </span>-v<span class="w"> </span><span class="m">1</span>.6.18~rc1<span class="w"> </span>--no-auto-backup<span class="w"> </span>-y
+sudo<span class="w"> </span>./install-bunkerweb.sh<span class="w"> </span>-v<span class="w"> </span><span class="m">1</span>.6.18~rc2<span class="w"> </span>--no-auto-backup<span class="w"> </span>-y
 </code></pre></div>
 <div class="admonition warning">
 <p class="admonition-title">跳过备份</p>
@@ -1723,7 +1773,7 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>stop<span class="w"
 </code></pre></div>
 <p>然后，您可以更新 BunkerWeb 软件包：</p>
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>apt<span class="w"> </span>update<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
-sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>--allow-downgrades<span class="w"> </span><span class="nv">bunkerweb</span><span class="o">=</span><span class="m">1</span>.6.18~rc1
+sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>--allow-downgrades<span class="w"> </span><span class="nv">bunkerweb</span><span class="o">=</span><span class="m">1</span>.6.18~rc2
 </code></pre></div>
 <p>为了防止在执行 <code>apt upgrade</code> 时升级 BunkerWeb 软件包，您可以使用以下命令：</p>
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>apt-mark<span class="w"> </span>hold<span class="w"> </span>bunkerweb<span class="w"> </span>nginx
@@ -1738,7 +1788,7 @@ sudo<span class="w"> </span>dnf<span class="w"> </span>versionlock<span class="w
 </code></pre></div>
 <p>然后，您可以更新 BunkerWeb 软件包：</p>
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>makecache<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
-sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>--allowerasing<span class="w"> </span>bunkerweb-1.6.18~rc1
+sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>--allowerasing<span class="w"> </span>bunkerweb-1.6.18~rc2
 </code></pre></div>
 <p>为了防止在执行 <code>dnf upgrade</code> 时升级 BunkerWeb 软件包，您可以使用以下命令：</p>
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>versionlock<span class="w"> </span>add<span class="w"> </span>bunkerweb<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
@@ -2231,16 +2281,16 @@ sudo<span class="w"> </span>chmod<span class="w"> </span><span class="m">770</sp
 <p><strong>更新 Docker Compose 文件</strong>：更新 Docker Compose 文件以使用新版本的 BunkerWeb 镜像。
     <div class="highlight"><pre><span></span><code><span class="nt">services</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">bunkerweb</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.18-rc1</span>
+<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.18-rc2</span>
 <span class="w">        </span><span class="l l-Scalar l-Scalar-Plain">...</span>
 <span class="w">    </span><span class="nt">bw-scheduler</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.18-rc1</span>
+<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.18-rc2</span>
 <span class="w">        </span><span class="l l-Scalar l-Scalar-Plain">...</span>
 <span class="w">    </span><span class="nt">bw-autoconf</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-autoconf:1.6.18-rc1</span>
+<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-autoconf:1.6.18-rc2</span>
 <span class="w">        </span><span class="l l-Scalar l-Scalar-Plain">...</span>
 <span class="w">    </span><span class="nt">bw-ui</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-ui:1.6.18-rc1</span>
+<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-ui:1.6.18-rc2</span>
 <span class="w">        </span><span class="l l-Scalar l-Scalar-Plain">...</span>
 </code></pre></div></p>
 </li>
@@ -2272,7 +2322,7 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>stop<span class="w"
 </code></pre></div>
 <p>然后，您可以更新 BunkerWeb 软件包：</p>
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>apt<span class="w"> </span>update<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
-sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>--allow-downgrades<span class="w"> </span><span class="nv">bunkerweb</span><span class="o">=</span><span class="m">1</span>.6.18~rc1
+sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>--allow-downgrades<span class="w"> </span><span class="nv">bunkerweb</span><span class="o">=</span><span class="m">1</span>.6.18~rc2
 </code></pre></div>
 <p>为了防止在执行 <code>apt upgrade</code> 时升级 BunkerWeb 软件包，您可以使用以下命令：</p>
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>apt-mark<span class="w"> </span>hold<span class="w"> </span>bunkerweb<span class="w"> </span>nginx
@@ -2287,7 +2337,7 @@ sudo<span class="w"> </span>dnf<span class="w"> </span>versionlock<span class="w
 </code></pre></div>
 <p>然后，您可以更新 BunkerWeb 软件包：</p>
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>makecache<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
-sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>--allowerasing<span class="w"> </span>bunkerweb-1.6.18~rc1
+sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>--allowerasing<span class="w"> </span>bunkerweb-1.6.18~rc2
 </code></pre></div>
 <p>为了防止在执行 <code>dnf upgrade</code> 时升级 BunkerWeb 软件包，您可以使用以下命令：</p>
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>versionlock<span class="w"> </span>add<span class="w"> </span>bunkerweb<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
@@ -2514,6 +2564,58 @@ sudo<span class="w"> </span>chmod<span class="w"> </span><span class="m">770</sp
 </div>
 </div>
 </div>
+<h2 id="_10">验证发行版<a class="headerlink" href="#_10" title="Permanent link">&para;</a></h2>
+<p>在安装或升级之前，请先检查所下载的内容。发行版在三个层面上签名：</p>
+<ul>
+<li>Git 标签由发布负责人的 GPG 密钥签名，GitHub 无法验证的标签，发布工作流会拒绝构建；</li>
+<li>容器镜像和 Linux 软件包带有已签名的构建来源证明（attestation），由发布工作流自身创建；</li>
+<li>GitHub Release 列出了每个软件包的 SHA-256 校验和。</li>
+</ul>
+<p>证明采用无密钥方式：使用 <a href="https://www.sigstore.dev/">Sigstore</a> 和 GitHub Actions 工作流的身份，因此任何地方都不存在私有签名密钥。验证方会检查该制品是否由 <code>bunkerity/bunkerweb</code> 的 <code>.github/workflows/release.yml</code> 针对该发布标签、基于被标记的提交构建。</p>
+<div class="admonition info">
+<p class="admonition-title">证明从 1.6.18 rc2 开始提供</p>
+<p>更早的版本只有已签名的标签。以下命令需要 <a href="https://cli.github.com/">GitHub CLI</a> 2.68 或更高版本，并已通过 <code>gh auth login</code> 登录。</p>
+</div>
+<p>这些命令共用两个变量。请将它们设置为要验证的版本：</p>
+<div class="highlight"><pre><span></span><code><span class="nv">VERSION</span><span class="o">=</span><span class="m">1</span>.6.18~rc2
+<span class="nv">TAG</span><span class="o">=</span><span class="s2">"v</span><span class="si">${</span><span class="nv">VERSION</span><span class="p">//</span><span class="se">\~</span><span class="p">/-</span><span class="si">}</span><span class="s2">"</span>
+</code></pre></div>
+<h3 id="_11">标签签名<a class="headerlink" href="#_11" title="Permanent link">&para;</a></h3>
+<p>发布负责人的公钥发布在他们的 GitHub 账户上。GPG 提示该密钥未经认证属于正常现象：请改为将其输出的指纹与下面的两个指纹进行比对。</p>
+<div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-fsSL<span class="w"> </span>https://github.com/TheophileDiot.gpg<span class="w"> </span><span class="p">|</span><span class="w"> </span>gpg<span class="w"> </span>--import
+curl<span class="w"> </span>-fsSL<span class="w"> </span>https://github.com/fl0ppy-d1sk.gpg<span class="w"> </span><span class="p">|</span><span class="w"> </span>gpg<span class="w"> </span>--import
+
+git<span class="w"> </span>init<span class="w"> </span>-q<span class="w"> </span>bunkerweb-verify<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">cd</span><span class="w"> </span>bunkerweb-verify
+git<span class="w"> </span>fetch<span class="w"> </span>--depth<span class="w"> </span><span class="m">1</span><span class="w"> </span>https://github.com/bunkerity/bunkerweb.git<span class="w"> </span>tag<span class="w"> </span><span class="s2">"</span><span class="nv">$TAG</span><span class="s2">"</span>
+git<span class="w"> </span>verify-tag<span class="w"> </span><span class="s2">"</span><span class="nv">$TAG</span><span class="s2">"</span>
+</code></pre></div>
+<p>输出必须包含 <code>Good signature</code>，以及创建该标签的发布负责人的主密钥指纹：Théophile Diot 为 <code>4821 439D 531B 030E 5DCC  F1F7 7C44 E4D7 7426 28F8</code>，Florian Pitance 为 <code>BBB2 5DF4 31F9 C568 D56C  748D D34B 4FF9 11F7 40D1</code>。</p>
+<h3 id="_12">容器镜像<a class="headerlink" href="#_12" title="Permanent link">&para;</a></h3>
+<p>证明与镜像索引的摘要（digest）绑定，因此在 Docker Hub、GitHub Container Registry 和 GitLab 镜像站上完全一致。先输出您所拉取镜像的摘要，再进行验证：</p>
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>buildx<span class="w"> </span>imagetools<span class="w"> </span>inspect<span class="w"> </span><span class="s2">"bunkerity/bunkerweb:</span><span class="si">${</span><span class="nv">TAG</span><span class="p">#v</span><span class="si">}</span><span class="s2">"</span><span class="w"> </span>--format<span class="w"> </span><span class="s1">'{{json .Manifest.Digest}}'</span>
+
+gh<span class="w"> </span>attestation<span class="w"> </span>verify<span class="w"> </span><span class="s2">"oci://docker.io/bunkerity/bunkerweb:</span><span class="si">${</span><span class="nv">TAG</span><span class="p">#v</span><span class="si">}</span><span class="s2">"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--repo<span class="w"> </span>bunkerity/bunkerweb<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--signer-workflow<span class="w"> </span>bunkerity/bunkerweb/.github/workflows/release.yml<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--source-ref<span class="w"> </span><span class="s2">"refs/tags/</span><span class="nv">$TAG</span><span class="s2">"</span>
+</code></pre></div>
+<p><code>Verification succeeded!</code> 表示该摘要由发布工作流针对此标签签名。如果镜像没有证明，或由其他工作流或仓库签名，命令会失败。更换镜像名称即可检查 <code>bunkerweb-scheduler</code>、<code>bunkerweb-autoconf</code>、<code>bunkerweb-ui</code>、<code>bunkerweb-api</code> 或 <code>bunkerweb-all-in-one</code>；检查其他镜像仓库时请使用 <code>ghcr.io/bunkerity/...</code> 或 <code>registry.gitlab.com/bunkerity/bunkerweb/...</code>。使用 <code>oci://docker.io/bunkerity/bunkerweb@sha256:&lt;digest&gt;</code> 可精确验证您正在运行的镜像。</p>
+<h3 id="linux">Linux 软件包<a class="headerlink" href="#linux" title="Permanent link">&para;</a></h3>
+<p>软件包发布在 packagecloud 上。下载您要安装的 <code>.deb</code> 或 <code>.rpm</code> 文件并验证：</p>
+<div class="highlight"><pre><span></span><code>gh<span class="w"> </span>attestation<span class="w"> </span>verify<span class="w"> </span>./bunkerweb_<span class="si">${</span><span class="nv">VERSION</span><span class="si">}</span>-1_amd64.deb<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--repo<span class="w"> </span>bunkerity/bunkerweb<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--signer-workflow<span class="w"> </span>bunkerity/bunkerweb/.github/workflows/release.yml<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--source-ref<span class="w"> </span><span class="s2">"refs/tags/</span><span class="nv">$TAG</span><span class="s2">"</span>
+</code></pre></div>
+<p>Release 还在 <code>release-manifest.json</code> 中列出了每个软件包的 SHA-256 校验和。先用清单自带的校验和检查清单，再用清单检查软件包，并选择与您的发行版（<code>ubuntu</code>、<code>ubuntu-noble</code>、<code>ubuntu-jammy</code>、<code>debian-bookworm</code>、<code>debian-trixie</code>、<code>fedora-43</code>、<code>fedora-44</code>、<code>rhel-8</code>、<code>rhel-9</code> 或 <code>rhel-10</code>）和平台（<code>linux/amd64</code> 或 <code>linux/arm64</code>）对应的条目：</p>
+<div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-fsSL<span class="w"> </span>-O<span class="w"> </span><span class="s2">"https://github.com/bunkerity/bunkerweb/releases/download/</span><span class="si">${</span><span class="nv">TAG</span><span class="si">}</span><span class="s2">/release-manifest.json"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-O<span class="w"> </span><span class="s2">"https://github.com/bunkerity/bunkerweb/releases/download/</span><span class="si">${</span><span class="nv">TAG</span><span class="si">}</span><span class="s2">/release-manifest.json.sha256"</span>
+sha256sum<span class="w"> </span>-c<span class="w"> </span>release-manifest.json.sha256
+
+jq<span class="w"> </span>-r<span class="w"> </span><span class="s1">'.packages[] | select(.distro == "debian-bookworm" and .platform == "linux/amd64") | "\(.sha256)  \(.filename)"'</span><span class="w"> </span>release-manifest.json<span class="w"> </span><span class="p">|</span><span class="w"> </span>sha256sum<span class="w"> </span>-c
+</code></pre></div>
+<p>请在包含该软件包的目录中运行最后一条命令。清单只列出校验和：证明才是确认软件包由谁构建的依据。</p>
+<p>GitHub 发行版还附带 <code>bunkerweb-${TAG#v}.intoto.jsonl</code>，其中包含每个镜像和每个软件包的证明包。<code>gh attestation verify &lt;文件&gt; --bundle bunkerweb-${TAG#v}.intoto.jsonl --repo bunkerity/bunkerweb</code> 可依据该文件验证已下载的软件包，无需从 GitHub 获取其证明。</p>
 
 
 

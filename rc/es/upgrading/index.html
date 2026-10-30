@@ -1062,6 +1062,56 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#verificar-una-version" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Verificar una versión
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Verificar una versión">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#firma-de-la-etiqueta" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Firma de la etiqueta
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#imagenes-de-contenedor" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Imágenes de contenedor
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#paquetes-de-linux" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Paquetes de Linux
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -1213,8 +1263,8 @@
 generado por él. Ejecútalo desde el directorio que contiene tu
 <code>docker-compose.yml</code> y tu <code>.env</code> (o indícalo con <code>--compose-dir</code>):</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># Descarga el script y su suma de verificación</span>
-curl<span class="w"> </span>-fsSL<span class="w"> </span>-O<span class="w"> </span>https://github.com/bunkerity/bunkerweb/releases/download/v1.6.18-rc1/install-bunkerweb.sh
-curl<span class="w"> </span>-fsSL<span class="w"> </span>-O<span class="w"> </span>https://github.com/bunkerity/bunkerweb/releases/download/v1.6.18-rc1/install-bunkerweb.sh.sha256
+curl<span class="w"> </span>-fsSL<span class="w"> </span>-O<span class="w"> </span>https://github.com/bunkerity/bunkerweb/releases/download/v1.6.18-rc2/install-bunkerweb.sh
+curl<span class="w"> </span>-fsSL<span class="w"> </span>-O<span class="w"> </span>https://github.com/bunkerity/bunkerweb/releases/download/v1.6.18-rc2/install-bunkerweb.sh.sha256
 
 <span class="c1"># Verifica la suma de verificación</span>
 sha256sum<span class="w"> </span>-c<span class="w"> </span>install-bunkerweb.sh.sha256
@@ -1350,16 +1400,16 @@ pestaña <strong>Manual</strong> para esos casos.</p>
 <li><strong>Actualiza el archivo Docker Compose</strong>: Actualiza el archivo Docker Compose para usar la nueva versión de la imagen de BunkerWeb.
     <div class="highlight"><pre><span></span><code><span class="nt">services</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">bunkerweb</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.18-rc1</span>
+<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.18-rc2</span>
 <span class="w">        </span><span class="l l-Scalar l-Scalar-Plain">...</span>
 <span class="w">    </span><span class="nt">bw-scheduler</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.18-rc1</span>
+<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.18-rc2</span>
 <span class="w">        </span><span class="l l-Scalar l-Scalar-Plain">...</span>
 <span class="w">    </span><span class="nt">bw-autoconf</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-autoconf:1.6.18-rc1</span>
+<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-autoconf:1.6.18-rc2</span>
 <span class="w">        </span><span class="l l-Scalar l-Scalar-Plain">...</span>
 <span class="w">    </span><span class="nt">bw-ui</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-ui:1.6.18-rc1</span>
+<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-ui:1.6.18-rc2</span>
 <span class="w">        </span><span class="l l-Scalar l-Scalar-Plain">...</span>
 </code></pre></div></li>
 </ol>
@@ -1427,7 +1477,7 @@ docker<span class="w"> </span>rm<span class="w"> </span>bunkerweb-aio
 </li>
 <li>
 <p><strong>Descarga la nueva imagen</strong>:
-    <div class="highlight"><pre><span></span><code>docker<span class="w"> </span>pull<span class="w"> </span>bunkerity/bunkerweb-all-in-one:1.6.18-rc1
+    <div class="highlight"><pre><span></span><code>docker<span class="w"> </span>pull<span class="w"> </span>bunkerity/bunkerweb-all-in-one:1.6.18-rc2
 </code></pre></div></p>
 </li>
 <li>
@@ -1438,7 +1488,7 @@ docker<span class="w"> </span>rm<span class="w"> </span>bunkerweb-aio
 -p<span class="w"> </span><span class="m">80</span>:8080/tcp<span class="w"> </span><span class="se">\</span>
 -p<span class="w"> </span><span class="m">443</span>:8443/tcp<span class="w"> </span><span class="se">\</span>
 -p<span class="w"> </span><span class="m">443</span>:8443/udp<span class="w"> </span><span class="se">\</span>
-bunkerity/bunkerweb-all-in-one:1.6.18-rc1
+bunkerity/bunkerweb-all-in-one:1.6.18-rc2
 </code></pre></div></p>
 </li>
 </ol>
@@ -1449,7 +1499,7 @@ bunkerity/bunkerweb-all-in-one:1.6.18-rc1
 <p><strong>Actualiza el archivo Docker Compose</strong>: Actualiza el archivo Docker Compose para usar la nueva versión de la imagen All-In-One.
     <div class="highlight"><pre><span></span><code><span class="nt">services</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">bunkerweb-aio</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-all-in-one:1.6.18-rc1</span>
+<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-all-in-one:1.6.18-rc2</span>
 <span class="w">        </span><span class="l l-Scalar l-Scalar-Plain">...</span>
 </code></pre></div></p>
 </li>
@@ -1494,8 +1544,8 @@ docker<span class="w"> </span>compose<span class="w"> </span>up<span class="w"> 
 <p><strong>Inicio rápido</strong>:</p>
 <p>Para empezar, descarga el script de instalación y su suma de verificación, luego verifica la integridad del script antes de ejecutarlo.</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># Download the script and its checksum</span>
-curl<span class="w"> </span>-fsSL<span class="w"> </span>-O<span class="w"> </span>https://github.com/bunkerity/bunkerweb/releases/download/v1.6.18-rc1/install-bunkerweb.sh
-curl<span class="w"> </span>-fsSL<span class="w"> </span>-O<span class="w"> </span>https://github.com/bunkerity/bunkerweb/releases/download/v1.6.18-rc1/install-bunkerweb.sh.sha256
+curl<span class="w"> </span>-fsSL<span class="w"> </span>-O<span class="w"> </span>https://github.com/bunkerity/bunkerweb/releases/download/v1.6.18-rc2/install-bunkerweb.sh
+curl<span class="w"> </span>-fsSL<span class="w"> </span>-O<span class="w"> </span>https://github.com/bunkerity/bunkerweb/releases/download/v1.6.18-rc2/install-bunkerweb.sh.sha256
 
 <span class="c1"># Verify the checksum</span>
 sha256sum<span class="w"> </span>-c<span class="w"> </span>install-bunkerweb.sh.sha256
@@ -1626,20 +1676,20 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
 </tbody>
 </table>
 <p>Ejemplos:</p>
-<div class="highlight"><pre><span></span><code><span class="c1"># Actualizar a 1.6.18~rc1 interactivamente (pedirá confirmación para la copia de seguridad)</span>
-sudo<span class="w"> </span>./install-bunkerweb.sh<span class="w"> </span>--version<span class="w"> </span><span class="m">1</span>.6.18~rc1
+<div class="highlight"><pre><span></span><code><span class="c1"># Actualizar a 1.6.18~rc2 interactivamente (pedirá confirmación para la copia de seguridad)</span>
+sudo<span class="w"> </span>./install-bunkerweb.sh<span class="w"> </span>--version<span class="w"> </span><span class="m">1</span>.6.18~rc2
 
 <span class="c1"># Actualización no interactiva con copia de seguridad automática a un directorio personalizado</span>
-sudo<span class="w"> </span>./install-bunkerweb.sh<span class="w"> </span>-v<span class="w"> </span><span class="m">1</span>.6.18~rc1<span class="w"> </span>--backup-dir<span class="w"> </span>/var/backups/bw-2025-01<span class="w"> </span>-y
+sudo<span class="w"> </span>./install-bunkerweb.sh<span class="w"> </span>-v<span class="w"> </span><span class="m">1</span>.6.18~rc2<span class="w"> </span>--backup-dir<span class="w"> </span>/var/backups/bw-2025-01<span class="w"> </span>-y
 
 <span class="c1"># Actualización desatendida silenciosa (salida suprimida) – depende de la copia de seguridad automática predeterminada</span>
-sudo<span class="w"> </span>./install-bunkerweb.sh<span class="w"> </span>-v<span class="w"> </span><span class="m">1</span>.6.18~rc1<span class="w"> </span>-y<span class="w"> </span>-q
+sudo<span class="w"> </span>./install-bunkerweb.sh<span class="w"> </span>-v<span class="w"> </span><span class="m">1</span>.6.18~rc2<span class="w"> </span>-y<span class="w"> </span>-q
 
 <span class="c1"># Realizar una ejecución de prueba (plan) sin aplicar cambios</span>
-sudo<span class="w"> </span>./install-bunkerweb.sh<span class="w"> </span>-v<span class="w"> </span><span class="m">1</span>.6.18~rc1<span class="w"> </span>--dry-run
+sudo<span class="w"> </span>./install-bunkerweb.sh<span class="w"> </span>-v<span class="w"> </span><span class="m">1</span>.6.18~rc2<span class="w"> </span>--dry-run
 
 <span class="c1"># Actualizar omitiendo la copia de seguridad automática (NO recomendado)</span>
-sudo<span class="w"> </span>./install-bunkerweb.sh<span class="w"> </span>-v<span class="w"> </span><span class="m">1</span>.6.18~rc1<span class="w"> </span>--no-auto-backup<span class="w"> </span>-y
+sudo<span class="w"> </span>./install-bunkerweb.sh<span class="w"> </span>-v<span class="w"> </span><span class="m">1</span>.6.18~rc2<span class="w"> </span>--no-auto-backup<span class="w"> </span>-y
 </code></pre></div>
 <div class="admonition warning">
 <p class="admonition-title">Omitir copias de seguridad</p>
@@ -1724,7 +1774,7 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>stop<span class="w"
 </code></pre></div>
 <p>Luego, puedes actualizar el paquete de BunkerWeb:</p>
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>apt<span class="w"> </span>update<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
-sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>--allow-downgrades<span class="w"> </span><span class="nv">bunkerweb</span><span class="o">=</span><span class="m">1</span>.6.18~rc1
+sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>--allow-downgrades<span class="w"> </span><span class="nv">bunkerweb</span><span class="o">=</span><span class="m">1</span>.6.18~rc2
 </code></pre></div>
 <p>Para evitar que el paquete de BunkerWeb se actualice al ejecutar <code>apt upgrade</code>, puedes usar el siguiente comando:</p>
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>apt-mark<span class="w"> </span>hold<span class="w"> </span>bunkerweb<span class="w"> </span>nginx
@@ -1739,7 +1789,7 @@ sudo<span class="w"> </span>dnf<span class="w"> </span>versionlock<span class="w
 </code></pre></div>
 <p>Luego, puedes actualizar el paquete de BunkerWeb:</p>
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>makecache<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
-sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>--allowerasing<span class="w"> </span>bunkerweb-1.6.18~rc1
+sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>--allowerasing<span class="w"> </span>bunkerweb-1.6.18~rc2
 </code></pre></div>
 <p>Para evitar que el paquete de BunkerWeb se actualice al ejecutar <code>dnf upgrade</code>, puedes usar el siguiente comando:</p>
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>versionlock<span class="w"> </span>add<span class="w"> </span>bunkerweb<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
@@ -2232,16 +2282,16 @@ sudo<span class="w"> </span>chmod<span class="w"> </span><span class="m">770</sp
 <p><strong>Actualiza el archivo Docker Compose</strong>: Actualiza el archivo Docker Compose para usar la nueva versión de la imagen de BunkerWeb.
     <div class="highlight"><pre><span></span><code><span class="nt">services</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">bunkerweb</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.18-rc1</span>
+<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.18-rc2</span>
 <span class="w">        </span><span class="l l-Scalar l-Scalar-Plain">...</span>
 <span class="w">    </span><span class="nt">bw-scheduler</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.18-rc1</span>
+<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.18-rc2</span>
 <span class="w">        </span><span class="l l-Scalar l-Scalar-Plain">...</span>
 <span class="w">    </span><span class="nt">bw-autoconf</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-autoconf:1.6.18-rc1</span>
+<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-autoconf:1.6.18-rc2</span>
 <span class="w">        </span><span class="l l-Scalar l-Scalar-Plain">...</span>
 <span class="w">    </span><span class="nt">bw-ui</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-ui:1.6.18-rc1</span>
+<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-ui:1.6.18-rc2</span>
 <span class="w">        </span><span class="l l-Scalar l-Scalar-Plain">...</span>
 </code></pre></div></p>
 </li>
@@ -2273,7 +2323,7 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>stop<span class="w"
 </code></pre></div>
 <p>Luego, puedes actualizar el paquete de BunkerWeb:</p>
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>apt<span class="w"> </span>update<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
-sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>--allow-downgrades<span class="w"> </span><span class="nv">bunkerweb</span><span class="o">=</span><span class="m">1</span>.6.18~rc1
+sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>--allow-downgrades<span class="w"> </span><span class="nv">bunkerweb</span><span class="o">=</span><span class="m">1</span>.6.18~rc2
 </code></pre></div>
 <p>Para evitar que el paquete de BunkerWeb se actualice al ejecutar <code>apt upgrade</code>, puedes usar el siguiente comando:</p>
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>apt-mark<span class="w"> </span>hold<span class="w"> </span>bunkerweb<span class="w"> </span>nginx
@@ -2288,7 +2338,7 @@ sudo<span class="w"> </span>dnf<span class="w"> </span>versionlock<span class="w
 </code></pre></div>
 <p>Luego, puedes actualizar el paquete de BunkerWeb:</p>
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>makecache<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
-sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>--allowerasing<span class="w"> </span>bunkerweb-1.6.18~rc1
+sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>--allowerasing<span class="w"> </span>bunkerweb-1.6.18~rc2
 </code></pre></div>
 <p>Para evitar que el paquete de BunkerWeb se actualice al ejecutar <code>dnf upgrade</code>, puedes usar el siguiente comando:</p>
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>versionlock<span class="w"> </span>add<span class="w"> </span>bunkerweb<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
@@ -2515,6 +2565,58 @@ sudo<span class="w"> </span>chmod<span class="w"> </span><span class="m">770</sp
 </div>
 </div>
 </div>
+<h2 id="verificar-una-version">Verificar una versión<a class="headerlink" href="#verificar-una-version" title="Permanent link">&para;</a></h2>
+<p>Compruebe lo que descarga antes de instalar o actualizar. Una versión está firmada en tres niveles:</p>
+<ul>
+<li>la etiqueta de Git está firmada con la clave GPG de un responsable de publicación, y el workflow de publicación se niega a construir una etiqueta que GitHub no pueda verificar;</li>
+<li>las imágenes de contenedor y los paquetes de Linux llevan una atestación firmada de procedencia de la compilación, creada por el propio workflow de publicación;</li>
+<li>la release de GitHub lista la suma de comprobación SHA-256 de cada paquete.</li>
+</ul>
+<p>Las atestaciones no usan claves: se basan en <a href="https://www.sigstore.dev/">Sigstore</a> y en la identidad del workflow de GitHub Actions, por lo que no existe ninguna clave de firma privada. El verificador comprueba que el artefacto fue construido por <code>.github/workflows/release.yml</code> de <code>bunkerity/bunkerweb</code>, para la etiqueta de la versión y a partir del commit etiquetado.</p>
+<div class="admonition info">
+<p class="admonition-title">Las atestaciones comienzan con la versión 1.6.18 rc2</p>
+<p>Las versiones anteriores solo tienen una etiqueta firmada. Los comandos siguientes requieren la <a href="https://cli.github.com/">GitHub CLI</a> 2.68 o posterior, con la sesión iniciada mediante <code>gh auth login</code>.</p>
+</div>
+<p>Los comandos comparten dos variables. Defínalas con la versión que desea verificar:</p>
+<div class="highlight"><pre><span></span><code><span class="nv">VERSION</span><span class="o">=</span><span class="m">1</span>.6.18~rc2
+<span class="nv">TAG</span><span class="o">=</span><span class="s2">"v</span><span class="si">${</span><span class="nv">VERSION</span><span class="p">//</span><span class="se">\~</span><span class="p">/-</span><span class="si">}</span><span class="s2">"</span>
+</code></pre></div>
+<h3 id="firma-de-la-etiqueta">Firma de la etiqueta<a class="headerlink" href="#firma-de-la-etiqueta" title="Permanent link">&para;</a></h3>
+<p>Las claves públicas de los responsables de publicación están publicadas en sus cuentas de GitHub. Es normal que GPG avise de que la clave no está certificada: compare en su lugar la huella que muestra con las dos que aparecen abajo.</p>
+<div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-fsSL<span class="w"> </span>https://github.com/TheophileDiot.gpg<span class="w"> </span><span class="p">|</span><span class="w"> </span>gpg<span class="w"> </span>--import
+curl<span class="w"> </span>-fsSL<span class="w"> </span>https://github.com/fl0ppy-d1sk.gpg<span class="w"> </span><span class="p">|</span><span class="w"> </span>gpg<span class="w"> </span>--import
+
+git<span class="w"> </span>init<span class="w"> </span>-q<span class="w"> </span>bunkerweb-verify<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">cd</span><span class="w"> </span>bunkerweb-verify
+git<span class="w"> </span>fetch<span class="w"> </span>--depth<span class="w"> </span><span class="m">1</span><span class="w"> </span>https://github.com/bunkerity/bunkerweb.git<span class="w"> </span>tag<span class="w"> </span><span class="s2">"</span><span class="nv">$TAG</span><span class="s2">"</span>
+git<span class="w"> </span>verify-tag<span class="w"> </span><span class="s2">"</span><span class="nv">$TAG</span><span class="s2">"</span>
+</code></pre></div>
+<p>La salida debe contener <code>Good signature</code> y la huella de la clave primaria de quien creó la etiqueta: <code>4821 439D 531B 030E 5DCC  F1F7 7C44 E4D7 7426 28F8</code> para Théophile Diot, <code>BBB2 5DF4 31F9 C568 D56C  748D D34B 4FF9 11F7 40D1</code> para Florian Pitance.</p>
+<h3 id="imagenes-de-contenedor">Imágenes de contenedor<a class="headerlink" href="#imagenes-de-contenedor" title="Permanent link">&para;</a></h3>
+<p>La atestación pertenece al digest del índice de la imagen, por lo que es la misma en Docker Hub, en GitHub Container Registry y en el espejo de GitLab. Muestre el digest de la imagen que descargó y verifíquelo:</p>
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>buildx<span class="w"> </span>imagetools<span class="w"> </span>inspect<span class="w"> </span><span class="s2">"bunkerity/bunkerweb:</span><span class="si">${</span><span class="nv">TAG</span><span class="p">#v</span><span class="si">}</span><span class="s2">"</span><span class="w"> </span>--format<span class="w"> </span><span class="s1">'{{json .Manifest.Digest}}'</span>
+
+gh<span class="w"> </span>attestation<span class="w"> </span>verify<span class="w"> </span><span class="s2">"oci://docker.io/bunkerity/bunkerweb:</span><span class="si">${</span><span class="nv">TAG</span><span class="p">#v</span><span class="si">}</span><span class="s2">"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--repo<span class="w"> </span>bunkerity/bunkerweb<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--signer-workflow<span class="w"> </span>bunkerity/bunkerweb/.github/workflows/release.yml<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--source-ref<span class="w"> </span><span class="s2">"refs/tags/</span><span class="nv">$TAG</span><span class="s2">"</span>
+</code></pre></div>
+<p><code>Verification succeeded!</code> significa que el workflow de publicación firmó el digest para esta etiqueta. El comando falla si la imagen no tiene atestación o si la firmó otro workflow u otro repositorio. Cambie el nombre de la imagen para comprobar <code>bunkerweb-scheduler</code>, <code>bunkerweb-autoconf</code>, <code>bunkerweb-ui</code>, <code>bunkerweb-api</code> o <code>bunkerweb-all-in-one</code>, y use <code>ghcr.io/bunkerity/...</code> o <code>registry.gitlab.com/bunkerity/bunkerweb/...</code> para los otros registros. Use <code>oci://docker.io/bunkerity/bunkerweb@sha256:&lt;digest&gt;</code> para verificar exactamente la imagen que ejecuta.</p>
+<h3 id="paquetes-de-linux">Paquetes de Linux<a class="headerlink" href="#paquetes-de-linux" title="Permanent link">&para;</a></h3>
+<p>Los paquetes se publican en packagecloud. Descargue el archivo <code>.deb</code> o <code>.rpm</code> que va a instalar y verifíquelo:</p>
+<div class="highlight"><pre><span></span><code>gh<span class="w"> </span>attestation<span class="w"> </span>verify<span class="w"> </span>./bunkerweb_<span class="si">${</span><span class="nv">VERSION</span><span class="si">}</span>-1_amd64.deb<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--repo<span class="w"> </span>bunkerity/bunkerweb<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--signer-workflow<span class="w"> </span>bunkerity/bunkerweb/.github/workflows/release.yml<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--source-ref<span class="w"> </span><span class="s2">"refs/tags/</span><span class="nv">$TAG</span><span class="s2">"</span>
+</code></pre></div>
+<p>La release también lista la suma de comprobación SHA-256 de cada paquete en <code>release-manifest.json</code>. Compruebe el manifiesto con su propia suma de comprobación y después el paquete con el manifiesto, eligiendo la entrada de su distribución (<code>ubuntu</code>, <code>ubuntu-noble</code>, <code>ubuntu-jammy</code>, <code>debian-bookworm</code>, <code>debian-trixie</code>, <code>fedora-43</code>, <code>fedora-44</code>, <code>rhel-8</code>, <code>rhel-9</code> o <code>rhel-10</code>) y de su plataforma (<code>linux/amd64</code> o <code>linux/arm64</code>):</p>
+<div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-fsSL<span class="w"> </span>-O<span class="w"> </span><span class="s2">"https://github.com/bunkerity/bunkerweb/releases/download/</span><span class="si">${</span><span class="nv">TAG</span><span class="si">}</span><span class="s2">/release-manifest.json"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-O<span class="w"> </span><span class="s2">"https://github.com/bunkerity/bunkerweb/releases/download/</span><span class="si">${</span><span class="nv">TAG</span><span class="si">}</span><span class="s2">/release-manifest.json.sha256"</span>
+sha256sum<span class="w"> </span>-c<span class="w"> </span>release-manifest.json.sha256
+
+jq<span class="w"> </span>-r<span class="w"> </span><span class="s1">'.packages[] | select(.distro == "debian-bookworm" and .platform == "linux/amd64") | "\(.sha256)  \(.filename)"'</span><span class="w"> </span>release-manifest.json<span class="w"> </span><span class="p">|</span><span class="w"> </span>sha256sum<span class="w"> </span>-c
+</code></pre></div>
+<p>Ejecute el último comando en el directorio que contiene el paquete. El manifiesto solo lista sumas de comprobación: la atestación es lo que demuestra quién construyó el paquete.</p>
+<p>La release de GitHub incluye también <code>bunkerweb-${TAG#v}.intoto.jsonl</code>, los bundles de atestaciones de cada imagen y cada paquete. <code>gh attestation verify &lt;archivo&gt; --bundle bunkerweb-${TAG#v}.intoto.jsonl --repo bunkerity/bunkerweb</code> verifica un paquete descargado con ese archivo, sin obtener su atestación de GitHub.</p>
 
 
 
