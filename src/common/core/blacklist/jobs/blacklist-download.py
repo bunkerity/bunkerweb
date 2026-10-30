@@ -54,6 +54,47 @@ def check_line(kind: str, line: bytes) -> Tuple[bool, bytes]:
     return False, b""
 
 
+def sanitize_validator(value: str) -> str:
+    """Keep a validator only when it is a single line."""
+    value = value.strip()
+    if "\n" in value or "\r" in value:
+        return ""
+    return value
+
+
+def parse_http_metadata(cached_data: bytes) -> dict:
+    """Extract ETag and Last-Modified stored in cache file comment headers."""
+    meta = {"etag": "", "last_modified": ""}
+    for line in cached_data.split(b"\n"):
+        if not line.startswith(b"# "):
+            break
+        if line.startswith(b"# ETag: "):
+            meta["etag"] = sanitize_validator(line[8:].decode("utf-8", errors="replace"))
+        elif line.startswith(b"# Last-Modified: "):
+            meta["last_modified"] = sanitize_validator(line[17:].decode("utf-8", errors="replace"))
+    return meta
+
+
+def iter_cached_entries(cached_data: bytes):
+    """Yield the entries of a per-URL cache file, skipping its comment header lines."""
+    for line in cached_data.split(b"\n"):
+        line = line.strip()
+        if line and not line.startswith(b"#"):
+            yield line
+
+
+def build_cache_header(url: str, etag: str = "", last_modified: str = "") -> bytes:
+    """Build cache file header bytes with URL and optional HTTP metadata."""
+    header = b"# Downloaded from " + url.encode("utf-8") + b"\n"
+    etag = sanitize_validator(etag)
+    last_modified = sanitize_validator(last_modified)
+    if etag:
+        header += b"# ETag: " + etag.encode("utf-8") + b"\n"
+    if last_modified:
+        header += b"# Last-Modified: " + last_modified.encode("utf-8") + b"\n"
+    return header
+
+
 LOGGER = getLogger("BLACKLIST")
 status = 0
 
@@ -168,11 +209,11 @@ try:
                 deleted, err = JOB.del_cache(file, service_id=file.parent.name)
 
             if not deleted:
-                LOGGER.warning(f"Couldn't delete file {file} from cache : {err}")
+                LOGGER.error(f"Couldn't delete file {file} from cache : {err}")
         sys_exit(0)
 
     urls = set()
-    failed_urls = set()
+    failed_urls = set()  # (kind, url) pairs: a failure while handling one kind must not skip another kind
     processed_urls = set()  # Track which URLs have been processed globally
     # Initialize aggregation per kind with service tracking
     aggregated_recap = {
@@ -181,6 +222,7 @@ try:
             "total_urls": 0,
             "downloaded_urls": 0,
             "skipped_urls": 0,
+            "not_modified": 0,
             "failed_count": 0,
             "total_lines": 0,
         }
@@ -195,7 +237,7 @@ try:
                     LOGGER.warning(f"{service} blacklist for {kind} is cached but no URL is configured, removing from cache...")
                     deleted, err = JOB.del_cache(f"{kind}.list", service_id=service)
                     if not deleted:
-                        LOGGER.warning(f"Couldn't delete {service} {kind}.list from cache : {err}")
+                        LOGGER.error(f"Couldn't delete {service} {kind}.list from cache : {err}")
                 continue
 
             # Track that this service provided URLs for the current kind
@@ -205,7 +247,10 @@ try:
             unique_entries = set()
             content = b""
             for url in urls_list:
-                url_file = f"{bytes_hash(url, algorithm='sha1')}.list"
+                # Key by kind too: cached entries are already transformed by check_line for that kind
+                # SHA-256 instead of SHA-1; TODO: switch the other list downloaders (greylist, whitelist,
+                # realip, dnsbl, robotstxt) to the same SHA-256 url_file key, they still use SHA-1
+                url_file = f"{bytes_hash(f'{kind}:{url}', algorithm='sha256')}.list"
                 cached_url = JOB.get_cache(url_file, with_info=True, with_data=True)
                 try:
                     # Only count URLs that haven't been processed globally
@@ -213,7 +258,7 @@ try:
                         aggregated_recap[kind]["total_urls"] += 1
 
                     # If the URL has recently been downloaded, use cache
-                    if url in failed_urls:
+                    if (kind, url) in failed_urls:
                         if url not in processed_urls:
                             aggregated_recap[kind]["failed_count"] += 1
                     elif (
@@ -225,18 +270,17 @@ try:
                         if url not in processed_urls:
                             aggregated_recap[kind]["skipped_urls"] += 1
                         # Process cached data and add to unique_entries
-                        cached_data = cached_url.get("data", b"")
-                        if cached_data:
-                            # Skip first line (URL comment) and process entries
-                            for line in cached_data.split(b"\n")[1:]:
-                                line = line.strip()
-                                if line:
-                                    unique_entries.add(line)
+                        unique_entries.update(iter_cached_entries(cached_url.get("data") or b""))
                     else:
                         failed = False
+                        handle_304 = False
+                        old_cached_data = cached_url.get("data", b"") if isinstance(cached_url, dict) else b""
+                        etag = ""
+                        last_modified = ""
                         LOGGER.info(f"Downloading blacklist data from {url} ...")
                         download_url, url_filter = split_list_url(url)
                         content_type = ""
+                        body = b""
                         if download_url.startswith("file://"):
                             try:
                                 body = Path(normpath(download_url[7:])).read_bytes()
@@ -244,16 +288,26 @@ try:
                                 status = 2
                                 LOGGER.debug(format_exc())
                                 LOGGER.error(f"Error while opening file {download_url[7:]} : {e}")
-                                failed_urls.add(url)
+                                failed_urls.add((kind, url))
                                 if url_file not in urls:
                                     aggregated_recap[kind]["failed_count"] += 1
                                 failed = True
                         else:
+                            # Build conditional request headers from stored metadata
+                            req_headers = {}
+                            if old_cached_data:
+                                meta = parse_http_metadata(old_cached_data)
+                                if meta["etag"]:
+                                    req_headers["If-None-Match"] = meta["etag"]
+                                if meta["last_modified"]:
+                                    req_headers["If-Modified-Since"] = meta["last_modified"]
+
                             max_retries = 3
                             retry_count = 0
-                            while retry_count < max_retries:
+                            # Leaves only by break (resp assigned) or by re-raising on the last attempt
+                            while True:
                                 try:
-                                    resp = get(download_url, stream=True, timeout=10)
+                                    resp = get(download_url, stream=True, timeout=10, headers=req_headers or None)
                                     break
                                 except ConnectionError as e:
                                     retry_count += 1
@@ -262,55 +316,80 @@ try:
                                     LOGGER.warning(f"Connection refused, retrying in 3 seconds... ({retry_count}/{max_retries})")
                                     sleep(3)
 
-                            if resp.status_code != 200:
+                            if resp.status_code == 304 and old_cached_data:
+                                resp.close()
+                                handle_304 = True
+                            elif resp.status_code != 200:
+                                # Also catches a 304 with nothing cached to fall back on
                                 status = 2
-                                LOGGER.warning(f"Got status code {resp.status_code}, skipping...")
-                                failed_urls.add(url)
+                                LOGGER.error(f"Got status code {resp.status_code}, skipping...")
+                                resp.close()
+                                failed_urls.add((kind, url))
                                 if url_file not in urls:
                                     aggregated_recap[kind]["failed_count"] += 1
                                 failed = True
                             else:
-                                body = resp.content
-                                content_type = resp.headers.get("Content-Type", "")
+                                try:
+                                    etag = resp.headers.get("ETag", "")
+                                    last_modified = resp.headers.get("Last-Modified", "")
+                                    content_type = resp.headers.get("Content-Type", "")
+                                    body = resp.content
+                                finally:
+                                    resp.close()
 
                         if not failed:
-                            if url not in processed_urls:
-                                aggregated_recap[kind]["downloaded_urls"] += 1
+                            if handle_304:
+                                LOGGER.info(f"URL {url} returned 304 Not Modified, using cached data.")
+                                if url not in processed_urls:
+                                    aggregated_recap[kind]["not_modified"] += 1
+                                # Re-save to bump last_update timestamp so the 1-hour check stays fresh
+                                cached, err = JOB.cache_file(url_file, old_cached_data)
+                                if not cached:
+                                    LOGGER.error(f"Error while refreshing cache for {url}: {err}")
+                                unique_entries.update(iter_cached_entries(old_cached_data))
+                            else:
+                                if url not in processed_urls:
+                                    aggregated_recap[kind]["downloaded_urls"] += 1
 
-                            url_content = b""
-                            count_lines = 0
-                            for line in iter_list_entries(
-                                body,
-                                content_type=content_type,
-                                url_filter=url_filter,
-                                ip_list=kind in ("IP", "IGNORE_IP"),
-                                whole_line=kind in ("USER_AGENT", "IGNORE_USER_AGENT"),
-                                logger=LOGGER,
-                            ):
-                                ok, data = check_line(kind, line)
-                                if ok:
-                                    unique_entries.add(data)
-                                    url_content += data + b"\n"
-                                    count_lines += 1
-                            if not count_lines:
-                                LOGGER.warning(f"No valid {kind} entry found in {url} (Content-Type: {content_type or 'unknown'})")
-                            if url not in processed_urls:
-                                aggregated_recap[kind]["total_lines"] += count_lines
+                                url_content = b""
+                                count_lines = 0
+                                for line in iter_list_entries(
+                                    body,
+                                    content_type=content_type,
+                                    url_filter=url_filter,
+                                    ip_list=kind in ("IP", "IGNORE_IP"),
+                                    whole_line=kind in ("USER_AGENT", "IGNORE_USER_AGENT"),
+                                    logger=LOGGER,
+                                ):
+                                    ok, data = check_line(kind, line)
+                                    if ok:
+                                        unique_entries.add(data)
+                                        url_content += data + b"\n"
+                                        count_lines += 1
+                                if not count_lines:
+                                    LOGGER.warning(f"No valid {kind} entry found in {url} (Content-Type: {content_type or 'unknown'})")
+                                if url not in processed_urls:
+                                    aggregated_recap[kind]["total_lines"] += count_lines
 
-                            cached, err = JOB.cache_file(url_file, b"# Downloaded from " + url.encode("utf-8") + b"\n" + url_content)
-                            if not cached:
-                                LOGGER.error(f"Error while caching url content for {url}: {err}")
+                                cached, err = JOB.cache_file(url_file, build_cache_header(url, etag, last_modified) + url_content)
+                                if not cached:
+                                    LOGGER.error(f"Error while caching url content for {url}: {err}")
                 except BaseException as e:
                     status = 2
                     LOGGER.debug(format_exc())
                     LOGGER.error(f"Exception while getting {service} blacklist from {url} :\n{e}")
-                    failed_urls.add(url)
+                    failed_urls.add((kind, url))
                     if url not in processed_urls:
                         aggregated_recap[kind]["failed_count"] += 1
                 finally:
                     # Mark URL as processed to avoid double counting
                     processed_urls.add(url)
                     urls.add(url_file)
+
+                # Keep a failed URL's last downloaded entries, so the list is not rebuilt without them
+                if (kind, url) in failed_urls and isinstance(cached_url, dict) and cached_url.get("data"):
+                    LOGGER.warning(f"Using the last cached {kind} entries from {url} until it can be downloaded again")
+                    unique_entries.update(iter_cached_entries(cached_url["data"]))
 
             # Build final content from unique entries, sorted for consistency
             content = b"\n".join(sorted(unique_entries)) + b"\n" if unique_entries else b""
@@ -345,11 +424,12 @@ try:
             continue
         successful = recap["downloaded_urls"]
         skipped = recap["skipped_urls"]
+        not_modified = recap["not_modified"]
         failed = recap["failed_count"]
         total_lines = recap["total_lines"]
         LOGGER.info(
             f"Recap for {kind} urls: Total Services: {service_count}, Successful: {successful}, "
-            f"Skipped (cached): {skipped}, Failed: {failed}, Total Lines: {total_lines}"
+            f"Skipped (cached): {skipped}, Not modified: {not_modified}, Failed: {failed}, Total Lines: {total_lines}"
         )
 
     # Remove old files
@@ -359,7 +439,7 @@ try:
             LOGGER.warning(f"Removing no longer used url file {url_file} ...")
             deleted, err = JOB.del_cache(url_file)
             if not deleted:
-                LOGGER.warning(f"Couldn't delete url file {url_file} from cache : {err}")
+                LOGGER.error(f"Couldn't delete url file {url_file} from cache : {err}")
 except SystemExit as e:
     status = e.code
 except BaseException as e:
