@@ -1,4 +1,5 @@
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
+from math import ceil
 from logging import Logger
 from os import sep
 from os.path import join
@@ -14,7 +15,7 @@ from bcrypt import gensalt, hashpw
 from sqlalchemy.orm import joinedload
 
 from Database import Database  # type: ignore
-from model import Permissions, Roles, RolesPermissions, RolesUsers, UserColumnsPreferences, UserRecoveryCodes, UserSessions  # type: ignore
+from model import Permissions, Roles, RolesPermissions, RolesUsers, UserColumnsPreferences, UserLoginFailures, UserRecoveryCodes, UserSessions  # type: ignore
 
 from app.models.models import UiUsers
 from app.utils import COLUMNS_PREFERENCES_DEFAULTS
@@ -463,6 +464,69 @@ class UIDatabase(Database):
                 query = query.filter(UserSessions.id != keep_session_id)
             for session_to_delete in query.all():
                 session.delete(session_to_delete)
+
+            try:
+                session.commit()
+            except BaseException as e:
+                return str(e)
+
+        return ""
+
+    def get_ui_login_lock(self, username: str, ip: str, *, max_attempts: int, window: int, lockout: int) -> int:
+        """Seconds a login attempt stays locked, 0 when it is not.
+
+        A username (or an IP) is locked by a failure that has at least ``max_attempts - 1`` older failures within
+        ``window`` seconds before it, until ``lockout`` seconds after that failure. The newest such failure counts.
+        The two keys are checked independently.
+        """
+        now = datetime.now(timezone.utc)
+        # a locking failure is up to ``lockout`` old and needs failures up to ``window`` before it
+        cutoff = now - timedelta(seconds=window + lockout)
+        remaining = 0
+        with self._db_session() as session:
+            for column, value in ((UserLoginFailures.username, username), (UserLoginFailures.ip, ip)):
+                rows = (
+                    session.query(UserLoginFailures.failure_date)
+                    .filter(column == value, UserLoginFailures.failure_date >= cutoff)
+                    .order_by(UserLoginFailures.failure_date.desc())
+                    .all()
+                )
+                # SQLite and MySQL hand back naive datetimes: they were stored as UTC
+                dates = [row[0] if row[0].tzinfo else row[0].replace(tzinfo=timezone.utc) for row in rows]
+                for index, failure in enumerate(dates):
+                    expires = failure + timedelta(seconds=lockout)
+                    if expires <= now:
+                        break  # the older failures expire earlier still
+                    # the failures up to this one are all inside the window, so only count the ones after it
+                    if sum(1 for date in dates if date >= failure - timedelta(seconds=window)) - index - 1 >= max_attempts - 1:
+                        remaining = max(remaining, ceil((expires - now).total_seconds()))
+                        break
+        return max(remaining, 0)
+
+    def add_ui_login_failure(self, username: str, ip: str, *, retention: int) -> str:
+        """Record one failed login and drop the failures older than ``retention`` seconds."""
+        with self._db_session() as session:
+            if self.readonly:
+                return "The database is read-only, the changes will not be saved"
+
+            now = datetime.now(timezone.utc)
+            session.query(UserLoginFailures).filter(UserLoginFailures.failure_date < now - timedelta(seconds=retention)).delete(synchronize_session=False)
+            session.add(UserLoginFailures(username=username, ip=ip, failure_date=now))
+
+            try:
+                session.commit()
+            except BaseException as e:
+                return str(e)
+
+        return ""
+
+    def clear_ui_login_failures(self, username: str) -> str:
+        """Forget the failed logins of a username (after a complete login)."""
+        with self._db_session() as session:
+            if self.readonly:
+                return "The database is read-only, the changes will not be saved"
+
+            session.query(UserLoginFailures).filter_by(username=username).delete(synchronize_session=False)
 
             try:
                 session.commit()

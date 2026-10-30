@@ -170,6 +170,7 @@ UI 需要可访问的 scheduler /（BunkerWeb）API / redis / 数据库。
     恢复码在 UI 中仅显示一次；若丢失加密密钥，将清除已存的 TOTP 秘钥。
 - 会话：默认空闲时长 12 小时（`SESSION_LIFETIME_HOURS`），每次请求刷新。`SESSION_ABSOLUTE_HOURS`（默认 `168` = 7 天）设定绝对上限——无论是否活跃，超过即强制登出。可选的会话 ID 轮换（`SESSION_ROLLING_HOURS`，默认 `0` = 关闭）按该间隔重新生成会话 ID。会话绑定 IP 与 User-Agent；`CHECK_PRIVATE_IP=no` 仅对私网放宽 IP 检查。`ALWAYS_REMEMBER=yes` 始终启用持久 Cookie。
 - 会话存储：当 `USE_REDIS=yes` 时会话存放在 Redis 中，否则存放在 `/var/lib/bunkerweb` 下的本地缓存中。Redis 停止响应，或因达到 `maxmemory` 而拒绝写入，都不再导致 Web UI 不可用：受影响的会话会转入该本地缓存；该缓存先于 Redis 读取，因此从未写入 Redis 的修改或删除不会被 Redis 仍持有的旧副本遮蔽，并会在 Redis 恢复响应后回写到 Redis。停机期间的登出或会话 ID 轮换也不会被恢复过程撤销，即使 Redis 停机时无法读取该会话本身。每次吊销都会同时写入两个存储，因此在两种情况下都持续生效。逐出不在覆盖范围内，因为 Redis 会报告成功，只是不再持有该键，所以请按你要保留的键来设置 `maxmemory`。当 Redis 拒绝一次更新时，该会话转入本地存储，并立即删除 Redis 中仍持有的副本，使该修改不会被旧版本遮蔽，也使 2FA 这类多步流程不会停留在此前状态上循环。该本地缓存按主机隔离，这在运行多个 Web UI 副本时很重要：其他副本在该副本把已转入其本地缓存的会话回写到 Redis 之前将看不到该会话，Redis 不可用期间发出的吊销仅由发出它的副本执行，而已经从自身本地缓存提供某个会话的副本，在另一个副本通过 Redis 删除该会话后，仍可能继续提供它长达 `SESSION_LIFETIME_HOURS`。`UI_USE_REDIS=no` 只让 Web UI 停用 Redis，而全局的 `USE_REDIS` 还会停止在各实例之间共享封禁与报告。
+- 登录限流：失败的登录（密码、TOTP 验证码或恢复码错误）按客户端 IP 和用户名在数据库中计数，因此所有 worker 和 UI 副本共享同一个计数。在 `LOGIN_WINDOW_MINUTES` 分钟（默认 `15`）内失败 `LOGIN_MAX_ATTEMPTS` 次（默认 `5`），该 IP 或该用户名会被锁定，直到最后一次失败后的 `LOGIN_LOCKOUT_MINUTES` 分钟（默认 `15`）。被锁定的尝试会收到 `429`，附带通用的凭据无效提示和等待时间，且不会校验密码。完整登录成功后会清除该用户名的计数。不存在的用户名也会计数，因此锁定不会泄露账户是否存在；代价是任何人都可以通过对已知用户名反复失败来锁定它。客户端 IP 是通过 `PROXY_NUMBERS` 从 `X-Forwarded-*` 解析出的 IP：如果用户直接访问 UI、前面没有代理，请设置 `PROXY_NUMBERS=0`，否则客户端可以伪造自己的 IP，只有按用户名的限制仍然有效。`LOGIN_THROTTLE=no` 可关闭限流。数据库为只读时无法记录失败，因此不会产生新的锁定。
 - 若多级代理附加 `X-Forwarded-*`，请设置 `PROXY_NUMBERS`。
 
 !!! warning "重建容器后 2FA 消失"
@@ -238,6 +239,10 @@ UI 需要可访问的 scheduler /（BunkerWeb）API / redis / 数据库。
 | `ALWAYS_REMEMBER`                           | 总是启用 “remember me”                                                            | `yes` 或 `no`                | `no`           |
 | `CHECK_PRIVATE_IP`                          | 绑定会话到 IP（`no` 时放宽私网变更）                                              | `yes` 或 `no`                | `yes`          |
 | `PROXY_NUMBERS`                             | 信任的 `X-Forwarded-*` 代理层数                                                   | 整数                         | `1`            |
+| `LOGIN_THROTTLE` | 统计失败的登录，并锁定失败过多的 IP 或用户名 | `yes` 或 `no` | `yes` |
+| `LOGIN_MAX_ATTEMPTS` | 窗口内触发锁定 IP 或用户名的失败次数 | 整数 | `5` |
+| `LOGIN_WINDOW_MINUTES` | 统计失败次数的时间窗口 | 整数（分钟） | `15` |
+| `LOGIN_LOCKOUT_MINUTES` | 锁定时长，从最后一次失败起算 | 整数（分钟） | `15` |
 | `UI_USE_REDIS`                              | 仅让 Web UI 停用 Redis，不改动全局 `USE_REDIS`                                     | `yes` 或 `no`                | `yes`          |
 
 ### 日志

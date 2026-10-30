@@ -497,6 +497,16 @@ class UserSessions(Base):
     user = relationship("Users", back_populates="sessions")
 
 
+class UserLoginFailures(Base):
+    __tablename__ = "bw_ui_login_failures"
+
+    id = Column(Integer, Identity(start=1, increment=1), primary_key=True)
+    # No foreign key on purpose: a failed login for an unknown username is counted too, so a lock never tells whether the user exists
+    username = Column(String(256), nullable=False, index=True)
+    ip = Column(String(45), nullable=False, index=True)
+    failure_date = Column(DateTime(timezone=True), nullable=False, index=True)
+
+
 class UserColumnsPreferences(Base):
     __tablename__ = "bw_ui_user_columns_preferences"
     __table_args__ = (UniqueConstraint("user_name", "table_name"),)

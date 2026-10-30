@@ -153,6 +153,7 @@ class Harness:
         self.config.reset_mock(return_value=True, side_effect=True)
         self.instances.reset_mock(return_value=True, side_effect=True)
         self.db.readonly = False
+        self.db.get_ui_login_lock.return_value = 0  # nobody is locked unless a test says so
         self.totp.reset_mock(return_value=True, side_effect=True)
         self.data.clear()
         self.data.update({"TO_FLASH": [], "RELOADING": False, "CONFIG_CHANGED": False})
