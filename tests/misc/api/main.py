@@ -7,6 +7,7 @@ from fastapi.responses import JSONResponse, PlainTextResponse
 app = FastAPI()
 instance_id = None
 report_num = 0
+received_reports = []
 
 list_router = APIRouter(prefix="/list")
 bunkernet_router = APIRouter(prefix="/bunkernet")
@@ -59,7 +60,9 @@ async def register(_: Request):
 async def report(request: Request):
     global report_num
     data = await request.json()
-    report_num += len(data.get("reports", []))
+    reports = data.get("reports", [])
+    report_num += len(reports)
+    received_reports.extend(reports)
     return JSONResponse(status_code=200, content={"result": "ok", "data": "Report acknowledged."})
 
 
@@ -80,11 +83,24 @@ async def get_report_num(_: Request):
     return JSONResponse(status_code=200, content={"result": "ok", "data": report_num})
 
 
+@bunkernet_router.get("/last_report")
+async def get_last_report(url: str = ""):
+    # Most recent received report whose URL contains `url`, so a spec can pick out the requests it sent.
+    # `header_names` is the sorted list of request header names the report carries.
+    for report in reversed(received_reports):
+        if url in str(report.get("url", "")):
+            headers = report.get("headers")
+            names = sorted(headers) if isinstance(headers, dict) else []
+            return JSONResponse(status_code=200, content={"result": "ok", "data": {"header_names": names, "report": report}})
+    return JSONResponse(status_code=404, content={"result": "error", "data": "No report matches."})
+
+
 @bunkernet_router.post("/reset")
 async def reset(_: Request):
     global instance_id, report_num
     instance_id = None
     report_num = 0
+    received_reports.clear()
     return JSONResponse(status_code=200, content={"result": "ok", "data": "Reset done."})
 
 

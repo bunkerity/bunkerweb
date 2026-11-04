@@ -50,6 +50,122 @@ actions:
     delay: 0.0
     string: '"data":100}'
     restart_stack: false
+
+  # What a report carries. The mock API keeps every report it receives and `/bunkernet/last_report?url=<text>`
+  # returns the latest one whose URL contains <text> (404 when none arrived, so a report that never shows up
+  # fails the action). Each block below sends 200 blocked requests from random addresses, every one carrying the
+  # same marker in its URL, so the batch of 100 goes out on the next scheduler start and the check can find it.
+  # The requests carry headers outside the User-Agent/Accept/Accept-Encoding/Accept-Language/Content-Type/
+  # Content-Length allowlist (one of them credentials) and a script tag in a cookie and in a header, which
+  # ModSecurity matches. The reason data then lists the matched values next to their variable names.
+  # `header_names` is the sorted list of header names inside the report, so the list is asserted whole.
+  #
+  # The setting is applied by the restart that follows an action, so the setting a request is logged under and
+  # the one in force when the scheduler sends it can differ. The three blocks use that on purpose:
+  #   default:   logged and sent with the setting unset (no)    -> everything is sent as received
+  #   queued:    logged with no, sent after it became yes       -> the scheduler filters the queued reports
+  #   filter on: logged with yes, sent after it became no again -> the report was already filtered when logged
+  # The last two show each side filtering on its own: the sender cannot hide a filter that is missing at
+  # request time, and the request-time filter cannot hide a sender that does not filter.
+  payload_default:
+    type: status
+    url: "http://www.example.com/?bn_probe=default"
+    status: 403
+    headers: &payload_headers
+      X-Forwarded-For: "random"
+      Cookie: "sid=<script>alert(1)</script>"
+      Authorization: "Bearer bn-probe-token"
+      Referer: "http://www.example.com/<script>alert(1)</script>"
+      X-Bn-Probe: "bn-probe-value"
+      Accept-Language: "en"
+    repeat: 199
+
+  check_payload_default_headers:
+    type: string
+    url: "http://127.0.0.1:8000/bunkernet/last_report?url=bn_probe=default"
+    delay: 0.0
+    string: '"header_names":["accept","accept-encoding","accept-language","authorization","connection","cookie","host","referer","user-agent","x-bn-probe","x-forwarded-for"]'
+    restart_stack: false
+  check_payload_default_cookie_value:
+    type: string
+    url: "http://127.0.0.1:8000/bunkernet/last_report?url=bn_probe=default"
+    delay: 0.0
+    string: '"cookie":"sid=<script>alert(1)</script>"'
+    restart_stack: false
+  # The quotes make this the whole value of a matched variable, not the tail of the header above.
+  check_payload_default_matched_value:
+    type: string
+    url: "http://127.0.0.1:8000/bunkernet/last_report?url=bn_probe=default"
+    delay: 0.0
+    string: '"<script>alert(1)</script>"'
+    restart_stack: false
+
+  payload_queued:
+    type: status
+    url: "http://www.example.com/?bn_probe=queued"
+    status: 403
+    headers: *payload_headers
+    repeat: 199
+
+  check_payload_queued_headers:
+    type: string
+    url: "http://127.0.0.1:8000/bunkernet/last_report?url=bn_probe=queued"
+    delay: 0.0
+    string: '"header_names":["accept","accept-encoding","accept-language","user-agent"]'
+    config:
+      BUNKERNET_FILTER_HEADERS: "yes"
+    restart_stack: false
+  check_payload_queued_matched_names:
+    type: string
+    url: "http://127.0.0.1:8000/bunkernet/last_report?url=bn_probe=queued"
+    delay: 0.0
+    string: "REQUEST_COOKIES:sid"
+    config:
+      BUNKERNET_FILTER_HEADERS: "yes"
+    restart_stack: false
+  check_payload_queued_no_payload:
+    type: string
+    url: "http://127.0.0.1:8000/bunkernet/last_report?url=bn_probe=queued"
+    delay: 0.0
+    not_string: "alert(1)"
+    config:
+      BUNKERNET_FILTER_HEADERS: "yes"
+    restart_stack: false
+
+  payload_filter_on:
+    type: status
+    url: "http://www.example.com/?bn_probe=filter_on"
+    status: 403
+    headers: *payload_headers
+    config:
+      BUNKERNET_FILTER_HEADERS: "yes"
+    repeat: 199
+
+  check_payload_filter_on_headers:
+    type: string
+    url: "http://127.0.0.1:8000/bunkernet/last_report?url=bn_probe=filter_on"
+    delay: 0.0
+    string: '"header_names":["accept","accept-encoding","accept-language","user-agent"]'
+    config:
+      BUNKERNET_FILTER_HEADERS: "no"
+    restart_stack: false
+  check_payload_filter_on_matched_names:
+    type: string
+    url: "http://127.0.0.1:8000/bunkernet/last_report?url=bn_probe=filter_on"
+    delay: 0.0
+    string: "REQUEST_COOKIES:sid"
+    config:
+      BUNKERNET_FILTER_HEADERS: "no"
+    restart_stack: false
+  check_payload_filter_on_no_payload:
+    type: string
+    url: "http://127.0.0.1:8000/bunkernet/last_report?url=bn_probe=filter_on"
+    delay: 0.0
+    not_string: "alert(1)"
+    config:
+      BUNKERNET_FILTER_HEADERS: "no"
+    restart_stack: false
+
   reset_api:
     type: status
     url: "http://127.0.0.1:8000/bunkernet/reset"
