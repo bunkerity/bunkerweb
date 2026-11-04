@@ -31,6 +31,8 @@ fi
 TESTS_CHECKOUT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 BW_TESTS_HOST_ROOT="${BW_TESTS_HOST_ROOT:-$TESTS_CHECKOUT/.cache/e2e-host}"
 export BW_TESTS_HOST_ROOT
+# Capture files stay in the checkout even when CI uses BW_TESTS_HOST_ROOT=/.
+export BW_TESTS_IPV6_ONLY_DIR="${BW_TESTS_IPV6_ONLY_DIR:-$TESTS_CHECKOUT/.cache/ipv6-only}"
 # A trailing slash would double up below, and "/" has to collapse to the empty string.
 _host_root="${BW_TESTS_HOST_ROOT%/}"
 export BW_TESTS_WWW="$_host_root/var/www/html"
@@ -934,7 +936,7 @@ function cleanup_stack () {
         if [ "${BW_TESTS_IPV6:-}" == "only" ] ; then
             docker compose -p ipv6-only-fixtures -f tests/core/ipv6-only/fixtures.yml down -v || return 1
             if [ "$exit_code" -ne 0 ] || $trapped ; then
-                touch "$BW_TESTS_HOST_ROOT/ipv6-only/stop"
+                touch "$BW_TESTS_IPV6_ONLY_DIR/stop"
             fi
         fi
 

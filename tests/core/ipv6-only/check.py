@@ -16,7 +16,7 @@ spec = importlib.util.spec_from_file_location("ipv6_probe", Path(__file__).paren
 assert spec and spec.loader
 probe = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(probe)
-ROOT = Path(os.environ["BW_TESTS_HOST_ROOT"]) / "ipv6-only"
+ROOT = Path(os.environ["BW_TESTS_IPV6_ONLY_DIR"])
 # (container, netid, local address) of the only IPv4 wildcard listeners tolerated: the core's HTTP, HTTPS and QUIC sockets.
 ALLOWED_IPV4_WILDCARDS = {("bunkerweb", "tcp", "0.0.0.0:80"), ("bunkerweb", "tcp", "0.0.0.0:443"), ("bunkerweb", "udp", "0.0.0.0:443")}
 CONTAINERS = ("redis", "dnsmasq", "bunkerweb", "bw-scheduler", "app1", "ipv6-client", "ipv6-other", "ipv6-untrusted", "ipv6-backend")

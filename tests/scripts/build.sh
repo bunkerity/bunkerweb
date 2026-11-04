@@ -29,9 +29,9 @@ fi
 
 log "BUILD" "ℹ️ " "💽 Starting redis server ..."
 if [ "${BW_TESTS_IPV6:-}" == "only" ] ; then
-  mkdir -p "$BW_TESTS_HOST_ROOT/ipv6-only"
-  rm -f "$BW_TESTS_HOST_ROOT/ipv6-only/stop"
-  python3 tests/core/ipv6-only/capture.py "$BW_TESTS_HOST_ROOT/ipv6-only" > "$BW_TESTS_HOST_ROOT/ipv6-only/capture.log" 2>&1 &
+  mkdir -p "$BW_TESTS_IPV6_ONLY_DIR"
+  rm -f "$BW_TESTS_IPV6_ONLY_DIR/stop"
+  python3 tests/core/ipv6-only/capture.py "$BW_TESTS_IPV6_ONLY_DIR" > "$BW_TESTS_IPV6_ONLY_DIR/capture.log" 2>&1 &
 fi
 robust_docker_pull "tests/misc/docker/redis.yml" "redis"
 # shellcheck disable=SC2181
