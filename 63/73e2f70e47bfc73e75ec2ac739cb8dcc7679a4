@@ -1,0 +1,29 @@
+src/common/core/reversescan/reversescan.lua
+  s_affbfc75971e67::t_ef45775805378a 55,114
+tests/unit/common/test_reversescan_coverage_lua.py
+  s_ed8ee59e1c0553::t_e2808780245556 1-133
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "6373e2f70e47bfc73e75ec2ac739cb8dcc7679a4",
+  "prompts": {},
+  "sessions": {
+    "s_affbfc75971e67": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a18dc5-af15-7c93-ad6e-f22db14545cb",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_ed8ee59e1c0553": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a18dbf-0117-7bf1-8480-ec9906a56341",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}
