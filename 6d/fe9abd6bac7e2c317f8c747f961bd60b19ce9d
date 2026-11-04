@@ -1,0 +1,33 @@
+CHANGELOG.md
+  s_da7dbab577ff72::t_b755e8c0e57546 60
+tests/unit/common/test_limit_behaviour_lua.py
+  s_18607d820ae687::t_008bb516d4ee58 184
+  s_18607d820ae687::t_d6c0dc35a186a7 135-183,185-194
+src/common/core/limit/limit.lua
+  s_18607d820ae687::t_406d6db17f7a23 14,304-320,435
+  s_18607d820ae687::t_3568f759a1680c 332-333,355,367
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "6dfe9abd6bac7e2c317f8c747f961bd60b19ce9d",
+  "prompts": {},
+  "sessions": {
+    "s_18607d820ae687": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "0d2d1b6b-177d-46e7-a331-fd459ae3ff2d",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_da7dbab577ff72": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1a534-54ad-7930-b3f6-288880646a4e",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}
