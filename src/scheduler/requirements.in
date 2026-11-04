@@ -1,19 +1,19 @@
-certbot==5.8.0
+certbot==5.9.0
 
 # Official certbot plugins
-certbot-dns-cloudflare==5.8.0
-certbot-dns-digitalocean==5.8.0
-certbot-dns-dnsimple==5.8.0
-certbot-dns-dnsmadeeasy==5.8.0
-certbot-dns-gehirn==5.8.0
-certbot-dns-google==5.8.0
-certbot-dns-linode==5.8.0
-certbot-dns-luadns==5.8.0
-certbot-dns-nsone==5.8.0
-certbot-dns-ovh==5.8.0
-certbot-dns-rfc2136==5.8.0
-certbot-dns-route53==5.8.0
-certbot-dns-sakuracloud==5.8.0
+certbot-dns-cloudflare==5.9.0
+certbot-dns-digitalocean==5.9.0
+certbot-dns-dnsimple==5.9.0
+certbot-dns-dnsmadeeasy==5.9.0
+certbot-dns-gehirn==5.9.0
+certbot-dns-google==5.9.0
+certbot-dns-linode==5.9.0
+certbot-dns-luadns==5.9.0
+certbot-dns-nsone==5.9.0
+certbot-dns-ovh==5.9.0
+certbot-dns-rfc2136==5.9.0
+certbot-dns-route53==5.9.0
+certbot-dns-sakuracloud==5.9.0
 
 # Third-party certbot plugins
 certbot-dns-bunny==3.0.0
@@ -36,12 +36,12 @@ https://github.com/bunkerity/certbot-dns-transip/archive/7b4f24d12f6fb21b2145912
 
 cffi==2.1.1
 cryptography==50.0.2
-importlib-metadata==9.1.0
+importlib-metadata==10.1.0
 maxminddb==3.2.0
-pydantic==2.14.1
+pydantic==2.14.2
 python-magic==0.4.27
 requests==2.34.2
 schedule==1.2.2
 
-setuptools<81
+setuptools<85
 soupsieve<3
