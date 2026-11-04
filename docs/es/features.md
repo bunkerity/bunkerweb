@@ -1392,6 +1392,7 @@ Siga estos pasos para configurar y usar la función BunkerNet:
 !!! info "Contenido de un informe"
     Cada informe enviado a BunkerNet contiene estos campos y nada más:
 
+    - los metadatos de la instancia enviados con cada petición: el ID de la instancia BunkerNet, la versión de BunkerWeb, la integración, y el nombre, la versión, el ID de versión, el nombre en clave, el ID y la arquitectura del sistema operativo;
     - la dirección IP del cliente, el motivo del bloqueo y la fecha;
     - el método HTTP, la URL **incluida su cadena de consulta** y el nombre del servicio (`server_name`);
     - las cabeceras de petición `User-Agent`, `Accept`, `Accept-Encoding`, `Accept-Language`, `Content-Type` y `Content-Length`, con sus valores. No se envía ninguna otra cabecera: las cookies, `Authorization` y las cabeceras personalizadas permanecen en su instancia;

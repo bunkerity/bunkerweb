@@ -1355,6 +1355,7 @@ Suivez ces étapes pour configurer et utiliser la fonctionnalité BunkerNet :
 !!! info "Contenu d'un signalement"
     Chaque signalement envoyé à BunkerNet contient ces champs, et rien d'autre :
 
+    - les métadonnées de l'instance envoyées avec chaque requête : l'identifiant de l'instance BunkerNet, la version de BunkerWeb, l'intégration, ainsi que le nom, la version, l'identifiant de version, le nom de code, l'identifiant et l'architecture du système d'exploitation ;
     - l'adresse IP du client, la raison du blocage et la date ;
     - la méthode HTTP, l'URL **y compris sa chaîne de requête** et le nom du service (`server_name`) ;
     - les en-têtes de requête `User-Agent`, `Accept`, `Accept-Encoding`, `Accept-Language`, `Content-Type` et `Content-Length`, avec leurs valeurs. Aucun autre en-tête n'est envoyé : les cookies, `Authorization` et les en-têtes personnalisés restent sur votre instance ;

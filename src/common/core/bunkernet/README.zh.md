@@ -39,6 +39,7 @@ BunkerNet 插件通过 BunkerWeb 实例之间的集体威胁情报共享，创�
 !!! info "报告包含的内容"
     发送给 BunkerNet 的每份报告包含以下字段，仅此而已：
 
+    - 每次请求发送的实例元数据：BunkerNet 实例 ID、BunkerWeb 版本、集成方式，以及操作系统名称、版本、版本 ID、代号、ID 和架构；
     - 客户端 IP 地址、阻止原因和日期；
     - HTTP 方法、**包含查询字符串的** URL，以及服务名称（`server_name`）；
     - 请求头 `User-Agent`、`Accept`、`Accept-Encoding`、`Accept-Language`、`Content-Type` 和 `Content-Length`，连同其值。不会发送其他请求头：Cookie、`Authorization` 和自定义请求头都保留在您的实例上；

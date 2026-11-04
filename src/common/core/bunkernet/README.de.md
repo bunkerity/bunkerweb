@@ -39,6 +39,7 @@ Führen Sie die folgenden Schritte aus, um die BunkerNet-Funktion zu konfigurier
 !!! info "Inhalt einer Meldung"
     Jede an BunkerNet gesendete Meldung enthält diese Felder und nichts anderes:
 
+    - die mit jeder Anfrage gesendeten Instanzmetadaten: die BunkerNet-Instanz-ID, die BunkerWeb-Version, die Integration sowie Name, Version, Versions-ID, Codename, ID und Architektur des Betriebssystems;
     - die IP-Adresse des Clients, den Grund für die Sperrung und das Datum;
     - die HTTP-Methode, die URL **einschließlich Query-String** und den Namen des Dienstes (`server_name`);
     - die Request-Header `User-Agent`, `Accept`, `Accept-Encoding`, `Accept-Language`, `Content-Type` und `Content-Length` mit ihren Werten. Kein anderer Header wird gesendet: Cookies, `Authorization` und benutzerdefinierte Header bleiben auf Ihrer Instanz;

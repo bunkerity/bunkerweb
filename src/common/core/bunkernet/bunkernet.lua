@@ -363,7 +363,7 @@ function bunkernet:request(method, url, data)
 	local file = io.open("/etc/os-release", "r")
 	if file then
 		for line in file:lines() do
-			local key, value = line:match("^(%w+)=(.+)$")
+			local key, value = line:match("^([%w_]+)=(.+)$")
 			if key and value then
 				value = value:gsub('"', "")
 				if key == "NAME" then

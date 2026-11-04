@@ -1396,6 +1396,7 @@ Follow these steps to configure and use the BunkerNet feature:
 !!! info "What a report contains"
     Each report sent to BunkerNet carries these fields, and nothing else:
 
+    - the instance metadata sent with each request: the BunkerNet instance ID, the BunkerWeb version, the integration, and the OS name, version, version ID, codename, ID and architecture;
     - the client IP address, the reason for blocking and the date;
     - the HTTP method, the URL **including its query string**, and the service name (`server_name`);
     - the request headers `User-Agent`, `Accept`, `Accept-Encoding`, `Accept-Language`, `Content-Type` and `Content-Length`, with their values. No other header is sent: cookies, `Authorization` and custom headers stay on your instance;
