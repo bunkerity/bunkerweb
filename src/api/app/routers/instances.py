@@ -236,6 +236,9 @@ def update_instance(hostname: str, req: InstanceUpdateRequest) -> JSONResponse:
         return JSONResponse(status_code=code, content={"status": "error", "message": err})
 
     instance = db.get_instance(hostname)
+    if instance:
+        instance["creation_date"] = instance["creation_date"].astimezone().isoformat()
+        instance["last_seen"] = instance["last_seen"].astimezone().isoformat() if instance.get("last_seen") else None
     return JSONResponse(status_code=200, content={"status": "success", "instance": instance})
 
 
