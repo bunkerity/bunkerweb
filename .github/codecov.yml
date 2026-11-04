@@ -1,9 +1,16 @@
 # Codecov only reports coverage (README badge); the per-component floors in unit-tests.yml are the gate.
 comment: false
+flags:
+  lua:
+    carryforward: false
+    paths: ["src/bw/lua/**", "src/common/core/**/*.lua"]
 coverage:
   status:
     project:
       default:
+        informational: true
+      lua:
+        flags: [lua]
         informational: true
     patch:
       default:

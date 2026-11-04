@@ -13,6 +13,8 @@ on:
       - "src/**"
       - "misc/install-bunkerweb.sh"
       - "tests/unit/**"
+      - ".luacov"
+      - ".github/scripts/**"
       - ".github/workflows/unit-tests.yml"
   pull_request:
     paths:
@@ -20,6 +22,8 @@ on:
       - "src/**"
       - "misc/install-bunkerweb.sh"
       - "tests/unit/**"
+      - ".luacov"
+      - ".github/scripts/**"
       - ".github/workflows/unit-tests.yml"
   schedule:
     - cron: "0 3 * * *" # nightly 03:00 UTC — runs the full engine matrix
@@ -68,6 +72,16 @@ jobs:
       # rather than let them silently pass by not running.
       - name: Install the Lua interpreter
         run: sudo apt-get update && sudo apt-get install -y --no-install-recommends lua5.4 && sudo ln -sf "$(command -v lua5.4)" /usr/local/bin/lua
+      - name: Install pinned LuaCov (pure Lua, no transitive dependencies)
+        shell: bash
+        run: |
+          sudo apt-get install -y --no-install-recommends luarocks
+          mkdir -p .cache/lua-tools
+          curl --fail --location --silent --show-error --max-time 60 \
+            https://luarocks.org/luacov-0.17.0-1.src.rock -o .cache/lua-tools/luacov-0.17.0-1.src.rock
+          echo '8a460ee46560d77dd2c9975abef3e8be9380e8939f258e91f583b101df6c2b1f  .cache/lua-tools/luacov-0.17.0-1.src.rock' | sha256sum --check
+          luarocks --lua-version=5.4 --tree "$PWD/.cache/lua-tools" install .cache/lua-tools/luacov-0.17.0-1.src.rock --deps-mode=none
+          echo "LUA_PATH=$PWD/.cache/lua-tools/share/lua/5.4/?.lua;$PWD/.cache/lua-tools/share/lua/5.4/?/init.lua;;" >> "$GITHUB_ENV"
       # `backup_database`/`restore_database` shell out to `sqlite3`, and the backup/restore round
       # trip now FAILS rather than skips when an engine is present but its client is not -- so this
       # job's one engine needs its client installed rather than assumed from the runner image.
@@ -75,28 +89,40 @@ jobs:
         run: sudo apt-get install -y --no-install-recommends sqlite3 redis-server
       - name: Run unit tests (SQLite, full suite incl. slow tier)
         # faulthandler_timeout only prints a hung test's stack; timeout is what ends it (~4 min locally).
-        run: timeout -k 30 1500 pytest tests/unit -o faulthandler_timeout=120
-      # Three cases need the real resty.lrucache, so LuaJIT: the two walk-direction cases of
-      # metrics/test_lru_sync_loop.py and the zero-ttl premise of common/test_datastore_worker_lru_exptime.py.
-      # They skip under the Lua 5.4 above, so run them here with `lua` resolving to LuaJIT (the datastore probe
-      # runs `lua -e "require 'ffi'"`) and the vendored library on LUA_PATH. Each test defines its own
-      # ngx stub outside OpenResty, including the metrics availability probe. The step fails if any of them skips.
+        run: python tests/unit/lua_coverage.py run .cache/lua-coverage -- timeout -k 30 1500 python -m pytest tests/unit -o faulthandler_timeout=120
+      # Real resty.lrucache, CrowdSec iputils and resty.ipmatcher need LuaJIT's FFI.
+      # Run both new files in full, including the bundled bit operations, alongside the three
+      # LRU cases. Resolve `lua` to LuaJIT for FFI probes and BW_LUAJIT for explicit callers.
+      # Each test supplies its own ngx stub; any skip fails this step.
       - name: Install LuaJIT
         run: sudo apt-get install -y --no-install-recommends luajit
-      - name: Run the LuaJIT-only unit tests (real resty.lrucache)
+      - name: Run the LuaJIT-only unit tests (LRU and IP parsing)
         shell: bash
-        env:
-          LUA_PATH: ${{ github.workspace }}/src/deps/src/lua-resty-lrucache/lib/?.lua;;
         run: |
           mkdir -p "$RUNNER_TEMP/luajit-bin"
           ln -sf "$(command -v luajit)" "$RUNNER_TEMP/luajit-bin/lua"
           export PATH="$RUNNER_TEMP/luajit-bin:$PATH"
+          export BW_LUAJIT="$(command -v luajit)"
+          export LUA_PATH="$PWD/src/deps/src/lua-resty-lrucache/lib/?.lua;${LUA_PATH:-;}"
           lua -e 'assert(jit, "lua is not LuaJIT")'
-          timeout -k 30 300 pytest -rs -o faulthandler_timeout=120 -k "resty or real_lrucache" \
+          python tests/unit/lua_coverage.py run .cache/lua-coverage -- timeout -k 30 300 python -m pytest -rs -o faulthandler_timeout=120 -k "resty or real_lrucache or iputils or ipmatcher" \
             "tests/unit/metrics/test_lru_sync_loop.py::test_the_walk_direction_decides_which_key_dies" \
-            "tests/unit/common/test_datastore_worker_lru_exptime.py::test_the_real_lrucache_treats_a_zero_ttl_as_already_expired" | tee luajit.log
-          grep -q ' 3 passed' luajit.log
+            "tests/unit/common/test_datastore_worker_lru_exptime.py::test_the_real_lrucache_treats_a_zero_ttl_as_already_expired" \
+            tests/unit/common/test_crowdsec_iputils_bitop_coverage_lua.py \
+            tests/unit/common/test_ipv6_ipmatcher_luajit.py | tee luajit.log
+          grep -q ' 75 passed' luajit.log
           ! grep -qi 'skipped' luajit.log
+      - name: Write Lua coverage reports and enforce the overall floor
+        run: python tests/unit/lua_coverage.py report .cache/lua-coverage --fail-under 94
+      - name: Upload Lua coverage to Codecov
+        uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7.1.1
+        continue-on-error: true
+        with:
+          files: .cache/lua-coverage/coverage.lcov
+          flags: lua
+          disable_search: true
+          fail_ci_if_error: true
+          token: ${{ secrets.CODECOV_TOKEN }}
       # The api_app lane imports the API's `app` package, so it runs in its own invocation
       # (tests/unit/api_app/README.md); the default run above ignores the directory.
       - name: Install the api_app lane dependencies

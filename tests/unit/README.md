@@ -119,7 +119,7 @@ timeout -k 30 300 env BW_API_APP_LANE=1 .venv-unit/bin/python -m pytest tests/un
 
 ## Component coverage gate
 
-Run the SQLite/UI and API-app suites in separate interpreters, then combine their line data.
+Run the SQLite/UI and API-app suites in separate interpreters, then combine their line and branch data.
 Coverage.py 7.17's subprocess patch includes Python scripts launched by the legacy wrapper;
 no manual startup hook is needed. Lua execution is outside this Python gate.
 
@@ -137,26 +137,65 @@ without changing the inputs. Every first-party Python file is counted even when 
 import it. Statement counts come from Coverage.py's parser, so unimported scheduler code and
 core-plugin UI actions contribute uncovered statements.
 
-Floors live in `FLOORS` at the top of `coverage_gate.py`:
+Floors live in `FLOORS`, `BRANCH_FLOORS`, `OVERALL_FLOOR` and `OVERALL_BRANCH_FLOOR` at the top
+of `coverage_gate.py`. They only go up: each ratchet uses the measured percentage minus two
+points, rounded down, without lowering an existing floor.
 
-| Floor | Components |
-| --- | --- |
-| 70% | `src/common/gen`, `src/common/db`, `src/common/utils` + `src/common/cli`, `src/api` |
-| 50% | `src/ui`, `src/autoconf`, `src/scheduler`, core-plugin jobs and UI |
+| Component | Statement floor | Branch floor |
+| --- | ---: | ---: |
+| `src/common/gen` | 88% | 82% |
+| `src/common/db` | 78% | 71% |
+| `src/common/utils` + `src/common/cli` | 90% | 84% |
+| `src/api` | 90% | 86% |
+| `src/ui` | 92% | 87% |
+| `src/autoconf` | 95% | 93% |
+| `src/scheduler` | 92% | 86% |
+| Core-plugin jobs | 86% | 79% |
+| Core-plugin UI | 94% | 91% |
+| Overall | 89% | 83% |
 
 The shared `src/common/api` helper belongs to utils/CLI. Backup's shared `backup.py` and
 `bwcli/` helpers belong to core jobs. Vendored `src/deps/` and ModSecurity CRS files,
 Alembic migrations and `gunicorn.conf.py` files are excluded. Other first-party paths must
 have a component assignment; an unmapped file is an error.
 
-The table prints executable statements, covered statements, percentage, floor and the minimum
-additional covered statements required (`gap`). Exit 0 means all floors pass; exit 1 means at
-least one component is below its floor; exit 2 means invalid input or configuration. JSON has
-`passed` and `components`, with the same numbers. Empty components have no coverage obligation.
+The table prints executable statements, covered statements, statement and branch percentages,
+both floors, and the minimum additional covered statements (`gap`) and branch outcomes
+(`branch_gap`) required. Exit 0 means every component and overall floor passes; exit 1 means
+at least one floor fails; exit 2 means invalid input or configuration. JSON has `passed`,
+`components` and `overall`, with the same numbers, including `branch_floor` and `branch_gap`.
+Legacy line-only data shows branch coverage and gap as `n/a` (JSON `null`); its branch floors
+are not evaluated. CI collects branches with `branch = true`. Empty components have no
+coverage obligation.
 
 The separate CI `coverage` job enforces these floors on push/PR. Existing SQLite and engine
-matrix jobs retain their test-success checks. Current coverage is below these approved floors;
-that failure is intentional until coverage work raises each component above its threshold.
+matrix jobs retain their test-success checks. Codecov uploads report coverage separately;
+these local floors remain mandatory.
+
+## Lua coverage gate
+
+The SQLite CI job installs checksum-pinned LuaCov 0.17.0-1 and measures the full suite under
+Lua 5.4, then merges a LuaJIT run into the same fresh stats directory. LuaJIT covers the real
+LRU, CrowdSec iputils/bitop and resty.ipmatcher tests; the step sets `BW_LUAJIT` and fails on
+any skip. Python's separate API-app lane adds no Lua execution.
+
+With LuaCov installed as in `.github/workflows/unit-tests.yml`:
+
+```bash
+export LUA_PATH="$PWD/.cache/lua-tools/share/lua/5.4/?.lua;$PWD/.cache/lua-tools/share/lua/5.4/?/init.lua;;"
+python tests/unit/lua_coverage.py run .cache/lua-coverage -- timeout -k 30 1500 python -m pytest tests/unit -o faulthandler_timeout=120
+# Run the workflow's LuaJIT-only step next, using the same stats directory.
+python tests/unit/lua_coverage.py report .cache/lua-coverage --fail-under 94
+```
+
+Start each measurement with a fresh stats directory; repeated `run` calls accumulate hits.
+The report counts every Lua source under `src/bw/lua/` and `src/common/core/`, including
+unloaded files and bundled libraries. `src/deps/` is outside these measured roots. LuaCov
+reports executable lines, not branches; extracted string fragments do not count as execution
+of their original source files. The report writes `coverage.lcov`, `coverage.json` and
+`baseline.md`. `--fail-under 94` enforces the overall 94% Lua line floor, returning 1 below
+it and 0 at or above it; omitting the option only reports. Codecov receives the LCOV report
+under its separate `lua` flag.
 
 ## Lua module checklist
 
