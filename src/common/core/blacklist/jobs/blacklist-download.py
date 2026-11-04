@@ -165,10 +165,10 @@ try:
         for file in list(JOB.job_path.rglob("*.list")):
             if file.parent == JOB.job_path:
                 LOGGER.warning(f"Removing no longer used url file {file} ...")
-                deleted, err = JOB.del_cache(file)
+                deleted, err = JOB.del_cache(file.name)
             else:
                 LOGGER.warning(f"Removing no longer used service file {file} ...")
-                deleted, err = JOB.del_cache(file, service_id=file.parent.name)
+                deleted, err = JOB.del_cache(file.name, service_id=file.parent.name)
 
             if not deleted:
                 LOGGER.warning(f"Couldn't delete file {file} from cache : {err}")
@@ -364,7 +364,7 @@ try:
         LOGGER.debug(f"Checking if {url_file} is still in use ...")
         if url_file.name not in urls:
             LOGGER.warning(f"Removing no longer used url file {url_file} ...")
-            deleted, err = JOB.del_cache(url_file)
+            deleted, err = JOB.del_cache(url_file.name)
             if not deleted:
                 LOGGER.warning(f"Couldn't delete url file {url_file} from cache : {err}")
 except SystemExit as e:
