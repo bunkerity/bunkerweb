@@ -108,7 +108,8 @@ try:
         if backed_up:
             update_cache_file(db, backup_dir)
 except SystemExit as e:
-    status = e.code
+    # The backup helper uses CLI exit codes; the scheduler treats 1 as success with reload.
+    status = 2 if e.code == 1 else e.code
 except BaseException as e:
     status = 2
     LOGGER.debug(format_exc())

@@ -159,7 +159,7 @@ try:
         cached, err = JOB.cache_file("reports.json", dumps(cached_data).encode())
         if not cached:
             LOGGER.error(f"Failed to cache reports.json :\n{err}")
-            status = 2
+            exit_status = 2
     else:
         deleted, err = JOB.del_cache("reports.json")
         if not deleted:
