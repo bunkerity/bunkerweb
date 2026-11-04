@@ -997,6 +997,9 @@ api.global.POST["^/ban$"] = function(self)
 	if not ok then
 		return self:response(HTTP_INTERNAL_SERVER_ERROR, "error", "can't decode JSON : " .. ip)
 	end
+	if type(ip) ~= "table" then
+		return self:response(HTTP_BAD_REQUEST, "error", "request body must be a JSON object")
+	end
 	local ban = {
 		ip = "",
 		exp = 86400,
