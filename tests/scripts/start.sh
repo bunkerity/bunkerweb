@@ -92,7 +92,12 @@ elif [ "$integration" == "Docker" ] || [ "$integration" == "Autoconf" ] || [ "$i
         if [ "${BW_TESTS_IPV6:-}" == "yes" ] ; then
             db_network_ipv6=(--ipv6 --subnet fd42:1618:4::/64)
         fi
-        docker network create --driver bridge --subnet 10.10.10.0/24 "${db_network_ipv6[@]}" bw-db --label "com.docker.compose.network=bw-db" > /dev/null
+        db_network_ipv4=(--subnet 10.10.10.0/24)
+        if [ "${BW_TESTS_IPV6:-}" == "only" ] ; then
+            db_network_ipv4=(--ipv4=false)
+            db_network_ipv6=(--ipv6 --subnet fd42:1618:4::/64)
+        fi
+        docker network create --driver bridge "${db_network_ipv4[@]}" "${db_network_ipv6[@]}" bw-db --label "com.docker.compose.network=bw-db" > /dev/null
         # shellcheck disable=SC2181
         if [ $? -ne 0 ] ; then
             log "START" "❌" "🐳 Network creation failed for bw-db"
@@ -346,6 +351,9 @@ fi
 
 if [ "${BW_TESTS_IPV6:-}" == "yes" ] ; then
     docker compose -p ipv6-fixtures -f tests/core/ipv6/fixtures.yml up -d || exit 1
+fi
+if [ "${BW_TESTS_IPV6:-}" == "only" ] ; then
+    docker compose -p ipv6-only-fixtures -f tests/core/ipv6-only/fixtures.yml up -d || exit 1
 fi
 
 # Starting stack

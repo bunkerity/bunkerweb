@@ -8,10 +8,13 @@ type="${2:-}"
 release="${3:-}"
 category="${4:-}"
 
-# Only this Docker spec opts into the dual-stack fixtures, including teardown.
+# Only these Docker specs opt into IPv6 fixtures, including teardown.
 unset BW_TESTS_IPV6
 if [ "$integration" == "Docker" ] && [ "$type" == "core" ] && [ "${category%%;*}" == "ipv6" ] ; then
   export BW_TESTS_IPV6=yes
+fi
+if [ "$integration" == "Docker" ] && [ "$type" == "core" ] && [ "${category%%;*}" == "ipv6-only" ] ; then
+  export BW_TESTS_IPV6=only
 fi
 
 if [ -z "$release" ] ; then

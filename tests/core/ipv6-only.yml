@@ -1,0 +1,157 @@
+integrations:
+  - Docker
+actions:
+  o1_bootstrap:
+    type: script
+    integrations:
+      - Docker
+    script:
+      - python3
+      - tests/core/ipv6-only/check.py
+      - o1_bootstrap
+    result: IPV6_ONLY_OK o1_bootstrap
+    config: {}
+    timeout: 120
+  o2_http_tls:
+    type: script
+    integrations:
+      - Docker
+    script:
+      - python3
+      - tests/core/ipv6-only/check.py
+      - o2_http_tls
+    result: IPV6_ONLY_OK o2_http_tls
+    config: {}
+    timeout: 120
+  o3_api:
+    type: script
+    integrations:
+      - Docker
+    script:
+      - python3
+      - tests/core/ipv6-only/check.py
+      - o3_api
+    result: IPV6_ONLY_OK o3_api
+    config: {}
+    timeout: 120
+  o4_blacklist:
+    type: script
+    integrations:
+      - Docker
+    script:
+      - python3
+      - tests/core/ipv6-only/check.py
+      - o4_blacklist
+    result: IPV6_ONLY_OK o4_blacklist
+    config:
+      USE_BLACKLIST: "yes"
+      BLACKLIST_IP: fd42:1618:2::a
+    timeout: 120
+  o4_waf:
+    type: script
+    integrations:
+      - Docker
+    script:
+      - python3
+      - tests/core/ipv6-only/check.py
+      - o4_waf
+    result: IPV6_ONLY_OK o4_waf
+    config:
+      USE_MODSECURITY: "yes"
+    timeout: 120
+  o4_ban:
+    type: script
+    integrations:
+      - Docker
+    script:
+      - python3
+      - tests/core/ipv6-only/check.py
+      - o4_ban
+    result: IPV6_ONLY_OK o4_ban
+    config: {}
+    timeout: 120
+  o5_dns:
+    type: script
+    integrations:
+      - Docker
+    script:
+      - python3
+      - tests/core/ipv6-only/check.py
+      - o5_dns
+    result: IPV6_ONLY_OK o5_dns
+    config:
+      REVERSE_PROXY_HOST: http://aaaa.example.com:8080
+    timeout: 120
+  o5_a_only:
+    type: script
+    integrations:
+      - Docker
+    script:
+      - python3
+      - tests/core/ipv6-only/check.py
+      - o5_a_only
+    result: IPV6_ONLY_OK o5_a_only
+    config:
+      REVERSE_PROXY_HOST: http://a-only.example.com:8080
+    timeout: 120
+  o7_jobs:
+    type: script
+    integrations:
+      - Docker
+    script:
+      - python3
+      - tests/core/ipv6-only/check.py
+      - o7_jobs
+    result: IPV6_ONLY_OK o7_jobs
+    config: {}
+    timeout: 120
+  o6_sockets:
+    type: script
+    integrations:
+      - Docker
+    script:
+      - python3
+      - tests/core/ipv6-only/check.py
+      - o6_sockets
+    result: IPV6_ONLY_OK o6_sockets
+    config: {}
+    timeout: 120
+config:
+  DISABLE_CONFIGURATION_TESTING: "no"
+  USE_IPV6: "yes"
+  API_LISTEN_IP: "::"
+  API_WHITELIST_IP: ::1/128 fd42:1618:1::24/128
+  BUNKERWEB_INSTANCES: "[fd42:1618:1::10]:5000"
+  DNS_RESOLVERS: "[fd42:1618:1::20]"
+  USE_BUNKERNET: "no"
+  SEND_ANONYMOUS_REPORT: "no"
+  USE_API: "yes"
+  API_SERVER_NAME: bwapi
+  USE_REVERSE_PROXY: "yes"
+  REVERSE_PROXY_HOST: http://[fd42:1618:3::80]:8080
+  USE_MODSECURITY: "no"
+  USE_BAD_BEHAVIOR: "no"
+  USE_DNSBL: "no"
+  USE_REVERSE_SCAN: "no"
+  USE_LIMIT_REQ: "no"
+  USE_LIMIT_CONN: "no"
+  USE_BLACKLIST: "no"
+  USE_WHITELIST: "no"
+  USE_REAL_IP: "no"
+  USE_REDIS: "no"
+  WHITELIST_IP: fd42:1618:2::a
+  GENERATE_SELF_SIGNED_SSL: "yes"
+  SELF_SIGNED_SSL_SUBJ: /CN=www.example.com/
+  SELF_SIGNED_SSL_ALGORITHM: ec-prime256v1
+  AUTO_REDIRECT_HTTP_TO_HTTPS: "no"
+  REDIRECT_HTTP_TO_HTTPS: "no"
+  WORKER_PROCESSES: "1"
+  BLACKLIST_IP_URLS: ""
+  BLACKLIST_RDNS_URLS: ""
+  BLACKLIST_ASN_URLS: ""
+  BLACKLIST_USER_AGENT_URLS: ""
+  BLACKLIST_URI_URLS: ""
+  BLACKLIST_COMMUNITY_LISTS: ""
+  BLACKLIST_RDNS: ""
+  WHITELIST_RDNS: ""
+  WHITELIST_ASN: ""

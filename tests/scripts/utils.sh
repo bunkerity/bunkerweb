@@ -181,6 +181,10 @@ function robust_docker_pull() {
 export TESTS_REDIS_PORT="${TESTS_REDIS_PORT:-6390}"
 
 function redis_cli() {
+    if [ "${BW_TESTS_IPV6:-}" == "only" ] ; then
+        redis-cli -h ::1 -p "$TESTS_REDIS_PORT" "$@"
+        return $?
+    fi
     redis-cli -p "$TESTS_REDIS_PORT" "$@"
 }
 
@@ -431,9 +435,10 @@ function stack_has_worker() {
 
 # Add network overrides only for the opt-in IPv6 spec, through startup and teardown.
 function docker_compose() {
-    local compose_file="$1" overlay=""
+    local compose_file="$1" overlay="" fixture=ipv6
     shift
-    if [ "${BW_TESTS_IPV6:-}" == "yes" ] ; then
+    if [ "${BW_TESTS_IPV6:-}" == "yes" ] || [ "${BW_TESTS_IPV6:-}" == "only" ] ; then
+        [ "$BW_TESTS_IPV6" != "only" ] || fixture=ipv6-only
         case "$compose_file" in
             tests/misc/docker/redis.yml) overlay=redis ;;
             tests/docker/docker-compose.bunkerweb.yml) overlay=bunkerweb ;;
@@ -443,7 +448,11 @@ function docker_compose() {
         esac
     fi
     if [ -n "$overlay" ] ; then
-        docker compose -f "$compose_file" -f "tests/core/ipv6/$overlay.yml" "$@"
+        if [ "$fixture" == "ipv6-only" ] ; then
+            docker compose -p docker -f "tests/core/$fixture/$overlay.yml" "$@"
+        else
+            docker compose -f "$compose_file" -f "tests/core/$fixture/$overlay.yml" "$@"
+        fi
     else
         docker compose -f "$compose_file" "$@"
     fi
@@ -821,7 +830,7 @@ function cleanup_stack () {
         # networks behind; the filter keeps that and removes the blast radius. Verified in both
         # directions: a network labelled with this project is removed, one labelled with another
         # project or unlabelled survives.
-        if [ "${BW_TESTS_IPV6:-}" != "yes" ] ; then
+        if [ -z "${BW_TESTS_IPV6:-}" ] ; then
             docker network prune -f --filter label=com.docker.compose.project=docker
         fi
         # shellcheck disable=SC2181
@@ -921,6 +930,12 @@ function cleanup_stack () {
 
         if [ "${BW_TESTS_IPV6:-}" == "yes" ] ; then
             docker compose -p ipv6-fixtures -f tests/core/ipv6/fixtures.yml down -v || return 1
+        fi
+        if [ "${BW_TESTS_IPV6:-}" == "only" ] ; then
+            docker compose -p ipv6-only-fixtures -f tests/core/ipv6-only/fixtures.yml down -v || return 1
+            if [ "$exit_code" -ne 0 ] || $trapped ; then
+                touch "$BW_TESTS_HOST_ROOT/ipv6-only/stop"
+            fi
         fi
 
         containers=$(docker ps -a --format "{{.Names}}")
@@ -1145,7 +1160,7 @@ function cleanup_stack () {
         fi
 
         # Leave no dual-stack network for the next ordinary spec to inherit.
-        if [ "${BW_TESTS_IPV6:-}" == "yes" ] && { [ "$exit_code" -ne 0 ] || $trapped; } ; then
+        if [ -n "${BW_TESTS_IPV6:-}" ] && { [ "$exit_code" -ne 0 ] || $trapped; } ; then
             for network in bw-universe bw-services ipv6-backend ; do
                 if echo "$networks" | grep -qx "$network" ; then
                     docker network rm "$network" || return 1

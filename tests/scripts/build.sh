@@ -28,6 +28,11 @@ if ! groups "$(whoami)" | grep -q '\bdocker\b' ; then
 fi
 
 log "BUILD" "ℹ️ " "💽 Starting redis server ..."
+if [ "${BW_TESTS_IPV6:-}" == "only" ] ; then
+  mkdir -p "$BW_TESTS_HOST_ROOT/ipv6-only"
+  rm -f "$BW_TESTS_HOST_ROOT/ipv6-only/stop"
+  python3 tests/core/ipv6-only/capture.py "$BW_TESTS_HOST_ROOT/ipv6-only" > "$BW_TESTS_HOST_ROOT/ipv6-only/capture.log" 2>&1 &
+fi
 robust_docker_pull "tests/misc/docker/redis.yml" "redis"
 # shellcheck disable=SC2181
 if [ $? -ne 0 ] ; then
