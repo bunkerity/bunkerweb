@@ -4,6 +4,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from contextlib import suppress
 from copy import deepcopy
 from functools import cache
+from ipaddress import AddressValueError, IPv6Address
 from json import loads
 from logging import Logger
 from os import getenv, listdir, sep
@@ -338,6 +339,8 @@ class Configurator:
                 # into syslog / docker logs / log shippers downstream.
                 self.__logger.warning(f"Ignoring variable {variable} : {err} - value={self._redact_value(value)}")
 
+        self.__warn_non_canonical_ipv6_names(config)
+
         # Expand variables to each sites if MULTISITE=yes and if not present
         if config.get("MULTISITE", "no") == "yes":
             for server_name in config["SERVER_NAME"].strip().split():
@@ -364,6 +367,31 @@ class Configurator:
 
         validate_audit_log_settings(config)
         return config
+
+    def __warn_non_canonical_ipv6_names(self, config: Dict[str, str]) -> None:
+        """Warn about an IPv6 server name that is not written the way a client sends it.
+
+        A client sends the compressed lowercase form in its Host header, so another spelling of the
+        same address never matches. The value is kept: dropping the global SERVER_NAME would remove
+        every service.
+        """
+        names = {
+            name
+            for variable, value in config.items()
+            if variable == "SERVER_NAME" or variable.endswith("_SERVER_NAME")
+            for name in value.split()
+            if ":" in name
+        }
+        for name in sorted(names):
+            try:
+                canonical = IPv6Address(name).compressed
+            except AddressValueError:
+                self.__logger.warning(f"Server name {name} looks like an IPv6 address but is not a valid one, it will never match a Host header")
+                continue
+            if canonical != name:
+                self.__logger.warning(
+                    f"Server name {name} is not written in its canonical form, use {canonical}: another spelling never matches the Host header"
+                )
 
     @staticmethod
     def __has_embedded_newline(value: str, setting_type: Optional[str]) -> bool:

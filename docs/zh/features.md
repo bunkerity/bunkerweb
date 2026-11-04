@@ -46,7 +46,7 @@ BunkerWeb 中的某些设置支持同一功能的多个配置。要定义多组�
 
 可以使用空格分隔的列表调整顺序：
 
-- 全局阶段：`PLUGINS_ORDER_INIT`、`PLUGINS_ORDER_INIT_WORKER`、`PLUGINS_ORDER_TIMER`。
+- 全局阶段：`PLUGINS_ORDER_INIT`、`PLUGINS_ORDER_INIT_WORKER`、`PLUGINS_ORDER_SSL_CLIENT_HELLO`、`PLUGINS_ORDER_TIMER`。
 - 按站点的阶段：`PLUGINS_ORDER_SET`、`PLUGINS_ORDER_ACCESS`、`PLUGINS_ORDER_SSL_CERTIFICATE`、`PLUGINS_ORDER_HEADER`、`PLUGINS_ORDER_LOG`、`PLUGINS_ORDER_PREREAD`、`PLUGINS_ORDER_LOG_STREAM`、`PLUGINS_ORDER_LOG_DEFAULT`。
 - 语义：列出的插件在该阶段优先执行；其余插件仍按正常顺序执行。仅使用空格分隔插件 ID。
 
@@ -79,7 +79,7 @@ BunkerWeb 中的某些设置支持同一功能的多个配置。要定义多组�
 
     | 设置                    | 默认值            | 上下文    | 多个 | 描述                                                                                                                                                                                                                                                                                 |
     | ----------------------- | ----------------- | --------- | ---- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-    | `SERVER_NAME`           | `www.example.com` | multisite | 否   | **主域名：** 此站点的主域名。在多站点模式下为必需。                                                                                                                                                                                                                                  |
+    | `SERVER_NAME`           | `www.example.com` | multisite | 否   | **主域名：** 此站点的主域名（或 IP 地址）。在多站点模式下为必需。                                                                                                                                                                                                                    |
     | `BUNKERWEB_INSTANCES`   | `127.0.0.1`       | global    | 否   | **BunkerWeb 实例：** 以空格分隔的 BunkerWeb 实例列表。                                                                                                                                                                                                                               |
     | `MULTISITE`             | `no`              | global    | 否   | **多站点：** 设置为 `yes` 以启用托管具有不同配置的多个网站。                                                                                                                                                                                                                         |
     | `SECURITY_MODE`         | `block`           | multisite | 否   | **安全级别：** 控制安全强制执行的级别。选项：`detect` 或 `block`。                                                                                                                                                                                                                   |
@@ -374,18 +374,18 @@ STREAM 支持 :x:
 
 BunkerWeb 允许您指定某些用户、IP 或请求应完全绕过 antibot 挑战。这对于将受信任的服务、内部网络或应始终无需挑战即可访问的特定页面列入白名单非常有用：
 
-| 设置                          | 默认值 | 上下文    | 多个 | 描述                                                                                                               |
-| ----------------------------- | ------ | --------- | ---- | ------------------------------------------------------------------------------------------------------------------ |
-| `ANTIBOT_IGNORE_URI`          |        | multisite | 否   | **排除的 URL：** 应绕过挑战的以空格分隔的 URI 正则表达式模式列表。模式会同时匹配路径和带查询字符串的完整请求 URI。 |
-| `ANTIBOT_IGNORE_IP`           |        | multisite | 否   | **排除的 IP：** 应绕过挑战的以空格分隔的 IP 地址或 CIDR 范围列表。                                                 |
-| `ANTIBOT_IGNORE_RDNS`         |        | multisite | 否   | **排除的反向 DNS：** 应绕过挑战的以空格分隔的反向 DNS 后缀列表。                                                   |
-| `ANTIBOT_RDNS_GLOBAL`         | `yes`  | multisite | 否   | **仅限全局 IP：** 如果设置为 `yes`，则仅对公共 IP 地址执行反向 DNS 检查。                                          |
-| `ANTIBOT_IGNORE_ASN`          |        | multisite | 否   | **排除的 ASN：** 应绕过挑战的以空格分隔的 ASN 编号列表。                                                           |
-| `ANTIBOT_IGNORE_USER_AGENT`   |        | multisite | 否   | **排除的用户代理：** 应绕过挑战的以空格分隔的用户代理正则表达式模式列表。                                          |
-| `ANTIBOT_IGNORE_HEADER_NAME`  |        | multisite | 是   | **请求头名称：** 使请求绕过 antibot 挑战的请求头名称。成对编号：`_NAME_1` 与 `_VALUE_1` 配对。                     |
-| `ANTIBOT_IGNORE_HEADER_VALUE` |        | multisite | 是   | **请求头值：** 请求头值必须匹配的 PCRE 正则表达式。留空则仅检查该请求头是否存在。                                  |
-| `ANTIBOT_IGNORE_COUNTRY`      |        | multisite | 否   | **排除的国家：** 应绕过挑战的 ISO 3166-1 alpha-2 国家代码（用空格分隔）列表。                                      |
-| `ANTIBOT_ONLY_COUNTRY`        |        | multisite | 否   | **仅挑战的国家：** 必须完成挑战的 ISO 3166-1 alpha-2 国家代码列表，其他国家将被跳过。                              |
+| 设置                          | 默认值 | 上下文    | 多个 | 描述                                                                                                                                                |
+| ----------------------------- | ------ | --------- | ---- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `ANTIBOT_IGNORE_URI`          |        | multisite | 否   | **排除的 URL：** 应绕过挑战的以空格分隔的 URI 正则表达式模式列表。模式会匹配规范化后的路径，既可单独匹配，也可匹配路径后接 `?` 和查询字符串的形式。 |
+| `ANTIBOT_IGNORE_IP`           |        | multisite | 否   | **排除的 IP：** 应绕过挑战的以空格分隔的 IP 地址或 CIDR 范围列表。                                                                                  |
+| `ANTIBOT_IGNORE_RDNS`         |        | multisite | 否   | **排除的反向 DNS：** 应绕过挑战的以空格分隔的反向 DNS 后缀列表。                                                                                    |
+| `ANTIBOT_RDNS_GLOBAL`         | `yes`  | multisite | 否   | **仅限全局 IP：** 如果设置为 `yes`，则仅对公共 IP 地址执行反向 DNS 检查。                                                                           |
+| `ANTIBOT_IGNORE_ASN`          |        | multisite | 否   | **排除的 ASN：** 应绕过挑战的以空格分隔的 ASN 编号列表。                                                                                            |
+| `ANTIBOT_IGNORE_USER_AGENT`   |        | multisite | 否   | **排除的用户代理：** 应绕过挑战的以空格分隔的用户代理正则表达式模式列表。                                                                           |
+| `ANTIBOT_IGNORE_HEADER_NAME`  |        | multisite | 是   | **请求头名称：** 使请求绕过 antibot 挑战的请求头名称。成对编号：`_NAME_1` 与 `_VALUE_1` 配对。                                                      |
+| `ANTIBOT_IGNORE_HEADER_VALUE` |        | multisite | 是   | **请求头值：** 请求头值必须匹配的 PCRE 正则表达式。留空则仅检查该请求头是否存在。                                                                   |
+| `ANTIBOT_IGNORE_COUNTRY`      |        | multisite | 否   | **排除的国家：** 应绕过挑战的 ISO 3166-1 alpha-2 国家代码（用空格分隔）列表。                                                                       |
+| `ANTIBOT_ONLY_COUNTRY`        |        | multisite | 否   | **仅挑战的国家：** 必须完成挑战的 ISO 3166-1 alpha-2 国家代码列表，其他国家将被跳过。                                                               |
 
 !!! warning "请求头规则是共享密钥"
     任何客户端都能发送请求头，因此请求头规则是一种持有者令牌，而非网络层控制。请仅通过 HTTPS 提供，用 `^` 和 `$` 锚定正则（默认不锚定，`abc` 也会匹配 `xabcx`），并定期轮换其值。若 BunkerWeb 位于代理之后，该代理必须覆盖客户端自行发送的同名请求头。 这些规则仅适用于 HTTP：stream 服务不携带请求头，因此在那里不会有任何匹配。
@@ -1362,7 +1362,7 @@ BunkerNet 插件通过 BunkerWeb 实例之间的集体威胁情报共享，创�
 **工作原理：**
 
 1.  您的 BunkerWeb 实例会自动向 BunkerNet API 注册，以获取一个唯一标识符。
-2.  当您的实例检测并阻止了恶意 IP 地址或行为时，它会匿名地向 BunkerNet 报告该威胁。
+2.  当您的实例检测并阻止了恶意 IP 地址或行为时，它会向 BunkerNet 报告该威胁。报告包含的字段见下文“报告包含的内容”。
 3.  BunkerNet 聚合来自所有参与实例的威胁情报，并分发整合后的数据库。
 4.  您的实例会定期从 BunkerNet 下载更新的已知威胁数据库。
 5.  这种集体情报使您的实例能够主动阻止在其他 BunkerWeb 实例上表现出恶意行为的 IP 地址。
@@ -1371,9 +1371,9 @@ BunkerNet 插件通过 BunkerWeb 实例之间的集体威胁情报共享，创�
 
       1. **集体防御：** 利用全球成千上万个其他 BunkerWeb 实例的安全发现。
       2. **主动防护：** 根据恶意行为者在别处的行为，在他们攻击您的网站之前就将其阻止。
-      3. **社区贡献：** 通过分享关于攻击者的匿名威胁数据，帮助保护其他 BunkerWeb 用户。
+      3. **社区贡献：** 通过分享关于攻击者的威胁数据，帮助保护其他 BunkerWeb 用户。
       4. **零配置：** 开箱即用，带有合理的默认值，只需最少的设置。
-      5. **注重隐私：** 只分享必要的威胁信息，不损害您或您用户的隐私。
+      5. **受控分享：** 报告包含一组固定的字段，`BUNKERNET_FILTER_HEADERS` 可将其请求头限制为一份简短的白名单（见下文）。
 
 ### 如何使用
 
@@ -1387,16 +1387,27 @@ BunkerNet 插件通过 BunkerWeb 实例之间的集体威胁情报共享，创�
 
 ### 配置设置
 
-| 设置               | 默认值                     | 上下文    | 多个 | 描述                                                                 |
-| ------------------ | -------------------------- | --------- | ---- | -------------------------------------------------------------------- |
-| `USE_BUNKERNET`    | `yes`                      | multisite | 否   | **启用 BunkerNet：** 设置为 `yes` 以启用 BunkerNet 威胁情报共享。    |
-| `BUNKERNET_SERVER` | `https://api.bunkerweb.io` | global    | 否   | **BunkerNet 服务器：** 用于共享威胁情报的 BunkerNet API 服务器地址。 |
+| 设置                       | 默认值                     | 上下文    | 多个 | 描述                                                                                                                                                                  |
+| -------------------------- | -------------------------- | --------- | ---- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `USE_BUNKERNET`            | `yes`                      | multisite | 否   | **启用 BunkerNet：** 设置为 `yes` 以启用 BunkerNet 威胁情报共享。                                                                                                     |
+| `BUNKERNET_FILTER_HEADERS` | `no`                       | multisite | 否   | **过滤上报的请求头：** 设置为 `yes` 时，只发送一份简短的请求头白名单，并清空 ModSecurity 在请求头和 Cookie 中命中的值。设置为 `no` 时，报告包含所有请求头和命中的值。 |
+| `BUNKERNET_SERVER`         | `https://api.bunkerweb.io` | global    | 否   | **BunkerNet 服务器：** 用于共享威胁情报的 BunkerNet API 服务器地址。                                                                                                  |
 
 !!! tip "网络保护"
     当 BunkerNet 检测到某个 IP 地址在多个 BunkerWeb 实例中参与了恶意活动时，它会将该 IP 添加到集体黑名单中。这提供了一个主动的防御层，在威胁直接攻击您之前就保护您的网站。
 
-!!! info "匿名报告"
-    在向 BunkerNet 报告威胁信息时，您的实例只分享识别威胁所需的数据：IP 地址、阻止原因和最少的上下文数据。不会分享有关您的用户的个人信息或有关您网站的敏感详细信息。
+!!! info "报告包含的内容"
+    发送给 BunkerNet 的每份报告包含以下字段，仅此而已：
+
+    - 每次请求发送的实例元数据：BunkerNet 实例 ID、BunkerWeb 版本、集成方式，以及操作系统名称、版本、版本 ID、代号、ID 和架构；
+    - 客户端 IP 地址、阻止原因和日期；
+    - HTTP 方法、**包含查询字符串的** URL，以及服务名称（`server_name`）；
+    - 请求头及其值：收到的所有请求头（最多 `MAX_HEADERS` 个），或在 `BUNKERNET_FILTER_HEADERS` 为 `yes` 时仅包含 `User-Agent`、`Accept`、`Accept-Encoding`、`Accept-Language`、`Content-Type` 和 `Content-Length`；
+    - 与阻止原因相关的详细信息。根据阻止该客户端的插件不同，可能包含命中的 ModSecurity 规则 ID 和消息，以及触发这些规则的请求值（参数、请求体、请求头或 Cookie 的片段，每项截断为 512 字节；`BUNKERNET_FILTER_HEADERS` 为 `yes` 时，在请求头和 Cookie 中命中的值会被清空，只发送变量名）；对于 Bad Behavior，则是导致封禁的近期请求的方法和 URL。
+
+    默认情况下（`BUNKERNET_FILTER_HEADERS` 为 `no`），报告包含收到的所有请求头（最多 `MAX_HEADERS` 个，包括 Cookie 和 `Authorization`），以及 ModSecurity 命中的原始值。将 `BUNKERNET_FILTER_HEADERS` 设置为 `yes`，则只发送上面列出的六个请求头，并清空在请求头和 Cookie 中命中的值。仍在队列中的报告在 `yes` 时也会在发送前以同样方式过滤。
+
+    URL 以及命中的值均来自请求，因此包含客户端发送的任何内容。对于 URL 中带有敏感值的服务，请将 `USE_BUNKERNET` 设置为 `no`。
 
 ### 示例配置
 
@@ -1742,13 +1753,13 @@ STREAM 支持 :white_check_mark:
 
 ### 配置设置
 
-| 设置                          | 默认值 | 上下文    | 多个 | 描述                                                                                                                              |
-| ----------------------------- | ------ | --------- | ---- | --------------------------------------------------------------------------------------------------------------------------------- |
-| `WHITELIST_COUNTRY`           |        | multisite | 否   | **国家/地区白名单：** 以空格分隔的国家/地区代码和/或分组 token 列表。只允许这些国家/地区。                                        |
-| `BLACKLIST_COUNTRY`           |        | multisite | 否   | **国家/地区黑名单：** 以空格分隔的国家/地区代码和/或分组 token 列表。这些国家/地区将被阻止。                                      |
-| `COUNTRY_IGNORE_URI`          |        | multisite | 否   | **忽略的 URI：** 以空格分隔的 PCRE 正则表达式列表，匹配的 URI 将跳过国家/地区检查。规则同时匹配路径和带查询字符串的完整请求 URI。 |
-| `COUNTRY_IGNORE_HEADER_NAME`  |        | multisite | 是   | **请求头名称：** 使请求绕过国家检查的请求头名称。成对编号：`_NAME_1` 与 `_VALUE_1` 配对。                                         |
-| `COUNTRY_IGNORE_HEADER_VALUE` |        | multisite | 是   | **请求头值：** 请求头值必须匹配的 PCRE 正则表达式。留空则仅检查该请求头是否存在。                                                 |
+| 设置                          | 默认值 | 上下文    | 多个 | 描述                                                                                                                                                                 |
+| ----------------------------- | ------ | --------- | ---- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `WHITELIST_COUNTRY`           |        | multisite | 否   | **国家/地区白名单：** 以空格分隔的国家/地区代码和/或分组 token 列表。只允许这些国家/地区。                                                                           |
+| `BLACKLIST_COUNTRY`           |        | multisite | 否   | **国家/地区黑名单：** 以空格分隔的国家/地区代码和/或分组 token 列表。这些国家/地区将被阻止。                                                                         |
+| `COUNTRY_IGNORE_URI`          |        | multisite | 否   | **忽略的 URI：** 以空格分隔的 PCRE 正则表达式列表，匹配的 URI 将跳过国家/地区检查。规则会匹配规范化后的路径，既可单独匹配，也可匹配路径后接 `?` 和查询字符串的形式。 |
+| `COUNTRY_IGNORE_HEADER_NAME`  |        | multisite | 是   | **请求头名称：** 使请求绕过国家检查的请求头名称。成对编号：`_NAME_1` 与 `_VALUE_1` 配对。                                                                            |
+| `COUNTRY_IGNORE_HEADER_VALUE` |        | multisite | 是   | **请求头值：** 请求头值必须匹配的 PCRE 正则表达式。留空则仅检查该请求头是否存在。                                                                                    |
 
 !!! warning "请求头规则是共享密钥"
     任何客户端都能发送请求头，因此请求头规则是一种持有者令牌，而非网络层控制。请仅通过 HTTPS 提供，用 `^` 和 `$` 锚定正则（默认不锚定，`abc` 也会匹配 `xabcx`），并定期轮换其值。若 BunkerWeb 位于代理之后，该代理必须覆盖客户端自行发送的同名请求头。 这些规则仅适用于 HTTP：stream 服务不携带请求头，因此在那里不会有任何匹配。
@@ -1901,7 +1912,7 @@ CrowdSec 是一种现代的开源安全引擎，它基于行为分析和社区�
 
 请原样使用返回的连接 ID。它包含实例身份，因此不同实例上相同的 localhost URL 仍会被区分。API 管理员可以使用这些操作。委派的 API 用户需要在现有 `bans` 资源下获得独立的 `crowdsec_read` 或 `crowdsec_delete` 权限，权限范围为返回的连接 ID 或 `*`。普通的 `ban_delete` 权限不允许移除 CrowdSec 决策。无需进行数据库迁移。
 
-运行时按目标保留各条独立决策，因此移除一条决策不会抹去同一 IP 或范围上的其他封禁。可选的报告元数据使用独立的 5 MiB (`CROWDSEC_METADATA_CACHE_SIZE=5m`) 缓存，不会逐出用于执行封禁的条目。流刷新使用 `/var/run/bunkerweb` 中的非阻塞进程锁，锁会一直保持到更新发布完成，并在 worker 退出时自动释放。
+运行时按目标保留各条独立决策，因此移除一条决策不会抹去同一 IP 或范围上的其他封禁。可选的报告元数据使用独立的 24 MiB (`CROWDSEC_METADATA_CACHE_SIZE=24m`) 缓存，不会逐出用于执行封禁的条目。流刷新使用 `/var/run/bunkerweb` 中的非阻塞进程锁，锁会一直保持到更新发布完成，并在 worker 退出时自动释放。
 
 流模式最多保留两个快照槽位，仅在完整快照存储成功后切换。配置未变的 nginx 重载会保留当前快照并请求增量更新。快照缺失、决策配置改变、上次启动未完成，或距离上次成功同步超过 300 秒与 `CROWDSEC_UPDATE_FREQUENCY` 的 30 倍两者中的较大值时，会强制获取完整快照。每个缓存前缀每分钟最多记录一次同步错误，恢复后记录一次通知。决策缓存已满时，请增大 `CROWDSEC_CACHE_SIZE` 以容纳两个快照并重载 BunkerWeb。重载时调整决策内存区大小会创建空缓存并触发完整同步；仅调整元数据内存区大小会清空可选元数据。
 
@@ -2000,7 +2011,7 @@ CrowdSec 是一种现代的开源安全引擎，它基于行为分析和社区�
     services:
       bunkerweb:
         # 这是将用于在调度器中识别实例的名称
-        image: bunkerity/bunkerweb:1.6.17
+        image: bunkerity/bunkerweb:1.6.18-rc3
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -2017,7 +2028,7 @@ CrowdSec 是一种现代的开源安全引擎，它基于行为分析和社区�
             syslog-address: "udp://10.20.30.254:514" # syslog 服务的 IP 地址
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.17
+        image: bunkerity/bunkerweb-scheduler:1.6.18-rc3
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb" # 确保设置正确的实例名称
@@ -2202,7 +2213,7 @@ CrowdSec 是一种现代的开源安全引擎，它基于行为分析和社区�
 | `CROWDSEC_REQUEST_TIMEOUT`     | `1s`                   | multisite | 否   | **请求超时：** 在实时模式下向 CrowdSec 本地 API 发出 HTTP 请求的超时时间（以毫秒为单位）。 支持时间后缀（ms、s、m、h、d、w、M、y）；无后缀的数字单位为毫秒。                                                                                                                             |
 | `CROWDSEC_EXCLUDE_LOCATION`    |                        | multisite | 否   | **排除的位置：** 从 CrowdSec 检查中排除的位置（URI）列表，以逗号分隔。                                                                                                                                                                                                                   |
 | `CROWDSEC_CACHE_SIZE`          | `100m`                 | global    | 否   | **决策缓存大小：** 所有服务共享的内存；流模式需要两个快照。使用正整数兆字节（`m`/`M`），最小 `1m`。调整大小会清空缓存区；已知决策从磁盘恢复并执行至完成校准。未知 IP 查询 LAPI，故障时放行未知 IP。                                                                                      |
-| `CROWDSEC_METADATA_CACHE_SIZE` | `5m`                   | global    | 否   | **元数据缓存大小：** 所有服务的可选报告元数据使用的独立共享内存。使用正整数兆字节（`m`/`M`），最小值为 `1m`；重载时调整大小会清空此内存区。                                                                                                                                              |
+| `CROWDSEC_METADATA_CACHE_SIZE` | `24m`                  | global    | 否   | **元数据缓存大小：** 所有服务的可选报告元数据使用的独立共享内存。使用正整数兆字节（`m`/`M`），最小值为 `1m`；重载时调整大小会清空此内存区。                                                                                                                                              |
 | `CROWDSEC_CACHE_EXPIRATION`    | `1s`                   | multisite | 否   | **缓存过期时间：** 在实时模式下，IP 决策的缓存过期时间（以秒为单位）。 支持时间后缀（ms、s、m、h、d、w、M、y）；无后缀的数字单位为秒。                                                                                                                                                   |
 | `CROWDSEC_UPDATE_FREQUENCY`    | `10s`                  | multisite | 否   | **更新频率：** 在流模式下，从 CrowdSec API 拉取新的/过期的决策的频率（以秒为单位）。 支持时间后缀（ms、s、m、h、d、w、M、y）；无后缀的数字单位为秒。                                                                                                                                     |
 | `CROWDSEC_BAN_REFRESH`         | `0`                    | multisite | 否   | **封禁刷新：** 将 CrowdSec 拦截转换为短时的 BunkerWeb 封禁，只要 CrowdSec 决策有效就会续期。该值是封禁在再次询问 CrowdSec 之前最长持续的时间。`0` 表示禁用。设置了 `CROWDSEC_EXCLUDE_LOCATION` 的服务永远不会产生 CrowdSec 封禁。支持时间后缀（ms、s、m、h、d、w、M、y）；纯数字表示秒。 |

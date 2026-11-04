@@ -1,0 +1,31 @@
+services:
+  bw-db:
+    image: mysql:9@sha256:e370cd5f64599d46985b7729b452f2153825246f88d82753ec595c5dfc6fef6a
+    container_name: bw-db
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_RANDOM_ROOT_PASSWORD: "yes"
+      MYSQL_DATABASE: "db"
+      MYSQL_USER: "bunkerweb"
+      MYSQL_PASSWORD: "secret"
+    volumes:
+      - bw-data:/var/lib/mysql
+    dns:
+      - 10.20.30.20
+    restart: "unless-stopped"
+    networks:
+      bw-db:
+        ipv4_address: 10.10.10.254
+
+volumes:
+  bw-data:
+    name: bw-data
+
+networks:
+  bw-db:
+    name: bw-db
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 10.10.10.0/24

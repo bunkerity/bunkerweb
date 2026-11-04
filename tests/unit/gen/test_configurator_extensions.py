@@ -1,0 +1,132 @@
+"""Configurator.__validate_plugin — the optional ``extensions`` block (1.7).
+
+Plugin-shipped API/DB code is a trust boundary, so the manifest is validated strictly:
+module paths are .py files inside the plugin (no traversal), the API prefix is locked
+to ``/<id>``, and table prefixes are bw_-namespaced and tied to the plugin id.
+"""
+
+import json
+import logging
+
+from Configurator import Configurator  # type: ignore
+
+LOGGER = logging.getLogger("cfg-ext-test")
+LOGGER.addHandler(logging.NullHandler())
+LOGGER.setLevel(logging.CRITICAL)
+
+SETTINGS = {
+    "SERVER_NAME": {"context": "multisite", "default": "www.example.com", "help": "h", "id": "server-name", "label": "x", "regex": "^.*$", "type": "text"},
+}
+
+BASE = {"id": "myplug", "name": "My", "description": "d", "version": "1.0", "stream": "no", "settings": {}}
+
+
+def _configurator(tmp_path):
+    settings_file = tmp_path / "settings.json"
+    settings_file.write_text(json.dumps(SETTINGS))
+    core = tmp_path / "core"
+    core.mkdir()
+    return Configurator(str(settings_file), str(core), [], [], {}, LOGGER)
+
+
+def _validate(tmp_path, extensions):
+    c = _configurator(tmp_path)
+    plugin = dict(BASE, extensions=extensions)
+    # name-mangled private validator — the focused unit under test
+    return c._Configurator__validate_plugin(plugin)
+
+
+class TestValidExtensions:
+    def test_full_block(self, tmp_path):
+        ok, _ = _validate(
+            tmp_path,
+            {
+                "api": {"module": "api/router.py", "prefix": "/myplug"},
+                "db": {"models": "db/models.py", "methods": "db/methods.py", "table_prefix": "bw_myplug_"},
+            },
+        )
+        assert ok
+
+    def test_api_only(self, tmp_path):
+        ok, _ = _validate(tmp_path, {"api": {"module": "api/router.py"}})
+        assert ok
+
+    def test_db_only_models(self, tmp_path):
+        ok, _ = _validate(tmp_path, {"db": {"models": "db/models.py"}})
+        assert ok
+
+    def test_no_extensions_key_is_valid(self, tmp_path):
+        c = _configurator(tmp_path)
+        ok, _ = c._Configurator__validate_plugin(dict(BASE))
+        assert ok
+
+    def test_activation_always_alone_is_valid(self, tmp_path):
+        """Declarative-only blocks must not sink the plugin.
+
+        Requiring api/db/config here dropped twelve core plugins that declare nothing
+        but activation — ssl among them — so NGINX rendered an empty `ssl_protocols ;`
+        and refused to start.
+        """
+        assert _validate(tmp_path, {"activation": "always"})[0]
+
+    def test_activation_map_alone_is_valid(self, tmp_path):
+        assert _validate(tmp_path, {"activation": {"USE_LIMIT_REQ": "no"}})[0]
+
+    def test_certificate_source_alone_is_valid(self, tmp_path):
+        assert _validate(tmp_path, {"certificate_source": {"label": "Custom", "renews": False}})[0]
+
+    def test_downgrade_alone_is_valid(self, tmp_path):
+        """Declarative-only, like activation/certificate_source: no plugin code is loaded for
+        it, so a plugin declaring nothing else must not be rejected."""
+        assert _validate(tmp_path, {"downgrade": {"module": "downgrade.py"}})[0]
+
+    def test_every_shipped_core_manifest_validates(self, tmp_path):
+        """The regression this class exists for is only caught end to end."""
+        from json import loads
+        from pathlib import Path
+
+        c = _configurator(tmp_path)
+        core = Path(__file__).resolve().parents[3] / "src" / "common" / "core"
+        rejected = []
+        for manifest in sorted(core.glob("*/plugin.json")):
+            ok, msg = c._Configurator__validate_plugin(loads(manifest.read_text(encoding="utf-8")))
+            if not ok:
+                rejected.append(f"{manifest.parent.name}: {msg}")
+        assert not rejected, "shipped core plugins rejected by their own validator: " + "; ".join(rejected)
+
+
+def _validate_setting(tmp_path, setting):
+    c = _configurator(tmp_path)
+    plugin = dict(BASE, settings={"MYSETTING": setting})
+    return c._Configurator__validate_plugin(plugin)
+
+
+def _select_setting(**over):
+    base = {
+        "context": "global",
+        "default": "modern",
+        "help": "h",
+        "id": "ms",
+        "label": "x",
+        "regex": "^(modern|old)$",
+        "type": "select",
+        "select": ["modern", "old"],
+    }
+    base.update(over)
+    return base
+
+
+class TestCaseInsensitiveValidation:
+    """A3: the per-setting ``case_insensitive`` flag is validated by __validate_plugin."""
+
+    def test_true_on_select_is_valid(self, tmp_path):
+        ok, _ = _validate_setting(tmp_path, _select_setting(case_insensitive=True))
+        assert ok
+
+    def test_false_on_non_select_is_valid(self, tmp_path):
+        # A disabled flag on a non-select type is a harmless no-op.
+        ok, _ = _validate_setting(
+            tmp_path,
+            {"context": "global", "default": "0", "help": "h", "id": "n", "label": "x", "regex": r"^\d+$", "type": "number", "case_insensitive": False},
+        )
+        assert ok

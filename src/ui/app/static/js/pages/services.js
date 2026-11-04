@@ -58,7 +58,7 @@ $(document).ready(function () {
     modal.append(headerList);
 
     services.forEach((service) => {
-      const sanitizedService = service.replace(/\./g, "-");
+      const sanitizedService = service.replace(/[.:]/g, "-");
       const serviceList = $(
         '<ul class="list-group list-group-horizontal w-100"></ul>',
       );
@@ -396,7 +396,7 @@ $(document).ready(function () {
       }
 
       const filteredServices = services.filter((service) => {
-        const serviceType = $(`#type-${service.replace(/\./g, "-")}`).data(
+        const serviceType = $(`#type-${service.replace(/[.:]/g, "-")}`).data(
           "value",
         );
         return serviceType !== conversionType;

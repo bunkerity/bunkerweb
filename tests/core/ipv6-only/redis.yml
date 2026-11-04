@@ -1,0 +1,33 @@
+services:
+  redis:
+    mem_limit: 128m
+    dns:
+      - fd42:1618:1::20
+    networks:
+      bw-universe:
+        ipv6_address: fd42:1618:1::50
+    container_name: redis
+    restart: unless-stopped
+    image: redis:8-alpine@sha256:09160599abd229764c0fb44cb6be640294e1d360a54b19985ab4843dcf2d90f1
+    command: [redis-server, --bind, "::", --protected-mode, "no"]
+    ports:
+      - "[::1]:${TESTS_REDIS_PORT:-6390}:6379"
+    healthcheck:
+      test:
+        - CMD
+        - redis-cli
+        - -h
+        - "::1"
+        - ping
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+networks:
+  bw-universe:
+    name: bw-universe
+    enable_ipv4: false
+    enable_ipv6: true
+    ipam:
+      config:
+        - subnet: fd42:1618:1::/64

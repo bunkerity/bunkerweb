@@ -44,7 +44,7 @@ Dieses Muster ermöglicht es Ihnen, mehrere Konfigurationen für Funktionen wie 
 
 Sie können die Reihenfolge mit durch Leerzeichen getrennten Listen steuern:
 
-- Globale Phasen: `PLUGINS_ORDER_INIT`, `PLUGINS_ORDER_INIT_WORKER`, `PLUGINS_ORDER_TIMER`.
+- Globale Phasen: `PLUGINS_ORDER_INIT`, `PLUGINS_ORDER_INIT_WORKER`, `PLUGINS_ORDER_SSL_CLIENT_HELLO`, `PLUGINS_ORDER_TIMER`.
 - Seitenspezifische Phasen: `PLUGINS_ORDER_SET`, `PLUGINS_ORDER_ACCESS`, `PLUGINS_ORDER_SSL_CERTIFICATE`, `PLUGINS_ORDER_HEADER`, `PLUGINS_ORDER_LOG`, `PLUGINS_ORDER_PREREAD`, `PLUGINS_ORDER_LOG_STREAM`, `PLUGINS_ORDER_LOG_DEFAULT`.
 - Semantik: aufgelistete Plugins laufen zuerst in der Phase; alle übrigen laufen danach in ihrer normalen Reihenfolge. IDs nur mit Leerzeichen trennen.
 
@@ -77,7 +77,7 @@ Der Wert ist eine durch Leerzeichen getrennte Liste von Gründen aus `crowdsec`,
 
     | Einstellung             | Standard          | Kontext   | Mehrfach | Beschreibung                                                                                                                                                                                                                                                                                                                                                           |
     | ----------------------- | ----------------- | --------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-    | `SERVER_NAME`           | `www.example.com` | multisite | Nein     | **Primäre Domain:** Der Hauptdomainname für diese Website. Im Multisite-Modus erforderlich.                                                                                                                                                                                                                                                                            |
+    | `SERVER_NAME`           | `www.example.com` | multisite | Nein     | **Primäre Domain:** Der Hauptdomainname (oder die IP-Adresse) für diese Website. Im Multisite-Modus erforderlich.                                                                                                                                                                                                                                                      |
     | `BUNKERWEB_INSTANCES`   | `127.0.0.1`       | global    | Nein     | **BunkerWeb-Instanzen:** Liste der BunkerWeb-Instanzen, durch Leerzeichen getrennt.                                                                                                                                                                                                                                                                                    |
     | `MULTISITE`             | `no`              | global    | Nein     | **Mehrere Websites:** Auf `yes` setzen, um das Hosten mehrerer Websites mit unterschiedlichen Konfigurationen zu ermöglichen.                                                                                                                                                                                                                                          |
     | `SECURITY_MODE`         | `block`           | multisite | Nein     | **Sicherheitsstufe:** Steuert die Stufe der Sicherheitsdurchsetzung. Optionen: `detect` oder `block`.                                                                                                                                                                                                                                                                  |
@@ -373,18 +373,18 @@ Die folgenden Parameter werden von allen Herausforderungsmechanismen gemeinsam g
 
 BunkerWeb ermöglicht es, bestimmte Benutzer, IPs oder Anfragen anzugeben, die die Antibot-Herausforderung vollständig umgehen sollen. Nützlich für vertrauenswürdige Dienste, interne Netzwerke oder Seiten, die immer zugänglich sein sollen:
 
-| Parameter                     | Standard | Kontext   | Mehrfach | Beschreibung                                                                                                                                                                                                               |
-| ----------------------------- | -------- | --------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `ANTIBOT_IGNORE_URI`          |          | Multisite | nein     | Ausgeschlossene URLs: Eine durch Leerzeichen getrennte Liste von URI-Regulären Ausdrücken, die die Herausforderung umgehen sollen. Muster werden gegen den Pfad und die vollständige Request-URI mit Query-String geprüft. |
-| `ANTIBOT_IGNORE_IP`           |          | Multisite | nein     | Ausgeschlossene IPs: Eine durch Leerzeichen getrennte Liste von IP-Adressen oder CIDR-Bereichen, die die Herausforderung umgehen sollen.                                                                                   |
-| `ANTIBOT_IGNORE_RDNS`         |          | Multisite | nein     | Ausgeschlossene rDNS: Eine durch Leerzeichen getrennte Liste von Reverse-DNS-Suffixen, die die Herausforderung umgehen sollen.                                                                                             |
-| `ANTIBOT_RDNS_GLOBAL`         | `yes`    | Multisite | nein     | Nur öffentliche IPs: Wenn `yes`, werden rDNS-Prüfungen nur für öffentliche IPs durchgeführt.                                                                                                                               |
-| `ANTIBOT_IGNORE_ASN`          |          | Multisite | nein     | Ausgeschlossene ASNs: Eine durch Leerzeichen getrennte Liste von ASN-Nummern, die die Herausforderung umgehen sollen.                                                                                                      |
-| `ANTIBOT_IGNORE_USER_AGENT`   |          | Multisite | nein     | Ausgeschlossene User-Agents: Eine durch Leerzeichen getrennte Liste von User-Agent-Regex-Mustern, die die Herausforderung umgehen sollen.                                                                                  |
-| `ANTIBOT_IGNORE_HEADER_NAME`  |          | multisite | ja       | **Header-Name:** Name eines Request-Headers, der es der Anfrage erlaubt, die Antibot-Challenge zu umgehen. Nummerierte Paare: `_NAME_1` gehört zu `_VALUE_1`.                                                              |
-| `ANTIBOT_IGNORE_HEADER_VALUE` |          | multisite | ja       | **Header-Wert:** PCRE-Regex, dem der Header-Wert entsprechen muss. Leer lassen, um nur auf das Vorhandensein des Headers zu prüfen.                                                                                        |
-| `ANTIBOT_IGNORE_COUNTRY`      |          | Multisite | nein     | Ausgeschlossene Länder: Eine durch Leerzeichen getrennte Liste von ISO-3166-1-Alpha-2-Ländercodes, die die Herausforderung umgehen sollen.                                                                                 |
-| `ANTIBOT_ONLY_COUNTRY`        |          | Multisite | nein     | Nur Herausforderungs-Länder: Eine durch Leerzeichen getrennte Liste von ISO-3166-1-Alpha-2-Ländercodes, die die Herausforderung erhalten müssen. Alle anderen Länder werden übersprungen.                                  |
+| Parameter                     | Standard | Kontext   | Mehrfach | Beschreibung                                                                                                                                                                                                                              |
+| ----------------------------- | -------- | --------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `ANTIBOT_IGNORE_URI`          |          | Multisite | nein     | Ausgeschlossene URLs: Eine durch Leerzeichen getrennte Liste von URI-Regulären Ausdrücken, die die Herausforderung umgehen sollen. Muster werden gegen den normalisierten Pfad geprüft, allein oder gefolgt von `?` und dem Query-String. |
+| `ANTIBOT_IGNORE_IP`           |          | Multisite | nein     | Ausgeschlossene IPs: Eine durch Leerzeichen getrennte Liste von IP-Adressen oder CIDR-Bereichen, die die Herausforderung umgehen sollen.                                                                                                  |
+| `ANTIBOT_IGNORE_RDNS`         |          | Multisite | nein     | Ausgeschlossene rDNS: Eine durch Leerzeichen getrennte Liste von Reverse-DNS-Suffixen, die die Herausforderung umgehen sollen.                                                                                                            |
+| `ANTIBOT_RDNS_GLOBAL`         | `yes`    | Multisite | nein     | Nur öffentliche IPs: Wenn `yes`, werden rDNS-Prüfungen nur für öffentliche IPs durchgeführt.                                                                                                                                              |
+| `ANTIBOT_IGNORE_ASN`          |          | Multisite | nein     | Ausgeschlossene ASNs: Eine durch Leerzeichen getrennte Liste von ASN-Nummern, die die Herausforderung umgehen sollen.                                                                                                                     |
+| `ANTIBOT_IGNORE_USER_AGENT`   |          | Multisite | nein     | Ausgeschlossene User-Agents: Eine durch Leerzeichen getrennte Liste von User-Agent-Regex-Mustern, die die Herausforderung umgehen sollen.                                                                                                 |
+| `ANTIBOT_IGNORE_HEADER_NAME`  |          | multisite | ja       | **Header-Name:** Name eines Request-Headers, der es der Anfrage erlaubt, die Antibot-Challenge zu umgehen. Nummerierte Paare: `_NAME_1` gehört zu `_VALUE_1`.                                                                             |
+| `ANTIBOT_IGNORE_HEADER_VALUE` |          | multisite | ja       | **Header-Wert:** PCRE-Regex, dem der Header-Wert entsprechen muss. Leer lassen, um nur auf das Vorhandensein des Headers zu prüfen.                                                                                                       |
+| `ANTIBOT_IGNORE_COUNTRY`      |          | Multisite | nein     | Ausgeschlossene Länder: Eine durch Leerzeichen getrennte Liste von ISO-3166-1-Alpha-2-Ländercodes, die die Herausforderung umgehen sollen.                                                                                                |
+| `ANTIBOT_ONLY_COUNTRY`        |          | Multisite | nein     | Nur Herausforderungs-Länder: Eine durch Leerzeichen getrennte Liste von ISO-3166-1-Alpha-2-Ländercodes, die die Herausforderung erhalten müssen. Alle anderen Länder werden übersprungen.                                                 |
 
 !!! warning "Eine Header-Regel ist ein gemeinsames Geheimnis"
     Jeder Client kann einen Header senden, eine Header-Regel ist daher ein Bearer-Token und keine Netzwerkkontrolle. Nur über HTTPS ausliefern, die Regex mit `^` und `$` verankern (die Suche ist standardmäßig nicht verankert, `abc` passt also auch auf `xabcx`) und den Wert rotieren. Steht BunkerWeb hinter einem Proxy, muss dieser jede vom Client gesendete Kopie des Headers überschreiben. Diese Regeln gelten nur für HTTP: ein Stream-Dienst überträgt keine Request-Header, dort greift also nichts.
@@ -1339,7 +1339,7 @@ Das BunkerNet-Plugin ermöglicht den kollektiven Austausch von Bedrohungsdaten z
 **So funktioniert es:**
 
 1.  Ihre BunkerWeb-Instanz registriert sich automatisch bei der BunkerNet-API, um eine eindeutige Kennung zu erhalten.
-2.  Wenn Ihre Instanz eine bösartige IP-Adresse oder ein bösartiges Verhalten erkennt und blockiert, meldet sie die Bedrohung anonym an BunkerNet.
+2.  Wenn Ihre Instanz eine bösartige IP-Adresse oder ein bösartiges Verhalten erkennt und blockiert, meldet sie die Bedrohung an BunkerNet. Die Felder einer Meldung sind im Hinweis „Inhalt einer Meldung“ weiter unten aufgeführt.
 3.  BunkerNet sammelt Bedrohungsdaten von allen teilnehmenden Instanzen und verteilt die konsolidierte Datenbank.
 4.  Ihre Instanz lädt regelmäßig eine aktualisierte Datenbank bekannter Bedrohungen von BunkerNet herunter.
 5.  Diese kollektive Intelligenz ermöglicht es Ihrer Instanz, proaktiv IP-Adressen zu blockieren, die auf anderen BunkerWeb-Instanzen bösartiges Verhalten gezeigt haben.
@@ -1348,9 +1348,9 @@ Das BunkerNet-Plugin ermöglicht den kollektiven Austausch von Bedrohungsdaten z
 
       1. **Kollektive Verteidigung:** Nutzen Sie die Sicherheitserkenntnisse von Tausenden anderer BunkerWeb-Instanzen weltweit.
       2. **Proaktiver Schutz:** Blockieren Sie böswillige Akteure, bevor sie Ihre Website angreifen können, basierend auf ihrem Verhalten an anderer Stelle.
-      3. **Beitrag zur Gemeinschaft:** Helfen Sie, andere BunkerWeb-Benutzer zu schützen, indem Sie anonymisierte Bedrohungsdaten über Angreifer teilen.
+      3. **Beitrag zur Gemeinschaft:** Helfen Sie, andere BunkerWeb-Benutzer zu schützen, indem Sie Bedrohungsdaten über Angreifer teilen.
       4. **Keine Konfiguration erforderlich:** Funktioniert standardmäßig mit sinnvollen Voreinstellungen und erfordert nur minimale Einrichtung.
-      5. **Datenschutzorientiert:** Teilt nur notwendige Bedrohungsinformationen, ohne Ihre Privatsphäre oder die Ihrer Benutzer zu gefährden.
+      5. **Kontrollierte Weitergabe:** Eine Meldung enthält eine feste Auswahl an Feldern, und `BUNKERNET_FILTER_HEADERS` kann ihre Request-Header auf eine kurze Positivliste beschränken (siehe unten).
 
 ### Wie man es benutzt
 
@@ -1364,16 +1364,27 @@ Führen Sie die folgenden Schritte aus, um die BunkerNet-Funktion zu konfigurier
 
 ### Konfigurationseinstellungen
 
-| Einstellung        | Standard                   | Kontext   | Mehrfach | Beschreibung                                                                                       |
-| ------------------ | -------------------------- | --------- | -------- | -------------------------------------------------------------------------------------------------- |
-| `USE_BUNKERNET`    | `yes`                      | multisite | nein     | **BunkerNet aktivieren:** Auf `yes` setzen, um den Austausch von Bedrohungsdaten zu aktivieren.    |
-| `BUNKERNET_SERVER` | `https://api.bunkerweb.io` | global    | nein     | **BunkerNet-Server:** Die Adresse des BunkerNet-API-Servers für den Austausch von Bedrohungsdaten. |
+| Einstellung                | Standard                   | Kontext   | Mehrfach | Beschreibung                                                                                                                                                                                                                                                        |
+| -------------------------- | -------------------------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `USE_BUNKERNET`            | `yes`                      | multisite | nein     | **BunkerNet aktivieren:** Auf `yes` setzen, um den Austausch von Bedrohungsdaten zu aktivieren.                                                                                                                                                                     |
+| `BUNKERNET_FILTER_HEADERS` | `no`                       | multisite | nein     | **Gemeldete Header filtern:** Auf `yes` setzen, um nur eine kurze Positivliste von Request-Headern zu senden und die von ModSecurity in Headern und Cookies gefundenen Werte zu leeren. Bei `no` enthält eine Meldung alle Request-Header und die gefundenen Werte. |
+| `BUNKERNET_SERVER`         | `https://api.bunkerweb.io` | global    | nein     | **BunkerNet-Server:** Die Adresse des BunkerNet-API-Servers für den Austausch von Bedrohungsdaten.                                                                                                                                                                  |
 
 !!! tip "Netzwerkschutz"
     Wenn BunkerNet feststellt, dass eine IP-Adresse an bösartigen Aktivitäten auf mehreren BunkerWeb-Instanzen beteiligt war, wird diese IP zu einer kollektiven schwarzen Liste hinzugefügt. Dies bietet eine proaktive Verteidigungsebene, die Ihre Website vor Bedrohungen schützt, bevor sie Sie direkt angreifen können.
 
-!!! info "Anonymes Melden"
-    Bei der Meldung von Bedrohungsinformationen an BunkerNet teilt Ihre Instanz nur die zur Identifizierung der Bedrohung erforderlichen Daten: die IP-Adresse, den Grund für die Sperrung und minimale kontextbezogene Daten. Es werden keine persönlichen Informationen über Ihre Benutzer oder sensible Details über Ihre Website weitergegeben.
+!!! info "Inhalt einer Meldung"
+    Jede an BunkerNet gesendete Meldung enthält diese Felder und nichts anderes:
+
+    - die mit jeder Anfrage gesendeten Instanzmetadaten: die BunkerNet-Instanz-ID, die BunkerWeb-Version, die Integration sowie Name, Version, Versions-ID, Codename, ID und Architektur des Betriebssystems;
+    - die IP-Adresse des Clients, den Grund für die Sperrung und das Datum;
+    - die HTTP-Methode, die URL **einschließlich Query-String** und den Namen des Dienstes (`server_name`);
+    - die Request-Header mit ihren Werten: alle empfangenen Header (bis zu `MAX_HEADERS`) oder, wenn `BUNKERNET_FILTER_HEADERS` auf `yes` steht, nur `User-Agent`, `Accept`, `Accept-Encoding`, `Accept-Language`, `Content-Type` und `Content-Length`;
+    - die Details zum Sperrgrund. Je nach Plugin, das den Client blockiert hat, enthalten sie die IDs und Meldungen der zutreffenden ModSecurity-Regeln samt den Request-Werten, die zugetroffen haben (Teile von Argumenten, Body, Headern oder Cookies, jeweils auf 512 Bytes gekürzt; mit `BUNKERNET_FILTER_HEADERS` auf `yes` werden in Headern und Cookies gefundene Werte geleert und nur der Variablenname wird gesendet), oder bei Bad Behavior die Methode und die URL der letzten Requests, die zur Sperrung geführt haben.
+
+    Standardmäßig (`BUNKERNET_FILTER_HEADERS` auf `no`) enthält eine Meldung jeden empfangenen Request-Header (bis zu `MAX_HEADERS`), einschließlich Cookies und `Authorization`, sowie die von ModSecurity gefundenen Werte unverändert. Setzen Sie `BUNKERNET_FILTER_HEADERS` auf `yes`, um nur die oben genannten sechs Header zu senden und die in Headern und Cookies gefundenen Werte zu leeren. Noch nicht gesendete Meldungen werden bei `yes` vor dem Senden ebenso gefiltert.
+
+    Die URL und die zugetroffenen Werte stammen aus dem Request und enthalten daher alles, was der Client gesendet hat. Setzen Sie `USE_BUNKERNET` auf `no` für Dienste, deren URLs sensible Werte enthalten.
 
 ### Beispielkonfigurationen
 
@@ -1717,13 +1728,13 @@ So funktioniert's:
 
 ### Parameter
 
-| Parameter                     | Standard | Kontext   | Mehrfach | Beschreibung                                                                                                                                                                                                             |
-| ----------------------------- | -------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `WHITELIST_COUNTRY`           |          | Multisite | Nein     | Whitelist: Ländercodes und/oder Gruppentokens, durch Leerzeichen getrennt. Nur diese Länder sind zugelassen.                                                                                                             |
-| `BLACKLIST_COUNTRY`           |          | Multisite | Nein     | Blacklist: Ländercodes und/oder Gruppentokens, durch Leerzeichen getrennt. Diese Länder sind blockiert.                                                                                                                  |
-| `COUNTRY_IGNORE_URI`          |          | Multisite | Nein     | Ignorierte URI: durch Leerzeichen getrennte PCRE-Regex-Muster für URIs, die von der Länderprüfung ausgenommen werden sollen. Die Muster werden gegen den Pfad und die vollständige Anfrage-URI mit Query-String geprüft. |
-| `COUNTRY_IGNORE_HEADER_NAME`  |          | multisite | ja       | **Header-Name:** Name eines Request-Headers, der es der Anfrage erlaubt, die Länderprüfung zu umgehen. Nummerierte Paare: `_NAME_1` gehört zu `_VALUE_1`.                                                                |
-| `COUNTRY_IGNORE_HEADER_VALUE` |          | multisite | ja       | **Header-Wert:** PCRE-Regex, dem der Header-Wert entsprechen muss. Leer lassen, um nur auf das Vorhandensein des Headers zu prüfen.                                                                                      |
+| Parameter                     | Standard | Kontext   | Mehrfach | Beschreibung                                                                                                                                                                                                                            |
+| ----------------------------- | -------- | --------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `WHITELIST_COUNTRY`           |          | Multisite | Nein     | Whitelist: Ländercodes und/oder Gruppentokens, durch Leerzeichen getrennt. Nur diese Länder sind zugelassen.                                                                                                                            |
+| `BLACKLIST_COUNTRY`           |          | Multisite | Nein     | Blacklist: Ländercodes und/oder Gruppentokens, durch Leerzeichen getrennt. Diese Länder sind blockiert.                                                                                                                                 |
+| `COUNTRY_IGNORE_URI`          |          | Multisite | Nein     | Ignorierte URI: durch Leerzeichen getrennte PCRE-Regex-Muster für URIs, die von der Länderprüfung ausgenommen werden sollen. Die Muster werden gegen den normalisierten Pfad geprüft, allein oder gefolgt von `?` und dem Query-String. |
+| `COUNTRY_IGNORE_HEADER_NAME`  |          | multisite | ja       | **Header-Name:** Name eines Request-Headers, der es der Anfrage erlaubt, die Länderprüfung zu umgehen. Nummerierte Paare: `_NAME_1` gehört zu `_VALUE_1`.                                                                               |
+| `COUNTRY_IGNORE_HEADER_VALUE` |          | multisite | ja       | **Header-Wert:** PCRE-Regex, dem der Header-Wert entsprechen muss. Leer lassen, um nur auf das Vorhandensein des Headers zu prüfen.                                                                                                     |
 
 !!! warning "Eine Header-Regel ist ein gemeinsames Geheimnis"
     Jeder Client kann einen Header senden, eine Header-Regel ist daher ein Bearer-Token und keine Netzwerkkontrolle. Nur über HTTPS ausliefern, die Regex mit `^` und `$` verankern (die Suche ist standardmäßig nicht verankert, `abc` passt also auch auf `xabcx`) und den Wert rotieren. Steht BunkerWeb hinter einem Proxy, muss dieser jede vom Client gesendete Kopie des Headers überschreiben. Diese Regeln gelten nur für HTTP: ein Stream-Dienst überträgt keine Request-Header, dort greift also nichts.
@@ -1868,7 +1879,7 @@ Die öffentliche API bietet dieselben Operationen:
 
 Verwenden Sie die zurückgegebene Verbindungs-ID unverändert. Sie enthält die Identität der Instanz, damit identische localhost-URLs auf verschiedenen Instanzen getrennt bleiben. API-Administratoren können diese Operationen nutzen. Delegierte API-Benutzer benötigen die unabhängige Berechtigung `crowdsec_read` oder `crowdsec_delete` unter der bestehenden Ressource `bans`, entweder für eine zurückgegebene Verbindungs-ID oder für `*`. Eine gewöhnliche `ban_delete`-Berechtigung erlaubt keine CrowdSec-Entfernung. Eine Datenbankmigration ist nicht erforderlich.
 
-Die Laufzeit speichert einzelne Entscheidungen je Ziel, sodass das Entfernen einer Entscheidung keine andere Sperre für dieselbe IP oder denselben Bereich löschen kann. Optionale Berichtsmetadaten verwenden einen separaten Cache mit 5 MiB (`CROWDSEC_METADATA_CACHE_SIZE=5m`) und können keine Einträge für die Durchsetzung von Sperren verdrängen. Stream-Aktualisierungen verwenden eine nicht blockierende Prozesssperre in `/var/run/bunkerweb`, die bis zur Veröffentlichung der Aktualisierung gehalten und beim Beenden des Workers automatisch freigegeben wird.
+Die Laufzeit speichert einzelne Entscheidungen je Ziel, sodass das Entfernen einer Entscheidung keine andere Sperre für dieselbe IP oder denselben Bereich löschen kann. Optionale Berichtsmetadaten verwenden einen separaten Cache mit 24 MiB (`CROWDSEC_METADATA_CACHE_SIZE=24m`) und können keine Einträge für die Durchsetzung von Sperren verdrängen. Stream-Aktualisierungen verwenden eine nicht blockierende Prozesssperre in `/var/run/bunkerweb`, die bis zur Veröffentlichung der Aktualisierung gehalten und beim Beenden des Workers automatisch freigegeben wird.
 
 Der Stream-Modus hält höchstens zwei Snapshot-Slots und schaltet erst um, wenn ein vollständiger Snapshot gespeichert wurde. Ein unverändertes nginx-Neuladen behält den Snapshot und fordert Deltas an. Ein fehlender Snapshot, geänderte Entscheidungseinstellungen, ein unvollständiger Start oder eine letzte erfolgreiche Synchronisierung vor mehr als dem Maximum aus 300 Sekunden und dem 30-Fachen von `CROWDSEC_UPDATE_FREQUENCY` erzwingt einen vollständigen Snapshot. Synchronisierungsfehler erzeugen höchstens einen Fehlerlogeintrag pro Minute und Cache-Präfix, gefolgt von einer Wiederherstellungsmeldung. Bei vollem Entscheidungscache erhöhen Sie `CROWDSEC_CACHE_SIZE` für zwei Snapshots und laden BunkerWeb neu. Eine Größenänderung der Entscheidungszone beim Neuladen erzeugt eine leere Zone und startet eine vollständige Synchronisierung; wird nur die Metadatenzone verändert, gehen optionale Metadaten verloren.
 
@@ -1967,7 +1978,7 @@ Standardmäßig fragt BunkerWeb bei jeder Anfrage CrowdSec ab. Setzen Sie `CROWD
     services:
       bunkerweb:
         # Dies ist der Name, der zur Identifizierung der Instanz im Scheduler verwendet wird
-        image: bunkerity/bunkerweb:1.6.17
+        image: bunkerity/bunkerweb:1.6.18-rc3
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -1984,7 +1995,7 @@ Standardmäßig fragt BunkerWeb bei jeder Anfrage CrowdSec ab. Setzen Sie `CROWD
             syslog-address: "udp://10.20.30.254:514" # Die IP-Adresse des syslog-Dienstes
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.17
+        image: bunkerity/bunkerweb-scheduler:1.6.18-rc3
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Stellen Sie sicher, dass Sie den richtigen Instanznamen festlegen
@@ -2167,7 +2178,7 @@ Verbindungseinstellungen sind `multisite`: Ein Wert ohne Präfix gilt für alle 
 | `CROWDSEC_REQUEST_TIMEOUT`     | `1s`                   | multisite | no       | **Anfrage-Timeout:** Timeout in Millisekunden für HTTP-Anfragen an die lokale CrowdSec-API im Live-Modus. Akzeptiert ein Zeitsuffix (ms, s, m, h, d, w, M, y); eine Zahl ohne Suffix gilt in Millisekunden.                                                                                                                                                                                                             |
 | `CROWDSEC_EXCLUDE_LOCATION`    |                        | multisite | no       | **Ausgeschlossene Orte:** Kommagetrennte Liste von Orten (URIs), die von CrowdSec-Prüfungen ausgeschlossen werden sollen.                                                                                                                                                                                                                                                                                               |
 | `CROWDSEC_CACHE_SIZE`          | `100m`                 | global    | no       | **Größe des Entscheidungscaches:** Gemeinsamer Speicher aller Dienste; zwei Snapshots im Stream-Modus. Positive ganze Megabyte (`m`/`M`), mindestens `1m`. Größenänderungen leeren die Zone; bekannte Entscheidungen werden bis zum Abgleich wiederhergestellt. Unbekannte IPs fragen LAPI ab und werden bei Ausfall zugelassen.                                                                                        |
-| `CROWDSEC_METADATA_CACHE_SIZE` | `5m`                   | global    | no       | **Größe des Metadatencaches:** Separater gemeinsamer Speicher für optionale Berichtsmetadaten aller Dienste. Positive ganze Anzahl Megabyte (`m`/`M`), mindestens `1m`. Eine Größenänderung beim Neuladen löscht diese Metadaten.                                                                                                                                                                                       |
+| `CROWDSEC_METADATA_CACHE_SIZE` | `24m`                  | global    | no       | **Größe des Metadatencaches:** Separater gemeinsamer Speicher für optionale Berichtsmetadaten aller Dienste. Positive ganze Anzahl Megabyte (`m`/`M`), mindestens `1m`. Eine Größenänderung beim Neuladen löscht diese Metadaten.                                                                                                                                                                                       |
 | `CROWDSEC_CACHE_EXPIRATION`    | `1s`                   | multisite | no       | **Cache-Ablauf:** Die Cache-Ablaufzeit in Sekunden für IP-Entscheidungen im Live-Modus. Akzeptiert ein Zeitsuffix (ms, s, m, h, d, w, M, y); eine Zahl ohne Suffix gilt in Sekunden.                                                                                                                                                                                                                                    |
 | `CROWDSEC_UPDATE_FREQUENCY`    | `10s`                  | multisite | no       | **Update-Frequenz:** Wie oft (in Sekunden) neue/abgelaufene Entscheidungen von der CrowdSec-API im Stream-Modus abgerufen werden sollen. Akzeptiert ein Zeitsuffix (ms, s, m, h, d, w, M, y); eine Zahl ohne Suffix gilt in Sekunden.                                                                                                                                                                                   |
 | `CROWDSEC_BAN_REFRESH`         | `0`                    | multisite | no       | **Sperrerneuerung:** Wandelt CrowdSec-Blocks in kurze BunkerWeb-Sperren um, die erneuert werden, solange die CrowdSec-Entscheidung gilt. Der Wert ist die längste Dauer einer Sperre, bevor CrowdSec erneut gefragt wird. `0` deaktiviert die Funktion. Ein Dienst mit `CROWDSEC_EXCLUDE_LOCATION` erhält nie CrowdSec-Sperren. Akzeptiert ein Zeitsuffix (ms, s, m, h, d, w, M, y); eine reine Zahl bedeutet Sekunden. |

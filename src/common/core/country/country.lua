@@ -210,12 +210,15 @@ function country:is_ignored_uri()
 	if not uri then
 		return false
 	end
-	local request_uri = self.ctx.bw.request_uri
+	-- Only the normalized path is matched, alone and joined with the query string : the raw request
+	-- path (//x, /%78, /./x) is routed like the normalized one but must not slip past a pattern.
+	local query = (self.ctx.bw.request_uri or ""):match("%?(.*)$")
+	local uri_query = query and (uri .. "?" .. query)
 	for _, pattern in ipairs(self.ignore_uri) do
 		if regex_match(uri, pattern, nil, "COUNTRY_IGNORE_URI") then
 			return true, pattern
 		end
-		if request_uri and request_uri ~= uri and regex_match(request_uri, pattern, nil, "COUNTRY_IGNORE_URI") then
+		if uri_query and regex_match(uri_query, pattern, nil, "COUNTRY_IGNORE_URI") then
 			return true, pattern
 		end
 	end

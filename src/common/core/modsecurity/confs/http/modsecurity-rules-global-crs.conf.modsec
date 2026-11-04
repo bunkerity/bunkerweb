@@ -1,4 +1,6 @@
 {% if USE_MODSECURITY_GLOBAL_CRS == "yes" %}
+  {%- set pathlib = import("pathlib") -%}
+  {%- set json = import("json") -%}
   {%- set effective_crs_version = "4" if MODSECURITY_CRS_VERSION == "nightly" else MODSECURITY_CRS_VERSION -%}
 # Process rules with disruptive actions
   {% if SECURITY_MODE == "block" -%}
@@ -115,6 +117,35 @@ include /etc/bunkerweb/configs/crs-plugins-before/*.conf
       {% if is_custom_conf("/etc/nginx/crs-plugins-before") %}
 include /etc/nginx/crs-plugins-before/*.conf
       {% endif %}
+
+      {#- Global CRS shares the union of downloaded plugins across services. -#}
+      {% with plugins_path = pathlib.Path("/var/cache/bunkerweb/modsecurity/crs/plugins") %}
+        {% with plugins_file = pathlib.Path("/var/cache/bunkerweb/modsecurity/crs-plugins.json") %}
+          {% if plugins_path.is_dir() and plugins_file.is_file() %}
+            {% with service_plugins = json.loads(plugins_file.read_text()) %}
+              {#- `sort` only so the include order is stable across renders. -#}
+              {% with all_plugins = service_plugins.values() | sum(start=[]) | unique | sort %}
+# include downloaded CRS plugins configurations and before rules
+                {% for plugin_id in all_plugins %}
+                  {% set plugin_dir = plugins_path.joinpath(plugin_id) %}
+                  {% if plugin_dir.is_dir() %}
+                    {% for config_file in plugin_dir.iterdir() %}
+                      {% if config_file.is_file() and config_file.name.endswith('-config.conf') %}
+include {{ config_file }}
+                      {% endif %}
+                    {% endfor %}
+                    {% for before_file in plugin_dir.iterdir() %}
+                      {% if before_file.is_file() and before_file.name.endswith('-before.conf') %}
+include {{ before_file }}
+                      {% endif %}
+                    {% endfor %}
+                  {% endif %}
+                {% endfor %}
+              {% endwith %}
+            {% endwith %}
+          {% endif %}
+        {% endwith %}
+      {% endwith %}
     {% endif %}
 
 # custom CRS configurations before loading rules (e.g. exclusions)
@@ -144,6 +175,28 @@ include /etc/bunkerweb/configs/crs-plugins-after/*.conf
       {% if is_custom_conf("/etc/nginx/crs-plugins-after") %}
 include /etc/nginx/crs-plugins-after/*.conf
       {% endif %}
+
+      {% with plugins_path = pathlib.Path("/var/cache/bunkerweb/modsecurity/crs/plugins") %}
+        {% with plugins_file = pathlib.Path("/var/cache/bunkerweb/modsecurity/crs-plugins.json") %}
+          {% if plugins_path.is_dir() and plugins_file.is_file() %}
+# include downloaded CRS plugins after rules
+            {% with service_plugins = json.loads(plugins_file.read_text()) %}
+              {% with all_plugins = service_plugins.values() | sum(start=[]) | unique | sort %}
+                {% for plugin_id in all_plugins %}
+                  {% set plugin_dir = plugins_path.joinpath(plugin_id) %}
+                  {% if plugin_dir.is_dir() %}
+                    {% for after_file in plugin_dir.iterdir() %}
+                      {% if after_file.is_file() and after_file.name.endswith('-after.conf') %}
+include {{ after_file }}
+                      {% endif %}
+                    {% endfor %}
+                  {% endif %}
+                {% endfor %}
+              {% endwith %}
+            {% endwith %}
+          {% endif %}
+        {% endwith %}
+      {% endwith %}
     {% endif %}
 
 # set reasons data tx vars

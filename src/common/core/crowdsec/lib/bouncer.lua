@@ -810,7 +810,7 @@ function csmod.Allow(ip, challengePrefix)
   if utils.table_len(runtime.conf["EXCLUDE_LOCATION"]) > 0 then
     for k, v in pairs(runtime.conf["EXCLUDE_LOCATION"]) do
       if ngx.var.uri == v then
-        ngx.log(ngx.ERR,  "whitelisted location: " .. v)
+        ngx.log(ngx.DEBUG,  "whitelisted location: " .. v)
         return true, "whitelisted " .. v
       end
       local uri_to_check = v
@@ -818,7 +818,8 @@ function csmod.Allow(ip, challengePrefix)
         uri_to_check = uri_to_check .. "/"
       end
       if utils.starts_with(ngx.var.uri, uri_to_check) then
-        ngx.log(ngx.ERR,  "whitelisted location: " .. uri_to_check)
+        ngx.log(ngx.DEBUG,  "whitelisted location: " .. uri_to_check)
+        return true, "whitelisted " .. uri_to_check
       end
     end
   end
@@ -826,11 +827,6 @@ function csmod.Allow(ip, challengePrefix)
   local ok, remediation, err, evidence, reported = csmod.allowIp(ip)
   if err ~= nil and not reported then
     ngx.log(ngx.ERR, "[Crowdsec] bouncer error: " .. err)
-  end
-
-  -- if the ip is now allowed, try to delete its captcha state in cache
-  if ok == true then
-    challenge_cache:delete("captcha_" .. ip)
   end
 
   -- check with appSec if the remediation component doesn't have decisions for the IP
@@ -866,7 +862,7 @@ function csmod.Allow(ip, challengePrefix)
     remediation = "ban"
   end
 
-  if captcha_ok then -- if captcha can be use (configuration is valid)
+  if captcha_ok and (ok == true or remediation == "captcha") then
     -- we check if the IP need to validate its captcha before checking it against crowdsec local API
     local previous_uri, flags = challenge_cache:get("captcha_"..ip)
     local source, state_id, err = flag.GetFlags(flags)
@@ -906,6 +902,11 @@ function csmod.Allow(ip, challengePrefix)
         end
     end
   end
+  -- Preserve pending AppSec challenges until their solutions have been checked.
+  if ok == true then
+    challenge_cache:delete("captcha_" .. ip)
+  end
+
   if not ok then
       if remediation == "ban" then
         ngx.log(ngx.ALERT, "[Crowdsec] denied '" .. ip .. "' with '"..remediation.."' (by " .. flag.Flags[remediationSource] .. ")")

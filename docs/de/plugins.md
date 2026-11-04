@@ -95,7 +95,7 @@ Der erste Schritt besteht darin, das Plugin zu installieren, indem Sie seine Dat
     services:
     ...
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.17
+        image: bunkerity/bunkerweb-scheduler:1.6.18-rc3
         volumes:
           - ./bw-data:/data
     ...
@@ -130,7 +130,7 @@ Der erste Schritt besteht darin, das Plugin zu installieren, indem Sie seine Dat
     services:
     ...
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.17
+        image: bunkerity/bunkerweb-scheduler:1.6.18-rc3
         volumes:
           - ./bw-data:/data
     ...
@@ -173,7 +173,7 @@ Der erste Schritt besteht darin, das Plugin zu installieren, indem Sie seine Dat
     services:
     ...
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.17
+        image: bunkerity/bunkerweb-scheduler:1.6.18-rc3
         volumes:
           - /shared/bw-plugins:/data/plugins
     ...
@@ -220,7 +220,7 @@ Der erste Schritt besteht darin, das Plugin zu installieren, indem Sie seine Dat
           serviceAccountName: sa-bunkerweb
           containers:
             - name: bunkerweb-scheduler
-              image: bunkerity/bunkerweb-scheduler:1.6.17
+              image: bunkerity/bunkerweb-scheduler:1.6.18-rc3
               imagePullPolicy: Always
               env:
                 - name: KUBERNETES_MODE
@@ -260,7 +260,7 @@ Der erste Schritt besteht darin, das Plugin zu installieren, indem Sie seine Dat
 
 !!! tip "Bestehende Plugins"
 
-    Wenn die Dokumentation nicht ausreicht, können Sie sich den bestehenden Quellcode der [offiziellen Plugins](https://github.com/bunkerity/bunkerweb-plugins) und der [Kern-Plugins](https://github.com/bunkerity/bunkerweb/tree/v1.6.17/src/common/core) ansehen (bereits in BunkerWeb enthalten, aber technisch gesehen sind es Plugins).
+    Wenn die Dokumentation nicht ausreicht, können Sie sich den bestehenden Quellcode der [offiziellen Plugins](https://github.com/bunkerity/bunkerweb-plugins) und der [Kern-Plugins](https://github.com/bunkerity/bunkerweb/tree/v1.6.18-rc3/src/common/core) ansehen (bereits in BunkerWeb enthalten, aber technisch gesehen sind es Plugins).
 
 Wie eine Plugin-Struktur aussieht:
 ```
@@ -482,9 +482,22 @@ Die deklarierten Funktionen werden automatisch in bestimmten Kontexten aufgerufe
 |   `preread`   | [preread_by_lua](https://github.com/openresty/stream-lua-nginx-module#preread_by_lua_block) | Ähnlich der `access`-Funktion, aber für den Stream-Modus.                                                                                                                                                                     | `ret`, `msg`,`status`<ul><li>`ret` (boolean): true, wenn kein Fehler, sonst false</li><li>`msg` (string): Erfolgs- oder Fehlermeldung</li><li>`status` (number): unterbricht den aktuellen Prozess und gibt den [Status](https://github.com/openresty/lua-nginx-module#http-status-constants) zurück</li></ul>                                                                                                |
 | `log_stream`  |     [log_by_lua](https://github.com/openresty/stream-lua-nginx-module#log_by_lua_block)     | Ähnlich der `log`-Funktion, aber für den Stream-Modus.                                                                                                                                                                        | `ret`, `msg`<ul><li>`ret` (boolean): true, wenn kein Fehler, sonst false</li><li>`msg` (string): Erfolgs- oder Fehlermeldung</li></ul>                                                                                                                                                                                                                                                                        |
 
+**TLS-ClientHello-Hook.** Ein Plugin kann außerdem jeden TLS-Handshake sehen, bevor das Zertifikat ausgewählt wird, für den Standardserver und für jeden Dienst, indem es aus seinem Haupt-Lua-Modul eine Funktion auf Modulebene exportiert (keine Methode, damit pro Handshake kein Plugin-Objekt erzeugt wird):
+
+```lua
+-- in myplugin/myplugin.lua
+function myplugin.client_hello(hello)
+    -- hello (read-only): service (nil on the default server), ip (nil when the client address is unknown), raw and family
+    -- (packed peer address from ngx.ssl.raw_client_addr()), quic, proxy_protocol, real_ip, trusted
+    return nil -- or "drop" / "detect" and a reason
+end
+```
+
+Geben Sie `"drop"` zurück, um den Handshake abzubrechen, `"detect"`, um nur zu protokollieren, dass er verworfen würde, oder nichts, um ihn durchzulassen. Ein Fehler oder jeder andere Wert lässt den Handshake durch. Die Funktion läuft für jeden Handshake genau einmal und **darf nicht yielden**: kein Redis, kein Cosocket, kein `ngx.var`, kein `resty.lock`, kein Sleep. Aufrufe von Shared Dictionaries und `ngx.timer.at(0, ...)` sind erlaubt. Die Reihenfolge der Plugins, die sie exportieren, folgt `PLUGINS_ORDER_SSL_CLIENT_HELLO`. Ein Plugin, das `client_hello` exportiert, wird auf dem Standardserver nicht über seine Methode `ssl_client_hello_default` aufgerufen. Plugins können die Unterstützung mit `pcall(require, "bunkerweb.banlease")` und `banlease.CLIENT_HELLO_PLUGIN_HOOK == 1` erkennen.
+
 #### Bibliotheken
 
-Alle Direktiven aus dem [NGINX LUA-Modul](https://github.com/openresty/lua-nginx-module) und dem [NGINX Stream LUA-Modul](https://github.com/openresty/stream-lua-nginx-module) sind verfügbar. Darüber hinaus können Sie die in BunkerWeb enthaltenen LUA-Bibliotheken verwenden: siehe [dieses Skript](https://github.com/bunkerity/bunkerweb/blob/v1.6.17/src/deps/clone.sh) für die vollständige Liste.
+Alle Direktiven aus dem [NGINX LUA-Modul](https://github.com/openresty/lua-nginx-module) und dem [NGINX Stream LUA-Modul](https://github.com/openresty/stream-lua-nginx-module) sind verfügbar. Darüber hinaus können Sie die in BunkerWeb enthaltenen LUA-Bibliotheken verwenden: siehe [dieses Skript](https://github.com/bunkerity/bunkerweb/blob/v1.6.18-rc3/src/deps/clone.sh) für die vollständige Liste.
 
 Wenn Sie zusätzliche Bibliotheken benötigen, können Sie diese in den Stammordner des Plugins legen und darauf zugreifen, indem Sie ihnen Ihre Plugin-ID voranstellen. Hier ist ein Beispiel für eine Datei namens **mylibrary.lua**:
 
@@ -565,7 +578,7 @@ end
 
 !!! tip "Weitere Beispiele"
 
-    Wenn Sie die vollständige Liste der verfügbaren Funktionen sehen möchten, können Sie sich die Dateien im [lua-Verzeichnis](https://github.com/bunkerity/bunkerweb/tree/v1.6.17/src/bw/lua/bunkerweb) des Repositorys ansehen.
+    Wenn Sie die vollständige Liste der verfügbaren Funktionen sehen möchten, können Sie sich die Dateien im [lua-Verzeichnis](https://github.com/bunkerity/bunkerweb/tree/v1.6.18-rc3/src/bw/lua/bunkerweb) des Repositorys ansehen.
 
 ### Jobs
 

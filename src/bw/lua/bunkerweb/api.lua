@@ -25,8 +25,7 @@ local logger = clogger:new("API")
 local get_country = utils.get_country
 local get_variable = utils.get_variable
 local is_ip_in_networks = utils.is_ip_in_networks
-local is_ipv4 = utils.is_ipv4
-local is_ipv6 = utils.is_ipv6
+local normalize_ip = utils.normalize_ip
 
 local RESERVED_SERVICE_NAMES = {
 	["unknown"] = true,
@@ -48,6 +47,7 @@ local kill = rsignal.kill
 local get_master_pid = process.get_master_pid
 local execute = os.execute
 local open = io.open
+local VARIABLES_PATH = "/etc/nginx/variables.env"
 local read_body = ngx_req.read_body
 local get_body_data = ngx_req.get_body_data
 local get_body_file = ngx_req.get_body_file
@@ -121,13 +121,48 @@ function api:is_allowed_token()
 	return true, "ok"
 end
 
+local function control_plane_variables_from_disk()
+	local file = open(VARIABLES_PATH, "r")
+	if not file then
+		return {}
+	end
+	local contents = file:read("*a")
+	file:close()
+	-- Rendered files end with a newline; a partial final line is not a credential snapshot.
+	if not contents or contents:sub(-1) ~= "\n" then
+		return {}
+	end
+	local found = {}
+	for line in contents:gmatch("([^\n]*)\n") do
+		local key, raw = line:match("^([^=]+)=(.*)$")
+		if key == "API_WHITELIST_IP" or key == "API_TOKEN" then
+			found[key] = raw
+		end
+	end
+	return found
+end
+
 function api:initialize(ctx)
 	self.ctx = ctx
 	local data, err = get_variable("API_WHITELIST_IP", false)
+	local tok = get_variable("API_TOKEN", false)
+	if not data then
+		local recovered = control_plane_variables_from_disk()
+		if tok == nil then
+			tok = recovered.API_TOKEN
+		end
+		-- Missing token state must not turn recovery into a tokenless control plane.
+		if tok ~= nil then
+			data = recovered.API_WHITELIST_IP
+		end
+		if data then
+			logger:log(ERR, "API_WHITELIST_IP is missing from the internalstore, falling back to " .. VARIABLES_PATH)
+		end
+	end
 	self.ips = {}
 	self.api_token = nil
 	if not data then
-		logger:log(ERR, "can't get API_WHITELIST_IP variable : " .. err)
+		logger:log(ERR, "can't get API_WHITELIST_IP variable : " .. tostring(err))
 	else
 		for ip in data:gmatch("%S+") do
 			table.insert(self.ips, ip)
@@ -135,7 +170,6 @@ function api:initialize(ctx)
 	end
 
 	-- Load optional API token (from internalstore variables, same pattern as whitelist)
-	local tok = get_variable("API_TOKEN", false)
 	if tok and tok ~= "" then
 		self.api_token = tok
 	end
@@ -579,7 +613,9 @@ local function wait_reload(token, seconds, no_wait_reason)
 		if ngx.now() >= deadline then
 			break
 		end
-		ngx.sleep(math.min(RELOAD_POLL, deadline - ngx.now()))
+		-- Never the remaining time: ngx.sleep truncates to whole milliseconds, and a zero-delay timer does not
+		-- advance the cached clock, so a sub-millisecond remainder would spin until the swap lock expires.
+		ngx.sleep(RELOAD_POLL)
 	end
 	-- Keep the in-flight marker; normal completion or existing stale-marker recovery releases it.
 	local message = "reload signalled but readiness is unconfirmed: "
@@ -836,10 +872,12 @@ api.global.POST["^/unban$"] = function(self)
 		return self:response(HTTP_INTERNAL_SERVER_ERROR, "error", "can't decode JSON : " .. ip)
 	end
 
-	-- Validate IP address
-	if not ip["ip"] or (not is_ipv4(ip["ip"]) and not is_ipv6(ip["ip"])) then
+	-- Validate IP address and keep its canonical spelling: one address is one ban
+	local canonical_ip = type(ip) == "table" and normalize_ip(ip["ip"])
+	if not canonical_ip then
 		return self:response(HTTP_BAD_REQUEST, "error", "invalid IP address")
 	end
+	ip["ip"] = canonical_ip
 
 	local ban_scope = ip["ban_scope"] or "global"
 	local service = ip["service"]
@@ -888,7 +926,8 @@ local function read_lease_args(self)
 		return nil, self:response(HTTP_BAD_REQUEST, "error", "can't decode JSON")
 	end
 	local ip, ban_scope, service = body["ip"], body["ban_scope"] or "global", body["service"]
-	if type(ip) ~= "string" or (not is_ipv4(ip) and not is_ipv6(ip)) then
+	ip = normalize_ip(ip)
+	if not ip then
 		return nil, self:response(HTTP_BAD_REQUEST, "error", "invalid IP address")
 	end
 	if ban_scope ~= "global" and ban_scope ~= "service" then
@@ -958,6 +997,9 @@ api.global.POST["^/ban$"] = function(self)
 	if not ok then
 		return self:response(HTTP_INTERNAL_SERVER_ERROR, "error", "can't decode JSON : " .. ip)
 	end
+	if type(ip) ~= "table" then
+		return self:response(HTTP_BAD_REQUEST, "error", "request body must be a JSON object")
+	end
 	local ban = {
 		ip = "",
 		exp = 86400,
@@ -982,10 +1024,12 @@ api.global.POST["^/ban$"] = function(self)
 		ban.ban_scope = ip["ban_scope"]
 	end
 
-	-- Validate IP address
-	if not ban.ip or (not is_ipv4(ban.ip) and not is_ipv6(ban.ip)) then
+	-- Validate IP address and keep its canonical spelling: one address is one ban
+	ban.ip = normalize_ip(ban.ip)
+	if not ban.ip then
 		return self:response(HTTP_BAD_REQUEST, "error", "invalid IP address")
 	end
+	ip["ip"] = ban.ip
 
 	-- Validate expiration
 	if ban.exp and (type(ban.exp) ~= "number" or ban.exp < 0) then

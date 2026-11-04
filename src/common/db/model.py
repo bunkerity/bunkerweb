@@ -371,7 +371,7 @@ class Metadata(Base):
     failover = Column(Boolean, default=None, nullable=True)
     failover_message = Column(Text, nullable=True, default="")
     integration = Column(INTEGRATIONS_ENUM, default="Unknown", nullable=False)
-    version = Column(String(32), default="1.6.17", nullable=False)
+    version = Column(String(32), default="1.6.18~rc3", nullable=False)
 
 
 ## UI Models
@@ -495,6 +495,16 @@ class UserSessions(Base):
     last_activity = Column(DateTime(timezone=True), nullable=False)
 
     user = relationship("Users", back_populates="sessions")
+
+
+class UserLoginFailures(Base):
+    __tablename__ = "bw_ui_login_failures"
+
+    id = Column(Integer, Identity(start=1, increment=1), primary_key=True)
+    # No foreign key on purpose: a failed login for an unknown username is counted too, so a lock never tells whether the user exists
+    username = Column(String(256), nullable=False, index=True)
+    ip = Column(String(45), nullable=False, index=True)
+    failure_date = Column(DateTime(timezone=True), nullable=False, index=True)
 
 
 class UserColumnsPreferences(Base):

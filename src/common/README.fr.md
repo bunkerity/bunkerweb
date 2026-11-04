@@ -36,7 +36,7 @@ Ce modèle permet de gérer plusieurs configurations pour des fonctionnalités c
 
 Vous pouvez définir l’ordre d’exécution via des listes séparées par des espaces :
 
-- Phases globales : `PLUGINS_ORDER_INIT`, `PLUGINS_ORDER_INIT_WORKER`, `PLUGINS_ORDER_TIMER`.
+- Phases globales : `PLUGINS_ORDER_INIT`, `PLUGINS_ORDER_INIT_WORKER`, `PLUGINS_ORDER_SSL_CLIENT_HELLO`, `PLUGINS_ORDER_TIMER`.
 - Phases par site : `PLUGINS_ORDER_SET`, `PLUGINS_ORDER_ACCESS`, `PLUGINS_ORDER_SSL_CERTIFICATE`, `PLUGINS_ORDER_HEADER`, `PLUGINS_ORDER_LOG`, `PLUGINS_ORDER_PREREAD`, `PLUGINS_ORDER_LOG_STREAM`, `PLUGINS_ORDER_LOG_DEFAULT`.
 - Sémantique : les plugins listés s’exécutent en premier pour la phase ; les autres s’exécutent ensuite dans leur séquence normale. Séparez les IDs uniquement par des espaces.
 
@@ -69,7 +69,7 @@ La valeur est une liste de motifs séparés par des espaces, parmi `crowdsec`, `
 
     | Paramètre             | Valeur par défaut | Contexte  | Multiple | Description                                                                                              |
     | --------------------- | ----------------- | --------- | -------- | -------------------------------------------------------------------------------------------------------- |
-    | `SERVER_NAME`         | `www.example.com` | multisite | Non      | **Domaine principal :** Nom de domaine principal pour ce site. Requis en mode multisite.                 |
+    | `SERVER_NAME`         | `www.example.com` | multisite | Non      | **Domaine principal :** Nom de domaine principal (ou adresse IP) pour ce site. Requis en mode multisite. |
     | `BUNKERWEB_INSTANCES` | `127.0.0.1`       | global    | Non      | **Instances BunkerWeb :** Liste des instances BunkerWeb séparées par des espaces.                        |
     | `MULTISITE`           | `no`              | global    | Non      | **Sites multiples :** Définir à `yes` pour héberger plusieurs sites avec des configurations différentes. |
     | `SECURITY_MODE`       | `block`           | multisite | Non      | **Niveau de sécurité :** `detect` ou `block` pour contrôler l’application de la sécurité.                |

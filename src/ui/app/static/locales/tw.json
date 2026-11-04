@@ -13,7 +13,8 @@
     "no_changes_detected": "未偵測到任何變更。",
     "notice": "注意",
     "ping_error": "Ping 執行個體時發生錯誤。",
-    "readonly_mode": "此操作在唯讀模式下被禁用。"
+    "readonly_mode": "此操作在唯讀模式下被禁用。",
+    "configs_import_invalid_file": "請上傳有效的自訂設定匯出檔案（.json）。"
   },
   "aria": {
     "label": {
@@ -1240,7 +1241,16 @@
     },
     "retention_notice": "報告儲存在記憶體中的循環緩衝區內：達到設定的上限後，最舊的紀錄會被捨棄。除非啟用 Redis，否則重新啟動 BunkerWeb 時報告也會被清空。",
     "security_incident": "安全事件",
-    "security_report_data": "安全報告資料"
+    "security_report_data": "安全報告資料",
+    "bad_behavior_no_details": "此報告中沒有擷取任何異常行為細節。",
+    "bad_behavior_activity_detected": "偵測到異常行為",
+    "bad_behavior_activity_explanation": "這些請求超過異常行為門檻，並已合併。",
+    "bad_behavior_request_label": "請求",
+    "bad_behavior_ip": "IP 位址",
+    "bad_behavior_server": "伺服器",
+    "bad_behavior_url": "URL",
+    "bad_behavior_captured_at": "擷取於",
+    "bad_behavior_request_id": "請求識別碼"
   },
   "scope": {
     "all_services": "所有服務",
@@ -1427,7 +1437,8 @@
     "template_in_use_description": "不允許在目前範本之外進行變更。請使用目前範本進行變更或切換到進階/原始模式。",
     "unique_server_name": "唯一伺服器名稱",
     "up": "執行中",
-    "yes": "是"
+    "yes": "是",
+    "not_applicable": "不適用"
   },
   "step": {
     "next": "下一步",
@@ -1724,7 +1735,8 @@
       "show_selected_only": "僅顯示所選項目",
       "stop_instance": "停止執行個體 {{hostname}}",
       "unban_ip": "解除封鎖 {{ip}}",
-      "value_from_global": "來自全域設定的值"
+      "value_from_global": "來自全域設定的值",
+      "update_ban_duration": "更新封鎖期限"
     },
     "cannot_delete_original_ban": "無法刪除原始封鎖項目。",
     "cannot_remove_disabled": "無法移除，因為一或多個設定已停用。",
@@ -1962,7 +1974,8 @@
     "zerossl_api_retry": "ZeroSSL API 請求的重試次數（0 代表停用重試）。",
     "zerossl_api_retry_delay": "ZeroSSL API 重試之間的延遲秒數。",
     "zerossl_api_connect_timeout": "ZeroSSL API 呼叫的連線逾時秒數。",
-    "zerossl_api_max_time": "每個 ZeroSSL API 請求的最大總秒數。"
+    "zerossl_api_max_time": "每個 ZeroSSL API 請求的最大總秒數。",
+    "readonly_mode": "此操作在唯讀模式下無法執行。"
   },
   "totp": {
     "prompt": "請輸入您的 TOTP 代碼。"
@@ -1985,5 +1998,12 @@
     "required": "{{field}} 是必填項。",
     "service_required_for_ban": "對於特定於服務的封鎖，必須選取一個服務。",
     "zerossl_email_or_api_key_required": "ZeroSSL 需要電子郵件或 ZeroSSL API 金鑰。"
+  },
+  "plugins": {
+    "multivalue": {
+      "show_less": "顯示較少",
+      "more_value": "更多值",
+      "more_values": "更多值"
+    }
   }
 }

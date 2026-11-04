@@ -3,7 +3,7 @@ Das BunkerNet-Plugin ermöglicht den kollektiven Austausch von Bedrohungsdaten z
 **So funktioniert es:**
 
 1.  Ihre BunkerWeb-Instanz registriert sich automatisch bei der BunkerNet-API, um eine eindeutige Kennung zu erhalten.
-2.  Wenn Ihre Instanz eine bösartige IP-Adresse oder ein bösartiges Verhalten erkennt und blockiert, meldet sie die Bedrohung anonym an BunkerNet.
+2.  Wenn Ihre Instanz eine bösartige IP-Adresse oder ein bösartiges Verhalten erkennt und blockiert, meldet sie die Bedrohung an BunkerNet. Die Felder einer Meldung sind im Hinweis „Inhalt einer Meldung“ weiter unten aufgeführt.
 3.  BunkerNet sammelt Bedrohungsdaten von allen teilnehmenden Instanzen und verteilt die konsolidierte Datenbank.
 4.  Ihre Instanz lädt regelmäßig eine aktualisierte Datenbank bekannter Bedrohungen von BunkerNet herunter.
 5.  Diese kollektive Intelligenz ermöglicht es Ihrer Instanz, proaktiv IP-Adressen zu blockieren, die auf anderen BunkerWeb-Instanzen bösartiges Verhalten gezeigt haben.
@@ -12,9 +12,9 @@ Das BunkerNet-Plugin ermöglicht den kollektiven Austausch von Bedrohungsdaten z
 
       1. **Kollektive Verteidigung:** Nutzen Sie die Sicherheitserkenntnisse von Tausenden anderer BunkerWeb-Instanzen weltweit.
       2. **Proaktiver Schutz:** Blockieren Sie böswillige Akteure, bevor sie Ihre Website angreifen können, basierend auf ihrem Verhalten an anderer Stelle.
-      3. **Beitrag zur Gemeinschaft:** Helfen Sie, andere BunkerWeb-Benutzer zu schützen, indem Sie anonymisierte Bedrohungsdaten über Angreifer teilen.
+      3. **Beitrag zur Gemeinschaft:** Helfen Sie, andere BunkerWeb-Benutzer zu schützen, indem Sie Bedrohungsdaten über Angreifer teilen.
       4. **Keine Konfiguration erforderlich:** Funktioniert standardmäßig mit sinnvollen Voreinstellungen und erfordert nur minimale Einrichtung.
-      5. **Datenschutzorientiert:** Teilt nur notwendige Bedrohungsinformationen, ohne Ihre Privatsphäre oder die Ihrer Benutzer zu gefährden.
+      5. **Kontrollierte Weitergabe:** Eine Meldung enthält eine feste Auswahl an Feldern, und `BUNKERNET_FILTER_HEADERS` kann ihre Request-Header auf eine kurze Positivliste beschränken (siehe unten).
 
 ### Wie man es benutzt
 
@@ -28,16 +28,27 @@ Führen Sie die folgenden Schritte aus, um die BunkerNet-Funktion zu konfigurier
 
 ### Konfigurationseinstellungen
 
-| Einstellung        | Standard                   | Kontext   | Mehrfach | Beschreibung                                                                                       |
-| ------------------ | -------------------------- | --------- | -------- | -------------------------------------------------------------------------------------------------- |
-| `USE_BUNKERNET`    | `yes`                      | multisite | nein     | **BunkerNet aktivieren:** Auf `yes` setzen, um den Austausch von Bedrohungsdaten zu aktivieren.    |
-| `BUNKERNET_SERVER` | `https://api.bunkerweb.io` | global    | nein     | **BunkerNet-Server:** Die Adresse des BunkerNet-API-Servers für den Austausch von Bedrohungsdaten. |
+| Einstellung                | Standard                   | Kontext   | Mehrfach | Beschreibung                                                                                                                                                                                                                                                        |
+| -------------------------- | -------------------------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `USE_BUNKERNET`            | `yes`                      | multisite | nein     | **BunkerNet aktivieren:** Auf `yes` setzen, um den Austausch von Bedrohungsdaten zu aktivieren.                                                                                                                                                                     |
+| `BUNKERNET_FILTER_HEADERS` | `no`                       | multisite | nein     | **Gemeldete Header filtern:** Auf `yes` setzen, um nur eine kurze Positivliste von Request-Headern zu senden und die von ModSecurity in Headern und Cookies gefundenen Werte zu leeren. Bei `no` enthält eine Meldung alle Request-Header und die gefundenen Werte. |
+| `BUNKERNET_SERVER`         | `https://api.bunkerweb.io` | global    | nein     | **BunkerNet-Server:** Die Adresse des BunkerNet-API-Servers für den Austausch von Bedrohungsdaten.                                                                                                                                                                  |
 
 !!! tip "Netzwerkschutz"
     Wenn BunkerNet feststellt, dass eine IP-Adresse an bösartigen Aktivitäten auf mehreren BunkerWeb-Instanzen beteiligt war, wird diese IP zu einer kollektiven schwarzen Liste hinzugefügt. Dies bietet eine proaktive Verteidigungsebene, die Ihre Website vor Bedrohungen schützt, bevor sie Sie direkt angreifen können.
 
-!!! info "Anonymes Melden"
-    Bei der Meldung von Bedrohungsinformationen an BunkerNet teilt Ihre Instanz nur die zur Identifizierung der Bedrohung erforderlichen Daten: die IP-Adresse, den Grund für die Sperrung und minimale kontextbezogene Daten. Es werden keine persönlichen Informationen über Ihre Benutzer oder sensible Details über Ihre Website weitergegeben.
+!!! info "Inhalt einer Meldung"
+    Jede an BunkerNet gesendete Meldung enthält diese Felder und nichts anderes:
+
+    - die mit jeder Anfrage gesendeten Instanzmetadaten: die BunkerNet-Instanz-ID, die BunkerWeb-Version, die Integration sowie Name, Version, Versions-ID, Codename, ID und Architektur des Betriebssystems;
+    - die IP-Adresse des Clients, den Grund für die Sperrung und das Datum;
+    - die HTTP-Methode, die URL **einschließlich Query-String** und den Namen des Dienstes (`server_name`);
+    - die Request-Header mit ihren Werten: alle empfangenen Header (bis zu `MAX_HEADERS`) oder, wenn `BUNKERNET_FILTER_HEADERS` auf `yes` steht, nur `User-Agent`, `Accept`, `Accept-Encoding`, `Accept-Language`, `Content-Type` und `Content-Length`;
+    - die Details zum Sperrgrund. Je nach Plugin, das den Client blockiert hat, enthalten sie die IDs und Meldungen der zutreffenden ModSecurity-Regeln samt den Request-Werten, die zugetroffen haben (Teile von Argumenten, Body, Headern oder Cookies, jeweils auf 512 Bytes gekürzt; mit `BUNKERNET_FILTER_HEADERS` auf `yes` werden in Headern und Cookies gefundene Werte geleert und nur der Variablenname wird gesendet), oder bei Bad Behavior die Methode und die URL der letzten Requests, die zur Sperrung geführt haben.
+
+    Standardmäßig (`BUNKERNET_FILTER_HEADERS` auf `no`) enthält eine Meldung jeden empfangenen Request-Header (bis zu `MAX_HEADERS`), einschließlich Cookies und `Authorization`, sowie die von ModSecurity gefundenen Werte unverändert. Setzen Sie `BUNKERNET_FILTER_HEADERS` auf `yes`, um nur die oben genannten sechs Header zu senden und die in Headern und Cookies gefundenen Werte zu leeren. Noch nicht gesendete Meldungen werden bei `yes` vor dem Senden ebenso gefiltert.
+
+    Die URL und die zugetroffenen Werte stammen aus dem Request und enthalten daher alles, was der Client gesendet hat. Setzen Sie `USE_BUNKERNET` auf `no` für Dienste, deren URLs sensible Werte enthalten.
 
 ### Beispielkonfigurationen
 

@@ -30,6 +30,9 @@ uri_rx = re_compile(rb"^/")
 
 def check_line(kind: str, line: bytes) -> Tuple[bool, bytes]:
     if kind == "IP":
+        # a zone id ("fe80::1%eth0") names an interface of the downloading host, not an address the matcher can load
+        if b"%" in line:
+            return False, b""
         if b"/" in line:
             with suppress(ValueError):
                 ip_network(line.decode("utf-8"))
@@ -106,10 +109,10 @@ try:
         for file in list(JOB.job_path.rglob("*.list")):
             if file.parent == JOB.job_path:
                 LOGGER.warning(f"Removing no longer used url file {file} ...")
-                deleted, err = JOB.del_cache(file)
+                deleted, err = JOB.del_cache(file.name)
             else:
                 LOGGER.warning(f"Removing no longer used service file {file} ...")
-                deleted, err = JOB.del_cache(file, service_id=file.parent.name)
+                deleted, err = JOB.del_cache(file.name, service_id=file.parent.name)
 
             if not deleted:
                 LOGGER.warning(f"Couldn't delete file {file} from cache : {err}")
@@ -171,11 +174,15 @@ try:
                         # Process cached data and add to unique_entries
                         cached_data = cached_url.get("data", b"")
                         if cached_data:
+                            # The validator wraps user agents on every call, so re-validating would wrap them twice.
+                            cached_passthrough_kinds = {"USER_AGENT"}
                             # Skip first line (URL comment) and process entries
                             for line in cached_data.split(b"\n")[1:]:
                                 line = line.strip()
                                 if line:
-                                    unique_entries.add(line)
+                                    ok, data = (True, line) if kind in cached_passthrough_kinds else check_line(kind, line)
+                                    if ok:
+                                        unique_entries.add(data)
                     else:
                         failed = False
                         LOGGER.info(f"Downloading whitelist data from {url} ...")
@@ -301,7 +308,7 @@ try:
         LOGGER.debug(f"Checking if {url_file} is still in use ...")
         if url_file.name not in urls:
             LOGGER.warning(f"Removing no longer used url file {url_file} ...")
-            deleted, err = JOB.del_cache(url_file)
+            deleted, err = JOB.del_cache(url_file.name)
             if not deleted:
                 LOGGER.warning(f"Couldn't delete url file {url_file} from cache : {err}")
 except SystemExit as e:

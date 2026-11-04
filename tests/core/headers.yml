@@ -1,0 +1,212 @@
+integrations: "all"
+
+actions:
+  check_headers:
+    type: header
+    url: "http://www.example.com"
+    method: "HEAD"
+    response_headers:
+      Server: null
+      Strict-Transport-Security: null
+      Content-Security-Policy: "^default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self'; font-src 'self'; connect-src 'self'; frame-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none';$"
+      Referrer-Policy: "^strict-origin-when-cross-origin$"
+      Permissions-Policy: '^accelerometer=\(\), ambient-light-sensor=\(\), aria-notify=\(\), attribution-reporting=\(\), autoplay=\(\), bluetooth=\(\), browsing-topics=\(\), camera=\(\), captured-surface-control=\(\), ch-device-memory=\(\), ch-downlink=\(\), ch-dpr=\(\), ch-ect=\(\), ch-prefers-color-scheme=\(\), ch-prefers-reduced-motion=\(\), ch-prefers-reduced-transparency=\(\), ch-rtt=\(\), ch-save-data=\(\), ch-ua-arch=\(\), ch-ua-bitness=\(\), ch-ua-form-factors=\(\), ch-ua-full-version-list=\(\), ch-ua-full-version=\(\), ch-ua-high-entropy-values=\(\), ch-ua-mobile=\(\), ch-ua-model=\(\), ch-ua-platform-version=\(\), ch-ua-platform=\(\), ch-ua-wow64=\(\), ch-ua=\(\), ch-viewport-height=\(\), ch-viewport-width=\(\), ch-width=\(\), compute-pressure=\(\), cross-origin-isolated=\(\), deferred-fetch-minimal=\(\), deferred-fetch=\(\), device-attributes=\(\), digital-credentials-create=\(\), digital-credentials-get=\(\), display-capture=\(\), encrypted-media=\(\), execution-while-not-rendered=\(\), execution-while-out-of-viewport=\(\), focus-without-user-activation=\(\), fullscreen=\(\), gamepad=\(\), geolocation=\(\), gyroscope=\(\), haptics=\(\), hid=\(\), identity-credentials-get=\(\), idle-detection=\(\), interest-cohort=\(\), keyboard-map=\(\), language-detector=\(\), language-model=\(\), local-fonts=\(\), local-network-access=\(\), local-network=\(\), loopback-network=\(\), magnetometer=\(\), manual-text=\(\), media-playback-while-not-visible=\(\), microphone=\(\), midi=\(\), on-device-speech-recognition=\(\), otp-credentials=\(\), payment=\(\), picture-in-picture=\(\), private-state-token-issuance=\(\), private-state-token-redemption=\(\), proofreader=\(\), publickey-credentials-create=\(\), publickey-credentials-get=\(\), publickey-credentials-remote-client-data-json=\(\), rewriter=\(\), screen-wake-lock=\(\), serial=\(\), speaker-selection=\(\), storage-access=\(\), summarizer=\(\), tools=\(\), translator=\(\), unbounded-element=\(\), unload=\(\), usb=\(\), vertical-scroll=\(\), web-app-installation=\(\), web-share=\(\), webnn=\(\), window-management=\(\), writer=\(\), xr-spatial-tracking=\(\)$'
+      X-Frame-Options: "^SAMEORIGIN$"
+      X-Content-Type-Options: "^nosniff$"
+      X-DNS-Prefetch-Control: "^off$"
+    # The Content-Security-Policy asserted above is not BunkerWeb's: `tests/misc/index.php` sends
+    # it, and BunkerWeb keeps it verbatim because Content-Security-Policy is in the default
+    # KEEP_UPSTREAM_HEADERS list. Kubernetes has no PHP -- this spec nulls REMOTE_PHP there and the
+    # ingress backend is nginxdemos/nginx-hello, which sends no CSP -- so BunkerWeb emits its own
+    # plugin default instead. Same dependency on index.php that already excludes every cookie
+    # action below (bw_cookie comes from the same file); this header was the one that was missed.
+    # A red here means the CONTENT_SECURITY_POLICY default changed, not that a setting failed to
+    # reach the pods -- check_headers sets nothing.
+    Kubernetes:
+      response_headers:
+        Content-Security-Policy: "^object-src 'none'; form-action 'self'; frame-ancestors 'self';$"
+  tweaked_headers_ssl:
+    type: header
+    url: "https://www.example.com"
+    method: "HEAD"
+    verify_ssl: false
+    response_headers:
+      Server: "^nginx$"
+      Strict-Transport-Security: "^max-age=63072000; includeSubDomains; preload$"
+      Referrer-Policy: "^no-referrer$"
+      Permissions-Policy: "^accelerometer=\\(\\)$"
+      X-Frame-Options: "^DENY$"
+      X-Content-Type-Options: null
+      X-DNS-Prefetch-Control: "^on$"
+      X-Test: "^test$"
+    config:
+      CUSTOM_HEADER: "X-Test: test"
+      REMOVE_HEADERS: "X-Powered-By X-AspNet-Version X-AspNetMvc-Version"
+      REFERRER_POLICY: "no-referrer"
+      PERMISSIONS_POLICY: "accelerometer=()"
+      X_FRAME_OPTIONS: "DENY"
+      X_CONTENT_TYPE_OPTIONS: ""
+      X_DNS_PREFETCH_CONTROL: "on"
+      GENERATE_SELF_SIGNED_SSL: "yes"
+  tweaked_strict_transport_security_ssl:
+    type: header
+    url: "https://www.example.com"
+    method: "HEAD"
+    verify_ssl: false
+    response_headers:
+      Strict-Transport-Security: "^max-age=86400$"
+    config:
+      STRICT_TRANSPORT_SECURITY: "max-age=86400"
+      GENERATE_SELF_SIGNED_SSL: "yes"
+  check_content_security_policy_header_report_only:
+    type: header
+    url: "http://www.example.com"
+    method: "HEAD"
+    response_headers:
+      Content-Security-Policy: null
+      Content-Security-Policy-Report-Only: "^object-src 'none'; form-action 'self'; frame-ancestors 'self';$"
+    config:
+      CONTENT_SECURITY_POLICY_REPORT_ONLY: "yes"
+      KEEP_UPSTREAM_HEADERS: "Permissions-Policy Feature-Policy X-Frame-Options"
+  tweaked_keep_upstream_headers:
+    type: header
+    integrations:
+      - "Linux"
+      - "Docker"
+      - "Autoconf"
+      - "All-in-one"
+    url: "https://www.example.com"
+    method: "HEAD"
+    verify_ssl: false
+    response_headers:
+      Content-Security-Policy: "^object-src 'none'; form-action 'self'; frame-ancestors 'self';$"
+    config:
+      KEEP_UPSTREAM_HEADERS: "Permissions-Policy Feature-Policy X-Frame-Options"
+  tweaked_keep_upstream_headers_1:
+    type: header
+    integrations:
+      - "Linux"
+      - "Docker"
+      - "Autoconf"
+      - "All-in-one"
+    url: "https://www.example.com"
+    method: "HEAD"
+    verify_ssl: false
+    response_headers:
+      Content-Security-Policy: null
+    config:
+      CONTENT_SECURITY_POLICY: ""
+      KEEP_UPSTREAM_HEADERS: "Permissions-Policy Feature-Policy X-Frame-Options"
+  check_cookie_flags:
+    type: cookie
+    integrations:
+      - "Linux"
+      - "Docker"
+      - "Autoconf"
+      - "All-in-one"
+    url: "http://www.example.com"
+    retries: 3
+    cookie_name: "bw_cookie"
+    cookie_rx: "^test$"
+    cookie_http_only_flag: True
+    cookie_same_site_flag: "Lax"
+    full_clean: true
+  check_cookie_flags_ssl:
+    type: cookie
+    integrations:
+      - "Linux"
+      - "Docker"
+      - "Autoconf"
+      - "All-in-one"
+    url: "https://www.example.com"
+    retries: 3
+    verify_ssl: false
+    cookie_name: "bw_cookie"
+    cookie_rx: "^test$"
+    cookie_secure_flag: True
+    cookie_http_only_flag: True
+    cookie_same_site_flag: "Lax"
+    config:
+      GENERATE_SELF_SIGNED_SSL: "yes"
+    full_clean: true
+  custom_cookie_flags:
+    type: cookie
+    integrations:
+      - "Linux"
+      - "Docker"
+      - "Autoconf"
+      - "All-in-one"
+    url: "http://www.example.com"
+    retries: 3
+    cookie_name: "bw_cookie"
+    cookie_rx: "^test$"
+    cookie_same_site_flag: "Strict"
+    config:
+      COOKIE_FLAGS: "* SameSite=Strict"
+    full_clean: true
+  custom_cookie_flags_ssl:
+    type: cookie
+    integrations:
+      - "Linux"
+      - "Docker"
+      - "Autoconf"
+      - "All-in-one"
+    url: "https://www.example.com"
+    retries: 3
+    verify_ssl: false
+    cookie_name: "bw_cookie"
+    cookie_rx: "^test$"
+    cookie_same_site_flag: "Strict"
+    config:
+      GENERATE_SELF_SIGNED_SSL: "yes"
+      COOKIE_FLAGS: "* SameSite=Strict"
+      COOKIE_AUTO_SECURE_FLAG: "no"
+    full_clean: true
+  multiple_cookie_flags:
+    type: cookie
+    integrations:
+      - "Linux"
+      - "Docker"
+      - "Autoconf"
+      - "All-in-one"
+    url: "http://www.example.com"
+    retries: 3
+    cookie_name: "bw_cookie"
+    cookie_rx: "^test$"
+    cookie_http_only_flag: True
+    cookie_same_site_flag: "Lax"
+    config:
+      COOKIE_FLAGS: "* HttpOnly SameSite=Lax"
+      COOKIE_FLAGS_1: "bw_cookie_1 SameSite=Strict"
+    restart_stack: false
+  multiple_cookie_flags_1:
+    type: cookie
+    integrations:
+      - "Linux"
+      - "Docker"
+      - "Autoconf"
+      - "All-in-one"
+    url: "http://www.example.com"
+    retries: 3
+    cookie_name: "bw_cookie_1"
+    cookie_rx: "^test1$"
+    cookie_same_site_flag: "Strict"
+    config:
+      COOKIE_FLAGS: "* HttpOnly SameSite=Lax"
+      COOKIE_FLAGS_1: "bw_cookie_1 SameSite=Strict"
+
+config:
+  REMOTE_PHP: "php-fpm"
+  REMOTE_PHP_PATH: "/var/www/html"
+
+Linux:
+  config:
+    REMOTE_PHP: null
+    REMOTE_PHP_PATH: null
+    LOCAL_PHP: "/run/php/php-fpm.sock"
+    LOCAL_PHP_PATH: "/var/www/html"
+
+Kubernetes:
+  config:
+    REMOTE_PHP: null
+    REMOTE_PHP_PATH: null

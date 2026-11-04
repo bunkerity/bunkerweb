@@ -2,6 +2,7 @@ local ngx = ngx
 local banlease = require "bunkerweb.banlease"
 local cdatastore = require "bunkerweb.datastore"
 local clogger = require "bunkerweb.logger"
+local ipaddr = require "bunkerweb.ipaddr"
 local mmdb = require "bunkerweb.mmdb"
 local rediskeys = require "bunkerweb.rediskeys"
 
@@ -26,6 +27,7 @@ local subsystem = ngx.config.subsystem
 local get_phase = ngx.get_phase
 local kill = ngx.thread.kill
 local ipmatcher_new = ipmatcher.new
+local ip_key = ipaddr.key
 local parse_ipv4 = ipmatcher.parse_ipv4
 local parse_ipv6 = ipmatcher.parse_ipv6
 local open = io.open
@@ -55,8 +57,83 @@ end
 local other_dict = subsystem == "http" and shared.datastore_stream or shared.datastore
 local other_datastore = other_dict and cdatastore:new(other_dict) or nil
 
+-- All local ban writers share this per-IP lock. safe_add cannot evict a live ban to make room for a lock.
+local ban_lock_dict = subsystem == "http" and shared.datastore or shared.datastore_stream
+local BAN_LOCK_TTL = 1
+local BAN_LOCK_WAIT = 0.05
+local BAN_LOCK_SLEEP = 0.001
+local BAN_LOCK_SPINS = 256
+local BAN_LOCK_SLEEP_PHASES = {
+	rewrite = true,
+	access = true,
+	content = true,
+	timer = true,
+	preread = true,
+	ssl_cert = true,
+	ssl_session_fetch = true,
+	ssl_client_hello = true,
+}
+
+-- Returns the token, or nil after logging. No caller mutates local ban state without it:
+--   "write"   ordinary writers fail with BAN_LOCK_UNAVAILABLE and write nothing (logged at ERROR);
+--   "cleanup" the if_absent ownership cleanup skips its removal;
+--   "cache"   the Redis-hit cache write is skipped; the next lookup reads Redis again.
+local BAN_LOCK_UNAVAILABLE = "ban lock unavailable"
+local BAN_LOCK_OUTCOMES = {
+	write = { ERR, "; nothing written" },
+	cleanup = { WARN, "; skipping if_absent cleanup, local copies expire with their ttl" },
+	cache = { WARN, "; skipping the cache write" },
+}
+local function acquire_ban_lock(ip, kind)
+	local token, err = banlease.new_incarnation()
+	if not ban_lock_dict or not ban_lock_dict.safe_add then
+		err = "datastore unavailable"
+	elseif token then
+		local can_sleep = BAN_LOCK_SLEEP_PHASES[get_phase()] == true
+		local attempts = can_sleep and (BAN_LOCK_WAIT / BAN_LOCK_SLEEP + 1) or BAN_LOCK_SPINS
+		local deadline = ngx.now() + BAN_LOCK_WAIT
+		for attempt = 1, attempts do
+			local ok
+			ok, err = ban_lock_dict:safe_add("ban_lock_" .. ip, token, BAN_LOCK_TTL)
+			if ok then
+				return token
+			end
+			if err ~= "exists" or attempt == attempts then
+				break
+			end
+			if can_sleep then
+				if ngx.now() >= deadline then
+					break
+				end
+				ngx.sleep(BAN_LOCK_SLEEP)
+			end
+		end
+	end
+	local outcome = BAN_LOCK_OUTCOMES[kind]
+	logger:log(outcome[1], "can't acquire local ban lock for " .. ip .. " : " .. tostring(err) .. outcome[2])
+end
+
+local function release_ban_lock(ip, token)
+	-- Never release a successor's lock after our own holder expired. Neither check nor delete yields.
+	if token and ban_lock_dict:get("ban_lock_" .. ip) == token then
+		ban_lock_dict:delete("ban_lock_" .. ip)
+	end
+end
+
 -- Short TTL for locally cached bans so unbans propagate from Redis within this window
 local BAN_LOCAL_CACHE_TTL = 30
+
+-- Bad Behavior's local per-IP abuse counters, purged by remove_ban along with the ban they produced
+-- (issue #3818). The Redis spelling of the same state is owned by rediskeys.badbehavior.
+-- ponytail: hard-coded because Bad Behavior is currently the only plugin with an accumulated abuse
+-- counter; move it to a plugin-declared registry as soon as a second one appears.
+--
+-- Known limitation: this purge cannot reach a Stream service's counter from the HTTP VM, so for a
+-- stream service running without Redis issue #3818 is NOT fixed. Bad Behavior's timer runs in the
+-- Stream VM too and keeps its own counter in `datastore_stream`, a zone the HTTP VM cannot address
+-- (`other_datastore` is nil there), and an unban only ever reaches the HTTP VM (bwcli, API, UI). With
+-- Redis it self-heals : the next hit overwrites the local counter with the Redis one.
+local BADBEHAVIOR_LOCAL_COUNTER_PREFIX = "plugin_badbehavior_count_"
 
 local utils = {}
 
@@ -138,7 +215,7 @@ utils.has_not_variable = function(variable, value)
 		local servers = variables["global"]["SERVER_NAME"]
 		-- Check each server
 		for server in servers:gmatch("%S+") do
-			if variables[server][variable] ~= "value" then
+			if variables[server][variable] ~= value then
 				return true, "success"
 			end
 		end
@@ -152,7 +229,7 @@ end
 utils.get_multiple_variables = function(vars)
 	local variables, err = internalstore:get("variables", true)
 	if not variables then
-		return nil, "can't access variables " .. vars .. " from internalstore : " .. err
+		return nil, "can't access variables " .. table.concat(vars, ", ") .. " from internalstore : " .. err
 	end
 	local result = {}
 	-- Loop on scoped vars
@@ -328,11 +405,17 @@ utils.is_ipv4 = function(ip)
 	return parse_ipv4(ip)
 end
 
+-- Canonical identity of a client address: RFC 5952 text for IPv6, plain IPv4 for an IPv4-mapped IPv6 address.
+-- nil when `ip` is not an address. Every ban, lease, counter and rate-limit key goes through it.
+utils.normalize_ip = ipaddr.normalize
+
 utils.is_ipv6 = function(ip)
 	return parse_ipv6(ip)
 end
 
 utils.ip_is_global = function(ip)
+	-- An IPv4-mapped IPv6 address is judged as the IPv4 address it carries
+	ip = ip_key(ip)
 	-- Reserved, non public IPs
 	local reserved_ips = {
 		"0.0.0.0/8",
@@ -353,7 +436,7 @@ utils.ip_is_global = function(ip)
 		"255.255.255.255/32",
 		"::/128",
 		"::1/128",
-		"::ffff:0:0/96",
+		-- ::ffff:0:0/96 is absent: an IPv4-mapped address is judged as the IPv4 address it carries
 		"::ffff:0:0:0/96",
 		"64:ff9b::/96",
 		"64:ff9b:1::/48",
@@ -583,7 +666,7 @@ utils.get_reason = function(ctx)
 	else
 		ip = var.remote_addr
 	end
-	local banned, _ = datastore:get("bans_ip_" .. ip)
+	local banned, _ = datastore:get("bans_ip_" .. ip_key(ip))
 	if banned then
 		local ok, ban_data = pcall(decode, banned)
 		if ok then
@@ -633,6 +716,7 @@ utils.is_ip_whitelisted = function(ip, server_name, opts)
 	if not ip then
 		return nil, "ip is nil"
 	end
+	ip = ip_key(ip)
 	-- Allow caller to provide service name; otherwise use current server_name
 	if not local_only and (not server_name or server_name == "") then
 		server_name = var.server_name
@@ -774,6 +858,7 @@ utils.get_resolvers = function()
 end
 
 utils.get_rdns = function(ip, ctx, pool)
+	ip = ip_key(ip)
 	-- Check cache
 	local cachestore = utils.new_cachestore(ctx, pool)
 	local ok, value = cachestore:get("rdns_" .. ip)
@@ -871,6 +956,7 @@ utils.get_ips = function(fqdn, ipv6, ctx, pool, force_ipv6)
 	local res_answers = {}
 	local res_errors = {}
 	local ans_errors = {}
+	local has_answer = false
 	local answers
 	for _, qtype in ipairs(qtypes) do
 		-- Query FQDN
@@ -878,14 +964,30 @@ utils.get_ips = function(fqdn, ipv6, ctx, pool, force_ipv6)
 		local qtype_str = qtype == res.TYPE_AAAA and "AAAA" or "A"
 		if not answers then
 			res_errors[qtype_str] = err
-		elseif answers.errcode then
-			ans_errors[qtype_str] = answers.errstr
 		else
-			table.insert(res_answers, answers)
+			if answers.errcode then
+				ans_errors[qtype_str] = answers.errstr
+				if answers.errcode == 3 then
+					has_answer = true
+				else
+					ans_errors[qtype_str] = answers.errstr or tostring(answers.errcode)
+					logger:log(
+						ERR,
+						"error while doing " .. qtype_str .. " DNS query for " .. fqdn .. " : " .. ans_errors[qtype_str]
+					)
+				end
+			else
+				has_answer = true
+				table.insert(res_answers, answers)
+			end
 		end
 	end
 	for qtype, error in pairs(res_errors) do
 		logger:log(ERR, "error while doing " .. qtype .. " DNS query for " .. fqdn .. " : " .. error)
+	end
+	-- Resolver failures are not negative DNS answers and must be retried.
+	if not has_answer then
+		return false, encode(res_errors) .. " " .. encode(ans_errors)
 	end
 	-- Extract all IPs
 	local ips = {}
@@ -909,13 +1011,13 @@ end
 -- For each PTR in rdns_list, if it ends with any suffix in suffix_list, the name is forward-resolved
 -- (A/AAAA via get_ips) and each result compared to remote_addr. Returns (matched_suffix, matched_rdns)
 -- only when a suffix match is forward-confirmed; returns nil otherwise.
--- Fail-closed: a suffix match that cannot be confirmed (resolver error, or empty/non-matching forward
--- result) returns nil and is logged as a possible spoof. An empty get_ips table needs no special case:
--- the inner loop runs zero times, so no match occurs and execution falls to the spoof branch.
+-- Fail-closed: resolver errors are logged and return nil. Empty/non-matching forward results
+-- cannot confirm the suffix and are logged as a possible spoof when a plugin logger is supplied.
 utils.rdns_forward_confirmed = function(rdns_list, suffix_list, ctx, remote_addr, plugin_logger)
 	if not rdns_list or not suffix_list then
 		return nil
 	end
+	remote_addr = ip_key(remote_addr)
 	local log_logger = plugin_logger or logger
 	for _, rdns in ipairs(rdns_list) do
 		for _, suffix in ipairs(suffix_list) do
@@ -947,6 +1049,7 @@ utils.rdns_forward_confirmed = function(rdns_list, suffix_list, ctx, remote_addr
 end
 
 utils.get_country = function(ip)
+	ip = ip_key(ip)
 	-- Check if mmdb is loaded
 	if not mmdb.country_db then
 		return false, "mmdb country not loaded"
@@ -963,6 +1066,7 @@ utils.get_country = function(ip)
 end
 
 utils.get_asn = function(ip)
+	ip = ip_key(ip)
 	-- Check if mmdp is loaded
 	if not mmdb.asn_db then
 		return false, "mmdb asn not loaded"
@@ -1139,7 +1243,44 @@ local function lease_copy_valid(ip, ban_data)
 	return epoch ~= nil and type(ban_data) == "table" and ban_data.lease_epoch == epoch
 end
 
+-- A multi-key command refused while a Redis Cluster slot migrates ("TRYAGAIN Multiple keys request ...")
+local function is_tryagain_error(err)
+	return type(err) == "string" and err:sub(1, 8) == "TRYAGAIN"
+end
+
+-- Single-key twin of the lookup script, same reply shape. A Redis Cluster refuses the script (TRYAGAIN) while the
+-- slot of the keys migrates, but a GET on one key follows ASK and MOVED. With leases on, the last key is the epoch.
+local function read_ban_keys_singly(clusterstore, redis_keys, lease_on)
+	local last, epoch = #redis_keys, nil
+	if lease_on then
+		last = last - 1
+		local value, err = clusterstore:call("get", redis_keys[#redis_keys])
+		if value == nil or value == false then
+			return nil, tostring(err)
+		end
+		epoch = value
+	end
+	for i = 1, last do
+		local value, err = clusterstore:call("get", redis_keys[i])
+		if value == nil or value == false then
+			return nil, tostring(err)
+		end
+		if value ~= null then
+			local ttl, ttl_err = clusterstore:call("ttl", redis_keys[i])
+			if type(ttl) ~= "number" then
+				return nil, tostring(ttl_err)
+			end
+			-- -2: the key expired between the two reads, which is a miss
+			if ttl ~= -2 then
+				return { value, ttl, i, epoch }
+			end
+		end
+	end
+	return { null, -2, 0, epoch }
+end
+
 utils.is_banned = function(ip, server_name, ctx)
+	ip = ip_key(ip)
 	-- Get Redis config once
 	local use_redis, err = utils.get_variable("USE_REDIS", false)
 	if not use_redis then
@@ -1325,7 +1466,13 @@ utils.is_banned = function(ip, server_name, ctx)
 	if lease_on then
 		redis_keys[#redis_keys + 1] = rediskeys.cs_epoch(ip, cluster)
 	end
+	-- No TRYAGAIN retry for the script: a slot can stay migrating far longer than any retry budget, so the
+	-- single-key twin below answers at once.
+	clusterstore.tryagain_retries = 0
 	local data, script_err = clusterstore:call("eval", redis_script, #redis_keys, unpack(redis_keys))
+	if not data and clusterstore.cluster_mode and is_tryagain_error(script_err) then
+		data, script_err = read_ban_keys_singly(clusterstore, redis_keys, lease_on)
+	end
 	clusterstore:close()
 	if not data then
 		return redis_failed("redis call error: " .. script_err)
@@ -1345,21 +1492,25 @@ utils.is_banned = function(ip, server_name, ctx)
 		-- trust it blindly, a nil key would be written as the cache entry.
 		local hit_key = keys[data[3]]
 		local hit_rank = missing_ranks[data[3]]
+		-- The lock only guards the local cache write; every verdict below holds without it
+		local lock_token = hit_key and acquire_ban_lock(ip, "cache")
 		if hit_key then
 			if hit_rank >= banlease.RANK.lease_service and banlease.meta() then
 				-- The copy of a lease must embed an epoch that no removal moved while this lookup yielded
 				local chosen = lease_before
 				if banlease.lease_epoch(ip, false) ~= lease_before then
+					release_ban_lock(ip, lock_token)
 					return false, "not banned", nil, nil
 				elseif chosen == nil then
 					-- A failed create-only add means another worker created the epoch meanwhile, maybe a removal
 					chosen = banlease.create_lease_epoch(ip)
 					if chosen == nil then
+						release_ban_lock(ip, lock_token)
 						return false, "not banned", nil, nil
 					end
 				end
 				local ok_lease, lease_data = pcall(decode, data[1])
-				if ok_lease and type(lease_data) == "table" then
+				if lock_token and ok_lease and type(lease_data) == "table" then
 					lease_data.lease_epoch = chosen
 					local cache_value = encode(lease_data)
 					local ok_cache, cache_err = datastore:set_with_retries(hit_key, cache_value, cache_ttl)
@@ -1369,15 +1520,17 @@ utils.is_banned = function(ip, server_name, ctx)
 					-- Post-write fence: a removal that ran between the check and the write wins
 					if banlease.lease_epoch(ip, false) ~= chosen then
 						datastore:delete(hit_key)
+						release_ban_lock(ip, lock_token)
 						return false, "not banned", nil, nil
 					end
 				end
-			else
+			elseif lock_token then
 				local ok_cache, cache_err = datastore:set_with_retries(hit_key, data[1], cache_ttl)
 				if not ok_cache then
 					logger:log(WARN, "datastore:set_with_retries() error: " .. cache_err)
 				end
 			end
+			release_ban_lock(ip, lock_token)
 		else
 			logger:log(WARN, "ban script returned an unknown key index: " .. tostring(data[3]))
 		end
@@ -1407,6 +1560,7 @@ end
 -- Local-only twin of is_banned for the ClientHello: same precedence and lease epoch rule, dict reads only.
 -- Returns banned, reason, rank. banned is nil on a dict error, reason then holds the error.
 utils.is_banned_local = function(ip, service)
+	ip = ip_key(ip)
 	local keys, ranks = ban_keys(ip, service, true)
 	for i, key in ipairs(keys) do
 		local value, err = datastore:get(key)
@@ -1434,20 +1588,15 @@ local function bump_markers(ip)
 	end
 end
 
-local function add_ban(ip, reason, ttl, service, country, ban_scope, reason_data)
-	-- Validate IP address
-	if not ip or (not utils.is_ipv4(ip) and not utils.is_ipv6(ip)) then
-		return false, "invalid IP address"
-	end
-
+-- The key, the stored record and the local ttl of a ban. The ip is already canonical.
+local function ban_record(ip, reason, ttl, service, country, ban_scope, reason_data)
 	-- Determine ban key based on scope
 	local ban_key = "bans_ip_" .. ip
 	if ban_scope == "service" and service then
 		ban_key = "bans_service_" .. service .. "_ip_" .. ip
 	end
 
-	-- Set on local datastore
-	local ban_data = encode({
+	local record = {
 		reason = reason,
 		ban_id = reason == "bad behavior" and type(reason_data) == "table" and reason_data.ban_id or nil,
 		service = service or "unknown",
@@ -1456,13 +1605,31 @@ local function add_ban(ip, reason, ttl, service, country, ban_scope, reason_data
 		ban_scope = ban_scope or "global",
 		reason_data = reason_data or {},
 		permanent = not ttl or ttl == 0,
-	})
+	}
 
 	-- Convert 0 TTL to nil for permanent bans in local datastore
-	local effective_ttl = (not ttl or ttl == 0) and nil or ttl
+	return ban_key, record, (not ttl or ttl == 0) and nil or ttl
+end
 
+local function add_ban(ip, reason, ttl, service, country, ban_scope, reason_data)
+	-- Validate the address and store the ban under its canonical identity, whatever spelling it came in
+	ip = ipaddr.normalize(ip)
+	if not ip then
+		return false, "invalid IP address"
+	end
+
+	local ban_key, record, effective_ttl = ban_record(ip, reason, ttl, service, country, ban_scope, reason_data)
+
+	-- Set on local datastore
+	local ban_data = encode(record)
+
+	local lock_token = acquire_ban_lock(ip, "write")
+	if not lock_token then
+		return false, BAN_LOCK_UNAVAILABLE
+	end
 	local ok, err = datastore:set_with_retries(ban_key, ban_data, effective_ttl)
 	if not ok then
+		release_ban_lock(ip, lock_token)
 		return false, "datastore:set_with_retries() error : " .. err
 	end
 
@@ -1475,6 +1642,8 @@ local function add_ban(ip, reason, ttl, service, country, ban_scope, reason_data
 			logger:log(WARN, "other datastore set_with_retries() error: " .. err2)
 		end
 	end
+
+	release_ban_lock(ip, lock_token)
 
 	-- Set on redis
 	local use_redis, err = utils.get_variable("USE_REDIS", false)
@@ -1510,16 +1679,161 @@ local function add_ban(ip, reason, ttl, service, country, ban_scope, reason_data
 	return true, "success"
 end
 
-utils.add_ban = function(ip, reason, ttl, service, country, ban_scope, reason_data)
+-- KEYS[1] ban key ; ARGV[1] the exact value one if_absent call wrote. The value carries that call's random id, so the
+-- key is deleted only while it is still our own write: an administrator's SET over it is never removed.
+local DELETE_OWN_BAN_SCRIPT = [[
+	if redis.call("GET", KEYS[1]) == ARGV[1] then
+		return redis.call("DEL", KEYS[1])
+	end
+	return 0
+]]
+
+-- Insert-only twin of add_ban: it never replaces a ban of either store and never leaves a local copy next to a Redis
+-- ban it could not see. Returns "added" | "exists" | "error", then a message. In this order:
+--   1. the primary local copy exists: "exists", nothing written;
+--   2. Redis on: SET NX with a value that carries a random id; NX fails: "exists", nothing written locally; Redis
+--      erroring or in an unknown state: "error", nothing written locally (Redis may hold a ban we could not see);
+--   3. the primary local copy with the datastore's atomic add, then every other local copy with add too. When the add
+--      finds the key filled since step 1 (an administrative write), our own Redis key is removed by a compare-and-
+--      delete and the local value is left alone;
+--   4. Redis on: recheck ownership after both adds; a changed/missing key or read error removes only our local copies.
+-- Redis off: steps 1 and 3 only.
+local function add_ban_if_absent(ip, reason, ttl, service, country, ban_scope, reason_data)
+	ip = ipaddr.normalize(ip)
+	if not ip then
+		return "error", "invalid IP address"
+	end
+	local ban_key, record, effective_ttl = ban_record(ip, reason, ttl, service, country, ban_scope, reason_data)
+	-- ban_record answers 0 for a permanent ban, which SET ... EX would refuse
+	if not effective_ttl or effective_ttl <= 0 then
+		effective_ttl = nil
+	end
+
+	local current, get_err = datastore:get(ban_key)
+	if current ~= nil then
+		return "exists", "a ban already exists"
+	elseif get_err ~= "not found" then
+		return "error", "datastore:get() error : " .. tostring(get_err)
+	end
+
+	local use_redis, redis_setting_err = utils.get_variable("USE_REDIS", false)
+	if not use_redis then
+		return "error", "can't get USE_REDIS variable : " .. tostring(redis_setting_err)
+	end
+
+	local clusterstore, redis_key
+	if use_redis == "yes" then
+		local id, id_err = banlease.new_incarnation()
+		if not id then
+			return "error", "can't draw a random id : " .. tostring(id_err)
+		end
+		record.nonce = id
+	end
+	local ban_data = encode(record)
+
+	if use_redis == "yes" then
+		clusterstore = require "bunkerweb.clusterstore":new()
+		local connected, connect_err = clusterstore:connect()
+		if not connected then
+			return "error", "can't connect to redis server : " .. tostring(connect_err)
+		end
+		redis_key = rediskeys.ban(ban_key, rediskeys.cluster_mode())
+		local reply, set_err
+		if effective_ttl then
+			reply, set_err = clusterstore:call("set", redis_key, ban_data, "NX", "EX", effective_ttl)
+		else
+			reply, set_err = clusterstore:call("set", redis_key, ban_data, "NX")
+		end
+		if reply == null then
+			clusterstore:close()
+			return "exists", "a ban already exists in redis"
+		elseif reply ~= "OK" then
+			clusterstore:close()
+			return "error", "redis SET NX failed : " .. tostring(set_err)
+		end
+	end
+
+	local lock_token = acquire_ban_lock(ip, "write")
+	local ok, add_err
+	if lock_token then
+		ok, add_err = datastore:add_with_retries(ban_key, ban_data, effective_ttl)
+	else
+		-- No local copy without the lock: undo our Redis key below and report the failure
+		add_err = BAN_LOCK_UNAVAILABLE
+	end
+	if not ok then
+		release_ban_lock(ip, lock_token)
+		if clusterstore then
+			local reply, del_err = clusterstore:call("eval", DELETE_OWN_BAN_SCRIPT, 1, redis_key, ban_data)
+			if reply == nil or reply == false then
+				logger:log(
+					WARN,
+					"can't remove the redis ban of a rejected if_absent write, it expires with its ttl : "
+						.. tostring(del_err)
+				)
+			end
+			clusterstore:close()
+		end
+		if add_err == "exists" then
+			return "exists", "a ban was written meanwhile"
+		end
+		return "error", "datastore:add_with_retries() error : " .. tostring(add_err)
+	end
+	-- The other subsystem's copy, create-only too: a copy an administrator wrote meanwhile stays
+	if other_datastore then
+		local ok2, err2 = other_datastore:add_with_retries(ban_key, ban_data, effective_ttl)
+		if not ok2 and err2 ~= "exists" then
+			logger:log(WARN, "other datastore add_with_retries() error: " .. tostring(err2))
+		end
+	end
+	release_ban_lock(ip, lock_token)
+	if clusterstore then
+		local value, read_err = clusterstore:call("get", redis_key)
+		clusterstore:close()
+		if value ~= ban_data then
+			-- The lock keeps a concurrent local administrator between our ownership read and delete from being erased.
+			lock_token = acquire_ban_lock(ip, "cleanup")
+			if not lock_token then
+				return "exists", "local cleanup skipped because the ban lock is unavailable"
+			end
+			for _, store in ipairs({ datastore, other_datastore }) do
+				if store:get(ban_key) == ban_data then
+					store:delete(ban_key)
+				end
+			end
+			release_ban_lock(ip, lock_token)
+			if value == nil or value == false then
+				return "error", "redis ownership GET failed : " .. tostring(read_err)
+			end
+			return "exists", "the redis ban changed meanwhile"
+		end
+	end
+	return "added", "success"
+end
+
+-- opts.if_absent writes the ban only when no ban of that address and scope exists in either store and returns
+-- "added" | "exists" | "error" (see add_ban_if_absent). Without it, the write still overwrites; only its local writes
+-- take the per-IP lock.
+utils.add_ban = function(ip, reason, ttl, service, country, ban_scope, reason_data, opts)
+	ip = ip_key(ip)
 	bump_markers(ip)
-	local ok, msg = add_ban(ip, reason, ttl, service, country, ban_scope, reason_data)
+	local ok, msg
+	if opts and opts.if_absent then
+		ok, msg = add_ban_if_absent(ip, reason, ttl, service, country, ban_scope, reason_data)
+	else
+		ok, msg = add_ban(ip, reason, ttl, service, country, ban_scope, reason_data)
+	end
 	bump_markers(ip)
 	return ok, msg
 end
 
+-- Capability flag for plugins: add_ban accepts opts.if_absent
+utils.ADD_BAN_IF_ABSENT = 1
+
 local function remove_ban(ip, service, ban_scope)
-	-- Validate IP address
-	if not ip or (not utils.is_ipv4(ip) and not utils.is_ipv6(ip)) then
+	-- Validate the address and unban its canonical identity, whatever spelling it came in
+	ip = ipaddr.normalize(ip)
+	if not ip then
 		return false, "invalid IP address"
 	end
 
@@ -1528,44 +1842,109 @@ local function remove_ban(ip, service, ban_scope)
 		ban_scope = "global"
 	end
 
-	-- Helper: delete a ban key from all local datastores
+	-- Local keys to delete, named by the sweeps below. The scans run outside the per-IP lock; the deletions all
+	-- happen in one locked section, so a lock timeout fails the unban before anything is deleted, locally or in Redis.
+	local local_keys = {}
+	local seen_local_keys = {}
 	local function delete_local(key)
-		datastore:delete(key)
-		if other_datastore then
-			other_datastore:delete(key)
+		if not seen_local_keys[key] then
+			seen_local_keys[key] = true
+			local_keys[#local_keys + 1] = key
 		end
 	end
 
-	-- Collect keys to delete and remove from local datastores FIRST.
+	-- Collect keys to delete, then remove them from local datastores FIRST.
 	-- This ensures unbans take effect locally even if Redis is unreachable.
 	local keys_to_delete = {}
+	-- Services whose Bad Behavior Redis counter a global unban deletes, named by the swept ban keys and counters.
+	local counter_services = {}
+	local seen_counter_services = {}
+	local function add_counter_service(name)
+		if name ~= "" and not seen_counter_services[name] then
+			seen_counter_services[name] = true
+			counter_services[#counter_services + 1] = name
+		end
+	end
+	-- Bans stored by an older version under another spelling of this address (expanded, upper case, mapped) are
+	-- the same ban: the sweep below names them by what they normalize to, so they go too, locally and in Redis.
+	-- A legacy spelling that only lives in Redis cannot be listed from here and stays until its TTL expires.
+	local function same_ip(spelling)
+		return spelling == ip or (spelling:find(":", 1, true) ~= nil and ip_key(spelling) == ip)
+	end
 	if ban_scope == "service" and service then
 		local ban_key = "bans_service_" .. service .. "_ip_" .. ip
 		keys_to_delete[#keys_to_delete + 1] = ban_key
 		delete_local(ban_key)
+		delete_local(BADBEHAVIOR_LOCAL_COUNTER_PREFIX .. service .. "_" .. ip)
+		local service_prefix = "bans_service_" .. service .. "_ip_"
+		local function sweep_service(store)
+			for _, k in ipairs(store:keys()) do
+				if
+					k:sub(1, #service_prefix) == service_prefix
+					and k ~= ban_key
+					and same_ip(k:sub(#service_prefix + 1))
+				then
+					keys_to_delete[#keys_to_delete + 1] = k
+					delete_local(k)
+				end
+			end
+		end
+		sweep_service(datastore)
+		if other_datastore then
+			sweep_service(other_datastore)
+		end
 	else
 		-- Delete global ban
 		local global_key = "bans_ip_" .. ip
 		keys_to_delete[#keys_to_delete + 1] = global_key
 		delete_local(global_key)
 
-		-- Delete all service-specific bans for this IP
-		local suffix = "_ip_" .. ip
-		for _, k in ipairs(datastore:keys()) do
-			if k:sub(1, 13) == "bans_service_" and k:sub(-#suffix) == suffix then
-				keys_to_delete[#keys_to_delete + 1] = k
-				delete_local(k)
-			end
-		end
-		if other_datastore then
-			for _, k in ipairs(other_datastore:keys()) do
-				if k:sub(1, 13) == "bans_service_" and k:sub(-#suffix) == suffix then
-					keys_to_delete[#keys_to_delete + 1] = k
+		-- Delete all service-specific bans for this IP. Bad Behavior counters go too, including the
+		-- per-service ones that never reached the threshold and so have no ban key. The counter prefix
+		-- ends with "_", so the global counter key matches counter_suffix as well.
+		local counter_suffix = "_" .. ip
+		local function sweep(store)
+			for _, k in ipairs(store:keys()) do
+				if k:sub(1, 8) == "bans_ip_" then
+					if k ~= global_key and same_ip(k:sub(9)) then
+						keys_to_delete[#keys_to_delete + 1] = k
+						delete_local(k)
+					end
+				elseif k:sub(1, 13) == "bans_service_" then
+					-- Greedy: the IP never contains "_ip_", a service name might.
+					local name, spelling = k:match("^bans_service_(.*)_ip_(.+)$")
+					if name and same_ip(spelling) then
+						keys_to_delete[#keys_to_delete + 1] = k
+						add_counter_service(name)
+						delete_local(k)
+					end
+				elseif
+					k:sub(1, #BADBEHAVIOR_LOCAL_COUNTER_PREFIX) == BADBEHAVIOR_LOCAL_COUNTER_PREFIX
+					and k:sub(-#counter_suffix) == counter_suffix
+				then
+					-- Empty for the global counter key, which add_counter_service skips.
+					add_counter_service(k:sub(#BADBEHAVIOR_LOCAL_COUNTER_PREFIX + 1, #k - #counter_suffix))
 					delete_local(k)
 				end
 			end
 		end
+		sweep(datastore)
+		if other_datastore then
+			sweep(other_datastore)
+		end
 	end
+
+	local lock_token = acquire_ban_lock(ip, "write")
+	if not lock_token then
+		return false, BAN_LOCK_UNAVAILABLE
+	end
+	for _, key in ipairs(local_keys) do
+		datastore:delete(key)
+		if other_datastore then
+			other_datastore:delete(key)
+		end
+	end
+	release_ban_lock(ip, lock_token)
 
 	-- Now delete from Redis (best-effort — local unbans already applied above)
 	local use_redis, err = utils.get_variable("USE_REDIS", false)
@@ -1582,6 +1961,17 @@ local function remove_ban(ip, service, ban_scope)
 			for _, key in ipairs(keys_to_delete) do
 				clusterstore:call("del", rediskeys.ban(key, cluster))
 			end
+			-- Bad Behavior's Redis counters. A global unban names the services from the swept ban keys and
+			-- local counters: increase() always writes the local counter, so a service still under the
+			-- threshold, with no ban key, is named too.
+			if ban_scope == "service" and service then
+				clusterstore:call("del", rediskeys.badbehavior(ip, service, cluster))
+			else
+				clusterstore:call("del", rediskeys.badbehavior(ip, nil, cluster))
+				for _, name in ipairs(counter_services) do
+					clusterstore:call("del", rediskeys.badbehavior(ip, name, cluster))
+				end
+			end
 			clusterstore:close()
 		end
 	end
@@ -1590,6 +1980,7 @@ local function remove_ban(ip, service, ban_scope)
 end
 
 utils.remove_ban = function(ip, service, ban_scope)
+	ip = ip_key(ip)
 	bump_markers(ip)
 	local ok, msg = remove_ban(ip, service, ban_scope)
 	bump_markers(ip)
@@ -1678,6 +2069,7 @@ utils.get_phases = function()
 		"rewrite",
 		"access",
 		"content",
+		"ssl_client_hello",
 		"ssl_client_hello_default",
 		"ssl_certificate_default",
 		"ssl_certificate",

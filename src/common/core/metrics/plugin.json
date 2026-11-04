@@ -56,7 +56,7 @@
       "help": "Time-to-live in seconds for metrics keys stored in Redis (default `30d`, 30 days; `0` keeps keys permanent). Refreshed on every sync so active data never expires; with a `volatile-lru` eviction policy this lets abandoned metrics data become evictable so Redis recovers from maxmemory instead of rejecting writes forever. Accepts a time suffix (ms, s, m, h, d, w, M, y); a bare number is seconds.",
       "id": "metrics-redis-ttl",
       "label": "Metrics Redis TTL",
-      "regex": "^\\d+(ms?|[shdwMy])?$",
+      "regex": "^[0-9]+(ms?|[shdwMy])?$",
       "type": "text"
     },
     "MAX_LRU_HISTORY": {

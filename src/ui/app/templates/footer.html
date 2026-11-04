@@ -11,7 +11,7 @@
                    class="footer-link">Bunkerity</a>
             </div>
             <div class="d-none d-md-inline-block">
-                {% from 'macros/docs_link.html' import docs_url %}
+                {% from 'macros/docs_link.html' import docs_url with context %}
                 <a href="{{ docs_url() }}"
                    target="_blank"
                    rel="noopener"

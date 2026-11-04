@@ -111,7 +111,7 @@ function redis:api()
 				HTTP_INTERNAL_SERVER_ERROR
 			)
 		end
-		if not ok then
+		if not nb_keys then
 			return self:ret(true, "redis dbsize command failed", HTTP_INTERNAL_SERVER_ERROR)
 		end
 		-- Return data

@@ -1,0 +1,96 @@
+integrations: "all"
+
+actions:
+  no_credentials:
+    type: status
+    url: "http://127.0.0.1:8888/bans"
+    status: 401
+
+  wrong_basic_auth:
+    type: status
+    url: "http://127.0.0.1:8888/bans"
+    status: 401
+    auth:
+      - "admin"
+      - "secret"
+    restart_stack: false
+  right_basic_auth:
+    type: status
+    url: "http://127.0.0.1:8888/bans"
+    status: 200
+    auth:
+      - "admin"
+      - "P@ssw0rd"
+
+  wrong_api_token:
+    type: status
+    url: "http://127.0.0.1:8888/bans"
+    status: 401
+    api:
+      API_TOKEN: "secret"
+      API_USERNAME: null
+      API_PASSWORD: null
+    restart_stack: false
+  right_api_token:
+    type: status
+    url: "http://127.0.0.1:8888/bans"
+    status: 200
+    headers:
+      Authorization: "Bearer secret"
+
+  save_biscuit:
+    type: export
+    url: "http://127.0.0.1:8888/auth"
+    method: POST
+    status: 200
+    auth:
+      - "admin"
+      - "P@ssw0rd"
+    exports:
+      API_TOKEN: "token"
+    restart_stack: false
+  wrong_biscuit:
+    type: status
+    url: "http://127.0.0.1:8888/bans"
+    status: 401
+    headers:
+      Authorization: "Bearer secret"
+    restart_stack: false
+  right_biscuit:
+    type: status
+    url: "http://127.0.0.1:8888/bans"
+    status: 200
+    headers:
+      Authorization: "Bearer ${API_TOKEN}"
+
+  save_biscuit_expire:
+    type: export
+    url: "http://127.0.0.1:8888/auth"
+    method: POST
+    status: 200
+    auth:
+      - "admin"
+      - "P@ssw0rd"
+    api:
+      API_BISCUIT_TTL_SECONDS: "10"
+    exports:
+      API_TOKEN: "token"
+    restart_stack: false
+  right_biscuit_expire:
+    type: status
+    url: "http://127.0.0.1:8888/bans"
+    status: 200
+    headers:
+      Authorization: "Bearer ${API_TOKEN}"
+    restart_stack: false
+  expired_biscuit:
+    type: status
+    url: "http://127.0.0.1:8888/bans"
+    status: 401
+    headers:
+      Authorization: "Bearer ${API_TOKEN}"
+    delay: 10
+
+api:
+  API_USERNAME: "admin"
+  API_PASSWORD: "P@ssw0rd"

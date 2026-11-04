@@ -1,0 +1,12 @@
+# Plural form: a list that appends, so a spec that installs the bot-detection collection can
+# extend appsec-default instead of replacing it. `crowdsecurity/appsec-bot-*` is deliberately
+# NOT listed: crowdsec refuses to configure the AppSec datasource when an entry -- glob or
+# literal -- resolves to no installed appsec-config, which would break every spec case that
+# does not install it (pkg/acquisition/modules/appsec/config.go, resolveAppsecConfigEntries).
+# The challenge scenario adds the entry from the spec instead.
+appsec_configs:
+  - crowdsecurity/appsec-default
+labels:
+  type: appsec
+listen_addr: 0.0.0.0:7422
+source: appsec

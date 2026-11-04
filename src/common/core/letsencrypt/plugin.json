@@ -29,7 +29,7 @@
       "help": "Email used for Let's Encrypt notification and in certificate.",
       "id": "email-lets-encrypt",
       "label": "Email Let's Encrypt",
-      "regex": "^([^@ \\t\\r\\n]+@[^@ \\t\\r\\n]+\\.[^@ \\t\\r\\n]+)?$",
+      "regex": "^([^@ \\t\\r\\n]+@[^@ \\t\\r\\n][^@ \\t\\r\\n.]*\\.[^@ \\t\\r\\n]+)?$",
       "type": "text"
     },
     "LETS_ENCRYPT_SERVER": {
@@ -66,7 +66,7 @@
       "help": "Delay in seconds between ZeroSSL API retries in zerossl-bot. Accepts a time suffix (ms, s, m, h, d, w, M, y); a bare number is seconds.",
       "id": "lets-encrypt-zerossl-api-retry-delay",
       "label": "ZeroSSL API Retry Delay",
-      "regex": "^\\d+(ms?|[shdwMy])?$",
+      "regex": "^[0-9]+(ms?|[shdwMy])?$",
       "type": "text"
     },
     "LETS_ENCRYPT_ZEROSSL_API_CONNECT_TIMEOUT": {
@@ -75,7 +75,7 @@
       "help": "Connection timeout in seconds for ZeroSSL API requests in zerossl-bot. Accepts a time suffix (ms, s, m, h, d, w, M, y); a bare number is seconds.",
       "id": "lets-encrypt-zerossl-api-connect-timeout",
       "label": "ZeroSSL API Connect Timeout",
-      "regex": "^[1-9]\\d*(ms?|[shdwMy])?$",
+      "regex": "^[1-9][0-9]*(ms?|[shdwMy])?$",
       "type": "text"
     },
     "LETS_ENCRYPT_ZEROSSL_API_MAX_TIME": {
@@ -84,7 +84,7 @@
       "help": "Maximum total time in seconds for each ZeroSSL API request in zerossl-bot. Accepts a time suffix (ms, s, m, h, d, w, M, y); a bare number is seconds.",
       "id": "lets-encrypt-zerossl-api-max-time",
       "label": "ZeroSSL API Max Time",
-      "regex": "^[1-9]\\d*(ms?|[shdwMy])?$",
+      "regex": "^[1-9][0-9]*(ms?|[shdwMy])?$",
       "type": "text"
     },
     "LETS_ENCRYPT_CHALLENGE": {
@@ -145,7 +145,7 @@
       "help": "The time to wait for DNS propagation in seconds for DNS challenges. Accepts a time suffix (ms, s, m, h, d, w, M, y); a bare number is seconds.",
       "id": "lets-encrypt-dns-propagation",
       "label": "DNS Propagation",
-      "regex": "^(default|\\d+(ms?|[shdwMy])?)$",
+      "regex": "^(default|[0-9]+(ms?|[shdwMy])?)$",
       "type": "text"
     },
     "LETS_ENCRYPT_DNS_CREDENTIAL_ITEM": {
@@ -154,7 +154,7 @@
       "help": "Configuration item that will be added to the credentials.ini file for the DNS provider for DNS challenges. Write it as the key, whitespace, then the value (e.g. 'cloudflare_api_token 123456'); do not quote the key. The value can also be base64 encoded, or the whole item can be a base64 encoded json object.",
       "id": "lets-encrypt-dns-credential-item",
       "label": "Credential Item",
-      "regex": "^.*",
+      "regex": "^.*$",
       "type": "password",
       "multiple": "lets-encrypt-dns-credential-item"
     },

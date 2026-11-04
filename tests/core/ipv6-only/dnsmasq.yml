@@ -1,0 +1,34 @@
+services:
+  dnsmasq:
+    mem_limit: 64m
+    dns:
+      - fd42:1618:1::20
+    networks:
+      bw-universe:
+        ipv6_address: fd42:1618:1::20
+      bw-services:
+        ipv6_address: fd42:1618:2::20
+    ports: []
+    volumes:
+      - ${PWD}/tests/core/ipv6-only/dnsmasq.conf:/etc/dnsmasq.conf:ro
+    container_name: dnsmasq
+    restart: unless-stopped
+    image: dockurr/dnsmasq:2.91@sha256:7873ce2dae1b0aa51d2c13dd4bd3aad47890c233088b3c7f6eb099a01e6e4307
+    command: --log-facility=/dev/stdout
+    cap_add:
+      - NET_ADMIN
+networks:
+  bw-universe:
+    name: bw-universe
+    enable_ipv4: false
+    enable_ipv6: true
+    ipam:
+      config:
+        - subnet: fd42:1618:1::/64
+  bw-services:
+    name: bw-services
+    enable_ipv4: false
+    enable_ipv6: true
+    ipam:
+      config:
+        - subnet: fd42:1618:2::/64

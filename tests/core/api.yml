@@ -1,0 +1,126 @@
+integrations: "all"
+
+actions:
+  http:
+    type: status
+    url: "http://127.0.0.1:5001/ping"
+    status: 200
+    headers:
+      Host: "bwapi"
+      # Since 1.7 the stack always sets API_TOKEN (the worker needs it to push each job's
+      # cache), so the instance answers an unauthenticated call with HTTP_CLOSE.
+      Authorization: "Bearer tests-secret-token"
+    restart_stack: false
+  # `/health` is not `/ping`. `/ping` answers `pong` unconditionally, so it stays 200 through the
+  # startup state that turns nine core plugins off -- which is exactly the state the 1.7 fix
+  # "restarting an instance no longer turns its access controls off" is about. `/health` reports
+  # that state (`loading` / `reloading` / `needs_config` / `ok`), and the scheduler drives its
+  # re-push from it, so `ok` here is the assertion that a configured instance is enforcing rather
+  # than merely answering. Verified live on 2026-08-24: the same call returns
+  # `{"msg":"loading","status":"success"}` before the first configuration lands and
+  # `{"msg":"ok","status":"success"}` after it, so this needle provably distinguishes the two.
+  health:
+    type: string
+    url: "http://127.0.0.1:5001/health"
+    string: '"msg":"ok"'
+    headers:
+      Host: "bwapi"
+      Authorization: "Bearer tests-secret-token"
+    restart_stack: false
+  health_no_token:
+    # Same gate as `/ping`: an unauthenticated call is closed, not answered. Without this a token
+    # check dropped from the health route would go unnoticed -- the route reports whether the
+    # instance is enforcing, which is not public information.
+    type: status
+    url: "http://127.0.0.1:5001/health"
+    headers:
+      Host: "bwapi"
+    restart_stack: false
+
+  health_reflects_the_reload_marker_window:
+    # The two actions above prove `/health` distinguishes startup from ready; this proves it also
+    # distinguishes ready from mid-reload on an instance that was already settled -- the OTHER
+    # window the 1.7 fix cares about, and the one a plain YAML action cannot express because
+    # nothing here runs two HTTP calls against the same instance concurrently. `POST /reload`
+    # applies no config -- it HUPs nginx -- so what this actually observes is the marker file's
+    # lifetime, not a config apply. See tests/core/api/health_during_reload.sh for exactly what
+    # it races and why. Docker only: the script hardcodes the loopback API port this arm
+    # publishes.
+    type: script
+    integrations:
+      - "Docker"
+    script: ["./tests/core/api/health_during_reload.sh"]
+    result: "health_during_reload: reloading was observed"
+    restart_stack: false
+    retries: 1
+
+  no_token:
+    type: status
+    url: "http://127.0.0.1:5001/ping"
+    headers:
+      Host: "bwapi"
+    restart_stack: false
+  wrong_host:
+    type: status
+    url: "http://127.0.0.1:5001/ping"
+    headers:
+      Host: "wrong-host"
+    full_clean: true
+
+  https:
+    type: status
+    url: "https://127.0.0.1:5443/ping"
+    status: 200
+    verify_ssl: false
+    headers:
+      Host: "bwapi"
+      Authorization: "Bearer tests-secret-token"
+    config:
+      API_LISTEN_HTTPS: "yes"
+    restart_stack: false
+  http_again:
+    type: status
+    url: "http://127.0.0.1:5001/ping"
+    status: 200
+    headers:
+      Host: "bwapi"
+      Authorization: "Bearer tests-secret-token"
+    full_clean: true
+
+  http_deactivated:
+    type: status
+    url: "http://127.0.0.1:5001/ping"
+    headers:
+      Host: "bwapi"
+    # Not on Linux. The other arms gate readiness on the container healthcheck, which only asks
+    # whether nginx answers `/healthz` -- indifferent to whether the instance was ever
+    # configured. The Linux gate greps `BunkerWeb is ready` out of error.log
+    # (`tests/scripts/wait.sh`), and that line is only written once `IS_LOADING` flips, which
+    # takes a scheduler -> instance configuration push through the very listener this action
+    # turns off. The stack therefore cannot become healthy here however long it waits, and the
+    # action spent the full 300s timeout before asserting anything.
+    integrations:
+      - "Docker"
+      - "Autoconf"
+      - "Kubernetes"
+      - "All-in-one"
+    config:
+      API_LISTEN_HTTP: "no"
+
+config:
+  USE_API: "yes"
+  API_LISTEN_HTTP: "yes"
+  API_LISTEN_HTTPS: "no"
+  API_HTTP_PORT: "5000"
+  API_HTTPS_PORT: "5443"
+  API_SERVER_NAME: "bwapi"
+  API_WHITELIST_IP: "0.0.0.0/0"
+
+Linux:
+  config:
+    API_LISTEN_IP: "0.0.0.0"
+    API_HTTP_PORT: "5001"
+
+All-in-one:
+  config:
+    API_LISTEN_IP: "0.0.0.0"

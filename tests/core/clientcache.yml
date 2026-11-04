@@ -1,0 +1,49 @@
+integrations: "all"
+
+actions:
+  deactivated:
+    type: header
+    url: "http://www.example.com/logo.png"
+    method: "HEAD"
+    response_headers:
+      Cache-Control: null
+    config:
+      USE_CLIENT_CACHE: "no"
+  activated:
+    type: header
+    url: "http://www.example.com/logo.png"
+    method: "HEAD"
+    response_headers:
+      Cache-Control: "^public, max-age=15552000$"
+      ETag: '^"[a-z0-9-]+"$'
+  deactivated_cache_etag:
+    type: header
+    url: "http://www.example.com/logo.png"
+    method: "HEAD"
+    response_headers:
+      ETag: null
+    config:
+      CLIENT_CACHE_ETAG: "no"
+  tweaked_cache_extensions:
+    type: header
+    url: "http://www.example.com/logo.png"
+    method: "HEAD"
+    response_headers:
+      Cache-Control: null
+    config:
+      CLIENT_CACHE_EXTENSIONS: "jpg|jpeg|bmp|ico|svg"
+  tweaked_value:
+    type: header
+    url: "http://www.example.com/logo.png"
+    method: "HEAD"
+    response_headers:
+      Cache-Control: "^public, max-age=3600$"
+      ETag: '^"[a-z0-9-]+"$'
+    config:
+      CLIENT_CACHE_CONTROL: "public, max-age=3600"
+
+config:
+  USE_CLIENT_CACHE: "yes"
+
+annotations:
+  bunkerweb.io/REVERSE_PROXY_URL: ""

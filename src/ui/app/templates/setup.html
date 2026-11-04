@@ -340,7 +340,7 @@
                                                        value="{{ server_name }}"
                                                        class="form-control plugin-setting mt-1"
                                                        aria-labelledby="label-SERVER_NAME"
-                                                       pattern="{{ server_name_setting['regex'] }}"
+                                                       pattern="{{ server_name_setting['regex'] | v_safe_pattern }}"
                                                        required />
                                             </div>
                                             <h6 class="mt-2 mb-2 fw-bold"
@@ -490,7 +490,7 @@
                                                            value="{{ email_lets_encrypt }}"
                                                            class="form-control plugin-setting mt-1"
                                                            aria-labelledby="label-EMAIL_LETS_ENCRYPT"
-                                                           pattern="{{ plugins_settings.get('EMAIL_LETS_ENCRYPT', {'regex': '^.*$'})['regex'] }}" />
+                                                           pattern="{{ plugins_settings.get('EMAIL_LETS_ENCRYPT', {'regex': '^.*$'})['regex'] | v_safe_pattern }}" />
                                                 </div>
                                                 <div class="col-12 pb-3">
                                                     <div class="d-flex justify-content-between align-items-center">
@@ -645,7 +645,7 @@
                                                                            value="{{ lets_encrypt_zerossl_api_key }}"
                                                                            class="form-control plugin-setting mt-1"
                                                                            aria-labelledby="label-LETS_ENCRYPT_ZEROSSL_API_KEY"
-                                                                           pattern="{{ plugins_settings.get('LETS_ENCRYPT_ZEROSSL_API_KEY', {'regex': '^.*$'})['regex'] }}" />
+                                                                           pattern="{{ plugins_settings.get('LETS_ENCRYPT_ZEROSSL_API_KEY', {'regex': '^.*$'})['regex'] | v_safe_pattern }}" />
                                                                     <small class="text-muted d-block mt-1"
                                                                            data-i18n="setup.step2.lets_encrypt.zerossl_api_key_hint">If empty, ZeroSSL will use the configured email for account registration.</small>
                                                                 </div>
@@ -682,7 +682,7 @@
                                                                            value="{{ lets_encrypt_zerossl_api_retry }}"
                                                                            class="form-control plugin-setting mt-1"
                                                                            aria-labelledby="label-LETS_ENCRYPT_ZEROSSL_API_RETRY"
-                                                                           pattern="{{ plugins_settings.get('LETS_ENCRYPT_ZEROSSL_API_RETRY', {'regex': '^\\d+$'})['regex'] }}" />
+                                                                           pattern="{{ plugins_settings.get('LETS_ENCRYPT_ZEROSSL_API_RETRY', {'regex': '^\\d+$'})['regex'] | v_safe_pattern }}" />
                                                                 </div>
                                                                 <div class="col-sm-6 col-md-3 pb-3">
                                                                     <div class="d-flex justify-content-between align-items-center">
@@ -716,7 +716,7 @@
                                                                            value="{{ lets_encrypt_zerossl_api_retry_delay }}"
                                                                            class="form-control plugin-setting mt-1"
                                                                            aria-labelledby="label-LETS_ENCRYPT_ZEROSSL_API_RETRY_DELAY"
-                                                                           pattern="{{ plugins_settings.get('LETS_ENCRYPT_ZEROSSL_API_RETRY_DELAY', {'regex': '^\\d+(ms?|[shdwMy])?$'})['regex'] }}" />
+                                                                           pattern="{{ plugins_settings.get('LETS_ENCRYPT_ZEROSSL_API_RETRY_DELAY', {'regex': '^\\d+(ms?|[shdwMy])?$'})['regex'] | v_safe_pattern }}" />
                                                                 </div>
                                                                 <div class="col-sm-6 col-md-3 pb-3">
                                                                     <div class="d-flex justify-content-between align-items-center">
@@ -750,7 +750,7 @@
                                                                            value="{{ lets_encrypt_zerossl_api_connect_timeout }}"
                                                                            class="form-control plugin-setting mt-1"
                                                                            aria-labelledby="label-LETS_ENCRYPT_ZEROSSL_API_CONNECT_TIMEOUT"
-                                                                           pattern="{{ plugins_settings.get('LETS_ENCRYPT_ZEROSSL_API_CONNECT_TIMEOUT', {'regex': '^[1-9]\\d*(ms?|[shdwMy])?$'})['regex'] }}" />
+                                                                           pattern="{{ plugins_settings.get('LETS_ENCRYPT_ZEROSSL_API_CONNECT_TIMEOUT', {'regex': '^[1-9]\\d*(ms?|[shdwMy])?$'})['regex'] | v_safe_pattern }}" />
                                                                 </div>
                                                                 <div class="col-sm-6 col-md-3 pb-3">
                                                                     <div class="d-flex justify-content-between align-items-center">
@@ -784,7 +784,7 @@
                                                                            value="{{ lets_encrypt_zerossl_api_max_time }}"
                                                                            class="form-control plugin-setting mt-1"
                                                                            aria-labelledby="label-LETS_ENCRYPT_ZEROSSL_API_MAX_TIME"
-                                                                           pattern="{{ plugins_settings.get('LETS_ENCRYPT_ZEROSSL_API_MAX_TIME', {'regex': '^[1-9]\\d*(ms?|[shdwMy])?$'})['regex'] }}" />
+                                                                           pattern="{{ plugins_settings.get('LETS_ENCRYPT_ZEROSSL_API_MAX_TIME', {'regex': '^[1-9]\\d*(ms?|[shdwMy])?$'})['regex'] | v_safe_pattern }}" />
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -970,7 +970,7 @@
                                                            value="{{ lets_encrypt_custom_profile }}"
                                                            class="form-control plugin-setting mt-1"
                                                            aria-labelledby="label-LETS_ENCRYPT_CUSTOM_PROFILE"
-                                                           pattern="{{ plugins_settings.get('LETS_ENCRYPT_CUSTOM_PROFILE', {'regex': '^.*$'})['regex'] }}" />
+                                                           pattern="{{ plugins_settings.get('LETS_ENCRYPT_CUSTOM_PROFILE', {'regex': '^.*$'})['regex'] | v_safe_pattern }}" />
                                                 </div>
                                                 <div class="col-sm-6 col-md-4 pb-3"
                                                      data-le-field="dns-propagation"
@@ -1006,7 +1006,7 @@
                                                            value="{{ lets_encrypt_dns_propagation }}"
                                                            class="form-control plugin-setting mt-1"
                                                            aria-labelledby="label-LETS_ENCRYPT_DNS_PROPAGATION"
-                                                           pattern="{{ plugins_settings.get('LETS_ENCRYPT_DNS_PROPAGATION', {'regex': '^(default|\\d+)$'})['regex'] }}"
+                                                           pattern="{{ plugins_settings.get('LETS_ENCRYPT_DNS_PROPAGATION', {'regex': '^(default|\\d+)$'})['regex'] | v_safe_pattern }}"
                                                            {% if lets_encrypt_challenge == 'http' %}disabled{% endif %} />
                                                 </div>
                                                 <div class="col-12 pb-3"
@@ -1081,7 +1081,7 @@
                                                                    value="{{ ui_host }}"
                                                                    class="form-control plugin-setting mt-1"
                                                                    aria-labelledby="label-REVERSE_PROXY_HOST"
-                                                                   pattern="{{ plugins_settings.get('REVERSE_PROXY_HOST', {'regex': '^.+$'})['regex'] }}"
+                                                                   pattern="{{ plugins_settings.get('REVERSE_PROXY_HOST', {'regex': '^.+$'})['regex'] | v_safe_pattern }}"
                                                                    required />
                                                         </div>
                                                         <div class="col-12 col-md-6 pb-6">
@@ -1114,7 +1114,7 @@
                                                                    value="{{ reverse_proxy_url_setting['default'] }}"
                                                                    class="form-control plugin-setting mt-1"
                                                                    aria-labelledby="label-REVERSE_PROXY_URL"
-                                                                   pattern="{{ reverse_proxy_url_setting['regex'] }}"
+                                                                   pattern="{{ reverse_proxy_url_setting['regex'] | v_safe_pattern }}"
                                                                    required />
                                                         </div>
                                                         <h6 class="mt-2 mb-2 fw-bold" data-i18n="setup.step2.section.real_ip">Real IP</h6>
@@ -1258,7 +1258,7 @@
                                                                    value="{{ real_ip_header }}"
                                                                    class="form-control plugin-setting mt-1"
                                                                    aria-labelledby="label-REAL_IP_HEADER"
-                                                                   pattern="{{ plugins_settings.get('REAL_IP_HEADER', {'regex': '^.+$'})['regex'] }}" />
+                                                                   pattern="{{ plugins_settings.get('REAL_IP_HEADER', {'regex': '^.+$'})['regex'] | v_safe_pattern }}" />
                                                         </div>
                                                         <div class="col-12 col-md-6 pb-3">
                                                             <div class="d-flex justify-content-between align-items-center">
@@ -1292,7 +1292,7 @@
                                                                    value="{{ real_ip_from }}"
                                                                    class="form-control plugin-setting mt-1"
                                                                    aria-labelledby="label-REAL_IP_FROM"
-                                                                   pattern="{{ plugins_settings.get('REAL_IP_FROM', {'regex': '^.+$'})['regex'] }}" />
+                                                                   pattern="{{ plugins_settings.get('REAL_IP_FROM', {'regex': '^.+$'})['regex'] | v_safe_pattern }}" />
                                                         </div>
                                                         <div class="col-12 pb-3">
                                                             <div class="d-flex justify-content-between align-items-center">
@@ -1326,7 +1326,7 @@
                                                                    value="{{ real_ip_from_urls }}"
                                                                    class="form-control plugin-setting mt-1"
                                                                    aria-labelledby="label-REAL_IP_FROM_URLS"
-                                                                   pattern="{{ plugins_settings.get('REAL_IP_FROM_URLS', {'regex': '^.+$'})['regex'] }}" />
+                                                                   pattern="{{ plugins_settings.get('REAL_IP_FROM_URLS', {'regex': '^.+$'})['regex'] | v_safe_pattern }}" />
                                                         </div>
                                                         <h6 class="mt-2 mb-2 fw-bold"
                                                             data-i18n="setup.step2.section.custom_certificate">
@@ -1440,7 +1440,7 @@
                                                                    value="{{ custom_ssl_cert }}"
                                                                    class="form-control plugin-setting mt-1"
                                                                    aria-labelledby="label-CUSTOM_SSL_CERT"
-                                                                   pattern="{{ plugins_settings.get('CUSTOM_SSL_CERT', {'regex': '^.*$'})['regex'] }}"
+                                                                   pattern="{{ plugins_settings.get('CUSTOM_SSL_CERT', {'regex': '^.*$'})['regex'] | v_safe_pattern }}"
                                                                    {% if use_custom_ssl == "no" %}disabled{% endif %} />
                                                         </div>
                                                         <div class="col-12 col-md-6 pb-3">
@@ -1476,7 +1476,7 @@
                                                                    value="{{ custom_ssl_key }}"
                                                                    class="form-control plugin-setting mt-1"
                                                                    aria-labelledby="label-CUSTOM_SSL_KEY"
-                                                                   pattern="{{ plugins_settings.get('CUSTOM_SSL_KEY', {'regex': '^.*$'})['regex'] }}"
+                                                                   pattern="{{ plugins_settings.get('CUSTOM_SSL_KEY', {'regex': '^.*$'})['regex'] | v_safe_pattern }}"
                                                                    {% if use_custom_ssl == "no" %}disabled{% endif %} />
                                                         </div>
                                                         <div class="col-12 col-md-6 pb-3">
@@ -1511,7 +1511,7 @@
                                                                        type="hidden"
                                                                        class="plugin-setting plugin-setting-file-text"
                                                                        aria-labelledby="label-CUSTOM_SSL_CERT_DATA"
-                                                                       pattern="{{ plugins_settings.get('CUSTOM_SSL_CERT_DATA', {'regex': '^.*$'})['regex'] }}"
+                                                                       pattern="{{ plugins_settings.get('CUSTOM_SSL_CERT_DATA', {'regex': '^.*$'})['regex'] | v_safe_pattern }}"
                                                                        value="{{ custom_ssl_cert_data }}"
                                                                        data-upload-target="#custom-ssl-cert-data-upload"
                                                                        data-manual-target="#custom-ssl-cert-data-manual"
@@ -1589,7 +1589,7 @@
                                                                        type="hidden"
                                                                        class="plugin-setting plugin-setting-file-text"
                                                                        aria-labelledby="label-CUSTOM_SSL_KEY_DATA"
-                                                                       pattern="{{ plugins_settings.get('CUSTOM_SSL_KEY_DATA', {'regex': '^.*$'})['regex'] }}"
+                                                                       pattern="{{ plugins_settings.get('CUSTOM_SSL_KEY_DATA', {'regex': '^.*$'})['regex'] | v_safe_pattern }}"
                                                                        value="{{ custom_ssl_key_data }}"
                                                                        data-upload-target="#custom-ssl-key-data-upload"
                                                                        data-manual-target="#custom-ssl-key-data-manual"

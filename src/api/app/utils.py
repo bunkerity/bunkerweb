@@ -29,9 +29,11 @@ def get_db(*, log: bool = True) -> Database:
     """
     global _DB_INSTANCE
     if _DB_INSTANCE is None or getattr(_DB_INSTANCE, "sql_engine", None) is None:  # type: ignore[attr-defined]
+        from API import API  # type: ignore
         from Database import Database  # type: ignore
 
         _DB_INSTANCE = Database(LOGGER, log=log)  # type: ignore
+        API.pin_from_database(_DB_INSTANCE)
     return _DB_INSTANCE  # type: ignore
 
 
@@ -115,4 +117,10 @@ def bcrypt_cost(value: str) -> int:
 
 
 def check_password(password: str, hashed: bytes) -> bool:
-    return checkpw(_bcrypt_secret(password), hashed)
+    try:
+        return checkpw(_bcrypt_secret(password), hashed)
+    except ValueError:
+        LOGGER.warning("Stored bcrypt hash is unusable, credential check refused")
+        # Spend the normal cost-13 verification work even when the stored salt is invalid.
+        checkpw(_bcrypt_secret(password), b"$2b$13$sVeBUZx0Jw7D4gGJQf7k7O5Wh2tJReLrfhp/SdAkh7AaQ.PuzvAmC")
+        return False

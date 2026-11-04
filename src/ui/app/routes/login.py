@@ -1,10 +1,11 @@
 from datetime import datetime
 from os import getenv
 
-from flask import Blueprint, current_app, redirect, render_template, request, session, url_for
+from flask import Blueprint, current_app, make_response, redirect, render_template, request, session, url_for
 from markupsafe import Markup
 from flask_login import current_user, login_user
 
+from app import login_throttle
 from app.dependencies import DB
 from app.utils import BISCUIT_PRIVATE_KEY_FILE, LOGGER, flash, _sanitize_internal_next
 from app.models.biscuit import BiscuitTokenFactory, PrivateKey
@@ -28,10 +29,13 @@ def login_page():
         return redirect(url_for("home.home_page"))
 
     fail = False
+    locked = ""
     if request.method == "POST" and "username" in request.form and "password" in request.form:
         LOGGER.warning(f"Login attempt from {request.remote_addr} with username \"{request.form['username']}\"")
 
-        ui_user = DB.get_ui_user(username=request.form["username"])
+        # Checked before the password, and answered the same whether or not the username exists
+        locked = login_throttle.locked_message(DB, request.form["username"], request.remote_addr)
+        ui_user = None if locked else DB.get_ui_user(username=request.form["username"])
         if ui_user and ui_user.username == request.form["username"] and ui_user.check_password(request.form["password"]):
             # Rotate the session id to prevent session fixation (CWE-384). flask_session's
             # regenerate() only rotates a *non-empty* session (it guards on `if session:`),
@@ -95,6 +99,11 @@ def login_page():
             if ret:
                 LOGGER.error(f"Couldn't update the user {current_user.get_id()}: {ret}")
 
+            # With a second factor the counter is cleared once that is passed (totp.py): clearing it here would
+            # give someone who knows the password a fresh set of guesses at every code.
+            if not ui_user.totp_secret:
+                login_throttle.reset(DB, ui_user.username)
+
             LOGGER.info(f"User {ui_user.username} logged in successfully" + (" with remember me" if request.form.get("remember-me") == "on" else ""))
 
             if not ui_user.totp_secret:
@@ -118,16 +127,22 @@ def login_page():
 
             return redirect(url_for("loading", next=safe_next))
         else:
-            flash("Invalid username or password", "error", save=False)
+            if not locked:
+                login_throttle.record_failure(DB, request.form["username"], request.remote_addr)
+            error = f"Invalid username or password. {locked}" if locked else "Invalid username or password"
+            flash(error, "error", save=False)
             fail = True
 
     kwargs = {
         "is_totp": bool(current_user.totp_secret),
-    } | ({"error": "Invalid username or password"} if fail else {})
+    } | ({"error": error} if fail else {})
 
     # Looked up, never echoed: whatever is in the query string must not reach the page.
     notice = LOGIN_NOTICES.get(request.args.get("reason", ""))
     if notice:
         kwargs["notice"] = notice
 
-    return render_template("login.html", **kwargs), 401 if fail else 200
+    response = make_response(render_template("login.html", **kwargs), 429 if locked else 401 if fail else 200)
+    if locked:
+        response.headers["Retry-After"] = "60"
+    return response

@@ -18,6 +18,7 @@ from stat import S_IRGRP, S_IRUSR, S_IWUSR, S_IXGRP, S_IXUSR
 from subprocess import run as subprocess_run, DEVNULL, STDOUT
 from sys import executable as sys_executable, path as sys_path
 from tarfile import open as tar_open
+from tarfile import TarError
 from threading import Event, Lock
 from time import monotonic, sleep
 from traceback import format_exc
@@ -74,10 +75,8 @@ SCHEDULER: Optional[JobScheduler] = None
 SCHEDULER_LOCK = Lock()
 
 CACHE_PATH = Path(sep, "var", "cache", "bunkerweb")
-CACHE_PATH.mkdir(parents=True, exist_ok=True)
 
 CUSTOM_CONFIGS_PATH = Path(sep, "etc", "bunkerweb", "configs")
-CUSTOM_CONFIGS_PATH.mkdir(parents=True, exist_ok=True)
 CUSTOM_CONFIGS_DIRS = (
     "http",
     "stream",
@@ -90,28 +89,37 @@ CUSTOM_CONFIGS_DIRS = (
     "crs-plugins-after",
 )
 
-for custom_config_dir in CUSTOM_CONFIGS_DIRS:
-    CUSTOM_CONFIGS_PATH.joinpath(custom_config_dir).mkdir(parents=True, exist_ok=True)
-
 CONFIG_PATH = Path(sep, "etc", "nginx")
 NGINX_VARIABLES_PATH = CONFIG_PATH.joinpath("variables.env")
 
 EXTERNAL_PLUGINS_PATH = Path(sep, "etc", "bunkerweb", "plugins")
-EXTERNAL_PLUGINS_PATH.mkdir(parents=True, exist_ok=True)
 
 PRO_PLUGINS_PATH = Path(sep, "etc", "bunkerweb", "pro", "plugins")
-PRO_PLUGINS_PATH.mkdir(parents=True, exist_ok=True)
 
 TMP_PATH = Path(sep, "var", "tmp", "bunkerweb")
-TMP_PATH.mkdir(parents=True, exist_ok=True)
 NGINX_TMP_VARIABLES_PATH = TMP_PATH.joinpath("variables.env")
 
 FAILOVER_PATH = TMP_PATH.joinpath("failover")
-FAILOVER_PATH.mkdir(parents=True, exist_ok=True)
 
 HEALTHY_PATH = TMP_PATH.joinpath("scheduler.healthy")
 
 DB_LOCK_FILE = Path(sep, "var", "lib", "bunkerweb", "db.lock")
+
+
+def ensure_runtime_dirs() -> None:
+    """Create the folders the scheduler writes to. Called first by main(), never at import."""
+    for path in (
+        CACHE_PATH,
+        CUSTOM_CONFIGS_PATH,
+        *(CUSTOM_CONFIGS_PATH.joinpath(d) for d in CUSTOM_CONFIGS_DIRS),
+        EXTERNAL_PLUGINS_PATH,
+        PRO_PLUGINS_PATH,
+        TMP_PATH,
+        FAILOVER_PATH,
+    ):
+        path.mkdir(parents=True, exist_ok=True)
+
+
 LOGGER = getLogger("SCHEDULER")
 PLUGIN_VALIDATOR: Optional[Configurator] = None
 
@@ -257,10 +265,6 @@ def handle_stop(signum, frame):
     stop(0)
 
 
-signal(SIGINT, handle_stop)
-signal(SIGTERM, handle_stop)
-
-
 # Function to catch SIGHUP and reload the scheduler
 def handle_reload(signum, frame):
     global RELOAD_SCAN_CONFIGS
@@ -296,7 +300,10 @@ def handle_reload(signum, frame):
         LOGGER.error(f"Exception while reloading scheduler : {e}")
 
 
-signal(SIGHUP, handle_reload)
+def install_signal_handlers() -> None:
+    signal(SIGINT, handle_stop)
+    signal(SIGTERM, handle_stop)
+    signal(SIGHUP, handle_reload)
 
 
 def stop(status):
@@ -349,6 +356,77 @@ def wait_for_reachable_instance(timeout: int = 60) -> bool:
         sleep(2)
 
 
+# What the instance's API answers (the JSON "msg" of a 503) while another change holds its marker or lock.
+BUSY_MESSAGES = ("a configuration generation is in progress", "a push swap is in progress", "another push swap is in progress")
+BUSY_RELOAD_PREFIX = "a reload is in progress ("
+
+# A reload that answered 200 with confirmed=false is checked with GET /health instead of another reload. The wait
+# has to outlast the new workers' readiness (30-50 s measured with a slow init_worker, #4086) and the marker of a
+# rejected reload never clears by itself before 5 minutes, so it is bounded: the reload timeout, at least a minute,
+# at most five. One deadline covers every instance of a reload, so several stuck instances cost one bound.
+RELOAD_CONFIRM_MIN_WAIT = 60
+RELOAD_CONFIRM_MAX_WAIT = 300
+RELOAD_CONFIRM_POLL = 2
+
+# Instances that answered a scheduler-wide push with a busy 503, hostname -> message. The push keeps them listed,
+# so whoever pushed (or reloaded) next has to read this, or it would report a configuration nothing took.
+PUSH_BUSY: Dict[str, str] = {}
+
+
+def is_busy_message(msg: str) -> bool:
+    return msg in BUSY_MESSAGES or msg.startswith(BUSY_RELOAD_PREFIX)
+
+
+def response_for(responses: Dict[str, Any], hostname: str, default: Dict[str, Any]) -> Dict[str, Any]:
+    """ApiCaller keys the answers by the lowercased URL hostname, the database keeps the hostname as written."""
+    response = responses.get(hostname)
+    if response is None:
+        response = responses.get(hostname.strip("[]").lower())
+    return default if response is None else response
+
+
+def take_busy_pushes() -> Dict[str, str]:
+    with SCHEDULER_LOCK:
+        busy = PUSH_BUSY.copy()
+        PUSH_BUSY.clear()
+    return busy
+
+
+def confirm_unconfirmed_reloads(responses: Dict[str, Any], timeout: Union[int, float]) -> Dict[str, str]:
+    """Ask GET /health of every instance whose reload answered 200 with confirmed=false, until it says "ok".
+
+    Returns {hostname: last state} for the instances still not ok when the shared deadline runs out. An instance
+    that is listed but did not answer counts as "unreachable". At least one probe per instance, whatever the clock.
+    """
+    assert SCHEDULER is not None
+    waiting = {}
+    for db_instance in SCHEDULER.db.get_instances():
+        response = response_for(responses, db_instance["hostname"], {})
+        if isinstance(response, dict) and response.get("status") == "success" and response.get("confirmed") is False:
+            waiting[db_instance["hostname"]] = db_instance
+
+    deadline = None
+    pending = {}
+    for hostname, db_instance in waiting.items():
+        api = API.from_instance(db_instance)
+        state = "unreachable"
+        while True:
+            try:
+                sent, _, status, resp = api.request("GET", "health", timeout=(5, 10))
+                state = str(resp.get("msg") or "unknown") if sent and status == 200 and isinstance(resp, dict) else "unreachable"
+            except Exception:
+                state = "unreachable"
+            if state == "ok":
+                break
+            if deadline is None:
+                deadline = monotonic() + min(max(timeout, RELOAD_CONFIRM_MIN_WAIT), RELOAD_CONFIRM_MAX_WAIT)
+            if monotonic() >= deadline:
+                pending[hostname] = state
+                break
+            sleep(RELOAD_CONFIRM_POLL)
+    return pending
+
+
 def send_file_to_bunkerweb(file_path: Path, endpoint: str, logger: Logger = LOGGER, *, api_caller: Optional[ApiCaller] = None):
     assert SCHEDULER is not None, "SCHEDULER is not defined"
     logger.info(f"Sending {file_path} to {'specific' if api_caller else 'all reachable'} BunkerWeb instances ...")
@@ -359,6 +437,7 @@ def send_file_to_bunkerweb(file_path: Path, endpoint: str, logger: Logger = LOGG
         response=True,
     )
     fails = []
+    busy_names = []
 
     # A push aimed at one instance says nothing about the others: they are simply absent from
     # responses, which the loop below would read as "down" and write to the database before evicting
@@ -374,9 +453,13 @@ def send_file_to_bunkerweb(file_path: Path, endpoint: str, logger: Logger = LOGG
             with SCHEDULER_LOCK:
                 known = any(api.endpoint == instance_endpoint for api in SCHEDULER.apis)
 
-            status = responses.get(db_instance["hostname"], {"status": "down"}).get("status", "down")
+            response = response_for(responses, db_instance["hostname"], {"status": "down"})
+            status = response.get("status", "down")
+            # The instance answered: it is busy with another change, not down. A busy 503 used to evict it, and
+            # the reload that followed then reported a configuration the instance never received.
+            busy = status != "success" and is_busy_message(str(response.get("msg", "")))
 
-            ret = SCHEDULER.db.update_instance(db_instance["hostname"], "up" if status == "success" else "down")
+            ret = SCHEDULER.db.update_instance(db_instance["hostname"], "up" if status == "success" or busy else "down")
             if ret:
                 logger.error(f"Couldn't update instance {db_instance['hostname']} status to down in the database: {ret}")
 
@@ -392,17 +475,24 @@ def send_file_to_bunkerweb(file_path: Path, endpoint: str, logger: Logger = LOGG
                     if not any(api.endpoint == instance_endpoint for api in SCHEDULER.apis):
                         logger.debug(f"Adding {db_instance['hostname']}:{port_display} to the list of reachable instances")
                         SCHEDULER.apis.append(API.from_instance(db_instance))
+                elif busy:
+                    busy_names.append(f"{db_instance['hostname']}:{port_display}")
+                    if api_caller is None:
+                        PUSH_BUSY[db_instance["hostname"]] = str(response.get("msg", ""))
                 elif known:
                     fails.append(f"{db_instance['hostname']}:{port_display}")
                     logger.debug(f"Removing {db_instance['hostname']}:{port_display} from the list of reachable instances")
                     SCHEDULER.apis[:] = [api for api in SCHEDULER.apis if api.endpoint != instance_endpoint]
 
+    if busy_names:
+        logger.warning(f"{file_path} was not applied on {', '.join(busy_names)}: the instance is busy applying another change, the configuration stays pending")
     if not success:
-        logger.error(f"Error while sending {file_path} to BunkerWeb instances")
-    elif not fails:
-        logger.info(f"Successfully sent {file_path} folder to reachable BunkerWeb instances")
-    elif not IGNORE_FAIL_SENDING_CONFIG:
+        if not busy_names:
+            logger.error(f"Error while sending {file_path} to BunkerWeb instances")
+    elif fails:
         logger.warning(f"Error while sending {file_path} to some BunkerWeb instances, removing them from the list of reachable instances: {', '.join(fails)}")
+    elif not busy_names:
+        logger.info(f"Successfully sent {file_path} folder to reachable BunkerWeb instances")
 
     return success
 
@@ -471,6 +561,40 @@ def generate_custom_configs(configs: Optional[List[Dict[str, Any]]] = None, *, o
         send_file_to_bunkerweb(original_path, "/custom_configs")
 
 
+def installed_plugin_matches_archive(plugin_content: BytesIO, plugin: Dict[str, Any]) -> bool:
+    """Compare archive contents after accounting for scheduler-owned permission changes."""
+    data = plugin.get("data")
+    if not data or bytes_hash(data, algorithm="sha256") != plugin["checksum"]:
+        return False
+    try:
+        plugin_content.seek(0)
+        with tar_open(fileobj=plugin_content, mode="r:gz") as installed, tar_open(fileobj=BytesIO(data), mode="r:gz") as stored:
+            actual = {member.name: member for member in installed.getmembers()}
+            expected = {member.name: member for member in stored.getmembers()}
+            if actual.keys() != expected.keys():
+                return False
+            for name, member in expected.items():
+                current = actual[name]
+                parts = Path(name).parts[1:]
+                mode = member.mode & ~0o022
+                if member.isdir():
+                    mode = 0o755
+                elif member.isfile() and len(parts) > 1 and (parts[0] in ("jobs", "bwcli") or (parts[0] == "ui" and parts[-1].endswith(".py"))):
+                    mode = 0o750
+                if (current.type, current.mode, current.size) != (member.type, mode, member.size):
+                    return False
+                if member.isfile():
+                    current_file = installed.extractfile(current)
+                    stored_file = stored.extractfile(member)
+                    assert current_file is not None and stored_file is not None
+                    with current_file, stored_file:
+                        if current_file.read() != stored_file.read():
+                            return False
+            return True
+    except (OSError, TarError, ValueError):
+        return False
+
+
 def generate_external_plugins(original_path: Union[Path, str] = EXTERNAL_PLUGINS_PATH, *, send: bool = True):
     if not isinstance(original_path, Path):
         original_path = Path(original_path)
@@ -497,7 +621,9 @@ def generate_external_plugins(original_path: Union[Path, str] = EXTERNAL_PLUGINS
                     plugin_content = create_plugin_tar_gz(file, arc_root=file.name)
                 else:
                     continue
-                if bytes_hash(plugin_content, algorithm="sha256") == plugins[index]["checksum"]:
+                if bytes_hash(plugin_content, algorithm="sha256") == plugins[index]["checksum"] or installed_plugin_matches_archive(
+                    plugin_content, plugins[index]
+                ):
                     ignored_plugins.add(file.name)
                     continue
                 LOGGER.debug(f"Checksum of {file} has changed, removing it ...")
@@ -838,6 +964,10 @@ def pre_push_configuration(env: Dict[str, Any], first_start: bool) -> Tuple[bool
     if not generate_configs():
         return False, False, True
 
+    if first_start:
+        # Startup generation may have run before any instance was reachable.
+        send_file_to_bunkerweb(CUSTOM_CONFIGS_PATH, "/custom_configs")
+
     futures = [
         SCHEDULER_TASKS_EXECUTOR.submit(send_file_to_bunkerweb, CONFIG_PATH, "/confs"),
         SCHEDULER_TASKS_EXECUTOR.submit(send_file_to_bunkerweb, CACHE_PATH, "/cache"),
@@ -852,17 +982,32 @@ def pre_push_configuration(env: Dict[str, Any], first_start: bool) -> Tuple[bool
             LOGGER.error(f"Exception while sending the configuration before running jobs : {e}")
             push_failed = True
 
+    # A busy instance kept its place in SCHEDULER.apis: the reload below is answered by it too, and a 200 from an
+    # instance that never received the configuration says nothing about this one.
+    if take_busy_pushes():
+        push_failed = True
+
+    reload_timeout = max(RELOAD_MIN_TIMEOUT, 3 * len(env.get("SERVER_NAME", "www.example.com").split()))
     reloaded, responses = SCHEDULER.send_to_apis(
         "POST",
         f"/reload?test={'no' if DISABLE_CONFIGURATION_TESTING else 'yes'}",
-        timeout=max(RELOAD_MIN_TIMEOUT, 3 * len(env.get("SERVER_NAME", "www.example.com").split())),
+        timeout=reload_timeout,
         response=True,
     )
+    responses = responses or {}
+
+    # 200 with confirmed=false: signalled, not known to be live. /health says when it is.
+    unconfirmed = confirm_unconfirmed_reloads(responses, reload_timeout)
+    for hostname, state in unconfirmed.items():
+        LOGGER.error(f"The reload was signalled to {hostname} but not confirmed: the instance is still {state}, treating the configuration as not applied")
 
     # send_to_apis answers False when any single instance failed, so one node failing its own
     # configuration check would otherwise hold back the jobs of every other node. One instance
     # running the new configuration is what the jobs need.
-    took_it = reloaded or any(isinstance(resp, dict) and resp.get("status") == "success" for resp in (responses or {}).values())
+    took_it = (reloaded and not unconfirmed) or any(
+        isinstance(resp, dict) and resp.get("status") == "success" and not any(name.lower() == str(host).lower() for name in unconfirmed)
+        for host, resp in responses.items()
+    )
 
     # An empty API list answers True, so the reload result on its own does not say the configuration
     # reached anything. IGNORE_FAIL_SENDING_CONFIG is the operator saying to proceed regardless.
@@ -889,6 +1034,21 @@ def pre_push_deferral(pushed: bool, deferrals: int) -> Tuple[bool, int]:
     if pushed or deferrals >= PRE_PUSH_MAX_DEFERRALS:
         return False, 0
     return True, deferrals + 1
+
+
+def once_jobs_republish(first_start: bool, pre_push_done: bool, pre_push_rendered: bool, jobs_changed: bool, readonly: bool) -> bool:
+    """Whether the iteration still has to render, push and reload after the once-jobs ran.
+
+    The pre-job push already delivered the configuration and reloaded the instances, so doing it again
+    is only worth it when a once-job reported a change (exit status 1 or 3: a file for the templates such
+    as api-server-cert.pem, a cache entry, ...). An unchanged second reload is pure cost: on Kubernetes
+    it lands while the workers of the first one are still draining and the instance holds the compiled
+    ruleset three times (#4106). The first start, a read-only database (the caches are only restored
+    locally) and IGNORE_FAIL_SENDING_CONFIG (a push nothing confirmed counts as taken) always publish.
+    """
+    if first_start or readonly or IGNORE_FAIL_SENDING_CONFIG or not (pre_push_done and pre_push_rendered):
+        return True
+    return jobs_changed
 
 
 def custom_configs_save_failed(err: str) -> bool:
@@ -1176,7 +1336,12 @@ def backup_failover():
         BACKING_UP_FAILOVER.clear()
 
 
-if __name__ == "__main__":
+def main() -> None:
+    global SCHEDULER, JOB, RELOAD_SCAN_CONFIGS
+
+    ensure_runtime_dirs()
+    install_signal_handlers()
+
     try:
         # Handle Docker secrets first
         docker_secrets = handle_docker_secrets()
@@ -1498,6 +1663,7 @@ if __name__ == "__main__":
             pre_push_failed = False
             pre_push_rendered = False
             generation_failed = False
+            republish_after_jobs = True
             if CONFIG_NEED_GENERATION and RUN_JOBS_ONCE:
                 # A fault in here is a failed push, not a reason to leave: uncaught it reaches the
                 # outer handler, which turns it into stop(1).
@@ -1567,19 +1733,25 @@ if __name__ == "__main__":
                 # The once-jobs only record what they changed; this iteration publishes it below.
                 # Taking the flags here keeps the render/push/reload to exactly one per applied
                 # change instead of letting the first run_pending() rediscover and repeat it.
-                _, jobs_need_generation = SCHEDULER.consume_pending_publication()
+                jobs_changed, jobs_need_generation = SCHEDULER.consume_pending_publication()
                 if jobs_need_generation:
                     CONFIG_NEED_GENERATION = True
+                    jobs_changed = True
 
                 healthcheck_job_run = False
                 # Jobs may have created files needed by config templates (e.g. api-server-cert.pem),
                 # so undo the flag the push above cleared and let the normal path render again. Keyed
                 # on the render, not on the push succeeding: the jobs also run once the deferral has
                 # given way, and that render is the only thing that carries what they produced to the
-                # instances.
+                # instances. Only when a job reported a change though, otherwise the same configuration
+                # is pushed and reloaded a second time for nothing (#4106).
+                republish_after_jobs = once_jobs_republish(FIRST_START, pre_push_done, pre_push_rendered, jobs_changed, SCHEDULER.db.readonly)
                 if pre_push_rendered:
-                    LOGGER.info("Regenerating config after once-jobs to pick up files created by jobs (e.g. api-server-cert.pem)")
-                    CONFIG_NEED_GENERATION = True
+                    if republish_after_jobs:
+                        LOGGER.info("Regenerating config after once-jobs to pick up files created by jobs (e.g. api-server-cert.pem)")
+                        CONFIG_NEED_GENERATION = True
+                    else:
+                        LOGGER.info("No once-job changed anything since the configuration was pushed, skipping the second push and reload")
 
             # A generation that just failed in the pre-push, with the once-jobs held back, has nothing new
             # to try: the same inputs would only fail the same way a second time in this iteration.
@@ -1594,11 +1766,17 @@ if __name__ == "__main__":
             try:
                 success = True
                 reachable = True
+                reloaded = False
                 if generation_failed:
                     # Nothing new reached the instances: a reload now would load the plugins and custom
                     # configs already pushed against the previous configuration, and report it as applied.
                     success = False
+                elif not republish_after_jobs:
+                    # The pre-job push is the configuration the instances run; its reload already succeeded.
+                    reloaded = True
                 elif SCHEDULER.apis:
+                    # A pre-job push that reached nothing is retried: this reload says nothing about it.
+                    reloaded = not pre_push_failed
                     # send cache
                     task_futures.append(SCHEDULER_TASKS_EXECUTOR.submit(send_file_to_bunkerweb, CACHE_PATH, "/cache"))
 
@@ -1607,10 +1785,15 @@ if __name__ == "__main__":
 
                     task_futures.clear()
 
+                    # An instance that answered a push with a busy 503 stays listed; whatever it answers to the
+                    # reload below is about the configuration it already ran, not the one just rendered.
+                    busy_pushes = take_busy_pushes()
+
+                    reload_timeout = max(RELOAD_MIN_TIMEOUT, 3 * len(env.get("SERVER_NAME", "www.example.com").split()))
                     success, responses = SCHEDULER.send_to_apis(
                         "POST",
                         f"/reload?test={'no' if DISABLE_CONFIGURATION_TESTING else 'yes'}",
-                        timeout=max(RELOAD_MIN_TIMEOUT, 3 * len(env.get("SERVER_NAME", "www.example.com").split())),
+                        timeout=reload_timeout,
                         response=True,
                     )
                     if not success:
@@ -1619,23 +1802,36 @@ if __name__ == "__main__":
                     LOGGER.debug(responses)
 
                     responses = responses or {}
+                    for hostname, busy_msg in busy_pushes.items():
+                        responses[hostname] = {"status": "error", "msg": busy_msg}
+
+                    # 200 with confirmed=false: signalled, not known to be live. /health says when it is, with no
+                    # second reload (#4106); the ones still not ok at the bound stay pending like a busy reload.
+                    unconfirmed = confirm_unconfirmed_reloads(responses, reload_timeout)
 
                     for db_instance in SCHEDULER.db.get_instances():
-                        metadata = responses.get(db_instance["hostname"], {})
+                        metadata = response_for(responses, db_instance["hostname"], {})
                         status = metadata.get("status", "down")
                         msg = str(metadata.get("msg", ""))
                         init_failed = status != "success" and msg.startswith("reload failed:")
-                        # ApiCaller returns the JSON body without the HTTP status; these are the reload API's 503 messages.
-                        reload_busy = status != "success" and (
-                            msg in ("a configuration generation is in progress", "a push swap is in progress") or msg.startswith("a reload is in progress (")
-                        )
+                        # ApiCaller returns the JSON body without the HTTP status; these are the API's 503 messages.
+                        reload_busy = status != "success" and is_busy_message(msg)
+                        # No answer at all (timeout, connection error): the configuration was not applied and nothing else retries it.
+                        no_answer = status != "success" and not metadata
                         config_check_failed = msg.startswith("config check failed") or init_failed
-                        generation_failed = generation_failed or init_failed or reload_busy
+                        generation_failed = generation_failed or init_failed or reload_busy or no_answer
 
                         if status == "success":
                             success = True
                             if metadata.get("confirmed") is False:
                                 LOGGER.warning(f"Reload readiness is unconfirmed on {db_instance['hostname']}: {msg}")
+                            if db_instance["hostname"] in unconfirmed:
+                                generation_failed = True
+                                port_display = db_instance["https_port"] if db_instance.get("listen_https") else db_instance["port"]
+                                failover_message += (
+                                    f"{db_instance['hostname']}:{port_display} - the reload was signalled but not confirmed "
+                                    f"(the instance is still {unconfirmed[db_instance['hostname']]})\n"
+                                )
                         else:
                             message = msg or "couldn't get message"
                             if "\n" in message:
@@ -1683,6 +1879,11 @@ if __name__ == "__main__":
 
                     task_futures.clear()
                     LOGGER.warning("No BunkerWeb instance found, skipping bunkerweb reload ...")
+                    if generation_failures:
+                        # A configuration that already failed to apply has reached nobody since: not applied, so not
+                        # forgotten. The healthcheck puts a healthy instance back in the list without pushing.
+                        generation_failed = True
+                        failover_message += "no BunkerWeb instance is listed, the pending configuration reached none\n"
             except BaseException as e:
                 LOGGER.error(f"Exception while reloading after running jobs once scheduling : {e}")
 
@@ -1743,8 +1944,11 @@ if __name__ == "__main__":
                         )[0]:
                             LOGGER.error("Error while reloading bunkerweb with failover configuration, skipping ...")
                 elif not reachable:
-                    LOGGER.warning("No BunkerWeb instance is reachable, skipping failover ...")
-                else:
+                    LOGGER.warning(
+                        "Every BunkerWeb instance failed the reload, skipping failover: "
+                        + ("; ".join(failover_message.strip().splitlines()) or "no answer details")
+                    )
+                elif reloaded:
                     LOGGER.info("Successfully reloaded bunkerweb")
                     SCHEDULER_TASKS_EXECUTOR.submit(backup_failover)
             except BaseException as e:
@@ -2006,3 +2210,7 @@ if __name__ == "__main__":
     except:
         LOGGER.error(f"Exception while executing scheduler : {format_exc()}")
         stop(1)
+
+
+if __name__ == "__main__":
+    main()

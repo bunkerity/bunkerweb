@@ -440,7 +440,7 @@ jobs:
     permissions:
       contents: read
       packages: write
-    needs: [prepare, candidates, push-gh]
+    needs: [prepare, candidates, push-gh, attest-images]
     strategy:
       # Cancelling the siblings only makes a partial publication smaller, never safer.
       fail-fast: false
@@ -479,9 +479,43 @@ jobs:
       GITLAB_REGISTRY_USER: ${{ secrets.GITLAB_REGISTRY_USER }}
       GITLAB_REGISTRY_TOKEN: ${{ secrets.GITLAB_REGISTRY_TOKEN }}
 
+  # Sign the package files the manifest lists before packagecloud receives them: a
+  # package that cannot be attested is never published. Keyless (Sigstore, this
+  # workflow's OIDC identity), so no private key exists anywhere.
+  attest-packages:
+    runs-on: ubuntu-26.04
+    timeout-minutes: 30
+    needs: [prepare, candidates, push-gh]
+    permissions:
+      contents: read
+      id-token: write # Sigstore signing certificate for this workflow run
+      attestations: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: release-manifest
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          pattern: package-*
+          path: packages
+      - name: Verify package bytes against the manifest and list the subjects
+        env:
+          MANIFEST_SHA256: ${{ needs.push-gh.outputs.manifest_sha256 }}
+        run: |
+          python3 .github/scripts/release_artifacts.py verify --directory packages
+          python3 .github/scripts/release_artifacts.py package-checksums --output packages.checksums
+      - name: Attest package files
+        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
+        with:
+          subject-checksums: packages.checksums
+
   # Push Linux packages
   push-packages:
-    needs: [prepare, candidates, push-gh]
+    needs: [prepare, candidates, push-gh, attest-packages]
     strategy:
       fail-fast: false
       matrix:
@@ -626,6 +660,147 @@ jobs:
     secrets:
       PACKAGECLOUD_TOKEN: ${{ secrets.PACKAGECLOUD_TOKEN }}
 
+  # Attest every candidate image index before any registry receives it: an image
+  # that cannot be attested is never published. The promotion keeps the digest
+  # (push-docker.yml checks it), so one attestation covers the image on Docker
+  # Hub, ghcr and the GitLab mirror. It lives only in GitHub's attestation store,
+  # which gh looks up by digest: no bundle is pushed to any registry.
+  attest-images:
+    needs: [prepare, candidates, push-gh]
+    runs-on: ubuntu-26.04
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        image: [bunkerweb, scheduler, autoconf, ui, api, all-in-one]
+    permissions:
+      contents: read
+      id-token: write # Sigstore signing certificate for this workflow run
+      attestations: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: release-manifest
+      - name: Read the image digest and repository from the manifest
+        id: subject
+        env:
+          MANIFEST_SHA256: ${{ needs.push-gh.outputs.manifest_sha256 }}
+          IMAGE: ${{ matrix.image }}
+        run: python3 .github/scripts/release_artifacts.py image-subject --image "$IMAGE" >> "$GITHUB_OUTPUT"
+      - name: Attest the image
+        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
+        with:
+          subject-name: ${{ steps.subject.outputs.docker_io }}
+          subject-digest: ${{ steps.subject.outputs.digest }}
+
+  # Fail closed: every published image digest, on every registry, and every
+  # package file must carry an attestation signed by this workflow for this tag
+  # and commit. The GitHub release stays a draft until a maintainer publishes it
+  # by hand, and the documentation is pushed only after this job is green.
+  verify-release:
+    runs-on: ubuntu-26.04
+    timeout-minutes: 30
+    needs:
+      [
+        prepare,
+        candidates,
+        push-gh,
+        push-images,
+        push-packages,
+        attest-images,
+        attest-packages,
+      ]
+    permissions:
+      contents: read
+      attestations: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: release-manifest
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          pattern: package-*
+          path: packages
+      - name: Verify package bytes against the manifest
+        env:
+          MANIFEST_SHA256: ${{ needs.push-gh.outputs.manifest_sha256 }}
+        run: python3 .github/scripts/release_artifacts.py verify --directory packages
+      - name: Verify the attestations of every published deliverable
+        env:
+          GH_TOKEN: ${{ github.token }}
+          MANIFEST_SHA256: ${{ needs.push-gh.outputs.manifest_sha256 }}
+        run: python3 .github/scripts/release_artifacts.py verify-attestations --directory packages
+      - name: Tell the releaser how to check it
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          {
+            echo "Every image digest and package file of \`$TAG\` carries an attestation signed by \`release.yml\`. Publish the draft release only after this job and \`attach-provenance\` are green."
+            echo
+            echo "Check an image yourself:"
+            echo '```'
+            echo "gh attestation verify oci://docker.io/bunkerity/bunkerweb:${TAG#v} --repo ${GITHUB_REPOSITORY} --signer-workflow ${GITHUB_REPOSITORY}/.github/workflows/release.yml"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  # OpenSSF Scorecard (Signed-Releases) reads release assets only and never the
+  # attestations API: an asset named `*.intoto.jsonl` counts as provenance. # codespell:ignore intoto
+  # Once the attestations are verified, gather the bundle of every attested subject
+  # into one such file and add it to the draft. A rerun overwrites that one asset
+  # (--clobber) and touches no other. The draft is not published here: a human does that.
+  attach-provenance:
+    runs-on: ubuntu-26.04
+    timeout-minutes: 30
+    needs: [prepare, candidates, push-gh, verify-release]
+    permissions:
+      contents: write # upload to the draft release, which only callers with push access can see
+      attestations: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: release-manifest
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          pattern: package-*
+          path: packages
+      - name: Verify package bytes against the manifest
+        env:
+          MANIFEST_SHA256: ${{ needs.push-gh.outputs.manifest_sha256 }}
+        run: python3 .github/scripts/release_artifacts.py verify --directory packages
+      - name: Gather the provenance bundles
+        id: provenance
+        env:
+          GH_TOKEN: ${{ github.token }}
+          MANIFEST_SHA256: ${{ needs.push-gh.outputs.manifest_sha256 }}
+        run: python3 .github/scripts/release_artifacts.py provenance-bundle --directory packages >> "$GITHUB_OUTPUT"
+      - name: Upload the provenance to the draft release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+          FILE: ${{ steps.provenance.outputs.file }}
+        run: |
+          gh release upload "$TAG" "$FILE" --clobber --repo "$GITHUB_REPOSITORY"
+          {
+            echo "Attached \`$FILE\` to the draft release of \`$TAG\`. The release is complete: publish it by hand."
+            echo
+            echo "Verify a file offline against it:"
+            echo '```'
+            echo "gh attestation verify <file> --bundle $FILE --repo ${GITHUB_REPOSITORY}"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
   # Create doc PDF
   doc-pdf:
     needs: [prepare, gate]
@@ -648,7 +823,8 @@ jobs:
 
   # Push doc
   push-doc:
-    needs: [prepare, push-images, push-packages]
+    needs:
+      [prepare, push-images, push-packages, verify-release, attach-provenance]
     permissions:
       contents: write
     uses: ./.github/workflows/push-doc.yml

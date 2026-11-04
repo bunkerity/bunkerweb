@@ -34,6 +34,71 @@ local table_insert = table.insert
 
 local INSTANCE_ID_PATH = "/var/cache/bunkerweb/bunkernet/instance.id"
 
+-- Request headers a report carries when BUNKERNET_FILTER_HEADERS=yes, lowercase. Everything else (cookies,
+-- credentials, custom tokens, client addresses) stays on this instance.
+local REPORT_HEADERS = {
+	"user-agent",
+	"accept",
+	"accept-encoding",
+	"accept-language",
+	"content-type",
+	"content-length",
+}
+
+-- Request headers of the current request (none for a stream service). With BUNKERNET_FILTER_HEADERS=yes only the
+-- allowlisted ones are kept, values untouched; otherwise every header goes out.
+local function get_report_headers(ctx, filter)
+	local report_headers = {}
+	if ctx.bw.kind ~= "http" then
+		return report_headers
+	end
+	local headers = ngx.req.get_headers(tonumber((utils.get_variable("MAX_HEADERS", false))) or 100)
+	if not filter then
+		return headers
+	end
+	for _, name in ipairs(REPORT_HEADERS) do
+		local value = headers[name]
+		if value ~= nil then
+			report_headers[name] = value
+		end
+	end
+	return report_headers
+end
+
+-- With BUNKERNET_FILTER_HEADERS=yes, request headers and cookies carry credentials, so a ModSecurity match on one
+-- keeps its name but not its value.
+local function is_header_or_cookie(name)
+	if type(name) ~= "string" then
+		return false
+	end
+	local variable = name:match("^&?([^:]*)"):upper()
+	return variable == "REQUEST_HEADERS" or variable == "REQUEST_COOKIES"
+end
+
+-- Copy of the reason data with matched header and cookie values blanked. The two lists are index-aligned
+-- (one entry each per rule hit), so a blanked value stays "" in place. When their lengths differ (an empty
+-- matched value is dropped from one list only) the pairing is unknown and the values are removed.
+local function get_report_data(data)
+	if type(data) ~= "table" or data.matched_vars == nil then
+		return data
+	end
+	local report_data = {}
+	for key, value in pairs(data) do
+		report_data[key] = value
+	end
+	local values, names = data.matched_vars, data.matched_var_names
+	if type(values) ~= "table" or type(names) ~= "table" or #values ~= #names then
+		report_data.matched_vars = nil
+		return report_data
+	end
+	local kept = {}
+	for i, value in ipairs(values) do
+		kept[i] = is_header_or_cookie(names[i]) and "" or value
+	end
+	report_data.matched_vars = kept
+	return report_data
+end
+
 -- Read the BunkerNet instance ID from disk, returning nil if the file is
 -- missing or empty (an empty file would otherwise poison the internalstore
 -- with a truthy "" value).
@@ -204,6 +269,11 @@ function bunkernet:log(bypass_checks)
 	if reason == "bunkernet" or reason == "modsecurity-body" then
 		return self:ret(true, "skipping report because the reason is " .. reason)
 	end
+	-- Served challenges and redirects do not establish that the client is an attacker.
+	local action = type(reason_data) == "table" and reason_data.action
+	if action == "challenge" or action == "captcha" or action == "redirect" then
+		return self:ret(true, "skipping report : the remediation was '" .. action .. "', the client was not blocked")
+	end
 
 	-- Check if IP is global
 	if not self.ctx.bw.ip_is_global then
@@ -222,15 +292,14 @@ function bunkernet:log(bypass_checks)
 		return self:ret(false, "can't get IP from datastore : " .. err)
 	elseif err == "not found" then
 		-- Push report
+		local filter = self.variables["BUNKERNET_FILTER_HEADERS"] == "yes"
 		local report = {
 			["ip"] = self.ctx.bw.remote_addr,
 			["reason"] = reason,
-			["data"] = reason_data,
+			["data"] = filter and get_report_data(reason_data) or reason_data,
 			["method"] = self.ctx.bw.request_method,
 			["url"] = self.ctx.bw.request_uri,
-			["headers"] = self.ctx.bw.kind == "http" and ngx.req.get_headers(
-				tonumber((utils.get_variable("MAX_HEADERS", false))) or 100
-			) or {},
+			["headers"] = get_report_headers(self.ctx, filter),
 			["server_name"] = self.ctx.bw.server_name,
 			["date"] = os.date("!%Y-%m-%dT%H:%M:%SZ", ngx.time()),
 		}
@@ -300,7 +369,7 @@ function bunkernet:request(method, url, data)
 	local file = io.open("/etc/os-release", "r")
 	if file then
 		for line in file:lines() do
-			local key, value = line:match("^(%w+)=(.+)$")
+			local key, value = line:match("^([%w_]+)=(.+)$")
 			if key and value then
 				value = value:gsub('"', "")
 				if key == "NAME" then

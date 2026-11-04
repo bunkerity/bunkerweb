@@ -2484,11 +2484,12 @@ const showFeedback = (type, messages) => {
   const list = Array.isArray(messages) ? messages : [messages];
   dom.feedback.className = `alert alert-${type}`;
   if (list.length > 1) {
-    dom.feedback.innerHTML = `<ul class="mb-0">${list
-      .map((msg) => `<li>${msg}</li>`)
-      .join("")}</ul>`;
+    setInlineHtml(
+      dom.feedback,
+      `<ul class="mb-0">${list.map((msg) => `<li>${msg}</li>`).join("")}</ul>`,
+    );
   } else {
-    dom.feedback.innerHTML = list[0];
+    setInlineHtml(dom.feedback, list[0]);
   }
   dom.feedback.classList.remove("d-none");
   dom.feedback.scrollIntoView({ behavior: "smooth", block: "center" });

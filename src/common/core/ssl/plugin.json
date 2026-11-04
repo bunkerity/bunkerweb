@@ -75,7 +75,7 @@
       "help": "Custom SSL cipher suite string. If specified, overrides the SSL Ciphers Level. Leave empty to use level-based configuration.",
       "id": "ssl-ciphers-custom",
       "label": "Custom SSL Ciphers",
-      "regex": "^(?!:)(:?[A-Za-z0-9-]+)*$",
+      "regex": "^([A-Za-z0-9-]+(:[A-Za-z0-9-]+)*)?$",
       "type": "text"
     },
     "SSL_ECDH_CURVE": {

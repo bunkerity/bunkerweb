@@ -1,0 +1,122 @@
+services:
+  redis-slave-1:
+    image: redis:8-alpine@sha256:09160599abd229764c0fb44cb6be640294e1d360a54b19985ab4843dcf2d90f1
+    container_name: redis-slave-1
+    entrypoint:
+      - /usr/local/bin/redis-entrypoint.sh
+    ports:
+      - "127.0.0.1:6381:6379"
+    volumes:
+      - /tmp/redis-acl:/acl
+      - ../scripts/redis-entrypoint.sh:/usr/local/bin/redis-entrypoint.sh:ro
+    env_file:
+      - path: /tmp/redis-slave.env
+        required: true
+    dns:
+      - 10.20.30.20
+    networks:
+      bw-universe:
+        ipv4_address: 10.20.30.52
+        aliases:
+          - redis-slave-1
+
+  redis-slave-2:
+    image: redis:8-alpine@sha256:09160599abd229764c0fb44cb6be640294e1d360a54b19985ab4843dcf2d90f1
+    container_name: redis-slave-2
+    entrypoint:
+      - /usr/local/bin/redis-entrypoint.sh
+    ports:
+      - "127.0.0.1:6382:6379"
+    volumes:
+      - /tmp/redis-acl:/acl
+      - ../scripts/redis-entrypoint.sh:/usr/local/bin/redis-entrypoint.sh:ro
+    env_file:
+      - path: /tmp/redis-slave.env
+        required: true
+    dns:
+      - 10.20.30.20
+    networks:
+      bw-universe:
+        ipv4_address: 10.20.30.53
+        aliases:
+          - redis-slave-2
+
+  redis-sentinel-1:
+    image: redis:8-alpine@sha256:09160599abd229764c0fb44cb6be640294e1d360a54b19985ab4843dcf2d90f1
+    container_name: redis-sentinel-1
+    entrypoint:
+      - /usr/local/bin/redis-sentinel-entrypoint.sh
+    ports:
+      - "127.0.0.1:26379:26379"
+    volumes:
+      - /tmp/redis-acl:/acl
+      - ../scripts/redis-sentinel-entrypoint.sh:/usr/local/bin/redis-sentinel-entrypoint.sh:ro
+    env_file:
+      - path: /tmp/redis-sentinel.env
+        required: true
+    depends_on:
+      - redis-slave-1
+      - redis-slave-2
+    dns:
+      - 10.20.30.20
+    networks:
+      bw-universe:
+        ipv4_address: 10.20.30.54
+        aliases:
+          - redis-sentinel-1
+
+  redis-sentinel-2:
+    image: redis:8-alpine@sha256:09160599abd229764c0fb44cb6be640294e1d360a54b19985ab4843dcf2d90f1
+    container_name: redis-sentinel-2
+    entrypoint:
+      - /usr/local/bin/redis-sentinel-entrypoint.sh
+    ports:
+      - "127.0.0.1:26380:26379"
+    volumes:
+      - /tmp/redis-acl:/acl
+      - ../scripts/redis-sentinel-entrypoint.sh:/usr/local/bin/redis-sentinel-entrypoint.sh:ro
+    env_file:
+      - path: /tmp/redis-sentinel.env
+        required: true
+    depends_on:
+      - redis-slave-1
+      - redis-slave-2
+    dns:
+      - 10.20.30.20
+    networks:
+      bw-universe:
+        ipv4_address: 10.20.30.55
+        aliases:
+          - redis-sentinel-2
+
+  redis-sentinel-3:
+    image: redis:8-alpine@sha256:09160599abd229764c0fb44cb6be640294e1d360a54b19985ab4843dcf2d90f1
+    container_name: redis-sentinel-3
+    entrypoint:
+      - /usr/local/bin/redis-sentinel-entrypoint.sh
+    ports:
+      - "127.0.0.1:26381:26379"
+    volumes:
+      - /tmp/redis-acl:/acl
+      - ../scripts/redis-sentinel-entrypoint.sh:/usr/local/bin/redis-sentinel-entrypoint.sh:ro
+    env_file:
+      - path: /tmp/redis-sentinel.env
+        required: true
+    depends_on:
+      - redis-slave-1
+      - redis-slave-2
+    dns:
+      - 10.20.30.20
+    networks:
+      bw-universe:
+        ipv4_address: 10.20.30.56
+        aliases:
+          - redis-sentinel-3
+
+networks:
+  bw-universe:
+    name: bw-universe
+    ipam:
+      driver: default
+      config:
+        - subnet: 10.20.30.0/24

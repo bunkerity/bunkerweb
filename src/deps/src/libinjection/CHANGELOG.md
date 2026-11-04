@@ -1,4 +1,15 @@
-# v4.0.0 - 2026-03-24
+# Changelog
+
+## [4.0.1](https://github.com/libinjection/libinjection/compare/v4.0.0...v4.0.1) (2026-10-17)
+
+
+### Bug Fixes
+
+* build cleanly as strict C89 (-ansi -pedantic -Werror) ([3b2a5bb](https://github.com/libinjection/libinjection/commit/3b2a5bbeb3f15ecc196a8e2a2e3542ee1d672b75))
+* don't treat a 0xFF byte as EOF in h5_skip_white on signed-char platforms ([#93](https://github.com/libinjection/libinjection/issues/93)) ([b9f3deb](https://github.com/libinjection/libinjection/commit/b9f3deb0d2c6eb9013efda5f4cfa53680349e8f1))
+* **sqli:** treat LIKE as an operator when it follows an operand ([#94](https://github.com/libinjection/libinjection/issues/94)) ([533a165](https://github.com/libinjection/libinjection/commit/533a165ebc1f7c36ecbe3e5583990ea0db81f554))
+
+## v4.0.0 - 2026-03-24
 
 ## MAJOR API BREAKING CHANGE
 
@@ -53,11 +64,11 @@ The new error handling model allows applications to detect and handle parser err
 * [#76](https://github.com/libinjection/libinjection/pull/76) Updated copyright to libinjection Contributors
 * [#73](https://github.com/libinjection/libinjection/pull/73) [#64](https://github.com/libinjection/libinjection/pull/64) CI updates: newer runners, action versions, clang-format and cppcheck fixes
 
-# v3.9.2 - 2016-05-21
+## v3.9.2 - 2016-05-21
 
 * Release of whatever changes have been made over the last 2.5 years.
 
-# v3.9.1 - 2013-12-26
+## v3.9.1 - 2013-12-26
 
 Day-After-Christmas Edition
 
@@ -67,7 +78,7 @@ Day-After-Christmas Edition
 * Other minor style changes to header files.
 
 
-# v3.9.0 - 2013-11-29
+## v3.9.0 - 2013-11-29
 
 Black Friday Edition
 
@@ -78,7 +89,7 @@ Black Friday Edition
 * Compiles clean under clang with `-Weverything -Wno-padded`   `-Wno-padded` is excluded since it's architecture dependant.   See `clang.sh` to see how to invoke.
 * PHP documentation fixes, thanks @LightOS
 
-# v3.8.0 - 2013-10-18
+## v3.8.0 - 2013-10-18
 
 LAMP Special Edition: MySQL and PHP improvements
 
@@ -97,11 +108,11 @@ Here's why:
 * I can't triangulate which SWIG for which language for which OS will work for you
 * I may be switching to [libffi](http://cffi.readthedocs.org/) for python, and [luajit.ffi](http://luajit.org/ext_ffi.html) for lua(jit) in the future, anyways.
 
-# v3.7.1 -- 2013-10-13
+## v3.7.1 -- 2013-10-13
 
 * Remove un-needed code
 
-# v3.7.0 -- 2013-10-13
+## v3.7.0 -- 2013-10-13
 
 Major Release
 
@@ -114,7 +125,7 @@ Major Release
 * Fixed folding issue where `1,-sin(1))` would be folded as `1 (1)`
 * Add more test cases and improved test coverage to [98.8%](https://libinjection.client9.com/cicada/artifacts/libinjection-coverage-unittest/lcov-html/c/libinjection_sqli.c.gcov.html)
 
-# v3.6.0 -- 2013-09-11
+## v3.6.0 -- 2013-09-11
 * New PHP API
 * Big fingerprint update
 ** about 500 new fingerprints added based on fuzzing tests by Reto Ischi
@@ -124,22 +135,22 @@ Major Release
 * Other minor fingerprints added
 * -maybe- API change as typedefs and structs were re-arranged for SWIG
 
-# v3.5.3 -- 2013-08-25
+## v3.5.3 -- 2013-08-25
 * Fingerprint update -- `BETWEEN` operation bypasses
 * Fingerprint update -- `ANY/SOME` quasi-function bypasses
 * Fixed issue with folding where `1-(2-3)` would fold to "nothing" instead of `1`
 * Improved test coverage to [98.0%](https://libinjection.client9.com/cicada/artifacts/libinjection-coverage-unittest/lcov-html/c/libinjection_sqli.c.gcov.html)
 * More adjustments to the PHP/MYSQL backtick to reduce false positives
 
-# v3.5.2 -- 2013-08-21
+## v3.5.2 -- 2013-08-21
 * Fingerprint update.  Credit: Reto Ischi
 
-# v3.5.1 -- 2013-08-21
+## v3.5.1 -- 2013-08-21
 * found regression in handling of PHP/MySQL backticks.  Tests added
 * Dead code removed.
 * Improved test coverage to [97.7%](https://libinjection.client9.com/cicada/artifacts/libinjection-coverage-unittest/lcov-html/c/libinjection_sqli.c.gcov.html)
 
-# v3.5.0 -- 2013-08-21
+## v3.5.0 -- 2013-08-21
 * Bug fix for libinjection_sqli_reset @brianrectanus
   https://github.com/client9/libinjection/pull/50
 * Non-critical parser fix for numbers with oracle's ending
@@ -160,10 +171,10 @@ Major Release
 * Fi possible stack over-read, and improve detection of "sp_password" flag
   in short sqli HT modsecurity team
 
-# v3.4.1 2013-07-18
+## v3.4.1 2013-07-18
 * Fingerprint update only HT @LightOS
 
-# v3.4.0 2013-07-18
+## v3.4.0 2013-07-18
 
 * Fix regression with COLLATE
 * Handle "procedure analyze" under MySQL
@@ -174,7 +185,7 @@ Major Release
 * Fired Jenkins!  Using in-house system.
 * Fixed bypass reported by @FluxReiners
 
-# v3.3.0 2013-07-13
+## v3.3.0 2013-07-13
 
 * change how backslash is handled to catch old MSSQL servers sqli
   See http://websec.ca/kb/sql_injection#MSSQL_Allowed_Intermediary_Chars_AND-OR
@@ -186,7 +197,7 @@ Major Release
 * False positive improvements
 
 
-# v3.2.0 2013-07-12
+## v3.2.0 2013-07-12
 
 * Parse binary litterals "0b010101" used by at least mysql and pgsql
 * Add fingerprints '1&EUE', '1&EkU' to work around ambiguous parsing rules
@@ -197,14 +208,14 @@ Major Release
 * Improvements in folding
 * Removed dependency on SWIG for installing python module
 
-# v3.1.0 2013-07-02
+## v3.1.0 2013-07-02
 
 * Fix for parsing Oracle numeric literals
 * Fix for oracle whitespace with null char.
 * Add unusual SQL join types to keywords lists
 * Minor fixes to python API examples
 
-# v3.0.0 2013-06-23
+## v3.0.0 2013-06-23
 
 Big Release and Big Engine change.  Highly recommend
 
@@ -230,7 +241,7 @@ Big Release and Big Engine change.  Highly recommend
 * Ban MySQL conditional comments.  If we find them, it's marked as SQLi immediately.
 * Probably a bunch of other stuff too
 
-# v2.0.4 2013-05-21 IMPORTANT
+## v2.0.4 2013-05-21 IMPORTANT
 
 All users are advised to upgrade due to risk of DOS
 
@@ -238,25 +249,25 @@ All users are advised to upgrade due to risk of DOS
 * more fingerprints, more tests
 * Issue 34: fix infinite loop
 
-# v2.0.3 2013-05-21
+## v2.0.3 2013-05-21
 
 ## security
 * Add variations on '1U(((', thanks @LightOS
 * Add automatically all variations on other cases of
   'parens padding'
 
-# v2.0.2 2013-05-21
+## v2.0.2 2013-05-21
 
 ## security
 * Added fingerprint 'nU(kn' and variations, thanks to
   discussion with @ModSecurity .
 
-# v2.0.1 2013-05-21
+## v2.0.1 2013-05-21
 
 ## security
 * Added fingerprint knknk, thanks @d0znpp
 
-# v2.0.0 2013-05-17
+## v2.0.0 2013-05-17
 
 Version 2 is more a software engineering release than SQLi.
 The API, the code, and filenames are improved for embedded
@@ -295,7 +306,7 @@ BIG CHANGES
   for normal workloads
 * Add `sqlite3` special functions and keywords (since why not)
 
-# v1.2.0 2013-05-06
+## v1.2.0 2013-05-06
 
 ## security
 * fix regression in detecting SQLi of type '1c'
@@ -303,7 +314,7 @@ BIG CHANGES
 ##
 * improved documentation, comments, edits.
 
-# v1.1.0 2013-05-04
+## v1.1.0 2013-05-04
 
 ## security
 
@@ -325,8 +336,7 @@ BIG CHANGES
 * Added version number in sqlparse.h, based on
   http://www.python.org/dev/peps/pep-0386/#normalizedversion
 
-# v1.0.0 2013-04-24
+## v1.0.0 2013-04-24
 
 * retroactive initial release
 * all memory issues fixed
-

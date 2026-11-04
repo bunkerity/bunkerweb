@@ -1,0 +1,141 @@
+"""`X-SSL-*` request headers are stripped on ingress, on every site, always.
+
+This is the mechanism behind a guarantee the mTLS documentation states outright: *"a client cannot
+spoof `X-SSL-Client-Verify: SUCCESS`"*. Applications are told to gate authorization on that header,
+so if the strip ever stops being emitted, every mTLS-protected backend behind BunkerWeb starts
+trusting a header any client can set. Until now the only thing standing behind it was a single
+`grep -qF` in a marker script, which proves the line exists, not that it is emitted.
+
+Two code paths, because one guard per behaviour is not one guard per path:
+
+* the strip itself, in `http.conf`, which must be unconditional -- a site with `USE_MTLS=no` still
+  has to have forged headers removed, because a *reverse-proxied* app cannot tell the difference;
+* the legitimate producers, which must read the TLS handshake variables (`$ssl_client_*`) and never
+  the incoming request header (`$http_x_ssl_*`). A producer reading the request header would put
+  the forged value back after the strip removed it, and the strip would still be there, still
+  emitted, still passing a test that only looked at `http.conf`.
+"""
+
+import re
+from pathlib import Path
+
+import pytest
+from importlib import import_module
+from jinja2 import ChainableUndefined, Environment, FileSystemLoader
+
+from Templator import Templator  # type: ignore  (src/common/gen is on the path, see conftest.py)
+
+ROOT = Path(__file__).resolve().parents[3]
+CONFS = ROOT / "src" / "common" / "confs"
+CORE = ROOT / "src" / "common" / "core"
+STRIP = 'more_clear_input_headers "X-SSL-*" "X_SSL_*";'
+
+# The producer templates that legitimately emit X-SSL-* toward the backend.
+PRODUCER_GLOBS = ("*/confs/server-http/*.conf", "*/confs/http/*.conf", "*/confs/*.conf")
+
+
+class _Blank(ChainableUndefined):
+    """Any setting not supplied renders empty, and stays usable when chained.
+
+    `http.conf` reads dozens of settings and none of them gates the strip; supplying a curated dict
+    would quietly turn "unconditional" into "conditional on the values I happened to choose".
+    Chainable because the template reaches through attributes (`x.all`) on values it expects to be
+    objects -- a plain Undefined raises there and the render dies before reaching the strip.
+    """
+
+    def __iter__(self):
+        return iter(())
+
+
+def render(**settings) -> str:
+    env = Environment(  # same knobs as Templator._build_environment
+        loader=FileSystemLoader(str(CONFS)),
+        lstrip_blocks=True,
+        trim_blocks=True,
+        keep_trailing_newline=True,
+        undefined=_Blank,
+    )
+    # `all` is not a setting -- Templator passes the whole config dict under that name and the
+    # template iterates it (`{% for k, v in all.items() %}`), so an Undefined there kills the render
+    # before it reaches the strip.
+    # Templator injects seven callables; `http.conf` uses three of them, and none of them gates the
+    # strip. Measured rather than assumed.
+    env.globals["normalize_memory_size"] = lambda value: str(value)
+    # `import(` is no longer absent: `http.conf` drops the reserved `default-server` id from its
+    # roster loops and reads it out of `utils/default_server.py` through the same global Templator
+    # injects (`gen/Templator.py:484,487`). The real callables, for the reason the sibling file
+    # states: a stub would let this env render a roster the product never renders.
+    env.globals["import"] = import_module
+    env.globals["has_variable"] = Templator.has_variable
+    return env.get_template("http.conf").render({"all": dict(settings), **settings})
+
+
+def directives(text: str) -> list:
+    return [line.strip() for line in text.splitlines() if line.strip() and not line.strip().startswith("#")]
+
+
+@pytest.mark.parametrize(
+    "settings",
+    [
+        {},
+        {"USE_MTLS": "no"},
+        {"USE_MTLS": "yes"},
+        {"MTLS_FORWARD_CLIENT_HEADERS": "no"},
+        # MULTISITE requires SERVER_NAME -- the template iterates it, and a multisite config
+        # without one is not a configuration BunkerWeb would ever render.
+        {"USE_MTLS": "no", "MULTISITE": "yes", "SERVER_NAME": "app.example.com"},
+        {"USE_MODSECURITY": "no", "USE_REVERSE_PROXY": "yes"},
+    ],
+)
+def test_the_strip_is_emitted_whatever_the_configuration(settings):
+    """`USE_MTLS=no` is the case that matters: the strip is not part of the mTLS feature."""
+    assert STRIP in directives(render(**settings)), f"the X-SSL ingress strip vanished for {settings}"
+
+
+def test_the_strip_is_not_nested_inside_a_conditional_block():
+    """A strip inside a `server {}` or `if {}` would apply to some requests only.
+
+    Checked by brace depth rather than by eye: it must sit at the top level of `http.conf`, which
+    nginx includes at `http` scope, so it applies to every server and every request.
+    """
+    depth = 0
+    for line in render().splitlines():
+        stripped = line.strip()
+        if STRIP in stripped:
+            assert depth == 0, f"the strip is nested {depth} block(s) deep, so it is conditional"
+            return
+        if not stripped.startswith("#"):
+            depth += stripped.count("{") - stripped.count("}")
+    pytest.fail("the strip was never emitted at all")
+
+
+def _producer_lines(core=CORE):
+    seen = []
+    for glob in PRODUCER_GLOBS:
+        for path in core.glob(glob):
+            for number, line in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
+                if re.search(r"set_header\s+X-SSL-", line, re.I):
+                    seen.append((path.relative_to(core), number, line.strip()))
+    return seen
+
+
+def _non_handshake_producers(producers):
+    offenders = []
+    for path, number, line in producers:
+        value = re.search(r"set_header\s+X-SSL-[\w-]+\s+([^;]+);", line, re.I)
+        if value is None or not re.fullmatch(r"\$ssl_client_[a-z_]+", value.group(1)):
+            offenders.append((path, number, line))
+    return offenders
+
+
+@pytest.mark.parametrize("source", ["$http_x_ssl_client_verify", "$remote_addr", "SUCCESS"])
+def test_producer_guard_rejects_non_handshake_sources(tmp_path, source):
+    template = tmp_path / "grpc/confs/server-http/grpc.conf"
+    template.parent.mkdir(parents=True)
+    # The live producer form: an inline directive, as the two templates emit it since the header
+    # override tags replaced the Jinja macros.
+    template.write_text("grpc_set_header X-SSL-Client-Verify " + source + ";\n")
+    # Use a real temporary template, so the scanner and guard both participate.
+    found = _producer_lines(tmp_path)
+    assert len(found) == 1
+    assert _non_handshake_producers(found)

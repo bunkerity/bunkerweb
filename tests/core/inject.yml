@@ -1,0 +1,31 @@
+integrations: "all"
+
+actions:
+  body:
+    type: string
+    url: "http://www.example.com"
+    string: "BunkerWeb Forever!"
+    config:
+      INJECT_BODY: "BunkerWeb Forever!"
+  head:
+    type: string
+    url: "http://www.example.com"
+    string: "BunkerWeb Forever!"
+    config:
+      INJECT_HEAD: "BunkerWeb Forever!"
+
+config:
+  REMOTE_PHP: "php-fpm"
+  REMOTE_PHP_PATH: "/var/www/html"
+
+Linux:
+  config:
+    REMOTE_PHP: null
+    REMOTE_PHP_PATH: null
+    LOCAL_PHP: "/run/php/php-fpm.sock"
+    LOCAL_PHP_PATH: "/var/www/html"
+
+Kubernetes:
+  config:
+    REMOTE_PHP: null
+    REMOTE_PHP_PATH: null

@@ -105,7 +105,9 @@ class SwarmController(Controller):
         """
         Fetch Swarm services labeled as 'bunkerweb.INSTANCE'.
         """
-        return self._get_controller_swarm_services(label_key="bunkerweb.INSTANCE")
+        services = self._get_controller_swarm_services(label_key="bunkerweb.INSTANCE")
+        self.__swarm_instances = list(dict.fromkeys(service.id for service in services))
+        return services
 
     def _get_controller_services(self) -> List[Service]:
         """
@@ -114,7 +116,6 @@ class SwarmController(Controller):
         return self._get_controller_swarm_services(label_key="bunkerweb.SERVER_NAME")
 
     def _to_instances(self, controller_instance) -> List[dict]:
-        self.__swarm_instances.append(controller_instance.id)
         instances = []
         instance_env = {}
         container_spec = controller_instance.attrs.get("Spec", {}).get("TaskTemplate", {}).get("ContainerSpec", {}) or {}

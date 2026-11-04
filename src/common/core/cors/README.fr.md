@@ -24,7 +24,7 @@ Comment ça marche :
 | `CORS_ALLOW_ORIGIN`            | `self`                                                                               | multisite | non      | Origines autorisées (regex PCRE). `*` = toute origine, `self` = même origine. |
 | `CORS_ALLOW_METHODS`           | `GET, POST, OPTIONS`                                                                 | multisite | non      | Méthodes autorisées.                                                          |
 | `CORS_ALLOW_HEADERS`           | `DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range` | multisite | non      | En‑têtes autorisés côté requête.                                              |
-| `CORS_ALLOW_CREDENTIALS`       | `no`                                                                                 | multisite | non      | Autoriser les identifiants (cookies, auth HTTP).                              |
+| `CORS_ALLOW_CREDENTIALS`       | `no`                                                                                 | multisite | non      | Autoriser les identifiants (cookies, auth HTTP). L'en-tête est envoyé sur les réponses pre-flight et réelles, uniquement pour une origine autorisée, jamais avec `CORS_ALLOW_ORIGIN` à `*`.                              |
 | `CORS_EXPOSE_HEADERS`          | `Content-Length,Content-Range`                                                       | multisite | non      | En‑têtes exposés côté réponse.                                                |
 | `CROSS_ORIGIN_OPENER_POLICY`   | `same-origin`                                                                        | multisite | non      | Politique COOP. Valeurs admises : `unsafe-none`, `same-origin-allow-popups`, `same-origin` ; laisser vide pour ne pas envoyer cet en-tête. |
 | `CROSS_ORIGIN_EMBEDDER_POLICY` | `require-corp`                                                                       | multisite | non      | Politique COEP. Valeurs admises : `unsafe-none`, `require-corp`, `credentialless` ; laisser vide pour ne pas envoyer cet en-tête. |
@@ -49,7 +49,7 @@ Voici des exemples de valeurs possibles pour `CORS_ALLOW_ORIGIN`, avec leur comp
 - **`^https://(www\.example1\.com|www\.example2\.com)$`** : autorise les requêtes depuis `https://www.example1.com` ou `https://www.example2.com`.
 - **`^https?://www\.example\.com$`** : autorise les requêtes depuis `http://www.example.com` et `https://www.example.com`.
 
-En mode regex, ancrez le motif avec `^` et `$` pour correspondre à l’origine entière ; la réponse reprend l’en-tête `Origin` de la requête dans `Access-Control-Allow-Origin`.
+En mode regex, ancrez le motif avec `^` et `$` pour correspondre à l’origine entière ; la réponse reprend l’en-tête `Origin` de la requête dans `Access-Control-Allow-Origin` uniquement s’il correspond ; une origine qui ne correspond pas ne reçoit pas l’en-tête `Access-Control-Allow-Origin`.
 
 === "Configuration basique"
 

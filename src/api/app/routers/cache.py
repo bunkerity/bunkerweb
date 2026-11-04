@@ -1,5 +1,6 @@
 from datetime import datetime
 from typing import Any, Dict, List, Optional
+from urllib.parse import quote
 
 from fastapi import APIRouter, Depends, Query
 from fastapi.responses import JSONResponse, Response
@@ -68,9 +69,11 @@ def list_cache(
 
 
 def _transform_filename(path_token: str) -> str:
-    # UI uses a special encoding for folders: prefix "folder:" and replace '_' with '/'
+    # UI uses a special encoding for folders: prefix "folder:" and replace '_' with '/'. The prefix
+    # is kept: `cache_dir` stores `file_name` with it included and the DB lookup matches that column
+    # exactly, so stripping it made every folder-backed cache file 404.
     if path_token.startswith("folder:"):
-        return path_token.replace("_", "/")[len("folder:") :]  # noqa: E203
+        return path_token.replace("_", "/")
     return path_token
 
 
@@ -104,7 +107,7 @@ def fetch_cache_file(
         content = data.get("data") if isinstance(data, dict) else data
         if not isinstance(content, (bytes, bytearray)):
             content = b""
-        headers = {"Content-Disposition": f"attachment; filename={fname}"}
+        headers = {"Content-Disposition": f'attachment; filename="{quote(fname, safe="")}"'}
         return Response(status_code=200, content=content, media_type="application/octet-stream", headers=headers)
     # Return printable content only
     content = data.get("data") if isinstance(data, dict) else data

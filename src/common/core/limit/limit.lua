@@ -11,6 +11,7 @@ local ERR = ngx.ERR
 local HTTP_TOO_MANY_REQUESTS = ngx.HTTP_TOO_MANY_REQUESTS
 local get_phase = ngx.get_phase
 local has_variable = utils.has_variable
+local get_variable = utils.get_variable
 local get_multiple_variables = utils.get_multiple_variables
 local is_whitelisted = utils.is_whitelisted
 local regex_match = utils.regex_match
@@ -300,6 +301,23 @@ function limit:access()
 	return self:ret(true, msg)
 end
 
+-- The Cap.js challenge page loads its widget from a second GET on the same URI (?capjs_frame=1).
+-- Counted in the page's bucket, a normal solve (page, frame, POST) is 3 requests, one over the
+-- default 2r/s, so a fast solve is answered 429. The frame request gets a counter of its own and
+-- stays limited. Only that exact query on a capjs service's challenge URI is split off.
+function limit:counter_key()
+	local ctx_bw = self.ctx.bw
+	local uri = ctx_bw.uri
+	if
+		ngx.var.arg_capjs_frame == "1"
+		and get_variable("USE_ANTIBOT", true, self.ctx) == "capjs"
+		and uri == get_variable("ANTIBOT_URI", true, self.ctx)
+	then
+		uri = uri .. "?capjs_frame=1"
+	end
+	return "plugin_limit_" .. ctx_bw.server_name .. ctx_bw.remote_addr .. uri
+end
+
 function limit:limit_req(rate_max, rate_time)
 	local timestamps = nil
 	-- Redis case
@@ -311,11 +329,8 @@ function limit:limit_req(rate_max, rate_time)
 			timestamps = redis_timestamps
 			-- Save the new timestamps
 			-- luacheck: ignore 421
-			local ok, err = self.datastore:set_with_retries(
-				"plugin_limit_" .. self.ctx.bw.server_name .. self.ctx.bw.remote_addr .. self.ctx.bw.uri,
-				encode(timestamps),
-				limit_global_delay(rate_time)
-			)
+			local ok, err =
+				self.datastore:set_with_retries(self:counter_key(), encode(timestamps), limit_global_delay(rate_time))
 			if not ok then
 				return nil, "can't update timestamps : " .. err
 			end
@@ -337,8 +352,7 @@ end
 
 function limit:limit_req_local(rate_max, rate_time)
 	-- Get timestamps
-	local timestamps, err =
-		self.datastore:get("plugin_limit_" .. self.ctx.bw.server_name .. self.ctx.bw.remote_addr .. self.ctx.bw.uri)
+	local timestamps, err = self.datastore:get(self:counter_key())
 	if not timestamps and err ~= "not found" then
 		return nil, err
 	elseif err == "not found" then
@@ -350,11 +364,7 @@ function limit:limit_req_local(rate_max, rate_time)
 	-- Save new timestamps if needed
 	if updated then
 		-- luacheck: ignore 421
-		local ok, err = self.datastore:set_with_retries(
-			"plugin_limit_" .. self.ctx.bw.server_name .. self.ctx.bw.remote_addr .. self.ctx.bw.uri,
-			encode(new_timestamps),
-			delay
-		)
+		local ok, err = self.datastore:set_with_retries(self:counter_key(), encode(new_timestamps), delay)
 		if not ok then
 			return nil, err
 		end
@@ -422,7 +432,7 @@ function limit:limit_req_redis(rate_max, rate_time)
 		"eval",
 		redis_script,
 		1,
-		redis_limit_key("plugin_limit_" .. self.ctx.bw.server_name .. self.ctx.bw.remote_addr .. self.ctx.bw.uri),
+		redis_limit_key(self:counter_key()),
 		rate_max,
 		rate_time,
 		time(date("!*t"))

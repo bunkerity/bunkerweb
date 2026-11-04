@@ -65,7 +65,7 @@
       "help": "Redis server timeout (in ms) for connect, read and write. Accepts a time suffix (ms, s, m, h, d, w, M, y); a bare number is milliseconds.",
       "id": "redis-timeout",
       "label": "Redis timeout",
-      "regex": "^\\d+(ms?|[shdwMy])?$",
+      "regex": "^[0-9]+(ms?|[shdwMy])?$",
       "type": "text"
     },
     "REDIS_USERNAME": {
@@ -137,7 +137,7 @@
       "help": "Max idle time (in ms) before closing redis connection in the pool. Accepts a time suffix (ms, s, m, h, d, w, M, y); a bare number is milliseconds.",
       "id": "redis-keepalive-idle",
       "label": "Redis keepalive idle",
-      "regex": "^\\d+(ms?|[shdwMy])?$",
+      "regex": "^[0-9]+(ms?|[shdwMy])?$",
       "type": "text"
     },
     "REDIS_KEEPALIVE_POOL": {

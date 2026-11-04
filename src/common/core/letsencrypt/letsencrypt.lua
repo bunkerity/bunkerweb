@@ -520,7 +520,12 @@ function letsencrypt:init()
 				insert(server_list, part)
 			end
 			local use_wildcard_mode = challenge == "dns" and use_wildcard == "yes"
-			if use_wildcard_mode then
+			-- Keep publishing the shared certificate indexes below, even with no service roster.
+			if not cert_identifier then
+				self.logger:log(ERR, "AUTO_LETS_ENCRYPT is enabled but SERVER_NAME is empty : no certificate to load")
+				ret_ok = false
+				ret_err = "no server name configured"
+			elseif use_wildcard_mode then
 				local wildcard_groups = build_wildcard_groups(server_list)
 				local bases = {}
 				for base, _ in pairs(wildcard_groups) do

@@ -30,6 +30,9 @@ def check_ip_line(line: bytes) -> bytes | None:
         return None
     # Only keep first token for non-User-Agent lists
     line = line.split(b" ")[0]
+    # A zone id ("fe80::1%eth0") names an interface of the downloading host, not an address the matcher can load
+    if b"%" in line:
+        return None
     # Validate IP or CIDR
     if b"/" in line:
         with suppress(ValueError):
@@ -125,9 +128,10 @@ try:
                     if cached_data:
                         for line in cached_data.split(b"\n")[1:]:
                             line = line.strip()
-                            if not line:
+                            valid = check_ip_line(line)
+                            if valid is None:
                                 continue
-                            unique_entries.add(line)
+                            unique_entries.add(valid)
                 else:
                     # Download
                     iterable = None

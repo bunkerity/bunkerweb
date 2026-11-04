@@ -1,0 +1,80 @@
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
+
+from contextlib import suppress
+from logging import Logger
+from os import environ, getenv
+from typing import Any, Dict
+
+from redis import Redis
+from httpx import Response
+
+from .http_common import perform_request
+
+
+def _get_by_path(data: Dict[str, Any], path: str) -> Any:
+    current: Any = data
+    for part in path.split(".") if path else []:
+        if isinstance(current, dict) and part in current:
+            current = current[part]
+        else:
+            raise KeyError(path)
+    return current
+
+
+def handle(LOGGER: Logger, action: Any) -> None:
+    # Perform the HTTP request and ensure we have a proper response
+    ctx = perform_request(LOGGER, action)
+    if not isinstance(ctx.response, Response):
+        LOGGER.error("Request failed, no HTTP response available for export action")
+        LOGGER.debug(str(ctx.response))
+        exit(1)
+
+    if action.status is not None and ctx.response.status_code != action.status:
+        LOGGER.error(f"📤 Expected status {action.status}, got {ctx.response.status_code}, exiting ...")
+        exit(1)
+    elif action.raise_for_status:
+        ctx.response.raise_for_status()
+
+    try:
+        payload = ctx.response.json()
+    except Exception as e:
+        LOGGER.exception(f"Failed to parse JSON response: {e}")
+        exit(1)
+
+    exports = getattr(action, "exports", {}) or {}
+    if not exports:
+        LOGGER.warning("No exports mapping provided; nothing to export")
+        return
+
+    # Connect to Redis for cross-process availability of exported values
+    try:
+        # The framework's state Redis is TESTS_REDIS_PORT (6390), not the product's 6379 --
+        # see tests/misc/docker/redis.yml. Exported values are read back by generate.py, a
+        # SEPARATE process, so this Redis is the only channel between them: environ below
+        # does not survive the process boundary. Pointing it at 6379 silently exported
+        # nothing and every "${VAR}" reached the request verbatim.
+        redis_client = Redis(host="localhost", port=int(getenv("TESTS_REDIS_PORT", "6390")), db=0, decode_responses=True)
+        redis_client.ping()
+    except Exception:
+        redis_client = None
+
+    for env_key, json_path in exports.items():
+        try:
+            value = _get_by_path(payload, json_path)
+        except KeyError:
+            LOGGER.error(f"Export path {json_path!r} not found in response payload")
+            exit(1)
+
+        # Normalize value to string
+        if not isinstance(value, str):
+            from json import dumps as _dumps
+
+            value = _dumps(value)
+
+        environ[env_key] = value
+        if redis_client:
+            with suppress(Exception):
+                redis_client.set(env_key, value)
+
+        LOGGER.info(f"Exported {env_key} from {json_path}")

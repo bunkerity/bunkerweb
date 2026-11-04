@@ -49,10 +49,10 @@
   "SERVER_NAME": {
     "context": "multisite",
     "default": "www.example.com",
-    "help": "List of the virtual hosts served by bunkerweb. (separated by space)",
+    "help": "List of the virtual hosts served by bunkerweb. (separated by space) A name can also be an IPv4 address or an IPv6 address written bare, in lowercase and compressed (2001:db8::1, without brackets).",
     "id": "server-name",
     "label": "Server name",
-    "regex": "^(?!.*\\.\\.)(?:(\\b[^\\s+\\/:A-Z]{1,255}\\b)(?:\\s+\\b[^\\s+\\/:A-Z]{1,255}\\b)*)?$",
+    "regex": "^(?!.*\\.\\.)(?:(?:\\b[^\\s+\\/:A-Z]{1,255}\\b|(?:[0-9a-f]{0,4}:){2,7}[0-9a-f]{0,4})(?:\\s+(?:\\b[^\\s+\\/:A-Z]{1,255}\\b|(?:[0-9a-f]{0,4}:){2,7}[0-9a-f]{0,4}))*)?$",
     "type": "text"
   },
   "WORKER_PROCESSES": {
@@ -97,7 +97,7 @@
     "help": "DNS addresses of resolvers to use.",
     "id": "dns-resolvers",
     "label": "DNS resolvers",
-    "regex": "^(?! )(( *[^ ]+)(?!.*\\2))*$",
+    "regex": "^(?! )(?:( *[^ ]+)(?![^ ])(?!.*\\1))*$",
     "type": "multivalue"
   },
   "CLIENT_BODY_TIMEOUT": {
@@ -295,7 +295,7 @@
     "help": "List of IP/network allowed to contact BunkerWeb internal API. (format: ip/netmask or ipv6/netmask, separated by space)",
     "id": "api-whitelist-ip",
     "label": "API whitelist IP",
-    "regex": "^(?! )( *(((\\b25[0-5]|\\b2[0-4]\\d|\\b[01]?\\d\\d?)(\\.(25[0-5]|2[0-4]\\d|[01]?\\d\\d?)){3})(\\/([1-2][0-9]?|3[0-2]?|[04-9]))?|(([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]Z{0,4}){0,4}%[0-9a-zA-Z]+|::(ffff(:0{1,4})?:)?((25[0-5]|(2[0-4]|1?\\d)?\\d)\\.){3}(25[0-5]|(2[0-4]|1?\\d)?\\d)|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1?\\d)?\\d)\\.){3}(25[0-5]|(2[0-4]|1?\\d)?\\d))(\\/(12[0-8]|1[01][0-9]|[0-9][0-9]?))?)(?!.*\\D\\2([^\\d\\/]|$)) *)*$",
+    "regex": "^(?:(?=(((\\b25[0-5]|\\b2[0-4]\\d|\\b[01]?\\d\\d?)(\\.(25[0-5]|2[0-4]\\d|[01]?\\d\\d?)){3})(\\/([1-2][0-9]?|3[0-2]?|[04-9]))?|(([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|::(ffff(:0{1,4})?:)?((25[0-5]|(2[0-4]|1?\\d)?\\d)\\.){3}(25[0-5]|(2[0-4]|1?\\d)?\\d)|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1?\\d)?\\d)\\.){3}(25[0-5]|(2[0-4]|1?\\d)?\\d)|(([0-9a-fA-F]{1,4}:){6}|::([0-9a-fA-F]{1,4}:){0,5}|(?!(?:[0-9a-fA-F]*:){7})([0-9a-fA-F]{1,4}:){1,5}:([0-9a-fA-F]{1,4}:){0,4})((25[0-5]|(2[0-4]|1?[0-9])?[0-9])\\.){3}(25[0-5]|(2[0-4]|1?[0-9])?[0-9]))(\\/(12[0-8]|1[01][0-9]|[0-9][0-9]?))?)(?: |$))[^ \\n]+(?!.*\\D\\1([^\\d\\/]|$))(?: +|$))*$",
     "type": "multivalue"
   },
   "AUTOCONF_MODE": {
@@ -555,6 +555,15 @@
     "help": "Plugins that should run first during the access phase for this site (request admission/control). Separate IDs with spaces; remaining plugins still run afterward in their normal sequence.",
     "id": "plugins-order-access",
     "label": "Plugins order (access)",
+    "regex": "^$|^[A-Za-z0-9._-]+( [A-Za-z0-9._-]+)*$",
+    "type": "multivalue"
+  },
+  "PLUGINS_ORDER_SSL_CLIENT_HELLO": {
+    "context": "global",
+    "default": "",
+    "help": "Plugins that should run first during the ssl_client_hello phase (TLS ClientHello, once per handshake, every service and the default server). Separate IDs with spaces; remaining plugins still run afterward in their normal sequence.",
+    "id": "plugins-order-ssl-client-hello",
+    "label": "Plugins order (ssl_client_hello)",
     "regex": "^$|^[A-Za-z0-9._-]+( [A-Za-z0-9._-]+)*$",
     "type": "multivalue"
   },

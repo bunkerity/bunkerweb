@@ -16,7 +16,9 @@ pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = libinjection.pc
 
 # Standard stuff.
-EXTRA_DIST = bootstrap COPYING README.md CHANGELOG.md
+EXTRA_DIST = COPYING README.md CHANGELOG.md version.txt
+# Golden files and sample corpora used by `make check`
+EXTRA_DIST += tests data
 
 LIBTOOL_DEPS = @LIBTOOL_DEPS@
 libtool: $(LIBTOOL_DEPS)
@@ -32,5 +34,17 @@ clang-asan: all
 cppcheck: $(CPPCHECK)
 	@cd src && $(MAKE) $(AM_MAKEFLAGS) cppcheck
 
-ci: all
+ci: all check-version-sync
 	@cd src && $(MAKE) $(AM_MAKEFLAGS) tests analyze cppcheck
+
+check-version-sync:
+	@echo "Checking LIBINJECTION_VERSION in src/libinjection_sqli.c matches version.txt..."
+	@want=`tr -d '[:space:]' < $(srcdir)/version.txt`; \
+	got=`sed -n 's/^#define LIBINJECTION_VERSION "\([^"]*\)".*$$/\1/p' \
+		$(srcdir)/src/libinjection_sqli.c`; \
+	if [ "$$got" != "$$want" ]; then \
+		echo "  MISMATCH: LIBINJECTION_VERSION is '$$got', version.txt says '$$want'"; \
+		exit 1; \
+	fi; \
+	echo "  OK: version macro matches version.txt ($$want)"
+.PHONY: check-version-sync

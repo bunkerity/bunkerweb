@@ -1,8 +1,8 @@
 # Utilisations avancées
 
-De nombreux exemples de cas d'utilisation concrets sont disponibles dans le dossier [examples](https://github.com/bunkerity/bunkerweb/tree/v1.6.17/examples) du dépôt GitHub.
+De nombreux exemples de cas d'utilisation concrets sont disponibles dans le dossier [examples](https://github.com/bunkerity/bunkerweb/tree/v1.6.18-rc3/examples) du dépôt GitHub.
 
-Nous fournissons également de nombreux modèles standard, tels que des fichiers YAML pour diverses intégrations et types de bases de données. Ceux-ci sont disponibles dans le dossier [misc/integrations](https://github.com/bunkerity/bunkerweb/tree/v1.6.17/misc/integrations).
+Nous fournissons également de nombreux modèles standard, tels que des fichiers YAML pour diverses intégrations et types de bases de données. Ceux-ci sont disponibles dans le dossier [misc/integrations](https://github.com/bunkerity/bunkerweb/tree/v1.6.18-rc3/misc/integrations).
 
 Cette section se concentre uniquement sur les utilisations avancées et le réglage de la sécurité, consultez la [section fonctionnalités](features.md) de la documentation pour voir tous les paramètres disponibles.
 
@@ -85,7 +85,7 @@ Vous trouverez plus de paramètres sur l'IP réelle dans la [section des fonctio
             -p 80:8080/tcp \
             -p 443:8443/tcp \
             -p 443:8443/udp \
-            bunkerity/bunkerweb-all-in-one:1.6.17
+            bunkerity/bunkerweb-all-in-one:1.6.18-rc3
         ```
 
         Veuillez noter que si votre conteneur existe déjà, vous devrez le supprimer et le recréer afin que les nouvelles variables d'environnement soient prises en compte.
@@ -96,7 +96,7 @@ Vous trouverez plus de paramètres sur l'IP réelle dans la [section des fonctio
 
         ```yaml
         bunkerweb:
-          image: bunkerity/bunkerweb:1.6.17
+          image: bunkerity/bunkerweb:1.6.18-rc3
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -104,7 +104,7 @@ Vous trouverez plus de paramètres sur l'IP réelle dans la [section des fonctio
             REAL_IP_HEADER: "X-Forwarded-For"
           ...
         bw-scheduler:
-          image: bunkerity/bunkerweb-scheduler:1.6.17
+          image: bunkerity/bunkerweb-scheduler:1.6.18-rc3
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -121,7 +121,7 @@ Vous trouverez plus de paramètres sur l'IP réelle dans la [section des fonctio
 
         ```yaml
         bunkerweb:
-          image: bunkerity/bunkerweb:1.6.17
+          image: bunkerity/bunkerweb:1.6.18-rc3
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -129,7 +129,7 @@ Vous trouverez plus de paramètres sur l'IP réelle dans la [section des fonctio
             REAL_IP_HEADER: "X-Forwarded-For"
           ...
         bw-scheduler:
-          image: bunkerity/bunkerweb-scheduler:1.6.17
+          image: bunkerity/bunkerweb-scheduler:1.6.18-rc3
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -176,7 +176,7 @@ Vous trouverez plus de paramètres sur l'IP réelle dans la [section des fonctio
 
         ```yaml
         bunkerweb:
-          image: bunkerity/bunkerweb:1.6.17
+          image: bunkerity/bunkerweb:1.6.18-rc3
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -184,7 +184,7 @@ Vous trouverez plus de paramètres sur l'IP réelle dans la [section des fonctio
             REAL_IP_HEADER: "X-Forwarded-For"
           ...
         bw-scheduler:
-          image: bunkerity/bunkerweb-scheduler:1.6.17
+          image: bunkerity/bunkerweb-scheduler:1.6.18-rc3
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -249,7 +249,7 @@ Vous trouverez plus de paramètres sur l'IP réelle dans la [section des fonctio
             -p 80:8080/tcp \
             -p 443:8443/tcp \
             -p 443:8443/udp \
-            bunkerity/bunkerweb-all-in-one:1.6.17
+            bunkerity/bunkerweb-all-in-one:1.6.18-rc3
         ```
 
         Veuillez noter que si votre conteneur existe déjà, vous devrez le supprimer et le recréer afin que les nouvelles variables d'environnement soient prises en compte.
@@ -260,7 +260,7 @@ Vous trouverez plus de paramètres sur l'IP réelle dans la [section des fonctio
 
         ```yaml
         bunkerweb:
-          image: bunkerity/bunkerweb:1.6.17
+          image: bunkerity/bunkerweb:1.6.18-rc3
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -270,7 +270,7 @@ Vous trouverez plus de paramètres sur l'IP réelle dans la [section des fonctio
           ...
         ...
         bw-scheduler:
-          image: bunkerity/bunkerweb-scheduler:1.6.17
+          image: bunkerity/bunkerweb-scheduler:1.6.18-rc3
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -288,7 +288,7 @@ Vous trouverez plus de paramètres sur l'IP réelle dans la [section des fonctio
 
         ```yaml
         bunkerweb:
-          image: bunkerity/bunkerweb:1.6.17
+          image: bunkerity/bunkerweb:1.6.18-rc3
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -298,7 +298,7 @@ Vous trouverez plus de paramètres sur l'IP réelle dans la [section des fonctio
           ...
         ...
         bw-scheduler:
-          image: bunkerity/bunkerweb-scheduler:1.6.17
+          image: bunkerity/bunkerweb-scheduler:1.6.18-rc3
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -350,7 +350,7 @@ Vous trouverez plus de paramètres sur l'IP réelle dans la [section des fonctio
 
         ```yaml
         bunkerweb:
-          image: bunkerity/bunkerweb:1.6.17
+          image: bunkerity/bunkerweb:1.6.18-rc3
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -360,7 +360,7 @@ Vous trouverez plus de paramètres sur l'IP réelle dans la [section des fonctio
           ...
         ...
         bw-scheduler:
-          image: bunkerity/bunkerweb-scheduler:1.6.17
+          image: bunkerity/bunkerweb-scheduler:1.6.18-rc3
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -485,8 +485,8 @@ Le Manager est le cerveau du cluster. Il exécute le Scheduler, la base de donn�
 
         ```bash
         # Télécharger le script et sa somme
-        curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.17/install-bunkerweb.sh
-        curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.17/install-bunkerweb.sh.sha256
+        curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.18-rc3/install-bunkerweb.sh
+        curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.18-rc3/install-bunkerweb.sh.sha256
 
         # Vérifier l'empreinte
         sha256sum -c install-bunkerweb.sh.sha256
@@ -588,7 +588,7 @@ Le Manager est le cerveau du cluster. Il exécute le Scheduler, la base de donn�
 
     services:
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.17
+        image: bunkerity/bunkerweb-scheduler:1.6.18-rc3
         environment:
           <<: *bw-ui-env
           BUNKERWEB_INSTANCES: "192.168.1.11 192.168.1.12" # Remplacez par les IPs de vos workers
@@ -607,7 +607,7 @@ Le Manager est le cerveau du cluster. Il exécute le Scheduler, la base de donn�
           - bw-redis
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.6.17
+        image: bunkerity/bunkerweb-ui:1.6.18-rc3
         ports:
           - "7000:7000" # Exposer le port de l'UI
         environment:
@@ -693,7 +693,7 @@ Les workers sont les nœuds qui traitent le trafic entrant.
     ```yaml title="docker-compose.yml"
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.17
+        image: bunkerity/bunkerweb:1.6.18-rc3
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -1130,7 +1130,7 @@ Pour activer systemd-resolved comme résolveur DNS dans BunkerWeb, définissez l
         -p 80:8080/tcp \
         -p 443:8443/tcp \
         -p 443:8443/udp \
-        bunkerity/bunkerweb-all-in-one:1.6.17
+        bunkerity/bunkerweb-all-in-one:1.6.18-rc3
     ```
 
 === "Docker"
@@ -1158,7 +1158,7 @@ Pour activer systemd-resolved comme résolveur DNS dans BunkerWeb, définissez l
           - bw-dns
 
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.17
+        image: bunkerity/bunkerweb:1.6.18-rc3
         ...
         environment:
           DNS_RESOLVERS: "dnsmasq"
@@ -1169,7 +1169,7 @@ Pour activer systemd-resolved comme résolveur DNS dans BunkerWeb, définissez l
           - bw-dns
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.17
+        image: bunkerity/bunkerweb-scheduler:1.6.18-rc3
         ...
         environment:
           DNS_RESOLVERS: "dnsmasq"
@@ -1286,7 +1286,7 @@ Certaines intégrations offrent des moyens plus pratiques d'appliquer des config
           }" \
         -p 80:8080/tcp \
         -p 443:8443/tcp \
-        bunkerity/bunkerweb-all-in-one:1.6.17
+        bunkerity/bunkerweb-all-in-one:1.6.18-rc3
     ```
 
     Veuillez noter que si votre conteneur est déjà créé, vous devrez le supprimer et le recréer pour que les nouvelles variables d'environnement soient appliquées.
@@ -1326,7 +1326,7 @@ Certaines intégrations offrent des moyens plus pratiques d'appliquer des config
         -p 80:8080/tcp \
         -p 443:8443/tcp \
         -p 443:8443/udp \
-        bunkerity/bunkerweb-all-in-one:1.6.17
+        bunkerity/bunkerweb-all-in-one:1.6.18-rc3
     ```
 
 === "Docker"
@@ -1349,7 +1349,7 @@ Certaines intégrations offrent des moyens plus pratiques d'appliquer des config
     ```yaml
     ...
     bw-scheduler:
-      image: bunkerity/bunkerweb-scheduler:1.6.17
+      image: bunkerity/bunkerweb-scheduler:1.6.18-rc3
       environment:
         - |
           CUSTOM_CONF_SERVER_HTTP_hello-world=
@@ -1392,7 +1392,7 @@ Certaines intégrations offrent des moyens plus pratiques d'appliquer des config
 
     ```yaml
     bw-scheduler:
-      image: bunkerity/bunkerweb-scheduler:1.6.17
+      image: bunkerity/bunkerweb-scheduler:1.6.18-rc3
       volumes:
         - ./bw-data:/data
       ...
@@ -1462,7 +1462,7 @@ Certaines intégrations offrent des moyens plus pratiques d'appliquer des config
 
     ```yaml
     bw-scheduler:
-      image: bunkerity/bunkerweb-scheduler:1.6.17
+      image: bunkerity/bunkerweb-scheduler:1.6.18-rc3
       volumes:
         - ./bw-data:/data
       ...
@@ -1708,7 +1708,7 @@ Pour la liste complète des paramètres concernant `stream` le  mode, veuillez v
         -p 443:8443/udp \
         -p 10000:10000/tcp \
         -p 20000:20000/tcp \
-        bunkerity/bunkerweb-all-in-one:1.6.17
+        bunkerity/bunkerweb-all-in-one:1.6.18-rc3
     ```
 
     Veuillez noter que si votre conteneur existe déjà, vous devrez le supprimer et le recréer afin que les nouvelles variables d'environnement soient prises en compte.
@@ -1731,7 +1731,7 @@ Pour la liste complète des paramètres concernant `stream` le  mode, veuillez v
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.17
+        image: bunkerity/bunkerweb:1.6.18-rc3
         ports:
           - "80:8080" # Keep it if you want to use Let's Encrypt automation when using http challenge type
           - "10000:10000" # app1
@@ -1746,7 +1746,7 @@ Pour la liste complète des paramètres concernant `stream` le  mode, veuillez v
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.17
+        image: bunkerity/bunkerweb-scheduler:1.6.18-rc3
         environment:
           <<: *bw-api-env
           BUNKERWEB_INSTANCES: "bunkerweb" # This setting is mandatory to specify the BunkerWeb instance
@@ -1797,7 +1797,7 @@ Pour la liste complète des paramètres concernant `stream` le  mode, veuillez v
     ```yaml
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.17
+        image: bunkerity/bunkerweb:1.6.18-rc3
         ports:
           - "80:8080" # Keep it if you want to use Let's Encrypt automation when using http challenge type
           - "10000:10000" # app1
@@ -2027,7 +2027,7 @@ Pour la liste complète des paramètres concernant `stream` le  mode, veuillez v
     ```yaml
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.17
+        image: bunkerity/bunkerweb:1.6.18-rc3
         ports:
           # Keep it if you want to use Let's Encrypt automation when using http challenge type
           - published: 80
@@ -2157,7 +2157,7 @@ BunkerWeb prend en charge PHP en utilisant des  instances [PHP-FPM externes ou ]
         -p 80:8080/tcp \
         -p 443:8443/tcp \
         -p 443:8443/udp \
-        bunkerity/bunkerweb-all-in-one:1.6.17
+        bunkerity/bunkerweb-all-in-one:1.6.18-rc3
     ```
 
     Veuillez noter que si votre conteneur est déjà créé, vous devrez le supprimer et le recréer pour que les nouvelles variables d'environnement soient appliquées.
@@ -2201,7 +2201,7 @@ BunkerWeb prend en charge PHP en utilisant des  instances [PHP-FPM externes ou ]
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.17
+        image: bunkerity/bunkerweb:1.6.18-rc3
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -2216,7 +2216,7 @@ BunkerWeb prend en charge PHP en utilisant des  instances [PHP-FPM externes ou ]
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.17
+        image: bunkerity/bunkerweb-scheduler:1.6.18-rc3
         environment:
           <<: *bw-api-env
           BUNKERWEB_INSTANCES: "bunkerweb" # This setting is mandatory to specify the BunkerWeb instance
@@ -2310,7 +2310,7 @@ BunkerWeb prend en charge PHP en utilisant des  instances [PHP-FPM externes ou ]
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.17
+        image: bunkerity/bunkerweb:1.6.18-rc3
         labels:
           - "bunkerweb.INSTANCE=yes"
         environment:
@@ -2323,7 +2323,7 @@ BunkerWeb prend en charge PHP en utilisant des  instances [PHP-FPM externes ou ]
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.17
+        image: bunkerity/bunkerweb-scheduler:1.6.18-rc3
         environment:
           <<: *bw-api-env
           BUNKERWEB_INSTANCES: "" # We don't need to specify the BunkerWeb instance here as they are automatically detected by the autoconf service
@@ -2338,7 +2338,7 @@ BunkerWeb prend en charge PHP en utilisant des  instances [PHP-FPM externes ou ]
           - bw-db
 
       bw-autoconf:
-        image: bunkerity/bunkerweb-autoconf:1.6.17
+        image: bunkerity/bunkerweb-autoconf:1.6.18-rc3
         depends_on:
           - bunkerweb
           - bw-docker
@@ -2578,7 +2578,7 @@ BunkerWeb prend en charge PHP en utilisant des  instances [PHP-FPM externes ou ]
     ```yaml
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.17
+        image: bunkerity/bunkerweb:1.6.18-rc3
         volumes:
           - /shared/www:/var/www/html
     ...
@@ -2647,39 +2647,28 @@ BunkerWeb prend en charge PHP en utilisant des  instances [PHP-FPM externes ou ]
 
 ## IPv6
 
-!!! example "Fonctionnalité expérimentale"
+Par défaut, BunkerWeb n'écoute que sur IPv4. Définissez `USE_IPV6=yes` (le nom est sensible à la casse) pour ajouter des écouteurs IPv6 à côté des écouteurs IPv4 pour les services HTTP, HTTPS, HTTP/3 et stream, et pour que NGINX et le résolveur Lua interrogent aussi les enregistrements AAAA. Ce paramètre ne configure pas votre réseau : adresses, routage, ports publiés et règles de pare-feu restent à votre charge. L'API interne, l'interface Web et l'API publique ont leurs propres paramètres d'écoute (voir [Réseaux IPv6 uniquement](#ipv6-only)). Un service peut aussi être nommé par une adresse IP (voir [Adresses IP comme noms de service](#ip-service-names)).
 
-    Cette fonctionnalité n'est pas prête pour la production. N'hésitez pas à la tester et à nous signaler tout bug via les [issues](https://github.com/bunkerity/bunkerweb/issues) du dépôt GitHub.
+!!! info "Couverture des tests"
 
-Par défaut, BunkerWeb n'écoutera que les adresses IPv4 et n'utilisera pas IPv6 pour les communications réseau. Si vous souhaitez activer la prise en charge d'IPv6, vous devez définir `USE_IPV6=yes`. Veuillez noter que la configuration IPv6 de votre réseau et de votre environnement n'entre pas dans le champ d'application de cette documentation.
+    Les tests automatisés couvrent IPv6 sur Docker, sur un réseau double pile et sur un réseau IPv6 uniquement : écouteurs HTTP et HTTPS, IP réelle du client issue de `X-Forwarded-For`, listes d'autorisation et de blocage d'IP (formes compressée, étendue et IPv4-mappée), bannissements via l'API interne et `bwcli`, limitation de débit, ModSecurity, upstreams IPv6 et AAAA uniquement, et un Redis autonome pour les bannissements et les limites.
+
+    Non testé sur une installation IPv6 réelle : paquets Linux, All-in-one, Autoconf, Swarm, Kubernetes et Gateway API (ils nécessitent un cluster double pile, et `USE_KUBERNETES_FQDN=no` si le DNS de votre cluster ne publie pas de noms de pod IPv6), services HTTP/3 et stream, Redis Sentinel et Cluster, l'interface Web et l'API publique, les contrôles de pays, d'ASN et de DNSBL pour les clients IPv6 publics, et l'émission de certificats. Les mêmes paramètres s'appliquent dans ces cas. Testez votre installation avant de vous y fier, et signalez les problèmes via les [issues](https://github.com/bunkerity/bunkerweb/issues) du dépôt GitHub.
 
 === "Docker / Autoconf / Swarm"
 
-    Tout d'abord, vous devrez configurer le démon Docker pour activer la prise en charge d'IPv6 pour les conteneurs et utiliser ip6tables si nécessaire. Voici une configuration d'exemple pour votre fichier /etc/docker/daemon.json :
+    Docker active IPv6 par réseau. Sur les versions actuelles (testé avec Docker 29.9.2, sans aucun fichier `/etc/docker/daemon.json`), il suffit de déclarer `enable_ipv6: true` et un sous-réseau IPv6 sur le réseau qui transporte le trafic des clients : pas de drapeau `experimental` et pas de redémarrage de Docker. Les options du démon `ipv6`, `fixed-cidr-v6` et `ip6tables` concernent surtout le réseau bridge par défaut, et les anciennes versions de Docker (non testées) peuvent encore en avoir besoin pour les réseaux définis par l'utilisateur. Consultez la documentation de Docker pour votre version.
 
-    ```json
-    {
-      "experimental": true,
-      "ipv6": true,
-      "ip6tables": true,
-      "fixed-cidr-v6": "fd00:dead:beef::/48"
-    }
-    ```
+    Un sous-réseau IPv6 privé ne donne l'IPv6 qu'entre les conteneurs. L'accès à Internet, ou l'accueil de clients sur des ports publiés en IPv6, dépend du routage IPv6, du pare-feu et du NAT de votre hôte, ce qui sort du cadre de cette documentation.
 
-    Vous pouvez maintenant redémarrer le service Docker pour appliquer les modifications :
-
-    ```shell
-    systemctl restart docker
-    ```
-
-    Une fois Docker configuré pour prendre en charge IPv6, vous pouvez ajouter le paramètre `USE_IPV6` et configurer le réseau bw-services pour IPv6 :
+    Ajoutez le paramètre `USE_IPV6` au scheduler et activez IPv6 sur le réseau `bw-services`. Si vous déclarez un `subnet` IPv4 pour le réseau, conservez-le dans la même liste `ipam.config` :
 
     ```yaml
     services:
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.17
+        image: bunkerity/bunkerweb-scheduler:1.6.18-rc3
         environment:
-          USE_IPv6: "yes"
+          USE_IPV6: "yes"
 
     ...
 
@@ -2689,7 +2678,7 @@ Par défaut, BunkerWeb n'écoutera que les adresses IPv4 et n'utilisera pas IPv6
         enable_ipv6: true
         ipam:
           config:
-            - subnet: fd00:13:37::/48
+            - subnet: fd00:13:37::/64
               gateway: fd00:13:37::1
 
     ...
@@ -2722,6 +2711,95 @@ Par défaut, BunkerWeb n'écoutera que les adresses IPv4 et n'utilisera pas IPv6
     ```shell
     systemctl start bunkerweb
     ```
+
+### Vérifier le fonctionnement d'IPv6
+
+Listez les écouteurs, sur l'hôte Linux ou dans le conteneur BunkerWeb (`docker compose exec bunkerweb ss -6 -ltn`). Les ports définis par `HTTP_PORT` et `HTTPS_PORT` doivent apparaître sur `[::]` :
+
+```shell
+ss -6 -ltn
+```
+
+Envoyez ensuite une requête en IPv6 à l'adresse de BunkerWeb, avec l'en-tête `Host` de l'un de vos services (`-g` évite que curl interprète les crochets comme un motif) :
+
+```shell
+curl -g -6 -H "Host: www.example.com" "http://[<BUNKERWEB_IPV6_ADDRESS>]:<HTTP_PORT>/"
+```
+
+Le journal d'accès affiche alors l'adresse IPv6 du client.
+
+### Adresses IP comme noms de service {#ip-service-names}
+
+Un service peut être nommé par une adresse IPv4 ou IPv6 au lieu d'un nom DNS. Écrivez une adresse IPv6 sans crochets, en minuscules et compressée, comme un client l'envoie dans l'en-tête `Host` : `2001:db8::1`, et non `[2001:db8::1]`, `2001:DB8::1` ou `2001:0db8::1`. BunkerWeb ajoute lui-même la forme avec crochets au `server_name` de NGINX. Un nom écrit autrement ne correspond jamais à l'en-tête `Host`, et BunkerWeb journalise un avertissement avec l'écriture canonique. ModSecurity ne note pas la règle CRS 920350 (« Host header is a numeric IP address ») pour une requête dont le `Host` est l'une des adresses du service ; tout autre `Host` numérique reste noté.
+
+!!! warning "Paramètres par service avec Docker Compose"
+
+    Un `env_file` de Compose ne peut pas transporter les paramètres par service d'un service nommé en IPv6 : il coupe `2001:db8::1_USE_ANTIBOT=yes` au premier deux-points et perd le paramètre sans erreur. Utilisez `environment:` (forme map ou liste), l'interface web ou l'API. Le fichier `variables.env` de Linux n'est pas concerné.
+
+Let's Encrypt n'émet pas encore de certificats pour les adresses IPv6 : le job ignore un service nommé en IPv6 et le journalise.
+
+### Réseaux IPv6 uniquement {#ipv6-only}
+
+BunkerWeb fonctionne aussi lorsque ses conteneurs n'ont aucune adresse IPv4. Cela a été testé sur Docker, avec le cœur et le scheduler sur des réseaux créés avec `enable_ipv4: false` (Docker 29.9.2, Compose 5.6.1). Les deux conteneurs ont besoin des mêmes paramètres, ainsi que d'adresses fixes pour que la liste d'autorisation et `BUNKERWEB_INSTANCES` restent valides :
+
+```yaml
+x-bw-ipv6-env: &bw-ipv6-env
+  USE_IPV6: "yes"
+  API_LISTEN_IP: "::"
+  API_WHITELIST_IP: "::1/128 2001:db8:1::24/128"
+  BUNKERWEB_INSTANCES: "[2001:db8:1::10]:5000"
+  DNS_RESOLVERS: "[2001:db8:1::20]"
+
+services:
+  bunkerweb:
+    image: bunkerity/bunkerweb:1.6.18-rc3
+    dns:
+      - 2001:db8:1::20
+    environment:
+      <<: *bw-ipv6-env
+    networks:
+      bw-universe:
+        ipv6_address: 2001:db8:1::10
+
+  bw-scheduler:
+    image: bunkerity/bunkerweb-scheduler:1.6.18-rc3
+    dns:
+      - 2001:db8:1::20
+    environment:
+      <<: *bw-ipv6-env
+    networks:
+      bw-universe:
+        ipv6_address: 2001:db8:1::24
+
+networks:
+  bw-universe:
+    name: bw-universe
+    enable_ipv4: false
+    enable_ipv6: true
+    ipam:
+      config:
+        - subnet: 2001:db8:1::/64
+```
+
+| Paramètre             | Pourquoi il est nécessaire                                                                                                                                  |
+| :-------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `USE_IPV6`            | Écouteurs IPv6 et résolution des enregistrements AAAA.                                                                                                      |
+| `API_LISTEN_IP`       | L'API interne écoute par défaut sur `0.0.0.0`, c'est-à-dire en IPv4 uniquement.                                                                             |
+| `API_WHITELIST_IP`    | L'API interne n'accepte par défaut que la boucle locale : listez l'adresse IPv6 de chaque appelant (scheduler, et l'interface Web ou autoconf si utilisés). |
+| `BUNKERWEB_INSTANCES` | L'endroit où le scheduler trouve le cœur. Une adresse IPv6 nécessite des crochets et un port.                                                               |
+| `DNS_RESOLVERS`       | La valeur par défaut est le résolveur IPv4 de Docker. NGINX et Lua ont besoin d'un résolveur IPv6, entre crochets.                                          |
+
+Les entrées `dns:` comptent aussi : le scheduler et les jobs utilisent le résolveur du conteneur, pas `DNS_RESOLVERS`. Les backends sont alors joints par adresse IPv6 ou par un nom qui possède un enregistrement AAAA : un nom d'upstream qui n'a qu'un enregistrement A échoue avec une erreur `502`.
+
+Certaines fonctionnalités sortantes contactent des serveurs qui n'avaient pas d'enregistrement AAAA lors de nos vérifications (octobre 2026). Sans sortie IPv4 ni NAT64/DNS64, leurs jobs échouent ou continuent d'utiliser des données en cache, tandis que le reste de BunkerWeb continue de servir :
+
+- BunkerNet et les rapports d'utilisation anonymes (désactivez-les avec `USE_BUNKERNET=no` et `SEND_ANONYMOUS_REPORT=no`).
+- Le téléchargement des plugins PRO.
+- La vérification de la disponibilité d'une nouvelle version de BunkerWeb.
+- Les mises à jour des bases de pays et d'ASN (les bases fournies ou en cache restent utilisées).
+- Fonctionnalités optionnelles : certificats ZeroSSL, téléchargement des plugins CRS de ModSecurity depuis GitHub, hCaptcha et le serveur de démonstration mCaptcha.
+
+Limitation connue : sur un réseau IPv6 uniquement, le cœur ouvre toujours des écouteurs génériques IPv4 sur les ports TCP HTTP et HTTPS et sur le port UDP HTTPS (HTTP/3). Ils ne transportent aucun trafic lorsque le réseau n'a pas d'IPv4, mais un scanner qui rejette tout écouteur IPv4 les signalera. La boucle locale IPv4 est également toujours utilisée à l'intérieur des conteneurs (vérification de santé, écouteur local de l'API). Les tests n'ont pas couvert l'interface Web, une base de données en réseau ni les autres intégrations sur un réseau IPv6 uniquement.
 
 ## Options de configuration de journalisation
 
@@ -2840,7 +2918,7 @@ Avec la valeur par défaut `BCFH` de `MODSECURITY_SEC_AUDIT_LOG_PARTS`, la parti
     services:
       bunkerweb:
         # Ceci est le nom qui sera utilisé pour identifier l'instance dans le Scheduler
-        image: bunkerity/bunkerweb:1.6.17
+        image: bunkerity/bunkerweb:1.6.18-rc3
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -2853,7 +2931,7 @@ Avec la valeur par défaut `BCFH` de `MODSECURITY_SEC_AUDIT_LOG_PARTS`, la parti
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.17
+        image: bunkerity/bunkerweb-scheduler:1.6.18-rc3
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Assurez-vous de définir le nom d'instance correct
@@ -2870,7 +2948,7 @@ Avec la valeur par défaut `BCFH` de `MODSECURITY_SEC_AUDIT_LOG_PARTS`, la parti
           - bw-db
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.6.17
+        image: bunkerity/bunkerweb-ui:1.6.18-rc3
         environment:
           <<: *bw-env
         volumes:
@@ -3042,7 +3120,7 @@ Vous pouvez configurer le pilote de journalisation pour vos services dans votre 
 ```yaml
 services:
   bunkerweb:
-    image: bunkerity/bunkerweb:1.6.17
+    image: bunkerity/bunkerweb:1.6.18-rc3
     logging:
       driver: "json-file"
       options:
@@ -3151,7 +3229,7 @@ Les variables couramment utilisées sont :
         -p 80:8080/tcp \
         -p 443:8443/tcp \
         -p 443:8443/udp \
-        bunkerity/bunkerweb-all-in-one:1.6.17
+        bunkerity/bunkerweb-all-in-one:1.6.18-rc3
     ```
 
     Si le conteneur existe déjà, recréez-le pour appliquer le nouvel environnement.
@@ -3162,7 +3240,7 @@ Les variables couramment utilisées sont :
 
     ```yaml
     bw-scheduler:
-      image: bunkerity/bunkerweb-scheduler:1.6.17
+      image: bunkerity/bunkerweb-scheduler:1.6.18-rc3
       ...
       environment:
         HTTP_PROXY: "http://proxy.example.local:3128"
@@ -3181,7 +3259,7 @@ Les variables couramment utilisées sont :
 
     ```yaml
     bw-scheduler:
-      image: bunkerity/bunkerweb-scheduler:1.6.17
+      image: bunkerity/bunkerweb-scheduler:1.6.18-rc3
       ...
       environment:
         HTTP_PROXY: "http://proxy.example.local:3128"
@@ -3224,7 +3302,7 @@ Les variables couramment utilisées sont :
 
     ```yaml
     bw-scheduler:
-      image: bunkerity/bunkerweb-scheduler:1.6.17
+      image: bunkerity/bunkerweb-scheduler:1.6.18-rc3
       ...
       environment:
         HTTP_PROXY: "http://proxy.example.local:3128"
@@ -3493,12 +3571,12 @@ Le **serveur MCP BunkerWeb** permet aux assistants IA comme **Claude Code** et *
 
 ### Exemple Docker Compose
 
-Un exemple complet est disponible dans [`examples/mcp-stack/`](https://github.com/bunkerity/bunkerweb/tree/v1.6.17/examples/mcp-stack) :
+Un exemple complet est disponible dans [`examples/mcp-stack/`](https://github.com/bunkerity/bunkerweb/tree/v1.6.18-rc3/examples/mcp-stack) :
 
 ```yaml
 services:
   bw-api:
-    image: bunkerity/bunkerweb-api:1.6.17
+    image: bunkerity/bunkerweb-api:1.6.18-rc3
     environment:
       API_TOKEN: "my-bearer-token-for-mcp"
       DATABASE_URI: "mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db"
@@ -4322,11 +4400,11 @@ Les modèles utilisent la syntaxe de modèle Lua avec les délimiteurs suivants 
         ```yaml
         services:
           bunkerweb:
-            image: bunkerity/bunkerweb:1.6.17
+            image: bunkerity/bunkerweb:1.6.18-rc3
             # ... autres paramètres (pas de variables d'environnement nécessaires ici pour les pages personnalisées)
 
           bw-scheduler:
-            image: bunkerity/bunkerweb-scheduler:1.6.17
+            image: bunkerity/bunkerweb-scheduler:1.6.18-rc3
             volumes:
               - ./templates:/custom_templates:ro
             environment:
@@ -4409,7 +4487,7 @@ Les modèles utilisent la syntaxe de modèle Lua avec les délimiteurs suivants 
             spec:
               containers:
                 - name: bunkerweb-scheduler
-                  image: bunkerity/bunkerweb-scheduler:1.6.17
+                  image: bunkerity/bunkerweb-scheduler:1.6.18-rc3
                   env:
                     - name: CUSTOM_ERROR_PAGE
                       value: "/custom_templates/error.html"

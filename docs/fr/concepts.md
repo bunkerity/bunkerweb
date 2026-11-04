@@ -105,7 +105,7 @@ Veuillez noter que le mode multisite est implicite lors de l'utilisation de l'in
 
 !!! info "Aller plus loin"
 
-    Vous trouverez des exemples concrets du mode multisite dans la section [Utilisations avancées](advanced.md) de la documentation et dans le répertoire [examples](https://github.com/bunkerity/bunkerweb/tree/v1.6.17/examples) du dépôt.
+    Vous trouverez des exemples concrets du mode multisite dans la section [Utilisations avancées](advanced.md) de la documentation et dans le répertoire [examples](https://github.com/bunkerity/bunkerweb/tree/v1.6.18-rc3/examples) du dépôt.
 
 ## Configurations personnalisées {#custom-configurations}
 
@@ -126,7 +126,7 @@ La gestion des configurations personnalisées à partir de l'interface utilisate
 
 !!! info "Aller plus loin"
 
-    Vous trouverez des exemples concrets de configurations personnalisées dans la section [Utilisations avancées](advanced.md#custom-configurations) de la documentation et dans le répertoire [examples](https://github.com/bunkerity/bunkerweb/tree/v1.6.17/examples) du dépôt.
+    Vous trouverez des exemples concrets de configurations personnalisées dans la section [Utilisations avancées](advanced.md#custom-configurations) de la documentation et dans le répertoire [examples](https://github.com/bunkerity/bunkerweb/tree/v1.6.18-rc3/examples) du dépôt.
 
 ## Base de données
 
@@ -172,7 +172,7 @@ En spécifiant l'URI de base de données appropriée dans la configuration, vous
 
 !!! info "Remarques"
     - **PostgreSQL** : les images basées sur Alpine, y compris all-in-one, incluent désormais le client `v18` ; `v18` et les versions antérieures sont donc pris en charge par défaut.
-    - **Linux** : La prise en charge dépend des paquets de votre distribution. Si nécessaire, vous pouvez installer les clients de base de données manuellement à partir des dépôts des fournisseurs (cela est généralement nécessaire pour RHEL).
+    - **Linux** : La prise en charge dépend des paquets de votre distribution. Si nécessaire, vous pouvez installer les clients de base de données manuellement à partir des dépôts des fournisseurs (cela est généralement nécessaire pour RHEL). Si la version majeure du serveur PostgreSQL est plus récente que celle du client Linux `pg_dump`, les sauvegardes échouent avec `server version mismatch` ; installez un client correspondant depuis le [dépôt PGDG](integrations.md#debian-ubuntu-postgresql-backups).
     - **SQLite** : Est livré avec les paquets et est prêt à l'emploi.
 
 Ressources externes utiles pour installer les clients de bases de données :

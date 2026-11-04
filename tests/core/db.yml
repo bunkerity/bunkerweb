@@ -1,0 +1,305 @@
+# What the stack stored, not just that a database answers: the jobs ran without a failure, the core
+# plugins are registered, a global value, a service value, a custom config and the service are in their
+# tables. Every query is shaped as one tagged string (`jobs_failed=0`), because `result` is a
+# substring match over the whole client output and a bare `0` would match anything.
+#
+# The config below gives the checks something specific to find. `MULTISITE` makes the per-service
+# value a row of bw_services_settings instead of a global one. The custom config rides in as
+# `CUSTOM_CONF_*`, which only the scheduler's process environment carries (src/common/gen/save_config.py
+# reads `environ`, not variables.env), so that check runs on Docker only.
+#
+# A `restart_stack: false` action leaves the stack up for the next one, and `full_clean` on the last
+# check of an engine tears it down so that the next engine's boot action starts on its own database.
+integrations: "all"
+
+config:
+  MULTISITE: "yes"
+  GZIP_COMP_LEVEL: "3"
+  www.example.com_GZIP_MIN_LENGTH: "2048"
+
+Docker:
+  config:
+    CUSTOM_CONF_SERVER_HTTP_dbspec: "# db spec marker"
+
+actions:
+  sqlite:
+    type: database
+    query: "SELECT 1"
+    result: null
+    not_log: "❌"
+    log_from: "scheduler"
+    integrations: # ? For the other integrations, mariadb is the default database
+      - "Linux"
+      - "Docker"
+      - "All-in-one"
+    database: "sqlite"
+    retries: 1
+    full_clean: true
+  # ? SUM() over no rows is NULL, which turns the whole string NULL: a stack where no job ever ran fails this too
+  sqlite_jobs:
+    type: database
+    query: "SELECT 'jobs_failed=' || SUM(CASE WHEN success = 0 THEN 1 ELSE 0 END) FROM bw_jobs_runs"
+    result: "jobs_failed=0"
+    log_from: "scheduler"
+    integrations:
+      - "Linux"
+      - "Docker"
+      - "All-in-one"
+    database: "sqlite"
+    restart_stack: false
+  # ? 42 `src/common/core/*/plugin.json` plus the `general` plugin built from settings.json
+  sqlite_plugins:
+    type: database
+    query: "SELECT 'core_plugins=' || COUNT(*) FROM bw_plugins WHERE type = 'core'"
+    result: "core_plugins=43"
+    log_from: "scheduler"
+    integrations:
+      - "Linux"
+      - "Docker"
+      - "All-in-one"
+    database: "sqlite"
+    restart_stack: false
+  sqlite_global:
+    type: database
+    query: "SELECT 'global=' || setting_id || '=' || value FROM bw_global_values WHERE setting_id = 'GZIP_COMP_LEVEL'"
+    result: "global=GZIP_COMP_LEVEL=3"
+    log_from: "scheduler"
+    integrations:
+      - "Linux"
+      - "Docker"
+      - "All-in-one"
+    database: "sqlite"
+    restart_stack: false
+  sqlite_service_value:
+    type: database
+    query: "SELECT 'service_value=' || service_id || '/' || setting_id || '=' || value FROM bw_services_settings WHERE setting_id = 'GZIP_MIN_LENGTH'"
+    result: "service_value=www.example.com/GZIP_MIN_LENGTH=2048"
+    log_from: "scheduler"
+    integrations:
+      - "Linux"
+      - "Docker"
+      - "All-in-one"
+    database: "sqlite"
+    restart_stack: false
+  sqlite_custom_config:
+    type: database
+    query: "SELECT 'custom_config=' || type || '/' || name || ' method=' || method FROM bw_custom_configs"
+    result: "custom_config=server_http/dbspec method=scheduler"
+    log_from: "scheduler"
+    integrations:
+      - "Docker"
+    database: "sqlite"
+    restart_stack: false
+  # ? Last of the engine on every integration: `full_clean` tears the stack down, so the next engine's boot action starts on its own database
+  sqlite_service:
+    type: database
+    query: "SELECT 'service=' || id FROM bw_services"
+    result: "service=www.example.com"
+    log_from: "scheduler"
+    integrations:
+      - "Linux"
+      - "Docker"
+      - "All-in-one"
+    database: "sqlite"
+    full_clean: true
+  mariadb:
+    type: database
+    query: "SELECT 1"
+    result: null
+    not_log: "❌"
+    log_from: "scheduler"
+    database: "mariadb"
+    retries: 1
+    full_clean: true
+  # ? SUM() over no rows is NULL, which turns the whole string NULL: a stack where no job ever ran fails this too
+  mariadb_jobs:
+    type: database
+    query: "SELECT CONCAT('jobs_failed=', SUM(CASE WHEN success = 0 THEN 1 ELSE 0 END)) FROM bw_jobs_runs"
+    result: "jobs_failed=0"
+    log_from: "scheduler"
+    database: "mariadb"
+    restart_stack: false
+  # ? 42 `src/common/core/*/plugin.json` plus the `general` plugin built from settings.json
+  mariadb_plugins:
+    type: database
+    query: "SELECT CONCAT('core_plugins=', COUNT(*)) FROM bw_plugins WHERE type = 'core'"
+    result: "core_plugins=43"
+    log_from: "scheduler"
+    database: "mariadb"
+    restart_stack: false
+  mariadb_global:
+    type: database
+    query: "SELECT CONCAT('global=', setting_id, '=', value) FROM bw_global_values WHERE setting_id = 'GZIP_COMP_LEVEL'"
+    result: "global=GZIP_COMP_LEVEL=3"
+    log_from: "scheduler"
+    integrations:
+      - "Linux"
+      - "Docker"
+      - "All-in-one"
+    database: "mariadb"
+    restart_stack: false
+  mariadb_service_value:
+    type: database
+    query: "SELECT CONCAT('service_value=', service_id, '/', setting_id, '=', value) FROM bw_services_settings WHERE setting_id = 'GZIP_MIN_LENGTH'"
+    result: "service_value=www.example.com/GZIP_MIN_LENGTH=2048"
+    log_from: "scheduler"
+    integrations:
+      - "Linux"
+      - "Docker"
+      - "All-in-one"
+    database: "mariadb"
+    restart_stack: false
+  mariadb_custom_config:
+    type: database
+    query: "SELECT CONCAT('custom_config=', type, '/', name, ' method=', method) FROM bw_custom_configs"
+    result: "custom_config=server_http/dbspec method=scheduler"
+    log_from: "scheduler"
+    integrations:
+      - "Docker"
+    database: "mariadb"
+    restart_stack: false
+  # ? Last of the engine on every integration: `full_clean` tears the stack down, so the next engine's boot action starts on its own database
+  mariadb_service:
+    type: database
+    query: "SELECT CONCAT('service=', id) FROM bw_services"
+    result: "service=www.example.com"
+    log_from: "scheduler"
+    database: "mariadb"
+    full_clean: true
+  mysql:
+    type: database
+    query: "SELECT 1"
+    result: null
+    not_log: "❌"
+    log_from: "scheduler"
+    database: "mysql"
+    retries: 1
+    full_clean: true
+  # ? SUM() over no rows is NULL, which turns the whole string NULL: a stack where no job ever ran fails this too
+  mysql_jobs:
+    type: database
+    query: "SELECT CONCAT('jobs_failed=', SUM(CASE WHEN success = 0 THEN 1 ELSE 0 END)) FROM bw_jobs_runs"
+    result: "jobs_failed=0"
+    log_from: "scheduler"
+    database: "mysql"
+    restart_stack: false
+  # ? 42 `src/common/core/*/plugin.json` plus the `general` plugin built from settings.json
+  mysql_plugins:
+    type: database
+    query: "SELECT CONCAT('core_plugins=', COUNT(*)) FROM bw_plugins WHERE type = 'core'"
+    result: "core_plugins=43"
+    log_from: "scheduler"
+    database: "mysql"
+    restart_stack: false
+  mysql_global:
+    type: database
+    query: "SELECT CONCAT('global=', setting_id, '=', value) FROM bw_global_values WHERE setting_id = 'GZIP_COMP_LEVEL'"
+    result: "global=GZIP_COMP_LEVEL=3"
+    log_from: "scheduler"
+    integrations:
+      - "Linux"
+      - "Docker"
+      - "All-in-one"
+    database: "mysql"
+    restart_stack: false
+  mysql_service_value:
+    type: database
+    query: "SELECT CONCAT('service_value=', service_id, '/', setting_id, '=', value) FROM bw_services_settings WHERE setting_id = 'GZIP_MIN_LENGTH'"
+    result: "service_value=www.example.com/GZIP_MIN_LENGTH=2048"
+    log_from: "scheduler"
+    integrations:
+      - "Linux"
+      - "Docker"
+      - "All-in-one"
+    database: "mysql"
+    restart_stack: false
+  mysql_custom_config:
+    type: database
+    query: "SELECT CONCAT('custom_config=', type, '/', name, ' method=', method) FROM bw_custom_configs"
+    result: "custom_config=server_http/dbspec method=scheduler"
+    log_from: "scheduler"
+    integrations:
+      - "Docker"
+    database: "mysql"
+    restart_stack: false
+  # ? Last of the engine on every integration: `full_clean` tears the stack down, so the next engine's boot action starts on its own database
+  mysql_service:
+    type: database
+    query: "SELECT CONCAT('service=', id) FROM bw_services"
+    result: "service=www.example.com"
+    log_from: "scheduler"
+    database: "mysql"
+    full_clean: true
+  postgresql:
+    type: database
+    query: "SELECT 1"
+    result: null
+    not_log: "❌"
+    log_from: "scheduler"
+    database: "postgresql"
+    retries: 1
+    full_clean: true
+  # ? SUM() over no rows is NULL, which turns the whole string NULL: a stack where no job ever ran fails this too
+  postgresql_jobs:
+    type: database
+    query: "SELECT 'jobs_failed=' || SUM(CASE WHEN success = false THEN 1 ELSE 0 END) FROM bw_jobs_runs"
+    result: "jobs_failed=0"
+    log_from: "scheduler"
+    database: "postgresql"
+    restart_stack: false
+  # ? 42 `src/common/core/*/plugin.json` plus the `general` plugin built from settings.json
+  postgresql_plugins:
+    type: database
+    query: "SELECT 'core_plugins=' || COUNT(*) FROM bw_plugins WHERE type = 'core'"
+    result: "core_plugins=43"
+    log_from: "scheduler"
+    database: "postgresql"
+    restart_stack: false
+  postgresql_global:
+    type: database
+    query: "SELECT 'global=' || setting_id || '=' || value FROM bw_global_values WHERE setting_id = 'GZIP_COMP_LEVEL'"
+    result: "global=GZIP_COMP_LEVEL=3"
+    log_from: "scheduler"
+    integrations:
+      - "Linux"
+      - "Docker"
+      - "All-in-one"
+    database: "postgresql"
+    restart_stack: false
+  postgresql_service_value:
+    type: database
+    query: "SELECT 'service_value=' || service_id || '/' || setting_id || '=' || value FROM bw_services_settings WHERE setting_id = 'GZIP_MIN_LENGTH'"
+    result: "service_value=www.example.com/GZIP_MIN_LENGTH=2048"
+    log_from: "scheduler"
+    integrations:
+      - "Linux"
+      - "Docker"
+      - "All-in-one"
+    database: "postgresql"
+    restart_stack: false
+  postgresql_custom_config:
+    type: database
+    query: "SELECT 'custom_config=' || type || '/' || name || ' method=' || method FROM bw_custom_configs"
+    result: "custom_config=server_http/dbspec method=scheduler"
+    log_from: "scheduler"
+    integrations:
+      - "Docker"
+    database: "postgresql"
+    restart_stack: false
+  # ? Last of the engine on every integration: `full_clean` tears the stack down, so the next engine's boot action starts on its own database
+  postgresql_service:
+    type: database
+    query: "SELECT 'service=' || id FROM bw_services"
+    result: "service=www.example.com"
+    log_from: "scheduler"
+    database: "postgresql"
+    full_clean: true
+  # oracle:
+  #   type: database
+  #   query: "SELECT 1"
+  #   result: null
+  #   not_log: "❌"
+  #   log_from: "scheduler"
+  #   database: "oracle"
+  #   retries: 1
+  #   full_clean: true

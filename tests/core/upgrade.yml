@@ -1,0 +1,193 @@
+integrations:
+  - "Docker"
+  - "Autoconf"
+  - "All-in-one"
+  - "Kubernetes"
+  # Debian family only: the arm installs a release from the public apt repository, then the package
+  # built from this checkout over it (tests/README.md, "Linux upgrade arm"). SQLite only, like the
+  # Docker and All-in-one arms that have no database container to start.
+  - "Linux;amd64;ubuntu/noble"
+  - "Linux;amd64;debian/trixie"
+dev_integrations: ["Docker", "Autoconf", "All-in-one", "Kubernetes"]
+
+actions:
+  from_latest_stable_sqlite:
+    type: status
+    url: "http://www.example.com"
+    status: 200
+    bw_version: "${BW_LATEST_STABLE}"
+    integrations: # ? For the other integrations, mariadb is the default database
+      - "Linux"
+      - "Docker"
+      - "All-in-one"
+    database: "sqlite"
+    Linux: # ? The snapshot below runs before the upgrade, on this very stack
+      restart_stack: false
+  # Linux only: the old release must be a real old schema, and the marker proves the upgrade keeps the
+  # database it found instead of starting a new one.
+  from_latest_stable_sqlite_snapshot:
+    type: script
+    script: ["./tests/core/upgrade/linux-database.sh", "snapshot", "stable"]
+    result: "linux-database snapshot stable: all checks passed"
+    bw_version: "${BW_LATEST_STABLE}"
+    integrations:
+      - "Linux"
+    database: "sqlite"
+  to_latest_sqlite:
+    type: status
+    url: "http://www.example.com"
+    status: 200
+    not_log: "❌"
+    full_clean: true
+    integrations: # ? For the other integrations, mariadb is the default database
+      - "Linux"
+      - "Docker"
+      - "All-in-one"
+    database: "sqlite"
+    Linux: # ? The database checks below run on this stack, and clean it up
+      full_clean: false
+      restart_stack: false
+  to_latest_sqlite_verify:
+    type: script
+    script: ["./tests/core/upgrade/linux-database.sh", "verify", "stable"]
+    result: "linux-database verify stable: all checks passed"
+    full_clean: true
+    integrations:
+      - "Linux"
+    database: "sqlite"
+
+  from_latest_non_stable_sqlite:
+    type: status
+    url: "http://www.example.com"
+    status: 200
+    bw_version: "${BW_LATEST_NON_STABLE}"
+    integrations: # ? For the other integrations, mariadb is the default database
+      - "Linux"
+      - "Docker"
+      - "All-in-one"
+    database: "sqlite"
+    Linux:
+      restart_stack: false
+  from_latest_non_stable_sqlite_snapshot:
+    type: script
+    script: ["./tests/core/upgrade/linux-database.sh", "snapshot", "non-stable"]
+    result: "linux-database snapshot non-stable: all checks passed"
+    bw_version: "${BW_LATEST_NON_STABLE}"
+    integrations:
+      - "Linux"
+    database: "sqlite"
+  to_latest_1_sqlite:
+    type: status
+    url: "http://www.example.com"
+    status: 200
+    not_log: "❌"
+    integrations: # ? For the other integrations, mariadb is the default database
+      - "Linux"
+      - "Docker"
+      - "All-in-one"
+    database: "sqlite"
+    Linux:
+      restart_stack: false
+  to_latest_1_sqlite_verify:
+    type: script
+    script: ["./tests/core/upgrade/linux-database.sh", "verify", "non-stable"]
+    result: "linux-database verify non-stable: all checks passed"
+    integrations:
+      - "Linux"
+    database: "sqlite"
+
+  # Upgrade matrix for MariaDB
+  from_latest_stable_mariadb:
+    type: status
+    url: "http://www.example.com"
+    status: 200
+    bw_version: "${BW_LATEST_STABLE}"
+    integrations: ["Docker", "Autoconf", "All-in-one", "Kubernetes"]
+    database: "mariadb"
+  to_latest_mariadb:
+    type: status
+    url: "http://www.example.com"
+    status: 200
+    not_log: "❌"
+    full_clean: true
+    integrations: ["Docker", "Autoconf", "All-in-one", "Kubernetes"]
+    database: "mariadb"
+
+  from_latest_non_stable_mariadb:
+    type: status
+    url: "http://www.example.com"
+    status: 200
+    bw_version: "${BW_LATEST_NON_STABLE}"
+    integrations: ["Docker", "Autoconf", "All-in-one", "Kubernetes"]
+    database: "mariadb"
+  to_latest_1_mariadb:
+    type: status
+    url: "http://www.example.com"
+    status: 200
+    not_log: "❌"
+    integrations: ["Docker", "Autoconf", "All-in-one", "Kubernetes"]
+    database: "mariadb"
+
+  # Upgrade matrix for MySQL
+  from_latest_stable_mysql:
+    type: status
+    url: "http://www.example.com"
+    status: 200
+    bw_version: "${BW_LATEST_STABLE}"
+    integrations: ["Docker", "Autoconf", "All-in-one", "Kubernetes"]
+    database: "mysql"
+  to_latest_mysql:
+    type: status
+    url: "http://www.example.com"
+    status: 200
+    not_log: "❌"
+    full_clean: true
+    integrations: ["Docker", "Autoconf", "All-in-one", "Kubernetes"]
+    database: "mysql"
+
+  from_latest_non_stable_mysql:
+    type: status
+    url: "http://www.example.com"
+    status: 200
+    bw_version: "${BW_LATEST_NON_STABLE}"
+    integrations: ["Docker", "Autoconf", "All-in-one", "Kubernetes"]
+    database: "mysql"
+  to_latest_1_mysql:
+    type: status
+    url: "http://www.example.com"
+    status: 200
+    not_log: "❌"
+    integrations: ["Docker", "Autoconf", "All-in-one", "Kubernetes"]
+    database: "mysql"
+
+  # Upgrade matrix for PostgreSQL
+  from_latest_stable_postgresql:
+    type: status
+    url: "http://www.example.com"
+    status: 200
+    bw_version: "${BW_LATEST_STABLE}"
+    integrations: ["Docker", "Autoconf", "All-in-one", "Kubernetes"]
+    database: "postgresql"
+  to_latest_postgresql:
+    type: status
+    url: "http://www.example.com"
+    status: 200
+    not_log: "❌"
+    full_clean: true
+    integrations: ["Docker", "Autoconf", "All-in-one", "Kubernetes"]
+    database: "postgresql"
+
+  from_latest_non_stable_postgresql:
+    type: status
+    url: "http://www.example.com"
+    status: 200
+    bw_version: "${BW_LATEST_NON_STABLE}"
+    integrations: ["Docker", "Autoconf", "All-in-one", "Kubernetes"]
+    database: "postgresql"
+  to_latest_1_postgresql:
+    type: status
+    url: "http://www.example.com"
+    status: 200
+    not_log: "❌"
+    integrations: ["Docker", "Autoconf", "All-in-one", "Kubernetes"]
+    database: "postgresql"

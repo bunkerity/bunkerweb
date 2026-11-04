@@ -13,7 +13,8 @@
     "no_changes_detected": "कोई परिवर्तन नहीं पाया गया।",
     "notice": "सूचना",
     "ping_error": "इंस्टेंस को पिंग करते समय एक त्रुटि हुई।",
-    "readonly_mode": "यह क्रिया रीड-ओनली मोड में अक्षम है।"
+    "readonly_mode": "यह क्रिया रीड-ओनली मोड में अक्षम है।",
+    "configs_import_invalid_file": "कृपया एक वैध कस्टम कॉन्फ़िगरेशन निर्यात फ़ाइल (.json) अपलोड करें।"
   },
   "aria": {
     "label": {
@@ -1240,7 +1241,16 @@
     },
     "retention_notice": "रिपोर्ट मेमोरी में एक रोलिंग बफ़र के रूप में रखी जाती हैं: निर्धारित सीमा तक पहुँचने पर सबसे पुरानी प्रविष्टियाँ हटा दी जाती हैं। जब तक Redis सक्षम न हो, BunkerWeb के पुनः आरंभ होने पर भी ये मिट जाती हैं।",
     "security_incident": "सुरक्षा घटना",
-    "security_report_data": "सुरक्षा रिपोर्ट डेटा"
+    "security_report_data": "सुरक्षा रिपोर्ट डेटा",
+    "bad_behavior_no_details": "इस रिपोर्ट के लिए कोई खराब व्यवहार विवरण नहीं कैप्चर किया गया।",
+    "bad_behavior_activity_detected": "खराब व्यवहार गतिविधि का पता चला",
+    "bad_behavior_activity_explanation": "ये अनुरोध खराब व्यवहार सीमा से अधिक थे और एक साथ समूहीकृत किए गए थे।",
+    "bad_behavior_request_label": "अनुरोध",
+    "bad_behavior_ip": "IP पता",
+    "bad_behavior_server": "सर्वर",
+    "bad_behavior_url": "URL",
+    "bad_behavior_captured_at": "रिकॉर्ड किया गया",
+    "bad_behavior_request_id": "अनुरोध आईडी"
   },
   "scope": {
     "all_services": "सभी सेवाएं",
@@ -1427,7 +1437,8 @@
     "template_in_use_description": "वर्तमान टेम्पलेट के बाहर परिवर्तन की अनुमति नहीं है। कृपया वर्तमान टेम्पलेट का उपयोग करके परिवर्तन करें या उन्नत/रॉ मोड पर स्विच करें।",
     "unique_server_name": "अद्वितीय सर्वर नाम",
     "up": "चालू",
-    "yes": "हाँ"
+    "yes": "हाँ",
+    "not_applicable": "लागू नहीं"
   },
   "step": {
     "next": "अगला",
@@ -1724,7 +1735,8 @@
       "show_selected_only": "केवल चयनित दिखाएं",
       "stop_instance": "इंस्टेंस {{hostname}} रोकें",
       "unban_ip": "{{ip}} का प्रतिबंध हटाएं",
-      "value_from_global": "ग्लोबल सेटिंग्स से मान"
+      "value_from_global": "ग्लोबल सेटिंग्स से मान",
+      "update_ban_duration": "बैन अवधि अपडेट करें"
     },
     "cannot_delete_original_ban": "मूल प्रतिबंध प्रविष्टि को हटाया नहीं जा सकता।",
     "cannot_remove_disabled": "हटाया नहीं जा सकता क्योंकि एक या अधिक सेटिंग्स अक्षम हैं।",
@@ -1962,7 +1974,8 @@
     "zerossl_api_retry": "ZeroSSL API अनुरोधों के लिए पुनः प्रयासों की संख्या (0 पुनः प्रयास बंद करता है)।",
     "zerossl_api_retry_delay": "ZeroSSL API पुनः प्रयासों के बीच सेकंड में विलंब।",
     "zerossl_api_connect_timeout": "ZeroSSL API कॉल के लिए सेकंड में कनेक्शन टाइमआउट।",
-    "zerossl_api_max_time": "प्रत्येक ZeroSSL API अनुरोध के लिए सेकंड में अधिकतम कुल समय।"
+    "zerossl_api_max_time": "प्रत्येक ZeroSSL API अनुरोध के लिए सेकंड में अधिकतम कुल समय।",
+    "readonly_mode": "यह क्रिया केवल रीड-ओनली मोड में अनुमत नहीं है।"
   },
   "totp": {
     "prompt": "कृपया अपना TOTP कोड दर्ज करें।"
@@ -1985,5 +1998,12 @@
     "required": "{{field}} आवश्यक है।",
     "service_required_for_ban": "सेवा-विशिष्ट प्रतिबंध के लिए एक सेवा का चयन किया जाना चाहिए।",
     "zerossl_email_or_api_key_required": "ZeroSSL के लिए ईमेल या ZeroSSL API कुंजी में से एक आवश्यक है।"
+  },
+  "plugins": {
+    "multivalue": {
+      "show_less": "कम दिखाएँ",
+      "more_value": "अधिक मूल्य",
+      "more_values": "अधिक मूल्य"
+    }
   }
 }

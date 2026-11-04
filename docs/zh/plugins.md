@@ -95,7 +95,7 @@ BunkerWeb 附带一个插件系统，可以轻松添加新功能。安装插件�
     services:
     ...
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.17
+        image: bunkerity/bunkerweb-scheduler:1.6.18-rc3
         volumes:
           - ./bw-data:/data
     ...
@@ -131,7 +131,7 @@ BunkerWeb 附带一个插件系统，可以轻松添加新功能。安装插件�
     services:
     ...
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.17
+        image: bunkerity/bunkerweb-scheduler:1.6.18-rc3
         volumes:
           - ./bw-data:/data
     ...
@@ -174,7 +174,7 @@ BunkerWeb 附带一个插件系统，可以轻松添加新功能。安装插件�
     services:
     ...
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.17
+        image: bunkerity/bunkerweb-scheduler:1.6.18-rc3
         volumes:
           - /shared/bw-plugins:/data/plugins
     ...
@@ -221,7 +221,7 @@ BunkerWeb 附带一个插件系统，可以轻松添加新功能。安装插件�
           serviceAccountName: sa-bunkerweb
           containers:
             - name: bunkerweb-scheduler
-              image: bunkerity/bunkerweb-scheduler:1.6.17
+              image: bunkerity/bunkerweb-scheduler:1.6.18-rc3
               imagePullPolicy: Always
               env:
                 - name: KUBERNETES_MODE
@@ -261,7 +261,7 @@ BunkerWeb 附带一个插件系统，可以轻松添加新功能。安装插件�
 
 !!! tip "现有插件"
 
-    如果文档不够，您可以查看[官方插件](https://github.com/bunkerity/bunkerweb-plugins)和[核心插件](https://github.com/bunkerity/bunkerweb/tree/v1.6.17/src/common/core)的现有源代码（已包含在 BunkerWeb 中，但从技术上讲它们是插件）。
+    如果文档不够，您可以查看[官方插件](https://github.com/bunkerity/bunkerweb-plugins)和[核心插件](https://github.com/bunkerity/bunkerweb/tree/v1.6.18-rc3/src/common/core)的现有源代码（已包含在 BunkerWeb 中，但从技术上讲它们是插件）。
 
 插件结构如下所示：
 ```
@@ -483,6 +483,19 @@ return myplugin
 |   `preread`   | [preread_by_lua](https://github.com/openresty/stream-lua-nginx-module#preread_by_lua_block) | 与 `access` 函数类似，但用于流模式。                                                 | `ret`, `msg`,`status`<ul><li>`ret` (布尔值)：如果没有错误则为 true，否则为 false</li><li>`msg` (字符串)：成功或错误消息</li><li>`status` (数字)：中断当前进程并返回 [status](https://github.com/openresty/lua-nginx-module#http-status-constants)</li></ul>                                                                        |
 | `log_stream`  |     [log_by_lua](https://github.com/openresty/stream-lua-nginx-module#log_by_lua_block)     | 与 `log` 函数类似，但用于流模式。                                                    | `ret`, `msg`<ul><li>`ret` (布尔值)：如果没有错误则为 true，否则为 false</li><li>`msg` (字符串)：成功或错误消息</li></ul>                                                                                                                                                                                                           |
 
+**TLS ClientHello 钩子。** 插件还可以在选择证书之前看到每一次 TLS 握手（默认服务器和每个服务均适用），方法是从其主 Lua 模块导出一个模块级函数（不是方法，因此每次握手都不会创建插件对象）：
+
+```lua
+-- in myplugin/myplugin.lua
+function myplugin.client_hello(hello)
+    -- hello (read-only): service (nil on the default server), ip (nil when the client address is unknown), raw and family
+    -- (packed peer address from ngx.ssl.raw_client_addr()), quic, proxy_protocol, real_ip, trusted
+    return nil -- or "drop" / "detect" and a reason
+end
+```
+
+返回 `"drop"` 将中止握手，返回 `"detect"` 仅记录该握手将被丢弃，不返回任何值则放行。出错或返回任何其他值都会放行握手。该函数对每次握手恰好运行一次，并且**不得让出（yield）**：不得使用 Redis、cosocket、`ngx.var`、`resty.lock` 或 sleep。可以调用共享字典和 `ngx.timer.at(0, ...)`。导出该函数的插件的顺序遵循 `PLUGINS_ORDER_SSL_CLIENT_HELLO`。导出 `client_hello` 的插件在默认服务器上不会再通过其 `ssl_client_hello_default` 方法被调用。插件可以通过 `pcall(require, "bunkerweb.banlease")` 和 `banlease.CLIENT_HELLO_PLUGIN_HOOK == 1` 检测是否支持。
+
 #### 库
 
 [NGINX LUA 模块](https://github.com/openresty/lua-nginx-module)和 [NGINX stream LUA 模块](https://github.com/openresty/stream-lua-nginx-module)的所有指令都可用。此外，您可以使用 BunkerWeb 中包含的 LUA 库：有关完整列表，请参见[此脚本](https://github.com/bunkerity/bunkerweb/blobsrc/deps/clone.sh)。
@@ -566,7 +579,7 @@ end
 
 !!! tip "更多示例"
 
-    如果您想查看可用函数的完整列表，可以查看仓库的 [lua 目录](https://github.com/bunkerity/bunkerweb/tree/v1.6.17/src/bw/lua/bunkerweb)中存在的文件。
+    如果您想查看可用函数的完整列表，可以查看仓库的 [lua 目录](https://github.com/bunkerity/bunkerweb/tree/v1.6.18-rc3/src/bw/lua/bunkerweb)中存在的文件。
 
 ### 作业
 

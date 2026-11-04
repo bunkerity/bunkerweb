@@ -292,6 +292,8 @@ class InstancesUtils:
 
     def __init__(self, db):
         self.__db = db
+        # The UI has no job cache on disk: the instances' API certificate it pins comes from the database.
+        API.pin_from_database(db)
 
     # Mirrors the METRICS_MAX_BLOCKED_REQUESTS_REDIS default in
     # src/common/core/metrics/plugin.json. A larger fallback here would let a failed

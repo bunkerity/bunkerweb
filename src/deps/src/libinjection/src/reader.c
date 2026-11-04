@@ -293,11 +293,14 @@ int main(int argc, const char *argv[]) {
         for (j = 0; j < flag_slow; ++j) {
             for (i = offset; i < argc; ++i) {
                 FILE *fd = fopen(argv[i], "r");
-                if (fd) {
-                    test_positive(fd, argv[i], mode, flag_invert, flag_true,
-                                  flag_quiet);
-                    fclose(fd);
+                if (fd == NULL) {
+                    /* TAP bail-out, so a bad path can't pass as 0 matches */
+                    printf("Bail out! could not open file: %s\n", argv[i]);
+                    return 1;
                 }
+                test_positive(fd, argv[i], mode, flag_invert, flag_true,
+                              flag_quiet);
+                fclose(fd);
             }
         }
     }
@@ -318,11 +321,8 @@ int main(int argc, const char *argv[]) {
         count = g_test_fail;
     }
 
-    if (count > max) {
-        printf("\nThreshold is %d, got %d, failing.\n", max, count);
-        return 1;
-    } else {
-        printf("\nThreshold is %d, got %d, passing.\n", max, count);
-        return 0;
-    }
+    /* TAP (https://testanything.org) result for the test harness */
+    printf("1..1\n%s 1 - threshold is %d, got %d\n",
+           count > max ? "not ok" : "ok", max, count);
+    return count > max;
 }

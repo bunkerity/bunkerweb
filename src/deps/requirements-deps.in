@@ -1,8 +1,8 @@
-importlib-metadata==9.1.0
+importlib-metadata==10.1.0
 pip==26.2.2
 pip-compile-multi==3.3.2
 pip-tools==7.6.2
 pip-upgrader==2.4.13
-setuptools<81
+setuptools<85
 tomli==2.5.0
 wheel==0.48.0

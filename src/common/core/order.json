@@ -25,6 +25,7 @@
     "selfsigned",
     "ui"
   ],
+  "ssl_client_hello": [],
   "ssl_client_hello_default": ["misc"],
   "ssl_certificate_default": ["letsencrypt"],
   "ssl_certificate": ["customcert", "letsencrypt", "selfsigned"],

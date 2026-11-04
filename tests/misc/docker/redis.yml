@@ -1,0 +1,32 @@
+services:
+  redis:
+    image: redis:8-alpine@sha256:09160599abd229764c0fb44cb6be640294e1d360a54b19985ab4843dcf2d90f1
+    container_name: redis
+    ports:
+      # NOT 6379. The Linux test container runs with network_mode: host, so a Redis the product
+      # under test starts on 6379 would own the host's port and whichever started second would
+      # fail to bind. The framework's own state store is what moves: the product's port is the
+      # product's.
+      - "127.0.0.1:${TESTS_REDIS_PORT:-6390}:6379"
+    dns:
+      - 10.20.30.20
+    restart: "unless-stopped"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+    networks:
+      bw-universe:
+        ipv4_address: 10.20.30.50
+        aliases:
+          - redis
+
+networks:
+  bw-universe:
+    name: bw-universe
+    ipam:
+      driver: default
+      config:
+        - subnet: 10.20.30.0/24

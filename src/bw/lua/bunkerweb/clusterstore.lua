@@ -2,6 +2,7 @@ local ngx = ngx
 local class = require "middleclass"
 local clogger = require "bunkerweb.logger"
 local rc = require "resty.redis.connector"
+local redisendpoints = require "bunkerweb.redisendpoints"
 local rediskeys = require "bunkerweb.rediskeys"
 local resty_redis = require "resty.redis"
 local utils = require "bunkerweb.utils"
@@ -116,7 +117,7 @@ function clusterstore:initialize(pool)
 			ssl = self.variables["REDIS_SSL"] == "yes",
 			ssl_verify = self.variables["REDIS_SSL_VERIFY"] == "yes",
 		},
-		host = self.variables["REDIS_HOST"],
+		host = redisendpoints.socket_host(self.variables["REDIS_HOST"]),
 		port = tonumber(self.variables["REDIS_PORT"]),
 		db = tonumber(self.variables["REDIS_DATABASE"]),
 		username = self.variables["REDIS_USERNAME"],
@@ -133,12 +134,7 @@ function clusterstore:initialize(pool)
 	end
 	if self.variables["REDIS_SENTINEL_HOSTS"] ~= "" then
 		for sentinel_host in self.variables["REDIS_SENTINEL_HOSTS"]:gmatch("%S+") do
-			local shost, sport = sentinel_host:match("([^:]+):?(%d*)")
-			if sport == "" then
-				sport = 26379
-			else
-				sport = tonumber(sport)
-			end
+			local shost, sport = redisendpoints.parse_endpoint(sentinel_host, 26379)
 			local data = { host = shost, port = sport }
 			if options.sentinel_username ~= "" then
 				data.username = options.sentinel_username
@@ -271,7 +267,7 @@ local function node_client(self, host, port)
 	red:set_timeouts(self.options.connect_timeout, self.options.send_timeout, self.options.read_timeout)
 	-- No keepalive pool: DBSIZE is rare, and a pooled socket would skip AUTH after a
 	-- credential or TLS change.
-	local ok, err = red:connect(host, port, {
+	local ok, err = red:connect(redisendpoints.socket_host(host), port, {
 		ssl = self.options.connect_opts.ssl,
 		ssl_verify = self.options.connect_opts.ssl_verify,
 	})
@@ -365,6 +361,15 @@ function clusterstore:scan_primaries(pattern, limit)
 	return keys
 end
 
+-- A multi-key command refused while a Redis Cluster slot migrates ("TRYAGAIN Multiple keys request ...")
+local function is_tryagain_error(err)
+	return type(err) == "string" and err:sub(1, 8) == "TRYAGAIN"
+end
+
+-- Seconds to sleep before each retry of a TRYAGAIN answer (cluster mode); set tryagain_retries on an
+-- instance to use fewer, 0 for none.
+local TRYAGAIN_DELAYS = { 0.02, 0.05, 0.1 }
+
 function clusterstore:call(method, ...)
 	-- Check if client is created
 	if not self.redis_client then
@@ -374,7 +379,17 @@ function clusterstore:call(method, ...)
 		if method == "ping" or method == "dbsize" then
 			return cluster_keyless(self, method)
 		end
-		return self.redis_client[method](self.redis_client, ...)
+		local res, err = self.redis_client[method](self.redis_client, ...)
+		-- Redis answers TRYAGAIN to a multi-key command while its slot migrates, when some keys are missing on the
+		-- node asked. It is transient: retry a few times with short sleeps where the phase allows a yield.
+		local retries = self.tryagain_retries or #TRYAGAIN_DELAYS
+		local attempt = 1
+		while attempt <= math.min(retries, #TRYAGAIN_DELAYS) and is_tryagain_error(err) and is_cosocket_available() do
+			ngx.sleep(TRYAGAIN_DELAYS[attempt])
+			res, err = self.redis_client[method](self.redis_client, ...)
+			attempt = attempt + 1
+		end
+		return res, err
 	end
 	-- Call method (res is nil for socket errors, false for Redis RESP errors)
 	local res, err = self.redis_client[method](self.redis_client, ...)

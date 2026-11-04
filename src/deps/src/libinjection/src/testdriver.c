@@ -1,9 +1,11 @@
+/* snprintf is C99/POSIX; glibc hides it under -ansi without this */
+#define _POSIX_C_SOURCE 200112L
+
 #include "libinjection.h"
 #include "libinjection_html5.h"
 #include "libinjection_sqli.h"
 #include "libinjection_xss.h"
 #include <assert.h>
-#include <glob.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -17,6 +19,7 @@ size_t print_string(char *buf, size_t len, stoken_t *t);
 size_t print_var(char *buf, size_t len, stoken_t *t);
 size_t print_token(char *buf, size_t len, stoken_t *t);
 static int read_file(const char *fname, int flags, int testtype);
+static void print_diag(const char *label, const char *text);
 const char *h5_type_to_string(enum html5_type x);
 size_t print_html5_token(char *buf, size_t len, h5_state_t *hs);
 
@@ -34,7 +37,7 @@ size_t modp_rtrim(char *str, size_t len) {
 }
 
 size_t print_string(char *buf, size_t len,
-                    stoken_t *t) { // cppcheck-suppress constParameterPointer
+                    stoken_t *t) { /* cppcheck-suppress constParameterPointer */
     int slen = 0;
 
     /* print opening quote */
@@ -103,17 +106,17 @@ const char *h5_type_to_string(enum html5_type x) {
     return "";
 }
 
-size_t
-print_html5_token(char *buf, size_t len,
-                  h5_state_t *hs) { // cppcheck-suppress constParameterPointer
+size_t print_html5_token(
+    char *buf, size_t len,
+    h5_state_t *hs) { /* cppcheck-suppress constParameterPointer */
     int slen;
+    const char *h5_string = h5_type_to_string(hs->token_type);
     char *tmp = (char *)malloc(hs->token_len + 1);
 
     assert(tmp != NULL);
     memcpy(tmp, hs->token_start, hs->token_len);
     /* TODO.. encode to be printable */
     tmp[hs->token_len] = '\0';
-    const char *h5_string = h5_type_to_string(hs->token_type);
     slen = sprintf(buf + len, "%s,%d,%s\n", h5_string, (int)hs->token_len, tmp);
     len += (size_t)slen;
     free(tmp);
@@ -144,6 +147,18 @@ size_t print_token(char *buf, size_t len, stoken_t *t) {
     return len;
 }
 
+/* TAP diagnostics: prefix every line with "# " so the harness ignores it */
+static void print_diag(const char *label, const char *text) {
+    printf("# %s:\n# ", label);
+    for (; *text; ++text) {
+        putchar(*text);
+        if (*text == '\n') {
+            fputs("# ", stdout);
+        }
+    }
+    putchar('\n');
+}
+
 static int read_file(const char *fname, int flags, int testtype) {
     int count = 0;
     FILE *fp = NULL;
@@ -164,8 +179,8 @@ static int read_file(const char *fname, int flags, int testtype) {
 
     fp = fopen(fname, "r");
     if (fp == NULL) {
-        fprintf(stderr, "could not open file: %s\n", fname);
-        return 1;
+        printf("# could not open file: %s\n", fname);
+        return 0;
     }
     while (fgets(linebuf, sizeof(linebuf), fp) != NULL) {
         if (count == 0 && strcmp(linebuf, "--TEST--\n") == 0) {
@@ -184,7 +199,8 @@ static int read_file(const char *fname, int flags, int testtype) {
     }
     fclose(fp);
     if (count != 3) {
-        return 1;
+        printf("# malformed test file: %s\n", fname);
+        return 0;
     }
 
     g_expected[modp_rtrim(g_expected, strlen(g_expected))] = '\0';
@@ -251,9 +267,9 @@ static int read_file(const char *fname, int flags, int testtype) {
     g_actual[modp_rtrim(g_actual, strlen(g_actual))] = '\0';
 
     if (strcmp(g_expected, g_actual) != 0) {
-        printf("INPUT: \n%s\n==\n", g_input);
-        printf("EXPECTED: \n%s\n==\n", g_expected);
-        printf("GOT: \n%s\n==\n", g_actual);
+        print_diag("INPUT", g_input);
+        print_diag("EXPECTED", g_expected);
+        print_diag("GOT", g_actual);
         ok = 0;
     }
 
@@ -261,6 +277,9 @@ static int read_file(const char *fname, int flags, int testtype) {
     return ok;
 }
 
+/*
+ * Emits TAP (https://testanything.org): one "ok"/"not ok" line per file.
+ */
 int main(int argc, char **argv) {
     int offset = 1;
     int i;
@@ -269,20 +288,21 @@ int main(int argc, char **argv) {
     int count_fail = 0;
     int flags = 0;
     int testtype = 0;
-    int quiet = 0;
 
     const char *fname;
-    while (argc > offset) {
-        if (strcmp(argv[offset], "-q") == 0 ||
-            strcmp(argv[offset], "--quiet") == 0) {
-            quiet = 1;
-            offset += 1;
-        } else {
-            break;
-        }
+    /* -q is accepted for backwards compatibility; output is always TAP */
+    while (argc > offset && (strcmp(argv[offset], "-q") == 0 ||
+                             strcmp(argv[offset], "--quiet") == 0)) {
+        offset += 1;
     }
 
-    printf("%s\n", libinjection_version());
+    printf("# %s\n", libinjection_version());
+    if (argc == offset) {
+        /* an empty plan ("1..0") would be reported as a skip, not an error */
+        printf("Bail out! no test files given\n");
+        return 1;
+    }
+    printf("1..%d\n", argc - offset);
 
     for (i = offset; i < argc; ++i) {
         fname = argv[i];
@@ -303,22 +323,16 @@ int main(int argc, char **argv) {
             flags = FLAG_NONE;
             testtype = 4;
         } else {
-            fprintf(stderr, "Unknown test type: %s, failing\n", fname);
+            printf("not ok %d - %s # unknown test type\n", count, fname);
             count_fail += 1;
             continue;
         }
 
         ok = read_file(fname, flags, testtype);
-        if (ok) {
-            if (!quiet) {
-                fprintf(stderr, "%s: ok\n", fname);
-            }
-        } else {
+        if (!ok) {
             count_fail += 1;
-            if (!quiet) {
-                fprintf(stderr, "%s: fail\n", fname);
-            }
         }
+        printf("%s %d - %s\n", ok ? "ok" : "not ok", count, fname);
     }
-    return count > 0 && count_fail > 0;
+    return count_fail > 0;
 }

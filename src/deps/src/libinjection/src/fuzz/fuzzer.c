@@ -6,9 +6,8 @@
 
 int LLVMFuzzerTestOneInput(const u_int8_t *data, size_t size);
 
-int LLVMFuzzerTestOneInput( // cppcheck-suppress unusedFunction
-    const u_int8_t *data,
-    size_t size) { // cppcheck-suppress unmatchedSuppression
+/* cppcheck-suppress[unusedFunction,unmatchedSuppression] */
+int LLVMFuzzerTestOneInput(const u_int8_t *data, size_t size) {
     char fingerprint[8];
 
     libinjection_sqli((const char *)data, size, fingerprint);

@@ -1,0 +1,82 @@
+integrations: "all"
+
+# The client address BunkerWeb sees is observed through the blacklist: 203.0.113.7 (TEST-NET-3) is
+# blacklisted, so a 403 means the real IP plugin resolved that address from the request and a 200
+# means it kept the address of the connection. The harness connects from a private or loopback
+# address, which REAL_IP_FROM trusts by default; 198.51.100.0/24 stands for an intermediate proxy.
+# Plugin: src/common/core/realip/confs/server-http/real-ip.conf, settings in plugin.json.
+actions:
+  # The default header is X-Forwarded-For: X-Real-IP is not read.
+  default_header_ignores_x_real_ip:
+    type: status
+    url: "http://www.example.com"
+    status: 200
+    headers:
+      X-Real-IP: "203.0.113.7"
+  x_real_ip_header:
+    type: status
+    url: "http://www.example.com"
+    status: 403
+    headers:
+      X-Real-IP: "203.0.113.7"
+    config:
+      REAL_IP_HEADER: "X-Real-IP"
+
+  # The client is the first address of the chain, 198.51.100.9 an intermediate proxy that is trusted.
+  # `real_ip_recursive on` skips it, `off` takes the last address of the header.
+  recursive:
+    type: status
+    url: "http://www.example.com"
+    status: 403
+    headers:
+      X-Forwarded-For: "203.0.113.7, 198.51.100.9"
+  not_recursive:
+    type: status
+    url: "http://www.example.com"
+    status: 200
+    headers:
+      X-Forwarded-For: "203.0.113.7, 198.51.100.9"
+    config:
+      REAL_IP_RECURSIVE: "no"
+
+  # The connection comes from an address REAL_IP_FROM does not list: the header is not trusted.
+  untrusted_source:
+    type: status
+    url: "http://www.example.com"
+    status: 200
+    headers:
+      X-Forwarded-For: "203.0.113.7"
+    config:
+      REAL_IP_FROM: "198.51.100.0/24"
+  # 2.254.254.254 is a proxy that only REAL_IP_FROM_URLS trusts: the list the custom API serves holds it
+  # (`realip-download` job). Without the list the recursion stops at that address, with it the client is the
+  # first address of the chain.
+  trusted_from_urls:
+    type: status
+    url: "http://www.example.com"
+    status: 403
+    retries: 1
+    headers:
+      X-Forwarded-For: "203.0.113.7, 2.254.254.254"
+    config:
+      REAL_IP_FROM_URLS: "http://custom-api:8000/list/ip"
+    Kubernetes:
+      config:
+        REAL_IP_FROM_URLS: "http://svc-custom-api.misc.svc.cluster.local:8000/list/ip"
+
+  deactivated:
+    type: status
+    url: "http://www.example.com"
+    status: 200
+    headers:
+      X-Forwarded-For: "203.0.113.7"
+    config:
+      USE_REAL_IP: "no"
+
+config:
+  USE_REAL_IP: "yes"
+  REAL_IP_FROM: "10.0.0.0/8 100.64.0.0/10 127.0.0.0/8 172.16.0.0/12 192.168.0.0/16 198.51.100.0/24"
+  USE_BLACKLIST: "yes"
+  BLACKLIST_COMMUNITY_LISTS: ""
+  BLACKLIST_IP_URLS: ""
+  BLACKLIST_IP: "203.0.113.7"

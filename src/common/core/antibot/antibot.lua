@@ -1308,13 +1308,16 @@ end
 
 function antibot:is_ignored_uri()
 	-- Check if URI is in ignore list
+	-- Only the normalized path is matched, alone and joined with the query string : the raw request
+	-- path (//x, /%78, /./x) is routed like the normalized one but must not slip past a pattern.
 	local uri = self.ctx.bw.uri
-	local request_uri = self.ctx.bw.request_uri
+	local query = (self.ctx.bw.request_uri or ""):match("%?(.*)$")
+	local uri_query = query and (uri .. "?" .. query)
 	for _, ignore_uri in ipairs(self.lists["IGNORE_URI"]) do
 		if regex_match(uri, ignore_uri, nil, "ANTIBOT_IGNORE_URI") then
 			return true, "URI " .. ignore_uri
 		end
-		if request_uri and request_uri ~= uri and regex_match(request_uri, ignore_uri, nil, "ANTIBOT_IGNORE_URI") then
+		if uri_query and regex_match(uri_query, ignore_uri, nil, "ANTIBOT_IGNORE_URI") then
 			return true, "URI " .. ignore_uri
 		end
 	end

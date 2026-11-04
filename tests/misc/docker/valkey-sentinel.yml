@@ -1,0 +1,143 @@
+services:
+  valkey-slave-1:
+    image: valkey/valkey:8-alpine@sha256:77643d152547b446fc15cbafaff22004545663fcd40c6b28038ad283837baa75
+    container_name: valkey-slave-1
+    ports:
+      - "127.0.0.1:6481:6379"
+    volumes:
+      - /tmp/valkey-acl:/acl
+      - /tmp/valkey-tls:/tls
+      - ../scripts/valkey-entrypoint.sh:/usr/local/bin/valkey-entrypoint.sh:ro
+      - ../scripts/valkey-healthcheck.sh:/usr/local/bin/valkey-healthcheck.sh:ro
+    env_file:
+      - path: /tmp/redis-slave.env
+        required: true
+      - path: /tmp/valkey-slave.env
+        required: true
+    entrypoint:
+      - "/usr/local/bin/valkey-entrypoint.sh"
+    healthcheck:
+      test:
+        - "CMD"
+        - "/usr/local/bin/valkey-healthcheck.sh"
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+    dns:
+      - 10.20.30.20
+    networks:
+      bw-universe:
+        ipv4_address: 10.20.30.62
+        aliases:
+          - valkey-slave-1
+
+  valkey-slave-2:
+    image: valkey/valkey:8-alpine@sha256:77643d152547b446fc15cbafaff22004545663fcd40c6b28038ad283837baa75
+    container_name: valkey-slave-2
+    ports:
+      - "127.0.0.1:6482:6379"
+    volumes:
+      - /tmp/valkey-acl:/acl
+      - /tmp/valkey-tls:/tls
+      - ../scripts/valkey-entrypoint.sh:/usr/local/bin/valkey-entrypoint.sh:ro
+      - ../scripts/valkey-healthcheck.sh:/usr/local/bin/valkey-healthcheck.sh:ro
+    env_file:
+      - path: /tmp/redis-slave.env
+        required: true
+      - path: /tmp/valkey-slave.env
+        required: true
+    entrypoint:
+      - "/usr/local/bin/valkey-entrypoint.sh"
+    healthcheck:
+      test:
+        - "CMD"
+        - "/usr/local/bin/valkey-healthcheck.sh"
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+    dns:
+      - 10.20.30.20
+    networks:
+      bw-universe:
+        ipv4_address: 10.20.30.63
+        aliases:
+          - valkey-slave-2
+
+  valkey-sentinel-1:
+    image: valkey/valkey:8-alpine@sha256:77643d152547b446fc15cbafaff22004545663fcd40c6b28038ad283837baa75
+    container_name: valkey-sentinel-1
+    command: valkey-sentinel /etc/valkey/sentinel.conf --port 26379 --aclfile /acl/sentinel.acl
+    ports:
+      - "127.0.0.1:26479:26379"
+    volumes:
+      - /tmp/valkey-acl:/acl
+      - /tmp/valkey-sentinel:/etc/valkey
+    env_file:
+      - path: /tmp/redis-sentinel.env
+        required: true
+    depends_on:
+      - valkey-slave-1
+      - valkey-slave-2
+    dns:
+      - 10.20.30.20
+    networks:
+      bw-universe:
+        ipv4_address: 10.20.30.64
+        aliases:
+          - valkey-sentinel-1
+
+  valkey-sentinel-2:
+    image: valkey/valkey:8-alpine@sha256:77643d152547b446fc15cbafaff22004545663fcd40c6b28038ad283837baa75
+    container_name: valkey-sentinel-2
+    command: valkey-sentinel /etc/valkey/sentinel.conf --port 26379 --aclfile /acl/sentinel.acl
+    ports:
+      - "127.0.0.1:26480:26379"
+    volumes:
+      - /tmp/valkey-acl:/acl
+      - /tmp/valkey-sentinel:/etc/valkey
+    env_file:
+      - path: /tmp/redis-sentinel.env
+        required: true
+    depends_on:
+      - valkey-slave-1
+      - valkey-slave-2
+    dns:
+      - 10.20.30.20
+    networks:
+      bw-universe:
+        ipv4_address: 10.20.30.65
+        aliases:
+          - valkey-sentinel-2
+
+  valkey-sentinel-3:
+    image: valkey/valkey:8-alpine@sha256:77643d152547b446fc15cbafaff22004545663fcd40c6b28038ad283837baa75
+    container_name: valkey-sentinel-3
+    command: valkey-sentinel /etc/valkey/sentinel.conf --port 26379 --aclfile /acl/sentinel.acl
+    ports:
+      - "127.0.0.1:26481:26379"
+    volumes:
+      - /tmp/valkey-acl:/acl
+      - /tmp/valkey-sentinel:/etc/valkey
+    env_file:
+      - path: /tmp/redis-sentinel.env
+        required: true
+    depends_on:
+      - valkey-slave-1
+      - valkey-slave-2
+    dns:
+      - 10.20.30.20
+    networks:
+      bw-universe:
+        ipv4_address: 10.20.30.66
+        aliases:
+          - valkey-sentinel-3
+
+networks:
+  bw-universe:
+    name: bw-universe
+    ipam:
+      driver: default
+      config:
+        - subnet: 10.20.30.0/24

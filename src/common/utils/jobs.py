@@ -55,7 +55,7 @@ class Job:
                 raise ValueError("source_file could not be determined.")
 
             plugin_id = source_path.parent.parent.name
-            job_name = job_name or source_path.name.replace(".py", "")
+            job_name = source_path.name.replace(".py", "")
 
         if not job_name:
             raise ValueError("Could not determine job name.")

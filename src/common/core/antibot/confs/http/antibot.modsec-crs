@@ -3,13 +3,14 @@
     {% set hosts = [] %}
     {% if MULTISITE == "no" %}
         {% for host in SERVER_NAME.split() %}
-            {% set _ = hosts.append(re.escape(host.lower())) %}
+            {# a bare IPv6 name: the Host header carries it bracketed #}
+            {% set _ = hosts.append(("\\[" ~ re.escape(host.lower()) ~ "\\]") if ":" in host else re.escape(host.lower())) %}
         {% endfor %}
     {% else %}
         {% for server_name in SERVER_NAME.split() %}
             {% if all[server_name + "_USE_ANTIBOT"] != "no" %}
                 {% for host in all[server_name + "_SERVER_NAME"].split() %}
-                    {% set _ = hosts.append(re.escape(host.lower())) %}
+                    {% set _ = hosts.append(("\\[" ~ re.escape(host.lower()) ~ "\\]") if ":" in host else re.escape(host.lower())) %}
                 {% endfor %}
             {% endif %}
         {% endfor %}

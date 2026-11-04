@@ -11,6 +11,7 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
         sys_path.append(deps_path)
 
 from flask import Flask, g, render_template, request
+from flask_login import AnonymousUserMixin
 
 from logger import getLogger  # type: ignore
 
@@ -59,6 +60,7 @@ def before_request():
 def inject_variables():
     return dict(
         current_endpoint=request.path.split("/")[-1],
+        current_user=AnonymousUserMixin(),  # base.html reads current_user; the temporary app has no login
         script_nonce=getattr(g, "script_nonce", None) or token_urlsafe(32),
     )
 

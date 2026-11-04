@@ -16,11 +16,14 @@ LOGGER = getLogger("DB.CLEANUP-EXCESS-JOBS-RUNS")
 status = 0
 
 try:
+    max_runs = int(getenv("DATABASE_MAX_JOBS_RUNS", "10000"))
+    if max_runs < 0:
+        raise ValueError("DATABASE_MAX_JOBS_RUNS must be non-negative")
     DB = Database(LOGGER, sqlalchemy_string=getenv("DATABASE_URI"))
-    ret = DB.cleanup_jobs_runs_excess(int(getenv("DATABASE_MAX_JOBS_RUNS", "10000")))
+    ret = DB.cleanup_jobs_runs_excess(max_runs)
     if not ret.startswith("Removed"):
         LOGGER.error(ret)
-        sys_exit(1)
+        sys_exit(2)
     LOGGER.info(ret)
 except SystemExit as e:
     status = e.code

@@ -3,7 +3,7 @@ BunkerNet 插件通过 BunkerWeb 实例之间的集体威胁情报共享，创�
 **工作原理：**
 
 1.  您的 BunkerWeb 实例会自动向 BunkerNet API 注册，以获取一个唯一标识符。
-2.  当您的实例检测并阻止了恶意 IP 地址或行为时，它会匿名地向 BunkerNet 报告该威胁。
+2.  当您的实例检测并阻止了恶意 IP 地址或行为时，它会向 BunkerNet 报告该威胁。报告包含的字段见下文“报告包含的内容”。
 3.  BunkerNet 聚合来自所有参与实例的威胁情报，并分发整合后的数据库。
 4.  您的实例会定期从 BunkerNet 下载更新的已知威胁数据库。
 5.  这种集体情报使您的实例能够主动阻止在其他 BunkerWeb 实例上表现出恶意行为的 IP 地址。
@@ -12,9 +12,9 @@ BunkerNet 插件通过 BunkerWeb 实例之间的集体威胁情报共享，创�
 
       1. **集体防御：** 利用全球成千上万个其他 BunkerWeb 实例的安全发现。
       2. **主动防护：** 根据恶意行为者在别处的行为，在他们攻击您的网站之前就将其阻止。
-      3. **社区贡献：** 通过分享关于攻击者的匿名威胁数据，帮助保护其他 BunkerWeb 用户。
+      3. **社区贡献：** 通过分享关于攻击者的威胁数据，帮助保护其他 BunkerWeb 用户。
       4. **零配置：** 开箱即用，带有合理的默认值，只需最少的设置。
-      5. **注重隐私：** 只分享必要的威胁信息，不损害您或您用户的隐私。
+      5. **受控分享：** 报告包含一组固定的字段，`BUNKERNET_FILTER_HEADERS` 可将其请求头限制为一份简短的白名单（见下文）。
 
 ### 如何使用
 
@@ -28,16 +28,27 @@ BunkerNet 插件通过 BunkerWeb 实例之间的集体威胁情报共享，创�
 
 ### 配置设置
 
-| 设置               | 默认值                     | 上下文    | 多个 | 描述                                                                 |
-| ------------------ | -------------------------- | --------- | ---- | -------------------------------------------------------------------- |
-| `USE_BUNKERNET`    | `yes`                      | multisite | 否   | **启用 BunkerNet：** 设置为 `yes` 以启用 BunkerNet 威胁情报共享。    |
-| `BUNKERNET_SERVER` | `https://api.bunkerweb.io` | global    | 否   | **BunkerNet 服务器：** 用于共享威胁情报的 BunkerNet API 服务器地址。 |
+| 设置                       | 默认值                     | 上下文    | 多个 | 描述                                                                                                                                                                  |
+| -------------------------- | -------------------------- | --------- | ---- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `USE_BUNKERNET`            | `yes`                      | multisite | 否   | **启用 BunkerNet：** 设置为 `yes` 以启用 BunkerNet 威胁情报共享。                                                                                                     |
+| `BUNKERNET_FILTER_HEADERS` | `no`                       | multisite | 否   | **过滤上报的请求头：** 设置为 `yes` 时，只发送一份简短的请求头白名单，并清空 ModSecurity 在请求头和 Cookie 中命中的值。设置为 `no` 时，报告包含所有请求头和命中的值。 |
+| `BUNKERNET_SERVER`         | `https://api.bunkerweb.io` | global    | 否   | **BunkerNet 服务器：** 用于共享威胁情报的 BunkerNet API 服务器地址。                                                                                                  |
 
 !!! tip "网络保护"
     当 BunkerNet 检测到某个 IP 地址在多个 BunkerWeb 实例中参与了恶意活动时，它会将该 IP 添加到集体黑名单中。这提供了一个主动的防御层，在威胁直接攻击您之前就保护您的网站。
 
-!!! info "匿名报告"
-    在向 BunkerNet 报告威胁信息时，您的实例只分享识别威胁所需的数据：IP 地址、阻止原因和最少的上下文数据。不会分享有关您的用户的个人信息或有关您网站的敏感详细信息。
+!!! info "报告包含的内容"
+    发送给 BunkerNet 的每份报告包含以下字段，仅此而已：
+
+    - 每次请求发送的实例元数据：BunkerNet 实例 ID、BunkerWeb 版本、集成方式，以及操作系统名称、版本、版本 ID、代号、ID 和架构；
+    - 客户端 IP 地址、阻止原因和日期；
+    - HTTP 方法、**包含查询字符串的** URL，以及服务名称（`server_name`）；
+    - 请求头及其值：收到的所有请求头（最多 `MAX_HEADERS` 个），或在 `BUNKERNET_FILTER_HEADERS` 为 `yes` 时仅包含 `User-Agent`、`Accept`、`Accept-Encoding`、`Accept-Language`、`Content-Type` 和 `Content-Length`；
+    - 与阻止原因相关的详细信息。根据阻止该客户端的插件不同，可能包含命中的 ModSecurity 规则 ID 和消息，以及触发这些规则的请求值（参数、请求体、请求头或 Cookie 的片段，每项截断为 512 字节；`BUNKERNET_FILTER_HEADERS` 为 `yes` 时，在请求头和 Cookie 中命中的值会被清空，只发送变量名）；对于 Bad Behavior，则是导致封禁的近期请求的方法和 URL。
+
+    默认情况下（`BUNKERNET_FILTER_HEADERS` 为 `no`），报告包含收到的所有请求头（最多 `MAX_HEADERS` 个，包括 Cookie 和 `Authorization`），以及 ModSecurity 命中的原始值。将 `BUNKERNET_FILTER_HEADERS` 设置为 `yes`，则只发送上面列出的六个请求头，并清空在请求头和 Cookie 中命中的值。仍在队列中的报告在 `yes` 时也会在发送前以同样方式过滤。
+
+    URL 以及命中的值均来自请求，因此包含客户端发送的任何内容。对于 URL 中带有敏感值的服务，请将 `USE_BUNKERNET` 设置为 `no`。
 
 ### 示例配置
 

@@ -1,0 +1,69 @@
+integrations: "all"
+
+actions:
+  manual_name:
+    type: "cookie"
+    url: "http://www.example.com"
+    cookie_name: "test"
+    # lua-resty-session 4.1.5 (src/deps/src/lua-resty-session) encodes the cookie as a fixed 82-byte
+    # header -- type, flags, 32-byte session id, timestamps, tag, MAC -- base64url'd to exactly 110
+    # characters (`base64_size(82) = ceil(4*82/3)`), with the payload concatenated straight after it
+    # and no separator. So the alphabet and that 110-character floor are guaranteed by the format
+    # itself, and are what this asserts. The observed value here is 486 characters, but that length
+    # is payload-dependent: pinning it would red on a harmless change to what the session carries.
+    # The previous `^.*$` matched anything at all, including the empty string, on a SESSION
+    # IDENTIFIER -- a regression emitting a constant, truncated or empty cookie passed silently.
+    # Not asserted, and not assertable through this action: that two sessions get DIFFERENT values.
+    # `type: cookie` opens its own driver and quits it (core_handlers/selenium_cookie_handler.py),
+    # so there is no second session to compare against and no way to carry a value between actions.
+    cookie_rx: "^[A-Za-z0-9_-]{110,}$"
+    cookie_http_only_flag: true
+    cookie_same_site_flag: "Lax"
+    config:
+      SESSIONS_NAME: "test"
+
+  # The three timeouts in the 1.6.16 suffixed form. sessions.lua used to `tonumber()` them: a suffix gave
+  # nil, which lua-resty-session silently replaces by its own defaults, so the cookie is still issued
+  # and this action cannot tell a read value from an ignored one. It does prove the suffixed values
+  # are accepted by the schema and that the session still starts with them. That they are READ (30m,
+  # 1h and 1d, in seconds) is asserted by tests/unit/common/test_duration_readers_lua.py; observing
+  # it here would need the cookie's lifetime, which lua-resty-session does not put in the cookie
+  # and `type: cookie` does not expose, so it is a framework change and is left out.
+  suffixed_timeouts:
+    type: "cookie"
+    url: "http://www.example.com"
+    cookie_name: "test"
+    cookie_rx: "^[A-Za-z0-9_-]{110,}$"
+    cookie_http_only_flag: true
+    cookie_same_site_flag: "Lax"
+    config:
+      SESSIONS_NAME: "test"
+      SESSIONS_IDLING_TIMEOUT: "30m"
+      SESSIONS_ROLLING_TIMEOUT: "1h"
+      SESSIONS_ABSOLUTE_TIMEOUT: "1d"
+  # SESSIONS_NAME left at its default, "random": the cookie gets a generated name, so no cookie action can
+  # name it (`type: cookie` looks one cookie up by name). The Set-Cookie header does show it: some name that
+  # is not the fixed "test" of the actions above, then the same 110-character-or-more session value.
+  random_name:
+    type: "header"
+    url: "http://www.example.com"
+    raise_for_status: false
+    response_headers:
+      Set-Cookie: "^(?!test=)[A-Za-z0-9_-]+=[A-Za-z0-9_-]{110,}"
+
+config:
+  USE_ANTIBOT: "cookie"
+  REMOTE_PHP: "php-fpm"
+  REMOTE_PHP_PATH: "/var/www/html"
+
+Linux:
+  config:
+    REMOTE_PHP: null
+    REMOTE_PHP_PATH: null
+    LOCAL_PHP: "/run/php/php-fpm.sock"
+    LOCAL_PHP_PATH: "/var/www/html"
+
+Kubernetes:
+  config:
+    REMOTE_PHP: null
+    REMOTE_PHP_PATH: null

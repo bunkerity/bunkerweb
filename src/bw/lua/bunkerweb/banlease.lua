@@ -1,4 +1,5 @@
 local cjson = require("cjson")
+local ipaddr = require("bunkerweb.ipaddr")
 local random = require("resty.random")
 local rstring = require("resty.string")
 
@@ -10,7 +11,10 @@ local char = string.char
 local floor = math.floor
 local concat = table.concat
 local ngx = ngx
+local ip_key = ipaddr.key
 
+-- Every function below that takes an ip names it by its canonical identity (RFC 5952 text, an IPv4-mapped IPv6
+-- address is its IPv4 address), so that one address is one lease, epoch and marker whatever spelling reached it.
 local banlease = {}
 
 banlease.RANK = { explicit_service = 1, explicit_global = 2, lease_service = 3, lease_global = 4 }
@@ -36,6 +40,7 @@ function banlease.is_known_id(id)
 end
 
 function banlease.lease_key(ip, service)
+	ip = ip_key(ip)
 	if service then
 		return "bans_cs_service_" .. service .. "_ip_" .. ip
 	end
@@ -69,6 +74,7 @@ local function get_epoch(prefix, ip, create)
 	if not dict then
 		return nil
 	end
+	ip = ip_key(ip)
 	local key = prefix .. ip
 	local value = dict:get(key)
 	if value ~= nil or not create then
@@ -92,6 +98,7 @@ local function bump_epoch(prefix, ip)
 	if not dict then
 		return nil, "no bans_meta dict"
 	end
+	ip = ip_key(ip)
 	local key = prefix .. ip
 	local seq, err = next_seq(dict)
 	if seq then
@@ -112,7 +119,7 @@ function banlease.create_lease_epoch(ip)
 		return nil
 	end
 	local seq = next_seq(dict)
-	if not seq or not dict:safe_add("le_" .. ip, seq, EPOCH_KEY_TTL) then
+	if not seq or not dict:safe_add("le_" .. ip_key(ip), seq, EPOCH_KEY_TTL) then
 		return nil
 	end
 	return seq
@@ -137,7 +144,7 @@ end
 -- Explicit ban mutations: only fence markers that can exist, so nothing is allocated while TLS drop is off
 function banlease.bump_marker_epoch_if_present(ip)
 	local dict = banlease.meta()
-	if not dict or dict:get("me_" .. ip) == nil then
+	if not dict or dict:get("me_" .. ip_key(ip)) == nil then
 		return nil
 	end
 	return bump_epoch("me_", ip)
@@ -148,7 +155,7 @@ function banlease.read_marker(service, ip)
 	if not dict then
 		return nil
 	end
-	local raw = dict:get("rs_" .. (service or "") .. "_" .. ip)
+	local raw = dict:get("rs_" .. (service or "") .. "_" .. ip_key(ip))
 	if not raw then
 		return nil
 	end
@@ -164,9 +171,11 @@ function banlease.write_marker(service, ip, id, rank, epoch, ttl)
 	if not dict then
 		return false
 	end
-	return dict:safe_set("rs_" .. (service or "") .. "_" .. ip, encode({ id = id, rank = rank, epoch = epoch }), ttl)
-			and true
-		or false
+	return dict:safe_set(
+		"rs_" .. (service or "") .. "_" .. ip_key(ip),
+		encode({ id = id, rank = rank, epoch = epoch }),
+		ttl
+	) and true or false
 end
 
 -- Port of ngx_inet6_ntop: the text nginx prints for an IPv6 $remote_addr. It compresses the first longest run of
@@ -511,6 +520,7 @@ local function scoped_service(service, ban_scope)
 end
 
 function banlease.promote_lease(ip, service, ban_scope, ttl, reason_data, country, captured)
+	ip = ip_key(ip)
 	-- A missing epoch never equals a captured one: no epoch means no lease
 	local current = banlease.lease_epoch(ip, false)
 	if type(captured) ~= "table" or current == nil or current ~= captured.lease_epoch then
@@ -575,6 +585,7 @@ function banlease.promote_lease(ip, service, ban_scope, ttl, reason_data, countr
 end
 
 function banlease.bump_redis_epoch(ip)
+	ip = ip_key(ip)
 	local redis_on, err = use_redis()
 	if redis_on == nil then
 		return false, err
@@ -599,6 +610,7 @@ function banlease.bump_redis_epoch(ip)
 end
 
 function banlease.remove_lease(ip, service, ban_scope)
+	ip = ip_key(ip)
 	local key = banlease.lease_key(ip, scoped_service(service, ban_scope))
 	-- Before anything that can yield
 	banlease.bump_lease_epoch(ip)
@@ -640,6 +652,7 @@ end
 -- The local lease copy first (it only counts while its epoch is current), else with Redis on an exact read of that
 -- one key. Returns the row, or nil and the error, plus whether Redis was read.
 function banlease.lookup_lease(ip, service, ban_scope)
+	ip = ip_key(ip)
 	local scope_service = scoped_service(service, ban_scope)
 	local key = banlease.lease_key(ip, scope_service)
 	local datastore = require("bunkerweb.datastore"):new()
@@ -733,6 +746,7 @@ local function decide(service, proxy_protocol, real_ip, trusted)
 	if not ip then
 		return nil
 	end
+	ip = ip_key(ip)
 	local banned, reason, rank = utils.is_banned_local(ip, service)
 	if banned == nil then
 		return nil
@@ -783,29 +797,150 @@ function banlease.tls_drop_decision(service, proxy_protocol, real_ip, trusted)
 	return verdict, id, ip
 end
 
+-- Capability flag for plugins: the core calls a module-level client_hello(hello) of the plugins that export one
+banlease.CLIENT_HELLO_PLUGIN_HOOK = 1
+
+-- Per worker, built once by init_worker: the plugins that export client_hello, in PLUGINS_ORDER_SSL_CLIENT_HELLO order
+local hello_plugins, hello_plugin_ids = {}, {}
+
+-- Keeps the plugins of the ssl_client_hello order whose main module exports a client_hello function. The module
+-- references are stored here: nothing is required, built or looked up per handshake. Returns the registered ids.
+function banlease.register_client_hello_plugins(plugin_ids)
+	local list, ids, registered = {}, {}, {}
+	for _, id in ipairs(plugin_ids or {}) do
+		if not ids[id] then
+			local ok, module = pcall(require, id .. "/" .. id)
+			if ok and type(module) == "table" and type(module.client_hello) == "function" then
+				list[#list + 1] = { id = id, fn = module.client_hello }
+				ids[id] = true
+				registered[#registered + 1] = id
+			elseif not ok and not tostring(module):find("not found", 1, true) then
+				ngx.log(ngx.WARN, "[BANS] can't load plugin ", id, " for the ClientHello hook : ", tostring(module))
+			end
+		end
+	end
+	hello_plugins, hello_plugin_ids = list, ids
+	return registered
+end
+
+-- True when the plugin is called through client_hello(): the default server's legacy loop skips it
+function banlease.is_client_hello_plugin(id)
+	return hello_plugin_ids[id] == true
+end
+
+local function plain_reason(reason)
+	if type(reason) ~= "string" then
+		return ""
+	end
+	return (reason:sub(1, 256):gsub("%c", " "))
+end
+
+-- Nothing below may yield either (same rule as decide): shared dict calls, ngx.ssl and the plugins' own functions.
+-- Any error, or any verdict but "drop" and "detect", means "do not drop".
+-- Returns true when a plugin dropped the handshake; the caller exits, outside the pcall.
+local function run_client_hello_plugins(service, proxy_protocol, real_ip, trusted)
+	local packed, family = require("ngx.ssl").raw_client_addr()
+	if not packed then
+		return false
+	end
+	local quic, quic_err = require("ngx.ssl.clienthello").get_client_hello_ext(57)
+	if quic_err then
+		return false
+	end
+	-- Behind a PROXY protocol header or a header based real IP the peer is not the client, unless its networks are
+	-- trusted and nginx's own rule picks the PROXY address
+	local ip
+	if trusted or not (proxy_protocol or real_ip) then
+		ip = banlease.format_raw_addr(packed, family)
+		if ip and trusted then
+			ip = banlease.proxy_protocol_client_ip(ip, trusted)
+		end
+		ip = ip and ip_key(ip) or nil
+	end
+	local hello = {
+		service = service,
+		ip = ip,
+		raw = packed,
+		family = family,
+		quic = quic ~= nil,
+		proxy_protocol = proxy_protocol and true or false,
+		real_ip = real_ip and true or false,
+		trusted = trusted,
+	}
+	local dict = banlease.meta()
+	local who = ip or "an unknown address"
+	for _, plugin in ipairs(hello_plugins) do
+		local ok, verdict, reason = pcall(plugin.fn, hello)
+		if not ok then
+			if dict and dict:safe_add("te_" .. plugin.id, true, 60) then
+				ngx.log(ngx.ERR, "[BANS] plugin ", plugin.id, " client_hello() failed : ", tostring(verdict))
+			end
+		elseif verdict == "detect" then
+			if dict and dict:safe_add("tp_detect_" .. plugin.id .. "_" .. who, true, 60) then
+				ngx.log(
+					ngx.WARN,
+					"[BANS] detect mode: plugin ",
+					plugin.id,
+					" would drop ",
+					who,
+					" at the TLS ClientHello : ",
+					plain_reason(reason)
+				)
+			end
+		elseif verdict == "drop" then
+			local metrics = ngx.shared.metrics_datastore
+			if metrics then
+				-- No "_counter_" in the name: the metrics timer never restores or overwrites it
+				metrics:incr("tls_drops_plugin_" .. plugin.id .. "_" .. ngx.worker.id(), 1, 0)
+			end
+			if dict and dict:safe_add("tp_" .. plugin.id .. "_" .. who, true, 60) then
+				ngx.log(
+					ngx.WARN,
+					"[BANS] plugin ",
+					plugin.id,
+					" dropped ",
+					who,
+					" at the TLS ClientHello : ",
+					plain_reason(reason)
+				)
+			end
+			return true
+		end
+	end
+	return false
+end
+
 function banlease.tls_drop_hook(service, proxy_protocol, real_ip, trusted)
 	local verdict, id, ip = banlease.tls_drop_decision(service, proxy_protocol, real_ip, trusted)
-	if not verdict then
-		return
-	end
-	local dict = banlease.meta()
-	local warn = dict and dict:safe_add("tw_" .. ip, true, 60)
-	if verdict == "detect" then
-		if warn then
-			ngx.log(ngx.WARN, "[BANS] detect mode: would drop banned IP ", ip, " (", id, ") at the TLS ClientHello")
+	if verdict then
+		local dict = banlease.meta()
+		local warn = dict and dict:safe_add("tw_" .. ip, true, 60)
+		if verdict == "detect" then
+			if warn then
+				ngx.log(ngx.WARN, "[BANS] detect mode: would drop banned IP ", ip, " (", id, ") at the TLS ClientHello")
+			end
+		else
+			local metrics = ngx.shared.metrics_datastore
+			if metrics then
+				-- No "_counter_" in the name: the metrics timer never restores or overwrites it
+				metrics:incr("tls_drops_" .. id .. "_" .. ngx.worker.id(), 1, 0)
+			end
+			if warn then
+				ngx.log(ngx.WARN, "[BANS] dropped banned IP ", ip, " (", id, ") at the TLS ClientHello")
+			end
+			ngx.exit(ngx.ERROR)
+			return true
 		end
+	end
+	-- Not dropped by the core, in both modes and whatever BANS_TLS_DROP_REASONS says: the plugins get their turn
+	if #hello_plugins == 0 then
 		return
 	end
-	local metrics = ngx.shared.metrics_datastore
-	if metrics then
-		-- No "_counter_" in the name: the metrics timer never restores or overwrites it
-		metrics:incr("tls_drops_" .. id .. "_" .. ngx.worker.id(), 1, 0)
+	local ok, dropped = pcall(run_client_hello_plugins, service, proxy_protocol, real_ip, trusted)
+	if ok and dropped then
+		ngx.exit(ngx.ERROR)
+		return true
 	end
-	if warn then
-		ngx.log(ngx.WARN, "[BANS] dropped banned IP ", ip, " (", id, ") at the TLS ClientHello")
-	end
-	ngx.exit(ngx.ERROR)
-	return true
 end
 
 return banlease

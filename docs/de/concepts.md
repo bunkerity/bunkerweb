@@ -105,7 +105,7 @@ Bitte beachten Sie, dass der Multisite-Modus bei Verwendung der Web-Benutzerober
 
 !!! info "Weiterführende Informationen"
 
-    Konkrete Beispiele für den Multisite-Modus finden Sie in den [fortgeschrittenen Nutzungen](advanced.md) der Dokumentation und im [Beispiele](https://github.com/bunkerity/bunkerweb/tree/v1.6.17/examples)-Verzeichnis des Repositorys.
+    Konkrete Beispiele für den Multisite-Modus finden Sie in den [fortgeschrittenen Nutzungen](advanced.md) der Dokumentation und im [Beispiele](https://github.com/bunkerity/bunkerweb/tree/v1.6.18-rc3/examples)-Verzeichnis des Repositorys.
 
 ## Benutzerdefinierte Konfigurationen {#custom-configurations}
 
@@ -126,7 +126,7 @@ Die Verwaltung benutzerdefinierter Konfigurationen über die Web-Benutzeroberfl�
 
 !!! info "Weiterführende Informationen"
 
-    Konkrete Beispiele für benutzerdefinierte Konfigurationen finden Sie in den [fortgeschrittenen Nutzungen](advanced.md#custom-configurations) der Dokumentation und im [Beispiele](https://github.com/bunkerity/bunkerweb/tree/v1.6.17/examples)-Verzeichnis des Repositorys.
+    Konkrete Beispiele für benutzerdefinierte Konfigurationen finden Sie in den [fortgeschrittenen Nutzungen](advanced.md#custom-configurations) der Dokumentation und im [Beispiele](https://github.com/bunkerity/bunkerweb/tree/v1.6.18-rc3/examples)-Verzeichnis des Repositorys.
 
 ## Datenbank
 
@@ -172,7 +172,7 @@ Durch Angabe des entsprechenden Datenbank-URI in der Konfiguration können Sie B
 
 !!! info "Hinweise"
     - **PostgreSQL**: Alpine-basierte Images, einschließlich des all-in-one-Images, enthalten jetzt den `v18`-Client; daher werden `v18` und frühere Versionen standardmäßig unterstützt.
-    - **Linux**: Die Unterstützung hängt von den Paketen Ihrer Distribution ab. Bei Bedarf können Sie Datenbank-Clients manuell aus den Hersteller-Repositorys installieren (dies ist bei RHEL normalerweise erforderlich).
+    - **Linux**: Die Unterstützung hängt von den Paketen Ihrer Distribution ab. Bei Bedarf können Sie Datenbank-Clients manuell aus den Hersteller-Repositorys installieren (dies ist bei RHEL normalerweise erforderlich). Ist die Hauptversion des PostgreSQL-Servers neuer als die des Linux-Clients `pg_dump`, schlagen Sicherungen mit `server version mismatch` fehl; installieren Sie einen passenden Client aus dem [PGDG-Repository](integrations.md#debian-ubuntu-postgresql-backups).
     - **SQLite**: Wird mit den Paketen ausgeliefert und ist sofort einsatzbereit.
 
 Hilfreiche externe Ressourcen zur Installation von Datenbankclients:

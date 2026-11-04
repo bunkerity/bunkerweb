@@ -76,15 +76,24 @@ int check_input(const char *input) {
     libinjection_sqli_init(&state, input, strlen(input), FLAG_NONE);
     result = libinjection_is_sqli(&state);
     
-    if (result == LIBINJECTION_RESULT_ERROR) {
-        log_error("Parser error - treating as suspicious");
-        return 1;  // Block on error (fail-safe)
-    } else if (result == LIBINJECTION_RESULT_TRUE) {
-        log("SQLi detected: %s", state.fingerprint);
-        return 1;  // Block request
+    if (result == LIBINJECTION_RESULT_FALSE) {
+        return 0;  // Allow request
     }
-    
-    return 0;  // Allow request
+    else {
+        switch(result) {
+            case LIBINJECTION_RESULT_ERROR:
+                log_error("Parser error - treating as suspicious");
+                break;
+            case LIBINJECTION_RESULT_TRUE:
+                log("SQLi detected: %s", state.fingerprint);
+                break;
+            default:
+                log("Unknow result");
+                break;
+        }
+    }
+
+    return 1;  // Block on error (fail-safe)
 }
 ```
 
@@ -98,7 +107,7 @@ injection_result_t result;
 result = libinjection_sqli(input, len, fingerprint);
 
 // Treat error as detection (fail-safe approach)
-if (result == LIBINJECTION_RESULT_TRUE || result == LIBINJECTION_RESULT_ERROR) {
+if (result != LIBINJECTION_RESULT_FALSE) {
     // Block request
     return 1;
 }
@@ -137,8 +146,8 @@ Recommended approach: **Fail-safe** - block on both detection and error.
 injection_result_t sqli_result = libinjection_sqli(input, len, fp);
 injection_result_t xss_result = libinjection_xss(input, len);
 
-if (sqli_result == LIBINJECTION_RESULT_TRUE || sqli_result == LIBINJECTION_RESULT_ERROR ||
-    xss_result == LIBINJECTION_RESULT_TRUE || xss_result == LIBINJECTION_RESULT_ERROR) {
+if (sqli_result != LIBINJECTION_RESULT_FALSE ||
+    xss_result != LIBINJECTION_RESULT_FALSE) {
     
     log_security_event(input, sqli_result, xss_result);
     return HTTP_403_FORBIDDEN;
@@ -168,6 +177,10 @@ switch (result) {
     
     case LIBINJECTION_RESULT_FALSE:
         log_metric("xss.clean", 1);
+        break;
+
+    default:
+        log_metric("Unknown result", 1);
         break;
 }
 ```
@@ -388,6 +401,6 @@ Use this checklist to verify your migration:
 ---
 
 **Version**: 4.0.0  
-**Last Updated**: 2025  
+**Last Updated**: 2026
 **Status**: Current
 
