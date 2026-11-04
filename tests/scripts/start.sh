@@ -629,6 +629,11 @@ else
         example_hook setup "$integration" || exit 1
     fi
 
+    # The upgrade spec names the package version per action; every other spec finds the wanted one installed.
+    if ! $IS_FREEBSD ; then
+        linux_install_version || exit 1
+    fi
+
     if $IS_FREEBSD ; then
         service bunkerweb start
         # shellcheck disable=SC2181

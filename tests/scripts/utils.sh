@@ -1624,6 +1624,12 @@ function restart_stack () {
 
         sleep 5
     else
+        # A version change (generate.py raised restart_whole_stack) is the Linux upgrade: swap the package first,
+        # then restart below as for any action.
+        if [ "$restart_whole_stack" -eq 1 ] && ! $IS_FREEBSD ; then
+            linux_install_version || return 1
+        fi
+
         # Stop the scheduler BEFORE the logs are cleared, not as the first half of a restart. A scheduler
         # stopped in its first apply round waits up to 30 s for it to end, and its job threads go on
         # sending their reload meanwhile (run 40848748952: stop 10:00:55, `reload successful` and "BunkerWeb is
@@ -1650,10 +1656,6 @@ function restart_stack () {
             docker exec -u 0 bunkerweb-linux truncate -s 0 /var/log/bunkerweb/api.log
             docker exec -u 0 bunkerweb-linux truncate -s 0 /var/log/bunkerweb/api-access.log
         fi
-
-        # if [ "$restart_whole_stack" -eq 1 ] ; then
-        #     # TODO
-        # fi
 
         apply_example_variables_env || return 1
 
@@ -1751,6 +1753,87 @@ function restart_stack () {
         log "UTILS" "❌" "💽 Failed to reset restart_services in redis server"
         return 1
     fi
+}
+
+# Linux upgrade arm: bring the package inside the systemd container to the version the current action
+# names (BW_VERSION). "tests" is the package built from this checkout, which the workflow stages as
+# /opt/bunkerweb.deb; anything else is a release from the public repository (a GitHub tag spells a
+# prerelease 1.6.18-rc2, apt spells it 1.6.18~rc2). Installing a release starts from nothing: the
+# installed package is removed and the data it left is wiped. Installing "tests" over a release is the
+# upgrade under test, so the data stays. A no-op while the installed package already is the wanted one,
+# which is every spec but upgrade. Debian-family only: an rpm distro has no arm that names a release.
+function linux_install_version() {
+    local want="${BW_VERSION:-tests}" local_pkg="/opt/bunkerweb.deb" installed target status_version
+
+    if ! docker exec -u 0 bunkerweb-linux sh -c 'command -v dpkg-query' > /dev/null 2>&1 ; then
+        if [ "$want" != "tests" ] ; then
+            log "UTILS" "❌" "🐧 Installing BunkerWeb $want needs a Debian-family container"
+            return 1
+        fi
+        return 0
+    fi
+
+    status_version="$(docker exec -u 0 bunkerweb-linux dpkg-query -W -f='${db:Status-Abbrev}|${Version}' bunkerweb 2> /dev/null || true)"
+    installed=""
+    if [[ "$status_version" == ii* ]] ; then
+        installed="${status_version#*|}"
+    fi
+
+    if [ "$want" == "tests" ] ; then
+        docker exec -u 0 bunkerweb-linux test -f "$local_pkg" || return 0
+        # dpkg-deb -f parses the control file and refuses a dev version; the control archive is not parsed.
+        target="$(docker exec -u 0 bunkerweb-linux sh -c "dpkg-deb --ctrl-tarfile '$local_pkg' | tar -xO ./control | sed -n 's/^Version: //p'")" || return 1
+        [ -n "$target" ] || return 1
+    else
+        target="${want//-/\~}"
+    fi
+    if [ "$installed" == "$target" ] ; then
+        return 0
+    fi
+
+    log "UTILS" "ℹ️ " "📦 Installing BunkerWeb $target (installed: ${installed:-none}) ..."
+    # An upgrade keeps the units running, as on a host: the package's postinstall restarts the active ones.
+    # A release replaces what is there, so stop it first.
+    local unit
+    if [ "$want" != "tests" ] ; then
+        for unit in bunkerweb-ui bunkerweb-api bunkerweb-scheduler bunkerweb ; do
+            docker exec -u 0 bunkerweb-linux systemctl stop "$unit" > /dev/null 2>&1 || true
+        done
+    fi
+
+    local apt_env=(-e UI_WIZARD=no)
+    if [ "${type:-}" == "ui" ] ; then
+        apt_env=()
+    fi
+
+    if [ "$want" == "tests" ] ; then
+        # dev and testing builds carry a version dpkg refuses ("does not start with a digit"); the
+        # workflow's step of the same name does it for a package it installs itself.
+        docker exec -u 0 bunkerweb-linux sh -c 'grep -qx force-bad-version /etc/dpkg/dpkg.cfg || echo force-bad-version >> /etc/dpkg/dpkg.cfg' || return 1
+        docker exec "${apt_env[@]}" -u 0 bunkerweb-linux apt-get install -y --allow-downgrades "$local_pkg" || return 1
+    else
+        if [ -n "$installed" ] ; then
+            docker exec -u 0 bunkerweb-linux apt-get remove -y bunkerweb || return 1
+        fi
+        docker exec -u 0 bunkerweb-linux sh -c 'rm -rf /var/lib/bunkerweb/* /var/backups/bunkerweb /var/tmp/bunkerweb_upgrade' || return 1
+        if ! docker exec -u 0 bunkerweb-linux test -f /etc/apt/sources.list.d/bunkerity_bunkerweb.list ; then
+            docker exec -u 0 bunkerweb-linux sh -c 'curl -fsSL https://repo.bunkerweb.io/install/script.deb.sh | bash' || return 1
+        fi
+        docker exec -u 0 bunkerweb-linux apt-get update || return 1
+        docker exec "${apt_env[@]}" -u 0 bunkerweb-linux apt-get install -y --allow-downgrades "bunkerweb=$target" || return 1
+    fi
+
+    # The package starts the units it installs. Wait until they have applied their first configuration,
+    # or the caller's next stop interrupts the very migration this arm exists to prove. Only a dev or
+    # testing scheduler writes the healthy marker; a release answers with its "ready" log line.
+    for _ in $(seq 1 180) ; do
+        if docker exec -u 0 bunkerweb-linux test -f /var/tmp/bunkerweb/scheduler.healthy || docker exec -u 0 bunkerweb-linux grep -q "BunkerWeb is ready" /var/log/bunkerweb/error.log ; then
+            break
+        fi
+        sleep 1
+    done
+    docker exec -u 0 bunkerweb-linux chmod 777 /etc/bunkerweb
+    log "UTILS" "ℹ️ " "📦 BunkerWeb $target installed ✅"
 }
 
 # shellcheck disable=SC2120

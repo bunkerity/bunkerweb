@@ -403,6 +403,38 @@ comment in its `parse-tests-core` job.
 (`package-<name>-<arch>`): dev's `ubuntu` leg is Ubuntu 26.04 (`ubuntu/resolute`, `FROM ubuntu:resolute`),
 noble is the separate `ubuntu-noble` leg.
 
+### Linux upgrade arm
+
+`core/upgrade.yml` runs on Linux for `ubuntu/noble` and `debian/trixie` (staging only: the spec's
+`dev_integrations` stays on the Docker family). Debian family only, SQLite only: the arm installs a
+release from the public apt repository (`repo.bunkerweb.io`), then upgrades to the package this run
+built. An rpm distro would need the same swap in `dnf`; none of them is listed.
+
+- `bw_version: "tests"` names the package built from this checkout, which the workflow installs and
+  leaves at `/opt/bunkerweb.deb` like for any Linux spec (the first cleanup needs the units to exist; the
+  first action then replaces it with a release). Any other `bw_version` is a
+  release (`1.6.17`, and `1.6.18-rc2` spelled `1.6.18~rc2` for apt).
+- `linux_install_version` (`scripts/utils.sh`) does the swap, from `start.sh` on a fresh stack and from
+  `restart_stack` when `generate.py` raised `restart_whole_stack`. A release is installed from nothing: the
+  installed package is removed and `/var/lib/bunkerweb` wiped. The package from this checkout goes over what is
+  there, data kept. It is a no-op whenever the installed package already is the wanted one, so no other spec
+  notices it.
+- Four actions per path. The `status` action proves the stack answers; `core/upgrade/linux-database.sh`
+  checks the database. `snapshot` runs on the old release (the rc3 `bw_ui_login_failures` table is not there
+  yet; it records the database version and writes a marker table), `verify` on the new package (the version
+  moved, `alembic_version` holds the migration head of this checkout, the table exists, the marker survived,
+  `www.example.com` is still declared). The marker tells a migrated database from a new one, and the head is
+  read from the checkout rather than the package, so a package that dropped a migration fails: the table
+  alone proves nothing, `init_tables` creates it on a database whatever the migrations did.
+- The `status` actions set `restart_stack: false` for Linux so the checks run on the stack they describe;
+  `full_clean` moves to the `verify` action.
+
+To run it locally, build the package from a scratch copy of the tree (`misc/update-version.sh dev` rewrites
+files all over the checkout), start the container with `docker compose -f tests/linux/docker-compose.yml up -d`
+after building `local/bunkerweb-linux` from `tests/linux/Dockerfile-<distro>`, add `force-bad-version` to the
+container's `/etc/dpkg/dpkg.cfg`, copy the package to `/opt/bunkerweb.deb`, then
+`./tests/scripts/test.sh Linux core dev upgrade`.
+
 ## The legacy harness (deleted)
 
 `tests/main.py`, the `*Test.py` classes, `tests/create.sh`, `tests/rm.sh`, `tests/ansible/`,
