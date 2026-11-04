@@ -1,0 +1,19 @@
+tests/core/cors.yml
+  s_903631c9046c55::t_d60437e1d214c2 236-238,248,262,331,345
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "af3df0763f9d2eb6263531b3afa5bb0eca851f80",
+  "prompts": {},
+  "sessions": {
+    "s_903631c9046c55": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1a57e-e647-7102-86de-f481a25ebe3f",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}
