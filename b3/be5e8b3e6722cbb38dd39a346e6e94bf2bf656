@@ -1,0 +1,19 @@
+.github/workflows/unit-tests.yml
+  s_bda801329e215d::t_ee97c49e6619d8 78
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "b3be5e8b3e6722cbb38dd39a346e6e94bf2bf656",
+  "prompts": {},
+  "sessions": {
+    "s_bda801329e215d": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1a5ae-34a8-76f0-bb09-a4fd3d9788b9",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}
