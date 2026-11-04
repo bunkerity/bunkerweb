@@ -63,13 +63,12 @@ def sockets(since=0):
                 container,
                 family,
             )
-        for row in samples:
-            if row["code"] and (
-                any(text in stream for text in ("is not running", "No such container") for stream in (row["out"], row["err"]))
-                or (f"failed to open /proc/{row['pid']}/ns/" in row["out"] and "No such file or directory" in row["out"])
-            ):
+        last_success = {tuple(row["command"]): index for index, row in enumerate(samples) if row["code"] == 0}
+        for index, row in enumerate(samples):
+            if row["code"]:
+                # Restarts can interrupt any probe; require the same command to recover before accepting the capture.
+                assert index < last_success.get(tuple(row["command"]), -1), ("CAPTURE_FAILED", row)
                 continue
-            assert row["code"] == 0, ("CAPTURE_FAILED", row)
             if row["command"] == ["ip", "-j", "addr"]:
                 addresses = [
                     ipaddress.ip_address(addr["local"])
@@ -91,7 +90,7 @@ def sockets(since=0):
     found = {
         (row["container"], line.split()[0], line.split()[4]): row["container"] + ": " + line
         for row in rows
-        if row["command"][0:2] == ["ss", "-4"]
+        if row["code"] == 0 and row["command"][0:2] == ["ss", "-4"]
         for line in row["out"].splitlines()[1:]
         if line.split()[4].rsplit(":", 1)[0] in ("0.0.0.0", "*")
     }
