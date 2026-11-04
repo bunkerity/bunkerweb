@@ -84,11 +84,11 @@ async def get_report_num(_: Request):
 
 
 @bunkernet_router.get("/last_report")
-async def get_last_report(url: str = ""):
-    # Most recent received report whose URL contains `url`, so a spec can pick out the requests it sent.
+async def get_last_report(url: str = "", reason: str = ""):
+    # Match the blocking reason too: another protection can block the same probe URL without CRS matched data.
     # `header_names` is the sorted list of request header names the report carries.
     for report in reversed(received_reports):
-        if url in str(report.get("url", "")):
+        if url in str(report.get("url", "")) and (not reason or report.get("reason") == reason):
             headers = report.get("headers")
             names = sorted(headers) if isinstance(headers, dict) else []
             return JSONResponse(status_code=200, content={"result": "ok", "data": {"header_names": names, "report": report}})

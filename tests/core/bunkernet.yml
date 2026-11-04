@@ -52,9 +52,11 @@ actions:
     restart_stack: false
 
   # What a report carries. The mock API keeps every report it receives and `/bunkernet/last_report?url=<text>`
-  # returns the latest one whose URL contains <text> (404 when none arrived, so a report that never shows up
-  # fails the action). Each block below sends 200 blocked requests from random addresses, every one carrying the
-  # same marker in its URL, so the batch of 100 goes out on the next scheduler start and the check can find it.
+  # returns the latest one whose URL contains <text> and whose reason matches `reason=modsecurity`
+  # (404 when none arrived, so a report that never shows up fails the action). Other protections can block
+  # the same URL without producing ModSecurity matched data. Each block below sends 200 blocked requests from random
+  # addresses, every one carrying the same marker in its URL, so the batch of 100 goes out on the next scheduler
+  # start and the check can find it.
   # The requests carry headers outside the User-Agent/Accept/Accept-Encoding/Accept-Language/Content-Type/
   # Content-Length allowlist (one of them credentials) and a script tag in a cookie and in a header, which
   # ModSecurity matches. The reason data then lists the matched values next to their variable names.
@@ -82,20 +84,20 @@ actions:
 
   check_payload_default_headers:
     type: string
-    url: "http://127.0.0.1:8000/bunkernet/last_report?url=bn_probe=default"
+    url: "http://127.0.0.1:8000/bunkernet/last_report?url=bn_probe=default&reason=modsecurity"
     delay: 0.0
     string: '"header_names":["accept","accept-encoding","accept-language","authorization","connection","cookie","host","referer","user-agent","x-bn-probe","x-forwarded-for"]'
     restart_stack: false
   check_payload_default_cookie_value:
     type: string
-    url: "http://127.0.0.1:8000/bunkernet/last_report?url=bn_probe=default"
+    url: "http://127.0.0.1:8000/bunkernet/last_report?url=bn_probe=default&reason=modsecurity"
     delay: 0.0
     string: '"cookie":"sid=<script>alert(1)</script>"'
     restart_stack: false
   # The quotes make this the whole value of a matched variable, not the tail of the header above.
   check_payload_default_matched_value:
     type: string
-    url: "http://127.0.0.1:8000/bunkernet/last_report?url=bn_probe=default"
+    url: "http://127.0.0.1:8000/bunkernet/last_report?url=bn_probe=default&reason=modsecurity"
     delay: 0.0
     string: '"<script>alert(1)</script>"'
     restart_stack: false
@@ -109,7 +111,7 @@ actions:
 
   check_payload_queued_headers:
     type: string
-    url: "http://127.0.0.1:8000/bunkernet/last_report?url=bn_probe=queued"
+    url: "http://127.0.0.1:8000/bunkernet/last_report?url=bn_probe=queued&reason=modsecurity"
     delay: 0.0
     string: '"header_names":["accept","accept-encoding","accept-language","user-agent"]'
     config:
@@ -117,7 +119,7 @@ actions:
     restart_stack: false
   check_payload_queued_matched_names:
     type: string
-    url: "http://127.0.0.1:8000/bunkernet/last_report?url=bn_probe=queued"
+    url: "http://127.0.0.1:8000/bunkernet/last_report?url=bn_probe=queued&reason=modsecurity"
     delay: 0.0
     string: "REQUEST_COOKIES:sid"
     config:
@@ -125,7 +127,7 @@ actions:
     restart_stack: false
   check_payload_queued_no_payload:
     type: string
-    url: "http://127.0.0.1:8000/bunkernet/last_report?url=bn_probe=queued"
+    url: "http://127.0.0.1:8000/bunkernet/last_report?url=bn_probe=queued&reason=modsecurity"
     delay: 0.0
     not_string: "alert(1)"
     config:
@@ -143,7 +145,7 @@ actions:
 
   check_payload_filter_on_headers:
     type: string
-    url: "http://127.0.0.1:8000/bunkernet/last_report?url=bn_probe=filter_on"
+    url: "http://127.0.0.1:8000/bunkernet/last_report?url=bn_probe=filter_on&reason=modsecurity"
     delay: 0.0
     string: '"header_names":["accept","accept-encoding","accept-language","user-agent"]'
     config:
@@ -151,7 +153,7 @@ actions:
     restart_stack: false
   check_payload_filter_on_matched_names:
     type: string
-    url: "http://127.0.0.1:8000/bunkernet/last_report?url=bn_probe=filter_on"
+    url: "http://127.0.0.1:8000/bunkernet/last_report?url=bn_probe=filter_on&reason=modsecurity"
     delay: 0.0
     string: "REQUEST_COOKIES:sid"
     config:
@@ -159,7 +161,7 @@ actions:
     restart_stack: false
   check_payload_filter_on_no_payload:
     type: string
-    url: "http://127.0.0.1:8000/bunkernet/last_report?url=bn_probe=filter_on"
+    url: "http://127.0.0.1:8000/bunkernet/last_report?url=bn_probe=filter_on&reason=modsecurity"
     delay: 0.0
     not_string: "alert(1)"
     config:

@@ -24,11 +24,13 @@ def handle(LOGGER: Logger, action: Any) -> None:
         needle = action.string.casefold() if action.ignore_case else action.string
         if needle not in text:
             LOGGER.error(f"🕸️ String {action.string} not found in response, exiting ...")
+            LOGGER.error(f"Response body: {response.text}")
             exit(1)
         LOGGER.info(f"🕸️ String {action.string} found in response")
     elif action.not_string is not None:
         needle = action.not_string.casefold() if action.ignore_case else action.not_string
         if needle in text:
             LOGGER.error(f"🕸️ String {action.not_string} found in response, exiting ...")
+            LOGGER.error(f"Response body: {response.text}")
             exit(1)
         LOGGER.info(f"🕸️ String {action.not_string} not found in response")
