@@ -233,10 +233,9 @@ actions:
       Origin: "https://evil.example.net"
       Access-Control-Request-Method: "POST"
     restart_stack: false
-  # The next four actions assert only the credentials header for a disallowed origin: cors.lua header()
-  # sets Access-Control-Allow-Origin to the request origin on every response, denied or not, and
-  # only Access-Control-Allow-Credentials is gated on the origin check (0fa4ccda9). The original
-  # checks only asserted the credentials header here.
+  # The next four actions assert that a disallowed origin gets neither Access-Control-Allow-Origin nor
+  # the credentials header (header() used to echo the request origin for a regex
+  # CORS_ALLOW_ORIGIN whether or not it matched).
   credentials_disallowed_origin_gets_no_credentials:
     type: header
     integrations: *php_arms
@@ -246,6 +245,7 @@ actions:
     headers:
       Origin: "https://evil.example.net"
     response_headers:
+      Access-Control-Allow-Origin: null
       Access-Control-Allow-Credentials: null
     restart_stack: false
   credentials_disallowed_preflight_gets_no_credentials:
@@ -259,6 +259,7 @@ actions:
       Origin: "https://evil.example.net"
       Access-Control-Request-Method: "POST"
     response_headers:
+      Access-Control-Allow-Origin: null
       Access-Control-Allow-Credentials: null
     restart_stack: false
   credentials_upstream_fixture_is_served:
@@ -327,6 +328,7 @@ actions:
     headers:
       Origin: "https://evil.example.net"
     response_headers:
+      Access-Control-Allow-Origin: null
       Access-Control-Allow-Credentials: null
     restart_stack: false
   no_deny_disallowed_preflight_gets_no_credentials:
@@ -340,6 +342,7 @@ actions:
       Origin: "https://evil.example.net"
       Access-Control-Request-Method: "POST"
     response_headers:
+      Access-Control-Allow-Origin: null
       Access-Control-Allow-Credentials: null
     restart_stack: false
   no_deny_upstream_fixture_is_served_to_a_disallowed_origin:
