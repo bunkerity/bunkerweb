@@ -25,6 +25,14 @@ DEACTIVATED = 'Unable to validate JWS :: Account is not valid, has status "deact
 # certbot's own message for a LOCAL directory that went missing. Repointing repairs this without
 # touching the CA, so matching it would retire an account the CA still considers perfectly valid.
 LOCAL_MISSING = "Account at /var/cache/bunkerweb/letsencrypt/etc/accounts/.../deadbeef does not exist"
+# RFC 8555 CAs other than Boulder (Pebble, step-ca, ...). certbot's terminal output carries title and detail only,
+# so the default line has no error type; the type shows up with `-v`, in the traceback's last line.
+RFC_NOT_FOUND = "Account https://pebble.example:14000/my-account/1 not found."
+RFC_NOT_FOUND_VERBOSE = (
+    "acme.messages.Error: urn:ietf:params:acme:error:accountDoesNotExist :: The request specified an account that does not exist "
+    ":: Account https://pebble.example:14000/my-account/1 not found."
+)
+RFC_TYPE_ONLY = "acme.messages.Error: urn:ietf:params:acme:error:accountDoesNotExist :: The request specified an account that does not exist"
 RENEW_FAILURE = "Failed to renew certificate app.example.com with error: Some error"
 
 
@@ -33,6 +41,26 @@ class TestIsStaleAccountLine:
     def test_both_rejection_phrasings_match(self, line):
         """Only the "not found" wording was matched before, so a deactivated account retried forever."""
         assert is_stale_account_line(line)
+
+    @pytest.mark.parametrize("line", [RFC_NOT_FOUND, RFC_NOT_FOUND_VERBOSE, RFC_TYPE_ONLY])
+    def test_rfc8555_account_does_not_exist_matches(self, line):
+        """Pebble and any other RFC 8555 CA answer with their own wording and URL shape, never Boulder's."""
+        assert is_stale_account_line(line)
+
+    @pytest.mark.parametrize(
+        "line",
+        [
+            "acme.messages.Error: urn:ietf:params:acme:error:unauthorized :: Invalid response from http://app.example/.well-known/acme-challenge/x",
+            "acme.messages.Error: urn:ietf:params:acme:error:rateLimited :: too many new orders recently",
+            "acme.messages.Error: urn:ietf:params:acme:error:badNonce :: JWS has an invalid anti-replay nonce",
+            "acme.messages.Error: urn:ietf:params:acme:error:malformed :: Unable to parse JWS",
+            "acme.messages.Error: urn:ietf:params:acme:error:orderNotReady :: Order https://pebble.example:14000/my-order/1 not found.",
+            "requests.exceptions.ConnectionError: HTTPSConnectionPool(host='pebble.example', port=14000): Max retries exceeded",
+            "Order https://pebble.example:14000/my-order/1 not found.",
+        ],
+    )
+    def test_other_acme_errors_do_not_match(self, line):
+        assert not is_stale_account_line(line)
 
     def test_a_missing_local_directory_is_not_a_rejection(self):
         assert not is_stale_account_line(LOCAL_MISSING)
@@ -53,6 +81,22 @@ class TestIsStaleAccountLine:
 class TestIdentifyingTheOffender:
     def test_the_uri_is_extracted_from_the_not_found_phrasing(self):
         assert stale_account_uri(NOT_FOUND) == "https://acme-v02.api.letsencrypt.org/acme/acct/1234567"
+
+    @pytest.mark.parametrize("line", [RFC_NOT_FOUND, RFC_NOT_FOUND_VERBOSE])
+    def test_the_uri_is_extracted_from_the_rfc8555_phrasing(self, line):
+        """Without the trailing full stop: it is compared for equality with the uri certbot stored in regr.json."""
+        assert stale_account_uri(line) == "https://pebble.example:14000/my-account/1"
+
+    def test_the_account_url_wins_over_other_urls_in_the_line(self):
+        line = "Account https://pebble.example:14000/my-account/1 not found. Order https://pebble.example:14000/my-order/9 pending"
+        assert stale_account_uri(line) == "https://pebble.example:14000/my-account/1"
+
+    def test_the_type_alone_carries_no_uri(self):
+        """The renew job then falls back to the lineage certbot names on the same run."""
+        assert stale_account_uri(RFC_TYPE_ONLY) == ""
+
+    def test_a_challenge_or_order_url_is_never_taken_for_the_account(self):
+        assert stale_account_uri("Order https://pebble.example:14000/my-order/1 not found.") == ""
 
     def test_the_deactivated_phrasing_carries_no_uri(self):
         """Which is the whole reason failed_renewal_cert exists as the second route."""
