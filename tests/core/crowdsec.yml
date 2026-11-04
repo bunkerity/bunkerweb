@@ -41,48 +41,8 @@ actions:
     delay: 5
     retries: 1
     # full_clean clears the decision this case created (CrowdSec database and the bouncer's
-    # crowdsec_cache shared dict, which SURVIVES reloads) before the stream arm starts.
+    # crowdsec_cache shared dict, which SURVIVES reloads) before the next case starts.
     full_clean: true
-
-  admin_interface_probe_stream:
-    type: script
-    # Same unpinned six-path, one-IP provocation as live mode.
-    script:
-      - "python3"
-      - "-c"
-      - |
-        from concurrent.futures import ThreadPoolExecutor
-        from http.client import HTTPConnection
-
-        paths = ("/admin", "/manager", "/phpmyadmin", "/pma", "/wp-admin", "/wp-login")
-        assert len(set(paths)) == len(paths)
-
-        def probe(path):
-            connection = HTTPConnection("127.0.0.1", timeout=5)
-            try:
-                connection.request("GET", path, headers={"Host": "www.example.com", "User-Agent": "LegitOne"})
-                response = connection.getresponse()
-                assert response.status in (403, 404), f"{path}: {response.status}"
-                response.read()
-            finally:
-                connection.close()
-
-        with ThreadPoolExecutor(max_workers=len(paths)) as executor:
-            list(executor.map(probe, paths))
-    config:
-      CROWDSEC_MODE: "stream"
-      # An hour away: nothing the bouncer does can interfere with the scan.
-      CROWDSEC_UPDATE_FREQUENCY: "3600"
-  blocked_stream:
-    type: status
-    url: "http://www.example.com"
-    status: 403
-    # `not_yet_blocked_stream` (a 200 right after the restart, before the first pull) was dropped: it
-    # asserts the 1.7 timing, where a reload leaves nothing to enforce until the bouncer's pull. Dev's
-    # bouncer keeps shared decisions across reloads (bouncer.lua `enforcement_state`), so the first
-    # request after the restart is already denied.
-    delay: 30
-    retries: 2
 
   # The acquisition file is restored by `disable_appsec_bot_challenge` and by tests/scripts/after/crowdsec.sh;
   # the AppSec bot-challenge cases (`enable_appsec_bot_challenge`, `challenged_by_appsec`) were 1.7-only
@@ -237,7 +197,7 @@ config:
   CROWDSEC_EXCLUDE_LOCATION: ""
   CROWDSEC_CACHE_EXPIRATION: "1"
   # CROWDSEC_UPDATE_FREQUENCY is deliberately absent here: it only means something in stream
-  # mode, and the two stream actions each set the value their own assertion depends on.
+  # mode, and the stream_pull actions each set the value their own assertion depends on.
   CROWDSEC_APPSEC_URL: "http://crowdsec:7422"
   CROWDSEC_APPSEC_FAILURE_ACTION: "passthrough"
   CROWDSEC_APPSEC_CONNECT_TIMEOUT: "100"
