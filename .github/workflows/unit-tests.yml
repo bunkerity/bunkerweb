@@ -80,7 +80,7 @@ jobs:
           curl --fail --location --silent --show-error --max-time 60 \
             https://luarocks.org/luacov-0.17.0-1.src.rock -o .cache/lua-tools/luacov-0.17.0-1.src.rock
           echo '8a460ee46560d77dd2c9975abef3e8be9380e8939f258e91f583b101df6c2b1f  .cache/lua-tools/luacov-0.17.0-1.src.rock' | sha256sum --check
-          luarocks --lua-version=5.4 --tree "$PWD/.cache/lua-tools" install .cache/lua-tools/luacov-0.17.0-1.src.rock --deps-mode=none
+          luarocks --lua-version=5.4 --lua-dir=/usr --tree "$PWD/.cache/lua-tools" install .cache/lua-tools/luacov-0.17.0-1.src.rock --deps-mode=none
           echo "LUA_PATH=$PWD/.cache/lua-tools/share/lua/5.4/?.lua;$PWD/.cache/lua-tools/share/lua/5.4/?/init.lua;;" >> "$GITHUB_ENV"
       # `backup_database`/`restore_database` shell out to `sqlite3`, and the backup/restore round
       # trip now FAILS rather than skips when an engine is present but its client is not -- so this
