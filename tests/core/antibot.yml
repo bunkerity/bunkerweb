@@ -202,9 +202,8 @@ actions:
       ANTIBOT_CAPJS_BACKEND_URL: "http://192.168.0.250:3000"
       ANTIBOT_CAPJS_SITEKEY: "test-site"
       ANTIBOT_CAPJS_SECRET: "test-secret"
-      # The widget solves the seeded challenge at once, so the challenge page, its frame and the
-      # verification POST all hit /challenge within one second: the default 2r/s answers the POST 429.
-      USE_LIMIT_REQ: "no"
+      # No USE_LIMIT_REQ override: the widget solves at once, so the challenge page, its frame and
+      # the verification POST all land within one second, and the default 2r/s must still let it through.
       REMOTE_PHP: "php-fpm"
       REMOTE_PHP_PATH: "/var/www/html"
     Linux:
