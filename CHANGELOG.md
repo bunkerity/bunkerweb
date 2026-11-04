@@ -56,6 +56,7 @@
 - [BUGFIX] `db`: removing a setting from a plugin also removes its stored values on SQLite.
 - [BUGFIX] `ui`: creating a user with two or more roles no longer fails on PostgreSQL, MariaDB and MySQL, and an unknown role leaves no half-created user.
 - [BUGFIX] `db`: the `MODSECURITY_CRS_PLUGIN_URLS` to `MODSECURITY_CRS_PLUGINS` rename keeps the stored values on PostgreSQL, MariaDB and MySQL.
+- [BUGFIX] `scheduler`: a reload the instance has not confirmed (busy, unreachable or rejected after the config test) stays pending and is retried instead of being logged as applied (Refs #4086)
 - [MISC] `release`: the floating `dev` and `testing` Linux packages and the `testing` GitHub release are no longer published, so package repositories stop offering a phantom upgrade; the installer refuses `--version dev` and `--version testing`.
 - [DOCS] `antibot`, `country`: the help and docs of `ANTIBOT_IGNORE_URI` and `COUNTRY_IGNORE_URI` now say patterns match the normalized path, alone or followed by `?` and the query string.
 - [DOCS] `core`: the IPv6 section drops the experimental label for what is tested, fixes the `USE_IPV6` example and the Docker prerequisites, and adds IPv6-only settings and limits.
