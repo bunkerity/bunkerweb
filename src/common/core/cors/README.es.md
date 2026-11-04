@@ -51,7 +51,7 @@ Aquí hay ejemplos de posibles valores para el ajuste `CORS_ALLOW_ORIGIN`, junto
 - **`^https://(www\.example1\.com|www\.example2\.com)$`**: Permite solicitudes de `https://www.example1.com` o `https://www.example2.com`.
 - **`^https?://www\.example\.com$`**: Permite solicitudes tanto de `https://www.example.com` como de `http://www.example.com`.
 
-En modo regex, ancla el patrón con `^` y `$` para que coincida con todo el origen; la respuesta refleja el `Origin` de la solicitud en `Access-Control-Allow-Origin`.
+En modo regex, ancla el patrón con `^` y `$` para que coincida con todo el origen; la respuesta refleja el `Origin` de la solicitud en `Access-Control-Allow-Origin` solo cuando coincide; un origen que no coincide no recibe el encabezado `Access-Control-Allow-Origin`.
 
 === "Configuración Básica"
 

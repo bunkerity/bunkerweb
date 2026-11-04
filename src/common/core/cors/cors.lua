@@ -71,12 +71,14 @@ function cors:header()
 	end
 
 	-- Set headers
+	local origin_allowed = is_origin_allowed(self)
 	if self.variables["CORS_ALLOW_ORIGIN"] == "*" then
 		ngx_header["Access-Control-Allow-Origin"] = "*"
 	elseif self.variables["CORS_ALLOW_ORIGIN"] == "self" then
 		ngx_header["Access-Control-Allow-Origin"] = get_self_origin(self)
 	else
-		ngx_header["Access-Control-Allow-Origin"] = self.ctx.bw.http_origin
+		-- Regex: echo only an origin the pattern allows, and drop any value the upstream sent for the others
+		ngx_header["Access-Control-Allow-Origin"] = origin_allowed and self.ctx.bw.http_origin or nil
 	end
 	for variable, header in pairs(self.all_headers) do
 		if self.variables[variable] ~= "" then
@@ -84,7 +86,7 @@ function cors:header()
 		end
 	end
 	-- Enforce origin restrictions on upstream credentials headers too
-	if ngx_header["Access-Control-Allow-Origin"] == "*" or not is_origin_allowed(self) then
+	if ngx_header["Access-Control-Allow-Origin"] == "*" or not origin_allowed then
 		ngx_header["Access-Control-Allow-Credentials"] = nil
 	elseif self.variables["CORS_ALLOW_CREDENTIALS"] == "yes" then
 		ngx_header["Access-Control-Allow-Credentials"] = "true"
