@@ -132,3 +132,63 @@ def test_every_rate_unit_is_a_counted_window(unit):
     out = requests(f'{{ ["/"] = "1r/{unit}" }}', ["/", "/"])
     assert out["status1"] == "nil"
     assert out["status2"] == "429"
+
+
+CAPJS = '{ USE_ANTIBOT = "capjs", ANTIBOT_URI = "/challenge" }'
+
+
+def counter_key(uri, *, arg="1", getvar=CAPJS):
+    """The counter key ``limit`` uses for a request on ``uri`` with ``?capjs_frame=<arg>``."""
+    arg_lua = "nil" if arg is None else f'"{arg}"'
+    out = run(
+        "limit",
+        f"""
+VARIABLES = {{ USE_LIMIT_REQ = "yes" }}
+STORE["plugin_limit_rules"] = {{ global = {{ ["/"] = "2r/s" }} }}
+STORE["plugin_limit_global_rules"] = {{ global = nil }}
+GETVAR = {getvar}
+ngx.var.arg_capjs_frame = {arg_lua}
+emit("key", PLUGIN:new(ctx({{ uri = "{uri}" }})):counter_key())
+""",
+    )
+    return out["key"]
+
+
+class TestCounterKey:
+    PLAIN = "plugin_limit_www.example.com1.2.3.4"
+
+    def test_the_capjs_frame_request_gets_its_own_counter(self):
+        assert counter_key("/challenge") == f"{self.PLAIN}/challenge?capjs_frame=1"
+
+    @pytest.mark.parametrize(
+        ("uri", "arg", "getvar"),
+        [
+            ("/challenge", None, CAPJS),
+            ("/challenge", "2", CAPJS),
+            ("/other", "1", CAPJS),
+            ("/challenge", "1", '{ USE_ANTIBOT = "captcha", ANTIBOT_URI = "/challenge" }'),
+            ("/challenge", "1", '{ USE_ANTIBOT = "no", ANTIBOT_URI = "/challenge" }'),
+        ],
+    )
+    def test_every_other_request_keeps_the_plain_counter(self, uri, arg, getvar):
+        assert counter_key(uri, arg=arg, getvar=getvar) == f"{self.PLAIN}{uri}"
+
+    def test_a_solve_is_not_limited_when_the_frame_has_its_own_counter(self):
+        out = run(
+            "limit",
+            f"""
+VARIABLES = {{ USE_LIMIT_REQ = "yes" }}
+STORE["plugin_limit_rules"] = {{ global = {{ ["/"] = "2r/s" }} }}
+STORE["plugin_limit_global_rules"] = {{ global = nil }}
+GETVAR = {CAPJS}
+for i, frame in ipairs({{ "0", "1", "0", "1", "0", "1" }}) do
+    ngx.var.arg_capjs_frame = frame
+    local r = PLUGIN:new(ctx({{ uri = "/challenge" }})):access()
+    emit("status" .. i, r.status)
+end
+""",
+        )
+        # page, frame, POST: 3 requests, 2 in the page bucket and 1 in the frame bucket.
+        assert [out["status1"], out["status2"], out["status3"]] == ["nil"] * 3
+        # The 3rd page-bucket request in the same second is still limited.
+        assert out["status5"] == "429"
