@@ -752,6 +752,10 @@ Aunque las configuraciones se declaran ahora en el contenedor del Programador, *
 
 Hicimos nuestro mejor esfuerzo para no cambiar el valor predeterminado, pero hemos añadido muchas otras configuraciones. Se recomienda encarecidamente leer las secciones de [ajuste de seguridad](advanced.md#security-tuning) y [configuraciones](features.md) de la documentación.
 
+!!! warning "`MODSECURITY_CRS_PLUGIN_URLS` se renombró a `MODSECURITY_CRS_PLUGINS`"
+
+    Si configuró `MODSECURITY_CRS_PLUGIN_URLS` y actualizó a 1.6 con PostgreSQL, MariaDB o MySQL antes de la 1.6.18, el valor almacenado se perdió. Compruebe `MODSECURITY_CRS_PLUGINS` y vuelva a configurarlo si está vacío. Desde la 1.6.18, los valores se conservan al actualizar.
+
 #### Plantillas
 
 Hemos añadido una nueva característica llamada **plantillas**. Las plantillas proporcionan un enfoque estructurado y estandarizado para definir configuraciones y configuraciones personalizadas, consulta la sección [conceptos/plantillas](concepts.md#templates) para obtener más información.

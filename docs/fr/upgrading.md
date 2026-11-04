@@ -752,6 +752,10 @@ Bien que les paramètres soient maintenant déclarés sur le conteneur du planif
 
 Nous avons fait de notre mieux pour ne pas changer la valeur par défaut, mais nous avons ajouté de nombreux autres paramètres. Il est fortement recommandé de lire les sections sur le [réglage de la sécurité ](advanced.md#security-tuning) et  les [paramètres](features.md) de la documentation.
 
+!!! warning "`MODSECURITY_CRS_PLUGIN_URLS` a été renommé en `MODSECURITY_CRS_PLUGINS`"
+
+    Si vous aviez défini `MODSECURITY_CRS_PLUGIN_URLS` et migré vers la 1.6 sur PostgreSQL, MariaDB ou MySQL avant la 1.6.18, la valeur enregistrée a été perdue. Vérifiez `MODSECURITY_CRS_PLUGINS` et redéfinissez-le s'il est vide. Depuis la 1.6.18, les valeurs sont conservées lors de la mise à niveau.
+
 #### Modèles
 
 Nous avons ajouté une nouvelle fonctionnalité appelée **modèles**. Les modèles fournissent une approche structurée et standardisée de la définition des paramètres et des configurations personnalisées, consultez la [ section concepts/modèles](concepts.md#templates) pour plus d'informations.

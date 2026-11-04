@@ -749,6 +749,10 @@ Obwohl die Einstellungen jetzt im Scheduler-Container deklariert werden, **müss
 
 Wir haben unser Bestes getan, um die Standardwerte nicht zu ändern, aber wir haben viele andere Einstellungen hinzugefügt. Es wird dringend empfohlen, die Abschnitte [Sicherheits-Tuning](advanced.md#security-tuning) und [Einstellungen](features.md) der Dokumentation zu lesen.
 
+!!! warning "`MODSECURITY_CRS_PLUGIN_URLS` wurde in `MODSECURITY_CRS_PLUGINS` umbenannt"
+
+    Wenn Sie `MODSECURITY_CRS_PLUGIN_URLS` gesetzt und vor 1.6.18 auf PostgreSQL, MariaDB oder MySQL auf 1.6 aktualisiert haben, ging der gespeicherte Wert verloren. Prüfen Sie `MODSECURITY_CRS_PLUGINS` und setzen Sie die Einstellung erneut, falls sie leer ist. Ab 1.6.18 bleiben die Werte beim Upgrade erhalten.
+
 #### Vorlagen
 
 Wir haben eine neue Funktion namens **Vorlagen** hinzugefügt. Vorlagen bieten einen strukturierten und standardisierten Ansatz zur Definition von Einstellungen und benutzerdefinierten Konfigurationen. Weitere Informationen finden Sie im Abschnitt [Konzepte/Vorlagen](concepts.md#templates).

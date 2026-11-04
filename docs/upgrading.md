@@ -752,6 +752,10 @@ While the settings are now declared on the Scheduler container, **you'll still n
 
 We tried our best not to change default value but we have added many other settings. It's highly recommended to read the [security tuning](advanced.md#security-tuning) and [settings](features.md) sections of the documentation.
 
+!!! warning "`MODSECURITY_CRS_PLUGIN_URLS` was renamed to `MODSECURITY_CRS_PLUGINS`"
+
+    If you set `MODSECURITY_CRS_PLUGIN_URLS` and upgraded to 1.6 on PostgreSQL, MariaDB or MySQL before 1.6.18, the stored value was lost. Check `MODSECURITY_CRS_PLUGINS` and set it again if it is empty. From 1.6.18, the values are kept on upgrade.
+
 #### Templates
 
 We added a new feature called **templates**. Templates provide a structured and standardized approach to defining settings and custom configurations, check the [concepts/templates](concepts.md#templates) section for more information.

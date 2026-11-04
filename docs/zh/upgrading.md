@@ -751,6 +751,10 @@
 
 我们尽力不更改默认值，但我们添加了许多其他设置。强烈建议阅读文档的[安全调整](advanced.md#security-tuning)和[设置](features.md)部分。
 
+!!! warning "`MODSECURITY_CRS_PLUGIN_URLS` 已重命名为 `MODSECURITY_CRS_PLUGINS`"
+
+    如果您设置了 `MODSECURITY_CRS_PLUGIN_URLS`，并在 1.6.18 之前于 PostgreSQL、MariaDB 或 MySQL 上升级到 1.6，则已存储的值会丢失。请检查 `MODSECURITY_CRS_PLUGINS`，如果为空，请重新设置。从 1.6.18 起，升级时会保留这些值。
+
 #### 模板
 
 我们添加了一个名为**模板**的新功能。模板提供了一种结构化和标准化的方法来定义设置和自定义配置，有关更多信息，请查看[概念/模板](concepts.md#templates)部分。
