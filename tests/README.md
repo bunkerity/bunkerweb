@@ -413,7 +413,7 @@ built. An rpm distro would need the same swap in `dnf`; none of them is listed.
 - `bw_version: "tests"` names the package built from this checkout, which the workflow installs and
   leaves at `/opt/bunkerweb.deb` like for any Linux spec (the first cleanup needs the units to exist; the
   first action then replaces it with a release). Any other `bw_version` is a
-  release (`1.6.17`, and `1.6.18-rc2` spelled `1.6.18~rc2` for apt).
+  release selected by `core/upgrade.yml` (`X.Y.Z-rcN` prereleases use `X.Y.Z~rcN` for apt).
 - `linux_install_version` (`scripts/utils.sh`) does the swap, from `start.sh` on a fresh stack and from
   `restart_stack` when `generate.py` raised `restart_whole_stack`. A release is installed from nothing: the
   installed package is removed and `/var/lib/bunkerweb` wiped. The package from this checkout goes over what is

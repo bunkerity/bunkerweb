@@ -1760,7 +1760,7 @@ function restart_stack () {
 # Linux upgrade arm: bring the package inside the systemd container to the version the current action
 # names (BW_VERSION). "tests" is the package built from this checkout, which the workflow stages as
 # /opt/bunkerweb.deb; anything else is a release from the public repository (a GitHub tag spells a
-# prerelease 1.6.18-rc2, apt spells it 1.6.18~rc2). Installing a release starts from nothing: the
+# prerelease X.Y.Z-rcN, apt spells it X.Y.Z~rcN). Installing a release starts from nothing: the
 # installed package is removed and the data it left is wiped. Installing "tests" over a release is the
 # upgrade under test, so the data stays. A no-op while the installed package already is the wanted one,
 # which is every spec but upgrade. Debian-family only: an rpm distro has no arm that names a release.
