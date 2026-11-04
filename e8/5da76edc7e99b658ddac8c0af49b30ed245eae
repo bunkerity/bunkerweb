@@ -1,0 +1,34 @@
+src/common/core/blacklist/jobs/blacklist-download.py
+  s_8bdd99fab25ac2::t_db17c1e1815951 239
+  s_8bdd99fab25ac2::t_4818c32c75f4b5 240-241
+src/common/core/greylist/jobs/greylist-download.py
+  s_8bdd99fab25ac2::t_db17c1e1815951 183
+  s_8bdd99fab25ac2::t_7883d45dd12553 184-185
+tests/unit/jobs/test_feed_cache_recheck.py
+  s_8bdd99fab25ac2::t_c06dfe9079edfe 1-30,48-52,56-108
+  s_8bdd99fab25ac2::t_030862b9476dba 31-47
+  s_8bdd99fab25ac2::t_8f17b085d6d116 53-55
+src/common/core/realip/jobs/realip-download.py
+  s_8bdd99fab25ac2::t_db17c1e1815951 146-148
+src/common/core/dnsbl/jobs/dnsbl-download.py
+  s_8bdd99fab25ac2::t_db17c1e1815951 131-132,134
+src/common/core/whitelist/jobs/whitelist-download.py
+  s_8bdd99fab25ac2::t_db17c1e1815951 183
+  s_8bdd99fab25ac2::t_673a54863c9563 184-185
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "e85da76edc7e99b658ddac8c0af49b30ed245eae",
+  "prompts": {},
+  "sessions": {
+    "s_8bdd99fab25ac2": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a18d8d-8fba-75e0-8cd9-0d5c781e6da2",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}
