@@ -7,7 +7,7 @@ from json import dumps, loads
 from os import getenv
 from os.path import join, sep
 from pathlib import Path
-from subprocess import PIPE, run
+from subprocess import PIPE, check_output, run
 from shutil import which
 from sqlite3 import connect as sqlite_connect
 from sys import exit as sys_exit, path as sys_path
@@ -46,7 +46,7 @@ def mysql_client_command(operation: Literal["dump", "restore"]) -> tuple[str, bo
     return ("mysqldump" if operation == "dump" else "mysql"), False
 
 
-def mysql_connection_args(query_args, mariadb_client: bool) -> list[str]:
+def mysql_connection_args(query_args, mariadb_client: bool, mysql8_client: bool = False) -> list[str]:
     args = []
     ssl = query_args.get("ssl")
     if isinstance(ssl, tuple):
@@ -54,9 +54,9 @@ def mysql_connection_args(query_args, mariadb_client: bool) -> list[str]:
     ssl = str(ssl).lower() if ssl is not None else None
 
     if ssl == "true":
-        args.append("--ssl")
+        args.append("--ssl-mode=REQUIRED" if mysql8_client else "--ssl")
     elif ssl == "false":
-        args.append("--skip-ssl")
+        args.append("--ssl-mode=DISABLED" if mysql8_client else "--skip-ssl")
     elif mariadb_client:
         # MariaDB clients verify opportunistic TLS by default. MySQL's generated
         # certificate is self-signed, so keep encryption but skip verification
@@ -143,6 +143,13 @@ def backup_database(current_time: datetime, db: Database = None, backup_dir: Pat
                 LOGGER.info("Creating a backup for the MariaDB/MySQL database ...")
 
                 dump_bin, mariadb_client = mysql_client_command("dump")
+                mysql8_client = False
+                if which(dump_bin):
+                    version = check_output([dump_bin, "--version"], text=True)
+                    mariadb_client = "MariaDB" in version
+                    # Older clients report their server-compatible version after Distrib, not Ver.
+                    client_version = re.search(r"\bDistrib (\d+)\.", version) or re.search(r"\bVer\s+(\d+)\.", version)
+                    mysql8_client = not mariadb_client and client_version is not None and int(client_version[1]) >= 8
                 inspector = inspect(db.sql_engine)
                 cmd = [
                     dump_bin,
@@ -177,9 +184,12 @@ def backup_database(current_time: datetime, db: Database = None, backup_dir: Pat
                 if database == "mariadb":
                     cmd.append("--routines")  # Include stored procedures and functions (MariaDB only, mariadb-dump sends MariaDB-only queries to MySQL)
 
+                if mysql8_client:
+                    cmd.append("--column-statistics=0")  # MariaDB has no information_schema.COLUMN_STATISTICS.
+
                 # Avoid --set-gtid-purged for broad compatibility (MariaDB variant doesn't support it)
 
-                cmd.extend(mysql_connection_args(db_query_args, mariadb_client))
+                cmd.extend(mysql_connection_args(db_query_args, mariadb_client, mysql8_client=mysql8_client))
 
                 proc = run(
                     cmd,
