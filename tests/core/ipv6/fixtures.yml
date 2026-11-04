@@ -1,0 +1,48 @@
+x-client: &client
+  image: bunkerity/bunkerweb-scheduler:tests
+  entrypoint: ["sleep", "infinity"]
+  healthcheck:
+    disable: true
+  mem_limit: 64m
+  volumes:
+    - ./:/fixtures:ro
+
+services:
+  client:
+    <<: *client
+    container_name: ipv6-client
+    networks:
+      bw-services:
+        ipv6_address: fd42:1618:2::a
+  other:
+    <<: *client
+    container_name: ipv6-other
+    networks:
+      bw-services:
+        ipv6_address: fd42:1618:2::b
+  untrusted:
+    <<: *client
+    container_name: ipv6-untrusted
+    networks:
+      bw-universe:
+        ipv6_address: fd42:1618:1::b
+  backend:
+    <<: *client
+    container_name: ipv6-backend
+    entrypoint: ["python3", "/fixtures/server.py"]
+    networks:
+      ipv6-backend:
+        ipv6_address: fd42:1618:3::80
+
+networks:
+  bw-universe:
+    external: true
+  bw-services:
+    external: true
+  ipv6-backend:
+    name: ipv6-backend
+    enable_ipv4: false
+    enable_ipv6: true
+    ipam:
+      config:
+        - subnet: fd42:1618:3::/64

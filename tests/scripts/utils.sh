@@ -429,6 +429,26 @@ function stack_has_worker() {
     [ -d "$root/src/worker" ]
 }
 
+# Add network overrides only for the opt-in IPv6 spec, through startup and teardown.
+function docker_compose() {
+    local compose_file="$1" overlay=""
+    shift
+    if [ "${BW_TESTS_IPV6:-}" == "yes" ] ; then
+        case "$compose_file" in
+            tests/misc/docker/redis.yml) overlay=redis ;;
+            tests/docker/docker-compose.bunkerweb.yml) overlay=bunkerweb ;;
+            tests/docker/docker-compose.scheduler.yml) overlay=scheduler ;;
+            tests/misc/docker/dnsmasq.yml) overlay=dnsmasq ;;
+            /tmp/services.yml) overlay=services ;;
+        esac
+    fi
+    if [ -n "$overlay" ] ; then
+        docker compose -f "$compose_file" -f "tests/core/ipv6/$overlay.yml" "$@"
+    else
+        docker compose -f "$compose_file" "$@"
+    fi
+}
+
 # Bring a compose file up, retrying once through a full "down -v" — the recovery the
 # stack-up steps have always open-coded.
 function compose_up() {
@@ -500,7 +520,7 @@ function cleanup_stack () {
                 fi
             fi
         else
-            docker compose -f /tmp/services.yml down -v
+            docker_compose /tmp/services.yml down -v
             # shellcheck disable=SC2181
             if [ $? -ne 0 ] ; then
                 log "UTILS" "❌" "🐳 Failed to stop dockerized services"
@@ -721,7 +741,7 @@ function cleanup_stack () {
                 return 1
             fi
 
-            docker compose -f tests/misc/docker/dnsmasq.yml down -v
+            docker_compose tests/misc/docker/dnsmasq.yml down -v
             # shellcheck disable=SC2181
             if [ $? -ne 0 ] ; then
                 log "UTILS" "❌" "🤿 Failed to stop dnsmasq"
@@ -787,7 +807,7 @@ function cleanup_stack () {
             sed_in_place 's/^listen.owner =.*$/listen.owner = www-data/g' tests/misc/conf/php-fpm.conf
         fi
 
-        docker compose -f tests/misc/docker/redis.yml down -v --remove-orphans
+        docker_compose tests/misc/docker/redis.yml down -v --remove-orphans
         # shellcheck disable=SC2181
         if [ $? -ne 0 ] ; then
             log "UTILS" "❌" "💽 Failed to stop redis"
@@ -801,7 +821,9 @@ function cleanup_stack () {
         # networks behind; the filter keeps that and removes the blast radius. Verified in both
         # directions: a network labelled with this project is removed, one labelled with another
         # project or unlabelled survives.
-        docker network prune -f --filter label=com.docker.compose.project=docker
+        if [ "${BW_TESTS_IPV6:-}" != "yes" ] ; then
+            docker network prune -f --filter label=com.docker.compose.project=docker
+        fi
         # shellcheck disable=SC2181
         if [ $? -ne 0 ] ; then
             log "UTILS" "❌" "🐳 Failed to prune networks"
@@ -842,7 +864,7 @@ function cleanup_stack () {
             fi
         fi
 
-        docker compose -f tests/docker/docker-compose.bunkerweb.yml down -v
+        docker_compose tests/docker/docker-compose.bunkerweb.yml down -v
         # shellcheck disable=SC2181
         if [ $? -ne 0 ] ; then
             log "UTILS" "❌" "🐳 Failed to stop BunkerWeb"
@@ -890,11 +912,15 @@ function cleanup_stack () {
         # first, the delete failed with "Resource is still in use", the volume survived the
         # `full_clean` boundary carrying the previous arm's database, and the next arm booted an
         # older image against it ("No migration file found for database version").
-        docker compose -f tests/docker/docker-compose.scheduler.yml down -v
+        docker_compose tests/docker/docker-compose.scheduler.yml down -v
         # shellcheck disable=SC2181
         if [ $? -ne 0 ] ; then
             log "UTILS" "❌" "🐳 Failed to stop BunkerWeb Scheduler"
             return 1
+        fi
+
+        if [ "${BW_TESTS_IPV6:-}" == "yes" ] ; then
+            docker compose -p ipv6-fixtures -f tests/core/ipv6/fixtures.yml down -v || return 1
         fi
 
         containers=$(docker ps -a --format "{{.Names}}")
@@ -1117,6 +1143,15 @@ function cleanup_stack () {
                 return 1
             fi
         fi
+
+        # Leave no dual-stack network for the next ordinary spec to inherit.
+        if [ "${BW_TESTS_IPV6:-}" == "yes" ] && { [ "$exit_code" -ne 0 ] || $trapped; } ; then
+            for network in bw-universe bw-services ipv6-backend ; do
+                if echo "$networks" | grep -qx "$network" ; then
+                    docker network rm "$network" || return 1
+                fi
+            done
+        fi
     fi
 
     log "UTILS" "ℹ️ " "🧹 Cleaned up current stack ✅"
@@ -1241,14 +1276,14 @@ function restart_stack () {
 
     if [ "$integration" == "Docker" ] || [ "$integration" == "Autoconf" ] ; then
         if [ "$restart_whole_stack" -eq 1 ] ; then
-            docker compose -f tests/docker/docker-compose.bunkerweb.yml down
+            docker_compose tests/docker/docker-compose.bunkerweb.yml down
             # shellcheck disable=SC2181
             if [ $? -ne 0 ] ; then
                 log "UTILS" "❌" "🐳 Failed to stop BunkerWeb"
                 return 1
             fi
 
-            docker compose -f tests/docker/docker-compose.bunkerweb.yml up -d
+            docker_compose tests/docker/docker-compose.bunkerweb.yml up -d
             # shellcheck disable=SC2181
             if [ $? -ne 0 ] ; then
                 log "UTILS" "❌" "🐳 Failed to start BunkerWeb"
@@ -1272,14 +1307,14 @@ function restart_stack () {
             fi
         fi
 
-        docker compose -f tests/docker/docker-compose.scheduler.yml down
+        docker_compose tests/docker/docker-compose.scheduler.yml down
         # shellcheck disable=SC2181
         if [ $? -ne 0 ] ; then
             log "UTILS" "❌" "🐳 Failed to stop BunkerWeb Scheduler"
             return 1
         fi
 
-        docker compose -f tests/docker/docker-compose.scheduler.yml up -d
+        docker_compose tests/docker/docker-compose.scheduler.yml up -d
         # shellcheck disable=SC2181
         if [ $? -ne 0 ] ; then
             log "UTILS" "❌" "🐳 Failed to start BunkerWeb Scheduler"
@@ -1333,14 +1368,14 @@ function restart_stack () {
                 return 1
             fi
 
-            docker compose -f /tmp/services.yml down -v
+            docker_compose /tmp/services.yml down -v
             # shellcheck disable=SC2181
             if [ $? -ne 0 ] ; then
                 log "UTILS" "❌" "🐳 Failed to stop dockerized services"
                 return 1
             fi
 
-            docker compose -f /tmp/services.yml up -d
+            docker_compose /tmp/services.yml up -d
             # shellcheck disable=SC2181
             if [ $? -ne 0 ] ; then
                 log "UTILS" "❌" "🐳 Failed to start dockerized services"
@@ -1397,14 +1432,14 @@ function restart_stack () {
                 return 1
             fi
 
-            docker compose -f /tmp/services.yml down -v
+            docker_compose /tmp/services.yml down -v
             # shellcheck disable=SC2181
             if [ $? -ne 0 ] ; then
                 log "UTILS" "❌" "🐳 Failed to stop dockerized services"
                 return 1
             fi
 
-            docker compose -f /tmp/services.yml up -d
+            docker_compose /tmp/services.yml up -d
             # shellcheck disable=SC2181
             if [ $? -ne 0 ] ; then
                 log "UTILS" "❌" "🐳 Failed to start dockerized services"
@@ -1642,14 +1677,14 @@ function restart_stack () {
                 return 1
             fi
 
-            docker compose -f /tmp/services.yml down -v
+            docker_compose /tmp/services.yml down -v
             # shellcheck disable=SC2181
             if [ $? -ne 0 ] ; then
                 log "UTILS" "❌" "🐳 Failed to stop dockerized services"
                 return 1
             fi
 
-            docker compose -f /tmp/services.yml up -d
+            docker_compose /tmp/services.yml up -d
             # shellcheck disable=SC2181
             if [ $? -ne 0 ] ; then
                 log "UTILS" "❌" "🐳 Failed to start dockerized services"
@@ -1747,18 +1782,18 @@ function log_stack () {
                     docker compose -f tests/docker/docker-compose.all-in-one.yml $command
                 else
                     # shellcheck disable=SC2086
-                    docker compose -f tests/docker/docker-compose.bunkerweb.yml $command
+                    docker_compose tests/docker/docker-compose.bunkerweb.yml $command
                 fi
             elif [ "$integration" == "All-in-one" ] ; then
                 docker compose -f tests/docker/docker-compose.all-in-one.yml logs
             else
                 log "UTILS" "ℹ️ " "📜 Showing BunkerWeb logs ..."
                 # shellcheck disable=SC2086
-                docker compose -f tests/docker/docker-compose.bunkerweb.yml logs
+                docker_compose tests/docker/docker-compose.bunkerweb.yml logs
 
                 log "UTILS" "ℹ️ " "📜 Showing BunkerWeb Scheduler logs ..."
                 # shellcheck disable=SC2086
-                docker compose -f tests/docker/docker-compose.scheduler.yml logs
+                docker_compose tests/docker/docker-compose.scheduler.yml logs
 
                 if [ "$integration" == "Autoconf" ] ; then
                     log "UTILS" "ℹ️ " "📜 Showing BunkerWeb Autoconf logs ..."

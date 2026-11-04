@@ -1,0 +1,346 @@
+# Docker-only, fixed ULA peers; each script asserts observed traffic and independent controls.
+integrations:
+  - Docker
+actions:
+  network:
+    type: script
+    integrations:
+      - Docker
+    script:
+      - python3
+      - tests/core/ipv6/check.py
+      - network
+    result: IPV6_CHECK_OK network
+    config: {}
+  l1_disabled:
+    type: script
+    integrations:
+      - Docker
+    script:
+      - python3
+      - tests/core/ipv6/check.py
+      - l1_disabled
+    result: IPV6_CHECK_OK l1_disabled
+    config:
+      USE_IPV6: "no"
+  l1_enabled:
+    type: script
+    integrations:
+      - Docker
+    script:
+      - python3
+      - tests/core/ipv6/check.py
+      - l1_enabled
+    result: IPV6_CHECK_OK l1_enabled
+    config: {}
+  l2:
+    type: script
+    integrations:
+      - Docker
+    script:
+      - python3
+      - tests/core/ipv6/check.py
+      - l2
+    result: IPV6_CHECK_OK l2
+    config:
+      GENERATE_SELF_SIGNED_SSL: "yes"
+      SELF_SIGNED_SSL_SUBJ: /CN=www.example.com/
+      SELF_SIGNED_SSL_ALGORITHM: ec-prime256v1
+  l5:
+    type: script
+    integrations:
+      - Docker
+    script:
+      - python3
+      - tests/core/ipv6/check.py
+      - l5
+    result: IPV6_CHECK_OK l5
+    config: {}
+  c1:
+    type: script
+    integrations:
+      - Docker
+    script:
+      - python3
+      - tests/core/ipv6/check.py
+      - c1
+    result: IPV6_CHECK_OK c1
+    config:
+      USE_REAL_IP: "yes"
+      REAL_IP_FROM: fd42:1618:2::/64
+      REVERSE_PROXY_HOST: http://[fd42:1618:3::80]:8080
+      REVERSE_PROXY_HEADERS: X-Forwarded-For $$remote_addr
+  c3_blacklist_exact:
+    type: script
+    integrations:
+      - Docker
+    script:
+      - python3
+      - tests/core/ipv6/check.py
+      - blacklist
+    result: IPV6_CHECK_OK blacklist
+    config:
+      USE_BLACKLIST: "yes"
+      BLACKLIST_IP: fd42:1618:2::a
+  c3_whitelist_exact:
+    type: script
+    integrations:
+      - Docker
+    script:
+      - python3
+      - tests/core/ipv6/check.py
+      - whitelist
+    result: IPV6_CHECK_OK whitelist
+    config:
+      USE_BLACKLIST: "yes"
+      BLACKLIST_IP: fd42:1618:1::/64 fd42:1618:2::/64
+      USE_WHITELIST: "yes"
+      WHITELIST_IP: fd42:1618:2::a
+  c3_blacklist_cidr64:
+    type: script
+    integrations:
+      - Docker
+    script:
+      - python3
+      - tests/core/ipv6/check.py
+      - blacklist
+    result: IPV6_CHECK_OK blacklist
+    config:
+      USE_BLACKLIST: "yes"
+      BLACKLIST_IP: fd42:1618:2::/64
+  c3_whitelist_cidr64:
+    type: script
+    integrations:
+      - Docker
+    script:
+      - python3
+      - tests/core/ipv6/check.py
+      - whitelist
+    result: IPV6_CHECK_OK whitelist
+    config:
+      USE_BLACKLIST: "yes"
+      BLACKLIST_IP: fd42:1618:1::/64 fd42:1618:2::/64
+      USE_WHITELIST: "yes"
+      WHITELIST_IP: fd42:1618:2::/64
+  c3_blacklist_cidr128:
+    type: script
+    integrations:
+      - Docker
+    script:
+      - python3
+      - tests/core/ipv6/check.py
+      - blacklist
+    result: IPV6_CHECK_OK blacklist
+    config:
+      USE_BLACKLIST: "yes"
+      BLACKLIST_IP: fd42:1618:2::a/128
+  c3_whitelist_cidr128:
+    type: script
+    integrations:
+      - Docker
+    script:
+      - python3
+      - tests/core/ipv6/check.py
+      - whitelist
+    result: IPV6_CHECK_OK whitelist
+    config:
+      USE_BLACKLIST: "yes"
+      BLACKLIST_IP: fd42:1618:1::/64 fd42:1618:2::/64
+      USE_WHITELIST: "yes"
+      WHITELIST_IP: fd42:1618:2::a/128
+  c3_blacklist_alias:
+    type: script
+    integrations:
+      - Docker
+    script:
+      - python3
+      - tests/core/ipv6/check.py
+      - blacklist
+    result: IPV6_CHECK_OK blacklist
+    config:
+      USE_BLACKLIST: "yes"
+      BLACKLIST_IP: FD42:1618:0002:0000:0000:0000:0000:000A
+  c3_whitelist_alias:
+    type: script
+    integrations:
+      - Docker
+    script:
+      - python3
+      - tests/core/ipv6/check.py
+      - whitelist
+    result: IPV6_CHECK_OK whitelist
+    config:
+      USE_BLACKLIST: "yes"
+      BLACKLIST_IP: fd42:1618:1::/64 fd42:1618:2::/64
+      USE_WHITELIST: "yes"
+      WHITELIST_IP: FD42:1618:0002:0000:0000:0000:0000:000A
+  c4:
+    type: script
+    integrations:
+      - Docker
+    script:
+      - python3
+      - tests/core/ipv6/check.py
+      - c4
+    result: IPV6_CHECK_OK c4
+    config:
+      USE_BLACKLIST: "yes"
+      BLACKLIST_IP_URLS: http://[fd42:1618:3::80]:8080/list
+  c5_ipv4:
+    type: script
+    integrations:
+      - Docker
+    script:
+      - python3
+      - tests/core/ipv6/check.py
+      - c5
+    result: IPV6_CHECK_OK c5
+    config:
+      USE_BLACKLIST: "yes"
+      BLACKLIST_IP: 192.0.2.0/24
+      USE_REAL_IP: "yes"
+      REAL_IP_FROM: fd42:1618:2::/64
+  c5_mapped:
+    type: script
+    integrations:
+      - Docker
+    script:
+      - python3
+      - tests/core/ipv6/check.py
+      - c5
+    result: IPV6_CHECK_OK c5
+    config:
+      USE_BLACKLIST: "yes"
+      BLACKLIST_IP: ::ffff:192.0.2.0/120
+      USE_REAL_IP: "yes"
+      REAL_IP_FROM: fd42:1618:2::/64
+  b1_api:
+    type: script
+    integrations:
+      - Docker
+    script:
+      - python3
+      - tests/core/ipv6/check.py
+      - b1_api
+    result: IPV6_CHECK_OK b1_api
+    config:
+      WHITELIST_IP: fd42:1618:2::a
+  b1_cli:
+    type: script
+    integrations:
+      - Docker
+    script:
+      - python3
+      - tests/core/ipv6/check.py
+      - b1_cli
+    result: IPV6_CHECK_OK b1_cli
+    config:
+      WHITELIST_IP: fd42:1618:2::a
+  b3:
+    type: script
+    integrations:
+      - Docker
+    script:
+      - python3
+      - tests/core/ipv6/check.py
+      - b3
+    result: IPV6_CHECK_OK b3
+    config:
+      USE_LIMIT_REQ: "yes"
+      LIMIT_REQ_RATE: 1r/m
+      USE_REDIS: "no"
+  u1:
+    type: script
+    integrations:
+      - Docker
+    script:
+      - python3
+      - tests/core/ipv6/check.py
+      - u1
+    result: IPV6_CHECK_OK u1
+    config:
+      REVERSE_PROXY_HOST: http://[fd42:1618:3::80]:8080
+  r1_bare_bans:
+    type: script
+    integrations:
+      - Docker
+    script:
+      - python3
+      - tests/core/ipv6/check.py
+      - r1_bans
+    result: IPV6_CHECK_OK r1_bans
+    config:
+      REDIS_HOST: fd42:1618:1::50
+  r1_bare_limits:
+    type: script
+    integrations:
+      - Docker
+    script:
+      - python3
+      - tests/core/ipv6/check.py
+      - r1_limits
+    result: IPV6_CHECK_OK r1_limits
+    config:
+      REDIS_HOST: fd42:1618:1::50
+      USE_LIMIT_REQ: "yes"
+      LIMIT_REQ_RATE: 1r/m
+  r1_bracketed_bans:
+    type: script
+    integrations:
+      - Docker
+    script:
+      - python3
+      - tests/core/ipv6/check.py
+      - r1_bans
+    result: IPV6_CHECK_OK r1_bans
+    config:
+      REDIS_HOST: "[fd42:1618:1::50]"
+  r1_bracketed_limits:
+    type: script
+    integrations:
+      - Docker
+    script:
+      - python3
+      - tests/core/ipv6/check.py
+      - r1_limits
+    result: IPV6_CHECK_OK r1_limits
+    config:
+      REDIS_HOST: "[fd42:1618:1::50]"
+      USE_LIMIT_REQ: "yes"
+      LIMIT_REQ_RATE: 1r/m
+config:
+  DISABLE_CONFIGURATION_TESTING: "no"
+  USE_IPV6: "yes"
+  API_LISTEN_IP: "::"
+  API_WHITELIST_IP: ::1/128 fd42:1618:1::24/128
+  BUNKERWEB_INSTANCES: fd42:1618:1::10
+  USE_API: "yes"
+  API_SERVER_NAME: bwapi
+  USE_REVERSE_PROXY: "yes"
+  REVERSE_PROXY_HOST: http://app1:8080
+  USE_MODSECURITY: "no"
+  USE_BAD_BEHAVIOR: "no"
+  USE_DNSBL: "no"
+  USE_REVERSE_SCAN: "no"
+  USE_LIMIT_REQ: "no"
+  USE_LIMIT_CONN: "no"
+  USE_BLACKLIST: "no"
+  USE_WHITELIST: "no"
+  USE_REAL_IP: "no"
+  USE_REDIS: "yes"
+  REDIS_HOST: fd42:1618:1::50
+  REDIS_PORT: "6379"
+  REDIS_DATABASE: "1"
+  BLACKLIST_IP_URLS: ""
+  BLACKLIST_RDNS_URLS: ""
+  BLACKLIST_ASN_URLS: ""
+  BLACKLIST_USER_AGENT_URLS: ""
+  BLACKLIST_URI_URLS: ""
+  BLACKLIST_COMMUNITY_LISTS: ""
+  BLACKLIST_RDNS: ""
+  WHITELIST_RDNS: ""
+  WHITELIST_ASN: ""
+  GENERATE_SELF_SIGNED_SSL: "no"
+  AUTO_REDIRECT_HTTP_TO_HTTPS: "no"
+  REDIRECT_HTTP_TO_HTTPS: "no"
+  WORKER_PROCESSES: "1"

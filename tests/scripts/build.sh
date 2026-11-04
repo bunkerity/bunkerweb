@@ -35,7 +35,7 @@ if [ $? -ne 0 ] ; then
   exit 1
 fi
 
-docker compose -f tests/misc/docker/redis.yml up -d
+docker_compose tests/misc/docker/redis.yml up -d
 # shellcheck disable=SC2181
 if [ $? -ne 0 ] ; then
   log "BUILD" "❌" "💽 Failed to start redis server"
@@ -220,7 +220,7 @@ if [ "$integration" != "Kubernetes" ] ; then
     exit 1
   fi
 
-  docker compose -f tests/misc/docker/dnsmasq.yml up -d
+  docker_compose tests/misc/docker/dnsmasq.yml up -d
   # shellcheck disable=SC2181
   if [ $? -ne 0 ] ; then
     log "BUILD" "❌" "🤿 Failed to start dnsmasq"

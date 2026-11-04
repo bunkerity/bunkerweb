@@ -1,0 +1,13 @@
+services:
+  bw-scheduler:
+    mem_limit: 1024m
+    networks:
+      bw-universe:
+        ipv6_address: fd42:1618:1::24
+      ipv6-backend:
+        ipv6_address: fd42:1618:3::24
+
+networks:
+  ipv6-backend:
+    external: true
+    name: ipv6-backend
