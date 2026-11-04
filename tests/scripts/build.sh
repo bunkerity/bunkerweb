@@ -194,7 +194,16 @@ if [ "$integration" == "Linux" ] ; then
     # differently (82 on Alpine, 33 on Debian), and an example hardens its web root to 0640/0750
     # -- so a mismatch here means php-fpm cannot read a file that is plainly there, and answers
     # "Primary script unknown", which nginx returns as a 404.
-    www_uid="$(docker exec -u 0 bunkerweb-linux id -u www-data)"
+    if ! www_uid="$(docker exec -u 0 bunkerweb-linux id -u www-data 2> /dev/null)" ; then
+      if ! www_uid="$(docker exec -u 0 bunkerweb-linux id -u apache 2> /dev/null)" ; then
+        log "BUILD" "❌" "🐧 No PHP user found (www-data or apache)"
+        exit 1
+      fi
+    fi
+    if ! [[ "$www_uid" =~ ^[0-9]+$ ]] || [ "$www_uid" -eq 0 ] ; then
+      log "BUILD" "❌" "🐧 PHP user must have a non-root numeric UID"
+      exit 1
+    fi
     sed_in_place "s/^user =.*$/user = $www_uid/g" tests/misc/conf/php-fpm.conf
     sed_in_place "s/^group =.*$/group = $nginx_gid/g" tests/misc/conf/php-fpm.conf
     sed_in_place "s/^listen.owner =.*$/listen.owner = $www_uid/g" tests/misc/conf/php-fpm.conf

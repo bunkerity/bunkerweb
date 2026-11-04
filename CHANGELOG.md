@@ -13,6 +13,7 @@
 - [FEATURE] `core`: `utils.add_ban` accepts `opts.if_absent` for insert-only bans that never replace an existing ban, locally or in Redis.
 - [FEATURE] `bunkernet`: `BUNKERNET_FILTER_HEADERS` (`no`, per service) limits a report to the User-Agent, Accept, Accept-Encoding, Accept-Language, Content-Type and Content-Length request headers and blanks the values matched in request headers and cookies, also for reports queued before the upgrade. By default a report carries every request header, as before; the plugin documentation lists what each value sends.
 - [FEATURE] `core`: a service can be named by an IPv4 or an IPv6 address (`SERVER_NAME=2001:db8::1`, bare, lowercase, compressed). NGINX also matches the bracketed `Host` form, and a name written another way logs a warning with its canonical spelling. (#4120)
+- [BUGFIX] `bwcli`: use the Linux package's Python interpreter, fixing startup crashes on RHEL 9.
 - [BUGFIX] `core`: stream services no longer abort NGINX init when an HTTP-only plugin (PRO included) is installed, a regression in 1.6.17.
 - [BUGFIX] `core`: local ban writes and unbans are now serialized per IP, and a writer that cannot take the lock fails with `ban lock unavailable`.
 - [BUGFIX] `installer`: on Debian and Ubuntu, the installer warns that the distribution PostgreSQL client cannot back up a newer server and shows the PGDG commands to install a matching one.

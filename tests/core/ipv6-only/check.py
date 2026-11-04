@@ -65,8 +65,7 @@ def sockets(since=0):
             )
         for row in samples:
             if row["code"] and (
-                "is not running" in row["err"]
-                or "No such container" in row["err"]
+                any(text in stream for text in ("is not running", "No such container") for stream in (row["out"], row["err"]))
                 or (f"failed to open /proc/{row['pid']}/ns/" in row["out"] and "No such file or directory" in row["out"])
             ):
                 continue
