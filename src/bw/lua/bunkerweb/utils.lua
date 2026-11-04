@@ -152,7 +152,7 @@ utils.has_not_variable = function(variable, value)
 		local servers = variables["global"]["SERVER_NAME"]
 		-- Check each server
 		for server in servers:gmatch("%S+") do
-			if variables[server][variable] ~= "value" then
+			if variables[server][variable] ~= value then
 				return true, "success"
 			end
 		end
@@ -166,7 +166,7 @@ end
 utils.get_multiple_variables = function(vars)
 	local variables, err = internalstore:get("variables", true)
 	if not variables then
-		return nil, "can't access variables " .. vars .. " from internalstore : " .. err
+		return nil, "can't access variables " .. table.concat(vars, ", ") .. " from internalstore : " .. err
 	end
 	local result = {}
 	-- Loop on scoped vars
