@@ -302,13 +302,6 @@ def create_custom_undefined_class(default_config: Dict[str, Any]):
     return ConfigurableCustomUndefined
 
 
-def _ensure_fork_start_method() -> None:
-    """Force fork start method when available so child processes inherit globals."""
-    with suppress(RuntimeError):
-        if mp.get_start_method(allow_none=True) != "fork":
-            mp.set_start_method("fork")
-
-
 class Templator:
     """A class to render configuration files using Jinja2 templates."""
 
@@ -455,7 +448,6 @@ class Templator:
         """
         global _ssl_ecdh_curve_resolution_logged
 
-        _ensure_fork_start_method()
         _ssl_ecdh_curve_resolution_logged = False
         if self._uses_auto_ssl_ecdh_curve():
             resolve_ssl_ecdh_curve("auto")
@@ -475,7 +467,7 @@ class Templator:
         batch_size = max(1, ceil(len(servers) / max_workers))
 
         server_start = perf_counter()
-        with ProcessPoolExecutor(max_workers=max_workers) as executor:
+        with ProcessPoolExecutor(max_workers=max_workers, mp_context=mp.get_context("fork")) as executor:
             future_to_batch = {}
             for i in range(0, len(servers), batch_size):
                 batch = servers[i : i + batch_size]  # noqa: E203
