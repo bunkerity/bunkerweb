@@ -139,6 +139,26 @@ jobs:
       Kubernetes_tests: ${{ steps.parse_tests.outputs.Kubernetes_tests }}
       All_in_one_tests: ${{ steps.parse_tests.outputs.All_in_one_tests }}
 
+  parse-tests-api:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Set up Python 3.13
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.13"
+      - id: parse_tests
+        name: Parse api tests
+        run: |
+          pip install --require-hashes -r tests/requirements.txt
+          python3 tests/parse.py "api" --dev
+          echo "Docker_tests=$(cat /tmp/tests/Docker_tests.json || echo "[]")" >> $GITHUB_OUTPUT
+    outputs:
+      Docker_tests: ${{ steps.parse_tests.outputs.Docker_tests }}
+
   run-Docker-tests-core:
     needs: [build-containers, parse-tests-core]
     strategy:
@@ -153,6 +173,8 @@ jobs:
 
   run-Autoconf-tests-core:
     needs: [build-containers, parse-tests-core]
+    # GitHub fails a job whose matrix is empty; dev only opts a few specs into this arm.
+    if: ${{ needs.parse-tests-core.outputs.Autoconf_tests != '[]' }}
     strategy:
       fail-fast: false
       matrix:
@@ -165,6 +187,8 @@ jobs:
 
   run-Linux-tests-core:
     needs: [build-packages, parse-tests-core]
+    # GitHub fails a job whose matrix is empty; dev only opts a few specs into this arm.
+    if: ${{ needs.parse-tests-core.outputs.Linux_tests != '[]' }}
     strategy:
       fail-fast: false
       matrix:
@@ -177,6 +201,8 @@ jobs:
 
   run-Kubernetes-tests-core:
     needs: [build-containers, parse-tests-core]
+    # GitHub fails a job whose matrix is empty; dev only opts a few specs into this arm.
+    if: ${{ needs.parse-tests-core.outputs.Kubernetes_tests != '[]' }}
     strategy:
       fail-fast: false
       matrix:
@@ -189,6 +215,8 @@ jobs:
 
   run-All-in-one-tests-core:
     needs: [build-containers, parse-tests-core]
+    # GitHub fails a job whose matrix is empty; dev only opts a few specs into this arm.
+    if: ${{ needs.parse-tests-core.outputs.All_in_one_tests != '[]' }}
     strategy:
       fail-fast: false
       matrix:
@@ -196,6 +224,18 @@ jobs:
     uses: ./.github/workflows/integration-tests.yml
     with:
       TYPE: core
+      TEST: ${{ matrix.test }}
+      RELEASE: dev
+
+  run-Docker-tests-api:
+    needs: [build-containers, parse-tests-api]
+    strategy:
+      fail-fast: false
+      matrix:
+        test: ${{ fromJson(needs.parse-tests-api.outputs.Docker_tests) }}
+    uses: ./.github/workflows/integration-tests.yml
+    with:
+      TYPE: api
       TEST: ${{ matrix.test }}
       RELEASE: dev
 
@@ -210,7 +250,10 @@ jobs:
         run-Linux-tests-core,
         run-Kubernetes-tests-core,
         run-All-in-one-tests-core,
+        run-Docker-tests-api,
       ]
+    # The per-arm jobs above are skipped when dev runs no spec on that arm; a skipped need must not skip the push.
+    if: ${{ !failure() && !cancelled() }}
     runs-on: ubuntu-26.04
     permissions:
       contents: read

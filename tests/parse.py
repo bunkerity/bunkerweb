@@ -67,6 +67,18 @@ if not ARGS.category:
         if data:
             name = basename(file).split(".")[0]
             test_integrations = data.get("integrations", [])
+            if ARGS.dev:
+                # Dev runs every Docker-capable spec on Docker only (staging runs the full matrix).
+                # An optional `dev_integrations: [..]` replaces the spec's arms under `--dev`, with the
+                # same spellings as `integrations`; staging ignores it. A spec with no Docker arm keeps its own.
+                if "dev_integrations" in data:
+                    test_integrations = data["dev_integrations"]
+                else:
+                    entries = [test_integrations] if isinstance(test_integrations, str) else test_integrations
+                    if isinstance(entries, list) and any(
+                        isinstance(entry, str) and (entry == "all" or integration_key(entry.split(";")[0]) == "Docker") for entry in entries
+                    ):
+                        test_integrations = ["Docker"]
             LOGGER.debug(f"Integrations: {test_integrations}")
             # `integrations: "all"` means every arm integrations.yml lists; a list may add arms
             # with a `;arch;runner` suffix. An arm the file does not list is skipped with a warning.

@@ -371,6 +371,17 @@ integration and architecture to a runner. The values are JSON and feed `runs-on`
   over SSH, then `rm-arm.yml`). A test matrix would hold that node for a whole run instead
   of one build, so we priced it out rather than enabling it by default.
 
+**Dev versus staging.** `staging.yml` runs the full matrix: every arm a spec lists. The dev pipelines
+(`dev.yml` and `ui.yml`, which pass `parse.py --dev`) run every spec whose `integrations` include
+Docker (or are `"all"`) on **Docker only**, for `core`, `api` and `ui` alike. A spec opts into more dev
+arms with an optional top-level `dev_integrations: [...]`: under `--dev` it replaces the spec's
+`integrations`, with the same arm spellings (`"all"`, `All-in-one`, `Linux;amd64;ubuntu/noble`); without
+`--dev` (staging) the key is ignored. A spec with no Docker arm (the Autoconf and Kubernetes examples)
+keeps its own arms under `--dev`. A dev arm may end up with no spec, and GitHub fails a job whose matrix
+is empty, so every non-Docker `run-*` job in `dev.yml` and `ui.yml` is skipped on an empty list
+(`if: needs.<parse job>.outputs.<arm>_tests != '[]'`); `push-dev` uses `!failure() && !cancelled()` so a
+skipped arm does not skip the push. `core/upgrade.yml` and `core/general.yml` carry the key today.
+
 ## CI
 
 `.github/workflows/integration-tests.yml` is the reusable entry point. It takes `TYPE`,
@@ -379,8 +390,8 @@ and `staging.yml` each parse the specs, then fan out one job per integration.
 `container-build.yml` publishes the images under their `-tests` names and the workflow
 retags them to what the stacks reference.
 
-`tests/parse.py "core"|"api"|"ui"` is invoked from `dev.yml` (`core`), `ui.yml` (`ui`) and
-`staging.yml` (`core` and `api`). The dev pipelines pass `--dev` and read `utils/integrations.yml`'s
+`tests/parse.py "core"|"api"|"ui"` is invoked from `dev.yml` (`core` and `api`), `ui.yml` (`ui`) and
+`staging.yml` (`core`, `api` and `ui`). The dev pipelines pass `--dev` and read `utils/integrations.yml`'s
 `dev:` block: `ubuntu/noble` alone on Linux, every other integration a single `ubuntu-latest` row.
 `staging.yml` does not pass `--dev` and reads the `staging:` block, which carries the live Linux
 distro rows (`el/8`, `el/9`, `el/10`, `fedora/43`, `fedora/44`, `ubuntu/resolute`, `ubuntu/noble`,

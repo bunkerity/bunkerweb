@@ -1,4 +1,5 @@
 integrations: "all"
+dev_integrations: ["Docker", "Autoconf", "All-in-one", "Linux"]
 
 actions:
   block:

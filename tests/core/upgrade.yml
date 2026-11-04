@@ -3,6 +3,7 @@ integrations:
   - "Autoconf"
   - "All-in-one"
   - "Kubernetes"
+dev_integrations: ["Docker", "Autoconf", "All-in-one", "Kubernetes"]
 
 actions:
   from_latest_stable_sqlite:

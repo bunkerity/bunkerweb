@@ -36,6 +36,9 @@ jobs:
 
   # Build Linux packages
   build-packages:
+    needs: [parse-tests-ui]
+    # Only run-Linux-tests-ui uses the packages; dev runs ui specs on Docker only.
+    if: ${{ needs.parse-tests-ui.outputs.Linux_tests != '[]' }}
     permissions:
       contents: read
       packages: write
@@ -100,6 +103,8 @@ jobs:
 
   run-Linux-tests-ui:
     needs: [parse-tests-ui, build-packages]
+    # GitHub fails a job whose matrix is empty; dev runs ui specs on Docker only.
+    if: ${{ needs.parse-tests-ui.outputs.Linux_tests != '[]' }}
     strategy:
       fail-fast: false
       matrix:
