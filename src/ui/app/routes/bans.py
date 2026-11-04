@@ -337,7 +337,12 @@ def _filter_and_sort_bans(all_bans, search_value, search_panes, order_column_ind
 
     if 0 <= order_column_index < len(_BAN_COLUMNS):
         sort_key = _BAN_COLUMNS[order_column_index]
-        if sort_key in ("end_date", "time_left"):
+        if sort_key == "time_left":
+            filtered_bans.sort(
+                key=lambda x: float("-inf" if order_direction == "desc" else "inf") if x.get("permanent", False) else _to_float(x.get("exp", 0)),
+                reverse=(order_direction == "desc"),
+            )
+        elif sort_key == "end_date":
             filtered_bans.sort(
                 key=lambda x: ("0" if order_direction == "desc" else "z") if x.get("permanent", False) else x.get(sort_key, ""),
                 reverse=(order_direction == "desc"),
@@ -579,8 +584,8 @@ def bans_fetch():
         {
             "label": '<span data-i18n="searchpane.future_30d">More than 30 days</span>',
             "value": "future_30d",
-            "total": sum(1 for ban in bans if not ban.get("permanent", False) and ban.get("exp", 0) >= 2592000),
-            "count": sum(1 for ban in filtered_bans if not ban.get("permanent", False) and ban.get("exp", 0) >= 2592000),
+            "total": sum(1 for ban in bans if ban.get("permanent", False) or ban.get("exp", 0) >= 2592000),
+            "count": sum(1 for ban in filtered_bans if ban.get("permanent", False) or ban.get("exp", 0) >= 2592000),
         },
     ]
 

@@ -36,6 +36,8 @@
 - [BUGFIX] `crowdsec`: a path below a `CROWDSEC_EXCLUDE_LOCATION` location is now excluded too, not only the exact location.
 - [BUGFIX] `crowdsec`: a captcha asked by AppSec alone can now be solved instead of being shown again.
 - [BUGFIX] `crowdsec`: a CrowdSec decision on an IPv6 address written with an IPv4 tail is no longer applied to that IPv4 address.
+- [BUGFIX] `ui`: the "More than 30 days" filter of the bans page now counts the permanent bans it shows.
+- [BUGFIX] `ui`: sorting bans by time left now follows their remaining time, with permanent bans last.
 - [MISC] `release`: the floating `dev` and `testing` Linux packages and the `testing` GitHub release are no longer published, so package repositories stop offering a phantom upgrade; the installer refuses `--version dev` and `--version testing`.
 - [DOCS] `antibot`, `country`: the help and docs of `ANTIBOT_IGNORE_URI` and `COUNTRY_IGNORE_URI` now say patterns match the normalized path, alone or followed by `?` and the query string.
 - [DEPS] Updated resty-redis-cluster version to v1.7.0
