@@ -50,7 +50,7 @@
     "link": {
       "here": "burada"
     },
-    "pro": "BunkerWeb'den en iyi şekilde yararlanmak için PRO sürümüne yükseltin. Daha fazla bilgi ve ücretsiz deneme <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/?utm_campaign=self&utm_source=banner#pro\">burada</a>.",
+    "pro": "BunkerWeb'den en iyi şekilde yararlanmak için PRO sürümüne yükseltin. 30 günlük ücretsiz denemenizi <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=banner\">burada</a> başlatın: bir plan sipariş edin, ardından ödeme aşamasında ödeme yöntemi olarak “Free 30 Days Trial” seçeneğini koruyun.",
     "support": "BunkerWeb için premium destek veya özel danışmanlık mı gerekiyor? <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/?utm_campaign=self&utm_source=banner#services\">Profesyonel hizmetlerimize</a> göz atın."
   },
   "breadcrumb": {
@@ -1155,6 +1155,7 @@
       "title": "Pro Bitiş Tarihi",
       "unknown": "Bilinmeyen bitiş tarihi"
     },
+    "free_trial_hint": "Bir plan sipariş edin, ardından ödeme aşamasında ödeme yöntemi olarak “Free 30 Days Trial” seçeneğini koruyun.",
     "force_check": {
       "description": "Force a new check for PRO plugins. This will trigger a new download of the plugins if new versions are available.",
       "title": "Force check"
