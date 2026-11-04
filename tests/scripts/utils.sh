@@ -49,11 +49,27 @@ case "$BW_TESTS_ETC/" in
 esac
 mkdir -p "$BW_TESTS_WWW" "$BW_TESTS_LOG" "$BW_TESTS_LIB" "$BW_TESTS_PHP" "$BW_TESTS_ETC"
 
-# The Linux arm installs the distro's postgresql-client, 16 on Ubuntu noble, and pg_dump refuses a newer server
-# ("aborting because of server version mismatch"): the backup spec needs a 16 server there. Every other
-# integration keeps the 17 pinned in tests/misc/docker/postgresql.yml, the client version of the images.
+# pg_dump refuses newer servers: match older distro clients, retaining the 16 fixture for clients >= 16.
+# Other integrations keep the pinned 17 in tests/misc/docker/postgresql.yml.
 if [ "$integration" == "Linux" ] ; then
-    export BW_TESTS_POSTGRES_IMAGE="postgres:16-alpine@sha256:0cefaabd882e42bcb2a2f3dc56d3ce4770560ba62fd7f197f1a2e008fd5731ab"
+    pg_version="$(docker exec -u 0 bunkerweb-linux pg_dump --version)" || {
+        echo "Cannot determine Linux pg_dump version; install the PostgreSQL client" >&2
+        exit 1
+    }
+    pg_major="$(echo "$pg_version" | awk '{split($3, version, "."); print version[1]}')"
+    case "$pg_major" in
+        10) export BW_TESTS_POSTGRES_IMAGE="postgres:10-alpine@sha256:63cfb6eac6b362c7c994f22c3804c61b31898cf0cb52f8e7e86bd99a244f4366" ;;
+        13) export BW_TESTS_POSTGRES_IMAGE="postgres:13-alpine@sha256:fb9065b6e3e213bdc07edd372a5b2a26245840b7fb65d1fd8b6700106d51805c" ;;
+        14) export BW_TESTS_POSTGRES_IMAGE="postgres:14-alpine@sha256:862ffc2556a2db763f0439c8323490000cd01975d2798a845e4a8dd3a905862f" ;;
+        15) export BW_TESTS_POSTGRES_IMAGE="postgres:15-alpine@sha256:54e0dd8e8cddcdbb9156c2486eed5a43eccb7214d7c6828097d41ce049fb3984" ;;
+        *)
+            if ! [[ "$pg_major" =~ ^[0-9]+$ ]] || [ "$pg_major" -lt 16 ] ; then
+                echo "Unsupported Linux pg_dump version: $pg_version" >&2
+                exit 1
+            fi
+            export BW_TESTS_POSTGRES_IMAGE="postgres:16-alpine@sha256:0cefaabd882e42bcb2a2f3dc56d3ce4770560ba62fd7f197f1a2e008fd5731ab"
+            ;;
+    esac
 fi
 
 function log() {

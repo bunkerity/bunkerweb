@@ -166,7 +166,7 @@ def execute_query(
     if integration == "Linux" and IS_FREEBSD:
         result = subprocess.run(command, capture_output=True, text=True)
         return result.returncode, (result.stdout + result.stderr).strip()
-    return run_docker_command(logger, "bunkerweb" if integration == "Linux" else "database", command)
+    return run_docker_command(logger, "database", command)
 
 
 if __name__ == "__main__":
