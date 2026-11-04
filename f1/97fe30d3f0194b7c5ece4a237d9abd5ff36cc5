@@ -1,0 +1,21 @@
+tests/README.md
+  s_ef9d7a0eb31bd2::t_541256d5135b96 416
+tests/scripts/utils.sh
+  s_ef9d7a0eb31bd2::t_541256d5135b96 1763
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "f197fe30d3f0194b7c5ece4a237d9abd5ff36cc5",
+  "prompts": {},
+  "sessions": {
+    "s_ef9d7a0eb31bd2": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1a632-8a97-7ad1-8556-e509c7a26190",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}
