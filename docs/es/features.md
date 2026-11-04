@@ -4986,7 +4986,7 @@ El complemento Pro agrupa características avanzadas y mejoras para implementaci
 
 Siga estos pasos para configurar y usar las características Pro:
 
-1.  **Obtenga una clave de licencia:** Compre una licencia Pro en el [Panel de BunkerWeb](https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc).
+1.  **Obtenga una clave de licencia:** Inicie una prueba gratuita de 30 días o compre una licencia Pro en el [Panel de BunkerWeb](https://panel.bunkerweb.io/store/bunkerweb-pro?language=spanish&utm_campaign=self&utm_source=doc) ([guía paso a paso](index.md#pro-version)).
 2.  **Configure su clave de licencia:** Use el ajuste `PRO_LICENSE_KEY` para configurar su licencia.
 3.  **Deje que BunkerWeb se encargue del resto:** Una vez configurado con una licencia válida, los complementos Pro se descargan y activan automáticamente.
 4.  **Supervise su estado Pro:** Verifique los indicadores de salud en la [interfaz de usuario web](web-ui.md) para confirmar el estado de su suscripción Pro.
@@ -5023,7 +5023,7 @@ Siga estos pasos para configurar y usar las características Pro:
 - **BunkerWeb PRO Standard:** Acceso completo a las características Pro sin soporte técnico.
 - **BunkerWeb PRO Enterprise:** Acceso completo a las características Pro con soporte técnico dedicado.
 
-Puede explorar las características Pro con una prueba gratuita de 30 días. Iníciela desde el [Panel de BunkerWeb](https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc) y obtenga más información sobre las opciones de precios flexibles basadas en el número de servicios protegidos por BunkerWeb PRO.
+Puede explorar las características Pro con una prueba gratuita de 30 días. Iníciela desde el [Panel de BunkerWeb](https://panel.bunkerweb.io/store/bunkerweb-pro?language=spanish&utm_campaign=self&utm_source=doc) y obtenga más información sobre las opciones de precios flexibles basadas en el número de servicios protegidos por BunkerWeb PRO: pida un plan y mantenga **Free 30 Days Trial** como método de pago al finalizar la compra ([guía paso a paso](index.md#pro-version)).
 
 ## Prometheus exporter <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 

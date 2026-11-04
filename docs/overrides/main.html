@@ -13,7 +13,9 @@
         "announcement_after": "for more information on our enterprise offers.",
         "search_aria": "Search in documentation",
         "trial_before": "Start a 30-day BunkerWeb PRO free trial from the",
-        "trial_after": ".",
+        "trial_after": ": order a plan, then keep “Free 30 Days Trial” as the payment method at checkout.",
+        "trial_guide": "step-by-step guide",
+        "panel_language": "",
         "support_before": "Need premium support or tailored consulting around BunkerWeb? Check out our",
         "support_link": "professional services",
         "support_after": ".",
@@ -29,7 +31,9 @@
         "announcement_after": "pour en savoir plus sur nos offres aux entreprises.",
         "search_aria": "Rechercher dans la documentation",
         "trial_before": "Profitez d’un essai gratuit de 30 jours de BunkerWeb PRO depuis le",
-        "trial_after": ".",
+        "trial_after": " : commandez une offre, puis gardez « Free 30 Days Trial » comme mode de paiement lors de la commande.",
+        "trial_guide": "guide pas à pas",
+        "panel_language": "french",
         "support_before": "Besoin d’une assistance premium ou de conseils personnalisés sur BunkerWeb ? Découvrez nos",
         "support_link": "services professionnels",
         "support_after": ".",
@@ -45,7 +49,9 @@
         "announcement_after": "und erfahren Sie mehr über unsere Angebote für Unternehmen.",
         "search_aria": "In der Dokumentation suchen",
         "trial_before": "Starten Sie über das",
-        "trial_after": " eine kostenlose 30-tägige Testversion von BunkerWeb PRO.",
+        "trial_after": " eine kostenlose 30-tägige Testversion von BunkerWeb PRO: Bestellen Sie einen Tarif und lassen Sie beim Bestellabschluss „Free 30 Days Trial“ als Zahlungsmethode ausgewählt.",
+        "trial_guide": "Schritt-für-Schritt-Anleitung",
+        "panel_language": "german",
         "support_before": "Benötigen Sie Premium-Support oder eine individuelle Beratung zu BunkerWeb? Informieren Sie sich über unsere",
         "support_link": "professionellen Dienstleistungen",
         "support_after": ".",
@@ -61,7 +67,9 @@
         "announcement_after": "para obtener más información sobre nuestras ofertas para empresas.",
         "search_aria": "Buscar en la documentación",
         "trial_before": "Inicia una prueba gratuita de 30 días de BunkerWeb PRO desde el",
-        "trial_after": ".",
+        "trial_after": ": pide un plan y mantén “Free 30 Days Trial” como método de pago al finalizar la compra.",
+        "trial_guide": "guía paso a paso",
+        "panel_language": "spanish",
         "support_before": "¿Necesitas asistencia prémium o asesoramiento personalizado sobre BunkerWeb? Consulta nuestros",
         "support_link": "servicios profesionales",
         "support_after": ".",
@@ -77,7 +85,9 @@
         "announcement_after": "，了解我们的企业服务。",
         "search_aria": "在文档中搜索",
         "trial_before": "通过",
-        "trial_after": "开启 BunkerWeb PRO 30 天免费试用。",
+        "trial_after": "开启 BunkerWeb PRO 30 天免费试用：订购一个方案，然后在结账时保持选中“Free 30 Days Trial”作为付款方式。",
+        "trial_guide": "分步指南",
+        "panel_language": "chinese",
         "support_before": "需要 BunkerWeb 高级支持或定制咨询？请查看我们的",
         "support_link": "专业服务",
         "support_after": "。",
@@ -88,6 +98,7 @@
     }
 } %}
 {% set localized = translations.get(config.theme.language, translations["en"]) %}
+{% set trial_store_url = "https://panel.bunkerweb.io/store/bunkerweb-pro?" ~ ("language=" ~ localized.panel_language ~ "&" if localized.panel_language else "") ~ "utm_campaign=self&utm_source=doc" %}
 {% block outdated %}
     {{ localized.outdated|e }}
     <a href="{{ '../' ~ base_url }}">
@@ -140,7 +151,7 @@
     <script defer>
       window.addEventListener('DOMContentLoaded', () => {
         const bannerEl = document.querySelector('aside.md-banner');
-        let defaultContent = [{ "content" : {{ ('<p>'|safe ~ localized.trial_before|e ~ ' <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc">BunkerWeb Panel</a>'|safe ~ localized.trial_after|e ~ '</p>'|safe)|tojson }} },
+        let defaultContent = [{ "content" : {{ ('<p>'|safe ~ localized.trial_before|e ~ ' <a style="text-decoration:underline; color :  white;" href="'|safe ~ trial_store_url|e ~ '">BunkerWeb Panel</a>'|safe ~ localized.trial_after|e ~ ' (<a style="text-decoration:underline; color :  white;" href="'|safe ~ ((nav.homepage.url|url) ~ '#pro-version')|e ~ '">'|safe ~ localized.trial_guide|e ~ '</a>)</p>'|safe)|tojson }} },
         { "content" : {{ ('<p>'|safe ~ localized.support_before|e ~ ' <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc#services">'|safe ~ localized.support_link|e ~ '</a>'|safe ~ localized.support_after|e ~ '</p>'|safe)|tojson }} },
         { "content" : {{ ('<p>'|safe ~ localized.community_before|e ~ ' <a style="text-decoration:underline; color: white;" href="https://discord.bunkerweb.io">'|safe ~ localized.discord_link|e ~ '</a> '|safe ~ localized.community_middle|e ~ ' <a style="text-decoration:underline; color: white;" href="https://www.linkedin.com/company/bunkerity/">LinkedIn</a>'|safe ~ localized.community_after|e ~ '</p>'|safe)|tojson }} }
         ]

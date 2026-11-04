@@ -303,7 +303,7 @@ log { source(s_net); destination(d_dyna_file); };
 ## Upgrade auf PRO {#upgrade-to-pro}
 
 !!! tip "BunkerWeb PRO Gratistest"
-    Starten Sie eine 30-tägige kostenlose Testversion von BunkerWeb PRO im [BunkerWeb Panel](https://panel.bunkerweb.io/store/bunkerweb-pro?language=german&utm_campaign=self&utm_source=doc).
+    Starten Sie eine 30-tägige kostenlose Testversion von BunkerWeb PRO im [BunkerWeb Panel](https://panel.bunkerweb.io/store/bunkerweb-pro?language=german&utm_campaign=self&utm_source=doc): Bestellen Sie einen Tarif und lassen Sie beim Bestellabschluss **Free 30 Days Trial** als Zahlungsmethode ausgewählt ([Schritt-für-Schritt-Anleitung](index.md#pro-version)).
 
 Fügen Sie den PRO-Lizenzschlüssel in der Seite **PRO** der UI ein (oder setzen Sie `PRO_LICENSE_KEY` vorab für den Wizard). Upgrades werden im Hintergrund vom Scheduler geladen; prüfen Sie Ablaufdatum und Service-Limits in der UI nach Anwendung.
 

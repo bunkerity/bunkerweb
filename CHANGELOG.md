@@ -67,6 +67,7 @@
 - [DOCS] `antibot`, `country`: the help and docs of `ANTIBOT_IGNORE_URI` and `COUNTRY_IGNORE_URI` now say patterns match the normalized path, alone or followed by `?` and the query string.
 - [DOCS] `core`: the IPv6 section drops the experimental label for what is tested, fixes the `USE_IPV6` example and the Docker prerequisites, and adds IPv6-only settings and limits.
 - [DOCS] The README has a cleaner layout: grouped badges and links, a logo that suits dark mode, uniform headings, and long reference sections folded.
+- [DOCS] The README, docs and web UI explain how to start the PRO free trial: keep the "Free 30 Days Trial" payment method at checkout.
 - [DEPS] Updated resty-redis-cluster version to v1.7.0
 - [DEPS] Updated the web UI libraries: i18next to v26.5.11, i18next-http-backend to v4.0.6, i18next-browser-languagedetector to v8.2.3, ipaddr.js to v2.5.0 and Ace to v1.45.2
 

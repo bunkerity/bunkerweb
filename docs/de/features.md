@@ -4934,7 +4934,7 @@ Das Pro-Plugin bündelt erweiterte Funktionen und Verbesserungen für Unternehme
 
 Führen Sie die folgenden Schritte aus, um die Pro-Funktionen zu konfigurieren und zu verwenden:
 
-1.  **Lizenzschlüssel erhalten:** Kaufen Sie eine Pro-Lizenz im [BunkerWeb Panel](https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc).
+1.  **Lizenzschlüssel erhalten:** Starten Sie eine kostenlose 30-tägige Testversion oder kaufen Sie eine Pro-Lizenz im [BunkerWeb Panel](https://panel.bunkerweb.io/store/bunkerweb-pro?language=german&utm_campaign=self&utm_source=doc) ([Schritt-für-Schritt-Anleitung](index.md#pro-version)).
 2.  **Lizenzschlüssel konfigurieren:** Verwenden Sie die Einstellung `PRO_LICENSE_KEY`, um Ihre Lizenz zu konfigurieren.
 3.  **Lassen Sie BunkerWeb den Rest erledigen:** Nach der Konfiguration mit einer gültigen Lizenz werden Pro-Plugins automatisch heruntergeladen und aktiviert.
 4.  **Überwachen Sie Ihren Pro-Status:** Überprüfen Sie die Zustandsindikatoren in der [Web-Benutzeroberfläche](web-ui.md), um Ihren Pro-Abonnementstatus zu bestätigen.
@@ -4971,7 +4971,7 @@ Führen Sie die folgenden Schritte aus, um die Pro-Funktionen zu konfigurieren u
 - **BunkerWeb PRO Standard:** Voller Zugriff auf die Pro-Funktionen ohne technischen Support.
 - **BunkerWeb PRO Enterprise:** Voller Zugriff auf die Pro-Funktionen mit dediziertem technischen Support.
 
-Sie können die Pro-Funktionen 30 Tage lang kostenlos testen. Starten Sie Ihre Testversion im [BunkerWeb Panel](https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc) und erfahren Sie mehr über flexible Preisoptionen basierend auf der Anzahl der von BunkerWeb PRO geschützten Dienste.
+Sie können die Pro-Funktionen 30 Tage lang kostenlos testen. Starten Sie Ihre Testversion im [BunkerWeb Panel](https://panel.bunkerweb.io/store/bunkerweb-pro?language=german&utm_campaign=self&utm_source=doc) und erfahren Sie mehr über flexible Preisoptionen basierend auf der Anzahl der von BunkerWeb PRO geschützten Dienste: Bestellen Sie einen Tarif und lassen Sie beim Bestellabschluss **Free 30 Days Trial** als Zahlungsmethode ausgewählt ([Schritt-für-Schritt-Anleitung](index.md#pro-version)).
 
 ## Prometheus exporter <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 

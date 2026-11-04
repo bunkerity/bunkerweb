@@ -4996,7 +4996,7 @@ Pro 插件为 BunkerWeb 的企业部署捆绑了高级功能和增强功能。�
 
 请按照以下步骤配置和使用 Pro 功能：
 
-1.  **获取许可证密钥：** 从 [BunkerWeb 面板](https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc) 购买 Pro 许可证。
+1.  **获取许可证密钥：** 从 [BunkerWeb 面板](https://panel.bunkerweb.io/store/bunkerweb-pro?language=chinese&utm_campaign=self&utm_source=doc)开始 30 天免费试用或购买 Pro 许可证（[分步指南](index.md#pro-version)）。
 2.  **配置您的许可证密钥：** 使用 `PRO_LICENSE_KEY` 设置来配置您的许可证。
 3.  **让 BunkerWeb 处理其余部分：** 一旦配置了有效的许可证，Pro 插件将自动下载并激活。
 4.  **监控您的 Pro 状态：** 在 [Web UI](web-ui.md) 中检查健康指示器，以确认您的 Pro 订阅状态。
@@ -5033,7 +5033,7 @@ Pro 插件为 BunkerWeb 的企业部署捆绑了高级功能和增强功能。�
 - **BunkerWeb PRO Standard：** 完全访问 Pro 功能，但不提供技术支持。
 - **BunkerWeb PRO Enterprise：** 完全访问 Pro 功能，并提供专属技术支持。
 
-您可以免费试用 BunkerWeb PRO 的全部 Pro 功能 30 天。请前往 [BunkerWeb 面板](https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc)开始试用，并了解根据受 BunkerWeb PRO 保护的服务数量灵活定价的方案。
+您可以免费试用 BunkerWeb PRO 的全部 Pro 功能 30 天。请前往 [BunkerWeb 面板](https://panel.bunkerweb.io/store/bunkerweb-pro?language=chinese&utm_campaign=self&utm_source=doc)开始试用，并了解根据受 BunkerWeb PRO 保护的服务数量灵活定价的方案：订购一个方案，然后在结账时保持选中 **Free 30 Days Trial** 作为付款方式（[分步指南](index.md#pro-version)）。
 
 ## Prometheus exporter <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 

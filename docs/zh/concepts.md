@@ -31,7 +31,7 @@
 ## 设置
 
 !!! tip "BunkerWeb PRO 设置"
-    某些插件是为 **PRO 版本**保留的。通过 [BunkerWeb 面板](https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc)开始 BunkerWeb PRO 的 30 天免费试用。
+    某些插件是为 **PRO 版本**保留的。通过 [BunkerWeb 面板](https://panel.bunkerweb.io/store/bunkerweb-pro?language=chinese&utm_campaign=self&utm_source=doc)开始 BunkerWeb PRO 的 30 天免费试用：订购一个方案，然后在结账时保持选中 **Free 30 Days Trial** 作为付款方式（[分步指南](index.md#pro-version)）。
 
 一旦 BunkerWeb 集成到您的环境中，您将需要配置它来服务和保护您的 Web 应用程序。
 
