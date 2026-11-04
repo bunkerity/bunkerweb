@@ -205,20 +205,20 @@ Every first-party Lua module, relative to `src/bw/lua/` and `src/common/core/` (
 | --- | --- | --- |
 | `bunkerweb/acme.lua` | `common/test_bw_acme_lua.py` | pytest, module |
 | `bunkerweb/api.lua` | `test_lua_api_leases.lua`; `common/test_api_audit_preflight_lua.py` | standalone; pytest fragment |
-| `bunkerweb/banlease.lua` | `test_lua_banlease.lua`, `test_lua_banlease_write.lua` | standalone |
+| `bunkerweb/banlease.lua` | `test_lua_banlease.lua`, `test_lua_banlease_write.lua`, `test_lua_client_hello_plugins.lua` | standalone |
 | `bunkerweb/cachestore.lua` | `common/test_bw_cachestore_lua.py` | pytest, module |
 | `bunkerweb/clusterstore.lua` | `common/test_duration_readers_lua.py` | pytest, module |
 | `bunkerweb/ctx.lua` | `common/test_bw_ctx_lua.py` | pytest, module |
-| `bunkerweb/datastore.lua` | `common/test_datastore_worker_lru_exptime.py` | pytest, module |
+| `bunkerweb/datastore.lua` | `common/test_datastore_worker_lru_exptime.py`; `test_lua_datastore_add.lua` | pytest, module; standalone |
 | `bunkerweb/duration.lua` | `common/test_duration_parser.py`, `common/test_duration_regex_parity.py` | pytest, module |
-| `bunkerweb/helpers.lua` | `test_lua_init_store_order.lua` | standalone |
+| `bunkerweb/helpers.lua` | `test_lua_init_store_order.lua`, `test_lua_client_hello_order.lua` | standalone |
 | `bunkerweb/ipaddr.lua` | `test_lua_ipaddr.lua`, `test_lua_ipv6_ban_identity.lua` | standalone |
 | `bunkerweb/logger.lua` | `common/test_bw_logger_lua.py` | pytest, module |
 | `bunkerweb/mmdb.lua` | `common/test_bw_mmdb_lua.py` | pytest, module |
 | `bunkerweb/plugin.lua` | `common/test_bw_plugin_lua.py` | pytest, module |
 | `bunkerweb/pushswap.lua` | `test_lua_pushswap_sentinel.lua` | standalone |
 | `bunkerweb/rediskeys.lua` | `common/test_redis_cluster_nodes_default_port.py`, `test_lua_rediskeys.lua` | pytest, module; standalone |
-| `bunkerweb/utils.lua` | `test_lua_is_banned_leases.lua`; `common/test_header_rules_lua.py` | standalone; pytest fragment |
+| `bunkerweb/utils.lua` | `test_lua_is_banned_leases.lua`, `test_lua_add_ban_if_absent.lua`; `common/test_header_rules_lua.py` | standalone; pytest fragment |
 | `antibot/antibot.lua` | `test_lua_rdns_skip_empty.lua` | standalone |
 | `authbasic/authbasic.lua` | `common/test_authbasic_behaviour_lua.py` (L1) | pytest, module |
 | `badbehavior/badbehavior.lua` | `common/test_duration_readers_lua.py` | pytest, module |

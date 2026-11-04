@@ -44,7 +44,7 @@ Este patrón te permite gestionar múltiples configuraciones para característic
 
 Puede ajustar el orden con listas separadas por espacios:
 
-- Fases globales: `PLUGINS_ORDER_INIT`, `PLUGINS_ORDER_INIT_WORKER`, `PLUGINS_ORDER_TIMER`.
+- Fases globales: `PLUGINS_ORDER_INIT`, `PLUGINS_ORDER_INIT_WORKER`, `PLUGINS_ORDER_SSL_CLIENT_HELLO`, `PLUGINS_ORDER_TIMER`.
 - Fases por sitio: `PLUGINS_ORDER_SET`, `PLUGINS_ORDER_ACCESS`, `PLUGINS_ORDER_SSL_CERTIFICATE`, `PLUGINS_ORDER_HEADER`, `PLUGINS_ORDER_LOG`, `PLUGINS_ORDER_PREREAD`, `PLUGINS_ORDER_LOG_STREAM`, `PLUGINS_ORDER_LOG_DEFAULT`.
 - Semántica: los plugins listados se ejecutan primero en esa fase; el resto se ejecuta después en su secuencia normal. Separe los IDs solo con espacios.
 

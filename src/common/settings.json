@@ -558,6 +558,15 @@
     "regex": "^$|^[A-Za-z0-9._-]+( [A-Za-z0-9._-]+)*$",
     "type": "multivalue"
   },
+  "PLUGINS_ORDER_SSL_CLIENT_HELLO": {
+    "context": "global",
+    "default": "",
+    "help": "Plugins that should run first during the ssl_client_hello phase (TLS ClientHello, once per handshake, every service and the default server). Separate IDs with spaces; remaining plugins still run afterward in their normal sequence.",
+    "id": "plugins-order-ssl-client-hello",
+    "label": "Plugins order (ssl_client_hello)",
+    "regex": "^$|^[A-Za-z0-9._-]+( [A-Za-z0-9._-]+)*$",
+    "type": "multivalue"
+  },
   "PLUGINS_ORDER_SSL_CERTIFICATE": {
     "context": "multisite",
     "default": "customcert letsencrypt selfsigned",

@@ -24,6 +24,10 @@ local get_variable = utils.get_variable
 
 local helpers = {}
 
+-- Phases a plugin exports under another name than the phase: ssl_client_hello is the module-level
+-- client_hello(hello) function, called once per handshake without building the plugin object
+local PHASE_METHODS = { ssl_client_hello = "client_hello" }
+
 helpers.load_plugin = function(json)
 	-- Open file
 	local file, err, nb = open(json, "r")
@@ -74,7 +78,7 @@ helpers.load_plugin = function(json)
 	plugin.phases = {}
 	if plugin_lua then
 		for _, phase in ipairs(phases) do
-			if plugin_lua[phase] ~= nil then
+			if plugin_lua[PHASE_METHODS[phase] or phase] ~= nil then
 				table.insert(plugin.phases, phase)
 			end
 		end

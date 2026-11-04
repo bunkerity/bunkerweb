@@ -7,8 +7,11 @@
 - [SECURITY] `core`: an IPv6 address is now one ban whatever its spelling (expanded, upper case or IPv4-mapped), in every ban, unban and lookup path.
 - [SECURITY] `core`: an IPv4-mapped IPv6 client (`::ffff:a.b.c.d`) now matches the IPv4 rules of IP lists, trusted proxies, bans and rate limits.
 - [SECURITY] `core`: an invalid or zone-id entry in an IP list is now skipped instead of disabling the whole list.
+- [FEATURE] `core`: plugins can run code at the TLS ClientHello of every service through the new `ssl_client_hello` phase (`PLUGINS_ORDER_SSL_CLIENT_HELLO`).
+- [FEATURE] `core`: `utils.add_ban` accepts `opts.if_absent` for insert-only bans that never replace an existing ban, locally or in Redis.
 - [BUGFIX] `core`: stream services no longer abort NGINX init when an HTTP-only plugin (PRO included) is installed, a regression in 1.6.17.
 - [BUGFIX] `bunkernet`: reports now carry only a fixed set of request headers (User-Agent, Accept, Accept-Encoding, Accept-Language, Content-Type, Content-Length) and no longer include the values matched in request headers and cookies, also for reports queued before the upgrade; the plugin documentation lists exactly what a report contains.
+- [BUGFIX] `core`: local ban writes and unbans are now serialized per IP, and a writer that cannot take the lock fails with `ban lock unavailable`.
 - [BUGFIX] `installer`: on Debian and Ubuntu, the installer warns that the distribution PostgreSQL client cannot back up a newer server and shows the PGDG commands to install a matching one.
 - [BUGFIX] `ui`: report and ban dates carry their UTC offset, so the browser no longer shifts them by the viewer's time zone. (Fixes #4118)
 - [BUGFIX] `redis`: Redis Cluster commands now follow ASK and MOVED redirections during slot migrations.

@@ -68,12 +68,14 @@ LOGS = {}
 NULL = setmetatable({}, { __tostring = function() return "ngx.null" end })
 SUBSYSTEM = SUBSYSTEM or "http"
 VARIABLES = VARIABLES or { global = {} }
+local clock, token_counter = 1000, 0
 
 local function new_dict()
     local d = { data = {} }
     function d:get(k) return self.data[k] end
     function d:set(k, v) self.data[k] = v return true end
     function d:safe_set(k, v) self.data[k] = v return true end
+    function d:safe_add(k, v) if self.data[k] ~= nil then return false, "exists" end self.data[k] = v return true end
     function d:delete(k) self.data[k] = nil end
     function d:get_keys() local ks = {} for k in pairs(self.data) do ks[#ks + 1] = k end table.sort(ks) return ks end
     return d
@@ -86,6 +88,8 @@ ngx = {
     HTTP_FORBIDDEN = 403, null = NULL, var = {},
     config = { subsystem = SUBSYSTEM },
     shared = SHARED,
+    now = function() return clock end,
+    sleep = function(delay) clock = clock + delay end,
     get_phase = function() return "access" end,
     thread = { kill = function() end },
     re = { match = function() return nil end },
@@ -114,6 +118,7 @@ package.loaded["bunkerweb.rediskeys"] = { cluster_mode = function() return false
 package.loaded["bunkerweb.duration"] = { parse_duration = function(v) return tonumber(v) end }
 BUMPS = {}
 package.loaded["bunkerweb.banlease"] = {
+    new_incarnation = function() token_counter = token_counter + 1 return "token-" .. token_counter end,
     RANK = { explicit_service = 4, explicit_global = 3, lease_service = 2, lease_global = 1 },
     meta = function() return nil end,
     lease_key = function(ip, service) return "lease_" .. (service or "") .. ip end,

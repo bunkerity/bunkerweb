@@ -483,6 +483,19 @@ Les fonctions déclarées sont automatiquement appelées dans des contextes spé
 |   `preread`   | [](https://github.com/openresty/stream-lua-nginx-module#preread_by_lua_block)  preread_by_lua | Similaire à la `access` fonction mais pour le mode flux.                                                                                                                                                    | `ret`, `msg`,`status`<ul><li>`ret` (booléen) : true s'il n'y a pas d'erreur ou sinon false</li><li>`msg` (chaîne) : message de réussite ou d'erreur</li><li>`status` (nombre) : interrompre le processus en cours et [renvoyer l'état](https://github.com/openresty/lua-nginx-module#http-status-constants)</li></ul>                                                                           |
 | `log_stream`  |      [log_by_lua](https://github.com/openresty/stream-lua-nginx-module#log_by_lua_block)      | Similaire à la `log` fonction mais pour le mode flux.                                                                                                                                                       | `ret`, `msg`<ul><li>`ret` (booléen) : true s'il n'y a pas d'erreur ou sinon false</li><li>`msg` (chaîne) : message de réussite ou d'erreur</li></ul>                                                                                                                                                                                                                                            |
 
+**Hook TLS ClientHello.** Un plugin peut aussi voir chaque handshake TLS avant le choix du certificat, pour le serveur par défaut et pour chaque service, en exportant depuis son module Lua principal une fonction de niveau module (pas une méthode, afin qu'aucun objet plugin ne soit créé par handshake) :
+
+```lua
+-- in myplugin/myplugin.lua
+function myplugin.client_hello(hello)
+    -- hello (read-only): service (nil on the default server), ip (nil when the client address is unknown), raw and family
+    -- (packed peer address from ngx.ssl.raw_client_addr()), quic, proxy_protocol, real_ip, trusted
+    return nil -- or "drop" / "detect" and a reason
+end
+```
+
+Retournez `"drop"` pour interrompre le handshake, `"detect"` pour seulement journaliser qu'il serait rejeté, ou rien pour le laisser passer. Une erreur ou toute autre valeur laisse passer le handshake. La fonction s'exécute exactement une fois par handshake et **ne doit pas faire de yield** : pas de Redis, pas de cosocket, pas de `ngx.var`, pas de `resty.lock`, pas de sleep. Les appels aux dictionnaires partagés et `ngx.timer.at(0, ...)` sont permis. L'ordre des plugins qui l'exportent suit `PLUGINS_ORDER_SSL_CLIENT_HELLO`. Un plugin qui exporte `client_hello` n'est pas appelé via sa méthode `ssl_client_hello_default` sur le serveur par défaut. Les plugins peuvent détecter la prise en charge avec `pcall(require, "bunkerweb.banlease")` et `banlease.CLIENT_HELLO_PLUGIN_HOOK == 1`.
+
 #### Bibliothèques
 
 Toutes les directives du [module LUA NGINX](https://github.com/openresty/lua-nginx-module) sont disponibles et  le [module LUA de flux NGINX](https://github.com/openresty/stream-lua-nginx-module). En plus de cela, vous pouvez utiliser les bibliothèques LUA incluses dans BunkerWeb : voir [ce script](https://github.com/bunkerity/bunkerweb/blobsrc/deps/clone.sh) pour la liste complète.

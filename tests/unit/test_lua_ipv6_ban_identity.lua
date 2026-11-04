@@ -62,7 +62,7 @@ end
 
 _G.ngx = {
 	null = setmetatable({}, {}),
-	shared = { bans_meta = new_dict(), internalstore = {} },
+	shared = { bans_meta = new_dict(), datastore = new_dict(), internalstore = {} },
 	config = { subsystem = "http" },
 	thread = { kill = function() end },
 	re = { match = function() end },
