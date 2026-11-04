@@ -1,0 +1,35 @@
+tests/unit/db/test_connection_and_metadata.py
+  s_373b85b0b2bf38::t_de27ac4e452037 1-374
+tests/unit/db/test_database_construction.py
+  s_373b85b0b2bf38::t_5f3c11107b1fb0 1-164
+tests/unit/db/test_init_tables_sync.py
+  s_373b85b0b2bf38::t_4d8ee87640a611 1-338
+tests/unit/db/test_instances_services_jobs.py
+  s_373b85b0b2bf38::t_d6569ebd19769c 1-447
+tests/unit/db/test_plugin_data_loss_guards.py
+  s_373b85b0b2bf38::t_65a47d01660469 1-581
+tests/unit/db/test_save_config_guards.py
+  s_373b85b0b2bf38::t_5ff2301d64d8aa 1-278
+tests/unit/db/test_templates_and_custom_configs.py
+  s_373b85b0b2bf38::t_150b7f08468ca0 1-350
+tests/unit/ui/models/test_totp_behaviour.py
+  s_373b85b0b2bf38::t_d755729ad45bb7 1-290
+tests/unit/ui/models/test_ui_database_behaviour.py
+  s_373b85b0b2bf38::t_04fad06eb33127 1-624
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "0cd9f317d4b5f56f16154e59e5992f602d7561a9",
+  "prompts": {},
+  "sessions": {
+    "s_373b85b0b2bf38": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "81a5c848-f89d-41f1-8137-6c85c84263af",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}
