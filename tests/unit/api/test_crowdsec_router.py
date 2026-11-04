@@ -3,6 +3,7 @@
 import ast
 import importlib.util
 import sys
+from datetime import timedelta
 from pathlib import Path
 from types import ModuleType
 from typing import Optional
@@ -133,8 +134,18 @@ def test_biscuit_crowdsec_subject_rule_extracts_authority_username():
     tree = ast.parse(path.read_text(encoding="utf-8"))
     rule_call = next(node for node in ast.walk(tree) if isinstance(node, ast.Call) and isinstance(node.func, ast.Name) and node.func.id == "Rule")
     rule_text = ast.literal_eval(rule_call.args[0])
+    # Authorize under the product's run limits: the library default of 1 ms flakes on a loaded host.
+    limits_nodes = [
+        node
+        for node in tree.body
+        if (isinstance(node, ast.Assign) and any(isinstance(t, ast.Name) and t.id == "AUTHORIZE_MAX_TIME" for t in node.targets))
+        or (isinstance(node, ast.FunctionDef) and node.name == "_raise_time_budget")
+    ]
+    limits = {"timedelta": timedelta, "AuthorizerBuilder": AuthorizerBuilder}
+    exec(compile(ast.Module(limits_nodes, type_ignores=[]), str(path), "exec"), limits)
     token = BiscuitBuilder("user({username});", {"username": "alice"}).build(KeyPair().private_key)
     builder = AuthorizerBuilder()
+    limits["_raise_time_budget"](builder)
     builder.add_policy(Policy("allow if true"))
     authorized = builder.build(token)
     authorized.authorize()

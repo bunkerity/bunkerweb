@@ -9,7 +9,13 @@ MODULE = BW_MODULES / "utils.lua"
 HARNESS = r"""
 ngx.re = {match = function() end}
 ngx.thread = {kill = function() end}
-ngx.shared = {internalstore = {}, datastore_stream = {}}
+ngx.now = function() return 1000 end
+ngx.sleep = function() end
+local locks = {}
+ngx.shared = {internalstore = {}, datastore_stream = {}, datastore = {
+    safe_add = function(_, k, v) if locks[k] then return false, "exists" end locks[k] = v return true end,
+    get = function(_, k) return locks[k] end,
+    delete = function(_, k) locks[k] = nil end}}
 local ipaddr = require "bunkerweb.ipaddr"
 local stores = {{}, {}, {}}
 DATA, INTERNAL, OTHER = stores[1], stores[2], stores[3]
@@ -40,6 +46,7 @@ function ds:keys() local out = {} for k in pairs(self.data) do out[#out+1] = k e
 TTLS = {}
 package.loaded["bunkerweb.datastore"] = ds
 local lease = {RANK = {explicit_service = 1, explicit_global = 2, lease_service = 3, lease_global = 4},
+    new_incarnation = function() return "token" end,
     meta = function() return META end,
     lease_key = function(ip, service) return "lease_" .. (service or "global") .. "_" .. ip end,
     lease_epoch = function() return EPOCH end,

@@ -324,7 +324,7 @@ assert(LOGS[#LOGS][2]:find('an unidentified setting on server -',1,true))
 def test_phases_cosockets_error_classifiers_threads_and_context():
     check(r"""
 local phases = utils.get_phases()
-assert(table.concat(phases, ',') == 'init,init_worker,set,rewrite,access,content,ssl_client_hello_default,ssl_certificate_default,ssl_certificate,header,log,preread,log_stream,log_default,timer,init_workers')
+assert(table.concat(phases, ',') == 'init,init_worker,set,rewrite,access,content,ssl_client_hello,ssl_client_hello_default,ssl_certificate_default,ssl_certificate,header,log,preread,log_stream,log_default,timer,init_workers')
 local allowed = {timer=true,rewrite=true,server_rewrite=true,access=true,content=true,
     ssl_cert=true,ssl_client_hello=true,ssl_session_fetch=true,preread=true}
 for phase in pairs(allowed) do PHASE=phase assert(utils.is_cosocket_available()) end
