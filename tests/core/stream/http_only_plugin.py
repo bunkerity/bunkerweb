@@ -45,7 +45,12 @@ def served() -> bool:
         with socket.create_connection((ip, PORT), timeout=8) as sock:
             sock.settimeout(8)
             sock.sendall(REQUEST)
-            return BACKEND_MARK.search(sock.recv(4096)) is not None
+            data = b""
+            while True:
+                chunk = sock.recv(4096)
+                if not chunk:
+                    return BACKEND_MARK.search(data) is not None
+                data += chunk
     except OSError:
         return False
 
