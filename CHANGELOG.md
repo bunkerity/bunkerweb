@@ -7,6 +7,7 @@
 - [SECURITY] `core`: an IPv6 address is now one ban whatever its spelling (expanded, upper case or IPv4-mapped), in every ban, unban and lookup path.
 - [SECURITY] `core`: an IPv4-mapped IPv6 client (`::ffff:a.b.c.d`) now matches the IPv4 rules of IP lists, trusted proxies, bans and rate limits.
 - [SECURITY] `core`: an invalid or zone-id entry in an IP list is now skipped instead of disabling the whole list.
+- [SECURITY] `docker`: update the Alpine `libexpat` package to 2.10.0-r0 in the BunkerWeb and all-in-one images, fixing CVE-2026-117610, CVE-2026-118370 and two lower-severity libexpat CVEs.
 - [FEATURE] `core`: plugins can run code at the TLS ClientHello of every service through the new `ssl_client_hello` phase (`PLUGINS_ORDER_SSL_CLIENT_HELLO`).
 - [FEATURE] `core`: `utils.add_ban` accepts `opts.if_absent` for insert-only bans that never replace an existing ban, locally or in Redis.
 - [FEATURE] `bunkernet`: `BUNKERNET_FILTER_HEADERS` (`no`, per service) limits a report to the User-Agent, Accept, Accept-Encoding, Accept-Language, Content-Type and Content-Length request headers and blanks the values matched in request headers and cookies, also for reports queued before the upgrade. By default a report carries every request header, as before; the plugin documentation lists what each value sends.

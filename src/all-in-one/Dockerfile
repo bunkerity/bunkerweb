@@ -174,7 +174,7 @@ RUN umask 027
 RUN apk add --no-cache bash coreutils curl geoip grep libgcc libgd libmagic libpq libstdc++ libxml2 mariadb-client mariadb-connector-c openssl pcre2 python3 py3-pip sed sqlite postgresql-client tzdata unzip yajl supervisor brotli lmdb libfuzzy2 logrotate
 
 # Fix CVEs
-# There are no CVEs for the following packages
+RUN apk add --no-cache "libexpat>=2.10.0-r0" # CVE-2026-117610, CVE-2026-118370, CVE-2026-113351, CVE-2026-115506
 
 COPY src/deps/requirements.txt /tmp/requirements-deps.txt
 

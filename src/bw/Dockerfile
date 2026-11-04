@@ -78,7 +78,7 @@ RUN umask 027
 RUN apk add --no-cache openssl pcre2 bash python3 yajl geoip libxml2 libgd curl tzdata brotli lmdb libfuzzy2
 
 # Fix CVEs
-# There are no CVEs for the following packages
+RUN apk add --no-cache "libexpat>=2.10.0-r0" # CVE-2026-117610, CVE-2026-118370, CVE-2026-113351, CVE-2026-115506
 
 # Copy dependencies
 COPY --from=builder --chown=0:101 --chmod=550 /usr/share/bunkerweb /usr/share/bunkerweb
