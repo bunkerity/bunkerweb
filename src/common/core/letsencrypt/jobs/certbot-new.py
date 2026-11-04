@@ -558,11 +558,13 @@ def build_service_config(service: str) -> Tuple[List[str], Dict[str, Union[str, 
     if unissuable or skipped_ips:
         issuable = [name for name in issuable if name not in skipped_ips]
         if activated:
-            if unissuable:
-                LOGGER.warning(
-                    f"[Service: {service}] No public CA issues certificates for {', '.join(unissuable)}"
-                    + (", requesting one for the remaining server names." if issuable else ", skipping generation.")
-                )
+            outcome = ", requesting one for the remaining server names." if issuable else ", skipping generation."
+            ipv6_names = [name for name in unissuable if ":" in name]
+            other_names = [name for name in unissuable if ":" not in name]
+            if other_names:
+                LOGGER.warning(f"[Service: {service}] No public CA issues certificates for {', '.join(other_names)}" + outcome)
+            if ipv6_names:
+                LOGGER.warning(f"[Service: {service}] Certificates for IPv6 addresses are not supported yet: {', '.join(ipv6_names)}" + outcome)
             for ip in skipped_ips:
                 for problem in ip_problems:
                     LOGGER.warning(f"[Service: {service}] {ip} needs {problem}, skipping it.")

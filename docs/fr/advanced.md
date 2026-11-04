@@ -2647,7 +2647,7 @@ BunkerWeb prend en charge PHP en utilisant des  instances [PHP-FPM externes ou ]
 
 ## IPv6
 
-Par défaut, BunkerWeb n'écoute que sur IPv4. Définissez `USE_IPV6=yes` (le nom est sensible à la casse) pour ajouter des écouteurs IPv6 à côté des écouteurs IPv4 pour les services HTTP, HTTPS, HTTP/3 et stream, et pour que NGINX et le résolveur Lua interrogent aussi les enregistrements AAAA. Ce paramètre ne configure pas votre réseau : adresses, routage, ports publiés et règles de pare-feu restent à votre charge. L'API interne, l'interface Web et l'API publique ont leurs propres paramètres d'écoute (voir [Réseaux IPv6 uniquement](#ipv6-only)). Les services sont toujours nommés par des noms DNS : un littéral IPv6 dans `SERVER_NAME` n'est pas pris en charge ([#4120](https://github.com/bunkerity/bunkerweb/issues/4120)).
+Par défaut, BunkerWeb n'écoute que sur IPv4. Définissez `USE_IPV6=yes` (le nom est sensible à la casse) pour ajouter des écouteurs IPv6 à côté des écouteurs IPv4 pour les services HTTP, HTTPS, HTTP/3 et stream, et pour que NGINX et le résolveur Lua interrogent aussi les enregistrements AAAA. Ce paramètre ne configure pas votre réseau : adresses, routage, ports publiés et règles de pare-feu restent à votre charge. L'API interne, l'interface Web et l'API publique ont leurs propres paramètres d'écoute (voir [Réseaux IPv6 uniquement](#ipv6-only)). Un service peut aussi être nommé par une adresse IP (voir [Adresses IP comme noms de service](#ip-service-names)).
 
 !!! info "Couverture des tests"
 
@@ -2727,6 +2727,16 @@ curl -g -6 -H "Host: www.example.com" "http://[<BUNKERWEB_IPV6_ADDRESS>]:<HTTP_P
 ```
 
 Le journal d'accès affiche alors l'adresse IPv6 du client.
+
+### Adresses IP comme noms de service {#ip-service-names}
+
+Un service peut être nommé par une adresse IPv4 ou IPv6 au lieu d'un nom DNS. Écrivez une adresse IPv6 sans crochets, en minuscules et compressée, comme un client l'envoie dans l'en-tête `Host` : `2001:db8::1`, et non `[2001:db8::1]`, `2001:DB8::1` ou `2001:0db8::1`. BunkerWeb ajoute lui-même la forme avec crochets au `server_name` de NGINX. Un nom écrit autrement ne correspond jamais à l'en-tête `Host`, et BunkerWeb journalise un avertissement avec l'écriture canonique. ModSecurity ne note pas la règle CRS 920350 (« Host header is a numeric IP address ») pour une requête dont le `Host` est l'une des adresses du service ; tout autre `Host` numérique reste noté.
+
+!!! warning "Paramètres par service avec Docker Compose"
+
+    Un `env_file` de Compose ne peut pas transporter les paramètres par service d'un service nommé en IPv6 : il coupe `2001:db8::1_USE_ANTIBOT=yes` au premier deux-points et perd le paramètre sans erreur. Utilisez `environment:` (forme map ou liste), l'interface web ou l'API. Le fichier `variables.env` de Linux n'est pas concerné.
+
+Let's Encrypt n'émet pas encore de certificats pour les adresses IPv6 : le job ignore un service nommé en IPv6 et le journalise.
 
 ### Réseaux IPv6 uniquement {#ipv6-only}
 

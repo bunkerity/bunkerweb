@@ -2646,7 +2646,7 @@ BunkerWeb 支持使用外部或远程的 [PHP-FPM](https://www.php.net/manual/en
 
 ## IPv6
 
-默认情况下，BunkerWeb 只监听 IPv4。将 `USE_IPV6=yes`（名称区分大小写）后，会在 HTTP、HTTPS、HTTP/3 和 stream 服务的 IPv4 监听器旁添加 IPv6 监听器，并让 NGINX 和 Lua 解析器同时查询 AAAA 记录。该设置不会配置您的网络：地址、路由、发布的端口和防火墙规则仍由您负责。内部 API、Web UI 和公共 API 有各自的绑定设置（参见[仅 IPv6 网络](#ipv6-only)）。服务仍然使用 DNS 名称命名：`SERVER_NAME` 中的 IPv6 字面量不受支持（[#4120](https://github.com/bunkerity/bunkerweb/issues/4120)）。
+默认情况下，BunkerWeb 只监听 IPv4。将 `USE_IPV6=yes`（名称区分大小写）后，会在 HTTP、HTTPS、HTTP/3 和 stream 服务的 IPv4 监听器旁添加 IPv6 监听器，并让 NGINX 和 Lua 解析器同时查询 AAAA 记录。该设置不会配置您的网络：地址、路由、发布的端口和防火墙规则仍由您负责。内部 API、Web UI 和公共 API 有各自的绑定设置（参见[仅 IPv6 网络](#ipv6-only)）。服务也可以用 IP 地址命名（参见 [以 IP 地址作为服务名称](#ip-service-names)）。
 
 !!! info "测试范围"
 
@@ -2726,6 +2726,16 @@ curl -g -6 -H "Host: www.example.com" "http://[<BUNKERWEB_IPV6_ADDRESS>]:<HTTP_P
 ```
 
 访问日志此时会显示客户端的 IPv6 地址。
+
+### 以 IP 地址作为服务名称 {#ip-service-names}
+
+服务可以用 IPv4 或 IPv6 地址命名，而不必使用 DNS 名称。IPv6 地址请不带方括号、使用小写并采用压缩写法，与客户端在 `Host` 请求头中发送的形式一致：写 `2001:db8::1`，而不是 `[2001:db8::1]`、`2001:DB8::1` 或 `2001:0db8::1`。BunkerWeb 会自行把带方括号的形式加入 NGINX 的 `server_name`。以其他方式书写的名称永远无法匹配 `Host` 请求头，BunkerWeb 会记录一条包含规范写法的警告。当请求的 `Host` 是该服务的某个地址时，ModSecurity 不会为 CRS 规则 920350（“Host header is a numeric IP address”）计分；其他任何数字形式的 `Host` 仍会计分。
+
+!!! warning "Docker Compose 中的服务专属设置"
+
+    Compose 的 `env_file` 无法传递以 IPv6 命名的服务的专属设置：它会在第一个冒号处拆分 `2001:db8::1_USE_ANTIBOT=yes`，该设置会在没有任何错误提示的情况下丢失。请改用 `environment:`（映射或列表形式）、Web 界面或 API。Linux 的 `variables.env` 文件不受影响。
+
+Let's Encrypt 目前不为 IPv6 地址签发证书：任务会跳过以 IPv6 命名的服务并记录日志。
 
 ### 仅 IPv6 网络 {#ipv6-only}
 

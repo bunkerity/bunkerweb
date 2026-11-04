@@ -2649,7 +2649,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
 
 ## IPv6
 
-By default, BunkerWeb listens on IPv4 only. Set `USE_IPV6=yes` (the name is case-sensitive) to add IPv6 listeners next to the IPv4 ones for HTTP, HTTPS, HTTP/3 and stream services, and to let NGINX and the Lua resolver also query AAAA records. The setting does not configure your network: addresses, routing, published ports and firewall rules stay yours. The internal API, the Web UI and the public API have their own bind settings (see [IPv6-only networks](#ipv6-only)). Services are still named with DNS names: an IPv6 literal in `SERVER_NAME` is not supported ([#4120](https://github.com/bunkerity/bunkerweb/issues/4120)).
+By default, BunkerWeb listens on IPv4 only. Set `USE_IPV6=yes` (the name is case-sensitive) to add IPv6 listeners next to the IPv4 ones for HTTP, HTTPS, HTTP/3 and stream services, and to let NGINX and the Lua resolver also query AAAA records. The setting does not configure your network: addresses, routing, published ports and firewall rules stay yours. The internal API, the Web UI and the public API have their own bind settings (see [IPv6-only networks](#ipv6-only)). A service can also be named by an IP address (see [IP addresses as service names](#ip-service-names)).
 
 !!! info "Test coverage"
 
@@ -2729,6 +2729,16 @@ curl -g -6 -H "Host: www.example.com" "http://[<BUNKERWEB_IPV6_ADDRESS>]:<HTTP_P
 ```
 
 The access log then shows the IPv6 address of the client.
+
+### IP addresses as service names {#ip-service-names}
+
+A service can be named by an IPv4 or an IPv6 address instead of a DNS name. Write an IPv6 address bare, in lowercase and compressed, the way a client sends it in the `Host` header and without the brackets: `2001:db8::1`, not `[2001:db8::1]`, `2001:DB8::1` or `2001:0db8::1`. BunkerWeb adds the bracketed form to the NGINX `server_name` itself. A name written any other way never matches the `Host` header, and BunkerWeb logs a warning with the canonical spelling. ModSecurity does not score the CRS rule 920350 ("Host header is a numeric IP address") for a request whose `Host` is one of the addresses of the service; any other numeric `Host` is still scored.
+
+!!! warning "Per-service settings with Docker Compose"
+
+    A Compose `env_file` cannot carry the per-service settings of an IPv6-named service: it splits `2001:db8::1_USE_ANTIBOT=yes` at the first colon and drops the setting without an error. Use `environment:` (map or list form), the Web UI or the API instead. The Linux `variables.env` file is not affected.
+
+Let's Encrypt does not issue certificates for IPv6 addresses yet: the job skips an IPv6-named service and logs it.
 
 ### IPv6-only networks {#ipv6-only}
 

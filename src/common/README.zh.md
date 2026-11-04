@@ -71,7 +71,7 @@ BunkerWeb 中的某些设置支持同一功能的多个配置。要定义多组�
 
     | 设置                  | 默认值            | 上下文    | 多个 | 描述                                                               |
     | --------------------- | ----------------- | --------- | ---- | ------------------------------------------------------------------ |
-    | `SERVER_NAME`         | `www.example.com` | multisite | 否   | **主域名：** 此站点的主域名。在多站点模式下为必需。                |
+    | `SERVER_NAME`         | `www.example.com` | multisite | 否   | **主域名：** 此站点的主域名（或 IP 地址）。在多站点模式下为必需。  |
     | `BUNKERWEB_INSTANCES` | `127.0.0.1`       | global    | 否   | **BunkerWeb 实例：** 以空格分隔的 BunkerWeb 实例列表。             |
     | `MULTISITE`           | `no`              | global    | 否   | **多站点：** 设置为 `yes` 以启用托管具有不同配置的多个网站。       |
     | `SECURITY_MODE`       | `block`           | multisite | 否   | **安全级别：** 控制安全强制执行的级别。选项：`detect` 或 `block`。 |

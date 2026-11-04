@@ -10,6 +10,7 @@
 - [FEATURE] `core`: plugins can run code at the TLS ClientHello of every service through the new `ssl_client_hello` phase (`PLUGINS_ORDER_SSL_CLIENT_HELLO`).
 - [FEATURE] `core`: `utils.add_ban` accepts `opts.if_absent` for insert-only bans that never replace an existing ban, locally or in Redis.
 - [FEATURE] `bunkernet`: `BUNKERNET_FILTER_HEADERS` (`no`, per service) limits a report to the User-Agent, Accept, Accept-Encoding, Accept-Language, Content-Type and Content-Length request headers and blanks the values matched in request headers and cookies, also for reports queued before the upgrade. By default a report carries every request header, as before; the plugin documentation lists what each value sends.
+- [FEATURE] `core`: a service can be named by an IPv4 or an IPv6 address (`SERVER_NAME=2001:db8::1`, bare, lowercase, compressed). NGINX also matches the bracketed `Host` form, and a name written another way logs a warning with its canonical spelling. (#4120)
 - [BUGFIX] `core`: stream services no longer abort NGINX init when an HTTP-only plugin (PRO included) is installed, a regression in 1.6.17.
 - [BUGFIX] `core`: local ban writes and unbans are now serialized per IP, and a writer that cannot take the lock fails with `ban lock unavailable`.
 - [BUGFIX] `installer`: on Debian and Ubuntu, the installer warns that the distribution PostgreSQL client cannot back up a newer server and shows the PGDG commands to install a matching one.
@@ -21,7 +22,7 @@
 - [BUGFIX] `core`: the reverse DNS name of an IPv6 address with an embedded IPv4 part is now valid and no longer corrupts the next lookups.
 - [BUGFIX] `core`, `api`, `ui`: IPv6 values of `API_LISTEN_IP`, `API_LISTEN_ADDR` and `UI_LISTEN_ADDR` now produce valid listeners.
 - [BUGFIX] `logging`: a bracketed IPv6 syslog address such as `udp://[2001:db8::1]:514` is now used instead of being ignored.
-- [BUGFIX] `ui`: the setup wizard no longer proposes a truncated server name when opened through an IPv6 address.
+- [BUGFIX] `ui`: the setup wizard proposes the IPv6 address of the `Host` header as the server name when opened through an IPv6 address (it was truncated), and the services page handles a service name with a colon.
 - [BUGFIX] `redis`: IPv6 Redis, Sentinel and Cluster hosts, bare or bracketed, now work in the core, sessions, jobs and the API rate limiter.
 - [BUGFIX] `redis`: Redis Cluster now handles IPv6 nodes in slot discovery and in ASK and MOVED redirections.
 - [BUGFIX] `autoconf`: Kubernetes pods with an IPv6 address now get a valid instance DNS name.
@@ -45,6 +46,9 @@
 - [BUGFIX] `letsencrypt`: the stale account recovery also recognizes the standard `accountDoesNotExist` rejection, so it works with any RFC 8555 certificate authority, not only Let's Encrypt.
 - [BUGFIX] `cors`: with a regex `CORS_ALLOW_ORIGIN`, no longer send `Access-Control-Allow-Origin` for an origin the pattern does not match (it was echoed on served responses when `CORS_DENY_REQUEST=no`).
 - [BUGFIX] `ui`: a refused two-factor enrolment code or password now shows the same secret and QR code again, so the code you already scanned can be retried instead of ending in "The totp token is invalid."
+- [BUGFIX] `modsecurity`: a service named by an IP address no longer scores CRS rule 920350 for requests whose `Host` is one of its own addresses; any other numeric `Host` is still scored.
+- [BUGFIX] `reverseproxy`: a stream service named by an IPv6 address now reaches its upstream instead of dropping the connection with `invalid port in upstream`.
+- [BUGFIX] `letsencrypt`: an IPv6 server name is skipped with a message that says IPv6 certificates are not supported yet.
 - [MISC] `release`: the floating `dev` and `testing` Linux packages and the `testing` GitHub release are no longer published, so package repositories stop offering a phantom upgrade; the installer refuses `--version dev` and `--version testing`.
 - [DOCS] `antibot`, `country`: the help and docs of `ANTIBOT_IGNORE_URI` and `COUNTRY_IGNORE_URI` now say patterns match the normalized path, alone or followed by `?` and the query string.
 - [DOCS] `core`: the IPv6 section drops the experimental label for what is tested, fixes the `USE_IPV6` example and the Docker prerequisites, and adds IPv6-only settings and limits.

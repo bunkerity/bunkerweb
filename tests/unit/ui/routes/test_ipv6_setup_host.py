@@ -1,4 +1,4 @@
-"""Wizard never proposes an unsupported IPv6 literal or truncated authority."""
+"""Wizard proposes the bare IPv6 literal (the service name form) and never a truncated authority."""
 
 import pytest
 
@@ -6,11 +6,12 @@ import pytest
 @pytest.mark.parametrize(
     "host,expected",
     [
-        ("[2001:db8::1]:7000", ""),
-        ("[2001:db8::1]", ""),
-        ("[::1]:7000", ""),
+        ("[2001:db8::1]:7000", "2001:db8::1"),
+        ("[2001:db8::1]", "2001:db8::1"),
+        ("[::1]:7000", "::1"),
         ("192.0.2.1:7000", "192.0.2.1"),
         ("ui.example.com:7000", "ui.example.com"),
+        ("[2001:DB8::1]:7000", "2001:db8::1"),
         ("", "www.example.com"),
     ],
 )

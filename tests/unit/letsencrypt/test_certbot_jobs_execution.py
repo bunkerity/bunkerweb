@@ -805,3 +805,14 @@ def test_renewal_ordinary_output_does_not_retire_account(job_run, monkeypatch):
     _, status = job_run.load("renew")
     assert status == 0
     purge.assert_not_called()
+
+
+def test_an_ipv6_server_name_is_skipped_with_its_own_message(job_run):
+    job_run.env.update(AUTO_LETS_ENCRYPT="yes", SERVER_NAME="app.example.com 2001:db8::1 localhost")
+    module, _ = job_run.load()
+    job_run.log.warning.reset_mock()
+    names, config = module.build_service_config("app.example.com")
+    messages = [call.args[0] for call in job_run.log.warning.call_args_list]
+    assert names == ["app.example.com"] and config["activated"]
+    assert any("Certificates for IPv6 addresses are not supported yet: 2001:db8::1" in m for m in messages), messages
+    assert any("No public CA issues certificates for localhost" in m and "2001" not in m for m in messages), messages

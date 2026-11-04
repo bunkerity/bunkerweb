@@ -49,10 +49,10 @@
   "SERVER_NAME": {
     "context": "multisite",
     "default": "www.example.com",
-    "help": "List of the virtual hosts served by bunkerweb. (separated by space)",
+    "help": "List of the virtual hosts served by bunkerweb. (separated by space) A name can also be an IPv4 address or an IPv6 address written bare, in lowercase and compressed (2001:db8::1, without brackets).",
     "id": "server-name",
     "label": "Server name",
-    "regex": "^(?!.*\\.\\.)(?:(\\b[^\\s+\\/:A-Z]{1,255}\\b)(?:\\s+\\b[^\\s+\\/:A-Z]{1,255}\\b)*)?$",
+    "regex": "^(?!.*\\.\\.)(?:(?:\\b[^\\s+\\/:A-Z]{1,255}\\b|(?:[0-9a-f]{0,4}:){2,7}[0-9a-f]{0,4})(?:\\s+(?:\\b[^\\s+\\/:A-Z]{1,255}\\b|(?:[0-9a-f]{0,4}:){2,7}[0-9a-f]{0,4}))*)?$",
     "type": "text"
   },
   "WORKER_PROCESSES": {
