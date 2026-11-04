@@ -6,6 +6,7 @@ import hashlib
 import json
 import subprocess
 import sys
+from datetime import datetime, timezone
 from pathlib import Path
 
 CLIENT = "fd42:1618:2::a"
@@ -64,14 +65,21 @@ def image_sources():
             "utils/common_utils.py": "src/common/utils/common_utils.py",
             "core/blacklist/jobs/blacklist-download.py": "src/common/core/blacklist/jobs/blacklist-download.py",
             "gen/Templator.py": "src/common/gen/Templator.py",
+            "gen/Configurator.py": "src/common/gen/Configurator.py",
+            "settings.json": "src/common/settings.json",
+            "confs/server-http/server.conf": "src/common/confs/server-http/server.conf",
+            "core/modsecurity/confs/modsec-crs/ip-host.conf": "src/common/core/modsecurity/confs/modsec-crs/ip-host.conf",
+            "core/modsecurity/confs/http/ip-host.modsec-crs": "src/common/core/modsecurity/confs/http/ip-host.modsec-crs",
         },
     }
     for container, sources in files.items():
+        # a source that does not exist in the tree under test (the pre-fix tree of a red run) is not expected in the image
+        sources = {target: source for target, source in sources.items() if Path(source).exists()}
         expected = {"/usr/share/bunkerweb/" + target: hashlib.sha256(Path(source).read_bytes()).hexdigest() for target, source in sources.items()}
         output = run("docker", "exec", container, "sha256sum", *expected)
         actual = {line.split()[1]: line.split()[0] for line in output.splitlines()}
         assert actual == expected, ("IMAGE_SOURCE_MISMATCH", container, actual, expected)
-    print("IMAGE_SOURCES_OK 8 runtime files", flush=True)
+    print("IMAGE_SOURCES_OK runtime files", flush=True)
 
 
 def request(client="ipv6-client", host=INSTANCE, port=80, tls=False, path="/", headers=None, name="www.example.com", method="GET", body=""):
@@ -136,6 +144,37 @@ def bans(writer):
     keys = redis("KEYS", "bans_*").splitlines()
     print("AFTER_UNBAN_KEYS", keys, flush=True)
     assert not keys, keys
+
+
+def container_logs(since):
+    process = subprocess.run(["docker", "logs", "--since", since, "bunkerweb"], text=True, capture_output=True, timeout=40, check=False)
+    return process.stdout + process.stderr
+
+
+def sn(mode):
+    """A service named by an IPv4 or IPv6 literal: reached through its Host, protected by ModSecurity, no CRS 920350 false positive."""
+    since = datetime.now(timezone.utc).isoformat()
+    quiet = {"User-Agent": "", "Accept": "*/*"}  # an empty User-Agent adds 920330 (2) to a 920350 hit (3): over the threshold of 5
+    normal = {"User-Agent": "sn-probe/1.0", "Accept": "*/*"}
+    if mode == "sn_multisite":
+        for name in ("192.0.2.10", "[2001:db8::1]"):
+            status(200, name=name, headers=quiet)
+            status(200, name=name, headers=normal)
+            status(403, name=name, headers=normal, path="/?id=/etc/passwd")
+    elif mode == "sn_single":
+        status(200, name="192.0.2.10", headers=quiet)
+        status(403, name="198.51.100.7", headers=quiet)
+    elif mode == "sn_single_v6":
+        status(200, name="[2001:db8::1]", headers=quiet)
+        status(403, name="[2001:db8::2]", headers=quiet)
+    logs = container_logs(since)
+    print("MODSEC_LOG_LINES", [line[:300] for line in logs.splitlines() if "ModSecurity" in line], flush=True)
+    if mode == "sn_multisite":
+        assert '[id "930120"]' in logs and "OWASP_CRS/4" in logs, "the attack must be blocked by CRS"
+        assert '[id "920350"]' not in logs, "920350 must be removed for the service's own literal"
+    else:
+        # only the other numeric Host keeps scoring 920350 (+3) and 920330 (+2)
+        assert '[id "920350"]' in logs and '[id "920330"]' in logs, "the other numeric Host must keep scoring 920350 and 920330"
 
 
 def limit():
@@ -231,6 +270,8 @@ def check(name):
         clients = redis("CLIENT", "LIST")
         print("REDIS_CLIENTS", clients, flush=True)
         assert "fd42:1618:1::10" in clients, clients
+    elif name in ("sn_multisite", "sn_single", "sn_single_v6"):
+        sn(name)
     elif name == "network":
         version = run("docker", "version", "--format", "{{.Server.Version}}")
         print("DOCKER_SERVER_VERSION", version, flush=True)

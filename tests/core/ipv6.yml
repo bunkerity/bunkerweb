@@ -308,6 +308,49 @@ actions:
       REDIS_HOST: "[fd42:1618:1::50]"
       USE_LIMIT_REQ: "yes"
       LIMIT_REQ_RATE: 1r/m
+  sn_multisite:
+    type: script
+    integrations:
+      - Docker
+    script:
+      - python3
+      - tests/core/ipv6/check.py
+      - sn_multisite
+    result: IPV6_CHECK_OK sn_multisite
+    config:
+      MULTISITE: "yes"
+      SERVER_NAME: 192.0.2.10 2001:db8::1
+      USE_MODSECURITY: "yes"
+      USE_REVERSE_PROXY: "yes"
+      REVERSE_PROXY_HOST: http://[fd42:1618:3::80]:8080
+  sn_single:
+    type: script
+    integrations:
+      - Docker
+    script:
+      - python3
+      - tests/core/ipv6/check.py
+      - sn_single
+    result: IPV6_CHECK_OK sn_single
+    config:
+      SERVER_NAME: 192.0.2.10
+      USE_MODSECURITY: "yes"
+      USE_REVERSE_PROXY: "yes"
+      REVERSE_PROXY_HOST: http://[fd42:1618:3::80]:8080
+  sn_single_v6:
+    type: script
+    integrations:
+      - Docker
+    script:
+      - python3
+      - tests/core/ipv6/check.py
+      - sn_single_v6
+    result: IPV6_CHECK_OK sn_single_v6
+    config:
+      SERVER_NAME: 2001:db8::1
+      USE_MODSECURITY: "yes"
+      USE_REVERSE_PROXY: "yes"
+      REVERSE_PROXY_HOST: http://[fd42:1618:3::80]:8080
 config:
   DISABLE_CONFIGURATION_TESTING: "no"
   USE_IPV6: "yes"
