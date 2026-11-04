@@ -2,6 +2,7 @@
 
 ## v1.6.18~rc3 - ????/??/??
 
+- [BUGFIX] `crowdsec`: `CROWDSEC_METADATA_CACHE_SIZE` now defaults to `24m`, so report metadata for the whole Community Blocklist fits in stream mode. (Refs #4135)
 - [SECURITY] `api`: when `API_LISTEN_HTTPS=yes`, the scheduler, UI, API service and `bwcli` check that an instance presents the generated API certificate (SHA-256 pin) instead of trusting any. A mismatch is logged and the call still falls back to HTTP.
 - [SECURITY] `ui`: failed logins (password, TOTP or recovery code) are counted per client IP and per username in the database, and five in 15 minutes lock that IP or username for 15 minutes (`LOGIN_THROTTLE`, `LOGIN_MAX_ATTEMPTS`, `LOGIN_WINDOW_MINUTES`, `LOGIN_LOCKOUT_MINUTES`).
 - [SECURITY] `core`: an IPv6 address is now one ban whatever its spelling (expanded, upper case or IPv4-mapped), in every ban, unban and lookup path.
