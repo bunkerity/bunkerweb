@@ -1243,6 +1243,42 @@ local function lease_copy_valid(ip, ban_data)
 	return epoch ~= nil and type(ban_data) == "table" and ban_data.lease_epoch == epoch
 end
 
+-- A multi-key command refused while a Redis Cluster slot migrates ("TRYAGAIN Multiple keys request ...")
+local function is_tryagain_error(err)
+	return type(err) == "string" and err:sub(1, 8) == "TRYAGAIN"
+end
+
+-- Single-key twin of the lookup script, same reply shape. A Redis Cluster refuses the script (TRYAGAIN) while the
+-- slot of the keys migrates, but a GET on one key follows ASK and MOVED. With leases on, the last key is the epoch.
+local function read_ban_keys_singly(clusterstore, redis_keys, lease_on)
+	local last, epoch = #redis_keys, nil
+	if lease_on then
+		last = last - 1
+		local value, err = clusterstore:call("get", redis_keys[#redis_keys])
+		if value == nil or value == false then
+			return nil, tostring(err)
+		end
+		epoch = value
+	end
+	for i = 1, last do
+		local value, err = clusterstore:call("get", redis_keys[i])
+		if value == nil or value == false then
+			return nil, tostring(err)
+		end
+		if value ~= null then
+			local ttl, ttl_err = clusterstore:call("ttl", redis_keys[i])
+			if type(ttl) ~= "number" then
+				return nil, tostring(ttl_err)
+			end
+			-- -2: the key expired between the two reads, which is a miss
+			if ttl ~= -2 then
+				return { value, ttl, i, epoch }
+			end
+		end
+	end
+	return { null, -2, 0, epoch }
+end
+
 utils.is_banned = function(ip, server_name, ctx)
 	ip = ip_key(ip)
 	-- Get Redis config once
@@ -1430,7 +1466,13 @@ utils.is_banned = function(ip, server_name, ctx)
 	if lease_on then
 		redis_keys[#redis_keys + 1] = rediskeys.cs_epoch(ip, cluster)
 	end
+	-- No TRYAGAIN retry for the script: a slot can stay migrating far longer than any retry budget, so the
+	-- single-key twin below answers at once.
+	clusterstore.tryagain_retries = 0
 	local data, script_err = clusterstore:call("eval", redis_script, #redis_keys, unpack(redis_keys))
+	if not data and clusterstore.cluster_mode and is_tryagain_error(script_err) then
+		data, script_err = read_ban_keys_singly(clusterstore, redis_keys, lease_on)
+	end
 	clusterstore:close()
 	if not data then
 		return redis_failed("redis call error: " .. script_err)

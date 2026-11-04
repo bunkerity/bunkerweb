@@ -41,6 +41,7 @@
 - [BUGFIX] `crowdsec`: a CrowdSec decision on an IPv6 address written with an IPv4 tail is no longer applied to that IPv4 address.
 - [BUGFIX] `ui`: the "More than 30 days" filter of the bans page now counts the permanent bans it shows.
 - [BUGFIX] `ui`: sorting bans by time left now follows their remaining time, with permanent bans last.
+- [BUGFIX] `redis`: with Redis Cluster, a ban held only in Redis stays enforced while a slot is resharded instead of failing open on `TRYAGAIN`, and other multi-key calls retry briefly.
 - [MISC] `release`: the floating `dev` and `testing` Linux packages and the `testing` GitHub release are no longer published, so package repositories stop offering a phantom upgrade; the installer refuses `--version dev` and `--version testing`.
 - [DOCS] `antibot`, `country`: the help and docs of `ANTIBOT_IGNORE_URI` and `COUNTRY_IGNORE_URI` now say patterns match the normalized path, alone or followed by `?` and the query string.
 - [DOCS] `core`: the IPv6 section drops the experimental label for what is tested, fixes the `USE_IPV6` example and the Docker prerequisites, and adds IPv6-only settings and limits.
