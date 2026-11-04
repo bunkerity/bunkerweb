@@ -24,6 +24,7 @@
 - [BUGFIX] `autoconf`: Kubernetes pods with an IPv6 address now get a valid instance DNS name.
 - [BUGFIX] `core`: an IPv6-only stack now starts, as the startup config keeps `USE_IPV6`, `API_LISTEN_IP` and `DNS_RESOLVERS`.
 - [BUGFIX] `api`: updating an instance with `PATCH /instances/{hostname}` now returns the instance instead of an error.
+- [BUGFIX] `reversescan`: once a decision is made, the remaining port scans are cancelled instead of left running until they time out.
 - [BUGFIX] `customcert`: a rejected certificate no longer removes the one being served.
 - [BUGFIX] `blacklist`, `greylist`, `whitelist`: removing a feed URL now also removes its cached rows, which could bring the old entries back.
 - [BUGFIX] `jobs`: a renewed API certificate is now written to the local cache too, not only to the database.

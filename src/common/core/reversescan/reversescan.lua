@@ -52,7 +52,7 @@ function reversescan:access()
 		end
 	end
 	if ret_threads ~= nil then
-		if #threads > 0 then
+		if next(threads) ~= nil then
 			local wait_threads = {}
 			for _, thread in pairs(threads) do
 				table.insert(wait_threads, thread)
@@ -111,7 +111,7 @@ function reversescan:access()
 		end
 	end
 	-- Kill running threads
-	if #threads > 0 then
+	if next(threads) ~= nil then
 		local wait_threads = {}
 		for _, thread in pairs(threads) do
 			table.insert(wait_threads, thread)
