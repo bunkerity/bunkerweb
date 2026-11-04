@@ -938,7 +938,9 @@ def certbot_new(
     return process.returncode
 
 
-def generate_certificate(service: str, config: Dict[str, Union[str, bool, int, Dict[str, str]]], cmd_env: Dict[str, str]) -> bool:
+def generate_certificate(
+    service: str, config: Dict[str, Union[str, bool, int, Dict[str, str]]], cmd_env: Dict[str, str], concurrent_requests: Optional[bool] = None
+) -> bool:
     LOGGER.info(
         f"Asking{' wildcard' if config['wildcard'] else ''} certificates for domain(s) : {config['server_names']} (email = {config['email'] or 'not provided'}){' using staging' if config['staging'] else ''} with {config['challenge']} challenge, using {config['profile']!r} profile on {config['acme_server']}..."
     )
@@ -947,7 +949,8 @@ def generate_certificate(service: str, config: Dict[str, Union[str, bool, int, D
         debug_config["zerossl_api_key"] = "***"
     LOGGER.debug(f"Service configuration: {debug_config}")
 
-    concurrent_requests = getenv("LETS_ENCRYPT_CONCURRENT_REQUESTS", "no").lower() == "yes"
+    if concurrent_requests is None:
+        concurrent_requests = getenv("LETS_ENCRYPT_CONCURRENT_REQUESTS", "no").lower() == "yes"
     paths, temp_root = prepare_certbot_paths(service, concurrent_requests, CACHE_PATH, DATA_PATH, WORK_DIR, LOGS_DIR)
     success = False
 
@@ -1206,8 +1209,9 @@ try:
                     required_accounts.add((bool(config.get("staging")), str(config.get("email") or "")))
                 else:
                     required_zerossl_accounts.add((bool(config.get("staging")), str(config.get("email") or "")))
+            registration_failed = False
             if required_accounts:
-                ensure_accounts(required_accounts, cmd_env.copy(), CERTBOT_BIN, LOG_LEVEL, DATA_PATH, WORK_DIR, LOGS_DIR, LOGGER)
+                registration_failed = not ensure_accounts(required_accounts, cmd_env.copy(), CERTBOT_BIN, LOG_LEVEL, DATA_PATH, WORK_DIR, LOGS_DIR, LOGGER)
             if required_zerossl_accounts:
                 zerossl_env = cmd_env.copy()
                 zerossl_env["CERTBOT_BIN"] = CERTBOT_BIN
@@ -1224,7 +1228,14 @@ try:
                         zerossl_env["LETS_ENCRYPT_ZEROSSL_API_CONNECT_TIMEOUT"] = str(config.get("zerossl_api_connect_timeout") or 5)
                         zerossl_env["LETS_ENCRYPT_ZEROSSL_API_MAX_TIME"] = str(config.get("zerossl_api_max_time") or 20)
                         break
-                ensure_zerossl_accounts(required_zerossl_accounts, zerossl_env, ZEROSSL_BOT_SCRIPT.as_posix(), LOG_LEVEL, DATA_PATH, WORK_DIR, LOGS_DIR, LOGGER)
+                if not ensure_zerossl_accounts(
+                    required_zerossl_accounts, zerossl_env, ZEROSSL_BOT_SCRIPT.as_posix(), LOG_LEVEL, DATA_PATH, WORK_DIR, LOGS_DIR, LOGGER
+                ):
+                    registration_failed = True
+            if registration_failed:
+                # Parallel orders would each register their own account, so a real CA would see several new accounts in one run.
+                LOGGER.warning("Account registration failed, falling back to sequential certificate orders for this run to avoid creating several new accounts")
+                concurrent_requests = False
         start_progress_monitor()
         try:
             if concurrent_requests and len(pending_services) > 1:
@@ -1249,7 +1260,7 @@ try:
                     # Same containment as the concurrent branch above: one service raising must not
                     # end the run for the ones after it, nor skip the cleanup and persist below.
                     try:
-                        config["exists"] = generate_certificate(service, config, cmd_env)
+                        config["exists"] = generate_certificate(service, config, cmd_env, concurrent_requests)
                     except BaseException as e:
                         LOGGER.error(f"Unexpected error while generating certificate(s) for {service}: {e}")
                         config["exists"] = False
