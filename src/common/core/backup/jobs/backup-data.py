@@ -15,7 +15,7 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
 from Database import Database  # type: ignore
 from logger import getLogger  # type: ignore
 from jobs import Job  # type: ignore
-from backup import backup_database, update_cache_file, acquire_db_lock, release_db_lock, DatabaseLockBusy
+from backup import backup_database, hanoi_rotation, update_cache_file, acquire_db_lock, release_db_lock, DatabaseLockBusy
 
 LOGGER = getLogger("BACKUP")
 status = 0
@@ -55,8 +55,15 @@ try:
             "monthly": timedelta(weeks=4).total_seconds(),
         }
 
-        already_done = last_backup_date and last_backup_date.timestamp() + PERIOD_STAMPS[backup_period] > current_time.timestamp()
+        if backup_period == "hanoi":
+            # "Less than an hour ago" would skip every other run: the date is stored when a backup ends,
+            # and the next hourly run starts an hour after this one started. Half an hour leaves room for
+            # long backups and scheduler drift; a second backup in the same hour is folded by the rotation.
+            already_done = last_backup_date and last_backup_date.timestamp() + timedelta(minutes=30).total_seconds() > current_time.timestamp()
+        else:
+            already_done = last_backup_date and last_backup_date.timestamp() + PERIOD_STAMPS[backup_period] > current_time.timestamp()
         backup_rotation = int(getenv("BACKUP_ROTATION", "7"))
+        LOGGER.debug(f"Schedule: {backup_period}, last backup: {last_backup_date.isoformat() if last_backup_date else 'none'}, already_done={already_done}")
 
         sorted_files = []
         if already_done:
@@ -67,7 +74,8 @@ try:
             # Sort the backup files by name
             sorted_files = sorted(backup_files)
 
-        if len(sorted_files) <= backup_rotation and already_done:
+        # BACKUP_ROTATION does not apply to hanoi, whose rotation runs after each new backup
+        if already_done and (backup_period == "hanoi" or len(sorted_files) <= backup_rotation):
             LOGGER.info(f"Backup already done within the last {backup_period} period, skipping backup ...")
             sys_exit(0)
 
@@ -95,8 +103,14 @@ try:
             sorted_files = sorted(backup_files)
 
     if not force_backup:
+        if backup_period == "hanoi":
+            to_delete = hanoi_rotation(sorted_files, current_time)
+            LOGGER.debug(f"Hanoi rotation: {len(sorted_files)} files total, {len(to_delete)} to delete, {len(sorted_files) - len(to_delete)} to keep.")
+            for file in to_delete:
+                LOGGER.warning(f"Removing old backup file: {file.name} (Towers of Hanoi rotation) ...")
+                file.unlink()
         # Check if the number of backup files exceeds the rotation limit
-        if len(sorted_files) > backup_rotation:
+        elif len(sorted_files) > backup_rotation:
             # Calculate the number of files to remove
             num_files_to_remove = len(sorted_files) - backup_rotation
 

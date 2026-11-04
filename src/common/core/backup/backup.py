@@ -1,18 +1,19 @@
 #!/usr/bin/env python3
 
-from contextlib import closing
-from datetime import datetime
+from contextlib import closing, suppress
+from datetime import datetime, timedelta
+from hashlib import sha256
 import re
 from json import dumps, loads
 from os import getenv
 from os.path import join, sep
 from pathlib import Path
 from subprocess import PIPE, run
-from shutil import which
+from shutil import disk_usage, which
 from sqlite3 import connect as sqlite_connect
 from sys import exit as sys_exit, path as sys_path
 from tempfile import TemporaryDirectory
-from typing import Literal
+from typing import List, Literal, Optional, Tuple
 from zipfile import BadZipFile, ZIP_DEFLATED, ZipFile
 from zlib import error as zlib_error
 
@@ -20,7 +21,7 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
     if deps_path not in sys_path:
         sys_path.append(deps_path)
 
-from sqlalchemy import inspect
+from sqlalchemy import inspect, text
 from sqlalchemy.engine.url import make_url
 
 from common_utils import acquire_db_lock as _acquire_db_lock, bytes_hash, DatabaseLockBusy, release_db_lock, safe_zip_extractall  # type: ignore  # noqa: F401
@@ -79,6 +80,129 @@ def acquire_db_lock(timeout: float = 30.0) -> int:
     return _acquire_db_lock(DB_LOCK_FILE, timeout=timeout)
 
 
+def check_disk_space(database: str, db: Database, backup_dir: Path, db_path: Optional[Path] = None) -> bool:
+    """Check whether backup_dir has enough free space to hold a new backup.
+
+    The estimated dump size uses a 2× multiplier over the raw database size to
+    account for SQL text being larger than the on-disk binary representation
+    (especially for SQLite). After zip compression the actual backup file will
+    be significantly smaller, so this is intentionally conservative.
+
+    Returns True when there is enough space or when the check cannot be
+    performed (so the backup is never silently skipped due to a query error).
+    """
+    try:
+        if database == "sqlite":
+            if db_path is None or not db_path.exists():
+                LOGGER.warning("Cannot check disk space: SQLite database path is not available.")
+                return True
+            db_size = db_path.stat().st_size
+        elif database in ("mariadb", "mysql"):
+            with db.sql_engine.connect() as conn:
+                row = conn.execute(text("SELECT SUM(data_length + index_length) FROM information_schema.tables WHERE table_schema = DATABASE()")).fetchone()
+            db_size = int(row[0]) if row and row[0] else 0
+        elif database == "postgresql":
+            with db.sql_engine.connect() as conn:
+                row = conn.execute(text("SELECT pg_database_size(current_database())")).fetchone()
+            db_size = int(row[0]) if row and row[0] else 0
+        else:
+            return True  # unsupported engine, skip check
+
+        # SQL text dumps are typically 2–3× the raw binary DB size. Use 2× as a
+        # conservative lower bound for the uncompressed dump that will be held
+        # in memory (proc.stdout) before compression.
+        estimated_size = db_size * 2
+        free = disk_usage(backup_dir).free
+
+        LOGGER.debug(f"Disk space check: DB ~{db_size:,} B, estimated dump ~{estimated_size:,} B, free in {backup_dir} ~{free:,} B")
+
+        if free < estimated_size:
+            LOGGER.error(
+                f"Not enough disk space for backup: need ~{estimated_size:,} bytes "
+                f"(2× DB size of {db_size:,} B), but only {free:,} bytes free in {backup_dir}"
+            )
+            return False
+
+        return True
+    except Exception as exc:
+        # Common expected causes: DB user lacks SELECT on information_schema /
+        # pg_database, or the connection is temporarily unavailable.
+        # In all cases we skip the check and let the backup proceed — a failed
+        # space check must never prevent a backup from running.
+        exc_str = str(exc).lower()
+        if any(kw in exc_str for kw in ("access denied", "permission denied", "insufficient privilege", "connection", "refused", "timeout")):
+            LOGGER.debug(f"Disk space check skipped (DB user may lack access to system tables): {exc}")
+        else:
+            LOGGER.warning(f"Disk space check skipped (unexpected error): {exc}")
+        return True
+
+
+# Towers of Hanoi retention: (number of buckets, bucket width), applied to consecutive age ranges.
+# Backups younger than 6h keep one per hour, the next 4h one per 2h, and so on up to 2050h (~85 days).
+HANOI_TIERS: List[Tuple[int, timedelta]] = [
+    (6, timedelta(hours=1)),  # ages 0-6h
+    (2, timedelta(hours=2)),  # 6-10h
+    (2, timedelta(hours=4)),  # 10-18h
+    (2, timedelta(hours=8)),  # 18-34h
+    (2, timedelta(hours=16)),  # 34-66h
+    (2, timedelta(hours=32)),  # 66-130h
+    (2, timedelta(hours=64)),  # 130-258h
+    (2, timedelta(hours=128)),  # 258-514h
+    (2, timedelta(hours=256)),  # 514-1026h
+    (2, timedelta(hours=512)),  # 1026-2050h (~85 days)
+]
+
+
+def backup_taken_at(backup_file: Path, local: datetime) -> datetime:
+    """When a backup was taken, from the naive local time in its name.
+
+    In the hour a DST change repeats, that name stands for two instants: take the one closest to the
+    file's modification time, which is written when the backup is taken.
+    """
+    first, second = local.replace(fold=0).astimezone(), local.replace(fold=1).astimezone()
+    if first == second:
+        return first
+    with suppress(OSError):
+        mtime = backup_file.stat().st_mtime
+        return min((first, second), key=lambda instant: abs(instant.timestamp() - mtime))
+    return first
+
+
+def hanoi_rotation(backup_files: List[Path], now: datetime) -> List[Path]:
+    """Return the list of files to DELETE under Towers-of-Hanoi rotation.
+
+    Each tier covers a fixed age range and keeps the newest backup of every bucket of its width.
+    Buckets are aligned on the epoch, not on *now*, and every width is twice the previous one, so a
+    coarser bucket is exactly two finer ones: the backup it keeps is always one the finer tier kept,
+    and a backup is only deleted once a newer one covers the same bucket. Sliding windows anchored on
+    *now* broke that and deleted backups a later window needed.
+
+    Keeps 24 to 34 files (a tier's age range can touch one bucket more than its count); the oldest is
+    64 to 85 days old, depending on where the buckets fall.
+    Backups dated in the future (clock change) are kept, and see backup_taken_at() for the hour a DST change repeats.
+    """
+    timed: List[Tuple[datetime, Path]] = []
+    for f in backup_files:
+        m = re.search(r"backup-\w+-(\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2})", f.name)
+        if m:
+            timed.append((backup_taken_at(f, datetime.strptime(m.group(1), "%Y-%m-%d_%H-%M-%S")), f))
+
+    timed.sort(reverse=True)  # newest first
+
+    keep = {f for dt, f in timed if dt > now}
+    tier_start = timedelta(0)
+    for count, interval in HANOI_TIERS:
+        tier_end = tier_start + count * interval
+        newest = {}
+        for dt, f in timed:
+            if tier_start <= now - dt < tier_end:
+                newest.setdefault(int(dt.timestamp() // interval.total_seconds()), f)
+        keep.update(newest.values())
+        tier_start = tier_end
+
+    return [f for _, f in timed if f not in keep]
+
+
 def update_cache_file(db: Database, backup_dir: Path) -> str:
     """Update the cache file in the database."""
     backup_data = loads(db.get_job_cache_file("backup-data", "backup.json") or "{}")
@@ -103,6 +227,11 @@ def backup_database(current_time: datetime, db: Database = None, backup_dir: Pat
     database: Literal["sqlite", "mariadb", "mysql", "postgresql", "oracle"] = database_url.drivername.split("+")[0]
     backup_file = backup_dir.joinpath(f"backup-{database}-{current_time.strftime('%Y-%m-%d_%H-%M-%S')}.zip")
     LOGGER.debug(f"Backup file path: {backup_file}")
+
+    # Pre-flight: ensure there is enough free space before starting the dump.
+    db_path_for_check = Path(database_url.database) if database == "sqlite" else None
+    if not check_disk_space(database, db, backup_dir, db_path=db_path_for_check):
+        sys_exit(1)
 
     # Get table names from the SQLAlchemy model
     model_tables = list(Base.metadata.tables.keys())
@@ -242,12 +371,19 @@ def backup_database(current_time: datetime, db: Database = None, backup_dir: Pat
             LOGGER.error(f"Failed to dump the database: {stderr}")
             sys_exit(1)
 
+    dump_size = len(proc.stdout) if proc.stdout else 0
+    sql_name = backup_file.with_suffix(".sql").name
+    LOGGER.info(f"Computing SHA-256 checksum of dump ({dump_size} bytes) ...")
+    checksum = sha256(proc.stdout).hexdigest()
+    LOGGER.info(f"SHA-256 of dump: {checksum}")
+
     with ZipFile(backup_file, "w", compression=ZIP_DEFLATED) as zipf:
-        zipf.writestr(backup_file.with_suffix(".sql").name, proc.stdout)
+        zipf.writestr(sql_name, proc.stdout)
+        zipf.writestr(sql_name + ".sha256", f"{checksum}  {sql_name}\n")
 
     backup_file.chmod(0o600)
-
-    LOGGER.info(f"💾 Backup {backup_file.name} created successfully in {backup_dir}")
+    compressed_size = backup_file.stat().st_size
+    LOGGER.info(f"💾 Backup {backup_file.name} created successfully in {backup_dir} ({compressed_size:,} bytes)")
     return db, backup_file
 
 
@@ -276,6 +412,39 @@ def check_backup_engine(backup_file: Path, database: str) -> str:
     return ""
 
 
+def verify_backup_checksum(backup_file: Path) -> bool:
+    """Verify the SHA-256 checksum of the SQL dump inside a backup zip.
+
+    Returns True if the checksum matches or if no .sha256 file is present
+    (backwards compatibility with backups created before checksums were added).
+    Returns False if the checksum does not match.
+    """
+    sql_name = backup_file.with_suffix(".sql").name
+    sha256_name = sql_name + ".sha256"
+
+    try:
+        with ZipFile(backup_file, "r") as zipf:
+            if sha256_name not in zipf.namelist():
+                LOGGER.warning(f"{backup_file.name}: no checksum file found (backup predates checksum support), skipping verification.")
+                return True
+
+            stored_line = zipf.read(sha256_name).decode().strip()
+            stored_checksum = stored_line.split()[0] if stored_line else ""
+            sql_data = zipf.read(sql_name)
+    except Exception as exc:
+        LOGGER.error(f"{backup_file.name}: could not read backup archive: {exc}")
+        return False
+
+    computed_checksum = sha256(sql_data).hexdigest()
+
+    if computed_checksum != stored_checksum:
+        LOGGER.error(f"{backup_file.name}: checksum MISMATCH — stored={stored_checksum}, computed={computed_checksum}")
+        return False
+
+    LOGGER.info(f"{backup_file.name}: checksum OK ({computed_checksum})")
+    return True
+
+
 def restore_database(backup_file: Path, db: Database = None) -> Database:
     """Restore the database from a backup."""
     db = db or Database(LOGGER)
@@ -286,6 +455,16 @@ def restore_database(backup_file: Path, db: Database = None) -> Database:
     if refusal:
         LOGGER.error(f"Refusing to restore {backup_file}, {refusal}. The database was left untouched")
         sys_exit(1)
+
+    # Verify checksum before touching the live database.
+    LOGGER.info(f"Verifying checksum of {backup_file.name} ...")
+    if not verify_backup_checksum(backup_file):
+        if getenv("BACKUP_IGNORE_CHECKSUM_ERROR_ON_DB_RESTORE", "no") == "yes":
+            LOGGER.warning("Checksum verification failed but BACKUP_IGNORE_CHECKSUM_ERROR_ON_DB_RESTORE=yes — proceeding with restore anyway.")
+        else:
+            LOGGER.error("Aborting restore: checksum verification failed. The database was left untouched")
+            LOGGER.error("To force restore despite a checksum mismatch, set BACKUP_IGNORE_CHECKSUM_ERROR_ON_DB_RESTORE=yes (use only as a last resort).")
+            sys_exit(1)
 
     Base.metadata.drop_all(db.sql_engine)
 
@@ -315,6 +494,7 @@ def restore_database(backup_file: Path, db: Database = None) -> Database:
             env={"PATH": getenv("PATH", ""), "PYTHONPATH": getenv("PYTHONPATH", "")},
         )
         tmp_file.unlink(missing_ok=True)
+        Path(str(tmp_file) + ".sha256").unlink(missing_ok=True)
     else:
         url = make_url(db.database_uri)
         db_user = url.username or ""
