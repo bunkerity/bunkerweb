@@ -1,0 +1,72 @@
+tests/core/ipv6/bunkerweb.yml
+  s_fbc44d4e8a2eaf::t_9ea0bba02368b0 1-27
+tests/core/ipv6/scheduler.yml
+  s_fbc44d4e8a2eaf::t_9b4c438f0db228 7-13
+  s_fbc44d4e8a2eaf::t_9ea0bba02368b0 1-6
+tests/scripts/build.sh
+  s_a735c7eaff7086::t_01b7ef18297bc2 38,223
+tests/core/ipv6/redis.yml
+  s_fbc44d4e8a2eaf::t_9ea0bba02368b0 1-14
+tests/core/ipv6/check.py
+  s_fbc44d4e8a2eaf::t_9b4c438f0db228 18,48,169-171,198,205
+  s_fbc44d4e8a2eaf::t_41b5f459cf3ca4 61,108-110
+  s_fbc44d4e8a2eaf::t_21a5aedeba9d86 57-60,62-76,152
+  s_fbc44d4e8a2eaf::t_808ab28b85ae4b 1-4,6-17,19-47,49-56,77-107,111-135,137,139-151,153,156,159-168,172-179,181-197,206-216,219-220,222-223,231-236,241-244,247-253
+  s_fbc44d4e8a2eaf::t_c3438bc232913d 157-158
+  s_fbc44d4e8a2eaf::t_06bb3ab0aa47db 5,154-155,180,221,224-230,245
+  s_fbc44d4e8a2eaf::t_4072fd684edb1f 136,138,217-218
+  s_fbc44d4e8a2eaf::t_f8a1c6e7401b5b 240
+  s_fbc44d4e8a2eaf::t_e36cd99d9ab9a1 199-204,237-239,246
+tests/core/ipv6.yml
+  s_fbc44d4e8a2eaf::t_c3438bc232913d 312
+  s_fbc44d4e8a2eaf::t_9b4c438f0db228 1-71,73-225,228-236,239-311,313-339,343-346
+  s_fbc44d4e8a2eaf::t_2c6a615b6cf24d 72,226-227,237-238
+  s_fbc44d4e8a2eaf::t_994756ac1903b0 340-342
+tests/core/ipv6/fixtures.yml
+  s_fbc44d4e8a2eaf::t_9ea0bba02368b0 1-48
+tests/scripts/utils.sh
+  s_fbc44d4e8a2eaf::t_999ac4a1573131 824-825,1146-1151,1286,1371,1687
+  s_fbc44d4e8a2eaf::t_9b4c438f0db228 523,744,810,915,922-923
+  s_fbc44d4e8a2eaf::t_8592ccb87de377 826
+  s_fbc44d4e8a2eaf::t_9fd9da3bb3b42a 924-925
+  s_fbc44d4e8a2eaf::t_db216e415055b6 1152-1154
+tests/core/ipv6/services.yml
+  s_fbc44d4e8a2eaf::t_9ea0bba02368b0 1-11
+tests/scripts/start.sh
+  s_a735c7eaff7086::t_01b7ef18297bc2 95
+  s_fbc44d4e8a2eaf::t_f8a1c6e7401b5b 91-94,361,365,371,379,383,389,772,777
+  s_fbc44d4e8a2eaf::t_999ac4a1573131 347-348
+  s_fbc44d4e8a2eaf::t_9ba4efd566cd0a 349-350
+tests/core/ipv6/server.py
+  s_fbc44d4e8a2eaf::t_808ab28b85ae4b 13-14
+  s_fbc44d4e8a2eaf::t_9ea0bba02368b0 1-12,15-29
+tests/core/ipv6/dnsmasq.yml
+  s_fbc44d4e8a2eaf::t_9ea0bba02368b0 1-17
+tests/scripts/test.sh
+  s_a735c7eaff7086::t_01b7ef18297bc2 11
+  s_fbc44d4e8a2eaf::t_ec9b14f70c23e8 12-16
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "6081e6f5e677861d10c2ec3f710c84193de21bb3",
+  "prompts": {},
+  "sessions": {
+    "s_a735c7eaff7086": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a18eb0-34d2-7fb0-a1a2-c1cc0432db8c",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_fbc44d4e8a2eaf": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a18e3c-87db-75c1-8f89-1c2d32eb0d8a",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}
