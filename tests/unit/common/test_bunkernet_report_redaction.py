@@ -1,4 +1,4 @@
-"""A BunkerNet report drops matched header and cookie values from the ModSecurity reason data.
+"""With ``BUNKERNET_FILTER_HEADERS=yes`` a BunkerNet report drops matched header and cookie values from the ModSecurity reason data.
 
 ModSecurity reasons carry ``matched_vars`` (the request values that tripped rules) next to
 ``matched_var_names`` (the variables they came from). The report keeps ids, messages, names and
@@ -19,7 +19,7 @@ GET_REASON = 'get_reason = function() return "blacklist", { id = "ua", ua = "cur
 EMIT = "emit({ ret = result.ret, msg = result.msg, key = REPORTS[1] and REPORTS[1].key, report = report, max = GET_HEADERS_MAX })"
 
 
-def send(reason_data):
+def send(reason_data, filter_headers="yes"):
     ctx = {
         "kind": "http",
         "remote_addr": IP,
@@ -33,7 +33,7 @@ def send(reason_data):
     assert stubs.count("REASON_DATA") == 2
     script = (
         BASE_LUA.replace("function emit(v)", "json_encode, json_decode = json.encode, json.decode\nfunction emit(v)")
-        + f"MODULE = {json.dumps(str(MODULE))}\nHEADERS = {{}}\nREASON_DATA = {to_lua(reason_data)}\nCTX = {to_lua(ctx)}\nLOG_METHOD = 'log'\n"
+        + f"MODULE = {json.dumps(str(MODULE))}\nFILTER = {json.dumps(filter_headers)}\nHEADERS = {{}}\nREASON_DATA = {to_lua(reason_data)}\nCTX = {to_lua(ctx)}\nLOG_METHOD = 'log'\n"
         + stubs
     )
     out = last_json(run_lua(script))
@@ -99,3 +99,17 @@ def test_the_original_reason_data_is_untouched():
     out = send(data)
     assert out["report"]["data"]["matched_vars"] == ["", "v"]
     assert out["original"] == data
+
+
+# BUNKERNET_FILTER_HEADERS=no (the default): the reason data goes out as ModSecurity produced it.
+def test_default_sends_matched_header_and_cookie_values():
+    data = reason(
+        ["REQUEST_HEADERS:Authorization", "REQUEST_COOKIES:session", "ARGS:q"],
+        ["Bearer t0ken", "abc123", "<script>"],
+    )
+    assert send(data, filter_headers="no")["report"]["data"] == data
+
+
+def test_default_keeps_unaligned_matched_values():
+    data = reason(["REQUEST_HEADERS:Cookie", "ARGS:a"], ["only-one-value"])
+    assert send(data, filter_headers="no")["report"]["data"] == data

@@ -1373,7 +1373,7 @@ BunkerNet 插件通过 BunkerWeb 实例之间的集体威胁情报共享，创�
       2. **主动防护：** 根据恶意行为者在别处的行为，在他们攻击您的网站之前就将其阻止。
       3. **社区贡献：** 通过分享关于攻击者的威胁数据，帮助保护其他 BunkerWeb 用户。
       4. **零配置：** 开箱即用，带有合理的默认值，只需最少的设置。
-      5. **有限分享：** 报告只包含一组固定的字段，以及一份简短的请求头白名单，详见下文。
+      5. **受控分享：** 报告包含一组固定的字段，`BUNKERNET_FILTER_HEADERS` 可将其请求头限制为一份简短的白名单（见下文）。
 
 ### 如何使用
 
@@ -1387,10 +1387,11 @@ BunkerNet 插件通过 BunkerWeb 实例之间的集体威胁情报共享，创�
 
 ### 配置设置
 
-| 设置               | 默认值                     | 上下文    | 多个 | 描述                                                                 |
-| ------------------ | -------------------------- | --------- | ---- | -------------------------------------------------------------------- |
-| `USE_BUNKERNET`    | `yes`                      | multisite | 否   | **启用 BunkerNet：** 设置为 `yes` 以启用 BunkerNet 威胁情报共享。    |
-| `BUNKERNET_SERVER` | `https://api.bunkerweb.io` | global    | 否   | **BunkerNet 服务器：** 用于共享威胁情报的 BunkerNet API 服务器地址。 |
+| 设置                       | 默认值                     | 上下文    | 多个 | 描述                                                                                                                                                                  |
+| -------------------------- | -------------------------- | --------- | ---- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `USE_BUNKERNET`            | `yes`                      | multisite | 否   | **启用 BunkerNet：** 设置为 `yes` 以启用 BunkerNet 威胁情报共享。                                                                                                     |
+| `BUNKERNET_FILTER_HEADERS` | `no`                       | multisite | 否   | **过滤上报的请求头：** 设置为 `yes` 时，只发送一份简短的请求头白名单，并清空 ModSecurity 在请求头和 Cookie 中命中的值。设置为 `no` 时，报告包含所有请求头和命中的值。 |
+| `BUNKERNET_SERVER`         | `https://api.bunkerweb.io` | global    | 否   | **BunkerNet 服务器：** 用于共享威胁情报的 BunkerNet API 服务器地址。                                                                                                  |
 
 !!! tip "网络保护"
     当 BunkerNet 检测到某个 IP 地址在多个 BunkerWeb 实例中参与了恶意活动时，它会将该 IP 添加到集体黑名单中。这提供了一个主动的防御层，在威胁直接攻击您之前就保护您的网站。
@@ -1401,10 +1402,12 @@ BunkerNet 插件通过 BunkerWeb 实例之间的集体威胁情报共享，创�
     - 每次请求发送的实例元数据：BunkerNet 实例 ID、BunkerWeb 版本、集成方式，以及操作系统名称、版本、版本 ID、代号、ID 和架构；
     - 客户端 IP 地址、阻止原因和日期；
     - HTTP 方法、**包含查询字符串的** URL，以及服务名称（`server_name`）；
-    - 请求头 `User-Agent`、`Accept`、`Accept-Encoding`、`Accept-Language`、`Content-Type` 和 `Content-Length`，连同其值。不会发送其他请求头：Cookie、`Authorization` 和自定义请求头都保留在您的实例上；
-    - 与阻止原因相关的详细信息。根据阻止该客户端的插件不同，可能包含命中的 ModSecurity 规则 ID 和消息，以及触发这些规则的请求值（参数或请求体的片段，每项截断为 512 字节；在请求头和 Cookie 中命中的值绝不会发送，只发送变量名）；对于 Bad Behavior，则是导致封禁的近期请求的方法和 URL。
+    - 请求头及其值：收到的所有请求头（最多 `MAX_HEADERS` 个），或在 `BUNKERNET_FILTER_HEADERS` 为 `yes` 时仅包含 `User-Agent`、`Accept`、`Accept-Encoding`、`Accept-Language`、`Content-Type` 和 `Content-Length`；
+    - 与阻止原因相关的详细信息。根据阻止该客户端的插件不同，可能包含命中的 ModSecurity 规则 ID 和消息，以及触发这些规则的请求值（参数、请求体、请求头或 Cookie 的片段，每项截断为 512 字节；`BUNKERNET_FILTER_HEADERS` 为 `yes` 时，在请求头和 Cookie 中命中的值会被清空，只发送变量名）；对于 Bad Behavior，则是导致封禁的近期请求的方法和 URL。
 
-    URL 以及命中的参数和请求体的值均来自请求，因此包含客户端发送的任何内容。对于 URL 中带有敏感值的服务，请将 `USE_BUNKERNET` 设置为 `no`。
+    默认情况下（`BUNKERNET_FILTER_HEADERS` 为 `no`），报告包含收到的所有请求头（最多 `MAX_HEADERS` 个，包括 Cookie 和 `Authorization`），以及 ModSecurity 命中的原始值。将 `BUNKERNET_FILTER_HEADERS` 设置为 `yes`，则只发送上面列出的六个请求头，并清空在请求头和 Cookie 中命中的值。仍在队列中的报告在 `yes` 时也会在发送前以同样方式过滤。
+
+    URL 以及命中的值均来自请求，因此包含客户端发送的任何内容。对于 URL 中带有敏感值的服务，请将 `USE_BUNKERNET` 设置为 `no`。
 
 ### 示例配置
 

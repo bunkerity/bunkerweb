@@ -11,7 +11,7 @@ MODULE = CORE / "bunkernet" / "bunkernet.lua"
 BOUNDARIES = r"""
 package.loaded["cjson"] = json
 NOW, HEADERS, REPORTS, RECENT = 1000000, {accept="text/html", cookie="secret", authorization="secret"}, {}, {}
-VARIABLES = {USE_BUNKERNET="yes", BUNKERNET_SERVER="https://feed.example"}
+VARIABLES = {USE_BUNKERNET="yes", BUNKERNET_FILTER_HEADERS="yes", BUNKERNET_SERVER="https://feed.example"}
 STORE.plugin_bunkernet_id = "instance-id"
 STORE.plugin_bunkernet_db = {ip={"203.0.113.1"}}
 REASON, REASON_DATA = "blacklist", {kind="ip"}
@@ -90,6 +90,19 @@ emit({first=first, second=second, reports=REPORTS, ttl=RECENT_TTL, limit=HEADER_
     assert out["reports"][0]["headers"] == {"accept": "text/html"}
     assert out["reports"][0]["data"] == {"kind": "ip"}
     assert out["ttl"] == 5400 and out["limit"] == 12
+
+
+def test_report_payload_is_unfiltered_by_default():
+    out = run(NEW + """
+VARIABLES.BUNKERNET_FILTER_HEADERS = "no"
+REASON_DATA = {matched_vars={"secret"}, matched_var_names={"REQUEST_HEADERS:Authorization"}}
+local result=p:log()
+emit({result=result, reports=REPORTS, limit=HEADER_LIMIT})
+""")
+    assert out["result"]["msg"] == "IP added to reports"
+    assert out["reports"][0]["headers"] == {"accept": "text/html", "cookie": "secret", "authorization": "secret"}
+    assert out["reports"][0]["data"] == {"matched_vars": ["secret"], "matched_var_names": ["REQUEST_HEADERS:Authorization"]}
+    assert out["limit"] == 12
 
 
 @pytest.mark.parametrize("action", ["challenge", "captcha", "redirect"])

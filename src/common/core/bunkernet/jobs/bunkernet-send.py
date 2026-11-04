@@ -26,8 +26,16 @@ exit_status = 0
 
 BATCH_SIZE = 100
 MAX_CACHED_REPORTS = 10000
-# Same allowlist as REPORT_HEADERS in bunkernet.lua: reports queued before the upgrade may hold every request header.
+# Same allowlist as REPORT_HEADERS in bunkernet.lua, applied when BUNKERNET_FILTER_HEADERS is yes.
 REPORT_HEADERS = ("user-agent", "accept", "accept-encoding", "accept-language", "content-type", "content-length")
+
+
+def is_filtered(report: dict) -> bool:
+    """BUNKERNET_FILTER_HEADERS for the report's service, the global value when the service is unknown."""
+    value = getenv("BUNKERNET_FILTER_HEADERS", "no")
+    if getenv("MULTISITE", "no") == "yes":
+        value = getenv(f"{report.get('server_name')}_BUNKERNET_FILTER_HEADERS", value)
+    return value == "yes"
 
 
 def filter_report(report: dict) -> dict:
@@ -110,7 +118,8 @@ try:
 
     # Oldest first: batches send the oldest reports and the cap below keeps the newest ones.
     reports = sorted(chain(cached_data.get("reports", []), instance_reports), key=lambda x: datetime.fromisoformat(x["date"]))
-    reports = [filter_report(report) for report in reports]
+    # Reports queued before the upgrade may hold every request header: filter them only where the setting asks for it.
+    reports = [filter_report(report) if is_filtered(report) else report for report in reports]
 
     # Check if forced send is needed due to time
     force_send = datetime.fromisoformat(cached_data["created"]) + timedelta(hours=24) < datetime.now().astimezone()

@@ -34,8 +34,8 @@ local table_insert = table.insert
 
 local INSTANCE_ID_PATH = "/var/cache/bunkerweb/bunkernet/instance.id"
 
--- Request headers a report may carry, lowercase. Everything else (cookies, credentials, custom
--- tokens, client addresses) stays on this instance.
+-- Request headers a report carries when BUNKERNET_FILTER_HEADERS=yes, lowercase. Everything else (cookies,
+-- credentials, custom tokens, client addresses) stays on this instance.
 local REPORT_HEADERS = {
 	"user-agent",
 	"accept",
@@ -45,13 +45,17 @@ local REPORT_HEADERS = {
 	"content-length",
 }
 
--- Keep only the allowlisted headers of the current request, values untouched.
-local function get_report_headers(ctx)
+-- Request headers of the current request (none for a stream service). With BUNKERNET_FILTER_HEADERS=yes only the
+-- allowlisted ones are kept, values untouched; otherwise every header goes out.
+local function get_report_headers(ctx, filter)
 	local report_headers = {}
 	if ctx.bw.kind ~= "http" then
 		return report_headers
 	end
 	local headers = ngx.req.get_headers(tonumber((utils.get_variable("MAX_HEADERS", false))) or 100)
+	if not filter then
+		return headers
+	end
 	for _, name in ipairs(REPORT_HEADERS) do
 		local value = headers[name]
 		if value ~= nil then
@@ -61,7 +65,8 @@ local function get_report_headers(ctx)
 	return report_headers
 end
 
--- Request headers and cookies carry credentials, so a ModSecurity match on one keeps its name but not its value.
+-- With BUNKERNET_FILTER_HEADERS=yes, request headers and cookies carry credentials, so a ModSecurity match on one
+-- keeps its name but not its value.
 local function is_header_or_cookie(name)
 	if type(name) ~= "string" then
 		return false
@@ -287,13 +292,14 @@ function bunkernet:log(bypass_checks)
 		return self:ret(false, "can't get IP from datastore : " .. err)
 	elseif err == "not found" then
 		-- Push report
+		local filter = self.variables["BUNKERNET_FILTER_HEADERS"] == "yes"
 		local report = {
 			["ip"] = self.ctx.bw.remote_addr,
 			["reason"] = reason,
-			["data"] = get_report_data(reason_data),
+			["data"] = filter and get_report_data(reason_data) or reason_data,
 			["method"] = self.ctx.bw.request_method,
 			["url"] = self.ctx.bw.request_uri,
-			["headers"] = get_report_headers(self.ctx),
+			["headers"] = get_report_headers(self.ctx, filter),
 			["server_name"] = self.ctx.bw.server_name,
 			["date"] = os.date("!%Y-%m-%dT%H:%M:%SZ", ngx.time()),
 		}

@@ -13,7 +13,7 @@ Le plugin BunkerNet permet le partage collectif de renseignements sur les menace
     2. **Protection proactive :** Bloquez les acteurs malveillants avant qu'ils ne ciblent votre site, d'après leur comportement ailleurs.
     3. **Contribution communautaire :** Aidez à protéger les autres utilisateurs BunkerWeb en partageant des données sur les attaquants.
     4. **Zéro configuration :** Fonctionne immédiatement avec des valeurs par défaut adaptées et très peu de configuration.
-    5. **Partage limité :** Un signalement contient un ensemble fixe de champs et seulement une courte liste autorisée d'en-têtes de requête, décrits ci-dessous.
+    5. **Partage maîtrisé :** Un signalement contient un ensemble fixe de champs, et `BUNKERNET_FILTER_HEADERS` peut limiter ses en-têtes de requête à une courte liste autorisée (voir ci-dessous).
 
 ### Comment l'utiliser
 
@@ -27,10 +27,11 @@ Suivez ces étapes pour configurer et utiliser la fonctionnalité BunkerNet :
 
 ### Paramètres de configuration
 
-| Paramètre          | Défaut                     | Contexte  | Multiple | Description                                                                                  |
-| ------------------ | -------------------------- | --------- | -------- | -------------------------------------------------------------------------------------------- |
-| `USE_BUNKERNET`    | `yes`                      | multisite | non      | **Activer BunkerNet :** Mettre à `yes` pour activer le partage de renseignements BunkerNet.  |
-| `BUNKERNET_SERVER` | `https://api.bunkerweb.io` | global    | non      | **Serveur BunkerNet :** Adresse du serveur API BunkerNet pour partager les renseignements sur les menaces. |
+| Paramètre                  | Défaut                     | Contexte  | Multiple | Description                                                                                                                                                                                                                                                                       |
+| -------------------------- | -------------------------- | --------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `USE_BUNKERNET`            | `yes`                      | multisite | non      | **Activer BunkerNet :** Mettre à `yes` pour activer le partage de renseignements BunkerNet.                                                                                                                                                                                       |
+| `BUNKERNET_FILTER_HEADERS` | `no`                       | multisite | non      | **Filtrer les en-têtes signalés :** Mettre à `yes` pour n'envoyer qu'une courte liste d'en-têtes de requête et vider les valeurs trouvées par ModSecurity dans les en-têtes et les cookies. À `no`, un signalement contient tous les en-têtes de requête et les valeurs trouvées. |
+| `BUNKERNET_SERVER`         | `https://api.bunkerweb.io` | global    | non      | **Serveur BunkerNet :** Adresse du serveur API BunkerNet pour partager les renseignements sur les menaces.                                                                                                                                                                        |
 
 !!! tip "Protection réseau"
     Lorsque BunkerNet détecte qu'une adresse IP a été impliquée dans une activité malveillante sur plusieurs instances BunkerWeb, il ajoute cette IP à une blacklist collective. Cela fournit une couche de défense proactive, protégeant votre site contre les menaces avant qu'elles ne vous ciblent directement.
@@ -41,10 +42,12 @@ Suivez ces étapes pour configurer et utiliser la fonctionnalité BunkerNet :
     - les métadonnées de l'instance envoyées avec chaque requête : l'identifiant de l'instance BunkerNet, la version de BunkerWeb, l'intégration, ainsi que le nom, la version, l'identifiant de version, le nom de code, l'identifiant et l'architecture du système d'exploitation ;
     - l'adresse IP du client, la raison du blocage et la date ;
     - la méthode HTTP, l'URL **y compris sa chaîne de requête** et le nom du service (`server_name`) ;
-    - les en-têtes de requête `User-Agent`, `Accept`, `Accept-Encoding`, `Accept-Language`, `Content-Type` et `Content-Length`, avec leurs valeurs. Aucun autre en-tête n'est envoyé : les cookies, `Authorization` et les en-têtes personnalisés restent sur votre instance ;
-    - les détails associés à la raison du blocage. Selon le plugin qui a bloqué le client, ils peuvent inclure les ID et messages des règles ModSecurity déclenchées avec les valeurs de la requête qui les ont déclenchées (parties d'arguments ou du corps, chacune tronquée à 512 octets ; les valeurs trouvées dans les en-têtes et les cookies ne sont jamais envoyées, seul le nom de la variable l'est) ou, pour Bad Behavior, la méthode et l'URL des requêtes récentes qui ont mené au bannissement.
+    - les en-têtes de requête, avec leurs valeurs : tous les en-têtes reçus (dans la limite de `MAX_HEADERS`), ou seulement `User-Agent`, `Accept`, `Accept-Encoding`, `Accept-Language`, `Content-Type` et `Content-Length` lorsque `BUNKERNET_FILTER_HEADERS` vaut `yes` ;
+    - les détails associés à la raison du blocage. Selon le plugin qui a bloqué le client, ils peuvent inclure les ID et messages des règles ModSecurity déclenchées avec les valeurs de la requête qui les ont déclenchées (parties d'arguments, du corps, des en-têtes ou des cookies, chacune tronquée à 512 octets ; avec `BUNKERNET_FILTER_HEADERS` à `yes`, les valeurs trouvées dans les en-têtes et les cookies sont vidées et seul le nom de la variable est envoyé) ou, pour Bad Behavior, la méthode et l'URL des requêtes récentes qui ont mené au bannissement.
 
-    L'URL et les valeurs d'arguments et de corps déclenchantes proviennent de la requête : elles contiennent tout ce que le client a envoyé. Définissez `USE_BUNKERNET` sur `no` pour les services dont les URL portent des valeurs sensibles.
+    Par défaut (`BUNKERNET_FILTER_HEADERS` à `no`), un signalement contient tous les en-têtes de requête reçus (dans la limite de `MAX_HEADERS`), cookies et `Authorization` compris, et les valeurs trouvées par ModSecurity telles quelles. Mettez `BUNKERNET_FILTER_HEADERS` à `yes` pour n'envoyer que les six en-têtes listés ci-dessus et vider les valeurs trouvées dans les en-têtes et les cookies. Les signalements encore en attente d'envoi sont filtrés de la même façon avant leur envoi lorsqu'il vaut `yes`.
+
+    L'URL et les valeurs trouvées proviennent de la requête : elles contiennent tout ce que le client a envoyé. Définissez `USE_BUNKERNET` sur `no` pour les services dont les URL portent des valeurs sensibles.
 
 ### Exemples de configuration
 

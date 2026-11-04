@@ -1,4 +1,4 @@
-"""A BunkerNet report carries only the allowlisted request headers.
+"""With ``BUNKERNET_FILTER_HEADERS=yes`` a BunkerNet report carries only the allowlisted request headers.
 
 ``bunkernet:log()`` pushes one JSON report per blocked client onto ``plugin_bunkernet_reports``.
 Its ``headers`` field is what ``ngx.req.get_headers`` returns once filtered through the plugin's
@@ -52,7 +52,7 @@ package.loaded["resty.http"] = { new = function() return nil, "stub" end }
 package.loaded["bunkerweb.plugin"] = {
     initialize = function(self, name, ctx)
         self.ctx = ctx
-        self.variables = { USE_BUNKERNET = "yes" }
+        self.variables = { USE_BUNKERNET = "yes", BUNKERNET_FILTER_HEADERS = FILTER }
         self.is_loading = false
         self.is_request = true
         self.logger = { log = function() end }
@@ -89,7 +89,7 @@ emit({ ret = result.ret, msg = result.msg, key = REPORTS[1] and REPORTS[1].key, 
 """
 
 
-def send(headers, *, kind="http"):
+def send(headers, *, kind="http", filter_headers="yes"):
     ctx = {
         "kind": kind,
         "remote_addr": IP,
@@ -100,7 +100,7 @@ def send(headers, *, kind="http"):
     }
     script = (
         BASE_LUA.replace("function emit(v)", "json_encode, json_decode = json.encode, json.decode\nfunction emit(v)")
-        + f"MODULE = {json.dumps(str(MODULE))}\nHEADERS = {to_lua(headers)}\nCTX = {to_lua(ctx)}\nLOG_METHOD = {json.dumps('log_stream' if kind == 'stream' else 'log')}\n"
+        + f"MODULE = {json.dumps(str(MODULE))}\nFILTER = {json.dumps(filter_headers)}\nHEADERS = {to_lua(headers)}\nCTX = {to_lua(ctx)}\nLOG_METHOD = {json.dumps('log_stream' if kind == 'stream' else 'log')}\n"
         + STUBS
     )
     out = last_json(run_lua(script))
@@ -173,3 +173,27 @@ def test_the_other_report_fields_are_unchanged():
     assert report["url"] == "/login?next=%2Fadmin"
     assert report["server_name"] == "www.example.com"
     assert report["date"] == "1970-01-12T13:46:40Z"
+
+
+# BUNKERNET_FILTER_HEADERS=no (the default): the report carries every request header, as it did before the filter existed.
+def test_default_sends_every_request_header():
+    headers = send({**ALLOWED, **SECRETS}, filter_headers="no")["report"]["headers"]
+    assert headers == {name.lower(): value for name, value in {**ALLOWED, **SECRETS}.items()}
+
+
+def test_default_keeps_multi_value_headers_and_the_header_cap():
+    out = send({"Accept": ["text/html", "application/json"], "Cookie": ["a=1", "b=2"]}, filter_headers="no")
+    assert out["report"]["headers"] == {"accept": ["text/html", "application/json"], "cookie": ["a=1", "b=2"]}
+    assert out["max"] == 100
+
+
+def test_default_stream_reports_still_carry_no_headers():
+    out = send({**ALLOWED, **SECRETS}, kind="stream", filter_headers="no")
+    assert out["report"]["headers"] == {}
+    assert out.get("max") is None
+
+
+def test_default_leaves_the_other_report_fields_unchanged():
+    report = send({**ALLOWED, **SECRETS}, filter_headers="no")["report"]
+    assert report["data"] == {"id": "ua", "ua": "curl"}
+    assert (report["method"], report["url"], report["server_name"]) == ("POST", "/login?next=%2Fadmin", "www.example.com")

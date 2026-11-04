@@ -1,10 +1,12 @@
-"""Reports queued before an upgrade get the same filter as new ones before they are sent.
+"""With ``BUNKERNET_FILTER_HEADERS=yes`` queued reports get the same filter as new ones before they are sent.
 
 ``bunkernet-send.py`` forwards the reports the instances queued (``/bunkernet/reports``) and the ones
-it cached in ``reports.json``. Both can predate the Lua filter, so the job keeps only the allowlisted
-request headers and blanks the matched header and cookie values before ``send_reports``.
+it cached in ``reports.json``. Both can predate the Lua filter, so for a service that sets the option
+the job keeps only the allowlisted request headers and blanks the matched header and cookie values
+before ``send_reports``. With the default (``no``) the reports go out as they were queued.
 """
 
+import copy
 import json
 import re
 import sys
@@ -12,10 +14,13 @@ from datetime import datetime, timedelta
 from types import SimpleNamespace
 from unittest.mock import Mock
 
+import pytest
+
 from _other_jobs_helpers import ROOT, Cache, load_job
 
 JOB = "bunkernet/jobs/bunkernet-send.py"
 LUA = ROOT / "src" / "common" / "core" / "bunkernet" / "bunkernet.lua"
+FILTER_ON = {"BUNKERNET_FILTER_HEADERS": "yes"}
 ALLOWED = ["user-agent", "accept", "accept-encoding", "accept-language", "content-type", "content-length"]
 
 
@@ -48,7 +53,11 @@ CLEAN = report(
 )
 
 
-def run(monkeypatch, tmp_path, *, cached=(), queued=()):
+def report_for(server_name, template, date):
+    return {**copy.deepcopy(template), "server_name": server_name, "date": date}
+
+
+def run(monkeypatch, tmp_path, *, cached=(), queued=(), env=FILTER_ON):
     """Load the job with a forced send and return ``(batches, cache)``."""
     cache = Cache(tmp_path / "cache")
     cache.cache_file("instance.id", b"instance-id")
@@ -63,11 +72,11 @@ def run(monkeypatch, tmp_path, *, cached=(), queued=()):
         batches.append(json.loads(json.dumps(batch)))
         return True, 200, {}
 
-    caller = SimpleNamespace(send_to_apis=lambda *_a, **_k: (True, {"bw": {"status": "success", "msg": list(queued)}}))
+    caller = SimpleNamespace(send_to_apis=lambda *_a, **_k: (True, {"bw": {"status": "success", "msg": copy.deepcopy(list(queued))}}))
     monkeypatch.setitem(sys.modules, "bunkernet", SimpleNamespace(send_reports=send_reports))
     monkeypatch.setitem(sys.modules, "API", SimpleNamespace(API=SimpleNamespace(from_instance=Mock())))
     monkeypatch.setitem(sys.modules, "ApiCaller", SimpleNamespace(ApiCaller=lambda _apis: caller))
-    _, status = load_job(monkeypatch, tmp_path, JOB, cache=cache)
+    _, status = load_job(monkeypatch, tmp_path, JOB, env=env, cache=cache)
     return batches, status, cache
 
 
@@ -115,13 +124,64 @@ def test_unsent_reports_are_cached_filtered(monkeypatch, tmp_path):
     cache.cache_file("instance.id", b"instance-id")
     cache.db.get_metadata.return_value = {"scheduler_first_start": False}
     cache.db.get_instances.return_value = []
-    caller = SimpleNamespace(send_to_apis=lambda *_a, **_k: (True, {"bw": {"status": "success", "msg": [OLD]}}))
+    caller = SimpleNamespace(send_to_apis=lambda *_a, **_k: (True, {"bw": {"status": "success", "msg": [copy.deepcopy(OLD)]}}))
+    monkeypatch.setitem(sys.modules, "bunkernet", SimpleNamespace(send_reports=Mock(side_effect=AssertionError("below the batch size"))))
+    monkeypatch.setitem(sys.modules, "API", SimpleNamespace(API=SimpleNamespace(from_instance=Mock())))
+    monkeypatch.setitem(sys.modules, "ApiCaller", SimpleNamespace(ApiCaller=lambda _apis: caller))
+    load_job(monkeypatch, tmp_path, JOB, env=FILTER_ON, cache=cache)
+    cached = json.loads(cache.data["", "reports.json"])["reports"][0]
+    assert "cookie" not in cached["headers"] and cached["data"]["matched_vars"] == ["<script>", "", ""]
+
+
+def test_default_sends_queued_and_cached_reports_unfiltered(monkeypatch, tmp_path):
+    batches, status, _ = run(monkeypatch, tmp_path, cached=[OLD], queued=[CLEAN], env={})
+    assert status == 0 and len(batches) == 1
+    assert sorted(batches[0], key=lambda r: r["date"]) == [OLD, CLEAN]
+
+
+def test_default_caches_unsent_reports_unfiltered(monkeypatch, tmp_path):
+    cache = Cache(tmp_path / "cache")
+    cache.cache_file("instance.id", b"instance-id")
+    cache.db.get_metadata.return_value = {"scheduler_first_start": False}
+    cache.db.get_instances.return_value = []
+    caller = SimpleNamespace(send_to_apis=lambda *_a, **_k: (True, {"bw": {"status": "success", "msg": [copy.deepcopy(OLD)]}}))
     monkeypatch.setitem(sys.modules, "bunkernet", SimpleNamespace(send_reports=Mock(side_effect=AssertionError("below the batch size"))))
     monkeypatch.setitem(sys.modules, "API", SimpleNamespace(API=SimpleNamespace(from_instance=Mock())))
     monkeypatch.setitem(sys.modules, "ApiCaller", SimpleNamespace(ApiCaller=lambda _apis: caller))
     load_job(monkeypatch, tmp_path, JOB, cache=cache)
-    cached = json.loads(cache.data["", "reports.json"])["reports"][0]
-    assert "cookie" not in cached["headers"] and cached["data"]["matched_vars"] == ["<script>", "", ""]
+    assert json.loads(cache.data["", "reports.json"])["reports"] == [OLD]
+
+
+def test_explicit_no_sends_reports_unfiltered(monkeypatch, tmp_path):
+    batches, _, _ = run(monkeypatch, tmp_path, cached=[OLD], env={"BUNKERNET_FILTER_HEADERS": "no"})
+    assert batches == [[OLD]]
+
+
+MULTISITE = {"MULTISITE": "yes", "SERVER_NAME": "a.example b.example"}
+
+
+def test_multisite_filters_only_the_services_that_set_the_option(monkeypatch, tmp_path):
+    env = {**MULTISITE, "a.example_BUNKERNET_FILTER_HEADERS": "yes", "b.example_BUNKERNET_FILTER_HEADERS": "no"}
+    a, b = report_for("a.example", OLD, "2026-10-28T10:00:00Z"), report_for("b.example", OLD, "2026-10-28T11:00:00Z")
+    batches, _, _ = run(monkeypatch, tmp_path, cached=[a, b], env=env)
+    sent = {r["server_name"]: r for r in batches[0]}
+    assert sent["a.example"]["headers"] == {"user-agent": "curl/8", "accept": "*/*"}
+    assert sent["a.example"]["data"]["matched_vars"] == ["<script>", "", ""]
+    assert sent["b.example"] == b
+
+
+@pytest.mark.parametrize("global_value, filtered", [("yes", True), ("no", False)])
+def test_multisite_unknown_service_uses_the_global_value(monkeypatch, tmp_path, global_value, filtered):
+    env = {**MULTISITE, "BUNKERNET_FILTER_HEADERS": global_value}
+    other = report_for("other.example", OLD, OLD["date"])
+    batches, _, _ = run(monkeypatch, tmp_path, cached=[other], env=env)
+    assert (batches[0][0]["headers"] != other["headers"]) is filtered
+
+
+def test_singlesite_global_value_applies_whatever_the_report_service(monkeypatch, tmp_path):
+    odd = report_for("any.example", OLD, OLD["date"])
+    batches, _, _ = run(monkeypatch, tmp_path, cached=[odd], env={"BUNKERNET_FILTER_HEADERS": "yes", "any.example_BUNKERNET_FILTER_HEADERS": "no"})
+    assert batches[0][0]["headers"] == {"user-agent": "curl/8", "accept": "*/*"}
 
 
 def test_python_and_lua_allowlists_match():

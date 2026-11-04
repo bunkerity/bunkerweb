@@ -1371,7 +1371,7 @@ The BunkerNet plugin enables collective threat intelligence sharing between Bunk
       2. **Proactive Protection:** Block malicious actors before they can target your site based on their behavior elsewhere.
       3. **Community Contribution:** Help protect other BunkerWeb users by sharing threat data about attackers.
       4. **Zero Configuration:** Works out of the box with sensible defaults, requiring minimal setup.
-      5. **Limited Sharing:** A report carries a fixed set of fields and only a short allowlist of request headers, described below.
+      5. **Controlled Sharing:** A report carries a fixed set of fields, and `BUNKERNET_FILTER_HEADERS` can limit its request headers to a short allowlist (see below).
 
 ### How to Use
 
@@ -1385,10 +1385,11 @@ Follow these steps to configure and use the BunkerNet feature:
 
 ### Configuration Settings
 
-| Setting            | Default                    | Context   | Multiple | Description                                                                                    |
-| ------------------ | -------------------------- | --------- | -------- | ---------------------------------------------------------------------------------------------- |
-| `USE_BUNKERNET`    | `yes`                      | multisite | no       | **Enable BunkerNet:** Set to `yes` to enable the BunkerNet threat intelligence sharing.        |
-| `BUNKERNET_SERVER` | `https://api.bunkerweb.io` | global    | no       | **BunkerNet Server:** The address of the BunkerNet API server for sharing threat intelligence. |
+| Setting                    | Default                    | Context   | Multiple | Description                                                                                                                                                                                                                           |
+| -------------------------- | -------------------------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `USE_BUNKERNET`            | `yes`                      | multisite | no       | **Enable BunkerNet:** Set to `yes` to enable the BunkerNet threat intelligence sharing.                                                                                                                                               |
+| `BUNKERNET_FILTER_HEADERS` | `no`                       | multisite | no       | **Filter Reported Headers:** Set to `yes` to send only a short allowlist of request headers and blank the values ModSecurity matched in headers and cookies. When `no`, a report carries every request header and the matched values. |
+| `BUNKERNET_SERVER`         | `https://api.bunkerweb.io` | global    | no       | **BunkerNet Server:** The address of the BunkerNet API server for sharing threat intelligence.                                                                                                                                        |
 
 !!! tip "Network Protection"
     When BunkerNet detects that an IP address has been involved in malicious activity across multiple BunkerWeb instances, it adds that IP to a collective blacklist. This provides a proactive defense layer, protecting your site from threats before they can target you directly.
@@ -1399,10 +1400,12 @@ Follow these steps to configure and use the BunkerNet feature:
     - the instance metadata sent with each request: the BunkerNet instance ID, the BunkerWeb version, the integration, and the OS name, version, version ID, codename, ID and architecture;
     - the client IP address, the reason for blocking and the date;
     - the HTTP method, the URL **including its query string**, and the service name (`server_name`);
-    - the request headers `User-Agent`, `Accept`, `Accept-Encoding`, `Accept-Language`, `Content-Type` and `Content-Length`, with their values. No other header is sent: cookies, `Authorization` and custom headers stay on your instance;
-    - the details attached to the blocking reason. Depending on the plugin that blocked the client, they can include the IDs and messages of the ModSecurity rules that matched together with the request values that matched them (parts of arguments or body, each cut to 512 bytes; values matched in headers and cookies are never sent, only the variable name), or, for Bad Behavior, the method and URL of the recent requests that led to the ban.
+    - the request headers, with their values: every header received (up to `MAX_HEADERS`), or only `User-Agent`, `Accept`, `Accept-Encoding`, `Accept-Language`, `Content-Type` and `Content-Length` when `BUNKERNET_FILTER_HEADERS` is `yes`;
+    - the details attached to the blocking reason. Depending on the plugin that blocked the client, they can include the IDs and messages of the ModSecurity rules that matched together with the request values that matched them (parts of arguments, body, headers or cookies, each cut to 512 bytes; with `BUNKERNET_FILTER_HEADERS` set to `yes`, values matched in headers and cookies are blanked and only the variable name is sent), or, for Bad Behavior, the method and URL of the recent requests that led to the ban.
 
-    The URL and the matched argument and body values come from the request, so they contain whatever the client sent. Set `USE_BUNKERNET` to `no` on services whose URLs carry sensitive values.
+    By default (`BUNKERNET_FILTER_HEADERS` set to `no`) a report carries every request header received (up to `MAX_HEADERS`), cookies and `Authorization` included, and the values ModSecurity matched as they are. Set `BUNKERNET_FILTER_HEADERS` to `yes` to send only the six headers listed above and blank the values matched in headers and cookies. Reports still waiting to be sent are filtered the same way before they go out when it is `yes`.
+
+    The URL and the matched values come from the request, so they contain whatever the client sent. Set `USE_BUNKERNET` to `no` on services whose URLs carry sensitive values.
 
 ### Example Configurations
 
