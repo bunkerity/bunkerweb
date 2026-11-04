@@ -364,3 +364,88 @@ def test_every_profile_write_is_refused_in_read_only_mode(h, profile, path):
     h.db.refresh_ui_user_recovery_codes.assert_not_called()
     h.db.delete_ui_user_old_sessions.assert_not_called()
     assert "Database is in read-only mode" in _flashed(h, client)
+
+
+# --------------------------------------------------------------------------------------
+# two-factor enrolment: a new secret per page load, except right after a refused attempt
+# --------------------------------------------------------------------------------------
+def _secret_shown(h, client):
+    with client.session_transaction() as sess:
+        return sess["tmp_totp_secret"], h.renders[-1][1]["totp_secret"]
+
+
+def test_each_profile_load_makes_a_new_pending_totp_secret(h, profile):
+    h.totp.generate_totp_secret.side_effect = ["FIRST", "SECOND"]
+    client = h.client("alice")
+
+    client.get("/profile")
+    assert _secret_shown(h, client) == ("FIRST", "pretty:FIRST")
+    client.get("/profile")  # reload or second tab
+
+    assert _secret_shown(h, client) == ("SECOND", "pretty:SECOND")
+
+
+def test_a_refused_enrolment_shows_the_same_secret_once_then_refreshes(h, profile):
+    h.totp.generate_totp_secret.side_effect = ["FIRST", "SECOND"]
+    h.totp.match_totp.return_value = None
+    client = h.client("alice")
+    client.get("/profile")
+
+    client.post("/profile/totp-enable", data={"password": CURRENT, "totp_token": "000000"})  # typo
+    client.get("/profile")  # handle_error redirects back here
+    assert _secret_shown(h, client) == ("FIRST", "pretty:FIRST")
+    client.get("/profile")  # a plain reload after the retry page
+
+    assert _secret_shown(h, client) == ("SECOND", "pretty:SECOND")
+    assert h.totp.generate_totp_secret.call_count == 2
+
+
+def test_a_wrong_password_on_enrolment_keeps_the_scanned_secret_too(h, profile):
+    h.totp.generate_totp_secret.side_effect = ["FIRST", "SECOND"]
+    client = h.client("alice")
+    client.get("/profile")
+
+    client.post("/profile/totp-enable", data={"password": "wrong", "totp_token": "111111"})
+    client.get("/profile")
+
+    assert _secret_shown(h, client) == ("FIRST", "pretty:FIRST")
+
+
+def test_a_correct_code_after_a_refused_one_enrols_the_scanned_secret(h, profile):
+    h.totp.generate_totp_secret.side_effect = ["FIRST", "SECOND"]
+    h.totp.match_totp.side_effect = lambda token, secret: SimpleNamespace(counter=7) if (token, secret) == ("111111", "FIRST") else None
+    h.db.enable_ui_user_totp.return_value = ""
+    client = h.client("alice")
+    client.get("/profile")
+
+    client.post("/profile/totp-enable", data={"password": CURRENT, "totp_token": "000000"})  # typo
+    client.get("/profile")
+    client.post("/profile/totp-enable", data={"password": CURRENT, "totp_token": "111111"})
+
+    h.db.enable_ui_user_totp.assert_called_once_with("alice", "FIRST", 7, ["c1", "c2"])
+
+
+def test_a_successful_enrolment_clears_the_pending_secret_and_the_retry_flag(h, profile):
+    h.totp.match_totp.side_effect = [None, SimpleNamespace(counter=7)]
+    h.db.enable_ui_user_totp.return_value = ""
+    client = h.client("alice")
+    client.get("/profile")
+    client.post("/profile/totp-enable", data={"password": CURRENT, "totp_token": "000000"})
+    client.get("/profile")
+
+    client.post("/profile/totp-enable", data={"password": CURRENT, "totp_token": "111111"})
+
+    with client.session_transaction() as sess:
+        assert "tmp_totp_secret" not in sess and "totp_retry" not in sess
+
+
+def test_totp_disable_drops_any_pending_enrollment_secret(h, profile):
+    h.totp.verify_totp.return_value = True
+    client = h.client("alice", totp_secret="S")
+    with client.session_transaction() as sess:
+        sess["tmp_totp_secret"] = "STALE"
+
+    client.post("/profile/totp-disable", data={"password": CURRENT, "totp_token": "123456"})
+
+    with client.session_transaction() as sess:
+        assert "tmp_totp_secret" not in sess

@@ -71,7 +71,9 @@ def get_last_sessions(page: int, per_page: int) -> Tuple[Generator[Dict[str, Uni
 def profile_page():
     totp_qr_image = ""
     if not bool(current_user.totp_secret):
-        session["tmp_totp_secret"] = TOTP.generate_totp_secret()
+        # A fresh load makes a new secret on purpose; only the redirect after a refused enrolment keeps the one already scanned.
+        if not (session.pop("totp_retry", False) and session.get("tmp_totp_secret")):
+            session["tmp_totp_secret"] = TOTP.generate_totp_secret()
         totp_qr_image = TOTP.generate_qrcode(current_user.get_id(), session["tmp_totp_secret"])
 
     last_sessions, total_sessions = get_last_sessions(1, 3)
@@ -165,6 +167,7 @@ def totp_disable():
         return handle_error(f"Couldn't disable the two-factor authentication in the database: {ret}", "profile")
 
     session["totp_validated"] = False
+    session.pop("tmp_totp_secret", None)
 
     flash("The two-factor authentication has been successfully disabled.")
     return redirect(url_for("profile.profile_page") + "#security")
@@ -183,11 +186,13 @@ def totp_enable():
     verify_data_in_form(data={"totp_token": None}, err_message="Missing totp token parameter on /profile/totp-enable.", redirect_url="profile")
 
     if not current_user.check_password(request.form["password"]):
+        session["totp_retry"] = True  # next GET /profile keeps the scanned secret
         return handle_error("The current password is incorrect.", "profile")
 
     totp_secret = session.get("tmp_totp_secret", "")
     match = TOTP.match_totp(request.form["totp_token"], totp_secret)
     if match is None:
+        session["totp_retry"] = True  # next GET /profile keeps the scanned secret
         return handle_error("The totp token is invalid.", "profile")
 
     totp_recovery_codes = TOTP.generate_recovery_codes()
