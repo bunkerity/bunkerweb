@@ -31,6 +31,7 @@
 - [BUGFIX] `backup`, `bunkernet`, `db`: a failed database dump, report cache write or job history cleanup now fails the job instead of counting as a success, and a negative `DATABASE_MAX_JOBS_RUNS` is refused instead of deleting the whole history.
 - [BUGFIX] `core`: the internal API answers 400 instead of an error when a ban request body is not a JSON object.
 - [BUGFIX] `core`: in multisite mode, `utils.has_not_variable` (used by external plugins) now compares each service with the value asked for.
+- [BUGFIX] `metrics`: the requests query refuses a negative or fractional page start, an invalid page length and an unknown sort direction.
 - [MISC] `release`: the floating `dev` and `testing` Linux packages and the `testing` GitHub release are no longer published, so package repositories stop offering a phantom upgrade; the installer refuses `--version dev` and `--version testing`.
 - [DOCS] `antibot`, `country`: the help and docs of `ANTIBOT_IGNORE_URI` and `COUNTRY_IGNORE_URI` now say patterns match the normalized path, alone or followed by `?` and the query string.
 - [DEPS] Updated resty-redis-cluster version to v1.7.0
