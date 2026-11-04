@@ -143,7 +143,9 @@ try:
                         for line in cached_data.split(b"\n")[1:]:
                             line = line.strip()
                             if line:
-                                unique_entries.add(line)
+                                ok, data = check_line(line)
+                                if ok:
+                                    unique_entries.add(data)
                 else:
                     LOGGER.info(f"Downloading Real IP data from {url} ...")
                     failed = False

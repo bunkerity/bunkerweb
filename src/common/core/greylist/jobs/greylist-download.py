@@ -174,11 +174,15 @@ try:
                         # Process cached data and add to unique_entries
                         cached_data = cached_url.get("data", b"")
                         if cached_data:
+                            # The validator wraps user agents on every call, so re-validating would wrap them twice.
+                            cached_passthrough_kinds = {"USER_AGENT"}
                             # Skip first line (URL comment) and process entries
                             for line in cached_data.split(b"\n")[1:]:
                                 line = line.strip()
                                 if line:
-                                    unique_entries.add(line)
+                                    ok, data = (True, line) if kind in cached_passthrough_kinds else check_line(kind, line)
+                                    if ok:
+                                        unique_entries.add(data)
                     else:
                         failed = False
                         LOGGER.info(f"Downloading greylist data from {url} ...")

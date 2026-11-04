@@ -128,9 +128,10 @@ try:
                     if cached_data:
                         for line in cached_data.split(b"\n")[1:]:
                             line = line.strip()
-                            if not line:
+                            valid = check_ip_line(line)
+                            if valid is None:
                                 continue
-                            unique_entries.add(line)
+                            unique_entries.add(valid)
                 else:
                     # Download
                     iterable = None
