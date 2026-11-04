@@ -75,7 +75,7 @@ jobs:
       - name: Install pinned LuaCov (pure Lua, no transitive dependencies)
         shell: bash
         run: |
-          sudo apt-get install -y --no-install-recommends luarocks
+          sudo apt-get install -y --no-install-recommends luarocks liblua5.4-dev
           mkdir -p .cache/lua-tools
           curl --fail --location --silent --show-error --max-time 60 \
             https://luarocks.org/luacov-0.17.0-1.src.rock -o .cache/lua-tools/luacov-0.17.0-1.src.rock
