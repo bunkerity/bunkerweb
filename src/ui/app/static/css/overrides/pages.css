@@ -423,3 +423,15 @@ code.bad-behavior-event__value {
 .dark-style .bad-behavior-event__label {
   color: rgba(255, 255, 255, 0.7);
 }
+
+/* Support page: the configuration card's two controls wrap instead of
+   spilling out of the card on narrow screens. */
+.card-body.d-flex.justify-content-evenly {
+  flex-wrap: wrap;
+  flex-shrink: 0;
+  row-gap: 0.5rem;
+}
+
+.card-body.d-flex.justify-content-evenly > .h-100 {
+  height: auto !important;
+}

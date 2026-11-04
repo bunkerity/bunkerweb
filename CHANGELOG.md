@@ -49,6 +49,8 @@
 - [BUGFIX] `modsecurity`: a service named by an IP address no longer scores CRS rule 920350 for requests whose `Host` is one of its own addresses; any other numeric `Host` is still scored.
 - [BUGFIX] `reverseproxy`: a stream service named by an IPv6 address now reaches its upstream instead of dropping the connection with `invalid port in upstream`.
 - [BUGFIX] `letsencrypt`: an IPv6 server name is skipped with a message that says IPv6 certificates are not supported yet.
+- [BUGFIX] `ui`: when the table toolbar wraps, the search box, auto refresh and filter buttons now fill the second row and end on the table's right edge. (Refs #3969)
+- [BUGFIX] `ui`: the Web UI diagnostics card on the support page keeps its help text inside the card, and the configuration card's controls wrap on narrow screens.
 - [MISC] `release`: the floating `dev` and `testing` Linux packages and the `testing` GitHub release are no longer published, so package repositories stop offering a phantom upgrade; the installer refuses `--version dev` and `--version testing`.
 - [DOCS] `antibot`, `country`: the help and docs of `ANTIBOT_IGNORE_URI` and `COUNTRY_IGNORE_URI` now say patterns match the normalized path, alone or followed by `?` and the query string.
 - [DOCS] `core`: the IPv6 section drops the experimental label for what is tested, fixes the `USE_IPV6` example and the Docker prerequisites, and adds IPv6-only settings and limits.
