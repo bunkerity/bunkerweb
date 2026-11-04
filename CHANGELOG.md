@@ -26,6 +26,7 @@
 - [BUGFIX] `api`: updating an instance with `PATCH /instances/{hostname}` now returns the instance instead of an error.
 - [BUGFIX] `customcert`: a rejected certificate no longer removes the one being served.
 - [BUGFIX] `blacklist`, `greylist`, `whitelist`: removing a feed URL now also removes its cached rows, which could bring the old entries back.
+- [BUGFIX] `jobs`: a renewed API certificate is now written to the local cache too, not only to the database.
 - [MISC] `release`: the floating `dev` and `testing` Linux packages and the `testing` GitHub release are no longer published, so package repositories stop offering a phantom upgrade; the installer refuses `--version dev` and `--version testing`.
 - [DOCS] `antibot`, `country`: the help and docs of `ANTIBOT_IGNORE_URI` and `COUNTRY_IGNORE_URI` now say patterns match the normalized path, alone or followed by `?` and the query string.
 - [DEPS] Updated resty-redis-cluster version to v1.7.0
