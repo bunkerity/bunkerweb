@@ -2648,39 +2648,28 @@ BunkerWeb unterstützt PHP über externe oder entfernte [PHP-FPM](https://www.ph
 
 ## IPv6
 
-!!! example "Experimentelles Feature"
+Standardmäßig lauscht BunkerWeb nur auf IPv4. Setzen Sie `USE_IPV6=yes` (der Name unterscheidet Groß- und Kleinschreibung), um neben den IPv4-Listenern auch IPv6-Listener für HTTP-, HTTPS-, HTTP/3- und Stream-Services hinzuzufügen und NGINX sowie den Lua-Resolver auch AAAA-Einträge abfragen zu lassen. Die Einstellung konfiguriert Ihr Netzwerk nicht: Adressen, Routing, veröffentlichte Ports und Firewall-Regeln bleiben Ihre Aufgabe. Die interne API, die Web-Oberfläche und die öffentliche API haben eigene Bind-Einstellungen (siehe [Reine IPv6-Netzwerke](#ipv6-only)). Services werden weiterhin mit DNS-Namen benannt: Ein IPv6-Literal in `SERVER_NAME` wird nicht unterstützt ([#4120](https://github.com/bunkerity/bunkerweb/issues/4120)).
 
-    Dieses Feature ist nicht produktionsreif. Fühlen Sie sich frei, es zu testen und uns Fehler über [Issues](https://github.com/bunkerity/bunkerweb/issues) im GitHub-Repository zu melden.
+!!! info "Testabdeckung"
 
-Standardmäßig lauscht BunkerWeb nur auf IPv4-Adressen und verwendet kein IPv6 für die Netzwerkkommunikation. Wenn Sie die IPv6-Unterstützung aktivieren möchten, müssen Sie `USE_IPV6=yes` setzen. Bitte beachten Sie, dass die IPv6-Konfiguration Ihres Netzwerks und Ihrer Umgebung außerhalb des Geltungsbereichs dieser Dokumentation liegt.
+    Die automatisierten Tests prüfen IPv6 unter Docker, in einem Dual-Stack-Netzwerk und in einem reinen IPv6-Netzwerk: HTTP- und HTTPS-Listener, die echte Client-IP aus `X-Forwarded-For`, IP-Zulassungs- und Sperrlisten (komprimierte, ausgeschriebene und IPv4-gemappte Schreibweise), Sperren über die interne API und `bwcli`, Ratenbegrenzung, ModSecurity, IPv6- und reine AAAA-Upstreams sowie ein eigenständiges Redis für Sperren und Limits.
+
+    Nicht an einem echten IPv6-Setup getestet: Linux-Pakete, All-in-one, Autoconf, Swarm, Kubernetes und Gateway API (sie benötigen einen Dual-Stack-Cluster und `USE_KUBERNETES_FQDN=no`, wenn das DNS Ihres Clusters keine IPv6-Pod-Namen veröffentlicht), HTTP/3- und Stream-Services, Redis Sentinel und Cluster, die Web-Oberfläche und die öffentliche API, Länder-, ASN- und DNSBL-Prüfungen für öffentliche IPv6-Clients sowie die Zertifikatsausstellung. Dort gelten dieselben Einstellungen. Testen Sie Ihr Setup, bevor Sie sich darauf verlassen, und melden Sie Probleme über [Issues](https://github.com/bunkerity/bunkerweb/issues) im GitHub-Repository.
 
 === "Docker / Autoconf / Swarm"
 
-    Zunächst müssen Sie Ihren Docker-Daemon so konfigurieren, dass er die IPv6-Unterstützung für Container aktiviert und bei Bedarf ip6tables verwendet. Hier ist eine Beispielkonfiguration für Ihre `/etc/docker/daemon.json`-Datei:
+    Docker aktiviert IPv6 pro Netzwerk. Bei aktuellen Versionen (getestet mit Docker 29.9.2, ohne jede `/etc/docker/daemon.json`) genügt es, auf dem Netzwerk, das den Client-Verkehr trägt, `enable_ipv6: true` und ein IPv6-Subnetz zu deklarieren: kein `experimental`-Flag und kein Neustart von Docker. Die Daemon-Optionen `ipv6`, `fixed-cidr-v6` und `ip6tables` betreffen vor allem das Standard-Bridge-Netzwerk, und ältere Docker-Versionen (nicht getestet) benötigen sie für benutzerdefinierte Netzwerke möglicherweise noch. Prüfen Sie die Docker-Dokumentation für Ihre Version.
 
-    ```json
-    {
-      "experimental": true,
-      "ipv6": true,
-      "ip6tables": true,
-      "fixed-cidr-v6": "fd00:dead:beef::/48"
-    }
-    ```
+    Ein privates IPv6-Subnetz ermöglicht IPv6 nur zwischen den Containern. Ob das Internet erreichbar ist oder Clients über veröffentlichte Ports per IPv6 bedient werden, hängt von IPv6-Routing, Firewall und NAT Ihres Hosts ab und liegt außerhalb dieser Dokumentation.
 
-    Sie können nun den Docker-Dienst neu starten, um die Änderungen zu übernehmen:
-
-    ```shell
-    systemctl restart docker
-    ```
-
-    Sobald Docker für die Unterstützung von IPv6 eingerichtet ist, können Sie die Einstellung `USE_IPV6` hinzufügen und die `bw-services` für IPv6 konfigurieren:
+    Fügen Sie die Einstellung `USE_IPV6` zum Scheduler hinzu und aktivieren Sie IPv6 im Netzwerk `bw-services`. Wenn Sie für das Netzwerk ein IPv4-`subnet` deklarieren, behalten Sie es in derselben `ipam.config`-Liste:
 
     ```yaml
     services:
       bw-scheduler:
         image: bunkerity/bunkerweb-scheduler:1.6.18-rc2
         environment:
-          USE_IPv6: "yes"
+          USE_IPV6: "yes"
 
     ...
 
@@ -2690,7 +2679,7 @@ Standardmäßig lauscht BunkerWeb nur auf IPv4-Adressen und verwendet kein IPv6 
         enable_ipv6: true
         ipam:
           config:
-            - subnet: fd00:13:37::/48
+            - subnet: fd00:13:37::/64
               gateway: fd00:13:37::1
 
     ...
@@ -2723,6 +2712,85 @@ Standardmäßig lauscht BunkerWeb nur auf IPv4-Adressen und verwendet kein IPv6 
     ```shell
     systemctl start bunkerweb
     ```
+
+### Prüfen, ob IPv6 funktioniert
+
+Listen Sie die Listener auf, auf dem Linux-Host oder im BunkerWeb-Container (`docker compose exec bunkerweb ss -6 -ltn`). Die durch `HTTP_PORT` und `HTTPS_PORT` festgelegten Ports müssen auf `[::]` erscheinen:
+
+```shell
+ss -6 -ltn
+```
+
+Senden Sie dann eine Anfrage über IPv6 an die Adresse von BunkerWeb, mit dem `Host`-Header eines Ihrer Services (`-g` verhindert, dass curl die eckigen Klammern als Muster behandelt):
+
+```shell
+curl -g -6 -H "Host: www.example.com" "http://[<BUNKERWEB_IPV6_ADDRESS>]:<HTTP_PORT>/"
+```
+
+Das Zugriffsprotokoll zeigt dann die IPv6-Adresse des Clients.
+
+### Reine IPv6-Netzwerke {#ipv6-only}
+
+BunkerWeb läuft auch, wenn seine Container keine IPv4-Adresse haben. Das wurde unter Docker getestet, mit dem Core und dem Scheduler in Netzwerken, die mit `enable_ipv4: false` erstellt wurden (Docker 29.9.2, Compose 5.6.1). Beide Container benötigen dieselben Einstellungen sowie feste Adressen, damit die Zulassungsliste und `BUNKERWEB_INSTANCES` gültig bleiben:
+
+```yaml
+x-bw-ipv6-env: &bw-ipv6-env
+  USE_IPV6: "yes"
+  API_LISTEN_IP: "::"
+  API_WHITELIST_IP: "::1/128 2001:db8:1::24/128"
+  BUNKERWEB_INSTANCES: "[2001:db8:1::10]:5000"
+  DNS_RESOLVERS: "[2001:db8:1::20]"
+
+services:
+  bunkerweb:
+    image: bunkerity/bunkerweb:1.6.18-rc2
+    dns:
+      - 2001:db8:1::20
+    environment:
+      <<: *bw-ipv6-env
+    networks:
+      bw-universe:
+        ipv6_address: 2001:db8:1::10
+
+  bw-scheduler:
+    image: bunkerity/bunkerweb-scheduler:1.6.18-rc2
+    dns:
+      - 2001:db8:1::20
+    environment:
+      <<: *bw-ipv6-env
+    networks:
+      bw-universe:
+        ipv6_address: 2001:db8:1::24
+
+networks:
+  bw-universe:
+    name: bw-universe
+    enable_ipv4: false
+    enable_ipv6: true
+    ipam:
+      config:
+        - subnet: 2001:db8:1::/64
+```
+
+| Einstellung           | Warum sie nötig ist                                                                                                                                      |
+| :-------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `USE_IPV6`            | IPv6-Listener und AAAA-Abfragen.                                                                                                                         |
+| `API_LISTEN_IP`       | Die interne API lauscht standardmäßig auf `0.0.0.0`, also nur auf IPv4.                                                                                  |
+| `API_WHITELIST_IP`    | Die interne API akzeptiert standardmäßig nur Loopback: Tragen Sie die IPv6-Adresse jedes Aufrufers ein (Scheduler sowie Web-Oberfläche oder Autoconf, falls genutzt). |
+| `BUNKERWEB_INSTANCES` | Wo der Scheduler den Core findet. Eine IPv6-Adresse benötigt eckige Klammern und einen Port.                                                             |
+| `DNS_RESOLVERS`       | Standard ist der IPv4-Resolver von Docker. NGINX und Lua benötigen einen IPv6-Resolver in eckigen Klammern.                                              |
+
+Auch die `dns:`-Einträge sind wichtig: Der Scheduler und die Jobs nutzen den Resolver des Containers, nicht `DNS_RESOLVERS`. Backends werden dann über IPv6-Adresse oder über einen Namen mit AAAA-Eintrag erreicht: Ein Upstream-Name mit nur einem A-Eintrag scheitert mit einem `502`.
+
+Einige ausgehende Funktionen kontaktieren Server, die bei unserer Prüfung (Oktober 2026) keinen AAAA-Eintrag hatten. Ohne IPv4-Ausgang oder NAT64/DNS64 schlagen ihre Jobs fehl oder nutzen weiter zwischengespeicherte Daten, während der Rest von BunkerWeb weiter ausliefert:
+
+- BunkerNet und anonyme Nutzungsberichte (deaktivieren Sie sie mit `USE_BUNKERNET=no` und `SEND_ANONYMOUS_REPORT=no`).
+- Der Download von PRO-Plugins.
+- Die Prüfung auf eine neue BunkerWeb-Version.
+- Aktualisierungen der Länder- und ASN-Datenbanken (die mitgelieferten oder zwischengespeicherten Datenbanken bleiben in Gebrauch).
+- Optionale Funktionen: ZeroSSL-Zertifikate, Downloads von ModSecurity-CRS-Plugins von GitHub, hCaptcha und der mCaptcha-Demoserver.
+
+Bekannte Einschränkung: In einem reinen IPv6-Netzwerk öffnet der Core weiterhin IPv4-Wildcard-Listener auf den TCP-Ports für HTTP und HTTPS sowie auf dem UDP-Port für HTTPS (HTTP/3). Sie transportieren keinen Verkehr, wenn das Netzwerk kein IPv4 hat, aber ein Scanner, der jeden IPv4-Listener beanstandet, meldet sie. Auch das IPv4-Loopback wird innerhalb der Container weiterhin genutzt (Health-Check, lokaler API-Listener). Die Tests deckten die Web-Oberfläche, eine Netzwerk-Datenbank und die anderen Integrationen in einem reinen IPv6-Netzwerk nicht ab.
 
 ## Protokollierungsoptionen
 
