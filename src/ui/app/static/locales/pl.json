@@ -50,7 +50,7 @@
     "link": {
       "here": "tutaj"
     },
-    "pro": "Wykorzystaj w pełni możliwości BunkerWeb, przechodząc na wersję PRO. Więcej informacji i bezpłatna wersja próbna <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/?utm_campaign=self&utm_source=banner#pro\">tutaj</a>.",
+    "pro": "Wykorzystaj w pełni możliwości BunkerWeb, przechodząc na wersję PRO. Rozpocznij 30-dniowy bezpłatny okres próbny <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=banner\">tutaj</a>: zamów plan, a następnie pozostaw „Free 30 Days Trial” jako metodę płatności podczas finalizacji zamówienia.",
     "support": "Potrzebujesz wsparcia premium lub dostosowanego doradztwa dla BunkerWeb? Sprawdź nasze <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/?utm_campaign=self&utm_source=banner#services\">profesjonalne usługi</a>."
   },
   "breadcrumb": {
@@ -1155,6 +1155,7 @@
       "title": "Data wygaśnięcia Pro",
       "unknown": "Nieznana data wygaśnięcia"
     },
+    "free_trial_hint": "Zamów plan, a następnie pozostaw „Free 30 Days Trial” jako metodę płatności podczas finalizacji zamówienia.",
     "force_check": {
       "description": "Wymuś nowe sprawdzenie wtyczek PRO. Spowoduje to ponowne pobranie wtyczek, jeśli dostępne są nowe wersje.",
       "title": "Wymuś sprawdzanie"

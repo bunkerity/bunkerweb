@@ -31,7 +31,7 @@ Si crees que se debería admitir una nueva integración, no dudes en abrir un [n
 ## Configuraciones
 
 !!! tip "Configuraciones de BunkerWeb PRO"
-    Algunos plugins están reservados para la **versión PRO**. Inicia una prueba gratuita de 30 días de BunkerWeb PRO desde el [Panel de BunkerWeb](https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc).
+    Algunos plugins están reservados para la **versión PRO**. Inicia una prueba gratuita de 30 días de BunkerWeb PRO desde el [Panel de BunkerWeb](https://panel.bunkerweb.io/store/bunkerweb-pro?language=spanish&utm_campaign=self&utm_source=doc): pide un plan y mantén **Free 30 Days Trial** como método de pago al finalizar la compra ([guía paso a paso](index.md#pro-version)).
 
 Una vez que BunkerWeb esté integrado en tu entorno, necesitarás configurarlo para servir y proteger tus aplicaciones web.
 

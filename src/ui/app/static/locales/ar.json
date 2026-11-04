@@ -50,7 +50,7 @@
     "link": {
       "here": "هنا"
     },
-    "pro": "احصل على أقصى استفادة من BunkerWeb بالترقية إلى إصدار PRO. مزيد من المعلومات وتجربة مجانية <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/?utm_campaign=self&utm_source=banner#pro\">هنا</a>.",
+    "pro": "احصل على أقصى استفادة من BunkerWeb بالترقية إلى إصدار PRO. ابدأ تجربتك المجانية لمدة 30 يومًا <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=banner\">هنا</a>: اطلب خطة، ثم أبقِ «Free 30 Days Trial» طريقة الدفع عند إتمام الطلب.",
     "support": "هل تحتاج إلى دعم متميز أو استشارات مخصصة لـ BunkerWeb؟ تحقق من <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/?utm_campaign=self&utm_source=banner#services\">خدماتنا الاحترافية</a>."
   },
   "breadcrumb": {
@@ -1155,6 +1155,7 @@
       "title": "تاريخ انتهاء صلاحية Pro",
       "unknown": "تاريخ انتهاء صلاحية غير معروف"
     },
+    "free_trial_hint": "اطلب خطة، ثم أبقِ «Free 30 Days Trial» طريقة الدفع عند إتمام الطلب.",
     "force_check": {
       "description": "فرض فحص جديد لإضافات PRO. سيؤدي هذا إلى تنزيل جديد للإضافات إذا كانت هناك إصدارات جديدة متاحة.",
       "title": "فرض الفحص"

@@ -13,6 +13,7 @@
 - [FEATURE] `core`: `utils.add_ban` accepts `opts.if_absent` for insert-only bans that never replace an existing ban, locally or in Redis.
 - [FEATURE] `bunkernet`: `BUNKERNET_FILTER_HEADERS` (`no`, per service) limits a report to the User-Agent, Accept, Accept-Encoding, Accept-Language, Content-Type and Content-Length request headers and blanks the values matched in request headers and cookies, also for reports queued before the upgrade. By default a report carries every request header, as before; the plugin documentation lists what each value sends.
 - [FEATURE] `core`: a service can be named by an IPv4 or an IPv6 address (`SERVER_NAME=2001:db8::1`, bare, lowercase, compressed). NGINX also matches the bracketed `Host` form, and a name written another way logs a warning with its canonical spelling. (#4120)
+- [BUGFIX] `backup`: MySQL 8+ dump clients can now back up MariaDB databases, including on Fedora.
 - [BUGFIX] `bwcli`: use the Linux package's Python interpreter, fixing startup crashes on RHEL 9.
 - [BUGFIX] `core`: stream services no longer abort NGINX init when an HTTP-only plugin (PRO included) is installed, a regression in 1.6.17.
 - [BUGFIX] `core`: local ban writes and unbans are now serialized per IP, and a writer that cannot take the lock fails with `ban lock unavailable`.
@@ -66,6 +67,7 @@
 - [DOCS] `antibot`, `country`: the help and docs of `ANTIBOT_IGNORE_URI` and `COUNTRY_IGNORE_URI` now say patterns match the normalized path, alone or followed by `?` and the query string.
 - [DOCS] `core`: the IPv6 section drops the experimental label for what is tested, fixes the `USE_IPV6` example and the Docker prerequisites, and adds IPv6-only settings and limits.
 - [DOCS] The README has a cleaner layout: grouped badges and links, a logo that suits dark mode, uniform headings, and long reference sections folded.
+- [DOCS] The README, docs and web UI explain how to start the PRO free trial: keep the "Free 30 Days Trial" payment method at checkout.
 - [DEPS] Updated resty-redis-cluster version to v1.7.0
 - [DEPS] Updated the web UI libraries: i18next to v26.5.11, i18next-http-backend to v4.0.6, i18next-browser-languagedetector to v8.2.3, ipaddr.js to v2.5.0 and Ace to v1.45.2
 

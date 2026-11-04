@@ -303,7 +303,7 @@ log { source(s_net); destination(d_dyna_file); };
 ## Actualizar a PRO {#upgrade-to-pro}
 
 !!! tip "Prueba gratis de BunkerWeb PRO"
-    Inicia una prueba gratuita de 30 días de BunkerWeb PRO desde el [Panel de BunkerWeb](https://panel.bunkerweb.io/store/bunkerweb-pro?language=spanish&utm_campaign=self&utm_source=doc).
+    Inicia una prueba gratuita de 30 días de BunkerWeb PRO desde el [Panel de BunkerWeb](https://panel.bunkerweb.io/store/bunkerweb-pro?language=spanish&utm_campaign=self&utm_source=doc): pide un plan y mantén **Free 30 Days Trial** como método de pago al finalizar la compra ([guía paso a paso](index.md#pro-version)).
 
 Pega tu clave PRO en la página **PRO** de la UI (o precarga `PRO_LICENSE_KEY` para el asistente). Las actualizaciones se descargan en segundo plano por el scheduler; revisa en la UI la caducidad y los límites de servicios tras aplicarlas.
 

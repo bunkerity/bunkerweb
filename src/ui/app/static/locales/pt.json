@@ -50,7 +50,7 @@
     "link": {
       "here": "aqui"
     },
-    "pro": "Aproveite ao máximo o BunkerWeb atualizando para a versão PRO. Mais informações e teste gratuito <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/?utm_campaign=self&utm_source=banner#pro\">aqui</a>.",
+    "pro": "Aproveite ao máximo o BunkerWeb atualizando para a versão PRO. Inicie o seu período de teste gratuito de 30 dias <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=banner\">aqui</a>: encomende um plano e mantenha «Free 30 Days Trial» como método de pagamento ao finalizar a encomenda.",
     "support": "Precisa de suporte premium ou consultoria personalizada para o BunkerWeb? Confira nossos <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/?utm_campaign=self&utm_source=banner#services\">serviços profissionais</a>."
   },
   "breadcrumb": {
@@ -1155,6 +1155,7 @@
       "title": "Data de Expiração Pro",
       "unknown": "Data de expiração desconhecida"
     },
+    "free_trial_hint": "Encomende um plano e mantenha «Free 30 Days Trial» como método de pagamento ao finalizar a encomenda.",
     "force_check": {
       "description": "Force a new check for PRO plugins. This will trigger a new download of the plugins if new versions are available.",
       "title": "Force check"

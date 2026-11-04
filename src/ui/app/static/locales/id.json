@@ -50,7 +50,7 @@
     "link": {
       "here": "di sini"
     },
-    "pro": "Dapatkan manfaat maksimal dari BunkerWeb dengan upgrade ke versi PRO. Info lebih lanjut dan uji coba gratis <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/?utm_campaign=self&utm_source=banner#pro\">di sini</a>.",
+    "pro": "Dapatkan manfaat maksimal dari BunkerWeb dengan upgrade ke versi PRO. Mulai uji coba gratis 30 hari Anda <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=banner\">di sini</a>: pesan paket, lalu pertahankan “Free 30 Days Trial” sebagai metode pembayaran saat checkout.",
     "support": "Butuh dukungan premium atau konsultasi khusus untuk BunkerWeb? Kunjungi <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/?utm_campaign=self&utm_source=banner#services\">layanan profesional</a> kami."
   },
   "breadcrumb": {
@@ -1155,6 +1155,7 @@
       "title": "Tanggal Kedaluwarsa Pro",
       "unknown": "Tanggal kedaluwarsa tidak diketahui"
     },
+    "free_trial_hint": "Pesan paket, lalu pertahankan “Free 30 Days Trial” sebagai metode pembayaran saat checkout.",
     "force_check": {
       "description": "Paksa pengecekan baru untuk plugin PRO. Ini akan memicu unduhan baru jika versi baru tersedia.",
       "title": "Paksa pengecekan"

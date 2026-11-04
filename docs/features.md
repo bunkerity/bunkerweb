@@ -5002,7 +5002,7 @@ The Pro plugin bundles advanced features and enhancements for enterprise deploym
 
 Follow these steps to configure and use the Pro features:
 
-1. **Obtain a license key:** Purchase a Pro license from the [BunkerWeb Panel](https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc).
+1. **Obtain a license key:** start a 30-day free trial or purchase a Pro license from the [BunkerWeb Panel](https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc) ([step-by-step guide](index.md#pro-version)).
 2. **Configure your license key:** Use the `PRO_LICENSE_KEY` setting to configure your license.
 3. **Let BunkerWeb handle the rest:** Once configured with a valid license, Pro plugins are automatically downloaded and activated.
 4. **Monitor your Pro status:** Check the health indicators in the [web UI](web-ui.md) to confirm your Pro subscription status.
@@ -5039,7 +5039,7 @@ Follow these steps to configure and use the Pro features:
 - **BunkerWeb PRO Standard:** Full access to Pro features without technical support.
 - **BunkerWeb PRO Enterprise:** Full access to Pro features with dedicated technical support.
 
-You can explore Pro features with a free 30-day trial. Start it from the [BunkerWeb Panel](https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc) and learn more about flexible pricing options based on the number of services protected by BunkerWeb PRO.
+You can explore Pro features with a free 30-day trial. Start it from the [BunkerWeb Panel](https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc) and learn more about flexible pricing options based on the number of services protected by BunkerWeb PRO: order a plan, then keep **Free 30 Days Trial** as the payment method at checkout ([step-by-step guide](index.md#pro-version)).
 
 ## Prometheus exporter <img src='../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 
