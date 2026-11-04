@@ -114,7 +114,6 @@ class UIDatabase(Database):
             for role in roles:
                 if not session.query(Roles).with_entities(Roles.name).filter_by(name=role).first():
                     return f"Role {role} doesn't exist"
-                session.add(RolesUsers(user_name=username, role_name=role))
 
             current_time = datetime.now().astimezone()
             session.add(
@@ -131,6 +130,10 @@ class UIDatabase(Database):
                     update_date=current_time,
                 )
             )
+
+            # After the user row: the foreign-key engines refuse a role row whose user is not stored yet
+            for role in roles:
+                session.add(RolesUsers(user_name=username, role_name=role))
 
             for code in totp_recovery_codes or []:
                 session.add(UserRecoveryCodes(user_name=username, code=hashpw(code.encode("utf-8"), gensalt(rounds=10)).decode("utf-8")))
