@@ -1,6 +1,6 @@
 # Changelog
 
-## v1.6.18~rc3 - ????/??/??
+## v1.6.18~rc3 - 2026/11/04
 
 - [BUGFIX] `crowdsec`: `CROWDSEC_METADATA_CACHE_SIZE` now defaults to `24m`, so report metadata for the whole Community Blocklist fits in stream mode. (Refs #4135)
 - [SECURITY] `api`: when `API_LISTEN_HTTPS=yes`, the scheduler, UI, API service and `bwcli` check that an instance presents the generated API certificate (SHA-256 pin) instead of trusting any. A mismatch is logged and the call still falls back to HTTP.

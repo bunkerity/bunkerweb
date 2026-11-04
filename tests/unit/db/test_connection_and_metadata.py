@@ -286,7 +286,7 @@ class TestMetadata:
     def test_before_initialisation_the_defaults_are_reported(self, db):
         meta = db.get_metadata()
         assert meta["default"] is True and meta["is_initialized"] is False and meta["scheduler_first_start"] is True
-        assert db.get_version() == "1.6.18~rc2"
+        assert db.get_version() == "1.6.18~rc3"
         assert meta["database_version"] not in ("", None)
 
     def test_initialisation_stores_the_version_and_integration_and_a_second_call_updates_them(self, db):
