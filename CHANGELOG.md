@@ -24,6 +24,7 @@
 - [BUGFIX] `autoconf`: Kubernetes pods with an IPv6 address now get a valid instance DNS name.
 - [BUGFIX] `core`: an IPv6-only stack now starts, as the startup config keeps `USE_IPV6`, `API_LISTEN_IP` and `DNS_RESOLVERS`.
 - [BUGFIX] `api`: updating an instance with `PATCH /instances/{hostname}` now returns the instance instead of an error.
+- [BUGFIX] `customcert`: a rejected certificate no longer removes the one being served.
 - [MISC] `release`: the floating `dev` and `testing` Linux packages and the `testing` GitHub release are no longer published, so package repositories stop offering a phantom upgrade; the installer refuses `--version dev` and `--version testing`.
 - [DOCS] `antibot`, `country`: the help and docs of `ANTIBOT_IGNORE_URI` and `COUNTRY_IGNORE_URI` now say patterns match the normalized path, alone or followed by `?` and the query string.
 - [DEPS] Updated resty-redis-cluster version to v1.7.0

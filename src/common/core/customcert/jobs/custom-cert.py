@@ -146,7 +146,6 @@ try:
                     "Variables (CUSTOM_SSL_CERT or CUSTOM_SSL_CERT_DATA) and (CUSTOM_SSL_KEY or CUSTOM_SSL_KEY_DATA) "
                     f"have to be set and valid to use custom certificates for {first_server}"
                 )
-                skipped_servers.append(first_server)
                 status = 2
                 continue
 
@@ -154,12 +153,10 @@ try:
             need_reload, err = check_cert(cert_file, key_file, first_server)
             if isinstance(err, BaseException):
                 LOGGER.error(f"Exception while checking {first_server}'s certificate, skipping ... \n{err}")
-                skipped_servers.append(first_server)
                 status = 2
                 continue
             elif err:
                 LOGGER.warning(f"Error while checking {first_server}'s certificate : {err}")
-                skipped_servers.append(first_server)
                 status = 2
                 continue
             elif need_reload:
