@@ -1,0 +1,39 @@
+src/ui/Dockerfile
+  s_94e529eaf64f5b::t_ac4a71e0159366 1,71
+src/scheduler/Dockerfile
+  s_94e529eaf64f5b::t_ac4a71e0159366 1,48
+src/linux/Dockerfile-rhel-9
+  s_94e529eaf64f5b::t_ac4a71e0159366 1,149
+src/linux/Dockerfile-rhel-8
+  s_94e529eaf64f5b::t_ac4a71e0159366 1,148
+misc/migration/Dockerfile
+  s_80a54b2aaf3dbe::t_086a91c59af257 1
+src/api/Dockerfile
+  s_80a54b2aaf3dbe::t_31fa18752b3341 1,31
+src/autoconf/Dockerfile
+  s_80a54b2aaf3dbe::t_5266c9632b8d59 1,35
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "efbaeb1af8fd62331f3a97df041f6e8239e95735",
+  "prompts": {},
+  "sessions": {
+    "s_80a54b2aaf3dbe": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "aa104066-cd7c-4cd6-bfd9-8d82570506d6",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_94e529eaf64f5b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "93276dd7-bfe3-4189-930a-628822db7364",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}
