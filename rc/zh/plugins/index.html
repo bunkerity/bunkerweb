@@ -86,7 +86,7 @@
     <script defer>
       window.addEventListener('DOMContentLoaded', () => {
         const bannerEl = document.querySelector('aside.md-banner');
-        let defaultContent = [{ "content" : "\u003cp\u003e\u901a\u8fc7 \u003ca style=\"text-decoration:underline; color :  white;\" href=\"https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self\u0026utm_source=doc\"\u003eBunkerWeb Panel\u003c/a\u003e\u5f00\u542f BunkerWeb PRO 30 \u5929\u514d\u8d39\u8bd5\u7528\u3002\u003c/p\u003e" },
+        let defaultContent = [{ "content" : "\u003cp\u003e\u901a\u8fc7 \u003ca style=\"text-decoration:underline; color :  white;\" href=\"https://panel.bunkerweb.io/store/bunkerweb-pro?language=chinese\u0026amp;utm_campaign=self\u0026amp;utm_source=doc\"\u003eBunkerWeb Panel\u003c/a\u003e\u5f00\u542f BunkerWeb PRO 30 \u5929\u514d\u8d39\u8bd5\u7528\uff1a\u8ba2\u8d2d\u4e00\u4e2a\u65b9\u6848\uff0c\u7136\u540e\u5728\u7ed3\u8d26\u65f6\u4fdd\u6301\u9009\u4e2d\u201cFree 30 Days Trial\u201d\u4f5c\u4e3a\u4ed8\u6b3e\u65b9\u5f0f\u3002 (\u003ca style=\"text-decoration:underline; color :  white;\" href=\"../#pro-version\"\u003e\u5206\u6b65\u6307\u5357\u003c/a\u003e)\u003c/p\u003e" },
         { "content" : "\u003cp\u003e\u9700\u8981 BunkerWeb \u9ad8\u7ea7\u652f\u6301\u6216\u5b9a\u5236\u54a8\u8be2\uff1f\u8bf7\u67e5\u770b\u6211\u4eec\u7684 \u003ca style=\"text-decoration:underline; color :  white;\" href=\"https://panel.bunkerweb.io/?utm_campaign=self\u0026utm_source=doc#services\"\u003e\u4e13\u4e1a\u670d\u52a1\u003c/a\u003e\u3002\u003c/p\u003e" },
         { "content" : "\u003cp\u003e\u52a0\u5165 Bunker \u793e\u533a\uff0c\u53c2\u4e0e \u003ca style=\"text-decoration:underline; color: white;\" href=\"https://discord.bunkerweb.io\"\u003eDiscord \u804a\u5929\u003c/a\u003e \u5e76\u5173\u6ce8\u6211\u4eec\u7684 \u003ca style=\"text-decoration:underline; color: white;\" href=\"https://www.linkedin.com/company/bunkerity/\"\u003eLinkedIn\u003c/a\u003e\u3002\u003c/p\u003e" }
         ]
@@ -1421,7 +1421,7 @@ sudo<span class="w"> </span>chmod<span class="w"> </span>-R<span class="w"> </sp
 <div class="highlight"><pre><span></span><code><span class="nt">services</span><span class="p">:</span>
 <span class="nn">...</span>
 <span class="w">  </span><span class="nt">bw-scheduler</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.18-rc2</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.18-rc3</span>
 <span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">./bw-data:/data</span>
 <span class="nn">...</span>
@@ -1443,7 +1443,7 @@ cp<span class="w"> </span>-rp<span class="w"> </span>./bunkerweb-plugins/*<span 
 <div class="highlight"><pre><span></span><code><span class="nt">services</span><span class="p">:</span>
 <span class="nn">...</span>
 <span class="w">  </span><span class="nt">bw-scheduler</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.18-rc2</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.18-rc3</span>
 <span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">./bw-data:/data</span>
 <span class="nn">...</span>
@@ -1474,7 +1474,7 @@ cp<span class="w"> </span>-rp<span class="w"> </span>./bunkerweb-plugins/*<span 
 <div class="highlight"><pre><span></span><code><span class="nt">services</span><span class="p">:</span>
 <span class="nn">...</span>
 <span class="w">  </span><span class="nt">bw-scheduler</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.18-rc2</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.18-rc3</span>
 <span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/shared/bw-plugins:/data/plugins</span>
 <span class="nn">...</span>
@@ -1514,7 +1514,7 @@ cp<span class="w"> </span>-rp<span class="w"> </span>./bunkerweb-plugins/*<span 
 <span class="w">      </span><span class="nt">serviceAccountName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sa-bunkerweb</span>
 <span class="w">      </span><span class="nt">containers</span><span class="p">:</span>
 <span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb-scheduler</span>
-<span class="w">          </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.18-rc2</span>
+<span class="w">          </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.18-rc3</span>
 <span class="w">          </span><span class="nt">imagePullPolicy</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Always</span>
 <span class="w">          </span><span class="nt">env</span><span class="p">:</span>
 <span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">KUBERNETES_MODE</span>
@@ -1551,7 +1551,7 @@ chown<span class="w"> </span>-R<span class="w"> </span>nginx:nginx<span class="w
 <h3 id="structure">结构<a class="headerlink" href="#structure" title="Permanent link">&para;</a></h3>
 <div class="admonition tip">
 <p class="admonition-title">现有插件</p>
-<p>如果文档不够，您可以查看<a href="https://github.com/bunkerity/bunkerweb-plugins">官方插件</a>和<a href="https://github.com/bunkerity/bunkerweb/tree/v1.6.18-rc2/src/common/core">核心插件</a>的现有源代码（已包含在 BunkerWeb 中，但从技术上讲它们是插件）。</p>
+<p>如果文档不够，您可以查看<a href="https://github.com/bunkerity/bunkerweb-plugins">官方插件</a>和<a href="https://github.com/bunkerity/bunkerweb/tree/v1.6.18-rc3/src/common/core">核心插件</a>的现有源代码（已包含在 BunkerWeb 中，但从技术上讲它们是插件）。</p>
 </div>
 <p>插件结构如下所示：
 <div class="highlight"><pre><span></span><code>plugin /
@@ -1924,6 +1924,15 @@ chown<span class="w"> </span>-R<span class="w"> </span>nginx:nginx<span class="w
 </tr>
 </tbody>
 </table>
+<p><strong>TLS ClientHello 钩子。</strong> 插件还可以在选择证书之前看到每一次 TLS 握手（默认服务器和每个服务均适用），方法是从其主 Lua 模块导出一个模块级函数（不是方法，因此每次握手都不会创建插件对象）：</p>
+<div class="highlight"><pre><span></span><code><span class="c1">-- in myplugin/myplugin.lua</span>
+<span class="kr">function</span><span class="w"> </span><span class="nc">myplugin</span><span class="p">.</span><span class="nf">client_hello</span><span class="p">(</span><span class="nv">hello</span><span class="p">)</span>
+<span class="w">    </span><span class="c1">-- hello (read-only): service (nil on the default server), ip (nil when the client address is unknown), raw and family</span>
+<span class="w">    </span><span class="c1">-- (packed peer address from ngx.ssl.raw_client_addr()), quic, proxy_protocol, real_ip, trusted</span>
+<span class="w">    </span><span class="kr">return</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="c1">-- or "drop" / "detect" and a reason</span>
+<span class="kr">end</span>
+</code></pre></div>
+<p>返回 <code>"drop"</code> 将中止握手，返回 <code>"detect"</code> 仅记录该握手将被丢弃，不返回任何值则放行。出错或返回任何其他值都会放行握手。该函数对每次握手恰好运行一次，并且<strong>不得让出（yield）</strong>：不得使用 Redis、cosocket、<code>ngx.var</code>、<code>resty.lock</code> 或 sleep。可以调用共享字典和 <code>ngx.timer.at(0, ...)</code>。导出该函数的插件的顺序遵循 <code>PLUGINS_ORDER_SSL_CLIENT_HELLO</code>。导出 <code>client_hello</code> 的插件在默认服务器上不会再通过其 <code>ssl_client_hello_default</code> 方法被调用。插件可以通过 <code>pcall(require, "bunkerweb.banlease")</code> 和 <code>banlease.CLIENT_HELLO_PLUGIN_HOOK == 1</code> 检测是否支持。</p>
 <h4 id="_12">库<a class="headerlink" href="#_12" title="Permanent link">&para;</a></h4>
 <p><a href="https://github.com/openresty/lua-nginx-module">NGINX LUA 模块</a>和 <a href="https://github.com/openresty/stream-lua-nginx-module">NGINX stream LUA 模块</a>的所有指令都可用。此外，您可以使用 BunkerWeb 中包含的 LUA 库：有关完整列表，请参见<a href="https://github.com/bunkerity/bunkerweb/blobsrc/deps/clone.sh">此脚本</a>。</p>
 <p>如果您需要其他库，可以将它们放在插件的根文件夹中，并通过在它们前面加上您的插件 ID 来访问它们。这是一个名为 <strong>mylibrary.lua</strong> 的示例文件：</p>
@@ -1986,7 +1995,7 @@ chown<span class="w"> </span>-R<span class="w"> </span>nginx:nginx<span class="w
 </code></pre></div>
 <div class="admonition tip">
 <p class="admonition-title">更多示例</p>
-<p>如果您想查看可用函数的完整列表，可以查看仓库的 <a href="https://github.com/bunkerity/bunkerweb/tree/v1.6.18-rc2/src/bw/lua/bunkerweb">lua 目录</a>中存在的文件。</p>
+<p>如果您想查看可用函数的完整列表，可以查看仓库的 <a href="https://github.com/bunkerity/bunkerweb/tree/v1.6.18-rc3/src/bw/lua/bunkerweb">lua 目录</a>中存在的文件。</p>
 </div>
 <h3 id="_14">作业<a class="headerlink" href="#_14" title="Permanent link">&para;</a></h3>
 <p>BunkerWeb 使用内部作业调度器来执行定期任务，例如使用 certbot 续订证书、下载黑名单、下载 MMDB 文件等。您可以通过将任务放入名为 <strong>jobs</strong> 的子文件夹中，并在 <strong>plugin.json</strong> 元数据文件中列出它们来添加您选择的任务。不要忘记为每个人添加执行权限，以避免用户克隆和安装您的插件时出现任何问题。</p>

@@ -86,7 +86,7 @@
     <script defer>
       window.addEventListener('DOMContentLoaded', () => {
         const bannerEl = document.querySelector('aside.md-banner');
-        let defaultContent = [{ "content" : "\u003cp\u003eProfitez d\u2019un essai gratuit de 30 jours de BunkerWeb PRO depuis le \u003ca style=\"text-decoration:underline; color :  white;\" href=\"https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self\u0026utm_source=doc\"\u003eBunkerWeb Panel\u003c/a\u003e.\u003c/p\u003e" },
+        let defaultContent = [{ "content" : "\u003cp\u003eProfitez d\u2019un essai gratuit de 30 jours de BunkerWeb PRO depuis le \u003ca style=\"text-decoration:underline; color :  white;\" href=\"https://panel.bunkerweb.io/store/bunkerweb-pro?language=french\u0026amp;utm_campaign=self\u0026amp;utm_source=doc\"\u003eBunkerWeb Panel\u003c/a\u003e : commandez une offre, puis gardez \u00ab Free 30 Days Trial \u00bb comme mode de paiement lors de la commande. (\u003ca style=\"text-decoration:underline; color :  white;\" href=\"../#pro-version\"\u003eguide pas \u00e0 pas\u003c/a\u003e)\u003c/p\u003e" },
         { "content" : "\u003cp\u003eBesoin d\u2019une assistance premium ou de conseils personnalis\u00e9s sur BunkerWeb ? D\u00e9couvrez nos \u003ca style=\"text-decoration:underline; color :  white;\" href=\"https://panel.bunkerweb.io/?utm_campaign=self\u0026utm_source=doc#services\"\u003eservices professionnels\u003c/a\u003e.\u003c/p\u003e" },
         { "content" : "\u003cp\u003eRejoignez la communaut\u00e9 Bunker en participant au \u003ca style=\"text-decoration:underline; color: white;\" href=\"https://discord.bunkerweb.io\"\u003esalon Discord\u003c/a\u003e et en nous suivant sur \u003ca style=\"text-decoration:underline; color: white;\" href=\"https://www.linkedin.com/company/bunkerity/\"\u003eLinkedIn\u003c/a\u003e.\u003c/p\u003e" }
         ]
@@ -1421,7 +1421,7 @@ chmod<span class="w"> </span>-R<span class="w"> </span><span class="m">770</span
 <div class="highlight"><pre><span></span><code><span class="nt">services</span><span class="p">:</span>
 <span class="nn">...</span>
 <span class="w">  </span><span class="nt">bw-scheduler</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.18-rc2</span>
+<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.18-rc3</span>
 <span class="w">  </span><span class="nt">volumes</span><span class="p">:</span>
 <span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">./bw-data:/data</span>
 <span class="nn">...</span>
@@ -1443,7 +1443,7 @@ cp<span class="w"> </span>-rp<span class="w"> </span>./bunkerweb-plugins/*<span 
 <div class="highlight"><pre><span></span><code><span class="nt">services</span><span class="p">:</span>
 <span class="nn">...</span>
 <span class="w">  </span><span class="nt">bw-scheduler</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.18-rc2</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.18-rc3</span>
 <span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">./bw-data:/data</span>
 <span class="nn">...</span>
@@ -1474,7 +1474,7 @@ cp<span class="w"> </span>-rp<span class="w"> </span>./bunkerweb-plugins/*<span 
 <div class="highlight"><pre><span></span><code><span class="nt">services</span><span class="p">:</span>
 <span class="nn">...</span>
 <span class="w">  </span><span class="nt">bw-scheduler</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.18-rc2</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.18-rc3</span>
 <span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/shared/bw-plugins:/data/plugins</span>
 <span class="nn">...</span>
@@ -1514,7 +1514,7 @@ cp<span class="w"> </span>-rp<span class="w"> </span>./bunkerweb-plugins/*<span 
 <span class="w">      </span><span class="nt">serviceAccountName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sa-bunkerweb</span>
 <span class="w">      </span><span class="nt">containers</span><span class="p">:</span>
 <span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb-scheduler</span>
-<span class="w">          </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.18-rc2</span>
+<span class="w">          </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.18-rc3</span>
 <span class="w">          </span><span class="nt">imagePullPolicy</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Always</span>
 <span class="w">          </span><span class="nt">env</span><span class="p">:</span>
 <span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">KUBERNETES_MODE</span>
@@ -1551,7 +1551,7 @@ chown<span class="w"> </span>-R<span class="w"> </span>nginx:nginx<span class="w
 <h3 id="structure">Structure<a class="headerlink" href="#structure" title="Permanent link">&para;</a></h3>
 <div class="admonition tip">
 <p class="admonition-title">Plugins existants</p>
-<p>Si la documentation n'est pas suffisante, vous pouvez consulter le code source existant des <a href="https://github.com/bunkerity/bunkerweb-plugins">plugins officiels</a> et des <a href="https://github.com/bunkerity/bunkerweb/tree/v1.6.18-rc2/src/common/core">plugins core</a> (déjà inclus dans BunkerWeb mais ce sont des plugins, techniquement parlant).</p>
+<p>Si la documentation n'est pas suffisante, vous pouvez consulter le code source existant des <a href="https://github.com/bunkerity/bunkerweb-plugins">plugins officiels</a> et des <a href="https://github.com/bunkerity/bunkerweb/tree/v1.6.18-rc3/src/common/core">plugins core</a> (déjà inclus dans BunkerWeb mais ce sont des plugins, techniquement parlant).</p>
 </div>
 <p>À quoi ressemble la structure d'un plugin :
 <div class="highlight"><pre><span></span><code>plugin /
@@ -1924,6 +1924,15 @@ chown<span class="w"> </span>-R<span class="w"> </span>nginx:nginx<span class="w
 </tr>
 </tbody>
 </table>
+<p><strong>Hook TLS ClientHello.</strong> Un plugin peut aussi voir chaque handshake TLS avant le choix du certificat, pour le serveur par défaut et pour chaque service, en exportant depuis son module Lua principal une fonction de niveau module (pas une méthode, afin qu'aucun objet plugin ne soit créé par handshake) :</p>
+<div class="highlight"><pre><span></span><code><span class="c1">-- in myplugin/myplugin.lua</span>
+<span class="kr">function</span><span class="w"> </span><span class="nc">myplugin</span><span class="p">.</span><span class="nf">client_hello</span><span class="p">(</span><span class="nv">hello</span><span class="p">)</span>
+<span class="w">    </span><span class="c1">-- hello (read-only): service (nil on the default server), ip (nil when the client address is unknown), raw and family</span>
+<span class="w">    </span><span class="c1">-- (packed peer address from ngx.ssl.raw_client_addr()), quic, proxy_protocol, real_ip, trusted</span>
+<span class="w">    </span><span class="kr">return</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="c1">-- or "drop" / "detect" and a reason</span>
+<span class="kr">end</span>
+</code></pre></div>
+<p>Retournez <code>"drop"</code> pour interrompre le handshake, <code>"detect"</code> pour seulement journaliser qu'il serait rejeté, ou rien pour le laisser passer. Une erreur ou toute autre valeur laisse passer le handshake. La fonction s'exécute exactement une fois par handshake et <strong>ne doit pas faire de yield</strong> : pas de Redis, pas de cosocket, pas de <code>ngx.var</code>, pas de <code>resty.lock</code>, pas de sleep. Les appels aux dictionnaires partagés et <code>ngx.timer.at(0, ...)</code> sont permis. L'ordre des plugins qui l'exportent suit <code>PLUGINS_ORDER_SSL_CLIENT_HELLO</code>. Un plugin qui exporte <code>client_hello</code> n'est pas appelé via sa méthode <code>ssl_client_hello_default</code> sur le serveur par défaut. Les plugins peuvent détecter la prise en charge avec <code>pcall(require, "bunkerweb.banlease")</code> et <code>banlease.CLIENT_HELLO_PLUGIN_HOOK == 1</code>.</p>
 <h4 id="bibliotheques">Bibliothèques<a class="headerlink" href="#bibliotheques" title="Permanent link">&para;</a></h4>
 <p>Toutes les directives du <a href="https://github.com/openresty/lua-nginx-module">module LUA NGINX</a> sont disponibles et  le <a href="https://github.com/openresty/stream-lua-nginx-module">module LUA de flux NGINX</a>. En plus de cela, vous pouvez utiliser les bibliothèques LUA incluses dans BunkerWeb : voir <a href="https://github.com/bunkerity/bunkerweb/blobsrc/deps/clone.sh">ce script</a> pour la liste complète.</p>
 <p>Si vous avez besoin de bibliothèques supplémentaires, vous pouvez les mettre dans le dossier racine du plugin et y accéder en les préfixant avec votre ID de plugin. Voici un exemple de fichier nommé <strong>mylibrary.lua</strong> :</p>
@@ -1986,7 +1995,7 @@ chown<span class="w"> </span>-R<span class="w"> </span>nginx:nginx<span class="w
 </code></pre></div>
 <div class="admonition tip">
 <p class="admonition-title">Plus d'exemples</p>
-<p>Si vous souhaitez voir la liste complète des fonctions disponibles, vous pouvez consulter les fichiers présents dans le <a href="https://github.com/bunkerity/bunkerweb/tree/v1.6.18-rc2/src/bw/lua/bunkerweb">répertoire lua</a> du dépôt.</p>
+<p>Si vous souhaitez voir la liste complète des fonctions disponibles, vous pouvez consulter les fichiers présents dans le <a href="https://github.com/bunkerity/bunkerweb/tree/v1.6.18-rc3/src/bw/lua/bunkerweb">répertoire lua</a> du dépôt.</p>
 </div>
 <h3 id="emplois">Emplois<a class="headerlink" href="#emplois" title="Permanent link">&para;</a></h3>
 <p>BunkerWeb utilise un planificateur de tâches interne pour des tâches périodiques telles que le renouvellement des certificats avec certbot, le téléchargement de listes noires, le téléchargement de fichiers MMDB, ... Vous pouvez ajouter des tâches de votre choix en les plaçant dans un sous-dossier nommé <strong>tâches</strong> et en les répertoriant dans le  fichier de métadonnées <strong>plugin.json</strong>. N'oubliez pas d'ajouter les permissions d'exécution pour tout le monde afin d'éviter tout problème lorsqu'un utilisateur clone et installe votre plugin.</p>

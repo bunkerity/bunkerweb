@@ -86,7 +86,7 @@
     <script defer>
       window.addEventListener('DOMContentLoaded', () => {
         const bannerEl = document.querySelector('aside.md-banner');
-        let defaultContent = [{ "content" : "\u003cp\u003e\u901a\u8fc7 \u003ca style=\"text-decoration:underline; color :  white;\" href=\"https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self\u0026utm_source=doc\"\u003eBunkerWeb Panel\u003c/a\u003e\u5f00\u542f BunkerWeb PRO 30 \u5929\u514d\u8d39\u8bd5\u7528\u3002\u003c/p\u003e" },
+        let defaultContent = [{ "content" : "\u003cp\u003e\u901a\u8fc7 \u003ca style=\"text-decoration:underline; color :  white;\" href=\"https://panel.bunkerweb.io/store/bunkerweb-pro?language=chinese\u0026amp;utm_campaign=self\u0026amp;utm_source=doc\"\u003eBunkerWeb Panel\u003c/a\u003e\u5f00\u542f BunkerWeb PRO 30 \u5929\u514d\u8d39\u8bd5\u7528\uff1a\u8ba2\u8d2d\u4e00\u4e2a\u65b9\u6848\uff0c\u7136\u540e\u5728\u7ed3\u8d26\u65f6\u4fdd\u6301\u9009\u4e2d\u201cFree 30 Days Trial\u201d\u4f5c\u4e3a\u4ed8\u6b3e\u65b9\u5f0f\u3002 (\u003ca style=\"text-decoration:underline; color :  white;\" href=\"../#pro-version\"\u003e\u5206\u6b65\u6307\u5357\u003c/a\u003e)\u003c/p\u003e" },
         { "content" : "\u003cp\u003e\u9700\u8981 BunkerWeb \u9ad8\u7ea7\u652f\u6301\u6216\u5b9a\u5236\u54a8\u8be2\uff1f\u8bf7\u67e5\u770b\u6211\u4eec\u7684 \u003ca style=\"text-decoration:underline; color :  white;\" href=\"https://panel.bunkerweb.io/?utm_campaign=self\u0026utm_source=doc#services\"\u003e\u4e13\u4e1a\u670d\u52a1\u003c/a\u003e\u3002\u003c/p\u003e" },
         { "content" : "\u003cp\u003e\u52a0\u5165 Bunker \u793e\u533a\uff0c\u53c2\u4e0e \u003ca style=\"text-decoration:underline; color: white;\" href=\"https://discord.bunkerweb.io\"\u003eDiscord \u804a\u5929\u003c/a\u003e \u5e76\u5173\u6ce8\u6211\u4eec\u7684 \u003ca style=\"text-decoration:underline; color: white;\" href=\"https://www.linkedin.com/company/bunkerity/\"\u003eLinkedIn\u003c/a\u003e\u3002\u003c/p\u003e" }
         ]
@@ -1245,7 +1245,7 @@
 <h2 id="_4">设置<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h2>
 <div class="admonition tip">
 <p class="admonition-title">BunkerWeb PRO 设置</p>
-<p>某些插件是为 <strong>PRO 版本</strong>保留的。通过 <a href="https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&amp;utm_source=doc">BunkerWeb 面板</a>开始 BunkerWeb PRO 的 30 天免费试用。</p>
+<p>某些插件是为 <strong>PRO 版本</strong>保留的。通过 <a href="https://panel.bunkerweb.io/store/bunkerweb-pro?language=chinese&amp;utm_campaign=self&amp;utm_source=doc">BunkerWeb 面板</a>开始 BunkerWeb PRO 的 30 天免费试用：订购一个方案，然后在结账时保持选中 <strong>Free 30 Days Trial</strong> 作为付款方式（<a href="../#pro-version">分步指南</a>）。</p>
 </div>
 <p>一旦 BunkerWeb 集成到您的环境中，您将需要配置它来服务和保护您的 Web 应用程序。</p>
 <p>BunkerWeb 的配置是通过我们称之为“设置”或“变量”的东西来完成的。每个设置都由一个名称来标识，例如 <code>AUTO_LETS_ENCRYPT</code> 或 <code>USE_ANTIBOT</code>。您可以为这些设置分配值来配置 BunkerWeb。</p>
@@ -1301,7 +1301,7 @@ app3.example.com_USE_BAD_BEHAVIOR=no
 </figure>
 <div class="admonition info">
 <p class="admonition-title">更进一步</p>
-<p>您将在文档的<a href="../advanced/">高级用法</a>和仓库的 <a href="https://github.com/bunkerity/bunkerweb/tree/v1.6.18-rc2/examples">examples</a> 目录中找到多站点模式的具体示例。</p>
+<p>您将在文档的<a href="../advanced/">高级用法</a>和仓库的 <a href="https://github.com/bunkerity/bunkerweb/tree/v1.6.18-rc3/examples">examples</a> 目录中找到多站点模式的具体示例。</p>
 </div>
 <h2 id="custom-configurations">自定义配置<a class="headerlink" href="#custom-configurations" title="Permanent link">&para;</a></h2>
 <p>为了应对独特的挑战并满足特定的用例，BunkerWeb 提供了自定义配置的灵活性。虽然提供的设置和<a href="../plugins/">外部插件</a>涵盖了广泛的场景，但可能存在需要额外定制的情况。</p>
@@ -1316,7 +1316,7 @@ app3.example.com_USE_BAD_BEHAVIOR=no
 </figure>
 <div class="admonition info">
 <p class="admonition-title">更进一步</p>
-<p>您将在文档的<a href="../advanced/#custom-configurations">高级用法</a>和仓库的 <a href="https://github.com/bunkerity/bunkerweb/tree/v1.6.18-rc2/examples">examples</a> 目录中找到自定义配置的具体示例。</p>
+<p>您将在文档的<a href="../advanced/#custom-configurations">高级用法</a>和仓库的 <a href="https://github.com/bunkerity/bunkerweb/tree/v1.6.18-rc3/examples">examples</a> 目录中找到自定义配置的具体示例。</p>
 </div>
 <h2 id="_5">数据库<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h2>
 <p>BunkerWeb 将其当前配置安全地存储在后端数据库中，该数据库包含平稳运行所需的基本数据。数据库中存储了以下信息：</p>
@@ -1401,7 +1401,7 @@ app3.example.com_USE_BAD_BEHAVIOR=no
 <p class="admonition-title">说明</p>
 <ul>
 <li><strong>PostgreSQL</strong>: 基于 Alpine 的镜像（包括 all-in-one）现已包含 <code>v18</code> 客户端，因此默认支持 <code>v18</code> 及更早版本。</li>
-<li><strong>Linux</strong>: 支持情况取决于您的发行版软件包。如果需要，您可以从供应商仓库手动安装数据库客户端（RHEL 通常需要这样做）。</li>
+<li><strong>Linux</strong>: 支持情况取决于您的发行版软件包。如果需要，您可以从供应商仓库手动安装数据库客户端（RHEL 通常需要这样做）。 如果 PostgreSQL 服务器的主版本比 Linux <code>pg_dump</code> 客户端更新，备份会因 <code>server version mismatch</code> 而失败；请从 <a href="../integrations/#debian-ubuntu-postgresql-backups">PGDG 仓库</a>安装匹配的客户端。</li>
 <li><strong>SQLite</strong>: 随软件包一起提供，可立即使用。</li>
 </ul>
 </div>

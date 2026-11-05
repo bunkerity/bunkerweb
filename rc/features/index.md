@@ -1,6 +1,6 @@
 # Features
 
-This section contains the full list of settings supported by BunkerWeb. If you are not yet familiar with BunkerWeb, you should first read the [concepts](https://docs.bunkerweb.io/1.6.18~rc2/concepts/) section of the documentation. Please follow the instructions for your own [integration](https://docs.bunkerweb.io/1.6.18~rc2/integrations/) on how to apply the settings.
+This section contains the full list of settings supported by BunkerWeb. If you are not yet familiar with BunkerWeb, you should first read the [concepts](https://docs.bunkerweb.io/1.6.18~rc3/concepts/) section of the documentation. Please follow the instructions for your own [integration](https://docs.bunkerweb.io/1.6.18~rc3/integrations/) on how to apply the settings.
 
 ## Global settings
 
@@ -44,7 +44,7 @@ This pattern allows you to manage multiple configurations for features like reve
 
 You can reorder plugin execution with space-separated lists:
 
-- Global phases: `PLUGINS_ORDER_INIT`, `PLUGINS_ORDER_INIT_WORKER`, `PLUGINS_ORDER_TIMER`.
+- Global phases: `PLUGINS_ORDER_INIT`, `PLUGINS_ORDER_INIT_WORKER`, `PLUGINS_ORDER_SSL_CLIENT_HELLO`, `PLUGINS_ORDER_TIMER`.
 - Per-site phases: `PLUGINS_ORDER_SET`, `PLUGINS_ORDER_ACCESS`, `PLUGINS_ORDER_SSL_CERTIFICATE`, `PLUGINS_ORDER_HEADER`, `PLUGINS_ORDER_LOG`, `PLUGINS_ORDER_PREREAD`, `PLUGINS_ORDER_LOG_STREAM`, `PLUGINS_ORDER_LOG_DEFAULT`.
 - Semantics: listed plugins run first for that phase; all remaining plugins still run afterward in their normal sequence. Separate IDs with spaces only.
 
@@ -77,7 +77,7 @@ The value is a list of reasons separated by spaces, among `crowdsec`, `bad_behav
 
     | Setting                 | Default           | Context   | Multiple | Description                                                                                                                                                                                                                                                                                                                           |
     | ----------------------- | ----------------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-    | `SERVER_NAME`           | `www.example.com` | multisite | No       | **Primary Domain:** The main domain name for this site. Required in multisite mode.                                                                                                                                                                                                                                                   |
+    | `SERVER_NAME`           | `www.example.com` | multisite | No       | **Primary Domain:** The main domain name (or IP address) for this site. Required in multisite mode.                                                                                                                                                                                                                                   |
     | `BUNKERWEB_INSTANCES`   | `127.0.0.1`       | global    | No       | **BunkerWeb Instances:** List of BunkerWeb instances separated with spaces.                                                                                                                                                                                                                                                           |
     | `MULTISITE`             | `no`              | global    | No       | **Multiple Sites:** Set to `yes` to enable hosting multiple websites with different configurations.                                                                                                                                                                                                                                   |
     | `SECURITY_MODE`         | `block`           | multisite | No       | **Security Level:** Controls the level of security enforcement. Options: `detect` or `block`.                                                                                                                                                                                                                                         |
@@ -263,7 +263,7 @@ The value is a list of reasons separated by spaces, among `crowdsec`, `bad_behav
 
 ## ACME  (PRO)
 
-For a more detailed guide, see the [advanced usages](https://docs.bunkerweb.io/1.6.18~rc2/advanced/#acme) documentation.
+For a more detailed guide, see the [advanced usages](https://docs.bunkerweb.io/1.6.18~rc3/advanced/#acme) documentation.
 
 STREAM support :white_check_mark:
 
@@ -312,7 +312,7 @@ Advanced ACME certificate management with custom CA support, certificate monitor
 
 ## Anti DDoS  (PRO)
 
-For a more detailed guide, see the [advanced usages](https://docs.bunkerweb.io/1.6.18~rc2/advanced/#anti-ddos-pro) documentation.
+For a more detailed guide, see the [advanced usages](https://docs.bunkerweb.io/1.6.18~rc3/advanced/#anti-ddos-pro) documentation.
 
 STREAM support :x:
 
@@ -370,18 +370,18 @@ The following settings are shared across all challenge mechanisms:
 
 BunkerWeb allows you to specify certain users, IPs, or requests that should bypass the antibot challenge completely. This is useful for whitelisting trusted services, internal networks, or specific pages that should always be accessible without challenge:
 
-| Setting                       | Default | Context   | Multiple | Description                                                                                                                                                                           |
-| ----------------------------- | ------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `ANTIBOT_IGNORE_URI`          |         | multisite | no       | **Excluded URLs:** List of URI regex patterns separated by spaces that should bypass the challenge. Patterns are checked against the path and the full request URI with query string. |
-| `ANTIBOT_IGNORE_IP`           |         | multisite | no       | **Excluded IPs:** List of IP addresses or CIDR ranges separated by spaces that should bypass the challenge.                                                                           |
-| `ANTIBOT_IGNORE_RDNS`         |         | multisite | no       | **Excluded Reverse DNS:** List of reverse DNS suffixes separated by spaces that should bypass the challenge.                                                                          |
-| `ANTIBOT_RDNS_GLOBAL`         | `yes`   | multisite | no       | **Global IPs Only:** If set to `yes`, only perform reverse DNS checks on public IP addresses.                                                                                         |
-| `ANTIBOT_IGNORE_ASN`          |         | multisite | no       | **Excluded ASNs:** List of ASN numbers separated by spaces that should bypass the challenge.                                                                                          |
-| `ANTIBOT_IGNORE_USER_AGENT`   |         | multisite | no       | **Excluded User Agents:** List of User-Agent regex patterns separated by spaces that should bypass the challenge.                                                                     |
-| `ANTIBOT_IGNORE_HEADER_NAME`  |         | multisite | yes      | **Header name:** Name of a request header that makes the request bypass the antibot challenge. Numbered pairs: `_NAME_1` goes with `_VALUE_1`.                                        |
-| `ANTIBOT_IGNORE_HEADER_VALUE` |         | multisite | yes      | **Header value:** PCRE regex the header value must match. Leave empty to match on the header being present, whatever it carries.                                                      |
-| `ANTIBOT_IGNORE_COUNTRY`      |         | multisite | no       | **Excluded Countries:** List of ISO 3166-1 alpha-2 country codes separated by spaces that should bypass the challenge.                                                                |
-| `ANTIBOT_ONLY_COUNTRY`        |         | multisite | no       | **Only Challenge Countries:** List of ISO 3166-1 alpha-2 country codes that must solve the challenge. All other countries are skipped.                                                |
+| Setting                       | Default | Context   | Multiple | Description                                                                                                                                                                                          |
+| ----------------------------- | ------- | --------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `ANTIBOT_IGNORE_URI`          |         | multisite | no       | **Excluded URLs:** List of URI regex patterns separated by spaces that should bypass the challenge. Patterns are matched against the normalized path, alone or followed by `?` and the query string. |
+| `ANTIBOT_IGNORE_IP`           |         | multisite | no       | **Excluded IPs:** List of IP addresses or CIDR ranges separated by spaces that should bypass the challenge.                                                                                          |
+| `ANTIBOT_IGNORE_RDNS`         |         | multisite | no       | **Excluded Reverse DNS:** List of reverse DNS suffixes separated by spaces that should bypass the challenge.                                                                                         |
+| `ANTIBOT_RDNS_GLOBAL`         | `yes`   | multisite | no       | **Global IPs Only:** If set to `yes`, only perform reverse DNS checks on public IP addresses.                                                                                                        |
+| `ANTIBOT_IGNORE_ASN`          |         | multisite | no       | **Excluded ASNs:** List of ASN numbers separated by spaces that should bypass the challenge.                                                                                                         |
+| `ANTIBOT_IGNORE_USER_AGENT`   |         | multisite | no       | **Excluded User Agents:** List of User-Agent regex patterns separated by spaces that should bypass the challenge.                                                                                    |
+| `ANTIBOT_IGNORE_HEADER_NAME`  |         | multisite | yes      | **Header name:** Name of a request header that makes the request bypass the antibot challenge. Numbered pairs: `_NAME_1` goes with `_VALUE_1`.                                                       |
+| `ANTIBOT_IGNORE_HEADER_VALUE` |         | multisite | yes      | **Header value:** PCRE regex the header value must match. Leave empty to match on the header being present, whatever it carries.                                                                     |
+| `ANTIBOT_IGNORE_COUNTRY`      |         | multisite | no       | **Excluded Countries:** List of ISO 3166-1 alpha-2 country codes separated by spaces that should bypass the challenge.                                                                               |
+| `ANTIBOT_ONLY_COUNTRY`        |         | multisite | no       | **Only Challenge Countries:** List of ISO 3166-1 alpha-2 country codes that must solve the challenge. All other countries are skipped.                                                               |
 
 !!! warning "A header rule is a shared secret"
     Any client can send a header, so a header rule is a bearer token, not a network control. Serve it over HTTPS only, anchor the regex with `^` and `$` (the match is not anchored by default, so `abc` also matches `xabcx`), and rotate the value. When BunkerWeb sits behind a proxy, that proxy must overwrite any client-supplied copy of the header. These rules are HTTP only: a stream service carries no request headers, so nothing matches there.
@@ -1071,7 +1071,7 @@ Follow these steps to configure and use the Blacklist feature:
 2. **Configure block rules:** Define which IPs, networks, rDNS patterns, ASNs, User-Agents, or URIs should be blocked.
 3. **Set up ignore rules:** Specify any exceptions that should bypass the blacklist checks.
 4. **Add external sources:** Configure URLs for automatically downloading and updating blacklist data.
-5. **Monitor effectiveness:** Check the [web UI](https://docs.bunkerweb.io/1.6.18~rc2/web-ui/) to see statistics on blocked requests.
+5. **Monitor effectiveness:** Check the [web UI](https://docs.bunkerweb.io/1.6.18~rc3/web-ui/) to see statistics on blocked requests.
 
 !!! info "stream mode"
     When using stream mode, only IP, rDNS, and ASN checks will be performed.
@@ -1357,7 +1357,7 @@ The BunkerNet plugin enables collective threat intelligence sharing between Bunk
 **How it works:**
 
 1. Your BunkerWeb instance automatically registers with the BunkerNet API to receive a unique identifier.
-2. When your instance detects and blocks a malicious IP address or behavior, it anonymously reports the threat to BunkerNet.
+2. When your instance detects and blocks a malicious IP address or behavior, it reports the threat to BunkerNet. The fields of a report are listed in the "What a report contains" note below.
 3. BunkerNet aggregates threat intelligence from all participating instances and distributes the consolidated database.
 4. Your instance regularly downloads an updated database of known threats from BunkerNet.
 5. This collective intelligence allows your instance to proactively block IP addresses that have exhibited malicious behavior on other BunkerWeb instances.
@@ -1366,9 +1366,9 @@ The BunkerNet plugin enables collective threat intelligence sharing between Bunk
 
       1. **Collective Defense:** Leverage the security findings from thousands of other BunkerWeb instances globally.
       2. **Proactive Protection:** Block malicious actors before they can target your site based on their behavior elsewhere.
-      3. **Community Contribution:** Help protect other BunkerWeb users by sharing anonymized threat data about attackers.
+      3. **Community Contribution:** Help protect other BunkerWeb users by sharing threat data about attackers.
       4. **Zero Configuration:** Works out of the box with sensible defaults, requiring minimal setup.
-      5. **Privacy Focused:** Only shares necessary threat information without compromising your or your users' privacy.
+      5. **Controlled Sharing:** A report carries a fixed set of fields, and `BUNKERNET_FILTER_HEADERS` can limit its request headers to a short allowlist (see below).
 
 ### How to Use
 
@@ -1378,20 +1378,31 @@ Follow these steps to configure and use the BunkerNet feature:
 2. **Initial registration:** Upon first startup, your instance will automatically register with the BunkerNet API and receive a unique identifier.
 3. **Automatic updates:** Your instance will automatically download the latest threat database on a regular schedule.
 4. **Automatic reporting:** When your instance blocks a malicious IP address, it will automatically contribute this data to the community.
-5. **Monitor protection:** Check the [web UI](https://docs.bunkerweb.io/1.6.18~rc2/web-ui/) to see statistics on threats blocked by BunkerNet intelligence.
+5. **Monitor protection:** Check the [web UI](https://docs.bunkerweb.io/1.6.18~rc3/web-ui/) to see statistics on threats blocked by BunkerNet intelligence.
 
 ### Configuration Settings
 
-| Setting            | Default                    | Context   | Multiple | Description                                                                                    |
-| ------------------ | -------------------------- | --------- | -------- | ---------------------------------------------------------------------------------------------- |
-| `USE_BUNKERNET`    | `yes`                      | multisite | no       | **Enable BunkerNet:** Set to `yes` to enable the BunkerNet threat intelligence sharing.        |
-| `BUNKERNET_SERVER` | `https://api.bunkerweb.io` | global    | no       | **BunkerNet Server:** The address of the BunkerNet API server for sharing threat intelligence. |
+| Setting                    | Default                    | Context   | Multiple | Description                                                                                                                                                                                                                           |
+| -------------------------- | -------------------------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `USE_BUNKERNET`            | `yes`                      | multisite | no       | **Enable BunkerNet:** Set to `yes` to enable the BunkerNet threat intelligence sharing.                                                                                                                                               |
+| `BUNKERNET_FILTER_HEADERS` | `no`                       | multisite | no       | **Filter Reported Headers:** Set to `yes` to send only a short allowlist of request headers and blank the values ModSecurity matched in headers and cookies. When `no`, a report carries every request header and the matched values. |
+| `BUNKERNET_SERVER`         | `https://api.bunkerweb.io` | global    | no       | **BunkerNet Server:** The address of the BunkerNet API server for sharing threat intelligence.                                                                                                                                        |
 
 !!! tip "Network Protection"
     When BunkerNet detects that an IP address has been involved in malicious activity across multiple BunkerWeb instances, it adds that IP to a collective blacklist. This provides a proactive defense layer, protecting your site from threats before they can target you directly.
 
-!!! info "Anonymous Reporting"
-    When reporting threat information to BunkerNet, your instance only shares the necessary data to identify the threat: the IP address, the reason for blocking, and minimal contextual data. No personal information about your users or sensitive details about your site is shared.
+!!! info "What a report contains"
+    Each report sent to BunkerNet carries these fields, and nothing else:
+
+    - the instance metadata sent with each request: the BunkerNet instance ID, the BunkerWeb version, the integration, and the OS name, version, version ID, codename, ID and architecture;
+    - the client IP address, the reason for blocking and the date;
+    - the HTTP method, the URL **including its query string**, and the service name (`server_name`);
+    - the request headers, with their values: every header received (up to `MAX_HEADERS`), or only `User-Agent`, `Accept`, `Accept-Encoding`, `Accept-Language`, `Content-Type` and `Content-Length` when `BUNKERNET_FILTER_HEADERS` is `yes`;
+    - the details attached to the blocking reason. Depending on the plugin that blocked the client, they can include the IDs and messages of the ModSecurity rules that matched together with the request values that matched them (parts of arguments, body, headers or cookies, each cut to 512 bytes; with `BUNKERNET_FILTER_HEADERS` set to `yes`, values matched in headers and cookies are blanked and only the variable name is sent), or, for Bad Behavior, the method and URL of the recent requests that led to the ban.
+
+    By default (`BUNKERNET_FILTER_HEADERS` set to `no`) a report carries every request header received (up to `MAX_HEADERS`), cookies and `Authorization` included, and the values ModSecurity matched as they are. Set `BUNKERNET_FILTER_HEADERS` to `yes` to send only the six headers listed above and blank the values matched in headers and cookies. Reports still waiting to be sent are filtered the same way before they go out when it is `yes`.
+
+    The URL and the matched values come from the request, so they contain whatever the client sent. Set `USE_BUNKERNET` to `no` on services whose URLs carry sensitive values.
 
 ### Example Configurations
 
@@ -1465,7 +1476,7 @@ Pro tip: When viewing your alerts, click the "columns" option and check the "con
 
 ## Cache  (PRO)
 
-For a more detailed guide, see the [advanced usages](https://docs.bunkerweb.io/1.6.18~rc2/advanced/#cache-pro) documentation.
+For a more detailed guide, see the [advanced usages](https://docs.bunkerweb.io/1.6.18~rc3/advanced/#cache-pro) documentation.
 
 STREAM support :x:
 
@@ -1712,17 +1723,17 @@ Follow these steps to configure and use the Country feature:
 1. **Define your strategy:** Decide whether you want to use a whitelist approach (allow only specific countries) or a blacklist approach (block specific countries).
 2. **Configure countries or groups:** Add ISO 3166-1 alpha-2 country codes (two-letter codes like US, GB, FR) and/or supported group tokens (like `@EU`, `@SCHENGEN`) to either the `WHITELIST_COUNTRY` or `BLACKLIST_COUNTRY` setting.
 3. **Apply settings:** Once configured, the country-based restrictions will apply to all visitors to your site.
-4. **Monitor effectiveness:** Check the [web UI](https://docs.bunkerweb.io/1.6.18~rc2/web-ui/) to see statistics on blocked requests by country.
+4. **Monitor effectiveness:** Check the [web UI](https://docs.bunkerweb.io/1.6.18~rc3/web-ui/) to see statistics on blocked requests by country.
 
 ### Configuration Settings
 
-| Setting                       | Default | Context   | Multiple | Description                                                                                                                                                                          |
-| ----------------------------- | ------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `WHITELIST_COUNTRY`           |         | multisite | no       | **Country Whitelist:** List of country codes and/or country-group tokens separated by spaces. Only these countries are allowed.                                                      |
-| `BLACKLIST_COUNTRY`           |         | multisite | no       | **Country Blacklist:** List of country codes and/or country-group tokens separated by spaces. These countries are blocked.                                                           |
-| `COUNTRY_IGNORE_URI`          |         | multisite | no       | **Ignored URI:** List of URI regex patterns separated by spaces that should bypass country checks. Patterns are checked against the path and the full request URI with query string. |
-| `COUNTRY_IGNORE_HEADER_NAME`  |         | multisite | yes      | **Header name:** Name of a request header that makes the request bypass the country check. Numbered pairs: `_NAME_1` goes with `_VALUE_1`.                                           |
-| `COUNTRY_IGNORE_HEADER_VALUE` |         | multisite | yes      | **Header value:** PCRE regex the header value must match. Leave empty to match on the header being present, whatever it carries.                                                     |
+| Setting                       | Default | Context   | Multiple | Description                                                                                                                                                                                         |
+| ----------------------------- | ------- | --------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `WHITELIST_COUNTRY`           |         | multisite | no       | **Country Whitelist:** List of country codes and/or country-group tokens separated by spaces. Only these countries are allowed.                                                                     |
+| `BLACKLIST_COUNTRY`           |         | multisite | no       | **Country Blacklist:** List of country codes and/or country-group tokens separated by spaces. These countries are blocked.                                                                          |
+| `COUNTRY_IGNORE_URI`          |         | multisite | no       | **Ignored URI:** List of URI regex patterns separated by spaces that should bypass country checks. Patterns are matched against the normalized path, alone or followed by `?` and the query string. |
+| `COUNTRY_IGNORE_HEADER_NAME`  |         | multisite | yes      | **Header name:** Name of a request header that makes the request bypass the country check. Numbered pairs: `_NAME_1` goes with `_VALUE_1`.                                                          |
+| `COUNTRY_IGNORE_HEADER_VALUE` |         | multisite | yes      | **Header value:** PCRE regex the header value must match. Leave empty to match on the header being present, whatever it carries.                                                                    |
 
 !!! warning "A header rule is a shared secret"
     Any client can send a header, so a header rule is a bearer token, not a network control. Serve it over HTTPS only, anchor the regex with `^` and `$` (the match is not anchored by default, so `abc` also matches `xabcx`), and rotate the value. When BunkerWeb sits behind a proxy, that proxy must overwrite any client-supplied copy of the header. These rules are HTTP only: a stream service carries no request headers, so nothing matches there.
@@ -1873,7 +1884,7 @@ The public API exposes the same operations:
 
 Use the returned connection ID verbatim. It includes instance identity, so identical localhost URLs on different instances remain separate. API administrators can use these operations. Delegated API users need the independent `crowdsec_read` or `crowdsec_delete` permission under the existing `bans` resource, either for a returned connection ID or `*`. An ordinary `ban_delete` grant does not authorize CrowdSec removal. No database migration is required.
 
-The runtime retains individual decisions per target, so removing one cannot erase another ban on the same IP or range. Optional report metadata uses a separate 5 MiB (`CROWDSEC_METADATA_CACHE_SIZE=5m`) cache and cannot evict enforcement entries. Stream refreshes use a nonblocking process lock in `/var/run/bunkerweb`, held until the update is published and released automatically if the worker exits.
+The runtime retains individual decisions per target, so removing one cannot erase another ban on the same IP or range. Optional report metadata uses a separate 24 MiB (`CROWDSEC_METADATA_CACHE_SIZE=24m`) cache and cannot evict enforcement entries. Stream refreshes use a nonblocking process lock in `/var/run/bunkerweb`, held until the update is published and released automatically if the worker exits.
 
 Stream mode retains at most two snapshot slots, switching only after a complete snapshot fits. An unchanged nginx reload keeps the current snapshot and requests deltas. A missing snapshot, changed decision configuration, incomplete startup, or last successful sync older than the greater of 300 seconds and 30 times `CROWDSEC_UPDATE_FREQUENCY` forces a full snapshot. Sync failures emit an error log at most once per minute per cache prefix, followed by a recovery notice. If the decision cache is full, increase `CROWDSEC_CACHE_SIZE` to hold two snapshots and reload BunkerWeb. Resizing the decision zone on reload creates an empty zone and triggers a full synchronization; resizing only the metadata zone clears optional metadata.
 
@@ -1974,7 +1985,7 @@ Follow one of the environment-specific guides below so the CrowdSec agent ingest
     services:
       bunkerweb:
         # This is the name that will be used to identify the instance in the Scheduler
-        image: bunkerity/bunkerweb:1.6.18-rc2
+        image: bunkerity/bunkerweb:1.6.18-rc3
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -1991,7 +2002,7 @@ Follow one of the environment-specific guides below so the CrowdSec agent ingest
             syslog-address: "udp://10.20.30.254:514" # The IP address of the syslog service
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.18-rc2
+        image: bunkerity/bunkerweb-scheduler:1.6.18-rc3
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Make sure to set the correct instance name
@@ -2158,7 +2169,7 @@ Follow one of the environment-specific guides below so the CrowdSec agent ingest
 
     The BunkerWeb All-In-One (AIO) Docker image comes with CrowdSec fully integrated. You don't need to set up a separate CrowdSec instance or manually configure acquisition files for BunkerWeb logs when using the internal CrowdSec agent.
 
-    Refer to the [All-In-One (AIO) Image integration documentation](https://docs.bunkerweb.io/1.6.18~rc2/integrations/#crowdsec-integration).
+    Refer to the [All-In-One (AIO) Image integration documentation](https://docs.bunkerweb.io/1.6.18~rc3/integrations/#crowdsec-integration).
 
 ### Step&nbsp;2 – Configure BunkerWeb settings
 
@@ -2176,7 +2187,7 @@ Connection settings are `multisite`: an unprefixed value applies to all services
 | `CROWDSEC_REQUEST_TIMEOUT`     | `1s`                   | multisite | no       | **Request Timeout:** Timeout in milliseconds for HTTP requests to the CrowdSec Local API in live mode. Accepts a time suffix (ms, s, m, h, d, w, M, y); a bare number is milliseconds.                                                                                                                                                                      |
 | `CROWDSEC_EXCLUDE_LOCATION`    |                        | multisite | no       | **Excluded Locations:** Comma-separated list of locations (URIs) to exclude from CrowdSec checks.                                                                                                                                                                                                                                                           |
 | `CROWDSEC_CACHE_SIZE`          | `100m`                 | global    | no       | **Decision cache size:** Shared memory for all services; stream mode needs two snapshots. Positive whole megabytes (`m`/`M`), minimum `1m`. Resizing clears this zone; known decisions restore from disk until reconciliation. Unknown IPs query LAPI; an outage allows unknown IPs.                                                                        |
-| `CROWDSEC_METADATA_CACHE_SIZE` | `5m`                   | global    | no       | **Metadata cache size:** Separate shared memory for optional report metadata across all services. Positive whole number of megabytes (`m`/`M`), minimum `1m`. Resizing on reload clears this metadata.                                                                                                                                                      |
+| `CROWDSEC_METADATA_CACHE_SIZE` | `24m`                  | global    | no       | **Metadata cache size:** Separate shared memory for optional report metadata across all services. Positive whole number of megabytes (`m`/`M`), minimum `1m`. Resizing on reload clears this metadata.                                                                                                                                                      |
 | `CROWDSEC_CACHE_EXPIRATION`    | `1s`                   | multisite | no       | **Cache Expiration:** The cache expiration time in seconds for IP decisions in live mode. Accepts a time suffix (ms, s, m, h, d, w, M, y); a bare number is seconds.                                                                                                                                                                                        |
 | `CROWDSEC_UPDATE_FREQUENCY`    | `10s`                  | multisite | no       | **Update Frequency:** How often (in seconds) to pull new/expired decisions from the CrowdSec API in stream mode. Accepts a time suffix (ms, s, m, h, d, w, M, y); a bare number is seconds.                                                                                                                                                                 |
 | `CROWDSEC_BAN_REFRESH`         | `0`                    | multisite | no       | **Ban Refresh:** Turn CrowdSec blocks into short BunkerWeb bans that are renewed while the CrowdSec decision lasts. The value is the longest a ban lasts before CrowdSec is asked again. `0` disables it. A service with a `CROWDSEC_EXCLUDE_LOCATION` never gets CrowdSec bans. Accepts a time suffix (ms, s, m, h, d, w, M, y); a bare number is seconds. |
@@ -2285,7 +2296,7 @@ A service with `USE_CROWDSEC` set to `yes` and both URLs empty checks nothing, a
 
 ## Custom Pages  (PRO)
 
-For a more detailed guide, see the [advanced usages](https://docs.bunkerweb.io/1.6.18~rc2/advanced/#custom-pages-pro) documentation.
+For a more detailed guide, see the [advanced usages](https://docs.bunkerweb.io/1.6.18~rc3/advanced/#custom-pages-pro) documentation.
 
 STREAM support :x:
 
@@ -2496,7 +2507,7 @@ Follow these steps to configure and use the DNSBL feature:
 1. **Control the feature:** DNSBL is enabled by default. Set `USE_DNSBL` to `no` to disable it.
 2. **Configure DNSBL servers:** Add the domain names of the DNSBL services you want to use to the `DNSBL_LIST` setting.
 3. **Apply settings:** Once configured, BunkerWeb will automatically check incoming connections against the specified DNSBL servers.
-4. **Monitor effectiveness:** Check the [web UI](https://docs.bunkerweb.io/1.6.18~rc2/web-ui/) to see statistics on requests blocked by DNSBL checks.
+4. **Monitor effectiveness:** Check the [web UI](https://docs.bunkerweb.io/1.6.18~rc3/web-ui/) to see statistics on requests blocked by DNSBL checks.
 
 ### Configuration Settings
 
@@ -2597,7 +2608,7 @@ Follow these steps to configure and use the DNSBL feature:
 
 <p align='center'></p>
 
-For a more detailed guide, see the [advanced usages](https://docs.bunkerweb.io/1.6.18~rc2/advanced/#easy-resolve-pro) documentation.
+For a more detailed guide, see the [advanced usages](https://docs.bunkerweb.io/1.6.18~rc3/advanced/#easy-resolve-pro) documentation.
 
 STREAM support :x:
 
@@ -2703,7 +2714,7 @@ Follow these steps to configure and use the Greylist feature:
 1. **Enable the feature:** The Greylist feature is disabled by default. Set the `USE_GREYLIST` setting to `yes` to enable it.
 2. **Configure greylist rules:** Define which IPs, networks, rDNS patterns, ASNs, User-Agents, or URIs should be greylisted.
 3. **Add external sources:** Optionally, configure URLs for automatically downloading and updating greylist data.
-4. **Monitor access:** Check the [web UI](https://docs.bunkerweb.io/1.6.18~rc2/web-ui/) to see which visitors are being allowed or denied.
+4. **Monitor access:** Check the [web UI](https://docs.bunkerweb.io/1.6.18~rc3/web-ui/) to see which visitors are being allowed or denied.
 
 !!! tip "Access Control Behavior"
     When the greylist feature is enabled with the `USE_GREYLIST` setting set to `yes`:
@@ -3369,7 +3380,7 @@ Follow these steps to configure and use the HTML Injection feature:
 
 ## LDAP SSO  (PRO)
 
-For a more detailed guide, see the [advanced usages](https://docs.bunkerweb.io/1.6.18~rc2/advanced/#ldap-sso-pro) documentation.
+For a more detailed guide, see the [advanced usages](https://docs.bunkerweb.io/1.6.18~rc3/advanced/#ldap-sso-pro) documentation.
 
 STREAM support :x:
 
@@ -3696,7 +3707,7 @@ The Limit plugin in BunkerWeb provides robust capabilities to enforce limiting p
 2. **Enable Global Rate Limiting:** Use `USE_LIMIT_REQ_GLOBAL` to cap the total aggregate request rate for a service, independent of client IP or URL, when protecting origin capacity matters more than per-client fairness.
 3. **Enable Connection Limiting:** Use `USE_LIMIT_CONN` to enable connection limiting and set the maximum number of concurrent connections for different protocols.
 4. **Apply Granular Control:** Create multiple rate limit rules for different URLs to provide varying levels of protection across your site.
-5. **Monitor Effectiveness:** Use the [web UI](https://docs.bunkerweb.io/1.6.18~rc2/web-ui/) to view statistics on limited requests and connections.
+5. **Monitor Effectiveness:** Use the [web UI](https://docs.bunkerweb.io/1.6.18~rc3/web-ui/) to view statistics on limited requests and connections.
 
 ### Configuration Settings
 
@@ -3848,7 +3859,7 @@ When `SECURITY_MODE` is `detect`, connection limits are evaluated and logged (`l
 
 <p align='center'></p>
 
-For a more detailed guide, see the [advanced usages](https://docs.bunkerweb.io/1.6.18~rc2/advanced/#load-balancer-pro) documentation.
+For a more detailed guide, see the [advanced usages](https://docs.bunkerweb.io/1.6.18~rc3/advanced/#load-balancer-pro) documentation.
 
 STREAM support :x:
 
@@ -3880,7 +3891,7 @@ Provides load balancing feature to group of upstreams with optional healthchecks
 
 ## Maintenance  (PRO)
 
-For a more detailed guide, see the [advanced usages](https://docs.bunkerweb.io/1.6.18~rc2/advanced/#maintenance-pro) documentation.
+For a more detailed guide, see the [advanced usages](https://docs.bunkerweb.io/1.6.18~rc3/advanced/#maintenance-pro) documentation.
 
 STREAM support :x:
 
@@ -3902,7 +3913,7 @@ The Metrics plugin provides comprehensive monitoring and data collection capabil
 2. These metrics include counters for blocked requests, performance measurements, and various security-related statistics.
 3. The data is stored efficiently in memory, with configurable limits to prevent excessive resource usage.
 4. For multi-instance setups, Redis can be used to centralize and aggregate metrics data.
-5. The collected metrics can be accessed through the API or visualized in the [web UI](https://docs.bunkerweb.io/1.6.18~rc2/web-ui/).
+5. The collected metrics can be accessed through the API or visualized in the [web UI](https://docs.bunkerweb.io/1.6.18~rc3/web-ui/).
 6. This information helps you identify security threats, troubleshoot issues, and optimize your configuration.
 
 ### Technical Implementation
@@ -3923,7 +3934,7 @@ Follow these steps to configure and use the Metrics feature:
 1. **Enable the feature:** Metrics collection is enabled by default. You can control this with the `USE_METRICS` setting.
 2. **Configure memory allocation:** Set the amount of memory to allocate for metrics storage using the `METRICS_MEMORY_SIZE` setting.
 3. **Set storage limits:** Define how many blocked requests to store per worker and in Redis with the respective settings.
-4. **Access the data:** View the collected metrics through the [web UI](https://docs.bunkerweb.io/1.6.18~rc2/web-ui/) or API endpoints.
+4. **Access the data:** View the collected metrics through the [web UI](https://docs.bunkerweb.io/1.6.18~rc3/web-ui/) or API endpoints.
 5. **Analyze the information:** Use the gathered data to identify patterns, detect security issues, and optimize your configuration.
 
 ### Collected Metrics
@@ -4061,7 +4072,7 @@ For example, `/metrics/requests` returns information about blocked requests.
 
 ## Migration  (PRO)
 
-For a more detailed guide, see the [advanced usages](https://docs.bunkerweb.io/1.6.18~rc2/advanced/#migration-pro) documentation.
+For a more detailed guide, see the [advanced usages](https://docs.bunkerweb.io/1.6.18~rc3/advanced/#migration-pro) documentation.
 
 STREAM support :white_check_mark:
 
@@ -4265,7 +4276,7 @@ Whether you need to restrict HTTP methods, manage request sizes, optimize file c
         - Verify plugin integrity using checksums when available.
         - Regularly review and update plugins to ensure security and compatibility.
 
-        For more details, refer to the [Plugins documentation](https://docs.bunkerweb.io/1.6.18~rc2/plugins/).
+        For more details, refer to the [Plugins documentation](https://docs.bunkerweb.io/1.6.18~rc3/plugins/).
 
     | Setting                 | Default | Context | Multiple | Description                                                                    |
     | ----------------------- | ------- | ------- | -------- | ------------------------------------------------------------------------------ |
@@ -4399,7 +4410,7 @@ Follow these steps to configure and use ModSecurity:
 1. **Enable the feature:** ModSecurity is enabled by default. This can be controlled using the `USE_MODSECURITY` setting.
 2. **Select a CRS version:** Choose a version of the OWASP Core Rule Set (v3 or v4).
 3. **Add plugins:** Optionally activate CRS plugins to enhance rule coverage.
-4. **Monitor and tune:** Use logs and the [web UI](https://docs.bunkerweb.io/1.6.18~rc2/web-ui/) to identify false positives and adjust settings.
+4. **Monitor and tune:** Use logs and the [web UI](https://docs.bunkerweb.io/1.6.18~rc3/web-ui/) to identify false positives and adjust settings.
 
 ### Configuration Settings
 
@@ -4762,7 +4773,7 @@ The Scheduler validates the whole candidate CA bundle and every CRL before repla
 
 <p align='center'></p>
 
-For a more detailed guide, see the [advanced usages](https://docs.bunkerweb.io/1.6.18~rc2/advanced/#openapi-validator-pro) documentation.
+For a more detailed guide, see the [advanced usages](https://docs.bunkerweb.io/1.6.18~rc3/advanced/#openapi-validator-pro) documentation.
 
 STREAM support :x:
 
@@ -4783,7 +4794,7 @@ Validates incoming HTTP requests against an OpenAPI / Swagger specification.
 
 <p align='center'></p>
 
-For a more detailed guide, see the [advanced usages](https://docs.bunkerweb.io/1.6.18~rc2/advanced/#openid-connect-pro) documentation.
+For a more detailed guide, see the [advanced usages](https://docs.bunkerweb.io/1.6.18~rc3/advanced/#openid-connect-pro) documentation.
 
 STREAM support :x:
 
@@ -4950,10 +4961,10 @@ The Pro plugin bundles advanced features and enhancements for enterprise deploym
 
 Follow these steps to configure and use the Pro features:
 
-1. **Obtain a license key:** Purchase a Pro license from the [BunkerWeb Panel](https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc).
+1. **Obtain a license key:** start a 30-day free trial or purchase a Pro license from the [BunkerWeb Panel](https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc) ([step-by-step guide](https://docs.bunkerweb.io/1.6.18~rc3/index/#pro-version)).
 2. **Configure your license key:** Use the `PRO_LICENSE_KEY` setting to configure your license.
 3. **Let BunkerWeb handle the rest:** Once configured with a valid license, Pro plugins are automatically downloaded and activated.
-4. **Monitor your Pro status:** Check the health indicators in the [web UI](https://docs.bunkerweb.io/1.6.18~rc2/web-ui/) to confirm your Pro subscription status.
+4. **Monitor your Pro status:** Check the health indicators in the [web UI](https://docs.bunkerweb.io/1.6.18~rc3/web-ui/) to confirm your Pro subscription status.
 
 ### Configuration Settings
 
@@ -4987,7 +4998,7 @@ Follow these steps to configure and use the Pro features:
 - **BunkerWeb PRO Standard:** Full access to Pro features without technical support.
 - **BunkerWeb PRO Enterprise:** Full access to Pro features with dedicated technical support.
 
-You can explore Pro features with a free 30-day trial. Start it from the [BunkerWeb Panel](https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc) and learn more about flexible pricing options based on the number of services protected by BunkerWeb PRO.
+You can explore Pro features with a free 30-day trial. Start it from the [BunkerWeb Panel](https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc) and learn more about flexible pricing options based on the number of services protected by BunkerWeb PRO: order a plan, then keep **Free 30 Days Trial** as the payment method at checkout ([step-by-step guide](https://docs.bunkerweb.io/1.6.18~rc3/index/#pro-version)).
 
 ## Prometheus exporter  (PRO)
 
@@ -5869,7 +5880,7 @@ Follow these steps to configure and use the Reverse Scan feature:
 1. **Enable the feature:** Set the `USE_REVERSE_SCAN` setting to `yes` to enable client port scanning.
 2. **Configure ports to scan:** Customize the `REVERSE_SCAN_PORTS` setting to specify which client ports should be checked.
 3. **Set scan timeout:** Adjust the `REVERSE_SCAN_TIMEOUT` to balance thorough scanning with performance.
-4. **Monitor scan activity:** Check logs and the [web UI](https://docs.bunkerweb.io/1.6.18~rc2/web-ui/) to review scan results and potential security incidents.
+4. **Monitor scan activity:** Check logs and the [web UI](https://docs.bunkerweb.io/1.6.18~rc3/web-ui/) to review scan results and potential security incidents.
 
 ### Configuration Settings
 
@@ -6029,7 +6040,7 @@ For more information, see the [robots.txt documentation](https://www.robotstxt.o
 
 ## SAML  (PRO)
 
-For a more detailed guide, see the [advanced usages](https://docs.bunkerweb.io/1.6.18~rc2/advanced/#saml-pro) documentation.
+For a more detailed guide, see the [advanced usages](https://docs.bunkerweb.io/1.6.18~rc3/advanced/#saml-pro) documentation.
 
 STREAM support :x:
 
@@ -6496,7 +6507,7 @@ Integrate easily the BunkerWeb UI.
 
 ## UI Single Sign-On  (PRO)
 
-For a more detailed guide, see the [advanced usages](https://docs.bunkerweb.io/1.6.18~rc2/advanced/#ui-single-sign-on-pro) documentation.
+For a more detailed guide, see the [advanced usages](https://docs.bunkerweb.io/1.6.18~rc3/advanced/#ui-single-sign-on-pro) documentation.
 
 STREAM support :x:
 
@@ -6527,7 +6538,7 @@ Enable SSO authentication for the BunkerWeb web interface by reading headers set
 
 <p align='center'></p>
 
-For a more detailed guide, see the [advanced usages](https://docs.bunkerweb.io/1.6.18~rc2/advanced/#user-manager-pro) documentation.
+For a more detailed guide, see the [advanced usages](https://docs.bunkerweb.io/1.6.18~rc3/advanced/#user-manager-pro) documentation.
 
 STREAM support :x:
 
@@ -6561,7 +6572,7 @@ Follow these steps to configure and use the Whitelist feature:
 1. **Enable the feature:** Whitelist is enabled by default (`USE_WHITELIST=yes`), with preset rDNS suffixes and ASN `32934`. Review these trusted sources; set `USE_WHITELIST=no` to disable it.
 2. **Configure allow rules:** Define which IPs, networks, rDNS patterns, ASNs, User-Agents, or URIs should be whitelisted.
 3. **Add external sources:** Configure URLs for automatically downloading and updating whitelist data.
-4. **Monitor access:** Check the [web UI](https://docs.bunkerweb.io/1.6.18~rc2/web-ui/) to see which visitors are being allowed or denied.
+4. **Monitor access:** Check the [web UI](https://docs.bunkerweb.io/1.6.18~rc3/web-ui/) to see which visitors are being allowed or denied.
 
 !!! info "stream mode"
     When using stream mode, only IP, rDNS, and ASN checks are performed.
@@ -6734,7 +6745,7 @@ TrustedMonitor/\d+\.\d+
 
 ## Wildcard  (PRO)
 
-For a more detailed guide, see the [advanced usages](https://docs.bunkerweb.io/1.6.18~rc2/advanced/#wildcard-pro) documentation.
+For a more detailed guide, see the [advanced usages](https://docs.bunkerweb.io/1.6.18~rc3/advanced/#wildcard-pro) documentation.
 
 STREAM support :x:
 
