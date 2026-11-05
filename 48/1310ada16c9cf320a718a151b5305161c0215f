@@ -1,0 +1,1086 @@
+.dockerignore
+  h_a33a1e80933106 5-6
+.github/ISSUE_TEMPLATE/bug_report.yml
+  h_a33a1e80933106 74
+.github/codecov.yml
+  h_a33a1e80933106 3-6,12-14,18-56
+.github/scripts/test_release_artifacts.py
+  h_a33a1e80933106 219-223
+.github/workflows/codeql.yml
+  h_a33a1e80933106 41,47
+.github/workflows/container-build.yml
+  h_a33a1e80933106 201
+.github/workflows/dev.yml
+  h_a33a1e80933106 142-161,176-177,190-191,204-205,218-219,230-241,253,255-256
+.github/workflows/plumber.yml
+  h_a33a1e80933106 25
+.github/workflows/push-packagecloud.yml
+  h_a33a1e80933106 62,71
+.github/workflows/scorecards-analysis.yml
+  h_a33a1e80933106 28
+.github/workflows/staging.yml
+  h_a33a1e80933106 400
+.github/workflows/ui.yml
+  h_a33a1e80933106 39-41,106-107
+.github/workflows/unit-tests.yml
+  h_a33a1e80933106 16-17,25-26,68-70,75-84,92-96,99,105-106,108,110-113,115-125,206
+.luacov
+  h_a33a1e80933106 1-6
+CHANGELOG.md
+  h_a33a1e80933106 3-73
+README.md
+  h_a33a1e80933106 2-5,8-38,40-44,46-47,49-50,52,58-63,68,71,76,78,84-92,107,136-137,143,145,147-152,166-173,175,177,180,183,185-186,192-197,199-202,220-223,231,233-236,242-245,248,261-264,275-280,282-293,298,306-307,320,322,324-325,335,337,339-340,346,348,350-351,357,359,361-362,364,366,368,370-371,375,377,379,381,383,385,387,389-391,397,399,416,418,433-435,437,439-442,462,464,478-480,482,484,490,499-500,502,504,506,510
+docs/about.md
+  h_a33a1e80933106 10
+docs/advanced.md
+  h_a33a1e80933106 3,5,88,99,107,124,132,179,187,252,263,273,291,301,353,363,488-489,593,612,698,1135,1163,1174,1291,1331,1354,1397,1467,1713,1736,1751,1802,2032,2162,2206,2221,2315,2328,2343,2583,2652,2654,2656,2658,2660,2662,2664,2666,2671,2673,2683,2717-2805,2923,2936,2953,3125,3234,3245,3264,3307,3576,3581,4405,4409,4492
+docs/api.md
+  h_a33a1e80933106 45,58,80,147
+docs/concepts.md
+  h_a33a1e80933106 34,108,129,177
+docs/de/about.md
+  h_a33a1e80933106 10
+docs/de/advanced.md
+  h_a33a1e80933106 3,5,88,99,107,124,132,179,187,252,263,273,291,301,353,363,488-489,591,610,696,1133,1161,1172,1289,1329,1352,1395,1465,1712,1735,1750,1801,2031,2161,2205,2220,2314,2327,2342,2582,2651,2653,2655,2657,2659,2661,2663,2665,2670,2672,2682,2716-2804,2922,2935,2952,3124,3233,3244,3263,3306,3575,3580,4404,4408,4491
+docs/de/api.md
+  h_a33a1e80933106 45,58,80,147
+docs/de/concepts.md
+  h_a33a1e80933106 34,108,129,175
+docs/de/features.md
+  h_a33a1e80933106 47,80,376-387,1342,1351,1353,1367-1371,1376-1387,1731-1737,1882,1981,1998,2181,4937,4974
+docs/de/index.md
+  h_a33a1e80933106 92,95,103,105-110
+docs/de/integrations.md
+  h_a33a1e80933106 1271,1287,1365,1373,1460,1519,1541,1563,1602,1634,1640,1650,1660,1707,1728,1737,1755,1903,1916,1949,1962,2029-2030,2133,2200,2291-2316,2364,2369,2405,2410,2441,2446,2491,2496,2594,2608,2623,2638,2810,2846,2852,2925,3040,3210,3254,3536,3688,3869,3873,3881,3885,4507,4521,4550,4571,4723,4735
+docs/de/plugins.md
+  h_a33a1e80933106 98,133,176,223,263,485-497,500,581
+docs/de/quickstart-guide.md
+  h_a33a1e80933106 21,52,70-71,112,125,142,212,228,246,269,367,397,415,444,670,692
+docs/de/upgrading.md
+  h_a33a1e80933106 22-23,107,110,113,116,172,183,192,231-232,309-310,313,316,319,322,402,428,752-755,904,907,910,913,948,974,1207
+docs/de/web-ui.md
+  h_a33a1e80933106 55,66,86,173,242-245,306
+docs/es/about.md
+  h_a33a1e80933106 10
+docs/es/advanced.md
+  h_a33a1e80933106 3,5,88,99,107,124,132,179,187,252,263,273,291,301,353,363,488-489,591,610,696,1133,1161,1172,1289,1329,1352,1395,1465,1712,1735,1750,1801,2031,2161,2205,2220,2314,2327,2342,2582,2651,2653,2655,2657,2659,2661,2663,2665,2670,2672,2682,2716-2804,2922,2935,2952,3124,3233,3244,3263,3306,3575,3580,4404,4408,4491
+docs/es/api.md
+  h_a33a1e80933106 45,58,80,147
+docs/es/concepts.md
+  h_a33a1e80933106 34,108,129,175
+docs/es/features.md
+  h_a33a1e80933106 47,80,375-386,1359,1368,1370,1384-1388,1393-1404,1750-1756,1909,2004,2021,2206,4989,5026
+docs/es/index.md
+  h_a33a1e80933106 92,95,103,105-110
+docs/es/integrations.md
+  h_a33a1e80933106 1271,1287,1365,1373,1460,1520,1542,1564,1603,1635,1641,1651,1661,1708,1729,1738,1756,1904,1917,1950,1963,2030-2031,2134,2201,2292-2317,2365,2370,2406,2411,2442,2447,2492,2497,2596,2610,2625,2640,2812,2848,2854,2926,3041,3211,3255,3537,3689,3870,3874,3882,3886,4508,4522,4551,4572,4724,4736
+docs/es/plugins.md
+  h_a33a1e80933106 98,134,177,224,264,486-498,582
+docs/es/quickstart-guide.md
+  h_a33a1e80933106 21,52,70-71,112,125,142,212,228,246,269,367,397,415,444,671,693
+docs/es/upgrading.md
+  h_a33a1e80933106 21-22,106,109,112,115,171,182,191,230-231,312-313,316,319,322,325,405,431,755-758,907,910,913,916,951,977,1210
+docs/es/web-ui.md
+  h_a33a1e80933106 55,66,86,173,242-245,306
+docs/features.md
+  h_a33a1e80933106 47,80,375-386,1363,1372,1374,1388-1392,1397-1408,1754-1760,1915,2016,2033,2218,5005,5042
+docs/fr/about.md
+  h_a33a1e80933106 10
+docs/fr/advanced.md
+  h_a33a1e80933106 3,5,88,99,107,124,132,179,187,252,263,273,291,301,353,363,488-489,591,610,696,1133,1161,1172,1289,1329,1352,1395,1465,1711,1734,1749,1800,2030,2160,2204,2219,2313,2326,2341,2581,2650,2652,2654,2656,2658,2660,2662,2664,2669,2671,2681,2715-2803,2921,2934,2951,3123,3232,3243,3262,3305,3574,3579,4403,4407,4490
+docs/fr/api.md
+  h_a33a1e80933106 45,58,80,147
+docs/fr/concepts.md
+  h_a33a1e80933106 34,108,129,175
+docs/fr/features.md
+  h_a33a1e80933106 47,80,375-386,1323,1331,1333,1347-1351,1356-1367,1695,1842,1941,1958,2143,4876,4913
+docs/fr/index.md
+  h_a33a1e80933106 92,95,103,105-110
+docs/fr/integrations.md
+  h_a33a1e80933106 1278,1293,1372,1380,1467,1527,1548,1570,1609,1643,1649,1659,1669,1716,1737,1746,1764,1912,1925,1958,1971,2038-2039,2139,2206,2294-2319,2367,2372,2408,2413,2444,2449,2494,2499,2598,2612,2627,2642,2814,2850,2856,2927,3042,3212,3256,3313,3539,3691,3872,3876,3884,3888,4509,4523,4552,4573,4725,4737
+docs/fr/plugins.md
+  h_a33a1e80933106 98,134,177,224,264,486-498,582
+docs/fr/quickstart-guide.md
+  h_a33a1e80933106 21,52,70-71,112,125,142,212,228,246,269,367,397,415,444,671,693
+docs/fr/upgrading.md
+  h_a33a1e80933106 21-22,106,109,112,115,171,182,191,230-231,312-313,316,319,322,325,405,431,755-758,907,910,913,916,951,977,1210
+docs/fr/web-ui.md
+  h_a33a1e80933106 55,66,86,173,242-245,306
+docs/index.md
+  h_a33a1e80933106 92,95,103,105-110
+docs/integrations.md
+  h_a33a1e80933106 1278,1305,1377,1385,1472,1532,1554,1576,1615,1649,1655,1665,1675,1722,1743,1752,1770,1918,1931,1964,1977,2044-2045,2152,2264,2387-2412,2479,2484,2520,2525,2556,2561,2606,2611,2710,2724,2739,2754,2925,2961,2967,3047,3164,3334,3378,3660,3812,3993,3997,4005,4009,4630,4644,4673,4694,4846,4858
+docs/overrides/main.html
+  h_a33a1e80933106 16-18,34-36,52-54,70-72,88-90,101,154
+docs/plugins.md
+  h_a33a1e80933106 98,134,177,224,264,489-501,585
+docs/quickstart-guide.md
+  h_a33a1e80933106 21,52,70-71,112,125,142,212,228,246,269,367,397,415,444,671,693
+docs/upgrading.md
+  h_a33a1e80933106 21-22,105,108,111,114,170,181,190,229-230,311-312,315,318,321,324,404,430,755-758,907,910,913,916,951,977,1210
+docs/web-ui.md
+  h_a33a1e80933106 50,65,89,194,263-266,356
+docs/zh/about.md
+  h_a33a1e80933106 10
+docs/zh/advanced.md
+  h_a33a1e80933106 3,5,88,99,107,124,132,179,187,252,263,273,291,301,353,363,488-489,591,610,696,1133,1161,1172,1289,1329,1352,1395,1465,1710,1733,1748,1799,2029,2159,2203,2218,2312,2325,2340,2580,2649,2651,2653,2655,2657,2659,2661,2663,2668,2670,2680,2714-2802,2919,2932,2949,3121,3230,3241,3260,3303,3572,3577,4401,4405,4488
+docs/zh/api.md
+  h_a33a1e80933106 45,58,80,147
+docs/zh/concepts.md
+  h_a33a1e80933106 34,108,129,175
+docs/zh/features.md
+  h_a33a1e80933106 49,82,377-388,1365,1374,1376,1390-1394,1399-1410,1756-1762,1915,2014,2031,2216,4999,5036
+docs/zh/index.md
+  h_a33a1e80933106 92,95,103,105-110
+docs/zh/integrations.md
+  h_a33a1e80933106 1271,1287,1365,1373,1460,1520,1542,1564,1603,1637,1643,1653,1663,1707,1728,1737,1755,1903,1916,1949,1962,2029-2030,2133,2200,2291-2316,2364,2369,2405,2410,2441,2446,2491,2496,2595,2609,2624,2639,2811,2847,2853,2922,3037,3207,3251,3533,3685,3866,3870,3878,3882,4504,4518,4547,4568,4717,4729
+docs/zh/plugins.md
+  h_a33a1e80933106 98,134,177,224,264,486-498,582
+docs/zh/quickstart-guide.md
+  h_a33a1e80933106 21,52,70-71,112,125,142,212,228,246,269,367,397,415,444,671,693
+docs/zh/upgrading.md
+  h_a33a1e80933106 21-22,105,108,111,114,170,181,190,229-230,311-312,315,318,321,324,404,430,754-757,906,909,912,915,950,976,1209
+docs/zh/web-ui.md
+  h_a33a1e80933106 55,66,86,173,242-245,306
+examples/authelia/docker-compose.yml
+  h_a33a1e80933106 3,17
+examples/authentik/docker-compose.yml
+  h_a33a1e80933106 3,17
+examples/behind-reverse-proxy/docker-compose.yml
+  h_a33a1e80933106 9,20
+examples/bigbluebutton/docker-compose.yml
+  h_a33a1e80933106 28,43
+examples/cors/docker-compose.yml
+  h_a33a1e80933106 3,25
+examples/dns-cloudflare/docker-compose.yml
+  h_a33a1e80933106 3,17
+examples/dns-desec/docker-compose.yml
+  h_a33a1e80933106 3,17
+examples/dns-digitalocean/docker-compose.yml
+  h_a33a1e80933106 3,17
+examples/dns-dnsimple/docker-compose.yml
+  h_a33a1e80933106 3,17
+examples/dns-dnsmadeeasy/docker-compose.yml
+  h_a33a1e80933106 3,17
+examples/dns-gehirn/docker-compose.yml
+  h_a33a1e80933106 3,17
+examples/dns-google/docker-compose.yml
+  h_a33a1e80933106 3,17
+examples/dns-linode/docker-compose.yml
+  h_a33a1e80933106 3,17
+examples/dns-luadns/docker-compose.yml
+  h_a33a1e80933106 3,17
+examples/dns-nsone/docker-compose.yml
+  h_a33a1e80933106 3,17
+examples/dns-ovh/docker-compose.yml
+  h_a33a1e80933106 3,17
+examples/dns-rfc2136/docker-compose.yml
+  h_a33a1e80933106 3,17
+examples/dns-route53/docker-compose.yml
+  h_a33a1e80933106 3,17
+examples/dns-sakuracloud/docker-compose.yml
+  h_a33a1e80933106 3,17
+examples/dns-scaleway/docker-compose.yml
+  h_a33a1e80933106 3,17
+examples/docker-configs/docker-compose.yml
+  h_a33a1e80933106 3,17
+examples/drupal/docker-compose.yml
+  h_a33a1e80933106 3,17
+examples/ghost/docker-compose.yml
+  h_a33a1e80933106 3,17
+examples/gogs/docker-compose.yml
+  h_a33a1e80933106 3,17
+examples/hardened/docker-compose.yml
+  h_a33a1e80933106 3,36
+examples/jellyfin/docker-compose.yml
+  h_a33a1e80933106 3,17
+examples/joomla/docker-compose.yml
+  h_a33a1e80933106 3,17
+examples/load-balancer/docker-compose.yml
+  h_a33a1e80933106 3,17
+examples/magento/docker-compose.yml
+  h_a33a1e80933106 3,17
+examples/mattermost/docker-compose.yml
+  h_a33a1e80933106 3,17
+examples/mcp-stack/docker-compose.yml
+  h_a33a1e80933106 12,25,47
+examples/mongo-express/docker-compose.yml
+  h_a33a1e80933106 3,17
+examples/moodle/docker-compose.yml
+  h_a33a1e80933106 3,17
+examples/nextcloud/docker-compose.yml
+  h_a33a1e80933106 3,17
+examples/passbolt/docker-compose.yml
+  h_a33a1e80933106 3,17
+examples/php-cookie-flags/docker-compose.yml
+  h_a33a1e80933106 3,25
+examples/php-multisite/docker-compose.yml
+  h_a33a1e80933106 3,26
+examples/php-singlesite/docker-compose.yml
+  h_a33a1e80933106 3,25
+examples/prestashop/docker-compose.yml
+  h_a33a1e80933106 3,17
+examples/proxy-protocol/docker-compose.yml
+  h_a33a1e80933106 11,22
+examples/radarr/docker-compose.yml
+  h_a33a1e80933106 3,17
+examples/redmine/docker-compose.yml
+  h_a33a1e80933106 3,17
+examples/reverse-proxy-multisite/docker-compose.yml
+  h_a33a1e80933106 3,17
+examples/reverse-proxy-singlesite/docker-compose.yml
+  h_a33a1e80933106 3,17
+examples/reverse-proxy-websocket/docker-compose.yml
+  h_a33a1e80933106 3,17
+examples/stream-multisite/docker-compose.yml
+  h_a33a1e80933106 3,19
+examples/syslog/docker-compose.yml
+  h_a33a1e80933106 3,24
+examples/tomcat/docker-compose.yml
+  h_a33a1e80933106 3,17
+examples/tor-hidden-service/docker-compose.yml
+  h_a33a1e80933106 13,24
+examples/web-ui/docker-compose.wizard.yml
+  h_a33a1e80933106 6,20,43
+examples/web-ui/docker-compose.yml
+  h_a33a1e80933106 6,20,46
+examples/wordpress/docker-compose.yml
+  h_a33a1e80933106 3,17
+misc/install-bunkerweb.sh
+  h_a33a1e80933106 117,5626-5678,8727-8736,9476,9494
+misc/integrations/all-in-one.mariadb.ui.yml
+  h_a33a1e80933106 3
+misc/integrations/all-in-one.mariadb.yml
+  h_a33a1e80933106 3
+misc/integrations/all-in-one.mysql.ui.yml
+  h_a33a1e80933106 3
+misc/integrations/all-in-one.mysql.yml
+  h_a33a1e80933106 3
+misc/integrations/all-in-one.oracle.ui.yml
+  h_a33a1e80933106 3
+misc/integrations/all-in-one.oracle.yml
+  h_a33a1e80933106 3
+misc/integrations/all-in-one.postgres.ui.yml
+  h_a33a1e80933106 3
+misc/integrations/all-in-one.postgres.yml
+  h_a33a1e80933106 3
+misc/integrations/all-in-one.yml
+  h_a33a1e80933106 3
+misc/integrations/autoconf.mariadb.ui.yml
+  h_a33a1e80933106 7,21,34,50
+misc/integrations/autoconf.mariadb.yml
+  h_a33a1e80933106 7,21,34
+misc/integrations/autoconf.mysql.ui.yml
+  h_a33a1e80933106 7,21,34,50
+misc/integrations/autoconf.mysql.yml
+  h_a33a1e80933106 7,21,34
+misc/integrations/autoconf.oracle.ui.yml
+  h_a33a1e80933106 7,21,34,50
+misc/integrations/autoconf.oracle.yml
+  h_a33a1e80933106 7,21,34
+misc/integrations/autoconf.postgres.ui.yml
+  h_a33a1e80933106 7,21,34,50
+misc/integrations/autoconf.postgres.yml
+  h_a33a1e80933106 7,21,34
+misc/integrations/docker.mariadb.ui.yml
+  h_a33a1e80933106 6,20,44
+misc/integrations/docker.mariadb.yml
+  h_a33a1e80933106 7,20
+misc/integrations/docker.mysql.ui.yml
+  h_a33a1e80933106 6,20,44
+misc/integrations/docker.mysql.yml
+  h_a33a1e80933106 7,20
+misc/integrations/docker.oracle.ui.yml
+  h_a33a1e80933106 6,20,44
+misc/integrations/docker.oracle.yml
+  h_a33a1e80933106 7,20
+misc/integrations/docker.postgres.ui.yml
+  h_a33a1e80933106 6,19,43
+misc/integrations/docker.postgres.yml
+  h_a33a1e80933106 7,20
+misc/integrations/docker.yml
+  h_a33a1e80933106 6,19
+misc/integrations/k8s.mariadb.ui.yml
+  h_a33a1e80933106 117,177,214,325
+misc/integrations/k8s.mariadb.yml
+  h_a33a1e80933106 127,187,224
+misc/integrations/k8s.mysql.ui.yml
+  h_a33a1e80933106 117,177,214,325
+misc/integrations/k8s.mysql.yml
+  h_a33a1e80933106 127,187,224
+misc/integrations/k8s.oracle.ui.yml
+  h_a33a1e80933106 117,177,214,321
+misc/integrations/k8s.oracle.yml
+  h_a33a1e80933106 127,187,224
+misc/integrations/k8s.postgres.ui.yml
+  h_a33a1e80933106 117,177,214,321
+misc/integrations/k8s.postgres.yml
+  h_a33a1e80933106 127,187,224
+misc/migration/Dockerfile
+  h_a33a1e80933106 1
+publiccode.yml
+  h_a33a1e80933106 4-6
+pyproject.toml
+  h_a33a1e80933106 4,37
+src/VERSION
+  h_a33a1e80933106 1
+src/all-in-one/Dockerfile
+  h_a33a1e80933106 177,245
+src/api/Dockerfile
+  h_a33a1e80933106 1,31,65
+src/api/app/rate_limit.py
+  h_a33a1e80933106 18,440-441,468-476,507,514-521
+src/api/app/routers/bans.py
+  h_a33a1e80933106 8,21-33,74-75,78-81,83-86,105,184-187
+src/api/app/routers/instances.py
+  h_a33a1e80933106 239-241
+src/api/app/utils.py
+  h_a33a1e80933106 32,36
+src/api/requirements.in
+  h_a33a1e80933106 6,8-9
+src/api/requirements.txt
+  h_a33a1e80933106 270-272,436-438,443-584,586-588
+src/api/utils/gunicorn.conf.py
+  h_a33a1e80933106 127
+src/autoconf/Dockerfile
+  h_a33a1e80933106 1,35,69
+src/autoconf/controllers/KubernetesController.py
+  h_a33a1e80933106 412-414
+src/autoconf/requirements.in
+  h_a33a1e80933106 4
+src/autoconf/requirements.txt
+  h_a33a1e80933106 978-980,982-1123,1129-1131
+src/bw/Dockerfile
+  h_a33a1e80933106 81,111
+src/bw/entrypoint.sh
+  h_a33a1e80933106 206-208
+src/bw/lua/bunkerweb/api.lua
+  h_a33a1e80933106 28,875-877,880,929-930,1000-1002,1027-1029,1032
+src/bw/lua/bunkerweb/banlease.lua
+  h_a33a1e80933106 2,14,16-17,43,77,101,122,147,158,174-178,523,588,613,655,749,800-833,835-869,871-907,910-933,935-942
+src/bw/lua/bunkerweb/clusterstore.lua
+  h_a33a1e80933106 5,120,137,270,364-372,382-392
+src/bw/lua/bunkerweb/datastore.lua
+  h_a33a1e80933106 223-246
+src/bw/lua/bunkerweb/helpers.lua
+  h_a33a1e80933106 5,27-30,65-70,81,318-320
+src/bw/lua/bunkerweb/ipaddr.lua
+  h_a33a1e80933106 1-193
+src/bw/lua/bunkerweb/redisendpoints.lua
+  h_a33a1e80933106 1-19
+src/bw/lua/bunkerweb/utils.lua
+  h_a33a1e80933106 5,30,60-122,218,232,408-411,417-418,439,669,719,861,1020,1052,1069,1246-1281,1283,1469-1471,1473-1475,1495-1496,1502,1508,1513,1523,1527,1533,1563,1591-1592,1599,1608,1611-1624,1626-1629,1632,1646-1647,1682-1818,1820-1825,1830-1832,1834-1836,1845-1848,1850-1852,1856,1868-1873,1879-1895,1908-1920,1937-1948,1983,2072
+src/common/README.de.md
+  h_a33a1e80933106 39,72
+src/common/README.es.md
+  h_a33a1e80933106 39,72
+src/common/README.fr.md
+  h_a33a1e80933106 39,72
+src/common/README.md
+  h_a33a1e80933106 39,72
+src/common/README.zh.md
+  h_a33a1e80933106 41,74
+src/common/api/API.py
+  h_a33a1e80933106 5-10,15,30-96,157-162,164-165,167,170-177,179-180,182-183,254-256,258-261,263-281,284-302,306,316-319,324,331,335-342
+src/common/cli/CLI.py
+  h_a33a1e80933106 30,422,554-557,595-598
+src/common/confs/api.conf
+  h_a33a1e80933106 12,14,30,36
+src/common/confs/default-server-http.conf
+  h_a33a1e80933106 117-118,129-137
+src/common/confs/init-worker-lua.conf
+  h_a33a1e80933106 87-99
+src/common/confs/server-http/server.conf
+  h_a33a1e80933106 14-15
+src/common/confs/stream.conf
+  h_a33a1e80933106 72,80
+src/common/core/antibot/README.de.md
+  h_a33a1e80933106 40-51
+src/common/core/antibot/README.es.md
+  h_a33a1e80933106 40-51
+src/common/core/antibot/README.fr.md
+  h_a33a1e80933106 40-51
+src/common/core/antibot/README.md
+  h_a33a1e80933106 40-51
+src/common/core/antibot/README.zh.md
+  h_a33a1e80933106 40-51
+src/common/core/antibot/confs/http/antibot.modsec-crs
+  h_a33a1e80933106 6-7,13
+src/common/core/antibot/plugin.json
+  h_a33a1e80933106 85,97,891,900
+src/common/core/backup/backup.py
+  h_a33a1e80933106 10,49-60,68,70,157,192-198,200,349,354
+src/common/core/backup/jobs/backup-data.py
+  h_a33a1e80933106 111-112
+src/common/core/blacklist/jobs/blacklist-download.py
+  h_a33a1e80933106 33-35,168,171,233-234,239-241,367
+src/common/core/blacklist/plugin.json
+  h_a33a1e80933106 54,128,193,202,211,220,229,238,247,256,265,274
+src/common/core/bunkernet/README.de.md
+  h_a33a1e80933106 6,15,17,31-35,40-51
+src/common/core/bunkernet/README.es.md
+  h_a33a1e80933106 6,15,17,31-35,40-51
+src/common/core/bunkernet/README.fr.md
+  h_a33a1e80933106 6,14,16,30-34,39-50
+src/common/core/bunkernet/README.md
+  h_a33a1e80933106 6,15,17,31-35,40-51
+src/common/core/bunkernet/README.zh.md
+  h_a33a1e80933106 6,15,17,31-35,40-51
+src/common/core/bunkernet/bunkernet.lua
+  h_a33a1e80933106 37-101,295,299,302,372
+src/common/core/bunkernet/jobs/bunkernet-send.py
+  h_a33a1e80933106 29-56,121-122,171
+src/common/core/bunkernet/plugin.json
+  h_a33a1e80933106 17-25
+src/common/core/cors/README.de.md
+  h_a33a1e80933106 54
+src/common/core/cors/README.es.md
+  h_a33a1e80933106 54
+src/common/core/cors/README.fr.md
+  h_a33a1e80933106 52
+src/common/core/cors/README.md
+  h_a33a1e80933106 54
+src/common/core/cors/README.zh.md
+  h_a33a1e80933106 54
+src/common/core/cors/cors.lua
+  h_a33a1e80933106 74,80-81,89
+src/common/core/country/README.de.md
+  h_a33a1e80933106 20-26
+src/common/core/country/README.es.md
+  h_a33a1e80933106 22-28
+src/common/core/country/README.fr.md
+  h_a33a1e80933106 24
+src/common/core/country/README.md
+  h_a33a1e80933106 22-28
+src/common/core/country/README.zh.md
+  h_a33a1e80933106 22-28
+src/common/core/country/plugin.json
+  h_a33a1e80933106 348
+src/common/core/crowdsec/README.de.md
+  h_a33a1e80933106 76,175,192,375
+src/common/core/crowdsec/README.es.md
+  h_a33a1e80933106 76,171,188,373
+src/common/core/crowdsec/README.fr.md
+  h_a33a1e80933106 76,175,192,377
+src/common/core/crowdsec/README.md
+  h_a33a1e80933106 76,177,194,379
+src/common/core/crowdsec/README.zh.md
+  h_a33a1e80933106 76,175,192,377
+src/common/core/crowdsec/lib/bouncer.lua
+  h_a33a1e80933106 813,821-822,865,905-909
+src/common/core/crowdsec/lib/iputils.lua
+  h_a33a1e80933106 130-137,150
+src/common/core/crowdsec/plugin.json
+  h_a33a1e80933106 102-103
+src/common/core/customcert/jobs/custom-cert.py
+  h_a33a1e80933106 145-146
+src/common/core/db/jobs/cleanup-excess-jobs-runs.py
+  h_a33a1e80933106 19-21,23,26
+src/common/core/dnsbl/jobs/dnsbl-download.py
+  h_a33a1e80933106 33-35,131-132,134
+src/common/core/dnsbl/plugin.json
+  h_a33a1e80933106 32,61
+src/common/core/greylist/jobs/greylist-download.py
+  h_a33a1e80933106 33-35,112,115,177-178,183-185,311
+src/common/core/greylist/plugin.json
+  h_a33a1e80933106 23,97,106,115,124,133
+src/common/core/grpc/plugin.json
+  h_a33a1e80933106 390
+src/common/core/jobs/jobs/api-server-cert.py
+  h_a33a1e80933106 104,110
+src/common/core/letsencrypt/jobs/certbot-new.py
+  h_a33a1e80933106 561-567,941-943,952-953,1212,1214,1231-1238,1263
+src/common/core/letsencrypt/jobs/certbot_concurrency.py
+  h_a33a1e80933106 289-290,292,331,338-339,419,427,430,469,476-477
+src/common/core/letsencrypt/jobs/letsencrypt_utils.py
+  h_a33a1e80933106 555-560,566-567,572-576,581-582,591-594,597-600
+src/common/core/limit/limit.lua
+  h_a33a1e80933106 14,304-320,332-333,355,367,435
+src/common/core/metrics/metrics.lua
+  h_a33a1e80933106 1474-1475,1480-1488
+src/common/core/misc/plugin.json
+  h_a33a1e80933106 159
+src/common/core/modsecurity/confs/http/ip-host.modsec-crs
+  h_a33a1e80933106 1-30
+src/common/core/modsecurity/confs/modsec-crs/ip-host.conf
+  h_a33a1e80933106 1-17
+src/common/core/order.json
+  h_a33a1e80933106 28
+src/common/core/pro/README.de.md
+  h_a33a1e80933106 23,60
+src/common/core/pro/README.es.md
+  h_a33a1e80933106 23,60
+src/common/core/pro/README.fr.md
+  h_a33a1e80933106 21,58
+src/common/core/pro/README.md
+  h_a33a1e80933106 23,60
+src/common/core/pro/README.zh.md
+  h_a33a1e80933106 23,60
+src/common/core/realip/jobs/realip-download.py
+  h_a33a1e80933106 26-28,146-148
+src/common/core/realip/plugin.json
+  h_a33a1e80933106 32,59
+src/common/core/reverseproxy/confs/server-stream/reverse-proxy.conf
+  h_a33a1e80933106 52-54
+src/common/core/reverseproxy/plugin.json
+  h_a33a1e80933106 370
+src/common/core/reversescan/reversescan.lua
+  h_a33a1e80933106 55,84,99-104,114,144-146,150-152,154-157,160
+src/common/core/robotstxt/plugin.json
+  h_a33a1e80933106 44
+src/common/core/sessions/sessions.lua
+  h_a33a1e80933106 4,168,172
+src/common/core/ui/confs/http/ui.modsec-crs
+  h_a33a1e80933106 10-12
+src/common/core/whitelist/jobs/whitelist-download.py
+  h_a33a1e80933106 33-35,112,115,177-178,183-185,311
+src/common/core/whitelist/plugin.json
+  h_a33a1e80933106 23,97,106,115,124,133
+src/common/db/Database.py
+  h_a33a1e80933106 18,76,906,940,1727-1736,1741-1744,1874-1876,5508,5540
+src/common/db/alembic/mariadb_versions/a80184d2b4fc_upgrade_to_version_1_6_18_rc3.py
+  h_a33a1e80933106 1-44
+src/common/db/alembic/mysql_versions/ba395a5101f5_upgrade_to_version_1_6_18_rc3.py
+  h_a33a1e80933106 1-44
+src/common/db/alembic/postgresql_versions/f34ce5d04993_upgrade_to_version_1_6_18_rc3.py
+  h_a33a1e80933106 1-44
+src/common/db/alembic/sqlite_versions/8ce60ebc52b7_upgrade_to_version_1_6_18_rc3.py
+  h_a33a1e80933106 1-44
+src/common/db/model.py
+  h_a33a1e80933106 374,500-509
+src/common/gen/Configurator.py
+  h_a33a1e80933106 7,342-343,371-395
+src/common/gen/Templator.py
+  h_a33a1e80933106 470
+src/common/gen/requirements.in
+  h_a33a1e80933106 4
+src/common/gen/requirements.txt
+  h_a33a1e80933106 483-485
+src/common/helpers/bwcli
+  h_a33a1e80933106 3-4,6
+src/common/settings.json
+  h_a33a1e80933106 52,55,298,561-569
+src/common/utils/common_utils.py
+  h_a33a1e80933106 833-840,921-931,944,991-992
+src/common/utils/ip_identity.py
+  h_a33a1e80933106 1-32
+src/common/utils/logger.py
+  h_a33a1e80933106 29,79-84
+src/deps/deps.json
+  h_a33a1e80933106 84,156,158
+src/deps/misc/ipmatcher.patch
+  h_a33a1e80933106 1-5,10-109
+src/deps/misc/lua-resty-dns-arpa-mapped.patch
+  h_a33a1e80933106 1-39
+src/deps/misc/lua-resty-redis-connector.patch
+  h_a33a1e80933106 3-20,45,47,52,54-56
+src/deps/misc/resty-redis-cluster.patch
+  h_a33a1e80933106 1-8,11-28,30,34-42,47-67,69,77,79-80,84,89-90,99,101,104,110-138,140,144,147,150,152,154,158-170,177,186,188-189,206-208,229,232,243-244,248
+src/deps/requirements-deps.in
+  h_a33a1e80933106 1,6
+src/deps/requirements-deps.txt
+  h_a33a1e80933106 203-205,254-256
+src/deps/requirements.in
+  h_a33a1e80933106 1,4
+src/deps/requirements.txt
+  h_a33a1e80933106 15-17,41-43
+src/deps/src/lua-resty-dns/lib/resty/dns/resolver.lua
+  h_a33a1e80933106 991-994,996-1002
+src/deps/src/lua-resty-ipmatcher/resty/ipmatcher.lua
+  h_a33a1e80933106 140-163,238-251,272-275,309,423-428,450-454
+src/deps/src/lua-resty-redis-connector/lib/resty/redis/connector.lua
+  h_a33a1e80933106 380-384,386,388
+src/deps/src/resty-redis-cluster/Makefile
+  h_a33a1e80933106 3,9-13,22-27,29-30
+src/deps/src/resty-redis-cluster/README.md
+  h_a33a1e80933106 135-190,408-413,427-432,435,443-452
+src/deps/src/resty-redis-cluster/kong-redis-cluster-1.7.0-0.rockspec
+  h_a33a1e80933106 2,5
+src/deps/src/resty-redis-cluster/lib/resty/rediscluster.lua
+  h_a33a1e80933106 53-59,124-136,142-144,153-160,164-168,171-188,190,194-208,243-250,426-429,431-432,467-470,505-508,529,552-553,560-643,665,684,777-786,803,810,835,844-845,882-887,960,978,1000,1005,1042-1054,1064-1069,1096-1106,1109,1118-1120,1126,1161,1166-1168,1177,1181,1215,1236-1237,1239,1242,1244-1247,1250,1255,1395,1409,1418,1495
+src/linux/Dockerfile-rhel-8
+  h_a33a1e80933106 1,148
+src/linux/Dockerfile-rhel-9
+  h_a33a1e80933106 1,149
+src/linux/scripts/start.sh
+  h_a33a1e80933106 33,150
+src/scheduler/Dockerfile
+  h_a33a1e80933106 1,48,88
+src/scheduler/main.py
+  h_a33a1e80933106 359-429,440,456-460,462,478-481,487-488,490-492,494-495,985-990,994,997-1002,1007-1010,1769,1776,1778-1779,1788-1792,1796,1805-1810,1813,1817-1820,1822,1828-1834,1882-1886,1947-1951
+src/scheduler/requirements.in
+  h_a33a1e80933106 1,4-16,39,41,46
+src/scheduler/requirements.txt
+  h_a33a1e80933106 7-9,57-59,96-98,108-110,112-114,116-118,139-141,147-149,163-165,167-169,175-177,179-181,191-193,195-197,199-201,678-680,850-852,856-997,1164-1166
+src/ui/Dockerfile
+  h_a33a1e80933106 1,71,110
+src/ui/app/login_throttle.py
+  h_a33a1e80933106 1-90
+src/ui/app/models/instance.py
+  h_a33a1e80933106 295-296
+src/ui/app/models/ui_database.py
+  h_a33a1e80933106 1-2,18,134-137,478-540
+src/ui/app/routes/bans.py
+  h_a33a1e80933106 30,75,340-345,587-588,798,831,994,1105
+src/ui/app/routes/login.py
+  h_a33a1e80933106 4,8,32,36-38,102-106,130-133,138,145-148
+src/ui/app/routes/profile.py
+  h_a33a1e80933106 74-76,170,189,195
+src/ui/app/routes/reports.py
+  h_a33a1e80933106 221,442,544
+src/ui/app/routes/setup.py
+  h_a33a1e80933106 9,300-303
+src/ui/app/routes/totp.py
+  h_a33a1e80933106 4,19-24,28,32-33,41
+src/ui/app/static/css/overrides/pages.css
+  h_a33a1e80933106 426-437
+src/ui/app/static/css/overrides/tables.css
+  h_a33a1e80933106 245-275
+src/ui/app/static/js/pages/services.js
+  h_a33a1e80933106 61,399
+src/ui/app/static/js/utils.js
+  h_a33a1e80933106 427
+src/ui/app/static/libs/ace/src-min/ace.js
+  h_a33a1e80933106 1
+src/ui/app/static/libs/ace/src-min/worker-json.js
+  h_a33a1e80933106 1
+src/ui/app/static/libs/i18next/i18next.min.js
+  h_a33a1e80933106 1
+src/ui/app/static/libs/i18next/i18nextBrowserLanguageDetector.min.js
+  h_a33a1e80933106 1
+src/ui/app/static/libs/i18next/i18nextHttpBackend.min.js
+  h_a33a1e80933106 1
+src/ui/app/static/libs/ipaddr.js/ipaddr.min.js
+  h_a33a1e80933106 1-7
+src/ui/app/static/locales/ar.json
+  h_a33a1e80933106 53,1158
+src/ui/app/static/locales/bn.json
+  h_a33a1e80933106 53,1158
+src/ui/app/static/locales/br.json
+  h_a33a1e80933106 53,1158
+src/ui/app/static/locales/de.json
+  h_a33a1e80933106 53,1158
+src/ui/app/static/locales/en.json
+  h_a33a1e80933106 53,1158
+src/ui/app/static/locales/es.json
+  h_a33a1e80933106 53,1158
+src/ui/app/static/locales/fr.json
+  h_a33a1e80933106 53,1158
+src/ui/app/static/locales/hi.json
+  h_a33a1e80933106 53,1158
+src/ui/app/static/locales/id.json
+  h_a33a1e80933106 53,1158
+src/ui/app/static/locales/it.json
+  h_a33a1e80933106 53,1158
+src/ui/app/static/locales/ko.json
+  h_a33a1e80933106 53,1158
+src/ui/app/static/locales/pl.json
+  h_a33a1e80933106 53,1158
+src/ui/app/static/locales/pt.json
+  h_a33a1e80933106 53,1158
+src/ui/app/static/locales/ru.json
+  h_a33a1e80933106 53,1158
+src/ui/app/static/locales/tl.json
+  h_a33a1e80933106 53,1158
+src/ui/app/static/locales/tr.json
+  h_a33a1e80933106 53,1158
+src/ui/app/static/locales/tw.json
+  h_a33a1e80933106 53,1158
+src/ui/app/static/locales/ur.json
+  h_a33a1e80933106 53,1158
+src/ui/app/static/locales/zh.json
+  h_a33a1e80933106 53,1158
+src/ui/app/templates/home.html
+  h_a33a1e80933106 306
+src/ui/app/templates/loading.html
+  h_a33a1e80933106 16
+src/ui/app/templates/pro.html
+  h_a33a1e80933106 117
+src/ui/app/templates/services.html
+  h_a33a1e80933106 106,112,119
+src/ui/app/templates/setup.html
+  h_a33a1e80933106 1673
+src/ui/app/templates/starting.html
+  h_a33a1e80933106 17
+src/ui/app/templates/support.html
+  h_a33a1e80933106 153-154
+src/ui/requirements.in
+  h_a33a1e80933106 5,8
+src/ui/requirements.txt
+  h_a33a1e80933106 7-9,330-332,712-714
+src/ui/utils/gunicorn.conf.py
+  h_a33a1e80933106 128
+src/ui/utils/tmp-gunicorn.conf.py
+  h_a33a1e80933106 71
+tests/README.md
+  h_a33a1e80933106 374-384,393-394,406-437
+tests/core/antibot.yml
+  h_a33a1e80933106 205-206
+tests/core/bunkernet.yml
+  h_a33a1e80933106 53-170
+tests/core/cors.yml
+  h_a33a1e80933106 236-238,248,262,331,345
+tests/core/crowdsec.yml
+  h_a33a1e80933106 44,200
+tests/core/general.yml
+  h_a33a1e80933106 2
+tests/core/ipv6-only.yml
+  h_a33a1e80933106 1-157
+tests/core/ipv6-only/bunkerweb.yml
+  h_a33a1e80933106 1-42
+tests/core/ipv6-only/capture.py
+  h_a33a1e80933106 1-77
+tests/core/ipv6-only/check.py
+  h_a33a1e80933106 1-195
+tests/core/ipv6-only/dnsmasq.conf
+  h_a33a1e80933106 1-10
+tests/core/ipv6-only/dnsmasq.yml
+  h_a33a1e80933106 1-34
+tests/core/ipv6-only/fixtures.yml
+  h_a33a1e80933106 1-67
+tests/core/ipv6-only/redis.yml
+  h_a33a1e80933106 1-33
+tests/core/ipv6-only/scheduler.yml
+  h_a33a1e80933106 1-34
+tests/core/ipv6-only/services.yml
+  h_a33a1e80933106 1-27
+tests/core/ipv6-only/test_sockets.py
+  h_a33a1e80933106 1-121
+tests/core/ipv6.yml
+  h_a33a1e80933106 1-389
+tests/core/ipv6/bunkerweb.yml
+  h_a33a1e80933106 1-27
+tests/core/ipv6/check.py
+  h_a33a1e80933106 1-294
+tests/core/ipv6/dnsmasq.yml
+  h_a33a1e80933106 1-17
+tests/core/ipv6/fixtures.yml
+  h_a33a1e80933106 1-48
+tests/core/ipv6/redis.yml
+  h_a33a1e80933106 1-14
+tests/core/ipv6/scheduler.yml
+  h_a33a1e80933106 1-13
+tests/core/ipv6/server.py
+  h_a33a1e80933106 1-29
+tests/core/ipv6/services.yml
+  h_a33a1e80933106 1-11
+tests/core/redis.yml
+  h_a33a1e80933106 629-638
+tests/core/redis/cluster_migrate.sh
+  h_a33a1e80933106 1-357
+tests/core/stream.yml
+  h_a33a1e80933106 48-56
+tests/core/stream/http_only_plugin.py
+  h_a33a1e80933106 1-98
+tests/core/stream/http_only_probe/http_only_probe.lua
+  h_a33a1e80933106 1-16
+tests/core/stream/http_only_probe/plugin.json
+  h_a33a1e80933106 1-8
+tests/core/upgrade.yml
+  h_a33a1e80933106 6-11,24-35,47-57,69-78,89-97,105,113,121,128,137,145,153,160,169,177,185,192
+tests/core/upgrade/linux-database.sh
+  h_a33a1e80933106 1-96
+tests/core_handlers/http_string_handler.py
+  h_a33a1e80933106 27,34
+tests/linux/Dockerfile-fedora-43
+  h_a33a1e80933106 23
+tests/linux/Dockerfile-fedora-44
+  h_a33a1e80933106 23
+tests/linux/Dockerfile-rhel-10
+  h_a33a1e80933106 18
+tests/linux/Dockerfile-rhel-8
+  h_a33a1e80933106 1,18
+tests/linux/Dockerfile-rhel-9
+  h_a33a1e80933106 18
+tests/misc/api/main.py
+  h_a33a1e80933106 10,63-65,86-97,103
+tests/parse.py
+  h_a33a1e80933106 70-81
+tests/scripts/build.sh
+  h_a33a1e80933106 31-35,43,197-206,237
+tests/scripts/start.sh
+  h_a33a1e80933106 91-100,352-358,369,373,379,387,391,397,632-636,785,790
+tests/scripts/test.sh
+  h_a33a1e80933106 11-19
+tests/scripts/utils.sh
+  h_a33a1e80933106 34-35,52-53,55-72,202-205,454-478,550,771,837,851-853,894,942,949-958,1179-1187,1312,1319,1343,1350,1404,1411,1468,1475,1645-1650,1715,1722,1776-1856,1901,1908,1912
+tests/unit/README.md
+  h_a33a1e80933106 122,140-155,162-169,172-198,208,212,214-215,221,244
+tests/unit/api/test_crowdsec_router.py
+  h_a33a1e80933106 6,137-145,148
+tests/unit/api_app/requirements.in
+  h_a33a1e80933106 11-12
+tests/unit/api_app/requirements.txt
+  h_a33a1e80933106 18-20,30-32,36-177,179-181
+tests/unit/api_app/test_biscuit_permission_contracts.py
+  h_a33a1e80933106 1-256
+tests/unit/api_app/test_dependency_logging_contracts.py
+  h_a33a1e80933106 1-268
+tests/unit/api_app/test_ipv6_api_ban_identity.py
+  h_a33a1e80933106 1-76
+tests/unit/api_app/test_route_behavior_contracts.py
+  h_a33a1e80933106 1-480
+tests/unit/api_app/test_route_permission_matrix.py
+  h_a33a1e80933106 1-279
+tests/unit/autoconf/test_ipv6_kubernetes_instances.py
+  h_a33a1e80933106 1-32
+tests/unit/backup/test_backup_list_outcomes.py
+  h_a33a1e80933106 1-58
+tests/unit/backup/test_mysql_client_args.py
+  h_a33a1e80933106 11,13-16,81-168
+tests/unit/cli/test_cli_failure_and_bundle_outcomes.py
+  h_a33a1e80933106 1-245
+tests/unit/cli/test_ipv6_cli_ban_identity.py
+  h_a33a1e80933106 1-48
+tests/unit/common/_t2_helpers.py
+  h_a33a1e80933106 71,78,91-92,121
+tests/unit/common/test_antibot_challenge_coverage_lua.py
+  h_a33a1e80933106 1-404
+tests/unit/common/test_antibot_request_coverage_lua.py
+  h_a33a1e80933106 1-518
+tests/unit/common/test_api_bans_coverage_lua.py
+  h_a33a1e80933106 1-253
+tests/unit/common/test_api_client_certificate_pin.py
+  h_a33a1e80933106 1-354
+tests/unit/common/test_api_core_coverage_lua.py
+  h_a33a1e80933106 1-279
+tests/unit/common/test_api_reload_coverage_lua.py
+  h_a33a1e80933106 1-411
+tests/unit/common/test_bunkernet_coverage_lua.py
+  h_a33a1e80933106 1-268
+tests/unit/common/test_bunkernet_report_headers.py
+  h_a33a1e80933106 1-199
+tests/unit/common/test_bunkernet_report_redaction.py
+  h_a33a1e80933106 1-115
+tests/unit/common/test_cache_recovery_failure_outcomes.py
+  h_a33a1e80933106 1-200
+tests/unit/common/test_certs_coverage_lua.py
+  h_a33a1e80933106 1-224
+tests/unit/common/test_clusterstore_coverage_lua.py
+  h_a33a1e80933106 1-275
+tests/unit/common/test_coverage_gate_regression.py
+  h_a33a1e80933106 117-193
+tests/unit/common/test_crowdsec_ban_captcha_coverage_lua.py
+  h_a33a1e80933106 1-310
+tests/unit/common/test_crowdsec_bouncer_live_coverage_lua.py
+  h_a33a1e80933106 1-567
+tests/unit/common/test_crowdsec_bouncer_stream_coverage_lua.py
+  h_a33a1e80933106 1-485
+tests/unit/common/test_crowdsec_control_coverage_lua.py
+  h_a33a1e80933106 1-277
+tests/unit/common/test_crowdsec_iputils_bitop_coverage_lua.py
+  h_a33a1e80933106 1-272
+tests/unit/common/test_crowdsec_lib_helpers_coverage_lua.py
+  h_a33a1e80933106 1-368
+tests/unit/common/test_crowdsec_url_coverage_lua.py
+  h_a33a1e80933106 1-222
+tests/unit/common/test_datastore_coverage_lua.py
+  h_a33a1e80933106 1-219
+tests/unit/common/test_helpers_coverage_lua.py
+  h_a33a1e80933106 1-351
+tests/unit/common/test_ipv6_gunicorn_listeners.py
+  h_a33a1e80933106 1-34
+tests/unit/common/test_ipv6_ip_identity.py
+  h_a33a1e80933106 1-56
+tests/unit/common/test_ipv6_ipmatcher_luajit.py
+  h_a33a1e80933106 1-104
+tests/unit/common/test_ipv6_redis_endpoints.py
+  h_a33a1e80933106 1-113
+tests/unit/common/test_ipv6_reversescan_lua.py
+  h_a33a1e80933106 1-106
+tests/unit/common/test_ipv6_syslog.py
+  h_a33a1e80933106 1-66
+tests/unit/common/test_letsencrypt_init_coverage_lua.py
+  h_a33a1e80933106 1-241
+tests/unit/common/test_letsencrypt_operator_outcomes.py
+  h_a33a1e80933106 1-119
+tests/unit/common/test_letsencrypt_runtime_coverage_lua.py
+  h_a33a1e80933106 1-326
+tests/unit/common/test_limit_behaviour_lua.py
+  h_a33a1e80933106 135-194
+tests/unit/common/test_limit_coverage_lua.py
+  h_a33a1e80933106 1-157
+tests/unit/common/test_lua_coverage.py
+  h_a33a1e80933106 1-100
+tests/unit/common/test_metrics_phases_coverage_lua.py
+  h_a33a1e80933106 1-438
+tests/unit/common/test_metrics_storage_coverage_lua.py
+  h_a33a1e80933106 1-539
+tests/unit/common/test_modsecurity_body_reason_lua.py
+  h_a33a1e80933106 57
+tests/unit/common/test_plugin_checksum_setgid_stability.py
+  h_a33a1e80933106 1-224
+tests/unit/common/test_pushswap_endpoints_coverage_lua.py
+  h_a33a1e80933106 1-169
+tests/unit/common/test_reversescan_coverage_lua.py
+  h_a33a1e80933106 1-133
+tests/unit/common/test_sessions_coverage_lua.py
+  h_a33a1e80933106 1-231
+tests/unit/common/test_stream_plugin_capability.py
+  h_a33a1e80933106 1-155
+tests/unit/common/test_system_utility_outcomes.py
+  h_a33a1e80933106 1-281
+tests/unit/common/test_utils_helpers_coverage_lua.py
+  h_a33a1e80933106 1-370
+tests/unit/common/test_utils_net_bans_coverage_lua.py
+  h_a33a1e80933106 1-441
+tests/unit/common/test_utils_settings_coverage_lua.py
+  h_a33a1e80933106 1-261
+tests/unit/common/test_whitelist_and_has_variable_inheritance_lua.py
+  h_a33a1e80933106 54
+tests/unit/common/test_whitelist_coverage_lua.py
+  h_a33a1e80933106 1-202
+tests/unit/conftest.py
+  h_a33a1e80933106 37-45
+tests/unit/coverage_gate.py
+  h_a33a1e80933106 1,13,15-23,25-37,57-68,82-84,94-98,101,105-112,122-126,128,133-143
+tests/unit/customcert/test_custom_cert_fallback.py
+  h_a33a1e80933106 1-86
+tests/unit/db/test_connection_and_metadata.py
+  h_a33a1e80933106 1-374
+tests/unit/db/test_database_construction.py
+  h_a33a1e80933106 1-164
+tests/unit/db/test_init_tables_sync.py
+  h_a33a1e80933106 1-338
+tests/unit/db/test_instances_services_jobs.py
+  h_a33a1e80933106 1-447
+tests/unit/db/test_plugin_data_loss_guards.py
+  h_a33a1e80933106 1-581
+tests/unit/db/test_save_config_guards.py
+  h_a33a1e80933106 1-278
+tests/unit/db/test_templates_and_custom_configs.py
+  h_a33a1e80933106 1-350
+tests/unit/gen/test_antibot_modsec_crs_hosts.py
+  h_a33a1e80933106 1-35
+tests/unit/gen/test_configurator_validation_outcomes.py
+  h_a33a1e80933106 1-247
+tests/unit/gen/test_empty_directive_arguments.py
+  h_a33a1e80933106 121
+tests/unit/gen/test_ipv6_api_listeners.py
+  h_a33a1e80933106 1-53
+tests/unit/gen/test_ipv6_setting_regexes.py
+  h_a33a1e80933106 1-173
+tests/unit/gen/test_issue_3154_reverse_proxy_location_modsecurity.py
+  h_a33a1e80933106 1-78
+tests/unit/gen/test_save_config_cli_outcomes.py
+  h_a33a1e80933106 159-161,167
+tests/unit/gen/test_save_config_pending_migration_regression.py
+  h_a33a1e80933106 21
+tests/unit/gen/test_save_config_version_stamp.py
+  h_a33a1e80933106 22
+tests/unit/gen/test_server_name_ip_literals.py
+  h_a33a1e80933106 1-244
+tests/unit/gen/test_setting_regexes.py
+  h_a33a1e80933106 23,59-84,116,134-136,138-142,185-186,217-266,278-301,531-540
+tests/unit/gen/test_templator_fork_context.py
+  h_a33a1e80933106 1-48
+tests/unit/jobs/test_bunkernet_send_filter.py
+  h_a33a1e80933106 1-192
+tests/unit/jobs/test_feed_cache_recheck.py
+  h_a33a1e80933106 1-108
+tests/unit/jobs/test_ipv6_feed_zone_ids.py
+  h_a33a1e80933106 1-36
+tests/unit/jobs/test_job_cache_contracts.py
+  h_a33a1e80933106 1-936
+tests/unit/letsencrypt/test_certbot_concurrency_storage.py
+  h_a33a1e80933106 136-159
+tests/unit/letsencrypt/test_certbot_jobs_execution.py
+  h_a33a1e80933106 3-4,370-422,863-873
+tests/unit/letsencrypt/test_stale_account_detection.py
+  h_a33a1e80933106 28-35,45-64,85-100
+tests/unit/linux/test_install_bunkerweb.py
+  h_a33a1e80933106 45-64
+tests/unit/linux/test_ipv6_bootstrap_env.py
+  h_a33a1e80933106 1-79
+tests/unit/lua/test_resume_rdns.py
+  h_a33a1e80933106 31
+tests/unit/lua_coverage.lua
+  h_a33a1e80933106 1-60
+tests/unit/lua_coverage.py
+  h_a33a1e80933106 1-107
+tests/unit/lua_lease_fakes.lua
+  h_a33a1e80933106 211-213
+tests/unit/requirements.in
+  h_a33a1e80933106 23,28,37,46-47
+tests/unit/requirements.txt
+  h_a33a1e80933106 987-989,1004-1006,1189-1192,1962-1964,1970-2111,2113-2115
+tests/unit/scheduler/test_main_loop.py
+  h_a33a1e80933106 476
+tests/unit/scheduler/test_reload_confirmation.py
+  h_a33a1e80933106 1-229
+tests/unit/test_ipv6_dns_arpa.lua
+  h_a33a1e80933106 1-68
+tests/unit/test_ipv6_redis_connector.lua
+  h_a33a1e80933106 1-97
+tests/unit/test_ipv6_redis_lua.lua
+  h_a33a1e80933106 1-130
+tests/unit/test_lua_add_ban_if_absent.lua
+  h_a33a1e80933106 1-1268
+tests/unit/test_lua_client_hello_order.lua
+  h_a33a1e80933106 1-151
+tests/unit/test_lua_client_hello_plugins.lua
+  h_a33a1e80933106 1-612
+tests/unit/test_lua_cluster_tryagain_lookup.lua
+  h_a33a1e80933106 1-535
+tests/unit/test_lua_cluster_tryagain_retry.lua
+  h_a33a1e80933106 1-140
+tests/unit/test_lua_cors_origin.lua
+  h_a33a1e80933106 1-140
+tests/unit/test_lua_datastore_add.lua
+  h_a33a1e80933106 1-123
+tests/unit/test_lua_ipaddr.lua
+  h_a33a1e80933106 1-105
+tests/unit/test_lua_ipv6_ban_identity.lua
+  h_a33a1e80933106 1-284
+tests/unit/test_lua_ipv6_rediscluster.lua
+  h_a33a1e80933106 1-249
+tests/unit/test_lua_is_banned_leases.lua
+  h_a33a1e80933106 160,171,183-186,371-374,534-561
+tests/unit/test_lua_rediscluster_patch.lua
+  h_a33a1e80933106 40-41,43-44,48-50,174-205
+tests/unit/test_lua_rediscluster_retry.lua
+  h_a33a1e80933106 143,158-160,168-170,194-196,198-199
+tests/unit/test_lua_server_name_ip_variables.lua
+  h_a33a1e80933106 1-95
+tests/unit/test_lua_tls_drop.lua
+  h_a33a1e80933106 403-404,412,414,416-417,419-420,425,445,535-536,541-542
+tests/unit/test_ui_modsec_crs_hosts.py
+  h_a33a1e80933106 60-70
+tests/unit/ui/models/test_totp_behaviour.py
+  h_a33a1e80933106 1-290
+tests/unit/ui/models/test_ui_database_behaviour.py
+  h_a33a1e80933106 1-624
+tests/unit/ui/routes/conftest.py
+  h_a33a1e80933106 156
+tests/unit/ui/routes/test_bans_filter_outcomes.py
+  h_a33a1e80933106 1-166
+tests/unit/ui/routes/test_ipv6_setup_host.py
+  h_a33a1e80933106 1-25
+tests/unit/ui/routes/test_routes_date_offsets.py
+  h_a33a1e80933106 1-49
+tests/unit/ui/routes/test_routes_login_throttle.py
+  h_a33a1e80933106 1-340
+tests/unit/ui/routes/test_routes_profile.py
+  h_a33a1e80933106 367-451
+tests/unit/ui/routes/test_services_preservation_outcomes.py
+  h_a33a1e80933106 1-183
+tests/unit/ui/test_ipv6_ui_ban_identity.py
+  h_a33a1e80933106 1-43
+tests/unit/ui/test_tmp_ui_worker_lifecycle.py
+  h_a33a1e80933106 1-90
+tests/unit/ui/test_ui_logger_outcomes.py
+  h_a33a1e80933106 1-97
+tests/utils/__init__.py
+  h_a33a1e80933106 169
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "481310ada16c9cf320a718a151b5305161c0215f",
+  "prompts": {},
+  "humans": {
+    "h_a33a1e80933106": {
+      "author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}
