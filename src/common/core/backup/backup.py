@@ -46,6 +46,17 @@ def mysql_client_command(operation: Literal["dump", "restore"]) -> tuple[str, bo
     return ("mysqldump" if operation == "dump" else "mysql"), False
 
 
+def mysql_client_info(command: str, mariadb_client: bool) -> tuple[bool, bool]:
+    mysql8_client = False
+    if which(command):
+        version = check_output([command, "--version"], text=True)
+        mariadb_client = "MariaDB" in version
+        # Older clients report their server-compatible version after Distrib, not Ver.
+        client_version = re.search(r"\bDistrib (\d+)\.", version) or re.search(r"\bVer\s+(\d+)\.", version)
+        mysql8_client = not mariadb_client and client_version is not None and int(client_version[1]) >= 8
+    return mariadb_client, mysql8_client
+
+
 def mysql_connection_args(query_args, mariadb_client: bool, mysql8_client: bool = False) -> list[str]:
     args = []
     ssl = query_args.get("ssl")
@@ -143,13 +154,7 @@ def backup_database(current_time: datetime, db: Database = None, backup_dir: Pat
                 LOGGER.info("Creating a backup for the MariaDB/MySQL database ...")
 
                 dump_bin, mariadb_client = mysql_client_command("dump")
-                mysql8_client = False
-                if which(dump_bin):
-                    version = check_output([dump_bin, "--version"], text=True)
-                    mariadb_client = "MariaDB" in version
-                    # Older clients report their server-compatible version after Distrib, not Ver.
-                    client_version = re.search(r"\bDistrib (\d+)\.", version) or re.search(r"\bVer\s+(\d+)\.", version)
-                    mysql8_client = not mariadb_client and client_version is not None and int(client_version[1]) >= 8
+                mariadb_client, mysql8_client = mysql_client_info(dump_bin, mariadb_client)
                 inspector = inspect(db.sql_engine)
                 cmd = [
                     dump_bin,
@@ -185,9 +190,12 @@ def backup_database(current_time: datetime, db: Database = None, backup_dir: Pat
                     cmd.append("--routines")  # Include stored procedures and functions (MariaDB only, mariadb-dump sends MariaDB-only queries to MySQL)
 
                 if mysql8_client:
-                    cmd.append("--column-statistics=0")  # MariaDB has no information_schema.COLUMN_STATISTICS.
-
-                # Avoid --set-gtid-purged for broad compatibility (MariaDB variant doesn't support it)
+                    cmd.extend(
+                        [
+                            "--column-statistics=0",  # MariaDB has no information_schema.COLUMN_STATISTICS.
+                            "--set-gtid-purged=OFF",  # Avoid FLUSH privileges and global GTID statements for a database-only backup.
+                        ]
+                    )
 
                 cmd.extend(mysql_connection_args(db_query_args, mariadb_client, mysql8_client=mysql8_client))
 
@@ -338,11 +346,12 @@ def restore_database(backup_file: Path, db: Database = None) -> Database:
             LOGGER.info("Restoring the MariaDB/MySQL database ...")
 
             restore_bin, mariadb_client = mysql_client_command("restore")
+            mariadb_client, mysql8_client = mysql_client_info(restore_bin, mariadb_client)
             cmd = [restore_bin, "-h", db_host, "-u", db_user, db_database_name]
             if db_port:
                 cmd.extend(["-P", db_port])
 
-            cmd.extend(mysql_connection_args(db_query_args, mariadb_client))
+            cmd.extend(mysql_connection_args(db_query_args, mariadb_client, mysql8_client=mysql8_client))
 
             with ZipFile(backup_file, "r") as zipf:
                 proc = run(
