@@ -424,7 +424,7 @@ $(document).ready(() => {
   ];
   // Store the original English fallbacks if needed, or rely on i18next fallbacks
   const newsItemFallbacks = {
-    "banner.pro": `Get the most of BunkerWeb by upgrading to the PRO version. More info and free trial <a class="light-href text-white-80" target="_blank" rel="noopener" href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=banner#pro">here</a>.`,
+    "banner.pro": `Get the most out of BunkerWeb by upgrading to the PRO version. Start your 30-day free trial <a class="light-href text-white-80" target="_blank" rel="noopener" href="https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=banner">here</a>: order a plan, then keep “Free 30 Days Trial” as the payment method at checkout.`,
     "banner.support": `Need premium support or tailored consulting around BunkerWeb? Check out our <a class="light-href text-white-80" target="_blank" rel="noopener" href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=banner#services">professional services</a>.`,
     "banner.community": `Be part of the Bunker community by joining the <a class="light-href text-white-80" target="_blank" rel="noopener" href="https://discord.bunkerweb.io/?utm_campaign=self&utm_source=banner">Discord chat</a> and following us on <a class="light-href text-white-80" target="_blank" rel="noopener" href="https://www.linkedin.com/company/bunkerity/">LinkedIn</a>.`,
   };

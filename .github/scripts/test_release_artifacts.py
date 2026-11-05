@@ -216,9 +216,11 @@ class ReleaseArtifactsTest(TestCase):
             "run-All-in-one-tests-core",
             "run-Docker-tests-api",
         }
-        for name in ("push-images", "push-packages"):
-            self.assertIn("smoke-images", staging[name]["needs"])
-            self.assertTrue(suites <= set(staging[name]["needs"]), name)
+        # Staging publishes images only: floating packages are gone, and a job brought back must be caught here.
+        self.assertNotIn("push-packages", staging)
+        self.assertNotIn("push-gh", staging)
+        self.assertIn("smoke-images", staging["push-images"]["needs"])
+        self.assertTrue(suites <= set(staging["push-images"]["needs"]))
         matrix = jobs["build-packages"]["strategy"]["matrix"]
         self.assertEqual(set(matrix["linux"]), set(release.DISTROS))
         self.assertEqual(set(matrix["platforms"]), set(release.PACKAGE_PLATFORMS))

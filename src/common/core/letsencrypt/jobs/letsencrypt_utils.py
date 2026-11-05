@@ -552,21 +552,34 @@ def stream_certbot(process, logger_certbot, timeout: float, on_line: Optional[Ca
 
 
 STALE_ACCOUNT_MARKERS = ("validate JWS", "acme/acct")
+# RFC 8555 section 6.7 error type: certbot shows it in the traceback's last line (`-v`).
+STALE_ACCOUNT_ERROR_TYPE = "urn:ietf:params:acme:error:accountDoesNotExist"
+# What certbot prints by default for it: only the CA's detail, whose wording RFC 8555 leaves free.
+# Pebble: `Account https://host:14000/my-account/<id> not found.` Anchored on "Account <url>" so an
+# order or challenge URL in the same line is never taken for the account.
+RFC8555_ACCOUNT_NOT_FOUND = r'Account "?(https?://[^\s"]+)"? not found'
 
 
 def is_stale_account_line(line: str) -> bool:
     """True when the CA refuses the account itself, so retrying with it can never succeed.
 
-    Two different rejections mean the same thing for us, and they read nothing alike:
+    Boulder (Let's Encrypt) has two rejections that mean the same thing for us, and they read
+    nothing alike:
 
         Unable to validate JWS :: Account "https://.../acme/acct/123" not found
         Unable to validate JWS :: Account is not valid, has status "deactivated"
 
-    Only the first was matched before, so a deactivated account was retried forever. Note that
+    Only the first was matched before, so a deactivated account was retried forever. Any other
+    RFC 8555 CA (Pebble, step-ca...) words it differently and uses its own URL shape, so the
+    standard error type `urn:ietf:params:acme:error:accountDoesNotExist` and the
+    `Account <url> not found` detail match too. Every other ACME error type (unauthorized,
+    rateLimited, badNonce...) does not. Note that
     certbot's own `Account at <path> does not exist` is deliberately NOT matched here: that one is
     a local directory that went missing, which repoint_orphan_renewals repairs without touching
     the CA, and treating it as a rejection would delete an account the CA still considers valid.
     """
+    if STALE_ACCOUNT_ERROR_TYPE in line or re_search(RFC8555_ACCOUNT_NOT_FOUND, line):
+        return True
     if "Account" not in line or not any(marker in line for marker in STALE_ACCOUNT_MARKERS):
         return False
     return "not found" in line or "is not valid" in line
@@ -575,11 +588,16 @@ def is_stale_account_line(line: str) -> bool:
 def stale_account_uri(line: str) -> str:
     """The ACME account URI a stale-account rejection names, or an empty string.
 
-    Only the "not found" phrasing carries one; the deactivated phrasing names no account at all,
-    which is why failed_renewal_cert exists as the other way to identify the offender.
+    Only the "not found" phrasings carry one (Boulder's `/acme/acct/<id>`, or any CA's
+    `Account <url> not found`); the deactivated phrasing and a bare error type name no account at
+    all, which is why failed_renewal_cert exists as the other way to identify the offender. The
+    result is compared for equality with the `uri` certbot stored in regr.json.
     """
     match = re_search(r"https?://\S*?/acme/acct/[A-Za-z0-9_-]+", line)
-    return match.group(0) if match else ""
+    if match:
+        return match.group(0)
+    match = re_search(RFC8555_ACCOUNT_NOT_FOUND, line)
+    return match.group(1) if match else ""
 
 
 def failed_renewal_cert(line: str) -> str:

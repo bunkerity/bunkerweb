@@ -1,0 +1,34 @@
+services:
+  bw-scheduler:
+    mem_limit: 1024m
+    dns:
+      - fd42:1618:1::20
+    networks:
+      bw-universe:
+        ipv6_address: fd42:1618:1::24
+      bw-db:
+        ipv6_address: fd42:1618:4::24
+    container_name: bw-scheduler
+    restart: unless-stopped
+    image: bunkerity/bunkerweb-scheduler:${BW_VERSION}
+    env_file:
+      - path: ${BW_TESTS_ETC:?use tests/scripts}/variables.env
+        required: true
+    volumes:
+      - bw-storage:/data
+      - ${BW_TESTS_WWW:?use tests/scripts}:/var/www/html
+      - /tmp/output:/tmp/output
+networks:
+  bw-universe:
+    name: bw-universe
+    enable_ipv4: false
+    enable_ipv6: true
+    ipam:
+      config:
+        - subnet: fd42:1618:1::/64
+  bw-db:
+    external: true
+    name: bw-db
+volumes:
+  bw-storage:
+    name: bw-storage

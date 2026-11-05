@@ -101,13 +101,13 @@ DNS.1 = www.example.org
                     LOGGER.error(f"Error setting permissions on api-server-cert.key: {e}")
                 status = 1
 
-                cached, err = JOB.cache_file("api-server-cert.pem", cert_path.joinpath("api-server-cert.pem"), overwrite_file=False)
+                cached, err = JOB.cache_file("api-server-cert.pem", cert_path.joinpath("api-server-cert.pem"))
                 if not cached:
                     LOGGER.error(f"Error while saving api-server-cert api-server-cert.pem file to db cache : {err}")
                 else:
                     LOGGER.info("Successfully saved api-server-cert api-server-cert.pem file to db cache")
 
-                cached, err = JOB.cache_file("api-server-cert.key", cert_path.joinpath("api-server-cert.key"), overwrite_file=False)
+                cached, err = JOB.cache_file("api-server-cert.key", cert_path.joinpath("api-server-cert.key"))
                 if not cached:
                     LOGGER.error(f"Error while saving api-server-cert api-server-cert.key file to db cache : {err}")
                 else:

@@ -44,7 +44,7 @@ Este patrón te permite gestionar múltiples configuraciones para característic
 
 Puede ajustar el orden con listas separadas por espacios:
 
-- Fases globales: `PLUGINS_ORDER_INIT`, `PLUGINS_ORDER_INIT_WORKER`, `PLUGINS_ORDER_TIMER`.
+- Fases globales: `PLUGINS_ORDER_INIT`, `PLUGINS_ORDER_INIT_WORKER`, `PLUGINS_ORDER_SSL_CLIENT_HELLO`, `PLUGINS_ORDER_TIMER`.
 - Fases por sitio: `PLUGINS_ORDER_SET`, `PLUGINS_ORDER_ACCESS`, `PLUGINS_ORDER_SSL_CERTIFICATE`, `PLUGINS_ORDER_HEADER`, `PLUGINS_ORDER_LOG`, `PLUGINS_ORDER_PREREAD`, `PLUGINS_ORDER_LOG_STREAM`, `PLUGINS_ORDER_LOG_DEFAULT`.
 - Semántica: los plugins listados se ejecutan primero en esa fase; el resto se ejecuta después en su secuencia normal. Separe los IDs solo con espacios.
 
@@ -77,7 +77,7 @@ El valor es una lista de motivos separados por espacios, entre `crowdsec`, `bad_
 
     | Parámetro               | Valor por defecto | Contexto  | Múltiple | Descripción                                                                                                                                                                                                                                                                                                                                                     |
     | ----------------------- | ----------------- | --------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-    | `SERVER_NAME`           | `www.example.com` | multisite | No       | **Dominio Principal:** El nombre de dominio principal para este sitio. Requerido en modo multisitio.                                                                                                                                                                                                                                                            |
+    | `SERVER_NAME`           | `www.example.com` | multisite | No       | **Dominio Principal:** El nombre de dominio principal (o dirección IP) para este sitio. Requerido en modo multisitio.                                                                                                                                                                                                                                           |
     | `BUNKERWEB_INSTANCES`   | `127.0.0.1`       | global    | No       | **Instancias de BunkerWeb:** Lista de instancias de BunkerWeb separadas por espacios.                                                                                                                                                                                                                                                                           |
     | `MULTISITE`             | `no`              | global    | No       | **Múltiples Sitios:** Establécelo en `yes` para permitir el alojamiento de múltiples sitios web con diferentes configuraciones.                                                                                                                                                                                                                                 |
     | `SECURITY_MODE`         | `block`           | multisite | No       | **Nivel de Seguridad:** Controla el nivel de aplicación de la seguridad. Opciones: `detect` o `block`.                                                                                                                                                                                                                                                          |
@@ -372,18 +372,18 @@ Las siguientes configuraciones son compartidas por todos los mecanismos de desaf
 
 BunkerWeb le permite especificar ciertos usuarios, IP o solicitudes que deben omitir por completo el desafío antibot. Esto es útil para incluir en la lista blanca servicios de confianza, redes internas o páginas específicas que siempre deben ser accesibles sin desafío:
 
-| Configuración                 | Valor por defecto | Contexto  | Múltiple | Descripción                                                                                                                                                                                         |
-| ----------------------------- | ----------------- | --------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `ANTIBOT_IGNORE_URI`          |                   | multisite | no       | **URL excluidas:** Lista de patrones regex de URI separados por espacios que deben omitir el desafío. Los patrones se comprueban contra la ruta y la URI completa de la solicitud con query string. |
-| `ANTIBOT_IGNORE_IP`           |                   | multisite | no       | **IP excluidas:** Lista de direcciones IP o rangos CIDR separados por espacios que deben omitir el desafío.                                                                                         |
-| `ANTIBOT_IGNORE_RDNS`         |                   | multisite | no       | **DNS inverso excluido:** Lista de sufijos de DNS inverso separados por espacios que deben omitir el desafío.                                                                                       |
-| `ANTIBOT_RDNS_GLOBAL`         | `yes`             | multisite | no       | **Solo IP globales:** Si se establece en `yes`, solo realiza comprobaciones de DNS inverso en direcciones IP públicas.                                                                              |
-| `ANTIBOT_IGNORE_ASN`          |                   | multisite | no       | **ASN excluidos:** Lista de números de ASN separados por espacios que deben omitir el desafío.                                                                                                      |
-| `ANTIBOT_IGNORE_USER_AGENT`   |                   | multisite | no       | **User-Agents excluidos:** Lista de patrones regex de User-Agent separados por espacios que deben omitir el desafío.                                                                                |
-| `ANTIBOT_IGNORE_HEADER_NAME`  |                   | multisite | sí       | **Nombre de cabecera:** Nombre de una cabecera de petición que hace que la petición omitir el desafío antibot. Pares numerados: `_NAME_1` va con `_VALUE_1`.                                        |
-| `ANTIBOT_IGNORE_HEADER_VALUE` |                   | multisite | sí       | **Valor de cabecera:** Expresión regular PCRE que debe coincidir con el valor de la cabecera. Déjelo vacío para comprobar solo su presencia.                                                        |
-| `ANTIBOT_IGNORE_COUNTRY`      |                   | multisite | no       | **Países excluidos:** Lista de códigos de país ISO 3166-1 alfa-2 separados por espacios que deben omitir el desafío.                                                                                |
-| `ANTIBOT_ONLY_COUNTRY`        |                   | multisite | no       | **Países con desafío obligatorio:** Lista de códigos de país ISO 3166-1 alfa-2 que deben resolver el desafío. El resto se omite.                                                                    |
+| Configuración                 | Valor por defecto | Contexto  | Múltiple | Descripción                                                                                                                                                                                           |
+| ----------------------------- | ----------------- | --------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `ANTIBOT_IGNORE_URI`          |                   | multisite | no       | **URL excluidas:** Lista de patrones regex de URI separados por espacios que deben omitir el desafío. Los patrones se comprueban contra la ruta normalizada, sola o seguida de `?` y la query string. |
+| `ANTIBOT_IGNORE_IP`           |                   | multisite | no       | **IP excluidas:** Lista de direcciones IP o rangos CIDR separados por espacios que deben omitir el desafío.                                                                                           |
+| `ANTIBOT_IGNORE_RDNS`         |                   | multisite | no       | **DNS inverso excluido:** Lista de sufijos de DNS inverso separados por espacios que deben omitir el desafío.                                                                                         |
+| `ANTIBOT_RDNS_GLOBAL`         | `yes`             | multisite | no       | **Solo IP globales:** Si se establece en `yes`, solo realiza comprobaciones de DNS inverso en direcciones IP públicas.                                                                                |
+| `ANTIBOT_IGNORE_ASN`          |                   | multisite | no       | **ASN excluidos:** Lista de números de ASN separados por espacios que deben omitir el desafío.                                                                                                        |
+| `ANTIBOT_IGNORE_USER_AGENT`   |                   | multisite | no       | **User-Agents excluidos:** Lista de patrones regex de User-Agent separados por espacios que deben omitir el desafío.                                                                                  |
+| `ANTIBOT_IGNORE_HEADER_NAME`  |                   | multisite | sí       | **Nombre de cabecera:** Nombre de una cabecera de petición que hace que la petición omitir el desafío antibot. Pares numerados: `_NAME_1` va con `_VALUE_1`.                                          |
+| `ANTIBOT_IGNORE_HEADER_VALUE` |                   | multisite | sí       | **Valor de cabecera:** Expresión regular PCRE que debe coincidir con el valor de la cabecera. Déjelo vacío para comprobar solo su presencia.                                                          |
+| `ANTIBOT_IGNORE_COUNTRY`      |                   | multisite | no       | **Países excluidos:** Lista de códigos de país ISO 3166-1 alfa-2 separados por espacios que deben omitir el desafío.                                                                                  |
+| `ANTIBOT_ONLY_COUNTRY`        |                   | multisite | no       | **Países con desafío obligatorio:** Lista de códigos de país ISO 3166-1 alfa-2 que deben resolver el desafío. El resto se omite.                                                                      |
 
 !!! warning "Una regla de cabecera es un secreto compartido"
     Cualquier cliente puede enviar una cabecera, así que una regla de cabecera es un token portador, no un control de red. Sírvala solo por HTTPS, ancle la expresión regular con `^` y `$` (la búsqueda no está anclada por defecto, así que `abc` también coincide con `xabcx`) y rote el valor. Si BunkerWeb está detrás de un proxy, ese proxy debe sobrescribir cualquier copia de la cabecera enviada por el cliente. Estas reglas son solo para HTTP: un servicio de stream no lleva cabeceras de petición, así que allí no coincide nada.
@@ -1356,7 +1356,7 @@ El complemento BunkerNet permite el intercambio colectivo de inteligencia sobre 
 **Cómo funciona:**
 
 1.  Su instancia de BunkerWeb se registra automáticamente con la API de BunkerNet para recibir un identificador único.
-2.  Cuando su instancia detecta y bloquea una dirección IP o comportamiento malicioso, informa anónimamente la amenaza a BunkerNet.
+2.  Cuando su instancia detecta y bloquea una dirección IP o comportamiento malicioso, informa de la amenaza a BunkerNet. Los campos de un informe se enumeran en la nota «Contenido de un informe» más abajo.
 3.  BunkerNet agrega la inteligencia sobre amenazas de todas las instancias participantes y distribuye la base de datos consolidada.
 4.  Su instancia descarga regularmente una base de datos actualizada de amenazas conocidas desde BunkerNet.
 5.  Esta inteligencia colectiva permite que su instancia bloquee proactivamente las direcciones IP que han exhibido comportamiento malicioso en otras instancias de BunkerWeb.
@@ -1365,9 +1365,9 @@ El complemento BunkerNet permite el intercambio colectivo de inteligencia sobre 
 
       1. **Defensa Colectiva:** Aproveche los hallazgos de seguridad de miles de otras instancias de BunkerWeb a nivel mundial.
       2. **Protección Proactiva:** Bloquee a los actores maliciosos antes de que puedan atacar su sitio basándose en su comportamiento en otros lugares.
-      3. **Contribución a la Comunidad:** Ayude a proteger a otros usuarios de BunkerWeb compartiendo datos de amenazas anónimos sobre los atacantes.
+      3. **Contribución a la Comunidad:** Ayude a proteger a otros usuarios de BunkerWeb compartiendo datos de amenazas sobre los atacantes.
       4. **Cero Configuración:** Funciona desde el primer momento con valores predeterminados sensatos, requiriendo una configuración mínima.
-      5. **Enfoque en la Privacidad:** Solo comparte la información de amenazas necesaria sin comprometer su privacidad ni la de sus usuarios.
+      5. **Intercambio controlado:** Un informe contiene un conjunto fijo de campos, y `BUNKERNET_FILTER_HEADERS` puede limitar sus cabeceras de petición a una lista corta permitida (véase más abajo).
 
 ### Cómo usar
 
@@ -1381,16 +1381,27 @@ Siga estos pasos para configurar y usar la función BunkerNet:
 
 ### Ajustes de configuración
 
-| Ajuste             | Valor por defecto          | Contexto  | Múltiple | Descripción                                                                                                             |
-| ------------------ | -------------------------- | --------- | -------- | ----------------------------------------------------------------------------------------------------------------------- |
-| `USE_BUNKERNET`    | `yes`                      | multisite | no       | **Habilitar BunkerNet:** Establezca en `yes` para habilitar el intercambio de inteligencia sobre amenazas de BunkerNet. |
-| `BUNKERNET_SERVER` | `https://api.bunkerweb.io` | global    | no       | **Servidor BunkerNet:** La dirección del servidor de la API de BunkerNet para compartir inteligencia sobre amenazas.    |
+| Ajuste                     | Valor por defecto          | Contexto  | Múltiple | Descripción                                                                                                                                                                                                                                                                         |
+| -------------------------- | -------------------------- | --------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `USE_BUNKERNET`            | `yes`                      | multisite | no       | **Habilitar BunkerNet:** Establezca en `yes` para habilitar el intercambio de inteligencia sobre amenazas de BunkerNet.                                                                                                                                                             |
+| `BUNKERNET_FILTER_HEADERS` | `no`                       | multisite | no       | **Filtrar las cabeceras notificadas:** Establezca en `yes` para enviar solo una lista corta de cabeceras de petición y vaciar los valores que ModSecurity encontró en cabeceras y cookies. Con `no`, un informe contiene todas las cabeceras de petición y los valores encontrados. |
+| `BUNKERNET_SERVER`         | `https://api.bunkerweb.io` | global    | no       | **Servidor BunkerNet:** La dirección del servidor de la API de BunkerNet para compartir inteligencia sobre amenazas.                                                                                                                                                                |
 
 !!! tip "Protección de Red"
     Cuando BunkerNet detecta que una dirección IP ha estado involucrada en actividades maliciosas en múltiples instancias de BunkerWeb, añade esa IP a una lista negra colectiva. Esto proporciona una capa de defensa proactiva, protegiendo su sitio de amenazas antes de que puedan atacarlo directamente.
 
-!!! info "Informes Anónimos"
-    Al informar sobre amenazas a BunkerNet, su instancia solo comparte los datos necesarios para identificar la amenaza: la dirección IP, el motivo del bloqueo y datos contextuales mínimos. No se comparte información personal sobre sus usuarios ni detalles sensibles sobre su sitio.
+!!! info "Contenido de un informe"
+    Cada informe enviado a BunkerNet contiene estos campos y nada más:
+
+    - los metadatos de la instancia enviados con cada petición: el ID de la instancia BunkerNet, la versión de BunkerWeb, la integración, y el nombre, la versión, el ID de versión, el nombre en clave, el ID y la arquitectura del sistema operativo;
+    - la dirección IP del cliente, el motivo del bloqueo y la fecha;
+    - el método HTTP, la URL **incluida su cadena de consulta** y el nombre del servicio (`server_name`);
+    - las cabeceras de petición, con sus valores: todas las recibidas (hasta `MAX_HEADERS`) o, si `BUNKERNET_FILTER_HEADERS` es `yes`, solo `User-Agent`, `Accept`, `Accept-Encoding`, `Accept-Language`, `Content-Type` y `Content-Length`;
+    - los detalles asociados al motivo del bloqueo. Según el plugin que bloqueó al cliente, pueden incluir los ID y mensajes de las reglas de ModSecurity que coincidieron junto con los valores de la petición que las activaron (partes de argumentos, cuerpo, cabeceras o cookies, cada una recortada a 512 bytes; con `BUNKERNET_FILTER_HEADERS` en `yes`, los valores hallados en cabeceras y cookies se vacían y solo se envía el nombre de la variable) o, para Bad Behavior, el método y la URL de las peticiones recientes que provocaron el bloqueo.
+
+    De forma predeterminada (`BUNKERNET_FILTER_HEADERS` en `no`), un informe contiene todas las cabeceras de petición recibidas (hasta `MAX_HEADERS`), incluidas las cookies y `Authorization`, y los valores encontrados por ModSecurity tal cual. Establezca `BUNKERNET_FILTER_HEADERS` en `yes` para enviar solo las seis cabeceras indicadas arriba y vaciar los valores hallados en cabeceras y cookies. Los informes aún sin enviar se filtran igual antes de enviarse cuando vale `yes`.
+
+    La URL y los valores coincidentes proceden de la petición, por lo que contienen todo lo que envió el cliente. Establezca `USE_BUNKERNET` en `no` en los servicios cuyas URL contengan valores sensibles.
 
 ### Configuraciones de Ejemplo
 
@@ -1736,13 +1747,13 @@ Siga estos pasos para configurar y utilizar la función de País:
 
 ### Ajustes de configuración
 
-| Ajuste                        | Valor por defecto | Contexto  | Múltiple | Descripción                                                                                                                                                                                                                                               |
-| ----------------------------- | ----------------- | --------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `WHITELIST_COUNTRY`           |                   | multisite | no       | **Lista Blanca de Países:** Lista de códigos de país y/o tokens de grupo separados por espacios. Solo se permiten estos países.                                                                                                                           |
-| `BLACKLIST_COUNTRY`           |                   | multisite | no       | **Lista Negra de Países:** Lista de códigos de país y/o tokens de grupo separados por espacios. Estos países están bloqueados.                                                                                                                            |
-| `COUNTRY_IGNORE_URI`          |                   | multisite | no       | **URI ignorada:** Lista de patrones de expresiones regulares PCRE separados por espacios para las URI que deben excluirse de la comprobación de país. Los patrones se comprueban contra la ruta y la URI de solicitud completa con la cadena de consulta. |
-| `COUNTRY_IGNORE_HEADER_NAME`  |                   | multisite | sí       | **Nombre de cabecera:** Nombre de una cabecera de petición que hace que la petición omitir la comprobación de país. Pares numerados: `_NAME_1` va con `_VALUE_1`.                                                                                         |
-| `COUNTRY_IGNORE_HEADER_VALUE` |                   | multisite | sí       | **Valor de cabecera:** Expresión regular PCRE que debe coincidir con el valor de la cabecera. Déjelo vacío para comprobar solo su presencia.                                                                                                              |
+| Ajuste                        | Valor por defecto | Contexto  | Múltiple | Descripción                                                                                                                                                                                                                                                 |
+| ----------------------------- | ----------------- | --------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `WHITELIST_COUNTRY`           |                   | multisite | no       | **Lista Blanca de Países:** Lista de códigos de país y/o tokens de grupo separados por espacios. Solo se permiten estos países.                                                                                                                             |
+| `BLACKLIST_COUNTRY`           |                   | multisite | no       | **Lista Negra de Países:** Lista de códigos de país y/o tokens de grupo separados por espacios. Estos países están bloqueados.                                                                                                                              |
+| `COUNTRY_IGNORE_URI`          |                   | multisite | no       | **URI ignorada:** Lista de patrones de expresiones regulares PCRE separados por espacios para las URI que deben excluirse de la comprobación de país. Los patrones se comprueban contra la ruta normalizada, sola o seguida de `?` y la cadena de consulta. |
+| `COUNTRY_IGNORE_HEADER_NAME`  |                   | multisite | sí       | **Nombre de cabecera:** Nombre de una cabecera de petición que hace que la petición omitir la comprobación de país. Pares numerados: `_NAME_1` va con `_VALUE_1`.                                                                                           |
+| `COUNTRY_IGNORE_HEADER_VALUE` |                   | multisite | sí       | **Valor de cabecera:** Expresión regular PCRE que debe coincidir con el valor de la cabecera. Déjelo vacío para comprobar solo su presencia.                                                                                                                |
 
 !!! warning "Una regla de cabecera es un secreto compartido"
     Cualquier cliente puede enviar una cabecera, así que una regla de cabecera es un token portador, no un control de red. Sírvala solo por HTTPS, ancle la expresión regular con `^` y `$` (la búsqueda no está anclada por defecto, así que `abc` también coincide con `xabcx`) y rote el valor. Si BunkerWeb está detrás de un proxy, ese proxy debe sobrescribir cualquier copia de la cabecera enviada por el cliente. Estas reglas son solo para HTTP: un servicio de stream no lleva cabeceras de petición, así que allí no coincide nada.
@@ -1895,7 +1906,7 @@ La API pública ofrece las mismas operaciones:
 
 Utilice el identificador de conexión devuelto sin modificarlo. Incluye la identidad de la instancia, por lo que las URL localhost idénticas en distintas instancias permanecen separadas. Los administradores de la API pueden usar estas operaciones. Los usuarios delegados de la API necesitan el permiso independiente `crowdsec_read` o `crowdsec_delete` en el recurso existente `bans`, para un identificador de conexión devuelto o para `*`. Un permiso ordinario `ban_delete` no autoriza la eliminación de decisiones de CrowdSec. No se requiere ninguna migración de base de datos.
 
-El entorno de ejecución conserva las decisiones individuales por objetivo, de modo que eliminar una no puede borrar otro baneo sobre la misma IP o rango. Los metadatos opcionales de los informes utilizan una caché independiente de 5 MiB (`CROWDSEC_METADATA_CACHE_SIZE=5m`) y no pueden desalojar las entradas que aplican los bloqueos. Las actualizaciones del flujo utilizan un bloqueo de proceso no bloqueante en `/var/run/bunkerweb`, mantenido hasta publicar la actualización y liberado automáticamente si el worker termina.
+El entorno de ejecución conserva las decisiones individuales por objetivo, de modo que eliminar una no puede borrar otro baneo sobre la misma IP o rango. Los metadatos opcionales de los informes utilizan una caché independiente de 24 MiB (`CROWDSEC_METADATA_CACHE_SIZE=24m`) y no pueden desalojar las entradas que aplican los bloqueos. Las actualizaciones del flujo utilizan un bloqueo de proceso no bloqueante en `/var/run/bunkerweb`, mantenido hasta publicar la actualización y liberado automáticamente si el worker termina.
 
 El modo stream conserva como máximo dos ranuras de instantáneas y cambia solo cuando cabe una instantánea completa. Una recarga de nginx sin cambios conserva la instantánea y solicita diferencias. Una instantánea ausente, cambios en la configuración de decisiones, un inicio incompleto o una última sincronización correcta anterior al máximo de 300 segundos y 30 veces `CROWDSEC_UPDATE_FREQUENCY` fuerzan una instantánea completa. Los fallos generan como máximo un error por minuto y prefijo de caché, seguido de un aviso de recuperación. Si se llena la caché de decisiones, aumente `CROWDSEC_CACHE_SIZE` para albergar dos instantáneas y recargue BunkerWeb. Redimensionar la zona de decisiones durante una recarga crea una zona vacía e inicia una sincronización completa; redimensionar solo la zona de metadatos borra los metadatos opcionales.
 
@@ -1990,7 +2001,7 @@ Por defecto, BunkerWeb consulta a CrowdSec en cada solicitud. Establezca `CROWDS
     services:
       bunkerweb:
         # Este es el nombre que se utilizará para identificar la instancia en el Planificador
-        image: bunkerity/bunkerweb:1.6.18-rc2
+        image: bunkerity/bunkerweb:1.6.18-rc3
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -2007,7 +2018,7 @@ Por defecto, BunkerWeb consulta a CrowdSec en cada solicitud. Establezca `CROWDS
             syslog-address: "udp://10.20.30.254:514" # La dirección IP del servicio syslog
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.18-rc2
+        image: bunkerity/bunkerweb-scheduler:1.6.18-rc3
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Asegúrese de establecer el nombre de instancia correcto
@@ -2192,7 +2203,7 @@ Los ajustes de conexión son `multisite`: un valor sin prefijo se aplica a todos
 | `CROWDSEC_REQUEST_TIMEOUT`     | `1s`                   | multisite | no       | **Tiempo de Espera de la Solicitud:** Tiempo de espera en milisegundos para las solicitudes HTTP a la API Local de CrowdSec en modo `live`. Acepta un sufijo de tiempo (ms, s, m, h, d, w, M, y); un número sin sufijo se interpreta en milisegundos.                                                                                                                                                                     |
 | `CROWDSEC_EXCLUDE_LOCATION`    |                        | multisite | no       | **Ubicaciones Excluidas:** Lista de ubicaciones (URI) separadas por comas para excluir de las verificaciones de CrowdSec.                                                                                                                                                                                                                                                                                                 |
 | `CROWDSEC_CACHE_SIZE`          | `100m`                 | global    | no       | **Tamaño de caché de decisiones:** Memoria compartida entre servicios; dos instantáneas en modo stream. Megabytes enteros positivos (`m`/`M`), mínimo `1m`. Cambiar el tamaño vacía la zona; se restauran las decisiones conocidas hasta reconciliar. Las IP desconocidas consultan LAPI y se permiten si falla.                                                                                                          |
-| `CROWDSEC_METADATA_CACHE_SIZE` | `5m`                   | global    | no       | **Tamaño de caché de metadatos:** Memoria compartida independiente para los metadatos opcionales de informes de todos los servicios. Número entero positivo de megabytes (`m`/`M`), mínimo `1m`. Redimensionar durante la recarga borra estos metadatos.                                                                                                                                                                  |
+| `CROWDSEC_METADATA_CACHE_SIZE` | `24m`                  | global    | no       | **Tamaño de caché de metadatos:** Memoria compartida independiente para los metadatos opcionales de informes de todos los servicios. Número entero positivo de megabytes (`m`/`M`), mínimo `1m`. Redimensionar durante la recarga borra estos metadatos.                                                                                                                                                                  |
 | `CROWDSEC_CACHE_EXPIRATION`    | `1s`                   | multisite | no       | **Expiración de la Caché:** El tiempo de expiración de la caché en segundos para las decisiones de IP en modo `live`. Acepta un sufijo de tiempo (ms, s, m, h, d, w, M, y); un número sin sufijo se interpreta en segundos.                                                                                                                                                                                               |
 | `CROWDSEC_UPDATE_FREQUENCY`    | `10s`                  | multisite | no       | **Frecuencia de Actualización:** Con qué frecuencia (en segundos) obtener decisiones nuevas/expiradas de la API de CrowdSec en modo `stream`. Acepta un sufijo de tiempo (ms, s, m, h, d, w, M, y); un número sin sufijo se interpreta en segundos.                                                                                                                                                                       |
 | `CROWDSEC_BAN_REFRESH`         | `0`                    | multisite | no       | **Renovación de baneos:** Convierte los bloqueos de CrowdSec en baneos cortos de BunkerWeb que se renuevan mientras dura la decisión de CrowdSec. El valor es lo máximo que dura un baneo antes de volver a consultar a CrowdSec. `0` lo desactiva. Un servicio con `CROWDSEC_EXCLUDE_LOCATION` nunca recibe baneos de CrowdSec. Acepta un sufijo de tiempo (ms, s, m, h, d, w, M, y); un número sin sufijo son segundos. |
@@ -4975,7 +4986,7 @@ El complemento Pro agrupa características avanzadas y mejoras para implementaci
 
 Siga estos pasos para configurar y usar las características Pro:
 
-1.  **Obtenga una clave de licencia:** Compre una licencia Pro en el [Panel de BunkerWeb](https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc).
+1.  **Obtenga una clave de licencia:** Inicie una prueba gratuita de 30 días o compre una licencia Pro en el [Panel de BunkerWeb](https://panel.bunkerweb.io/store/bunkerweb-pro?language=spanish&utm_campaign=self&utm_source=doc) ([guía paso a paso](index.md#pro-version)).
 2.  **Configure su clave de licencia:** Use el ajuste `PRO_LICENSE_KEY` para configurar su licencia.
 3.  **Deje que BunkerWeb se encargue del resto:** Una vez configurado con una licencia válida, los complementos Pro se descargan y activan automáticamente.
 4.  **Supervise su estado Pro:** Verifique los indicadores de salud en la [interfaz de usuario web](web-ui.md) para confirmar el estado de su suscripción Pro.
@@ -5012,7 +5023,7 @@ Siga estos pasos para configurar y usar las características Pro:
 - **BunkerWeb PRO Standard:** Acceso completo a las características Pro sin soporte técnico.
 - **BunkerWeb PRO Enterprise:** Acceso completo a las características Pro con soporte técnico dedicado.
 
-Puede explorar las características Pro con una prueba gratuita de 30 días. Iníciela desde el [Panel de BunkerWeb](https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc) y obtenga más información sobre las opciones de precios flexibles basadas en el número de servicios protegidos por BunkerWeb PRO.
+Puede explorar las características Pro con una prueba gratuita de 30 días. Iníciela desde el [Panel de BunkerWeb](https://panel.bunkerweb.io/store/bunkerweb-pro?language=spanish&utm_campaign=self&utm_source=doc) y obtenga más información sobre las opciones de precios flexibles basadas en el número de servicios protegidos por BunkerWeb PRO: pida un plan y mantenga **Free 30 Days Trial** como método de pago al finalizar la compra ([guía paso a paso](index.md#pro-version)).
 
 ## Prometheus exporter <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 

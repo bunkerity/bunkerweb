@@ -50,7 +50,7 @@
     "link": {
       "here": "dito"
     },
-    "pro": "Masulit ang BunkerWeb sa pamamagitan ng pag-upgrade sa PRO na bersyon. Karagdagang impormasyon at libreng pagsubok <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/?utm_campaign=self&utm_source=banner#pro\">dito</a>.",
+    "pro": "Masulit ang BunkerWeb sa pamamagitan ng pag-upgrade sa PRO na bersyon. Simulan ang iyong 30-araw na libreng pagsubok <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=banner\">dito</a>: umorder ng plano, pagkatapos ay panatilihin ang “Free 30 Days Trial” bilang paraan ng pagbabayad sa checkout.",
     "support": "Kailangan ng premium na suporta o pasadyang konsultasyon para sa BunkerWeb? Tingnan ang aming <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/?utm_campaign=self&utm_source=banner#services\">mga propesyonal na serbisyo</a>."
   },
   "breadcrumb": {
@@ -1155,6 +1155,7 @@
       "title": "Petsa ng Pag-expire ng Pro",
       "unknown": "Hindi kilalang petsa ng pag-expire"
     },
+    "free_trial_hint": "Umorder ng plano, pagkatapos ay panatilihin ang “Free 30 Days Trial” bilang paraan ng pagbabayad sa checkout.",
     "force_check": {
       "description": "Pilitin ang bagong pagsusuri para sa mga PRO plugin. Magti-trigger ito ng bagong pag-download ng mga plugin kung may mga bagong bersyon na available.",
       "title": "Pilitin ang pagsusuri"

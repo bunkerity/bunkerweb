@@ -31,7 +31,7 @@
 ## 设置
 
 !!! tip "BunkerWeb PRO 设置"
-    某些插件是为 **PRO 版本**保留的。通过 [BunkerWeb 面板](https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc)开始 BunkerWeb PRO 的 30 天免费试用。
+    某些插件是为 **PRO 版本**保留的。通过 [BunkerWeb 面板](https://panel.bunkerweb.io/store/bunkerweb-pro?language=chinese&utm_campaign=self&utm_source=doc)开始 BunkerWeb PRO 的 30 天免费试用：订购一个方案，然后在结账时保持选中 **Free 30 Days Trial** 作为付款方式（[分步指南](index.md#pro-version)）。
 
 一旦 BunkerWeb 集成到您的环境中，您将需要配置它来服务和保护您的 Web 应用程序。
 
@@ -105,7 +105,7 @@ app3.example.com_USE_BAD_BEHAVIOR=no
 
 !!! info "更进一步"
 
-    您将在文档的[高级用法](advanced.md)和仓库的 [examples](https://github.com/bunkerity/bunkerweb/tree/v1.6.18-rc2/examples) 目录中找到多站点模式的具体示例。
+    您将在文档的[高级用法](advanced.md)和仓库的 [examples](https://github.com/bunkerity/bunkerweb/tree/v1.6.18-rc3/examples) 目录中找到多站点模式的具体示例。
 
 ## 自定义配置 {#custom-configurations}
 
@@ -126,7 +126,7 @@ BunkerWeb 的另一个不可或缺的组件是 ModSecurity Web 应用程序防�
 
 !!! info "更进一步"
 
-    您将在文档的[高级用法](advanced.md#custom-configurations)和仓库的 [examples](https://github.com/bunkerity/bunkerweb/tree/v1.6.18-rc2/examples) 目录中找到自定义配置的具体示例。
+    您将在文档的[高级用法](advanced.md#custom-configurations)和仓库的 [examples](https://github.com/bunkerity/bunkerweb/tree/v1.6.18-rc3/examples) 目录中找到自定义配置的具体示例。
 
 ## 数据库
 
@@ -172,7 +172,7 @@ BunkerWeb 将其当前配置安全地存储在后端数据库中，该数据库�
 
 !!! info "说明"
     - **PostgreSQL**: 基于 Alpine 的镜像（包括 all-in-one）现已包含 `v18` 客户端，因此默认支持 `v18` 及更早版本。
-    - **Linux**: 支持情况取决于您的发行版软件包。如果需要，您可以从供应商仓库手动安装数据库客户端（RHEL 通常需要这样做）。
+    - **Linux**: 支持情况取决于您的发行版软件包。如果需要，您可以从供应商仓库手动安装数据库客户端（RHEL 通常需要这样做）。 如果 PostgreSQL 服务器的主版本比 Linux `pg_dump` 客户端更新，备份会因 `server version mismatch` 而失败；请从 [PGDG 仓库](integrations.md#debian-ubuntu-postgresql-backups)安装匹配的客户端。
     - **SQLite**: 随软件包一起提供，可立即使用。
 
 有助于安装数据库客户端的外部资源：

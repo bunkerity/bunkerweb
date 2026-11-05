@@ -50,7 +50,7 @@
     "link": {
       "here": "這裡"
     },
-    "pro": "升級至 PRO 版本，充分利用 BunkerWeb。更多資訊和免費試用請點擊<a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/?utm_campaign=self&utm_source=banner#pro\">這裡</a>。",
+    "pro": "升級至 PRO 版本，充分利用 BunkerWeb。 從<a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=banner\">這裡</a>開始您的 30 天免費試用：訂購方案，然後在結帳時保留「Free 30 Days Trial」作為付款方式。",
     "support": "需要 BunkerWeb 的進階支援或客製化諮詢服務？查看我們的<a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/?utm_campaign=self&utm_source=banner#services\">專業服務</a>。"
   },
   "breadcrumb": {
@@ -1155,6 +1155,7 @@
       "title": "Pro 到期日期",
       "unknown": "未知的到期日期"
     },
+    "free_trial_hint": "訂購方案，然後在結帳時保留「Free 30 Days Trial」作為付款方式。",
     "force_check": {
       "description": "Force a new check for PRO plugins. This will trigger a new download of the plugins if new versions are available.",
       "title": "Force check"

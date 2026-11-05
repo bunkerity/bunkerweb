@@ -7,7 +7,7 @@ BunkerWeb wird von [Bunkerity](https://www.bunkerity.com/?utm_campaign=self&utm_
 ## Haben Sie eine professionelle Version?
 
 !!! tip "Kostenlose Testversion von BunkerWeb PRO"
-    Starten Sie eine 30-tägige kostenlose Testversion von BunkerWeb PRO im [BunkerWeb Panel](https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc).
+    Starten Sie eine 30-tägige kostenlose Testversion von BunkerWeb PRO im [BunkerWeb Panel](https://panel.bunkerweb.io/store/bunkerweb-pro?language=german&utm_campaign=self&utm_source=doc): Bestellen Sie einen Tarif und lassen Sie beim Bestellabschluss **Free 30 Days Trial** als Zahlungsmethode ausgewählt ([Schritt-für-Schritt-Anleitung](index.md#pro-version)).
 
 Ja, wir bieten eine professionelle Version von BunkerWeb namens "BunkerWeb PRO" mit zusätzlichen Funktionen und (optionalem) technischem Support an.
 

@@ -1,5 +1,7 @@
 """Execute issuance and renewal jobs with temporary storage and fake process boundaries."""
 
+import concurrent.futures
+from concurrent.futures import ThreadPoolExecutor
 from contextlib import nullcontext
 from datetime import datetime
 import importlib.util
@@ -363,6 +365,59 @@ def test_concurrent_issuance_merges_distinct_certificates_and_preregisters_accou
     assert certbot_concurrency.ensure_accounts.call_args.args[0] == {(False, "")}
     assert not list(job_run.cache.glob("certbot-*/"))
     assert module.RUNNING_CERTBOT == 0
+
+
+def concurrent_two_services(job_run, monkeypatch):
+    """Two pending services in concurrent mode; returns the executor classes used and the config dirs each order ran with."""
+    job_run.env.update(MULTISITE="yes", LETS_ENCRYPT_CONCURRENT_REQUESTS="yes", SERVER_NAME="a.example.com b.example.com")
+    for name in ("a.example.com", "b.example.com"):
+        job_run.env.update({f"{name}_AUTO_LETS_ENCRYPT": "yes", f"{name}_SERVER_NAME": name})
+    job_run.rotate = True
+    executors = []
+
+    class RecordingExecutor(ThreadPoolExecutor):
+        def __init__(self, *args, **kwargs):
+            executors.append(self)
+            super().__init__(*args, **kwargs)
+
+    monkeypatch.setattr(concurrent.futures, "ThreadPoolExecutor", RecordingExecutor)
+    return executors
+
+
+def test_concurrent_issuance_keeps_parallel_orders_when_registration_succeeds(job_run, monkeypatch):
+    executors = concurrent_two_services(job_run, monkeypatch)
+    certbot_concurrency.ensure_accounts.return_value = True
+    _, status = job_run.load()
+    assert status == 1
+    assert len(executors) == 1
+    config_dirs = {Path(call.args[0][call.args[0].index("--config-dir") + 1]) for call in job_run.popen.call_args_list}
+    assert job_run.data not in config_dirs
+    assert not [call for call in job_run.log.warning.call_args_list if "sequential" in call.args[0]]
+
+
+def test_failed_account_registration_falls_back_to_sequential_orders(job_run, monkeypatch):
+    executors = concurrent_two_services(job_run, monkeypatch)
+    certbot_concurrency.ensure_accounts.return_value = False
+    _, status = job_run.load()
+    assert status == 1
+    assert not executors
+    assert sorted(path.parent.name for path in job_run.data.glob("live/*/fullchain.pem")) == ["a.example.com", "b.example.com"]
+    # Sequential orders share the canonical config dir, so the first one registers the only account
+    config_dirs = {Path(call.args[0][call.args[0].index("--config-dir") + 1]) for call in job_run.popen.call_args_list}
+    assert config_dirs == {job_run.data}
+    warnings = [call.args[0] for call in job_run.log.warning.call_args_list if "sequential" in call.args[0]]
+    assert len(warnings) == 1
+
+
+def test_failed_zerossl_registration_falls_back_to_sequential_orders(job_run, monkeypatch):
+    executors = concurrent_two_services(job_run, monkeypatch)
+    job_run.env.update({"a.example.com_LETS_ENCRYPT_SERVER": "zerossl", "a.example.com_LETS_ENCRYPT_ZEROSSL_API_KEY": "test-key"})
+    certbot_concurrency.ensure_accounts.return_value = True
+    certbot_concurrency.ensure_zerossl_accounts.return_value = False
+    _, status = job_run.load()
+    assert status == 1
+    assert not executors
+    assert len([call for call in job_run.log.warning.call_args_list if "sequential" in call.args[0]]) == 1
 
 
 def test_retry_backoff_and_finalization(job_run, monkeypatch):
@@ -805,3 +860,14 @@ def test_renewal_ordinary_output_does_not_retire_account(job_run, monkeypatch):
     _, status = job_run.load("renew")
     assert status == 0
     purge.assert_not_called()
+
+
+def test_an_ipv6_server_name_is_skipped_with_its_own_message(job_run):
+    job_run.env.update(AUTO_LETS_ENCRYPT="yes", SERVER_NAME="app.example.com 2001:db8::1 localhost")
+    module, _ = job_run.load()
+    job_run.log.warning.reset_mock()
+    names, config = module.build_service_config("app.example.com")
+    messages = [call.args[0] for call in job_run.log.warning.call_args_list]
+    assert names == ["app.example.com"] and config["activated"]
+    assert any("Certificates for IPv6 addresses are not supported yet: 2001:db8::1" in m for m in messages), messages
+    assert any("No public CA issues certificates for localhost" in m and "2001" not in m for m in messages), messages

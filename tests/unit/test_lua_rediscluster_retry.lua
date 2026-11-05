@@ -140,6 +140,7 @@ ngx.shared.redis_cluster_slot_locks = {
 }
 
 local rc = require "resty.rediscluster"
+local failures = 0
 
 local red, err = rc:new({
 	name = "bw_retry_test",
@@ -154,18 +155,20 @@ local res, cmd_err = red:get("bans_ip_{1.2.3.4}")
 assert(res == nil and cmd_err, "command against a dead primary must fail")
 if dead_connects ~= 1 then
 	print(("FAIL dead primary costs one connect per command: got %d connects (%s)"):format(dead_connects, cmd_err))
-	os.exit(1)
+	failures = failures + 1
+else
+	print("PASS dead primary costs one connect per command")
 end
-print("PASS dead primary costs one connect per command")
 
 -- Inside the down window the next command fails fast, without another connect timeout.
 dead_connects = 0
 local res_again, err_again = red:get("bans_ip_{1.2.3.4}")
 if res_again ~= nil or dead_connects ~= 0 then
 	print(("FAIL marked-down node is skipped: got %d connects (%s)"):format(dead_connects, tostring(err_again)))
-	os.exit(1)
+	failures = failures + 1
+else
+	print("PASS marked-down node is skipped")
 end
-print("PASS marked-down node is skipped")
 
 -- The window has passed: the node gets tried again.
 now_ts = 10
@@ -188,6 +191,9 @@ if res2 ~= "v" or dead_connects ~= 1 then
 			dead_connects
 		)
 	)
-	os.exit(1)
+	failures = failures + 1
+else
+	print("PASS retry reaches the promoted node")
 end
-print("PASS retry reaches the promoted node")
+
+os.exit(failures == 0 and 0 or 1)

@@ -371,6 +371,17 @@ integration and architecture to a runner. The values are JSON and feed `runs-on`
   over SSH, then `rm-arm.yml`). A test matrix would hold that node for a whole run instead
   of one build, so we priced it out rather than enabling it by default.
 
+**Dev versus staging.** `staging.yml` runs the full matrix: every arm a spec lists. The dev pipelines
+(`dev.yml` and `ui.yml`, which pass `parse.py --dev`) run every spec whose `integrations` include
+Docker (or are `"all"`) on **Docker only**, for `core`, `api` and `ui` alike. A spec opts into more dev
+arms with an optional top-level `dev_integrations: [...]`: under `--dev` it replaces the spec's
+`integrations`, with the same arm spellings (`"all"`, `All-in-one`, `Linux;amd64;ubuntu/noble`); without
+`--dev` (staging) the key is ignored. A spec with no Docker arm (the Autoconf and Kubernetes examples)
+keeps its own arms under `--dev`. A dev arm may end up with no spec, and GitHub fails a job whose matrix
+is empty, so every non-Docker `run-*` job in `dev.yml` and `ui.yml` is skipped on an empty list
+(`if: needs.<parse job>.outputs.<arm>_tests != '[]'`); `push-dev` uses `!failure() && !cancelled()` so a
+skipped arm does not skip the push. `core/upgrade.yml` and `core/general.yml` carry the key today.
+
 ## CI
 
 `.github/workflows/integration-tests.yml` is the reusable entry point. It takes `TYPE`,
@@ -379,8 +390,8 @@ and `staging.yml` each parse the specs, then fan out one job per integration.
 `container-build.yml` publishes the images under their `-tests` names and the workflow
 retags them to what the stacks reference.
 
-`tests/parse.py "core"|"api"|"ui"` is invoked from `dev.yml` (`core`), `ui.yml` (`ui`) and
-`staging.yml` (`core` and `api`). The dev pipelines pass `--dev` and read `utils/integrations.yml`'s
+`tests/parse.py "core"|"api"|"ui"` is invoked from `dev.yml` (`core` and `api`), `ui.yml` (`ui`) and
+`staging.yml` (`core`, `api` and `ui`). The dev pipelines pass `--dev` and read `utils/integrations.yml`'s
 `dev:` block: `ubuntu/noble` alone on Linux, every other integration a single `ubuntu-latest` row.
 `staging.yml` does not pass `--dev` and reads the `staging:` block, which carries the live Linux
 distro rows (`el/8`, `el/9`, `el/10`, `fedora/43`, `fedora/44`, `ubuntu/resolute`, `ubuntu/noble`,
@@ -391,6 +402,38 @@ comment in its `parse-tests-core` job.
 `utils/packages.yml` maps each Linux row to the `linux-build.yml` leg that built its package
 (`package-<name>-<arch>`): dev's `ubuntu` leg is Ubuntu 26.04 (`ubuntu/resolute`, `FROM ubuntu:resolute`),
 noble is the separate `ubuntu-noble` leg.
+
+### Linux upgrade arm
+
+`core/upgrade.yml` runs on Linux for `ubuntu/noble` and `debian/trixie` (staging only: the spec's
+`dev_integrations` stays on the Docker family). Debian family only, SQLite only: the arm installs a
+release from the public apt repository (`repo.bunkerweb.io`), then upgrades to the package this run
+built. An rpm distro would need the same swap in `dnf`; none of them is listed.
+
+- `bw_version: "tests"` names the package built from this checkout, which the workflow installs and
+  leaves at `/opt/bunkerweb.deb` like for any Linux spec (the first cleanup needs the units to exist; the
+  first action then replaces it with a release). Any other `bw_version` is a
+  release selected by `core/upgrade.yml` (`X.Y.Z-rcN` prereleases use `X.Y.Z~rcN` for apt).
+- `linux_install_version` (`scripts/utils.sh`) does the swap, from `start.sh` on a fresh stack and from
+  `restart_stack` when `generate.py` raised `restart_whole_stack`. A release is installed from nothing: the
+  installed package is removed and `/var/lib/bunkerweb` wiped. The package from this checkout goes over what is
+  there, data kept. It is a no-op whenever the installed package already is the wanted one, so no other spec
+  notices it.
+- Four actions per path. The `status` action proves the stack answers; `core/upgrade/linux-database.sh`
+  checks the database. `snapshot` runs on the old release (the rc3 `bw_ui_login_failures` table is not there
+  yet; it records the database version and writes a marker table), `verify` on the new package (the version
+  moved, `alembic_version` holds the migration head of this checkout, the table exists, the marker survived,
+  `www.example.com` is still declared). The marker tells a migrated database from a new one, and the head is
+  read from the checkout rather than the package, so a package that dropped a migration fails: the table
+  alone proves nothing, `init_tables` creates it on a database whatever the migrations did.
+- The `status` actions set `restart_stack: false` for Linux so the checks run on the stack they describe;
+  `full_clean` moves to the `verify` action.
+
+To run it locally, build the package from a scratch copy of the tree (`misc/update-version.sh dev` rewrites
+files all over the checkout), start the container with `docker compose -f tests/linux/docker-compose.yml up -d`
+after building `local/bunkerweb-linux` from `tests/linux/Dockerfile-<distro>`, add `force-bad-version` to the
+container's `/etc/dpkg/dpkg.cfg`, copy the package to `/opt/bunkerweb.deb`, then
+`./tests/scripts/test.sh Linux core dev upgrade`.
 
 ## The legacy harness (deleted)
 

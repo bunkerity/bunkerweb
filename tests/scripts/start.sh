@@ -88,7 +88,16 @@ elif [ "$integration" == "Docker" ] || [ "$integration" == "Autoconf" ] || [ "$i
         network="skipped"
     fi
     if [ -z "$network" ] ; then
-        docker network create --driver bridge --subnet 10.10.10.0/24 bw-db --label "com.docker.compose.network=bw-db" > /dev/null
+        db_network_ipv6=()
+        if [ "${BW_TESTS_IPV6:-}" == "yes" ] ; then
+            db_network_ipv6=(--ipv6 --subnet fd42:1618:4::/64)
+        fi
+        db_network_ipv4=(--subnet 10.10.10.0/24)
+        if [ "${BW_TESTS_IPV6:-}" == "only" ] ; then
+            db_network_ipv4=(--ipv4=false)
+            db_network_ipv6=(--ipv6 --subnet fd42:1618:4::/64)
+        fi
+        docker network create --driver bridge "${db_network_ipv4[@]}" "${db_network_ipv6[@]}" bw-db --label "com.docker.compose.network=bw-db" > /dev/null
         # shellcheck disable=SC2181
         if [ $? -ne 0 ] ; then
             log "START" "❌" "🐳 Network creation failed for bw-db"
@@ -340,6 +349,13 @@ if [ -n "$redis_type" ] ; then
     fi
 fi
 
+if [ "${BW_TESTS_IPV6:-}" == "yes" ] ; then
+    docker compose -p ipv6-fixtures -f tests/core/ipv6/fixtures.yml up -d || exit 1
+fi
+if [ "${BW_TESTS_IPV6:-}" == "only" ] ; then
+    docker compose -p ipv6-only-fixtures -f tests/core/ipv6-only/fixtures.yml up -d || exit 1
+fi
+
 # Starting stack
 if [ -f /tmp/example_stack.txt ] && [ "$integration" == "Docker" ] ; then
     # A Docker example ships the whole stack, BunkerWeb included, so the framework
@@ -350,17 +366,17 @@ if [ -f /tmp/example_stack.txt ] && [ "$integration" == "Docker" ] ; then
     log "START" "ℹ️ " "📕 Starting example stack from $example_stack ..."
     compose_up "$example_stack" "example stack" "📕" || exit 1
 elif [ "$integration" == "Docker" ] || [ "$integration" == "Autoconf" ] ; then
-    docker compose -f tests/docker/docker-compose.bunkerweb.yml up -d
+    docker_compose tests/docker/docker-compose.bunkerweb.yml up -d
     # shellcheck disable=SC2181
     if [ $? -ne 0 ] ; then
         log "START" "⚠️" "🐳 Up failed for BunkerWeb, retrying ..."
-        docker compose -f tests/docker/docker-compose.bunkerweb.yml down -v
+        docker_compose tests/docker/docker-compose.bunkerweb.yml down -v
         # shellcheck disable=SC2181
         if [ $? -ne 0 ] ; then
             log "START" "❌" "🐳 Down failed for BunkerWeb"
             exit 1
         fi
-        docker compose -f tests/docker/docker-compose.bunkerweb.yml up -d
+        docker_compose tests/docker/docker-compose.bunkerweb.yml up -d
         # shellcheck disable=SC2181
         if [ $? -ne 0 ] ; then
             log "START" "❌" "🐳 Up failed for BunkerWeb"
@@ -368,17 +384,17 @@ elif [ "$integration" == "Docker" ] || [ "$integration" == "Autoconf" ] ; then
         fi
     fi
 
-    docker compose -f tests/docker/docker-compose.scheduler.yml up -d
+    docker_compose tests/docker/docker-compose.scheduler.yml up -d
     # shellcheck disable=SC2181
     if [ $? -ne 0 ] ; then
         log "START" "⚠️" "🐳 Up failed for scheduler, retrying ..."
-        docker compose -f tests/docker/docker-compose.scheduler.yml down -v
+        docker_compose tests/docker/docker-compose.scheduler.yml down -v
         # shellcheck disable=SC2181
         if [ $? -ne 0 ] ; then
             log "START" "❌" "🐳 Down failed for scheduler"
             exit 1
         fi
-        docker compose -f tests/docker/docker-compose.scheduler.yml up -d
+        docker_compose tests/docker/docker-compose.scheduler.yml up -d
         # shellcheck disable=SC2181
         if [ $? -ne 0 ] ; then
             log "START" "❌" "🐳 Up failed for scheduler"
@@ -613,6 +629,11 @@ else
         example_hook setup "$integration" || exit 1
     fi
 
+    # The upgrade spec names the package version per action; every other spec finds the wanted one installed.
+    if ! $IS_FREEBSD ; then
+        linux_install_version || exit 1
+    fi
+
     if $IS_FREEBSD ; then
         service bunkerweb start
         # shellcheck disable=SC2181
@@ -761,12 +782,12 @@ elif [ -f /tmp/services.yml ] ; then
             exit 1
         fi
 
-        docker compose -f /tmp/services.yml up -d
+        docker_compose /tmp/services.yml up -d
         # shellcheck disable=SC2181
         if [ $? -ne 0 ] ; then
             log "START" "⚠️" "🐳 Up failed for dockerized services, retrying ..."
             cleanup_stack
-            docker compose -f /tmp/services.yml up -d
+            docker_compose /tmp/services.yml up -d
             # shellcheck disable=SC2181
             if [ $? -ne 0 ] ; then
                 log "START" "❌" "🐳 Up failed for dockerized services"

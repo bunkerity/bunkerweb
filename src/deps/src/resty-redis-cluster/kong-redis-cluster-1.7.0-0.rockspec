@@ -1,8 +1,8 @@
 package = "kong-redis-cluster"
-version = "1.6.1-0"
+version = "1.7.0-0"
 source = {
     url = "git://github.com/Kong/resty-redis-cluster",
-    tag = "1.6.1"
+    tag = "1.7.0"
 }
 
 description = {

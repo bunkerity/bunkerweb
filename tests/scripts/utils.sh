@@ -31,6 +31,8 @@ fi
 TESTS_CHECKOUT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 BW_TESTS_HOST_ROOT="${BW_TESTS_HOST_ROOT:-$TESTS_CHECKOUT/.cache/e2e-host}"
 export BW_TESTS_HOST_ROOT
+# Capture files stay in the checkout even when CI uses BW_TESTS_HOST_ROOT=/.
+export BW_TESTS_IPV6_ONLY_DIR="${BW_TESTS_IPV6_ONLY_DIR:-$TESTS_CHECKOUT/.cache/ipv6-only}"
 # A trailing slash would double up below, and "/" has to collapse to the empty string.
 _host_root="${BW_TESTS_HOST_ROOT%/}"
 export BW_TESTS_WWW="$_host_root/var/www/html"
@@ -47,11 +49,27 @@ case "$BW_TESTS_ETC/" in
 esac
 mkdir -p "$BW_TESTS_WWW" "$BW_TESTS_LOG" "$BW_TESTS_LIB" "$BW_TESTS_PHP" "$BW_TESTS_ETC"
 
-# The Linux arm installs the distro's postgresql-client, 16 on Ubuntu noble, and pg_dump refuses a newer server
-# ("aborting because of server version mismatch"): the backup spec needs a 16 server there. Every other
-# integration keeps the 17 pinned in tests/misc/docker/postgresql.yml, the client version of the images.
+# pg_dump refuses newer servers: match older distro clients, retaining the 16 fixture for clients >= 16.
+# Other integrations keep the pinned 17 in tests/misc/docker/postgresql.yml.
 if [ "$integration" == "Linux" ] ; then
-    export BW_TESTS_POSTGRES_IMAGE="postgres:16-alpine@sha256:0cefaabd882e42bcb2a2f3dc56d3ce4770560ba62fd7f197f1a2e008fd5731ab"
+    pg_version="$(docker exec -u 0 bunkerweb-linux pg_dump --version)" || {
+        echo "Cannot determine Linux pg_dump version; install the PostgreSQL client" >&2
+        exit 1
+    }
+    pg_major="$(echo "$pg_version" | awk '{split($3, version, "."); print version[1]}')"
+    case "$pg_major" in
+        10) export BW_TESTS_POSTGRES_IMAGE="postgres:10-alpine@sha256:63cfb6eac6b362c7c994f22c3804c61b31898cf0cb52f8e7e86bd99a244f4366" ;;
+        13) export BW_TESTS_POSTGRES_IMAGE="postgres:13-alpine@sha256:fb9065b6e3e213bdc07edd372a5b2a26245840b7fb65d1fd8b6700106d51805c" ;;
+        14) export BW_TESTS_POSTGRES_IMAGE="postgres:14-alpine@sha256:862ffc2556a2db763f0439c8323490000cd01975d2798a845e4a8dd3a905862f" ;;
+        15) export BW_TESTS_POSTGRES_IMAGE="postgres:15-alpine@sha256:54e0dd8e8cddcdbb9156c2486eed5a43eccb7214d7c6828097d41ce049fb3984" ;;
+        *)
+            if ! [[ "$pg_major" =~ ^[0-9]+$ ]] || [ "$pg_major" -lt 16 ] ; then
+                echo "Unsupported Linux pg_dump version: $pg_version" >&2
+                exit 1
+            fi
+            export BW_TESTS_POSTGRES_IMAGE="postgres:16-alpine@sha256:0cefaabd882e42bcb2a2f3dc56d3ce4770560ba62fd7f197f1a2e008fd5731ab"
+            ;;
+    esac
 fi
 
 function log() {
@@ -181,6 +199,10 @@ function robust_docker_pull() {
 export TESTS_REDIS_PORT="${TESTS_REDIS_PORT:-6390}"
 
 function redis_cli() {
+    if [ "${BW_TESTS_IPV6:-}" == "only" ] ; then
+        redis-cli -h ::1 -p "$TESTS_REDIS_PORT" "$@"
+        return $?
+    fi
     redis-cli -p "$TESTS_REDIS_PORT" "$@"
 }
 
@@ -429,6 +451,31 @@ function stack_has_worker() {
     [ -d "$root/src/worker" ]
 }
 
+# Add network overrides only for the opt-in IPv6 spec, through startup and teardown.
+function docker_compose() {
+    local compose_file="$1" overlay="" fixture=ipv6
+    shift
+    if [ "${BW_TESTS_IPV6:-}" == "yes" ] || [ "${BW_TESTS_IPV6:-}" == "only" ] ; then
+        [ "$BW_TESTS_IPV6" != "only" ] || fixture=ipv6-only
+        case "$compose_file" in
+            tests/misc/docker/redis.yml) overlay=redis ;;
+            tests/docker/docker-compose.bunkerweb.yml) overlay=bunkerweb ;;
+            tests/docker/docker-compose.scheduler.yml) overlay=scheduler ;;
+            tests/misc/docker/dnsmasq.yml) overlay=dnsmasq ;;
+            /tmp/services.yml) overlay=services ;;
+        esac
+    fi
+    if [ -n "$overlay" ] ; then
+        if [ "$fixture" == "ipv6-only" ] ; then
+            docker compose -p docker -f "tests/core/$fixture/$overlay.yml" "$@"
+        else
+            docker compose -f "$compose_file" -f "tests/core/$fixture/$overlay.yml" "$@"
+        fi
+    else
+        docker compose -f "$compose_file" "$@"
+    fi
+}
+
 # Bring a compose file up, retrying once through a full "down -v" — the recovery the
 # stack-up steps have always open-coded.
 function compose_up() {
@@ -500,7 +547,7 @@ function cleanup_stack () {
                 fi
             fi
         else
-            docker compose -f /tmp/services.yml down -v
+            docker_compose /tmp/services.yml down -v
             # shellcheck disable=SC2181
             if [ $? -ne 0 ] ; then
                 log "UTILS" "❌" "🐳 Failed to stop dockerized services"
@@ -721,7 +768,7 @@ function cleanup_stack () {
                 return 1
             fi
 
-            docker compose -f tests/misc/docker/dnsmasq.yml down -v
+            docker_compose tests/misc/docker/dnsmasq.yml down -v
             # shellcheck disable=SC2181
             if [ $? -ne 0 ] ; then
                 log "UTILS" "❌" "🤿 Failed to stop dnsmasq"
@@ -787,7 +834,7 @@ function cleanup_stack () {
             sed_in_place 's/^listen.owner =.*$/listen.owner = www-data/g' tests/misc/conf/php-fpm.conf
         fi
 
-        docker compose -f tests/misc/docker/redis.yml down -v --remove-orphans
+        docker_compose tests/misc/docker/redis.yml down -v --remove-orphans
         # shellcheck disable=SC2181
         if [ $? -ne 0 ] ; then
             log "UTILS" "❌" "💽 Failed to stop redis"
@@ -801,7 +848,9 @@ function cleanup_stack () {
         # networks behind; the filter keeps that and removes the blast radius. Verified in both
         # directions: a network labelled with this project is removed, one labelled with another
         # project or unlabelled survives.
-        docker network prune -f --filter label=com.docker.compose.project=docker
+        if [ -z "${BW_TESTS_IPV6:-}" ] ; then
+            docker network prune -f --filter label=com.docker.compose.project=docker
+        fi
         # shellcheck disable=SC2181
         if [ $? -ne 0 ] ; then
             log "UTILS" "❌" "🐳 Failed to prune networks"
@@ -842,7 +891,7 @@ function cleanup_stack () {
             fi
         fi
 
-        docker compose -f tests/docker/docker-compose.bunkerweb.yml down -v
+        docker_compose tests/docker/docker-compose.bunkerweb.yml down -v
         # shellcheck disable=SC2181
         if [ $? -ne 0 ] ; then
             log "UTILS" "❌" "🐳 Failed to stop BunkerWeb"
@@ -890,11 +939,21 @@ function cleanup_stack () {
         # first, the delete failed with "Resource is still in use", the volume survived the
         # `full_clean` boundary carrying the previous arm's database, and the next arm booted an
         # older image against it ("No migration file found for database version").
-        docker compose -f tests/docker/docker-compose.scheduler.yml down -v
+        docker_compose tests/docker/docker-compose.scheduler.yml down -v
         # shellcheck disable=SC2181
         if [ $? -ne 0 ] ; then
             log "UTILS" "❌" "🐳 Failed to stop BunkerWeb Scheduler"
             return 1
+        fi
+
+        if [ "${BW_TESTS_IPV6:-}" == "yes" ] ; then
+            docker compose -p ipv6-fixtures -f tests/core/ipv6/fixtures.yml down -v || return 1
+        fi
+        if [ "${BW_TESTS_IPV6:-}" == "only" ] ; then
+            docker compose -p ipv6-only-fixtures -f tests/core/ipv6-only/fixtures.yml down -v || return 1
+            if [ "$exit_code" -ne 0 ] || $trapped ; then
+                touch "$BW_TESTS_IPV6_ONLY_DIR/stop"
+            fi
         fi
 
         containers=$(docker ps -a --format "{{.Names}}")
@@ -1117,6 +1176,15 @@ function cleanup_stack () {
                 return 1
             fi
         fi
+
+        # Leave no dual-stack network for the next ordinary spec to inherit.
+        if [ -n "${BW_TESTS_IPV6:-}" ] && { [ "$exit_code" -ne 0 ] || $trapped; } ; then
+            for network in bw-universe bw-services ipv6-backend ; do
+                if echo "$networks" | grep -qx "$network" ; then
+                    docker network rm "$network" || return 1
+                fi
+            done
+        fi
     fi
 
     log "UTILS" "ℹ️ " "🧹 Cleaned up current stack ✅"
@@ -1241,14 +1309,14 @@ function restart_stack () {
 
     if [ "$integration" == "Docker" ] || [ "$integration" == "Autoconf" ] ; then
         if [ "$restart_whole_stack" -eq 1 ] ; then
-            docker compose -f tests/docker/docker-compose.bunkerweb.yml down
+            docker_compose tests/docker/docker-compose.bunkerweb.yml down
             # shellcheck disable=SC2181
             if [ $? -ne 0 ] ; then
                 log "UTILS" "❌" "🐳 Failed to stop BunkerWeb"
                 return 1
             fi
 
-            docker compose -f tests/docker/docker-compose.bunkerweb.yml up -d
+            docker_compose tests/docker/docker-compose.bunkerweb.yml up -d
             # shellcheck disable=SC2181
             if [ $? -ne 0 ] ; then
                 log "UTILS" "❌" "🐳 Failed to start BunkerWeb"
@@ -1272,14 +1340,14 @@ function restart_stack () {
             fi
         fi
 
-        docker compose -f tests/docker/docker-compose.scheduler.yml down
+        docker_compose tests/docker/docker-compose.scheduler.yml down
         # shellcheck disable=SC2181
         if [ $? -ne 0 ] ; then
             log "UTILS" "❌" "🐳 Failed to stop BunkerWeb Scheduler"
             return 1
         fi
 
-        docker compose -f tests/docker/docker-compose.scheduler.yml up -d
+        docker_compose tests/docker/docker-compose.scheduler.yml up -d
         # shellcheck disable=SC2181
         if [ $? -ne 0 ] ; then
             log "UTILS" "❌" "🐳 Failed to start BunkerWeb Scheduler"
@@ -1333,14 +1401,14 @@ function restart_stack () {
                 return 1
             fi
 
-            docker compose -f /tmp/services.yml down -v
+            docker_compose /tmp/services.yml down -v
             # shellcheck disable=SC2181
             if [ $? -ne 0 ] ; then
                 log "UTILS" "❌" "🐳 Failed to stop dockerized services"
                 return 1
             fi
 
-            docker compose -f /tmp/services.yml up -d
+            docker_compose /tmp/services.yml up -d
             # shellcheck disable=SC2181
             if [ $? -ne 0 ] ; then
                 log "UTILS" "❌" "🐳 Failed to start dockerized services"
@@ -1397,14 +1465,14 @@ function restart_stack () {
                 return 1
             fi
 
-            docker compose -f /tmp/services.yml down -v
+            docker_compose /tmp/services.yml down -v
             # shellcheck disable=SC2181
             if [ $? -ne 0 ] ; then
                 log "UTILS" "❌" "🐳 Failed to stop dockerized services"
                 return 1
             fi
 
-            docker compose -f /tmp/services.yml up -d
+            docker_compose /tmp/services.yml up -d
             # shellcheck disable=SC2181
             if [ $? -ne 0 ] ; then
                 log "UTILS" "❌" "🐳 Failed to start dockerized services"
@@ -1574,6 +1642,12 @@ function restart_stack () {
 
         sleep 5
     else
+        # A version change (generate.py raised restart_whole_stack) is the Linux upgrade: swap the package first,
+        # then restart below as for any action.
+        if [ "$restart_whole_stack" -eq 1 ] && ! $IS_FREEBSD ; then
+            linux_install_version || return 1
+        fi
+
         # Stop the scheduler BEFORE the logs are cleared, not as the first half of a restart. A scheduler
         # stopped in its first apply round waits up to 30 s for it to end, and its job threads go on
         # sending their reload meanwhile (run 40848748952: stop 10:00:55, `reload successful` and "BunkerWeb is
@@ -1600,10 +1674,6 @@ function restart_stack () {
             docker exec -u 0 bunkerweb-linux truncate -s 0 /var/log/bunkerweb/api.log
             docker exec -u 0 bunkerweb-linux truncate -s 0 /var/log/bunkerweb/api-access.log
         fi
-
-        # if [ "$restart_whole_stack" -eq 1 ] ; then
-        #     # TODO
-        # fi
 
         apply_example_variables_env || return 1
 
@@ -1642,14 +1712,14 @@ function restart_stack () {
                 return 1
             fi
 
-            docker compose -f /tmp/services.yml down -v
+            docker_compose /tmp/services.yml down -v
             # shellcheck disable=SC2181
             if [ $? -ne 0 ] ; then
                 log "UTILS" "❌" "🐳 Failed to stop dockerized services"
                 return 1
             fi
 
-            docker compose -f /tmp/services.yml up -d
+            docker_compose /tmp/services.yml up -d
             # shellcheck disable=SC2181
             if [ $? -ne 0 ] ; then
                 log "UTILS" "❌" "🐳 Failed to start dockerized services"
@@ -1703,6 +1773,87 @@ function restart_stack () {
     fi
 }
 
+# Linux upgrade arm: bring the package inside the systemd container to the version the current action
+# names (BW_VERSION). "tests" is the package built from this checkout, which the workflow stages as
+# /opt/bunkerweb.deb; anything else is a release from the public repository (a GitHub tag spells a
+# prerelease X.Y.Z-rcN, apt spells it X.Y.Z~rcN). Installing a release starts from nothing: the
+# installed package is removed and the data it left is wiped. Installing "tests" over a release is the
+# upgrade under test, so the data stays. A no-op while the installed package already is the wanted one,
+# which is every spec but upgrade. Debian-family only: an rpm distro has no arm that names a release.
+function linux_install_version() {
+    local want="${BW_VERSION:-tests}" local_pkg="/opt/bunkerweb.deb" installed target status_version
+
+    if ! docker exec -u 0 bunkerweb-linux sh -c 'command -v dpkg-query' > /dev/null 2>&1 ; then
+        if [ "$want" != "tests" ] ; then
+            log "UTILS" "❌" "🐧 Installing BunkerWeb $want needs a Debian-family container"
+            return 1
+        fi
+        return 0
+    fi
+
+    status_version="$(docker exec -u 0 bunkerweb-linux dpkg-query -W -f='${db:Status-Abbrev}|${Version}' bunkerweb 2> /dev/null || true)"
+    installed=""
+    if [[ "$status_version" == ii* ]] ; then
+        installed="${status_version#*|}"
+    fi
+
+    if [ "$want" == "tests" ] ; then
+        docker exec -u 0 bunkerweb-linux test -f "$local_pkg" || return 0
+        # dpkg-deb -f parses the control file and refuses a dev version; the control archive is not parsed.
+        target="$(docker exec -u 0 bunkerweb-linux sh -c "dpkg-deb --ctrl-tarfile '$local_pkg' | tar -xO ./control | sed -n 's/^Version: //p'")" || return 1
+        [ -n "$target" ] || return 1
+    else
+        target="${want//-/\~}"
+    fi
+    if [ "$installed" == "$target" ] ; then
+        return 0
+    fi
+
+    log "UTILS" "ℹ️ " "📦 Installing BunkerWeb $target (installed: ${installed:-none}) ..."
+    # An upgrade keeps the units running, as on a host: the package's postinstall restarts the active ones.
+    # A release replaces what is there, so stop it first.
+    local unit
+    if [ "$want" != "tests" ] ; then
+        for unit in bunkerweb-ui bunkerweb-api bunkerweb-scheduler bunkerweb ; do
+            docker exec -u 0 bunkerweb-linux systemctl stop "$unit" > /dev/null 2>&1 || true
+        done
+    fi
+
+    local apt_env=(-e UI_WIZARD=no)
+    if [ "${type:-}" == "ui" ] ; then
+        apt_env=()
+    fi
+
+    if [ "$want" == "tests" ] ; then
+        # dev and testing builds carry a version dpkg refuses ("does not start with a digit"); the
+        # workflow's step of the same name does it for a package it installs itself.
+        docker exec -u 0 bunkerweb-linux sh -c 'grep -qx force-bad-version /etc/dpkg/dpkg.cfg || echo force-bad-version >> /etc/dpkg/dpkg.cfg' || return 1
+        docker exec "${apt_env[@]}" -u 0 bunkerweb-linux apt-get install -y --allow-downgrades "$local_pkg" || return 1
+    else
+        if [ -n "$installed" ] ; then
+            docker exec -u 0 bunkerweb-linux apt-get remove -y bunkerweb || return 1
+        fi
+        docker exec -u 0 bunkerweb-linux sh -c 'rm -rf /var/lib/bunkerweb/* /var/backups/bunkerweb /var/tmp/bunkerweb_upgrade' || return 1
+        if ! docker exec -u 0 bunkerweb-linux test -f /etc/apt/sources.list.d/bunkerity_bunkerweb.list ; then
+            docker exec -u 0 bunkerweb-linux sh -c 'curl -fsSL https://repo.bunkerweb.io/install/script.deb.sh | bash' || return 1
+        fi
+        docker exec -u 0 bunkerweb-linux apt-get update || return 1
+        docker exec "${apt_env[@]}" -u 0 bunkerweb-linux apt-get install -y --allow-downgrades "bunkerweb=$target" || return 1
+    fi
+
+    # The package starts the units it installs. Wait until they have applied their first configuration,
+    # or the caller's next stop interrupts the very migration this arm exists to prove. Only a dev or
+    # testing scheduler writes the healthy marker; a release answers with its "ready" log line.
+    for _ in $(seq 1 180) ; do
+        if docker exec -u 0 bunkerweb-linux test -f /var/tmp/bunkerweb/scheduler.healthy || docker exec -u 0 bunkerweb-linux grep -q "BunkerWeb is ready" /var/log/bunkerweb/error.log ; then
+            break
+        fi
+        sleep 1
+    done
+    docker exec -u 0 bunkerweb-linux chmod 777 /etc/bunkerweb
+    log "UTILS" "ℹ️ " "📦 BunkerWeb $target installed ✅"
+}
+
 # shellcheck disable=SC2120
 function log_stack () {
     service="${1:-}"
@@ -1747,18 +1898,18 @@ function log_stack () {
                     docker compose -f tests/docker/docker-compose.all-in-one.yml $command
                 else
                     # shellcheck disable=SC2086
-                    docker compose -f tests/docker/docker-compose.bunkerweb.yml $command
+                    docker_compose tests/docker/docker-compose.bunkerweb.yml $command
                 fi
             elif [ "$integration" == "All-in-one" ] ; then
                 docker compose -f tests/docker/docker-compose.all-in-one.yml logs
             else
                 log "UTILS" "ℹ️ " "📜 Showing BunkerWeb logs ..."
                 # shellcheck disable=SC2086
-                docker compose -f tests/docker/docker-compose.bunkerweb.yml logs
+                docker_compose tests/docker/docker-compose.bunkerweb.yml logs
 
                 log "UTILS" "ℹ️ " "📜 Showing BunkerWeb Scheduler logs ..."
                 # shellcheck disable=SC2086
-                docker compose -f tests/docker/docker-compose.scheduler.yml logs
+                docker_compose tests/docker/docker-compose.scheduler.yml logs
 
                 if [ "$integration" == "Autoconf" ] ; then
                     log "UTILS" "ℹ️ " "📜 Showing BunkerWeb Autoconf logs ..."

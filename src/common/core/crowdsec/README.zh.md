@@ -73,7 +73,7 @@ CrowdSec 是一种现代的开源安全引擎，它基于行为分析和社区�
 
 请原样使用返回的连接 ID。它包含实例身份，因此不同实例上相同的 localhost URL 仍会被区分。API 管理员可以使用这些操作。委派的 API 用户需要在现有 `bans` 资源下获得独立的 `crowdsec_read` 或 `crowdsec_delete` 权限，权限范围为返回的连接 ID 或 `*`。普通的 `ban_delete` 权限不允许移除 CrowdSec 决策。无需进行数据库迁移。
 
-运行时按目标保留各条独立决策，因此移除一条决策不会抹去同一 IP 或范围上的其他封禁。可选的报告元数据使用独立的 5 MiB (`CROWDSEC_METADATA_CACHE_SIZE=5m`) 缓存，不会逐出用于执行封禁的条目。流刷新使用 `/var/run/bunkerweb` 中的非阻塞进程锁，锁会一直保持到更新发布完成，并在 worker 退出时自动释放。
+运行时按目标保留各条独立决策，因此移除一条决策不会抹去同一 IP 或范围上的其他封禁。可选的报告元数据使用独立的 24 MiB (`CROWDSEC_METADATA_CACHE_SIZE=24m`) 缓存，不会逐出用于执行封禁的条目。流刷新使用 `/var/run/bunkerweb` 中的非阻塞进程锁，锁会一直保持到更新发布完成，并在 worker 退出时自动释放。
 
 流模式最多保留两个快照槽位，仅在完整快照存储成功后切换。配置未变的 nginx 重载会保留当前快照并请求增量更新。快照缺失、决策配置改变、上次启动未完成，或距离上次成功同步超过 300 秒与 `CROWDSEC_UPDATE_FREQUENCY` 的 30 倍两者中的较大值时，会强制获取完整快照。每个缓存前缀每分钟最多记录一次同步错误，恢复后记录一次通知。决策缓存已满时，请增大 `CROWDSEC_CACHE_SIZE` 以容纳两个快照并重载 BunkerWeb。重载时调整决策内存区大小会创建空缓存并触发完整同步；仅调整元数据内存区大小会清空可选元数据。
 
@@ -172,7 +172,7 @@ CrowdSec 是一种现代的开源安全引擎，它基于行为分析和社区�
     services:
       bunkerweb:
         # 这是将用于在调度器中识别实例的名称
-        image: bunkerity/bunkerweb:1.6.18-rc2
+        image: bunkerity/bunkerweb:1.6.18-rc3
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -189,7 +189,7 @@ CrowdSec 是一种现代的开源安全引擎，它基于行为分析和社区�
             syslog-address: "udp://10.20.30.254:514" # syslog 服务的 IP 地址
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.18-rc2
+        image: bunkerity/bunkerweb-scheduler:1.6.18-rc3
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb" # 确保设置正确的实例名称
@@ -374,7 +374,7 @@ CrowdSec 是一种现代的开源安全引擎，它基于行为分析和社区�
 | `CROWDSEC_REQUEST_TIMEOUT`     | `1s`                   | multisite | 否   | **请求超时：** 在实时模式下向 CrowdSec 本地 API 发出 HTTP 请求的超时时间（以毫秒为单位）。 支持时间后缀（ms、s、m、h、d、w、M、y）；无后缀的数字单位为毫秒。                                                                                                                             |
 | `CROWDSEC_EXCLUDE_LOCATION`    |                        | multisite | 否   | **排除的位置：** 从 CrowdSec 检查中排除的位置（URI）列表，以逗号分隔。                                                                                                                                                                                                                   |
 | `CROWDSEC_CACHE_SIZE`          | `100m`                 | global    | 否   | **决策缓存大小：** 所有服务共享的内存；流模式需要两个快照。使用正整数兆字节（`m`/`M`），最小 `1m`。调整大小会清空缓存区；已知决策从磁盘恢复并执行至完成校准。未知 IP 查询 LAPI，故障时放行未知 IP。                                                                                      |
-| `CROWDSEC_METADATA_CACHE_SIZE` | `5m`                   | global    | 否   | **元数据缓存大小：** 所有服务的可选报告元数据使用的独立共享内存。使用正整数兆字节（`m`/`M`），最小值为 `1m`；重载时调整大小会清空此内存区。                                                                                                                                              |
+| `CROWDSEC_METADATA_CACHE_SIZE` | `24m`                  | global    | 否   | **元数据缓存大小：** 所有服务的可选报告元数据使用的独立共享内存。使用正整数兆字节（`m`/`M`），最小值为 `1m`；重载时调整大小会清空此内存区。                                                                                                                                              |
 | `CROWDSEC_CACHE_EXPIRATION`    | `1s`                   | multisite | 否   | **缓存过期时间：** 在实时模式下，IP 决策的缓存过期时间（以秒为单位）。 支持时间后缀（ms、s、m、h、d、w、M、y）；无后缀的数字单位为秒。                                                                                                                                                   |
 | `CROWDSEC_UPDATE_FREQUENCY`    | `10s`                  | multisite | 否   | **更新频率：** 在流模式下，从 CrowdSec API 拉取新的/过期的决策的频率（以秒为单位）。 支持时间后缀（ms、s、m、h、d、w、M、y）；无后缀的数字单位为秒。                                                                                                                                     |
 | `CROWDSEC_BAN_REFRESH`         | `0`                    | multisite | 否   | **封禁刷新：** 将 CrowdSec 拦截转换为短时的 BunkerWeb 封禁，只要 CrowdSec 决策有效就会续期。该值是封禁在再次询问 CrowdSec 之前最长持续的时间。`0` 表示禁用。设置了 `CROWDSEC_EXCLUDE_LOCATION` 的服务永远不会产生 CrowdSec 封禁。支持时间后缀（ms、s、m、h、d、w、M、y）；纯数字表示秒。 |

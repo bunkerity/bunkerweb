@@ -15,7 +15,7 @@ from os.path import join as os_join
 from pathlib import Path
 from re import DOTALL, IGNORECASE, Match, compile as re_compile, escape, error as RegexError, search
 from sys import argv, path as sys_path
-from threading import Lock
+from threading import RLock
 from traceback import format_exc
 from typing import Any, Callable, Dict, List, Literal, NoReturn, Optional, Sequence, Set, Tuple, TypeVar, Union
 from time import sleep
@@ -73,7 +73,7 @@ from sqlite3 import Connection as SQLiteConnection
 
 install_as_MySQLdb()
 
-LOCK = Lock()
+LOCK = RLock()
 
 
 @event.listens_for(Engine, "connect")
@@ -903,7 +903,7 @@ class Database:
                 metadata = session.query(Metadata).with_entities(Metadata.version).filter_by(id=1).first()
                 if metadata:
                     return metadata.version
-                return "1.6.18~rc2"
+                return "1.6.18~rc3"
             except BaseException as e:
                 return f"Error: {e}"
 
@@ -937,7 +937,7 @@ class Database:
             "last_instances_change": None,
             "reload_ui_plugins": False,
             "integration": "unknown",
-            "version": "1.6.18~rc2",
+            "version": "1.6.18~rc3",
             "database_version": "Unknown",  # ? Extracted from the database
             "default": True,  # ? Extra field to know if the returned data is the default one
         }
@@ -1724,11 +1724,24 @@ class Database:
 
             # APPLY CHANGES
             try:
+                # A renamed setting is deleted after its value rows moved to the new id: the delete cascades them on the foreign-key engines
+                migrated_setting_ids = {u["filter"]["setting_id"] for u in to_update if u["type"] in ("global_value", "service_setting")}
+                deferred_setting_deletes = []
+
+                def delete_setting(setting_filter: Dict[str, Any]) -> None:
+                    # Explicit, so SQLite (no enforced foreign keys) leaves no orphan values behind either
+                    for model in (Selects, Multiselects, Services_settings, Global_values, Template_settings):
+                        session.query(model).filter_by(setting_id=setting_filter["id"]).delete()
+                    session.query(Settings).filter_by(**setting_filter).delete()
+
                 # Apply deletes
                 for delete in to_delete:
                     t = delete["type"]
                     if t == "setting":
-                        session.query(Settings).filter_by(**delete["filter"]).delete()
+                        if delete["filter"]["id"] in migrated_setting_ids:
+                            deferred_setting_deletes.append(delete["filter"])
+                        else:
+                            delete_setting(delete["filter"])
                     elif t == "global_value":
                         session.query(Global_values).filter_by(**delete["filter"]).delete()
                     elif t == "service_setting":
@@ -1857,6 +1870,9 @@ class Database:
                         session.query(Global_values).filter_by(**update["filter"]).update(update["data"])
                     elif t == "service_setting":
                         session.query(Services_settings).filter_by(**update["filter"]).update(update["data"])
+
+                for setting_filter in deferred_setting_deletes:
+                    delete_setting(setting_filter)
 
                 self._blob_sweep(session)
                 session.commit()
@@ -5489,6 +5505,7 @@ class Database:
             if not plugin:
                 return f"Plugin with id {plugin_id} and method {method} not found"
 
+            plugin_type = plugin.type
             session.query(Plugins).filter_by(id=plugin_id, method=method).delete()
             for db_setting in session.query(Settings).filter_by(plugin_id=plugin_id).all():
                 session.query(Selects).filter_by(setting_id=db_setting.id).delete()
@@ -5520,7 +5537,7 @@ class Database:
                             metadata.external_plugins_changed = True
                             metadata.last_external_plugins_change = datetime.now().astimezone()
                             metadata.reload_ui_plugins = True
-                        elif method == "pro":
+                        elif plugin_type == "pro":
                             metadata.pro_plugins_changed = True
                             metadata.last_pro_plugins_change = datetime.now().astimezone()
                             metadata.reload_ui_plugins = True

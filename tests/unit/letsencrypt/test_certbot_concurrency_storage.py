@@ -133,6 +133,30 @@ def test_registration_failures_are_reported_without_aborting(tmp_path, monkeypat
     assert any(expected in message for message in messages)
 
 
+@pytest.mark.parametrize("zerossl", [False, True])
+@pytest.mark.parametrize(
+    "result, expected",
+    [
+        (CompletedProcess([], 0, stdout="registered"), True),
+        (CompletedProcess([], 1, stdout="Existing account found"), True),
+        (CompletedProcess([], 1, stdout="registration refused"), False),
+        (TimeoutExpired("fake-register", 300), False),
+    ],
+)
+def test_registration_reports_whether_every_account_is_usable(tmp_path, monkeypatch, zerossl, result, expected):
+    process = Mock(side_effect=result) if isinstance(result, Exception) else Mock(return_value=result)
+    monkeypatch.setattr(concurrency, "run", process)
+    register = concurrency.ensure_zerossl_accounts if zerossl else concurrency.ensure_accounts
+    assert register({(False, "")}, {}, "fake-register", "INFO", tmp_path, "work", "logs", Mock()) is expected
+
+
+@pytest.mark.parametrize("zerossl", [False, True])
+def test_registration_with_existing_account_reports_success(tmp_path, zerossl):
+    account(tmp_path / "accounts", ZEROSSL if zerossl else PRODUCTION, "present", "ops@example.com")
+    register = concurrency.ensure_zerossl_accounts if zerossl else concurrency.ensure_accounts
+    assert register({(False, "ops@example.com")}, {}, "fake-register", "INFO", tmp_path, "work", "logs", Mock()) is True
+
+
 def test_orphan_recovery_registers_only_missing_supported_endpoints(tmp_path, monkeypatch):
     monkeypatch.setattr(concurrency, "environ", {"svc_EMAIL_LETS_ENCRYPT": " service@example.com "})
     monkeypatch.setattr(concurrency, "detect_orphan_renewals", lambda path: [{"server": server} for server in (PRODUCTION, PRODUCTION, STAGING, ZEROSSL, "")])

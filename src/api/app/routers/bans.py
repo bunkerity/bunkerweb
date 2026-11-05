@@ -5,6 +5,7 @@ import json
 
 from CrowdSec import CrowdSecClient, CrowdSecError  # type: ignore
 from crowdsec_unban import apply, find_lease, involved, preview, revalidate  # type: ignore
+from ip_identity import normalize_ip  # type: ignore
 
 from ..auth.biscuit import authorize_resource
 from ..auth.guard import guard
@@ -15,6 +16,19 @@ from ..utils import LOGGER, get_db
 router = APIRouter(prefix="/bans", tags=["bans"])
 
 RESERVED_SERVICE_NAMES = frozenset({"unknown", "Web UI", "bwcli", "default server", ""})
+
+
+def _canonical_ip(payload: dict) -> None:
+    """Store the ban target under its canonical spelling (RFC 5952 IPv6, IPv4-mapped IPv6 as IPv4). Raises ValueError otherwise."""
+    payload["ip"] = normalize_ip(payload["ip"])
+
+
+def _canonical_or_raw(ip) -> object:
+    """Canonical spelling of a listed ban, so a ban stored under another spelling by an older version still matches."""
+    try:
+        return normalize_ip(ip)
+    except ValueError:
+        return ip
 
 
 def _derive_scope(payload: dict) -> None:
@@ -57,10 +71,19 @@ def ban(req: Union[List[BanRequest], BanRequest, str], api_caller=Depends(get_in
     else:
         items = req if isinstance(req, list) else [req]
 
-    all_ok = True
+    # Every target is checked before the first one is banned, so a bad one never leaves a half applied request
+    payloads = []
     for it in items:
         payload = it.model_dump()
+        try:
+            _canonical_ip(payload)
+        except ValueError as exc:
+            return JSONResponse(status_code=422, content={"status": "error", "message": f"Invalid IP address: {exc}"})
         _derive_scope(payload)
+        payloads.append(payload)
+
+    all_ok = True
+    for payload in payloads:
         ok, _ = api_caller.send_to_apis("POST", "/ban", data=payload)
         all_ok = all_ok and ok
     return JSONResponse(status_code=200 if all_ok else 502, content={"status": "success" if all_ok else "error"})
@@ -79,7 +102,7 @@ def _explicit_ban_state(api_caller, ip: str, ban_scope: str, service: Optional[s
     for resp in (responses or {}).values():
         rows = resp.get("data") if isinstance(resp, dict) else None
         for row in rows or []:
-            if not isinstance(row, dict) or row.get("kind", "ban") != "ban" or row.get("ip") != ip:
+            if not isinstance(row, dict) or row.get("kind", "ban") != "ban" or _canonical_or_raw(row.get("ip")) != ip:
                 continue
             row_service = row.get("service")
             row_scope = row.get("ban_scope") or ("global" if row_service in (None, "_") else "service")
@@ -158,6 +181,10 @@ def unban(req: Union[List[UnbanRequest], UnbanRequest, str], request: Request, a
     entries = []
     for it in items:
         payload = it.model_dump(exclude=LEASE_FIELDS)
+        try:
+            _canonical_ip(payload)
+        except ValueError as exc:
+            return JSONResponse(status_code=422, content={"status": "error", "message": f"Invalid IP address: {exc}"})
         _derive_scope(payload)
         entries.append(
             {

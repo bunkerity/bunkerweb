@@ -114,3 +114,80 @@ def test_cli_refuses_output_input_collision(gate_tree, monkeypatch, capsys, alia
     assert error.value.code == 2
     assert "must not overwrite a coverage data input" in capsys.readouterr().err
     assert data.read_bytes() == before
+
+
+@pytest.mark.parametrize("branch_config", [False, True])
+def test_cli_reports_branches_without_changing_statement_coverage(gate_tree, monkeypatch, capsys, branch_config):
+    tree = gate_tree
+    config = tree.root / "pyproject.toml"
+    config.write_text(config.read_text().replace("[tool.coverage.run]", f"[tool.coverage.run]\nbranch = {str(branch_config).lower()}"))
+    known = tree.source("src/common/gen/known.py", "if flag:\n    value = 1\nelse:\n    value = 2\n")
+    tree.source("src/common/gen/unseen.py", "if flag:\n    value = 1\nelse:\n    value = 2\n")
+    data_path = tree.root / "branches"
+    data = CoverageData(basename=str(data_path))
+    data.add_arcs({str(known): [(-1, 1), (1, 2), (2, -1)]})
+    data.write()
+    before = data_path.read_bytes()
+    output = tree.root / "result.json"
+    monkeypatch.setattr(sys, "argv", ["coverage_gate.py", str(data_path), "--json", str(output)])
+    assert tree.gate.main() == 1
+    row = next(row for row in json.loads(output.read_text())["components"] if row["component"] == "src/common/gen")
+    assert (row["statements"], row["covered"]) == (6, 2)
+    assert (row["branches"], row["covered_branches"], row["branch_coverage"]) == (4, 1, 25.0)
+    table = capsys.readouterr().out
+    assert "Branch %" in table
+    assert "25.00%" in table
+    assert data_path.read_bytes() == before
+
+
+def test_line_only_data_reports_branches_as_unmeasured(gate_tree):
+    tree = gate_tree
+    known = tree.source("src/common/gen/known.py")
+    assert tree.gen(tree.dataset("data", {known: [1]}))["branch_coverage"] is None
+
+
+def test_cli_enforces_overall_floor_even_when_components_pass(gate_tree, monkeypatch, capsys):
+    tree = gate_tree
+    monkeypatch.setattr(tree.gate, "FLOORS", {"src/common/gen": 70})
+    known = tree.source("src/common/gen/known.py", "first = 1\nsecond = 2\nthird = 3\nfourth = 4\nfifth = 5\n")
+    output = tree.root / "result.json"
+    for lines, code, covered, gap in [([1, 2, 3, 4], 1, 4, 1), ([1, 2, 3, 4, 5], 0, 5, 0)]:
+        data = tree.dataset(f"data-{covered}", {known: lines})
+        monkeypatch.setattr(sys, "argv", ["coverage_gate.py", str(data), "--json", str(output)])
+        assert tree.gate.main() == code
+        report = json.loads(output.read_text())
+        assert all(row["passed"] for row in report["components"])
+        assert report["passed"] == (code == 0)
+        row = report["overall"]
+        assert (row["statements"], row["covered"], row["gap"], row["passed"]) == (5, covered, gap, code == 0)
+        assert row["floor"] >= 83
+    assert "Overall" in capsys.readouterr().out
+
+
+@pytest.mark.parametrize("scope", ["component", "overall"])
+@pytest.mark.parametrize("floor, code, gap", [(51, 1, 1), (50, 0, 0)], ids=["below-floor", "at-floor"])
+def test_cli_enforces_branch_floor_with_full_statement_coverage(gate_tree, monkeypatch, capsys, scope, floor, code, gap):
+    tree = gate_tree
+    # All statements execute, but the false edge of the decision does not.
+    known = tree.source("src/common/gen/known.py", "if flag:\n    value = 1\nvalue = 2\n")
+    data_path = tree.root / "branches"
+    data = CoverageData(basename=str(data_path))
+    data.add_arcs({str(known): [(-1, 1), (1, 2), (2, 3), (3, -1)]})
+    data.write()
+    before = data_path.read_bytes()
+    branch_floors = dict.fromkeys(tree.gate.FLOORS, 0)
+    branch_floors["src/common/gen"] = floor if scope == "component" else 0
+    monkeypatch.setattr(tree.gate, "BRANCH_FLOORS", branch_floors, raising=False)
+    monkeypatch.setattr(tree.gate, "OVERALL_BRANCH_FLOOR", floor if scope == "overall" else 0, raising=False)
+    output = tree.root / "result.json"
+    monkeypatch.setattr(sys, "argv", ["coverage_gate.py", str(data_path), "--json", str(output)])
+    assert tree.gate.main() == code
+    result = json.loads(output.read_text())
+    component = next(row for row in result["components"] if row["component"] == "src/common/gen")
+    row = component if scope == "component" else result["overall"]
+    assert (row["coverage"], row["branches"], row["covered_branches"], row["branch_coverage"]) == (100.0, 2, 1, 50.0)
+    assert (row["branch_floor"], row["branch_gap"], row["passed"], result["passed"]) == (floor, gap, code == 0, code == 0)
+    if scope == "overall":
+        assert all(item["passed"] for item in result["components"])
+    assert "Branch floor" in capsys.readouterr().out
+    assert data_path.read_bytes() == before

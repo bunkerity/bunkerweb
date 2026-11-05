@@ -473,7 +473,7 @@ def test_an_instance_that_is_down_is_dropped_and_no_failover_is_attempted(drive,
         drive.run()
     assert ("update_instance", "bw1", "down") in drive.db.calls
     assert drive.sched.apis == []
-    assert "No BunkerWeb instance is reachable, skipping failover" in caplog.text
+    assert "Every BunkerWeb instance failed the reload, skipping failover: bw1:5000 - connection refused" in caplog.text
 
 
 def test_an_instance_still_applying_another_change_is_kept_up_and_the_generation_retried(drive):

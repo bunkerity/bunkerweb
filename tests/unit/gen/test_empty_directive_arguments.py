@@ -118,7 +118,7 @@ def test_a_setting_that_is_absent_entirely_emits_no_directive(template, setting,
 class _InlinePool:
     """Runs submitted work in-process; ``render()`` otherwise forks and the assertion never sees it."""
 
-    def __init__(self, max_workers=None):
+    def __init__(self, max_workers=None, mp_context=None):
         self.max_workers = max_workers
 
     def __enter__(self):
@@ -151,7 +151,6 @@ def test_an_empty_server_name_renders_no_server_at_all(monkeypatch, server_name,
     templator = import_module("Templator")
     batches = []
 
-    monkeypatch.setattr(templator, "_ensure_fork_start_method", lambda: [])
     monkeypatch.setattr(templator, "ProcessPoolExecutor", _InlinePool)
     monkeypatch.setattr(templator, "effective_cpu_count", lambda: 4)
 

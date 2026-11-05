@@ -1,5 +1,76 @@
 # Changelog
 
+## v1.6.18~rc3 - 2026/11/04
+
+- [BUGFIX] `crowdsec`: `CROWDSEC_METADATA_CACHE_SIZE` now defaults to `24m`, so report metadata for the whole Community Blocklist fits in stream mode. (Refs #4135)
+- [SECURITY] `api`: when `API_LISTEN_HTTPS=yes`, the scheduler, UI, API service and `bwcli` check that an instance presents the generated API certificate (SHA-256 pin) instead of trusting any. A mismatch is logged and the call still falls back to HTTP.
+- [SECURITY] `ui`: failed logins (password, TOTP or recovery code) are counted per client IP and per username in the database, and five in 15 minutes lock that IP or username for 15 minutes (`LOGIN_THROTTLE`, `LOGIN_MAX_ATTEMPTS`, `LOGIN_WINDOW_MINUTES`, `LOGIN_LOCKOUT_MINUTES`).
+- [SECURITY] `core`: an IPv6 address is now one ban whatever its spelling (expanded, upper case or IPv4-mapped), in every ban, unban and lookup path.
+- [SECURITY] `core`: an IPv4-mapped IPv6 client (`::ffff:a.b.c.d`) now matches the IPv4 rules of IP lists, trusted proxies, bans and rate limits.
+- [SECURITY] `core`: an invalid or zone-id entry in an IP list is now skipped instead of disabling the whole list.
+- [SECURITY] `docker`: update the Alpine `libexpat` package to 2.10.0-r0 in the BunkerWeb and all-in-one images, fixing CVE-2026-117610, CVE-2026-118370 and two lower-severity libexpat CVEs.
+- [FEATURE] `core`: plugins can run code at the TLS ClientHello of every service through the new `ssl_client_hello` phase (`PLUGINS_ORDER_SSL_CLIENT_HELLO`).
+- [FEATURE] `core`: `utils.add_ban` accepts `opts.if_absent` for insert-only bans that never replace an existing ban, locally or in Redis.
+- [FEATURE] `bunkernet`: `BUNKERNET_FILTER_HEADERS` (`no`, per service) limits a report to the User-Agent, Accept, Accept-Encoding, Accept-Language, Content-Type and Content-Length request headers and blanks the values matched in request headers and cookies, also for reports queued before the upgrade. By default a report carries every request header, as before; the plugin documentation lists what each value sends.
+- [FEATURE] `core`: a service can be named by an IPv4 or an IPv6 address (`SERVER_NAME=2001:db8::1`, bare, lowercase, compressed). NGINX also matches the bracketed `Host` form, and a name written another way logs a warning with its canonical spelling. (#4120)
+- [BUGFIX] `backup`: MySQL 8+ clients, including on Fedora, can now back up and restore MySQL and MariaDB databases without the RELOAD privilege.
+- [BUGFIX] `bwcli`: use the Linux package's Python interpreter, fixing startup crashes on RHEL 9.
+- [BUGFIX] `core`: stream services no longer abort NGINX init when an HTTP-only plugin (PRO included) is installed, a regression in 1.6.17.
+- [BUGFIX] `core`: local ban writes and unbans are now serialized per IP, and a writer that cannot take the lock fails with `ban lock unavailable`.
+- [BUGFIX] `installer`: on Debian and Ubuntu, the installer warns that the distribution PostgreSQL client cannot back up a newer server and shows the PGDG commands to install a matching one.
+- [BUGFIX] `ui`: report and ban dates carry their UTC offset, so the browser no longer shifts them by the viewer's time zone. (Fixes #4118)
+- [BUGFIX] `redis`: Redis Cluster commands now follow ASK and MOVED redirections during slot migrations.
+- [BUGFIX] `reversescan`: scanning an IPv6 client now works, and a port that could not be tried is no longer cached as closed.
+- [BUGFIX] `settings`: URL settings (`*_URLS`, Cap.js, auth request sign-in) accept bracketed IPv6 hosts such as `http://[2001:db8::1]:8080/`.
+- [BUGFIX] `settings`: IP list settings accept expanded and IPv4-mapped IPv6 addresses and refuse zone identifiers (`fe80::1%eth0`).
+- [BUGFIX] `core`: the reverse DNS name of an IPv6 address with an embedded IPv4 part is now valid and no longer corrupts the next lookups.
+- [BUGFIX] `core`, `api`, `ui`: IPv6 values of `API_LISTEN_IP`, `API_LISTEN_ADDR` and `UI_LISTEN_ADDR` now produce valid listeners.
+- [BUGFIX] `logging`: a bracketed IPv6 syslog address such as `udp://[2001:db8::1]:514` is now used instead of being ignored.
+- [BUGFIX] `ui`: the setup wizard proposes the IPv6 address of the `Host` header as the server name when opened through an IPv6 address (it was truncated), and the services page handles a service name with a colon.
+- [BUGFIX] `redis`: IPv6 Redis, Sentinel and Cluster hosts, bare or bracketed, now work in the core, sessions, jobs and the API rate limiter.
+- [BUGFIX] `redis`: Redis Cluster now handles IPv6 nodes in slot discovery and in ASK and MOVED redirections.
+- [BUGFIX] `autoconf`: Kubernetes pods with an IPv6 address now get a valid instance DNS name.
+- [BUGFIX] `core`: an IPv6-only stack now starts, as the startup config keeps `USE_IPV6`, `API_LISTEN_IP` and `DNS_RESOLVERS`.
+- [BUGFIX] `api`: updating an instance with `PATCH /instances/{hostname}` now returns the instance instead of an error.
+- [BUGFIX] `reversescan`: once a decision is made, the remaining port scans are cancelled instead of left running until they time out.
+- [BUGFIX] `customcert`: a rejected certificate no longer removes the one being served.
+- [BUGFIX] `blacklist`, `greylist`, `whitelist`: removing a feed URL now also removes its cached rows, which could bring the old entries back.
+- [BUGFIX] `jobs`: a renewed API certificate is now written to the local cache too, not only to the database.
+- [BUGFIX] `backup`, `bunkernet`, `db`: a failed database dump, report cache write or job history cleanup now fails the job instead of counting as a success, and a negative `DATABASE_MAX_JOBS_RUNS` is refused instead of deleting the whole history.
+- [BUGFIX] `core`: the internal API answers 400 instead of an error when a ban request body is not a JSON object.
+- [BUGFIX] `core`: in multisite mode, `utils.has_not_variable` (used by external plugins) now compares each service with the value asked for.
+- [BUGFIX] `metrics`: the requests query refuses a negative or fractional page start, an invalid page length and an unknown sort direction.
+- [BUGFIX] `bunkernet`: the OS version id and codename are now read from `/etc/os-release`, and the README lists the instance details sent with each request.
+- [BUGFIX] `crowdsec`: a path below a `CROWDSEC_EXCLUDE_LOCATION` location is now excluded too, not only the exact location.
+- [BUGFIX] `crowdsec`: a captcha asked by AppSec alone can now be solved instead of being shown again.
+- [BUGFIX] `crowdsec`: a CrowdSec decision on an IPv6 address written with an IPv4 tail is no longer applied to that IPv4 address.
+- [BUGFIX] `ui`: the "More than 30 days" filter of the bans page now counts the permanent bans it shows.
+- [BUGFIX] `ui`: sorting bans by time left now follows their remaining time, with permanent bans last.
+- [BUGFIX] `redis`: with Redis Cluster, a ban held only in Redis stays enforced while a slot is resharded instead of failing open on `TRYAGAIN`, and other multi-key calls retry briefly.
+- [BUGFIX] `letsencrypt`: the stale account recovery also recognizes the standard `accountDoesNotExist` rejection, so it works with any RFC 8555 certificate authority, not only Let's Encrypt.
+- [BUGFIX] `cors`: with a regex `CORS_ALLOW_ORIGIN`, no longer send `Access-Control-Allow-Origin` for an origin the pattern does not match (it was echoed on served responses when `CORS_DENY_REQUEST=no`).
+- [BUGFIX] `ui`: a refused two-factor enrolment code or password now shows the same secret and QR code again, so the code you already scanned can be retried instead of ending in "The totp token is invalid."
+- [BUGFIX] `modsecurity`: a service named by an IP address no longer scores CRS rule 920350 for requests whose `Host` is one of its own addresses; any other numeric `Host` is still scored.
+- [BUGFIX] `reverseproxy`: a stream service named by an IPv6 address now reaches its upstream instead of dropping the connection with `invalid port in upstream`.
+- [BUGFIX] `letsencrypt`: an IPv6 server name is skipped with a message that says IPv6 certificates are not supported yet.
+- [BUGFIX] `ui`: when the table toolbar wraps, the search box, auto refresh and filter buttons now fill the second row and end on the table's right edge. (Refs #3969)
+- [BUGFIX] `ui`: the Web UI diagnostics card on the support page keeps its help text inside the card, and the configuration card's controls wrap on narrow screens.
+- [BUGFIX] `db`: deleting a PRO plugin now flags the PRO plugins change, so the UI and scheduler reload it.
+- [BUGFIX] `db`: a read-only database error or the read-only fallback no longer hangs the caller forever.
+- [BUGFIX] `db`: removing a setting from a plugin also removes its stored values on SQLite.
+- [BUGFIX] `ui`: creating a user with two or more roles no longer fails on PostgreSQL, MariaDB and MySQL, and an unknown role leaves no half-created user.
+- [BUGFIX] `db`: the `MODSECURITY_CRS_PLUGIN_URLS` to `MODSECURITY_CRS_PLUGINS` rename keeps the stored values on PostgreSQL, MariaDB and MySQL.
+- [BUGFIX] `scheduler`: a reload the instance has not confirmed (busy, unreachable or rejected after the config test) stays pending and is retried instead of being logged as applied (Refs #4086)
+- [BUGFIX] `limit`: a fast Cap.js antibot solve is no longer answered 429 by the default request limit (the widget frame now has its own counter).
+- [BUGFIX] `letsencrypt`: with `LETS_ENCRYPT_CONCURRENT_REQUESTS=yes`, a failed up-front account registration now runs that run's orders one by one instead of letting each parallel order register its own account.
+- [MISC] `release`: the floating `dev` and `testing` Linux packages and the `testing` GitHub release are no longer published, so package repositories stop offering a phantom upgrade; the installer refuses `--version dev` and `--version testing`.
+- [DOCS] `antibot`, `country`: the help and docs of `ANTIBOT_IGNORE_URI` and `COUNTRY_IGNORE_URI` now say patterns match the normalized path, alone or followed by `?` and the query string.
+- [DOCS] `core`: the IPv6 section drops the experimental label for what is tested, fixes the `USE_IPV6` example and the Docker prerequisites, and adds IPv6-only settings and limits.
+- [DOCS] The README has a cleaner layout: grouped badges and links, a logo that suits dark mode, uniform headings, and long reference sections folded.
+- [DOCS] The README, docs and web UI explain how to start the PRO free trial: keep the "Free 30 Days Trial" payment method at checkout.
+- [DEPS] Updated resty-redis-cluster version to v1.7.0
+- [DEPS] Updated the web UI libraries: i18next to v26.5.11, i18next-http-backend to v4.0.6, i18next-browser-languagedetector to v8.2.3, ipaddr.js to v2.5.0 and Ace to v1.45.2
+
 ## v1.6.18~rc2 - 2026/10/30
 
 - [FEATURE] `tests`: a pytest unit test suite in `tests/unit/`, run in CI by `.github/workflows/unit-tests.yml`, with per-component coverage floors.

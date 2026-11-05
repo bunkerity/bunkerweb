@@ -18,8 +18,8 @@ Upgrade every Web UI replica together: replay protection for two-factor codes is
 
         ```bash
         # Download the script and its checksum
-        curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.18-rc2/install-bunkerweb.sh
-        curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.18-rc2/install-bunkerweb.sh.sha256
+        curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.18-rc3/install-bunkerweb.sh
+        curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.18-rc3/install-bunkerweb.sh.sha256
 
         # Verify the checksum
         sha256sum -c install-bunkerweb.sh.sha256
@@ -102,16 +102,16 @@ Upgrade every Web UI replica together: replay protection for two-factor codes is
                     ```yaml
                     services:
                         bunkerweb:
-                            image: bunkerity/bunkerweb:1.6.18-rc2
+                            image: bunkerity/bunkerweb:1.6.18-rc3
                             ...
                         bw-scheduler:
-                            image: bunkerity/bunkerweb-scheduler:1.6.18-rc2
+                            image: bunkerity/bunkerweb-scheduler:1.6.18-rc3
                             ...
                         bw-autoconf:
-                            image: bunkerity/bunkerweb-autoconf:1.6.18-rc2
+                            image: bunkerity/bunkerweb-autoconf:1.6.18-rc3
                             ...
                         bw-ui:
-                            image: bunkerity/bunkerweb-ui:1.6.18-rc2
+                            image: bunkerity/bunkerweb-ui:1.6.18-rc3
                             ...
                     ```
 
@@ -167,7 +167,7 @@ Upgrade every Web UI replica together: replay protection for two-factor codes is
 
             4. **Pull the new image**:
                 ```bash
-                docker pull bunkerity/bunkerweb-all-in-one:1.6.18-rc2
+                docker pull bunkerity/bunkerweb-all-in-one:1.6.18-rc3
                 ```
 
             5. **Re-create the container** with the same options, reusing the same `/data` volume, ports and environment variables as before:
@@ -178,7 +178,7 @@ Upgrade every Web UI replica together: replay protection for two-factor codes is
                 -p 80:8080/tcp \
                 -p 443:8443/tcp \
                 -p 443:8443/udp \
-                bunkerity/bunkerweb-all-in-one:1.6.18-rc2
+                bunkerity/bunkerweb-all-in-one:1.6.18-rc3
                 ```
 
         === "Docker Compose"
@@ -187,7 +187,7 @@ Upgrade every Web UI replica together: replay protection for two-factor codes is
                 ```yaml
                 services:
                     bunkerweb-aio:
-                        image: bunkerity/bunkerweb-all-in-one:1.6.18-rc2
+                        image: bunkerity/bunkerweb-all-in-one:1.6.18-rc3
                         ...
                 ```
 
@@ -226,8 +226,8 @@ Upgrade every Web UI replica together: replay protection for two-factor codes is
 
             ```bash
             # Download the script and its checksum
-            curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.18-rc2/install-bunkerweb.sh
-            curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.18-rc2/install-bunkerweb.sh.sha256
+            curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.18-rc3/install-bunkerweb.sh
+            curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.18-rc3/install-bunkerweb.sh.sha256
 
             # Verify the checksum
             sha256sum -c install-bunkerweb.sh.sha256
@@ -308,20 +308,20 @@ Upgrade every Web UI replica together: replay protection for two-factor codes is
             Examples:
 
             ```bash
-            # Upgrade to 1.6.18~rc2 interactively (will prompt for backup)
-            sudo ./install-bunkerweb.sh --version 1.6.18~rc2
+            # Upgrade to 1.6.18~rc3 interactively (will prompt for backup)
+            sudo ./install-bunkerweb.sh --version 1.6.18~rc3
 
             # Non-interactive upgrade with automatic backup to custom directory
-            sudo ./install-bunkerweb.sh -v 1.6.18~rc2 --backup-dir /var/backups/bw-2025-01 -y
+            sudo ./install-bunkerweb.sh -v 1.6.18~rc3 --backup-dir /var/backups/bw-2025-01 -y
 
             # Silent unattended upgrade (logs suppressed) – relies on default auto-backup
-            sudo ./install-bunkerweb.sh -v 1.6.18~rc2 -y -q
+            sudo ./install-bunkerweb.sh -v 1.6.18~rc3 -y -q
 
             # Perform a dry run (plan) without applying changes
-            sudo ./install-bunkerweb.sh -v 1.6.18~rc2 --dry-run
+            sudo ./install-bunkerweb.sh -v 1.6.18~rc3 --dry-run
 
             # Upgrade skipping automatic backup (NOT recommended)
-            sudo ./install-bunkerweb.sh -v 1.6.18~rc2 --no-auto-backup -y
+            sudo ./install-bunkerweb.sh -v 1.6.18~rc3 --no-auto-backup -y
             ```
 
             !!! warning "Skipping backups"
@@ -401,7 +401,7 @@ Upgrade every Web UI replica together: replay protection for two-factor codes is
 
                         ```shell
                         sudo apt update && \
-                        sudo apt install -y --allow-downgrades bunkerweb=1.6.18~rc2
+                        sudo apt install -y --allow-downgrades bunkerweb=1.6.18~rc3
                         ```
 
                         To prevent the BunkerWeb package from upgrading when executing `apt upgrade`, you can use the following command :
@@ -427,7 +427,7 @@ Upgrade every Web UI replica together: replay protection for two-factor codes is
 
                         ```shell
                         sudo dnf makecache && \
-                        sudo dnf install -y --allowerasing bunkerweb-1.6.18~rc2
+                        sudo dnf install -y --allowerasing bunkerweb-1.6.18~rc3
                         ```
 
                         To prevent the BunkerWeb package from upgrading when executing `dnf upgrade`, you can use the following command :
@@ -752,6 +752,10 @@ While the settings are now declared on the Scheduler container, **you'll still n
 
 We tried our best not to change default value but we have added many other settings. It's highly recommended to read the [security tuning](advanced.md#security-tuning) and [settings](features.md) sections of the documentation.
 
+!!! warning "`MODSECURITY_CRS_PLUGIN_URLS` was renamed to `MODSECURITY_CRS_PLUGINS`"
+
+    If you set `MODSECURITY_CRS_PLUGIN_URLS` and upgraded to 1.6 on PostgreSQL, MariaDB or MySQL before 1.6.18, the stored value was lost. Check `MODSECURITY_CRS_PLUGINS` and set it again if it is empty. From 1.6.18, the values are kept on upgrade.
+
 #### Templates
 
 We added a new feature called **templates**. Templates provide a structured and standardized approach to defining settings and custom configurations, check the [concepts/templates](concepts.md#templates) section for more information.
@@ -900,16 +904,16 @@ We added a **namespace** feature to the autoconf integrations. Namespaces allow 
                 ```yaml
                 services:
                     bunkerweb:
-                        image: bunkerity/bunkerweb:1.6.18-rc2
+                        image: bunkerity/bunkerweb:1.6.18-rc3
                         ...
                     bw-scheduler:
-                        image: bunkerity/bunkerweb-scheduler:1.6.18-rc2
+                        image: bunkerity/bunkerweb-scheduler:1.6.18-rc3
                         ...
                     bw-autoconf:
-                        image: bunkerity/bunkerweb-autoconf:1.6.18-rc2
+                        image: bunkerity/bunkerweb-autoconf:1.6.18-rc3
                         ...
                     bw-ui:
-                        image: bunkerity/bunkerweb-ui:1.6.18-rc2
+                        image: bunkerity/bunkerweb-ui:1.6.18-rc3
                         ...
                 ```
 
@@ -944,7 +948,7 @@ We added a **namespace** feature to the autoconf integrations. Namespaces allow 
 
                     ```shell
                     sudo apt update && \
-                    sudo apt install -y --allow-downgrades bunkerweb=1.6.18~rc2
+                    sudo apt install -y --allow-downgrades bunkerweb=1.6.18~rc3
                     ```
 
                     To prevent the BunkerWeb package from upgrading when executing `apt upgrade`, you can use the following command :
@@ -970,7 +974,7 @@ We added a **namespace** feature to the autoconf integrations. Namespaces allow 
 
                     ```shell
                     sudo dnf makecache && \
-                    sudo dnf install -y --allowerasing bunkerweb-1.6.18~rc2
+                    sudo dnf install -y --allowerasing bunkerweb-1.6.18~rc3
                     ```
 
                     To prevent the BunkerWeb package from upgrading when executing `dnf upgrade`, you can use the following command :
@@ -1203,7 +1207,7 @@ Attestations are keyless: they use [Sigstore](https://www.sigstore.dev/) and the
 The commands share two variables. Set them to the release you want to verify:
 
 ```bash
-VERSION=1.6.18~rc2
+VERSION=1.6.18~rc3
 TAG="v${VERSION//\~/-}"
 ```
 

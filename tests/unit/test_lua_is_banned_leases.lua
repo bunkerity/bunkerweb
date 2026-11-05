@@ -157,6 +157,7 @@ end
 
 -- ngx before any module is required; ngx.var errors while `var_guard` is on
 local var_guard = false
+local clock = 1700000000
 -- one-shot hooks the datastore/clusterstore stubs fire; tests set them, reset_state() clears them
 local bump_after_local_write, bump_during_eval, bump_marker_during_eval
 local ngx_null = setmetatable({}, {
@@ -167,7 +168,7 @@ local ngx_null = setmetatable({}, {
 _G.unpack = rawget(table, "unpack")
 _G.ngx = {
 	null = ngx_null,
-	shared = { bans_meta = new_dict(), internalstore = {} },
+	shared = { bans_meta = new_dict(), datastore = new_dict(), internalstore = {} },
 	config = { subsystem = "http" },
 	thread = { kill = function() end },
 	re = { match = function() end },
@@ -179,7 +180,10 @@ _G.ngx = {
 		end,
 	}),
 	now = function()
-		return 1700000000
+		return clock
+	end,
+	sleep = function(seconds)
+		clock = clock + seconds
 	end,
 	time = function()
 		return 1700000000
@@ -364,6 +368,10 @@ function test_setup()
 		dict:delete(k)
 	end
 	dict.full = false
+	for k in pairs(ngx.shared.datastore._data) do
+		ngx.shared.datastore:delete(k)
+	end
+	clock = 1700000000
 	redis_calls, last_eval_nkeys = 0, nil
 	bump_after_local_write, bump_during_eval, bump_marker_during_eval = nil, nil, nil
 	var_guard = false
@@ -522,6 +530,34 @@ it("a Redis lease hit after a lease epoch bump during the lookup is discarded", 
 	assert(utils.is_banned("6.6.6.6", "www", ctx()) == false)
 	assert(local_get("bans_cs_ip_6.6.6.6") == nil, "no local copy")
 end)
+
+-- The cache lock only guards the local cache write: the lease epoch verdict never depends on it
+it("a Redis lease hit with the cache lock unavailable still honours a lease epoch bump during the lookup", function()
+	set_var("USE_REDIS", "yes")
+	redis_put("bans_cs_ip_6.6.7.1", lease_json("crowdsec", 1), 60)
+	assert(ngx.shared.datastore:safe_add("ban_lock_6.6.7.1", "other writer", 1))
+	bump_during_eval = "6.6.7.1"
+	local banned, reason = utils.is_banned("6.6.7.1", "www", ctx())
+	assert(
+		banned == false and reason == "not banned",
+		"revoked lease answers not banned, got " .. tostring(banned) .. " " .. tostring(reason)
+	)
+	assert(local_get("bans_cs_ip_6.6.7.1") == nil, "no cache write")
+	assert(ngx.shared.datastore:get("ban_lock_6.6.7.1") == "other writer", "foreign lock untouched")
+end)
+
+it(
+	"a Redis lease hit with the cache lock unavailable and no epoch bump keeps the Redis answer and writes nothing",
+	function()
+		set_var("USE_REDIS", "yes")
+		redis_put("bans_cs_ip_6.6.7.2", lease_json("crowdsec", 1), 60)
+		assert(ngx.shared.datastore:safe_add("ban_lock_6.6.7.2", "other writer", 1))
+		local banned, reason = utils.is_banned("6.6.7.2", "www", ctx())
+		assert(banned == true and reason == "crowdsec", "Redis answer stands")
+		assert(local_get("bans_cs_ip_6.6.7.2") == nil, "no cache write")
+		assert(ngx.shared.datastore:get("ban_lock_6.6.7.2") == "other writer", "foreign lock untouched")
+	end
+)
 
 it("defaults allocate nothing in bans_meta", function()
 	set_var("BANS_TLS_DROP_REASONS", "")

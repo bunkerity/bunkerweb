@@ -50,7 +50,7 @@
     "link": {
       "here": "یہاں"
     },
-    "pro": "PRO ورژن میں اپ گریڈ کر کے BunkerWeb سے زیادہ سے زیادہ فائدہ اٹھائیں۔ مزید معلومات اور مفت ٹرائل <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/?utm_campaign=self&utm_source=banner#pro\">یہاں</a>۔",
+    "pro": "PRO ورژن میں اپ گریڈ کر کے BunkerWeb سے زیادہ سے زیادہ فائدہ اٹھائیں۔ اپنا 30 دن کا مفت ٹرائل <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=banner\">یہاں</a> شروع کریں: ایک پلان آرڈر کریں، پھر چیک آؤٹ پر ادائیگی کے طریقے کے طور پر “Free 30 Days Trial” برقرار رکھیں۔",
     "support": "BunkerWeb کے لیے پریمیم سپورٹ یا موزوں مشاورت کی ضرورت ہے؟ ہماری <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/?utm_campaign=self&utm_source=banner#services\">پیشہ ورانہ خدمات</a> دیکھیں۔"
   },
   "breadcrumb": {
@@ -1155,6 +1155,7 @@
       "title": "پرو کی میعاد ختم ہونے کی تاریخ",
       "unknown": "نامعلوم میعاد ختم ہونے کی تاریخ"
     },
+    "free_trial_hint": "ایک پلان آرڈر کریں، پھر چیک آؤٹ پر ادائیگی کے طریقے کے طور پر “Free 30 Days Trial” برقرار رکھیں۔",
     "force_check": {
       "description": "Force a new check for PRO plugins. This will trigger a new download of the plugins if new versions are available.",
       "title": "Force check"

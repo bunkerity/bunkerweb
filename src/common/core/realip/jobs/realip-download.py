@@ -23,6 +23,9 @@ from jobs import Job  # type: ignore
 
 
 def check_line(line):
+    # A zone id ("fe80::1%eth0") names an interface of the downloading host, not an address NGINX can load
+    if b"%" in line:
+        return False, b""
     with suppress(ValueError):
         if b"/" in line:
             ip_network(line.decode())
@@ -140,7 +143,9 @@ try:
                         for line in cached_data.split(b"\n")[1:]:
                             line = line.strip()
                             if line:
-                                unique_entries.add(line)
+                                ok, data = check_line(line)
+                                if ok:
+                                    unique_entries.add(data)
                 else:
                     LOGGER.info(f"Downloading Real IP data from {url} ...")
                     failed = False

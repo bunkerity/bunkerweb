@@ -99,8 +99,8 @@
     },
     "CROWDSEC_METADATA_CACHE_SIZE": {
       "context": "global",
-      "default": "5m",
-      "help": "Shared memory for optional CrowdSec report metadata across all services. Use a positive whole number of megabytes (m/M), minimum 1m. Metadata cannot evict decision records. Resizing on reload clears this optional metadata.",
+      "default": "24m",
+      "help": "Shared memory for optional CrowdSec report metadata across all services. Use a positive whole number of megabytes (m/M), minimum 1m. Metadata cannot evict decision records. Resizing on reload clears this optional metadata. Allow about 1m per 1,000 stream decisions, plus headroom.",
       "id": "crowdsec-metadata-cache-size",
       "label": "CrowdSec metadata cache size",
       "regex": "^[1-9][0-9]*[mM]$",

@@ -45,6 +45,15 @@ actions:
     config:
       SECURITY_MODE: "block"
 
+  # An HTTP-only plugin (`"stream": "no"`) whose module raises on the stream ngx_lua version must not stop the
+  # stream init: since 1.6.17 the stream VM required every plugin and aborted init on the failure, so no stream
+  # service could start. The script installs the plugin through the scheduler, then asserts that both init phases
+  # loaded it, that nothing required it in the stream VM and that the stream service answers.
+  http_only_plugin_does_not_stop_a_stream_service:
+    type: script
+    script: ["python3", "tests/core/stream/http_only_plugin.py"]
+    result: "stream http_only_plugin: all checks passed"
+
 config:
   SERVER_NAME: "www.example.com s1.example.com s2.example.com tls.example.com"
   MULTISITE: "yes"

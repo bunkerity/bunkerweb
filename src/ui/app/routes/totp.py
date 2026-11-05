@@ -1,6 +1,7 @@
 from flask import Blueprint, redirect, render_template, request, session, url_for
 from flask_login import current_user, login_required
 
+from app import login_throttle
 from app.dependencies import DB
 from app.models.totp import totp as TOTP
 from app.routes.utils import flash, handle_error, verify_data_in_form
@@ -15,13 +16,21 @@ def totp_page():
     if request.method == "POST":
         verify_data_in_form(data={"totp_token": None}, err_message="No token provided on /totp.", redirect_url="totp")
 
+        # A wrong code or recovery code counts like a wrong password: same keys, same lock
+        username = current_user.get_id()
+        locked = login_throttle.locked_message(DB, username, request.remote_addr)
+        if locked:
+            return handle_error(locked, "totp")
+
         if not TOTP.verify_totp(request.form["totp_token"], user=current_user):
             recovery_code = TOTP.verify_recovery_code(request.form["totp_token"], user=current_user)
             if not recovery_code:
+                login_throttle.record_failure(DB, username, request.remote_addr)
                 return handle_error("The token is invalid.", "totp")
             # A refused write can be the moment the database is found read-only: like a TOTP code,
             # a valid recovery code then keeps the login available without being consumed.
-            if DB.use_ui_user_recovery_code(current_user.get_id(), recovery_code) and not DB.readonly:
+            if DB.use_ui_user_recovery_code(username, recovery_code) and not DB.readonly:
+                login_throttle.record_failure(DB, username, request.remote_addr)
                 return handle_error("The token is invalid.", "totp")
             if DB.readonly:
                 LOGGER.warning("Database is read-only, recovery code accepted without being consumed")
@@ -29,6 +38,7 @@ def totp_page():
             else:
                 flash(f"You've used one of your recovery codes. You have {len(current_user.list_recovery_codes)} left.")
 
+        login_throttle.reset(DB, username)
         session["totp_validated"] = True
         try:
             safe_next = _sanitize_internal_next(request.form.get("next"), url_for("home.home_page"))

@@ -52,7 +52,7 @@ Die UI erwartet, dass Scheduler/(BunkerWeb-)API/Redis/DB erreichbar sind.
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.18-rc2
+        image: bunkerity/bunkerweb:1.6.18-rc3
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -63,7 +63,7 @@ Die UI erwartet, dass Scheduler/(BunkerWeb-)API/Redis/DB erreichbar sind.
         networks: [bw-universe, bw-services]
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.18-rc2
+        image: bunkerity/bunkerweb-scheduler:1.6.18-rc3
         environment:
           <<: *service-env
           BUNKERWEB_INSTANCES: "bunkerweb"
@@ -83,7 +83,7 @@ Die UI erwartet, dass Scheduler/(BunkerWeb-)API/Redis/DB erreichbar sind.
         networks: [bw-universe, bw-db]
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.6.18-rc2
+        image: bunkerity/bunkerweb-ui:1.6.18-rc3
         environment:
           <<: *service-env
           ADMIN_USERNAME: "admin"
@@ -170,6 +170,7 @@ Die UI erwartet, dass Scheduler/(BunkerWeb-)API/Redis/DB erreichbar sind.
     Recovery-Codes werden einmalig angezeigt; gehen die Verschlüsselungs-Keys verloren, werden gespeicherte TOTP-Secrets verworfen.
 - Sessions: Standard-Leerlauf-Lebensdauer 12 h (`SESSION_LIFETIME_HOURS`), bei jeder Anfrage erneuert. Ein hartes Absolutlimit gilt über `SESSION_ABSOLUTE_HOURS` (Standard `168` = 7 Tage) — danach werden Nutzer unabhängig von Aktivität ausgeloggt. Optionale Session-ID-Rotation (`SESSION_ROLLING_HOURS`, Standard `0` = deaktiviert) erzeugt in diesem Intervall eine neue Session-ID. Sessions an IP und User-Agent gebunden; `CHECK_PRIVATE_IP=no` lockert die IP-Prüfung nur für private Netze. `ALWAYS_REMEMBER=yes` erzwingt persistente Cookies.
 - Sitzungsspeicher: Sitzungen liegen in Redis, wenn `USE_REDIS=yes` gesetzt ist, sonst in einem lokalen Cache unter `/var/lib/bunkerweb`. Ein Redis, das nicht mehr antwortet oder Schreibvorgänge ablehnt, weil es `maxmemory` erreicht hat, legt die Oberfläche nicht mehr lahm: die betroffenen Sitzungen weichen auf diesen lokalen Cache aus, der vor Redis gelesen wird, damit eine Änderung oder Löschung, die Redis nie erreicht hat, nicht von der älteren Kopie verdeckt wird, die Redis noch hält, und sie werden zurück nach Redis geschrieben, sobald es wieder antwortet. Auch eine Abmeldung oder eine Rotation der Sitzungs-ID während eines Ausfalls wird durch die Wiederherstellung nicht rückgängig gemacht, selbst wenn die Sitzung während des Redis-Ausfalls nicht gelesen werden konnte. Jeder Widerruf wird in beiden Speichern vermerkt, damit er in jedem Fall greift. Eine Verdrängung ist nicht abgedeckt, da Redis Erfolg meldet und den Schlüssel einfach nicht mehr hält; dimensionieren Sie `maxmemory` daher für die Schlüssel, die Sie behalten. Lehnt Redis eine Aktualisierung ab, wandert diese Sitzung in den lokalen Speicher und die noch in Redis liegende Kopie wird sofort entfernt, damit die Änderung nicht von der älteren Fassung verdeckt wird und ein mehrstufiger Ablauf wie 2FA nicht auf seinem vorherigen Stand hängen bleibt. Dieser lokale Cache gilt pro Host, was bei mehreren Instanzen der Oberfläche zählt: die übrigen Instanzen sehen eine in den lokalen Cache einer Instanz gewanderte Sitzung erst wieder, wenn diese Instanz sie nach Redis zurückgeschrieben hat, ein während eines Redis-Ausfalls ausgesprochener Widerruf wird nur von der Instanz durchgesetzt, die ihn ausgesprochen hat, und eine Instanz, die eine Sitzung bereits aus ihrem lokalen Cache bedient, kann das bis zu `SESSION_LIFETIME_HOURS` lang weiter tun, nachdem eine andere Instanz diese Sitzung über Redis gelöscht hat. `UI_USE_REDIS=no` nimmt allein die Oberfläche von Redis, anders als das globale `USE_REDIS`, das auch das Teilen von Sperren und Berichten zwischen Instanzen beendet.
+- Login-Drosselung: Fehlgeschlagene Anmeldungen (falsches Passwort, TOTP-Code oder Wiederherstellungscode) werden pro Client-IP und pro Benutzername in der Datenbank gezählt, sodass jeder Worker und jedes UI-Replikat denselben Zähler nutzt. `LOGIN_MAX_ATTEMPTS` Fehlversuche (Standard `5`) innerhalb von `LOGIN_WINDOW_MINUTES` Minuten (Standard `15`) sperren diese IP oder diesen Benutzernamen bis `LOGIN_LOCKOUT_MINUTES` Minuten (Standard `15`) nach dem letzten Fehlversuch. Ein gesperrter Versuch erhält ein `429` mit der allgemeinen Meldung für ungültige Zugangsdaten samt Wartezeit, das Passwort wird nicht geprüft. Eine vollständige Anmeldung setzt den Zähler dieses Benutzernamens zurück. Unbekannte Benutzernamen werden mitgezählt, eine Sperre verrät also nie, ob ein Konto existiert; umgekehrt kann jeder einen bekannten Benutzernamen sperren, indem er sich damit falsch anmeldet. Die Client-IP ist die über `PROXY_NUMBERS` aus `X-Forwarded-*` ermittelte: Greifen Benutzer direkt ohne vorgeschalteten Proxy auf die UI zu, setzen Sie `PROXY_NUMBERS=0`, sonst kann ein Client seine IP fälschen und nur die Grenze pro Benutzername greift. `LOGIN_THROTTLE=no` schaltet die Drosselung ab. Bei einer schreibgeschützten Datenbank können Fehlversuche nicht gespeichert werden, daher entsteht keine neue Sperre.
 - `PROXY_NUMBERS` setzen, wenn mehrere Proxies `X-Forwarded-*` anhängen.
 
 !!! warning "2FA ist nach dem Neuerstellen des Containers weg"
@@ -238,6 +239,10 @@ Der RAW-Editor eines Dienstes oder der globalen Einstellungen kann eine Einstell
 | `ALWAYS_REMEMBER`                           | „Remember me“-Cookies immer setzen                                                                                             | `yes` oder `no`       | `no`                         |
 | `CHECK_PRIVATE_IP`                          | Sessions an IP binden (locker für private Netze bei `no`)                                                                      | `yes` oder `no`       | `yes`                        |
 | `PROXY_NUMBERS`                             | Anzahl vertrauenswürdiger Proxy-Hops für `X-Forwarded-*`                                                                       | Integer               | `1`                          |
+| `LOGIN_THROTTLE` | Fehlgeschlagene Anmeldungen zählen und eine IP oder einen Benutzernamen mit zu vielen Fehlversuchen sperren | `yes` oder `no` | `yes` |
+| `LOGIN_MAX_ATTEMPTS` | Fehlversuche im Zeitfenster, die eine IP oder einen Benutzernamen sperren | Integer | `5` |
+| `LOGIN_WINDOW_MINUTES` | Zeitfenster, in dem Fehlversuche gezählt werden | Integer (Minuten) | `15` |
+| `LOGIN_LOCKOUT_MINUTES` | Sperrdauer, ab dem letzten Fehlversuch gerechnet | Integer (Minuten) | `15` |
 | `UI_USE_REDIS`                              | Nimmt die Weboberfläche von Redis, ohne das globale `USE_REDIS` anzufassen                                                     | `yes` oder `no`       | `yes`                        |
 
 ### Logging
@@ -298,7 +303,7 @@ log { source(s_net); destination(d_dyna_file); };
 ## Upgrade auf PRO {#upgrade-to-pro}
 
 !!! tip "BunkerWeb PRO Gratistest"
-    Starten Sie eine 30-tägige kostenlose Testversion von BunkerWeb PRO im [BunkerWeb Panel](https://panel.bunkerweb.io/store/bunkerweb-pro?language=german&utm_campaign=self&utm_source=doc).
+    Starten Sie eine 30-tägige kostenlose Testversion von BunkerWeb PRO im [BunkerWeb Panel](https://panel.bunkerweb.io/store/bunkerweb-pro?language=german&utm_campaign=self&utm_source=doc): Bestellen Sie einen Tarif und lassen Sie beim Bestellabschluss **Free 30 Days Trial** als Zahlungsmethode ausgewählt ([Schritt-für-Schritt-Anleitung](index.md#pro-version)).
 
 Fügen Sie den PRO-Lizenzschlüssel in der Seite **PRO** der UI ein (oder setzen Sie `PRO_LICENSE_KEY` vorab für den Wizard). Upgrades werden im Hintergrund vom Scheduler geladen; prüfen Sie Ablaufdatum und Service-Limits in der UI nach Anwendung.
 

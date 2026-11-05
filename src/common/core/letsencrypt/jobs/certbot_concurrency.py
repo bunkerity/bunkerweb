@@ -286,8 +286,10 @@ def ensure_accounts(
     work_dir: str,
     logs_dir: str,
     logger,
-) -> None:
+) -> bool:
+    """Register the missing Let's Encrypt accounts. Returns False when any registration failed."""
     accounts_root = data_path.joinpath("accounts")
+    registered = True
     for staging, email in sorted(requests, key=itemgetter(0, 1)):
         server_url = LETSENCRYPT_STAGING_DIRECTORY if staging else LETSENCRYPT_PRODUCTION_DIRECTORY
         if _account_exists(accounts_root, staging, email, server_url=server_url):
@@ -326,12 +328,15 @@ def ensure_accounts(
             )
         except TimeoutExpired:
             logger.error(f"Let's Encrypt account registration timed out after 300s (staging={staging}, email={'set' if email else 'empty'})")
+            registered = False
             continue
         if proc.returncode != 0:
             if "existing account" in proc.stdout.lower():
                 logger.info(f"Let's Encrypt account already exists (staging={staging}, email={'set' if email else 'empty'}), skipping registration.")
                 continue
             logger.error(f"Failed to register Let's Encrypt account (staging={staging}, email={'set' if email else 'empty'}):\n{proc.stdout}")
+            registered = False
+    return registered
 
 
 def _configured_letsencrypt_email() -> str:
@@ -411,7 +416,7 @@ def ensure_zerossl_accounts(
     work_dir: str,
     logs_dir: str,
     logger,
-) -> None:
+) -> bool:
     """Pre-register ZeroSSL accounts sequentially before concurrent certificate generation.
 
     Mirrors ``ensure_accounts`` for Let's Encrypt but invokes zerossl-bot.sh so that
@@ -419,8 +424,10 @@ def ensure_zerossl_accounts(
     server.  Running this once before spawning threads guarantees that all concurrent
     certbot invocations share a single pre-existing account, avoiding the interactive
     "Please choose an account" prompt that certbot emits when multiple accounts are found.
+    Returns False when any registration failed.
     """
     accounts_root = data_path.joinpath("accounts")
+    registered = True
     for staging, email in sorted(requests, key=itemgetter(0, 1)):
         # ZeroSSL has no separate staging endpoint — the URL is fixed.
         if _account_exists(accounts_root, staging, email, server_url=ZEROSSL_DIRECTORY):
@@ -459,12 +466,15 @@ def ensure_zerossl_accounts(
             )
         except TimeoutExpired:
             logger.error(f"ZeroSSL account registration timed out after 300s (email={'set' if email else 'empty'})")
+            registered = False
             continue
         if proc.returncode != 0:
             if "existing account" in proc.stdout.lower():
                 logger.info(f"ZeroSSL account already exists (email={'set' if email else 'empty'}), skipping registration.")
                 continue
             logger.error(f"Failed to register ZeroSSL account (email={'set' if email else 'empty'}):\n{proc.stdout}")
+            registered = False
+    return registered
 
 
 def _rewrite_renewal_paths(paths: CertbotPaths, data_path: Path, work_dir: str, logs_dir: str, logger) -> None:

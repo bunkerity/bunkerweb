@@ -27,6 +27,7 @@ from common_utils import get_integration, get_os_info, get_redis_client, handle_
 from CrowdSec import CrowdSecClient, CrowdSecError  # type: ignore
 from crowdsec_unban import execute, preview  # type: ignore
 from env_file import parse_env_file  # type: ignore
+from ip_identity import normalize_ip  # type: ignore
 from redis_keys import ban_ip, unescape  # type: ignore
 from support_common import (  # type: ignore
     FILE_TAIL_CAP,
@@ -418,6 +419,7 @@ class CLI(ApiCaller):
         self.__api_token = api_token
 
         if self.__db:
+            API.pin_from_database(self.__db)
             for db_instance in self.__db.get_instances():
                 try:
                     # Centralized builder handles scheme/port/host
@@ -550,6 +552,10 @@ class CLI(ApiCaller):
         # Always use API as the source of truth for unban
         ban_scope = "service" if service else "global"
         try:
+            ip = normalize_ip(ip)  # one address is one ban, whatever its spelling
+        except ValueError:
+            return False, self.__format_error(f"Failed to unban {ip}: not a valid IP address")
+        try:
             if not self.apis:
                 return False, self.__format_error(f"Failed to unban {ip}: no BunkerWeb instance to send the request to")
             lease, failures = self.__lookup_lease(ip, ban_scope, service)
@@ -586,6 +592,10 @@ class CLI(ApiCaller):
 
     def ban(self, ip: str, exp: float, reason: str, service: str = "bwcli") -> Tuple[bool, str]:
         """Ban an IP address globally or from a specific service"""
+        try:
+            ip = normalize_ip(ip)  # one address is one ban, whatever its spelling
+        except ValueError:
+            return False, self.__format_error(f"Failed to ban {ip}: not a valid IP address")
         # Auto-set scope to service if a non-default service is specified
         ban_scope = "global"
         if service != "bwcli" and service:

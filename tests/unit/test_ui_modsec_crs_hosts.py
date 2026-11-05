@@ -57,6 +57,17 @@ class UiModsecCrsHostsTest(unittest.TestCase):
     def test_non_ui_service_names_are_ignored(self):
         self.assertEqual(host_rules(render({"other.com": ("no", "other.com www.other.com")})), [])
 
+    def test_a_bare_ipv6_name_is_matched_bracketed_in_the_ip_rule(self):
+        rules = host_rules(render({"app.example.com": ("yes", "app.example.com 2001:db8::1")}))
+
+        ip_rules = [rule for rule in rules if "2001:db8::1" in rule]
+        self.assertEqual(len(ip_rules), 1)
+        self.assertIn("\\[2001:db8::1\\]", ip_rules[0])
+        self.assertNotIn("app", ip_rules[0])
+        for rule in rules:
+            if rule not in ip_rules:
+                self.assertNotIn("2001", rule)
+
 
 if __name__ == "__main__":
     unittest.main()

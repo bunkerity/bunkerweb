@@ -1,0 +1,8 @@
+{
+  "id": "http_only_probe",
+  "name": "HTTP-only probe",
+  "description": "Test fixture: an HTTP-only plugin whose module raises at require time in the stream Lua VM.",
+  "version": "1.0",
+  "stream": "no",
+  "settings": {}
+}

@@ -1,0 +1,27 @@
+services:
+  bunkerweb:
+    mem_limit: 768m
+    networks:
+      bw-universe:
+        ipv6_address: fd42:1618:1::10
+      bw-services:
+        ipv6_address: fd42:1618:2::10
+      ipv6-backend:
+        ipv6_address: fd42:1618:3::10
+
+networks:
+  bw-universe:
+    enable_ipv6: true
+    ipam:
+      config:
+        - subnet: 10.20.30.0/24
+        - subnet: fd42:1618:1::/64
+  bw-services:
+    enable_ipv6: true
+    ipam:
+      config:
+        - subnet: 192.168.0.0/24
+        - subnet: fd42:1618:2::/64
+  ipv6-backend:
+    external: true
+    name: ipv6-backend

@@ -1,8 +1,23 @@
-diff --git a/src/deps/src/lua-resty-redis-connector/lib/resty/redis/connector.lua b/src/deps/src/lua-resty-redis-connector/lib/resty/redis/connector.lua
-index ee148079b..2f24f18e1 100644
 --- a/src/deps/src/lua-resty-redis-connector/lib/resty/redis/connector.lua
 +++ b/src/deps/src/lua-resty-redis-connector/lib/resty/redis/connector.lua
-@@ -387,9 +387,23 @@ function _M.connect_to_host(self, host)
+@@ -377,19 +377,38 @@
+             ok, err = r:connect(path)
+         end
+     else
++        -- BW edit: Sentinel returns bare IPv6; ngx cosockets require brackets.
++        local address = host.host
++        if str_find(address, ":", 1, true) and str_sub(address, 1, 1) ~= "[" then
++            address = "[" .. address .. "]"
++        end
+         if opts then
+-            ok, err = r:connect(host.host, host.port, config.connection_options)
++            ok, err = r:connect(address, host.port, config.connection_options)
+         else
+-            ok, err = r:connect(host.host, host.port)
++            ok, err = r:connect(address, host.port)
+         end
+     end
+
      if not ok then
          return nil, err
      else
@@ -27,18 +42,18 @@ index ee148079b..2f24f18e1 100644
              local res
              -- usernames are supported only on Redis 6+, so use new AUTH form only when absolutely necessary
              if username and username ~= "" and username ~= "default" then
-@@ -403,7 +417,7 @@ function _M.connect_to_host(self, host)
+@@ -403,7 +422,7 @@
          end
- 
+
          -- No support for DBs in proxied Redis.
 -        if config.connection_is_proxied ~= true and host.db ~= nil then
 +        if reused == 0 and config.connection_is_proxied ~= true and host.db ~= nil then
              local res, err = r:select(host.db)
- 
+
              -- SELECT will fail if we are connected to sentinel:
-@@ -424,13 +438,13 @@ end
- 
- 
+@@ -424,13 +443,13 @@
+
+
  function _M.set_keepalive(self, redis)
 -    -- Restore connection to "NORMAL" before putting into keepalive pool,
 -    -- ignoring any errors.

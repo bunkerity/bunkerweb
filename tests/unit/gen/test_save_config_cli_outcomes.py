@@ -156,13 +156,13 @@ def test_unexpected_database_error_has_failure_exit(saver):
     "stored,installed,engine,expected",
     [
         ("1.6.17", "1.6.17", "sqlite", False),
-        ("1.6.17", "1.6.18~rc2", "sqlite", True),
-        ("1.6.17", "1.6.18~rc2", "postgresql", False),
-        ("1.6.17", "1.6.18-rc2", "sqlite", True),
+        ("1.6.17", "1.6.18~rc3", "sqlite", True),
+        ("1.6.17", "1.6.18~rc3", "postgresql", False),
+        ("1.6.17", "1.6.18-rc3", "sqlite", True),
     ],
 )
 def test_migration_lookup_matches_normalized_version_and_engine(tmp_path, monkeypatch, stored, installed, engine, expected):
     monkeypatch.setattr(save_config, "ALEMBIC_PATH", tmp_path)
     (tmp_path / "sqlite_versions").mkdir()
-    (tmp_path / "sqlite_versions/abc_upgrade_to_version_1_6_18_rc2.py").touch()
+    (tmp_path / "sqlite_versions/abc_upgrade_to_version_1_6_18_rc3.py").touch()
     assert save_config.migration_pending(stored, installed, engine) is expected

@@ -7,7 +7,7 @@ from json import dumps, loads
 from os import getenv
 from os.path import join, sep
 from pathlib import Path
-from subprocess import PIPE, run
+from subprocess import PIPE, check_output, run
 from shutil import which
 from sqlite3 import connect as sqlite_connect
 from sys import exit as sys_exit, path as sys_path
@@ -46,7 +46,18 @@ def mysql_client_command(operation: Literal["dump", "restore"]) -> tuple[str, bo
     return ("mysqldump" if operation == "dump" else "mysql"), False
 
 
-def mysql_connection_args(query_args, mariadb_client: bool) -> list[str]:
+def mysql_client_info(command: str, mariadb_client: bool) -> tuple[bool, bool]:
+    mysql8_client = False
+    if which(command):
+        version = check_output([command, "--version"], text=True)
+        mariadb_client = "MariaDB" in version
+        # Older clients report their server-compatible version after Distrib, not Ver.
+        client_version = re.search(r"\bDistrib (\d+)\.", version) or re.search(r"\bVer\s+(\d+)\.", version)
+        mysql8_client = not mariadb_client and client_version is not None and int(client_version[1]) >= 8
+    return mariadb_client, mysql8_client
+
+
+def mysql_connection_args(query_args, mariadb_client: bool, mysql8_client: bool = False) -> list[str]:
     args = []
     ssl = query_args.get("ssl")
     if isinstance(ssl, tuple):
@@ -54,9 +65,9 @@ def mysql_connection_args(query_args, mariadb_client: bool) -> list[str]:
     ssl = str(ssl).lower() if ssl is not None else None
 
     if ssl == "true":
-        args.append("--ssl")
+        args.append("--ssl-mode=REQUIRED" if mysql8_client else "--ssl")
     elif ssl == "false":
-        args.append("--skip-ssl")
+        args.append("--ssl-mode=DISABLED" if mysql8_client else "--skip-ssl")
     elif mariadb_client:
         # MariaDB clients verify opportunistic TLS by default. MySQL's generated
         # certificate is self-signed, so keep encryption but skip verification
@@ -143,6 +154,7 @@ def backup_database(current_time: datetime, db: Database = None, backup_dir: Pat
                 LOGGER.info("Creating a backup for the MariaDB/MySQL database ...")
 
                 dump_bin, mariadb_client = mysql_client_command("dump")
+                mariadb_client, mysql8_client = mysql_client_info(dump_bin, mariadb_client)
                 inspector = inspect(db.sql_engine)
                 cmd = [
                     dump_bin,
@@ -177,9 +189,15 @@ def backup_database(current_time: datetime, db: Database = None, backup_dir: Pat
                 if database == "mariadb":
                     cmd.append("--routines")  # Include stored procedures and functions (MariaDB only, mariadb-dump sends MariaDB-only queries to MySQL)
 
-                # Avoid --set-gtid-purged for broad compatibility (MariaDB variant doesn't support it)
+                if mysql8_client:
+                    cmd.extend(
+                        [
+                            "--column-statistics=0",  # MariaDB has no information_schema.COLUMN_STATISTICS.
+                            "--set-gtid-purged=OFF",  # Avoid FLUSH privileges and global GTID statements for a database-only backup.
+                        ]
+                    )
 
-                cmd.extend(mysql_connection_args(db_query_args, mariadb_client))
+                cmd.extend(mysql_connection_args(db_query_args, mariadb_client, mysql8_client=mysql8_client))
 
                 proc = run(
                     cmd,
@@ -328,11 +346,12 @@ def restore_database(backup_file: Path, db: Database = None) -> Database:
             LOGGER.info("Restoring the MariaDB/MySQL database ...")
 
             restore_bin, mariadb_client = mysql_client_command("restore")
+            mariadb_client, mysql8_client = mysql_client_info(restore_bin, mariadb_client)
             cmd = [restore_bin, "-h", db_host, "-u", db_user, db_database_name]
             if db_port:
                 cmd.extend(["-P", db_port])
 
-            cmd.extend(mysql_connection_args(db_query_args, mariadb_client))
+            cmd.extend(mysql_connection_args(db_query_args, mariadb_client, mysql8_client=mysql8_client))
 
             with ZipFile(backup_file, "r") as zipf:
                 proc = run(

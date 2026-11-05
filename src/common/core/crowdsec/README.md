@@ -73,7 +73,7 @@ The public API exposes the same operations:
 
 Use the returned connection ID verbatim. It includes instance identity, so identical localhost URLs on different instances remain separate. API administrators can use these operations. Delegated API users need the independent `crowdsec_read` or `crowdsec_delete` permission under the existing `bans` resource, either for a returned connection ID or `*`. An ordinary `ban_delete` grant does not authorize CrowdSec removal. No database migration is required.
 
-The runtime retains individual decisions per target, so removing one cannot erase another ban on the same IP or range. Optional report metadata uses a separate 5 MiB (`CROWDSEC_METADATA_CACHE_SIZE=5m`) cache and cannot evict enforcement entries. Stream refreshes use a nonblocking process lock in `/var/run/bunkerweb`, held until the update is published and released automatically if the worker exits.
+The runtime retains individual decisions per target, so removing one cannot erase another ban on the same IP or range. Optional report metadata uses a separate 24 MiB (`CROWDSEC_METADATA_CACHE_SIZE=24m`) cache and cannot evict enforcement entries. Stream refreshes use a nonblocking process lock in `/var/run/bunkerweb`, held until the update is published and released automatically if the worker exits.
 
 Stream mode retains at most two snapshot slots, switching only after a complete snapshot fits. An unchanged nginx reload keeps the current snapshot and requests deltas. A missing snapshot, changed decision configuration, incomplete startup, or last successful sync older than the greater of 300 seconds and 30 times `CROWDSEC_UPDATE_FREQUENCY` forces a full snapshot. Sync failures emit an error log at most once per minute per cache prefix, followed by a recovery notice. If the decision cache is full, increase `CROWDSEC_CACHE_SIZE` to hold two snapshots and reload BunkerWeb. Resizing the decision zone on reload creates an empty zone and triggers a full synchronization; resizing only the metadata zone clears optional metadata.
 
@@ -174,7 +174,7 @@ Follow one of the environment-specific guides below so the CrowdSec agent ingest
     services:
       bunkerweb:
         # This is the name that will be used to identify the instance in the Scheduler
-        image: bunkerity/bunkerweb:1.6.18-rc2
+        image: bunkerity/bunkerweb:1.6.18-rc3
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -191,7 +191,7 @@ Follow one of the environment-specific guides below so the CrowdSec agent ingest
             syslog-address: "udp://10.20.30.254:514" # The IP address of the syslog service
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.18-rc2
+        image: bunkerity/bunkerweb-scheduler:1.6.18-rc3
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Make sure to set the correct instance name
@@ -376,7 +376,7 @@ Connection settings are `multisite`: an unprefixed value applies to all services
 | `CROWDSEC_REQUEST_TIMEOUT`     | `1s`                   | multisite | no       | **Request Timeout:** Timeout in milliseconds for HTTP requests to the CrowdSec Local API in live mode. Accepts a time suffix (ms, s, m, h, d, w, M, y); a bare number is milliseconds.                                                                                                                                                                      |
 | `CROWDSEC_EXCLUDE_LOCATION`    |                        | multisite | no       | **Excluded Locations:** Comma-separated list of locations (URIs) to exclude from CrowdSec checks.                                                                                                                                                                                                                                                           |
 | `CROWDSEC_CACHE_SIZE`          | `100m`                 | global    | no       | **Decision cache size:** Shared memory for all services; stream mode needs two snapshots. Positive whole megabytes (`m`/`M`), minimum `1m`. Resizing clears this zone; known decisions restore from disk until reconciliation. Unknown IPs query LAPI; an outage allows unknown IPs.                                                                        |
-| `CROWDSEC_METADATA_CACHE_SIZE` | `5m`                   | global    | no       | **Metadata cache size:** Separate shared memory for optional report metadata across all services. Positive whole number of megabytes (`m`/`M`), minimum `1m`. Resizing on reload clears this metadata.                                                                                                                                                      |
+| `CROWDSEC_METADATA_CACHE_SIZE` | `24m`                  | global    | no       | **Metadata cache size:** Separate shared memory for optional report metadata across all services. Positive whole number of megabytes (`m`/`M`), minimum `1m`. Resizing on reload clears this metadata.                                                                                                                                                      |
 | `CROWDSEC_CACHE_EXPIRATION`    | `1s`                   | multisite | no       | **Cache Expiration:** The cache expiration time in seconds for IP decisions in live mode. Accepts a time suffix (ms, s, m, h, d, w, M, y); a bare number is seconds.                                                                                                                                                                                        |
 | `CROWDSEC_UPDATE_FREQUENCY`    | `10s`                  | multisite | no       | **Update Frequency:** How often (in seconds) to pull new/expired decisions from the CrowdSec API in stream mode. Accepts a time suffix (ms, s, m, h, d, w, M, y); a bare number is seconds.                                                                                                                                                                 |
 | `CROWDSEC_BAN_REFRESH`         | `0`                    | multisite | no       | **Ban Refresh:** Turn CrowdSec blocks into short BunkerWeb bans that are renewed while the CrowdSec decision lasts. The value is the longest a ban lasts before CrowdSec is asked again. `0` disables it. A service with a `CROWDSEC_EXCLUDE_LOCATION` never gets CrowdSec bans. Accepts a time suffix (ms, s, m, h, d, w, M, y); a bare number is seconds. |

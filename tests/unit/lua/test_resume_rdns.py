@@ -28,6 +28,7 @@ def function_source(path, signature):
 PREAMBLE = r"""
 local utils, cache, encoded, queries, logs = {}, {}, {}, {}, {}
 local ERR, WARN = 'ERR', 'WARN'
+local ip_key = require('bunkerweb.ipaddr').key
 local logger = {log = function(_, level, message) table.insert(logs, {level, message}) end}
 local use_ipv6, setup_error, query_error = 'no', false, false
 local negative_answer

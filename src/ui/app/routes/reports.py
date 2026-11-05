@@ -218,7 +218,7 @@ def reports_fetch():
             server_name = str(report.get("server_name", "N/A"))
 
             return {
-                "date": datetime.fromtimestamp(report.get("date", 0)).isoformat() if report.get("date") else "N/A",
+                "date": datetime.fromtimestamp(report.get("date", 0)).astimezone().isoformat() if report.get("date") else "N/A",
                 "id": escape(request_id),
                 "request_id": request_id,
                 "ip": escape(str(report.get("ip", "N/A"))),
@@ -439,7 +439,7 @@ def reports_export_csv():
 
             writer.writerow(
                 [
-                    datetime.fromtimestamp(report.get("date", 0)).isoformat() if report.get("date") else "N/A",
+                    datetime.fromtimestamp(report.get("date", 0)).astimezone().isoformat() if report.get("date") else "N/A",
                     str(report.get("id", "N/A")),
                     str(report.get("ip", "N/A")),
                     str(report.get("country", "N/A")),
@@ -541,7 +541,7 @@ def reports_export_excel():
 
             ws.append(
                 [
-                    csv_safe(datetime.fromtimestamp(report.get("date", 0)).isoformat() if report.get("date") else "N/A"),
+                    csv_safe(datetime.fromtimestamp(report.get("date", 0)).astimezone().isoformat() if report.get("date") else "N/A"),
                     csv_safe(report.get("id", "N/A")),
                     csv_safe(report.get("ip", "N/A")),
                     csv_safe(report.get("country", "N/A")),

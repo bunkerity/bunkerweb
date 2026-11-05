@@ -31,7 +31,7 @@ Si crees que se debería admitir una nueva integración, no dudes en abrir un [n
 ## Configuraciones
 
 !!! tip "Configuraciones de BunkerWeb PRO"
-    Algunos plugins están reservados para la **versión PRO**. Inicia una prueba gratuita de 30 días de BunkerWeb PRO desde el [Panel de BunkerWeb](https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc).
+    Algunos plugins están reservados para la **versión PRO**. Inicia una prueba gratuita de 30 días de BunkerWeb PRO desde el [Panel de BunkerWeb](https://panel.bunkerweb.io/store/bunkerweb-pro?language=spanish&utm_campaign=self&utm_source=doc): pide un plan y mantén **Free 30 Days Trial** como método de pago al finalizar la compra ([guía paso a paso](index.md#pro-version)).
 
 Una vez que BunkerWeb esté integrado en tu entorno, necesitarás configurarlo para servir y proteger tus aplicaciones web.
 
@@ -105,7 +105,7 @@ Ten en cuenta que el modo multisitio es implícito cuando se utiliza la interfaz
 
 !!! info "Para saber más"
 
-    Encontrarás ejemplos concretos del modo multisitio en los [usos avanzados](advanced.md) de la documentación y en el directorio de [ejemplos](https://github.com/bunkerity/bunkerweb/tree/v1.6.18-rc2/examples) del repositorio.
+    Encontrarás ejemplos concretos del modo multisitio en los [usos avanzados](advanced.md) de la documentación y en el directorio de [ejemplos](https://github.com/bunkerity/bunkerweb/tree/v1.6.18-rc3/examples) del repositorio.
 
 ## Configuraciones personalizadas {#custom-configurations}
 
@@ -126,7 +126,7 @@ La gestión de configuraciones personalizadas desde la interfaz de usuario web s
 
 !!! info "Para saber más"
 
-    Encontrarás ejemplos concretos de configuraciones personalizadas en los [usos avanzados](advanced.md#custom-configurations) de la documentación y en el directorio de [ejemplos](https://github.com/bunkerity/bunkerweb/tree/v1.6.18-rc2/examples) del repositorio.
+    Encontrarás ejemplos concretos de configuraciones personalizadas en los [usos avanzados](advanced.md#custom-configurations) de la documentación y en el directorio de [ejemplos](https://github.com/bunkerity/bunkerweb/tree/v1.6.18-rc3/examples) del repositorio.
 
 ## Base de datos
 
@@ -172,7 +172,7 @@ Al especificar el URI de la base de datos apropiado en la configuración, puedes
 
 !!! info "Notas"
     - **PostgreSQL**: Las imágenes basadas en Alpine, incluida all-in-one, incluyen ahora el cliente `v18`, por lo que `v18` y versiones anteriores son compatibles de forma predeterminada.
-    - **Linux**: La compatibilidad depende de los paquetes de tu distribución. Si es necesario, puedes instalar los clientes de la base de datos manualmente desde los repositorios del proveedor (esto suele ser necesario en RHEL).
+    - **Linux**: La compatibilidad depende de los paquetes de tu distribución. Si es necesario, puedes instalar los clientes de la base de datos manualmente desde los repositorios del proveedor (esto suele ser necesario en RHEL). Si la versión principal del servidor PostgreSQL es más reciente que la del cliente Linux `pg_dump`, las copias fallan con `server version mismatch`; instala un cliente correspondiente desde el [repositorio PGDG](integrations.md#debian-ubuntu-postgresql-backups).
     - **SQLite**: Se entrega con los paquetes y está listo para usar.
 
 Recursos externos útiles para instalar clientes de bases de datos:

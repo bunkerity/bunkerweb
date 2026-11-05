@@ -52,7 +52,7 @@ La UI requiere scheduler/API de BunkerWeb/redis/base de datos accesibles.
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.18-rc2
+        image: bunkerity/bunkerweb:1.6.18-rc3
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -63,7 +63,7 @@ La UI requiere scheduler/API de BunkerWeb/redis/base de datos accesibles.
         networks: [bw-universe, bw-services]
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.18-rc2
+        image: bunkerity/bunkerweb-scheduler:1.6.18-rc3
         environment:
           <<: *service-env
           BUNKERWEB_INSTANCES: "bunkerweb"
@@ -83,7 +83,7 @@ La UI requiere scheduler/API de BunkerWeb/redis/base de datos accesibles.
         networks: [bw-universe, bw-db]
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.6.18-rc2
+        image: bunkerity/bunkerweb-ui:1.6.18-rc3
         environment:
           <<: *service-env
           ADMIN_USERNAME: "admin"
@@ -170,6 +170,7 @@ La UI requiere scheduler/API de BunkerWeb/redis/base de datos accesibles.
     Los códigos de recuperación se muestran una sola vez; si pierdes las llaves de cifrado, se eliminan los secretos TOTP almacenados.
 - Sesiones: duración de inactividad por defecto 12 h (`SESSION_LIFETIME_HOURS`), refrescada en cada petición. Se aplica un límite absoluto vía `SESSION_ABSOLUTE_HOURS` (por defecto `168` = 7 días) — superado ese tiempo, los usuarios son desconectados aunque sigan activos. Rotación opcional del identificador de sesión (`SESSION_ROLLING_HOURS`, por defecto `0` = deshabilitada) regenera el ID de sesión en ese intervalo. Sesiones fijadas a IP y User-Agent; `CHECK_PRIVATE_IP=no` relaja el control de IP solo en rangos privados. `ALWAYS_REMEMBER=yes` fuerza cookies persistentes.
 - Almacenamiento de sesiones: las sesiones viven en Redis cuando `USE_REDIS=yes`, y si no en una caché local bajo `/var/lib/bunkerweb`. Un Redis que deja de responder, o que rechaza las escrituras porque alcanzó `maxmemory`, ya no rompe la interfaz: las sesiones afectadas pasan a esa caché local, que se lee antes que Redis para que un cambio o un borrado que nunca llegó a Redis no quede oculto tras la copia antigua que Redis aún conserva, y se reconcilian con Redis en cuanto responde de nuevo. Un cierre de sesión o una rotación del ID de sesión durante la caída tampoco se deshace con la recuperación, incluso si la propia sesión no se pudo leer mientras Redis estaba caído. Cada revocación se registra en ambos almacenes para seguir aplicándose en cualquier caso. Un desalojo no está cubierto, porque Redis informa éxito y simplemente deja de tener la clave, así que dimensiona `maxmemory` para las claves que conservas. Cuando Redis rechaza una actualización, esa sesión pasa al almacenamiento local y se elimina de inmediato la copia que Redis aún tenía, de modo que el cambio no quede oculto tras la versión anterior y un flujo de varios pasos como el 2FA no se quede en bucle sobre su estado previo. Esa caché local es por host, lo que importa si ejecutas varias réplicas de la interfaz: las demás réplicas dejan de ver una sesión que se ha movido a la caché local de una réplica hasta que esa réplica la reconcilia con Redis, una revocación emitida mientras Redis no estaba disponible solo la aplica la réplica que la emitió, y una réplica que ya sirve una sesión desde su propia caché local puede seguir haciéndolo hasta `SESSION_LIFETIME_HOURS` después de que otra réplica borre esa sesión a través de Redis. `UI_USE_REDIS=no` desconecta solo la interfaz de Redis, a diferencia del `USE_REDIS` global, que además deja de compartir baneos e informes entre instancias.
+- Limitación de inicios de sesión: los inicios de sesión fallidos (contraseña, código TOTP o código de recuperación incorrectos) se cuentan por IP del cliente y por nombre de usuario en la base de datos, así que todos los workers y réplicas de la UI comparten la cuenta. `LOGIN_MAX_ATTEMPTS` fallos (por defecto `5`) en `LOGIN_WINDOW_MINUTES` minutos (por defecto `15`) bloquean esa IP, o ese nombre de usuario, hasta `LOGIN_LOCKOUT_MINUTES` minutos (por defecto `15`) después de su último fallo. Un intento bloqueado recibe un `429` con el mensaje genérico de credenciales inválidas y la espera, sin comprobar la contraseña. Un inicio de sesión completo borra la cuenta de ese nombre de usuario. Los nombres desconocidos también se cuentan, así que un bloqueo nunca revela si una cuenta existe; a cambio, cualquiera puede bloquear un nombre conocido fallando con él. La IP del cliente es la resuelta desde `X-Forwarded-*` mediante `PROXY_NUMBERS`: si los usuarios acceden a la UI directamente, sin proxy delante, define `PROXY_NUMBERS=0`; de lo contrario un cliente puede falsificar su IP y solo se mantiene el límite por nombre de usuario. `LOGIN_THROTTLE=no` desactiva la limitación. Con una base de datos de solo lectura los fallos no se pueden registrar, así que no aparece ningún bloqueo nuevo.
 - Ajusta `PROXY_NUMBERS` si varios proxies añaden `X-Forwarded-*`.
 
 !!! warning "La 2FA desaparece al recrear el contenedor"
@@ -238,6 +239,10 @@ El editor RAW de un servicio o de la configuración global puede conservar un aj
 | `ALWAYS_REMEMBER`                           | Activar siempre “remember me”                                                                                          | `yes` o `no`            | `no`                      |
 | `CHECK_PRIVATE_IP`                          | Ligar sesión a IP (relaja en redes privadas con `no`)                                                                  | `yes` o `no`            | `yes`                     |
 | `PROXY_NUMBERS`                             | Saltos de proxy confiables para `X-Forwarded-*`                                                                        | Entero                  | `1`                       |
+| `LOGIN_THROTTLE` | Contar los inicios de sesión fallidos y bloquear una IP o un usuario que falla demasiado | `yes` o `no` | `yes` |
+| `LOGIN_MAX_ATTEMPTS` | Fallos dentro de la ventana que bloquean una IP o un usuario | Entero | `5` |
+| `LOGIN_WINDOW_MINUTES` | Ventana en la que se cuentan los fallos | Entero (minutos) | `15` |
+| `LOGIN_LOCKOUT_MINUTES` | Duración del bloqueo, contada desde el último fallo | Entero (minutos) | `15` |
 | `UI_USE_REDIS`                              | Desconecta la interfaz web de Redis sin tocar el `USE_REDIS` global                                                    | `yes` o `no`            | `yes`                     |
 
 ### Logging
@@ -298,7 +303,7 @@ log { source(s_net); destination(d_dyna_file); };
 ## Actualizar a PRO {#upgrade-to-pro}
 
 !!! tip "Prueba gratis de BunkerWeb PRO"
-    Inicia una prueba gratuita de 30 días de BunkerWeb PRO desde el [Panel de BunkerWeb](https://panel.bunkerweb.io/store/bunkerweb-pro?language=spanish&utm_campaign=self&utm_source=doc).
+    Inicia una prueba gratuita de 30 días de BunkerWeb PRO desde el [Panel de BunkerWeb](https://panel.bunkerweb.io/store/bunkerweb-pro?language=spanish&utm_campaign=self&utm_source=doc): pide un plan y mantén **Free 30 Days Trial** como método de pago al finalizar la compra ([guía paso a paso](index.md#pro-version)).
 
 Pega tu clave PRO en la página **PRO** de la UI (o precarga `PRO_LICENSE_KEY` para el asistente). Las actualizaciones se descargan en segundo plano por el scheduler; revisa en la UI la caducidad y los límites de servicios tras aplicarlas.
 

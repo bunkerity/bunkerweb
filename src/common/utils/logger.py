@@ -26,7 +26,7 @@ DATE_FORMAT = "[%Y-%m-%d %H:%M:%S %z]"
 
 # Regex patterns for validation
 FILE_PATH_PATTERN = r"^(/[\w\-./]+|[A-Za-z]:\\[\w\-./\\]+)$"
-SYSLOG_ADDRESS_PATTERN = r"^((udp|tcp)://)?(/[\w\-./]+|[\w\-.]+(:\d{1,5})?)$"
+SYSLOG_ADDRESS_PATTERN = r"^((udp|tcp)://)?(/[\w\-./]+|([\w\-.]+|\[[\da-fA-F:.]+\])(:\d{1,5})?)$"
 
 
 class BWLogger(Logger):
@@ -76,7 +76,12 @@ if "syslog" in env_log_types:
             address = syslog_address[6:]  # Remove "tcp://"
 
         # Resolve the handler address: network (host, port) or Unix socket path
-        if ":" in address and not address.startswith("/"):
+        if address.startswith("["):
+            host, _, port = address[1:].partition("]")
+            handler_address = (host, int(port[1:]) if port else 514)
+            if not port and socktype is None:
+                socktype = SOCK_DGRAM
+        elif ":" in address and not address.startswith("/"):
             host, port = address.rsplit(":", 1)
             handler_address = (host, int(port))
         elif not address.startswith("/"):

@@ -114,7 +114,7 @@ fi
 
 # Default values
 # Hardcoded default version (immutable reference)
-DEFAULT_BUNKERWEB_VERSION="1.6.18~rc2"
+DEFAULT_BUNKERWEB_VERSION="1.6.18~rc3"
 # Mutable effective version (can be overridden by --version)
 BUNKERWEB_VERSION="$DEFAULT_BUNKERWEB_VERSION"
 BUNKERWEB_VERSION_EXPLICIT="no"
@@ -5623,6 +5623,59 @@ This is required for the BunkerWeb Scheduler to connect to your database."
     fi
 }
 
+# Debian/Ubuntu ship a fixed PostgreSQL client major; newer servers need PGDG for backups.
+show_debian_database_warning() {
+    if [ "$DISTRO_FAMILY" = "debian" ]; then
+        local client_major
+        local pgdg_url="https://www.postgresql.org/download/linux/ubuntu/"
+        if [ "$DISTRO_ID" = "debian" ]; then
+            pgdg_url="https://www.postgresql.org/download/linux/debian/"
+        fi
+        case "$DISTRO_ID:$DISTRO_VERSION" in
+            debian:12) client_major=15 ;;
+            debian:13) client_major=17 ;;
+            ubuntu:22.04) client_major=14 ;;
+            ubuntu:24.04) client_major=16 ;;
+            ubuntu:26.04) client_major=18 ;;
+            *) client_major="(distribution default)" ;;
+        esac
+        local msg="Your distribution's postgresql-client package ships PostgreSQL ${client_major}.
+If your external PostgreSQL server has a newer major version, scheduled backups and
+bwcli plugin backup save fail with a server version mismatch from pg_dump.
+Install a matching postgresql-client-<N> from the official PGDG repository manually.
+Set PG_MAJOR below to your server's major version (18 is an example):
+
+sudo apt install curl ca-certificates
+sudo install -d /usr/share/postgresql-common/pgdg
+sudo curl -o /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc --fail https://www.postgresql.org/media/keys/ACCC4CF8.asc
+. /etc/os-release
+sudo tee /etc/apt/sources.list.d/pgdg.sources > /dev/null <<EOF
+Types: deb
+URIs: https://apt.postgresql.org/pub/repos/apt
+Suites: \${VERSION_CODENAME}-pgdg
+Architectures: \$(dpkg --print-architecture)
+Components: main
+Signed-By: /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc
+EOF
+sudo apt update
+PG_MAJOR=18
+sudo apt install \"postgresql-client-\${PG_MAJOR}\"
+pg_dump --version
+
+Check that pg_dump --version reports the matching client before running backups.
+Repository instructions: ${pgdg_url}"
+        if [ "$INTERACTIVE_MODE" = "yes" ]; then
+            tui_msgbox "Debian/Ubuntu PostgreSQL Backup Client" "$msg"
+        else
+            print_warning "Important information for Debian/Ubuntu PostgreSQL backups:"
+            echo
+            echo "$msg"
+            echo
+            print_status "Continuing installation..."
+        fi
+    fi
+}
+
 # Echo the base NGINX version (no distro suffix) that BunkerWeb $BUNKERWEB_VERSION
 # was built against, applying the Fedora exceptions. Versions not in the dictionary
 # (current-default line, pre-1.6, or newer-than-this-script) fall back to
@@ -6571,23 +6624,8 @@ EOF
     print_status "NGINX $NGINX_VERSION installed successfully"
 }
 
-# testing/dev channels carry non-standard version strings that dpkg flags as a
-# "bad version number"; allow them so the install/upgrade is not rejected. Both
-# the fresh-install AND the upgrade path call this (an upgrade stable -> testing/dev
-# fails otherwise). Idempotent: append the directive only when absent so re-runs
-# never duplicate the line.
-_dpkg_allow_testing_dev_version() {
-    [[ "$BUNKERWEB_VERSION" =~ (testing|dev) ]] || return 0
-    if ! grep -qxF "force-bad-version" /etc/dpkg/dpkg.cfg 2>/dev/null; then
-        print_status "Adding force-bad-version directive for testing/dev version"
-        echo "force-bad-version" >> /etc/dpkg/dpkg.cfg
-    fi
-}
-
 install_bunkerweb_debian() {
     print_step "Installing BunkerWeb on Debian/Ubuntu"
-
-    _dpkg_allow_testing_dev_version
 
     if [ "$ENABLE_WIZARD" = "no" ]; then
         export UI_WIZARD=no
@@ -8686,6 +8724,16 @@ if [ "$DOCKER_SYSLOG_EXPLICIT" = "yes" ]; then
     exit 1
 fi
 
+# The floating dev/testing (and 1.7-dev) builds are no longer published to the package
+# repository: only versioned packages are. Docker images keep their testing tag.
+case "$BUNKERWEB_VERSION" in
+    dev|testing|*-dev|*-testing)
+        print_error "No '$BUNKERWEB_VERSION' package is published: floating dev/testing builds are no longer shipped to the package repository."
+        print_error "Install a published version instead, e.g. --version $DEFAULT_BUNKERWEB_VERSION (release candidates are published too), or use --docker --image-tag testing."
+        exit 1
+        ;;
+esac
+
 # Force wizard off for manager installations
 if [ "$INSTALL_TYPE" = "manager" ]; then
     if [ "$ENABLE_WIZARD" = "yes" ]; then
@@ -9346,9 +9394,6 @@ to /etc/bunkerweb and the database schema."
     print_step "Upgrading BunkerWeb package"
     case "$DISTRO_ID" in
         debian|ubuntu)
-            # Upgrading stable -> testing/dev needs the same dpkg allowance as a
-            # fresh install, else apt rejects the non-standard version string.
-            _dpkg_allow_testing_dev_version
             run_cmd apt update
             run_cmd apt install -y --allow-downgrades "bunkerweb=$BUNKERWEB_VERSION"
             run_cmd apt-mark hold bunkerweb nginx
@@ -9428,6 +9473,7 @@ main() {
         # an upgrade; running this as a non-upgrade fresh install is correct.
         print_status "Starting a fresh installation over the interrupted one."
         show_rhel_database_warning
+        show_debian_database_warning
         ask_user_preferences
         check_ports
     elif [ "$_BW_RESUMING" = "yes" ]; then
@@ -9445,6 +9491,7 @@ main() {
         fi
 
         [ "$DOCKER_MODE" != "yes" ] && show_rhel_database_warning
+        [ "$DOCKER_MODE" != "yes" ] && show_debian_database_warning
         ask_user_preferences
         check_ports
     fi

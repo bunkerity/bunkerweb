@@ -626,6 +626,16 @@ actions:
       - "Autoconf"
       - "All-in-one"
     restart_stack: false
+  # Slots of a banned and an unbanned client move to another master under live traffic: the
+  # client must follow ASK and MOVED. The script restores the slots, so clear_keys_cluster and the
+  # groups below still find each key on its first owner.
+  cluster_slot_migration:
+    type: script
+    script: ["./tests/core/redis/cluster_migrate.sh", "docker"]
+    result: "cluster_migrate: all checks passed"
+    integrations:
+      - "Docker"
+    restart_stack: false
   clear_keys_cluster:
     type: redis
     cluster: true

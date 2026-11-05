@@ -18,8 +18,8 @@ Mettez à niveau toutes les répliques de l'interface web en même temps : la pr
 
         ```bash
         # Téléchargez le script et sa somme de contrôle
-        curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.18-rc2/install-bunkerweb.sh
-        curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.18-rc2/install-bunkerweb.sh.sha256
+        curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.18-rc3/install-bunkerweb.sh
+        curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.18-rc3/install-bunkerweb.sh.sha256
 
         # Vérifiez la somme de contrôle
         sha256sum -c install-bunkerweb.sh.sha256
@@ -103,16 +103,16 @@ Mettez à niveau toutes les répliques de l'interface web en même temps : la pr
                     ```yaml
                     services:
                         bunkerweb:
-                            image: bunkerity/bunkerweb:1.6.18-rc2
+                            image: bunkerity/bunkerweb:1.6.18-rc3
                             ...
                         bw-scheduler:
-                            image: bunkerity/bunkerweb-scheduler:1.6.18-rc2
+                            image: bunkerity/bunkerweb-scheduler:1.6.18-rc3
                             ...
                         bw-autoconf:
-                            image: bunkerity/bunkerweb-autoconf:1.6.18-rc2
+                            image: bunkerity/bunkerweb-autoconf:1.6.18-rc3
                             ...
                         bw-ui:
-                            image: bunkerity/bunkerweb-ui:1.6.18-rc2
+                            image: bunkerity/bunkerweb-ui:1.6.18-rc3
                             ...
                     ```
 
@@ -168,7 +168,7 @@ Mettez à niveau toutes les répliques de l'interface web en même temps : la pr
 
             4. **Téléchargez la nouvelle image** :
                 ```bash
-                docker pull bunkerity/bunkerweb-all-in-one:1.6.18-rc2
+                docker pull bunkerity/bunkerweb-all-in-one:1.6.18-rc3
                 ```
 
             5. **Recréez le conteneur** avec les mêmes options, en réutilisant le même volume `/data`, les mêmes ports et les mêmes variables d'environnement qu'avant :
@@ -179,7 +179,7 @@ Mettez à niveau toutes les répliques de l'interface web en même temps : la pr
                 -p 80:8080/tcp \
                 -p 443:8443/tcp \
                 -p 443:8443/udp \
-                bunkerity/bunkerweb-all-in-one:1.6.18-rc2
+                bunkerity/bunkerweb-all-in-one:1.6.18-rc3
                 ```
 
         === "Docker Compose"
@@ -188,7 +188,7 @@ Mettez à niveau toutes les répliques de l'interface web en même temps : la pr
                 ```yaml
                 services:
                     bunkerweb-aio:
-                        image: bunkerity/bunkerweb-all-in-one:1.6.18-rc2
+                        image: bunkerity/bunkerweb-all-in-one:1.6.18-rc3
                         ...
                 ```
 
@@ -227,8 +227,8 @@ Mettez à niveau toutes les répliques de l'interface web en même temps : la pr
 
             ```bash
             # Download the script and its checksum
-            curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.18-rc2/install-bunkerweb.sh
-            curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.18-rc2/install-bunkerweb.sh.sha256
+            curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.18-rc3/install-bunkerweb.sh
+            curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.18-rc3/install-bunkerweb.sh.sha256
 
             # Verify the checksum
             sha256sum -c install-bunkerweb.sh.sha256
@@ -309,20 +309,20 @@ Mettez à niveau toutes les répliques de l'interface web en même temps : la pr
             Exemples:
 
             ```bash
-            # Upgrade to 1.6.18~rc2 interactively (will prompt for backup)
-            sudo ./install-bunkerweb.sh --version 1.6.18~rc2
+            # Upgrade to 1.6.18~rc3 interactively (will prompt for backup)
+            sudo ./install-bunkerweb.sh --version 1.6.18~rc3
 
             # Non-interactive upgrade with automatic backup to custom directory
-            sudo ./install-bunkerweb.sh -v 1.6.18~rc2 --backup-dir /var/backups/bw-2025-01 -y
+            sudo ./install-bunkerweb.sh -v 1.6.18~rc3 --backup-dir /var/backups/bw-2025-01 -y
 
             # Silent unattended upgrade (logs suppressed) – relies on default auto-backup
-            sudo ./install-bunkerweb.sh -v 1.6.18~rc2 -y -q
+            sudo ./install-bunkerweb.sh -v 1.6.18~rc3 -y -q
 
             # Perform a dry run (plan) without applying changes
-            sudo ./install-bunkerweb.sh -v 1.6.18~rc2 --dry-run
+            sudo ./install-bunkerweb.sh -v 1.6.18~rc3 --dry-run
 
             # Upgrade skipping automatic backup (NOT recommended)
-            sudo ./install-bunkerweb.sh -v 1.6.18~rc2 --no-auto-backup -y
+            sudo ./install-bunkerweb.sh -v 1.6.18~rc3 --no-auto-backup -y
             ```
 
             !!! warning "Sauter les sauvegardes"
@@ -402,7 +402,7 @@ Mettez à niveau toutes les répliques de l'interface web en même temps : la pr
 
                         ```shell
                         sudo apt update && \
-                        sudo apt install -y --allow-downgrades bunkerweb=1.6.18~rc2
+                        sudo apt install -y --allow-downgrades bunkerweb=1.6.18~rc3
                         ```
 
                         Pour empêcher le paquet BunkerWeb d'être mis à niveau lors de l'exécution de `apt upgrade`, vous pouvez utiliser la commande suivante :
@@ -428,7 +428,7 @@ Mettez à niveau toutes les répliques de l'interface web en même temps : la pr
 
                         ```shell
                         sudo dnf makecache && \
-                        sudo dnf install -y --allowerasing bunkerweb-1.6.18~rc2
+                        sudo dnf install -y --allowerasing bunkerweb-1.6.18~rc3
                         ```
 
                         Pour empêcher le paquet BunkerWeb d'être mis à niveau lors de l'exécution de `dnf upgrade`, vous pouvez utiliser la commande suivante :
@@ -752,6 +752,10 @@ Bien que les paramètres soient maintenant déclarés sur le conteneur du planif
 
 Nous avons fait de notre mieux pour ne pas changer la valeur par défaut, mais nous avons ajouté de nombreux autres paramètres. Il est fortement recommandé de lire les sections sur le [réglage de la sécurité ](advanced.md#security-tuning) et  les [paramètres](features.md) de la documentation.
 
+!!! warning "`MODSECURITY_CRS_PLUGIN_URLS` a été renommé en `MODSECURITY_CRS_PLUGINS`"
+
+    Si vous aviez défini `MODSECURITY_CRS_PLUGIN_URLS` et migré vers la 1.6 sur PostgreSQL, MariaDB ou MySQL avant la 1.6.18, la valeur enregistrée a été perdue. Vérifiez `MODSECURITY_CRS_PLUGINS` et redéfinissez-le s'il est vide. Depuis la 1.6.18, les valeurs sont conservées lors de la mise à niveau.
+
 #### Modèles
 
 Nous avons ajouté une nouvelle fonctionnalité appelée **modèles**. Les modèles fournissent une approche structurée et standardisée de la définition des paramètres et des configurations personnalisées, consultez la [ section concepts/modèles](concepts.md#templates) pour plus d'informations.
@@ -900,16 +904,16 @@ Nous avons ajouté une fonctionnalité d**'espace de noms** aux intégrations au
                 ```yaml
                 services:
                     bunkerweb:
-                        image: bunkerity/bunkerweb:1.6.18-rc2
+                        image: bunkerity/bunkerweb:1.6.18-rc3
                         ...
                     bw-scheduler:
-                        image: bunkerity/bunkerweb-scheduler:1.6.18-rc2
+                        image: bunkerity/bunkerweb-scheduler:1.6.18-rc3
                         ...
                     bw-autoconf:
-                        image: bunkerity/bunkerweb-autoconf:1.6.18-rc2
+                        image: bunkerity/bunkerweb-autoconf:1.6.18-rc3
                         ...
                     bw-ui:
-                        image: bunkerity/bunkerweb-ui:1.6.18-rc2
+                        image: bunkerity/bunkerweb-ui:1.6.18-rc3
                         ...
                 ```
 
@@ -944,7 +948,7 @@ Nous avons ajouté une fonctionnalité d**'espace de noms** aux intégrations au
 
                     ```shell
                     sudo apt update && \
-                    sudo apt install -y --allow-downgrades bunkerweb=1.6.18~rc2
+                    sudo apt install -y --allow-downgrades bunkerweb=1.6.18~rc3
                     ```
 
                     Pour empêcher le paquet BunkerWeb d'être mis à niveau lors de l'exécution de `apt upgrade`, vous pouvez utiliser la commande suivante :
@@ -970,7 +974,7 @@ Nous avons ajouté une fonctionnalité d**'espace de noms** aux intégrations au
 
                     ```shell
                     sudo dnf makecache && \
-                    sudo dnf install -y --allowerasing bunkerweb-1.6.18~rc2
+                    sudo dnf install -y --allowerasing bunkerweb-1.6.18~rc3
                     ```
 
                     Pour empêcher le paquet BunkerWeb d'être mis à niveau lors de l'exécution de `dnf upgrade`, vous pouvez utiliser la commande suivante :
@@ -1203,7 +1207,7 @@ Les attestations sont sans clé : elles reposent sur [Sigstore](https://www.sigs
 Les commandes partagent deux variables. Définissez-les pour la version à vérifier :
 
 ```bash
-VERSION=1.6.18~rc2
+VERSION=1.6.18~rc3
 TAG="v${VERSION//\~/-}"
 ```
 

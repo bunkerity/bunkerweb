@@ -1,7 +1,7 @@
 [project]
 name = "BunkerWeb"
 description = "Make your web services secure by default !"
-version = "1.6.18~rc2"
+version = "1.6.18~rc3"
 authors = [
     { name = "Bunkerity", email = "contact@bunkerity.com" }
 ]
@@ -34,6 +34,7 @@ markers = [
 filterwarnings = ["ignore::sqlalchemy.exc.SAWarning"]
 
 [tool.coverage.run]
+branch = true
 source = ["src"]
 omit = [
     "src/deps/**",

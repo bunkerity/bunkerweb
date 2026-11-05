@@ -830,6 +830,14 @@ def shared_redis_pool_size() -> int:
     return max(32, (max(threads, 1) + 8) * 2)
 
 
+def parse_redis_endpoint(value: str, default_port: int = 6379) -> tuple[str, int]:
+    """Return a bare host and port for Redis, Sentinel or Cluster settings."""
+    scheme, host, port = parse_host(value)
+    if scheme or "%" in host:
+        raise ValueError(f"Invalid Redis endpoint: {value}")
+    return host, port if port is not None else default_port
+
+
 def get_redis_client(
     use_redis: bool = False,
     redis_host: Optional[str] = None,
@@ -910,9 +918,17 @@ def get_redis_client(
         redis_timeout = 1000.0
         redis_keepalive_pool = 10
 
-    # Process sentinel hosts if provided as string
-    if isinstance(redis_sentinel_hosts, str):
-        redis_sentinel_hosts = [tuple(host.split(":", 1)) if ":" in host else (host, "26379") for host in redis_sentinel_hosts.split() if host]
+    try:
+        if redis_host and not redis_sentinel_hosts and not redis_cluster_nodes:
+            redis_host = parse_redis_endpoint(redis_host, redis_port)[0]
+        if isinstance(redis_sentinel_hosts, str):
+            redis_sentinel_hosts = [parse_redis_endpoint(host, 26379) for host in redis_sentinel_hosts.split()]
+        else:
+            redis_sentinel_hosts = [(parse_redis_endpoint(host)[0], int(port)) for host, port in redis_sentinel_hosts]
+    except ValueError as e:
+        if logger:
+            logger.error(f"Invalid Redis endpoint: {e}")
+        return None
 
     # Every connection parameter except the logger, so a configuration change simply
     # produces a different key.
@@ -925,7 +941,7 @@ def get_redis_client(
         redis_ssl_verify,
         redis_username,
         redis_password,
-        tuple(tuple(host) for host in redis_sentinel_hosts),
+        tuple(redis_sentinel_hosts),
         redis_sentinel_username,
         redis_sentinel_password,
         redis_sentinel_master,
@@ -972,13 +988,8 @@ def get_redis_client(
                 logger.info(f"Connecting to Redis Cluster: {redis_cluster_nodes}")
             startup_nodes = []
             for node in redis_cluster_nodes.split():
-                if node.startswith("[") and "]:" in node:
-                    host, _, port = node[1:].partition("]:")
-                elif node.count(":") == 1:
-                    host, _, port = node.partition(":")
-                else:
-                    host, port = node, "6379"
-                startup_nodes.append(ClusterNode(host, int(port)))
+                host, port = parse_redis_endpoint(node)
+                startup_nodes.append(ClusterNode(host, port))
             redis_client = RedisCluster(
                 startup_nodes=startup_nodes,
                 username=redis_username,

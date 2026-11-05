@@ -1471,12 +1471,21 @@ end
 function metrics:api_requests_query()
 	-- Parse query parameters from request args
 	local args = ngx.req.get_uri_args()
-	local start_idx = tonumber(args.start) or 0
-	local length = tonumber(args.length) or 10
+	local start_idx = tonumber(tostring(args.start or "0"))
+	local length = tonumber(tostring(args.length or "10"))
 	local search = unescape_uri(args.search or "")
 	local order_column = args.order_column or "date"
 	local order_dir = args.order_dir or "desc"
 	local count_only = args.count_only == "true"
+	if not start_idx or start_idx < 0 or start_idx % 1 ~= 0 then
+		return self:ret(true, "invalid page start", ngx.HTTP_BAD_REQUEST)
+	end
+	if not length or length < -1 or length % 1 ~= 0 then
+		return self:ret(true, "invalid page length", ngx.HTTP_BAD_REQUEST)
+	end
+	if order_dir ~= "asc" and order_dir ~= "desc" then
+		return self:ret(true, "invalid sort direction", ngx.HTTP_BAD_REQUEST)
+	end
 
 	-- Parse search panes filters (format: field1:value1,value2;field2:value3)
 	local search_panes = {}

@@ -30,6 +30,7 @@ IS_LOADING=yes
 USE_BUNKERNET=no
 SEND_ANONYMOUS_REPORT=no
 SERVER_NAME=
+USE_IPV6=${USE_IPV6}
 DNS_RESOLVERS=${DNS_RESOLVERS}
 API_LISTEN_HTTP=${API_LISTEN_HTTP}
 API_HTTP_PORT=${API_HTTP_PORT}
@@ -146,6 +147,7 @@ function start() {
     # Generate temp conf for nginx
     # Default values
     declare -A defaults=(
+        [USE_IPV6]="no"
         [DNS_RESOLVERS]="9.9.9.9 149.112.112.112 8.8.8.8 8.8.4.4" # Quad9, Google
         [API_LISTEN_HTTP]="yes"
         [API_LISTEN_HTTPS]="no"

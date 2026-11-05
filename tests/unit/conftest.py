@@ -34,6 +34,15 @@ for _path in reversed(
         sys.path.remove(_path_str)
     sys.path.insert(0, _path_str)
 
+# Lua subprocesses (the Lua behaviour tests and the legacy scripts) resolve ``require "bunkerweb.*"`` from the shipped
+# tree, so a module such as ``bunkerweb.ipaddr`` loads without anyone exporting LUA_PATH by hand. Prepended to any
+# LUA_PATH already set (CI points it at the lrucache library); the trailing ";;" keeps the interpreter defaults.
+_BW_LUA_PATH = str(_REPO_ROOT / "src" / "bw" / "lua" / "?.lua")
+for _name in ("LUA_PATH", "LUA_PATH_5_4"):
+    _current = os.environ.get(_name)
+    if _name == "LUA_PATH" or _current:
+        os.environ[_name] = f"{_BW_LUA_PATH};{_current}" if _current else f"{_BW_LUA_PATH};;"
+
 from fixtures.engines import reset_schema  # noqa: E402
 from fixtures.db_factory import resolve_uri  # noqa: E402
 
