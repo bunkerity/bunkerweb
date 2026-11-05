@@ -1,0 +1,19 @@
+src/common/core/antibot/files/javascript.html
+  s_6745e7134058c2::t_671f41605848e7 300-306,476-479
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "557487773f3931eabefbec4ec9683b9fc6d912ee",
+  "prompts": {},
+  "sessions": {
+    "s_6745e7134058c2": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "bca3faf4-b183-4885-8067-c0f37633c1b6",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

@@ -1,0 +1,31 @@
+CHANGELOG.md
+  s_ece0b7db599386::t_b37305fa657104 6
+src/bw/entrypoint.sh
+  s_b80b2f00fb3ccc::t_5df6b8d80b7eef 92-124
+src/common/core/misc/jobs/default-server-cert.py
+  s_b80b2f00fb3ccc::t_2eda0cc162ce7e 17,138-154,156
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "30625f29babde6d01fb2e8d7ba896a351112be00",
+  "prompts": {},
+  "sessions": {
+    "s_b80b2f00fb3ccc": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a14428-4e2d-7500-ae0b-bad7b110d1f4",
+        "model": "unknown"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_ece0b7db599386": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "9ae7700f-1e09-430f-9d34-fdc016638720",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

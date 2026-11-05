@@ -1,0 +1,122 @@
+docs/zh/plugins.md
+  s_d75bec8aaf1fcf::t_dd263ff4219c6e 722
+docs/fr/features.md
+  s_6efdccdb92b706::t_f178b69a996658 938-940,946,4648
+  s_2881d3d32d7df1::t_6284b363d244e5 941-945
+docs/de/advanced.md
+  s_d75bec8aaf1fcf::t_dd263ff4219c6e 1071-1073
+docs/zh/features.md
+  s_6efdccdb92b706::t_f178b69a996658 951-952,954,4696
+  s_2881d3d32d7df1::t_6284b363d244e5 953
+docs/zh/web-ui.md
+  s_d75bec8aaf1fcf::t_5ea468e69ebb7b 574-577
+docs/de/web-ui.md
+  s_d75bec8aaf1fcf::t_5ea468e69ebb7b 697-700
+docs/advanced.md
+  s_d75bec8aaf1fcf::t_dd263ff4219c6e 1073-1075
+docs/de/upgrading.md
+  s_6efdccdb92b706::t_fc96dd3ae2e2aa 8-11,258,384-388,390-391
+  s_2881d3d32d7df1::t_253e8b6c5d21cd 389
+  s_2881d3d32d7df1::t_16864aa796381c 392
+docs/plugins.md
+  s_d75bec8aaf1fcf::t_dd263ff4219c6e 729
+docs/de/plugins.md
+  s_d75bec8aaf1fcf::t_dd263ff4219c6e 723
+docs/es/web-ui.md
+  s_d75bec8aaf1fcf::t_5ea468e69ebb7b 636-639
+CHANGELOG.md
+  s_d75bec8aaf1fcf::t_c9e8bba1d1b060 295
+  s_d75bec8aaf1fcf::t_25780a930f327a 277,288-293,296-299
+  s_413ba47e9d5e0f::t_307f044eb1f9fc 308
+  s_621eea57027fb3::t_4354d82199a29b 305-307
+  s_d75bec8aaf1fcf::t_5ea468e69ebb7b 300
+  s_6efdccdb92b706::t_b269907d12eda3 301-304,309
+  s_2881d3d32d7df1::t_253e8b6c5d21cd 294
+docs/de/features.md
+  s_2881d3d32d7df1::t_6284b363d244e5 951-954
+  s_6efdccdb92b706::t_f178b69a996658 947-950,955,4773
+docs/fr/advanced.md
+  s_d75bec8aaf1fcf::t_dd263ff4219c6e 1071-1073
+docs/zh/advanced.md
+  s_d75bec8aaf1fcf::t_dd263ff4219c6e 1071-1073
+docs/features.md
+  s_2881d3d32d7df1::t_6284b363d244e5 1030-1032
+  s_6efdccdb92b706::t_f178b69a996658 1027-1029,1033,4871
+docs/fr/upgrading.md
+  s_2881d3d32d7df1::t_253e8b6c5d21cd 314
+  s_6efdccdb92b706::t_fc96dd3ae2e2aa 8-11,205,309-313,315-316
+  s_2881d3d32d7df1::t_0f7af0c3184342 317
+docs/web-ui.md
+  s_d75bec8aaf1fcf::t_5ea468e69ebb7b 592-595
+docs/upgrading.md
+  s_6efdccdb92b706::t_fc96dd3ae2e2aa 8-11,262,361-365,367-368
+  s_2881d3d32d7df1::t_253e8b6c5d21cd 366
+  s_2881d3d32d7df1::t_bc47bcaa2a2236 369
+docs/es/advanced.md
+  s_d75bec8aaf1fcf::t_dd263ff4219c6e 1071-1073
+docs/es/features.md
+  s_2881d3d32d7df1::t_6284b363d244e5 959-963
+  s_6efdccdb92b706::t_f178b69a996658 956-958,964,4809
+docs/fr/plugins.md
+  s_d75bec8aaf1fcf::t_dd263ff4219c6e 724
+docs/fr/web-ui.md
+  s_d75bec8aaf1fcf::t_5ea468e69ebb7b 580-583
+docs/zh/upgrading.md
+  s_6efdccdb92b706::t_fc96dd3ae2e2aa 8-11,172,257-261,263-264
+  s_2881d3d32d7df1::t_253e8b6c5d21cd 262
+  s_2881d3d32d7df1::t_07431d661f514d 265
+docs/es/upgrading.md
+  s_2881d3d32d7df1::t_253e8b6c5d21cd 401
+  s_6efdccdb92b706::t_fc96dd3ae2e2aa 8-11,271,396-400,402-403
+  s_2881d3d32d7df1::t_fa233b0f092a9b 404
+docs/es/plugins.md
+  s_d75bec8aaf1fcf::t_dd263ff4219c6e 724
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "7bb46fa86aa7ea24637c485eef85eb90bc9be92b",
+  "prompts": {},
+  "sessions": {
+    "s_2881d3d32d7df1": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "e626e75b-baf0-4069-a85a-e00a3f40e0bb",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_413ba47e9d5e0f": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "6cc33ab2-5fec-4565-89b2-5169189f5a11",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_621eea57027fb3": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "f0beae4b-ab20-41be-8d5f-ce09621ca260",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_6efdccdb92b706": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "2a83a17f-b097-40da-92ac-f2bca895184d",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_d75bec8aaf1fcf": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "08466656-5bff-4eec-9534-2094aef65d6a",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

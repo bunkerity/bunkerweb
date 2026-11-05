@@ -1,0 +1,58 @@
+CHANGELOG.md
+  s_1981a6d47f11f8::t_62c65b721b7960 6
+src/ui/app/utils.py
+  s_4600783926e6d7::t_62304504378500 21
+  s_d81c21d214deb0::t_714d0b5c8032ce 374,378,380
+src/ui/app/templates/navbar.html
+  s_43fdbc5d705273::t_5e950cf3ad7989 115
+src/common/utils/common_utils.py
+  s_4600783926e6d7::t_34d8c7d12131c8 695-707,710-715
+  s_4600783926e6d7::t_418fd5b727fe29 720-721,729,737,739-741,743
+  s_4600783926e6d7::t_26d48a63a99290 708-709
+  s_43fdbc5d705273::t_b8504ff5acbaaf 716-719,722-728,730-736,738,742,744-745
+src/common/core/jobs/jobs/update-check.py
+  s_4600783926e6d7::t_3e97a762ccbb70 43,45,53-60
+  s_4600783926e6d7::t_d19454bf8cca78 20
+  s_43fdbc5d705273::t_b8504ff5acbaaf 16,62-63,73-81
+  s_d81c21d214deb0::t_7113eeed2b6aa0 61,82
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "d3591651f6321f5e27b1bf0d60cb11464a78849c",
+  "prompts": {},
+  "sessions": {
+    "s_1981a6d47f11f8": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "81d4e090-9d15-4bff-bc6b-4a6e5d427958",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_43fdbc5d705273": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "96a2837d-dbda-4515-9b39-c3bfb6ecc2a2",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_4600783926e6d7": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "577228b8-9e99-4afb-b5b7-0fab1e1a53d0",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_d81c21d214deb0": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "07074307-9b14-4cbf-a649-4f303e4e6244",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

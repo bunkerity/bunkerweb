@@ -1,0 +1,19 @@
+.github/workflows/integration-tests.yml
+  s_1add68aa482bfb::t_71b6bafdcbe8fe 1,3-9,11-12,16-27,30-39,41-115,120-201,203-267,269,271-281,283-306,308-316,318-349,351-384,386-395,397-407
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "5fcdf3d65b10df6fe1f206624dcc3a18c01488cb",
+  "prompts": {},
+  "sessions": {
+    "s_1add68aa482bfb": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "74230799-e1b8-4aa6-8711-cc0641a54a27",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

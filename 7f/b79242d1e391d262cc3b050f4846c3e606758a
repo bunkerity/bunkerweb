@@ -1,0 +1,50 @@
+src/common/core/letsencrypt/README.md
+  s_b1a8411c08a190::t_ea1b5c0bc9ef8a 31-33,62
+src/common/core/letsencrypt/letsencrypt.lua
+  s_b1a8411c08a190::t_70decac4ad3902 65,77,114-119,140-141,143,145-166
+src/common/core/letsencrypt/README.zh.md
+  s_b1a8411c08a190::t_ea1b5c0bc9ef8a 31-33,62
+src/common/core/letsencrypt/README.fr.md
+  s_b1a8411c08a190::t_ea1b5c0bc9ef8a 31-33,62
+src/common/core/letsencrypt/README.de.md
+  s_b1a8411c08a190::t_ea1b5c0bc9ef8a 31-33,62
+src/common/core/letsencrypt/plugin.json
+  s_b1a8411c08a190::t_ea1b5c0bc9ef8a 392
+src/common/core/letsencrypt/jobs/certbot-new.py
+  s_b1a8411c08a190::t_70decac4ad3902 640,645,650-654
+  s_97829bd3b546d8::t_6cf4e53e114ff0 139-141
+  s_b1a8411c08a190::t_67c3ec850ac420 106-107,129-138,142-143
+  s_b1a8411c08a190::t_e8fefee5498e2e 636,639,655,657-659,945
+tests/unit/letsencrypt/test_wildcard_explicit_scopes.py
+  s_b1a8411c08a190::t_9b01767d595f92 40,87
+  s_b1a8411c08a190::t_e2bcf9f4447ec3 1-39,41-70,72-86,88-150
+  s_97829bd3b546d8::t_a319a5c1b69e9b 71
+src/common/core/letsencrypt/README.es.md
+  s_b1a8411c08a190::t_ea1b5c0bc9ef8a 31-33,62
+tests/unit/letsencrypt/test_profile_name_limit.py
+  s_b1a8411c08a190::t_a161fd71c6cd40 1-99
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "7fb79242d1e391d262cc3b050f4846c3e606758a",
+  "prompts": {},
+  "sessions": {
+    "s_97829bd3b546d8": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b2517ec2-7793-439c-a7d8-ce741cb4a2fd",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_b1a8411c08a190": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "f1ea583f-1a26-451c-ab8c-64d0ec4cec22",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

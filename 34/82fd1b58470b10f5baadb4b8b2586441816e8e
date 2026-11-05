@@ -1,0 +1,29 @@
+src/common/core/crowdsec/crowdsec.lua
+  s_e4c14e230b8109::t_8a136e486105b4 249-253
+CHANGELOG.md
+  s_1981a6d47f11f8::t_62c65b721b7960 6
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "3482fd1b58470b10f5baadb4b8b2586441816e8e",
+  "prompts": {},
+  "sessions": {
+    "s_1981a6d47f11f8": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "81d4e090-9d15-4bff-bc6b-4a6e5d427958",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_e4c14e230b8109": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "06ea7a7a-39ac-4d68-a548-75f7fde5e3dc",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

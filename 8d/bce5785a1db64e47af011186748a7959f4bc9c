@@ -1,0 +1,82 @@
+src/common/db/requirements.txt
+  s_1cf1bb6e04a363::t_7a52bbe7629f0d 5
+  s_1cf1bb6e04a363::t_84630022b2824c 7-9,407-409,415-487
+src/deps/requirements-deps.txt
+  s_1cf1bb6e04a363::t_7a52bbe7629f0d 5
+  s_1cf1bb6e04a363::t_9309da547f12cc 11-13,203-205,370-372
+docs/requirements.txt
+  s_1cf1bb6e04a363::t_7a52bbe7629f0d 5
+  s_1cf1bb6e04a363::t_ebe044e25fcb10 28-30,674-676
+src/autoconf/requirements.txt
+  s_1cf1bb6e04a363::t_7a52bbe7629f0d 5
+  s_a47238aa09168d::t_f4a6b7e3e0e332 192-194
+src/ui/requirements.in
+  s_1cf1bb6e04a363::t_7a52bbe7629f0d 15
+  s_a47238aa09168d::t_9fcaf29df98399 4
+src/api/requirements.txt
+  s_1cf1bb6e04a363::t_7a52bbe7629f0d 5,270-272
+  s_1cf1bb6e04a363::t_d59d2b0dc8b439 432-434,582-584
+src/deps/requirements.txt
+  s_1cf1bb6e04a363::t_7a52bbe7629f0d 5
+  s_1cf1bb6e04a363::t_dd9f3ee3735a6e 15-17,53-55
+src/common/gen/requirements.txt
+  s_1cf1bb6e04a363::t_7a52bbe7629f0d 5
+  s_1cf1bb6e04a363::t_e49b7c499050c9 11-13
+src/common/db/requirements.arm.txt
+  s_1cf1bb6e04a363::t_7a52bbe7629f0d 5
+  s_1cf1bb6e04a363::t_799dcdd76c0e82 7-9,342-344,350-422
+src/scheduler/requirements.txt
+  s_1cf1bb6e04a363::t_7a52bbe7629f0d 5
+  s_1cf1bb6e04a363::t_94f66b5454b813 47-49,51-53,210-212,623-625,643-645,678-680,846-848,1212-1214
+src/api/requirements.in
+  s_1cf1bb6e04a363::t_7a52bbe7629f0d 6
+  s_1cf1bb6e04a363::t_50fa08378010e1 9
+misc/requirements-ansible.txt
+  s_912601094037fd::t_404af7329fabaa 5,339-341
+misc/requirements-mmdb.txt
+  s_912601094037fd::t_fcb6c3546fce08 5
+src/common/db/requirements.arm.in
+  s_1cf1bb6e04a363::t_63fc9c4a234e79 1,6
+src/common/db/requirements.in
+  s_1cf1bb6e04a363::t_9983bbe449d5ee 1,6
+src/deps/requirements-deps.in
+  s_1cf1bb6e04a363::t_9a02c797d4debb 1
+src/deps/requirements.in
+  s_1cf1bb6e04a363::t_10f5737ca50cb3 1
+src/scheduler/requirements.in
+  s_1cf1bb6e04a363::t_99ca656b425bd7 39
+src/ui/requirements.txt
+  s_a47238aa09168d::t_a162bd85b6f969 5,179-322,334-336,1019-1102,1127-1129
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "8dbce5785a1db64e47af011186748a7959f4bc9c",
+  "prompts": {},
+  "sessions": {
+    "s_1cf1bb6e04a363": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "1320a673-8b85-49c7-bcac-04dd8a9ac973",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_912601094037fd": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "7e62caf3-2f07-4b32-a4c2-968e1f6e8579",
+        "model": "unknown"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_a47238aa09168d": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "c6fa62a1-695d-44d4-9991-ab155dc8f5f8",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

@@ -1,0 +1,19 @@
+src/common/core/antibot/antibot.lua
+  s_5fd30d8642d574::t_a50bc38de59e50 119-139,1105-1108
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "c4a055f1e547c761204d44b391041db39966cf8d",
+  "prompts": {},
+  "sessions": {
+    "s_5fd30d8642d574": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "f2dfe12f-68ca-42fd-90b2-3518c8ddaf62",
+        "model": "claude-mythos-5-1"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

@@ -1,0 +1,19 @@
+tests/unit/common/test_plugin_checksum_setgid_stability.py
+  s_832f7b53e6eaf0::t_66c0c535c7b8da 1-224
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "c53c86ea2eec69d35d538978f884d04680bcc7e3",
+  "prompts": {},
+  "sessions": {
+    "s_832f7b53e6eaf0": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a18d0f-0df2-7e91-9ffd-d67775f14a9e",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

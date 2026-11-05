@@ -1,0 +1,32 @@
+CHANGELOG.md
+  s_80f1da85912d1b::t_72d87030ae45b6 54
+tests/unit/scheduler/test_startup_template_configs.py
+  s_3a779869b74857::t_7c939342ae147d 1-38,44-70
+  s_3a779869b74857::t_4eeb9f4485d0e1 39-43
+src/scheduler/main.py
+  s_3a779869b74857::t_38165475134915 884-887
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "cf74df40ad5b12e8917dee209d48b1132208ca5a",
+  "prompts": {},
+  "sessions": {
+    "s_3a779869b74857": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a18822-11a5-79e2-b019-6cbda30fb541",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_80f1da85912d1b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "48f28331-3ce2-4fa3-b959-69d5d1238c0a",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

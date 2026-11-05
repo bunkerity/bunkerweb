@@ -1,0 +1,28 @@
+docs/concepts.md
+  s_e0fdc018f87553::t_503ee5e59f6cb2 168-170,176
+  s_86d7b74b9aaef0::t_b07ece62ef6187 175
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "774907f7b543aeaff38b49a9413e7a106f86f401",
+  "prompts": {},
+  "sessions": {
+    "s_86d7b74b9aaef0": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "4fc3c357-c049-4ec2-ba19-44d5999518c9",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_e0fdc018f87553": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "516c2f4c-92e0-44c9-8252-467c6561feba",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

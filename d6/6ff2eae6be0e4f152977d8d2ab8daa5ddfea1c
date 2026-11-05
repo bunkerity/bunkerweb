@@ -1,0 +1,19 @@
+tests/unit/gen/test_issue_3154_reverse_proxy_location_modsecurity.py
+  s_580470c7401722::t_6a0afaf2c6fe16 1-78
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "d66ff2eae6be0e4f152977d8d2ab8daa5ddfea1c",
+  "prompts": {},
+  "sessions": {
+    "s_580470c7401722": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b3a66e4f-bb92-4d85-a5b9-f11851993728",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

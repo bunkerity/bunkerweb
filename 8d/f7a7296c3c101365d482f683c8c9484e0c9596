@@ -1,0 +1,77 @@
+tests/unit/gen/test_generated_header_overrides.py
+  s_e8917a61014dbb::t_a0cec8348dc023 16,51
+tests/unit/reverseproxy/test_trusted_cert.py
+  s_20295d7565a496::t_310951cdfc28b5 411-439
+  s_e8917a61014dbb::t_1d16fa822d33f7 81,84-90,349-389,393-404,406-410,440-445
+  s_20295d7565a496::t_d51ce3ab49089f 405
+  s_b6f88e446f5df4::t_c0626e84ff0ece 327-328,390-392
+  s_ef625e877b4921::t_fb604c6b31578b 202-206,208-217,219-221,224,234,237-238,248-249,258-259,294,299,301-326,329-342
+src/common/core/reverseproxy/jobs/trusted-cert.py
+  s_77fa5bfb272b67::t_3828617a2313e3 65,229-231,234-236,239-242,245,247-250,267
+  s_ef625e877b4921::t_fa8276dc5f88c7 246
+  s_20295d7565a496::t_d51ce3ab49089f 233,237-238,243-244,298-302
+  s_20295d7565a496::t_91a1087453e3ef 39-64,66-72,85-87,132-134,142-143,151-161,192-193,197-198,212,216-217,232
+tests/unit/gen/test_grpc_upstream_tls.py
+  s_e8917a61014dbb::t_a0cec8348dc023 186-190
+  s_ef625e877b4921::t_ca5dd1f4e039fe 195
+docs/de/upgrading.md
+  s_ef625e877b4921::t_3f1907f7770c71 257-262
+docs/es/upgrading.md
+  s_ef625e877b4921::t_9c3e39f5f95a24 270-275
+docs/fr/upgrading.md
+  s_ef625e877b4921::t_5aea033463ce16 204-209
+docs/upgrading.md
+  s_ef625e877b4921::t_f5c6875bb80aad 261-266
+docs/zh/upgrading.md
+  s_ef625e877b4921::t_89415a06cc90ce 171-176
+src/common/core/grpc/confs/server-http/grpc.conf
+  s_ef625e877b4921::t_fa7cbabb7f293b 127-129
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "8df7a7296c3c101365d482f683c8c9484e0c9596",
+  "prompts": {},
+  "sessions": {
+    "s_20295d7565a496": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "ce5b0a36-692f-4550-a1af-96b2483a870e",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_77fa5bfb272b67": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "e4d6dcd8-c3a1-419e-98ad-820b5deed5d8",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_b6f88e446f5df4": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "92798179-02f4-4f26-b193-3b177a4f7333",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_e8917a61014dbb": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "7ff350ad-bc0b-4556-8679-17b87e179e57",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_ef625e877b4921": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "e988b4f0-6198-4fab-84c3-5d48b4dea73a",
+        "model": "unknown"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

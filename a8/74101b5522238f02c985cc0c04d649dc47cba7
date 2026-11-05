@@ -1,0 +1,21 @@
+tests/unit/requirements.in
+  s_a80692ccb4af3b::t_349cafcbe83434 10-11
+tests/unit/requirements.txt
+  s_a80692ccb4af3b::t_349cafcbe83434 92-94
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "a874101b5522238f02c985cc0c04d649dc47cba7",
+  "prompts": {},
+  "sessions": {
+    "s_a80692ccb4af3b": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0fb81-f402-70d0-9a75-db3a35fa77a8",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

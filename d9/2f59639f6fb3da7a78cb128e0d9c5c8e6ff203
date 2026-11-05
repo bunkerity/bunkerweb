@@ -1,0 +1,36 @@
+src/api/app/routers/cache.py
+  s_4547f49864268d::t_574f40597afb90 3,72-74,76,110
+CHANGELOG.md
+  s_60628c795bd662::t_0c371b897c1794 11
+src/api/app/yaml_base_settings.py
+  s_4547f49864268d::t_1c86af7fb2f3d1 119-121
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "d92f59639f6fb3da7a78cb128e0d9c5c8e6ff203",
+  "prompts": {},
+  "humans": {
+    "h_a33a1e80933106": {
+      "author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  },
+  "sessions": {
+    "s_4547f49864268d": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "d16b9e3b-5ea0-43b7-85a0-c4e213a3226c",
+        "model": "unknown"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_60628c795bd662": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1869d-2e49-7ff2-8e88-cfcf2fe9cb0c",
+        "model": "unknown"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

@@ -1,0 +1,24 @@
+tests/core/aio-broker/test.sh
+  s_795e2ccdb6801b::t_fb636886ac8283 104,120-121
+tests/scripts/start.sh
+  s_795e2ccdb6801b::t_fb636886ac8283 705
+tests/scripts/utils.sh
+  s_795e2ccdb6801b::t_25edad2424f6b5 2517
+  s_795e2ccdb6801b::t_fb636886ac8283 1276,2124
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "bc2f83624537387eaa6a8e5451b8bcb25c4eeb49",
+  "prompts": {},
+  "sessions": {
+    "s_795e2ccdb6801b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "71804b16-900c-4824-8bbc-5e7434803315",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

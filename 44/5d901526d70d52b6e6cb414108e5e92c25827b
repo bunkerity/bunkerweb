@@ -1,0 +1,21 @@
+.github/workflows/container-build.yml
+  s_603218613425f8::t_013837f62ebeae 169-171,197-199
+.github/workflows/unit-tests.yml
+  s_603218613425f8::t_013837f62ebeae 112-113
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "445d901526d70d52b6e6cb414108e5e92c25827b",
+  "prompts": {},
+  "sessions": {
+    "s_603218613425f8": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "70e2adb6-a530-4b2d-b691-41fb04490362",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

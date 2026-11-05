@@ -1,0 +1,23 @@
+src/deps/src/nginx_cookie_flag_module/ngx_http_cookie_flag_filter_module.c
+  s_e1fbfd3163b991::t_60cb1e099d3326 56,246,251,257,262,268,273,279,284,290,295,301,306,358
+src/deps/misc/nginx-cookie-flag-samesite-none.patch
+  s_e1fbfd3163b991::t_95a2d98dfa1a51 9-17,25,34-81,85-96,98,103-107,109-115
+CHANGELOG.md
+  s_e1fbfd3163b991::t_096d873a903989 32
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "eb98e4752fe88296760362a7bcab1394e8dbd596",
+  "prompts": {},
+  "sessions": {
+    "s_e1fbfd3163b991": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b779971c-c931-4dde-943d-eaa0f5fa2a64",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": null
+    }
+  }
+}

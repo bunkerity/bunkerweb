@@ -1,0 +1,76 @@
+src/ui/app/static/js/pages/plugins.js
+  s_60628c795bd662::t_ddf9654a8b3d8b 86-87,531
+src/ui/app/static/locales/it.json
+  s_60628c795bd662::t_48237af84b2d0f 16-17,1244-1253,1440-1441,1738-1739,1977-1978,2001-2007
+src/ui/app/static/locales/id.json
+  s_60628c795bd662::t_7ace66ba236657 16-17,1244-1253,1440-1441,1738-1739,1977-1978,2001-2007
+src/ui/app/static/js/pages/config_edit.js
+  s_60628c795bd662::t_7df9d3821efe88 61,148,170,237
+src/ui/app/static/locales/de.json
+  s_60628c795bd662::t_ad6fae96f49166 16-17,1244-1253,1440-1441,1738-1739,1977-1978,2001-2007
+src/ui/app/templates/footer.html
+  s_60628c795bd662::t_ba8bca5cc7cd5c 14
+src/ui/app/static/locales/hi.json
+  s_60628c795bd662::t_e7b17d016286e0 16-17,1244-1253,1440-1441,1738-1739,1977-1978,2001-2007
+src/ui/app/static/locales/ar.json
+  s_60628c795bd662::t_6db05b8adbb3ba 16-17,1244-1253,1440-1441,1738-1739,1977-1978,2001-2007
+src/ui/app/static/locales/en.json
+  s_60628c795bd662::t_d0e7e90ea114d7 16-17,1244-1253,1440-1441,1738-1739,1977-1978,2001-2007
+src/ui/app/static/js/pages/jobs.js
+  s_60628c795bd662::t_31a35a575616f8 412-413
+src/ui/app/static/locales/tw.json
+  s_60628c795bd662::t_96cef002938b88 16-17,1244-1253,1440-1441,1738-1739,1977-1978,2001-2007
+src/ui/app/static/locales/ru.json
+  s_60628c795bd662::t_364cf2987af62d 16-17,1244-1253,1440-1441,1738-1739,1977-1978,2001-2007
+src/ui/app/static/locales/zh.json
+  s_60628c795bd662::t_fc231c63d3c4d3 16-17,1244-1253,1440-1441,1738-1739,1977-1978,2001-2007
+src/ui/app/static/locales/bn.json
+  s_60628c795bd662::t_038d7698e49eb7 16-17,1244-1253,1440-1441,1738-1739,1977-1978,2001-2007
+src/ui/app/static/js/pages/reports.js
+  s_60628c795bd662::t_c68c9424273e66 1225,1227
+src/ui/app/static/js/pages/configs.js
+  s_60628c795bd662::t_e9b428828b2f29 182-183
+src/ui/app/static/locales/pt.json
+  s_60628c795bd662::t_b86cb44205b802 16-17,1244-1253,1440-1441,1738-1739,1977-1978,2001-2007
+src/ui/app/static/locales/es.json
+  s_60628c795bd662::t_094a96f0019690 16-17,1244-1253,1440-1441,1738-1739,1977-1978,2001-2007
+src/ui/app/static/locales/tl.json
+  s_60628c795bd662::t_7578e0b42ec680 16-17,1244-1253,1440-1441,1738-1739,1977-1978,2001-2007
+src/ui/app/static/locales/fr.json
+  s_60628c795bd662::t_db7e55f3accfa7 16-17,1244-1253,1440-1441,1738-1739,1977-1978,2001-2007
+src/ui/app/templates/macros/docs_link.html
+  s_60628c795bd662::t_4e7e4b0908d8a6 8-17
+src/ui/app/static/locales/pl.json
+  s_60628c795bd662::t_62bcc041fc3ff7 16-17,1244-1253,1440-1441,1738-1739,1977-1978,2001-2007
+src/ui/app/static/locales/tr.json
+  s_60628c795bd662::t_02d667e8627a5f 16-17,1244-1253,1440-1441,1738-1739,1977-1978,2001-2007
+src/ui/app/static/js/pages/instances.js
+  s_60628c795bd662::t_5283fe93d76035 703,713,732
+src/ui/app/static/locales/ko.json
+  s_60628c795bd662::t_e65a55de01dc2a 16-17,1244-1253,1440-1441,1738-1739,1977-1978,2001-2007
+src/ui/app/static/locales/br.json
+  s_60628c795bd662::t_dc832518c84b04 16-17,1244-1253,1440-1441,1738-1739,1977-1978,2001-2007
+src/ui/app/static/locales/ur.json
+  s_60628c795bd662::t_e60aac25a0b4d5 16-17,1244-1253,1440-1441,1738-1739,1977-1978,2001-2007
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "363afc7c1d74a338e07399c66b0be145704db421",
+  "prompts": {},
+  "humans": {
+    "h_a33a1e80933106": {
+      "author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  },
+  "sessions": {
+    "s_60628c795bd662": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1869d-2e49-7ff2-8e88-cfcf2fe9cb0c",
+        "model": "unknown"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

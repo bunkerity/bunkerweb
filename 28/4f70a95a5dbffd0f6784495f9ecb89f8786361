@@ -1,0 +1,29 @@
+src/ui/utils/gunicorn.conf.py
+  s_79a1a220e82375::t_e93a0ae936a207 156-165,639
+CHANGELOG.md
+  s_903b7c72de84b7::t_2c9da31d2c1169 10
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "284f70a95a5dbffd0f6784495f9ecb89f8786361",
+  "prompts": {},
+  "sessions": {
+    "s_79a1a220e82375": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0d2a4-7f9d-7913-a6f8-f30d983a8f7f",
+        "model": "gpt-6-luna"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_903b7c72de84b7": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "0480e9ee-0210-41f9-84ad-79eac73433d7",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

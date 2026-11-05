@@ -1,0 +1,21 @@
+src/common/core/customcert/jobs/custom-cert.py
+  s_a578a391081c8e::t_0e19676c1e50e1 145-146
+tests/unit/customcert/test_custom_cert_fallback.py
+  s_a578a391081c8e::t_22bf8930557475 1-86
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "d26c383826463eebfe8a9d6378dfced7b472532c",
+  "prompts": {},
+  "sessions": {
+    "s_a578a391081c8e": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1a5b9-8481-7622-b8b5-86163ed02484",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

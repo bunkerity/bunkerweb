@@ -1,0 +1,38 @@
+CHANGELOG.md
+  s_19a8c59c3bacc7::t_30c5d771110f56 14
+src/bw/lua/bunkerweb/helpers.lua
+  s_6f6d4cd4c42524::t_0ab432641218f3 44,101
+  s_34ebeafbaf1b0a::t_44581d9b4504e3 30-33,36,38-42,45-47
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "689c2a0ac6b611de4fb0774d18fdd7fe18606d43",
+  "prompts": {},
+  "sessions": {
+    "s_19a8c59c3bacc7": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a143c1-15fe-7fb1-868e-56ce4bfbe4f5",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_34ebeafbaf1b0a": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a143c1-068f-7192-8986-b09d1d930732",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_6f6d4cd4c42524": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "71b43a34-2d68-413d-9e91-d38ccd377c90",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

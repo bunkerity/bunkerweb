@@ -1,0 +1,27 @@
+.github/codecov.yml
+  s_80f1da85912d1b::t_55da97d76439a7 11-49
+.github/workflows/unit-tests.yml
+  s_80f1da85912d1b::t_1f48215561795f 64-66,180
+pyproject.toml
+  s_80f1da85912d1b::t_7ab05102f70633 37
+tests/unit/common/test_coverage_gate_regression.py
+  s_80f1da85912d1b::t_44041279e22a8e 117-164
+tests/unit/coverage_gate.py
+  s_80f1da85912d1b::t_e471a73001c73c 13,15-23,25,45-48,62-64,74-78,81,85-91,101-105,107,112-118
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "6d51b9f36286027b6593189ea422922952342471",
+  "prompts": {},
+  "sessions": {
+    "s_80f1da85912d1b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "48f28331-3ce2-4fa3-b959-69d5d1238c0a",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

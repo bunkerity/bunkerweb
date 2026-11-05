@@ -1,0 +1,131 @@
+src/ui/app/static/locales/tr.json
+  s_ccb6a39f8f0b4f::t_64c0745bb6d5d4 1438-1442
+src/ui/app/static/locales/hi.json
+  s_ccb6a39f8f0b4f::t_64c0745bb6d5d4 1438-1442
+src/ui/app/static/locales/it.json
+  s_ccb6a39f8f0b4f::t_64c0745bb6d5d4 1438-1442
+src/ui/app/static/locales/de.json
+  s_ccb6a39f8f0b4f::t_64c0745bb6d5d4 1438-1442
+src/ui/app/static/locales/tl.json
+  s_ccb6a39f8f0b4f::t_64c0745bb6d5d4 1438-1442
+src/ui/app/static/locales/zh.json
+  s_ccb6a39f8f0b4f::t_64c0745bb6d5d4 1438-1442
+src/ui/app/static/locales/es.json
+  s_ccb6a39f8f0b4f::t_64c0745bb6d5d4 1438-1442
+src/ui/app/static/locales/pl.json
+  s_ccb6a39f8f0b4f::t_64c0745bb6d5d4 1438-1442
+CHANGELOG.md
+  s_1981a6d47f11f8::t_62c65b721b7960 7
+src/ui/app/utils.py
+  s_ccb6a39f8f0b4f::t_810bc2a5d766c0 31-33
+  s_ccb6a39f8f0b4f::t_967aae11b5f6f1 5
+  s_ccb6a39f8f0b4f::t_6704c74cdaa602 23-25
+src/ui/app/static/locales/bn.json
+  s_ccb6a39f8f0b4f::t_64c0745bb6d5d4 1438-1442
+src/ui/app/static/locales/en.json
+  s_ccb6a39f8f0b4f::t_64c0745bb6d5d4 1438-1442
+src/ui/app/static/locales/ko.json
+  s_ccb6a39f8f0b4f::t_64c0745bb6d5d4 1438-1442
+src/ui/app/routes/support.py
+  s_ccb6a39f8f0b4f::t_bbe511f261d9f6 1,4,7-9,11-14,19-32,51,60,83-132
+src/ui/app/templates/support.html
+  s_ccb6a39f8f0b4f::t_bbe511f261d9f6 128-156
+src/ui/app/support_bundle.py
+  s_74440e8ee3eaa4::t_5779dec9cb4657 62,64,72,75-76,79-83,98-127,137-138,202,209
+  s_ccb6a39f8f0b4f::t_64a2e38bb3d5e7 9,290,309-313,323,490-491,493,587
+  s_967d220419908f::t_b650a6b3977d53 63
+  s_ccb6a39f8f0b4f::t_bb1e32ec078d66 559-561
+  s_ccb6a39f8f0b4f::t_d360d1dd104e4d 454
+  s_8983619c1c076a::t_78ce605be11b2f 51,57,65-69,77-78,84-97,128-133,136,139-140,143-149,151-165
+  s_8983619c1c076a::t_6d7d1030220d15 134-135
+  s_ccb6a39f8f0b4f::t_6f9f9ab1025c0d 485,487,489,492,497-498,591-592
+  s_967d220419908f::t_eb99d45ad8f045 14,18,48-50,52-53
+  s_ccb6a39f8f0b4f::t_cacb4d72920bba 31-35,537-538
+  s_b6479f594574a3::t_4235428e4369b9 17,43-47,70-71,141-142,150,200-201
+  s_ccb6a39f8f0b4f::t_d915ea558bf737 1-8,10-13,15-16,19-30,36-42,54-56,58-61,73-74,166-199,203-206,210-289,291-308,314-322,324-453,455-484,486,488,494-496,499-536,539-558,562-586,588-590,593-615
+  s_8983619c1c076a::t_80ba0e17598930 208
+  s_b6479f594574a3::t_296924e85774b2 207
+src/ui/app/static/locales/ru.json
+  s_ccb6a39f8f0b4f::t_64c0745bb6d5d4 1438-1442
+src/ui/app/static/locales/ur.json
+  s_ccb6a39f8f0b4f::t_64c0745bb6d5d4 1438-1442
+src/ui/app/static/locales/fr.json
+  s_ccb6a39f8f0b4f::t_64c0745bb6d5d4 1438-1442
+src/ui/app/static/locales/id.json
+  s_ccb6a39f8f0b4f::t_64c0745bb6d5d4 1438-1442
+src/ui/app/static/locales/tw.json
+  s_ccb6a39f8f0b4f::t_64c0745bb6d5d4 1438-1442
+src/ui/main.py
+  s_ccb6a39f8f0b4f::t_c99f74455f880d 79
+  s_ad0f286dcdc004::t_8d531982958134 511
+src/ui/app/static/locales/pt.json
+  s_ccb6a39f8f0b4f::t_64c0745bb6d5d4 1438-1442
+src/ui/app/static/locales/ar.json
+  s_ccb6a39f8f0b4f::t_64c0745bb6d5d4 1438-1442
+src/ui/app/static/locales/br.json
+  s_ccb6a39f8f0b4f::t_64c0745bb6d5d4 1438-1442
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "d363779b28723cc369b293ee4cd5f36e7b7c90c2",
+  "prompts": {},
+  "sessions": {
+    "s_1981a6d47f11f8": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "81d4e090-9d15-4bff-bc6b-4a6e5d427958",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_74440e8ee3eaa4": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "d2fc8593-3c4a-4ed9-9072-5cb686233bb4",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_8983619c1c076a": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b8240175-93b6-4026-a51e-4f2be537ec75",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_967d220419908f": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "9dd19443-72ab-453c-a1ce-88ab598bd0c1",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_ad0f286dcdc004": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "a64a5657-3127-4444-a5a9-2dad9d71b783",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_b6479f594574a3": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "10472c29-45a9-41f1-ab35-79e1914e27ab",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_ccb6a39f8f0b4f": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "e2e2940b-011c-44d1-a041-56e37851e5d4",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

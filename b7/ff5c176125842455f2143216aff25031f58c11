@@ -1,0 +1,19 @@
+tests/unit/common/test_pow_port.py
+  s_13151b4a3f069c::t_6dfeb2bee0d0b3 102-108,115,123
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "b7ff5c176125842455f2143216aff25031f58c11",
+  "prompts": {},
+  "sessions": {
+    "s_13151b4a3f069c": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "ddcafb8d-5712-4ecc-be6c-db996d80dae9",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

@@ -1,0 +1,67 @@
+CHANGELOG.md
+  s_80f1da85912d1b::t_ce3b5d14d873cf 6
+docs/de/web-ui.md
+  s_6949454c48464d::t_8f7b0c1cd86f3e 173,242-245
+docs/es/web-ui.md
+  s_6949454c48464d::t_a0fb591bb47b90 173,242-245
+docs/fr/web-ui.md
+  s_6949454c48464d::t_fc98fb3d086357 173,242-245
+docs/web-ui.md
+  s_6949454c48464d::t_a6d27803880b4c 194,263-266
+docs/zh/web-ui.md
+  s_6949454c48464d::t_073e4913130f95 173,242-245
+src/common/db/alembic/mariadb_versions/a80184d2b4fc_upgrade_to_version_1_6_18_rc3.py
+  s_832f7b53e6eaf0::t_c59c8b9ae68339 1-44
+src/common/db/alembic/mysql_versions/ba395a5101f5_upgrade_to_version_1_6_18_rc3.py
+  s_832f7b53e6eaf0::t_7f76f7d7375557 1-44
+src/common/db/alembic/postgresql_versions/f34ce5d04993_upgrade_to_version_1_6_18_rc3.py
+  s_832f7b53e6eaf0::t_0bcb4327386cb8 1-44
+src/common/db/alembic/sqlite_versions/8ce60ebc52b7_upgrade_to_version_1_6_18_rc3.py
+  s_832f7b53e6eaf0::t_1441dd9a17a046 1-44
+src/common/db/model.py
+  s_6949454c48464d::t_a4e4dc945a59b0 500-509
+src/ui/app/login_throttle.py
+  s_832f7b53e6eaf0::t_3318f55823bf8d 1-90
+src/ui/app/models/ui_database.py
+  s_6949454c48464d::t_043674aa446b2d 1-2,18,475-537
+src/ui/app/routes/login.py
+  s_6949454c48464d::t_2cf2974791987a 4,8,32,36-38,102-106,130-133,138,145-148
+src/ui/app/routes/totp.py
+  s_6949454c48464d::t_f3fc054d1e149c 4,19-24,28,32-33,41
+tests/unit/ui/routes/conftest.py
+  s_6949454c48464d::t_9f48759cdeca03 156
+tests/unit/ui/routes/test_routes_login_throttle.py
+  s_832f7b53e6eaf0::t_f9dab4405e96a7 1-340
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "bda10b0075e0023e1c15dd0dae4a800db91b3fe5",
+  "prompts": {},
+  "sessions": {
+    "s_6949454c48464d": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "77301e23-9756-4ddb-9866-b0b5e58b4429",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_80f1da85912d1b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "48f28331-3ce2-4fa3-b959-69d5d1238c0a",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_832f7b53e6eaf0": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a18d0f-0df2-7e91-9ffd-d67775f14a9e",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

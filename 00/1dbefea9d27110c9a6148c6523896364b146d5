@@ -1,0 +1,79 @@
+src/common/db/alembic/postgresql_versions/8053e91a84bc_upgrade_to_version_1_6_17_rc1.py
+  s_19dc2bf8c2f1c8::t_ad59eb83c3a539 1-29
+tests/unit/backup/test_downgrade_execute.py
+  s_19dc2bf8c2f1c8::t_048052ea3fefb6 43
+tests/unit/db/test_upgrade_schema_parity.py
+  s_19dc2bf8c2f1c8::t_048052ea3fefb6 678
+  s_19dc2bf8c2f1c8::t_3d8e6c81c9da47 752-759,765
+tests/unit/db/test_upgrade_replay_from_1_6_16.py
+  s_19dc2bf8c2f1c8::t_e9ebf64768dedd 6-7
+src/common/core/backup/downgrade-manifest.json
+  s_19dc2bf8c2f1c8::t_aa96928f738cd6 70,115,161,180,197,216,233,279,327,346,363,382
+  s_19dc2bf8c2f1c8::t_63e873a178d86b 42-47,58,85,131,175,181,211,217,248,295,341,347,377,383
+tests/unit/db/test_upgrade_replay_from_1_6_17_rc1.py
+  s_19dc2bf8c2f1c8::t_e9ebf64768dedd 1-182
+tests/unit/db/test_certificate_migrations.py
+  s_19dc2bf8c2f1c8::t_048052ea3fefb6 17-20
+src/common/db/alembic/mariadb_versions/ee638d4e1982_upgrade_to_version_1_6_17_rc1.py
+  s_19dc2bf8c2f1c8::t_ad59eb83c3a539 1-29
+src/common/db/alembic/sqlite_versions/7a6ea3dfdc62_upgrade_to_version_1_6_17_rc1.py
+  s_19dc2bf8c2f1c8::t_ad59eb83c3a539 1-29
+src/common/db/alembic/mysql_versions/fd7d5270fa73_upgrade_to_version_1_6_17_rc1.py
+  s_19dc2bf8c2f1c8::t_ad59eb83c3a539 1-29
+src/common/db/alembic/mariadb_versions/bddf0fbfac2d_upgrade_to_version_1_7_0_alpha.py
+  s_219311cce6f482::t_98fa222da2ab14 3-5,16-17,27-422,429-630
+src/common/db/alembic/mysql_versions/3262a37cf54c_upgrade_to_version_1_7_0_alpha.py
+  s_5a35bb898a3739::t_6dc4c26dfce9a3 3-5,16-17,27-422,429-630
+src/common/db/alembic/postgresql_versions/771093deaf74_upgrade_to_version_1_7_0_alpha.py
+  s_03bf9f38fabbc8::t_3545696d0c9280 3-5,17-18,28,30-31,41-400,407-573
+src/common/db/alembic/sqlite_versions/66114d1192c5_upgrade_to_version_1_7_0_alpha.py
+  s_20127ce9fe3215::t_c6d85d1dcc3bda 3-5,16-17,27-43,45-76,78-111,113-133,135-158,160-171,173-183,185-199,201-227,229-240,242-247,249-258,260-272,274-291,293-454,462-722
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "001dbefea9d27110c9a6148c6523896364b146d5",
+  "prompts": {},
+  "sessions": {
+    "s_03bf9f38fabbc8": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "ea6bc699-07f2-4bc3-9b01-a3276f1986cf",
+        "model": "unknown"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_19dc2bf8c2f1c8": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "9ef84139-8bf3-40c1-8941-4d86369d0798",
+        "model": "unknown"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_20127ce9fe3215": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "176cd8f5-203f-4410-95e5-6feee45f1847",
+        "model": "unknown"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_219311cce6f482": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "d5752036-ea40-4676-8b09-74a3d878087a",
+        "model": "unknown"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_5a35bb898a3739": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "6108f795-5b6f-48d6-903d-383b02099774",
+        "model": "unknown"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

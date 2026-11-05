@@ -1,0 +1,33 @@
+CHANGELOG.md
+  s_ece0b7db599386::t_b37305fa657104 9
+src/common/confs/server-http/access-lua.conf
+  s_fed092df95071c::t_aeec29f6593ebc 41-42,44-45,75-76
+src/common/confs/server-http/server.conf
+  s_fed092df95071c::t_3c690a949afd9d 8-11,39-42
+src/common/core/crowdsec/lib/bouncer.lua
+  s_fed092df95071c::t_382c15f1808323 584-586
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "a71fb5122497507bb654ad112d9a28490e6cce00",
+  "prompts": {},
+  "sessions": {
+    "s_ece0b7db599386": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "9ae7700f-1e09-430f-9d34-fdc016638720",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_fed092df95071c": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "881ed196-a754-44f3-9561-9976b2e22e73",
+        "model": "unknown"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}
