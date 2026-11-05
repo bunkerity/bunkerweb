@@ -1888,7 +1888,7 @@
         "last_seen": "Örneğin en son görüldüğü tarih ve saat",
         "method": "Örneğin oluşturulma yöntemi (örn. ui, autoconf)",
         "name": "Kullanıcı tanımlı veya otomatik oluşturulan Instance adı",
-        "select_all": "Tüm Instance'şaro seç",
+        "select_all": "Tüm Instance'ları seç",
         "type": "Instance türü (örn. Konteyner, Statik)"
       },
       "jobs": {
