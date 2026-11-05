@@ -86,7 +86,7 @@
     <script defer>
       window.addEventListener('DOMContentLoaded', () => {
         const bannerEl = document.querySelector('aside.md-banner');
-        let defaultContent = [{ "content" : "\u003cp\u003eInicia una prueba gratuita de 30 d\u00edas de BunkerWeb PRO desde el \u003ca style=\"text-decoration:underline; color :  white;\" href=\"https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self\u0026utm_source=doc\"\u003eBunkerWeb Panel\u003c/a\u003e.\u003c/p\u003e" },
+        let defaultContent = [{ "content" : "\u003cp\u003eInicia una prueba gratuita de 30 d\u00edas de BunkerWeb PRO desde el \u003ca style=\"text-decoration:underline; color :  white;\" href=\"https://panel.bunkerweb.io/store/bunkerweb-pro?language=spanish\u0026amp;utm_campaign=self\u0026amp;utm_source=doc\"\u003eBunkerWeb Panel\u003c/a\u003e: pide un plan y mant\u00e9n \u201cFree 30 Days Trial\u201d como m\u00e9todo de pago al finalizar la compra. (\u003ca style=\"text-decoration:underline; color :  white;\" href=\"../#pro-version\"\u003egu\u00eda paso a paso\u003c/a\u003e)\u003c/p\u003e" },
         { "content" : "\u003cp\u003e\u00bfNecesitas asistencia pr\u00e9mium o asesoramiento personalizado sobre BunkerWeb? Consulta nuestros \u003ca style=\"text-decoration:underline; color :  white;\" href=\"https://panel.bunkerweb.io/?utm_campaign=self\u0026utm_source=doc#services\"\u003eservicios profesionales\u003c/a\u003e.\u003c/p\u003e" },
         { "content" : "\u003cp\u003eForma parte de la comunidad de Bunker uni\u00e9ndote al \u003ca style=\"text-decoration:underline; color: white;\" href=\"https://discord.bunkerweb.io\"\u003echat de Discord\u003c/a\u003e y s\u00edguenos en \u003ca style=\"text-decoration:underline; color: white;\" href=\"https://www.linkedin.com/company/bunkerity/\"\u003eLinkedIn\u003c/a\u003e.\u003c/p\u003e" }
         ]
@@ -1245,7 +1245,7 @@
 <h2 id="configuraciones">Configuraciones<a class="headerlink" href="#configuraciones" title="Permanent link">&para;</a></h2>
 <div class="admonition tip">
 <p class="admonition-title">Configuraciones de BunkerWeb PRO</p>
-<p>Algunos plugins están reservados para la <strong>versión PRO</strong>. Inicia una prueba gratuita de 30 días de BunkerWeb PRO desde el <a href="https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&amp;utm_source=doc">Panel de BunkerWeb</a>.</p>
+<p>Algunos plugins están reservados para la <strong>versión PRO</strong>. Inicia una prueba gratuita de 30 días de BunkerWeb PRO desde el <a href="https://panel.bunkerweb.io/store/bunkerweb-pro?language=spanish&amp;utm_campaign=self&amp;utm_source=doc">Panel de BunkerWeb</a>: pide un plan y mantén <strong>Free 30 Days Trial</strong> como método de pago al finalizar la compra (<a href="../#pro-version">guía paso a paso</a>).</p>
 </div>
 <p>Una vez que BunkerWeb esté integrado en tu entorno, necesitarás configurarlo para servir y proteger tus aplicaciones web.</p>
 <p>La configuración de BunkerWeb se realiza utilizando lo que llamamos "configuraciones" o "variables". Cada configuración se identifica por un nombre como <code>AUTO_LETS_ENCRYPT</code> o <code>USE_ANTIBOT</code>. Puedes asignar valores a estas configuraciones para configurar BunkerWeb.</p>
@@ -1401,7 +1401,7 @@ app3.example.com_USE_BAD_BEHAVIOR=no
 <p class="admonition-title">Notas</p>
 <ul>
 <li><strong>PostgreSQL</strong>: Las imágenes basadas en Alpine, incluida all-in-one, incluyen ahora el cliente <code>v18</code>, por lo que <code>v18</code> y versiones anteriores son compatibles de forma predeterminada.</li>
-<li><strong>Linux</strong>: La compatibilidad depende de los paquetes de tu distribución. Si es necesario, puedes instalar los clientes de la base de datos manualmente desde los repositorios del proveedor (esto suele ser necesario en RHEL).</li>
+<li><strong>Linux</strong>: La compatibilidad depende de los paquetes de tu distribución. Si es necesario, puedes instalar los clientes de la base de datos manualmente desde los repositorios del proveedor (esto suele ser necesario en RHEL). Si la versión principal del servidor PostgreSQL es más reciente que la del cliente Linux <code>pg_dump</code>, las copias fallan con <code>server version mismatch</code>; instala un cliente correspondiente desde el <a href="../integrations/#debian-ubuntu-postgresql-backups">repositorio PGDG</a>.</li>
 <li><strong>SQLite</strong>: Se entrega con los paquetes y está listo para usar.</li>
 </ul>
 </div>

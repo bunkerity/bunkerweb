@@ -2364,6 +2364,32 @@ This provides a seamless, out-of-the-box integration for powerful intrusion prev
 
     This is required for the BunkerWeb Scheduler to connect to your external database.
 
+#### Debian/Ubuntu PostgreSQL backups {#debian-ubuntu-postgresql-backups}
+
+!!! warning "PostgreSQL client major version"
+    Debian 12 (Bookworm) ships PostgreSQL client 15; Debian 13 (Trixie), 17; Ubuntu 22.04 (Jammy), 14; Ubuntu 24.04 (Noble), 16; Ubuntu 26.04 (Resolute), 18. If your external PostgreSQL server has a newer major version, scheduled backups and `bwcli plugin backup save` fail with `server version mismatch` from `pg_dump`. Install the matching `postgresql-client-<N>` manually from the [official PGDG repository for Debian](https://www.postgresql.org/download/linux/debian/) or [Ubuntu](https://www.postgresql.org/download/linux/ubuntu/) on the host running the Scheduler or the backup command. Set `PG_MAJOR` below to your server's major version (`18` is an example); these commands install only the client, not a database server.
+
+    ```bash
+    sudo apt install curl ca-certificates
+    sudo install -d /usr/share/postgresql-common/pgdg
+    sudo curl -o /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc --fail https://www.postgresql.org/media/keys/ACCC4CF8.asc
+    . /etc/os-release
+    sudo tee /etc/apt/sources.list.d/pgdg.sources > /dev/null <<EOF
+    Types: deb
+    URIs: https://apt.postgresql.org/pub/repos/apt
+    Suites: ${VERSION_CODENAME}-pgdg
+    Architectures: $(dpkg --print-architecture)
+    Components: main
+    Signed-By: /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc
+    EOF
+    sudo apt update
+    PG_MAJOR=18
+    sudo apt install "postgresql-client-${PG_MAJOR}"
+    pg_dump --version
+    ```
+
+    Check that `pg_dump --version` reports the matching client before running backups. The installer only displays this warning; it does not configure PGDG or install a newer client.
+
 #### After installation
 
 Once installation is complete, the script provides mode-specific next steps to help you get started with your BunkerWeb deployment.
@@ -2423,13 +2449,6 @@ Please ensure that you have **NGINX 1.30.6 installed before installing BunkerWeb
     sudo apt install -y --allow-downgrades nginx=1.30.6-1~$(lsb_release -cs)
     ```
 
-    !!! warning "Testing/dev version"
-        If you use the `testing` or `dev` version, you will need to add the `force-bad-version` directive to your `/etc/dpkg/dpkg.cfg` file before installing BunkerWeb.
-
-        ```shell
-        echo "force-bad-version" | sudo tee -a /etc/dpkg/dpkg.cfg
-        ```
-
     !!! example "Disable the setup wizard"
         If you don't want to use the setup wizard of the web UI when BunkerWeb is installed, export the following variable:
 
@@ -2471,13 +2490,6 @@ Please ensure that you have **NGINX 1.30.6 installed before installing BunkerWeb
     sudo apt install -y --allow-downgrades nginx=1.30.6-1~$(lsb_release -cs)
     ```
 
-    !!! warning "Testing/dev version"
-        If you use the `testing` or `dev` version, you will need to add the `force-bad-version` directive to your `/etc/dpkg/dpkg.cfg` file before installing BunkerWeb.
-
-        ```shell
-        echo "force-bad-version" | sudo tee -a /etc/dpkg/dpkg.cfg
-        ```
-
     !!! example "Disable the setup wizard"
         If you don't want to use the setup wizard of the web UI when BunkerWeb is installed, export the following variable:
 
@@ -2508,13 +2520,10 @@ Please ensure that you have **NGINX 1.30.6 installed before installing BunkerWeb
         sudo dnf config-manager setopt updates-testing.enabled=1
         ```
 
-    !!! warning "Fedora ships NGINX 1.30.5"
-        Fedora 43 and 44 do not provide NGINX 1.30.6 yet, so the BunkerWeb packages for Fedora are built against NGINX 1.30.5 and expect `nginx-1.30.5`. Install that version on Fedora; the pin moves to 1.30.6 as soon as Fedora publishes it.
-
-    Fedora already provides NGINX 1.30.5 that we support
+    Fedora already provides NGINX 1.30.6 that we support
 
     ```shell
-    sudo dnf install -y --allowerasing nginx-1.30.5
+    sudo dnf install -y --allowerasing nginx-1.30.6
     ```
 
     !!! example "Disable the setup wizard"

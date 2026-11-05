@@ -79,10 +79,10 @@ Order your [BunkerWeb Cloud instance](https://panel.bunkerweb.io/store/bunkerweb
 
 If you are interested in the BunkerWeb Cloud offering, don't hesitate to [contact us](https://panel.bunkerweb.io/contact.php?utm_campaign=self&utm_source=doc) so we can discuss your needs.
 
-## PRO version
+## PRO version {#pro-version}
 
 !!! tip "BunkerWeb PRO free trial"
-    Start a 30-day BunkerWeb PRO free trial from the [BunkerWeb Panel](https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc).
+    Start a 30-day BunkerWeb PRO free trial from the [BunkerWeb Panel](https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc): order a plan, then keep **Free 30 Days Trial** as the payment method at checkout ([step-by-step guide](#pro-version)).
 
 When using BunkerWeb, you have the choice of the version you want to use: open-source or PRO.
 
@@ -90,11 +90,14 @@ Whether it's enhanced security, an enriched user experience, or technical monito
 
 In the documentation or the user interface, PRO features are annotated with a crown  to distinguish them from those integrated into the open-source version.
 
-You can upgrade from the open-source version to the PRO one easily and at any time. The process is straightforward:
+You can upgrade from the open-source version to the PRO one easily and at any time. To start your 30-day free trial:
 
-- Start your [30-day BunkerWeb PRO free trial](https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc)
-- Once connected to the client area, copy your PRO license key
-- Paste your private key into BunkerWeb using the [web UI](https://docs.bunkerweb.io/testing/web-ui/#upgrade-to-pro) or [specific setting](https://docs.bunkerweb.io/testing/features/#pro)
+1. Open the [BunkerWeb Panel store](https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc) and click **Order Now** on the **STANDARD** or **ENTERPRISE** plan.
+2. Keep the **Monthly** billing cycle, choose the **Number of services**, then click **Continue**. The configuration summary still shows the full price: the trial is applied at checkout.
+3. On the **Review & Checkout** page, under **Payment Method**, keep **Free 30 Days Trial** selected. **Total Due Today** then shows 0.00 €.
+4. Create your account (or log in), accept the Terms of Service and click **Place Order**.
+5. Once connected to the client area, copy your PRO license key.
+6. Paste it into BunkerWeb using the [web UI](https://docs.bunkerweb.io/testing/web-ui/#upgrade-to-pro) or a [specific setting](https://docs.bunkerweb.io/testing/features/#pro).
 
 Do not hesitate to visit the [BunkerWeb panel](https://panel.bunkerweb.io/knowledgebase?utm_campaign=self&utm_source=doc) or [contact us](https://panel.bunkerweb.io/contact.php?utm_campaign=self&utm_source=doc) if you have any questions regarding the PRO version.
 

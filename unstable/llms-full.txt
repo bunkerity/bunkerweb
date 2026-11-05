@@ -85,10 +85,10 @@ Order your [BunkerWeb Cloud instance](https://panel.bunkerweb.io/store/bunkerweb
 
 If you are interested in the BunkerWeb Cloud offering, don't hesitate to [contact us](https://panel.bunkerweb.io/contact.php?utm_campaign=self&utm_source=doc) so we can discuss your needs.
 
-## PRO version
+## PRO version {#pro-version}
 
 !!! tip "BunkerWeb PRO free trial"
-    Start a 30-day BunkerWeb PRO free trial from the [BunkerWeb Panel](https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc).
+    Start a 30-day BunkerWeb PRO free trial from the [BunkerWeb Panel](https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc): order a plan, then keep **Free 30 Days Trial** as the payment method at checkout ([step-by-step guide](#pro-version)).
 
 When using BunkerWeb, you have the choice of the version you want to use: open-source or PRO.
 
@@ -96,11 +96,14 @@ Whether it's enhanced security, an enriched user experience, or technical monito
 
 In the documentation or the user interface, PRO features are annotated with a crown  to distinguish them from those integrated into the open-source version.
 
-You can upgrade from the open-source version to the PRO one easily and at any time. The process is straightforward:
+You can upgrade from the open-source version to the PRO one easily and at any time. To start your 30-day free trial:
 
-- Start your [30-day BunkerWeb PRO free trial](https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc)
-- Once connected to the client area, copy your PRO license key
-- Paste your private key into BunkerWeb using the [web UI](https://docs.bunkerweb.io/testing/web-ui/#upgrade-to-pro) or [specific setting](https://docs.bunkerweb.io/testing/features/#pro)
+1. Open the [BunkerWeb Panel store](https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc) and click **Order Now** on the **STANDARD** or **ENTERPRISE** plan.
+2. Keep the **Monthly** billing cycle, choose the **Number of services**, then click **Continue**. The configuration summary still shows the full price: the trial is applied at checkout.
+3. On the **Review & Checkout** page, under **Payment Method**, keep **Free 30 Days Trial** selected. **Total Due Today** then shows 0.00 €.
+4. Create your account (or log in), accept the Terms of Service and click **Place Order**.
+5. Once connected to the client area, copy your PRO license key.
+6. Paste it into BunkerWeb using the [web UI](https://docs.bunkerweb.io/testing/web-ui/#upgrade-to-pro) or a [specific setting](https://docs.bunkerweb.io/testing/features/#pro).
 
 Do not hesitate to visit the [BunkerWeb panel](https://panel.bunkerweb.io/knowledgebase?utm_campaign=self&utm_source=doc) or [contact us](https://panel.bunkerweb.io/contact.php?utm_campaign=self&utm_source=doc) if you have any questions regarding the PRO version.
 
@@ -160,7 +163,7 @@ If you think a new integration should be supported, do not hesitate to open a [n
 ## Settings
 
 !!! tip "BunkerWeb PRO settings"
-    Some plugins are reserved for the **PRO version**. Start a 30-day BunkerWeb PRO free trial from the [BunkerWeb panel](https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc).
+    Some plugins are reserved for the **PRO version**. Start a 30-day BunkerWeb PRO free trial from the [BunkerWeb panel](https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc): order a plan, then keep **Free 30 Days Trial** as the payment method at checkout ([step-by-step guide](https://docs.bunkerweb.io/testing/index/#pro-version)).
 
 Once BunkerWeb is integrated into your environment, you will need to configure it to serve and protect your web applications.
 
@@ -283,7 +286,7 @@ By specifying the appropriate database URI in the configuration, you can seamles
     - **PostgreSQL**: Alpine-based images, including all-in-one, now ship with the `v18` client, so `v18` and earlier are supported out of the box.
     - **MariaDB**: Alpine-based images ship the `v11.8` client, which works against MariaDB `v13` servers, including the built-in backup and restore.
     - **MySQL**: The Alpine-based images use the MariaDB client for backups, which works against MySQL `v9` (`9.7` LTS) and `26.x` (the new year-based Innovation releases), including the built-in backup and restore.
-    - **Linux**: Support depends on your distribution's packages. If needed, you can install database clients manually from vendor repositories (RHEL typically requires this).
+    - **Linux**: Support depends on your distribution's packages. If needed, you can install database clients manually from vendor repositories (RHEL typically requires this). If the PostgreSQL server major is newer than the Linux `pg_dump` client, backups fail with `server version mismatch`; install a matching client from the [PGDG repository](https://docs.bunkerweb.io/testing/integrations/#debian-ubuntu-postgresql-backups).
     - **SQLite**: Ships with the packages and is ready to use.
 
 Helpful external resources for installing database clients:
@@ -3643,6 +3646,32 @@ This provides a seamless, out-of-the-box integration for powerful intrusion prev
 
     This is required for the BunkerWeb Scheduler to connect to your external database.
 
+#### Debian/Ubuntu PostgreSQL backups {#debian-ubuntu-postgresql-backups}
+
+!!! warning "PostgreSQL client major version"
+    Debian 12 (Bookworm) ships PostgreSQL client 15; Debian 13 (Trixie), 17; Ubuntu 22.04 (Jammy), 14; Ubuntu 24.04 (Noble), 16; Ubuntu 26.04 (Resolute), 18. If your external PostgreSQL server has a newer major version, scheduled backups and `bwcli plugin backup save` fail with `server version mismatch` from `pg_dump`. Install the matching `postgresql-client-<N>` manually from the [official PGDG repository for Debian](https://www.postgresql.org/download/linux/debian/) or [Ubuntu](https://www.postgresql.org/download/linux/ubuntu/) on the host running the Scheduler or the backup command. Set `PG_MAJOR` below to your server's major version (`18` is an example); these commands install only the client, not a database server.
+
+    ```bash
+    sudo apt install curl ca-certificates
+    sudo install -d /usr/share/postgresql-common/pgdg
+    sudo curl -o /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc --fail https://www.postgresql.org/media/keys/ACCC4CF8.asc
+    . /etc/os-release
+    sudo tee /etc/apt/sources.list.d/pgdg.sources > /dev/null <<EOF
+    Types: deb
+    URIs: https://apt.postgresql.org/pub/repos/apt
+    Suites: ${VERSION_CODENAME}-pgdg
+    Architectures: $(dpkg --print-architecture)
+    Components: main
+    Signed-By: /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc
+    EOF
+    sudo apt update
+    PG_MAJOR=18
+    sudo apt install "postgresql-client-${PG_MAJOR}"
+    pg_dump --version
+    ```
+
+    Check that `pg_dump --version` reports the matching client before running backups. The installer only displays this warning; it does not configure PGDG or install a newer client.
+
 #### After installation
 
 Once installation is complete, the script provides mode-specific next steps to help you get started with your BunkerWeb deployment.
@@ -3702,13 +3731,6 @@ Please ensure that you have **NGINX 1.30.6 installed before installing BunkerWeb
     sudo apt install -y --allow-downgrades nginx=1.30.6-1~$(lsb_release -cs)
     ```
 
-    !!! warning "Testing/dev version"
-        If you use the `testing` or `dev` version, you will need to add the `force-bad-version` directive to your `/etc/dpkg/dpkg.cfg` file before installing BunkerWeb.
-
-        ```shell
-        echo "force-bad-version" | sudo tee -a /etc/dpkg/dpkg.cfg
-        ```
-
     !!! example "Disable the setup wizard"
         If you don't want to use the setup wizard of the web UI when BunkerWeb is installed, export the following variable:
 
@@ -3750,13 +3772,6 @@ Please ensure that you have **NGINX 1.30.6 installed before installing BunkerWeb
     sudo apt install -y --allow-downgrades nginx=1.30.6-1~$(lsb_release -cs)
     ```
 
-    !!! warning "Testing/dev version"
-        If you use the `testing` or `dev` version, you will need to add the `force-bad-version` directive to your `/etc/dpkg/dpkg.cfg` file before installing BunkerWeb.
-
-        ```shell
-        echo "force-bad-version" | sudo tee -a /etc/dpkg/dpkg.cfg
-        ```
-
     !!! example "Disable the setup wizard"
         If you don't want to use the setup wizard of the web UI when BunkerWeb is installed, export the following variable:
 
@@ -3787,13 +3802,10 @@ Please ensure that you have **NGINX 1.30.6 installed before installing BunkerWeb
         sudo dnf config-manager setopt updates-testing.enabled=1
         ```
 
-    !!! warning "Fedora ships NGINX 1.30.5"
-        Fedora 43 and 44 do not provide NGINX 1.30.6 yet, so the BunkerWeb packages for Fedora are built against NGINX 1.30.5 and expect `nginx-1.30.5`. Install that version on Fedora; the pin moves to 1.30.6 as soon as Fedora publishes it.
-
-    Fedora already provides NGINX 1.30.5 that we support
+    Fedora already provides NGINX 1.30.6 that we support
 
     ```shell
-    sudo dnf install -y --allowerasing nginx-1.30.5
+    sudo dnf install -y --allowerasing nginx-1.30.6
     ```
 
     !!! example "Disable the setup wizard"
@@ -6762,7 +6774,7 @@ This pattern allows you to manage multiple configurations for features like reve
 
 You can reorder plugin execution with space-separated lists:
 
-- Global phases: `PLUGINS_ORDER_INIT`, `PLUGINS_ORDER_INIT_WORKER`, `PLUGINS_ORDER_TIMER`.
+- Global phases: `PLUGINS_ORDER_INIT`, `PLUGINS_ORDER_INIT_WORKER`, `PLUGINS_ORDER_SSL_CLIENT_HELLO`, `PLUGINS_ORDER_TIMER`.
 - Per-site phases: `PLUGINS_ORDER_SET`, `PLUGINS_ORDER_ACCESS`, `PLUGINS_ORDER_SSL_CERTIFICATE`, `PLUGINS_ORDER_HEADER`, `PLUGINS_ORDER_LOG`, `PLUGINS_ORDER_PREREAD`, `PLUGINS_ORDER_LOG_STREAM`, `PLUGINS_ORDER_LOG_DEFAULT`.
 - Semantics: listed plugins run first for that phase; all remaining plugins still run afterward in their normal sequence. Separate IDs with spaces only.
 
@@ -6795,7 +6807,7 @@ The value is a list of reasons separated by spaces, among `crowdsec`, `bad_behav
 
     | Setting                 | Default           | Context   | Multiple | Description                                                                                                                                                                                                                                                                                                                           |
     | ----------------------- | ----------------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-    | `SERVER_NAME`           | `www.example.com` | multisite | No       | **Primary Domain:** The main domain name for this site. Required in multisite mode.                                                                                                                                                                                                                                                   |
+    | `SERVER_NAME`           | `www.example.com` | multisite | No       | **Primary Domain:** The main domain name (or IP address) for this site. Required in multisite mode.                                                                                                                                                                                                                                   |
     | `BUNKERWEB_INSTANCES`   | `127.0.0.1`       | global    | No       | **BunkerWeb Instances:** List of BunkerWeb instances separated with spaces.                                                                                                                                                                                                                                                           |
     | `MULTISITE`             | `no`              | global    | No       | **Multiple Sites:** Set to `yes` to enable hosting multiple websites with different configurations.                                                                                                                                                                                                                                   |
     | `SECURITY_MODE`         | `block`           | multisite | No       | **Security Level:** Controls the level of security enforcement. Options: `detect` or `block`.                                                                                                                                                                                                                                         |
@@ -7088,18 +7100,18 @@ The following settings are shared across all challenge mechanisms:
 
 BunkerWeb allows you to specify certain users, IPs, or requests that should bypass the antibot challenge completely. This is useful for whitelisting trusted services, internal networks, or specific pages that should always be accessible without challenge:
 
-| Setting                       | Default | Context   | Multiple | Description                                                                                                                                                                           |
-| ----------------------------- | ------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `ANTIBOT_IGNORE_URI`          |         | multisite | no       | **Excluded URLs:** List of URI regex patterns separated by spaces that should bypass the challenge. Patterns are checked against the path and the full request URI with query string. |
-| `ANTIBOT_IGNORE_IP`           |         | multisite | no       | **Excluded IPs:** List of IP addresses or CIDR ranges separated by spaces that should bypass the challenge.                                                                           |
-| `ANTIBOT_IGNORE_RDNS`         |         | multisite | no       | **Excluded Reverse DNS:** List of reverse DNS suffixes separated by spaces that should bypass the challenge.                                                                          |
-| `ANTIBOT_RDNS_GLOBAL`         | `yes`   | multisite | no       | **Global IPs Only:** If set to `yes`, only perform reverse DNS checks on public IP addresses.                                                                                         |
-| `ANTIBOT_IGNORE_ASN`          |         | multisite | no       | **Excluded ASNs:** List of ASN numbers separated by spaces that should bypass the challenge.                                                                                          |
-| `ANTIBOT_IGNORE_USER_AGENT`   |         | multisite | no       | **Excluded User Agents:** List of User-Agent regex patterns separated by spaces that should bypass the challenge.                                                                     |
-| `ANTIBOT_IGNORE_HEADER_NAME`  |         | multisite | yes      | **Header name:** Name of a request header that makes the request bypass the antibot challenge. Numbered pairs: `_NAME_1` goes with `_VALUE_1`.                                        |
-| `ANTIBOT_IGNORE_HEADER_VALUE` |         | multisite | yes      | **Header value:** PCRE regex the header value must match. Leave empty to match on the header being present, whatever it carries.                                                      |
-| `ANTIBOT_IGNORE_COUNTRY`      |         | multisite | no       | **Excluded Countries:** List of ISO 3166-1 alpha-2 country codes separated by spaces that should bypass the challenge.                                                                |
-| `ANTIBOT_ONLY_COUNTRY`        |         | multisite | no       | **Only Challenge Countries:** List of ISO 3166-1 alpha-2 country codes that must solve the challenge. All other countries are skipped.                                                |
+| Setting                       | Default | Context   | Multiple | Description                                                                                                                                                                                          |
+| ----------------------------- | ------- | --------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `ANTIBOT_IGNORE_URI`          |         | multisite | no       | **Excluded URLs:** List of URI regex patterns separated by spaces that should bypass the challenge. Patterns are matched against the normalized path, alone or followed by `?` and the query string. |
+| `ANTIBOT_IGNORE_IP`           |         | multisite | no       | **Excluded IPs:** List of IP addresses or CIDR ranges separated by spaces that should bypass the challenge.                                                                                          |
+| `ANTIBOT_IGNORE_RDNS`         |         | multisite | no       | **Excluded Reverse DNS:** List of reverse DNS suffixes separated by spaces that should bypass the challenge.                                                                                         |
+| `ANTIBOT_RDNS_GLOBAL`         | `yes`   | multisite | no       | **Global IPs Only:** If set to `yes`, only perform reverse DNS checks on public IP addresses.                                                                                                        |
+| `ANTIBOT_IGNORE_ASN`          |         | multisite | no       | **Excluded ASNs:** List of ASN numbers separated by spaces that should bypass the challenge.                                                                                                         |
+| `ANTIBOT_IGNORE_USER_AGENT`   |         | multisite | no       | **Excluded User Agents:** List of User-Agent regex patterns separated by spaces that should bypass the challenge.                                                                                    |
+| `ANTIBOT_IGNORE_HEADER_NAME`  |         | multisite | yes      | **Header name:** Name of a request header that makes the request bypass the antibot challenge. Numbered pairs: `_NAME_1` goes with `_VALUE_1`.                                                       |
+| `ANTIBOT_IGNORE_HEADER_VALUE` |         | multisite | yes      | **Header value:** PCRE regex the header value must match. Leave empty to match on the header being present, whatever it carries.                                                                     |
+| `ANTIBOT_IGNORE_COUNTRY`      |         | multisite | no       | **Excluded Countries:** List of ISO 3166-1 alpha-2 country codes separated by spaces that should bypass the challenge.                                                                               |
+| `ANTIBOT_ONLY_COUNTRY`        |         | multisite | no       | **Only Challenge Countries:** List of ISO 3166-1 alpha-2 country codes that must solve the challenge. All other countries are skipped.                                                               |
 
 !!! warning "A header rule is a shared secret"
     Any client can send a header, so a header rule is a bearer token, not a network control. Serve it over HTTPS only, anchor the regex with `^` and `$` (the match is not anchored by default, so `abc` also matches `xabcx`), and rotate the value. When BunkerWeb sits behind a proxy, that proxy must overwrite any client-supplied copy of the header. These rules are HTTP only: a stream service carries no request headers, so nothing matches there.
@@ -8075,7 +8087,7 @@ The BunkerNet plugin enables collective threat intelligence sharing between Bunk
 **How it works:**
 
 1. Your BunkerWeb instance automatically registers with the BunkerNet API to receive a unique identifier.
-2. When your instance detects and blocks a malicious IP address or behavior, it anonymously reports the threat to BunkerNet.
+2. When your instance detects and blocks a malicious IP address or behavior, it reports the threat to BunkerNet. The fields of a report are listed in the "What a report contains" note below.
 3. BunkerNet aggregates threat intelligence from all participating instances and distributes the consolidated database.
 4. Your instance regularly downloads an updated database of known threats from BunkerNet.
 5. This collective intelligence allows your instance to proactively block IP addresses that have exhibited malicious behavior on other BunkerWeb instances.
@@ -8084,9 +8096,9 @@ The BunkerNet plugin enables collective threat intelligence sharing between Bunk
 
       1. **Collective Defense:** Leverage the security findings from thousands of other BunkerWeb instances globally.
       2. **Proactive Protection:** Block malicious actors before they can target your site based on their behavior elsewhere.
-      3. **Community Contribution:** Help protect other BunkerWeb users by sharing anonymized threat data about attackers.
+      3. **Community Contribution:** Help protect other BunkerWeb users by sharing threat data about attackers.
       4. **Zero Configuration:** Works out of the box with sensible defaults, requiring minimal setup.
-      5. **Privacy Focused:** Only shares necessary threat information without compromising your or your users' privacy.
+      5. **Controlled Sharing:** A report carries a fixed set of fields, and `BUNKERNET_FILTER_HEADERS` can limit its request headers to a short allowlist (see below).
 
 ### How to Use
 
@@ -8100,16 +8112,27 @@ Follow these steps to configure and use the BunkerNet feature:
 
 ### Configuration Settings
 
-| Setting            | Default                    | Context   | Multiple | Description                                                                                    |
-| ------------------ | -------------------------- | --------- | -------- | ---------------------------------------------------------------------------------------------- |
-| `USE_BUNKERNET`    | `yes`                      | multisite | no       | **Enable BunkerNet:** Set to `yes` to enable the BunkerNet threat intelligence sharing.        |
-| `BUNKERNET_SERVER` | `https://api.bunkerweb.io` | global    | no       | **BunkerNet Server:** The address of the BunkerNet API server for sharing threat intelligence. |
+| Setting                    | Default                    | Context   | Multiple | Description                                                                                                                                                                                                                           |
+| -------------------------- | -------------------------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `USE_BUNKERNET`            | `yes`                      | multisite | no       | **Enable BunkerNet:** Set to `yes` to enable the BunkerNet threat intelligence sharing.                                                                                                                                               |
+| `BUNKERNET_FILTER_HEADERS` | `no`                       | multisite | no       | **Filter Reported Headers:** Set to `yes` to send only a short allowlist of request headers and blank the values ModSecurity matched in headers and cookies. When `no`, a report carries every request header and the matched values. |
+| `BUNKERNET_SERVER`         | `https://api.bunkerweb.io` | global    | no       | **BunkerNet Server:** The address of the BunkerNet API server for sharing threat intelligence.                                                                                                                                        |
 
 !!! tip "Network Protection"
     When BunkerNet detects that an IP address has been involved in malicious activity across multiple BunkerWeb instances, it adds that IP to a collective blacklist. This provides a proactive defense layer, protecting your site from threats before they can target you directly.
 
-!!! info "Anonymous Reporting"
-    When reporting threat information to BunkerNet, your instance only shares the necessary data to identify the threat: the IP address, the reason for blocking, and minimal contextual data. No personal information about your users or sensitive details about your site is shared.
+!!! info "What a report contains"
+    Each report sent to BunkerNet carries these fields, and nothing else:
+
+    - the instance metadata sent with each request: the BunkerNet instance ID, the BunkerWeb version, the integration, and the OS name, version, version ID, codename, ID and architecture;
+    - the client IP address, the reason for blocking and the date;
+    - the HTTP method, the URL **including its query string**, and the service name (`server_name`);
+    - the request headers, with their values: every header received (up to `MAX_HEADERS`), or only `User-Agent`, `Accept`, `Accept-Encoding`, `Accept-Language`, `Content-Type` and `Content-Length` when `BUNKERNET_FILTER_HEADERS` is `yes`;
+    - the details attached to the blocking reason. Depending on the plugin that blocked the client, they can include the IDs and messages of the ModSecurity rules that matched together with the request values that matched them (parts of arguments, body, headers or cookies, each cut to 512 bytes; with `BUNKERNET_FILTER_HEADERS` set to `yes`, values matched in headers and cookies are blanked and only the variable name is sent), or, for Bad Behavior, the method and URL of the recent requests that led to the ban.
+
+    By default (`BUNKERNET_FILTER_HEADERS` set to `no`) a report carries every request header received (up to `MAX_HEADERS`), cookies and `Authorization` included, and the values ModSecurity matched as they are. Set `BUNKERNET_FILTER_HEADERS` to `yes` to send only the six headers listed above and blank the values matched in headers and cookies. Reports still waiting to be sent are filtered the same way before they go out when it is `yes`.
+
+    The URL and the matched values come from the request, so they contain whatever the client sent. Set `USE_BUNKERNET` to `no` on services whose URLs carry sensitive values.
 
 ### Example Configurations
 
@@ -8434,13 +8457,13 @@ Follow these steps to configure and use the Country feature:
 
 ### Configuration Settings
 
-| Setting                       | Default | Context   | Multiple | Description                                                                                                                                                                          |
-| ----------------------------- | ------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `WHITELIST_COUNTRY`           |         | multisite | no       | **Country Whitelist:** List of country codes and/or country-group tokens separated by spaces. Only these countries are allowed.                                                      |
-| `BLACKLIST_COUNTRY`           |         | multisite | no       | **Country Blacklist:** List of country codes and/or country-group tokens separated by spaces. These countries are blocked.                                                           |
-| `COUNTRY_IGNORE_URI`          |         | multisite | no       | **Ignored URI:** List of URI regex patterns separated by spaces that should bypass country checks. Patterns are checked against the path and the full request URI with query string. |
-| `COUNTRY_IGNORE_HEADER_NAME`  |         | multisite | yes      | **Header name:** Name of a request header that makes the request bypass the country check. Numbered pairs: `_NAME_1` goes with `_VALUE_1`.                                           |
-| `COUNTRY_IGNORE_HEADER_VALUE` |         | multisite | yes      | **Header value:** PCRE regex the header value must match. Leave empty to match on the header being present, whatever it carries.                                                     |
+| Setting                       | Default | Context   | Multiple | Description                                                                                                                                                                                         |
+| ----------------------------- | ------- | --------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `WHITELIST_COUNTRY`           |         | multisite | no       | **Country Whitelist:** List of country codes and/or country-group tokens separated by spaces. Only these countries are allowed.                                                                     |
+| `BLACKLIST_COUNTRY`           |         | multisite | no       | **Country Blacklist:** List of country codes and/or country-group tokens separated by spaces. These countries are blocked.                                                                          |
+| `COUNTRY_IGNORE_URI`          |         | multisite | no       | **Ignored URI:** List of URI regex patterns separated by spaces that should bypass country checks. Patterns are matched against the normalized path, alone or followed by `?` and the query string. |
+| `COUNTRY_IGNORE_HEADER_NAME`  |         | multisite | yes      | **Header name:** Name of a request header that makes the request bypass the country check. Numbered pairs: `_NAME_1` goes with `_VALUE_1`.                                                          |
+| `COUNTRY_IGNORE_HEADER_VALUE` |         | multisite | yes      | **Header value:** PCRE regex the header value must match. Leave empty to match on the header being present, whatever it carries.                                                                    |
 
 !!! warning "A header rule is a shared secret"
     Any client can send a header, so a header rule is a bearer token, not a network control. Serve it over HTTPS only, anchor the regex with `^` and `$` (the match is not anchored by default, so `abc` also matches `xabcx`), and rotate the value. When BunkerWeb sits behind a proxy, that proxy must overwrite any client-supplied copy of the header. These rules are HTTP only: a stream service carries no request headers, so nothing matches there.
@@ -8591,7 +8614,7 @@ The public API exposes the same operations:
 
 Use the returned connection ID verbatim. It includes instance identity, so identical localhost URLs on different instances remain separate. API administrators can use these operations. Delegated API users need the independent `crowdsec_read` or `crowdsec_delete` permission under the existing `bans` resource, either for a returned connection ID or `*`. An ordinary `ban_delete` grant does not authorize CrowdSec removal. No database migration is required.
 
-The runtime retains individual decisions per target, so removing one cannot erase another ban on the same IP or range. Optional report metadata uses a separate 5 MiB (`CROWDSEC_METADATA_CACHE_SIZE=5m`) cache and cannot evict enforcement entries. Stream refreshes use a nonblocking process lock in `/var/run/bunkerweb`, held until the update is published and released automatically if the worker exits.
+The runtime retains individual decisions per target, so removing one cannot erase another ban on the same IP or range. Optional report metadata uses a separate 24 MiB (`CROWDSEC_METADATA_CACHE_SIZE=24m`) cache and cannot evict enforcement entries. Stream refreshes use a nonblocking process lock in `/var/run/bunkerweb`, held until the update is published and released automatically if the worker exits.
 
 Stream mode retains at most two snapshot slots, switching only after a complete snapshot fits. An unchanged nginx reload keeps the current snapshot and requests deltas. A missing snapshot, changed decision configuration, incomplete startup, or last successful sync older than the greater of 300 seconds and 30 times `CROWDSEC_UPDATE_FREQUENCY` forces a full snapshot. Sync failures emit an error log at most once per minute per cache prefix, followed by a recovery notice. If the decision cache is full, increase `CROWDSEC_CACHE_SIZE` to hold two snapshots and reload BunkerWeb. Resizing the decision zone on reload creates an empty zone and triggers a full synchronization; resizing only the metadata zone clears optional metadata.
 
@@ -8894,7 +8917,7 @@ Connection settings are `multisite`: an unprefixed value applies to all services
 | `CROWDSEC_REQUEST_TIMEOUT`     | `1s`                   | multisite | no       | **Request Timeout:** Timeout in milliseconds for HTTP requests to the CrowdSec Local API in live mode. Accepts a time suffix (ms, s, m, h, d, w, M, y); a bare number is milliseconds.                                                                                                                                                                      |
 | `CROWDSEC_EXCLUDE_LOCATION`    |                        | multisite | no       | **Excluded Locations:** Comma-separated list of locations (URIs) to exclude from CrowdSec checks.                                                                                                                                                                                                                                                           |
 | `CROWDSEC_CACHE_SIZE`          | `100m`                 | global    | no       | **Decision cache size:** Shared memory for all services; stream mode needs two snapshots. Positive whole megabytes (`m`/`M`), minimum `1m`. Resizing clears this zone; known decisions restore from disk until reconciliation. Unknown IPs query LAPI; an outage allows unknown IPs.                                                                        |
-| `CROWDSEC_METADATA_CACHE_SIZE` | `5m`                   | global    | no       | **Metadata cache size:** Separate shared memory for optional report metadata across all services. Positive whole number of megabytes (`m`/`M`), minimum `1m`. Resizing on reload clears this metadata.                                                                                                                                                      |
+| `CROWDSEC_METADATA_CACHE_SIZE` | `24m`                  | global    | no       | **Metadata cache size:** Separate shared memory for optional report metadata across all services. Positive whole number of megabytes (`m`/`M`), minimum `1m`. Resizing on reload clears this metadata.                                                                                                                                                      |
 | `CROWDSEC_CACHE_EXPIRATION`    | `1s`                   | multisite | no       | **Cache Expiration:** The cache expiration time in seconds for IP decisions in live mode. Accepts a time suffix (ms, s, m, h, d, w, M, y); a bare number is seconds.                                                                                                                                                                                        |
 | `CROWDSEC_UPDATE_FREQUENCY`    | `10s`                  | multisite | no       | **Update Frequency:** How often (in seconds) to pull new/expired decisions from the CrowdSec API in stream mode. Accepts a time suffix (ms, s, m, h, d, w, M, y); a bare number is seconds.                                                                                                                                                                 |
 | `CROWDSEC_BAN_REFRESH`         | `0`                    | multisite | no       | **Ban Refresh:** Turn CrowdSec blocks into short BunkerWeb bans that are renewed while the CrowdSec decision lasts. The value is the longest a ban lasts before CrowdSec is asked again. `0` disables it. A service with a `CROWDSEC_EXCLUDE_LOCATION` never gets CrowdSec bans. Accepts a time suffix (ms, s, m, h, d, w, M, y); a bare number is seconds. |
@@ -11154,7 +11177,7 @@ Follow these steps to configure and use ModSecurity:
 Select a CRS version to best match your security needs:
 
 - **`3`**: Stable [v3.3.10](https://github.com/coreruleset/coreruleset/releases/tag/v3.3.10).
-- **`4`**: Stable [v4.29.0](https://github.com/coreruleset/coreruleset/releases/tag/v4.29.0) (**default**).
+- **`4`**: Stable [v4.30.0](https://github.com/coreruleset/coreruleset/releases/tag/v4.30.0) (**default**).
 
 !!! warning "Nightly Build Deprecated"
     The `nightly` option for `MODSECURITY_CRS_VERSION` has been deprecated as the OWASP Core Rule Set project has discontinued nightly releases. If your configuration still uses `nightly`, CRS v4 will be used instead. Please update your configuration to use `MODSECURITY_CRS_VERSION=4`.
@@ -11668,7 +11691,7 @@ The Pro plugin bundles advanced features and enhancements for enterprise deploym
 
 Follow these steps to configure and use the Pro features:
 
-1. **Obtain a license key:** Purchase a Pro license from the [BunkerWeb Panel](https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc).
+1. **Obtain a license key:** start a 30-day free trial or purchase a Pro license from the [BunkerWeb Panel](https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc) ([step-by-step guide](https://docs.bunkerweb.io/testing/index/#pro-version)).
 2. **Configure your license key:** Use the `PRO_LICENSE_KEY` setting to configure your license.
 3. **Let BunkerWeb handle the rest:** Once configured with a valid license, Pro plugins are automatically downloaded and activated.
 4. **Monitor your Pro status:** Check the health indicators in the [web UI](https://docs.bunkerweb.io/testing/web-ui/) to confirm your Pro subscription status.
@@ -11705,7 +11728,7 @@ Follow these steps to configure and use the Pro features:
 - **BunkerWeb PRO Standard:** Full access to Pro features without technical support.
 - **BunkerWeb PRO Enterprise:** Full access to Pro features with dedicated technical support.
 
-You can explore Pro features with a free 30-day trial. Start it from the [BunkerWeb Panel](https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc) and learn more about flexible pricing options based on the number of services protected by BunkerWeb PRO.
+You can explore Pro features with a free 30-day trial. Start it from the [BunkerWeb Panel](https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc) and learn more about flexible pricing options based on the number of services protected by BunkerWeb PRO: order a plan, then keep **Free 30 Days Trial** as the payment method at checkout ([step-by-step guide](https://docs.bunkerweb.io/testing/index/#pro-version)).
 
 ## Prometheus exporter  (PRO)
 
@@ -16095,39 +16118,28 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
 
 ## IPv6
 
-!!! example "Experimental feature"
+By default, BunkerWeb listens on IPv4 only. Set `USE_IPV6=yes` (the name is case-sensitive) to add IPv6 listeners next to the IPv4 ones for HTTP, HTTPS, HTTP/3 and stream services, and to let NGINX and the Lua resolver also query AAAA records. The setting does not configure your network: addresses, routing, published ports and firewall rules stay yours. The internal API, the Web UI and the public API have their own bind settings (see [IPv6-only networks](#ipv6-only)). A service can also be named by an IP address (see [IP addresses as service names](#ip-service-names)).
 
-    This feature is not production-ready. Feel free to test it and report us any bug using [issues](https://github.com/bunkerity/bunkerweb/issues) in the GitHub repository.
+!!! info "Test coverage"
 
-By default, BunkerWeb will only listen on IPv4 addresses and won't use IPv6 for network communications. If you want to enable IPv6 support, you need to set `USE_IPV6=yes`. Please note that IPv6 configuration of your network and environment is out-of-the-scope of this documentation.
+    The automated tests exercise IPv6 on Docker, on a dual-stack network and on an IPv6-only network: HTTP and HTTPS listeners, the real client IP taken from `X-Forwarded-For`, IP allow and block lists (compressed, expanded and IPv4-mapped spellings), bans through the internal API and `bwcli`, rate limiting, ModSecurity, IPv6 and AAAA-only upstreams, and a standalone Redis for bans and limits.
+
+    Not tested on a live IPv6 setup: Linux packages, All-in-one, Autoconf, Swarm, Kubernetes and Gateway API (they need a dual-stack cluster, and `USE_KUBERNETES_FQDN=no` if your cluster DNS does not publish IPv6 pod names), HTTP/3 and stream services, Redis Sentinel and Cluster, the Web UI and the public API, country, ASN and DNSBL checks for public IPv6 clients, and certificate issuance. The same settings apply there. Test your setup before relying on it, and report problems through [issues](https://github.com/bunkerity/bunkerweb/issues) in the GitHub repository.
 
 === "Docker / Autoconf / Swarm"
 
-    First of all, you will need to configure your Docker daemon to enable IPv6 support for containers and use ip6tables if needed. Here is sample configuration for your `/etc/docker/daemon.json` file :
+    Docker enables IPv6 per network. On current releases (tested with Docker 29.9.2, without any `/etc/docker/daemon.json`), declaring `enable_ipv6: true` and an IPv6 subnet on the network that carries the client traffic is enough: no `experimental` flag and no Docker restart. The daemon options `ipv6`, `fixed-cidr-v6` and `ip6tables` mainly concern the default bridge network, and older Docker releases (not tested) may still need them for user-defined networks. Check the Docker documentation for your version.
 
-    ```json
-    {
-      "experimental": true,
-      "ipv6": true,
-      "ip6tables": true,
-      "fixed-cidr-v6": "fd00:dead:beef::/48"
-    }
-    ```
+    A private IPv6 subnet only gives containers IPv6 among themselves. Reaching the Internet, or accepting clients on published ports over IPv6, depends on the IPv6 routing, firewall and NAT setup of your host, which is out of scope here.
 
-    You can now restart the Docker service to apply the changes :
-
-    ```shell
-    systemctl restart docker
-    ```
-
-    Once Docker is setup to support IPv6 you can add the `USE_IPV6` setting and configure the `bw-services` for IPv6 :
+    Add the `USE_IPV6` setting to the scheduler and enable IPv6 on the `bw-services` network. If you declare an IPv4 `subnet` for the network, keep it in the same `ipam.config` list:
 
     ```yaml
     services:
       bw-scheduler:
         image: bunkerity/bunkerweb-scheduler:testing
         environment:
-          USE_IPv6: "yes"
+          USE_IPV6: "yes"
 
     ...
 
@@ -16137,7 +16149,7 @@ By default, BunkerWeb will only listen on IPv4 addresses and won't use IPv6 for 
         enable_ipv6: true
         ipam:
           config:
-            - subnet: fd00:13:37::/48
+            - subnet: fd00:13:37::/64
               gateway: fd00:13:37::1
 
     ...
@@ -16170,6 +16182,95 @@ By default, BunkerWeb will only listen on IPv4 addresses and won't use IPv6 for 
     ```shell
     systemctl start bunkerweb
     ```
+
+### Check that IPv6 works
+
+List the listeners, on the Linux host or inside the BunkerWeb container (`docker compose exec bunkerweb ss -6 -ltn`). The ports set by `HTTP_PORT` and `HTTPS_PORT` must appear on `[::]`:
+
+```shell
+ss -6 -ltn
+```
+
+Then send a request over IPv6 to the address of BunkerWeb, with the `Host` header of one of your services (`-g` stops curl from treating the brackets as a pattern):
+
+```shell
+curl -g -6 -H "Host: www.example.com" "http://[<BUNKERWEB_IPV6_ADDRESS>]:<HTTP_PORT>/"
+```
+
+The access log then shows the IPv6 address of the client.
+
+### IP addresses as service names {#ip-service-names}
+
+A service can be named by an IPv4 or an IPv6 address instead of a DNS name. Write an IPv6 address bare, in lowercase and compressed, the way a client sends it in the `Host` header and without the brackets: `2001:db8::1`, not `[2001:db8::1]`, `2001:DB8::1` or `2001:0db8::1`. BunkerWeb adds the bracketed form to the NGINX `server_name` itself. A name written any other way never matches the `Host` header, and BunkerWeb logs a warning with the canonical spelling. ModSecurity does not score the CRS rule 920350 ("Host header is a numeric IP address") for a request whose `Host` is one of the addresses of the service; any other numeric `Host` is still scored.
+
+!!! warning "Per-service settings with Docker Compose"
+
+    A Compose `env_file` cannot carry the per-service settings of an IPv6-named service: it splits `2001:db8::1_USE_ANTIBOT=yes` at the first colon and drops the setting without an error. Use `environment:` (map or list form), the Web UI or the API instead. The Linux `variables.env` file is not affected.
+
+Let's Encrypt does not issue certificates for IPv6 addresses yet: the job skips an IPv6-named service and logs it.
+
+### IPv6-only networks {#ipv6-only}
+
+BunkerWeb also runs when its containers have no IPv4 address. This was tested on Docker, with the core and the scheduler on networks created with `enable_ipv4: false` (Docker 29.9.2, Compose 5.6.1). Both containers need the same settings, and fixed addresses so that the allowlist and `BUNKERWEB_INSTANCES` stay valid:
+
+```yaml
+x-bw-ipv6-env: &bw-ipv6-env
+  USE_IPV6: "yes"
+  API_LISTEN_IP: "::"
+  API_WHITELIST_IP: "::1/128 2001:db8:1::24/128"
+  BUNKERWEB_INSTANCES: "[2001:db8:1::10]:5000"
+  DNS_RESOLVERS: "[2001:db8:1::20]"
+
+services:
+  bunkerweb:
+    image: bunkerity/bunkerweb:testing
+    dns:
+      - 2001:db8:1::20
+    environment:
+      <<: *bw-ipv6-env
+    networks:
+      bw-universe:
+        ipv6_address: 2001:db8:1::10
+
+  bw-scheduler:
+    image: bunkerity/bunkerweb-scheduler:testing
+    dns:
+      - 2001:db8:1::20
+    environment:
+      <<: *bw-ipv6-env
+    networks:
+      bw-universe:
+        ipv6_address: 2001:db8:1::24
+
+networks:
+  bw-universe:
+    name: bw-universe
+    enable_ipv4: false
+    enable_ipv6: true
+    ipam:
+      config:
+        - subnet: 2001:db8:1::/64
+```
+
+| Setting               | Why it is needed                                                                                                                       |
+| :-------------------- | :------------------------------------------------------------------------------------------------------------------------------------- |
+| `USE_IPV6`            | IPv6 listeners and AAAA lookups.                                                                                                       |
+| `API_LISTEN_IP`       | The internal API listens on `0.0.0.0` by default, which is IPv4 only.                                                                  |
+| `API_WHITELIST_IP`    | The internal API only accepts loopback by default: list the IPv6 address of every caller (scheduler, and the UI or autoconf if used).  |
+| `BUNKERWEB_INSTANCES` | Where the scheduler finds the core. An IPv6 address needs brackets and a port.                                                         |
+| `DNS_RESOLVERS`       | The default is the IPv4 resolver of Docker. NGINX and Lua need an IPv6 resolver, in brackets.                                          |
+
+The `dns:` entries matter too: the scheduler and the jobs use the resolver of the container, not `DNS_RESOLVERS`. Backends are then reached by IPv6 address or by a name that has an AAAA record: an upstream name with only an A record fails with a `502`.
+
+Some outbound features contact servers that had no AAAA record when we checked (October 2026). Without IPv4 egress or NAT64/DNS64 their jobs fail or keep using cached data, while the rest of BunkerWeb keeps serving:
+
+- BunkerNet and anonymous usage reports (turn them off with `USE_BUNKERNET=no` and `SEND_ANONYMOUS_REPORT=no`).
+- PRO plugin downloads.
+- The check for a new BunkerWeb version.
+- Country and ASN database updates (the bundled or cached databases stay in use).
+- Optional features: ZeroSSL certificates, ModSecurity CRS plugin downloads from GitHub, hCaptcha and the mCaptcha demo server.
+
+Known limitation: on an IPv6-only network the core still opens IPv4 wildcard listeners on the HTTP and HTTPS TCP ports and on the HTTPS UDP port (HTTP/3). They carry no traffic when the network has no IPv4, but a scanner that rejects any IPv4 listener will report them. IPv4 loopback is also still used inside the containers (health check, local API listener). The tests did not cover the Web UI, a networked database or the other integrations on an IPv6-only network.
 
 ## Logging configuration options
 
@@ -19139,6 +19240,7 @@ The UI expects the scheduler/(BunkerWeb) API/redis/database stack to be reachabl
     Recovery codes are shown once in the UI; losing the encryption keys wipes stored TOTP secrets.
 - Sessions: default idling lifetime is 12h (`SESSION_LIFETIME_HOURS`), refreshed on every request. A hard absolute cap is enforced by `SESSION_ABSOLUTE_HOURS` (default `168` = 7 days) — past it, users are logged out regardless of activity. Optional session ID rotation (`SESSION_ROLLING_HOURS`, default `0` = disabled) regenerates the session ID at that interval. Sessions are pinned to IP and User-Agent; `CHECK_PRIVATE_IP=no` relaxes the IP check for private ranges only. `ALWAYS_REMEMBER=yes` (like ticking "Remember me" at login) marks the session cookie permanent so it survives a browser restart — no separate long-lived token is issued, so the session stays bound by the limits above and is revoked immediately by logout, a password change or *Wipe other sessions*. To stay logged in longer, raise **both** `SESSION_LIFETIME_HOURS` and `SESSION_ABSOLUTE_HOURS`: the absolute cap is clamped up to the idle lifetime, so raising only one of them will not do what you expect.
 - Session storage: sessions live in Redis when `USE_REDIS=yes`, otherwise in a local cache under `/var/lib/bunkerweb`. A Redis that stops answering, or that refuses writes because it hit `maxmemory`, no longer breaks the UI: the affected sessions fall back to that local cache, which is read before Redis so a change or a deletion that never reached Redis is never shadowed by the older copy Redis still holds, and reconciles back to Redis the next time it answers. A logout or a session ID rotation during an outage is not undone by the recovery either, even when the session itself could not be read while Redis was down. Every revocation is recorded in both stores so it keeps applying either way. An eviction is not covered, since Redis reports success and simply stops holding the key, so size `maxmemory` for the keys you keep. When Redis refuses an update, that session moves to the local store and the copy Redis still held is dropped immediately, so the change is not shadowed by the older payload and a multi-step flow such as 2FA cannot loop on its pre-outage state. That local cache is per host, which matters when you run several UI replicas: the other replicas stop seeing a session that moved to one replica's local cache until that replica reconciles it back to Redis, a revocation issued while Redis was unavailable is enforced only by the replica that issued it, and a replica already serving a session from its own local cache can keep doing so for up to `SESSION_LIFETIME_HOURS` after another replica deletes that session through Redis. `UI_USE_REDIS=no` takes the UI off Redis on its own, unlike the global `USE_REDIS` which also stops bans and reports being shared between instances.
+- Login throttle: failed logins (wrong password, TOTP code or recovery code) are counted per client IP and per username in the database, so every worker and UI replica shares the count. `LOGIN_MAX_ATTEMPTS` failures (default `5`) within `LOGIN_WINDOW_MINUTES` (default `15`) lock that IP, or that username, until `LOGIN_LOCKOUT_MINUTES` (default `15`) after its last failure. A locked attempt gets a `429` with the generic invalid-credentials message plus the wait, and the password is not checked. Completing a login clears the count of that username. Unknown usernames are counted too, so a lock never tells whether an account exists; the flip side is that anyone can lock a known username by failing on it. The client IP is the one resolved from `X-Forwarded-*` through `PROXY_NUMBERS`: if users reach the UI directly with no proxy in front, set `PROXY_NUMBERS=0`, otherwise a client can forge its IP and only the per-username limit holds. `LOGIN_THROTTLE=no` turns the throttle off. On a read-only database failures cannot be recorded, so no new lock appears.
 - Remember to set `PROXY_NUMBERS` if multiple proxies append `X-Forwarded-*` headers.
 
 !!! warning "2FA is gone after recreating the container"
@@ -19207,6 +19309,10 @@ The RAW editor of a service or of the global settings can keep a setting as a **
 | `ALWAYS_REMEMBER`                           | Always keep the session cookie across browser restarts (does not extend session lifetimes)               | `yes` or `no`            | `no`                      |
 | `CHECK_PRIVATE_IP`                          | Enforce IP pinning (skips change inside private ranges when `no`)                                        | `yes` or `no`            | `yes`                     |
 | `PROXY_NUMBERS`                             | Number of proxy hops to trust for `X-Forwarded-*`                                                        | Integer                  | `1`                       |
+| `LOGIN_THROTTLE` | Count failed logins and lock an IP or username that fails too often | `yes` or `no` | `yes` |
+| `LOGIN_MAX_ATTEMPTS` | Failures within the window that lock an IP or a username | Integer | `5` |
+| `LOGIN_WINDOW_MINUTES` | Window in which failures are counted | Integer (minutes) | `15` |
+| `LOGIN_LOCKOUT_MINUTES` | Lock duration, counted from the last failure | Integer (minutes) | `15` |
 | `UI_USE_REDIS`                              | Take the web UI off Redis without touching the global `USE_REDIS`                                        | `yes` or `no`            | `yes`                     |
 
 ### Logging
@@ -19295,7 +19401,7 @@ log {
 ## Upgrade to PRO {#upgrade-to-pro}
 
 !!! tip "BunkerWeb PRO free trial"
-    Start a 30-day BunkerWeb PRO free trial from the [BunkerWeb panel](https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc).
+    Start a 30-day BunkerWeb PRO free trial from the [BunkerWeb panel](https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc): order a plan, then keep **Free 30 Days Trial** as the payment method at checkout ([step-by-step guide](https://docs.bunkerweb.io/testing/index/#pro-version)).
 
 ## Translations (i18n)
 
@@ -20260,6 +20366,19 @@ The declared functions are automatically called during specific contexts. Here a
 | `log_default` |           [log_by_lua](https://github.com/openresty/lua-nginx-module#log_by_lua)            | Same as `log` but only called on the default server.                                                                                                      | `ret`, `msg`<ul><li>`ret` (boolean) : true if no error or else false</li><li>`msg` (string) : success or error message</li></ul>                                                                                                                                                                                                                                      |
 |   `preread`   | [preread_by_lua](https://github.com/openresty/stream-lua-nginx-module#preread_by_lua_block) | Similar to the `access` function but for stream mode.                                                                                                     | `ret`, `msg`,`status`<ul><li>`ret` (boolean) : true if no error or else false</li><li>`msg` (string) : success or error message</li><li>`status` (number) : interrupt current process and return [status](https://github.com/openresty/lua-nginx-module#http-status-constants)</li></ul>                                                                              |
 | `log_stream`  |     [log_by_lua](https://github.com/openresty/stream-lua-nginx-module#log_by_lua_block)     | Similar to the `log` function but for stream mode.                                                                                                        | `ret`, `msg`<ul><li>`ret` (boolean) : true if no error or else false</li><li>`msg` (string) : success or error message</li></ul>                                                                                                                                                                                                                                      |
+
+**TLS ClientHello hook.** A plugin can also see every TLS handshake before the certificate is chosen, for the default server and for each service, by exporting a module-level function (not a method, so no plugin object is built per handshake) from its main Lua module:
+
+```lua
+-- in myplugin/myplugin.lua
+function myplugin.client_hello(hello)
+    -- hello (read-only): service (nil on the default server), ip (nil when the client address is unknown), raw and family
+    -- (packed peer address from ngx.ssl.raw_client_addr()), quic, proxy_protocol, real_ip, trusted
+    return nil -- or "drop" / "detect" and a reason
+end
+```
+
+Return `"drop"` to abort the handshake, `"detect"` to only log that it would be dropped, or nothing to let it through. An error or any other value lets the handshake through. The function runs for every handshake, exactly once, and **must not yield**: no Redis, no cosocket, no `ngx.var`, no `resty.lock`, no sleep. Shared dictionary calls and `ngx.timer.at(0, ...)` are fine. The order of the plugins that export it follows `PLUGINS_ORDER_SSL_CLIENT_HELLO`. A plugin that exports `client_hello` is not called through its `ssl_client_hello_default` method on the default server. Plugins can detect support with `pcall(require, "bunkerweb.banlease")` and `banlease.CLIENT_HELLO_PLUGIN_HOOK == 1`.
 
 #### Libraries
 
@@ -21409,6 +21528,10 @@ While the settings are now declared on the Scheduler container, **you'll still n
 
 We tried our best not to change default value but we have added many other settings. It's highly recommended to read the [security tuning](https://docs.bunkerweb.io/testing/advanced/#security-tuning) and [settings](https://docs.bunkerweb.io/testing/features/) sections of the documentation.
 
+!!! warning "`MODSECURITY_CRS_PLUGIN_URLS` was renamed to `MODSECURITY_CRS_PLUGINS`"
+
+    If you set `MODSECURITY_CRS_PLUGIN_URLS` and upgraded to 1.6 on PostgreSQL, MariaDB or MySQL before 1.6.18, the stored value was lost. Check `MODSECURITY_CRS_PLUGINS` and set it again if it is empty. From 1.6.18, the values are kept on upgrade.
+
 #### Templates
 
 We added a new feature called **templates**. Templates provide a structured and standardized approach to defining settings and custom configurations, check the [concepts/templates](https://docs.bunkerweb.io/testing/concepts/#templates) section for more information.
@@ -21842,6 +21965,81 @@ We added a **namespace** feature to the autoconf integrations. Namespaces allow 
 
     8. **Downgrade BunkerWeb**.
         - Downgrade BunkerWeb to the previous version by following the same steps as when upgrading BunkerWeb in the [integration Linux page](https://docs.bunkerweb.io/testing/integrations/#linux)
+
+## Verify a release
+
+Check what you download before you install or upgrade. A release is signed at three levels:
+
+- the Git tag is signed with the GPG key of a release owner, and the release workflow refuses to build a tag GitHub cannot verify;
+- the container images and the Linux packages carry a signed build provenance attestation, created by the release workflow itself;
+- the GitHub release lists the SHA-256 checksum of every package.
+
+Attestations are keyless: they use [Sigstore](https://www.sigstore.dev/) and the identity of the GitHub Actions workflow, so no private signing key exists anywhere. A verifier checks that the artifact was built by `.github/workflows/release.yml` of `bunkerity/bunkerweb`, for the release tag, from the tagged commit.
+
+!!! info "Attestations start with 1.6.18 rc2"
+    Earlier releases only have a signed tag. The commands below need the [GitHub CLI](https://cli.github.com/) 2.68 or later, signed in with `gh auth login`.
+
+The commands share two variables. Set them to the release you want to verify:
+
+```bash
+VERSION=testing
+TAG="v${VERSION//\~/-}"
+```
+
+### Tag signature
+
+The public keys of the release owners are published on their GitHub accounts. A GPG warning that the key is not certified is expected: compare the fingerprint it prints with the two below instead.
+
+```bash
+curl -fsSL https://github.com/TheophileDiot.gpg | gpg --import
+curl -fsSL https://github.com/fl0ppy-d1sk.gpg | gpg --import
+
+git init -q bunkerweb-verify && cd bunkerweb-verify
+git fetch --depth 1 https://github.com/bunkerity/bunkerweb.git tag "$TAG"
+git verify-tag "$TAG"
+```
+
+The output must contain `Good signature` and the primary key fingerprint of the release owner who cut the tag: `4821 439D 531B 030E 5DCC  F1F7 7C44 E4D7 7426 28F8` for Théophile Diot, `BBB2 5DF4 31F9 C568 D56C  748D D34B 4FF9 11F7 40D1` for Florian Pitance.
+
+### Container images
+
+The attestation belongs to the image index digest, so it is the same on Docker Hub, GitHub Container Registry and the GitLab mirror. Print the digest of the image you pulled, then verify it:
+
+```bash
+docker buildx imagetools inspect "bunkerity/bunkerweb:${TAG#v}" --format '{{json .Manifest.Digest}}'
+
+gh attestation verify "oci://docker.io/bunkerity/bunkerweb:${TAG#v}" \
+  --repo bunkerity/bunkerweb \
+  --signer-workflow bunkerity/bunkerweb/.github/workflows/release.yml \
+  --source-ref "refs/tags/$TAG"
+```
+
+`Verification succeeded!` means the digest was signed by the release workflow for this tag. The command fails when the image has no attestation or when another workflow or repository signed it. Replace the image name to check `bunkerweb-scheduler`, `bunkerweb-autoconf`, `bunkerweb-ui`, `bunkerweb-api` or `bunkerweb-all-in-one`, and use `ghcr.io/bunkerity/...` or `registry.gitlab.com/bunkerity/bunkerweb/...` for the other registries. Pin `oci://docker.io/bunkerity/bunkerweb@sha256:<digest>` to verify exactly the image you run.
+
+### Linux packages
+
+Packages are published on packagecloud. Download the `.deb` or `.rpm` file you intend to install and verify it:
+
+```bash
+gh attestation verify ./bunkerweb_${VERSION}-1_amd64.deb \
+  --repo bunkerity/bunkerweb \
+  --signer-workflow bunkerity/bunkerweb/.github/workflows/release.yml \
+  --source-ref "refs/tags/$TAG"
+```
+
+The release also lists the SHA-256 checksum of every package in `release-manifest.json`. Check the manifest against its own checksum, then the package against the manifest, choosing the entry of your distribution (`ubuntu`, `ubuntu-noble`, `ubuntu-jammy`, `debian-bookworm`, `debian-trixie`, `fedora-43`, `fedora-44`, `rhel-8`, `rhel-9` or `rhel-10`) and platform (`linux/amd64` or `linux/arm64`):
+
+```bash
+curl -fsSL -O "https://github.com/bunkerity/bunkerweb/releases/download/${TAG}/release-manifest.json" \
+  -O "https://github.com/bunkerity/bunkerweb/releases/download/${TAG}/release-manifest.json.sha256"
+sha256sum -c release-manifest.json.sha256
+
+jq -r '.packages[] | select(.distro == "debian-bookworm" and .platform == "linux/amd64") | "\(.sha256)  \(.filename)"' release-manifest.json | sha256sum -c
+```
+
+Run the last command in the directory that holds the package. The manifest only lists checksums: the attestation is what proves who built the package.
+
+The GitHub release also carries `bunkerweb-${TAG#v}.intoto.jsonl`, the attestation bundles of every image and package. `gh attestation verify <file> --bundle bunkerweb-${TAG#v}.intoto.jsonl --repo bunkerity/bunkerweb` verifies a downloaded package against it without fetching its attestation from GitHub. <!-- codespell:ignore intoto -->
 
 # Troubleshooting
 

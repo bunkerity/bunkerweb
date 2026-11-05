@@ -86,7 +86,7 @@
     <script defer>
       window.addEventListener('DOMContentLoaded', () => {
         const bannerEl = document.querySelector('aside.md-banner');
-        let defaultContent = [{ "content" : "\u003cp\u003eStart a 30-day BunkerWeb PRO free trial from the \u003ca style=\"text-decoration:underline; color :  white;\" href=\"https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self\u0026utm_source=doc\"\u003eBunkerWeb Panel\u003c/a\u003e.\u003c/p\u003e" },
+        let defaultContent = [{ "content" : "\u003cp\u003eStart a 30-day BunkerWeb PRO free trial from the \u003ca style=\"text-decoration:underline; color :  white;\" href=\"https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self\u0026amp;utm_source=doc\"\u003eBunkerWeb Panel\u003c/a\u003e: order a plan, then keep \u201cFree 30 Days Trial\u201d as the payment method at checkout. (\u003ca style=\"text-decoration:underline; color :  white;\" href=\"..#pro-version\"\u003estep-by-step guide\u003c/a\u003e)\u003c/p\u003e" },
         { "content" : "\u003cp\u003eNeed premium support or tailored consulting around BunkerWeb? Check out our \u003ca style=\"text-decoration:underline; color :  white;\" href=\"https://panel.bunkerweb.io/?utm_campaign=self\u0026utm_source=doc#services\"\u003eprofessional services\u003c/a\u003e.\u003c/p\u003e" },
         { "content" : "\u003cp\u003eBe part of the Bunker community by joining the \u003ca style=\"text-decoration:underline; color: white;\" href=\"https://discord.bunkerweb.io\"\u003eDiscord chat\u003c/a\u003e and following us on \u003ca style=\"text-decoration:underline; color: white;\" href=\"https://www.linkedin.com/company/bunkerity/\"\u003eLinkedIn\u003c/a\u003e.\u003c/p\u003e" }
         ]
@@ -1928,6 +1928,15 @@ chown<span class="w"> </span>-R<span class="w"> </span>nginx:nginx<span class="w
 </tr>
 </tbody>
 </table>
+<p><strong>TLS ClientHello hook.</strong> A plugin can also see every TLS handshake before the certificate is chosen, for the default server and for each service, by exporting a module-level function (not a method, so no plugin object is built per handshake) from its main Lua module:</p>
+<div class="highlight"><pre><span></span><code><span class="c1">-- in myplugin/myplugin.lua</span>
+<span class="kr">function</span><span class="w"> </span><span class="nc">myplugin</span><span class="p">.</span><span class="nf">client_hello</span><span class="p">(</span><span class="nv">hello</span><span class="p">)</span>
+<span class="w">    </span><span class="c1">-- hello (read-only): service (nil on the default server), ip (nil when the client address is unknown), raw and family</span>
+<span class="w">    </span><span class="c1">-- (packed peer address from ngx.ssl.raw_client_addr()), quic, proxy_protocol, real_ip, trusted</span>
+<span class="w">    </span><span class="kr">return</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="c1">-- or "drop" / "detect" and a reason</span>
+<span class="kr">end</span>
+</code></pre></div>
+<p>Return <code>"drop"</code> to abort the handshake, <code>"detect"</code> to only log that it would be dropped, or nothing to let it through. An error or any other value lets the handshake through. The function runs for every handshake, exactly once, and <strong>must not yield</strong>: no Redis, no cosocket, no <code>ngx.var</code>, no <code>resty.lock</code>, no sleep. Shared dictionary calls and <code>ngx.timer.at(0, ...)</code> are fine. The order of the plugins that export it follows <code>PLUGINS_ORDER_SSL_CLIENT_HELLO</code>. A plugin that exports <code>client_hello</code> is not called through its <code>ssl_client_hello_default</code> method on the default server. Plugins can detect support with <code>pcall(require, "bunkerweb.banlease")</code> and <code>banlease.CLIENT_HELLO_PLUGIN_HOOK == 1</code>.</p>
 <h4 id="libraries">Libraries<a class="headerlink" href="#libraries" title="Permanent link">&para;</a></h4>
 <p>All directives from <a href="https://github.com/openresty/lua-nginx-module">NGINX LUA module</a> and are available and <a href="https://github.com/openresty/stream-lua-nginx-module">NGINX stream LUA module</a>. On top of that, you can use the LUA libraries included within BunkerWeb : see <a href="https://github.com/bunkerity/bunkerweb/blobsrc/deps/clone.sh">this script</a> for the complete list.</p>
 <p>If you need additional libraries, you can put them in the root folder of the plugin and access them by prefixing them with your plugin ID. Here is an example file named <strong>mylibrary.lua</strong> :</p>

@@ -86,7 +86,7 @@
     <script defer>
       window.addEventListener('DOMContentLoaded', () => {
         const bannerEl = document.querySelector('aside.md-banner');
-        let defaultContent = [{ "content" : "\u003cp\u003eProfitez d\u2019un essai gratuit de 30 jours de BunkerWeb PRO depuis le \u003ca style=\"text-decoration:underline; color :  white;\" href=\"https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self\u0026utm_source=doc\"\u003eBunkerWeb Panel\u003c/a\u003e.\u003c/p\u003e" },
+        let defaultContent = [{ "content" : "\u003cp\u003eProfitez d\u2019un essai gratuit de 30 jours de BunkerWeb PRO depuis le \u003ca style=\"text-decoration:underline; color :  white;\" href=\"https://panel.bunkerweb.io/store/bunkerweb-pro?language=french\u0026amp;utm_campaign=self\u0026amp;utm_source=doc\"\u003eBunkerWeb Panel\u003c/a\u003e : commandez une offre, puis gardez \u00ab Free 30 Days Trial \u00bb comme mode de paiement lors de la commande. (\u003ca style=\"text-decoration:underline; color :  white;\" href=\"../#pro-version\"\u003eguide pas \u00e0 pas\u003c/a\u003e)\u003c/p\u003e" },
         { "content" : "\u003cp\u003eBesoin d\u2019une assistance premium ou de conseils personnalis\u00e9s sur BunkerWeb ? D\u00e9couvrez nos \u003ca style=\"text-decoration:underline; color :  white;\" href=\"https://panel.bunkerweb.io/?utm_campaign=self\u0026utm_source=doc#services\"\u003eservices professionnels\u003c/a\u003e.\u003c/p\u003e" },
         { "content" : "\u003cp\u003eRejoignez la communaut\u00e9 Bunker en participant au \u003ca style=\"text-decoration:underline; color: white;\" href=\"https://discord.bunkerweb.io\"\u003esalon Discord\u003c/a\u003e et en nous suivant sur \u003ca style=\"text-decoration:underline; color: white;\" href=\"https://www.linkedin.com/company/bunkerity/\"\u003eLinkedIn\u003c/a\u003e.\u003c/p\u003e" }
         ]
@@ -1051,6 +1051,56 @@
     <span class="md-ellipsis">
       
         Rollback
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#verifier-une-version" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Vérifier une version
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Vérifier une version">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#signature-du-tag" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Signature du tag
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#images-de-conteneur" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Images de conteneur
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#paquets-linux" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Paquets Linux
       
     </span>
   </a>
@@ -2074,6 +2124,10 @@ sudo<span class="w"> </span>chmod<span class="w"> </span><span class="m">770</sp
 </div>
 <h4 id="valeurs-par-defaut-et-nouveaux-parametres">Valeurs par défaut et nouveaux paramètres<a class="headerlink" href="#valeurs-par-defaut-et-nouveaux-parametres" title="Permanent link">&para;</a></h4>
 <p>Nous avons fait de notre mieux pour ne pas changer la valeur par défaut, mais nous avons ajouté de nombreux autres paramètres. Il est fortement recommandé de lire les sections sur le <a href="../advanced/#security-tuning">réglage de la sécurité </a> et  les <a href="../features/">paramètres</a> de la documentation.</p>
+<div class="admonition warning">
+<p class="admonition-title"><code>MODSECURITY_CRS_PLUGIN_URLS</code> a été renommé en <code>MODSECURITY_CRS_PLUGINS</code></p>
+<p>Si vous aviez défini <code>MODSECURITY_CRS_PLUGIN_URLS</code> et migré vers la 1.6 sur PostgreSQL, MariaDB ou MySQL avant la 1.6.18, la valeur enregistrée a été perdue. Vérifiez <code>MODSECURITY_CRS_PLUGINS</code> et redéfinissez-le s'il est vide. Depuis la 1.6.18, les valeurs sont conservées lors de la mise à niveau.</p>
+</div>
 <h4 id="modeles">Modèles<a class="headerlink" href="#modeles" title="Permanent link">&para;</a></h4>
 <p>Nous avons ajouté une nouvelle fonctionnalité appelée <strong>modèles</strong>. Les modèles fournissent une approche structurée et standardisée de la définition des paramètres et des configurations personnalisées, consultez la <a href="../concepts/#templates"> section concepts/modèles</a> pour plus d'informations.</p>
 <h4 id="espaces-de-noms-autoconf">Espaces de noms Autoconf<a class="headerlink" href="#espaces-de-noms-autoconf" title="Permanent link">&para;</a></h4>
@@ -2515,6 +2569,58 @@ sudo<span class="w"> </span>chmod<span class="w"> </span><span class="m">770</sp
 </div>
 </div>
 </div>
+<h2 id="verifier-une-version">Vérifier une version<a class="headerlink" href="#verifier-une-version" title="Permanent link">&para;</a></h2>
+<p>Vérifiez ce que vous téléchargez avant d'installer ou de mettre à niveau. Une version est signée à trois niveaux :</p>
+<ul>
+<li>le tag Git est signé avec la clé GPG d'un responsable de publication, et le workflow de publication refuse de construire un tag que GitHub ne peut pas vérifier ;</li>
+<li>les images de conteneur et les paquets Linux portent une attestation de provenance de build signée, créée par le workflow de publication lui-même ;</li>
+<li>la release GitHub liste la somme de contrôle SHA-256 de chaque paquet.</li>
+</ul>
+<p>Les attestations sont sans clé : elles reposent sur <a href="https://www.sigstore.dev/">Sigstore</a> et sur l'identité du workflow GitHub Actions, si bien qu'aucune clé de signature privée n'existe nulle part. Le vérificateur contrôle que l'artefact a été construit par <code>.github/workflows/release.yml</code> de <code>bunkerity/bunkerweb</code>, pour le tag de la version, à partir du commit taggé.</p>
+<div class="admonition info">
+<p class="admonition-title">Les attestations commencent avec la version 1.6.18 rc2</p>
+<p>Les versions antérieures n'ont qu'un tag signé. Les commandes ci-dessous nécessitent la <a href="https://cli.github.com/">GitHub CLI</a> 2.68 ou ultérieure, connectée avec <code>gh auth login</code>.</p>
+</div>
+<p>Les commandes partagent deux variables. Définissez-les pour la version à vérifier :</p>
+<div class="highlight"><pre><span></span><code><span class="nv">VERSION</span><span class="o">=</span>testing
+<span class="nv">TAG</span><span class="o">=</span><span class="s2">"v</span><span class="si">${</span><span class="nv">VERSION</span><span class="p">//</span><span class="se">\~</span><span class="p">/-</span><span class="si">}</span><span class="s2">"</span>
+</code></pre></div>
+<h3 id="signature-du-tag">Signature du tag<a class="headerlink" href="#signature-du-tag" title="Permanent link">&para;</a></h3>
+<p>Les clés publiques des responsables de publication sont publiées sur leurs comptes GitHub. Un avertissement GPG indiquant que la clé n'est pas certifiée est normal : comparez plutôt l'empreinte affichée avec les deux ci-dessous.</p>
+<div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-fsSL<span class="w"> </span>https://github.com/TheophileDiot.gpg<span class="w"> </span><span class="p">|</span><span class="w"> </span>gpg<span class="w"> </span>--import
+curl<span class="w"> </span>-fsSL<span class="w"> </span>https://github.com/fl0ppy-d1sk.gpg<span class="w"> </span><span class="p">|</span><span class="w"> </span>gpg<span class="w"> </span>--import
+
+git<span class="w"> </span>init<span class="w"> </span>-q<span class="w"> </span>bunkerweb-verify<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">cd</span><span class="w"> </span>bunkerweb-verify
+git<span class="w"> </span>fetch<span class="w"> </span>--depth<span class="w"> </span><span class="m">1</span><span class="w"> </span>https://github.com/bunkerity/bunkerweb.git<span class="w"> </span>tag<span class="w"> </span><span class="s2">"</span><span class="nv">$TAG</span><span class="s2">"</span>
+git<span class="w"> </span>verify-tag<span class="w"> </span><span class="s2">"</span><span class="nv">$TAG</span><span class="s2">"</span>
+</code></pre></div>
+<p>La sortie doit contenir <code>Good signature</code> et l'empreinte de la clé primaire du responsable de publication qui a créé le tag : <code>4821 439D 531B 030E 5DCC  F1F7 7C44 E4D7 7426 28F8</code> pour Théophile Diot, <code>BBB2 5DF4 31F9 C568 D56C  748D D34B 4FF9 11F7 40D1</code> pour Florian Pitance.</p>
+<h3 id="images-de-conteneur">Images de conteneur<a class="headerlink" href="#images-de-conteneur" title="Permanent link">&para;</a></h3>
+<p>L'attestation est liée au digest de l'index de l'image : elle est donc identique sur Docker Hub, sur GitHub Container Registry et sur le miroir GitLab. Affichez le digest de l'image que vous avez téléchargée, puis vérifiez-le :</p>
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>buildx<span class="w"> </span>imagetools<span class="w"> </span>inspect<span class="w"> </span><span class="s2">"bunkerity/bunkerweb:</span><span class="si">${</span><span class="nv">TAG</span><span class="p">#v</span><span class="si">}</span><span class="s2">"</span><span class="w"> </span>--format<span class="w"> </span><span class="s1">'{{json .Manifest.Digest}}'</span>
+
+gh<span class="w"> </span>attestation<span class="w"> </span>verify<span class="w"> </span><span class="s2">"oci://docker.io/bunkerity/bunkerweb:</span><span class="si">${</span><span class="nv">TAG</span><span class="p">#v</span><span class="si">}</span><span class="s2">"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--repo<span class="w"> </span>bunkerity/bunkerweb<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--signer-workflow<span class="w"> </span>bunkerity/bunkerweb/.github/workflows/release.yml<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--source-ref<span class="w"> </span><span class="s2">"refs/tags/</span><span class="nv">$TAG</span><span class="s2">"</span>
+</code></pre></div>
+<p><code>Verification succeeded!</code> signifie que le digest a été signé par le workflow de publication pour ce tag. La commande échoue si l'image n'a pas d'attestation ou si un autre workflow ou dépôt l'a signée. Remplacez le nom de l'image pour contrôler <code>bunkerweb-scheduler</code>, <code>bunkerweb-autoconf</code>, <code>bunkerweb-ui</code>, <code>bunkerweb-api</code> ou <code>bunkerweb-all-in-one</code>, et utilisez <code>ghcr.io/bunkerity/...</code> ou <code>registry.gitlab.com/bunkerity/bunkerweb/...</code> pour les autres registres. Utilisez <code>oci://docker.io/bunkerity/bunkerweb@sha256:&lt;digest&gt;</code> pour vérifier exactement l'image que vous exécutez.</p>
+<h3 id="paquets-linux">Paquets Linux<a class="headerlink" href="#paquets-linux" title="Permanent link">&para;</a></h3>
+<p>Les paquets sont publiés sur packagecloud. Téléchargez le fichier <code>.deb</code> ou <code>.rpm</code> que vous comptez installer et vérifiez-le :</p>
+<div class="highlight"><pre><span></span><code>gh<span class="w"> </span>attestation<span class="w"> </span>verify<span class="w"> </span>./bunkerweb_<span class="si">${</span><span class="nv">VERSION</span><span class="si">}</span>-1_amd64.deb<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--repo<span class="w"> </span>bunkerity/bunkerweb<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--signer-workflow<span class="w"> </span>bunkerity/bunkerweb/.github/workflows/release.yml<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--source-ref<span class="w"> </span><span class="s2">"refs/tags/</span><span class="nv">$TAG</span><span class="s2">"</span>
+</code></pre></div>
+<p>La release liste aussi la somme de contrôle SHA-256 de chaque paquet dans <code>release-manifest.json</code>. Vérifiez le manifeste avec sa propre somme de contrôle, puis le paquet avec le manifeste, en choisissant l'entrée de votre distribution (<code>ubuntu</code>, <code>ubuntu-noble</code>, <code>ubuntu-jammy</code>, <code>debian-bookworm</code>, <code>debian-trixie</code>, <code>fedora-43</code>, <code>fedora-44</code>, <code>rhel-8</code>, <code>rhel-9</code> ou <code>rhel-10</code>) et de votre plateforme (<code>linux/amd64</code> ou <code>linux/arm64</code>) :</p>
+<div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-fsSL<span class="w"> </span>-O<span class="w"> </span><span class="s2">"https://github.com/bunkerity/bunkerweb/releases/download/</span><span class="si">${</span><span class="nv">TAG</span><span class="si">}</span><span class="s2">/release-manifest.json"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-O<span class="w"> </span><span class="s2">"https://github.com/bunkerity/bunkerweb/releases/download/</span><span class="si">${</span><span class="nv">TAG</span><span class="si">}</span><span class="s2">/release-manifest.json.sha256"</span>
+sha256sum<span class="w"> </span>-c<span class="w"> </span>release-manifest.json.sha256
+
+jq<span class="w"> </span>-r<span class="w"> </span><span class="s1">'.packages[] | select(.distro == "debian-bookworm" and .platform == "linux/amd64") | "\(.sha256)  \(.filename)"'</span><span class="w"> </span>release-manifest.json<span class="w"> </span><span class="p">|</span><span class="w"> </span>sha256sum<span class="w"> </span>-c
+</code></pre></div>
+<p>Exécutez la dernière commande dans le répertoire qui contient le paquet. Le manifeste ne liste que des sommes de contrôle : c'est l'attestation qui prouve qui a construit le paquet.</p>
+<p>La version GitHub contient aussi <code>bunkerweb-${TAG#v}.intoto.jsonl</code>, les lots d'attestations de chaque image et de chaque paquet. <code>gh attestation verify &lt;fichier&gt; --bundle bunkerweb-${TAG#v}.intoto.jsonl --repo bunkerity/bunkerweb</code> vérifie un paquet téléchargé à partir de ce fichier, sans récupérer son attestation auprès de GitHub.</p>
 
 
 

@@ -86,7 +86,7 @@
     <script defer>
       window.addEventListener('DOMContentLoaded', () => {
         const bannerEl = document.querySelector('aside.md-banner');
-        let defaultContent = [{ "content" : "\u003cp\u003eInicia una prueba gratuita de 30 d\u00edas de BunkerWeb PRO desde el \u003ca style=\"text-decoration:underline; color :  white;\" href=\"https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self\u0026utm_source=doc\"\u003eBunkerWeb Panel\u003c/a\u003e.\u003c/p\u003e" },
+        let defaultContent = [{ "content" : "\u003cp\u003eInicia una prueba gratuita de 30 d\u00edas de BunkerWeb PRO desde el \u003ca style=\"text-decoration:underline; color :  white;\" href=\"https://panel.bunkerweb.io/store/bunkerweb-pro?language=spanish\u0026amp;utm_campaign=self\u0026amp;utm_source=doc\"\u003eBunkerWeb Panel\u003c/a\u003e: pide un plan y mant\u00e9n \u201cFree 30 Days Trial\u201d como m\u00e9todo de pago al finalizar la compra. (\u003ca style=\"text-decoration:underline; color :  white;\" href=\"../#pro-version\"\u003egu\u00eda paso a paso\u003c/a\u003e)\u003c/p\u003e" },
         { "content" : "\u003cp\u003e\u00bfNecesitas asistencia pr\u00e9mium o asesoramiento personalizado sobre BunkerWeb? Consulta nuestros \u003ca style=\"text-decoration:underline; color :  white;\" href=\"https://panel.bunkerweb.io/?utm_campaign=self\u0026utm_source=doc#services\"\u003eservicios profesionales\u003c/a\u003e.\u003c/p\u003e" },
         { "content" : "\u003cp\u003eForma parte de la comunidad de Bunker uni\u00e9ndote al \u003ca style=\"text-decoration:underline; color: white;\" href=\"https://discord.bunkerweb.io\"\u003echat de Discord\u003c/a\u003e y s\u00edguenos en \u003ca style=\"text-decoration:underline; color: white;\" href=\"https://www.linkedin.com/company/bunkerity/\"\u003eLinkedIn\u003c/a\u003e.\u003c/p\u003e" }
         ]
@@ -1902,6 +1902,15 @@ chown<span class="w"> </span>-R<span class="w"> </span>nginx:nginx<span class="w
 </tr>
 </tbody>
 </table>
+<p><strong>Hook TLS ClientHello.</strong> Un plugin también puede ver cada handshake TLS antes de que se elija el certificado, tanto en el servidor predeterminado como en cada servicio, exportando desde su módulo Lua principal una función a nivel de módulo (no un método, para que no se cree un objeto de plugin por handshake):</p>
+<div class="highlight"><pre><span></span><code><span class="c1">-- in myplugin/myplugin.lua</span>
+<span class="kr">function</span><span class="w"> </span><span class="nc">myplugin</span><span class="p">.</span><span class="nf">client_hello</span><span class="p">(</span><span class="nv">hello</span><span class="p">)</span>
+<span class="w">    </span><span class="c1">-- hello (read-only): service (nil on the default server), ip (nil when the client address is unknown), raw and family</span>
+<span class="w">    </span><span class="c1">-- (packed peer address from ngx.ssl.raw_client_addr()), quic, proxy_protocol, real_ip, trusted</span>
+<span class="w">    </span><span class="kr">return</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="c1">-- or "drop" / "detect" and a reason</span>
+<span class="kr">end</span>
+</code></pre></div>
+<p>Devuelva <code>"drop"</code> para abortar el handshake, <code>"detect"</code> para solo registrar que se descartaría, o nada para dejarlo pasar. Un error o cualquier otro valor deja pasar el handshake. La función se ejecuta exactamente una vez por handshake y <strong>no debe ceder (yield)</strong>: sin Redis, sin cosocket, sin <code>ngx.var</code>, sin <code>resty.lock</code>, sin sleep. Las llamadas a diccionarios compartidos y <code>ngx.timer.at(0, ...)</code> están permitidas. El orden de los plugins que la exportan sigue <code>PLUGINS_ORDER_SSL_CLIENT_HELLO</code>. Un plugin que exporta <code>client_hello</code> no se invoca a través de su método <code>ssl_client_hello_default</code> en el servidor predeterminado. Los plugins pueden detectar la compatibilidad con <code>pcall(require, "bunkerweb.banlease")</code> y <code>banlease.CLIENT_HELLO_PLUGIN_HOOK == 1</code>.</p>
 <h4 id="librerias">Librerías<a class="headerlink" href="#librerias" title="Permanent link">&para;</a></h4>
 <p>Todas las directivas del <a href="https://github.com/openresty/lua-nginx-module">módulo LUA de NGINX</a> y del <a href="https://github.com/openresty/stream-lua-nginx-module">módulo LUA de stream de NGINX</a> están disponibles. Además de eso, puedes usar las librerías LUA incluidas en BunkerWeb: consulta <a href="https://github.com/bunkerity/bunkerweb/blobsrc/deps/clone.sh">este script</a> para la lista completa.</p>
 <p>Si necesitas librerías adicionales, puedes ponerlas en la carpeta raíz del plugin y acceder a ellas prefijándolas con el ID de tu plugin. Aquí hay un ejemplo de archivo llamado <strong>mialibreria.lua</strong>:</p>

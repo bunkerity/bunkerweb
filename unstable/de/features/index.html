@@ -86,7 +86,7 @@
     <script defer>
       window.addEventListener('DOMContentLoaded', () => {
         const bannerEl = document.querySelector('aside.md-banner');
-        let defaultContent = [{ "content" : "\u003cp\u003eStarten Sie \u00fcber das \u003ca style=\"text-decoration:underline; color :  white;\" href=\"https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self\u0026utm_source=doc\"\u003eBunkerWeb Panel\u003c/a\u003e eine kostenlose 30-t\u00e4gige Testversion von BunkerWeb PRO.\u003c/p\u003e" },
+        let defaultContent = [{ "content" : "\u003cp\u003eStarten Sie \u00fcber das \u003ca style=\"text-decoration:underline; color :  white;\" href=\"https://panel.bunkerweb.io/store/bunkerweb-pro?language=german\u0026amp;utm_campaign=self\u0026amp;utm_source=doc\"\u003eBunkerWeb Panel\u003c/a\u003e eine kostenlose 30-t\u00e4gige Testversion von BunkerWeb PRO: Bestellen Sie einen Tarif und lassen Sie beim Bestellabschluss \u201eFree 30 Days Trial\u201c als Zahlungsmethode ausgew\u00e4hlt. (\u003ca style=\"text-decoration:underline; color :  white;\" href=\"../#pro-version\"\u003eSchritt-f\u00fcr-Schritt-Anleitung\u003c/a\u003e)\u003c/p\u003e" },
         { "content" : "\u003cp\u003eBen\u00f6tigen Sie Premium-Support oder eine individuelle Beratung zu BunkerWeb? Informieren Sie sich \u00fcber unsere \u003ca style=\"text-decoration:underline; color :  white;\" href=\"https://panel.bunkerweb.io/?utm_campaign=self\u0026utm_source=doc#services\"\u003eprofessionellen Dienstleistungen\u003c/a\u003e.\u003c/p\u003e" },
         { "content" : "\u003cp\u003eWerden Sie Teil der Bunker-Community und treten Sie dem \u003ca style=\"text-decoration:underline; color: white;\" href=\"https://discord.bunkerweb.io\"\u003eDiscord-Chat\u003c/a\u003e bei. Folgen Sie uns auch auf \u003ca style=\"text-decoration:underline; color: white;\" href=\"https://www.linkedin.com/company/bunkerity/\"\u003eLinkedIn\u003c/a\u003e.\u003c/p\u003e" }
         ]
@@ -3706,7 +3706,7 @@
 <h3 id="plugin-order">Ausführungsreihenfolge der Plugins<a class="headerlink" href="#plugin-order" title="Permanent link">&para;</a></h3>
 <p>Sie können die Reihenfolge mit durch Leerzeichen getrennten Listen steuern:</p>
 <ul>
-<li>Globale Phasen: <code>PLUGINS_ORDER_INIT</code>, <code>PLUGINS_ORDER_INIT_WORKER</code>, <code>PLUGINS_ORDER_TIMER</code>.</li>
+<li>Globale Phasen: <code>PLUGINS_ORDER_INIT</code>, <code>PLUGINS_ORDER_INIT_WORKER</code>, <code>PLUGINS_ORDER_SSL_CLIENT_HELLO</code>, <code>PLUGINS_ORDER_TIMER</code>.</li>
 <li>Seitenspezifische Phasen: <code>PLUGINS_ORDER_SET</code>, <code>PLUGINS_ORDER_ACCESS</code>, <code>PLUGINS_ORDER_SSL_CERTIFICATE</code>, <code>PLUGINS_ORDER_HEADER</code>, <code>PLUGINS_ORDER_LOG</code>, <code>PLUGINS_ORDER_PREREAD</code>, <code>PLUGINS_ORDER_LOG_STREAM</code>, <code>PLUGINS_ORDER_LOG_DEFAULT</code>.</li>
 <li>Semantik: aufgelistete Plugins laufen zuerst in der Phase; alle übrigen laufen danach in ihrer normalen Reihenfolge. IDs nur mit Leerzeichen trennen.</li>
 </ul>
@@ -3749,7 +3749,7 @@
 <td><code>www.example.com</code></td>
 <td>multisite</td>
 <td>Nein</td>
-<td><strong>Primäre Domain:</strong> Der Hauptdomainname für diese Website. Im Multisite-Modus erforderlich.</td>
+<td><strong>Primäre Domain:</strong> Der Hauptdomainname (oder die IP-Adresse) für diese Website. Im Multisite-Modus erforderlich.</td>
 </tr>
 <tr>
 <td><code>BUNKERWEB_INSTANCES</code></td>
@@ -4734,7 +4734,7 @@ curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">"Host: bw
 <td></td>
 <td>Multisite</td>
 <td>nein</td>
-<td>Ausgeschlossene URLs: Eine durch Leerzeichen getrennte Liste von URI-Regulären Ausdrücken, die die Herausforderung umgehen sollen. Muster werden gegen den Pfad und die vollständige Request-URI mit Query-String geprüft.</td>
+<td>Ausgeschlossene URLs: Eine durch Leerzeichen getrennte Liste von URI-Regulären Ausdrücken, die die Herausforderung umgehen sollen. Muster werden gegen den normalisierten Pfad geprüft, allein oder gefolgt von <code>?</code> und dem Query-String.</td>
 </tr>
 <tr>
 <td><code>ANTIBOT_IGNORE_IP</code></td>
@@ -6414,7 +6414,7 @@ TrustedMonitor/\d+\.\d+
 <p><strong>So funktioniert es:</strong></p>
 <ol>
 <li>Ihre BunkerWeb-Instanz registriert sich automatisch bei der BunkerNet-API, um eine eindeutige Kennung zu erhalten.</li>
-<li>Wenn Ihre Instanz eine bösartige IP-Adresse oder ein bösartiges Verhalten erkennt und blockiert, meldet sie die Bedrohung anonym an BunkerNet.</li>
+<li>Wenn Ihre Instanz eine bösartige IP-Adresse oder ein bösartiges Verhalten erkennt und blockiert, meldet sie die Bedrohung an BunkerNet. Die Felder einer Meldung sind im Hinweis „Inhalt einer Meldung“ weiter unten aufgeführt.</li>
 <li>BunkerNet sammelt Bedrohungsdaten von allen teilnehmenden Instanzen und verteilt die konsolidierte Datenbank.</li>
 <li>Ihre Instanz lädt regelmäßig eine aktualisierte Datenbank bekannter Bedrohungen von BunkerNet herunter.</li>
 <li>Diese kollektive Intelligenz ermöglicht es Ihrer Instanz, proaktiv IP-Adressen zu blockieren, die auf anderen BunkerWeb-Instanzen bösartiges Verhalten gezeigt haben.</li>
@@ -6424,9 +6424,9 @@ TrustedMonitor/\d+\.\d+
 <ol>
 <li><strong>Kollektive Verteidigung:</strong> Nutzen Sie die Sicherheitserkenntnisse von Tausenden anderer BunkerWeb-Instanzen weltweit.</li>
 <li><strong>Proaktiver Schutz:</strong> Blockieren Sie böswillige Akteure, bevor sie Ihre Website angreifen können, basierend auf ihrem Verhalten an anderer Stelle.</li>
-<li><strong>Beitrag zur Gemeinschaft:</strong> Helfen Sie, andere BunkerWeb-Benutzer zu schützen, indem Sie anonymisierte Bedrohungsdaten über Angreifer teilen.</li>
+<li><strong>Beitrag zur Gemeinschaft:</strong> Helfen Sie, andere BunkerWeb-Benutzer zu schützen, indem Sie Bedrohungsdaten über Angreifer teilen.</li>
 <li><strong>Keine Konfiguration erforderlich:</strong> Funktioniert standardmäßig mit sinnvollen Voreinstellungen und erfordert nur minimale Einrichtung.</li>
-<li><strong>Datenschutzorientiert:</strong> Teilt nur notwendige Bedrohungsinformationen, ohne Ihre Privatsphäre oder die Ihrer Benutzer zu gefährden.</li>
+<li><strong>Kontrollierte Weitergabe:</strong> Eine Meldung enthält eine feste Auswahl an Feldern, und <code>BUNKERNET_FILTER_HEADERS</code> kann ihre Request-Header auf eine kurze Positivliste beschränken (siehe unten).</li>
 </ol>
 </div>
 <h3 id="wie-man-es-benutzt_3">Wie man es benutzt<a class="headerlink" href="#wie-man-es-benutzt_3" title="Permanent link">&para;</a></h3>
@@ -6458,6 +6458,13 @@ TrustedMonitor/\d+\.\d+
 <td><strong>BunkerNet aktivieren:</strong> Auf <code>yes</code> setzen, um den Austausch von Bedrohungsdaten zu aktivieren.</td>
 </tr>
 <tr>
+<td><code>BUNKERNET_FILTER_HEADERS</code></td>
+<td><code>no</code></td>
+<td>multisite</td>
+<td>nein</td>
+<td><strong>Gemeldete Header filtern:</strong> Auf <code>yes</code> setzen, um nur eine kurze Positivliste von Request-Headern zu senden und die von ModSecurity in Headern und Cookies gefundenen Werte zu leeren. Bei <code>no</code> enthält eine Meldung alle Request-Header und die gefundenen Werte.</td>
+</tr>
+<tr>
 <td><code>BUNKERNET_SERVER</code></td>
 <td><code>https://api.bunkerweb.io</code></td>
 <td>global</td>
@@ -6471,8 +6478,17 @@ TrustedMonitor/\d+\.\d+
 <p>Wenn BunkerNet feststellt, dass eine IP-Adresse an bösartigen Aktivitäten auf mehreren BunkerWeb-Instanzen beteiligt war, wird diese IP zu einer kollektiven schwarzen Liste hinzugefügt. Dies bietet eine proaktive Verteidigungsebene, die Ihre Website vor Bedrohungen schützt, bevor sie Sie direkt angreifen können.</p>
 </div>
 <div class="admonition info">
-<p class="admonition-title">Anonymes Melden</p>
-<p>Bei der Meldung von Bedrohungsinformationen an BunkerNet teilt Ihre Instanz nur die zur Identifizierung der Bedrohung erforderlichen Daten: die IP-Adresse, den Grund für die Sperrung und minimale kontextbezogene Daten. Es werden keine persönlichen Informationen über Ihre Benutzer oder sensible Details über Ihre Website weitergegeben.</p>
+<p class="admonition-title">Inhalt einer Meldung</p>
+<p>Jede an BunkerNet gesendete Meldung enthält diese Felder und nichts anderes:</p>
+<ul>
+<li>die mit jeder Anfrage gesendeten Instanzmetadaten: die BunkerNet-Instanz-ID, die BunkerWeb-Version, die Integration sowie Name, Version, Versions-ID, Codename, ID und Architektur des Betriebssystems;</li>
+<li>die IP-Adresse des Clients, den Grund für die Sperrung und das Datum;</li>
+<li>die HTTP-Methode, die URL <strong>einschließlich Query-String</strong> und den Namen des Dienstes (<code>server_name</code>);</li>
+<li>die Request-Header mit ihren Werten: alle empfangenen Header (bis zu <code>MAX_HEADERS</code>) oder, wenn <code>BUNKERNET_FILTER_HEADERS</code> auf <code>yes</code> steht, nur <code>User-Agent</code>, <code>Accept</code>, <code>Accept-Encoding</code>, <code>Accept-Language</code>, <code>Content-Type</code> und <code>Content-Length</code>;</li>
+<li>die Details zum Sperrgrund. Je nach Plugin, das den Client blockiert hat, enthalten sie die IDs und Meldungen der zutreffenden ModSecurity-Regeln samt den Request-Werten, die zugetroffen haben (Teile von Argumenten, Body, Headern oder Cookies, jeweils auf 512 Bytes gekürzt; mit <code>BUNKERNET_FILTER_HEADERS</code> auf <code>yes</code> werden in Headern und Cookies gefundene Werte geleert und nur der Variablenname wird gesendet), oder bei Bad Behavior die Methode und die URL der letzten Requests, die zur Sperrung geführt haben.</li>
+</ul>
+<p>Standardmäßig (<code>BUNKERNET_FILTER_HEADERS</code> auf <code>no</code>) enthält eine Meldung jeden empfangenen Request-Header (bis zu <code>MAX_HEADERS</code>), einschließlich Cookies und <code>Authorization</code>, sowie die von ModSecurity gefundenen Werte unverändert. Setzen Sie <code>BUNKERNET_FILTER_HEADERS</code> auf <code>yes</code>, um nur die oben genannten sechs Header zu senden und die in Headern und Cookies gefundenen Werte zu leeren. Noch nicht gesendete Meldungen werden bei <code>yes</code> vor dem Senden ebenso gefiltert.</p>
+<p>Die URL und die zugetroffenen Werte stammen aus dem Request und enthalten daher alles, was der Client gesendet hat. Setzen Sie <code>USE_BUNKERNET</code> auf <code>no</code> für Dienste, deren URLs sensible Werte enthalten.</p>
 </div>
 <h3 id="beispielkonfigurationen_4">Beispielkonfigurationen<a class="headerlink" href="#beispielkonfigurationen_4" title="Permanent link">&para;</a></h3>
 <div class="tabbed-set tabbed-alternate" data-tabs="11:3"><input checked="checked" id="__tabbed_11_1" name="__tabbed_11" type="radio" /><input id="__tabbed_11_2" name="__tabbed_11" type="radio" /><input id="__tabbed_11_3" name="__tabbed_11" type="radio" /><div class="tabbed-labels"><label for="__tabbed_11_1">Standardkonfiguration (empfohlen)</label><label for="__tabbed_11_2">Deaktivierte Konfiguration</label><label for="__tabbed_11_3">Benutzerdefinierte Serverkonfiguration</label></div>
@@ -6967,7 +6983,7 @@ TrustedMonitor/\d+\.\d+
 <td></td>
 <td>Multisite</td>
 <td>Nein</td>
-<td>Ignorierte URI: durch Leerzeichen getrennte PCRE-Regex-Muster für URIs, die von der Länderprüfung ausgenommen werden sollen. Die Muster werden gegen den Pfad und die vollständige Anfrage-URI mit Query-String geprüft.</td>
+<td>Ignorierte URI: durch Leerzeichen getrennte PCRE-Regex-Muster für URIs, die von der Länderprüfung ausgenommen werden sollen. Die Muster werden gegen den normalisierten Pfad geprüft, allein oder gefolgt von <code>?</code> und dem Query-String.</td>
 </tr>
 <tr>
 <td><code>COUNTRY_IGNORE_HEADER_NAME</code></td>
@@ -7114,7 +7130,7 @@ TrustedMonitor/\d+\.\d+
 <li><code>DELETE /crowdsec/{connection_id}/decisions/{decision_id}</code>: die ausgewählten Werte für <code>scope</code>, <code>value</code> und <code>decision_type</code> im JSON-Anfragetext angeben.</li>
 </ul>
 <p>Verwenden Sie die zurückgegebene Verbindungs-ID unverändert. Sie enthält die Identität der Instanz, damit identische localhost-URLs auf verschiedenen Instanzen getrennt bleiben. API-Administratoren können diese Operationen nutzen. Delegierte API-Benutzer benötigen die unabhängige Berechtigung <code>crowdsec_read</code> oder <code>crowdsec_delete</code> unter der bestehenden Ressource <code>bans</code>, entweder für eine zurückgegebene Verbindungs-ID oder für <code>*</code>. Eine gewöhnliche <code>ban_delete</code>-Berechtigung erlaubt keine CrowdSec-Entfernung. Eine Datenbankmigration ist nicht erforderlich.</p>
-<p>Die Laufzeit speichert einzelne Entscheidungen je Ziel, sodass das Entfernen einer Entscheidung keine andere Sperre für dieselbe IP oder denselben Bereich löschen kann. Optionale Berichtsmetadaten verwenden einen separaten Cache mit 5 MiB (<code>CROWDSEC_METADATA_CACHE_SIZE=5m</code>) und können keine Einträge für die Durchsetzung von Sperren verdrängen. Stream-Aktualisierungen verwenden eine nicht blockierende Prozesssperre in <code>/var/run/bunkerweb</code>, die bis zur Veröffentlichung der Aktualisierung gehalten und beim Beenden des Workers automatisch freigegeben wird.</p>
+<p>Die Laufzeit speichert einzelne Entscheidungen je Ziel, sodass das Entfernen einer Entscheidung keine andere Sperre für dieselbe IP oder denselben Bereich löschen kann. Optionale Berichtsmetadaten verwenden einen separaten Cache mit 24 MiB (<code>CROWDSEC_METADATA_CACHE_SIZE=24m</code>) und können keine Einträge für die Durchsetzung von Sperren verdrängen. Stream-Aktualisierungen verwenden eine nicht blockierende Prozesssperre in <code>/var/run/bunkerweb</code>, die bis zur Veröffentlichung der Aktualisierung gehalten und beim Beenden des Workers automatisch freigegeben wird.</p>
 <p>Der Stream-Modus hält höchstens zwei Snapshot-Slots und schaltet erst um, wenn ein vollständiger Snapshot gespeichert wurde. Ein unverändertes nginx-Neuladen behält den Snapshot und fordert Deltas an. Ein fehlender Snapshot, geänderte Entscheidungseinstellungen, ein unvollständiger Start oder eine letzte erfolgreiche Synchronisierung vor mehr als dem Maximum aus 300 Sekunden und dem 30-Fachen von <code>CROWDSEC_UPDATE_FREQUENCY</code> erzwingt einen vollständigen Snapshot. Synchronisierungsfehler erzeugen höchstens einen Fehlerlogeintrag pro Minute und Cache-Präfix, gefolgt von einer Wiederherstellungsmeldung. Bei vollem Entscheidungscache erhöhen Sie <code>CROWDSEC_CACHE_SIZE</code> für zwei Snapshots und laden BunkerWeb neu. Eine Größenänderung der Entscheidungszone beim Neuladen erzeugt eine leere Zone und startet eine vollständige Synchronisierung; wird nur die Metadatenzone verändert, gehen optionale Metadaten verloren.</p>
 <p>Bei einem direkten Upgrade von einer früheren Version behalten aktive Altbestände ihre ursprüngliche TTL, damit auslaufende alte Worker sie auch bei verkürztem neuem Shutdown-Timeout weiter anwenden. Veraltete Generationen werden vor der Snapshot-Zuweisung freigegeben. Planen Sie neben den zwei Snapshot-Slots zusätzlichen Cache-Platz für aktive Altbestände ein. Scheitert die Zuweisung, bleibt die bisherige Durchsetzung aktiv und die Synchronisierung meldet einen Fehler. Dimensionieren Sie den Entscheidungscache anhand dieser Werte, gemessen mit synthetischen, unterschiedlichen IPv4-Zielen und einstündiger TTL: Planen Sie im Dauerbetrieb (zwei Snapshot-Slots) etwa 1,1 KiB pro Entscheidung ein und während eines Upgrades mit aktiven Altbeständen etwa 1,4 KiB pro Entscheidung, jeweils mit Reserve aufgerundet. 100.000 Entscheidungen benötigen beispielsweise etwa <code>120m</code> im Dauerbetrieb und <code>150m</code> während eines Upgrades. Bei diesen Werten fasst der Standardwert <code>100m</code> etwa 90.000 Entscheidungen im Dauerbetrieb und etwa 70.000 während eines Upgrades. Andere Zieltypen wie IPv6 oder Bereiche können mehr belegen; legen Sie <code>CROWDSEC_CACHE_SIZE</code> daher passend zur Listengröße fest, am besten vor dem Upgrade.</p>
 <p>Eine unterbrochene oder fehlgeschlagene Stream-Anfrage erzwingt beim nächsten Abruf einen vollständigen Snapshot. Ein vollständiger Abgleich erfolgt außerdem nach 3600 Sekunden seit der letzten erfolgreichen vollständigen Synchronisierung. Beim Start verwenden direkte Antworten der lokalen API einen getrennten Cache je wirksamen Zugangsdaten und Richtlinie. Bei einem Fehler pausieren nur die Abfragen dieser Richtlinie für <code>CROWDSEC_UPDATE_FREQUENCY</code>; unbekannte IPs werden während des Ausfalls zugelassen. Bekannte Sperren und Captchas bleiben bis zu ihrem jeweiligen Ablauf wirksam. Weder Startantworten noch wiederhergestellte Entscheidungen überschreiben einen neueren veröffentlichten Snapshot.</p>
@@ -7421,7 +7437,7 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 </tr>
 <tr>
 <td><code>CROWDSEC_METADATA_CACHE_SIZE</code></td>
-<td><code>5m</code></td>
+<td><code>24m</code></td>
 <td>global</td>
 <td>no</td>
 <td><strong>Größe des Metadatencaches:</strong> Separater gemeinsamer Speicher für optionale Berichtsmetadaten aller Dienste. Positive ganze Anzahl Megabyte (<code>m</code>/<code>M</code>), mindestens <code>1m</code>. Eine Größenänderung beim Neuladen löscht diese Metadaten.</td>
@@ -11697,7 +11713,7 @@ TrustedMonitor/\d+\.\d+
 <p>Wählen Sie eine CRS-Version, die Ihren Sicherheitsanforderungen am besten entspricht:</p>
 <ul>
 <li><strong><code>3</code></strong>: Stabile <a href="https://github.com/coreruleset/coreruleset/releases/tag/v3.3.10">v3.3.10</a>.</li>
-<li><strong><code>4</code></strong>: Stabile <a href="https://github.com/coreruleset/coreruleset/releases/tag/v4.29.0">v4.29.0</a> (<strong>Standard</strong>).</li>
+<li><strong><code>4</code></strong>: Stabile <a href="https://github.com/coreruleset/coreruleset/releases/tag/v4.30.0">v4.30.0</a> (<strong>Standard</strong>).</li>
 </ul>
 <div class="admonition warning">
 <p class="admonition-title">Nightly-Build veraltet</p>
@@ -12690,7 +12706,7 @@ SecRule REQUEST_FILENAME "^/wp-json/yoast" "id:3,ctl:ruleRemoveById=930120"
 <h3 id="wie-man-es-benutzt_15">Wie man es benutzt<a class="headerlink" href="#wie-man-es-benutzt_15" title="Permanent link">&para;</a></h3>
 <p>Führen Sie die folgenden Schritte aus, um die Pro-Funktionen zu konfigurieren und zu verwenden:</p>
 <ol>
-<li><strong>Lizenzschlüssel erhalten:</strong> Kaufen Sie eine Pro-Lizenz im <a href="https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&amp;utm_source=doc">BunkerWeb Panel</a>.</li>
+<li><strong>Lizenzschlüssel erhalten:</strong> Starten Sie eine kostenlose 30-tägige Testversion oder kaufen Sie eine Pro-Lizenz im <a href="https://panel.bunkerweb.io/store/bunkerweb-pro?language=german&amp;utm_campaign=self&amp;utm_source=doc">BunkerWeb Panel</a> (<a href="../#pro-version">Schritt-für-Schritt-Anleitung</a>).</li>
 <li><strong>Lizenzschlüssel konfigurieren:</strong> Verwenden Sie die Einstellung <code>PRO_LICENSE_KEY</code>, um Ihre Lizenz zu konfigurieren.</li>
 <li><strong>Lassen Sie BunkerWeb den Rest erledigen:</strong> Nach der Konfiguration mit einer gültigen Lizenz werden Pro-Plugins automatisch heruntergeladen und aktiviert.</li>
 <li><strong>Überwachen Sie Ihren Pro-Status:</strong> Überprüfen Sie die Zustandsindikatoren in der <a href="../web-ui/">Web-Benutzeroberfläche</a>, um Ihren Pro-Abonnementstatus zu bestätigen.</li>
@@ -12739,7 +12755,7 @@ SecRule REQUEST_FILENAME "^/wp-json/yoast" "id:3,ctl:ruleRemoveById=930120"
 <li><strong>BunkerWeb PRO Standard:</strong> Voller Zugriff auf die Pro-Funktionen ohne technischen Support.</li>
 <li><strong>BunkerWeb PRO Enterprise:</strong> Voller Zugriff auf die Pro-Funktionen mit dediziertem technischen Support.</li>
 </ul>
-<p>Sie können die Pro-Funktionen 30 Tage lang kostenlos testen. Starten Sie Ihre Testversion im <a href="https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&amp;utm_source=doc">BunkerWeb Panel</a> und erfahren Sie mehr über flexible Preisoptionen basierend auf der Anzahl der von BunkerWeb PRO geschützten Dienste.</p>
+<p>Sie können die Pro-Funktionen 30 Tage lang kostenlos testen. Starten Sie Ihre Testversion im <a href="https://panel.bunkerweb.io/store/bunkerweb-pro?language=german&amp;utm_campaign=self&amp;utm_source=doc">BunkerWeb Panel</a> und erfahren Sie mehr über flexible Preisoptionen basierend auf der Anzahl der von BunkerWeb PRO geschützten Dienste: Bestellen Sie einen Tarif und lassen Sie beim Bestellabschluss <strong>Free 30 Days Trial</strong> als Zahlungsmethode ausgewählt (<a href="../#pro-version">Schritt-für-Schritt-Anleitung</a>).</p>
 <h2 id="prometheus-exporter-pro">Prometheus exporter <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)<a class="headerlink" href="#prometheus-exporter-pro" title="Permanent link">&para;</a></h2>
 <p>STREAM-Unterstützung <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
 <p>Prometheus exporter for BunkerWeb internal metrics.</p>

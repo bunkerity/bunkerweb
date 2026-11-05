@@ -86,7 +86,7 @@
     <script defer>
       window.addEventListener('DOMContentLoaded', () => {
         const bannerEl = document.querySelector('aside.md-banner');
-        let defaultContent = [{ "content" : "\u003cp\u003e\u901a\u8fc7 \u003ca style=\"text-decoration:underline; color :  white;\" href=\"https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self\u0026utm_source=doc\"\u003eBunkerWeb Panel\u003c/a\u003e\u5f00\u542f BunkerWeb PRO 30 \u5929\u514d\u8d39\u8bd5\u7528\u3002\u003c/p\u003e" },
+        let defaultContent = [{ "content" : "\u003cp\u003e\u901a\u8fc7 \u003ca style=\"text-decoration:underline; color :  white;\" href=\"https://panel.bunkerweb.io/store/bunkerweb-pro?language=chinese\u0026amp;utm_campaign=self\u0026amp;utm_source=doc\"\u003eBunkerWeb Panel\u003c/a\u003e\u5f00\u542f BunkerWeb PRO 30 \u5929\u514d\u8d39\u8bd5\u7528\uff1a\u8ba2\u8d2d\u4e00\u4e2a\u65b9\u6848\uff0c\u7136\u540e\u5728\u7ed3\u8d26\u65f6\u4fdd\u6301\u9009\u4e2d\u201cFree 30 Days Trial\u201d\u4f5c\u4e3a\u4ed8\u6b3e\u65b9\u5f0f\u3002 (\u003ca style=\"text-decoration:underline; color :  white;\" href=\"../#pro-version\"\u003e\u5206\u6b65\u6307\u5357\u003c/a\u003e)\u003c/p\u003e" },
         { "content" : "\u003cp\u003e\u9700\u8981 BunkerWeb \u9ad8\u7ea7\u652f\u6301\u6216\u5b9a\u5236\u54a8\u8be2\uff1f\u8bf7\u67e5\u770b\u6211\u4eec\u7684 \u003ca style=\"text-decoration:underline; color :  white;\" href=\"https://panel.bunkerweb.io/?utm_campaign=self\u0026utm_source=doc#services\"\u003e\u4e13\u4e1a\u670d\u52a1\u003c/a\u003e\u3002\u003c/p\u003e" },
         { "content" : "\u003cp\u003e\u52a0\u5165 Bunker \u793e\u533a\uff0c\u53c2\u4e0e \u003ca style=\"text-decoration:underline; color: white;\" href=\"https://discord.bunkerweb.io\"\u003eDiscord \u804a\u5929\u003c/a\u003e \u5e76\u5173\u6ce8\u6211\u4eec\u7684 \u003ca style=\"text-decoration:underline; color: white;\" href=\"https://www.linkedin.com/company/bunkerity/\"\u003eLinkedIn\u003c/a\u003e\u3002\u003c/p\u003e" }
         ]
@@ -3708,7 +3708,7 @@
 <h3 id="plugin-order">插件执行顺序<a class="headerlink" href="#plugin-order" title="Permanent link">&para;</a></h3>
 <p>可以使用空格分隔的列表调整顺序：</p>
 <ul>
-<li>全局阶段：<code>PLUGINS_ORDER_INIT</code>、<code>PLUGINS_ORDER_INIT_WORKER</code>、<code>PLUGINS_ORDER_TIMER</code>。</li>
+<li>全局阶段：<code>PLUGINS_ORDER_INIT</code>、<code>PLUGINS_ORDER_INIT_WORKER</code>、<code>PLUGINS_ORDER_SSL_CLIENT_HELLO</code>、<code>PLUGINS_ORDER_TIMER</code>。</li>
 <li>按站点的阶段：<code>PLUGINS_ORDER_SET</code>、<code>PLUGINS_ORDER_ACCESS</code>、<code>PLUGINS_ORDER_SSL_CERTIFICATE</code>、<code>PLUGINS_ORDER_HEADER</code>、<code>PLUGINS_ORDER_LOG</code>、<code>PLUGINS_ORDER_PREREAD</code>、<code>PLUGINS_ORDER_LOG_STREAM</code>、<code>PLUGINS_ORDER_LOG_DEFAULT</code>。</li>
 <li>语义：列出的插件在该阶段优先执行；其余插件仍按正常顺序执行。仅使用空格分隔插件 ID。</li>
 </ul>
@@ -3751,7 +3751,7 @@
 <td><code>www.example.com</code></td>
 <td>multisite</td>
 <td>否</td>
-<td><strong>主域名：</strong> 此站点的主域名。在多站点模式下为必需。</td>
+<td><strong>主域名：</strong> 此站点的主域名（或 IP 地址）。在多站点模式下为必需。</td>
 </tr>
 <tr>
 <td><code>BUNKERWEB_INSTANCES</code></td>
@@ -4736,7 +4736,7 @@ curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">"Host: bw
 <td></td>
 <td>multisite</td>
 <td>否</td>
-<td><strong>排除的 URL：</strong> 应绕过挑战的以空格分隔的 URI 正则表达式模式列表。模式会同时匹配路径和带查询字符串的完整请求 URI。</td>
+<td><strong>排除的 URL：</strong> 应绕过挑战的以空格分隔的 URI 正则表达式模式列表。模式会匹配规范化后的路径，既可单独匹配，也可匹配路径后接 <code>?</code> 和查询字符串的形式。</td>
 </tr>
 <tr>
 <td><code>ANTIBOT_IGNORE_IP</code></td>
@@ -6427,7 +6427,7 @@ TrustedMonitor/\d+\.\d+
 <p><strong>工作原理：</strong></p>
 <ol>
 <li>您的 BunkerWeb 实例会自动向 BunkerNet API 注册，以获取一个唯一标识符。</li>
-<li>当您的实例检测并阻止了恶意 IP 地址或行为时，它会匿名地向 BunkerNet 报告该威胁。</li>
+<li>当您的实例检测并阻止了恶意 IP 地址或行为时，它会向 BunkerNet 报告该威胁。报告包含的字段见下文“报告包含的内容”。</li>
 <li>BunkerNet 聚合来自所有参与实例的威胁情报，并分发整合后的数据库。</li>
 <li>您的实例会定期从 BunkerNet 下载更新的已知威胁数据库。</li>
 <li>这种集体情报使您的实例能够主动阻止在其他 BunkerWeb 实例上表现出恶意行为的 IP 地址。</li>
@@ -6437,9 +6437,9 @@ TrustedMonitor/\d+\.\d+
 <ol>
 <li><strong>集体防御：</strong> 利用全球成千上万个其他 BunkerWeb 实例的安全发现。</li>
 <li><strong>主动防护：</strong> 根据恶意行为者在别处的行为，在他们攻击您的网站之前就将其阻止。</li>
-<li><strong>社区贡献：</strong> 通过分享关于攻击者的匿名威胁数据，帮助保护其他 BunkerWeb 用户。</li>
+<li><strong>社区贡献：</strong> 通过分享关于攻击者的威胁数据，帮助保护其他 BunkerWeb 用户。</li>
 <li><strong>零配置：</strong> 开箱即用，带有合理的默认值，只需最少的设置。</li>
-<li><strong>注重隐私：</strong> 只分享必要的威胁信息，不损害您或您用户的隐私。</li>
+<li><strong>受控分享：</strong> 报告包含一组固定的字段，<code>BUNKERNET_FILTER_HEADERS</code> 可将其请求头限制为一份简短的白名单（见下文）。</li>
 </ol>
 </div>
 <h3 id="_26">如何使用<a class="headerlink" href="#_26" title="Permanent link">&para;</a></h3>
@@ -6471,6 +6471,13 @@ TrustedMonitor/\d+\.\d+
 <td><strong>启用 BunkerNet：</strong> 设置为 <code>yes</code> 以启用 BunkerNet 威胁情报共享。</td>
 </tr>
 <tr>
+<td><code>BUNKERNET_FILTER_HEADERS</code></td>
+<td><code>no</code></td>
+<td>multisite</td>
+<td>否</td>
+<td><strong>过滤上报的请求头：</strong> 设置为 <code>yes</code> 时，只发送一份简短的请求头白名单，并清空 ModSecurity 在请求头和 Cookie 中命中的值。设置为 <code>no</code> 时，报告包含所有请求头和命中的值。</td>
+</tr>
+<tr>
 <td><code>BUNKERNET_SERVER</code></td>
 <td><code>https://api.bunkerweb.io</code></td>
 <td>global</td>
@@ -6484,8 +6491,17 @@ TrustedMonitor/\d+\.\d+
 <p>当 BunkerNet 检测到某个 IP 地址在多个 BunkerWeb 实例中参与了恶意活动时，它会将该 IP 添加到集体黑名单中。这提供了一个主动的防御层，在威胁直接攻击您之前就保护您的网站。</p>
 </div>
 <div class="admonition info">
-<p class="admonition-title">匿名报告</p>
-<p>在向 BunkerNet 报告威胁信息时，您的实例只分享识别威胁所需的数据：IP 地址、阻止原因和最少的上下文数据。不会分享有关您的用户的个人信息或有关您网站的敏感详细信息。</p>
+<p class="admonition-title">报告包含的内容</p>
+<p>发送给 BunkerNet 的每份报告包含以下字段，仅此而已：</p>
+<ul>
+<li>每次请求发送的实例元数据：BunkerNet 实例 ID、BunkerWeb 版本、集成方式，以及操作系统名称、版本、版本 ID、代号、ID 和架构；</li>
+<li>客户端 IP 地址、阻止原因和日期；</li>
+<li>HTTP 方法、<strong>包含查询字符串的</strong> URL，以及服务名称（<code>server_name</code>）；</li>
+<li>请求头及其值：收到的所有请求头（最多 <code>MAX_HEADERS</code> 个），或在 <code>BUNKERNET_FILTER_HEADERS</code> 为 <code>yes</code> 时仅包含 <code>User-Agent</code>、<code>Accept</code>、<code>Accept-Encoding</code>、<code>Accept-Language</code>、<code>Content-Type</code> 和 <code>Content-Length</code>；</li>
+<li>与阻止原因相关的详细信息。根据阻止该客户端的插件不同，可能包含命中的 ModSecurity 规则 ID 和消息，以及触发这些规则的请求值（参数、请求体、请求头或 Cookie 的片段，每项截断为 512 字节；<code>BUNKERNET_FILTER_HEADERS</code> 为 <code>yes</code> 时，在请求头和 Cookie 中命中的值会被清空，只发送变量名）；对于 Bad Behavior，则是导致封禁的近期请求的方法和 URL。</li>
+</ul>
+<p>默认情况下（<code>BUNKERNET_FILTER_HEADERS</code> 为 <code>no</code>），报告包含收到的所有请求头（最多 <code>MAX_HEADERS</code> 个，包括 Cookie 和 <code>Authorization</code>），以及 ModSecurity 命中的原始值。将 <code>BUNKERNET_FILTER_HEADERS</code> 设置为 <code>yes</code>，则只发送上面列出的六个请求头，并清空在请求头和 Cookie 中命中的值。仍在队列中的报告在 <code>yes</code> 时也会在发送前以同样方式过滤。</p>
+<p>URL 以及命中的值均来自请求，因此包含客户端发送的任何内容。对于 URL 中带有敏感值的服务，请将 <code>USE_BUNKERNET</code> 设置为 <code>no</code>。</p>
 </div>
 <h3 id="_28">示例配置<a class="headerlink" href="#_28" title="Permanent link">&para;</a></h3>
 <div class="tabbed-set tabbed-alternate" data-tabs="11:3"><input checked="checked" id="__tabbed_11_1" name="__tabbed_11" type="radio" /><input id="__tabbed_11_2" name="__tabbed_11" type="radio" /><input id="__tabbed_11_3" name="__tabbed_11" type="radio" /><div class="tabbed-labels"><label for="__tabbed_11_1">默认配置（推荐）</label><label for="__tabbed_11_2">禁用配置</label><label for="__tabbed_11_3">自定义服务器配置</label></div>
@@ -7016,7 +7032,7 @@ TrustedMonitor/\d+\.\d+
 <td></td>
 <td>multisite</td>
 <td>否</td>
-<td><strong>忽略的 URI：</strong> 以空格分隔的 PCRE 正则表达式列表，匹配的 URI 将跳过国家/地区检查。规则同时匹配路径和带查询字符串的完整请求 URI。</td>
+<td><strong>忽略的 URI：</strong> 以空格分隔的 PCRE 正则表达式列表，匹配的 URI 将跳过国家/地区检查。规则会匹配规范化后的路径，既可单独匹配，也可匹配路径后接 <code>?</code> 和查询字符串的形式。</td>
 </tr>
 <tr>
 <td><code>COUNTRY_IGNORE_HEADER_NAME</code></td>
@@ -7167,7 +7183,7 @@ TrustedMonitor/\d+\.\d+
 <li><code>DELETE /crowdsec/{connection_id}/decisions/{decision_id}</code>：在 JSON 请求体中包含所选的 <code>scope</code>、<code>value</code> 和 <code>decision_type</code>。</li>
 </ul>
 <p>请原样使用返回的连接 ID。它包含实例身份，因此不同实例上相同的 localhost URL 仍会被区分。API 管理员可以使用这些操作。委派的 API 用户需要在现有 <code>bans</code> 资源下获得独立的 <code>crowdsec_read</code> 或 <code>crowdsec_delete</code> 权限，权限范围为返回的连接 ID 或 <code>*</code>。普通的 <code>ban_delete</code> 权限不允许移除 CrowdSec 决策。无需进行数据库迁移。</p>
-<p>运行时按目标保留各条独立决策，因此移除一条决策不会抹去同一 IP 或范围上的其他封禁。可选的报告元数据使用独立的 5 MiB (<code>CROWDSEC_METADATA_CACHE_SIZE=5m</code>) 缓存，不会逐出用于执行封禁的条目。流刷新使用 <code>/var/run/bunkerweb</code> 中的非阻塞进程锁，锁会一直保持到更新发布完成，并在 worker 退出时自动释放。</p>
+<p>运行时按目标保留各条独立决策，因此移除一条决策不会抹去同一 IP 或范围上的其他封禁。可选的报告元数据使用独立的 24 MiB (<code>CROWDSEC_METADATA_CACHE_SIZE=24m</code>) 缓存，不会逐出用于执行封禁的条目。流刷新使用 <code>/var/run/bunkerweb</code> 中的非阻塞进程锁，锁会一直保持到更新发布完成，并在 worker 退出时自动释放。</p>
 <p>流模式最多保留两个快照槽位，仅在完整快照存储成功后切换。配置未变的 nginx 重载会保留当前快照并请求增量更新。快照缺失、决策配置改变、上次启动未完成，或距离上次成功同步超过 300 秒与 <code>CROWDSEC_UPDATE_FREQUENCY</code> 的 30 倍两者中的较大值时，会强制获取完整快照。每个缓存前缀每分钟最多记录一次同步错误，恢复后记录一次通知。决策缓存已满时，请增大 <code>CROWDSEC_CACHE_SIZE</code> 以容纳两个快照并重载 BunkerWeb。重载时调整决策内存区大小会创建空缓存并触发完整同步；仅调整元数据内存区大小会清空可选元数据。</p>
 <p>从早期版本原地升级时，旧版本的有效记录保留原始 TTL，因此即使新的关闭超时更短，正在退出的旧工作进程仍可继续执行这些决策。分配快照前会清理过时的代际记录。除两个快照槽位外，还应为这些旧记录预留缓存空间；分配失败时保留原有防护，并报告同步错误。请按以下数据确定决策缓存大小，这些数据使用合成的互不相同的 IPv4 目标和一小时 TTL 测得：稳定状态（两个快照槽位）下约为每条决策 1.1 KiB，升级期间旧记录仍有效时约为每条决策 1.4 KiB，二者均已向上取整以留有余量。例如，100,000 条决策在稳定状态下约需 <code>120m</code>，升级期间约需 <code>150m</code>。按这些数据，默认值 <code>100m</code> 在稳定状态下可容纳约 90,000 条决策，升级期间约 70,000 条。IPv6 或网段等其他目标类型可能占用更多，因此请按列表规模设置 <code>CROWDSEC_CACHE_SIZE</code>，最好在升级前完成。</p>
 <p>流请求被中断或失败后，下次轮询会强制获取完整快照。距离上次成功完整同步超过 3600 秒时，也会执行一次完整校准。初始化期间，本地 API 的直接查询结果按有效凭据和策略使用独立缓存。查询失败后，仅该策略暂停查询 <code>CROWDSEC_UPDATE_FREQUENCY</code>；故障期间未知 IP 会被放行。已知的封禁和验证码决策仍执行至各自到期。初始化查询结果和恢复的决策都不会覆盖更新的已发布快照。</p>
@@ -7474,7 +7490,7 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 </tr>
 <tr>
 <td><code>CROWDSEC_METADATA_CACHE_SIZE</code></td>
-<td><code>5m</code></td>
+<td><code>24m</code></td>
 <td>global</td>
 <td>否</td>
 <td><strong>元数据缓存大小：</strong> 所有服务的可选报告元数据使用的独立共享内存。使用正整数兆字节（<code>m</code>/<code>M</code>），最小值为 <code>1m</code>；重载时调整大小会清空此内存区。</td>
@@ -11764,7 +11780,7 @@ TrustedMonitor/\d+\.\d+
 <p>选择一个 CRS 版本以最符合您的安全需求：</p>
 <ul>
 <li><strong><code>3</code></strong>：稳定版 <a href="https://github.com/coreruleset/coreruleset/releases/tag/v3.3.10">v3.3.10</a>。</li>
-<li><strong><code>4</code></strong>：稳定版 <a href="https://github.com/coreruleset/coreruleset/releases/tag/v4.29.0">v4.29.0</a> (<strong>默认</strong>)。</li>
+<li><strong><code>4</code></strong>：稳定版 <a href="https://github.com/coreruleset/coreruleset/releases/tag/v4.30.0">v4.30.0</a> (<strong>默认</strong>)。</li>
 </ul>
 <div class="admonition warning">
 <p class="admonition-title">每日构建版已弃用</p>
@@ -12757,7 +12773,7 @@ SecRule REQUEST_FILENAME "^/wp-json/yoast" "id:3,ctl:ruleRemoveById=930120"
 <h3 id="_96">如何使用<a class="headerlink" href="#_96" title="Permanent link">&para;</a></h3>
 <p>请按照以下步骤配置和使用 Pro 功能：</p>
 <ol>
-<li><strong>获取许可证密钥：</strong> 从 <a href="https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&amp;utm_source=doc">BunkerWeb 面板</a> 购买 Pro 许可证。</li>
+<li><strong>获取许可证密钥：</strong> 从 <a href="https://panel.bunkerweb.io/store/bunkerweb-pro?language=chinese&amp;utm_campaign=self&amp;utm_source=doc">BunkerWeb 面板</a>开始 30 天免费试用或购买 Pro 许可证（<a href="../#pro-version">分步指南</a>）。</li>
 <li><strong>配置您的许可证密钥：</strong> 使用 <code>PRO_LICENSE_KEY</code> 设置来配置您的许可证。</li>
 <li><strong>让 BunkerWeb 处理其余部分：</strong> 一旦配置了有效的许可证，Pro 插件将自动下载并激活。</li>
 <li><strong>监控您的 Pro 状态：</strong> 在 <a href="../web-ui/">Web UI</a> 中检查健康指示器，以确认您的 Pro 订阅状态。</li>
@@ -12806,7 +12822,7 @@ SecRule REQUEST_FILENAME "^/wp-json/yoast" "id:3,ctl:ruleRemoveById=930120"
 <li><strong>BunkerWeb PRO Standard：</strong> 完全访问 Pro 功能，但不提供技术支持。</li>
 <li><strong>BunkerWeb PRO Enterprise：</strong> 完全访问 Pro 功能，并提供专属技术支持。</li>
 </ul>
-<p>您可以免费试用 BunkerWeb PRO 的全部 Pro 功能 30 天。请前往 <a href="https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&amp;utm_source=doc">BunkerWeb 面板</a>开始试用，并了解根据受 BunkerWeb PRO 保护的服务数量灵活定价的方案。</p>
+<p>您可以免费试用 BunkerWeb PRO 的全部 Pro 功能 30 天。请前往 <a href="https://panel.bunkerweb.io/store/bunkerweb-pro?language=chinese&amp;utm_campaign=self&amp;utm_source=doc">BunkerWeb 面板</a>开始试用，并了解根据受 BunkerWeb PRO 保护的服务数量灵活定价的方案：订购一个方案，然后在结账时保持选中 <strong>Free 30 Days Trial</strong> 作为付款方式（<a href="../#pro-version">分步指南</a>）。</p>
 <h2 id="prometheus-exporter-pro">Prometheus exporter <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)<a class="headerlink" href="#prometheus-exporter-pro" title="Permanent link">&para;</a></h2>
 <p>STREAM 支持 <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
 <p>Prometheus exporter for BunkerWeb internal metrics.</p>

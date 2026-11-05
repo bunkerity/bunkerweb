@@ -86,7 +86,7 @@
     <script defer>
       window.addEventListener('DOMContentLoaded', () => {
         const bannerEl = document.querySelector('aside.md-banner');
-        let defaultContent = [{ "content" : "\u003cp\u003eStart a 30-day BunkerWeb PRO free trial from the \u003ca style=\"text-decoration:underline; color :  white;\" href=\"https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self\u0026utm_source=doc\"\u003eBunkerWeb Panel\u003c/a\u003e.\u003c/p\u003e" },
+        let defaultContent = [{ "content" : "\u003cp\u003eStart a 30-day BunkerWeb PRO free trial from the \u003ca style=\"text-decoration:underline; color :  white;\" href=\"https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self\u0026amp;utm_source=doc\"\u003eBunkerWeb Panel\u003c/a\u003e: order a plan, then keep \u201cFree 30 Days Trial\u201d as the payment method at checkout. (\u003ca style=\"text-decoration:underline; color :  white;\" href=\"..#pro-version\"\u003estep-by-step guide\u003c/a\u003e)\u003c/p\u003e" },
         { "content" : "\u003cp\u003eNeed premium support or tailored consulting around BunkerWeb? Check out our \u003ca style=\"text-decoration:underline; color :  white;\" href=\"https://panel.bunkerweb.io/?utm_campaign=self\u0026utm_source=doc#services\"\u003eprofessional services\u003c/a\u003e.\u003c/p\u003e" },
         { "content" : "\u003cp\u003eBe part of the Bunker community by joining the \u003ca style=\"text-decoration:underline; color: white;\" href=\"https://discord.bunkerweb.io\"\u003eDiscord chat\u003c/a\u003e and following us on \u003ca style=\"text-decoration:underline; color: white;\" href=\"https://www.linkedin.com/company/bunkerity/\"\u003eLinkedIn\u003c/a\u003e.\u003c/p\u003e" }
         ]
@@ -4457,6 +4457,29 @@ sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> <
 </code></pre></div>
 <p>This is required for the BunkerWeb Scheduler to connect to your external database.</p>
 </div>
+<h4 id="debian-ubuntu-postgresql-backups">Debian/Ubuntu PostgreSQL backups<a class="headerlink" href="#debian-ubuntu-postgresql-backups" title="Permanent link">&para;</a></h4>
+<div class="admonition warning">
+<p class="admonition-title">PostgreSQL client major version</p>
+<p>Debian 12 (Bookworm) ships PostgreSQL client 15; Debian 13 (Trixie), 17; Ubuntu 22.04 (Jammy), 14; Ubuntu 24.04 (Noble), 16; Ubuntu 26.04 (Resolute), 18. If your external PostgreSQL server has a newer major version, scheduled backups and <code>bwcli plugin backup save</code> fail with <code>server version mismatch</code> from <code>pg_dump</code>. Install the matching <code>postgresql-client-&lt;N&gt;</code> manually from the <a href="https://www.postgresql.org/download/linux/debian/">official PGDG repository for Debian</a> or <a href="https://www.postgresql.org/download/linux/ubuntu/">Ubuntu</a> on the host running the Scheduler or the backup command. Set <code>PG_MAJOR</code> below to your server's major version (<code>18</code> is an example); these commands install only the client, not a database server.</p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>curl<span class="w"> </span>ca-certificates
+sudo<span class="w"> </span>install<span class="w"> </span>-d<span class="w"> </span>/usr/share/postgresql-common/pgdg
+sudo<span class="w"> </span>curl<span class="w"> </span>-o<span class="w"> </span>/usr/share/postgresql-common/pgdg/apt.postgresql.org.asc<span class="w"> </span>--fail<span class="w"> </span>https://www.postgresql.org/media/keys/ACCC4CF8.asc
+.<span class="w"> </span>/etc/os-release
+sudo<span class="w"> </span>tee<span class="w"> </span>/etc/apt/sources.list.d/pgdg.sources<span class="w"> </span>&gt;<span class="w"> </span>/dev/null<span class="w"> </span><span class="s">&lt;&lt;EOF</span>
+<span class="s">Types: deb</span>
+<span class="s">URIs: https://apt.postgresql.org/pub/repos/apt</span>
+<span class="s">Suites: ${VERSION_CODENAME}-pgdg</span>
+<span class="s">Architectures: $(dpkg --print-architecture)</span>
+<span class="s">Components: main</span>
+<span class="s">Signed-By: /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc</span>
+<span class="s">EOF</span>
+sudo<span class="w"> </span>apt<span class="w"> </span>update
+<span class="nv">PG_MAJOR</span><span class="o">=</span><span class="m">18</span>
+sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span><span class="s2">"postgresql-client-</span><span class="si">${</span><span class="nv">PG_MAJOR</span><span class="si">}</span><span class="s2">"</span>
+pg_dump<span class="w"> </span>--version
+</code></pre></div>
+<p>Check that <code>pg_dump --version</code> reports the matching client before running backups. The installer only displays this warning; it does not configure PGDG or install a newer client.</p>
+</div>
 <h4 id="after-installation">After installation<a class="headerlink" href="#after-installation" title="Permanent link">&para;</a></h4>
 <p>Once installation is complete, the script provides mode-specific next steps to help you get started with your BunkerWeb deployment.</p>
 <p><strong>Installation Modes Overview:</strong></p>
@@ -4545,12 +4568,6 @@ curl<span class="w"> </span>https://nginx.org/keys/nginx_signing.key<span class=
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>apt<span class="w"> </span>update<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
 sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>--allow-downgrades<span class="w"> </span><span class="nv">nginx</span><span class="o">=</span><span class="m">1</span>.30.6-1~<span class="k">$(</span>lsb_release<span class="w"> </span>-cs<span class="k">)</span>
 </code></pre></div>
-<div class="admonition warning">
-<p class="admonition-title">Testing/dev version</p>
-<p>If you use the <code>testing</code> or <code>dev</code> version, you will need to add the <code>force-bad-version</code> directive to your <code>/etc/dpkg/dpkg.cfg</code> file before installing BunkerWeb.</p>
-<div class="highlight"><pre><span></span><code><span class="nb">echo</span><span class="w"> </span><span class="s2">"force-bad-version"</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>tee<span class="w"> </span>-a<span class="w"> </span>/etc/dpkg/dpkg.cfg
-</code></pre></div>
-</div>
 <div class="admonition example">
 <p class="admonition-title">Disable the setup wizard</p>
 <p>If you don't want to use the setup wizard of the web UI when BunkerWeb is installed, export the following variable:</p>
@@ -4579,12 +4596,6 @@ curl<span class="w"> </span>https://nginx.org/keys/nginx_signing.key<span class=
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>apt<span class="w"> </span>update<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
 sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>--allow-downgrades<span class="w"> </span><span class="nv">nginx</span><span class="o">=</span><span class="m">1</span>.30.6-1~<span class="k">$(</span>lsb_release<span class="w"> </span>-cs<span class="k">)</span>
 </code></pre></div>
-<div class="admonition warning">
-<p class="admonition-title">Testing/dev version</p>
-<p>If you use the <code>testing</code> or <code>dev</code> version, you will need to add the <code>force-bad-version</code> directive to your <code>/etc/dpkg/dpkg.cfg</code> file before installing BunkerWeb.</p>
-<div class="highlight"><pre><span></span><code><span class="nb">echo</span><span class="w"> </span><span class="s2">"force-bad-version"</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>tee<span class="w"> </span>-a<span class="w"> </span>/etc/dpkg/dpkg.cfg
-</code></pre></div>
-</div>
 <div class="admonition example">
 <p class="admonition-title">Disable the setup wizard</p>
 <p>If you don't want to use the setup wizard of the web UI when BunkerWeb is installed, export the following variable:</p>
@@ -4607,12 +4618,8 @@ sudo<span class="w"> </span>-E<span class="w"> </span>apt<span class="w"> </span
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>config-manager<span class="w"> </span>setopt<span class="w"> </span>updates-testing.enabled<span class="o">=</span><span class="m">1</span>
 </code></pre></div>
 </div>
-<div class="admonition warning">
-<p class="admonition-title">Fedora ships NGINX 1.30.5</p>
-<p>Fedora 43 and 44 do not provide NGINX 1.30.6 yet, so the BunkerWeb packages for Fedora are built against NGINX 1.30.5 and expect <code>nginx-1.30.5</code>. Install that version on Fedora; the pin moves to 1.30.6 as soon as Fedora publishes it.</p>
-</div>
-<p>Fedora already provides NGINX 1.30.5 that we support</p>
-<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>--allowerasing<span class="w"> </span>nginx-1.30.5
+<p>Fedora already provides NGINX 1.30.6 that we support</p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>--allowerasing<span class="w"> </span>nginx-1.30.6
 </code></pre></div>
 <div class="admonition example">
 <p class="admonition-title">Disable the setup wizard</p>

@@ -86,7 +86,7 @@
     <script defer>
       window.addEventListener('DOMContentLoaded', () => {
         const bannerEl = document.querySelector('aside.md-banner');
-        let defaultContent = [{ "content" : "\u003cp\u003eInicia una prueba gratuita de 30 d\u00edas de BunkerWeb PRO desde el \u003ca style=\"text-decoration:underline; color :  white;\" href=\"https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self\u0026utm_source=doc\"\u003eBunkerWeb Panel\u003c/a\u003e.\u003c/p\u003e" },
+        let defaultContent = [{ "content" : "\u003cp\u003eInicia una prueba gratuita de 30 d\u00edas de BunkerWeb PRO desde el \u003ca style=\"text-decoration:underline; color :  white;\" href=\"https://panel.bunkerweb.io/store/bunkerweb-pro?language=spanish\u0026amp;utm_campaign=self\u0026amp;utm_source=doc\"\u003eBunkerWeb Panel\u003c/a\u003e: pide un plan y mant\u00e9n \u201cFree 30 Days Trial\u201d como m\u00e9todo de pago al finalizar la compra. (\u003ca style=\"text-decoration:underline; color :  white;\" href=\"../#pro-version\"\u003egu\u00eda paso a paso\u003c/a\u003e)\u003c/p\u003e" },
         { "content" : "\u003cp\u003e\u00bfNecesitas asistencia pr\u00e9mium o asesoramiento personalizado sobre BunkerWeb? Consulta nuestros \u003ca style=\"text-decoration:underline; color :  white;\" href=\"https://panel.bunkerweb.io/?utm_campaign=self\u0026utm_source=doc#services\"\u003eservicios profesionales\u003c/a\u003e.\u003c/p\u003e" },
         { "content" : "\u003cp\u003eForma parte de la comunidad de Bunker uni\u00e9ndote al \u003ca style=\"text-decoration:underline; color: white;\" href=\"https://discord.bunkerweb.io\"\u003echat de Discord\u003c/a\u003e y s\u00edguenos en \u003ca style=\"text-decoration:underline; color: white;\" href=\"https://www.linkedin.com/company/bunkerity/\"\u003eLinkedIn\u003c/a\u003e.\u003c/p\u003e" }
         ]
@@ -1127,6 +1127,45 @@
       
     </span>
   </a>
+  
+    <nav class="md-nav" aria-label="IPv6">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#comprobar-que-ipv6-funciona" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Comprobar que IPv6 funciona
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ip-service-names" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Direcciones IP como nombres de servicio
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ipv6-only" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Redes solo IPv6
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -4989,31 +5028,23 @@ find<span class="w"> </span>/shared/www<span class="w"> </span>-type<span class=
 </div>
 </div>
 <h2 id="ipv6">IPv6<a class="headerlink" href="#ipv6" title="Permanent link">&para;</a></h2>
-<div class="admonition example">
-<p class="admonition-title">Característica experimental</p>
-<p>Esta característica no está lista para producción. Siéntete libre de probarla y reportarnos cualquier error usando los <a href="https://github.com/bunkerity/bunkerweb/issues">issues</a> en el repositorio de GitHub.</p>
+<p>Por defecto, BunkerWeb solo escucha en IPv4. Establece <code>USE_IPV6=yes</code> (el nombre distingue mayúsculas de minúsculas) para añadir listeners IPv6 junto a los IPv4 en los servicios HTTP, HTTPS, HTTP/3 y stream, y para que NGINX y el resolvedor de Lua consulten también los registros AAAA. El ajuste no configura tu red: direcciones, enrutamiento, puertos publicados y reglas de firewall siguen siendo cosa tuya. La API interna, la interfaz web y la API pública tienen sus propios ajustes de escucha (consulta <a href="#ipv6-only">Redes solo IPv6</a>). Un servicio también puede nombrarse con una dirección IP (consulta <a href="#ip-service-names">Direcciones IP como nombres de servicio</a>).</p>
+<div class="admonition info">
+<p class="admonition-title">Cobertura de pruebas</p>
+<p>Las pruebas automatizadas ejercitan IPv6 en Docker, en una red de doble pila y en una red solo IPv6: listeners HTTP y HTTPS, la IP real del cliente tomada de <code>X-Forwarded-For</code>, listas de permitidos y bloqueados de IP (formas comprimida, expandida y mapeada a IPv4), bloqueos mediante la API interna y <code>bwcli</code>, limitación de tasa, ModSecurity, upstreams IPv6 y solo AAAA, y un Redis independiente para bloqueos y límites.</p>
+<p>No probado en una instalación IPv6 real: paquetes de Linux, All-in-one, Autoconf, Swarm, Kubernetes y Gateway API (requieren un clúster de doble pila, y <code>USE_KUBERNETES_FQDN=no</code> si el DNS de tu clúster no publica nombres de pod IPv6), servicios HTTP/3 y stream, Redis Sentinel y Cluster, la interfaz web y la API pública, las comprobaciones de país, ASN y DNSBL para clientes IPv6 públicos, y la emisión de certificados. Los mismos ajustes se aplican en esos casos. Prueba tu instalación antes de depender de ella e informa de los problemas mediante los <a href="https://github.com/bunkerity/bunkerweb/issues">issues</a> del repositorio de GitHub.</p>
 </div>
-<p>Por defecto, BunkerWeb solo escuchará en direcciones IPv4 y no usará IPv6 para las comunicaciones de red. Si quieres habilitar el soporte de IPv6, necesitas establecer <code>USE_IPV6=yes</code>. Ten en cuenta que la configuración de IPv6 de tu red y entorno está fuera del alcance de esta documentación.</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="19:2"><input checked="checked" id="__tabbed_19_1" name="__tabbed_19" type="radio" /><input id="__tabbed_19_2" name="__tabbed_19" type="radio" /><div class="tabbed-labels"><label for="__tabbed_19_1">Docker / Autoconf / Swarm</label><label for="__tabbed_19_2">Linux</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
-<p>En primer lugar, necesitarás configurar tu demonio de Docker para habilitar el soporte de IPv6 para los contenedores y usar ip6tables si es necesario. Aquí hay una configuración de ejemplo para tu archivo <code>/etc/docker/daemon.json</code>:</p>
-<div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">  </span><span class="nt">"experimental"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">"ipv6"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">"ip6tables"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">"fixed-cidr-v6"</span><span class="p">:</span><span class="w"> </span><span class="s2">"fd00:dead:beef::/48"</span>
-<span class="p">}</span>
-</code></pre></div>
-<p>Ahora puedes reiniciar el servicio de Docker para aplicar los cambios:</p>
-<div class="highlight"><pre><span></span><code>systemctl<span class="w"> </span>restart<span class="w"> </span>docker
-</code></pre></div>
-<p>Una vez que Docker esté configurado para soportar IPv6, puedes agregar la configuración <code>USE_IPV6</code> y configurar la red <code>bw-services</code> para IPv6:</p>
+<p>Docker habilita IPv6 por red. En las versiones actuales (probado con Docker 29.9.2, sin ningún archivo <code>/etc/docker/daemon.json</code>), basta con declarar <code>enable_ipv6: true</code> y una subred IPv6 en la red que transporta el tráfico de los clientes: sin la opción <code>experimental</code> y sin reiniciar Docker. Las opciones del demonio <code>ipv6</code>, <code>fixed-cidr-v6</code> y <code>ip6tables</code> afectan sobre todo a la red bridge por defecto, y las versiones antiguas de Docker (no probadas) pueden seguir necesitándolas para las redes definidas por el usuario. Consulta la documentación de Docker para tu versión.</p>
+<p>Una subred IPv6 privada solo da IPv6 entre los contenedores. Llegar a Internet, o aceptar clientes en puertos publicados mediante IPv6, depende del enrutamiento IPv6, el firewall y el NAT de tu host, lo que queda fuera del alcance de esta documentación.</p>
+<p>Añade el ajuste <code>USE_IPV6</code> al scheduler y habilita IPv6 en la red <code>bw-services</code>. Si declaras una <code>subnet</code> IPv4 para la red, mantenla en la misma lista <code>ipam.config</code>:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">services</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bw-scheduler</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:testing</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">USE_IPv6</span><span class="p">:</span><span class="w"> </span><span class="s">"yes"</span>
+<span class="w">      </span><span class="nt">USE_IPV6</span><span class="p">:</span><span class="w"> </span><span class="s">"yes"</span>
 
 <span class="nn">...</span>
 
@@ -5023,7 +5054,7 @@ find<span class="w"> </span>/shared/www<span class="w"> </span>-type<span class=
 <span class="w">    </span><span class="nt">enable_ipv6</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
 <span class="w">    </span><span class="nt">ipam</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">config</span><span class="p">:</span>
-<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">subnet</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">fd00:13:37::/48</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">subnet</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">fd00:13:37::/64</span>
 <span class="w">          </span><span class="nt">gateway</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">fd00:13:37::1</span>
 
 <span class="nn">...</span>
@@ -5047,6 +5078,100 @@ USE_IPV6=yes
 </div>
 </div>
 </div>
+<h3 id="comprobar-que-ipv6-funciona">Comprobar que IPv6 funciona<a class="headerlink" href="#comprobar-que-ipv6-funciona" title="Permanent link">&para;</a></h3>
+<p>Lista los listeners, en el host Linux o dentro del contenedor de BunkerWeb (<code>docker compose exec bunkerweb ss -6 -ltn</code>). Los puertos definidos por <code>HTTP_PORT</code> y <code>HTTPS_PORT</code> deben aparecer en <code>[::]</code>:</p>
+<div class="highlight"><pre><span></span><code>ss<span class="w"> </span>-6<span class="w"> </span>-ltn
+</code></pre></div>
+<p>Después envía una petición por IPv6 a la dirección de BunkerWeb, con la cabecera <code>Host</code> de uno de tus servicios (<code>-g</code> evita que curl trate los corchetes como un patrón):</p>
+<div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-g<span class="w"> </span>-6<span class="w"> </span>-H<span class="w"> </span><span class="s2">"Host: www.example.com"</span><span class="w"> </span><span class="s2">"http://[&lt;BUNKERWEB_IPV6_ADDRESS&gt;]:&lt;HTTP_PORT&gt;/"</span>
+</code></pre></div>
+<p>El registro de acceso muestra entonces la dirección IPv6 del cliente.</p>
+<h3 id="ip-service-names">Direcciones IP como nombres de servicio<a class="headerlink" href="#ip-service-names" title="Permanent link">&para;</a></h3>
+<p>Un servicio puede nombrarse con una dirección IPv4 o IPv6 en lugar de un nombre DNS. Escribe una dirección IPv6 sin corchetes, en minúsculas y comprimida, tal como la envía un cliente en la cabecera <code>Host</code>: <code>2001:db8::1</code>, no <code>[2001:db8::1]</code>, <code>2001:DB8::1</code> ni <code>2001:0db8::1</code>. BunkerWeb añade por sí mismo la forma con corchetes al <code>server_name</code> de NGINX. Un nombre escrito de otra forma nunca coincide con la cabecera <code>Host</code>, y BunkerWeb registra una advertencia con la grafía canónica. ModSecurity no puntúa la regla CRS 920350 («Host header is a numeric IP address») para una petición cuyo <code>Host</code> es una de las direcciones del servicio; cualquier otro <code>Host</code> numérico se sigue puntuando.</p>
+<div class="admonition warning">
+<p class="admonition-title">Ajustes por servicio con Docker Compose</p>
+<p>Un <code>env_file</code> de Compose no puede transportar los ajustes por servicio de un servicio nombrado con IPv6: divide <code>2001:db8::1_USE_ANTIBOT=yes</code> en el primer signo de dos puntos y pierde el ajuste sin ningún error. Usa <code>environment:</code> (formato de mapa o de lista), la interfaz web o la API. El archivo <code>variables.env</code> de Linux no se ve afectado.</p>
+</div>
+<p>Let's Encrypt todavía no emite certificados para direcciones IPv6: el trabajo omite un servicio nombrado con IPv6 y lo registra.</p>
+<h3 id="ipv6-only">Redes solo IPv6<a class="headerlink" href="#ipv6-only" title="Permanent link">&para;</a></h3>
+<p>BunkerWeb también funciona cuando sus contenedores no tienen dirección IPv4. Esto se probó en Docker, con el core y el scheduler en redes creadas con <code>enable_ipv4: false</code> (Docker 29.9.2, Compose 5.6.1). Ambos contenedores necesitan los mismos ajustes, además de direcciones fijas para que la lista de permitidos y <code>BUNKERWEB_INSTANCES</code> sigan siendo válidos:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">x-bw-ipv6-env</span><span class="p">:</span><span class="w"> </span><span class="nl">&amp;bw-ipv6-env</span>
+<span class="w">  </span><span class="nt">USE_IPV6</span><span class="p">:</span><span class="w"> </span><span class="s">"yes"</span>
+<span class="w">  </span><span class="nt">API_LISTEN_IP</span><span class="p">:</span><span class="w"> </span><span class="s">"::"</span>
+<span class="w">  </span><span class="nt">API_WHITELIST_IP</span><span class="p">:</span><span class="w"> </span><span class="s">"::1/128</span><span class="nv"> </span><span class="s">2001:db8:1::24/128"</span>
+<span class="w">  </span><span class="nt">BUNKERWEB_INSTANCES</span><span class="p">:</span><span class="w"> </span><span class="s">"[2001:db8:1::10]:5000"</span>
+<span class="w">  </span><span class="nt">DNS_RESOLVERS</span><span class="p">:</span><span class="w"> </span><span class="s">"[2001:db8:1::20]"</span>
+
+<span class="nt">services</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">bunkerweb</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:testing</span>
+<span class="w">    </span><span class="nt">dns</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2001:db8:1::20</span>
+<span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">&lt;&lt;</span><span class="p">:</span><span class="w"> </span><span class="nv">*bw-ipv6-env</span>
+<span class="w">    </span><span class="nt">networks</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">bw-universe</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">ipv6_address</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2001:db8:1::10</span>
+
+<span class="w">  </span><span class="nt">bw-scheduler</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:testing</span>
+<span class="w">    </span><span class="nt">dns</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2001:db8:1::20</span>
+<span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">&lt;&lt;</span><span class="p">:</span><span class="w"> </span><span class="nv">*bw-ipv6-env</span>
+<span class="w">    </span><span class="nt">networks</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">bw-universe</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">ipv6_address</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2001:db8:1::24</span>
+
+<span class="nt">networks</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">bw-universe</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-universe</span>
+<span class="w">    </span><span class="nt">enable_ipv4</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+<span class="w">    </span><span class="nt">enable_ipv6</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">    </span><span class="nt">ipam</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">config</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">subnet</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2001:db8:1::/64</span>
+</code></pre></div>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Ajuste</th>
+<th style="text-align: left;">Por qué es necesario</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>USE_IPV6</code></td>
+<td style="text-align: left;">Listeners IPv6 y consultas de registros AAAA.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>API_LISTEN_IP</code></td>
+<td style="text-align: left;">La API interna escucha por defecto en <code>0.0.0.0</code>, es decir, solo en IPv4.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>API_WHITELIST_IP</code></td>
+<td style="text-align: left;">La API interna solo acepta por defecto el bucle local: indica la dirección IPv6 de cada cliente que la llama (scheduler, y la interfaz web o autoconf si se usan).</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>BUNKERWEB_INSTANCES</code></td>
+<td style="text-align: left;">Dónde encuentra el scheduler al core. Una dirección IPv6 necesita corchetes y un puerto.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>DNS_RESOLVERS</code></td>
+<td style="text-align: left;">El valor por defecto es el resolvedor IPv4 de Docker. NGINX y Lua necesitan un resolvedor IPv6, entre corchetes.</td>
+</tr>
+</tbody>
+</table>
+<p>Las entradas <code>dns:</code> también importan: el scheduler y los jobs usan el resolvedor del contenedor, no <code>DNS_RESOLVERS</code>. Los backends se alcanzan entonces por dirección IPv6 o por un nombre que tenga un registro AAAA: un nombre de upstream con solo un registro A falla con un <code>502</code>.</p>
+<p>Algunas funciones salientes contactan con servidores que no tenían registro AAAA cuando lo comprobamos (octubre de 2026). Sin salida IPv4 ni NAT64/DNS64, sus jobs fallan o siguen usando datos en caché, mientras el resto de BunkerWeb sigue sirviendo:</p>
+<ul>
+<li>BunkerNet y los informes de uso anónimos (desactívalos con <code>USE_BUNKERNET=no</code> y <code>SEND_ANONYMOUS_REPORT=no</code>).</li>
+<li>La descarga de plugins PRO.</li>
+<li>La comprobación de una nueva versión de BunkerWeb.</li>
+<li>Las actualizaciones de las bases de datos de país y ASN (se siguen usando las incluidas o las que están en caché).</li>
+<li>Funciones opcionales: certificados ZeroSSL, descarga de plugins CRS de ModSecurity desde GitHub, hCaptcha y el servidor de demostración de mCaptcha.</li>
+</ul>
+<p>Limitación conocida: en una red solo IPv6, el core sigue abriendo listeners comodín IPv4 en los puertos TCP de HTTP y HTTPS y en el puerto UDP de HTTPS (HTTP/3). No transportan tráfico cuando la red no tiene IPv4, pero un escáner que rechace cualquier listener IPv4 los señalará. El bucle local IPv4 también se sigue usando dentro de los contenedores (comprobación de salud, listener local de la API). Las pruebas no cubrieron la interfaz web, una base de datos en red ni las demás integraciones en una red solo IPv6.</p>
 <h2 id="opciones-de-configuracion-de-registros">Opciones de configuración de registros<a class="headerlink" href="#opciones-de-configuracion-de-registros" title="Permanent link">&para;</a></h2>
 <p>BunkerWeb ofrece una configuración de registros flexible que permite enviar registros a múltiples destinos (por ejemplo, archivos, stdout/stderr o syslog) simultáneamente. Esto es especialmente útil para integrarse con recopiladores externos de registros mientras se mantienen registros locales para la interfaz web.</p>
 <p>Hay dos categorías principales de registros para configurar:</p>

@@ -86,7 +86,7 @@
     <script defer>
       window.addEventListener('DOMContentLoaded', () => {
         const bannerEl = document.querySelector('aside.md-banner');
-        let defaultContent = [{ "content" : "\u003cp\u003e\u901a\u8fc7 \u003ca style=\"text-decoration:underline; color :  white;\" href=\"https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self\u0026utm_source=doc\"\u003eBunkerWeb Panel\u003c/a\u003e\u5f00\u542f BunkerWeb PRO 30 \u5929\u514d\u8d39\u8bd5\u7528\u3002\u003c/p\u003e" },
+        let defaultContent = [{ "content" : "\u003cp\u003e\u901a\u8fc7 \u003ca style=\"text-decoration:underline; color :  white;\" href=\"https://panel.bunkerweb.io/store/bunkerweb-pro?language=chinese\u0026amp;utm_campaign=self\u0026amp;utm_source=doc\"\u003eBunkerWeb Panel\u003c/a\u003e\u5f00\u542f BunkerWeb PRO 30 \u5929\u514d\u8d39\u8bd5\u7528\uff1a\u8ba2\u8d2d\u4e00\u4e2a\u65b9\u6848\uff0c\u7136\u540e\u5728\u7ed3\u8d26\u65f6\u4fdd\u6301\u9009\u4e2d\u201cFree 30 Days Trial\u201d\u4f5c\u4e3a\u4ed8\u6b3e\u65b9\u5f0f\u3002 (\u003ca style=\"text-decoration:underline; color :  white;\" href=\"../#pro-version\"\u003e\u5206\u6b65\u6307\u5357\u003c/a\u003e)\u003c/p\u003e" },
         { "content" : "\u003cp\u003e\u9700\u8981 BunkerWeb \u9ad8\u7ea7\u652f\u6301\u6216\u5b9a\u5236\u54a8\u8be2\uff1f\u8bf7\u67e5\u770b\u6211\u4eec\u7684 \u003ca style=\"text-decoration:underline; color :  white;\" href=\"https://panel.bunkerweb.io/?utm_campaign=self\u0026utm_source=doc#services\"\u003e\u4e13\u4e1a\u670d\u52a1\u003c/a\u003e\u3002\u003c/p\u003e" },
         { "content" : "\u003cp\u003e\u52a0\u5165 Bunker \u793e\u533a\uff0c\u53c2\u4e0e \u003ca style=\"text-decoration:underline; color: white;\" href=\"https://discord.bunkerweb.io\"\u003eDiscord \u804a\u5929\u003c/a\u003e \u5e76\u5173\u6ce8\u6211\u4eec\u7684 \u003ca style=\"text-decoration:underline; color: white;\" href=\"https://www.linkedin.com/company/bunkerity/\"\u003eLinkedIn\u003c/a\u003e\u3002\u003c/p\u003e" }
         ]
@@ -1127,6 +1127,45 @@
       
     </span>
   </a>
+  
+    <nav class="md-nav" aria-label="IPv6">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#ipv6_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        检查 IPv6 是否正常工作
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ip-service-names" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        以 IP 地址作为服务名称
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ipv6-only" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        仅 IPv6 网络
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -5000,31 +5039,23 @@ find<span class="w"> </span>/shared/www<span class="w"> </span>-type<span class=
 </div>
 </div>
 <h2 id="ipv6">IPv6<a class="headerlink" href="#ipv6" title="Permanent link">&para;</a></h2>
-<div class="admonition example">
-<p class="admonition-title">实验性功能</p>
-<p>此功能尚未准备好用于生产。欢迎您进行测试，并通过 GitHub 仓库中的 <a href="https://github.com/bunkerity/bunkerweb/issues">issues</a> 向我们报告任何错误。</p>
+<p>默认情况下，BunkerWeb 只监听 IPv4。将 <code>USE_IPV6=yes</code>（名称区分大小写）后，会在 HTTP、HTTPS、HTTP/3 和 stream 服务的 IPv4 监听器旁添加 IPv6 监听器，并让 NGINX 和 Lua 解析器同时查询 AAAA 记录。该设置不会配置您的网络：地址、路由、发布的端口和防火墙规则仍由您负责。内部 API、Web UI 和公共 API 有各自的绑定设置（参见<a href="#ipv6-only">仅 IPv6 网络</a>）。服务也可以用 IP 地址命名（参见 <a href="#ip-service-names">以 IP 地址作为服务名称</a>）。</p>
+<div class="admonition info">
+<p class="admonition-title">测试范围</p>
+<p>自动化测试在 Docker 上覆盖了 IPv6，包括双栈网络和仅 IPv6 网络：HTTP 和 HTTPS 监听器、取自 <code>X-Forwarded-For</code> 的真实客户端 IP、IP 允许列表和封锁列表（压缩、展开和 IPv4 映射写法）、通过内部 API 和 <code>bwcli</code> 封禁、速率限制、ModSecurity、IPv6 和仅 AAAA 的上游，以及用于封禁和限制的独立 Redis。</p>
+<p>未在真实 IPv6 环境中测试：Linux 软件包、All-in-one、Autoconf、Swarm、Kubernetes 和 Gateway API（它们需要双栈集群，如果集群 DNS 不发布 IPv6 Pod 名称，还需要 <code>USE_KUBERNETES_FQDN=no</code>）、HTTP/3 和 stream 服务、Redis Sentinel 和 Cluster、Web UI 和公共 API、针对公网 IPv6 客户端的国家、ASN 和 DNSBL 检查，以及证书签发。这些场景使用相同的设置。在依赖它之前请先测试您的环境，并通过 GitHub 仓库中的 <a href="https://github.com/bunkerity/bunkerweb/issues">issues</a> 报告问题。</p>
 </div>
-<p>默认情况下，BunkerWeb 只会监听 IPv4 地址，不会使用 IPv6 进行网络通信。如果您想启用 IPv6 支持，需要将 <code>USE_IPV6=yes</code>。请注意，您的网络和环境的 IPv6 配置超出了本文档的范围。</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="20:2"><input checked="checked" id="__tabbed_20_1" name="__tabbed_20" type="radio" /><input id="__tabbed_20_2" name="__tabbed_20" type="radio" /><div class="tabbed-labels"><label for="__tabbed_20_1">Docker / Autoconf / Swarm</label><label for="__tabbed_20_2">Linux</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
-<p>首先，您需要配置您的 Docker 守护进程以启用容器的 IPv6 支持，并在需要时使用 ip6tables。这是您 <code>/etc/docker/daemon.json</code> 文件的示例配置：</p>
-<div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">  </span><span class="nt">"experimental"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">"ipv6"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">"ip6tables"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">"fixed-cidr-v6"</span><span class="p">:</span><span class="w"> </span><span class="s2">"fd00:dead:beef::/48"</span>
-<span class="p">}</span>
-</code></pre></div>
-<p>现在您可以重启 Docker 服务以应用更改：</p>
-<div class="highlight"><pre><span></span><code>systemctl<span class="w"> </span>restart<span class="w"> </span>docker
-</code></pre></div>
-<p>一旦 Docker 设置好支持 IPv6，您就可以添加 <code>USE_IPV6</code> 设置并为 <code>bw-services</code> 配置 IPv6：</p>
+<p>Docker 按网络启用 IPv6。在当前版本上（使用 Docker 29.9.2 测试，没有任何 <code>/etc/docker/daemon.json</code>），只需在承载客户端流量的网络上声明 <code>enable_ipv6: true</code> 和一个 IPv6 子网即可：不需要 <code>experimental</code> 标志，也不需要重启 Docker。守护进程选项 <code>ipv6</code>、<code>fixed-cidr-v6</code> 和 <code>ip6tables</code> 主要针对默认 bridge 网络，较旧的 Docker 版本（未测试）对用户自定义网络可能仍然需要它们。请查阅您所用版本的 Docker 文档。</p>
+<p>私有 IPv6 子网只让容器之间可以使用 IPv6。访问互联网，或通过已发布端口以 IPv6 接收客户端，取决于主机的 IPv6 路由、防火墙和 NAT 配置，这超出了本文档的范围。</p>
+<p>将 <code>USE_IPV6</code> 设置添加到调度器，并在 <code>bw-services</code> 网络上启用 IPv6。如果您为该网络声明了 IPv4 <code>subnet</code>，请将其保留在同一个 <code>ipam.config</code> 列表中：</p>
 <div class="highlight"><pre><span></span><code><span class="nt">services</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bw-scheduler</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:testing</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">USE_IPv6</span><span class="p">:</span><span class="w"> </span><span class="s">"yes"</span>
+<span class="w">      </span><span class="nt">USE_IPV6</span><span class="p">:</span><span class="w"> </span><span class="s">"yes"</span>
 
 <span class="nn">...</span>
 
@@ -5034,7 +5065,7 @@ find<span class="w"> </span>/shared/www<span class="w"> </span>-type<span class=
 <span class="w">    </span><span class="nt">enable_ipv6</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
 <span class="w">    </span><span class="nt">ipam</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">config</span><span class="p">:</span>
-<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">subnet</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">fd00:13:37::/48</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">subnet</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">fd00:13:37::/64</span>
 <span class="w">          </span><span class="nt">gateway</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">fd00:13:37::1</span>
 
 <span class="nn">...</span>
@@ -5058,6 +5089,100 @@ USE_IPV6=yes
 </div>
 </div>
 </div>
+<h3 id="ipv6_1">检查 IPv6 是否正常工作<a class="headerlink" href="#ipv6_1" title="Permanent link">&para;</a></h3>
+<p>在 Linux 主机上或 BunkerWeb 容器内（<code>docker compose exec bunkerweb ss -6 -ltn</code>）列出监听器。由 <code>HTTP_PORT</code> 和 <code>HTTPS_PORT</code> 设置的端口必须出现在 <code>[::]</code> 上：</p>
+<div class="highlight"><pre><span></span><code>ss<span class="w"> </span>-6<span class="w"> </span>-ltn
+</code></pre></div>
+<p>然后通过 IPv6 向 BunkerWeb 的地址发送请求，并带上您某个服务的 <code>Host</code> 头（<code>-g</code> 可避免 curl 把方括号当作模式）：</p>
+<div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-g<span class="w"> </span>-6<span class="w"> </span>-H<span class="w"> </span><span class="s2">"Host: www.example.com"</span><span class="w"> </span><span class="s2">"http://[&lt;BUNKERWEB_IPV6_ADDRESS&gt;]:&lt;HTTP_PORT&gt;/"</span>
+</code></pre></div>
+<p>访问日志此时会显示客户端的 IPv6 地址。</p>
+<h3 id="ip-service-names">以 IP 地址作为服务名称<a class="headerlink" href="#ip-service-names" title="Permanent link">&para;</a></h3>
+<p>服务可以用 IPv4 或 IPv6 地址命名，而不必使用 DNS 名称。IPv6 地址请不带方括号、使用小写并采用压缩写法，与客户端在 <code>Host</code> 请求头中发送的形式一致：写 <code>2001:db8::1</code>，而不是 <code>[2001:db8::1]</code>、<code>2001:DB8::1</code> 或 <code>2001:0db8::1</code>。BunkerWeb 会自行把带方括号的形式加入 NGINX 的 <code>server_name</code>。以其他方式书写的名称永远无法匹配 <code>Host</code> 请求头，BunkerWeb 会记录一条包含规范写法的警告。当请求的 <code>Host</code> 是该服务的某个地址时，ModSecurity 不会为 CRS 规则 920350（“Host header is a numeric IP address”）计分；其他任何数字形式的 <code>Host</code> 仍会计分。</p>
+<div class="admonition warning">
+<p class="admonition-title">Docker Compose 中的服务专属设置</p>
+<p>Compose 的 <code>env_file</code> 无法传递以 IPv6 命名的服务的专属设置：它会在第一个冒号处拆分 <code>2001:db8::1_USE_ANTIBOT=yes</code>，该设置会在没有任何错误提示的情况下丢失。请改用 <code>environment:</code>（映射或列表形式）、Web 界面或 API。Linux 的 <code>variables.env</code> 文件不受影响。</p>
+</div>
+<p>Let's Encrypt 目前不为 IPv6 地址签发证书：任务会跳过以 IPv6 命名的服务并记录日志。</p>
+<h3 id="ipv6-only">仅 IPv6 网络<a class="headerlink" href="#ipv6-only" title="Permanent link">&para;</a></h3>
+<p>当容器没有 IPv4 地址时，BunkerWeb 也能运行。这已在 Docker 上测试，核心和调度器位于使用 <code>enable_ipv4: false</code> 创建的网络中（Docker 29.9.2，Compose 5.6.1）。两个容器需要相同的设置，并且需要固定地址，以便允许列表和 <code>BUNKERWEB_INSTANCES</code> 保持有效：</p>
+<div class="highlight"><pre><span></span><code><span class="nt">x-bw-ipv6-env</span><span class="p">:</span><span class="w"> </span><span class="nl">&amp;bw-ipv6-env</span>
+<span class="w">  </span><span class="nt">USE_IPV6</span><span class="p">:</span><span class="w"> </span><span class="s">"yes"</span>
+<span class="w">  </span><span class="nt">API_LISTEN_IP</span><span class="p">:</span><span class="w"> </span><span class="s">"::"</span>
+<span class="w">  </span><span class="nt">API_WHITELIST_IP</span><span class="p">:</span><span class="w"> </span><span class="s">"::1/128</span><span class="nv"> </span><span class="s">2001:db8:1::24/128"</span>
+<span class="w">  </span><span class="nt">BUNKERWEB_INSTANCES</span><span class="p">:</span><span class="w"> </span><span class="s">"[2001:db8:1::10]:5000"</span>
+<span class="w">  </span><span class="nt">DNS_RESOLVERS</span><span class="p">:</span><span class="w"> </span><span class="s">"[2001:db8:1::20]"</span>
+
+<span class="nt">services</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">bunkerweb</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:testing</span>
+<span class="w">    </span><span class="nt">dns</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2001:db8:1::20</span>
+<span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">&lt;&lt;</span><span class="p">:</span><span class="w"> </span><span class="nv">*bw-ipv6-env</span>
+<span class="w">    </span><span class="nt">networks</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">bw-universe</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">ipv6_address</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2001:db8:1::10</span>
+
+<span class="w">  </span><span class="nt">bw-scheduler</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:testing</span>
+<span class="w">    </span><span class="nt">dns</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2001:db8:1::20</span>
+<span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">&lt;&lt;</span><span class="p">:</span><span class="w"> </span><span class="nv">*bw-ipv6-env</span>
+<span class="w">    </span><span class="nt">networks</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">bw-universe</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">ipv6_address</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2001:db8:1::24</span>
+
+<span class="nt">networks</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">bw-universe</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-universe</span>
+<span class="w">    </span><span class="nt">enable_ipv4</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+<span class="w">    </span><span class="nt">enable_ipv6</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">    </span><span class="nt">ipam</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">config</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">subnet</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2001:db8:1::/64</span>
+</code></pre></div>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">设置</th>
+<th style="text-align: left;">为什么需要</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>USE_IPV6</code></td>
+<td style="text-align: left;">IPv6 监听器和 AAAA 查询。</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>API_LISTEN_IP</code></td>
+<td style="text-align: left;">内部 API 默认监听 <code>0.0.0.0</code>，即仅 IPv4。</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>API_WHITELIST_IP</code></td>
+<td style="text-align: left;">内部 API 默认只接受回环地址：请列出每个调用方的 IPv6 地址（调度器，以及使用时的 Web UI 或 autoconf）。</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>BUNKERWEB_INSTANCES</code></td>
+<td style="text-align: left;">调度器查找核心的位置。IPv6 地址需要方括号和端口。</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>DNS_RESOLVERS</code></td>
+<td style="text-align: left;">默认值是 Docker 的 IPv4 解析器。NGINX 和 Lua 需要用方括号括起来的 IPv6 解析器。</td>
+</tr>
+</tbody>
+</table>
+<p><code>dns:</code> 条目同样重要：调度器和作业使用容器自身的解析器，而不是 <code>DNS_RESOLVERS</code>。这样后端就可以通过 IPv6 地址或带有 AAAA 记录的名称访问：只有 A 记录的上游名称会以 <code>502</code> 失败。</p>
+<p>一些出站功能会连接到我们检查时（2026 年 10 月）没有 AAAA 记录的服务器。没有 IPv4 出口或 NAT64/DNS64 时，它们的作业会失败或继续使用缓存数据，而 BunkerWeb 的其余部分继续提供服务：</p>
+<ul>
+<li>BunkerNet 和匿名使用报告（使用 <code>USE_BUNKERNET=no</code> 和 <code>SEND_ANONYMOUS_REPORT=no</code> 关闭）。</li>
+<li>PRO 插件下载。</li>
+<li>BunkerWeb 新版本检查。</li>
+<li>国家和 ASN 数据库更新（继续使用内置或缓存的数据库）。</li>
+<li>可选功能：ZeroSSL 证书、从 GitHub 下载 ModSecurity CRS 插件、hCaptcha 和 mCaptcha 演示服务器。</li>
+</ul>
+<p>已知限制：在仅 IPv6 的网络中，核心仍会在 HTTP 和 HTTPS 的 TCP 端口以及 HTTPS 的 UDP 端口（HTTP/3）上打开 IPv4 通配监听器。当网络没有 IPv4 时，它们不承载任何流量，但会拒绝任何 IPv4 监听器的扫描工具会将其报告出来。容器内部仍会使用 IPv4 回环地址（健康检查、本地 API 监听器）。测试未覆盖仅 IPv6 网络上的 Web UI、网络数据库和其他集成。</p>
 <h2 id="_5">日志配置选项<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h2>
 <p>BunkerWeb 提供灵活的日志配置，允许您同时将日志发送到多个目标（例如文件、stdout/stderr 或 syslog）。这对于将日志集成到外部收集器并同时在 Web UI 中保留本地日志非常有用。</p>
 <p>可以配置的日志主要分为两类：</p>

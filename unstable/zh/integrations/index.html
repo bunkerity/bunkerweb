@@ -86,7 +86,7 @@
     <script defer>
       window.addEventListener('DOMContentLoaded', () => {
         const bannerEl = document.querySelector('aside.md-banner');
-        let defaultContent = [{ "content" : "\u003cp\u003e\u901a\u8fc7 \u003ca style=\"text-decoration:underline; color :  white;\" href=\"https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self\u0026utm_source=doc\"\u003eBunkerWeb Panel\u003c/a\u003e\u5f00\u542f BunkerWeb PRO 30 \u5929\u514d\u8d39\u8bd5\u7528\u3002\u003c/p\u003e" },
+        let defaultContent = [{ "content" : "\u003cp\u003e\u901a\u8fc7 \u003ca style=\"text-decoration:underline; color :  white;\" href=\"https://panel.bunkerweb.io/store/bunkerweb-pro?language=chinese\u0026amp;utm_campaign=self\u0026amp;utm_source=doc\"\u003eBunkerWeb Panel\u003c/a\u003e\u5f00\u542f BunkerWeb PRO 30 \u5929\u514d\u8d39\u8bd5\u7528\uff1a\u8ba2\u8d2d\u4e00\u4e2a\u65b9\u6848\uff0c\u7136\u540e\u5728\u7ed3\u8d26\u65f6\u4fdd\u6301\u9009\u4e2d\u201cFree 30 Days Trial\u201d\u4f5c\u4e3a\u4ed8\u6b3e\u65b9\u5f0f\u3002 (\u003ca style=\"text-decoration:underline; color :  white;\" href=\"../#pro-version\"\u003e\u5206\u6b65\u6307\u5357\u003c/a\u003e)\u003c/p\u003e" },
         { "content" : "\u003cp\u003e\u9700\u8981 BunkerWeb \u9ad8\u7ea7\u652f\u6301\u6216\u5b9a\u5236\u54a8\u8be2\uff1f\u8bf7\u67e5\u770b\u6211\u4eec\u7684 \u003ca style=\"text-decoration:underline; color :  white;\" href=\"https://panel.bunkerweb.io/?utm_campaign=self\u0026utm_source=doc#services\"\u003e\u4e13\u4e1a\u670d\u52a1\u003c/a\u003e\u3002\u003c/p\u003e" },
         { "content" : "\u003cp\u003e\u52a0\u5165 Bunker \u793e\u533a\uff0c\u53c2\u4e0e \u003ca style=\"text-decoration:underline; color: white;\" href=\"https://discord.bunkerweb.io\"\u003eDiscord \u804a\u5929\u003c/a\u003e \u5e76\u5173\u6ce8\u6211\u4eec\u7684 \u003ca style=\"text-decoration:underline; color: white;\" href=\"https://www.linkedin.com/company/bunkerity/\"\u003eLinkedIn\u003c/a\u003e\u3002\u003c/p\u003e" }
         ]
@@ -4268,6 +4268,29 @@ sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> <
 </code></pre></div>
 <p>这是 BunkerWeb 调度器连接到您的外部数据库所必需的。</p>
 </div>
+<h4 id="debian-ubuntu-postgresql-backups">Debian/Ubuntu 上的 PostgreSQL 备份<a class="headerlink" href="#debian-ubuntu-postgresql-backups" title="Permanent link">&para;</a></h4>
+<div class="admonition warning">
+<p class="admonition-title">PostgreSQL 客户端主版本</p>
+<p>Debian 12（Bookworm）提供 PostgreSQL 客户端 15；Debian 13（Trixie）为 17；Ubuntu 22.04（Jammy）为 14；Ubuntu 24.04（Noble）为 16；Ubuntu 26.04（Resolute）为 18。如果外部 PostgreSQL 服务器的主版本更新，计划备份和 <code>bwcli plugin backup save</code> 会因 <code>pg_dump</code> 的 <code>server version mismatch</code> 错误而失败。请在运行调度器或备份命令的主机上，从 <a href="https://www.postgresql.org/download/linux/debian/">Debian 的 PGDG 官方仓库</a>或 <a href="https://www.postgresql.org/download/linux/ubuntu/">Ubuntu 的 PGDG 官方仓库</a>手动安装匹配的 <code>postgresql-client-&lt;N&gt;</code>。将下方的 <code>PG_MAJOR</code> 设置为服务器的主版本（<code>18</code> 仅为示例）；这些命令只安装客户端，不安装数据库服务器。</p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>curl<span class="w"> </span>ca-certificates
+sudo<span class="w"> </span>install<span class="w"> </span>-d<span class="w"> </span>/usr/share/postgresql-common/pgdg
+sudo<span class="w"> </span>curl<span class="w"> </span>-o<span class="w"> </span>/usr/share/postgresql-common/pgdg/apt.postgresql.org.asc<span class="w"> </span>--fail<span class="w"> </span>https://www.postgresql.org/media/keys/ACCC4CF8.asc
+.<span class="w"> </span>/etc/os-release
+sudo<span class="w"> </span>tee<span class="w"> </span>/etc/apt/sources.list.d/pgdg.sources<span class="w"> </span>&gt;<span class="w"> </span>/dev/null<span class="w"> </span><span class="s">&lt;&lt;EOF</span>
+<span class="s">Types: deb</span>
+<span class="s">URIs: https://apt.postgresql.org/pub/repos/apt</span>
+<span class="s">Suites: ${VERSION_CODENAME}-pgdg</span>
+<span class="s">Architectures: $(dpkg --print-architecture)</span>
+<span class="s">Components: main</span>
+<span class="s">Signed-By: /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc</span>
+<span class="s">EOF</span>
+sudo<span class="w"> </span>apt<span class="w"> </span>update
+<span class="nv">PG_MAJOR</span><span class="o">=</span><span class="m">18</span>
+sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span><span class="s2">"postgresql-client-</span><span class="si">${</span><span class="nv">PG_MAJOR</span><span class="si">}</span><span class="s2">"</span>
+pg_dump<span class="w"> </span>--version
+</code></pre></div>
+<p>运行备份前，请检查 <code>pg_dump --version</code> 是否显示匹配的客户端版本。安装脚本仅显示此警告，不会配置 PGDG 或安装更新的客户端。</p>
+</div>
 <h4 id="_54">安装后<a class="headerlink" href="#_54" title="Permanent link">&para;</a></h4>
 <p>根据您在安装过程中的选择：</p>
 <p><strong>启用设置向导：</strong></p>
@@ -4299,12 +4322,6 @@ curl<span class="w"> </span>https://nginx.org/keys/nginx_signing.key<span class=
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>apt<span class="w"> </span>update<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
 sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>--allow-downgrades<span class="w"> </span><span class="nv">nginx</span><span class="o">=</span><span class="m">1</span>.30.6-1~<span class="k">$(</span>lsb_release<span class="w"> </span>-cs<span class="k">)</span>
 </code></pre></div>
-<div class="admonition warning">
-<p class="admonition-title">测试/开发版本</p>
-<p>如果您使用 <code>testing</code> 或 <code>dev</code> 版本，您需要在安装 BunkerWeb 之前将 <code>force-bad-version</code> 指令添加到您的 <code>/etc/dpkg/dpkg.cfg</code> 文件中。</p>
-<div class="highlight"><pre><span></span><code><span class="nb">echo</span><span class="w"> </span><span class="s2">"force-bad-version"</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>tee<span class="w"> </span>-a<span class="w"> </span>/etc/dpkg/dpkg.cfg
-</code></pre></div>
-</div>
 <div class="admonition example">
 <p class="admonition-title">禁用设置向导</p>
 <p>如果您不希望在安装 BunkerWeb 时使用 Web UI 的设置向导，请导出以下变量：</p>
@@ -4333,12 +4350,6 @@ curl<span class="w"> </span>https://nginx.org/keys/nginx_signing.key<span class=
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>apt<span class="w"> </span>update<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
 sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>--allow-downgrades<span class="w"> </span><span class="nv">nginx</span><span class="o">=</span><span class="m">1</span>.30.6-1~<span class="k">$(</span>lsb_release<span class="w"> </span>-cs<span class="k">)</span>
 </code></pre></div>
-<div class="admonition warning">
-<p class="admonition-title">测试/开发版本</p>
-<p>如果您使用 <code>testing</code> 或 <code>dev</code> 版本，您需要在安装 BunkerWeb 之前将 <code>force-bad-version</code> 指令添加到您的 <code>/etc/dpkg/dpkg.cfg</code> 文件中。</p>
-<div class="highlight"><pre><span></span><code><span class="nb">echo</span><span class="w"> </span><span class="s2">"force-bad-version"</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>tee<span class="w"> </span>-a<span class="w"> </span>/etc/dpkg/dpkg.cfg
-</code></pre></div>
-</div>
 <div class="admonition example">
 <p class="admonition-title">禁用设置向导</p>
 <p>如果您不希望在安装 BunkerWeb 时使用 Web UI 的设置向导，请导出以下变量：</p>
@@ -4361,12 +4372,8 @@ sudo<span class="w"> </span>-E<span class="w"> </span>apt<span class="w"> </span
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>config-manager<span class="w"> </span>setopt<span class="w"> </span>updates-testing.enabled<span class="o">=</span><span class="m">1</span>
 </code></pre></div>
 </div>
-<div class="admonition warning">
-<p class="admonition-title">Fedora 提供的是 NGINX 1.30.5</p>
-<p>Fedora 43 和 44 尚未提供 NGINX 1.30.6，因此 Fedora 的 BunkerWeb 软件包基于 NGINX 1.30.5 构建并依赖 <code>nginx-1.30.5</code>。请在 Fedora 上安装该版本；Fedora 发布 1.30.6 后，依赖将随之更新。</p>
-</div>
-<p>Fedora 已经提供了我们支持的 NGINX 1.30.5</p>
-<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>--allowerasing<span class="w"> </span>nginx-1.30.5
+<p>Fedora 已经提供了我们支持的 NGINX 1.30.6</p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>--allowerasing<span class="w"> </span>nginx-1.30.6
 </code></pre></div>
 <div class="admonition example">
 <p class="admonition-title">禁用设置向导</p>
