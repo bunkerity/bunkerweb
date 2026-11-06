@@ -804,6 +804,82 @@ local function refresh_request_ttls(self, ttl, wid)
 	end
 end
 
+-- Newest occurrence wins, including its sync state; keeps the FIFO cap. Appends newer to older.
+local function merge_requests(self, older, newer)
+	for _, request in ipairs(newer or {}) do
+		table_insert(older, request)
+	end
+	local requests, seen = {}, {}
+	local max_requests = parse_count(self.variables["METRICS_MAX_BLOCKED_REQUESTS"]) or 1000
+	for i = #older, 1, -1 do
+		if #requests >= max_requests then
+			break
+		end
+		local request = older[i]
+		local id = type(request) == "table" and request.id or encode(request)
+		if not seen[id] then
+			seen[id] = true
+			table_insert(requests, request)
+		end
+	end
+	local merged = {}
+	for i = #requests, 1, -1 do
+		table_insert(merged, requests[i])
+	end
+	return merged
+end
+
+-- Rows a previous worker of this id left in SHM. Redis may have accepted a report before that
+-- worker died without rewriting SHM, so every restored unsynced row is uncertain.
+local function restore_requests(self, stored, live)
+	for _, request in ipairs(stored) do
+		if type(request) == "table" and not request.synced then
+			request.redis_retry_json = request.redis_retry_json or encode(request)
+		end
+	end
+	return merge_requests(self, stored, live)
+end
+
+local function stored_requests(self, wid)
+	local ok, stored = pcall(decode, self.metrics_datastore:get("requests_" .. wid) or "")
+	return ok and type(stored) == "table" and stored or nil
+end
+
+-- Left by a worker that flushed on exit, read once by the next worker of the same id. A marker
+-- ("handoff:requests:<id>") says a snapshot exists; each exiting process writes its own snapshot
+-- ("handoff:requests:<id>:<pid>"), so two exits never overwrite each other. Neither shape matches what
+-- the API and init_workers() scan ("requests_*", "*_<id>").
+local HANDOFF_PREFIX = "handoff:requests:"
+local HANDOFF_TTL = 600
+
+-- The exiting worker and the one that replaces it share an id, hence the "requests_<id>" key, and the
+-- new one overwrites it with its own LRU on every tick. The exit flush can land between that tick's
+-- own lookup and its write, so the reports travel in the snapshots, not in "requests_<id>".
+local function adopt_exit_requests(self, wid)
+	local marker = HANDOFF_PREFIX .. wid
+	if not self.metrics_datastore:get(marker) then
+		return
+	end
+	-- Marker first: an exit landing during the scan writes its snapshot, then sets it again for the next tick.
+	self.metrics_datastore:delete(marker)
+	local prefix = marker .. ":"
+	local requests
+	for _, key in ipairs(self.metrics_datastore:keys()) do
+		if key:sub(1, #prefix) == prefix then
+			local value = self.metrics_datastore:get(key)
+			-- Consumed before decoding: a corrupt snapshot must not be retried every tick.
+			self.metrics_datastore:delete(key)
+			local ok, stored = pcall(decode, value or "")
+			if ok and type(stored) == "table" then
+				requests = restore_requests(self, stored, requests or lru:get("requests"))
+			end
+		end
+	end
+	if requests then
+		lru:set("requests", requests)
+	end
+end
+
 function metrics:initialize(ctx)
 	-- Call parent initialize
 	plugin.initialize(self, "metrics", ctx)
@@ -861,34 +937,7 @@ function metrics:init_workers()
 					if name:find("_counter_", 1, true) then
 						value = new_counter(self, name)
 					elseif name == "requests" and type(value) == "table" then
-						-- Redis may have accepted a report before the old worker died
-						-- without rewriting SHM. Every restored unsynced row is uncertain.
-						for _, request in ipairs(value) do
-							if type(request) == "table" and not request.synced then
-								request.redis_retry_json = request.redis_retry_json or encode(request)
-							end
-						end
-						for _, request in ipairs(live or {}) do
-							table_insert(value, request)
-						end
-						-- Newest occurrence wins, including its sync state; keep the FIFO cap.
-						local requests, seen = {}, {}
-						local max_requests = parse_count(self.variables["METRICS_MAX_BLOCKED_REQUESTS"]) or 1000
-						for i = #value, 1, -1 do
-							if #requests >= max_requests then
-								break
-							end
-							local request = value[i]
-							local id = type(request) == "table" and request.id or encode(request)
-							if not seen[id] then
-								seen[id] = true
-								table_insert(requests, request)
-							end
-						end
-						value = {}
-						for i = #requests, 1, -1 do
-							table_insert(value, requests[i])
-						end
+						value = restore_requests(self, value, live)
 					end
 					lru:set(name, value)
 					if live == nil then
@@ -1113,98 +1162,12 @@ function metrics:log_default()
 	return self:ret(true, "metrics not used")
 end
 
-function metrics:timer()
-	-- Check if metrics is used
-	local is_needed, err = has_variable("USE_METRICS", "yes")
-	if is_needed == nil then
-		return self:ret(false, "can't check USE_METRICS variable : " .. err)
-	end
-	if not is_needed then
-		return self:ret(true, "metrics not used")
-	end
-
+-- Writes the LRU of this worker to the shared dict. The Redis branches only run when the caller connected
+-- (self.redis_ok), which is what lets the exit flush share this code without touching Redis.
+local function flush_lru(self, wid, max_retries, on_exit)
 	local ret = true
 	local ret_err = "metrics updated"
-	local wid = tostring(worker_id())
-	local max_retries = tonumber(self.variables["METRICS_MEMORY_MAX_RETRIES"]) or 5
-
-	self.redis_ok = nil
-	local ttl = parse_duration(self.variables["METRICS_REDIS_TTL"], "s")
-	local redis_connected = false
-	if self.use_redis then
-		self.redis_ok, err = self.clusterstore:connect()
-		if not self.redis_ok then
-			self:log_throttled(
-				ERR,
-				"redis_connect",
-				"Can't connect to Redis server: "
-					.. (err or "unknown error")
-					.. " - requests will be stored in datastore"
-			)
-		else
-			redis_connected = true
-			if not prefilled_redis and self.variables["METRICS_SAVE_TO_REDIS"] == "yes" then
-				prefill_attempts = prefill_attempts + 1
-				prefilled_redis = prefill_counters(self, wid) or prefill_attempts >= MAX_PREFILL_ATTEMPTS
-			end
-			if self.variables["METRICS_SAVE_TO_REDIS"] == "yes" and ngx.now() >= legacy_due then
-				local legacy_ttl = ttl or 0
-				local done, failed = refresh_legacy_counters(self, wid, legacy_ttl)
-				if done then
-					legacy_failures = 0
-					legacy_due = legacy_ttl > 0 and ngx.now() + legacy_ttl / 2 or math.huge
-				elseif failed then
-					-- Never give up (Redis may recover), but back off: an ACL-denied SCAN fails forever.
-					legacy_failures = legacy_failures + 1
-					local cap = legacy_ttl > 0 and legacy_ttl / 2 or 3600
-					legacy_due = ngx.now() + math.min(60 * 2 ^ math.min(legacy_failures - 1, 10), cap)
-				end
-			end
-			self_heal_request_facets(self)
-			-- With a TTL, the per-tick EXPIRE replies already reveal lost keys.
-			if self.variables["METRICS_SAVE_TO_REDIS"] == "yes" and not (ttl and ttl > 0) then
-				check_synced_keys(self, wid)
-			end
-		end
-	end
-
-	if worker_id() == 0 and self.redis_ok then
-		for _ = 1, BAN_EVIDENCE_RECOVERY_BATCH do
-			local ban_id, pop_err = self.metrics_datastore.dict:rpop(BAN_EVIDENCE_PENDING)
-			if not ban_id then
-				if pop_err then
-					self:log_throttled(ERR, "ban_evidence_queue", "Can't read ban evidence queue: " .. pop_err)
-				end
-				break
-			end
-			local key = "ban_evidence:" .. ban_id .. ":data"
-			local payload = self.metrics_datastore:get(key)
-			if payload then
-				local ok, remaining = self.metrics_datastore:ttl(key)
-				local sync_err = not ok and remaining or nil
-				if ok then
-					ok, sync_err = sync_ban_evidence(self, ban_id, payload, remaining)
-				end
-				if not ok then
-					self:log_throttled(
-						ERR,
-						"ban_evidence_recovery",
-						"Can't recover ban evidence: " .. (sync_err or "unknown error")
-					)
-					local pending_ok, pending_err = self.metrics_datastore.dict:rpush(BAN_EVIDENCE_PENDING, ban_id)
-					if not pending_ok then
-						self:log_throttled(
-							ERR,
-							"ban_evidence_pending",
-							"Can't requeue ban evidence recovery: " .. (pending_err or "unknown error")
-						)
-					end
-					break
-				end
-			end
-		end
-	end
-
+	local err
 	local lru_keys = lru:get_keys()
 	-- Built from the snapshot rather than from the writes below, so a key skipped because
 	-- the OOM breaker tripped or because it was raced out mid-loop is not taken for evicted.
@@ -1327,6 +1290,10 @@ function metrics:timer()
 					end
 				end
 			end
+			-- The next worker of this id may already have flushed rows of its own to this key.
+			if on_exit and key == "requests" then
+				value = merge_requests(self, stored_requests(self, wid) or {}, value)
+			end
 			if type(value) == "table" then
 				value = encode(value)
 			end
@@ -1374,6 +1341,127 @@ function metrics:timer()
 			end
 		end
 	end
+	return ret, ret_err, live_keys
+end
+
+-- Called by init-worker-lua.conf when the worker exits (reload or stop), in place of the timer: whatever
+-- log() still holds in the LRU would otherwise be lost, since the next tick never comes. Local only:
+-- no Redis connection while the worker shuts down. Reports stay unsynced in the dict, and the
+-- next worker of this id restores them with a replay flag, so they still reach Redis on its first tick.
+function metrics:flush_on_exit()
+	local is_needed, err = has_variable("USE_METRICS", "yes")
+	if is_needed == nil then
+		return self:ret(false, "can't check USE_METRICS variable : " .. err)
+	end
+	if not is_needed then
+		return self:ret(true, "metrics not used")
+	end
+	self.redis_ok = nil
+	local wid = tostring(worker_id())
+	local ret, ret_err = flush_lru(self, wid, tonumber(self.variables["METRICS_MEMORY_MAX_RETRIES"]) or 5, true)
+	-- Capped like the LRU it copies (log() keeps at most METRICS_MAX_BLOCKED_REQUESTS rows) and expiring.
+	local requests = lru:get("requests")
+	if requests then
+		local snapshot = HANDOFF_PREFIX .. wid .. ":" .. ngx.worker.pid()
+		if self.metrics_datastore:set_with_retries(snapshot, encode(requests), HANDOFF_TTL, 1) then
+			self.metrics_datastore:set_with_retries(HANDOFF_PREFIX .. wid, "1", HANDOFF_TTL, 1)
+		end
+	end
+	return self:ret(ret, ret_err)
+end
+
+function metrics:timer()
+	-- Check if metrics is used
+	local is_needed, err = has_variable("USE_METRICS", "yes")
+	if is_needed == nil then
+		return self:ret(false, "can't check USE_METRICS variable : " .. err)
+	end
+	if not is_needed then
+		return self:ret(true, "metrics not used")
+	end
+
+	local wid = tostring(worker_id())
+	local max_retries = tonumber(self.variables["METRICS_MEMORY_MAX_RETRIES"]) or 5
+
+	self.redis_ok = nil
+	local ttl = parse_duration(self.variables["METRICS_REDIS_TTL"], "s")
+	local redis_connected = false
+	if self.use_redis then
+		self.redis_ok, err = self.clusterstore:connect()
+		if not self.redis_ok then
+			self:log_throttled(
+				ERR,
+				"redis_connect",
+				"Can't connect to Redis server: "
+					.. (err or "unknown error")
+					.. " - requests will be stored in datastore"
+			)
+		else
+			redis_connected = true
+			if not prefilled_redis and self.variables["METRICS_SAVE_TO_REDIS"] == "yes" then
+				prefill_attempts = prefill_attempts + 1
+				prefilled_redis = prefill_counters(self, wid) or prefill_attempts >= MAX_PREFILL_ATTEMPTS
+			end
+			if self.variables["METRICS_SAVE_TO_REDIS"] == "yes" and ngx.now() >= legacy_due then
+				local legacy_ttl = ttl or 0
+				local done, failed = refresh_legacy_counters(self, wid, legacy_ttl)
+				if done then
+					legacy_failures = 0
+					legacy_due = legacy_ttl > 0 and ngx.now() + legacy_ttl / 2 or math.huge
+				elseif failed then
+					-- Never give up (Redis may recover), but back off: an ACL-denied SCAN fails forever.
+					legacy_failures = legacy_failures + 1
+					local cap = legacy_ttl > 0 and legacy_ttl / 2 or 3600
+					legacy_due = ngx.now() + math.min(60 * 2 ^ math.min(legacy_failures - 1, 10), cap)
+				end
+			end
+			self_heal_request_facets(self)
+			-- With a TTL, the per-tick EXPIRE replies already reveal lost keys.
+			if self.variables["METRICS_SAVE_TO_REDIS"] == "yes" and not (ttl and ttl > 0) then
+				check_synced_keys(self, wid)
+			end
+		end
+	end
+
+	if worker_id() == 0 and self.redis_ok then
+		for _ = 1, BAN_EVIDENCE_RECOVERY_BATCH do
+			local ban_id, pop_err = self.metrics_datastore.dict:rpop(BAN_EVIDENCE_PENDING)
+			if not ban_id then
+				if pop_err then
+					self:log_throttled(ERR, "ban_evidence_queue", "Can't read ban evidence queue: " .. pop_err)
+				end
+				break
+			end
+			local key = "ban_evidence:" .. ban_id .. ":data"
+			local payload = self.metrics_datastore:get(key)
+			if payload then
+				local ok, remaining = self.metrics_datastore:ttl(key)
+				local sync_err = not ok and remaining or nil
+				if ok then
+					ok, sync_err = sync_ban_evidence(self, ban_id, payload, remaining)
+				end
+				if not ok then
+					self:log_throttled(
+						ERR,
+						"ban_evidence_recovery",
+						"Can't recover ban evidence: " .. (sync_err or "unknown error")
+					)
+					local pending_ok, pending_err = self.metrics_datastore.dict:rpush(BAN_EVIDENCE_PENDING, ban_id)
+					if not pending_ok then
+						self:log_throttled(
+							ERR,
+							"ban_evidence_pending",
+							"Can't requeue ban evidence recovery: " .. (pending_err or "unknown error")
+						)
+					end
+					break
+				end
+			end
+		end
+	end
+
+	adopt_exit_requests(self, wid)
+	local ret, ret_err, live_keys = flush_lru(self, wid, max_retries)
 
 	if self.redis_ok then
 		enforce_redis_requests_cap(self)
