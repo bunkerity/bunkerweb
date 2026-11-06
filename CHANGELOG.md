@@ -12,6 +12,7 @@
 - [SECURITY] `authbasic`: the default `changeme` / `changeme` pair is ignored once another pair is configured, and `AUTH_BASIC_USER` refuses line breaks.
 - [SECURITY] `ui`: form values and the setup configuration are no longer logged at DEBUG level, and the username of a failed login is escaped in the log.
 - [SECURITY] `ui`: escape template ids in the templates deletion modal and the Services template filter.
+- [SECURITY] `api`: an instance API certificate that does not match the pinned one now fails the call instead of falling back to HTTP.
 - [FEATURE] `bwcli`: `bwcli bans --json` prints the bans as JSON for scripts and monitoring.
 - [BUGFIX] `limit`: `LIMIT_CONN_MAX_*` settings now accept only values NGINX supports (1 to 65535).
 - [BUGFIX] `limit`: in local mode, simultaneous requests from one client across workers no longer exceed `LIMIT_REQ_RATE` (rates up to 100 per window).
@@ -26,6 +27,7 @@
 - [BUGFIX] `reversescan`: a cache write failure for one port no longer prevents caching the results of the other ports.
 - [BUGFIX] `ui`: renaming the admin user through `ADMIN_USERNAME` now applies at startup instead of failing with "User ... doesn't exist".
 - [BUGFIX] `ui`: a client resuming the log stream from a far-behind offset gets the tail instead of the whole file.
+- [BUGFIX] `api`: an administrator username or password set through `API_USERNAME` and `API_PASSWORD` is now applied at startup.
 - [PERF] `core`: cut request-path CPU by 14.2% for HTTP proxy traffic and by 33.3% for TLS proxy traffic with the community blacklists.
 - [PERF] `blacklist`: reuse downloaded lists between requests instead of copying and deduplicating them each time.
 - [PERF] `core`: build the reserved-address matcher once per worker and cache successful plugin module lookups.
