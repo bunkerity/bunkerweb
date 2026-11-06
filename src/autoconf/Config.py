@@ -9,6 +9,45 @@ from typing import Any, Dict, List, Literal, Optional, Union
 from Database import Database  # type: ignore
 from logger import getLogger  # type: ignore
 
+# Substrings (matched against the upper-cased setting name) of settings whose value is a secret.
+# Every autoconf log line that prints a setting value goes through redact_secrets()/is_sensitive_key(),
+# so the list is the one place to extend when a plugin adds a secret-bearing setting.
+SENSITIVE_KEY_SUBSTRINGS = (
+    "PASSWORD",
+    "SECRET",
+    "TOKEN",
+    "API_KEY",
+    "PRIVATE_KEY",
+    "_KEY_DATA",
+    "CREDENTIAL",
+    "LICENSE",
+    "DATABASE_URI",
+    "AUTH_BASIC",
+    "HEADER_VALUE",
+)
+
+REDACTED = "<redacted>"
+
+
+def is_sensitive_key(key: Any) -> bool:
+    upper_key = str(key).upper()
+    return any(marker in upper_key for marker in SENSITIVE_KEY_SUBSTRINGS)
+
+
+def redact_secrets(value: Any, key: Any = "") -> Any:
+    """Return a copy of ``value`` that is safe to log: the value of every sensitive key is replaced.
+
+    ``key`` is the name the value is stored under; containers are walked so an instance dict holding
+    an ``API_TOKEN`` or a service dict holding ``*_KEY_DATA`` never reaches a log in clear.
+    """
+    if is_sensitive_key(key):
+        return REDACTED
+    if isinstance(value, dict):
+        return {k: redact_secrets(v, k) for k, v in value.items()}
+    if isinstance(value, (list, tuple)):
+        return [redact_secrets(v, key) for v in value]
+    return value
+
 
 class Config:
     def __init__(self, ctrl_type: Union[Literal["docker"], Literal["swarm"], Literal["kubernetes"]]):
@@ -98,7 +137,7 @@ class Config:
                             is_global = True
                             self.__logger.warning(f"Variable {variable} is a global value and will be applied globally")
                     if not success:
-                        self.__logger.warning(f"Variable {variable}: {value} is not a valid autoconf setting ({err}), ignoring it")
+                        self.__logger.warning(f"Variable {variable} is not a valid autoconf setting ({err}), ignoring it")
                         continue
 
                 if is_global or variable.startswith(f"{server_name}_"):
@@ -141,22 +180,27 @@ class Config:
         # str() of a dict follows its insertion order, so the same services or configs rebuilt in another
         # order (labels serialised differently by the daemon) read as a change through set(map(str, ...)).
         if self._instance_targets(self.__instances) != self._instance_targets(instances):
-            self.__logger.debug(f"Instances changed: {self.__instances} -> {instances}")
+            self.__logger.debug(f"Instances changed: {redact_secrets(self.__instances)} -> {redact_secrets(instances)}")
             return True
 
         if self.__services != services:
-            self.__logger.debug(f"Services changed: {self.__services} -> {services}")
+            self.__logger.debug(f"Services changed: {redact_secrets(self.__services)} -> {redact_secrets(services)}")
             return True
 
         if self.__configs != configs:
-            self.__logger.debug(f"Configs changed: {self.__configs} -> {configs}")
+            self.__logger.debug(f"Configs changed: {self.__log_configs(self.__configs)} -> {self.__log_configs(configs)}")
             return True
 
         if set(map(str, self.__extra_config.items())) != set(map(str, extra_config.items())):
-            self.__logger.debug(f"Extra config changed: {self.__extra_config} -> {extra_config}")
+            self.__logger.debug(f"Extra config changed: {redact_secrets(self.__extra_config)} -> {redact_secrets(extra_config)}")
             return True
 
         return False
+
+    @staticmethod
+    def __log_configs(configs: Dict[str, Dict[str, bytes]]) -> Dict[str, List[str]]:
+        # Custom config bodies can hold anything (keys, tokens): log which files exist, never their content.
+        return {config_type: sorted(files) for config_type, files in configs.items()}
 
     def have_to_wait(self) -> bool:
         db_metadata = self._db.get_metadata()
@@ -253,7 +297,7 @@ class Config:
 
         # update instances in database
         if "instances" in changes:
-            self.__logger.debug(f"Updating instances in database: {self.__instances}")
+            self.__logger.debug(f"Updating instances in database: {redact_secrets(self.__instances)}")
             err = self._db.update_instances(self.__instances, "autoconf", changed=False)
             if err:
                 self.__logger.error(f"Failed to update instances: {err}")
@@ -261,7 +305,7 @@ class Config:
         # save config to database
         changed_plugins = []
         if "config" in changes:
-            self.__logger.debug(f"Saving config in database: {self.__config}")
+            self.__logger.debug(f"Saving config in database: {redact_secrets(self.__config)}")
             err = self._db.save_config(self.__config, "autoconf", changed=False, disable_cleanup=self._disable_cleanup)
             if isinstance(err, str):
                 success = False
@@ -270,7 +314,7 @@ class Config:
 
         # save custom configs to database
         if "custom_configs" in changes:
-            self.__logger.debug(f"Saving custom configs in database: {custom_configs}")
+            self.__logger.debug(f"Saving custom configs in database: {[config['exploded'] for config in custom_configs]}")
             err = self._db.save_custom_configs(custom_configs, "autoconf", changed=False, disable_cleanup=self._disable_cleanup)
             if err:
                 success = False
