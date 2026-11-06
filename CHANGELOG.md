@@ -42,6 +42,7 @@
 - [PERF] `core`: build the reserved-address matcher once per worker and cache successful plugin module lookups.
 - [PERF] `core`: avoid temporary result-check tables and build informational log messages only when their level is enabled.
 - [PERF] `sessions`: stop reading the random cookie name and secret from shared memory on every request.
+- [PERF] `errors`: the default error page is 42% lighter (a 403 drops from about 69 KB to 39 KB), with no visible change (Refs #3892).
 - [DOCS] `linux`: the custom configuration section says where NGINX includes each type and how to check a file is live.
 - [DOCS] `reverseproxy`: `REVERSE_PROXY_KEEPALIVE` does not pool backend connections by itself; the docs show how to pool with a named upstream.
 
