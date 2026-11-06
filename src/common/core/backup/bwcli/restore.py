@@ -5,6 +5,7 @@ from datetime import datetime
 from os.path import join, sep
 from pathlib import Path
 from sys import exit as sys_exit, path as sys_path
+from tempfile import mkdtemp
 
 deps_path = join(sep, "usr", "share", "bunkerweb", "core", "backup")
 if deps_path not in sys_path:
@@ -54,9 +55,11 @@ try:
 
     LOGGER.info("Backing up the current database before restoring the backup ...")
     current_time = datetime.now().astimezone()
-    tmp_backup_dir = Path(sep, "tmp", "bunkerweb", "backups")
-    tmp_backup_dir.mkdir(parents=True, exist_ok=True)
-    db, _ = backup_database(current_time, backup_dir=tmp_backup_dir)
+    # A private (0700) directory with an unpredictable name: the dump holds the whole database and the
+    # command can run as root, so it must not go to a fixed path under a shared directory
+    tmp_backup_dir = Path(mkdtemp(prefix="bunkerweb-restore-"))
+    db, tmp_backup_file = backup_database(current_time, backup_dir=tmp_backup_dir)
+    LOGGER.info(f"The database was saved to {tmp_backup_file} before restoring")
 
     LOGGER.info(f"Restoring backup {backup_file} ...")
     restore_database(backup_file, db)

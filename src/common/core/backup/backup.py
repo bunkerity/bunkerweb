@@ -4,7 +4,7 @@ from contextlib import closing
 from datetime import datetime
 import re
 from json import dumps, loads
-from os import getenv
+from os import fchmod, fdopen, getenv, open as os_open, O_CREAT, O_TRUNC, O_WRONLY
 from os.path import join, sep
 from pathlib import Path
 from subprocess import PIPE, check_output, run
@@ -260,10 +260,12 @@ def backup_database(current_time: datetime, db: Database = None, backup_dir: Pat
             LOGGER.error(f"Failed to dump the database: {stderr}")
             sys_exit(1)
 
-    with ZipFile(backup_file, "w", compression=ZIP_DEFLATED) as zipf:
-        zipf.writestr(backup_file.with_suffix(".sql").name, proc.stdout)
-
-    backup_file.chmod(0o600)
+    # The dump holds the whole database: create the archive 0600 so it is never readable, even briefly
+    fd = os_open(backup_file, O_WRONLY | O_CREAT | O_TRUNC, 0o600)
+    with fdopen(fd, "wb") as archive:
+        fchmod(fd, 0o600)  # an archive that already existed keeps its old mode otherwise
+        with ZipFile(archive, "w", compression=ZIP_DEFLATED) as zipf:
+            zipf.writestr(backup_file.with_suffix(".sql").name, proc.stdout)
 
     LOGGER.info(f"💾 Backup {backup_file.name} created successfully in {backup_dir}")
     return db, backup_file
