@@ -11,6 +11,7 @@
 - [BUGFIX] `scheduler`, `api`, `ui`: a reload that an instance has not confirmed is no longer reported as applied. (Refs #4086)
 - [BUGFIX] `autoconf`: a health change of a BunkerWeb instance no longer triggers a full configuration regeneration and reload.
 - [BUGFIX] `metrics`: blocked requests logged just before a reload are no longer missing from the reports.
+- [BUGFIX] `scheduler`: after a scheduler restart, nginx no longer serves the default certificate before the custom or self-signed one is ready.
 - [PERF] `core`: cut request-path CPU by 14.2% for HTTP proxy traffic and by 33.3% for TLS proxy traffic with the community blacklists.
 - [PERF] `blacklist`: reuse downloaded lists between requests instead of copying and deduplicating them each time.
 - [PERF] `core`: build the reserved-address matcher once per worker and cache successful plugin module lookups.

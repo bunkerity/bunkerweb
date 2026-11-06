@@ -58,6 +58,9 @@ def run_once_jobs_block(*, pre_push_done=True, pre_push_rendered=True, first_sta
         "CONFIG_NEED_GENERATION": False,
         "healthcheck_job_run": True,
         "republish_after_jobs": True,
+        "prepared_plugins": [],
+        "preparation_success": True,
+        "preparation_failed_jobs": [],
     }
     if helper:
         exec(compile(ast.Module(helper, []), "helper", "exec"), namespace)

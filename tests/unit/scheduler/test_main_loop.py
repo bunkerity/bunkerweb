@@ -309,7 +309,7 @@ def test_the_first_iteration_pushes_then_runs_jobs_then_publishes_once(drive):
     drive.run()
     sched = drive.sched
     env, changed, ignored = sched.reload_calls[0]
-    assert ignored == ["misc", "pro"]
+    assert ignored == ["customcert", "selfsigned", "misc", "pro"]
     assert env["TZ"] == "UTC" or "TZ" in env
     assert drive.renders == 2  # the pre-push render, then the one that picks up files the jobs created
     assert len(reloads(drive)) == 2

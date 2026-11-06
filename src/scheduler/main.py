@@ -1682,10 +1682,22 @@ def main() -> None:
             pre_push_outcome = {}
             generation_failed = False
             republish_after_jobs = True
+            prepared_plugins = []
+            preparation_success = True
+            preparation_failed_jobs = []
             if CONFIG_NEED_GENERATION and RUN_JOBS_ONCE:
                 # A fault in here is a failed push, not a reason to leave: uncaught it reaches the
                 # outer handler, which turns it into stop(1).
                 try:
+                    # Like misc's default-server-cert at startup, local pairs must exist before nginx loads this generation.
+                    SCHEDULER.env = env | {
+                        "TZ": getenv("TZ", "UTC"),
+                        "RELOAD_MIN_TIMEOUT": str(RELOAD_MIN_TIMEOUT),
+                        "SEND_FILES_MIN_TIMEOUT": str(SEND_FILES_MIN_TIMEOUT),
+                    }
+                    prepared_plugins = ["customcert", "selfsigned"]
+                    preparation_success = SCHEDULER.run_once(prepared_plugins)
+                    preparation_failed_jobs = SCHEDULER.failed_jobs
                     pre_push_done, pre_push_rendered, generation_failed = pre_push_configuration(env, FIRST_START, pre_push_outcome)
                 except BaseException as e:
                     LOGGER.error(f"Exception while pushing the configuration before running jobs : {e}")
@@ -1720,17 +1732,20 @@ def main() -> None:
 
             if RUN_JOBS_ONCE and not pre_push_failed:
                 # Only run jobs once
-                if not SCHEDULER.reload(
-                    env
-                    | {
-                        "TZ": getenv("TZ", "UTC"),
-                        "RELOAD_MIN_TIMEOUT": str(RELOAD_MIN_TIMEOUT),
-                        "SEND_FILES_MIN_TIMEOUT": str(SEND_FILES_MIN_TIMEOUT),
-                    },
-                    changed_plugins=changed_plugins,
-                    ignore_plugins=["misc", "pro"] if FIRST_START else None,
+                if (
+                    not SCHEDULER.reload(
+                        env
+                        | {
+                            "TZ": getenv("TZ", "UTC"),
+                            "RELOAD_MIN_TIMEOUT": str(RELOAD_MIN_TIMEOUT),
+                            "SEND_FILES_MIN_TIMEOUT": str(SEND_FILES_MIN_TIMEOUT),
+                        },
+                        changed_plugins=changed_plugins,
+                        ignore_plugins=prepared_plugins + (["misc", "pro"] if FIRST_START else []),
+                    )
+                    or not preparation_success
                 ):
-                    failed = SCHEDULER.failed_jobs
+                    failed = preparation_failed_jobs + SCHEDULER.failed_jobs
                     if failed:
                         LOGGER.error(f"Jobs failed in run_once(): {', '.join(failed)}")
                     else:
