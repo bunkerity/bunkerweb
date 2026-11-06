@@ -1,0 +1,32 @@
+tests/unit/api_app/test_api_schema_validators_ub4_7.py
+  s_10ef18feb295fa::t_e4796f48ca39c1 1-111
+tests/unit/api_app/test_api_ban_scope_ub4_3.py
+  s_53a59aedfa342a::t_d8e2dacc8bb41b 53-56
+  s_10ef18feb295fa::t_e4796f48ca39c1 1-52,57-81
+tests/unit/api_app/test_api_jobs_global_settings_status_ub4_6.py
+  s_10ef18feb295fa::t_e4796f48ca39c1 1-72
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "e8ffa763496022342e76515a261ab9d12b7c1200",
+  "prompts": {},
+  "sessions": {
+    "s_10ef18feb295fa": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1b12b-c1bb-7182-82c2-be0b8eb08e01",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_53a59aedfa342a": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1b12b-8be9-7361-911e-c091fff539cc",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}
