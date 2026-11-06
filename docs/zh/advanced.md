@@ -1647,6 +1647,10 @@ REDIS_DATABASE=0
 
 如果您需要更高级的设置，例如身份验证、SSL/TLS 支持或 Sentinel 模式，请参阅 [Redis 插件设置文档](features.md#redis)以获取详细指导。
 
+### 将封禁导出为 JSON
+
+运行 `bwcli bans --json`，将单个 JSON 对象写入标准输出。结果按实例分组；收集 Redis 封禁时，还包含 `redis` 条目。每个来源包含按 `date` 排序的封禁记录数组。记录保留来源返回的字段，例如 `ip`、`country`、`date`、`exp`、`permanent`、`reason`、`service`、`ban_scope` 和 `kind`。成功时命令退出码为 0；失败时退出码非零，并向标准错误输出写入错误信息。不使用 `--json` 时，`bwcli bans` 保持原有的格式化输出。
+
 ## 保护 UDP/TCP 应用程序
 
 !!! example "实验性功能"

@@ -1649,6 +1649,10 @@ REDIS_DATABASE=0
 
 Wenn Sie erweiterte Einstellungen wie Authentifizierung, SSL/TLS-Unterstützung oder den Sentinel-Modus benötigen, finden Sie detaillierte Anleitungen in der [Dokumentation zu den Redis-Plugin-Einstellungen](features.md#redis).
 
+### Sperren als JSON exportieren
+
+Mit `bwcli bans --json` wird ein einzelnes JSON-Objekt auf der Standardausgabe ausgegeben, gruppiert nach Instanz und mit einem Eintrag `redis`, wenn Redis-Sperren abgerufen werden. Jede Quelle enthält ein nach `date` sortiertes Array von Sperreinträgen. Die von der Quelle gelieferten Felder bleiben erhalten, etwa `ip`, `country`, `date`, `exp`, `permanent`, `reason`, `service`, `ban_scope` und `kind`. Bei Erfolg endet der Befehl mit Status 0. Bei einem Fehler endet er mit einem Status ungleich null und schreibt eine Fehlermeldung auf die Standardfehlerausgabe. Ohne `--json` behält `bwcli bans` seine formatierte Ausgabe bei.
+
 ## UDP/TCP-Anwendungen schützen
 
 !!! example "Experimentelles Feature"

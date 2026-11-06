@@ -1649,6 +1649,10 @@ REDIS_DATABASE=0
 
 Si necesitas configuraciones más avanzadas, como autenticación, soporte SSL/TLS o modo Sentinel, consulta la [documentación de configuración del plugin de Redis](features.md#redis) para obtener una guía detallada.
 
+### Exportar bloqueos como JSON
+
+Ejecute `bwcli bans --json` para escribir un único objeto JSON en la salida estándar, agrupado por instancia y con una entrada `redis` cuando se recopilan bloqueos de Redis. Cada origen contiene un array de bloqueos ordenados por `date`. Los registros conservan los campos devueltos por el origen, como `ip`, `country`, `date`, `exp`, `permanent`, `reason`, `service`, `ban_scope` y `kind`. El comando termina con el código 0 si tiene éxito. Si falla, termina con un código distinto de cero y escribe un error en la salida de error estándar. Sin `--json`, `bwcli bans` mantiene su salida con formato.
+
 ## Proteger aplicaciones UDP/TCP
 
 !!! example "Característica experimental"

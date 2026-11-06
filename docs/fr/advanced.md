@@ -1648,6 +1648,10 @@ REDIS_DATABASE=0
 
 Si vous avez besoin de paramètres plus avancés, tels que l'authentification, la prise en charge SSL/TLS ou le mode Sentinel, reportez-vous à la documentation sur les paramètres du [plug-in Redis](features.md#redis) pour obtenir des conseils détaillés.
 
+### Exporter les bannissements en JSON
+
+Exécutez `bwcli bans --json` pour écrire un objet JSON unique sur la sortie standard, regroupé par instance, avec une entrée `redis` lorsque les bannissements Redis sont collectés. Chaque source contient un tableau de bannissements triés par `date`. Les enregistrements conservent les champs renvoyés par la source, notamment `ip`, `country`, `date`, `exp`, `permanent`, `reason`, `service`, `ban_scope` et `kind`. La commande renvoie le code 0 en cas de succès. En cas d'échec, elle renvoie un code non nul et écrit une erreur sur la sortie d'erreur standard. Sans `--json`, `bwcli bans` conserve son affichage formaté.
+
 ## Protéger les applications UDP/TCP
 
 !!! example "Fonctionnalité expérimentale"

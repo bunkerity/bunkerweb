@@ -1,5 +1,6 @@
 """CLI ban and unban reporting against dev's instance-backed ban model."""
 
+import json
 import sys
 from pathlib import Path
 from unittest.mock import Mock
@@ -96,6 +97,29 @@ class TestBansListingWasNotRegressed:
         ok, message = cli.bans()
         assert ok is False
         assert "Failed to retrieve ban information" in message
+
+    def test_json_preserves_instance_and_redis_records(self):
+        cli = _cli(apis=[Mock()])
+        ban = {
+            "ip": "192.0.2.1",
+            "country": "unknown",
+            "date": 2,
+            "exp": 60,
+            "permanent": False,
+            "reason": "manual",
+            "service": "example.com",
+            "ban_scope": "service",
+            "kind": "ban",
+        }
+        older = dict(ban, ip="2001:db8::1", date=1, kind="crowdsec_lease")
+        cli.send_to_apis.return_value = True, {"instance": {"data": [ban, older]}, "empty": {"data": []}}
+        redis = Mock()
+        redis.scan_iter.side_effect = [[b"bans_ip_192.0.2.2"], [], [], []]
+        redis.pipeline.return_value.execute.return_value = [json.dumps(dict(ban, service="bwcli", ban_scope="global")), 30]
+        cli._CLI__redis = redis
+        ok, message = cli.bans(json_output=True)
+        assert ok
+        assert json.loads(message) == {"instance": [older, ban], "empty": [], "redis": [dict(ban, ip="192.0.2.2", service="bwcli", ban_scope="global", exp=30)]}
 
 
 if __name__ == "__main__":
