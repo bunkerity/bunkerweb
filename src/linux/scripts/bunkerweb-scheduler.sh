@@ -90,6 +90,12 @@ function start() {
     export_env_file /etc/bunkerweb/variables.env
     export_env_file /etc/bunkerweb/scheduler.env
 
+    # The env files cannot change the interpreter or its search path: pin them again for the root calls below
+    PYTHON_BIN=$(get_python_bin)
+    export PYTHON_BIN
+    BW_PYTHONPATH=$(get_bunkerweb_pythonpath)
+    export PYTHONPATH="${BW_PYTHONPATH}:/usr/share/bunkerweb/db"
+
     : "${LOG_LEVEL:=INFO}"
     : "${CUSTOM_LOG_LEVEL:=$LOG_LEVEL}"
 
@@ -138,8 +144,15 @@ function start() {
     # Check current version and stamp
     log "SYSTEMCTL" "ℹ️" "Checking database version..."
     installed_version=$(cat /usr/share/bunkerweb/VERSION)
+    # Stage the helper scripts in a directory only root can write to (nginx reads and runs them)
+    bw_tmp_dir=$(create_private_tmpdir) || {
+        log "SYSTEMCTL" "❌" "Failed to create a temporary directory"
+        exit 1
+    }
+    trap 'rm -rf -- "$bw_tmp_dir"' EXIT
+
     # Create temporary Python script
-    cat > /tmp/version_check.py << EOL
+    cat > "$bw_tmp_dir/version_check.py" << EOL
 #!/usr/bin/env python3
 from os import getenv
 import sqlalchemy as sa
@@ -171,18 +184,15 @@ if db:
     with open("/var/tmp/bunkerweb/database_uri", "w") as file:
         file.write(db.database_uri)
 EOL
-    # Ensure the temporary script is readable by nginx under UMask=027
-    chown root:nginx /tmp/version_check.py
-    chmod 640 /tmp/version_check.py
+    # Ensure the temporary script is readable by nginx under UMask=027, but not writable
+    chmod 644 "$bw_tmp_dir/version_check.py"
 
-    current_version=$(run_as_nginx env PYTHONPATH="$PYTHONPATH" "$PYTHON_BIN" /tmp/version_check.py)
+    current_version=$(run_as_nginx env PYTHONPATH="$PYTHONPATH" "$PYTHON_BIN" "$bw_tmp_dir/version_check.py")
     # shellcheck disable=SC2181
     if [ $? -ne 0 ]; then
         log "SYSTEMCTL" "❌" "Failed to retrieve database version (nginx user execution error)"
-        rm -f /tmp/version_check.py
         exit 1
     fi
-    rm -f /tmp/version_check.py
 
     if [ -f /var/tmp/bunkerweb/database_error ]; then
         log "SYSTEMCTL" "❌" "Failed to retrieve database version: $(cat /var/tmp/bunkerweb/database_error)"
@@ -212,10 +222,10 @@ EOL
                 fi
 
                 # Stamp the database with the determined revision
-                if $PYTHON_BIN -m alembic stamp --purge "$REVISION"; then
+                if "$PYTHON_BIN" -s -m alembic stamp --purge "$REVISION"; then
                     # Run database migration
                     log "SYSTEMCTL" "ℹ️" "Running database migration..."
-                    if ! $PYTHON_BIN -m alembic upgrade head; then
+                    if ! "$PYTHON_BIN" -s -m alembic upgrade head; then
                         log "SYSTEMCTL" "❌" "Database migration failed"
                         exit 1
                     fi
@@ -230,7 +240,7 @@ EOL
             fi
         else
             # Create temporary Python script to update version
-            cat > /tmp/version_update.py << EOL
+            cat > "$bw_tmp_dir/version_update.py" << EOL
 #!/usr/bin/env python3
 import sqlalchemy as sa
 from os import getenv
@@ -244,20 +254,20 @@ db = Database(LOGGER)
 with db.sql_engine.connect() as conn:
     conn.execute(sa.text("UPDATE bw_metadata SET version = '${installed_version}' WHERE id = 1"))
 EOL
-            # Ensure the temporary script is readable by nginx under UMask=027
-            chown root:nginx /tmp/version_update.py
-            chmod 640 /tmp/version_update.py
+            # Ensure the temporary script is readable by nginx under UMask=027, but not writable
+            chmod 644 "$bw_tmp_dir/version_update.py"
 
-            if ! run_as_nginx env PYTHONPATH="$PYTHONPATH" "$PYTHON_BIN" /tmp/version_update.py; then
+            if ! run_as_nginx env PYTHONPATH="$PYTHONPATH" "$PYTHON_BIN" "$bw_tmp_dir/version_update.py"; then
                 log "SYSTEMCTL" "❌" "Failed to update database version (nginx user execution error)"
-                rm -f /tmp/version_update.py
                 exit 1
             fi
-            rm -f /tmp/version_update.py
         fi
     fi
 
     cd - > /dev/null || exit 1
+
+    rm -rf -- "$bw_tmp_dir"
+    trap - EXIT
 
     # Execute scheduler
     log "SYSTEMCTL" "ℹ️ " "Executing scheduler ..."

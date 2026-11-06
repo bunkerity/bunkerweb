@@ -131,6 +131,12 @@ start() {
     export_env_file /etc/bunkerweb/variables.env
     export_env_file /etc/bunkerweb/ui.env
 
+    # The env files cannot change the interpreter or its search path: pin them again
+    PYTHON_BIN=$(get_python_bin)
+    export PYTHON_BIN
+    BW_PYTHONPATH=$(get_bunkerweb_pythonpath)
+    export PYTHONPATH="${BW_PYTHONPATH}:/usr/share/bunkerweb/ui"
+
 
     if [ -f "/var/run/bunkerweb/tmp-ui.pid" ]; then
         rm -f /var/run/bunkerweb/tmp-ui.pid

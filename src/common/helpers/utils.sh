@@ -120,7 +120,22 @@ function get_nginx_conf_dir() {
 	echo "/etc/nginx"
 }
 
+# Succeeds when an env file key would change how a program is found, loaded or run, or how the
+# shell itself behaves. The service wrappers read env files that the nginx user can write while
+# they run as root, so these names must never come from a file: they are not BunkerWeb settings.
+function is_execution_env_key() {
+	case "$1" in
+		PATH | HOME | SHELL | ENV | IFS | PS[0-9] | CDPATH | SHELLOPTS | PROMPT_COMMAND | GLOBIGNORE) return 0 ;;
+		PYTHON* | LD_* | BASH* | GCONV_PATH | GLIBC_* | MALLOC_* | OPENSSL_*) return 0 ;;
+		TMPDIR | TMP | TEMP | LOCPATH | NLSPATH | TZDIR | HOSTALIASES | LOCALDOMAIN | RES_OPTIONS) return 0 ;;
+		UID | EUID | PPID | PWD | OLDPWD | USER | LOGNAME) return 0 ;;
+	esac
+	return 1
+}
+
 # Export shell-compatible key/value pairs from a simple env file (KEY=VALUE lines).
+# Keys that change program execution (see is_execution_env_key) are skipped with a warning
+# naming the key only.
 function export_env_file() {
 	local env_file=$1
 	[ -f "$env_file" ] || return 0
@@ -128,8 +143,25 @@ function export_env_file() {
 		[[ -z "$key" || "$key" =~ ^# ]] && continue
 		key=$(echo "$key" | xargs)
 		[[ "$key" =~ ^[A-Za-z_][A-Za-z0-9_]*$ ]] || continue
+		if is_execution_env_key "$key"; then
+			log "ENV" "⚠️" "Ignoring $key from $env_file: it changes how programs are executed and is not a BunkerWeb setting" >&2
+			continue
+		fi
 		export "$key=$value"
 	done < "$env_file"
+}
+
+# Print a new root-owned directory that other users can read but not change. It sits directly
+# under the sticky /tmp (never under TMPDIR, and never under /var/tmp/bunkerweb, which the nginx
+# user owns) so nothing can pre-create, rename or replace what root writes into it.
+function create_private_tmpdir() {
+	local dir
+	dir=$(mktemp -d /tmp/bunkerweb.XXXXXX) || return 1
+	chmod 755 "$dir" || {
+		rmdir "$dir"
+		return 1
+	}
+	echo "$dir"
 }
 
 # Execute a command as the nginx user using the safest available helper
