@@ -5621,6 +5621,9 @@ Suivez ces étapes pour configurer et utiliser la fonctionnalité Reverse Proxy 
         - Configurez `PROXY_NO_CACHE` pour éviter de mettre en cache du contenu sensible ou personnalisé
         - Surveillez les taux de réussite du cache et ajustez les paramètres en conséquence
 
+    !!! warning "La mise en cache exige la mise en tampon des réponses"
+        La mise en cache du proxy ne fonctionne que sur les emplacements où la mise en tampon des réponses est active. Avec `USE_PROXY_CACHE=yes`, définissez `REVERSE_PROXY_BUFFERING=yes` pour chaque emplacement à mettre en cache, y compris pour les paramètres numérotés comme `REVERSE_PROXY_BUFFERING_1`. Tant que la mise en tampon des réponses est désactivée, les nouvelles réponses ne sont pas mises en cache, sauf si l'upstream l'active via `X-Accel-Buffering`. Les réponses déjà en cache peuvent encore être servies. `REVERSE_PROXY_REQUEST_BUFFERING` contrôle les corps de requête et n'active pas la mise en cache des réponses. BunkerWeb journalise un avertissement lorsqu'il génère une configuration où la mise en cache du proxy est activée sur un emplacement dont la mise en tampon des réponses est désactivée.
+
 !!! tip "TLS mutuel vers l'upstream"
     Le certificat client et sa clé doivent tous deux être fournis, et la clé ne doit pas être chiffrée. Le scheduler valide la paire, la met en cache et la distribue aux instances ; si elle n'est pas valide, les directives de certificat ne sont simplement pas générées. Une CRL n'est appliquée que si la vérification de l'upstream est active.
 

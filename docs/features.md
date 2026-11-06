@@ -5775,6 +5775,9 @@ Follow these steps to configure and use the Reverse Proxy feature:
         - Configure `PROXY_NO_CACHE` to avoid caching sensitive or personalized content
         - Monitor cache hit rates and adjust settings accordingly
 
+    !!! warning "Caching requires response buffering"
+        Proxy caching only works on locations where response buffering is on. When `USE_PROXY_CACHE=yes`, set `REVERSE_PROXY_BUFFERING=yes` for each location you want to cache, including numbered settings such as `REVERSE_PROXY_BUFFERING_1`. While response buffering is off, new responses are not cached, unless the upstream enables it through `X-Accel-Buffering`. Previously cached responses may still be served. `REVERSE_PROXY_REQUEST_BUFFERING` controls request bodies and does not enable response caching. BunkerWeb logs a warning when it generates a configuration with proxy caching enabled on a location whose response buffering is off.
+
 !!! tip "Upstream Mutual TLS"
     A client certificate and its key must both be supplied, and the key must not be encrypted. The scheduler validates the pair, caches it and distributes it to the instances; if it does not validate, the certificate directives are simply not generated. A CRL is only applied while upstream verification is on.
 

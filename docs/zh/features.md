@@ -5770,6 +5770,9 @@ STREAM 支持 :warning:
         - 配置 `PROXY_NO_CACHE` 以避免缓存敏感或个性化内容
         - 监控缓存命中率并相应地调整设置
 
+    !!! warning "缓存需要启用响应缓冲"
+        代理缓存只对启用了响应缓冲的位置生效。当 `USE_PROXY_CACHE=yes` 时，请为每个要缓存的位置设置 `REVERSE_PROXY_BUFFERING=yes`，带编号的设置（如 `REVERSE_PROXY_BUFFERING_1`）也一样。响应缓冲关闭期间，新的响应不会被缓存，除非上游通过 `X-Accel-Buffering` 启用它；之前已缓存的响应仍可能被返回。`REVERSE_PROXY_REQUEST_BUFFERING` 控制的是请求正文，不会启用响应缓存。当 BunkerWeb 生成的配置中某个位置启用了代理缓存但响应缓冲已关闭时，会记录一条警告。
+
 !!! tip "上游双向 TLS"
     客户端证书与私钥必须同时提供，且私钥不能加密。调度器 会校验该证书对、缓存并分发到各实例；若校验不通过，则不会生成证书相关指令。只有在启用上游校验时，CRL 才会生效。
 

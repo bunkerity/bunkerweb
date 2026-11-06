@@ -3,6 +3,7 @@
 ## v1.6.18~rc4 - ????/??/??
 
 - [BUGFIX] `limit`: `LIMIT_CONN_MAX_*` settings now accept only values NGINX supports (1 to 65535).
+- [BUGFIX] `reverseproxy`: warn when proxy caching is enabled on a location whose response buffering is off, since NGINX stores nothing there.
 
 ## v1.6.18~rc3 - 2026/11/05
 

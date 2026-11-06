@@ -260,6 +260,9 @@ Siga estos pasos para configurar y usar la función de Proxy Inverso:
         - Configure `PROXY_NO_CACHE` para evitar almacenar en caché contenido sensible o personalizado
         - Supervise las tasas de aciertos de la caché y ajuste la configuración en consecuencia
 
+    !!! warning "El almacenamiento en caché requiere el almacenamiento en búfer de respuestas"
+        El almacenamiento en caché del proxy solo funciona en las ubicaciones donde el almacenamiento en búfer de respuestas está activado. Con `USE_PROXY_CACHE=yes`, defina `REVERSE_PROXY_BUFFERING=yes` en cada ubicación que quiera almacenar en caché, incluidos los ajustes numerados como `REVERSE_PROXY_BUFFERING_1`. Mientras el almacenamiento en búfer de respuestas esté desactivado, las respuestas nuevas no se almacenan en caché, salvo que el upstream lo active mediante `X-Accel-Buffering`. Las respuestas ya almacenadas en caché aún pueden servirse. `REVERSE_PROXY_REQUEST_BUFFERING` controla los cuerpos de las solicitudes y no activa el almacenamiento en caché de respuestas. BunkerWeb registra una advertencia cuando genera una configuración con el almacenamiento en caché del proxy activado en una ubicación cuyo almacenamiento en búfer de respuestas está desactivado.
+
 !!! tip "TLS mutuo hacia el upstream"
     Hay que proporcionar el certificado cliente y su clave, y la clave no debe estar cifrada. El scheduler valida el par, lo cachea y lo distribuye a las instancias; si no valida, las directivas de certificado simplemente no se generan. Una CRL solo se aplica mientras la verificación del upstream está activa.
 

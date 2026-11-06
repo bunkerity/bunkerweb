@@ -260,6 +260,9 @@ Führen Sie die folgenden Schritte aus, um die Reverse-Proxy-Funktion zu konfigu
         - Konfigurieren Sie `PROXY_NO_CACHE`, um das Zwischenspeichern sensibler oder personalisierter Inhalte zu vermeiden
         - Überwachen Sie die Cache-Trefferquoten und passen Sie die Einstellungen entsprechend an
 
+    !!! warning "Caching setzt Antwort-Pufferung voraus"
+        Das Proxy-Caching funktioniert nur an Standorten, an denen die Antwort-Pufferung aktiv ist. Setzen Sie bei `USE_PROXY_CACHE=yes` für jeden Standort, der zwischengespeichert werden soll, `REVERSE_PROXY_BUFFERING=yes`, auch bei nummerierten Einstellungen wie `REVERSE_PROXY_BUFFERING_1`. Solange die Antwort-Pufferung deaktiviert ist, werden neue Antworten nicht zwischengespeichert, es sei denn, der Upstream aktiviert sie über `X-Accel-Buffering`. Bereits zwischengespeicherte Antworten können weiterhin ausgeliefert werden. `REVERSE_PROXY_REQUEST_BUFFERING` steuert die Anfragekörper und aktiviert kein Caching von Antworten. BunkerWeb protokolliert eine Warnung, wenn es eine Konfiguration erzeugt, in der Proxy-Caching an einem Standort mit deaktivierter Antwort-Pufferung aktiviert ist.
+
 !!! tip "Gegenseitiges TLS zum Upstream"
     Client-Zertifikat und Schlüssel müssen beide angegeben werden, und der Schlüssel darf nicht verschlüsselt sein. Der Scheduler prüft das Paar, legt es im Cache ab und verteilt es an die Instanzen; ist es ungültig, werden die Zertifikatsdirektiven schlicht nicht erzeugt. Eine CRL wird nur angewendet, solange die Upstream-Prüfung aktiv ist.
 
