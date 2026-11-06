@@ -190,10 +190,14 @@ jobs:
             libasound2t64 libdbus-glib-1-2 libxtst6 libxt6 unzip firefox sed jq \
             dnsutils coreutils redis
 
-          GECKODRIVER_VERSION=$(curl -sI https://github.com/mozilla/geckodriver/releases/latest \
-            | grep -Po 'v[0-9]+\.[0-9]+\.[0-9]+')
-          wget -O geckodriver.tar.gz \
+          GECKODRIVER_VERSION=v0.37.1
+          GECKODRIVER_SHA256=e815130ea95983e162ae91843b48d3a3ce991735635fce83a647afde21e09f7e
+          wget --tries=3 -O geckodriver.tar.gz \
             https://github.com/mozilla/geckodriver/releases/download/${GECKODRIVER_VERSION}/geckodriver-${GECKODRIVER_VERSION}-linux64.tar.gz
+          echo "${GECKODRIVER_SHA256}  geckodriver.tar.gz" | sha256sum --check - || {
+            echo "Geckodriver SHA-256 mismatch for ${GECKODRIVER_VERSION}; refusing to install" >&2
+            exit 1
+          }
           sudo tar -xzf geckodriver.tar.gz -C /usr/local/bin
           sudo chmod +x /usr/local/bin/geckodriver
           rm -f geckodriver.tar.gz
