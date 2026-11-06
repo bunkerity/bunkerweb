@@ -3663,13 +3663,13 @@ Le plugin Limit permet d’appliquer des politiques de limitation pour garantir 
 
 === "Limitation de connexions"
 
-    | Paramètre               | Défaut | Contexte  | Multiple | Description                                                                                                    |
-    | ----------------------- | ------ | --------- | -------- | -------------------------------------------------------------------------------------------------------------- |
-    | `USE_LIMIT_CONN`        | `yes`  | multisite | non      | **Activer la limitation de connexions :** Mettre à `yes` pour activer la limitation de connexions simultanées. |
-    | `LIMIT_CONN_MAX_HTTP1`  | `10`   | multisite | non      | **Connexions HTTP/1.X :** Nombre maximal de connexions HTTP/1.X simultanées par adresse IP.                    |
-    | `LIMIT_CONN_MAX_HTTP2`  | `100`  | multisite | non      | **Flux HTTP/2 :** Nombre maximal de flux HTTP/2 simultanés par adresse IP.                                     |
-    | `LIMIT_CONN_MAX_HTTP3`  | `100`  | multisite | non      | **Flux HTTP/3 :** Nombre maximal de flux HTTP/3 simultanés par adresse IP.                                     |
-    | `LIMIT_CONN_MAX_STREAM` | `10`   | multisite | non      | **Connexions Stream :** Nombre maximal de connexions stream simultanées par adresse IP.                        |
+    | Paramètre               | Défaut | Contexte  | Multiple | Description                                                                                                       |
+    | ----------------------- | ------ | --------- | -------- | ----------------------------------------------------------------------------------------------------------------- |
+    | `USE_LIMIT_CONN`        | `yes`  | multisite | non      | **Activer la limitation de connexions :** Mettre à `yes` pour activer la limitation de connexions simultanées.    |
+    | `LIMIT_CONN_MAX_HTTP1`  | `10`   | multisite | non      | **Connexions HTTP/1.X :** Nombre maximal de connexions HTTP/1.X simultanées par adresse IP. Plage : de 1 à 65535. |
+    | `LIMIT_CONN_MAX_HTTP2`  | `100`  | multisite | non      | **Flux HTTP/2 :** Nombre maximal de flux HTTP/2 simultanés par adresse IP. Plage : de 1 à 65535.                  |
+    | `LIMIT_CONN_MAX_HTTP3`  | `100`  | multisite | non      | **Flux HTTP/3 :** Nombre maximal de flux HTTP/3 simultanés par adresse IP. Plage : de 1 à 65535.                  |
+    | `LIMIT_CONN_MAX_STREAM` | `10`   | multisite | non      | **Connexions Stream :** Nombre maximal de connexions stream simultanées par adresse IP. Plage : de 1 à 65535.     |
 
 Lorsque `SECURITY_MODE` est `detect`, les limites de connexions sont évaluées et journalisées (`limiting connections, dry run`) mais pas appliquées.
 

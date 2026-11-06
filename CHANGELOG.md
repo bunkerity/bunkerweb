@@ -1,5 +1,9 @@
 # Changelog
 
+## v1.6.18~rc4 - ????/??/??
+
+- [BUGFIX] `limit`: `LIMIT_CONN_MAX_*` settings now accept only values NGINX supports (1 to 65535).
+
 ## v1.6.18~rc3 - 2026/11/05
 
 - [BUGFIX] `crowdsec`: `CROWDSEC_METADATA_CACHE_SIZE` now defaults to `24m`, so report metadata for the whole Community Blocklist fits in stream mode. (Refs #4135)

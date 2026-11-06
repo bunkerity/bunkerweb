@@ -54,13 +54,13 @@ Das Limit-Plugin in BunkerWeb bietet robuste Funktionen zur Durchsetzung von Beg
 
 === "Verbindungsbegrenzung"
 
-    | Einstellung             | Standard | Kontext   | Mehrfach | Beschreibung                                                                                                     |
-    | ----------------------- | -------- | --------- | -------- | ---------------------------------------------------------------------------------------------------------------- |
-    | `USE_LIMIT_CONN`        | `yes`    | multisite | nein     | **Verbindungsbegrenzung aktivieren:** Auf `yes` setzen, um die Funktion zur Verbindungsbegrenzung zu aktivieren. |
-    | `LIMIT_CONN_MAX_HTTP1`  | `10`     | multisite | nein     | **HTTP/1.X-Verbindungen:** Maximale Anzahl gleichzeitiger HTTP/1.X-Verbindungen pro IP-Adresse.                  |
-    | `LIMIT_CONN_MAX_HTTP2`  | `100`    | multisite | nein     | **HTTP/2-Streams:** Maximale Anzahl gleichzeitiger HTTP/2-Streams pro IP-Adresse.                                |
-    | `LIMIT_CONN_MAX_HTTP3`  | `100`    | multisite | nein     | **HTTP/3-Streams:** Maximale Anzahl gleichzeitiger HTTP/3-Streams pro IP-Adresse.                                |
-    | `LIMIT_CONN_MAX_STREAM` | `10`     | multisite | nein     | **Stream-Verbindungen:** Maximale Anzahl gleichzeitiger Stream-Verbindungen pro IP-Adresse.                      |
+    | Einstellung             | Standard | Kontext   | Mehrfach | Beschreibung                                                                                                          |
+    | ----------------------- | -------- | --------- | -------- | --------------------------------------------------------------------------------------------------------------------- |
+    | `USE_LIMIT_CONN`        | `yes`    | multisite | nein     | **Verbindungsbegrenzung aktivieren:** Auf `yes` setzen, um die Funktion zur Verbindungsbegrenzung zu aktivieren.      |
+    | `LIMIT_CONN_MAX_HTTP1`  | `10`     | multisite | nein     | **HTTP/1.X-Verbindungen:** Maximale Anzahl gleichzeitiger HTTP/1.X-Verbindungen pro IP-Adresse. Bereich: 1 bis 65535. |
+    | `LIMIT_CONN_MAX_HTTP2`  | `100`    | multisite | nein     | **HTTP/2-Streams:** Maximale Anzahl gleichzeitiger HTTP/2-Streams pro IP-Adresse. Bereich: 1 bis 65535.               |
+    | `LIMIT_CONN_MAX_HTTP3`  | `100`    | multisite | nein     | **HTTP/3-Streams:** Maximale Anzahl gleichzeitiger HTTP/3-Streams pro IP-Adresse. Bereich: 1 bis 65535.               |
+    | `LIMIT_CONN_MAX_STREAM` | `10`     | multisite | nein     | **Stream-Verbindungen:** Maximale Anzahl gleichzeitiger Stream-Verbindungen pro IP-Adresse. Bereich: 1 bis 65535.     |
 
 Wenn `SECURITY_MODE` auf `detect` steht, werden die Verbindungsgrenzen ausgewertet und protokolliert (`limiting connections, dry run`), aber nicht durchgesetzt.
 

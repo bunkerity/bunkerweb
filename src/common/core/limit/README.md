@@ -54,13 +54,13 @@ The Limit plugin in BunkerWeb provides robust capabilities to enforce limiting p
 
 === "Connection Limiting"
 
-    | Setting                 | Default | Context   | Multiple | Description                                                                                 |
-    | ----------------------- | ------- | --------- | -------- | ------------------------------------------------------------------------------------------- |
-    | `USE_LIMIT_CONN`        | `yes`   | multisite | no       | **Enable Connection Limiting:** Set to `yes` to enable the connection limiting feature.     |
-    | `LIMIT_CONN_MAX_HTTP1`  | `10`    | multisite | no       | **HTTP/1.X Connections:** Maximum number of concurrent HTTP/1.X connections per IP address. |
-    | `LIMIT_CONN_MAX_HTTP2`  | `100`   | multisite | no       | **HTTP/2 Streams:** Maximum number of concurrent HTTP/2 streams per IP address.             |
-    | `LIMIT_CONN_MAX_HTTP3`  | `100`   | multisite | no       | **HTTP/3 Streams:** Maximum number of concurrent HTTP/3 streams per IP address.             |
-    | `LIMIT_CONN_MAX_STREAM` | `10`    | multisite | no       | **Stream Connections:** Maximum number of concurrent stream connections per IP address.     |
+    | Setting                 | Default | Context   | Multiple | Description                                                                                                    |
+    | ----------------------- | ------- | --------- | -------- | -------------------------------------------------------------------------------------------------------------- |
+    | `USE_LIMIT_CONN`        | `yes`   | multisite | no       | **Enable Connection Limiting:** Set to `yes` to enable the connection limiting feature.                        |
+    | `LIMIT_CONN_MAX_HTTP1`  | `10`    | multisite | no       | **HTTP/1.X Connections:** Maximum number of concurrent HTTP/1.X connections per IP address. Range: 1 to 65535. |
+    | `LIMIT_CONN_MAX_HTTP2`  | `100`   | multisite | no       | **HTTP/2 Streams:** Maximum number of concurrent HTTP/2 streams per IP address. Range: 1 to 65535.             |
+    | `LIMIT_CONN_MAX_HTTP3`  | `100`   | multisite | no       | **HTTP/3 Streams:** Maximum number of concurrent HTTP/3 streams per IP address. Range: 1 to 65535.             |
+    | `LIMIT_CONN_MAX_STREAM` | `10`    | multisite | no       | **Stream Connections:** Maximum number of concurrent stream connections per IP address. Range: 1 to 65535.     |
 
 When `SECURITY_MODE` is `detect`, connection limits are evaluated and logged (`limiting connections, dry run`) but not enforced.
 

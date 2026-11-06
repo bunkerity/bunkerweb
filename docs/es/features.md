@@ -3766,10 +3766,10 @@ El complemento de Límite en BunkerWeb proporciona capacidades robustas para apl
     | Ajuste                  | Valor por defecto | Contexto  | Múltiple | Descripción                                                                                                        |
     | ----------------------- | ----------------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------ |
     | `USE_LIMIT_CONN`        | `yes`             | multisite | no       | **Habilitar Limitación de Conexiones:** Establezca en `yes` para habilitar la función de limitación de conexiones. |
-    | `LIMIT_CONN_MAX_HTTP1`  | `10`              | multisite | no       | **Conexiones HTTP/1.X:** Número máximo de conexiones HTTP/1.X concurrentes por dirección IP.                       |
-    | `LIMIT_CONN_MAX_HTTP2`  | `100`             | multisite | no       | **Flujos HTTP/2:** Número máximo de flujos HTTP/2 concurrentes por dirección IP.                                   |
-    | `LIMIT_CONN_MAX_HTTP3`  | `100`             | multisite | no       | **Flujos HTTP/3:** Número máximo de flujos HTTP/3 concurrentes por dirección IP.                                   |
-    | `LIMIT_CONN_MAX_STREAM` | `10`              | multisite | no       | **Conexiones de Flujo:** Número máximo de conexiones de flujo concurrentes por dirección IP.                       |
+    | `LIMIT_CONN_MAX_HTTP1`  | `10`              | multisite | no       | **Conexiones HTTP/1.X:** Número máximo de conexiones HTTP/1.X concurrentes por dirección IP. Rango: de 1 a 65535.  |
+    | `LIMIT_CONN_MAX_HTTP2`  | `100`             | multisite | no       | **Flujos HTTP/2:** Número máximo de flujos HTTP/2 concurrentes por dirección IP. Rango: de 1 a 65535.              |
+    | `LIMIT_CONN_MAX_HTTP3`  | `100`             | multisite | no       | **Flujos HTTP/3:** Número máximo de flujos HTTP/3 concurrentes por dirección IP. Rango: de 1 a 65535.              |
+    | `LIMIT_CONN_MAX_STREAM` | `10`              | multisite | no       | **Conexiones de Flujo:** Número máximo de conexiones de flujo concurrentes por dirección IP. Rango: de 1 a 65535.  |
 
 Cuando `SECURITY_MODE` es `detect`, los límites de conexiones se evalúan y se registran (`limiting connections, dry run`) pero no se aplican.
 

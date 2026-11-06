@@ -54,13 +54,13 @@ BunkerWeb 中的限制插件提供了强大的功能来对您的网站强制执�
 
 === "连接限制"
 
-    | 设置                    | 默认值 | 上下文    | 多选 | 描述                                                           |
-    | ----------------------- | ------ | --------- | ---- | -------------------------------------------------------------- |
-    | `USE_LIMIT_CONN`        | `yes`  | multisite | 否   | **启用连接限制：** 设置为 `yes` 以启用连接限制功能。           |
-    | `LIMIT_CONN_MAX_HTTP1`  | `10`   | multisite | 否   | **HTTP/1.X 连接数：** 每个 IP 地址的最大并发 HTTP/1.X 连接数。 |
-    | `LIMIT_CONN_MAX_HTTP2`  | `100`  | multisite | 否   | **HTTP/2 流数：** 每个 IP 地址的最大并发 HTTP/2 流数。         |
-    | `LIMIT_CONN_MAX_HTTP3`  | `100`  | multisite | 否   | **HTTP/3 流数：** 每个 IP 地址的最大并发 HTTP/3 流数。         |
-    | `LIMIT_CONN_MAX_STREAM` | `10`   | multisite | 否   | **流连接数：** 每个 IP 地址的最大并发流连接数。                |
+    | 设置                    | 默认值 | 上下文    | 多选 | 描述                                                                              |
+    | ----------------------- | ------ | --------- | ---- | --------------------------------------------------------------------------------- |
+    | `USE_LIMIT_CONN`        | `yes`  | multisite | 否   | **启用连接限制：** 设置为 `yes` 以启用连接限制功能。                              |
+    | `LIMIT_CONN_MAX_HTTP1`  | `10`   | multisite | 否   | **HTTP/1.X 连接数：** 每个 IP 地址的最大并发 HTTP/1.X 连接数。范围：1 至 65535。  |
+    | `LIMIT_CONN_MAX_HTTP2`  | `100`  | multisite | 否   | **HTTP/2 流数：** 每个 IP 地址的最大并发 HTTP/2 流数。范围：1 至 65535。          |
+    | `LIMIT_CONN_MAX_HTTP3`  | `100`  | multisite | 否   | **HTTP/3 流数：** 每个 IP 地址的最大并发 HTTP/3 流数。范围：1 至 65535。          |
+    | `LIMIT_CONN_MAX_STREAM` | `10`   | multisite | 否   | **流连接数：** 每个 IP 地址的最大并发流连接数。范围：1 至 65535。                 |
 
 当 `SECURITY_MODE` 为 `detect` 时，连接限制会被评估并记录（`limiting connections, dry run`），但不会被强制执行。
 
