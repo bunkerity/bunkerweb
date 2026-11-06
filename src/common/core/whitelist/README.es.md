@@ -30,6 +30,7 @@ Siga estos pasos para configurar y usar la función de Lista Blanca:
 | Ajuste          | Valor por defecto | Contexto  | Múltiple | Descripción                                                                                |
 | --------------- | ----------------- | --------- | -------- | ------------------------------------------------------------------------------------------ |
 | `USE_WHITELIST` | `yes` | multisite | no       | **Habilitar Lista Blanca:** Establezca en `yes` para habilitar la función de lista blanca. |
+| `WHITELIST_URLS_REFRESH_INTERVAL` | `1h` | multisite | no | **Intervalo de actualización de URL:** Antigüedad mínima de la caché antes de volver a descargar. Acepta segundos sin unidad o sufijos de tiempo (`ms`, `s`, `m`, `h`, `d`, `w`, `M`, `y`). |
 
 === "Dirección IP"
     **Qué hace esto:** Pone en la lista blanca a los visitantes según su dirección IP o red. Estos visitantes omitirán todos los controles de seguridad.
@@ -93,7 +94,7 @@ Siga estos pasos para configurar y usar la función de Lista Blanca:
     Todos los ajustes `*_URLS` admiten URL HTTP/HTTPS así como rutas de archivos locales usando el prefijo `file:///`. Se admite la autenticación básica usando el formato `http://usuario:contraseña@url`.
 
 !!! tip "Actualizaciones Regulares"
-    Las listas blancas de las URL se descargan y actualizan automáticamente cada hora para asegurar que su protección se mantenga actualizada con las últimas fuentes de confianza.
+    La tarea se ejecuta cada hora. `WHITELIST_URLS_REFRESH_INTERVAL` establece la antigüedad mínima de una URL en caché antes de volver a descargarla (valor predeterminado: `1h`). Use `24h` para proveedores que permiten como máximo una descarga al día, o `0` para descargar en cada ejecución. Las cachés recientes y las descargas fallidas conservan las últimas entradas válidas. Dentro de este plugin, los servicios comparten las cachés de URL: el intervalo más corto puede provocar una descarga. Configure el mismo intervalo en todos los servicios que compartan una URL con un límite del proveedor.
 
 !!! warning "Omisión de Seguridad"
     Los visitantes en la lista blanca **omitirán por completo todos los demás controles de seguridad** en BunkerWeb, incluidas las reglas del WAF, la limitación de velocidad, la detección de bots maliciosos y cualquier otro mecanismo de seguridad. Use la lista blanca solo para fuentes de confianza en las que esté absolutamente seguro.

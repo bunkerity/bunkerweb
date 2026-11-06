@@ -1086,6 +1086,7 @@ Follow these steps to configure and use the Blacklist feature:
 | Setting                     | Default                                                 | Context   | Multiple | Description                                                                                             |
 | --------------------------- | ------------------------------------------------------- | --------- | -------- | ------------------------------------------------------------------------------------------------------- |
 | `USE_BLACKLIST`             | `yes`                                                   | multisite | no       | **Enable Blacklist:** Set to `yes` to enable the blacklist feature.                                     |
+| `BLACKLIST_URLS_REFRESH_INTERVAL` | `1h` | multisite | no | **URL refresh interval:** Minimum cache age before downloading again. Accepts bare seconds or time suffixes (`ms`, `s`, `m`, `h`, `d`, `w`, `M`, `y`). |
 | `BLACKLIST_COMMUNITY_LISTS` | `ip:danmeuk-tor-exit ua:mitchellkrogza-bad-user-agents` | multisite | no       | **Community Blacklists:** Select pre-configured community-maintained blacklists to include in blocking. |
 
 === "Community Blacklists"
@@ -1194,7 +1195,7 @@ Follow these steps to configure and use the Blacklist feature:
     All `*_URLS` settings support HTTP/HTTPS URLs as well as local file paths using the `file:///` prefix. Basic authentication is supported using the `http://user:pass@url` format.
 
 !!! tip "Regular Updates"
-    Blacklists from URLs are automatically downloaded and updated hourly to ensure your protection remains current against the latest threats.
+    The job runs hourly. `BLACKLIST_URLS_REFRESH_INTERVAL` sets the minimum age of a cached URL before downloading again (default: `1h`). Use `24h` for providers allowing at most one download per day, or `0` to download on every job run. Fresh caches and failed downloads keep their last valid entries. Within this plugin, URL caches are shared across services: the shortest interval can trigger a download, so use the same interval on every service sharing a provider-limited URL.
 
 ### Example Configurations
 
@@ -2764,6 +2765,7 @@ Follow these steps to configure and use the Greylist feature:
 | Setting        | Default | Context   | Multiple | Description                                              |
 | -------------- | ------- | --------- | -------- | -------------------------------------------------------- |
 | `USE_GREYLIST` | `no`    | multisite | no       | **Enable Greylist:** Set to `yes` to enable greylisting. |
+| `GREYLIST_URLS_REFRESH_INTERVAL` | `1h` | multisite | no | **URL refresh interval:** Minimum cache age before downloading again. Accepts bare seconds or time suffixes (`ms`, `s`, `m`, `h`, `d`, `w`, `M`, `y`). |
 
 === "IP Address"
     **What this does:** Greylist visitors based on their IP address or network. These visitors gain access but remain subject to security checks.
@@ -2830,7 +2832,7 @@ Follow these steps to configure and use the Greylist feature:
     All `*_URLS` settings support HTTP/HTTPS URLs as well as local file paths using the `file:///` prefix. Basic authentication is supported using the `http://user:pass@url` format.
 
 !!! tip "Regular Updates"
-    Greylists from URLs are automatically downloaded and updated hourly to ensure that your protection remains current with the latest trusted sources.
+    The job runs hourly. `GREYLIST_URLS_REFRESH_INTERVAL` sets the minimum age of a cached URL before downloading again (default: `1h`). Use `24h` for providers allowing at most one download per day, or `0` to download on every job run. Fresh caches and failed downloads keep their last valid entries. Within this plugin, URL caches are shared across services: the shortest interval can trigger a download, so use the same interval on every service sharing a provider-limited URL.
 
 
 ### Example Configurations
@@ -6648,6 +6650,7 @@ Follow these steps to configure and use the Whitelist feature:
 | Setting         | Default | Context   | Multiple | Description                                                         |
 | --------------- | ------- | --------- | -------- | ------------------------------------------------------------------- |
 | `USE_WHITELIST` | `yes`   | multisite | no       | **Enable Whitelist:** Set to `yes` to enable the whitelist feature. |
+| `WHITELIST_URLS_REFRESH_INTERVAL` | `1h` | multisite | no | **URL refresh interval:** Minimum cache age before downloading again. Accepts bare seconds or time suffixes (`ms`, `s`, `m`, `h`, `d`, `w`, `M`, `y`). |
 
 === "IP Address"
     **What this does:** Whitelists visitors based on their IP address or network. These visitors will bypass all security checks.
@@ -6711,7 +6714,7 @@ Follow these steps to configure and use the Whitelist feature:
     All `*_URLS` settings support HTTP/HTTPS URLs as well as local file paths using the `file:///` prefix. Basic authentication is supported using the `http://user:pass@url` format.
 
 !!! tip "Regular Updates"
-    Whitelists from URLs are automatically downloaded and updated hourly to ensure your protection remains current with the latest trusted sources.
+    The job runs hourly. `WHITELIST_URLS_REFRESH_INTERVAL` sets the minimum age of a cached URL before downloading again (default: `1h`). Use `24h` for providers allowing at most one download per day, or `0` to download on every job run. Fresh caches and failed downloads keep their last valid entries. Within this plugin, URL caches are shared across services: the shortest interval can trigger a download, so use the same interval on every service sharing a provider-limited URL.
 
 !!! warning "Security Bypass"
     Whitelisted visitors will completely **bypass all other security checks** in BunkerWeb, including WAF rules, rate limiting, bad bot detection, and any other security mechanisms. Only use the whitelist for trusted sources you're absolutely confident in.

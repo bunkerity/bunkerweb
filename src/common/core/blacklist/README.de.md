@@ -28,6 +28,7 @@ Befolgen Sie diese Schritte, um die Blacklist-Funktion einzurichten und zu verwe
 | Parameter                   | Standard                                                | Kontext   | Mehrfach | Beschreibung                                                                                                                                           |
 | :-------------------------- | :------------------------------------------------------ | :-------- | :------- | :----------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `USE_BLACKLIST`             | `yes`                                                   | Multisite | Nein     | **Blacklist aktivieren:** Setzen Sie auf `yes`, um die Blacklist-Funktion zu aktivieren.                                                               |
+| `BLACKLIST_URLS_REFRESH_INTERVAL` | `1h` | multisite | nein | **URL-Aktualisierungsintervall:** Mindestalter des Caches vor einem erneuten Download. Akzeptiert Sekunden ohne Einheit oder Zeitsuffixe (`ms`, `s`, `m`, `h`, `d`, `w`, `M`, `y`). |
 | `BLACKLIST_COMMUNITY_LISTS` | `ip:danmeuk-tor-exit ua:mitchellkrogza-bad-user-agents` | Multisite | Nein     | **Community-Blacklists:** Wählen Sie vorkonfigurierte und von der Community gepflegte Blacklists aus, die in die Blockierung einbezogen werden sollen. |
 
 === "Community-Blacklists"
@@ -136,7 +137,7 @@ Befolgen Sie diese Schritte, um die Blacklist-Funktion einzurichten und zu verwe
     Alle `*_URLS`-Parameter unterstützen HTTP/HTTPS-URLs sowie lokale Dateipfade unter Verwendung des Präfixes `file:///`. Die Basisauthentifizierung wird im Format `http://user:pass@url` unterstützt.
 
 !!! tip "Regelmäßige Updates"
-    Blacklists von URLs werden automatisch stündlich heruntergeladen und aktualisiert, um sicherzustellen, dass Ihr Schutz gegen die neuesten Bedrohungen auf dem neuesten Stand bleibt.
+    Der Job läuft stündlich. `BLACKLIST_URLS_REFRESH_INTERVAL` legt das Mindestalter einer zwischengespeicherten URL vor einem erneuten Download fest (Standard: `1h`). Verwenden Sie `24h` für Anbieter, die höchstens einen Download pro Tag erlauben, oder `0` für einen Download bei jedem Joblauf. Bei frischen Caches oder fehlgeschlagenen Downloads bleiben die letzten gültigen Einträge erhalten. Innerhalb dieses Plugins teilen sich Dienste die URL-Caches: Das kürzeste Intervall kann einen Download auslösen. Verwenden Sie daher für eine URL mit Anbieterlimit bei allen Diensten dasselbe Intervall.
 
 ### Konfigurationsbeispiele
 

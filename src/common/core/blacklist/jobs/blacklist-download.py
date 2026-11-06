@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 from contextlib import suppress
-from datetime import datetime, timedelta
+from datetime import datetime
 from ipaddress import ip_address, ip_network
 from os import getenv, sep
 from os.path import join, normpath
@@ -19,7 +19,7 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
 from requests import get
 from requests.exceptions import ConnectionError
 
-from common_utils import bytes_hash, iter_list_entries, split_list_url  # type: ignore
+from common_utils import bytes_hash, iter_list_entries, parse_duration, split_list_url  # type: ignore
 from logger import getLogger  # type: ignore
 from jobs import Job  # type: ignore
 
@@ -192,6 +192,14 @@ try:
 
     # Loop on services and kinds
     for service, kinds in services_blacklist_urls.items():
+        interval_value = getenv("BLACKLIST_URLS_REFRESH_INTERVAL", "1h")
+        if getenv("MULTISITE", "no") == "yes":
+            interval_value = getenv(f"{service}_BLACKLIST_URLS_REFRESH_INTERVAL", interval_value)
+        try:
+            refresh_interval = parse_duration(interval_value, "s")
+        except ValueError:
+            LOGGER.warning(f"Invalid BLACKLIST_URLS_REFRESH_INTERVAL for {service}: {interval_value}, using 1h")
+            refresh_interval = 3600
         for kind, urls_list in kinds.items():
             if not urls_list:
                 if JOB.job_path.joinpath(service, f"{kind}.list").is_file():
@@ -222,10 +230,11 @@ try:
                             aggregated_recap[kind]["failed_count"] += 1
                     elif (
                         isinstance(cached_url, dict)
+                        and refresh_interval > 0
                         and cached_url.get("last_update")
-                        and cached_url["last_update"] > (datetime.now().astimezone() - timedelta(hours=1)).timestamp()
+                        and cached_url["last_update"] > datetime.now().astimezone().timestamp() - refresh_interval
                     ):
-                        LOGGER.debug(f"URL {url} has already been downloaded less than 1 hour ago, skipping download...")
+                        LOGGER.debug(f"URL {url} has already been downloaded less than {refresh_interval} seconds ago, skipping download...")
                         if url not in processed_urls:
                             aggregated_recap[kind]["skipped_urls"] += 1
                         use_cached_url = True

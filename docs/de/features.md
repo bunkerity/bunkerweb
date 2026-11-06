@@ -1073,6 +1073,7 @@ Befolgen Sie diese Schritte, um die Blacklist-Funktion einzurichten und zu verwe
 | Parameter                   | Standard                                                | Kontext   | Mehrfach | Beschreibung                                                                                                                                           |
 | :-------------------------- | :------------------------------------------------------ | :-------- | :------- | :----------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `USE_BLACKLIST`             | `yes`                                                   | Multisite | Nein     | **Blacklist aktivieren:** Setzen Sie auf `yes`, um die Blacklist-Funktion zu aktivieren.                                                               |
+| `BLACKLIST_URLS_REFRESH_INTERVAL` | `1h` | multisite | nein | **URL-Aktualisierungsintervall:** Mindestalter des Caches vor einem erneuten Download. Akzeptiert Sekunden ohne Einheit oder Zeitsuffixe (`ms`, `s`, `m`, `h`, `d`, `w`, `M`, `y`). |
 | `BLACKLIST_COMMUNITY_LISTS` | `ip:danmeuk-tor-exit ua:mitchellkrogza-bad-user-agents` | Multisite | Nein     | **Community-Blacklists:** Wählen Sie vorkonfigurierte und von der Community gepflegte Blacklists aus, die in die Blockierung einbezogen werden sollen. |
 
 === "Community-Blacklists"
@@ -1181,7 +1182,7 @@ Befolgen Sie diese Schritte, um die Blacklist-Funktion einzurichten und zu verwe
     Alle `*_URLS`-Parameter unterstützen HTTP/HTTPS-URLs sowie lokale Dateipfade unter Verwendung des Präfixes `file:///`. Die Basisauthentifizierung wird im Format `http://user:pass@url` unterstützt.
 
 !!! tip "Regelmäßige Updates"
-    Blacklists von URLs werden automatisch stündlich heruntergeladen und aktualisiert, um sicherzustellen, dass Ihr Schutz gegen die neuesten Bedrohungen auf dem neuesten Stand bleibt.
+    Der Job läuft stündlich. `BLACKLIST_URLS_REFRESH_INTERVAL` legt das Mindestalter einer zwischengespeicherten URL vor einem erneuten Download fest (Standard: `1h`). Verwenden Sie `24h` für Anbieter, die höchstens einen Download pro Tag erlauben, oder `0` für einen Download bei jedem Joblauf. Bei frischen Caches oder fehlgeschlagenen Downloads bleiben die letzten gültigen Einträge erhalten. Innerhalb dieses Plugins teilen sich Dienste die URL-Caches: Das kürzeste Intervall kann einen Download auslösen. Verwenden Sie daher für eine URL mit Anbieterlimit bei allen Diensten dasselbe Intervall.
 
 ### Konfigurationsbeispiele
 
@@ -2707,6 +2708,7 @@ Führen Sie die folgenden Schritte aus, um die Greylist-Funktion zu konfiguriere
 | Einstellung    | Standard | Kontext   | Mehrfach | Beschreibung                                                             |
 | -------------- | -------- | --------- | -------- | ------------------------------------------------------------------------ |
 | `USE_GREYLIST` | `no`     | multisite | nein     | **Greylist aktivieren:** Auf `yes` setzen, um Greylisting zu aktivieren. |
+| `GREYLIST_URLS_REFRESH_INTERVAL` | `1h` | multisite | nein | **URL-Aktualisierungsintervall:** Mindestalter des Caches vor einem erneuten Download. Akzeptiert Sekunden ohne Einheit oder Zeitsuffixe (`ms`, `s`, `m`, `h`, `d`, `w`, `M`, `y`). |
 
 === "IP-Adresse"
     **Was dies bewirkt:** Setzt Besucher basierend auf ihrer IP-Adresse oder ihrem Netzwerk auf die Greylist. Diese Besucher erhalten Zugriff, unterliegen aber weiterhin den Sicherheitsprüfungen.
@@ -2773,7 +2775,7 @@ Führen Sie die folgenden Schritte aus, um die Greylist-Funktion zu konfiguriere
     Alle `*_URLS`-Einstellungen unterstützen HTTP/HTTPS-URLs sowie lokale Dateipfade mit dem Präfix `file:///`. Die Basisauthentifizierung wird im Format `http://user:pass@url` unterstützt.
 
 !!! tip "Regelmäßige Aktualisierungen"
-    Greylists von URLs werden stündlich automatisch heruntergeladen und aktualisiert, um sicherzustellen, dass Ihr Schutz mit den neuesten vertrauenswürdigen Quellen auf dem neuesten Stand bleibt.
+    Der Job läuft stündlich. `GREYLIST_URLS_REFRESH_INTERVAL` legt das Mindestalter einer zwischengespeicherten URL vor einem erneuten Download fest (Standard: `1h`). Verwenden Sie `24h` für Anbieter, die höchstens einen Download pro Tag erlauben, oder `0` für einen Download bei jedem Joblauf. Bei frischen Caches oder fehlgeschlagenen Downloads bleiben die letzten gültigen Einträge erhalten. Innerhalb dieses Plugins teilen sich Dienste die URL-Caches: Das kürzeste Intervall kann einen Download auslösen. Verwenden Sie daher für eine URL mit Anbieterlimit bei allen Diensten dasselbe Intervall.
 
 ### Beispielkonfigurationen
 
@@ -6558,6 +6560,7 @@ Führen Sie die folgenden Schritte aus, um die Whitelist-Funktion zu konfigurier
 | Einstellung     | Standard | Kontext   | Mehrfach | Beschreibung                                                                         |
 | --------------- | -------- | --------- | -------- | ------------------------------------------------------------------------------------ |
 | `USE_WHITELIST` | `yes`    | multisite | nein     | **Whitelist aktivieren:** Auf `yes` setzen, um die Whitelist-Funktion zu aktivieren. |
+| `WHITELIST_URLS_REFRESH_INTERVAL` | `1h` | multisite | nein | **URL-Aktualisierungsintervall:** Mindestalter des Caches vor einem erneuten Download. Akzeptiert Sekunden ohne Einheit oder Zeitsuffixe (`ms`, `s`, `m`, `h`, `d`, `w`, `M`, `y`). |
 
 === "IP-Adresse"
     **Was dies bewirkt:** Setzt Besucher basierend auf ihrer IP-Adresse oder ihrem Netzwerk auf die Whitelist. Diese Besucher umgehen alle Sicherheitsprüfungen.
@@ -6621,7 +6624,7 @@ Führen Sie die folgenden Schritte aus, um die Whitelist-Funktion zu konfigurier
     Alle `*_URLS`-Einstellungen unterstützen HTTP/HTTPS-URLs sowie lokale Dateipfade mit dem Präfix `file:///`. Die Basisauthentifizierung wird im Format `http://user:pass@url` unterstützt.
 
 !!! tip "Regelmäßige Aktualisierungen"
-    Whitelists von URLs werden stündlich automatisch heruntergeladen und aktualisiert, um sicherzustellen, dass Ihr Schutz mit den neuesten vertrauenswürdigen Quellen auf dem neuesten Stand bleibt.
+    Der Job läuft stündlich. `WHITELIST_URLS_REFRESH_INTERVAL` legt das Mindestalter einer zwischengespeicherten URL vor einem erneuten Download fest (Standard: `1h`). Verwenden Sie `24h` für Anbieter, die höchstens einen Download pro Tag erlauben, oder `0` für einen Download bei jedem Joblauf. Bei frischen Caches oder fehlgeschlagenen Downloads bleiben die letzten gültigen Einträge erhalten. Innerhalb dieses Plugins teilen sich Dienste die URL-Caches: Das kürzeste Intervall kann einen Download auslösen. Verwenden Sie daher für eine URL mit Anbieterlimit bei allen Diensten dasselbe Intervall.
 
 !!! warning "Sicherheitsumgehung"
     Auf der Whitelist stehende Besucher **umgehen vollständig alle anderen Sicherheitsprüfungen** in BunkerWeb, einschließlich WAF-Regeln, Ratenbegrenzung, Erkennung bösartiger Bots und aller anderen Sicherheitsmechanismen. Verwenden Sie die Whitelist nur für vertrauenswürdige Quellen, bei denen Sie absolut sicher sind.
