@@ -4,7 +4,8 @@ services:
     # because of server version mismatch"). BunkerWeb runs against an 18 server, but the
     # backup plugin cannot dump it, so the suite tests the combination the images support.
     # Bump this only together with the client in src/*/Dockerfile.
-    # tests/scripts/utils.sh sets BW_TESTS_POSTGRES_IMAGE to a 16 server for the Linux arm only (Ubuntu noble's client is 16).
+    # For Linux only, tests/scripts/utils.sh matches BW_TESTS_POSTGRES_IMAGE to pg_dump major 10, 13, 14 or 15;
+    # clients >= 16 use the 16 server fixture. Other or unreadable client versions fail the suite.
     image: ${BW_TESTS_POSTGRES_IMAGE:-postgres:17-alpine@sha256:d4bb0a8c1b7bb2e29f976d099e7bfb9a5d8858cffe9e46b35cd302cd1f1f8168}
     container_name: bw-db
     ports:
