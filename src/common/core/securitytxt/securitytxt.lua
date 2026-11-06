@@ -105,7 +105,16 @@ function securitytxt:init()
 				["csaf"] = {},
 			}
 		end
-		for var, value in pairs(vars) do
+		-- pairs() loses configured value order; visit bare settings before their numeric suffixes.
+		local ordered_vars = {}
+		for var in pairs(vars) do
+			ordered_vars[#ordered_vars + 1] = var
+		end
+		table.sort(ordered_vars, function(a, b)
+			return (tonumber(a:match("_(%d+)$")) or 0) < (tonumber(b:match("_(%d+)$")) or 0)
+		end)
+		for _, var in ipairs(ordered_vars) do
+			local value = vars[var]
 			if value ~= "" then
 				key = string.lower(string.gsub(string.gsub(var, "^SECURITYTXT_", ""), "_%d+$", ""))
 				if key == "uri" or key == "expires" or key == "preferred_lang" then
