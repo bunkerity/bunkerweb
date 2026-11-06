@@ -1,0 +1,50 @@
+tests/unit/harness/test_ci_matrix.py
+  s_81dc4f6574fe65::t_cd81de0210ed74 1-55,57-90
+  s_81dc4f6574fe65::t_826c796879af4c 56
+tests/unit/harness/test_ci_engine_guard.py
+  s_81dc4f6574fe65::t_2069744f6b8c13 1-42
+.github/workflows/dev.yml
+  s_81dc4f6574fe65::t_826c796879af4c 190-191
+.github/workflows/unit-tests.yml
+  s_81dc4f6574fe65::t_826c796879af4c 312,317-321,325,328-332
+tests/core.py
+  s_81dc4f6574fe65::t_e321afbc32ad11 198,217
+  s_81dc4f6574fe65::t_826c796879af4c 5,197,216
+  s_81dc4f6574fe65::t_90c32f2e38be0a 12
+  s_81dc4f6574fe65::t_a1eb2ce090f365 82-86
+tests/core_handlers/limit_handler.py
+  s_81dc4f6574fe65::t_826c796879af4c 97-115
+tests/core/upgrade.yml
+  s_81dc4f6574fe65::t_826c796879af4c 11
+  s_da9b5c7afb5449::t_8ca0ed7235a4be 12,42,86,115,132,149,166,183,200
+tests/api/limit.yml
+  s_81dc4f6574fe65::t_826c796879af4c 12
+tests/unit/harness/test_ci_rate_limit.py
+  s_81dc4f6574fe65::t_cd81de0210ed74 1-75
+tests/core/api.yml
+  s_81dc4f6574fe65::t_826c796879af4c 2
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "a1ac0d069b709b09e2f22012e154e8be93f672cf",
+  "prompts": {},
+  "sessions": {
+    "s_81dc4f6574fe65": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1b12b-75e8-7c93-ab66-d2b70ced81a8",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_da9b5c7afb5449": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1b16c-db54-7951-87e9-da37136f3dfe",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}
