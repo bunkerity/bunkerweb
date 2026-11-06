@@ -220,6 +220,15 @@ class TestAuthenticatedSession:
         assert um.data["CONFIG_CHANGED"] is False
         assert flashed(client) == ["The last changes have been applied successfully."]
 
+    def test_partial_application_warns_without_a_success_flash(self, um):
+        um.db.get_metadata.return_value = um.metadata(failover=True, failover_message="bw2: configuration rejected")
+        um.data["CONFIG_CHANGED"] = True
+        client, _ = authed_env(um)
+        messages = flashed(client)
+        assert any("some instances only (or none)" in m and "previous configuration" in m for m in messages)
+        assert any("bw2: configuration rejected" in m for m in messages)
+        assert not any("applied successfully" in m for m in messages)
+
     def test_queued_flashes_are_flushed_and_deduplicated(self, um):
         um.data["TO_FLASH"] = [{"content": "hello", "type": "success"}, {"content": "hello", "type": "success"}]
         client, _ = authed_env(um)
