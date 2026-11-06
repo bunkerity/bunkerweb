@@ -3651,6 +3651,9 @@ Le plugin Limit permet d’appliquer des politiques de limitation pour garantir 
 
         Par exemple, `5r/m` signifie que 5 requêtes par minute sont autorisées pour chaque adresse IP.
 
+    !!! info "Précision du comptage entre workers"
+        Sans Redis, le comptage est exact entre les workers jusqu'à 100 requêtes par fenêtre, pour `LIMIT_REQ_RATE` comme pour `LIMIT_REQ_GLOBAL_RATE` : des requêtes simultanées ne peuvent pas dépasser la limite. Au-delà de 100 requêtes par fenêtre, des requêtes simultanées peuvent dépasser légèrement la limite, car sérialiser à chaque requête le compteur d'un long historique de requêtes coûterait du débit. Avec Redis, le comptage est toujours exact.
+
 === "Limitation de débit globale"
 
     | Paramètre               | Défaut    | Contexte  | Multiple | Description                                                                                                                                         |

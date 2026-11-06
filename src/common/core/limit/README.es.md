@@ -42,6 +42,9 @@ El complemento de Límite en BunkerWeb proporciona capacidades robustas para apl
 
         Por ejemplo, `5r/m` significa que se permiten 5 solicitudes por minuto desde cada dirección IP.
 
+    !!! info "Precisión del recuento entre workers"
+        Sin Redis, el recuento es exacto entre workers hasta 100 solicitudes por ventana, tanto para `LIMIT_REQ_RATE` como para `LIMIT_REQ_GLOBAL_RATE`: las solicitudes simultáneas no pueden superar el límite. Por encima de 100 solicitudes por ventana, las solicitudes simultáneas pueden superar ligeramente el límite, porque serializar el contador de un historial largo de solicitudes en cada solicitud costaría rendimiento. Con Redis, el recuento siempre es exacto.
+
 === "Limitación de Tasa Global"
 
     | Ajuste                  | Valor por defecto | Contexto  | Múltiple | Descripción                                                                                                                                                       |

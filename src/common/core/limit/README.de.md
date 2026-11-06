@@ -42,6 +42,9 @@ Das Limit-Plugin in BunkerWeb bietet robuste Funktionen zur Durchsetzung von Beg
 
         Zum Beispiel bedeutet `5r/m`, dass 5 Anfragen pro Minute von jeder IP-Adresse erlaubt sind.
 
+    !!! info "Zählgenauigkeit über Worker hinweg"
+        Ohne Redis ist die Zählung über Worker hinweg bis zu 100 Anfragen pro Zeitfenster exakt, für `LIMIT_REQ_RATE` und für `LIMIT_REQ_GLOBAL_RATE`: gleichzeitige Anfragen können das Limit nicht umgehen. Oberhalb von 100 Anfragen pro Zeitfenster können gleichzeitige Anfragen das Limit geringfügig überschreiten, da die Serialisierung des Zählers einer langen Anfragehistorie bei jeder Anfrage Durchsatz kosten würde. Mit Redis ist die Zählung immer exakt.
+
 === "Globale Ratenbegrenzung"
 
     | Einstellung             | Standard  | Kontext   | Mehrfach | Beschreibung                                                                                                                                            |

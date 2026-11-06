@@ -3767,6 +3767,9 @@ The Limit plugin in BunkerWeb provides robust capabilities to enforce limiting p
 
         For example, `5r/m` means that 5 requests per minute are allowed from each IP address.
 
+    !!! info "Counting accuracy across workers"
+        Without Redis, the count is exact across workers up to 100 requests per window, for `LIMIT_REQ_RATE` and for `LIMIT_REQ_GLOBAL_RATE`: simultaneous requests cannot slip past the limit. Above 100 requests per window, simultaneous requests can exceed the limit slightly, because serializing the counter of a long request history on every request would cost throughput. With Redis, the count is always exact.
+
 === "Global Rate Limiting"
 
     | Setting                 | Default   | Context   | Multiple | Description                                                                                                                    |
