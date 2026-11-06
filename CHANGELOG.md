@@ -28,6 +28,7 @@
 - [BUGFIX] `ui`: renaming the admin user through `ADMIN_USERNAME` now applies at startup instead of failing with "User ... doesn't exist".
 - [BUGFIX] `ui`: a client resuming the log stream from a far-behind offset gets the tail instead of the whole file.
 - [BUGFIX] `api`: an administrator username or password set through `API_USERNAME` and `API_PASSWORD` is now applied at startup.
+- [BUGFIX] `reverseproxy`: a location with `REVERSE_PROXY_PASS_REQUEST_BODY` set to `no` no longer forwards the client's `Content-Length`.
 - [PERF] `core`: cut request-path CPU by 14.2% for HTTP proxy traffic and by 33.3% for TLS proxy traffic with the community blacklists.
 - [PERF] `blacklist`: reuse downloaded lists between requests instead of copying and deduplicating them each time.
 - [PERF] `core`: build the reserved-address matcher once per worker and cache successful plugin module lookups.
