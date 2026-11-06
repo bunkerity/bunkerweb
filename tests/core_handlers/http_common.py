@@ -10,9 +10,10 @@ from httpx import Client, Response
 
 
 class HTTPContext:
-    def __init__(self, response: Union[Response, str], http2: bool):
+    def __init__(self, response: Union[Response, str], http2: bool, error: Exception | None = None):
         self.response = response
         self.http2 = http2
+        self.error = error
 
 
 essential_timeout = 10
@@ -61,6 +62,7 @@ def perform_request(LOGGER: Logger, action: Any) -> HTTPContext:
         headers["Content-Type"] = "application/x-www-form-urlencoded"
 
     response: Union[Response, str]
+    error: Exception | None = None
     try:
         with Client(
             auth=auth,
@@ -73,7 +75,8 @@ def perform_request(LOGGER: Logger, action: Any) -> HTTPContext:
             cert=client_cert,
         ) as client:
             response = client.request(method, url, data="a" * body_length if body_length > 0 else body)
-    except BaseException:
+    except Exception as exc:
+        error = exc
         response = format_exc()
 
     if isinstance(response, Response):
@@ -86,4 +89,4 @@ def perform_request(LOGGER: Logger, action: Any) -> HTTPContext:
             LOGGER.error(f"HTTP/2 not used, instead found {response.http_version}, exiting ...")
             exit(1)
 
-    return HTTPContext(response, http2)
+    return HTTPContext(response, http2, error)

@@ -4,9 +4,23 @@
 from logging import Logger
 from typing import Any
 
-from httpx import Response
+from httpx import ConnectError, ReadError, RemoteProtocolError, Response
 
 from .http_common import perform_request
+
+
+def _failure_kind(error: Exception | None) -> str | None:
+    message = str(error)
+    if isinstance(error, ConnectError):
+        if "CERTIFICATE_VERIFY_FAILED" in message:
+            return "tls_verify"
+        if "Connection refused" in message:
+            return "connection_refused"
+    if isinstance(error, ReadError) and "Connection reset by peer" in message:
+        return "connection_closed"
+    if isinstance(error, RemoteProtocolError) and message in ("Server disconnected", "Server disconnected without sending a response."):
+        return "connection_closed"
+    return None
 
 
 def handle(LOGGER: Logger, action: Any) -> None:
@@ -14,10 +28,11 @@ def handle(LOGGER: Logger, action: Any) -> None:
     response = ctx.response
 
     if isinstance(response, str):
-        if action.status:
-            LOGGER.error(f"📃 Request failed, expected status code {action.status}, exiting ...")
+        kind = _failure_kind(ctx.error)
+        if action.status is not None or kind not in action.expect_error:
+            LOGGER.error(f"📃 Unexpected request failure ({kind}), expected status {action.status} or errors {action.expect_error}:\n{response}")
             exit(1)
-        LOGGER.info("📃 Request failed, as expected")
+        LOGGER.info(f"📃 Request failed with {kind}, as expected")
         return
 
     assert isinstance(response, Response)

@@ -1,11 +1,18 @@
-from pydantic import field_validator
-from typing import Literal, Optional
+from pydantic import field_validator, model_validator
+from typing import Literal, Optional, Set
 
 from .action import ActionBase, ActionData
 
 
 class StatusData(ActionData):
-    status: Optional[int] = None  # ? If status is None, then the request must fail
+    status: Optional[int] = None
+    expect_error: Set[Literal["connection_refused", "connection_closed", "tls_verify"]] = set()
+
+    @model_validator(mode="after")
+    def check_expectation(self):
+        if (self.status is None) == (not self.expect_error):
+            raise ValueError("Set either status or a nonempty expect_error, not both")
+        return self
 
     @field_validator("status")
     @classmethod
