@@ -21,23 +21,13 @@ local encode = cjson.encode
 -- Per worker session config
 local sessions_config = {}
 
+-- Random cookie name and secret captured at init, so requests never read them from shared memory
+local session_randoms = {}
+
 function sessions:initialize(ctx)
 	-- Call parent initialize
 	plugin.initialize(self, "sessions", ctx)
-	-- Check if random cookie name and secrets are already generated
-	local is_random = {
-		"SESSIONS_SECRET",
-		"SESSIONS_NAME",
-	}
-	self.randoms = {}
-	for _, var in ipairs(is_random) do
-		if self.variables[var] == "random" then
-			local data, _ = self.internalstore:get("storage_sessions_" .. var)
-			if data then
-				self.randoms[var] = data
-			end
-		end
-	end
+	self.randoms = session_randoms
 end
 
 function sessions:set()
@@ -109,26 +99,21 @@ function sessions:init()
 		rolling_timeout = parse_duration(self.variables["SESSIONS_ROLLING_TIMEOUT"], "s"),
 		absolute_timeout = parse_duration(self.variables["SESSIONS_ABSOLUTE_TIMEOUT"], "s"),
 	}
-	if self.variables["SESSIONS_SECRET"] == "random" then
-		if self.randoms["SESSIONS_SECRET"] then
-			config.secret = self.randoms["SESSIONS_SECRET"]
-		else
-			config.secret = utils.rand(16)
-			local ok, err = self.internalstore:set("storage_sessions_SESSIONS_SECRET", config.secret)
-			if not ok then
-				self.logger:log(ERR, "error from internalstore:set : " .. err)
+	-- Reuse the value stored by a previous configuration so the cookie name and secret survive reloads
+	local randoms = {}
+	for _, item in ipairs({ { "SESSIONS_SECRET", "secret" }, { "SESSIONS_NAME", "cookie_name" } }) do
+		local var, key = item[1], item[2]
+		if self.variables[var] == "random" then
+			local value = self.internalstore:get("storage_sessions_" .. var)
+			if not value then
+				value = utils.rand(16)
+				local ok, err = self.internalstore:set("storage_sessions_" .. var, value)
+				if not ok then
+					self.logger:log(ERR, "error from internalstore:set : " .. err)
+				end
 			end
-		end
-	end
-	if self.variables["SESSIONS_NAME"] == "random" then
-		if self.randoms["SESSIONS_NAME"] then
-			config.cookie_name = self.randoms["SESSIONS_NAME"]
-		else
-			config.cookie_name = utils.rand(16)
-			local ok, err = self.internalstore:set("storage_sessions_SESSIONS_NAME", config.cookie_name)
-			if not ok then
-				self.logger:log(ERR, "error from internalstore:set : " .. err)
-			end
+			config[key] = value
+			randoms[var] = value
 		end
 	end
 	if redis_vars["USE_REDIS"] ~= "yes" then
@@ -194,6 +179,8 @@ function sessions:init()
 		self.logger:log(ERR, "error from internalstore:set : " .. err_set)
 	end
 	sessions_config = config
+	session_randoms = randoms
+	self.randoms = randoms
 	session_init(config)
 	return self:ret(true, "sessions init successful")
 end
