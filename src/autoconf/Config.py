@@ -111,6 +111,20 @@ class Config:
         config["SERVER_NAME"] = config["SERVER_NAME"].strip()
         return config
 
+    @staticmethod
+    def _instance_targets(instances: List[Dict[str, Any]]) -> list:
+        # Match Database.update_instances: health and discovery metadata do not change push targets.
+        return sorted(
+            (
+                instance.get("hostname", ""),
+                str(instance.get("env", {}).get("API_HTTP_PORT", 5000)),
+                instance.get("env", {}).get("API_LISTEN_HTTPS", "no") == "yes",
+                str(instance.get("env", {}).get("API_HTTPS_PORT", 5443)),
+                instance.get("env", {}).get("API_SERVER_NAME", "bwapi"),
+            )
+            for instance in instances
+        )
+
     def update_needed(
         self,
         instances: List[Dict[str, Any]],
@@ -126,7 +140,7 @@ class Config:
         # it finds no change the stored content stays old and the next poll reports it again, forever.
         # str() of a dict follows its insertion order, so the same services or configs rebuilt in another
         # order (labels serialised differently by the daemon) read as a change through set(map(str, ...)).
-        if self.__instances != instances:
+        if self._instance_targets(self.__instances) != self._instance_targets(instances):
             self.__logger.debug(f"Instances changed: {self.__instances} -> {instances}")
             return True
 
@@ -198,7 +212,7 @@ class Config:
         extra_config = extra_config or {}
 
         changes = []
-        if instances != self.__instances or first:
+        if first or self._instance_targets(instances) != self._instance_targets(self.__instances):
             self.__instances = instances
             changes.append("instances")
         if services != self.__services or first:
