@@ -2,13 +2,14 @@
 # -*- coding: utf-8 -*-
 
 from os import getenv
+from datetime import datetime, timezone
 from argparse import ArgumentParser
 from logging import getLogger
 from math import ceil
 from os.path import join
 from pathlib import Path
 from time import sleep
-from typing import Optional
+from typing import Optional, cast
 
 from redis import Redis
 from yaml import safe_load
@@ -76,6 +77,11 @@ resp = redis_client.ping()
 if not resp:
     LOGGER.error("Redis server is not running")
     exit(1)
+
+# A restarted action includes its startup logs; otherwise last_test still belongs to an earlier action.
+action_started = datetime.now(timezone.utc)
+if redis_client.get("restart_stack") != "0":
+    action_started = cast(Optional[str], redis_client.get("last_test")) or action_started
 
 delay: float = action.delay
 wait_duration = delay
@@ -185,18 +191,8 @@ for x in range(action.repeat + 1):
         LOGGER.info(f"📜 Checking {log_from} logs if they contain {action.log!r} ...")
 
         sleep(1)  # Wait for the logs to be written
-        raw_logs = get_logs(LOGGER, ARGS.integration, log_from=log_from)
-        if ARGS.integration in ("Autoconf", "Kubernetes"):
-            start_idx = 0
-            for i, line in enumerate(raw_logs):
-                if "Executing job scheduler ..." in line:
-                    start_idx = i + 1
-                    break
-            service_logs = raw_logs[start_idx:]
-            service_logs.reverse()
-        else:
-            service_logs = raw_logs
-            service_logs.reverse()
+        raw_logs = get_logs(LOGGER, ARGS.integration, since=action_started, log_from=log_from)
+        service_logs = reversed(raw_logs)
 
         found = False
         for bw_log in service_logs:
@@ -214,18 +210,8 @@ for x in range(action.repeat + 1):
         LOGGER.info(f"📜 Checking {log_from} logs if they don't contain {action.not_log!r} ...")
 
         sleep(1)  # Wait for the logs to be written
-        raw_logs = get_logs(LOGGER, ARGS.integration, log_from=log_from)
-        if ARGS.integration in ("Autoconf", "Kubernetes"):
-            start_idx = 0
-            for i, line in enumerate(raw_logs):
-                if "Executing job scheduler ..." in line:
-                    start_idx = i + 1
-                    break
-            service_logs = raw_logs[start_idx:]
-            service_logs.reverse()
-        else:
-            service_logs = raw_logs
-            service_logs.reverse()
+        raw_logs = get_logs(LOGGER, ARGS.integration, since=action_started, log_from=log_from)
+        service_logs = reversed(raw_logs)
 
         found = False
         for bw_log in service_logs:
