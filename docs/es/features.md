@@ -115,16 +115,16 @@ El valor es una lista de motivos separados por espacios, entre `crowdsec`, `bad_
 
 === "Ajustes de Red y Puertos"
 
-    | Parámetro               | Valor por defecto | Contexto | Múltiple | Descripción                                                                                              |
-    | ----------------------- | ----------------- | -------- | -------- | -------------------------------------------------------------------------------------------------------- |
-    | `HTTP_PORT`             | `8080`            | global   | Sí       | **Puerto HTTP:** Número de puerto para el tráfico HTTP. Dejar vacío para desactivar la escucha HTTP.     |
-    | `HTTPS_PORT`            | `8443`            | global   | Sí       | **Puerto HTTPS:** Número de puerto para el tráfico HTTPS. Dejar vacío para desactivar la escucha HTTPS.  |
-    | `USE_IPV6`              | `no`              | global   | No       | **Soporte IPv6:** Habilita la conectividad IPv6.                                                         |
-    | `DNS_RESOLVERS`         | `127.0.0.11`      | global   | No       | **Resolutores DNS:** Direcciones DNS de los resolutores a usar.                                          |
-    | `CLIENT_BODY_TIMEOUT`   | `10s`             | global   | No       | **Timeout del cuerpo del cliente:** Tiempo límite para leer el cuerpo de la solicitud del cliente.       |
-    | `CLIENT_HEADER_TIMEOUT` | `10s`             | global   | No       | **Timeout de cabeceras del cliente:** Tiempo límite para leer las cabeceras de la solicitud del cliente. |
-    | `KEEPALIVE_TIMEOUT`     | `15s`             | global   | No       | **Timeout keepalive:** Tiempo límite para conexiones keepalive del cliente.                              |
-    | `SEND_TIMEOUT`          | `10s`             | global   | No       | **Timeout de envío:** Tiempo límite para transmitir una respuesta al cliente.                            |
+    | Parámetro               | Valor por defecto | Contexto | Múltiple | Descripción                                                                                                                                                                                                                                                  |
+    | ----------------------- | ----------------- | -------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+    | `HTTP_PORT`             | `8080`            | global   | Sí       | **Puerto HTTP:** Número de puerto para el tráfico HTTP. Dejar vacío para desactivar la escucha HTTP.                                                                                                                                                         |
+    | `HTTPS_PORT`            | `8443`            | global   | Sí       | **Puerto HTTPS:** Número de puerto para el tráfico HTTPS. Dejar vacío para desactivar la escucha HTTPS.                                                                                                                                                      |
+    | `USE_IPV6`              | `no`              | global   | No       | **Soporte IPv6:** Habilita la conectividad IPv6.                                                                                                                                                                                                             |
+    | `DNS_RESOLVERS`         | `127.0.0.11`      | global   | No       | **Resolutores DNS:** Direcciones DNS de los resolutores a usar.                                                                                                                                                                                              |
+    | `CLIENT_BODY_TIMEOUT`   | `10s`             | global   | No       | **Timeout del cuerpo del cliente:** Tiempo límite para leer el cuerpo de la solicitud del cliente.                                                                                                                                                           |
+    | `CLIENT_HEADER_TIMEOUT` | `10s`             | global   | No       | **Timeout de cabeceras del cliente:** Tiempo límite para leer las cabeceras de la solicitud del cliente. También limita cuánto tiempo permanece activo un proceso worker antiguo tras una recarga mientras un cliente no haya completado su negociación TLS. |
+    | `KEEPALIVE_TIMEOUT`     | `15s`             | global   | No       | **Timeout keepalive:** Tiempo límite para conexiones keepalive del cliente.                                                                                                                                                                                  |
+    | `SEND_TIMEOUT`          | `10s`             | global   | No       | **Timeout de envío:** Tiempo límite para transmitir una respuesta al cliente.                                                                                                                                                                                |
 
 === "Ajustes del Servidor de Stream"
 

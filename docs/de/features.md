@@ -115,16 +115,16 @@ Der Wert ist eine durch Leerzeichen getrennte Liste von Gründen aus `crowdsec`,
 
 === "Netzwerk- & Port-Einstellungen"
 
-    | Einstellung             | Standard     | Kontext | Mehrfach | Beschreibung                                                                                   |
-    | ----------------------- | ------------ | ------- | -------- | ---------------------------------------------------------------------------------------------- |
-    | `HTTP_PORT`             | `8080`       | global  | Ja       | **HTTP-Port:** Portnummer für HTTP-Verkehr. Leer lassen, um HTTP-Listening zu deaktivieren.    |
-    | `HTTPS_PORT`            | `8443`       | global  | Ja       | **HTTPS-Port:** Portnummer für HTTPS-Verkehr. Leer lassen, um HTTPS-Listening zu deaktivieren. |
-    | `USE_IPV6`              | `no`         | global  | Nein     | **IPv6-Unterstützung:** IPv6-Konnektivität aktivieren.                                         |
-    | `DNS_RESOLVERS`         | `127.0.0.11` | global  | Nein     | **DNS-Resolver:** DNS-Adressen der zu verwendenden Resolver.                                   |
-    | `CLIENT_BODY_TIMEOUT`   | `10s`        | global  | Nein     | **Client-Body-Timeout:** Timeout zum Lesen des Request-Bodys vom Client.                       |
-    | `CLIENT_HEADER_TIMEOUT` | `10s`        | global  | Nein     | **Client-Header-Timeout:** Timeout zum Lesen der Request-Header vom Client.                    |
-    | `KEEPALIVE_TIMEOUT`     | `15s`        | global  | Nein     | **Keepalive-Timeout:** Timeout für Keepalive-Clientverbindungen.                               |
-    | `SEND_TIMEOUT`          | `10s`        | global  | Nein     | **Sende-Timeout:** Timeout für das Übertragen einer Antwort an den Client.                     |
+    | Einstellung             | Standard     | Kontext | Mehrfach | Beschreibung                                                                                                                                                                                                                  |
+    | ----------------------- | ------------ | ------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+    | `HTTP_PORT`             | `8080`       | global  | Ja       | **HTTP-Port:** Portnummer für HTTP-Verkehr. Leer lassen, um HTTP-Listening zu deaktivieren.                                                                                                                                   |
+    | `HTTPS_PORT`            | `8443`       | global  | Ja       | **HTTPS-Port:** Portnummer für HTTPS-Verkehr. Leer lassen, um HTTPS-Listening zu deaktivieren.                                                                                                                                |
+    | `USE_IPV6`              | `no`         | global  | Nein     | **IPv6-Unterstützung:** IPv6-Konnektivität aktivieren.                                                                                                                                                                        |
+    | `DNS_RESOLVERS`         | `127.0.0.11` | global  | Nein     | **DNS-Resolver:** DNS-Adressen der zu verwendenden Resolver.                                                                                                                                                                  |
+    | `CLIENT_BODY_TIMEOUT`   | `10s`        | global  | Nein     | **Client-Body-Timeout:** Timeout zum Lesen des Request-Bodys vom Client.                                                                                                                                                      |
+    | `CLIENT_HEADER_TIMEOUT` | `10s`        | global  | Nein     | **Client-Header-Timeout:** Timeout zum Lesen der Request-Header vom Client. Er begrenzt auch, wie lange ein alter Worker nach einem Reload weiterläuft, solange ein Client seinen TLS-Handshake noch nicht abgeschlossen hat. |
+    | `KEEPALIVE_TIMEOUT`     | `15s`        | global  | Nein     | **Keepalive-Timeout:** Timeout für Keepalive-Clientverbindungen.                                                                                                                                                              |
+    | `SEND_TIMEOUT`          | `10s`        | global  | Nein     | **Sende-Timeout:** Timeout für das Übertragen einer Antwort an den Client.                                                                                                                                                    |
 
 === "Stream-Server-Einstellungen"
 
