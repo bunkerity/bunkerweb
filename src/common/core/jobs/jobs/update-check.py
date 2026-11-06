@@ -5,6 +5,7 @@ from datetime import datetime, timedelta
 from json import dumps, loads
 from os import sep
 from os.path import join
+from re import compile as re_compile
 from sys import exit as sys_exit, path as sys_path
 from time import sleep
 from traceback import format_exc
@@ -18,13 +19,7 @@ from packaging.version import Version
 from requests import get
 from requests.exceptions import ConnectionError, RequestException
 
-from common_utils import (  # type: ignore
-    fetch_bunkerweb_releases,
-    get_version,
-    is_newer_version_available,
-    normalize_bunkerweb_version,
-    pick_latest_line_release,
-)
+from common_utils import fetch_bunkerweb_releases, get_version, is_newer_version_available, normalize_bunkerweb_version, pick_latest_line_release  # type: ignore
 from logger import getLogger  # type: ignore
 from jobs import Job  # type: ignore
 
@@ -109,14 +104,21 @@ try:
     latest_version = latest_release["tag_name"].removeprefix("v")
 
     if is_newer_version_available(current_version, latest_version):
-        alert_message = "🚨  A NEW VERSION OF BUNKERWEB IS AVAILABLE!  🚨"
-        latest_version_line = f"Latest Version: {latest_version}"
-        current_version_line = f"Current Version: {current_version}"
+        latest_version_text = f"\033[1;92m{latest_version}\033[0m"
+        current_version_text = f"\033[1;93m{current_version}\033[0m"
         release_notes_url = f"https://github.com/bunkerity/bunkerweb/releases/v{latest_version}"
-        release_notes_url_line = f"Release Notes: {release_notes_url}"
+        release_notes_url_text = f"\033[4;94m{release_notes_url}\033[0m"
+
+        alert_message = "\033[1;97m🚨  A NEW VERSION OF BUNKERWEB IS AVAILABLE!  🚨\033[0m"
+        latest_version_line = f"\033[1;97mLatest Version: {latest_version_text}\033[0m"
+        current_version_line = f"\033[1;97mCurrent Version: {current_version_text}\033[0m"
+        release_notes_url_line = f"\033[1;97mRelease Notes: {release_notes_url_text}\033[0m"
+
+        ansi_pattern = re_compile(r"\x1b\[[0-9;]*[a-zA-Z]")
 
         def display_width(text: str) -> int:
-            return sum(2 if east_asian_width(c) in ("F", "W") else 1 for c in text)
+            clean = ansi_pattern.sub("", text)
+            return sum(2 if east_asian_width(c) in ("F", "W") else 1 for c in clean)
 
         def pad_center(text: str, target_width: int) -> str:
             pad = target_width - display_width(text)
@@ -128,19 +130,19 @@ try:
         max_width = max(display_width(line) for line in content_lines)
 
         box_width = max_width + 4
-        border = f"+{'—' * box_width}+"
-        empty_row = f"|{' ' * box_width}|"
+        border = f"\033[1;91m+{'—' * box_width}+\033[0m"
+        empty_row = f"\033[1;91m|{' ' * box_width}|\033[0m"
 
         LOGGER.warning(
             (
                 f"\n{border}\n"
                 f"{empty_row}\n"
-                f"|  {pad_center(alert_message, max_width)}  |\n"
+                f"\033[1;91m|\033[0m  {pad_center(alert_message, max_width)}  \033[1;91m|\033[0m\n"
                 f"{empty_row}\n"
-                f"|  {pad_center(latest_version_line, max_width)}  |\n"
-                f"|  {pad_center(current_version_line, max_width)}  |\n"
+                f"\033[1;91m|\033[0m  {pad_center(latest_version_line, max_width)}  \033[1;91m|\033[0m\n"
+                f"\033[1;91m|\033[0m  {pad_center(current_version_line, max_width)}  \033[1;91m|\033[0m\n"
                 f"{empty_row}\n"
-                f"|  {pad_center(release_notes_url_line, max_width)}  |\n"
+                f"\033[1;91m|\033[0m  {pad_center(release_notes_url_line, max_width)}  \033[1;91m|\033[0m\n"
                 f"{empty_row}\n"
                 f"{border}"
             )

@@ -130,7 +130,8 @@ def test_job_without_any_release_reports_failure_not_change(monkeypatch):
     job.cache_file.assert_not_called()
 
 
-def test_job_alert_box_has_no_ansi_and_is_aligned(monkeypatch):
+def test_job_alert_box_is_aligned(monkeypatch):
+    import re
     from unicodedata import east_asian_width
 
     get = Mock(return_value=response([release("v1.7.1")]))
@@ -139,8 +140,33 @@ def test_job_alert_box_has_no_ansi_and_is_aligned(monkeypatch):
     warning_calls = [call.args[0] for call in logger.warning.call_args_list if "A NEW VERSION OF BUNKERWEB IS AVAILABLE" in call.args[0]]
     assert len(warning_calls) == 1
     box = warning_calls[0]
-    assert "\033" not in box
-    assert "\x1b" not in box
-    lines = box.strip().split("\n")
+    assert "\033[1;91m" in box
+
+    ansi_re = re.compile(r"\x1b\[[0-9;]*[a-zA-Z]")
+    clean_box = ansi_re.sub("", box)
+    assert "\033" not in clean_box
+    assert "\x1b" not in clean_box
+
+    lines = clean_box.strip().split("\n")
     widths = [sum(2 if east_asian_width(c) in ("F", "W") else 1 for c in line) for line in lines]
     assert len(set(widths)) == 1
+
+
+def test_strip_ansi_formatter_cleans_file_logs():
+    import logging
+    from logger import StripAnsiFormatter
+
+    record = logging.LogRecord(
+        name="UPDATE-CHECK",
+        level=logging.WARNING,
+        pathname="",
+        lineno=0,
+        msg="\033[1;91m+———+\033[0m\n\033[1;92mVersion 1.6.17\033[0m",
+        args=(),
+        exc_info=None,
+    )
+    formatter = StripAnsiFormatter("%(message)s")
+    formatted = formatter.format(record)
+    assert "\033" not in formatted
+    assert "\x1b" not in formatted
+    assert formatted == "+———+\nVersion 1.6.17"

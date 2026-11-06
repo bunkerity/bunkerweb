@@ -3,6 +3,7 @@ from logging import (
     DEBUG,
     ERROR,
     FileHandler,
+    Formatter,
     INFO,
     NOTSET,
     WARNING,
@@ -17,7 +18,7 @@ from logging import (
 from logging.handlers import SysLogHandler
 from os import getenv, sep
 from os.path import join
-from re import match
+from re import compile as re_compile, match
 from socket import SOCK_DGRAM, SOCK_STREAM
 from typing import Optional, Union
 
@@ -35,6 +36,15 @@ class BWLogger(Logger):
     def __init__(self, name, level=INFO):
         # SQLAlchemy loggers inherit DATABASE_LOG_LEVEL from the "sqlalchemy" logger, whatever their class names
         super().__init__(name, NOTSET if name.startswith("sqlalchemy.") else level)
+
+
+class StripAnsiFormatter(Formatter):
+    """Format log entries stripping ANSI escape sequences for file and syslog destinations."""
+
+    ANSI_ESCAPE_RE = re_compile(r"\x1b\[[0-9;]*[a-zA-Z]")
+
+    def format(self, record):
+        return self.ANSI_ESCAPE_RE.sub("", super().format(record))
 
 
 # Set the custom logger class as the default
@@ -111,6 +121,12 @@ if not log_types or "stderr" in env_log_types:
     log_types["stderr"] = {"handler": StreamHandler()}
 
 basicConfig(format=LOG_FORMAT, datefmt=DATE_FORMAT, level=default_level, handlers=[handler["handler"] for handler in log_types.values()], force=True)
+
+if "file" in log_types:
+    log_types["file"]["handler"].setFormatter(StripAnsiFormatter(LOG_FORMAT, DATE_FORMAT))
+
+if "syslog" in log_types:
+    log_types["syslog"]["handler"].setFormatter(StripAnsiFormatter(LOG_FORMAT, DATE_FORMAT))
 
 # Set the default logging level for every SQLAlchemy logger (BWLogger leaves their children at NOTSET)
 database_default_level = _nameToLevel.get(getenv("DATABASE_LOG_LEVEL", "WARNING").upper(), WARNING)
