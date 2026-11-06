@@ -1,4 +1,4 @@
-"""Plain stub checks: generation backoff must fence publication and survive rejected or busy reloads."""
+"""Generation backoff must fence publication and survive rejected or busy reloads."""
 
 import ast
 import logging
@@ -7,52 +7,47 @@ import unittest
 
 from importlib.util import module_from_spec, spec_from_file_location
 from pathlib import Path
-from types import ModuleType, SimpleNamespace
+from types import SimpleNamespace
+from unittest.mock import patch
+
+ROOT = Path(__file__).resolve().parents[2]
+for directory in ("src/common/utils", "src/common/db", "src/common/api", "src/common/gen", "src/scheduler"):
+    if str(ROOT / directory) not in sys.path:
+        sys.path.append(str(ROOT / directory))
 
 
-def stub(name, **values):
-    module = ModuleType(name)
-    module.__dict__.update(values)
-    sys.modules[name] = module
+import schedule
+from ApiCaller import MIN_RELOAD_TIMEOUT
+from common_utils import parse_duration
+from reload_utils import RELOAD_CONFIRM_HTTP_WAIT, wait_for_reload
 
 
-stub("schedule", jobs=[], Job=object)
-stub("cache_restore", cache_tree=lambda *args: None)
-stub("common_utils", effective_cpu_count=lambda: 1, parse_duration=lambda value, unit: int(value))
-stub("Database", Database=object, DEFAULT_POOL_MAX_OVERFLOW=10, DEFAULT_POOL_SIZE=5)
-stub("logger", getLogger=logging.getLogger)
+def load_scheduler_module(name, filename):
+    spec = spec_from_file_location(name, ROOT / "src/scheduler" / filename)
+    module = module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
 
 
-class ApiCaller:
-    def __init__(self, apis):
-        self.apis = apis
-
-
-leaf = ast.parse(Path("src/common/utils/ApiCaller.py").read_text())
-floor_values = {}
-for node in leaf.body:
-    if isinstance(node, ast.Assign) and any(isinstance(target, ast.Name) and target.id == "MIN_RELOAD_TIMEOUT" for target in node.targets):
-        exec(compile(ast.Module(body=[node], type_ignores=[]), "ApiCaller.py", "exec"), floor_values)
-stub("ApiCaller", ApiCaller=ApiCaller, MIN_RELOAD_TIMEOUT=floor_values.get("MIN_RELOAD_TIMEOUT", 15), folder_push_timeout=lambda minimum, count: (5, minimum))
-spec = spec_from_file_location("JobScheduler", "src/scheduler/JobScheduler.py")
-module = module_from_spec(spec)
-spec.loader.exec_module(module)
-JobScheduler = module.JobScheduler
+JobScheduler = load_scheduler_module("publication_job_scheduler", "JobScheduler.py").JobScheduler
+main = load_scheduler_module("publication_scheduler_main", "main.py")
 
 
 class PublicationChecks(unittest.TestCase):
     def test_other_reload_callers_allow_readiness_confirmation(self):
         calls = []
 
-        def send(method, url, timeout=(5, 10)):
+        def send(method, url, timeout=(5, 10), **kwargs):
             self.assertEqual(method, "POST")
             self.assertTrue(url.startswith("/reload?test="))
             calls.append(timeout)
             return True, {}
 
-        caller = SimpleNamespace(send_to_apis=send)
+        caller = SimpleNamespace(send_to_apis=send, apis=[])
         shared = {
-            "MIN_RELOAD_TIMEOUT": sys.modules["ApiCaller"].MIN_RELOAD_TIMEOUT,
+            "MIN_RELOAD_TIMEOUT": MIN_RELOAD_TIMEOUT,
+            "RELOAD_CONFIRM_HTTP_WAIT": RELOAD_CONFIRM_HTTP_WAIT,
+            "wait_for_reload": wait_for_reload,
             "getenv": lambda key, default=None: default,
             "JSONResponse": lambda **kwargs: SimpleNamespace(**kwargs),
             "Depends": lambda dep: None,
@@ -91,7 +86,7 @@ class PublicationChecks(unittest.TestCase):
                 caller = SimpleNamespace(send_to_apis=lambda *args, **kwargs: calls.append(kwargs["timeout"]) or (True, {}))
                 api = SimpleNamespace(endpoint="http://node/", request=lambda *args, **kwargs: (True, None, 200, {}))
                 context = {
-                    "MIN_RELOAD_TIMEOUT": sys.modules["ApiCaller"].MIN_RELOAD_TIMEOUT,
+                    "MIN_RELOAD_TIMEOUT": MIN_RELOAD_TIMEOUT,
                     "instances": [{}],
                     "services": ["service"] * count,
                     "reload_min_timeout": minimum,
@@ -107,8 +102,8 @@ class PublicationChecks(unittest.TestCase):
     def test_main_pre_push_and_healthcheck_use_floored_budget(self):
         tree = ast.parse(Path("src/scheduler/main.py").read_text())
         context = {
-            "MIN_RELOAD_TIMEOUT": sys.modules["ApiCaller"].MIN_RELOAD_TIMEOUT,
-            "parse_duration": lambda value, unit: int(value),
+            "MIN_RELOAD_TIMEOUT": MIN_RELOAD_TIMEOUT,
+            "parse_duration": parse_duration,
             "getenv": lambda key, default=None: default,
             "LOGGER": logging.getLogger("check"),
             "env": {},
@@ -140,6 +135,13 @@ class PublicationChecks(unittest.TestCase):
                     and any(isinstance(value, ast.Constant) and str(value.value).startswith("/reload?") for value in node.args[1].values)
                 )
                 budget = next(keyword.value for keyword in call.keywords if keyword.arg == "timeout")
+                if isinstance(budget, ast.Name):
+                    assignment = next(
+                        node
+                        for node in ast.walk(function)
+                        if isinstance(node, ast.Assign) and any(isinstance(target, ast.Name) and target.id == budget.id for target in node.targets)
+                    )
+                    exec(compile(ast.Module(body=[assignment], type_ignores=[]), "main.py", "exec"), context)
                 self.assertGreaterEqual(eval(compile(ast.Expression(body=budget), "main.py", "eval"), context), 15)
 
     def scheduler(self):
@@ -175,9 +177,9 @@ class PublicationChecks(unittest.TestCase):
         scheduler.generation_pending = True
         scheduler.try_database_readonly = lambda: False
         scheduler._JobScheduler__update_cache_permissions = lambda: None
-        original_jobs = sys.modules["schedule"].jobs
-        self.addCleanup(setattr, sys.modules["schedule"], "jobs", original_jobs)
-        sys.modules["schedule"].jobs = [SimpleNamespace(should_run=True, run=lambda: self.effects.append(("job",)))]
+        original_jobs = schedule.jobs
+        self.addCleanup(setattr, schedule, "jobs", original_jobs)
+        schedule.jobs = [SimpleNamespace(should_run=True, run=lambda: self.effects.append(("job",)))]
         self.assertFalse(scheduler.run_pending())
         self.assertEqual([effect[0] for effect in self.effects], ["job"])
         self.assertEqual(scheduler.consume_pending_publication(), (True, False))
@@ -248,7 +250,7 @@ class PublicationChecks(unittest.TestCase):
             with self.subTest(outcome=outcome, partial_success=partial_success):
                 busy = outcome.startswith("a ")
                 rejected = outcome == "rejected" or busy
-                nodes = [{"hostname": "node", "port": 5000}]
+                nodes = [{"hostname": "node", "port": 5000, "status": "up"}]
                 responses = {
                     "node": {"status": "error" if rejected else "success", "msg": "reload failed: initialization rejected" if rejected else "reload signalled"}
                 }
@@ -258,7 +260,7 @@ class PublicationChecks(unittest.TestCase):
                     responses["node"]["confirmed"] = outcome == "confirmed"
                 apis = [SimpleNamespace(endpoint="http://node:5000/")]
                 if partial_success:
-                    nodes.append({"hostname": "other", "port": 5000})
+                    nodes.append({"hostname": "other", "port": 5000, "status": "up"})
                     responses["other"] = {"status": "success", "msg": "reload successful"}
                     apis.append(SimpleNamespace(endpoint="http://other:5000/"))
                 statuses = {}
@@ -289,8 +291,17 @@ class PublicationChecks(unittest.TestCase):
                     "LOGGER": SimpleNamespace(debug=lambda *args: None, error=lambda *args: None, warning=warnings.append, info=successes.append),
                     "backup_failover": lambda: None,
                     "_instance_endpoint": lambda instance: "http://" + instance["hostname"] + ":5000",
+                    "response_for": main.response_for,
+                    "is_busy_message": main.is_busy_message,
+                    "take_busy_pushes": main.take_busy_pushes,
+                    "confirm_unconfirmed_reloads": main.confirm_unconfirmed_reloads,
                 }
-                exec(code, context)
+                ready_api = SimpleNamespace(
+                    endpoint="http://node:5000/",
+                    request=lambda *args, **kwargs: (True, "", 200, {"status": "success", "msg": "ok"}),
+                )
+                with patch.object(main, "SCHEDULER", scheduler), patch.object(main, "API", SimpleNamespace(from_instance=lambda _: ready_api)):
+                    exec(code, context)
                 self.assertEqual(context["CONFIG_NEED_GENERATION"], rejected)
                 self.assertEqual(context["success"], not rejected)
                 self.assertEqual(context["generation_failures"], 1 if rejected else 0)
