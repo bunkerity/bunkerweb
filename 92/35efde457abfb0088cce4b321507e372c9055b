@@ -1,0 +1,32 @@
+tests/core/ipv6-only/check.py
+  s_1753e32751b643::t_11aa74836bad7d 117
+  s_1753e32751b643::t_4d5cf722b8520a 72-81
+  s_1753e32751b643::t_bd17ef925ec292 22-24
+  s_1753e32751b643::t_accdc557fa0840 127
+tests/core/ipv6-only/test_sockets.py
+  s_35e602e57103fa::t_3693ecaf643755 194-217
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "9235efde457abfb0088cce4b321507e372c9055b",
+  "prompts": {},
+  "sessions": {
+    "s_1753e32751b643": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "d7b305da-e6be-4cfa-ad40-cc6b95ce7380",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_35e602e57103fa": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "d56ede09-d3e5-497d-9cb4-6cab27eb1321",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}
