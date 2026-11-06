@@ -1949,11 +1949,14 @@ def main() -> None:
                     LOGGER.error(f"The configuration was not confirmed, retrying the generation in {retry_delay}s ...")
                 elif not success and reachable:
                     LOGGER.error("Error while reloading bunkerweb, failing over to last working configuration ...")
-                    if (
-                        not FAILOVER_PATH.joinpath("config").is_dir()
-                        or not FAILOVER_PATH.joinpath("custom_configs").is_dir()
-                        or not FAILOVER_PATH.joinpath("cache").is_dir()
-                    ):
+                    failover_dirs = [FAILOVER_PATH / name for name in ("config", "custom_configs", "cache")]
+                    failover_available = all(failover_dir.is_dir() for failover_dir in failover_dirs)
+                    if not failover_available:
+                        # Temporary files may be aged away while the scheduler keeps running.
+                        failover_available = JOB.restore_cache(job_name="failover-backup", plugin_id="jobs") and all(
+                            failover_dir.is_dir() for failover_dir in failover_dirs
+                        )
+                    if not failover_available:
                         LOGGER.error("No failover configuration found, ignoring failover ...")
                     else:
                         # Failover to last working configuration

@@ -39,6 +39,7 @@
 - [BUGFIX] `securitytxt`: sort the fields alphabetically and keep repeatable values in their configured order (Fixes #3705).
 - [BUGFIX] `misc`: an external plugin download that fails (HTTP, connection or archive error) now fails the job instead of reporting success.
 - [BUGFIX] `linux`: `systemctl reload` of the API and UI signals the running Gunicorn master; restart the service after editing its env file.
+- [BUGFIX] `scheduler`: rebuild missing failover snapshots from the database before rolling back a rejected configuration.
 - [PERF] `core`: cut request-path CPU by 14.2% for HTTP proxy traffic and by 33.3% for TLS proxy traffic with the community blacklists.
 - [PERF] `blacklist`: reuse downloaded lists between requests instead of copying and deduplicating them each time.
 - [PERF] `core`: build the reserved-address matcher once per worker and cache successful plugin module lookups.
