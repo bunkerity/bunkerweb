@@ -35,6 +35,7 @@
 - [BUGFIX] `blacklist`, `greylist`, `whitelist`: keep a feed's last valid entries when its download fails or returns no valid entry.
 - [BUGFIX] `linux`: Debian package rollback no longer overwrites or deletes the existing upgrade backups.
 - [BUGFIX] `securitytxt`: sort the fields alphabetically and keep repeatable values in their configured order (Fixes #3705).
+- [BUGFIX] `misc`: an external plugin download that fails (HTTP, connection or archive error) now fails the job instead of reporting success.
 - [PERF] `core`: cut request-path CPU by 14.2% for HTTP proxy traffic and by 33.3% for TLS proxy traffic with the community blacklists.
 - [PERF] `blacklist`: reuse downloaded lists between requests instead of copying and deduplicating them each time.
 - [PERF] `core`: build the reserved-address matcher once per worker and cache successful plugin module lookups.

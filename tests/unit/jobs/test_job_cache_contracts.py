@@ -832,7 +832,7 @@ def test_plugin_download_failure_keeps_previous_plugin_files_and_db_archive(runt
     assert job.db.set_metadata({"last_pro_check": None}) == ""
     body = b"corrupt" if failure == "corrupt" else b""
     _, status = run(env=env, get=Mock(return_value=_response(body, 503 if failure == "http" else 200, "application/zip")))
-    assert status == (0 if plugin == "misc" else 2)
+    assert status == 2
     assert (root / "demo/jobs/run.py").read_bytes() == b"print('fixture')\n"
     with session(job.db) as s:
         installed = s.get(Plugins, "demo")
