@@ -801,16 +801,16 @@ jobs:
             echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
 
-  # Create doc PDF
+  # Build the PDF before approval so documentation failures surface alongside builds.
   doc-pdf:
-    needs: [prepare, gate]
+    needs: [prepare]
     uses: ./.github/workflows/doc-to-pdf.yml
     with:
       VERSION: ${{ needs.prepare.outputs.version }}
 
   # Push on GH
   push-gh:
-    needs: [prepare, candidates, doc-pdf]
+    needs: [prepare, candidates, doc-pdf, gate]
     permissions:
       contents: write
       discussions: write
