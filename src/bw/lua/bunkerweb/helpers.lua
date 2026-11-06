@@ -242,7 +242,13 @@ helpers.order_plugins = function(plugins, variables)
 	return true, result_orders, missing_plugins
 end
 
+local required_plugins = {}
+local require_messages = {}
 helpers.require_plugin = function(id)
+	local cached = required_plugins[id]
+	if cached then
+		return cached, require_messages[id]
+	end
 	-- Require call
 	local ok, plugin_lua = pcall(require, id .. "/" .. id)
 	if not ok then
@@ -256,7 +262,10 @@ helpers.require_plugin = function(id)
 		return false, "missing new() method for plugin " .. id
 	end
 	-- Return plugin
-	return plugin_lua, "require() call successful for plugin " .. id
+	local message = "require() call successful for plugin " .. id
+	required_plugins[id] = plugin_lua
+	require_messages[id] = message
+	return plugin_lua, message
 end
 
 helpers.new_plugin = function(plugin_lua, ctx)
@@ -282,14 +291,14 @@ helpers.call_plugin = function(plugin, method)
 		return false, plugin:get_id() .. ":" .. method .. "() returned nil value"
 	end
 	-- Check values
-	local missing_values = {}
-	local required_values = { "ret", "msg" }
-	for _, value in ipairs(required_values) do
-		if ret[value] == nil then
-			table.insert(missing_values, value)
+	if ret.ret == nil or ret.msg == nil then
+		local missing_values = {}
+		if ret.ret == nil then
+			table.insert(missing_values, "ret")
 		end
-	end
-	if #missing_values > 0 then
+		if ret.msg == nil then
+			table.insert(missing_values, "msg")
+		end
 		return false, "missing required return value(s) : " .. encode(missing_values)
 	end
 	-- Return

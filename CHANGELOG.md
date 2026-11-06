@@ -12,6 +12,7 @@
 - [BUGFIX] `autoconf`: a health change of a BunkerWeb instance no longer triggers a full configuration regeneration and reload.
 - [BUGFIX] `metrics`: blocked requests logged just before a reload are no longer missing from the reports.
 - [PERF] `blacklist`: reuse downloaded lists between requests instead of copying and deduplicating them each time.
+- [PERF] `core`: build the reserved-address matcher once per worker and cache successful plugin module lookups.
 - [PERF] `sessions`: stop reading the random cookie name and secret from shared memory on every request.
 
 ## v1.6.18~rc3 - 2026/11/05
