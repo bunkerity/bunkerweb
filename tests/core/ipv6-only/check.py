@@ -52,22 +52,35 @@ def logs(container):
     return process.stdout + process.stderr
 
 
-def sockets(since=0):
-    rows = [json.loads(line) for line in (ROOT / "sockets.jsonl").read_text().splitlines()]
+def sockets(since=0, timeout=90):
+    deadline = time.monotonic() + timeout
+    while True:
+        # The writer can be mid-append; only newline-terminated JSONL records are complete.
+        lines = (ROOT / "sockets.jsonl").read_text().split("\n")[:-1]
+        rows = [json.loads(line) for line in lines]
+        pending = check_socket_samples(rows, since)
+        if pending is None:
+            return
+        remaining = deadline - time.monotonic()
+        assert remaining > 0, pending
+        time.sleep(min(1, remaining))
+
+
+def check_socket_samples(rows, since):
+    pending = None
     for container in CONTAINERS:
         samples = [row for row in rows if row["container"] == container]
-        assert any(row["code"] == 0 for row in samples), ("NO_SOCKET_SAMPLES", container)
+        if not any(row["code"] == 0 for row in samples):
+            pending = pending or ("NO_SOCKET_SAMPLES", container)
         for family in ("-4", "-6"):
-            assert any(row["code"] == 0 and row["time"] >= since and row["command"][0:2] == ["ss", family] for row in samples), (
-                "NO_POST_RELOAD_SAMPLE",
-                container,
-                family,
-            )
+            if not any(row["code"] == 0 and row["time"] >= since and row["command"][0:2] == ["ss", family] for row in samples):
+                pending = pending or ("NO_POST_RELOAD_SAMPLE", container, family)
         last_success = {tuple(row["command"]): index for index, row in enumerate(samples) if row["code"] == 0}
         for index, row in enumerate(samples):
             if row["code"]:
                 # Restarts can interrupt any probe; require the same command to recover before accepting the capture.
-                assert index < last_success.get(tuple(row["command"]), -1), ("CAPTURE_FAILED", row)
+                if index >= last_success.get(tuple(row["command"]), -1):
+                    pending = pending or ("CAPTURE_FAILED", row)
                 continue
             if row["command"] == ["ip", "-j", "addr"]:
                 addresses = [
@@ -96,12 +109,14 @@ def sockets(since=0):
     }
     wildcards = sorted(set(found.values()))
     (ROOT / "ipv4-wildcard-listeners.json").write_text(json.dumps(wildcards, indent=2))
-    print("SOCKET_SAMPLES_OK", len(rows), "snapshots; no non-loopback IPv4 address/route/peer", flush=True)
-    print("IPV4_WILDCARD_LISTENERS", json.dumps(wildcards), flush=True)
     # Known product limitation: the core renders IPv4 `listen` directives next to the IPv6 ones. On an IPv4-disabled
     # network they carry no traffic. Remove this allowlist once the product can drop them.
     unexpected = sorted(found[key] for key in found if key not in ALLOWED_IPV4_WILDCARDS)
     assert not unexpected, ("STRICT_LOOPBACK_ONLY_SOCKET_GATE", unexpected)
+    if pending is None:
+        print("SOCKET_SAMPLES_OK", len(rows), "snapshots; no non-loopback IPv4 address/route/peer", flush=True)
+        print("IPV4_WILDCARD_LISTENERS", json.dumps(wildcards), flush=True)
+    return pending
 
 
 def jobs():
@@ -182,7 +197,6 @@ def check(name):
         assert response["status"] == 200 and json.loads(response["body"]).get("confirmed") is True, response
         reloaded = time.time()
         probe.status(200)
-        time.sleep(10)
         sockets(reloaded)
     elif name == "o7_jobs":
         jobs()
