@@ -585,6 +585,29 @@ end
 
 BunkerWeb utilise un planificateur de tâches interne pour des tâches périodiques telles que le renouvellement des certificats avec certbot, le téléchargement de listes noires, le téléchargement de fichiers MMDB, ... Vous pouvez ajouter des tâches de votre choix en les plaçant dans un sous-dossier nommé **tâches** et en les répertoriant dans le  fichier de métadonnées **plugin.json**. N'oubliez pas d'ajouter les permissions d'exécution pour tout le monde afin d'éviter tout problème lorsqu'un utilisateur clone et installe votre plugin.
 
+#### Entrées sensibles du cache des jobs
+
+Un job qui met un secret en cache (une clé propre à l’installation, un jeton, des identifiants) marque l’entrée comme sensible par son nom stocké :
+
+- Le nom est exactement `secret`, ou se termine par `.secret` (par exemple `token.secret`). La comparaison est sensible à la casse : `SECRET` et `token.SECRET` sont des noms ordinaires.
+- Un `.tgz` final est ignoré : un répertoire mis en cache avec `cache_dir` est donc sensible si son propre nom suit la règle. `state.secret` est stocké sous `folder:<chemin>/state.secret.tgz`. Seul le dernier composant du chemin compte, `folder:<chemin>/secret/other.tgz` est une entrée ordinaire.
+
+La lecture d’une entrée sensible est alors restreinte :
+
+- **API** : `GET /cache/{service}/{plugin}/{job}/{file}` renvoie `403` sauf si l’appelant s’est authentifié en HTTP Basic comme administrateur de l’API ou avec l’`API_TOKEN`. Un jeton Biscuit est refusé même s’il a été émis pour un administrateur. `GET /cache?with_data=true` omet `data` et `printable` pour ces entrées et garde les métadonnées (nom, checksum, dernière mise à jour). `DELETE` est inchangé.
+- **Interface web** : l’affichage et le téléchargement renvoient `403` sauf pour un super administrateur (l’indicateur `admin`, pas un rôle attribué). La page du cache continue de lister l’entrée.
+
+La restriction porte sur la lecture par l’API et par l’interface web. Elle ne chiffre pas les octets stockés, ne masque ni le nom ni le checksum, et ne change pas la façon dont le scheduler restaure le fichier. Les entrées déjà nommées `secret` ou `*.secret`, et quelques entrées du cœur qui contiennent des clés privées ou des identifiants sous des noms fixes (dont les clés clientes mTLS vers l’upstream et l’archive de sauvegarde de failover, qui regroupe tout le cache des jobs), sont restreintes à partir de 1.6.18, sans renommage.
+
+Pour s’appuyer sur la restriction, détectez-la à l’exécution, car un cœur plus ancien sert toute entrée à tout appelant de l’API muni d’un Biscuit `cache_read` :
+
+```python
+try:
+    from common_utils import SENSITIVE_JOB_CACHE_SUPPORTED  # type: ignore
+except ImportError:
+    SENSITIVE_JOB_CACHE_SUPPORTED = False
+```
+
 ### Page du plugin
 
 Tout ce qui concerne l'interface utilisateur web se trouve dans le sous-dossier **ui** comme nous l'avons vu dans la [section précédente sur la structure.](#structure).

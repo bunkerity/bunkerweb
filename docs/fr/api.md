@@ -409,6 +409,7 @@ Désactivez docs ou schéma en mettant leurs URLs à `off|disabled|none|false|0`
   - `GET /cache` : lister les fichiers de cache avec filtres (`service`, `plugin`, `job_name`) ; `with_data=true` intègre le contenu imprimable.
   - `GET /cache/{service}/{plugin}/{job}/{file}` : récupérer/télécharger un fichier de cache spécifique (`download=true`).
   - `DELETE /cache` ou `DELETE /cache/{service}/{plugin}/{job}/{file}` : supprimer des fichiers de cache. Le scheduler n’est notifié que pour un plugin dont une ligne a réellement été supprimée ; un `plugin` qui ne possède pas le job est refusé et rien n’est supprimé.
+  - Entrées sensibles (nom stocké `secret` ou se terminant par `.secret`, plus quelques entrées du cœur contenant des clés privées ou des identifiants, les clés clientes mTLS vers l’upstream et l’archive de sauvegarde de failover) : `GET /cache/{service}/{plugin}/{job}/{file}` renvoie `403` et `GET /cache?with_data=true` omet `data` et `printable` (les métadonnées restent), sauf si l’appelant utilise HTTP Basic comme administrateur de l’API ou l’`API_TOKEN`. Un jeton Biscuit est refusé même s’il a été émis pour un administrateur. Le `403` est aussi renvoyé pour un nom sensible qui n’existe pas. `DELETE` est inchangé et exige toujours `cache_delete`. Voir [Entrées sensibles du cache des jobs](plugins.md#entrees-sensibles-du-cache-des-jobs).
 - **Jobs**
   - `GET /jobs` : lister jobs, plannings et résumés de cache.
   - `POST /jobs/run` : marquer des plugins comme modifiés pour déclencher les jobs associés.

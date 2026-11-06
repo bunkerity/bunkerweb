@@ -588,6 +588,29 @@ end
 
 BunkerWeb uses an internal job scheduler for periodic tasks like renewing certificates with certbot, downloading blacklists, downloading MMDB files, ... You can add tasks of your choice by putting them inside a subfolder named **jobs** and listing them in the **plugin.json** metadata file. Don't forget to add the execution permissions for everyone to avoid any problems when a user is cloning and installing your plugin.
 
+#### Sensitive job-cache entries
+
+A job that caches a secret (a per-install key, a token, credentials) marks the entry as sensitive through its stored name:
+
+- The name is exactly `secret`, or ends with `.secret` (for example `token.secret`). The match is case-sensitive: `SECRET` and `token.SECRET` are ordinary names.
+- One trailing `.tgz` is ignored, so a directory cached with `cache_dir` is sensitive when its own name follows the rule: `state.secret` is stored as `folder:<path>/state.secret.tgz`. Only the last path component counts, `folder:<path>/secret/other.tgz` is an ordinary entry.
+
+Reading a sensitive entry is then restricted:
+
+- **API**: `GET /cache/{service}/{plugin}/{job}/{file}` returns `403` unless the caller authenticated with HTTP Basic as an API administrator or with the `API_TOKEN`. A Biscuit token is refused even when it was issued to an administrator. `GET /cache?with_data=true` omits `data` and `printable` for such entries and keeps the metadata (name, checksum, last update). `DELETE` is unchanged.
+- **Web UI**: viewing and downloading return `403` unless the user is a super administrator (the `admin` flag, not an assigned role). The cache page still lists the entry.
+
+The restriction applies to reading through the API and the web UI. It does not encrypt the stored bytes, does not hide the name or the checksum, and does not change how the scheduler restores the file. Entries already named `secret` or `*.secret`, and a few core entries that hold private keys or credentials under fixed names (including the upstream mTLS client keys and the failover backup archive, which bundles the whole job cache), are restricted from 1.6.18 on, without any rename.
+
+To rely on the restriction, detect it, because an older core serves every entry to any API caller holding a `cache_read` Biscuit:
+
+```python
+try:
+    from common_utils import SENSITIVE_JOB_CACHE_SUPPORTED  # type: ignore
+except ImportError:
+    SENSITIVE_JOB_CACHE_SUPPORTED = False
+```
+
 ### Plugin page
 
 Everything related to the web UI is located inside the subfolder **ui** as we seen in the [previous structure section.](#structure).

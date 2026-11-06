@@ -585,6 +585,29 @@ end
 
 BunkerWeb utiliza un programador de trabajos interno para tareas periódicas como renovar certificados con certbot, descargar listas negras, descargar archivos MMDB, ... Puedes añadir tareas de tu elección colocándolas dentro de una subcarpeta llamada **jobs** y listándolas en el archivo de metadatos **plugin.json**. No olvides añadir los permisos de ejecución para todos para evitar cualquier problema cuando un usuario clone e instale tu plugin.
 
+#### Entradas sensibles de la caché de jobs
+
+Un job que guarda un secreto en la caché (una clave propia de la instalación, un token, credenciales) marca la entrada como sensible mediante su nombre almacenado:
+
+- El nombre es exactamente `secret` o termina en `.secret` (por ejemplo `token.secret`). La comparación distingue mayúsculas y minúsculas: `SECRET` y `token.SECRET` son nombres normales.
+- Se ignora un `.tgz` final, así que un directorio guardado con `cache_dir` es sensible cuando su propio nombre sigue la regla: `state.secret` se almacena como `folder:<ruta>/state.secret.tgz`. Solo cuenta el último componente de la ruta: `folder:<ruta>/secret/other.tgz` es una entrada normal.
+
+La lectura de una entrada sensible queda entonces restringida:
+
+- **API**: `GET /cache/{service}/{plugin}/{job}/{file}` devuelve `403` salvo que quien llama se haya autenticado con HTTP Basic como administrador de la API o con el `API_TOKEN`. Un token Biscuit se rechaza incluso si se emitió para un administrador. `GET /cache?with_data=true` omite `data` y `printable` de esas entradas y conserva los metadatos (nombre, checksum, última actualización). `DELETE` no cambia.
+- **Interfaz web**: ver y descargar devuelven `403` salvo que el usuario sea superadministrador (el indicador `admin`, no un rol asignado). La página de caché sigue listando la entrada.
+
+La restricción se aplica a la lectura a través de la API y de la interfaz web. No cifra los bytes almacenados, no oculta el nombre ni el checksum y no cambia cómo el scheduler restaura el archivo. Las entradas que ya se llaman `secret` o `*.secret`, y algunas entradas del core que guardan claves privadas o credenciales con nombres fijos (incluidas las claves de cliente mTLS hacia el upstream y el archivo de copia de seguridad de failover, que agrupa toda la caché de los jobs), quedan restringidas desde 1.6.18 sin renombrar nada.
+
+Para apoyarse en la restricción, deténtala en tiempo de ejecución, porque un core anterior sirve cualquier entrada a cualquier llamada de la API con un Biscuit `cache_read`:
+
+```python
+try:
+    from common_utils import SENSITIVE_JOB_CACHE_SUPPORTED  # type: ignore
+except ImportError:
+    SENSITIVE_JOB_CACHE_SUPPORTED = False
+```
+
 ### Página del plugin
 
 Todo lo relacionado con la interfaz de usuario web se encuentra dentro de la subcarpeta **ui**, como vimos en la [sección de estructura anterior.](#estructura).

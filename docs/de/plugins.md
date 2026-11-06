@@ -584,6 +584,29 @@ end
 
 BunkerWeb verwendet einen internen Job-Scheduler für periodische Aufgaben wie die Erneuerung von Zertifikaten mit Certbot, das Herunterladen von Blacklists, das Herunterladen von MMDB-Dateien usw. Sie können Aufgaben Ihrer Wahl hinzufügen, indem Sie sie in einen Unterordner namens **jobs** legen und sie in der Metadatendatei **plugin.json** auflisten. Vergessen Sie nicht, die Ausführungsberechtigungen für alle hinzuzufügen, um Probleme zu vermeiden, wenn ein Benutzer Ihr Plugin klont und installiert.
 
+#### Sensible Job-Cache-Einträge
+
+Ein Job, der ein Geheimnis zwischenspeichert (einen installationsspezifischen Schlüssel, ein Token, Zugangsdaten), kennzeichnet den Eintrag über seinen gespeicherten Namen als sensibel:
+
+- Der Name lautet genau `secret` oder endet auf `.secret` (zum Beispiel `token.secret`). Die Prüfung unterscheidet Groß- und Kleinschreibung: `SECRET` und `token.SECRET` sind gewöhnliche Namen.
+- Ein abschließendes `.tgz` wird ignoriert. Ein mit `cache_dir` zwischengespeichertes Verzeichnis ist daher sensibel, wenn sein eigener Name der Regel folgt: `state.secret` wird als `folder:<Pfad>/state.secret.tgz` gespeichert. Nur die letzte Pfadkomponente zählt, `folder:<Pfad>/secret/other.tgz` ist ein gewöhnlicher Eintrag.
+
+Das Lesen eines sensiblen Eintrags ist dann eingeschränkt:
+
+- **API**: `GET /cache/{service}/{plugin}/{job}/{file}` liefert `403`, sofern sich der Aufrufer nicht per HTTP Basic als API-Administrator oder mit dem `API_TOKEN` authentifiziert hat. Ein Biscuit-Token wird auch dann abgelehnt, wenn er für einen Administrator ausgestellt wurde. `GET /cache?with_data=true` lässt `data` und `printable` solcher Einträge weg und behält die Metadaten (Name, Prüfsumme, letzte Aktualisierung). `DELETE` bleibt unverändert.
+- **Web-UI**: Anzeigen und Herunterladen liefern `403`, sofern der Benutzer kein Super-Administrator ist (das Flag `admin`, nicht eine zugewiesene Rolle). Die Cache-Seite listet den Eintrag weiterhin auf.
+
+Die Einschränkung gilt für das Lesen über API und Web-UI. Sie verschlüsselt die gespeicherten Bytes nicht, verbirgt weder Namen noch Prüfsumme und ändert nichts daran, wie der Scheduler die Datei wiederherstellt. Bereits vorhandene Einträge namens `secret` oder `*.secret` sowie einige Core-Einträge, die private Schlüssel oder Zugangsdaten unter festen Namen enthalten (darunter die mTLS-Client-Schlüssel für Upstreams und das Failover-Backup-Archiv, das den gesamten Job-Cache bündelt), sind ab 1.6.18 eingeschränkt, ohne Umbenennung.
+
+Wer sich auf die Einschränkung verlassen will, erkennt sie zur Laufzeit, denn ein älterer Core liefert jeden Eintrag an jeden API-Aufrufer mit einem `cache_read`-Biscuit aus:
+
+```python
+try:
+    from common_utils import SENSITIVE_JOB_CACHE_SUPPORTED  # type: ignore
+except ImportError:
+    SENSITIVE_JOB_CACHE_SUPPORTED = False
+```
+
 ### Plugin-Seite
 
 Alles, was mit der Web-UI zu tun hat, befindet sich im Unterordner **ui**, wie wir im [vorherigen Strukturabschnitt](#struktur) gesehen haben.

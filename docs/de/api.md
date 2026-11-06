@@ -409,6 +409,7 @@ Docs oder Schema deaktivieren, indem die zugehörigen URLs auf `off|disabled|non
   - `GET /cache`: Cache-Dateien mit Filtern (`service`, `plugin`, `job_name`) auflisten; `with_data=true` bettet druckbaren Inhalt ein.
   - `GET /cache/{service}/{plugin}/{job}/{file}`: spezifische Cache-Datei holen/herunterladen (`download=true`).
   - `DELETE /cache` oder `DELETE /cache/{service}/{plugin}/{job}/{file}`: Cache-Dateien löschen. Der Scheduler wird nur für ein Plugin benachrichtigt, dessen Zeile tatsächlich gelöscht wurde; ein `plugin`, dem der Job nicht gehört, wird abgelehnt und nichts wird gelöscht.
+  - Sensible Einträge (gespeicherter Name `secret` oder auf `.secret` endend, dazu einige Core-Einträge mit privaten Schlüsseln oder Zugangsdaten die mTLS-Client-Schlüssel für Upstreams und das Failover-Backup-Archiv): `GET /cache/{service}/{plugin}/{job}/{file}` liefert `403`, und `GET /cache?with_data=true` lässt `data` und `printable` weg (die Metadaten bleiben), sofern der Aufrufer nicht HTTP Basic als API-Administrator oder den `API_TOKEN` verwendet hat. Ein Biscuit-Token wird auch dann abgelehnt, wenn er für einen Administrator ausgestellt wurde. Das `403` kommt auch bei einem sensiblen Namen, der nicht existiert. `DELETE` bleibt unverändert und benötigt weiterhin `cache_delete`. Siehe [Sensible Job-Cache-Einträge](plugins.md#sensible-job-cache-eintrage).
 - **Jobs**
   - `GET /jobs`: Jobs, Zeitpläne und Cache-Zusammenfassungen auflisten.
   - `POST /jobs/run`: Plugins als geändert markieren, um zugehörige Jobs auszulösen.

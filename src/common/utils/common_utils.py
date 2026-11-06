@@ -46,6 +46,44 @@ _HOSTNAME_LABEL_RX = re_compile(r"^(?!-)[A-Za-z0-9_-]{1,63}(?<!-)$")
 _DURATION_RX = re_compile(r"^([0-9]+(?:\.[0-9]+)?)(ms|[smhdwMy])?$")
 _DURATION_UNITS_MS = {"ms": 1, "s": 1000, "m": 60000, "h": 3600000, "d": 86400000, "w": 604800000, "M": 2592000000, "y": 31536000000}
 
+# Plugins feature-detect the job-cache restriction with `try: from common_utils import SENSITIVE_JOB_CACHE_SUPPORTED`.
+# Published only while both the API and the UI enforce it.
+SENSITIVE_JOB_CACHE_SUPPORTED: bool = True
+# Core entries that hold keys or credentials under names that cannot be renamed (readers and restore paths depend on
+# them), keyed by (plugin id, job name). Plugin-scoped on purpose: `key.pem` is public material for other plugins.
+_SENSITIVE_CORE_JOB_CACHE_RX = {
+    ("customcert", "custom-cert"): re_compile(r"key\.pem"),
+    ("selfsigned", "self-signed"): re_compile(r"key\.pem"),
+    ("misc", "default-server-cert"): re_compile(r"default-server-cert\.key"),
+    ("jobs", "api-server-cert"): re_compile(r"api-server-cert\.key"),
+    ("letsencrypt", "certbot-new"): re_compile(r"credentials_[0-9a-f]{12}\.[a-z]+|folder:/var/cache/bunkerweb/letsencrypt/etc\.tgz"),
+    ("letsencrypt", "certbot-renew"): re_compile(r"folder:/var/cache/bunkerweb/letsencrypt/etc\.tgz"),
+    ("crowdsec", "crowdsec-conf"): re_compile(r"crowdsec\.conf"),
+    # Archive of config, custom configs and the whole job cache (every key above included). Every name of the job, not only
+    # today's `folder:/var/tmp/bunkerweb/failover.tgz`, so a changed FAILOVER_PATH cannot reopen it.
+    ("jobs", "failover-backup"): re_compile(r"(?s).*"),
+    # Upstream mTLS client key, stored under the bare name (the service is a separate column). The CA, certificate and CRL are public.
+    ("reverseproxy", "trusted-cert"): re_compile(r"client-key\.pem"),
+    ("grpc", "grpc-trusted-cert"): re_compile(r"client-key\.pem"),
+}
+
+
+def is_sensitive_job_cache_file(file_name: str, plugin_id: str = "", job_name: str = "") -> bool:
+    """Tell whether a stored job-cache name holds secret material that only administrators may read.
+
+    ``file_name`` is the stored name, already normalised by the caller (never a raw URL token). The convention is the
+    final slash-separated component, minus at most one trailing ``.tgz``, being exactly ``secret`` or ending with
+    ``.secret``; it is case-sensitive. The core mapping applies when ``plugin_id`` and ``job_name`` identify one of its
+    entries. Its keys are compared case-insensitively because a database collation may match them that way.
+    """
+    if not isinstance(file_name, str):
+        return False
+    base = file_name.rsplit("/", 1)[-1].removesuffix(".tgz")
+    if base == "secret" or base.endswith(".secret"):
+        return True
+    pattern = _SENSITIVE_CORE_JOB_CACHE_RX.get((plugin_id.lower(), job_name.lower()))
+    return bool(pattern and pattern.fullmatch(file_name.lower()))
+
 
 def parse_duration(value: Any, default_unit: str = "s") -> Union[int, float]:
     """Return a duration expressed in ``default_unit``.

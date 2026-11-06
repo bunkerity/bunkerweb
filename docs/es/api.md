@@ -409,6 +409,7 @@ Desactiva docs o esquema poniendo sus URLs en `off|disabled|none|false|0`. Defin
   - `GET /cache`: lista archivos de caché con filtros (`service`, `plugin`, `job_name`); `with_data=true` incrusta contenido imprimible.
   - `GET /cache/{service}/{plugin}/{job}/{file}`: obtiene/descarga un archivo de caché específico (`download=true`).
   - `DELETE /cache` o `DELETE /cache/{service}/{plugin}/{job}/{file}`: borra archivos de caché. Solo se notifica al scheduler para un plugin cuya fila se borró de verdad; un `plugin` que no posee el job se rechaza y no se borra nada.
+  - Entradas sensibles (nombre almacenado `secret` o terminado en `.secret`, más algunas entradas del core con claves privadas o credenciales las claves de cliente mTLS hacia el upstream y el archivo de copia de seguridad de failover): `GET /cache/{service}/{plugin}/{job}/{file}` devuelve `403` y `GET /cache?with_data=true` omite `data` y `printable` (los metadatos se mantienen), salvo que quien llama use HTTP Basic como administrador de la API o el `API_TOKEN`. Un token Biscuit se rechaza incluso si se emitió para un administrador. El `403` también se devuelve para un nombre sensible que no existe. `DELETE` no cambia y sigue necesitando `cache_delete`. Consulta [Entradas sensibles de la caché de jobs](plugins.md#entradas-sensibles-de-la-cache-de-jobs).
 - **Jobs**
   - `GET /jobs`: lista jobs, horarios y resúmenes de caché.
   - `POST /jobs/run`: marca plugins como cambiados para disparar los jobs asociados.

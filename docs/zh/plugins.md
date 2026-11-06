@@ -585,6 +585,29 @@ end
 
 BunkerWeb 使用内部作业调度器来执行定期任务，例如使用 certbot 续订证书、下载黑名单、下载 MMDB 文件等。您可以通过将任务放入名为 **jobs** 的子文件夹中，并在 **plugin.json** 元数据文件中列出它们来添加您选择的任务。不要忘记为每个人添加执行权限，以避免用户克隆和安装您的插件时出现任何问题。
 
+#### 敏感的作业缓存条目 {#sensitive-job-cache-entries}
+
+缓存机密（安装专属密钥、令牌、凭据）的作业，通过缓存条目的存储名称将其标记为敏感：
+
+- 名称恰好为 `secret`，或以 `.secret` 结尾（例如 `token.secret`）。匹配区分大小写：`SECRET` 和 `token.SECRET` 是普通名称。
+- 末尾的一个 `.tgz` 会被忽略，因此用 `cache_dir` 缓存的目录，只要其自身名称符合规则即为敏感：`state.secret` 存储为 `folder:<路径>/state.secret.tgz`。只看路径的最后一个组成部分，`folder:<路径>/secret/other.tgz` 是普通条目。
+
+读取敏感条目随即受限：
+
+- **API**：`GET /cache/{service}/{plugin}/{job}/{file}` 返回 `403`，除非调用方以 HTTP Basic 身份作为 API 管理员认证，或使用 `API_TOKEN`。即使 Biscuit 令牌是为管理员签发的，也会被拒绝。`GET /cache?with_data=true` 对这些条目省略 `data` 和 `printable`，保留元数据（名称、校验和、最后更新时间）。`DELETE` 不变。
+- **Web UI**：查看和下载返回 `403`，除非用户是超级管理员（`admin` 标志，而非分配的角色）。缓存页面仍会列出该条目。
+
+此限制只针对通过 API 和 Web UI 的读取。它不会加密已存储的字节，不会隐藏名称或校验和，也不会改变调度器恢复文件的方式。已命名为 `secret` 或 `*.secret` 的条目，以及少数以固定名称保存私钥或凭据的核心条目（包括上游 mTLS 客户端密钥和汇总整个作业缓存的故障转移备份归档），从 1.6.18 起受到限制，无需重命名。
+
+若要依赖该限制，请在运行时检测它，因为较旧的核心会向任何持有 `cache_read` Biscuit 的 API 调用方提供所有条目：
+
+```python
+try:
+    from common_utils import SENSITIVE_JOB_CACHE_SUPPORTED  # type: ignore
+except ImportError:
+    SENSITIVE_JOB_CACHE_SUPPORTED = False
+```
+
 ### 插件页面
 
 与 Web UI 相关的所有内容都位于 **ui** 子文件夹中，正如我们在[之前的结构部分](#structure)中看到的那样。
