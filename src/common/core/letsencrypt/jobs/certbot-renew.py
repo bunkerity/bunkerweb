@@ -4,15 +4,17 @@ from hashlib import sha256
 from os import getenv, sep
 from os.path import join
 from pathlib import Path
+from re import MULTILINE, search
 from subprocess import DEVNULL, PIPE, Popen
 from sys import exit as sys_exit, path as sys_path
 from traceback import format_exc
-from typing import Dict
+from typing import Dict, Optional
 
 for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("utils",), ("db",))]:
     if deps_path not in sys_path:
         sys_path.append(deps_path)
 
+from common_utils import bytes_hash  # type: ignore
 from logger import getLogger  # type: ignore
 from jobs import Job  # type: ignore
 from certbot_concurrency import ensure_accounts_for_orphans
@@ -33,11 +35,14 @@ from letsencrypt_utils import (
     is_zerossl_used_in_env,
     le_cache_write_lock,
     letsencrypt_cache_consistent,
+    load_hashes,
     prepare_logs_dir,
     purge_stale_account,
     purge_stale_account_by_uri,
     resolve_certbot_entrypoint,
+    route53_credentials_hashes_path,
     sanitize_and_persist,
+    save_hashes,
     setup_route53_aws_config,
     stale_account_uri,
     stream_certbot,
@@ -78,6 +83,48 @@ def publication_status(status: int, before: Dict[str, str], after: Dict[str, str
     if not rotated or status not in (0, 2):
         return status
     return 1 if status == 0 else 3
+
+
+def route53_credentials_hash(credentials_file: Optional[str]) -> str:
+    """Return the hash of the route53 credentials this run authenticated with, or '' if none."""
+    if not credentials_file:
+        return ""
+    try:
+        return bytes_hash(Path(credentials_file).read_bytes(), algorithm="sha256")
+    except OSError as e:
+        LOGGER.warning(f"Could not read the route53 credentials file {credentials_file}: {e}")
+        return ""
+
+
+def record_renewed_route53_hashes(before: Dict[str, str], after: Dict[str, str], credentials_hash: str) -> None:
+    """Record the credentials hash of the route53 certificates this run actually renewed.
+
+    certbot-new writes the hash at issuance, but a credential rotation is applied here by the daily
+    renew, which leaves the stored hash at the previous value. The next certbot-new would then
+    delete the certificate this run just renewed and issue another one. Only lineages whose material
+    changed are recorded, so a failed renewal keeps the previous hash and is retried on the next run.
+    """
+    if not credentials_hash:
+        return
+
+    renewed = [name for name, digest in after.items() if before.get(name) != digest]
+    if not renewed:
+        return
+
+    path = route53_credentials_hashes_path(DATA_PATH)
+    stored = load_hashes(path, LOGGER)
+    updated = dict(stored)
+    for name in renewed:
+        try:
+            renewal_content = DATA_PATH.joinpath("renewal", f"{name}.conf").read_text()
+        except OSError:
+            continue
+        if not search(r"^authenticator\s*=\s*dns-route53\s*$", renewal_content, MULTILINE):
+            continue
+        updated[name] = credentials_hash
+
+    if updated != stored:
+        save_hashes(path, updated, LOGGER)
 
 
 before_digests: Dict[str, str] = {}
@@ -191,6 +238,11 @@ try:
         LOGGER.error("Certificates renewal failed")
 
     after_digests = certificate_digests(DATA_PATH)
+
+    # A rotation applied here must be visible to certbot-new, which only runs at startup: without
+    # this it would see the hash stored at the previous issuance, delete the certificate this run
+    # just renewed and issue another one.
+    record_renewed_route53_hashes(before_digests, after_digests, route53_credentials_hash(cmd_env.get("AWS_CONFIG_FILE")))
 
     # Recover in this run, not the next one. The persist below refuses an inconsistent tree, so a
     # purge left unrepaired would never reach the DB row, the dead account would be restored from

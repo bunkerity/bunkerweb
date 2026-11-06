@@ -650,6 +650,52 @@ def test_failed_route53_renewal_keeps_retrying_rotated_credentials(job_run):
     assert issued_commands(job_run) == ["delete", "certonly"]
 
 
+def enable_route53_renewal(monkeypatch):
+    """Let the renew job derive the route53 credentials file from the environment instead of mocking it."""
+
+    def setup(cmd_env, data_path, logger):
+        provider = utils.extract_provider("default", "LETS_ENCRYPT_DNS_CREDENTIAL_ITEM", "route53", True, logger)
+        path = utils.write_provider_credentials_file(provider, data_path)
+        cmd_env["AWS_CONFIG_FILE"] = path
+        return [path]
+
+    monkeypatch.setattr(utils, "setup_route53_aws_config", setup)
+
+
+def test_renewal_records_the_route53_credentials_it_renewed_with(job_run, monkeypatch):
+    route53_certificate(job_run)
+    enable_route53_renewal(monkeypatch)
+    job_run.env["LETS_ENCRYPT_DNS_CREDENTIAL_ITEM_1"] = "aws_secret_access_key rotated-secret"
+    job_run.rotate = True
+
+    _, status = job_run.load("renew")
+    assert status == 1
+
+    credentials_file = Path(job_run.popen.call_args.kwargs["env"]["AWS_CONFIG_FILE"])
+    expected = utils.bytes_hash(credentials_file.read_bytes(), algorithm="sha256")
+    hash_path = utils.route53_credentials_hashes_path(job_run.data)
+    assert json.loads(hash_path.read_text()) == {"app.example.com": expected}
+
+    # The next startup must accept the certificate this renewal produced instead of re-issuing it.
+    job_run.rotate = False
+    job_run.popen.reset_mock()
+    job_run.load()
+    assert issued_commands(job_run) == []
+
+
+def test_renewal_keeps_the_route53_hash_when_nothing_was_renewed(job_run, monkeypatch):
+    route53_certificate(job_run)
+    job_run.load()
+    hash_path = utils.route53_credentials_hashes_path(job_run.data)
+    stored = hash_path.read_text()
+
+    enable_route53_renewal(monkeypatch)
+    job_run.env["LETS_ENCRYPT_DNS_CREDENTIAL_ITEM_1"] = "aws_secret_access_key rotated-secret"
+    job_run.rotate = False
+    job_run.load("renew")
+    assert hash_path.read_text() == stored
+
+
 def test_route53_move_to_a_sibling_services_credentials_forces_renewal(job_run):
     job_run.env.update(MULTISITE="yes", SERVER_NAME="app.example.com other.example.com")
     for service, secret in (("app.example.com", "app-secret"), ("other.example.com", "other-secret")):
@@ -924,7 +970,7 @@ def test_zerossl_hash_write_error_preserves_previous_hash(job_run, monkeypatch):
         return original(path, *args, **kwargs)
 
     monkeypatch.setattr(Path, "write_text", write)
-    module.save_hashes(module.ZEROSSL_API_KEY_HASHES_PATH, {"app.example.com": "new-hash"})
+    module.save_hashes(module.ZEROSSL_API_KEY_HASHES_PATH, {"app.example.com": "new-hash"}, module.LOGGER)
     assert module.load_hashes(module.ZEROSSL_API_KEY_HASHES_PATH) == {"app.example.com": "hash"}
     assert "read-only" in job_run.log.warning.call_args.args[0]
 

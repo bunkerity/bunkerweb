@@ -4,7 +4,6 @@ from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timedelta
 from ipaddress import ip_address
-from json import dumps, loads
 from os import getenv, sep
 from os.path import join
 from pathlib import Path
@@ -53,11 +52,14 @@ from letsencrypt_utils import (
     is_stale_account_line,
     le_cache_write_lock,
     letsencrypt_cache_consistent,
+    load_hashes,
     prepare_logs_dir,
     purge_lineage,
     purge_stale_account,
     resolve_certbot_entrypoint,
+    route53_credentials_hashes_path,
     sanitize_and_persist,
+    save_hashes,
     stream_certbot,
 )
 
@@ -70,7 +72,7 @@ LOGGER_CERTBOT = getLogger("LETS-ENCRYPT.NEW.CERTBOT")
 attach_job_log_file(LOGGER, "certbot-new.log", LOGS_DIR)
 
 ZEROSSL_API_KEY_HASHES_PATH = DATA_PATH.joinpath("renewal", ".bw-zerossl-api-key-hashes.json")
-ROUTE53_CREDENTIALS_HASHES_PATH = DATA_PATH.joinpath("renewal", ".bw-route53-credentials-hashes.json")
+ROUTE53_CREDENTIALS_HASHES_PATH = route53_credentials_hashes_path(DATA_PATH)
 MERGE_LOCK = Lock()
 RUNNING_LOCK = Lock()
 RUNNING_CERTBOT = 0
@@ -273,31 +275,6 @@ def parse_certbot_domains(certificate_block: str) -> str:
 
 def normalize_server_url(url: str) -> str:
     return url.strip().rstrip("/")
-
-
-def load_hashes(path: Path) -> Dict[str, str]:
-    if not path.is_file():
-        return {}
-
-    try:
-        data = loads(path.read_text())
-        if not isinstance(data, dict):
-            return {}
-        return {str(key): str(value) for key, value in data.items()}
-    except BaseException as e:
-        LOGGER.warning(f"Failed to read hash file {path}: {e}")
-        return {}
-
-
-def save_hashes(path: Path, hashes: Dict[str, str]) -> None:
-    try:
-        path.parent.mkdir(parents=True, exist_ok=True)
-        if not hashes:
-            path.unlink(missing_ok=True)
-            return
-        path.write_text(dumps(hashes, sort_keys=True))
-    except BaseException as e:
-        LOGGER.warning(f"Failed to persist hashes to {path}: {e}")
 
 
 def updated_hashes(
@@ -1172,8 +1149,8 @@ try:
 
         LOGGER_CERTBOT.debug(f"Existing certificates: {existing_certificates}")
 
-    zerossl_api_key_hashes = load_hashes(ZEROSSL_API_KEY_HASHES_PATH)
-    route53_credentials_hashes = load_hashes(ROUTE53_CREDENTIALS_HASHES_PATH)
+    zerossl_api_key_hashes = load_hashes(ZEROSSL_API_KEY_HASHES_PATH, LOGGER)
+    route53_credentials_hashes = load_hashes(ROUTE53_CREDENTIALS_HASHES_PATH, LOGGER)
     LOGGER_CERTBOT.debug(f"Stored ZeroSSL API key hashes: {list(zerossl_api_key_hashes.keys())}")
 
     # ? Check if the services' certificates already exist
@@ -1361,7 +1338,9 @@ try:
         configured_api_key_hashes = {
             service: str(config.get("zerossl_api_key_hash") or "") for service, config in services.items() if config.get("acme_server") == "zerossl"
         }
-        save_hashes(ZEROSSL_API_KEY_HASHES_PATH, updated_hashes(zerossl_api_key_hashes, configured_api_key_hashes, services, existing_certificates, listing_ok))
+        save_hashes(
+            ZEROSSL_API_KEY_HASHES_PATH, updated_hashes(zerossl_api_key_hashes, configured_api_key_hashes, services, existing_certificates, listing_ok), LOGGER
+        )
 
         configured_credentials_hashes = {
             service: bytes_hash(config["provider"].get_formatted_credentials(), algorithm="sha256")
@@ -1371,6 +1350,7 @@ try:
         save_hashes(
             ROUTE53_CREDENTIALS_HASHES_PATH,
             updated_hashes(route53_credentials_hashes, configured_credentials_hashes, services, existing_certificates, listing_ok),
+            LOGGER,
         )
 
         # * Save data to db cache

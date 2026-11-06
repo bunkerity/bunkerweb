@@ -1,6 +1,6 @@
 from base64 import b64decode
 from contextlib import suppress
-from json import loads as json_loads
+from json import dumps as json_dumps, loads as json_loads
 from logging import Formatter
 from logging.handlers import RotatingFileHandler
 from os import (
@@ -231,6 +231,40 @@ def write_provider_credentials_file(provider_instance: Provider, data_path: Unio
     finally:
         os_close(fd)
     return cred_file.as_posix()
+
+
+def route53_credentials_hashes_path(data_path: Union[str, Path]) -> Path:
+    """Return the path of the per-certificate route53 credentials hash file."""
+    return Path(data_path).joinpath("renewal", ".bw-route53-credentials-hashes.json")
+
+
+def load_hashes(path: Path, logger=None) -> Dict[str, str]:
+    """Read a JSON service -> hash map, returning an empty one when it is missing or unreadable."""
+    if not path.is_file():
+        return {}
+
+    try:
+        data = json_loads(path.read_text())
+        if not isinstance(data, dict):
+            return {}
+        return {str(key): str(value) for key, value in data.items()}
+    except BaseException as e:
+        if logger is not None:
+            logger.warning(f"Failed to read hash file {path}: {e}")
+        return {}
+
+
+def save_hashes(path: Path, hashes: Dict[str, str], logger=None) -> None:
+    """Write a JSON service -> hash map, removing the file when there is nothing left to track."""
+    try:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        if not hashes:
+            path.unlink(missing_ok=True)
+            return
+        path.write_text(json_dumps(hashes, sort_keys=True))
+    except BaseException as e:
+        if logger is not None:
+            logger.warning(f"Failed to persist hashes to {path}: {e}")
 
 
 def setup_route53_aws_config(cmd_env: Dict[str, str], data_path: Union[str, Path] = LETSENCRYPT_CACHE_PATH, logger=None) -> List[str]:
