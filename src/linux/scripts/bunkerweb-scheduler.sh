@@ -210,7 +210,8 @@ EOL
     # Update configuration files
     if [ "$current_version" != "$installed_version" ]; then
         if [ "$current_version" != "dev" ] && [ "$current_version" != "testing" ]; then
-            if sed -i "s|^version_locations =.*$|version_locations = ${DATABASE}_versions|" alembic.ini; then
+            # Alembic loads revision locations before env.py: configure a private copy, never the packaged file.
+            if sed "s|^version_locations =.*$|version_locations = ${DATABASE}_versions|" alembic.ini > "$bw_tmp_dir/alembic.ini"; then
                 # Find the corresponding Alembic revision by scanning migration files
                 MIGRATION_DIR="/usr/share/bunkerweb/db/alembic/${DATABASE}_versions"
                 NORMALIZED_VERSION=$(echo "$current_version" | tr '.' '_' | tr '-' '_' | tr '~' '_')
@@ -222,10 +223,10 @@ EOL
                 fi
 
                 # Stamp the database with the determined revision
-                if "$PYTHON_BIN" -s -m alembic stamp --purge "$REVISION"; then
+                if ALEMBIC_CONFIG="$bw_tmp_dir/alembic.ini" "$PYTHON_BIN" -s -m alembic stamp --purge "$REVISION"; then
                     # Run database migration
                     log "SYSTEMCTL" "ℹ️" "Running database migration..."
-                    if ! "$PYTHON_BIN" -s -m alembic upgrade head; then
+                    if ! ALEMBIC_CONFIG="$bw_tmp_dir/alembic.ini" "$PYTHON_BIN" -s -m alembic upgrade head; then
                         log "SYSTEMCTL" "❌" "Database migration failed"
                         exit 1
                     fi
