@@ -288,3 +288,146 @@ emit({{ ret = result.ret, msg = result.msg, store = STORE }})
         out = self._init(tmp_path, setup='STORE_SET_ERROR = "no memory"')
         assert out["ret"] is False
         assert out["msg"] == f"can't store blacklist {SERVER} list into internalstore : no memory"
+
+
+def _lists_body(stored: dict, variables: dict | None = None, tail: str = "") -> str:
+    """Two plugin objects built against one stored table, then ``tail`` (which can use ``p1``, ``p2``, ``stored``)."""
+    full_variables = {"USE_BLACKLIST": "yes", "BLACKLIST_RDNS_GLOBAL": "no", **{f"BLACKLIST_{k}": "" for k in KINDS}}
+    full_variables.update(variables or {})
+    return f"""
+VARIABLES = {to_lua(full_variables)}
+local stored = {to_lua({kind: [] for kind in KINDS} | stored)}
+STORE["plugin_blacklist_lists_{SERVER}"] = stored
+local p1, p2 = new_plugin(PLUGIN), new_plugin(PLUGIN)
+{tail}
+"""
+
+
+class TestListReuse:
+    def test_kinds_without_inline_entries_use_the_stored_array_itself(self):
+        out = run_plugin(
+            MODULE,
+            _lists_body(
+                {"IP": ["1.2.3.4"], "URI": ["^/a"], "USER_AGENT": ["Bad"]},
+                tail="""
+local same = {}
+for _, kind in ipairs({ "IP", "ASN", "USER_AGENT", "URI", "IGNORE_IP", "IGNORE_URI" }) do
+    same[kind] = p1.lists[kind] == stored[kind] and p2.lists[kind] == stored[kind]
+end
+emit({ same = same, outer_fresh = p1.lists ~= p2.lists and p1.lists ~= stored })
+""",
+            ),
+        )
+        assert out["same"] == {kind: True for kind in ("IP", "ASN", "USER_AGENT", "URI", "IGNORE_IP", "IGNORE_URI")}
+        assert out["outer_fresh"] is True
+
+    def test_a_kind_with_inline_entries_is_merged_ordered_and_deduplicated_on_a_copy(self):
+        out = run_plugin(
+            MODULE,
+            _lists_body(
+                {"IP": ["1.1.1.1", "2.2.2.2"], "URI": ["^/a"]},
+                variables={"BLACKLIST_IP": "3.3.3.3 1.1.1.1 3.3.3.3"},
+                tail="""
+emit({
+    merged = p1.lists.IP, copied = p1.lists.IP ~= stored.IP and p1.lists.IP ~= p2.lists.IP,
+    stored_ip = stored.IP, uri_shared = p1.lists.URI == stored.URI,
+})
+""",
+            ),
+        )
+        assert out["merged"] == ["1.1.1.1", "2.2.2.2", "3.3.3.3"]
+        assert out["copied"] is True
+        assert out["stored_ip"] == ["1.1.1.1", "2.2.2.2"]
+        assert out["uri_shared"] is True
+
+    def test_the_default_inline_rdns_suffixes_do_not_force_copies_of_the_other_kinds(self):
+        out = run_plugin(
+            MODULE,
+            _lists_body(
+                {"RDNS": [".evil.example"], "IP": ["1.2.3.4"], "USER_AGENT": ["Bad"]},
+                variables={"BLACKLIST_RDNS": ".shodan.io .censys.io"},
+                tail="""
+emit({
+    rdns = p1.lists.RDNS, rdns_copied = p1.lists.RDNS ~= stored.RDNS, stored_rdns = stored.RDNS,
+    ip_shared = p1.lists.IP == stored.IP, ua_shared = p1.lists.USER_AGENT == stored.USER_AGENT,
+})
+""",
+            ),
+        )
+        assert out["rdns"] == [".evil.example", ".shodan.io", ".censys.io"]
+        assert out["rdns_copied"] is True
+        assert out["stored_rdns"] == [".evil.example"]
+        assert (out["ip_shared"], out["ua_shared"]) == (True, True)
+
+    def test_a_kind_missing_from_the_stored_table_gets_its_own_empty_array(self):
+        out = run_plugin(
+            MODULE,
+            _lists_body(
+                {},
+                tail="""
+STORE["plugin_blacklist_lists_" .. "www.example.com"] = { IP = { "1.2.3.4" } }
+local q1, q2 = new_plugin(PLUGIN), new_plugin(PLUGIN)
+q1.lists.URI[#q1.lists.URI + 1] = "^/x"
+emit({ uri1 = q1.lists.URI, uri2 = q2.lists.URI, ip_shared = q1.lists.IP == q2.lists.IP })
+""",
+            ),
+        )
+        assert out["uri1"] == ["^/x"]
+        assert not out["uri2"]  # an empty Lua table encodes as {}
+        assert out["ip_shared"] is True
+
+    def test_a_full_access_pass_leaves_the_stored_arrays_untouched(self):
+        stored = {
+            "IP": ["1.2.3.0/24"],
+            "RDNS": [".evil.example"],
+            "ASN": ["64496"],
+            "USER_AGENT": ["BadBot"],
+            "URI": ["^/admin"],
+            "IGNORE_IP": ["1.2.3.4"],
+            "IGNORE_URI": ["^/admin/public"],
+        }
+        body = _lists_body(
+            stored,
+            variables={"BLACKLIST_IP": "9.9.9.9", "BLACKLIST_URI": "^/secret"},
+            tail="""
+ASN = 64496
+RDNS = { "scan1.evil.example" }
+local before = encode(stored)
+local clients = { "1.2.3.77", "1.2.3.4", "9.9.9.9", "8.8.8.8" }
+for _, ip in ipairs(clients) do
+    for _, uri in ipairs({ "/", "/admin", "/secret" }) do
+        CACHE = {}
+        new_plugin(PLUGIN, { remote_addr = ip, uri = uri, http_user_agent = "BadBot", ip_is_global = true }):access()
+    end
+end
+emit({ unchanged = encode(stored) == before, stored = stored })
+""",
+        )
+        out = run_plugin(MODULE, body)
+        assert out["unchanged"] is True
+        assert {kind: value or [] for kind, value in out["stored"].items() if value} == stored  # empty arrays encode as {}
+
+    @pytest.mark.parametrize(
+        ("client", "uri", "ua", "expected"),
+        [
+            ("1.2.3.77", "/", None, "IP is blacklisted (info : ip)"),
+            ("1.2.3.4", "/", None, "not blacklisted"),
+            ("9.9.9.9", "/", None, "IP is blacklisted (info : ip)"),
+            ("8.8.8.8", "/admin/users", None, "URI is blacklisted (info : URI ^/admin)"),
+            ("8.8.8.8", "/admin/public/x", None, "not blacklisted"),
+            ("8.8.8.8", "/", "xBadBotx", "UA is blacklisted (info : UA BadBot)"),
+        ],
+    )
+    def test_decisions_are_unchanged_when_the_stored_arrays_are_shared(self, client, uri, ua, expected):
+        out = access(
+            {
+                "IP": ["1.2.3.0/24"],
+                "USER_AGENT": ["BadBot"],
+                "URI": ["^/admin"],
+                "IGNORE_IP": ["1.2.3.4"],
+                "IGNORE_URI": ["^/admin/public"],
+            },
+            variables={"BLACKLIST_IP": "9.9.9.9"},
+            ctx={"remote_addr": client, "uri": uri, "http_user_agent": ua},
+        )
+        assert out["msg"] == expected

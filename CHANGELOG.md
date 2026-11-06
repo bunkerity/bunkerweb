@@ -6,6 +6,7 @@
 - [BUGFIX] `reverseproxy`: warn when proxy caching is enabled on a location whose response buffering is off, since NGINX stores nothing there.
 - [BUGFIX] `scheduler`: a configuration rejected by only some instances now keeps its failover warning, and a healthcheck no longer clears it.
 - [BUGFIX] `scheduler`, `api`, `ui`: a reload that an instance has not confirmed is no longer reported as applied. (Refs #4086)
+- [PERF] `blacklist`: reuse downloaded lists between requests instead of copying and deduplicating them each time.
 
 ## v1.6.18~rc3 - 2026/11/05
 
