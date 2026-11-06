@@ -1,0 +1,32 @@
+tests/unit/gen/test_reverse_proxy_pass_request_body.py
+  s_57e959acfa509b::t_1d9fb31063c2e0 1-53
+  s_57e959acfa509b::t_40e4a14a94676b 54-59
+src/common/core/reverseproxy/confs/server-http/reverse-proxy.conf
+  s_57e959acfa509b::t_5b495f5071783c 210
+CHANGELOG.md
+  s_35e602e57103fa::t_20fa9f4c198ce6 31
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "de56143f78700a1c75f86d8984d9e5df13daf511",
+  "prompts": {},
+  "sessions": {
+    "s_35e602e57103fa": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "d56ede09-d3e5-497d-9cb4-6cab27eb1321",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_57e959acfa509b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "e9276d0c-9e23-4e76-8af1-19b4a22af525",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}
