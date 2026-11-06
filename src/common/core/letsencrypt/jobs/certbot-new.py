@@ -236,7 +236,12 @@ def certificate_changes(
         if server_name in zerossl_api_key_hashes and configured_api_key_hash != previous_api_key_hash:
             reasons.append(f"[Service: {server_name}] ZeroSSL API key changed, forcing renewal.")
 
-    if config["challenge"] == "dns" and bytes_hash(config["provider"].get_formatted_credentials(), algorithm="sha256") != existing_cert["credentials_hash"]:
+    # Route53 persists no credentials path in renewal confs; renewal rebuilds AWS_CONFIG_FILE from current settings.
+    if (
+        config["challenge"] == "dns"
+        and config["authenticator"] != "route53"
+        and bytes_hash(config["provider"].get_formatted_credentials(), algorithm="sha256") != existing_cert["credentials_hash"]
+    ):
         reasons.append(f"[Service: {server_name}] DNS credentials have changed, forcing renewal.")
 
     return reasons, expand_names and not reasons
