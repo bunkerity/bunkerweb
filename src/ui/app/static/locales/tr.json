@@ -99,7 +99,6 @@
     "convert_configs": "Yapılandırmaları Dönüştür",
     "convert_configs_to": "{{state}} durumuna dönüştür",
     "convert_services": "Servisleri Dönüştür",
-    "convert_services_to": "{{state}} durumuna dönüştür",
     "copy": "Kopyala",
     "copy_codes": "Kodları Kopyala",
     "copy_raw": "Ham Veriyi Kopyala",
