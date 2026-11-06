@@ -1392,7 +1392,7 @@ def before_request():
                 logs_url = url_for("logs.logs_page", **logs_args)
                 flash(
                     Markup(
-                        "<p class='p-0 m-0 fst-italic'>The last changes could not be applied because it creates a configuration error on NGINX, please check <a href='{}' class='text-reset text-decoration-underline'>BunkerWeb's logs</a> for more information. The configuration fell back to the last working one.</p>"
+                        "<p class='p-0 m-0 fst-italic'>The last changes could not be applied to every instance. They were applied to some instances only (or none); the previous configuration still runs on instances that rejected the changes. Please check <a href='{}' class='text-reset text-decoration-underline'>BunkerWeb's logs</a> for more information.</p>"
                     ).format(logs_url),
                     "error",
                     save=False,

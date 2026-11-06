@@ -136,6 +136,64 @@ def test_require_failures_are_distinct(definition, expected, message):
     assert message in out["msg"]
 
 
+@pytest.mark.parametrize("subsystem", ["http", "stream"])
+def test_require_success_is_cached_with_identical_returns(subsystem):
+    out = run(
+        r"""
+local module = {new=function() end}
+package.preload["sample/sample"] = function() return module end
+local real_require, calls = require, 0
+require = function(name)
+    assert(name == "sample/sample")
+    calls = calls + 1
+    return real_require(name)
+end
+local first, first_msg = helpers.require_plugin("sample")
+local second, second_msg = helpers.require_plugin("sample")
+assert(first == module and second == first and first_msg == second_msg)
+emit({calls=calls, msg=second_msg})
+""",
+        subsystem=subsystem,
+    )
+    assert out == {"calls": 1, "msg": "require() call successful for plugin sample"}
+
+
+@pytest.mark.parametrize(
+    ("mode", "expected", "message"),
+    [
+        ("missing", None, "plugin sample doesn't have LUA code"),
+        ("broken", False, "require error for plugin sample : broken module"),
+        ("no_new", False, "missing new() method for plugin sample"),
+    ],
+)
+def test_require_failures_are_retried_and_can_recover(mode, expected, message):
+    out = run(
+        r"""
+local calls, module = 0, {}
+require = function(name)
+    assert(name == "sample/sample")
+    calls = calls + 1
+    if MODE == "missing" then error("module 'sample/sample' not found", 0) end
+    if MODE == "broken" then error("broken module", 0) end
+    return module
+end
+local first, first_msg = helpers.require_plugin("sample")
+local second, second_msg = helpers.require_plugin("sample")
+assert(first == second and first_msg == second_msg and calls == 2)
+MODE = "valid"
+module.new = function() end
+local recovered, recovered_msg = helpers.require_plugin("sample")
+assert(recovered == module and recovered_msg == "require() call successful for plugin sample")
+helpers.require_plugin("sample")
+emit({ok=second, msg=second_msg, calls=calls})
+""",
+        MODE=mode,
+    )
+    assert out.get("ok") is expected
+    assert out["msg"] == message
+    assert out["calls"] == 3
+
+
 def test_constructor_passes_context_and_returns_errors():
     out = run(r"""
 local ctx = {}
@@ -155,6 +213,8 @@ emit({ok=failed, err=err})
         ('function() error("dispatch broke") end', False, "sample:access() failed"),
         ("function() end", False, "returned nil value"),
         ("function() return {} end", False, 'missing required return value(s) : ["ret","msg"]'),
+        ("function() return {ret=true} end", False, 'missing required return value(s) : ["msg"]'),
+        ('function() return {msg="ok"} end', False, 'missing required return value(s) : ["ret"]'),
     ],
 )
 def test_dispatch_rejects_missing_or_broken_results(method, expected, message):
@@ -173,6 +233,27 @@ end }
 local ok, result = helpers.call_plugin(p, "access")
 emit({ok=ok, result=result})
 """) == {"ok": True, "result": {"ret": False, "msg": "denied", "status": 403}}
+
+
+def test_dispatch_success_executes_no_table_constructors():
+    lines = run(r"""
+local result = {ret=true, msg="ok"}
+local plugin = {access=function() return result end}
+local executed = {}
+debug.sethook(function(_, line)
+    if debug.getinfo(2, "f").func == helpers.call_plugin then executed[line] = true end
+end, "l")
+local ok, returned = helpers.call_plugin(plugin, "access")
+debug.sethook()
+assert(ok and returned == result)
+local lines = {}
+for line in pairs(executed) do lines[#lines + 1] = line end
+emit(lines)
+""")
+    assert lines
+    source = MODULE.read_text().splitlines()
+    # The line hook covers the real dispatch body, excluding constructors in the plugin and harness.
+    assert not [source[line - 1] for line in lines if "{" in source[line - 1]]
 
 
 def test_orders_apply_overrides_aliases_deduplication_and_sorted_fallback():

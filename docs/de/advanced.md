@@ -1257,6 +1257,43 @@ Einige Integrationen bieten bequemere Möglichkeiten zum Anwenden von Konfigurat
     !!! info "Das Neuladen liest den Ordner erneut ein"
         Ein Neuladen liest `/etc/bunkerweb/configs` erneut ein: dort erstellte, geänderte oder gelöschte Dateien werden angewendet und in der Datenbank gespeichert. Eine Konfiguration, die der Weboberfläche oder der API gehört, behält ihren Besitzer, nur ihr Inhalt wird aus der Datei aktualisiert.
 
+    **Woher NGINX die einzelnen Typen einbindet**
+
+    NGINX bindet die Dateien direkt aus den Unterordnern von `/etc/bunkerweb/configs` ein; BunkerWeb kopiert sie nicht nach `/etc/nginx`. Konfigurationen, die in der Weboberfläche oder über die API erstellt werden, schreibt der Scheduler in dieselben Ordner. Im Multisite-Modus kommt eine Datei, die nur für einen Dienst gilt, in einen weiteren Unterordner, der nach dem ersten Namen in `SERVER_NAME` dieses Dienstes benannt ist, zum Beispiel `server-http/www.example.com/hello-world.conf`.
+
+    | Typ                   | Ordner in `/etc/bunkerweb/configs` | Eingebunden in                                                                             | Unterordner pro Dienst |
+    | --------------------- | ---------------------------------- | ------------------------------------------------------------------------------------------ | ---------------------- |
+    | `http`                | `http/`                            | `http`-Block von `nginx.conf`, nach den Konfigurationen von Kern und Plugins               | Nein                   |
+    | `stream`              | `stream/`                          | `stream`-Block von `nginx.conf`, nach den Konfigurationen von Kern und Plugins             | Nein                   |
+    | `default-server-http` | `default-server-http/`             | Default-Server (`default-server-http.conf`), nach den Konfigurationen von Kern und Plugins | Nein                   |
+    | `server-http`         | `server-http/`                     | jeder HTTP-`server`-Block (`server.conf`)                                                  | Ja                     |
+    | `server-stream`       | `server-stream/`                   | jeder Stream-`server`-Block (`server-stream.conf`)                                         | Ja                     |
+    | `modsec`              | `modsec/`                          | ModSecurity-Regeln, nach dem Core Rule Set                                                 | Ja                     |
+    | `modsec-crs`          | `modsec-crs/`                      | ModSecurity-Regeln, vor den Regeln des Core Rule Set                                       | Ja, siehe Hinweis      |
+    | `crs-plugins-before`  | `crs-plugins-before/`              | ModSecurity-Regeln, vor den CRS-Plugins                                                    | Ja, siehe Hinweis      |
+    | `crs-plugins-after`   | `crs-plugins-after/`               | ModSecurity-Regeln, nach den CRS-Plugins                                                   | Ja, siehe Hinweis      |
+
+    `modsec-crs` wird nur bei `USE_MODSECURITY_CRS=yes` gelesen. `crs-plugins-before` und `crs-plugins-after` benötigen zusätzlich `USE_MODSECURITY_CRS_PLUGINS=yes` und eine andere Version des Core Rule Set als 3. Bei `USE_MODSECURITY_GLOBAL_CRS=yes` werden diese drei Typen einmal für alle Dienste geladen: Nur der Ordner der obersten Ebene wird gelesen, ein Dienst-Unterordner wird ignoriert. `modsec` behält seinen Dienst-Unterordner.
+
+    **Prüfen, ob eine Datei aktiv ist**
+
+    Prüfen Sie mit `nginx -T`, ob NGINX Ihre Datei von der Festplatte einbindet und die Include-Pfade stimmen. Der Befehl prüft die aktuellen Konfigurationsdateien auf der Festplatte und gibt sie aus, nicht die von den laufenden Worker-Prozessen geladene Konfiguration. NGINX markiert jede eingebundene Datei mit einer Zeile `# configuration file <Pfad>:`:
+
+    ```shell
+    sudo nginx -T 2>&1 | grep -A 3 "configuration file /etc/bunkerweb/configs/server-http/hello-world.conf"
+    ```
+
+    Wird nichts ausgegeben, prüfen Sie Ordner, `.conf`-Endung und Berechtigungen und laden Sie den Scheduler erneut.
+
+    Um sicherzustellen, dass die Datei angewendet wurde, prüfen Sie, ob das Scheduler-Log (`journalctl -u bunkerweb-scheduler`) ein erfolgreiches Neuladen meldet und die Weboberfläche keine teilweise Anwendung anzeigt. Senden Sie anschließend eine Anfrage, die die Konfiguration nutzt, und prüfen Sie das erwartete Ergebnis. Ersetzen Sie für das obige Beispiel `/hello` den Namen `www.example.com` durch Ihren Dienstnamen und prüfen Sie, ob der Antworttext `world` lautet:
+
+    ```shell
+    curl -i http://www.example.com/hello
+    ```
+
+    !!! warning "Eine abgelehnte Konfiguration behält die vorherige"
+        Jeder `upstream`-Name muss über alle benutzerdefinierten Konfigurationen hinweg eindeutig sein. Zwei `upstream`-Blöcke mit demselben Namen lassen NGINX die neue Konfiguration ablehnen, und das Neuladen schlägt fehl. Die Instanzen, die sie ablehnen, laufen mit der letzten funktionierenden Konfiguration weiter, und die Weboberfläche weist darauf hin, dass die Änderungen nur auf einigen Instanzen (oder auf keiner) angewendet wurden. Den Grund finden Sie in den Scheduler-Logs (`journalctl -u bunkerweb-scheduler`).
+
 === "All-in-one"
 
     Bei Verwendung des [All-in-one-Images](integrations.md#all-in-one-aio-image) haben Sie zwei Möglichkeiten, benutzerdefinierte Konfigurationen hinzuzufügen:
@@ -1648,6 +1685,10 @@ REDIS_DATABASE=0
 -   **`REDIS_DATABASE`**: Geben Sie die zu verwendende Redis/Valkey-Datenbanknummer an. Standard ist `0`.
 
 Wenn Sie erweiterte Einstellungen wie Authentifizierung, SSL/TLS-Unterstützung oder den Sentinel-Modus benötigen, finden Sie detaillierte Anleitungen in der [Dokumentation zu den Redis-Plugin-Einstellungen](features.md#redis).
+
+### Sperren als JSON exportieren
+
+Mit `bwcli bans --json` wird ein einzelnes JSON-Objekt auf der Standardausgabe ausgegeben, gruppiert nach Instanz und mit einem Eintrag `redis`, wenn Redis-Sperren abgerufen werden. Jede Quelle enthält ein nach `date` sortiertes Array von Sperreinträgen. Die von der Quelle gelieferten Felder bleiben erhalten, etwa `ip`, `country`, `date`, `exp`, `permanent`, `reason`, `service`, `ban_scope` und `kind`. Bei Erfolg endet der Befehl mit Status 0. Bei einem Fehler endet er mit einem Status ungleich null und schreibt eine Fehlermeldung auf die Standardfehlerausgabe. Ohne `--json` behält `bwcli bans` seine formatierte Ausgabe bei.
 
 ## UDP/TCP-Anwendungen schützen
 

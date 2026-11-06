@@ -1257,6 +1257,43 @@ Certaines intégrations offrent des moyens plus pratiques d'appliquer des config
     !!! info "Le rechargement relit le dossier"
         Un rechargement relit `/etc/bunkerweb/configs` : les fichiers qui y sont créés, modifiés ou supprimés sont appliqués et enregistrés en base de données. Une configuration appartenant à l'interface web ou à l'API conserve son propriétaire, seul son contenu est actualisé depuis le fichier.
 
+    **D'où NGINX inclut chaque type**
+
+    NGINX inclut les fichiers directement depuis les sous-dossiers de `/etc/bunkerweb/configs` ; BunkerWeb ne les copie pas dans `/etc/nginx`. Le Scheduler écrit dans ces mêmes dossiers les configurations créées dans l'interface web ou via l'API. En mode multisite, un fichier qui ne concerne qu'un service va dans un sous-dossier supplémentaire portant le premier nom du `SERVER_NAME` de ce service, par exemple `server-http/www.example.com/hello-world.conf`.
+
+    | Type                  | Dossier dans `/etc/bunkerweb/configs` | Inclus dans                                                                                      | Sous-dossier par service |
+    | --------------------- | ------------------------------------- | ------------------------------------------------------------------------------------------------ | ------------------------ |
+    | `http`                | `http/`                               | bloc `http` de `nginx.conf`, après les configurations du cœur et des plugins                     | Non                      |
+    | `stream`              | `stream/`                             | bloc `stream` de `nginx.conf`, après les configurations du cœur et des plugins                   | Non                      |
+    | `default-server-http` | `default-server-http/`                | serveur par défaut (`default-server-http.conf`), après les configurations du cœur et des plugins | Non                      |
+    | `server-http`         | `server-http/`                        | chaque bloc `server` HTTP (`server.conf`)                                                        | Oui                      |
+    | `server-stream`       | `server-stream/`                      | chaque bloc `server` stream (`server-stream.conf`)                                               | Oui                      |
+    | `modsec`              | `modsec/`                             | règles ModSecurity, après le Core Rule Set                                                       | Oui                      |
+    | `modsec-crs`          | `modsec-crs/`                         | règles ModSecurity, avant les règles du Core Rule Set                                            | Oui, voir la note        |
+    | `crs-plugins-before`  | `crs-plugins-before/`                 | règles ModSecurity, avant les plugins du CRS                                                     | Oui, voir la note        |
+    | `crs-plugins-after`   | `crs-plugins-after/`                  | règles ModSecurity, après les plugins du CRS                                                     | Oui, voir la note        |
+
+    `modsec-crs` n'est lu que si `USE_MODSECURITY_CRS=yes`. `crs-plugins-before` et `crs-plugins-after` exigent en plus `USE_MODSECURITY_CRS_PLUGINS=yes` et une version du Core Rule Set autre que la 3. Avec `USE_MODSECURITY_GLOBAL_CRS=yes`, ces trois types sont chargés une seule fois pour tous les services : seul le dossier de premier niveau est lu et un sous-dossier de service est ignoré. `modsec` garde son sous-dossier de service.
+
+    **Vérifier qu'un fichier est actif**
+
+    Utilisez `nginx -T` pour vérifier que NGINX inclut votre fichier depuis le disque et que les chemins d'inclusion sont corrects. Cette commande teste et affiche les fichiers de configuration actuels sur le disque, pas la configuration chargée par les processus workers en cours d'exécution. NGINX signale chaque fichier inclus par une ligne `# configuration file <chemin>:` :
+
+    ```shell
+    sudo nginx -T 2>&1 | grep -A 3 "configuration file /etc/bunkerweb/configs/server-http/hello-world.conf"
+    ```
+
+    Si rien ne s'affiche, vérifiez le dossier, le suffixe `.conf` et les permissions, puis rechargez à nouveau le Scheduler.
+
+    Pour confirmer que le fichier est appliqué, vérifiez que le journal du Scheduler (`journalctl -u bunkerweb-scheduler`) indique un rechargement réussi et que l'interface web ne signale pas d'application partielle. Envoyez ensuite une requête qui utilise cette configuration et vérifiez le résultat attendu. Pour l'exemple `/hello` ci-dessus, remplacez `www.example.com` par le nom de votre service et vérifiez que le corps de la réponse est `world` :
+
+    ```shell
+    curl -i http://www.example.com/hello
+    ```
+
+    !!! warning "Une configuration rejetée conserve la précédente"
+        Chaque nom d'`upstream` doit être unique parmi toutes les configurations personnalisées. Deux blocs `upstream` portant le même nom font que NGINX refuse la nouvelle configuration et que le rechargement échoue. Les instances qui la rejettent continuent d'exécuter la dernière configuration fonctionnelle, et l'interface web indique que les changements ont été appliqués à certaines instances seulement (ou à aucune). Les journaux du Scheduler (`journalctl -u bunkerweb-scheduler`) en donnent la cause.
+
 === "Tout-en-un"
 
     Lorsque vous utilisez l'image [Tout-en-un](integrations.md#all-in-one-aio-image), vous avez deux options pour ajouter des configurations personnalisées :
@@ -1647,6 +1684,10 @@ REDIS_DATABASE=0
 - **`REDIS_DATABASE`**: Indiquez le numéro de base de données Redis/Valkey à utiliser. La valeur par défaut est `0`.
 
 Si vous avez besoin de paramètres plus avancés, tels que l'authentification, la prise en charge SSL/TLS ou le mode Sentinel, reportez-vous à la documentation sur les paramètres du [plug-in Redis](features.md#redis) pour obtenir des conseils détaillés.
+
+### Exporter les bannissements en JSON
+
+Exécutez `bwcli bans --json` pour écrire un objet JSON unique sur la sortie standard, regroupé par instance, avec une entrée `redis` lorsque les bannissements Redis sont collectés. Chaque source contient un tableau de bannissements triés par `date`. Les enregistrements conservent les champs renvoyés par la source, notamment `ip`, `country`, `date`, `exp`, `permanent`, `reason`, `service`, `ban_scope` et `kind`. La commande renvoie le code 0 en cas de succès. En cas d'échec, elle renvoie un code non nul et écrit une erreur sur la sortie d'erreur standard. Sans `--json`, `bwcli bans` conserve son affichage formaté.
 
 ## Protéger les applications UDP/TCP
 

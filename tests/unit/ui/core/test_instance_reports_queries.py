@@ -20,6 +20,8 @@ NOW = datetime(2026, 10, 26, 12, 0, 0)
 
 
 def inst(hostname, caller, status="up"):
+    if not hasattr(caller, "apis"):
+        caller.apis = []
     return Instance(hostname, hostname + ".local", "ui", status, "static", NOW, NOW, caller)
 
 

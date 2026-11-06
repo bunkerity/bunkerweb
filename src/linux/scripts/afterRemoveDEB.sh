@@ -162,7 +162,8 @@ case "$1" in
     purge)
         purge
         ;;
-    *)
+    upgrade|failed-upgrade)
+        # failed-upgrade continues installation; postinstall must restore fresh backups.
         echo "ℹ️ Package is being upgraded"
         # Back up config + DB to /var/backups/bunkerweb. /var/tmp is reaped by
         # systemd-tmpfiles after 30d, which silently lost backups on delayed reinstalls.
@@ -195,5 +196,12 @@ case "$1" in
             do_and_check_cmd install -m 0600 -o root -g root /var/lib/bunkerweb/db.sqlite3 "$backup_dir/db.sqlite3"
         fi
         do_and_check_cmd touch /var/tmp/bunkerweb_upgrade
+        ;;
+    abort-install|abort-upgrade|disappear)
+        # Rollback callbacks must not replace a known-good upgrade backup.
+        ;;
+    *)
+        echo "❌ Unsupported postrm argument: $1" >&2
+        exit 1
         ;;
 esac

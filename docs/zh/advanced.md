@@ -1257,6 +1257,43 @@ systemctl status systemd-resolved
     !!! info "重新加载会重新读取该文件夹"
         重新加载会重新读取 `/etc/bunkerweb/configs`：在其中创建、修改或删除的文件都会被应用并保存到数据库。归 Web UI 或 API 所有的配置会保留其所有者，只有其内容会从文件中刷新。
 
+    **NGINX 从哪里引入各个类型**
+
+    NGINX 直接从 `/etc/bunkerweb/configs` 的子文件夹中引入这些文件；BunkerWeb 不会将它们复制到 `/etc/nginx`。在 Web UI 或 API 中创建的配置，调度程序会写入同样的文件夹。在多站点模式下，仅适用于某个服务的文件应放在再下一级的子文件夹中，该子文件夹以该服务 `SERVER_NAME` 中的第一个名称命名，例如 `server-http/www.example.com/hello-world.conf`。
+
+    | 类型                  | `/etc/bunkerweb/configs` 中的文件夹 | 引入位置                                                         | 服务子文件夹   |
+    | --------------------- | ----------------------------------- | ---------------------------------------------------------------- | -------------- |
+    | `http`                | `http/`                             | `nginx.conf` 的 `http` 块，位于核心和插件配置之后                | 否             |
+    | `stream`              | `stream/`                           | `nginx.conf` 的 `stream` 块，位于核心和插件配置之后              | 否             |
+    | `default-server-http` | `default-server-http/`              | 默认服务器（`default-server-http.conf`），位于核心和插件配置之后 | 否             |
+    | `server-http`         | `server-http/`                      | 每个 HTTP `server` 块（`server.conf`）                           | 是             |
+    | `server-stream`       | `server-stream/`                    | 每个 stream `server` 块（`server-stream.conf`）                  | 是             |
+    | `modsec`              | `modsec/`                           | ModSecurity 规则，位于 Core Rule Set 之后                        | 是             |
+    | `modsec-crs`          | `modsec-crs/`                       | ModSecurity 规则，位于 Core Rule Set 规则之前                    | 是，见下方说明 |
+    | `crs-plugins-before`  | `crs-plugins-before/`               | ModSecurity 规则，位于 CRS 插件之前                              | 是，见下方说明 |
+    | `crs-plugins-after`   | `crs-plugins-after/`                | ModSecurity 规则，位于 CRS 插件之后                              | 是，见下方说明 |
+
+    仅当 `USE_MODSECURITY_CRS=yes` 时才会读取 `modsec-crs`。`crs-plugins-before` 和 `crs-plugins-after` 还要求 `USE_MODSECURITY_CRS_PLUGINS=yes`，且 Core Rule Set 版本不是 3。当 `USE_MODSECURITY_GLOBAL_CRS=yes` 时，这三个类型会为所有服务统一加载一次：只读取顶层文件夹，服务子文件夹会被忽略。`modsec` 仍保留其服务子文件夹。
+
+    **确认文件已生效**
+
+    使用 `nginx -T` 检查 NGINX 是否从磁盘引入您的文件，以及引入路径是否正确。该命令会检查并输出磁盘上当前的配置文件，而不是正在运行的 worker 进程已加载的配置。NGINX 会用 `# configuration file <路径>:` 这一行标记每个被引入的文件：
+
+    ```shell
+    sudo nginx -T 2>&1 | grep -A 3 "configuration file /etc/bunkerweb/configs/server-http/hello-world.conf"
+    ```
+
+    如果没有任何输出，请检查文件夹、`.conf` 后缀和权限，然后再次重新加载调度程序。
+
+    要确认文件已应用，请检查调度程序日志（`journalctl -u bunkerweb-scheduler`）是否报告重新加载成功，并确认 Web UI 未提示仅部分应用。然后发送一个会用到该配置的请求，检查是否得到预期结果。对于上面的 `/hello` 示例，请将 `www.example.com` 替换为您的服务名称，并确认响应正文为 `world`：
+
+    ```shell
+    curl -i http://www.example.com/hello
+    ```
+
+    !!! warning "被拒绝的配置会保留上一份配置"
+        每个 `upstream` 名称在所有自定义配置中必须唯一。两个同名的 `upstream` 块会导致 NGINX 拒绝新配置，重新加载失败。拒绝新配置的实例会继续运行最后一份可用的配置，Web UI 会提示更改仅应用到了部分实例（或没有任何实例）。原因请查看调度程序日志（`journalctl -u bunkerweb-scheduler`）。
+
 === "All-in-one"
 
     当使用 [All-in-one 镜像](integrations.md#all-in-one-aio-image)时，您有两种选择来添加自定义配置：
@@ -1646,6 +1683,10 @@ REDIS_DATABASE=0
 - **`REDIS_DATABASE`**：指定要使用的 Redis/Valkey 数据库编号。默认为 `0`。
 
 如果您需要更高级的设置，例如身份验证、SSL/TLS 支持或 Sentinel 模式，请参阅 [Redis 插件设置文档](features.md#redis)以获取详细指导。
+
+### 将封禁导出为 JSON
+
+运行 `bwcli bans --json`，将单个 JSON 对象写入标准输出。结果按实例分组；收集 Redis 封禁时，还包含 `redis` 条目。每个来源包含按 `date` 排序的封禁记录数组。记录保留来源返回的字段，例如 `ip`、`country`、`date`、`exp`、`permanent`、`reason`、`service`、`ban_scope` 和 `kind`。成功时命令退出码为 0；失败时退出码非零，并向标准错误输出写入错误信息。不使用 `--json` 时，`bwcli bans` 保持原有的格式化输出。
 
 ## 保护 UDP/TCP 应用程序
 

@@ -18,7 +18,7 @@ cannot contain ``/``). That caller is still broken; out of this lane's scope, tr
 import importlib.util
 import sys
 from pathlib import Path
-from types import ModuleType
+from types import ModuleType, SimpleNamespace
 from unittest.mock import patch
 
 import schemas  # type: ignore  # noqa: E402 -- on sys.path via tests/unit/api/conftest.py
@@ -64,6 +64,7 @@ def _load_router():
     names["fastapi"].APIRouter = _Router
     names["fastapi"].Depends = lambda dependency: dependency
     names["fastapi"].Query = lambda default=..., **_kwargs: default
+    names["fastapi"].Request = SimpleNamespace
     names["fastapi.responses"].JSONResponse = _JSONResponse
     names["fastapi.responses"].Response = _Response
     names["bw_cache"].__path__ = []
@@ -83,6 +84,8 @@ ROUTER = _load_router()
 
 STORED_NAME = "folder:/var/cache/bunkerweb/letsencrypt/etc.tgz"
 ENCODED_NAME = "folder:_var_cache_bunkerweb_letsencrypt_etc.tgz"
+# The Let's Encrypt archive is a sensitive entry: reading it takes an API admin credential.
+ADMIN_REQUEST = SimpleNamespace(state=SimpleNamespace(auth_admin=True))
 
 
 class _FakeDB:
@@ -127,7 +130,7 @@ def test_fetch_cache_file_resolves_a_folder_prefixed_name(monkeypatch):
     db = _FakeDB({STORED_NAME: b"tarball-bytes"})
     monkeypatch.setattr(ROUTER, "get_db", lambda: db)
 
-    response = ROUTER.fetch_cache_file("global", "letsencrypt", "certbot-renew", ENCODED_NAME, download=True)
+    response = ROUTER.fetch_cache_file(ADMIN_REQUEST, "global", "letsencrypt", "certbot-renew", ENCODED_NAME, download=True)
 
     assert response.status_code == 200
     assert response.body == b"tarball-bytes"
@@ -140,7 +143,7 @@ def test_fetch_cache_file_404s_when_the_name_genuinely_does_not_match(monkeypatc
     db = _FakeDB({})
     monkeypatch.setattr(ROUTER, "get_db", lambda: db)
 
-    response = ROUTER.fetch_cache_file("global", "letsencrypt", "certbot-renew", ENCODED_NAME, download=True)
+    response = ROUTER.fetch_cache_file(ADMIN_REQUEST, "global", "letsencrypt", "certbot-renew", ENCODED_NAME, download=True)
 
     assert response.status_code == 404
 
@@ -149,11 +152,11 @@ def test_fetch_cache_file_quotes_download_filename(monkeypatch):
     db = _FakeDB({"report %0d%0a injected.txt": b"content", "backup.json": b"content"})
     monkeypatch.setattr(ROUTER, "get_db", lambda: db)
 
-    response = ROUTER.fetch_cache_file("global", "test-plugin", "test-job", "report %0d%0a injected.txt", download=True)
+    response = ROUTER.fetch_cache_file(ADMIN_REQUEST, "global", "test-plugin", "test-job", "report %0d%0a injected.txt", download=True)
 
     assert response.status_code == 200
     assert response.headers["content-disposition"] == 'attachment; filename="report%20%250d%250a%20injected.txt"'
-    plain = ROUTER.fetch_cache_file("global", "test-plugin", "test-job", "backup.json", download=True)
+    plain = ROUTER.fetch_cache_file(ADMIN_REQUEST, "global", "test-plugin", "test-job", "backup.json", download=True)
     assert plain.headers["content-disposition"] == 'attachment; filename="backup.json"'
     assert "\r" not in response.headers["content-disposition"]
     assert "\n" not in response.headers["content-disposition"]

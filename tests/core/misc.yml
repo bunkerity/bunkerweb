@@ -89,19 +89,30 @@ actions:
       SERVE_FILES: "no"
   http2_disabled:
     type: status
+    # HTTP/2-only client sends its preface to an HTTP/1 listener, which closes the exchange.
+    expect_error: [connection_closed]
     url: "https://www.example.com"
     verify_ssl: false
     http2: true
+    restart_stack: false
     config:
       HTTP2: "no"
       GENERATE_SELF_SIGNED_SSL: "yes"
+  http2_disabled_http1:
+    # Same listener must still serve HTTP/1; a broken HTTPS listener cannot satisfy this pair.
+    type: status
+    url: "https://www.example.com"
+    verify_ssl: false
+    status: 200
   listen_http_disabled:
     type: status
+    expect_error: [connection_refused, connection_closed]
     url: "http://www.example.com"
     config:
       LISTEN_HTTP: "no"
   tweaked_deny_http_status:
     type: status
+    expect_error: [connection_closed]
     url: "http://www.example.com/?id=/etc/passwd"
     config:
       DENY_HTTP_STATUS: "444"

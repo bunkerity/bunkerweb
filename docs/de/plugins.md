@@ -8,18 +8,18 @@ Hier ist die Liste der "offiziellen" Plugins, die wir pflegen (weitere Informati
 
 |      Name       | Version | Beschreibung                                                                                                                                                              |                                                 Link                                                  |
 | :-------------: | :-----: | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | :---------------------------------------------------------------------------------------------------: |
-|  **Authentik**  |  1.13   | Schützen Sie Ihre Webdienste mit der Authentik-Forward-Authentifizierung (auth_request) für Single Sign-On.                                                               |   [bunkerweb-plugins/authentik](https://github.com/bunkerity/bunkerweb-plugins/tree/main/authentik)   |
-|   **ClamAV**    |  1.13   | Scannt hochgeladene Dateien automatisch mit der ClamAV-Antiviren-Engine und lehnt die Anfrage ab, wenn eine Datei als bösartig erkannt wird.                              |      [bunkerweb-plugins/clamav](https://github.com/bunkerity/bunkerweb-plugins/tree/main/clamav)      |
-| **Cloudflare**  |  1.13   | Konfigurieren Sie die vertrauenswürdigen IPs von Cloudflare, verwalten Sie Origin-CA-Zertifikate und synchronisieren Sie BunkerWeb-Sperren mit einer Cloudflare-IP-Liste. |  [bunkerweb-plugins/cloudflare](https://github.com/bunkerity/bunkerweb-plugins/tree/main/cloudflare)  |
-|   **Coraza**    |  1.13   | Überprüft Anfragen mit der Coraza WAF (Alternative zu ModSecurity).                                                                                                       |      [bunkerweb-plugins/coraza](https://github.com/bunkerity/bunkerweb-plugins/tree/main/coraza)      |
-|   **Discord**   |  1.13   | Sendet Sicherheitsbenachrichtigungen über einen Webhook an einen Discord-Kanal.                                                                                           |     [bunkerweb-plugins/discord](https://github.com/bunkerity/bunkerweb-plugins/tree/main/discord)     |
-|   **Matrix**    |  1.13   | Sendet Sicherheitsbenachrichtigungen über die Matrix-API an einen Matrix-Raum.                                                                                            |      [bunkerweb-plugins/matrix](https://github.com/bunkerity/bunkerweb-plugins/tree/main/matrix)      |
-| **open-appsec** |  1.13   | Prüft Anfragen mit der Machine-Learning-WAF open-appsec über einen Sidecar-Agenten und blockiert, was diese ablehnt.                                                      |  [bunkerweb-plugins/openappsec](https://github.com/bunkerity/bunkerweb-plugins/tree/main/openappsec)  |
-| **SentinelOne** |  1.13   | Prüft Hashes hochgeladener Dateien und Client-IPs über die SentinelOne-API und blockiert Anfragen anhand der Hash-Reputation oder von Bedrohungsindikatoren.              | [bunkerweb-plugins/sentinelone](https://github.com/bunkerity/bunkerweb-plugins/tree/main/sentinelone) |
-|    **Slack**    |  1.13   | Sendet Sicherheitsbenachrichtigungen über einen Webhook an einen Slack-Kanal.                                                                                             |       [bunkerweb-plugins/slack](https://github.com/bunkerity/bunkerweb-plugins/tree/main/slack)       |
-|  **SysWarden**  |  1.13   | Synchronisiert BunkerWeb-Sperren mit SysWarden für nftables-Blockierung auf Kernel-Ebene und importiert SysWarden-Sperr- und Freigabelisten.                              |   [bunkerweb-plugins/syswarden](https://github.com/bunkerity/bunkerweb-plugins/tree/main/syswarden)   |
-| **VirusTotal**  |  1.13   | Prüft Hashes hochgeladener Dateien und Client-IPs über die VirusTotal-API und blockiert Anfragen, wenn konfigurierte Reputationsschwellen überschritten werden.           |  [bunkerweb-plugins/virustotal](https://github.com/bunkerity/bunkerweb-plugins/tree/main/virustotal)  |
-|   **WebHook**   |  1.13   | Sendet Sicherheitsbenachrichtigungen über einen Webhook an einen benutzerdefinierten HTTP-Endpunkt.                                                                       |     [bunkerweb-plugins/webhook](https://github.com/bunkerity/bunkerweb-plugins/tree/main/webhook)     |
+|  **Authentik**  |  1.14   | Schützen Sie Ihre Webdienste mit der Authentik-Forward-Authentifizierung (auth_request) für Single Sign-On.                                                               |   [bunkerweb-plugins/authentik](https://github.com/bunkerity/bunkerweb-plugins/tree/main/authentik)   |
+|   **ClamAV**    |  1.14   | Scannt hochgeladene Dateien automatisch mit der ClamAV-Antiviren-Engine und lehnt die Anfrage ab, wenn eine Datei als bösartig erkannt wird.                              |      [bunkerweb-plugins/clamav](https://github.com/bunkerity/bunkerweb-plugins/tree/main/clamav)      |
+| **Cloudflare**  |  1.14   | Konfigurieren Sie die vertrauenswürdigen IPs von Cloudflare, verwalten Sie Origin-CA-Zertifikate und synchronisieren Sie BunkerWeb-Sperren mit einer Cloudflare-IP-Liste. |  [bunkerweb-plugins/cloudflare](https://github.com/bunkerity/bunkerweb-plugins/tree/main/cloudflare)  |
+|   **Coraza**    |  1.14   | Überprüft Anfragen mit der Coraza WAF (Alternative zu ModSecurity).                                                                                                       |      [bunkerweb-plugins/coraza](https://github.com/bunkerity/bunkerweb-plugins/tree/main/coraza)      |
+|   **Discord**   |  1.14   | Sendet Sicherheitsbenachrichtigungen über einen Webhook an einen Discord-Kanal.                                                                                           |     [bunkerweb-plugins/discord](https://github.com/bunkerity/bunkerweb-plugins/tree/main/discord)     |
+|   **Matrix**    |  1.14   | Sendet Sicherheitsbenachrichtigungen über die Matrix-API an einen Matrix-Raum.                                                                                            |      [bunkerweb-plugins/matrix](https://github.com/bunkerity/bunkerweb-plugins/tree/main/matrix)      |
+| **open-appsec** |  1.14   | Prüft Anfragen mit der Machine-Learning-WAF open-appsec über einen Sidecar-Agenten und blockiert, was diese ablehnt.                                                      |  [bunkerweb-plugins/openappsec](https://github.com/bunkerity/bunkerweb-plugins/tree/main/openappsec)  |
+| **SentinelOne** |  1.14   | Prüft Hashes hochgeladener Dateien und Client-IPs über die SentinelOne-API und blockiert Anfragen anhand der Hash-Reputation oder von Bedrohungsindikatoren.              | [bunkerweb-plugins/sentinelone](https://github.com/bunkerity/bunkerweb-plugins/tree/main/sentinelone) |
+|    **Slack**    |  1.14   | Sendet Sicherheitsbenachrichtigungen über einen Webhook an einen Slack-Kanal.                                                                                             |       [bunkerweb-plugins/slack](https://github.com/bunkerity/bunkerweb-plugins/tree/main/slack)       |
+|  **SysWarden**  |  1.14   | Synchronisiert BunkerWeb-Sperren mit SysWarden für nftables-Blockierung auf Kernel-Ebene und importiert SysWarden-Sperr- und Freigabelisten.                              |   [bunkerweb-plugins/syswarden](https://github.com/bunkerity/bunkerweb-plugins/tree/main/syswarden)   |
+| **VirusTotal**  |  1.14   | Prüft Hashes hochgeladener Dateien und Client-IPs über die VirusTotal-API und blockiert Anfragen, wenn konfigurierte Reputationsschwellen überschritten werden.           |  [bunkerweb-plugins/virustotal](https://github.com/bunkerity/bunkerweb-plugins/tree/main/virustotal)  |
+|   **WebHook**   |  1.14   | Sendet Sicherheitsbenachrichtigungen über einen Webhook an einen benutzerdefinierten HTTP-Endpunkt.                                                                       |     [bunkerweb-plugins/webhook](https://github.com/bunkerity/bunkerweb-plugins/tree/main/webhook)     |
 
 ## Wie man ein Plugin verwendet
 
@@ -27,7 +27,7 @@ Hier ist die Liste der "offiziellen" Plugins, die wir pflegen (weitere Informati
 
 Wenn Sie externe Plugins schnell installieren möchten, können Sie die Einstellung `EXTERNAL_PLUGIN_URLS` verwenden. Sie akzeptiert eine durch Leerzeichen getrennte Liste von URLs, die jeweils auf ein komprimiertes (zip-Format) Archiv mit einem oder mehreren Plugins verweisen.
 
-Sie können den folgenden Wert verwenden, wenn Sie die offiziellen Plugins automatisch installieren möchten: `EXTERNAL_PLUGIN_URLS=https://github.com/bunkerity/bunkerweb-plugins/archive/refs/tags/v1.13.zip`
+Sie können den folgenden Wert verwenden, wenn Sie die offiziellen Plugins automatisch installieren möchten: `EXTERNAL_PLUGIN_URLS=https://github.com/bunkerity/bunkerweb-plugins/archive/refs/tags/v1.14.zip`
 
 ### Manuell
 
@@ -583,6 +583,29 @@ end
 ### Jobs
 
 BunkerWeb verwendet einen internen Job-Scheduler für periodische Aufgaben wie die Erneuerung von Zertifikaten mit Certbot, das Herunterladen von Blacklists, das Herunterladen von MMDB-Dateien usw. Sie können Aufgaben Ihrer Wahl hinzufügen, indem Sie sie in einen Unterordner namens **jobs** legen und sie in der Metadatendatei **plugin.json** auflisten. Vergessen Sie nicht, die Ausführungsberechtigungen für alle hinzuzufügen, um Probleme zu vermeiden, wenn ein Benutzer Ihr Plugin klont und installiert.
+
+#### Sensible Job-Cache-Einträge
+
+Ein Job, der ein Geheimnis zwischenspeichert (einen installationsspezifischen Schlüssel, ein Token, Zugangsdaten), kennzeichnet den Eintrag über seinen gespeicherten Namen als sensibel:
+
+- Der Name lautet genau `secret` oder endet auf `.secret` (zum Beispiel `token.secret`). Die Prüfung unterscheidet Groß- und Kleinschreibung: `SECRET` und `token.SECRET` sind gewöhnliche Namen.
+- Ein abschließendes `.tgz` wird ignoriert. Ein mit `cache_dir` zwischengespeichertes Verzeichnis ist daher sensibel, wenn sein eigener Name der Regel folgt: `state.secret` wird als `folder:<Pfad>/state.secret.tgz` gespeichert. Nur die letzte Pfadkomponente zählt, `folder:<Pfad>/secret/other.tgz` ist ein gewöhnlicher Eintrag.
+
+Das Lesen eines sensiblen Eintrags ist dann eingeschränkt:
+
+- **API**: `GET /cache/{service}/{plugin}/{job}/{file}` liefert `403`, sofern sich der Aufrufer nicht per HTTP Basic als API-Administrator oder mit dem `API_TOKEN` authentifiziert hat. Ein Biscuit-Token wird auch dann abgelehnt, wenn er für einen Administrator ausgestellt wurde. `GET /cache?with_data=true` lässt `data` und `printable` solcher Einträge weg und behält die Metadaten (Name, Prüfsumme, letzte Aktualisierung). `DELETE` bleibt unverändert.
+- **Web-UI**: Anzeigen und Herunterladen liefern `403`, sofern der Benutzer kein Super-Administrator ist (das Flag `admin`, nicht eine zugewiesene Rolle). Die Cache-Seite listet den Eintrag weiterhin auf.
+
+Die Einschränkung gilt für das Lesen über API und Web-UI. Sie verschlüsselt die gespeicherten Bytes nicht, verbirgt weder Namen noch Prüfsumme und ändert nichts daran, wie der Scheduler die Datei wiederherstellt. Bereits vorhandene Einträge namens `secret` oder `*.secret` sowie einige Core-Einträge, die private Schlüssel oder Zugangsdaten unter festen Namen enthalten (darunter die mTLS-Client-Schlüssel für Upstreams und das Failover-Backup-Archiv, das den gesamten Job-Cache bündelt), sind ab 1.6.18 eingeschränkt, ohne Umbenennung.
+
+Wer sich auf die Einschränkung verlassen will, erkennt sie zur Laufzeit, denn ein älterer Core liefert jeden Eintrag an jeden API-Aufrufer mit einem `cache_read`-Biscuit aus:
+
+```python
+try:
+    from common_utils import SENSITIVE_JOB_CACHE_SUPPORTED  # type: ignore
+except ImportError:
+    SENSITIVE_JOB_CACHE_SUPPORTED = False
+```
 
 ### Plugin-Seite
 

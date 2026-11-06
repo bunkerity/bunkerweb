@@ -87,7 +87,9 @@ def test_folder_cache_download_uses_the_stored_name(h, service):
     payload = b"folder archive"
 
     def lookup(job_name, file_name, **kwargs):
-        return payload if file_name == stored_name else None
+        if file_name != stored_name:
+            return None
+        return {"data": payload, "file_name": stored_name, "job_name": job_name, "plugin_id": kwargs["plugin_id"]} if kwargs.get("with_info") else payload
 
     h.db.get_job_cache_file.side_effect = lookup
 
@@ -96,7 +98,9 @@ def test_folder_cache_download_uses_the_stored_name(h, service):
     assert response.status_code == 200
     assert response.get_data() == payload
     assert "attachment" in response.headers["Content-Disposition"]
-    h.db.get_job_cache_file.assert_called_once_with("certbot", stored_name, service_id=None if service == "global" else service, plugin_id="letsencrypt")
+    h.db.get_job_cache_file.assert_called_once_with(
+        "certbot", stored_name, service_id=None if service == "global" else service, plugin_id="letsencrypt", with_info=True
+    )
 
 
 def test_actions_support_dataclasses_with_postponed_annotations(h, action_loader, monkeypatch):

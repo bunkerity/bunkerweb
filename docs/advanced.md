@@ -1259,6 +1259,43 @@ Some integrations provide more convenient ways to apply configurations, such as 
     !!! info "Reload re-reads the folder"
         A reload re-reads `/etc/bunkerweb/configs`: files created, modified or deleted there are applied and saved to the database. A configuration owned by the web UI or the API keeps its owner, only its content is refreshed from the file.
 
+    **Where NGINX includes each type from**
+
+    NGINX includes the files directly from the subfolders of `/etc/bunkerweb/configs`; BunkerWeb does not copy them under `/etc/nginx`. The scheduler writes configurations created in the web UI or the API to the same folders. In multisite mode, a file that applies to one service goes in a further subfolder named after the first name in that service's `SERVER_NAME`, for example `server-http/www.example.com/hello-world.conf`.
+
+    | Type                  | Folder in `/etc/bunkerweb/configs` | Included in                                                                           | Service subfolder |
+    | --------------------- | ---------------------------------- | ------------------------------------------------------------------------------------- | ----------------- |
+    | `http`                | `http/`                            | `http` block of `nginx.conf`, after the core and plugin configurations                | No                |
+    | `stream`              | `stream/`                          | `stream` block of `nginx.conf`, after the core and plugin configurations              | No                |
+    | `default-server-http` | `default-server-http/`             | default server (`default-server-http.conf`), after the core and plugin configurations | No                |
+    | `server-http`         | `server-http/`                     | each HTTP `server` block (`server.conf`)                                              | Yes               |
+    | `server-stream`       | `server-stream/`                   | each stream `server` block (`server-stream.conf`)                                     | Yes               |
+    | `modsec`              | `modsec/`                          | ModSecurity rules, after the Core Rule Set                                            | Yes               |
+    | `modsec-crs`          | `modsec-crs/`                      | ModSecurity rules, before the Core Rule Set rules                                     | Yes, see the note |
+    | `crs-plugins-before`  | `crs-plugins-before/`              | ModSecurity rules, before the CRS plugins                                             | Yes, see the note |
+    | `crs-plugins-after`   | `crs-plugins-after/`               | ModSecurity rules, after the CRS plugins                                              | Yes, see the note |
+
+    `modsec-crs` is only read when `USE_MODSECURITY_CRS=yes`. `crs-plugins-before` and `crs-plugins-after` also need `USE_MODSECURITY_CRS_PLUGINS=yes` and a Core Rule Set version other than 3. When `USE_MODSECURITY_GLOBAL_CRS=yes`, these three types are loaded once for all services: only the top-level folder is read and a service subfolder is ignored. `modsec` keeps its service subfolder.
+
+    **Check that a file is live**
+
+    Use `nginx -T` to check whether NGINX includes your file from disk and the include paths are correct. It tests and prints the current configuration files on disk, not the configuration loaded by the running workers. NGINX marks each included file with a `# configuration file <path>:` line:
+
+    ```shell
+    sudo nginx -T 2>&1 | grep -A 3 "configuration file /etc/bunkerweb/configs/server-http/hello-world.conf"
+    ```
+
+    If nothing is printed, check the folder, the `.conf` suffix and the permissions, then reload the scheduler again.
+
+    To confirm the file is applied, check that the scheduler log (`journalctl -u bunkerweb-scheduler`) reports a successful reload and the web UI does not report a partial application. Then send a request that exercises the configuration and check the expected result. For the `/hello` example above, replace `www.example.com` with your service name and verify that the response body is `world`:
+
+    ```shell
+    curl -i http://www.example.com/hello
+    ```
+
+    !!! warning "A rejected configuration keeps the previous one"
+        Each `upstream` name must be unique across all custom configurations. Two `upstream` blocks with the same name make NGINX refuse the new configuration, and the reload fails. The instances that reject it keep running the last working configuration, and the web UI shows that the changes were applied to some instances only (or to none). The scheduler logs (`journalctl -u bunkerweb-scheduler`) tell you why.
+
 === "All-in-one"
 
     When using the [All-in-one image](integrations.md#all-in-one-aio-image), you have two choices for adding custom configurations:
@@ -1649,6 +1686,10 @@ REDIS_DATABASE=0
 - **`REDIS_DATABASE`**: Specify the Redis/Valkey database number to use. Defaults to `0`.
 
 If you require more advanced settings, such as authentication, SSL/TLS support, or Sentinel mode, refer to the [Redis plugin settings documentation](features.md#redis) for detailed guidance.
+
+### Export bans as JSON
+
+Run `bwcli bans --json` to print one JSON object to standard output, grouped by instance, with a `redis` entry when Redis bans are collected. Each source contains an array of ban records, sorted by `date`. Records retain the fields returned by the source, such as `ip`, `country`, `date`, `exp`, `permanent`, `reason`, `service`, `ban_scope`, and `kind`. The command exits with status 0 on success. On failure, it exits non-zero and writes an error to standard error. Without `--json`, `bwcli bans` keeps its formatted output.
 
 ## Protect UDP/TCP applications
 

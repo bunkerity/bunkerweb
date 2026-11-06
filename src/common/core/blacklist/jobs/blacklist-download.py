@@ -210,6 +210,7 @@ try:
             for url in urls_list:
                 url_file = f"{bytes_hash(url, algorithm='sha1')}.list"
                 cached_url = JOB.get_cache(url_file, with_info=True, with_data=True)
+                use_cached_url = False
                 try:
                     # Only count URLs that haven't been processed globally
                     if url not in processed_urls:
@@ -227,18 +228,7 @@ try:
                         LOGGER.debug(f"URL {url} has already been downloaded less than 1 hour ago, skipping download...")
                         if url not in processed_urls:
                             aggregated_recap[kind]["skipped_urls"] += 1
-                        # Process cached data and add to unique_entries
-                        cached_data = cached_url.get("data", b"")
-                        if cached_data:
-                            # The validator wraps user agents on every call, so re-validating would wrap them twice.
-                            cached_passthrough_kinds = {"USER_AGENT", "IGNORE_USER_AGENT"}
-                            # Skip first line (URL comment) and process entries
-                            for line in cached_data.split(b"\n")[1:]:
-                                line = line.strip()
-                                if line:
-                                    ok, data = (True, line) if kind in cached_passthrough_kinds else check_line(kind, line)
-                                    if ok:
-                                        unique_entries.add(data)
+                        use_cached_url = True
                     else:
                         failed = False
                         LOGGER.info(f"Downloading blacklist data from {url} ...")
@@ -281,9 +271,6 @@ try:
                                 content_type = resp.headers.get("Content-Type", "")
 
                         if not failed:
-                            if url not in processed_urls:
-                                aggregated_recap[kind]["downloaded_urls"] += 1
-
                             url_content = b""
                             count_lines = 0
                             for line in iter_list_entries(
@@ -301,7 +288,13 @@ try:
                                     count_lines += 1
                             if not count_lines:
                                 LOGGER.warning(f"No valid {kind} entry found in {url} (Content-Type: {content_type or 'unknown'})")
+                                status = 2
+                                failed_urls.add(url)
+                                if url_file not in urls:
+                                    aggregated_recap[kind]["failed_count"] += 1
+                                continue
                             if url not in processed_urls:
+                                aggregated_recap[kind]["downloaded_urls"] += 1
                                 aggregated_recap[kind]["total_lines"] += count_lines
 
                             cached, err = JOB.cache_file(url_file, b"# Downloaded from " + url.encode("utf-8") + b"\n" + url_content)
@@ -315,6 +308,26 @@ try:
                     if url not in processed_urls:
                         aggregated_recap[kind]["failed_count"] += 1
                 finally:
+                    try:
+                        if (use_cached_url or url in failed_urls) and isinstance(cached_url, dict):
+                            cached_data = cached_url.get("data", b"")
+                            if cached_data:
+                                # The validator wraps user agents on every call, so re-validating would wrap them twice.
+                                cached_passthrough_kinds = {"USER_AGENT", "IGNORE_USER_AGENT"}
+                                # Skip first line (URL comment) and process entries
+                                for line in cached_data.split(b"\n")[1:]:
+                                    line = line.strip()
+                                    if line:
+                                        ok, data = (True, line) if kind in cached_passthrough_kinds else check_line(kind, line)
+                                        if ok:
+                                            unique_entries.add(data)
+                    except BaseException as e:
+                        status = 2
+                        LOGGER.debug(format_exc())
+                        LOGGER.error(f"Exception while getting {service} blacklist from cached {url} :\n{e}")
+                        if url not in failed_urls and url not in processed_urls:
+                            aggregated_recap[kind]["failed_count"] += 1
+                        failed_urls.add(url)
                     # Mark URL as processed to avoid double counting
                     processed_urls.add(url)
                     urls.add(url_file)

@@ -244,17 +244,39 @@ def test_cache_page_passes_filters_and_services(h):
     )
 
 
+def _serve(h, payload, rows=None):
+    """Make the fake DB answer like `Database.get_job_cache_file`: bytes alone, or a dict with the STORED names when
+    `with_info=True`. With `rows` ((plugin, job, file, bytes) tuples) it resolves like a `*_general_ci` column, case-insensitive
+    and PAD SPACE; without, whatever is asked for is the stored name."""
+
+    def same(left, right):
+        return left.casefold().rstrip(" ") == right.casefold().rstrip(" ")
+
+    def lookup(job_name, file_name, *, service_id=None, plugin_id="", with_info=False, with_data=True):
+        if rows is None:
+            stored = (plugin_id, job_name, file_name, payload)
+        else:
+            stored = next((row for row in rows if same(row[0], plugin_id) and same(row[1], job_name) and same(row[2], file_name)), None)
+        if stored is None:
+            return None
+        if not with_info:
+            return stored[3]
+        return {"data": stored[3], "last_update": None, "checksum": "sum", "plugin_id": stored[0], "job_name": stored[1], "file_name": stored[2]}
+
+    h.db.get_job_cache_file.side_effect = lookup
+
+
 def test_cache_view_sanitizes_the_file_name_and_maps_global_to_no_service(h):
-    h.db.get_job_cache_file.return_value = b"hello"
+    _serve(h, b"hello")
 
     h.client().get("/cache/global/plugin/job/..%20etc%20passwd%00.txt")
 
     args, kwargs = h.db.get_job_cache_file.call_args
-    assert args == ("job", "etc_passwd.txt") and kwargs == {"service_id": None, "plugin_id": "plugin"}
+    assert args == ("job", "etc_passwd.txt") and kwargs == {"service_id": None, "plugin_id": "plugin", "with_info": True}
 
 
 def test_cache_view_folder_names_use_slashes(h):
-    h.db.get_job_cache_file.return_value = b"x"
+    _serve(h, b"x")
 
     h.client().get("/cache/svc/plugin/job/folder:a_b_c")
 
@@ -263,7 +285,7 @@ def test_cache_view_folder_names_use_slashes(h):
 
 
 def test_cache_view_download_serves_the_bytes(h):
-    h.db.get_job_cache_file.return_value = b"payload"
+    _serve(h, b"payload")
 
     response = h.client().get("/cache/global/p/j/f.txt?download=1")
 
@@ -272,7 +294,7 @@ def test_cache_view_download_serves_the_bytes(h):
 
 
 def test_cache_view_missing_file(h):
-    h.db.get_job_cache_file.return_value = None
+    _serve(h, None, rows=[])
 
     assert h.client().get("/cache/global/p/j/f.txt?download=1").status_code == 404
     client = h.client()
@@ -282,11 +304,190 @@ def test_cache_view_missing_file(h):
 
 
 def test_cache_view_renders_printable_content(h):
-    h.db.get_job_cache_file.return_value = b"hello"
+    _serve(h, b"hello")
 
     h.client().get("/cache/global/p/j/f.txt")
 
     assert h.renders[-1][0] == "cache_view.html"
+
+
+# (url path after /cache/global, expected lookup name): entries only a super administrator may read.
+SENSITIVE_CACHE_URLS = [
+    ("ui_sso/ui-sso-secret/secret", "secret"),
+    ("p/j/token.secret", "token.secret"),
+    ("p/j/secret.tgz", "secret.tgz"),
+    ("p/j/state.secret.tgz", "state.secret.tgz"),
+    ("p/j/folder:_var_cache_bunkerweb_p_state.secret.tgz", "folder:/var/cache/bunkerweb/p/state.secret.tgz"),
+    ("customcert/custom-cert/key.pem", "key.pem"),
+    ("selfsigned/self-signed/key.pem", "key.pem"),
+    ("misc/default-server-cert/default-server-cert.key", "default-server-cert.key"),
+    ("jobs/api-server-cert/api-server-cert.key", "api-server-cert.key"),
+    ("letsencrypt/certbot-new/credentials_0123456789ab.ini", "credentials_0123456789ab.ini"),
+    ("letsencrypt/certbot-renew/folder:_var_cache_bunkerweb_letsencrypt_etc.tgz", "folder:/var/cache/bunkerweb/letsencrypt/etc.tgz"),
+    ("crowdsec/crowdsec-conf/crowdsec.conf", "crowdsec.conf"),
+    ("jobs/failover-backup/folder:_var_tmp_bunkerweb_failover.tgz", "folder:/var/tmp/bunkerweb/failover.tgz"),
+    ("reverseproxy/trusted-cert/client-key.pem", "client-key.pem"),
+    ("grpc/grpc-trusted-cert/client-key.pem", "client-key.pem"),
+]
+NON_SUPER_ADMINS = [
+    {"admin": False, "permissions": ("read",), "list_roles": ["reader"]},
+    {"admin": False, "permissions": ("read", "write"), "list_roles": ["writer"]},
+    {"admin": False, "permissions": ("read", "write"), "list_roles": ["admin"]},
+]
+
+
+@pytest.mark.parametrize("user", NON_SUPER_ADMINS, ids=["reader", "writer", "assigned-admin"])
+@pytest.mark.parametrize("suffix", ["", "?download=1"])
+@pytest.mark.parametrize("path,name", SENSITIVE_CACHE_URLS)
+def test_cache_view_refuses_sensitive_entries_to_everyone_but_the_super_admin(h, user, suffix, path, name):
+    _serve(h, b"PLACEHOLDER-BYTES")
+    renders = len(h.renders)
+
+    response = h.client(**user).get(f"/cache/global/{path}{suffix}")
+
+    assert response.status_code == 403
+    assert b"PLACEHOLDER-BYTES" not in response.get_data()
+    h.db.get_job_cache_file.assert_not_called()
+    assert len(h.renders) == renders
+
+
+@pytest.mark.parametrize("path,name", SENSITIVE_CACHE_URLS)
+def test_cache_view_gives_the_super_admin_sensitive_entries(h, path, name):
+    _serve(h, b"PLACEHOLDER-BYTES")
+
+    download = h.client(admin=True).get(f"/cache/global/{path}?download=1")
+    view = h.client(admin=True).get(f"/cache/global/{path}")
+
+    assert download.status_code == 200 and download.get_data() == b"PLACEHOLDER-BYTES"
+    assert h.renders[-1][0] == "cache_view.html"
+    assert view.status_code == 200
+    assert h.db.get_job_cache_file.call_args.args[1] == name
+
+
+@pytest.mark.parametrize("user", NON_SUPER_ADMINS, ids=["reader", "writer", "assigned-admin"])
+@pytest.mark.parametrize(
+    "path",
+    [
+        "p/j/backup.json",
+        "p/j/SECRET",
+        "p/j/secret.txt",
+        "other/other-job/key.pem",
+        "customcert/custom-cert/cert.pem",
+        "other/other-job/folder:_var_cache_bunkerweb_letsencrypt_etc.tgz",
+    ],
+)
+def test_cache_view_keeps_ordinary_entries_open_to_every_signed_in_user(h, user, path):
+    _serve(h, b"hello")
+
+    download = h.client(**user).get(f"/cache/global/{path}?download=1")
+    view = h.client(**user).get(f"/cache/global/{path}")
+
+    assert download.status_code == 200 and download.get_data() == b"hello"
+    assert view.status_code == 200 and h.renders[-1][0] == "cache_view.html"
+
+
+def test_cache_view_classifies_the_name_after_sanitising_it(h):
+    _serve(h, b"PLACEHOLDER-BYTES")
+
+    response = h.client(admin=False).get("/cache/global/p/j/..%20token.secret%00")
+
+    assert response.status_code == 403
+    h.db.get_job_cache_file.assert_not_called()
+
+
+def test_cache_list_and_delete_still_reach_non_super_admins(h):
+    h.db.get_jobs_cache_files.return_value = [{"file_name": "secret"}]
+    h.config.get_config.return_value = {"SERVER_NAME": ""}
+    h.db.delete_job_cache.return_value = ""
+    h.db.checked_changes.return_value = ""
+    client = h.client(admin=False)
+
+    assert client.get("/cache").status_code == 200
+    assert h.renders[-1][1]["caches"] == [{"file_name": "secret"}]
+    files = json.dumps([{"fileName": "secret", "jobName": "j", "service": "global", "plugin": "p"}])
+    assert client.post("/cache/delete", data={"cache_files": files}).status_code == 302
+    assert h.db.delete_job_cache.call_args.args == ("secret",)
+
+
+# Rework 1: the database compares plugin id, job name and file name with its collation (MariaDB/MySQL `_ci`: case-insensitive,
+# trailing spaces ignored), so a spelling the classifier does not recognise can still resolve a stored sensitive row. The
+# gate must classify the STORED names. `secure_filename` turns a trailing space into `_`, so that variant is only reachable
+# through the plugin id, the job name and `folder:` names.
+LE_ARCHIVE_TOKEN = "folder:_var_cache_bunkerweb_letsencrypt_etc.tgz"
+STORED_SENSITIVE_ROWS = [
+    ("ui_sso", "ui-sso-secret", "secret", b"PLACEHOLDER-BYTES"),
+    ("p", "j", "token.secret", b"PLACEHOLDER-BYTES"),
+    ("customcert", "custom-cert", "key.pem", b"PLACEHOLDER-BYTES"),
+    ("letsencrypt", "certbot-new", "credentials_0123456789ab.ini", b"PLACEHOLDER-BYTES"),
+    ("letsencrypt", "certbot-renew", "folder:/var/cache/bunkerweb/letsencrypt/etc.tgz", b"PLACEHOLDER-BYTES"),
+    ("crowdsec", "crowdsec-conf", "crowdsec.conf", b"PLACEHOLDER-BYTES"),
+    ("jobs", "failover-backup", "folder:/var/tmp/bunkerweb/failover.tgz", b"PLACEHOLDER-BYTES"),
+    ("reverseproxy", "trusted-cert", "client-key.pem", b"PLACEHOLDER-BYTES"),
+    ("grpc", "grpc-trusted-cert", "client-key.pem", b"PLACEHOLDER-BYTES"),
+]
+UI_COLLATION_VARIANTS = [
+    "ui_sso/ui-sso-secret/SECRET",
+    "ui_sso/ui-sso-secret/Secret",
+    "ui_sso%20/ui-sso-secret/secret",
+    "ui_sso/ui-sso-secret%20/secret",
+    "UI_SSO/UI-SSO-SECRET/secret",
+    "p/j/TOKEN.SECRET",
+    "p/j/token.SECRET",
+    "p%20/j/token.secret",
+    "p/j%20%20/token.secret",
+    "customcert/custom-cert/KEY.PEM",
+    "customcert%20/custom-cert/key.pem",
+    "customcert/custom-cert%20/key.pem",
+    "CustomCert/Custom-Cert/key.pem",
+    "letsencrypt/certbot-new/CREDENTIALS_0123456789AB.INI",
+    "letsencrypt%20/certbot-new/credentials_0123456789ab.ini",
+    "letsencrypt/certbot-new%20/credentials_0123456789ab.ini",
+    f"letsencrypt/certbot-renew/{LE_ARCHIVE_TOKEN}%20",
+    f"letsencrypt/certbot-renew%20/{LE_ARCHIVE_TOKEN}",
+    "letsencrypt/certbot-renew/folder:_VAR_CACHE_BUNKERWEB_LETSENCRYPT_ETC.TGZ",
+    "crowdsec/crowdsec-conf/CrowdSec.conf",
+    "crowdsec%20/crowdsec-conf/crowdsec.conf",
+    "crowdsec/crowdsec-conf%20/crowdsec.conf",
+    "Jobs/Failover-Backup/folder:_var_tmp_bunkerweb_failover.tgz",
+    "jobs/failover-backup%20/folder:_var_tmp_bunkerweb_failover.tgz",
+    "ReverseProxy/Trusted-Cert/CLIENT-KEY.PEM",
+    "grpc/grpc-trusted-cert%20/client-key.pem",
+]
+
+
+@pytest.mark.parametrize("user", NON_SUPER_ADMINS, ids=["reader", "writer", "assigned-admin"])
+@pytest.mark.parametrize("suffix", ["", "?download=1"])
+@pytest.mark.parametrize("path", UI_COLLATION_VARIANTS)
+def test_cache_view_refuses_a_collation_variant_of_a_sensitive_entry(h, user, suffix, path):
+    _serve(h, None, rows=STORED_SENSITIVE_ROWS)
+
+    response = h.client(**user).get(f"/cache/global/{path}{suffix}")
+
+    assert response.status_code == 403
+    assert b"PLACEHOLDER-BYTES" not in response.get_data()
+    assert [name for name, _context in h.renders if name == "cache_view.html"] == []
+
+
+@pytest.mark.parametrize("path", UI_COLLATION_VARIANTS)
+def test_the_super_admin_still_reads_a_collation_variant(h, path):
+    _serve(h, None, rows=STORED_SENSITIVE_ROWS)
+
+    response = h.client(admin=True).get(f"/cache/global/{path}?download=1")
+
+    assert response.status_code == 200 and response.get_data() == b"PLACEHOLDER-BYTES"
+
+
+@pytest.mark.parametrize("path", ["P/J/NOTES.TXT", "p%20/j/notes.txt", "p/j%20/notes.txt", "customcert/custom-cert/CERT.PEM"])
+def test_a_collation_variant_of_an_ordinary_entry_stays_readable(h, path):
+    _serve(
+        h,
+        None,
+        rows=[("p", "j", "notes.txt", b"hello"), ("customcert", "custom-cert", "cert.pem", b"hello")],
+    )
+
+    response = h.client(admin=False, permissions=("read",)).get(f"/cache/global/{path}?download=1")
+
+    assert response.status_code == 200 and response.get_data() == b"hello"
 
 
 def test_cache_bulk_delete_reports_each_outcome(h):
@@ -349,3 +550,15 @@ def test_cache_bulk_delete_in_read_only_mode(h):
 
     assert response.status_code == 403
     h.db.delete_job_cache.assert_not_called()
+
+
+@pytest.mark.parametrize("plugin,job", [("reverseproxy", "trusted-cert"), ("grpc", "grpc-trusted-cert")])
+def test_a_service_scoped_upstream_client_key_is_super_admin_only(h, plugin, job):
+    _serve(h, b"PLACEHOLDER-BYTES")
+    path = f"/cache/www.example.com/{plugin}/{job}/client-key.pem"
+
+    reader = h.client(admin=False, permissions=("read",), list_roles=["reader"]).get(f"{path}?download=1")
+    admin = h.client(admin=True).get(f"{path}?download=1")
+
+    assert reader.status_code == 403 and b"PLACEHOLDER-BYTES" not in reader.get_data()
+    assert admin.status_code == 200 and admin.get_data() == b"PLACEHOLDER-BYTES"

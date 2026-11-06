@@ -8,18 +8,18 @@ Here is the list of "official" plugins that we maintain (see the [bunkerweb-plug
 
 |      Name       | Version | Description                                                                                                                                      |                                                 Link                                                  |
 | :-------------: | :-----: | :----------------------------------------------------------------------------------------------------------------------------------------------- | :---------------------------------------------------------------------------------------------------: |
-|  **Authentik**  |  1.13   | Protect your web services with Authentik forward authentication (auth_request) for single sign-on.                                               |   [bunkerweb-plugins/authentik](https://github.com/bunkerity/bunkerweb-plugins/tree/main/authentik)   |
-|   **ClamAV**    |  1.13   | Automatically scans uploaded files with the ClamAV antivirus engine and denies the request when a file is detected as malicious.                 |      [bunkerweb-plugins/clamav](https://github.com/bunkerity/bunkerweb-plugins/tree/main/clamav)      |
-| **Cloudflare**  |  1.13   | Configure Cloudflare's trusted IPs, manage Origin CA certificates and sync BunkerWeb bans to a Cloudflare IP List.                               |  [bunkerweb-plugins/cloudflare](https://github.com/bunkerity/bunkerweb-plugins/tree/main/cloudflare)  |
-|   **Coraza**    |  1.13   | Inspect requests using the Coraza WAF (alternative of ModSecurity).                                                                              |      [bunkerweb-plugins/coraza](https://github.com/bunkerity/bunkerweb-plugins/tree/main/coraza)      |
-|   **Discord**   |  1.13   | Send security notifications to a Discord channel using a Webhook.                                                                                |     [bunkerweb-plugins/discord](https://github.com/bunkerity/bunkerweb-plugins/tree/main/discord)     |
-|   **Matrix**    |  1.13   | Send security notifications to a Matrix room using the Matrix API.                                                                               |      [bunkerweb-plugins/matrix](https://github.com/bunkerity/bunkerweb-plugins/tree/main/matrix)      |
-| **open-appsec** |  1.13   | Inspect requests with the open-appsec machine-learning WAF through a sidecar agent and deny what it blocks.                                      |  [bunkerweb-plugins/openappsec](https://github.com/bunkerity/bunkerweb-plugins/tree/main/openappsec)  |
-| **SentinelOne** |  1.13   | Check uploaded file hashes and client IPs with the SentinelOne API and deny requests based on hash reputation or threat-intelligence indicators. | [bunkerweb-plugins/sentinelone](https://github.com/bunkerity/bunkerweb-plugins/tree/main/sentinelone) |
-|    **Slack**    |  1.13   | Send security notifications to a Slack channel using a Webhook.                                                                                  |       [bunkerweb-plugins/slack](https://github.com/bunkerity/bunkerweb-plugins/tree/main/slack)       |
-|  **SysWarden**  |  1.13   | Sync BunkerWeb bans to SysWarden for kernel-level nftables blocking and import SysWarden blocklists and whitelists.                              |   [bunkerweb-plugins/syswarden](https://github.com/bunkerity/bunkerweb-plugins/tree/main/syswarden)   |
-| **VirusTotal**  |  1.13   | Check uploaded file hashes and client IPs with the VirusTotal API and deny requests when configured reputation thresholds are exceeded.          |  [bunkerweb-plugins/virustotal](https://github.com/bunkerity/bunkerweb-plugins/tree/main/virustotal)  |
-|   **WebHook**   |  1.13   | Send security notifications to a custom HTTP endpoint using a Webhook.                                                                           |     [bunkerweb-plugins/webhook](https://github.com/bunkerity/bunkerweb-plugins/tree/main/webhook)     |
+|  **Authentik**  |  1.14   | Protect your web services with Authentik forward authentication (auth_request) for single sign-on.                                               |   [bunkerweb-plugins/authentik](https://github.com/bunkerity/bunkerweb-plugins/tree/main/authentik)   |
+|   **ClamAV**    |  1.14   | Automatically scans uploaded files with the ClamAV antivirus engine and denies the request when a file is detected as malicious.                 |      [bunkerweb-plugins/clamav](https://github.com/bunkerity/bunkerweb-plugins/tree/main/clamav)      |
+| **Cloudflare**  |  1.14   | Configure Cloudflare's trusted IPs, manage Origin CA certificates and sync BunkerWeb bans to a Cloudflare IP List.                               |  [bunkerweb-plugins/cloudflare](https://github.com/bunkerity/bunkerweb-plugins/tree/main/cloudflare)  |
+|   **Coraza**    |  1.14   | Inspect requests using the Coraza WAF (alternative of ModSecurity).                                                                              |      [bunkerweb-plugins/coraza](https://github.com/bunkerity/bunkerweb-plugins/tree/main/coraza)      |
+|   **Discord**   |  1.14   | Send security notifications to a Discord channel using a Webhook.                                                                                |     [bunkerweb-plugins/discord](https://github.com/bunkerity/bunkerweb-plugins/tree/main/discord)     |
+|   **Matrix**    |  1.14   | Send security notifications to a Matrix room using the Matrix API.                                                                               |      [bunkerweb-plugins/matrix](https://github.com/bunkerity/bunkerweb-plugins/tree/main/matrix)      |
+| **open-appsec** |  1.14   | Inspect requests with the open-appsec machine-learning WAF through a sidecar agent and deny what it blocks.                                      |  [bunkerweb-plugins/openappsec](https://github.com/bunkerity/bunkerweb-plugins/tree/main/openappsec)  |
+| **SentinelOne** |  1.14   | Check uploaded file hashes and client IPs with the SentinelOne API and deny requests based on hash reputation or threat-intelligence indicators. | [bunkerweb-plugins/sentinelone](https://github.com/bunkerity/bunkerweb-plugins/tree/main/sentinelone) |
+|    **Slack**    |  1.14   | Send security notifications to a Slack channel using a Webhook.                                                                                  |       [bunkerweb-plugins/slack](https://github.com/bunkerity/bunkerweb-plugins/tree/main/slack)       |
+|  **SysWarden**  |  1.14   | Sync BunkerWeb bans to SysWarden for kernel-level nftables blocking and import SysWarden blocklists and whitelists.                              |   [bunkerweb-plugins/syswarden](https://github.com/bunkerity/bunkerweb-plugins/tree/main/syswarden)   |
+| **VirusTotal**  |  1.14   | Check uploaded file hashes and client IPs with the VirusTotal API and deny requests when configured reputation thresholds are exceeded.          |  [bunkerweb-plugins/virustotal](https://github.com/bunkerity/bunkerweb-plugins/tree/main/virustotal)  |
+|   **WebHook**   |  1.14   | Send security notifications to a custom HTTP endpoint using a Webhook.                                                                           |     [bunkerweb-plugins/webhook](https://github.com/bunkerity/bunkerweb-plugins/tree/main/webhook)     |
 
 ## How to use a plugin
 
@@ -27,7 +27,7 @@ Here is the list of "official" plugins that we maintain (see the [bunkerweb-plug
 
 If you want to quickly install external plugins, you can use the `EXTERNAL_PLUGIN_URLS` setting. It takes a list of URLs separated by spaces, each pointing to a compressed (zip format) archive containing one or more plugins.
 
-You can use the following value if you want to automatically install the official plugins : `EXTERNAL_PLUGIN_URLS=https://github.com/bunkerity/bunkerweb-plugins/archive/refs/tags/v1.13.zip`
+You can use the following value if you want to automatically install the official plugins : `EXTERNAL_PLUGIN_URLS=https://github.com/bunkerity/bunkerweb-plugins/archive/refs/tags/v1.14.zip`
 
 ### Manual
 
@@ -587,6 +587,29 @@ end
 ### Jobs
 
 BunkerWeb uses an internal job scheduler for periodic tasks like renewing certificates with certbot, downloading blacklists, downloading MMDB files, ... You can add tasks of your choice by putting them inside a subfolder named **jobs** and listing them in the **plugin.json** metadata file. Don't forget to add the execution permissions for everyone to avoid any problems when a user is cloning and installing your plugin.
+
+#### Sensitive job-cache entries
+
+A job that caches a secret (a per-install key, a token, credentials) marks the entry as sensitive through its stored name:
+
+- The name is exactly `secret`, or ends with `.secret` (for example `token.secret`). The match is case-sensitive: `SECRET` and `token.SECRET` are ordinary names.
+- One trailing `.tgz` is ignored, so a directory cached with `cache_dir` is sensitive when its own name follows the rule: `state.secret` is stored as `folder:<path>/state.secret.tgz`. Only the last path component counts, `folder:<path>/secret/other.tgz` is an ordinary entry.
+
+Reading a sensitive entry is then restricted:
+
+- **API**: `GET /cache/{service}/{plugin}/{job}/{file}` returns `403` unless the caller authenticated with HTTP Basic as an API administrator or with the `API_TOKEN`. A Biscuit token is refused even when it was issued to an administrator. `GET /cache?with_data=true` omits `data` and `printable` for such entries and keeps the metadata (name, checksum, last update). `DELETE` is unchanged.
+- **Web UI**: viewing and downloading return `403` unless the user is a super administrator (the `admin` flag, not an assigned role). The cache page still lists the entry.
+
+The restriction applies to reading through the API and the web UI. It does not encrypt the stored bytes, does not hide the name or the checksum, and does not change how the scheduler restores the file. Entries already named `secret` or `*.secret`, and a few core entries that hold private keys or credentials under fixed names (including the upstream mTLS client keys and the failover backup archive, which bundles the whole job cache), are restricted from 1.6.18 on, without any rename.
+
+To rely on the restriction, detect it, because an older core serves every entry to any API caller holding a `cache_read` Biscuit:
+
+```python
+try:
+    from common_utils import SENSITIVE_JOB_CACHE_SUPPORTED  # type: ignore
+except ImportError:
+    SENSITIVE_JOB_CACHE_SUPPORTED = False
+```
 
 ### Plugin page
 

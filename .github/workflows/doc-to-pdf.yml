@@ -45,8 +45,8 @@ jobs:
           PUPPETEER_SKIP_DOWNLOAD: "true"
           PUPPETEER_SKIP_CHROMIUM_DOWNLOAD: "true"
       - name: Run mkdocs serve in background
-        # A fixed sleep either wastes the wait or hands the PDF step a dead port, and this job
-        # runs after the release approval: a flake here costs another approval round.
+        # A fixed sleep either wastes time or hands the PDF step a dead port.
+        # The PDF builds before release approval, alongside builds, so failures surface early.
         run: |
           mkdocs serve -f mkdocs_print.yml &
           for _ in $(seq 60); do

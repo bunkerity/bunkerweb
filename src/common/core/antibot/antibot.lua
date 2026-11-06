@@ -459,7 +459,8 @@ function antibot:access()
 	-- Get session data
 	local session, err = get_session(self.ctx)
 	if not session then
-		return self:ret(false, "can't get session : " .. err)
+		-- Fail closed: without a status the dispatcher would let the request through unchallenged.
+		return self:ret(false, "can't get session : " .. err, HTTP_INTERNAL_SERVER_ERROR)
 	end
 	self.session = session
 	self.session_data = session:get("antibot") or {}

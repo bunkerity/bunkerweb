@@ -117,7 +117,7 @@ def verify_data_in_form(
         return handle_error("Invalid request", redirect_url, next, "error")
 
     LOGGER.debug(f"Verifying data in form: {data}")
-    LOGGER.debug(f"Request form: {request.form}")
+    LOGGER.debug(f"Request form keys: {list(request.form)}")
 
     # Loop on each key in data
     for key, values in (data or {}).items():

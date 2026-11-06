@@ -15,6 +15,8 @@ NOW = datetime(2026, 10, 26, 12, 0, 0)
 
 
 def make(caller, hostname="bw1", name="bw1.local"):
+    if caller is not None and not hasattr(caller, "apis"):
+        caller.apis = []
     return Instance(hostname, name, "ui", "up", "static", NOW, NOW, caller)
 
 

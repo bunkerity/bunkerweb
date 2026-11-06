@@ -194,7 +194,7 @@ emit({{ret = result.ret, status = result.status, second_ret = second.ret,
         assert out["errors"] == [f"error while sending DNS request to bl.example.org : dns failure for {Q}bl.example.org"]
         assert out["cache"] == {}
 
-    def test_one_clean_answer_during_a_partial_outage_is_cached_for_a_day(self):
+    def test_one_clean_answer_during_a_partial_outage_is_cached_for_a_minute(self):
         out = access(
             extra_variables={"DNSBL_LIST": "a.bl b.bl"},
             dns={Q + "b.bl": []},
@@ -202,7 +202,27 @@ emit({{ret = result.ret, status = result.status, second_ret = second.ret,
         assert (out["ret"], out["status"]) == (True, None)
         assert out["errors"] == [f"error while sending DNS request to a.bl : dns failure for {Q}a.bl"]
         assert out["cache"] == {f"plugin_dnsbl_{SERVER}1.2.3.4": "ok"}
+        assert out["ttl"] == 60
+
+    def test_a_clean_verdict_from_every_server_is_cached_for_a_day(self):
+        out = access(
+            extra_variables={"DNSBL_LIST": "a.bl b.bl"},
+            dns={Q + "a.bl": [], Q + "b.bl": []},
+        )
+        assert (out["ret"], out["status"]) == (True, None)
+        assert out["cache"] == {f"plugin_dnsbl_{SERVER}1.2.3.4": "ok"}
         assert out["ttl"] == 86400
+
+    def test_a_listing_is_denied_even_when_the_cache_write_fails(self):
+        out = access(dns={Q + "bl.example.org": ["127.0.0.2"]}, setup='CACHE_SET_ERROR = "no memory"')
+        assert (out["ret"], out["status"], out["msg"]) == (True, 403, "IP is blacklisted by bl.example.org")
+        assert out["data"] == {"id": "dnsbl", "dnsbl": "bl.example.org"}
+        assert out["metrics"] == {"failed_dnsbl": 1}
+        assert "error while adding element to cache : no memory" in out["errors"]
+
+    def test_a_clean_verdict_that_cannot_be_cached_is_reported_without_denying(self):
+        out = access(dns={Q + "bl.example.org": []}, setup='CACHE_SET_ERROR = "no memory"')
+        assert (out["ret"], out["status"]) == (False, None)
 
     def test_one_failing_server_does_not_hide_a_listing_on_another(self):
         out = access(

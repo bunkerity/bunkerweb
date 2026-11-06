@@ -1658,6 +1658,23 @@ Les concepts clés de l'intégration Docker sont les suivants :
 !!! info "Backend de base de données"
     Veuillez noter que nos instructions supposent que vous utilisez SQLite comme backend de base de données par défaut, tel que configuré par le `DATABASE_URI` paramètre. Cependant, d'autres backends de base de données sont également pris en charge. Pour plus d'informations, consultez les fichiers docker-compose dans le [dossier misc/integrations](https://github.com/bunkerity/bunkerweb/tree/v1.6.18-rc3/misc/integrations) du dépôt.
 
+### Tags des images Docker {#docker-image-tags}
+
+Chaque image est publiée sous les mêmes tags sur Docker Hub (`bunkerity/`), GHCR (`ghcr.io/bunkerity/`) et le registre GitLab (`registry.gitlab.com/bunkerity/bunkerweb/`). `X.Y` désigne une version mineure comme `1.6`, `X.Y.Z` une version complète comme `1.6.18`.
+
+| Tag                               | Pointe vers                                                           | À utiliser pour                                                          |
+| --------------------------------- | --------------------------------------------------------------------- | ------------------------------------------------------------------------ |
+| `X.Y.Z`, `X.Y.Z-rcN`              | Une version ou une version candidate précise, ne bouge jamais         | La production : épinglez ces tags                                        |
+| `latest`                          | La dernière version stable, toutes versions mineures confondues       | Des tests rapides : il passe à la version mineure suivante dès sa sortie |
+| `X.Y`                             | La dernière version stable de cette version mineure                   | Suivre une version mineure et recevoir ses correctifs                    |
+| `X.Y-edge`                        | La dernière version candidate ou stable de cette version mineure      | Essayer la prochaine version en avance, puis la suivre une fois stable   |
+| `X.Y-rc`, `X.Y-beta`, `X.Y-alpha` | La dernière version candidate, bêta ou alpha de cette version mineure | Tester les préversions d'une version mineure donnée                      |
+| `rc`, `beta`                      | La dernière version candidate ou bêta publiée, quelle que soit sa version ; republier une ancienne version fait reculer le tag | Anciens noms : préférez les tags par version mineure ci-dessus       |
+| `testing`                         | Le dernier build du pipeline de staging (branches `staging` et `fix-cve` ou exécution manuelle) | Tester des changements non publiés, jamais en production                 |
+| `dev`                             | Le dernier build du pipeline de dev (branche `dev` ou exécution manuelle) | Les contributeurs, jamais en production                                  |
+
+Seule la première ligne est immuable. Tous les autres tags bougent à chaque nouveau build publié : utilisez un tag de version complète en production et mettez-le à jour volontairement.
+
 ### Variables d'environnement
 
 Les paramètres sont transmis au Scheduler à l'aide de variables d'environnement Docker :

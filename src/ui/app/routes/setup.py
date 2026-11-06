@@ -274,7 +274,7 @@ def setup_page():
                 global_config = DB.get_config(global_only=True)
                 BW_CONFIG.edit_global_conf(global_config | {"MULTISITE": "yes"}, check_changes=False)
 
-            LOGGER.debug(f"Creating new service with base_config: {base_config} and config: {config}")
+            LOGGER.debug(f"Creating new service with base_config: {base_config} and config keys: {list(config)}")
 
             operation, error = BW_CONFIG.new_service(base_config, override_method="wizard", check_changes=False)
             if error:

@@ -32,6 +32,7 @@ actions:
     # check dropped from the health route would go unnoticed -- the route reports whether the
     # instance is enforcing, which is not public information.
     type: status
+    expect_error: [connection_closed]
     url: "http://127.0.0.1:5001/health"
     headers:
       Host: "bwapi"
@@ -56,12 +57,14 @@ actions:
 
   no_token:
     type: status
+    expect_error: [connection_closed]
     url: "http://127.0.0.1:5001/ping"
     headers:
       Host: "bwapi"
     restart_stack: false
   wrong_host:
     type: status
+    expect_error: [connection_closed]
     url: "http://127.0.0.1:5001/ping"
     headers:
       Host: "wrong-host"
@@ -89,9 +92,12 @@ actions:
 
   http_deactivated:
     type: status
+    # Published container ports may reset instead of refusing a connection to an absent listener.
+    expect_error: [connection_refused, connection_closed]
     url: "http://127.0.0.1:5001/ping"
     headers:
       Host: "bwapi"
+      Authorization: "Bearer tests-secret-token"
     # Not on Linux. The other arms gate readiness on the container healthcheck, which only asks
     # whether nginx answers `/healthz` -- indifferent to whether the instance was ever
     # configured. The Linux gate greps `BunkerWeb is ready` out of error.log

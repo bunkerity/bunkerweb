@@ -115,16 +115,16 @@ La valeur est une liste de motifs séparés par des espaces, parmi `crowdsec`, `
 
 === "Paramètres réseau et ports"
 
-    | Paramètre               | Valeur par défaut | Contexte | Multiple | Description                                                                                        |
-    | ----------------------- | ----------------- | -------- | -------- | -------------------------------------------------------------------------------------------------- |
-    | `HTTP_PORT`             | `8080`            | global   | Oui      | **Port HTTP :** Numéro de port pour le trafic HTTP. Laisser vide pour désactiver l'écoute HTTP.    |
-    | `HTTPS_PORT`            | `8443`            | global   | Oui      | **Port HTTPS :** Numéro de port pour le trafic HTTPS. Laisser vide pour désactiver l'écoute HTTPS. |
-    | `USE_IPV6`              | `no`              | global   | Non      | **Support IPv6 :** Active la connectivité IPv6.                                                    |
-    | `DNS_RESOLVERS`         | `127.0.0.11`      | global   | Non      | **Résolveurs DNS :** Adresses des résolveurs à utiliser.                                           |
-    | `CLIENT_BODY_TIMEOUT`   | `10s`             | global   | Non      | **Timeout corps client :** Délai de lecture du corps de la requête client.                         |
-    | `CLIENT_HEADER_TIMEOUT` | `10s`             | global   | Non      | **Timeout en-têtes client :** Délai de lecture des en-têtes de la requête client.                  |
-    | `KEEPALIVE_TIMEOUT`     | `15s`             | global   | Non      | **Timeout keepalive :** Délai des connexions client en keepalive.                                  |
-    | `SEND_TIMEOUT`          | `10s`             | global   | Non      | **Timeout d'envoi :** Délai maximal de transmission de la réponse au client.                       |
+    | Paramètre               | Valeur par défaut | Contexte | Multiple | Description                                                                                                                                                                                                                          |
+    | ----------------------- | ----------------- | -------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+    | `HTTP_PORT`             | `8080`            | global   | Oui      | **Port HTTP :** Numéro de port pour le trafic HTTP. Laisser vide pour désactiver l'écoute HTTP.                                                                                                                                      |
+    | `HTTPS_PORT`            | `8443`            | global   | Oui      | **Port HTTPS :** Numéro de port pour le trafic HTTPS. Laisser vide pour désactiver l'écoute HTTPS.                                                                                                                                   |
+    | `USE_IPV6`              | `no`              | global   | Non      | **Support IPv6 :** Active la connectivité IPv6.                                                                                                                                                                                      |
+    | `DNS_RESOLVERS`         | `127.0.0.11`      | global   | Non      | **Résolveurs DNS :** Adresses des résolveurs à utiliser.                                                                                                                                                                             |
+    | `CLIENT_BODY_TIMEOUT`   | `10s`             | global   | Non      | **Timeout corps client :** Délai de lecture du corps de la requête client.                                                                                                                                                           |
+    | `CLIENT_HEADER_TIMEOUT` | `10s`             | global   | Non      | **Timeout en-têtes client :** Délai de lecture des en-têtes de la requête client. Il limite aussi la durée pendant laquelle un ancien worker reste actif après un rechargement tant qu’un client n’a pas terminé sa négociation TLS. |
+    | `KEEPALIVE_TIMEOUT`     | `15s`             | global   | Non      | **Timeout keepalive :** Délai des connexions client en keepalive.                                                                                                                                                                    |
+    | `SEND_TIMEOUT`          | `10s`             | global   | Non      | **Timeout d'envoi :** Délai maximal de transmission de la réponse au client.                                                                                                                                                         |
 
 === "Paramètres serveur Stream"
 
@@ -759,7 +759,7 @@ Comment ça marche :
     Les identifiants sont encodés Base64, pas chiffrés. Utilisez toujours HTTPS avec l’authentification Basic.
 
 !!! tip "Plusieurs comptes"
-    Vous pouvez configurer plusieurs paires identifiant/mot de passe pour l'accès. Chaque paramètre `AUTH_BASIC_USER` doit avoir un paramètre `AUTH_BASIC_PASSWORD` correspondant.
+    Vous pouvez configurer plusieurs paires identifiant/mot de passe pour l'accès. Chaque paramètre `AUTH_BASIC_USER` doit avoir un paramètre `AUTH_BASIC_PASSWORD` correspondant. La paire par défaut `changeme` / `changeme` est ignorée dès qu'une autre paire est configurée ; définissez `AUTH_BASIC_USER` et `AUTH_BASIC_PASSWORD` sans suffixe avec vos propres valeurs pour la conserver.
 
 ### Exemples
 
@@ -1347,7 +1347,7 @@ Suivez ces étapes pour configurer et utiliser la fonctionnalité BunkerNet :
 | Paramètre                  | Défaut                     | Contexte  | Multiple | Description                                                                                                                                                                                                                                                                       |
 | -------------------------- | -------------------------- | --------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `USE_BUNKERNET`            | `yes`                      | multisite | non      | **Activer BunkerNet :** Mettre à `yes` pour activer le partage de renseignements BunkerNet.                                                                                                                                                                                       |
-| `BUNKERNET_FILTER_HEADERS` | `no`                       | multisite | non      | **Filtrer les en-têtes signalés :** Mettre à `yes` pour n'envoyer qu'une courte liste d'en-têtes de requête et vider les valeurs trouvées par ModSecurity dans les en-têtes et les cookies. À `no`, un signalement contient tous les en-têtes de requête et les valeurs trouvées. |
+| `BUNKERNET_FILTER_HEADERS` | `no`                       | multisite | non      | **Filtrer les en-têtes signalés :** Mettre à `yes` pour n'envoyer qu'une courte liste d'en-têtes de requête et vider les valeurs trouvées par ModSecurity dans les en-têtes et les cookies. À `no`, un signalement contient tous les en-têtes de requête sauf `Cookie`, `Authorization` et `Proxy-Authorization`, et les valeurs trouvées sauf celles trouvées dans ces en-têtes et dans les cookies. |
 | `BUNKERNET_SERVER`         | `https://api.bunkerweb.io` | global    | non      | **Serveur BunkerNet :** Adresse du serveur API BunkerNet pour partager les renseignements sur les menaces.                                                                                                                                                                        |
 
 !!! tip "Protection réseau"
@@ -1359,10 +1359,10 @@ Suivez ces étapes pour configurer et utiliser la fonctionnalité BunkerNet :
     - les métadonnées de l'instance envoyées avec chaque requête : l'identifiant de l'instance BunkerNet, la version de BunkerWeb, l'intégration, ainsi que le nom, la version, l'identifiant de version, le nom de code, l'identifiant et l'architecture du système d'exploitation ;
     - l'adresse IP du client, la raison du blocage et la date ;
     - la méthode HTTP, l'URL **y compris sa chaîne de requête** et le nom du service (`server_name`) ;
-    - les en-têtes de requête, avec leurs valeurs : tous les en-têtes reçus (dans la limite de `MAX_HEADERS`), ou seulement `User-Agent`, `Accept`, `Accept-Encoding`, `Accept-Language`, `Content-Type` et `Content-Length` lorsque `BUNKERNET_FILTER_HEADERS` vaut `yes` ;
-    - les détails associés à la raison du blocage. Selon le plugin qui a bloqué le client, ils peuvent inclure les ID et messages des règles ModSecurity déclenchées avec les valeurs de la requête qui les ont déclenchées (parties d'arguments, du corps, des en-têtes ou des cookies, chacune tronquée à 512 octets ; avec `BUNKERNET_FILTER_HEADERS` à `yes`, les valeurs trouvées dans les en-têtes et les cookies sont vidées et seul le nom de la variable est envoyé) ou, pour Bad Behavior, la méthode et l'URL des requêtes récentes qui ont mené au bannissement.
+    - les en-têtes de requête, avec leurs valeurs : tous les en-têtes reçus (dans la limite de `MAX_HEADERS`) sauf `Cookie`, `Authorization` et `Proxy-Authorization`, ou seulement `User-Agent`, `Accept`, `Accept-Encoding`, `Accept-Language`, `Content-Type` et `Content-Length` lorsque `BUNKERNET_FILTER_HEADERS` vaut `yes` ;
+    - les détails associés à la raison du blocage. Selon le plugin qui a bloqué le client, ils peuvent inclure les ID et messages des règles ModSecurity déclenchées avec les valeurs de la requête qui les ont déclenchées (parties d'arguments, du corps, des en-têtes ou des cookies, chacune tronquée à 512 octets ; les valeurs trouvées dans les cookies et dans les en-têtes `Cookie`, `Authorization` et `Proxy-Authorization` sont toujours vidées, et avec `BUNKERNET_FILTER_HEADERS` à `yes` celles de tout autre en-tête aussi ; seul le nom de la variable est envoyé) ou, pour Bad Behavior, la méthode et l'URL des requêtes récentes qui ont mené au bannissement.
 
-    Par défaut (`BUNKERNET_FILTER_HEADERS` à `no`), un signalement contient tous les en-têtes de requête reçus (dans la limite de `MAX_HEADERS`), cookies et `Authorization` compris, et les valeurs trouvées par ModSecurity telles quelles. Mettez `BUNKERNET_FILTER_HEADERS` à `yes` pour n'envoyer que les six en-têtes listés ci-dessus et vider les valeurs trouvées dans les en-têtes et les cookies. Les signalements encore en attente d'envoi sont filtrés de la même façon avant leur envoi lorsqu'il vaut `yes`.
+    Par défaut (`BUNKERNET_FILTER_HEADERS` à `no`), un signalement contient tous les en-têtes de requête reçus (dans la limite de `MAX_HEADERS`) sauf `Cookie`, `Authorization` et `Proxy-Authorization`, qui ne sont jamais envoyés, et les valeurs trouvées par ModSecurity sauf celles trouvées dans les cookies et dans ces en-têtes. Mettez `BUNKERNET_FILTER_HEADERS` à `yes` pour n'envoyer que les six en-têtes listés ci-dessus et vider les valeurs trouvées dans les en-têtes et les cookies. Les signalements encore en attente d'envoi sont nettoyés de la même façon avant leur envoi (les identifiants toujours, la liste autorisée lorsqu'il vaut `yes`).
 
     L'URL et les valeurs trouvées proviennent de la requête : elles contiennent tout ce que le client a envoyé. Définissez `USE_BUNKERNET` sur `no` pour les services dont les URL portent des valeurs sensibles.
 
@@ -3651,6 +3651,9 @@ Le plugin Limit permet d’appliquer des politiques de limitation pour garantir 
 
         Par exemple, `5r/m` signifie que 5 requêtes par minute sont autorisées pour chaque adresse IP.
 
+    !!! info "Précision du comptage entre workers"
+        Sans Redis, le comptage est exact entre les workers jusqu'à 100 requêtes par fenêtre, pour `LIMIT_REQ_RATE` comme pour `LIMIT_REQ_GLOBAL_RATE` : des requêtes simultanées ne peuvent pas dépasser la limite. Au-delà de 100 requêtes par fenêtre, des requêtes simultanées peuvent dépasser légèrement la limite, car sérialiser à chaque requête le compteur d'un long historique de requêtes coûterait du débit. Avec Redis, le comptage est toujours exact.
+
 === "Limitation de débit globale"
 
     | Paramètre               | Défaut    | Contexte  | Multiple | Description                                                                                                                                         |
@@ -3663,13 +3666,13 @@ Le plugin Limit permet d’appliquer des politiques de limitation pour garantir 
 
 === "Limitation de connexions"
 
-    | Paramètre               | Défaut | Contexte  | Multiple | Description                                                                                                    |
-    | ----------------------- | ------ | --------- | -------- | -------------------------------------------------------------------------------------------------------------- |
-    | `USE_LIMIT_CONN`        | `yes`  | multisite | non      | **Activer la limitation de connexions :** Mettre à `yes` pour activer la limitation de connexions simultanées. |
-    | `LIMIT_CONN_MAX_HTTP1`  | `10`   | multisite | non      | **Connexions HTTP/1.X :** Nombre maximal de connexions HTTP/1.X simultanées par adresse IP.                    |
-    | `LIMIT_CONN_MAX_HTTP2`  | `100`  | multisite | non      | **Flux HTTP/2 :** Nombre maximal de flux HTTP/2 simultanés par adresse IP.                                     |
-    | `LIMIT_CONN_MAX_HTTP3`  | `100`  | multisite | non      | **Flux HTTP/3 :** Nombre maximal de flux HTTP/3 simultanés par adresse IP.                                     |
-    | `LIMIT_CONN_MAX_STREAM` | `10`   | multisite | non      | **Connexions Stream :** Nombre maximal de connexions stream simultanées par adresse IP.                        |
+    | Paramètre               | Défaut | Contexte  | Multiple | Description                                                                                                       |
+    | ----------------------- | ------ | --------- | -------- | ----------------------------------------------------------------------------------------------------------------- |
+    | `USE_LIMIT_CONN`        | `yes`  | multisite | non      | **Activer la limitation de connexions :** Mettre à `yes` pour activer la limitation de connexions simultanées.    |
+    | `LIMIT_CONN_MAX_HTTP1`  | `10`   | multisite | non      | **Connexions HTTP/1.X :** Nombre maximal de connexions HTTP/1.X simultanées par adresse IP. Plage : de 1 à 65535. |
+    | `LIMIT_CONN_MAX_HTTP2`  | `100`  | multisite | non      | **Flux HTTP/2 :** Nombre maximal de flux HTTP/2 simultanés par adresse IP. Plage : de 1 à 65535.                  |
+    | `LIMIT_CONN_MAX_HTTP3`  | `100`  | multisite | non      | **Flux HTTP/3 :** Nombre maximal de flux HTTP/3 simultanés par adresse IP. Plage : de 1 à 65535.                  |
+    | `LIMIT_CONN_MAX_STREAM` | `10`   | multisite | non      | **Connexions Stream :** Nombre maximal de connexions stream simultanées par adresse IP. Plage : de 1 à 65535.     |
 
 Lorsque `SECURITY_MODE` est `detect`, les limites de connexions sont évaluées et journalisées (`limiting connections, dry run`) mais pas appliquées.
 
@@ -5393,17 +5396,17 @@ Suivez ces étapes pour configurer et utiliser la fonctionnalité Reverse Proxy 
         - **Gestion des protocoles :** Prise en charge de HTTP, HTTPS, WebSockets, et d'autres protocoles
         - **Interception des erreurs :** Personnalisez les pages d'erreur pour une expérience utilisateur cohérente
 
-    | Paramètre                         | Défaut | Contexte  | Multiple | Description                                                                                                                                                                                                                                       |
-    | --------------------------------- | ------ | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-    | `USE_REVERSE_PROXY`               | `no`   | multisite | no       | **Activer le Reverse Proxy :** Mettre à `yes` pour activer la fonctionnalité de reverse proxy.                                                                                                                                                    |
-    | `REVERSE_PROXY_HOST`              |        | multisite | yes      | **Hôte Backend :** URL complète de la ressource proxifiée (proxy_pass).                                                                                                                                                                           |
-    | `REVERSE_PROXY_URL`               | `/`    | multisite | yes      | **URL d'emplacement :** Chemin qui sera proxifié vers le serveur backend. Une valeur commençant par `^` ou se terminant par `$` est traitée comme un emplacement défini par une expression régulière. Préfixez éventuellement par `~`, `~*`, `=` ou `^~` suivi d'un espace pour définir explicitement le modificateur d'emplacement nginx ; aucun espace, `;`, `{` ou `}` n'est autorisé ailleurs dans la valeur.                                             |
-    | `REVERSE_PROXY_BUFFERING`         | `yes`  | multisite | yes      | **Mise en tampon de la réponse :** Active ou désactive la mise en tampon des réponses de la ressource proxifiée.                                                                                                                                  |
-    | `REVERSE_PROXY_REQUEST_BUFFERING` | `yes`  | multisite | yes      | **Mise en tampon des requêtes :** Active ou désactive la mise en tampon des requêtes vers la ressource proxifiée.                                                                                                                                 |
-    | `REVERSE_PROXY_KEEPALIVE`         | `no`   | multisite | yes      | **Keep-Alive :** Active ou désactive les connexions keepalive avec la ressource proxifiée.                                                                                                                                                        |
-    | `REVERSE_PROXY_HTTP_VERSION`      | `1.1`  | multisite | yes      | **Version HTTP :** Version du protocole HTTP utilisée pour communiquer avec l'amont (`1.0`, `1.1` ou `2`). Définissez à `2` pour activer le multiplexage HTTP/2 sur le lien amont. Les emplacements WebSocket sont fixés à 1.1 quoi qu'il arrive. |
-    | `REVERSE_PROXY_CUSTOM_HOST`       |        | multisite | no       | **Hôte personnalisé :** Remplace l'en-tête Host envoyé au serveur en amont.                                                                                                                                                                       |
-    | `REVERSE_PROXY_INTERCEPT_ERRORS`  | `yes`  | multisite | no       | **Intercepter les erreurs :** Intercepte et réécrit les réponses d'erreur du backend. Voir [Conserver les corps d'erreur des API en amont](#errors). |
+    | Paramètre                         | Défaut | Contexte  | Multiple | Description                                                                                                                                                                                                                                                                                                                                                                                                       |
+    | --------------------------------- | ------ | --------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+    | `USE_REVERSE_PROXY`               | `no`   | multisite | no       | **Activer le Reverse Proxy :** Mettre à `yes` pour activer la fonctionnalité de reverse proxy.                                                                                                                                                                                                                                                                                                                    |
+    | `REVERSE_PROXY_HOST`              |        | multisite | yes      | **Hôte Backend :** URL complète de la ressource proxifiée (proxy_pass).                                                                                                                                                                                                                                                                                                                                           |
+    | `REVERSE_PROXY_URL`               | `/`    | multisite | yes      | **URL d'emplacement :** Chemin qui sera proxifié vers le serveur backend. Une valeur commençant par `^` ou se terminant par `$` est traitée comme un emplacement défini par une expression régulière. Préfixez éventuellement par `~`, `~*`, `=` ou `^~` suivi d'un espace pour définir explicitement le modificateur d'emplacement nginx ; aucun espace, `;`, `{` ou `}` n'est autorisé ailleurs dans la valeur. |
+    | `REVERSE_PROXY_BUFFERING`         | `yes`  | multisite | yes      | **Mise en tampon de la réponse :** Active ou désactive la mise en tampon des réponses de la ressource proxifiée.                                                                                                                                                                                                                                                                                                  |
+    | `REVERSE_PROXY_REQUEST_BUFFERING` | `yes`  | multisite | yes      | **Mise en tampon des requêtes :** Active ou désactive la mise en tampon des requêtes vers la ressource proxifiée.                                                                                                                                                                                                                                                                                                 |
+    | `REVERSE_PROXY_KEEPALIVE`         | `no`   | multisite | yes      | **Keep-Alive :** Envoie à la ressource proxifiée la version HTTP configurée (`1.1` par défaut) et un en-tête `Connection` vide. Cela ne crée pas à lui seul de pool de connexions : pour réutiliser les connexions, faites pointer `REVERSE_PROXY_HOST` vers un `upstream` nommé avec `keepalive`, déclaré dans une configuration personnalisée `http`.                                                           |
+    | `REVERSE_PROXY_HTTP_VERSION`      | `1.1`  | multisite | yes      | **Version HTTP :** Version du protocole HTTP utilisée pour communiquer avec l'amont (`1.0`, `1.1` ou `2`). Définissez à `2` pour activer le multiplexage HTTP/2 sur le lien amont. Les emplacements WebSocket sont fixés à 1.1 quoi qu'il arrive.                                                                                                                                                                 |
+    | `REVERSE_PROXY_CUSTOM_HOST`       |        | multisite | no       | **Hôte personnalisé :** Remplace l'en-tête Host envoyé au serveur en amont.                                                                                                                                                                                                                                                                                                                                       |
+    | `REVERSE_PROXY_INTERCEPT_ERRORS`  | `yes`  | multisite | no       | **Intercepter les erreurs :** Intercepte et réécrit les réponses d'erreur du backend. Voir [Conserver les corps d'erreur des API en amont](#errors).                                                                                                                                                                                                                                                              |
 
     BunkerWeb met le chemin ou l’expression régulière entre guillemets lors de la génération de l’emplacement NGINX, en préservant les guillemets littéraux, `#` et les barres obliques inverses des expressions régulières. Saisissez la valeur sans ajouter vous-même de guillemets NGINX. Les restrictions existantes sur les espaces, `;`, `{` et `}` restent applicables.
 
@@ -5414,6 +5417,32 @@ Suivez ces étapes pour configurer et utiliser la fonctionnalité Reverse Proxy 
 
     !!! warning "Comportement de la mise en tampon des requêtes"
         La désactivation de `REVERSE_PROXY_REQUEST_BUFFERING` n'a d'effet que lorsque ModSecurity est désactivé, car la mise en tampon des requêtes est autrement imposée.
+
+    !!! info "Réutiliser les connexions vers le backend"
+        `REVERSE_PROXY_KEEPALIVE=yes` fait seulement envoyer par BunkerWeb la version HTTP configurée (`1.1` par défaut) et un en-tête `Connection` vide au backend. Cela ne crée pas de pool de connexions : avec une URL `REVERSE_PROXY_HOST` ordinaire, NGINX ouvre une nouvelle connexion vers le backend pour chaque requête.
+
+        Pour réutiliser les connexions vers le backend, déclarez un `upstream` nommé avec `keepalive` dans une [configuration personnalisée `http`](advanced.md#custom-configurations), puis faites pointer `REVERSE_PROXY_HOST` vers le nom du groupe **sans port** : le port va sur la ligne `server` de l'`upstream`.
+
+        ```nginx
+        upstream app_pool {
+            server backend.internal:8443;
+            keepalive 32;
+        }
+        ```
+
+        ```conf
+        REVERSE_PROXY_HOST=https://app_pool
+        REVERSE_PROXY_KEEPALIVE=yes
+        # HTTPS uniquement : envoyer le nom de l'origine comme SNI et vérifier par rapport à celui-ci
+        REVERSE_PROXY_SSL_SNI=yes
+        REVERSE_PROXY_SSL_SNI_NAME=backend.example.com
+        # uniquement si le backend vérifie l'en-tête Host
+        REVERSE_PROXY_CUSTOM_HOST=backend.example.com
+        ```
+
+        - Le nom de l'`upstream` doit être unique, et le nom d'hôte de la ligne `server` doit se résoudre au moment où NGINX charge la configuration.
+        - En HTTPS, NGINX utilise le nom du groupe comme nom SNI et nom de vérification tant que `REVERSE_PROXY_SSL_SNI_NAME` est vide ; ce paramètre est ignoré tant que `REVERSE_PROXY_SSL_SNI` vaut `no`. Définissez les deux, comme ci-dessus, pour que le backend voie son vrai nom.
+        - L'en-tête `Host` reste le `$host` du client ; définissez `REVERSE_PROXY_CUSTOM_HOST` si le backend attend un autre nom.
 
 === "Paramètres de connexion"
 
@@ -5620,6 +5649,9 @@ Suivez ces étapes pour configurer et utiliser la fonctionnalité Reverse Proxy 
         - Utilisez des durées de cache appropriées en fonction du type de contenu (les ressources statiques peuvent être mises en cache plus longtemps)
         - Configurez `PROXY_NO_CACHE` pour éviter de mettre en cache du contenu sensible ou personnalisé
         - Surveillez les taux de réussite du cache et ajustez les paramètres en conséquence
+
+    !!! warning "La mise en cache exige la mise en tampon des réponses"
+        La mise en cache du proxy ne fonctionne que sur les emplacements où la mise en tampon des réponses est active. Avec `USE_PROXY_CACHE=yes`, définissez `REVERSE_PROXY_BUFFERING=yes` pour chaque emplacement à mettre en cache, y compris pour les paramètres numérotés comme `REVERSE_PROXY_BUFFERING_1`. Tant que la mise en tampon des réponses est désactivée, les nouvelles réponses ne sont pas mises en cache, sauf si l'upstream l'active via `X-Accel-Buffering`. Les réponses déjà en cache peuvent encore être servies. `REVERSE_PROXY_REQUEST_BUFFERING` contrôle les corps de requête et n'active pas la mise en cache des réponses. BunkerWeb journalise un avertissement lorsqu'il génère une configuration où la mise en cache du proxy est activée sur un emplacement dont la mise en tampon des réponses est désactivée.
 
 !!! tip "TLS mutuel vers l'upstream"
     Le certificat client et sa clé doivent tous deux être fournis, et la clé ne doit pas être chiffrée. Le scheduler valide la paire, la met en cache et la distribue aux instances ; si elle n'est pas valide, les directives de certificat ne sont simplement pas générées. Une CRL n'est appliquée que si la vérification de l'upstream est active.

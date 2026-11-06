@@ -410,6 +410,16 @@ class TestJobCache:
         both = seeded.get_job_cache_file("testjob", "a.txt", with_info=True)
         assert both["data"] == b"payload" and both["checksum"] == "seedsum"
 
+    def test_get_job_cache_file_info_carries_the_stored_names(self, seeded):
+        # Callers that gate on the name (the API and UI cache routes) classify these, not the spelling they asked with:
+        # a case-insensitive collation resolves variants to the stored row.
+        add_jobs_cache_row(seeded, file_name="a.txt", data=b"payload")
+        for kwargs in ({}, {"plugin_id": "general"}):
+            for data_kwargs in ({"with_data": True}, {"with_data": False}):
+                info = seeded.get_job_cache_file("testjob", "a.txt", with_info=True, **data_kwargs, **kwargs)
+                assert (info["file_name"], info["job_name"], info["plugin_id"]) == ("a.txt", "testjob", "general")
+        assert seeded.get_job_cache_file("testjob", "a.txt", with_info=False, with_data=True) == b"payload"
+
     def test_get_job_cache_file_misses(self, seeded):
         add_jobs_cache_row(seeded, file_name="a.txt")
         assert seeded.get_job_cache_file("testjob", "missing") is None

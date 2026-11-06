@@ -118,11 +118,13 @@ function reversescan:access()
 		end
 		kill_all_threads(wait_threads)
 	end
-	-- Cache results
+	-- Cache results: a failed write is logged and never skips the other ports nor lifts a denial
+	local cache_err = nil
 	for port, result in pairs(results) do
 		local ok, err = self:add_to_cache(self.ctx.bw.remote_addr .. ":" .. port, result)
 		if not ok then
-			return self:ret(false, "error while adding element to cache : " .. err)
+			cache_err = "error while adding element to cache : " .. err
+			self.logger:log(ngx.ERR, cache_err)
 		end
 	end
 	if ret_threads ~= nil then
@@ -132,6 +134,9 @@ function reversescan:access()
 		end
 		-- Error case
 		return self:ret(false, ret_err)
+	end
+	if cache_err then
+		return self:ret(false, cache_err)
 	end
 	-- No port opened
 	return self:ret(true, "no port open for IP " .. self.ctx.bw.remote_addr)

@@ -409,6 +409,7 @@ BunkerWeb API 是用于管理实例、服务、封禁、插件、任务和自定
   - `GET /cache`: 按筛选 (`service`, `plugin`, `job_name`) 列出缓存文件；`with_data=true` 内嵌可打印内容。
   - `GET /cache/{service}/{plugin}/{job}/{file}`: 获取/下载特定缓存文件（`download=true`）。
   - `DELETE /cache` 或 `DELETE /cache/{service}/{plugin}/{job}/{file}`: 删除缓存文件。只有某个插件的行真正被删除时才会通知调度器；`plugin` 不拥有该 job 时会被拒绝且不删除任何内容。
+  - 敏感条目（存储名称为 `secret` 或以 `.secret` 结尾，另有一些保存私钥或凭据的核心条目以及上游 mTLS 客户端密钥和故障转移备份归档）：除非调用方使用 HTTP Basic 的 API 管理员身份或 `API_TOKEN`，否则 `GET /cache/{service}/{plugin}/{job}/{file}` 返回 `403`，`GET /cache?with_data=true` 省略 `data` 和 `printable`（元数据保留）。即使 Biscuit 令牌是为管理员签发的，也会被拒绝。对于不存在的敏感名称同样返回 `403`。`DELETE` 不变，仍需要 `cache_delete`。参见[敏感的作业缓存条目](plugins.md#sensitive-job-cache-entries)。
 - **Jobs**
   - `GET /jobs`: 列出作业、计划和缓存摘要。
   - `POST /jobs/run`: 将插件标记为已变更以触发关联作业。

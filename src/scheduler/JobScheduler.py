@@ -31,6 +31,7 @@ from common_utils import effective_cpu_count, file_hash, parse_duration  # type:
 from Database import Database, DEFAULT_POOL_MAX_OVERFLOW, DEFAULT_POOL_SIZE  # type: ignore
 from logger import getLogger  # type: ignore
 from ApiCaller import ApiCaller, MIN_RELOAD_TIMEOUT, folder_push_timeout  # type: ignore
+from reload_utils import RELOAD_CONFIRM_MIN_WAIT, RELOAD_CONFIRM_MAX_WAIT, wait_for_reload  # type: ignore
 
 
 class JobScheduler(ApiCaller):
@@ -81,6 +82,8 @@ class JobScheduler(ApiCaller):
         # instead of only knowing that "at least one" did.
         self.__failed_jobs: List[str] = []
         self.__job_reload = False
+        self.__reload_pending: Optional[Tuple[bool, list, Dict[str, Any]]] = None
+        self.__reload_changed = False
         self.__job_regenerate = False
         self.generation_pending = False
         # A push or reload failure must not re-render what generate_configs() already produced.
@@ -270,12 +273,28 @@ class JobScheduler(ApiCaller):
             self.__logger.error("RELOAD_MIN_TIMEOUT must be a duration like 30 or 30s, defaulting to 5")
             reload_min_timeout = 5
 
-        reload_success = self.send_to_apis(
-            "POST",
-            f"/reload?test={'no' if self.env.get('DISABLE_CONFIGURATION_TESTING', 'no').lower() == 'yes' else 'yes'}",
-            timeout=max(MIN_RELOAD_TIMEOUT, int(reload_min_timeout), 3 * len(self.env.get("SERVER_NAME", "www.example.com").split())),
-        )[0]
-        if reload_success:
+        timeout = max(MIN_RELOAD_TIMEOUT, int(reload_min_timeout), 3 * len(self.env.get("SERVER_NAME", "www.example.com").split()))
+        if self.__reload_pending is None:
+            reload_success, responses = self.send_to_apis(
+                "POST",
+                f"/reload?test={'no' if self.env.get('DISABLE_CONFIGURATION_TESTING', 'no').lower() == 'yes' else 'yes'}",
+                timeout=timeout,
+                response=True,
+            )
+            apis = self.apis.copy()
+        else:
+            reload_success, apis, responses = self.__reload_pending
+        responses = responses or {}
+        pending, failed = wait_for_reload(apis, responses, min(max(timeout, RELOAD_CONFIRM_MIN_WAIT), RELOAD_CONFIRM_MAX_WAIT))
+        if pending:
+            outstanding = {host: response for host, response in responses.items() if host.strip("[]").lower() in pending}
+            self.__reload_pending = (reload_success and not failed, apis, outstanding)
+            self.__logger.warning(f"Reload signalled, confirmation still pending: {pending}; checking health on the next publication cycle")
+            return False
+        self.__reload_pending = None
+        if failed:
+            self.__logger.error(f"Error while confirming reload readiness: {failed}")
+        if reload_success and not failed:
             self.__logger.info("Successfully reloaded nginx")
             return True
         self.__logger.error("Error while reloading nginx")
@@ -351,6 +370,8 @@ class JobScheduler(ApiCaller):
 
         if ret in (1, 3):
             with self.__thread_lock:
+                if self.__reload_pending is not None:
+                    self.__reload_changed = True
                 self.__job_reload = True
                 if (plugin, name) in (
                     ("mtls", "client-cert"),
@@ -497,6 +518,7 @@ class JobScheduler(ApiCaller):
         self.__configs_generated = False
         self.__publish_retry_at = None
         self.__publish_retry_delay = self.PUBLISH_RETRY_MIN_DELAY
+        self.__reload_changed = False
 
     def consume_pending_publication(self) -> Tuple[bool, bool]:
         """Hand the pending (reload, regenerate) state to a caller that publishes it itself.
@@ -507,11 +529,19 @@ class JobScheduler(ApiCaller):
         """
         with self.__thread_lock:
             pending = (self.__job_reload, self.__job_regenerate)
+            # The caller now owns publication of this generation, including any accepted reload.
+            self.__reload_pending = None
             self.__clear_pending_publication()
         return pending
 
     def __publish_pending(self) -> bool:
         """Only acknowledge a changed generation after every publication step succeeds."""
+        if self.__reload_pending is not None:
+            if not self.__reload():
+                return False
+            if not self.__reload_changed:
+                return True
+            self.__reload_changed = False
         if self.generation_pending:
             self.__logger.debug("Configuration generation is pending; holding job publication")
             return False

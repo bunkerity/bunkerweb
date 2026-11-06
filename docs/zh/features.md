@@ -117,16 +117,16 @@ BunkerWeb 中的某些设置支持同一功能的多个配置。要定义多组�
 
 === "网络和端口设置"
 
-    | 设置                    | 默认值       | 上下文 | 多个 | 描述                                                       |
-    | ----------------------- | ------------ | ------ | ---- | ---------------------------------------------------------- |
-    | `HTTP_PORT`             | `8080`       | global | 是   | **HTTP 端口：** HTTP 流量的端口号。留空以禁用HTTP监听。    |
-    | `HTTPS_PORT`            | `8443`       | global | 是   | **HTTPS 端口：** HTTPS 流量的端口号。留空以禁用HTTPS监听。 |
-    | `USE_IPV6`              | `no`         | global | 否   | **IPv6 支持：** 启用 IPv6 连接。                           |
-    | `DNS_RESOLVERS`         | `127.0.0.11` | global | 否   | **DNS 解析器：** 要使用的解析器的 DNS 地址。               |
-    | `CLIENT_BODY_TIMEOUT`   | `10s`        | global | 否   | **客户端请求体超时：** 读取客户端请求体的超时时间。        |
-    | `CLIENT_HEADER_TIMEOUT` | `10s`        | global | 否   | **客户端请求头超时：** 读取客户端请求头的超时时间。        |
-    | `KEEPALIVE_TIMEOUT`     | `15s`        | global | 否   | **Keepalive 超时：** 客户端 Keepalive 连接的超时时间。     |
-    | `SEND_TIMEOUT`          | `10s`        | global | 否   | **发送超时：** 向客户端传输响应的超时时间。                |
+    | 设置                    | 默认值       | 上下文 | 多个 | 描述                                                                                                                          |
+    | ----------------------- | ------------ | ------ | ---- | ----------------------------------------------------------------------------------------------------------------------------- |
+    | `HTTP_PORT`             | `8080`       | global | 是   | **HTTP 端口：** HTTP 流量的端口号。留空以禁用HTTP监听。                                                                       |
+    | `HTTPS_PORT`            | `8443`       | global | 是   | **HTTPS 端口：** HTTPS 流量的端口号。留空以禁用HTTPS监听。                                                                    |
+    | `USE_IPV6`              | `no`         | global | 否   | **IPv6 支持：** 启用 IPv6 连接。                                                                                              |
+    | `DNS_RESOLVERS`         | `127.0.0.11` | global | 否   | **DNS 解析器：** 要使用的解析器的 DNS 地址。                                                                                  |
+    | `CLIENT_BODY_TIMEOUT`   | `10s`        | global | 否   | **客户端请求体超时：** 读取客户端请求体的超时时间。                                                                           |
+    | `CLIENT_HEADER_TIMEOUT` | `10s`        | global | 否   | **客户端请求头超时：** 读取客户端请求头的超时时间。 它还限制了重新加载后，客户端尚未完成 TLS 握手时旧工作进程继续存活的时间。 |
+    | `KEEPALIVE_TIMEOUT`     | `15s`        | global | 否   | **Keepalive 超时：** 客户端 Keepalive 连接的超时时间。                                                                        |
+    | `SEND_TIMEOUT`          | `10s`        | global | 否   | **发送超时：** 向客户端传输响应的超时时间。                                                                                   |
 
 === "流服务器设置"
 
@@ -777,7 +777,7 @@ Auth Basic 插件提供 HTTP 基本认证来保护您的网站或特定资源。
     HTTP 基本认证以 Base64 编码（非加密）传输凭据。虽然在通过 HTTPS 使用时这是可以接受的，但在普通 HTTP 上不应被认为是安全的。使用基本身份验证时，请务必启用 SSL/TLS。
 
 !!! tip "使用多个凭据"
-    您可以为访问配置多个用户名/密码对。每个 `AUTH_BASIC_USER` 设置都应有一个对应的 `AUTH_BASIC_PASSWORD` 设置。
+    您可以为访问配置多个用户名/密码对。每个 `AUTH_BASIC_USER` 设置都应有一个对应的 `AUTH_BASIC_PASSWORD` 设置。一旦配置了其他凭据对，默认的 `changeme` / `changeme` 凭据对就会被忽略；将不带后缀的 `AUTH_BASIC_USER` 和 `AUTH_BASIC_PASSWORD` 设置为您自己的值即可保留它。
 
 ### 示例配置
 
@@ -1390,7 +1390,7 @@ BunkerNet 插件通过 BunkerWeb 实例之间的集体威胁情报共享，创�
 | 设置                       | 默认值                     | 上下文    | 多个 | 描述                                                                                                                                                                  |
 | -------------------------- | -------------------------- | --------- | ---- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `USE_BUNKERNET`            | `yes`                      | multisite | 否   | **启用 BunkerNet：** 设置为 `yes` 以启用 BunkerNet 威胁情报共享。                                                                                                     |
-| `BUNKERNET_FILTER_HEADERS` | `no`                       | multisite | 否   | **过滤上报的请求头：** 设置为 `yes` 时，只发送一份简短的请求头白名单，并清空 ModSecurity 在请求头和 Cookie 中命中的值。设置为 `no` 时，报告包含所有请求头和命中的值。 |
+| `BUNKERNET_FILTER_HEADERS` | `no`                       | multisite | 否   | **过滤上报的请求头：** 设置为 `yes` 时，只发送一份简短的请求头白名单，并清空 ModSecurity 在请求头和 Cookie 中命中的值。设置为 `no` 时，报告包含除 `Cookie`、`Authorization` 和 `Proxy-Authorization` 之外的所有请求头，以及命中的值（在 Cookie 和这些请求头中命中的值除外）。 |
 | `BUNKERNET_SERVER`         | `https://api.bunkerweb.io` | global    | 否   | **BunkerNet 服务器：** 用于共享威胁情报的 BunkerNet API 服务器地址。                                                                                                  |
 
 !!! tip "网络保护"
@@ -1402,10 +1402,10 @@ BunkerNet 插件通过 BunkerWeb 实例之间的集体威胁情报共享，创�
     - 每次请求发送的实例元数据：BunkerNet 实例 ID、BunkerWeb 版本、集成方式，以及操作系统名称、版本、版本 ID、代号、ID 和架构；
     - 客户端 IP 地址、阻止原因和日期；
     - HTTP 方法、**包含查询字符串的** URL，以及服务名称（`server_name`）；
-    - 请求头及其值：收到的所有请求头（最多 `MAX_HEADERS` 个），或在 `BUNKERNET_FILTER_HEADERS` 为 `yes` 时仅包含 `User-Agent`、`Accept`、`Accept-Encoding`、`Accept-Language`、`Content-Type` 和 `Content-Length`；
-    - 与阻止原因相关的详细信息。根据阻止该客户端的插件不同，可能包含命中的 ModSecurity 规则 ID 和消息，以及触发这些规则的请求值（参数、请求体、请求头或 Cookie 的片段，每项截断为 512 字节；`BUNKERNET_FILTER_HEADERS` 为 `yes` 时，在请求头和 Cookie 中命中的值会被清空，只发送变量名）；对于 Bad Behavior，则是导致封禁的近期请求的方法和 URL。
+    - 请求头及其值：收到的所有请求头（最多 `MAX_HEADERS` 个，不含 `Cookie`、`Authorization` 和 `Proxy-Authorization`），或在 `BUNKERNET_FILTER_HEADERS` 为 `yes` 时仅包含 `User-Agent`、`Accept`、`Accept-Encoding`、`Accept-Language`、`Content-Type` 和 `Content-Length`；
+    - 与阻止原因相关的详细信息。根据阻止该客户端的插件不同，可能包含命中的 ModSecurity 规则 ID 和消息，以及触发这些规则的请求值（参数、请求体、请求头或 Cookie 的片段，每项截断为 512 字节；在 Cookie 以及 `Cookie`、`Authorization`、`Proxy-Authorization` 请求头中命中的值始终会被清空，`BUNKERNET_FILTER_HEADERS` 为 `yes` 时其他请求头中命中的值也会被清空，只发送变量名）；对于 Bad Behavior，则是导致封禁的近期请求的方法和 URL。
 
-    默认情况下（`BUNKERNET_FILTER_HEADERS` 为 `no`），报告包含收到的所有请求头（最多 `MAX_HEADERS` 个，包括 Cookie 和 `Authorization`），以及 ModSecurity 命中的原始值。将 `BUNKERNET_FILTER_HEADERS` 设置为 `yes`，则只发送上面列出的六个请求头，并清空在请求头和 Cookie 中命中的值。仍在队列中的报告在 `yes` 时也会在发送前以同样方式过滤。
+    默认情况下（`BUNKERNET_FILTER_HEADERS` 为 `no`），报告包含收到的所有请求头（最多 `MAX_HEADERS` 个），但不含从不发送的 `Cookie`、`Authorization` 和 `Proxy-Authorization`，以及 ModSecurity 命中的值（在 Cookie 和这些请求头中命中的值除外）。将 `BUNKERNET_FILTER_HEADERS` 设置为 `yes`，则只发送上面列出的六个请求头，并清空在请求头和 Cookie 中命中的值。仍在队列中的报告在发送前也会以同样方式处理（凭据始终清除，白名单在 `yes` 时应用）。
 
     URL 以及命中的值均来自请求，因此包含客户端发送的任何内容。对于 URL 中带有敏感值的服务，请将 `USE_BUNKERNET` 设置为 `no`。
 
@@ -3761,6 +3761,9 @@ BunkerWeb 中的限制插件提供了强大的功能来对您的网站强制执�
 
         例如，`5r/m` 表示每个 IP 地址每分钟允许 5 个请求。
 
+    !!! info "跨 worker 的计数精度"
+        未使用 Redis 时，对于 `LIMIT_REQ_RATE` 和 `LIMIT_REQ_GLOBAL_RATE`，每个时间窗口不超过 100 个请求时，跨 worker 的计数是精确的：同时到达的请求无法突破限制。每个时间窗口超过 100 个请求时，同时到达的请求可能略微超出限制，因为在每个请求上串行化一长串请求历史的计数器会降低吞吐量。使用 Redis 时，计数始终精确。
+
 === "全局速率限制"
 
     | 设置                    | 默认值    | 上下文    | 多选 | 描述                                                                                       |
@@ -3773,13 +3776,13 @@ BunkerWeb 中的限制插件提供了强大的功能来对您的网站强制执�
 
 === "连接限制"
 
-    | 设置                    | 默认值 | 上下文    | 多选 | 描述                                                           |
-    | ----------------------- | ------ | --------- | ---- | -------------------------------------------------------------- |
-    | `USE_LIMIT_CONN`        | `yes`  | multisite | 否   | **启用连接限制：** 设置为 `yes` 以启用连接限制功能。           |
-    | `LIMIT_CONN_MAX_HTTP1`  | `10`   | multisite | 否   | **HTTP/1.X 连接数：** 每个 IP 地址的最大并发 HTTP/1.X 连接数。 |
-    | `LIMIT_CONN_MAX_HTTP2`  | `100`  | multisite | 否   | **HTTP/2 流数：** 每个 IP 地址的最大并发 HTTP/2 流数。         |
-    | `LIMIT_CONN_MAX_HTTP3`  | `100`  | multisite | 否   | **HTTP/3 流数：** 每个 IP 地址的最大并发 HTTP/3 流数。         |
-    | `LIMIT_CONN_MAX_STREAM` | `10`   | multisite | 否   | **流连接数：** 每个 IP 地址的最大并发流连接数。                |
+    | 设置                    | 默认值 | 上下文    | 多选 | 描述                                                                              |
+    | ----------------------- | ------ | --------- | ---- | --------------------------------------------------------------------------------- |
+    | `USE_LIMIT_CONN`        | `yes`  | multisite | 否   | **启用连接限制：** 设置为 `yes` 以启用连接限制功能。                              |
+    | `LIMIT_CONN_MAX_HTTP1`  | `10`   | multisite | 否   | **HTTP/1.X 连接数：** 每个 IP 地址的最大并发 HTTP/1.X 连接数。范围：1 至 65535。  |
+    | `LIMIT_CONN_MAX_HTTP2`  | `100`  | multisite | 否   | **HTTP/2 流数：** 每个 IP 地址的最大并发 HTTP/2 流数。范围：1 至 65535。          |
+    | `LIMIT_CONN_MAX_HTTP3`  | `100`  | multisite | 否   | **HTTP/3 流数：** 每个 IP 地址的最大并发 HTTP/3 流数。范围：1 至 65535。          |
+    | `LIMIT_CONN_MAX_STREAM` | `10`   | multisite | 否   | **流连接数：** 每个 IP 地址的最大并发流连接数。范围：1 至 65535。                 |
 
 当 `SECURITY_MODE` 为 `detect` 时，连接限制会被评估并记录（`limiting connections, dry run`），但不会被强制执行。
 
@@ -5542,17 +5545,17 @@ STREAM 支持 :warning:
         - **协议处理：** 支持 HTTP、HTTPS、WebSockets 和其他协议
         - **错误拦截：** 自定义错误页面以获得一致的用户体验
 
-    | 设置                              | 默认值 | 上下文    | 多选 | 描述                                                                                                                                               |
-    | --------------------------------- | ------ | --------- | ---- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
-    | `USE_REVERSE_PROXY`               | `no`   | multisite | 否   | **启用反向代理：** 设置为 `yes` 以启用反向代理功能。                                                                                               |
-    | `REVERSE_PROXY_HOST`              |        | multisite | 是   | **后端主机：** 代理资源的完整 URL (proxy_pass)。                                                                                                   |
-    | `REVERSE_PROXY_URL`               | `/`    | multisite | 是   | **位置 URL：** 将被代理到后端服务器的路径。以 `^` 开头或以 `$` 结尾的值将被视为正则表达式 location。可选地在前面加上 `~`、`~*`、`=` 或 `^~` 并紧跟一个空格，以显式设置 nginx location 修饰符；值的其余部分不允许包含空格、`;`、`{` 或 `}`。                                                 |
-    | `REVERSE_PROXY_BUFFERING`         | `yes`  | multisite | 是   | **响应缓冲：** 启用或禁用来自代理资源的响应缓冲。                                                                                                  |
-    | `REVERSE_PROXY_REQUEST_BUFFERING` | `yes`  | multisite | 是   | **请求缓冲：** 启用或禁用向代理资源发送请求时的缓冲。                                                                                              |
-    | `REVERSE_PROXY_KEEPALIVE`         | `no`   | multisite | 是   | **保持连接：** 启用或禁用与代理资源的保持连接。                                                                                                    |
-    | `REVERSE_PROXY_HTTP_VERSION`      | `1.1`  | multisite | 是   | **HTTP 版本：** 用于与上游通信的 HTTP 协议版本（`1.0`、`1.1` 或 `2`）。设为 `2` 可在上游连接上启用 HTTP/2 多路复用。WebSocket 位置始终固定为 1.1。 |
-    | `REVERSE_PROXY_CUSTOM_HOST`       |        | multisite | 否   | **自定义主机：** 覆盖发送到上游服务器的 Host 标头。                                                                                                |
-    | `REVERSE_PROXY_INTERCEPT_ERRORS`  | `yes`  | multisite | 否   | **拦截错误：** 是否拦截和重写来自后端的错误响应。 参见[保留上游 API 的错误响应体](#errors)。 |
+    | 设置                              | 默认值 | 上下文    | 多选 | 描述                                                                                                                                                                                                                                        |
+    | --------------------------------- | ------ | --------- | ---- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+    | `USE_REVERSE_PROXY`               | `no`   | multisite | 否   | **启用反向代理：** 设置为 `yes` 以启用反向代理功能。                                                                                                                                                                                        |
+    | `REVERSE_PROXY_HOST`              |        | multisite | 是   | **后端主机：** 代理资源的完整 URL (proxy_pass)。                                                                                                                                                                                            |
+    | `REVERSE_PROXY_URL`               | `/`    | multisite | 是   | **位置 URL：** 将被代理到后端服务器的路径。以 `^` 开头或以 `$` 结尾的值将被视为正则表达式 location。可选地在前面加上 `~`、`~*`、`=` 或 `^~` 并紧跟一个空格，以显式设置 nginx location 修饰符；值的其余部分不允许包含空格、`;`、`{` 或 `}`。 |
+    | `REVERSE_PROXY_BUFFERING`         | `yes`  | multisite | 是   | **响应缓冲：** 启用或禁用来自代理资源的响应缓冲。                                                                                                                                                                                           |
+    | `REVERSE_PROXY_REQUEST_BUFFERING` | `yes`  | multisite | 是   | **请求缓冲：** 启用或禁用向代理资源发送请求时的缓冲。                                                                                                                                                                                       |
+    | `REVERSE_PROXY_KEEPALIVE`         | `no`   | multisite | 是   | **保持连接：** 向代理资源发送已配置的 HTTP 版本（默认 `1.1`）和空的 `Connection` 标头。它本身不会创建连接池：要复用连接，请让 `REVERSE_PROXY_HOST` 指向在 `http` 自定义配置中声明的、带 `keepalive` 的具名 `upstream`。                     |
+    | `REVERSE_PROXY_HTTP_VERSION`      | `1.1`  | multisite | 是   | **HTTP 版本：** 用于与上游通信的 HTTP 协议版本（`1.0`、`1.1` 或 `2`）。设为 `2` 可在上游连接上启用 HTTP/2 多路复用。WebSocket 位置始终固定为 1.1。                                                                                          |
+    | `REVERSE_PROXY_CUSTOM_HOST`       |        | multisite | 否   | **自定义主机：** 覆盖发送到上游服务器的 Host 标头。                                                                                                                                                                                         |
+    | `REVERSE_PROXY_INTERCEPT_ERRORS`  | `yes`  | multisite | 否   | **拦截错误：** 是否拦截和重写来自后端的错误响应。 参见[保留上游 API 的错误响应体](#errors)。                                                                                                                                                |
 
     BunkerWeb 在生成 NGINX location 时会为路径或正则表达式加上引号，并保留其中的字面引号、`#` 和正则表达式反斜杠。输入设置值时不要自行添加 NGINX 引号。现有的空白字符、`;`、`{` 和 `}` 限制仍然适用。
 
@@ -5563,6 +5566,32 @@ STREAM 支持 :warning:
 
     !!! warning "请求缓冲行为"
         禁用 `REVERSE_PROXY_REQUEST_BUFFERING` 仅在 ModSecurity 被禁用时才会生效，因为否则会强制执行请求缓冲。
+
+    !!! info "复用后端连接"
+        `REVERSE_PROXY_KEEPALIVE=yes` 只会让 BunkerWeb 向后端发送已配置的 HTTP 版本（默认 `1.1`）和空的 `Connection` 标头，并不会创建连接池：使用普通的 `REVERSE_PROXY_HOST` URL 时，NGINX 会为每个请求新建一条到后端的连接。
+
+        要复用后端连接，请在 [`http` 自定义配置](advanced.md#custom-configurations)中声明一个带 `keepalive` 的具名 `upstream`，再让 `REVERSE_PROXY_HOST` 指向该组名，**不带端口**：端口写在 `upstream` 的 `server` 行中。
+
+        ```nginx
+        upstream app_pool {
+            server backend.internal:8443;
+            keepalive 32;
+        }
+        ```
+
+        ```conf
+        REVERSE_PROXY_HOST=https://app_pool
+        REVERSE_PROXY_KEEPALIVE=yes
+        # 仅 HTTPS：将源站名称作为 SNI 发送，并据此验证
+        REVERSE_PROXY_SSL_SNI=yes
+        REVERSE_PROXY_SSL_SNI_NAME=backend.example.com
+        # 仅当后端检查 Host 标头时才需要
+        REVERSE_PROXY_CUSTOM_HOST=backend.example.com
+        ```
+
+        - `upstream` 名称必须唯一，且 `server` 行中的主机名在 NGINX 加载配置时必须能够解析。
+        - 使用 HTTPS 时，只要 `REVERSE_PROXY_SSL_SNI_NAME` 为空，NGINX 就会把组名同时用作 SNI 名称和验证名称；而 `REVERSE_PROXY_SSL_SNI` 为 `no` 时，该设置会被忽略。请像上面这样同时设置两者，让后端看到其真实名称。
+        - `Host` 标头仍为客户端的 `$host`；如果后端期望其他名称，请设置 `REVERSE_PROXY_CUSTOM_HOST`。
 
 === "连接设置"
 
@@ -5769,6 +5798,9 @@ STREAM 支持 :warning:
         - 根据内容类型使用适当的缓存持续时间（静态资源可以缓存更长时间）
         - 配置 `PROXY_NO_CACHE` 以避免缓存敏感或个性化内容
         - 监控缓存命中率并相应地调整设置
+
+    !!! warning "缓存需要启用响应缓冲"
+        代理缓存只对启用了响应缓冲的位置生效。当 `USE_PROXY_CACHE=yes` 时，请为每个要缓存的位置设置 `REVERSE_PROXY_BUFFERING=yes`，带编号的设置（如 `REVERSE_PROXY_BUFFERING_1`）也一样。响应缓冲关闭期间，新的响应不会被缓存，除非上游通过 `X-Accel-Buffering` 启用它；之前已缓存的响应仍可能被返回。`REVERSE_PROXY_REQUEST_BUFFERING` 控制的是请求正文，不会启用响应缓存。当 BunkerWeb 生成的配置中某个位置启用了代理缓存但响应缓冲已关闭时，会记录一条警告。
 
 !!! tip "上游双向 TLS"
     客户端证书与私钥必须同时提供，且私钥不能加密。调度器 会校验该证书对、缓存并分发到各实例；若校验不通过，则不会生成证书相关指令。只有在启用上游校验时，CRL 才会生效。

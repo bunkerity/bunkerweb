@@ -1650,6 +1650,23 @@ Los conceptos clave para la integración con Docker incluyen:
 !!! info "Backend de la base de datos"
     Ten en cuenta que nuestras instrucciones asumen que estás utilizando SQLite como el backend de base de datos predeterminado, según lo configurado por el ajuste `DATABASE_URI`. Sin embargo, también se admiten otros backends de bases de datos. Consulta los archivos docker-compose en la [carpeta misc/integrations](https://github.com/bunkerity/bunkerweb/tree/v1.6.18-rc3/misc/integrations) del repositorio para obtener más información.
 
+### Etiquetas de las imágenes Docker {#docker-image-tags}
+
+Cada imagen se publica con las mismas etiquetas en Docker Hub (`bunkerity/`), GHCR (`ghcr.io/bunkerity/`) y el registro de GitLab (`registry.gitlab.com/bunkerity/bunkerweb/`). `X.Y` designa una versión menor como `1.6` y `X.Y.Z` una versión completa como `1.6.18`.
+
+| Etiqueta                          | Apunta a                                                             | Úsela para                                                           |
+| --------------------------------- | -------------------------------------------------------------------- | -------------------------------------------------------------------- |
+| `X.Y.Z`, `X.Y.Z-rcN`              | Una versión o candidata a versión concreta, nunca cambia             | Producción: fije estas etiquetas                                     |
+| `latest`                          | La última versión estable de cualquier versión menor                 | Pruebas rápidas: salta a la siguiente versión menor cuando sale      |
+| `X.Y`                             | La última versión estable de esa versión menor                       | Seguir una versión menor y recibir sus versiones de corrección       |
+| `X.Y-edge`                        | La última candidata a versión o versión estable de esa versión menor | Probar la próxima versión antes de tiempo y seguirla una vez estable |
+| `X.Y-rc`, `X.Y-beta`, `X.Y-alpha` | La última candidata a versión, beta o alfa de esa versión menor      | Probar las preversiones de una versión menor concreta                |
+| `rc`, `beta`                      | La última candidata a versión o beta publicada, sea cual sea su versión; volver a publicar una versión anterior hace retroceder la etiqueta | Nombres heredados: prefiera las etiquetas por versión menor          |
+| `testing`                         | La última compilación del pipeline de staging (ramas `staging` y `fix-cve` o una ejecución manual) | Probar cambios sin publicar, nunca en producción                     |
+| `dev`                             | La última compilación del pipeline de dev (rama `dev` o una ejecución manual) | Colaboradores, nunca en producción                                   |
+
+Solo la primera fila es inmutable. Las demás etiquetas se mueven cada vez que se publica una nueva compilación: use una etiqueta de versión completa en producción y actualícela de forma deliberada.
+
 ### Variables de entorno
 
 Las configuraciones se pasan al Programador usando las variables de entorno de Docker:

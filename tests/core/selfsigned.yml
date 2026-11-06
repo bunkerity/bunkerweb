@@ -3,6 +3,7 @@ integrations: "all"
 actions:
   check_verification:
     type: status
+    expect_error: [tls_verify]
     url: "https://www.example.com"
     restart_stack: false
   check_ssl:

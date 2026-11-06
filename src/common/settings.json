@@ -112,7 +112,7 @@
   "CLIENT_HEADER_TIMEOUT": {
     "context": "global",
     "default": "10s",
-    "help": "Timeout for reading the client request header.",
+    "help": "Timeout for reading the client request header. It also limits how long an old worker stays alive after a reload while a client has not finished its TLS handshake.",
     "id": "client-header-timeout",
     "label": "Client header timeout",
     "regex": "^\\d+(ms?|[shdwMy])?$",

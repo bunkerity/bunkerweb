@@ -1257,6 +1257,43 @@ Algunas integraciones proporcionan formas más convenientes de aplicar configura
     !!! info "La recarga vuelve a leer la carpeta"
         Una recarga vuelve a leer `/etc/bunkerweb/configs`: los archivos creados, modificados o eliminados allí se aplican y se guardan en la base de datos. Una configuración que pertenece a la interfaz web o a la API conserva su propietario, solo su contenido se actualiza desde el archivo.
 
+    **Desde dónde incluye NGINX cada tipo**
+
+    NGINX incluye los archivos directamente desde las subcarpetas de `/etc/bunkerweb/configs`; BunkerWeb no los copia en `/etc/nginx`. El scheduler escribe en las mismas carpetas las configuraciones creadas en la interfaz web o mediante la API. En el modo multisitio, un archivo que se aplica a un solo servicio va en una subcarpeta adicional con el primer nombre de `SERVER_NAME` de ese servicio, por ejemplo `server-http/www.example.com/hello-world.conf`.
+
+    | Tipo                  | Carpeta en `/etc/bunkerweb/configs` | Incluido en                                                                                                   | Subcarpeta por servicio |
+    | --------------------- | ----------------------------------- | ------------------------------------------------------------------------------------------------------------- | ----------------------- |
+    | `http`                | `http/`                             | bloque `http` de `nginx.conf`, después de las configuraciones del núcleo y de los plugins                     | No                      |
+    | `stream`              | `stream/`                           | bloque `stream` de `nginx.conf`, después de las configuraciones del núcleo y de los plugins                   | No                      |
+    | `default-server-http` | `default-server-http/`              | servidor por defecto (`default-server-http.conf`), después de las configuraciones del núcleo y de los plugins | No                      |
+    | `server-http`         | `server-http/`                      | cada bloque `server` HTTP (`server.conf`)                                                                     | Sí                      |
+    | `server-stream`       | `server-stream/`                    | cada bloque `server` de stream (`server-stream.conf`)                                                         | Sí                      |
+    | `modsec`              | `modsec/`                           | reglas de ModSecurity, después del Core Rule Set                                                              | Sí                      |
+    | `modsec-crs`          | `modsec-crs/`                       | reglas de ModSecurity, antes de las reglas del Core Rule Set                                                  | Sí, véase la nota       |
+    | `crs-plugins-before`  | `crs-plugins-before/`               | reglas de ModSecurity, antes de los plugins del CRS                                                           | Sí, véase la nota       |
+    | `crs-plugins-after`   | `crs-plugins-after/`                | reglas de ModSecurity, después de los plugins del CRS                                                         | Sí, véase la nota       |
+
+    `modsec-crs` solo se lee con `USE_MODSECURITY_CRS=yes`. `crs-plugins-before` y `crs-plugins-after` requieren además `USE_MODSECURITY_CRS_PLUGINS=yes` y una versión del Core Rule Set distinta de la 3. Con `USE_MODSECURITY_GLOBAL_CRS=yes`, estos tres tipos se cargan una sola vez para todos los servicios: solo se lee la carpeta de primer nivel y se ignora cualquier subcarpeta de servicio. `modsec` conserva su subcarpeta de servicio.
+
+    **Comprobar que un archivo está activo**
+
+    Use `nginx -T` para comprobar si NGINX incluye su archivo desde el disco y si las rutas de inclusión son correctas. El comando comprueba y muestra los archivos de configuración actuales en disco, no la configuración cargada por los procesos de trabajo en ejecución. NGINX marca cada archivo incluido con una línea `# configuration file <ruta>:`:
+
+    ```shell
+    sudo nginx -T 2>&1 | grep -A 3 "configuration file /etc/bunkerweb/configs/server-http/hello-world.conf"
+    ```
+
+    Si no aparece nada, revise la carpeta, el sufijo `.conf` y los permisos, y vuelva a recargar el scheduler.
+
+    Para confirmar que el archivo se ha aplicado, compruebe que el registro del scheduler (`journalctl -u bunkerweb-scheduler`) indique una recarga correcta y que la interfaz web no informe de una aplicación parcial. Después, envíe una petición que utilice la configuración y compruebe el resultado esperado. Para el ejemplo `/hello` anterior, sustituya `www.example.com` por el nombre de su servicio y verifique que el cuerpo de la respuesta sea `world`:
+
+    ```shell
+    curl -i http://www.example.com/hello
+    ```
+
+    !!! warning "Una configuración rechazada conserva la anterior"
+        Cada nombre de `upstream` debe ser único en todas las configuraciones personalizadas. Dos bloques `upstream` con el mismo nombre hacen que NGINX rechace la nueva configuración y que la recarga falle. Las instancias que la rechazan siguen ejecutando la última configuración que funcionaba, y la interfaz web indica que los cambios se aplicaron solo a algunas instancias (o a ninguna). Los registros del scheduler (`journalctl -u bunkerweb-scheduler`) explican el motivo.
+
 === "Todo en uno"
 
     Cuando se utiliza la [imagen Todo en uno](integrations.md#all-in-one-aio-image), tienes dos opciones para añadir configuraciones personalizadas:
@@ -1648,6 +1685,10 @@ REDIS_DATABASE=0
 - **`REDIS_DATABASE`**: Especifica el número de la base de datos de Redis/Valkey a utilizar. El valor predeterminado es `0`.
 
 Si necesitas configuraciones más avanzadas, como autenticación, soporte SSL/TLS o modo Sentinel, consulta la [documentación de configuración del plugin de Redis](features.md#redis) para obtener una guía detallada.
+
+### Exportar bloqueos como JSON
+
+Ejecute `bwcli bans --json` para escribir un único objeto JSON en la salida estándar, agrupado por instancia y con una entrada `redis` cuando se recopilan bloqueos de Redis. Cada origen contiene un array de bloqueos ordenados por `date`. Los registros conservan los campos devueltos por el origen, como `ip`, `country`, `date`, `exp`, `permanent`, `reason`, `service`, `ban_scope` y `kind`. El comando termina con el código 0 si tiene éxito. Si falla, termina con un código distinto de cero y escribe un error en la salida de error estándar. Sin `--json`, `bwcli bans` mantiene su salida con formato.
 
 ## Proteger aplicaciones UDP/TCP
 

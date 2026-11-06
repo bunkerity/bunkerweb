@@ -32,17 +32,17 @@
         - **协议处理：** 支持 HTTP、HTTPS、WebSockets 和其他协议
         - **错误拦截：** 自定义错误页面以获得一致的用户体验
 
-    | 设置                              | 默认值 | 上下文    | 多选 | 描述                                                                                                                                               |
-    | --------------------------------- | ------ | --------- | ---- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
-    | `USE_REVERSE_PROXY`               | `no`   | multisite | 否   | **启用反向代理：** 设置为 `yes` 以启用反向代理功能。                                                                                               |
-    | `REVERSE_PROXY_HOST`              |        | multisite | 是   | **后端主机：** 代理资源的完整 URL (proxy_pass)。                                                                                                   |
-    | `REVERSE_PROXY_URL`               | `/`    | multisite | 是   | **位置 URL：** 将被代理到后端服务器的路径。以 `^` 开头或以 `$` 结尾的值将被视为正则表达式 location。可选地在前面加上 `~`、`~*`、`=` 或 `^~` 并紧跟一个空格，以显式设置 nginx location 修饰符；值的其余部分不允许包含空格、`;`、`{` 或 `}`。                                                 |
-    | `REVERSE_PROXY_BUFFERING`         | `yes`  | multisite | 是   | **响应缓冲：** 启用或禁用来自代理资源的响应缓冲。                                                                                                  |
-    | `REVERSE_PROXY_REQUEST_BUFFERING` | `yes`  | multisite | 是   | **请求缓冲：** 启用或禁用向代理资源发送请求时的缓冲。                                                                                              |
-    | `REVERSE_PROXY_KEEPALIVE`         | `no`   | multisite | 是   | **保持连接：** 启用或禁用与代理资源的保持连接。                                                                                                    |
-    | `REVERSE_PROXY_HTTP_VERSION`      | `1.1`  | multisite | 是   | **HTTP 版本：** 用于与上游通信的 HTTP 协议版本（`1.0`、`1.1` 或 `2`）。设为 `2` 可在上游连接上启用 HTTP/2 多路复用。WebSocket 位置始终固定为 1.1。 |
-    | `REVERSE_PROXY_CUSTOM_HOST`       |        | multisite | 否   | **自定义主机：** 覆盖发送到上游服务器的 Host 标头。                                                                                                |
-    | `REVERSE_PROXY_INTERCEPT_ERRORS`  | `yes`  | multisite | 否   | **拦截错误：** 是否拦截和重写来自后端的错误响应。 参见[保留上游 API 的错误响应体](#errors)。 |
+    | 设置                              | 默认值 | 上下文    | 多选 | 描述                                                                                                                                                                                                                                        |
+    | --------------------------------- | ------ | --------- | ---- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+    | `USE_REVERSE_PROXY`               | `no`   | multisite | 否   | **启用反向代理：** 设置为 `yes` 以启用反向代理功能。                                                                                                                                                                                        |
+    | `REVERSE_PROXY_HOST`              |        | multisite | 是   | **后端主机：** 代理资源的完整 URL (proxy_pass)。                                                                                                                                                                                            |
+    | `REVERSE_PROXY_URL`               | `/`    | multisite | 是   | **位置 URL：** 将被代理到后端服务器的路径。以 `^` 开头或以 `$` 结尾的值将被视为正则表达式 location。可选地在前面加上 `~`、`~*`、`=` 或 `^~` 并紧跟一个空格，以显式设置 nginx location 修饰符；值的其余部分不允许包含空格、`;`、`{` 或 `}`。 |
+    | `REVERSE_PROXY_BUFFERING`         | `yes`  | multisite | 是   | **响应缓冲：** 启用或禁用来自代理资源的响应缓冲。                                                                                                                                                                                           |
+    | `REVERSE_PROXY_REQUEST_BUFFERING` | `yes`  | multisite | 是   | **请求缓冲：** 启用或禁用向代理资源发送请求时的缓冲。                                                                                                                                                                                       |
+    | `REVERSE_PROXY_KEEPALIVE`         | `no`   | multisite | 是   | **保持连接：** 向代理资源发送已配置的 HTTP 版本（默认 `1.1`）和空的 `Connection` 标头。它本身不会创建连接池：要复用连接，请让 `REVERSE_PROXY_HOST` 指向在 `http` 自定义配置中声明的、带 `keepalive` 的具名 `upstream`。                     |
+    | `REVERSE_PROXY_HTTP_VERSION`      | `1.1`  | multisite | 是   | **HTTP 版本：** 用于与上游通信的 HTTP 协议版本（`1.0`、`1.1` 或 `2`）。设为 `2` 可在上游连接上启用 HTTP/2 多路复用。WebSocket 位置始终固定为 1.1。                                                                                          |
+    | `REVERSE_PROXY_CUSTOM_HOST`       |        | multisite | 否   | **自定义主机：** 覆盖发送到上游服务器的 Host 标头。                                                                                                                                                                                         |
+    | `REVERSE_PROXY_INTERCEPT_ERRORS`  | `yes`  | multisite | 否   | **拦截错误：** 是否拦截和重写来自后端的错误响应。 参见[保留上游 API 的错误响应体](#errors)。                                                                                                                                                |
 
     BunkerWeb 在生成 NGINX location 时会为路径或正则表达式加上引号，并保留其中的字面引号、`#` 和正则表达式反斜杠。输入设置值时不要自行添加 NGINX 引号。现有的空白字符、`;`、`{` 和 `}` 限制仍然适用。
 
@@ -53,6 +53,32 @@
 
     !!! warning "请求缓冲行为"
         禁用 `REVERSE_PROXY_REQUEST_BUFFERING` 仅在 ModSecurity 被禁用时才会生效，因为否则会强制执行请求缓冲。
+
+    !!! info "复用后端连接"
+        `REVERSE_PROXY_KEEPALIVE=yes` 只会让 BunkerWeb 向后端发送已配置的 HTTP 版本（默认 `1.1`）和空的 `Connection` 标头，并不会创建连接池：使用普通的 `REVERSE_PROXY_HOST` URL 时，NGINX 会为每个请求新建一条到后端的连接。
+
+        要复用后端连接，请在 [`http` 自定义配置](advanced.md#custom-configurations)中声明一个带 `keepalive` 的具名 `upstream`，再让 `REVERSE_PROXY_HOST` 指向该组名，**不带端口**：端口写在 `upstream` 的 `server` 行中。
+
+        ```nginx
+        upstream app_pool {
+            server backend.internal:8443;
+            keepalive 32;
+        }
+        ```
+
+        ```conf
+        REVERSE_PROXY_HOST=https://app_pool
+        REVERSE_PROXY_KEEPALIVE=yes
+        # 仅 HTTPS：将源站名称作为 SNI 发送，并据此验证
+        REVERSE_PROXY_SSL_SNI=yes
+        REVERSE_PROXY_SSL_SNI_NAME=backend.example.com
+        # 仅当后端检查 Host 标头时才需要
+        REVERSE_PROXY_CUSTOM_HOST=backend.example.com
+        ```
+
+        - `upstream` 名称必须唯一，且 `server` 行中的主机名在 NGINX 加载配置时必须能够解析。
+        - 使用 HTTPS 时，只要 `REVERSE_PROXY_SSL_SNI_NAME` 为空，NGINX 就会把组名同时用作 SNI 名称和验证名称；而 `REVERSE_PROXY_SSL_SNI` 为 `no` 时，该设置会被忽略。请像上面这样同时设置两者，让后端看到其真实名称。
+        - `Host` 标头仍为客户端的 `$host`；如果后端期望其他名称，请设置 `REVERSE_PROXY_CUSTOM_HOST`。
 
 === "连接设置"
 
@@ -259,6 +285,9 @@
         - 根据内容类型使用适当的缓存持续时间（静态资源可以缓存更长时间）
         - 配置 `PROXY_NO_CACHE` 以避免缓存敏感或个性化内容
         - 监控缓存命中率并相应地调整设置
+
+    !!! warning "缓存需要启用响应缓冲"
+        代理缓存只对启用了响应缓冲的位置生效。当 `USE_PROXY_CACHE=yes` 时，请为每个要缓存的位置设置 `REVERSE_PROXY_BUFFERING=yes`，带编号的设置（如 `REVERSE_PROXY_BUFFERING_1`）也一样。响应缓冲关闭期间，新的响应不会被缓存，除非上游通过 `X-Accel-Buffering` 启用它；之前已缓存的响应仍可能被返回。`REVERSE_PROXY_REQUEST_BUFFERING` 控制的是请求正文，不会启用响应缓存。当 BunkerWeb 生成的配置中某个位置启用了代理缓存但响应缓冲已关闭时，会记录一条警告。
 
 !!! tip "上游双向 TLS"
     客户端证书与私钥必须同时提供，且私钥不能加密。调度器 会校验该证书对、缓存并分发到各实例；若校验不通过，则不会生成证书相关指令。只有在启用上游校验时，CRL 才会生效。

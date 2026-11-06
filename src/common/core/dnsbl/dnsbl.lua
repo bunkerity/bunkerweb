@@ -258,6 +258,7 @@ function dnsbl:access()
 	local ret_err = nil
 	local ret_server = nil
 	local has_answer = false
+	local has_error = false
 	while true do
 		-- Compute threads to wait
 		local wait_threads = {}
@@ -282,6 +283,7 @@ function dnsbl:access()
 		-- DNS error
 		if result == nil then
 			self.logger:log(ERR, "error while sending DNS request to " .. server .. " : " .. err)
+			has_error = true
 		else
 			has_answer = true
 		end
@@ -304,9 +306,10 @@ function dnsbl:access()
 		end
 		-- Blacklisted by a server : add to cache and deny access
 		if ret_threads then
+			-- A cache failure must not lift the denial
 			local ok, err = self:add_to_cache(self.ctx.bw.remote_addr, ret_server)
 			if not ok then
-				return self:ret(false, "error while adding element to cache : " .. err)
+				self.logger:log(ERR, "error while adding element to cache : " .. err)
 			end
 			self:set_metric("counters", "failed_dnsbl", 1)
 			return self:ret(
@@ -322,7 +325,8 @@ function dnsbl:access()
 	end
 	-- IP is not in DNSBL
 	if has_answer then
-		local ok, err = self:add_to_cache(self.ctx.bw.remote_addr, "ok")
+		-- A provider that failed proves nothing, so the clean verdict only lives a minute then
+		local ok, err = self:add_to_cache(self.ctx.bw.remote_addr, "ok", has_error and 60 or nil)
 		if not ok then
 			return self:ret(false, "IP is not in DNSBL (error = " .. err .. ")")
 		end
@@ -342,8 +346,8 @@ function dnsbl:is_in_cache(ip)
 	return true, data
 end
 
-function dnsbl:add_to_cache(ip, value)
-	local ok, err = self.cachestore_local:set("plugin_dnsbl_" .. self.ctx.bw.server_name .. ip, value, 86400)
+function dnsbl:add_to_cache(ip, value, ttl)
+	local ok, err = self.cachestore_local:set("plugin_dnsbl_" .. self.ctx.bw.server_name .. ip, value, ttl or 86400)
 	if not ok then
 		return false, err
 	end

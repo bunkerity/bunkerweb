@@ -28,6 +28,8 @@ BATCH_SIZE = 100
 MAX_CACHED_REPORTS = 10000
 # Same allowlist as REPORT_HEADERS in bunkernet.lua, applied when BUNKERNET_FILTER_HEADERS is yes.
 REPORT_HEADERS = ("user-agent", "accept", "accept-encoding", "accept-language", "content-type", "content-length")
+# Never sent, whatever BUNKERNET_FILTER_HEADERS says (CREDENTIAL_HEADERS in bunkernet.lua).
+CREDENTIAL_HEADERS = ("cookie", "authorization", "proxy-authorization")
 
 
 def is_filtered(report: dict) -> bool:
@@ -38,20 +40,44 @@ def is_filtered(report: dict) -> bool:
     return value == "yes"
 
 
+def is_header_or_cookie(name) -> bool:
+    return isinstance(name, str) and name.lstrip("&").split(":", 1)[0].upper() in ("REQUEST_HEADERS", "REQUEST_COOKIES")
+
+
+def is_credential_match(name) -> bool:
+    """A match on a cookie, a credential header or a whole header collection (see is_credential_match in bunkernet.lua)."""
+    if not isinstance(name, str):
+        return False
+    variable, _, header = name.lstrip("&").partition(":")
+    variable = variable.upper()
+    return variable == "REQUEST_COOKIES" or (variable == "REQUEST_HEADERS" and (not header or header.lower() in CREDENTIAL_HEADERS))
+
+
+def blank_matched_values(report: dict, is_blanked, always_drop_unpaired: bool) -> None:
+    """Blank the matched values whose variable is_blanked says so; drop them when the pairing with their names is unknown."""
+    data = report.get("data")
+    if not isinstance(data, dict) or "matched_vars" not in data:
+        return
+    values, names = data["matched_vars"], data.get("matched_var_names")
+    if isinstance(values, list) and isinstance(names, list) and len(values) == len(names):
+        data["matched_vars"] = ["" if is_blanked(name) else value for value, name in zip(values, names)]
+    elif always_drop_unpaired or not isinstance(names, list) or any(is_blanked(name) for name in names):
+        del data["matched_vars"]
+
+
+def scrub_credentials(report: dict) -> dict:
+    """Whatever the setting: no credential header, and no value matched in a credential variable (see bunkernet.lua)."""
+    if isinstance(report.get("headers"), dict):
+        report["headers"] = {name: value for name, value in report["headers"].items() if str(name).lower() not in CREDENTIAL_HEADERS}
+    blank_matched_values(report, is_credential_match, False)
+    return report
+
+
 def filter_report(report: dict) -> dict:
     """Keep only allowlisted headers and blank matched header/cookie values (see get_report_data in bunkernet.lua)."""
     if isinstance(report.get("headers"), dict):
         report["headers"] = {name: value for name, value in report["headers"].items() if name.lower() in REPORT_HEADERS}
-    data = report.get("data")
-    if isinstance(data, dict) and "matched_vars" in data:
-        values, names = data["matched_vars"], data.get("matched_var_names")
-        if isinstance(values, list) and isinstance(names, list) and len(values) == len(names):
-            data["matched_vars"] = [
-                "" if isinstance(name, str) and name.lstrip("&").split(":", 1)[0].upper() in ("REQUEST_HEADERS", "REQUEST_COOKIES") else value
-                for value, name in zip(values, names)
-            ]
-        else:
-            del data["matched_vars"]
+    blank_matched_values(report, is_header_or_cookie, True)
     return report
 
 
@@ -118,8 +144,9 @@ try:
 
     # Oldest first: batches send the oldest reports and the cap below keeps the newest ones.
     reports = sorted(chain(cached_data.get("reports", []), instance_reports), key=lambda x: datetime.fromisoformat(x["date"]))
-    # Reports queued before the upgrade may hold every request header: filter them only where the setting asks for it.
-    reports = [filter_report(report) if is_filtered(report) else report for report in reports]
+    # Reports queued before the upgrade may hold every request header: drop the credentials from all of them, and
+    # apply the allowlist only where the setting asks for it.
+    reports = [filter_report(report) if is_filtered(report) else report for report in map(scrub_credentials, reports)]
 
     # Check if forced send is needed due to time
     force_send = datetime.fromisoformat(cached_data["created"]) + timedelta(hours=24) < datetime.now().astimezone()
