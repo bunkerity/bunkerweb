@@ -14,6 +14,7 @@
 - [SECURITY] `ui`: escape template ids in the templates deletion modal and the Services template filter.
 - [SECURITY] `api`: an instance API certificate that does not match the pinned one now fails the call instead of falling back to HTTP.
 - [SECURITY] `bunkernet`: reports never carry `Cookie`, `Authorization` or `Proxy-Authorization` headers or the values matched in them, with or without header filtering.
+- [SECURITY] `api`: deny every request when `API_WHITELIST_IPS` is enabled but holds no valid IP or network.
 - [FEATURE] `bwcli`: `bwcli bans --json` prints the bans as JSON for scripts and monitoring.
 - [FEATURE] `docker`: new floating image tags `1.6-edge` (newest release candidate or release), `1.6-rc`, `1.6-beta` and `1.6-alpha`, listed in the Docker docs.
 - [BUGFIX] `limit`: `LIMIT_CONN_MAX_*` settings now accept only values NGINX supports (1 to 65535).
