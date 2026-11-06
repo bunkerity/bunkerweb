@@ -16,6 +16,7 @@
 - [SECURITY] `bunkernet`: reports never carry `Cookie`, `Authorization` or `Proxy-Authorization` headers or the values matched in them, with or without header filtering.
 - [SECURITY] `api`: deny every request when `API_WHITELIST_IPS` is enabled but holds no valid IP or network.
 - [SECURITY] `linux`: database migrations use a private copy of their configuration instead of editing the packaged `alembic.ini`.
+- [SECURITY] `installer`: repository setup scripts run from a private temporary directory, removed on success or failure.
 - [FEATURE] `bwcli`: `bwcli bans --json` prints the bans as JSON for scripts and monitoring.
 - [FEATURE] `docker`: new floating image tags `1.6-edge` (newest release candidate or release), `1.6-rc`, `1.6-beta` and `1.6-alpha`, listed in the Docker docs.
 - [FEATURE] `blacklist`, `greylist`, `whitelist`: new `*_URLS_REFRESH_INTERVAL` settings set how often URL lists are refreshed (default `1h`) (Refs #3994).
