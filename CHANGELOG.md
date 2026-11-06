@@ -17,6 +17,8 @@
 - [SECURITY] `api`: deny every request when `API_WHITELIST_IPS` is enabled but holds no valid IP or network.
 - [SECURITY] `linux`: database migrations use a private copy of their configuration instead of editing the packaged `alembic.ini`.
 - [SECURITY] `installer`: repository setup scripts run from a private temporary directory, removed on success or failure.
+- [SECURITY] `linux`: packaged Python code, migrations included, is no longer group-writable after install or upgrade.
+- [SECURITY] `linux`: packaged logs are created with mode 0640, and upgrades tighten existing logs and rotated archives to 0640.
 - [FEATURE] `bwcli`: `bwcli bans --json` prints the bans as JSON for scripts and monitoring.
 - [FEATURE] `docker`: new floating image tags `1.6-edge` (newest release candidate or release), `1.6-rc`, `1.6-beta` and `1.6-alpha`, listed in the Docker docs.
 - [FEATURE] `blacklist`, `greylist`, `whitelist`: new `*_URLS_REFRESH_INTERVAL` settings set how often URL lists are refreshed (default `1h`) (Refs #3994).
@@ -41,6 +43,10 @@
 - [BUGFIX] `misc`: an external plugin download that fails (HTTP, connection or archive error) now fails the job instead of reporting success.
 - [BUGFIX] `linux`: `systemctl reload` of the API and UI signals the running Gunicorn master; restart the service after editing its env file.
 - [BUGFIX] `scheduler`: rebuild missing failover snapshots from the database before rolling back a rejected configuration.
+- [BUGFIX] `linux`: upgrades back up SQLite with a validated snapshot that keeps committed WAL data, and RPM upgrades restore only their own.
+- [BUGFIX] `linux`: a failed dependency extraction or backup restore now fails package setup and keeps the recovery material.
+- [BUGFIX] `linux`: a plain package upgrade keeps an enabled, running API; uninstall stops the services first and keeps administrator unit files.
+- [BUGFIX] `linux`: RHEL packages now require logrotate.
 - [PERF] `core`: cut request-path CPU by 14.2% for HTTP proxy traffic and by 33.3% for TLS proxy traffic with the community blacklists.
 - [PERF] `blacklist`: reuse downloaded lists between requests instead of copying and deduplicating them each time.
 - [PERF] `core`: build the reserved-address matcher once per worker and cache successful plugin module lookups.
