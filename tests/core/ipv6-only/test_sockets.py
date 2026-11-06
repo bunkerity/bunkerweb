@@ -191,6 +191,30 @@ class SocketGateTests(unittest.TestCase):
         with self.assertRaisesRegex(AssertionError, "STRICT_LOOPBACK_ONLY_SOCKET_GATE"):
             self.run_gate()
 
+    def ss4(self, line, container="bw-scheduler"):
+        self.rows.append(sample(container=container, command=COMMANDS[0], out=sample(command=COMMANDS[0])["out"] + line + "\n"))
+
+    def test_scheduler_resolver_ephemeral_udp_socket_is_tolerated(self):
+        # CI sample: musl binds an unconnected AF_INET UDP socket on 0.0.0.0 for each lookup, even without IPv4.
+        self.ss4("udp   UNCONN 0      0            0.0.0.0:38543      0.0.0.0:*          ")
+        self.run_gate()
+        self.assertIn("bw-scheduler: udp   UNCONN", (check.ROOT / "ipv4-wildcard-listeners.json").read_text())
+
+    def test_narrow_resolver_allowance_does_not_hide_real_listeners(self):
+        cases = (
+            ("fixed UDP port", "udp   UNCONN 0      0            0.0.0.0:5353       0.0.0.0:*", "bw-scheduler"),
+            ("privileged UDP port", "udp   UNCONN 0      0            0.0.0.0:443        0.0.0.0:*", "bw-scheduler"),
+            ("ephemeral TCP listener", "tcp   LISTEN 0      4096         0.0.0.0:38543      0.0.0.0:*", "bw-scheduler"),
+            ("connected UDP", "udp   ESTAB  0      0            0.0.0.0:38543      0.0.0.0:*", "bw-scheduler"),
+            ("other container", "udp   UNCONN 0      0            0.0.0.0:38543      0.0.0.0:*", "redis"),
+        )
+        for label, line, container in cases:
+            with self.subTest(label):
+                self.rows = [sample(name, command) for name in check.CONTAINERS for command in COMMANDS]
+                self.ss4(line, container)
+                with self.assertRaisesRegex(AssertionError, "STRICT_LOOPBACK_ONLY_SOCKET_GATE"):
+                    self.run_gate()
+
     def test_both_families_need_post_reload_samples(self):
         for command in COMMANDS[:2]:
             with self.subTest(family=command[1]):

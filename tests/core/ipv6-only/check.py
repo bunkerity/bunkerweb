@@ -19,6 +19,9 @@ spec.loader.exec_module(probe)
 ROOT = Path(os.environ["BW_TESTS_IPV6_ONLY_DIR"])
 # (container, netid, local address) of the only IPv4 wildcard listeners tolerated: the core's HTTP, HTTPS and QUIC sockets.
 ALLOWED_IPV4_WILDCARDS = {("bunkerweb", "tcp", "0.0.0.0:80"), ("bunkerweb", "tcp", "0.0.0.0:443"), ("bunkerweb", "udp", "0.0.0.0:443")}
+# The Alpine (musl) resolver binds an unconnected 0.0.0.0:<ephemeral> UDP socket per lookup, even with IPv4 disabled.
+RESOLVER_UDP_CONTAINERS = {"bw-scheduler"}
+EPHEMERAL_PORT_START = 32768
 CONTAINERS = ("redis", "dnsmasq", "bunkerweb", "bw-scheduler", "app1", "ipv6-client", "ipv6-other", "ipv6-untrusted", "ipv6-backend")
 
 
@@ -66,6 +69,16 @@ def sockets(since=0, timeout=90):
         time.sleep(min(1, remaining))
 
 
+def resolver_socket(container, netid, local, state):
+    return (
+        container in RESOLVER_UDP_CONTAINERS
+        and netid == "udp"
+        and state == "UNCONN"
+        and local.startswith("0.0.0.0:")
+        and int(local.rsplit(":", 1)[1]) >= EPHEMERAL_PORT_START
+    )
+
+
 def check_socket_samples(rows, since):
     pending = None
     for container in CONTAINERS:
@@ -101,7 +114,7 @@ def check_socket_samples(rows, since):
                             continue  # Wildcard listeners are recorded separately; they have no peer.
                         assert ipaddress.ip_address(host).is_loopback, ("NON_LOOPBACK_IPV4_SOCKET", container, line)
     found = {
-        (row["container"], line.split()[0], line.split()[4]): row["container"] + ": " + line
+        (row["container"], line.split()[0], line.split()[4], line.split()[1]): row["container"] + ": " + line
         for row in rows
         if row["code"] == 0 and row["command"][0:2] == ["ss", "-4"]
         for line in row["out"].splitlines()[1:]
@@ -111,7 +124,7 @@ def check_socket_samples(rows, since):
     (ROOT / "ipv4-wildcard-listeners.json").write_text(json.dumps(wildcards, indent=2))
     # Known product limitation: the core renders IPv4 `listen` directives next to the IPv6 ones. On an IPv4-disabled
     # network they carry no traffic. Remove this allowlist once the product can drop them.
-    unexpected = sorted(found[key] for key in found if key not in ALLOWED_IPV4_WILDCARDS)
+    unexpected = sorted(found[key] for key in found if key[:3] not in ALLOWED_IPV4_WILDCARDS and not resolver_socket(*key))
     assert not unexpected, ("STRICT_LOOPBACK_ONLY_SOCKET_GATE", unexpected)
     if pending is None:
         print("SOCKET_SAMPLES_OK", len(rows), "snapshots; no non-loopback IPv4 address/route/peer", flush=True)
