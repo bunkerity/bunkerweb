@@ -7,6 +7,7 @@
 - [SECURITY] `linux`: the service wrappers ignore `PATH`, `HOME`, `PYTHON*`, `LD_*` and similar variables set in `variables.env` and the service env files.
 - [SECURITY] `backup`: the pre-restore dump goes to a private temporary directory, and backup archives are created with mode 0600 from the start.
 - [SECURITY] `core`: settings written through autoconf, the API or the database now refuse a value with an embedded newline, as the scheduler already did.
+- [SECURITY] `dnsbl`, `country`, `reversescan`: a client denied by these plugins is still denied when the verdict cannot be written to the cache.
 - [FEATURE] `bwcli`: `bwcli bans --json` prints the bans as JSON for scripts and monitoring.
 - [BUGFIX] `limit`: `LIMIT_CONN_MAX_*` settings now accept only values NGINX supports (1 to 65535).
 - [BUGFIX] `limit`: in local mode, simultaneous requests from one client across workers no longer exceed `LIMIT_REQ_RATE` (rates up to 100 per window).
@@ -17,6 +18,8 @@
 - [BUGFIX] `metrics`: blocked requests logged just before a reload are no longer missing from the reports.
 - [BUGFIX] `scheduler`: after a scheduler restart, nginx no longer serves the default certificate before the custom or self-signed one is ready.
 - [BUGFIX] `letsencrypt`: Route53 certificates are no longer reissued at every scheduler restart. (Fixes #4144)
+- [BUGFIX] `dnsbl`: a clean verdict is cached for 60 seconds instead of a day when a DNSBL provider failed to answer.
+- [BUGFIX] `reversescan`: a cache write failure for one port no longer prevents caching the results of the other ports.
 - [PERF] `core`: cut request-path CPU by 14.2% for HTTP proxy traffic and by 33.3% for TLS proxy traffic with the community blacklists.
 - [PERF] `blacklist`: reuse downloaded lists between requests instead of copying and deduplicating them each time.
 - [PERF] `core`: build the reserved-address matcher once per worker and cache successful plugin module lookups.
