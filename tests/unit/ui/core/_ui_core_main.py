@@ -4,9 +4,10 @@ What is replaced, and why it is safe:
 
 * ``app.dependencies``: a stub module (mock ``DB``, dict-backed ``DATA``, tmp plugin directories); the
   real one builds a ``UIDatabase`` and reads ``/usr/share`` and ``/var/tmp`` at import.
-* ``psutil``, ``user_agents``, ``flask_wtf``, ``passlib`` (through ``app.models.totp``): third-party
-  packages shipped in the UI image but not in the unit pins. ``CSRFProtect`` is a no-op, so CSRF
-  *enforcement* is not covered here; the ``CSRFError`` handler is.
+* Missing ``psutil``, ``user_agents``, ``passlib`` (through ``app.models.totp``): third-party
+  packages shipped in the UI image are stubbed when absent from the unit environment.
+* CSRF enforcement is explicitly disabled for these route tests; the ``CSRFError`` handler is
+  covered here. ``test_csrf_enforced.py`` tests enforcement with real Flask-WTF.
 * ``app.utils.LIB_DIR`` / ``BISCUIT_PUBLIC_KEY_FILE``: tmp copies holding a real Biscuit key pair and
   Flask secret, so the real session store, Biscuit middleware and Flask-Login all run.
 
@@ -227,7 +228,7 @@ class LoadedMain:
             setattr(self.main, name, self.executors[name])
         self.app = self.main.app
         self._add_probe()
-        self.app.config.update(TESTING=False, PROPAGATE_EXCEPTIONS=False)
+        self.app.config.update(TESTING=False, PROPAGATE_EXCEPTIONS=False, WTF_CSRF_ENABLED=False)
         self.renders = []
         self.envs = []
         self.main.render_template = self._render
