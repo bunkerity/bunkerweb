@@ -118,12 +118,24 @@ def test_a_non_administrator_cannot_manage_plugins(h, plug, method, path, extra)
 
 @pytest.mark.parametrize("path", ["/plugins/delete", "/plugins/refresh", "/plugins/upload"])
 def test_plugin_writes_are_refused_in_read_only_mode(h, plug, path):
+    archive = _zip({"plugin.json": json.dumps(PLUGIN_JSON)})
+    _stage(h, "myplugin.zip", archive)
+    h.config.get_plugins.return_value = {}
+    h.db.update_external_plugins.return_value = ""
     h.db.readonly = True
+    client = h.client()
 
-    response = h.client().post(path, data={"plugins": "a", "csrf_token": "t"})
+    response = client.post(path, data={"plugins": "a", "csrf_token": "t"})
 
-    assert response.status_code in (302, 403)
+    if path == "/plugins/refresh":
+        assert response.status_code == 302
+        assert "Database is in read-only mode" in _flashed(h, client)
+    else:
+        assert response.status_code == 403
+        assert "Database is in read-only mode" in response.get_data(as_text=True)
     h.db.delete_plugin.assert_not_called()
+    h.db.update_external_plugins.assert_not_called()
+    assert (h.paths["TMP_DIR"] / "ui" / "myplugin.zip").read_bytes() == archive
 
 
 def test_delete_removes_each_plugin_and_flags_the_change_on_the_last_one(h, plug):
