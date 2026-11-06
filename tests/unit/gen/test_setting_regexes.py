@@ -115,7 +115,7 @@ def _token(item: str) -> str:
 # old regex -> (new regex, kind or tuple of kinds, item regex for the "glued" kind)
 REWRITES: dict[str, tuple[str, str | tuple[str, ...], str | None]] = {
     # No end anchor: `re.search` accepted any suffix.
-    r"^[\w\-]+": (r"^[^:]+$", "rfc7617", None),
+    r"^[\w\-]+": (r"^(?![\s\S]*[\r\n])[^:]+$", "rfc7617", None),
     r"^.+": (r"^.+$", "same", None),
     r"^[1-9][0-9]*": (r"^[1-9][0-9]*$", "same", None),
     r"^\d+": (r"^[0-9]+$", "ascii-digits", None),

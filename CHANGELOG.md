@@ -9,6 +9,7 @@
 - [SECURITY] `core`: settings written through autoconf, the API or the database now refuse a value with an embedded newline, as the scheduler already did.
 - [SECURITY] `dnsbl`, `country`, `reversescan`: a client denied by these plugins is still denied when the verdict cannot be written to the cache.
 - [SECURITY] `antibot`: when the session store is unavailable, the request gets an HTTP 500 instead of passing without the challenge.
+- [SECURITY] `authbasic`: the default `changeme` / `changeme` pair is ignored once another pair is configured, and `AUTH_BASIC_USER` refuses line breaks.
 - [FEATURE] `bwcli`: `bwcli bans --json` prints the bans as JSON for scripts and monitoring.
 - [BUGFIX] `limit`: `LIMIT_CONN_MAX_*` settings now accept only values NGINX supports (1 to 65535).
 - [BUGFIX] `limit`: in local mode, simultaneous requests from one client across workers no longer exceed `LIMIT_REQ_RATE` (rates up to 100 per window).

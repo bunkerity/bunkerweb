@@ -759,7 +759,7 @@ Comment ça marche :
     Les identifiants sont encodés Base64, pas chiffrés. Utilisez toujours HTTPS avec l’authentification Basic.
 
 !!! tip "Plusieurs comptes"
-    Vous pouvez configurer plusieurs paires identifiant/mot de passe pour l'accès. Chaque paramètre `AUTH_BASIC_USER` doit avoir un paramètre `AUTH_BASIC_PASSWORD` correspondant.
+    Vous pouvez configurer plusieurs paires identifiant/mot de passe pour l'accès. Chaque paramètre `AUTH_BASIC_USER` doit avoir un paramètre `AUTH_BASIC_PASSWORD` correspondant. La paire par défaut `changeme` / `changeme` est ignorée dès qu'une autre paire est configurée ; définissez `AUTH_BASIC_USER` et `AUTH_BASIC_PASSWORD` sans suffixe avec vos propres valeurs pour la conserver.
 
 ### Exemples
 

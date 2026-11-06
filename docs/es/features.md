@@ -771,7 +771,7 @@ Siga estos pasos para habilitar y configurar la autenticación básica:
     La autenticación básica HTTP transmite las credenciales codificadas (no cifradas) en Base64. Aunque esto es aceptable cuando se utiliza sobre HTTPS, no debe considerarse seguro sobre HTTP plano. Habilite siempre SSL/TLS cuando utilice la autenticación básica.
 
 !!! tip "Uso de múltiples credenciales"
-    Puede configurar múltiples pares de nombre de usuario/contraseña para el acceso. Cada ajuste `AUTH_BASIC_USER` debe tener un ajuste `AUTH_BASIC_PASSWORD` correspondiente.
+    Puede configurar múltiples pares de nombre de usuario/contraseña para el acceso. Cada ajuste `AUTH_BASIC_USER` debe tener un ajuste `AUTH_BASIC_PASSWORD` correspondiente. El par predeterminado `changeme` / `changeme` se ignora en cuanto se configura otro par; defina `AUTH_BASIC_USER` y `AUTH_BASIC_PASSWORD` sin sufijo con sus propios valores para conservarlo.
 
 ### Configuraciones de ejemplo
 
