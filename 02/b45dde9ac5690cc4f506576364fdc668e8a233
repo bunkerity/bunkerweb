@@ -1,0 +1,34 @@
+tests/models/status.py
+  s_8c45e4f50c0adf::t_1a60fe5697f755 1-2,8-15
+tests/core/misc.yml
+  s_8c45e4f50c0adf::t_473d7b4eccb66b 92-93,97,101-106,109,115
+tests/core_handlers/http_status_handler.py
+  s_8c45e4f50c0adf::t_1a60fe5697f755 7,12-25,31-33,35
+tests/core/selfsigned.yml
+  s_8c45e4f50c0adf::t_473d7b4eccb66b 6
+tests/core_handlers/http_common.py
+  s_8c45e4f50c0adf::t_9a07ced9ae6775 65
+  s_8c45e4f50c0adf::t_1a60fe5697f755 13,16,78-79,92
+tests/core/api.yml
+  s_8c45e4f50c0adf::t_473d7b4eccb66b 35,60,67,95-96
+  s_8c45e4f50c0adf::t_49c103fef82468 100
+tests/unit/harness/test_http_status.py
+  s_8c45e4f50c0adf::t_90b783c4559d19 1-8,10-12,14-138
+  s_8c45e4f50c0adf::t_bc5ef4df3a8b26 9,13,139-167
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "02b45dde9ac5690cc4f506576364fdc668e8a233",
+  "prompts": {},
+  "sessions": {
+    "s_8c45e4f50c0adf": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1b09f-78cb-7db0-bdd9-389f859d3b6b",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}
