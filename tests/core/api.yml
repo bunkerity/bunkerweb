@@ -1,4 +1,5 @@
 integrations: "all"
+dev_integrations: ["Docker", "Linux"]
 
 actions:
   http:

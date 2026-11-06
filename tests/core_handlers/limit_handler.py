@@ -94,6 +94,25 @@ def _test_rate_limiting(LOGGER: Logger, action: Any) -> None:
     LOGGER.info(f"⏱️  Test duration: {duration:.2f} seconds")
 
     # Validate results based on expectations
+    if action.max_requests and action.expect_limited:
+        # max_requests pins an exact burst; rate_limit alone permits time-based NGINX limiting.
+        allowed = action.max_requests
+        expected_limited = num_requests - allowed
+        if (
+            errors
+            or expected_limited <= 0
+            or len(responses) != num_requests
+            or any(not 200 <= response.status_code < 300 for response in responses[:allowed])
+            or any(response.status_code != 429 for response in responses[allowed:])
+            or limited_count != expected_limited
+        ):
+            LOGGER.error(f"❌ Expected {allowed} allowed requests followed by {expected_limited} limited requests")
+            exit(1)
+        retry_after = responses[allowed].headers.get("Retry-After", "")
+        if not retry_after.isascii() or not retry_after.isdecimal() or int(retry_after) <= 0:
+            LOGGER.error("❌ First limited response must include a positive Retry-After delay")
+            exit(1)
+
     if action.expect_limited:
         if limited_count == 0:
             LOGGER.error("❌ Expected requests to be rate limited, but none were limited")

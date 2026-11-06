@@ -309,17 +309,27 @@ jobs:
           mariadb -h 127.0.0.1 -P 3307 -u root -proot -e "SET GLOBAL innodb_snapshot_isolation=1"
           test "$(mariadb -h 127.0.0.1 -P 3307 -u root -proot -N -e 'SELECT @@global.innodb_snapshot_isolation')" = 1
       - name: Run unit tests (all engines)
+        shell: bash
         env:
           BW_TEST_PG_URI: postgresql://bw:bw@127.0.0.1:5433/bw_test
           BW_TEST_MARIA_URI: mariadb://bw:bw@127.0.0.1:3307/bw_test
         # timeout ends a hang (~5 min locally); faulthandler_timeout prints its stack first.
-        run: timeout -k 30 1500 pytest tests/unit --db-engines=sqlite,postgresql,mariadb -o faulthandler_timeout=120
+        run: |
+          set -o pipefail
+          timeout -k 30 1500 pytest tests/unit --db-engines=sqlite,postgresql,mariadb -o faulthandler_timeout=120 -rs 2>&1 | tee engines.log
+          grep -Eq '[1-9][0-9]* passed' engines.log
+          ! grep -Eq 'not (configured|reachable)' engines.log
       # MySQL runs the DB layer only (tests/unit/db: 440 passed, 15 skipped against mysql:8.4 locally, ~17 min); the ui,
       # api and gen fixtures that also take an engine were not measured on it.
       - name: Run the DB-layer unit tests (MySQL)
+        shell: bash
         env:
           BW_TEST_MYSQL_URI: mysql://bw:bw@127.0.0.1:3308/bw_test
-        run: timeout -k 30 2400 pytest tests/unit/db --db-engines=mysql -o faulthandler_timeout=120
+        run: |
+          set -o pipefail
+          timeout -k 30 2400 pytest tests/unit/db --db-engines=mysql -o faulthandler_timeout=120 -rs 2>&1 | tee mysql.log
+          grep -Eq '[1-9][0-9]* passed' mysql.log
+          ! grep -Eq 'not (configured|reachable)' mysql.log
       # The run above executes that script in a legacy subprocess, where a skipTest still reads as green. Run the
       # snapshot-isolation race case on its own and fail if it skipped.
       - name: Run the MariaDB snapshot-isolation pruning race (must not skip)

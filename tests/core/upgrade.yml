@@ -8,7 +8,8 @@ integrations:
   # Docker and All-in-one arms that have no database container to start.
   - "Linux;amd64;ubuntu/noble"
   - "Linux;amd64;debian/trixie"
-dev_integrations: ["Docker", "Autoconf", "All-in-one", "Kubernetes"]
+dev_integrations:
+  ["Docker", "Autoconf", "All-in-one", "Kubernetes", "Linux;amd64;ubuntu/noble"]
 
 actions:
   from_latest_stable_sqlite:
@@ -38,6 +39,7 @@ actions:
     url: "http://www.example.com"
     status: 200
     not_log: "❌"
+    log_from: "scheduler"
     full_clean: true
     integrations: # ? For the other integrations, mariadb is the default database
       - "Linux"
@@ -81,6 +83,7 @@ actions:
     url: "http://www.example.com"
     status: 200
     not_log: "❌"
+    log_from: "scheduler"
     integrations: # ? For the other integrations, mariadb is the default database
       - "Linux"
       - "Docker"
@@ -109,6 +112,7 @@ actions:
     url: "http://www.example.com"
     status: 200
     not_log: "❌"
+    log_from: "scheduler"
     full_clean: true
     integrations: ["Docker", "Autoconf", "All-in-one", "Kubernetes"]
     database: "mariadb"
@@ -125,6 +129,7 @@ actions:
     url: "http://www.example.com"
     status: 200
     not_log: "❌"
+    log_from: "scheduler"
     integrations: ["Docker", "Autoconf", "All-in-one", "Kubernetes"]
     database: "mariadb"
 
@@ -141,6 +146,7 @@ actions:
     url: "http://www.example.com"
     status: 200
     not_log: "❌"
+    log_from: "scheduler"
     full_clean: true
     integrations: ["Docker", "Autoconf", "All-in-one", "Kubernetes"]
     database: "mysql"
@@ -157,6 +163,7 @@ actions:
     url: "http://www.example.com"
     status: 200
     not_log: "❌"
+    log_from: "scheduler"
     integrations: ["Docker", "Autoconf", "All-in-one", "Kubernetes"]
     database: "mysql"
 
@@ -173,6 +180,7 @@ actions:
     url: "http://www.example.com"
     status: 200
     not_log: "❌"
+    log_from: "scheduler"
     full_clean: true
     integrations: ["Docker", "Autoconf", "All-in-one", "Kubernetes"]
     database: "postgresql"
@@ -189,5 +197,6 @@ actions:
     url: "http://www.example.com"
     status: 200
     not_log: "❌"
+    log_from: "scheduler"
     integrations: ["Docker", "Autoconf", "All-in-one", "Kubernetes"]
     database: "postgresql"
