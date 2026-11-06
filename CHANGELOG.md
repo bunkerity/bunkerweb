@@ -5,6 +5,7 @@
 - [BUGFIX] `limit`: `LIMIT_CONN_MAX_*` settings now accept only values NGINX supports (1 to 65535).
 - [BUGFIX] `reverseproxy`: warn when proxy caching is enabled on a location whose response buffering is off, since NGINX stores nothing there.
 - [BUGFIX] `scheduler`: a configuration rejected by only some instances now keeps its failover warning, and a healthcheck no longer clears it.
+- [BUGFIX] `scheduler`, `api`, `ui`: a reload that an instance has not confirmed is no longer reported as applied. (Refs #4086)
 
 ## v1.6.18~rc3 - 2026/11/05
 

@@ -63,6 +63,7 @@ from cache_restore import (  # type: ignore
 from API import API  # type: ignore
 
 from ApiCaller import ApiCaller, MIN_RELOAD_TIMEOUT, folder_push_timeout  # type: ignore
+from reload_utils import RELOAD_CONFIRM_MIN_WAIT, RELOAD_CONFIRM_MAX_WAIT, wait_for_reload  # type: ignore
 
 APPLYING_CHANGES = Event()
 BACKING_UP_FAILOVER = Event()
@@ -141,6 +142,8 @@ NEEDS_CONFIG_PASSES: dict = {}
 # sibling upload or the reload) it answers "ok" although the configuration it was sent is not
 # live. These still need a push, until a reload succeeds.
 NEEDS_CONFIG_PENDING: set = set()
+# Accepted reloads are polled on later healthchecks, never pushed/reloaded again while pending.
+HEALTHCHECK_RELOADS: Dict[str, Dict[str, Any]] = {}
 
 
 def needs_config_push_due(hostname: str) -> bool:
@@ -360,14 +363,6 @@ def wait_for_reachable_instance(timeout: int = 60) -> bool:
 BUSY_MESSAGES = ("a configuration generation is in progress", "a push swap is in progress", "another push swap is in progress")
 BUSY_RELOAD_PREFIX = "a reload is in progress ("
 
-# A reload that answered 200 with confirmed=false is checked with GET /health instead of another reload. The wait
-# has to outlast the new workers' readiness (30-50 s measured with a slow init_worker, #4086) and the marker of a
-# rejected reload never clears by itself before 5 minutes, so it is bounded: the reload timeout, at least a minute,
-# at most five. One deadline covers every instance of a reload, so several stuck instances cost one bound.
-RELOAD_CONFIRM_MIN_WAIT = 60
-RELOAD_CONFIRM_MAX_WAIT = 300
-RELOAD_CONFIRM_POLL = 2
-
 # Instances that answered a scheduler-wide push with a busy 503, hostname -> message. The push keeps them listed,
 # so whoever pushed (or reloaded) next has to read this, or it would report a configuration nothing took.
 PUSH_BUSY: Dict[str, str] = {}
@@ -393,38 +388,17 @@ def take_busy_pushes() -> Dict[str, str]:
 
 
 def confirm_unconfirmed_reloads(responses: Dict[str, Any], timeout: Union[int, float]) -> Dict[str, str]:
-    """Ask GET /health of every instance whose reload answered 200 with confirmed=false, until it says "ok".
-
-    Returns {hostname: last state} for the instances still not ok when the shared deadline runs out. An instance
-    that is listed but did not answer counts as "unreachable". At least one probe per instance, whatever the clock.
-    """
+    """Keep scheduler's readiness bound and database hostnames around the shared health poll."""
     assert SCHEDULER is not None
-    waiting = {}
-    for db_instance in SCHEDULER.db.get_instances():
-        response = response_for(responses, db_instance["hostname"], {})
+    instances = SCHEDULER.db.get_instances()
+    apis = []
+    for instance in instances:
+        response = response_for(responses, instance["hostname"], {})
         if isinstance(response, dict) and response.get("status") == "success" and response.get("confirmed") is False:
-            waiting[db_instance["hostname"]] = db_instance
-
-    deadline = None
-    pending = {}
-    for hostname, db_instance in waiting.items():
-        api = API.from_instance(db_instance)
-        state = "unreachable"
-        while True:
-            try:
-                sent, _, status, resp = api.request("GET", "health", timeout=(5, 10))
-                state = str(resp.get("msg") or "unknown") if sent and status == 200 and isinstance(resp, dict) else "unreachable"
-            except Exception:
-                state = "unreachable"
-            if state == "ok":
-                break
-            if deadline is None:
-                deadline = monotonic() + min(max(timeout, RELOAD_CONFIRM_MIN_WAIT), RELOAD_CONFIRM_MAX_WAIT)
-            if monotonic() >= deadline:
-                pending[hostname] = state
-                break
-            sleep(RELOAD_CONFIRM_POLL)
-    return pending
+            apis.append(API.from_instance(instance))
+    pending, failed = wait_for_reload(apis, responses, min(max(timeout, RELOAD_CONFIRM_MIN_WAIT), RELOAD_CONFIRM_MAX_WAIT))
+    outstanding = {**pending, **failed}
+    return {instance["hostname"]: outstanding[key] for instance in instances if (key := instance["hostname"].strip("[]").lower()) in outstanding}
 
 
 def send_file_to_bunkerweb(file_path: Path, endpoint: str, logger: Logger = LOGGER, *, api_caller: Optional[ApiCaller] = None):
@@ -1190,6 +1164,25 @@ def healthcheck_job():
 
                 hostname = db_instance["hostname"]
                 state = resp["msg"]
+                pending_status = "failover" if db_instance["status"] == "failover" else "loading"
+                if hostname in HEALTHCHECK_RELOADS:
+                    pending, failed = wait_for_reload([bw_instance], HEALTHCHECK_RELOADS[hostname], RELOAD_CONFIRM_MIN_WAIT)
+                    if pending:
+                        HEALTHCHECK_LOGGER.warning(f"Reload confirmation still pending for instance {bw_instance.endpoint}: {pending}")
+                        ret = SCHEDULER.db.update_instance(hostname, pending_status)
+                        if ret:
+                            HEALTHCHECK_LOGGER.error(f"Couldn't update instance {bw_instance.endpoint} status to {pending_status} in the database: {ret}")
+                        continue
+                    del HEALTHCHECK_RELOADS[hostname]
+                    if failed:
+                        HEALTHCHECK_LOGGER.error(f"Error while confirming reload of instance {bw_instance.endpoint}: {failed}")
+                        ret = SCHEDULER.db.update_instance(hostname, pending_status)
+                        if ret:
+                            HEALTHCHECK_LOGGER.error(f"Couldn't update instance {bw_instance.endpoint} status to {pending_status} in the database: {ret}")
+                        continue
+                    HEALTHCHECK_LOGGER.info(f"Successfully reloaded instance {bw_instance.endpoint}")
+                    NEEDS_CONFIG_PENDING.discard(hostname)
+                    state = "ok"
                 if state == "ok" and hostname in NEEDS_CONFIG_PENDING:
                     state = "needs_config"
                 if state not in ("needs_config", "reloading"):
@@ -1287,11 +1280,21 @@ def healthcheck_job():
                             HEALTHCHECK_LOGGER.error(f"Couldn't update instance {bw_instance.endpoint} status to loading in the database: {ret}")
                         continue
 
-                    if not api_caller.send_to_apis(
+                    reloaded, responses = api_caller.send_to_apis(
                         "POST",
                         f"/reload?test={'no' if DISABLE_CONFIGURATION_TESTING else 'yes'}",
                         timeout=max(RELOAD_MIN_TIMEOUT, 3 * len(env.get("SERVER_NAME", "www.example.com").split())),
-                    )[0]:
+                        response=True,
+                    )
+                    pending, failed = wait_for_reload([bw_instance], responses or {}, RELOAD_CONFIRM_MIN_WAIT)
+                    if pending:
+                        HEALTHCHECK_RELOADS[hostname] = responses or {}
+                        HEALTHCHECK_LOGGER.warning(f"Reload signalled to instance {bw_instance.endpoint}, confirmation still pending: {pending}")
+                        ret = SCHEDULER.db.update_instance(hostname, pending_status)
+                        if ret:
+                            HEALTHCHECK_LOGGER.error(f"Couldn't update instance {bw_instance.endpoint} status to {pending_status} in the database: {ret}")
+                        continue
+                    if not reloaded or failed:
                         HEALTHCHECK_LOGGER.error(f"Error while reloading instance {bw_instance.endpoint}")
                         ret = SCHEDULER.db.update_instance(db_instance["hostname"], "loading")
                         if ret:

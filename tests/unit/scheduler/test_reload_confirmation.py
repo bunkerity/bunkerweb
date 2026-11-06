@@ -10,6 +10,7 @@ import logging
 from types import SimpleNamespace
 
 import pytest
+import reload_utils
 
 from scheduler_fakes import FakeApi, instance
 import test_main_loop
@@ -21,6 +22,11 @@ drive = test_main_loop.drive
 OK = (True, "", 200, {"status": "success", "msg": "ok"})
 RELOADING = (True, "", 200, {"status": "success", "msg": "reloading"})
 UNCONFIRMED = {"bw1": {"status": "success", "msg": "reload signalled but readiness is unconfirmed", "confirmed": False}}
+
+
+@pytest.fixture(autouse=True)
+def no_real_sleep(monkeypatch):
+    monkeypatch.setattr(reload_utils, "sleep", lambda _: None)
 
 
 def health_states(drive, monkeypatch, *states):
@@ -50,7 +56,7 @@ def health_states(drive, monkeypatch, *states):
 def no_wait(drive, monkeypatch):
     """A clock that jumps 20 s per reading (``drive`` already stubs sleep): the confirmation bound runs out fast."""
     ticks = iter(range(0, 10**7, 20))
-    monkeypatch.setattr(drive.main, "monotonic", lambda: next(ticks))
+    monkeypatch.setattr(reload_utils, "monotonic", lambda: next(ticks))
 
 
 # --- an unconfirmed reload is confirmed by health, not by a second reload -------------------------------
@@ -97,8 +103,8 @@ def test_the_confirmation_wait_is_bounded_for_several_instances(drive, monkeypat
     drive.sched.reload_answer = (True, {"bw1": UNCONFIRMED["bw1"], "bw2": UNCONFIRMED["bw1"]})
     now = [0]
     slept = []
-    monkeypatch.setattr(drive.main, "monotonic", lambda: now[0])
-    monkeypatch.setattr(drive.main, "sleep", lambda s: (slept.append(s), now.__setitem__(0, now[0] + s)))
+    monkeypatch.setattr(reload_utils, "monotonic", lambda: now[0])
+    monkeypatch.setattr(reload_utils, "sleep", lambda s: (slept.append(s), now.__setitem__(0, now[0] + s)))
     health_states(drive, monkeypatch, RELOADING)
     drive.run()
     bound = drive.main.RELOAD_CONFIRM_MIN_WAIT + 4
