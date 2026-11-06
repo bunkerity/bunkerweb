@@ -194,9 +194,16 @@ stop() {
 
 # Function to reload the UI
 reload() {
-    stop
-    sleep 5
-    start
+    echo "Reloading UI service..."
+    if [ ! -f /var/run/bunkerweb/ui.pid ]; then
+        echo "UI service is not running or the pid file doesn't exist." >&2
+        return 1
+    fi
+    pid=$(cat /var/run/bunkerweb/ui.pid) || return 1
+    if ! [[ "$pid" =~ ^[1-9][0-9]*$ ]] || ! kill -s HUP "$pid"; then
+        echo "Failed to signal the UI service for reload." >&2
+        return 1
+    fi
 }
 
 # Function to restart the UI

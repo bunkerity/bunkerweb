@@ -158,7 +158,7 @@ BunkerWeb API 是用于管理实例、服务、封禁、插件、任务和自定
     - 配置文件：`/etc/bunkerweb/api.env`（首次启动生成带注释默认值）和 `/etc/bunkerweb/api.yml`
     - 环境来源：`api.env`、`variables.env`、`/run/secrets/<VAR>`，随后导出到 Gunicorn 进程
 
-    编辑 `/etc/bunkerweb/api.env` 设置 `API_USERNAME`/`API_PASSWORD`、白名单、TLS、速率限制或 `API_ROOT_PATH`，然后 `systemctl reload bunkerweb-api`。
+    编辑 `/etc/bunkerweb/api.env` 设置 `API_USERNAME`/`API_PASSWORD`、白名单、TLS、速率限制或 `API_ROOT_PATH`，然后 `systemctl restart bunkerweb-api`。
 
 ## 认证与授权
 

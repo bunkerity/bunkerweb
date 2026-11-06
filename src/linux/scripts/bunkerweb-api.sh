@@ -273,8 +273,15 @@ stop() {
 
 reload() {
     echo "Reloading API service..."
-    stop
-    start
+    if [ ! -f "$API_PID_FILE" ]; then
+        echo "API service is not running or the pid file doesn't exist." >&2
+        return 1
+    fi
+    pid=$(cat "$API_PID_FILE") || return 1
+    if ! [[ "$pid" =~ ^[1-9][0-9]*$ ]] || ! kill -s HUP "$pid"; then
+        echo "Failed to signal the API service for reload." >&2
+        return 1
+    fi
 }
 
 case "$1" in

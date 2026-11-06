@@ -158,7 +158,7 @@ Choose the flavor that matches your environment.
     - Config files: `/etc/bunkerweb/api.env` (auto-created with commented defaults on first start) and `/etc/bunkerweb/api.yml`
     - Environment sources: `api.env`, `variables.env`, `/run/secrets/<VAR>`, then exported to the Gunicorn process
 
-    Edit `/etc/bunkerweb/api.env` to set `API_USERNAME`/`API_PASSWORD`, allowlist, TLS, rate limits, or `API_ROOT_PATH`, then `systemctl reload bunkerweb-api`.
+    Edit `/etc/bunkerweb/api.env` to set `API_USERNAME`/`API_PASSWORD`, allowlist, TLS, rate limits, or `API_ROOT_PATH`, then `systemctl restart bunkerweb-api`.
 
 ## Authentication and authorization
 
