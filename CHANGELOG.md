@@ -17,6 +17,7 @@
 - [PERF] `core`: build the reserved-address matcher once per worker and cache successful plugin module lookups.
 - [PERF] `core`: avoid temporary result-check tables and build informational log messages only when their level is enabled.
 - [PERF] `sessions`: stop reading the random cookie name and secret from shared memory on every request.
+- [DOCS] `linux`: the custom configuration section says where NGINX includes each type and how to check a file is live.
 
 ## v1.6.18~rc3 - 2026/11/05
 
