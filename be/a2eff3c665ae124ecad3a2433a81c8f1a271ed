@@ -1,0 +1,21 @@
+src/common/core/sessions/sessions.lua
+  s_0bf82062f9947a::t_330acd61a1474e 24-26,30,102-113,115-116,182-183
+tests/unit/common/test_sessions_coverage_lua.py
+  s_0bf82062f9947a::t_b6d91c6a8c0dfc 31,35-36,107-169
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "bea2eff3c665ae124ecad3a2433a81c8f1a271ed",
+  "prompts": {},
+  "sessions": {
+    "s_0bf82062f9947a": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "2c17ecf2-1ff4-4f18-ad06-7a2b92bad02d",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}
