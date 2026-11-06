@@ -1390,7 +1390,7 @@ BunkerNet 插件通过 BunkerWeb 实例之间的集体威胁情报共享，创�
 | 设置                       | 默认值                     | 上下文    | 多个 | 描述                                                                                                                                                                  |
 | -------------------------- | -------------------------- | --------- | ---- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `USE_BUNKERNET`            | `yes`                      | multisite | 否   | **启用 BunkerNet：** 设置为 `yes` 以启用 BunkerNet 威胁情报共享。                                                                                                     |
-| `BUNKERNET_FILTER_HEADERS` | `no`                       | multisite | 否   | **过滤上报的请求头：** 设置为 `yes` 时，只发送一份简短的请求头白名单，并清空 ModSecurity 在请求头和 Cookie 中命中的值。设置为 `no` 时，报告包含所有请求头和命中的值。 |
+| `BUNKERNET_FILTER_HEADERS` | `no`                       | multisite | 否   | **过滤上报的请求头：** 设置为 `yes` 时，只发送一份简短的请求头白名单，并清空 ModSecurity 在请求头和 Cookie 中命中的值。设置为 `no` 时，报告包含除 `Cookie`、`Authorization` 和 `Proxy-Authorization` 之外的所有请求头，以及命中的值（在 Cookie 和这些请求头中命中的值除外）。 |
 | `BUNKERNET_SERVER`         | `https://api.bunkerweb.io` | global    | 否   | **BunkerNet 服务器：** 用于共享威胁情报的 BunkerNet API 服务器地址。                                                                                                  |
 
 !!! tip "网络保护"
@@ -1402,10 +1402,10 @@ BunkerNet 插件通过 BunkerWeb 实例之间的集体威胁情报共享，创�
     - 每次请求发送的实例元数据：BunkerNet 实例 ID、BunkerWeb 版本、集成方式，以及操作系统名称、版本、版本 ID、代号、ID 和架构；
     - 客户端 IP 地址、阻止原因和日期；
     - HTTP 方法、**包含查询字符串的** URL，以及服务名称（`server_name`）；
-    - 请求头及其值：收到的所有请求头（最多 `MAX_HEADERS` 个），或在 `BUNKERNET_FILTER_HEADERS` 为 `yes` 时仅包含 `User-Agent`、`Accept`、`Accept-Encoding`、`Accept-Language`、`Content-Type` 和 `Content-Length`；
-    - 与阻止原因相关的详细信息。根据阻止该客户端的插件不同，可能包含命中的 ModSecurity 规则 ID 和消息，以及触发这些规则的请求值（参数、请求体、请求头或 Cookie 的片段，每项截断为 512 字节；`BUNKERNET_FILTER_HEADERS` 为 `yes` 时，在请求头和 Cookie 中命中的值会被清空，只发送变量名）；对于 Bad Behavior，则是导致封禁的近期请求的方法和 URL。
+    - 请求头及其值：收到的所有请求头（最多 `MAX_HEADERS` 个，不含 `Cookie`、`Authorization` 和 `Proxy-Authorization`），或在 `BUNKERNET_FILTER_HEADERS` 为 `yes` 时仅包含 `User-Agent`、`Accept`、`Accept-Encoding`、`Accept-Language`、`Content-Type` 和 `Content-Length`；
+    - 与阻止原因相关的详细信息。根据阻止该客户端的插件不同，可能包含命中的 ModSecurity 规则 ID 和消息，以及触发这些规则的请求值（参数、请求体、请求头或 Cookie 的片段，每项截断为 512 字节；在 Cookie 以及 `Cookie`、`Authorization`、`Proxy-Authorization` 请求头中命中的值始终会被清空，`BUNKERNET_FILTER_HEADERS` 为 `yes` 时其他请求头中命中的值也会被清空，只发送变量名）；对于 Bad Behavior，则是导致封禁的近期请求的方法和 URL。
 
-    默认情况下（`BUNKERNET_FILTER_HEADERS` 为 `no`），报告包含收到的所有请求头（最多 `MAX_HEADERS` 个，包括 Cookie 和 `Authorization`），以及 ModSecurity 命中的原始值。将 `BUNKERNET_FILTER_HEADERS` 设置为 `yes`，则只发送上面列出的六个请求头，并清空在请求头和 Cookie 中命中的值。仍在队列中的报告在 `yes` 时也会在发送前以同样方式过滤。
+    默认情况下（`BUNKERNET_FILTER_HEADERS` 为 `no`），报告包含收到的所有请求头（最多 `MAX_HEADERS` 个），但不含从不发送的 `Cookie`、`Authorization` 和 `Proxy-Authorization`，以及 ModSecurity 命中的值（在 Cookie 和这些请求头中命中的值除外）。将 `BUNKERNET_FILTER_HEADERS` 设置为 `yes`，则只发送上面列出的六个请求头，并清空在请求头和 Cookie 中命中的值。仍在队列中的报告在发送前也会以同样方式处理（凭据始终清除，白名单在 `yes` 时应用）。
 
     URL 以及命中的值均来自请求，因此包含客户端发送的任何内容。对于 URL 中带有敏感值的服务，请将 `USE_BUNKERNET` 设置为 `no`。
 

@@ -53,6 +53,35 @@ CLEAN = report(
 )
 
 
+# OLD without the credentials: the Authorization and Cookie headers go, their matched values are blanked, the rest stays.
+OLD_SCRUBBED = copy.deepcopy(OLD)
+del OLD_SCRUBBED["headers"]["cookie"], OLD_SCRUBBED["headers"]["authorization"]
+OLD_SCRUBBED["data"]["matched_vars"] = ["<script>", "", ""]
+
+CREDENTIALS = report(
+    headers={
+        "User-Agent": "curl/8",
+        "X-Api-Key": "k",
+        "Cookie": "session=abc",
+        "AUTHORIZATION": "Bearer t0ken",
+        "proxy-authorization": "Basic Zm9v",
+    },
+    data={
+        "ids": ["941100"],
+        "matched_vars": ["abc", "Bearer t0ken", "Basic Zm9v", "session=abc", "curl/8", "<script>", "{}"],
+        "matched_var_names": [
+            "REQUEST_COOKIES:session",
+            "REQUEST_HEADERS:Authorization",
+            "REQUEST_HEADERS:proxy-authorization",
+            "REQUEST_HEADERS:Cookie",
+            "REQUEST_HEADERS:User-Agent",
+            "ARGS:q",
+            "REQUEST_BODY",
+        ],
+    },
+)
+
+
 def report_for(server_name, template, date):
     return {**copy.deepcopy(template), "server_name": server_name, "date": date}
 
@@ -133,10 +162,10 @@ def test_unsent_reports_are_cached_filtered(monkeypatch, tmp_path):
     assert "cookie" not in cached["headers"] and cached["data"]["matched_vars"] == ["<script>", "", ""]
 
 
-def test_default_sends_queued_and_cached_reports_unfiltered(monkeypatch, tmp_path):
+def test_default_sends_queued_and_cached_reports_without_credentials(monkeypatch, tmp_path):
     batches, status, _ = run(monkeypatch, tmp_path, cached=[OLD], queued=[CLEAN], env={})
     assert status == 0 and len(batches) == 1
-    assert sorted(batches[0], key=lambda r: r["date"]) == [OLD, CLEAN]
+    assert sorted(batches[0], key=lambda r: r["date"]) == [OLD_SCRUBBED, CLEAN]
 
 
 def test_default_caches_unsent_reports_unfiltered(monkeypatch, tmp_path):
@@ -149,12 +178,12 @@ def test_default_caches_unsent_reports_unfiltered(monkeypatch, tmp_path):
     monkeypatch.setitem(sys.modules, "API", SimpleNamespace(API=SimpleNamespace(from_instance=Mock())))
     monkeypatch.setitem(sys.modules, "ApiCaller", SimpleNamespace(ApiCaller=lambda _apis: caller))
     load_job(monkeypatch, tmp_path, JOB, cache=cache)
-    assert json.loads(cache.data["", "reports.json"])["reports"] == [OLD]
+    assert json.loads(cache.data["", "reports.json"])["reports"] == [OLD_SCRUBBED]
 
 
-def test_explicit_no_sends_reports_unfiltered(monkeypatch, tmp_path):
+def test_explicit_no_sends_reports_without_credentials(monkeypatch, tmp_path):
     batches, _, _ = run(monkeypatch, tmp_path, cached=[OLD], env={"BUNKERNET_FILTER_HEADERS": "no"})
-    assert batches == [[OLD]]
+    assert batches == [[OLD_SCRUBBED]]
 
 
 MULTISITE = {"MULTISITE": "yes", "SERVER_NAME": "a.example b.example"}
@@ -167,15 +196,16 @@ def test_multisite_filters_only_the_services_that_set_the_option(monkeypatch, tm
     sent = {r["server_name"]: r for r in batches[0]}
     assert sent["a.example"]["headers"] == {"user-agent": "curl/8", "accept": "*/*"}
     assert sent["a.example"]["data"]["matched_vars"] == ["<script>", "", ""]
-    assert sent["b.example"] == b
+    assert sent["b.example"]["headers"] == OLD_SCRUBBED["headers"]  # no allowlist, but no credentials
+    assert sent["b.example"]["data"] == OLD_SCRUBBED["data"]
 
 
 @pytest.mark.parametrize("global_value, filtered", [("yes", True), ("no", False)])
 def test_multisite_unknown_service_uses_the_global_value(monkeypatch, tmp_path, global_value, filtered):
     env = {**MULTISITE, "BUNKERNET_FILTER_HEADERS": global_value}
-    other = report_for("other.example", OLD, OLD["date"])
+    other = report_for("other.example", CREDENTIALS, OLD["date"])
     batches, _, _ = run(monkeypatch, tmp_path, cached=[other], env=env)
-    assert (batches[0][0]["headers"] != other["headers"]) is filtered
+    assert batches[0][0]["headers"] == ({"User-Agent": "curl/8"} if filtered else {"User-Agent": "curl/8", "X-Api-Key": "k"})
 
 
 def test_singlesite_global_value_applies_whatever_the_report_service(monkeypatch, tmp_path):
@@ -190,3 +220,46 @@ def test_python_and_lua_allowlists_match():
     source = (ROOT / "src" / "common" / "core" / JOB).read_text()
     constant = re.search(r"REPORT_HEADERS = \((.*?)\)", source, re.S).group(1)
     assert re.findall(r'"([^"]+)"', constant) == ALLOWED
+
+
+# Credential headers and the values matched in them leave in no case, whatever the setting says.
+@pytest.mark.parametrize("env", [{}, {"BUNKERNET_FILTER_HEADERS": "no"}])
+def test_credentials_are_dropped_without_the_filter(monkeypatch, tmp_path, env):
+    batches, _, _ = run(monkeypatch, tmp_path, cached=[copy.deepcopy(CREDENTIALS)], env=env)
+    sent = batches[0][0]
+    assert sent["headers"] == {"User-Agent": "curl/8", "X-Api-Key": "k"}
+    assert sent["data"]["matched_vars"] == ["", "", "", "", "curl/8", "<script>", "{}"]
+    assert sent["data"]["matched_var_names"] == CREDENTIALS["data"]["matched_var_names"]
+    assert sent["url"] == CREDENTIALS["url"] and sent["data"]["ids"] == ["941100"]
+
+
+def test_credentials_are_dropped_from_queued_reports_too(monkeypatch, tmp_path):
+    batches, _, _ = run(monkeypatch, tmp_path, cached=[CLEAN], queued=[copy.deepcopy(CREDENTIALS)], env={})
+    sent = next(r for r in batches[0] if r["data"]["ids"] == ["941100"])
+    assert set(sent["headers"]) == {"User-Agent", "X-Api-Key"} and sent["data"]["matched_vars"][0] == ""
+
+
+def test_the_filter_still_applies_on_top(monkeypatch, tmp_path):
+    batches, _, _ = run(monkeypatch, tmp_path, cached=[copy.deepcopy(CREDENTIALS)])
+    sent = batches[0][0]
+    assert sent["headers"] == {"User-Agent": "curl/8"}
+    assert sent["data"]["matched_vars"] == ["", "", "", "", "", "<script>", "{}"]
+
+
+def test_multisite_service_without_the_filter_still_loses_its_credentials(monkeypatch, tmp_path):
+    env = {**MULTISITE, "a.example_BUNKERNET_FILTER_HEADERS": "no"}
+    batches, _, _ = run(monkeypatch, tmp_path, cached=[report_for("a.example", CREDENTIALS, "2026-10-28T10:00:00Z")], env=env)
+    assert set(batches[0][0]["headers"]) == {"User-Agent", "X-Api-Key"}
+
+
+def test_unpaired_values_with_a_credential_name_are_dropped_and_others_kept(monkeypatch, tmp_path):
+    odd = report(data={"matched_vars": ["v"], "matched_var_names": ["REQUEST_HEADERS:Cookie", "ARGS:a"]})
+    fine = report(date="2026-10-28T11:00:00Z", data={"matched_vars": ["v"], "matched_var_names": ["ARGS:a", "ARGS:b"]})
+    batches, _, _ = run(monkeypatch, tmp_path, cached=[odd, fine], env={})
+    assert "matched_vars" not in batches[0][0]["data"]
+    assert batches[0][1]["data"]["matched_vars"] == ["v"]
+
+
+def test_values_without_names_are_dropped_by_default(monkeypatch, tmp_path):
+    batches, _, _ = run(monkeypatch, tmp_path, cached=[report(data={"ids": ["1"], "matched_vars": ["v"]})], env={})
+    assert batches[0][0]["data"] == {"ids": ["1"]}

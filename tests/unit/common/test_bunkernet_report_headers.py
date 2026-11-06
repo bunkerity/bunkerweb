@@ -175,15 +175,18 @@ def test_the_other_report_fields_are_unchanged():
     assert report["date"] == "1970-01-12T13:46:40Z"
 
 
-# BUNKERNET_FILTER_HEADERS=no (the default): the report carries every request header, as it did before the filter existed.
-def test_default_sends_every_request_header():
+# BUNKERNET_FILTER_HEADERS=no (the default): the report carries every request header but the credential ones.
+CREDENTIALS = ("Cookie", "Authorization", "Proxy-Authorization")
+
+
+def test_default_sends_every_request_header_but_the_credential_ones():
     headers = send({**ALLOWED, **SECRETS}, filter_headers="no")["report"]["headers"]
-    assert headers == {name.lower(): value for name, value in {**ALLOWED, **SECRETS}.items()}
+    assert headers == {name.lower(): value for name, value in {**ALLOWED, **SECRETS}.items() if name not in CREDENTIALS}
 
 
 def test_default_keeps_multi_value_headers_and_the_header_cap():
-    out = send({"Accept": ["text/html", "application/json"], "Cookie": ["a=1", "b=2"]}, filter_headers="no")
-    assert out["report"]["headers"] == {"accept": ["text/html", "application/json"], "cookie": ["a=1", "b=2"]}
+    out = send({"Accept": ["text/html", "application/json"], "X-Multi": ["a=1", "b=2"], "Cookie": ["a=1", "b=2"]}, filter_headers="no")
+    assert out["report"]["headers"] == {"accept": ["text/html", "application/json"], "x-multi": ["a=1", "b=2"]}
     assert out["max"] == 100
 
 
