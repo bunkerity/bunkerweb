@@ -24,6 +24,7 @@ local utils = package.loaded["bunkerweb.utils"]
 utils.get_session = function() if SESSION_ERROR then return nil, SESSION_ERROR end return SESSION end
 utils.rand = function(len) return string.rep("n", len) end
 ngx.now = function() return NOW end
+ngx.HTTP_INTERNAL_SERVER_ERROR = 500
 ngx.escape_uri = function(s)
     return (s:gsub("[^%w%-%._~]", function(c) return string.format("%%%02X", c:byte()) end))
 end
@@ -126,6 +127,17 @@ emit({ result = a:access(), cache = CACHE, ttl = CACHE_TTL })
     assert out["ttl"] == 86400
 
 
+@pytest.mark.parametrize("uri, method", [("/page", "GET"), ("/challenge", "POST")])
+def test_session_store_failure_fails_closed_with_http_500_instead_of_skipping_the_challenge(uri, method):
+    out = run(f"""
+SESSION_ERROR = "session store down"
+local a = new_plugin(PLUGIN, {{ uri = "{uri}", request_uri = "{uri}", request_method = "{method}" }})
+emit({{ result = a:access(), session = SESSION_DATA }})
+""")
+    assert out["result"] == {"ret": False, "msg": "can't get session : session store down", "status": 500}
+    assert "session" not in out  # nothing stored: the request is refused, not challenged
+
+
 def test_cache_keys_separate_queries_and_cached_ignores_bypass_session():
     out = run(r"""
 local a = new_plugin(PLUGIN, { uri = "/page", request_uri = "/page?x=1", http_user_agent = "agent" })
@@ -139,7 +151,7 @@ emit({ key = key, first = first, second = second, ip = a:kind_to_ele("IP"), ua =
 """)
     assert out["key"] == "uri#" + hashlib.sha256(b"/page?x=1").hexdigest()
     assert out["first"]["msg"] == "URI is in cached antibot ignored (info : URI cached)"
-    assert out["second"] == {"ret": False, "msg": "can't get session : session offline"}
+    assert out["second"] == {"ret": False, "msg": "can't get session : session offline", "status": 500}
     assert out["ip"] == "ip1.2.3.4"
     assert out["ua"] == "uaagent"
     assert out["country"] == "country1.2.3.4"

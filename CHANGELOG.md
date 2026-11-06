@@ -8,6 +8,7 @@
 - [SECURITY] `backup`: the pre-restore dump goes to a private temporary directory, and backup archives are created with mode 0600 from the start.
 - [SECURITY] `core`: settings written through autoconf, the API or the database now refuse a value with an embedded newline, as the scheduler already did.
 - [SECURITY] `dnsbl`, `country`, `reversescan`: a client denied by these plugins is still denied when the verdict cannot be written to the cache.
+- [SECURITY] `antibot`: when the session store is unavailable, the request gets an HTTP 500 instead of passing without the challenge.
 - [FEATURE] `bwcli`: `bwcli bans --json` prints the bans as JSON for scripts and monitoring.
 - [BUGFIX] `limit`: `LIMIT_CONN_MAX_*` settings now accept only values NGINX supports (1 to 65535).
 - [BUGFIX] `limit`: in local mode, simultaneous requests from one client across workers no longer exceed `LIMIT_REQ_RATE` (rates up to 100 per window).
