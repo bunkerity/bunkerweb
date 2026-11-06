@@ -21,8 +21,8 @@ from yaml import safe_load
 
 
 class ReleaseArtifactsTest(TestCase):
-    def manifest(self):
-        identity = {"source_sha": "a" * 40, "version": "1.6.15~rc2", "run_id": "123", "run_attempt": "1"}
+    def manifest(self, version="1.6.15~rc2"):
+        identity = {"source_sha": "a" * 40, "version": version, "run_id": "123", "run_attempt": "1"}
         manifest = identity | {"schema": 1, "images": {}, "packages": []}
         for image in release.IMAGES:
             manifest["images"][image] = {
@@ -65,6 +65,15 @@ class ReleaseArtifactsTest(TestCase):
             mutate(changed)
             with self.assertRaises(ValueError):
                 release.validate(changed, manifest)
+
+    def test_validate_accepts_every_release_version_kind(self):
+        for version in ("1.6.15", "1.6.15~rc2", "1.6.15-rc2", "1.7.0~beta1", "1.7.0~alpha1", "1.7.0-alpha10"):
+            manifest = self.manifest(version)
+            release.validate(manifest, manifest)
+        for version in ("1.7.0~alpha", "1.7.0~gamma1", "1.7.0~alpha1~rc1", "1.7~alpha1"):
+            manifest = self.manifest(version)
+            with self.assertRaises(ValueError):
+                release.validate(manifest, manifest)
 
     def test_checksums_detect_changed_package_bytes(self):
         package = self.manifest()["packages"][0]
@@ -246,6 +255,14 @@ gh() {
     *) return 99 ;;
   esac
 }
+git() {
+  if [ "$1" = ls-remote ]; then
+    if [ "$REMOTE_TAGS_STATUS" != ok ]; then return 1; fi
+    printf '%s' "$REMOTE_TAGS"
+  else
+    command git "$@"
+  fi
+}
 """
         with TemporaryDirectory() as tmp:
             directory = Path(tmp)
@@ -285,6 +302,8 @@ gh() {
                 "TAG_OBJECT_JSON": dumps(signed),
                 "RELEASE_STATUS": "ok",
                 "RELEASES_JSON": "[[]]",
+                "REMOTE_TAGS_STATUS": "ok",
+                "REMOTE_TAGS": "",
                 "PROTECTION_JSON": dumps(
                     {"name": "release", "protection_rules": [{"type": "required_reviewers", "prevent_self_review": False, "reviewers": OWNERS}]}
                 ),
@@ -294,6 +313,9 @@ gh() {
                 return run(["bash", "-c", gh_stub + derive], cwd=directory, env=dict(env, **overrides), capture_output=True)
 
             self.assertEqual(execute({}).returncode, 0)
+            failed_lookup = execute({"REMOTE_TAGS_STATUS": "failed"})
+            self.assertNotEqual(failed_lookup.returncode, 0)
+            self.assertIn(b"::error::Cannot list the remote tags to decide the floating aliases", failed_lookup.stdout)
             for overrides, expected in (({}, 0), ({"TAG_OBJECT_JSON": dumps(signed | {"object": {"type": "commit", "sha": "c" * 40}})}, 1)):
                 result = run(["bash", "-c", gh_stub + gate_checks], cwd=directory, env=dict(env, **overrides), capture_output=True)
                 self.assertEqual(result.returncode, expected)

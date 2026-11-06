@@ -1649,6 +1649,23 @@ Schlüsselkonzepte für die Docker-Integration sind:
 !!! info "Datenbank-Backend"
     Bitte beachten Sie, dass unsere Anweisungen davon ausgehen, dass Sie SQLite als Standard-Datenbank-Backend verwenden, wie durch die Einstellung `DATABASE_URI` konfiguriert. Es werden jedoch auch andere Datenbank-Backends unterstützt. Weitere Informationen finden Sie in den docker-compose-Dateien im Ordner [misc/integrations](https://github.com/bunkerity/bunkerweb/tree/v1.6.18-rc3/misc/integrations) des Repositorys.
 
+### Docker-Image-Tags {#docker-image-tags}
+
+Jedes Image wird unter denselben Tags auf Docker Hub (`bunkerity/`), GHCR (`ghcr.io/bunkerity/`) und in der GitLab-Registry (`registry.gitlab.com/bunkerity/bunkerweb/`) veröffentlicht. `X.Y` steht für eine Minor-Version wie `1.6`, `X.Y.Z` für eine vollständige Version wie `1.6.18`.
+
+| Tag                               | Zeigt auf                                                                             | Verwendung                                                                  |
+| --------------------------------- | ------------------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
+| `X.Y.Z`, `X.Y.Z-rcN`              | Genau ein Release oder Release Candidate, ändert sich nie                             | Produktion: diese Tags festlegen                                            |
+| `latest`                          | Das neueste stabile Release jeder Minor-Version                                       | Schnelle Tests: springt auf die nächste Minor-Version, sobald sie erscheint |
+| `X.Y`                             | Das neueste stabile Release dieser Minor-Version                                      | Einer Minor-Version folgen und ihre Patch-Releases erhalten                 |
+| `X.Y-edge`                        | Der neueste Release Candidate oder das neueste stabile Release dieser Minor-Version   | Das nächste Release früh testen und ihm nach der Veröffentlichung folgen    |
+| `X.Y-rc`, `X.Y-beta`, `X.Y-alpha` | Der neueste Release Candidate, die neueste Beta oder Alpha dieser Minor-Version       | Vorabversionen einer bestimmten Minor-Version testen                        |
+| `rc`, `beta`                      | Der zuletzt veröffentlichte Release Candidate bzw. die zuletzt veröffentlichte Beta, unabhängig von der Version; erneutes Veröffentlichen einer älteren Version setzt den Tag zurück | Alte Namen: besser die Tags pro Minor-Version oben verwenden                |
+| `testing`                         | Der neueste Build der Staging-Pipeline (Branches `staging` und `fix-cve` oder ein manueller Lauf) | Unveröffentlichte Änderungen testen, nie in Produktion                      |
+| `dev`                             | Der neueste Build der Dev-Pipeline (Branch `dev` oder ein manueller Lauf) | Mitwirkende, nie in Produktion                                              |
+
+Nur die erste Zeile ist unveränderlich. Jeder andere Tag verschiebt sich, sobald ein neuer Build veröffentlicht wird. Verwenden Sie in der Produktion daher einen Tag mit vollständiger Version und aktualisieren Sie ihn bewusst.
+
 ### Umgebungsvariablen
 
 Einstellungen werden dem Scheduler über Docker-Umgebungsvariablen übergeben:
