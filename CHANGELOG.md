@@ -6,6 +6,7 @@
 - [SECURITY] `autoconf`: secret setting values (keys, credentials, tokens, passwords) are no longer written to the logs, whatever the log level.
 - [SECURITY] `linux`: the service wrappers ignore `PATH`, `HOME`, `PYTHON*`, `LD_*` and similar variables set in `variables.env` and the service env files.
 - [SECURITY] `backup`: the pre-restore dump goes to a private temporary directory, and backup archives are created with mode 0600 from the start.
+- [SECURITY] `core`: settings written through autoconf, the API or the database now refuse a value with an embedded newline, as the scheduler already did.
 - [FEATURE] `bwcli`: `bwcli bans --json` prints the bans as JSON for scripts and monitoring.
 - [BUGFIX] `limit`: `LIMIT_CONN_MAX_*` settings now accept only values NGINX supports (1 to 65535).
 - [BUGFIX] `limit`: in local mode, simultaneous requests from one client across workers no longer exceed `LIMIT_REQ_RATE` (rates up to 100 per window).

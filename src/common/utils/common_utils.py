@@ -85,6 +85,20 @@ def is_sensitive_job_cache_file(file_name: str, plugin_id: str = "", job_name: s
     return bool(pattern and pattern.fullmatch(file_name.lower()))
 
 
+def has_embedded_newline(value: str, setting_type: Optional[str]) -> bool:
+    """Tell whether a setting value carries a newline that would split it into several settings.
+
+    variables.env is line-oriented ("KEY=VALUE\\n" per setting), so a value with its own newline
+    defines a second setting when the file is read back. Settings of type "file" hold PEM data and
+    are exempt, and trailing newlines stay valid because a Kubernetes ConfigMap block scalar always
+    leaves one.
+    """
+    if setting_type == "file":
+        return False
+    stripped = value.rstrip("\r\n")
+    return "\n" in stripped or "\r" in stripped
+
+
 def parse_duration(value: Any, default_unit: str = "s") -> Union[int, float]:
     """Return a duration expressed in ``default_unit``.
 

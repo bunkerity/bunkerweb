@@ -52,7 +52,7 @@ for deps_path in [os_join(sep, "usr", "share", "bunkerweb", *paths) for paths in
     if deps_path not in sys_path:
         sys_path.append(deps_path)
 
-from common_utils import bytes_hash, create_plugin_tar_gz, is_valid_host, parse_duration  # type: ignore
+from common_utils import bytes_hash, create_plugin_tar_gz, has_embedded_newline, is_valid_host, parse_duration  # type: ignore
 
 from pymysql import install_as_MySQLdb
 from sqlalchemy import and_, bindparam, case, create_engine, event, MetaData as sql_metadata, func, join, select as db_select, text
@@ -851,6 +851,9 @@ class Database:
                     return False, "not multiple"
 
                 if value is not None:
+                    if has_embedded_newline(value, db_setting.type):
+                        return False, "value contains a newline"
+
                     try:
                         regex_flags = DOTALL if db_setting.type == "file" else 0
                         if not self.__ignore_regex_check and search(db_setting.regex, value, regex_flags) is None:
