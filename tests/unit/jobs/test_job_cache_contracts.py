@@ -502,8 +502,12 @@ def test_feed_failure_retains_previous_service_list(runtime, plugin, failure, tm
         return_value=_response(b"" if failure == "empty" else b"not-an-ip", 503 if failure == "http" else 200),
     )
     _, status = run(env=_feed_env(plugin, **{f"{plugin.upper()}_IP_URLS": url}), get=remote)
-    assert status == (0 if failure in ("empty", "corrupt") else 2)
+    assert status == 2
     _assert_file(job, "IP.list", b"203.0.113.9\n", "app.example")
+    filename = hashlib.sha1(url.encode()).hexdigest() + ".list"
+    assert not (job.job_path / filename).exists()
+    with session(job.db) as s:
+        assert s.query(Jobs_cache).filter_by(job_name=job.job_name, file_name=filename).count() == 0
     assert remote.call_count == (3 if failure == "offline" else 0 if failure == "file-missing" else 1)
 
 
@@ -921,8 +925,15 @@ def test_cleanup_database_refusal_is_logged_and_keeps_history(runtime, monkeypat
 
 
 @pytest.mark.parametrize("plugin", LIST_PLUGINS)
-@pytest.mark.xfail(strict=True, reason="Empty successful feed overwrites the last-good URL cache with a comment-only file")
-def test_empty_feed_retains_previous_url_cache_and_service_list(runtime, plugin):
+@pytest.mark.parametrize(
+    "body,content_type",
+    [
+        pytest.param(b"", "text/plain", id="empty"),
+        pytest.param(b"not-an-ip\n203.0.113.999\n", "text/plain", id="invalid"),
+        pytest.param(b"<html><body>Temporarily unavailable</body></html>", "text/html", id="html"),
+    ],
+)
+def test_empty_feed_retains_previous_url_cache_and_service_list(runtime, plugin, body, content_type, caplog):
     job, run = runtime(f"{plugin}/jobs/{plugin}-download.py")
     url = "https://feeds.invalid/list"
     filename = hashlib.sha1(url.encode()).hexdigest() + ".list"
@@ -931,6 +942,44 @@ def test_empty_feed_retains_previous_url_cache_and_service_list(runtime, plugin)
     assert job.cache_file("IP.list", b"203.0.113.9\n", service_id="app.example")[0]
     with session(job.db) as s:
         s.query(Jobs_cache).filter_by(job_name=job.job_name, file_name=filename).update({"last_update": FIXED_DT})
-    run(env=_feed_env(plugin, **{f"{plugin.upper()}_IP_URLS": url}), get=Mock(return_value=_response(b"")))
+    _, status = run(env=_feed_env(plugin, **{f"{plugin.upper()}_IP_URLS": url}), get=Mock(return_value=_response(body, content_type=content_type)))
     _assert_file(job, "IP.list", b"203.0.113.9\n", "app.example")
     _assert_file(job, filename, previous)
+    with session(job.db) as s:
+        row = s.query(Jobs_cache).filter_by(job_name=job.job_name, file_name=filename).one()
+        assert row.last_update.replace(tzinfo=timezone.utc) == FIXED_DT
+    assert status == 2
+    assert any(record.levelno == logging.WARNING and f"No valid IP entry found in {url}" in record.getMessage() for record in caplog.records)
+
+
+@pytest.mark.parametrize("plugin", LIST_PLUGINS)
+@pytest.mark.parametrize("failure", ["empty", "invalid", "http", "connection"])
+def test_mixed_feed_refresh_keeps_failed_urls_last_good_entries(runtime, plugin, failure):
+    job, run = runtime(f"{plugin}/jobs/{plugin}-download.py")
+    good_url, failed_url = "https://feeds.invalid/good", "https://feeds.invalid/failed"
+    good_file = hashlib.sha1(good_url.encode()).hexdigest() + ".list"
+    failed_file = hashlib.sha1(failed_url.encode()).hexdigest() + ".list"
+    previous = b"# Downloaded from https://feeds.invalid/failed\n203.0.113.9\n"
+    assert job.cache_file(failed_file, previous)[0]
+    assert job.cache_file(good_file, b"# Downloaded from https://feeds.invalid/good\n203.0.113.7\n")[0]
+    assert job.cache_file("IP.list", b"203.0.113.7\n203.0.113.9\n", service_id="app.example")[0]
+    with session(job.db) as s:
+        s.query(Jobs_cache).filter_by(job_name=job.job_name, service_id=None).update({"last_update": FIXED_DT})
+
+    def download(url, **kwargs):
+        assert url in (good_url, failed_url)
+        if url == good_url:
+            return _response(b"203.0.113.8\n")
+        if failure == "connection":
+            raise requests.ConnectionError("offline")
+        return _response(b"not-an-ip\n" if failure == "invalid" else b"", status=503 if failure == "http" else 200)
+
+    _, status = run(env=_feed_env(plugin, **{f"{plugin.upper()}_IP_URLS": f"{good_url} {failed_url}"}), get=download)
+
+    _assert_file(job, "IP.list", b"203.0.113.8\n203.0.113.9\n", "app.example")
+    _assert_file(job, good_file, b"# Downloaded from https://feeds.invalid/good\n203.0.113.8\n")
+    _assert_file(job, failed_file, previous)
+    with session(job.db) as s:
+        row = s.query(Jobs_cache).filter_by(job_name=job.job_name, file_name=failed_file).one()
+        assert row.last_update.replace(tzinfo=timezone.utc) == FIXED_DT
+    assert status == 2
