@@ -498,14 +498,14 @@ def test_renewal_ignores_missing_and_unreadable_live_material(job_run):
 def test_zerossl_hash_file_roundtrip_and_invalid_data(job_run):
     job_run.env["AUTO_LETS_ENCRYPT"] = "no"
     module, _ = job_run.load()
-    assert module.load_zerossl_api_key_hashes() == {}
-    module.save_zerossl_api_key_hashes({"b.example.com": "b", "a.example.com": "a"})
+    assert module.load_hashes(module.ZEROSSL_API_KEY_HASHES_PATH) == {}
+    module.save_hashes(module.ZEROSSL_API_KEY_HASHES_PATH, {"b.example.com": "b", "a.example.com": "a"})
     assert json.loads(module.ZEROSSL_API_KEY_HASHES_PATH.read_text()) == {"a.example.com": "a", "b.example.com": "b"}
-    assert module.load_zerossl_api_key_hashes() == {"a.example.com": "a", "b.example.com": "b"}
+    assert module.load_hashes(module.ZEROSSL_API_KEY_HASHES_PATH) == {"a.example.com": "a", "b.example.com": "b"}
     for body in ("[1,2]", "not json"):
         module.ZEROSSL_API_KEY_HASHES_PATH.write_text(body)
-        assert module.load_zerossl_api_key_hashes() == {}
-    module.save_zerossl_api_key_hashes({})
+        assert module.load_hashes(module.ZEROSSL_API_KEY_HASHES_PATH) == {}
+    module.save_hashes(module.ZEROSSL_API_KEY_HASHES_PATH, {})
     assert not module.ZEROSSL_API_KEY_HASHES_PATH.exists()
 
 
@@ -592,6 +592,82 @@ def test_dns_credential_change_and_zerossl_key_rotation_force_renewal(job_run):
     assert any("ZeroSSL API key changed" in reason for reason in reasons)
     assert any("DNS credentials have changed" in reason for reason in reasons)
     assert not expand
+
+
+ROUTE53_CREDENTIALS = {
+    "LETS_ENCRYPT_CHALLENGE": "dns",
+    "LETS_ENCRYPT_DNS_PROVIDER": "route53",
+    "LETS_ENCRYPT_DNS_CREDENTIAL_ITEM": "aws_access_key_id test-key",
+    "LETS_ENCRYPT_DNS_CREDENTIAL_ITEM_1": "aws_secret_access_key test-secret",
+}
+
+
+def route53_certificate(job_run):
+    """A live route53 certificate: certbot-dns-route53 leaves no credentials line in its renewal conf."""
+    job_run.env.update(ROUTE53_CREDENTIALS)
+    live_cert(job_run)
+    renewal_conf(job_run, pref_challs="dns-01,", authenticator="dns-route53")
+    job_run.listing.stdout = "Certificate Name: app.example.com\n  Domains: app.example.com\n"
+
+
+def issued_commands(job_run):
+    return [call.args[0][1] for call in job_run.popen.call_args_list]
+
+
+def test_route53_certificate_survives_restarts_and_rotation_forces_renewal(job_run):
+    job_run.env.update(ROUTE53_CREDENTIALS)
+    job_run.rotate = True
+    job_run.load()
+    assert issued_commands(job_run) == ["certonly"]
+
+    route53_certificate(job_run)
+    job_run.popen.reset_mock()
+    job_run.load()
+    assert issued_commands(job_run) == []
+
+    job_run.env["LETS_ENCRYPT_DNS_CREDENTIAL_ITEM_1"] = "aws_secret_access_key rotated-secret"
+    job_run.load()
+    assert issued_commands(job_run) == ["delete", "certonly"]
+    assert any("DNS credentials have changed" in call.args[0] for call in job_run.log.warning.call_args_list)
+
+
+def test_route53_certificate_without_a_recorded_hash_is_kept(job_run):
+    route53_certificate(job_run)
+    module, _ = job_run.load()
+    assert issued_commands(job_run) == []
+    assert list(json.loads(module.ROUTE53_CREDENTIALS_HASHES_PATH.read_text())) == ["app.example.com"]
+
+
+def test_failed_route53_renewal_keeps_retrying_rotated_credentials(job_run):
+    route53_certificate(job_run)
+    job_run.load()
+    job_run.env["LETS_ENCRYPT_DNS_CREDENTIAL_ITEM_1"] = "aws_secret_access_key rotated-secret"
+    job_run.returncode = 1
+    job_run.load()
+    job_run.returncode = 0
+    job_run.popen.reset_mock()
+    job_run.load()
+    assert issued_commands(job_run) == ["delete", "certonly"]
+
+
+def test_route53_move_to_a_sibling_services_credentials_forces_renewal(job_run):
+    job_run.env.update(MULTISITE="yes", SERVER_NAME="app.example.com other.example.com")
+    for service, secret in (("app.example.com", "app-secret"), ("other.example.com", "other-secret")):
+        job_run.env.update({f"{service}_SERVER_NAME": service, f"{service}_AUTO_LETS_ENCRYPT": "yes", f"{service}_EMAIL_LETS_ENCRYPT": "ops@example.com"})
+        job_run.env.update({f"{service}_{key}": value for key, value in ROUTE53_CREDENTIALS.items()})
+        job_run.env[f"{service}_LETS_ENCRYPT_DNS_CREDENTIAL_ITEM_1"] = f"aws_secret_access_key {secret}"
+        live_cert(job_run, service)
+        renewal_conf(job_run, service, pref_challs="dns-01,", authenticator="dns-route53")
+    job_run.listing.stdout = (
+        "Certificate Name: app.example.com\n  Domains: app.example.com\nCertificate Name: other.example.com\n  Domains: other.example.com\n"
+    )
+    job_run.load()
+    assert issued_commands(job_run) == []
+
+    job_run.env["other.example.com_LETS_ENCRYPT_DNS_CREDENTIAL_ITEM_1"] = "aws_secret_access_key app-secret"
+    job_run.load()
+    assert issued_commands(job_run) == ["delete", "certonly"]
+    assert all("other.example.com" in call.args[0] for call in job_run.popen.call_args_list)
 
 
 def test_old_certificate_cleanup_falls_back_to_lineage_purge(job_run, monkeypatch):
@@ -839,7 +915,7 @@ def test_staging_debug_issuance_uses_scoped_account_and_verbose_flags(job_run, m
 def test_zerossl_hash_write_error_preserves_previous_hash(job_run, monkeypatch):
     job_run.env["AUTO_LETS_ENCRYPT"] = "no"
     module, _ = job_run.load()
-    module.save_zerossl_api_key_hashes({"app.example.com": "hash"})
+    module.save_hashes(module.ZEROSSL_API_KEY_HASHES_PATH, {"app.example.com": "hash"})
     original = Path.write_text
 
     def write(path, *args, **kwargs):
@@ -848,8 +924,8 @@ def test_zerossl_hash_write_error_preserves_previous_hash(job_run, monkeypatch):
         return original(path, *args, **kwargs)
 
     monkeypatch.setattr(Path, "write_text", write)
-    module.save_zerossl_api_key_hashes({"app.example.com": "new-hash"})
-    assert module.load_zerossl_api_key_hashes() == {"app.example.com": "hash"}
+    module.save_hashes(module.ZEROSSL_API_KEY_HASHES_PATH, {"app.example.com": "new-hash"})
+    assert module.load_hashes(module.ZEROSSL_API_KEY_HASHES_PATH) == {"app.example.com": "hash"}
     assert "read-only" in job_run.log.warning.call_args.args[0]
 
 

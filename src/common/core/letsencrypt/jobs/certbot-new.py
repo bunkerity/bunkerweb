@@ -70,6 +70,7 @@ LOGGER_CERTBOT = getLogger("LETS-ENCRYPT.NEW.CERTBOT")
 attach_job_log_file(LOGGER, "certbot-new.log", LOGS_DIR)
 
 ZEROSSL_API_KEY_HASHES_PATH = DATA_PATH.joinpath("renewal", ".bw-zerossl-api-key-hashes.json")
+ROUTE53_CREDENTIALS_HASHES_PATH = DATA_PATH.joinpath("renewal", ".bw-route53-credentials-hashes.json")
 MERGE_LOCK = Lock()
 RUNNING_LOCK = Lock()
 RUNNING_CERTBOT = 0
@@ -274,29 +275,52 @@ def normalize_server_url(url: str) -> str:
     return url.strip().rstrip("/")
 
 
-def load_zerossl_api_key_hashes() -> Dict[str, str]:
-    if not ZEROSSL_API_KEY_HASHES_PATH.is_file():
+def load_hashes(path: Path) -> Dict[str, str]:
+    if not path.is_file():
         return {}
 
     try:
-        data = loads(ZEROSSL_API_KEY_HASHES_PATH.read_text())
+        data = loads(path.read_text())
         if not isinstance(data, dict):
             return {}
         return {str(key): str(value) for key, value in data.items()}
     except BaseException as e:
-        LOGGER.warning(f"Failed to read ZeroSSL API key hash file {ZEROSSL_API_KEY_HASHES_PATH}: {e}")
+        LOGGER.warning(f"Failed to read hash file {path}: {e}")
         return {}
 
 
-def save_zerossl_api_key_hashes(hashes: Dict[str, str]) -> None:
+def save_hashes(path: Path, hashes: Dict[str, str]) -> None:
     try:
-        ZEROSSL_API_KEY_HASHES_PATH.parent.mkdir(parents=True, exist_ok=True)
+        path.parent.mkdir(parents=True, exist_ok=True)
         if not hashes:
-            ZEROSSL_API_KEY_HASHES_PATH.unlink(missing_ok=True)
+            path.unlink(missing_ok=True)
             return
-        ZEROSSL_API_KEY_HASHES_PATH.write_text(dumps(hashes, sort_keys=True))
+        path.write_text(dumps(hashes, sort_keys=True))
     except BaseException as e:
-        LOGGER.warning(f"Failed to persist ZeroSSL API key hashes to {ZEROSSL_API_KEY_HASHES_PATH}: {e}")
+        LOGGER.warning(f"Failed to persist hashes to {path}: {e}")
+
+
+def updated_hashes(
+    stored: Dict[str, str],
+    configured: Dict[str, str],
+    services: Dict[str, Dict[str, Union[str, bool, int, Dict[str, str]]]],
+    existing_certificates: Dict[str, Dict[str, Union[str, bool, Set[str]]]],
+    listing_ok: bool,
+) -> Dict[str, str]:
+    """Return the per-service hashes to persist, given the ones stored and the ones currently configured."""
+    updated = {key: value for key, value in stored.items() if key in services}
+    for service, config in services.items():
+        if service not in configured:
+            updated.pop(service, None)
+        # Only trust "exists" when the listing parsed: the on-disk fallback never got to
+        # compare the hash, so recording it here would swallow a rotation for good.
+        elif config.get("exists") and listing_ok:
+            updated[service] = configured[service]
+        # If generation failed but an old certificate is still active, keep the previous hash
+        # so the renewal attempt will be retried on the next run.
+        elif not existing_certificates.get(service, {}).get("active"):
+            updated.pop(service, None)
+    return updated
 
 
 status = 0
@@ -1148,7 +1172,8 @@ try:
 
         LOGGER_CERTBOT.debug(f"Existing certificates: {existing_certificates}")
 
-    zerossl_api_key_hashes = load_zerossl_api_key_hashes()
+    zerossl_api_key_hashes = load_hashes(ZEROSSL_API_KEY_HASHES_PATH)
+    route53_credentials_hashes = load_hashes(ROUTE53_CREDENTIALS_HASHES_PATH)
     LOGGER_CERTBOT.debug(f"Stored ZeroSSL API key hashes: {list(zerossl_api_key_hashes.keys())}")
 
     # ? Check if the services' certificates already exist
@@ -1174,6 +1199,12 @@ try:
                 config["misconfigured"] = True
                 config["activated"] = False
                 continue
+
+        # route53 credentials reach certbot through AWS_CONFIG_FILE, so the renewal conf has no credentials line to
+        # read back. Compare against the hash recorded for the service; a certificate with none yet adopts the current one.
+        if config["challenge"] == "dns" and config["authenticator"] == "route53":
+            credentials_hash = bytes_hash(config["provider"].get_formatted_credentials(), algorithm="sha256")
+            existing_cert["credentials_hash"] = route53_credentials_hashes.get(server_name, credentials_hash)
 
         reasons, expand_names = certificate_changes(server_name, config, existing_cert, zerossl_api_key_hashes)
         for reason in reasons:
@@ -1326,26 +1357,21 @@ try:
                     else:
                         LOGGER.info(f"Certificate for {service} deleted successfully.")
 
-        # * Persist ZeroSSL API key hash tracking (for change-triggered renewals)
-        updated_zerossl_api_key_hashes = {key: value for key, value in zerossl_api_key_hashes.items() if key in services}
-        for service, config in services.items():
-            if config.get("acme_server") != "zerossl":
-                updated_zerossl_api_key_hashes.pop(service, None)
-                continue
+        # * Persist the ZeroSSL API key and route53 credentials hash tracking (for change-triggered renewals)
+        configured_api_key_hashes = {
+            service: str(config.get("zerossl_api_key_hash") or "") for service, config in services.items() if config.get("acme_server") == "zerossl"
+        }
+        save_hashes(ZEROSSL_API_KEY_HASHES_PATH, updated_hashes(zerossl_api_key_hashes, configured_api_key_hashes, services, existing_certificates, listing_ok))
 
-            configured_hash = str(config.get("zerossl_api_key_hash") or "")
-            # Only trust "exists" when the listing parsed: the on-disk fallback never got to
-            # compare the API key, so recording it here would swallow a rotation for good.
-            if config.get("exists") and listing_ok:
-                updated_zerossl_api_key_hashes[service] = configured_hash
-                continue
-
-            # If generation failed but an old certificate is still active, keep previous hash
-            # so the renewal attempt will be retried on the next run.
-            if not existing_certificates.get(service, {}).get("active"):
-                updated_zerossl_api_key_hashes.pop(service, None)
-
-        save_zerossl_api_key_hashes(updated_zerossl_api_key_hashes)
+        configured_credentials_hashes = {
+            service: bytes_hash(config["provider"].get_formatted_credentials(), algorithm="sha256")
+            for service, config in services.items()
+            if config.get("challenge") == "dns" and config.get("authenticator") == "route53" and config.get("provider")
+        }
+        save_hashes(
+            ROUTE53_CREDENTIALS_HASHES_PATH,
+            updated_hashes(route53_credentials_hashes, configured_credentials_hashes, services, existing_certificates, listing_ok),
+        )
 
         # * Save data to db cache
         # Guards: only re-cache if the initial restore succeeded AND we actually have
