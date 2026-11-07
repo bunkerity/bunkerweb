@@ -68,7 +68,7 @@ package.loaded["crowdsec.lib.config"] = {
 }
 
 -- One fresh bouncer per require, like the real module: its behaviour is looked up by the file it was initialised with.
-BOUNCERS, ALLOW_CALLS, INIT_ERR, ALLOW, HEALTH, CONN_INFO, CONTROL = {}, {}, {}, {}, {}, {}, {}
+BOUNCERS, ALLOW_CALLS, SETUP_STREAM_CALLS, INIT_ERR, ALLOW, HEALTH, CONN_INFO, CONTROL = {}, {}, {}, {}, {}, {}, {}, {}
 package.preload["crowdsec.lib.bouncer"] = function()
     if BOUNCER_LOAD_ERR then error(BOUNCER_LOAD_ERR) end
     local b = {}
@@ -80,6 +80,13 @@ package.preload["crowdsec.lib.bouncer"] = function()
         if handle then handle:close() end
         if INIT_ERR[file] then return false, INIT_ERR[file] end
         return true
+    end
+    function b.SetupStream()
+        SETUP_STREAM_CALLS[#SETUP_STREAM_CALLS + 1] = { file = b.file }
+        if SETUP_STREAM_ERR and SETUP_STREAM_ERR[b.file] then
+            return true, nil, SETUP_STREAM_ERR[b.file]
+        end
+        return nil
     end
     function b.ConnectionInfo()
         local info = {}
@@ -514,3 +521,45 @@ class TestApiControl:
     def test_an_unknown_operation_is_not_handled(self, tmp_path):
         out = control(tmp_path, "shutdown", flat({"connection": conn_id()}))
         assert (out["ret"], out["control_calls"]) == (False, 0)
+
+
+INIT_WORKERS = """
+PHASE = "init_workers"
+IS_REQUEST = false
+local result = new_plugin(PLUGIN, {}):init_workers()
+emit({ ret = result.ret, msg = result.msg, setup_stream_calls = SETUP_STREAM_CALLS, logs = LOGS })
+"""
+
+
+def init_workers(tmp_path, *, confs=None, multisite="no", setup="", boot_enabled=True):
+    return run(tmp_path, INIT_WORKERS, confs=confs, multisite=multisite, setup=setup, boot_enabled=boot_enabled)
+
+
+class TestInitWorkers:
+    def test_init_workers_disabled_when_not_needed(self, tmp_path):
+        out = init_workers(tmp_path, boot_enabled=False)
+        assert (out["ret"], out["msg"], out["setup_stream_calls"]) == (True, "init_workers not needed", {})
+
+    def test_init_workers_launches_setup_stream_for_bouncers(self, tmp_path):
+        out = init_workers(tmp_path)
+        assert (out["ret"], out["msg"]) == (True, "1 CrowdSec bouncer stream poller(s) initialized")
+        assert len(out["setup_stream_calls"]) == 1
+
+    def test_init_workers_deduplicates_shared_bouncers(self, tmp_path):
+        # Two services sharing the exact same config share a bouncer instance
+        confs = {
+            "svc1": conf("http://lapi:8080"),
+            "svc2": conf("http://lapi:8080"),
+        }
+        out = init_workers(tmp_path, confs=confs, multisite="yes")
+        assert (out["ret"], out["msg"]) == (True, "1 CrowdSec bouncer stream poller(s) initialized")
+        assert len(out["setup_stream_calls"]) == 1
+
+    def test_init_workers_launches_distinct_bouncers_for_distinct_apis(self, tmp_path):
+        confs = {
+            "svc1": conf("http://lapi1:8080"),
+            "svc2": conf("http://lapi2:8080"),
+        }
+        out = init_workers(tmp_path, confs=confs, multisite="yes")
+        assert (out["ret"], out["msg"]) == (True, "2 CrowdSec bouncer stream poller(s) initialized")
+        assert len(out["setup_stream_calls"]) == 2
