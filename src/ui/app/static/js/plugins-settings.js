@@ -1437,8 +1437,8 @@ $(document).ready(() => {
         : savedGlobalDrafts.has(key)
     )
       return false;
-    // Activating a saved draft: until now the default applied, not the draft's value.
-    if (savedGlobalDrafts.has(key)) {
+    // RAW mode activating a saved draft: until now the default applied, not the draft's value.
+    if (currentMode === "raw" && savedGlobalDrafts.has(key)) {
       const defaults = parseRawSettings(
         $("#raw-config-defaults").val(),
         makeRawKeyPredicates(),
