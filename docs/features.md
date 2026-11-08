@@ -3346,6 +3346,7 @@ The HTML Injection plugin enables you to seamlessly add custom HTML code to your
 3. If you've configured head injection, BunkerWeb inserts your custom HTML code just before the closing `</head>` tag.
 4. The insertion happens automatically for all HTML pages served by your website.
 5. This allows you to add scripts, styles, or other elements without modifying your application's code.
+6. The antibot challenge page is left untouched: BunkerWeb generates it, and its Content Security Policy would block the injected code anyway.
 
 ### How to Use
 

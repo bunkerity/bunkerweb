@@ -3278,6 +3278,7 @@ Das HTML-Injection-Plugin ermöglicht es Ihnen, nahtlos benutzerdefinierten HTML
 3.  Wenn Sie die Head-Injection konfiguriert haben, fügt BunkerWeb Ihren benutzerdefinierten HTML-Code direkt vor dem schließenden `</head>`-Tag ein.
 4.  Das Einfügen erfolgt automatisch für alle HTML-Seiten, die von Ihrer Website ausgeliefert werden.
 5.  Dies ermöglicht es Ihnen, Skripte, Stile oder andere Elemente hinzuzufügen, ohne den Code Ihrer Anwendung ändern zu müssen.
+6.  Die Antibot-Challenge-Seite bleibt unverändert: Sie wird von BunkerWeb erzeugt, und ihre Content Security Policy würde den eingefügten Code ohnehin blockieren.
 
 ### Wie man es benutzt
 

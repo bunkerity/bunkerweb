@@ -7,6 +7,7 @@ El complemento de Inyección de HTML le permite agregar sin problemas código HT
 3.  Si ha configurado la inyección en la cabecera (head), BunkerWeb inserta su código HTML personalizado justo antes de la etiqueta de cierre `</head>`.
 4.  La inserción se realiza automáticamente para todas las páginas HTML servidas por su sitio web.
 5.  Esto le permite agregar scripts, estilos u otros elementos sin modificar el código de su aplicación.
+6.  La página de desafío antibot no se modifica: la genera BunkerWeb y su Content Security Policy bloquearía de todos modos el código inyectado.
 
 ### Cómo usar
 
