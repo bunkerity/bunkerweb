@@ -1431,6 +1431,8 @@ $(document).ready(() => {
     const $setting = form.find(`[name='${key}']`);
     if (!$setting.length || $setting.val() !== "yes") return false;
     // A draft keeps its value without applying it, so saving one changes nothing.
+    // savedGlobalDrafts is the page-load snapshot of the saved drafts, rawDraftSettings
+    // the live set the RAW editor updates (both start from #raw-draft-settings).
     if (
       currentMode === "raw"
         ? rawDraftSettings.has(key)

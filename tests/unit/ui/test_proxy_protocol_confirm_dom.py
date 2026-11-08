@@ -2,6 +2,9 @@
 
 PROXY protocol makes NGINX refuse every connection without a PROXY header, the web UI included,
 so the real save handler must stop on the confirmation modal and only submit once it is confirmed.
+
+The modal double fires ``shown.bs.modal`` synchronously: the fade-in case checks that a confirm
+click before that event is ignored, not real Bootstrap transition timing in a browser.
 """
 
 import pytest
