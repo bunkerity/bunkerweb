@@ -38,6 +38,10 @@ actions:
     headers:
       Content-Type: "application/x-www-form-urlencoded"
     not_string: "BunkerWeb Forever!"
+    config:
+      USE_ANTIBOT: "captcha"
+      INJECT_HEAD: "BunkerWeb Forever!"
+      INJECT_BODY: "BunkerWeb Forever!"
 
 config:
   REMOTE_PHP: "php-fpm"
