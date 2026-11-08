@@ -1427,9 +1427,25 @@ $(document).ready(() => {
   // PROXY protocol makes NGINX refuse every connection that does not start with a
   // PROXY header, the web UI included when nothing in front of BunkerWeb sends one.
   const enablesProxyProtocol = (form) => {
-    const $setting = form.find("[name='USE_PROXY_PROTOCOL']");
+    const key = "USE_PROXY_PROTOCOL";
+    const $setting = form.find(`[name='${key}']`);
     if (!$setting.length || $setting.val() !== "yes") return false;
-    return getOriginalGlobalValues().get("USE_PROXY_PROTOCOL") !== "yes";
+    // A draft keeps its value without applying it, so saving one changes nothing.
+    if (
+      currentMode === "raw"
+        ? rawDraftSettings.has(key)
+        : savedGlobalDrafts.has(key)
+    )
+      return false;
+    // Activating a saved draft: until now the default applied, not the draft's value.
+    if (savedGlobalDrafts.has(key)) {
+      const defaults = parseRawSettings(
+        $("#raw-config-defaults").val(),
+        makeRawKeyPredicates(),
+      );
+      return defaults.find((entry) => entry.key === key)?.value !== "yes";
+    }
+    return getOriginalGlobalValues().get(key) !== "yes";
   };
 
   const confirmWithModal = (modalSelector, confirmSelector, $trigger) =>
@@ -1437,12 +1453,19 @@ $(document).ready(() => {
       const $modal = $(modalSelector).appendTo("body");
       const $confirm = $modal.find(confirmSelector);
       let confirmed = false;
-      $confirm.one("click", () => {
+      let shown = false;
+      $modal.one("shown.bs.modal", () => {
+        shown = true;
+      });
+      $confirm.on("click.confirm-modal", () => {
+        // Bootstrap ignores hide() during the fade-in: a click then would leave the
+        // modal open with the save already accepted, whatever the user does next.
+        if (!shown) return;
         confirmed = true;
         $modal.modal("hide");
       });
       $modal.one("hidden.bs.modal", () => {
-        $confirm.off("click");
+        $confirm.off("click.confirm-modal");
         $trigger.trigger("focus");
         resolve(confirmed);
       });
