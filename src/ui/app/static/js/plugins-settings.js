@@ -1392,16 +1392,20 @@ $(document).ready(() => {
     return form;
   };
 
+  // Saved global values the form is compared against: the RAW config in raw mode,
+  // the advanced inputs' data-original otherwise.
+  const getOriginalGlobalValues = (predicates = makeRawKeyPredicates()) =>
+    currentMode === "raw"
+      ? new Map(
+          parseRawSettings($("#raw-entire-config").val(), predicates).map(
+            ({ key, value }) => [key, value],
+          ),
+        )
+      : originalGlobalValues;
+
   const hasChangedGlobalSettings = (form) => {
     const predicates = makeRawKeyPredicates();
-    const originals =
-      currentMode === "raw"
-        ? new Map(
-            parseRawSettings($("#raw-entire-config").val(), predicates).map(
-              ({ key, value }) => [key, value],
-            ),
-          )
-        : originalGlobalValues;
+    const originals = getOriginalGlobalValues(predicates);
 
     return form
       .find("input, textarea")
@@ -1420,10 +1424,18 @@ $(document).ready(() => {
       });
   };
 
-  const confirmGlobalOverride = ($trigger) =>
+  // PROXY protocol makes NGINX refuse every connection that does not start with a
+  // PROXY header, the web UI included when nothing in front of BunkerWeb sends one.
+  const enablesProxyProtocol = (form) => {
+    const $setting = form.find("[name='USE_PROXY_PROTOCOL']");
+    if (!$setting.length || $setting.val() !== "yes") return false;
+    return getOriginalGlobalValues().get("USE_PROXY_PROTOCOL") !== "yes";
+  };
+
+  const confirmWithModal = (modalSelector, confirmSelector, $trigger) =>
     new Promise((resolve) => {
-      const $modal = $("#modal-apply-all-services").appendTo("body");
-      const $confirm = $modal.find("#confirm-apply-all-services");
+      const $modal = $(modalSelector).appendTo("body");
+      const $confirm = $modal.find(confirmSelector);
       let confirmed = false;
       $confirm.one("click", () => {
         confirmed = true;
@@ -2299,9 +2311,24 @@ $(document).ready(() => {
     }
 
     if (
+      $("#modal-confirm-proxy-protocol").length &&
+      enablesProxyProtocol(form) &&
+      !(await confirmWithModal(
+        "#modal-confirm-proxy-protocol",
+        "#confirm-enable-proxy-protocol",
+        $(this),
+      ))
+    )
+      return;
+
+    if (
       isOverrideNonGlobalEnabled() &&
       hasChangedGlobalSettings(form) &&
-      !(await confirmGlobalOverride($(this)))
+      !(await confirmWithModal(
+        "#modal-apply-all-services",
+        "#confirm-apply-all-services",
+        $(this),
+      ))
     )
       return;
 
