@@ -17,12 +17,15 @@ Jq.prototype.one = function (event, fn) { this.els.forEach((e) => { (once[e.attr
 Jq.prototype.off = function () { return this; };
 Jq.prototype.trigger = function () { return this; };
 Jq.prototype.has = function () { return wrap(new Jq()); };
+// hasChangedGlobalSettings() reads the posted fields as { name, value } pairs
+Jq.prototype.toArray = function () { return this.els.map((e) => ({ name: e.attrs.name, value: e.value })); };
 Jq.prototype.modal = function (action) {
   const id = this.els[0].attrs.id;
   if (action !== "show") return this;
   modals.push(id);
   const confirmId = { "modal-confirm-proxy-protocol": "confirm-enable-proxy-protocol", "modal-apply-all-services": "confirm-apply-all-services" }[id];
-  if (scenario.confirm && once[confirmId]?.click) once[confirmId].click();
+  const confirm = typeof scenario.confirm === "object" ? scenario.confirm[id] : scenario.confirm;
+  if (confirm && once[confirmId]?.click) once[confirmId].click();
   once[id]["hidden.bs.modal"]();
   return this;
 };
@@ -39,12 +42,12 @@ modalFinds("modal-apply-all-services", "confirm-apply-all-services");
 
 registry["#selected-mode"] = [el({ value: scenario.mode })];
 registry["#csrf_token"] = [el({ value: "csrf-proof" })];
-registry["#override-non-global-settings"] = [el({ value: "no" })];
+registry["#override-non-global-settings"] = [el({ value: scenario.override ? "yes" : "no" })];
+registry["#raw-known-keys"] = [el({ value: JSON.stringify({ keys: ["USE_PROXY_PROTOCOL", "USE_GZIP"], multiple: [], multiline: [] }) })];
 
 if (scenario.mode === "raw") {
   registry["#raw-config"] = [el({ value: scenario.raw })];
   registry["#raw-entire-config"] = [el({ value: scenario.saved_raw })];
-  registry["#raw-known-keys"] = [el({ value: JSON.stringify({ keys: ["USE_PROXY_PROTOCOL", "USE_GZIP"], multiple: [], multiline: [] }) })];
 } else {
   const box = el({ name: "USE_PROXY_PROTOCOL", attrs: { type: "checkbox", name: "USE_PROXY_PROTOCOL", "data-original": scenario.saved, "data-method": "ui" }, props: { checked: scenario.value === "yes" } });
   registry["#navs-modes-advanced .plugin-setting[data-original]"] = [box];
@@ -63,7 +66,7 @@ process.exit(0);
 
 
 def save(tmp_path, **scenario):
-    scenario = {"mode": "advanced", "modal": True, "confirm": False, **scenario}
+    scenario = {"mode": "advanced", "modal": True, "confirm": False, "override": False, **scenario}
     return run_dom(tmp_path, DRIVER, scenario)
 
 
@@ -85,6 +88,28 @@ def test_no_confirmation_unless_proxy_protocol_is_being_turned_on(tmp_path, save
     out = save(tmp_path, saved=saved, value=value)
     assert out["modals"] == []
     assert out["submitted"] is True
+
+
+PROXY_MODAL, OVERRIDE_MODAL = "modal-confirm-proxy-protocol", "modal-apply-all-services"
+
+
+def test_cancelling_the_apply_to_all_services_prompt_after_confirming_proxy_protocol_saves_nothing(tmp_path):
+    out = save(tmp_path, saved="no", value="yes", override=True, confirm={PROXY_MODAL: True, OVERRIDE_MODAL: False})
+    assert out["modals"] == [PROXY_MODAL, OVERRIDE_MODAL]
+    assert out["submitted"] is False
+
+
+def test_confirming_both_prompts_saves(tmp_path):
+    out = save(tmp_path, saved="no", value="yes", override=True, confirm={PROXY_MODAL: True, OVERRIDE_MODAL: True})
+    assert out["modals"] == [PROXY_MODAL, OVERRIDE_MODAL]
+    assert out["submitted"] is True
+    assert dict(out["fields"])["USE_PROXY_PROTOCOL"] == "yes"
+
+
+def test_cancelling_proxy_protocol_never_reaches_the_apply_to_all_services_prompt(tmp_path):
+    out = save(tmp_path, saved="no", value="yes", override=True, confirm={PROXY_MODAL: False, OVERRIDE_MODAL: True})
+    assert out["modals"] == [PROXY_MODAL]
+    assert out["submitted"] is False
 
 
 def test_pages_without_the_modal_save_as_before(tmp_path):
