@@ -175,6 +175,7 @@ RUN apk add --no-cache bash coreutils curl geoip grep libgcc libgd libmagic libp
 
 # Fix CVEs
 RUN apk add --no-cache "libexpat>=2.10.0-r0" # CVE-2026-117610, CVE-2026-118370, CVE-2026-113351, CVE-2026-115506
+RUN apk add --no-cache "zlib>=1.4-r0" # CVE-2026-4738
 
 COPY src/deps/requirements.txt /tmp/requirements-deps.txt
 
