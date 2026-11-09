@@ -26,9 +26,7 @@ def defines(method: str) -> bool:
 
 def test_crowdsec_stream_poller_runs_per_worker_not_once_per_instance():
     assert defines("init_workers"), "crowdsec must define init_workers() -- the ungated, per-worker hook"
-    assert not defines(
-        "init_worker"
-    ), "crowdsec:init_worker() is gated on misc_ready and runs once per instance; per-worker timers cannot be initialised there"
+    assert not defines("init_worker"), "crowdsec:init_worker() is gated on misc_ready and runs once per instance; per-worker timers cannot be initialised there"
 
 
 def test_order_json_does_not_name_crowdsec_for_init_workers():

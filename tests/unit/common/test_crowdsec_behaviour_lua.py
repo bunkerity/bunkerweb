@@ -536,13 +536,29 @@ def init_workers(tmp_path, *, confs=None, multisite="no", setup="", boot_enabled
 
 
 class TestInitWorkers:
+    @pytest.mark.parametrize("failed_service", ["svc1", "svc2"])
+    def test_init_workers_reports_timer_failure_and_sets_up_other_bouncers(self, tmp_path, failed_service):
+        confs = {"svc1": conf("http://lapi1:8080"), "svc2": conf("http://lapi2:8080")}
+        failed_file = CACHE + failed_service + "/crowdsec.conf"
+        error = "Failed to create the timer: no memory"
+        out = init_workers(
+            tmp_path,
+            confs=confs,
+            multisite="yes",
+            setup=f"SETUP_STREAM_ERR = {{ [{to_lua(failed_file)}] = {to_lua(error)} }}",
+        )
+        assert out["ret"] is False
+        assert error in out["msg"]
+        assert ["ERR", "error while setting up CrowdSec stream poller : " + error] in out["logs"]
+        assert sorted(call["file"] for call in out["setup_stream_calls"]) == [CACHE + service + "/crowdsec.conf" for service in confs]
+
     def test_init_workers_disabled_when_not_needed(self, tmp_path):
         out = init_workers(tmp_path, boot_enabled=False)
         assert (out["ret"], out["msg"], out["setup_stream_calls"]) == (True, "init_workers not needed", {})
 
     def test_init_workers_launches_setup_stream_for_bouncers(self, tmp_path):
         out = init_workers(tmp_path)
-        assert (out["ret"], out["msg"]) == (True, "1 CrowdSec bouncer stream poller(s) initialized")
+        assert (out["ret"], out["msg"]) == (True, "1 CrowdSec bouncer stream setup call(s) completed")
         assert len(out["setup_stream_calls"]) == 1
 
     def test_init_workers_deduplicates_shared_bouncers(self, tmp_path):
@@ -552,7 +568,7 @@ class TestInitWorkers:
             "svc2": conf("http://lapi:8080"),
         }
         out = init_workers(tmp_path, confs=confs, multisite="yes")
-        assert (out["ret"], out["msg"]) == (True, "1 CrowdSec bouncer stream poller(s) initialized")
+        assert (out["ret"], out["msg"]) == (True, "1 CrowdSec bouncer stream setup call(s) completed")
         assert len(out["setup_stream_calls"]) == 1
 
     def test_init_workers_launches_distinct_bouncers_for_distinct_apis(self, tmp_path):
@@ -561,5 +577,5 @@ class TestInitWorkers:
             "svc2": conf("http://lapi2:8080"),
         }
         out = init_workers(tmp_path, confs=confs, multisite="yes")
-        assert (out["ret"], out["msg"]) == (True, "2 CrowdSec bouncer stream poller(s) initialized")
+        assert (out["ret"], out["msg"]) == (True, "2 CrowdSec bouncer stream setup call(s) completed")
         assert len(out["setup_stream_calls"]) == 2

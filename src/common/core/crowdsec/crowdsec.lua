@@ -280,7 +280,8 @@ function crowdsec:init_workers()
 		return self:ret(true, "init_workers not needed")
 	end
 
-	local launched = 0
+	local completed = 0
+	local failed = {}
 	local seen = {}
 	for _, bouncer in pairs(bouncers) do
 		if not seen[bouncer] then
@@ -289,14 +290,18 @@ function crowdsec:init_workers()
 				local ok, _, err = bouncer.SetupStream()
 				if ok == true and err then
 					self.logger:log(ERR, "error while setting up CrowdSec stream poller : " .. tostring(err))
+					insert(failed, tostring(err))
 				else
-					launched = launched + 1
+					completed = completed + 1
 				end
 			end
 		end
 	end
 
-	return self:ret(true, launched .. " CrowdSec bouncer stream poller(s) initialized")
+	if #failed > 0 then
+		return self:ret(false, "error while setting up CrowdSec stream poller(s) : " .. concat(failed, "; "))
+	end
+	return self:ret(true, completed .. " CrowdSec bouncer stream setup call(s) completed")
 end
 
 -- Whether a CrowdSec deny may become a short BunkerWeb ban. Pure, so the rules are testable on their own.
