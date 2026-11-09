@@ -1,0 +1,37 @@
+.github/workflows/unit-tests.yml
+  s_8dc69f09cbabb7::t_04b0ba7b04daaf 118
+  s_8dc69f09cbabb7::t_b6c937010cb5cb 108,115-117
+tests/unit/common/test_challenge_template_sizes.py
+  s_8dc69f09cbabb7::t_6397fd0a591a32 1-25
+tests/unit/common/test_request_work_counts_luajit.py
+  s_8dc69f09cbabb7::t_4a82e8a9c8af03 1-45,47-80,82-105,107-109,111-113,119-158,160-239,241-244,246-256
+  s_8dc69f09cbabb7::t_132d66eeef855b 46,81,159
+  s_8dc69f09cbabb7::t_34a32df891dfc4 106,110,114-118
+  s_3329783b248f99::t_707dd9f5d27795 240,245
+tests/unit/README.md
+  s_8dc69f09cbabb7::t_b6c937010cb5cb 214,218,222-223
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "4d24100be07e5d2c71f56757a513b6720e28fb05",
+  "prompts": {},
+  "sessions": {
+    "s_3329783b248f99": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1c014-14b3-7002-b11e-d026676d6661",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_8dc69f09cbabb7": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1bf60-11ea-71f1-acc8-4310051326e3",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}
