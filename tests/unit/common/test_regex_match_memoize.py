@@ -144,3 +144,26 @@ class TestMemoizationSkipsTheEngine:
             print("ok")
             """)
         assert out.strip() == "ok"
+
+
+def test_regex_error_return_distinguishes_invalid_and_memoized_patterns():
+    assert run("""
+        local match, err = utils.regex_match("x", BAD)
+        assert(match == nil and err:find("pcre_compile", 1, true))
+        local again, cached_err = utils.regex_match("y", BAD)
+        assert(again == nil and cached_err == err)
+        assert(match_calls == 2 and #log_calls == 1)
+        local good, good_err = utils.regex_match("x", "GOOD")
+        assert(good and good_err == nil)
+        print("ok")
+    """).strip() == "ok"
+
+
+def test_regex_error_return_preserves_runtime_error_without_memoizing():
+    assert run("""
+        local match, err = utils.regex_match("x", FLAKY)
+        assert(match == nil and err:find("pcre_exec", 1, true))
+        utils.regex_match("y", FLAKY)
+        assert(match_calls == 4)
+        print("ok")
+    """).strip() == "ok"

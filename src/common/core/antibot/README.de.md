@@ -40,6 +40,7 @@ BunkerWeb ermöglicht es, bestimmte Benutzer, IPs oder Anfragen anzugeben, die d
 | Parameter                     | Standard | Kontext   | Mehrfach | Beschreibung                                                                                                                                                                                                                              |
 | ----------------------------- | -------- | --------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `ANTIBOT_IGNORE_URI`          |          | Multisite | nein     | Ausgeschlossene URLs: Eine durch Leerzeichen getrennte Liste von URI-Regulären Ausdrücken, die die Herausforderung umgehen sollen. Muster werden gegen den normalisierten Pfad geprüft, allein oder gefolgt von `?` und dem Query-String. |
+| `ANTIBOT_INCLUDE_URI`          |          | Multisite | nein     | Eingeschlossene URLs: Durch Leerzeichen getrennte PCRE-Muster für die einzigen URIs mit Herausforderung. Leer bedeutet alle URIs. Geprüft wird der normalisierte Pfad, allein oder mit `?` und Query-String. `ANTIBOT_IGNORE_URI` hat Vorrang. |
 | `ANTIBOT_IGNORE_IP`           |          | Multisite | nein     | Ausgeschlossene IPs: Eine durch Leerzeichen getrennte Liste von IP-Adressen oder CIDR-Bereichen, die die Herausforderung umgehen sollen.                                                                                                  |
 | `ANTIBOT_IGNORE_RDNS`         |          | Multisite | nein     | Ausgeschlossene rDNS: Eine durch Leerzeichen getrennte Liste von Reverse-DNS-Suffixen, die die Herausforderung umgehen sollen.                                                                                                            |
 | `ANTIBOT_RDNS_GLOBAL`         | `yes`    | Multisite | nein     | Nur öffentliche IPs: Wenn `yes`, werden rDNS-Prüfungen nur für öffentliche IPs durchgeführt.                                                                                                                                              |
@@ -61,6 +62,9 @@ BunkerWeb ermöglicht es, bestimmte Benutzer, IPs oder Anfragen anzugeben, die d
     Der Antibot-Zustand (einschließlich `turnstile`, `hcaptcha`, `recaptcha`, `mcaptcha`, `captcha`, `javascript` und `cookie`) wird im BunkerWeb-[Sitzungs-Cookie](#sessions) gespeichert. Standardmäßig ist dieses Cookie auf genau den Host beschränkt, der es gesetzt hat. Das bedeutet: Wenn ein Benutzer die Herausforderung auf `a.example.com` löst, muss er sie auf `b.example.com` erneut lösen. Damit die Herausforderung einmal für alle gleichrangigen Subdomains derselben registrierbaren Domain gelöst werden kann, setzen Sie [`SESSIONS_DOMAIN`](#sessions) **für jeden relevanten Server** auf die Parent-Domain (zum Beispiel `example.com`). `SESSIONS_DOMAIN` ist eine Multisite-Einstellung – konfigurieren Sie sie pro Server, damit nicht verwandte Mandanten auf derselben BunkerWeb-Instanz niemals ein mandantenübergreifendes `Domain`-Attribut erhalten.
 
 Beispiele:
+
+- `ANTIBOT_INCLUDE_URI=^/search(/|$) ^/login(/|$)`
+  Fordert nur für `/search`, `/login` und ihre Unterpfade eine Lösung; eine leere Liste gilt für alle URIs. Muster sind nicht verankert, daher passt `^/search` allein auch auf `/searchengine`.
 
 - `ANTIBOT_IGNORE_URI: "^/api/ ^/webhook/ ^/assets/"`
   Schließt alle URIs aus, die mit `/api/`, `/webhook/` oder `/assets/` beginnen.

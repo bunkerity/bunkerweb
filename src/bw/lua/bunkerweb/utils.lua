@@ -2049,7 +2049,7 @@ utils.regex_match = function(str, regex, options, source)
 	local bad = bad_regexes[key]
 	if bad then
 		relog_bad_regex(regex, bad, source)
-		return nil
+		return nil, bad.err
 	end
 	local match, err = re_match(str, regex, all_options)
 	if err then
@@ -2061,7 +2061,7 @@ utils.regex_match = function(str, regex, options, source)
 			bad_regexes[key] = { ts = os_time(), err = probe_err }
 		end
 		log_bad_regex(regex, err, source)
-		return nil
+		return nil, err
 	end
 	return match
 end
