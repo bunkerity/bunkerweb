@@ -152,6 +152,10 @@ certbot-dns-hetzner==4.0.0 \
     --hash=sha256:1dd5d43467bb624996d36a416ceeffb4068be7b315a774a6e7fc2b562140743f \
     --hash=sha256:cc122c13b19e96bac8f9d7f7715887f6e0313b56be253de71e8877a8eacb6e3a
     # via -r requirements.in
+certbot-dns-hosttech==0.1.0 \
+    --hash=sha256:2c9cc3036468ee1e922542870fe442a8f9eda7a7b7f528c276be68911d3175d8 \
+    --hash=sha256:e049cc90fdca085f603311ea5949cc7d767dac669da14f1af202d642888a895b
+    # via -r requirements.in
 certbot-dns-infomaniak==0.3.3 \
     --hash=sha256:224c4a9b979d8954f86a40422e0a24c9ccac7dad222ba7ba59449f1d6faf300c \
     --hash=sha256:bdf6d11d413e3f98b2ca7401e2febc45822cc3ebc7d929eb23373e580c9f493f

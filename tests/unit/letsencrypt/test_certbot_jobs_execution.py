@@ -148,6 +148,32 @@ def test_new_issues_http_certificate_and_persists_it(job_run):
     assert module.MONITOR_THREAD is None
 
 
+@pytest.mark.parametrize("propagation, expected", [(None, None), ("default", None), ("15m", "900")])
+def test_new_hosttech_uses_private_credentials_and_provider_propagation_default(job_run, propagation, expected):
+    job_run.env.update(
+        LETS_ENCRYPT_CHALLENGE="dns",
+        LETS_ENCRYPT_DNS_PROVIDER="hosttech",
+        LETS_ENCRYPT_DNS_CREDENTIAL_ITEM="api_token dummy-hosttech-token",
+    )
+    if propagation is not None:
+        job_run.env["LETS_ENCRYPT_DNS_PROPAGATION"] = propagation
+    job_run.rotate = True
+    _, status = job_run.load()
+    assert status == 1
+    command = job_run.popen.call_args.args[0]
+    assert command[command.index("-a") + 1] == "dns-hosttech"
+    assert "--preferred-challenges=dns" in command
+    credentials = Path(command[command.index("--dns-hosttech-credentials") + 1])
+    assert credentials.read_bytes() == b"dns_hosttech_api_token = dummy-hosttech-token"
+    assert credentials.stat().st_mode & 0o777 == 0o600
+    propagation_flag = "--dns-hosttech-propagation-seconds"
+    if expected is None:
+        assert propagation_flag not in command
+    else:
+        assert command[command.index(propagation_flag) + 1] == expected
+    assert "dummy-hosttech-token" not in " ".join(command)
+
+
 @pytest.mark.parametrize("kind", ["new", "renew"])
 @pytest.mark.parametrize("settings", [{"AUTO_LETS_ENCRYPT": "no"}, {"MULTISITE": "yes", "SERVER_NAME": ""}])
 def test_disabled_jobs_never_start_certbot(job_run, kind, settings):
