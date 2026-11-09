@@ -1,0 +1,20 @@
+CHANGELOG.md
+  s_8957b83407cdf6::t_428e8d5033357b 58
+  s_8957b83407cdf6::t_7366b1aba03408 63-64
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "02a8b17c90079c9216b63ea5c2ae1b3115dda41c",
+  "prompts": {},
+  "sessions": {
+    "s_8957b83407cdf6": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "f0ed5bf7-382f-48ad-b7ad-d9883e810768",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}
