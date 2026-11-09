@@ -105,15 +105,17 @@ jobs:
           export BW_LUAJIT="$(command -v luajit)"
           export LUA_PATH="$PWD/src/deps/src/lua-resty-lrucache/lib/?.lua;${LUA_PATH:-;}"
           lua -e 'assert(jit, "lua is not LuaJIT")'
-          python tests/unit/lua_coverage.py run .cache/lua-coverage -- timeout -k 30 300 python -m pytest -rs -o faulthandler_timeout=120 -k "resty or real_lrucache or iputils or ipmatcher or test_blacklist_list_reuse_luajit or test_utils_ip_is_global_lua or test_http_phase_lazy_info_lua" \
+          python tests/unit/lua_coverage.py run .cache/lua-coverage -- timeout -k 30 300 python -m pytest -rs -o faulthandler_timeout=120 -k "resty or real_lrucache or iputils or ipmatcher or test_blacklist_list_reuse_luajit or test_utils_ip_is_global_lua or test_http_phase_lazy_info_lua or test_request_work_counts_luajit or rdns_skip_empty" \
             "tests/unit/metrics/test_lru_sync_loop.py::test_the_walk_direction_decides_which_key_dies" \
             "tests/unit/common/test_datastore_worker_lru_exptime.py::test_the_real_lrucache_treats_a_zero_ttl_as_already_expired" \
             tests/unit/common/test_crowdsec_iputils_bitop_coverage_lua.py \
             tests/unit/common/test_ipv6_ipmatcher_luajit.py \
             tests/unit/common/test_blacklist_list_reuse_luajit.py \
             tests/unit/common/test_utils_ip_is_global_lua.py \
-            tests/unit/common/test_http_phase_lazy_info_lua.py | tee luajit.log
-          grep -q ' 343 passed' luajit.log
+            tests/unit/common/test_http_phase_lazy_info_lua.py \
+            tests/unit/common/test_request_work_counts_luajit.py \
+            "tests/unit/legacy/test_legacy_scripts.py::test_legacy_script[test_lua_rdns_skip_empty.lua]" | tee luajit.log
+          grep -q ' 352 passed' luajit.log
           ! grep -qi 'skipped' luajit.log
       - name: Write Lua coverage reports and enforce the overall floor
         run: python tests/unit/lua_coverage.py report .cache/lua-coverage --fail-under 94

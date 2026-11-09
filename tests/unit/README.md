@@ -211,15 +211,16 @@ Every first-party Lua module, relative to `src/bw/lua/` and `src/common/core/` (
 | `bunkerweb/ctx.lua` | `common/test_bw_ctx_lua.py` | pytest, module |
 | `bunkerweb/datastore.lua` | `common/test_datastore_worker_lru_exptime.py`; `test_lua_datastore_add.lua` | pytest, module; standalone |
 | `bunkerweb/duration.lua` | `common/test_duration_parser.py`, `common/test_duration_regex_parity.py` | pytest, module |
-| `bunkerweb/helpers.lua` | `test_lua_init_store_order.lua`, `test_lua_client_hello_order.lua` | standalone |
+| `bunkerweb/helpers.lua` | `test_lua_init_store_order.lua`, `test_lua_client_hello_order.lua`; `common/test_request_work_counts_luajit.py` | standalone; pytest, LuaJIT, real framework and core plugins across set/access/header/log, warm G1 and security-default work ceilings |
 | `bunkerweb/ipaddr.lua` | `test_lua_ipaddr.lua`, `test_lua_ipv6_ban_identity.lua` | standalone |
 | `bunkerweb/logger.lua` | `common/test_bw_logger_lua.py` | pytest, module |
 | `bunkerweb/mmdb.lua` | `common/test_bw_mmdb_lua.py` | pytest, module |
-| `bunkerweb/plugin.lua` | `common/test_bw_plugin_lua.py` | pytest, module |
+| `bunkerweb/plugin.lua` | `common/test_bw_plugin_lua.py`, `common/test_request_work_counts_luajit.py` | pytest, module; LuaJIT object, base and total setting-read ceilings |
 | `bunkerweb/pushswap.lua` | `test_lua_pushswap_sentinel.lua` | standalone |
 | `bunkerweb/rediskeys.lua` | `common/test_redis_cluster_nodes_default_port.py`, `test_lua_rediskeys.lua` | pytest, module; standalone |
 | `bunkerweb/utils.lua` | `test_lua_is_banned_leases.lua`, `test_lua_add_ban_if_absent.lua`; `common/test_header_rules_lua.py` | standalone; pytest fragment |
-| `antibot/antibot.lua` | `test_lua_rdns_skip_empty.lua` | standalone |
+| `antibot/antibot.lua` | `test_lua_rdns_skip_empty.lua` | legacy pytest wrapper; also explicitly selected in the LuaJIT CI step (whitelist, blacklist, greylist and antibot PTR skip checks) |
+| Error and antibot HTML templates | `common/test_challenge_template_sizes.py` | pytest, static file byte ceilings: rc4 sizes plus 5%, error page and all eight challenge templates; not rendered wire sizes |
 | `authbasic/authbasic.lua` | `common/test_authbasic_behaviour_lua.py` (L1) | pytest, module |
 | `badbehavior/badbehavior.lua` | `common/test_duration_readers_lua.py` | pytest, module |
 | `blacklist/blacklist.lua` | `common/test_blacklist_behaviour_lua.py` | pytest, module |
