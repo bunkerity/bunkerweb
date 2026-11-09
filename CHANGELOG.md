@@ -41,6 +41,7 @@
 - [BUGFIX] `ui`: renaming the admin user through `ADMIN_USERNAME` now applies at startup instead of failing with "User ... doesn't exist".
 - [BUGFIX] `ui`: a client resuming the log stream from a far-behind offset gets the tail instead of the whole file.
 - [BUGFIX] `api`: an administrator username or password set through `API_USERNAME` and `API_PASSWORD` is now applied at startup.
+- [BUGFIX] `api`: a reload that NGINX rejects now fails at once and no longer blocks later reloads for five minutes (Refs #4086).
 - [BUGFIX] `reverseproxy`: a location with `REVERSE_PROXY_PASS_REQUEST_BODY` set to `no` no longer forwards the client's `Content-Length`.
 - [BUGFIX] `blacklist`, `greylist`, `whitelist`: keep a feed's last valid entries when its download fails or returns no valid entry.
 - [BUGFIX] `linux`: Debian package rollback no longer overwrites or deletes the existing upgrade backups.

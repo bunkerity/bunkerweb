@@ -333,12 +333,12 @@ end
 --
 -- One reload is in flight at a time, from its signal to the moment its new workers are up. The
 -- marker is created exclusively and holds a token; the master keeps the token of the reload that
--- signalled it (init-lua.conf), and only the workers of that reload remove the marker (and only
+-- signalled it (init-lua.conf), and the workers of that reload remove the marker once ready (only
 -- while it still holds their token). A reload that finds a marker waits for it to go instead of
 -- sharing it: the master takes signals one after another, so a second reload's parse would
 -- otherwise run after the first one's workers had cleared the marker. A marker that never goes
--- belongs to a reload the master rejected after it parsed the configuration, and then reloads and
--- generations wait for it to clear; an orphan with a monotonic stamp is removed after five minutes.
+-- can belong to a reload the master rejected. The API clears its own token when rejection is known;
+-- otherwise an orphan with a monotonic stamp is removed after five minutes.
 local RELOADING_PATH = "/var/tmp/bunkerweb/reloading"
 local GENERATING_PATH = "/var/tmp/bunkerweb/generating"
 -- Queue separately from readiness: workers publish it from a timer delayed by five seconds.
@@ -594,11 +594,83 @@ local function reload_checked(test_arg)
 	return HTTP_OK, "success", "reload successful"
 end
 
-local function wait_reload(token, seconds, no_wait_reason)
+local function read_reload_proc(path)
+	local file = open(path, "r")
+	if not file then
+		return nil
+	end
+	local content = file:read("*a")
+	file:close()
+	return content
+end
+
+local function observe_reload_master()
+	if ffi.os ~= "Linux" then
+		return nil
+	end
+	local pid = get_master_pid()
+	if not pid then
+		return nil
+	end
+	local path = "/proc/" .. pid .. "/"
+	local children_path = path .. "task/" .. pid .. "/children"
+	local children = read_reload_proc(children_path)
+	if not children then
+		return nil
+	end
+	local pids = {}
+	for child in children:gmatch("%d+") do
+		pids[child] = true
+	end
+	if not pids[tostring(ngx.worker.pid())] then
+		return nil
+	end
+	return { path = path, children_path = children_path, pids = pids }
+end
+
+local function reload_rejected(master)
+	if ngx.worker.exiting() then
+		return false
+	end
+	-- A non-exiting worker also means the master could still be parsing. Linux's master blocks HUP
+	-- outside sigsuspend: read pending signals BEFORE its wait channel to exclude an unconsumed HUP.
+	local status = read_reload_proc(master.path .. "status")
+	local pending = status and status:match("\nSigPnd:%s*(%x+)")
+	local shared_pending = status and status:match("\nShdPnd:%s*(%x+)")
+	if
+		not pending
+		or not shared_pending
+		or tonumber(pending:sub(-1), 16) % 2 ~= 0
+		or tonumber(shared_pending:sub(-1), 16) % 2 ~= 0
+	then
+		return false
+	end
+	local wchan = read_reload_proc(master.path .. "wchan")
+	if not wchan or not wchan:find("sigsuspend", 1, true) then
+		return false
+	end
+	-- A successful cycle forks before returning to sigsuspend, even if our QUIT channel is not read yet.
+	-- shortcut: hidden /proc or non-Linux keeps the marker; a portable master acknowledgement would replace this probe.
+	local children = read_reload_proc(master.children_path)
+	if not children then
+		return false
+	end
+	local worker_present = false
+	for child in children:gmatch("%d+") do
+		if not master.pids[child] then
+			return false
+		end
+		worker_present = worker_present or child == tostring(ngx.worker.pid())
+	end
+	return worker_present
+end
+
+local function wait_reload(token, seconds, no_wait_reason, master)
 	local ready_key = "misc_ready_" .. token
 	-- The blocking configuration test does not refresh nginx's cached clock.
 	ngx.update_time()
 	local deadline = ngx.now() + seconds
+	local was_rejected = false
 	while seconds > 0 do
 		if internalstore:get(ready_key) == "ok" then
 			return HTTP_OK, "success", "reload successful", true
@@ -610,6 +682,18 @@ local function wait_reload(token, seconds, no_wait_reason)
 			end
 			return HTTP_INTERNAL_SERVER_ERROR, "error", "reload failed: initialization did not confirm readiness"
 		end
+		local rejected = master and reload_rejected(master)
+		-- Yield once so a queued graceful-shutdown channel message can mark this old worker exiting.
+		if rejected and was_rejected then
+			if read_marker() == token then
+				os.remove(RELOADING_PATH)
+			end
+			return HTTP_INTERNAL_SERVER_ERROR,
+				"error",
+				"reload failed: rejected by nginx master; no new workers started",
+				false
+		end
+		was_rejected = rejected
 		if ngx.now() >= deadline then
 			break
 		end
@@ -649,6 +733,7 @@ local function reload_locked(test_arg)
 		-- begin_reload took back what it published; the values are then the HTTP status and the message
 		return status, "error", failure
 	end
+	local master = observe_reload_master()
 	local ran, code, level, message = pcall(reload_checked, test_arg)
 	-- The marker stands for a reload that signalled nginx; the new workers remove it.
 	if not ran or level ~= "success" then
@@ -660,7 +745,7 @@ local function reload_locked(test_arg)
 		error(code, 0)
 	end
 	if level == "success" then
-		return wait_reload(started, ready_wait, no_wait_reason)
+		return wait_reload(started, ready_wait, no_wait_reason, master)
 	end
 	return code, level, message
 end
