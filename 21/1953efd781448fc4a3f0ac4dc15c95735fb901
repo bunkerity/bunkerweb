@@ -1,0 +1,26 @@
+src/ui/requirements.in
+  s_9bb90c2dd9ef24::t_2529f9e15a4eae 18
+  s_9bb90c2dd9ef24::t_212f8cba298b1c 17
+src/autoconf/requirements.in
+  s_9bb90c2dd9ef24::t_2529f9e15a4eae 3,5-6
+  s_9bb90c2dd9ef24::t_3d08ff87a7db71 2
+src/autoconf/requirements.txt
+  s_9bb90c2dd9ef24::t_2529f9e15a4eae 1105-1109
+  s_9bb90c2dd9ef24::t_0e483464fe0a80 1104
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "211953efd781448fc4a3f0ac4dc15c95735fb901",
+  "prompts": {},
+  "sessions": {
+    "s_9bb90c2dd9ef24": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1bfa6-8610-7070-9774-32243828f259",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}
