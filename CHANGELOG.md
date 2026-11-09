@@ -48,6 +48,7 @@
 - [BUGFIX] `linux`: a plain package upgrade keeps an enabled, running API; uninstall stops the services first and keeps administrator unit files.
 - [BUGFIX] `linux`: RHEL packages now require logrotate.
 - [BUGFIX] `crowdsec`: start stream-mode decision synchronisation during worker initialisation, so an NGINX reload no longer leaves the poller dormant on quiet or whitelisted instances. (Fixes #4151)
+- [BUGFIX] `badbehavior`: match status codes exactly, so aborted requests (status 0) no longer count toward bans. (Refs #4162)
 - [PERF] `core`: cut request-path CPU by 14.2% for HTTP proxy traffic and by 33.3% for TLS proxy traffic with the community blacklists.
 - [PERF] `blacklist`: reuse downloaded lists between requests instead of copying and deduplicating them each time.
 - [PERF] `core`: build the reserved-address matcher once per worker and cache successful plugin module lookups.
