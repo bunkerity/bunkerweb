@@ -55,13 +55,13 @@
 - [BUGFIX] `linux`: RHEL packages now require logrotate.
 - [BUGFIX] `crowdsec`: start stream-mode decision synchronisation during worker initialisation, so an NGINX reload no longer leaves the poller dormant on quiet or whitelisted instances. (Fixes #4151)
 - [BUGFIX] `badbehavior`: match status codes exactly, so aborted requests (status 0) no longer count toward bans. (Refs #4162)
-- [PERF] `core`: cut request-path CPU by 14.2% for HTTP proxy traffic and by 33.3% for TLS proxy traffic with the community blacklists.
+- [PERF] `core`: in a 2-worker lab test, request-path CPU drops 14.2% for HTTP proxying and 33.3% for TLS proxying with the community blacklists.
 - [PERF] `blacklist`: reuse downloaded lists between requests instead of copying and deduplicating them each time.
 - [PERF] `core`: build the reserved-address matcher once per worker and cache successful plugin module lookups.
 - [PERF] `core`: avoid temporary result-check tables and build informational log messages only when their level is enabled.
 - [PERF] `sessions`: stop reading the random cookie name and secret from shared memory on every request.
-- [PERF] `errors`: the default error page is 42% lighter (a 403 drops from about 69 KB to 39 KB), with no visible change (Refs #3892).
-- [PERF] `antibot`: the challenge pages are about 30% lighter once minified, with no visible change.
+- [PERF] `errors`: the default error page is 44% lighter (a 403 drops from about 69 KB to 39 KB), with no visible change (Refs #3892).
+- [PERF] `antibot`: the challenge pages are about 30% lighter once minified (about 20% with gzip or Brotli), with no visible change.
 - [DOCS] `linux`: the custom configuration section says where NGINX includes each type and how to check a file is live.
 - [DOCS] `reverseproxy`: `REVERSE_PROXY_KEEPALIVE` does not pool backend connections by itself; the docs show how to pool with a named upstream.
 - [MISC] `headers`: the default `PERMISSIONS_POLICY` also denies `semantic-embedder` and drops `browsing-topics`, which Chromium removed.
