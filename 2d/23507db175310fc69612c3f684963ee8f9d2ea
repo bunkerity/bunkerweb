@@ -1,0 +1,78 @@
+src/common/core/antibot/README.es.md
+  s_ce10cabc05c542::t_71049a7a9cd38b 43,66-67
+  s_ce10cabc05c542::t_5787a3b888aa12 68
+src/common/core/antibot/plugin.json
+  s_ce10cabc05c542::t_71049a7a9cd38b 94
+  s_ce10cabc05c542::t_368ff680a594f1 91-93,95-99
+src/common/core/antibot/README.zh.md
+  s_ce10cabc05c542::t_71049a7a9cd38b 43,66-67
+  s_ce10cabc05c542::t_16a77445a93ef1 68
+src/common/core/antibot/README.de.md
+  s_ce10cabc05c542::t_71049a7a9cd38b 43,66-67
+  s_ce10cabc05c542::t_c3adefaaf50239 68
+tests/unit/common/test_issue_3650_antibot_redirect_target_regression.py
+  s_27f0cf42e5430b::t_ae15023490c49c 28
+docs/zh/features.md
+  s_ce10cabc05c542::t_71049a7a9cd38b 380
+CHANGELOG.md
+  s_8957b83407cdf6::t_c68c943b1b37c6 28
+tests/unit/common/test_ignore_uri_normalized_path_regression.py
+  s_27f0cf42e5430b::t_ae15023490c49c 55
+src/common/core/antibot/README.md
+  s_ce10cabc05c542::t_71049a7a9cd38b 43,66-67
+  s_ce10cabc05c542::t_0d127d6f07a416 68
+src/common/core/antibot/antibot.lua
+  s_ce10cabc05c542::t_3b143ff4bf7752 217-224
+  s_ce10cabc05c542::t_368ff680a594f1 1332-1346
+  s_ce10cabc05c542::t_03b774fdc30615 1347
+tests/unit/common/test_antibot_include_uri_lua.py
+  s_ce10cabc05c542::t_368ff680a594f1 4,143
+  s_ce10cabc05c542::t_c88a4bba3dccdf 1-3,5-142,144-150
+docs/de/features.md
+  s_ce10cabc05c542::t_71049a7a9cd38b 379
+src/bw/lua/bunkerweb/utils.lua
+  s_ce10cabc05c542::t_368ff680a594f1 2052,2064
+tests/unit/common/test_regex_match_memoize.py
+  s_ce10cabc05c542::t_c88a4bba3dccdf 147-169
+src/common/core/antibot/README.fr.md
+  s_ce10cabc05c542::t_71049a7a9cd38b 43,66-67
+  s_ce10cabc05c542::t_1b54c63488d59c 68
+docs/es/features.md
+  s_ce10cabc05c542::t_71049a7a9cd38b 378
+docs/features.md
+  s_ce10cabc05c542::t_71049a7a9cd38b 378
+docs/fr/features.md
+  s_ce10cabc05c542::t_71049a7a9cd38b 378
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "2d23507db175310fc69612c3f684963ee8f9d2ea",
+  "prompts": {},
+  "sessions": {
+    "s_27f0cf42e5430b": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1c038-537b-77b0-85a1-68ecb0d23311",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_8957b83407cdf6": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "f0ed5bf7-382f-48ad-b7ad-d9883e810768",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_ce10cabc05c542": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1bff0-7135-7a61-bfad-b6bfe9ea330a",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}
