@@ -26,6 +26,7 @@
 - [FEATURE] `linux`: support Fedora 45 (x86_64 and aarch64).
 - [FEATURE] `letsencrypt`: add Hosttech as a DNS-01 provider, through the new `certbot-dns-hosttech` plugin.
 - [FEATURE] `antibot`: new `ANTIBOT_INCLUDE_URI` setting challenges only the URIs that match it; `ANTIBOT_IGNORE_URI` still takes precedence (Refs #3647).
+- [BUGFIX] `inject`: quotes and backslashes in `INJECT_HEAD` and `INJECT_BODY` no longer break the generated config; remove hand-added `\'` workaround escapes.
 - [BUGFIX] `limit`: `LIMIT_CONN_MAX_*` settings now accept only values NGINX supports (1 to 65535).
 - [BUGFIX] `limit`: in local mode, simultaneous requests from one client across workers no longer exceed `LIMIT_REQ_RATE` (rates up to 100 per window).
 - [BUGFIX] `reverseproxy`: warn when proxy caching is enabled on a location whose response buffering is off, since NGINX stores nothing there.

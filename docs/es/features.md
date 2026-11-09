@@ -3349,6 +3349,8 @@ Siga estos pasos para configurar y usar la función de Inyección de HTML:
 | `INJECT_HEAD` |                   | multisite | no       | **Código HTML de la Cabecera:** El código HTML para inyectar antes de la etiqueta `</head>`. |
 | `INJECT_BODY` |                   | multisite | no       | **Código HTML del Cuerpo:** El código HTML para inyectar antes de la etiqueta `</body>`.     |
 
+Los valores de `INJECT_HEAD` e `INJECT_BODY` se insertan como HTML literal: las comillas y las barras invertidas no necesitan escape adicional para NGINX. Si antes añadió `\'` manualmente como solución provisional, elimine la barra invertida. Mantenga el escape que requiera su formato de configuración (como YAML); la expansión de variables de NGINX (`$variable`) no cambia.
+
 !!! tip "Mejores Prácticas"
     - Por razones de rendimiento, coloque los archivos de JavaScript al final del cuerpo para evitar el bloqueo del renderizado.
     - Coloque CSS y JavaScript crítico en la sección de la cabecera para evitar un "destello" de contenido sin estilo (FOUC).

@@ -3296,6 +3296,8 @@ Führen Sie die folgenden Schritte aus, um die HTML-Injection-Funktion zu konfig
 | `INJECT_HEAD` |          | multisite | nein     | **Head-HTML-Code:** Der HTML-Code, der vor dem `</head>`-Tag eingefügt wird. |
 | `INJECT_BODY` |          | multisite | nein     | **Body-HTML-Code:** Der HTML-Code, der vor dem `</body>`-Tag eingefügt wird. |
 
+Die Werte von `INJECT_HEAD` und `INJECT_BODY` werden als wörtlicher HTML-Code eingefügt: Anführungszeichen und Backslashes benötigen kein zusätzliches NGINX-Escaping. Wenn Sie zuvor `\'` von Hand als Umgehungslösung eingefügt haben, entfernen Sie den Backslash. Behalten Sie das für Ihr Konfigurationsformat (etwa YAML) erforderliche Escaping bei; die Expansion von NGINX-Variablen (`$variable`) bleibt unverändert.
+
 !!! tip "Bewährte Praktiken"
     - Aus Leistungsgründen sollten Sie JavaScript-Dateien am Ende des Body platzieren, um das Rendern nicht zu blockieren.
     - Platzieren Sie CSS und kritisches JavaScript im Head-Bereich, um ein Aufblitzen von ungestyltem Inhalt zu vermeiden.
