@@ -63,8 +63,9 @@ function badbehavior:log()
 	if self.variables["USE_BAD_BEHAVIOR"] ~= "yes" then
 		return self:ret(true, "bad behavior not activated")
 	end
-	-- Check if we have a bad status code
-	if not self.variables["BAD_BEHAVIOR_STATUS_CODES"]:match(tostring(ngx.status)) then
+	-- Check if we have a bad status code (whole-token match so that e.g. status 0 doesn't match "400")
+	local status = tostring(ngx.status)
+	if not (" " .. self.variables["BAD_BEHAVIOR_STATUS_CODES"] .. " "):find(" " .. status .. " ", 1, true) then
 		return self:ret(true, "not increasing counter")
 	end
 	-- Fast path: access phase already flagged this request as banned.
@@ -90,7 +91,6 @@ function badbehavior:log()
 		end
 	end
 	-- Add incr operation so timer can manage it
-	local status = tostring(ngx.status)
 	local ban_scope = self.variables["BAD_BEHAVIOR_BAN_SCOPE"]
 	-- The default server must propagate bans to every service, regardless of configured scope
 	if self.ctx.bw.server_name == "_" then
