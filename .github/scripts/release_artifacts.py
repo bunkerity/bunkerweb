@@ -22,6 +22,7 @@ DISTROS = {
     "debian-trixie": "deb",
     "fedora-43": "rpm",
     "fedora-44": "rpm",
+    "fedora-45": "rpm",
     "rhel-8": "rpm",
     "rhel-9": "rpm",
     "rhel-10": "rpm",

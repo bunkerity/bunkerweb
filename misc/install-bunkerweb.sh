@@ -5720,11 +5720,11 @@ check_supported_os() {
             NGINX_VERSION="${_nginx_base}-1~$DISTRO_CODENAME"
             ;;
         "fedora")
-            if [[ "$DISTRO_VERSION" != "43" && "$DISTRO_VERSION" != "44" ]]; then
-                print_warning "Only Fedora 43 and 44 are officially supported"
+            if [[ "$DISTRO_VERSION" != "43" && "$DISTRO_VERSION" != "44" && "$DISTRO_VERSION" != "45" ]]; then
+                print_warning "Only Fedora 43, 44 and 45 are officially supported"
                 if [ "$FORCE_INSTALL" != "yes" ] && [ "$INTERACTIVE_MODE" = "yes" ]; then
                     if ! tui_yesno "Unsupported OS" \
-                        "Only Fedora 43 and 44 are officially supported (detected: $DISTRO_VERSION).\nContinue anyway?" "no"; then
+                        "Only Fedora 43, 44 and 45 are officially supported (detected: $DISTRO_VERSION).\nContinue anyway?" "no"; then
                         exit 1
                     fi
                 fi
@@ -5746,7 +5746,7 @@ check_supported_os() {
             ;;
         *)
             print_error "Unsupported operating system: $DISTRO_ID"
-            print_error "Supported distributions: Debian 12/13, Ubuntu 22.04/24.04/26.04, Fedora 43/44, RHEL/CentOS/Rocky/AlmaLinux 8/9/10"
+            print_error "Supported distributions: Debian 12/13, Ubuntu 22.04/24.04/26.04, Fedora 43/44/45, RHEL/CentOS/Rocky/AlmaLinux 8/9/10"
             exit 1
             ;;
     esac

@@ -2039,7 +2039,7 @@ Les distributions Linux prises en charge par BunkerWeb (architectures amd64/x86_
 - Ubuntu 22.04 "Jammy"
 - Ubuntu 24.04 "Noble"
 - Ubuntu 26.04 "Resolute Raccoon"
-- Fedora 43 et 44
+- Fedora 43, 44 et 45
 - Red Hat Enterprise Linux (RHEL), CentOS, Rocky Linux et AlmaLinux 8, 9 et 10
 
 ### Script d'installation facile
@@ -5161,6 +5161,7 @@ La génération des paquets Linux peut être effectuée directement avec Docker 
 - `debian-trixie`
 - `fedora-43`
 - `fedora-44`
+- `fedora-45`
 - `rhel-8`
 - `rhel-9`
 - `rhel-10`

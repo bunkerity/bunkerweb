@@ -46,7 +46,7 @@ class ReleaseArtifactsTest(TestCase):
     def test_inventory_requires_every_platform_and_package_variant(self):
         manifest = self.manifest()
         release.validate(manifest, manifest)
-        self.assertEqual(len(manifest["packages"]), 20)
+        self.assertEqual(len(manifest["packages"]), 22)
         self.assertEqual(sum(len(image["platforms"]) for image in manifest["images"].values()), 24)
         mutations = [
             lambda m: m["images"].pop("api"),
@@ -65,6 +65,17 @@ class ReleaseArtifactsTest(TestCase):
             mutate(changed)
             with self.assertRaises(ValueError):
                 release.validate(changed, manifest)
+
+    def test_fedora_45_requires_both_package_architectures(self):
+        manifest = self.manifest()
+        packages = [package for package in manifest["packages"] if package["distro"] == "fedora-45"]
+        self.assertEqual({package["platform"] for package in packages}, {"linux/amd64", "linux/arm64"})
+        release.validate(manifest, manifest)
+        for package in packages:
+            incomplete = deepcopy(manifest)
+            incomplete["packages"].remove(package)
+            with self.assertRaisesRegex(ValueError, "incomplete package inventory"):
+                release.validate(incomplete, manifest)
 
     def test_validate_accepts_every_release_version_kind(self):
         for version in ("1.6.15", "1.6.15~rc2", "1.6.15-rc2", "1.7.0~beta1", "1.7.0~alpha1", "1.7.0-alpha10"):
@@ -408,7 +419,7 @@ git() {
                             release.main()
                     else:
                         release.main()
-                        self.assertEqual(len(Path(output).read_text().splitlines()), 20)
+                        self.assertEqual(len(Path(output).read_text().splitlines()), 22)
 
     def test_attestation_verification_fails_closed_on_missing_or_foreign_attestation(self):
         manifest = self.manifest()
@@ -427,8 +438,8 @@ git() {
         with patch.object(release, "sleep") as pause:
             with patch.object(release, "command", gh(set())):
                 targets = verify()
-            self.assertEqual(len(targets), 18 + 20)
-            self.assertEqual(len(calls), 38)
+            self.assertEqual(len(targets), 18 + 22)
+            self.assertEqual(len(calls), 40)
             for args in calls:
                 self.assertEqual(args[:3], ["gh", "attestation", "verify"])
                 self.assertEqual(args[args.index("--repo") + 1], "bunkerity/bunkerweb")
@@ -444,7 +455,7 @@ git() {
                 calls.clear()
                 with patch.object(release, "command", gh({missing})), self.assertRaisesRegex(ValueError, "missing or foreign attestation"):
                     verify()
-                self.assertEqual(len(calls), 38 + (release.REGISTRY_ATTEMPTS - 1))
+                self.assertEqual(len(calls), 40 + (release.REGISTRY_ATTEMPTS - 1))
             # An attestation that shows up late is accepted, only the missing target is asked again.
             attempts = []
 
@@ -457,7 +468,7 @@ git() {
             pause.reset_mock()
             with patch.object(release, "command", late):
                 verify()
-            self.assertEqual(len(attempts), 38 + 6)
+            self.assertEqual(len(attempts), 40 + 6)
             pause.assert_called_once_with(release.REGISTRY_DELAY)
         incomplete = deepcopy(manifest)
         incomplete["packages"].pop()
@@ -493,9 +504,9 @@ git() {
             output = Path(tmp) / "out.intoto.jsonl"  # codespell:ignore intoto
             with patch.object(release, "command", download()):
                 self.assertEqual(release.provenance_bundle(manifest, packages, output), len(expected))
-            # One bundle per line, one per attested subject: the 6 image index digests and the 20 package files.
+            # One bundle per line, one per attested subject: the 6 image index digests and the 22 package files.
             self.assertEqual(sorted(loads(line)["subject"] for line in output.read_text().splitlines()), sorted(expected))
-            self.assertEqual(len(calls), 26)
+            self.assertEqual(len(calls), 28)
             for args in calls:
                 self.assertEqual(args[:3], ["gh", "attestation", "download"])
                 self.assertEqual(args[args.index("--repo") + 1], "bunkerity/bunkerweb")

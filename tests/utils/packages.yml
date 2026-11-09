@@ -39,6 +39,9 @@ packages_info:
   fedora/44:
     name: "fedora-44"
     package: rpm
+  fedora/45:
+    name: "fedora-45"
+    package: rpm
 # freebsd/13 and freebsd/14 lived here until the PO dropped FreeBSD packaging on 2026-08-20.
 # There is no `pkg` artefact to install any more, so a target named here would be a manifest
 # entry nothing can build -- a lie the next reader believes, and one nothing fails on.

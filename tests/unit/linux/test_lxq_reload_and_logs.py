@@ -47,7 +47,7 @@ def test_recipe_creates_private_logs_in_the_same_run(tmp_path, recipe, umask):
     text = re.sub(r"\\\n", "", recipe.read_text())
     runs = re.findall(r"^RUN (.*)$", text, re.M)
     creators = [run for run in runs if "touch /var/log/bunkerweb/error.log" in run]
-    assert len(RECIPES) == 10 and len(creators) == 1
+    assert len(RECIPES) == 11 and len(creators) == 1
     start = creators[0].index("touch /var/log/bunkerweb/error.log")
     command = creators[0][start:]
     logdir = tmp_path / "var/log/bunkerweb"

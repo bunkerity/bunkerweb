@@ -353,7 +353,7 @@ jobs:
             docker exec -u 0 bunkerweb-linux apt install -y /opt/bunkerweb.deb
           fi
       - name: Install rpm file
-        if: needs.setup.outputs.integration == 'Linux' && (needs.setup.outputs.linux_name == 'fedora-43' || needs.setup.outputs.linux_name == 'fedora-44' || needs.setup.outputs.linux_name == 'rhel-8' || needs.setup.outputs.linux_name == 'rhel-9' || needs.setup.outputs.linux_name == 'rhel-10')
+        if: needs.setup.outputs.integration == 'Linux' && (needs.setup.outputs.linux_name == 'fedora-43' || needs.setup.outputs.linux_name == 'fedora-44' || needs.setup.outputs.linux_name == 'fedora-45' || needs.setup.outputs.linux_name == 'rhel-8' || needs.setup.outputs.linux_name == 'rhel-9' || needs.setup.outputs.linux_name == 'rhel-10')
         env:
           PACKAGE: ${{ needs.setup.outputs.package }}
           TYPE: ${{ inputs.TYPE }}

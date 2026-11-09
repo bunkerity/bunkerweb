@@ -1251,7 +1251,7 @@ gh attestation verify ./bunkerweb_${VERSION}-1_amd64.deb \
   --source-ref "refs/tags/$TAG"
 ```
 
-Release 还在 `release-manifest.json` 中列出了每个软件包的 SHA-256 校验和。先用清单自带的校验和检查清单，再用清单检查软件包，并选择与您的发行版（`ubuntu`、`ubuntu-noble`、`ubuntu-jammy`、`debian-bookworm`、`debian-trixie`、`fedora-43`、`fedora-44`、`rhel-8`、`rhel-9` 或 `rhel-10`）和平台（`linux/amd64` 或 `linux/arm64`）对应的条目：
+Release 还在 `release-manifest.json` 中列出了每个软件包的 SHA-256 校验和。先用清单自带的校验和检查清单，再用清单检查软件包，并选择与您的发行版（`ubuntu`、`ubuntu-noble`、`ubuntu-jammy`、`debian-bookworm`、`debian-trixie`、`fedora-43`、`fedora-44`、`fedora-45`、`rhel-8`、`rhel-9` 或 `rhel-10`）和平台（`linux/amd64` 或 `linux/arm64`）对应的条目：
 
 ```bash
 curl -fsSL -O "https://github.com/bunkerity/bunkerweb/releases/download/${TAG}/release-manifest.json" \

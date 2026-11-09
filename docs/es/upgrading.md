@@ -1252,7 +1252,7 @@ gh attestation verify ./bunkerweb_${VERSION}-1_amd64.deb \
   --source-ref "refs/tags/$TAG"
 ```
 
-La release también lista la suma de comprobación SHA-256 de cada paquete en `release-manifest.json`. Compruebe el manifiesto con su propia suma de comprobación y después el paquete con el manifiesto, eligiendo la entrada de su distribución (`ubuntu`, `ubuntu-noble`, `ubuntu-jammy`, `debian-bookworm`, `debian-trixie`, `fedora-43`, `fedora-44`, `rhel-8`, `rhel-9` o `rhel-10`) y de su plataforma (`linux/amd64` o `linux/arm64`):
+La release también lista la suma de comprobación SHA-256 de cada paquete en `release-manifest.json`. Compruebe el manifiesto con su propia suma de comprobación y después el paquete con el manifiesto, eligiendo la entrada de su distribución (`ubuntu`, `ubuntu-noble`, `ubuntu-jammy`, `debian-bookworm`, `debian-trixie`, `fedora-43`, `fedora-44`, `fedora-45`, `rhel-8`, `rhel-9` o `rhel-10`) y de su plataforma (`linux/amd64` o `linux/arm64`):
 
 ```bash
 curl -fsSL -O "https://github.com/bunkerity/bunkerweb/releases/download/${TAG}/release-manifest.json" \

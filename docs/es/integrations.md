@@ -2031,7 +2031,7 @@ Las distribuciones de Linux compatibles con BunkerWeb (arquitecturas amd64/x86_6
 - Ubuntu 22.04 "Jammy"
 - Ubuntu 24.04 "Noble"
 - Ubuntu 26.04 "Resolute Raccoon"
-- Fedora 43 y 44
+- Fedora 43, 44 y 45
 - Red Hat Enterprise Linux (RHEL), CentOS, Rocky Linux y AlmaLinux 8, 9 y 10
 
 ### Script de instalación fácil
@@ -5161,6 +5161,7 @@ La generación de paquetes de Linux puede realizarse directamente con Docker en 
 - `debian-trixie`
 - `fedora-43`
 - `fedora-44`
+- `fedora-45`
 - `rhel-8`
 - `rhel-9`
 - `rhel-10`

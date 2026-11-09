@@ -394,7 +394,7 @@ retags them to what the stacks reference.
 `staging.yml` (`core`, `api` and `ui`). The dev pipelines pass `--dev` and read `utils/integrations.yml`'s
 `dev:` block: `ubuntu/noble` alone on Linux, every other integration a single `ubuntu-latest` row.
 `staging.yml` does not pass `--dev` and reads the `staging:` block, which carries the live Linux
-distro rows (`el/8`, `el/9`, `el/10`, `fedora/43`, `fedora/44`, `ubuntu/resolute`, `ubuntu/noble`,
+distro rows (`el/8`, `el/9`, `el/10`, `fedora/43`, `fedora/44`, `fedora/45`, `ubuntu/resolute`, `ubuntu/noble`,
 `ubuntu/jammy`, `debian/bookworm`, `debian/trixie`; aarch64/arm64 stay `TODO`). GitHub caps a job's
 matrix at 256 entries, so `staging.yml` narrows the parsed Linux list before fanning out; see the
 comment in its `parse-tests-core` job.

@@ -305,7 +305,7 @@ def test_failed_snapshot_keeps_previous_snapshot_and_fails_preinstall(host):
 
 def test_all_package_definitions_wire_removal_and_rpm_posttrans():
     paths = sorted(DEFINITIONS.glob("fpm-*"))
-    assert len(paths) == 10
+    assert len(paths) == 11
     for path in paths:
         text = path.read_text()
         assert "--before-remove /usr/share/bunkerweb/scripts/beforeRemove.sh" in text, path
@@ -315,7 +315,7 @@ def test_all_package_definitions_wire_removal_and_rpm_posttrans():
             assert "--depends logrotate" in text, path
 
 
-@pytest.mark.parametrize("distro", ["rhel-8", "rhel-9", "rhel-10", "fedora-43", "fedora-44"])
+@pytest.mark.parametrize("distro", ["rhel-8", "rhel-9", "rhel-10", "fedora-43", "fedora-44", "fedora-45"])
 def test_rpm_packages_require_logrotate(distro):
     assert "--depends logrotate" in (DEFINITIONS / f"fpm-{distro}").read_text()
 

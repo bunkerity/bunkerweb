@@ -326,6 +326,7 @@ jobs:
             debian-trixie,
             fedora-43,
             fedora-44,
+            fedora-45,
             rhel-8,
             rhel-9,
             rhel-10,
@@ -345,6 +346,8 @@ jobs:
           - linux: fedora-43
             package: rpm
           - linux: fedora-44
+            package: rpm
+          - linux: fedora-45
             package: rpm
           - linux: rhel-8
             package: rpm
@@ -553,6 +556,7 @@ jobs:
             debian-trixie,
             fedora-43,
             fedora-44,
+            fedora-45,
             el-8,
             el-9,
             el-10,
@@ -592,6 +596,11 @@ jobs:
             suffix: "1."
             version: 44
             package: rpm
+          - linux: fedora-45
+            separator: "-"
+            suffix: "1."
+            version: 45
+            package: rpm
           - linux: el-8
             separator: "-"
             suffix: "1."
@@ -630,6 +639,9 @@ jobs:
           - linux: fedora-44
             arch: amd64
             package_arch: x86_64
+          - linux: fedora-45
+            arch: amd64
+            package_arch: x86_64
           - linux: el-8
             arch: amd64
             package_arch: x86_64
@@ -658,6 +670,9 @@ jobs:
             arch: arm64
             package_arch: aarch64
           - linux: fedora-44
+            arch: arm64
+            package_arch: aarch64
+          - linux: fedora-45
             arch: arm64
             package_arch: aarch64
           - linux: el-8

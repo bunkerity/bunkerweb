@@ -2030,7 +2030,7 @@ docker build -t bw-ui -f src/ui/Dockerfile .
 - Ubuntu 22.04 "Jammy"
 - Ubuntu 24.04 "Noble"
 - Ubuntu 26.04 "Resolute Raccoon"
-- Fedora 43 和 44
+- Fedora 43、44 和 45
 - Red Hat Enterprise Linux (RHEL)、CentOS、Rocky Linux 和 AlmaLinux 8, 9 和 10
 
 ### 简易安装脚本
@@ -5154,6 +5154,7 @@ docker build -f src/all-in-one/Dockerfile \
 - `debian-trixie`
 - `fedora-43`
 - `fedora-44`
+- `fedora-45`
 - `rhel-8`
 - `rhel-9`
 - `rhel-10`
