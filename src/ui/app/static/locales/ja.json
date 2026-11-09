@@ -13,7 +13,8 @@
     "no_changes_detected": "変更は検出されませんでした。",
     "notice": "通知",
     "ping_error": "インスタンスへの ping 中にエラーが発生しました。",
-    "readonly_mode": "読み取り専用モードではこの操作は無効です。"
+    "readonly_mode": "読み取り専用モードではこの操作は無効です。",
+    "configs_import_invalid_file": "有効なカスタム設定のエクスポートファイル（.json）をアップロードしてください。"
   },
   "aria": {
     "label": {
@@ -49,7 +50,7 @@
     "link": {
       "here": "こちら"
     },
-    "pro": "BunkerWeb を最大限に活用するには PRO 版へアップグレードしてください。詳細と無料トライアルは<a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/?utm_campaign=self&utm_source=banner#pro\">こちら</a>。",
+    "pro": "BunkerWeb を最大限に活用するには PRO 版へアップグレードしてください。30 日間の無料トライアルは<a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=banner\">こちら</a>から始められます。プランを注文し、支払い方法は“Free 30 Days Trial”のままにしてください。",
     "support": "BunkerWeb のプレミアムサポートや個別コンサルティングが必要ですか？<a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/?utm_campaign=self&utm_source=banner#services\">プロフェッショナルサービス</a>をご覧ください。"
   },
   "breadcrumb": {
@@ -1154,6 +1155,7 @@
       "title": "Pro の有効期限",
       "unknown": "有効期限は不明です"
     },
+    "free_trial_hint": "プランを注文し、支払い方法は“Free 30 Days Trial”のままにしてください。",
     "force_check": {
       "description": "PRO プラグインを強制的に再確認します。新しいバージョンがあれば、プラグインのダウンロードが始まります。",
       "title": "強制チェック"
@@ -1223,6 +1225,9 @@
     }
   },
   "reports": {
+    "bad_behavior_total_requests": "不審なリクエスト",
+    "bad_behavior_stored_events": "保存されたイベント",
+    "bad_behavior_evidence_missing": "遮断の証跡はもう利用できません。",
     "crowdsec": {
       "source_lapi": "ローカル API の判定",
       "source_appsec": "AppSec 検査",
@@ -1237,7 +1242,16 @@
     },
     "retention_notice": "レポートはローリング方式のメモリ内バッファです。設定した上限に達すると、最も古い項目から破棄されます。Redis を有効にしていない場合は、BunkerWeb の再起動時にも消去されます。",
     "security_incident": "セキュリティインシデント",
-    "security_report_data": "セキュリティレポートデータ"
+    "security_report_data": "セキュリティレポートデータ",
+    "bad_behavior_no_details": "このレポートには Bad Behavior の詳細が記録されていません。",
+    "bad_behavior_activity_detected": "Bad Behavior の活動を検出しました",
+    "bad_behavior_activity_explanation": "これらのリクエストは Bad Behavior のしきい値を超え、まとめてグループ化されました。",
+    "bad_behavior_request_label": "リクエスト",
+    "bad_behavior_ip": "IP アドレス",
+    "bad_behavior_server": "サーバー",
+    "bad_behavior_url": "URL",
+    "bad_behavior_captured_at": "取得日時",
+    "bad_behavior_request_id": "リクエスト ID"
   },
   "scope": {
     "all_services": "すべてのサービス",
@@ -1424,7 +1438,8 @@
     "template_in_use_description": "現在のテンプレート以外の変更はできません。現在のテンプレートで変更するか、詳細モードまたは Raw モードに切り替えてください。",
     "unique_server_name": "一意のサーバー名",
     "up": "稼働",
-    "yes": "はい"
+    "yes": "はい",
+    "not_applicable": "該当なし"
   },
   "step": {
     "next": "次へ",
@@ -1721,7 +1736,8 @@
       "show_selected_only": "選択項目だけを表示",
       "stop_instance": "インスタンス {{hostname}} を停止",
       "unban_ip": "{{ip}} の遮断を解除",
-      "value_from_global": "グローバル設定の値"
+      "value_from_global": "グローバル設定の値",
+      "update_ban_duration": "遮断期間を更新"
     },
     "cannot_delete_original_ban": "元の遮断エントリは削除できません。",
     "cannot_remove_disabled": "1 つ以上の設定項目が無効なため、削除できません。",
@@ -1959,7 +1975,8 @@
     "zerossl_api_retry": "ZeroSSL API リクエストの再試行回数です（0 で再試行を無効化します）。",
     "zerossl_api_retry_delay": "ZeroSSL API の再試行間隔（秒）です。",
     "zerossl_api_connect_timeout": "ZeroSSL API 呼び出しの接続タイムアウト（秒）です。",
-    "zerossl_api_max_time": "各 ZeroSSL API リクエストの合計最大時間（秒）です。"
+    "zerossl_api_max_time": "各 ZeroSSL API リクエストの合計最大時間（秒）です。",
+    "readonly_mode": "読み取り専用モードではこの操作はできません。"
   },
   "totp": {
     "prompt": "TOTP コードを入力してください。"
@@ -1982,5 +1999,12 @@
     "required": "{{field}} は必須です。",
     "service_required_for_ban": "サービス単位の遮断には、サービスを選択する必要があります。",
     "zerossl_email_or_api_key_required": "ZeroSSL には、メールアドレスまたは ZeroSSL API キーのいずれかが必要です。"
+  },
+  "plugins": {
+    "multivalue": {
+      "show_less": "表示を減らす",
+      "more_value": "件の値",
+      "more_values": "件の値"
+    }
   }
 }
