@@ -1,4 +1,4 @@
-FROM redhat/ubi10:10.2@sha256:7495bfa53ae7a81a58aeface0bb4858d12741832c542c29dc690d67b183b73b0 AS builder
+FROM redhat/ubi10:10.2@sha256:0e8ccad7d35f5fd756f4f2202f018b8d3c3e8bb9af8e627d874239381a00ab41 AS builder
 
 ENV OS=rhel
 ENV OS_VERSION=10
@@ -148,7 +148,7 @@ RUN if [ "$SKIP_MINIFY" != "yes" ] && [ "$SKIP_MINIFY_HTML" != "yes" ]; then \
     echo "Skipping HTML minification"; \
     fi
 
-FROM redhat/ubi10:10.2@sha256:7495bfa53ae7a81a58aeface0bb4858d12741832c542c29dc690d67b183b73b0
+FROM redhat/ubi10:10.2@sha256:0e8ccad7d35f5fd756f4f2202f018b8d3c3e8bb9af8e627d874239381a00ab41
 
 # Install fpm
 RUN dnf install -y wget redhat-rpm-config rpm-build yum-utils gcc make && \
