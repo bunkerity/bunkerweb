@@ -157,10 +157,19 @@ def get_logs(logger: Logger, _type: Literal["bunkerweb", "controller", "schedule
     return logs
 
 
-def run_command(logger: Logger, _type: Literal["bunkerweb", "controller", "scheduler", "database", "api"], command: List[str]) -> Tuple[int, str]:
+def run_command(
+    logger: Logger,
+    _type: Literal["bunkerweb", "controller", "scheduler", "database", "api"],
+    command: List[str],
+    *,
+    user: str = "",
+    strip_output: bool = True,
+) -> Tuple[int, str]:
     exit_code, output = get_container(logger, _type).exec_run(
         command,
         stdout=True,
         stderr=True,
+        user=user,
     )
-    return exit_code, output.decode("utf-8").strip()
+    text = output.decode("utf-8")
+    return exit_code, text.strip() if strip_output else text

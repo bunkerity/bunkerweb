@@ -110,8 +110,15 @@ def get_logs(
     files = {"bunkerweb": "error.log", "scheduler": "scheduler.log", "ui": "ui.log", "api": "api.log"}
     if log_from not in files:
         raise ValueError(f"Unsupported Linux log source: {log_from}")
-    with ERROR_LOG_FILE.with_name(files[log_from]).open("r", encoding="utf-8") as file:
-        lines = file.readlines()
+    if IS_FREEBSD:
+        with ERROR_LOG_FILE.with_name(files[log_from]).open("r", encoding="utf-8") as file:
+            lines = file.readlines()
+    else:
+        path = f"/var/log/bunkerweb/{files[log_from]}"
+        status, output = run_docker_command(logger, "bunkerweb", ["cat", path], user="root", strip_output=False)
+        if status:
+            raise RuntimeError(f"Failed to read Linux log {path} (exit {status}): {output.strip()}")
+        lines = output.splitlines(keepends=True)
     return _linux_log_lines(lines, since) if since is not None else lines
 
 

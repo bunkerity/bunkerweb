@@ -5,7 +5,8 @@ import logging
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
-from types import ModuleType
+from types import ModuleType, SimpleNamespace
+from unittest.mock import Mock
 
 import pytest
 
@@ -24,9 +25,71 @@ def linux_logs(monkeypatch, tmp_path):
     module = importlib.util.module_from_spec(spec)
     monkeypatch.setitem(sys.modules, alias, module)
     spec.loader.exec_module(module)
+    monkeypatch.setattr(module, "IS_FREEBSD", False)
+    monkeypatch.setattr(module, "run_docker_command", lambda _logger, _service, command, **_: (0, (tmp_path / Path(command[-1]).name).read_text()))
     monkeypatch.setattr(module, "ERROR_LOG_FILE", tmp_path / "error.log")
     (tmp_path / "error.log").write_text("wrong stream\n")
     return module, tmp_path
+
+
+@pytest.mark.parametrize("service,filename", [("bunkerweb", "error.log"), ("scheduler", "scheduler.log"), ("ui", "ui.log"), ("api", "api.log")])
+@pytest.mark.parametrize(
+    "text,lines",
+    [
+        ("  ❌ record\n  continuation\n\n", ["  ❌ record\n", "  continuation\n", "\n"]),
+        ("record without final newline", ["record without final newline"]),
+        ("", []),
+    ],
+)
+def test_linux_reads_container_file_as_root_without_changing_lines(linux_logs, monkeypatch, service, filename, text, lines):
+    module, _ = linux_logs
+    monkeypatch.setattr(module, "IS_FREEBSD", False)
+    read = Mock(return_value=(0, text))
+    monkeypatch.setattr(module, "run_docker_command", read)
+    logger = logging.getLogger(__name__)
+    assert module.get_logs(logger, "Linux", log_from=service) == lines
+    read.assert_called_once_with(logger, "bunkerweb", ["cat", f"/var/log/bunkerweb/{filename}"], user="root", strip_output=False)
+
+
+def test_linux_filters_container_records_and_continuations(linux_logs, monkeypatch):
+    module, _ = linux_logs
+    monkeypatch.setattr(module, "IS_FREEBSD", False)
+    read = Mock(return_value=(0, "2026/11/06 10:00:59 old\nold frame\n2026/11/06 10:01:00 current\n  current frame\n"))
+    monkeypatch.setattr(module, "run_docker_command", read)
+    assert module.get_logs(logging.getLogger(__name__), "Linux", "2026-11-06T10:01:00+00:00") == [
+        "2026/11/06 10:01:00 current\n",
+        "  current frame\n",
+    ]
+
+
+@pytest.mark.parametrize("status", [1, 127])
+def test_linux_container_read_failure_surfaces(linux_logs, monkeypatch, status):
+    module, _ = linux_logs
+    monkeypatch.setattr(module, "IS_FREEBSD", False)
+    monkeypatch.setattr(module, "run_docker_command", Mock(return_value=(status, "cat: /var/log/bunkerweb/error.log: read failed\n")))
+    with pytest.raises(RuntimeError, match=rf"error.log.*{status}.*read failed"):
+        module.get_logs(logging.getLogger(__name__), "Linux")
+
+
+def test_freebsd_reads_host_file_without_docker(linux_logs, monkeypatch):
+    module, directory = linux_logs
+    monkeypatch.setattr(module, "IS_FREEBSD", True)
+    (directory / "scheduler.log").write_text("❌ migration failed\n")
+    read = Mock(side_effect=AssertionError("FreeBSD must read native logs"))
+    monkeypatch.setattr(module, "run_docker_command", read)
+    assert module.get_logs(logging.getLogger(__name__), "Linux", log_from="scheduler") == ["❌ migration failed\n"]
+    read.assert_not_called()
+
+
+@pytest.mark.parametrize("options,want", [({}, "record"), ({"user": "root", "strip_output": False}, "  record\n\n")])
+def test_docker_command_preserves_output_only_when_requested(monkeypatch, options, want):
+    spec = importlib.util.spec_from_file_location("ci_linux_docker_utils", ROOT / "tests/utils/docker.py")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    execute = Mock(return_value=(0, b"  record\n\n"))
+    monkeypatch.setattr(module, "get_container", lambda *_: SimpleNamespace(exec_run=execute))
+    assert module.run_command(logging.getLogger(__name__), "bunkerweb", ["cat", "/var/log/bunkerweb/error.log"], **options) == (0, want)
+    assert execute.call_args.kwargs.get("user", "") == options.get("user", "")
 
 
 def test_linux_logs_exclude_prior_action(linux_logs):
