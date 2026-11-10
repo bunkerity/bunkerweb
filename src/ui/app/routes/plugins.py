@@ -648,7 +648,7 @@ def custom_plugin_page(plugin: str):
                 plugin_page = '<div class="mt-2 mb-2 alert alert-danger text-center" role="alert">An error occurred while rendering the plugin page<br/>See logs for more details</div>'
 
             # Clean up temporary directories if extracted from database
-            if not str(tmp_page_dir).startswith((str(EXTERNAL_PLUGINS_PATH), str(PRO_PLUGINS_PATH))):
+            if tmp_page_dir.is_relative_to(TMP_DIR):
                 rmtree(tmp_page_dir.parent, ignore_errors=True)
 
     return render_template("plugin_page.html", plugin_page=plugin_page, plugin=plugin_data, is_used=is_used, is_metrics=is_metrics_on, pre_render=pre_render)

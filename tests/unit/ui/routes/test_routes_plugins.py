@@ -440,6 +440,20 @@ def test_a_used_plugin_page_is_rendered_from_its_template_and_pre_render(h, plug
     assert context["pre_render"]["data"] == {"greeting": "hello"}
 
 
+@pytest.mark.parametrize("root_name", ["core", "ext"])
+def test_plugin_page_get_keeps_on_disk_plugin_dir(h, plug, root_name):
+    ui = _install(h, root_name=root_name, name="demo", actions="def pre_render(**kwargs):\n    return {}\n", template="<p>demo</p>")
+    h.config.get_plugins.return_value = {"demo": {"name": "Demo", "type": "core" if root_name == "core" else "external"}}
+    h.db.get_config.return_value = {"USE_METRICS": "yes", "USE_DEMO": "yes", "SERVER_NAME": "a.example.com"}
+
+    response = h.client(admin=True).get("/plugins/demo")
+
+    assert response.status_code == 200
+    assert h.renders[-1][1]["plugin_page"] == "<p>demo</p>"
+    assert (ui / "template.html").is_file()
+    assert (ui / "actions.py").is_file()
+
+
 def test_the_page_escapes_what_the_pre_render_returns(h, plug):
     _install(h, actions='def pre_render(**kw):\n    return {"greeting": "<script>x</script>"}\n')
 
