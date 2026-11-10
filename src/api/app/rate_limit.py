@@ -423,6 +423,11 @@ def _build_storage(cfg: Dict[str, Any]) -> Tuple[str, Dict[str, Any]]:
         storage_options.setdefault("socket_connect_timeout", timeout_ms / 1000.0)
         storage_options.setdefault("socket_keepalive", True)
         storage_options.setdefault("max_connections", keepalive_pool)
+        if redis_ssl:
+            # redis-py verifies unless told otherwise; only an explicit "no" turns it off, as in the Web UI.
+            ssl_verify = str(_env_or_cfg("REDIS_SSL_VERIFY", "yes") or "yes").lower() != "no"
+            ssl_cert_reqs = "required" if ssl_verify else "none"
+            storage_options.setdefault("ssl_cert_reqs", ssl_cert_reqs)
 
         cluster_nodes = str(_env_or_cfg("REDIS_CLUSTER_NODES", "") or "").strip()
         config_error = cluster_config_error(cluster_nodes, sentinels, str(_env_or_cfg("REDIS_DATABASE", "0") or "0").strip())
@@ -452,10 +457,6 @@ def _build_storage(cfg: Dict[str, Any]) -> Tuple[str, Dict[str, Any]]:
             storage = f"redis+cluster://[{first.host}]:{first.port}" if ":" in first.host else f"redis+cluster://{first.host}:{first.port}"
             storage_options["startup_nodes"] = startup_nodes
             storage_options.setdefault("ssl", redis_ssl)
-            if redis_ssl:
-                # redis-py verifies unless told otherwise; only an explicit "no" turns it off, as in the Web UI.
-                ssl_verify = str(_env_or_cfg("REDIS_SSL_VERIFY", "yes") or "yes").lower() != "no"
-                storage_options.setdefault("ssl_cert_reqs", "required" if ssl_verify else "none")
             if username:
                 storage_options.setdefault("username", username)
             if password:
@@ -494,6 +495,8 @@ def _build_storage(cfg: Dict[str, Any]) -> Tuple[str, Dict[str, Any]]:
             sentinel_kwargs.setdefault("socket_connect_timeout", storage_options.get("socket_connect_timeout"))
             sentinel_kwargs.setdefault("socket_keepalive", storage_options.get("socket_keepalive"))
             sentinel_kwargs.setdefault("ssl", redis_ssl)
+            if redis_ssl:
+                sentinel_kwargs.setdefault("ssl_cert_reqs", ssl_cert_reqs)
 
             # Explicit None values prevent limits from reusing master auth
             # when Sentinel auth is intentionally unset.
