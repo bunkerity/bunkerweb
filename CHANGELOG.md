@@ -71,6 +71,7 @@
 - [PERF] `antibot`: the challenge pages are about 30% lighter once minified (about 20% with gzip or Brotli), with no visible change.
 - [DOCS] `linux`: the custom configuration section says where NGINX includes each type and how to check a file is live.
 - [DOCS] `reverseproxy`: `REVERSE_PROXY_KEEPALIVE` does not pool backend connections by itself; the docs show how to pool with a named upstream.
+- [DOCS] `core`: a new section shows how to send the access, error and ModSecurity audit logs to Splunk, with a `key=value` access log and a JSON audit log.
 - [MISC] `headers`: the default `PERMISSIONS_POLICY` also denies `semantic-embedder` and drops `browsing-topics`, which Chromium removed.
 - [DEPS] Updated lua-resty-session to v4.3.0
 

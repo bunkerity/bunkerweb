@@ -3148,6 +3148,131 @@ log {
 };
 ```
 
+### Envoyer les journaux vers Splunk {#send-logs-to-splunk}
+
+BunkerWeb n'a besoin d'aucun plugin Splunk. Un Splunk Universal Forwarder lit les fichiers journaux, et trois réglages font écrire à BunkerWeb des formats que Splunk sait interpréter : un second journal d'accès au format `key=value`, le journal d'erreurs existant et un journal d'audit ModSecurity en JSON.
+
+**1. Ajouter un journal d'accès pour Splunk.** Chaque `ACCESS_LOG_N` est associé au `LOG_FORMAT_N` de même suffixe : `access.log` garde donc son format par défaut (l'interface web le lit) et le nouveau fichier reçoit le sien. Ajoutez ceci à `/etc/bunkerweb/variables.env`, avec un autre suffixe si `_1` est déjà pris :
+
+```conf
+ACCESS_LOG_1=/var/log/bunkerweb/access-splunk.log
+LOG_FORMAT_1=time=$time_iso8601 host=$host client=$remote_addr request_id=$request_id method=$request_method uri="$request_uri" status=$status bytes=$body_bytes_sent ua="$http_user_agent" reason=$reason modsec_rules="$modsecurity_rules" modsec_score=$modsecurity_anomaly_score modsec_id=$modsecurity_unique_id
+```
+
+!!! warning "Écrire les valeurs exactement comme indiqué"
+    BunkerWeb lit `variables.env` littéralement : pas de guillemets autour d'une valeur, et pas de commentaire après une valeur sur la même ligne. Un commentaire en fin de ligne devient une partie de la valeur. Le réglage est alors ignoré avec `Ignoring variable ... doesn't match regex` dans le journal du scheduler, et la valeur par défaut s'applique. Placez les commentaires sur leur propre ligne.
+
+**2. Facultatif : garder les corps de requête hors du journal d'audit.** La valeur par défaut de `MODSECURITY_SEC_AUDIT_LOG_PARTS` est `BCFH`, et la partie `C` écrit le corps de la requête dans chaque entrée d'audit. Traitez le fichier comme sensible, ou retirez cette partie :
+
+```conf
+MODSECURITY_SEC_AUDIT_LOG_PARTS=BFH
+```
+
+**3. Écrire le journal d'audit en JSON.** Créez `/etc/bunkerweb/configs/modsec/audit-json.conf` avec cette seule ligne, puis donnez au scheduler l'accès au dossier comme décrit dans [Configurations personnalisées](#custom-configurations) :
+
+```conf
+SecAuditLogFormat JSON
+```
+
+```shell
+sudo chown -R root:nginx /etc/bunkerweb/configs && \
+sudo chmod -R 770 /etc/bunkerweb/configs
+```
+
+**4. Redémarrer les services.**
+
+```shell
+sudo systemctl restart bunkerweb && \
+sudo systemctl restart bunkerweb-scheduler
+```
+
+**5. Vérifier les fichiers.** Envoyez une requête que ModSecurity bloque, par exemple une URL avec `?q=<script>alert(1)</script>` et un `User-Agent` de type navigateur (un `User-Agent` vide est déjà bloqué par le Core Rule Set seul). Lisez ensuite la dernière ligne de chaque fichier. Le journal d'audit contient un objet JSON par ligne :
+
+```shell
+sudo tail -n 1 /var/log/bunkerweb/access-splunk.log
+sudo tail -n 1 /var/log/bunkerweb/modsec_audit.log | jq .transaction.unique_id
+```
+
+**6. Configurer le forwarder.** Les fichiers journaux de BunkerWeb appartiennent à `nginx:nginx` et les paquets en restreignent l'accès à cet utilisateur et à ce groupe : ajoutez donc l'utilisateur qui exécute le forwarder au groupe `nginx`. Surveillez ensuite les trois fichiers dans `inputs.conf`, avec un sourcetype pour chacun :
+
+```conf
+[monitor:///var/log/bunkerweb/access-splunk.log]
+sourcetype = bunkerweb:access
+
+[monitor:///var/log/bunkerweb/error.log]
+sourcetype = bunkerweb:error
+
+[monitor:///var/log/bunkerweb/modsec_audit.log]
+sourcetype = bunkerweb:modsec_audit
+```
+
+Dans `props.conf`, faites interpréter les entrées d'audit comme du JSON sur le search head, et augmentez `TRUNCATE` sur les indexeurs (ou le heavy forwarder). Les entrées sont longues : une seule sonde XSS a écrit 7,3 Ko, et une requête avec plusieurs charges d'attaque en a écrit 20, alors que le `TRUNCATE` par défaut coupe les événements à 10 000 octets.
+
+```conf
+[bunkerweb:modsec_audit]
+KV_MODE = json
+TRUNCATE = 100000
+```
+
+`access-splunk.log` correspond au motif `/var/log/bunkerweb/*.log` de la politique décrite dans [Rétention des fichiers journaux](#log-file-retention) : `logrotate` le prend donc en charge comme les autres fichiers.
+
+**Champs du journal d'accès**
+
+| Champ          | Contenu                                                                                                                                                             |
+| :------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `time`         | `$time_iso8601`                                                                                                                                                     |
+| `host`         | `$host`                                                                                                                                                             |
+| `client`       | `$remote_addr`                                                                                                                                                      |
+| `request_id`   | `$request_id`, la même valeur que le quatrième champ de la ligne par défaut de `access.log`                                                                         |
+| `method`       | `$request_method`                                                                                                                                                   |
+| `uri`          | `$request_uri`, avec la chaîne de requête                                                                                                                           |
+| `status`       | `$status`                                                                                                                                                           |
+| `bytes`        | `$body_bytes_sent`                                                                                                                                                  |
+| `ua`           | `$http_user_agent`                                                                                                                                                  |
+| `reason`       | L'identifiant du plugin lorsqu'un plugin a refusé la requête (`blacklist`, `limit`, ...). Vide sinon, **y compris lorsque ModSecurity l'a refusée**                 |
+| `modsec_rules` | Identifiants de règles exposés par l’intégration CRS de BunkerWeb, séparés et précédés d’un espace (ils peuvent se répéter). `-` si non renseignés ; liste non exhaustive des correspondances |
+| `modsec_score` | Le score d’anomalie exposé par l’intégration CRS de BunkerWeb, `-` si non renseigné |
+| `modsec_id` | L’identifiant exposé par l’intégration CRS de BunkerWeb, `-` si non renseigné. Lorsqu’il est présent, il correspond à `transaction.unique_id` de l’entrée d’audit associée |
+
+Trois requêtes telles qu'elles apparaissent dans `access-splunk.log` : une autorisée, une refusée par le plugin `blacklist` et une refusée par ModSecurity (`ua` abrégé).
+
+```text
+time=2026-11-10T08:11:02+00:00 host=www.example.com client=10.77.52.1 request_id=a1b31236225cf6d34fec07e089838f48 method=GET uri="/spl-allowed" status=404 bytes=69298 ua="Mozilla/5.0 ..." reason= modsec_rules="-" modsec_score=- modsec_id=-
+time=2026-11-10T08:11:02+00:00 host=www.example.com client=10.77.52.1 request_id=260b845a6bb21e46656c42e7a682f2a1 method=GET uri="/spl-blacklisted" status=403 bytes=69297 ua="Mozilla/5.0 ..." reason=blacklist modsec_rules="-" modsec_score=- modsec_id=-
+time=2026-11-10T08:11:02+00:00 host=www.example.com client=10.77.52.1 request_id=f3ddfff5a4652efdeb3daa645dee0827 method=GET uri="/spl-xss?q=<script>alert(1)</script>" status=403 bytes=69297 ua="Mozilla/5.0 ..." reason= modsec_rules=" 941100 941110 941160 941390" modsec_score=20 modsec_id=179429826266.143898
+```
+
+La première requête renvoie `404` parce que la pile de test n'a pas de backend. L'entrée d'audit correspondante, abrégée, commence par le même identifiant :
+
+```json
+{"transaction":{"client_ip":"10.77.52.1","time_stamp":"Tue Nov 10 08:11:02 2026","unique_id":"179429826266.143898","request":{"method":"GET","uri":"/spl-xss?q=<script>alert(1)</script>","body":""},"response":{"http_code":403},"messages":[{"message":"XSS Attack Detected via libinjection","details":{"ruleId":"941100","severity":"2"}}]}}
+```
+
+!!! warning "Limites"
+    - **Pas de journal d'accès en JSON.** `LOG_FORMAT_N` est écrit entre apostrophes dans la configuration NGINX, et il n'y a pas d'emplacement pour `escape=json`. Utilisez `key=value` pour le journal d'accès, et JSON uniquement pour le journal d'audit.
+    - **Pas d'apostrophe dans une valeur de `LOG_FORMAT_N`.** NGINX rejette la configuration. NGINX échappe un guillemet double dans une valeur journalisée sous la forme `\x22` (`ua="Mozilla/5.0 \x22quoted\x22"`).
+    - **Les métadonnées ModSecurity dépendent des règles.** Les refus pour anomalie du CRS par défaut renseignent `modsec_id`, `modsec_rules` et `modsec_score`, avec un `reason` vide. Une règle `deny` personnalisée sans les actions `setvar` correspondantes pour `tx.bunkerweb_*` peut laisser ces champs à `-`. Le journal d’accès seul ne permet alors pas d’identifier ce refus ; consultez le journal d’erreurs ou d’audit.
+    - **Le journal d’audit n’est ni un journal de requêtes ni une preuve de blocage.** La valeur par défaut de `MODSECURITY_SEC_AUDIT_ENGINE` (`RelevantOnly`) peut aussi enregistrer des transactions autorisées lorsqu’une règle journalise une correspondance (y compris en mode `DetectionOnly` ou avec un score inférieur au seuil de blocage), ou lorsque le statut correspond à `SecAuditLogRelevantStatus`. Dans le test ci-dessus, seuls les refus ModSecurity ont produit des entrées.
+    - **La partie `C` contient les corps de requête**, y compris les champs de formulaire et les identifiants de connexion. Utilisez `BFH` sauf si vous avez besoin des corps, et limitez les droits de lecture de l'index.
+
+!!! info "Docker, Autoconf, Swarm et Kubernetes"
+    Les images relient `access.log`, `error.log` et `modsec_audit.log` au flux de journaux propre du conteneur (voir [Rétention des fichiers journaux](#log-file-retention)) : un forwarder n'a donc aucun fichier à lire pour eux, et un fichier écrit par `ACCESS_LOG_1` reste dans le conteneur, où rien ne le fait tourner. Appliquez le format d'audit JSON avec un réglage de configuration personnalisée sur le scheduler plutôt qu'avec un fichier : `CUSTOM_CONF_MODSEC_audit-json=SecAuditLogFormat JSON`. Les entrées JSON apparaissent alors dans `docker logs` du conteneur `bunkerweb`, une par ligne, parmi les lignes du journal d'erreurs : les lignes qui commencent par `{` sont les entrées d'audit.
+
+    Pour envoyer le flux vers Splunk, utilisez le [pilote de journalisation `splunk` de Docker](https://docs.docker.com/engine/logging/drivers/splunk/) avec un jeton HTTP Event Collector. Le pilote envoie ensemble les lignes d'accès, d'erreur et d'audit sous un seul sourcetype : seul leur contenu permet de les distinguer. Définissez le format `key=value` sur `LOG_FORMAT` (sans suffixe) pour que les lignes d'accès envoyées le portent. Cela remplace le format par défaut dans `access.log`.
+
+    ```yaml
+    services:
+      bunkerweb:
+        image: bunkerity/bunkerweb:1.6.18-rc3
+        logging:
+          driver: splunk
+          options:
+            splunk-url: "https://splunk.example.com:8088"
+            splunk-token: "<HEC token>"
+            splunk-format: raw
+            splunk-sourcetype: "bunkerweb:docker"
+    ```
+
 ## Meilleures pratiques de journalisation Docker {#docker-logging-best-practices}
 
 Lors de l'utilisation de Docker, il est important de gérer les journaux des conteneurs pour éviter qu'ils ne consomment un espace disque excessif. Par défaut, Docker utilise le pilote de journalisation `json-file`, ce qui peut entraîner des fichiers journaux très volumineux s'il n'est pas configuré.

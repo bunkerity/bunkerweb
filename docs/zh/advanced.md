@@ -3146,6 +3146,131 @@ log {
 };
 ```
 
+### 将日志发送到 Splunk {#send-logs-to-splunk}
+
+BunkerWeb 不需要任何 Splunk 插件。Splunk Universal Forwarder 读取日志文件，三项设置让 BunkerWeb 以 Splunk 能够解析的格式写入日志：一个 `key=value` 格式的第二访问日志、现有的错误日志，以及 JSON 格式的 ModSecurity 审计日志。
+
+**1. 添加供 Splunk 使用的访问日志。** 每个 `ACCESS_LOG_N` 与后缀相同的 `LOG_FORMAT_N` 配对，因此 `access.log` 保持默认格式（Web 界面会读取它），新文件使用自己的格式。将以下内容添加到 `/etc/bunkerweb/variables.env`；如果 `_1` 已被占用，请改用其他后缀：
+
+```conf
+ACCESS_LOG_1=/var/log/bunkerweb/access-splunk.log
+LOG_FORMAT_1=time=$time_iso8601 host=$host client=$remote_addr request_id=$request_id method=$request_method uri="$request_uri" status=$status bytes=$body_bytes_sent ua="$http_user_agent" reason=$reason modsec_rules="$modsecurity_rules" modsec_score=$modsecurity_anomaly_score modsec_id=$modsecurity_unique_id
+```
+
+!!! warning "请严格按示例书写值"
+    BunkerWeb 按字面读取 `variables.env`：值两侧不要加引号，同一行的值后面也不要加注释。行尾注释会成为值的一部分。该设置随后会被忽略，调度器日志中会出现 `Ignoring variable ... doesn't match regex`，并使用默认值。请把注释写在单独一行。
+
+**2. 可选：不在审计日志中保留请求正文。** `MODSECURITY_SEC_AUDIT_LOG_PARTS` 的默认值为 `BCFH`，其中 `C` 部分会把请求正文写入每条审计记录。请将该文件视为敏感文件，或去掉该部分：
+
+```conf
+MODSECURITY_SEC_AUDIT_LOG_PARTS=BFH
+```
+
+**3. 以 JSON 格式写入审计日志。** 创建 `/etc/bunkerweb/configs/modsec/audit-json.conf`，内容仅此一行，然后按照[自定义配置](#custom-configurations)中的说明让调度器可以访问该文件夹：
+
+```conf
+SecAuditLogFormat JSON
+```
+
+```shell
+sudo chown -R root:nginx /etc/bunkerweb/configs && \
+sudo chmod -R 770 /etc/bunkerweb/configs
+```
+
+**4. 重启服务。**
+
+```shell
+sudo systemctl restart bunkerweb && \
+sudo systemctl restart bunkerweb-scheduler
+```
+
+**5. 检查文件。** 发送一个会被 ModSecurity 拦截的请求，例如带有 `?q=<script>alert(1)</script>` 的 URL，并使用类似浏览器的 `User-Agent`（空的 `User-Agent` 本身就会被核心规则集拦截）。然后读取每个文件的最后一行。审计日志每行是一个 JSON 对象：
+
+```shell
+sudo tail -n 1 /var/log/bunkerweb/access-splunk.log
+sudo tail -n 1 /var/log/bunkerweb/modsec_audit.log | jq .transaction.unique_id
+```
+
+**6. 配置 forwarder。** BunkerWeb 的日志文件属于 `nginx:nginx`，软件包将访问权限限制为该用户和该组，因此请把运行 forwarder 的用户加入 `nginx` 组。然后在 `inputs.conf` 中监控这三个文件，每个文件使用一个 sourcetype：
+
+```conf
+[monitor:///var/log/bunkerweb/access-splunk.log]
+sourcetype = bunkerweb:access
+
+[monitor:///var/log/bunkerweb/error.log]
+sourcetype = bunkerweb:error
+
+[monitor:///var/log/bunkerweb/modsec_audit.log]
+sourcetype = bunkerweb:modsec_audit
+```
+
+在 `props.conf` 中，让搜索头把审计记录按 JSON 解析，并在索引器（或重型 forwarder）上调高 `TRUNCATE`。记录很长：一次 XSS 探测写入了 7.3 KB，一个包含多种攻击载荷的请求写入了 20 KB，而默认的 `TRUNCATE` 会在 10,000 字节处截断事件。
+
+```conf
+[bunkerweb:modsec_audit]
+KV_MODE = json
+TRUNCATE = 100000
+```
+
+`access-splunk.log` 符合[日志文件保留策略](#log-file-retention)中的 `/var/log/bunkerweb/*.log` 模式，因此 `logrotate` 会像处理其他文件一样处理它。
+
+**访问日志字段**
+
+| 字段           | 内容                                                                                              |
+| :------------- | :------------------------------------------------------------------------------------------------ |
+| `time`         | `$time_iso8601`                                                                                   |
+| `host`         | `$host`                                                                                           |
+| `client`       | `$remote_addr`                                                                                    |
+| `request_id`   | `$request_id`，与默认 `access.log` 行的第四个字段相同                                             |
+| `method`       | `$request_method`                                                                                 |
+| `uri`          | `$request_uri`，包含查询字符串                                                                    |
+| `status`       | `$status`                                                                                         |
+| `bytes`        | `$body_bytes_sent`                                                                                |
+| `ua`           | `$http_user_agent`                                                                                |
+| `reason`       | 插件拒绝请求时为插件 ID（`blacklist`、`limit` 等）。其他情况为空，**包括 ModSecurity 拒绝的请求** |
+| `modsec_rules` | BunkerWeb 的 CRS 集成提供的规则 ID，以空格分隔并以空格开头（ID 可重复）。未设置时为 `-`；并非所有命中的完整记录 |
+| `modsec_score` | BunkerWeb 的 CRS 集成提供的异常分数，未设置时为 `-` |
+| `modsec_id` | BunkerWeb 的 CRS 集成提供的 ID，未设置时为 `-`。设置后等于对应审计记录的 `transaction.unique_id` |
+
+三个请求在 `access-splunk.log` 中的样子：一个被放行，一个被 `blacklist` 插件拒绝，一个被 ModSecurity 拒绝（`ua` 已缩短）。
+
+```text
+time=2026-11-10T08:11:02+00:00 host=www.example.com client=10.77.52.1 request_id=a1b31236225cf6d34fec07e089838f48 method=GET uri="/spl-allowed" status=404 bytes=69298 ua="Mozilla/5.0 ..." reason= modsec_rules="-" modsec_score=- modsec_id=-
+time=2026-11-10T08:11:02+00:00 host=www.example.com client=10.77.52.1 request_id=260b845a6bb21e46656c42e7a682f2a1 method=GET uri="/spl-blacklisted" status=403 bytes=69297 ua="Mozilla/5.0 ..." reason=blacklist modsec_rules="-" modsec_score=- modsec_id=-
+time=2026-11-10T08:11:02+00:00 host=www.example.com client=10.77.52.1 request_id=f3ddfff5a4652efdeb3daa645dee0827 method=GET uri="/spl-xss?q=<script>alert(1)</script>" status=403 bytes=69297 ua="Mozilla/5.0 ..." reason= modsec_rules=" 941100 941110 941160 941390" modsec_score=20 modsec_id=179429826266.143898
+```
+
+第一个请求返回 `404`，因为测试环境没有后端。对应的审计记录（已缩短）以相同的 ID 开头：
+
+```json
+{"transaction":{"client_ip":"10.77.52.1","time_stamp":"Tue Nov 10 08:11:02 2026","unique_id":"179429826266.143898","request":{"method":"GET","uri":"/spl-xss?q=<script>alert(1)</script>","body":""},"response":{"http_code":403},"messages":[{"message":"XSS Attack Detected via libinjection","details":{"ruleId":"941100","severity":"2"}}]}}
+```
+
+!!! warning "限制"
+    - **没有 JSON 访问日志。** `LOG_FORMAT_N` 在 NGINX 配置中写在单引号之间，没有位置放置 `escape=json`。访问日志请使用 `key=value`，仅审计日志使用 JSON。
+    - **`LOG_FORMAT_N` 的值中不能含有单引号。** NGINX 会拒绝该配置。NGINX 会把被记录的值中的双引号转义为 `\x22`（`ua="Mozilla/5.0 \x22quoted\x22"`）。
+    - **ModSecurity 元数据取决于规则。** 默认 CRS 的异常拦截会填充 `modsec_id`、`modsec_rules` 和 `modsec_score`，而 `reason` 为空。自定义 `deny` 规则若没有相应的 `tx.bunkerweb_*` `setvar` 操作，这些字段可能仍为 `-`。此时仅凭访问日志无法识别拦截，应查看错误日志或审计日志。
+    - **审计日志既不是请求日志，也不是拦截证明。** 默认的 `MODSECURITY_SEC_AUDIT_ENGINE`（`RelevantOnly`）也可能记录被放行的事务：规则记录命中时（包括 `DetectionOnly` 模式或分数低于拦截阈值时），或者状态码匹配 `SecAuditLogRelevantStatus` 时。在上面的测试中，只有 ModSecurity 的拒绝产生了记录。
+    - **`C` 部分包含请求正文**，其中有表单字段和凭据。除非需要正文，否则请使用 `BFH`，并限制谁可以读取该索引。
+
+!!! info "Docker、Autoconf、Swarm 和 Kubernetes"
+    这些镜像把 `access.log`、`error.log` 和 `modsec_audit.log` 链接到容器自身的日志流（参见[日志文件保留策略](#log-file-retention)），因此 forwarder 没有文件可读；由 `ACCESS_LOG_1` 写入的文件留在容器内，没有任何机制轮转它。请在调度器上用自定义配置设置而不是文件来启用 JSON 审计格式：`CUSTOM_CONF_MODSEC_audit-json=SecAuditLogFormat JSON`。JSON 记录随后会出现在 `bunkerweb` 容器的 `docker logs` 中，每条一行，夹杂在错误日志行之间：以 `{` 开头的行就是审计记录。
+
+    要把日志流发送到 Splunk，请使用 [Docker `splunk` 日志驱动](https://docs.docker.com/engine/logging/drivers/splunk/)和 HTTP Event Collector 令牌。该驱动会把访问、错误和审计行一起以同一个 sourcetype 发送，因此只能根据内容区分它们。请把 `key=value` 格式设置在 `LOG_FORMAT`（不带后缀）上，使发送的访问行采用该格式。这会替换 `access.log` 中的默认格式。
+
+    ```yaml
+    services:
+      bunkerweb:
+        image: bunkerity/bunkerweb:1.6.18-rc3
+        logging:
+          driver: splunk
+          options:
+            splunk-url: "https://splunk.example.com:8088"
+            splunk-token: "<HEC token>"
+            splunk-format: raw
+            splunk-sourcetype: "bunkerweb:docker"
+    ```
+
 ## Docker 日志记录最佳实践 {#docker-logging-best-practices}
 
 使用 Docker 时，管理容器日志以防止其占用过多磁盘空间非常重要。默认情况下，Docker 使用 `json-file` 日志记录驱动程序，如果未进行配置，可能会导致日志文件非常大。
