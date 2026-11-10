@@ -65,6 +65,8 @@ emit({initialized=initialized,configured=configured,config=CONFIG,checks=p.ctx.b
         "storage": "cookie",
         "revocation": "shm",
         "revocation_fail_mode": "open",
+        "revocation_cache_ttl": 0,
+        "revocation_error_cache_ttl": 0,
         "shm": {"zone": "sessions_revocation", "prefix": "revoked_"},
     }
     assert sorted(out["checks"]) == [["IP", "203.0.113.1"], ["USER_AGENT", "fixture-agent"]]

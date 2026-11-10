@@ -165,6 +165,10 @@ function sessions:init()
 	if shared["sessions_revocation"] then
 		config.revocation = "shm"
 		config.revocation_fail_mode = "open"
+		-- Read shared revocations directly so destroy() takes effect across workers immediately.
+		config.revocation_cache_ttl = 0
+		-- Upstream still reads the uninitialized LRU when only the error cache remains enabled.
+		config.revocation_error_cache_ttl = 0
 		config.shm = { zone = "sessions_revocation", prefix = "revoked_" }
 	else
 		self.logger:log(ERR, "lua_shared_dict sessions_revocation is missing, cookie session revocation is disabled")
