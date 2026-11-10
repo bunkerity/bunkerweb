@@ -115,16 +115,18 @@ The value is a list of reasons separated by spaces, among `crowdsec`, `bad_behav
 
 === "Network & Port Settings"
 
-    | Setting                 | Default      | Context | Multiple | Description                                                                                                                                                                                   |
-    | ----------------------- | ------------ | ------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-    | `HTTP_PORT`             | `8080`       | global  | Yes      | **HTTP Port:** Port number for HTTP traffic. Leave empty to disable HTTP listening.                                                                                                           |
-    | `HTTPS_PORT`            | `8443`       | global  | Yes      | **HTTPS Port:** Port number for HTTPS traffic. Leave empty to disable HTTPS listening.                                                                                                        |
-    | `USE_IPV6`              | `no`         | global  | No       | **IPv6 Support:** Enable IPv6 connectivity.                                                                                                                                                   |
-    | `DNS_RESOLVERS`         | `127.0.0.11` | global  | No       | **DNS Resolvers:** DNS addresses of resolvers to use.                                                                                                                                         |
-    | `CLIENT_BODY_TIMEOUT`   | `10s`        | global  | No       | **Client Body Timeout:** Timeout for reading the client request body.                                                                                                                         |
-    | `CLIENT_HEADER_TIMEOUT` | `10s`        | global  | No       | **Client Header Timeout:** Timeout for reading the client request header. It also limits how long an old worker stays alive after a reload while a client has not finished its TLS handshake. |
-    | `KEEPALIVE_TIMEOUT`     | `15s`        | global  | No       | **Keepalive Timeout:** Timeout for keep-alive client connections.                                                                                                                             |
-    | `SEND_TIMEOUT`          | `10s`        | global  | No       | **Send Timeout:** Timeout for transmitting a response to the client.                                                                                                                          |
+    | Setting                 | Default      | Context   | Multiple | Description                                                                            |
+    | ----------------------- | ------------ | --------- | -------- | -------------------------------------------------------------------------------------- |
+    | `HTTP_PORT`             | `8080`       | global    | Yes      | **HTTP Port:** Port number for HTTP traffic. Leave empty to disable HTTP listening.    |
+    | `HTTPS_PORT`            | `8443`       | global    | Yes      | **HTTPS Port:** Port number for HTTPS traffic. Leave empty to disable HTTPS listening. |
+    | `USE_IPV6`              | `no`         | global    | No       | **IPv6 Support:** Enable IPv6 connectivity.                                            |
+    | `DNS_RESOLVERS`         | `127.0.0.11` | global    | No       | **DNS Resolvers:** DNS addresses of resolvers to use.                                  |
+    | `CLIENT_BODY_TIMEOUT`   | `10s`        | multisite | No       | **Client Body Timeout:** Timeout for reading the client request body.                  |
+    | `CLIENT_HEADER_TIMEOUT` | `10s`        | multisite | No       | **Client Header Timeout:** Timeout for reading the client request header.              |
+    | `KEEPALIVE_TIMEOUT`     | `15s`        | global    | No       | **Keepalive Timeout:** Timeout for keep-alive client connections.                      |
+    | `SEND_TIMEOUT`          | `10s`        | global    | No       | **Send Timeout:** Timeout for transmitting a response to the client.                   |
+
+    Set `CLIENT_HEADER_TIMEOUT` and `CLIENT_BODY_TIMEOUT` per service for long-lived gRPC streams (for example, `netbird.example.com_CLIENT_HEADER_TIMEOUT=1d`). Keep the global `CLIENT_HEADER_TIMEOUT` short: it also bounds TLS handshakes on the default server and how long incomplete handshakes can keep old workers alive after a reload. Existing `client_header_timeout` or `client_body_timeout` directives in `server-http` custom configurations keep working when the service inherits the global value. Remove the matching custom directive when setting a different per-service timeout to avoid duplicate directives.
 
 === "Stream Server Settings"
 
@@ -3002,7 +3004,7 @@ The gRPC plugin lets BunkerWeb proxy gRPC services through HTTP/2 using `grpc_pa
     `GRPC_SSL_VERIFY` only takes effect once a CA bundle is available. Provide it with `GRPC_SSL_TRUSTED_CERTIFICATE` (a path the scheduler can read) or `GRPC_SSL_TRUSTED_CERTIFICATE_DATA` (base64 or plaintext PEM), and select the source with `GRPC_SSL_TRUSTED_CERTIFICATE_PRIORITY`. The scheduler validates the bundle, caches it and distributes it to the instances. Without a usable bundle, verification stays off.
 
 !!! warning "Long-Lived Streams and Core Timeouts"
-    Long-lived or streaming RPCs may require higher generic NGINX timeouts than the global defaults. Commonly tuned settings are `CLIENT_BODY_TIMEOUT` and `CLIENT_HEADER_TIMEOUT` in the General plugin settings.
+    Long-lived or streaming RPCs may need longer `CLIENT_BODY_TIMEOUT` and `CLIENT_HEADER_TIMEOUT` values. Set them for the gRPC service in the General plugin settings; keep the global `CLIENT_HEADER_TIMEOUT` short to bound TLS handshakes and old worker lifetime after a reload.
 
 !!! tip "Multiple gRPC Backends"
     Use suffixed settings for multiple routes:

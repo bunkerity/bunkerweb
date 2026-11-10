@@ -117,16 +117,18 @@ BunkerWeb 中的某些设置支持同一功能的多个配置。要定义多组�
 
 === "网络和端口设置"
 
-    | 设置                    | 默认值       | 上下文 | 多个 | 描述                                                                                                                          |
-    | ----------------------- | ------------ | ------ | ---- | ----------------------------------------------------------------------------------------------------------------------------- |
-    | `HTTP_PORT`             | `8080`       | global | 是   | **HTTP 端口：** HTTP 流量的端口号。留空以禁用HTTP监听。                                                                       |
-    | `HTTPS_PORT`            | `8443`       | global | 是   | **HTTPS 端口：** HTTPS 流量的端口号。留空以禁用HTTPS监听。                                                                    |
-    | `USE_IPV6`              | `no`         | global | 否   | **IPv6 支持：** 启用 IPv6 连接。                                                                                              |
-    | `DNS_RESOLVERS`         | `127.0.0.11` | global | 否   | **DNS 解析器：** 要使用的解析器的 DNS 地址。                                                                                  |
-    | `CLIENT_BODY_TIMEOUT`   | `10s`        | global | 否   | **客户端请求体超时：** 读取客户端请求体的超时时间。                                                                           |
-    | `CLIENT_HEADER_TIMEOUT` | `10s`        | global | 否   | **客户端请求头超时：** 读取客户端请求头的超时时间。 它还限制了重新加载后，客户端尚未完成 TLS 握手时旧工作进程继续存活的时间。 |
-    | `KEEPALIVE_TIMEOUT`     | `15s`        | global | 否   | **Keepalive 超时：** 客户端 Keepalive 连接的超时时间。                                                                        |
-    | `SEND_TIMEOUT`          | `10s`        | global | 否   | **发送超时：** 向客户端传输响应的超时时间。                                                                                   |
+    | 设置                    | 默认值       | 上下文    | 多个 | 描述                                                       |
+    | ----------------------- | ------------ | --------- | ---- | ---------------------------------------------------------- |
+    | `HTTP_PORT`             | `8080`       | global    | 是   | **HTTP 端口：** HTTP 流量的端口号。留空以禁用HTTP监听。    |
+    | `HTTPS_PORT`            | `8443`       | global    | 是   | **HTTPS 端口：** HTTPS 流量的端口号。留空以禁用HTTPS监听。 |
+    | `USE_IPV6`              | `no`         | global    | 否   | **IPv6 支持：** 启用 IPv6 连接。                           |
+    | `DNS_RESOLVERS`         | `127.0.0.11` | global    | 否   | **DNS 解析器：** 要使用的解析器的 DNS 地址。               |
+    | `CLIENT_BODY_TIMEOUT`   | `10s`        | multisite | 否   | **客户端请求体超时：** 读取客户端请求体的超时时间。        |
+    | `CLIENT_HEADER_TIMEOUT` | `10s`        | multisite | 否   | **客户端请求头超时：** 读取客户端请求头的超时时间。        |
+    | `KEEPALIVE_TIMEOUT`     | `15s`        | global    | 否   | **Keepalive 超时：** 客户端 Keepalive 连接的超时时间。     |
+    | `SEND_TIMEOUT`          | `10s`        | global    | 否   | **发送超时：** 向客户端传输响应的超时时间。                |
+
+    对于长连接 gRPC 流，请按服务设置 `CLIENT_HEADER_TIMEOUT` 和 `CLIENT_BODY_TIMEOUT`（例如 `netbird.example.com_CLIENT_HEADER_TIMEOUT=1d`）。全局 `CLIENT_HEADER_TIMEOUT` 应保持较短：它还限制默认服务器上的 TLS 握手时间，以及重新加载后未完成的握手使旧工作进程继续存活的时间。 当服务继承全局值时，`server-http` 自定义配置中已有的 `client_header_timeout` 或 `client_body_timeout` 指令仍可正常工作。为服务设置不同的超时值时，请删除对应的自定义指令，以免产生重复指令。
 
 === "流服务器设置"
 
@@ -2997,7 +2999,7 @@ gRPC 插件允许 BunkerWeb 通过 HTTP/2 使用 `grpc_pass` 代理 gRPC 服务�
     只有在 CA 包可用时 `GRPC_SSL_VERIFY` 才会生效。可通过 `GRPC_SSL_TRUSTED_CERTIFICATE`（调度器 可读取的路径）或 `GRPC_SSL_TRUSTED_CERTIFICATE_DATA`（base64 或明文 PEM）提供，并用 `GRPC_SSL_TRUSTED_CERTIFICATE_PRIORITY` 选择来源。调度器 会校验该 CA 包、缓存并分发到各实例。若没有可用的 CA 包，校验将保持关闭。
 
 !!! warning "长连接流与核心超时"
-    长连接或流式 RPC 可能需要高于全局默认值的通用 NGINX 超时。常见需要调整的是 General 插件设置中的 `CLIENT_BODY_TIMEOUT` 和 `CLIENT_HEADER_TIMEOUT`。
+    长连接或流式 RPC 可能需要更大的 `CLIENT_BODY_TIMEOUT` 和 `CLIENT_HEADER_TIMEOUT`。请在 General 插件设置中为 gRPC 服务单独配置；全局 `CLIENT_HEADER_TIMEOUT` 应保持较短，以限制 TLS 握手时间和重新加载后旧工作进程的存活时间。
 
 !!! tip "多个 gRPC 后端"
     多路由场景请使用带后缀的配置项：

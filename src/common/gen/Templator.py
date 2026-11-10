@@ -774,7 +774,8 @@ class Templator:
         template_vars = self._base_template_vars.copy()
         template_vars["all"] = full_config
         template_vars.update(config)
-        # Derived ownership cannot be shadowed by a setting.
+        # Derived values cannot be shadowed by a setting.
+        template_vars["global_config"] = self._global_only_full_config
         template_vars["STREAM_REUSEPORT_PORTS"] = self._stream_reuseport_ports.get(server, set())
 
         failures = []

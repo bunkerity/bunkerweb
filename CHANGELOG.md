@@ -27,6 +27,7 @@
 - [FEATURE] `letsencrypt`: add Hosttech as a DNS-01 provider, through the new `certbot-dns-hosttech` plugin.
 - [FEATURE] `antibot`: new `ANTIBOT_INCLUDE_URI` setting challenges only the URIs that match it; `ANTIBOT_IGNORE_URI` still takes precedence (Refs #3647).
 - [FEATURE] `zstd`: new optional Zstandard response compression (`USE_ZSTD`, off by default), preferred over Brotli and gzip when the client accepts it.
+- [FEATURE] `core`: `CLIENT_HEADER_TIMEOUT` and `CLIENT_BODY_TIMEOUT` now support per-service overrides.
 - [BUGFIX] `inject`: quotes and backslashes in `INJECT_HEAD` and `INJECT_BODY` no longer break the generated config; remove hand-added `\'` workaround escapes.
 - [BUGFIX] `modsecurity`: response body rules now inspect Brotli-compressed responses too; ModSecurity used to see the compressed bytes when `USE_BROTLI=yes`.
 - [BUGFIX] `limit`: `LIMIT_CONN_MAX_*` settings now accept only values NGINX supports (1 to 65535).

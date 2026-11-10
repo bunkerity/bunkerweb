@@ -115,16 +115,18 @@ El valor es una lista de motivos separados por espacios, entre `crowdsec`, `bad_
 
 === "Ajustes de Red y Puertos"
 
-    | Parámetro               | Valor por defecto | Contexto | Múltiple | Descripción                                                                                                                                                                                                                                                  |
-    | ----------------------- | ----------------- | -------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-    | `HTTP_PORT`             | `8080`            | global   | Sí       | **Puerto HTTP:** Número de puerto para el tráfico HTTP. Dejar vacío para desactivar la escucha HTTP.                                                                                                                                                         |
-    | `HTTPS_PORT`            | `8443`            | global   | Sí       | **Puerto HTTPS:** Número de puerto para el tráfico HTTPS. Dejar vacío para desactivar la escucha HTTPS.                                                                                                                                                      |
-    | `USE_IPV6`              | `no`              | global   | No       | **Soporte IPv6:** Habilita la conectividad IPv6.                                                                                                                                                                                                             |
-    | `DNS_RESOLVERS`         | `127.0.0.11`      | global   | No       | **Resolutores DNS:** Direcciones DNS de los resolutores a usar.                                                                                                                                                                                              |
-    | `CLIENT_BODY_TIMEOUT`   | `10s`             | global   | No       | **Timeout del cuerpo del cliente:** Tiempo límite para leer el cuerpo de la solicitud del cliente.                                                                                                                                                           |
-    | `CLIENT_HEADER_TIMEOUT` | `10s`             | global   | No       | **Timeout de cabeceras del cliente:** Tiempo límite para leer las cabeceras de la solicitud del cliente. También limita cuánto tiempo permanece activo un proceso worker antiguo tras una recarga mientras un cliente no haya completado su negociación TLS. |
-    | `KEEPALIVE_TIMEOUT`     | `15s`             | global   | No       | **Timeout keepalive:** Tiempo límite para conexiones keepalive del cliente.                                                                                                                                                                                  |
-    | `SEND_TIMEOUT`          | `10s`             | global   | No       | **Timeout de envío:** Tiempo límite para transmitir una respuesta al cliente.                                                                                                                                                                                |
+    | Parámetro               | Valor por defecto | Contexto  | Múltiple | Descripción                                                                                              |
+    | ----------------------- | ----------------- | --------- | -------- | -------------------------------------------------------------------------------------------------------- |
+    | `HTTP_PORT`             | `8080`            | global    | Sí       | **Puerto HTTP:** Número de puerto para el tráfico HTTP. Dejar vacío para desactivar la escucha HTTP.     |
+    | `HTTPS_PORT`            | `8443`            | global    | Sí       | **Puerto HTTPS:** Número de puerto para el tráfico HTTPS. Dejar vacío para desactivar la escucha HTTPS.  |
+    | `USE_IPV6`              | `no`              | global    | No       | **Soporte IPv6:** Habilita la conectividad IPv6.                                                         |
+    | `DNS_RESOLVERS`         | `127.0.0.11`      | global    | No       | **Resolutores DNS:** Direcciones DNS de los resolutores a usar.                                          |
+    | `CLIENT_BODY_TIMEOUT`   | `10s`             | multisite | No       | **Timeout del cuerpo del cliente:** Tiempo límite para leer el cuerpo de la solicitud del cliente.       |
+    | `CLIENT_HEADER_TIMEOUT` | `10s`             | multisite | No       | **Timeout de cabeceras del cliente:** Tiempo límite para leer las cabeceras de la solicitud del cliente. |
+    | `KEEPALIVE_TIMEOUT`     | `15s`             | global    | No       | **Timeout keepalive:** Tiempo límite para conexiones keepalive del cliente.                              |
+    | `SEND_TIMEOUT`          | `10s`             | global    | No       | **Timeout de envío:** Tiempo límite para transmitir una respuesta al cliente.                            |
+
+    Configure `CLIENT_HEADER_TIMEOUT` y `CLIENT_BODY_TIMEOUT` por servicio para streams gRPC de larga duración (por ejemplo, `netbird.example.com_CLIENT_HEADER_TIMEOUT=1d`). Mantenga corto el valor global de `CLIENT_HEADER_TIMEOUT`: también limita las negociaciones TLS en el servidor predeterminado y cuánto tiempo las negociaciones incompletas pueden mantener activos los workers antiguos tras una recarga. Las directivas `client_header_timeout` o `client_body_timeout` existentes en configuraciones personalizadas `server-http` siguen funcionando cuando el servicio hereda el valor global. Elimine la directiva personalizada correspondiente al configurar un timeout distinto por servicio para evitar directivas duplicadas.
 
 === "Ajustes del Servidor de Stream"
 
@@ -2987,7 +2989,7 @@ El plugin gRPC permite a BunkerWeb hacer proxy de servicios gRPC a través de HT
     `GRPC_SSL_VERIFY` solo surte efecto cuando hay un bundle CA disponible. Proporciónalo con `GRPC_SSL_TRUSTED_CERTIFICATE` (una ruta legible por el scheduler) o `GRPC_SSL_TRUSTED_CERTIFICATE_DATA` (base64 o PEM en texto plano), y elige el origen con `GRPC_SSL_TRUSTED_CERTIFICATE_PRIORITY`. El scheduler valida el bundle, lo cachea y lo distribuye a las instancias. Sin un bundle utilizable, la verificación permanece desactivada.
 
 !!! warning "Streams de larga duración y timeouts del core"
-    Los RPC de larga duración o en streaming pueden requerir timeouts NGINX genéricos más altos que los valores globales por defecto. Los ajustes más comunes son `CLIENT_BODY_TIMEOUT` y `CLIENT_HEADER_TIMEOUT` en la configuración del plugin General.
+    Los RPC de larga duración o en streaming pueden necesitar valores mayores de `CLIENT_BODY_TIMEOUT` y `CLIENT_HEADER_TIMEOUT`. Configúrelos para el servicio gRPC en el plugin General; mantenga corto el valor global de `CLIENT_HEADER_TIMEOUT` para limitar las negociaciones TLS y la duración de los workers antiguos tras una recarga.
 
 !!! tip "Múltiples backends gRPC"
     Usa ajustes con sufijo para varias rutas:
