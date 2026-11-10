@@ -1,0 +1,21 @@
+tests/unit/harness/test_database_action_models.py
+  s_41462312fe20df::t_57cf842e1b11b3 1-50
+tests/models/__init__.py
+  s_41462312fe20df::t_ee9bdf2357ed03 18-20
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "89af337a481a61b1c8a38757f40b7e3875047cd1",
+  "prompts": {},
+  "sessions": {
+    "s_41462312fe20df": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1c495-787a-7a33-a5a1-723669af63da",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}
