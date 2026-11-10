@@ -83,6 +83,15 @@ def test_freebsd_reads_host_file_without_docker(linux_logs, monkeypatch):
 
 @pytest.mark.parametrize("options,want", [({}, "record"), ({"user": "root", "strip_output": False}, "  record\n\n")])
 def test_docker_command_preserves_output_only_when_requested(monkeypatch, options, want):
+    # The unit environment has no Docker SDK; keep this import independent of other suites' stubs.
+    for name, attrs in {
+        "docker": {"DockerClient": object},
+        "docker.errors": {"NotFound": type("NotFound", (Exception,), {})},
+        "docker.models.containers": {"Container": object},
+    }.items():
+        dependency = ModuleType(name)
+        dependency.__dict__.update(attrs)
+        monkeypatch.setitem(sys.modules, name, dependency)
     spec = importlib.util.spec_from_file_location("ci_linux_docker_utils", ROOT / "tests/utils/docker.py")
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
