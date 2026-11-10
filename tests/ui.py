@@ -37,6 +37,7 @@ from ui_handlers import (
     upload_handle,
     fetch_handle,
     count_handle,
+    database_handle,
 )
 
 LOGGER = getLogger("UI_TEST")
@@ -172,6 +173,8 @@ with build_driver(LOGGER, accept_insecure_certs=True) as driver:
                 fetch_handle(LOGGER, ctx, step_data)
             elif step_data.type == "count":
                 count_handle(LOGGER, ctx, step_data)
+            elif step_data.type == "database":
+                database_handle(LOGGER, ARGS.integration, action.database, step_data)
             else:
                 if step_data.item in ("service", "global_config"):
                     service_flow_handle(LOGGER, ctx, step_data)

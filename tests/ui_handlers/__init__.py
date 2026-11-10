@@ -17,6 +17,7 @@ from .services import handle_service_flow as service_flow_handle
 from .upload import handle_upload as upload_handle
 from .fetch import handle_fetch as fetch_handle
 from .count import handle_count as count_handle
+from .database import handle_database as database_handle
 
 __all__ = [
     "setup_handle",
@@ -37,4 +38,5 @@ __all__ = [
     "upload_handle",
     "fetch_handle",
     "count_handle",
+    "database_handle",
 ]
