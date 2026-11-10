@@ -1,0 +1,21 @@
+src/ui/app/models/biscuit.py
+  s_fadd982e7b37fe::t_0f35a3186570f3 5,34,98,101-102,215
+tests/unit/ui/core/test_biscuit_middleware.py
+  s_fadd982e7b37fe::t_b1a58ac8a3fcb6 80-89,132-157,223-235
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "4e224d76080925530875cf2f274b97c70acf0f94",
+  "prompts": {},
+  "sessions": {
+    "s_fadd982e7b37fe": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1c132-6d25-7962-8275-ade3406f1530",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}
