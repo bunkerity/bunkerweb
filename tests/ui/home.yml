@@ -33,14 +33,14 @@ actions:
         type: find
         selector: '//a[@href="/services"]//span[contains(@class, "don-jose") and contains(text(), "01")]'
         sleep: 0.0
-      # The big number is core + PRO previews + external (43 + 19 + 0 on dev, 62), and the PRO previews
+      # The big number is core + PRO previews + external (44 + 19 + 0 on dev, 63), and the PRO previews
       # come from the scheduler's remote plugin list, so the total moves with it. The status line
-      # under it splits the three: core is stable per release (43 on 1.6.18, observed on the home
-      # card; the scheduler logs "Computed 42 core plugins" and the card counts one more) and
-      # external is 0 on a fresh stack. Bump the 43 when a core plugin is added or removed.
+      # under it splits the three: core is stable per release (43 manifests plus the synthetic
+      # general core plugin, 44 on 1.6.18), and external is 0 on a fresh stack.
+      # Bump the 44 when a core plugin is added or removed.
       assert_plugins_number:
         type: find
-        selector: '//a[@href="/plugins"]//span[contains(text(), "43 core") and contains(text(), "/ 0 external")]'
+        selector: '//a[@href="/plugins"]//span[contains(text(), "44 core") and contains(text(), "/ 0 external")]'
         sleep: 0.0
       assert_map:
         type: find

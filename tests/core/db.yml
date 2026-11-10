@@ -47,11 +47,11 @@ actions:
       - "All-in-one"
     database: "sqlite"
     restart_stack: false
-  # ? 42 `src/common/core/*/plugin.json` plus the `general` plugin built from settings.json
+  # ? 43 `src/common/core/*/plugin.json` plus the `general` plugin built from settings.json
   sqlite_plugins:
     type: database
     query: "SELECT 'core_plugins=' || COUNT(*) FROM bw_plugins WHERE type = 'core'"
-    result: "core_plugins=43"
+    result: "core_plugins=44"
     log_from: "scheduler"
     integrations:
       - "Linux"
@@ -119,11 +119,11 @@ actions:
     log_from: "scheduler"
     database: "mariadb"
     restart_stack: false
-  # ? 42 `src/common/core/*/plugin.json` plus the `general` plugin built from settings.json
+  # ? 43 `src/common/core/*/plugin.json` plus the `general` plugin built from settings.json
   mariadb_plugins:
     type: database
     query: "SELECT CONCAT('core_plugins=', COUNT(*)) FROM bw_plugins WHERE type = 'core'"
-    result: "core_plugins=43"
+    result: "core_plugins=44"
     log_from: "scheduler"
     database: "mariadb"
     restart_stack: false
@@ -183,11 +183,11 @@ actions:
     log_from: "scheduler"
     database: "mysql"
     restart_stack: false
-  # ? 42 `src/common/core/*/plugin.json` plus the `general` plugin built from settings.json
+  # ? 43 `src/common/core/*/plugin.json` plus the `general` plugin built from settings.json
   mysql_plugins:
     type: database
     query: "SELECT CONCAT('core_plugins=', COUNT(*)) FROM bw_plugins WHERE type = 'core'"
-    result: "core_plugins=43"
+    result: "core_plugins=44"
     log_from: "scheduler"
     database: "mysql"
     restart_stack: false
@@ -247,11 +247,11 @@ actions:
     log_from: "scheduler"
     database: "postgresql"
     restart_stack: false
-  # ? 42 `src/common/core/*/plugin.json` plus the `general` plugin built from settings.json
+  # ? 43 `src/common/core/*/plugin.json` plus the `general` plugin built from settings.json
   postgresql_plugins:
     type: database
     query: "SELECT 'core_plugins=' || COUNT(*) FROM bw_plugins WHERE type = 'core'"
-    result: "core_plugins=43"
+    result: "core_plugins=44"
     log_from: "scheduler"
     database: "postgresql"
     restart_stack: false
