@@ -43,6 +43,8 @@
 - [BUGFIX] `reversescan`: a cache write failure for one port no longer prevents caching the results of the other ports.
 - [BUGFIX] `ui`: renaming the admin user through `ADMIN_USERNAME` now applies at startup instead of failing with "User ... doesn't exist".
 - [BUGFIX] `ui`: a client resuming the log stream from a far-behind offset gets the tail instead of the whole file.
+- [BUGFIX] `ui`: users with the reader role can now load the Let's Encrypt certificate list.
+- [BUGFIX] `letsencrypt`: the web UI refuses to delete or heal certificates while the database is read-only.
 - [BUGFIX] `api`: an administrator username or password set through `API_USERNAME` and `API_PASSWORD` is now applied at startup.
 - [BUGFIX] `api`: the rate limiter now honors `REDIS_SSL_VERIFY` for standalone Redis and Sentinel connections.
 - [BUGFIX] `api`: a reload that NGINX rejects now fails at once and no longer blocks later reloads for five minutes (Refs #4086).

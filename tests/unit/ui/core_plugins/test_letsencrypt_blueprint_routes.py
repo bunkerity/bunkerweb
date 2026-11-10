@@ -126,6 +126,26 @@ def fetch_rows(le, monkeypatch):
     return rows
 
 
+def test_letsencrypt_fetch_is_marked_read_only(le, ui_env):
+    assert ui_env.app.view_functions["letsencrypt.letsencrypt_fetch"].bw_read_only_post is True
+
+
+def test_letsencrypt_fetch_as_reader_makes_no_mutation(le, ui_env, fetch_rows, monkeypatch):
+    ui_env.user.list_permissions = ["read"]
+    instances = Mock()
+    monkeypatch.setattr(le, "BW_INSTANCES_UTILS", instances, raising=False)
+    response = ui_env.client.post("/letsencrypt/fetch", data={"draw": "2", "search[value]": "b.test"})
+    assert response.status_code == 200
+    assert response.json["draw"] == 2
+    assert [row["domain"] for row in response.json["data"]] == ["b.test"]
+    ui_env.db.get_jobs_cache_files.assert_called_once_with(job_name="certbot-renew")
+    mutator_prefixes = ("add_", "create_", "delete_", "update_", "upsert_", "remove_", "set_", "save_", "insert_", "edit_", "checked_changes")
+    assert not [call for call in ui_env.db.mock_calls if call[0].startswith(mutator_prefixes)]
+    assert instances.mock_calls == []
+    le.run.assert_not_called()
+    assert list(Path(le.SCRATCH_ROOT).iterdir()) == []
+
+
 def test_fetch_filters_search_and_panels_before_pagination(le, ui_env, fetch_rows):
     response = ui_env.client.post(
         "/letsencrypt/fetch",
