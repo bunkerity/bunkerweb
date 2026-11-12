@@ -1,0 +1,405 @@
+src/deps/src/yajl/test/parsing/cases/bogus_char.json.gold
+  s_da1a323572977f::t_f102293a95bfa9 1-10
+src/deps/src/yajl/test/parsing/cases/ap_map_open.json.gold
+  s_da1a323572977f::t_f102293a95bfa9 1-2
+src/deps/src/yajl/test/parsing/cases/doubles_in_array.json.gold
+  s_da1a323572977f::t_f102293a95bfa9 1-8
+src/deps/src/yajl/test/parsing/cases/ac_difficult_json_c_test_case_with_comments.json
+  s_da1a323572977f::t_f102293a95bfa9 1
+src/deps/src/yajl/test/parsing/cases/escaped_bulgarian.json
+  s_da1a323572977f::t_f102293a95bfa9 1-4
+src/deps/src/yajl/verify/json_verify.c
+  s_da1a323572977f::t_f102293a95bfa9 1-120
+src/deps/src/yajl/perf/perftest.c
+  s_da1a323572977f::t_f102293a95bfa9 1-134
+src/deps/src/yajl/src/api/yajl_parse.h
+  s_da1a323572977f::t_f102293a95bfa9 1-226
+src/deps/src/yajl/test/parsing/cases/zerobyte.json
+  s_da1a323572977f::t_f102293a95bfa9 1
+src/deps/src/yajl/src/api/yajl_version.h.cmake
+  s_da1a323572977f::t_f102293a95bfa9 1-23
+src/deps/src/yajl/COPYING
+  s_da1a323572977f::t_f102293a95bfa9 1-13
+src/deps/src/yajl/src/yajl_encode.h
+  s_da1a323572977f::t_f102293a95bfa9 1-34
+src/deps/src/yajl/ChangeLog
+  s_da1a323572977f::t_f102293a95bfa9 1-189
+src/deps/src/yajl/test/parsing/cases/multiple.json.gold
+  s_da1a323572977f::t_f102293a95bfa9 1-4
+src/deps/src/yajl/test/parsing/cases/string_invalid_escape.json.gold
+  s_da1a323572977f::t_f102293a95bfa9 1-3
+src/deps/src/yajl/test/parsing/cases/string_with_invalid_newline.json
+  s_da1a323572977f::t_f102293a95bfa9 1-2
+src/deps/src/yajl/test/parsing/cases/true.json
+  s_da1a323572977f::t_f102293a95bfa9 1
+src/deps/src/yajl/test/parsing/cases/array_close.json.gold
+  s_da1a323572977f::t_f102293a95bfa9 1-2
+src/deps/src/yajl/test/parsing/cases/empty_array.json
+  s_da1a323572977f::t_f102293a95bfa9 1
+src/deps/src/yajl/test/parsing/cases/np_partial_bad.json
+  s_da1a323572977f::t_f102293a95bfa9 1
+src/deps/src/yajl/test/parsing/cases/escaped_foobar.json
+  s_da1a323572977f::t_f102293a95bfa9 1
+src/deps/misc/yajl.README.md
+  s_da1a323572977f::t_dd91baa8726111 1-21,23-38
+  s_da1a323572977f::t_e1dcf7b45d23be 22
+src/deps/src/yajl/test/parsing/cases/simple.json.gold
+  s_da1a323572977f::t_f102293a95bfa9 1-9
+src/deps/src/yajl/src/yajl_alloc.c
+  s_da1a323572977f::t_f102293a95bfa9 1-52
+src/deps/src/yajl/test/parsing/cases/empty_string.json.gold
+  s_da1a323572977f::t_f102293a95bfa9 1-2
+src/deps/src/yajl/test/parsing/cases/ag_true_then_garbage.json
+  s_da1a323572977f::t_f102293a95bfa9 1
+src/deps/src/yajl/test/parsing/cases/ap_partial_ok.json
+  s_da1a323572977f::t_f102293a95bfa9 1
+src/deps/src/yajl/test/parsing/cases/simple_with_comments.json
+  s_da1a323572977f::t_f102293a95bfa9 1-11
+src/deps/src/yajl/test/parsing/cases/simple_with_comments.json.gold
+  s_da1a323572977f::t_f102293a95bfa9 1-5
+src/deps/src/yajl/test/parsing/cases/ag_false_then_garbage.json.gold
+  s_da1a323572977f::t_f102293a95bfa9 1-2
+src/deps/src/yajl/test/parsing/cases/string_invalid_hex_char.json.gold
+  s_da1a323572977f::t_f102293a95bfa9 1-2
+src/deps/src/yajl/test/parsing/cases/deep_arrays.json
+  s_da1a323572977f::t_f102293a95bfa9 1
+src/deps/src/yajl/test/parsing/cases/low_overflow.json.gold
+  s_da1a323572977f::t_f102293a95bfa9 1-2
+src/deps/src/yajl/test/parsing/cases/ap_array_open.json
+  s_da1a323572977f::t_f102293a95bfa9 1
+src/deps/misc/yajl-CVE-2023-33460.patch
+  s_da1a323572977f::t_c08457df1254c5 1-36
+src/deps/src/yajl/test/parsing/cases/am_multiple.json.gold
+  s_da1a323572977f::t_f102293a95bfa9 1-5
+src/deps/src/yajl/perf/CMakeLists.txt
+  s_da1a323572977f::t_f102293a95bfa9 1-23
+tests/unit/linux/modsecurity_json_probe.py
+  s_da1a323572977f::t_94c1d28b77dfbb 6
+  s_da1a323572977f::t_0cba5d73ffe1cf 22-32
+  s_da1a323572977f::t_fac608a92fe536 55
+  s_da1a323572977f::t_1f380d3603b04b 80-85
+  s_5e27562a09aacd::t_c828065b4e71bf 1-5,7-21,33-54,56-79,86-95
+src/deps/src/yajl/test/parsing/cases/null.json
+  s_da1a323572977f::t_f102293a95bfa9 1
+src/deps/src/yajl/test/parsing/cases/missing_integer_after_decimal_point.json
+  s_da1a323572977f::t_f102293a95bfa9 1
+src/deps/src/yajl/test/parsing/cases/ag_null_then_garbage.json.gold
+  s_da1a323572977f::t_f102293a95bfa9 1-2
+src/deps/src/yajl/test/parsing/cases/codepoints_from_unicode_org.json
+  s_da1a323572977f::t_f102293a95bfa9 1
+src/deps/src/yajl/src/yajl.pc.cmake
+  s_da1a323572977f::t_f102293a95bfa9 1-9
+src/deps/src/yajl/test/parsing/cases/lonely_minus_sign.json
+  s_da1a323572977f::t_f102293a95bfa9 1-7
+src/deps/src/yajl/test/parsing/cases/string_with_invalid_newline.json.gold
+  s_da1a323572977f::t_f102293a95bfa9 1-2
+src/deps/src/yajl/example/CMakeLists.txt
+  s_da1a323572977f::t_f102293a95bfa9 1-23
+src/deps/src/yajl/test/parsing/cases/bignums.json
+  s_da1a323572977f::t_f102293a95bfa9 1
+src/deps/src/yajl/test/parsing/cases/four_byte_utf8.json.gold
+  s_da1a323572977f::t_f102293a95bfa9 1-5
+src/deps/src/yajl/test/parsing/cases/am_integers.json
+  s_da1a323572977f::t_f102293a95bfa9 1
+src/deps/src/yajl/test/parsing/CMakeLists.txt
+  s_da1a323572977f::t_f102293a95bfa9 1-23
+src/deps/deps.json
+  s_da1a323572977f::t_12865f6672a939 294-299
+  s_e89df7ada20bae::t_0a4567eb272b0f 293
+src/deps/src/yajl/test/parsing/cases/ac_difficult_json_c_test_case_with_comments.json.gold
+  s_da1a323572977f::t_f102293a95bfa9 1-36
+src/deps/src/yajl/test/parsing/cases/ap_eof_str.json.gold
+  s_da1a323572977f::t_f102293a95bfa9 1
+src/deps/src/yajl/src/YAJL.dxy
+  s_da1a323572977f::t_f102293a95bfa9 1-1258
+src/deps/src/yajl/configure
+  s_da1a323572977f::t_f102293a95bfa9 1-81
+src/deps/src/yajl/src/yajl_lex.h
+  s_da1a323572977f::t_f102293a95bfa9 1-117
+src/deps/src/yajl/test/parsing/cases/ag_true_then_garbage.json.gold
+  s_da1a323572977f::t_f102293a95bfa9 1-2
+src/deps/src/yajl/test/parsing/cases/empty_array.json.gold
+  s_da1a323572977f::t_f102293a95bfa9 1-3
+src/deps/src/yajl/test/parsing/cases/fg_false_then_garbage.json.gold
+  s_da1a323572977f::t_f102293a95bfa9 1-3
+src/deps/src/yajl/test/parsing/yajl_test.c
+  s_da1a323572977f::t_f102293a95bfa9 1-291
+src/deps/src/yajl/test/parsing/cases/ap_partial_ok.json.gold
+  s_da1a323572977f::t_f102293a95bfa9 1-4
+src/deps/src/yajl/test/parsing/cases/ap_eof_str.json
+  s_da1a323572977f::t_f102293a95bfa9 1
+src/deps/src/yajl/test/parsing/cases/ap_array_open.json.gold
+  s_da1a323572977f::t_f102293a95bfa9 1-2
+src/deps/src/yajl/test/parsing/cases/ac_simple_with_comments.json
+  s_da1a323572977f::t_f102293a95bfa9 1-11
+src/deps/src/yajl/src/yajl_gen.c
+  s_da1a323572977f::t_f102293a95bfa9 1-362
+src/deps/src/yajl/test/parsing/cases/high_overflow.json
+  s_da1a323572977f::t_f102293a95bfa9 1
+src/deps/src/yajl/test/parsing/cases/bignums.json.gold
+  s_da1a323572977f::t_f102293a95bfa9 1-5
+src/deps/src/yajl/BUILDING
+  s_da1a323572977f::t_f102293a95bfa9 1-23
+src/deps/src/yajl/BUILDING.win32
+  s_da1a323572977f::t_f102293a95bfa9 1-27
+src/deps/src/yajl/src/api/yajl_gen.h
+  s_da1a323572977f::t_f102293a95bfa9 1-167
+src/deps/src/yajl/test/parsing/cases/ap_map_open.json
+  s_da1a323572977f::t_f102293a95bfa9 1
+src/deps/src/yajl/example/parse_config.c
+  s_da1a323572977f::t_f102293a95bfa9 1-69
+src/deps/src/yajl/test/parsing/cases/am_stuff.json.gold
+  s_da1a323572977f::t_f102293a95bfa9 1-14
+src/deps/src/yajl/test/parsing/cases/array_close.json
+  s_da1a323572977f::t_f102293a95bfa9 1
+src/deps/src/yajl/test/parsing/cases/integers.json.gold
+  s_da1a323572977f::t_f102293a95bfa9 1-14
+src/deps/src/yajl/test/parsing/cases/lonely_number.json.gold
+  s_da1a323572977f::t_f102293a95bfa9 1-2
+src/deps/src/yajl/test/parsing/cases/string_invalid_escape.json
+  s_da1a323572977f::t_f102293a95bfa9 1
+src/deps/src/yajl/test/parsing/cases/string_invalid_hex_char.json
+  s_da1a323572977f::t_f102293a95bfa9 1
+src/deps/src/yajl/test/api/run_tests.sh
+  s_da1a323572977f::t_f102293a95bfa9 1-23
+src/deps/misc/yajl-CVE-2017-16516.patch
+  s_da1a323572977f::t_c08457df1254c5 1-22
+src/deps/src/yajl/CMakeLists.txt
+  s_da1a323572977f::t_f102293a95bfa9 1-81
+src/deps/src/yajl/test/parsing/cases/bogus_char.json
+  s_da1a323572977f::t_f102293a95bfa9 1-4
+src/deps/src/yajl/test/parsing/cases/am_stuff.json
+  s_da1a323572977f::t_f102293a95bfa9 1-7
+src/deps/src/yajl/test/parsing/cases/lonely_minus_sign.json.gold
+  s_da1a323572977f::t_f102293a95bfa9 1-9
+src/deps/src/yajl/test/parsing/cases/map_close.json.gold
+  s_da1a323572977f::t_f102293a95bfa9 1-2
+src/deps/src/yajl/test/parsing/cases/ag_false_then_garbage.json
+  s_da1a323572977f::t_f102293a95bfa9 1
+src/deps/src/yajl/test/parsing/cases/invalid_utf8.json.gold
+  s_da1a323572977f::t_f102293a95bfa9 1-3
+src/deps/src/yajl/test/parsing/cases/fg_issue_7.json
+  s_da1a323572977f::t_f102293a95bfa9 1
+src/deps/install.sh
+  s_da1a323572977f::t_12865f6672a939 43-57,69
+src/deps/src/yajl/test/parsing/cases/difficult_json_c_test_case.json
+  s_da1a323572977f::t_f102293a95bfa9 1
+src/deps/src/yajl/test/parsing/run_tests.sh
+  s_da1a323572977f::t_f102293a95bfa9 1-94
+src/deps/src/yajl/src/api/yajl_common.h
+  s_da1a323572977f::t_f102293a95bfa9 1-75
+src/deps/src/yajl/test/parsing/cases/high_overflow.json.gold
+  s_da1a323572977f::t_f102293a95bfa9 1-2
+src/deps/src/yajl/test/parsing/cases/fg_issue_7.json.gold
+  s_da1a323572977f::t_f102293a95bfa9 1-3
+src/deps/src/yajl/src/api/yajl_tree.h
+  s_da1a323572977f::t_f102293a95bfa9 1-186
+src/deps/src/yajl/test/parsing/cases/missing_integer_after_exponent.json
+  s_da1a323572977f::t_f102293a95bfa9 1
+src/deps/src/yajl/test/parsing/cases/unescaped_bulgarian.json
+  s_da1a323572977f::t_f102293a95bfa9 1
+src/deps/src/yajl/.gitignore
+  s_da1a323572977f::t_f102293a95bfa9 1-3
+src/deps/src/yajl/test/parsing/cases/three_byte_utf8.json.gold
+  s_da1a323572977f::t_f102293a95bfa9 1-7
+src/deps/src/yajl/test/CMakeLists.txt
+  s_da1a323572977f::t_f102293a95bfa9 1-16
+src/deps/src/yajl/test/parsing/cases/escaped_foobar.json.gold
+  s_da1a323572977f::t_f102293a95bfa9 1-2
+src/deps/src/yajl/test/parsing/cases/unescaped_bulgarian.json.gold
+  s_da1a323572977f::t_f102293a95bfa9 1-4
+src/deps/src/yajl/src/CMakeLists.txt
+  s_da1a323572977f::t_f102293a95bfa9 1-87
+src/deps/src/yajl/test/parsing/cases/codepoints_from_unicode_org.json.gold
+  s_da1a323572977f::t_f102293a95bfa9 1-2
+src/deps/src/yajl/test/parsing/cases/am_integers.json.gold
+  s_da1a323572977f::t_f102293a95bfa9 1-3
+src/deps/src/yajl/src/yajl_lex.c
+  s_da1a323572977f::t_f102293a95bfa9 1-763
+src/deps/src/yajl/test/parsing/cases/array.json
+  s_da1a323572977f::t_f102293a95bfa9 1-6
+src/deps/src/yajl/test/parsing/cases/fg_null_then_garbage.json
+  s_da1a323572977f::t_f102293a95bfa9 1
+src/deps/src/yajl/test/parsing/cases/nulls_and_bools.json.gold
+  s_da1a323572977f::t_f102293a95bfa9 1-9
+src/deps/src/yajl/test/parsing/cases/missing_integer_after_decimal_point.json.gold
+  s_da1a323572977f::t_f102293a95bfa9 1-2
+src/deps/src/yajl/test/parsing/cases/string_with_escapes.json.gold
+  s_da1a323572977f::t_f102293a95bfa9 1-7
+src/deps/src/yajl/src/yajl_parser.c
+  s_da1a323572977f::t_f102293a95bfa9 1-498
+src/deps/src/yajl/test/parsing/cases/false.json.gold
+  s_da1a323572977f::t_f102293a95bfa9 1-2
+src/deps/misc/yajl-CVE-2022-24795.patch
+  s_da1a323572977f::t_c08457df1254c5 1-30
+src/deps/src/yajl/reformatter/CMakeLists.txt
+  s_da1a323572977f::t_f102293a95bfa9 1-43
+src/deps/src/yajl/test/parsing/cases/empty_string.json
+  s_da1a323572977f::t_f102293a95bfa9 1
+src/deps/src/yajl/test/parsing/cases/fg_false_then_garbage.json
+  s_da1a323572977f::t_f102293a95bfa9 1
+src/deps/src/yajl/test/parsing/cases/integers.json
+  s_da1a323572977f::t_f102293a95bfa9 1-3
+src/deps/src/yajl/test/parsing/cases/true.json.gold
+  s_da1a323572977f::t_f102293a95bfa9 1-2
+src/deps/src/yajl/test/parsing/cases/doubles.json
+  s_da1a323572977f::t_f102293a95bfa9 1
+src/deps/src/yajl/src/yajl_encode.c
+  s_da1a323572977f::t_f102293a95bfa9 1-220
+src/deps/src/yajl/test/parsing/cases/false.json
+  s_da1a323572977f::t_f102293a95bfa9 1
+src/deps/src/yajl/test/parsing/cases/ac_simple_with_comments.json.gold
+  s_da1a323572977f::t_f102293a95bfa9 1-9
+src/deps/src/yajl/test/parsing/cases/ag_null_then_garbage.json
+  s_da1a323572977f::t_f102293a95bfa9 1
+src/deps/src/yajl/test/api/gen-extra-close.c
+  s_da1a323572977f::t_f102293a95bfa9 1-19
+src/deps/src/yajl/YAJLDoc.cmake
+  s_da1a323572977f::t_f102293a95bfa9 1-26
+src/deps/src/yajl/src/yajl
+  s_da1a323572977f::t_f102293a95bfa9 1-33
+src/deps/src/yajl/src/yajl.c
+  s_da1a323572977f::t_f102293a95bfa9 1-175
+src/deps/src/yajl/src/yajl_bytestack.h
+  s_da1a323572977f::t_f102293a95bfa9 1-69
+src/deps/src/yajl/test/parsing/cases/am_multiple.json
+  s_da1a323572977f::t_f102293a95bfa9 1-3
+src/deps/src/yajl/test/parsing/cases/doubles_in_array.json
+  s_da1a323572977f::t_f102293a95bfa9 1
+src/deps/src/yajl/test/parsing/cases/fg_true_then_garbage.json
+  s_da1a323572977f::t_f102293a95bfa9 1
+src/deps/src/yajl/test/parsing/cases/multiple.json
+  s_da1a323572977f::t_f102293a95bfa9 1-3
+src/deps/src/yajl/example/README.md
+  s_da1a323572977f::t_f102293a95bfa9 1-7
+src/deps/src/yajl/test/parsing/cases/fg_null_then_garbage.json.gold
+  s_da1a323572977f::t_f102293a95bfa9 1-3
+src/deps/src/yajl/reformatter/json_reformat.c
+  s_da1a323572977f::t_f102293a95bfa9 1-210
+src/deps/src/yajl/TODO
+  s_da1a323572977f::t_f102293a95bfa9 1-9
+src/deps/src/yajl/test/api/CMakeLists.txt
+  s_da1a323572977f::t_f102293a95bfa9 1-25
+src/deps/src/yajl/verify/CMakeLists.txt
+  s_da1a323572977f::t_f102293a95bfa9 1-37
+src/deps/src/yajl/test/parsing/cases/array.json.gold
+  s_da1a323572977f::t_f102293a95bfa9 1-22
+src/deps/src/yajl/test/parsing/cases/difficult_json_c_test_case.json.gold
+  s_da1a323572977f::t_f102293a95bfa9 1-36
+src/deps/src/yajl/perf/documents.c
+  s_da1a323572977f::t_f102293a95bfa9 1-1418
+src/deps/src/yajl/perf/documents.h
+  s_da1a323572977f::t_f102293a95bfa9 1-28
+src/deps/src/yajl/test/parsing/cases/simple.json
+  s_da1a323572977f::t_f102293a95bfa9 1-5
+src/deps/src/yajl/example/sample.config
+  s_da1a323572977f::t_f102293a95bfa9 1-101
+src/deps/src/yajl/src/yajl_alloc.h
+  s_da1a323572977f::t_f102293a95bfa9 1-34
+src/deps/src/yajl/src/yajl_tree.c
+  s_da1a323572977f::t_f102293a95bfa9 1-510
+src/deps/src/yajl/src/yajl_buf.h
+  s_da1a323572977f::t_f102293a95bfa9 1-57
+src/deps/src/yajl/src/yajl_buf.c
+  s_da1a323572977f::t_f102293a95bfa9 1-113
+src/deps/src/yajl/src/yajl_parser.h
+  s_da1a323572977f::t_f102293a95bfa9 1-78
+src/deps/src/yajl/test/parsing/cases/string_with_escapes.json
+  s_da1a323572977f::t_f102293a95bfa9 1-3
+src/linux/Dockerfile-rhel-10
+  s_da1a323572977f::t_12865f6672a939 22
+src/deps/src/yajl/test/parsing/cases/lonely_number.json
+  s_da1a323572977f::t_f102293a95bfa9 1
+src/deps/src/yajl/test/parsing/cases/leading_zero_in_number.json.gold
+  s_da1a323572977f::t_f102293a95bfa9 1-5
+src/deps/src/yajl/test/parsing/cases/missing_integer_after_exponent.json.gold
+  s_da1a323572977f::t_f102293a95bfa9 1-2
+src/deps/src/yajl/test/parsing/cases/fg_true_then_garbage.json.gold
+  s_da1a323572977f::t_f102293a95bfa9 1-3
+src/deps/src/yajl/test/parsing/cases/low_overflow.json
+  s_da1a323572977f::t_f102293a95bfa9 1
+src/deps/src/yajl/test/parsing/cases/map_close.json
+  s_da1a323572977f::t_f102293a95bfa9 1
+src/deps/src/yajl/test/parsing/cases/np_partial_bad.json.gold
+  s_da1a323572977f::t_f102293a95bfa9 1-5
+src/deps/src/yajl/test/parsing/cases/null.json.gold
+  s_da1a323572977f::t_f102293a95bfa9 1-2
+src/deps/src/yajl/test/parsing/cases/am_eof.json.gold
+  s_da1a323572977f::t_f102293a95bfa9 1-4
+src/deps/src/yajl/test/parsing/cases/non_utf8_char_in_string.json.gold
+  s_da1a323572977f::t_f102293a95bfa9 1-8
+src/deps/src/yajl/test/parsing/cases/doubles.json.gold
+  s_da1a323572977f::t_f102293a95bfa9 1-7
+src/deps/src/yajl/README
+  s_da1a323572977f::t_f102293a95bfa9 1-74
+tests/unit/linux/test_yajl_build.py
+  s_da1a323572977f::t_b224447417bd92 1-27,29-32,34-48
+  s_da1a323572977f::t_dad947e861c8cd 28
+  s_da1a323572977f::t_a864e0383b6084 33
+src/deps/src/yajl/test/parsing/cases/isolated_surrogate_marker.json
+  s_da1a323572977f::t_f102293a95bfa9 1
+src/deps/src/yajl/src/yajl_version.c
+  s_da1a323572977f::t_f102293a95bfa9 1-7
+src/deps/src/yajl/test/parsing/cases/am_eof.json
+  s_da1a323572977f::t_f102293a95bfa9 1
+src/deps/src/yajl/test/parsing/cases/deep_arrays.json.gold
+  s_da1a323572977f::t_f102293a95bfa9 1-2049
+src/deps/src/yajl/test/parsing/cases/four_byte_utf8.json
+  s_da1a323572977f::t_f102293a95bfa9 1-2
+src/deps/src/yajl/test/parsing/cases/isolated_surrogate_marker.json.gold
+  s_da1a323572977f::t_f102293a95bfa9 1-2
+src/deps/src/yajl/test/parsing/cases/escaped_bulgarian.json.gold
+  s_da1a323572977f::t_f102293a95bfa9 1-7
+src/deps/src/yajl/test/parsing/cases/leading_zero_in_number.json
+  s_da1a323572977f::t_f102293a95bfa9 1
+src/deps/src/yajl/test/parsing/cases/nulls_and_bools.json
+  s_da1a323572977f::t_f102293a95bfa9 1-5
+src/deps/src/yajl/test/parsing/cases/three_byte_utf8.json
+  s_da1a323572977f::t_f102293a95bfa9 1
+CHANGELOG.md
+  s_4507497497abc6::t_af9241dd8bd4c5 33
+src/deps/src/yajl/test/parsing/cases/invalid_utf8.json
+  s_da1a323572977f::t_7e0150d897ac14 1
+src/deps/src/yajl/test/parsing/cases/non_utf8_char_in_string.json
+  s_da1a323572977f::t_04ea1f1b66826c 1
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "7393ebcade46ef320925cb26ebe0d0ea865f6d57",
+  "prompts": {},
+  "sessions": {
+    "s_4507497497abc6": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "18f6c3a7-132e-4c3b-9654-c0183ac2253f",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_5e27562a09aacd": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1c623-f29c-7823-9f69-bf1cda924157",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_da1a323572977f": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1c622-0764-79d2-aeb5-1e4e5161c833",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_e89df7ada20bae": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1c52e-a16b-74d2-ae09-6d58ec91e68e",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}
