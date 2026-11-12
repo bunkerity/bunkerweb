@@ -2,6 +2,10 @@
 
 All notable changes to `lua-resty-session` will be documented in this file.
 
+## [4.3.0] - 2026-11-09
+### Added
+- perf(*): cache revocation lookups in a worker-local LRU (thanks @Hockenba)
+
 ## [4.2.0] - 2026-08-24
 ### Added
 - feat(*): revocation store for stateless cookie sessions (thanks @Hockenba)

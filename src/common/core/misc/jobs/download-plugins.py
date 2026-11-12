@@ -188,6 +188,7 @@ try:
 
                     if resp.status_code != 200:
                         LOGGER.warning(f"Got status code {resp.status_code}, skipping...")
+                        status = 2
                         continue
 
                     # Iterate over the response content in chunks
@@ -227,6 +228,7 @@ try:
                     except BadZipFile as e:
                         LOGGER.debug(format_exc())
                         LOGGER.error(f"Invalid ZIP file: {e}")
+                        status = 2
                         continue
 
                 # Handle TAR files (all compression types)
@@ -247,15 +249,18 @@ try:
                     except TarError as e:
                         LOGGER.debug(format_exc())
                         LOGGER.error(f"Invalid TAR file: {e}")
+                        status = 2
                         continue
 
                 else:
                     LOGGER.error(f"Unknown file type for {plugin_url}, either ZIP or TAR is supported, skipping...")
+                    status = 2
                     continue
 
             except BaseException as e:
                 LOGGER.debug(format_exc())
                 LOGGER.error(f"Exception while decompressing plugin(s) from {plugin_url}:\n{e}")
+                status = 2
                 continue
 
         # Install plugins
@@ -273,7 +278,7 @@ try:
 
     if not plugin_nbr:
         LOGGER.info("No external plugins to update to database")
-        sys_exit(0)
+        sys_exit(status)
 
     external_plugins = []
     external_plugins_ids = []
@@ -311,7 +316,7 @@ try:
     if err:
         LOGGER.error(f"Couldn't update external plugins to database: {err}")
 
-    status = 1
+    status = max(status, 1)
     LOGGER.info("External plugins downloaded and installed")
 
 except SystemExit as e:

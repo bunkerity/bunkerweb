@@ -3,6 +3,7 @@
 import hashlib
 import io
 import logging
+import re
 from pathlib import Path
 import runpy
 from unittest.mock import Mock
@@ -237,7 +238,8 @@ def load_logging(monkeypatch):
             entry["handler"].close()
 
 
-def test_file_logging_emits_message_and_uses_custom_level(load_logging, tmp_path):
+@pytest.mark.parametrize("message", ["visible log entry", "\x1b[32mvisible log entry\x1b[0m"])
+def test_file_logging_emits_message_and_uses_custom_level(load_logging, tmp_path, message):
     target = tmp_path / "scheduler.log"
     namespace, configured, _ = load_logging(
         LOG_TYPES="file stderr", LOG_FILE_PATH=str(target), LOG_LEVEL="WARNING", CUSTOM_LOG_LEVEL="DEBUG", DATABASE_LOG_LEVEL="ERROR"
@@ -246,9 +248,16 @@ def test_file_logging_emits_message_and_uses_custom_level(load_logging, tmp_path
     assert configured.call_args.kwargs["level"] == logging.DEBUG
     assert configured.call_args.kwargs["force"] is True
     handler = namespace["log_types"]["file"]["handler"]
-    handler.emit(logging.LogRecord("fixture", logging.INFO, __file__, 1, "visible log entry", (), None))
+    record = logging.LogRecord("fixture", logging.INFO, __file__, 1, message, (), None)
+    record.levelname = "INFO"
+    handler.emit(record)
     handler.flush()
-    assert target.read_text() == "visible log entry\n"
+    output = target.read_text()
+    assert re.fullmatch(
+        rf"\[[0-9]{{4}}-[0-9]{{2}}-[0-9]{{2}} [0-9]{{2}}:[0-9]{{2}}:[0-9]{{2}} [+-][0-9]{{4}}\] \[fixture\] \[{record.process}\] \[INFO\] - visible log entry\n",
+        output,
+    )
+    assert "\x1b" not in output
     assert logging.getLogger("sqlalchemy").level == logging.ERROR
     assert namespace["BWLogger"]("sqlalchemy.engine").level == logging.NOTSET
     assert namespace["BWLogger"]("fixture").level == logging.INFO

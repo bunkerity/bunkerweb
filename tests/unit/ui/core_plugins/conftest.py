@@ -32,6 +32,7 @@ def load_plugin(monkeypatch):
 def ui_env(monkeypatch):
     deps = ModuleType("app.dependencies")
     deps.DB = Mock()
+    deps.DB.readonly = False
     deps.DATA = {}
     utils = ModuleType("app.utils")
     utils.LOGGER = Mock()

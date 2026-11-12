@@ -1,0 +1,7 @@
+array open '['
+string: '
+ foo / bar \￿	"\'
+string: '"and this string has an escape at the beginning'
+string: 'and this string has no escapes'
+array close ']'
+memory leaks:	0

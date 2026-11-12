@@ -22,6 +22,7 @@ DISTROS = {
     "debian-trixie": "deb",
     "fedora-43": "rpm",
     "fedora-44": "rpm",
+    "fedora-45": "rpm",
     "rhel-8": "rpm",
     "rhel-9": "rpm",
     "rhel-10": "rpm",
@@ -124,7 +125,7 @@ def validate(manifest, expected):
     for field in ("source_sha", "version", "run_id", "run_attempt"):
         require(manifest.get(field) == expected[field], f"manifest {field} mismatch")
     require(fullmatch(r"[0-9a-f]{40}", manifest["source_sha"]), "invalid source SHA")
-    require(fullmatch(r"[0-9]+\.[0-9]+\.[0-9]+(?:[~-](?:rc|beta)[0-9]+)?", manifest["version"]), "invalid release version")
+    require(fullmatch(r"[0-9]+\.[0-9]+\.[0-9]+(?:[~-](?:rc|beta|alpha)[0-9]+)?", manifest["version"]), "invalid release version")
     require(set(manifest["images"]) == set(IMAGES), "incomplete image inventory")
     for name, image in manifest["images"].items():
         prefix = f"ghcr.io/bunkerity/{name}-tests@"

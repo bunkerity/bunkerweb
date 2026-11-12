@@ -116,6 +116,16 @@
       "type": "select",
       "select": ["Serial", "Concurrent"]
     },
+    "MODSECURITY_SEC_AUDIT_LOG_FORMAT": {
+      "context": "multisite",
+      "default": "Native",
+      "help": "Audit log format: Native keeps the classic multi-part text, JSON writes one JSON object per entry (for log shippers such as Splunk). In global CRS mode, set this globally.",
+      "id": "modsecurity-sec-audit-log-format",
+      "label": "SecAuditLogFormat",
+      "regex": "^(Native|JSON)$",
+      "type": "select",
+      "select": ["Native", "JSON"]
+    },
     "MODSECURITY_SEC_AUDIT_LOG_STORAGE_DIR": {
       "context": "multisite",
       "default": "",

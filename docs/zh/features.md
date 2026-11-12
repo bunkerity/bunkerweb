@@ -117,16 +117,18 @@ BunkerWeb 中的某些设置支持同一功能的多个配置。要定义多组�
 
 === "网络和端口设置"
 
-    | 设置                    | 默认值       | 上下文 | 多个 | 描述                                                       |
-    | ----------------------- | ------------ | ------ | ---- | ---------------------------------------------------------- |
-    | `HTTP_PORT`             | `8080`       | global | 是   | **HTTP 端口：** HTTP 流量的端口号。留空以禁用HTTP监听。    |
-    | `HTTPS_PORT`            | `8443`       | global | 是   | **HTTPS 端口：** HTTPS 流量的端口号。留空以禁用HTTPS监听。 |
-    | `USE_IPV6`              | `no`         | global | 否   | **IPv6 支持：** 启用 IPv6 连接。                           |
-    | `DNS_RESOLVERS`         | `127.0.0.11` | global | 否   | **DNS 解析器：** 要使用的解析器的 DNS 地址。               |
-    | `CLIENT_BODY_TIMEOUT`   | `10s`        | global | 否   | **客户端请求体超时：** 读取客户端请求体的超时时间。        |
-    | `CLIENT_HEADER_TIMEOUT` | `10s`        | global | 否   | **客户端请求头超时：** 读取客户端请求头的超时时间。        |
-    | `KEEPALIVE_TIMEOUT`     | `15s`        | global | 否   | **Keepalive 超时：** 客户端 Keepalive 连接的超时时间。     |
-    | `SEND_TIMEOUT`          | `10s`        | global | 否   | **发送超时：** 向客户端传输响应的超时时间。                |
+    | 设置                    | 默认值       | 上下文    | 多个 | 描述                                                       |
+    | ----------------------- | ------------ | --------- | ---- | ---------------------------------------------------------- |
+    | `HTTP_PORT`             | `8080`       | global    | 是   | **HTTP 端口：** HTTP 流量的端口号。留空以禁用HTTP监听。    |
+    | `HTTPS_PORT`            | `8443`       | global    | 是   | **HTTPS 端口：** HTTPS 流量的端口号。留空以禁用HTTPS监听。 |
+    | `USE_IPV6`              | `no`         | global    | 否   | **IPv6 支持：** 启用 IPv6 连接。                           |
+    | `DNS_RESOLVERS`         | `127.0.0.11` | global    | 否   | **DNS 解析器：** 要使用的解析器的 DNS 地址。               |
+    | `CLIENT_BODY_TIMEOUT`   | `10s`        | multisite | 否   | **客户端请求体超时：** 读取客户端请求体的超时时间。        |
+    | `CLIENT_HEADER_TIMEOUT` | `10s`        | multisite | 否   | **客户端请求头超时：** 读取客户端请求头的超时时间。        |
+    | `KEEPALIVE_TIMEOUT`     | `15s`        | global    | 否   | **Keepalive 超时：** 客户端 Keepalive 连接的超时时间。     |
+    | `SEND_TIMEOUT`          | `10s`        | global    | 否   | **发送超时：** 向客户端传输响应的超时时间。                |
+
+    对于长连接 gRPC 流，请按服务设置 `CLIENT_HEADER_TIMEOUT` 和 `CLIENT_BODY_TIMEOUT`（例如 `netbird.example.com_CLIENT_HEADER_TIMEOUT=1d`）。全局 `CLIENT_HEADER_TIMEOUT` 应保持较短：它还限制默认服务器上的 TLS 握手时间，以及重新加载后未完成的握手使旧工作进程继续存活的时间。 当服务继承全局值时，`server-http` 自定义配置中已有的 `client_header_timeout` 或 `client_body_timeout` 指令仍可正常工作。为服务设置不同的超时值时，请删除对应的自定义指令，以免产生重复指令。
 
 === "流服务器设置"
 
@@ -377,6 +379,7 @@ BunkerWeb 允许您指定某些用户、IP 或请求应完全绕过 antibot 挑�
 | 设置                          | 默认值 | 上下文    | 多个 | 描述                                                                                                                                                |
 | ----------------------------- | ------ | --------- | ---- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `ANTIBOT_IGNORE_URI`          |        | multisite | 否   | **排除的 URL：** 应绕过挑战的以空格分隔的 URI 正则表达式模式列表。模式会匹配规范化后的路径，既可单独匹配，也可匹配路径后接 `?` 和查询字符串的形式。 |
+| `ANTIBOT_INCLUDE_URI`          |       | multisite | 否   | **包含的 URL：** 仅对匹配这些以空格分隔的 PCRE 模式的 URI 发起挑战。留空表示所有 URI。匹配规范化路径，或路径后接 `?` 和查询字符串。`ANTIBOT_IGNORE_URI` 优先。 |
 | `ANTIBOT_IGNORE_IP`           |        | multisite | 否   | **排除的 IP：** 应绕过挑战的以空格分隔的 IP 地址或 CIDR 范围列表。                                                                                  |
 | `ANTIBOT_IGNORE_RDNS`         |        | multisite | 否   | **排除的反向 DNS：** 应绕过挑战的以空格分隔的反向 DNS 后缀列表。                                                                                    |
 | `ANTIBOT_RDNS_GLOBAL`         | `yes`  | multisite | 否   | **仅限全局 IP：** 如果设置为 `yes`，则仅对公共 IP 地址执行反向 DNS 检查。                                                                           |
@@ -777,7 +780,7 @@ Auth Basic 插件提供 HTTP 基本认证来保护您的网站或特定资源。
     HTTP 基本认证以 Base64 编码（非加密）传输凭据。虽然在通过 HTTPS 使用时这是可以接受的，但在普通 HTTP 上不应被认为是安全的。使用基本身份验证时，请务必启用 SSL/TLS。
 
 !!! tip "使用多个凭据"
-    您可以为访问配置多个用户名/密码对。每个 `AUTH_BASIC_USER` 设置都应有一个对应的 `AUTH_BASIC_PASSWORD` 设置。
+    您可以为访问配置多个用户名/密码对。每个 `AUTH_BASIC_USER` 设置都应有一个对应的 `AUTH_BASIC_PASSWORD` 设置。一旦配置了其他凭据对，默认的 `changeme` / `changeme` 凭据对就会被忽略；将不带后缀的 `AUTH_BASIC_USER` 和 `AUTH_BASIC_PASSWORD` 设置为您自己的值即可保留它。
 
 ### 示例配置
 
@@ -1088,6 +1091,7 @@ STREAM 支持 :warning:
 | 设置                        | 默认值                                                  | 上下文    | 多个 | 描述                                                          |
 | --------------------------- | ------------------------------------------------------- | --------- | ---- | ------------------------------------------------------------- |
 | `USE_BLACKLIST`             | `yes`                                                   | multisite | 否   | **启用黑名单：** 设置为 `yes` 以启用黑名单功能。              |
+| `BLACKLIST_URLS_REFRESH_INTERVAL` | `1h` | multisite | 否 | **URL 刷新间隔：** 再次下载前缓存必须达到的最短时间。接受不带单位的秒数或时间后缀（`ms`、`s`、`m`、`h`、`d`、`w`、`M`、`y`）。 |
 | `BLACKLIST_COMMUNITY_LISTS` | `ip:danmeuk-tor-exit ua:mitchellkrogza-bad-user-agents` | multisite | 否   | **社区黑名单：** 选择预配置的社区维护的黑名单以包含在阻止中。 |
 
 === "社区黑名单"
@@ -1196,7 +1200,7 @@ STREAM 支持 :warning:
     所有 `*_URLS` 设置都支持 HTTP/HTTPS URL 以及使用 `file:///` 前缀的本地文件路径。使用 `http://user:pass@url` 格式支持基本身份验证。
 
 !!! tip "定期更新"
-    来自 URL 的黑名单会每小时自动下载和更新，以确保您的保护措施始终能应对最新的威胁。
+    任务每小时运行一次。`BLACKLIST_URLS_REFRESH_INTERVAL` 设置再次下载前 URL 缓存必须达到的最短时间（默认：`1h`）。对于每天最多允许下载一次的提供商，请使用 `24h`；设置为 `0` 则每次任务运行时都下载。缓存仍有效或下载失败时，会保留上次的有效条目。在此插件内，各服务共享 URL 缓存：最短的间隔可能触发下载，因此对于有下载频率限制的同一 URL，请在所有使用它的服务上设置相同的间隔。
 
 ### 示例配置
 
@@ -1390,7 +1394,7 @@ BunkerNet 插件通过 BunkerWeb 实例之间的集体威胁情报共享，创�
 | 设置                       | 默认值                     | 上下文    | 多个 | 描述                                                                                                                                                                  |
 | -------------------------- | -------------------------- | --------- | ---- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `USE_BUNKERNET`            | `yes`                      | multisite | 否   | **启用 BunkerNet：** 设置为 `yes` 以启用 BunkerNet 威胁情报共享。                                                                                                     |
-| `BUNKERNET_FILTER_HEADERS` | `no`                       | multisite | 否   | **过滤上报的请求头：** 设置为 `yes` 时，只发送一份简短的请求头白名单，并清空 ModSecurity 在请求头和 Cookie 中命中的值。设置为 `no` 时，报告包含所有请求头和命中的值。 |
+| `BUNKERNET_FILTER_HEADERS` | `no`                       | multisite | 否   | **过滤上报的请求头：** 设置为 `yes` 时，只发送一份简短的请求头白名单，并清空 ModSecurity 在请求头和 Cookie 中命中的值。设置为 `no` 时，报告包含除 `Cookie`、`Authorization` 和 `Proxy-Authorization` 之外的所有请求头，以及命中的值（在 Cookie 和这些请求头中命中的值除外）。 |
 | `BUNKERNET_SERVER`         | `https://api.bunkerweb.io` | global    | 否   | **BunkerNet 服务器：** 用于共享威胁情报的 BunkerNet API 服务器地址。                                                                                                  |
 
 !!! tip "网络保护"
@@ -1402,10 +1406,10 @@ BunkerNet 插件通过 BunkerWeb 实例之间的集体威胁情报共享，创�
     - 每次请求发送的实例元数据：BunkerNet 实例 ID、BunkerWeb 版本、集成方式，以及操作系统名称、版本、版本 ID、代号、ID 和架构；
     - 客户端 IP 地址、阻止原因和日期；
     - HTTP 方法、**包含查询字符串的** URL，以及服务名称（`server_name`）；
-    - 请求头及其值：收到的所有请求头（最多 `MAX_HEADERS` 个），或在 `BUNKERNET_FILTER_HEADERS` 为 `yes` 时仅包含 `User-Agent`、`Accept`、`Accept-Encoding`、`Accept-Language`、`Content-Type` 和 `Content-Length`；
-    - 与阻止原因相关的详细信息。根据阻止该客户端的插件不同，可能包含命中的 ModSecurity 规则 ID 和消息，以及触发这些规则的请求值（参数、请求体、请求头或 Cookie 的片段，每项截断为 512 字节；`BUNKERNET_FILTER_HEADERS` 为 `yes` 时，在请求头和 Cookie 中命中的值会被清空，只发送变量名）；对于 Bad Behavior，则是导致封禁的近期请求的方法和 URL。
+    - 请求头及其值：收到的所有请求头（最多 `MAX_HEADERS` 个，不含 `Cookie`、`Authorization` 和 `Proxy-Authorization`），或在 `BUNKERNET_FILTER_HEADERS` 为 `yes` 时仅包含 `User-Agent`、`Accept`、`Accept-Encoding`、`Accept-Language`、`Content-Type` 和 `Content-Length`；
+    - 与阻止原因相关的详细信息。根据阻止该客户端的插件不同，可能包含命中的 ModSecurity 规则 ID 和消息，以及触发这些规则的请求值（参数、请求体、请求头或 Cookie 的片段，每项截断为 512 字节；在 Cookie 以及 `Cookie`、`Authorization`、`Proxy-Authorization` 请求头中命中的值始终会被清空，`BUNKERNET_FILTER_HEADERS` 为 `yes` 时其他请求头中命中的值也会被清空，只发送变量名）；对于 Bad Behavior，则是导致封禁的近期请求的方法和 URL。
 
-    默认情况下（`BUNKERNET_FILTER_HEADERS` 为 `no`），报告包含收到的所有请求头（最多 `MAX_HEADERS` 个，包括 Cookie 和 `Authorization`），以及 ModSecurity 命中的原始值。将 `BUNKERNET_FILTER_HEADERS` 设置为 `yes`，则只发送上面列出的六个请求头，并清空在请求头和 Cookie 中命中的值。仍在队列中的报告在 `yes` 时也会在发送前以同样方式过滤。
+    默认情况下（`BUNKERNET_FILTER_HEADERS` 为 `no`），报告包含收到的所有请求头（最多 `MAX_HEADERS` 个），但不含从不发送的 `Cookie`、`Authorization` 和 `Proxy-Authorization`，以及 ModSecurity 命中的值（在 Cookie 和这些请求头中命中的值除外）。将 `BUNKERNET_FILTER_HEADERS` 设置为 `yes`，则只发送上面列出的六个请求头，并清空在请求头和 Cookie 中命中的值。仍在队列中的报告在发送前也会以同样方式处理（凭据始终清除，白名单在 `yes` 时应用）。
 
     URL 以及命中的值均来自请求，因此包含客户端发送的任何内容。对于 URL 中带有敏感值的服务，请将 `USE_BUNKERNET` 设置为 `no`。
 
@@ -2011,7 +2015,7 @@ CrowdSec 是一种现代的开源安全引擎，它基于行为分析和社区�
     services:
       bunkerweb:
         # 这是将用于在调度器中识别实例的名称
-        image: bunkerity/bunkerweb:1.6.18-rc3
+        image: bunkerity/bunkerweb:1.6.18-rc4
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -2028,7 +2032,7 @@ CrowdSec 是一种现代的开源安全引擎，它基于行为分析和社区�
             syslog-address: "udp://10.20.30.254:514" # syslog 服务的 IP 地址
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.18-rc3
+        image: bunkerity/bunkerweb-scheduler:1.6.18-rc4
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb" # 确保设置正确的实例名称
@@ -2760,6 +2764,7 @@ Greylist 插件提供了一种灵活的安全方法，允许访问者访问，�
 | 设置           | 默认值 | 上下文    | 多个 | 描述                                         |
 | -------------- | ------ | --------- | ---- | -------------------------------------------- |
 | `USE_GREYLIST` | `no`   | multisite | 否   | **启用灰名单：** 设置为 `yes` 以启用灰名单。 |
+| `GREYLIST_URLS_REFRESH_INTERVAL` | `1h` | multisite | 否 | **URL 刷新间隔：** 再次下载前缓存必须达到的最短时间。接受不带单位的秒数或时间后缀（`ms`、`s`、`m`、`h`、`d`、`w`、`M`、`y`）。 |
 
 === "IP 地址"
     **这是做什么的：** 根据访问者的 IP 地址或网络将访问者列入灰名单。这些访问者可以获得访问权限，但仍会受到安全检查。
@@ -2826,7 +2831,7 @@ Greylist 插件提供了一种灵活的安全方法，允许访问者访问，�
     所有 `*_URLS` 设置都支持 HTTP/HTTPS URL 以及使用 `file:///` 前缀的本地文件路径。使用 `http://user:pass@url` 格式支持基本身份验证。
 
 !!! tip "定期更新"
-    来自 URL 的灰名单会每小时自动下载和更新，以确保您的保护始终与最新的受信任来源保持同步。
+    任务每小时运行一次。`GREYLIST_URLS_REFRESH_INTERVAL` 设置再次下载前 URL 缓存必须达到的最短时间（默认：`1h`）。对于每天最多允许下载一次的提供商，请使用 `24h`；设置为 `0` 则每次任务运行时都下载。缓存仍有效或下载失败时，会保留上次的有效条目。在此插件内，各服务共享 URL 缓存：最短的间隔可能触发下载，因此对于有下载频率限制的同一 URL，请在所有使用它的服务上设置相同的间隔。
 
 ### 示例配置
 
@@ -2994,7 +2999,7 @@ gRPC 插件允许 BunkerWeb 通过 HTTP/2 使用 `grpc_pass` 代理 gRPC 服务�
     只有在 CA 包可用时 `GRPC_SSL_VERIFY` 才会生效。可通过 `GRPC_SSL_TRUSTED_CERTIFICATE`（调度器 可读取的路径）或 `GRPC_SSL_TRUSTED_CERTIFICATE_DATA`（base64 或明文 PEM）提供，并用 `GRPC_SSL_TRUSTED_CERTIFICATE_PRIORITY` 选择来源。调度器 会校验该 CA 包、缓存并分发到各实例。若没有可用的 CA 包，校验将保持关闭。
 
 !!! warning "长连接流与核心超时"
-    长连接或流式 RPC 可能需要高于全局默认值的通用 NGINX 超时。常见需要调整的是 General 插件设置中的 `CLIENT_BODY_TIMEOUT` 和 `CLIENT_HEADER_TIMEOUT`。
+    长连接或流式 RPC 可能需要更大的 `CLIENT_BODY_TIMEOUT` 和 `CLIENT_HEADER_TIMEOUT`。请在 General 插件设置中为 gRPC 服务单独配置；全局 `CLIENT_HEADER_TIMEOUT` 应保持较短，以限制 TLS 握手时间和重新加载后旧工作进程的存活时间。
 
 !!! tip "多个 gRPC 后端"
     多路由场景请使用带后缀的配置项：
@@ -3356,6 +3361,8 @@ HTML 注入插件允许您无缝地将自定义 HTML 代码添加到您网站页
 | `INJECT_HEAD` |        | multisite | 否   | **头部 HTML 代码：** 在 `</head>` 标签前注入的 HTML 代码。 |
 | `INJECT_BODY` |        | multisite | 否   | **主体 HTML 代码：** 在 `</body>` 标签前注入的 HTML 代码。 |
 
+`INJECT_HEAD` 和 `INJECT_BODY` 的值按原样作为 HTML 插入：引号和反斜杠无需额外进行 NGINX 转义。如果您之前手动添加了 `\'` 作为临时解决方法，请删除其中的反斜杠。请保留配置格式（如 YAML）要求的转义；NGINX 的 `$variable` 变量展开行为保持不变。
+
 !!! tip "最佳实践"
     - 出于性能考虑，请将 JavaScript 文件放在 body 的末尾，以防止渲染阻塞。
     - 将 CSS 和关键的 JavaScript 放在 head 部分，以避免出现无样式内容的闪烁。
@@ -3618,6 +3625,7 @@ Let's Encrypt 插件支持广泛的 DNS 提供商进行 DNS 验证。每个提�
 | `godaddy`         | GoDaddy          | `key`<br>`secret`                                                                                            | `ttl` (默认: `600`)                                                                                                                                                                                                                                          | [文档](https://github.com/miigotu/certbot-dns-godaddy/blob/main/README.md)                   |
 | `google`          | Google Cloud     | `project_id`<br>`private_key_id`<br>`private_key`<br>`client_email`<br>`client_id`<br>`client_x509_cert_url` | `type` (默认: `service_account`)<br>`auth_uri` (默认: `https://accounts.google.com/o/oauth2/auth`)<br>`token_uri` (默认: `https://accounts.google.com/o/oauth2/token`)<br>`auth_provider_x509_cert_url` (默认: `https://www.googleapis.com/oauth2/v1/certs`) | [文档](https://certbot-dns-google.readthedocs.io/en/stable/)                                 |
 | `hetzner`         | Hetzner          | `api_token`                                                                                                  |                                                                                                                                                                                                                                                              | [文档](https://github.com/ctrlaltcoop/certbot-dns-hetzner/blob/main/README.md)               |
+| `hosttech` | Hosttech | `api_token` | 默认传播等待时间为 600 秒；如有需要，请增大 `LETS_ENCRYPT_DNS_PROPAGATION`。 | [文档](https://github.com/bunkerity/certbot-dns-hosttech/blob/main/README.md) |
 | `infomaniak`      | Infomaniak       | `token`                                                                                                      |                                                                                                                                                                                                                                                              | [文档](https://github.com/infomaniak/certbot-dns-infomaniak/blob/main/README.rst)            |
 | `ionos`           | IONOS            | `prefix`<br>`secret`                                                                                         | `endpoint` (默认: `https://api.hosting.ionos.com`)                                                                                                                                                                                                           | [文档](https://github.com/helgeerbe/certbot-dns-ionos/blob/master/README.md)                 |
 | `linode`          | Linode           | `key`                                                                                                        |                                                                                                                                                                                                                                                              | [文档](https://certbot-dns-linode.readthedocs.io/en/stable/)                                 |
@@ -3761,6 +3769,9 @@ BunkerWeb 中的限制插件提供了强大的功能来对您的网站强制执�
 
         例如，`5r/m` 表示每个 IP 地址每分钟允许 5 个请求。
 
+    !!! info "跨 worker 的计数精度"
+        未使用 Redis 时，对于 `LIMIT_REQ_RATE` 和 `LIMIT_REQ_GLOBAL_RATE`，每个时间窗口不超过 100 个请求时，跨 worker 的计数是精确的：同时到达的请求无法突破限制。每个时间窗口超过 100 个请求时，同时到达的请求可能略微超出限制，因为在每个请求上串行化一长串请求历史的计数器会降低吞吐量。使用 Redis 时，计数始终精确。
+
 === "全局速率限制"
 
     | 设置                    | 默认值    | 上下文    | 多选 | 描述                                                                                       |
@@ -3773,13 +3784,13 @@ BunkerWeb 中的限制插件提供了强大的功能来对您的网站强制执�
 
 === "连接限制"
 
-    | 设置                    | 默认值 | 上下文    | 多选 | 描述                                                           |
-    | ----------------------- | ------ | --------- | ---- | -------------------------------------------------------------- |
-    | `USE_LIMIT_CONN`        | `yes`  | multisite | 否   | **启用连接限制：** 设置为 `yes` 以启用连接限制功能。           |
-    | `LIMIT_CONN_MAX_HTTP1`  | `10`   | multisite | 否   | **HTTP/1.X 连接数：** 每个 IP 地址的最大并发 HTTP/1.X 连接数。 |
-    | `LIMIT_CONN_MAX_HTTP2`  | `100`  | multisite | 否   | **HTTP/2 流数：** 每个 IP 地址的最大并发 HTTP/2 流数。         |
-    | `LIMIT_CONN_MAX_HTTP3`  | `100`  | multisite | 否   | **HTTP/3 流数：** 每个 IP 地址的最大并发 HTTP/3 流数。         |
-    | `LIMIT_CONN_MAX_STREAM` | `10`   | multisite | 否   | **流连接数：** 每个 IP 地址的最大并发流连接数。                |
+    | 设置                    | 默认值 | 上下文    | 多选 | 描述                                                                              |
+    | ----------------------- | ------ | --------- | ---- | --------------------------------------------------------------------------------- |
+    | `USE_LIMIT_CONN`        | `yes`  | multisite | 否   | **启用连接限制：** 设置为 `yes` 以启用连接限制功能。                              |
+    | `LIMIT_CONN_MAX_HTTP1`  | `10`   | multisite | 否   | **HTTP/1.X 连接数：** 每个 IP 地址的最大并发 HTTP/1.X 连接数。范围：1 至 65535。  |
+    | `LIMIT_CONN_MAX_HTTP2`  | `100`  | multisite | 否   | **HTTP/2 流数：** 每个 IP 地址的最大并发 HTTP/2 流数。范围：1 至 65535。          |
+    | `LIMIT_CONN_MAX_HTTP3`  | `100`  | multisite | 否   | **HTTP/3 流数：** 每个 IP 地址的最大并发 HTTP/3 流数。范围：1 至 65535。          |
+    | `LIMIT_CONN_MAX_STREAM` | `10`   | multisite | 否   | **流连接数：** 每个 IP 地址的最大并发流连接数。范围：1 至 65535。                 |
 
 当 `SECURITY_MODE` 为 `detect` 时，连接限制会被评估并记录（`limiting connections, dry run`），但不会被强制执行。
 
@@ -4456,6 +4467,7 @@ ModSecurity 插件将功能强大的 [ModSecurity](https://modsecurity.org) Web 
 | `MODSECURITY_SEC_AUDIT_LOG_PARTS`           | `BCFH`                                | multisite | 否   | **审计日志部分：** 审计日志中要包含的请求/响应的哪些部分。                                                                                                                                                                                                                                                                                                                              |
 | `MODSECURITY_SEC_AUDIT_LOG`                 | `/var/log/bunkerweb/modsec_audit.log` | multisite | 否   | **审计日志路径：** ModSecurity 写入审计条目的文件路径。必须是常规文件：Serial 审计写入器会锁定该文件，管道或流无法支持锁定。路径必须以 `.log` 结尾。通过该后缀实现的轮转仅适用于安装了 logrotate 的场景（Linux 软件包和 All-In-One 镜像）；在 Docker、Swarm 和 Kubernetes 上，非默认名称既不会被流式传输也不会被轮转，会在容器内无限增长，因为容器的日志流仅链接了 `modsec_audit.log`。 |
 | `MODSECURITY_SEC_AUDIT_LOG_TYPE`            | `Serial`                              | multisite | 否   | 写入模式：`Serial`（默认）或 `Concurrent`。                                                                                                                                                                                                                                                                                                                                             |
+| `MODSECURITY_SEC_AUDIT_LOG_FORMAT`          | `Native`                              | multisite | 否   | 审计日志格式：`Native`（默认）或 `JSON`（每条记录一个 JSON 对象）。在全局 CRS 模式下须全局设置。                                                                                                                                                                                                                                                                                        |
 | `MODSECURITY_SEC_AUDIT_LOG_STORAGE_DIR`     |                                       | multisite | 否   | 默认为空；`Concurrent` 必须使用绝对存储目录。                                                                                                                                                                                                                                                                                                                                           |
 | `MODSECURITY_SEC_REQUEST_BODY_LIMIT`        |                                       | multisite | 否   | 最大请求体检查大小，以字节或 `k`/`m`/`g` 后缀表示。留空时取自 `MAX_CLIENT_SIZE`，NGINX 会先执行该限制。`REVERSE_PROXY_MAX_CLIENT_SIZE` 会在对应 location 中覆盖此值。`0` 取消检查大小限制，可能耗尽内存。                                                                                                                                                                               |
 | `MODSECURITY_SEC_REQUEST_BODY_LIMIT_ACTION` | `Reject`                              | multisite | 否   | `Reject` 对超过检查限制的请求返回 HTTP 413。`ProcessPartial` 只检查限制内的部分并转发完整请求体，因此会降低 WAF 覆盖范围。独立的无文件请求体限制仍然有效。                                                                                                                                                                                                                              |
@@ -4473,6 +4485,22 @@ ModSecurity 插件将功能强大的 [ModSecurity](https://modsecurity.org) Web 
     ModSecurity 会将完整请求体缓冲到内存中，并且无法为数 GB 的上传设置上限，这可能导致 worker OOM。如果——**并且仅当**——某个反向代理 URL *专门* 用于文件上传（例如专用的 `/upload` 端点），请在该 URL 上设置 `REVERSE_PROXY_MODSECURITY_N: "no"`，以便在其 `location` 块中生成 `modsecurity off;`。不要在混合用途的 URL 上禁用它：否则该 location 提供的所有内容都会失去 WAF 覆盖。
 
     为了在绕过 ModSecurity 后仍保护上传内容，请将其与文件扫描插件配合使用，例如 [ClamAV](https://github.com/bunkerity/bunkerweb-plugins/tree/main/clamav) 或 [VirusTotal](https://github.com/bunkerity/bunkerweb-plugins/tree/main/virustotal)——它们检查上传文件本身，而不是原始请求体。
+
+!!! warning "响应体阻断与压缩响应"
+    如果响应体阻断规则在响应头发送后才触发，客户端可能先收到原始状态码（如 `200`），随后出现响应体不完整或分块传输错误，而不是完整的 `403` 响应。BunkerWeb 应用 gzip、Brotli 或 zstd 压缩时都可能出现这种情况。从 `1.6.18~rc4` 开始，Brotli 的行为与 gzip 已有的行为一致。请检查 ModSecurity 审计日志和错误日志，确定触发的规则，并用范围严格受限的排除规则处理已确认的误报。
+
+!!! warning "上游压缩的响应体"
+    CRS v4 不检查上游已经压缩的响应体（`gzip`、`br` 或 `zstd`）。BunkerWeb 不会为检查而解压这些响应体。如果需要检查响应体，请配置上游返回未压缩的内容。对于遵循此请求头的上游，可以仅在受影响的服务和 location 中移除转发请求的 `Accept-Encoding` 头，以请求未压缩的响应：
+
+    ```yaml
+    REVERSE_PROXY_HOST_1: "http://app:8080"
+    REVERSE_PROXY_URL_1: "/reports/"
+    REVERSE_PROXY_HEADERS_1: 'Accept-Encoding ""'
+    ```
+
+    请替换主机和路径，并将后缀调整为目标反向代理 location 的编号。如果该 location 的 `REVERSE_PROXY_HEADERS_1` 已有条目，请保留它们并追加 `;Accept-Encoding ""`。应使用此设置，而不是服务器级别的 `proxy_set_header`，因为生成的 location 请求头配置会覆盖后者。
+
+    请验证上游确实返回未压缩的响应；如果仍然压缩，请在上游禁用该路由的压缩。这会增加上游与 BunkerWeb 之间的带宽使用量。检查完成后，BunkerWeb 仍可为客户端压缩响应；配置的响应体检查 MIME 类型和大小限制仍然适用。
 
 ### 可用的 CRS 版本
 
@@ -5556,17 +5584,17 @@ STREAM 支持 :warning:
         - **协议处理：** 支持 HTTP、HTTPS、WebSockets 和其他协议
         - **错误拦截：** 自定义错误页面以获得一致的用户体验
 
-    | 设置                              | 默认值 | 上下文    | 多选 | 描述                                                                                                                                               |
-    | --------------------------------- | ------ | --------- | ---- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
-    | `USE_REVERSE_PROXY`               | `no`   | multisite | 否   | **启用反向代理：** 设置为 `yes` 以启用反向代理功能。                                                                                               |
-    | `REVERSE_PROXY_HOST`              |        | multisite | 是   | **后端主机：** 代理资源的完整 URL (proxy_pass)。                                                                                                   |
-    | `REVERSE_PROXY_URL`               | `/`    | multisite | 是   | **位置 URL：** 将被代理到后端服务器的路径。以 `^` 开头或以 `$` 结尾的值将被视为正则表达式 location。可选地在前面加上 `~`、`~*`、`=` 或 `^~` 并紧跟一个空格，以显式设置 nginx location 修饰符；值的其余部分不允许包含空格、`;`、`{` 或 `}`。                                                 |
-    | `REVERSE_PROXY_BUFFERING`         | `yes`  | multisite | 是   | **响应缓冲：** 启用或禁用来自代理资源的响应缓冲。                                                                                                  |
-    | `REVERSE_PROXY_REQUEST_BUFFERING` | `yes`  | multisite | 是   | **请求缓冲：** 启用或禁用向代理资源发送请求时的缓冲。                                                                                              |
-    | `REVERSE_PROXY_KEEPALIVE`         | `no`   | multisite | 是   | **保持连接：** 启用或禁用与代理资源的保持连接。                                                                                                    |
-    | `REVERSE_PROXY_HTTP_VERSION`      | `1.1`  | multisite | 是   | **HTTP 版本：** 用于与上游通信的 HTTP 协议版本（`1.0`、`1.1` 或 `2`）。设为 `2` 可在上游连接上启用 HTTP/2 多路复用。WebSocket 位置始终固定为 1.1。 |
-    | `REVERSE_PROXY_CUSTOM_HOST`       |        | multisite | 否   | **自定义主机：** 覆盖发送到上游服务器的 Host 标头。                                                                                                |
-    | `REVERSE_PROXY_INTERCEPT_ERRORS`  | `yes`  | multisite | 否   | **拦截错误：** 是否拦截和重写来自后端的错误响应。 参见[保留上游 API 的错误响应体](#errors)。 |
+    | 设置                              | 默认值 | 上下文    | 多选 | 描述                                                                                                                                                                                                                                        |
+    | --------------------------------- | ------ | --------- | ---- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+    | `USE_REVERSE_PROXY`               | `no`   | multisite | 否   | **启用反向代理：** 设置为 `yes` 以启用反向代理功能。                                                                                                                                                                                        |
+    | `REVERSE_PROXY_HOST`              |        | multisite | 是   | **后端主机：** 代理资源的完整 URL (proxy_pass)。                                                                                                                                                                                            |
+    | `REVERSE_PROXY_URL`               | `/`    | multisite | 是   | **位置 URL：** 将被代理到后端服务器的路径。以 `^` 开头或以 `$` 结尾的值将被视为正则表达式 location。可选地在前面加上 `~`、`~*`、`=` 或 `^~` 并紧跟一个空格，以显式设置 nginx location 修饰符；值的其余部分不允许包含空格、`;`、`{` 或 `}`。 |
+    | `REVERSE_PROXY_BUFFERING`         | `yes`  | multisite | 是   | **响应缓冲：** 启用或禁用来自代理资源的响应缓冲。                                                                                                                                                                                           |
+    | `REVERSE_PROXY_REQUEST_BUFFERING` | `yes`  | multisite | 是   | **请求缓冲：** 启用或禁用向代理资源发送请求时的缓冲。                                                                                                                                                                                       |
+    | `REVERSE_PROXY_KEEPALIVE`         | `no`   | multisite | 是   | **保持连接：** 向代理资源发送已配置的 HTTP 版本（默认 `1.1`）和空的 `Connection` 标头。它本身不会创建连接池：要复用连接，请让 `REVERSE_PROXY_HOST` 指向在 `http` 自定义配置中声明的、带 `keepalive` 的具名 `upstream`。                     |
+    | `REVERSE_PROXY_HTTP_VERSION`      | `1.1`  | multisite | 是   | **HTTP 版本：** 用于与上游通信的 HTTP 协议版本（`1.0`、`1.1` 或 `2`）。设为 `2` 可在上游连接上启用 HTTP/2 多路复用。WebSocket 位置始终固定为 1.1。                                                                                          |
+    | `REVERSE_PROXY_CUSTOM_HOST`       |        | multisite | 否   | **自定义主机：** 覆盖发送到上游服务器的 Host 标头。                                                                                                                                                                                         |
+    | `REVERSE_PROXY_INTERCEPT_ERRORS`  | `yes`  | multisite | 否   | **拦截错误：** 是否拦截和重写来自后端的错误响应。 参见[保留上游 API 的错误响应体](#errors)。                                                                                                                                                |
 
     BunkerWeb 在生成 NGINX location 时会为路径或正则表达式加上引号，并保留其中的字面引号、`#` 和正则表达式反斜杠。输入设置值时不要自行添加 NGINX 引号。现有的空白字符、`;`、`{` 和 `}` 限制仍然适用。
 
@@ -5577,6 +5605,32 @@ STREAM 支持 :warning:
 
     !!! warning "请求缓冲行为"
         禁用 `REVERSE_PROXY_REQUEST_BUFFERING` 仅在 ModSecurity 被禁用时才会生效，因为否则会强制执行请求缓冲。
+
+    !!! info "复用后端连接"
+        `REVERSE_PROXY_KEEPALIVE=yes` 只会让 BunkerWeb 向后端发送已配置的 HTTP 版本（默认 `1.1`）和空的 `Connection` 标头，并不会创建连接池：使用普通的 `REVERSE_PROXY_HOST` URL 时，NGINX 会为每个请求新建一条到后端的连接。
+
+        要复用后端连接，请在 [`http` 自定义配置](advanced.md#custom-configurations)中声明一个带 `keepalive` 的具名 `upstream`，再让 `REVERSE_PROXY_HOST` 指向该组名，**不带端口**：端口写在 `upstream` 的 `server` 行中。
+
+        ```nginx
+        upstream app_pool {
+            server backend.internal:8443;
+            keepalive 32;
+        }
+        ```
+
+        ```conf
+        REVERSE_PROXY_HOST=https://app_pool
+        REVERSE_PROXY_KEEPALIVE=yes
+        # 仅 HTTPS：将源站名称作为 SNI 发送，并据此验证
+        REVERSE_PROXY_SSL_SNI=yes
+        REVERSE_PROXY_SSL_SNI_NAME=backend.example.com
+        # 仅当后端检查 Host 标头时才需要
+        REVERSE_PROXY_CUSTOM_HOST=backend.example.com
+        ```
+
+        - `upstream` 名称必须唯一，且 `server` 行中的主机名在 NGINX 加载配置时必须能够解析。
+        - 使用 HTTPS 时，只要 `REVERSE_PROXY_SSL_SNI_NAME` 为空，NGINX 就会把组名同时用作 SNI 名称和验证名称；而 `REVERSE_PROXY_SSL_SNI` 为 `no` 时，该设置会被忽略。请像上面这样同时设置两者，让后端看到其真实名称。
+        - `Host` 标头仍为客户端的 `$host`；如果后端期望其他名称，请设置 `REVERSE_PROXY_CUSTOM_HOST`。
 
 === "连接设置"
 
@@ -5783,6 +5837,9 @@ STREAM 支持 :warning:
         - 根据内容类型使用适当的缓存持续时间（静态资源可以缓存更长时间）
         - 配置 `PROXY_NO_CACHE` 以避免缓存敏感或个性化内容
         - 监控缓存命中率并相应地调整设置
+
+    !!! warning "缓存需要启用响应缓冲"
+        代理缓存只对启用了响应缓冲的位置生效。当 `USE_PROXY_CACHE=yes` 时，请为每个要缓存的位置设置 `REVERSE_PROXY_BUFFERING=yes`，带编号的设置（如 `REVERSE_PROXY_BUFFERING_1`）也一样。响应缓冲关闭期间，新的响应不会被缓存，除非上游通过 `X-Accel-Buffering` 启用它；之前已缓存的响应仍可能被返回。`REVERSE_PROXY_REQUEST_BUFFERING` 控制的是请求正文，不会启用响应缓存。当 BunkerWeb 生成的配置中某个位置启用了代理缓存但响应缓冲已关闭时，会记录一条警告。
 
 !!! tip "上游双向 TLS"
     客户端证书与私钥必须同时提供，且私钥不能加密。调度器 会校验该证书对、缓存并分发到各实例；若校验不通过，则不会生成证书相关指令。只有在启用上游校验时，CRL 才会生效。
@@ -6625,6 +6682,7 @@ STREAM 支持 :warning:
 | 设置            | 默认值 | 上下文    | 多选 | 描述                                             |
 | --------------- | ------ | --------- | ---- | ------------------------------------------------ |
 | `USE_WHITELIST` | `yes`  | multisite | 否   | **启用白名单：** 设置为 `yes` 以启用白名单功能。 |
+| `WHITELIST_URLS_REFRESH_INTERVAL` | `1h` | multisite | 否 | **URL 刷新间隔：** 再次下载前缓存必须达到的最短时间。接受不带单位的秒数或时间后缀（`ms`、`s`、`m`、`h`、`d`、`w`、`M`、`y`）。 |
 
 === "IP 地址"
     **功能说明：** 根据访问者的 IP 地址或网络将其列入白名单。这些访问者将绕过所有安全检查。
@@ -6688,7 +6746,7 @@ STREAM 支持 :warning:
     所有 `*_URLS` 设置都支持 HTTP/HTTPS URL 以及使用 `file:///` 前缀的本地文件路径。支持使用 `http://user:pass@url` 格式进行基本身份验证。
 
 !!! tip "定期更新"
-    从 URL 获取的白名单会每小时自动下载和更新，以确保您的保护与最新的受信任来源保持同步。
+    任务每小时运行一次。`WHITELIST_URLS_REFRESH_INTERVAL` 设置再次下载前 URL 缓存必须达到的最短时间（默认：`1h`）。对于每天最多允许下载一次的提供商，请使用 `24h`；设置为 `0` 则每次任务运行时都下载。缓存仍有效或下载失败时，会保留上次的有效条目。在此插件内，各服务共享 URL 缓存：最短的间隔可能触发下载，因此对于有下载频率限制的同一 URL，请在所有使用它的服务上设置相同的间隔。
 
 !!! warning "安全绕过"
     被列入白名单的访问者将完全**绕过 BunkerWeb 中的所有其他安全检查**，包括 WAF 规则、速率限制、恶意机器人检测以及任何其他安全机制。仅对您绝对信任的来源使用白名单。
@@ -6796,3 +6854,51 @@ Adds wildcard server_name support (*.domain) for services, and serves the matchi
 | 参数           | 默认值 | 上下文    | 可重复 | 描述                                                                                              |
 | -------------- | ------ | --------- | ------ | ------------------------------------------------------------------------------------------------- |
 | `USE_WILDCARD` | `no`   | multisite | 否     | Enable wildcard server_name for this service (adds *.domain for the first domain in SERVER_NAME). |
+
+## Zstandard
+
+STREAM 支持 :x:
+
+Zstandard 插件使用 Zstandard (zstd) 算法压缩 HTTP 响应。对于声明 `Accept-Encoding: zstd` 的客户端，它可以减少带宽使用量。
+
+### 如何使用
+
+1.  **启用压缩：** 将 `USE_ZSTD` 设置为 `yes`（默认禁用）。
+2.  **配置 MIME 类型和最小大小：** 使用 `ZSTD_TYPES` 指定要压缩的内容类型，使用 `ZSTD_MIN_LENGTH` 指定最小响应大小。
+3.  **设置压缩级别：** 将 `ZSTD_COMP_LEVEL` 设置在 `1`（最快）到 `19`（支持的最高压缩率）之间。默认值为 `3`。
+
+支持 zstd 的客户端会收到 `Content-Encoding: zstd` 和 `Vary: Accept-Encoding`。不支持 zstd 的客户端（包括发送 `zstd;q=0` 的客户端）在启用 Brotli 或 gzip 插件时可以使用这两种压缩方式；否则将收到未压缩的响应。
+
+启用 `USE_ZSTD=yes` 后，即使最终选择未压缩、gzip 或 Brotli 表示，符合条件的响应也可能包含 `Vary: Accept-Encoding`。缓存必须遵循此响应头，将不同表示分开存储。
+
+当启用多个压缩插件时，服务器的优先顺序为 zstd、Brotli、gzip。每种编码各自遵循自己的 `q=0`；不同压缩插件之间不会比较正权重。
+
+### 配置设置
+
+| 设置              | 默认值                                                                                                                                                                                                                                                                                                                                                                                                                           | 上下文    | 多个 | 描述                                                                       |
+| ----------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------- | ---- | -------------------------------------------------------------------------- |
+| `USE_ZSTD`        | `no`                                                                                                                                                                                                                                                                                                                                                                                                                             | multisite | 否   | **启用 Zstandard：** 启用 Zstandard 响应压缩。                             |
+| `ZSTD_TYPES`      | `application/atom+xml application/javascript application/json application/rss+xml application/vnd.ms-fontobject application/x-font-opentype application/x-font-truetype application/x-font-ttf application/x-javascript application/xhtml+xml application/xml font/eot font/opentype font/otf font/truetype image/svg+xml image/vnd.microsoft.icon image/x-icon image/x-win-bitmap text/css text/javascript text/plain text/xml` | multisite | 否   | **MIME 类型：** 要压缩的 MIME 类型，`text/html` 始终包含在内。             |
+| `ZSTD_MIN_LENGTH` | `1000`                                                                                                                                                                                                                                                                                                                                                                                                                           | multisite | 否   | **最小大小：** 最小响应大小（以字节为单位）。长度未知的响应也可能被压缩。  |
+| `ZSTD_COMP_LEVEL` | `3`                                                                                                                                                                                                                                                                                                                                                                                                                              | multisite | 否   | **压缩级别：** 压缩级别从 `1` 到 `19`。较高的级别会使用更多的 CPU 和内存。 |
+
+!!! tip "压缩级别"
+    建议从级别 `3` 开始。较高的级别会增加每个请求的 CPU 和内存使用量；请为并发请求保留足够的容量。级别上限为 `19`，以符合 HTTP 的 8 MB zstd 窗口限制。
+
+!!! warning "敏感响应"
+    当响应同时包含机密信息和攻击者可控的输入时，压缩可能通过响应大小的差异泄露机密信息。请对敏感服务禁用压缩，或在应用程序中解决此风险。启用 zstd 后，即使 `ZSTD_TYPES` 中省略了 `text/html`，它也始终可被压缩。
+
+!!! info "上游压缩"
+    上游已压缩的响应不会被再次压缩。inject 插件需要未压缩的上游响应才能修改 HTML；同时使用这两项功能时，请相应地配置上游。
+
+### 示例配置
+
+启用 zstd，并以 Brotli 和 gzip 作为回退：
+
+```yaml
+USE_ZSTD: "yes"
+ZSTD_MIN_LENGTH: "1000"
+ZSTD_COMP_LEVEL: "3"
+USE_BROTLI: "yes"
+USE_GZIP: "yes"
+```

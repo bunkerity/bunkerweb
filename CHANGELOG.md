@@ -1,6 +1,85 @@
 # Changelog
 
-## v1.6.18~rc3 - 2026/11/04
+## v1.6.18~rc4 - 2026/11/13
+
+- [SECURITY] `api`, `ui`: restrict sensitive job-cache content (core private keys, credentials) to API admin credentials and UI super administrators.
+- [SECURITY] `autoconf`: secret setting values (keys, credentials, tokens, passwords) are no longer written to the logs, whatever the log level.
+- [SECURITY] `linux`: the service wrappers ignore `PATH`, `HOME`, `PYTHON*`, `LD_*` and similar variables set in `variables.env` and the service env files.
+- [SECURITY] `backup`: the pre-restore dump goes to a private temporary directory, and backup archives are created with mode 0600 from the start.
+- [SECURITY] `core`: settings written through autoconf, the API or the database now refuse a value with an embedded newline, as the scheduler already did.
+- [SECURITY] `dnsbl`, `country`, `reversescan`: a client denied by these plugins is still denied when the verdict cannot be written to the cache.
+- [SECURITY] `antibot`: when the session store is unavailable, the request gets an HTTP 500 instead of passing without the challenge.
+- [SECURITY] `authbasic`: the default `changeme` / `changeme` pair is ignored once another pair is configured, and `AUTH_BASIC_USER` refuses line breaks.
+- [SECURITY] `ui`: form values and the setup configuration are no longer logged at DEBUG level, and the username of a failed login is escaped in the log.
+- [SECURITY] `ui`: escape template ids in the templates deletion modal and the Services template filter.
+- [SECURITY] `api`: an instance API certificate that does not match the pinned one now fails the call instead of falling back to HTTP.
+- [SECURITY] `bunkernet`: reports never carry `Cookie`, `Authorization` or `Proxy-Authorization` headers or the values matched in them, with or without header filtering.
+- [SECURITY] `api`: deny every request when `API_WHITELIST_IPS` is enabled but holds no valid IP or network.
+- [SECURITY] `linux`: database migrations use a private copy of their configuration instead of editing the packaged `alembic.ini`.
+- [SECURITY] `installer`: repository setup scripts run from a private temporary directory, removed on success or failure.
+- [SECURITY] `linux`: packaged Python code, migrations included, is no longer group-writable after install or upgrade.
+- [SECURITY] `linux`: packaged logs are created with mode 0640, and upgrades tighten existing logs and rotated archives to 0640.
+- [SECURITY] `docker`: update the Alpine `zlib` package to 1.4-r0, fixing CVE-2026-4738 (its Deflate64 code is not built, so BunkerWeb was not exposed).
+- [FEATURE] `bwcli`: `bwcli bans --json` prints the bans as JSON for scripts and monitoring.
+- [FEATURE] `docker`: new floating image tags `1.6-edge` (newest release candidate or release), `1.6-rc`, `1.6-beta` and `1.6-alpha`, listed in the Docker docs.
+- [FEATURE] `blacklist`, `greylist`, `whitelist`: new `*_URLS_REFRESH_INTERVAL` settings set how often URL lists are refreshed (default `1h`) (Refs #3994).
+- [FEATURE] `linux`: support Fedora 45 (x86_64 and aarch64).
+- [FEATURE] `letsencrypt`: add Hosttech as a DNS-01 provider, through the new `certbot-dns-hosttech` plugin.
+- [FEATURE] `antibot`: new `ANTIBOT_INCLUDE_URI` setting challenges only the URIs that match it; `ANTIBOT_IGNORE_URI` still takes precedence (Refs #3647).
+- [FEATURE] `zstd`: new optional Zstandard response compression (`USE_ZSTD`, off by default), preferred over Brotli and gzip when the client accepts it. Enabling it can add `Vary: Accept-Encoding` to eligible uncompressed, gzip and Brotli responses too.
+- [FEATURE] `core`: `CLIENT_HEADER_TIMEOUT` and `CLIENT_BODY_TIMEOUT` now support per-service overrides.
+- [FEATURE] `modsecurity`: new `MODSECURITY_SEC_AUDIT_LOG_FORMAT` setting (`Native` or `JSON`) writes the audit log as one JSON object per entry.
+- [BUGFIX] `inject`: quotes and backslashes in `INJECT_HEAD` and `INJECT_BODY` no longer break the generated config; remove hand-added `\'` workaround escapes.
+- [BUGFIX] `modsecurity`: response body rules now inspect Brotli-compressed responses too; ModSecurity used to see the compressed bytes when `USE_BROTLI=yes`. A response-body deny after headers were sent can leave the client with an incomplete response, as with gzip.
+- [BUGFIX] `linux`: RHEL 9 and 10 packages now build ModSecurity with yajl, so JSON request bodies are parsed for CRS and `SecAuditLogFormat JSON` works.
+- [BUGFIX] `limit`: `LIMIT_CONN_MAX_*` settings now accept only values NGINX supports (1 to 65535).
+- [BUGFIX] `limit`: in local mode, simultaneous requests from one client across workers no longer exceed `LIMIT_REQ_RATE` (rates up to 100 per window).
+- [BUGFIX] `reverseproxy`: warn when proxy caching is enabled on a location whose response buffering is off, since NGINX stores nothing there.
+- [BUGFIX] `scheduler`: a configuration rejected by only some instances now keeps its failover warning, and a healthcheck no longer clears it.
+- [BUGFIX] `scheduler`, `api`, `ui`: a reload that an instance has not confirmed is no longer reported as applied. (Refs #4086)
+- [BUGFIX] `autoconf`: a health change of a BunkerWeb instance no longer triggers a full configuration regeneration and reload.
+- [BUGFIX] `metrics`: blocked requests logged just before a reload are no longer missing from the reports.
+- [BUGFIX] `scheduler`: after a scheduler restart, nginx no longer serves the default certificate before the custom or self-signed one is ready.
+- [BUGFIX] `letsencrypt`: Route53 certificates are no longer reissued at every scheduler restart. (Fixes #4144)
+- [BUGFIX] `dnsbl`: a clean verdict is cached for 60 seconds instead of a day when a DNSBL provider failed to answer.
+- [BUGFIX] `reversescan`: a cache write failure for one port no longer prevents caching the results of the other ports.
+- [BUGFIX] `ui`: remove ANSI escape sequences from the update-check alert box. (Fixes #4121, PR #4134) Thanks to @Mohit20057 for the fix.
+- [BUGFIX] `ui`: renaming the admin user through `ADMIN_USERNAME` now applies at startup instead of failing with "User ... doesn't exist".
+- [BUGFIX] `ui`: a client resuming the log stream from a far-behind offset gets the tail instead of the whole file.
+- [BUGFIX] `ui`: users with the reader role can now load the Let's Encrypt certificate list.
+- [BUGFIX] `letsencrypt`: the web UI refuses to delete or heal certificates while the database is read-only.
+- [BUGFIX] `ui`: opening a plugin page no longer tries to remove the directory of a plugin installed on disk.
+- [BUGFIX] `api`: an administrator username or password set through `API_USERNAME` and `API_PASSWORD` is now applied at startup.
+- [BUGFIX] `api`: the rate limiter now honors `REDIS_SSL_VERIFY` for standalone Redis and Sentinel connections.
+- [BUGFIX] `api`: a reload that NGINX rejects now fails at once and no longer blocks later reloads for five minutes (Refs #4086).
+- [BUGFIX] `reverseproxy`: a location with `REVERSE_PROXY_PASS_REQUEST_BODY` set to `no` no longer forwards the client's `Content-Length`.
+- [BUGFIX] `blacklist`, `greylist`, `whitelist`: keep a feed's last valid entries when its download fails or returns no valid entry.
+- [BUGFIX] `linux`: Debian package rollback no longer overwrites or deletes the existing upgrade backups.
+- [BUGFIX] `securitytxt`: sort the fields alphabetically and keep repeatable values in their configured order (Fixes #3705).
+- [BUGFIX] `misc`: an external plugin download that fails (HTTP, connection or archive error) now fails the job instead of reporting success.
+- [BUGFIX] `linux`: `systemctl reload` of the API and UI signals the running Gunicorn master; restart the service after editing its env file.
+- [BUGFIX] `scheduler`: rebuild missing failover snapshots from the database before rolling back a rejected configuration.
+- [BUGFIX] `linux`: upgrades back up SQLite with a validated snapshot that keeps committed WAL data, and RPM upgrades restore only their own.
+- [BUGFIX] `linux`: a failed dependency extraction or backup restore now fails package setup and keeps the recovery material.
+- [BUGFIX] `linux`: a plain package upgrade keeps an enabled, running API; uninstall stops the services first and keeps administrator unit files.
+- [BUGFIX] `linux`: RHEL packages now require logrotate.
+- [BUGFIX] `crowdsec`: start stream-mode decision synchronisation during worker initialisation, so an NGINX reload no longer leaves the poller dormant on quiet or whitelisted instances. (Fixes #4151)
+- [BUGFIX] `badbehavior`: match status codes exactly, so aborted requests (status 0) no longer count toward bans. (Refs #4162)
+- [PERF] `core`: in a 2-worker lab test, request-path CPU drops 14.2% for HTTP proxying and 33.3% for TLS proxying with the community blacklists.
+- [PERF] `blacklist`: reuse downloaded lists between requests instead of copying and deduplicating them each time.
+- [PERF] `core`: build the reserved-address matcher once per worker and cache successful plugin module lookups.
+- [PERF] `core`: avoid temporary result-check tables and build informational log messages only when their level is enabled.
+- [PERF] `sessions`: stop reading the random cookie name and secret from shared memory on every request.
+- [PERF] `errors`: the default error page is 44% lighter (a 403 drops from about 69 KB to 39 KB), with no visible change (Refs #3892).
+- [PERF] `antibot`: the challenge pages are about 30% lighter once minified (about 20% with gzip or Brotli), with no visible change.
+- [DOCS] `linux`: the custom configuration section says where NGINX includes each type and how to check a file is live.
+- [DOCS] `reverseproxy`: `REVERSE_PROXY_KEEPALIVE` does not pool backend connections by itself; the docs show how to pool with a named upstream.
+- [DOCS] `modsecurity`: document response-body inspection limits for upstream-compressed content and how to request uncompressed content for one reverse-proxy location.
+- [DOCS] `core`: a new section shows how to send the access, error and ModSecurity audit logs to Splunk, with a `key=value` access log and a JSON audit log. The Splunk side uses the official BunkerWeb Add-on for Splunk from Splunkbase.
+- [MISC] `headers`: the default `PERMISSIONS_POLICY` also denies `semantic-embedder` and drops `browsing-topics`, which Chromium removed.
+- [DEPS] Updated lua-resty-session to v4.3.0
+
+## v1.6.18~rc3 - 2026/11/05
 
 - [BUGFIX] `crowdsec`: `CROWDSEC_METADATA_CACHE_SIZE` now defaults to `24m`, so report metadata for the whole Community Blocklist fits in stream mode. (Refs #4135)
 - [SECURITY] `api`: when `API_LISTEN_HTTPS=yes`, the scheduler, UI, API service and `bwcli` check that an instance presents the generated API certificate (SHA-256 pin) instead of trusting any. A mismatch is logged and the call still falls back to HTTP.

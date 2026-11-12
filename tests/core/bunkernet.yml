@@ -64,7 +64,7 @@ actions:
   #
   # The setting is applied by the restart that follows an action, so the setting a request is logged under and
   # the one in force when the scheduler sends it can differ. The three blocks use that on purpose:
-  #   default:   logged and sent with the setting unset (no)    -> everything is sent as received
+  #   default:   logged and sent with the setting unset (no)    -> credentials are removed, other headers kept
   #   queued:    logged with no, sent after it became yes       -> the scheduler filters the queued reports
   #   filter on: logged with yes, sent after it became no again -> the report was already filtered when logged
   # The last two show each side filtering on its own: the sender cannot hide a filter that is missing at
@@ -86,20 +86,31 @@ actions:
     type: string
     url: "http://127.0.0.1:8000/bunkernet/last_report?url=bn_probe=default&reason=modsecurity"
     delay: 0.0
-    string: '"header_names":["accept","accept-encoding","accept-language","authorization","connection","cookie","host","referer","user-agent","x-bn-probe","x-forwarded-for"]'
+    string: '"header_names":["accept","accept-encoding","accept-language","connection","host","referer","user-agent","x-bn-probe","x-forwarded-for"]'
     restart_stack: false
   check_payload_default_cookie_value:
     type: string
     url: "http://127.0.0.1:8000/bunkernet/last_report?url=bn_probe=default&reason=modsecurity"
     delay: 0.0
-    string: '"cookie":"sid=<script>alert(1)</script>"'
+    not_string: '"cookie":'
     restart_stack: false
-  # The quotes make this the whole value of a matched variable, not the tail of the header above.
+  # Inspect matched values separately from headers: cookie matches are blank, Referer matches stay.
   check_payload_default_matched_value:
-    type: string
-    url: "http://127.0.0.1:8000/bunkernet/last_report?url=bn_probe=default&reason=modsecurity"
+    type: script
+    script:
+      - python3
+      - -c
+      - |
+        import json
+        from urllib.request import urlopen
+
+        with urlopen("http://127.0.0.1:8000/bunkernet/last_report?url=bn_probe=default&reason=modsecurity", timeout=10) as response:
+            data = json.load(response)["data"]["report"]["data"]
+        matches = list(zip(data["matched_var_names"], data["matched_vars"], strict=True))
+        assert ("REQUEST_COOKIES:sid", "") in matches, matches
+        assert all(value == "" for name, value in matches if name == "REQUEST_COOKIES:sid"), matches
+        assert ("REQUEST_HEADERS:Referer", "http://www.example.com/<script>alert(1)</script>") in matches, matches
     delay: 0.0
-    string: '"<script>alert(1)</script>"'
     restart_stack: false
 
   payload_queued:

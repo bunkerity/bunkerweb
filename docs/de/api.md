@@ -42,7 +42,7 @@ Wählen Sie die Variante, die zu Ihrer Umgebung passt.
     services:
       bunkerweb:
         # Name, unter dem die Instanz im Scheduler erscheint
-        image: bunkerity/bunkerweb:1.6.18-rc3
+        image: bunkerity/bunkerweb:1.6.18-rc4
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -55,7 +55,7 @@ Wählen Sie die Variante, die zu Ihrer Umgebung passt.
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.18-rc3
+        image: bunkerity/bunkerweb-scheduler:1.6.18-rc4
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Instanznamen korrekt setzen
@@ -77,7 +77,7 @@ Wählen Sie die Variante, die zu Ihrer Umgebung passt.
           - bw-db
 
       bw-api:
-        image: bunkerity/bunkerweb-api:1.6.18-rc3
+        image: bunkerity/bunkerweb-api:1.6.18-rc4
         environment:
           <<: *bw-env
           API_USERNAME: "admin"
@@ -144,7 +144,7 @@ Wählen Sie die Variante, die zu Ihrer Umgebung passt.
       -e SERVICE_API=yes \
       -e API_WHITELIST_IPS="127.0.0.0/8" \
       -p 80:8080/tcp -p 443:8443/tcp -p 443:8443/udp \
-      bunkerity/bunkerweb-all-in-one:1.6.18-rc3
+      bunkerity/bunkerweb-all-in-one:1.6.18-rc4
     ```
 
 === "Linux"
@@ -158,7 +158,7 @@ Wählen Sie die Variante, die zu Ihrer Umgebung passt.
     - Konfigurationsdateien: `/etc/bunkerweb/api.env` (bei erstem Start mit kommentierten Defaults erzeugt) und `/etc/bunkerweb/api.yml`
     - Umgebungsquellen: `api.env`, `variables.env`, `/run/secrets/<VAR>` und dann exportiert in den Gunicorn-Prozess
 
-    Bearbeiten Sie `/etc/bunkerweb/api.env`, um `API_USERNAME`/`API_PASSWORD`, Allowlist, TLS, Ratenlimits oder `API_ROOT_PATH` zu setzen, dann `systemctl reload bunkerweb-api`.
+    Bearbeiten Sie `/etc/bunkerweb/api.env`, um `API_USERNAME`/`API_PASSWORD`, Allowlist, TLS, Ratenlimits oder `API_ROOT_PATH` zu setzen, dann `systemctl restart bunkerweb-api`.
 
 ## Authentifizierung und Autorisierung
 
@@ -409,6 +409,7 @@ Docs oder Schema deaktivieren, indem die zugehörigen URLs auf `off|disabled|non
   - `GET /cache`: Cache-Dateien mit Filtern (`service`, `plugin`, `job_name`) auflisten; `with_data=true` bettet druckbaren Inhalt ein.
   - `GET /cache/{service}/{plugin}/{job}/{file}`: spezifische Cache-Datei holen/herunterladen (`download=true`).
   - `DELETE /cache` oder `DELETE /cache/{service}/{plugin}/{job}/{file}`: Cache-Dateien löschen. Der Scheduler wird nur für ein Plugin benachrichtigt, dessen Zeile tatsächlich gelöscht wurde; ein `plugin`, dem der Job nicht gehört, wird abgelehnt und nichts wird gelöscht.
+  - Sensible Einträge (gespeicherter Name `secret` oder auf `.secret` endend, dazu einige Core-Einträge mit privaten Schlüsseln oder Zugangsdaten die mTLS-Client-Schlüssel für Upstreams und das Failover-Backup-Archiv): `GET /cache/{service}/{plugin}/{job}/{file}` liefert `403`, und `GET /cache?with_data=true` lässt `data` und `printable` weg (die Metadaten bleiben), sofern der Aufrufer nicht HTTP Basic als API-Administrator oder den `API_TOKEN` verwendet hat. Ein Biscuit-Token wird auch dann abgelehnt, wenn er für einen Administrator ausgestellt wurde. Das `403` kommt auch bei einem sensiblen Namen, der nicht existiert. `DELETE` bleibt unverändert und benötigt weiterhin `cache_delete`. Siehe [Sensible Job-Cache-Einträge](plugins.md#sensible-job-cache-eintrage).
 - **Jobs**
   - `GET /jobs`: Jobs, Zeitpläne und Cache-Zusammenfassungen auflisten.
   - `POST /jobs/run`: Plugins als geändert markieren, um zugehörige Jobs auszulösen.

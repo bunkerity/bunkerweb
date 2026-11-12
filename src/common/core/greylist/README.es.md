@@ -34,6 +34,7 @@ Siga estos pasos para configurar y usar la función de Lista Gris:
 | Ajuste         | Valor por defecto | Contexto  | Múltiple | Descripción                                                                 |
 | -------------- | ----------------- | --------- | -------- | --------------------------------------------------------------------------- |
 | `USE_GREYLIST` | `no`              | multisite | no       | **Habilitar Lista Gris:** Establezca en `yes` para habilitar la lista gris. |
+| `GREYLIST_URLS_REFRESH_INTERVAL` | `1h` | multisite | no | **Intervalo de actualización de URL:** Antigüedad mínima de la caché antes de volver a descargar. Acepta segundos sin unidad o sufijos de tiempo (`ms`, `s`, `m`, `h`, `d`, `w`, `M`, `y`). |
 
 === "Dirección IP"
     **Qué hace esto:** Incluye en la lista gris a los visitantes según su dirección IP o red. Estos visitantes obtienen acceso pero siguen estando sujetos a los controles de seguridad.
@@ -100,7 +101,7 @@ Siga estos pasos para configurar y usar la función de Lista Gris:
     Todos los ajustes `*_URLS` admiten URLs HTTP/HTTPS así como rutas de archivos locales usando el prefijo `file:///`. Se admite la autenticación básica usando el formato `http://usuario:contraseña@url`.
 
 !!! tip "Actualizaciones Regulares"
-    Las listas grises de las URLs se descargan y actualizan automáticamente cada hora para asegurar que su protección se mantenga actualizada con las últimas fuentes de confianza.
+    La tarea se ejecuta cada hora. `GREYLIST_URLS_REFRESH_INTERVAL` establece la antigüedad mínima de una URL en caché antes de volver a descargarla (valor predeterminado: `1h`). Use `24h` para proveedores que permiten como máximo una descarga al día, o `0` para descargar en cada ejecución. Las cachés recientes y las descargas fallidas conservan las últimas entradas válidas. Dentro de este plugin, los servicios comparten las cachés de URL: el intervalo más corto puede provocar una descarga. Configure el mismo intervalo en todos los servicios que compartan una URL con un límite del proveedor.
 
 ### Configuraciones de Ejemplo
 

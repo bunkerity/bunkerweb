@@ -40,6 +40,7 @@ BunkerWeb allows you to specify certain users, IPs, or requests that should bypa
 | Setting                       | Default | Context   | Multiple | Description                                                                                                                                                                                          |
 | ----------------------------- | ------- | --------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `ANTIBOT_IGNORE_URI`          |         | multisite | no       | **Excluded URLs:** List of URI regex patterns separated by spaces that should bypass the challenge. Patterns are matched against the normalized path, alone or followed by `?` and the query string. |
+| `ANTIBOT_INCLUDE_URI`          |         | multisite | no       | **Included URLs:** Space-separated PCRE patterns for the only URIs to challenge. Empty means all URIs. Match the normalized path, alone or with `?` and query string. `ANTIBOT_IGNORE_URI` takes precedence. |
 | `ANTIBOT_IGNORE_IP`           |         | multisite | no       | **Excluded IPs:** List of IP addresses or CIDR ranges separated by spaces that should bypass the challenge.                                                                                          |
 | `ANTIBOT_IGNORE_RDNS`         |         | multisite | no       | **Excluded Reverse DNS:** List of reverse DNS suffixes separated by spaces that should bypass the challenge.                                                                                         |
 | `ANTIBOT_RDNS_GLOBAL`         | `yes`   | multisite | no       | **Global IPs Only:** If set to `yes`, only perform reverse DNS checks on public IP addresses.                                                                                                        |
@@ -61,6 +62,9 @@ BunkerWeb allows you to specify certain users, IPs, or requests that should bypa
     The antibot state (including `turnstile`, `hcaptcha`, `recaptcha`, `mcaptcha`, `captcha`, `javascript` and `cookie`) is persisted in the BunkerWeb [session cookie](#sessions). By default that cookie is scoped to the exact host that served it, so a user who solves the challenge on `a.example.com` will be challenged again on `b.example.com`. To solve the challenge once for every sibling subdomain of the same registrable domain, set [`SESSIONS_DOMAIN`](#sessions) to the parent domain (for example `example.com`) **for each relevant server**. `SESSIONS_DOMAIN` is a multisite setting — configure it per-server so unrelated tenants hosted on the same BunkerWeb instance never receive a cross-tenant `Domain` attribute.
 
 **Examples:**
+
+- `ANTIBOT_INCLUDE_URI=^/search(/|$) ^/login(/|$)`
+  Challenges only `/search`, `/login` and their subpaths; an empty list challenges every URI. Patterns are unanchored, so `^/search` alone also matches `/searchengine`.
 
 - `ANTIBOT_IGNORE_URI: "^/api/ ^/webhook/ ^/assets/"`
   This will exclude all URIs starting with `/api/`, `/webhook/`, or `/assets/` from the antibot challenge.

@@ -17,31 +17,9 @@ The second half of the chain -- an empty `changes` list being read as "everythin
 covered in test_config.py, next to the apply() fixture that already produces it.
 """
 
-import importlib.util
-from pathlib import Path
-from unittest.mock import patch
-
 import pytest
 
-ROOT = Path(__file__).resolve().parents[3]
-AUTOCONF = ROOT / "src" / "autoconf"
-
-
-def _load_config():
-    """Load src/autoconf/Config.py by path, so nothing from src/autoconf leaks onto sys.path.
-
-    tests/unit/conftest.py already puts src/common/db and src/common/utils on sys.path, which is all
-    `Config.py` needs (`Database`, `logger`). Differs from 1.7: dev's Config talks to the database
-    directly and has no api_client, so there is nothing to stub there.
-    """
-    spec = importlib.util.spec_from_file_location("bw_autoconf_config_order", AUTOCONF / "Config.py")
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
-    return module
-
-
-config_module = _load_config()
-Config = config_module.Config
+from Config import Config
 
 # What the autoconf-configs example produces: one server-http config per service.
 STORED = {
@@ -65,17 +43,18 @@ REORDERED = {
 # daemon serialised the container's labels.
 SERVICES = [{"SERVER_NAME": "app1.example.com", "USE_ANTIBOT": "no", "REVERSE_PROXY_HOST": "http://app1:8080"}]
 SERVICES_REORDERED = [{"REVERSE_PROXY_HOST": "http://app1:8080", "SERVER_NAME": "app1.example.com", "USE_ANTIBOT": "no"}]
-INSTANCES = [{"hostname": "bw-1", "name": "bw-1", "port": 5000, "server_name": "bwapi"}]
-INSTANCES_REORDERED = [{"server_name": "bwapi", "port": 5000, "hostname": "bw-1", "name": "bw-1"}]
+INSTANCES = [{"hostname": "bw-1", "name": "bw-1", "env": {"API_HTTP_PORT": "5000", "API_SERVER_NAME": "bwapi"}}]
+INSTANCES_REORDERED = [{"env": {"API_SERVER_NAME": "bwapi", "API_HTTP_PORT": "5000"}, "hostname": "bw-1", "name": "bw-1"}]
 
 
 @pytest.fixture
-def config():
-    with patch.object(config_module, "Database"):
-        cfg = Config("docker")
-    cfg._Config__configs = STORED
-    cfg._Config__services = SERVICES
-    cfg._Config__instances = INSTANCES
+def config(fake_db):
+    cfg = Config("docker")
+    assert cfg.apply(INSTANCES, SERVICES, configs=STORED, first=True)
+    fake_db.checked.clear()
+    fake_db.saved_instances.clear()
+    fake_db.saved_configs.clear()
+    fake_db.saved_custom_configs.clear()
     return cfg
 
 
@@ -117,19 +96,29 @@ def test_a_real_service_change_is_still_a_change(config):
 
 
 def test_a_real_instance_change_is_still_a_change(config):
-    assert config.update_needed([dict(INSTANCES[0], port=5001)], SERVICES, STORED) is True
+    changed = [dict(INSTANCES[0], env={"API_HTTP_PORT": "5001", "API_SERVER_NAME": "bwapi"})]
+    assert config.update_needed(changed, SERVICES, STORED) is True
 
 
-def test_update_needed_and_apply_compare_the_same_way():
+def test_update_needed_and_apply_compare_the_same_way(config, fake_db):
     """The defect was the two disagreeing, not either one on its own."""
-    source = (AUTOCONF / "Config.py").read_text(encoding="utf-8")
-    for predicate in ("if self.__instances != instances:", "if self.__services != services:", "if self.__configs != configs:"):
-        assert predicate in source
-    for stored in ("if instances != self.__instances or first:", "if services != self.__services or first:", "if configs != self.__configs or first:"):
-        assert stored in source
-    # extra_config is a flat Dict[str, str]: set(map(str, items())) is genuinely equivalent to
-    # `!=` there, and it is the one line of the four that keeps the idiom. Count CODE lines only --
-    # the comment above the block names the idiom too, and counting raw occurrences would pass or
-    # fail on how the comment is worded.
-    idiom = [line.strip() for line in source.splitlines() if "set(map(str, " in line and not line.lstrip().startswith("#")]
-    assert idiom == ["if set(map(str, self.__extra_config.items())) != set(map(str, extra_config.items())):"]
+    for instances, services, configs in ((INSTANCES_REORDERED, SERVICES, STORED), (INSTANCES, SERVICES_REORDERED, STORED), (INSTANCES, SERVICES, REORDERED)):
+        assert config.update_needed(instances, services, configs) is False
+        assert config.apply(instances, services, configs=configs)
+    assert fake_db.checked == []
+    assert fake_db.saved_instances == []
+    assert fake_db.saved_configs == []
+    assert fake_db.saved_custom_configs == []
+
+
+def test_extra_config_in_another_order_is_not_published(config, fake_db):
+    assert config.apply(INSTANCES, SERVICES, configs=STORED, extra_config={"SECURITY_MODE": "block", "USE_ANTIBOT": "captcha"})
+    assert fake_db.checked == [["extra_config", "config"]]
+    fake_db.checked.clear()
+    fake_db.saved_configs.clear()
+    reordered = {"USE_ANTIBOT": "captcha", "SECURITY_MODE": "block"}
+
+    assert config.update_needed(INSTANCES, SERVICES, STORED, reordered) is False
+    assert config.apply(INSTANCES, SERVICES, configs=STORED, extra_config=reordered)
+    assert fake_db.checked == []
+    assert fake_db.saved_configs == []

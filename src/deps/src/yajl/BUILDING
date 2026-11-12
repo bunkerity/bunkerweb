@@ -1,0 +1,23 @@
+Short story (If you already have ruby and cmake):
+
+./configure && make install
+
+When things go wrong:
+
+attain CMake (http://www.cmake.org) and ruby (http://ruby-lang.org) and
+try again.
+
+OR, attain CMake and build by hand:
+
+1. mkdir build
+2. cd build
+3. cmake ..
+4. make 
+5. build output left in yajl-X.Y.Z
+
+NOTE: for 64-bit systems where lib64 is used you can pass the cmake
+      variable LIB_SUFFIX to cause installation into the system's 'lib64'
+      directory.
+
+best,
+lloyd

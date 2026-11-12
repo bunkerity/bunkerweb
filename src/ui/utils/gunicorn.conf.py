@@ -509,6 +509,7 @@ def on_starting(server):
             override_admin_creds = getenv("OVERRIDE_ADMIN_CREDS", "no").lower() == "yes"
             if ADMIN_USER["method"] == "manual" or override_admin_creds:
                 updated = False
+                old_admin_username = ADMIN_USER["username"]
                 if env_admin_username and ADMIN_USER["username"] != env_admin_username:
                     ADMIN_USER["username"] = env_admin_username
                     updated = True
@@ -552,6 +553,7 @@ def on_starting(server):
                         ADMIN_USER["password"],
                         ADMIN_USER["totp_secret"],
                         theme=ADMIN_USER["theme"],
+                        old_username=old_admin_username,
                         method="manual",
                         language=ADMIN_USER["language"],
                     )

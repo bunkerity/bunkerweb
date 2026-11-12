@@ -72,6 +72,27 @@ def test_a_known_healthy_instance_is_not_registered_twice(health):
     assert len(health.sched.apis) == 1
 
 
+@pytest.mark.parametrize("answer", [OK, (False, "refused", 500, {}), (True, "", 503, {"status": "error", "msg": "nginx is down"})])
+def test_old_configuration_health_does_not_clear_failover(health, answer):
+    health.sched.db.instances = [instance("bw1", status="failover")]
+    health.api.answers["bw1"] = answer
+    for _ in range(3):
+        health.main.healthcheck_job()
+    assert statuses(health) == [("bw1", "failover")] * 3
+    assert [a.endpoint for a in health.sched.apis] == (["http://bw1:5000/"] if answer == OK else [])
+    assert health.sends.calls == []
+
+
+@pytest.mark.parametrize("success", [False, True])
+def test_upload_does_not_clear_failover_before_a_reload(sched_main, fake_sched, fake_api, tmp_path, success):
+    fake_sched.db.instances = [instance("bw1", status="failover")]
+    fake_sched.send_ok = success
+    fake_sched.responses = {"bw1": {"status": "success" if success else "error"}}
+    assert sched_main.send_file_to_bunkerweb(tmp_path, "/cache") is success
+    assert ("update_instance", "bw1", "failover") in fake_sched.db.calls
+    assert ("update_instance", "bw1", "up") not in fake_sched.db.calls
+
+
 def test_an_unreachable_instance_is_marked_down_and_dropped(health, caplog):
     health.api.answers["bw1"] = (False, "refused", 500, {})
     health.sched.apis = [FakeApi("http://bw1:5000/"), FakeApi("http://other:5000/")]

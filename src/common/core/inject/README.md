@@ -24,6 +24,8 @@ Follow these steps to configure and use the HTML Injection feature:
 | `INJECT_HEAD` |         | multisite | no       | **Head HTML Code:** The HTML code to inject before the `</head>` tag. |
 | `INJECT_BODY` |         | multisite | no       | **Body HTML Code:** The HTML code to inject before the `</body>` tag. |
 
+`INJECT_HEAD` and `INJECT_BODY` values are inserted as literal HTML: quotes and backslashes need no extra NGINX escaping. If you previously added `\'` by hand as a workaround, remove the backslash. Keep any escaping required by your configuration format (such as YAML); NGINX `$variable` expansion is unchanged.
+
 !!! tip "Best Practices"
     - For performance reasons, place JavaScript files at the end of the body to prevent render blocking.
     - Place CSS and critical JavaScript in the head section to avoid a flash of unstyled content.

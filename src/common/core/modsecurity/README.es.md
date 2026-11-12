@@ -37,6 +37,7 @@ Siga estos pasos para configurar y usar ModSecurity:
 | `MODSECURITY_SEC_AUDIT_LOG_PARTS`     | `BCFH`                                | multisite | no       | **Partes del Registro de Auditoría:** Qué partes de las solicitudes/respuestas incluir en los registros de auditoría.                                                                                                                              |
 | `MODSECURITY_SEC_AUDIT_LOG`           | `/var/log/bunkerweb/modsec_audit.log` | multisite | no       | **Ruta del Registro de Auditoría:** Ruta del archivo en el que ModSecurity escribe las entradas de auditoría. Debe ser un archivo regular: el escritor de auditoría Serial lo bloquea, algo que una tubería o flujo no puede soportar. La ruta debe terminar en `.log`. La rotación mediante esa extensión solo se aplica donde logrotate está instalado (los paquetes de Linux y la imagen All-In-One); en Docker, Swarm y Kubernetes, un nombre distinto del predeterminado no se transmite ni se rota, y crece sin límite dentro del contenedor, porque solo `modsec_audit.log` está enlazado al streaming de logs del contenedor.             |
 | `MODSECURITY_SEC_AUDIT_LOG_TYPE` | `Serial` | multisite | no | Modo: `Serial` (predeterminado) o `Concurrent`. |
+| `MODSECURITY_SEC_AUDIT_LOG_FORMAT` | `Native` | multisite | no | Formato del registro de auditoría: `Native` (predeterminado) o `JSON` (un objeto JSON por entrada). En modo CRS global, defínalo globalmente. |
 | `MODSECURITY_SEC_AUDIT_LOG_STORAGE_DIR` |  | multisite | no | Vacío por defecto; `Concurrent` requiere un directorio de almacenamiento absoluto. |
 | `MODSECURITY_SEC_REQUEST_BODY_LIMIT` | | multisite | no | Tamaño máximo del cuerpo inspeccionado, en bytes o con sufijos `k`/`m`/`g`. Vacío: se deriva de `MAX_CLIENT_SIZE`, que NGINX aplica primero. `REVERSE_PROXY_MAX_CLIENT_SIZE` sustituye el valor para su location. `0` elimina el límite y puede agotar la memoria. |
 | `MODSECURITY_SEC_REQUEST_BODY_LIMIT_ACTION` | `Reject` | multisite | no | `Reject` devuelve HTTP 413 por encima del límite de inspección. `ProcessPartial` inspecciona solo la parte dentro del límite y reenvía el cuerpo completo, reduciendo la cobertura WAF. El límite independiente sin archivos sigue aplicándose. |
@@ -54,6 +55,22 @@ Siga estos pasos para configurar y usar ModSecurity:
     ModSecurity almacena en memoria el cuerpo completo de la solicitud y no puede limitarlo para cargas de varios GB, lo que puede provocar OOM en el worker. Si — **y solo si** — una URL de proxy inverso se usa *exclusivamente* para cargas de archivos (por ejemplo, un endpoint `/upload` dedicado), establezca `REVERSE_PROXY_MODSECURITY_N: "no"` en esa URL para emitir `modsecurity off;` en su bloque `location`. No lo deshabilite en URL de uso mixto: perdería la cobertura del WAF en todo lo servido por esa ubicación.
 
     Para mantener protegidas las cargas después de omitir ModSecurity, combínelo con un plugin de análisis de archivos como [ClamAV](https://github.com/bunkerity/bunkerweb-plugins/tree/main/clamav) o [VirusTotal](https://github.com/bunkerity/bunkerweb-plugins/tree/main/virustotal); inspeccionan el archivo cargado en sí en lugar del cuerpo bruto de la solicitud.
+
+!!! warning "Bloqueos del cuerpo de respuesta y respuestas comprimidas"
+    Si una regla de bloqueo del cuerpo de respuesta se activa después de enviar las cabeceras, el cliente puede recibir el estado original (como `200`) seguido de un error de cuerpo incompleto o de transferencia fragmentada, en lugar de una respuesta `403` completa. Esto puede ocurrir con la compresión gzip, Brotli o zstd aplicada por BunkerWeb. Desde `1.6.18~rc4`, Brotli sigue el comportamiento ya existente de gzip. Consulte los registros de auditoría y errores de ModSecurity para identificar la regla activada y ajuste los falsos positivos confirmados con exclusiones de alcance limitado.
+
+!!! warning "Cuerpos de respuesta comprimidos por el upstream"
+    CRS v4 no inspecciona cuerpos de respuesta ya comprimidos por el upstream (`gzip`, `br` o `zstd`). BunkerWeb no los descomprime para inspeccionarlos. Cuando necesite inspeccionar el cuerpo de respuesta, configure el upstream para devolver contenido sin comprimir. Para solicitarlo a un upstream que respete esta cabecera, elimine `Accept-Encoding` de la solicitud reenviada solo en el servicio y la ubicación afectados:
+
+    ```yaml
+    REVERSE_PROXY_HOST_1: "http://app:8080"
+    REVERSE_PROXY_URL_1: "/reports/"
+    REVERSE_PROXY_HEADERS_1: 'Accept-Encoding ""'
+    ```
+
+    Sustituya el host y la ruta por sus valores y adapte el sufijo a la ubicación de proxy inverso deseada. Si esa ubicación ya tiene entradas en `REVERSE_PROXY_HEADERS_1`, consérvelas y añada `;Accept-Encoding ""`. Use este ajuste en lugar de un `proxy_set_header` a nivel de servidor, que queda sobrescrito por las cabeceras generadas en la ubicación.
+
+    Compruebe que el upstream devuelve realmente una respuesta sin comprimir; si sigue comprimiendo, desactive la compresión de esa ruta en el upstream. Esto aumenta el uso de ancho de banda entre el upstream y BunkerWeb. BunkerWeb puede seguir comprimiendo la respuesta para el cliente después de la inspección; siguen aplicándose los tipos MIME y los límites de tamaño configurados para inspeccionar el cuerpo de respuesta.
 
 ### Versiones de CRS Disponibles
 

@@ -8,18 +8,18 @@ BunkerWeb 附带一个插件系统，可以轻松添加新功能。安装插件�
 
 |      名称       | 版本  | 描述                                                                                                     |                                                 链接                                                  |
 | :-------------: | :---: | :------------------------------------------------------------------------------------------------------- | :---------------------------------------------------------------------------------------------------: |
-|  **Authentik**  | 1.13  | 使用 Authentik 转发认证（auth_request）为您的 Web 服务提供单点登录（SSO）保护。                          |   [bunkerweb-plugins/authentik](https://github.com/bunkerity/bunkerweb-plugins/tree/main/authentik)   |
-|   **ClamAV**    | 1.13  | 使用 ClamAV 杀毒引擎自动扫描上传的文件，并在检测到文件为恶意时拒绝请求。                                 |      [bunkerweb-plugins/clamav](https://github.com/bunkerity/bunkerweb-plugins/tree/main/clamav)      |
-| **Cloudflare**  | 1.13  | 配置 Cloudflare 的可信 IP，管理 Origin CA 证书，并将 BunkerWeb 封禁同步到 Cloudflare IP 列表。           |  [bunkerweb-plugins/cloudflare](https://github.com/bunkerity/bunkerweb-plugins/tree/main/cloudflare)  |
-|   **Coraza**    | 1.13  | 使用 Coraza WAF（ModSecurity 的替代品）检查请求。                                                        |      [bunkerweb-plugins/coraza](https://github.com/bunkerity/bunkerweb-plugins/tree/main/coraza)      |
-|   **Discord**   | 1.13  | 使用 Webhook 将安全通知发送到 Discord 频道。                                                             |     [bunkerweb-plugins/discord](https://github.com/bunkerity/bunkerweb-plugins/tree/main/discord)     |
-|   **Matrix**    | 1.13  | 使用 Matrix API 将安全通知发送到 Matrix 房间。                                                           |      [bunkerweb-plugins/matrix](https://github.com/bunkerity/bunkerweb-plugins/tree/main/matrix)      |
-| **open-appsec** | 1.13  | 通过 sidecar 代理使用 open-appsec 机器学习 WAF 检查请求，并拒绝其拦截的内容。               |      [bunkerweb-plugins/openappsec](https://github.com/bunkerity/bunkerweb-plugins/tree/main/openappsec)      |
-| **SentinelOne** | 1.13  | 使用 SentinelOne API 检查上传文件的哈希值和客户端 IP，并根据哈希信誉或威胁情报指标拒绝请求。             | [bunkerweb-plugins/sentinelone](https://github.com/bunkerity/bunkerweb-plugins/tree/main/sentinelone) |
-|    **Slack**    | 1.13  | 使用 Webhook 将安全通知发送到 Slack 频道。                                                               |       [bunkerweb-plugins/slack](https://github.com/bunkerity/bunkerweb-plugins/tree/main/slack)       |
-|  **SysWarden**  | 1.13  | 将 BunkerWeb 封禁同步到 SysWarden，通过 nftables 在内核层面阻止流量，并导入 SysWarden 的黑名单和白名单。 |   [bunkerweb-plugins/syswarden](https://github.com/bunkerity/bunkerweb-plugins/tree/main/syswarden)   |
-| **VirusTotal**  | 1.13  | 使用 VirusTotal API 检查上传文件的哈希值和客户端 IP，并在超过配置的信誉阈值时拒绝请求。                  |  [bunkerweb-plugins/virustotal](https://github.com/bunkerity/bunkerweb-plugins/tree/main/virustotal)  |
-|   **WebHook**   | 1.13  | 使用 Webhook 将安全通知发送到自定义 HTTP 端点。                                                          |     [bunkerweb-plugins/webhook](https://github.com/bunkerity/bunkerweb-plugins/tree/main/webhook)     |
+|  **Authentik**  | 1.14  | 使用 Authentik 转发认证（auth_request）为您的 Web 服务提供单点登录（SSO）保护。                          |   [bunkerweb-plugins/authentik](https://github.com/bunkerity/bunkerweb-plugins/tree/main/authentik)   |
+|   **ClamAV**    | 1.14  | 使用 ClamAV 杀毒引擎自动扫描上传的文件，并在检测到文件为恶意时拒绝请求。                                 |      [bunkerweb-plugins/clamav](https://github.com/bunkerity/bunkerweb-plugins/tree/main/clamav)      |
+| **Cloudflare**  | 1.14  | 配置 Cloudflare 的可信 IP，管理 Origin CA 证书，并将 BunkerWeb 封禁同步到 Cloudflare IP 列表。           |  [bunkerweb-plugins/cloudflare](https://github.com/bunkerity/bunkerweb-plugins/tree/main/cloudflare)  |
+|   **Coraza**    | 1.14  | 使用 Coraza WAF（ModSecurity 的替代品）检查请求。                                                        |      [bunkerweb-plugins/coraza](https://github.com/bunkerity/bunkerweb-plugins/tree/main/coraza)      |
+|   **Discord**   | 1.14  | 使用 Webhook 将安全通知发送到 Discord 频道。                                                             |     [bunkerweb-plugins/discord](https://github.com/bunkerity/bunkerweb-plugins/tree/main/discord)     |
+|   **Matrix**    | 1.14  | 使用 Matrix API 将安全通知发送到 Matrix 房间。                                                           |      [bunkerweb-plugins/matrix](https://github.com/bunkerity/bunkerweb-plugins/tree/main/matrix)      |
+| **open-appsec** | 1.14  | 通过 sidecar 代理使用 open-appsec 机器学习 WAF 检查请求，并拒绝其拦截的内容。               |      [bunkerweb-plugins/openappsec](https://github.com/bunkerity/bunkerweb-plugins/tree/main/openappsec)      |
+| **SentinelOne** | 1.14  | 使用 SentinelOne API 检查上传文件的哈希值和客户端 IP，并根据哈希信誉或威胁情报指标拒绝请求。             | [bunkerweb-plugins/sentinelone](https://github.com/bunkerity/bunkerweb-plugins/tree/main/sentinelone) |
+|    **Slack**    | 1.14  | 使用 Webhook 将安全通知发送到 Slack 频道。                                                               |       [bunkerweb-plugins/slack](https://github.com/bunkerity/bunkerweb-plugins/tree/main/slack)       |
+|  **SysWarden**  | 1.14  | 将 BunkerWeb 封禁同步到 SysWarden，通过 nftables 在内核层面阻止流量，并导入 SysWarden 的黑名单和白名单。 |   [bunkerweb-plugins/syswarden](https://github.com/bunkerity/bunkerweb-plugins/tree/main/syswarden)   |
+| **VirusTotal**  | 1.14  | 使用 VirusTotal API 检查上传文件的哈希值和客户端 IP，并在超过配置的信誉阈值时拒绝请求。                  |  [bunkerweb-plugins/virustotal](https://github.com/bunkerity/bunkerweb-plugins/tree/main/virustotal)  |
+|   **WebHook**   | 1.14  | 使用 Webhook 将安全通知发送到自定义 HTTP 端点。                                                          |     [bunkerweb-plugins/webhook](https://github.com/bunkerity/bunkerweb-plugins/tree/main/webhook)     |
 
 ## 如何使用插件
 
@@ -27,7 +27,7 @@ BunkerWeb 附带一个插件系统，可以轻松添加新功能。安装插件�
 
 如果您想快速安装外部插件，可以使用 `EXTERNAL_PLUGIN_URLS` 设置。它接受一个以空格分隔的 URL 列表，每个 URL 指向一个包含一个或多个插件的压缩（zip 格式）存档。
 
-如果您想自动安装官方插件，可以使用以下值：`EXTERNAL_PLUGIN_URLS=https://github.com/bunkerity/bunkerweb-plugins/archive/refs/tags/v1.13.zip`
+如果您想自动安装官方插件，可以使用以下值：`EXTERNAL_PLUGIN_URLS=https://github.com/bunkerity/bunkerweb-plugins/archive/refs/tags/v1.14.zip`
 
 ### 手动
 
@@ -95,7 +95,7 @@ BunkerWeb 附带一个插件系统，可以轻松添加新功能。安装插件�
     services:
     ...
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.18-rc3
+        image: bunkerity/bunkerweb-scheduler:1.6.18-rc4
         volumes:
           - ./bw-data:/data
     ...
@@ -131,7 +131,7 @@ BunkerWeb 附带一个插件系统，可以轻松添加新功能。安装插件�
     services:
     ...
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.18-rc3
+        image: bunkerity/bunkerweb-scheduler:1.6.18-rc4
         volumes:
           - ./bw-data:/data
     ...
@@ -174,7 +174,7 @@ BunkerWeb 附带一个插件系统，可以轻松添加新功能。安装插件�
     services:
     ...
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.18-rc3
+        image: bunkerity/bunkerweb-scheduler:1.6.18-rc4
         volumes:
           - /shared/bw-plugins:/data/plugins
     ...
@@ -221,7 +221,7 @@ BunkerWeb 附带一个插件系统，可以轻松添加新功能。安装插件�
           serviceAccountName: sa-bunkerweb
           containers:
             - name: bunkerweb-scheduler
-              image: bunkerity/bunkerweb-scheduler:1.6.18-rc3
+              image: bunkerity/bunkerweb-scheduler:1.6.18-rc4
               imagePullPolicy: Always
               env:
                 - name: KUBERNETES_MODE
@@ -261,7 +261,7 @@ BunkerWeb 附带一个插件系统，可以轻松添加新功能。安装插件�
 
 !!! tip "现有插件"
 
-    如果文档不够，您可以查看[官方插件](https://github.com/bunkerity/bunkerweb-plugins)和[核心插件](https://github.com/bunkerity/bunkerweb/tree/v1.6.18-rc3/src/common/core)的现有源代码（已包含在 BunkerWeb 中，但从技术上讲它们是插件）。
+    如果文档不够，您可以查看[官方插件](https://github.com/bunkerity/bunkerweb-plugins)和[核心插件](https://github.com/bunkerity/bunkerweb/tree/v1.6.18-rc4/src/common/core)的现有源代码（已包含在 BunkerWeb 中，但从技术上讲它们是插件）。
 
 插件结构如下所示：
 ```
@@ -579,11 +579,34 @@ end
 
 !!! tip "更多示例"
 
-    如果您想查看可用函数的完整列表，可以查看仓库的 [lua 目录](https://github.com/bunkerity/bunkerweb/tree/v1.6.18-rc3/src/bw/lua/bunkerweb)中存在的文件。
+    如果您想查看可用函数的完整列表，可以查看仓库的 [lua 目录](https://github.com/bunkerity/bunkerweb/tree/v1.6.18-rc4/src/bw/lua/bunkerweb)中存在的文件。
 
 ### 作业
 
 BunkerWeb 使用内部作业调度器来执行定期任务，例如使用 certbot 续订证书、下载黑名单、下载 MMDB 文件等。您可以通过将任务放入名为 **jobs** 的子文件夹中，并在 **plugin.json** 元数据文件中列出它们来添加您选择的任务。不要忘记为每个人添加执行权限，以避免用户克隆和安装您的插件时出现任何问题。
+
+#### 敏感的作业缓存条目 {#sensitive-job-cache-entries}
+
+缓存机密（安装专属密钥、令牌、凭据）的作业，通过缓存条目的存储名称将其标记为敏感：
+
+- 名称恰好为 `secret`，或以 `.secret` 结尾（例如 `token.secret`）。匹配区分大小写：`SECRET` 和 `token.SECRET` 是普通名称。
+- 末尾的一个 `.tgz` 会被忽略，因此用 `cache_dir` 缓存的目录，只要其自身名称符合规则即为敏感：`state.secret` 存储为 `folder:<路径>/state.secret.tgz`。只看路径的最后一个组成部分，`folder:<路径>/secret/other.tgz` 是普通条目。
+
+读取敏感条目随即受限：
+
+- **API**：`GET /cache/{service}/{plugin}/{job}/{file}` 返回 `403`，除非调用方以 HTTP Basic 身份作为 API 管理员认证，或使用 `API_TOKEN`。即使 Biscuit 令牌是为管理员签发的，也会被拒绝。`GET /cache?with_data=true` 对这些条目省略 `data` 和 `printable`，保留元数据（名称、校验和、最后更新时间）。`DELETE` 不变。
+- **Web UI**：查看和下载返回 `403`，除非用户是超级管理员（`admin` 标志，而非分配的角色）。缓存页面仍会列出该条目。
+
+此限制只针对通过 API 和 Web UI 的读取。它不会加密已存储的字节，不会隐藏名称或校验和，也不会改变调度器恢复文件的方式。已命名为 `secret` 或 `*.secret` 的条目，以及少数以固定名称保存私钥或凭据的核心条目（包括上游 mTLS 客户端密钥和汇总整个作业缓存的故障转移备份归档），从 1.6.18 起受到限制，无需重命名。
+
+若要依赖该限制，请在运行时检测它，因为较旧的核心会向任何持有 `cache_read` Biscuit 的 API 调用方提供所有条目：
+
+```python
+try:
+    from common_utils import SENSITIVE_JOB_CACHE_SUPPORTED  # type: ignore
+except ImportError:
+    SENSITIVE_JOB_CACHE_SUPPORTED = False
+```
 
 ### 插件页面
 

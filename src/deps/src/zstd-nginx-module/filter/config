@@ -1,0 +1,47 @@
+HTTP_ZSTD_SRCS="$ngx_addon_dir/filter/ngx_http_zstd_filter_module.c \
+                $ngx_addon_dir/filter/ngx_http_zstd_filter.c"
+
+ngx_addon_name=ngx_http_zstd_filter_module
+ngx_module_type=HTTP_FILTER
+ngx_module_name=ngx_http_zstd_filter_module
+ngx_module_incs="$ZSTD_INC"
+ngx_module_deps=
+ngx_module_srcs=$HTTP_ZSTD_SRCS
+ngx_module_libs="$ngx_zstd_opt_L"
+ngx_module_order="$ngx_module_name \
+                  ngx_pagespeed \
+                  ngx_http_postpone_filter_module \
+                  ngx_http_ssi_filter_module \
+                  ngx_http_charset_filter_module \
+                  ngx_http_xslt_filter_module \
+                  ngx_http_image_filter_module \
+                  ngx_http_sub_filter_module \
+                  ngx_http_addition_filter_module \
+                  ngx_http_gunzip_filter_module \
+                  ngx_http_userid_filter_module \
+                  ngx_http_headers_filter_module \
+                  ngx_http_copy_filter_module \
+                  ngx_http_range_body_filter_module \
+                  ngx_http_not_modified_filter_module \
+                  ngx_http_slice_filter_module"
+
+. auto/module
+
+if [ "$ngx_module_link" != DYNAMIC ]; then
+    # ngx_module_order doesn't work with static modules,
+    # so we must re-order filters here.
+
+    if echo "$HTTP_FILTER_MODULES" | grep -qw ngx_http_brotli_filter_module; then
+        next=ngx_http_brotli_filter_module
+    elif [ "$HTTP_GZIP" = YES ]; then
+        next=ngx_http_gzip_filter_module
+    elif echo $HTTP_FILTER_MODULES | grep pagespeed_etag_filter >/dev/null; then
+        next=ngx_pagespeed_etag_filter
+    else
+        next=ngx_http_range_header_filter_module
+    fi
+
+    HTTP_FILTER_MODULES=`echo $HTTP_FILTER_MODULES \
+                         | sed "s/$ngx_module_name//" \
+                         | sed "s/$next/$next $ngx_module_name/"`
+fi

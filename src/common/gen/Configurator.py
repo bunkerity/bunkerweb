@@ -17,7 +17,7 @@ from typing import Dict, List, Literal, Optional, Set, Tuple, Union
 if join(sep, "usr", "share", "bunkerweb", "utils") not in sys_path:
     sys_path.append(join(sep, "usr", "share", "bunkerweb", "utils"))
 
-from common_utils import bytes_hash, create_plugin_tar_gz  # type: ignore
+from common_utils import bytes_hash, create_plugin_tar_gz, has_embedded_newline  # type: ignore
 from env_file import make_key_predicate, parse_env_file  # type: ignore
 from modsecurity_audit import validate_audit_log_settings  # type: ignore
 
@@ -393,17 +393,6 @@ class Configurator:
                     f"Server name {name} is not written in its canonical form, use {canonical}: another spelling never matches the Host header"
                 )
 
-    @staticmethod
-    def __has_embedded_newline(value: str, setting_type: Optional[str]) -> bool:
-        # variables.env is line-oriented: Templator writes "KEY=VALUE\n" and load_variables reads
-        # every schema-known key back, so a value carrying its own newline defines a second
-        # setting. Settings of type "file" hold PEM data and are exempt, and trailing newlines
-        # stay valid because a Kubernetes ConfigMap block scalar always leaves one.
-        if setting_type == "file":
-            return False
-        stripped = value.rstrip("\r\n")
-        return "\n" in stripped or "\r" in stripped
-
     def __check_var(self, variable: str) -> Tuple[bool, str]:
         value = self.__variables[variable]
         # MULTISITE=no
@@ -412,7 +401,7 @@ class Configurator:
             if not where:
                 return False, f"variable name {variable} doesn't exist"
 
-            if self.__has_embedded_newline(value, where[real_var].get("type")):
+            if has_embedded_newline(value, where[real_var].get("type")):
                 return False, f"value of {variable} contains a newline"
 
             try:
@@ -434,7 +423,7 @@ class Configurator:
         elif prefixed and real_var == "SERVER_NAME" and not value.strip():
             return False, f"{variable} can't be empty"
 
-        if self.__has_embedded_newline(value, where[real_var].get("type")):
+        if has_embedded_newline(value, where[real_var].get("type")):
             return False, f"value of {variable} contains a newline"
 
         try:

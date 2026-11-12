@@ -15,11 +15,11 @@ if S.marker then files[marker_path] = S.marker end
 files["/var/tmp/bunkerweb_needs_config"] = "pending"
 local errno, now, signals, unlocked, closed, swaps = 0, 0, {}, 0, 0, 0
 local commands, removed = {}, {}
-local ready, ready_reads = false, 0
+local ready, ready_reads, proc_reads = false, 0, 0
 ngx.HTTP_OK, ngx.HTTP_INTERNAL_SERVER_ERROR = 200, 500
 ngx.HTTP_BAD_REQUEST, ngx.HTTP_SERVICE_UNAVAILABLE = 400, 503
 ngx.HTTP_BAD_GATEWAY, ngx.HTTP_NOT_FOUND = 502, 404
-ngx.worker = { pid = function() return 42 end }
+ngx.worker = { pid = function() return 42 end, exiting = function() return S.exiting or false end }
 ngx.var.connection = "77"
 ngx.req = {
     start_time = function() return 0 end,
@@ -33,6 +33,7 @@ ngx.sleep = function(seconds)
     assert(now < 20, "unbounded reload wait")
     if S.ready_after and now >= S.ready_after then ready = true end
     if S.drop_marker and now >= 0.1 then files[marker_path] = nil end
+    if S.exit_after and now >= S.exit_after then S.exiting = true end
 end
 package.loaded["bunkerweb.banlease"] = {}
 package.loaded["bit"] = {}
@@ -125,6 +126,22 @@ io.open = function(path, mode)
     if path == "/proc/uptime" then
         if S.no_uptime then return nil end
         return {read = function() return "1000.00 500.00" end, close = function() end}
+    end
+    if S.master and path:sub(1, 10) == "/proc/123/" then
+        local value
+        if path == "/proc/123/task/123/children" then
+            if S.master.no_children then return nil end
+            if #signals > 0 and S.master.lost_children then return nil end
+            value = #signals == 0 and "42 43 " or (S.master.children or "42 43 ")
+        elseif path == "/proc/123/status" then
+            value = "Name:\tnginx\n" .. (S.master.status or "SigPnd:\t0000000000000000\nShdPnd:\t0000000000000000\n")
+        elseif path == "/proc/123/wchan" then
+            value = S.master.wchan
+            proc_reads = proc_reads + 1
+            if S.replace_marker and proc_reads == 2 then files[marker_path] = S.replace_marker end
+        end
+        if value == nil then return nil end
+        return {read = function() return value end, close = function() end}
     end
     if mode == "w+" then
         if S.open_error then return nil, "disk full" end
@@ -333,6 +350,61 @@ def test_removed_marker_requires_readiness_confirmation(race):
     else:
         assert_error(result, 500, "initialization did not confirm readiness")
     assert result["unlocked"] == 1
+
+
+def test_rejected_master_reload_releases_marker_and_reports_failure():
+    result = request(master={"wchan": "sigsuspend"})
+    assert_error(result, 500, "rejected")
+    assert result["response"]["confirmed"] is False
+    assert "marker" not in result
+    assert result["signals"] == ["HUP"]
+    assert result["unlocked"] == 1
+
+
+@pytest.mark.parametrize(
+    "master,exiting",
+    [
+        ({"wchan": "sigsuspend", "children": "42 43 50 51 "}, False),
+        ({"wchan": "sigsuspend"}, True),
+        ({"wchan": "hrtimer_nanosleep"}, False),
+        ({"wchan": "0"}, False),
+        ({}, False),
+        ({"wchan": "sigsuspend", "no_children": True}, False),
+        ({"wchan": "sigsuspend", "lost_children": True}, False),
+        ({"wchan": "sigsuspend", "children": ""}, False),
+        ({"wchan": "sigsuspend", "status": "SigPnd:\t0000000000000001\nShdPnd:\t0000000000000000\n"}, False),
+        ({"wchan": "sigsuspend", "status": "SigPnd:\t0000000000000000\nShdPnd:\t0000000000000001\n"}, False),
+        ({"wchan": "sigsuspend", "status": "unreadable"}, False),
+    ],
+)
+def test_slow_or_unknown_reload_keeps_marker(master, exiting):
+    result = request(master=master, exiting=exiting)
+    assert result["code"] == 200
+    assert result["response"]["confirmed"] is False
+    assert result["marker"]
+    assert result["unlocked"] == 1
+
+
+def test_rejection_never_clears_another_reload_token():
+    result = request(master={"wchan": "sigsuspend"}, replace_marker="next-token")
+    assert_error(result, 500, "rejected")
+    assert result["marker"] == "next-token"
+    assert result["unlocked"] == 1
+
+
+def test_queued_graceful_shutdown_is_processed_before_rejection():
+    result = request(master={"wchan": "sigsuspend"}, exit_after=0.1)
+    assert result["code"] == 200
+    assert result["response"]["confirmed"] is False
+    assert result["marker"]
+
+
+def test_no_wait_budget_keeps_marker_even_with_master_observation():
+    result = request(shutdown="1", master={"wchan": "sigsuspend"})
+    assert result["code"] == 200
+    assert result["response"]["confirmed"] is False
+    assert result["marker"]
+    assert result["elapsed"] == 0
 
 
 @pytest.mark.parametrize("failure", [False, True])

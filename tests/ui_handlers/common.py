@@ -32,6 +32,9 @@ def build_driver(LOGGER: Logger, accept_insecure_certs: bool = True) -> webdrive
         firefox_options.add_argument("--width=1920")
         firefox_options.add_argument("--height=1080")
     firefox_options.log.level = "trace"  # type: ignore
+    # The gateway advertises HTTP/3 (Alt-Svc) and the stack never completes a QUIC handshake: each probe Firefox
+    # makes on a fresh connection is logged by nginx as "quic fixed bit is not set". Keep Firefox on TCP/h2.
+    firefox_options.set_preference("network.http.http3.enable", False)
 
     if accept_insecure_certs:
         firefox_options.accept_insecure_certs = True

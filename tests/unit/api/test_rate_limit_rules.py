@@ -197,7 +197,7 @@ def test_direct_redis_uses_env_over_db_and_keeps_custom_options(rules, monkeypat
         }
     )
     assert uri == "rediss://user:fixture@environment:6379/2"
-    assert options == {"socket_timeout": 2.5, "socket_connect_timeout": 2.5, "socket_keepalive": True, "max_connections": 4}
+    assert options == {"socket_timeout": 2.5, "socket_connect_timeout": 2.5, "socket_keepalive": True, "max_connections": 4, "ssl_cert_reqs": "required"}
 
 
 def test_sentinel_separates_redis_and_sentinel_credentials(rules):
@@ -220,6 +220,7 @@ def test_sentinel_separates_redis_and_sentinel_credentials(rules):
         "socket_connect_timeout": 1.0,
         "socket_keepalive": True,
         "ssl": True,
+        "ssl_cert_reqs": "required",
         "username": "sentinel-user",
         "password": "sentinel-fixture",
     }

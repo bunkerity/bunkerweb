@@ -17,6 +17,7 @@ from urllib.parse import quote, unquote
 
 from API import API  # type: ignore
 from ApiCaller import ApiCaller, MIN_RELOAD_TIMEOUT  # type: ignore
+from reload_utils import RELOAD_CONFIRM_HTTP_WAIT, wait_for_reload  # type: ignore
 
 from app.utils import LOGGER, RESERVED_SERVICE_NAMES
 
@@ -150,11 +151,17 @@ class Instance:
 
     def reload(self) -> str:
         try:
-            result = self.apiCaller.send_to_apis(
+            result, responses = self.apiCaller.send_to_apis(
                 "POST",
                 f"/reload?test={'no' if getenv('DISABLE_CONFIGURATION_TESTING', 'no').lower() == 'yes' else 'yes'}",
                 timeout=(5, MIN_RELOAD_TIMEOUT),
-            )[0]
+                response=True,
+            )
+            pending, failed = wait_for_reload(self.apiCaller.apis, responses or {}, RELOAD_CONFIRM_HTTP_WAIT)
+            if result and not failed and pending:
+                return f"Can't reload instance {self.hostname}: reload signalled, confirmation still pending ({', '.join(pending.values())})."
+            if failed:
+                return f"Can't reload instance {self.hostname}: {', '.join(failed.values())}"
         except BaseException as e:
             return f"Can't reload instance {self.hostname}: {e}"
 

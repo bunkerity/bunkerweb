@@ -172,7 +172,29 @@ jobs:
           done
           echo "deb [signed-by=${signed_by}] https://ppa.launchpadcontent.net/mozillateam/ppa/ubuntu $(lsb_release -cs) main debug" | sudo tee /etc/apt/sources.list.d/mozillateam-ppa.list
           echo "deb-src [signed-by=${signed_by}] https://ppa.launchpadcontent.net/mozillateam/ppa/ubuntu $(lsb_release -cs) main debug" | sudo tee -a /etc/apt/sources.list.d/mozillateam-ppa.list
-          sudo apt update -y
+
+          # Launchpad answers 503 now and then (STAGING 43194170054 lost three jobs to it). `apt update`
+          # only warns about an index it could not fetch and exits 0, so the update also has to prove the
+          # PPA's firefox is a candidate; the install fails hard on a 503 for a .deb, hence the retry too.
+          retry() {
+            local attempt=0
+            until "$@"; do
+              attempt=$((attempt+1))
+              if [ $attempt -ge 5 ]; then
+                echo "::error::'$*' failed after $attempt attempts"
+                return 1
+              fi
+              echo "Retrying '$*' (attempt $attempt)…"
+              sleep $((attempt*10))
+            done
+          }
+          ppa_update() {
+            local policy
+            sudo apt update -y || return 1
+            policy="$(apt-cache policy firefox)" || return 1
+            grep -qF "ppa.launchpadcontent.net/mozillateam/ppa" <<< "$policy"
+          }
+          retry ppa_update
 
           sudo apt purge -y firefox
           echo '
@@ -185,15 +207,19 @@ jobs:
           Pin-Priority: -1
           ' | sudo tee /etc/apt/preferences.d/mozilla-firefox
 
-          sudo -E apt install --no-install-recommends -y \
+          retry sudo -E apt install --no-install-recommends -y \
             openssl git tar bzip2 wget curl grep libx11-xcb1 libappindicator3-1 \
             libasound2t64 libdbus-glib-1-2 libxtst6 libxt6 unzip firefox sed jq \
             dnsutils coreutils redis
 
-          GECKODRIVER_VERSION=$(curl -sI https://github.com/mozilla/geckodriver/releases/latest \
-            | grep -Po 'v[0-9]+\.[0-9]+\.[0-9]+')
-          wget -O geckodriver.tar.gz \
+          GECKODRIVER_VERSION=v0.37.1
+          GECKODRIVER_SHA256=e815130ea95983e162ae91843b48d3a3ce991735635fce83a647afde21e09f7e
+          wget --tries=3 -O geckodriver.tar.gz \
             https://github.com/mozilla/geckodriver/releases/download/${GECKODRIVER_VERSION}/geckodriver-${GECKODRIVER_VERSION}-linux64.tar.gz
+          echo "${GECKODRIVER_SHA256}  geckodriver.tar.gz" | sha256sum --check - || {
+            echo "Geckodriver SHA-256 mismatch for ${GECKODRIVER_VERSION}; refusing to install" >&2
+            exit 1
+          }
           sudo tar -xzf geckodriver.tar.gz -C /usr/local/bin
           sudo chmod +x /usr/local/bin/geckodriver
           rm -f geckodriver.tar.gz
@@ -349,7 +375,7 @@ jobs:
             docker exec -u 0 bunkerweb-linux apt install -y /opt/bunkerweb.deb
           fi
       - name: Install rpm file
-        if: needs.setup.outputs.integration == 'Linux' && (needs.setup.outputs.linux_name == 'fedora-43' || needs.setup.outputs.linux_name == 'fedora-44' || needs.setup.outputs.linux_name == 'rhel-8' || needs.setup.outputs.linux_name == 'rhel-9' || needs.setup.outputs.linux_name == 'rhel-10')
+        if: needs.setup.outputs.integration == 'Linux' && (needs.setup.outputs.linux_name == 'fedora-43' || needs.setup.outputs.linux_name == 'fedora-44' || needs.setup.outputs.linux_name == 'fedora-45' || needs.setup.outputs.linux_name == 'rhel-8' || needs.setup.outputs.linux_name == 'rhel-9' || needs.setup.outputs.linux_name == 'rhel-10')
         env:
           PACKAGE: ${{ needs.setup.outputs.package }}
           TYPE: ${{ inputs.TYPE }}

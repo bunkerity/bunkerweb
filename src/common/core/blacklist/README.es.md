@@ -28,6 +28,7 @@ Siga estos pasos para configurar y usar la función de Lista Negra:
 | Ajuste                      | Valor por defecto                                       | Contexto  | Múltiple | Descripción                                                                                                                            |
 | --------------------------- | ------------------------------------------------------- | --------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------- |
 | `USE_BLACKLIST`             | `yes`                                                   | multisite | no       | **Habilitar Lista Negra:** Establezca en `yes` para habilitar la función de lista negra.                                               |
+| `BLACKLIST_URLS_REFRESH_INTERVAL` | `1h` | multisite | no | **Intervalo de actualización de URL:** Antigüedad mínima de la caché antes de volver a descargar. Acepta segundos sin unidad o sufijos de tiempo (`ms`, `s`, `m`, `h`, `d`, `w`, `M`, `y`). |
 | `BLACKLIST_COMMUNITY_LISTS` | `ip:danmeuk-tor-exit ua:mitchellkrogza-bad-user-agents` | multisite | no       | **Listas Negras de la Comunidad:** Seleccione listas negras preconfiguradas mantenidas por la comunidad para incluirlas en el bloqueo. |
 
 === "Listas Negras de la Comunidad"
@@ -136,7 +137,7 @@ Siga estos pasos para configurar y usar la función de Lista Negra:
     Todos los ajustes `*_URLS` admiten URL HTTP/HTTPS así como rutas de archivos locales usando el prefijo `file:///`. Se admite la autenticación básica usando el formato `http://usuario:contraseña@url`.
 
 !!! tip "Actualizaciones Regulares"
-    Las listas negras de las URL se descargan y actualizan automáticamente cada hora para asegurar que su protección se mantenga actualizada contra las últimas amenazas.
+    La tarea se ejecuta cada hora. `BLACKLIST_URLS_REFRESH_INTERVAL` establece la antigüedad mínima de una URL en caché antes de volver a descargarla (valor predeterminado: `1h`). Use `24h` para proveedores que permiten como máximo una descarga al día, o `0` para descargar en cada ejecución. Las cachés recientes y las descargas fallidas conservan las últimas entradas válidas. Dentro de este plugin, los servicios comparten las cachés de URL: el intervalo más corto puede provocar una descarga. Configure el mismo intervalo en todos los servicios que compartan una URL con un límite del proveedor.
 
 ### Configuraciones de Ejemplo
 

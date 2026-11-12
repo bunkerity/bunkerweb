@@ -5,9 +5,11 @@ from datetime import datetime, timedelta
 from json import dumps, loads
 from os import sep
 from os.path import join
+from re import compile as re_compile
 from sys import exit as sys_exit, path as sys_path
 from time import sleep
 from traceback import format_exc
+from unicodedata import east_asian_width
 
 for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("utils",), ("db",))]:
     if deps_path not in sys_path:
@@ -102,42 +104,47 @@ try:
     latest_version = latest_release["tag_name"].removeprefix("v")
 
     if is_newer_version_available(current_version, latest_version):
-        # Version details
         latest_version_text = f"\033[1;92m{latest_version}\033[0m"
         current_version_text = f"\033[1;93m{current_version}\033[0m"
         release_notes_url = f"https://github.com/bunkerity/bunkerweb/releases/v{latest_version}"
         release_notes_url_text = f"\033[4;94m{release_notes_url}\033[0m"
 
-        # Centering based on the longest line length
-        alert_message = "🚨  A NEW VERSION OF BUNKERWEB IS AVAILABLE!  🚨"
-        latest_version_line = f"Latest Version: {latest_version_text}"
-        current_version_line = f"Current Version: {current_version_text}"
-        release_notes_url_line = f"Release Notes: {release_notes_url_text}"
+        alert_message = "\033[1;97m🚨  A NEW VERSION OF BUNKERWEB IS AVAILABLE!  🚨\033[0m"
+        latest_version_line = f"\033[1;97mLatest Version: {latest_version_text}\033[0m"
+        current_version_line = f"\033[1;97mCurrent Version: {current_version_text}\033[0m"
+        release_notes_url_line = f"\033[1;97mRelease Notes: {release_notes_url_text}\033[0m"
 
-        # Determine the longest line length
-        longest_line_length = max(
-            len(alert_message),
-            len(latest_version_line),
-            len(current_version_line),
-            len(release_notes_url_line),
-        )
+        ansi_pattern = re_compile(r"\x1b\[[0-9;]*[a-zA-Z]")
 
-        # Centering the lines within the box width
-        alert_message_padded = alert_message.center(longest_line_length - 13)
-        latest_version_padded = latest_version_line.center(longest_line_length)
-        current_version_padded = current_version_line.center(longest_line_length)
+        def display_width(text: str) -> int:
+            clean = ansi_pattern.sub("", text)
+            return sum(2 if east_asian_width(c) in ("F", "W") else 1 for c in clean)
+
+        def pad_center(text: str, target_width: int) -> str:
+            pad = target_width - display_width(text)
+            left = pad // 2
+            right = pad - left
+            return f"{' ' * left}{text}{' ' * right}"
+
+        content_lines = [alert_message, latest_version_line, current_version_line, release_notes_url_line]
+        max_width = max(display_width(line) for line in content_lines)
+
+        box_width = max_width + 4
+        border = f"\033[1;91m+{'—' * box_width}+\033[0m"
+        empty_row = f"\033[1;91m|{' ' * box_width}|\033[0m"
+
         LOGGER.warning(
             (
-                f"\n\033[1;91m+{'—' * (longest_line_length - 7)}+\033[0m\n"
-                f"\033[1;91m|{' ' * (longest_line_length - 7)}|\033[0m\n"
-                f"\033[1;91m|  \033[1;97m{alert_message_padded}\033[1;91m  |\033[0m\n"
-                f"\033[1;91m|{' ' * (longest_line_length - 7)}|\033[0m\n"
-                f"\033[1;91m|  \033[1;97m{latest_version_padded}\033[1;91m  |\033[0m\n"
-                f"\033[1;91m|  \033[1;97m{current_version_padded}\033[1;91m  |\033[0m\n"
-                f"\033[1;91m|{' ' * (longest_line_length - 7)}|\033[0m\n"
-                f"\033[1;91m|  \033[1;97m{release_notes_url_line}\033[1;91m  |\033[0m\n"
-                f"\033[1;91m|{' ' * (longest_line_length - 7)}|\033[0m\n"
-                f"\033[1;91m+{'—' * (longest_line_length - 7)}+\033[0m"
+                f"\n{border}\n"
+                f"{empty_row}\n"
+                f"\033[1;91m|\033[0m  {pad_center(alert_message, max_width)}  \033[1;91m|\033[0m\n"
+                f"{empty_row}\n"
+                f"\033[1;91m|\033[0m  {pad_center(latest_version_line, max_width)}  \033[1;91m|\033[0m\n"
+                f"\033[1;91m|\033[0m  {pad_center(current_version_line, max_width)}  \033[1;91m|\033[0m\n"
+                f"{empty_row}\n"
+                f"\033[1;91m|\033[0m  {pad_center(release_notes_url_line, max_width)}  \033[1;91m|\033[0m\n"
+                f"{empty_row}\n"
+                f"{border}"
             )
         )
     else:

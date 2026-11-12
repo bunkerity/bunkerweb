@@ -63,6 +63,75 @@ emit("msg", r.msg) emit("scopes", next(STORE["plugin_authbasic_configs"]) and "s
         assert out["log"].startswith("WARN: no credentials configured for scope global")
 
 
+class TestDefaultPair:
+    """The shipped ``changeme`` / ``changeme`` pair is public: it must not open a scope that has its own credentials."""
+
+    @staticmethod
+    def stored(vars_lua):
+        out = run(
+            "authbasic",
+            f"""
+MULTI_VARS = {{ global = {{ USE_AUTH_BASIC = "yes", {vars_lua} }} }}
+local r = PLUGIN:new(ctx()):init()
+local names = {{}}
+local scope = STORE["plugin_authbasic_configs"] and STORE["plugin_authbasic_configs"].global
+for name in pairs(scope and scope.credentials or {{}}) do names[#names + 1] = name end
+table.sort(names)
+emit("users", table.concat(names, ","))
+""",
+        )
+        return out["users"]
+
+    def test_default_pair_is_dropped_next_to_a_numbered_pair(self):
+        users = self.stored('AUTH_BASIC_USER = "changeme", AUTH_BASIC_PASSWORD = "changeme", AUTH_BASIC_USER_1 = "alice", AUTH_BASIC_PASSWORD_1 = "secret"')
+        assert users == "alice"
+
+    def test_default_only_install_keeps_working(self):
+        assert self.stored('AUTH_BASIC_USER = "changeme", AUTH_BASIC_PASSWORD = "changeme"') == "changeme"
+
+    def test_custom_unsuffixed_pair_is_kept_next_to_a_numbered_pair(self):
+        users = self.stored('AUTH_BASIC_USER = "bob", AUTH_BASIC_PASSWORD = "hunter2", AUTH_BASIC_USER_1 = "alice", AUTH_BASIC_PASSWORD_1 = "secret"')
+        assert users == "alice,bob"
+
+    @pytest.mark.parametrize(
+        ("pair", "expected"),
+        [
+            ('AUTH_BASIC_USER = "changeme", AUTH_BASIC_PASSWORD = "other"', "alice,changeme"),  # default user, own password
+            ('AUTH_BASIC_USER = "bob", AUTH_BASIC_PASSWORD = "changeme"', "alice,bob"),  # own user, default password
+        ],
+    )
+    def test_a_half_default_unsuffixed_pair_is_kept(self, pair, expected):
+        users = self.stored(pair + ', AUTH_BASIC_USER_1 = "alice", AUTH_BASIC_PASSWORD_1 = "secret"')
+        assert users == expected
+
+    def test_default_pair_set_explicitly_as_a_numbered_pair_is_kept(self):
+        users = self.stored('AUTH_BASIC_USER_1 = "changeme", AUTH_BASIC_PASSWORD_1 = "changeme", AUTH_BASIC_USER_2 = "alice", AUTH_BASIC_PASSWORD_2 = "secret"')
+        assert users == "alice,changeme"
+
+    def test_default_pair_next_to_an_incomplete_numbered_pair_is_kept(self):
+        users = self.stored('AUTH_BASIC_USER = "changeme", AUTH_BASIC_PASSWORD = "changeme", AUTH_BASIC_USER_1 = "alice", AUTH_BASIC_PASSWORD_1 = ""')
+        assert users == "changeme"
+
+    def test_default_credentials_are_refused_at_request_time_next_to_a_numbered_pair(self):
+        out = run(
+            "authbasic",
+            r"""
+MULTI_VARS = { global = { USE_AUTH_BASIC = "yes", AUTH_BASIC_USER = "changeme", AUTH_BASIC_PASSWORD = "changeme",
+                          AUTH_BASIC_USER_1 = "alice", AUTH_BASIC_PASSWORD_1 = "secret" } }
+VARIABLES = { USE_AUTH_BASIC = "yes" }
+PLUGIN:new(ctx()):init()
+local results = {}
+for _, who in ipairs({ { "changeme", "changeme" }, { "alice", "secret" } }) do
+    HEADERS = { authorization = basic_auth(who[1], who[2]) }
+    local r = PLUGIN:new(ctx({ uri = "/" })):access()
+    results[#results + 1] = tostring(r.status)
+end
+emit("results", table.concat(results, ","))
+""",
+        )
+        assert out["results"] == "401,nil"
+
+
 class TestRequest:
     def test_disabled_service_is_not_challenged(self):
         out = run(

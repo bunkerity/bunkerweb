@@ -1,0 +1,5 @@
+map open '{'
+key: 'this'
+string: 'is'
+lexical error: probable comment found in input text, comments are not enabled.
+memory leaks:	0

@@ -51,7 +51,9 @@ def test_reload_passes_test_flag_and_minimum_timeout(api_routes, single, test_ar
     response = call(api_routes, "POST", path, params={} if test_arg is None else {"test": test_arg})
     assert response.status_code == 200
     caller = api_routes.single if single else api_routes.broadcast
-    caller.send_to_apis.assert_called_once_with("POST", f"/reload?test={'no' if test_arg == 'false' else 'yes'}", timeout=(5, MIN_RELOAD_TIMEOUT))
+    caller.send_to_apis.assert_called_once_with(
+        "POST", f"/reload?test={'no' if test_arg == 'false' else 'yes'}", timeout=(5, MIN_RELOAD_TIMEOUT), response=True
+    )
 
 
 @pytest.mark.parametrize(

@@ -42,6 +42,9 @@ El complemento de Límite en BunkerWeb proporciona capacidades robustas para apl
 
         Por ejemplo, `5r/m` significa que se permiten 5 solicitudes por minuto desde cada dirección IP.
 
+    !!! info "Precisión del recuento entre workers"
+        Sin Redis, el recuento es exacto entre workers hasta 100 solicitudes por ventana, tanto para `LIMIT_REQ_RATE` como para `LIMIT_REQ_GLOBAL_RATE`: las solicitudes simultáneas no pueden superar el límite. Por encima de 100 solicitudes por ventana, las solicitudes simultáneas pueden superar ligeramente el límite, porque serializar el contador de un historial largo de solicitudes en cada solicitud costaría rendimiento. Con Redis, el recuento siempre es exacto.
+
 === "Limitación de Tasa Global"
 
     | Ajuste                  | Valor por defecto | Contexto  | Múltiple | Descripción                                                                                                                                                       |
@@ -57,10 +60,10 @@ El complemento de Límite en BunkerWeb proporciona capacidades robustas para apl
     | Ajuste                  | Valor por defecto | Contexto  | Múltiple | Descripción                                                                                                        |
     | ----------------------- | ----------------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------ |
     | `USE_LIMIT_CONN`        | `yes`             | multisite | no       | **Habilitar Limitación de Conexiones:** Establezca en `yes` para habilitar la función de limitación de conexiones. |
-    | `LIMIT_CONN_MAX_HTTP1`  | `10`              | multisite | no       | **Conexiones HTTP/1.X:** Número máximo de conexiones HTTP/1.X concurrentes por dirección IP.                       |
-    | `LIMIT_CONN_MAX_HTTP2`  | `100`             | multisite | no       | **Flujos HTTP/2:** Número máximo de flujos HTTP/2 concurrentes por dirección IP.                                   |
-    | `LIMIT_CONN_MAX_HTTP3`  | `100`             | multisite | no       | **Flujos HTTP/3:** Número máximo de flujos HTTP/3 concurrentes por dirección IP.                                   |
-    | `LIMIT_CONN_MAX_STREAM` | `10`              | multisite | no       | **Conexiones de Flujo:** Número máximo de conexiones de flujo concurrentes por dirección IP.                       |
+    | `LIMIT_CONN_MAX_HTTP1`  | `10`              | multisite | no       | **Conexiones HTTP/1.X:** Número máximo de conexiones HTTP/1.X concurrentes por dirección IP. Rango: de 1 a 65535.  |
+    | `LIMIT_CONN_MAX_HTTP2`  | `100`             | multisite | no       | **Flujos HTTP/2:** Número máximo de flujos HTTP/2 concurrentes por dirección IP. Rango: de 1 a 65535.              |
+    | `LIMIT_CONN_MAX_HTTP3`  | `100`             | multisite | no       | **Flujos HTTP/3:** Número máximo de flujos HTTP/3 concurrentes por dirección IP. Rango: de 1 a 65535.              |
+    | `LIMIT_CONN_MAX_STREAM` | `10`              | multisite | no       | **Conexiones de Flujo:** Número máximo de conexiones de flujo concurrentes por dirección IP. Rango: de 1 a 65535.  |
 
 Cuando `SECURITY_MODE` es `detect`, los límites de conexiones se evalúan y se registran (`limiting connections, dry run`) pero no se aplican.
 

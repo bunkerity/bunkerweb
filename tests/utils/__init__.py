@@ -1,5 +1,5 @@
 from base64 import b64decode
-from datetime import datetime
+from datetime import datetime, timezone
 from logging import Logger
 from os import getenv
 from os.path import sep
@@ -58,25 +58,68 @@ def resolve_env_placeholders(value: str):
     return value
 
 
+def _linux_log_lines(lines: List[str], since: datetime) -> List[str]:
+    """Filter records by header time, retaining every continuation of an included record."""
+    timestamp = re_compile(r"^(\d{4}/\d{2}/\d{2} \d{2}:\d{2}:\d{2})|^\[(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2} [+-]\d{4})\]")
+    # shortcut: logs have second precision, use file offsets if actions need subsecond isolation.
+    boundary = (since if since.tzinfo else since.replace(tzinfo=timezone.utc)).replace(microsecond=0)
+    included = None
+    result = []
+    for line in lines:
+        match = timestamp.match(line)
+        if match:
+            try:
+                if match[1]:
+                    # shortcut: harness containers use UTC, revisit if Linux fixtures set a timezone.
+                    record_time = datetime.strptime(match[1], "%Y/%m/%d %H:%M:%S").replace(tzinfo=timezone.utc)
+                else:
+                    record_time = datetime.strptime(match[2], "%Y-%m-%d %H:%M:%S %z")
+            except ValueError as error:
+                raise ValueError(f"Invalid Linux log timestamp: {line.rstrip()}") from error
+            included = record_time >= boundary
+        elif included is None:
+            # An orphan has no trustworthy time; never let it silently satisfy a bounded assertion.
+            raise ValueError(f"Linux log line has no timestamp: {line.rstrip()}")
+        if included:
+            result.append(line)
+    return result
+
+
 def get_logs(
     logger: Logger,  # noqa: F811
     integration: Literal["Docker", "Linux", "Autoconf", "Kubernetes", "All-in-one"],
     since: Optional[Union[datetime, str]] = None,
     *,
-    log_from: Literal["bunkerweb", "controller", "scheduler", "database"] = "bunkerweb",
+    log_from: Literal["bunkerweb", "controller", "scheduler", "database", "ui", "api"] = "bunkerweb",
 ) -> List[str]:
-    if integration != "Linux":
-        if isinstance(since, str):
-            since = datetime.fromisoformat(since)
+    if isinstance(since, str):
+        since = datetime.fromisoformat(since)
 
+    if integration != "Linux":
+        if log_from == "ui":
+            raise ValueError(f"Unsupported {integration} log source: {log_from}")
         logger.debug(f"Getting logs from {log_from}" + (f" since {since}" if since else ""))
 
         if integration == "Kubernetes":
+            if log_from == "api":
+                raise ValueError(f"Unsupported {integration} log source: {log_from}")
             return get_k8s_logs(logger, log_from, since)
-        return get_docker_logs(logger, "bunkerweb" if integration == "Linux" else log_from, since)
+        return get_docker_logs(logger, log_from, since)
 
-    with ERROR_LOG_FILE.open("r", encoding="utf-8") as file:
-        return file.readlines()
+    # Defaults from the packaged service wrappers; all four files share the logrotate directory.
+    files = {"bunkerweb": "error.log", "scheduler": "scheduler.log", "ui": "ui.log", "api": "api.log"}
+    if log_from not in files:
+        raise ValueError(f"Unsupported Linux log source: {log_from}")
+    if IS_FREEBSD:
+        with ERROR_LOG_FILE.with_name(files[log_from]).open("r", encoding="utf-8") as file:
+            lines = file.readlines()
+    else:
+        path = f"/var/log/bunkerweb/{files[log_from]}"
+        status, output = run_docker_command(logger, "bunkerweb", ["cat", path], user="root", strip_output=False)
+        if status:
+            raise RuntimeError(f"Failed to read Linux log {path} (exit {status}): {output.strip()}")
+        lines = output.splitlines(keepends=True)
+    return _linux_log_lines(lines, since) if since is not None else lines
 
 
 def run_command(

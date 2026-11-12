@@ -25,7 +25,7 @@ local function new(bw, session, vars)
     return setmetatable({
         variables = v, session_data = session or {}, ctx = { bw = bw },
         logger = { log = function(_, level, msg) LOGS[#LOGS + 1] = level .. ": " .. tostring(msg) end },
-        lists = { IGNORE_URI = IGNORE_URI or {} }, set_session_data = function() end,
+        lists = { IGNORE_URI = IGNORE_URI or {}, INCLUDE_URI = {} }, set_session_data = function() end,
     }, { __index = PLUGIN })
 end
 """

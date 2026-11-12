@@ -73,13 +73,14 @@ pushed, not the tag object's own signature, so it does not replace the guard in
 
 ## Channels
 
-The channel is derived from the tag, and one workflow serves all three:
+The channel is derived from the tag, and one workflow serves all four:
 
-| tag            | Docker tags                  | packagecloud  | docs alias      | GitHub release   |
-| -------------- | ---------------------------- | ------------- | --------------- | ---------------- |
-| `v1.6.15`      | `:latest`, `:1.6`, `:1.6.15` | `1.6.15`      | `latest`, `1.6` | draft            |
-| `v1.6.15-rc1`  | `:rc`, `:1.6.15-rc1`         | `1.6.15~rc1`  | `rc`, hidden    | draft prerelease |
-| `v1.6.15-beta` | `:beta`, `:1.6.15-beta`      | `1.6.15~beta` | `beta`          | draft prerelease |
+| tag             | Docker tags                                  | packagecloud   | docs alias      | GitHub release   |
+| --------------- | -------------------------------------------- | -------------- | --------------- | ---------------- |
+| `v1.6.15`       | `:latest`, `:1.6`, `:1.6.15`, `:1.6-edge`    | `1.6.15`       | `latest`, `1.6` | draft            |
+| `v1.6.15-rc1`   | `:rc`, `:1.6.15-rc1`, `:1.6-edge`, `:1.6-rc` | `1.6.15~rc1`   | `rc`, hidden    | draft prerelease |
+| `v1.6.15-beta1` | `:beta`, `:1.6.15-beta1`, `:1.6-beta`        | `1.6.15~beta1` | `beta`          | draft prerelease |
+| `v1.7.0-alpha1` | `:1.7.0-alpha1`, `:1.7-alpha`                | `1.7.0~alpha1` | none, hidden    | draft prerelease |
 
 A final tag also moves the floating `<major>.<minor>` Docker tag and docs alias when it
 is the highest final of that minor, so `docs.bunkerweb.io/1.6/` and `:1.6` keep the
@@ -90,6 +91,24 @@ and a patch older than its minor's newest gets only its own version. `prepare` f
 when the remote tags cannot be listed, and computes both lists (`docs_aliases`,
 `docker_tags`). The channel stays `latest` for every final, as it only keys build
 caches and the version-stamping branches.
+
+The floating `<major>.<minor>-edge` Docker tag (`:1.6-edge`) follows the newest release of its
+minor, rc or final, in release order (`1.6.18-rc4` < `1.6.18` < `1.6.19-rc1`). A final or rc
+tag takes it only when it is the highest rc or final of that minor among the remote `v*` tags
+plus itself, so a late older release never moves it backward. Betas and alphas never take it
+and do not count in the comparison.
+
+`<major>.<minor>-rc`, `-beta` and `-alpha` follow the newest tag of the same kind in the minor
+(`1.7-rc` and `1.6-rc` move independently). A final never takes them, and an older tag
+re-released later does not move them back. The plain `rc` and `beta` names follow the last
+published rc or beta, whatever its version: re-publishing an older release moves them back.
+These are legacy aliases; prefer the per-minor tags. There is no plain `alpha`. An alpha is a
+hidden prerelease with no docs alias, and it never takes `latest` or `<major>.<minor>`.
+
+`prepare` maps `-rc` to `~rc` before `sort -V`, since plain `sort -V` orders `1.6.18` before
+`1.6.18-rc4`. These are Docker tags only: no docs alias, no packagecloud entry. Release versions
+accept `-rcN`, `-betaN` and `-alphaN` (`release_artifacts.py`), and the user-facing list of tags
+is the "Docker image tags" section of `docs/integrations.md`.
 
 ## What the guards reject
 

@@ -30,6 +30,7 @@ Suivez ces étapes pour configurer et utiliser la fonctionnalité Whitelist :
 | Paramètre       | Défaut | Contexte  | Multiple | Description                                                           |
 | --------------- | ------ | --------- | -------- | --------------------------------------------------------------------- |
 | `USE_WHITELIST` | `yes` | multisite | non      | **Activer Whitelist :** Mettre à `yes` pour activer la fonctionnalité whitelist. |
+| `WHITELIST_URLS_REFRESH_INTERVAL` | `1h` | multisite | non | **Intervalle d’actualisation des URL :** Âge minimal du cache avant un nouveau téléchargement. Accepte des secondes sans unité ou un suffixe de durée (`ms`, `s`, `m`, `h`, `d`, `w`, `M`, `y`). |
 
 === "Adresse IP"
     **Ce que cela fait :** Place les visiteurs en whitelist selon leur adresse IP ou leur réseau. Ces visiteurs contourneront tous les contrôles de sécurité.
@@ -93,7 +94,7 @@ Suivez ces étapes pour configurer et utiliser la fonctionnalité Whitelist :
     Tous les paramètres `*_URLS` prennent en charge les URL HTTP/HTTPS ainsi que les chemins de fichiers locaux avec le préfixe `file:///`. L'authentification basique est prise en charge avec le format `http://user:pass@url`.
 
 !!! tip "Mises à jour régulières"
-    Les whitelists provenant d'URL sont automatiquement téléchargées et mises à jour toutes les heures afin que votre protection reste à jour avec les dernières sources de confiance.
+    La tâche s’exécute toutes les heures. `WHITELIST_URLS_REFRESH_INTERVAL` définit l’âge minimal d’une URL en cache avant un nouveau téléchargement (défaut : `1h`). Utilisez `24h` pour les fournisseurs autorisant au plus un téléchargement par jour, ou `0` pour télécharger à chaque exécution. Les caches récents et les téléchargements échoués conservent les dernières entrées valides. Au sein de ce plugin, les services partagent les caches d’URL : l’intervalle le plus court peut déclencher un téléchargement. Utilisez donc le même intervalle sur tous les services partageant une URL soumise à une limite du fournisseur.
 
 !!! warning "Contournement de sécurité"
     Les visiteurs en whitelist **contourneront complètement tous les autres contrôles de sécurité** de BunkerWeb, y compris les règles WAF, la limitation de débit, la détection des mauvais bots et tout autre mécanisme de sécurité. Utilisez la whitelist uniquement pour des sources de confiance dont vous êtes absolument certain.

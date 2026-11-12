@@ -91,8 +91,8 @@ jobs:
         # faulthandler_timeout only prints a hung test's stack; timeout is what ends it (~4 min locally).
         run: python tests/unit/lua_coverage.py run .cache/lua-coverage -- timeout -k 30 1500 python -m pytest tests/unit -o faulthandler_timeout=120
       # Real resty.lrucache, CrowdSec iputils and resty.ipmatcher need LuaJIT's FFI.
-      # Run both new files in full, including the bundled bit operations, alongside the three
-      # LRU cases. Resolve `lua` to LuaJIT for FFI probes and BW_LUAJIT for explicit callers.
+      # Run IP parsing, bundled bit operations, blacklist list reuse, global IP classification and lazy INFO logs
+      # alongside the three LRU cases. Resolve `lua` to LuaJIT for FFI probes and BW_LUAJIT for explicit callers.
       # Each test supplies its own ngx stub; any skip fails this step.
       - name: Install LuaJIT
         run: sudo apt-get install -y --no-install-recommends luajit
@@ -105,12 +105,17 @@ jobs:
           export BW_LUAJIT="$(command -v luajit)"
           export LUA_PATH="$PWD/src/deps/src/lua-resty-lrucache/lib/?.lua;${LUA_PATH:-;}"
           lua -e 'assert(jit, "lua is not LuaJIT")'
-          python tests/unit/lua_coverage.py run .cache/lua-coverage -- timeout -k 30 300 python -m pytest -rs -o faulthandler_timeout=120 -k "resty or real_lrucache or iputils or ipmatcher" \
+          python tests/unit/lua_coverage.py run .cache/lua-coverage -- timeout -k 30 300 python -m pytest -rs -o faulthandler_timeout=120 -k "resty or real_lrucache or iputils or ipmatcher or test_blacklist_list_reuse_luajit or test_utils_ip_is_global_lua or test_http_phase_lazy_info_lua or test_request_work_counts_luajit or rdns_skip_empty" \
             "tests/unit/metrics/test_lru_sync_loop.py::test_the_walk_direction_decides_which_key_dies" \
             "tests/unit/common/test_datastore_worker_lru_exptime.py::test_the_real_lrucache_treats_a_zero_ttl_as_already_expired" \
             tests/unit/common/test_crowdsec_iputils_bitop_coverage_lua.py \
-            tests/unit/common/test_ipv6_ipmatcher_luajit.py | tee luajit.log
-          grep -q ' 75 passed' luajit.log
+            tests/unit/common/test_ipv6_ipmatcher_luajit.py \
+            tests/unit/common/test_blacklist_list_reuse_luajit.py \
+            tests/unit/common/test_utils_ip_is_global_lua.py \
+            tests/unit/common/test_http_phase_lazy_info_lua.py \
+            tests/unit/common/test_request_work_counts_luajit.py \
+            "tests/unit/legacy/test_legacy_scripts.py::test_legacy_script[test_lua_rdns_skip_empty.lua]" | tee luajit.log
+          grep -q ' 352 passed' luajit.log
           ! grep -qi 'skipped' luajit.log
       - name: Write Lua coverage reports and enforce the overall floor
         run: python tests/unit/lua_coverage.py report .cache/lua-coverage --fail-under 94
@@ -306,17 +311,27 @@ jobs:
           mariadb -h 127.0.0.1 -P 3307 -u root -proot -e "SET GLOBAL innodb_snapshot_isolation=1"
           test "$(mariadb -h 127.0.0.1 -P 3307 -u root -proot -N -e 'SELECT @@global.innodb_snapshot_isolation')" = 1
       - name: Run unit tests (all engines)
+        shell: bash
         env:
           BW_TEST_PG_URI: postgresql://bw:bw@127.0.0.1:5433/bw_test
           BW_TEST_MARIA_URI: mariadb://bw:bw@127.0.0.1:3307/bw_test
         # timeout ends a hang (~5 min locally); faulthandler_timeout prints its stack first.
-        run: timeout -k 30 1500 pytest tests/unit --db-engines=sqlite,postgresql,mariadb -o faulthandler_timeout=120
+        run: |
+          set -o pipefail
+          timeout -k 30 1500 pytest tests/unit --db-engines=sqlite,postgresql,mariadb -o faulthandler_timeout=120 -rs 2>&1 | tee engines.log
+          grep -Eq '[1-9][0-9]* passed' engines.log
+          ! grep -Eq 'not (configured|reachable)' engines.log
       # MySQL runs the DB layer only (tests/unit/db: 440 passed, 15 skipped against mysql:8.4 locally, ~17 min); the ui,
       # api and gen fixtures that also take an engine were not measured on it.
       - name: Run the DB-layer unit tests (MySQL)
+        shell: bash
         env:
           BW_TEST_MYSQL_URI: mysql://bw:bw@127.0.0.1:3308/bw_test
-        run: timeout -k 30 2400 pytest tests/unit/db --db-engines=mysql -o faulthandler_timeout=120
+        run: |
+          set -o pipefail
+          timeout -k 30 2400 pytest tests/unit/db --db-engines=mysql -o faulthandler_timeout=120 -rs 2>&1 | tee mysql.log
+          grep -Eq '[1-9][0-9]* passed' mysql.log
+          ! grep -Eq 'not (configured|reachable)' mysql.log
       # The run above executes that script in a legacy subprocess, where a skipTest still reads as green. Run the
       # snapshot-isolation race case on its own and fail if it skipped.
       - name: Run the MariaDB snapshot-isolation pruning race (must not skip)

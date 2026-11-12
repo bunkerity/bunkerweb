@@ -245,8 +245,8 @@ def stream_logs():
             with suppress(OSError):
                 last_size = file_path.stat().st_size
 
-            # Resume from the client's offset if still valid, else send a bounded tail.
-            if resume_from is not None and resume_from <= last_size:
+            # Resume from the client's offset if still valid and within the tail cap, else send a bounded tail.
+            if resume_from is not None and resume_from <= last_size and last_size - resume_from <= REFRESH_TAIL_BYTES:
                 with file_path.open(encoding="utf-8", errors="replace") as f:
                     f.seek(resume_from)
                     new_content = f.read()

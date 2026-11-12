@@ -319,6 +319,7 @@ def on_starting(server):
             override_api_creds = getenv("OVERRIDE_API_CREDS", "no").lower() == "yes"
             if API_USER["method"] == "manual" or override_api_creds:
                 updated = False
+                old_api_username = API_USER["username"]
                 if env_api_username and API_USER["username"] != env_api_username:
                     API_USER["username"] = env_api_username
                     updated = True
@@ -343,6 +344,7 @@ def on_starting(server):
                     err = DB.update_api_user(
                         API_USER["username"],
                         API_USER["password"],
+                        old_username=old_api_username,
                         method="manual",
                     )
                     if err:

@@ -101,7 +101,7 @@
     "type": "multivalue"
   },
   "CLIENT_BODY_TIMEOUT": {
-    "context": "global",
+    "context": "multisite",
     "default": "10s",
     "help": "Timeout for reading the client request body.",
     "id": "client-body-timeout",
@@ -110,9 +110,9 @@
     "type": "text"
   },
   "CLIENT_HEADER_TIMEOUT": {
-    "context": "global",
+    "context": "multisite",
     "default": "10s",
-    "help": "Timeout for reading the client request header.",
+    "help": "Timeout for reading the client request header. The global value also bounds incomplete TLS handshakes and how long they keep old workers alive after a reload. Override per service for long-lived gRPC streams.",
     "id": "client-header-timeout",
     "label": "Client header timeout",
     "regex": "^\\d+(ms?|[shdwMy])?$",

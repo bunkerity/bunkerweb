@@ -3,7 +3,7 @@
 from argparse import ArgumentParser
 from os import _exit, getenv, sep
 from os.path import join
-from sys import exit as sys_exit, path as sys_path
+from sys import exit as sys_exit, path as sys_path, stderr
 from traceback import format_exc
 
 for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("utils",), ("api",), ("db",))]:
@@ -16,6 +16,7 @@ from CLI import CLI, support_refusal
 
 if __name__ == "__main__":
     logger = getLogger("CLI")
+    json_output = False
 
     try:
         # Global parser
@@ -58,6 +59,7 @@ if __name__ == "__main__":
 
         # Bans subparser
         parser_bans = subparsers.add_parser("bans", help="list current bans")
+        parser_bans.add_argument("--json", action="store_true", help="print bans as JSON grouped by instance and Redis")
 
         # Plugin list subparser
         parser_plugin_list = subparsers.add_parser("plugin_list", help="list all available plugins and their commands")
@@ -77,6 +79,7 @@ if __name__ == "__main__":
 
         # Parse args
         args, unknown_args = parser.parse_known_args()
+        json_output = args.command == "bans" and args.json
 
         logger.debug(f"args : {args}")
         logger.debug(f"unknown_args : {unknown_args}")
@@ -98,7 +101,7 @@ if __name__ == "__main__":
         elif args.command == "ban":
             ret, err = cli.ban(args.ip, args.exp, args.reason, args.service)
         elif args.command == "bans":
-            ret, err = cli.bans()
+            ret, err = cli.bans(json_output=True) if json_output else cli.bans()
         elif args.command == "support":
             ret, err = cli.support(args.output, not args.no_anonymize)
         elif args.command == "plugin_list":
@@ -107,6 +110,10 @@ if __name__ == "__main__":
             if args.debug:
                 logger.setLevel("DEBUG")
             ret, err = cli.custom(args.plugin_id, args.plugin_command, debug=args.debug, extra_args=unknown_args)
+
+        if json_output:
+            print(err, file=None if ret else stderr, flush=True)
+            sys_exit(0 if ret else 1)
 
         if not ret:
             logger.error(f"CLI command status : ❌ (fail)\n{err}")
@@ -121,5 +128,8 @@ if __name__ == "__main__":
     except SystemExit as se:
         sys_exit(se.code)
     except:
-        logger.error(f"Error while executing bwcli :\n{format_exc()}")
+        if json_output:
+            print(f"Error while executing bwcli :\n{format_exc()}", file=stderr)
+        else:
+            logger.error(f"Error while executing bwcli :\n{format_exc()}")
         sys_exit(1)

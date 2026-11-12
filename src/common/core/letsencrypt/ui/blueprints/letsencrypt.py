@@ -427,10 +427,16 @@ def letsencrypt_fetch():
     )
 
 
+# This POST only carries the datatable query.
+letsencrypt_fetch.bw_read_only_post = True
+
+
 @letsencrypt.route("/letsencrypt/delete", methods=["POST"])
 @login_required
 @cors_required
 def letsencrypt_delete():
+    if DB.readonly:
+        return jsonify({"status": "ko", "message": "Database is in read-only mode"}), 403
     if _user_readonly():
         return jsonify({"status": "ko", "message": "User is read-only"}), 403
     cert_name = request.json.get("cert_name") if request.is_json else None
@@ -578,6 +584,8 @@ def letsencrypt_heal():
     can be resurrected by a concurrent scheduler write (per-host lock caveat, see
     letsencrypt_consistency.py LE_CACHE_LOCK_PATH).
     """
+    if DB.readonly:
+        return jsonify({"status": "ko", "message": "Database is in read-only mode"}), 403
     if _user_readonly():
         return jsonify({"status": "ko", "message": "User is read-only"}), 403
     cert_name = request.json.get("cert_name") if request.is_json else None

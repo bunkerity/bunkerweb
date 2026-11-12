@@ -30,6 +30,7 @@ Führen Sie die folgenden Schritte aus, um die Whitelist-Funktion zu konfigurier
 | Einstellung     | Standard | Kontext   | Mehrfach | Beschreibung                                                                         |
 | --------------- | -------- | --------- | -------- | ------------------------------------------------------------------------------------ |
 | `USE_WHITELIST` | `yes` | multisite | nein     | **Whitelist aktivieren:** Auf `yes` setzen, um die Whitelist-Funktion zu aktivieren. |
+| `WHITELIST_URLS_REFRESH_INTERVAL` | `1h` | multisite | nein | **URL-Aktualisierungsintervall:** Mindestalter des Caches vor einem erneuten Download. Akzeptiert Sekunden ohne Einheit oder Zeitsuffixe (`ms`, `s`, `m`, `h`, `d`, `w`, `M`, `y`). |
 
 === "IP-Adresse"
     **Was dies bewirkt:** Setzt Besucher basierend auf ihrer IP-Adresse oder ihrem Netzwerk auf die Whitelist. Diese Besucher umgehen alle Sicherheitsprüfungen.
@@ -93,7 +94,7 @@ Führen Sie die folgenden Schritte aus, um die Whitelist-Funktion zu konfigurier
     Alle `*_URLS`-Einstellungen unterstützen HTTP/HTTPS-URLs sowie lokale Dateipfade mit dem Präfix `file:///`. Die Basisauthentifizierung wird im Format `http://user:pass@url` unterstützt.
 
 !!! tip "Regelmäßige Aktualisierungen"
-    Whitelists von URLs werden stündlich automatisch heruntergeladen und aktualisiert, um sicherzustellen, dass Ihr Schutz mit den neuesten vertrauenswürdigen Quellen auf dem neuesten Stand bleibt.
+    Der Job läuft stündlich. `WHITELIST_URLS_REFRESH_INTERVAL` legt das Mindestalter einer zwischengespeicherten URL vor einem erneuten Download fest (Standard: `1h`). Verwenden Sie `24h` für Anbieter, die höchstens einen Download pro Tag erlauben, oder `0` für einen Download bei jedem Joblauf. Bei frischen Caches oder fehlgeschlagenen Downloads bleiben die letzten gültigen Einträge erhalten. Innerhalb dieses Plugins teilen sich Dienste die URL-Caches: Das kürzeste Intervall kann einen Download auslösen. Verwenden Sie daher für eine URL mit Anbieterlimit bei allen Diensten dasselbe Intervall.
 
 !!! warning "Sicherheitsumgehung"
     Auf der Whitelist stehende Besucher **umgehen vollständig alle anderen Sicherheitsprüfungen** in BunkerWeb, einschließlich WAF-Regeln, Ratenbegrenzung, Erkennung bösartiger Bots und aller anderen Sicherheitsmechanismen. Verwenden Sie die Whitelist nur für vertrauenswürdige Quellen, bei denen Sie absolut sicher sind.

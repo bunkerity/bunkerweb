@@ -42,7 +42,7 @@ Choisissez la saveur adaptée à votre environnement.
     services:
       bunkerweb:
         # Nom utilisé par le scheduler pour identifier l’instance
-        image: bunkerity/bunkerweb:1.6.18-rc3
+        image: bunkerity/bunkerweb:1.6.18-rc4
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -55,7 +55,7 @@ Choisissez la saveur adaptée à votre environnement.
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.18-rc3
+        image: bunkerity/bunkerweb-scheduler:1.6.18-rc4
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Assurez-vous de mettre le bon nom d’instance
@@ -77,7 +77,7 @@ Choisissez la saveur adaptée à votre environnement.
           - bw-db
 
       bw-api:
-        image: bunkerity/bunkerweb-api:1.6.18-rc3
+        image: bunkerity/bunkerweb-api:1.6.18-rc4
         environment:
           <<: *bw-env
           API_USERNAME: "admin"
@@ -144,7 +144,7 @@ Choisissez la saveur adaptée à votre environnement.
       -e SERVICE_API=yes \
       -e API_WHITELIST_IPS="127.0.0.0/8" \
       -p 80:8080/tcp -p 443:8443/tcp -p 443:8443/udp \
-      bunkerity/bunkerweb-all-in-one:1.6.18-rc3
+      bunkerity/bunkerweb-all-in-one:1.6.18-rc4
     ```
 
 === "Linux"
@@ -158,7 +158,7 @@ Choisissez la saveur adaptée à votre environnement.
     - Fichiers de config : `/etc/bunkerweb/api.env` (créé au premier démarrage avec des defaults commentés) et `/etc/bunkerweb/api.yml`
     - Sources d’environnement : `api.env`, `variables.env`, `/run/secrets/<VAR>`, puis exportées dans le processus Gunicorn
 
-    Modifiez `/etc/bunkerweb/api.env` pour définir `API_USERNAME`/`API_PASSWORD`, la liste blanche, TLS, les limites ou `API_ROOT_PATH`, puis `systemctl reload bunkerweb-api`.
+    Modifiez `/etc/bunkerweb/api.env` pour définir `API_USERNAME`/`API_PASSWORD`, la liste blanche, TLS, les limites ou `API_ROOT_PATH`, puis `systemctl restart bunkerweb-api`.
 
 ## Authentification et autorisation
 
@@ -409,6 +409,7 @@ Désactivez docs ou schéma en mettant leurs URLs à `off|disabled|none|false|0`
   - `GET /cache` : lister les fichiers de cache avec filtres (`service`, `plugin`, `job_name`) ; `with_data=true` intègre le contenu imprimable.
   - `GET /cache/{service}/{plugin}/{job}/{file}` : récupérer/télécharger un fichier de cache spécifique (`download=true`).
   - `DELETE /cache` ou `DELETE /cache/{service}/{plugin}/{job}/{file}` : supprimer des fichiers de cache. Le scheduler n’est notifié que pour un plugin dont une ligne a réellement été supprimée ; un `plugin` qui ne possède pas le job est refusé et rien n’est supprimé.
+  - Entrées sensibles (nom stocké `secret` ou se terminant par `.secret`, plus quelques entrées du cœur contenant des clés privées ou des identifiants, les clés clientes mTLS vers l’upstream et l’archive de sauvegarde de failover) : `GET /cache/{service}/{plugin}/{job}/{file}` renvoie `403` et `GET /cache?with_data=true` omet `data` et `printable` (les métadonnées restent), sauf si l’appelant utilise HTTP Basic comme administrateur de l’API ou l’`API_TOKEN`. Un jeton Biscuit est refusé même s’il a été émis pour un administrateur. Le `403` est aussi renvoyé pour un nom sensible qui n’existe pas. `DELETE` est inchangé et exige toujours `cache_delete`. Voir [Entrées sensibles du cache des jobs](plugins.md#entrees-sensibles-du-cache-des-jobs).
 - **Jobs**
   - `GET /jobs` : lister jobs, plannings et résumés de cache.
   - `POST /jobs/run` : marquer des plugins comme modifiés pour déclencher les jobs associés.

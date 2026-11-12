@@ -22,6 +22,8 @@ Comment ça marche :
 | `INJECT_HEAD` |        | multisite | non      | Code HTML injecté avant `</head>`. |
 | `INJECT_BODY` |        | multisite | non      | Code HTML injecté avant `</body>`. |
 
+Les valeurs de `INJECT_HEAD` et `INJECT_BODY` sont insérées comme du HTML littéral : les guillemets et les barres obliques inverses ne nécessitent aucun échappement supplémentaire pour NGINX. Si vous aviez ajouté `\'` manuellement pour contourner le problème, retirez la barre oblique inverse. Conservez l’échappement requis par votre format de configuration (comme YAML) ; l’expansion des variables NGINX (`$variable`) reste inchangée.
+
 !!! tip "Bonnes pratiques"
     - Placez de préférence les scripts JS en fin de body pour éviter de bloquer le rendu.
     - Mettez le CSS et le JS critique dans le head pour éviter le flash de contenu non stylé.

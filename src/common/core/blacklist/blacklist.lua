@@ -35,13 +35,10 @@ function blacklist:initialize(ctx)
 			self.logger:log(ERR, err)
 			self.lists = {}
 		else
-			-- Create a deep copy to avoid modifying the shared internalstore reference
+			-- Outer table is per object; the stored arrays are shared and already deduplicated, so they are only ever read.
 			self.lists = {}
 			for kind, list in pairs(internalstore_lists) do
-				self.lists[kind] = {}
-				for _, item in ipairs(list) do
-					table.insert(self.lists[kind], item)
-				end
+				self.lists[kind] = list
 			end
 		end
 		local kinds = {
@@ -57,15 +54,26 @@ function blacklist:initialize(ctx)
 			["IGNORE_URI"] = {},
 		}
 		for kind, _ in pairs(kinds) do
-			if not self.lists[kind] then
-				self.lists[kind] = {}
-			end
+			local stored = self.lists[kind] or {}
+			local inline = {}
 			for data in self.variables["BLACKLIST_" .. kind]:gmatch("%S+") do
 				if data ~= "" then
-					table.insert(self.lists[kind], data)
+					table.insert(inline, data)
 				end
 			end
-			self.lists[kind] = deduplicate_list(self.lists[kind])
+			if #inline == 0 then
+				self.lists[kind] = stored
+			else
+				-- Copy before merging: never mutate the shared stored array.
+				local merged = {}
+				for _, item in ipairs(stored) do
+					table.insert(merged, item)
+				end
+				for _, item in ipairs(inline) do
+					table.insert(merged, item)
+				end
+				self.lists[kind] = deduplicate_list(merged)
+			end
 		end
 		local header_rules = self.internalstore:get("plugin_blacklist_header_rules", true)
 		self.header_rules = pick_header_rules(header_rules, self.ctx.bw.server_name)

@@ -178,20 +178,47 @@ def test_secrets_are_redacted_in_conflict_logs_unless_debugging(ctrl):
     assert "hunter" not in text
 
 
-def test_secrets_are_shown_when_the_logger_is_at_debug(ctrl):
-    log = attach_log(ctrl)
+SECRET_KEYS = [
+    "MY_PASSWORD",
+    "x_secret_y",
+    "TOKEN",
+    "API_KEY",
+    "PRIVATE_KEY",
+    "AUTH_BASIC_USER",
+    "CUSTOM_SSL_KEY_DATA",
+    "GRPC_SSL_KEY_DATA",
+    "REVERSE_PROXY_SSL_KEY_DATA",
+    "LETS_ENCRYPT_DNS_CREDENTIAL_ITEM",
+    "PRO_LICENSE_KEY",
+    "DATABASE_URI",
+    "DATABASE_URI_READONLY",
+    "SESSIONS_SECRET",
+    "REDIS_PASSWORD",
+    "ROBOTSTXT_DARKVISITORS_TOKEN",
+    "CROWDSEC_API_KEY",
+    "LETS_ENCRYPT_ZEROSSL_API_KEY",
+]
 
-    ctrl._merge_services_by_server_name([svc(API_KEY="k1"), svc(API_KEY="k2")])
 
-    assert log.has("API_KEY='k1' overwritten by 'k2'", logging.WARNING)
-
-
-@pytest.mark.parametrize("key", ["MY_PASSWORD", "x_secret_y", "TOKEN", "API_KEY", "PRIVATE_KEY", "AUTH_BASIC_USER"])
-def test_every_sensitive_marker_redacts(ctrl, key):
-    ctrl._logger.setLevel(logging.INFO)
+@pytest.mark.parametrize("level", [logging.DEBUG, logging.WARNING])
+@pytest.mark.parametrize("key", SECRET_KEYS)
+def test_every_sensitive_marker_redacts(ctrl, key, level):
+    ctrl._logger.setLevel(level)
 
     assert ctrl._format_conflict_value(key, "value") == "'<redacted>'"
     assert ctrl._format_conflict_value("USE_ANTIBOT", "value") == "'value'"
+
+
+@pytest.mark.parametrize("level", [logging.DEBUG, logging.INFO])
+def test_conflicting_secrets_never_reach_the_log(ctrl, level):
+    log = attach_log(ctrl)
+    ctrl._logger.setLevel(level)
+
+    ctrl._merge_services_by_server_name([svc(CUSTOM_SSL_KEY_DATA="pem-one"), svc(CUSTOM_SSL_KEY_DATA="pem-two")])
+
+    text = " ".join(log.messages(logging.WARNING))
+    assert "Conflicting annotation for a.example.com: CUSTOM_SSL_KEY_DATA='<redacted>' overwritten by '<redacted>'" in text
+    assert "pem-" not in text
 
 
 def test_extract_slots_removes_what_it_returns_and_keeps_scalars(ctrl):

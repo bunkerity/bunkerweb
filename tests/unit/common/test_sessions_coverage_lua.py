@@ -28,9 +28,12 @@ CLUSTERSTORE={
     close=function() CLOSED=true end,
 }
 PING_OK=true
+GETS={}
 local original_init=package.loaded["bunkerweb.plugin"].initialize
 package.loaded["bunkerweb.plugin"].initialize=function(self,name,ctx)
     original_init(self,name,ctx)
+    local get=self.internalstore.get
+    self.internalstore.get=function(store,key) GETS[key]=(GETS[key] or 0)+1 return get(store,key) end
     self.kind=KIND or "http"
     self.log_throttled=function(_,level,key,msg) LOGS[#LOGS+1]={level,msg} end
     self.flush_log_recaps=function() FLUSHED=true end
@@ -62,6 +65,8 @@ emit({initialized=initialized,configured=configured,config=CONFIG,checks=p.ctx.b
         "storage": "cookie",
         "revocation": "shm",
         "revocation_fail_mode": "open",
+        "revocation_cache_ttl": 0,
+        "revocation_error_cache_ttl": 0,
         "shm": {"zone": "sessions_revocation", "prefix": "revoked_"},
     }
     assert sorted(out["checks"]) == [["IP", "203.0.113.1"], ["USER_AGENT", "fixture-agent"]]
@@ -99,6 +104,69 @@ def test_random_secret_and_cookie_name_are_reused(cached):
     assert out["config"]["cookie_name"] == ("old-name" if cached else "r" * 16)
     assert out["store"]["storage_sessions_SESSIONS_SECRET"] == out["config"]["secret"]
     assert out["store"]["storage_sessions_SESSIONS_NAME"] == out["config"]["cookie_name"]
+
+
+RANDOM = 'VARIABLES.SESSIONS_SECRET="random" VARIABLES.SESSIONS_NAME="random"\n'
+RANDOM_KEYS = ("storage_sessions_SESSIONS_SECRET", "storage_sessions_SESSIONS_NAME")
+
+
+def test_request_constructor_does_not_read_random_values_from_shared_memory():
+    out = run(RANDOM + NEW + """
+p:init()
+GETS={}
+for _=1,5 do new_plugin(plugin,{remote_addr="203.0.113.1"}) end
+emit({gets=GETS})
+""")
+    assert not any(out["gets"].get(key) for key in RANDOM_KEYS), out["gets"]
+
+
+def test_random_values_are_recovered_once_and_exposed_on_randoms():
+    out = run(RANDOM + 'STORE.storage_sessions_SESSIONS_SECRET="old-secret" STORE.storage_sessions_SESSIONS_NAME="old-name"\n' + NEW + """
+p:init()
+local q=new_plugin(plugin,{remote_addr="203.0.113.1"})
+emit({gets=GETS,config=CONFIG,request_randoms=q.randoms,sets=STORE_SET_LOG})
+""")
+    expected = {"SESSIONS_SECRET": "old-secret", "SESSIONS_NAME": "old-name"}
+    assert out["config"]["secret"] == "old-secret" and out["config"]["cookie_name"] == "old-name"
+    assert out["request_randoms"] == expected
+    assert [out["gets"].get(key) for key in RANDOM_KEYS] == [1, 1]
+    assert not any(key in out["sets"] for key in RANDOM_KEYS)
+
+
+def test_generated_random_values_are_stored_once_and_survive_a_reload():
+    out = run(RANDOM + NEW + """
+local n=0
+u.rand=function(len) n=n+1 return string.rep(tostring(n),len) end
+p:init()
+local first={secret=CONFIG.secret,name=CONFIG.cookie_name,randoms=new_plugin(plugin,{remote_addr="203.0.113.1"}).randoms}
+local reloaded=new_plugin(plugin,{remote_addr="203.0.113.1"})
+reloaded:init()
+emit({first=first,second=CONFIG,randoms=new_plugin(plugin,{remote_addr="203.0.113.1"}).randoms,store=STORE,calls=n})
+""")
+    assert out["calls"] == 2  # one secret and one name, nothing regenerated on reload
+    assert out["first"]["randoms"] == {"SESSIONS_SECRET": "1" * 16, "SESSIONS_NAME": "2" * 16}
+    assert out["second"]["secret"] == out["first"]["secret"] and out["second"]["cookie_name"] == out["first"]["name"]
+    assert out["randoms"] == out["first"]["randoms"]
+    assert out["store"]["storage_sessions_SESSIONS_SECRET"] == "1" * 16
+
+
+def test_explicit_setting_change_replaces_the_random_value_on_next_configuration():
+    out = run(RANDOM + NEW + """
+p:init()
+VARIABLES.SESSIONS_SECRET="fixed-secret" VARIABLES.SESSIONS_NAME="fixed-name"
+local q=new_plugin(plugin,{remote_addr="203.0.113.1"})
+q:init()
+local explicit={config=CONFIG,randoms=new_plugin(plugin,{remote_addr="203.0.113.1"}).randoms}
+VARIABLES.SESSIONS_SECRET="random" VARIABLES.SESSIONS_NAME="random"
+local r=new_plugin(plugin,{remote_addr="203.0.113.1"})
+r:init()
+emit({explicit=explicit,back=CONFIG,back_randoms=new_plugin(plugin,{remote_addr="203.0.113.1"}).randoms})
+""")
+    assert out["explicit"]["config"]["secret"] == "fixed-secret"
+    assert out["explicit"]["config"]["cookie_name"] == "fixed-name"
+    assert out["explicit"]["randoms"] == {}
+    # the stored random value comes back when the setting returns to "random"
+    assert out["back"]["secret"] == "r" * 16 and out["back_randoms"]["SESSIONS_SECRET"] == "r" * 16
 
 
 def test_standalone_redis_configuration():

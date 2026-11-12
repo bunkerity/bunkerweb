@@ -185,15 +185,28 @@ class TestFailures:
         ("vars_", "country", "fragment"),
         [
             ({"WHITELIST_COUNTRY": "FR"}, "FR", "error while adding item to cache"),
-            ({"WHITELIST_COUNTRY": "FR"}, "CN", "error while adding item to cache"),
-            ({"BLACKLIST_COUNTRY": "CN"}, "CN", "error while adding item to cache"),
             ({"BLACKLIST_COUNTRY": "CN"}, "FR", "error while caching IP"),
         ],
     )
-    def test_a_cache_write_failure_is_reported(self, vars_, country, fragment):
+    def test_a_cache_write_failure_is_reported_when_the_client_is_allowed(self, vars_, country, fragment):
         out = access(vars_, country=country, setup='CACHE_SET_ERROR = "no memory"')
         assert out["ret"] is False
         assert out["msg"].startswith(fragment) and out["msg"].endswith("no memory")
+        assert out["status"] is None
+
+    @pytest.mark.parametrize(
+        ("vars_", "country"),
+        [
+            ({"WHITELIST_COUNTRY": "FR"}, "CN"),
+            ({"BLACKLIST_COUNTRY": "CN"}, "CN"),
+        ],
+    )
+    def test_a_cache_write_failure_never_lifts_a_denial(self, vars_, country):
+        out = access(vars_, country=country, setup='CACHE_SET_ERROR = "no memory"')
+        assert (out["ret"], out["status"]) == (True, 403)
+        assert out["data"] == {"id": "country", "country": country}
+        assert ["ERR", "error while adding item to cache : no memory"] in out["logs"]
+        assert out["cache"] == {}
 
 
 class TestPrereadAndInit:

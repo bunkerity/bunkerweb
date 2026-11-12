@@ -37,6 +37,7 @@ ModSecurity 插件将功能强大的 [ModSecurity](https://modsecurity.org) Web 
 | `MODSECURITY_SEC_AUDIT_LOG_PARTS`     | `BCFH`                                | multisite | 否   | **审计日志部分：** 审计日志中要包含的请求/响应的哪些部分。                                                                                  |
 | `MODSECURITY_SEC_AUDIT_LOG`           | `/var/log/bunkerweb/modsec_audit.log` | multisite | 否   | **审计日志路径：** ModSecurity 写入审计条目的文件路径。必须是常规文件：Serial 审计写入器会锁定该文件，管道或流无法支持锁定。路径必须以 `.log` 结尾。通过该后缀实现的轮转仅适用于安装了 logrotate 的场景（Linux 软件包和 All-In-One 镜像）；在 Docker、Swarm 和 Kubernetes 上，非默认名称既不会被流式传输也不会被轮转，会在容器内无限增长，因为容器的日志流仅链接了 `modsec_audit.log`。                |
 | `MODSECURITY_SEC_AUDIT_LOG_TYPE` | `Serial` | multisite | 否 | 写入模式：`Serial`（默认）或 `Concurrent`。 |
+| `MODSECURITY_SEC_AUDIT_LOG_FORMAT` | `Native` | multisite | 否 | 审计日志格式：`Native`（默认）或 `JSON`（每条记录一个 JSON 对象）。在全局 CRS 模式下须全局设置。 |
 | `MODSECURITY_SEC_AUDIT_LOG_STORAGE_DIR` |  | multisite | 否 | 默认为空；`Concurrent` 必须使用绝对存储目录。 |
 | `MODSECURITY_SEC_REQUEST_BODY_LIMIT` | | multisite | 否 | 最大请求体检查大小，以字节或 `k`/`m`/`g` 后缀表示。留空时取自 `MAX_CLIENT_SIZE`，NGINX 会先执行该限制。`REVERSE_PROXY_MAX_CLIENT_SIZE` 会在对应 location 中覆盖此值。`0` 取消检查大小限制，可能耗尽内存。 |
 | `MODSECURITY_SEC_REQUEST_BODY_LIMIT_ACTION` | `Reject` | multisite | 否 | `Reject` 对超过检查限制的请求返回 HTTP 413。`ProcessPartial` 只检查限制内的部分并转发完整请求体，因此会降低 WAF 覆盖范围。独立的无文件请求体限制仍然有效。 |
@@ -54,6 +55,22 @@ ModSecurity 插件将功能强大的 [ModSecurity](https://modsecurity.org) Web 
     ModSecurity 会将完整请求体缓冲到内存中，并且无法为数 GB 的上传设置上限，这可能导致 worker OOM。如果——**并且仅当**——某个反向代理 URL *专门* 用于文件上传（例如专用的 `/upload` 端点），请在该 URL 上设置 `REVERSE_PROXY_MODSECURITY_N: "no"`，以便在其 `location` 块中生成 `modsecurity off;`。不要在混合用途的 URL 上禁用它：否则该 location 提供的所有内容都会失去 WAF 覆盖。
 
     为了在绕过 ModSecurity 后仍保护上传内容，请将其与文件扫描插件配合使用，例如 [ClamAV](https://github.com/bunkerity/bunkerweb-plugins/tree/main/clamav) 或 [VirusTotal](https://github.com/bunkerity/bunkerweb-plugins/tree/main/virustotal)——它们检查上传文件本身，而不是原始请求体。
+
+!!! warning "响应体阻断与压缩响应"
+    如果响应体阻断规则在响应头发送后才触发，客户端可能先收到原始状态码（如 `200`），随后出现响应体不完整或分块传输错误，而不是完整的 `403` 响应。BunkerWeb 应用 gzip、Brotli 或 zstd 压缩时都可能出现这种情况。从 `1.6.18~rc4` 开始，Brotli 的行为与 gzip 已有的行为一致。请检查 ModSecurity 审计日志和错误日志，确定触发的规则，并用范围严格受限的排除规则处理已确认的误报。
+
+!!! warning "上游压缩的响应体"
+    CRS v4 不检查上游已经压缩的响应体（`gzip`、`br` 或 `zstd`）。BunkerWeb 不会为检查而解压这些响应体。如果需要检查响应体，请配置上游返回未压缩的内容。对于遵循此请求头的上游，可以仅在受影响的服务和 location 中移除转发请求的 `Accept-Encoding` 头，以请求未压缩的响应：
+
+    ```yaml
+    REVERSE_PROXY_HOST_1: "http://app:8080"
+    REVERSE_PROXY_URL_1: "/reports/"
+    REVERSE_PROXY_HEADERS_1: 'Accept-Encoding ""'
+    ```
+
+    请替换主机和路径，并将后缀调整为目标反向代理 location 的编号。如果该 location 的 `REVERSE_PROXY_HEADERS_1` 已有条目，请保留它们并追加 `;Accept-Encoding ""`。应使用此设置，而不是服务器级别的 `proxy_set_header`，因为生成的 location 请求头配置会覆盖后者。
+
+    请验证上游确实返回未压缩的响应；如果仍然压缩，请在上游禁用该路由的压缩。这会增加上游与 BunkerWeb 之间的带宽使用量。检查完成后，BunkerWeb 仍可为客户端压缩响应；配置的响应体检查 MIME 类型和大小限制仍然适用。
 
 ### 可用的 CRS 版本
 
