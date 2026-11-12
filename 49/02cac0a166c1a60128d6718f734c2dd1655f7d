@@ -1,0 +1,21 @@
+tests/unit/common/test_proxy_protocol_addr_patch.py
+  s_8dd94324ac7724::t_3c7c65c17002bc 91-100
+src/deps/init_deps.sh
+  s_8dd94324ac7724::t_0a1f03ca2c2d67 94
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "4902cac0a166c1a60128d6718f734c2dd1655f7d",
+  "prompts": {},
+  "sessions": {
+    "s_8dd94324ac7724": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1c619-e44f-72f0-b8e0-956683358801",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}
