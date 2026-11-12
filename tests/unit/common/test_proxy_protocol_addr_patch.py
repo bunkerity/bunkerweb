@@ -88,6 +88,16 @@ def test_initializer_accepts_successful_post_install(tmp_path):
     assert (tmp_path / "hook-ran").exists()
 
 
+def test_initializer_stops_on_failed_post_install(tmp_path):
+    failed = {"id": "failed", "name": "Failed dependency", "url": "unused", "commit": "unused", "post_install": "exit 37"}
+    following = {"id": "following", "name": "Next dependency", "url": "unused", "commit": "unused", "post_install": "touch should-not-run"}
+    env = _initializer_tree(tmp_path, {"download": [], "git_repository": [failed, following]})
+    result = _run(["bash", str(DEPS / "init_deps.sh")], tmp_path, env=env)
+    assert result.returncode == 37, result.stdout + result.stderr
+    assert not (tmp_path / "src/deps/src/following").exists()
+    assert not (tmp_path / "should-not-run").exists()
+
+
 def test_hooks_patch_both_files_and_second_run_is_a_noop(source_tree):
     result = _hooks(source_tree)
     assert result.returncode == 0, result.stdout + result.stderr
