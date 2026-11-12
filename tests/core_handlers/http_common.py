@@ -1,8 +1,11 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
+from contextlib import contextmanager, nullcontext
 from logging import Logger
 from random import randint
+import socket
+from socket import AF_INET, gaierror
 from traceback import format_exc
 from typing import Any, Union
 
@@ -19,7 +22,34 @@ class HTTPContext:
 essential_timeout = 10
 
 
-def perform_request(LOGGER: Logger, action: Any) -> HTTPContext:
+@contextmanager
+def ipv4_first_resolution():
+    """Resolve names to IPv4 addresses only, for the duration of one request.
+
+    The fixture hosts (`www.example.com`...) are IPv4-only entries in `tests/misc/conf/dnsmasq.hosts`,
+    but dnsmasq forwards the AAAA query upstream and the real zone answers it. A runner has no IPv6
+    route, so when the IPv4 target refuses the connection, `socket.create_connection` goes on to the
+    AAAA address and re-raises its last error, `[Errno 101] Network is unreachable`, in place of
+    `Connection refused`. A name or literal with no IPv4 address falls back to the unfiltered answer.
+    """
+    resolver = socket.getaddrinfo
+
+    def getaddrinfo(host, port, family=0, *args, **kwargs):
+        if family == 0:
+            try:
+                return resolver(host, port, AF_INET, *args, **kwargs)
+            except gaierror:
+                pass
+        return resolver(host, port, family, *args, **kwargs)
+
+    socket.getaddrinfo = getaddrinfo
+    try:
+        yield
+    finally:
+        socket.getaddrinfo = resolver
+
+
+def perform_request(LOGGER: Logger, action: Any, ipv4_only: bool = False) -> HTTPContext:
     url = action.url
     method = action.method
     headers = action.headers.copy()
@@ -64,7 +94,7 @@ def perform_request(LOGGER: Logger, action: Any) -> HTTPContext:
     response: Union[Response, str]
     error: Exception | None = None
     try:
-        with Client(
+        with ipv4_first_resolution() if ipv4_only else nullcontext(), Client(
             auth=auth,
             headers=headers,
             verify=verify_ssl,
