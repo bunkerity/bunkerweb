@@ -3152,7 +3152,9 @@ log {
 
 ### Send logs to Splunk {#send-logs-to-splunk}
 
-BunkerWeb needs no Splunk plugin. A Splunk Universal Forwarder reads the log files, and three settings make BunkerWeb write them in formats Splunk parses: a second access log in `key=value` format, the existing error log, and a ModSecurity audit log in JSON.
+BunkerWeb needs no Splunk plugin: nothing is installed on BunkerWeb. The Splunk side uses the official [BunkerWeb Add-on for Splunk](https://splunkbase.splunk.com/app/10342) (`TA-bunkerweb`, [source on GitHub](https://github.com/bunkerity/bunkerweb-splunk-addon)). It defines the sourcetypes `bunkerweb:access`, `bunkerweb:error` and `bunkerweb:modsec_audit`, with timestamps, line breaking, search-time field extraction and CIM mappings for the Web and Intrusion Detection data models.
+
+A Splunk Universal Forwarder reads the log files, and three settings make BunkerWeb write them in formats the add-on parses: a second access log in `key=value` format, the existing error log, and a ModSecurity audit log in JSON.
 
 **1. Add an access log for Splunk.** Each `ACCESS_LOG_N` pairs with the `LOG_FORMAT_N` of the same suffix, so `access.log` keeps its default format (the Web UI reads it) and the new file gets its own. Add this to `/etc/bunkerweb/variables.env`, and use another suffix if `_1` is already taken:
 
@@ -3192,7 +3194,11 @@ sudo tail -n 1 /var/log/bunkerweb/access-splunk.log
 sudo tail -n 1 /var/log/bunkerweb/modsec_audit.log | jq .transaction.unique_id
 ```
 
-**6. Configure the forwarder.** BunkerWeb log files belong to `nginx:nginx` and the packages restrict access to that user and group, so add the user that runs the forwarder to the `nginx` group. Then monitor the three files, one sourcetype each, in `inputs.conf`:
+**6. Install the add-on in Splunk.** Install the [BunkerWeb Add-on for Splunk](https://splunkbase.splunk.com/app/10342) on the search head, and on the indexers (or the heavy forwarder that parses the data). The Universal Forwarder needs no `props.conf`, and the add-on needs no configuration. It sets `KV_MODE = json` for `bunkerweb:modsec_audit` and raises `TRUNCATE` to `100000` for it and for `bunkerweb:error`, so you write no `props.conf` yourself. Audit entries are long: one XSS probe wrote 7.3 KB, and a request with several attack payloads wrote 20 KB, while the default `TRUNCATE` cuts events at 10,000 bytes.
+
+The add-on extracts the access log with one pattern that expects the field order of `LOG_FORMAT_1` above. Keep that format as shown.
+
+**7. Configure the forwarder.** BunkerWeb log files belong to `nginx:nginx` and the packages restrict access to that user and group, so add the user that runs the forwarder to the `nginx` group. Then monitor the three files, one sourcetype each, in `inputs.conf`:
 
 ```conf
 [monitor:///var/log/bunkerweb/access-splunk.log]
@@ -3205,17 +3211,11 @@ sourcetype = bunkerweb:error
 sourcetype = bunkerweb:modsec_audit
 ```
 
-In `props.conf`, parse the audit entries as JSON on the search head, and raise `TRUNCATE` on the indexers (or the heavy forwarder). Entries are long: one XSS probe wrote 7.3 KB, and a request with several attack payloads wrote 20 KB, while the default `TRUNCATE` cuts events at 10,000 bytes.
-
-```conf
-[bunkerweb:modsec_audit]
-KV_MODE = json
-TRUNCATE = 100000
-```
-
 `access-splunk.log` matches the `/var/log/bunkerweb/*.log` pattern of the [Log File Retention](#log-file-retention) policy, so `logrotate` covers it like the other files.
 
 **Fields of the access log**
+
+The add-on keeps the virtual host in `site` and `dest` in Splunk, because `host` is the name of the machine that sent the event. It also maps `client` to `src`.
 
 | Field          | Content                                                                                                                                |
 | :------------- | :------------------------------------------------------------------------------------------------------------------------------------- |
@@ -3271,6 +3271,8 @@ The first request returns `404` because the test stack has no backend. The match
             splunk-format: raw
             splunk-sourcetype: "bunkerweb:docker"
     ```
+
+    The add-on's extractions apply to `bunkerweb:access`, `bunkerweb:error` and `bunkerweb:modsec_audit`, not to `bunkerweb:docker`.
 
 ## Docker logging best practices {#docker-logging-best-practices}
 
