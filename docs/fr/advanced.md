@@ -3168,16 +3168,13 @@ LOG_FORMAT_1=time=$time_iso8601 host=$host client=$remote_addr request_id=$reque
 MODSECURITY_SEC_AUDIT_LOG_PARTS=BFH
 ```
 
-**3. Écrire le journal d'audit en JSON.** Créez `/etc/bunkerweb/configs/modsec/audit-json.conf` avec cette seule ligne, puis donnez au scheduler l'accès au dossier comme décrit dans [Configurations personnalisées](#custom-configurations) :
+**3. Écrire le journal d'audit en JSON.** Ajoutez ceci à `/etc/bunkerweb/variables.env` :
 
 ```conf
-SecAuditLogFormat JSON
+MODSECURITY_SEC_AUDIT_LOG_FORMAT=JSON
 ```
 
-```shell
-sudo chown -R root:nginx /etc/bunkerweb/configs && \
-sudo chmod -R 770 /etc/bunkerweb/configs
-```
+Les versions antérieures n'ont pas ce réglage : placez à la place `SecAuditLogFormat JSON` dans une configuration personnalisée de type `modsec` (par exemple `/etc/bunkerweb/configs/modsec/audit-json.conf`, voir [Configurations personnalisées](#custom-configurations)).
 
 **4. Redémarrer les services.**
 
@@ -3256,7 +3253,7 @@ La première requête renvoie `404` parce que la pile de test n'a pas de backend
     - **La partie `C` contient les corps de requête**, y compris les champs de formulaire et les identifiants de connexion. Utilisez `BFH` sauf si vous avez besoin des corps, et limitez les droits de lecture de l'index.
 
 !!! info "Docker, Autoconf, Swarm et Kubernetes"
-    Les images relient `access.log`, `error.log` et `modsec_audit.log` au flux de journaux propre du conteneur (voir [Rétention des fichiers journaux](#log-file-retention)) : un forwarder n'a donc aucun fichier à lire pour eux, et un fichier écrit par `ACCESS_LOG_1` reste dans le conteneur, où rien ne le fait tourner. Appliquez le format d'audit JSON avec un réglage de configuration personnalisée sur le scheduler plutôt qu'avec un fichier : `CUSTOM_CONF_MODSEC_audit-json=SecAuditLogFormat JSON`. Les entrées JSON apparaissent alors dans `docker logs` du conteneur `bunkerweb`, une par ligne, parmi les lignes du journal d'erreurs : les lignes qui commencent par `{` sont les entrées d'audit.
+    Les images relient `access.log`, `error.log` et `modsec_audit.log` au flux de journaux propre du conteneur (voir [Rétention des fichiers journaux](#log-file-retention)) : un forwarder n'a donc aucun fichier à lire pour eux, et un fichier écrit par `ACCESS_LOG_1` reste dans le conteneur, où rien ne le fait tourner. Définissez `MODSECURITY_SEC_AUDIT_LOG_FORMAT=JSON` sur le scheduler, comme n'importe quel autre réglage, plutôt que d'utiliser un fichier. Les entrées JSON apparaissent alors dans `docker logs` du conteneur `bunkerweb`, une par ligne, parmi les lignes du journal d'erreurs : les lignes qui commencent par `{` sont les entrées d'audit.
 
     Pour envoyer le flux vers Splunk, utilisez le [pilote de journalisation `splunk` de Docker](https://docs.docker.com/engine/logging/drivers/splunk/) avec un jeton HTTP Event Collector. Le pilote envoie ensemble les lignes d'accès, d'erreur et d'audit sous un seul sourcetype : seul leur contenu permet de les distinguer. Définissez le format `key=value` sur `LOG_FORMAT` (sans suffixe) pour que les lignes d'accès envoyées le portent. Cela remplace le format par défaut dans `access.log`.
 

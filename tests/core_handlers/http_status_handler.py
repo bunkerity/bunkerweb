@@ -24,7 +24,8 @@ def _failure_kind(error: Exception | None) -> str | None:
 
 
 def handle(LOGGER: Logger, action: Any) -> None:
-    ctx = perform_request(LOGGER, action)
+    # A closed port must read as a refused connection, not as whatever an unreachable AAAA answer adds.
+    ctx = perform_request(LOGGER, action, ipv4_only=True)
     response = ctx.response
 
     if isinstance(response, str):

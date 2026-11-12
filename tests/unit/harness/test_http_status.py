@@ -1,7 +1,9 @@
 """Transport failures must match the status action's explicit expectation (UB5-1)."""
 
+import errno
 import importlib
 import logging
+import socket
 import sys
 from pathlib import Path
 from types import ModuleType, SimpleNamespace
@@ -36,7 +38,7 @@ def modules(monkeypatch):
 
 
 def _request(monkeypatch, handler, response, error=None):
-    monkeypatch.setattr(handler, "perform_request", lambda *_: SimpleNamespace(response=response, error=error))
+    monkeypatch.setattr(handler, "perform_request", lambda *_, **__: SimpleNamespace(response=response, error=error))
 
 
 @pytest.mark.parametrize(
@@ -165,3 +167,79 @@ def test_every_status_spec_has_an_explicit_expectation(modules):
                         pytest.fail(f"{path.relative_to(ROOT)}:{name}/{integration}: {error}")
                     count += 1
     assert count > 0
+
+
+def _fake_dns(monkeypatch, addresses):
+    """Stand in for the runner's resolver: `addresses` maps a family (0 = any) to the answers."""
+    real_calls = []
+
+    def getaddrinfo(host, port, family=0, type=0, proto=0, flags=0):
+        real_calls.append(family)
+        found = [a for a in addresses if family in (0, a[0])]
+        if not found:
+            raise socket.gaierror(socket.EAI_ADDRFAMILY, "Address family for hostname not supported")
+        return [(af, socket.SOCK_STREAM, 6, "", (ip, port) + ((0, 0) if af == socket.AF_INET6 else ())) for af, ip in found]
+
+    monkeypatch.setattr(socket, "getaddrinfo", getaddrinfo)
+    return real_calls
+
+
+def _fake_connect(monkeypatch, refused=(socket.AF_INET,), unreachable=(socket.AF_INET6,)):
+    """No network: an IPv4 target refuses the connection, an IPv6 one has no route (ENETUNREACH)."""
+    attempts = []
+
+    def connect(self, address):
+        attempts.append(self.family)
+        if self.family in unreachable:
+            raise OSError(errno.ENETUNREACH, "Network is unreachable")
+        raise ConnectionRefusedError(errno.ECONNREFUSED, "Connection refused")
+
+    monkeypatch.setattr(socket.socket, "connect", connect)
+    return attempts
+
+
+def test_closed_port_with_an_unreachable_ipv6_answer_is_connection_refused(modules, monkeypatch):
+    """STAGING 43194170054, Linux `misc;listen_http_disabled`.
+
+    dnsmasq answers A from its hosts file but forwards AAAA upstream, and a runner has no IPv6 route:
+    the closed port refuses 127.0.0.1, the AAAA address is then unreachable, and that last error won.
+    """
+    handler, _, status = modules
+    attempts = _fake_connect(monkeypatch)
+    _fake_dns(monkeypatch, [(socket.AF_INET, "127.0.0.1"), (socket.AF_INET6, "2606:4700:10::6814:179a")])
+    handler.handle(LOGGER, status(url="http://www.example.com", expect_error=["connection_refused"]))
+    assert socket.AF_INET in attempts
+
+
+def test_unreachable_ipv6_alone_is_still_not_an_expected_failure(modules, monkeypatch):
+    handler, _, status = modules
+    _fake_connect(monkeypatch)
+    _fake_dns(monkeypatch, [(socket.AF_INET6, "2606:4700:10::6814:179a")])
+    with pytest.raises(SystemExit) as failed:
+        handler.handle(LOGGER, status(url="http://www.example.com", expect_error=["connection_refused", "connection_closed"]))
+    assert failed.value.code == 1
+
+
+def test_ipv6_literal_url_keeps_working(modules, monkeypatch):
+    handler, _, status = modules
+    attempts = _fake_connect(monkeypatch, refused=(socket.AF_INET6,), unreachable=())
+    _fake_dns(monkeypatch, [(socket.AF_INET6, "::1")])
+    handler.handle(LOGGER, status(url="http://[::1]:8080", expect_error=["connection_refused"]))
+    assert attempts == [socket.AF_INET6]
+
+
+def test_ipv6_only_name_keeps_working(modules, monkeypatch):
+    handler, _, status = modules
+    attempts = _fake_connect(monkeypatch, refused=(socket.AF_INET6,), unreachable=())
+    _fake_dns(monkeypatch, [(socket.AF_INET6, "fd42:1618:1::10")])
+    handler.handle(LOGGER, status(url="http://v6.example.com", expect_error=["connection_refused"]))
+    assert attempts == [socket.AF_INET6]
+
+
+def test_resolver_is_restored_after_the_request(modules, monkeypatch):
+    handler, _, status = modules
+    _fake_connect(monkeypatch)
+    _fake_dns(monkeypatch, [(socket.AF_INET, "127.0.0.1")])
+    resolver = socket.getaddrinfo
+    handler.handle(LOGGER, status(url="http://www.example.com", expect_error=["connection_refused"]))
+    assert socket.getaddrinfo is resolver
