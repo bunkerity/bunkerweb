@@ -8,6 +8,8 @@ Le plugin Zstandard compresse les réponses HTTP avec l’algorithme Zstandard (
 
 Les clients compatibles zstd reçoivent `Content-Encoding: zstd` et `Vary: Accept-Encoding`. Les clients sans prise en charge de zstd, y compris ceux qui envoient `zstd;q=0`, peuvent recevoir du Brotli ou du gzip lorsque ces plugins sont activés ; sinon, ils reçoivent des réponses non compressées.
 
+Avec `USE_ZSTD=yes`, les réponses éligibles peuvent contenir `Vary: Accept-Encoding` même si la représentation choisie est non compressée, en gzip ou en Brotli. Les caches doivent respecter cet en-tête pour séparer les représentations.
+
 Lorsque plusieurs plugins de compression sont activés, la préférence du serveur va à zstd, puis à Brotli, puis à gzip. Chaque codage respecte son propre `q=0` ; les poids positifs ne sont pas comparés entre les plugins de compression.
 
 ### Paramètres

@@ -4485,6 +4485,22 @@ ModSecurity 插件将功能强大的 [ModSecurity](https://modsecurity.org) Web 
 
     为了在绕过 ModSecurity 后仍保护上传内容，请将其与文件扫描插件配合使用，例如 [ClamAV](https://github.com/bunkerity/bunkerweb-plugins/tree/main/clamav) 或 [VirusTotal](https://github.com/bunkerity/bunkerweb-plugins/tree/main/virustotal)——它们检查上传文件本身，而不是原始请求体。
 
+!!! warning "响应体阻断与压缩响应"
+    如果响应体阻断规则在响应头发送后才触发，客户端可能先收到原始状态码（如 `200`），随后出现响应体不完整或分块传输错误，而不是完整的 `403` 响应。BunkerWeb 应用 gzip、Brotli 或 zstd 压缩时都可能出现这种情况。从 `1.6.18~rc4` 开始，Brotli 的行为与 gzip 已有的行为一致。请检查 ModSecurity 审计日志和错误日志，确定触发的规则，并用范围严格受限的排除规则处理已确认的误报。
+
+!!! warning "上游压缩的响应体"
+    CRS v4 不检查上游已经压缩的响应体（`gzip`、`br` 或 `zstd`）。BunkerWeb 不会为检查而解压这些响应体。如果需要检查响应体，请配置上游返回未压缩的内容。对于遵循此请求头的上游，可以仅在受影响的服务和 location 中移除转发请求的 `Accept-Encoding` 头，以请求未压缩的响应：
+
+    ```yaml
+    REVERSE_PROXY_HOST_1: "http://app:8080"
+    REVERSE_PROXY_URL_1: "/reports/"
+    REVERSE_PROXY_HEADERS_1: 'Accept-Encoding ""'
+    ```
+
+    请替换主机和路径，并将后缀调整为目标反向代理 location 的编号。如果该 location 的 `REVERSE_PROXY_HEADERS_1` 已有条目，请保留它们并追加 `;Accept-Encoding ""`。应使用此设置，而不是服务器级别的 `proxy_set_header`，因为生成的 location 请求头配置会覆盖后者。
+
+    请验证上游确实返回未压缩的响应；如果仍然压缩，请在上游禁用该路由的压缩。这会增加上游与 BunkerWeb 之间的带宽使用量。检查完成后，BunkerWeb 仍可为客户端压缩响应；配置的响应体检查 MIME 类型和大小限制仍然适用。
+
 ### 可用的 CRS 版本
 
 选择一个 CRS 版本以最符合您的安全需求：
@@ -6837,6 +6853,8 @@ Zstandard 插件使用 Zstandard (zstd) 算法压缩 HTTP 响应。对于声明 
 3.  **设置压缩级别：** 将 `ZSTD_COMP_LEVEL` 设置在 `1`（最快）到 `19`（支持的最高压缩率）之间。默认值为 `3`。
 
 支持 zstd 的客户端会收到 `Content-Encoding: zstd` 和 `Vary: Accept-Encoding`。不支持 zstd 的客户端（包括发送 `zstd;q=0` 的客户端）在启用 Brotli 或 gzip 插件时可以使用这两种压缩方式；否则将收到未压缩的响应。
+
+启用 `USE_ZSTD=yes` 后，即使最终选择未压缩、gzip 或 Brotli 表示，符合条件的响应也可能包含 `Vary: Accept-Encoding`。缓存必须遵循此响应头，将不同表示分开存储。
 
 当启用多个压缩插件时，服务器的优先顺序为 zstd、Brotli、gzip。每种编码各自遵循自己的 `q=0`；不同压缩插件之间不会比较正权重。
 

@@ -26,10 +26,10 @@
 - [FEATURE] `linux`: support Fedora 45 (x86_64 and aarch64).
 - [FEATURE] `letsencrypt`: add Hosttech as a DNS-01 provider, through the new `certbot-dns-hosttech` plugin.
 - [FEATURE] `antibot`: new `ANTIBOT_INCLUDE_URI` setting challenges only the URIs that match it; `ANTIBOT_IGNORE_URI` still takes precedence (Refs #3647).
-- [FEATURE] `zstd`: new optional Zstandard response compression (`USE_ZSTD`, off by default), preferred over Brotli and gzip when the client accepts it.
+- [FEATURE] `zstd`: new optional Zstandard response compression (`USE_ZSTD`, off by default), preferred over Brotli and gzip when the client accepts it. Enabling it can add `Vary: Accept-Encoding` to eligible uncompressed, gzip and Brotli responses too.
 - [FEATURE] `core`: `CLIENT_HEADER_TIMEOUT` and `CLIENT_BODY_TIMEOUT` now support per-service overrides.
 - [BUGFIX] `inject`: quotes and backslashes in `INJECT_HEAD` and `INJECT_BODY` no longer break the generated config; remove hand-added `\'` workaround escapes.
-- [BUGFIX] `modsecurity`: response body rules now inspect Brotli-compressed responses too; ModSecurity used to see the compressed bytes when `USE_BROTLI=yes`.
+- [BUGFIX] `modsecurity`: response body rules now inspect Brotli-compressed responses too; ModSecurity used to see the compressed bytes when `USE_BROTLI=yes`. A response-body deny after headers were sent can leave the client with an incomplete response, as with gzip.
 - [BUGFIX] `linux`: RHEL 9 and 10 packages now build ModSecurity with yajl, so JSON request bodies are parsed for CRS and `SecAuditLogFormat JSON` works.
 - [BUGFIX] `limit`: `LIMIT_CONN_MAX_*` settings now accept only values NGINX supports (1 to 65535).
 - [BUGFIX] `limit`: in local mode, simultaneous requests from one client across workers no longer exceed `LIMIT_REQ_RATE` (rates up to 100 per window).
@@ -72,6 +72,7 @@
 - [PERF] `antibot`: the challenge pages are about 30% lighter once minified (about 20% with gzip or Brotli), with no visible change.
 - [DOCS] `linux`: the custom configuration section says where NGINX includes each type and how to check a file is live.
 - [DOCS] `reverseproxy`: `REVERSE_PROXY_KEEPALIVE` does not pool backend connections by itself; the docs show how to pool with a named upstream.
+- [DOCS] `modsecurity`: document response-body inspection limits for upstream-compressed content and how to request uncompressed content for one reverse-proxy location.
 - [DOCS] `core`: a new section shows how to send the access, error and ModSecurity audit logs to Splunk, with a `key=value` access log and a JSON audit log.
 - [MISC] `headers`: the default `PERMISSIONS_POLICY` also denies `semantic-embedder` and drops `browsing-topics`, which Chromium removed.
 - [DEPS] Updated lua-resty-session to v4.3.0

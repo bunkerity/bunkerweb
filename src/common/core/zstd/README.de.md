@@ -8,6 +8,8 @@ Das Zstandard-Plugin komprimiert HTTP-Antworten mit dem Zstandard-Algorithmus (z
 
 Clients mit zstd-Unterstützung erhalten `Content-Encoding: zstd` und `Vary: Accept-Encoding`. Clients ohne zstd-Unterstützung, auch solche, die `zstd;q=0` senden, können Brotli oder gzip erhalten, sofern diese Plugins aktiviert sind. Andernfalls erhalten sie unkomprimierte Antworten.
 
+Mit `USE_ZSTD=yes` können geeignete Antworten auch dann `Vary: Accept-Encoding` enthalten, wenn die gewählte Darstellung unkomprimiert ist oder gzip bzw. Brotli verwendet. Caches müssen diesen Header beachten, um die Darstellungen getrennt zu halten.
+
 Sind mehrere Komprimierungs-Plugins aktiviert, gilt die Server-Präferenz zstd, dann Brotli, dann gzip. Jede Codierung beachtet ihr eigenes `q=0`; positive Gewichtungen werden zwischen den Komprimierungs-Plugins nicht verglichen.
 
 ### Parameter

@@ -8,6 +8,8 @@ El complemento Zstandard comprime las respuestas HTTP utilizando el algoritmo Zs
 
 Los clientes compatibles con zstd reciben `Content-Encoding: zstd` y `Vary: Accept-Encoding`. Los clientes sin compatibilidad con zstd, incluidos los que envían `zstd;q=0`, pueden recibir Brotli o gzip si esos complementos están habilitados; en caso contrario, reciben respuestas sin comprimir.
 
+Con `USE_ZSTD=yes`, las respuestas elegibles pueden incluir `Vary: Accept-Encoding` aunque la representación seleccionada esté sin comprimir o use gzip o Brotli. Las cachés deben respetar esta cabecera para mantener separadas las representaciones.
+
 Cuando hay varios complementos de compresión habilitados, el servidor da preferencia a zstd, luego a Brotli y después a gzip. Cada codificación respeta su propio `q=0`; los pesos positivos no se comparan entre complementos de compresión.
 
 ### Ajustes de configuración

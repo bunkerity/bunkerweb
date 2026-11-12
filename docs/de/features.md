@@ -4423,6 +4423,22 @@ Führen Sie die folgenden Schritte aus, um ModSecurity zu konfigurieren und zu v
 
     Um Uploads nach dem Umgehen von ModSecurity weiterhin zu schützen, kombinieren Sie dies mit einem Datei-Scan-Plugin wie [ClamAV](https://github.com/bunkerity/bunkerweb-plugins/tree/main/clamav) oder [VirusTotal](https://github.com/bunkerity/bunkerweb-plugins/tree/main/virustotal) — sie prüfen die hochgeladene Datei selbst statt des rohen Anforderungskörpers.
 
+!!! warning "Antwortkörper-Sperren und komprimierte Antworten"
+    Greift eine Sperrregel für den Antwortkörper erst nach dem Senden der Antwortheader, kann der Client den ursprünglichen Status (etwa `200`) und anschließend einen Fehler wegen eines unvollständigen Antwortkörpers oder einer unvollständigen Chunked-Übertragung erhalten, statt einer vollständigen `403`-Antwort. Dies kann bei gzip-, Brotli- oder zstd-Komprimierung durch BunkerWeb auftreten. Ab `1.6.18~rc4` verhält sich Brotli wie bisher gzip. Prüfen Sie die ModSecurity-Audit- und Fehlerprotokolle auf die ausgelöste Regel und behandeln Sie bestätigte Falsch-Positive mit eng begrenzten Ausschlüssen.
+
+!!! warning "Vom Upstream komprimierte Antwortkörper"
+    CRS v4 prüft keine Antwortkörper, die bereits vom Upstream komprimiert wurden (`gzip`, `br` oder `zstd`). BunkerWeb dekomprimiert diese Körper nicht zur Prüfung. Wenn eine Prüfung erforderlich ist, konfigurieren Sie den Upstream für unkomprimierte Inhalte. Entfernen Sie bei einem Upstream, der diesen Header berücksichtigt, `Accept-Encoding` aus der weitergeleiteten Anfrage, ausschließlich für den betroffenen Dienst und die betroffene Location:
+
+    ```yaml
+    REVERSE_PROXY_HOST_1: "http://app:8080"
+    REVERSE_PROXY_URL_1: "/reports/"
+    REVERSE_PROXY_HEADERS_1: 'Accept-Encoding ""'
+    ```
+
+    Ersetzen Sie Host und Pfad durch Ihre Werte und passen Sie das Suffix an die gewünschte Reverse-Proxy-Location an. Hat diese Location bereits Einträge in `REVERSE_PROXY_HEADERS_1`, behalten Sie diese bei und hängen Sie `;Accept-Encoding ""` an. Verwenden Sie diese Einstellung statt eines `proxy_set_header` auf Server-Ebene, das von den generierten Location-Headern überschrieben wird.
+
+    Prüfen Sie, ob der Upstream tatsächlich unkomprimiert antwortet. Komprimiert er weiterhin, deaktivieren Sie die Komprimierung für diese Route auf dem Upstream. Dies erhöht die Bandbreitennutzung zwischen Upstream und BunkerWeb. BunkerWeb kann die Antwort nach der Prüfung weiterhin für den Client komprimieren; die konfigurierten MIME-Typen und Größenlimits für die Antwortkörperprüfung gelten weiterhin.
+
 ### Verfügbare CRS-Versionen
 
 Wählen Sie eine CRS-Version, die Ihren Sicherheitsanforderungen am besten entspricht:
@@ -6752,6 +6768,8 @@ Das Zstandard-Plugin komprimiert HTTP-Antworten mit dem Zstandard-Algorithmus (z
 3. Komprimierungsstufe: Setzen Sie `ZSTD_COMP_LEVEL` zwischen `1` (am schnellsten) und `19` (höchste unterstützte Komprimierung). Der Standardwert ist `3`.
 
 Clients mit zstd-Unterstützung erhalten `Content-Encoding: zstd` und `Vary: Accept-Encoding`. Clients ohne zstd-Unterstützung, auch solche, die `zstd;q=0` senden, können Brotli oder gzip erhalten, sofern diese Plugins aktiviert sind. Andernfalls erhalten sie unkomprimierte Antworten.
+
+Mit `USE_ZSTD=yes` können geeignete Antworten auch dann `Vary: Accept-Encoding` enthalten, wenn die gewählte Darstellung unkomprimiert ist oder gzip bzw. Brotli verwendet. Caches müssen diesen Header beachten, um die Darstellungen getrennt zu halten.
 
 Sind mehrere Komprimierungs-Plugins aktiviert, gilt die Server-Präferenz zstd, dann Brotli, dann gzip. Jede Codierung beachtet ihr eigenes `q=0`; positive Gewichtungen werden zwischen den Komprimierungs-Plugins nicht verglichen.
 

@@ -55,6 +55,22 @@ Siga estos pasos para configurar y usar ModSecurity:
 
     Para mantener protegidas las cargas después de omitir ModSecurity, combínelo con un plugin de análisis de archivos como [ClamAV](https://github.com/bunkerity/bunkerweb-plugins/tree/main/clamav) o [VirusTotal](https://github.com/bunkerity/bunkerweb-plugins/tree/main/virustotal); inspeccionan el archivo cargado en sí en lugar del cuerpo bruto de la solicitud.
 
+!!! warning "Bloqueos del cuerpo de respuesta y respuestas comprimidas"
+    Si una regla de bloqueo del cuerpo de respuesta se activa después de enviar las cabeceras, el cliente puede recibir el estado original (como `200`) seguido de un error de cuerpo incompleto o de transferencia fragmentada, en lugar de una respuesta `403` completa. Esto puede ocurrir con la compresión gzip, Brotli o zstd aplicada por BunkerWeb. Desde `1.6.18~rc4`, Brotli sigue el comportamiento ya existente de gzip. Consulte los registros de auditoría y errores de ModSecurity para identificar la regla activada y ajuste los falsos positivos confirmados con exclusiones de alcance limitado.
+
+!!! warning "Cuerpos de respuesta comprimidos por el upstream"
+    CRS v4 no inspecciona cuerpos de respuesta ya comprimidos por el upstream (`gzip`, `br` o `zstd`). BunkerWeb no los descomprime para inspeccionarlos. Cuando necesite inspeccionar el cuerpo de respuesta, configure el upstream para devolver contenido sin comprimir. Para solicitarlo a un upstream que respete esta cabecera, elimine `Accept-Encoding` de la solicitud reenviada solo en el servicio y la ubicación afectados:
+
+    ```yaml
+    REVERSE_PROXY_HOST_1: "http://app:8080"
+    REVERSE_PROXY_URL_1: "/reports/"
+    REVERSE_PROXY_HEADERS_1: 'Accept-Encoding ""'
+    ```
+
+    Sustituya el host y la ruta por sus valores y adapte el sufijo a la ubicación de proxy inverso deseada. Si esa ubicación ya tiene entradas en `REVERSE_PROXY_HEADERS_1`, consérvelas y añada `;Accept-Encoding ""`. Use este ajuste en lugar de un `proxy_set_header` a nivel de servidor, que queda sobrescrito por las cabeceras generadas en la ubicación.
+
+    Compruebe que el upstream devuelve realmente una respuesta sin comprimir; si sigue comprimiendo, desactive la compresión de esa ruta en el upstream. Esto aumenta el uso de ancho de banda entre el upstream y BunkerWeb. BunkerWeb puede seguir comprimiendo la respuesta para el cliente después de la inspección; siguen aplicándose los tipos MIME y los límites de tamaño configurados para inspeccionar el cuerpo de respuesta.
+
 ### Versiones de CRS Disponibles
 
 Seleccione una versión de CRS que se ajuste mejor a sus necesidades de seguridad:

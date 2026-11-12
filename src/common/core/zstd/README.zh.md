@@ -8,6 +8,8 @@ Zstandard 插件使用 Zstandard (zstd) 算法压缩 HTTP 响应。对于声明 
 
 支持 zstd 的客户端会收到 `Content-Encoding: zstd` 和 `Vary: Accept-Encoding`。不支持 zstd 的客户端（包括发送 `zstd;q=0` 的客户端）在启用 Brotli 或 gzip 插件时可以使用这两种压缩方式；否则将收到未压缩的响应。
 
+启用 `USE_ZSTD=yes` 后，即使最终选择未压缩、gzip 或 Brotli 表示，符合条件的响应也可能包含 `Vary: Accept-Encoding`。缓存必须遵循此响应头，将不同表示分开存储。
+
 当启用多个压缩插件时，服务器的优先顺序为 zstd、Brotli、gzip。每种编码各自遵循自己的 `q=0`；不同压缩插件之间不会比较正权重。
 
 ### 配置设置
