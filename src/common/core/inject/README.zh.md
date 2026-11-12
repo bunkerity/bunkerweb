@@ -24,6 +24,8 @@ HTML 注入插件允许您无缝地将自定义 HTML 代码添加到您网站页
 | `INJECT_HEAD` |        | multisite | 否   | **头部 HTML 代码：** 在 `</head>` 标签前注入的 HTML 代码。 |
 | `INJECT_BODY` |        | multisite | 否   | **主体 HTML 代码：** 在 `</body>` 标签前注入的 HTML 代码。 |
 
+`INJECT_HEAD` 和 `INJECT_BODY` 的值按原样作为 HTML 插入：引号和反斜杠无需额外进行 NGINX 转义。如果您之前手动添加了 `\'` 作为临时解决方法，请删除其中的反斜杠。请保留配置格式（如 YAML）要求的转义；NGINX 的 `$variable` 变量展开行为保持不变。
+
 !!! tip "最佳实践"
     - 出于性能考虑，请将 JavaScript 文件放在 body 的末尾，以防止渲染阻塞。
     - 将 CSS 和关键的 JavaScript 放在 head 部分，以避免出现无样式内容的闪烁。

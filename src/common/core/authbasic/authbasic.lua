@@ -76,25 +76,41 @@ local function build_matcher(raw_location)
 	return { kind = "prefix", value = location }
 end
 
+-- Shipped defaults of AUTH_BASIC_USER / AUTH_BASIC_PASSWORD (plugin.json): a public pair.
+local DEFAULT_USER = "changeme"
+local DEFAULT_PASSWORD = "changeme"
+
 local function extract_credentials(vars)
 	local credentials = {}
 	local users_list = {}
 	local count = 0
+	local default_pair
+	local function add(username, password)
+		credentials[username] = password
+		table.insert(users_list, {
+			username = username,
+			password_set = true,
+			password_length = #password,
+		})
+		count = count + 1
+	end
 	for key, value in pairs(vars) do
 		local suffix = key:match("^AUTH_BASIC_USER(_?%d*)$")
 		if suffix and value ~= "" then
 			local password_key = "AUTH_BASIC_PASSWORD" .. suffix
 			local password = vars[password_key]
 			if password and password ~= "" then
-				credentials[value] = password
-				table.insert(users_list, {
-					username = value,
-					password_set = true,
-					password_length = #password,
-				})
-				count = count + 1
+				if suffix == "" and value == DEFAULT_USER and password == DEFAULT_PASSWORD then
+					-- Held back: the public default pair only counts when nothing else is configured.
+					default_pair = true
+				else
+					add(value, password)
+				end
 			end
 		end
+	end
+	if default_pair and count == 0 then
+		add(DEFAULT_USER, DEFAULT_PASSWORD)
 	end
 	return credentials, count, users_list
 end

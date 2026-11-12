@@ -8,6 +8,10 @@ class Fetch(StepBase):
     url: str
     method: Literal["GET", "POST"] = "GET"
     headers: Dict[str, str] = {}
+    # Form-encoded request body, for a POST
+    body: Optional[str] = None
+    # Send the CSRF token of the current page (its `csrf_token` input) in the X-CSRFToken header
+    csrf: bool = False
     # Requests sent one after the other from the current page, so the cookies and the origin are the browser's
     count: int = 1
     # Status every response must carry, when set

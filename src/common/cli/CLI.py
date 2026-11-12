@@ -704,19 +704,22 @@ class CLI(ApiCaller):
     def __format_kind(ban: dict) -> str:
         return "CrowdSec lease" if ban.get("kind") == "crowdsec_lease" else "ban"
 
-    def bans(self) -> Tuple[bool, str]:
+    def bans(self, json_output: bool = False) -> Tuple[bool, str]:
         """Get all bans from the system"""
         servers = {}
 
         if not self.apis:
-            return False, self.__format_error("Failed to retrieve ban information: no BunkerWeb instance to query")
+            error = "Failed to retrieve ban information: no BunkerWeb instance to query"
+            return False, error if json_output else self.__format_error(error)
 
         try:
             ret, resp = self.send_to_apis("GET", "/bans", response=True)
         except BaseException as e:
-            return False, self.__format_error(f"Failed to get bans: {e}")
+            error = f"Failed to get bans: {e}"
+            return False, error if json_output else self.__format_error(error)
         if not ret or not resp:
-            return False, self.__format_error("Failed to retrieve ban information")
+            error = "Failed to retrieve ban information"
+            return False, error if json_output else self.__format_error(error)
 
         for k, v in resp.items():
             servers[k] = v.get("data", [])
@@ -730,9 +733,14 @@ class CLI(ApiCaller):
                     + self.__collect_redis_bans("bans_cs_service_*_ip_*", "service", "crowdsec_lease")
                 )
             except Exception as e:
+                if json_output:
+                    return False, f"Failed to get bans from redis: {e}"
                 self.__logger.error(f"Failed to get bans from redis: {e}")
 
         servers = {k: sorted(v, key=itemgetter("date")) for k, v in servers.items()}
+
+        if json_output:
+            return True, dumps(servers)
 
         width = self.__adapt_display_width()
         cli_str = f"\n{self.BOLD}{self.BG_BLUE}{self.WHITE} BunkerWeb Ban List {self.RESET}\n"

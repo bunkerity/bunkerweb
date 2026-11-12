@@ -52,7 +52,7 @@ def antibot_ignored(pattern, uri, request_uri):
         f"""
 local a = setmetatable({{
     ctx = {{ bw = {{ uri = {lua_string(uri)}, request_uri = {lua_string(request_uri)} }} }},
-    lists = {{ IGNORE_URI = {{ {lua_string(pattern)} }} }},
+    lists = {{ IGNORE_URI = {{ {lua_string(pattern)} }}, INCLUDE_URI = {{}} }},
 }}, {{ __index = PLUGIN }})
 local ignored = a:is_ignored_uri()
 emit({{ ignored = ignored }})

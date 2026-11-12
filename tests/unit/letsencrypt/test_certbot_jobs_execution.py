@@ -148,6 +148,32 @@ def test_new_issues_http_certificate_and_persists_it(job_run):
     assert module.MONITOR_THREAD is None
 
 
+@pytest.mark.parametrize("propagation, expected", [(None, None), ("default", None), ("15m", "900")])
+def test_new_hosttech_uses_private_credentials_and_provider_propagation_default(job_run, propagation, expected):
+    job_run.env.update(
+        LETS_ENCRYPT_CHALLENGE="dns",
+        LETS_ENCRYPT_DNS_PROVIDER="hosttech",
+        LETS_ENCRYPT_DNS_CREDENTIAL_ITEM="api_token dummy-hosttech-token",
+    )
+    if propagation is not None:
+        job_run.env["LETS_ENCRYPT_DNS_PROPAGATION"] = propagation
+    job_run.rotate = True
+    _, status = job_run.load()
+    assert status == 1
+    command = job_run.popen.call_args.args[0]
+    assert command[command.index("-a") + 1] == "dns-hosttech"
+    assert "--preferred-challenges=dns" in command
+    credentials = Path(command[command.index("--dns-hosttech-credentials") + 1])
+    assert credentials.read_bytes() == b"dns_hosttech_api_token = dummy-hosttech-token"
+    assert credentials.stat().st_mode & 0o777 == 0o600
+    propagation_flag = "--dns-hosttech-propagation-seconds"
+    if expected is None:
+        assert propagation_flag not in command
+    else:
+        assert command[command.index(propagation_flag) + 1] == expected
+    assert "dummy-hosttech-token" not in " ".join(command)
+
+
 @pytest.mark.parametrize("kind", ["new", "renew"])
 @pytest.mark.parametrize("settings", [{"AUTO_LETS_ENCRYPT": "no"}, {"MULTISITE": "yes", "SERVER_NAME": ""}])
 def test_disabled_jobs_never_start_certbot(job_run, kind, settings):
@@ -302,6 +328,40 @@ def test_matching_listing_skips_issuance_and_reads_renewal_settings(job_run):
     assert module.services["app.example.com"]["exists"]
     assert module.existing_certificates["app.example.com"]["challenge"] == "http"
     job_run.get.assert_not_called()
+
+
+@pytest.mark.parametrize(
+    "provider, credential_items, force_renew",
+    [
+        ("route53", "aws_access_key_id test-key", False),
+        ("route53", "aws_access_key_id rotated-key", False),
+        ("cloudflare", "dns_cloudflare_api_token new-token", True),
+    ],
+)
+def test_dns_credentials_on_restart_only_force_reissue_for_persisted_providers(job_run, provider, credential_items, force_renew):
+    job_run.env.update(LETS_ENCRYPT_CHALLENGE="dns", LETS_ENCRYPT_DNS_PROVIDER=provider, LETS_ENCRYPT_DNS_CREDENTIAL_ITEM=credential_items)
+    settings = {}
+    if provider == "route53":
+        job_run.env["LETS_ENCRYPT_DNS_CREDENTIAL_ITEM_1"] = "aws_secret_access_key test-secret"
+    else:
+        credentials = job_run.cache / "credentials_old.ini"
+        credentials.write_text("dns_cloudflare_api_token = old-token\n")
+        settings["dns_cloudflare_credentials"] = str(credentials)
+    original = live_cert(job_run)
+    renewal_conf(job_run, pref_challs="dns-01,", authenticator=f"dns-{provider}", **settings)
+    job_run.listing.stdout = "Certificate Name: app.example.com\n  Domains: app.example.com\n"
+
+    module, status = job_run.load()
+
+    assert status == int(force_renew)
+    assert module.services["app.example.com"]["force_renew"] is force_renew
+    assert any("DNS credentials have changed" in call.args[0] for call in job_run.log.warning.call_args_list) is force_renew
+    if provider == "route53":
+        assert module.existing_certificates["app.example.com"]["credentials_hash"] == ""
+        job_run.popen.assert_not_called()
+        assert original.read_bytes() == b"old certificate"
+    else:
+        assert [call.args[0][1] for call in job_run.popen.call_args_list] == ["delete", "certonly"]
 
 
 def test_added_names_expand_without_deleting_current_lineage(job_run):

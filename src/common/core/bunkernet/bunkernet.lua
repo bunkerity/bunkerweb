@@ -45,8 +45,15 @@ local REPORT_HEADERS = {
 	"content-length",
 }
 
+-- Request headers that carry credentials: a report never sends them, whatever BUNKERNET_FILTER_HEADERS says.
+local CREDENTIAL_HEADERS = {
+	["cookie"] = true,
+	["authorization"] = true,
+	["proxy-authorization"] = true,
+}
+
 -- Request headers of the current request (none for a stream service). With BUNKERNET_FILTER_HEADERS=yes only the
--- allowlisted ones are kept, values untouched; otherwise every header goes out.
+-- allowlisted ones are kept, values untouched; otherwise every header goes out except the credential ones.
 local function get_report_headers(ctx, filter)
 	local report_headers = {}
 	if ctx.bw.kind ~= "http" then
@@ -54,7 +61,12 @@ local function get_report_headers(ctx, filter)
 	end
 	local headers = ngx.req.get_headers(tonumber((utils.get_variable("MAX_HEADERS", false))) or 100)
 	if not filter then
-		return headers
+		for name, value in pairs(headers) do
+			if not CREDENTIAL_HEADERS[tostring(name):lower()] then
+				report_headers[name] = value
+			end
+		end
+		return report_headers
 	end
 	for _, name in ipairs(REPORT_HEADERS) do
 		local value = headers[name]
@@ -65,8 +77,7 @@ local function get_report_headers(ctx, filter)
 	return report_headers
 end
 
--- With BUNKERNET_FILTER_HEADERS=yes, request headers and cookies carry credentials, so a ModSecurity match on one
--- keeps its name but not its value.
+-- With BUNKERNET_FILTER_HEADERS=yes, every request header and cookie value matched by ModSecurity is blanked.
 local function is_header_or_cookie(name)
 	if type(name) ~= "string" then
 		return false
@@ -75,25 +86,52 @@ local function is_header_or_cookie(name)
 	return variable == "REQUEST_HEADERS" or variable == "REQUEST_COOKIES"
 end
 
--- Copy of the reason data with matched header and cookie values blanked. The two lists are index-aligned
--- (one entry each per rule hit), so a blanked value stays "" in place. When their lengths differ (an empty
--- matched value is dropped from one list only) the pairing is unknown and the values are removed.
-local function get_report_data(data)
+-- Always, whatever the setting: a match on a cookie, a credential header or a whole header collection (which
+-- holds them) keeps its name but not its value. Other headers, arguments and the body keep theirs.
+local function is_credential_match(name)
+	if type(name) ~= "string" then
+		return false
+	end
+	local variable, header = name:match("^&?([^:]*):?(.*)$")
+	variable = variable:upper()
+	if variable == "REQUEST_COOKIES" then
+		return true
+	end
+	return variable == "REQUEST_HEADERS" and (header == "" or CREDENTIAL_HEADERS[header:lower()] == true)
+end
+
+-- Copy of the reason data with the values matched in credential variables blanked (every header and cookie
+-- variable with BUNKERNET_FILTER_HEADERS=yes). The two lists are index-aligned (one entry each per rule hit), so a
+-- blanked value stays "" in place. When their lengths differ (an empty matched value is dropped from one list
+-- only) the pairing is unknown: the values are removed, unless no listed name is a credential variable and the
+-- filter is off.
+local function get_report_data(data, filter)
 	if type(data) ~= "table" or data.matched_vars == nil then
 		return data
 	end
+	local is_blanked = filter and is_header_or_cookie or is_credential_match
 	local report_data = {}
 	for key, value in pairs(data) do
 		report_data[key] = value
 	end
 	local values, names = data.matched_vars, data.matched_var_names
-	if type(values) ~= "table" or type(names) ~= "table" or #values ~= #names then
+	if type(values) ~= "table" or type(names) ~= "table" then
 		report_data.matched_vars = nil
+		return report_data
+	end
+	if #values ~= #names then
+		local drop = filter
+		for _, name in ipairs(names) do
+			drop = drop or is_blanked(name)
+		end
+		if drop then
+			report_data.matched_vars = nil
+		end
 		return report_data
 	end
 	local kept = {}
 	for i, value in ipairs(values) do
-		kept[i] = is_header_or_cookie(names[i]) and "" or value
+		kept[i] = is_blanked(names[i]) and "" or value
 	end
 	report_data.matched_vars = kept
 	return report_data
@@ -296,7 +334,7 @@ function bunkernet:log(bypass_checks)
 		local report = {
 			["ip"] = self.ctx.bw.remote_addr,
 			["reason"] = reason,
-			["data"] = filter and get_report_data(reason_data) or reason_data,
+			["data"] = get_report_data(reason_data, filter),
 			["method"] = self.ctx.bw.request_method,
 			["url"] = self.ctx.bw.request_uri,
 			["headers"] = get_report_headers(self.ctx, filter),

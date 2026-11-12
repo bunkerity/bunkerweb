@@ -314,9 +314,11 @@ class API:
                 if write_timeout is not None and _carries_write_timeout(e):
                     return False, f"Write timed out: {e}", None, None
                 if pin_refused:
-                    self.__logger.warning(f"Certificate of {self.__endpoint} did not match the pinned API server certificate, trying HTTP for {url}: {e}")
-                else:
-                    self.__logger.warning(f"SSL connection error when contacting {self.__endpoint}{url}, trying HTTP: {e}")
+                    # Plain HTTP would hand the token and the payload to whoever forced the mismatch.
+                    message = f"Certificate of {self.__endpoint} did not match the pinned API server certificate, not sending {url} over HTTP: {e}"
+                    self.__logger.warning(message)
+                    return False, message, None, None
+                self.__logger.warning(f"SSL connection error when contacting {self.__endpoint}{url}, trying HTTP: {e}")
                 # replace(..., 1) strips the scheme prefix. lstrip takes a character set, so it
                 # also ate any leading hostname character in {h, t, p, s, :, /}: an IP endpoint
                 # came through intact while a named one lost its first letters and the retry

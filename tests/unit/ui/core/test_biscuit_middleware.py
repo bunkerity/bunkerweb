@@ -77,6 +77,16 @@ def env(tmp_path, monkeypatch):
     app.add_url_rule("/settings", "settings", lambda: "settings", methods=["GET", "POST"])
     app.add_url_rule("/css/site.css", "css", lambda: "css")
 
+    def read_probe():
+        return "read probe"
+
+    read_probe.bw_read_only_post = True
+    app.add_url_rule("/probe/read", "probe_read", read_probe, methods=["POST"])
+    app.add_url_rule("/probe/write", "probe_write", lambda: "write probe", methods=["POST"])
+    app.add_url_rule("/probe/page", "probe_page", read_probe, methods=["GET"])
+    app.add_url_rule("/probe/page", "probe_page_write", lambda: "page write", methods=["POST"])
+    app.add_url_rule("/probe/page/refresh", "probe_page_refresh", read_probe, methods=["POST"])
+
     class Env:
         pass
 
@@ -119,6 +129,32 @@ def env(tmp_path, monkeypatch):
 
 
 class TestResolveOperation:
+    def test_resolve_operation_marked_post_view_is_read(self):
+        def view():
+            pass
+
+        view.bw_read_only_post = True
+        assert resolve_operation("POST", "/x", "bp.x", "/x", view=view) == "read"
+
+    @pytest.mark.parametrize("marker", ["yes", 1])
+    def test_resolve_operation_marker_must_be_true(self, marker):
+        def view():
+            pass
+
+        view.bw_read_only_post = marker
+        assert resolve_operation("POST", "/x", "bp.x", "/x", view=view) == "write"
+
+    def test_resolve_operation_unmarked_post_is_write(self):
+        assert resolve_operation("POST", "/x", "bp.x", "/x", view=lambda: None) == "write"
+
+    def test_resolve_operation_marker_only_applies_to_post(self, monkeypatch):
+        def view():
+            pass
+
+        view.bw_read_only_post = True
+        monkeypatch.setitem(biscuit_module.OPERATIONS, "PUT", "write")
+        assert resolve_operation("PUT", "/x", "bp.x", "/x", view=view) == "write"
+
     @pytest.mark.parametrize(
         ("method", "endpoint", "rule", "expected"),
         [
@@ -184,6 +220,19 @@ class TestInitApp:
 
 
 class TestAuthorization:
+    def test_reader_post_to_marked_route_reaches_view(self, env):
+        response = env.client(env.token("reader")).post("/probe/read")
+        assert (response.status_code, response.data) == (200, b"read probe")
+
+    def test_reader_post_to_unmarked_route_is_denied(self, env):
+        assert env.client(env.token("reader")).post("/probe/write").status_code == 403
+
+    def test_marker_on_post_view_does_not_cover_sibling_method(self, env):
+        client = env.client(env.token("reader"))
+        assert client.get("/probe/page").data == b"read probe"
+        assert client.post("/probe/page").status_code == 403
+        assert client.post("/probe/page/refresh").data == b"read probe"
+
     def test_static_and_logout_paths_skip_the_check(self, env):
         client = env.client("garbage-token")
         assert client.get("/css/site.css").status_code == 200

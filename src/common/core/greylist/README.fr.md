@@ -34,6 +34,7 @@ Suivez ces étapes pour configurer et utiliser la fonctionnalité Greylist :
 | Paramètre      | Défaut | Contexte  | Multiple | Description                                                   |
 | -------------- | ------ | --------- | -------- | ------------------------------------------------------------- |
 | `USE_GREYLIST` | `no`   | multisite | non      | **Activer Greylist :** Mettre à `yes` pour activer la greylist. |
+| `GREYLIST_URLS_REFRESH_INTERVAL` | `1h` | multisite | non | **Intervalle d’actualisation des URL :** Âge minimal du cache avant un nouveau téléchargement. Accepte des secondes sans unité ou un suffixe de durée (`ms`, `s`, `m`, `h`, `d`, `w`, `M`, `y`). |
 
 === "Adresse IP"
     **Ce que cela fait :** Place les visiteurs en greylist selon leur adresse IP ou leur réseau. Ces visiteurs obtiennent l'accès, mais restent soumis aux contrôles de sécurité.
@@ -100,7 +101,7 @@ Suivez ces étapes pour configurer et utiliser la fonctionnalité Greylist :
     Tous les paramètres `*_URLS` prennent en charge les URL HTTP/HTTPS ainsi que les chemins de fichiers locaux avec le préfixe `file:///`. L'authentification basique est prise en charge avec le format `http://user:pass@url`.
 
 !!! tip "Mises à jour régulières"
-    Les greylists provenant d'URL sont automatiquement téléchargées et mises à jour toutes les heures afin que votre protection reste à jour avec les dernières sources de confiance.
+    La tâche s’exécute toutes les heures. `GREYLIST_URLS_REFRESH_INTERVAL` définit l’âge minimal d’une URL en cache avant un nouveau téléchargement (défaut : `1h`). Utilisez `24h` pour les fournisseurs autorisant au plus un téléchargement par jour, ou `0` pour télécharger à chaque exécution. Les caches récents et les téléchargements échoués conservent les dernières entrées valides. Au sein de ce plugin, les services partagent les caches d’URL : l’intervalle le plus court peut déclencher un téléchargement. Utilisez donc le même intervalle sur tous les services partageant une URL soumise à une limite du fournisseur.
 
 
 ### Exemples de configuration

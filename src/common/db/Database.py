@@ -52,7 +52,7 @@ for deps_path in [os_join(sep, "usr", "share", "bunkerweb", *paths) for paths in
     if deps_path not in sys_path:
         sys_path.append(deps_path)
 
-from common_utils import bytes_hash, create_plugin_tar_gz, is_valid_host, parse_duration  # type: ignore
+from common_utils import bytes_hash, create_plugin_tar_gz, has_embedded_newline, is_valid_host, parse_duration  # type: ignore
 
 from pymysql import install_as_MySQLdb
 from sqlalchemy import and_, bindparam, case, create_engine, event, MetaData as sql_metadata, func, join, select as db_select, text
@@ -851,6 +851,9 @@ class Database:
                     return False, "not multiple"
 
                 if value is not None:
+                    if has_embedded_newline(value, db_setting.type):
+                        return False, "value contains a newline"
+
                     try:
                         regex_flags = DOTALL if db_setting.type == "file" else 0
                         if not self.__ignore_regex_check and search(db_setting.regex, value, regex_flags) is None:
@@ -903,7 +906,7 @@ class Database:
                 metadata = session.query(Metadata).with_entities(Metadata.version).filter_by(id=1).first()
                 if metadata:
                     return metadata.version
-                return "1.6.18~rc3"
+                return "1.6.18~rc4"
             except BaseException as e:
                 return f"Error: {e}"
 
@@ -937,7 +940,7 @@ class Database:
             "last_instances_change": None,
             "reload_ui_plugins": False,
             "integration": "unknown",
-            "version": "1.6.18~rc3",
+            "version": "1.6.18~rc4",
             "database_version": "Unknown",  # ? Extracted from the database
             "default": True,  # ? Extra field to know if the returned data is the default one
         }
@@ -5729,18 +5732,24 @@ class Database:
         """Get job cache file."""
         entities = []
         if with_info:
-            entities.extend([Jobs_cache.last_update, Jobs_cache.checksum])
+            entities.extend([Jobs_cache.last_update, Jobs_cache.checksum, Jobs_cache.file_name, Jobs_cache.job_name])
         if with_data:
             entities.extend([Jobs_cache.id, Jobs_cache.data])
 
         filters = {"job_name": job_name, "file_name": file_name, "service_id": service_id or None}
 
+        stored_plugin_id = ""
         with self._db_session() as session:
+            job = None
             if plugin_id:
                 job = session.query(Jobs).filter_by(name=job_name, plugin_id=plugin_id).first()
                 if not job:
                     return None
             data = session.query(Jobs_cache).with_entities(*entities).filter_by(**filters).first()
+            if data and with_info:
+                # The filters above follow the database collation (MariaDB/MySQL: case-insensitive, trailing spaces ignored),
+                # so the caller's spelling may differ from what is stored. Hand back the stored names for access decisions.
+                stored_plugin_id = job.plugin_id if job else session.query(Jobs.plugin_id).filter_by(name=data.job_name).scalar() or ""
             if data and with_data:
                 blob = self._blob_load(session, f"bw_jobs_cache:{data.id}", data.data, lambda: session.query(Jobs_cache.data).filter_by(id=data.id).scalar())
 
@@ -5753,6 +5762,9 @@ class Database:
         if with_info:
             ret_data["last_update"] = data.last_update.timestamp() if data.last_update is not None else "Never"
             ret_data["checksum"] = data.checksum
+            ret_data["file_name"] = data.file_name
+            ret_data["job_name"] = data.job_name
+            ret_data["plugin_id"] = stored_plugin_id
         if with_data:
             ret_data["data"] = blob
         return ret_data

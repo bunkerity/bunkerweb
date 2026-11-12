@@ -28,6 +28,7 @@ Suivez ces étapes pour configurer et utiliser la fonctionnalité Blacklist :
 | Paramètre                   | Défaut                                                  | Contexte  | Multiple | Description                                                                                                                                  |
 | --------------------------- | ------------------------------------------------------- | --------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
 | `USE_BLACKLIST`             | `yes`                                                   | multisite | non      | **Activer la Blacklist :** Mettre à `yes` pour activer la fonctionnalité de liste noire.                                                     |
+| `BLACKLIST_URLS_REFRESH_INTERVAL` | `1h` | multisite | non | **Intervalle d’actualisation des URL :** Âge minimal du cache avant un nouveau téléchargement. Accepte des secondes sans unité ou un suffixe de durée (`ms`, `s`, `m`, `h`, `d`, `w`, `M`, `y`). |
 | `BLACKLIST_COMMUNITY_LISTS` | `ip:danmeuk-tor-exit ua:mitchellkrogza-bad-user-agents` | multisite | non      | **Listes noires communautaires :** Sélectionnez des listes noires pré-configurées et maintenues par la communauté à inclure dans le blocage. |
 
 === "Listes noires communautaires"
@@ -136,7 +137,7 @@ Suivez ces étapes pour configurer et utiliser la fonctionnalité Blacklist :
     Tous les paramètres `*_URLS` supportent les URL HTTP/HTTPS ainsi que les chemins de fichiers locaux en utilisant le préfixe `file:///`. L’authentification basique est supportée en utilisant le format `http://user:pass@url`.
 
 !!! tip "Mises à jour régulières"
-    Les listes noires provenant d’URL sont automatiquement téléchargées et mises à jour toutes les heures pour garantir que votre protection reste à jour contre les dernières menaces.
+    La tâche s’exécute toutes les heures. `BLACKLIST_URLS_REFRESH_INTERVAL` définit l’âge minimal d’une URL en cache avant un nouveau téléchargement (défaut : `1h`). Utilisez `24h` pour les fournisseurs autorisant au plus un téléchargement par jour, ou `0` pour télécharger à chaque exécution. Les caches récents et les téléchargements échoués conservent les dernières entrées valides. Au sein de ce plugin, les services partagent les caches d’URL : l’intervalle le plus court peut déclencher un téléchargement. Utilisez donc le même intervalle sur tous les services partageant une URL soumise à une limite du fournisseur.
 
 ### Exemples de configuration
 

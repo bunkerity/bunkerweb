@@ -26,6 +26,7 @@ certbot-dns-dynu==0.0.6.post2502111739272536
 certbot-dns-gandi==1.6.2
 certbot-dns-godaddy==2.8.0
 certbot-dns-hetzner==4.0.0
+certbot-dns-hosttech==0.1.0
 certbot-dns-infomaniak==0.3.3
 certbot-dns-ionos==2024.11.9
 certbot-dns-njalla==2.0.2
@@ -38,7 +39,7 @@ cffi==2.1.1
 cryptography==50.0.2
 importlib-metadata==10.1.0
 maxminddb==3.2.0
-pydantic==2.14.2
+pydantic==2.14.3
 python-magic==0.4.27
 requests==2.34.2
 schedule==1.2.2

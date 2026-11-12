@@ -68,6 +68,7 @@ from .update import *  # noqa: F401, F403
 from .access import Access  # noqa: F401
 from .close_tab import Close_Tab  # noqa: F401
 from .count import Count  # noqa: F401
+from .database import Database  # noqa: F401
 from .fetch import Fetch  # noqa: F401
 from .login import Login  # noqa: F401
 from .setup import Setup  # noqa: F401

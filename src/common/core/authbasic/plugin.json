@@ -29,7 +29,7 @@
       "help": "Username",
       "id": "auth-basic-user",
       "label": "Auth basic Username",
-      "regex": "^[^:]+$",
+      "regex": "^(?![\\s\\S]*[\\r\\n])[^:]+$",
       "type": "text",
       "multiple": "auth-basic-credentials"
     },

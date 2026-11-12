@@ -88,6 +88,15 @@
       "regex": "^.*$",
       "type": "multivalue"
     },
+    "ANTIBOT_INCLUDE_URI": {
+      "context": "multisite",
+      "default": "",
+      "help": "List of PCRE regex patterns (separated by spaces) for the only URIs that get the antibot challenge; when empty, every URI does. Patterns are matched against the normalized path, alone or followed by ? and the query string. ANTIBOT_IGNORE_URI takes precedence. Patterns are unanchored: ^/search also matches /searchengine. Example: ANTIBOT_INCLUDE_URI=^/search(/|$) ^/login(/|$).",
+      "id": "antibot-include-uri",
+      "label": "Included URI",
+      "regex": "^.*$",
+      "type": "multivalue"
+    },
     "ANTIBOT_IGNORE_IP": {
       "context": "multisite",
       "default": "",

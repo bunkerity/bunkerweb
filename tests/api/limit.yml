@@ -9,6 +9,7 @@ actions:
       - "admin"
       - "P@ssw0rd"
     rate_limit: "10r/m"
+    max_requests: 10
     expect_limited: true
     rate_exceeded_count: 12
     cooldown: 0.1

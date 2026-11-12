@@ -115,16 +115,18 @@ Der Wert ist eine durch Leerzeichen getrennte Liste von Gründen aus `crowdsec`,
 
 === "Netzwerk- & Port-Einstellungen"
 
-    | Einstellung             | Standard     | Kontext | Mehrfach | Beschreibung                                                                                   |
-    | ----------------------- | ------------ | ------- | -------- | ---------------------------------------------------------------------------------------------- |
-    | `HTTP_PORT`             | `8080`       | global  | Ja       | **HTTP-Port:** Portnummer für HTTP-Verkehr. Leer lassen, um HTTP-Listening zu deaktivieren.    |
-    | `HTTPS_PORT`            | `8443`       | global  | Ja       | **HTTPS-Port:** Portnummer für HTTPS-Verkehr. Leer lassen, um HTTPS-Listening zu deaktivieren. |
-    | `USE_IPV6`              | `no`         | global  | Nein     | **IPv6-Unterstützung:** IPv6-Konnektivität aktivieren.                                         |
-    | `DNS_RESOLVERS`         | `127.0.0.11` | global  | Nein     | **DNS-Resolver:** DNS-Adressen der zu verwendenden Resolver.                                   |
-    | `CLIENT_BODY_TIMEOUT`   | `10s`        | global  | Nein     | **Client-Body-Timeout:** Timeout zum Lesen des Request-Bodys vom Client.                       |
-    | `CLIENT_HEADER_TIMEOUT` | `10s`        | global  | Nein     | **Client-Header-Timeout:** Timeout zum Lesen der Request-Header vom Client.                    |
-    | `KEEPALIVE_TIMEOUT`     | `15s`        | global  | Nein     | **Keepalive-Timeout:** Timeout für Keepalive-Clientverbindungen.                               |
-    | `SEND_TIMEOUT`          | `10s`        | global  | Nein     | **Sende-Timeout:** Timeout für das Übertragen einer Antwort an den Client.                     |
+    | Einstellung             | Standard     | Kontext   | Mehrfach | Beschreibung                                                                                   |
+    | ----------------------- | ------------ | --------- | -------- | ---------------------------------------------------------------------------------------------- |
+    | `HTTP_PORT`             | `8080`       | global    | Ja       | **HTTP-Port:** Portnummer für HTTP-Verkehr. Leer lassen, um HTTP-Listening zu deaktivieren.    |
+    | `HTTPS_PORT`            | `8443`       | global    | Ja       | **HTTPS-Port:** Portnummer für HTTPS-Verkehr. Leer lassen, um HTTPS-Listening zu deaktivieren. |
+    | `USE_IPV6`              | `no`         | global    | Nein     | **IPv6-Unterstützung:** IPv6-Konnektivität aktivieren.                                         |
+    | `DNS_RESOLVERS`         | `127.0.0.11` | global    | Nein     | **DNS-Resolver:** DNS-Adressen der zu verwendenden Resolver.                                   |
+    | `CLIENT_BODY_TIMEOUT`   | `10s`        | multisite | Nein     | **Client-Body-Timeout:** Timeout zum Lesen des Request-Bodys vom Client.                       |
+    | `CLIENT_HEADER_TIMEOUT` | `10s`        | multisite | Nein     | **Client-Header-Timeout:** Timeout zum Lesen der Request-Header vom Client.                    |
+    | `KEEPALIVE_TIMEOUT`     | `15s`        | global    | Nein     | **Keepalive-Timeout:** Timeout für Keepalive-Clientverbindungen.                               |
+    | `SEND_TIMEOUT`          | `10s`        | global    | Nein     | **Sende-Timeout:** Timeout für das Übertragen einer Antwort an den Client.                     |
+
+    Setzen Sie `CLIENT_HEADER_TIMEOUT` und `CLIENT_BODY_TIMEOUT` pro Dienst für lang laufende gRPC-Streams (zum Beispiel `netbird.example.com_CLIENT_HEADER_TIMEOUT=1d`). Halten Sie den globalen Wert von `CLIENT_HEADER_TIMEOUT` kurz: Er begrenzt auch TLS-Handshakes auf dem Standardserver und wie lange unvollständige Handshakes alte Worker nach einem Reload am Leben halten können. Vorhandene Direktiven `client_header_timeout` oder `client_body_timeout` in benutzerdefinierten `server-http`-Konfigurationen funktionieren weiterhin, wenn der Dienst den globalen Wert erbt. Entfernen Sie die passende benutzerdefinierte Direktive, wenn Sie einen abweichenden Timeout pro Dienst setzen, um doppelte Direktiven zu vermeiden.
 
 === "Stream-Server-Einstellungen"
 
@@ -376,6 +378,7 @@ BunkerWeb ermöglicht es, bestimmte Benutzer, IPs oder Anfragen anzugeben, die d
 | Parameter                     | Standard | Kontext   | Mehrfach | Beschreibung                                                                                                                                                                                                                              |
 | ----------------------------- | -------- | --------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `ANTIBOT_IGNORE_URI`          |          | Multisite | nein     | Ausgeschlossene URLs: Eine durch Leerzeichen getrennte Liste von URI-Regulären Ausdrücken, die die Herausforderung umgehen sollen. Muster werden gegen den normalisierten Pfad geprüft, allein oder gefolgt von `?` und dem Query-String. |
+| `ANTIBOT_INCLUDE_URI`          |          | Multisite | nein     | Eingeschlossene URLs: Durch Leerzeichen getrennte PCRE-Muster für die einzigen URIs mit Herausforderung. Leer bedeutet alle URIs. Geprüft wird der normalisierte Pfad, allein oder mit `?` und Query-String. `ANTIBOT_IGNORE_URI` hat Vorrang. |
 | `ANTIBOT_IGNORE_IP`           |          | Multisite | nein     | Ausgeschlossene IPs: Eine durch Leerzeichen getrennte Liste von IP-Adressen oder CIDR-Bereichen, die die Herausforderung umgehen sollen.                                                                                                  |
 | `ANTIBOT_IGNORE_RDNS`         |          | Multisite | nein     | Ausgeschlossene rDNS: Eine durch Leerzeichen getrennte Liste von Reverse-DNS-Suffixen, die die Herausforderung umgehen sollen.                                                                                                            |
 | `ANTIBOT_RDNS_GLOBAL`         | `yes`    | Multisite | nein     | Nur öffentliche IPs: Wenn `yes`, werden rDNS-Prüfungen nur für öffentliche IPs durchgeführt.                                                                                                                                              |
@@ -762,7 +765,7 @@ Führen Sie die folgenden Schritte aus, um die Auth Basic-Authentifizierung zu a
     Die HTTP-Basisauthentifizierung überträgt Anmeldeinformationen, die in Base64 kodiert (nicht verschlüsselt) sind. Obwohl dies bei Verwendung über HTTPS akzeptabel ist, sollte es über reines HTTP nicht als sicher angesehen werden. Aktivieren Sie immer SSL/TLS, wenn Sie die Basisauthentifizierung verwenden.
 
 !!! tip "Verwendung mehrerer Anmeldeinformationen"
-    Sie können mehrere Paare aus Benutzername/Passwort für den Zugriff konfigurieren. Jede `AUTH_BASIC_USER`-Einstellung sollte eine entsprechende `AUTH_BASIC_PASSWORD`-Einstellung haben.
+    Sie können mehrere Paare aus Benutzername/Passwort für den Zugriff konfigurieren. Jede `AUTH_BASIC_USER`-Einstellung sollte eine entsprechende `AUTH_BASIC_PASSWORD`-Einstellung haben. Das Standardpaar `changeme` / `changeme` wird ignoriert, sobald ein weiteres Paar konfiguriert ist; setzen Sie `AUTH_BASIC_USER` und `AUTH_BASIC_PASSWORD` ohne Suffix auf eigene Werte, um es zu behalten.
 
 ### Beispielkonfigurationen
 
@@ -1073,6 +1076,7 @@ Befolgen Sie diese Schritte, um die Blacklist-Funktion einzurichten und zu verwe
 | Parameter                   | Standard                                                | Kontext   | Mehrfach | Beschreibung                                                                                                                                           |
 | :-------------------------- | :------------------------------------------------------ | :-------- | :------- | :----------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `USE_BLACKLIST`             | `yes`                                                   | Multisite | Nein     | **Blacklist aktivieren:** Setzen Sie auf `yes`, um die Blacklist-Funktion zu aktivieren.                                                               |
+| `BLACKLIST_URLS_REFRESH_INTERVAL` | `1h` | multisite | nein | **URL-Aktualisierungsintervall:** Mindestalter des Caches vor einem erneuten Download. Akzeptiert Sekunden ohne Einheit oder Zeitsuffixe (`ms`, `s`, `m`, `h`, `d`, `w`, `M`, `y`). |
 | `BLACKLIST_COMMUNITY_LISTS` | `ip:danmeuk-tor-exit ua:mitchellkrogza-bad-user-agents` | Multisite | Nein     | **Community-Blacklists:** Wählen Sie vorkonfigurierte und von der Community gepflegte Blacklists aus, die in die Blockierung einbezogen werden sollen. |
 
 === "Community-Blacklists"
@@ -1181,7 +1185,7 @@ Befolgen Sie diese Schritte, um die Blacklist-Funktion einzurichten und zu verwe
     Alle `*_URLS`-Parameter unterstützen HTTP/HTTPS-URLs sowie lokale Dateipfade unter Verwendung des Präfixes `file:///`. Die Basisauthentifizierung wird im Format `http://user:pass@url` unterstützt.
 
 !!! tip "Regelmäßige Updates"
-    Blacklists von URLs werden automatisch stündlich heruntergeladen und aktualisiert, um sicherzustellen, dass Ihr Schutz gegen die neuesten Bedrohungen auf dem neuesten Stand bleibt.
+    Der Job läuft stündlich. `BLACKLIST_URLS_REFRESH_INTERVAL` legt das Mindestalter einer zwischengespeicherten URL vor einem erneuten Download fest (Standard: `1h`). Verwenden Sie `24h` für Anbieter, die höchstens einen Download pro Tag erlauben, oder `0` für einen Download bei jedem Joblauf. Bei frischen Caches oder fehlgeschlagenen Downloads bleiben die letzten gültigen Einträge erhalten. Innerhalb dieses Plugins teilen sich Dienste die URL-Caches: Das kürzeste Intervall kann einen Download auslösen. Verwenden Sie daher für eine URL mit Anbieterlimit bei allen Diensten dasselbe Intervall.
 
 ### Konfigurationsbeispiele
 
@@ -1367,7 +1371,7 @@ Führen Sie die folgenden Schritte aus, um die BunkerNet-Funktion zu konfigurier
 | Einstellung                | Standard                   | Kontext   | Mehrfach | Beschreibung                                                                                                                                                                                                                                                        |
 | -------------------------- | -------------------------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `USE_BUNKERNET`            | `yes`                      | multisite | nein     | **BunkerNet aktivieren:** Auf `yes` setzen, um den Austausch von Bedrohungsdaten zu aktivieren.                                                                                                                                                                     |
-| `BUNKERNET_FILTER_HEADERS` | `no`                       | multisite | nein     | **Gemeldete Header filtern:** Auf `yes` setzen, um nur eine kurze Positivliste von Request-Headern zu senden und die von ModSecurity in Headern und Cookies gefundenen Werte zu leeren. Bei `no` enthält eine Meldung alle Request-Header und die gefundenen Werte. |
+| `BUNKERNET_FILTER_HEADERS` | `no`                       | multisite | nein     | **Gemeldete Header filtern:** Auf `yes` setzen, um nur eine kurze Positivliste von Request-Headern zu senden und die von ModSecurity in Headern und Cookies gefundenen Werte zu leeren. Bei `no` enthält eine Meldung alle Request-Header außer `Cookie`, `Authorization` und `Proxy-Authorization` sowie die gefundenen Werte, außer denen aus diesen Headern und aus Cookies. |
 | `BUNKERNET_SERVER`         | `https://api.bunkerweb.io` | global    | nein     | **BunkerNet-Server:** Die Adresse des BunkerNet-API-Servers für den Austausch von Bedrohungsdaten.                                                                                                                                                                  |
 
 !!! tip "Netzwerkschutz"
@@ -1379,10 +1383,10 @@ Führen Sie die folgenden Schritte aus, um die BunkerNet-Funktion zu konfigurier
     - die mit jeder Anfrage gesendeten Instanzmetadaten: die BunkerNet-Instanz-ID, die BunkerWeb-Version, die Integration sowie Name, Version, Versions-ID, Codename, ID und Architektur des Betriebssystems;
     - die IP-Adresse des Clients, den Grund für die Sperrung und das Datum;
     - die HTTP-Methode, die URL **einschließlich Query-String** und den Namen des Dienstes (`server_name`);
-    - die Request-Header mit ihren Werten: alle empfangenen Header (bis zu `MAX_HEADERS`) oder, wenn `BUNKERNET_FILTER_HEADERS` auf `yes` steht, nur `User-Agent`, `Accept`, `Accept-Encoding`, `Accept-Language`, `Content-Type` und `Content-Length`;
-    - die Details zum Sperrgrund. Je nach Plugin, das den Client blockiert hat, enthalten sie die IDs und Meldungen der zutreffenden ModSecurity-Regeln samt den Request-Werten, die zugetroffen haben (Teile von Argumenten, Body, Headern oder Cookies, jeweils auf 512 Bytes gekürzt; mit `BUNKERNET_FILTER_HEADERS` auf `yes` werden in Headern und Cookies gefundene Werte geleert und nur der Variablenname wird gesendet), oder bei Bad Behavior die Methode und die URL der letzten Requests, die zur Sperrung geführt haben.
+    - die Request-Header mit ihren Werten: alle empfangenen Header (bis zu `MAX_HEADERS`) außer `Cookie`, `Authorization` und `Proxy-Authorization` oder, wenn `BUNKERNET_FILTER_HEADERS` auf `yes` steht, nur `User-Agent`, `Accept`, `Accept-Encoding`, `Accept-Language`, `Content-Type` und `Content-Length`;
+    - die Details zum Sperrgrund. Je nach Plugin, das den Client blockiert hat, enthalten sie die IDs und Meldungen der zutreffenden ModSecurity-Regeln samt den Request-Werten, die zugetroffen haben (Teile von Argumenten, Body, Headern oder Cookies, jeweils auf 512 Bytes gekürzt; in Cookies und in den Headern `Cookie`, `Authorization` und `Proxy-Authorization` gefundene Werte werden immer geleert, mit `BUNKERNET_FILTER_HEADERS` auf `yes` auch die in allen anderen Headern gefundenen; es wird nur der Variablenname gesendet), oder bei Bad Behavior die Methode und die URL der letzten Requests, die zur Sperrung geführt haben.
 
-    Standardmäßig (`BUNKERNET_FILTER_HEADERS` auf `no`) enthält eine Meldung jeden empfangenen Request-Header (bis zu `MAX_HEADERS`), einschließlich Cookies und `Authorization`, sowie die von ModSecurity gefundenen Werte unverändert. Setzen Sie `BUNKERNET_FILTER_HEADERS` auf `yes`, um nur die oben genannten sechs Header zu senden und die in Headern und Cookies gefundenen Werte zu leeren. Noch nicht gesendete Meldungen werden bei `yes` vor dem Senden ebenso gefiltert.
+    Standardmäßig (`BUNKERNET_FILTER_HEADERS` auf `no`) enthält eine Meldung jeden empfangenen Request-Header (bis zu `MAX_HEADERS`) außer `Cookie`, `Authorization` und `Proxy-Authorization`, die nie gesendet werden, sowie die von ModSecurity gefundenen Werte, außer denen aus Cookies und diesen Headern. Setzen Sie `BUNKERNET_FILTER_HEADERS` auf `yes`, um nur die oben genannten sechs Header zu senden und die in Headern und Cookies gefundenen Werte zu leeren. Noch nicht gesendete Meldungen werden vor dem Senden ebenso bereinigt (Zugangsdaten immer, die Positivliste bei `yes`).
 
     Die URL und die zugetroffenen Werte stammen aus dem Request und enthalten daher alles, was der Client gesendet hat. Setzen Sie `USE_BUNKERNET` auf `no` für Dienste, deren URLs sensible Werte enthalten.
 
@@ -1978,7 +1982,7 @@ Standardmäßig fragt BunkerWeb bei jeder Anfrage CrowdSec ab. Setzen Sie `CROWD
     services:
       bunkerweb:
         # Dies ist der Name, der zur Identifizierung der Instanz im Scheduler verwendet wird
-        image: bunkerity/bunkerweb:1.6.18-rc3
+        image: bunkerity/bunkerweb:1.6.18-rc4
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -1995,7 +1999,7 @@ Standardmäßig fragt BunkerWeb bei jeder Anfrage CrowdSec ab. Setzen Sie `CROWD
             syslog-address: "udp://10.20.30.254:514" # Die IP-Adresse des syslog-Dienstes
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.18-rc3
+        image: bunkerity/bunkerweb-scheduler:1.6.18-rc4
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Stellen Sie sicher, dass Sie den richtigen Instanznamen festlegen
@@ -2707,6 +2711,7 @@ Führen Sie die folgenden Schritte aus, um die Greylist-Funktion zu konfiguriere
 | Einstellung    | Standard | Kontext   | Mehrfach | Beschreibung                                                             |
 | -------------- | -------- | --------- | -------- | ------------------------------------------------------------------------ |
 | `USE_GREYLIST` | `no`     | multisite | nein     | **Greylist aktivieren:** Auf `yes` setzen, um Greylisting zu aktivieren. |
+| `GREYLIST_URLS_REFRESH_INTERVAL` | `1h` | multisite | nein | **URL-Aktualisierungsintervall:** Mindestalter des Caches vor einem erneuten Download. Akzeptiert Sekunden ohne Einheit oder Zeitsuffixe (`ms`, `s`, `m`, `h`, `d`, `w`, `M`, `y`). |
 
 === "IP-Adresse"
     **Was dies bewirkt:** Setzt Besucher basierend auf ihrer IP-Adresse oder ihrem Netzwerk auf die Greylist. Diese Besucher erhalten Zugriff, unterliegen aber weiterhin den Sicherheitsprüfungen.
@@ -2773,7 +2778,7 @@ Führen Sie die folgenden Schritte aus, um die Greylist-Funktion zu konfiguriere
     Alle `*_URLS`-Einstellungen unterstützen HTTP/HTTPS-URLs sowie lokale Dateipfade mit dem Präfix `file:///`. Die Basisauthentifizierung wird im Format `http://user:pass@url` unterstützt.
 
 !!! tip "Regelmäßige Aktualisierungen"
-    Greylists von URLs werden stündlich automatisch heruntergeladen und aktualisiert, um sicherzustellen, dass Ihr Schutz mit den neuesten vertrauenswürdigen Quellen auf dem neuesten Stand bleibt.
+    Der Job läuft stündlich. `GREYLIST_URLS_REFRESH_INTERVAL` legt das Mindestalter einer zwischengespeicherten URL vor einem erneuten Download fest (Standard: `1h`). Verwenden Sie `24h` für Anbieter, die höchstens einen Download pro Tag erlauben, oder `0` für einen Download bei jedem Joblauf. Bei frischen Caches oder fehlgeschlagenen Downloads bleiben die letzten gültigen Einträge erhalten. Innerhalb dieses Plugins teilen sich Dienste die URL-Caches: Das kürzeste Intervall kann einen Download auslösen. Verwenden Sie daher für eine URL mit Anbieterlimit bei allen Diensten dasselbe Intervall.
 
 ### Beispielkonfigurationen
 
@@ -2941,7 +2946,7 @@ Das gRPC-Plugin ermöglicht BunkerWeb, gRPC-Dienste über HTTP/2 mit `grpc_pass`
     `GRPC_SSL_VERIFY` wirkt erst, wenn ein CA-Bundle verfügbar ist. Stellen Sie es über `GRPC_SSL_TRUSTED_CERTIFICATE` (ein für den Scheduler lesbarer Pfad) oder `GRPC_SSL_TRUSTED_CERTIFICATE_DATA` (base64 oder Klartext-PEM) bereit und wählen Sie die Quelle mit `GRPC_SSL_TRUSTED_CERTIFICATE_PRIORITY`. Der Scheduler prüft das Bundle, legt es im Cache ab und verteilt es an die Instanzen. Ohne nutzbares Bundle bleibt die Prüfung deaktiviert.
 
 !!! warning "Lang laufende Streams und Core-Timeouts"
-    Lang laufende oder Streaming-RPCs benötigen eventuell höhere generische NGINX-Timeouts als die globalen Standardwerte. Am häufigsten werden `CLIENT_BODY_TIMEOUT` und `CLIENT_HEADER_TIMEOUT` in den Einstellungen des General-Plugins angepasst.
+    Lang laufende oder Streaming-RPCs benötigen eventuell höhere Werte für `CLIENT_BODY_TIMEOUT` und `CLIENT_HEADER_TIMEOUT`. Setzen Sie diese in den Einstellungen des General-Plugins für den gRPC-Dienst; halten Sie den globalen Wert von `CLIENT_HEADER_TIMEOUT` kurz, um TLS-Handshakes und die Lebensdauer alter Worker nach einem Reload zu begrenzen.
 
 !!! tip "Mehrere gRPC-Backends"
     Nutzen Sie suffixierte Einstellungen für mehrere Routen:
@@ -3293,6 +3298,8 @@ Führen Sie die folgenden Schritte aus, um die HTML-Injection-Funktion zu konfig
 | `INJECT_HEAD` |          | multisite | nein     | **Head-HTML-Code:** Der HTML-Code, der vor dem `</head>`-Tag eingefügt wird. |
 | `INJECT_BODY` |          | multisite | nein     | **Body-HTML-Code:** Der HTML-Code, der vor dem `</body>`-Tag eingefügt wird. |
 
+Die Werte von `INJECT_HEAD` und `INJECT_BODY` werden als wörtlicher HTML-Code eingefügt: Anführungszeichen und Backslashes benötigen kein zusätzliches NGINX-Escaping. Wenn Sie zuvor `\'` von Hand als Umgehungslösung eingefügt haben, entfernen Sie den Backslash. Behalten Sie das für Ihr Konfigurationsformat (etwa YAML) erforderliche Escaping bei; die Expansion von NGINX-Variablen (`$variable`) bleibt unverändert.
+
 !!! tip "Bewährte Praktiken"
     - Aus Leistungsgründen sollten Sie JavaScript-Dateien am Ende des Body platzieren, um das Rendern nicht zu blockieren.
     - Platzieren Sie CSS und kritisches JavaScript im Head-Bereich, um ein Aufblitzen von ungestyltem Inhalt zu vermeiden.
@@ -3555,6 +3562,7 @@ Das Let's Encrypt-Plugin unterstützt eine breite Palette von DNS-Anbietern für
 | `godaddy`         | GoDaddy          | `key`<br>`secret`                                                                                            | `ttl` (Standard: `600`)                                                                                                                                                                                                                                                      | [Dokumentation](https://github.com/miigotu/certbot-dns-godaddy/blob/main/README.md)                   |
 | `google`          | Google Cloud     | `project_id`<br>`private_key_id`<br>`private_key`<br>`client_email`<br>`client_id`<br>`client_x509_cert_url` | `type` (Standard: `service_account`)<br>`auth_uri` (Standard: `https://accounts.google.com/o/oauth2/auth`)<br>`token_uri` (Standard: `https://accounts.google.com/o/oauth2/token`)<br>`auth_provider_x509_cert_url` (Standard: `https://www.googleapis.com/oauth2/v1/certs`) | [Dokumentation](https://certbot-dns-google.readthedocs.io/en/stable/)                                 |
 | `hetzner`         | Hetzner          | `api_token`                                                                                                  |                                                                                                                                                                                                                                                                              | [Dokumentation](https://github.com/ctrlaltcoop/certbot-dns-hetzner/blob/main/README.md)               |
+| `hosttech` | Hosttech | `api_token` | Standard-Propagationszeit: 600 Sekunden; bei Bedarf `LETS_ENCRYPT_DNS_PROPAGATION` erhöhen. | [Dokumentation](https://github.com/bunkerity/certbot-dns-hosttech/blob/main/README.md) |
 | `infomaniak`      | Infomaniak       | `token`                                                                                                      |                                                                                                                                                                                                                                                                              | [Dokumentation](https://github.com/infomaniak/certbot-dns-infomaniak/blob/main/README.rst)            |
 | `ionos`           | IONOS            | `prefix`<br>`secret`                                                                                         | `endpoint` (Standard: `https://api.hosting.ionos.com`)                                                                                                                                                                                                                       | [Dokumentation](https://github.com/helgeerbe/certbot-dns-ionos/blob/master/README.md)                 |
 | `linode`          | Linode           | `key`                                                                                                        |                                                                                                                                                                                                                                                                              | [Dokumentation](https://certbot-dns-linode.readthedocs.io/en/stable/)                                 |
@@ -3698,6 +3706,9 @@ Das Limit-Plugin in BunkerWeb bietet robuste Funktionen zur Durchsetzung von Beg
 
         Zum Beispiel bedeutet `5r/m`, dass 5 Anfragen pro Minute von jeder IP-Adresse erlaubt sind.
 
+    !!! info "Zählgenauigkeit über Worker hinweg"
+        Ohne Redis ist die Zählung über Worker hinweg bis zu 100 Anfragen pro Zeitfenster exakt, für `LIMIT_REQ_RATE` und für `LIMIT_REQ_GLOBAL_RATE`: gleichzeitige Anfragen können das Limit nicht umgehen. Oberhalb von 100 Anfragen pro Zeitfenster können gleichzeitige Anfragen das Limit geringfügig überschreiten, da die Serialisierung des Zählers einer langen Anfragehistorie bei jeder Anfrage Durchsatz kosten würde. Mit Redis ist die Zählung immer exakt.
+
 === "Globale Ratenbegrenzung"
 
     | Einstellung             | Standard  | Kontext   | Mehrfach | Beschreibung                                                                                                                                            |
@@ -3710,13 +3721,13 @@ Das Limit-Plugin in BunkerWeb bietet robuste Funktionen zur Durchsetzung von Beg
 
 === "Verbindungsbegrenzung"
 
-    | Einstellung             | Standard | Kontext   | Mehrfach | Beschreibung                                                                                                     |
-    | ----------------------- | -------- | --------- | -------- | ---------------------------------------------------------------------------------------------------------------- |
-    | `USE_LIMIT_CONN`        | `yes`    | multisite | nein     | **Verbindungsbegrenzung aktivieren:** Auf `yes` setzen, um die Funktion zur Verbindungsbegrenzung zu aktivieren. |
-    | `LIMIT_CONN_MAX_HTTP1`  | `10`     | multisite | nein     | **HTTP/1.X-Verbindungen:** Maximale Anzahl gleichzeitiger HTTP/1.X-Verbindungen pro IP-Adresse.                  |
-    | `LIMIT_CONN_MAX_HTTP2`  | `100`    | multisite | nein     | **HTTP/2-Streams:** Maximale Anzahl gleichzeitiger HTTP/2-Streams pro IP-Adresse.                                |
-    | `LIMIT_CONN_MAX_HTTP3`  | `100`    | multisite | nein     | **HTTP/3-Streams:** Maximale Anzahl gleichzeitiger HTTP/3-Streams pro IP-Adresse.                                |
-    | `LIMIT_CONN_MAX_STREAM` | `10`     | multisite | nein     | **Stream-Verbindungen:** Maximale Anzahl gleichzeitiger Stream-Verbindungen pro IP-Adresse.                      |
+    | Einstellung             | Standard | Kontext   | Mehrfach | Beschreibung                                                                                                          |
+    | ----------------------- | -------- | --------- | -------- | --------------------------------------------------------------------------------------------------------------------- |
+    | `USE_LIMIT_CONN`        | `yes`    | multisite | nein     | **Verbindungsbegrenzung aktivieren:** Auf `yes` setzen, um die Funktion zur Verbindungsbegrenzung zu aktivieren.      |
+    | `LIMIT_CONN_MAX_HTTP1`  | `10`     | multisite | nein     | **HTTP/1.X-Verbindungen:** Maximale Anzahl gleichzeitiger HTTP/1.X-Verbindungen pro IP-Adresse. Bereich: 1 bis 65535. |
+    | `LIMIT_CONN_MAX_HTTP2`  | `100`    | multisite | nein     | **HTTP/2-Streams:** Maximale Anzahl gleichzeitiger HTTP/2-Streams pro IP-Adresse. Bereich: 1 bis 65535.               |
+    | `LIMIT_CONN_MAX_HTTP3`  | `100`    | multisite | nein     | **HTTP/3-Streams:** Maximale Anzahl gleichzeitiger HTTP/3-Streams pro IP-Adresse. Bereich: 1 bis 65535.               |
+    | `LIMIT_CONN_MAX_STREAM` | `10`     | multisite | nein     | **Stream-Verbindungen:** Maximale Anzahl gleichzeitiger Stream-Verbindungen pro IP-Adresse. Bereich: 1 bis 65535.     |
 
 Wenn `SECURITY_MODE` auf `detect` steht, werden die Verbindungsgrenzen ausgewertet und protokolliert (`limiting connections, dry run`), aber nicht durchgesetzt.
 
@@ -4411,6 +4422,22 @@ Führen Sie die folgenden Schritte aus, um ModSecurity zu konfigurieren und zu v
     ModSecurity puffert den vollständigen Anforderungskörper im Arbeitsspeicher und kann ihn bei Uploads mit mehreren GB nicht begrenzen, was zu einem OOM des Workers führen kann. Wenn — **und nur wenn** — eine Reverse-Proxy-URL *ausschließlich* für Datei-Uploads verwendet wird (z. B. ein dedizierter `/upload`-Endpunkt), setzen Sie `REVERSE_PROXY_MODSECURITY_N: "no"` für diese URL, um `modsecurity off;` in ihrem `location`-Block auszugeben. Deaktivieren Sie dies nicht für gemischt genutzte URLs: Sie würden die WAF-Abdeckung für alles verlieren, was von dieser Location bereitgestellt wird.
 
     Um Uploads nach dem Umgehen von ModSecurity weiterhin zu schützen, kombinieren Sie dies mit einem Datei-Scan-Plugin wie [ClamAV](https://github.com/bunkerity/bunkerweb-plugins/tree/main/clamav) oder [VirusTotal](https://github.com/bunkerity/bunkerweb-plugins/tree/main/virustotal) — sie prüfen die hochgeladene Datei selbst statt des rohen Anforderungskörpers.
+
+!!! warning "Antwortkörper-Sperren und komprimierte Antworten"
+    Greift eine Sperrregel für den Antwortkörper erst nach dem Senden der Antwortheader, kann der Client den ursprünglichen Status (etwa `200`) und anschließend einen Fehler wegen eines unvollständigen Antwortkörpers oder einer unvollständigen Chunked-Übertragung erhalten, statt einer vollständigen `403`-Antwort. Dies kann bei gzip-, Brotli- oder zstd-Komprimierung durch BunkerWeb auftreten. Ab `1.6.18~rc4` verhält sich Brotli wie bisher gzip. Prüfen Sie die ModSecurity-Audit- und Fehlerprotokolle auf die ausgelöste Regel und behandeln Sie bestätigte Falsch-Positive mit eng begrenzten Ausschlüssen.
+
+!!! warning "Vom Upstream komprimierte Antwortkörper"
+    CRS v4 prüft keine Antwortkörper, die bereits vom Upstream komprimiert wurden (`gzip`, `br` oder `zstd`). BunkerWeb dekomprimiert diese Körper nicht zur Prüfung. Wenn eine Prüfung erforderlich ist, konfigurieren Sie den Upstream für unkomprimierte Inhalte. Entfernen Sie bei einem Upstream, der diesen Header berücksichtigt, `Accept-Encoding` aus der weitergeleiteten Anfrage, ausschließlich für den betroffenen Dienst und die betroffene Location:
+
+    ```yaml
+    REVERSE_PROXY_HOST_1: "http://app:8080"
+    REVERSE_PROXY_URL_1: "/reports/"
+    REVERSE_PROXY_HEADERS_1: 'Accept-Encoding ""'
+    ```
+
+    Ersetzen Sie Host und Pfad durch Ihre Werte und passen Sie das Suffix an die gewünschte Reverse-Proxy-Location an. Hat diese Location bereits Einträge in `REVERSE_PROXY_HEADERS_1`, behalten Sie diese bei und hängen Sie `;Accept-Encoding ""` an. Verwenden Sie diese Einstellung statt eines `proxy_set_header` auf Server-Ebene, das von den generierten Location-Headern überschrieben wird.
+
+    Prüfen Sie, ob der Upstream tatsächlich unkomprimiert antwortet. Komprimiert er weiterhin, deaktivieren Sie die Komprimierung für diese Route auf dem Upstream. Dies erhöht die Bandbreitennutzung zwischen Upstream und BunkerWeb. BunkerWeb kann die Antwort nach der Prüfung weiterhin für den Client komprimieren; die konfigurierten MIME-Typen und Größenlimits für die Antwortkörperprüfung gelten weiterhin.
 
 ### Verfügbare CRS-Versionen
 
@@ -5475,17 +5502,17 @@ Führen Sie die folgenden Schritte aus, um die Reverse-Proxy-Funktion zu konfigu
         - **Protokollbehandlung:** Unterstützung für HTTP, HTTPS, WebSockets und andere Protokolle
         - **Fehlerabfang:** Passen Sie Fehlerseiten für ein einheitliches Benutzererlebnis an
 
-    | Einstellung                       | Standard | Kontext   | Mehrfach | Beschreibung                                                                                                                                                                                                                       |
-    | --------------------------------- | -------- | --------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-    | `USE_REVERSE_PROXY`               | `no`     | multisite | nein     | **Reverse-Proxy aktivieren:** Auf `yes` setzen, um die Reverse-Proxy-Funktionalität zu aktivieren.                                                                                                                                 |
-    | `REVERSE_PROXY_HOST`              |          | multisite | ja       | **Backend-Host:** Vollständige URL der weitergeleiteten Ressource (proxy_pass).                                                                                                                                                    |
-    | `REVERSE_PROXY_URL`               | `/`      | multisite | ja       | **Standort-URL:** Pfad, der zum Backend-Server weitergeleitet wird. Ein Wert, der mit `^` beginnt oder mit `$` endet, wird als Regex-Location behandelt. Optional mit `~`, `~*`, `=` oder `^~` gefolgt von einem Leerzeichen voranstellen, um den nginx-Standortmodifikator explizit festzulegen; an anderer Stelle im Wert sind keine Leerzeichen, `;`, `{` oder `}` erlaubt.                                                                            |
-    | `REVERSE_PROXY_BUFFERING`         | `yes`    | multisite | ja       | **Antwort-Pufferung:** Aktiviert oder deaktiviert die Pufferung von Antworten von der weitergeleiteten Ressource.                                                                                                                  |
-    | `REVERSE_PROXY_REQUEST_BUFFERING` | `yes`    | multisite | ja       | **Anfrage-Pufferung:** Aktiviert oder deaktiviert die Pufferung von Anfragen an die weitergeleitete Ressource.                                                                                                                     |
-    | `REVERSE_PROXY_KEEPALIVE`         | `no`     | multisite | ja       | **Keep-Alive:** Aktiviert oder deaktiviert Keep-Alive-Verbindungen mit der weitergeleiteten Ressource.                                                                                                                             |
-    | `REVERSE_PROXY_HTTP_VERSION`      | `1.1`    | multisite | ja       | **HTTP-Version:** HTTP-Protokollversion für die Kommunikation mit dem Upstream (`1.0`, `1.1` oder `2`). Auf `2` setzen, um HTTP/2-Multiplexing auf der Upstream-Verbindung zu aktivieren. Der WebSocket-Zweig verwendet immer 1.1. |
-    | `REVERSE_PROXY_CUSTOM_HOST`       |          | multisite | nein     | **Benutzerdefinierter Host:** Überschreibt den an den Upstream-Server gesendeten Host-Header.                                                                                                                                      |
-    | `REVERSE_PROXY_INTERCEPT_ERRORS`  | `yes`    | multisite | nein     | **Fehler abfangen:** Ob Fehlerantworten vom Backend abgefangen und neu geschrieben werden sollen. Siehe [Fehlerantworten von Upstream-APIs beibehalten](#errors). |
+    | Einstellung                       | Standard | Kontext   | Mehrfach | Beschreibung                                                                                                                                                                                                                                                                                                                                                                                           |
+    | --------------------------------- | -------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+    | `USE_REVERSE_PROXY`               | `no`     | multisite | nein     | **Reverse-Proxy aktivieren:** Auf `yes` setzen, um die Reverse-Proxy-Funktionalität zu aktivieren.                                                                                                                                                                                                                                                                                                     |
+    | `REVERSE_PROXY_HOST`              |          | multisite | ja       | **Backend-Host:** Vollständige URL der weitergeleiteten Ressource (proxy_pass).                                                                                                                                                                                                                                                                                                                        |
+    | `REVERSE_PROXY_URL`               | `/`      | multisite | ja       | **Standort-URL:** Pfad, der zum Backend-Server weitergeleitet wird. Ein Wert, der mit `^` beginnt oder mit `$` endet, wird als Regex-Location behandelt. Optional mit `~`, `~*`, `=` oder `^~` gefolgt von einem Leerzeichen voranstellen, um den nginx-Standortmodifikator explizit festzulegen; an anderer Stelle im Wert sind keine Leerzeichen, `;`, `{` oder `}` erlaubt.                         |
+    | `REVERSE_PROXY_BUFFERING`         | `yes`    | multisite | ja       | **Antwort-Pufferung:** Aktiviert oder deaktiviert die Pufferung von Antworten von der weitergeleiteten Ressource.                                                                                                                                                                                                                                                                                      |
+    | `REVERSE_PROXY_REQUEST_BUFFERING` | `yes`    | multisite | ja       | **Anfrage-Pufferung:** Aktiviert oder deaktiviert die Pufferung von Anfragen an die weitergeleitete Ressource.                                                                                                                                                                                                                                                                                         |
+    | `REVERSE_PROXY_KEEPALIVE`         | `no`     | multisite | ja       | **Keep-Alive:** Sendet die konfigurierte HTTP-Version (standardmäßig `1.1`) und einen leeren `Connection`-Header an die weitergeleitete Ressource. Das legt für sich allein keinen Verbindungspool an: Um Verbindungen wiederzuverwenden, lassen Sie `REVERSE_PROXY_HOST` auf einen benannten `upstream` mit `keepalive` zeigen, der in einer benutzerdefinierten `http`-Konfiguration deklariert ist. |
+    | `REVERSE_PROXY_HTTP_VERSION`      | `1.1`    | multisite | ja       | **HTTP-Version:** HTTP-Protokollversion für die Kommunikation mit dem Upstream (`1.0`, `1.1` oder `2`). Auf `2` setzen, um HTTP/2-Multiplexing auf der Upstream-Verbindung zu aktivieren. Der WebSocket-Zweig verwendet immer 1.1.                                                                                                                                                                     |
+    | `REVERSE_PROXY_CUSTOM_HOST`       |          | multisite | nein     | **Benutzerdefinierter Host:** Überschreibt den an den Upstream-Server gesendeten Host-Header.                                                                                                                                                                                                                                                                                                          |
+    | `REVERSE_PROXY_INTERCEPT_ERRORS`  | `yes`    | multisite | nein     | **Fehler abfangen:** Ob Fehlerantworten vom Backend abgefangen und neu geschrieben werden sollen. Siehe [Fehlerantworten von Upstream-APIs beibehalten](#errors).                                                                                                                                                                                                                                      |
 
     BunkerWeb setzt den Pfad oder Regex-Ausdruck beim Erzeugen der NGINX-Location in Anführungszeichen und erhält dabei enthaltene Anführungszeichen, `#` und Regex-Backslashes. Geben Sie den Wert ohne zusätzliche NGINX-Anführungszeichen an. Die bestehenden Einschränkungen für Leerraum, `;`, `{` und `}` gelten weiterhin.
 
@@ -5496,6 +5523,32 @@ Führen Sie die folgenden Schritte aus, um die Reverse-Proxy-Funktion zu konfigu
 
     !!! warning "Verhalten der Anfrage-Pufferung"
         Das Deaktivieren von `REVERSE_PROXY_REQUEST_BUFFERING` hat nur Wirkung, wenn ModSecurity deaktiviert ist, da die Anfrage-Pufferung ansonsten erzwungen wird.
+
+    !!! info "Backend-Verbindungen wiederverwenden"
+        `REVERSE_PROXY_KEEPALIVE=yes` sorgt nur dafür, dass BunkerWeb die konfigurierte HTTP-Version (standardmäßig `1.1`) und einen leeren `Connection`-Header an das Backend sendet. Einen Verbindungspool legt die Einstellung nicht an: Bei einer gewöhnlichen `REVERSE_PROXY_HOST`-URL öffnet NGINX für jede Anfrage eine neue Verbindung zum Backend.
+
+        Um Backend-Verbindungen wiederzuverwenden, deklarieren Sie in einer [benutzerdefinierten `http`-Konfiguration](advanced.md#custom-configurations) einen benannten `upstream` mit `keepalive` und lassen `REVERSE_PROXY_HOST` auf den Gruppennamen **ohne Port** zeigen: Der Port gehört in die `server`-Zeile des `upstream`.
+
+        ```nginx
+        upstream app_pool {
+            server backend.internal:8443;
+            keepalive 32;
+        }
+        ```
+
+        ```conf
+        REVERSE_PROXY_HOST=https://app_pool
+        REVERSE_PROXY_KEEPALIVE=yes
+        # Nur HTTPS: den Namen des Ursprungsservers als SNI senden und dagegen prüfen
+        REVERSE_PROXY_SSL_SNI=yes
+        REVERSE_PROXY_SSL_SNI_NAME=backend.example.com
+        # nur wenn das Backend den Host-Header prüft
+        REVERSE_PROXY_CUSTOM_HOST=backend.example.com
+        ```
+
+        - Der Name des `upstream` muss eindeutig sein, und der Hostname in der `server`-Zeile muss sich auflösen lassen, wenn NGINX die Konfiguration lädt.
+        - Bei HTTPS verwendet NGINX den Gruppennamen als SNI- und Prüfnamen, solange `REVERSE_PROXY_SSL_SNI_NAME` leer ist; diese Einstellung wird ignoriert, solange `REVERSE_PROXY_SSL_SNI` auf `no` steht. Setzen Sie wie oben beide, damit das Backend seinen echten Namen sieht.
+        - Der `Host`-Header bleibt der `$host` des Clients; setzen Sie `REVERSE_PROXY_CUSTOM_HOST`, wenn das Backend einen anderen Namen erwartet.
 
 === "Verbindungseinstellungen"
 
@@ -5702,6 +5755,9 @@ Führen Sie die folgenden Schritte aus, um die Reverse-Proxy-Funktion zu konfigu
         - Verwenden Sie je nach Inhaltstyp geeignete Cache-Dauern (statische Assets können länger zwischengespeichert werden)
         - Konfigurieren Sie `PROXY_NO_CACHE`, um das Zwischenspeichern sensibler oder personalisierter Inhalte zu vermeiden
         - Überwachen Sie die Cache-Trefferquoten und passen Sie die Einstellungen entsprechend an
+
+    !!! warning "Caching setzt Antwort-Pufferung voraus"
+        Das Proxy-Caching funktioniert nur an Standorten, an denen die Antwort-Pufferung aktiv ist. Setzen Sie bei `USE_PROXY_CACHE=yes` für jeden Standort, der zwischengespeichert werden soll, `REVERSE_PROXY_BUFFERING=yes`, auch bei nummerierten Einstellungen wie `REVERSE_PROXY_BUFFERING_1`. Solange die Antwort-Pufferung deaktiviert ist, werden neue Antworten nicht zwischengespeichert, es sei denn, der Upstream aktiviert sie über `X-Accel-Buffering`. Bereits zwischengespeicherte Antworten können weiterhin ausgeliefert werden. `REVERSE_PROXY_REQUEST_BUFFERING` steuert die Anfragekörper und aktiviert kein Caching von Antworten. BunkerWeb protokolliert eine Warnung, wenn es eine Konfiguration erzeugt, in der Proxy-Caching an einem Standort mit deaktivierter Antwort-Pufferung aktiviert ist.
 
 !!! tip "Gegenseitiges TLS zum Upstream"
     Client-Zertifikat und Schlüssel müssen beide angegeben werden, und der Schlüssel darf nicht verschlüsselt sein. Der Scheduler prüft das Paar, legt es im Cache ab und verteilt es an die Instanzen; ist es ungültig, werden die Zertifikatsdirektiven schlicht nicht erzeugt. Eine CRL wird nur angewendet, solange die Upstream-Prüfung aktiv ist.
@@ -6526,6 +6582,7 @@ Führen Sie die folgenden Schritte aus, um die Whitelist-Funktion zu konfigurier
 | Einstellung     | Standard | Kontext   | Mehrfach | Beschreibung                                                                         |
 | --------------- | -------- | --------- | -------- | ------------------------------------------------------------------------------------ |
 | `USE_WHITELIST` | `yes`    | multisite | nein     | **Whitelist aktivieren:** Auf `yes` setzen, um die Whitelist-Funktion zu aktivieren. |
+| `WHITELIST_URLS_REFRESH_INTERVAL` | `1h` | multisite | nein | **URL-Aktualisierungsintervall:** Mindestalter des Caches vor einem erneuten Download. Akzeptiert Sekunden ohne Einheit oder Zeitsuffixe (`ms`, `s`, `m`, `h`, `d`, `w`, `M`, `y`). |
 
 === "IP-Adresse"
     **Was dies bewirkt:** Setzt Besucher basierend auf ihrer IP-Adresse oder ihrem Netzwerk auf die Whitelist. Diese Besucher umgehen alle Sicherheitsprüfungen.
@@ -6589,7 +6646,7 @@ Führen Sie die folgenden Schritte aus, um die Whitelist-Funktion zu konfigurier
     Alle `*_URLS`-Einstellungen unterstützen HTTP/HTTPS-URLs sowie lokale Dateipfade mit dem Präfix `file:///`. Die Basisauthentifizierung wird im Format `http://user:pass@url` unterstützt.
 
 !!! tip "Regelmäßige Aktualisierungen"
-    Whitelists von URLs werden stündlich automatisch heruntergeladen und aktualisiert, um sicherzustellen, dass Ihr Schutz mit den neuesten vertrauenswürdigen Quellen auf dem neuesten Stand bleibt.
+    Der Job läuft stündlich. `WHITELIST_URLS_REFRESH_INTERVAL` legt das Mindestalter einer zwischengespeicherten URL vor einem erneuten Download fest (Standard: `1h`). Verwenden Sie `24h` für Anbieter, die höchstens einen Download pro Tag erlauben, oder `0` für einen Download bei jedem Joblauf. Bei frischen Caches oder fehlgeschlagenen Downloads bleiben die letzten gültigen Einträge erhalten. Innerhalb dieses Plugins teilen sich Dienste die URL-Caches: Das kürzeste Intervall kann einen Download auslösen. Verwenden Sie daher für eine URL mit Anbieterlimit bei allen Diensten dasselbe Intervall.
 
 !!! warning "Sicherheitsumgehung"
     Auf der Whitelist stehende Besucher **umgehen vollständig alle anderen Sicherheitsprüfungen** in BunkerWeb, einschließlich WAF-Regeln, Ratenbegrenzung, Erkennung bösartiger Bots und aller anderen Sicherheitsmechanismen. Verwenden Sie die Whitelist nur für vertrauenswürdige Quellen, bei denen Sie absolut sicher sind.
@@ -6697,3 +6754,51 @@ Adds wildcard server_name support (*.domain) for services, and serves the matchi
 | Einstellung    | Standardwert | Kontext   | Mehrfach | Beschreibung                                                                                      |
 | -------------- | ------------ | --------- | -------- | ------------------------------------------------------------------------------------------------- |
 | `USE_WILDCARD` | `no`         | multisite | nein     | Enable wildcard server_name for this service (adds *.domain for the first domain in SERVER_NAME). |
+
+## Zstandard
+
+STREAM-Unterstützung :x:
+
+Das Zstandard-Plugin komprimiert HTTP-Antworten mit dem Zstandard-Algorithmus (zstd). Es reduziert die Bandbreitennutzung bei Clients, die `Accept-Encoding: zstd` senden.
+
+### So wird's verwendet
+
+1. Aktivieren: Setzen Sie den Parameter `USE_ZSTD` auf `yes` (standardmäßig deaktiviert).
+2. MIME-Typen und Mindestgröße: Definieren Sie die zu komprimierenden Inhalte über `ZSTD_TYPES` und die Mindestgröße einer Antwort über `ZSTD_MIN_LENGTH`.
+3. Komprimierungsstufe: Setzen Sie `ZSTD_COMP_LEVEL` zwischen `1` (am schnellsten) und `19` (höchste unterstützte Komprimierung). Der Standardwert ist `3`.
+
+Clients mit zstd-Unterstützung erhalten `Content-Encoding: zstd` und `Vary: Accept-Encoding`. Clients ohne zstd-Unterstützung, auch solche, die `zstd;q=0` senden, können Brotli oder gzip erhalten, sofern diese Plugins aktiviert sind. Andernfalls erhalten sie unkomprimierte Antworten.
+
+Mit `USE_ZSTD=yes` können geeignete Antworten auch dann `Vary: Accept-Encoding` enthalten, wenn die gewählte Darstellung unkomprimiert ist oder gzip bzw. Brotli verwendet. Caches müssen diesen Header beachten, um die Darstellungen getrennt zu halten.
+
+Sind mehrere Komprimierungs-Plugins aktiviert, gilt die Server-Präferenz zstd, dann Brotli, dann gzip. Jede Codierung beachtet ihr eigenes `q=0`; positive Gewichtungen werden zwischen den Komprimierungs-Plugins nicht verglichen.
+
+### Parameter
+
+| Parameter         | Standard                                                                                                                                                                                                                                                                                                                                                                                                                         | Kontext   | Mehrfach | Beschreibung                                                                                          |
+| ----------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------- | -------- | ----------------------------------------------------------------------------------------------------- |
+| `USE_ZSTD`        | `no`                                                                                                                                                                                                                                                                                                                                                                                                                             | Multisite | nein     | Zstandard-Komprimierung von Antworten aktivieren.                                                     |
+| `ZSTD_TYPES`      | `application/atom+xml application/javascript application/json application/rss+xml application/vnd.ms-fontobject application/x-font-opentype application/x-font-truetype application/x-font-ttf application/x-javascript application/xhtml+xml application/xml font/eot font/opentype font/otf font/truetype image/svg+xml image/vnd.microsoft.icon image/x-icon image/x-win-bitmap text/css text/javascript text/plain text/xml` | Multisite | nein     | Zu komprimierende MIME-Typen, zusätzlich zu `text/html`, das immer enthalten ist.                     |
+| `ZSTD_MIN_LENGTH` | `1000`                                                                                                                                                                                                                                                                                                                                                                                                                           | Multisite | nein     | Mindestgröße einer Antwort in Bytes. Antworten unbekannter Länge können ebenfalls komprimiert werden. |
+| `ZSTD_COMP_LEVEL` | `3`                                                                                                                                                                                                                                                                                                                                                                                                                              | Multisite | nein     | Komprimierungsstufe von `1` bis `19`. Höhere Stufen benötigen mehr CPU und Arbeitsspeicher.           |
+
+!!! tip "Komprimierungsstufe"
+    Beginnen Sie mit Stufe `3`. Höhere Stufen erhöhen den CPU- und Speicherbedarf pro Anfrage; halten Sie Kapazität für gleichzeitige Anfragen frei. Die Stufen sind auf `19` begrenzt, damit das 8-MB-zstd-Fenster-Limit für HTTP eingehalten wird.
+
+!!! warning "Sensible Antworten"
+    Die Komprimierung kann Geheimnisse über Unterschiede in der Antwortgröße offenlegen, wenn eine Antwort sowohl Geheimnisse als auch vom Angreifer kontrollierte Eingaben enthält. Deaktivieren Sie die Komprimierung für sensible Dienste oder begegnen Sie diesem Risiko in der Anwendung. `text/html` kommt bei aktiviertem zstd immer für die Komprimierung in Frage, auch wenn es in `ZSTD_TYPES` fehlt.
+
+!!! info "Komprimierung durch den Upstream"
+    Antworten, die der Upstream bereits komprimiert hat, werden nicht erneut komprimiert. Das Inject-Plugin benötigt eine unkomprimierte Upstream-Antwort, um HTML zu verändern; konfigurieren Sie den Upstream entsprechend, wenn Sie beide Funktionen nutzen.
+
+### Beispielkonfiguration
+
+Zstd mit Brotli- und gzip-Fallback aktivieren:
+
+```yaml
+USE_ZSTD: "yes"
+ZSTD_MIN_LENGTH: "1000"
+ZSTD_COMP_LEVEL: "3"
+USE_BROTLI: "yes"
+USE_GZIP: "yes"
+```

@@ -31,22 +31,22 @@
       :root {
         color-scheme: light dark;
         --bw-ground: #edf2f5;
-        --bw-card: #ffffff;
+        --bw-card: #fff;
         --bw-border: rgba(11, 53, 74, 0.16);
         --bw-ink: #0f2a38;
         --bw-ink-soft: #4d6776;
         --bw-accent: #1c7a47;
         --bw-primary: #0b354a;
-        --bw-primary-ink: #ffffff;
         --bw-danger: #c0341d;
         --bw-status-bg: #f2f6f8;
-        --bw-widget-bg: #fafafa;
-        --bw-widget-border: #e0e0e0;
         --bw-shadow:
           0 1px 2px rgba(11, 53, 74, 0.06), 0 12px 32px rgba(11, 53, 74, 0.1);
         --bw-grid-dot: rgba(11, 53, 74, 0.1);
         --bw-grid-line: transparent;
         --bw-mark: #0b5577;
+        --bw-mono:
+          ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono",
+          monospace;
       }
       @media (prefers-color-scheme: dark) {
         :root {
@@ -57,28 +57,20 @@
           --bw-ink-soft: #93b4c4;
           --bw-accent: #3ecb80;
           --bw-primary: #2eac68;
-          --bw-primary-ink: #062433;
           --bw-danger: #ff7a66;
           --bw-status-bg: #062a3b;
-          --bw-widget-bg: #232323;
-          --bw-widget-border: #3a3a3a;
           --bw-shadow:
             0 0 0 1px rgba(46, 172, 104, 0.06), 0 22px 48px rgba(0, 0, 0, 0.45);
           --bw-grid-dot: rgba(143, 199, 230, 0.08);
           --bw-grid-line: rgba(255, 255, 255, 0.022);
-          --bw-mark: #ffffff;
+          --bw-mark: #fff;
         }
       }
       * {
         box-sizing: border-box;
       }
-      html,
       body {
         margin: 0;
-        padding: 0;
-        min-height: 100%;
-      }
-      body {
         min-height: 100vh;
         display: flex;
         flex-direction: column;
@@ -97,13 +89,10 @@
         font-family:
           -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
           "Helvetica Neue", Arial, sans-serif;
-        font-size: 1rem;
         -webkit-font-smoothing: antialiased;
       }
       .bw-main {
         flex: 1 0 auto;
-        width: 100%;
-        box-sizing: border-box;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -112,12 +101,10 @@
       .bw-card {
         width: 100%;
         max-width: 420px;
-        box-sizing: border-box;
         background: var(--bw-card);
         border: 1px solid var(--bw-border);
         border-radius: 6px;
         box-shadow: var(--bw-shadow);
-        overflow: visible;
       }
       .bw-topbar {
         display: flex;
@@ -127,13 +114,7 @@
         gap: 6px 12px;
         padding: 11px 16px;
         border-bottom: 1px solid var(--bw-border);
-        font:
-          600 0.65625rem/1 ui-monospace,
-          SFMono-Regular,
-          Menlo,
-          Consolas,
-          "Liberation Mono",
-          monospace;
+        font: 600 0.65625rem/1 var(--bw-mono);
         letter-spacing: 0.08em;
         color: var(--bw-ink-soft);
       }
@@ -149,7 +130,6 @@
         height: 7px;
         border-radius: 50%;
         background: #2eac68;
-        display: inline-block;
         animation: bw-live 1.6s ease-in-out infinite;
       }
       .bw-dot.bw-dot-error {
@@ -161,48 +141,33 @@
         color: var(--bw-accent);
       }
       .bw-body {
-        padding: 26px 32px 26px;
+        padding: 26px 32px;
         text-align: center;
       }
-      .bw-hero {
-        display: block;
-        width: 88px;
-        height: 95px;
-        margin: 0 auto;
-      }
+      .bw-hero,
       .bw-hero-canvas {
         display: block;
         width: 88px;
         height: 95px;
       }
+      .bw-hero {
+        margin: 0 auto;
+      }
       .bw-title {
         margin: 18px 0 8px;
-        font:
-          700 1rem/1.4 ui-monospace,
-          SFMono-Regular,
-          Menlo,
-          Consolas,
-          "Liberation Mono",
-          monospace;
+        font: 700 1rem/1.4 var(--bw-mono);
         letter-spacing: 0.06em;
         color: var(--bw-ink);
       }
       .bw-subtitle {
         margin: 0 auto;
         max-width: 330px;
-        font:
-          400 0.8125rem/1.55 -apple-system,
-          BlinkMacSystemFont,
-          "Segoe UI",
-          Roboto,
-          "Helvetica Neue",
-          Arial,
-          sans-serif;
+        font-size: 0.8125rem;
+        line-height: 1.55;
         color: var(--bw-ink-soft);
       }
       .bw-status {
         min-height: 42px;
-        box-sizing: border-box;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -211,13 +176,7 @@
         background: var(--bw-status-bg);
         border: 1px solid var(--bw-border);
         border-radius: 4px;
-        font:
-          500 0.75rem/1.5 ui-monospace,
-          SFMono-Regular,
-          Menlo,
-          Consolas,
-          "Liberation Mono",
-          monospace;
+        font: 500 0.75rem/1.5 var(--bw-mono);
         text-align: left;
       }
       #challenge-error {
@@ -235,21 +194,14 @@
       }
       .bw-retry {
         min-height: 2.5rem;
-        box-sizing: border-box;
         display: flex;
         flex-direction: column;
         align-items: center;
         justify-content: center;
         gap: 2px;
         margin-top: 10px;
-        font:
-          400 0.75rem/1.2 -apple-system,
-          BlinkMacSystemFont,
-          "Segoe UI",
-          Roboto,
-          "Helvetica Neue",
-          Arial,
-          sans-serif;
+        font-size: 0.75rem;
+        line-height: 1.2;
         color: var(--bw-ink-soft);
         visibility: hidden;
       }
@@ -265,7 +217,6 @@
       }
       .bw-retry-help {
         font-size: 0.6875rem;
-        font-weight: 400;
       }
       .bw-retry-btn {
         display: inline-flex;
@@ -294,127 +245,10 @@
         outline: 2px solid var(--bw-primary);
         outline-offset: 2px;
       }
-      .bw-widget {
-        width: 300px;
-        height: 65px;
-        box-sizing: border-box;
-        margin: 4px auto 0;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-      }
-      .bw-widget.bw-widget-compact {
-        width: 150px;
-        height: 140px;
-      }
-      .bw-widget-hcaptcha {
-        width: 303px;
-        height: 78px;
-      }
-      .bw-widget-recaptcha {
-        width: 304px;
-        height: 78px;
-      }
-      .bw-widget-hcaptcha.bw-widget-compact,
-      .bw-widget-recaptcha.bw-widget-compact {
-        width: 164px;
-        height: 144px;
-      }
-      .bw-form {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 0;
-        margin-top: 18px;
-      }
-      .bw-captcha-img {
-        width: 250px;
-        max-width: 100%;
-        height: auto;
-        aspect-ratio: 250 / 80;
-        box-sizing: border-box;
-        background: var(--bw-status-bg);
-        border: 1px solid var(--bw-border);
-        border-radius: 4px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        overflow: hidden;
-      }
-      .bw-captcha-img img {
-        max-width: 100%;
-        max-height: 100%;
-        display: block;
-      }
-      .bw-field-label {
-        display: block;
-        margin: 16px 0 6px;
-        font:
-          600 0.65625rem/1 ui-monospace,
-          SFMono-Regular,
-          Menlo,
-          Consolas,
-          "Liberation Mono",
-          monospace;
-        letter-spacing: 0.08em;
-        color: var(--bw-ink-soft);
-      }
-      .bw-field-row {
-        display: flex;
-        justify-content: center;
-        gap: 8px;
-        width: 250px;
-        max-width: 100%;
-        margin: 8px auto 0;
-      }
-      .bw-field-row input {
-        flex: 1;
-        min-width: 0;
-        height: 44px;
-        box-sizing: border-box;
-        padding: 0 12px;
-        border: 1px solid var(--bw-border);
-        border-radius: 4px;
-        background: var(--bw-status-bg);
-        color: var(--bw-ink);
-        font:
-          600 1rem/1 ui-monospace,
-          SFMono-Regular,
-          Menlo,
-          Consolas,
-          "Liberation Mono",
-          monospace;
-        letter-spacing: 0.2em;
-        text-align: center;
-      }
-      .bw-field-row button,
-      .bw-submit {
-        height: 44px;
-        padding: 0 16px;
-        border: 0;
-        border-radius: 4px;
-        background: var(--bw-primary);
-        color: var(--bw-primary-ink);
-        font:
-          700 0.75rem/1 ui-monospace,
-          SFMono-Regular,
-          Menlo,
-          Consolas,
-          "Liberation Mono",
-          monospace;
-        letter-spacing: 0.08em;
-        cursor: pointer;
-      }
       .bw-help-link {
         margin-top: 10px;
-        font:
-          400 0.6875rem/1.4 -apple-system,
-          BlinkMacSystemFont,
-          "Segoe UI",
-          Roboto,
-          "Helvetica Neue",
-          Arial,
-          sans-serif;
+        font-size: 0.6875rem;
+        line-height: 1.4;
         color: var(--bw-ink-soft);
       }
       .bw-help-link a {
@@ -422,8 +256,6 @@
       }
       .bw-footer {
         flex-shrink: 0;
-        width: 100%;
-        box-sizing: border-box;
         padding: 12px 16px 18px;
         display: flex;
         flex-direction: column;
@@ -441,13 +273,7 @@
       }
       .bw-footer p {
         margin: 0;
-        font:
-          400 0.71875rem/1.4 ui-monospace,
-          SFMono-Regular,
-          Menlo,
-          Consolas,
-          "Liberation Mono",
-          monospace;
+        font: 0.71875rem/1.4 var(--bw-mono);
         color: var(--bw-ink-soft);
       }
       .bw-footer a {
@@ -473,7 +299,6 @@
         fill: #2eac68;
       }
       .bw-noscript-msg {
-        display: block;
         background: #f8d7da;
         color: #721c24;
         border: 1px solid #f5c6cb;
@@ -481,12 +306,6 @@
         margin: 1rem 0;
         border-radius: 4px;
         text-align: center;
-        font-family:
-          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-          "Helvetica Neue", Arial, sans-serif;
-      }
-      .bw-recaptcha-v2 .grecaptcha-badge {
-        display: none !important;
       }
       .bw-hidden {
         display: none;
@@ -511,9 +330,7 @@
         }
       }
       @media (prefers-reduced-motion: reduce) {
-        .bw-dot {
-          animation: none;
-        }
+        .bw-dot,
         .bw-caret {
           animation: none;
         }
@@ -543,19 +360,14 @@
         }
         .bw-card,
         .bw-topbar,
-        .bw-status,
-        .bw-widget,
-        .bw-captcha-img,
-        .bw-field-row input {
+        .bw-status {
           border-color: CanvasText;
         }
         .bw-dot {
           forced-color-adjust: none;
           background: Highlight;
         }
-        .bw-retry-btn,
-        .bw-submit,
-        .bw-field-row button {
+        .bw-retry-btn {
           border: 1px solid ButtonText;
         }
         a:focus-visible,
@@ -574,11 +386,6 @@
           padding-left: 10px;
           padding-right: 10px;
         }
-        .bw-widget {
-          width: auto;
-          margin-left: -10px;
-          margin-right: -10px;
-        }
         .bw-sfx {
           display: none;
         }
@@ -596,13 +403,6 @@
         .bw-body {
           padding-left: 4px;
           padding-right: 4px;
-        }
-        .bw-field-row {
-          width: 100%;
-        }
-        .bw-field-row button,
-        .bw-submit {
-          padding: 0 8px;
         }
       }
     </style>
@@ -642,54 +442,18 @@
                 role="img"
                 aria-label="Computing proof of work"
                 xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                stroke-width="4.5"
+                stroke-linecap="round"
               >
-                <circle cx="71.7" cy="53.5" r="2.25" fill="currentColor" />
-                <circle cx="69.8" cy="45.9" r="2.25" fill="currentColor" />
-                <circle cx="64.7" cy="40.0" r="2.25" fill="currentColor" />
-                <circle cx="67.1" cy="32.5" r="2.25" fill="currentColor" />
-                <circle cx="67.0" cy="24.5" r="2.25" fill="currentColor" />
-                <circle cx="63.6" cy="17.4" r="2.25" fill="currentColor" />
-                <circle cx="56.7" cy="13.6" r="2.25" fill="currentColor" />
-                <circle cx="48.7" cy="12.8" r="2.25" fill="currentColor" />
-                <circle cx="40.8" cy="13.5" r="2.25" fill="currentColor" />
-                <circle cx="32.9" cy="14.5" r="2.25" fill="currentColor" />
-                <circle cx="24.9" cy="15.7" r="2.25" fill="currentColor" />
-                <circle cx="17.0" cy="16.9" r="2.25" fill="currentColor" />
-                <circle cx="13.9" cy="23.0" r="2.25" fill="currentColor" />
-                <circle cx="15.1" cy="30.9" r="2.25" fill="currentColor" />
-                <circle cx="16.4" cy="38.8" r="2.25" fill="currentColor" />
-                <circle cx="17.6" cy="46.7" r="2.25" fill="currentColor" />
-                <circle cx="18.9" cy="54.6" r="2.25" fill="currentColor" />
-                <circle cx="20.1" cy="62.4" r="2.25" fill="currentColor" />
-                <circle cx="25.6" cy="65.4" r="2.25" fill="currentColor" />
-                <circle cx="33.6" cy="65.4" r="2.25" fill="currentColor" />
-                <circle cx="41.6" cy="65.4" r="2.25" fill="currentColor" />
-                <circle cx="49.6" cy="65.4" r="2.25" fill="currentColor" />
-                <circle cx="57.6" cy="65.4" r="2.25" fill="currentColor" />
-                <circle cx="65.5" cy="65.4" r="2.25" fill="currentColor" />
-                <circle cx="71.1" cy="61.4" r="2.25" fill="currentColor" />
-                <circle cx="38.5" cy="56.6" r="2.25" fill="currentColor" />
-                <circle cx="38.1" cy="48.3" r="2.25" fill="currentColor" />
-                <circle cx="34.6" cy="41.3" r="2.25" fill="currentColor" />
-                <circle cx="37.8" cy="34.2" r="2.25" fill="currentColor" />
-                <circle cx="45.6" cy="34.3" r="2.25" fill="currentColor" />
-                <circle cx="48.3" cy="41.6" r="2.25" fill="currentColor" />
-                <circle cx="47.6" cy="49.2" r="2.25" fill="currentColor" />
-                <circle cx="46.8" cy="55.5" r="2.25" fill="currentColor" />
-                <circle cx="17.8" cy="70.5" r="2.25" fill="#2eac68" />
-                <circle cx="30.2" cy="70.5" r="2.25" fill="#2eac68" />
-                <circle cx="42.6" cy="70.5" r="2.25" fill="#2eac68" />
-                <circle cx="55.0" cy="70.5" r="2.25" fill="#2eac68" />
-                <circle cx="67.4" cy="70.5" r="2.25" fill="#2eac68" />
-                <circle cx="22.0" cy="75.2" r="2.25" fill="#2eac68" />
-                <circle cx="34.4" cy="75.2" r="2.25" fill="#2eac68" />
-                <circle cx="46.7" cy="75.2" r="2.25" fill="#2eac68" />
-                <circle cx="59.1" cy="75.2" r="2.25" fill="#2eac68" />
-                <circle cx="71.5" cy="75.2" r="2.25" fill="#2eac68" />
-                <circle cx="26.1" cy="79.9" r="2.25" fill="#2eac68" />
-                <circle cx="38.5" cy="79.9" r="2.25" fill="#2eac68" />
-                <circle cx="50.9" cy="79.9" r="2.25" fill="#2eac68" />
-                <circle cx="63.3" cy="79.9" r="2.25" fill="#2eac68" />
+                <path
+                  stroke="currentColor"
+                  d="M71.7 53.5h0m-1.9 -7.6h0m-5.1 -5.9h0m2.4 -7.5h0m-0.1 -8h0m-3.4 -7.1h0m-6.9 -3.8h0m-8 -0.8h0m-7.9 0.7h0m-7.9 1h0m-8 1.2h0m-7.9 1.2h0m-3.1 6.1h0m1.2 7.9h0m1.3 7.9h0m1.2 7.9h0m1.3 7.9h0m1.2 7.8h0m5.5 3h0m8 0h0m8 0h0m8 0h0m8 0h0m7.9 0h0m5.6 -4h0m-32.6 -4.8h0m-0.4 -8.3h0m-3.5 -7h0m3.2 -7.1h0m7.8 0.1h0m2.7 7.3h0m-0.7 7.6h0m-0.8 6.3h0"
+                />
+                <path
+                  stroke="#2eac68"
+                  d="M17.8 70.5h0m12.4 0h0m12.4 0h0m12.4 0h0m12.4 0h0m-45.4 4.7h0m12.4 0h0m12.3 0h0m12.4 0h0m12.4 0h0m-45.4 4.7h0m12.4 0h0m12.4 0h0m12.4 0h0"
+                />
               </svg>
             </noscript>
           </div>
@@ -771,19 +535,15 @@
         target="_blank"
         rel="noopener noreferrer"
         class="bw-footer-logo"
-        ><svg viewBox="0 0 213.09 59.68" xmlns="http://www.w3.org/2000/svg">
-          <path class="bunker-cls-4" d="M76.46 40.57h73.22v19.11H76.46z" />
+        ><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 213.09 59.68">
+          <path d="M76.5 40.6h73.2v19H76.5z" class="bunker-cls-4" />
           <path
+            d="m198 6-14.6-1.8c-1-.1-2 .6-2 1.6l-3.6 32H191l.4-3c0-1 1-1.7 2-1.6q1.3.3 1.5 1.6 0 1.7.3 3h12.5l-.7-4.7q0-1 .7-1.5 4-3 5.1-9.8C214.6 11.6 207.2 7 198 6m2.4 14.9a3 3 0 0 1-3.6 2.5q-1.5-.2-2.3-1.5l-5-.3.6-4.5 5 1.1q1-1 2.6-.8a3 3 0 0 1 2.7 3.5M178.6 5.3q0-1.5-1.5-1.7-13-1.3-26.1-2.2-1.7.1-1.8 1.4l-2.1 34q0 .6.3 1h27.8l.6-5.8q-.1-1.4-1.4-1.7l-12-1q-1.6-.4-1.5-1.8v-.2q.2-1.4 1.7-1.4l8.7.8q1.5 0 1.8-1.5l.7-7q0-1.4-1.5-1.6l-8.8-.8q-1.5-.3-1.6-1.8c.1-.8 1-1.5 1.8-1.4l12.4 1.2c.8 0 1.7-.6 1.8-1.5zM145.5 1c-4.3-.3-6.4-.4-10.7-.5q-1 0-1.3.8l-4.2 11.2q-.3.8-1.3.9-1.2-.1-1.3-1.3l.3-10.6q0-1.2-1.3-1.3l-11-.3q-1.2.1-1.3 1.3l-.4 34.6q.1 1.3 1.3 1.3l10.4.2q1.2 0 1.3-1.2l.3-9.9q.1-1.1 1.3-1.2h.1q.9 0 1.3.9c1.4 4.3 2 6.5 3.5 10.8q.3.8 1.1.9l2.6.1h8.7q.5-.5.4-1.3l-5-17.3v-.8l6.4-15.6c.3-.8-.3-1.7-1.2-1.8Zm-38.1-1h-8.7a2.5 2.5 0 0 0-2.5 2.4l.1 8q0 1-1.2 1.1-.5 0-1-.4c-2.7-4-4.2-5.9-7-9.7q-.8-1-2.2-1c-3.8 0-5.7.2-9.6.4A2.3 2.3 0 0 0 73 3.2l1.6 32.5c0 1 .9 2 1.9 2.2h1.8l7-.3c1.3 0 2.3-1.1 2.3-2.4l-.3-8.8q0-1.1 1.2-1.2.6 0 1 .5l6.8 10.4q.7 1.2 2 1.2h9c1.4 0 2.4-1.1 2.4-2.4l.1-32.5c0-1.3-1-2.4-2.4-2.4M69.7 3.6c0-1.4-1.4-2.5-2.9-2.4l-8.1.5A3 3 0 0 0 56 4.5l1.6 21.7c.2 2.4-1 3-3.3 3.2s-3.6-.2-3.8-2.6L48.8 5c-.1-1.4-1.5-2.5-3-2.4l-8 .8c-1.6.2-2.7 1.5-2.6 2.9l2.2 21.1q1 7.5 5.9 10.3h20.5c4.6-2.3 7.6-6.5 7-13.2zM32.3 23.7c-1-.6-1.4-2-.7-3 1.5-2.2 1.4-4.8 1.1-7.4q-1-9.2-15.3-7.4c-6.1.8-9.2 1.2-15.2 2.2C.8 8.3-.2 9.5 0 10.8l4.3 27h29.5a10 10 0 0 0 1.8-7.3c-.3-2.6-.8-5.4-3.3-6.8m-17 8.7-.3-6.6a4 4 0 0 1-2.1-3c-.3-2.3 1.3-4.4 3.7-4.7s4.5 1.2 4.8 3.5a4 4 0 0 1-1.2 3.5l1.5 6.4zm63 5.4h-1.8z"
             class="bunker-cls-2"
-            d="M198.03 6.01c-5.85-.78-8.78-1.14-14.65-1.79-1.05-.12-1.96.57-2.07 1.56l-3.48 32.05h13.12l.4-3.08c.13-.99 1.01-1.66 2.03-1.53.79.1 1.44.75 1.5 1.6.11 1.18.2 2.12.28 3.01h12.52c-.19-1.4-.38-2.82-.64-4.69-.08-.63.19-1.26.7-1.58 2.66-1.9 4.26-5.28 5.07-9.77 1.83-10.2-5.66-14.74-14.78-15.78m2.34 14.86c-.25 1.65-1.84 2.78-3.56 2.53-.99-.15-1.8-.73-2.28-1.52-2-.11-3-.16-5.01-.25.25-1.81.37-2.72.61-4.53 1.97.44 2.95.67 4.92 1.12.68-.62 1.63-.95 2.63-.81 1.73.25 2.93 1.8 2.68 3.45ZM178.59 5.27c.09-.83-.6-1.63-1.48-1.71-8.72-.83-17.42-1.55-26.15-2.16-.94-.06-1.75.61-1.8 1.44l-2.07 33.96c-.02.39.1.75.31 1.04h27.8c.21-2.04.36-3.43.6-5.79.09-.83-.57-1.62-1.42-1.71-4.81-.49-7.21-.71-12.02-1.12-.9-.08-1.58-.85-1.51-1.74 0-.07 0-.1.01-.17.07-.83.86-1.49 1.77-1.41 3.47.29 5.21.45 8.68.78.85.08 1.66-.56 1.75-1.45.28-2.78.41-4.18.69-6.96.08-.83-.6-1.62-1.46-1.7-3.52-.34-5.29-.5-8.81-.79-.92-.08-1.61-.86-1.54-1.74.07-.83.88-1.49 1.8-1.41 4.93.41 7.4.64 12.32 1.14.87.09 1.69-.55 1.79-1.43.29-2.83.44-4.24.74-7.07M145.48 1.06c-4.26-.24-6.39-.34-10.66-.51-.59-.02-1.13.34-1.33.84-1.7 4.49-2.54 6.74-4.19 11.24-.19.49-.72.87-1.3.85-.75-.02-1.31-.59-1.29-1.32l.3-10.6c.02-.72-.55-1.29-1.32-1.31-4.38-.12-6.57-.16-10.96-.21-.77 0-1.36.54-1.37 1.26-.1 11.54-.2 23.09-.31 34.63 0 .72.55 1.28 1.27 1.29 4.15.05 6.22.08 10.37.19.72.02 1.3-.52 1.32-1.24.11-3.93.17-5.89.28-9.82.02-.72.6-1.26 1.34-1.24h.11c.57.02 1.01.37 1.22.87 1.42 4.33 2.12 6.5 3.5 10.84.2.51.64.86 1.19.88.96.04 1.81.07 2.6.11h8.69c.31-.32.47-.78.34-1.26-1.95-6.96-2.95-10.44-5.02-17.39-.05-.22-.03-.56.04-.78 2.49-6.26 3.77-9.38 6.36-15.61.34-.81-.26-1.68-1.2-1.74ZM107.38 0c-3.49 0-5.23.01-8.72.05-1.36.02-2.46 1.09-2.44 2.37.05 3.2.08 4.79.13 7.99.01.67-.56 1.12-1.2 1.13-.35 0-.76-.15-.99-.48-2.81-3.88-4.24-5.81-7.13-9.65C86.6.76 85.76.34 84.88.37c-3.82.12-5.72.2-9.54.38-1.35.06-2.42 1.17-2.36 2.45.54 10.83 1.08 21.66 1.63 32.49.05 1.07.85 1.94 1.86 2.16h1.88c2.5-.11 4.12-.18 6.96-.27 1.28-.04 2.31-1.13 2.27-2.4-.11-3.51-.16-5.26-.26-8.77-.02-.72.53-1.18 1.16-1.2.4-.01.74.15.98.53 2.77 4.12 4.13 6.19 6.81 10.34.4.77 1.19 1.2 2.08 1.19 3.61-.05 5.42-.06 9.03-.06 1.28 0 2.35-1.05 2.35-2.33l.12-32.53c0-1.28-1.11-2.34-2.47-2.34ZM69.71 3.64c-.08-1.44-1.38-2.54-2.91-2.45-3.25.19-4.87.3-8.12.53-1.53.11-2.68 1.36-2.57 2.8.65 8.68.97 13.02 1.62 21.7.18 2.38-1.08 3.03-3.28 3.2-2.2.18-3.6-.26-3.81-2.64-.74-8.67-1.11-13.01-1.86-21.68-.12-1.44-1.46-2.49-2.98-2.36-3.22.29-4.83.44-8.05.77-1.58.16-2.69 1.45-2.54 2.89.89 8.46 1.34 12.68 2.23 21.14.48 5.05 2.65 8.34 5.83 10.28h20.48c4.69-2.31 7.67-6.5 7.1-13.19l-1.15-21ZM32.33 23.7c-1.05-.59-1.44-2.01-.74-2.99 1.49-2.24 1.43-4.85 1.15-7.39-.68-6.12-5.83-8.68-15.37-7.42-6.09.8-9.13 1.24-15.2 2.18C.76 8.29-.18 9.51.03 10.83c1.43 9 2.85 18 4.28 27h29.48c1.54-1.9 2.15-4.32 1.83-7.29-.28-2.59-.8-5.44-3.28-6.84ZM15.3 32.39c-.12-2.65-.19-3.97-.3-6.62-1.11-.62-1.93-1.69-2.11-3-.32-2.27 1.34-4.39 3.72-4.71s4.54 1.28 4.84 3.55c.17 1.32-.33 2.57-1.24 3.46.59 2.59.88 3.88 1.47 6.46-2.55.33-3.82.51-6.37.86Z"
           />
           <path
-            class="bunker-cls-2"
-            d="M78.34 37.83h-1.88c.19.04.39.07.6.06.46-.02.88-.04 1.28-.06"
-          />
-          <path
+            d="M104.2 45.3h-3.3l-.6.2q-.2.2-.2.5t.2.4l.6.2h1.5l-2 9.5-2.7-7.6h-1.4l-2.6 7.7-2.1-9.6H93q.5 0 .6-.2l.2-.4q0-.3-.2-.4l-.6-.2h-3.3q-.5 0-.6.2-.3 0-.2.4 0 .3.2.4l.6.2h.6l2.5 11.2h1.5l2.6-7.7 2.7 7.7h1.5l2.4-11.2h.6q.4 0 .6-.2l.2-.4q0-.3-.2-.5zm16.4 9.8-.4.3q-1 .6-2.4 1.1-1.5.5-2.9.5-2.5 0-4-1.4c-1.5-1.4-1.8-2.2-2-3.8h12.3q0-3-2-5c-2-2-2.8-2-4.8-2q-3 0-4.8 2c-1.8 2-2 2.7-2 4.5q0 3 2.2 4.9c2.2 1.9 3 2 5.1 2q2 0 3.6-.6c1.6-.6 2-.9 2.5-1.4l.2-.5q0-.3-.2-.4zm-9.8-7.8q1.5-1.2 3.6-1.2t3.6 1.2 2 3.3h-11.1q.3-2 1.9-3.3m26.7-.6a6 6 0 0 0-4.5-1.9q-3 0-5.3 2.9v-8h-2.8q-.4 0-.7.2l-.1.4q0 .3.2.4l.6.2h1.6v15.6H125l-.6.1-.2.5q0 .3.2.4l.6.2h2.9v-2.4q2 2.8 5.2 2.8 2.7 0 4.5-2c1.8-2 2-2.8 2-4.7q0-2.8-2-4.7m-.8 8.6a5 5 0 0 1-7.4 0q-1.5-1.5-1.5-3.8t1.5-3.9c1.5-1.7 2.3-1.6 3.7-1.6q2.1 0 3.6 1.6c1.5 1.6 1.6 2.3 1.6 3.9q0 2.3-1.5 3.8"
             class="bunker-cls-3"
-            d="M104.18 45.34h-3.3c-.3.01-.51.07-.63.19-.12.11-.19.26-.19.43 0 .18.07.33.19.44.13.11.34.17.63.17h1.52l-2.02 9.56-2.67-7.62h-1.44l-2.54 7.65-2.17-9.55h1.54c.29 0 .49-.06.62-.18.12-.11.19-.26.19-.43 0-.18-.06-.33-.19-.44-.12-.11-.33-.17-.62-.17h-3.31c-.29.01-.49.07-.62.19-.12.11-.19.26-.19.43 0 .18.06.33.19.44s.33.17.62.17h.59l2.54 11.2h1.49l2.61-7.75 2.68 7.74 1.49-.02 2.41-11.22h.57q.45 0 .63-.18c.12-.11.19-.26.19-.43 0-.18-.06-.33-.19-.44-.12-.11-.34-.17-.63-.17ZM120.64 55.13c-.13 0-.29.07-.47.22-.62.49-1.42.89-2.41 1.19-.98.3-1.93.45-2.83.46-1.62 0-2.97-.46-4.07-1.41s-1.76-2.2-1.97-3.76l12.28-.05c.01-2.05-.62-3.71-1.9-4.99s-2.9-1.92-4.87-1.91c-1.91 0-3.52.64-4.81 1.9s-1.93 2.76-1.93 4.51c0 1.92.7 3.56 2.09 4.91s3.11 2.02 5.18 2.01c1.23 0 2.44-.22 3.61-.64s1.98-.87 2.44-1.35c.15-.15.23-.31.23-.47s-.06-.3-.17-.42a.55.55 0 0 0-.4-.18Zm-9.86-7.8c1.01-.83 2.22-1.24 3.63-1.25 1.41 0 2.62.41 3.64 1.23 1.02.83 1.66 1.91 1.9 3.24l-11.05.04c.24-1.35.87-2.44 1.88-3.26M137.52 46.7c-1.26-1.27-2.77-1.91-4.53-1.9-2.06 0-3.81.96-5.26 2.86l-.03-7.99h-2.83c-.29.01-.49.07-.62.19-.12.12-.19.26-.18.43 0 .18.06.33.19.44s.33.17.62.17h1.62l.06 15.58h-1.62c-.29 0-.49.06-.62.17a.58.58 0 0 0-.19.44c0 .17.06.32.19.43.12.11.33.17.62.17h2.83v-2.38q2.115 2.835 5.28 2.82c1.73 0 3.23-.66 4.49-1.97s1.89-2.9 1.88-4.77c0-1.86-.64-3.42-1.9-4.69m-.86 8.63c-1.04 1.06-2.26 1.59-3.65 1.6-1.4 0-2.62-.52-3.67-1.57s-1.57-2.34-1.58-3.86c0-1.52.51-2.81 1.55-3.87s2.26-1.59 3.65-1.6c1.4 0 2.62.52 3.67 1.57s1.57 2.34 1.58 3.86c0 1.52-.51 2.81-1.55 3.87"
           /></svg
       ></a>
       <p>
@@ -797,149 +557,29 @@
     </footer>
     {-raw-}
     <script nonce="{*nonce_script*}">
-      var bwColorSchemeMQ =
-        window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)");
-      var bwReducedMotionMQ =
-        window.matchMedia &&
-        window.matchMedia("(prefers-reduced-motion: reduce)");
-      var bwTheme =
-        bwColorSchemeMQ && bwColorSchemeMQ.matches ? "dark" : "light";
-      function bwOrb(canvas, kind, theme, fixedT) {
-        // BunkerWeb mark as an extruded 3D dot cloud: rotated, depth-shaded, z-sorted, one clock.
-        // Technique after github.com/Jakubantalik/thinking-orbs (MIT); geometry sampled from the BunkerWeb icon.
-        var D = {
-          outer: [
-            [0.7333, 0.16],
-            [0.7171, 0.0556],
-            [0.681, -0.0433],
-            [0.6119, -0.122],
-            [0.5463, -0.1997],
-            [0.5788, -0.2971],
-            [0.6107, -0.3974],
-            [0.6162, -0.5027],
-            [0.6066, -0.6079],
-            [0.5769, -0.7089],
-            [0.5179, -0.796],
-            [0.4333, -0.8586],
-            [0.3348, -0.8962],
-            [0.2308, -0.9142],
-            [0.1253, -0.9186],
-            [0.0198, -0.9131],
-            [-0.0852, -0.901],
-            [-0.1899, -0.887],
-            [-0.2946, -0.8727],
-            [-0.3993, -0.858],
-            [-0.5039, -0.8429],
-            [-0.6084, -0.8273],
-            [-0.7128, -0.8114],
-            [-0.7952, -0.7516],
-            [-0.7962, -0.648],
-            [-0.7797, -0.5437],
-            [-0.7631, -0.4393],
-            [-0.7466, -0.3349],
-            [-0.7301, -0.2305],
-            [-0.7135, -0.1262],
-            [-0.697, -0.0218],
-            [-0.6805, 0.0826],
-            [-0.6639, 0.187],
-            [-0.6474, 0.2913],
-            [-0.6309, 0.3957],
-            [-0.5929, 0.475],
-            [-0.4873, 0.475],
-            [-0.3816, 0.475],
-            [-0.2759, 0.475],
-            [-0.1702, 0.475],
-            [-0.0646, 0.475],
-            [0.0411, 0.475],
-            [0.1468, 0.475],
-            [0.2525, 0.475],
-            [0.3582, 0.475],
-            [0.4638, 0.475],
-            [0.5695, 0.475],
-            [0.668, 0.4603],
-            [0.7168, 0.3671],
-            [0.7377, 0.2638],
-          ],
-          key: [
-            [-0.145, 0.24],
-            [-0.15, 0.1303],
-            [-0.1553, 0.0205],
-            [-0.193, -0.0713],
-            [-0.2477, -0.1645],
-            [-0.2362, -0.2718],
-            [-0.1646, -0.353],
-            [-0.0601, -0.3816],
-            [0.0435, -0.3498],
-            [0.1107, -0.2653],
-            [0.1143, -0.1573],
-            [0.07, -0.0618],
-            [0.0942, 0.0453],
-            [0.1186, 0.1525],
-            [0.0728, 0.2111],
-            [-0.0361, 0.2254],
-          ],
-          plinth: [
-            [-0.6917, 0.6083],
-            [-0.5825, 0.6083],
-            [-0.4733, 0.6083],
-            [-0.3642, 0.6083],
-            [-0.255, 0.6083],
-            [-0.1458, 0.6083],
-            [-0.0367, 0.6083],
-            [0.0725, 0.6083],
-            [0.1817, 0.6083],
-            [0.2908, 0.6083],
-            [0.4, 0.6083],
-            [0.5092, 0.6083],
-            [0.6183, 0.6083],
-            [0.7275, 0.6083],
-            [-0.6917, 0.7333],
-            [-0.5825, 0.7333],
-            [-0.4733, 0.7333],
-            [-0.3642, 0.7333],
-            [-0.255, 0.7333],
-            [-0.1458, 0.7333],
-            [-0.0367, 0.7333],
-            [0.0725, 0.7333],
-            [0.1817, 0.7333],
-            [0.2908, 0.7333],
-            [0.4, 0.7333],
-            [0.5092, 0.7333],
-            [0.6183, 0.7333],
-            [0.7275, 0.7333],
-            [-0.6917, 0.8583],
-            [-0.5825, 0.8583],
-            [-0.4733, 0.8583],
-            [-0.3642, 0.8583],
-            [-0.255, 0.8583],
-            [-0.1458, 0.8583],
-            [-0.0367, 0.8583],
-            [0.0725, 0.8583],
-            [0.1817, 0.8583],
-            [0.2908, 0.8583],
-            [0.4, 0.8583],
-            [0.5092, 0.8583],
-            [0.6183, 0.8583],
-            [0.7275, 0.8583],
-          ],
-        };
-        var dark = theme === "dark";
-        var INK = dark ? [207, 230, 241] : [11, 85, 119];
-        var GREEN = [46, 172, 104];
-        var DANGER = dark ? [255, 122, 102] : [192, 52, 29];
-        var ctx = canvas.getContext("2d");
-        var W = canvas.clientWidth || 88,
-          H = canvas.clientHeight || 95;
-        var dpr = Math.min(2, window.devicePixelRatio || 1);
+      // Technique after github.com/Jakubantalik/thinking-orbs (MIT); geometry sampled from the BunkerWeb icon.
+      var bwMQ = function (q) {
+        return window.matchMedia && window.matchMedia(q);
+      };
+      var bwDarkMQ = bwMQ("(prefers-color-scheme: dark)");
+      var bwMotionMQ = bwMQ("(prefers-reduced-motion: reduce)");
+      var bwTheme = bwDarkMQ && bwDarkMQ.matches ? "dark" : "light";
+      function bwOrb(canvas, kind, theme) {
+        // The BunkerWeb mark as an extruded 3D dot cloud: rotated, depth-shaded, z-sorted, one clock.
+        var dark = theme === "dark",
+          INK = dark ? [207, 230, 241] : [11, 85, 119],
+          GREEN = [46, 172, 104],
+          DANGER = dark ? [255, 122, 102] : [192, 52, 29],
+          ctx = canvas.getContext("2d"),
+          W = canvas.clientWidth || 88,
+          H = canvas.clientHeight || 95,
+          dpr = Math.min(2, window.devicePixelRatio || 1),
+          S = W * 0.43,
+          DEPTH = 0.13,
+          R0 = (W / 107) * 2.1,
+          pts = [];
         canvas.width = Math.round(W * dpr);
         canvas.height = Math.round(H * dpr);
-        var S = W * 0.43,
-          CX = W / 2,
-          CY = H / 2,
-          DEPTH = 0.13,
-          R0 = (W / 107) * 2.1;
-        var nOuter = D.outer.length;
-
         function hash(a, b) {
           var h = Math.sin(a * 12.9898 + b * 78.233) * 43758.5453;
           return h - Math.floor(h);
@@ -955,50 +595,70 @@
           x = Math.max(0, Math.min(1, x));
           return x * x * (3 - 2 * x);
         }
-
-        var pts = [];
-        function add(list, g, col, zs) {
-          for (var i = 0; i < list.length; i++)
-            for (var k = 0; k < zs.length; k++)
-              pts.push({
-                x: list[i][0],
-                y: list[i][1],
-                z: zs[k],
-                g: g,
-                i: i,
-                c: col,
-              });
+        // [x, y] in units of 1e-4 of the half-width, y down
+        var OUTER = [
+            7333, 1600, 7171, 556, 6810, -433, 6119, -1220, 5463, -1997, 5788,
+            -2971, 6107, -3974, 6162, -5027, 6066, -6079, 5769, -7089, 5179,
+            -7960, 4333, -8586, 3348, -8962, 2308, -9142, 1253, -9186, 198,
+            -9131, -852, -9010, -1899, -8870, -2946, -8727, -3993, -8580, -5039,
+            -8429, -6084, -8273, -7128, -8114, -7952, -7516, -7962, -6480,
+            -7797, -5437, -7631, -4393, -7466, -3349, -7301, -2305, -7135,
+            -1262, -6970, -218, -6805, 826, -6639, 1870, -6474, 2913, -6309,
+            3957, -5929, 4750, -4873, 4750, -3816, 4750, -2759, 4750, -1702,
+            4750, -646, 4750, 411, 4750, 1468, 4750, 2525, 4750, 3582, 4750,
+            4638, 4750, 5695, 4750, 6680, 4603, 7168, 3671, 7377, 2638,
+          ],
+          KEY = [
+            -1450, 2400, -1500, 1303, -1553, 205, -1930, -713, -2477, -1645,
+            -2362, -2718, -1646, -3530, -601, -3816, 435, -3498, 1107, -2653,
+            1143, -1573, 700, -618, 942, 453, 1186, 1525, 728, 2111, -361, 2254,
+          ],
+          nOuter = OUTER.length / 2;
+        function add(g, col, x, y, i) {
+          pts.push(
+            { x: x, y: y, z: DEPTH, g: g, i: i, c: col },
+            { x: x, y: y, z: -DEPTH, g: g, i: i, c: col },
+          );
         }
-        add(D.outer, "o", INK, [DEPTH, -DEPTH]);
-        add(D.key, "k", INK, [DEPTH, -DEPTH]);
-        add(D.plinth, "p", GREEN, [DEPTH, -DEPTH]);
-        for (var j = 0; j < nOuter; j += 3)
+        for (var i = 0; i < nOuter; i++)
+          add("o", INK, OUTER[2 * i] / 1e4, OUTER[2 * i + 1] / 1e4, i);
+        for (i = 0; i < KEY.length / 2; i++)
+          add("k", INK, KEY[2 * i] / 1e4, KEY[2 * i + 1] / 1e4, i);
+        // plinth: 14 x 3 grid
+        for (i = 0; i < 42; i++)
+          add(
+            "p",
+            GREEN,
+            -0.6917 + (i % 14) * 0.109183,
+            0.6083 + ((i / 14) | 0) * 0.125,
+            i,
+          );
+        for (i = 0; i < nOuter; i += 3)
           pts.push({
-            x: D.outer[j][0],
-            y: D.outer[j][1],
+            x: OUTER[2 * i] / 1e4,
+            y: OUTER[2 * i + 1] / 1e4,
             z: 0,
             g: "o",
-            i: j,
+            i: i,
             c: INK,
             rim: 1,
           });
-
-        // solving: rigid body. Dots gather into a spinning dotted sphere, which lands front-facing as the mark, holds, dissolves.
+        // solving: rigid body. The dots gather into a spinning dotted sphere, which lands front-facing as the mark, holds, dissolves.
+        // Dots are paired with sphere slots by polar angle so they travel outward, never through the centre.
         var SPH = [],
-          GOLD = Math.PI * (3 - Math.sqrt(5));
-        for (var q0 = 0; q0 < pts.length; q0++) {
-          var fy = 1 - (2 * (q0 + 0.5)) / pts.length,
-            fr = Math.sqrt(1 - fy * fy),
-            fa = q0 * GOLD;
+          GOLD = Math.PI * (3 - Math.sqrt(5)),
+          SPH_FOR = [];
+        for (i = 0; i < pts.length; i++) {
+          var fy = 1 - (2 * (i + 0.5)) / pts.length,
+            fr = Math.sqrt(1 - fy * fy);
           SPH.push([
-            fr * Math.cos(fa) * 0.78,
+            fr * Math.cos(i * GOLD) * 0.78,
             fy * 0.78,
-            fr * Math.sin(fa) * 0.78,
-            hash(q0, 4.4) * 0.3,
+            fr * Math.sin(i * GOLD) * 0.78,
+            hash(i, 4.4) * 0.3,
           ]);
         }
-        // pair dots with sphere slots by polar angle so they travel outward, never through the centre
-        var byAng = function (arr, fx, fy) {
+        function byAng(arr, fx, fy) {
           return arr
             .map(function (_, k) {
               return k;
@@ -1009,27 +669,26 @@
                 Math.atan2(fy(arr[b]), fx(arr[b]))
               );
             });
-        };
+        }
         var om = byAng(
-          pts,
-          function (v) {
-            return v.x;
-          },
-          function (v) {
-            return v.y;
-          },
-        );
-        var os = byAng(
-          SPH,
-          function (v) {
-            return v[0];
-          },
-          function (v) {
-            return v[1];
-          },
-        );
-        var SPH_FOR = [];
-        for (var q1 = 0; q1 < om.length; q1++) SPH_FOR[om[q1]] = SPH[os[q1]];
+            pts,
+            function (v) {
+              return v.x;
+            },
+            function (v) {
+              return v.y;
+            },
+          ),
+          os = byAng(
+            SPH,
+            function (v) {
+              return v[0];
+            },
+            function (v) {
+              return v[1];
+            },
+          );
+        for (i = 0; i < om.length; i++) SPH_FOR[om[i]] = SPH[os[i]];
         function solvePhase(t) {
           var c = t % 4.8;
           if (c < 2.5)
@@ -1041,35 +700,25 @@
             return { m: 1, yaw: 0.15 * Math.sin((Math.PI * (c - 2.5)) / 1.4) };
           return { m: 1 - (c - 3.9) / 0.9, yaw: 0 };
         }
-
         function frame(t) {
           var yaw,
             tilt,
             scale = 1,
             out = [],
-            sc = null,
+            sc,
             scanX = 0;
-          if (kind === "connecting") {
-            yaw = 0.55 * Math.sin(t * 0.9);
-            tilt = 0.1 * Math.sin(t * 0.6);
-            scanX = 1.05 * Math.sin(t * 1.5);
-          } else if (kind === "solving") {
+          if (kind === "solving") {
             sc = solvePhase(t);
             yaw = sc.yaw;
             tilt = 0.14;
-          } else if (kind === "broken") {
+          } else {
             yaw = 0.3 + 0.05 * Math.sin(t * 0.7);
             tilt = 0.12 + 0.02 * Math.sin(t * 0.5);
-          } else {
-            yaw = 0.2 * Math.sin(t * 0.45);
-            tilt = 0.06 * Math.sin(t * 0.3);
-            scale = 1 + 0.02 * Math.sin(t * 1.7);
           }
           var sy = Math.sin(yaw),
             cyw = Math.cos(yaw),
             st = Math.sin(tilt),
             ct = Math.cos(tilt);
-
           for (var n = 0; n < pts.length; n++) {
             var p = pts[n],
               x = p.x,
@@ -1078,20 +727,14 @@
               a = 1,
               col = p.c,
               rb = 0;
-            if (kind === "connecting" && p.g !== "p") {
-              var b = Math.exp(-((x - scanX) * (x - scanX)) / 0.012);
-              col = mix(col, GREEN, 0.85 * b);
-              rb = 0.9 * b;
-            } else if (kind === "connecting") {
-              a = 0.55 + 0.45 * (0.5 + 0.5 * Math.sin(t * 3 - x * 5));
-            } else if (sc) {
+            if (kind === "solving") {
               var sp = SPH_FOR[n],
                 mi = smooth(sc.m * 1.3 - sp[3]);
               x = sp[0] + (x - sp[0]) * mi;
               y = sp[1] + (y - sp[1]) * mi;
               z = sp[2] + (z - sp[2]) * mi;
               if (p.g === "p") col = mix(INK, GREEN, mi);
-            } else if (kind === "broken") {
+            } else {
               var f0 = p.i / nOuter;
               if (p.g === "o" && f0 >= 0.02 && f0 <= 0.2) {
                 var T = 3.4,
@@ -1103,32 +746,26 @@
                   z += 0.3 * f * (hash(p.i, 9.2) - 0.5);
                   a = 1 - smooth(f);
                   col = DANGER;
-                } else if (ph < 0.75) {
-                  a = 0;
-                } else {
+                } else if (ph < 0.75) a = 0;
+                else {
                   a = smooth((ph - 0.75) / 0.25);
                   col = mix(DANGER, INK, a);
                 }
-              } else if (p.g === "k") {
+              } else if (p.g === "k")
                 a = 0.3 + 0.25 * (0.5 + 0.5 * Math.sin(t * 2.3 + p.i));
-              } else if (p.g === "p") {
-                a = 0.35;
-              }
-            } else if (p.g === "p") {
-              a = 0.55 + 0.45 * (0.5 + 0.5 * Math.sin(t * 1.6 - x * 4));
+              else if (p.g === "p") a = 0.35;
             }
             if (a < 0.02) continue;
             x *= scale;
             y *= scale;
             z *= scale;
             var x1 = x * cyw + z * sy,
-              z1 = -x * sy + z * cyw;
-            var yy = y * ct - z1 * st,
-              z2 = y * st + z1 * ct;
-            var d = Math.max(0, Math.min(1, (z2 + 0.9) / 1.8));
+              z1 = z * cyw - x * sy,
+              z2 = y * st + z1 * ct,
+              d = Math.max(0, Math.min(1, (z2 + 0.9) / 1.8));
             out.push({
-              x: CX + x1 * S,
-              y: CY + yy * S,
+              x: W / 2 + x1 * S,
+              y: H / 2 + (y * ct - z1 * st) * S,
               z: z2,
               r: R0 * (0.7 + 0.55 * d + rb) * (p.rim ? 0.8 : 1),
               a: a * (0.3 + 0.7 * d),
@@ -1157,15 +794,7 @@
             ctx.fill();
           }
         }
-
-        if (typeof fixedT === "number") {
-          frame(fixedT);
-          return function () {};
-        }
-        if (
-          window.matchMedia &&
-          window.matchMedia("(prefers-reduced-motion: reduce)").matches
-        ) {
+        if (bwMotionMQ && bwMotionMQ.matches) {
           frame(1.2);
           return function () {};
         }
@@ -1193,24 +822,17 @@
         stopOrb = bwOrb(canvas, orbKind, bwTheme);
       }
       bwStartOrb();
-      if (bwReducedMotionMQ) {
-        if (bwReducedMotionMQ.addEventListener) {
-          bwReducedMotionMQ.addEventListener("change", bwStartOrb);
-        } else if (bwReducedMotionMQ.addListener) {
-          bwReducedMotionMQ.addListener(bwStartOrb);
-        }
+      function bwWatch(mq, fn) {
+        if (mq)
+          mq.addEventListener
+            ? mq.addEventListener("change", fn)
+            : mq.addListener && mq.addListener(fn);
       }
-      if (bwColorSchemeMQ) {
-        var bwOnColorSchemeChange = function () {
-          bwTheme = bwColorSchemeMQ.matches ? "dark" : "light";
-          bwStartOrb();
-        };
-        if (bwColorSchemeMQ.addEventListener) {
-          bwColorSchemeMQ.addEventListener("change", bwOnColorSchemeChange);
-        } else if (bwColorSchemeMQ.addListener) {
-          bwColorSchemeMQ.addListener(bwOnColorSchemeChange);
-        }
-      }
+      bwWatch(bwMotionMQ, bwStartOrb);
+      bwWatch(bwDarkMQ, function () {
+        bwTheme = bwDarkMQ.matches ? "dark" : "light";
+        bwStartOrb();
+      });
       document.addEventListener("visibilitychange", bwStartOrb);
       function showRetry() {
         var r = document.getElementById("bw-retry");

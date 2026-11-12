@@ -18,8 +18,8 @@
 
         ```bash
         # 下载脚本及其校验和
-        curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.18-rc3/install-bunkerweb.sh
-        curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.18-rc3/install-bunkerweb.sh.sha256
+        curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.18-rc4/install-bunkerweb.sh
+        curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.18-rc4/install-bunkerweb.sh.sha256
 
         # 验证校验和
         sha256sum -c install-bunkerweb.sh.sha256
@@ -47,7 +47,7 @@
             1. 检测
                 * 从 `.env` 中读回安装类型（full、manager、worker、scheduler、ui、api），因此您无需重新声明拓扑结构。
                 * 从 `.env` 中恢复密钥、主机端口、worker 列表和 Compose 项目名称，因此升级不会轮换数据库密码、使已保存的 2FA 密钥失效，也不会改动您已发布的端口。同一键重复出现时以最后一次赋值为准；可选的 `export` 前缀会被接受，而命令行中显式给出的值仍然优先。引号、变量插值、转义以及其他不受支持的 dotenv 语法会在重写文件之前被拒绝；对于这类文件请使用手动升级方式。
-                * 从容器中读取实际运行的版本，而不是信任镜像标签，因此浮动标签（`latest`、`testing` 或 `1.6`，即最新的 1.6.x 版本，1.7 发布后仍保持在 1.6）和上一次中断的升级都能被正确识别。
+                * 从容器中读取实际运行的版本，而不是信任镜像标签，因此浮动标签（[全部标签](integrations.md#docker-image-tags)：`latest`、`testing`、`1.6`，即最新的 1.6.x 版本，1.7 发布后仍保持在 1.6，或 `1.6-edge`，即最新的 1.6.x 候选版本或正式版本）和上一次中断的升级都能被正确识别。
             2. 升级决策
                 * 已在运行相同版本：打印堆栈状态并退出。
                 * 目标版本更旧：**拒绝执行**。BunkerWeb 没有降级迁移，调度器将无法启动并陷入重启循环。支持的回退方式请参见[回滚](#rollback)。
@@ -102,16 +102,16 @@
                     ```yaml
                     services:
                         bunkerweb:
-                            image: bunkerity/bunkerweb:1.6.18-rc3
+                            image: bunkerity/bunkerweb:1.6.18-rc4
                             ...
                         bw-scheduler:
-                            image: bunkerity/bunkerweb-scheduler:1.6.18-rc3
+                            image: bunkerity/bunkerweb-scheduler:1.6.18-rc4
                             ...
                         bw-autoconf:
-                            image: bunkerity/bunkerweb-autoconf:1.6.18-rc3
+                            image: bunkerity/bunkerweb-autoconf:1.6.18-rc4
                             ...
                         bw-ui:
-                            image: bunkerity/bunkerweb-ui:1.6.18-rc3
+                            image: bunkerity/bunkerweb-ui:1.6.18-rc4
                             ...
                     ```
 
@@ -167,7 +167,7 @@
 
             4.  **拉取新镜像**：
                 ```bash
-                docker pull bunkerity/bunkerweb-all-in-one:1.6.18-rc3
+                docker pull bunkerity/bunkerweb-all-in-one:1.6.18-rc4
                 ```
 
             5.  **用相同选项重新创建容器**，复用与之前相同的 `/data` 卷、端口和环境变量：
@@ -178,7 +178,7 @@
                 -p 80:8080/tcp \
                 -p 443:8443/tcp \
                 -p 443:8443/udp \
-                bunkerity/bunkerweb-all-in-one:1.6.18-rc3
+                bunkerity/bunkerweb-all-in-one:1.6.18-rc4
                 ```
 
         === "Docker Compose"
@@ -187,7 +187,7 @@
                 ```yaml
                 services:
                     bunkerweb-aio:
-                        image: bunkerity/bunkerweb-all-in-one:1.6.18-rc3
+                        image: bunkerity/bunkerweb-all-in-one:1.6.18-rc4
                         ...
                 ```
 
@@ -226,8 +226,8 @@
 
             ```bash
             # Download the script and its checksum
-            curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.18-rc3/install-bunkerweb.sh
-            curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.18-rc3/install-bunkerweb.sh.sha256
+            curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.18-rc4/install-bunkerweb.sh
+            curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.18-rc4/install-bunkerweb.sh.sha256
 
             # Verify the checksum
             sha256sum -c install-bunkerweb.sh.sha256
@@ -308,20 +308,20 @@
             示例：
 
             ```bash
-            # 交互式升级到 1.6.18~rc3（会提示备份）
-            sudo ./install-bunkerweb.sh --version 1.6.18~rc3
+            # 交互式升级到 1.6.18~rc4（会提示备份）
+            sudo ./install-bunkerweb.sh --version 1.6.18~rc4
 
             # 使用自动备份到自定义目录的非交互式升级
-            sudo ./install-bunkerweb.sh -v 1.6.18~rc3 --backup-dir /var/backups/bw-2025-01 -y
+            sudo ./install-bunkerweb.sh -v 1.6.18~rc4 --backup-dir /var/backups/bw-2025-01 -y
 
             # 静默无人值守升级（抑制日志）– 依赖默认的自动备份
-            sudo ./install-bunkerweb.sh -v 1.6.18~rc3 -y -q
+            sudo ./install-bunkerweb.sh -v 1.6.18~rc4 -y -q
 
             # 执行一次空运行（计划）而不应用更改
-            sudo ./install-bunkerweb.sh -v 1.6.18~rc3 --dry-run
+            sudo ./install-bunkerweb.sh -v 1.6.18~rc4 --dry-run
 
             # 跳过自动备份进行升级（不推荐）
-            sudo ./install-bunkerweb.sh -v 1.6.18~rc3 --no-auto-backup -y
+            sudo ./install-bunkerweb.sh -v 1.6.18~rc4 --no-auto-backup -y
             ```
 
             !!! warning "跳过备份"
@@ -401,7 +401,7 @@
 
                         ```shell
                         sudo apt update && \
-                        sudo apt install -y --allow-downgrades bunkerweb=1.6.18~rc3
+                        sudo apt install -y --allow-downgrades bunkerweb=1.6.18~rc4
                         ```
 
                         为了防止在执行 `apt upgrade` 时升级 BunkerWeb 软件包，您可以使用以下命令：
@@ -427,7 +427,7 @@
 
                         ```shell
                         sudo dnf makecache && \
-                        sudo dnf install -y --allowerasing bunkerweb-1.6.18~rc3
+                        sudo dnf install -y --allowerasing bunkerweb-1.6.18~rc4
                         ```
 
                         为了防止在执行 `dnf upgrade` 时升级 BunkerWeb 软件包，您可以使用以下命令：
@@ -903,16 +903,16 @@
                 ```yaml
                 services:
                     bunkerweb:
-                        image: bunkerity/bunkerweb:1.6.18-rc3
+                        image: bunkerity/bunkerweb:1.6.18-rc4
                         ...
                     bw-scheduler:
-                        image: bunkerity/bunkerweb-scheduler:1.6.18-rc3
+                        image: bunkerity/bunkerweb-scheduler:1.6.18-rc4
                         ...
                     bw-autoconf:
-                        image: bunkerity/bunkerweb-autoconf:1.6.18-rc3
+                        image: bunkerity/bunkerweb-autoconf:1.6.18-rc4
                         ...
                     bw-ui:
-                        image: bunkerity/bunkerweb-ui:1.6.18-rc3
+                        image: bunkerity/bunkerweb-ui:1.6.18-rc4
                         ...
                 ```
 
@@ -947,7 +947,7 @@
 
                     ```shell
                     sudo apt update && \
-                    sudo apt install -y --allow-downgrades bunkerweb=1.6.18~rc3
+                    sudo apt install -y --allow-downgrades bunkerweb=1.6.18~rc4
                     ```
 
                     为了防止在执行 `apt upgrade` 时升级 BunkerWeb 软件包，您可以使用以下命令：
@@ -973,7 +973,7 @@
 
                     ```shell
                     sudo dnf makecache && \
-                    sudo dnf install -y --allowerasing bunkerweb-1.6.18~rc3
+                    sudo dnf install -y --allowerasing bunkerweb-1.6.18~rc4
                     ```
 
                     为了防止在执行 `dnf upgrade` 时升级 BunkerWeb 软件包，您可以使用以下命令：
@@ -1206,7 +1206,7 @@
 这些命令共用两个变量。请将它们设置为要验证的版本：
 
 ```bash
-VERSION=1.6.18~rc3
+VERSION=1.6.18~rc4
 TAG="v${VERSION//\~/-}"
 ```
 
@@ -1251,7 +1251,7 @@ gh attestation verify ./bunkerweb_${VERSION}-1_amd64.deb \
   --source-ref "refs/tags/$TAG"
 ```
 
-Release 还在 `release-manifest.json` 中列出了每个软件包的 SHA-256 校验和。先用清单自带的校验和检查清单，再用清单检查软件包，并选择与您的发行版（`ubuntu`、`ubuntu-noble`、`ubuntu-jammy`、`debian-bookworm`、`debian-trixie`、`fedora-43`、`fedora-44`、`rhel-8`、`rhel-9` 或 `rhel-10`）和平台（`linux/amd64` 或 `linux/arm64`）对应的条目：
+Release 还在 `release-manifest.json` 中列出了每个软件包的 SHA-256 校验和。先用清单自带的校验和检查清单，再用清单检查软件包，并选择与您的发行版（`ubuntu`、`ubuntu-noble`、`ubuntu-jammy`、`debian-bookworm`、`debian-trixie`、`fedora-43`、`fedora-44`、`fedora-45`、`rhel-8`、`rhel-9` 或 `rhel-10`）和平台（`linux/amd64` 或 `linux/arm64`）对应的条目：
 
 ```bash
 curl -fsSL -O "https://github.com/bunkerity/bunkerweb/releases/download/${TAG}/release-manifest.json" \

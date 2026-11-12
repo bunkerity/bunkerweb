@@ -274,6 +274,36 @@ function crowdsec:init()
 	return self:ret(true, msg)
 end
 
+function crowdsec:init_workers()
+	-- Check if init_workers is needed
+	if not self:is_needed() then
+		return self:ret(true, "init_workers not needed")
+	end
+
+	local completed = 0
+	local failed = {}
+	local seen = {}
+	for _, bouncer in pairs(bouncers) do
+		if not seen[bouncer] then
+			seen[bouncer] = true
+			if bouncer.SetupStream then
+				local ok, _, err = bouncer.SetupStream()
+				if ok == true and err then
+					self.logger:log(ERR, "error while setting up CrowdSec stream poller : " .. tostring(err))
+					insert(failed, tostring(err))
+				else
+					completed = completed + 1
+				end
+			end
+		end
+	end
+
+	if #failed > 0 then
+		return self:ret(false, "error while setting up CrowdSec stream poller(s) : " .. concat(failed, "; "))
+	end
+	return self:ret(true, completed .. " CrowdSec bouncer stream setup call(s) completed")
+end
+
 -- Whether a CrowdSec deny may become a short BunkerWeb ban. Pure, so the rules are testable on their own.
 -- A stream connection that stopped synchronizing never renews bans: its cached decisions may already be stale.
 local function should_promote(params)

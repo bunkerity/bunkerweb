@@ -1,8 +1,8 @@
 # Utilisations avancées
 
-De nombreux exemples de cas d'utilisation concrets sont disponibles dans le dossier [examples](https://github.com/bunkerity/bunkerweb/tree/v1.6.18-rc3/examples) du dépôt GitHub.
+De nombreux exemples de cas d'utilisation concrets sont disponibles dans le dossier [examples](https://github.com/bunkerity/bunkerweb/tree/v1.6.18-rc4/examples) du dépôt GitHub.
 
-Nous fournissons également de nombreux modèles standard, tels que des fichiers YAML pour diverses intégrations et types de bases de données. Ceux-ci sont disponibles dans le dossier [misc/integrations](https://github.com/bunkerity/bunkerweb/tree/v1.6.18-rc3/misc/integrations).
+Nous fournissons également de nombreux modèles standard, tels que des fichiers YAML pour diverses intégrations et types de bases de données. Ceux-ci sont disponibles dans le dossier [misc/integrations](https://github.com/bunkerity/bunkerweb/tree/v1.6.18-rc4/misc/integrations).
 
 Cette section se concentre uniquement sur les utilisations avancées et le réglage de la sécurité, consultez la [section fonctionnalités](features.md) de la documentation pour voir tous les paramètres disponibles.
 
@@ -85,7 +85,7 @@ Vous trouverez plus de paramètres sur l'IP réelle dans la [section des fonctio
             -p 80:8080/tcp \
             -p 443:8443/tcp \
             -p 443:8443/udp \
-            bunkerity/bunkerweb-all-in-one:1.6.18-rc3
+            bunkerity/bunkerweb-all-in-one:1.6.18-rc4
         ```
 
         Veuillez noter que si votre conteneur existe déjà, vous devrez le supprimer et le recréer afin que les nouvelles variables d'environnement soient prises en compte.
@@ -96,7 +96,7 @@ Vous trouverez plus de paramètres sur l'IP réelle dans la [section des fonctio
 
         ```yaml
         bunkerweb:
-          image: bunkerity/bunkerweb:1.6.18-rc3
+          image: bunkerity/bunkerweb:1.6.18-rc4
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -104,7 +104,7 @@ Vous trouverez plus de paramètres sur l'IP réelle dans la [section des fonctio
             REAL_IP_HEADER: "X-Forwarded-For"
           ...
         bw-scheduler:
-          image: bunkerity/bunkerweb-scheduler:1.6.18-rc3
+          image: bunkerity/bunkerweb-scheduler:1.6.18-rc4
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -121,7 +121,7 @@ Vous trouverez plus de paramètres sur l'IP réelle dans la [section des fonctio
 
         ```yaml
         bunkerweb:
-          image: bunkerity/bunkerweb:1.6.18-rc3
+          image: bunkerity/bunkerweb:1.6.18-rc4
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -129,7 +129,7 @@ Vous trouverez plus de paramètres sur l'IP réelle dans la [section des fonctio
             REAL_IP_HEADER: "X-Forwarded-For"
           ...
         bw-scheduler:
-          image: bunkerity/bunkerweb-scheduler:1.6.18-rc3
+          image: bunkerity/bunkerweb-scheduler:1.6.18-rc4
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -176,7 +176,7 @@ Vous trouverez plus de paramètres sur l'IP réelle dans la [section des fonctio
 
         ```yaml
         bunkerweb:
-          image: bunkerity/bunkerweb:1.6.18-rc3
+          image: bunkerity/bunkerweb:1.6.18-rc4
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -184,7 +184,7 @@ Vous trouverez plus de paramètres sur l'IP réelle dans la [section des fonctio
             REAL_IP_HEADER: "X-Forwarded-For"
           ...
         bw-scheduler:
-          image: bunkerity/bunkerweb-scheduler:1.6.18-rc3
+          image: bunkerity/bunkerweb-scheduler:1.6.18-rc4
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -249,7 +249,7 @@ Vous trouverez plus de paramètres sur l'IP réelle dans la [section des fonctio
             -p 80:8080/tcp \
             -p 443:8443/tcp \
             -p 443:8443/udp \
-            bunkerity/bunkerweb-all-in-one:1.6.18-rc3
+            bunkerity/bunkerweb-all-in-one:1.6.18-rc4
         ```
 
         Veuillez noter que si votre conteneur existe déjà, vous devrez le supprimer et le recréer afin que les nouvelles variables d'environnement soient prises en compte.
@@ -260,7 +260,7 @@ Vous trouverez plus de paramètres sur l'IP réelle dans la [section des fonctio
 
         ```yaml
         bunkerweb:
-          image: bunkerity/bunkerweb:1.6.18-rc3
+          image: bunkerity/bunkerweb:1.6.18-rc4
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -270,7 +270,7 @@ Vous trouverez plus de paramètres sur l'IP réelle dans la [section des fonctio
           ...
         ...
         bw-scheduler:
-          image: bunkerity/bunkerweb-scheduler:1.6.18-rc3
+          image: bunkerity/bunkerweb-scheduler:1.6.18-rc4
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -288,7 +288,7 @@ Vous trouverez plus de paramètres sur l'IP réelle dans la [section des fonctio
 
         ```yaml
         bunkerweb:
-          image: bunkerity/bunkerweb:1.6.18-rc3
+          image: bunkerity/bunkerweb:1.6.18-rc4
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -298,7 +298,7 @@ Vous trouverez plus de paramètres sur l'IP réelle dans la [section des fonctio
           ...
         ...
         bw-scheduler:
-          image: bunkerity/bunkerweb-scheduler:1.6.18-rc3
+          image: bunkerity/bunkerweb-scheduler:1.6.18-rc4
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -350,7 +350,7 @@ Vous trouverez plus de paramètres sur l'IP réelle dans la [section des fonctio
 
         ```yaml
         bunkerweb:
-          image: bunkerity/bunkerweb:1.6.18-rc3
+          image: bunkerity/bunkerweb:1.6.18-rc4
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -360,7 +360,7 @@ Vous trouverez plus de paramètres sur l'IP réelle dans la [section des fonctio
           ...
         ...
         bw-scheduler:
-          image: bunkerity/bunkerweb-scheduler:1.6.18-rc3
+          image: bunkerity/bunkerweb-scheduler:1.6.18-rc4
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -485,8 +485,8 @@ Le Manager est le cerveau du cluster. Il exécute le Scheduler, la base de donn�
 
         ```bash
         # Télécharger le script et sa somme
-        curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.18-rc3/install-bunkerweb.sh
-        curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.18-rc3/install-bunkerweb.sh.sha256
+        curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.18-rc4/install-bunkerweb.sh
+        curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.18-rc4/install-bunkerweb.sh.sha256
 
         # Vérifier l'empreinte
         sha256sum -c install-bunkerweb.sh.sha256
@@ -588,7 +588,7 @@ Le Manager est le cerveau du cluster. Il exécute le Scheduler, la base de donn�
 
     services:
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.18-rc3
+        image: bunkerity/bunkerweb-scheduler:1.6.18-rc4
         environment:
           <<: *bw-ui-env
           BUNKERWEB_INSTANCES: "192.168.1.11 192.168.1.12" # Remplacez par les IPs de vos workers
@@ -607,7 +607,7 @@ Le Manager est le cerveau du cluster. Il exécute le Scheduler, la base de donn�
           - bw-redis
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.6.18-rc3
+        image: bunkerity/bunkerweb-ui:1.6.18-rc4
         ports:
           - "7000:7000" # Exposer le port de l'UI
         environment:
@@ -693,7 +693,7 @@ Les workers sont les nœuds qui traitent le trafic entrant.
     ```yaml title="docker-compose.yml"
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.18-rc3
+        image: bunkerity/bunkerweb:1.6.18-rc4
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -1130,7 +1130,7 @@ Pour activer systemd-resolved comme résolveur DNS dans BunkerWeb, définissez l
         -p 80:8080/tcp \
         -p 443:8443/tcp \
         -p 443:8443/udp \
-        bunkerity/bunkerweb-all-in-one:1.6.18-rc3
+        bunkerity/bunkerweb-all-in-one:1.6.18-rc4
     ```
 
 === "Docker"
@@ -1158,7 +1158,7 @@ Pour activer systemd-resolved comme résolveur DNS dans BunkerWeb, définissez l
           - bw-dns
 
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.18-rc3
+        image: bunkerity/bunkerweb:1.6.18-rc4
         ...
         environment:
           DNS_RESOLVERS: "dnsmasq"
@@ -1169,7 +1169,7 @@ Pour activer systemd-resolved comme résolveur DNS dans BunkerWeb, définissez l
           - bw-dns
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.18-rc3
+        image: bunkerity/bunkerweb-scheduler:1.6.18-rc4
         ...
         environment:
           DNS_RESOLVERS: "dnsmasq"
@@ -1257,6 +1257,43 @@ Certaines intégrations offrent des moyens plus pratiques d'appliquer des config
     !!! info "Le rechargement relit le dossier"
         Un rechargement relit `/etc/bunkerweb/configs` : les fichiers qui y sont créés, modifiés ou supprimés sont appliqués et enregistrés en base de données. Une configuration appartenant à l'interface web ou à l'API conserve son propriétaire, seul son contenu est actualisé depuis le fichier.
 
+    **D'où NGINX inclut chaque type**
+
+    NGINX inclut les fichiers directement depuis les sous-dossiers de `/etc/bunkerweb/configs` ; BunkerWeb ne les copie pas dans `/etc/nginx`. Le Scheduler écrit dans ces mêmes dossiers les configurations créées dans l'interface web ou via l'API. En mode multisite, un fichier qui ne concerne qu'un service va dans un sous-dossier supplémentaire portant le premier nom du `SERVER_NAME` de ce service, par exemple `server-http/www.example.com/hello-world.conf`.
+
+    | Type                  | Dossier dans `/etc/bunkerweb/configs` | Inclus dans                                                                                      | Sous-dossier par service |
+    | --------------------- | ------------------------------------- | ------------------------------------------------------------------------------------------------ | ------------------------ |
+    | `http`                | `http/`                               | bloc `http` de `nginx.conf`, après les configurations du cœur et des plugins                     | Non                      |
+    | `stream`              | `stream/`                             | bloc `stream` de `nginx.conf`, après les configurations du cœur et des plugins                   | Non                      |
+    | `default-server-http` | `default-server-http/`                | serveur par défaut (`default-server-http.conf`), après les configurations du cœur et des plugins | Non                      |
+    | `server-http`         | `server-http/`                        | chaque bloc `server` HTTP (`server.conf`)                                                        | Oui                      |
+    | `server-stream`       | `server-stream/`                      | chaque bloc `server` stream (`server-stream.conf`)                                               | Oui                      |
+    | `modsec`              | `modsec/`                             | règles ModSecurity, après le Core Rule Set                                                       | Oui                      |
+    | `modsec-crs`          | `modsec-crs/`                         | règles ModSecurity, avant les règles du Core Rule Set                                            | Oui, voir la note        |
+    | `crs-plugins-before`  | `crs-plugins-before/`                 | règles ModSecurity, avant les plugins du CRS                                                     | Oui, voir la note        |
+    | `crs-plugins-after`   | `crs-plugins-after/`                  | règles ModSecurity, après les plugins du CRS                                                     | Oui, voir la note        |
+
+    `modsec-crs` n'est lu que si `USE_MODSECURITY_CRS=yes`. `crs-plugins-before` et `crs-plugins-after` exigent en plus `USE_MODSECURITY_CRS_PLUGINS=yes` et une version du Core Rule Set autre que la 3. Avec `USE_MODSECURITY_GLOBAL_CRS=yes`, ces trois types sont chargés une seule fois pour tous les services : seul le dossier de premier niveau est lu et un sous-dossier de service est ignoré. `modsec` garde son sous-dossier de service.
+
+    **Vérifier qu'un fichier est actif**
+
+    Utilisez `nginx -T` pour vérifier que NGINX inclut votre fichier depuis le disque et que les chemins d'inclusion sont corrects. Cette commande teste et affiche les fichiers de configuration actuels sur le disque, pas la configuration chargée par les processus workers en cours d'exécution. NGINX signale chaque fichier inclus par une ligne `# configuration file <chemin>:` :
+
+    ```shell
+    sudo nginx -T 2>&1 | grep -A 3 "configuration file /etc/bunkerweb/configs/server-http/hello-world.conf"
+    ```
+
+    Si rien ne s'affiche, vérifiez le dossier, le suffixe `.conf` et les permissions, puis rechargez à nouveau le Scheduler.
+
+    Pour confirmer que le fichier est appliqué, vérifiez que le journal du Scheduler (`journalctl -u bunkerweb-scheduler`) indique un rechargement réussi et que l'interface web ne signale pas d'application partielle. Envoyez ensuite une requête qui utilise cette configuration et vérifiez le résultat attendu. Pour l'exemple `/hello` ci-dessus, remplacez `www.example.com` par le nom de votre service et vérifiez que le corps de la réponse est `world` :
+
+    ```shell
+    curl -i http://www.example.com/hello
+    ```
+
+    !!! warning "Une configuration rejetée conserve la précédente"
+        Chaque nom d'`upstream` doit être unique parmi toutes les configurations personnalisées. Deux blocs `upstream` portant le même nom font que NGINX refuse la nouvelle configuration et que le rechargement échoue. Les instances qui la rejettent continuent d'exécuter la dernière configuration fonctionnelle, et l'interface web indique que les changements ont été appliqués à certaines instances seulement (ou à aucune). Les journaux du Scheduler (`journalctl -u bunkerweb-scheduler`) en donnent la cause.
+
 === "Tout-en-un"
 
     Lorsque vous utilisez l'image [Tout-en-un](integrations.md#all-in-one-aio-image), vous avez deux options pour ajouter des configurations personnalisées :
@@ -1286,7 +1323,7 @@ Certaines intégrations offrent des moyens plus pratiques d'appliquer des config
           }" \
         -p 80:8080/tcp \
         -p 443:8443/tcp \
-        bunkerity/bunkerweb-all-in-one:1.6.18-rc3
+        bunkerity/bunkerweb-all-in-one:1.6.18-rc4
     ```
 
     Veuillez noter que si votre conteneur est déjà créé, vous devrez le supprimer et le recréer pour que les nouvelles variables d'environnement soient appliquées.
@@ -1326,7 +1363,7 @@ Certaines intégrations offrent des moyens plus pratiques d'appliquer des config
         -p 80:8080/tcp \
         -p 443:8443/tcp \
         -p 443:8443/udp \
-        bunkerity/bunkerweb-all-in-one:1.6.18-rc3
+        bunkerity/bunkerweb-all-in-one:1.6.18-rc4
     ```
 
 === "Docker"
@@ -1349,7 +1386,7 @@ Certaines intégrations offrent des moyens plus pratiques d'appliquer des config
     ```yaml
     ...
     bw-scheduler:
-      image: bunkerity/bunkerweb-scheduler:1.6.18-rc3
+      image: bunkerity/bunkerweb-scheduler:1.6.18-rc4
       environment:
         - |
           CUSTOM_CONF_SERVER_HTTP_hello-world=
@@ -1392,7 +1429,7 @@ Certaines intégrations offrent des moyens plus pratiques d'appliquer des config
 
     ```yaml
     bw-scheduler:
-      image: bunkerity/bunkerweb-scheduler:1.6.18-rc3
+      image: bunkerity/bunkerweb-scheduler:1.6.18-rc4
       volumes:
         - ./bw-data:/data
       ...
@@ -1462,7 +1499,7 @@ Certaines intégrations offrent des moyens plus pratiques d'appliquer des config
 
     ```yaml
     bw-scheduler:
-      image: bunkerity/bunkerweb-scheduler:1.6.18-rc3
+      image: bunkerity/bunkerweb-scheduler:1.6.18-rc4
       volumes:
         - ./bw-data:/data
       ...
@@ -1648,6 +1685,10 @@ REDIS_DATABASE=0
 
 Si vous avez besoin de paramètres plus avancés, tels que l'authentification, la prise en charge SSL/TLS ou le mode Sentinel, reportez-vous à la documentation sur les paramètres du [plug-in Redis](features.md#redis) pour obtenir des conseils détaillés.
 
+### Exporter les bannissements en JSON
+
+Exécutez `bwcli bans --json` pour écrire un objet JSON unique sur la sortie standard, regroupé par instance, avec une entrée `redis` lorsque les bannissements Redis sont collectés. Chaque source contient un tableau de bannissements triés par `date`. Les enregistrements conservent les champs renvoyés par la source, notamment `ip`, `country`, `date`, `exp`, `permanent`, `reason`, `service`, `ban_scope` et `kind`. La commande renvoie le code 0 en cas de succès. En cas d'échec, elle renvoie un code non nul et écrit une erreur sur la sortie d'erreur standard. Sans `--json`, `bwcli bans` conserve son affichage formaté.
+
 ## Protéger les applications UDP/TCP
 
 !!! example "Fonctionnalité expérimentale"
@@ -1708,7 +1749,7 @@ Pour la liste complète des paramètres concernant `stream` le  mode, veuillez v
         -p 443:8443/udp \
         -p 10000:10000/tcp \
         -p 20000:20000/tcp \
-        bunkerity/bunkerweb-all-in-one:1.6.18-rc3
+        bunkerity/bunkerweb-all-in-one:1.6.18-rc4
     ```
 
     Veuillez noter que si votre conteneur existe déjà, vous devrez le supprimer et le recréer afin que les nouvelles variables d'environnement soient prises en compte.
@@ -1731,7 +1772,7 @@ Pour la liste complète des paramètres concernant `stream` le  mode, veuillez v
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.18-rc3
+        image: bunkerity/bunkerweb:1.6.18-rc4
         ports:
           - "80:8080" # Keep it if you want to use Let's Encrypt automation when using http challenge type
           - "10000:10000" # app1
@@ -1746,7 +1787,7 @@ Pour la liste complète des paramètres concernant `stream` le  mode, veuillez v
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.18-rc3
+        image: bunkerity/bunkerweb-scheduler:1.6.18-rc4
         environment:
           <<: *bw-api-env
           BUNKERWEB_INSTANCES: "bunkerweb" # This setting is mandatory to specify the BunkerWeb instance
@@ -1797,7 +1838,7 @@ Pour la liste complète des paramètres concernant `stream` le  mode, veuillez v
     ```yaml
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.18-rc3
+        image: bunkerity/bunkerweb:1.6.18-rc4
         ports:
           - "80:8080" # Keep it if you want to use Let's Encrypt automation when using http challenge type
           - "10000:10000" # app1
@@ -2027,7 +2068,7 @@ Pour la liste complète des paramètres concernant `stream` le  mode, veuillez v
     ```yaml
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.18-rc3
+        image: bunkerity/bunkerweb:1.6.18-rc4
         ports:
           # Keep it if you want to use Let's Encrypt automation when using http challenge type
           - published: 80
@@ -2157,7 +2198,7 @@ BunkerWeb prend en charge PHP en utilisant des  instances [PHP-FPM externes ou ]
         -p 80:8080/tcp \
         -p 443:8443/tcp \
         -p 443:8443/udp \
-        bunkerity/bunkerweb-all-in-one:1.6.18-rc3
+        bunkerity/bunkerweb-all-in-one:1.6.18-rc4
     ```
 
     Veuillez noter que si votre conteneur est déjà créé, vous devrez le supprimer et le recréer pour que les nouvelles variables d'environnement soient appliquées.
@@ -2201,7 +2242,7 @@ BunkerWeb prend en charge PHP en utilisant des  instances [PHP-FPM externes ou ]
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.18-rc3
+        image: bunkerity/bunkerweb:1.6.18-rc4
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -2216,7 +2257,7 @@ BunkerWeb prend en charge PHP en utilisant des  instances [PHP-FPM externes ou ]
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.18-rc3
+        image: bunkerity/bunkerweb-scheduler:1.6.18-rc4
         environment:
           <<: *bw-api-env
           BUNKERWEB_INSTANCES: "bunkerweb" # This setting is mandatory to specify the BunkerWeb instance
@@ -2310,7 +2351,7 @@ BunkerWeb prend en charge PHP en utilisant des  instances [PHP-FPM externes ou ]
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.18-rc3
+        image: bunkerity/bunkerweb:1.6.18-rc4
         labels:
           - "bunkerweb.INSTANCE=yes"
         environment:
@@ -2323,7 +2364,7 @@ BunkerWeb prend en charge PHP en utilisant des  instances [PHP-FPM externes ou ]
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.18-rc3
+        image: bunkerity/bunkerweb-scheduler:1.6.18-rc4
         environment:
           <<: *bw-api-env
           BUNKERWEB_INSTANCES: "" # We don't need to specify the BunkerWeb instance here as they are automatically detected by the autoconf service
@@ -2338,7 +2379,7 @@ BunkerWeb prend en charge PHP en utilisant des  instances [PHP-FPM externes ou ]
           - bw-db
 
       bw-autoconf:
-        image: bunkerity/bunkerweb-autoconf:1.6.18-rc3
+        image: bunkerity/bunkerweb-autoconf:1.6.18-rc4
         depends_on:
           - bunkerweb
           - bw-docker
@@ -2578,7 +2619,7 @@ BunkerWeb prend en charge PHP en utilisant des  instances [PHP-FPM externes ou ]
     ```yaml
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.18-rc3
+        image: bunkerity/bunkerweb:1.6.18-rc4
         volumes:
           - /shared/www:/var/www/html
     ...
@@ -2666,7 +2707,7 @@ Par défaut, BunkerWeb n'écoute que sur IPv4. Définissez `USE_IPV6=yes` (le no
     ```yaml
     services:
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.18-rc3
+        image: bunkerity/bunkerweb-scheduler:1.6.18-rc4
         environment:
           USE_IPV6: "yes"
 
@@ -2752,7 +2793,7 @@ x-bw-ipv6-env: &bw-ipv6-env
 
 services:
   bunkerweb:
-    image: bunkerity/bunkerweb:1.6.18-rc3
+    image: bunkerity/bunkerweb:1.6.18-rc4
     dns:
       - 2001:db8:1::20
     environment:
@@ -2762,7 +2803,7 @@ services:
         ipv6_address: 2001:db8:1::10
 
   bw-scheduler:
-    image: bunkerity/bunkerweb-scheduler:1.6.18-rc3
+    image: bunkerity/bunkerweb-scheduler:1.6.18-rc4
     dns:
       - 2001:db8:1::20
     environment:
@@ -2918,7 +2959,7 @@ Avec la valeur par défaut `BCFH` de `MODSECURITY_SEC_AUDIT_LOG_PARTS`, la parti
     services:
       bunkerweb:
         # Ceci est le nom qui sera utilisé pour identifier l'instance dans le Scheduler
-        image: bunkerity/bunkerweb:1.6.18-rc3
+        image: bunkerity/bunkerweb:1.6.18-rc4
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -2931,7 +2972,7 @@ Avec la valeur par défaut `BCFH` de `MODSECURITY_SEC_AUDIT_LOG_PARTS`, la parti
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.18-rc3
+        image: bunkerity/bunkerweb-scheduler:1.6.18-rc4
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Assurez-vous de définir le nom d'instance correct
@@ -2948,7 +2989,7 @@ Avec la valeur par défaut `BCFH` de `MODSECURITY_SEC_AUDIT_LOG_PARTS`, la parti
           - bw-db
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.6.18-rc3
+        image: bunkerity/bunkerweb-ui:1.6.18-rc4
         environment:
           <<: *bw-env
         volumes:
@@ -3107,6 +3148,131 @@ log {
 };
 ```
 
+### Envoyer les journaux vers Splunk {#send-logs-to-splunk}
+
+BunkerWeb n'a besoin d'aucun plugin Splunk. Un Splunk Universal Forwarder lit les fichiers journaux, et trois réglages font écrire à BunkerWeb des formats que Splunk sait interpréter : un second journal d'accès au format `key=value`, le journal d'erreurs existant et un journal d'audit ModSecurity en JSON.
+
+**1. Ajouter un journal d'accès pour Splunk.** Chaque `ACCESS_LOG_N` est associé au `LOG_FORMAT_N` de même suffixe : `access.log` garde donc son format par défaut (l'interface web le lit) et le nouveau fichier reçoit le sien. Ajoutez ceci à `/etc/bunkerweb/variables.env`, avec un autre suffixe si `_1` est déjà pris :
+
+```conf
+ACCESS_LOG_1=/var/log/bunkerweb/access-splunk.log
+LOG_FORMAT_1=time=$time_iso8601 host=$host client=$remote_addr request_id=$request_id method=$request_method uri="$request_uri" status=$status bytes=$body_bytes_sent ua="$http_user_agent" reason=$reason modsec_rules="$modsecurity_rules" modsec_score=$modsecurity_anomaly_score modsec_id=$modsecurity_unique_id
+```
+
+!!! warning "Écrire les valeurs exactement comme indiqué"
+    BunkerWeb lit `variables.env` littéralement : pas de guillemets autour d'une valeur, et pas de commentaire après une valeur sur la même ligne. Un commentaire en fin de ligne devient une partie de la valeur. Le réglage est alors ignoré avec `Ignoring variable ... doesn't match regex` dans le journal du scheduler, et la valeur par défaut s'applique. Placez les commentaires sur leur propre ligne.
+
+**2. Facultatif : garder les corps de requête hors du journal d'audit.** La valeur par défaut de `MODSECURITY_SEC_AUDIT_LOG_PARTS` est `BCFH`, et la partie `C` écrit le corps de la requête dans chaque entrée d'audit. Traitez le fichier comme sensible, ou retirez cette partie :
+
+```conf
+MODSECURITY_SEC_AUDIT_LOG_PARTS=BFH
+```
+
+**3. Écrire le journal d'audit en JSON.** Créez `/etc/bunkerweb/configs/modsec/audit-json.conf` avec cette seule ligne, puis donnez au scheduler l'accès au dossier comme décrit dans [Configurations personnalisées](#custom-configurations) :
+
+```conf
+SecAuditLogFormat JSON
+```
+
+```shell
+sudo chown -R root:nginx /etc/bunkerweb/configs && \
+sudo chmod -R 770 /etc/bunkerweb/configs
+```
+
+**4. Redémarrer les services.**
+
+```shell
+sudo systemctl restart bunkerweb && \
+sudo systemctl restart bunkerweb-scheduler
+```
+
+**5. Vérifier les fichiers.** Envoyez une requête que ModSecurity bloque, par exemple une URL avec `?q=<script>alert(1)</script>` et un `User-Agent` de type navigateur (un `User-Agent` vide est déjà bloqué par le Core Rule Set seul). Lisez ensuite la dernière ligne de chaque fichier. Le journal d'audit contient un objet JSON par ligne :
+
+```shell
+sudo tail -n 1 /var/log/bunkerweb/access-splunk.log
+sudo tail -n 1 /var/log/bunkerweb/modsec_audit.log | jq .transaction.unique_id
+```
+
+**6. Configurer le forwarder.** Les fichiers journaux de BunkerWeb appartiennent à `nginx:nginx` et les paquets en restreignent l'accès à cet utilisateur et à ce groupe : ajoutez donc l'utilisateur qui exécute le forwarder au groupe `nginx`. Surveillez ensuite les trois fichiers dans `inputs.conf`, avec un sourcetype pour chacun :
+
+```conf
+[monitor:///var/log/bunkerweb/access-splunk.log]
+sourcetype = bunkerweb:access
+
+[monitor:///var/log/bunkerweb/error.log]
+sourcetype = bunkerweb:error
+
+[monitor:///var/log/bunkerweb/modsec_audit.log]
+sourcetype = bunkerweb:modsec_audit
+```
+
+Dans `props.conf`, faites interpréter les entrées d'audit comme du JSON sur le search head, et augmentez `TRUNCATE` sur les indexeurs (ou le heavy forwarder). Les entrées sont longues : une seule sonde XSS a écrit 7,3 Ko, et une requête avec plusieurs charges d'attaque en a écrit 20, alors que le `TRUNCATE` par défaut coupe les événements à 10 000 octets.
+
+```conf
+[bunkerweb:modsec_audit]
+KV_MODE = json
+TRUNCATE = 100000
+```
+
+`access-splunk.log` correspond au motif `/var/log/bunkerweb/*.log` de la politique décrite dans [Rétention des fichiers journaux](#log-file-retention) : `logrotate` le prend donc en charge comme les autres fichiers.
+
+**Champs du journal d'accès**
+
+| Champ          | Contenu                                                                                                                                                             |
+| :------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `time`         | `$time_iso8601`                                                                                                                                                     |
+| `host`         | `$host`                                                                                                                                                             |
+| `client`       | `$remote_addr`                                                                                                                                                      |
+| `request_id`   | `$request_id`, la même valeur que le quatrième champ de la ligne par défaut de `access.log`                                                                         |
+| `method`       | `$request_method`                                                                                                                                                   |
+| `uri`          | `$request_uri`, avec la chaîne de requête                                                                                                                           |
+| `status`       | `$status`                                                                                                                                                           |
+| `bytes`        | `$body_bytes_sent`                                                                                                                                                  |
+| `ua`           | `$http_user_agent`                                                                                                                                                  |
+| `reason`       | L'identifiant du plugin lorsqu'un plugin a refusé la requête (`blacklist`, `limit`, ...). Vide sinon, **y compris lorsque ModSecurity l'a refusée**                 |
+| `modsec_rules` | Identifiants de règles exposés par l’intégration CRS de BunkerWeb, séparés et précédés d’un espace (ils peuvent se répéter). `-` si non renseignés ; liste non exhaustive des correspondances |
+| `modsec_score` | Le score d’anomalie exposé par l’intégration CRS de BunkerWeb, `-` si non renseigné |
+| `modsec_id` | L’identifiant exposé par l’intégration CRS de BunkerWeb, `-` si non renseigné. Lorsqu’il est présent, il correspond à `transaction.unique_id` de l’entrée d’audit associée |
+
+Trois requêtes telles qu'elles apparaissent dans `access-splunk.log` : une autorisée, une refusée par le plugin `blacklist` et une refusée par ModSecurity (`ua` abrégé).
+
+```text
+time=2026-11-10T08:11:02+00:00 host=www.example.com client=10.77.52.1 request_id=a1b31236225cf6d34fec07e089838f48 method=GET uri="/spl-allowed" status=404 bytes=69298 ua="Mozilla/5.0 ..." reason= modsec_rules="-" modsec_score=- modsec_id=-
+time=2026-11-10T08:11:02+00:00 host=www.example.com client=10.77.52.1 request_id=260b845a6bb21e46656c42e7a682f2a1 method=GET uri="/spl-blacklisted" status=403 bytes=69297 ua="Mozilla/5.0 ..." reason=blacklist modsec_rules="-" modsec_score=- modsec_id=-
+time=2026-11-10T08:11:02+00:00 host=www.example.com client=10.77.52.1 request_id=f3ddfff5a4652efdeb3daa645dee0827 method=GET uri="/spl-xss?q=<script>alert(1)</script>" status=403 bytes=69297 ua="Mozilla/5.0 ..." reason= modsec_rules=" 941100 941110 941160 941390" modsec_score=20 modsec_id=179429826266.143898
+```
+
+La première requête renvoie `404` parce que la pile de test n'a pas de backend. L'entrée d'audit correspondante, abrégée, commence par le même identifiant :
+
+```json
+{"transaction":{"client_ip":"10.77.52.1","time_stamp":"Tue Nov 10 08:11:02 2026","unique_id":"179429826266.143898","request":{"method":"GET","uri":"/spl-xss?q=<script>alert(1)</script>","body":""},"response":{"http_code":403},"messages":[{"message":"XSS Attack Detected via libinjection","details":{"ruleId":"941100","severity":"2"}}]}}
+```
+
+!!! warning "Limites"
+    - **Pas de journal d'accès en JSON.** `LOG_FORMAT_N` est écrit entre apostrophes dans la configuration NGINX, et il n'y a pas d'emplacement pour `escape=json`. Utilisez `key=value` pour le journal d'accès, et JSON uniquement pour le journal d'audit.
+    - **Pas d'apostrophe dans une valeur de `LOG_FORMAT_N`.** NGINX rejette la configuration. NGINX échappe un guillemet double dans une valeur journalisée sous la forme `\x22` (`ua="Mozilla/5.0 \x22quoted\x22"`).
+    - **Les métadonnées ModSecurity dépendent des règles.** Les refus pour anomalie du CRS par défaut renseignent `modsec_id`, `modsec_rules` et `modsec_score`, avec un `reason` vide. Une règle `deny` personnalisée sans les actions `setvar` correspondantes pour `tx.bunkerweb_*` peut laisser ces champs à `-`. Le journal d’accès seul ne permet alors pas d’identifier ce refus ; consultez le journal d’erreurs ou d’audit.
+    - **Le journal d’audit n’est ni un journal de requêtes ni une preuve de blocage.** La valeur par défaut de `MODSECURITY_SEC_AUDIT_ENGINE` (`RelevantOnly`) peut aussi enregistrer des transactions autorisées lorsqu’une règle journalise une correspondance (y compris en mode `DetectionOnly` ou avec un score inférieur au seuil de blocage), ou lorsque le statut correspond à `SecAuditLogRelevantStatus`. Dans le test ci-dessus, seuls les refus ModSecurity ont produit des entrées.
+    - **La partie `C` contient les corps de requête**, y compris les champs de formulaire et les identifiants de connexion. Utilisez `BFH` sauf si vous avez besoin des corps, et limitez les droits de lecture de l'index.
+
+!!! info "Docker, Autoconf, Swarm et Kubernetes"
+    Les images relient `access.log`, `error.log` et `modsec_audit.log` au flux de journaux propre du conteneur (voir [Rétention des fichiers journaux](#log-file-retention)) : un forwarder n'a donc aucun fichier à lire pour eux, et un fichier écrit par `ACCESS_LOG_1` reste dans le conteneur, où rien ne le fait tourner. Appliquez le format d'audit JSON avec un réglage de configuration personnalisée sur le scheduler plutôt qu'avec un fichier : `CUSTOM_CONF_MODSEC_audit-json=SecAuditLogFormat JSON`. Les entrées JSON apparaissent alors dans `docker logs` du conteneur `bunkerweb`, une par ligne, parmi les lignes du journal d'erreurs : les lignes qui commencent par `{` sont les entrées d'audit.
+
+    Pour envoyer le flux vers Splunk, utilisez le [pilote de journalisation `splunk` de Docker](https://docs.docker.com/engine/logging/drivers/splunk/) avec un jeton HTTP Event Collector. Le pilote envoie ensemble les lignes d'accès, d'erreur et d'audit sous un seul sourcetype : seul leur contenu permet de les distinguer. Définissez le format `key=value` sur `LOG_FORMAT` (sans suffixe) pour que les lignes d'accès envoyées le portent. Cela remplace le format par défaut dans `access.log`.
+
+    ```yaml
+    services:
+      bunkerweb:
+        image: bunkerity/bunkerweb:1.6.18-rc4
+        logging:
+          driver: splunk
+          options:
+            splunk-url: "https://splunk.example.com:8088"
+            splunk-token: "<HEC token>"
+            splunk-format: raw
+            splunk-sourcetype: "bunkerweb:docker"
+    ```
+
 ## Meilleures pratiques de journalisation Docker {#docker-logging-best-practices}
 
 Lors de l'utilisation de Docker, il est important de gérer les journaux des conteneurs pour éviter qu'ils ne consomment un espace disque excessif. Par défaut, Docker utilise le pilote de journalisation `json-file`, ce qui peut entraîner des fichiers journaux très volumineux s'il n'est pas configuré.
@@ -3120,7 +3286,7 @@ Vous pouvez configurer le pilote de journalisation pour vos services dans votre 
 ```yaml
 services:
   bunkerweb:
-    image: bunkerity/bunkerweb:1.6.18-rc3
+    image: bunkerity/bunkerweb:1.6.18-rc4
     logging:
       driver: "json-file"
       options:
@@ -3229,7 +3395,7 @@ Les variables couramment utilisées sont :
         -p 80:8080/tcp \
         -p 443:8443/tcp \
         -p 443:8443/udp \
-        bunkerity/bunkerweb-all-in-one:1.6.18-rc3
+        bunkerity/bunkerweb-all-in-one:1.6.18-rc4
     ```
 
     Si le conteneur existe déjà, recréez-le pour appliquer le nouvel environnement.
@@ -3240,7 +3406,7 @@ Les variables couramment utilisées sont :
 
     ```yaml
     bw-scheduler:
-      image: bunkerity/bunkerweb-scheduler:1.6.18-rc3
+      image: bunkerity/bunkerweb-scheduler:1.6.18-rc4
       ...
       environment:
         HTTP_PROXY: "http://proxy.example.local:3128"
@@ -3259,7 +3425,7 @@ Les variables couramment utilisées sont :
 
     ```yaml
     bw-scheduler:
-      image: bunkerity/bunkerweb-scheduler:1.6.18-rc3
+      image: bunkerity/bunkerweb-scheduler:1.6.18-rc4
       ...
       environment:
         HTTP_PROXY: "http://proxy.example.local:3128"
@@ -3302,7 +3468,7 @@ Les variables couramment utilisées sont :
 
     ```yaml
     bw-scheduler:
-      image: bunkerity/bunkerweb-scheduler:1.6.18-rc3
+      image: bunkerity/bunkerweb-scheduler:1.6.18-rc4
       ...
       environment:
         HTTP_PROXY: "http://proxy.example.local:3128"
@@ -3571,12 +3737,12 @@ Le **serveur MCP BunkerWeb** permet aux assistants IA comme **Claude Code** et *
 
 ### Exemple Docker Compose
 
-Un exemple complet est disponible dans [`examples/mcp-stack/`](https://github.com/bunkerity/bunkerweb/tree/v1.6.18-rc3/examples/mcp-stack) :
+Un exemple complet est disponible dans [`examples/mcp-stack/`](https://github.com/bunkerity/bunkerweb/tree/v1.6.18-rc4/examples/mcp-stack) :
 
 ```yaml
 services:
   bw-api:
-    image: bunkerity/bunkerweb-api:1.6.18-rc3
+    image: bunkerity/bunkerweb-api:1.6.18-rc4
     environment:
       API_TOKEN: "my-bearer-token-for-mcp"
       DATABASE_URI: "mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db"
@@ -4400,11 +4566,11 @@ Les modèles utilisent la syntaxe de modèle Lua avec les délimiteurs suivants 
         ```yaml
         services:
           bunkerweb:
-            image: bunkerity/bunkerweb:1.6.18-rc3
+            image: bunkerity/bunkerweb:1.6.18-rc4
             # ... autres paramètres (pas de variables d'environnement nécessaires ici pour les pages personnalisées)
 
           bw-scheduler:
-            image: bunkerity/bunkerweb-scheduler:1.6.18-rc3
+            image: bunkerity/bunkerweb-scheduler:1.6.18-rc4
             volumes:
               - ./templates:/custom_templates:ro
             environment:
@@ -4487,7 +4653,7 @@ Les modèles utilisent la syntaxe de modèle Lua avec les délimiteurs suivants 
             spec:
               containers:
                 - name: bunkerweb-scheduler
-                  image: bunkerity/bunkerweb-scheduler:1.6.18-rc3
+                  image: bunkerity/bunkerweb-scheduler:1.6.18-rc4
                   env:
                     - name: CUSTOM_ERROR_PAGE
                       value: "/custom_templates/error.html"

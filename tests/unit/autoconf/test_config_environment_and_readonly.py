@@ -68,7 +68,7 @@ def test_invalid_settings_are_dropped_with_a_warning(cfg, fake_db):
     apply(cfg, [{"SERVER_NAME": HOST, "NOT_A_SETTING": "x"}])
 
     assert f"{HOST}_NOT_A_SETTING" not in fake_db.saved_configs[0]
-    assert cfg.log.has("Variable NOT_A_SETTING: x is not a valid autoconf setting (setting NOT_A_SETTING not found), ignoring it", logging.WARNING)
+    assert cfg.log.has("Variable NOT_A_SETTING is not a valid autoconf setting (setting NOT_A_SETTING not found), ignoring it", logging.WARNING)
 
 
 def test_validation_knows_the_services_already_in_the_database(cfg, fake_db):

@@ -160,9 +160,9 @@
     },
     {
       "id": "lua-resty-session",
-      "name": "lua-resty-session v4.2.0",
+      "name": "lua-resty-session v4.3.0",
       "url": "https://github.com/bungle/lua-resty-session.git",
-      "commit": "9c7e43735b62819b69927b3104c9e1f47696c30a",
+      "commit": "7673f98c1ca67d079ba950f4abbe131ea9ee933b",
       "post_install": "rm -r src/deps/src/lua-resty-session/t"
     },
     {
@@ -291,11 +291,32 @@
       "post_install": "rm -r src/deps/src/stream-lua-nginx-module/t"
     },
     {
+      "id": "yajl",
+      "name": "YAJL v2.1.1 + Debian 2.1.0-7 security fixes",
+      "url": "https://github.com/lloyd/yajl.git",
+      "commit": "5e3a7856e643b4d6410ddc3f84bc2f38174f2872",
+      "post_install": "for cve in CVE-2017-16516 CVE-2022-24795 CVE-2023-33460; do patch --batch --forward --fuzz=0 --no-backup-if-mismatch -p1 -d src/deps/src/yajl < src/deps/misc/yajl-$cve.patch || exit; done"
+    },
+    {
       "id": "zlib",
       "name": "zlib v1.3.2",
       "url": "https://github.com/madler/zlib.git",
       "commit": "da607da739fa6047df13e66a2af6b8bec7c2a498",
       "post_install": "rm -r src/deps/src/zlib/doc src/deps/src/zlib/examples"
+    },
+    {
+      "id": "zstd",
+      "name": "Zstandard v1.5.7",
+      "url": "https://github.com/facebook/zstd.git",
+      "commit": "f8745da6ff1ad1e7bab384bd1f9d742439278e99",
+      "post_install": "rm -r src/deps/src/zstd/tests src/deps/src/zstd/contrib src/deps/src/zstd/doc src/deps/src/zstd/programs src/deps/src/zstd/build src/deps/src/zstd/examples src/deps/src/zstd/zlibWrapper"
+    },
+    {
+      "id": "zstd-nginx-module",
+      "name": "Nginx Zstandard v0.2.2",
+      "url": "https://github.com/GetPageSpeed/zstd-nginx-module.git",
+      "commit": "6bce903d3f02416d478fb11efeb0303945bdbca9",
+      "post_install": "rm -r src/deps/src/zstd-nginx-module/t && rm src/deps/src/zstd-nginx-module/Dockerfile.* src/deps/src/zstd-nginx-module/docker-compose.test.yml src/deps/src/zstd-nginx-module/docker-run-tests.sh"
     }
   ]
 }

@@ -13,6 +13,7 @@ staging:
       # no Dockerfile on either side.
       fedora/43: '["ubuntu-latest"]'
       fedora/44: '["ubuntu-latest"]'
+      fedora/45: '["ubuntu-latest"]'
     amd64:
       ubuntu/resolute: '["ubuntu-latest"]'
       ubuntu/noble: '["ubuntu-latest"]'

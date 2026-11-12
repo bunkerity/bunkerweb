@@ -1,4 +1,4 @@
-FROM redhat/ubi10:10.2@sha256:7495bfa53ae7a81a58aeface0bb4858d12741832c542c29dc690d67b183b73b0 AS builder
+FROM redhat/ubi10:10.2@sha256:0e8ccad7d35f5fd756f4f2202f018b8d3c3e8bb9af8e627d874239381a00ab41 AS builder
 
 ENV OS=rhel
 ENV OS_VERSION=10
@@ -19,7 +19,7 @@ RUN dnf install -y wget make yum-utils dnf-plugins-core && \
   dnf install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-10.noarch.rpm && \
   rpm -e --nodeps openssl-fips-provider-so || true && \
   dnf config-manager --set-enabled crb || true && \
-  dnf install -y --skip-broken --setopt=install_weak_deps=False openssl-libs openssl-devel readline-devel python3.12 python3.12-devel brotli brotli-devel gperftools-devel perl libxslt-devel libxml2 yajl libxslt bash gd gd-devel gcc-c++ gawk libtool pcre2 pcre2-devel automake autoconf gcc make git zlib-devel libxml2-devel pkgconf libcurl-devel libmaxminddb lmdb-devel ssdeep-devel cargo patch && \
+  dnf install -y --skip-broken --setopt=install_weak_deps=False openssl-libs openssl-devel readline-devel python3.12 python3.12-devel brotli brotli-devel gperftools-devel perl libxslt-devel libxml2 libxslt bash gd gd-devel gcc-c++ gawk libtool pcre2 pcre2-devel automake autoconf gcc make cmake git zlib-devel libxml2-devel pkgconf libcurl-devel libmaxminddb lmdb-devel ssdeep-devel cargo patch && \
   dnf install -y https://nginx.org/packages/rhel/10/$(uname -m)/RPMS/nginx-${NGINX_VERSION}-1.el10.ngx.$(uname -m).rpm
 
 WORKDIR /tmp/bunkerweb/deps
@@ -148,10 +148,7 @@ RUN if [ "$SKIP_MINIFY" != "yes" ] && [ "$SKIP_MINIFY_HTML" != "yes" ]; then \
     echo "Skipping HTML minification"; \
     fi
 
-FROM redhat/ubi10:10.2@sha256:7495bfa53ae7a81a58aeface0bb4858d12741832c542c29dc690d67b183b73b0
-
-# Set default umask to prevent huge recursive chmod increasing the final image size
-RUN umask 027
+FROM redhat/ubi10:10.2@sha256:0e8ccad7d35f5fd756f4f2202f018b8d3c3e8bb9af8e627d874239381a00ab41
 
 # Install fpm
 RUN dnf install -y wget redhat-rpm-config rpm-build yum-utils gcc make && \
@@ -174,7 +171,8 @@ RUN install -m 755 helpers/bwcli /usr/bin/bwcli && \
   echo "Linux" > INTEGRATION && \
   mkdir -p /etc/bunkerweb/configs /etc/bunkerweb/plugins /var/cache/bunkerweb /var/tmp/bunkerweb /var/run/bunkerweb /var/log/bunkerweb /var/lib/bunkerweb /var/www/html && \
   for dir in $(echo "plugins pro/plugins configs/http configs/stream configs/server-http configs/server-stream configs/default-server-http configs/modsec configs/modsec-crs configs/crs-plugins-before configs/crs-plugins-after") ; do mkdir -p "/etc/bunkerweb/${dir}" ; done && \
-  touch /var/log/bunkerweb/error.log /var/log/bunkerweb/access.log /var/log/bunkerweb/modsec_audit.log
+  touch /var/log/bunkerweb/error.log /var/log/bunkerweb/access.log /var/log/bunkerweb/modsec_audit.log && \
+  chmod 640 /var/log/bunkerweb/*.log
 
 COPY --chmod=660 src/bw/misc/asn.mmdb /var/tmp/bunkerweb/asn.mmdb
 COPY --chmod=660 src/bw/misc/country.mmdb /var/tmp/bunkerweb/country.mmdb

@@ -653,6 +653,8 @@ actions:
     cluster: true
     query: "PING"
     result: "True"
+    # Discovery tries the refused seed during startup, before the request below.
+    log: "unable to connect ip:port redis-cluster-1:6399"
     config:
       REDIS_DATABASE: "0"
       REDIS_CLUSTER_NODES: "redis-cluster-1:6399 redis-cluster-1:6379 redis-cluster-2:6379 redis-cluster-3:6379"
@@ -665,8 +667,6 @@ actions:
     type: status
     url: "http://www.example.com/?id=/etc/passwd"
     status: 403
-    # The refused seed is tried first; the log line proves it was, not just that the cluster worked.
-    log: "unable to connect ip:port redis-cluster-1:6399"
     headers:
       X-Forwarded-For: "192.168.0.254"
     integrations:

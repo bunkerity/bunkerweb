@@ -2,9 +2,10 @@ from io import BytesIO
 from json import JSONDecodeError, loads
 
 from flask import Blueprint, Response, redirect, render_template, request, send_file, url_for
-from flask_login import login_required
+from flask_login import current_user, login_required
 from werkzeug.utils import secure_filename
 
+from common_utils import is_sensitive_job_cache_file  # type: ignore
 from app.dependencies import BW_CONFIG, DB
 from app.utils import LOGGER, flash, get_printable_content
 
@@ -37,12 +38,22 @@ def cache_view(service: str, plugin_id: str, job_name: str, file_name: str):
     else:
         file_name = secure_filename(file_name)
 
-    cache_file = DB.get_job_cache_file(
+    # Super administrators only (`admin`, not an assigned admin role); checked on the normalised name, before the DB read.
+    if is_sensitive_job_cache_file(file_name, plugin_id, job_name) and not current_user.admin:
+        return Response("Forbidden", status=403)
+
+    cached = DB.get_job_cache_file(
         job_name,
         file_name,
         service_id=service if service != "global" else None,
         plugin_id=plugin_id,
+        with_info=True,
     )
+    # The lookup follows the database collation, so the row found may carry other spellings than the request (case, trailing
+    # spaces): decide again on the stored names, before any byte leaves.
+    if cached and not current_user.admin and is_sensitive_job_cache_file(cached["file_name"], cached["plugin_id"], cached["job_name"]):
+        return Response("Forbidden", status=403)
+    cache_file = cached["data"] if cached else None
 
     download = request.args.get("download", False)
     if download:

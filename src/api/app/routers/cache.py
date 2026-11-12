@@ -2,8 +2,10 @@ from datetime import datetime
 from typing import Any, Dict, List, Optional
 from urllib.parse import quote
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Query, Request
 from fastapi.responses import JSONResponse, Response
+from common_utils import is_sensitive_job_cache_file  # type: ignore
+
 from ..schemas import CacheFilesDeleteRequest, CacheFileKey
 
 from ..auth.guard import guard
@@ -33,6 +35,7 @@ def _decode_printable(b: Optional[bytes]) -> tuple[str, bool]:
 
 @router.get("", dependencies=[Depends(guard)])
 def list_cache(
+    request: Request,
     service: Optional[str] = None,
     plugin: Optional[str] = None,
     job_name: Optional[str] = None,
@@ -44,8 +47,9 @@ def list_cache(
         service: Filter by service ID
         plugin: Filter by plugin ID
         job_name: Filter by job name
-        with_data: Include file content (text files only)
+        with_data: Include file content (text files only); never for sensitive entries unless the caller is an API admin
     """
+    is_admin = getattr(request.state, "auth_admin", False) is True
     items = get_db().get_jobs_cache_files(with_data=with_data, job_name=job_name or "", plugin_id=plugin or "")
     out: List[Dict[str, Any]] = []
     for it in items:
@@ -60,7 +64,7 @@ def list_cache(
             "last_update": last_update.astimezone().isoformat() if isinstance(last_update, datetime) else None,
             "checksum": it.get("checksum"),
         }
-        if with_data:
+        if with_data and (is_admin or not is_sensitive_job_cache_file(it.get("file_name") or "", it.get("plugin_id") or "", it.get("job_name") or "")):
             text, printable = _decode_printable(it.get("data"))
             data["data"] = text
             data["printable"] = printable
@@ -83,6 +87,7 @@ def _transform_filename(path_token: str) -> str:
     response_model=None,
 )
 def fetch_cache_file(
+    request: Request,
     service: str,
     plugin_id: str,
     job_name: str,
@@ -98,11 +103,19 @@ def fetch_cache_file(
         file_name: File name
         download: Return as downloadable attachment
     """
-    db = get_db()
     fname = _transform_filename(file_name)
-    data = db.get_job_cache_file(job_name, fname, service_id=_normalize_service(service) or "", plugin_id=plugin_id, with_info=True, with_data=True)
+    # Before the DB read, and for absent rows too, so the answer does not reveal which sensitive names exist. Only the
+    # Basic admin and API_TOKEN paths set `auth_admin`; an admin-issued Biscuit deliberately does not.
+    is_admin = getattr(request.state, "auth_admin", False) is True
+    if not is_admin and is_sensitive_job_cache_file(fname, plugin_id, job_name):
+        return JSONResponse(status_code=403, content={"status": "error", "message": "Forbidden"})
+    data = get_db().get_job_cache_file(job_name, fname, service_id=_normalize_service(service) or "", plugin_id=plugin_id, with_info=True, with_data=True)
     if not data:
         return JSONResponse(status_code=404, content={"status": "error", "message": "Cache file not found"})
+    # The lookup follows the database collation, so the row found may carry other spellings than the request (case, trailing
+    # spaces): decide again on the stored names, before any byte leaves.
+    if not is_admin and is_sensitive_job_cache_file(data["file_name"], data["plugin_id"], data["job_name"]):
+        return JSONResponse(status_code=403, content={"status": "error", "message": "Forbidden"})
     if download:
         content = data.get("data") if isinstance(data, dict) else data
         if not isinstance(content, (bytes, bytearray)):

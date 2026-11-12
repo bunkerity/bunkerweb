@@ -755,12 +755,27 @@ class Templator:
             full_config = self._get_server_config(server, self._global_only_full_config, self._server_specific_full_config.get(server, {}))
             default_config = self._get_server_config(server, self._global_only_default_config, self._server_specific_default_config.get(server, {}))
 
+        if full_config.get("SERVER_TYPE", "http") == "http" and full_config.get("USE_REVERSE_PROXY") == full_config.get("USE_PROXY_CACHE") == "yes":
+            for key, host in full_config.items():
+                if not key.startswith("REVERSE_PROXY_HOST") or host == "":
+                    continue
+                suffix = key[18:]
+                if suffix and not suffix.startswith("_"):
+                    continue
+                setting = f"REVERSE_PROXY_BUFFERING{suffix}"
+                if full_config.get(setting, "yes") == "no":
+                    logger.warning(
+                        f"Service {server}: {setting}=no with USE_PROXY_CACHE=yes; new responses are not cached while response buffering is off "
+                        "unless the upstream enables response buffering."
+                    )
+
         server_custom_undefined = create_custom_undefined_class(default_config)
 
         template_vars = self._base_template_vars.copy()
         template_vars["all"] = full_config
         template_vars.update(config)
-        # Derived ownership cannot be shadowed by a setting.
+        # Derived values cannot be shadowed by a setting.
+        template_vars["global_config"] = self._global_only_full_config
         template_vars["STREAM_REUSEPORT_PORTS"] = self._stream_reuseport_ports.get(server, set())
 
         failures = []

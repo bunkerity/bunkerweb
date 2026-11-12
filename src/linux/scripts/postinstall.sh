@@ -15,18 +15,29 @@ function do_and_check_cmd() {
     return 0
 }
 
+set -o pipefail
+
 # Decompress deps directory with pigz for fastest decompression
 echo "Decompressing deps directory with pigz..."
 cd /usr/share/bunkerweb || exit 1
 if [ -f "deps.tar.gz" ]; then
-    rm -rf deps
+    deps_stage=$(mktemp -d /usr/share/bunkerweb/.deps.XXXXXX) || exit 1
     # Use pigz if available, fallback to gzip
     if command -v pigz >/dev/null 2>&1; then
-        tar --use-compress-program="pigz -d -p$(nproc)" -xf deps.tar.gz
+        do_and_check_cmd tar --use-compress-program="pigz -d -p$(nproc)" -xf deps.tar.gz -C "$deps_stage"
     else
-        tar -xzf deps.tar.gz
+        do_and_check_cmd tar -xzf deps.tar.gz -C "$deps_stage"
     fi
-    rm -f deps.tar.gz
+    [ -d "$deps_stage/deps" ] || { echo "❌ Dependency archive has no deps directory" >&2; exit 1; }
+    if [ -d deps ]; then
+        do_and_check_cmd mv deps "$deps_stage/previous"
+    fi
+    if ! mv "$deps_stage/deps" deps; then
+        [ ! -d "$deps_stage/previous" ] || mv "$deps_stage/previous" deps
+        exit 1
+    fi
+    do_and_check_cmd rm -rf "$deps_stage"
+    do_and_check_cmd rm -f deps.tar.gz
     echo "Decompression completed successfully"
 else
     echo "No compressed deps directory found, skipping decompression"
@@ -42,55 +53,74 @@ if [ -f /var/lib/bunkerweb/db.lock ]; then
     do_and_check_cmd chmod 0644 /var/lib/bunkerweb/db.lock
 fi
 
-chmod 755 /var/log/bunkerweb
-chmod 770 /var/cache/bunkerweb/ /var/tmp/bunkerweb/ /var/run/bunkerweb/
+do_and_check_cmd chmod 755 /var/log/bunkerweb
+# Tighten active logs and archives in place, preserving narrower administrator modes.
+do_and_check_cmd find /var/log/bunkerweb -type f -exec chmod u-x,g-wx,o-rwx {} +
+do_and_check_cmd chmod 770 /var/cache/bunkerweb/ /var/tmp/bunkerweb/ /var/run/bunkerweb/
 # Ensure temp dir enforces group inheritance and no access for others
-chmod 2770 /var/tmp/bunkerweb/
-chmod 550 -R /usr/share/bunkerweb/
-find . \( -path './api' -o -path './scheduler' -o -path './ui' -o -path './cli' -o -path './lua' -o -path './core' -o -path './db' -o -path './gen' -o -path './utils' -o -path './helpers' -o -path './scripts' -o -path './deps' \) -prune -o -type f -print0 | xargs -0 -P "$(nproc)" -n 1024 chmod 440
-find api/ scheduler/ ui/ cli/ lua/ core/ db/ gen/ utils/ helpers/ scripts/ deps/ -type f ! -path 'deps/python/bin/*' ! -name '*.lua' ! -name '*.py' ! -name '*.pyc' ! -name '*.sh' ! -name '*.so' -print0 | xargs -0 -P "$(nproc)" -n 1024 chmod 440
-chmod 770 -R db/alembic/
+do_and_check_cmd chmod 2770 /var/tmp/bunkerweb/
+do_and_check_cmd chmod 550 -R /usr/share/bunkerweb/
+find . \( -path './api' -o -path './scheduler' -o -path './ui' -o -path './cli' -o -path './lua' -o -path './core' -o -path './db' -o -path './gen' -o -path './utils' -o -path './helpers' -o -path './scripts' -o -path './deps' \) -prune -o -type f -print0 | xargs -0 -r -P "$(nproc)" -n 1024 chmod 440 || exit 1
+find api/ scheduler/ ui/ cli/ lua/ core/ db/ gen/ utils/ helpers/ scripts/ deps/ -type f ! -path 'deps/python/bin/*' ! -name '*.lua' ! -name '*.py' ! -name '*.pyc' ! -name '*.sh' ! -name '*.so' -print0 | xargs -0 -r -P "$(nproc)" -n 1024 chmod 440 || exit 1
 
 # Retro-tighten 0644 backups left by pre-fix versions.
 chmod 0600 /var/tmp/variables.env /var/tmp/ui.env /var/tmp/scheduler.env \
            /var/tmp/api.env /var/tmp/api.yml /var/tmp/db.sqlite3 2>/dev/null || true
 
-# Function to migrate files from old locations to new ones
+# Restore only the snapshot published by this transaction's pre-install hook.
+transaction=/var/backups/bunkerweb/transaction
+UPGRADE=no
+if [ -f "$transaction/upgrade" ]; then
+    UPGRADE=$(cat "$transaction/upgrade") || exit 1
+    case "$UPGRADE" in
+        yes|no) ;;
+        *) echo "❌ Invalid upgrade transaction state" >&2; exit 1 ;;
+    esac
+elif { [ "${1:-}" = configure ] && [ -n "${2:-}" ]; } || [ -f /var/tmp/bunkerweb_upgrade ]; then
+    UPGRADE=yes
+fi
+if [ "$UPGRADE" = yes ]; then
+    do_and_check_cmd touch /var/tmp/bunkerweb_upgrade
+else
+    do_and_check_cmd rm -f /var/tmp/bunkerweb_upgrade
+fi
+
+function was_active() {
+    systemctl is-active --quiet "$1" || { [ -f "$transaction/active" ] && grep -qxF "$1" "$transaction/active"; }
+}
+
 function migrate_file() {
     local old_path="$1"
     local new_path="$2"
 
     if [ -f "$old_path" ]; then
-        echo "Old file $old_path found!"
-        if [ ! -f /var/tmp/bunkerweb_upgrade ]; then
-            touch /var/tmp/bunkerweb_upgrade
+        local replacement
+        replacement=$(mktemp "${new_path}.XXXXXX") || exit 1
+        do_and_check_cmd cp "$old_path" "$replacement"
+        do_and_check_cmd chown root:nginx "$replacement"
+        do_and_check_cmd chmod 660 "$replacement"
+        do_and_check_cmd mv -f "$replacement" "$new_path"
+        if [ "$new_path" = /var/lib/bunkerweb/db.sqlite3 ]; then
+            do_and_check_cmd rm -f "${new_path}-wal" "${new_path}-shm" "${new_path}-journal"
         fi
-        echo "Copying old file to new location: $new_path..."
-        # Gate the copy: a failed cp must NOT delete the source, and must return non-zero so
-        # the caller's `|| migrate_file <fallback>` chain still fires (no silent backup loss).
-        if ! cp "$old_path" "$new_path"; then
-            echo "❌ Failed to copy $old_path to $new_path; leaving source intact."
-            return 1
-        fi
-        echo "Removing old file..."
-        do_and_check_cmd rm -f "$old_path"
-        do_and_check_cmd chown root:nginx "$new_path"
-        do_and_check_cmd chmod 660 "$new_path"
-        return 0  # Success
-    else
-        echo "Old file $old_path not found. Skipping copy..."
-        return 1  # File not found
     fi
 }
 
-# Restore upgrade backups: /var/backups/bunkerweb (current), else legacy /var/tmp
-# (upgrades coming from a pre-fix version whose postrm still wrote there).
-migrate_file "/var/backups/bunkerweb/variables.env" "/etc/bunkerweb/variables.env" || migrate_file "/var/tmp/variables.env" "/etc/bunkerweb/variables.env"
-migrate_file "/var/backups/bunkerweb/scheduler.env" "/etc/bunkerweb/scheduler.env" || migrate_file "/var/tmp/scheduler.env" "/etc/bunkerweb/scheduler.env"
-migrate_file "/var/backups/bunkerweb/ui.env" "/etc/bunkerweb/ui.env" || migrate_file "/var/tmp/ui.env" "/etc/bunkerweb/ui.env"
-migrate_file "/var/backups/bunkerweb/api.env" "/etc/bunkerweb/api.env" || migrate_file "/var/tmp/api.env" "/etc/bunkerweb/api.env"
-migrate_file "/var/backups/bunkerweb/api.yml" "/etc/bunkerweb/api.yml" || migrate_file "/var/tmp/api.yml" "/etc/bunkerweb/api.yml"
-migrate_file "/var/backups/bunkerweb/db.sqlite3" "/var/lib/bunkerweb/db.sqlite3" || migrate_file "/var/tmp/db.sqlite3" "/var/lib/bunkerweb/db.sqlite3"
+if [ "$UPGRADE" = yes ] && [ -f "$transaction/upgrade" ] && [ ! -f "$transaction/restored" ]; then
+    for service in bunkerweb bunkerweb-scheduler bunkerweb-ui bunkerweb-api; do
+        do_and_check_cmd systemctl stop "$service"
+    done
+    if [ -f "$transaction/db.sqlite3" ]; then
+        check=$(sqlite3 -batch -bail -readonly "$transaction/db.sqlite3" 'PRAGMA quick_check;') || exit 1
+        [ "$check" = ok ] || { echo "❌ Invalid SQLite upgrade snapshot: $check" >&2; exit 1; }
+    fi
+    for name in variables.env scheduler.env ui.env api.env api.yml; do
+        migrate_file "$transaction/$name" "/etc/bunkerweb/$name"
+    done
+    migrate_file "$transaction/db.sqlite3" /var/lib/bunkerweb/db.sqlite3
+    # A failed service restart may be retried after services have already written new data.
+    do_and_check_cmd touch "$transaction/restored"
+fi
 
 # Create /var/www/html if needed
 if [ ! -d /var/www/html ] ; then
@@ -102,7 +132,7 @@ else
     echo "/var/www/html directory already exists, skipping copy..."
 fi
 
-systemctl daemon-reload
+do_and_check_cmd systemctl daemon-reload
 
 # Always stop and disable nginx service
 echo "🛑 Stopping and disabling the nginx service..."
@@ -147,7 +177,7 @@ if {
 } && [ "$SERVICE_BUNKERWEB" != "no" ]; then
     # Upgrade scenario
     if [ -f /var/tmp/bunkerweb_upgrade ]; then
-        if systemctl is-active --quiet bunkerweb; then
+        if was_active bunkerweb; then
             echo "📋 Reloading the BunkerWeb service after upgrade..."
             do_and_check_cmd systemctl restart bunkerweb
         fi
@@ -160,7 +190,7 @@ if {
 # topology was declared this run — enabled-but-stopped. Clearing leftovers keeps the
 # host's systemd state consistent with its real topology so upgrade-time detection
 # stays correct; we never touch enabled-but-stopped units on a bare upgrade.
-elif systemctl is-active --quiet bunkerweb || { [ "$TOPOLOGY_DECLARED" = "yes" ] && systemctl is-enabled --quiet bunkerweb 2>/dev/null; }; then
+elif was_active bunkerweb || { [ "$TOPOLOGY_DECLARED" = "yes" ] && systemctl is-enabled --quiet bunkerweb 2>/dev/null; }; then
     echo "🛑 Disabling and stopping the BunkerWeb service..."
     do_and_check_cmd systemctl disable --now bunkerweb
 else
@@ -190,7 +220,7 @@ if {
     # Upgrade scenario
     else
         # Restart the scheduler service only if it's already running
-        if systemctl is-active --quiet bunkerweb-scheduler; then
+        if was_active bunkerweb-scheduler; then
             echo "📋 Restarting the BunkerWeb Scheduler service after upgrade..."
             do_and_check_cmd systemctl restart bunkerweb-scheduler
         fi
@@ -199,7 +229,7 @@ if {
 # topology was declared this run — enabled-but-stopped. An enabled-but-stopped scheduler
 # left over from a prior full install would otherwise make this worker look like a full
 # stack on the next upgrade; but on a bare upgrade we leave the operator's units alone.
-elif systemctl is-active --quiet bunkerweb-scheduler || { [ "$TOPOLOGY_DECLARED" = "yes" ] && systemctl is-enabled --quiet bunkerweb-scheduler 2>/dev/null; }; then
+elif was_active bunkerweb-scheduler || { [ "$TOPOLOGY_DECLARED" = "yes" ] && systemctl is-enabled --quiet bunkerweb-scheduler 2>/dev/null; }; then
     echo "🛑 Disabling and stopping the BunkerWeb Scheduler service..."
     do_and_check_cmd systemctl disable --now bunkerweb-scheduler
 else
@@ -261,14 +291,14 @@ EOF
     # Upgrade scenario
     else
         # Restart the UI service only if it's already running
-        if systemctl is-active --quiet bunkerweb-ui; then
+        if was_active bunkerweb-ui; then
             echo "📋 Restarting the BunkerWeb UI service after upgrade..."
             do_and_check_cmd systemctl restart bunkerweb-ui
         fi
     fi
 # Disable UI if it shouldn't be running but is still active, or — only when the topology
 # was declared this run — enabled-but-stopped.
-elif systemctl is-active --quiet bunkerweb-ui || { [ "$TOPOLOGY_DECLARED" = "yes" ] && systemctl is-enabled --quiet bunkerweb-ui 2>/dev/null; }; then
+elif was_active bunkerweb-ui || { [ "$TOPOLOGY_DECLARED" = "yes" ] && systemctl is-enabled --quiet bunkerweb-ui 2>/dev/null; }; then
     echo "🛑 Disabling and stopping the BunkerWeb UI service..."
     do_and_check_cmd systemctl disable --now bunkerweb-ui
 else
@@ -279,19 +309,19 @@ fi
 echo "Configuring BunkerWeb API service..."
 
 # Enable API only when explicitly requested (via env or flag)
-if [ "${SERVICE_API:-no}" = "yes" ]; then
+if [ "${SERVICE_API:-no}" = "yes" ] || { [ "$UPGRADE" = yes ] && [ "$TOPOLOGY_DECLARED" = no ] && [ -z "${SERVICE_API+x}" ]; }; then
     # Fresh installation or explicit API enablement
     if [ ! -f /var/tmp/bunkerweb_upgrade ]; then
         echo "🚀 Enabling and starting the BunkerWeb API service..."
         do_and_check_cmd systemctl enable --now bunkerweb-api
     else
         # Restart API only if already running
-        if systemctl is-active --quiet bunkerweb-api; then
+        if was_active bunkerweb-api; then
             echo "📋 Restarting the BunkerWeb API service after upgrade..."
             do_and_check_cmd systemctl restart bunkerweb-api
         fi
     fi
-elif systemctl is-active --quiet bunkerweb-api || { [ "$TOPOLOGY_DECLARED" = "yes" ] && systemctl is-enabled --quiet bunkerweb-api 2>/dev/null; }; then
+elif was_active bunkerweb-api || { [ "$TOPOLOGY_DECLARED" = "yes" ] && systemctl is-enabled --quiet bunkerweb-api 2>/dev/null; }; then
     echo "🛑 Disabling and stopping the BunkerWeb API service..."
     do_and_check_cmd systemctl disable --now bunkerweb-api
 else
@@ -310,8 +340,31 @@ if [ "$TOPOLOGY_DECLARED" = "yes" ] && [ -n "$RESOLVED_INSTALL_TYPE" ]; then
         || echo "ℹ️ Note: could not persist install-type marker at $INSTALL_TYPE_MARKER"
 fi
 
-if [ -f /var/tmp/bunkerweb_upgrade ]; then
-    rm -f /var/tmp/bunkerweb_upgrade
+# Old postrm/%postun may have written flat snapshots after pre-install. Keep them for
+# recovery, but never let them become the next transaction's restore source.
+backup_dir=/var/backups/bunkerweb
+do_and_check_cmd mkdir -p "$backup_dir"
+do_and_check_cmd chmod 0700 "$backup_dir"
+completed=$(mktemp -d "$backup_dir/completed.XXXXXX") || exit 1
+for name in variables.env scheduler.env ui.env api.env api.yml db.sqlite3; do
+    for legacy in "$backup_dir/$name" "/var/tmp/$name"; do
+        if [ -f "$legacy" ]; then
+            do_and_check_cmd chmod 0600 "$legacy"
+            # Keep current and /var/tmp snapshots distinct when both exist.
+            if [ "$legacy" = "$backup_dir/$name" ]; then
+                do_and_check_cmd mv "$legacy" "$completed/$name"
+            else
+                do_and_check_cmd mv "$legacy" "$completed/legacy-$name"
+            fi
+        fi
+    done
+done
+if [ -d "$transaction" ]; then
+    do_and_check_cmd mv "$transaction" "$completed/transaction"
+fi
+
+if [ "$UPGRADE" = yes ]; then
+    do_and_check_cmd rm -f /var/tmp/bunkerweb_upgrade
     echo "BunkerWeb has been successfully upgraded! 🎉"
 else
     echo "BunkerWeb has been successfully installed! 🎉"

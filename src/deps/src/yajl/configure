@@ -1,0 +1,81 @@
+#!/bin/sh
+#
+# Copyright (c) 2007-2014, Lloyd Hilaiel <me@lloyd.io>
+#
+# Permission to use, copy, modify, and/or distribute this software for any
+# purpose with or without fee is hereby granted, provided that the above
+# copyright notice and this permission notice appear in all copies.
+#
+# THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+# WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+# ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+# WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+# ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+# OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+
+prefix="/usr/local"
+usage="Usage: configure [options]
+    -p, --prefix PATH                Set installation prefix
+    -h, --help                       Output usage summary"
+if [ "$1" = "-h" ] || [ "$1" = "--help" ]
+then
+    echo "$usage"
+    exit 0
+fi
+if [ "$1" = "-p" ] || [ "$1" = "--prefix" ]
+then
+    if [ "$#" != 2 ]; then
+        echo "$usage"
+        exit 1
+    fi
+    prefix="$2"
+fi
+
+echo "== removing old build files"
+rm -rf build
+rm -f Makefile
+echo "== running CMake in build directory"
+mkdir build || exit 1
+cd build || exit 1
+cmake -DCMAKE_INSTALL_PREFIX="$prefix" .. ||
+{
+    echo "The \"cmake\" program is required to configure yajl."
+    echo "It's available from most ports/packaging systems and http://cmake.org"
+    exit 1
+}
+cd ..
+
+echo "== Generating Makefile"
+cat > ./Makefile <<EOS
+.PHONY: all clean distclean install package test distro
+all: distro doc test test-api
+
+distro:
+	@cd build && make
+
+doc:
+	@cd build && make doc
+
+test:
+	@cd build && make test
+
+test-api:
+	@cd build && make test-api
+
+clean:
+	@cd build && make clean
+
+distclean:
+	@rm -rf Makefile build
+	@rm -f yajl-*.tgz
+
+install: distro doc
+	@cd build && make install
+
+package: all
+	@echo \"compressing to $(basename build/yajl-*).tgz\"
+	@cd build && tar czf ../$(basename yajl-*).tgz yajl-*
+EOS
+
+echo "== Configured with installation prefix: $prefix"

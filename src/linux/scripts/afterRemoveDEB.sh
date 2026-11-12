@@ -24,36 +24,6 @@ function reload_systemd() {
     fi
 }
 
-# Detect and remove systemd services related to the package
-function remove_systemd_services() {
-    service_prefix=$1  # Prefix to identify relevant services
-    echo "ℹ️ Searching for services related to '$service_prefix'"
-
-    # Search for services in common locations
-    for dir in /etc/systemd/system /usr/lib/systemd/system /lib/systemd/system; do
-        if [ -d "$dir" ]; then
-            services=$(find "$dir" -type f -name "${service_prefix}*.service" -exec basename {} \;)
-            for service_file in $services; do
-                service_name="${service_file%.service}"
-                echo "ℹ️ Found service: $service_name"
-                echo "ℹ️ Removing $service_name service"
-
-                if command -v systemctl >/dev/null 2>&1; then
-                    do_and_check_cmd systemctl stop "$service_name" || echo "ℹ️ Service $service_name already stopped."
-                    do_and_check_cmd systemctl disable "$service_name"
-                else
-                    echo "❌ Systemctl not available, skipping service operations."
-                fi
-
-                # Remove the service file
-                do_and_check_cmd rm -f "$dir/$service_file"
-            done
-        fi
-    done
-
-    reload_systemd
-}
-
 # Remove directories or files if they exist
 function remove_path() {
     path=$1
@@ -78,18 +48,14 @@ function remove() {
     echo "ℹ️ Package is being uninstalled"
 
     # Tighten any backups left 0644 by pre-fix versions (legacy /var/tmp + current dir).
-    chmod 0600 /var/backups/bunkerweb/* \
-               /var/tmp/variables.env /var/tmp/ui.env /var/tmp/scheduler.env \
+    if [ -d /var/backups/bunkerweb ]; then
+        do_and_check_cmd find /var/backups/bunkerweb -maxdepth 1 -type f -exec chmod 0600 {} +
+    fi
+    chmod 0600 /var/tmp/variables.env /var/tmp/ui.env /var/tmp/scheduler.env \
                /var/tmp/api.env /var/tmp/api.yml /var/tmp/db.sqlite3 2>/dev/null || true
 
-    # Stop nginx if it is active
-    if command -v systemctl >/dev/null 2>&1 && systemctl is-active --quiet nginx; then
-        echo "ℹ️ Stopping nginx service"
-        do_and_check_cmd systemctl stop nginx
-    fi
-
-    # Dynamically remove all related systemd services
-    remove_systemd_services "bunkerweb"
+    # Units were stopped by prerm/%preun; vendor files belong to the package manager.
+    reload_systemd
 
     # /etc, /var/lib, /var/log, /var/backups/bunkerweb preserved (Debian Policy §10.8).
     remove_path "/usr/share/bunkerweb" "application files"
@@ -162,38 +128,14 @@ case "$1" in
     purge)
         purge
         ;;
+    upgrade|failed-upgrade)
+        # The new pre-install hook owns the current transaction snapshot.
+        ;;
+    abort-install|abort-upgrade|disappear)
+        # Rollback callbacks must not replace a known-good upgrade backup.
+        ;;
     *)
-        echo "ℹ️ Package is being upgraded"
-        # Back up config + DB to /var/backups/bunkerweb. /var/tmp is reaped by
-        # systemd-tmpfiles after 30d, which silently lost backups on delayed reinstalls.
-        backup_dir="/var/backups/bunkerweb"
-        do_and_check_cmd mkdir -p "$backup_dir"
-        do_and_check_cmd chmod 0700 "$backup_dir"
-        remove_path "$backup_dir/variables.env" "environment variables backup"
-        remove_path "$backup_dir/ui.env" "UI environment variables backup"
-        remove_path "$backup_dir/scheduler.env" "Scheduler environment variables backup"
-        remove_path "$backup_dir/api.env" "API environment variables backup"
-        remove_path "$backup_dir/api.yml" "API config backup"
-        remove_path "$backup_dir/db.sqlite3" "database backup"
-        # install -m 0600 (atomic) — backups must not leak credentials.
-        if [ -f /etc/bunkerweb/variables.env ]; then
-            do_and_check_cmd install -m 0600 -o root -g root /etc/bunkerweb/variables.env "$backup_dir/variables.env"
-        fi
-        if [ -f /etc/bunkerweb/ui.env ]; then
-            do_and_check_cmd install -m 0600 -o root -g root /etc/bunkerweb/ui.env "$backup_dir/ui.env"
-        fi
-        if [ -f /etc/bunkerweb/scheduler.env ]; then
-            do_and_check_cmd install -m 0600 -o root -g root /etc/bunkerweb/scheduler.env "$backup_dir/scheduler.env"
-        fi
-        if [ -f /etc/bunkerweb/api.env ]; then
-            do_and_check_cmd install -m 0600 -o root -g root /etc/bunkerweb/api.env "$backup_dir/api.env"
-        fi
-        if [ -f /etc/bunkerweb/api.yml ]; then
-            do_and_check_cmd install -m 0600 -o root -g root /etc/bunkerweb/api.yml "$backup_dir/api.yml"
-        fi
-        if [ -f /var/lib/bunkerweb/db.sqlite3 ]; then
-            do_and_check_cmd install -m 0600 -o root -g root /var/lib/bunkerweb/db.sqlite3 "$backup_dir/db.sqlite3"
-        fi
-        do_and_check_cmd touch /var/tmp/bunkerweb_upgrade
+        echo "❌ Unsupported postrm argument: $1" >&2
+        exit 1
         ;;
 esac

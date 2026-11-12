@@ -1,8 +1,8 @@
 # 高级用法
 
-GitHub 仓库的 [examples](https://github.com/bunkerity/bunkerweb/tree/v1.6.18-rc3/examples) 文件夹中提供了许多真实世界的用例示例。
+GitHub 仓库的 [examples](https://github.com/bunkerity/bunkerweb/tree/v1.6.18-rc4/examples) 文件夹中提供了许多真实世界的用例示例。
 
-我们还提供了许多样板文件，例如用于各种集成和数据库类型的 YAML 文件。这些都可以在 [misc/integrations](https://github.com/bunkerity/bunkerweb/tree/v1.6.18-rc3/misc/integrations) 文件夹中找到。
+我们还提供了许多样板文件，例如用于各种集成和数据库类型的 YAML 文件。这些都可以在 [misc/integrations](https://github.com/bunkerity/bunkerweb/tree/v1.6.18-rc4/misc/integrations) 文件夹中找到。
 
 本节仅关注高级用法和安全调整，请参阅文档的[功能部分](features.md)以查看所有可用的设置。
 
@@ -85,7 +85,7 @@ BunkerWeb 实际上支持两种方法来检索客户端的真实 IP 地址：
             -p 80:8080/tcp \
             -p 443:8443/tcp \
             -p 443:8443/udp \
-            bunkerity/bunkerweb-all-in-one:1.6.18-rc3
+            bunkerity/bunkerweb-all-in-one:1.6.18-rc4
         ```
 
         请注意，如果您的容器已经创建，您需要删除并重新创建它，以便更新新的环境变量。
@@ -96,7 +96,7 @@ BunkerWeb 实际上支持两种方法来检索客户端的真实 IP 地址：
 
         ```yaml
         bunkerweb:
-          image: bunkerity/bunkerweb:1.6.18-rc3
+          image: bunkerity/bunkerweb:1.6.18-rc4
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -104,7 +104,7 @@ BunkerWeb 实际上支持两种方法来检索客户端的真实 IP 地址：
             REAL_IP_HEADER: "X-Forwarded-For"
           ...
         bw-scheduler:
-          image: bunkerity/bunkerweb-scheduler:1.6.18-rc3
+          image: bunkerity/bunkerweb-scheduler:1.6.18-rc4
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -121,7 +121,7 @@ BunkerWeb 实际上支持两种方法来检索客户端的真实 IP 地址：
 
         ```yaml
         bunkerweb:
-          image: bunkerity/bunkerweb:1.6.18-rc3
+          image: bunkerity/bunkerweb:1.6.18-rc4
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -129,7 +129,7 @@ BunkerWeb 实际上支持两种方法来检索客户端的真实 IP 地址：
             REAL_IP_HEADER: "X-Forwarded-For"
           ...
         bw-scheduler:
-          image: bunkerity/bunkerweb-scheduler:1.6.18-rc3
+          image: bunkerity/bunkerweb-scheduler:1.6.18-rc4
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -176,7 +176,7 @@ BunkerWeb 实际上支持两种方法来检索客户端的真实 IP 地址：
 
         ```yaml
         bunkerweb:
-          image: bunkerity/bunkerweb:1.6.18-rc3
+          image: bunkerity/bunkerweb:1.6.18-rc4
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -184,7 +184,7 @@ BunkerWeb 实际上支持两种方法来检索客户端的真实 IP 地址：
             REAL_IP_HEADER: "X-Forwarded-For"
           ...
         bw-scheduler:
-          image: bunkerity/bunkerweb-scheduler:1.6.18-rc3
+          image: bunkerity/bunkerweb-scheduler:1.6.18-rc4
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -249,7 +249,7 @@ BunkerWeb 实际上支持两种方法来检索客户端的真实 IP 地址：
             -p 80:8080/tcp \
             -p 443:8443/tcp \
             -p 443:8443/udp \
-            bunkerity/bunkerweb-all-in-one:1.6.18-rc3
+            bunkerity/bunkerweb-all-in-one:1.6.18-rc4
         ```
 
         请注意，如果您的容器已经创建，您需要删除并重新创建它，以便更新新的环境变量。
@@ -260,7 +260,7 @@ BunkerWeb 实际上支持两种方法来检索客户端的真实 IP 地址：
 
         ```yaml
         bunkerweb:
-          image: bunkerity/bunkerweb:1.6.18-rc3
+          image: bunkerity/bunkerweb:1.6.18-rc4
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -270,7 +270,7 @@ BunkerWeb 实际上支持两种方法来检索客户端的真实 IP 地址：
           ...
         ...
         bw-scheduler:
-          image: bunkerity/bunkerweb-scheduler:1.6.18-rc3
+          image: bunkerity/bunkerweb-scheduler:1.6.18-rc4
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -288,7 +288,7 @@ BunkerWeb 实际上支持两种方法来检索客户端的真实 IP 地址：
 
         ```yaml
         bunkerweb:
-          image: bunkerity/bunkerweb:1.6.18-rc3
+          image: bunkerity/bunkerweb:1.6.18-rc4
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -298,7 +298,7 @@ BunkerWeb 实际上支持两种方法来检索客户端的真实 IP 地址：
           ...
         ...
         bw-scheduler:
-          image: bunkerity/bunkerweb-scheduler:1.6.18-rc3
+          image: bunkerity/bunkerweb-scheduler:1.6.18-rc4
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -350,7 +350,7 @@ BunkerWeb 实际上支持两种方法来检索客户端的真实 IP 地址：
 
         ```yaml
         bunkerweb:
-          image: bunkerity/bunkerweb:1.6.18-rc3
+          image: bunkerity/bunkerweb:1.6.18-rc4
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -360,7 +360,7 @@ BunkerWeb 实际上支持两种方法来检索客户端的真实 IP 地址：
           ...
         ...
         bw-scheduler:
-          image: bunkerity/bunkerweb-scheduler:1.6.18-rc3
+          image: bunkerity/bunkerweb-scheduler:1.6.18-rc4
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -485,8 +485,8 @@ Manager 是集群的大脑，运行 Scheduler、数据库以及可选的 Web 界
 
         ```bash
         # 下载脚本及校验文件
-        curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.18-rc3/install-bunkerweb.sh
-        curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.18-rc3/install-bunkerweb.sh.sha256
+        curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.18-rc4/install-bunkerweb.sh
+        curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.18-rc4/install-bunkerweb.sh.sha256
 
         # 校验完整性
         sha256sum -c install-bunkerweb.sh.sha256
@@ -588,7 +588,7 @@ Manager 是集群的大脑，运行 Scheduler、数据库以及可选的 Web 界
 
     services:
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.18-rc3
+        image: bunkerity/bunkerweb-scheduler:1.6.18-rc4
         environment:
           <<: *bw-ui-env
           BUNKERWEB_INSTANCES: "192.168.1.11 192.168.1.12" # 替换为 Worker IP
@@ -607,7 +607,7 @@ Manager 是集群的大脑，运行 Scheduler、数据库以及可选的 Web 界
           - bw-redis
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.6.18-rc3
+        image: bunkerity/bunkerweb-ui:1.6.18-rc4
         ports:
           - "7000:7000" # 暴露 UI 端口
         environment:
@@ -693,7 +693,7 @@ Worker 负责处理进入的流量。
     ```yaml title="docker-compose.yml"
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.18-rc3
+        image: bunkerity/bunkerweb:1.6.18-rc4
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -1130,7 +1130,7 @@ systemctl status systemd-resolved
         -p 80:8080/tcp \
         -p 443:8443/tcp \
         -p 443:8443/udp \
-        bunkerity/bunkerweb-all-in-one:1.6.18-rc3
+        bunkerity/bunkerweb-all-in-one:1.6.18-rc4
     ```
 
 === "Docker"
@@ -1158,7 +1158,7 @@ systemctl status systemd-resolved
           - bw-dns
 
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.18-rc3
+        image: bunkerity/bunkerweb:1.6.18-rc4
         ...
         environment:
           DNS_RESOLVERS: "dnsmasq"
@@ -1169,7 +1169,7 @@ systemctl status systemd-resolved
           - bw-dns
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.18-rc3
+        image: bunkerity/bunkerweb-scheduler:1.6.18-rc4
         ...
         environment:
           DNS_RESOLVERS: "dnsmasq"
@@ -1257,6 +1257,43 @@ systemctl status systemd-resolved
     !!! info "重新加载会重新读取该文件夹"
         重新加载会重新读取 `/etc/bunkerweb/configs`：在其中创建、修改或删除的文件都会被应用并保存到数据库。归 Web UI 或 API 所有的配置会保留其所有者，只有其内容会从文件中刷新。
 
+    **NGINX 从哪里引入各个类型**
+
+    NGINX 直接从 `/etc/bunkerweb/configs` 的子文件夹中引入这些文件；BunkerWeb 不会将它们复制到 `/etc/nginx`。在 Web UI 或 API 中创建的配置，调度程序会写入同样的文件夹。在多站点模式下，仅适用于某个服务的文件应放在再下一级的子文件夹中，该子文件夹以该服务 `SERVER_NAME` 中的第一个名称命名，例如 `server-http/www.example.com/hello-world.conf`。
+
+    | 类型                  | `/etc/bunkerweb/configs` 中的文件夹 | 引入位置                                                         | 服务子文件夹   |
+    | --------------------- | ----------------------------------- | ---------------------------------------------------------------- | -------------- |
+    | `http`                | `http/`                             | `nginx.conf` 的 `http` 块，位于核心和插件配置之后                | 否             |
+    | `stream`              | `stream/`                           | `nginx.conf` 的 `stream` 块，位于核心和插件配置之后              | 否             |
+    | `default-server-http` | `default-server-http/`              | 默认服务器（`default-server-http.conf`），位于核心和插件配置之后 | 否             |
+    | `server-http`         | `server-http/`                      | 每个 HTTP `server` 块（`server.conf`）                           | 是             |
+    | `server-stream`       | `server-stream/`                    | 每个 stream `server` 块（`server-stream.conf`）                  | 是             |
+    | `modsec`              | `modsec/`                           | ModSecurity 规则，位于 Core Rule Set 之后                        | 是             |
+    | `modsec-crs`          | `modsec-crs/`                       | ModSecurity 规则，位于 Core Rule Set 规则之前                    | 是，见下方说明 |
+    | `crs-plugins-before`  | `crs-plugins-before/`               | ModSecurity 规则，位于 CRS 插件之前                              | 是，见下方说明 |
+    | `crs-plugins-after`   | `crs-plugins-after/`                | ModSecurity 规则，位于 CRS 插件之后                              | 是，见下方说明 |
+
+    仅当 `USE_MODSECURITY_CRS=yes` 时才会读取 `modsec-crs`。`crs-plugins-before` 和 `crs-plugins-after` 还要求 `USE_MODSECURITY_CRS_PLUGINS=yes`，且 Core Rule Set 版本不是 3。当 `USE_MODSECURITY_GLOBAL_CRS=yes` 时，这三个类型会为所有服务统一加载一次：只读取顶层文件夹，服务子文件夹会被忽略。`modsec` 仍保留其服务子文件夹。
+
+    **确认文件已生效**
+
+    使用 `nginx -T` 检查 NGINX 是否从磁盘引入您的文件，以及引入路径是否正确。该命令会检查并输出磁盘上当前的配置文件，而不是正在运行的 worker 进程已加载的配置。NGINX 会用 `# configuration file <路径>:` 这一行标记每个被引入的文件：
+
+    ```shell
+    sudo nginx -T 2>&1 | grep -A 3 "configuration file /etc/bunkerweb/configs/server-http/hello-world.conf"
+    ```
+
+    如果没有任何输出，请检查文件夹、`.conf` 后缀和权限，然后再次重新加载调度程序。
+
+    要确认文件已应用，请检查调度程序日志（`journalctl -u bunkerweb-scheduler`）是否报告重新加载成功，并确认 Web UI 未提示仅部分应用。然后发送一个会用到该配置的请求，检查是否得到预期结果。对于上面的 `/hello` 示例，请将 `www.example.com` 替换为您的服务名称，并确认响应正文为 `world`：
+
+    ```shell
+    curl -i http://www.example.com/hello
+    ```
+
+    !!! warning "被拒绝的配置会保留上一份配置"
+        每个 `upstream` 名称在所有自定义配置中必须唯一。两个同名的 `upstream` 块会导致 NGINX 拒绝新配置，重新加载失败。拒绝新配置的实例会继续运行最后一份可用的配置，Web UI 会提示更改仅应用到了部分实例（或没有任何实例）。原因请查看调度程序日志（`journalctl -u bunkerweb-scheduler`）。
+
 === "All-in-one"
 
     当使用 [All-in-one 镜像](integrations.md#all-in-one-aio-image)时，您有两种选择来添加自定义配置：
@@ -1286,7 +1323,7 @@ systemctl status systemd-resolved
           }" \
         -p 80:8080/tcp \
         -p 443:8443/tcp \
-        bunkerity/bunkerweb-all-in-one:1.6.18-rc3
+        bunkerity/bunkerweb-all-in-one:1.6.18-rc4
     ```
 
     请注意，如果您的容器已经创建，您需要删除并重新创建它，以便应用新的环境变量。
@@ -1326,7 +1363,7 @@ systemctl status systemd-resolved
         -p 80:8080/tcp \
         -p 443:8443/tcp \
         -p 443:8443/udp \
-        bunkerity/bunkerweb-all-in-one:1.6.18-rc3
+        bunkerity/bunkerweb-all-in-one:1.6.18-rc4
     ```
 
 === "Docker"
@@ -1349,7 +1386,7 @@ systemctl status systemd-resolved
     ```yaml
     ...
     bw-scheduler:
-      image: bunkerity/bunkerweb-scheduler:1.6.18-rc3
+      image: bunkerity/bunkerweb-scheduler:1.6.18-rc4
       environment:
         - |
           CUSTOM_CONF_SERVER_HTTP_hello-world=
@@ -1392,7 +1429,7 @@ systemctl status systemd-resolved
 
     ```yaml
     bw-scheduler:
-      image: bunkerity/bunkerweb-scheduler:1.6.18-rc3
+      image: bunkerity/bunkerweb-scheduler:1.6.18-rc4
       volumes:
         - ./bw-data:/data
       ...
@@ -1462,7 +1499,7 @@ systemctl status systemd-resolved
 
     ```yaml
     bw-scheduler:
-      image: bunkerity/bunkerweb-scheduler:1.6.18-rc3
+      image: bunkerity/bunkerweb-scheduler:1.6.18-rc4
       volumes:
         - ./bw-data:/data
       ...
@@ -1647,6 +1684,10 @@ REDIS_DATABASE=0
 
 如果您需要更高级的设置，例如身份验证、SSL/TLS 支持或 Sentinel 模式，请参阅 [Redis 插件设置文档](features.md#redis)以获取详细指导。
 
+### 将封禁导出为 JSON
+
+运行 `bwcli bans --json`，将单个 JSON 对象写入标准输出。结果按实例分组；收集 Redis 封禁时，还包含 `redis` 条目。每个来源包含按 `date` 排序的封禁记录数组。记录保留来源返回的字段，例如 `ip`、`country`、`date`、`exp`、`permanent`、`reason`、`service`、`ban_scope` 和 `kind`。成功时命令退出码为 0；失败时退出码非零，并向标准错误输出写入错误信息。不使用 `--json` 时，`bwcli bans` 保持原有的格式化输出。
+
 ## 保护 UDP/TCP 应用程序
 
 !!! example "实验性功能"
@@ -1707,7 +1748,7 @@ BunkerWeb 能够作为**通用的 UDP/TCP 反向代理**，让您可以保护任
         -p 443:8443/udp \
         -p 10000:10000/tcp \
         -p 20000:20000/tcp \
-        bunkerity/bunkerweb-all-in-one:1.6.18-rc3
+        bunkerity/bunkerweb-all-in-one:1.6.18-rc4
     ```
 
     请注意，如果您的容器已经创建，您需要删除并重新创建它，以便应用新的环境变量。
@@ -1730,7 +1771,7 @@ BunkerWeb 能够作为**通用的 UDP/TCP 反向代理**，让您可以保护任
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.18-rc3
+        image: bunkerity/bunkerweb:1.6.18-rc4
         ports:
           - "80:8080" # 如果您想在使用 http 挑战类型时使用 Let's Encrypt 自动化，请保留此项
           - "10000:10000" # app1
@@ -1745,7 +1786,7 @@ BunkerWeb 能够作为**通用的 UDP/TCP 反向代理**，让您可以保护任
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.18-rc3
+        image: bunkerity/bunkerweb-scheduler:1.6.18-rc4
         environment:
           <<: *bw-api-env
           BUNKERWEB_INSTANCES: "bunkerweb" # 此设置是指定 BunkerWeb 实例所必需的
@@ -1796,7 +1837,7 @@ BunkerWeb 能够作为**通用的 UDP/TCP 反向代理**，让您可以保护任
     ```yaml
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.18-rc3
+        image: bunkerity/bunkerweb:1.6.18-rc4
         ports:
           - "80:8080" # 如果您想在使用 http 挑战类型时使用 Let's Encrypt 自动化，请保留此项
           - "10000:10000" # app1
@@ -2026,7 +2067,7 @@ BunkerWeb 能够作为**通用的 UDP/TCP 反向代理**，让您可以保护任
     ```yaml
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.18-rc3
+        image: bunkerity/bunkerweb:1.6.18-rc4
         ports:
           # 如果您想在使用 http 挑战类型时使用 Let's Encrypt 自动化，请保留此项
           - published: 80
@@ -2156,7 +2197,7 @@ BunkerWeb 支持使用外部或远程的 [PHP-FPM](https://www.php.net/manual/en
         -p 80:8080/tcp \
         -p 443:8443/tcp \
         -p 443:8443/udp \
-        bunkerity/bunkerweb-all-in-one:1.6.18-rc3
+        bunkerity/bunkerweb-all-in-one:1.6.18-rc4
     ```
 
     请注意，如果您的容器已经创建，您需要删除并重新创建它，以便应用新的环境变量。
@@ -2200,7 +2241,7 @@ BunkerWeb 支持使用外部或远程的 [PHP-FPM](https://www.php.net/manual/en
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.18-rc3
+        image: bunkerity/bunkerweb:1.6.18-rc4
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -2215,7 +2256,7 @@ BunkerWeb 支持使用外部或远程的 [PHP-FPM](https://www.php.net/manual/en
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.18-rc3
+        image: bunkerity/bunkerweb-scheduler:1.6.18-rc4
         environment:
           <<: *bw-api-env
           BUNKERWEB_INSTANCES: "bunkerweb" # 此设置是指定 BunkerWeb 实例所必需的
@@ -2309,7 +2350,7 @@ BunkerWeb 支持使用外部或远程的 [PHP-FPM](https://www.php.net/manual/en
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.18-rc3
+        image: bunkerity/bunkerweb:1.6.18-rc4
         labels:
           - "bunkerweb.INSTANCE=yes"
         environment:
@@ -2322,7 +2363,7 @@ BunkerWeb 支持使用外部或远程的 [PHP-FPM](https://www.php.net/manual/en
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.18-rc3
+        image: bunkerity/bunkerweb-scheduler:1.6.18-rc4
         environment:
           <<: *bw-api-env
           BUNKERWEB_INSTANCES: "" # 我们不需要在这里指定 BunkerWeb 实例，因为它们由 autoconf 服务自动检测
@@ -2337,7 +2378,7 @@ BunkerWeb 支持使用外部或远程的 [PHP-FPM](https://www.php.net/manual/en
           - bw-db
 
       bw-autoconf:
-        image: bunkerity/bunkerweb-autoconf:1.6.18-rc3
+        image: bunkerity/bunkerweb-autoconf:1.6.18-rc4
         depends_on:
           - bunkerweb
           - bw-docker
@@ -2577,7 +2618,7 @@ BunkerWeb 支持使用外部或远程的 [PHP-FPM](https://www.php.net/manual/en
     ```yaml
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.18-rc3
+        image: bunkerity/bunkerweb:1.6.18-rc4
         volumes:
           - /shared/www:/var/www/html
     ...
@@ -2665,7 +2706,7 @@ BunkerWeb 支持使用外部或远程的 [PHP-FPM](https://www.php.net/manual/en
     ```yaml
     services:
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.18-rc3
+        image: bunkerity/bunkerweb-scheduler:1.6.18-rc4
         environment:
           USE_IPV6: "yes"
 
@@ -2751,7 +2792,7 @@ x-bw-ipv6-env: &bw-ipv6-env
 
 services:
   bunkerweb:
-    image: bunkerity/bunkerweb:1.6.18-rc3
+    image: bunkerity/bunkerweb:1.6.18-rc4
     dns:
       - 2001:db8:1::20
     environment:
@@ -2761,7 +2802,7 @@ services:
         ipv6_address: 2001:db8:1::10
 
   bw-scheduler:
-    image: bunkerity/bunkerweb-scheduler:1.6.18-rc3
+    image: bunkerity/bunkerweb-scheduler:1.6.18-rc4
     dns:
       - 2001:db8:1::20
     environment:
@@ -2916,7 +2957,7 @@ LOG_LEVEL_1=error
     services:
       bunkerweb:
         # 这将是用于在调度程序中识别实例的名称
-        image: bunkerity/bunkerweb:1.6.18-rc3
+        image: bunkerity/bunkerweb:1.6.18-rc4
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -2929,7 +2970,7 @@ LOG_LEVEL_1=error
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.18-rc3
+        image: bunkerity/bunkerweb-scheduler:1.6.18-rc4
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb" # 确保设置正确的实例名称
@@ -2946,7 +2987,7 @@ LOG_LEVEL_1=error
           - bw-db
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.6.18-rc3
+        image: bunkerity/bunkerweb-ui:1.6.18-rc4
         environment:
           <<: *bw-env
         volumes:
@@ -3105,6 +3146,131 @@ log {
 };
 ```
 
+### 将日志发送到 Splunk {#send-logs-to-splunk}
+
+BunkerWeb 不需要任何 Splunk 插件。Splunk Universal Forwarder 读取日志文件，三项设置让 BunkerWeb 以 Splunk 能够解析的格式写入日志：一个 `key=value` 格式的第二访问日志、现有的错误日志，以及 JSON 格式的 ModSecurity 审计日志。
+
+**1. 添加供 Splunk 使用的访问日志。** 每个 `ACCESS_LOG_N` 与后缀相同的 `LOG_FORMAT_N` 配对，因此 `access.log` 保持默认格式（Web 界面会读取它），新文件使用自己的格式。将以下内容添加到 `/etc/bunkerweb/variables.env`；如果 `_1` 已被占用，请改用其他后缀：
+
+```conf
+ACCESS_LOG_1=/var/log/bunkerweb/access-splunk.log
+LOG_FORMAT_1=time=$time_iso8601 host=$host client=$remote_addr request_id=$request_id method=$request_method uri="$request_uri" status=$status bytes=$body_bytes_sent ua="$http_user_agent" reason=$reason modsec_rules="$modsecurity_rules" modsec_score=$modsecurity_anomaly_score modsec_id=$modsecurity_unique_id
+```
+
+!!! warning "请严格按示例书写值"
+    BunkerWeb 按字面读取 `variables.env`：值两侧不要加引号，同一行的值后面也不要加注释。行尾注释会成为值的一部分。该设置随后会被忽略，调度器日志中会出现 `Ignoring variable ... doesn't match regex`，并使用默认值。请把注释写在单独一行。
+
+**2. 可选：不在审计日志中保留请求正文。** `MODSECURITY_SEC_AUDIT_LOG_PARTS` 的默认值为 `BCFH`，其中 `C` 部分会把请求正文写入每条审计记录。请将该文件视为敏感文件，或去掉该部分：
+
+```conf
+MODSECURITY_SEC_AUDIT_LOG_PARTS=BFH
+```
+
+**3. 以 JSON 格式写入审计日志。** 创建 `/etc/bunkerweb/configs/modsec/audit-json.conf`，内容仅此一行，然后按照[自定义配置](#custom-configurations)中的说明让调度器可以访问该文件夹：
+
+```conf
+SecAuditLogFormat JSON
+```
+
+```shell
+sudo chown -R root:nginx /etc/bunkerweb/configs && \
+sudo chmod -R 770 /etc/bunkerweb/configs
+```
+
+**4. 重启服务。**
+
+```shell
+sudo systemctl restart bunkerweb && \
+sudo systemctl restart bunkerweb-scheduler
+```
+
+**5. 检查文件。** 发送一个会被 ModSecurity 拦截的请求，例如带有 `?q=<script>alert(1)</script>` 的 URL，并使用类似浏览器的 `User-Agent`（空的 `User-Agent` 本身就会被核心规则集拦截）。然后读取每个文件的最后一行。审计日志每行是一个 JSON 对象：
+
+```shell
+sudo tail -n 1 /var/log/bunkerweb/access-splunk.log
+sudo tail -n 1 /var/log/bunkerweb/modsec_audit.log | jq .transaction.unique_id
+```
+
+**6. 配置 forwarder。** BunkerWeb 的日志文件属于 `nginx:nginx`，软件包将访问权限限制为该用户和该组，因此请把运行 forwarder 的用户加入 `nginx` 组。然后在 `inputs.conf` 中监控这三个文件，每个文件使用一个 sourcetype：
+
+```conf
+[monitor:///var/log/bunkerweb/access-splunk.log]
+sourcetype = bunkerweb:access
+
+[monitor:///var/log/bunkerweb/error.log]
+sourcetype = bunkerweb:error
+
+[monitor:///var/log/bunkerweb/modsec_audit.log]
+sourcetype = bunkerweb:modsec_audit
+```
+
+在 `props.conf` 中，让搜索头把审计记录按 JSON 解析，并在索引器（或重型 forwarder）上调高 `TRUNCATE`。记录很长：一次 XSS 探测写入了 7.3 KB，一个包含多种攻击载荷的请求写入了 20 KB，而默认的 `TRUNCATE` 会在 10,000 字节处截断事件。
+
+```conf
+[bunkerweb:modsec_audit]
+KV_MODE = json
+TRUNCATE = 100000
+```
+
+`access-splunk.log` 符合[日志文件保留策略](#log-file-retention)中的 `/var/log/bunkerweb/*.log` 模式，因此 `logrotate` 会像处理其他文件一样处理它。
+
+**访问日志字段**
+
+| 字段           | 内容                                                                                              |
+| :------------- | :------------------------------------------------------------------------------------------------ |
+| `time`         | `$time_iso8601`                                                                                   |
+| `host`         | `$host`                                                                                           |
+| `client`       | `$remote_addr`                                                                                    |
+| `request_id`   | `$request_id`，与默认 `access.log` 行的第四个字段相同                                             |
+| `method`       | `$request_method`                                                                                 |
+| `uri`          | `$request_uri`，包含查询字符串                                                                    |
+| `status`       | `$status`                                                                                         |
+| `bytes`        | `$body_bytes_sent`                                                                                |
+| `ua`           | `$http_user_agent`                                                                                |
+| `reason`       | 插件拒绝请求时为插件 ID（`blacklist`、`limit` 等）。其他情况为空，**包括 ModSecurity 拒绝的请求** |
+| `modsec_rules` | BunkerWeb 的 CRS 集成提供的规则 ID，以空格分隔并以空格开头（ID 可重复）。未设置时为 `-`；并非所有命中的完整记录 |
+| `modsec_score` | BunkerWeb 的 CRS 集成提供的异常分数，未设置时为 `-` |
+| `modsec_id` | BunkerWeb 的 CRS 集成提供的 ID，未设置时为 `-`。设置后等于对应审计记录的 `transaction.unique_id` |
+
+三个请求在 `access-splunk.log` 中的样子：一个被放行，一个被 `blacklist` 插件拒绝，一个被 ModSecurity 拒绝（`ua` 已缩短）。
+
+```text
+time=2026-11-10T08:11:02+00:00 host=www.example.com client=10.77.52.1 request_id=a1b31236225cf6d34fec07e089838f48 method=GET uri="/spl-allowed" status=404 bytes=69298 ua="Mozilla/5.0 ..." reason= modsec_rules="-" modsec_score=- modsec_id=-
+time=2026-11-10T08:11:02+00:00 host=www.example.com client=10.77.52.1 request_id=260b845a6bb21e46656c42e7a682f2a1 method=GET uri="/spl-blacklisted" status=403 bytes=69297 ua="Mozilla/5.0 ..." reason=blacklist modsec_rules="-" modsec_score=- modsec_id=-
+time=2026-11-10T08:11:02+00:00 host=www.example.com client=10.77.52.1 request_id=f3ddfff5a4652efdeb3daa645dee0827 method=GET uri="/spl-xss?q=<script>alert(1)</script>" status=403 bytes=69297 ua="Mozilla/5.0 ..." reason= modsec_rules=" 941100 941110 941160 941390" modsec_score=20 modsec_id=179429826266.143898
+```
+
+第一个请求返回 `404`，因为测试环境没有后端。对应的审计记录（已缩短）以相同的 ID 开头：
+
+```json
+{"transaction":{"client_ip":"10.77.52.1","time_stamp":"Tue Nov 10 08:11:02 2026","unique_id":"179429826266.143898","request":{"method":"GET","uri":"/spl-xss?q=<script>alert(1)</script>","body":""},"response":{"http_code":403},"messages":[{"message":"XSS Attack Detected via libinjection","details":{"ruleId":"941100","severity":"2"}}]}}
+```
+
+!!! warning "限制"
+    - **没有 JSON 访问日志。** `LOG_FORMAT_N` 在 NGINX 配置中写在单引号之间，没有位置放置 `escape=json`。访问日志请使用 `key=value`，仅审计日志使用 JSON。
+    - **`LOG_FORMAT_N` 的值中不能含有单引号。** NGINX 会拒绝该配置。NGINX 会把被记录的值中的双引号转义为 `\x22`（`ua="Mozilla/5.0 \x22quoted\x22"`）。
+    - **ModSecurity 元数据取决于规则。** 默认 CRS 的异常拦截会填充 `modsec_id`、`modsec_rules` 和 `modsec_score`，而 `reason` 为空。自定义 `deny` 规则若没有相应的 `tx.bunkerweb_*` `setvar` 操作，这些字段可能仍为 `-`。此时仅凭访问日志无法识别拦截，应查看错误日志或审计日志。
+    - **审计日志既不是请求日志，也不是拦截证明。** 默认的 `MODSECURITY_SEC_AUDIT_ENGINE`（`RelevantOnly`）也可能记录被放行的事务：规则记录命中时（包括 `DetectionOnly` 模式或分数低于拦截阈值时），或者状态码匹配 `SecAuditLogRelevantStatus` 时。在上面的测试中，只有 ModSecurity 的拒绝产生了记录。
+    - **`C` 部分包含请求正文**，其中有表单字段和凭据。除非需要正文，否则请使用 `BFH`，并限制谁可以读取该索引。
+
+!!! info "Docker、Autoconf、Swarm 和 Kubernetes"
+    这些镜像把 `access.log`、`error.log` 和 `modsec_audit.log` 链接到容器自身的日志流（参见[日志文件保留策略](#log-file-retention)），因此 forwarder 没有文件可读；由 `ACCESS_LOG_1` 写入的文件留在容器内，没有任何机制轮转它。请在调度器上用自定义配置设置而不是文件来启用 JSON 审计格式：`CUSTOM_CONF_MODSEC_audit-json=SecAuditLogFormat JSON`。JSON 记录随后会出现在 `bunkerweb` 容器的 `docker logs` 中，每条一行，夹杂在错误日志行之间：以 `{` 开头的行就是审计记录。
+
+    要把日志流发送到 Splunk，请使用 [Docker `splunk` 日志驱动](https://docs.docker.com/engine/logging/drivers/splunk/)和 HTTP Event Collector 令牌。该驱动会把访问、错误和审计行一起以同一个 sourcetype 发送，因此只能根据内容区分它们。请把 `key=value` 格式设置在 `LOG_FORMAT`（不带后缀）上，使发送的访问行采用该格式。这会替换 `access.log` 中的默认格式。
+
+    ```yaml
+    services:
+      bunkerweb:
+        image: bunkerity/bunkerweb:1.6.18-rc4
+        logging:
+          driver: splunk
+          options:
+            splunk-url: "https://splunk.example.com:8088"
+            splunk-token: "<HEC token>"
+            splunk-format: raw
+            splunk-sourcetype: "bunkerweb:docker"
+    ```
+
 ## Docker 日志记录最佳实践 {#docker-logging-best-practices}
 
 使用 Docker 时，管理容器日志以防止其占用过多磁盘空间非常重要。默认情况下，Docker 使用 `json-file` 日志记录驱动程序，如果未进行配置，可能会导致日志文件非常大。
@@ -3118,7 +3284,7 @@ log {
 ```yaml
 services:
   bunkerweb:
-    image: bunkerity/bunkerweb:1.6.18-rc3
+    image: bunkerity/bunkerweb:1.6.18-rc4
     logging:
       driver: "json-file"
       options:
@@ -3227,7 +3393,7 @@ BunkerWeb 提供了许多安全功能，您可以通过[功能](features.md)进�
         -p 80:8080/tcp \
         -p 443:8443/tcp \
         -p 443:8443/udp \
-        bunkerity/bunkerweb-all-in-one:1.6.18-rc3
+        bunkerity/bunkerweb-all-in-one:1.6.18-rc4
     ```
 
     如果容器已存在，请重新创建以应用新的环境变量。
@@ -3238,7 +3404,7 @@ BunkerWeb 提供了许多安全功能，您可以通过[功能](features.md)进�
 
     ```yaml
     bw-scheduler:
-      image: bunkerity/bunkerweb-scheduler:1.6.18-rc3
+      image: bunkerity/bunkerweb-scheduler:1.6.18-rc4
       ...
       environment:
         HTTP_PROXY: "http://proxy.example.local:3128"
@@ -3257,7 +3423,7 @@ BunkerWeb 提供了许多安全功能，您可以通过[功能](features.md)进�
 
     ```yaml
     bw-scheduler:
-      image: bunkerity/bunkerweb-scheduler:1.6.18-rc3
+      image: bunkerity/bunkerweb-scheduler:1.6.18-rc4
       ...
       environment:
         HTTP_PROXY: "http://proxy.example.local:3128"
@@ -3300,7 +3466,7 @@ BunkerWeb 提供了许多安全功能，您可以通过[功能](features.md)进�
 
     ```yaml
     bw-scheduler:
-      image: bunkerity/bunkerweb-scheduler:1.6.18-rc3
+      image: bunkerity/bunkerweb-scheduler:1.6.18-rc4
       ...
       environment:
         HTTP_PROXY: "http://proxy.example.local:3128"
@@ -3569,12 +3735,12 @@ S3 备份工具可以无缝地自动化数据保护，类似于社区备份插�
 
 ### Docker Compose 示例
 
-完整示例可在 [`examples/mcp-stack/`](https://github.com/bunkerity/bunkerweb/tree/v1.6.18-rc3/examples/mcp-stack) 中找到：
+完整示例可在 [`examples/mcp-stack/`](https://github.com/bunkerity/bunkerweb/tree/v1.6.18-rc4/examples/mcp-stack) 中找到：
 
 ```yaml
 services:
   bw-api:
-    image: bunkerity/bunkerweb-api:1.6.18-rc3
+    image: bunkerity/bunkerweb-api:1.6.18-rc4
     environment:
       API_TOKEN: "my-bearer-token-for-mcp"
       DATABASE_URI: "mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db"
@@ -4398,11 +4564,11 @@ BunkerWeb 模板使用 [lua-resty-template](https://github.com/bungle/lua-resty-
         ```yaml
         services:
           bunkerweb:
-            image: bunkerity/bunkerweb:1.6.18-rc3
+            image: bunkerity/bunkerweb:1.6.18-rc4
             # ... 其他设置（自定义页面无需在此处设置环境变量）
 
           bw-scheduler:
-            image: bunkerity/bunkerweb-scheduler:1.6.18-rc3
+            image: bunkerity/bunkerweb-scheduler:1.6.18-rc4
             volumes:
               - ./templates:/custom_templates:ro
             environment:
@@ -4485,7 +4651,7 @@ BunkerWeb 模板使用 [lua-resty-template](https://github.com/bungle/lua-resty-
             spec:
               containers:
                 - name: bunkerweb-scheduler
-                  image: bunkerity/bunkerweb-scheduler:1.6.18-rc3
+                  image: bunkerity/bunkerweb-scheduler:1.6.18-rc4
                   env:
                     - name: CUSTOM_ERROR_PAGE
                       value: "/custom_templates/error.html"

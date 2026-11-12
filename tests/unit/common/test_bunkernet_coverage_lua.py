@@ -92,7 +92,7 @@ emit({first=first, second=second, reports=REPORTS, ttl=RECENT_TTL, limit=HEADER_
     assert out["ttl"] == 5400 and out["limit"] == 12
 
 
-def test_report_payload_is_unfiltered_by_default():
+def test_report_payload_drops_credentials_but_is_otherwise_unfiltered_by_default():
     out = run(NEW + """
 VARIABLES.BUNKERNET_FILTER_HEADERS = "no"
 REASON_DATA = {matched_vars={"secret"}, matched_var_names={"REQUEST_HEADERS:Authorization"}}
@@ -100,8 +100,8 @@ local result=p:log()
 emit({result=result, reports=REPORTS, limit=HEADER_LIMIT})
 """)
     assert out["result"]["msg"] == "IP added to reports"
-    assert out["reports"][0]["headers"] == {"accept": "text/html", "cookie": "secret", "authorization": "secret"}
-    assert out["reports"][0]["data"] == {"matched_vars": ["secret"], "matched_var_names": ["REQUEST_HEADERS:Authorization"]}
+    assert out["reports"][0]["headers"] == {"accept": "text/html"}
+    assert out["reports"][0]["data"] == {"matched_vars": [""], "matched_var_names": ["REQUEST_HEADERS:Authorization"]}
     assert out["limit"] == 12
 
 

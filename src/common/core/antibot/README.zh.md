@@ -40,6 +40,7 @@ BunkerWeb 允许您指定某些用户、IP 或请求应完全绕过 antibot 挑�
 | 设置                            | 默认值   | 上下文       | 多个  | 描述                                                                                  |
 | ----------------------------- | ----- | --------- | --- | ----------------------------------------------------------------------------------- |
 | `ANTIBOT_IGNORE_URI`          |       | multisite | 否   | **排除的 URL：** 应绕过挑战的以空格分隔的 URI 正则表达式模式列表。模式会匹配规范化后的路径，既可单独匹配，也可匹配路径后接 `?` 和查询字符串的形式。 |
+| `ANTIBOT_INCLUDE_URI`          |       | multisite | 否   | **包含的 URL：** 仅对匹配这些以空格分隔的 PCRE 模式的 URI 发起挑战。留空表示所有 URI。匹配规范化路径，或路径后接 `?` 和查询字符串。`ANTIBOT_IGNORE_URI` 优先。 |
 | `ANTIBOT_IGNORE_IP`           |       | multisite | 否   | **排除的 IP：** 应绕过挑战的以空格分隔的 IP 地址或 CIDR 范围列表。                                          |
 | `ANTIBOT_IGNORE_RDNS`         |       | multisite | 否   | **排除的反向 DNS：** 应绕过挑战的以空格分隔的反向 DNS 后缀列表。                                             |
 | `ANTIBOT_RDNS_GLOBAL`         | `yes` | multisite | 否   | **仅限全局 IP：** 如果设置为 `yes`，则仅对公共 IP 地址执行反向 DNS 检查。                                    |
@@ -61,6 +62,9 @@ BunkerWeb 允许您指定某些用户、IP 或请求应完全绕过 antibot 挑�
     antibot 状态（包括 `turnstile`、`hcaptcha`、`recaptcha`、`mcaptcha`、`captcha`、`javascript` 和 `cookie`）会保存在 BunkerWeb 的[会话 Cookie](#sessions) 中。默认情况下，该 Cookie 仅作用于设置它的确切主机，因此用户如果在 `a.example.com` 上完成了挑战，在 `b.example.com` 上仍会再次被挑战。若要让同一可注册域名下的所有同级子域只需完成一次挑战，请为**每个相关服务器**将 [`SESSIONS_DOMAIN`](#sessions) 设置为父域名（例如 `example.com`）。`SESSIONS_DOMAIN` 是一项 multisite 设置，应按服务器分别配置，这样同一 BunkerWeb 实例上托管的无关租户就不会收到跨租户共享的 `Domain` 属性。
 
 **示例：**
+
+- `ANTIBOT_INCLUDE_URI=^/search(/|$) ^/login(/|$)`
+  仅对 `/search`、`/login` 及其子路径发起挑战；列表为空时涵盖所有 URI。模式默认不锚定，因此单独使用 `^/search` 也会匹配 `/searchengine`。
 
 - `ANTIBOT_IGNORE_URI: "^/api/ ^/webhook/ ^/assets/"`
   这将从 antibot 挑战中排除所有以 `/api/`、`/webhook/` 或 `/assets/` 开头的 URI。

@@ -31,7 +31,7 @@ def login_page():
     fail = False
     locked = ""
     if request.method == "POST" and "username" in request.form and "password" in request.form:
-        LOGGER.warning(f"Login attempt from {request.remote_addr} with username \"{request.form['username']}\"")
+        LOGGER.warning(f"Login attempt from {request.remote_addr} with username {request.form['username']!r}")
 
         # Checked before the password, and answered the same whether or not the username exists
         locked = login_throttle.locked_message(DB, request.form["username"], request.remote_addr)

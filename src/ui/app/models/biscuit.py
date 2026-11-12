@@ -2,7 +2,7 @@ from datetime import datetime, timedelta, timezone
 from ipaddress import ip_address
 from pathlib import Path
 from traceback import format_exc
-from typing import Optional
+from typing import Callable, Optional
 
 from flask import Flask, current_app, render_template, request, session
 from biscuit_auth import (
@@ -31,6 +31,7 @@ OPERATIONS = {
 }
 
 # Some UI endpoints use POST for datatable/query payloads but are read-only operations.
+READ_ONLY_POST_ATTR = "bw_read_only_post"
 READ_ONLY_POST_ENDPOINTS = frozenset(
     {
         "bans.bans_fetch",
@@ -94,9 +95,11 @@ def _normalize_path(path: str) -> str:
     return "/" + "/".join(segment for segment in path.split("/") if segment)
 
 
-def resolve_operation(method: str, path: str, endpoint: Optional[str] = None, rule: Optional[str] = None) -> str:
+def resolve_operation(method: str, path: str, endpoint: Optional[str] = None, rule: Optional[str] = None, view: Optional[Callable] = None) -> str:
     normalized_rule = _normalize_path(rule or "").rstrip("/") if rule else ""
 
+    if method == "POST" and getattr(view, READ_ONLY_POST_ATTR, False) is True:
+        return "read"
     if method == "POST" and endpoint in READ_ONLY_POST_ENDPOINTS:
         return "read"
     if method == "POST" and normalized_rule in READ_ONLY_POST_RULES:
@@ -209,7 +212,7 @@ class BiscuitMiddleware:
 
         route_rule = request.url_rule.rule if request.url_rule else None
         resource_path = route_rule or request.path
-        operation = resolve_operation(request.method, request.path, request.endpoint, route_rule)
+        operation = resolve_operation(request.method, request.path, request.endpoint, route_rule, current_app.view_functions.get(request.endpoint))
 
         try:
             authorizer = AuthorizerBuilder()

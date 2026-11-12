@@ -309,7 +309,7 @@ def test_the_first_iteration_pushes_then_runs_jobs_then_publishes_once(drive):
     drive.run()
     sched = drive.sched
     env, changed, ignored = sched.reload_calls[0]
-    assert ignored == ["misc", "pro"]
+    assert ignored == ["customcert", "selfsigned", "misc", "pro"]
     assert env["TZ"] == "UTC" or "TZ" in env
     assert drive.renders == 2  # the pre-push render, then the one that picks up files the jobs created
     assert len(reloads(drive)) == 2
@@ -355,6 +355,15 @@ def test_without_any_instance_the_reload_is_skipped_but_the_run_counts_as_succes
     assert set_metadata_calls(drive)[0]["failover"] is False
 
 
+def test_no_instance_cannot_clear_a_previous_rejection(drive):
+    drive.db.instances = []
+    drive.db.metadata.update(failover=True, failover_message="bw2: config check failed: invalid directive")
+    drive.run()
+    metadata = set_metadata_calls(drive)[0]
+    assert metadata["failover"] is True
+    assert "bw2: config check failed: invalid directive" in metadata["failover_message"]
+
+
 def test_failing_once_jobs_are_named_in_the_log(drive, caplog):
     drive.sched.reload_result = False
     drive.sched.failed_jobs = ["letsencrypt/certbot-new"]
@@ -380,7 +389,7 @@ def test_a_crash_while_restoring_the_job_caches_is_logged(drive, monkeypatch, ca
 
 
 def test_a_fault_in_the_pre_push_is_a_failed_push_not_a_reason_to_leave(drive, monkeypatch, caplog):
-    monkeypatch.setattr(drive.main, "pre_push_configuration", lambda env, first: (_ for _ in ()).throw(RuntimeError("socket")))
+    monkeypatch.setattr(drive.main, "pre_push_configuration", lambda env, first, outcome: (_ for _ in ()).throw(RuntimeError("socket")))
     with caplog.at_level(logging.ERROR):
         drive.run()
     assert "Exception while pushing the configuration before running jobs : socket" in caplog.text
@@ -436,6 +445,58 @@ def answer(drive, status, msg=""):
     drive.sched.reload_answer = (status == "success", {"bw1": {"status": status, "msg": msg}})
 
 
+@pytest.mark.parametrize("pre_push_only", [False, True])
+def test_partial_application_keeps_failover_until_every_instance_confirms(drive, pre_push_only):
+    drive.db.instances = [instance("bw1"), instance("bw2")]
+    drive.sched.reload_answer = (True, {host: {"status": "success", "confirmed": True} for host in ("bw1", "bw2")})
+    drive.iterations = 3
+    snapshots = []
+
+    def change():
+        snapshots.append((len(reloads(drive)), len(drive.sched.reload_calls)))
+        drive.db.metadata["plugins_config_changed"] = ["antibot"]
+        drive.sched.pending = (not pre_push_only, False)
+        drive.sched.reload_answer = (
+            False,
+            {"bw1": {"status": "success", "confirmed": True}, "bw2": {"status": "error", "msg": "config check failed: invalid directive"}},
+        )
+
+    def repair():
+        snapshots.append((len(reloads(drive)), len(drive.sched.reload_calls)))
+        drive.db.metadata["plugins_config_changed"] = ["antibot"]
+        drive.sched.reload_answer = (True, {host: {"status": "success", "confirmed": True} for host in ("bw1", "bw2")})
+
+    drive.on_iteration.update({1: change, 2: repair})
+    drive.run()
+    metadata = set_metadata_calls(drive)
+    assert metadata[1]["failover"] is True
+    assert "bw2:5000 - config check failed: invalid directive" in metadata[1]["failover_message"]
+    assert ("update_instance", "bw1", "up") in drive.db.calls
+    assert ("update_instance", "bw2", "failover") in drive.db.calls
+    assert metadata[2] == {"failover": False, "failover_message": ""}
+    assert [c[2] for c in drive.db.calls if c[:2] == ("update_instance", "bw2")][-1] == "up"
+    # Jobs still run after one confirmed application; no rollback reload on successful nodes.
+    assert snapshots[1][1] - snapshots[0][1] == 1
+    assert snapshots[1][0] - snapshots[0][0] == (1 if pre_push_only else 2)
+
+
+@pytest.mark.parametrize("state", ["busy", "unconfirmed", "unreachable"])
+def test_an_unconfirmed_or_busy_reload_does_not_clear_existing_failover(drive, monkeypatch, state):
+    drive.db.instances = [instance("bw1", status="failover")]
+    drive.sched.reload_answer = (
+        state == "unconfirmed",
+        (
+            {}
+            if state == "unreachable"
+            else {"bw1": {"status": "error", "msg": "a reload is in progress (12s)"} if state == "busy" else {"status": "success", "confirmed": False}}
+        ),
+    )
+    monkeypatch.setattr(drive.main, "confirm_unconfirmed_reloads", lambda responses, timeout: {"bw1": "reloading"} if state == "unconfirmed" else {})
+    drive.run()
+    assert [c[2] for c in drive.db.calls if c[:2] == ("update_instance", "bw1")] == ["failover"]
+    assert set_metadata_calls(drive)[0]["failover"] is True
+
+
 def test_a_config_check_failure_puts_the_instance_in_failover_and_fails_over_to_the_last_working_config(drive, caplog):
     answer(drive, "error", "config check failed: unknown directive\nnginx: [emerg] bad")
     for sub in ("config", "custom_configs", "cache"):
@@ -447,6 +508,23 @@ def test_a_config_check_failure_puts_the_instance_in_failover_and_fails_over_to_
     assert "bw1:5000 - nginx: [emerg] bad" in metadata["failover_message"]
     assert "failing over to last working configuration" in caplog.text
     assert any(c[1] == "/reload?test=yes" for c in drive.sched.send_to_apis_calls)
+    assert drive.backups == 0
+
+
+def test_all_instances_rejecting_keeps_the_existing_fallback(drive, caplog):
+    drive.db.instances = [instance("bw1"), instance("bw2")]
+    drive.sched.reload_answer = (False, {host: {"status": "error", "msg": "config check failed: invalid directive"} for host in ("bw1", "bw2")})
+    for sub in ("config", "custom_configs", "cache"):
+        (drive.sandbox.FAILOVER_PATH / sub).mkdir(parents=True, exist_ok=True)
+    with caplog.at_level(logging.ERROR):
+        drive.run()
+    metadata = set_metadata_calls(drive)[0]
+    assert metadata["failover"] is True
+    for host in ("bw1", "bw2"):
+        assert ("update_instance", host, "failover") in drive.db.calls
+        assert f"{host}:5000 - config check failed: invalid directive" in metadata["failover_message"]
+    assert "failing over to last working configuration" in caplog.text
+    assert len(reloads(drive)) == 3  # pre-push, main publication, existing fallback
     assert drive.backups == 0
 
 

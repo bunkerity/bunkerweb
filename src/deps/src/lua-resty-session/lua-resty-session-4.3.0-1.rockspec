@@ -1,8 +1,8 @@
 package = "lua-resty-session"
-version = "4.2.0-1"
+version = "4.3.0-1"
 source = {
   url = "git+https://github.com/bungle/lua-resty-session.git",
-  tag = "v4.2.0",
+  tag = "v4.3.0",
 }
 description = {
   summary = "Session Library for OpenResty - Flexible and Secure",
@@ -14,6 +14,7 @@ description = {
 dependencies = {
   "lua >= 5.1",
   "lua-ffi-zlib >= 0.5",
+  "lua-resty-lrucache >= 0.09",
   "lua-resty-openssl >= 1.5.0",
 }
 build = {

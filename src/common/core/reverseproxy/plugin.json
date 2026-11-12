@@ -67,7 +67,7 @@
     "REVERSE_PROXY_KEEPALIVE": {
       "context": "multisite",
       "default": "no",
-      "help": "Enable or disable keepalive connections with the proxied resource.",
+      "help": "Send the configured HTTP version (1.1 by default) and an empty Connection header to the proxied resource. This does not create a connection pool by itself: to reuse connections, point REVERSE_PROXY_HOST at a named upstream with keepalive, declared in an http custom configuration.",
       "id": "reverse-proxy-keepalive",
       "label": "Reverse proxy keepalive",
       "regex": "^(yes|no)$",

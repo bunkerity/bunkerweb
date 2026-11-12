@@ -60,6 +60,7 @@ def create_app() -> FastAPI:
 
     # Optional IP whitelist (enabled by default, can be disabled)
     whitelist_networks: list[IPv4Network | IPv6Network] = []
+    raw_whitelist = ""
     if api_config.whitelist_enabled:
         raw_whitelist = api_config.API_WHITELIST_IPS.strip()
         if raw_whitelist:
@@ -79,10 +80,13 @@ def create_app() -> FastAPI:
                     LOGGER.error(f"Error parsing API whitelist entry {tok}: {format_exc()}")
                     continue
 
-    if whitelist_networks:
+            if not whitelist_networks:
+                LOGGER.error("API_WHITELIST_IPS contains no valid IP/CIDR; all requests will be denied")
+
+    if raw_whitelist:
 
         @app.middleware("http")
-        async def whitelist_middleware(request: Request, call_next):  # pragma: no cover
+        async def whitelist_middleware(request: Request, call_next):
             cip = request.client.host if request.client else "0.0.0.0"
             ipobj = ip_address(cip)
             for net in whitelist_networks:

@@ -114,7 +114,7 @@ fi
 
 # Default values
 # Hardcoded default version (immutable reference)
-DEFAULT_BUNKERWEB_VERSION="1.6.18~rc3"
+DEFAULT_BUNKERWEB_VERSION="1.6.18~rc4"
 # Mutable effective version (can be overridden by --version)
 BUNKERWEB_VERSION="$DEFAULT_BUNKERWEB_VERSION"
 BUNKERWEB_VERSION_EXPLICIT="no"
@@ -5720,11 +5720,11 @@ check_supported_os() {
             NGINX_VERSION="${_nginx_base}-1~$DISTRO_CODENAME"
             ;;
         "fedora")
-            if [[ "$DISTRO_VERSION" != "43" && "$DISTRO_VERSION" != "44" ]]; then
-                print_warning "Only Fedora 43 and 44 are officially supported"
+            if [[ "$DISTRO_VERSION" != "43" && "$DISTRO_VERSION" != "44" && "$DISTRO_VERSION" != "45" ]]; then
+                print_warning "Only Fedora 43, 44 and 45 are officially supported"
                 if [ "$FORCE_INSTALL" != "yes" ] && [ "$INTERACTIVE_MODE" = "yes" ]; then
                     if ! tui_yesno "Unsupported OS" \
-                        "Only Fedora 43 and 44 are officially supported (detected: $DISTRO_VERSION).\nContinue anyway?" "no"; then
+                        "Only Fedora 43, 44 and 45 are officially supported (detected: $DISTRO_VERSION).\nContinue anyway?" "no"; then
                         exit 1
                     fi
                 fi
@@ -5746,7 +5746,7 @@ check_supported_os() {
             ;;
         *)
             print_error "Unsupported operating system: $DISTRO_ID"
-            print_error "Supported distributions: Debian 12/13, Ubuntu 22.04/24.04/26.04, Fedora 43/44, RHEL/CentOS/Rocky/AlmaLinux 8/9/10"
+            print_error "Supported distributions: Debian 12/13, Ubuntu 22.04/24.04/26.04, Fedora 43/44/45, RHEL/CentOS/Rocky/AlmaLinux 8/9/10"
             exit 1
             ;;
     esac
@@ -6624,6 +6624,22 @@ EOF
     print_status "NGINX $NGINX_VERSION installed successfully"
 }
 
+install_bunkerweb_repository() (
+    local repo_tmp
+    repo_tmp=$(mktemp -d /tmp/bunkerweb-repo.XXXXXX) || {
+        print_error "Could not create a private directory for the BunkerWeb repository setup."
+        exit 1
+    }
+    trap 'rm -rf -- "$repo_tmp"' EXIT
+    trap 'exit 1' HUP INT TERM
+
+    # Keep download and execution inside the same private directory, including on failure.
+    run_cmd curl --proto '=https' --tlsv1.2 --fail --silent --show-error \
+                 --connect-timeout 10 --max-time 60 -L \
+                 "https://repo.bunkerweb.io/install/script.$1.sh" -o "$repo_tmp/install.sh"
+    run_cmd bash "$repo_tmp/install.sh"
+)
+
 install_bunkerweb_debian() {
     print_step "Installing BunkerWeb on Debian/Ubuntu"
 
@@ -6631,12 +6647,7 @@ install_bunkerweb_debian() {
         export UI_WIZARD=no
     fi
 
-    # TLS-pin + bounded timeouts (no hang on stalled CDN).
-    run_cmd curl --proto '=https' --tlsv1.2 --fail --silent --show-error \
-                 --connect-timeout 10 --max-time 60 -L \
-                 https://repo.bunkerweb.io/install/script.deb.sh -o /tmp/bunkerweb-repo.sh
-    run_cmd bash /tmp/bunkerweb-repo.sh
-    run_cmd rm -f /tmp/bunkerweb-repo.sh
+    install_bunkerweb_repository deb
 
     run_cmd apt update
     run_cmd apt install -y --allow-downgrades "bunkerweb=$BUNKERWEB_VERSION"
@@ -6676,12 +6687,7 @@ install_bunkerweb_rpm() {
         export UI_WIZARD=no
     fi
 
-    # TLS-pin + bounded timeouts (no hang on stalled CDN).
-    run_cmd curl --proto '=https' --tlsv1.2 --fail --silent --show-error \
-                 --connect-timeout 10 --max-time 60 -L \
-                 https://repo.bunkerweb.io/install/script.rpm.sh -o /tmp/bunkerweb-repo.sh
-    run_cmd bash /tmp/bunkerweb-repo.sh
-    run_cmd rm -f /tmp/bunkerweb-repo.sh
+    install_bunkerweb_repository rpm
 
     run_cmd dnf makecache
     run_cmd dnf install -y "bunkerweb-$BUNKERWEB_VERSION"

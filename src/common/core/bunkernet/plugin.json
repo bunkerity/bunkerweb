@@ -17,7 +17,7 @@
     "BUNKERNET_FILTER_HEADERS": {
       "context": "multisite",
       "default": "no",
-      "help": "Limit what a BunkerNet report carries. When yes, only the User-Agent, Accept, Accept-Encoding, Accept-Language, Content-Type and Content-Length request headers are sent, and the values ModSecurity matched in headers and cookies are blanked. When no, every request header and the matched values are sent as they are.",
+      "help": "Limit what a BunkerNet report carries. The Cookie, Authorization and Proxy-Authorization request headers, and the values ModSecurity matched in them or in cookies, are never sent. When yes, only the User-Agent, Accept, Accept-Encoding, Accept-Language, Content-Type and Content-Length request headers are sent, and the values matched in any header are blanked. When no, the other request headers are sent as they are.",
       "id": "bunkernet-filter-headers",
       "label": "Filter reported headers",
       "regex": "^(yes|no)$",

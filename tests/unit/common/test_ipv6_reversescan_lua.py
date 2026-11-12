@@ -104,3 +104,30 @@ local result = scanner:access()
 print(tostring(result.ok), #cached, #LOGS)
 """)
     assert out.split("\t") == ["true", "0", "1"]
+
+
+def test_an_open_port_is_denied_even_when_the_cache_write_fails():
+    out = run("""
+PLUGIN_VARS = { USE_REVERSE_SCAN = "yes", REVERSE_SCAN_PORTS = "8080", REVERSE_SCAN_TIMEOUT = "1s" }
+CONNECT_ANSWER = {true}
+local scanner = REVERSESCAN:new({ bw = { remote_addr = "192.0.2.1" } })
+scanner.is_in_cache = function() return true, nil end
+scanner.add_to_cache = function() return false, "no memory" end
+local result = scanner:access()
+print(tostring(result.ok), result.status, #LOGS, LOGS[1])
+""")
+    assert out.split("\t") == ["true", "403", "1", "error while adding element to cache : no memory"]
+
+
+def test_a_cache_write_failure_does_not_skip_the_other_ports_results():
+    out = run("""
+PLUGIN_VARS = { USE_REVERSE_SCAN = "yes", REVERSE_SCAN_PORTS = "22 80", REVERSE_SCAN_TIMEOUT = "1s" }
+CONNECT_ANSWER = {nil, "connection refused"}
+local scanner = REVERSESCAN:new({ bw = { remote_addr = "192.0.2.1" } })
+scanner.is_in_cache = function() return true, nil end
+local attempts = 0
+scanner.add_to_cache = function() attempts = attempts + 1; return false, "no memory" end
+local result = scanner:access()
+print(tostring(result.ok), result.status, attempts, #LOGS)
+""")
+    assert out.split("\t") == ["false", "nil", "2", "2"]

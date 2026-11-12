@@ -7,8 +7,10 @@ and bwcli read it from the database job cache), so the client knows exactly what
 the SHA-256 fingerprint, because the instances are reached by IP, service name or pod name and a
 hostname check cannot work.
 
-A mismatch still retries over HTTP, as before, with a warning. Every test here handshakes with a
-real local TLS server, so the pin is checked by urllib3 and not by a mock.
+A refused pin returns the failure and sends nothing over plain HTTP: the retry would hand the bearer
+token and the payload to whoever forced the mismatch. A plain connection failure (an instance that
+is not up yet) still retries over HTTP. Every test here handshakes with a real local TLS server, so
+the pin is checked by urllib3 and not by a mock.
 """
 
 import sys
@@ -170,17 +172,19 @@ def test_the_pinned_certificate_is_accepted(server, certs, pin, logger):
     assert logger.warnings == []
 
 
-def test_another_certificate_is_refused_and_the_call_falls_back_to_http(server, certs, pin, logger):
+def test_another_certificate_is_refused_and_nothing_is_sent_over_http(server, certs, pin, logger):
     _publish(pin, certs, "a")
     server.serve(certs["b"])
 
-    ok, _, status, _ = _call(server)
+    ok, err, status, body = _call(server)
 
-    assert (ok, status) == (True, 200)
-    assert server.hits == ["plain"], "the TLS attempt must not reach the handler, only the plain retry"
+    assert (ok, status, body) == (False, None, None)
+    assert "did not match the pinned API server certificate" in err
+    assert server.hits == [], "neither the TLS attempt nor a plain retry may reach the handler"
     assert len(logger.warnings) == 1
     assert "did not match the pinned API server certificate" in logger.warnings[0]
     assert f"127.0.0.1:{server.server_address[1]}" in logger.warnings[0], "the warning names the instance"
+    assert "trying HTTP" not in logger.warnings[0]
 
 
 def test_a_renewal_is_picked_up_without_a_restart(server, certs, pin, logger):
@@ -198,7 +202,7 @@ def test_a_renewal_is_picked_up_without_a_restart(server, certs, pin, logger):
 
     # Only the current and the previous one are accepted, so a third certificate is refused.
     server.serve(certs["c"])
-    assert _call(server)[0] and server.hits[-1] == "plain"
+    assert not _call(server)[0] and server.hits == ["tls", "tls", "tls"]
     assert "did not match" in logger.warnings[0]
 
 
@@ -215,7 +219,7 @@ def test_an_instance_ahead_of_the_last_read_is_followed(server, certs, pin, logg
 
     # A certificate that is nowhere in the source stays refused after that re-read.
     server.serve(certs["c"])
-    assert _call(server)[0] and server.hits[-1] == "plain"
+    assert not _call(server)[0] and server.hits == ["tls", "tls"]
     assert len(logger.warnings) == 1
 
 
@@ -240,7 +244,7 @@ def test_the_database_supplies_the_certificate_when_there_is_no_file(server, cer
     assert _call(server)[0] and server.hits == ["tls"]
 
     server.serve(certs["b"])
-    assert _call(server)[0] and server.hits[-1] == "plain"
+    assert not _call(server)[0] and server.hits == ["tls"]
     assert "did not match" in logger.warnings[0]
 
 
@@ -317,9 +321,9 @@ def test_another_certificate_is_refused_through_a_proxy(server, certs, pin, logg
     _publish(pin, certs, "a")
     server.serve(certs["b"])
 
-    assert _call(server)[0]
+    assert not _call(server)[0]
     assert proxy.connects, "the TLS attempt must have gone through the tunnel"
-    assert server.hits == ["plain"], "the TLS attempt must not reach the handler, only the plain retry"
+    assert server.hits == [], "no request may reach the handler, and no plain retry is made"
     assert len(logger.warnings) == 1
     assert "did not match the pinned API server certificate" in logger.warnings[0]
 
@@ -338,8 +342,8 @@ def test_another_certificate_is_refused_with_a_write_timeout(server, certs, pin,
 
     ok, _, status, _ = _call(server, write_timeout=5)
 
-    assert (ok, status) == (True, 200)
-    assert server.hits == ["plain"], "the TLS attempt must not reach the handler, only the plain retry"
+    assert (ok, status) == (False, None)
+    assert server.hits == [], "no request may reach the handler, and no plain retry is made"
     assert len(logger.warnings) == 1
     assert "did not match the pinned API server certificate" in logger.warnings[0]
 
@@ -348,7 +352,27 @@ def test_the_pin_holds_with_a_write_timeout_through_a_proxy(server, certs, pin, 
     _publish(pin, certs, "a")
     server.serve(certs["b"])
 
-    assert _call(server, write_timeout=5)[0]
+    assert not _call(server, write_timeout=5)[0]
     assert proxy.connects
-    assert server.hits == ["plain"]
+    assert server.hits == []
     assert "did not match the pinned API server certificate" in logger.warnings[0]
+
+
+def test_a_connection_failure_with_a_pin_still_retries_over_http(server, certs, pin, logger):
+    """Only a refused pin ends the call: an instance that has no TLS yet is still reached in plain HTTP."""
+    _publish(pin, certs, "a")
+    real = server.finish_request
+
+    def _drop_tls(request, client_address):
+        if request.recv(1, MSG_PEEK) == b"\x16":
+            request.close()  # reset before any certificate is shown: not a pin mismatch
+            return
+        real(request, client_address)
+
+    server.finish_request = _drop_tls
+
+    ok, _, status, _ = _call(server)
+
+    assert (ok, status) == (True, 200)
+    assert server.hits == ["plain"]
+    assert "trying HTTP" in logger.warnings[0]

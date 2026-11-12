@@ -1,0 +1,16 @@
+// cppcheck suppressions for the zstd filter and static modules.
+// Keep this list tight: suppress noise, never a real bug. If cppcheck flags a
+// genuine issue, fix the code rather than adding a line here.
+
+// nginx and zstd headers are pulled in via -I system paths; we don't want
+// cppcheck reporting on or descending into them.
+missingIncludeSystem
+
+// Module entry points (handlers, directive setters, filter init, variable
+// getters) are referenced only through nginx's static command/module tables,
+// so cppcheck cannot see the call sites and reports them as unused.
+unusedFunction
+
+// Avoid failing the build when a suppression above stops matching after a
+// refactor; surfaced as information, reviewed when tuning this file.
+unmatchedSuppression

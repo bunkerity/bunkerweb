@@ -63,6 +63,7 @@ jobs:
             debian-trixie,
             fedora-43,
             fedora-44,
+            fedora-45,
             rhel-8,
             rhel-9,
             rhel-10,
@@ -83,6 +84,8 @@ jobs:
           - linux: fedora-43
             package: rpm
           - linux: fedora-44
+            package: rpm
+          - linux: fedora-45
             package: rpm
           - linux: rhel-8
             package: rpm
@@ -187,7 +190,8 @@ jobs:
 
   run-Linux-tests-core:
     needs: [build-packages, parse-tests-core]
-    # GitHub fails a job whose matrix is empty; dev only opts a few specs into this arm.
+    # Linux smoke specs opt in through dev_integrations: general, api and upgrade.
+    # Keep the empty-matrix guard for filtered parser runs.
     if: ${{ needs.parse-tests-core.outputs.Linux_tests != '[]' }}
     strategy:
       fail-fast: false

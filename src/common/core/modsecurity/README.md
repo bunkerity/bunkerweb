@@ -55,6 +55,22 @@ Follow these steps to configure and use ModSecurity:
 
     To keep uploads protected after bypassing ModSecurity, pair this with a file-scanning plugin such as [ClamAV](https://github.com/bunkerity/bunkerweb-plugins/tree/main/clamav) or [VirusTotal](https://github.com/bunkerity/bunkerweb-plugins/tree/main/virustotal) — they inspect the uploaded file itself instead of the raw request body.
 
+!!! warning "Response-body denies and compressed responses"
+    If a response-body deny rule fires after response headers have been sent, the client can receive the original status (such as `200`) followed by an incomplete-body or chunked-encoding error instead of a clean `403` response. This can happen with gzip, Brotli or zstd compression applied by BunkerWeb. Starting with `1.6.18~rc4`, Brotli follows the established gzip behavior. Check the ModSecurity audit and error logs for the triggered rule; tune confirmed false positives with narrowly scoped exclusions.
+
+!!! warning "Upstream-compressed response bodies"
+    CRS v4 does not inspect response bodies already compressed by the upstream (`gzip`, `br` or `zstd`). BunkerWeb does not decode these bodies for inspection. Where response-body inspection is required, configure the upstream to return uncompressed content. To ask an upstream that honors this header to do so, remove `Accept-Encoding` from the proxied request for only the affected service and location:
+
+    ```yaml
+    REVERSE_PROXY_HOST_1: "http://app:8080"
+    REVERSE_PROXY_URL_1: "/reports/"
+    REVERSE_PROXY_HEADERS_1: 'Accept-Encoding ""'
+    ```
+
+    Replace the host and path with your own, and match the suffix to the target reverse-proxy location. If that location already has `REVERSE_PROXY_HEADERS_1` entries, keep them and append `;Accept-Encoding ""`. Use this setting rather than a server-level `proxy_set_header`, which the generated location headers override.
+
+    Verify that the upstream actually returns an uncompressed response; if it still compresses, disable compression for that route on the upstream. This increases bandwidth between the upstream and BunkerWeb. BunkerWeb can still compress the response for the client after inspection; the configured response-body MIME types and size limits still apply.
+
 ### Available CRS Versions
 
 Select a CRS version to best match your security needs:

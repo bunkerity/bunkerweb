@@ -184,6 +184,15 @@
       "type": "password",
       "multiple": "blacklist-ignore-header"
     },
+    "BLACKLIST_URLS_REFRESH_INTERVAL": {
+      "context": "multisite",
+      "default": "1h",
+      "help": "Minimum time before downloading cached URLs again. Accepts time suffixes (ms, s, m, h, d, w, M, y); bare numbers are seconds. 0 downloads on every job run. The job runs hourly; shared URLs use the shortest interval across services.",
+      "id": "blacklist-urls-refresh-interval",
+      "label": "Blacklist URLs refresh interval",
+      "regex": "^[0-9]+(ms?|[shdwMy])?$",
+      "type": "text"
+    },
     "BLACKLIST_IP_URLS": {
       "context": "multisite",
       "default": "",

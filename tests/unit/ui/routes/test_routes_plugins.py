@@ -118,12 +118,24 @@ def test_a_non_administrator_cannot_manage_plugins(h, plug, method, path, extra)
 
 @pytest.mark.parametrize("path", ["/plugins/delete", "/plugins/refresh", "/plugins/upload"])
 def test_plugin_writes_are_refused_in_read_only_mode(h, plug, path):
+    archive = _zip({"plugin.json": json.dumps(PLUGIN_JSON)})
+    _stage(h, "myplugin.zip", archive)
+    h.config.get_plugins.return_value = {}
+    h.db.update_external_plugins.return_value = ""
     h.db.readonly = True
+    client = h.client()
 
-    response = h.client().post(path, data={"plugins": "a", "csrf_token": "t"})
+    response = client.post(path, data={"plugins": "a", "csrf_token": "t"})
 
-    assert response.status_code in (302, 403)
+    if path == "/plugins/refresh":
+        assert response.status_code == 302
+        assert "Database is in read-only mode" in _flashed(h, client)
+    else:
+        assert response.status_code == 403
+        assert "Database is in read-only mode" in response.get_data(as_text=True)
     h.db.delete_plugin.assert_not_called()
+    h.db.update_external_plugins.assert_not_called()
+    assert (h.paths["TMP_DIR"] / "ui" / "myplugin.zip").read_bytes() == archive
 
 
 def test_delete_removes_each_plugin_and_flags_the_change_on_the_last_one(h, plug):
@@ -426,6 +438,20 @@ def test_a_used_plugin_page_is_rendered_from_its_template_and_pre_render(h, plug
     assert template == "plugin_page.html"
     assert context["plugin_page"] == "<p>hello</p>" and context["is_used"] and context["is_metrics"]
     assert context["pre_render"]["data"] == {"greeting": "hello"}
+
+
+@pytest.mark.parametrize("root_name", ["core", "ext"])
+def test_plugin_page_get_keeps_on_disk_plugin_dir(h, plug, root_name):
+    ui = _install(h, root_name=root_name, name="demo", actions="def pre_render(**kwargs):\n    return {}\n", template="<p>demo</p>")
+    h.config.get_plugins.return_value = {"demo": {"name": "Demo", "type": "core" if root_name == "core" else "external"}}
+    h.db.get_config.return_value = {"USE_METRICS": "yes", "USE_DEMO": "yes", "SERVER_NAME": "a.example.com"}
+
+    response = h.client(admin=True).get("/plugins/demo")
+
+    assert response.status_code == 200
+    assert h.renders[-1][1]["plugin_page"] == "<p>demo</p>"
+    assert (ui / "template.html").is_file()
+    assert (ui / "actions.py").is_file()
 
 
 def test_the_page_escapes_what_the_pre_render_returns(h, plug):

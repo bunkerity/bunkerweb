@@ -101,15 +101,16 @@ def test_the_original_reason_data_is_untouched():
     assert out["original"] == data
 
 
-# BUNKERNET_FILTER_HEADERS=no (the default): the reason data goes out as ModSecurity produced it.
-def test_default_sends_matched_header_and_cookie_values():
+# BUNKERNET_FILTER_HEADERS=no (the default): only the values matched in credential headers and cookies are blanked
+# (test_bunkernet_report_credentials.py); the rest of the reason data goes out as ModSecurity produced it.
+def test_default_sends_the_other_matched_values():
     data = reason(
-        ["REQUEST_HEADERS:Authorization", "REQUEST_COOKIES:session", "ARGS:q"],
-        ["Bearer t0ken", "abc123", "<script>"],
+        ["REQUEST_HEADERS:User-Agent", "REQUEST_HEADERS:X-Custom", "ARGS:q"],
+        ["curl/8", "custom", "<script>"],
     )
     assert send(data, filter_headers="no")["report"]["data"] == data
 
 
-def test_default_keeps_unaligned_matched_values():
-    data = reason(["REQUEST_HEADERS:Cookie", "ARGS:a"], ["only-one-value"])
+def test_default_keeps_unaligned_matched_values_without_credential_names():
+    data = reason(["ARGS:a", "REQUEST_HEADERS:User-Agent"], ["only-one-value"])
     assert send(data, filter_headers="no")["report"]["data"] == data

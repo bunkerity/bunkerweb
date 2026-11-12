@@ -115,23 +115,28 @@ jobs:
           case "$TAG" in
             *-rc*)   CHANNEL=rc     ; PRERELEASE=true  ; HIDDEN=true  ;;
             *-beta*) CHANNEL=beta   ; PRERELEASE=true  ; HIDDEN=false ;;
+            *-alpha*) CHANNEL=alpha ; PRERELEASE=true  ; HIDDEN=true  ;;
             *)       CHANNEL=latest ; PRERELEASE=false ; HIDDEN=false ;;
           esac
 
           # A final owns the floating <major>.<minor> names only when it is the highest final of
           # its minor, and `latest` only when it is the highest final across all v* tags, so an
           # older patch released late never moves either name backward.
+          MINOR="${VERSION%.*}"
+          REMOTE_TAGS="$(git ls-remote --tags --refs "https://github.com/${GITHUB_REPOSITORY}.git" 'refs/tags/v*')" || {
+            echo "::error::Cannot list the remote tags to decide the floating aliases"
+            exit 1
+          }
           case "$TAG" in
             *-rc*|*-beta*)
               DOCS_ALIASES="$CHANNEL"
               DOCKER_TAGS="$CHANNEL,$VERSION"
               ;;
+            *-alpha*)
+              DOCS_ALIASES=""
+              DOCKER_TAGS="$VERSION"
+              ;;
             *)
-              MINOR="${VERSION%.*}"
-              REMOTE_TAGS="$(git ls-remote --tags --refs "https://github.com/${GITHUB_REPOSITORY}.git" 'refs/tags/v*')" || {
-                echo "::error::Cannot list the remote tags to decide the floating aliases"
-                exit 1
-              }
               FINALS="$({ printf '%s\n' "$REMOTE_TAGS" | sed 's|.*refs/tags/||'; echo "$TAG"; } | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | sort -uV)"
               HIGHEST="$(printf '%s\n' "$FINALS" | tail -n 1)"
               HIGHEST_MINOR="$(printf '%s\n' "$FINALS" | grep "^v${MINOR//./\\.}\." | tail -n 1)"
@@ -144,6 +149,28 @@ jobs:
               if [ "$HIGHEST" = "$TAG" ]; then
                 DOCS_ALIASES="latest${DOCS_ALIASES:+ $DOCS_ALIASES}"
                 DOCKER_TAGS="latest,$DOCKER_TAGS"
+              fi
+              ;;
+          esac
+
+          ALL_TAGS="$({ printf '%s\n' "$REMOTE_TAGS" | sed 's|.*refs/tags/||'; echo "$TAG"; } | sort -u)"
+          # Highest tag of this minor among the remote tags plus this one, for the ERE in $1.
+          # `sort -V` puts 1.6.18-rc4 after 1.6.18, so `-rc` is mapped to `~rc` (sorts first) and back.
+          minor_highest() {
+            printf '%s\n' "$ALL_TAGS" | grep -E "^v${MINOR//./\\.}\.[0-9]+$1$" | sed 's/-rc/~rc/' | sort -V | tail -n 1 | sed 's/~rc/-rc/' || true
+          }
+
+          # <major>.<minor>-edge follows the newest rc or final of its minor, so an older tag
+          # released late never moves it backward. Betas and alphas neither take it nor count.
+          if [ "$(minor_highest '(-rc[0-9]+)?')" = "$TAG" ]; then
+            DOCKER_TAGS="$DOCKER_TAGS,$MINOR-edge"
+          fi
+          # <major>.<minor>-rc, -beta and -alpha follow the newest tag of the same kind in the
+          # minor. The plain `rc` and `beta` names stay as legacy aliases.
+          case "$TAG" in
+            *-rc[0-9]*|*-beta[0-9]*|*-alpha[0-9]*)
+              if [ "$(minor_highest "-$CHANNEL[0-9]+")" = "$TAG" ]; then
+                DOCKER_TAGS="$DOCKER_TAGS,$MINOR-$CHANNEL"
               fi
               ;;
           esac
@@ -299,6 +326,7 @@ jobs:
             debian-trixie,
             fedora-43,
             fedora-44,
+            fedora-45,
             rhel-8,
             rhel-9,
             rhel-10,
@@ -318,6 +346,8 @@ jobs:
           - linux: fedora-43
             package: rpm
           - linux: fedora-44
+            package: rpm
+          - linux: fedora-45
             package: rpm
           - linux: rhel-8
             package: rpm
@@ -526,6 +556,7 @@ jobs:
             debian-trixie,
             fedora-43,
             fedora-44,
+            fedora-45,
             el-8,
             el-9,
             el-10,
@@ -565,6 +596,11 @@ jobs:
             suffix: "1."
             version: 44
             package: rpm
+          - linux: fedora-45
+            separator: "-"
+            suffix: "1."
+            version: 45
+            package: rpm
           - linux: el-8
             separator: "-"
             suffix: "1."
@@ -603,6 +639,9 @@ jobs:
           - linux: fedora-44
             arch: amd64
             package_arch: x86_64
+          - linux: fedora-45
+            arch: amd64
+            package_arch: x86_64
           - linux: el-8
             arch: amd64
             package_arch: x86_64
@@ -631,6 +670,9 @@ jobs:
             arch: arm64
             package_arch: aarch64
           - linux: fedora-44
+            arch: arm64
+            package_arch: aarch64
+          - linux: fedora-45
             arch: arm64
             package_arch: aarch64
           - linux: el-8
@@ -801,16 +843,16 @@ jobs:
             echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
 
-  # Create doc PDF
+  # Build the PDF before approval so documentation failures surface alongside builds.
   doc-pdf:
-    needs: [prepare, gate]
+    needs: [prepare]
     uses: ./.github/workflows/doc-to-pdf.yml
     with:
       VERSION: ${{ needs.prepare.outputs.version }}
 
   # Push on GH
   push-gh:
-    needs: [prepare, candidates, doc-pdf]
+    needs: [prepare, candidates, doc-pdf, gate]
     permissions:
       contents: write
       discussions: write

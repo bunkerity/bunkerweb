@@ -36,7 +36,8 @@ $(document).ready(function () {
   templates.forEach((template) => {
     if (template) {
       templatesSearchPanesOptions.push({
-        label: template,
+        // SearchPanes renders the label as HTML and the id is user-supplied: escape it
+        label: $("<div>").text(template).html(),
         value: (rowData) => $(rowData[6]).text().trim() === template,
       });
     }

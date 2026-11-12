@@ -214,7 +214,14 @@ function antibot:initialize(ctx)
 	-- Decode lists only once
 	if get_phase() ~= "init" and self.use_antibot ~= "no" then
 		self.lists = {}
-		for _, list in ipairs({ "IGNORE_URI", "IGNORE_IP", "IGNORE_RDNS", "IGNORE_ASN", "IGNORE_USER_AGENT" }) do
+		for _, list in ipairs({
+			"IGNORE_URI",
+			"INCLUDE_URI",
+			"IGNORE_IP",
+			"IGNORE_RDNS",
+			"IGNORE_ASN",
+			"IGNORE_USER_AGENT",
+		}) do
 			self.lists[list] = {}
 			local list_var = self.variables["ANTIBOT_" .. list]
 			if list_var then
@@ -459,7 +466,8 @@ function antibot:access()
 	-- Get session data
 	local session, err = get_session(self.ctx)
 	if not session then
-		return self:ret(false, "can't get session : " .. err)
+		-- Fail closed: without a status the dispatcher would let the request through unchallenged.
+		return self:ret(false, "can't get session : " .. err, HTTP_INTERNAL_SERVER_ERROR)
 	end
 	self.session = session
 	self.session_data = session:get("antibot") or {}
@@ -1320,6 +1328,22 @@ function antibot:is_ignored_uri()
 		if uri_query and regex_match(uri_query, ignore_uri, nil, "ANTIBOT_IGNORE_URI") then
 			return true, "URI " .. ignore_uri
 		end
+	end
+	if #self.lists["INCLUDE_URI"] > 0 then
+		for _, include_uri in ipairs(self.lists["INCLUDE_URI"]) do
+			local matched, err = regex_match(uri, include_uri, nil, "ANTIBOT_INCLUDE_URI")
+			-- Fail closed on regex errors; the shared helper already logs and throttles bad patterns.
+			if matched or err then
+				return false, "ko"
+			end
+			if uri_query then
+				matched, err = regex_match(uri_query, include_uri, nil, "ANTIBOT_INCLUDE_URI")
+				if matched or err then
+					return false, "ko"
+				end
+			end
+		end
+		return true, "URI not included in ANTIBOT_INCLUDE_URI"
 	end
 	-- URI is not ignored
 	return false, "ko"

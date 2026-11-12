@@ -2,13 +2,13 @@
 # Database checks around a Linux package upgrade (tests/core/upgrade.yml, Linux arm). The runner calls it
 # twice per upgrade path, against the SQLite database of the `bunkerweb-linux` systemd container:
 #
-#   snapshot <name>   on the old release, before the upgrade. The database must be an old schema (the
-#                     rc3 table is not there yet), and a marker table is written into it.
+#   snapshot <name>   on the old release, before the upgrade. Record whether the rc3 table already
+#                     exists (recent prereleases have it), and write a marker table into the database.
 #   verify <name>     on the package built from this checkout, after the upgrade. The version recorded in
 #                     the database moved, the migration ran (alembic_version exists, it is only created by
 #                     the scheduler's upgrade path), the rc3 table exists, the marker survived (the database
 #                     was migrated, not replaced by a new one) and the service the old release served is
-#                     still declared.
+#                     still declared. Report whether the upgrade created the rc3 table or kept it.
 #
 # Why a marker: a database created from scratch by the new code also has the rc3 table, so the table
 # alone cannot tell an upgrade that migrated the old database from one that threw it away.
@@ -26,6 +26,7 @@ container="bunkerweb-linux"
 database="/var/lib/bunkerweb/db.sqlite3"
 state_dir="${TMPDIR:-/tmp}/linux-upgrade"
 version_file="${state_dir}/${name}.version"
+login_failures_file="${state_dir}/${name}.login-failures"
 login_failures_table="bw_ui_login_failures"
 service_name="www.example.com"
 
@@ -48,10 +49,11 @@ version="$(query "SELECT version FROM bw_metadata WHERE id = 1")" || fail "canno
 [ -n "$version" ] || fail "the database version is empty"
 
 if [ "$mode" = "snapshot" ]; then
-	[ "$(table_count "$login_failures_table")" = "0" ] || fail "${login_failures_table} already exists on the old release, so this is not an old schema"
+	login_failures_before="$(table_count "$login_failures_table")" || fail "cannot read whether ${login_failures_table} exists"
 
 	mkdir -p "$state_dir"
 	echo "$version" >"$version_file"
+	echo "$login_failures_before" >"$login_failures_file"
 
 	# The checkpoint folds the marker into the main file: the package backs that file up on upgrade.
 	docker exec -u 0 "$container" sqlite3 "$database" \
@@ -67,6 +69,7 @@ if [ "$mode" = "snapshot" ]; then
 fi
 
 [ -s "$version_file" ] || fail "no snapshot of the old release (${version_file})"
+[ -s "$login_failures_file" ] || fail "no snapshot of ${login_failures_table} (${login_failures_file})"
 old_version="$(cat "$version_file")"
 [ "$version" != "$old_version" ] || fail "the database version is still ${old_version}: the database was not migrated"
 [ "$(table_count alembic_version)" = "1" ] || fail "alembic_version is missing: the scheduler's migration did not run"
@@ -93,4 +96,9 @@ current="$(query "SELECT version_num FROM alembic_version")"
 [ "$(query "SELECT count(*) FROM bw_services WHERE id = '${service_name}'")" -ge 1 ] || fail "${service_name} is not declared after the upgrade"
 
 echo "linux-database verify ${name}: database version ${old_version} -> ${version}, revision ${current} (head)"
+if [ "$(cat "$login_failures_file")" = "0" ]; then
+	echo "linux-database verify ${name}: migration created ${login_failures_table}"
+else
+	echo "linux-database verify ${name}: ${login_failures_table} already existed before the upgrade"
+fi
 echo "linux-database verify ${name}: all checks passed"

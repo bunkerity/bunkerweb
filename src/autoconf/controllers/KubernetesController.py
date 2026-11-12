@@ -2,7 +2,6 @@
 
 from contextlib import suppress
 from ipaddress import ip_address
-from logging import DEBUG
 from os import getenv, sep
 from pathlib import Path
 from re import match as re_match, split as re_split, sub as re_sub
@@ -16,6 +15,7 @@ from kubernetes import client, config, watch
 from kubernetes.client import Configuration
 from kubernetes.client.exceptions import ApiException
 
+from Config import REDACTED, is_sensitive_key
 from controllers.Controller import Controller, HoldTimeLock
 
 # Written by main.py once the controller starts and checked by healthcheck-autoconf.sh.
@@ -237,29 +237,15 @@ class KubernetesController(Controller):
     # cross-namespace check at the top of the merge loop short-circuits first.
     _CONFLICT_LOG_SKIP_KEYS = frozenset({"SERVER_NAME", "NAMESPACE"})
 
-    # Substrings that mark an annotation value as sensitive. Conflict logs that
-    # would otherwise echo the old/new value verbatim substitute "<redacted>"
-    # for any key matching one of these substrings, so secrets do not leak into
-    # scheduler logs that may be shipped to centralized log sinks. Operators
-    # who need the raw values for debugging can drop the controller logger to
-    # DEBUG (the most verbose level the project ships) — the redaction is
-    # bypassed in that mode.
-    _SENSITIVE_KEY_SUBSTRINGS = ("PASSWORD", "SECRET", "TOKEN", "API_KEY", "PRIVATE_KEY", "AUTH_BASIC")
-
     def _format_conflict_value(self, key: str, value) -> str:
-        """Return ``repr(value)`` unless ``key`` looks sensitive.
+        """Return ``repr(value)``, or ``'<redacted>'`` when ``key`` names a secret setting.
 
-        When the controller logger is enabled for ``DEBUG`` the original value
-        is always shown — operators on debug/trace verbosity have explicitly
-        opted into verbose output, so silent redaction would defeat the purpose
-        of turning the level up in the first place.
+        Conflict logs go to scheduler logs that may be shipped to centralized sinks, so the redaction
+        is unconditional: a secret value is never logged, whatever the logger level. The markers are
+        the shared ``SENSITIVE_KEY_SUBSTRINGS`` list of ``Config``.
         """
-        if self._logger.isEnabledFor(DEBUG):
-            return repr(value)
-        upper_key = key.upper()
-        for marker in self._SENSITIVE_KEY_SUBSTRINGS:
-            if marker in upper_key:
-                return "'<redacted>'"
+        if is_sensitive_key(key):
+            return f"'{REDACTED}'"
         return repr(value)
 
     def _merge_services_by_server_name(self, services: list) -> list:
