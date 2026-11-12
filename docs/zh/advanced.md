@@ -3166,16 +3166,13 @@ LOG_FORMAT_1=time=$time_iso8601 host=$host client=$remote_addr request_id=$reque
 MODSECURITY_SEC_AUDIT_LOG_PARTS=BFH
 ```
 
-**3. 以 JSON 格式写入审计日志。** 创建 `/etc/bunkerweb/configs/modsec/audit-json.conf`，内容仅此一行，然后按照[自定义配置](#custom-configurations)中的说明让调度器可以访问该文件夹：
+**3. 以 JSON 格式写入审计日志。** 将以下内容添加到 `/etc/bunkerweb/variables.env`：
 
 ```conf
-SecAuditLogFormat JSON
+MODSECURITY_SEC_AUDIT_LOG_FORMAT=JSON
 ```
 
-```shell
-sudo chown -R root:nginx /etc/bunkerweb/configs && \
-sudo chmod -R 770 /etc/bunkerweb/configs
-```
+更早的版本没有此设置：请改为在 `modsec` 类型的自定义配置中写入 `SecAuditLogFormat JSON`（例如 `/etc/bunkerweb/configs/modsec/audit-json.conf`，参见[自定义配置](#custom-configurations)）。
 
 **4. 重启服务。**
 
@@ -3254,7 +3251,7 @@ time=2026-11-10T08:11:02+00:00 host=www.example.com client=10.77.52.1 request_id
     - **`C` 部分包含请求正文**，其中有表单字段和凭据。除非需要正文，否则请使用 `BFH`，并限制谁可以读取该索引。
 
 !!! info "Docker、Autoconf、Swarm 和 Kubernetes"
-    这些镜像把 `access.log`、`error.log` 和 `modsec_audit.log` 链接到容器自身的日志流（参见[日志文件保留策略](#log-file-retention)），因此 forwarder 没有文件可读；由 `ACCESS_LOG_1` 写入的文件留在容器内，没有任何机制轮转它。请在调度器上用自定义配置设置而不是文件来启用 JSON 审计格式：`CUSTOM_CONF_MODSEC_audit-json=SecAuditLogFormat JSON`。JSON 记录随后会出现在 `bunkerweb` 容器的 `docker logs` 中，每条一行，夹杂在错误日志行之间：以 `{` 开头的行就是审计记录。
+    这些镜像把 `access.log`、`error.log` 和 `modsec_audit.log` 链接到容器自身的日志流（参见[日志文件保留策略](#log-file-retention)），因此 forwarder 没有文件可读；由 `ACCESS_LOG_1` 写入的文件留在容器内，没有任何机制轮转它。请像其他设置一样，在调度器上设置 `MODSECURITY_SEC_AUDIT_LOG_FORMAT=JSON`，而不是使用文件。JSON 记录随后会出现在 `bunkerweb` 容器的 `docker logs` 中，每条一行，夹杂在错误日志行之间：以 `{` 开头的行就是审计记录。
 
     要把日志流发送到 Splunk，请使用 [Docker `splunk` 日志驱动](https://docs.docker.com/engine/logging/drivers/splunk/)和 HTTP Event Collector 令牌。该驱动会把访问、错误和审计行一起以同一个 sourcetype 发送，因此只能根据内容区分它们。请把 `key=value` 格式设置在 `LOG_FORMAT`（不带后缀）上，使发送的访问行采用该格式。这会替换 `access.log` 中的默认格式。
 

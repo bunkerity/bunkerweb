@@ -28,6 +28,7 @@
 - [FEATURE] `antibot`: new `ANTIBOT_INCLUDE_URI` setting challenges only the URIs that match it; `ANTIBOT_IGNORE_URI` still takes precedence (Refs #3647).
 - [FEATURE] `zstd`: new optional Zstandard response compression (`USE_ZSTD`, off by default), preferred over Brotli and gzip when the client accepts it. Enabling it can add `Vary: Accept-Encoding` to eligible uncompressed, gzip and Brotli responses too.
 - [FEATURE] `core`: `CLIENT_HEADER_TIMEOUT` and `CLIENT_BODY_TIMEOUT` now support per-service overrides.
+- [FEATURE] `modsecurity`: new `MODSECURITY_SEC_AUDIT_LOG_FORMAT` setting (`Native` or `JSON`) writes the audit log as one JSON object per entry.
 - [BUGFIX] `inject`: quotes and backslashes in `INJECT_HEAD` and `INJECT_BODY` no longer break the generated config; remove hand-added `\'` workaround escapes.
 - [BUGFIX] `modsecurity`: response body rules now inspect Brotli-compressed responses too; ModSecurity used to see the compressed bytes when `USE_BROTLI=yes`. A response-body deny after headers were sent can leave the client with an incomplete response, as with gzip.
 - [BUGFIX] `linux`: RHEL 9 and 10 packages now build ModSecurity with yajl, so JSON request bodies are parsed for CRS and `SecAuditLogFormat JSON` works.
