@@ -1,0 +1,27 @@
+tests/unit/ui/test_ui_logger_outcomes.py
+  s_04e40d87fce8b4::t_6df65bcd63e937 1-97
+tests/unit/ui/routes/test_services_preservation_outcomes.py
+  s_04e40d87fce8b4::t_14911b5b254b29 82-88,94-102,146-162,166-168,175-178
+  s_04e40d87fce8b4::t_557917b2a0e203 173
+  s_04e40d87fce8b4::t_58ae11db93f770 1-81,89-93,103-145,163-165,169-172,174,179-183
+tests/unit/ui/test_tmp_ui_worker_lifecycle.py
+  s_04e40d87fce8b4::t_756b8abb7cbb19 79
+  s_04e40d87fce8b4::t_6df65bcd63e937 1-35,37-78,80-90
+  s_04e40d87fce8b4::t_14911b5b254b29 36
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "7d3423fec5f7854f7ee587d3bc16134b86efc922",
+  "prompts": {},
+  "sessions": {
+    "s_04e40d87fce8b4": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a18de2-c2c7-7441-bef0-5d18718eba4e",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

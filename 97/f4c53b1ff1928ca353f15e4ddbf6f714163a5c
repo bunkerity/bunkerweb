@@ -1,0 +1,16 @@
+CHANGELOG.md
+  h_a33a1e80933106 11
+src/common/core/antibot/files/capjs_frame.html
+  h_a33a1e80933106 13-15
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "97f4c53b1ff1928ca353f15e4ddbf6f714163a5c",
+  "prompts": {},
+  "humans": {
+    "h_a33a1e80933106": {
+      "author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

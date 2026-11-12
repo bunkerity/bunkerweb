@@ -1,0 +1,25 @@
+README.md
+  h_a33a1e80933106 27-29,35-48,50-70
+  s_5765503030423a::t_6627249eb9b19d 25-26,30-34,49
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "c088ccbbcee826238d4c2d295d36718d1634c459",
+  "prompts": {},
+  "humans": {
+    "h_a33a1e80933106": {
+      "author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  },
+  "sessions": {
+    "s_5765503030423a": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "8115552a-34c2-4993-ba26-6ba9cf0ff251",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

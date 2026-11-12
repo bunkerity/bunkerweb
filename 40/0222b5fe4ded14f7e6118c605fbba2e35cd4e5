@@ -1,0 +1,27 @@
+docs/zh/plugins.md
+  s_128e4034bbce23::t_bcb8165bf0a0d8 11-22,30
+docs/fr/plugins.md
+  s_128e4034bbce23::t_bcb8165bf0a0d8 11-22,30
+docs/de/plugins.md
+  s_128e4034bbce23::t_bcb8165bf0a0d8 11-22,30
+docs/es/plugins.md
+  s_128e4034bbce23::t_bcb8165bf0a0d8 11-22,30
+docs/plugins.md
+  s_128e4034bbce23::t_bcb8165bf0a0d8 11-22,30
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "400222b5fe4ded14f7e6118c605fbba2e35cd4e5",
+  "prompts": {},
+  "sessions": {
+    "s_128e4034bbce23": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1ac7d-d90b-7d62-8f61-eba1f2829c30",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

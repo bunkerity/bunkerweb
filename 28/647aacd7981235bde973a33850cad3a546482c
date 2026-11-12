@@ -1,0 +1,29 @@
+src/common/db/alembic/mariadb_versions/2f4621324c8c_upgrade_to_version_1_6_17.py
+  s_ff20fc71fc9551::t_4593166bae7de8 8-24
+  s_ff20fc71fc9551::t_ecfeea15c76767 1-7,25-29
+src/common/db/alembic/mysql_versions/fd7656b2e096_upgrade_to_version_1_6_17.py
+  s_ff20fc71fc9551::t_4593166bae7de8 8-24
+  s_ff20fc71fc9551::t_34a5a8805b96c1 1-7,25-29
+src/common/db/alembic/postgresql_versions/e8a90b5d846a_upgrade_to_version_1_6_17.py
+  s_ff20fc71fc9551::t_4593166bae7de8 8-24
+  s_ff20fc71fc9551::t_d6ce40e579e5fe 1-7,25-29
+src/common/db/alembic/sqlite_versions/98601421d101_upgrade_to_version_1_6_17.py
+  s_ff20fc71fc9551::t_4593166bae7de8 8-24
+  s_ff20fc71fc9551::t_11345075a34221 1-7,25-29
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "28647aacd7981235bde973a33850cad3a546482c",
+  "prompts": {},
+  "sessions": {
+    "s_ff20fc71fc9551": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "162362c5-42b6-46e1-83a0-29f8b51592ba",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

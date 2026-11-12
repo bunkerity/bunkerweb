@@ -1,0 +1,85 @@
+tests/unit/requirements.in
+  s_5c1a5223f1efbd::t_0983f60fb3fd05 23,28,46-47
+  s_903631c9046c55::t_d60437e1d214c2 37
+src/deps/requirements.txt
+  s_5c1a5223f1efbd::t_275bc758520966 41-43
+  s_a6feea008b86c1::t_308617ed8b8575 15-17
+tests/unit/requirements.txt
+  s_5c1a5223f1efbd::t_0863bf6213dfba 1189-1192
+  s_5c1a5223f1efbd::t_0983f60fb3fd05 987-989,1004-1006,1962-1964,1970-2111,2113-2115
+.github/workflows/container-build.yml
+  s_5c1a5223f1efbd::t_43fa61fdf8e2ae 201
+src/scheduler/requirements.txt
+  s_5c1a5223f1efbd::t_275bc758520966 1164-1166
+  s_a6feea008b86c1::t_3e084a57e62e51 7-9,57-59,96-98,108-110,112-114,116-118,139-141,147-149,163-165,167-169,175-177,179-181,191-193,195-197,199-201,678-680,850-852,856-997
+.github/workflows/scorecards-analysis.yml
+  s_5c1a5223f1efbd::t_43fa61fdf8e2ae 28
+.github/workflows/plumber.yml
+  s_5c1a5223f1efbd::t_43fa61fdf8e2ae 25
+src/autoconf/requirements.txt
+  s_5c1a5223f1efbd::t_9d002035cae194 978-980,982-1123
+  s_a6feea008b86c1::t_db6f627b9f9b58 1129-1131
+src/api/requirements.txt
+  s_5c1a5223f1efbd::t_c9b8cb64f1a9f1 270-272,436-438,443-584,586-588
+.github/workflows/push-packagecloud.yml
+  s_5c1a5223f1efbd::t_43fa61fdf8e2ae 71
+src/deps/requirements-deps.txt
+  s_5c1a5223f1efbd::t_275bc758520966 254-256
+  s_a6feea008b86c1::t_4f5c5bbb5fbdef 203-205
+.github/workflows/codeql.yml
+  s_5c1a5223f1efbd::t_43fa61fdf8e2ae 41,47
+src/api/requirements.in
+  s_a6feea008b86c1::t_7335da8c50fa28 6,8-9
+src/autoconf/requirements.in
+  s_a6feea008b86c1::t_11ce2f36631aa8 4
+src/common/gen/requirements.in
+  s_a6feea008b86c1::t_e5b8a5b55f2fa8 4
+src/common/gen/requirements.txt
+  s_a6feea008b86c1::t_d0ea69c736a926 483-485
+src/deps/requirements-deps.in
+  s_a6feea008b86c1::t_8f654178daf197 1,6
+src/deps/requirements.in
+  s_a6feea008b86c1::t_c7ab089bb25dde 1,4
+src/scheduler/requirements.in
+  s_a6feea008b86c1::t_ed534e38d518e0 1,4-16,39,41,46
+src/ui/requirements.in
+  s_a6feea008b86c1::t_3092fecf5cefe0 5,8
+src/ui/requirements.txt
+  s_a6feea008b86c1::t_88d94aef0b4761 7-9,330-332,712-714
+tests/unit/api_app/requirements.in
+  s_a6feea008b86c1::t_507e9f48134c77 11-12
+tests/unit/api_app/requirements.txt
+  s_a6feea008b86c1::t_43a3c18c211ff3 18-20,30-32,36-177,179-181
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "86db3a6f9bbb98ba31a8ca1d1e0e65ccaff232ae",
+  "prompts": {},
+  "sessions": {
+    "s_5c1a5223f1efbd": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "7ffa63cd-7d5b-4713-9df5-75366d4ed825",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_903631c9046c55": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1a57e-e647-7102-86de-f481a25ebe3f",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_a6feea008b86c1": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "d777bd6a-c454-44a3-9638-1a7c9632f003",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

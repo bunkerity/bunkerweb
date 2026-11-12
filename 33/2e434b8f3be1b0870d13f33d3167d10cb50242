@@ -1,0 +1,59 @@
+src/ui/app/static/locales/pl.json
+  s_4600783926e6d7::t_55cdf8b3538088 850,1765
+src/ui/app/templates/setup.html
+  s_4600783926e6d7::t_55cdf8b3538088 430,444
+src/ui/app/static/locales/ar.json
+  s_4600783926e6d7::t_55cdf8b3538088 850,1765
+src/ui/app/static/locales/bn.json
+  s_4600783926e6d7::t_55cdf8b3538088 850,1765
+src/ui/app/static/locales/es.json
+  s_4600783926e6d7::t_55cdf8b3538088 850,1765
+src/ui/app/static/locales/fr.json
+  s_4600783926e6d7::t_55cdf8b3538088 850,1765
+src/ui/app/static/locales/it.json
+  s_4600783926e6d7::t_55cdf8b3538088 850,1765
+src/ui/app/static/locales/de.json
+  s_4600783926e6d7::t_55cdf8b3538088 850,1765
+src/ui/app/static/locales/id.json
+  s_4600783926e6d7::t_55cdf8b3538088 850,1765
+src/ui/app/static/locales/pt.json
+  s_4600783926e6d7::t_55cdf8b3538088 850,1765
+src/ui/app/static/locales/en.json
+  s_4600783926e6d7::t_55cdf8b3538088 850,1765
+src/ui/app/static/locales/ru.json
+  s_4600783926e6d7::t_55cdf8b3538088 850,1765
+src/ui/app/static/locales/tw.json
+  s_4600783926e6d7::t_55cdf8b3538088 850,1765
+src/ui/app/static/locales/br.json
+  s_4600783926e6d7::t_55cdf8b3538088 850,1765
+src/ui/app/static/locales/hi.json
+  s_4600783926e6d7::t_55cdf8b3538088 850,1765
+src/ui/app/static/locales/tl.json
+  s_4600783926e6d7::t_55cdf8b3538088 850,1765
+CHANGELOG.md
+  s_4600783926e6d7::t_886a23f3d15d9e 25
+src/ui/app/static/locales/ko.json
+  s_4600783926e6d7::t_55cdf8b3538088 850,1765
+src/ui/app/static/locales/tr.json
+  s_4600783926e6d7::t_55cdf8b3538088 850,1765
+src/ui/app/static/locales/zh.json
+  s_4600783926e6d7::t_55cdf8b3538088 850,1765
+src/ui/app/static/locales/ur.json
+  s_4600783926e6d7::t_55cdf8b3538088 850,1765
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "332e434b8f3be1b0870d13f33d3167d10cb50242",
+  "prompts": {},
+  "sessions": {
+    "s_4600783926e6d7": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "577228b8-9e99-4afb-b5b7-0fab1e1a53d0",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

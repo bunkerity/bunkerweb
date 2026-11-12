@@ -1,0 +1,36 @@
+src/common/core/letsencrypt/jobs/certbot-cleanup.py
+  s_71621021b58e89::t_05d748a0e3d48b 20-22,24,34,38,40
+  s_71621021b58e89::t_ab4c2312a2db0e 19,23
+src/common/core/letsencrypt/jobs/certbot-deploy.py
+  s_71621021b58e89::t_ab4c2312a2db0e 22,26
+  s_71621021b58e89::t_05d748a0e3d48b 23-25,27,58,62,64,69,77,79
+CHANGELOG.md
+  s_1981a6d47f11f8::t_62c65b721b7960 10
+src/common/core/letsencrypt/jobs/certbot-auth.py
+  s_71621021b58e89::t_05d748a0e3d48b 20-22,24,36,40,42
+  s_71621021b58e89::t_ab4c2312a2db0e 19,23
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "550eb7103cb4ce48dcddb9d49ef74d6568599db6",
+  "prompts": {},
+  "sessions": {
+    "s_1981a6d47f11f8": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "81d4e090-9d15-4bff-bc6b-4a6e5d427958",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_71621021b58e89": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "186c95a8-1afd-4f42-bcf4-aae1c4e730a6",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

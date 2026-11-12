@@ -1,0 +1,52 @@
+tests/unit/reverseproxy/test_pem.py
+  s_42c090211b4ee8::t_d7c9a67a850c1e 63-80
+  s_7194258068b77b::t_c2ce4cd5e40a31 8-10,53-54,81-87
+tests/unit/reverseproxy/test_trusted_cert.py
+  s_42c090211b4ee8::t_38a72764a3e7a5 185-221
+  s_7194258068b77b::t_016037cba540cf 3-6,19-40,125-126,222-265,267-282
+  s_795e2ccdb6801b::t_2bae555b46ce28 266
+  s_42c090211b4ee8::t_aa2867b607a03c 178-183
+  s_42c090211b4ee8::t_5352bb83fdd460 1-2,7-16,41-124,127-177,184
+  s_795e2ccdb6801b::t_f0d70e2dbbed78 17-18
+src/common/core/reverseproxy/jobs/reverseproxy_pem.py
+  s_42c090211b4ee8::t_b217c68cb51d29 44-45
+  s_7194258068b77b::t_c2ce4cd5e40a31 21-24,60,92-109
+src/common/core/reverseproxy/jobs/trusted-cert.py
+  s_7194258068b77b::t_43cc6b94ec97b0 47-49
+  s_42c090211b4ee8::t_38a72764a3e7a5 259,261,266
+  s_7194258068b77b::t_c2ce4cd5e40a31 19,52-69,96,112,114,122-130,132-133,137,140,149,162,166,180,184-193,248-251,255-256,260,262-265,268-269
+  s_42c090211b4ee8::t_321cf4f0bf9bab 25-29,86-93,101,103-104,148,150-161,163-165,167-179,181-183,214-217,219-247,252-254,257-258,267,270-271,296-305
+  s_795e2ccdb6801b::t_e019ffad261b16 51,194-195,306
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "52e00e51fb899b4694779e64fc1fb2fa8f44e594",
+  "prompts": {},
+  "sessions": {
+    "s_42c090211b4ee8": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0c95b-8b89-7011-b466-f4c54d78d995",
+        "model": "gpt-6-astra"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_7194258068b77b": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0c98b-9849-71e1-8054-c5204ae7079e",
+        "model": "gpt-6-astra"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_795e2ccdb6801b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "71804b16-900c-4824-8bbc-5e7434803315",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

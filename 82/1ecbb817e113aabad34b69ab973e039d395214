@@ -1,0 +1,29 @@
+CHANGELOG.md
+  s_ece0b7db599386::t_b37305fa657104 8
+src/ui/app/routes/configs.py
+  s_b80b2f00fb3ccc::t_59562c824110f8 44-45,53-54
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "821ecbb817e113aabad34b69ab973e039d395214",
+  "prompts": {},
+  "sessions": {
+    "s_b80b2f00fb3ccc": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a14428-4e2d-7500-ae0b-bad7b110d1f4",
+        "model": "unknown"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_ece0b7db599386": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "9ae7700f-1e09-430f-9d34-fdc016638720",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

@@ -1,0 +1,32 @@
+tests/unit/ui/core_plugins/conftest.py
+  s_ba3eae99430ba9::t_e9a585217dbaa5 35
+tests/unit/ui/core_plugins/test_letsencrypt_blueprint_routes.py
+  s_fadd982e7b37fe::t_b1a58ac8a3fcb6 129-148
+src/common/core/letsencrypt/ui/blueprints/letsencrypt.py
+  s_ba3eae99430ba9::t_da59101771f757 438-439,587-588
+  s_fadd982e7b37fe::t_0f35a3186570f3 430-433
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "9a3fd1d5fa45d89092722793e1fa1b6a2aa24ed0",
+  "prompts": {},
+  "sessions": {
+    "s_ba3eae99430ba9": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1c13c-678e-7962-9c8f-f5a2159faf9d",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_fadd982e7b37fe": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1c132-6d25-7962-8275-ade3406f1530",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

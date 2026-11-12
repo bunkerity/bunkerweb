@@ -1,0 +1,70 @@
+docs/zh/features.md
+  s_5771cf5c48ca3c::t_ee811c666e6a89 4488-4503,6857
+  s_4507497497abc6::t_15019cb7648ba2 6858
+src/common/core/modsecurity/README.es.md
+  s_8dd94324ac7724::t_1f8ddeb49bbe33 58-73
+docs/de/features.md
+  s_5771cf5c48ca3c::t_ee811c666e6a89 4426-4441,6772
+  s_4507497497abc6::t_68f13f0c7423f5 6773
+docs/features.md
+  s_5771cf5c48ca3c::t_ee811c666e6a89 4494-4509,6863
+  s_4507497497abc6::t_c2bb9d3d470c0f 6864
+src/common/core/modsecurity/README.zh.md
+  s_8dd94324ac7724::t_1f8ddeb49bbe33 58-73
+src/common/core/modsecurity/README.md
+  s_8dd94324ac7724::t_1f8ddeb49bbe33 58-73
+docs/es/features.md
+  s_5771cf5c48ca3c::t_ee811c666e6a89 4478-4493,6849
+  s_4507497497abc6::t_7883ed08543237 6850
+src/common/core/modsecurity/README.fr.md
+  s_8dd94324ac7724::t_1f8ddeb49bbe33 58-73
+src/common/core/modsecurity/README.de.md
+  s_8dd94324ac7724::t_1f8ddeb49bbe33 58-73
+src/common/core/zstd/README.md
+  s_5771cf5c48ca3c::t_ee811c666e6a89 11-12
+src/common/core/zstd/README.zh.md
+  s_5771cf5c48ca3c::t_ee811c666e6a89 11-12
+CHANGELOG.md
+  s_8dd94324ac7724::t_1f8ddeb49bbe33 29,32,75
+src/common/core/zstd/README.fr.md
+  s_5771cf5c48ca3c::t_ee811c666e6a89 11-12
+src/common/core/zstd/README.de.md
+  s_5771cf5c48ca3c::t_ee811c666e6a89 11-12
+src/common/core/zstd/README.es.md
+  s_5771cf5c48ca3c::t_ee811c666e6a89 11-12
+docs/fr/features.md
+  s_5771cf5c48ca3c::t_ee811c666e6a89 4378-4393,6669
+  s_4507497497abc6::t_2bb0beec888f4e 6670
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "33ff8dce02ff86658b91d01213cdde068c3869a4",
+  "prompts": {},
+  "sessions": {
+    "s_4507497497abc6": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "18f6c3a7-132e-4c3b-9654-c0183ac2253f",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_5771cf5c48ca3c": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1c683-bded-7d60-9447-fdae4fa0f1e2",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_8dd94324ac7724": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1c619-e44f-72f0-b8e0-956683358801",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

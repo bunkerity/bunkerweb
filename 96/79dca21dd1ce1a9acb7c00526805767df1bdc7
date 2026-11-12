@@ -1,0 +1,27 @@
+CHANGELOG.md
+  s_36cff8fad440d1::t_429b6c3101ac39 11
+src/scheduler/JobScheduler.py
+  s_36cff8fad440d1::t_429b6c3101ac39 233-240,328,332
+  s_36cff8fad440d1::t_948e02f882fb18 333
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "9679dca21dd1ce1a9acb7c00526805767df1bdc7",
+  "prompts": {},
+  "humans": {
+    "h_a33a1e80933106": {
+      "author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  },
+  "sessions": {
+    "s_36cff8fad440d1": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "9e7b0240-ab8b-4374-b9b3-c0f8bb66b3ef",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

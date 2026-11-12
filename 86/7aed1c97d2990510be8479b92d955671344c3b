@@ -1,0 +1,21 @@
+tests/unit/api_app/test_read_only_grant_matrix.py
+  s_efad3d2ca422b2::t_b0014ff3e38818 159
+  s_efad3d2ca422b2::t_1df6964c0711c8 146,168-169,177,185
+  s_efad3d2ca422b2::t_905f384906463a 1-145,147-158,160-167,170-176,178-184,186-189
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "867aed1c97d2990510be8479b92d955671344c3b",
+  "prompts": {},
+  "sessions": {
+    "s_efad3d2ca422b2": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1c13c-7d13-7d51-9aaf-9340c2979537",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

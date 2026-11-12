@@ -1,0 +1,21 @@
+CHANGELOG.md
+  s_9b72a24114dc24::t_1c68a656112fa5 45
+src/common/core/errors/files/error.html
+  s_9b72a24114dc24::t_992ce51bcb5a02 312,315,318,342,360,363,366,397
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "5803f00dd2eada8c4d3b59443853cd180ba3144c",
+  "prompts": {},
+  "sessions": {
+    "s_9b72a24114dc24": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "cc5a1ca8-e952-421b-979b-0d94c0aab861",
+        "model": "unknown"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

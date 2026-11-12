@@ -1,0 +1,19 @@
+tests/core/customcert.yml
+  s_b98258159f53e1::t_e057055f82e7c3 131-132
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "8959c53588801523108ee0525ef100ba21ee86c1",
+  "prompts": {},
+  "sessions": {
+    "s_b98258159f53e1": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "178c8fb4-a897-4890-8b32-8c80f5be0bed",
+        "model": "unknown"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

@@ -1,0 +1,30 @@
+src/common/utils/common_utils.py
+  s_498655ca1802b8::t_f30f287ded8bd2 423-425
+tests/unit/plugins_download/test_plugin_checksum_umask.py
+  s_c664bb3b4a1428::t_6bb52634624a70 1-32,34-72
+  s_498655ca1802b8::t_f30f287ded8bd2 33
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "a4f25aeaf64b51b113e6b47909b2b8aaef84cc4b",
+  "prompts": {},
+  "sessions": {
+    "s_498655ca1802b8": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "e7e0d3ee-4b8a-4387-b044-edced6ed9aa1",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_c664bb3b4a1428": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "607ca059-e57e-4cf7-9868-93e3cb13c276",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

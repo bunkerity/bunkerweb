@@ -1,0 +1,90 @@
+docs/fr/plugins.md
+  s_f11623f9cc147d::t_fb556dd05b5dfc 414-416,444
+  s_aaf044b857f6de::t_44ed9b3fb69fd7 377-378
+  s_aaf044b857f6de::t_3834910b3623c2 727
+  s_aaf044b857f6de::t_d37a3e777fb2f5 364,366-374,376,379-387
+  s_aaf044b857f6de::t_1d4e1504a9d2fd 955-957,959-964,966-1003
+  s_f11623f9cc147d::t_0d6c5ab084366c 362,365,375,411,724
+  s_aaf044b857f6de::t_74f9b65d2aa3af 21-35
+  s_aaf044b857f6de::t_36d27c7197f917 417-443
+  s_aaf044b857f6de::t_2fb57accbc92d8 958,965
+  s_aaf044b857f6de::t_8f31c3ef52f384 388
+  s_aaf044b857f6de::t_c21c3f6c6aee52 728
+  s_aaf044b857f6de::t_8823a1f2254f9a 363
+docs/es/plugins.md
+  s_aaf044b857f6de::t_0f94b36c84586a 327
+  s_f11623f9cc147d::t_0d6c5ab084366c 362,365,375,388,411,724
+  s_aaf044b857f6de::t_791d820a40b3c9 21-35
+  s_aaf044b857f6de::t_64e52ebde75181 955-957,959-964,966-1003
+  s_aaf044b857f6de::t_9a2cb2bf72437c 958,965
+  s_f11623f9cc147d::t_fb556dd05b5dfc 414-416,444
+  s_aaf044b857f6de::t_043d0aed0e2864 782-783,788-789
+  s_aaf044b857f6de::t_84be59e31b9e4a 727-728
+  s_aaf044b857f6de::t_bbf7c2fa0bf6f8 417-443
+  s_aaf044b857f6de::t_e2d65296aa0f1b 716-717
+  s_aaf044b857f6de::t_a9a43f121c712d 364,366-374,376,379-387
+  s_aaf044b857f6de::t_b429a298e28bbd 377-378
+  s_aaf044b857f6de::t_e28aa3651d32d7 363
+docs/es/integrations.md
+  s_f11623f9cc147d::t_437c4e05220570 1905-1907
+docs/de/plugins.md
+  s_aaf044b857f6de::t_4ae680b6eeed7f 416-442
+  s_aaf044b857f6de::t_617ec082ca0f21 376-377
+  s_aaf044b857f6de::t_83f0dc2fc72b28 362-375,378-386
+  s_aaf044b857f6de::t_85e14cbd7b9867 955,962
+  s_f11623f9cc147d::t_fb556dd05b5dfc 413-415,443
+  s_aaf044b857f6de::t_74fba7949c3196 952-954,956-961,963-1000
+  s_aaf044b857f6de::t_b1bd3aaee98f3f 725
+  s_aaf044b857f6de::t_dd1a343ba58be4 361
+  s_f11623f9cc147d::t_ad1a1361adde12 410,722
+  s_aaf044b857f6de::t_4c4316fc249d36 21-35
+  s_aaf044b857f6de::t_a5d73008e3b085 387
+  s_aaf044b857f6de::t_a8a5c5c72ff2aa 726
+docs/de/integrations.md
+  s_f11623f9cc147d::t_437c4e05220570 1906-1908
+docs/zh/integrations.md
+  s_f11623f9cc147d::t_437c4e05220570 1886-1888
+docs/zh/plugins.md
+  s_aaf044b857f6de::t_bc84e7a272328b 377-378
+  s_aaf044b857f6de::t_070de4f28b194c 364,366-376,379-387
+  s_aaf044b857f6de::t_a118a7dd637012 956,963
+  s_aaf044b857f6de::t_6170ceec98acf5 415-438,440-441
+  s_aaf044b857f6de::t_e0526e897cff40 953-955,957-962,964-1001
+  s_f11623f9cc147d::t_fb556dd05b5dfc 414,439
+  s_aaf044b857f6de::t_0ae64316b2796f 725
+  s_aaf044b857f6de::t_48aa07f49394cd 670-671
+  s_aaf044b857f6de::t_1923176a475d57 21-35
+  s_f11623f9cc147d::t_0d6c5ab084366c 362,365,388,411,722
+  s_aaf044b857f6de::t_029262ed635de3 442
+  s_aaf044b857f6de::t_11cf45ad396bfa 726
+  s_aaf044b857f6de::t_e0237f628c7924 363
+docs/plugins.md
+  s_aaf044b857f6de::t_bc053ecfa42d91 380-381
+  s_aaf044b857f6de::t_0f7d2478b2f641 962,969
+docs/fr/integrations.md
+  s_f11623f9cc147d::t_437c4e05220570 1899-1901
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "71f0188a9f5602a817e3f675222071cee3316f13",
+  "prompts": {},
+  "sessions": {
+    "s_aaf044b857f6de": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "e8256852-b014-4414-b74a-10947137a317",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_f11623f9cc147d": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0c527-d745-75a2-9047-df84c2781da2",
+        "model": "gpt-5.6-luna"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

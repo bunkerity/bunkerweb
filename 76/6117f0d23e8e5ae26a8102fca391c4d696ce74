@@ -1,0 +1,80 @@
+src/deps/src/libinjection/src/test-samples-sqli-positive.sh
+  s_d1c7c8db52db08::t_a89a3f28152b78 2-4
+src/deps/src/libinjection/src/testdriver.c
+  s_d1c7c8db52db08::t_a89a3f28152b78 1-3,22,40,109-111,113,150-161,182-183,202-203,270-272,280-282,293-296,299-305,326,332,335,337
+src/deps/src/libinjection/CHANGELOG.md
+  s_d1c7c8db52db08::t_a89a3f28152b78 1-12,67,71,81,92,111,115,128,138,145,148,153,174,177,188,200,211,218,244,252,259,265,270,309,317,339
+src/deps/src/libinjection/src/test-samples-xss-positive.sh
+  s_d1c7c8db52db08::t_a89a3f28152b78 2-4
+src/deps/src/libinjection/src/libinjection_error.h
+  s_d1c7c8db52db08::t_a89a3f28152b78 26
+src/deps/src/libinjection/.gitignore
+  s_d1c7c8db52db08::t_a89a3f28152b78 61-62
+src/deps/deps.json
+  s_d1c7c8db52db08::t_a89a3f28152b78 34,36
+src/deps/src/libinjection/src/test-samples-sqli-negative.sh
+  s_d1c7c8db52db08::t_a89a3f28152b78 2-4
+src/deps/src/libinjection/src/html5_cli.c
+  s_d1c7c8db52db08::t_a89a3f28152b78 134
+src/deps/src/libinjection/src/sqlparse2c.py
+  s_d1c7c8db52db08::t_a89a3f28152b78 125-128
+src/deps/src/libinjection/src/libinjection_sqli.c
+  s_d1c7c8db52db08::t_a89a3f28152b78 27-30,32,99,102-130,381-383,1249-1250,1348,1633-1639,2280,2295-2296
+src/deps/src/libinjection/src/test_error_handling.c
+  s_d1c7c8db52db08::t_a89a3f28152b78 27-28,33,35,110-111,130-141,230,238-240
+src/deps/src/libinjection/src/sqli_cli.c
+  s_d1c7c8db52db08::t_a89a3f28152b78 23
+src/deps/src/libinjection/src/libinjection_xss.c
+  s_d1c7c8db52db08::t_a89a3f28152b78 102,998-1000,1003
+src/deps/src/libinjection/Makefile.am
+  s_d1c7c8db52db08::t_a89a3f28152b78 19-21,37,39-50
+src/deps/src/libinjection/src/reader.c
+  s_d1c7c8db52db08::t_a89a3f28152b78 296-299,301-303,324-327
+src/deps/src/libinjection/MIGRATION.md
+  s_d1c7c8db52db08::t_a89a3f28152b78 79-80,82-96,110,149-150,181-184,404
+src/deps/src/libinjection/src/fuzz/fuzzer.c
+  s_d1c7c8db52db08::t_a89a3f28152b78 9-10
+src/deps/src/libinjection/src/test_stack_xss.c
+  s_d1c7c8db52db08::t_a89a3f28152b78 2,4,27,29,31
+src/deps/src/libinjection/src/libinjection_html5.c
+  s_d1c7c8db52db08::t_a89a3f28152b78 114-118,120,122,146
+CHANGELOG.md
+  s_d1c7c8db52db08::t_a6b6c1856d547f 112
+src/deps/src/libinjection/src/libinjection_sqli.h
+  s_d1c7c8db52db08::t_a89a3f28152b78 40
+src/deps/src/libinjection/README.md
+  s_d1c7c8db52db08::t_a89a3f28152b78 100-177
+  s_d1c7c8db52db08::t_af916fcb9fb45d 178
+src/deps/src/libinjection/src/Makefile.am
+  s_d1c7c8db52db08::t_a89a3f28152b78 6,19,24-25,27-37
+src/deps/src/libinjection/src/test-unit.sh
+  s_d1c7c8db52db08::t_a89a3f28152b78 2-4
+src/deps/src/libinjection/configure.ac
+  s_d1c7c8db52db08::t_a89a3f28152b78 11,15,105
+src/deps/src/libinjection/.release-please-manifest.json
+  s_d1c7c8db52db08::t_e27e945cc0b82d 1-3
+src/deps/src/libinjection/data/xss-github-92.txt
+  s_d1c7c8db52db08::t_71714c843d2a6e 1-11
+src/deps/src/libinjection/release-please-config.json
+  s_d1c7c8db52db08::t_e0b9f871c303b5 1-11
+src/deps/src/libinjection/src/libinjection_sqli_data.h
+  s_d1c7c8db52db08::t_580e9bac0c3e9c 9650-9651
+src/deps/src/libinjection/version.txt
+  s_d1c7c8db52db08::t_d7feadf8708522 1
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "766117f0d23e8e5ae26a8102fca391c4d696ce74",
+  "prompts": {},
+  "sessions": {
+    "s_d1c7c8db52db08": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "c5aea997-beee-4854-98c7-ae58ac715e78",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

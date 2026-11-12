@@ -1,0 +1,79 @@
+docs/de/features.md
+  s_2717e4bbf1068f::t_b9f5b7efb10f7a 1394
+src/common/core/bunkernet/README.fr.md
+  s_2717e4bbf1068f::t_b9f5b7efb10f7a 75
+docs/fr/integrations.md
+  s_2717e4bbf1068f::t_b9f5b7efb10f7a 115,149,894,4958
+src/common/core/bunkernet/README.zh.md
+  s_2717e4bbf1068f::t_b9f5b7efb10f7a 76
+docs/features.md
+  s_2717e4bbf1068f::t_b9f5b7efb10f7a 1415
+src/common/core/bunkernet/README.md
+  s_2717e4bbf1068f::t_b9f5b7efb10f7a 76
+src/linux/bunkerweb-scheduler.service
+  s_43fdbc5d705273::t_5e950cf3ad7989 3
+docs/zh/features.md
+  s_2717e4bbf1068f::t_b9f5b7efb10f7a 1417
+docs/es/integrations.md
+  s_2717e4bbf1068f::t_b9f5b7efb10f7a 115,149,887,4958
+src/linux/bunkerweb-ui.service
+  s_43fdbc5d705273::t_5e950cf3ad7989 3
+docs/fr/features.md
+  s_2717e4bbf1068f::t_b9f5b7efb10f7a 1374
+docs/de/integrations.md
+  s_2717e4bbf1068f::t_b9f5b7efb10f7a 115,149,887,4957
+docs/zh/integrations.md
+  s_2717e4bbf1068f::t_b9f5b7efb10f7a 115,149,887,4951
+src/common/core/bunkernet/README.es.md
+  s_2717e4bbf1068f::t_b9f5b7efb10f7a 76
+publiccode.yml
+  s_2717e4bbf1068f::t_b9f5b7efb10f7a 31
+src/linux/bunkerweb-api.service
+  s_43fdbc5d705273::t_5e950cf3ad7989 3
+docs/integrations.md
+  s_2717e4bbf1068f::t_b9f5b7efb10f7a 115,149,894,5080
+src/common/core/bunkernet/README.de.md
+  s_2717e4bbf1068f::t_b9f5b7efb10f7a 76
+src/linux/scripts/postinstall.sh
+  s_43fdbc5d705273::t_5e950cf3ad7989 318
+docs/es/features.md
+  s_2717e4bbf1068f::t_b9f5b7efb10f7a 1411
+examples/community/photoprism/README.md
+  s_2717e4bbf1068f::t_b9f5b7efb10f7a 14,16
+CHANGELOG.md
+  s_1981a6d47f11f8::t_62c65b721b7960 9
+src/linux/bunkerweb.service
+  s_43fdbc5d705273::t_5e950cf3ad7989 3
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "dd3c408d311906c9ac2b1d6ceb0571ba2d9e27c1",
+  "prompts": {},
+  "sessions": {
+    "s_1981a6d47f11f8": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "81d4e090-9d15-4bff-bc6b-4a6e5d427958",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_2717e4bbf1068f": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "8b608e72-daaf-48f3-be56-dac542ffa651",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_43fdbc5d705273": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "96a2837d-dbda-4515-9b39-c3bfb6ecc2a2",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

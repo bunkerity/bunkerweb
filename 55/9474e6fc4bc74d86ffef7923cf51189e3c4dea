@@ -1,0 +1,88 @@
+src/common/core/antibot/plugin.json
+  s_36cff8fad440d1::t_472f96d1ed657b 43,52,97,124,162,459
+src/common/core/brotli/plugin.json
+  s_36cff8fad440d1::t_472f96d1ed657b 23
+src/common/core/sessions/plugin.json
+  s_36cff8fad440d1::t_472f96d1ed657b 41,50,59
+src/common/core/greylist/plugin.json
+  s_36cff8fad440d1::t_472f96d1ed657b 23,50,97,106,115,124,133
+src/common/core/ssl/plugin.json
+  s_36cff8fad440d1::t_472f96d1ed657b 78
+src/common/core/reverseproxy/plugin.json
+  s_36cff8fad440d1::t_472f96d1ed657b 103,124,370,380,467
+src/common/core/clientcache/plugin.json
+  s_36cff8fad440d1::t_472f96d1ed657b 23
+src/common/utils/common_utils.py
+  s_36cff8fad440d1::t_472f96d1ed657b 45
+src/common/core/letsencrypt/plugin.json
+  s_36cff8fad440d1::t_472f96d1ed657b 32,69,78,87,148,157
+src/common/core/gzip/plugin.json
+  s_36cff8fad440d1::t_472f96d1ed657b 23
+src/common/core/metrics/plugin.json
+  s_36cff8fad440d1::t_472f96d1ed657b 59
+src/common/core/dnsbl/plugin.json
+  s_36cff8fad440d1::t_472f96d1ed657b 32,61
+src/common/core/country/plugin.json
+  s_36cff8fad440d1::t_472f96d1ed657b 14,380
+src/common/core/whitelist/plugin.json
+  s_36cff8fad440d1::t_472f96d1ed657b 23,50,68,97,106,115,124,133
+src/common/core/selfsigned/plugin.json
+  s_36cff8fad440d1::t_472f96d1ed657b 33
+src/common/core/crowdsec/plugin.json
+  s_36cff8fad440d1::t_472f96d1ed657b 78,115,124,161,170,179
+src/common/core/authbasic/plugin.json
+  s_36cff8fad440d1::t_472f96d1ed657b 32,42,52
+src/common/settings.json
+  s_36cff8fad440d1::t_472f96d1ed657b 100,298
+src/common/core/realip/plugin.json
+  s_36cff8fad440d1::t_472f96d1ed657b 32,41,59
+src/common/core/misc/plugin.json
+  s_36cff8fad440d1::t_472f96d1ed657b 32,159
+src/common/core/errors/plugin.json
+  s_36cff8fad440d1::t_472f96d1ed657b 14,23
+src/common/core/db/plugin.json
+  s_36cff8fad440d1::t_472f96d1ed657b 51,78,87,115,151
+src/common/core/redirect/plugin.json
+  s_36cff8fad440d1::t_472f96d1ed657b 24
+CHANGELOG.md
+  s_36cff8fad440d1::t_472f96d1ed657b 5,7
+src/common/core/cors/plugin.json
+  s_36cff8fad440d1::t_472f96d1ed657b 32,42,61,101
+src/common/core/redis/plugin.json
+  s_36cff8fad440d1::t_472f96d1ed657b 68,140
+src/common/core/reversescan/plugin.json
+  s_36cff8fad440d1::t_472f96d1ed657b 23,32
+src/common/core/badbehavior/plugin.json
+  s_36cff8fad440d1::t_472f96d1ed657b 23,103,112,121
+src/common/core/grpc/plugin.json
+  s_36cff8fad440d1::t_472f96d1ed657b 52,73,390,400
+src/common/core/blacklist/plugin.json
+  s_36cff8fad440d1::t_472f96d1ed657b 54,81,128,146,193,202,211,220,229,238,247,256,265,274
+src/common/core/robotstxt/plugin.json
+  s_36cff8fad440d1::t_472f96d1ed657b 44
+src/common/core/headers/plugin.json
+  s_36cff8fad440d1::t_472f96d1ed657b 24,33,97
+src/common/core/bunkernet/plugin.json
+  s_36cff8fad440d1::t_472f96d1ed657b 23
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "559474e6fc4bc74d86ffef7923cf51189e3c4dea",
+  "prompts": {},
+  "humans": {
+    "h_a33a1e80933106": {
+      "author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  },
+  "sessions": {
+    "s_36cff8fad440d1": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "9e7b0240-ab8b-4374-b9b3-c0f8bb66b3ef",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

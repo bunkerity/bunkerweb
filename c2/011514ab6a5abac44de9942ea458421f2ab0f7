@@ -1,0 +1,32 @@
+tests/ui/reader.yml
+  s_0123f453878d3e::t_4321f1dcc3b7c2 1-226
+  s_42af244dbb3423::t_8fc53a8ec9fce1 227-247
+tests/models/ui/database.py
+  s_0123f453878d3e::t_d746ee13bd56c5 1-14
+tests/ui_handlers/database.py
+  s_0123f453878d3e::t_bbfae7544762c3 1-21
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "c2011514ab6a5abac44de9942ea458421f2ab0f7",
+  "prompts": {},
+  "sessions": {
+    "s_0123f453878d3e": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "7eaeaf7b-0b9b-4b07-900c-e2ba56709e23",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_42af244dbb3423": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "0a6cc8d0-2931-401a-a3fb-8d7ccac6c6a5",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

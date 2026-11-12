@@ -1,0 +1,38 @@
+tests/unit/backup/test_downgrade_manifest.py
+  s_38af68e247552c::t_5dd244caf3c20c 168-173,176,187
+  s_e8917a61014dbb::t_255dc76fd9e738 193,199
+tests/unit/backup/test_downgrade_preflight.py
+  s_38af68e247552c::t_dfd14926cc70e5 528-529
+src/common/core/backup/downgrade-manifest.json
+  s_38af68e247552c::t_efdc832fa545e8 7-10,48-54,56,60,65
+  s_38af68e247552c::t_ca45af6e68977b 438,488
+  s_38af68e247552c::t_621c27aa16088d 395-437,439-487,489-563
+tests/unit/backup/test_downgrade_chunks_and_downloads.py
+  s_38af68e247552c::t_5dd244caf3c20c 115-116
+src/common/core/backup/downgrade.py
+  s_38af68e247552c::t_411cfa2dd1771d 353
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "31932e17fca3a62c353add406b43a24e79dfe6dd",
+  "prompts": {},
+  "sessions": {
+    "s_38af68e247552c": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "30b61e62-ea26-4b9b-93c3-b7f004db2903",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_e8917a61014dbb": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "7ff350ad-bc0b-4556-8679-17b87e179e57",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

@@ -1,0 +1,43 @@
+src/common/confs/http.conf
+  s_36cff8fad440d1::t_40bd0ea0eb1173 89-93
+src/common/core/realip/confs/server-http/real-ip.conf
+  s_36cff8fad440d1::t_40bd0ea0eb1173 35
+src/common/confs/server-stream/server-stream.conf
+  s_36cff8fad440d1::t_40bd0ea0eb1173 26-28,30
+src/common/confs/default-server-http.conf
+  s_36cff8fad440d1::t_40bd0ea0eb1173 20,70,79
+src/common/core/reverseproxy/confs/server-http/reverse-proxy.conf
+  s_36cff8fad440d1::t_40bd0ea0eb1173 70,73
+src/common/core/gzip/confs/server-http/gzip.conf
+  s_36cff8fad440d1::t_40bd0ea0eb1173 6
+src/common/gen/Templator.py
+  s_36cff8fad440d1::t_40bd0ea0eb1173 435-436,671-699,767
+  s_36cff8fad440d1::t_002fcc6dc48396 768
+src/common/core/realip/confs/default-server-http/real-ip.conf
+  s_36cff8fad440d1::t_40bd0ea0eb1173 21
+src/common/confs/server-http/server.conf
+  s_36cff8fad440d1::t_40bd0ea0eb1173 23
+CHANGELOG.md
+  s_36cff8fad440d1::t_40bd0ea0eb1173 13
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "cee99752e05af15cb4df66eb7efd401f68841b65",
+  "prompts": {},
+  "humans": {
+    "h_a33a1e80933106": {
+      "author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  },
+  "sessions": {
+    "s_36cff8fad440d1": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "9e7b0240-ab8b-4374-b9b3-c0f8bb66b3ef",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

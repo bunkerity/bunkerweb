@@ -1,0 +1,51 @@
+CHANGELOG.md
+  s_685c6ea6e2ff63::t_4ec5ffef77f219 29
+tests/unit/gen/test_inject_escaping.py
+  s_dfb4e042fce40a::t_ef4292332065fd 1-23
+src/common/core/inject/README.es.md
+  s_685c6ea6e2ff63::t_4ec5ffef77f219 27-28
+docs/es/features.md
+  s_685c6ea6e2ff63::t_4ec5ffef77f219 3352-3353
+docs/de/features.md
+  s_685c6ea6e2ff63::t_4ec5ffef77f219 3299-3300
+src/common/core/inject/confs/server-http/inject.conf
+  s_685c6ea6e2ff63::t_4ec5ffef77f219 2,5
+docs/zh/features.md
+  s_685c6ea6e2ff63::t_4ec5ffef77f219 3362-3363
+src/common/core/inject/README.fr.md
+  s_685c6ea6e2ff63::t_4ec5ffef77f219 25-26
+src/common/core/inject/README.md
+  s_685c6ea6e2ff63::t_4ec5ffef77f219 27-28
+docs/fr/features.md
+  s_685c6ea6e2ff63::t_4ec5ffef77f219 3260-3261
+docs/features.md
+  s_685c6ea6e2ff63::t_4ec5ffef77f219 3367-3368
+src/common/core/inject/README.zh.md
+  s_685c6ea6e2ff63::t_4ec5ffef77f219 27-28
+src/common/core/inject/README.de.md
+  s_685c6ea6e2ff63::t_4ec5ffef77f219 27-28
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "5a2b065736879b8c86d772ca4b369c945db4aa60",
+  "prompts": {},
+  "sessions": {
+    "s_685c6ea6e2ff63": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1bf4d-bef0-7c40-8dc4-0ebee4b8f645",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_dfb4e042fce40a": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1bf50-6d07-7b22-896c-c4963c51fbb2",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

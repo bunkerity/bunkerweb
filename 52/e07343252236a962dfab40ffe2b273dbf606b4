@@ -1,0 +1,26 @@
+CHANGELOG.md
+  s_60628c795bd662::t_b34bdcc4553d88 14
+src/autoconf/Config.py
+  s_60628c795bd662::t_3506ff2bead0d1 124-129,133,137,265-270,272
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "52e07343252236a962dfab40ffe2b273dbf606b4",
+  "prompts": {},
+  "humans": {
+    "h_a33a1e80933106": {
+      "author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  },
+  "sessions": {
+    "s_60628c795bd662": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1869d-2e49-7ff2-8e88-cfcf2fe9cb0c",
+        "model": "unknown"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

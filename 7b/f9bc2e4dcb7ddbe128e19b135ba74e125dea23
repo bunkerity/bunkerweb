@@ -1,0 +1,49 @@
+src/common/core/dnsbl/dnsbl.lua
+  s_2adad82a505d27::t_edf263798ab2bd 261,286,309,312,328-329,349-350
+src/common/core/reversescan/reversescan.lua
+  s_2adad82a505d27::t_edf263798ab2bd 121-122,126-127,138-139
+  s_c2d3f97b7590b3::t_2fa2b8e3055ffa 140
+tests/unit/common/test_country_behaviour_lua.py
+  s_e10b1192eac789::t_68ecc488db0753 191,195-209
+tests/unit/common/test_dnsbl_behaviour_lua.py
+  s_e10b1192eac789::t_68ecc488db0753 197,205-213,216-225
+  s_c2d3f97b7590b3::t_f66a591223489f 226
+src/common/core/country/country.lua
+  s_2adad82a505d27::t_edf263798ab2bd 17,310,314,332,336
+tests/unit/common/test_ipv6_reversescan_lua.py
+  s_e10b1192eac789::t_68ecc488db0753 107-133
+CHANGELOG.md
+  s_c2d3f97b7590b3::t_7b53dab69a0e94 10,21-22
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "7bf9bc2e4dcb7ddbe128e19b135ba74e125dea23",
+  "prompts": {},
+  "sessions": {
+    "s_2adad82a505d27": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1b017-22e8-77b0-8978-3bad268ce710",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_c2d3f97b7590b3": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "cca42d64-b3c1-4d5d-98a3-c62ea37cf2b5",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_e10b1192eac789": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "ceb5b7ff-43d0-4aa7-a3fd-36e638348d71",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

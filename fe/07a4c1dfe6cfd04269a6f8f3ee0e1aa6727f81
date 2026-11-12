@@ -1,0 +1,31 @@
+tests/unit/common/test_antibot_request_coverage_lua.py
+  s_05ace2c1fc766d::t_1e1e95ff6bf126 138
+  s_06e96c821ea634::t_bc7d9221640f39 132,136
+  s_05ace2c1fc766d::t_215597ed04f24e 27,130-131,133-135,137,139-140,154
+src/common/core/antibot/antibot.lua
+  s_06e96c821ea634::t_8101f3e1340d6a 462-463
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "fe07a4c1dfe6cfd04269a6f8f3ee0e1aa6727f81",
+  "prompts": {},
+  "sessions": {
+    "s_05ace2c1fc766d": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "589c6e39-07a2-4896-a308-010a21365f54",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_06e96c821ea634": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "e27ccd4e-cfc1-4404-9bc3-91f5632c425d",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}
