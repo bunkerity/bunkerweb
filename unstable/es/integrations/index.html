@@ -33,7 +33,7 @@
       
       
       <link rel="icon" href="../../assets/favicon.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.1">
     
     
       
@@ -41,7 +41,7 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.57a0d79d.min.css">
       
       
 
@@ -1043,6 +1043,17 @@
   
     <nav class="md-nav" aria-label="Docker">
       <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#docker-image-tags" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Etiquetas de las imágenes Docker
+      
+    </span>
+  </a>
+  
+</li>
         
           <li class="md-nav__item">
   <a href="#variables-de-entorno" class="md-nav__link">
@@ -3421,6 +3432,60 @@ cscli<span class="w"> </span>install<span class="w"> </span>parser<span class="w
 <p class="admonition-title">Backend de la base de datos</p>
 <p>Ten en cuenta que nuestras instrucciones asumen que estás utilizando SQLite como el backend de base de datos predeterminado, según lo configurado por el ajuste <code>DATABASE_URI</code>. Sin embargo, también se admiten otros backends de bases de datos. Consulta los archivos docker-compose en la <a href="https://github.com/bunkerity/bunkerweb/tree/vtesting/misc/integrations">carpeta misc/integrations</a> del repositorio para obtener más información.</p>
 </div>
+<h3 id="docker-image-tags">Etiquetas de las imágenes Docker<a class="headerlink" href="#docker-image-tags" title="Permanent link">&para;</a></h3>
+<p>Cada imagen se publica con las mismas etiquetas en Docker Hub (<code>bunkerity/</code>), GHCR (<code>ghcr.io/bunkerity/</code>) y el registro de GitLab (<code>registry.gitlab.com/bunkerity/bunkerweb/</code>). <code>X.Y</code> designa una versión menor como <code>1.6</code> y <code>X.Y.Z</code> una versión completa como <code>1.6.18</code>.</p>
+<table>
+<thead>
+<tr>
+<th>Etiqueta</th>
+<th>Apunta a</th>
+<th>Úsela para</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>X.Y.Z</code>, <code>X.Y.Z-rcN</code></td>
+<td>Una versión o candidata a versión concreta, nunca cambia</td>
+<td>Producción: fije estas etiquetas</td>
+</tr>
+<tr>
+<td><code>latest</code></td>
+<td>La última versión estable de cualquier versión menor</td>
+<td>Pruebas rápidas: salta a la siguiente versión menor cuando sale</td>
+</tr>
+<tr>
+<td><code>X.Y</code></td>
+<td>La última versión estable de esa versión menor</td>
+<td>Seguir una versión menor y recibir sus versiones de corrección</td>
+</tr>
+<tr>
+<td><code>X.Y-edge</code></td>
+<td>La última candidata a versión o versión estable de esa versión menor</td>
+<td>Probar la próxima versión antes de tiempo y seguirla una vez estable</td>
+</tr>
+<tr>
+<td><code>X.Y-rc</code>, <code>X.Y-beta</code>, <code>X.Y-alpha</code></td>
+<td>La última candidata a versión, beta o alfa de esa versión menor</td>
+<td>Probar las preversiones de una versión menor concreta</td>
+</tr>
+<tr>
+<td><code>rc</code>, <code>beta</code></td>
+<td>La última candidata a versión o beta publicada, sea cual sea su versión; volver a publicar una versión anterior hace retroceder la etiqueta</td>
+<td>Nombres heredados: prefiera las etiquetas por versión menor</td>
+</tr>
+<tr>
+<td><code>testing</code></td>
+<td>La última compilación del pipeline de staging (ramas <code>staging</code> y <code>fix-cve</code> o una ejecución manual)</td>
+<td>Probar cambios sin publicar, nunca en producción</td>
+</tr>
+<tr>
+<td><code>dev</code></td>
+<td>La última compilación del pipeline de dev (rama <code>dev</code> o una ejecución manual)</td>
+<td>Colaboradores, nunca en producción</td>
+</tr>
+</tbody>
+</table>
+<p>Solo la primera fila es inmutable. Las demás etiquetas se mueven cada vez que se publica una nueva compilación: use una etiqueta de versión completa en producción y actualícela de forma deliberada.</p>
 <h3 id="variables-de-entorno">Variables de entorno<a class="headerlink" href="#variables-de-entorno" title="Permanent link">&para;</a></h3>
 <p>Las configuraciones se pasan al Programador usando las variables de entorno de Docker:</p>
 <div class="highlight"><pre><span></span><code><span class="nn">...</span>
@@ -3889,7 +3954,7 @@ docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </
 <li>Ubuntu 22.04 "Jammy"</li>
 <li>Ubuntu 24.04 "Noble"</li>
 <li>Ubuntu 26.04 "Resolute Raccoon"</li>
-<li>Fedora 43 y 44</li>
+<li>Fedora 43, 44 y 45</li>
 <li>Red Hat Enterprise Linux (RHEL), CentOS, Rocky Linux y AlmaLinux 8, 9 y 10</li>
 </ul>
 <h3 id="script-de-instalacion-facil">Script de instalación fácil<a class="headerlink" href="#script-de-instalacion-facil" title="Permanent link">&para;</a></h3>
@@ -7184,6 +7249,7 @@ Reduce el tiempo de compilación al omitir la minificación de recursos, pero no
 <li><code>debian-trixie</code></li>
 <li><code>fedora-43</code></li>
 <li><code>fedora-44</code></li>
+<li><code>fedora-45</code></li>
 <li><code>rhel-8</code></li>
 <li><code>rhel-9</code></li>
 <li><code>rhel-10</code></li>
@@ -7498,10 +7564,10 @@ docker<span class="w"> </span>image<span class="w"> </span>ls<span class="w"> </
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.top", "content.tabs.link", "toc.integrate", "content.code.copy", "search.highlight"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copiado al portapapeles", "clipboard.copy": "Copiar al portapapeles", "search.result.more.one": "1 m\u00e1s en esta p\u00e1gina", "search.result.more.other": "# m\u00e1s en esta p\u00e1gina", "search.result.none": "No se encontraron documentos", "search.result.one": "1 documento encontrado", "search.result.other": "# documentos encontrados", "search.result.placeholder": "Teclee para comenzar b\u00fasqueda", "search.result.term.missing": "Falta", "select.version": "Seleccionar versi\u00f3n"}, "version": {"provider": "mike", "version": "latest"}}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.top", "content.tabs.link", "toc.integrate", "content.code.copy", "search.highlight"], "search": "../../assets/javascripts/workers/search.a7633da7.min.js", "tags": null, "translations": {"clipboard.copied": "Copiado al portapapeles", "clipboard.copy": "Copiar al portapapeles", "search.result.more.one": "1 m\u00e1s en esta p\u00e1gina", "search.result.more.other": "# m\u00e1s en esta p\u00e1gina", "search.result.none": "No se encontraron documentos", "search.result.one": "1 documento encontrado", "search.result.other": "# documentos encontrados", "search.result.placeholder": "Teclee para comenzar b\u00fasqueda", "search.result.term.missing": "Falta", "select.version": "Seleccionar versi\u00f3n"}, "version": {"provider": "mike", "version": "latest"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      <script src="../../assets/javascripts/bundle.a5f9d56c.min.js"></script>
       
         <script src="../../assets/extra.js"></script>
       

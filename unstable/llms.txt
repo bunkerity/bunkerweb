@@ -77,6 +77,7 @@
 - [User Manager](https://docs.bunkerweb.io/testing/settings/user-manager-pro.json)
 - [Whitelist](https://docs.bunkerweb.io/testing/settings/whitelist.json)
 - [Wildcard](https://docs.bunkerweb.io/testing/settings/wildcard-pro.json)
+- [Zstandard](https://docs.bunkerweb.io/testing/settings/zstandard.json)
 
 ## Advanced Usage
 

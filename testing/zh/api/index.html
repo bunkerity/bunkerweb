@@ -33,7 +33,7 @@
       
       
       <link rel="icon" href="../../assets/favicon.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.1">
     
     
       
@@ -41,7 +41,7 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.57a0d79d.min.css">
       
       
 
@@ -1380,7 +1380,7 @@
 <li>配置文件：<code>/etc/bunkerweb/api.env</code>（首次启动生成带注释默认值）和 <code>/etc/bunkerweb/api.yml</code></li>
 <li>环境来源：<code>api.env</code>、<code>variables.env</code>、<code>/run/secrets/&lt;VAR&gt;</code>，随后导出到 Gunicorn 进程</li>
 </ul>
-<p>编辑 <code>/etc/bunkerweb/api.env</code> 设置 <code>API_USERNAME</code>/<code>API_PASSWORD</code>、白名单、TLS、速率限制或 <code>API_ROOT_PATH</code>，然后 <code>systemctl reload bunkerweb-api</code>。</p>
+<p>编辑 <code>/etc/bunkerweb/api.env</code> 设置 <code>API_USERNAME</code>/<code>API_PASSWORD</code>、白名单、TLS、速率限制或 <code>API_ROOT_PATH</code>，然后 <code>systemctl restart bunkerweb-api</code>。</p>
 </div>
 </div>
 </div>
@@ -1913,6 +1913,7 @@
 <li><code>GET /cache</code>: 按筛选 (<code>service</code>, <code>plugin</code>, <code>job_name</code>) 列出缓存文件；<code>with_data=true</code> 内嵌可打印内容。</li>
 <li><code>GET /cache/{service}/{plugin}/{job}/{file}</code>: 获取/下载特定缓存文件（<code>download=true</code>）。</li>
 <li><code>DELETE /cache</code> 或 <code>DELETE /cache/{service}/{plugin}/{job}/{file}</code>: 删除缓存文件。只有某个插件的行真正被删除时才会通知调度器；<code>plugin</code> 不拥有该 job 时会被拒绝且不删除任何内容。</li>
+<li>敏感条目（存储名称为 <code>secret</code> 或以 <code>.secret</code> 结尾，另有一些保存私钥或凭据的核心条目以及上游 mTLS 客户端密钥和故障转移备份归档）：除非调用方使用 HTTP Basic 的 API 管理员身份或 <code>API_TOKEN</code>，否则 <code>GET /cache/{service}/{plugin}/{job}/{file}</code> 返回 <code>403</code>，<code>GET /cache?with_data=true</code> 省略 <code>data</code> 和 <code>printable</code>（元数据保留）。即使 Biscuit 令牌是为管理员签发的，也会被拒绝。对于不存在的敏感名称同样返回 <code>403</code>。<code>DELETE</code> 不变，仍需要 <code>cache_delete</code>。参见<a href="../plugins/#sensitive-job-cache-entries">敏感的作业缓存条目</a>。</li>
 <li><strong>Jobs</strong></li>
 <li><code>GET /jobs</code>: 列出作业、计划和缓存摘要。</li>
 <li><code>POST /jobs/run</code>: 将插件标记为已变更以触发关联作业。</li>
@@ -2051,10 +2052,10 @@
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.top", "content.tabs.link", "toc.integrate", "content.code.copy", "search.highlight"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "\u5df2\u590d\u5236", "clipboard.copy": "\u590d\u5236", "search.result.more.one": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.more.other": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 # \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.none": "\u6ca1\u6709\u627e\u5230\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.one": "\u627e\u5230 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.other": "# \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.placeholder": "\u952e\u5165\u4ee5\u5f00\u59cb\u641c\u7d22", "search.result.term.missing": "\u7f3a\u5c11", "select.version": "\u9009\u62e9\u5f53\u524d\u7248\u672c"}, "version": {"provider": "mike", "version": "latest"}}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.top", "content.tabs.link", "toc.integrate", "content.code.copy", "search.highlight"], "search": "../../assets/javascripts/workers/search.a7633da7.min.js", "tags": null, "translations": {"clipboard.copied": "\u5df2\u590d\u5236", "clipboard.copy": "\u590d\u5236", "search.result.more.one": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.more.other": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 # \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.none": "\u6ca1\u6709\u627e\u5230\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.one": "\u627e\u5230 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.other": "# \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.placeholder": "\u952e\u5165\u4ee5\u5f00\u59cb\u641c\u7d22", "search.result.term.missing": "\u7f3a\u5c11", "select.version": "\u9009\u62e9\u5f53\u524d\u7248\u672c"}, "version": {"provider": "mike", "version": "latest"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      <script src="../../assets/javascripts/bundle.a5f9d56c.min.js"></script>
       
         <script src="../../assets/extra.js"></script>
       

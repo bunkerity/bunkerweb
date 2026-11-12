@@ -33,7 +33,7 @@
       
       
       <link rel="icon" href="../../assets/favicon.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.1">
     
     
       
@@ -41,7 +41,7 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.57a0d79d.min.css">
       
       
 
@@ -1380,7 +1380,7 @@
 <li>Archivos de config: <code>/etc/bunkerweb/api.env</code> (se crea con defaults comentados al primer arranque) y <code>/etc/bunkerweb/api.yml</code></li>
 <li>Fuentes de entorno: <code>api.env</code>, <code>variables.env</code>, <code>/run/secrets/&lt;VAR&gt;</code> y luego exportadas al proceso Gunicorn</li>
 </ul>
-<p>Edita <code>/etc/bunkerweb/api.env</code> para definir <code>API_USERNAME</code>/<code>API_PASSWORD</code>, allowlist, TLS, límites de tasa o <code>API_ROOT_PATH</code>, luego <code>systemctl reload bunkerweb-api</code>.</p>
+<p>Edita <code>/etc/bunkerweb/api.env</code> para definir <code>API_USERNAME</code>/<code>API_PASSWORD</code>, allowlist, TLS, límites de tasa o <code>API_ROOT_PATH</code>, luego <code>systemctl restart bunkerweb-api</code>.</p>
 </div>
 </div>
 </div>
@@ -1913,6 +1913,7 @@
 <li><code>GET /cache</code>: lista archivos de caché con filtros (<code>service</code>, <code>plugin</code>, <code>job_name</code>); <code>with_data=true</code> incrusta contenido imprimible.</li>
 <li><code>GET /cache/{service}/{plugin}/{job}/{file}</code>: obtiene/descarga un archivo de caché específico (<code>download=true</code>).</li>
 <li><code>DELETE /cache</code> o <code>DELETE /cache/{service}/{plugin}/{job}/{file}</code>: borra archivos de caché. Solo se notifica al scheduler para un plugin cuya fila se borró de verdad; un <code>plugin</code> que no posee el job se rechaza y no se borra nada.</li>
+<li>Entradas sensibles (nombre almacenado <code>secret</code> o terminado en <code>.secret</code>, más algunas entradas del core con claves privadas o credenciales las claves de cliente mTLS hacia el upstream y el archivo de copia de seguridad de failover): <code>GET /cache/{service}/{plugin}/{job}/{file}</code> devuelve <code>403</code> y <code>GET /cache?with_data=true</code> omite <code>data</code> y <code>printable</code> (los metadatos se mantienen), salvo que quien llama use HTTP Basic como administrador de la API o el <code>API_TOKEN</code>. Un token Biscuit se rechaza incluso si se emitió para un administrador. El <code>403</code> también se devuelve para un nombre sensible que no existe. <code>DELETE</code> no cambia y sigue necesitando <code>cache_delete</code>. Consulta <a href="../plugins/#entradas-sensibles-de-la-cache-de-jobs">Entradas sensibles de la caché de jobs</a>.</li>
 <li><strong>Jobs</strong></li>
 <li><code>GET /jobs</code>: lista jobs, horarios y resúmenes de caché.</li>
 <li><code>POST /jobs/run</code>: marca plugins como cambiados para disparar los jobs asociados.</li>
@@ -2051,10 +2052,10 @@
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.top", "content.tabs.link", "toc.integrate", "content.code.copy", "search.highlight"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copiado al portapapeles", "clipboard.copy": "Copiar al portapapeles", "search.result.more.one": "1 m\u00e1s en esta p\u00e1gina", "search.result.more.other": "# m\u00e1s en esta p\u00e1gina", "search.result.none": "No se encontraron documentos", "search.result.one": "1 documento encontrado", "search.result.other": "# documentos encontrados", "search.result.placeholder": "Teclee para comenzar b\u00fasqueda", "search.result.term.missing": "Falta", "select.version": "Seleccionar versi\u00f3n"}, "version": {"provider": "mike", "version": "latest"}}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.top", "content.tabs.link", "toc.integrate", "content.code.copy", "search.highlight"], "search": "../../assets/javascripts/workers/search.a7633da7.min.js", "tags": null, "translations": {"clipboard.copied": "Copiado al portapapeles", "clipboard.copy": "Copiar al portapapeles", "search.result.more.one": "1 m\u00e1s en esta p\u00e1gina", "search.result.more.other": "# m\u00e1s en esta p\u00e1gina", "search.result.none": "No se encontraron documentos", "search.result.one": "1 documento encontrado", "search.result.other": "# documentos encontrados", "search.result.placeholder": "Teclee para comenzar b\u00fasqueda", "search.result.term.missing": "Falta", "select.version": "Seleccionar versi\u00f3n"}, "version": {"provider": "mike", "version": "latest"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      <script src="../../assets/javascripts/bundle.a5f9d56c.min.js"></script>
       
         <script src="../../assets/extra.js"></script>
       

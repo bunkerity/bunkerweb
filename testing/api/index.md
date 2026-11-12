@@ -158,7 +158,7 @@ Choose the flavor that matches your environment.
     - Config files: `/etc/bunkerweb/api.env` (auto-created with commented defaults on first start) and `/etc/bunkerweb/api.yml`
     - Environment sources: `api.env`, `variables.env`, `/run/secrets/<VAR>`, then exported to the Gunicorn process
 
-    Edit `/etc/bunkerweb/api.env` to set `API_USERNAME`/`API_PASSWORD`, allowlist, TLS, rate limits, or `API_ROOT_PATH`, then `systemctl reload bunkerweb-api`.
+    Edit `/etc/bunkerweb/api.env` to set `API_USERNAME`/`API_PASSWORD`, allowlist, TLS, rate limits, or `API_ROOT_PATH`, then `systemctl restart bunkerweb-api`.
 
 ## Authentication and authorization
 
@@ -412,6 +412,7 @@ Disable docs or schema by setting their URLs to `off|disabled|none|false|0`. Set
   - `GET /cache`: list cache files with filters (`service`, `plugin`, `job_name`); `with_data=true` embeds printable content.
   - `GET /cache/{service}/{plugin}/{job}/{file}`: fetch/download a specific cache file (`download=true`).
   - `DELETE /cache` or `DELETE /cache/{service}/{plugin}/{job}/{file}`: delete cache files. The scheduler is notified only for a plugin whose row was really deleted; a `plugin` that does not own the job is refused and nothing is deleted.
+  - Sensitive entries (stored name `secret` or ending in `.secret`, plus some core entries holding private keys or credentials, such as the upstream mTLS client keys and the failover backup archive): `GET /cache/{service}/{plugin}/{job}/{file}` returns `403` and `GET /cache?with_data=true` omits `data` and `printable` (the metadata stays), unless the caller used HTTP Basic as an API administrator or the `API_TOKEN`. A Biscuit token is refused even when issued to an administrator. The `403` is also returned for a sensitive name that does not exist. `DELETE` is unchanged and still needs `cache_delete`. See [Sensitive job-cache entries](https://docs.bunkerweb.io/testing/plugins/#sensitive-job-cache-entries).
 - **Jobs**
   - `GET /jobs`: list jobs, schedules, and cache summaries.
   - `POST /jobs/run`: mark plugins as changed to trigger associated jobs.

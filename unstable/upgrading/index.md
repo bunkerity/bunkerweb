@@ -47,7 +47,7 @@ Upgrade every Web UI replica together: replay protection for two-factor codes is
             1. Detection
                 * Reads the install type (full, manager, worker, scheduler, ui, api) back from `.env`, so you never have to restate your topology.
                 * Recovers the secrets, host ports, worker list and Compose project name from `.env`, so an upgrade cannot rotate the database password, invalidate stored 2FA secrets, or move your published ports; when a key is repeated the last assignment wins. Optional `export` prefixes are accepted, and explicit command-line values still take precedence. Quoting, interpolation, escaping, and other unsupported dotenv syntax are rejected before the file is rewritten; use the manual upgrade path for those files.
-                * Reads the version actually running from the container rather than trusting the image tag, so a floating tag (`latest`, `testing`, or `1.6`, the newest 1.6.x release, which stays on 1.6 when 1.7 ships) and an interrupted previous upgrade are both detected correctly.
+                * Reads the version actually running from the container rather than trusting the image tag, so a floating tag ([all tags](https://docs.bunkerweb.io/testing/integrations/#docker-image-tags): `latest`, `testing`, `1.6`, the newest 1.6.x release, which stays on 1.6 when 1.7 ships, or `1.6-edge`, the newest 1.6.x release candidate or release) and an interrupted previous upgrade are both detected correctly.
             2. Upgrade decision
                 * Same version already running: prints the stack status and exits.
                 * Older target version: **refuses**. BunkerWeb has no downgrade migration, so the scheduler would fail to start and restart in a loop. See [Rollback](#rollback) for the supported way back.
@@ -1250,7 +1250,7 @@ gh attestation verify ./bunkerweb_${VERSION}-1_amd64.deb \
   --source-ref "refs/tags/$TAG"
 ```
 
-The release also lists the SHA-256 checksum of every package in `release-manifest.json`. Check the manifest against its own checksum, then the package against the manifest, choosing the entry of your distribution (`ubuntu`, `ubuntu-noble`, `ubuntu-jammy`, `debian-bookworm`, `debian-trixie`, `fedora-43`, `fedora-44`, `rhel-8`, `rhel-9` or `rhel-10`) and platform (`linux/amd64` or `linux/arm64`):
+The release also lists the SHA-256 checksum of every package in `release-manifest.json`. Check the manifest against its own checksum, then the package against the manifest, choosing the entry of your distribution (`ubuntu`, `ubuntu-noble`, `ubuntu-jammy`, `debian-bookworm`, `debian-trixie`, `fedora-43`, `fedora-44`, `fedora-45`, `rhel-8`, `rhel-9` or `rhel-10`) and platform (`linux/amd64` or `linux/arm64`):
 
 ```bash
 curl -fsSL -O "https://github.com/bunkerity/bunkerweb/releases/download/${TAG}/release-manifest.json" \

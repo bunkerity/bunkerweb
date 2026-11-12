@@ -33,7 +33,7 @@
       
       
       <link rel="icon" href="../assets/favicon.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.1">
     
     
       
@@ -41,7 +41,7 @@
       
     
     
-      <link rel="stylesheet" href="../assets/stylesheets/main.ec1eaa64.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.57a0d79d.min.css">
       
       
 
@@ -3426,6 +3426,56 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#zstandard" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Zstandard
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Zstandard">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#how-to-use_36" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How to Use
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#configuration-settings_35" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configuration Settings
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example Configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -3921,14 +3971,14 @@ curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">"Host: bw
 <tr>
 <td><code>CLIENT_BODY_TIMEOUT</code></td>
 <td><code>10s</code></td>
-<td>global</td>
+<td>multisite</td>
 <td>No</td>
 <td><strong>Client Body Timeout:</strong> Timeout for reading the client request body.</td>
 </tr>
 <tr>
 <td><code>CLIENT_HEADER_TIMEOUT</code></td>
 <td><code>10s</code></td>
-<td>global</td>
+<td>multisite</td>
 <td>No</td>
 <td><strong>Client Header Timeout:</strong> Timeout for reading the client request header.</td>
 </tr>
@@ -3948,6 +3998,7 @@ curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">"Host: bw
 </tr>
 </tbody>
 </table>
+<p>Set <code>CLIENT_HEADER_TIMEOUT</code> and <code>CLIENT_BODY_TIMEOUT</code> per service for long-lived gRPC streams (for example, <code>netbird.example.com_CLIENT_HEADER_TIMEOUT=1d</code>). Keep the global <code>CLIENT_HEADER_TIMEOUT</code> short: it also bounds TLS handshakes on the default server and how long incomplete handshakes can keep old workers alive after a reload. Existing <code>client_header_timeout</code> or <code>client_body_timeout</code> directives in <code>server-http</code> custom configurations keep working when the service inherits the global value. Remove the matching custom directive when setting a different per-service timeout to avoid duplicate directives.</p>
 </div>
 <div class="tabbed-block">
 <table>
@@ -4737,6 +4788,13 @@ curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">"Host: bw
 <td><strong>Excluded URLs:</strong> List of URI regex patterns separated by spaces that should bypass the challenge. Patterns are matched against the normalized path, alone or followed by <code>?</code> and the query string.</td>
 </tr>
 <tr>
+<td><code>ANTIBOT_INCLUDE_URI</code></td>
+<td></td>
+<td>multisite</td>
+<td>no</td>
+<td><strong>Included URLs:</strong> Space-separated PCRE patterns for the only URIs to challenge. Empty means all URIs. Match the normalized path, alone or with <code>?</code> and query string. <code>ANTIBOT_IGNORE_URI</code> takes precedence.</td>
+</tr>
+<tr>
 <td><code>ANTIBOT_IGNORE_IP</code></td>
 <td></td>
 <td>multisite</td>
@@ -5447,7 +5505,7 @@ For the new version, create a reCAPTCHA key in your Google Cloud project and use
 </div>
 <div class="admonition tip">
 <p class="admonition-title">Using Multiple Credentials</p>
-<p>You can configure multiple username/password pairs for access. Each <code>AUTH_BASIC_USER</code> setting should have a corresponding <code>AUTH_BASIC_PASSWORD</code> setting.</p>
+<p>You can configure multiple username/password pairs for access. Each <code>AUTH_BASIC_USER</code> setting should have a corresponding <code>AUTH_BASIC_PASSWORD</code> setting. The default <code>changeme</code> / <code>changeme</code> pair is ignored as soon as another pair is configured; set the unsuffixed <code>AUTH_BASIC_USER</code> and <code>AUTH_BASIC_PASSWORD</code> to your own values to keep it.</p>
 </div>
 <h3 id="example-configurations_2">Example Configurations<a class="headerlink" href="#example-configurations_2" title="Permanent link">&para;</a></h3>
 <div class="tabbed-set tabbed-alternate" data-tabs="5:3"><input checked="checked" id="__tabbed_5_1" name="__tabbed_5" type="radio" /><input id="__tabbed_5_2" name="__tabbed_5" type="radio" /><input id="__tabbed_5_3" name="__tabbed_5" type="radio" /><div class="tabbed-labels"><label for="__tabbed_5_1">Site-wide Protection</label><label for="__tabbed_5_2">Protecting Specific Areas</label><label for="__tabbed_5_3">Multiple Users</label></div>
@@ -5897,6 +5955,13 @@ bwcli<span class="w"> </span>plugin<span class="w"> </span>backup<span class="w"
 <td><strong>Enable Blacklist:</strong> Set to <code>yes</code> to enable the blacklist feature.</td>
 </tr>
 <tr>
+<td><code>BLACKLIST_URLS_REFRESH_INTERVAL</code></td>
+<td><code>1h</code></td>
+<td>multisite</td>
+<td>no</td>
+<td><strong>URL refresh interval:</strong> Minimum cache age before downloading again. Accepts bare seconds or time suffixes (<code>ms</code>, <code>s</code>, <code>m</code>, <code>h</code>, <code>d</code>, <code>w</code>, <code>M</code>, <code>y</code>).</td>
+</tr>
+<tr>
 <td><code>BLACKLIST_COMMUNITY_LISTS</code></td>
 <td><code>ip:danmeuk-tor-exit ua:mitchellkrogza-bad-user-agents</code></td>
 <td>multisite</td>
@@ -6251,7 +6316,7 @@ bwcli<span class="w"> </span>plugin<span class="w"> </span>backup<span class="w"
 </div>
 <div class="admonition tip">
 <p class="admonition-title">Regular Updates</p>
-<p>Blacklists from URLs are automatically downloaded and updated hourly to ensure your protection remains current against the latest threats.</p>
+<p>The job runs hourly. <code>BLACKLIST_URLS_REFRESH_INTERVAL</code> sets the minimum age of a cached URL before downloading again (default: <code>1h</code>). Use <code>24h</code> for providers allowing at most one download per day, or <code>0</code> to download on every job run. Fresh caches and failed downloads keep their last valid entries. Within this plugin, URL caches are shared across services: the shortest interval can trigger a download, so use the same interval on every service sharing a provider-limited URL.</p>
 </div>
 <h3 id="example-configurations_5">Example Configurations<a class="headerlink" href="#example-configurations_5" title="Permanent link">&para;</a></h3>
 <div class="tabbed-set tabbed-alternate" data-tabs="9:3"><input checked="checked" id="__tabbed_9_1" name="__tabbed_9" type="radio" /><input id="__tabbed_9_2" name="__tabbed_9" type="radio" /><input id="__tabbed_9_3" name="__tabbed_9" type="radio" /><div class="tabbed-labels"><label for="__tabbed_9_1">Basic IP and User-Agent Protection</label><label for="__tabbed_9_2">Advanced Protection with Custom Rules</label><label for="__tabbed_9_3">Using Local Files</label></div>
@@ -6473,7 +6538,7 @@ TrustedMonitor/\d+\.\d+
 <td><code>no</code></td>
 <td>multisite</td>
 <td>no</td>
-<td><strong>Filter Reported Headers:</strong> Set to <code>yes</code> to send only a short allowlist of request headers and blank the values ModSecurity matched in headers and cookies. When <code>no</code>, a report carries every request header and the matched values.</td>
+<td><strong>Filter Reported Headers:</strong> Set to <code>yes</code> to send only a short allowlist of request headers and blank the values ModSecurity matched in headers and cookies. When <code>no</code>, a report carries every request header except <code>Cookie</code>, <code>Authorization</code> and <code>Proxy-Authorization</code>, and the matched values except those found in them and in cookies.</td>
 </tr>
 <tr>
 <td><code>BUNKERNET_SERVER</code></td>
@@ -6495,10 +6560,10 @@ TrustedMonitor/\d+\.\d+
 <li>the instance metadata sent with each request: the BunkerNet instance ID, the BunkerWeb version, the integration, and the OS name, version, version ID, codename, ID and architecture;</li>
 <li>the client IP address, the reason for blocking and the date;</li>
 <li>the HTTP method, the URL <strong>including its query string</strong>, and the service name (<code>server_name</code>);</li>
-<li>the request headers, with their values: every header received (up to <code>MAX_HEADERS</code>), or only <code>User-Agent</code>, <code>Accept</code>, <code>Accept-Encoding</code>, <code>Accept-Language</code>, <code>Content-Type</code> and <code>Content-Length</code> when <code>BUNKERNET_FILTER_HEADERS</code> is <code>yes</code>;</li>
-<li>the details attached to the blocking reason. Depending on the plugin that blocked the client, they can include the IDs and messages of the ModSecurity rules that matched together with the request values that matched them (parts of arguments, body, headers or cookies, each cut to 512 bytes; with <code>BUNKERNET_FILTER_HEADERS</code> set to <code>yes</code>, values matched in headers and cookies are blanked and only the variable name is sent), or, for Bad Behavior, the method and URL of the recent requests that led to the ban.</li>
+<li>the request headers, with their values: every header received (up to <code>MAX_HEADERS</code>) except <code>Cookie</code>, <code>Authorization</code> and <code>Proxy-Authorization</code>, or only <code>User-Agent</code>, <code>Accept</code>, <code>Accept-Encoding</code>, <code>Accept-Language</code>, <code>Content-Type</code> and <code>Content-Length</code> when <code>BUNKERNET_FILTER_HEADERS</code> is <code>yes</code>;</li>
+<li>the details attached to the blocking reason. Depending on the plugin that blocked the client, they can include the IDs and messages of the ModSecurity rules that matched together with the request values that matched them (parts of arguments, body, headers or cookies, each cut to 512 bytes; values matched in cookies and in the <code>Cookie</code>, <code>Authorization</code> and <code>Proxy-Authorization</code> headers are always blanked, and with <code>BUNKERNET_FILTER_HEADERS</code> set to <code>yes</code> so are values matched in any other header; only the variable name is sent), or, for Bad Behavior, the method and URL of the recent requests that led to the ban.</li>
 </ul>
-<p>By default (<code>BUNKERNET_FILTER_HEADERS</code> set to <code>no</code>) a report carries every request header received (up to <code>MAX_HEADERS</code>), cookies and <code>Authorization</code> included, and the values ModSecurity matched as they are. Set <code>BUNKERNET_FILTER_HEADERS</code> to <code>yes</code> to send only the six headers listed above and blank the values matched in headers and cookies. Reports still waiting to be sent are filtered the same way before they go out when it is <code>yes</code>.</p>
+<p>By default (<code>BUNKERNET_FILTER_HEADERS</code> set to <code>no</code>) a report carries every request header received (up to <code>MAX_HEADERS</code>) except <code>Cookie</code>, <code>Authorization</code> and <code>Proxy-Authorization</code>, which are never sent, and the values ModSecurity matched except those found in cookies and in these headers. Set <code>BUNKERNET_FILTER_HEADERS</code> to <code>yes</code> to send only the six headers listed above and blank the values matched in headers and cookies. Reports still waiting to be sent are cleaned the same way before they go out (credentials always, the allowlist when it is <code>yes</code>).</p>
 <p>The URL and the matched values come from the request, so they contain whatever the client sent. Set <code>USE_BUNKERNET</code> to <code>no</code> on services whose URLs carry sensitive values.</p>
 </div>
 <h3 id="example-configurations_7">Example Configurations<a class="headerlink" href="#example-configurations_7" title="Permanent link">&para;</a></h3>
@@ -8375,6 +8440,13 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 <td>no</td>
 <td><strong>Enable Greylist:</strong> Set to <code>yes</code> to enable greylisting.</td>
 </tr>
+<tr>
+<td><code>GREYLIST_URLS_REFRESH_INTERVAL</code></td>
+<td><code>1h</code></td>
+<td>multisite</td>
+<td>no</td>
+<td><strong>URL refresh interval:</strong> Minimum cache age before downloading again. Accepts bare seconds or time suffixes (<code>ms</code>, <code>s</code>, <code>m</code>, <code>h</code>, <code>d</code>, <code>w</code>, <code>M</code>, <code>y</code>).</td>
+</tr>
 </tbody>
 </table>
 <div class="tabbed-set tabbed-alternate" data-tabs="20:6"><input checked="checked" id="__tabbed_20_1" name="__tabbed_20" type="radio" /><input id="__tabbed_20_2" name="__tabbed_20" type="radio" /><input id="__tabbed_20_3" name="__tabbed_20" type="radio" /><input id="__tabbed_20_4" name="__tabbed_20" type="radio" /><input id="__tabbed_20_5" name="__tabbed_20" type="radio" /><input id="__tabbed_20_6" name="__tabbed_20" type="radio" /><div class="tabbed-labels"><label for="__tabbed_20_1">IP Address</label><label for="__tabbed_20_2">Reverse DNS</label><label for="__tabbed_20_3">ASN</label><label for="__tabbed_20_4">User Agent</label><label for="__tabbed_20_5">URI</label><label for="__tabbed_20_6">Header</label></div>
@@ -8590,7 +8662,7 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 </div>
 <div class="admonition tip">
 <p class="admonition-title">Regular Updates</p>
-<p>Greylists from URLs are automatically downloaded and updated hourly to ensure that your protection remains current with the latest trusted sources.</p>
+<p>The job runs hourly. <code>GREYLIST_URLS_REFRESH_INTERVAL</code> sets the minimum age of a cached URL before downloading again (default: <code>1h</code>). Use <code>24h</code> for providers allowing at most one download per day, or <code>0</code> to download on every job run. Fresh caches and failed downloads keep their last valid entries. Within this plugin, URL caches are shared across services: the shortest interval can trigger a download, so use the same interval on every service sharing a provider-limited URL.</p>
 </div>
 <h3 id="example-configurations_15">Example Configurations<a class="headerlink" href="#example-configurations_15" title="Permanent link">&para;</a></h3>
 <div class="tabbed-set tabbed-alternate" data-tabs="21:4"><input checked="checked" id="__tabbed_21_1" name="__tabbed_21" type="radio" /><input id="__tabbed_21_2" name="__tabbed_21" type="radio" /><input id="__tabbed_21_3" name="__tabbed_21" type="radio" /><input id="__tabbed_21_4" name="__tabbed_21" type="radio" /><div class="tabbed-labels"><label for="__tabbed_21_1">Basic Configuration</label><label for="__tabbed_21_2">Advanced Configuration</label><label for="__tabbed_21_3">Using Local Files</label><label for="__tabbed_21_4">Selective API Access</label></div>
@@ -9019,7 +9091,7 @@ TrustedMonitor/\d+\.\d+
 </div>
 <div class="admonition warning">
 <p class="admonition-title">Long-Lived Streams and Core Timeouts</p>
-<p>Long-lived or streaming RPCs may require higher generic NGINX timeouts than the global defaults. Commonly tuned settings are <code>CLIENT_BODY_TIMEOUT</code> and <code>CLIENT_HEADER_TIMEOUT</code> in the General plugin settings.</p>
+<p>Long-lived or streaming RPCs may need longer <code>CLIENT_BODY_TIMEOUT</code> and <code>CLIENT_HEADER_TIMEOUT</code> values. Set them for the gRPC service in the General plugin settings; keep the global <code>CLIENT_HEADER_TIMEOUT</code> short to bound TLS handshakes and old worker lifetime after a reload.</p>
 </div>
 <div class="admonition tip">
 <p class="admonition-title">Multiple gRPC Backends</p>
@@ -9532,6 +9604,7 @@ TrustedMonitor/\d+\.\d+
 </tr>
 </tbody>
 </table>
+<p><code>INJECT_HEAD</code> and <code>INJECT_BODY</code> values are inserted as literal HTML: quotes and backslashes need no extra NGINX escaping. If you previously added <code>\'</code> by hand as a workaround, remove the backslash. Keep any escaping required by your configuration format (such as YAML); NGINX <code>$variable</code> expansion is unchanged.</p>
 <div class="admonition tip">
 <p class="admonition-title">Best Practices</p>
 <ul>
@@ -10281,6 +10354,13 @@ TrustedMonitor/\d+\.\d+
 <td><a href="https://github.com/ctrlaltcoop/certbot-dns-hetzner/blob/main/README.md">Documentation</a></td>
 </tr>
 <tr>
+<td><code>hosttech</code></td>
+<td>Hosttech</td>
+<td><code>api_token</code></td>
+<td>Default propagation: 600 seconds; increase <code>LETS_ENCRYPT_DNS_PROPAGATION</code> if needed.</td>
+<td><a href="https://github.com/bunkerity/certbot-dns-hosttech/blob/main/README.md">Documentation</a></td>
+</tr>
+<tr>
 <td><code>infomaniak</code></td>
 <td>Infomaniak</td>
 <td><code>token</code></td>
@@ -10521,6 +10601,10 @@ TrustedMonitor/\d+\.\d+
 </ul>
 <p>For example, <code>5r/m</code> means that 5 requests per minute are allowed from each IP address.</p>
 </div>
+<div class="admonition info">
+<p class="admonition-title">Counting accuracy across workers</p>
+<p>Without Redis, the count is exact across workers up to 100 requests per window, for <code>LIMIT_REQ_RATE</code> and for <code>LIMIT_REQ_GLOBAL_RATE</code>: simultaneous requests cannot slip past the limit. Above 100 requests per window, simultaneous requests can exceed the limit slightly, because serializing the counter of a long request history on every request would cost throughput. With Redis, the count is always exact.</p>
+</div>
 </div>
 <div class="tabbed-block">
 <table>
@@ -10579,28 +10663,28 @@ TrustedMonitor/\d+\.\d+
 <td><code>10</code></td>
 <td>multisite</td>
 <td>no</td>
-<td><strong>HTTP/1.X Connections:</strong> Maximum number of concurrent HTTP/1.X connections per IP address.</td>
+<td><strong>HTTP/1.X Connections:</strong> Maximum number of concurrent HTTP/1.X connections per IP address. Range: 1 to 65535.</td>
 </tr>
 <tr>
 <td><code>LIMIT_CONN_MAX_HTTP2</code></td>
 <td><code>100</code></td>
 <td>multisite</td>
 <td>no</td>
-<td><strong>HTTP/2 Streams:</strong> Maximum number of concurrent HTTP/2 streams per IP address.</td>
+<td><strong>HTTP/2 Streams:</strong> Maximum number of concurrent HTTP/2 streams per IP address. Range: 1 to 65535.</td>
 </tr>
 <tr>
 <td><code>LIMIT_CONN_MAX_HTTP3</code></td>
 <td><code>100</code></td>
 <td>multisite</td>
 <td>no</td>
-<td><strong>HTTP/3 Streams:</strong> Maximum number of concurrent HTTP/3 streams per IP address.</td>
+<td><strong>HTTP/3 Streams:</strong> Maximum number of concurrent HTTP/3 streams per IP address. Range: 1 to 65535.</td>
 </tr>
 <tr>
 <td><code>LIMIT_CONN_MAX_STREAM</code></td>
 <td><code>10</code></td>
 <td>multisite</td>
 <td>no</td>
-<td><strong>Stream Connections:</strong> Maximum number of concurrent stream connections per IP address.</td>
+<td><strong>Stream Connections:</strong> Maximum number of concurrent stream connections per IP address. Range: 1 to 65535.</td>
 </tr>
 </tbody>
 </table>
@@ -11715,6 +11799,13 @@ TrustedMonitor/\d+\.\d+
 <td>Writer: <code>Serial</code> (default) or <code>Concurrent</code>.</td>
 </tr>
 <tr>
+<td><code>MODSECURITY_SEC_AUDIT_LOG_FORMAT</code></td>
+<td><code>Native</code></td>
+<td>multisite</td>
+<td>no</td>
+<td>Audit log format: <code>Native</code> (default) or <code>JSON</code> (one JSON object per entry). In global CRS mode, set it globally.</td>
+</tr>
+<tr>
 <td><code>MODSECURITY_SEC_AUDIT_LOG_STORAGE_DIR</code></td>
 <td></td>
 <td>multisite</td>
@@ -11774,6 +11865,20 @@ TrustedMonitor/\d+\.\d+
 <p class="admonition-title">Safety recommendation for large uploads</p>
 <p>ModSecurity buffers the full request body in memory and cannot cap it for multi-GB uploads, which can OOM the worker. If — <strong>and only if</strong> — a reverse-proxy URL is used <em>exclusively</em> for file uploads (e.g. a dedicated <code>/upload</code> endpoint), set <code>REVERSE_PROXY_MODSECURITY_N: "no"</code> on that URL to emit <code>modsecurity off;</code> in its <code>location</code> block. Do not disable it on mixed-use URLs: you would lose WAF coverage on everything served by that location.</p>
 <p>To keep uploads protected after bypassing ModSecurity, pair this with a file-scanning plugin such as <a href="https://github.com/bunkerity/bunkerweb-plugins/tree/main/clamav">ClamAV</a> or <a href="https://github.com/bunkerity/bunkerweb-plugins/tree/main/virustotal">VirusTotal</a> — they inspect the uploaded file itself instead of the raw request body.</p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Response-body denies and compressed responses</p>
+<p>If a response-body deny rule fires after response headers have been sent, the client can receive the original status (such as <code>200</code>) followed by an incomplete-body or chunked-encoding error instead of a clean <code>403</code> response. This can happen with gzip, Brotli or zstd compression applied by BunkerWeb. Starting with <code>testing</code>, Brotli follows the established gzip behavior. Check the ModSecurity audit and error logs for the triggered rule; tune confirmed false positives with narrowly scoped exclusions.</p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Upstream-compressed response bodies</p>
+<p>CRS v4 does not inspect response bodies already compressed by the upstream (<code>gzip</code>, <code>br</code> or <code>zstd</code>). BunkerWeb does not decode these bodies for inspection. Where response-body inspection is required, configure the upstream to return uncompressed content. To ask an upstream that honors this header to do so, remove <code>Accept-Encoding</code> from the proxied request for only the affected service and location:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">REVERSE_PROXY_HOST_1</span><span class="p">:</span><span class="w"> </span><span class="s">"http://app:8080"</span>
+<span class="nt">REVERSE_PROXY_URL_1</span><span class="p">:</span><span class="w"> </span><span class="s">"/reports/"</span>
+<span class="nt">REVERSE_PROXY_HEADERS_1</span><span class="p">:</span><span class="w"> </span><span class="s">'Accept-Encoding</span><span class="nv"> </span><span class="s">""'</span>
+</code></pre></div>
+<p>Replace the host and path with your own, and match the suffix to the target reverse-proxy location. If that location already has <code>REVERSE_PROXY_HEADERS_1</code> entries, keep them and append <code>;Accept-Encoding ""</code>. Use this setting rather than a server-level <code>proxy_set_header</code>, which the generated location headers override.</p>
+<p>Verify that the upstream actually returns an uncompressed response; if it still compresses, disable compression for that route on the upstream. This increases bandwidth between the upstream and BunkerWeb. BunkerWeb can still compress the response for the client after inspection; the configured response-body MIME types and size limits still apply.</p>
 </div>
 <h3 id="available-crs-versions">Available CRS Versions<a class="headerlink" href="#available-crs-versions" title="Permanent link">&para;</a></h3>
 <p>Select a CRS version to best match your security needs:</p>
@@ -13632,7 +13737,7 @@ Setting these only on <code>bunkerweb.extraEnvs</code> has <strong>no effect</st
 <td><code>no</code></td>
 <td>multisite</td>
 <td>yes</td>
-<td><strong>Keep-Alive:</strong> Enable or disable keepalive connections with the proxied resource.</td>
+<td><strong>Keep-Alive:</strong> Send the configured HTTP version (<code>1.1</code> by default) and an empty <code>Connection</code> header to the proxied resource. This does not create a connection pool by itself: to reuse connections, point <code>REVERSE_PROXY_HOST</code> at a named <code>upstream</code> with <code>keepalive</code>, declared in an <code>http</code> custom configuration.</td>
 </tr>
 <tr>
 <td><code>REVERSE_PROXY_HTTP_VERSION</code></td>
@@ -13669,6 +13774,29 @@ Setting these only on <code>bunkerweb.extraEnvs</code> has <strong>no effect</st
 <div class="admonition warning">
 <p class="admonition-title">Request buffering behavior</p>
 <p>Disabling <code>REVERSE_PROXY_REQUEST_BUFFERING</code> only takes effect when ModSecurity is disabled, because request buffering is otherwise enforced.</p>
+</div>
+<div class="admonition info">
+<p class="admonition-title">Reusing backend connections</p>
+<p><code>REVERSE_PROXY_KEEPALIVE=yes</code> only makes BunkerWeb send the configured HTTP version (<code>1.1</code> by default) and an empty <code>Connection</code> header to the backend. It does not create a connection pool: with an ordinary <code>REVERSE_PROXY_HOST</code> URL, NGINX opens a new connection to the backend for each request.</p>
+<p>To reuse backend connections, declare a named <code>upstream</code> with <code>keepalive</code> in an <a href="../advanced/#custom-configurations"><code>http</code> custom configuration</a>, then point <code>REVERSE_PROXY_HOST</code> at the group name <strong>without a port</strong>: the port goes on the <code>server</code> line of the <code>upstream</code>.</p>
+<div class="highlight"><pre><span></span><code><span class="k">upstream</span><span class="w"> </span><span class="s">app_pool</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kn">server</span><span class="w"> </span><span class="n">backend.internal</span><span class="p">:</span><span class="mi">8443</span><span class="p">;</span>
+<span class="w">    </span><span class="kn">keepalive</span><span class="w"> </span><span class="mi">32</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code>REVERSE_PROXY_HOST=https://app_pool
+REVERSE_PROXY_KEEPALIVE=yes
+# HTTPS only: send the origin name as SNI and verify against it
+REVERSE_PROXY_SSL_SNI=yes
+REVERSE_PROXY_SSL_SNI_NAME=backend.example.com
+# only if the backend checks the Host header
+REVERSE_PROXY_CUSTOM_HOST=backend.example.com
+</code></pre></div>
+<ul>
+<li>The <code>upstream</code> name must be unique, and the hostname on the <code>server</code> line must resolve when NGINX loads the configuration.</li>
+<li>For HTTPS, NGINX uses the group name as the SNI and verification name while <code>REVERSE_PROXY_SSL_SNI_NAME</code> is empty, and that setting is ignored while <code>REVERSE_PROXY_SSL_SNI</code> is <code>no</code>. Set both, as above, so the backend sees its real name.</li>
+<li>The <code>Host</code> header stays the client's <code>$host</code>; set <code>REVERSE_PROXY_CUSTOM_HOST</code> if the backend expects another name.</li>
+</ul>
 </div>
 </div>
 <div class="tabbed-block">
@@ -14230,6 +14358,10 @@ Setting these only on <code>bunkerweb.extraEnvs</code> has <strong>no effect</st
 <li>Configure <code>PROXY_NO_CACHE</code> to avoid caching sensitive or personalized content</li>
 <li>Monitor cache hit rates and adjust settings accordingly</li>
 </ul>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Caching requires response buffering</p>
+<p>Proxy caching only works on locations where response buffering is on. When <code>USE_PROXY_CACHE=yes</code>, set <code>REVERSE_PROXY_BUFFERING=yes</code> for each location you want to cache, including numbered settings such as <code>REVERSE_PROXY_BUFFERING_1</code>. While response buffering is off, new responses are not cached, unless the upstream enables it through <code>X-Accel-Buffering</code>. Previously cached responses may still be served. <code>REVERSE_PROXY_REQUEST_BUFFERING</code> controls request bodies and does not enable response caching. BunkerWeb logs a warning when it generates a configuration with proxy caching enabled on a location whose response buffering is off.</p>
 </div>
 </div>
 </div>
@@ -15671,6 +15803,13 @@ For blocking unwanted clients instead, refer to the <a href="#blacklist">Blackli
 <td>no</td>
 <td><strong>Enable Whitelist:</strong> Set to <code>yes</code> to enable the whitelist feature.</td>
 </tr>
+<tr>
+<td><code>WHITELIST_URLS_REFRESH_INTERVAL</code></td>
+<td><code>1h</code></td>
+<td>multisite</td>
+<td>no</td>
+<td><strong>URL refresh interval:</strong> Minimum cache age before downloading again. Accepts bare seconds or time suffixes (<code>ms</code>, <code>s</code>, <code>m</code>, <code>h</code>, <code>d</code>, <code>w</code>, <code>M</code>, <code>y</code>).</td>
+</tr>
 </tbody>
 </table>
 <div class="tabbed-set tabbed-alternate" data-tabs="46:6"><input checked="checked" id="__tabbed_46_1" name="__tabbed_46" type="radio" /><input id="__tabbed_46_2" name="__tabbed_46" type="radio" /><input id="__tabbed_46_3" name="__tabbed_46" type="radio" /><input id="__tabbed_46_4" name="__tabbed_46" type="radio" /><input id="__tabbed_46_5" name="__tabbed_46" type="radio" /><input id="__tabbed_46_6" name="__tabbed_46" type="radio" /><div class="tabbed-labels"><label for="__tabbed_46_1">IP Address</label><label for="__tabbed_46_2">Reverse DNS</label><label for="__tabbed_46_3">ASN</label><label for="__tabbed_46_4">User Agent</label><label for="__tabbed_46_5">URI</label><label for="__tabbed_46_6">Header</label></div>
@@ -15882,7 +16021,7 @@ For blocking unwanted clients instead, refer to the <a href="#blacklist">Blackli
 </div>
 <div class="admonition tip">
 <p class="admonition-title">Regular Updates</p>
-<p>Whitelists from URLs are automatically downloaded and updated hourly to ensure your protection remains current with the latest trusted sources.</p>
+<p>The job runs hourly. <code>WHITELIST_URLS_REFRESH_INTERVAL</code> sets the minimum age of a cached URL before downloading again (default: <code>1h</code>). Use <code>24h</code> for providers allowing at most one download per day, or <code>0</code> to download on every job run. Fresh caches and failed downloads keep their last valid entries. Within this plugin, URL caches are shared across services: the shortest interval can trigger a download, so use the same interval on every service sharing a provider-limited URL.</p>
 </div>
 <div class="admonition warning">
 <p class="admonition-title">Security Bypass</p>
@@ -15986,6 +16125,80 @@ TrustedMonitor/\d+\.\d+
 </tr>
 </tbody>
 </table>
+<h2 id="zstandard">Zstandard<a class="headerlink" href="#zstandard" title="Permanent link">&para;</a></h2>
+<p>STREAM support <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
+<p>The Zstandard plugin compresses HTTP responses using the Zstandard (zstd) algorithm. It reduces bandwidth usage for clients that advertise <code>Accept-Encoding: zstd</code>.</p>
+<h3 id="how-to-use_36">How to Use<a class="headerlink" href="#how-to-use_36" title="Permanent link">&para;</a></h3>
+<ol>
+<li>Enable compression with <code>USE_ZSTD=yes</code> (disabled by default).</li>
+<li>Choose MIME types with <code>ZSTD_TYPES</code> and a minimum response size with <code>ZSTD_MIN_LENGTH</code>.</li>
+<li>Set <code>ZSTD_COMP_LEVEL</code> between <code>1</code> (fastest) and <code>19</code> (highest supported compression). The default is <code>3</code>.</li>
+</ol>
+<p>Clients that support zstd receive <code>Content-Encoding: zstd</code> and <code>Vary: Accept-Encoding</code>. Clients without zstd support, including those sending <code>zstd;q=0</code>, can use Brotli or gzip when those plugins are enabled; otherwise they receive uncompressed responses.</p>
+<p>With <code>USE_ZSTD=yes</code>, eligible responses can carry <code>Vary: Accept-Encoding</code> even when the selected representation is uncompressed, gzip or Brotli. Caches must honor this header to keep representations separate.</p>
+<p>When several compression plugins are enabled, the server preference is zstd, then Brotli, then gzip. Each coding honors its own <code>q=0</code>; positive weights are not compared across compression plugins.</p>
+<h3 id="configuration-settings_35">Configuration Settings<a class="headerlink" href="#configuration-settings_35" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Setting</th>
+<th>Default</th>
+<th>Context</th>
+<th>Multiple</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>USE_ZSTD</code></td>
+<td><code>no</code></td>
+<td>multisite</td>
+<td>no</td>
+<td>Enable Zstandard response compression.</td>
+</tr>
+<tr>
+<td><code>ZSTD_TYPES</code></td>
+<td><code>application/atom+xml application/javascript application/json application/rss+xml application/vnd.ms-fontobject application/x-font-opentype application/x-font-truetype application/x-font-ttf application/x-javascript application/xhtml+xml application/xml font/eot font/opentype font/otf font/truetype image/svg+xml image/vnd.microsoft.icon image/x-icon image/x-win-bitmap text/css text/javascript text/plain text/xml</code></td>
+<td>multisite</td>
+<td>no</td>
+<td>MIME types to compress, in addition to <code>text/html</code> which is always included.</td>
+</tr>
+<tr>
+<td><code>ZSTD_MIN_LENGTH</code></td>
+<td><code>1000</code></td>
+<td>multisite</td>
+<td>no</td>
+<td>Minimum response size in bytes. Responses of unknown length may also be compressed.</td>
+</tr>
+<tr>
+<td><code>ZSTD_COMP_LEVEL</code></td>
+<td><code>3</code></td>
+<td>multisite</td>
+<td>no</td>
+<td>Compression level from <code>1</code> to <code>19</code>. Higher levels use more CPU and memory.</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition tip">
+<p class="admonition-title">Compression Level</p>
+<p>Start with level <code>3</code>. Higher levels increase per-request CPU and memory usage; keep capacity for concurrent requests. Levels are limited to <code>19</code> to stay within the 8 MB zstd window limit for HTTP.</p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Sensitive Responses</p>
+<p>Compression can expose secrets through response-size differences when a response contains both secrets and attacker-controlled input. Disable compression for sensitive services or address this risk in the application. <code>text/html</code> is always eligible when zstd is enabled, even if omitted from <code>ZSTD_TYPES</code>.</p>
+</div>
+<div class="admonition info">
+<p class="admonition-title">Upstream Compression</p>
+<p>Responses already compressed by the upstream are not compressed again. The inject plugin needs an uncompressed upstream response to modify HTML; configure the upstream accordingly when using both features.</p>
+</div>
+<h3 id="example-configuration">Example Configuration<a class="headerlink" href="#example-configuration" title="Permanent link">&para;</a></h3>
+<p>Enable zstd with Brotli and gzip fallback:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">USE_ZSTD</span><span class="p">:</span><span class="w"> </span><span class="s">"yes"</span>
+<span class="nt">ZSTD_MIN_LENGTH</span><span class="p">:</span><span class="w"> </span><span class="s">"1000"</span>
+<span class="nt">ZSTD_COMP_LEVEL</span><span class="p">:</span><span class="w"> </span><span class="s">"3"</span>
+<span class="nt">USE_BROTLI</span><span class="p">:</span><span class="w"> </span><span class="s">"yes"</span>
+<span class="nt">USE_GZIP</span><span class="p">:</span><span class="w"> </span><span class="s">"yes"</span>
+</code></pre></div>
 
 
 
@@ -16113,10 +16326,10 @@ TrustedMonitor/\d+\.\d+
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.top", "content.tabs.link", "toc.integrate", "content.code.copy", "search.highlight"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike", "version": "latest"}}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.top", "content.tabs.link", "toc.integrate", "content.code.copy", "search.highlight"], "search": "../assets/javascripts/workers/search.a7633da7.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike", "version": "latest"}}</script>
     
     
-      <script src="../assets/javascripts/bundle.d7400e89.min.js"></script>
+      <script src="../assets/javascripts/bundle.a5f9d56c.min.js"></script>
       
         <script src="../assets/extra.js"></script>
       

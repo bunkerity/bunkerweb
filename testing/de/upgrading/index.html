@@ -33,7 +33,7 @@
       
       
       <link rel="icon" href="../../assets/favicon.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.1">
     
     
       
@@ -41,7 +41,7 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.57a0d79d.min.css">
       
       
 
@@ -1295,7 +1295,7 @@ verwenden Sie dafür den Reiter <strong>Manuell</strong>.</p>
 <li>Erkennung<ul>
 <li>Liest den Installationstyp (full, manager, worker, scheduler, ui, api) aus der <code>.env</code> zurück, sodass Sie Ihre Topologie nie erneut angeben müssen.</li>
 <li>Übernimmt Geheimnisse, Host-Ports, Worker-Liste und Compose-Projektnamen aus der <code>.env</code>. Ein Upgrade kann so weder das Datenbankpasswort rotieren noch gespeicherte 2FA-Geheimnisse ungültig machen oder Ihre veröffentlichten Ports verschieben. Wird ein Schlüssel mehrfach gesetzt, gilt die letzte Zuweisung; ein optionales <code>export</code> wird akzeptiert, und explizite Kommandozeilenwerte haben weiterhin Vorrang. Anführungszeichen, Variablenersetzung, Escapes und andere nicht unterstützte dotenv-Syntax werden abgewiesen, bevor die Datei neu geschrieben wird; verwenden Sie für solche Dateien den manuellen Upgrade-Weg.</li>
-<li>Liest die tatsächlich laufende Version aus dem Container statt dem Image-Tag zu vertrauen. So werden ein gleitender Tag (<code>latest</code>, <code>testing</code> oder <code>1.6</code>, das neueste 1.6.x-Release, das auf 1.6 bleibt, wenn 1.7 erscheint) und ein zuvor abgebrochenes Upgrade zuverlässig erkannt.</li>
+<li>Liest die tatsächlich laufende Version aus dem Container statt dem Image-Tag zu vertrauen. So werden ein gleitender Tag (<a href="../integrations/#docker-image-tags">alle Tags</a>: <code>latest</code>, <code>testing</code>, <code>1.6</code>, das neueste 1.6.x-Release, das auf 1.6 bleibt, wenn 1.7 erscheint, oder <code>1.6-edge</code>, der neueste 1.6.x-Release-Candidate oder das neueste 1.6.x-Release) und ein zuvor abgebrochenes Upgrade zuverlässig erkannt.</li>
 </ul>
 </li>
 <li>Upgrade-Entscheidung<ul>
@@ -2609,7 +2609,7 @@ gh<span class="w"> </span>attestation<span class="w"> </span>verify<span class="
 <span class="w">  </span>--signer-workflow<span class="w"> </span>bunkerity/bunkerweb/.github/workflows/release.yml<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>--source-ref<span class="w"> </span><span class="s2">"refs/tags/</span><span class="nv">$TAG</span><span class="s2">"</span>
 </code></pre></div>
-<p>Das Release listet außerdem die SHA-256-Prüfsumme jedes Pakets in <code>release-manifest.json</code> auf. Prüfen Sie das Manifest gegen seine eigene Prüfsumme und anschließend das Paket gegen das Manifest, indem Sie den Eintrag Ihrer Distribution (<code>ubuntu</code>, <code>ubuntu-noble</code>, <code>ubuntu-jammy</code>, <code>debian-bookworm</code>, <code>debian-trixie</code>, <code>fedora-43</code>, <code>fedora-44</code>, <code>rhel-8</code>, <code>rhel-9</code> oder <code>rhel-10</code>) und Plattform (<code>linux/amd64</code> oder <code>linux/arm64</code>) wählen:</p>
+<p>Das Release listet außerdem die SHA-256-Prüfsumme jedes Pakets in <code>release-manifest.json</code> auf. Prüfen Sie das Manifest gegen seine eigene Prüfsumme und anschließend das Paket gegen das Manifest, indem Sie den Eintrag Ihrer Distribution (<code>ubuntu</code>, <code>ubuntu-noble</code>, <code>ubuntu-jammy</code>, <code>debian-bookworm</code>, <code>debian-trixie</code>, <code>fedora-43</code>, <code>fedora-44</code>, <code>fedora-45</code>, <code>rhel-8</code>, <code>rhel-9</code> oder <code>rhel-10</code>) und Plattform (<code>linux/amd64</code> oder <code>linux/arm64</code>) wählen:</p>
 <div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-fsSL<span class="w"> </span>-O<span class="w"> </span><span class="s2">"https://github.com/bunkerity/bunkerweb/releases/download/</span><span class="si">${</span><span class="nv">TAG</span><span class="si">}</span><span class="s2">/release-manifest.json"</span><span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>-O<span class="w"> </span><span class="s2">"https://github.com/bunkerity/bunkerweb/releases/download/</span><span class="si">${</span><span class="nv">TAG</span><span class="si">}</span><span class="s2">/release-manifest.json.sha256"</span>
 sha256sum<span class="w"> </span>-c<span class="w"> </span>release-manifest.json.sha256
@@ -2745,10 +2745,10 @@ jq<span class="w"> </span>-r<span class="w"> </span><span class="s1">'.packages[
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.top", "content.tabs.link", "toc.integrate", "content.code.copy", "search.highlight"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "In Zwischenablage kopiert", "clipboard.copy": "In Zwischenablage kopieren", "search.result.more.one": "1 weiteres Suchergebnis auf dieser Seite", "search.result.more.other": "# weitere Suchergebnisse auf dieser Seite", "search.result.none": "Keine Suchergebnisse", "search.result.one": "1 Suchergebnis", "search.result.other": "# Suchergebnisse", "search.result.placeholder": "Suchbegriff eingeben", "search.result.term.missing": "Es fehlt", "select.version": "Version ausw\u00e4hlen"}, "version": {"provider": "mike", "version": "latest"}}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.top", "content.tabs.link", "toc.integrate", "content.code.copy", "search.highlight"], "search": "../../assets/javascripts/workers/search.a7633da7.min.js", "tags": null, "translations": {"clipboard.copied": "In Zwischenablage kopiert", "clipboard.copy": "In Zwischenablage kopieren", "search.result.more.one": "1 weiteres Suchergebnis auf dieser Seite", "search.result.more.other": "# weitere Suchergebnisse auf dieser Seite", "search.result.none": "Keine Suchergebnisse", "search.result.one": "1 Suchergebnis", "search.result.other": "# Suchergebnisse", "search.result.placeholder": "Suchbegriff eingeben", "search.result.term.missing": "Es fehlt", "select.version": "Version ausw\u00e4hlen"}, "version": {"provider": "mike", "version": "latest"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      <script src="../../assets/javascripts/bundle.a5f9d56c.min.js"></script>
       
         <script src="../../assets/extra.js"></script>
       

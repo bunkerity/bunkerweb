@@ -33,7 +33,7 @@
       
       
       <link rel="icon" href="../../assets/favicon.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.1">
     
     
       
@@ -41,7 +41,7 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.57a0d79d.min.css">
       
       
 
@@ -1095,6 +1095,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Persistance des interdictions et des signalements">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#exporter-les-bannissements-en-json" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Exporter les bannissements en JSON
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -1230,6 +1247,17 @@
     <span class="md-ellipsis">
       
         Configuration de syslog-ng
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#send-logs-to-splunk" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Envoyer les journaux vers Splunk
       
     </span>
   </a>
@@ -3840,6 +3868,87 @@ chmod<span class="w"> </span>-R<span class="w"> </span><span class="m">770</span
 <p class="admonition-title">Le rechargement relit le dossier</p>
 <p>Un rechargement relit <code>/etc/bunkerweb/configs</code> : les fichiers qui y sont créés, modifiés ou supprimés sont appliqués et enregistrés en base de données. Une configuration appartenant à l'interface web ou à l'API conserve son propriétaire, seul son contenu est actualisé depuis le fichier.</p>
 </div>
+<p><strong>D'où NGINX inclut chaque type</strong></p>
+<p>NGINX inclut les fichiers directement depuis les sous-dossiers de <code>/etc/bunkerweb/configs</code> ; BunkerWeb ne les copie pas dans <code>/etc/nginx</code>. Le Scheduler écrit dans ces mêmes dossiers les configurations créées dans l'interface web ou via l'API. En mode multisite, un fichier qui ne concerne qu'un service va dans un sous-dossier supplémentaire portant le premier nom du <code>SERVER_NAME</code> de ce service, par exemple <code>server-http/www.example.com/hello-world.conf</code>.</p>
+<table>
+<thead>
+<tr>
+<th>Type</th>
+<th>Dossier dans <code>/etc/bunkerweb/configs</code></th>
+<th>Inclus dans</th>
+<th>Sous-dossier par service</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>http</code></td>
+<td><code>http/</code></td>
+<td>bloc <code>http</code> de <code>nginx.conf</code>, après les configurations du cœur et des plugins</td>
+<td>Non</td>
+</tr>
+<tr>
+<td><code>stream</code></td>
+<td><code>stream/</code></td>
+<td>bloc <code>stream</code> de <code>nginx.conf</code>, après les configurations du cœur et des plugins</td>
+<td>Non</td>
+</tr>
+<tr>
+<td><code>default-server-http</code></td>
+<td><code>default-server-http/</code></td>
+<td>serveur par défaut (<code>default-server-http.conf</code>), après les configurations du cœur et des plugins</td>
+<td>Non</td>
+</tr>
+<tr>
+<td><code>server-http</code></td>
+<td><code>server-http/</code></td>
+<td>chaque bloc <code>server</code> HTTP (<code>server.conf</code>)</td>
+<td>Oui</td>
+</tr>
+<tr>
+<td><code>server-stream</code></td>
+<td><code>server-stream/</code></td>
+<td>chaque bloc <code>server</code> stream (<code>server-stream.conf</code>)</td>
+<td>Oui</td>
+</tr>
+<tr>
+<td><code>modsec</code></td>
+<td><code>modsec/</code></td>
+<td>règles ModSecurity, après le Core Rule Set</td>
+<td>Oui</td>
+</tr>
+<tr>
+<td><code>modsec-crs</code></td>
+<td><code>modsec-crs/</code></td>
+<td>règles ModSecurity, avant les règles du Core Rule Set</td>
+<td>Oui, voir la note</td>
+</tr>
+<tr>
+<td><code>crs-plugins-before</code></td>
+<td><code>crs-plugins-before/</code></td>
+<td>règles ModSecurity, avant les plugins du CRS</td>
+<td>Oui, voir la note</td>
+</tr>
+<tr>
+<td><code>crs-plugins-after</code></td>
+<td><code>crs-plugins-after/</code></td>
+<td>règles ModSecurity, après les plugins du CRS</td>
+<td>Oui, voir la note</td>
+</tr>
+</tbody>
+</table>
+<p><code>modsec-crs</code> n'est lu que si <code>USE_MODSECURITY_CRS=yes</code>. <code>crs-plugins-before</code> et <code>crs-plugins-after</code> exigent en plus <code>USE_MODSECURITY_CRS_PLUGINS=yes</code> et une version du Core Rule Set autre que la 3. Avec <code>USE_MODSECURITY_GLOBAL_CRS=yes</code>, ces trois types sont chargés une seule fois pour tous les services : seul le dossier de premier niveau est lu et un sous-dossier de service est ignoré. <code>modsec</code> garde son sous-dossier de service.</p>
+<p><strong>Vérifier qu'un fichier est actif</strong></p>
+<p>Utilisez <code>nginx -T</code> pour vérifier que NGINX inclut votre fichier depuis le disque et que les chemins d'inclusion sont corrects. Cette commande teste et affiche les fichiers de configuration actuels sur le disque, pas la configuration chargée par les processus workers en cours d'exécution. NGINX signale chaque fichier inclus par une ligne <code># configuration file &lt;chemin&gt;:</code> :</p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>nginx<span class="w"> </span>-T<span class="w"> </span><span class="m">2</span>&gt;<span class="p">&amp;</span><span class="m">1</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-A<span class="w"> </span><span class="m">3</span><span class="w"> </span><span class="s2">"configuration file /etc/bunkerweb/configs/server-http/hello-world.conf"</span>
+</code></pre></div>
+<p>Si rien ne s'affiche, vérifiez le dossier, le suffixe <code>.conf</code> et les permissions, puis rechargez à nouveau le Scheduler.</p>
+<p>Pour confirmer que le fichier est appliqué, vérifiez que le journal du Scheduler (<code>journalctl -u bunkerweb-scheduler</code>) indique un rechargement réussi et que l'interface web ne signale pas d'application partielle. Envoyez ensuite une requête qui utilise cette configuration et vérifiez le résultat attendu. Pour l'exemple <code>/hello</code> ci-dessus, remplacez <code>www.example.com</code> par le nom de votre service et vérifiez que le corps de la réponse est <code>world</code> :</p>
+<div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-i<span class="w"> </span>http://www.example.com/hello
+</code></pre></div>
+<div class="admonition warning">
+<p class="admonition-title">Une configuration rejetée conserve la précédente</p>
+<p>Chaque nom d'<code>upstream</code> doit être unique parmi toutes les configurations personnalisées. Deux blocs <code>upstream</code> portant le même nom font que NGINX refuse la nouvelle configuration et que le rechargement échoue. Les instances qui la rejettent continuent d'exécuter la dernière configuration fonctionnelle, et l'interface web indique que les changements ont été appliqués à certaines instances seulement (ou à aucune). Les journaux du Scheduler (<code>journalctl -u bunkerweb-scheduler</code>) en donnent la cause.</p>
+</div>
 </div>
 <div class="tabbed-block">
 <p>Lorsque vous utilisez l'image <a href="../integrations/#all-in-one-aio-image">Tout-en-un</a>, vous avez deux options pour ajouter des configurations personnalisées :</p>
@@ -4148,6 +4257,8 @@ REDIS_DATABASE=0
 <li><strong><code>REDIS_DATABASE</code></strong>: Indiquez le numéro de base de données Redis/Valkey à utiliser. La valeur par défaut est <code>0</code>.</li>
 </ul>
 <p>Si vous avez besoin de paramètres plus avancés, tels que l'authentification, la prise en charge SSL/TLS ou le mode Sentinel, reportez-vous à la documentation sur les paramètres du <a href="../features/#redis">plug-in Redis</a> pour obtenir des conseils détaillés.</p>
+<h3 id="exporter-les-bannissements-en-json">Exporter les bannissements en JSON<a class="headerlink" href="#exporter-les-bannissements-en-json" title="Permanent link">&para;</a></h3>
+<p>Exécutez <code>bwcli bans --json</code> pour écrire un objet JSON unique sur la sortie standard, regroupé par instance, avec une entrée <code>redis</code> lorsque les bannissements Redis sont collectés. Chaque source contient un tableau de bannissements triés par <code>date</code>. Les enregistrements conservent les champs renvoyés par la source, notamment <code>ip</code>, <code>country</code>, <code>date</code>, <code>exp</code>, <code>permanent</code>, <code>reason</code>, <code>service</code>, <code>ban_scope</code> et <code>kind</code>. La commande renvoie le code 0 en cas de succès. En cas d'échec, elle renvoie un code non nul et écrit une erreur sur la sortie d'erreur standard. Sans <code>--json</code>, <code>bwcli bans</code> conserve son affichage formaté.</p>
 <h2 id="proteger-les-applications-udptcp">Protéger les applications UDP/TCP<a class="headerlink" href="#proteger-les-applications-udptcp" title="Permanent link">&para;</a></h2>
 <div class="admonition example">
 <p class="admonition-title">Fonctionnalité expérimentale</p>
@@ -5474,6 +5585,144 @@ log {
   destination(d_dyna_file);
 };
 </code></pre></div>
+<h3 id="send-logs-to-splunk">Envoyer les journaux vers Splunk<a class="headerlink" href="#send-logs-to-splunk" title="Permanent link">&para;</a></h3>
+<p>BunkerWeb n'a besoin d'aucun plugin Splunk. Un Splunk Universal Forwarder lit les fichiers journaux, et trois réglages font écrire à BunkerWeb des formats que Splunk sait interpréter : un second journal d'accès au format <code>key=value</code>, le journal d'erreurs existant et un journal d'audit ModSecurity en JSON.</p>
+<p><strong>1. Ajouter un journal d'accès pour Splunk.</strong> Chaque <code>ACCESS_LOG_N</code> est associé au <code>LOG_FORMAT_N</code> de même suffixe : <code>access.log</code> garde donc son format par défaut (l'interface web le lit) et le nouveau fichier reçoit le sien. Ajoutez ceci à <code>/etc/bunkerweb/variables.env</code>, avec un autre suffixe si <code>_1</code> est déjà pris :</p>
+<div class="highlight"><pre><span></span><code>ACCESS_LOG_1=/var/log/bunkerweb/access-splunk.log
+LOG_FORMAT_1=time=$time_iso8601 host=$host client=$remote_addr request_id=$request_id method=$request_method uri="$request_uri" status=$status bytes=$body_bytes_sent ua="$http_user_agent" reason=$reason modsec_rules="$modsecurity_rules" modsec_score=$modsecurity_anomaly_score modsec_id=$modsecurity_unique_id
+</code></pre></div>
+<div class="admonition warning">
+<p class="admonition-title">Écrire les valeurs exactement comme indiqué</p>
+<p>BunkerWeb lit <code>variables.env</code> littéralement : pas de guillemets autour d'une valeur, et pas de commentaire après une valeur sur la même ligne. Un commentaire en fin de ligne devient une partie de la valeur. Le réglage est alors ignoré avec <code>Ignoring variable ... doesn't match regex</code> dans le journal du scheduler, et la valeur par défaut s'applique. Placez les commentaires sur leur propre ligne.</p>
+</div>
+<p><strong>2. Facultatif : garder les corps de requête hors du journal d'audit.</strong> La valeur par défaut de <code>MODSECURITY_SEC_AUDIT_LOG_PARTS</code> est <code>BCFH</code>, et la partie <code>C</code> écrit le corps de la requête dans chaque entrée d'audit. Traitez le fichier comme sensible, ou retirez cette partie :</p>
+<div class="highlight"><pre><span></span><code>MODSECURITY_SEC_AUDIT_LOG_PARTS=BFH
+</code></pre></div>
+<p><strong>3. Écrire le journal d'audit en JSON.</strong> Ajoutez ceci à <code>/etc/bunkerweb/variables.env</code> :</p>
+<div class="highlight"><pre><span></span><code>MODSECURITY_SEC_AUDIT_LOG_FORMAT=JSON
+</code></pre></div>
+<p>Les versions antérieures n'ont pas ce réglage : placez à la place <code>SecAuditLogFormat JSON</code> dans une configuration personnalisée de type <code>modsec</code> (par exemple <code>/etc/bunkerweb/configs/modsec/audit-json.conf</code>, voir <a href="#custom-configurations">Configurations personnalisées</a>).</p>
+<p><strong>4. Redémarrer les services.</strong></p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class="w"> </span>bunkerweb<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class="w"> </span>bunkerweb-scheduler
+</code></pre></div>
+<p><strong>5. Vérifier les fichiers.</strong> Envoyez une requête que ModSecurity bloque, par exemple une URL avec <code>?q=&lt;script&gt;alert(1)&lt;/script&gt;</code> et un <code>User-Agent</code> de type navigateur (un <code>User-Agent</code> vide est déjà bloqué par le Core Rule Set seul). Lisez ensuite la dernière ligne de chaque fichier. Le journal d'audit contient un objet JSON par ligne :</p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>tail<span class="w"> </span>-n<span class="w"> </span><span class="m">1</span><span class="w"> </span>/var/log/bunkerweb/access-splunk.log
+sudo<span class="w"> </span>tail<span class="w"> </span>-n<span class="w"> </span><span class="m">1</span><span class="w"> </span>/var/log/bunkerweb/modsec_audit.log<span class="w"> </span><span class="p">|</span><span class="w"> </span>jq<span class="w"> </span>.transaction.unique_id
+</code></pre></div>
+<p><strong>6. Configurer le forwarder.</strong> Les fichiers journaux de BunkerWeb appartiennent à <code>nginx:nginx</code> et les paquets en restreignent l'accès à cet utilisateur et à ce groupe : ajoutez donc l'utilisateur qui exécute le forwarder au groupe <code>nginx</code>. Surveillez ensuite les trois fichiers dans <code>inputs.conf</code>, avec un sourcetype pour chacun :</p>
+<div class="highlight"><pre><span></span><code>[monitor:///var/log/bunkerweb/access-splunk.log]
+sourcetype = bunkerweb:access
+
+[monitor:///var/log/bunkerweb/error.log]
+sourcetype = bunkerweb:error
+
+[monitor:///var/log/bunkerweb/modsec_audit.log]
+sourcetype = bunkerweb:modsec_audit
+</code></pre></div>
+<p>Dans <code>props.conf</code>, faites interpréter les entrées d'audit comme du JSON sur le search head, et augmentez <code>TRUNCATE</code> sur les indexeurs (ou le heavy forwarder). Les entrées sont longues : une seule sonde XSS a écrit 7,3 Ko, et une requête avec plusieurs charges d'attaque en a écrit 20, alors que le <code>TRUNCATE</code> par défaut coupe les événements à 10 000 octets.</p>
+<div class="highlight"><pre><span></span><code>[bunkerweb:modsec_audit]
+KV_MODE = json
+TRUNCATE = 100000
+</code></pre></div>
+<p><code>access-splunk.log</code> correspond au motif <code>/var/log/bunkerweb/*.log</code> de la politique décrite dans <a href="#log-file-retention">Rétention des fichiers journaux</a> : <code>logrotate</code> le prend donc en charge comme les autres fichiers.</p>
+<p><strong>Champs du journal d'accès</strong></p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Champ</th>
+<th style="text-align: left;">Contenu</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>time</code></td>
+<td style="text-align: left;"><code>$time_iso8601</code></td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>host</code></td>
+<td style="text-align: left;"><code>$host</code></td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>client</code></td>
+<td style="text-align: left;"><code>$remote_addr</code></td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>request_id</code></td>
+<td style="text-align: left;"><code>$request_id</code>, la même valeur que le quatrième champ de la ligne par défaut de <code>access.log</code></td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>method</code></td>
+<td style="text-align: left;"><code>$request_method</code></td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>uri</code></td>
+<td style="text-align: left;"><code>$request_uri</code>, avec la chaîne de requête</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>status</code></td>
+<td style="text-align: left;"><code>$status</code></td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>bytes</code></td>
+<td style="text-align: left;"><code>$body_bytes_sent</code></td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>ua</code></td>
+<td style="text-align: left;"><code>$http_user_agent</code></td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>reason</code></td>
+<td style="text-align: left;">L'identifiant du plugin lorsqu'un plugin a refusé la requête (<code>blacklist</code>, <code>limit</code>, ...). Vide sinon, <strong>y compris lorsque ModSecurity l'a refusée</strong></td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>modsec_rules</code></td>
+<td style="text-align: left;">Identifiants de règles exposés par l’intégration CRS de BunkerWeb, séparés et précédés d’un espace (ils peuvent se répéter). <code>-</code> si non renseignés ; liste non exhaustive des correspondances</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>modsec_score</code></td>
+<td style="text-align: left;">Le score d’anomalie exposé par l’intégration CRS de BunkerWeb, <code>-</code> si non renseigné</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>modsec_id</code></td>
+<td style="text-align: left;">L’identifiant exposé par l’intégration CRS de BunkerWeb, <code>-</code> si non renseigné. Lorsqu’il est présent, il correspond à <code>transaction.unique_id</code> de l’entrée d’audit associée</td>
+</tr>
+</tbody>
+</table>
+<p>Trois requêtes telles qu'elles apparaissent dans <code>access-splunk.log</code> : une autorisée, une refusée par le plugin <code>blacklist</code> et une refusée par ModSecurity (<code>ua</code> abrégé).</p>
+<div class="highlight"><pre><span></span><code>time=2026-11-10T08:11:02+00:00 host=www.example.com client=10.77.52.1 request_id=a1b31236225cf6d34fec07e089838f48 method=GET uri="/spl-allowed" status=404 bytes=69298 ua="Mozilla/5.0 ..." reason= modsec_rules="-" modsec_score=- modsec_id=-
+time=2026-11-10T08:11:02+00:00 host=www.example.com client=10.77.52.1 request_id=260b845a6bb21e46656c42e7a682f2a1 method=GET uri="/spl-blacklisted" status=403 bytes=69297 ua="Mozilla/5.0 ..." reason=blacklist modsec_rules="-" modsec_score=- modsec_id=-
+time=2026-11-10T08:11:02+00:00 host=www.example.com client=10.77.52.1 request_id=f3ddfff5a4652efdeb3daa645dee0827 method=GET uri="/spl-xss?q=&lt;script&gt;alert(1)&lt;/script&gt;" status=403 bytes=69297 ua="Mozilla/5.0 ..." reason= modsec_rules=" 941100 941110 941160 941390" modsec_score=20 modsec_id=179429826266.143898
+</code></pre></div>
+<p>La première requête renvoie <code>404</code> parce que la pile de test n'a pas de backend. L'entrée d'audit correspondante, abrégée, commence par le même identifiant :</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span><span class="nt">"transaction"</span><span class="p">:{</span><span class="nt">"client_ip"</span><span class="p">:</span><span class="s2">"10.77.52.1"</span><span class="p">,</span><span class="nt">"time_stamp"</span><span class="p">:</span><span class="s2">"Tue Nov 10 08:11:02 2026"</span><span class="p">,</span><span class="nt">"unique_id"</span><span class="p">:</span><span class="s2">"179429826266.143898"</span><span class="p">,</span><span class="nt">"request"</span><span class="p">:{</span><span class="nt">"method"</span><span class="p">:</span><span class="s2">"GET"</span><span class="p">,</span><span class="nt">"uri"</span><span class="p">:</span><span class="s2">"/spl-xss?q=&lt;script&gt;alert(1)&lt;/script&gt;"</span><span class="p">,</span><span class="nt">"body"</span><span class="p">:</span><span class="s2">""</span><span class="p">},</span><span class="nt">"response"</span><span class="p">:{</span><span class="nt">"http_code"</span><span class="p">:</span><span class="mi">403</span><span class="p">},</span><span class="nt">"messages"</span><span class="p">:[{</span><span class="nt">"message"</span><span class="p">:</span><span class="s2">"XSS Attack Detected via libinjection"</span><span class="p">,</span><span class="nt">"details"</span><span class="p">:{</span><span class="nt">"ruleId"</span><span class="p">:</span><span class="s2">"941100"</span><span class="p">,</span><span class="nt">"severity"</span><span class="p">:</span><span class="s2">"2"</span><span class="p">}}]}}</span>
+</code></pre></div>
+<div class="admonition warning">
+<p class="admonition-title">Limites</p>
+<ul>
+<li><strong>Pas de journal d'accès en JSON.</strong> <code>LOG_FORMAT_N</code> est écrit entre apostrophes dans la configuration NGINX, et il n'y a pas d'emplacement pour <code>escape=json</code>. Utilisez <code>key=value</code> pour le journal d'accès, et JSON uniquement pour le journal d'audit.</li>
+<li><strong>Pas d'apostrophe dans une valeur de <code>LOG_FORMAT_N</code>.</strong> NGINX rejette la configuration. NGINX échappe un guillemet double dans une valeur journalisée sous la forme <code>\x22</code> (<code>ua="Mozilla/5.0 \x22quoted\x22"</code>).</li>
+<li><strong>Les métadonnées ModSecurity dépendent des règles.</strong> Les refus pour anomalie du CRS par défaut renseignent <code>modsec_id</code>, <code>modsec_rules</code> et <code>modsec_score</code>, avec un <code>reason</code> vide. Une règle <code>deny</code> personnalisée sans les actions <code>setvar</code> correspondantes pour <code>tx.bunkerweb_*</code> peut laisser ces champs à <code>-</code>. Le journal d’accès seul ne permet alors pas d’identifier ce refus ; consultez le journal d’erreurs ou d’audit.</li>
+<li><strong>Le journal d’audit n’est ni un journal de requêtes ni une preuve de blocage.</strong> La valeur par défaut de <code>MODSECURITY_SEC_AUDIT_ENGINE</code> (<code>RelevantOnly</code>) peut aussi enregistrer des transactions autorisées lorsqu’une règle journalise une correspondance (y compris en mode <code>DetectionOnly</code> ou avec un score inférieur au seuil de blocage), ou lorsque le statut correspond à <code>SecAuditLogRelevantStatus</code>. Dans le test ci-dessus, seuls les refus ModSecurity ont produit des entrées.</li>
+<li><strong>La partie <code>C</code> contient les corps de requête</strong>, y compris les champs de formulaire et les identifiants de connexion. Utilisez <code>BFH</code> sauf si vous avez besoin des corps, et limitez les droits de lecture de l'index.</li>
+</ul>
+</div>
+<div class="admonition info">
+<p class="admonition-title">Docker, Autoconf, Swarm et Kubernetes</p>
+<p>Les images relient <code>access.log</code>, <code>error.log</code> et <code>modsec_audit.log</code> au flux de journaux propre du conteneur (voir <a href="#log-file-retention">Rétention des fichiers journaux</a>) : un forwarder n'a donc aucun fichier à lire pour eux, et un fichier écrit par <code>ACCESS_LOG_1</code> reste dans le conteneur, où rien ne le fait tourner. Définissez <code>MODSECURITY_SEC_AUDIT_LOG_FORMAT=JSON</code> sur le scheduler, comme n'importe quel autre réglage, plutôt que d'utiliser un fichier. Les entrées JSON apparaissent alors dans <code>docker logs</code> du conteneur <code>bunkerweb</code>, une par ligne, parmi les lignes du journal d'erreurs : les lignes qui commencent par <code>{</code> sont les entrées d'audit.</p>
+<p>Pour envoyer le flux vers Splunk, utilisez le <a href="https://docs.docker.com/engine/logging/drivers/splunk/">pilote de journalisation <code>splunk</code> de Docker</a> avec un jeton HTTP Event Collector. Le pilote envoie ensemble les lignes d'accès, d'erreur et d'audit sous un seul sourcetype : seul leur contenu permet de les distinguer. Définissez le format <code>key=value</code> sur <code>LOG_FORMAT</code> (sans suffixe) pour que les lignes d'accès envoyées le portent. Cela remplace le format par défaut dans <code>access.log</code>.</p>
+<div class="highlight"><pre><span></span><code><span class="nt">services</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">bunkerweb</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:testing</span>
+<span class="w">    </span><span class="nt">logging</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">driver</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">splunk</span>
+<span class="w">      </span><span class="nt">options</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">splunk-url</span><span class="p">:</span><span class="w"> </span><span class="s">"https://splunk.example.com:8088"</span>
+<span class="w">        </span><span class="nt">splunk-token</span><span class="p">:</span><span class="w"> </span><span class="s">"&lt;HEC</span><span class="nv"> </span><span class="s">token&gt;"</span>
+<span class="w">        </span><span class="nt">splunk-format</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">raw</span>
+<span class="w">        </span><span class="nt">splunk-sourcetype</span><span class="p">:</span><span class="w"> </span><span class="s">"bunkerweb:docker"</span>
+</code></pre></div>
+</div>
 <h2 id="docker-logging-best-practices">Meilleures pratiques de journalisation Docker<a class="headerlink" href="#docker-logging-best-practices" title="Permanent link">&para;</a></h2>
 <p>Lors de l'utilisation de Docker, il est important de gérer les journaux des conteneurs pour éviter qu'ils ne consomment un espace disque excessif. Par défaut, Docker utilise le pilote de journalisation <code>json-file</code>, ce qui peut entraîner des fichiers journaux très volumineux s'il n'est pas configuré.</p>
 <p>Pour éviter cela, vous pouvez configurer la rotation des journaux. Cela peut être fait pour des services spécifiques dans votre fichier <code>docker-compose.yml</code>, ou globalement pour le démon Docker.</p>
@@ -9534,10 +9783,10 @@ PLUGINS_ORDER_INIT=sessions whitelist blacklist greylist bunkernet limit authbas
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.top", "content.tabs.link", "toc.integrate", "content.code.copy", "search.highlight"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copi\u00e9 dans le presse-papier", "clipboard.copy": "Copier dans le presse-papier", "search.result.more.one": "1 de plus sur cette page", "search.result.more.other": "# de plus sur cette page", "search.result.none": "Aucun document trouv\u00e9", "search.result.one": "1 document trouv\u00e9", "search.result.other": "# documents trouv\u00e9s", "search.result.placeholder": "Taper pour d\u00e9marrer la recherche", "search.result.term.missing": "Non trouv\u00e9", "select.version": "S\u00e9lectionner la version"}, "version": {"provider": "mike", "version": "latest"}}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.top", "content.tabs.link", "toc.integrate", "content.code.copy", "search.highlight"], "search": "../../assets/javascripts/workers/search.a7633da7.min.js", "tags": null, "translations": {"clipboard.copied": "Copi\u00e9 dans le presse-papier", "clipboard.copy": "Copier dans le presse-papier", "search.result.more.one": "1 de plus sur cette page", "search.result.more.other": "# de plus sur cette page", "search.result.none": "Aucun document trouv\u00e9", "search.result.one": "1 document trouv\u00e9", "search.result.other": "# documents trouv\u00e9s", "search.result.placeholder": "Taper pour d\u00e9marrer la recherche", "search.result.term.missing": "Non trouv\u00e9", "select.version": "S\u00e9lectionner la version"}, "version": {"provider": "mike", "version": "latest"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      <script src="../../assets/javascripts/bundle.a5f9d56c.min.js"></script>
       
         <script src="../../assets/extra.js"></script>
       

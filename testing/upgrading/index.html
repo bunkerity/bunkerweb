@@ -33,7 +33,7 @@
       
       
       <link rel="icon" href="../assets/favicon.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.1">
     
     
       
@@ -41,7 +41,7 @@
       
     
     
-      <link rel="stylesheet" href="../assets/stylesheets/main.ec1eaa64.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.57a0d79d.min.css">
       
       
 
@@ -1293,7 +1293,7 @@ by the script — use the <strong>Manual</strong> tab for those.</p>
 <li>Detection<ul>
 <li>Reads the install type (full, manager, worker, scheduler, ui, api) back from <code>.env</code>, so you never have to restate your topology.</li>
 <li>Recovers the secrets, host ports, worker list and Compose project name from <code>.env</code>, so an upgrade cannot rotate the database password, invalidate stored 2FA secrets, or move your published ports; when a key is repeated the last assignment wins. Optional <code>export</code> prefixes are accepted, and explicit command-line values still take precedence. Quoting, interpolation, escaping, and other unsupported dotenv syntax are rejected before the file is rewritten; use the manual upgrade path for those files.</li>
-<li>Reads the version actually running from the container rather than trusting the image tag, so a floating tag (<code>latest</code>, <code>testing</code>, or <code>1.6</code>, the newest 1.6.x release, which stays on 1.6 when 1.7 ships) and an interrupted previous upgrade are both detected correctly.</li>
+<li>Reads the version actually running from the container rather than trusting the image tag, so a floating tag (<a href="../integrations/#docker-image-tags">all tags</a>: <code>latest</code>, <code>testing</code>, <code>1.6</code>, the newest 1.6.x release, which stays on 1.6 when 1.7 ships, or <code>1.6-edge</code>, the newest 1.6.x release candidate or release) and an interrupted previous upgrade are both detected correctly.</li>
 </ul>
 </li>
 <li>Upgrade decision<ul>
@@ -2611,7 +2611,7 @@ gh<span class="w"> </span>attestation<span class="w"> </span>verify<span class="
 <span class="w">  </span>--signer-workflow<span class="w"> </span>bunkerity/bunkerweb/.github/workflows/release.yml<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>--source-ref<span class="w"> </span><span class="s2">"refs/tags/</span><span class="nv">$TAG</span><span class="s2">"</span>
 </code></pre></div>
-<p>The release also lists the SHA-256 checksum of every package in <code>release-manifest.json</code>. Check the manifest against its own checksum, then the package against the manifest, choosing the entry of your distribution (<code>ubuntu</code>, <code>ubuntu-noble</code>, <code>ubuntu-jammy</code>, <code>debian-bookworm</code>, <code>debian-trixie</code>, <code>fedora-43</code>, <code>fedora-44</code>, <code>rhel-8</code>, <code>rhel-9</code> or <code>rhel-10</code>) and platform (<code>linux/amd64</code> or <code>linux/arm64</code>):</p>
+<p>The release also lists the SHA-256 checksum of every package in <code>release-manifest.json</code>. Check the manifest against its own checksum, then the package against the manifest, choosing the entry of your distribution (<code>ubuntu</code>, <code>ubuntu-noble</code>, <code>ubuntu-jammy</code>, <code>debian-bookworm</code>, <code>debian-trixie</code>, <code>fedora-43</code>, <code>fedora-44</code>, <code>fedora-45</code>, <code>rhel-8</code>, <code>rhel-9</code> or <code>rhel-10</code>) and platform (<code>linux/amd64</code> or <code>linux/arm64</code>):</p>
 <div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-fsSL<span class="w"> </span>-O<span class="w"> </span><span class="s2">"https://github.com/bunkerity/bunkerweb/releases/download/</span><span class="si">${</span><span class="nv">TAG</span><span class="si">}</span><span class="s2">/release-manifest.json"</span><span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>-O<span class="w"> </span><span class="s2">"https://github.com/bunkerity/bunkerweb/releases/download/</span><span class="si">${</span><span class="nv">TAG</span><span class="si">}</span><span class="s2">/release-manifest.json.sha256"</span>
 sha256sum<span class="w"> </span>-c<span class="w"> </span>release-manifest.json.sha256
@@ -2747,10 +2747,10 @@ jq<span class="w"> </span>-r<span class="w"> </span><span class="s1">'.packages[
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.top", "content.tabs.link", "toc.integrate", "content.code.copy", "search.highlight"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike", "version": "latest"}}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.top", "content.tabs.link", "toc.integrate", "content.code.copy", "search.highlight"], "search": "../assets/javascripts/workers/search.a7633da7.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike", "version": "latest"}}</script>
     
     
-      <script src="../assets/javascripts/bundle.d7400e89.min.js"></script>
+      <script src="../assets/javascripts/bundle.a5f9d56c.min.js"></script>
       
         <script src="../assets/extra.js"></script>
       

@@ -2931,6 +2931,23 @@ Key concepts for Docker integration include:
 !!! info "Database backend"
     Please note that our instructions assume you are using SQLite as the default database backend, as configured by the `DATABASE_URI` setting. However, other database backends are also supported. See the docker-compose files in the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/vtesting/misc/integrations) of the repository for more information.
 
+### Docker image tags {#docker-image-tags}
+
+Every image is published under the same tags on Docker Hub (`bunkerity/`), GHCR (`ghcr.io/bunkerity/`) and the GitLab registry (`registry.gitlab.com/bunkerity/bunkerweb/`). `X.Y` stands for a minor version such as `1.6`, `X.Y.Z` for a full version such as `1.6.18`.
+
+| Tag                               | Points at                                                    | Use it for                                                    |
+| --------------------------------- | ------------------------------------------------------------ | ------------------------------------------------------------- |
+| `X.Y.Z`, `X.Y.Z-rcN`              | One exact release or release candidate, never moves          | Production: pin these                                         |
+| `latest`                          | The newest stable release of any minor                       | Quick tests: it jumps to the next minor when one ships        |
+| `X.Y`                             | The newest stable release of that minor                      | Following a minor and getting its patch releases              |
+| `X.Y-edge`                        | The newest release candidate or stable release of that minor | Trying the next release early, then following it once stable |
+| `X.Y-rc`, `X.Y-beta`, `X.Y-alpha` | The newest release candidate, beta or alpha of that minor    | Testing pre-releases of a given minor                         |
+| `rc`, `beta`                      | The last published release candidate or beta, whatever its version; re-publishing an older release moves the tag back | Legacy names: prefer the per-minor tags above                 |
+| `testing`                         | The latest build from the staging pipeline (the `staging` and `fix-cve` branches or a manual run) | Testing unreleased changes, never production                  |
+| `dev`                             | The latest build from the dev pipeline (the `dev` branch or a manual run) | Contributors, never production                                |
+
+Only the first row is immutable. Every other tag moves when a new build is published, so use a full version tag in production and update it on purpose.
+
 ### Environment variables
 
 Settings are passed to the Scheduler using Docker environment variables:
@@ -3290,7 +3307,7 @@ Supported Linux distributions for BunkerWeb (amd64/x86_64 and arm64/aarch64 arch
 - Ubuntu 22.04 "Jammy"
 - Ubuntu 24.04 "Noble"
 - Ubuntu 26.04 "Resolute Raccoon"
-- Fedora 43 and 44
+- Fedora 43, 44 and 45
 - Red Hat Enterprise Linux (RHEL), CentOS, Rocky Linux and AlmaLinux 8, 9 and 10
 
 ### Easy installation script
@@ -6506,6 +6523,7 @@ Linux package generation can be done directly with Docker in 2 steps:
 - `debian-trixie`
 - `fedora-43`
 - `fedora-44`
+- `fedora-45`
 - `rhel-8`
 - `rhel-9`
 - `rhel-10`
@@ -6845,16 +6863,18 @@ The value is a list of reasons separated by spaces, among `crowdsec`, `bad_behav
 
 === "Network & Port Settings"
 
-    | Setting                 | Default      | Context | Multiple | Description                                                                            |
-    | ----------------------- | ------------ | ------- | -------- | -------------------------------------------------------------------------------------- |
-    | `HTTP_PORT`             | `8080`       | global  | Yes      | **HTTP Port:** Port number for HTTP traffic. Leave empty to disable HTTP listening.    |
-    | `HTTPS_PORT`            | `8443`       | global  | Yes      | **HTTPS Port:** Port number for HTTPS traffic. Leave empty to disable HTTPS listening. |
-    | `USE_IPV6`              | `no`         | global  | No       | **IPv6 Support:** Enable IPv6 connectivity.                                            |
-    | `DNS_RESOLVERS`         | `127.0.0.11` | global  | No       | **DNS Resolvers:** DNS addresses of resolvers to use.                                  |
-    | `CLIENT_BODY_TIMEOUT`   | `10s`        | global  | No       | **Client Body Timeout:** Timeout for reading the client request body.                  |
-    | `CLIENT_HEADER_TIMEOUT` | `10s`        | global  | No       | **Client Header Timeout:** Timeout for reading the client request header.              |
-    | `KEEPALIVE_TIMEOUT`     | `15s`        | global  | No       | **Keepalive Timeout:** Timeout for keep-alive client connections.                      |
-    | `SEND_TIMEOUT`          | `10s`        | global  | No       | **Send Timeout:** Timeout for transmitting a response to the client.                   |
+    | Setting                 | Default      | Context   | Multiple | Description                                                                            |
+    | ----------------------- | ------------ | --------- | -------- | -------------------------------------------------------------------------------------- |
+    | `HTTP_PORT`             | `8080`       | global    | Yes      | **HTTP Port:** Port number for HTTP traffic. Leave empty to disable HTTP listening.    |
+    | `HTTPS_PORT`            | `8443`       | global    | Yes      | **HTTPS Port:** Port number for HTTPS traffic. Leave empty to disable HTTPS listening. |
+    | `USE_IPV6`              | `no`         | global    | No       | **IPv6 Support:** Enable IPv6 connectivity.                                            |
+    | `DNS_RESOLVERS`         | `127.0.0.11` | global    | No       | **DNS Resolvers:** DNS addresses of resolvers to use.                                  |
+    | `CLIENT_BODY_TIMEOUT`   | `10s`        | multisite | No       | **Client Body Timeout:** Timeout for reading the client request body.                  |
+    | `CLIENT_HEADER_TIMEOUT` | `10s`        | multisite | No       | **Client Header Timeout:** Timeout for reading the client request header.              |
+    | `KEEPALIVE_TIMEOUT`     | `15s`        | global    | No       | **Keepalive Timeout:** Timeout for keep-alive client connections.                      |
+    | `SEND_TIMEOUT`          | `10s`        | global    | No       | **Send Timeout:** Timeout for transmitting a response to the client.                   |
+
+    Set `CLIENT_HEADER_TIMEOUT` and `CLIENT_BODY_TIMEOUT` per service for long-lived gRPC streams (for example, `netbird.example.com_CLIENT_HEADER_TIMEOUT=1d`). Keep the global `CLIENT_HEADER_TIMEOUT` short: it also bounds TLS handshakes on the default server and how long incomplete handshakes can keep old workers alive after a reload. Existing `client_header_timeout` or `client_body_timeout` directives in `server-http` custom configurations keep working when the service inherits the global value. Remove the matching custom directive when setting a different per-service timeout to avoid duplicate directives.
 
 === "Stream Server Settings"
 
@@ -7103,6 +7123,7 @@ BunkerWeb allows you to specify certain users, IPs, or requests that should bypa
 | Setting                       | Default | Context   | Multiple | Description                                                                                                                                                                                          |
 | ----------------------------- | ------- | --------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `ANTIBOT_IGNORE_URI`          |         | multisite | no       | **Excluded URLs:** List of URI regex patterns separated by spaces that should bypass the challenge. Patterns are matched against the normalized path, alone or followed by `?` and the query string. |
+| `ANTIBOT_INCLUDE_URI`          |         | multisite | no       | **Included URLs:** Space-separated PCRE patterns for the only URIs to challenge. Empty means all URIs. Match the normalized path, alone or with `?` and query string. `ANTIBOT_IGNORE_URI` takes precedence. |
 | `ANTIBOT_IGNORE_IP`           |         | multisite | no       | **Excluded IPs:** List of IP addresses or CIDR ranges separated by spaces that should bypass the challenge.                                                                                          |
 | `ANTIBOT_IGNORE_RDNS`         |         | multisite | no       | **Excluded Reverse DNS:** List of reverse DNS suffixes separated by spaces that should bypass the challenge.                                                                                         |
 | `ANTIBOT_RDNS_GLOBAL`         | `yes`   | multisite | no       | **Global IPs Only:** If set to `yes`, only perform reverse DNS checks on public IP addresses.                                                                                                        |
@@ -7503,7 +7524,7 @@ Follow these steps to enable and configure Auth Basic authentication:
     HTTP Basic Authentication transmits credentials encoded (not encrypted) in Base64. While this is acceptable when used over HTTPS, it should not be considered secure over plain HTTP. Always enable SSL/TLS when using basic authentication.
 
 !!! tip "Using Multiple Credentials"
-    You can configure multiple username/password pairs for access. Each `AUTH_BASIC_USER` setting should have a corresponding `AUTH_BASIC_PASSWORD` setting.
+    You can configure multiple username/password pairs for access. Each `AUTH_BASIC_USER` setting should have a corresponding `AUTH_BASIC_PASSWORD` setting. The default `changeme` / `changeme` pair is ignored as soon as another pair is configured; set the unsuffixed `AUTH_BASIC_USER` and `AUTH_BASIC_PASSWORD` to your own values to keep it.
 
 ### Example Configurations
 
@@ -7813,6 +7834,7 @@ Follow these steps to configure and use the Blacklist feature:
 | Setting                     | Default                                                 | Context   | Multiple | Description                                                                                             |
 | --------------------------- | ------------------------------------------------------- | --------- | -------- | ------------------------------------------------------------------------------------------------------- |
 | `USE_BLACKLIST`             | `yes`                                                   | multisite | no       | **Enable Blacklist:** Set to `yes` to enable the blacklist feature.                                     |
+| `BLACKLIST_URLS_REFRESH_INTERVAL` | `1h` | multisite | no | **URL refresh interval:** Minimum cache age before downloading again. Accepts bare seconds or time suffixes (`ms`, `s`, `m`, `h`, `d`, `w`, `M`, `y`). |
 | `BLACKLIST_COMMUNITY_LISTS` | `ip:danmeuk-tor-exit ua:mitchellkrogza-bad-user-agents` | multisite | no       | **Community Blacklists:** Select pre-configured community-maintained blacklists to include in blocking. |
 
 === "Community Blacklists"
@@ -7921,7 +7943,7 @@ Follow these steps to configure and use the Blacklist feature:
     All `*_URLS` settings support HTTP/HTTPS URLs as well as local file paths using the `file:///` prefix. Basic authentication is supported using the `http://user:pass@url` format.
 
 !!! tip "Regular Updates"
-    Blacklists from URLs are automatically downloaded and updated hourly to ensure your protection remains current against the latest threats.
+    The job runs hourly. `BLACKLIST_URLS_REFRESH_INTERVAL` sets the minimum age of a cached URL before downloading again (default: `1h`). Use `24h` for providers allowing at most one download per day, or `0` to download on every job run. Fresh caches and failed downloads keep their last valid entries. Within this plugin, URL caches are shared across services: the shortest interval can trigger a download, so use the same interval on every service sharing a provider-limited URL.
 
 ### Example Configurations
 
@@ -8115,7 +8137,7 @@ Follow these steps to configure and use the BunkerNet feature:
 | Setting                    | Default                    | Context   | Multiple | Description                                                                                                                                                                                                                           |
 | -------------------------- | -------------------------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `USE_BUNKERNET`            | `yes`                      | multisite | no       | **Enable BunkerNet:** Set to `yes` to enable the BunkerNet threat intelligence sharing.                                                                                                                                               |
-| `BUNKERNET_FILTER_HEADERS` | `no`                       | multisite | no       | **Filter Reported Headers:** Set to `yes` to send only a short allowlist of request headers and blank the values ModSecurity matched in headers and cookies. When `no`, a report carries every request header and the matched values. |
+| `BUNKERNET_FILTER_HEADERS` | `no`                       | multisite | no       | **Filter Reported Headers:** Set to `yes` to send only a short allowlist of request headers and blank the values ModSecurity matched in headers and cookies. When `no`, a report carries every request header except `Cookie`, `Authorization` and `Proxy-Authorization`, and the matched values except those found in them and in cookies. |
 | `BUNKERNET_SERVER`         | `https://api.bunkerweb.io` | global    | no       | **BunkerNet Server:** The address of the BunkerNet API server for sharing threat intelligence.                                                                                                                                        |
 
 !!! tip "Network Protection"
@@ -8127,10 +8149,10 @@ Follow these steps to configure and use the BunkerNet feature:
     - the instance metadata sent with each request: the BunkerNet instance ID, the BunkerWeb version, the integration, and the OS name, version, version ID, codename, ID and architecture;
     - the client IP address, the reason for blocking and the date;
     - the HTTP method, the URL **including its query string**, and the service name (`server_name`);
-    - the request headers, with their values: every header received (up to `MAX_HEADERS`), or only `User-Agent`, `Accept`, `Accept-Encoding`, `Accept-Language`, `Content-Type` and `Content-Length` when `BUNKERNET_FILTER_HEADERS` is `yes`;
-    - the details attached to the blocking reason. Depending on the plugin that blocked the client, they can include the IDs and messages of the ModSecurity rules that matched together with the request values that matched them (parts of arguments, body, headers or cookies, each cut to 512 bytes; with `BUNKERNET_FILTER_HEADERS` set to `yes`, values matched in headers and cookies are blanked and only the variable name is sent), or, for Bad Behavior, the method and URL of the recent requests that led to the ban.
+    - the request headers, with their values: every header received (up to `MAX_HEADERS`) except `Cookie`, `Authorization` and `Proxy-Authorization`, or only `User-Agent`, `Accept`, `Accept-Encoding`, `Accept-Language`, `Content-Type` and `Content-Length` when `BUNKERNET_FILTER_HEADERS` is `yes`;
+    - the details attached to the blocking reason. Depending on the plugin that blocked the client, they can include the IDs and messages of the ModSecurity rules that matched together with the request values that matched them (parts of arguments, body, headers or cookies, each cut to 512 bytes; values matched in cookies and in the `Cookie`, `Authorization` and `Proxy-Authorization` headers are always blanked, and with `BUNKERNET_FILTER_HEADERS` set to `yes` so are values matched in any other header; only the variable name is sent), or, for Bad Behavior, the method and URL of the recent requests that led to the ban.
 
-    By default (`BUNKERNET_FILTER_HEADERS` set to `no`) a report carries every request header received (up to `MAX_HEADERS`), cookies and `Authorization` included, and the values ModSecurity matched as they are. Set `BUNKERNET_FILTER_HEADERS` to `yes` to send only the six headers listed above and blank the values matched in headers and cookies. Reports still waiting to be sent are filtered the same way before they go out when it is `yes`.
+    By default (`BUNKERNET_FILTER_HEADERS` set to `no`) a report carries every request header received (up to `MAX_HEADERS`) except `Cookie`, `Authorization` and `Proxy-Authorization`, which are never sent, and the values ModSecurity matched except those found in cookies and in these headers. Set `BUNKERNET_FILTER_HEADERS` to `yes` to send only the six headers listed above and blank the values matched in headers and cookies. Reports still waiting to be sent are cleaned the same way before they go out (credentials always, the allowlist when it is `yes`).
 
     The URL and the matched values come from the request, so they contain whatever the client sent. Set `USE_BUNKERNET` to `no` on services whose URLs carry sensitive values.
 
@@ -9462,6 +9484,7 @@ Follow these steps to configure and use the Greylist feature:
 | Setting        | Default | Context   | Multiple | Description                                              |
 | -------------- | ------- | --------- | -------- | -------------------------------------------------------- |
 | `USE_GREYLIST` | `no`    | multisite | no       | **Enable Greylist:** Set to `yes` to enable greylisting. |
+| `GREYLIST_URLS_REFRESH_INTERVAL` | `1h` | multisite | no | **URL refresh interval:** Minimum cache age before downloading again. Accepts bare seconds or time suffixes (`ms`, `s`, `m`, `h`, `d`, `w`, `M`, `y`). |
 
 === "IP Address"
     **What this does:** Greylist visitors based on their IP address or network. These visitors gain access but remain subject to security checks.
@@ -9528,7 +9551,7 @@ Follow these steps to configure and use the Greylist feature:
     All `*_URLS` settings support HTTP/HTTPS URLs as well as local file paths using the `file:///` prefix. Basic authentication is supported using the `http://user:pass@url` format.
 
 !!! tip "Regular Updates"
-    Greylists from URLs are automatically downloaded and updated hourly to ensure that your protection remains current with the latest trusted sources.
+    The job runs hourly. `GREYLIST_URLS_REFRESH_INTERVAL` sets the minimum age of a cached URL before downloading again (default: `1h`). Use `24h` for providers allowing at most one download per day, or `0` to download on every job run. Fresh caches and failed downloads keep their last valid entries. Within this plugin, URL caches are shared across services: the shortest interval can trigger a download, so use the same interval on every service sharing a provider-limited URL.
 
 ### Example Configurations
 
@@ -9696,7 +9719,7 @@ The gRPC plugin lets BunkerWeb proxy gRPC services through HTTP/2 using `grpc_pa
     `GRPC_SSL_VERIFY` only takes effect once a CA bundle is available. Provide it with `GRPC_SSL_TRUSTED_CERTIFICATE` (a path the scheduler can read) or `GRPC_SSL_TRUSTED_CERTIFICATE_DATA` (base64 or plaintext PEM), and select the source with `GRPC_SSL_TRUSTED_CERTIFICATE_PRIORITY`. The scheduler validates the bundle, caches it and distributes it to the instances. Without a usable bundle, verification stays off.
 
 !!! warning "Long-Lived Streams and Core Timeouts"
-    Long-lived or streaming RPCs may require higher generic NGINX timeouts than the global defaults. Commonly tuned settings are `CLIENT_BODY_TIMEOUT` and `CLIENT_HEADER_TIMEOUT` in the General plugin settings.
+    Long-lived or streaming RPCs may need longer `CLIENT_BODY_TIMEOUT` and `CLIENT_HEADER_TIMEOUT` values. Set them for the gRPC service in the General plugin settings; keep the global `CLIENT_HEADER_TIMEOUT` short to bound TLS handshakes and old worker lifetime after a reload.
 
 !!! tip "Multiple gRPC Backends"
     Use suffixed settings for multiple routes:
@@ -10058,6 +10081,8 @@ Follow these steps to configure and use the HTML Injection feature:
 | `INJECT_HEAD` |         | multisite | no       | **Head HTML Code:** The HTML code to inject before the `</head>` tag. |
 | `INJECT_BODY` |         | multisite | no       | **Body HTML Code:** The HTML code to inject before the `</body>` tag. |
 
+`INJECT_HEAD` and `INJECT_BODY` values are inserted as literal HTML: quotes and backslashes need no extra NGINX escaping. If you previously added `\'` by hand as a workaround, remove the backslash. Keep any escaping required by your configuration format (such as YAML); NGINX `$variable` expansion is unchanged.
+
 !!! tip "Best Practices"
     - For performance reasons, place JavaScript files at the end of the body to prevent render blocking.
     - Place CSS and critical JavaScript in the head section to avoid a flash of unstyled content.
@@ -10319,6 +10344,7 @@ The Let's Encrypt plugin supports a wide range of DNS providers for DNS challeng
 | `godaddy`         | GoDaddy          | `key`<br>`secret`                                                                                            | `ttl` (default: `600`)                                                                                                                                                                                                                                                   | [Documentation](https://github.com/miigotu/certbot-dns-godaddy/blob/main/README.md)                   |
 | `google`          | Google Cloud     | `project_id`<br>`private_key_id`<br>`private_key`<br>`client_email`<br>`client_id`<br>`client_x509_cert_url` | `type` (default: `service_account`)<br>`auth_uri` (default: `https://accounts.google.com/o/oauth2/auth`)<br>`token_uri` (default: `https://accounts.google.com/o/oauth2/token`)<br>`auth_provider_x509_cert_url` (default: `https://www.googleapis.com/oauth2/v1/certs`) | [Documentation](https://certbot-dns-google.readthedocs.io/en/stable/)                                 |
 | `hetzner`         | Hetzner          | `api_token`                                                                                                  |                                                                                                                                                                                                                                                                          | [Documentation](https://github.com/ctrlaltcoop/certbot-dns-hetzner/blob/main/README.md)               |
+| `hosttech` | Hosttech | `api_token` | Default propagation: 600 seconds; increase `LETS_ENCRYPT_DNS_PROPAGATION` if needed. | [Documentation](https://github.com/bunkerity/certbot-dns-hosttech/blob/main/README.md) |
 | `infomaniak`      | Infomaniak       | `token`                                                                                                      |                                                                                                                                                                                                                                                                          | [Documentation](https://github.com/infomaniak/certbot-dns-infomaniak/blob/main/README.rst)            |
 | `ionos`           | IONOS            | `prefix`<br>`secret`                                                                                         | `endpoint` (default: `https://api.hosting.ionos.com`)                                                                                                                                                                                                                    | [Documentation](https://github.com/helgeerbe/certbot-dns-ionos/blob/master/README.md)                 |
 | `linode`          | Linode           | `key`                                                                                                        |                                                                                                                                                                                                                                                                          | [Documentation](https://certbot-dns-linode.readthedocs.io/en/stable/)                                 |
@@ -10462,6 +10488,9 @@ The Limit plugin in BunkerWeb provides robust capabilities to enforce limiting p
 
         For example, `5r/m` means that 5 requests per minute are allowed from each IP address.
 
+    !!! info "Counting accuracy across workers"
+        Without Redis, the count is exact across workers up to 100 requests per window, for `LIMIT_REQ_RATE` and for `LIMIT_REQ_GLOBAL_RATE`: simultaneous requests cannot slip past the limit. Above 100 requests per window, simultaneous requests can exceed the limit slightly, because serializing the counter of a long request history on every request would cost throughput. With Redis, the count is always exact.
+
 === "Global Rate Limiting"
 
     | Setting                 | Default   | Context   | Multiple | Description                                                                                                                    |
@@ -10474,13 +10503,13 @@ The Limit plugin in BunkerWeb provides robust capabilities to enforce limiting p
 
 === "Connection Limiting"
 
-    | Setting                 | Default | Context   | Multiple | Description                                                                                 |
-    | ----------------------- | ------- | --------- | -------- | ------------------------------------------------------------------------------------------- |
-    | `USE_LIMIT_CONN`        | `yes`   | multisite | no       | **Enable Connection Limiting:** Set to `yes` to enable the connection limiting feature.     |
-    | `LIMIT_CONN_MAX_HTTP1`  | `10`    | multisite | no       | **HTTP/1.X Connections:** Maximum number of concurrent HTTP/1.X connections per IP address. |
-    | `LIMIT_CONN_MAX_HTTP2`  | `100`   | multisite | no       | **HTTP/2 Streams:** Maximum number of concurrent HTTP/2 streams per IP address.             |
-    | `LIMIT_CONN_MAX_HTTP3`  | `100`   | multisite | no       | **HTTP/3 Streams:** Maximum number of concurrent HTTP/3 streams per IP address.             |
-    | `LIMIT_CONN_MAX_STREAM` | `10`    | multisite | no       | **Stream Connections:** Maximum number of concurrent stream connections per IP address.     |
+    | Setting                 | Default | Context   | Multiple | Description                                                                                                    |
+    | ----------------------- | ------- | --------- | -------- | -------------------------------------------------------------------------------------------------------------- |
+    | `USE_LIMIT_CONN`        | `yes`   | multisite | no       | **Enable Connection Limiting:** Set to `yes` to enable the connection limiting feature.                        |
+    | `LIMIT_CONN_MAX_HTTP1`  | `10`    | multisite | no       | **HTTP/1.X Connections:** Maximum number of concurrent HTTP/1.X connections per IP address. Range: 1 to 65535. |
+    | `LIMIT_CONN_MAX_HTTP2`  | `100`   | multisite | no       | **HTTP/2 Streams:** Maximum number of concurrent HTTP/2 streams per IP address. Range: 1 to 65535.             |
+    | `LIMIT_CONN_MAX_HTTP3`  | `100`   | multisite | no       | **HTTP/3 Streams:** Maximum number of concurrent HTTP/3 streams per IP address. Range: 1 to 65535.             |
+    | `LIMIT_CONN_MAX_STREAM` | `10`    | multisite | no       | **Stream Connections:** Maximum number of concurrent stream connections per IP address. Range: 1 to 65535.     |
 
 When `SECURITY_MODE` is `detect`, connection limits are evaluated and logged (`limiting connections, dry run`) but not enforced.
 
@@ -11154,6 +11183,7 @@ Follow these steps to configure and use ModSecurity:
 | `MODSECURITY_SEC_AUDIT_LOG_PARTS`           | `BCFH`                                | multisite | no       | **Audit Log Parts:** Which parts of requests/responses to include in audit logs.                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
 | `MODSECURITY_SEC_AUDIT_LOG`                 | `/var/log/bunkerweb/modsec_audit.log` | multisite | no       | **Audit Log Path:** Path of the file ModSecurity writes audit entries to. Must be a regular file: the Serial audit writer locks it, which a pipe or stream can't support. The path must end in `.log`. Rotation via that suffix only applies where logrotate is installed (the Linux packages and the All-In-One image); on Docker, Swarm and Kubernetes a non-default name is neither streamed nor rotated and grows unbounded inside the container, because only `modsec_audit.log` is symlinked into the container's log stream. |
 | `MODSECURITY_SEC_AUDIT_LOG_TYPE`            | `Serial`                              | multisite | no       | Writer: `Serial` (default) or `Concurrent`.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| `MODSECURITY_SEC_AUDIT_LOG_FORMAT`          | `Native`                              | multisite | no       | Audit log format: `Native` (default) or `JSON` (one JSON object per entry). In global CRS mode, set it globally.                                                                                                                                                                                                                                                                                                                                                                                                                    |
 | `MODSECURITY_SEC_AUDIT_LOG_STORAGE_DIR`     |                                       | multisite | no       | Empty by default; required absolute storage directory for `Concurrent`.                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
 | `MODSECURITY_SEC_REQUEST_BODY_LIMIT`        |                                       | multisite | no       | Maximum inspected request body size, in bytes or with `k`/`m`/`g` suffixes. Empty derives from `MAX_CLIENT_SIZE`; NGINX enforces that limit first. `REVERSE_PROXY_MAX_CLIENT_SIZE` overrides this setting for its location. `0` removes the inspection limit and risks memory exhaustion.                                                                                                                                                                                                                                           |
 | `MODSECURITY_SEC_REQUEST_BODY_LIMIT_ACTION` | `Reject`                              | multisite | no       | `Reject` returns HTTP 413 above the inspection limit. `ProcessPartial` inspects only the portion within the limit and forwards the full body, reducing WAF coverage. The separate no-files limit still applies.                                                                                                                                                                                                                                                                                                                     |
@@ -11171,6 +11201,22 @@ Follow these steps to configure and use ModSecurity:
     ModSecurity buffers the full request body in memory and cannot cap it for multi-GB uploads, which can OOM the worker. If — **and only if** — a reverse-proxy URL is used *exclusively* for file uploads (e.g. a dedicated `/upload` endpoint), set `REVERSE_PROXY_MODSECURITY_N: "no"` on that URL to emit `modsecurity off;` in its `location` block. Do not disable it on mixed-use URLs: you would lose WAF coverage on everything served by that location.
 
     To keep uploads protected after bypassing ModSecurity, pair this with a file-scanning plugin such as [ClamAV](https://github.com/bunkerity/bunkerweb-plugins/tree/main/clamav) or [VirusTotal](https://github.com/bunkerity/bunkerweb-plugins/tree/main/virustotal) — they inspect the uploaded file itself instead of the raw request body.
+
+!!! warning "Response-body denies and compressed responses"
+    If a response-body deny rule fires after response headers have been sent, the client can receive the original status (such as `200`) followed by an incomplete-body or chunked-encoding error instead of a clean `403` response. This can happen with gzip, Brotli or zstd compression applied by BunkerWeb. Starting with `testing`, Brotli follows the established gzip behavior. Check the ModSecurity audit and error logs for the triggered rule; tune confirmed false positives with narrowly scoped exclusions.
+
+!!! warning "Upstream-compressed response bodies"
+    CRS v4 does not inspect response bodies already compressed by the upstream (`gzip`, `br` or `zstd`). BunkerWeb does not decode these bodies for inspection. Where response-body inspection is required, configure the upstream to return uncompressed content. To ask an upstream that honors this header to do so, remove `Accept-Encoding` from the proxied request for only the affected service and location:
+
+    ```yaml
+    REVERSE_PROXY_HOST_1: "http://app:8080"
+    REVERSE_PROXY_URL_1: "/reports/"
+    REVERSE_PROXY_HEADERS_1: 'Accept-Encoding ""'
+    ```
+
+    Replace the host and path with your own, and match the suffix to the target reverse-proxy location. If that location already has `REVERSE_PROXY_HEADERS_1` entries, keep them and append `;Accept-Encoding ""`. Use this setting rather than a server-level `proxy_set_header`, which the generated location headers override.
+
+    Verify that the upstream actually returns an uncompressed response; if it still compresses, disable compression for that route on the upstream. This increases bandwidth between the upstream and BunkerWeb. BunkerWeb can still compress the response for the client after inspection; the configured response-body MIME types and size limits still apply.
 
 ### Available CRS Versions
 
@@ -12234,17 +12280,17 @@ Follow these steps to configure and use the Reverse Proxy feature:
         - **Protocol Handling:** Support for HTTP, HTTPS, WebSockets, and other protocols
         - **Error Interception:** Customize error pages for a consistent user experience
 
-    | Setting                           | Default | Context   | Multiple | Description                                                                                                                                                                                 |
-    | --------------------------------- | ------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-    | `USE_REVERSE_PROXY`               | `no`    | multisite | no       | **Enable Reverse Proxy:** Set to `yes` to enable reverse proxy functionality.                                                                                                               |
-    | `REVERSE_PROXY_HOST`              |         | multisite | yes      | **Backend Host:** Full URL of the proxied resource (proxy_pass).                                                                                                                            |
-    | `REVERSE_PROXY_URL`               | `/`     | multisite | yes      | **Location URL:** Path that will be proxied to the backend server. A value starting with `^` or ending with `$` is treated as a regex location. Optionally prefix with `~`, `~*`, `=` or `^~` followed by one space to set the nginx location modifier explicitly; no spaces, `;`, `{` or `}` are allowed elsewhere in the value.                                             |
-    | `REVERSE_PROXY_BUFFERING`         | `yes`   | multisite | yes      | **Response Buffering:** Enable or disable buffering of responses from proxied resource.                                                                                                     |
-    | `REVERSE_PROXY_REQUEST_BUFFERING` | `yes`   | multisite | yes      | **Request Buffering:** Enable or disable buffering of requests to the proxied resource.                                                                                                     |
-    | `REVERSE_PROXY_KEEPALIVE`         | `no`    | multisite | yes      | **Keep-Alive:** Enable or disable keepalive connections with the proxied resource.                                                                                                          |
-    | `REVERSE_PROXY_HTTP_VERSION`      | `1.1`   | multisite | yes      | **HTTP Version:** Protocol version used to talk to the upstream (`1.0`, `1.1`, or `2`). Set to `2` for HTTP/2 multiplexing on the upstream leg. WebSocket locations stay on 1.1 regardless. |
-    | `REVERSE_PROXY_CUSTOM_HOST`       |         | multisite | no       | **Custom Host:** Override Host header sent to upstream server.                                                                                                                              |
-    | `REVERSE_PROXY_INTERCEPT_ERRORS`  | `yes`   | multisite | no       | **Intercept Errors:** Whether to intercept and rewrite error responses from the backend. See [Keep upstream API error bodies](#errors). |
+    | Setting                           | Default | Context   | Multiple | Description                                                                                                                                                                                                                                                                                                                       |
+    | --------------------------------- | ------- | --------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+    | `USE_REVERSE_PROXY`               | `no`    | multisite | no       | **Enable Reverse Proxy:** Set to `yes` to enable reverse proxy functionality.                                                                                                                                                                                                                                                     |
+    | `REVERSE_PROXY_HOST`              |         | multisite | yes      | **Backend Host:** Full URL of the proxied resource (proxy_pass).                                                                                                                                                                                                                                                                  |
+    | `REVERSE_PROXY_URL`               | `/`     | multisite | yes      | **Location URL:** Path that will be proxied to the backend server. A value starting with `^` or ending with `$` is treated as a regex location. Optionally prefix with `~`, `~*`, `=` or `^~` followed by one space to set the nginx location modifier explicitly; no spaces, `;`, `{` or `}` are allowed elsewhere in the value. |
+    | `REVERSE_PROXY_BUFFERING`         | `yes`   | multisite | yes      | **Response Buffering:** Enable or disable buffering of responses from proxied resource.                                                                                                                                                                                                                                           |
+    | `REVERSE_PROXY_REQUEST_BUFFERING` | `yes`   | multisite | yes      | **Request Buffering:** Enable or disable buffering of requests to the proxied resource.                                                                                                                                                                                                                                           |
+    | `REVERSE_PROXY_KEEPALIVE`         | `no`    | multisite | yes      | **Keep-Alive:** Send the configured HTTP version (`1.1` by default) and an empty `Connection` header to the proxied resource. This does not create a connection pool by itself: to reuse connections, point `REVERSE_PROXY_HOST` at a named `upstream` with `keepalive`, declared in an `http` custom configuration.              |
+    | `REVERSE_PROXY_HTTP_VERSION`      | `1.1`   | multisite | yes      | **HTTP Version:** Protocol version used to talk to the upstream (`1.0`, `1.1`, or `2`). Set to `2` for HTTP/2 multiplexing on the upstream leg. WebSocket locations stay on 1.1 regardless.                                                                                                                                       |
+    | `REVERSE_PROXY_CUSTOM_HOST`       |         | multisite | no       | **Custom Host:** Override Host header sent to upstream server.                                                                                                                                                                                                                                                                    |
+    | `REVERSE_PROXY_INTERCEPT_ERRORS`  | `yes`   | multisite | no       | **Intercept Errors:** Whether to intercept and rewrite error responses from the backend. See [Keep upstream API error bodies](#errors).                                                                                                                                                                                           |
 
     BunkerWeb quotes the path or regex operand when generating the NGINX location, preserving literal quotes, `#`, and regex backslashes. Supply the value without adding NGINX quoting yourself. Existing restrictions on whitespace, `;`, `{`, and `}` still apply.
 
@@ -12255,6 +12301,32 @@ Follow these steps to configure and use the Reverse Proxy feature:
 
     !!! warning "Request buffering behavior"
         Disabling `REVERSE_PROXY_REQUEST_BUFFERING` only takes effect when ModSecurity is disabled, because request buffering is otherwise enforced.
+
+    !!! info "Reusing backend connections"
+        `REVERSE_PROXY_KEEPALIVE=yes` only makes BunkerWeb send the configured HTTP version (`1.1` by default) and an empty `Connection` header to the backend. It does not create a connection pool: with an ordinary `REVERSE_PROXY_HOST` URL, NGINX opens a new connection to the backend for each request.
+
+        To reuse backend connections, declare a named `upstream` with `keepalive` in an [`http` custom configuration](https://docs.bunkerweb.io/testing/advanced/#custom-configurations), then point `REVERSE_PROXY_HOST` at the group name **without a port**: the port goes on the `server` line of the `upstream`.
+
+        ```nginx
+        upstream app_pool {
+            server backend.internal:8443;
+            keepalive 32;
+        }
+        ```
+
+        ```conf
+        REVERSE_PROXY_HOST=https://app_pool
+        REVERSE_PROXY_KEEPALIVE=yes
+        # HTTPS only: send the origin name as SNI and verify against it
+        REVERSE_PROXY_SSL_SNI=yes
+        REVERSE_PROXY_SSL_SNI_NAME=backend.example.com
+        # only if the backend checks the Host header
+        REVERSE_PROXY_CUSTOM_HOST=backend.example.com
+        ```
+
+        - The `upstream` name must be unique, and the hostname on the `server` line must resolve when NGINX loads the configuration.
+        - For HTTPS, NGINX uses the group name as the SNI and verification name while `REVERSE_PROXY_SSL_SNI_NAME` is empty, and that setting is ignored while `REVERSE_PROXY_SSL_SNI` is `no`. Set both, as above, so the backend sees its real name.
+        - The `Host` header stays the client's `$host`; set `REVERSE_PROXY_CUSTOM_HOST` if the backend expects another name.
 
 === "Connection Settings"
 
@@ -12461,6 +12533,9 @@ Follow these steps to configure and use the Reverse Proxy feature:
         - Use appropriate cache durations based on content type (static assets can be cached longer)
         - Configure `PROXY_NO_CACHE` to avoid caching sensitive or personalized content
         - Monitor cache hit rates and adjust settings accordingly
+
+    !!! warning "Caching requires response buffering"
+        Proxy caching only works on locations where response buffering is on. When `USE_PROXY_CACHE=yes`, set `REVERSE_PROXY_BUFFERING=yes` for each location you want to cache, including numbered settings such as `REVERSE_PROXY_BUFFERING_1`. While response buffering is off, new responses are not cached, unless the upstream enables it through `X-Accel-Buffering`. Previously cached responses may still be served. `REVERSE_PROXY_REQUEST_BUFFERING` controls request bodies and does not enable response caching. BunkerWeb logs a warning when it generates a configuration with proxy caching enabled on a location whose response buffering is off.
 
 !!! tip "Upstream Mutual TLS"
     A client certificate and its key must both be supplied, and the key must not be encrypted. The scheduler validates the pair, caches it and distributes it to the instances; if it does not validate, the certificate directives are simply not generated. A CRL is only applied while upstream verification is on.
@@ -13300,6 +13375,7 @@ Follow these steps to configure and use the Whitelist feature:
 | Setting         | Default | Context   | Multiple | Description                                                         |
 | --------------- | ------- | --------- | -------- | ------------------------------------------------------------------- |
 | `USE_WHITELIST` | `yes`   | multisite | no       | **Enable Whitelist:** Set to `yes` to enable the whitelist feature. |
+| `WHITELIST_URLS_REFRESH_INTERVAL` | `1h` | multisite | no | **URL refresh interval:** Minimum cache age before downloading again. Accepts bare seconds or time suffixes (`ms`, `s`, `m`, `h`, `d`, `w`, `M`, `y`). |
 
 === "IP Address"
     **What this does:** Whitelists visitors based on their IP address or network. These visitors will bypass all security checks.
@@ -13363,7 +13439,7 @@ Follow these steps to configure and use the Whitelist feature:
     All `*_URLS` settings support HTTP/HTTPS URLs as well as local file paths using the `file:///` prefix. Basic authentication is supported using the `http://user:pass@url` format.
 
 !!! tip "Regular Updates"
-    Whitelists from URLs are automatically downloaded and updated hourly to ensure your protection remains current with the latest trusted sources.
+    The job runs hourly. `WHITELIST_URLS_REFRESH_INTERVAL` sets the minimum age of a cached URL before downloading again (default: `1h`). Use `24h` for providers allowing at most one download per day, or `0` to download on every job run. Fresh caches and failed downloads keep their last valid entries. Within this plugin, URL caches are shared across services: the shortest interval can trigger a download, so use the same interval on every service sharing a provider-limited URL.
 
 !!! warning "Security Bypass"
     Whitelisted visitors will completely **bypass all other security checks** in BunkerWeb, including WAF rules, rate limiting, bad bot detection, and any other security mechanisms. Only use the whitelist for trusted sources you're absolutely confident in.
@@ -13470,6 +13546,54 @@ Adds wildcard server_name support (*.domain) for services, and serves the matchi
 | Setting        | Default | Context   | Multiple | Description                                                                                       |
 | -------------- | ------- | --------- | -------- | ------------------------------------------------------------------------------------------------- |
 | `USE_WILDCARD` | `no`    | multisite | no       | Enable wildcard server_name for this service (adds *.domain for the first domain in SERVER_NAME). |
+
+## Zstandard
+
+STREAM support :x:
+
+The Zstandard plugin compresses HTTP responses using the Zstandard (zstd) algorithm. It reduces bandwidth usage for clients that advertise `Accept-Encoding: zstd`.
+
+### How to Use
+
+1. Enable compression with `USE_ZSTD=yes` (disabled by default).
+2. Choose MIME types with `ZSTD_TYPES` and a minimum response size with `ZSTD_MIN_LENGTH`.
+3. Set `ZSTD_COMP_LEVEL` between `1` (fastest) and `19` (highest supported compression). The default is `3`.
+
+Clients that support zstd receive `Content-Encoding: zstd` and `Vary: Accept-Encoding`. Clients without zstd support, including those sending `zstd;q=0`, can use Brotli or gzip when those plugins are enabled; otherwise they receive uncompressed responses.
+
+With `USE_ZSTD=yes`, eligible responses can carry `Vary: Accept-Encoding` even when the selected representation is uncompressed, gzip or Brotli. Caches must honor this header to keep representations separate.
+
+When several compression plugins are enabled, the server preference is zstd, then Brotli, then gzip. Each coding honors its own `q=0`; positive weights are not compared across compression plugins.
+
+### Configuration Settings
+
+| Setting | Default | Context | Multiple | Description |
+| ------- | ------- | ------- | -------- | ----------- |
+| `USE_ZSTD` | `no` | multisite | no | Enable Zstandard response compression. |
+| `ZSTD_TYPES` | `application/atom+xml application/javascript application/json application/rss+xml application/vnd.ms-fontobject application/x-font-opentype application/x-font-truetype application/x-font-ttf application/x-javascript application/xhtml+xml application/xml font/eot font/opentype font/otf font/truetype image/svg+xml image/vnd.microsoft.icon image/x-icon image/x-win-bitmap text/css text/javascript text/plain text/xml` | multisite | no | MIME types to compress, in addition to `text/html` which is always included. |
+| `ZSTD_MIN_LENGTH` | `1000` | multisite | no | Minimum response size in bytes. Responses of unknown length may also be compressed. |
+| `ZSTD_COMP_LEVEL` | `3` | multisite | no | Compression level from `1` to `19`. Higher levels use more CPU and memory. |
+
+!!! tip "Compression Level"
+    Start with level `3`. Higher levels increase per-request CPU and memory usage; keep capacity for concurrent requests. Levels are limited to `19` to stay within the 8 MB zstd window limit for HTTP.
+
+!!! warning "Sensitive Responses"
+    Compression can expose secrets through response-size differences when a response contains both secrets and attacker-controlled input. Disable compression for sensitive services or address this risk in the application. `text/html` is always eligible when zstd is enabled, even if omitted from `ZSTD_TYPES`.
+
+!!! info "Upstream Compression"
+    Responses already compressed by the upstream are not compressed again. The inject plugin needs an uncompressed upstream response to modify HTML; configure the upstream accordingly when using both features.
+
+### Example Configuration
+
+Enable zstd with Brotli and gzip fallback:
+
+```yaml
+USE_ZSTD: "yes"
+ZSTD_MIN_LENGTH: "1000"
+ZSTD_COMP_LEVEL: "3"
+USE_BROTLI: "yes"
+USE_GZIP: "yes"
+```
 
 # Advanced Usage
 
@@ -14728,6 +14852,43 @@ Some integrations provide more convenient ways to apply configurations, such as 
     !!! info "Reload re-reads the folder"
         A reload re-reads `/etc/bunkerweb/configs`: files created, modified or deleted there are applied and saved to the database. A configuration owned by the web UI or the API keeps its owner, only its content is refreshed from the file.
 
+    **Where NGINX includes each type from**
+
+    NGINX includes the files directly from the subfolders of `/etc/bunkerweb/configs`; BunkerWeb does not copy them under `/etc/nginx`. The scheduler writes configurations created in the web UI or the API to the same folders. In multisite mode, a file that applies to one service goes in a further subfolder named after the first name in that service's `SERVER_NAME`, for example `server-http/www.example.com/hello-world.conf`.
+
+    | Type                  | Folder in `/etc/bunkerweb/configs` | Included in                                                                           | Service subfolder |
+    | --------------------- | ---------------------------------- | ------------------------------------------------------------------------------------- | ----------------- |
+    | `http`                | `http/`                            | `http` block of `nginx.conf`, after the core and plugin configurations                | No                |
+    | `stream`              | `stream/`                          | `stream` block of `nginx.conf`, after the core and plugin configurations              | No                |
+    | `default-server-http` | `default-server-http/`             | default server (`default-server-http.conf`), after the core and plugin configurations | No                |
+    | `server-http`         | `server-http/`                     | each HTTP `server` block (`server.conf`)                                              | Yes               |
+    | `server-stream`       | `server-stream/`                   | each stream `server` block (`server-stream.conf`)                                     | Yes               |
+    | `modsec`              | `modsec/`                          | ModSecurity rules, after the Core Rule Set                                            | Yes               |
+    | `modsec-crs`          | `modsec-crs/`                      | ModSecurity rules, before the Core Rule Set rules                                     | Yes, see the note |
+    | `crs-plugins-before`  | `crs-plugins-before/`              | ModSecurity rules, before the CRS plugins                                             | Yes, see the note |
+    | `crs-plugins-after`   | `crs-plugins-after/`               | ModSecurity rules, after the CRS plugins                                              | Yes, see the note |
+
+    `modsec-crs` is only read when `USE_MODSECURITY_CRS=yes`. `crs-plugins-before` and `crs-plugins-after` also need `USE_MODSECURITY_CRS_PLUGINS=yes` and a Core Rule Set version other than 3. When `USE_MODSECURITY_GLOBAL_CRS=yes`, these three types are loaded once for all services: only the top-level folder is read and a service subfolder is ignored. `modsec` keeps its service subfolder.
+
+    **Check that a file is live**
+
+    Use `nginx -T` to check whether NGINX includes your file from disk and the include paths are correct. It tests and prints the current configuration files on disk, not the configuration loaded by the running workers. NGINX marks each included file with a `# configuration file <path>:` line:
+
+    ```shell
+    sudo nginx -T 2>&1 | grep -A 3 "configuration file /etc/bunkerweb/configs/server-http/hello-world.conf"
+    ```
+
+    If nothing is printed, check the folder, the `.conf` suffix and the permissions, then reload the scheduler again.
+
+    To confirm the file is applied, check that the scheduler log (`journalctl -u bunkerweb-scheduler`) reports a successful reload and the web UI does not report a partial application. Then send a request that exercises the configuration and check the expected result. For the `/hello` example above, replace `www.example.com` with your service name and verify that the response body is `world`:
+
+    ```shell
+    curl -i http://www.example.com/hello
+    ```
+
+    !!! warning "A rejected configuration keeps the previous one"
+        Each `upstream` name must be unique across all custom configurations. Two `upstream` blocks with the same name make NGINX refuse the new configuration, and the reload fails. The instances that reject it keep running the last working configuration, and the web UI shows that the changes were applied to some instances only (or to none). The scheduler logs (`journalctl -u bunkerweb-scheduler`) tell you why.
+
 === "All-in-one"
 
     When using the [All-in-one image](https://docs.bunkerweb.io/testing/integrations/#all-in-one-aio-image), you have two choices for adding custom configurations:
@@ -15118,6 +15279,10 @@ REDIS_DATABASE=0
 - **`REDIS_DATABASE`**: Specify the Redis/Valkey database number to use. Defaults to `0`.
 
 If you require more advanced settings, such as authentication, SSL/TLS support, or Sentinel mode, refer to the [Redis plugin settings documentation](https://docs.bunkerweb.io/testing/features/#redis) for detailed guidance.
+
+### Export bans as JSON
+
+Run `bwcli bans --json` to print one JSON object to standard output, grouped by instance, with a `redis` entry when Redis bans are collected. Each source contains an array of ban records, sorted by `date`. Records retain the fields returned by the source, such as `ip`, `country`, `date`, `exp`, `permanent`, `reason`, `service`, `ban_scope`, and `kind`. The command exits with status 0 on success. On failure, it exits non-zero and writes an error to standard error. Without `--json`, `bwcli bans` keeps its formatted output.
 
 ## Protect UDP/TCP applications
 
@@ -16577,6 +16742,130 @@ log {
   destination(d_dyna_file);
 };
 ```
+
+### Send logs to Splunk {#send-logs-to-splunk}
+
+BunkerWeb needs no Splunk plugin: nothing is installed on BunkerWeb. The Splunk side uses the official [BunkerWeb Add-on for Splunk](https://splunkbase.splunk.com/app/10342) (`TA-bunkerweb`, [source on GitHub](https://github.com/bunkerity/bunkerweb-splunk-addon)). It defines the sourcetypes `bunkerweb:access`, `bunkerweb:error` and `bunkerweb:modsec_audit`, with timestamps, line breaking, search-time field extraction and CIM mappings for the Web and Intrusion Detection data models.
+
+A Splunk Universal Forwarder reads the log files, and three settings make BunkerWeb write them in formats the add-on parses: a second access log in `key=value` format, the existing error log, and a ModSecurity audit log in JSON.
+
+**1. Add an access log for Splunk.** Each `ACCESS_LOG_N` pairs with the `LOG_FORMAT_N` of the same suffix, so `access.log` keeps its default format (the Web UI reads it) and the new file gets its own. Add this to `/etc/bunkerweb/variables.env`, and use another suffix if `_1` is already taken:
+
+```conf
+ACCESS_LOG_1=/var/log/bunkerweb/access-splunk.log
+LOG_FORMAT_1=time=$time_iso8601 host=$host client=$remote_addr request_id=$request_id method=$request_method uri="$request_uri" status=$status bytes=$body_bytes_sent ua="$http_user_agent" reason=$reason modsec_rules="$modsecurity_rules" modsec_score=$modsecurity_anomaly_score modsec_id=$modsecurity_unique_id
+```
+
+!!! warning "Write values exactly as shown"
+    BunkerWeb reads `variables.env` literally: no quotes around a value, and no comment after a value on the same line. A trailing comment becomes part of the value. The setting is then ignored with `Ignoring variable ... doesn't match regex` in the scheduler log, and the default applies. Put comments on their own line.
+
+**2. Optional: keep request bodies out of the audit log.** The default `MODSECURITY_SEC_AUDIT_LOG_PARTS` is `BCFH`, and part `C` writes the request body into every audit entry. Treat the file as sensitive, or drop that part:
+
+```conf
+MODSECURITY_SEC_AUDIT_LOG_PARTS=BFH
+```
+
+**3. Write the audit log as JSON.** Add this to `/etc/bunkerweb/variables.env`:
+
+```conf
+MODSECURITY_SEC_AUDIT_LOG_FORMAT=JSON
+```
+
+Earlier versions do not have this setting: put `SecAuditLogFormat JSON` in a custom configuration of type `modsec` instead (for example `/etc/bunkerweb/configs/modsec/audit-json.conf`, see [Custom configurations](#custom-configurations)).
+
+**4. Restart the services.**
+
+```shell
+sudo systemctl restart bunkerweb && \
+sudo systemctl restart bunkerweb-scheduler
+```
+
+**5. Check the files.** Send a request that ModSecurity blocks, for example a URL with `?q=<script>alert(1)</script>` and a browser-like `User-Agent` (a bare `User-Agent` is blocked by the Core Rule Set on its own). Then read the last line of each file. The audit log holds one JSON object per line:
+
+```shell
+sudo tail -n 1 /var/log/bunkerweb/access-splunk.log
+sudo tail -n 1 /var/log/bunkerweb/modsec_audit.log | jq .transaction.unique_id
+```
+
+**6. Install the add-on in Splunk.** Install the [BunkerWeb Add-on for Splunk](https://splunkbase.splunk.com/app/10342) on the search head, and on the indexers (or the heavy forwarder that parses the data). The Universal Forwarder needs no `props.conf`, and the add-on needs no configuration. It sets `KV_MODE = json` for `bunkerweb:modsec_audit` and raises `TRUNCATE` to `100000` for it and for `bunkerweb:error`, so you write no `props.conf` yourself. Audit entries are long: one XSS probe wrote 7.3 KB, and a request with several attack payloads wrote 20 KB, while the default `TRUNCATE` cuts events at 10,000 bytes.
+
+The add-on extracts the access log with one pattern that expects the field order of `LOG_FORMAT_1` above. Keep that format as shown.
+
+**7. Configure the forwarder.** BunkerWeb log files belong to `nginx:nginx` and the packages restrict access to that user and group, so add the user that runs the forwarder to the `nginx` group. Then monitor the three files, one sourcetype each, in `inputs.conf`:
+
+```conf
+[monitor:///var/log/bunkerweb/access-splunk.log]
+sourcetype = bunkerweb:access
+
+[monitor:///var/log/bunkerweb/error.log]
+sourcetype = bunkerweb:error
+
+[monitor:///var/log/bunkerweb/modsec_audit.log]
+sourcetype = bunkerweb:modsec_audit
+```
+
+`access-splunk.log` matches the `/var/log/bunkerweb/*.log` pattern of the [Log File Retention](#log-file-retention) policy, so `logrotate` covers it like the other files.
+
+**Fields of the access log**
+
+The add-on keeps the virtual host in `site` and `dest` in Splunk, because `host` is the name of the machine that sent the event. It also maps `client` to `src`.
+
+| Field          | Content                                                                                                                                |
+| :------------- | :------------------------------------------------------------------------------------------------------------------------------------- |
+| `time`         | `$time_iso8601`                                                                                                                        |
+| `host`         | `$host`                                                                                                                                |
+| `client`       | `$remote_addr`                                                                                                                         |
+| `request_id`   | `$request_id`, the same value as the fourth field of the default `access.log` line                                                     |
+| `method`       | `$request_method`                                                                                                                      |
+| `uri`          | `$request_uri`, with the query string                                                                                                  |
+| `status`       | `$status`                                                                                                                              |
+| `bytes`        | `$body_bytes_sent`                                                                                                                     |
+| `ua`           | `$http_user_agent`                                                                                                                     |
+| `reason`       | The plugin id when a plugin denied the request (`blacklist`, `limit`, ...). Empty otherwise, **including when ModSecurity denied it**  |
+| `modsec_rules` | Rule ids exposed by BunkerWeb’s CRS integration, space-separated with a leading space (ids can repeat). `-` when unset; not a complete record of every match |
+| `modsec_score` | The anomaly score exposed by BunkerWeb’s CRS integration, `-` when unset |
+| `modsec_id` | The id exposed by BunkerWeb’s CRS integration, `-` when unset. When set, it equals `transaction.unique_id` of the matching audit entry |
+
+Three requests, as they appear in `access-splunk.log`: an allowed one, one denied by the `blacklist` plugin, and one denied by ModSecurity (`ua` shortened).
+
+```text
+time=2026-11-10T08:11:02+00:00 host=www.example.com client=10.77.52.1 request_id=a1b31236225cf6d34fec07e089838f48 method=GET uri="/spl-allowed" status=404 bytes=69298 ua="Mozilla/5.0 ..." reason= modsec_rules="-" modsec_score=- modsec_id=-
+time=2026-11-10T08:11:02+00:00 host=www.example.com client=10.77.52.1 request_id=260b845a6bb21e46656c42e7a682f2a1 method=GET uri="/spl-blacklisted" status=403 bytes=69297 ua="Mozilla/5.0 ..." reason=blacklist modsec_rules="-" modsec_score=- modsec_id=-
+time=2026-11-10T08:11:02+00:00 host=www.example.com client=10.77.52.1 request_id=f3ddfff5a4652efdeb3daa645dee0827 method=GET uri="/spl-xss?q=<script>alert(1)</script>" status=403 bytes=69297 ua="Mozilla/5.0 ..." reason= modsec_rules=" 941100 941110 941160 941390" modsec_score=20 modsec_id=179429826266.143898
+```
+
+The first request returns `404` because the test stack has no backend. The matching audit entry, shortened, starts with the same id:
+
+```json
+{"transaction":{"client_ip":"10.77.52.1","time_stamp":"Tue Nov 10 08:11:02 2026","unique_id":"179429826266.143898","request":{"method":"GET","uri":"/spl-xss?q=<script>alert(1)</script>","body":""},"response":{"http_code":403},"messages":[{"message":"XSS Attack Detected via libinjection","details":{"ruleId":"941100","severity":"2"}}]}}
+```
+
+!!! warning "Limits"
+    - **No JSON access log.** `LOG_FORMAT_N` is written between single quotes in the NGINX configuration and there is no place for `escape=json`. Use `key=value` for the access log, and JSON only for the audit log.
+    - **No single quote in a `LOG_FORMAT_N` value.** NGINX rejects the configuration. NGINX escapes a double quote in a logged value as `\x22` (`ua="Mozilla/5.0 \x22quoted\x22"`).
+    - **ModSecurity metadata depends on the rules.** Default CRS anomaly denials populate `modsec_id`, `modsec_rules` and `modsec_score`, with an empty `reason`. A custom `deny` rule without the corresponding `tx.bunkerweb_*` `setvar` actions can leave those fields as `-`. The access log alone cannot identify such a denial; consult the error or audit log.
+    - **The audit log is not a request log or proof of blocking.** The default `MODSECURITY_SEC_AUDIT_ENGINE` (`RelevantOnly`) can also record allowed transactions when a rule logs a match (including `DetectionOnly` or a score below the blocking threshold), or when the status matches `SecAuditLogRelevantStatus`. In the test above, only the ModSecurity denials produced entries.
+    - **Part `C` holds request bodies**, form fields and credentials included. Use `BFH` unless you need the bodies, and restrict who can read the index.
+
+!!! info "Docker, Autoconf, Swarm and Kubernetes"
+    The images link `access.log`, `error.log` and `modsec_audit.log` to the container's own log stream (see [Log File Retention](#log-file-retention)), so a forwarder has no file to read for them, and a file written by `ACCESS_LOG_1` stays inside the container where nothing rotates it. Set `MODSECURITY_SEC_AUDIT_LOG_FORMAT=JSON` on the scheduler, like any other setting, instead of using a file. The JSON entries then appear in `docker logs` of the `bunkerweb` container, one per line, among the error log lines: the lines that start with `{` are the audit entries.
+
+    To ship the stream to Splunk, use the [Docker `splunk` logging driver](https://docs.docker.com/engine/logging/drivers/splunk/) with an HTTP Event Collector token. The driver sends access, error and audit lines together under one sourcetype, so only their content tells them apart. Set the `key=value` format on `LOG_FORMAT` (no suffix) so that the streamed access lines carry it. That replaces the default format in `access.log`.
+
+    ```yaml
+    services:
+      bunkerweb:
+        image: bunkerity/bunkerweb:testing
+        logging:
+          driver: splunk
+          options:
+            splunk-url: "https://splunk.example.com:8088"
+            splunk-token: "<HEC token>"
+            splunk-format: raw
+            splunk-sourcetype: "bunkerweb:docker"
+    ```
+
+    The add-on's extractions apply to `bunkerweb:access`, `bunkerweb:error` and `bunkerweb:modsec_audit`, not to `bunkerweb:docker`.
 
 ## Docker logging best practices {#docker-logging-best-practices}
 
@@ -19615,7 +19904,7 @@ Choose the flavor that matches your environment.
     - Config files: `/etc/bunkerweb/api.env` (auto-created with commented defaults on first start) and `/etc/bunkerweb/api.yml`
     - Environment sources: `api.env`, `variables.env`, `/run/secrets/<VAR>`, then exported to the Gunicorn process
 
-    Edit `/etc/bunkerweb/api.env` to set `API_USERNAME`/`API_PASSWORD`, allowlist, TLS, rate limits, or `API_ROOT_PATH`, then `systemctl reload bunkerweb-api`.
+    Edit `/etc/bunkerweb/api.env` to set `API_USERNAME`/`API_PASSWORD`, allowlist, TLS, rate limits, or `API_ROOT_PATH`, then `systemctl restart bunkerweb-api`.
 
 ## Authentication and authorization
 
@@ -19869,6 +20158,7 @@ Disable docs or schema by setting their URLs to `off|disabled|none|false|0`. Set
   - `GET /cache`: list cache files with filters (`service`, `plugin`, `job_name`); `with_data=true` embeds printable content.
   - `GET /cache/{service}/{plugin}/{job}/{file}`: fetch/download a specific cache file (`download=true`).
   - `DELETE /cache` or `DELETE /cache/{service}/{plugin}/{job}/{file}`: delete cache files. The scheduler is notified only for a plugin whose row was really deleted; a `plugin` that does not own the job is refused and nothing is deleted.
+  - Sensitive entries (stored name `secret` or ending in `.secret`, plus some core entries holding private keys or credentials, such as the upstream mTLS client keys and the failover backup archive): `GET /cache/{service}/{plugin}/{job}/{file}` returns `403` and `GET /cache?with_data=true` omits `data` and `printable` (the metadata stays), unless the caller used HTTP Basic as an API administrator or the `API_TOKEN`. A Biscuit token is refused even when issued to an administrator. The `403` is also returned for a sensitive name that does not exist. `DELETE` is unchanged and still needs `cache_delete`. See [Sensitive job-cache entries](https://docs.bunkerweb.io/testing/plugins/#sensitive-job-cache-entries).
 - **Jobs**
   - `GET /jobs`: list jobs, schedules, and cache summaries.
   - `POST /jobs/run`: mark plugins as changed to trigger associated jobs.
@@ -19892,18 +20182,18 @@ Here is the list of "official" plugins that we maintain (see the [bunkerweb-plug
 
 |      Name       | Version | Description                                                                                                                                      |                                                 Link                                                  |
 | :-------------: | :-----: | :----------------------------------------------------------------------------------------------------------------------------------------------- | :---------------------------------------------------------------------------------------------------: |
-|  **Authentik**  |  1.13   | Protect your web services with Authentik forward authentication (auth_request) for single sign-on.                                               |   [bunkerweb-plugins/authentik](https://github.com/bunkerity/bunkerweb-plugins/tree/main/authentik)   |
-|   **ClamAV**    |  1.13   | Automatically scans uploaded files with the ClamAV antivirus engine and denies the request when a file is detected as malicious.                 |      [bunkerweb-plugins/clamav](https://github.com/bunkerity/bunkerweb-plugins/tree/main/clamav)      |
-| **Cloudflare**  |  1.13   | Configure Cloudflare's trusted IPs, manage Origin CA certificates and sync BunkerWeb bans to a Cloudflare IP List.                               |  [bunkerweb-plugins/cloudflare](https://github.com/bunkerity/bunkerweb-plugins/tree/main/cloudflare)  |
-|   **Coraza**    |  1.13   | Inspect requests using the Coraza WAF (alternative of ModSecurity).                                                                              |      [bunkerweb-plugins/coraza](https://github.com/bunkerity/bunkerweb-plugins/tree/main/coraza)      |
-|   **Discord**   |  1.13   | Send security notifications to a Discord channel using a Webhook.                                                                                |     [bunkerweb-plugins/discord](https://github.com/bunkerity/bunkerweb-plugins/tree/main/discord)     |
-|   **Matrix**    |  1.13   | Send security notifications to a Matrix room using the Matrix API.                                                                               |      [bunkerweb-plugins/matrix](https://github.com/bunkerity/bunkerweb-plugins/tree/main/matrix)      |
-| **open-appsec** |  1.13   | Inspect requests with the open-appsec machine-learning WAF through a sidecar agent and deny what it blocks.                                      |  [bunkerweb-plugins/openappsec](https://github.com/bunkerity/bunkerweb-plugins/tree/main/openappsec)  |
-| **SentinelOne** |  1.13   | Check uploaded file hashes and client IPs with the SentinelOne API and deny requests based on hash reputation or threat-intelligence indicators. | [bunkerweb-plugins/sentinelone](https://github.com/bunkerity/bunkerweb-plugins/tree/main/sentinelone) |
-|    **Slack**    |  1.13   | Send security notifications to a Slack channel using a Webhook.                                                                                  |       [bunkerweb-plugins/slack](https://github.com/bunkerity/bunkerweb-plugins/tree/main/slack)       |
-|  **SysWarden**  |  1.13   | Sync BunkerWeb bans to SysWarden for kernel-level nftables blocking and import SysWarden blocklists and whitelists.                              |   [bunkerweb-plugins/syswarden](https://github.com/bunkerity/bunkerweb-plugins/tree/main/syswarden)   |
-| **VirusTotal**  |  1.13   | Check uploaded file hashes and client IPs with the VirusTotal API and deny requests when configured reputation thresholds are exceeded.          |  [bunkerweb-plugins/virustotal](https://github.com/bunkerity/bunkerweb-plugins/tree/main/virustotal)  |
-|   **WebHook**   |  1.13   | Send security notifications to a custom HTTP endpoint using a Webhook.                                                                           |     [bunkerweb-plugins/webhook](https://github.com/bunkerity/bunkerweb-plugins/tree/main/webhook)     |
+|  **Authentik**  |  1.14   | Protect your web services with Authentik forward authentication (auth_request) for single sign-on.                                               |   [bunkerweb-plugins/authentik](https://github.com/bunkerity/bunkerweb-plugins/tree/main/authentik)   |
+|   **ClamAV**    |  1.14   | Automatically scans uploaded files with the ClamAV antivirus engine and denies the request when a file is detected as malicious.                 |      [bunkerweb-plugins/clamav](https://github.com/bunkerity/bunkerweb-plugins/tree/main/clamav)      |
+| **Cloudflare**  |  1.14   | Configure Cloudflare's trusted IPs, manage Origin CA certificates and sync BunkerWeb bans to a Cloudflare IP List.                               |  [bunkerweb-plugins/cloudflare](https://github.com/bunkerity/bunkerweb-plugins/tree/main/cloudflare)  |
+|   **Coraza**    |  1.14   | Inspect requests using the Coraza WAF (alternative of ModSecurity).                                                                              |      [bunkerweb-plugins/coraza](https://github.com/bunkerity/bunkerweb-plugins/tree/main/coraza)      |
+|   **Discord**   |  1.14   | Send security notifications to a Discord channel using a Webhook.                                                                                |     [bunkerweb-plugins/discord](https://github.com/bunkerity/bunkerweb-plugins/tree/main/discord)     |
+|   **Matrix**    |  1.14   | Send security notifications to a Matrix room using the Matrix API.                                                                               |      [bunkerweb-plugins/matrix](https://github.com/bunkerity/bunkerweb-plugins/tree/main/matrix)      |
+| **open-appsec** |  1.14   | Inspect requests with the open-appsec machine-learning WAF through a sidecar agent and deny what it blocks.                                      |  [bunkerweb-plugins/openappsec](https://github.com/bunkerity/bunkerweb-plugins/tree/main/openappsec)  |
+| **SentinelOne** |  1.14   | Check uploaded file hashes and client IPs with the SentinelOne API and deny requests based on hash reputation or threat-intelligence indicators. | [bunkerweb-plugins/sentinelone](https://github.com/bunkerity/bunkerweb-plugins/tree/main/sentinelone) |
+|    **Slack**    |  1.14   | Send security notifications to a Slack channel using a Webhook.                                                                                  |       [bunkerweb-plugins/slack](https://github.com/bunkerity/bunkerweb-plugins/tree/main/slack)       |
+|  **SysWarden**  |  1.14   | Sync BunkerWeb bans to SysWarden for kernel-level nftables blocking and import SysWarden blocklists and whitelists.                              |   [bunkerweb-plugins/syswarden](https://github.com/bunkerity/bunkerweb-plugins/tree/main/syswarden)   |
+| **VirusTotal**  |  1.14   | Check uploaded file hashes and client IPs with the VirusTotal API and deny requests when configured reputation thresholds are exceeded.          |  [bunkerweb-plugins/virustotal](https://github.com/bunkerity/bunkerweb-plugins/tree/main/virustotal)  |
+|   **WebHook**   |  1.14   | Send security notifications to a custom HTTP endpoint using a Webhook.                                                                           |     [bunkerweb-plugins/webhook](https://github.com/bunkerity/bunkerweb-plugins/tree/main/webhook)     |
 
 ## How to use a plugin
 
@@ -19911,7 +20201,7 @@ Here is the list of "official" plugins that we maintain (see the [bunkerweb-plug
 
 If you want to quickly install external plugins, you can use the `EXTERNAL_PLUGIN_URLS` setting. It takes a list of URLs separated by spaces, each pointing to a compressed (zip format) archive containing one or more plugins.
 
-You can use the following value if you want to automatically install the official plugins : `EXTERNAL_PLUGIN_URLS=https://github.com/bunkerity/bunkerweb-plugins/archive/refs/tags/v1.13.zip`
+You can use the following value if you want to automatically install the official plugins : `EXTERNAL_PLUGIN_URLS=https://github.com/bunkerity/bunkerweb-plugins/archive/refs/tags/v1.14.zip`
 
 ### Manual
 
@@ -20469,6 +20759,29 @@ end
 
 BunkerWeb uses an internal job scheduler for periodic tasks like renewing certificates with certbot, downloading blacklists, downloading MMDB files, ... You can add tasks of your choice by putting them inside a subfolder named **jobs** and listing them in the **plugin.json** metadata file. Don't forget to add the execution permissions for everyone to avoid any problems when a user is cloning and installing your plugin.
 
+#### Sensitive job-cache entries
+
+A job that caches a secret (a per-install key, a token, credentials) marks the entry as sensitive through its stored name:
+
+- The name is exactly `secret`, or ends with `.secret` (for example `token.secret`). The match is case-sensitive: `SECRET` and `token.SECRET` are ordinary names.
+- One trailing `.tgz` is ignored, so a directory cached with `cache_dir` is sensitive when its own name follows the rule: `state.secret` is stored as `folder:<path>/state.secret.tgz`. Only the last path component counts, `folder:<path>/secret/other.tgz` is an ordinary entry.
+
+Reading a sensitive entry is then restricted:
+
+- **API**: `GET /cache/{service}/{plugin}/{job}/{file}` returns `403` unless the caller authenticated with HTTP Basic as an API administrator or with the `API_TOKEN`. A Biscuit token is refused even when it was issued to an administrator. `GET /cache?with_data=true` omits `data` and `printable` for such entries and keeps the metadata (name, checksum, last update). `DELETE` is unchanged.
+- **Web UI**: viewing and downloading return `403` unless the user is a super administrator (the `admin` flag, not an assigned role). The cache page still lists the entry.
+
+The restriction applies to reading through the API and the web UI. It does not encrypt the stored bytes, does not hide the name or the checksum, and does not change how the scheduler restores the file. Entries already named `secret` or `*.secret`, and a few core entries that hold private keys or credentials under fixed names (including the upstream mTLS client keys and the failover backup archive, which bundles the whole job cache), are restricted from 1.6.18 on, without any rename.
+
+To rely on the restriction, detect it, because an older core serves every entry to any API caller holding a `cache_read` Biscuit:
+
+```python
+try:
+    from common_utils import SENSITIVE_JOB_CACHE_SUPPORTED  # type: ignore
+except ImportError:
+    SENSITIVE_JOB_CACHE_SUPPORTED = False
+```
+
 ### Plugin page
 
 Everything related to the web UI is located inside the subfolder **ui** as we seen in the [previous structure section.](#structure).
@@ -20824,7 +21137,7 @@ Upgrade every Web UI replica together: replay protection for two-factor codes is
             1. Detection
                 * Reads the install type (full, manager, worker, scheduler, ui, api) back from `.env`, so you never have to restate your topology.
                 * Recovers the secrets, host ports, worker list and Compose project name from `.env`, so an upgrade cannot rotate the database password, invalidate stored 2FA secrets, or move your published ports; when a key is repeated the last assignment wins. Optional `export` prefixes are accepted, and explicit command-line values still take precedence. Quoting, interpolation, escaping, and other unsupported dotenv syntax are rejected before the file is rewritten; use the manual upgrade path for those files.
-                * Reads the version actually running from the container rather than trusting the image tag, so a floating tag (`latest`, `testing`, or `1.6`, the newest 1.6.x release, which stays on 1.6 when 1.7 ships) and an interrupted previous upgrade are both detected correctly.
+                * Reads the version actually running from the container rather than trusting the image tag, so a floating tag ([all tags](https://docs.bunkerweb.io/testing/integrations/#docker-image-tags): `latest`, `testing`, `1.6`, the newest 1.6.x release, which stays on 1.6 when 1.7 ships, or `1.6-edge`, the newest 1.6.x release candidate or release) and an interrupted previous upgrade are both detected correctly.
             2. Upgrade decision
                 * Same version already running: prints the stack status and exits.
                 * Older target version: **refuses**. BunkerWeb has no downgrade migration, so the scheduler would fail to start and restart in a loop. See [Rollback](#rollback) for the supported way back.
@@ -22027,7 +22340,7 @@ gh attestation verify ./bunkerweb_${VERSION}-1_amd64.deb \
   --source-ref "refs/tags/$TAG"
 ```
 
-The release also lists the SHA-256 checksum of every package in `release-manifest.json`. Check the manifest against its own checksum, then the package against the manifest, choosing the entry of your distribution (`ubuntu`, `ubuntu-noble`, `ubuntu-jammy`, `debian-bookworm`, `debian-trixie`, `fedora-43`, `fedora-44`, `rhel-8`, `rhel-9` or `rhel-10`) and platform (`linux/amd64` or `linux/arm64`):
+The release also lists the SHA-256 checksum of every package in `release-manifest.json`. Check the manifest against its own checksum, then the package against the manifest, choosing the entry of your distribution (`ubuntu`, `ubuntu-noble`, `ubuntu-jammy`, `debian-bookworm`, `debian-trixie`, `fedora-43`, `fedora-44`, `fedora-45`, `rhel-8`, `rhel-9` or `rhel-10`) and platform (`linux/amd64` or `linux/arm64`):
 
 ```bash
 curl -fsSL -O "https://github.com/bunkerity/bunkerweb/releases/download/${TAG}/release-manifest.json" \

@@ -1253,6 +1253,43 @@ Some integrations provide more convenient ways to apply configurations, such as 
     !!! info "Reload re-reads the folder"
         A reload re-reads `/etc/bunkerweb/configs`: files created, modified or deleted there are applied and saved to the database. A configuration owned by the web UI or the API keeps its owner, only its content is refreshed from the file.
 
+    **Where NGINX includes each type from**
+
+    NGINX includes the files directly from the subfolders of `/etc/bunkerweb/configs`; BunkerWeb does not copy them under `/etc/nginx`. The scheduler writes configurations created in the web UI or the API to the same folders. In multisite mode, a file that applies to one service goes in a further subfolder named after the first name in that service's `SERVER_NAME`, for example `server-http/www.example.com/hello-world.conf`.
+
+    | Type                  | Folder in `/etc/bunkerweb/configs` | Included in                                                                           | Service subfolder |
+    | --------------------- | ---------------------------------- | ------------------------------------------------------------------------------------- | ----------------- |
+    | `http`                | `http/`                            | `http` block of `nginx.conf`, after the core and plugin configurations                | No                |
+    | `stream`              | `stream/`                          | `stream` block of `nginx.conf`, after the core and plugin configurations              | No                |
+    | `default-server-http` | `default-server-http/`             | default server (`default-server-http.conf`), after the core and plugin configurations | No                |
+    | `server-http`         | `server-http/`                     | each HTTP `server` block (`server.conf`)                                              | Yes               |
+    | `server-stream`       | `server-stream/`                   | each stream `server` block (`server-stream.conf`)                                     | Yes               |
+    | `modsec`              | `modsec/`                          | ModSecurity rules, after the Core Rule Set                                            | Yes               |
+    | `modsec-crs`          | `modsec-crs/`                      | ModSecurity rules, before the Core Rule Set rules                                     | Yes, see the note |
+    | `crs-plugins-before`  | `crs-plugins-before/`              | ModSecurity rules, before the CRS plugins                                             | Yes, see the note |
+    | `crs-plugins-after`   | `crs-plugins-after/`               | ModSecurity rules, after the CRS plugins                                              | Yes, see the note |
+
+    `modsec-crs` is only read when `USE_MODSECURITY_CRS=yes`. `crs-plugins-before` and `crs-plugins-after` also need `USE_MODSECURITY_CRS_PLUGINS=yes` and a Core Rule Set version other than 3. When `USE_MODSECURITY_GLOBAL_CRS=yes`, these three types are loaded once for all services: only the top-level folder is read and a service subfolder is ignored. `modsec` keeps its service subfolder.
+
+    **Check that a file is live**
+
+    Use `nginx -T` to check whether NGINX includes your file from disk and the include paths are correct. It tests and prints the current configuration files on disk, not the configuration loaded by the running workers. NGINX marks each included file with a `# configuration file <path>:` line:
+
+    ```shell
+    sudo nginx -T 2>&1 | grep -A 3 "configuration file /etc/bunkerweb/configs/server-http/hello-world.conf"
+    ```
+
+    If nothing is printed, check the folder, the `.conf` suffix and the permissions, then reload the scheduler again.
+
+    To confirm the file is applied, check that the scheduler log (`journalctl -u bunkerweb-scheduler`) reports a successful reload and the web UI does not report a partial application. Then send a request that exercises the configuration and check the expected result. For the `/hello` example above, replace `www.example.com` with your service name and verify that the response body is `world`:
+
+    ```shell
+    curl -i http://www.example.com/hello
+    ```
+
+    !!! warning "A rejected configuration keeps the previous one"
+        Each `upstream` name must be unique across all custom configurations. Two `upstream` blocks with the same name make NGINX refuse the new configuration, and the reload fails. The instances that reject it keep running the last working configuration, and the web UI shows that the changes were applied to some instances only (or to none). The scheduler logs (`journalctl -u bunkerweb-scheduler`) tell you why.
+
 === "All-in-one"
 
     When using the [All-in-one image](https://docs.bunkerweb.io/testing/integrations/#all-in-one-aio-image), you have two choices for adding custom configurations:
@@ -1643,6 +1680,10 @@ REDIS_DATABASE=0
 - **`REDIS_DATABASE`**: Specify the Redis/Valkey database number to use. Defaults to `0`.
 
 If you require more advanced settings, such as authentication, SSL/TLS support, or Sentinel mode, refer to the [Redis plugin settings documentation](https://docs.bunkerweb.io/testing/features/#redis) for detailed guidance.
+
+### Export bans as JSON
+
+Run `bwcli bans --json` to print one JSON object to standard output, grouped by instance, with a `redis` entry when Redis bans are collected. Each source contains an array of ban records, sorted by `date`. Records retain the fields returned by the source, such as `ip`, `country`, `date`, `exp`, `permanent`, `reason`, `service`, `ban_scope`, and `kind`. The command exits with status 0 on success. On failure, it exits non-zero and writes an error to standard error. Without `--json`, `bwcli bans` keeps its formatted output.
 
 ## Protect UDP/TCP applications
 
@@ -3102,6 +3143,130 @@ log {
   destination(d_dyna_file);
 };
 ```
+
+### Send logs to Splunk {#send-logs-to-splunk}
+
+BunkerWeb needs no Splunk plugin: nothing is installed on BunkerWeb. The Splunk side uses the official [BunkerWeb Add-on for Splunk](https://splunkbase.splunk.com/app/10342) (`TA-bunkerweb`, [source on GitHub](https://github.com/bunkerity/bunkerweb-splunk-addon)). It defines the sourcetypes `bunkerweb:access`, `bunkerweb:error` and `bunkerweb:modsec_audit`, with timestamps, line breaking, search-time field extraction and CIM mappings for the Web and Intrusion Detection data models.
+
+A Splunk Universal Forwarder reads the log files, and three settings make BunkerWeb write them in formats the add-on parses: a second access log in `key=value` format, the existing error log, and a ModSecurity audit log in JSON.
+
+**1. Add an access log for Splunk.** Each `ACCESS_LOG_N` pairs with the `LOG_FORMAT_N` of the same suffix, so `access.log` keeps its default format (the Web UI reads it) and the new file gets its own. Add this to `/etc/bunkerweb/variables.env`, and use another suffix if `_1` is already taken:
+
+```conf
+ACCESS_LOG_1=/var/log/bunkerweb/access-splunk.log
+LOG_FORMAT_1=time=$time_iso8601 host=$host client=$remote_addr request_id=$request_id method=$request_method uri="$request_uri" status=$status bytes=$body_bytes_sent ua="$http_user_agent" reason=$reason modsec_rules="$modsecurity_rules" modsec_score=$modsecurity_anomaly_score modsec_id=$modsecurity_unique_id
+```
+
+!!! warning "Write values exactly as shown"
+    BunkerWeb reads `variables.env` literally: no quotes around a value, and no comment after a value on the same line. A trailing comment becomes part of the value. The setting is then ignored with `Ignoring variable ... doesn't match regex` in the scheduler log, and the default applies. Put comments on their own line.
+
+**2. Optional: keep request bodies out of the audit log.** The default `MODSECURITY_SEC_AUDIT_LOG_PARTS` is `BCFH`, and part `C` writes the request body into every audit entry. Treat the file as sensitive, or drop that part:
+
+```conf
+MODSECURITY_SEC_AUDIT_LOG_PARTS=BFH
+```
+
+**3. Write the audit log as JSON.** Add this to `/etc/bunkerweb/variables.env`:
+
+```conf
+MODSECURITY_SEC_AUDIT_LOG_FORMAT=JSON
+```
+
+Earlier versions do not have this setting: put `SecAuditLogFormat JSON` in a custom configuration of type `modsec` instead (for example `/etc/bunkerweb/configs/modsec/audit-json.conf`, see [Custom configurations](#custom-configurations)).
+
+**4. Restart the services.**
+
+```shell
+sudo systemctl restart bunkerweb && \
+sudo systemctl restart bunkerweb-scheduler
+```
+
+**5. Check the files.** Send a request that ModSecurity blocks, for example a URL with `?q=<script>alert(1)</script>` and a browser-like `User-Agent` (a bare `User-Agent` is blocked by the Core Rule Set on its own). Then read the last line of each file. The audit log holds one JSON object per line:
+
+```shell
+sudo tail -n 1 /var/log/bunkerweb/access-splunk.log
+sudo tail -n 1 /var/log/bunkerweb/modsec_audit.log | jq .transaction.unique_id
+```
+
+**6. Install the add-on in Splunk.** Install the [BunkerWeb Add-on for Splunk](https://splunkbase.splunk.com/app/10342) on the search head, and on the indexers (or the heavy forwarder that parses the data). The Universal Forwarder needs no `props.conf`, and the add-on needs no configuration. It sets `KV_MODE = json` for `bunkerweb:modsec_audit` and raises `TRUNCATE` to `100000` for it and for `bunkerweb:error`, so you write no `props.conf` yourself. Audit entries are long: one XSS probe wrote 7.3 KB, and a request with several attack payloads wrote 20 KB, while the default `TRUNCATE` cuts events at 10,000 bytes.
+
+The add-on extracts the access log with one pattern that expects the field order of `LOG_FORMAT_1` above. Keep that format as shown.
+
+**7. Configure the forwarder.** BunkerWeb log files belong to `nginx:nginx` and the packages restrict access to that user and group, so add the user that runs the forwarder to the `nginx` group. Then monitor the three files, one sourcetype each, in `inputs.conf`:
+
+```conf
+[monitor:///var/log/bunkerweb/access-splunk.log]
+sourcetype = bunkerweb:access
+
+[monitor:///var/log/bunkerweb/error.log]
+sourcetype = bunkerweb:error
+
+[monitor:///var/log/bunkerweb/modsec_audit.log]
+sourcetype = bunkerweb:modsec_audit
+```
+
+`access-splunk.log` matches the `/var/log/bunkerweb/*.log` pattern of the [Log File Retention](#log-file-retention) policy, so `logrotate` covers it like the other files.
+
+**Fields of the access log**
+
+The add-on keeps the virtual host in `site` and `dest` in Splunk, because `host` is the name of the machine that sent the event. It also maps `client` to `src`.
+
+| Field          | Content                                                                                                                                |
+| :------------- | :------------------------------------------------------------------------------------------------------------------------------------- |
+| `time`         | `$time_iso8601`                                                                                                                        |
+| `host`         | `$host`                                                                                                                                |
+| `client`       | `$remote_addr`                                                                                                                         |
+| `request_id`   | `$request_id`, the same value as the fourth field of the default `access.log` line                                                     |
+| `method`       | `$request_method`                                                                                                                      |
+| `uri`          | `$request_uri`, with the query string                                                                                                  |
+| `status`       | `$status`                                                                                                                              |
+| `bytes`        | `$body_bytes_sent`                                                                                                                     |
+| `ua`           | `$http_user_agent`                                                                                                                     |
+| `reason`       | The plugin id when a plugin denied the request (`blacklist`, `limit`, ...). Empty otherwise, **including when ModSecurity denied it**  |
+| `modsec_rules` | Rule ids exposed by BunkerWeb’s CRS integration, space-separated with a leading space (ids can repeat). `-` when unset; not a complete record of every match |
+| `modsec_score` | The anomaly score exposed by BunkerWeb’s CRS integration, `-` when unset |
+| `modsec_id` | The id exposed by BunkerWeb’s CRS integration, `-` when unset. When set, it equals `transaction.unique_id` of the matching audit entry |
+
+Three requests, as they appear in `access-splunk.log`: an allowed one, one denied by the `blacklist` plugin, and one denied by ModSecurity (`ua` shortened).
+
+```text
+time=2026-11-10T08:11:02+00:00 host=www.example.com client=10.77.52.1 request_id=a1b31236225cf6d34fec07e089838f48 method=GET uri="/spl-allowed" status=404 bytes=69298 ua="Mozilla/5.0 ..." reason= modsec_rules="-" modsec_score=- modsec_id=-
+time=2026-11-10T08:11:02+00:00 host=www.example.com client=10.77.52.1 request_id=260b845a6bb21e46656c42e7a682f2a1 method=GET uri="/spl-blacklisted" status=403 bytes=69297 ua="Mozilla/5.0 ..." reason=blacklist modsec_rules="-" modsec_score=- modsec_id=-
+time=2026-11-10T08:11:02+00:00 host=www.example.com client=10.77.52.1 request_id=f3ddfff5a4652efdeb3daa645dee0827 method=GET uri="/spl-xss?q=<script>alert(1)</script>" status=403 bytes=69297 ua="Mozilla/5.0 ..." reason= modsec_rules=" 941100 941110 941160 941390" modsec_score=20 modsec_id=179429826266.143898
+```
+
+The first request returns `404` because the test stack has no backend. The matching audit entry, shortened, starts with the same id:
+
+```json
+{"transaction":{"client_ip":"10.77.52.1","time_stamp":"Tue Nov 10 08:11:02 2026","unique_id":"179429826266.143898","request":{"method":"GET","uri":"/spl-xss?q=<script>alert(1)</script>","body":""},"response":{"http_code":403},"messages":[{"message":"XSS Attack Detected via libinjection","details":{"ruleId":"941100","severity":"2"}}]}}
+```
+
+!!! warning "Limits"
+    - **No JSON access log.** `LOG_FORMAT_N` is written between single quotes in the NGINX configuration and there is no place for `escape=json`. Use `key=value` for the access log, and JSON only for the audit log.
+    - **No single quote in a `LOG_FORMAT_N` value.** NGINX rejects the configuration. NGINX escapes a double quote in a logged value as `\x22` (`ua="Mozilla/5.0 \x22quoted\x22"`).
+    - **ModSecurity metadata depends on the rules.** Default CRS anomaly denials populate `modsec_id`, `modsec_rules` and `modsec_score`, with an empty `reason`. A custom `deny` rule without the corresponding `tx.bunkerweb_*` `setvar` actions can leave those fields as `-`. The access log alone cannot identify such a denial; consult the error or audit log.
+    - **The audit log is not a request log or proof of blocking.** The default `MODSECURITY_SEC_AUDIT_ENGINE` (`RelevantOnly`) can also record allowed transactions when a rule logs a match (including `DetectionOnly` or a score below the blocking threshold), or when the status matches `SecAuditLogRelevantStatus`. In the test above, only the ModSecurity denials produced entries.
+    - **Part `C` holds request bodies**, form fields and credentials included. Use `BFH` unless you need the bodies, and restrict who can read the index.
+
+!!! info "Docker, Autoconf, Swarm and Kubernetes"
+    The images link `access.log`, `error.log` and `modsec_audit.log` to the container's own log stream (see [Log File Retention](#log-file-retention)), so a forwarder has no file to read for them, and a file written by `ACCESS_LOG_1` stays inside the container where nothing rotates it. Set `MODSECURITY_SEC_AUDIT_LOG_FORMAT=JSON` on the scheduler, like any other setting, instead of using a file. The JSON entries then appear in `docker logs` of the `bunkerweb` container, one per line, among the error log lines: the lines that start with `{` are the audit entries.
+
+    To ship the stream to Splunk, use the [Docker `splunk` logging driver](https://docs.docker.com/engine/logging/drivers/splunk/) with an HTTP Event Collector token. The driver sends access, error and audit lines together under one sourcetype, so only their content tells them apart. Set the `key=value` format on `LOG_FORMAT` (no suffix) so that the streamed access lines carry it. That replaces the default format in `access.log`.
+
+    ```yaml
+    services:
+      bunkerweb:
+        image: bunkerity/bunkerweb:testing
+        logging:
+          driver: splunk
+          options:
+            splunk-url: "https://splunk.example.com:8088"
+            splunk-token: "<HEC token>"
+            splunk-format: raw
+            splunk-sourcetype: "bunkerweb:docker"
+    ```
+
+    The add-on's extractions apply to `bunkerweb:access`, `bunkerweb:error` and `bunkerweb:modsec_audit`, not to `bunkerweb:docker`.
 
 ## Docker logging best practices {#docker-logging-best-practices}
 

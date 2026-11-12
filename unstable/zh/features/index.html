@@ -33,7 +33,7 @@
       
       
       <link rel="icon" href="../../assets/favicon.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.1">
     
     
       
@@ -41,7 +41,7 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.57a0d79d.min.css">
       
       
 
@@ -3426,6 +3426,56 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#zstandard" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Zstandard
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Zstandard">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_137" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        如何使用
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_138" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        配置设置
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_139" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        示例配置
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -3923,14 +3973,14 @@ curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">"Host: bw
 <tr>
 <td><code>CLIENT_BODY_TIMEOUT</code></td>
 <td><code>10s</code></td>
-<td>global</td>
+<td>multisite</td>
 <td>否</td>
 <td><strong>客户端请求体超时：</strong> 读取客户端请求体的超时时间。</td>
 </tr>
 <tr>
 <td><code>CLIENT_HEADER_TIMEOUT</code></td>
 <td><code>10s</code></td>
-<td>global</td>
+<td>multisite</td>
 <td>否</td>
 <td><strong>客户端请求头超时：</strong> 读取客户端请求头的超时时间。</td>
 </tr>
@@ -3950,6 +4000,7 @@ curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">"Host: bw
 </tr>
 </tbody>
 </table>
+<p>对于长连接 gRPC 流，请按服务设置 <code>CLIENT_HEADER_TIMEOUT</code> 和 <code>CLIENT_BODY_TIMEOUT</code>（例如 <code>netbird.example.com_CLIENT_HEADER_TIMEOUT=1d</code>）。全局 <code>CLIENT_HEADER_TIMEOUT</code> 应保持较短：它还限制默认服务器上的 TLS 握手时间，以及重新加载后未完成的握手使旧工作进程继续存活的时间。 当服务继承全局值时，<code>server-http</code> 自定义配置中已有的 <code>client_header_timeout</code> 或 <code>client_body_timeout</code> 指令仍可正常工作。为服务设置不同的超时值时，请删除对应的自定义指令，以免产生重复指令。</p>
 </div>
 <div class="tabbed-block">
 <table>
@@ -4739,6 +4790,13 @@ curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">"Host: bw
 <td><strong>排除的 URL：</strong> 应绕过挑战的以空格分隔的 URI 正则表达式模式列表。模式会匹配规范化后的路径，既可单独匹配，也可匹配路径后接 <code>?</code> 和查询字符串的形式。</td>
 </tr>
 <tr>
+<td><code>ANTIBOT_INCLUDE_URI</code></td>
+<td></td>
+<td>multisite</td>
+<td>否</td>
+<td><strong>包含的 URL：</strong> 仅对匹配这些以空格分隔的 PCRE 模式的 URI 发起挑战。留空表示所有 URI。匹配规范化路径，或路径后接 <code>?</code> 和查询字符串。<code>ANTIBOT_IGNORE_URI</code> 优先。</td>
+</tr>
+<tr>
 <td><code>ANTIBOT_IGNORE_IP</code></td>
 <td></td>
 <td>multisite</td>
@@ -5449,7 +5507,7 @@ curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">"Host: bw
 </div>
 <div class="admonition tip">
 <p class="admonition-title">使用多个凭据</p>
-<p>您可以为访问配置多个用户名/密码对。每个 <code>AUTH_BASIC_USER</code> 设置都应有一个对应的 <code>AUTH_BASIC_PASSWORD</code> 设置。</p>
+<p>您可以为访问配置多个用户名/密码对。每个 <code>AUTH_BASIC_USER</code> 设置都应有一个对应的 <code>AUTH_BASIC_PASSWORD</code> 设置。一旦配置了其他凭据对，默认的 <code>changeme</code> / <code>changeme</code> 凭据对就会被忽略；将不带后缀的 <code>AUTH_BASIC_USER</code> 和 <code>AUTH_BASIC_PASSWORD</code> 设置为您自己的值即可保留它。</p>
 </div>
 <h3 id="_11">示例配置<a class="headerlink" href="#_11" title="Permanent link">&para;</a></h3>
 <div class="tabbed-set tabbed-alternate" data-tabs="5:3"><input checked="checked" id="__tabbed_5_1" name="__tabbed_5" type="radio" /><input id="__tabbed_5_2" name="__tabbed_5" type="radio" /><input id="__tabbed_5_3" name="__tabbed_5" type="radio" /><div class="tabbed-labels"><label for="__tabbed_5_1">全站保护</label><label for="__tabbed_5_2">保护特定区域</label><label for="__tabbed_5_3">多个用户</label></div>
@@ -5899,6 +5957,13 @@ bwcli<span class="w"> </span>plugin<span class="w"> </span>backup<span class="w"
 <td><strong>启用黑名单：</strong> 设置为 <code>yes</code> 以启用黑名单功能。</td>
 </tr>
 <tr>
+<td><code>BLACKLIST_URLS_REFRESH_INTERVAL</code></td>
+<td><code>1h</code></td>
+<td>multisite</td>
+<td>否</td>
+<td><strong>URL 刷新间隔：</strong> 再次下载前缓存必须达到的最短时间。接受不带单位的秒数或时间后缀（<code>ms</code>、<code>s</code>、<code>m</code>、<code>h</code>、<code>d</code>、<code>w</code>、<code>M</code>、<code>y</code>）。</td>
+</tr>
+<tr>
 <td><code>BLACKLIST_COMMUNITY_LISTS</code></td>
 <td><code>ip:danmeuk-tor-exit ua:mitchellkrogza-bad-user-agents</code></td>
 <td>multisite</td>
@@ -6253,7 +6318,7 @@ bwcli<span class="w"> </span>plugin<span class="w"> </span>backup<span class="w"
 </div>
 <div class="admonition tip">
 <p class="admonition-title">定期更新</p>
-<p>来自 URL 的黑名单会每小时自动下载和更新，以确保您的保护措施始终能应对最新的威胁。</p>
+<p>任务每小时运行一次。<code>BLACKLIST_URLS_REFRESH_INTERVAL</code> 设置再次下载前 URL 缓存必须达到的最短时间（默认：<code>1h</code>）。对于每天最多允许下载一次的提供商，请使用 <code>24h</code>；设置为 <code>0</code> 则每次任务运行时都下载。缓存仍有效或下载失败时，会保留上次的有效条目。在此插件内，各服务共享 URL 缓存：最短的间隔可能触发下载，因此对于有下载频率限制的同一 URL，请在所有使用它的服务上设置相同的间隔。</p>
 </div>
 <h3 id="_21">示例配置<a class="headerlink" href="#_21" title="Permanent link">&para;</a></h3>
 <div class="tabbed-set tabbed-alternate" data-tabs="9:3"><input checked="checked" id="__tabbed_9_1" name="__tabbed_9" type="radio" /><input id="__tabbed_9_2" name="__tabbed_9" type="radio" /><input id="__tabbed_9_3" name="__tabbed_9" type="radio" /><div class="tabbed-labels"><label for="__tabbed_9_1">基本的 IP 和用户代理保护</label><label for="__tabbed_9_2">带有自定义规则的高级保护</label><label for="__tabbed_9_3">使用本地文件</label></div>
@@ -6475,7 +6540,7 @@ TrustedMonitor/\d+\.\d+
 <td><code>no</code></td>
 <td>multisite</td>
 <td>否</td>
-<td><strong>过滤上报的请求头：</strong> 设置为 <code>yes</code> 时，只发送一份简短的请求头白名单，并清空 ModSecurity 在请求头和 Cookie 中命中的值。设置为 <code>no</code> 时，报告包含所有请求头和命中的值。</td>
+<td><strong>过滤上报的请求头：</strong> 设置为 <code>yes</code> 时，只发送一份简短的请求头白名单，并清空 ModSecurity 在请求头和 Cookie 中命中的值。设置为 <code>no</code> 时，报告包含除 <code>Cookie</code>、<code>Authorization</code> 和 <code>Proxy-Authorization</code> 之外的所有请求头，以及命中的值（在 Cookie 和这些请求头中命中的值除外）。</td>
 </tr>
 <tr>
 <td><code>BUNKERNET_SERVER</code></td>
@@ -6497,10 +6562,10 @@ TrustedMonitor/\d+\.\d+
 <li>每次请求发送的实例元数据：BunkerNet 实例 ID、BunkerWeb 版本、集成方式，以及操作系统名称、版本、版本 ID、代号、ID 和架构；</li>
 <li>客户端 IP 地址、阻止原因和日期；</li>
 <li>HTTP 方法、<strong>包含查询字符串的</strong> URL，以及服务名称（<code>server_name</code>）；</li>
-<li>请求头及其值：收到的所有请求头（最多 <code>MAX_HEADERS</code> 个），或在 <code>BUNKERNET_FILTER_HEADERS</code> 为 <code>yes</code> 时仅包含 <code>User-Agent</code>、<code>Accept</code>、<code>Accept-Encoding</code>、<code>Accept-Language</code>、<code>Content-Type</code> 和 <code>Content-Length</code>；</li>
-<li>与阻止原因相关的详细信息。根据阻止该客户端的插件不同，可能包含命中的 ModSecurity 规则 ID 和消息，以及触发这些规则的请求值（参数、请求体、请求头或 Cookie 的片段，每项截断为 512 字节；<code>BUNKERNET_FILTER_HEADERS</code> 为 <code>yes</code> 时，在请求头和 Cookie 中命中的值会被清空，只发送变量名）；对于 Bad Behavior，则是导致封禁的近期请求的方法和 URL。</li>
+<li>请求头及其值：收到的所有请求头（最多 <code>MAX_HEADERS</code> 个，不含 <code>Cookie</code>、<code>Authorization</code> 和 <code>Proxy-Authorization</code>），或在 <code>BUNKERNET_FILTER_HEADERS</code> 为 <code>yes</code> 时仅包含 <code>User-Agent</code>、<code>Accept</code>、<code>Accept-Encoding</code>、<code>Accept-Language</code>、<code>Content-Type</code> 和 <code>Content-Length</code>；</li>
+<li>与阻止原因相关的详细信息。根据阻止该客户端的插件不同，可能包含命中的 ModSecurity 规则 ID 和消息，以及触发这些规则的请求值（参数、请求体、请求头或 Cookie 的片段，每项截断为 512 字节；在 Cookie 以及 <code>Cookie</code>、<code>Authorization</code>、<code>Proxy-Authorization</code> 请求头中命中的值始终会被清空，<code>BUNKERNET_FILTER_HEADERS</code> 为 <code>yes</code> 时其他请求头中命中的值也会被清空，只发送变量名）；对于 Bad Behavior，则是导致封禁的近期请求的方法和 URL。</li>
 </ul>
-<p>默认情况下（<code>BUNKERNET_FILTER_HEADERS</code> 为 <code>no</code>），报告包含收到的所有请求头（最多 <code>MAX_HEADERS</code> 个，包括 Cookie 和 <code>Authorization</code>），以及 ModSecurity 命中的原始值。将 <code>BUNKERNET_FILTER_HEADERS</code> 设置为 <code>yes</code>，则只发送上面列出的六个请求头，并清空在请求头和 Cookie 中命中的值。仍在队列中的报告在 <code>yes</code> 时也会在发送前以同样方式过滤。</p>
+<p>默认情况下（<code>BUNKERNET_FILTER_HEADERS</code> 为 <code>no</code>），报告包含收到的所有请求头（最多 <code>MAX_HEADERS</code> 个），但不含从不发送的 <code>Cookie</code>、<code>Authorization</code> 和 <code>Proxy-Authorization</code>，以及 ModSecurity 命中的值（在 Cookie 和这些请求头中命中的值除外）。将 <code>BUNKERNET_FILTER_HEADERS</code> 设置为 <code>yes</code>，则只发送上面列出的六个请求头，并清空在请求头和 Cookie 中命中的值。仍在队列中的报告在发送前也会以同样方式处理（凭据始终清除，白名单在 <code>yes</code> 时应用）。</p>
 <p>URL 以及命中的值均来自请求，因此包含客户端发送的任何内容。对于 URL 中带有敏感值的服务，请将 <code>USE_BUNKERNET</code> 设置为 <code>no</code>。</p>
 </div>
 <h3 id="_28">示例配置<a class="headerlink" href="#_28" title="Permanent link">&para;</a></h3>
@@ -8376,6 +8441,13 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 <td>否</td>
 <td><strong>启用灰名单：</strong> 设置为 <code>yes</code> 以启用灰名单。</td>
 </tr>
+<tr>
+<td><code>GREYLIST_URLS_REFRESH_INTERVAL</code></td>
+<td><code>1h</code></td>
+<td>multisite</td>
+<td>否</td>
+<td><strong>URL 刷新间隔：</strong> 再次下载前缓存必须达到的最短时间。接受不带单位的秒数或时间后缀（<code>ms</code>、<code>s</code>、<code>m</code>、<code>h</code>、<code>d</code>、<code>w</code>、<code>M</code>、<code>y</code>）。</td>
+</tr>
 </tbody>
 </table>
 <div class="tabbed-set tabbed-alternate" data-tabs="20:6"><input checked="checked" id="__tabbed_20_1" name="__tabbed_20" type="radio" /><input id="__tabbed_20_2" name="__tabbed_20" type="radio" /><input id="__tabbed_20_3" name="__tabbed_20" type="radio" /><input id="__tabbed_20_4" name="__tabbed_20" type="radio" /><input id="__tabbed_20_5" name="__tabbed_20" type="radio" /><input id="__tabbed_20_6" name="__tabbed_20" type="radio" /><div class="tabbed-labels"><label for="__tabbed_20_1">IP 地址</label><label for="__tabbed_20_2">反向 DNS</label><label for="__tabbed_20_3">ASN</label><label for="__tabbed_20_4">用户代理</label><label for="__tabbed_20_5">URI</label><label for="__tabbed_20_6">请求头</label></div>
@@ -8591,7 +8663,7 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 </div>
 <div class="admonition tip">
 <p class="admonition-title">定期更新</p>
-<p>来自 URL 的灰名单会每小时自动下载和更新，以确保您的保护始终与最新的受信任来源保持同步。</p>
+<p>任务每小时运行一次。<code>GREYLIST_URLS_REFRESH_INTERVAL</code> 设置再次下载前 URL 缓存必须达到的最短时间（默认：<code>1h</code>）。对于每天最多允许下载一次的提供商，请使用 <code>24h</code>；设置为 <code>0</code> 则每次任务运行时都下载。缓存仍有效或下载失败时，会保留上次的有效条目。在此插件内，各服务共享 URL 缓存：最短的间隔可能触发下载，因此对于有下载频率限制的同一 URL，请在所有使用它的服务上设置相同的间隔。</p>
 </div>
 <h3 id="_57">示例配置<a class="headerlink" href="#_57" title="Permanent link">&para;</a></h3>
 <div class="tabbed-set tabbed-alternate" data-tabs="21:4"><input checked="checked" id="__tabbed_21_1" name="__tabbed_21" type="radio" /><input id="__tabbed_21_2" name="__tabbed_21" type="radio" /><input id="__tabbed_21_3" name="__tabbed_21" type="radio" /><input id="__tabbed_21_4" name="__tabbed_21" type="radio" /><div class="tabbed-labels"><label for="__tabbed_21_1">基本配置</label><label for="__tabbed_21_2">高级配置</label><label for="__tabbed_21_3">使用本地文件</label><label for="__tabbed_21_4">选择性 API 访问</label></div>
@@ -9020,7 +9092,7 @@ TrustedMonitor/\d+\.\d+
 </div>
 <div class="admonition warning">
 <p class="admonition-title">长连接流与核心超时</p>
-<p>长连接或流式 RPC 可能需要高于全局默认值的通用 NGINX 超时。常见需要调整的是 General 插件设置中的 <code>CLIENT_BODY_TIMEOUT</code> 和 <code>CLIENT_HEADER_TIMEOUT</code>。</p>
+<p>长连接或流式 RPC 可能需要更大的 <code>CLIENT_BODY_TIMEOUT</code> 和 <code>CLIENT_HEADER_TIMEOUT</code>。请在 General 插件设置中为 gRPC 服务单独配置；全局 <code>CLIENT_HEADER_TIMEOUT</code> 应保持较短，以限制 TLS 握手时间和重新加载后旧工作进程的存活时间。</p>
 </div>
 <div class="admonition tip">
 <p class="admonition-title">多个 gRPC 后端</p>
@@ -9533,6 +9605,7 @@ TrustedMonitor/\d+\.\d+
 </tr>
 </tbody>
 </table>
+<p><code>INJECT_HEAD</code> 和 <code>INJECT_BODY</code> 的值按原样作为 HTML 插入：引号和反斜杠无需额外进行 NGINX 转义。如果您之前手动添加了 <code>\'</code> 作为临时解决方法，请删除其中的反斜杠。请保留配置格式（如 YAML）要求的转义；NGINX 的 <code>$variable</code> 变量展开行为保持不变。</p>
 <div class="admonition tip">
 <p class="admonition-title">最佳实践</p>
 <ul>
@@ -10282,6 +10355,13 @@ TrustedMonitor/\d+\.\d+
 <td><a href="https://github.com/ctrlaltcoop/certbot-dns-hetzner/blob/main/README.md">文档</a></td>
 </tr>
 <tr>
+<td><code>hosttech</code></td>
+<td>Hosttech</td>
+<td><code>api_token</code></td>
+<td>默认传播等待时间为 600 秒；如有需要，请增大 <code>LETS_ENCRYPT_DNS_PROPAGATION</code>。</td>
+<td><a href="https://github.com/bunkerity/certbot-dns-hosttech/blob/main/README.md">文档</a></td>
+</tr>
+<tr>
 <td><code>infomaniak</code></td>
 <td>Infomaniak</td>
 <td><code>token</code></td>
@@ -10522,6 +10602,10 @@ TrustedMonitor/\d+\.\d+
 </ul>
 <p>例如，<code>5r/m</code> 表示每个 IP 地址每分钟允许 5 个请求。</p>
 </div>
+<div class="admonition info">
+<p class="admonition-title">跨 worker 的计数精度</p>
+<p>未使用 Redis 时，对于 <code>LIMIT_REQ_RATE</code> 和 <code>LIMIT_REQ_GLOBAL_RATE</code>，每个时间窗口不超过 100 个请求时，跨 worker 的计数是精确的：同时到达的请求无法突破限制。每个时间窗口超过 100 个请求时，同时到达的请求可能略微超出限制，因为在每个请求上串行化一长串请求历史的计数器会降低吞吐量。使用 Redis 时，计数始终精确。</p>
+</div>
 </div>
 <div class="tabbed-block">
 <table>
@@ -10580,28 +10664,28 @@ TrustedMonitor/\d+\.\d+
 <td><code>10</code></td>
 <td>multisite</td>
 <td>否</td>
-<td><strong>HTTP/1.X 连接数：</strong> 每个 IP 地址的最大并发 HTTP/1.X 连接数。</td>
+<td><strong>HTTP/1.X 连接数：</strong> 每个 IP 地址的最大并发 HTTP/1.X 连接数。范围：1 至 65535。</td>
 </tr>
 <tr>
 <td><code>LIMIT_CONN_MAX_HTTP2</code></td>
 <td><code>100</code></td>
 <td>multisite</td>
 <td>否</td>
-<td><strong>HTTP/2 流数：</strong> 每个 IP 地址的最大并发 HTTP/2 流数。</td>
+<td><strong>HTTP/2 流数：</strong> 每个 IP 地址的最大并发 HTTP/2 流数。范围：1 至 65535。</td>
 </tr>
 <tr>
 <td><code>LIMIT_CONN_MAX_HTTP3</code></td>
 <td><code>100</code></td>
 <td>multisite</td>
 <td>否</td>
-<td><strong>HTTP/3 流数：</strong> 每个 IP 地址的最大并发 HTTP/3 流数。</td>
+<td><strong>HTTP/3 流数：</strong> 每个 IP 地址的最大并发 HTTP/3 流数。范围：1 至 65535。</td>
 </tr>
 <tr>
 <td><code>LIMIT_CONN_MAX_STREAM</code></td>
 <td><code>10</code></td>
 <td>multisite</td>
 <td>否</td>
-<td><strong>流连接数：</strong> 每个 IP 地址的最大并发流连接数。</td>
+<td><strong>流连接数：</strong> 每个 IP 地址的最大并发流连接数。范围：1 至 65535。</td>
 </tr>
 </tbody>
 </table>
@@ -11716,6 +11800,13 @@ TrustedMonitor/\d+\.\d+
 <td>写入模式：<code>Serial</code>（默认）或 <code>Concurrent</code>。</td>
 </tr>
 <tr>
+<td><code>MODSECURITY_SEC_AUDIT_LOG_FORMAT</code></td>
+<td><code>Native</code></td>
+<td>multisite</td>
+<td>否</td>
+<td>审计日志格式：<code>Native</code>（默认）或 <code>JSON</code>（每条记录一个 JSON 对象）。在全局 CRS 模式下须全局设置。</td>
+</tr>
+<tr>
 <td><code>MODSECURITY_SEC_AUDIT_LOG_STORAGE_DIR</code></td>
 <td></td>
 <td>multisite</td>
@@ -11775,6 +11866,20 @@ TrustedMonitor/\d+\.\d+
 <p class="admonition-title">大文件上传的安全建议</p>
 <p>ModSecurity 会将完整请求体缓冲到内存中，并且无法为数 GB 的上传设置上限，这可能导致 worker OOM。如果——<strong>并且仅当</strong>——某个反向代理 URL <em>专门</em> 用于文件上传（例如专用的 <code>/upload</code> 端点），请在该 URL 上设置 <code>REVERSE_PROXY_MODSECURITY_N: "no"</code>，以便在其 <code>location</code> 块中生成 <code>modsecurity off;</code>。不要在混合用途的 URL 上禁用它：否则该 location 提供的所有内容都会失去 WAF 覆盖。</p>
 <p>为了在绕过 ModSecurity 后仍保护上传内容，请将其与文件扫描插件配合使用，例如 <a href="https://github.com/bunkerity/bunkerweb-plugins/tree/main/clamav">ClamAV</a> 或 <a href="https://github.com/bunkerity/bunkerweb-plugins/tree/main/virustotal">VirusTotal</a>——它们检查上传文件本身，而不是原始请求体。</p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">响应体阻断与压缩响应</p>
+<p>如果响应体阻断规则在响应头发送后才触发，客户端可能先收到原始状态码（如 <code>200</code>），随后出现响应体不完整或分块传输错误，而不是完整的 <code>403</code> 响应。BunkerWeb 应用 gzip、Brotli 或 zstd 压缩时都可能出现这种情况。从 <code>testing</code> 开始，Brotli 的行为与 gzip 已有的行为一致。请检查 ModSecurity 审计日志和错误日志，确定触发的规则，并用范围严格受限的排除规则处理已确认的误报。</p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">上游压缩的响应体</p>
+<p>CRS v4 不检查上游已经压缩的响应体（<code>gzip</code>、<code>br</code> 或 <code>zstd</code>）。BunkerWeb 不会为检查而解压这些响应体。如果需要检查响应体，请配置上游返回未压缩的内容。对于遵循此请求头的上游，可以仅在受影响的服务和 location 中移除转发请求的 <code>Accept-Encoding</code> 头，以请求未压缩的响应：</p>
+<div class="highlight"><pre><span></span><code><span class="nt">REVERSE_PROXY_HOST_1</span><span class="p">:</span><span class="w"> </span><span class="s">"http://app:8080"</span>
+<span class="nt">REVERSE_PROXY_URL_1</span><span class="p">:</span><span class="w"> </span><span class="s">"/reports/"</span>
+<span class="nt">REVERSE_PROXY_HEADERS_1</span><span class="p">:</span><span class="w"> </span><span class="s">'Accept-Encoding</span><span class="nv"> </span><span class="s">""'</span>
+</code></pre></div>
+<p>请替换主机和路径，并将后缀调整为目标反向代理 location 的编号。如果该 location 的 <code>REVERSE_PROXY_HEADERS_1</code> 已有条目，请保留它们并追加 <code>;Accept-Encoding ""</code>。应使用此设置，而不是服务器级别的 <code>proxy_set_header</code>，因为生成的 location 请求头配置会覆盖后者。</p>
+<p>请验证上游确实返回未压缩的响应；如果仍然压缩，请在上游禁用该路由的压缩。这会增加上游与 BunkerWeb 之间的带宽使用量。检查完成后，BunkerWeb 仍可为客户端压缩响应；配置的响应体检查 MIME 类型和大小限制仍然适用。</p>
 </div>
 <h3 id="crs">可用的 CRS 版本<a class="headerlink" href="#crs" title="Permanent link">&para;</a></h3>
 <p>选择一个 CRS 版本以最符合您的安全需求：</p>
@@ -13631,7 +13736,7 @@ Pod 环境读取这些 Redis 设置。使用官方 Helm chart 时，请在 <code
 <td><code>no</code></td>
 <td>multisite</td>
 <td>是</td>
-<td><strong>保持连接：</strong> 启用或禁用与代理资源的保持连接。</td>
+<td><strong>保持连接：</strong> 向代理资源发送已配置的 HTTP 版本（默认 <code>1.1</code>）和空的 <code>Connection</code> 标头。它本身不会创建连接池：要复用连接，请让 <code>REVERSE_PROXY_HOST</code> 指向在 <code>http</code> 自定义配置中声明的、带 <code>keepalive</code> 的具名 <code>upstream</code>。</td>
 </tr>
 <tr>
 <td><code>REVERSE_PROXY_HTTP_VERSION</code></td>
@@ -13668,6 +13773,29 @@ Pod 环境读取这些 Redis 设置。使用官方 Helm chart 时，请在 <code
 <div class="admonition warning">
 <p class="admonition-title">请求缓冲行为</p>
 <p>禁用 <code>REVERSE_PROXY_REQUEST_BUFFERING</code> 仅在 ModSecurity 被禁用时才会生效，因为否则会强制执行请求缓冲。</p>
+</div>
+<div class="admonition info">
+<p class="admonition-title">复用后端连接</p>
+<p><code>REVERSE_PROXY_KEEPALIVE=yes</code> 只会让 BunkerWeb 向后端发送已配置的 HTTP 版本（默认 <code>1.1</code>）和空的 <code>Connection</code> 标头，并不会创建连接池：使用普通的 <code>REVERSE_PROXY_HOST</code> URL 时，NGINX 会为每个请求新建一条到后端的连接。</p>
+<p>要复用后端连接，请在 <a href="../advanced/#custom-configurations"><code>http</code> 自定义配置</a>中声明一个带 <code>keepalive</code> 的具名 <code>upstream</code>，再让 <code>REVERSE_PROXY_HOST</code> 指向该组名，<strong>不带端口</strong>：端口写在 <code>upstream</code> 的 <code>server</code> 行中。</p>
+<div class="highlight"><pre><span></span><code><span class="k">upstream</span><span class="w"> </span><span class="s">app_pool</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kn">server</span><span class="w"> </span><span class="n">backend.internal</span><span class="p">:</span><span class="mi">8443</span><span class="p">;</span>
+<span class="w">    </span><span class="kn">keepalive</span><span class="w"> </span><span class="mi">32</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code>REVERSE_PROXY_HOST=https://app_pool
+REVERSE_PROXY_KEEPALIVE=yes
+# 仅 HTTPS：将源站名称作为 SNI 发送，并据此验证
+REVERSE_PROXY_SSL_SNI=yes
+REVERSE_PROXY_SSL_SNI_NAME=backend.example.com
+# 仅当后端检查 Host 标头时才需要
+REVERSE_PROXY_CUSTOM_HOST=backend.example.com
+</code></pre></div>
+<ul>
+<li><code>upstream</code> 名称必须唯一，且 <code>server</code> 行中的主机名在 NGINX 加载配置时必须能够解析。</li>
+<li>使用 HTTPS 时，只要 <code>REVERSE_PROXY_SSL_SNI_NAME</code> 为空，NGINX 就会把组名同时用作 SNI 名称和验证名称；而 <code>REVERSE_PROXY_SSL_SNI</code> 为 <code>no</code> 时，该设置会被忽略。请像上面这样同时设置两者，让后端看到其真实名称。</li>
+<li><code>Host</code> 标头仍为客户端的 <code>$host</code>；如果后端期望其他名称，请设置 <code>REVERSE_PROXY_CUSTOM_HOST</code>。</li>
+</ul>
 </div>
 </div>
 <div class="tabbed-block">
@@ -14229,6 +14357,10 @@ Pod 环境读取这些 Redis 设置。使用官方 Helm chart 时，请在 <code
 <li>配置 <code>PROXY_NO_CACHE</code> 以避免缓存敏感或个性化内容</li>
 <li>监控缓存命中率并相应地调整设置</li>
 </ul>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">缓存需要启用响应缓冲</p>
+<p>代理缓存只对启用了响应缓冲的位置生效。当 <code>USE_PROXY_CACHE=yes</code> 时，请为每个要缓存的位置设置 <code>REVERSE_PROXY_BUFFERING=yes</code>，带编号的设置（如 <code>REVERSE_PROXY_BUFFERING_1</code>）也一样。响应缓冲关闭期间，新的响应不会被缓存，除非上游通过 <code>X-Accel-Buffering</code> 启用它；之前已缓存的响应仍可能被返回。<code>REVERSE_PROXY_REQUEST_BUFFERING</code> 控制的是请求正文，不会启用响应缓存。当 BunkerWeb 生成的配置中某个位置启用了代理缓存但响应缓冲已关闭时，会记录一条警告。</p>
 </div>
 </div>
 </div>
@@ -15670,6 +15802,13 @@ Pod 环境读取这些 Redis 设置。使用官方 Helm chart 时，请在 <code
 <td>否</td>
 <td><strong>启用白名单：</strong> 设置为 <code>yes</code> 以启用白名单功能。</td>
 </tr>
+<tr>
+<td><code>WHITELIST_URLS_REFRESH_INTERVAL</code></td>
+<td><code>1h</code></td>
+<td>multisite</td>
+<td>否</td>
+<td><strong>URL 刷新间隔：</strong> 再次下载前缓存必须达到的最短时间。接受不带单位的秒数或时间后缀（<code>ms</code>、<code>s</code>、<code>m</code>、<code>h</code>、<code>d</code>、<code>w</code>、<code>M</code>、<code>y</code>）。</td>
+</tr>
 </tbody>
 </table>
 <div class="tabbed-set tabbed-alternate" data-tabs="46:6"><input checked="checked" id="__tabbed_46_1" name="__tabbed_46" type="radio" /><input id="__tabbed_46_2" name="__tabbed_46" type="radio" /><input id="__tabbed_46_3" name="__tabbed_46" type="radio" /><input id="__tabbed_46_4" name="__tabbed_46" type="radio" /><input id="__tabbed_46_5" name="__tabbed_46" type="radio" /><input id="__tabbed_46_6" name="__tabbed_46" type="radio" /><div class="tabbed-labels"><label for="__tabbed_46_1">IP 地址</label><label for="__tabbed_46_2">反向 DNS</label><label for="__tabbed_46_3">ASN</label><label for="__tabbed_46_4">用户代理</label><label for="__tabbed_46_5">URI</label><label for="__tabbed_46_6">请求头</label></div>
@@ -15881,7 +16020,7 @@ Pod 环境读取这些 Redis 设置。使用官方 Helm chart 时，请在 <code
 </div>
 <div class="admonition tip">
 <p class="admonition-title">定期更新</p>
-<p>从 URL 获取的白名单会每小时自动下载和更新，以确保您的保护与最新的受信任来源保持同步。</p>
+<p>任务每小时运行一次。<code>WHITELIST_URLS_REFRESH_INTERVAL</code> 设置再次下载前 URL 缓存必须达到的最短时间（默认：<code>1h</code>）。对于每天最多允许下载一次的提供商，请使用 <code>24h</code>；设置为 <code>0</code> 则每次任务运行时都下载。缓存仍有效或下载失败时，会保留上次的有效条目。在此插件内，各服务共享 URL 缓存：最短的间隔可能触发下载，因此对于有下载频率限制的同一 URL，请在所有使用它的服务上设置相同的间隔。</p>
 </div>
 <div class="admonition warning">
 <p class="admonition-title">安全绕过</p>
@@ -15985,6 +16124,80 @@ TrustedMonitor/\d+\.\d+
 </tr>
 </tbody>
 </table>
+<h2 id="zstandard">Zstandard<a class="headerlink" href="#zstandard" title="Permanent link">&para;</a></h2>
+<p>STREAM 支持 <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
+<p>Zstandard 插件使用 Zstandard (zstd) 算法压缩 HTTP 响应。对于声明 <code>Accept-Encoding: zstd</code> 的客户端，它可以减少带宽使用量。</p>
+<h3 id="_137">如何使用<a class="headerlink" href="#_137" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>启用压缩：</strong> 将 <code>USE_ZSTD</code> 设置为 <code>yes</code>（默认禁用）。</li>
+<li><strong>配置 MIME 类型和最小大小：</strong> 使用 <code>ZSTD_TYPES</code> 指定要压缩的内容类型，使用 <code>ZSTD_MIN_LENGTH</code> 指定最小响应大小。</li>
+<li><strong>设置压缩级别：</strong> 将 <code>ZSTD_COMP_LEVEL</code> 设置在 <code>1</code>（最快）到 <code>19</code>（支持的最高压缩率）之间。默认值为 <code>3</code>。</li>
+</ol>
+<p>支持 zstd 的客户端会收到 <code>Content-Encoding: zstd</code> 和 <code>Vary: Accept-Encoding</code>。不支持 zstd 的客户端（包括发送 <code>zstd;q=0</code> 的客户端）在启用 Brotli 或 gzip 插件时可以使用这两种压缩方式；否则将收到未压缩的响应。</p>
+<p>启用 <code>USE_ZSTD=yes</code> 后，即使最终选择未压缩、gzip 或 Brotli 表示，符合条件的响应也可能包含 <code>Vary: Accept-Encoding</code>。缓存必须遵循此响应头，将不同表示分开存储。</p>
+<p>当启用多个压缩插件时，服务器的优先顺序为 zstd、Brotli、gzip。每种编码各自遵循自己的 <code>q=0</code>；不同压缩插件之间不会比较正权重。</p>
+<h3 id="_138">配置设置<a class="headerlink" href="#_138" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>设置</th>
+<th>默认值</th>
+<th>上下文</th>
+<th>多个</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>USE_ZSTD</code></td>
+<td><code>no</code></td>
+<td>multisite</td>
+<td>否</td>
+<td><strong>启用 Zstandard：</strong> 启用 Zstandard 响应压缩。</td>
+</tr>
+<tr>
+<td><code>ZSTD_TYPES</code></td>
+<td><code>application/atom+xml application/javascript application/json application/rss+xml application/vnd.ms-fontobject application/x-font-opentype application/x-font-truetype application/x-font-ttf application/x-javascript application/xhtml+xml application/xml font/eot font/opentype font/otf font/truetype image/svg+xml image/vnd.microsoft.icon image/x-icon image/x-win-bitmap text/css text/javascript text/plain text/xml</code></td>
+<td>multisite</td>
+<td>否</td>
+<td><strong>MIME 类型：</strong> 要压缩的 MIME 类型，<code>text/html</code> 始终包含在内。</td>
+</tr>
+<tr>
+<td><code>ZSTD_MIN_LENGTH</code></td>
+<td><code>1000</code></td>
+<td>multisite</td>
+<td>否</td>
+<td><strong>最小大小：</strong> 最小响应大小（以字节为单位）。长度未知的响应也可能被压缩。</td>
+</tr>
+<tr>
+<td><code>ZSTD_COMP_LEVEL</code></td>
+<td><code>3</code></td>
+<td>multisite</td>
+<td>否</td>
+<td><strong>压缩级别：</strong> 压缩级别从 <code>1</code> 到 <code>19</code>。较高的级别会使用更多的 CPU 和内存。</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition tip">
+<p class="admonition-title">压缩级别</p>
+<p>建议从级别 <code>3</code> 开始。较高的级别会增加每个请求的 CPU 和内存使用量；请为并发请求保留足够的容量。级别上限为 <code>19</code>，以符合 HTTP 的 8 MB zstd 窗口限制。</p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">敏感响应</p>
+<p>当响应同时包含机密信息和攻击者可控的输入时，压缩可能通过响应大小的差异泄露机密信息。请对敏感服务禁用压缩，或在应用程序中解决此风险。启用 zstd 后，即使 <code>ZSTD_TYPES</code> 中省略了 <code>text/html</code>，它也始终可被压缩。</p>
+</div>
+<div class="admonition info">
+<p class="admonition-title">上游压缩</p>
+<p>上游已压缩的响应不会被再次压缩。inject 插件需要未压缩的上游响应才能修改 HTML；同时使用这两项功能时，请相应地配置上游。</p>
+</div>
+<h3 id="_139">示例配置<a class="headerlink" href="#_139" title="Permanent link">&para;</a></h3>
+<p>启用 zstd，并以 Brotli 和 gzip 作为回退：</p>
+<div class="highlight"><pre><span></span><code><span class="nt">USE_ZSTD</span><span class="p">:</span><span class="w"> </span><span class="s">"yes"</span>
+<span class="nt">ZSTD_MIN_LENGTH</span><span class="p">:</span><span class="w"> </span><span class="s">"1000"</span>
+<span class="nt">ZSTD_COMP_LEVEL</span><span class="p">:</span><span class="w"> </span><span class="s">"3"</span>
+<span class="nt">USE_BROTLI</span><span class="p">:</span><span class="w"> </span><span class="s">"yes"</span>
+<span class="nt">USE_GZIP</span><span class="p">:</span><span class="w"> </span><span class="s">"yes"</span>
+</code></pre></div>
 
 
 
@@ -16112,10 +16325,10 @@ TrustedMonitor/\d+\.\d+
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.top", "content.tabs.link", "toc.integrate", "content.code.copy", "search.highlight"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "\u5df2\u590d\u5236", "clipboard.copy": "\u590d\u5236", "search.result.more.one": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.more.other": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 # \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.none": "\u6ca1\u6709\u627e\u5230\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.one": "\u627e\u5230 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.other": "# \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.placeholder": "\u952e\u5165\u4ee5\u5f00\u59cb\u641c\u7d22", "search.result.term.missing": "\u7f3a\u5c11", "select.version": "\u9009\u62e9\u5f53\u524d\u7248\u672c"}, "version": {"provider": "mike", "version": "latest"}}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.top", "content.tabs.link", "toc.integrate", "content.code.copy", "search.highlight"], "search": "../../assets/javascripts/workers/search.a7633da7.min.js", "tags": null, "translations": {"clipboard.copied": "\u5df2\u590d\u5236", "clipboard.copy": "\u590d\u5236", "search.result.more.one": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.more.other": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 # \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.none": "\u6ca1\u6709\u627e\u5230\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.one": "\u627e\u5230 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.other": "# \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.placeholder": "\u952e\u5165\u4ee5\u5f00\u59cb\u641c\u7d22", "search.result.term.missing": "\u7f3a\u5c11", "select.version": "\u9009\u62e9\u5f53\u524d\u7248\u672c"}, "version": {"provider": "mike", "version": "latest"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      <script src="../../assets/javascripts/bundle.a5f9d56c.min.js"></script>
       
         <script src="../../assets/extra.js"></script>
       

@@ -33,7 +33,7 @@
       
       
       <link rel="icon" href="../../assets/favicon.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.1">
     
     
       
@@ -41,7 +41,7 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.57a0d79d.min.css">
       
       
 
@@ -1380,7 +1380,7 @@
 <li>Konfigurationsdateien: <code>/etc/bunkerweb/api.env</code> (bei erstem Start mit kommentierten Defaults erzeugt) und <code>/etc/bunkerweb/api.yml</code></li>
 <li>Umgebungsquellen: <code>api.env</code>, <code>variables.env</code>, <code>/run/secrets/&lt;VAR&gt;</code> und dann exportiert in den Gunicorn-Prozess</li>
 </ul>
-<p>Bearbeiten Sie <code>/etc/bunkerweb/api.env</code>, um <code>API_USERNAME</code>/<code>API_PASSWORD</code>, Allowlist, TLS, Ratenlimits oder <code>API_ROOT_PATH</code> zu setzen, dann <code>systemctl reload bunkerweb-api</code>.</p>
+<p>Bearbeiten Sie <code>/etc/bunkerweb/api.env</code>, um <code>API_USERNAME</code>/<code>API_PASSWORD</code>, Allowlist, TLS, Ratenlimits oder <code>API_ROOT_PATH</code> zu setzen, dann <code>systemctl restart bunkerweb-api</code>.</p>
 </div>
 </div>
 </div>
@@ -1913,6 +1913,7 @@
 <li><code>GET /cache</code>: Cache-Dateien mit Filtern (<code>service</code>, <code>plugin</code>, <code>job_name</code>) auflisten; <code>with_data=true</code> bettet druckbaren Inhalt ein.</li>
 <li><code>GET /cache/{service}/{plugin}/{job}/{file}</code>: spezifische Cache-Datei holen/herunterladen (<code>download=true</code>).</li>
 <li><code>DELETE /cache</code> oder <code>DELETE /cache/{service}/{plugin}/{job}/{file}</code>: Cache-Dateien löschen. Der Scheduler wird nur für ein Plugin benachrichtigt, dessen Zeile tatsächlich gelöscht wurde; ein <code>plugin</code>, dem der Job nicht gehört, wird abgelehnt und nichts wird gelöscht.</li>
+<li>Sensible Einträge (gespeicherter Name <code>secret</code> oder auf <code>.secret</code> endend, dazu einige Core-Einträge mit privaten Schlüsseln oder Zugangsdaten die mTLS-Client-Schlüssel für Upstreams und das Failover-Backup-Archiv): <code>GET /cache/{service}/{plugin}/{job}/{file}</code> liefert <code>403</code>, und <code>GET /cache?with_data=true</code> lässt <code>data</code> und <code>printable</code> weg (die Metadaten bleiben), sofern der Aufrufer nicht HTTP Basic als API-Administrator oder den <code>API_TOKEN</code> verwendet hat. Ein Biscuit-Token wird auch dann abgelehnt, wenn er für einen Administrator ausgestellt wurde. Das <code>403</code> kommt auch bei einem sensiblen Namen, der nicht existiert. <code>DELETE</code> bleibt unverändert und benötigt weiterhin <code>cache_delete</code>. Siehe <a href="../plugins/#sensible-job-cache-eintrage">Sensible Job-Cache-Einträge</a>.</li>
 <li><strong>Jobs</strong></li>
 <li><code>GET /jobs</code>: Jobs, Zeitpläne und Cache-Zusammenfassungen auflisten.</li>
 <li><code>POST /jobs/run</code>: Plugins als geändert markieren, um zugehörige Jobs auszulösen.</li>
@@ -2051,10 +2052,10 @@
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.top", "content.tabs.link", "toc.integrate", "content.code.copy", "search.highlight"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "In Zwischenablage kopiert", "clipboard.copy": "In Zwischenablage kopieren", "search.result.more.one": "1 weiteres Suchergebnis auf dieser Seite", "search.result.more.other": "# weitere Suchergebnisse auf dieser Seite", "search.result.none": "Keine Suchergebnisse", "search.result.one": "1 Suchergebnis", "search.result.other": "# Suchergebnisse", "search.result.placeholder": "Suchbegriff eingeben", "search.result.term.missing": "Es fehlt", "select.version": "Version ausw\u00e4hlen"}, "version": {"provider": "mike", "version": "latest"}}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.top", "content.tabs.link", "toc.integrate", "content.code.copy", "search.highlight"], "search": "../../assets/javascripts/workers/search.a7633da7.min.js", "tags": null, "translations": {"clipboard.copied": "In Zwischenablage kopiert", "clipboard.copy": "In Zwischenablage kopieren", "search.result.more.one": "1 weiteres Suchergebnis auf dieser Seite", "search.result.more.other": "# weitere Suchergebnisse auf dieser Seite", "search.result.none": "Keine Suchergebnisse", "search.result.one": "1 Suchergebnis", "search.result.other": "# Suchergebnisse", "search.result.placeholder": "Suchbegriff eingeben", "search.result.term.missing": "Es fehlt", "select.version": "Version ausw\u00e4hlen"}, "version": {"provider": "mike", "version": "latest"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      <script src="../../assets/javascripts/bundle.a5f9d56c.min.js"></script>
       
         <script src="../../assets/extra.js"></script>
       

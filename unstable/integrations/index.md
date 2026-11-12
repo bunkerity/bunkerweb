@@ -1649,6 +1649,23 @@ Key concepts for Docker integration include:
 !!! info "Database backend"
     Please note that our instructions assume you are using SQLite as the default database backend, as configured by the `DATABASE_URI` setting. However, other database backends are also supported. See the docker-compose files in the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/vtesting/misc/integrations) of the repository for more information.
 
+### Docker image tags {#docker-image-tags}
+
+Every image is published under the same tags on Docker Hub (`bunkerity/`), GHCR (`ghcr.io/bunkerity/`) and the GitLab registry (`registry.gitlab.com/bunkerity/bunkerweb/`). `X.Y` stands for a minor version such as `1.6`, `X.Y.Z` for a full version such as `1.6.18`.
+
+| Tag                               | Points at                                                    | Use it for                                                    |
+| --------------------------------- | ------------------------------------------------------------ | ------------------------------------------------------------- |
+| `X.Y.Z`, `X.Y.Z-rcN`              | One exact release or release candidate, never moves          | Production: pin these                                         |
+| `latest`                          | The newest stable release of any minor                       | Quick tests: it jumps to the next minor when one ships        |
+| `X.Y`                             | The newest stable release of that minor                      | Following a minor and getting its patch releases              |
+| `X.Y-edge`                        | The newest release candidate or stable release of that minor | Trying the next release early, then following it once stable |
+| `X.Y-rc`, `X.Y-beta`, `X.Y-alpha` | The newest release candidate, beta or alpha of that minor    | Testing pre-releases of a given minor                         |
+| `rc`, `beta`                      | The last published release candidate or beta, whatever its version; re-publishing an older release moves the tag back | Legacy names: prefer the per-minor tags above                 |
+| `testing`                         | The latest build from the staging pipeline (the `staging` and `fix-cve` branches or a manual run) | Testing unreleased changes, never production                  |
+| `dev`                             | The latest build from the dev pipeline (the `dev` branch or a manual run) | Contributors, never production                                |
+
+Only the first row is immutable. Every other tag moves when a new build is published, so use a full version tag in production and update it on purpose.
+
 ### Environment variables
 
 Settings are passed to the Scheduler using Docker environment variables:
@@ -2008,7 +2025,7 @@ Supported Linux distributions for BunkerWeb (amd64/x86_64 and arm64/aarch64 arch
 - Ubuntu 22.04 "Jammy"
 - Ubuntu 24.04 "Noble"
 - Ubuntu 26.04 "Resolute Raccoon"
-- Fedora 43 and 44
+- Fedora 43, 44 and 45
 - Red Hat Enterprise Linux (RHEL), CentOS, Rocky Linux and AlmaLinux 8, 9 and 10
 
 ### Easy installation script
@@ -5224,6 +5241,7 @@ Linux package generation can be done directly with Docker in 2 steps:
 - `debian-trixie`
 - `fedora-43`
 - `fedora-44`
+- `fedora-45`
 - `rhel-8`
 - `rhel-9`
 - `rhel-10`

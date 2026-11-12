@@ -33,7 +33,7 @@
       
       
       <link rel="icon" href="../../assets/favicon.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.1">
     
     
       
@@ -41,7 +41,7 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.57a0d79d.min.css">
       
       
 
@@ -1043,6 +1043,17 @@
   
     <nav class="md-nav" aria-label="Docker">
       <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#docker-image-tags" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Docker 镜像标签
+      
+    </span>
+  </a>
+  
+</li>
         
           <li class="md-nav__item">
   <a href="#_37" class="md-nav__link">
@@ -3422,6 +3433,60 @@ cscli<span class="w"> </span>install<span class="w"> </span>parser<span class="w
 <p class="admonition-title">数据库后端</p>
 <p>请注意，我们的说明假设您正在使用 SQLite 作为默认的数据库后端，这是由 <code>DATABASE_URI</code> 设置配置的。但是，也支持其他数据库后端。有关更多信息，请参阅仓库的 <a href="https://github.com/bunkerity/bunkerweb/tree/vtesting/misc/integrations">misc/integrations 文件夹</a>中的 docker-compose 文件。</p>
 </div>
+<h3 id="docker-image-tags">Docker 镜像标签<a class="headerlink" href="#docker-image-tags" title="Permanent link">&para;</a></h3>
+<p>每个镜像都以相同的标签发布到 Docker Hub（<code>bunkerity/</code>）、GHCR（<code>ghcr.io/bunkerity/</code>）和 GitLab 镜像仓库（<code>registry.gitlab.com/bunkerity/bunkerweb/</code>）。<code>X.Y</code> 表示次版本号，例如 <code>1.6</code>；<code>X.Y.Z</code> 表示完整版本号，例如 <code>1.6.18</code>。</p>
+<table>
+<thead>
+<tr>
+<th>标签</th>
+<th>指向</th>
+<th>适用场景</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>X.Y.Z</code>、<code>X.Y.Z-rcN</code></td>
+<td>某个确定的正式版本或候选版本，永不移动</td>
+<td>生产环境：请固定使用这些标签</td>
+</tr>
+<tr>
+<td><code>latest</code></td>
+<td>所有次版本中最新的稳定版本</td>
+<td>快速测试：新的次版本发布后会随之跳转</td>
+</tr>
+<tr>
+<td><code>X.Y</code></td>
+<td>该次版本中最新的稳定版本</td>
+<td>跟随某个次版本并获取其补丁版本</td>
+</tr>
+<tr>
+<td><code>X.Y-edge</code></td>
+<td>该次版本中最新的候选版本或稳定版本</td>
+<td>提前试用下一个版本，稳定后继续跟随</td>
+</tr>
+<tr>
+<td><code>X.Y-rc</code>、<code>X.Y-beta</code>、<code>X.Y-alpha</code></td>
+<td>该次版本中最新的候选版本、Beta 版或 Alpha 版</td>
+<td>测试某个次版本的预发布版本</td>
+</tr>
+<tr>
+<td><code>rc</code>、<code>beta</code></td>
+<td>最后发布的候选版本或 Beta 版，不区分版本号；重新发布旧版本会使标签回退</td>
+<td>旧名称：请优先使用上面按次版本区分的标签</td>
+</tr>
+<tr>
+<td><code>testing</code></td>
+<td>来自 staging 流水线的最新构建（<code>staging</code> 和 <code>fix-cve</code> 分支或手动运行）</td>
+<td>测试尚未发布的更改，切勿用于生产环境</td>
+</tr>
+<tr>
+<td><code>dev</code></td>
+<td>来自 dev 流水线的最新构建（<code>dev</code> 分支或手动运行）</td>
+<td>贡献者使用，切勿用于生产环境</td>
+</tr>
+</tbody>
+</table>
+<p>只有第一行是不可变的。其他标签会在发布新构建时移动，因此生产环境请使用完整版本标签，并有计划地更新。</p>
 <h3 id="_37">环境变量<a class="headerlink" href="#_37" title="Permanent link">&para;</a></h3>
 <p>设置通过 Docker 环境变量传递给调度器：</p>
 <div class="highlight"><pre><span></span><code><span class="nn">...</span>
@@ -3886,7 +3951,7 @@ docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </
 <li>Ubuntu 22.04 "Jammy"</li>
 <li>Ubuntu 24.04 "Noble"</li>
 <li>Ubuntu 26.04 "Resolute Raccoon"</li>
-<li>Fedora 43 和 44</li>
+<li>Fedora 43、44 和 45</li>
 <li>Red Hat Enterprise Linux (RHEL)、CentOS、Rocky Linux 和 AlmaLinux 8, 9 和 10</li>
 </ul>
 <h3 id="_48">简易安装脚本<a class="headerlink" href="#_48" title="Permanent link">&para;</a></h3>
@@ -7174,6 +7239,7 @@ kubectl<span class="w"> </span>delete<span class="w"> </span>ingress<span class=
 <li><code>debian-trixie</code></li>
 <li><code>fedora-43</code></li>
 <li><code>fedora-44</code></li>
+<li><code>fedora-45</code></li>
 <li><code>rhel-8</code></li>
 <li><code>rhel-9</code></li>
 <li><code>rhel-10</code></li>
@@ -7488,10 +7554,10 @@ docker<span class="w"> </span>image<span class="w"> </span>ls<span class="w"> </
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.top", "content.tabs.link", "toc.integrate", "content.code.copy", "search.highlight"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "\u5df2\u590d\u5236", "clipboard.copy": "\u590d\u5236", "search.result.more.one": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.more.other": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 # \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.none": "\u6ca1\u6709\u627e\u5230\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.one": "\u627e\u5230 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.other": "# \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.placeholder": "\u952e\u5165\u4ee5\u5f00\u59cb\u641c\u7d22", "search.result.term.missing": "\u7f3a\u5c11", "select.version": "\u9009\u62e9\u5f53\u524d\u7248\u672c"}, "version": {"provider": "mike", "version": "latest"}}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.top", "content.tabs.link", "toc.integrate", "content.code.copy", "search.highlight"], "search": "../../assets/javascripts/workers/search.a7633da7.min.js", "tags": null, "translations": {"clipboard.copied": "\u5df2\u590d\u5236", "clipboard.copy": "\u590d\u5236", "search.result.more.one": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.more.other": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 # \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.none": "\u6ca1\u6709\u627e\u5230\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.one": "\u627e\u5230 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.other": "# \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.placeholder": "\u952e\u5165\u4ee5\u5f00\u59cb\u641c\u7d22", "search.result.term.missing": "\u7f3a\u5c11", "select.version": "\u9009\u62e9\u5f53\u524d\u7248\u672c"}, "version": {"provider": "mike", "version": "latest"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      <script src="../../assets/javascripts/bundle.a5f9d56c.min.js"></script>
       
         <script src="../../assets/extra.js"></script>
       

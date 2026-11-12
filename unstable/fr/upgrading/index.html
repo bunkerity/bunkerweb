@@ -33,7 +33,7 @@
       
       
       <link rel="icon" href="../../assets/favicon.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.1">
     
     
       
@@ -41,7 +41,7 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.57a0d79d.min.css">
       
       
 
@@ -1294,7 +1294,7 @@ utilisez l'onglet <strong>Manuel</strong> dans ces cas.</p>
 <li>Détection<ul>
 <li>Relit le type d'installation (full, manager, worker, scheduler, ui, api) depuis le <code>.env</code>, vous n'avez donc jamais à redéclarer votre topologie.</li>
 <li>Récupère les secrets, les ports de l'hôte, la liste des workers et le nom de projet Compose depuis le <code>.env</code> : une mise à niveau ne peut donc ni changer le mot de passe de la base, ni invalider les secrets 2FA enregistrés, ni déplacer vos ports publiés. Lorsqu'une clé est répétée, la dernière affectation l'emporte ; un préfixe <code>export</code> facultatif est accepté et les valeurs explicites de la ligne de commande restent prioritaires. Les guillemets, l'interpolation, les échappements et toute autre syntaxe dotenv non prise en charge sont rejetés avant la réécriture du fichier ; utilisez la procédure manuelle pour ces fichiers.</li>
-<li>Lit la version réellement en cours d'exécution depuis le conteneur plutôt que de se fier au tag de l'image : un tag flottant (<code>latest</code>, <code>testing</code> ou <code>1.6</code>, la dernière version 1.6.x, qui reste sur 1.6 à la sortie de la 1.7) comme une mise à niveau précédente interrompue sont ainsi correctement détectés.</li>
+<li>Lit la version réellement en cours d'exécution depuis le conteneur plutôt que de se fier au tag de l'image : un tag flottant (<a href="../integrations/#docker-image-tags">tous les tags</a> : <code>latest</code>, <code>testing</code>, <code>1.6</code>, la dernière version 1.6.x, qui reste sur 1.6 à la sortie de la 1.7, ou <code>1.6-edge</code>, la dernière version candidate ou finale 1.6.x) comme une mise à niveau précédente interrompue sont ainsi correctement détectés.</li>
 </ul>
 </li>
 <li>Décision de mise à niveau<ul>
@@ -2612,7 +2612,7 @@ gh<span class="w"> </span>attestation<span class="w"> </span>verify<span class="
 <span class="w">  </span>--signer-workflow<span class="w"> </span>bunkerity/bunkerweb/.github/workflows/release.yml<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>--source-ref<span class="w"> </span><span class="s2">"refs/tags/</span><span class="nv">$TAG</span><span class="s2">"</span>
 </code></pre></div>
-<p>La release liste aussi la somme de contrôle SHA-256 de chaque paquet dans <code>release-manifest.json</code>. Vérifiez le manifeste avec sa propre somme de contrôle, puis le paquet avec le manifeste, en choisissant l'entrée de votre distribution (<code>ubuntu</code>, <code>ubuntu-noble</code>, <code>ubuntu-jammy</code>, <code>debian-bookworm</code>, <code>debian-trixie</code>, <code>fedora-43</code>, <code>fedora-44</code>, <code>rhel-8</code>, <code>rhel-9</code> ou <code>rhel-10</code>) et de votre plateforme (<code>linux/amd64</code> ou <code>linux/arm64</code>) :</p>
+<p>La release liste aussi la somme de contrôle SHA-256 de chaque paquet dans <code>release-manifest.json</code>. Vérifiez le manifeste avec sa propre somme de contrôle, puis le paquet avec le manifeste, en choisissant l'entrée de votre distribution (<code>ubuntu</code>, <code>ubuntu-noble</code>, <code>ubuntu-jammy</code>, <code>debian-bookworm</code>, <code>debian-trixie</code>, <code>fedora-43</code>, <code>fedora-44</code>, <code>fedora-45</code>, <code>rhel-8</code>, <code>rhel-9</code> ou <code>rhel-10</code>) et de votre plateforme (<code>linux/amd64</code> ou <code>linux/arm64</code>) :</p>
 <div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-fsSL<span class="w"> </span>-O<span class="w"> </span><span class="s2">"https://github.com/bunkerity/bunkerweb/releases/download/</span><span class="si">${</span><span class="nv">TAG</span><span class="si">}</span><span class="s2">/release-manifest.json"</span><span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>-O<span class="w"> </span><span class="s2">"https://github.com/bunkerity/bunkerweb/releases/download/</span><span class="si">${</span><span class="nv">TAG</span><span class="si">}</span><span class="s2">/release-manifest.json.sha256"</span>
 sha256sum<span class="w"> </span>-c<span class="w"> </span>release-manifest.json.sha256
@@ -2748,10 +2748,10 @@ jq<span class="w"> </span>-r<span class="w"> </span><span class="s1">'.packages[
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.top", "content.tabs.link", "toc.integrate", "content.code.copy", "search.highlight"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copi\u00e9 dans le presse-papier", "clipboard.copy": "Copier dans le presse-papier", "search.result.more.one": "1 de plus sur cette page", "search.result.more.other": "# de plus sur cette page", "search.result.none": "Aucun document trouv\u00e9", "search.result.one": "1 document trouv\u00e9", "search.result.other": "# documents trouv\u00e9s", "search.result.placeholder": "Taper pour d\u00e9marrer la recherche", "search.result.term.missing": "Non trouv\u00e9", "select.version": "S\u00e9lectionner la version"}, "version": {"provider": "mike", "version": "latest"}}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.top", "content.tabs.link", "toc.integrate", "content.code.copy", "search.highlight"], "search": "../../assets/javascripts/workers/search.a7633da7.min.js", "tags": null, "translations": {"clipboard.copied": "Copi\u00e9 dans le presse-papier", "clipboard.copy": "Copier dans le presse-papier", "search.result.more.one": "1 de plus sur cette page", "search.result.more.other": "# de plus sur cette page", "search.result.none": "Aucun document trouv\u00e9", "search.result.one": "1 document trouv\u00e9", "search.result.other": "# documents trouv\u00e9s", "search.result.placeholder": "Taper pour d\u00e9marrer la recherche", "search.result.term.missing": "Non trouv\u00e9", "select.version": "S\u00e9lectionner la version"}, "version": {"provider": "mike", "version": "latest"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      <script src="../../assets/javascripts/bundle.a5f9d56c.min.js"></script>
       
         <script src="../../assets/extra.js"></script>
       

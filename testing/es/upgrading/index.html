@@ -33,7 +33,7 @@
       
       
       <link rel="icon" href="../../assets/favicon.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.1">
     
     
       
@@ -41,7 +41,7 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.57a0d79d.min.css">
       
       
 
@@ -1294,7 +1294,7 @@ pestaña <strong>Manual</strong> para esos casos.</p>
 <li>Detección<ul>
 <li>Lee el tipo de instalación (full, manager, worker, scheduler, ui, api) desde el <code>.env</code>, así que nunca tienes que volver a indicar tu topología.</li>
 <li>Recupera los secretos, los puertos del host, la lista de workers y el nombre de proyecto de Compose desde el <code>.env</code>, de modo que una actualización no puede rotar la contraseña de la base de datos, invalidar los secretos 2FA almacenados ni mover tus puertos publicados. Cuando una clave se repite se usa la última asignación; se acepta un prefijo <code>export</code> opcional y los valores explícitos de la línea de comandos siguen teniendo prioridad. Las comillas, la interpolación, los escapes y cualquier otra sintaxis dotenv no admitida se rechazan antes de reescribir el archivo; usa la vía de actualización manual para esos archivos.</li>
-<li>Lee la versión que realmente se está ejecutando desde el contenedor en lugar de fiarse de la etiqueta de imagen, así se detectan correctamente tanto una etiqueta móvil (<code>latest</code>, <code>testing</code> o <code>1.6</code>, la última versión 1.6.x, que se mantiene en 1.6 cuando sale la 1.7) como una actualización anterior interrumpida.</li>
+<li>Lee la versión que realmente se está ejecutando desde el contenedor en lugar de fiarse de la etiqueta de imagen, así se detectan correctamente tanto una etiqueta móvil (<a href="../integrations/#docker-image-tags">todas las etiquetas</a>: <code>latest</code>, <code>testing</code>, <code>1.6</code>, la última versión 1.6.x, que se mantiene en 1.6 cuando sale la 1.7, o <code>1.6-edge</code>, la última versión candidata o versión final 1.6.x) como una actualización anterior interrumpida.</li>
 </ul>
 </li>
 <li>Decisión de actualización<ul>
@@ -2612,7 +2612,7 @@ gh<span class="w"> </span>attestation<span class="w"> </span>verify<span class="
 <span class="w">  </span>--signer-workflow<span class="w"> </span>bunkerity/bunkerweb/.github/workflows/release.yml<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>--source-ref<span class="w"> </span><span class="s2">"refs/tags/</span><span class="nv">$TAG</span><span class="s2">"</span>
 </code></pre></div>
-<p>La release también lista la suma de comprobación SHA-256 de cada paquete en <code>release-manifest.json</code>. Compruebe el manifiesto con su propia suma de comprobación y después el paquete con el manifiesto, eligiendo la entrada de su distribución (<code>ubuntu</code>, <code>ubuntu-noble</code>, <code>ubuntu-jammy</code>, <code>debian-bookworm</code>, <code>debian-trixie</code>, <code>fedora-43</code>, <code>fedora-44</code>, <code>rhel-8</code>, <code>rhel-9</code> o <code>rhel-10</code>) y de su plataforma (<code>linux/amd64</code> o <code>linux/arm64</code>):</p>
+<p>La release también lista la suma de comprobación SHA-256 de cada paquete en <code>release-manifest.json</code>. Compruebe el manifiesto con su propia suma de comprobación y después el paquete con el manifiesto, eligiendo la entrada de su distribución (<code>ubuntu</code>, <code>ubuntu-noble</code>, <code>ubuntu-jammy</code>, <code>debian-bookworm</code>, <code>debian-trixie</code>, <code>fedora-43</code>, <code>fedora-44</code>, <code>fedora-45</code>, <code>rhel-8</code>, <code>rhel-9</code> o <code>rhel-10</code>) y de su plataforma (<code>linux/amd64</code> o <code>linux/arm64</code>):</p>
 <div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-fsSL<span class="w"> </span>-O<span class="w"> </span><span class="s2">"https://github.com/bunkerity/bunkerweb/releases/download/</span><span class="si">${</span><span class="nv">TAG</span><span class="si">}</span><span class="s2">/release-manifest.json"</span><span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>-O<span class="w"> </span><span class="s2">"https://github.com/bunkerity/bunkerweb/releases/download/</span><span class="si">${</span><span class="nv">TAG</span><span class="si">}</span><span class="s2">/release-manifest.json.sha256"</span>
 sha256sum<span class="w"> </span>-c<span class="w"> </span>release-manifest.json.sha256
@@ -2748,10 +2748,10 @@ jq<span class="w"> </span>-r<span class="w"> </span><span class="s1">'.packages[
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.top", "content.tabs.link", "toc.integrate", "content.code.copy", "search.highlight"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copiado al portapapeles", "clipboard.copy": "Copiar al portapapeles", "search.result.more.one": "1 m\u00e1s en esta p\u00e1gina", "search.result.more.other": "# m\u00e1s en esta p\u00e1gina", "search.result.none": "No se encontraron documentos", "search.result.one": "1 documento encontrado", "search.result.other": "# documentos encontrados", "search.result.placeholder": "Teclee para comenzar b\u00fasqueda", "search.result.term.missing": "Falta", "select.version": "Seleccionar versi\u00f3n"}, "version": {"provider": "mike", "version": "latest"}}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.top", "content.tabs.link", "toc.integrate", "content.code.copy", "search.highlight"], "search": "../../assets/javascripts/workers/search.a7633da7.min.js", "tags": null, "translations": {"clipboard.copied": "Copiado al portapapeles", "clipboard.copy": "Copiar al portapapeles", "search.result.more.one": "1 m\u00e1s en esta p\u00e1gina", "search.result.more.other": "# m\u00e1s en esta p\u00e1gina", "search.result.none": "No se encontraron documentos", "search.result.one": "1 documento encontrado", "search.result.other": "# documentos encontrados", "search.result.placeholder": "Teclee para comenzar b\u00fasqueda", "search.result.term.missing": "Falta", "select.version": "Seleccionar versi\u00f3n"}, "version": {"provider": "mike", "version": "latest"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      <script src="../../assets/javascripts/bundle.a5f9d56c.min.js"></script>
       
         <script src="../../assets/extra.js"></script>
       
