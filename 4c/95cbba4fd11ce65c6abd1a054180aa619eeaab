@@ -1,0 +1,1788 @@
+.github/ISSUE_TEMPLATE/bug_report.yml
+  h_a33a1e80933106 74
+.github/RELEASING.md
+  h_a33a1e80933106 76,78-83,95-112
+.github/scripts/release_artifacts.py
+  h_a33a1e80933106 25,128
+.github/scripts/test_release_artifacts.py
+  h_a33a1e80933106 24-25,49,69-88,269-276,316-317,327-329,422,441-442,458,471,507,509
+.github/workflows/dev.yml
+  h_a33a1e80933106 66,88-89,193-194
+.github/workflows/doc-to-pdf.yml
+  h_a33a1e80933106 7-12,36,42,48-49,59-64
+.github/workflows/integration-tests.yml
+  h_a33a1e80933106 175-197,210,215-217,219-222,378
+.github/workflows/push-github.yml
+  h_a33a1e80933106 94-95,104,126
+.github/workflows/release.yml
+  h_a33a1e80933106 118,125-129,135-138,156-177,329,350-351,559,599-603,642-644,675-677,846,848,855
+.github/workflows/staging.yml
+  h_a33a1e80933106 64,84-85
+.github/workflows/unit-tests.yml
+  h_a33a1e80933106 94-95,108,112-118,314,319-323,327,330-334
+CHANGELOG.md
+  h_a33a1e80933106 3-82
+README.md
+  h_a33a1e80933106 3-4,26,71,76,78,107,143,152,180,183,192-197,236,248,284-286,289-291,298,320,335,346,357,364,366,375,377,383,387,389,397,416,433,462,478,504
+docs/Dockerfile
+  h_a33a1e80933106 1
+docs/advanced.md
+  h_a33a1e80933106 3,5,88,99,107,124,132,179,187,252,263,273,291,301,353,363,488-489,593,612,698,1135,1163,1174,1262-1298,1328,1368,1391,1434,1504,1690-1693,1754,1777,1792,1843,2073,2203,2247,2262,2356,2369,2384,2624,2712,2798,2808,2964,2977,2994,3153-3276,3290,3399,3410,3429,3472,3741,3746,4570,4574,4657
+docs/api.md
+  h_a33a1e80933106 45,58,80,147,161,415
+docs/concepts.md
+  h_a33a1e80933106 108,129
+docs/de/advanced.md
+  h_a33a1e80933106 3,5,88,99,107,124,132,179,187,252,263,273,291,301,353,363,488-489,591,610,696,1133,1161,1172,1260-1296,1326,1366,1389,1432,1502,1689-1692,1753,1776,1791,1842,2072,2202,2246,2261,2355,2368,2383,2623,2711,2797,2807,2963,2976,2993,3152-3273,3287,3396,3407,3426,3469,3738,3743,4567,4571,4654
+docs/de/api.md
+  h_a33a1e80933106 45,58,80,147,161,412
+docs/de/concepts.md
+  h_a33a1e80933106 108,129
+docs/de/features.md
+  h_a33a1e80933106 118-129,381,768,1079,1188,1374,1386-1387,1389,1985,2002,2714,2781,2949,3301-3302,3565,3709-3711,3724-3730,4408,4427-4442,5520-5530,5542-5567,5774-5776,6600,6664,6772-6819
+docs/de/integrations.md
+  h_a33a1e80933106 1271,1287,1365,1373,1460,1519,1541,1563,1602,1634,1640,1650-1667,1677,1724,1745,1754,1772,1920,1933,1966,1979,2033,2046-2047,2150,2217,2381,2386,2422,2427,2458,2463,2508,2513,2611,2625,2640,2655,2827,2863,2869,2942,3057,3227,3271,3553,3705,3886,3890,3898,3902,4524,4538,4567,4588,4740,4752,5163
+docs/de/plugins.md
+  h_a33a1e80933106 11-22,30,98,133,176,223,263,500,581,587-609
+docs/de/quickstart-guide.md
+  h_a33a1e80933106 21,52,70-71,112,125,142,212,228,246,269,367,397,415,444,670,692
+docs/de/upgrading.md
+  h_a33a1e80933106 22-23,52,107,110,113,116,172,183,192,231-232,309-310,313,316,319,322,402,428,904,907,910,913,948,974,1207,1252
+docs/de/web-ui.md
+  h_a33a1e80933106 55,66,86
+docs/es/advanced.md
+  h_a33a1e80933106 3,5,88,99,107,124,132,179,187,252,263,273,291,301,353,363,488-489,591,610,696,1133,1161,1172,1260-1296,1326,1366,1389,1432,1502,1689-1692,1753,1776,1791,1842,2072,2202,2246,2261,2355,2368,2383,2623,2711,2797,2807,2963,2976,2993,3152-3273,3287,3396,3407,3426,3469,3738,3743,4567,4571,4654
+docs/es/api.md
+  h_a33a1e80933106 45,58,80,147,161,412
+docs/es/concepts.md
+  h_a33a1e80933106 108,129
+docs/es/features.md
+  h_a33a1e80933106 118-129,380,777,1088,1197,1391,1403-1404,1406,2008,2025,2757,2824,2992,3354-3355,3618,3762-3764,3780-3783,4460,4479-4494,5579-5589,5601-5626,5833-5835,6677,6741,6849-6896
+docs/es/integrations.md
+  h_a33a1e80933106 1271,1287,1365,1373,1460,1520,1542,1564,1603,1635,1641,1651-1668,1678,1725,1746,1755,1773,1921,1934,1967,1980,2034,2047-2048,2151,2218,2382,2387,2423,2428,2459,2464,2509,2514,2613,2627,2642,2657,2829,2865,2871,2943,3058,3228,3272,3554,3706,3887,3891,3899,3903,4525,4539,4568,4589,4741,4753,5164
+docs/es/plugins.md
+  h_a33a1e80933106 11-22,30,98,134,177,224,264,582,588-610
+docs/es/quickstart-guide.md
+  h_a33a1e80933106 21,52,70-71,112,125,142,212,228,246,269,367,397,415,444,671,693
+docs/es/upgrading.md
+  h_a33a1e80933106 21-22,51,106,109,112,115,171,182,191,230-231,312-313,316,319,322,325,405,431,907,910,913,916,951,977,1210,1255
+docs/es/web-ui.md
+  h_a33a1e80933106 55,66,86
+docs/features.md
+  h_a33a1e80933106 118-129,380,781,1092,1201,1395,1407-1408,1410,2020,2037,2771,2838,3007,3369-3370,3634,3778-3780,3793-3799,4476,4495-4510,5592-5602,5614-5639,5846-5848,6690,6754,6863-6910
+docs/fr/advanced.md
+  h_a33a1e80933106 3,5,88,99,107,124,132,179,187,252,263,273,291,301,353,363,488-489,591,610,696,1133,1161,1172,1260-1296,1326,1366,1389,1432,1502,1688-1691,1752,1775,1790,1841,2071,2201,2245,2260,2354,2367,2382,2622,2710,2796,2806,2962,2975,2992,3151-3272,3286,3395,3406,3425,3468,3737,3742,4566,4570,4653
+docs/fr/api.md
+  h_a33a1e80933106 45,58,80,147,161,412
+docs/fr/concepts.md
+  h_a33a1e80933106 108,129
+docs/fr/features.md
+  h_a33a1e80933106 118-129,380,765,1060,1169,1354,1366-1367,1369,1945,1962,2676,2743,2912,3262-3263,3518,3662-3664,3677-3683,4360,4379-4394,5438-5448,5460-5485,5692-5694,6496,6560,6669-6716
+docs/fr/integrations.md
+  h_a33a1e80933106 1278,1293,1372,1380,1467,1527,1548,1570,1609,1643,1649,1659-1676,1686,1733,1754,1763,1781,1929,1942,1975,1988,2042,2055-2056,2156,2223,2384,2389,2425,2430,2461,2466,2511,2516,2615,2629,2644,2659,2831,2867,2873,2944,3059,3229,3273,3330,3556,3708,3889,3893,3901,3905,4526,4540,4569,4590,4742,4754,5164
+docs/fr/plugins.md
+  h_a33a1e80933106 11-22,30,98,134,177,224,264,582,588-610
+docs/fr/quickstart-guide.md
+  h_a33a1e80933106 21,52,70-71,112,125,142,212,228,246,269,367,397,415,444,671,693
+docs/fr/upgrading.md
+  h_a33a1e80933106 21-22,51,106,109,112,115,171,182,191,230-231,312-313,316,319,322,325,405,431,907,910,913,916,951,977,1210,1255
+docs/fr/web-ui.md
+  h_a33a1e80933106 55,66,86
+docs/integrations.md
+  h_a33a1e80933106 1278,1305,1377,1385,1472,1532,1554,1576,1615,1649,1655,1665-1682,1692,1739,1760,1769,1787,1935,1948,1981,1994,2048,2061-2062,2169,2281,2496,2501,2537,2542,2573,2578,2623,2628,2727,2741,2756,2771,2942,2978,2984,3064,3181,3351,3395,3677,3829,4010,4014,4022,4026,4647,4661,4690,4711,4863,4875,5286
+docs/plugins.md
+  h_a33a1e80933106 11-22,30,98,134,177,224,264,585,591-613
+docs/quickstart-guide.md
+  h_a33a1e80933106 21,52,70-71,112,125,142,212,228,246,269,367,397,415,444,671,693
+docs/requirements.in
+  h_a33a1e80933106 2,5
+docs/requirements.txt
+  h_a33a1e80933106 11-18,312-314,353-355,544-546,578-661,666-668,678-680,696-698,831-875
+docs/upgrading.md
+  h_a33a1e80933106 21-22,50,105,108,111,114,170,181,190,229-230,311-312,315,318,321,324,404,430,907,910,913,916,951,977,1210,1255
+docs/web-ui.md
+  h_a33a1e80933106 50,65,89
+docs/zh/advanced.md
+  h_a33a1e80933106 3,5,88,99,107,124,132,179,187,252,263,273,291,301,353,363,488-489,591,610,696,1133,1161,1172,1260-1296,1326,1366,1389,1432,1502,1687-1690,1751,1774,1789,1840,2070,2200,2244,2259,2353,2366,2381,2621,2709,2795,2805,2960,2973,2990,3149-3270,3284,3393,3404,3423,3466,3735,3740,4564,4568,4651
+docs/zh/api.md
+  h_a33a1e80933106 45,58,80,147,161,412
+docs/zh/concepts.md
+  h_a33a1e80933106 108,129
+docs/zh/features.md
+  h_a33a1e80933106 120-131,382,783,1094,1203,1397,1409-1410,1412,2018,2035,2767,2834,3002,3364-3365,3628,3772-3774,3787-3793,4470,4489-4504,5587-5597,5609-5634,5841-5843,6685,6749,6857-6904
+docs/zh/integrations.md
+  h_a33a1e80933106 1271,1287,1365,1373,1460,1520,1542,1564,1603,1637,1643,1653-1670,1680,1724,1745,1754,1772,1920,1933,1966,1979,2033,2046-2047,2150,2217,2381,2386,2422,2427,2458,2463,2508,2513,2612,2626,2641,2656,2828,2864,2870,2939,3054,3224,3268,3550,3702,3883,3887,3895,3899,4521,4535,4564,4585,4734,4746,5157
+docs/zh/plugins.md
+  h_a33a1e80933106 11-22,30,98,134,177,224,264,582,588-610
+docs/zh/quickstart-guide.md
+  h_a33a1e80933106 21,52,70-71,112,125,142,212,228,246,269,367,397,415,444,671,693
+docs/zh/upgrading.md
+  h_a33a1e80933106 21-22,50,105,108,111,114,170,181,190,229-230,311-312,315,318,321,324,404,430,906,909,912,915,950,976,1209,1254
+docs/zh/web-ui.md
+  h_a33a1e80933106 55,66,86
+examples/authelia/docker-compose.yml
+  h_a33a1e80933106 3,17
+examples/authentik/docker-compose.yml
+  h_a33a1e80933106 3,17
+examples/behind-reverse-proxy/docker-compose.yml
+  h_a33a1e80933106 9,20
+examples/bigbluebutton/docker-compose.yml
+  h_a33a1e80933106 28,43
+examples/cors/docker-compose.yml
+  h_a33a1e80933106 3,25
+examples/dns-cloudflare/docker-compose.yml
+  h_a33a1e80933106 3,17
+examples/dns-desec/docker-compose.yml
+  h_a33a1e80933106 3,17
+examples/dns-digitalocean/docker-compose.yml
+  h_a33a1e80933106 3,17
+examples/dns-dnsimple/docker-compose.yml
+  h_a33a1e80933106 3,17
+examples/dns-dnsmadeeasy/docker-compose.yml
+  h_a33a1e80933106 3,17
+examples/dns-gehirn/docker-compose.yml
+  h_a33a1e80933106 3,17
+examples/dns-google/docker-compose.yml
+  h_a33a1e80933106 3,17
+examples/dns-linode/docker-compose.yml
+  h_a33a1e80933106 3,17
+examples/dns-luadns/docker-compose.yml
+  h_a33a1e80933106 3,17
+examples/dns-nsone/docker-compose.yml
+  h_a33a1e80933106 3,17
+examples/dns-ovh/docker-compose.yml
+  h_a33a1e80933106 3,17
+examples/dns-rfc2136/docker-compose.yml
+  h_a33a1e80933106 3,17
+examples/dns-route53/docker-compose.yml
+  h_a33a1e80933106 3,17
+examples/dns-sakuracloud/docker-compose.yml
+  h_a33a1e80933106 3,17
+examples/dns-scaleway/docker-compose.yml
+  h_a33a1e80933106 3,17
+examples/docker-configs/docker-compose.yml
+  h_a33a1e80933106 3,17
+examples/drupal/docker-compose.yml
+  h_a33a1e80933106 3,17
+examples/ghost/docker-compose.yml
+  h_a33a1e80933106 3,17
+examples/gogs/docker-compose.yml
+  h_a33a1e80933106 3,17
+examples/hardened/docker-compose.yml
+  h_a33a1e80933106 3,36
+examples/jellyfin/docker-compose.yml
+  h_a33a1e80933106 3,17
+examples/joomla/docker-compose.yml
+  h_a33a1e80933106 3,17
+examples/load-balancer/docker-compose.yml
+  h_a33a1e80933106 3,17
+examples/magento/docker-compose.yml
+  h_a33a1e80933106 3,17
+examples/mattermost/docker-compose.yml
+  h_a33a1e80933106 3,17
+examples/mcp-stack/docker-compose.yml
+  h_a33a1e80933106 12,25,47
+examples/mongo-express/docker-compose.yml
+  h_a33a1e80933106 3,17
+examples/moodle/docker-compose.yml
+  h_a33a1e80933106 3,17
+examples/nextcloud/docker-compose.yml
+  h_a33a1e80933106 3,17
+examples/passbolt/docker-compose.yml
+  h_a33a1e80933106 3,17
+examples/php-cookie-flags/docker-compose.yml
+  h_a33a1e80933106 3,25
+examples/php-multisite/docker-compose.yml
+  h_a33a1e80933106 3,26
+examples/php-singlesite/docker-compose.yml
+  h_a33a1e80933106 3,25
+examples/prestashop/docker-compose.yml
+  h_a33a1e80933106 3,17
+examples/proxy-protocol/docker-compose.yml
+  h_a33a1e80933106 11,22
+examples/radarr/docker-compose.yml
+  h_a33a1e80933106 3,17
+examples/redmine/docker-compose.yml
+  h_a33a1e80933106 3,17
+examples/reverse-proxy-multisite/docker-compose.yml
+  h_a33a1e80933106 3,17
+examples/reverse-proxy-singlesite/docker-compose.yml
+  h_a33a1e80933106 3,17
+examples/reverse-proxy-websocket/docker-compose.yml
+  h_a33a1e80933106 3,17
+examples/stream-multisite/docker-compose.yml
+  h_a33a1e80933106 3,19
+examples/syslog/docker-compose.yml
+  h_a33a1e80933106 3,24
+examples/tomcat/docker-compose.yml
+  h_a33a1e80933106 3,17
+examples/tor-hidden-service/docker-compose.yml
+  h_a33a1e80933106 13,24
+examples/web-ui/docker-compose.wizard.yml
+  h_a33a1e80933106 6,20,43
+examples/web-ui/docker-compose.yml
+  h_a33a1e80933106 6,20,46
+examples/wordpress/docker-compose.yml
+  h_a33a1e80933106 3,17
+misc/check-version-consistency.sh
+  h_a33a1e80933106 59
+misc/install-bunkerweb.sh
+  h_a33a1e80933106 117,5723-5724,5727,5749,6627-6642,6650,6690
+misc/integrations/all-in-one.mariadb.ui.yml
+  h_a33a1e80933106 3
+misc/integrations/all-in-one.mariadb.yml
+  h_a33a1e80933106 3
+misc/integrations/all-in-one.mysql.ui.yml
+  h_a33a1e80933106 3
+misc/integrations/all-in-one.mysql.yml
+  h_a33a1e80933106 3
+misc/integrations/all-in-one.oracle.ui.yml
+  h_a33a1e80933106 3
+misc/integrations/all-in-one.oracle.yml
+  h_a33a1e80933106 3
+misc/integrations/all-in-one.postgres.ui.yml
+  h_a33a1e80933106 3
+misc/integrations/all-in-one.postgres.yml
+  h_a33a1e80933106 3
+misc/integrations/all-in-one.yml
+  h_a33a1e80933106 3
+misc/integrations/autoconf.mariadb.ui.yml
+  h_a33a1e80933106 7,21,34,50
+misc/integrations/autoconf.mariadb.yml
+  h_a33a1e80933106 7,21,34
+misc/integrations/autoconf.mysql.ui.yml
+  h_a33a1e80933106 7,21,34,50
+misc/integrations/autoconf.mysql.yml
+  h_a33a1e80933106 7,21,34
+misc/integrations/autoconf.oracle.ui.yml
+  h_a33a1e80933106 7,21,34,50
+misc/integrations/autoconf.oracle.yml
+  h_a33a1e80933106 7,21,34
+misc/integrations/autoconf.postgres.ui.yml
+  h_a33a1e80933106 7,21,34,50
+misc/integrations/autoconf.postgres.yml
+  h_a33a1e80933106 7,21,34
+misc/integrations/docker.mariadb.ui.yml
+  h_a33a1e80933106 6,20,44
+misc/integrations/docker.mariadb.yml
+  h_a33a1e80933106 7,20
+misc/integrations/docker.mysql.ui.yml
+  h_a33a1e80933106 6,20,44
+misc/integrations/docker.mysql.yml
+  h_a33a1e80933106 7,20
+misc/integrations/docker.oracle.ui.yml
+  h_a33a1e80933106 6,20,44
+misc/integrations/docker.oracle.yml
+  h_a33a1e80933106 7,20
+misc/integrations/docker.postgres.ui.yml
+  h_a33a1e80933106 6,19,43
+misc/integrations/docker.postgres.yml
+  h_a33a1e80933106 7,20
+misc/integrations/docker.yml
+  h_a33a1e80933106 6,19
+misc/integrations/k8s.mariadb.ui.yml
+  h_a33a1e80933106 117,177,214,325
+misc/integrations/k8s.mariadb.yml
+  h_a33a1e80933106 127,187,224
+misc/integrations/k8s.mysql.ui.yml
+  h_a33a1e80933106 117,177,214,325
+misc/integrations/k8s.mysql.yml
+  h_a33a1e80933106 127,187,224
+misc/integrations/k8s.oracle.ui.yml
+  h_a33a1e80933106 117,177,214,321
+misc/integrations/k8s.oracle.yml
+  h_a33a1e80933106 127,187,224
+misc/integrations/k8s.postgres.ui.yml
+  h_a33a1e80933106 117,177,214,321
+misc/integrations/k8s.postgres.yml
+  h_a33a1e80933106 127,187,224
+misc/migration/Dockerfile
+  h_a33a1e80933106 1
+misc/requirements-ansible.txt
+  h_a33a1e80933106 11-13
+publiccode.yml
+  h_a33a1e80933106 4-6
+pyproject.toml
+  h_a33a1e80933106 4
+src/VERSION
+  h_a33a1e80933106 1
+src/all-in-one/Dockerfile
+  h_a33a1e80933106 1,168,178,246
+src/api/Dockerfile
+  h_a33a1e80933106 1,31,47,65
+src/api/app/main.py
+  h_a33a1e80933106 63,83-86,89
+src/api/app/rate_limit.py
+  h_a33a1e80933106 426-430,498-499
+src/api/app/routers/cache.py
+  h_a33a1e80933106 5,7-8,38,50,52,67,90,107-112,115-118
+src/api/app/routers/instances.py
+  h_a33a1e80933106 7,37-40,74-77
+src/api/requirements.in
+  h_a33a1e80933106 6,8,10,12
+src/api/requirements.txt
+  h_a33a1e80933106 15-17,191-193,262-264,270-272,424-426,436-438,443-583,595-597,676-790,796-798,813-815,922-1076,1078-1179
+src/api/utils/gunicorn.conf.py
+  h_a33a1e80933106 322,347
+src/autoconf/Config.py
+  h_a33a1e80933106 12-50,140,153-166,182-183,187,191,195,200-204,259,300,308,317
+src/autoconf/Dockerfile
+  h_a33a1e80933106 1,35,46,69
+src/autoconf/controllers/KubernetesController.py
+  h_a33a1e80933106 18,241,243-245,247-248
+src/autoconf/requirements.in
+  h_a33a1e80933106 2,5-6
+src/autoconf/requirements.txt
+  h_a33a1e80933106 653-804,808-810,958-960,962-1102,1107-1109,1218-1220
+src/bw/Dockerfile
+  h_a33a1e80933106 1,72,82,112
+src/bw/lua/bunkerweb/api.lua
+  h_a33a1e80933106 336,340-341,597-668,673,685-696,736,748
+src/bw/lua/bunkerweb/helpers.lua
+  h_a33a1e80933106 245-246,248-251,265-268,294-300
+src/bw/lua/bunkerweb/utils.lua
+  h_a33a1e80933106 416-417,421-460,463,2052,2064
+src/common/README.de.md
+  h_a33a1e80933106 110-121
+src/common/README.es.md
+  h_a33a1e80933106 110-121
+src/common/README.fr.md
+  h_a33a1e80933106 110-121
+src/common/README.md
+  h_a33a1e80933106 110-121
+src/common/README.zh.md
+  h_a33a1e80933106 112-123
+src/common/api/API.py
+  h_a33a1e80933106 317-321
+src/common/cli/CLI.py
+  h_a33a1e80933106 707,712-713,718-719,721-722,736-737,742-744
+src/common/cli/main.py
+  h_a33a1e80933106 6,19,62,82,104,114-117,131-134
+src/common/confs/default-server-http.conf
+  h_a33a1e80933106 241
+src/common/confs/init-worker-lua.conf
+  h_a33a1e80933106 184-217,226
+src/common/confs/nginx.conf
+  h_a33a1e80933106 18-19
+src/common/confs/server-http/access-lua.conf
+  h_a33a1e80933106 9,47,53,63,72,110,133,142,157,190,194,199,207
+src/common/confs/server-http/header-lua.conf
+  h_a33a1e80933106 7,20,23,32,53,60,75,79,83
+src/common/confs/server-http/log-lua.conf
+  h_a33a1e80933106 9,24,27,36,57,64,79,83,87,94,96,100,102,107
+src/common/confs/server-http/server.conf
+  h_a33a1e80933106 40-46
+src/common/confs/server-http/set-lua.conf
+  h_a33a1e80933106 8,23,29,32,41,62,69,84,88,92
+src/common/core/antibot/README.de.md
+  h_a33a1e80933106 43,66-68
+src/common/core/antibot/README.es.md
+  h_a33a1e80933106 43,66-68
+src/common/core/antibot/README.fr.md
+  h_a33a1e80933106 43,66-68
+src/common/core/antibot/README.md
+  h_a33a1e80933106 43,66-68
+src/common/core/antibot/README.zh.md
+  h_a33a1e80933106 43,66-68
+src/common/core/antibot/antibot.lua
+  h_a33a1e80933106 217-224,469-470,1332-1347
+src/common/core/antibot/files/capjs.html
+  h_a33a1e80933106 34,47-49,66,117,144,147,153-155,158,165-166,179,203-204,250-251,276,333,363,370,445-447,449-456,538-539,541,545,560-580,598-636,638-639,642,646-647,649-653,655,657-658,661,672,674-691,708,710,714,730,737,749-750,754,756,763-765,767-768,797,825-835
+src/common/core/antibot/files/captcha.html
+  h_a33a1e80933106 34,40,48-50,68,119,142,145,151-153,156,163-164,200,221,233,256,411-413,415-422,464-465,467,471,486-505,512-550,552-553,556,565,567-569,582,589-591,593-594,623,647,650-660
+src/common/core/antibot/files/hcaptcha.html
+  h_a33a1e80933106 34,47-49,66,117,144,147,153-155,158,165-166,179,203-204,264,270-271,296,350,381,388,468-470,472-479,566-567,569,573,588-608,626-664,666-667,670,679,685,701-707,719-720,724,726,733-735,737-738,767,795-805
+src/common/core/antibot/files/javascript.html
+  h_a33a1e80933106 35,47-49,65,116,143,146,152-154,157,164-165,178,202-203,229,286,316,395-397,399-406,457-458,460,464,479-499,517-555,557-558,561,565-566,568-572,574,576-577,580,591,593-610,627,629,633,649,656,668-669,673,675,682-684,686-687,716,744-754
+src/common/core/antibot/files/mcaptcha.html
+  h_a33a1e80933106 34,40,48-50,68,119,146,149,155-157,160,167-168,189-190,259,271,277-278,303,474-476,478-485,578-579,581,585,600-620,638-676,678-679,682,691,697,713-719,731-732,736,738,745-747,749-750,779,807-817
+src/common/core/antibot/files/recaptcha.html
+  h_a33a1e80933106 36,42,50-52,70,121,148,151,157-159,162,169-170,183,207-208,279,285-286,311,371,402,410,493-495,497-504,597-598,600,604,619-639,657-695,697-698,701,710,716,732-738,750-751,755,757,764-766,768-769,798,826-836
+src/common/core/antibot/files/turnstile.html
+  h_a33a1e80933106 34,47-49,66,117,144,147,153-155,158,165-166,179,203-204,262-263,288,342,373,380,460-462,464-471,564-565,567,571,586-606,624-662,664-665,668,677,683,699-705,717-718,722,724,731-733,735-736,765,793-803
+src/common/core/antibot/plugin.json
+  h_a33a1e80933106 91-99
+src/common/core/authbasic/README.de.md
+  h_a33a1e80933106 37
+src/common/core/authbasic/README.es.md
+  h_a33a1e80933106 37
+src/common/core/authbasic/README.fr.md
+  h_a33a1e80933106 35
+src/common/core/authbasic/README.md
+  h_a33a1e80933106 37
+src/common/core/authbasic/README.zh.md
+  h_a33a1e80933106 37
+src/common/core/authbasic/authbasic.lua
+  h_a33a1e80933106 79-82,87-96,103-108,112-114
+src/common/core/authbasic/plugin.json
+  h_a33a1e80933106 32
+src/common/core/backup/backup.py
+  h_a33a1e80933106 7,263-268
+src/common/core/backup/bwcli/restore.py
+  h_a33a1e80933106 8,58-62
+src/common/core/badbehavior/badbehavior.lua
+  h_a33a1e80933106 66-68
+src/common/core/blacklist/README.de.md
+  h_a33a1e80933106 31,140
+src/common/core/blacklist/README.es.md
+  h_a33a1e80933106 31,140
+src/common/core/blacklist/README.fr.md
+  h_a33a1e80933106 31,140
+src/common/core/blacklist/README.md
+  h_a33a1e80933106 31,140
+src/common/core/blacklist/README.zh.md
+  h_a33a1e80933106 31,140
+src/common/core/blacklist/blacklist.lua
+  h_a33a1e80933106 38,41,57-58,61-73,75
+src/common/core/blacklist/jobs/blacklist-download.py
+  h_a33a1e80933106 4,22,195-202,221,233,235,237,240,300-304,306,320-339
+src/common/core/blacklist/plugin.json
+  h_a33a1e80933106 187-195
+src/common/core/bunkernet/README.de.md
+  h_a33a1e80933106 34,46-47,49
+src/common/core/bunkernet/README.es.md
+  h_a33a1e80933106 34,46-47,49
+src/common/core/bunkernet/README.fr.md
+  h_a33a1e80933106 33,45-46,48
+src/common/core/bunkernet/README.md
+  h_a33a1e80933106 34,46-47,49
+src/common/core/bunkernet/README.zh.md
+  h_a33a1e80933106 34,46-47,49
+src/common/core/bunkernet/bunkernet.lua
+  h_a33a1e80933106 48-54,56,64-69,80,89-108,112,118,122-131,134,337
+src/common/core/bunkernet/jobs/bunkernet-send.py
+  h_a33a1e80933106 31-32,43-75,80,147-149
+src/common/core/bunkernet/plugin.json
+  h_a33a1e80933106 20
+src/common/core/country/country.lua
+  h_a33a1e80933106 17,310,314,332,336
+src/common/core/crowdsec/README.de.md
+  h_a33a1e80933106 175,192
+src/common/core/crowdsec/README.es.md
+  h_a33a1e80933106 171,188
+src/common/core/crowdsec/README.fr.md
+  h_a33a1e80933106 175,192
+src/common/core/crowdsec/README.md
+  h_a33a1e80933106 177,194
+src/common/core/crowdsec/README.zh.md
+  h_a33a1e80933106 175,192
+src/common/core/crowdsec/crowdsec.lua
+  h_a33a1e80933106 277-306
+src/common/core/dnsbl/dnsbl.lua
+  h_a33a1e80933106 261,286,309,312,328-329,349-350
+src/common/core/errors/errors.lua
+  h_a33a1e80933106 162
+src/common/core/errors/files/error.html
+  h_a33a1e80933106 312,315,318,342,360,363,366,397
+src/common/core/greylist/README.de.md
+  h_a33a1e80933106 37,104
+src/common/core/greylist/README.es.md
+  h_a33a1e80933106 37,104
+src/common/core/greylist/README.fr.md
+  h_a33a1e80933106 37,104
+src/common/core/greylist/README.md
+  h_a33a1e80933106 37,104
+src/common/core/greylist/README.zh.md
+  h_a33a1e80933106 37,104
+src/common/core/greylist/jobs/greylist-download.py
+  h_a33a1e80933106 4,22,139-146,165,177,179,181,184,244-248,250,264-283
+src/common/core/greylist/plugin.json
+  h_a33a1e80933106 91-99
+src/common/core/grpc/README.de.md
+  h_a33a1e80933106 75
+src/common/core/grpc/README.es.md
+  h_a33a1e80933106 75
+src/common/core/grpc/README.fr.md
+  h_a33a1e80933106 75
+src/common/core/grpc/README.md
+  h_a33a1e80933106 75
+src/common/core/grpc/README.zh.md
+  h_a33a1e80933106 75
+src/common/core/headers/plugin.json
+  h_a33a1e80933106 93
+src/common/core/inject/README.de.md
+  h_a33a1e80933106 27-28
+src/common/core/inject/README.es.md
+  h_a33a1e80933106 27-28
+src/common/core/inject/README.fr.md
+  h_a33a1e80933106 25-26
+src/common/core/inject/README.md
+  h_a33a1e80933106 27-28
+src/common/core/inject/README.zh.md
+  h_a33a1e80933106 27-28
+src/common/core/inject/confs/server-http/inject.conf
+  h_a33a1e80933106 2,5
+src/common/core/jobs/jobs/update-check.py
+  h_a33a1e80933106 8,12,112-134,138-147
+src/common/core/letsencrypt/README.de.md
+  h_a33a1e80933106 158
+src/common/core/letsencrypt/README.es.md
+  h_a33a1e80933106 158
+src/common/core/letsencrypt/README.fr.md
+  h_a33a1e80933106 158
+src/common/core/letsencrypt/README.md
+  h_a33a1e80933106 159
+src/common/core/letsencrypt/README.zh.md
+  h_a33a1e80933106 158
+src/common/core/letsencrypt/jobs/certbot-new.py
+  h_a33a1e80933106 239-244
+src/common/core/letsencrypt/jobs/letsencrypt_providers.py
+  h_a33a1e80933106 417-433
+src/common/core/letsencrypt/jobs/letsencrypt_utils.py
+  h_a33a1e80933106 52,108
+src/common/core/letsencrypt/plugin.json
+  h_a33a1e80933106 126
+src/common/core/letsencrypt/ui/blueprints/letsencrypt.py
+  h_a33a1e80933106 430-433,438-439,587-588
+src/common/core/limit/README.de.md
+  h_a33a1e80933106 45-47,60-66
+src/common/core/limit/README.es.md
+  h_a33a1e80933106 45-47,63-66
+src/common/core/limit/README.fr.md
+  h_a33a1e80933106 45-47,60-66
+src/common/core/limit/README.md
+  h_a33a1e80933106 45-47,60-66
+src/common/core/limit/README.zh.md
+  h_a33a1e80933106 45-47,60-66
+src/common/core/limit/limit.lua
+  h_a33a1e80933106 11,46-69,346-379,413-420,422,434,533,545,549-555
+src/common/core/limit/plugin.json
+  h_a33a1e80933106 70,79,88,97
+src/common/core/metrics/metrics.lua
+  h_a33a1e80933106 807-882,940,1165-1167,1170,1293-1296,1344-1464
+src/common/core/misc/confs/default-server-http/page.conf
+  h_a33a1e80933106 49
+src/common/core/misc/jobs/download-plugins.py
+  h_a33a1e80933106 191,231,252,257,263,281,319
+src/common/core/modsecurity/README.de.md
+  h_a33a1e80933106 40,59-74
+src/common/core/modsecurity/README.es.md
+  h_a33a1e80933106 40,59-74
+src/common/core/modsecurity/README.fr.md
+  h_a33a1e80933106 40,59-74
+src/common/core/modsecurity/README.md
+  h_a33a1e80933106 40,59-74
+src/common/core/modsecurity/README.zh.md
+  h_a33a1e80933106 40,59-74
+src/common/core/modsecurity/confs/http/modsecurity-rules-global-crs.conf.modsec
+  h_a33a1e80933106 69-71
+src/common/core/modsecurity/confs/server-http/modsecurity-rules.conf.modsec
+  h_a33a1e80933106 131-133
+src/common/core/modsecurity/plugin.json
+  h_a33a1e80933106 119-128
+src/common/core/reverseproxy/README.de.md
+  h_a33a1e80933106 35-45,57-82,289-291
+src/common/core/reverseproxy/README.es.md
+  h_a33a1e80933106 35-45,57-82,289-291
+src/common/core/reverseproxy/README.fr.md
+  h_a33a1e80933106 35-45,57-82,289-291
+src/common/core/reverseproxy/README.md
+  h_a33a1e80933106 35-45,57-82,289-291
+src/common/core/reverseproxy/README.zh.md
+  h_a33a1e80933106 35-45,57-82,289-291
+src/common/core/reverseproxy/confs/server-http/reverse-proxy.conf
+  h_a33a1e80933106 210
+src/common/core/reverseproxy/plugin.json
+  h_a33a1e80933106 70
+src/common/core/reversescan/reversescan.lua
+  h_a33a1e80933106 121-122,126-127,138-140
+src/common/core/securitytxt/files/security.txt
+  h_a33a1e80933106 11-12,14-20,24-25,27
+src/common/core/securitytxt/securitytxt.lua
+  h_a33a1e80933106 108-117
+src/common/core/sessions/sessions.lua
+  h_a33a1e80933106 24-26,30,102-113,115-116,168-171,186-187
+src/common/core/templates/templates/high.json
+  h_a33a1e80933106 40
+src/common/core/templates/templates/medium.json
+  h_a33a1e80933106 40
+src/common/core/whitelist/README.de.md
+  h_a33a1e80933106 33,97
+src/common/core/whitelist/README.es.md
+  h_a33a1e80933106 33,97
+src/common/core/whitelist/README.fr.md
+  h_a33a1e80933106 33,97
+src/common/core/whitelist/README.md
+  h_a33a1e80933106 33,97
+src/common/core/whitelist/README.zh.md
+  h_a33a1e80933106 33,97
+src/common/core/whitelist/jobs/whitelist-download.py
+  h_a33a1e80933106 4,22,139-146,165,177,179,181,184,244-248,250,264-283
+src/common/core/whitelist/plugin.json
+  h_a33a1e80933106 91-99
+src/common/core/zstd/README.de.md
+  h_a33a1e80933106 1-43
+src/common/core/zstd/README.es.md
+  h_a33a1e80933106 1-43
+src/common/core/zstd/README.fr.md
+  h_a33a1e80933106 1-43
+src/common/core/zstd/README.md
+  h_a33a1e80933106 1-43
+src/common/core/zstd/README.zh.md
+  h_a33a1e80933106 1-43
+src/common/core/zstd/confs/server-http/zstd.conf
+  h_a33a1e80933106 1-6
+src/common/core/zstd/plugin.json
+  h_a33a1e80933106 1-66
+src/common/db/Database.py
+  h_a33a1e80933106 55,854-856,909,943,5735,5741,5743,5749-5752,5765-5767
+src/common/db/alembic/mariadb_versions/c1792bed017f_upgrade_to_version_1_6_18_rc4.py
+  h_a33a1e80933106 1-29
+src/common/db/alembic/mysql_versions/a353b53c962e_upgrade_to_version_1_6_18_rc4.py
+  h_a33a1e80933106 1-29
+src/common/db/alembic/postgresql_versions/1260a17b68a4_upgrade_to_version_1_6_18_rc4.py
+  h_a33a1e80933106 1-29
+src/common/db/alembic/sqlite_versions/699108755df8_upgrade_to_version_1_6_18_rc4.py
+  h_a33a1e80933106 1-29
+src/common/db/model.py
+  h_a33a1e80933106 374
+src/common/db/requirements.arm.in
+  h_a33a1e80933106 6
+src/common/db/requirements.arm.txt
+  h_a33a1e80933106 350-422
+src/common/db/requirements.in
+  h_a33a1e80933106 6
+src/common/db/requirements.txt
+  h_a33a1e80933106 415-487
+src/common/gen/Configurator.py
+  h_a33a1e80933106 20,404,426
+src/common/gen/Templator.py
+  h_a33a1e80933106 758-771,777-778
+src/common/helpers/utils.sh
+  h_a33a1e80933106 123-135,137-138,146-149,154-166
+src/common/settings.json
+  h_a33a1e80933106 104,113,115
+src/common/utils/common_utils.py
+  h_a33a1e80933106 49-100
+src/common/utils/logger.py
+  h_a33a1e80933106 6,21,41-49,130-135
+src/common/utils/reload_utils.py
+  h_a33a1e80933106 1-62
+src/deps/deps.json
+  h_a33a1e80933106 163,165,293-299,306-319
+src/deps/init_deps.sh
+  h_a33a1e80933106 94
+src/deps/install.sh
+  h_a33a1e80933106 43-57,69,227-232,251,261,264-267
+src/deps/misc/yajl-CVE-2017-16516.patch
+  h_a33a1e80933106 1-22
+src/deps/misc/yajl-CVE-2022-24795.patch
+  h_a33a1e80933106 1-30
+src/deps/misc/yajl-CVE-2023-33460.patch
+  h_a33a1e80933106 1-36
+src/deps/misc/yajl.README.md
+  h_a33a1e80933106 1-38
+src/deps/requirements-deps.in
+  h_a33a1e80933106 2
+src/deps/requirements-deps.txt
+  h_a33a1e80933106 189-191,213-215,333-362
+src/deps/requirements.in
+  h_a33a1e80933106 2
+src/deps/requirements.txt
+  h_a33a1e80933106 11-13,25-27
+src/deps/src/lua-resty-session/Changes.md
+  h_a33a1e80933106 5-8
+src/deps/src/lua-resty-session/README.md
+  h_a33a1e80933106 332-334,366-381
+src/deps/src/lua-resty-session/docs/index.html
+  h_a33a1e80933106 124
+src/deps/src/lua-resty-session/docs/modules/resty.session.dshm.html
+  h_a33a1e80933106 391
+src/deps/src/lua-resty-session/docs/modules/resty.session.file.html
+  h_a33a1e80933106 361
+src/deps/src/lua-resty-session/docs/modules/resty.session.file.thread.html
+  h_a33a1e80933106 325
+src/deps/src/lua-resty-session/docs/modules/resty.session.file.utils.html
+  h_a33a1e80933106 348
+src/deps/src/lua-resty-session/docs/modules/resty.session.html
+  h_a33a1e80933106 1028-1033,1358
+src/deps/src/lua-resty-session/docs/modules/resty.session.memcached.html
+  h_a33a1e80933106 394
+src/deps/src/lua-resty-session/docs/modules/resty.session.mysql.html
+  h_a33a1e80933106 474
+src/deps/src/lua-resty-session/docs/modules/resty.session.postgres.html
+  h_a33a1e80933106 470
+src/deps/src/lua-resty-session/docs/modules/resty.session.redis.cluster.html
+  h_a33a1e80933106 457
+src/deps/src/lua-resty-session/docs/modules/resty.session.redis.common.html
+  h_a33a1e80933106 315
+src/deps/src/lua-resty-session/docs/modules/resty.session.redis.html
+  h_a33a1e80933106 403
+src/deps/src/lua-resty-session/docs/modules/resty.session.redis.sentinel.html
+  h_a33a1e80933106 454
+src/deps/src/lua-resty-session/docs/modules/resty.session.shm.html
+  h_a33a1e80933106 358
+src/deps/src/lua-resty-session/docs/modules/resty.session.utils.html
+  h_a33a1e80933106 1429
+src/deps/src/lua-resty-session/lib/resty/session.lua
+  h_a33a1e80933106 35,150-151,171-176,378-402,430-442,446,448-452,454-458,462-464,467,492-500,505-516,520-524,2463,2512-2513,2647-2652,2665-2702,2705,2727-2763,2820-2823,2825-2857
+src/deps/src/lua-resty-session/lua-resty-session-4.3.0-1.rockspec
+  h_a33a1e80933106 2,5,17
+src/deps/src/lua-resty-session/spec/06-revocation-1_spec.lua
+  h_a33a1e80933106 332-587
+src/deps/src/yajl/.gitignore
+  h_a33a1e80933106 1-3
+src/deps/src/yajl/BUILDING
+  h_a33a1e80933106 1-23
+src/deps/src/yajl/BUILDING.win32
+  h_a33a1e80933106 1-27
+src/deps/src/yajl/CMakeLists.txt
+  h_a33a1e80933106 1-81
+src/deps/src/yajl/COPYING
+  h_a33a1e80933106 1-13
+src/deps/src/yajl/ChangeLog
+  h_a33a1e80933106 1-189
+src/deps/src/yajl/README
+  h_a33a1e80933106 1-74
+src/deps/src/yajl/TODO
+  h_a33a1e80933106 1-9
+src/deps/src/yajl/YAJLDoc.cmake
+  h_a33a1e80933106 1-26
+src/deps/src/yajl/configure
+  h_a33a1e80933106 1-81
+src/deps/src/yajl/example/CMakeLists.txt
+  h_a33a1e80933106 1-23
+src/deps/src/yajl/example/README.md
+  h_a33a1e80933106 1-7
+src/deps/src/yajl/example/parse_config.c
+  h_a33a1e80933106 1-69
+src/deps/src/yajl/example/sample.config
+  h_a33a1e80933106 1-101
+src/deps/src/yajl/perf/CMakeLists.txt
+  h_a33a1e80933106 1-23
+src/deps/src/yajl/perf/documents.c
+  h_a33a1e80933106 1-1418
+src/deps/src/yajl/perf/documents.h
+  h_a33a1e80933106 1-28
+src/deps/src/yajl/perf/perftest.c
+  h_a33a1e80933106 1-134
+src/deps/src/yajl/reformatter/CMakeLists.txt
+  h_a33a1e80933106 1-43
+src/deps/src/yajl/reformatter/json_reformat.c
+  h_a33a1e80933106 1-210
+src/deps/src/yajl/src/CMakeLists.txt
+  h_a33a1e80933106 1-87
+src/deps/src/yajl/src/YAJL.dxy
+  h_a33a1e80933106 1-1258
+src/deps/src/yajl/src/api/yajl_common.h
+  h_a33a1e80933106 1-75
+src/deps/src/yajl/src/api/yajl_gen.h
+  h_a33a1e80933106 1-167
+src/deps/src/yajl/src/api/yajl_parse.h
+  h_a33a1e80933106 1-226
+src/deps/src/yajl/src/api/yajl_tree.h
+  h_a33a1e80933106 1-186
+src/deps/src/yajl/src/api/yajl_version.h.cmake
+  h_a33a1e80933106 1-23
+src/deps/src/yajl/src/yajl
+  h_a33a1e80933106 1-33
+src/deps/src/yajl/src/yajl.c
+  h_a33a1e80933106 1-175
+src/deps/src/yajl/src/yajl.pc.cmake
+  h_a33a1e80933106 1-9
+src/deps/src/yajl/src/yajl_alloc.c
+  h_a33a1e80933106 1-52
+src/deps/src/yajl/src/yajl_alloc.h
+  h_a33a1e80933106 1-34
+src/deps/src/yajl/src/yajl_buf.c
+  h_a33a1e80933106 1-113
+src/deps/src/yajl/src/yajl_buf.h
+  h_a33a1e80933106 1-57
+src/deps/src/yajl/src/yajl_bytestack.h
+  h_a33a1e80933106 1-69
+src/deps/src/yajl/src/yajl_encode.c
+  h_a33a1e80933106 1-220
+src/deps/src/yajl/src/yajl_encode.h
+  h_a33a1e80933106 1-34
+src/deps/src/yajl/src/yajl_gen.c
+  h_a33a1e80933106 1-362
+src/deps/src/yajl/src/yajl_lex.c
+  h_a33a1e80933106 1-763
+src/deps/src/yajl/src/yajl_lex.h
+  h_a33a1e80933106 1-117
+src/deps/src/yajl/src/yajl_parser.c
+  h_a33a1e80933106 1-498
+src/deps/src/yajl/src/yajl_parser.h
+  h_a33a1e80933106 1-78
+src/deps/src/yajl/src/yajl_tree.c
+  h_a33a1e80933106 1-510
+src/deps/src/yajl/src/yajl_version.c
+  h_a33a1e80933106 1-7
+src/deps/src/yajl/test/CMakeLists.txt
+  h_a33a1e80933106 1-16
+src/deps/src/yajl/test/api/CMakeLists.txt
+  h_a33a1e80933106 1-25
+src/deps/src/yajl/test/api/gen-extra-close.c
+  h_a33a1e80933106 1-19
+src/deps/src/yajl/test/api/run_tests.sh
+  h_a33a1e80933106 1-23
+src/deps/src/yajl/test/parsing/CMakeLists.txt
+  h_a33a1e80933106 1-23
+src/deps/src/yajl/test/parsing/cases/ac_difficult_json_c_test_case_with_comments.json
+  h_a33a1e80933106 1
+src/deps/src/yajl/test/parsing/cases/ac_difficult_json_c_test_case_with_comments.json.gold
+  h_a33a1e80933106 1-36
+src/deps/src/yajl/test/parsing/cases/ac_simple_with_comments.json
+  h_a33a1e80933106 1-11
+src/deps/src/yajl/test/parsing/cases/ac_simple_with_comments.json.gold
+  h_a33a1e80933106 1-9
+src/deps/src/yajl/test/parsing/cases/ag_false_then_garbage.json
+  h_a33a1e80933106 1
+src/deps/src/yajl/test/parsing/cases/ag_false_then_garbage.json.gold
+  h_a33a1e80933106 1-2
+src/deps/src/yajl/test/parsing/cases/ag_null_then_garbage.json
+  h_a33a1e80933106 1
+src/deps/src/yajl/test/parsing/cases/ag_null_then_garbage.json.gold
+  h_a33a1e80933106 1-2
+src/deps/src/yajl/test/parsing/cases/ag_true_then_garbage.json
+  h_a33a1e80933106 1
+src/deps/src/yajl/test/parsing/cases/ag_true_then_garbage.json.gold
+  h_a33a1e80933106 1-2
+src/deps/src/yajl/test/parsing/cases/am_eof.json
+  h_a33a1e80933106 1
+src/deps/src/yajl/test/parsing/cases/am_eof.json.gold
+  h_a33a1e80933106 1-4
+src/deps/src/yajl/test/parsing/cases/am_integers.json
+  h_a33a1e80933106 1
+src/deps/src/yajl/test/parsing/cases/am_integers.json.gold
+  h_a33a1e80933106 1-3
+src/deps/src/yajl/test/parsing/cases/am_multiple.json
+  h_a33a1e80933106 1-3
+src/deps/src/yajl/test/parsing/cases/am_multiple.json.gold
+  h_a33a1e80933106 1-5
+src/deps/src/yajl/test/parsing/cases/am_stuff.json
+  h_a33a1e80933106 1-7
+src/deps/src/yajl/test/parsing/cases/am_stuff.json.gold
+  h_a33a1e80933106 1-14
+src/deps/src/yajl/test/parsing/cases/ap_array_open.json
+  h_a33a1e80933106 1
+src/deps/src/yajl/test/parsing/cases/ap_array_open.json.gold
+  h_a33a1e80933106 1-2
+src/deps/src/yajl/test/parsing/cases/ap_eof_str.json
+  h_a33a1e80933106 1
+src/deps/src/yajl/test/parsing/cases/ap_eof_str.json.gold
+  h_a33a1e80933106 1
+src/deps/src/yajl/test/parsing/cases/ap_map_open.json
+  h_a33a1e80933106 1
+src/deps/src/yajl/test/parsing/cases/ap_map_open.json.gold
+  h_a33a1e80933106 1-2
+src/deps/src/yajl/test/parsing/cases/ap_partial_ok.json
+  h_a33a1e80933106 1
+src/deps/src/yajl/test/parsing/cases/ap_partial_ok.json.gold
+  h_a33a1e80933106 1-4
+src/deps/src/yajl/test/parsing/cases/array.json
+  h_a33a1e80933106 1-6
+src/deps/src/yajl/test/parsing/cases/array.json.gold
+  h_a33a1e80933106 1-22
+src/deps/src/yajl/test/parsing/cases/array_close.json
+  h_a33a1e80933106 1
+src/deps/src/yajl/test/parsing/cases/array_close.json.gold
+  h_a33a1e80933106 1-2
+src/deps/src/yajl/test/parsing/cases/bignums.json
+  h_a33a1e80933106 1
+src/deps/src/yajl/test/parsing/cases/bignums.json.gold
+  h_a33a1e80933106 1-5
+src/deps/src/yajl/test/parsing/cases/bogus_char.json
+  h_a33a1e80933106 1-4
+src/deps/src/yajl/test/parsing/cases/bogus_char.json.gold
+  h_a33a1e80933106 1-10
+src/deps/src/yajl/test/parsing/cases/codepoints_from_unicode_org.json
+  h_a33a1e80933106 1
+src/deps/src/yajl/test/parsing/cases/codepoints_from_unicode_org.json.gold
+  h_a33a1e80933106 1-2
+src/deps/src/yajl/test/parsing/cases/deep_arrays.json
+  h_a33a1e80933106 1
+src/deps/src/yajl/test/parsing/cases/deep_arrays.json.gold
+  h_a33a1e80933106 1-2049
+src/deps/src/yajl/test/parsing/cases/difficult_json_c_test_case.json
+  h_a33a1e80933106 1
+src/deps/src/yajl/test/parsing/cases/difficult_json_c_test_case.json.gold
+  h_a33a1e80933106 1-36
+src/deps/src/yajl/test/parsing/cases/doubles.json
+  h_a33a1e80933106 1
+src/deps/src/yajl/test/parsing/cases/doubles.json.gold
+  h_a33a1e80933106 1-7
+src/deps/src/yajl/test/parsing/cases/doubles_in_array.json
+  h_a33a1e80933106 1
+src/deps/src/yajl/test/parsing/cases/doubles_in_array.json.gold
+  h_a33a1e80933106 1-8
+src/deps/src/yajl/test/parsing/cases/empty_array.json
+  h_a33a1e80933106 1
+src/deps/src/yajl/test/parsing/cases/empty_array.json.gold
+  h_a33a1e80933106 1-3
+src/deps/src/yajl/test/parsing/cases/empty_string.json
+  h_a33a1e80933106 1
+src/deps/src/yajl/test/parsing/cases/empty_string.json.gold
+  h_a33a1e80933106 1-2
+src/deps/src/yajl/test/parsing/cases/escaped_bulgarian.json
+  h_a33a1e80933106 1-4
+src/deps/src/yajl/test/parsing/cases/escaped_bulgarian.json.gold
+  h_a33a1e80933106 1-7
+src/deps/src/yajl/test/parsing/cases/escaped_foobar.json
+  h_a33a1e80933106 1
+src/deps/src/yajl/test/parsing/cases/escaped_foobar.json.gold
+  h_a33a1e80933106 1-2
+src/deps/src/yajl/test/parsing/cases/false.json
+  h_a33a1e80933106 1
+src/deps/src/yajl/test/parsing/cases/false.json.gold
+  h_a33a1e80933106 1-2
+src/deps/src/yajl/test/parsing/cases/fg_false_then_garbage.json
+  h_a33a1e80933106 1
+src/deps/src/yajl/test/parsing/cases/fg_false_then_garbage.json.gold
+  h_a33a1e80933106 1-3
+src/deps/src/yajl/test/parsing/cases/fg_issue_7.json
+  h_a33a1e80933106 1
+src/deps/src/yajl/test/parsing/cases/fg_issue_7.json.gold
+  h_a33a1e80933106 1-3
+src/deps/src/yajl/test/parsing/cases/fg_null_then_garbage.json
+  h_a33a1e80933106 1
+src/deps/src/yajl/test/parsing/cases/fg_null_then_garbage.json.gold
+  h_a33a1e80933106 1-3
+src/deps/src/yajl/test/parsing/cases/fg_true_then_garbage.json
+  h_a33a1e80933106 1
+src/deps/src/yajl/test/parsing/cases/fg_true_then_garbage.json.gold
+  h_a33a1e80933106 1-3
+src/deps/src/yajl/test/parsing/cases/four_byte_utf8.json
+  h_a33a1e80933106 1-2
+src/deps/src/yajl/test/parsing/cases/four_byte_utf8.json.gold
+  h_a33a1e80933106 1-5
+src/deps/src/yajl/test/parsing/cases/high_overflow.json
+  h_a33a1e80933106 1
+src/deps/src/yajl/test/parsing/cases/high_overflow.json.gold
+  h_a33a1e80933106 1-2
+src/deps/src/yajl/test/parsing/cases/integers.json
+  h_a33a1e80933106 1-3
+src/deps/src/yajl/test/parsing/cases/integers.json.gold
+  h_a33a1e80933106 1-14
+src/deps/src/yajl/test/parsing/cases/invalid_utf8.json
+  h_a33a1e80933106 1
+src/deps/src/yajl/test/parsing/cases/invalid_utf8.json.gold
+  h_a33a1e80933106 1-3
+src/deps/src/yajl/test/parsing/cases/isolated_surrogate_marker.json
+  h_a33a1e80933106 1
+src/deps/src/yajl/test/parsing/cases/isolated_surrogate_marker.json.gold
+  h_a33a1e80933106 1-2
+src/deps/src/yajl/test/parsing/cases/leading_zero_in_number.json
+  h_a33a1e80933106 1
+src/deps/src/yajl/test/parsing/cases/leading_zero_in_number.json.gold
+  h_a33a1e80933106 1-5
+src/deps/src/yajl/test/parsing/cases/lonely_minus_sign.json
+  h_a33a1e80933106 1-7
+src/deps/src/yajl/test/parsing/cases/lonely_minus_sign.json.gold
+  h_a33a1e80933106 1-9
+src/deps/src/yajl/test/parsing/cases/lonely_number.json
+  h_a33a1e80933106 1
+src/deps/src/yajl/test/parsing/cases/lonely_number.json.gold
+  h_a33a1e80933106 1-2
+src/deps/src/yajl/test/parsing/cases/low_overflow.json
+  h_a33a1e80933106 1
+src/deps/src/yajl/test/parsing/cases/low_overflow.json.gold
+  h_a33a1e80933106 1-2
+src/deps/src/yajl/test/parsing/cases/map_close.json
+  h_a33a1e80933106 1
+src/deps/src/yajl/test/parsing/cases/map_close.json.gold
+  h_a33a1e80933106 1-2
+src/deps/src/yajl/test/parsing/cases/missing_integer_after_decimal_point.json
+  h_a33a1e80933106 1
+src/deps/src/yajl/test/parsing/cases/missing_integer_after_decimal_point.json.gold
+  h_a33a1e80933106 1-2
+src/deps/src/yajl/test/parsing/cases/missing_integer_after_exponent.json
+  h_a33a1e80933106 1
+src/deps/src/yajl/test/parsing/cases/missing_integer_after_exponent.json.gold
+  h_a33a1e80933106 1-2
+src/deps/src/yajl/test/parsing/cases/multiple.json
+  h_a33a1e80933106 1-3
+src/deps/src/yajl/test/parsing/cases/multiple.json.gold
+  h_a33a1e80933106 1-4
+src/deps/src/yajl/test/parsing/cases/non_utf8_char_in_string.json
+  h_a33a1e80933106 1
+src/deps/src/yajl/test/parsing/cases/non_utf8_char_in_string.json.gold
+  h_a33a1e80933106 1-8
+src/deps/src/yajl/test/parsing/cases/np_partial_bad.json
+  h_a33a1e80933106 1
+src/deps/src/yajl/test/parsing/cases/np_partial_bad.json.gold
+  h_a33a1e80933106 1-5
+src/deps/src/yajl/test/parsing/cases/null.json
+  h_a33a1e80933106 1
+src/deps/src/yajl/test/parsing/cases/null.json.gold
+  h_a33a1e80933106 1-2
+src/deps/src/yajl/test/parsing/cases/nulls_and_bools.json
+  h_a33a1e80933106 1-5
+src/deps/src/yajl/test/parsing/cases/nulls_and_bools.json.gold
+  h_a33a1e80933106 1-9
+src/deps/src/yajl/test/parsing/cases/simple.json
+  h_a33a1e80933106 1-5
+src/deps/src/yajl/test/parsing/cases/simple.json.gold
+  h_a33a1e80933106 1-9
+src/deps/src/yajl/test/parsing/cases/simple_with_comments.json
+  h_a33a1e80933106 1-11
+src/deps/src/yajl/test/parsing/cases/simple_with_comments.json.gold
+  h_a33a1e80933106 1-5
+src/deps/src/yajl/test/parsing/cases/string_invalid_escape.json
+  h_a33a1e80933106 1
+src/deps/src/yajl/test/parsing/cases/string_invalid_escape.json.gold
+  h_a33a1e80933106 1-3
+src/deps/src/yajl/test/parsing/cases/string_invalid_hex_char.json
+  h_a33a1e80933106 1
+src/deps/src/yajl/test/parsing/cases/string_invalid_hex_char.json.gold
+  h_a33a1e80933106 1-2
+src/deps/src/yajl/test/parsing/cases/string_with_escapes.json
+  h_a33a1e80933106 1-3
+src/deps/src/yajl/test/parsing/cases/string_with_escapes.json.gold
+  h_a33a1e80933106 1-7
+src/deps/src/yajl/test/parsing/cases/string_with_invalid_newline.json
+  h_a33a1e80933106 1-2
+src/deps/src/yajl/test/parsing/cases/string_with_invalid_newline.json.gold
+  h_a33a1e80933106 1-2
+src/deps/src/yajl/test/parsing/cases/three_byte_utf8.json
+  h_a33a1e80933106 1
+src/deps/src/yajl/test/parsing/cases/three_byte_utf8.json.gold
+  h_a33a1e80933106 1-7
+src/deps/src/yajl/test/parsing/cases/true.json
+  h_a33a1e80933106 1
+src/deps/src/yajl/test/parsing/cases/true.json.gold
+  h_a33a1e80933106 1-2
+src/deps/src/yajl/test/parsing/cases/unescaped_bulgarian.json
+  h_a33a1e80933106 1
+src/deps/src/yajl/test/parsing/cases/unescaped_bulgarian.json.gold
+  h_a33a1e80933106 1-4
+src/deps/src/yajl/test/parsing/cases/zerobyte.json
+  h_a33a1e80933106 1
+src/deps/src/yajl/test/parsing/run_tests.sh
+  h_a33a1e80933106 1-94
+src/deps/src/yajl/test/parsing/yajl_test.c
+  h_a33a1e80933106 1-291
+src/deps/src/yajl/verify/CMakeLists.txt
+  h_a33a1e80933106 1-37
+src/deps/src/yajl/verify/json_verify.c
+  h_a33a1e80933106 1-120
+src/deps/src/zstd-nginx-module/.cppcheck-suppressions
+  h_a33a1e80933106 1-16
+src/deps/src/zstd-nginx-module/.gitattributes
+  h_a33a1e80933106 1
+src/deps/src/zstd-nginx-module/.gitignore
+  h_a33a1e80933106 1-60
+src/deps/src/zstd-nginx-module/LICENSE
+  h_a33a1e80933106 1-25
+src/deps/src/zstd-nginx-module/Makefile
+  h_a33a1e80933106 1-72
+src/deps/src/zstd-nginx-module/NOTICE
+  h_a33a1e80933106 1-18
+src/deps/src/zstd-nginx-module/README.md
+  h_a33a1e80933106 1-172
+src/deps/src/zstd-nginx-module/config
+  h_a33a1e80933106 1-80
+src/deps/src/zstd-nginx-module/filter/config
+  h_a33a1e80933106 1-47
+src/deps/src/zstd-nginx-module/filter/ngx_http_zstd_filter.c
+  h_a33a1e80933106 1-614
+src/deps/src/zstd-nginx-module/filter/ngx_http_zstd_filter_module.c
+  h_a33a1e80933106 1-447
+src/deps/src/zstd-nginx-module/filter/ngx_http_zstd_filter_module.h
+  h_a33a1e80933106 1-75
+src/deps/src/zstd-nginx-module/ngx_http_zstd_accept_encoding.h
+  h_a33a1e80933106 1-417
+src/deps/src/zstd-nginx-module/static/config
+  h_a33a1e80933106 1-14
+src/deps/src/zstd-nginx-module/static/ngx_http_zstd_static_module.c
+  h_a33a1e80933106 1-356
+src/deps/src/zstd-nginx-module/valgrind.suppress
+  h_a33a1e80933106 1-218
+src/deps/src/zstd/.buckconfig
+  h_a33a1e80933106 1-9
+src/deps/src/zstd/.buckversion
+  h_a33a1e80933106 1
+src/deps/src/zstd/.cirrus.yml
+  h_a33a1e80933106 1-9
+src/deps/src/zstd/.gitattributes
+  h_a33a1e80933106 1-21
+src/deps/src/zstd/.gitignore
+  h_a33a1e80933106 1-63
+src/deps/src/zstd/CHANGELOG
+  h_a33a1e80933106 1-863
+src/deps/src/zstd/CODE_OF_CONDUCT.md
+  h_a33a1e80933106 1-5
+src/deps/src/zstd/CONTRIBUTING.md
+  h_a33a1e80933106 1-489
+src/deps/src/zstd/COPYING
+  h_a33a1e80933106 1-339
+src/deps/src/zstd/LICENSE
+  h_a33a1e80933106 1-30
+src/deps/src/zstd/Makefile
+  h_a33a1e80933106 1-471
+src/deps/src/zstd/Package.swift
+  h_a33a1e80933106 1-36
+src/deps/src/zstd/README.md
+  h_a33a1e80933106 1-237
+src/deps/src/zstd/SECURITY.md
+  h_a33a1e80933106 1-15
+src/deps/src/zstd/TESTING.md
+  h_a33a1e80933106 1-43
+src/deps/src/zstd/lib/.gitignore
+  h_a33a1e80933106 1-3
+src/deps/src/zstd/lib/BUCK
+  h_a33a1e80933106 1-232
+src/deps/src/zstd/lib/Makefile
+  h_a33a1e80933106 1-389
+src/deps/src/zstd/lib/README.md
+  h_a33a1e80933106 1-248
+src/deps/src/zstd/lib/common/allocations.h
+  h_a33a1e80933106 1-55
+src/deps/src/zstd/lib/common/bits.h
+  h_a33a1e80933106 1-205
+src/deps/src/zstd/lib/common/bitstream.h
+  h_a33a1e80933106 1-454
+src/deps/src/zstd/lib/common/compiler.h
+  h_a33a1e80933106 1-464
+src/deps/src/zstd/lib/common/cpu.h
+  h_a33a1e80933106 1-249
+src/deps/src/zstd/lib/common/debug.c
+  h_a33a1e80933106 1-30
+src/deps/src/zstd/lib/common/debug.h
+  h_a33a1e80933106 1-107
+src/deps/src/zstd/lib/common/entropy_common.c
+  h_a33a1e80933106 1-340
+src/deps/src/zstd/lib/common/error_private.c
+  h_a33a1e80933106 1-64
+src/deps/src/zstd/lib/common/error_private.h
+  h_a33a1e80933106 1-158
+src/deps/src/zstd/lib/common/fse.h
+  h_a33a1e80933106 1-625
+src/deps/src/zstd/lib/common/fse_decompress.c
+  h_a33a1e80933106 1-315
+src/deps/src/zstd/lib/common/huf.h
+  h_a33a1e80933106 1-277
+src/deps/src/zstd/lib/common/mem.h
+  h_a33a1e80933106 1-422
+src/deps/src/zstd/lib/common/pool.c
+  h_a33a1e80933106 1-371
+src/deps/src/zstd/lib/common/pool.h
+  h_a33a1e80933106 1-81
+src/deps/src/zstd/lib/common/portability_macros.h
+  h_a33a1e80933106 1-171
+src/deps/src/zstd/lib/common/threading.c
+  h_a33a1e80933106 1-182
+src/deps/src/zstd/lib/common/threading.h
+  h_a33a1e80933106 1-142
+src/deps/src/zstd/lib/common/xxhash.c
+  h_a33a1e80933106 1-18
+src/deps/src/zstd/lib/common/xxhash.h
+  h_a33a1e80933106 1-7094
+src/deps/src/zstd/lib/common/zstd_common.c
+  h_a33a1e80933106 1-48
+src/deps/src/zstd/lib/common/zstd_deps.h
+  h_a33a1e80933106 1-123
+src/deps/src/zstd/lib/common/zstd_internal.h
+  h_a33a1e80933106 1-324
+src/deps/src/zstd/lib/common/zstd_trace.h
+  h_a33a1e80933106 1-156
+src/deps/src/zstd/lib/compress/clevels.h
+  h_a33a1e80933106 1-134
+src/deps/src/zstd/lib/compress/fse_compress.c
+  h_a33a1e80933106 1-625
+src/deps/src/zstd/lib/compress/hist.c
+  h_a33a1e80933106 1-191
+src/deps/src/zstd/lib/compress/hist.h
+  h_a33a1e80933106 1-82
+src/deps/src/zstd/lib/compress/huf_compress.c
+  h_a33a1e80933106 1-1464
+src/deps/src/zstd/lib/compress/zstd_compress.c
+  h_a33a1e80933106 1-7843
+src/deps/src/zstd/lib/compress/zstd_compress_internal.h
+  h_a33a1e80933106 1-1636
+src/deps/src/zstd/lib/compress/zstd_compress_literals.c
+  h_a33a1e80933106 1-235
+src/deps/src/zstd/lib/compress/zstd_compress_literals.h
+  h_a33a1e80933106 1-39
+src/deps/src/zstd/lib/compress/zstd_compress_sequences.c
+  h_a33a1e80933106 1-442
+src/deps/src/zstd/lib/compress/zstd_compress_sequences.h
+  h_a33a1e80933106 1-55
+src/deps/src/zstd/lib/compress/zstd_compress_superblock.c
+  h_a33a1e80933106 1-688
+src/deps/src/zstd/lib/compress/zstd_compress_superblock.h
+  h_a33a1e80933106 1-32
+src/deps/src/zstd/lib/compress/zstd_cwksp.h
+  h_a33a1e80933106 1-765
+src/deps/src/zstd/lib/compress/zstd_double_fast.c
+  h_a33a1e80933106 1-778
+src/deps/src/zstd/lib/compress/zstd_double_fast.h
+  h_a33a1e80933106 1-42
+src/deps/src/zstd/lib/compress/zstd_fast.c
+  h_a33a1e80933106 1-985
+src/deps/src/zstd/lib/compress/zstd_fast.h
+  h_a33a1e80933106 1-30
+src/deps/src/zstd/lib/compress/zstd_lazy.c
+  h_a33a1e80933106 1-2199
+src/deps/src/zstd/lib/compress/zstd_lazy.h
+  h_a33a1e80933106 1-193
+src/deps/src/zstd/lib/compress/zstd_ldm.c
+  h_a33a1e80933106 1-745
+src/deps/src/zstd/lib/compress/zstd_ldm.h
+  h_a33a1e80933106 1-109
+src/deps/src/zstd/lib/compress/zstd_ldm_geartab.h
+  h_a33a1e80933106 1-106
+src/deps/src/zstd/lib/compress/zstd_opt.c
+  h_a33a1e80933106 1-1580
+src/deps/src/zstd/lib/compress/zstd_opt.h
+  h_a33a1e80933106 1-72
+src/deps/src/zstd/lib/compress/zstd_preSplit.c
+  h_a33a1e80933106 1-238
+src/deps/src/zstd/lib/compress/zstd_preSplit.h
+  h_a33a1e80933106 1-33
+src/deps/src/zstd/lib/compress/zstdmt_compress.c
+  h_a33a1e80933106 1-1923
+src/deps/src/zstd/lib/compress/zstdmt_compress.h
+  h_a33a1e80933106 1-102
+src/deps/src/zstd/lib/decompress/huf_decompress.c
+  h_a33a1e80933106 1-1944
+src/deps/src/zstd/lib/decompress/huf_decompress_amd64.S
+  h_a33a1e80933106 1-602
+src/deps/src/zstd/lib/decompress/zstd_ddict.c
+  h_a33a1e80933106 1-244
+src/deps/src/zstd/lib/decompress/zstd_ddict.h
+  h_a33a1e80933106 1-44
+src/deps/src/zstd/lib/decompress/zstd_decompress.c
+  h_a33a1e80933106 1-2410
+src/deps/src/zstd/lib/decompress/zstd_decompress_block.c
+  h_a33a1e80933106 1-2209
+src/deps/src/zstd/lib/decompress/zstd_decompress_block.h
+  h_a33a1e80933106 1-73
+src/deps/src/zstd/lib/decompress/zstd_decompress_internal.h
+  h_a33a1e80933106 1-240
+src/deps/src/zstd/lib/deprecated/zbuff.h
+  h_a33a1e80933106 1-214
+src/deps/src/zstd/lib/deprecated/zbuff_common.c
+  h_a33a1e80933106 1-26
+src/deps/src/zstd/lib/deprecated/zbuff_compress.c
+  h_a33a1e80933106 1-167
+src/deps/src/zstd/lib/deprecated/zbuff_decompress.c
+  h_a33a1e80933106 1-77
+src/deps/src/zstd/lib/dictBuilder/cover.c
+  h_a33a1e80933106 1-1302
+src/deps/src/zstd/lib/dictBuilder/cover.h
+  h_a33a1e80933106 1-152
+src/deps/src/zstd/lib/dictBuilder/divsufsort.c
+  h_a33a1e80933106 1-1913
+src/deps/src/zstd/lib/dictBuilder/divsufsort.h
+  h_a33a1e80933106 1-57
+src/deps/src/zstd/lib/dictBuilder/fastcover.c
+  h_a33a1e80933106 1-766
+src/deps/src/zstd/lib/dictBuilder/zdict.c
+  h_a33a1e80933106 1-1133
+src/deps/src/zstd/lib/dll/example/Makefile
+  h_a33a1e80933106 1-48
+src/deps/src/zstd/lib/dll/example/README.md
+  h_a33a1e80933106 1-63
+src/deps/src/zstd/lib/dll/example/build_package.bat
+  h_a33a1e80933106 1-20
+src/deps/src/zstd/lib/dll/example/fullbench-dll.sln
+  h_a33a1e80933106 1-25
+src/deps/src/zstd/lib/dll/example/fullbench-dll.vcxproj
+  h_a33a1e80933106 1-181
+src/deps/src/zstd/lib/legacy/zstd_legacy.h
+  h_a33a1e80933106 1-452
+src/deps/src/zstd/lib/legacy/zstd_v01.c
+  h_a33a1e80933106 1-2127
+src/deps/src/zstd/lib/legacy/zstd_v01.h
+  h_a33a1e80933106 1-94
+src/deps/src/zstd/lib/legacy/zstd_v02.c
+  h_a33a1e80933106 1-3465
+src/deps/src/zstd/lib/legacy/zstd_v02.h
+  h_a33a1e80933106 1-93
+src/deps/src/zstd/lib/legacy/zstd_v03.c
+  h_a33a1e80933106 1-3105
+src/deps/src/zstd/lib/legacy/zstd_v03.h
+  h_a33a1e80933106 1-93
+src/deps/src/zstd/lib/legacy/zstd_v04.c
+  h_a33a1e80933106 1-3598
+src/deps/src/zstd/lib/legacy/zstd_v04.h
+  h_a33a1e80933106 1-142
+src/deps/src/zstd/lib/legacy/zstd_v05.c
+  h_a33a1e80933106 1-4005
+src/deps/src/zstd/lib/legacy/zstd_v05.h
+  h_a33a1e80933106 1-162
+src/deps/src/zstd/lib/legacy/zstd_v06.c
+  h_a33a1e80933106 1-4110
+src/deps/src/zstd/lib/legacy/zstd_v06.h
+  h_a33a1e80933106 1-172
+src/deps/src/zstd/lib/legacy/zstd_v07.c
+  h_a33a1e80933106 1-4490
+src/deps/src/zstd/lib/legacy/zstd_v07.h
+  h_a33a1e80933106 1-187
+src/deps/src/zstd/lib/libzstd.mk
+  h_a33a1e80933106 1-235
+src/deps/src/zstd/lib/libzstd.pc.in
+  h_a33a1e80933106 1-16
+src/deps/src/zstd/lib/module.modulemap
+  h_a33a1e80933106 1-35
+src/deps/src/zstd/lib/zdict.h
+  h_a33a1e80933106 1-481
+src/deps/src/zstd/lib/zstd.h
+  h_a33a1e80933106 1-3198
+src/deps/src/zstd/lib/zstd_errors.h
+  h_a33a1e80933106 1-107
+src/linux/Dockerfile-debian-bookworm
+  h_a33a1e80933106 1,152,173-174
+src/linux/Dockerfile-debian-trixie
+  h_a33a1e80933106 1,147,168-169
+src/linux/Dockerfile-fedora-43
+  h_a33a1e80933106 1,139,160-161
+src/linux/Dockerfile-fedora-44
+  h_a33a1e80933106 1,139,160-161
+src/linux/Dockerfile-fedora-45
+  h_a33a1e80933106 1-176
+src/linux/Dockerfile-rhel-10
+  h_a33a1e80933106 1,22,151,174-175
+src/linux/Dockerfile-rhel-8
+  h_a33a1e80933106 170-171
+src/linux/Dockerfile-rhel-9
+  h_a33a1e80933106 1,20,149,173-174
+src/linux/Dockerfile-ubuntu
+  h_a33a1e80933106 167-168
+src/linux/Dockerfile-ubuntu-jammy
+  h_a33a1e80933106 171-172
+src/linux/Dockerfile-ubuntu-noble
+  h_a33a1e80933106 172-173
+src/linux/fpm-debian-bookworm
+  h_a33a1e80933106 11
+src/linux/fpm-debian-trixie
+  h_a33a1e80933106 11
+src/linux/fpm-fedora-43
+  h_a33a1e80933106 11-12
+src/linux/fpm-fedora-44
+  h_a33a1e80933106 11-12
+src/linux/fpm-fedora-45
+  h_a33a1e80933106 1-14
+src/linux/fpm-rhel-10
+  h_a33a1e80933106 6,11-12
+src/linux/fpm-rhel-8
+  h_a33a1e80933106 6,11-12
+src/linux/fpm-rhel-9
+  h_a33a1e80933106 6,11-12
+src/linux/fpm-ubuntu
+  h_a33a1e80933106 11
+src/linux/fpm-ubuntu-jammy
+  h_a33a1e80933106 11
+src/linux/fpm-ubuntu-noble
+  h_a33a1e80933106 11
+src/linux/scripts/afterRemoveDEB.sh
+  h_a33a1e80933106 51-52,54-55,57-58,131-136,138-139
+src/linux/scripts/afterRemoveRPM.sh
+  h_a33a1e80933106 51-52,54-55,57-58,120
+src/linux/scripts/beforeInstall.sh
+  h_a33a1e80933106 27,31-93
+src/linux/scripts/beforeRemove.sh
+  h_a33a1e80933106 1-20
+src/linux/scripts/bunkerweb-api.sh
+  h_a33a1e80933106 238-243,276-284
+src/linux/scripts/bunkerweb-scheduler.sh
+  h_a33a1e80933106 93-98,147-153,155,187-188,190,213-214,226,229,244,258-259,261,270-272
+src/linux/scripts/bunkerweb-ui.sh
+  h_a33a1e80933106 134-139,197-206
+src/linux/scripts/postinstall.sh
+  h_a33a1e80933106 18-19,24,27,29-37,39-40,56-59,61-64,70-91,97-104,109-123,135,180,193,223,232,294,301,312,319,324,343-367
+src/scheduler/Dockerfile
+  h_a33a1e80933106 1,48,59,88
+src/scheduler/JobScheduler.py
+  h_a33a1e80933106 34,85-86,276-297,373-374,521,532-533,539-544
+src/scheduler/main.py
+  h_a33a1e80933106 66,145-146,391,393-396,398-401,436-440,922,928,966-967,992-998,1154,1167-1185,1283,1287-1297,1306-1307,1682,1685-1687,1692-1701,1735-1746,1748,1807-1837,1839,1841-1843,1845-1847,1880-1883,1919-1922,1943,1952-1959
+src/scheduler/requirements.in
+  h_a33a1e80933106 29,42
+src/scheduler/requirements.txt
+  h_a33a1e80933106 37-39,47-49,51-53,155-158,500-502,508-510,591-593,607-609,623-625,627-629,635-637,663-665,813-815,842-844,854-856,860-1000,1204-1206
+src/ui/Dockerfile
+  h_a33a1e80933106 1,71,88,110
+src/ui/app/models/biscuit.py
+  h_a33a1e80933106 5,34,98,101-102,215
+src/ui/app/models/instance.py
+  h_a33a1e80933106 20,154,158-164
+src/ui/app/routes/cache.py
+  h_a33a1e80933106 5,8,41-45,50,52-56
+src/ui/app/routes/login.py
+  h_a33a1e80933106 34
+src/ui/app/routes/logs.py
+  h_a33a1e80933106 248-249
+src/ui/app/routes/plugins.py
+  h_a33a1e80933106 651
+src/ui/app/routes/setup.py
+  h_a33a1e80933106 277
+src/ui/app/routes/utils.py
+  h_a33a1e80933106 120
+src/ui/app/static/js/pages/services.js
+  h_a33a1e80933106 39-40
+src/ui/app/static/js/pages/templates.js
+  h_a33a1e80933106 52,55-56
+src/ui/app/static/locales/tr.json
+  h_a33a1e80933106 17,25-26,37,49,53,74,89,92,99,119-120,124,130,157,172,174,179,183-186,188-189,191-209,213-214,216-223,226-230,233,236-244,246-262,265-267,269-272,274-280,283-298,300-302,304-317,319-329,566-567,597,612,627,668,674,678,684-685,691,696-697,702,720-722,738-740,744,750,794,815-820,842,848,851,853,860,865-868,876-877,879-880,883,888,893,895,897,899,901,933-934,937,944,956,963-964,966-967,972-980,982-983,985-991,995-1009,1011-1012,1014-1015,1017-1019,1022-1024,1039,1043,1045,1047,1049-1051,1054,1089,1100,1112-1113,1125-1130,1138,1144,1147,1154-1155,1160-1161,1164-1165,1175,1178,1194,1209,1230,1237-1240,1243,1247-1248,1253,1258-1259,1279-1280,1292-1294,1310,1329,1335,1337,1348-1349,1359-1360,1368-1370,1379,1384,1388,1390-1391,1398,1405,1417,1421-1422,1425,1428-1430,1433,1437-1438,1440,1442,1452,1455-1456,1465,1475,1478,1488-1490,1512,1518-1519,1530,1536,1555,1559,1581-1582,1585-1586,1590,1592,1594-1597,1600-1601,1604,1606,1609-1611,1615-1617,1619-1621,1624,1626,1633,1637,1643,1648,1651,1664,1674,1679,1681,1683,1695,1698,1701,1713-1714,1717-1721,1729,1731,1733-1734,1740,1742-1743,1745,1749-1751,1753-1755,1757,1760,1762,1764,1767,1769-1770,1772,1777,1779-1781,1783-1784,1786-1787,1796,1800-1801,1803,1812,1816-1818,1821-1827,1831,1839,1841-1843,1847,1849,1854-1856,1860-1861,1865-1867,1870-1876,1878-1879,1882-1886,1889-1891,1894-1895,1898,1902,1905,1911-1914,1917-1919,1926-1927,1931,1933,1935,1938,1941-1944,1947,1950,1954-1956,1961-1967,1970,1972-1973,1975,1978-1979,1985-1986,1989,1994,1996,1999,2001
+src/ui/app/templates/setup.html
+  h_a33a1e80933106 880
+src/ui/main.py
+  h_a33a1e80933106 1395,1539
+src/ui/requirements.in
+  h_a33a1e80933106 17-18,20
+src/ui/requirements.txt
+  h_a33a1e80933106 614-616,618-620,1149-1263,1298-1300
+src/ui/utils/gunicorn.conf.py
+  h_a33a1e80933106 512,556
+tests/README.md
+  h_a33a1e80933106 397
+tests/api.py
+  h_a33a1e80933106 5,12,81-85,194-195,213-214
+tests/api/limit.yml
+  h_a33a1e80933106 12
+tests/core.py
+  h_a33a1e80933106 5,12,82-86,197-198,216-217
+tests/core/api.yml
+  h_a33a1e80933106 2,36,61,68,96-97,101
+tests/core/bunkernet.yml
+  h_a33a1e80933106 67,89,95,97,99-112
+tests/core/db.yml
+  h_a33a1e80933106 50,54,122,126,186,190,250,254
+tests/core/headers.yml
+  h_a33a1e80933106 13
+tests/core/ipv6-only/check.py
+  h_a33a1e80933106 22-24,58-83,86-87,89-90,95-96,117,127,129-132
+tests/core/ipv6-only/test_sockets.py
+  h_a33a1e80933106 40-60,63,66-127,194-217
+tests/core/misc.yml
+  h_a33a1e80933106 92-93,97,101-106,109,115
+tests/core/redis.yml
+  h_a33a1e80933106 656-657
+tests/core/selfsigned.yml
+  h_a33a1e80933106 6
+tests/core/upgrade.yml
+  h_a33a1e80933106 11-12,42,86,115,132,149,166,183,200
+tests/core/upgrade/linux-database.sh
+  h_a33a1e80933106 5-6,11,29,52,56,72,99-103
+tests/core_handlers/http_common.py
+  h_a33a1e80933106 4,7-8,16,19,25-52,95,97,108-109,122
+tests/core_handlers/http_status_handler.py
+  h_a33a1e80933106 7,12-25,27-28,32-34,36
+tests/core_handlers/limit_handler.py
+  h_a33a1e80933106 97-115
+tests/linux/Dockerfile-debian-bookworm
+  h_a33a1e80933106 1
+tests/linux/Dockerfile-debian-trixie
+  h_a33a1e80933106 1
+tests/linux/Dockerfile-fedora-43
+  h_a33a1e80933106 1
+tests/linux/Dockerfile-fedora-44
+  h_a33a1e80933106 1
+tests/linux/Dockerfile-fedora-45
+  h_a33a1e80933106 1-29
+tests/linux/Dockerfile-rhel-10
+  h_a33a1e80933106 1
+tests/linux/Dockerfile-rhel-9
+  h_a33a1e80933106 1
+tests/linux/Linux.sh
+  h_a33a1e80933106 37-39,77-79,101
+tests/misc/docker/postgresql.yml
+  h_a33a1e80933106 7-8
+tests/models/__init__.py
+  h_a33a1e80933106 18-20
+tests/models/status.py
+  h_a33a1e80933106 1-2,8-15
+tests/models/ui/__init__.py
+  h_a33a1e80933106 71
+tests/models/ui/database.py
+  h_a33a1e80933106 1-14
+tests/models/ui/fetch.py
+  h_a33a1e80933106 11-14
+tests/ui.py
+  h_a33a1e80933106 40,176-177
+tests/ui/home.yml
+  h_a33a1e80933106 36,38-40,43
+tests/ui/reader.yml
+  h_a33a1e80933106 1-247
+tests/ui_handlers/__init__.py
+  h_a33a1e80933106 20,41
+tests/ui_handlers/common.py
+  h_a33a1e80933106 35-37
+tests/ui_handlers/database.py
+  h_a33a1e80933106 1-21
+tests/ui_handlers/fetch.py
+  h_a33a1e80933106 8,11-23,26,41
+tests/unit/README.md
+  h_a33a1e80933106 214,218,222-223
+tests/unit/api/test_cache_router_folder_names.py
+  h_a33a1e80933106 21,67,87-88,133,146,155,159
+tests/unit/api/test_gunicorn_admin_rename.py
+  h_a33a1e80933106 1-102
+tests/unit/api/test_rate_limit_redis_tls.py
+  h_a33a1e80933106 1-62
+tests/unit/api/test_rate_limit_rules.py
+  h_a33a1e80933106 200,223
+tests/unit/api_app/test_all_routes_authorization.py
+  h_a33a1e80933106 1-106
+tests/unit/api_app/test_api_allowlist_invalid_entries.py
+  h_a33a1e80933106 1-64
+tests/unit/api_app/test_api_ban_scope_ub4_3.py
+  h_a33a1e80933106 1-81
+tests/unit/api_app/test_api_jobs_global_settings_status_ub4_6.py
+  h_a33a1e80933106 1-72
+tests/unit/api_app/test_api_schema_validators_ub4_7.py
+  h_a33a1e80933106 1-111
+tests/unit/api_app/test_ban_instance_failures.py
+  h_a33a1e80933106 1-51
+tests/unit/api_app/test_instances_reload_confirmation.py
+  h_a33a1e80933106 1-49
+tests/unit/api_app/test_read_only_grant_matrix.py
+  h_a33a1e80933106 1-189
+tests/unit/api_app/test_route_behavior_contracts.py
+  h_a33a1e80933106 54-56
+tests/unit/api_app/test_sensitive_cache.py
+  h_a33a1e80933106 1-376
+tests/unit/autoconf/test_config_environment_and_readonly.py
+  h_a33a1e80933106 71
+tests/unit/autoconf/test_config_instance_targets.py
+  h_a33a1e80933106 1-162
+tests/unit/autoconf/test_config_log_redaction.py
+  h_a33a1e80933106 1-75
+tests/unit/autoconf/test_config_update_needed_order.py
+  h_a33a1e80933106 22,46-47,51-57,99-100,103,105-124
+tests/unit/autoconf/test_kubernetes_multi_ingress_merge.py
+  h_a33a1e80933106 181-206,208-209,212-215,217,219-221
+tests/unit/backup/test_private_temp_files.py
+  h_a33a1e80933106 1-103
+tests/unit/cli/test_ban_reporting.py
+  h_a33a1e80933106 3,101-123
+tests/unit/cli/test_main_command_dispatch.py
+  h_a33a1e80933106 4,77-129
+tests/unit/common/test_antibot_include_uri_lua.py
+  h_a33a1e80933106 1-150
+tests/unit/common/test_antibot_request_coverage_lua.py
+  h_a33a1e80933106 27,130-140,154
+tests/unit/common/test_api_client_certificate_pin.py
+  h_a33a1e80933106 10-13,175,179,181-183,187,205,222,247,324,326,345-346,355,357,359-378
+tests/unit/common/test_api_reload_coverage_lua.py
+  h_a33a1e80933106 18,22,36,130-145,355-409
+tests/unit/common/test_authbasic_behaviour_lua.py
+  h_a33a1e80933106 66-134
+tests/unit/common/test_authbasic_location_regex_lua.py
+  h_a33a1e80933106 1-76
+tests/unit/common/test_authbasic_verify_password_branches_lua.py
+  h_a33a1e80933106 1-94
+tests/unit/common/test_badbehavior_exact_status_match.py
+  h_a33a1e80933106 1-66
+tests/unit/common/test_badbehavior_report_limits_lua.py
+  h_a33a1e80933106 1-102
+tests/unit/common/test_blacklist_behaviour_lua.py
+  h_a33a1e80933106 291-433
+tests/unit/common/test_blacklist_list_reuse_luajit.py
+  h_a33a1e80933106 1-142
+tests/unit/common/test_bunkernet_coverage_lua.py
+  h_a33a1e80933106 95,103-104
+tests/unit/common/test_bunkernet_report_credentials.py
+  h_a33a1e80933106 1-116
+tests/unit/common/test_bunkernet_report_headers.py
+  h_a33a1e80933106 178-182,184,188-189
+tests/unit/common/test_bunkernet_report_redaction.py
+  h_a33a1e80933106 104-106,108-109,114-115
+tests/unit/common/test_challenge_template_sizes.py
+  h_a33a1e80933106 1-25
+tests/unit/common/test_country_behaviour_lua.py
+  h_a33a1e80933106 191,195-209
+tests/unit/common/test_crowdsec_behaviour_lua.py
+  h_a33a1e80933106 71,84-90,524-581
+tests/unit/common/test_crowdsec_stream_reload.py
+  h_a33a1e80933106 1-46
+tests/unit/common/test_dnsbl_behaviour_lua.py
+  h_a33a1e80933106 197,205-213,216-226
+tests/unit/common/test_helpers_coverage_lua.py
+  h_a33a1e80933106 139-196,216-217,238-258
+tests/unit/common/test_http_phase_lazy_info_lua.py
+  h_a33a1e80933106 1-170
+tests/unit/common/test_ignore_uri_normalized_path_regression.py
+  h_a33a1e80933106 55
+tests/unit/common/test_ipv6_reversescan_lua.py
+  h_a33a1e80933106 107-133
+tests/unit/common/test_issue_3650_antibot_redirect_target_regression.py
+  h_a33a1e80933106 28
+tests/unit/common/test_limit_req_lock_lua.py
+  h_a33a1e80933106 1-404
+tests/unit/common/test_metrics_flush_on_exit_lua.py
+  h_a33a1e80933106 1-515
+tests/unit/common/test_proxy_protocol_addr_patch.py
+  h_a33a1e80933106 91-100
+tests/unit/common/test_regex_match_memoize.py
+  h_a33a1e80933106 147-169
+tests/unit/common/test_request_work_counts_luajit.py
+  h_a33a1e80933106 1-256
+tests/unit/common/test_securitytxt_order_render.py
+  h_a33a1e80933106 1-66
+tests/unit/common/test_sensitive_job_cache.py
+  h_a33a1e80933106 1-119
+tests/unit/common/test_session_revocation_cache_luajit.py
+  h_a33a1e80933106 1-70
+tests/unit/common/test_sessions_coverage_lua.py
+  h_a33a1e80933106 31,35-36,68-69,109-171
+tests/unit/common/test_system_utility_outcomes.py
+  h_a33a1e80933106 6,241-242,251-253,255-260
+tests/unit/common/test_utils_ip_is_global_lua.py
+  h_a33a1e80933106 1-133
+tests/unit/db/test_check_setting_newlines.py
+  h_a33a1e80933106 1-42
+tests/unit/db/test_connection_and_metadata.py
+  h_a33a1e80933106 289
+tests/unit/db/test_instances_services_jobs.py
+  h_a33a1e80933106 413-422
+tests/unit/db/test_save_config_global_wipe.py
+  h_a33a1e80933106 1-54
+tests/unit/gen/test_authbasic_user_regex.py
+  h_a33a1e80933106 1-56
+tests/unit/gen/test_client_timeouts.py
+  h_a33a1e80933106 1-103
+tests/unit/gen/test_compression_module_order.py
+  h_a33a1e80933106 1-10
+tests/unit/gen/test_inject_escaping.py
+  h_a33a1e80933106 1-23
+tests/unit/gen/test_limit_conn_setting_validation.py
+  h_a33a1e80933106 1-60
+tests/unit/gen/test_proxy_cache_buffering_warning.py
+  h_a33a1e80933106 1-127
+tests/unit/gen/test_reverse_proxy_pass_request_body.py
+  h_a33a1e80933106 1-59
+tests/unit/gen/test_save_config_pending_migration_regression.py
+  h_a33a1e80933106 21
+tests/unit/gen/test_save_config_version_stamp.py
+  h_a33a1e80933106 22
+tests/unit/gen/test_setting_regexes.py
+  h_a33a1e80933106 118
+tests/unit/gen/test_zstd.py
+  h_a33a1e80933106 1-58
+tests/unit/harness/test_ci_core_logs.py
+  h_a33a1e80933106 1-150
+tests/unit/harness/test_ci_engine_guard.py
+  h_a33a1e80933106 1-42
+tests/unit/harness/test_ci_linux_logs.py
+  h_a33a1e80933106 1-195
+tests/unit/harness/test_ci_matrix.py
+  h_a33a1e80933106 1-90
+tests/unit/harness/test_ci_rate_limit.py
+  h_a33a1e80933106 1-75
+tests/unit/harness/test_database_action_models.py
+  h_a33a1e80933106 1-50
+tests/unit/harness/test_http_status.py
+  h_a33a1e80933106 1-245
+tests/unit/jobs/test_bunkernet_send_filter.py
+  h_a33a1e80933106 56-84,165,168,181,184,186,199-200,206,208,223-265
+tests/unit/jobs/test_job_cache_contracts.py
+  h_a33a1e80933106 505,507-510,835,928-936,945,948-985
+tests/unit/jobs/test_list_refresh_interval_jobs.py
+  h_a33a1e80933106 1-181
+tests/unit/jobs/test_ub2_5_external_plugin_failures.py
+  h_a33a1e80933106 1-146
+tests/unit/jobs/test_update_check_release_line.py
+  h_a33a1e80933106 131-172
+tests/unit/letsencrypt/test_certbot_jobs_execution.py
+  h_a33a1e80933106 151-176,333-366
+tests/unit/letsencrypt/test_hosttech_provider.py
+  h_a33a1e80933106 1-42
+tests/unit/linux/modsecurity_json_probe.py
+  h_a33a1e80933106 1-95
+tests/unit/linux/test_deb_postrm_lifecycle.py
+  h_a33a1e80933106 1-90
+tests/unit/linux/test_env_file_exec_keys.py
+  h_a33a1e80933106 1-219
+tests/unit/linux/test_lxp_package_lifecycle.py
+  h_a33a1e80933106 1-376
+tests/unit/linux/test_lxq_migration_config.py
+  h_a33a1e80933106 1-105
+tests/unit/linux/test_lxq_reload_and_logs.py
+  h_a33a1e80933106 1-58
+tests/unit/linux/test_lxq_repository_bootstrap.py
+  h_a33a1e80933106 1-64
+tests/unit/linux/test_yajl_build.py
+  h_a33a1e80933106 1-48
+tests/unit/modsecurity/test_audit_log_format.py
+  h_a33a1e80933106 1-133
+tests/unit/reload_publication.py
+  h_a33a1e80933106 1,10-11,13-16,19-22,25-29,32-33,40,46,48-50,89,105-106,138-144,180-182,253,263,294-297,299-304
+tests/unit/requirements.in
+  h_a33a1e80933106 31-32,75-76
+tests/unit/requirements.txt
+  h_a33a1e80933106 1000,1017-1020,1182-1184,1367,1629-1631,2640-2645
+tests/unit/scheduler/test_certificates_before_publication.py
+  h_a33a1e80933106 1-133
+tests/unit/scheduler/test_lxq_failover_recovery.py
+  h_a33a1e80933106 1-80
+tests/unit/scheduler/test_main_healthcheck.py
+  h_a33a1e80933106 75-95
+tests/unit/scheduler/test_main_loop.py
+  h_a33a1e80933106 312,358-366,392,448-499,514-530
+tests/unit/scheduler/test_once_jobs_regenerate.py
+  h_a33a1e80933106 61-63
+tests/unit/scheduler/test_reload_callers.py
+  h_a33a1e80933106 1-129
+tests/unit/scheduler/test_reload_confirmation.py
+  h_a33a1e80933106 13,27-31,59,106-107
+tests/unit/scheduler/test_reload_wait.py
+  h_a33a1e80933106 1-62
+tests/unit/ui/core/_ui_core_main.py
+  h_a33a1e80933106 7-10,231
+tests/unit/ui/core/reader_route_manifest.py
+  h_a33a1e80933106 1-118
+tests/unit/ui/core/test_biscuit_middleware.py
+  h_a33a1e80933106 80-89,132-157,223-235
+tests/unit/ui/core/test_db_readonly_matrix.py
+  h_a33a1e80933106 1-267
+tests/unit/ui/core/test_instance_api_calls.py
+  h_a33a1e80933106 18-19
+tests/unit/ui/core/test_instance_reload_confirmation.py
+  h_a33a1e80933106 1-41
+tests/unit/ui/core/test_instance_reports_queries.py
+  h_a33a1e80933106 23-24
+tests/unit/ui/core/test_main_request_pipeline.py
+  h_a33a1e80933106 223-231
+tests/unit/ui/core/test_reader_route_matrix.py
+  h_a33a1e80933106 1-227
+tests/unit/ui/core_plugins/conftest.py
+  h_a33a1e80933106 35
+tests/unit/ui/core_plugins/test_letsencrypt_blueprint_routes.py
+  h_a33a1e80933106 129-148
+tests/unit/ui/routes/test_reports_4084_large_data.py
+  h_a33a1e80933106 1-98
+tests/unit/ui/routes/test_routes_crowdsec_jobs_cache.py
+  h_a33a1e80933106 247-268,270,275,279,288,297,307,314-492,553-564
+tests/unit/ui/routes/test_routes_f3_regressions.py
+  h_a33a1e80933106 90-92,101-103
+tests/unit/ui/routes/test_routes_plugins.py
+  h_a33a1e80933106 121-124,126,128,130-135,137-138,443-456
+tests/unit/ui/routes/test_ub3_3_datatable_filter_state.py
+  h_a33a1e80933106 1-16
+tests/unit/ui/routes/test_ub3_4_global_settings_drafts.py
+  h_a33a1e80933106 1-92
+tests/unit/ui/routes/test_ui_log_hardening.py
+  h_a33a1e80933106 1-135
+tests/unit/ui/test_admin_rename_from_env.py
+  h_a33a1e80933106 1-90
+tests/unit/ui/test_authbasic_user_browser_pattern.py
+  h_a33a1e80933106 1-53
+tests/unit/ui/test_config_validation_rejections.py
+  h_a33a1e80933106 1-79
+tests/unit/ui/test_csrf_enforced.py
+  h_a33a1e80933106 1-48
+tests/unit/ui/test_template_id_escaping.py
+  h_a33a1e80933106 1-37
+tests/utils/__init__.py
+  h_a33a1e80933106 2,61-87,93,95-96,98-100,104-105,107-122
+tests/utils/docker.py
+  h_a33a1e80933106 160-167,172,174-175
+tests/utils/integrations.yml
+  h_a33a1e80933106 16
+tests/utils/packages.yml
+  h_a33a1e80933106 42-44
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "4c95cbba4fd11ce65c6abd1a054180aa619eeaab",
+  "prompts": {},
+  "humans": {
+    "h_a33a1e80933106": {
+      "author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}
