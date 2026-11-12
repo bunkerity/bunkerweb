@@ -172,7 +172,29 @@ jobs:
           done
           echo "deb [signed-by=${signed_by}] https://ppa.launchpadcontent.net/mozillateam/ppa/ubuntu $(lsb_release -cs) main debug" | sudo tee /etc/apt/sources.list.d/mozillateam-ppa.list
           echo "deb-src [signed-by=${signed_by}] https://ppa.launchpadcontent.net/mozillateam/ppa/ubuntu $(lsb_release -cs) main debug" | sudo tee -a /etc/apt/sources.list.d/mozillateam-ppa.list
-          sudo apt update -y
+
+          # Launchpad answers 503 now and then (STAGING 43194170054 lost three jobs to it). `apt update`
+          # only warns about an index it could not fetch and exits 0, so the update also has to prove the
+          # PPA's firefox is a candidate; the install fails hard on a 503 for a .deb, hence the retry too.
+          retry() {
+            local attempt=0
+            until "$@"; do
+              attempt=$((attempt+1))
+              if [ $attempt -ge 5 ]; then
+                echo "::error::'$*' failed after $attempt attempts"
+                return 1
+              fi
+              echo "Retrying '$*' (attempt $attempt)…"
+              sleep $((attempt*10))
+            done
+          }
+          ppa_update() {
+            local policy
+            sudo apt update -y || return 1
+            policy="$(apt-cache policy firefox)" || return 1
+            grep -qF "ppa.launchpadcontent.net/mozillateam/ppa" <<< "$policy"
+          }
+          retry ppa_update
 
           sudo apt purge -y firefox
           echo '
@@ -185,7 +207,7 @@ jobs:
           Pin-Priority: -1
           ' | sudo tee /etc/apt/preferences.d/mozilla-firefox
 
-          sudo -E apt install --no-install-recommends -y \
+          retry sudo -E apt install --no-install-recommends -y \
             openssl git tar bzip2 wget curl grep libx11-xcb1 libappindicator3-1 \
             libasound2t64 libdbus-glib-1-2 libxtst6 libxt6 unzip firefox sed jq \
             dnsutils coreutils redis
