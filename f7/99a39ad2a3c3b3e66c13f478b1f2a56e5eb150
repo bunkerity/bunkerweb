@@ -1,0 +1,91 @@
+.github/scripts/test_release_artifacts.py
+  s_1ffe1354434287::t_712d96f2fc72a9 69-79
+  s_1ffe1354434287::t_e25a7cd5ae709b 49,422,441-442,458,471,507,509
+.github/scripts/release_artifacts.py
+  s_1ffe1354434287::t_e25a7cd5ae709b 25
+.github/workflows/staging.yml
+  s_1ffe1354434287::t_e25a7cd5ae709b 64,84
+  s_1ffe1354434287::t_09ea91c4d22bb5 85
+docs/es/integrations.md
+  s_1ffe1354434287::t_e25a7cd5ae709b 2034,5164
+docs/zh/integrations.md
+  s_1ffe1354434287::t_e25a7cd5ae709b 2033,5157
+.github/workflows/dev.yml
+  s_1ffe1354434287::t_e25a7cd5ae709b 66,88
+  s_1ffe1354434287::t_6da3885aa62985 89
+src/linux/Dockerfile-fedora-45
+  s_1ffe1354434287::t_e25a7cd5ae709b 1-176
+docs/zh/upgrading.md
+  s_1ffe1354434287::t_e25a7cd5ae709b 1254
+.github/workflows/integration-tests.yml
+  s_1ffe1354434287::t_e25a7cd5ae709b 356
+docs/de/upgrading.md
+  s_1ffe1354434287::t_e25a7cd5ae709b 1252
+tests/unit/linux/test_lxq_reload_and_logs.py
+  s_27f0cf42e5430b::t_ae15023490c49c 50
+docs/upgrading.md
+  s_1ffe1354434287::t_e25a7cd5ae709b 1255
+src/linux/fpm-fedora-45
+  s_1ffe1354434287::t_e25a7cd5ae709b 1-14
+docs/fr/upgrading.md
+  s_1ffe1354434287::t_e25a7cd5ae709b 1255
+docs/de/integrations.md
+  s_1ffe1354434287::t_e25a7cd5ae709b 2033,5163
+.github/workflows/release.yml
+  s_1ffe1354434287::t_e25a7cd5ae709b 329,350-351,559,599-603,642-644,675
+  s_1ffe1354434287::t_648d8a7d3e6640 676-677
+misc/install-bunkerweb.sh
+  s_1ffe1354434287::t_e25a7cd5ae709b 5723-5724,5727,5749
+tests/unit/linux/test_lxp_package_lifecycle.py
+  s_fc422216093e44::t_dcfb7a7fa74f73 308,318
+docs/es/upgrading.md
+  s_1ffe1354434287::t_e25a7cd5ae709b 1255
+CHANGELOG.md
+  s_8957b83407cdf6::t_b940759b881480 26
+docs/integrations.md
+  s_1ffe1354434287::t_e25a7cd5ae709b 2048,5286
+docs/fr/integrations.md
+  s_1ffe1354434287::t_e25a7cd5ae709b 2042,5164
+tests/linux/Dockerfile-fedora-45
+  s_1ffe1354434287::t_eb84574d01f1b7 1-29
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "f799a39ad2a3c3b3e66c13f478b1f2a56e5eb150",
+  "prompts": {},
+  "sessions": {
+    "s_1ffe1354434287": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1bf68-8369-7e82-92bf-0b8d9a565584",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_27f0cf42e5430b": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1c038-537b-77b0-85a1-68ecb0d23311",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_8957b83407cdf6": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "f0ed5bf7-382f-48ad-b7ad-d9883e810768",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_fc422216093e44": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1bf60-2ae5-70e3-a392-b2addf6c4a84",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

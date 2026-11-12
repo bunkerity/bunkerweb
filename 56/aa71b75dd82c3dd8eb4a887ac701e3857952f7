@@ -1,0 +1,29 @@
+CHANGELOG.md
+  s_8957b83407cdf6::t_a5fb49fca47110 33
+src/linux/Dockerfile-rhel-9
+  s_b5f8b3c8b255ab::t_44880b3ad5fb4e 20
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "56aa71b75dd82c3dd8eb4a887ac701e3857952f7",
+  "prompts": {},
+  "sessions": {
+    "s_8957b83407cdf6": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "f0ed5bf7-382f-48ad-b7ad-d9883e810768",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_b5f8b3c8b255ab": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1c532-b3e1-7242-b3a3-a03eb80d0a0b",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

@@ -1,0 +1,33 @@
+src/linux/scripts/bunkerweb-scheduler.sh
+  s_29c5c5c0683384::t_c1dad9cb8dcb91 213-214,226,229
+tests/unit/linux/test_lxq_migration_config.py
+  s_29c5c5c0683384::t_53320ed2769d70 41
+  s_29c5c5c0683384::t_c1dad9cb8dcb91 96
+  s_29c5c5c0683384::t_0a6be3899a99e0 1-40,42-95,97-105
+CHANGELOG.md
+  s_9b72a24114dc24::t_c5e3c8723b9c9e 18
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "14dd26564e17124915752af2a1a72dd3825f5ac5",
+  "prompts": {},
+  "sessions": {
+    "s_29c5c5c0683384": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1b133-30a1-7872-af63-bcd7da5ddc3c",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_9b72a24114dc24": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "cc5a1ca8-e952-421b-979b-0d94c0aab861",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

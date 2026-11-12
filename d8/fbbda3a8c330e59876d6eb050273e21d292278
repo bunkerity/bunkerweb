@@ -1,0 +1,1299 @@
+tests/unit/ui/routes/test_routes_pro_and_support.py
+  s_d532896ccd56b1::t_8a29bff33cf5d7 1-161,163-165,167-215,218-223,225,227-235,238-244,251-263
+  s_5c120ac04c47dc::t_2f06eeb91aaa2d 162,166,216-217,224,226,236-237,245-250
+tests/unit/ui/test_page_script_reachability.py
+  s_ff2b36b648c85c::t_3a32e2f8916644 1-50
+tests/unit/ui/routes/test_routes_global_settings.py
+  s_54379ae77c04b0::t_1360c96eece717 1-172
+tests/unit/ui/core/test_main_plugin_refresh.py
+  s_54379ae77c04b0::t_1a0b39b99d4460 48-196
+  s_c1401fc71f30b1::t_6ae2fccc15a690 1-47,197-202
+tests/unit/autoconf/test_ingress_swarm_known_defects.py
+  s_ddaf4c4a532033::t_a007b43f24911d 2-28
+  s_80f1da85912d1b::t_155c975f679825 1
+tests/unit/gen/test_custom_error_pages.py
+  s_ff2b36b648c85c::t_12bdb0caa366a2 1-63
+tests/unit/gen/test_modsecurity_audit_render.py
+  s_ff2b36b648c85c::t_0b8a564a1358b0 1-223
+tests/unit/ui/test_ui_users.py
+  s_ff2b36b648c85c::t_b19ca219ce1382 1-135
+tests/unit/gen/test_reverse_proxy_max_client_size.py
+  s_ff2b36b648c85c::t_3499bde9881978 1-79
+tests/unit/common/test_authbasic_behaviour_lua.py
+  s_4fa0052e9bdca1::t_e6675455a75bea 24,27,41
+  s_8830845dc521da::t_0939c57a330c9b 1-23,25-26,28-40,42-88,92-157
+  s_8830845dc521da::t_ff81d844fc2291 89-91
+tests/unit/letsencrypt/test_certbot_concurrency_storage.py
+  s_ee364a6ae859d6::t_012195f96364e8 61
+  s_ee364a6ae859d6::t_6a35aff08f7a9e 1-60,62-117,126-260
+  s_ee364a6ae859d6::t_27fed2adbfd5fd 261-296
+  s_dd2816558e02d5::t_7f7f22ed26f200 118-125
+tests/unit/linux/test_db_lock_upgrade_permissions.py
+  s_dd2816558e02d5::t_4820a38e5d9b09 1-54
+tests/unit/jobs/test_selfsigned_generation.py
+  s_4706d671c01354::t_59e4efc9562fdd 1-94
+tests/unit/api/test_plugins_acl.py
+  s_ff2b36b648c85c::t_1e7ed9caff6fdb 1-35
+tests/unit/ui/routes/test_routes_templates.py
+  s_d532896ccd56b1::t_17c5c1339eb43e 1-323
+tests/unit/ui/routes/test_routes_anonymous_refused.py
+  s_d532896ccd56b1::t_f1bde4b38651ba 10-25,28-57
+  s_d532896ccd56b1::t_73e281d5bcc6c5 1-7,9
+  s_d532896ccd56b1::t_d4bd2d550fdc46 8,26-27
+tests/unit/common/test_api_audit_preflight_lua.py
+  s_ff2b36b648c85c::t_5629e2978996b8 1-74
+tests/unit/common/test_bw_cachestore_lua.py
+  s_0a6110287c15c2::t_87de12ffc92d70 144,153,157,227,266
+  s_0a6110287c15c2::t_b1d7ba3855b3f8 112-113
+  s_0a6110287c15c2::t_8c1864dd2118f9 1-22,25-39,43-94,96-111,114-119,121-127,129-143,145-152,154-156,158-176,179-186,188-192,194-196,198-206,208-210,212-217,219-226,228-265,267-269,271-308,310-312,314-329,332-337,339-341,343-346,348-382
+  s_0a6110287c15c2::t_8682566e45f0ff 270
+  s_0a6110287c15c2::t_28b15e2bc1c6d5 23-24,40-42,95,177-178,331
+  s_0a6110287c15c2::t_92d85c7588f8c0 120,128,187,193,197,207,211,218,309,313,330,338,342,347
+tests/unit/ui/routes/test_routes_plugins.py
+  s_d532896ccd56b1::t_67e042248747d9 12,23,29-34,96-101,134-138,140-144
+  s_ddaf4c4a532033::t_1724710c825747 1-11,13-22,24-28,35-95,102-133,139,146-496,501,505
+  s_c1401fc71f30b1::t_ac94af046459b0 145,497-500,502-504,506-510
+tests/unit/customcert/test_custom_cert_strip_duplicates.py
+  s_ff2b36b648c85c::t_82cee071a0a1c9 1-71
+tests/unit/common/test_crowdsec_cache_partition_lua.py
+  s_265a75478a3c04::t_b05eda75b241db 209-210
+  s_265a75478a3c04::t_f14483a9c71bc2 1-208,211-220
+tests/unit/integrations/test_requirements_coinstall.py
+  s_ff2b36b648c85c::t_805f878f98c7dc 1-59
+tests/unit/ui/test_gettext_placeholders.py
+  s_ff2b36b648c85c::t_c1a719238b4cff 1-77
+tests/unit/common/test_letsencrypt_cache_recovery.py
+  s_873413dfc3c805::t_1128e6c4cb8f01 1-237
+tests/unit/db/test_migrations_use_one_connection.py
+  s_ff2b36b648c85c::t_419ff57a7a884b 1-64
+tests/unit/common/test_api_empty_internalstore_lua.py
+  s_5fb50095e4a17f::t_d8329abfc6d6d6 1-170,175-226
+  s_5fb50095e4a17f::t_e34a77a841de8f 173
+  s_5fb50095e4a17f::t_f641fbd1873884 171-172,174
+tests/unit/db/test_metadata.py
+  s_ff2b36b648c85c::t_25c48bd621ae40 1-94
+tests/unit/ui/test_resume_identifier_strings.py
+  s_fa9a376e8fb070::t_9fd67a719e2811 1-30
+tests/unit/api/test_global_settings_acl.py
+  s_ff2b36b648c85c::t_47f863102f8a88 1-62
+tests/unit/autoconf/conftest.py
+  s_dd2816558e02d5::t_decf134f16c52b 103-106,112-113,116-117,124-127,129,131-139
+  s_5c120ac04c47dc::t_7e9b4608b4134e 171
+  s_ddaf4c4a532033::t_fb70f3e4d398ca 1-27,29-40,42-44,46-48,50-65,67-102,140-168,174-194,198-211
+  s_ee364a6ae859d6::t_0163c683d5e61e 221,237
+  s_ddaf4c4a532033::t_691b31263b945c 195-197
+  s_ddaf4c4a532033::t_1c5ba481bdda09 107-111,114-115,118-123,128,130
+  s_54379ae77c04b0::t_ca944a748bc7ca 28,41,45,49
+  s_ddaf4c4a532033::t_818732d2d72f06 66,169-170,172-173
+  s_ddaf4c4a532033::t_72747756d3d3d3 212-220,222-236,238-245
+tests/unit/gen/test_bans_tls_drop_setting.py
+  s_ff2b36b648c85c::t_ee931d066003f0 1-47
+tests/unit/gen/test_global_crs_plugins.py
+  s_5b4f95050f6c74::t_3af7e009dbc1e5 1-146
+tests/unit/metrics/test_lru_resize_phase.py
+  s_ff2b36b648c85c::t_7d405beba27bc2 1-54
+tests/unit/db/test_upgrade_schema_parity.py
+  s_ff2b36b648c85c::t_c4ac6847fef0cf 1-708
+tests/unit/api_app/test_auth_token_issuance.py
+  s_cf4873c795c511::t_52abfaad62e2d8 42-47,49-51,59-62,64-66,74,79-82
+  s_cf4873c795c511::t_9ea8eea6a53110 1-41,48,52-58,63,67-73,75-78,83-113
+tests/unit/db/test_config_save_cleanup_methods.py
+  s_545098f0881e62::t_6a4631d905f95f 1-196
+tests/unit/jobs/conftest.py
+  s_ff2b36b648c85c::t_63ff75f054c29c 1-119
+tests/unit/gen/test_service_server_name.py
+  s_ff2b36b648c85c::t_4ed06b91925e16 1-95
+tests/unit/common/test_resume_maintenance.py
+  s_ff2b36b648c85c::t_4405b63ec896b5 1-108
+tests/unit/db/test_listen_port_context.py
+  s_ff2b36b648c85c::t_26374608f27876 1-104
+tests/unit/api/conftest.py
+  s_ff2b36b648c85c::t_1f3c59b8f93b0f 1-35
+tests/unit/ui/_css.py
+  s_ff2b36b648c85c::t_5329a23a349d7c 1-21
+tests/unit/common/test_api_disk_fallback_auth_ports.py
+  s_5fb50095e4a17f::t_1f100d4d9aee0d 1-2,5-7,10-35,50-53
+  s_5fb50095e4a17f::t_6abfedd503a244 3-4,8-9
+  s_5fb50095e4a17f::t_98ef8b8b78743d 36-49
+tests/unit/cli/test_variables_paths_precedence.py
+  s_ff2b36b648c85c::t_c433c241f8e6be 1-126
+tests/unit/ui/core/_ui_core_main.py
+  s_54379ae77c04b0::t_02da2e19fe99f2 232,245-246,248,317
+  s_54379ae77c04b0::t_c44be128bc28c9 128-138,181-183
+  s_54379ae77c04b0::t_b0d8549eb2b8e1 30
+  s_54379ae77c04b0::t_cfc53c066e46f1 1-20,22-27,29,31-127,139-180,184-210,215-217,228,230-231,233-235,243-244,247,249-263
+  s_54379ae77c04b0::t_939a30320eb00d 324-325
+  s_54379ae77c04b0::t_8d678a725adaab 229,236-242
+  s_80f1da85912d1b::t_8533965083e433 218-227,264-316,318-323,326-342
+  s_54379ae77c04b0::t_98d1760685830c 21,28,211-214
+tests/unit/common/test_bunkernet_challenge_not_reported.py
+  s_5fb50095e4a17f::t_d8329abfc6d6d6 1-129
+tests/unit/autoconf/_autoconf_helpers.py
+  s_ddaf4c4a532033::t_818732d2d72f06 1-43
+tests/unit/api/test_cache_router_folder_names.py
+  s_fa9a376e8fb070::t_36b61da68cdd49 1-96,98-99,101-173,175
+  s_fa9a376e8fb070::t_4626f5193fe092 97,100,174
+tests/unit/db/test_write_probe_primary_key.py
+  s_ff2b36b648c85c::t_f878c9137b4ea4 1-112
+tests/unit/ui/test_redis_scan_window.py
+  s_ff2b36b648c85c::t_ef4cff13f81e7e 1-187
+tests/unit/common/test_init_empty_server_name_guards_lua.py
+  s_ff2b36b648c85c::t_586e6014ae603e 1-129
+tests/unit/ui/routes/test_routes_helpers.py
+  s_d532896ccd56b1::t_22b66b07802e7a 134,282,284-286,288,292,297,300,305
+  s_d532896ccd56b1::t_a6f630b5350047 1-133,135-281,283,287,289-291,293-296,298-299,301-304
+tests/unit/db/test_default_multiple_sibling_lock.py
+  s_ff2b36b648c85c::t_c7a758d84b8f0e 1-498
+tests/unit/ui/routes/test_routes_bans.py
+  s_d532896ccd56b1::t_e4a875ecd716ac 240,403
+  s_ee364a6ae859d6::t_c172db370488e4 1-239,241-402,404-630
+tests/unit/common/test_tar_link_validation.py
+  s_ff2b36b648c85c::t_88f9ea05b9ebd5 1-115
+tests/unit/letsencrypt/test_certbot_retry_psl_regressions.py
+  s_342f512e997e91::t_d37cb6b57ce25d 1-5,9-20,22-52,54-62
+  s_342f512e997e91::t_d536b39672b31f 21,53
+  s_342f512e997e91::t_4f37a200f4bacf 6-8
+tests/unit/common/test_dnsbl_behaviour_lua.py
+  s_265a75478a3c04::t_e8b5caabc3be2d 43-45,51,55,59,281-283,301
+  s_6cd666a05b8150::t_701ed665c87a85 195-205
+  s_f79283919b1c60::t_8c0571ab31dd44 106-142,144-151
+  s_265a75478a3c04::t_1a4d9fa59ec6ea 1-9,12,14-42,46-50,52-54,56-58,60-105,191-194,206-280,284-300,302-345
+  s_68aaec3b2cb519::t_dfe1b06b68c708 10-11,13,152-190
+  s_f79283919b1c60::t_ee2511b5307e3c 143
+tests/unit/api/test_rate_limit_rules.py
+  s_873413dfc3c805::t_7274b52a4ae46c 14-28,35-60,71-83,93-102,148-157,188-198,204-215,218-230,232-234,241-249
+  s_cf4873c795c511::t_5a1d5caca10928 1-13,29-34,61-70,84-92,103-147,158-187,199-203,216-217,231,235-240,250-260
+tests/unit/ui/routes/test_routes_logs.py
+  s_54379ae77c04b0::t_1360c96eece717 1-14,16-215
+  s_5c120ac04c47dc::t_2f06eeb91aaa2d 15
+tests/unit/ui/core/_ui_core_helpers.py
+  s_54379ae77c04b0::t_1cdb7f781d7dae 3,5-7,117-149
+  s_54379ae77c04b0::t_d908467d33879e 1-2,4,8-116
+tests/unit/gen/test_save_config_version_stamp.py
+  s_ea759106783868::t_47edb711f9ef99 25-40
+  s_ea759106783868::t_9cfb361fe80ab3 1-24,41-98
+tests/unit/misc/test_anonymous_report_single_site.py
+  s_ff2b36b648c85c::t_2645b406a1ddbe 1-40
+tests/unit/letsencrypt/test_certbot_jobs_execution.py
+  s_ee364a6ae859d6::t_45654f5749027e 342
+  s_ee364a6ae859d6::t_c87a0743c5e66d 480-483,489-492,495-502,513-525,532-556,560-610,617-622,624-625,635-641
+  s_ee364a6ae859d6::t_40a1c1a751e275 652-653,669-684,695-768
+  s_ee364a6ae859d6::t_e3b3334c60c0a9 1-201,208-223,232-325,336-341,343-479
+  s_ee364a6ae859d6::t_292ea7320ca7d0 202-207,224-231,326-335,484-488,493-494,503-512,526-531,557-559,611-616,628-634
+  s_736055e3c050de::t_f24ea4895cb4fc 654-668,685-694
+  s_ee364a6ae859d6::t_97f62ca03e6fff 623,626-627,642-651
+  s_ee364a6ae859d6::t_27fed2adbfd5fd 769-783,785-807
+  s_ee364a6ae859d6::t_180b0c1902d6c3 784
+tests/unit/api_app/_api_http_helpers.py
+  s_cf4873c795c511::t_f5f4279423b1ff 1-25
+tests/unit/ui/core/test_config_service_operations.py
+  s_54379ae77c04b0::t_42c42233e7da05 127-130
+  s_54379ae77c04b0::t_d2263b6f02d199 1-126,131-138,142-151,156-275
+  s_4706d671c01354::t_b173f15e59112e 139-141,152-155
+tests/unit/common/test_redis_cluster_nodes_default_port.py
+  s_ff2b36b648c85c::t_cb5fbc89ef0f3d 1-62
+tests/unit/linux/test_start_sh_recognises_empty_defaults.py
+  s_ff2b36b648c85c::t_db62e336c07113 1-87
+tests/unit/autoconf/test_gateway_controller_routes.py
+  s_d532896ccd56b1::t_b762144879856e 12
+  s_ddaf4c4a532033::t_4c201d28579a73 1-6,8-11,13-16,19-37,40-45,48-52,55-58,61-68,70-72,74-79,81-82,84-95,97-98,101-102,104-105,107-108,110-114,119-122,124-125,127-133,135,137-140,143-161,164-168,171-175,178-182,185-189,191,193-200,203-214,217-227,230-242,245-255,258-276,279-284,287-295,298-302,305-325,328-348,351-357,360-375,378-394,397-408,411-419,422-428,431-438,441-450,453-461,464-469,472-486,489-496,499-515,518-530,533-547,550-559,562-576,579-585,588-606,609-623,626-633,636-648,651-667,670,674-687,690-701,703-704,715-716,719-730,733-751,754-769,772-786,789-794,797-802,805-813,816-817,819-820,824-825,828-844,847-855,858-863,866-869
+  s_ddaf4c4a532033::t_818732d2d72f06 7
+  s_ddaf4c4a532033::t_9a23f595f20e88 671-673,702,705-706,709-714
+  s_ddaf4c4a532033::t_5e5432fa2af078 99,103
+  s_ddaf4c4a532033::t_72747756d3d3d3 17-18,38-39,46-47,53-54,59-60,69,73,80,83,96,100,106,109,115-118,123,126,134,136,141-142,162-163,169-170,176-177,183-184,190,192,201-202,215-216,228-229,243-244,256-257,277-278,285-286,296-297,303-304,326-327,349-350,358-359,376-377,395-396,409-410,420-421,429-430,439-440,451-452,462-463,470-471,487-488,497-498,516-517,531-532,548-549,560-561,577-578,586-587,607-608,624-625,634-635,649-650,668-669,688-689,707-708,717-718,731-732,752-753,770-771,787-788,795-796,803-804,814-815,818,821-823,826-827,845-846,856-857,864-865
+tests/unit/common/test_mmdb_bundled_publication.py
+  s_873413dfc3c805::t_8f68b7015f2419 1-82
+tests/unit/db/test_job_cache_transactions.py
+  s_c1401fc71f30b1::t_7d2777ea5f9e37 1-82
+tests/unit/ui/core_plugins/conftest.py
+  s_6d2d9b094d3725::t_f60468780967a0 1-3,5-65,67-72
+  s_6d2d9b094d3725::t_5e2240114d62db 4,66
+tests/unit/bunkernet/test_registration_retry.py
+  s_ff2b36b648c85c::t_cd4bf3309312c2 1-96
+tests/unit/db/test_instances.py
+  s_ff2b36b648c85c::t_ce3d0b50a4799d 1-105
+tests/unit/gen/test_setting_value_newlines.py
+  s_ff2b36b648c85c::t_d7fc8a91a766df 1-119
+tests/unit/api_app/README.md
+  s_ff2b36b648c85c::t_735d4677252f16 1-62
+tests/unit/db/test_service_server_names.py
+  s_ff2b36b648c85c::t_a2060e4d64e135 1-153
+tests/unit/common/test_pow_port.py
+  s_ff2b36b648c85c::t_a81500e1dee94f 1-112
+tests/unit/ui/routes/test_routes_crowdsec_jobs_cache.py
+  s_d532896ccd56b1::t_04bd12444460f3 1-11,13,15-184,186-188,198-237,245-249,251-252,254-294,300-329,338-351
+  s_80f1da85912d1b::t_31e6dface9467d 238-244,295-299,330-337
+  s_5c120ac04c47dc::t_2f06eeb91aaa2d 12,14
+  s_d532896ccd56b1::t_f3f199399b0afe 189,250,253
+  s_54379ae77c04b0::t_ada4431eebefc2 185,190-197
+tests/unit/api_app/conftest.py
+  s_ff2b36b648c85c::t_5fd2fb32885541 1-39
+tests/unit/common/test_blacklist_behaviour_lua.py
+  s_265a75478a3c04::t_f5f2b978280c1d 1-37,39-221,223-245,247-268,270,272-290
+  s_80f1da85912d1b::t_8c4799bfaaa84d 222,246,269,271
+  s_265a75478a3c04::t_b3fa85e3d32d24 38
+tests/unit/jobs/test_dnsbl_ignore_download.py
+  s_4706d671c01354::t_6b90665afc2e60 1-103
+tests/unit/scheduler/conftest.py
+  s_736055e3c050de::t_4f747a4a5e9a74 51-62,72-114
+  s_736055e3c050de::t_e8d7ff4c101a39 1-44,47,50
+  s_736055e3c050de::t_b823b9cf108cc2 45-46,48-49
+  s_736055e3c050de::t_b4803f94e881e9 63-71
+tests/unit/api_app/test_app_http_contract.py
+  s_cf4873c795c511::t_0d24590e86d0ad 25-28
+  s_cf4873c795c511::t_e0c94b78fc83b5 9,44
+  s_cf4873c795c511::t_10805af078b5e5 30-31
+  s_cf4873c795c511::t_7d748b22c26c81 1-8,10-24,29,32-43,45-103
+tests/unit/gen/test_gen_utils.py
+  s_ff2b36b648c85c::t_98a3bd8a8473aa 1-43
+tests/unit/common/workflow_cases.json
+  s_ff2b36b648c85c::t_6aed057f628483 1-467
+tests/unit/common/test_duration_parser.py
+  s_641d41c515f76c::t_779fe0f7c50ae3 1-100
+tests/unit/ui/test_export_formatters.py
+  s_ff2b36b648c85c::t_39c0996e1545c0 1-117
+tests/unit/db/test_duration_upgrade.py
+  s_ff2b36b648c85c::t_cb2c020729e98c 1-82
+tests/unit/common/test_api_caller_busy_retry.py
+  s_ff2b36b648c85c::t_798d486a9a47ff 1-130
+tests/unit/ui/test_theme_persistence_race.py
+  s_ff2b36b648c85c::t_b57f8ea8a812fd 1-56
+tests/unit/api/test_crowdsec_router.py
+  s_ff2b36b648c85c::t_c4b991dc906d74 1-144
+tests/unit/gen/test_api_ui_template_whitelist.py
+  s_ff2b36b648c85c::t_6c7861af8e1884 1-60
+tests/unit/ui/core_plugins/test_letsencrypt_blueprint_routes.py
+  s_6d2d9b094d3725::t_6f779742c41b2e 186,188-196,269-279,301-305,311-316
+  s_da7dd7f2f9f264::t_f85c44c7d4f3cd 187,306-310
+  s_6d2d9b094d3725::t_5d00bd4c63ee9f 1-28,33-62,66-107,123-129,142-157,162-169,173-185,197,207-268,280-300,317-320,334-365,379-382,389-393,397-416
+  s_c1401fc71f30b1::t_5e4d153a34ebf5 29-32,63-65,108-122,130-141,158-161,170-172,198-206,321-333,366-378,383-388,394-396
+tests/unit/ui/core_plugins/_core_ui_helpers.py
+  s_6d2d9b094d3725::t_f60468780967a0 1-45
+tests/unit/db/test_config_read.py
+  s_ff2b36b648c85c::t_dbb52acb56dfd7 1-235
+tests/unit/ui/test_flash_no_english_literal_left.py
+  s_ff2b36b648c85c::t_00de846b215867 1-160
+tests/unit/autoconf/test_config_update_needed_order.py
+  s_ea759106783868::t_6ab006626f1f84 1-135
+tests/unit/gen/test_configurator_extensions.py
+  s_ff2b36b648c85c::t_64a87329adeaec 1-132
+tests/unit/lua/test_resume_rdns.py
+  s_68aaec3b2cb519::t_f631b378c49da5 1-207
+tests/unit/jobs/test_pro_plugins_installation.py
+  s_4706d671c01354::t_e678d0a25b3bba 1-73,76,78-94,96-101,103-104,106-127,133-135,137,139-203
+  s_4706d671c01354::t_b15dee9cc33045 74-75,77,95,102,105,128-132,136,138
+tests/unit/common/test_bw_utils_get_ips_lua.py
+  s_68aaec3b2cb519::t_dfe1b06b68c708 1-20,23-49,51-64,95-102,104-114
+  s_f79283919b1c60::t_8a16985c5bc5fc 21-22,50,65-94
+  s_68aaec3b2cb519::t_80e5782fd4baa2 103,115
+tests/unit/ui/core/test_instance_metrics_home.py
+  s_54379ae77c04b0::t_6b25268d70bb11 1-45,55-91,93-187,192-249,258-284,286-347
+  s_4706d671c01354::t_b173f15e59112e 46-54,188-191,250-257
+  s_54379ae77c04b0::t_f950988882b12c 92,285
+tests/unit/common/test_coverage_gate_regression.py
+  s_f2ef22612d7aa2::t_579aa7bdae8677 1-116
+tests/unit/ui/test_delete_confirm_keys.py
+  s_fa9a376e8fb070::t_bd0d85dab1cded 1-46
+tests/unit/autoconf/test_gateway_controller_status.py
+  s_ddaf4c4a532033::t_d45ce9124d097a 1-6,8-10,12-22,24,26-95,97-98,101-309,311-312,314-368
+  s_ddaf4c4a532033::t_72747756d3d3d3 11,23,25,96,99-100,310,313
+  s_ddaf4c4a532033::t_818732d2d72f06 7
+tests/unit/ui/routes/test_routes_home_and_instances.py
+  s_d532896ccd56b1::t_04bd12444460f3 1-153,155-157,164-233,235-250
+  s_d532896ccd56b1::t_d6d225545bf6c4 234
+  s_54379ae77c04b0::t_ada4431eebefc2 154,158-163
+tests/unit/scheduler/test_main_loop.py
+  s_736055e3c050de::t_cdb3f6807e2d30 20,23-26,100-101,108,168,238,647,700
+  s_736055e3c050de::t_26fad4cf76d2a7 599
+  s_736055e3c050de::t_163f731b89351b 1-19,21-22,27-99,102-107,109-167,169-237,239-423,426-598,600-646,648-699,701-758
+  s_736055e3c050de::t_138d3bd0cf34e6 424-425
+tests/unit/ui/core_plugins/test_core_ui_timestamp_overflow.py
+  s_977eb424ed5ff6::t_2f67e26b4474c2 1-8
+tests/unit/jobs/test_lists_port_download.py
+  s_ff2b36b648c85c::t_f838645c415f63 1-116
+tests/unit/common/test_securitytxt_behaviour_lua.py
+  s_8830845dc521da::t_9fe010321737d1 1-113
+tests/unit/modsecurity/test_download_crs_plugins_retry.py
+  s_ff2b36b648c85c::t_1474156a7dbacf 1-71
+tests/unit/ui/test_docs_and_license_links.py
+  s_fa9a376e8fb070::t_d9f888cfc2328c 1-85
+tests/unit/gen/test_sync_tree_reload_marker.py
+  s_c1401fc71f30b1::t_14e2a3b68e7c9d 1-65
+tests/unit/scheduler/test_once_job_cache_publication.py
+  s_fa705db5039af8::t_503e1d8a68bca4 27,154-165
+  s_fa705db5039af8::t_25054c463a89f2 187-213
+  s_fa705db5039af8::t_cf8bb4c680002c 1-26,28-153
+  s_fa705db5039af8::t_4762a49274b92a 166-186
+tests/unit/jobs/test_crowdsec_captcha_provider_render.py
+  s_ff2b36b648c85c::t_bc0a3f9248f958 1-63
+tests/unit/linux/test_install_downgrade_and_backup_uri.py
+  s_ff2b36b648c85c::t_59994bb876616a 1-120
+tests/unit/scheduler/scheduler_fakes.py
+  s_736055e3c050de::t_4f747a4a5e9a74 135,156
+  s_736055e3c050de::t_2a1183c205300a 1-31,34-84,92-97,102-134,136-155,157-186,199-202
+  s_54379ae77c04b0::t_704f6f421b0179 85-91,187-198
+  s_736055e3c050de::t_3d46349e4d0e0b 32-33,98-101
+tests/unit/common/test_redis_behaviour_lua.py
+  s_265a75478a3c04::t_4a9408817e1b84 1-21,24-156
+  s_265a75478a3c04::t_be1e8e09746ef6 22-23
+tests/unit/common/_lua_request_helpers.py
+  s_8830845dc521da::t_75eff1860438e8 1-219,221-229
+  s_8830845dc521da::t_ef8ca07ef96362 220
+tests/unit/autoconf/test_kubernetes_multi_ingress_merge.py
+  s_ddaf4c4a532033::t_f61981d612f377 1-5,7-233,235-237
+  s_54379ae77c04b0::t_953443f5df78e7 234
+  s_ddaf4c4a532033::t_818732d2d72f06 6
+tests/unit/common/test_proxy_protocol_addr_patch.py
+  s_ff2b36b648c85c::t_6a2c8452ec05bf 1-99
+tests/unit/db/test_plugin_update_reconciliation.py
+  s_ec9624231d5e26::t_a5ea284e5de631 1-113
+tests/unit/common/test_apicaller_write_budget.py
+  s_ff2b36b648c85c::t_05ffa54698c9a3 1-85
+tests/unit/autoconf/test_f8_autoconf_regressions.py
+  s_89887f7cafd42c::t_4f6886a80c38c9 1-64
+tests/unit/common/test_duration_readers_lua.py
+  s_ff2b36b648c85c::t_35f545eadaf033 1-326
+tests/unit/ui/test_session_storage_throttle.py
+  s_ff2b36b648c85c::t_aeb429034edb30 1-134
+tests/unit/scheduler/test_main_files.py
+  s_736055e3c050de::t_ff4e5ccb626486 5,287-288,290
+  s_736055e3c050de::t_6312293d6fd499 222-223
+  s_736055e3c050de::t_371df08b8fc28c 1-4,6-13,15-28,30-31,35-54,56-99,101-133,135-221,224-229,238-286,289,291-390,392-477
+  s_736055e3c050de::t_4e8ffd583127c9 14,29,32-34,55,100,391
+  s_d532896ccd56b1::t_8a29bff33cf5d7 134,230-237
+tests/unit/ui/core_plugins/test_letsencrypt_certificate_actions.py
+  s_6d2d9b094d3725::t_94e5d1c408a423 15-17,25-35,44-56
+  s_6d2d9b094d3725::t_6f779742c41b2e 78,88-99
+  s_6d2d9b094d3725::t_5e2240114d62db 1-14,18-24,36-43,57-77,79-87
+tests/unit/ui/core/test_ui_data_and_templates.py
+  s_54379ae77c04b0::t_9871b79fb6774c 1-87
+tests/unit/ui/routes/test_routes_setup.py
+  s_5c120ac04c47dc::t_2f06eeb91aaa2d 24,26
+  s_d532896ccd56b1::t_5ba2beaa5b27f5 1-23,27-297
+  s_d532896ccd56b1::t_5e57dfab10067b 25
+tests/unit/ui/routes/test_plugin_action_spec_regression.py
+  s_f2ef22612d7aa2::t_639c353fcedd7e 1-37
+tests/unit/ui/routes/test_routes_profile.py
+  s_d532896ccd56b1::t_096c1b085a85fd 1-13,15,17-366
+  s_5c120ac04c47dc::t_2f06eeb91aaa2d 14,16
+tests/unit/api_app/test_biscuit_run_limit.py
+  s_ff2b36b648c85c::t_4d3cef65c72c48 1-292
+tests/unit/ui/test_setting_patterns_v_flag.py
+  s_5b4f95050f6c74::t_93ac295039376f 1-5,8-9,11-32,34-220,225-227,230-263,266-270,278-307,311-332
+  s_fa9a376e8fb070::t_0d70890a44b46e 6-7,10,33,221-224,228-229,264-265,271-277,308-310
+tests/unit/scheduler/test_main_globals.py
+  s_0acf78da78d316::t_cc67ed50f39677 73
+  s_0acf78da78d316::t_11497775c5e7a1 1-72,74-103
+tests/unit/gen/test_generated_header_overrides.py
+  s_ff2b36b648c85c::t_1a219defcf5daa 1-62
+tests/unit/common/test_whitelist_and_has_variable_inheritance_lua.py
+  s_ff2b36b648c85c::t_8adaa2969c4dee 1-188
+tests/unit/ui/test_resume_service_integrity.py
+  s_ff2b36b648c85c::t_7d089a8a9e930c 1-38
+tests/unit/jobs/_other_jobs_helpers.py
+  s_4706d671c01354::t_59e4efc9562fdd 35-36,47-48,67
+  s_4706d671c01354::t_e2d6401d900f4d 15-17,74,78,96-98
+  s_4706d671c01354::t_7313b7e5dec595 1-14,18-34,37-46,49-66,68-73,75-77,79-95,99-106
+tests/unit/db/test_issue_1946_global_suffixed_default_add.py
+  s_f2ef22612d7aa2::t_416675b3d40259 1-12,23-34
+  s_af747a00606fd7::t_e152cb21f53bee 13-22
+tests/unit/common/test_misc_behaviour_lua.py
+  s_8830845dc521da::t_ef86860ce21f0a 1-158
+tests/unit/cli/test_main_command_dispatch.py
+  s_873413dfc3c805::t_59d5b805376d66 1-75
+tests/unit/ui/routes/test_routes_services.py
+  s_d532896ccd56b1::t_67e042248747d9 148-156,561-571
+  s_80f1da85912d1b::t_4cd542dae9da73 585,598
+  s_d532896ccd56b1::t_b7866a63c53172 1-147,157-431
+  s_d532896ccd56b1::t_133cbf5fe96c8e 432-560,572-584,586-597,599-659
+tests/unit/common/test_jobs_cache_operations.py
+  s_873413dfc3c805::t_db2af224b66f05 168,177-213
+  s_873413dfc3c805::t_50d62d408cff35 216-235
+  s_873413dfc3c805::t_1128e6c4cb8f01 1-167,169-176,214-215,236-255
+tests/unit/common/test_datastore_worker_lru_exptime.py
+  s_ff2b36b648c85c::t_35bbb8ea086b9b 1-207
+tests/unit/ui/core/test_reverse_proxied_environ.py
+  s_54379ae77c04b0::t_9871b79fb6774c 1-87
+tests/unit/ui/core_plugins/test_badbehavior_event_tables.py
+  s_6d2d9b094d3725::t_f60468780967a0 1-64,69-78
+  s_6d2d9b094d3725::t_5e2240114d62db 65-68
+tests/unit/gen/_listen_helpers.py
+  s_ff2b36b648c85c::t_8e0c0783fdca5c 1-47
+tests/unit/api_app/requirements.txt
+  s_ff2b36b648c85c::t_e625c4c3fecf05 1-208
+tests/unit/api_app/test_plugins_archive_installation.py
+  s_cf4873c795c511::t_f5f4279423b1ff 1-155
+tests/unit/modsecurity/test_audit_concurrent.py
+  s_ff2b36b648c85c::t_053d5ba15bfd61 1-289
+tests/unit/common/test_regex_match_memoize.py
+  s_ff2b36b648c85c::t_164c1e8bd58abf 1-146
+tests/unit/common/test_bw_mmdb_lua.py
+  s_0a6110287c15c2::t_92d85c7588f8c0 52,55,59,63,69,73,77,81,85,89
+  s_0a6110287c15c2::t_233e4ced2f78ae 1-51,53-54,56-58,60-62,64-68,70-72,74-76,78-80,82-84,86-88,90
+tests/unit/ui/test_t_placeholders.py
+  s_ff2b36b648c85c::t_6a2c8452ec05bf 1-433
+tests/unit/common/test_lists_port_parser.py
+  s_641d41c515f76c::t_779fe0f7c50ae3 1-63
+tests/unit/db/test_blob_integrity.py
+  s_da7dd7f2f9f264::t_d39a643593fefd 1-31,33-119
+  s_c1401fc71f30b1::t_7d9545aa0320c1 32
+tests/unit/ui/test_temp_ui_stop_contract.py
+  s_ff2b36b648c85c::t_2b04a6bbcd2dd3 1-103
+tests/unit/ui/test_support_bundle.py
+  s_ff2b36b648c85c::t_995a5856492c00 1-173
+tests/unit/ui/test_update_release_line.py
+  s_ff2b36b648c85c::t_19d477e3c20a23 1-41
+tests/unit/ui/test_config_check_variables.py
+  s_ff2b36b648c85c::t_16096d641fa101 1-201
+tests/unit/common/test_crowdsec_client_scope.py
+  s_6d2d9b094d3725::t_26cb8bbf540b40 35-43,124-129,144-145
+  s_873413dfc3c805::t_80af4ab8f33883 1-34,44-123,130-143,146-166
+tests/unit/api/test_https_retry_endpoint.py
+  s_ff2b36b648c85c::t_3603b1d695c079 1-100
+tests/unit/ui/test_datatable_column_preferences_flush.py
+  s_ff2b36b648c85c::t_b2fca3327f7cc5 1-34
+tests/unit/api/test_ui_stored_bcrypt.py
+  s_4998e063ffed88::t_5a3c95d69e0eed 1-53
+tests/unit/common/test_crowdsec_enforcement_state_lua.py
+  s_265a75478a3c04::t_9ca613c0dfc7bd 1-162,164-185,189-454,456-457,459-577
+  s_265a75478a3c04::t_47172a71921914 163,186-188,455,458
+tests/unit/scheduler/test_plugin_archive_errors_regression.py
+  s_f2ef22612d7aa2::t_d6a2a4468fb3ef 1-33
+tests/unit/modsecurity/crs_plugins_job_source.py
+  s_ff2b36b648c85c::t_9946e47dfe6c57 1-62
+tests/unit/common/test_mtls_behaviour_lua.py
+  s_8830845dc521da::t_86f118e38ff780 63-65
+  s_8830845dc521da::t_2ec663c3f67b41 1-62,66-118
+tests/unit/autoconf/test_k8s_event_batching.py
+  s_ff2b36b648c85c::t_6acb5fc8031dcb 40
+  s_865ad2db28e50b::t_31252c4aa3ddb7 1-11,13-39,41-62,68-76,78-97
+  s_ea759106783868::t_de2d6a27707583 12
+  s_ea759106783868::t_33ead442f32257 77
+  s_ea759106783868::t_752dc57b3135ee 63-67
+tests/unit/common/test_run_as_nginx_home.py
+  s_ff2b36b648c85c::t_6b8625ce053942 1-186
+tests/unit/common/test_bw_plugin_lua.py
+  s_0a6110287c15c2::t_d5e67b1cadb0f8 81,112-113,159,227,492-495,498
+  s_0a6110287c15c2::t_92d85c7588f8c0 111,120,124,132,144-147,199,204,211,215,220,226,261,269,273,278,300-302,359,363,367,374,382,387,391,398,402,409,418,422,428,435,439,445,449,456,464,469,473,479,483,491
+  s_0a6110287c15c2::t_205b2b7e6dcf3e 423
+  s_0a6110287c15c2::t_5708b6bb4b9791 1-80,82-110,114-119,121-123,125-131,133-143,148-158,160-198,200-203,205-210,212-214,216-219,221-225,228-260,262-268,270-272,274-277,279-299,303-358,360-362,364-366,368-373,375-381,383-386,388-390,392-397,399-401,403-408,410-417,419-421,424-427,429-434,436-438,440-444,446-448,450-455,457-463,465-468,470-472,474-478,480-482,484-490,496-497
+tests/unit/jobs/test_external_plugins_installation.py
+  s_4706d671c01354::t_fe7a3e8762e61e 1-148
+tests/unit/letsencrypt/test_letsencrypt_utils_runtime.py
+  s_ee364a6ae859d6::t_27fed2adbfd5fd 318-348
+  s_ee364a6ae859d6::t_ff7ac48b15b723 1-3,5-216,218-276,278-317
+  s_ee364a6ae859d6::t_1286e1b1d48da2 4,217,277
+tests/unit/linux/test_install_bunkerweb.py
+  s_ff2b36b648c85c::t_8486f9ff806399 1-44
+tests/unit/ui/test_static_asset_references.py
+  s_ff2b36b648c85c::t_d8c39575d47714 1-133
+tests/unit/letsencrypt/test_stale_account_detection.py
+  s_ff2b36b648c85c::t_3159365e1d80a1 1-154
+tests/unit/ui/core_plugins/test_letsencrypt_orphan_hooks.py
+  s_6d2d9b094d3725::t_5e2240114d62db 1-125
+tests/unit/db/test_config_save_does_not_drain_payload.py
+  s_ff2b36b648c85c::t_a477bece962bbb 1-125
+tests/unit/jobs/test_mtls_pair_publication.py
+  s_4706d671c01354::t_3da2c17385bf2a 1-9,13-171
+  s_4706d671c01354::t_613d5afc869ee9 10-12
+tests/unit/gen/test_service_server_name_render.py
+  s_ff2b36b648c85c::t_68b7755bb3abb9 1-50
+tests/unit/ui/core/test_session_cookie_and_cache.py
+  s_54379ae77c04b0::t_7d5726902877de 64-65
+  s_54379ae77c04b0::t_935f3248d3c2e8 3-4,78,86
+  s_54379ae77c04b0::t_9871b79fb6774c 1-2,5-8,10-19,21-62,66-77,79-85,87-107
+  s_54379ae77c04b0::t_7e5ba7d1009fd5 9,20,63
+tests/unit/cli/test_cli_operator_actions.py
+  s_873413dfc3c805::t_db2af224b66f05 101
+  s_873413dfc3c805::t_59d5b805376d66 1-100,102-221
+tests/unit/ui/_jsscan.py
+  s_ff2b36b648c85c::t_d9ff083c6b196f 1-308
+tests/unit/ui/test_static_path_exemption.py
+  s_ff2b36b648c85c::t_efcc6623f69092 1-147
+tests/unit/gen/test_listen_ports.py
+  s_5b4f95050f6c74::t_99c280c45b90a6 33-46
+  s_5b4f95050f6c74::t_2e0b576394df84 18-28
+  s_5b4f95050f6c74::t_3af7e009dbc1e5 1-17,29-32,47-173
+tests/unit/api/test_rate_limit_once.py
+  s_ff2b36b648c85c::t_7f6b25386a1a76 1-145
+tests/unit/common/test_redis_client_memo.py
+  s_ff2b36b648c85c::t_5d15b3e1880357 1-244
+tests/unit/backup/test_db_lock_processes.py
+  s_ff2b36b648c85c::t_942f8ffaed4a2a 1-215
+tests/unit/common/test_modsecurity_body_reason_lua.py
+  s_5fb50095e4a17f::t_13eefba7b791b4 156,158-159
+  s_5fb50095e4a17f::t_d8329abfc6d6d6 1-155,157,160-196
+tests/unit/ui/test_plugin_blueprint_reload.py
+  s_ff2b36b648c85c::t_70b5ee7afde11e 1-140
+tests/unit/backup/test_db_lock_deadline.py
+  s_641d41c515f76c::t_779fe0f7c50ae3 1-117
+tests/unit/ui/core/test_main_blueprint_registry.py
+  s_54379ae77c04b0::t_b6dd7a9a4c2a85 1-31,43-159
+  s_54379ae77c04b0::t_939a30320eb00d 160
+  s_736055e3c050de::t_59989379e89cd5 32-42
+tests/unit/ui/test_ace_editor_theme_preload.py
+  s_ff2b36b648c85c::t_c58406270f02ff 1-50
+tests/unit/gen/test_antibot_challenge_location.py
+  s_ff2b36b648c85c::t_d7ad73612ac34a 1-47
+tests/unit/common/test_bw_ctx_lua.py
+  s_0a6110287c15c2::t_1a9d97c339130e 1-40,42-46,50-55,57-67,69-72,74-78,80-84,86-93,95-135
+  s_0a6110287c15c2::t_789dd31ef04eb5 41,47-49,56,68,73,79,85,94
+tests/unit/ui/test_i18n_no_interpolated_words.py
+  s_ff2b36b648c85c::t_50cc281e37e91c 1-136
+tests/unit/db/test_config_save_session_leak.py
+  s_ff2b36b648c85c::t_d383fb6bbc5dfe 1-127
+tests/unit/ui/test_datatable_delegated_tooltips.py
+  s_ff2b36b648c85c::t_f81c86f37e835e 1-104
+tests/unit/ui/test_config_editor_xss_exclusion.py
+  s_ff2b36b648c85c::t_af21840a409ffb 1-71
+tests/unit/scheduler/test_main_bootstrap_regression.py
+  s_f2ef22612d7aa2::t_38a42aaab7392a 1-47
+tests/unit/plugins_download/test_plugin_checksum_umask.py
+  s_fa9a376e8fb070::t_3c6d1849ac5757 75,83
+  s_ff2b36b648c85c::t_6a2c8452ec05bf 1-74,76-82,84-90
+tests/unit/db/test_service_view_keeps_own_settings.py
+  s_ff2b36b648c85c::t_5b1eb9aa39ebd2 1-67
+tests/unit/common/test_bw_acme_lua.py
+  s_0a6110287c15c2::t_b51dd8ea4e602a 1-95,97-103,105-134,137-146,149-154
+  s_0a6110287c15c2::t_4cd6c284e97f48 96,104,135-136,147-148
+tests/unit/db/test_checked_changes_ui_plugins_flag.py
+  s_ff2b36b648c85c::t_52f376dc250fe6 1-41
+tests/unit/scheduler/test_plugin_generation_stability.py
+  s_dcbf55388a87aa::t_f0f9d955a315ba 14-21
+  s_dcbf55388a87aa::t_7b01c5fa004fb6 107-119
+  s_dcbf55388a87aa::t_0b34f24a684044 1-13,22-68,70-106
+  s_dcbf55388a87aa::t_741a7d1b2de57d 69
+tests/unit/metrics/test_lru_sync_loop.py
+  s_67deaf9d8c8e2f::t_d8c877db51ddf0 35-41
+  s_5fb50095e4a17f::t_6c5f171ba05604 1-34,42-185
+tests/unit/gen/test_cookie_flags_regex.py
+  s_ff2b36b648c85c::t_aaf38b34d1e65b 1-56
+tests/unit/common/test_duration_regex_parity.py
+  s_641d41c515f76c::t_779fe0f7c50ae3 1-161
+tests/unit/db/test_get_services_reports_inherited.py
+  s_ff2b36b648c85c::t_963dff650707ca 1-70
+tests/unit/ui/test_translated_key_exists_in_catalog.py
+  s_ff2b36b648c85c::t_d2f794f9a0b7cf 1-66
+tests/unit/api/test_plugin_id_reserved_prefix.py
+  s_ff2b36b648c85c::t_2679cb0133f7da 1-59
+tests/unit/ui/test_ui_utils.py
+  s_ff2b36b648c85c::t_f996e07f257b50 1-223
+tests/unit/ui/test_home_aggregates_shared_cache.py
+  s_ff2b36b648c85c::t_ab40542dd3b611 1-118
+tests/unit/ui/core/test_main_request_pipeline.py
+  s_54379ae77c04b0::t_02da2e19fe99f2 1-13,19,21,23,25-193,195-212,216-218,220,222-224,227-238,240,242-264,266,268-386,388-400
+  s_54379ae77c04b0::t_10541d56276524 214
+  s_54379ae77c04b0::t_8d678a725adaab 20,22,24,265,267,387
+  s_54379ae77c04b0::t_b0d8549eb2b8e1 14-18,194,213,215,219,221,225-226,239,241
+tests/unit/db/test_autoconf_globals.py
+  s_ff2b36b648c85c::t_6db85837f571fc 1-80
+tests/unit/letsencrypt/test_acme_passthrough_host_template.py
+  s_ff2b36b648c85c::t_5a4279d529cd51 1-71
+tests/unit/common/test_country_behaviour_lua.py
+  s_7d90ddb1d89074::t_55c99a1c2e5412 1-44,50-156,158-163,165-172,174-223
+  s_7d90ddb1d89074::t_e79ef90d02889b 45-49,157,164,173
+tests/unit/jobs/test_upstream_cert_material.py
+  s_4706d671c01354::t_d4e94277e67c05 1-183
+tests/unit/ui/test_plugin_activation.py
+  s_ff2b36b648c85c::t_dcdb9e66152d39 1-57
+tests/unit/ui/test_ui_rbac.py
+  s_ff2b36b648c85c::t_2dc9df3a5cb3d2 24,26
+  s_ff2b36b648c85c::t_546f62ec19ff1a 1-23,25,27-61
+tests/unit/common/test_errors_behaviour_lua.py
+  s_7d90ddb1d89074::t_2cf25b678316e5 1-49,51-55,57-95,99-180
+  s_7d90ddb1d89074::t_24c2fb83b33ee4 96-98
+  s_7d90ddb1d89074::t_061f91d3103b74 50,56
+tests/unit/api/test_api_users.py
+  s_ff2b36b648c85c::t_abd0b136173d2a 1-49
+tests/unit/common/test_lua_request_path_ports.py
+  s_5fb50095e4a17f::t_6c5f171ba05604 1-335
+tests/unit/db/test_setting_drafts.py
+  s_ff2b36b648c85c::t_4c086e9ce3abd5 1-177
+tests/unit/ui/routes/test_routes_reports.py
+  s_d532896ccd56b1::t_8cd214f3263fd1 1-241,243-265
+  s_54379ae77c04b0::t_823fe0e6f86fb6 242
+tests/unit/autoconf/test_config_apply_signal.py
+  s_ddaf4c4a532033::t_ae67782ba7b217 1-124
+tests/unit/cli/test_ban_reporting.py
+  s_ff2b36b648c85c::t_a32e1b19468fa6 1-102
+tests/unit/ui/test_permissions_policy_defaults.py
+  s_ff2b36b648c85c::t_7318e389c03112 1-85
+tests/unit/ui/conftest.py
+  s_ff2b36b648c85c::t_8fcfd0876b0067 1-31
+tests/unit/common/test_ui_behaviour_lua.py
+  s_8830845dc521da::t_fd37dc4c53f177 1-22
+tests/unit/autoconf/test_ingress_controller_services.py
+  s_80f1da85912d1b::t_8d6b5cb8efb320 51-52,54-57,77
+  s_ddaf4c4a532033::t_818732d2d72f06 8
+  s_ddaf4c4a532033::t_ef55fb88ba14ba 1-7,9-50,53,58-70,72-76,78-310,312-516
+  s_ddaf4c4a532033::t_8d04cab49e386a 71,311
+tests/unit/autoconf/test_controller_base_behaviour.py
+  s_ddaf4c4a532033::t_e08048ff3947ea 1-8,10-135,137,139-522
+  s_ddaf4c4a532033::t_ff11ea3028fe93 136,138
+  s_ddaf4c4a532033::t_818732d2d72f06 9
+tests/unit/jobs/test_update_check_release_line.py
+  s_fa9a376e8fb070::t_3c6d1849ac5757 117
+  s_dd2816558e02d5::t_5ca68509d4072f 124-130
+  s_ff2b36b648c85c::t_6a2c8452ec05bf 1-116,118-123
+tests/unit/common/test_tar_link_verification.py
+  s_ff2b36b648c85c::t_e6286d76315284 1-173
+tests/unit/integrations/test_all_in_one_log_flushing.py
+  s_dd2816558e02d5::t_1eeef78a7d7f5b 1-112
+tests/unit/ui/test_flash_escaping.py
+  s_ff2b36b648c85c::t_4d0ab806dba4de 1-105
+tests/unit/autoconf/test_gateway_status_builders.py
+  s_ddaf4c4a532033::t_a437ed1d1fbde1 1-204
+tests/unit/common/test_header_rules_lua.py
+  s_ff2b36b648c85c::t_0847fd256e2464 1-348
+tests/unit/jobs/test_duration_jobs.py
+  s_ff2b36b648c85c::t_92fd2a36d12b97 1-87
+tests/unit/ui/test_security_headers_emitted.py
+  s_ff2b36b648c85c::t_bae3167bb7ea72 1-165
+tests/unit/ui/test_blocked_requests_cap.py
+  s_ff2b36b648c85c::t_b123e722f253d8 1-152
+tests/unit/ui/routes/_ui_routes_helpers.py
+  s_80f1da85912d1b::t_4d45df311ca496 4
+  s_d532896ccd56b1::t_240d8badb63bb7 1-3,5-103
+tests/unit/gen/test_xssl_ingress_strip.py
+  s_ff2b36b648c85c::t_3cc8e0f2773ee2 1-141
+tests/unit/cli/test_ban_time_default.py
+  s_ff2b36b648c85c::t_3b71cbbae893ff 1-25
+tests/unit/common/test_headers_behaviour_lua.py
+  s_8830845dc521da::t_595ba670b17d3a 87-89
+  s_8830845dc521da::t_37568c8341aa1a 1-86,90-142
+tests/unit/db/test_templates.py
+  s_ff2b36b648c85c::t_412614f08531ae 1-320
+tests/unit/gen/test_default_server_strict_sni_inert_warning.py
+  s_ff2b36b648c85c::t_f0dc4436dcab0a 1-42
+tests/unit/autoconf/gateway_fakes.py
+  s_ddaf4c4a532033::t_e43d328726b0e9 2-66
+  s_ddaf4c4a532033::t_72747756d3d3d3 1
+tests/unit/ui/core_plugins/test_authbasic_event_tables.py
+  s_6d2d9b094d3725::t_5e2240114d62db 65-68
+  s_873413dfc3c805::t_2cd972dc0a59cb 48-50
+  s_6d2d9b094d3725::t_f60468780967a0 1-47,51-64,69-78
+tests/unit/common/test_customcert_empty_server_name_lua.py
+  s_5fb50095e4a17f::t_d8329abfc6d6d6 1-157
+tests/unit/gen/test_templator_ssl.py
+  s_ff2b36b648c85c::t_d439d961c6d12a 1-51
+tests/unit/certificates/test_custom_cert_validation.py
+  s_ff2b36b648c85c::t_11652a06ed7b13 1-198
+tests/unit/api_app/requirements.in
+  s_ff2b36b648c85c::t_41013c014ecb04 1-13
+tests/unit/db/test_custom_configs.py
+  s_545098f0881e62::t_6a4631d905f95f 1-374
+tests/unit/letsencrypt/test_wildcard_group_coverage.py
+  s_ff2b36b648c85c::t_bae195755681ab 1-123
+tests/unit/ui/core/test_instance_api_calls.py
+  s_ddaf4c4a532033::t_72747756d3d3d3 1-197
+tests/unit/ui/core/conftest.py
+  s_80f1da85912d1b::t_8533965083e433 69-85
+  s_54379ae77c04b0::t_625ec6604be407 1-11,13-16,18-20,22-48
+  s_54379ae77c04b0::t_ee29aa78cf95f3 12,54-68
+  s_5c120ac04c47dc::t_7e9b4608b4134e 86-92
+  s_54379ae77c04b0::t_d908467d33879e 17
+  s_ddaf4c4a532033::t_72747756d3d3d3 49-53
+  s_54379ae77c04b0::t_98d1760685830c 21
+tests/unit/ui/core/test_main_smoke_routes.py
+  s_54379ae77c04b0::t_385e4b337fcd92 12-22
+  s_80f1da85912d1b::t_8533965083e433 1-11
+tests/unit/ui/test_csrf_time_limit.py
+  s_ff2b36b648c85c::t_49316619072e80 1-52
+tests/unit/api_app/test_guard_authentication.py
+  s_c1401fc71f30b1::t_94f5230fc362de 1-23,27-81,93-119,121-158
+  s_cf4873c795c511::t_52abfaad62e2d8 24-26,82-92,120
+tests/unit/gen/test_reverse_proxy_upstream_tls.py
+  s_5b4f95050f6c74::t_3af7e009dbc1e5 1-91
+tests/unit/ui/core/test_dependencies_plugin_reload.py
+  s_54379ae77c04b0::t_823fe0e6f86fb6 1-264
+tests/unit/autoconf/test_docker_controller_labels.py
+  s_ddaf4c4a532033::t_d66dc03b4c62eb 307-313
+  s_ddaf4c4a532033::t_818732d2d72f06 8
+  s_ddaf4c4a532033::t_63ad9b13662376 1-7,9-23,27-29,31-33,35,37-306,314-397
+  s_ddaf4c4a532033::t_39e67f390b9f2c 24-26,30,34,36
+tests/unit/gen/test_modsec_plugin_fragment_includes.py
+  s_ff2b36b648c85c::t_f7f43ff352c454 1-142
+tests/unit/db/alembic_baseline.py
+  s_ff2b36b648c85c::t_602005edd30f81 1-205
+tests/unit/autoconf/test_main_controller_selection.py
+  s_ddaf4c4a532033::t_818732d2d72f06 10
+  s_54379ae77c04b0::t_be81b58b8fcffe 1-9,11-189
+tests/unit/ui/core/test_biscuit_middleware.py
+  s_736055e3c050de::t_cdb3f6807e2d30 1-7,10,14-89,96,106,108-157,160-192,194-202,207,209-237,240,242-249,251-253,268-269,271-330
+  s_54379ae77c04b0::t_278c63686b4543 8-9,158-159,238-239,241,250,254-267,270
+  s_54379ae77c04b0::t_136ec0a5716595 11-13,90-95,97-105,107,193,203-206,208
+tests/unit/autoconf/test_config_environment_and_readonly.py
+  s_ddaf4c4a532033::t_818732d2d72f06 8
+  s_ddaf4c4a532033::t_e536d99d754675 42-44,71,84,139-141,166
+  s_ddaf4c4a532033::t_88bd4055b960df 1-7,9-41,45-70,72-83,85-138,142-165,167-354
+tests/unit/ui/core/test_raw_drafts_parsing.py
+  s_4706d671c01354::t_66dcb631b93ff7 87
+  s_54379ae77c04b0::t_abd07cd93c3e35 1-86,88-136
+tests/unit/ui/routes/test_routes_f3_regressions.py
+  s_da7dd7f2f9f264::t_2c73621bf5ba4c 78-80
+  s_da7dd7f2f9f264::t_a2153cf0428993 44
+  s_4fa0052e9bdca1::t_85e72a228597ec 100-157,160-167,169-170
+  s_4fa0052e9bdca1::t_bad55ab0195303 158-159,168
+  s_da7dd7f2f9f264::t_4288bb753658ed 1-26,28-43,45-56,58-71,73-77,82-99
+  s_da7dd7f2f9f264::t_2d050d4e6de0b9 57,72,81
+  s_da7dd7f2f9f264::t_d360e8d791fc1f 27
+tests/unit/ui/core_plugins/test_small_plugin_dashboards.py
+  s_6d2d9b094d3725::t_452f2773e63d8b 1-145
+tests/unit/common/test_crowdsec_control_already_absent_lua.py
+  s_ff2b36b648c85c::t_fedeec442581f9 1-200
+tests/unit/common/test_certificate_empty_name_guard_ports.py
+  s_e7f67111afca3f::t_97d7fa8aecd88e 1-40
+tests/unit/ui/test_user_data_escaping.py
+  s_80f1da85912d1b::t_3db10838c79e5c 68
+  s_fa9a376e8fb070::t_0aaf38ebf5cc93 1-67,69-115
+tests/unit/ui/test_route_import_cost.py
+  s_ff2b36b648c85c::t_e20d11a53728e2 1-49
+tests/unit/ui/core/test_instance_reports_queries.py
+  s_736055e3c050de::t_59989379e89cd5 20-21,128-130
+  s_54379ae77c04b0::t_1cdb7f781d7dae 16
+  s_d532896ccd56b1::t_2a8b39fcacd04c 255
+  s_54379ae77c04b0::t_db5f464c50a6d0 1-15,17-19,22-127,131-254,256-391
+tests/unit/scheduler/test_main_helpers.py
+  s_736055e3c050de::t_d455bf0688a82a 1-619
+tests/unit/common/_lua_state_helpers.py
+  s_265a75478a3c04::t_17ba85adcd85d8 1-28,30-213,215-229,232-280,291-412,414-425
+  s_265a75478a3c04::t_a04bd2f544e202 281-290
+  s_265a75478a3c04::t_3d9593e8eb6810 29,214,413
+  s_265a75478a3c04::t_df568f5090843d 426-440
+  s_80f1da85912d1b::t_8c4799bfaaa84d 230-231
+tests/unit/common/test_cli_redis_bans_pipeline.py
+  s_ff2b36b648c85c::t_8df19a86e3f3d9 1-166
+tests/unit/common/test_crowdsec_behaviour_lua.py
+  s_7d90ddb1d89074::t_ad9bc75d643caf 151-154
+  s_7d90ddb1d89074::t_dfc5b77d2b16c9 382
+  s_7d90ddb1d89074::t_ea76aac428ebd7 1-77,81-85,87-149,155-330,332-381,383-399,401,411-415,417-488,490-493,495-498,500-501,503-506,508-510,512-514,516
+  s_7d90ddb1d89074::t_544c440b3b819d 78-80,86,150,331,400,402-410,416,489,494,499,502,507,511,515
+tests/unit/gen/test_variables_env_atomic_write.py
+  s_5b4f95050f6c74::t_99c280c45b90a6 67-84
+  s_5b4f95050f6c74::t_3af7e009dbc1e5 1-66
+tests/unit/ui/routes/conftest.py
+  s_d532896ccd56b1::t_f1bde4b38651ba 97
+  s_d532896ccd56b1::t_33418da0d43ecd 51,141,144-145
+  s_ee364a6ae859d6::t_c172db370488e4 89-90
+  s_d532896ccd56b1::t_d6d225545bf6c4 14,176
+  s_d532896ccd56b1::t_5154fef9799a5d 1-13,15-24,27-50,72-88,91-96,98-102,110-119,122-140,142-143,146-155,157-175,177-191
+  s_d532896ccd56b1::t_07da5ceae8ad0c 52-71,103,120-121
+  s_d532896ccd56b1::t_cff427a54aa1f9 26
+  s_ddaf4c4a532033::t_532b41ed757d34 25
+  s_d532896ccd56b1::t_4384cb307ae8e6 104-109,156
+tests/unit/common/test_healthcheck_status_match.py
+  s_ff2b36b648c85c::t_cac2f0d8a93f12 1-71
+tests/unit/api_app/test_stored_bcrypt.py
+  s_4998e063ffed88::t_5a3c95d69e0eed 1-41
+tests/unit/db/test_external_plugin_lifecycle.py
+  s_c1401fc71f30b1::t_7d9545aa0320c1 241-280
+  s_c1401fc71f30b1::t_e04b66d9e4388d 1-30,39-40,49-51,60-73,84-123,127-134,143,154-240
+  s_da7dd7f2f9f264::t_b8c753151087a8 31-38,41-48,52-59,74-83,124-126,135-142,144-153
+tests/unit/backup/test_mysql_client_args.py
+  s_ff2b36b648c85c::t_7f071c3c5aff71 1-75
+tests/unit/common/test_mmdb_download_validation.py
+  s_873413dfc3c805::t_1665d2ff9de18d 22
+  s_873413dfc3c805::t_8f68b7015f2419 1-21,23-183
+tests/unit/api/test_config_name_rule_is_advertised_correctly.py
+  s_ff2b36b648c85c::t_6f14711759cec8 1-102
+tests/unit/letsencrypt/conftest.py
+  s_ff2b36b648c85c::t_27bfdf374191d7 1-15
+tests/unit/ui/routes/test_routes_login_logout_totp.py
+  s_d532896ccd56b1::t_c782b27ed352fb 1-14,16,18-323
+  s_5c120ac04c47dc::t_2f06eeb91aaa2d 15,17
+tests/unit/gen/test_empty_directive_arguments.py
+  s_5b4f95050f6c74::t_3af7e009dbc1e5 1-167
+tests/unit/scheduler/test_main_healthcheck.py
+  s_736055e3c050de::t_36e3bf4bfd0fe0 1-229
+tests/unit/gen/conftest.py
+  s_ff2b36b648c85c::t_fc99b50d85fa70 1-169
+tests/unit/common/test_greylist_behaviour_lua.py
+  s_265a75478a3c04::t_925235ce9130ec 1-235
+tests/unit/api_app/test_api_response_compression.py
+  s_ff2b36b648c85c::t_8c110538a13fe9 1-113
+tests/unit/common/test_letsencrypt_wildcard_sni.py
+  s_ff2b36b648c85c::t_3ab9032011e8c9 1-232
+tests/unit/ui/test_home_aggregates_window.py
+  s_ff2b36b648c85c::t_81d2f48df4743d 1-120
+tests/unit/common/test_mmdb_runtime_recovery.py
+  s_873413dfc3c805::t_8f68b7015f2419 1-143
+tests/unit/common/_lua_core_helpers.py
+  s_0a6110287c15c2::t_b3f6c82e90cb67 1-68
+tests/unit/ui/test_duration_ui.py
+  s_ff2b36b648c85c::t_f0ff7cf431238e 1-48
+tests/unit/common/test_header_rules_plugins_lua.py
+  s_ff2b36b648c85c::t_51afd29a6b76ae 1-393
+tests/unit/gen/test_ssl_certificate_partial.py
+  s_ff2b36b648c85c::t_4530fd65e84288 1-74
+tests/unit/gen/test_grpc_upstream_tls.py
+  s_ff2b36b648c85c::t_c5810c58ab24e4 1-145
+tests/unit/jobs/test_robots_rules_download.py
+  s_4706d671c01354::t_6b90665afc2e60 1-32,48-99,106-129,142-149,163-165
+  s_4706d671c01354::t_bbd105eefece63 33-47,100-105,130-141,150-162
+tests/unit/gen/test_save_config_cli_outcomes.py
+  s_da7dd7f2f9f264::t_d39a643593fefd 3,49
+  s_da7dd7f2f9f264::t_b8c753151087a8 155-163
+  s_c1401fc71f30b1::t_7d2777ea5f9e37 1-2,4-48,50-154,164-168
+tests/unit/ui/core/test_instance_redis_primitives.py
+  s_54379ae77c04b0::t_1cdb7f781d7dae 10,242
+  s_54379ae77c04b0::t_3e44868aa5bc0b 1-9,11-37,39-241,243
+  s_54379ae77c04b0::t_1b8e35b013196e 38
+tests/unit/common/test_ssl_behaviour_lua.py
+  s_7d90ddb1d89074::t_eaf3e0b547a967 1-81
+tests/unit/common/test_limit_behaviour_lua.py
+  s_8830845dc521da::t_c9732fe7455d61 1-134
+tests/unit/ui/core/test_main_misc_routes.py
+  s_54379ae77c04b0::t_10541d56276524 1-76,78,80-81,85-86,89-92,95-286
+  s_54379ae77c04b0::t_f9ede08bd54eb3 77,79,82-84,87-88,93-94
+tests/unit/gen/test_templator_default_values.py
+  s_c1401fc71f30b1::t_c7c30f0a2325bc 1-102
+tests/unit/db/test_plugin_page_and_config_checksums.py
+  s_ff2b36b648c85c::t_8fcab655e994f9 1-27
+tests/unit/ui/test_jsscan_walker.py
+  s_ff2b36b648c85c::t_7f4ccd5ae24f63 1-330
+tests/unit/autoconf/test_swarm_controller_labels.py
+  s_ddaf4c4a532033::t_1e1173fb2c3b5e 1-8,10-50,60-369
+  s_ddaf4c4a532033::t_532b41ed757d34 9
+  s_ddaf4c4a532033::t_e926efd9ac7c7c 51-59
+tests/unit/api_app/test_configs_move_authz.py
+  s_ff2b36b648c85c::t_ebcd5796fe8bcf 1-222
+tests/unit/db/test_duration_env_database.py
+  s_ff2b36b648c85c::t_7b1bdceaa5854f 1-52
+tests/unit/common/test_duration_redis_client.py
+  s_ff2b36b648c85c::t_924ba81a5c6406 1-19
+tests/unit/linux/test_install_docker_upgrade_verification.py
+  s_ff2b36b648c85c::t_de2c4fb31e5fb1 1-450
+tests/unit/gen/test_setting_regexes.py
+  s_e7f67111afca3f::t_9451d3da0cb432 1-440,444-471
+  s_e7f67111afca3f::t_3652e198cb391e 441-443
+tests/unit/api/test_bans_timeseries.py
+  s_ff2b36b648c85c::t_35afd6ea8f09c1 1-40
+tests/unit/ui/routes/test_routes_configs.py
+  s_80f1da85912d1b::t_31e6dface9467d 267-274,325-332,343-352,379-382,414-420,431-438,466-470,483-486
+  s_d532896ccd56b1::t_f8a83933494ba2 214
+  s_d532896ccd56b1::t_5c2dc2d0477a06 1-213,215-266,275-324,333-342,353-378,383-413,421-430,439-465,471-482,487-549
+tests/unit/gen/test_ui_modsec_crs_exclusions.py
+  s_ff2b36b648c85c::t_ac631649affddc 1-71
+tests/unit/ui/core/test_resilient_session_fallback.py
+  s_54379ae77c04b0::t_704f6f421b0179 159,249,257
+  s_54379ae77c04b0::t_5d103bda1017a3 1-158,160-248,250-256,258-268
+tests/unit/autoconf/test_kubernetes_controller_core.py
+  s_ddaf4c4a532033::t_943fe8af001d9d 1-8,10-120,131-265,274-956,964-1064,1067,1071-1078
+  s_d532896ccd56b1::t_eb70b8dc7c8712 1065-1066,1068-1070
+  s_ddaf4c4a532033::t_818732d2d72f06 9
+  s_80f1da85912d1b::t_a7dfcfbf0de6c4 121-130,266-273,957-963
+tests/unit/gen/test_configurator_jobs.py
+  s_ff2b36b648c85c::t_1a98d0c173d731 1-60
+tests/unit/common/test_archive_expansion_cap.py
+  s_641d41c515f76c::t_779fe0f7c50ae3 1-105
+tests/unit/common/test_bw_logger_lua.py
+  s_0a6110287c15c2::t_92d85c7588f8c0 18,29,35,51,55
+  s_0a6110287c15c2::t_17390b738f27ed 1-17,19-28,30-34,36-37,39-50,52-54,56-65
+  s_0a6110287c15c2::t_ad80411a2269af 38
+tests/unit/ui/test_favicon_root_resolves.py
+  s_ff2b36b648c85c::t_69d32bc2ca28e9 1-98
+tests/unit/ui/test_smoke_ui_sentences.py
+  s_ff2b36b648c85c::t_834fdf29f63fb0 1-33
+tests/unit/db/test_plugins.py
+  s_ff2b36b648c85c::t_83cf3fa6d7b0d5 1-52
+tests/unit/ui/test_session_revocation.py
+  s_ff2b36b648c85c::t_46c51e93221ad2 1-206
+tests/unit/common/_lua_plugin_helpers.py
+  s_7d90ddb1d89074::t_7711e26b805ae0 42-43
+  s_7d90ddb1d89074::t_4acb87c9783cd9 1-41,44-118
+tests/unit/ui/test_public_wellknown_routes.py
+  s_ff2b36b648c85c::t_e05f886ecb622d 1-232
+tests/unit/jobs/test_crs_plugins_publication.py
+  s_4706d671c01354::t_9dd9295aa83dca 1-5,7-147,149-153,155-171
+  s_4706d671c01354::t_d07fce57a5c875 6,148,154
+tests/unit/api/test_api_permissions.py
+  s_ff2b36b648c85c::t_1de57c2fa49e4d 1-138
+tests/unit/common/test_env_file_multiline.py
+  s_ff2b36b648c85c::t_76fa24b70d2297 1-239
+tests/unit/gen/test_has_service_with.py
+  s_ff2b36b648c85c::t_656040c5bc88ff 1-105
+tests/unit/common/_g5_helpers.py
+  s_965bcf2df76d3f::t_5c472c8400f69a 1-17
+tests/unit/ui/core/test_temp_ui_wizard_app.py
+  s_54379ae77c04b0::t_557d77e7d95476 1-91
+tests/unit/common/test_customcert_wildcard_sni.py
+  s_ff2b36b648c85c::t_3ac6d0db8d33d1 1-90
+tests/unit/db/test_init_tables.py
+  s_545098f0881e62::t_6a4631d905f95f 1-74
+tests/unit/gen/test_save_config_pending_migration_regression.py
+  s_f2ef22612d7aa2::t_3c28ebc85b944f 41,45-46
+  s_f2ef22612d7aa2::t_1533b9879ec294 1-40,42-44
+tests/unit/ui/test_temp_ui_error_detail.py
+  s_ff2b36b648c85c::t_f788989acee69d 1-39
+tests/unit/common/test_robotstxt_behaviour_lua.py
+  s_7d90ddb1d89074::t_7711e26b805ae0 53-54,58-59,69-70
+  s_7d90ddb1d89074::t_c0295beae8f174 1-52,55-57,60-68,71-207
+tests/unit/api/test_service_convert_permission.py
+  s_ff2b36b648c85c::t_13d3068acfb49d 1-95
+tests/unit/letsencrypt/test_certbot_hooks_api_reply.py
+  s_ff2b36b648c85c::t_daf8bedff30237 1-64
+tests/unit/letsencrypt/test_wildcard_explicit_scopes.py
+  s_ff2b36b648c85c::t_a12cd675996bdc 1-150
+tests/unit/scheduler/test_jobscheduler_jobs.py
+  s_736055e3c050de::t_c52e20fe97e5c2 1-6,8-85,96-166,168-175,181-315,317-404,408,415-422,424-432,434-447,449-850
+  s_ee364a6ae859d6::t_f68a26cb69bbe0 167,176-180
+  s_736055e3c050de::t_58ed703bb247f0 7,86-95,316,405-407,409-414,423,433,448
+tests/unit/api_app/test_configuration_sources.py
+  s_cf4873c795c511::t_7d748b22c26c81 1-121
+tests/unit/scheduler/test_once_jobs_regenerate.py
+  s_ea759106783868::t_80a49d8f72f7d3 1-101
+tests/unit/ui/test_searchpane_filters.py
+  s_ff2b36b648c85c::t_f3d098de2c1f03 1-20
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "d8fbbda3a8c330e59876d6eb050273e21d292278",
+  "prompts": {},
+  "sessions": {
+    "s_0a6110287c15c2": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "fc76ab3b-50bf-4a69-bdf0-f5843e2258f6",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_0acf78da78d316": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "af4926eb-0229-44fa-94ea-477e9b630b54",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_265a75478a3c04": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "fe22e231-4a93-40b4-a5aa-4fe410a7e1ed",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_342f512e997e91": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a17968-70ef-7010-894f-62dc23f3062c",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_4706d671c01354": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a17937-6a27-7f82-bb6a-2e2be7650409",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_4998e063ffed88": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a17963-3d88-7641-a2aa-5a8f1b69c2ba",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_4fa0052e9bdca1": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a179d4-d444-7290-9846-bac68e65faa7",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_54379ae77c04b0": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b67438ba-0691-43a3-8849-eff00099ff01",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_545098f0881e62": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a17916-88cc-7bf0-870f-a279f17af376",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_5b4f95050f6c74": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a178f6-c308-7c13-9baf-f8987ca2093d",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_5c120ac04c47dc": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a17986-05d0-7130-8416-b0acea99798e",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_5fb50095e4a17f": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a178e3-7820-7993-b09e-f7acf5334fde",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_641d41c515f76c": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a178f6-aa0f-7eb3-ab1d-b0fbf7cf06f5",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_67deaf9d8c8e2f": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1836f-1735-7cb0-b0a4-3f4f114efd3f",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_68aaec3b2cb519": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a17c40-b6d0-7033-9aa8-a89d9ec2bb9c",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_6cd666a05b8150": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a17c23-fbce-7133-b741-51e79d3b2c9c",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_6d2d9b094d3725": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a17952-18ef-7d00-ba59-9e5166b48dfc",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_736055e3c050de": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "78f01100-2e4f-4316-a347-4f44faf91959",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_7d90ddb1d89074": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "d1c7269b-b27e-4055-84a3-45c6ae4db008",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_80f1da85912d1b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "48f28331-3ce2-4fa3-b959-69d5d1238c0a",
+        "model": "unknown"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_865ad2db28e50b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "04f28163-eece-49ae-b8fa-c0252fa15eae",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_873413dfc3c805": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1794a-8ada-7381-b3b0-08b1b0b0abfe",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_8830845dc521da": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "ee58cf1c-6cc2-4183-a699-6d8f1b66682d",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_89887f7cafd42c": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1797c-490b-7cb0-a7e9-8f7054f8cd73",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_965bcf2df76d3f": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "4b4676a5-b632-41af-8f72-ea9c7f449645",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_977eb424ed5ff6": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1796c-b646-79c2-bb7b-70057a4f8a18",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_af747a00606fd7": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a182b0-8e49-7712-b052-129b2cab675b",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_c1401fc71f30b1": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1794f-a912-7493-bce8-6d61103ef84e",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_cf4873c795c511": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1794b-c79a-7832-b9c2-36ff1a62dbe6",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_d532896ccd56b1": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "ab386a55-cf40-4987-8c9b-81510430f4ae",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_da7dd7f2f9f264": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a17954-19c4-71a3-826f-69f305bb6efd",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_dcbf55388a87aa": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a17962-7e18-7693-b3fe-077226e15f88",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_dd2816558e02d5": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1790f-8239-7fe2-b769-ef7ac45a5570",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_ddaf4c4a532033": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "98d3e772-ec4f-4ddf-8a0a-439274e16036",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_e7f67111afca3f": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "fcb3d403-f068-4458-bc07-ed32a60c9b6d",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_ea759106783868": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "8394b284-22d6-45b3-a362-d07c074cdb5f",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_ec9624231d5e26": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a17965-bf9e-79d0-8814-754e1fbc4ae2",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_ee364a6ae859d6": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1791d-46ec-72b3-8462-0767cdaa1c3d",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_f2ef22612d7aa2": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a182b0-a182-72e3-9fc7-af6fc7ddbcb7",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_f79283919b1c60": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a17c51-ac66-7811-8040-5809f139f0c4",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_fa705db5039af8": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a18349-739c-7843-8dc3-827090422899",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_fa9a376e8fb070": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "1c118fd6-05ff-4f65-9a80-fcc449429077",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_ff2b36b648c85c": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a178dc-6a68-73a3-845c-660e4217edea",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

@@ -1,0 +1,27 @@
+docs/fr/upgrading.md
+  s_18396c3b3ab5c9::t_45c8160b2ba2b7 21-22,230-231
+docs/upgrading.md
+  s_18396c3b3ab5c9::t_45c8160b2ba2b7 21-22,229-230
+docs/zh/upgrading.md
+  s_18396c3b3ab5c9::t_45c8160b2ba2b7 21-22,229-230
+docs/de/upgrading.md
+  s_18396c3b3ab5c9::t_45c8160b2ba2b7 22-23,231-232
+docs/es/upgrading.md
+  s_18396c3b3ab5c9::t_45c8160b2ba2b7 21-22,230-231
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "2bc088238bc7d56ce29121bbd276a180405b9407",
+  "prompts": {},
+  "sessions": {
+    "s_18396c3b3ab5c9": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "79005264-10eb-4a2b-b9c9-52958668ec62",
+        "model": "unknown"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

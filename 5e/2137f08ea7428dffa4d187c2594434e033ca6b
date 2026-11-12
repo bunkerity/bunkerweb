@@ -1,0 +1,144 @@
+src/linux/Dockerfile-rhel-8
+  s_d1c1096e35b63b::t_b351dd86cc153e 74-76
+src/ui/app/static/css/overrides/base.css
+  s_d1c1096e35b63b::t_41a8a795788a9a 1-702
+tests/unit/ui/test_row_actions.py
+  s_d1c1096e35b63b::t_0b085419a18660 19,54
+src/ui/app/static/css/overrides/dark-mode.css
+  s_d1c1096e35b63b::t_0b00586847f355 357
+  s_d1c1096e35b63b::t_41a8a795788a9a 1-356,358-624
+src/ui/app/static/css/overrides/main.css
+  s_d1c1096e35b63b::t_41a8a795788a9a 1-472
+src/ui/app/static/css/overrides/modals-steps.css
+  s_d1c1096e35b63b::t_41a8a795788a9a 1-288
+misc/dev/build-rtl-css.sh
+  s_d1c1096e35b63b::t_05881fd22c05ad 6-8,30-57,59-65,67-70
+tests/unit/ui/test_template_settings_page.py
+  s_d1c1096e35b63b::t_0b00586847f355 1056-1057
+tests/unit/ui/_css.py
+  s_d1c1096e35b63b::t_b2568c2848ab28 1-21
+src/ui/app/static/css/overrides/utilities.css
+  s_d1c1096e35b63b::t_41a8a795788a9a 1-360
+src/linux/Dockerfile-debian-bookworm
+  s_d1c1096e35b63b::t_b351dd86cc153e 77-79
+src/linux/Dockerfile-fedora-44
+  s_d1c1096e35b63b::t_b351dd86cc153e 65-67
+src/ui/app/static/css/overrides.css
+  s_d1c1096e35b63b::t_38d4a38647d3e7 18
+  s_d1c1096e35b63b::t_41a8a795788a9a 2-5,8-16,19-23
+  s_d1c1096e35b63b::t_a4ccc43d70fbfe 17
+src/ui/app/static/css/overrides/multiselect-menu.css
+  s_d1c1096e35b63b::t_41a8a795788a9a 1-355
+misc/build/merge_css_imports.py
+  s_d1c1096e35b63b::t_f3709b3e245022 1-6,11-16,18-75,77-93,99,101,103-105,110-111,116-118
+  s_d1c1096e35b63b::t_60a4935e6f9391 7-10,17,76,94-98,100,102,106-109,112-115
+tests/unit/ui/test_onboarding_surfaces.py
+  s_d1c1096e35b63b::t_0b085419a18660 11,248,283
+tests/unit/ui/test_ui_components.py
+  s_d1c1096e35b63b::t_0b085419a18660 6,730
+tests/unit/ui/test_rtl_stylesheets.py
+  s_29c133fb874634::t_eb250f90a57c4e 6-8,18,28-30,70-78,81,85-104
+tests/unit/ui/test_whats_new_surfaces.py
+  s_d1c1096e35b63b::t_0b085419a18660 11,172
+src/ui/app/static/css/overrides/walkthrough-rtl.css
+  s_d1c1096e35b63b::t_41a8a795788a9a 1-83
+src/ui/app/static/css/overrides/settings-modals.css
+  s_d1c1096e35b63b::t_41a8a795788a9a 1-479
+src/linux/Dockerfile-rhel-10
+  s_d1c1096e35b63b::t_b351dd86cc153e 77-79
+src/linux/Dockerfile-debian-trixie
+  s_d1c1096e35b63b::t_b351dd86cc153e 72-74
+src/ui/app/static/css/overrides/multiselect.css
+  s_d1c1096e35b63b::t_41a8a795788a9a 1-64
+src/ui/app/static/css/overrides/kit-fidelity.css
+  s_d1c1096e35b63b::t_41a8a795788a9a 1-409
+src/ui/app/static/css/overrides/components.css
+  s_d1c1096e35b63b::t_41a8a795788a9a 1-624
+src/ui/app/static/css/rtl/overrides.css
+  s_6911e523875c35::t_77cdb9c684bfdd 2-5,8-9,95,799,1223,1270,1415,1533,1777,2067,2244,2310,2484,2601,2958,3315,3584,4065,4691,5101-5102
+  s_d1c1096e35b63b::t_1c6cf66ad1f32f 5185
+src/ui/Dockerfile
+  s_d1c1096e35b63b::t_b351dd86cc153e 40-42
+src/ui/app/static/css/overrides/pro.css
+  s_d1c1096e35b63b::t_41a8a795788a9a 1-115
+tests/unit/ui/test_overrides_css_split.py
+  s_d1c1096e35b63b::t_ea153cb4080b77 199
+  s_d1c1096e35b63b::t_e5a301c3ce81e2 28-29,38-40
+  s_8d197e4b580a12::t_4834b10abbf42e 49-51,180-183
+  s_d1c1096e35b63b::t_f75043248c74b9 1-11,13-27,30-37,41-48,52-179,184-198,200-201
+  s_d1c1096e35b63b::t_9fac3be2bd1f5d 12
+src/linux/Dockerfile-ubuntu-noble
+  s_d1c1096e35b63b::t_b351dd86cc153e 76-78
+src/all-in-one/Dockerfile
+  s_d1c1096e35b63b::t_b351dd86cc153e 114-116
+src/linux/Dockerfile-ubuntu
+  s_d1c1096e35b63b::t_b351dd86cc153e 71-73
+src/ui/AGENTS.md
+  s_d1c1096e35b63b::t_0b00586847f355 61
+src/linux/Dockerfile-fedora-43
+  s_d1c1096e35b63b::t_b351dd86cc153e 65-67
+src/ui/app/static/css/overrides/multivalue.css
+  s_d1c1096e35b63b::t_41a8a795788a9a 1-172
+src/linux/Dockerfile-ubuntu-jammy
+  s_d1c1096e35b63b::t_b351dd86cc153e 76-78
+src/ui/app/static/css/overrides/editors.css
+  s_d1c1096e35b63b::t_41a8a795788a9a 1-143
+src/linux/Dockerfile-rhel-9
+  s_d1c1096e35b63b::t_b351dd86cc153e 75-77
+src/ui/app/static/css/overrides/news.css
+  s_d1c1096e35b63b::t_41a8a795788a9a 1-175
+src/ui/app/static/css/overrides/tokens.css
+  s_d1c1096e35b63b::t_41a8a795788a9a 1-84
+src/ui/app/static/js/pages/template-settings-page.js
+  s_d75bec8aaf1fcf::t_f4612649f047bf 472
+src/ui/app/templates/template_settings_page.html
+  s_d1c1096e35b63b::t_0b00586847f355 24
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "5e2137f08ea7428dffa4d187c2594434e033ca6b",
+  "prompts": {},
+  "sessions": {
+    "s_29c133fb874634": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "772cc5c5-b94c-45d2-a53e-ad4c01185bfb",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_6911e523875c35": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "55281034-dc46-4f57-90b7-82fb3d38ae2c",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_8d197e4b580a12": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "9259e11f-db97-474d-a6a4-960a22155e90",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_d1c1096e35b63b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "3401481d-a660-470c-9b1c-0a9192bd691c",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_d75bec8aaf1fcf": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "08466656-5bff-4eec-9534-2094aef65d6a",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

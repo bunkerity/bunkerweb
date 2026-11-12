@@ -1,0 +1,29 @@
+src/bw/lua/bunkerweb/utils.lua
+  s_0bf82062f9947a::t_7774b4c61b4ebf 416-417,421-460,463
+tests/unit/common/test_utils_ip_is_global_lua.py
+  s_5ed793c745ae55::t_68067d6d3a78e2 1-133
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "127640cb2855bcce2825de7ae9ef881eeca7998f",
+  "prompts": {},
+  "sessions": {
+    "s_0bf82062f9947a": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "2c17ecf2-1ff4-4f18-ad06-7a2b92bad02d",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_5ed793c745ae55": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "148d3a95-15a4-4e21-be97-31de65000a7f",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

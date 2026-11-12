@@ -1,0 +1,19 @@
+CHANGELOG.md
+  s_ece0b7db599386::t_b37305fa657104 7
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "8b90345f7e271e824791b6e791143180c8702812",
+  "prompts": {},
+  "sessions": {
+    "s_ece0b7db599386": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "9ae7700f-1e09-430f-9d34-fdc016638720",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

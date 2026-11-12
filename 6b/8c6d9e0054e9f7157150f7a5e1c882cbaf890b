@@ -1,0 +1,19 @@
+tests/unit/api/test_crowdsec_router.py
+  s_0a5adf8a41809a::t_b6a95ac9e2345f 125-128
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "6b8c6d9e0054e9f7157150f7a5e1c882cbaf890b",
+  "prompts": {},
+  "sessions": {
+    "s_0a5adf8a41809a": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "af2f2ef9-db17-4b49-a13b-6caa6dd98394",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

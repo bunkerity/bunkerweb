@@ -1,0 +1,21 @@
+CHANGELOG.md
+  s_175dfb7646d720::t_d7cf8ac4e5aded 42
+src/ui/app/static/libs/purify/purify.min.js
+  s_175dfb7646d720::t_95bdebafd8b3d2 1-6
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "a7b39555d40a997841d29239dccb66bcdeb1ad07",
+  "prompts": {},
+  "sessions": {
+    "s_175dfb7646d720": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "6287d9cf-9a0e-4d8a-a3c0-5a6e08f44cfe",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

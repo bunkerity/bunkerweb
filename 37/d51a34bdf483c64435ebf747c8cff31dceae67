@@ -1,0 +1,19 @@
+tests/unit/db/test_save_config_global_wipe.py
+  s_30dc02f461e642::t_c3f9c5a39827be 1-54
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "37d51a34bdf483c64435ebf747c8cff31dceae67",
+  "prompts": {},
+  "sessions": {
+    "s_30dc02f461e642": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1b09e-f363-7890-8c31-73c4c9efaa0b",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

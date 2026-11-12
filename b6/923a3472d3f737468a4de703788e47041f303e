@@ -1,0 +1,31 @@
+src/common/core/cors/README.fr.md
+  s_74db267b9e85e3::t_a5264fb2744718 52
+src/common/core/cors/cors.lua
+  s_74db267b9e85e3::t_119b242c12bc6e 74,80-81,89
+src/common/core/cors/README.de.md
+  s_74db267b9e85e3::t_a5264fb2744718 54
+src/common/core/cors/README.es.md
+  s_74db267b9e85e3::t_a5264fb2744718 54
+src/common/core/cors/README.zh.md
+  s_74db267b9e85e3::t_a5264fb2744718 54
+tests/unit/test_lua_cors_origin.lua
+  s_74db267b9e85e3::t_61ef6a05da1bfc 1-140
+src/common/core/cors/README.md
+  s_74db267b9e85e3::t_a5264fb2744718 54
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "b6923a3472d3f737468a4de703788e47041f303e",
+  "prompts": {},
+  "sessions": {
+    "s_74db267b9e85e3": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "ad5b14de-2901-4f3f-9e87-27c928b9c8f9",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

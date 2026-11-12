@@ -1,0 +1,23 @@
+tests/core_handlers/http_common.py
+  s_9d3c9ff68669a4::t_e173c5ba0e1316 4,7-8,25-52,97
+tests/core_handlers/http_status_handler.py
+  s_9d3c9ff68669a4::t_12aa3eaf654ba6 27-28
+tests/unit/harness/test_http_status.py
+  s_9d3c9ff68669a4::t_4b59ba5a8f6635 3,6,41,170-245
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "b213c9a36631434b02c1dd6e21e774d4b1fb5fc0",
+  "prompts": {},
+  "sessions": {
+    "s_9d3c9ff68669a4": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "f5c03f63-ccfb-4a9a-bf27-6aa77d610b94",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

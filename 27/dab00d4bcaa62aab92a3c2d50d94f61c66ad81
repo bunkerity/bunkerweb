@@ -1,0 +1,39 @@
+src/common/settings.json
+  s_7a466a062cb992::t_50d36860d0bcf9 662
+  s_7a466a062cb992::t_2231f4fe0604e2 644
+  s_7a466a062cb992::t_299a05d151a2ad 636-643,645-661
+tests/unit/scheduler/test_jobscheduler.py
+  s_7a466a062cb992::t_86fa9bf66bb198 8-9
+  s_7a466a062cb992::t_ed70d496a1822b 77-80,82,87-92,96-97,99,101-105,107,109,111-112,115-119,121-122,124-129,131-132,134-136,139-140
+  s_7a466a062cb992::t_d4e93f25e0dae0 81,84
+  s_7a466a062cb992::t_a8c80efe2de249 12
+  s_7a466a062cb992::t_909b084255646e 83,85-86,93-95,98,100,106,108,110,113-114,120,123,130,133,137-138
+src/scheduler/JobScheduler.py
+  s_a12e0254ad4a4d::t_2b90ca0105b769 36-40,62,166-170,172-174,176-178,182-183,185-192
+  s_7a466a062cb992::t_46a79d3b0f827c 171,175,179-181
+  s_7a466a062cb992::t_911004c1e3cb95 33-35
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "27dab00d4bcaa62aab92a3c2d50d94f61c66ad81",
+  "prompts": {},
+  "sessions": {
+    "s_7a466a062cb992": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "9c96dc7f-ada6-452b-b5ca-f894485d36a4",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_a12e0254ad4a4d": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0c2ca-1393-7a90-b9c1-a428efc126ab",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

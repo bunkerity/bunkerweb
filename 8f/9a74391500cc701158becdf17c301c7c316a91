@@ -1,0 +1,90 @@
+src/common/core/bunkernet/README.fr.md
+  s_d9843d0b2c31d2::t_945bd6a2510365 16,30-34,45-46,48-50
+src/common/core/bunkernet/README.zh.md
+  s_d9843d0b2c31d2::t_945bd6a2510365 17,31-35,46-47,49-51
+src/common/core/bunkernet/README.md
+  s_d9843d0b2c31d2::t_945bd6a2510365 17,31-35,46-47,49-51
+docs/fr/features.md
+  s_d9843d0b2c31d2::t_2ed1bc7392459b 1347-1351,1362-1363,1365-1366
+  s_80a54b2aaf3dbe::t_a0f3a79bff2e53 1333,1367
+src/common/core/bunkernet/plugin.json
+  s_d9843d0b2c31d2::t_eb2422fc2fb6ba 17-25
+tests/unit/jobs/test_bunkernet_send_filter.py
+  s_069d588794c2c2::t_ea83787c2cec90 127
+  s_d9843d0b2c31d2::t_84d3574bffa6f9 1,4-6,9,17-18,23,56-60,75,79,131,136-184
+  s_a93873b098dfeb::t_ec7372d6c9c21b 185-186
+tests/unit/common/test_bunkernet_report_redaction.py
+  s_d9843d0b2c31d2::t_afd676135d064a 1,22,36,102-115
+src/common/core/bunkernet/jobs/bunkernet-send.py
+  s_d9843d0b2c31d2::t_a8b61f08b28f75 29
+  s_d9843d0b2c31d2::t_a4e04777706b99 121-122
+  s_d9843d0b2c31d2::t_90ba3dda1adfce 33-38
+  s_a93873b098dfeb::t_a834f34e69c1bc 39-40
+CHANGELOG.md
+  s_d9843d0b2c31d2::t_a4ebf54246e97f 12
+tests/unit/common/test_bunkernet_report_headers.py
+  s_d9843d0b2c31d2::t_afd676135d064a 1,55,92,103,176-199
+src/common/core/bunkernet/bunkernet.lua
+  s_d9843d0b2c31d2::t_34f165fff877d0 295,299,302
+  s_d9843d0b2c31d2::t_dd63e3bc68f2ff 48-50,56-58
+  s_d9843d0b2c31d2::t_a8b61f08b28f75 37-38,68-69
+src/common/core/bunkernet/README.de.md
+  s_d9843d0b2c31d2::t_945bd6a2510365 17,31-35,46-47,49-51
+docs/zh/features.md
+  s_d9843d0b2c31d2::t_2ed1bc7392459b 1390-1394,1405-1406,1408-1409
+  s_80a54b2aaf3dbe::t_d34841430a6a20 1376,1410
+docs/es/features.md
+  s_d9843d0b2c31d2::t_e8096cc6ffe9ba 1384-1388,1399-1400,1402-1403
+  s_80a54b2aaf3dbe::t_42846f08f806f4 1370,1404
+src/common/core/bunkernet/README.es.md
+  s_d9843d0b2c31d2::t_945bd6a2510365 17,31-35,46-47,49-51
+docs/features.md
+  s_d9843d0b2c31d2::t_e8096cc6ffe9ba 1388-1392,1403-1404,1406-1407
+  s_80a54b2aaf3dbe::t_b0a61eef4521fe 1374,1408
+docs/de/features.md
+  s_d9843d0b2c31d2::t_e8096cc6ffe9ba 1367-1371,1382-1383,1385-1386
+  s_80a54b2aaf3dbe::t_e205b2008ae27d 1353,1387
+tests/unit/common/test_bunkernet_coverage_lua.py
+  s_d9843d0b2c31d2::t_43c60af3e1b725 95-105
+  s_a93873b098dfeb::t_fd491ae54b187f 14,106-107
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "8f9a74391500cc701158becdf17c301c7c316a91",
+  "prompts": {},
+  "sessions": {
+    "s_069d588794c2c2": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "84fe7cda-2bca-4767-bd4f-5fd51bba09cf",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_80a54b2aaf3dbe": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "aa104066-cd7c-4cd6-bfd9-8d82570506d6",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_a93873b098dfeb": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "0cd1d6bf-148c-4fa6-86b9-5646018aa76b",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_d9843d0b2c31d2": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "1061a9ca-a0e7-4e0d-b606-4f8370981eb9",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

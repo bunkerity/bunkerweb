@@ -1,0 +1,47 @@
+docs/de/quickstart-guide.md
+  s_15aae0ca0fad8c::t_d909b67223e446 23,25,27-37
+  s_15aae0ca0fad8c::t_c10ca32ada2dc1 24,26,38
+docs/zh/quickstart-guide.md
+  s_15aae0ca0fad8c::t_c10ca32ada2dc1 24,26,38
+  s_15aae0ca0fad8c::t_d909b67223e446 23,25,27-37
+docs/fr/troubleshooting.md
+  s_15aae0ca0fad8c::t_d909b67223e446 6,8,10-20
+  s_15aae0ca0fad8c::t_c10ca32ada2dc1 7,9,21
+docs/fr/quickstart-guide.md
+  s_15aae0ca0fad8c::t_d909b67223e446 23,25,27-37
+  s_15aae0ca0fad8c::t_c10ca32ada2dc1 24,26,38
+docs/de/troubleshooting.md
+  s_15aae0ca0fad8c::t_c10ca32ada2dc1 7,9,21
+  s_15aae0ca0fad8c::t_d909b67223e446 6,8,10-20
+docs/es/quickstart-guide.md
+  s_15aae0ca0fad8c::t_d909b67223e446 23,25,27-37
+  s_15aae0ca0fad8c::t_c10ca32ada2dc1 24,26,38
+docs/troubleshooting.md
+  s_15aae0ca0fad8c::t_d909b67223e446 6,8,10-20
+  s_15aae0ca0fad8c::t_c10ca32ada2dc1 7,9,21
+docs/zh/troubleshooting.md
+  s_15aae0ca0fad8c::t_c10ca32ada2dc1 7,9,21
+  s_15aae0ca0fad8c::t_d909b67223e446 6,8,10-20
+docs/es/troubleshooting.md
+  s_15aae0ca0fad8c::t_d909b67223e446 6,8,10-20
+  s_15aae0ca0fad8c::t_c10ca32ada2dc1 7,9,21
+docs/quickstart-guide.md
+  s_15aae0ca0fad8c::t_d909b67223e446 23,25,27-37
+  s_15aae0ca0fad8c::t_c10ca32ada2dc1 24,26,38
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "ebeec9657735486810c916d3c7996345b77c52b4",
+  "prompts": {},
+  "sessions": {
+    "s_15aae0ca0fad8c": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a13a71-b30a-7ea2-9ee3-3d9f33715e40",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

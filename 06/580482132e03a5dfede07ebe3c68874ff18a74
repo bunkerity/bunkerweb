@@ -1,0 +1,34 @@
+src/common/db/alembic/mariadb_versions/310f6a3be271_upgrade_to_version_1_6_16_rc1.py
+  h_a33a1e80933106 8,14-15,24
+  h_a33a1e80933106 1-7,9-13,16-23,25-29
+src/common/db/alembic/sqlite_versions/201d47c5efcc_upgrade_to_version_1_6_16_rc1.py
+  h_a33a1e80933106 8,14-15,24
+  h_a33a1e80933106 1-7,9-13,16-23,25-29
+src/common/db/alembic/mysql_versions/884ef6f96c44_upgrade_to_version_1_6_16_rc1.py
+  h_a33a1e80933106 8,14-15,24
+  h_a33a1e80933106 1-7,9-13,16-23,25-29
+src/common/db/alembic/postgresql_versions/3257b41568d0_upgrade_to_version_1_6_16_rc1.py
+  h_a33a1e80933106 8,14-15,24
+  s_1f3f4a4f086ee9::t_40efd78bfb58d1 1-7,9-13,16-23,25-29
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "06580482132e03a5dfede07ebe3c68874ff18a74",
+  "prompts": {},
+  "humans": {
+    "h_a33a1e80933106": {
+      "author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  },
+  "sessions": {
+    "s_1f3f4a4f086ee9": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "f7710b59-8e06-4d02-80b1-414d11093a51",
+        "model": "unknown"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

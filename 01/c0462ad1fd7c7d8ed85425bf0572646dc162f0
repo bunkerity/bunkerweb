@@ -1,0 +1,108 @@
+src/ui/requirements.in
+  s_9bb90c2dd9ef24::t_2529f9e15a4eae 17
+  s_685c6ea6e2ff63::t_d9c33362569c6b 19
+src/api/requirements.txt
+  s_685c6ea6e2ff63::t_b91adb29a3e383 15-17,191-193,262-264,270-272,424-426,436-438,443-583,595-597,676-790,796-798,813-815,922-1076,1078-1179
+docs/requirements.txt
+  s_a6ab1d342e946a::t_1e7d49acec5e9a 11-18,312-314,353-355,544-546,578-661,666-668,678-680,696-698,831-875
+src/deps/requirements-deps.txt
+  s_a6ab1d342e946a::t_7a4b3024509b56 213-215
+  s_c2a676a0398ad4::t_5e2af27d704a43 189-191,333-362
+docs/requirements.in
+  s_a6ab1d342e946a::t_929737394e3f4e 5
+  s_2c0e19aa7a553e::t_ae7e67789bcd93 2
+src/autoconf/requirements.txt
+  s_9bb90c2dd9ef24::t_2529f9e15a4eae 811-813,960-962,964-1104,1106-1107
+  s_73a85b773b9052::t_6c061cde2bcced 649-651,653-804,808-810,1108,1214-1216,1218-1221
+src/deps/requirements.txt
+  s_a6ab1d342e946a::t_7a4b3024509b56 25-27
+  s_c2a676a0398ad4::t_cd43cea45252f5 11-13
+src/autoconf/requirements.in
+  s_9bb90c2dd9ef24::t_2529f9e15a4eae 2
+misc/requirements-ansible.txt
+  s_685c6ea6e2ff63::t_b3ec79fbc234c1 11-13
+src/api/requirements.in
+  s_873af6a7f29d78::t_e3d59777c9813c 6,8,10,12
+src/common/db/requirements.arm.in
+  s_685c6ea6e2ff63::t_74ec6d024cf9f7 6
+src/common/db/requirements.arm.txt
+  s_685c6ea6e2ff63::t_f51500b2e7f511 350-422
+src/common/db/requirements.in
+  s_685c6ea6e2ff63::t_d104d8d0575c32 6
+src/common/db/requirements.txt
+  s_685c6ea6e2ff63::t_59c658acd983ff 415-487
+src/deps/requirements-deps.in
+  s_873af6a7f29d78::t_dd0f46c69cf353 2
+src/deps/requirements.in
+  s_873af6a7f29d78::t_ee10fb2238b17e 2
+src/scheduler/requirements.in
+  s_73a85b773b9052::t_566511e57d763e 41
+src/scheduler/requirements.txt
+  s_73a85b773b9052::t_158a67e8f45d21 37-39,47-49,51-53,496-498,504-506,587-589,603-605,619-621,623-625,631-633,659-661,809-811,838-840,850-852,856-996,1200-1202
+src/ui/requirements.txt
+  s_73a85b773b9052::t_92b7e6225d77a4 614-616,618-620,1141-1143,1149-1263,1273-1276,1298-1300
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "01c0462ad1fd7c7d8ed85425bf0572646dc162f0",
+  "prompts": {},
+  "sessions": {
+    "s_2c0e19aa7a553e": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1c00b-ff4f-76b2-bd48-8769231a3294",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_685c6ea6e2ff63": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1bf4d-bef0-7c40-8dc4-0ebee4b8f645",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_73a85b773b9052": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1c081-21f6-7d21-9ccc-8c1eb28af0de",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_873af6a7f29d78": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1bf3f-fea6-7a10-bae9-ac6557c133e8",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_9bb90c2dd9ef24": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1bfa6-8610-7070-9774-32243828f259",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_a6ab1d342e946a": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1c011-3d73-76c3-bc7e-a252b1defe82",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_c2a676a0398ad4": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1c019-02e2-73b0-8b02-93a49ebddf6c",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

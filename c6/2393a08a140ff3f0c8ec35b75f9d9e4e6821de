@@ -1,0 +1,105 @@
+tests/core/ipv6-only.yml
+  s_a735c7eaff7086::t_89df53943e61e4 1-156
+  s_101dbaa32bddc1::t_bac354da3c535c 157
+tests/scripts/test.sh
+  s_a735c7eaff7086::t_01b7ef18297bc2 16-17
+  s_80a235770604f0::t_c9beb9cb5aaec5 11,18
+tests/scripts/utils.sh
+  s_a735c7eaff7086::t_01b7ef18297bc2 438,440-441,833,934-939,1163
+  s_a735c7eaff7086::t_d2c7ccc7461c29 184-187,451-455
+tests/core/ipv6-only/redis.yml
+  s_a735c7eaff7086::t_66e17e0c41bf04 1-33
+tests/scripts/build.sh
+  s_a735c7eaff7086::t_01b7ef18297bc2 31-35
+tests/core/ipv6-only/check.py
+  s_a735c7eaff7086::t_d4686863005b37 146-147
+  s_a735c7eaff7086::t_c7560bcbdc7200 174
+  s_a735c7eaff7086::t_6ce278549354a2 131
+  s_a735c7eaff7086::t_cb78c251bf18d9 26-29,36
+  s_a735c7eaff7086::t_f4e9fb0d58f5be 50-54,75-80,110,114,129,136-138,152-156
+  s_0026495be52a07::t_ee6af842708d33 20-21
+  s_0026495be52a07::t_1e5746771f9250 92-99,103-106
+  s_a735c7eaff7086::t_4b75765ba4240f 61-65
+  s_a735c7eaff7086::t_78332177f7b977 55,60,185,187-188
+  s_28c7e79bc4599c::t_f7585cebc73731 67-71,180
+  s_a735c7eaff7086::t_0e31dead926fa3 59,72,183-184
+  s_a735c7eaff7086::t_a9c1b487fe9cf5 143-145,151
+  s_a735c7eaff7086::t_1681768908802c 1-19,22-25,30-35,37-49,56-58,66,73-74,81-91,100-102,107-109,111-113,115-128,130,132-135,139-142,148-150,157-173,175-179,181-182,186,189-197
+tests/scripts/start.sh
+  s_a735c7eaff7086::t_01b7ef18297bc2 96-100,355-356
+  s_0bf82062f9947a::t_09c1cd2216ffad 95,357
+tests/core/ipv6-only/capture.py
+  s_a735c7eaff7086::t_1681768908802c 1-4,7-16,27,29-30,32-34,47,64,71-75
+  s_a735c7eaff7086::t_755a69574f7552 37
+  s_a735c7eaff7086::t_babb205936b5aa 5-6,17-24,26,31,35-36,38-46,65-70
+  s_a735c7eaff7086::t_f4e9fb0d58f5be 25,28,48-63
+  s_a735c7eaff7086::t_f991cf8c0c63bb 76-77
+tests/core/ipv6-only/dnsmasq.conf
+  s_a735c7eaff7086::t_91e1c577b0469a 1-10
+tests/core/ipv6-only/bunkerweb.yml
+  s_101dbaa32bddc1::t_9eda7feafe3619 1-42
+tests/core/ipv6-only/dnsmasq.yml
+  s_101dbaa32bddc1::t_0e170eb61a2f73 1-34
+tests/core/ipv6-only/fixtures.yml
+  s_101dbaa32bddc1::t_667e46ab394cd0 1-67
+tests/core/ipv6-only/scheduler.yml
+  s_101dbaa32bddc1::t_cd9433b1b80bb0 1-34
+tests/core/ipv6-only/services.yml
+  s_101dbaa32bddc1::t_afcd9d52bd4b37 1-27
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "c62393a08a140ff3f0c8ec35b75f9d9e4e6821de",
+  "prompts": {},
+  "sessions": {
+    "s_0026495be52a07": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "74676682-4661-4a6f-b5e2-ee4d36802d56",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_0bf82062f9947a": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "2c17ecf2-1ff4-4f18-ad06-7a2b92bad02d",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_101dbaa32bddc1": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1a5a8-7bc3-7f21-8743-8a9e7ac9be05",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_28c7e79bc4599c": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a19b26-d3e3-7f32-8db5-d8129228b064",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_80a235770604f0": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "2fa6bc31-bf90-4d00-9c92-2195dc41acd6",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_a735c7eaff7086": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a18eb0-34d2-7fb0-a1a2-c1cc0432db8c",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

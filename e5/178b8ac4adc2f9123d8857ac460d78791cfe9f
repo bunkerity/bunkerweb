@@ -1,0 +1,19 @@
+tests/misc/docker/postgresql.yml
+  s_128e4034bbce23::t_b8b2c082797b53 7-8
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "e5178b8ac4adc2f9123d8857ac460d78791cfe9f",
+  "prompts": {},
+  "sessions": {
+    "s_128e4034bbce23": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1ac7d-d90b-7d62-8f61-eba1f2829c30",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

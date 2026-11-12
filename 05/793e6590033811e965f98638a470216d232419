@@ -1,0 +1,126 @@
+src/common/core/selfsigned/api/router.py
+  s_2a41e2db317b4b::t_f1d00c3b435b07 6,9,32-35
+tests/unit/api/test_api_upstreams.py
+  s_647a1724ed2b54::t_986c7b6b535753 14-15,51,59-60,120,137,149,195,198,219-237
+src/api/app/auth/guard.py
+  s_62c5db992cd453::t_d5a39be60bb870 88,98
+tests/unit/api/test_configs_bulk_save_classification.py
+  s_0702ce82ba2584::t_2a3804a17bb4cf 70,77,82
+tests/unit/ui/test_api_app_lane_isolation.py
+  s_647a1724ed2b54::t_367abc52783999 96
+src/api/app/routers/redirects.py
+  s_647a1724ed2b54::t_3911a30ba54723 1,4,36,40-42,84-86,94-95
+tests/unit/api/test_api_certificates.py
+  s_647a1724ed2b54::t_986c7b6b535753 10,14-15,51,59-60,139,207-222
+src/common/core/customcert/api/router.py
+  s_2a41e2db317b4b::t_f1d00c3b435b07 6,9,29,53-55
+  s_2a41e2db317b4b::t_538d38a6d8215c 56
+src/api/app/routers/certificates.py
+  s_647a1724ed2b54::t_3911a30ba54723 4,7,100-102,109-110
+tests/unit/api_app/requirements.txt
+  s_647a1724ed2b54::t_85a92f98e41114 280-283
+tests/unit/api/test_api_redirects.py
+  s_647a1724ed2b54::t_986c7b6b535753 14-15,51,59-60,115,131,143,174,177,192-208
+src/api/app/routers/upstreams.py
+  s_647a1724ed2b54::t_3911a30ba54723 1,4,36,40-42,90-92,100,102
+src/api/app/auth/biscuit.py
+  s_62c5db992cd453::t_d5a39be60bb870 578-585,687-691,714,740-768
+  s_62c5db992cd453::t_c5cf3261d633ba 769-770
+tests/unit/api_app/requirements.in
+  s_33cd4587c25ea2::t_e674cbc6eaaffe 21
+src/common/core/workflows/api/router.py
+  s_647a1724ed2b54::t_3911a30ba54723 9,12,184-187,262-264,272-273
+src/common/core/letsencrypt/api/router.py
+  s_2a41e2db317b4b::t_f1d00c3b435b07 6,10,52-55
+tests/unit/api_app/README.md
+  s_be02b82eefc527::t_a3ea7ab7dc54df 55-62
+  s_be02b82eefc527::t_a256694e113a1e 35
+src/api/app/routers/configs.py
+  s_62c5db992cd453::t_d5a39be60bb870 6,10,57-62,270,286-288,297,330,357
+tests/unit/api_app/test_attachments_authz.py
+  s_647a1724ed2b54::t_91ac41b8162eb3 1-19,21-37,45-251
+  s_4773e3fe6f577f::t_563bd61158927e 20,39-44
+  s_18e1cfb5402ed1::t_4f6eb219d3d47c 38
+tests/unit/api_app/test_configs_move_authz.py
+  s_62c5db992cd453::t_26fda87bef00ec 1-18,20-194,197-201,204-209
+  s_18e1cfb5402ed1::t_c952bd39f0dcf3 195-196,202-203
+  s_647a1724ed2b54::t_a7919c9c2614d1 19
+tests/unit/api/test_api_workflows.py
+  s_647a1724ed2b54::t_986c7b6b535753 15-16,19-20,48-49,54-56,133,147,410-426
+tests/unit/api_app/test_certificate_plugin_authz.py
+  s_2a41e2db317b4b::t_97ae780a6b0c0f 1-178
+tests/unit/api/test_certificate_provider_routers.py
+  s_2a41e2db317b4b::t_e13a3728ad861b 11-12,16,52-55,63,71-72,130,155,179,202,217,281-333
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "05793e6590033811e965f98638a470216d232419",
+  "prompts": {},
+  "sessions": {
+    "s_0702ce82ba2584": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "809d5db4-9bb0-42b4-bfd3-69362cac66a5",
+        "model": "unknown"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_18e1cfb5402ed1": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "087a9dfe-326f-41fb-b619-845867a497da",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_2a41e2db317b4b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "fdc045b0-ab34-425a-a9b2-1bb8bb9e66a4",
+        "model": "unknown"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_33cd4587c25ea2": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "01ac58e2-ebe6-42de-81c6-ec913cac3930",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_4773e3fe6f577f": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a13f11-e093-7af2-ab1d-61ca0b0559b4",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_62c5db992cd453": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "f838ce07-3ed0-4f2d-915a-319c4c19a488",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_647a1724ed2b54": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "14282522-2e48-43ca-9f90-f96aeadcab8d",
+        "model": "unknown"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_be02b82eefc527": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a13f71-81aa-73c0-96d8-767c982a98a0",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

@@ -1,0 +1,344 @@
+docs/fr/features.md
+  s_5d7ab565167ba6::t_61600ff24b39ac 6636-6681
+src/common/core/zstd/plugin.json
+  s_4f6db4e86c6ae2::t_d9da323fc754e9 1-66
+src/common/core/zstd/README.es.md
+  s_5d7ab565167ba6::t_4bb80aa1d2ac6a 15-20
+  s_5d7ab565167ba6::t_b501db05485aec 1-4,8-14,21-22,24-25,27-28,30-41
+  s_5d7ab565167ba6::t_9159c9a14d0c67 5-7,23,26,29
+CHANGELOG.md
+  s_8957b83407cdf6::t_a49b8fbd355068 29
+src/common/core/zstd/README.zh.md
+  s_5d7ab565167ba6::t_b501db05485aec 1-4,8-14,21-22,24-25,27-28,30-41
+  s_5d7ab565167ba6::t_9159c9a14d0c67 5-7,23,26,29
+  s_5d7ab565167ba6::t_4bb80aa1d2ac6a 15-20
+docs/features.md
+  s_5d7ab565167ba6::t_61600ff24b39ac 6830-6875
+src/common/core/zstd/README.de.md
+  s_5d7ab565167ba6::t_8175d01bf30213 1-14,18,21-22,24-25,27-28,30,32,34
+  s_5d7ab565167ba6::t_ce154c17729e19 31,33,35-41
+  s_5d7ab565167ba6::t_4bb80aa1d2ac6a 15-17,19-20
+  s_5d7ab565167ba6::t_9159c9a14d0c67 23,26,29
+docs/de/features.md
+  s_5d7ab565167ba6::t_61600ff24b39ac 6739-6784
+docs/zh/features.md
+  s_5d7ab565167ba6::t_61600ff24b39ac 6824-6869
+src/common/core/zstd/confs/server-http/zstd.conf
+  s_4f6db4e86c6ae2::t_d9da323fc754e9 1-6
+src/deps/install.sh
+  s_4f6db4e86c6ae2::t_2d5ec4ff870881 236
+  s_4f6db4e86c6ae2::t_926d7f770bc2ef 212-217
+  s_4f6db4e86c6ae2::t_f8020546170aa7 246,249-252
+src/common/core/zstd/README.md
+  s_4f6db4e86c6ae2::t_f8020546170aa7 1-41
+src/common/confs/nginx.conf
+  s_4f6db4e86c6ae2::t_926d7f770bc2ef 18
+src/deps/deps.json
+  s_4f6db4e86c6ae2::t_d9da323fc754e9 299-312
+docs/es/features.md
+  s_5d7ab565167ba6::t_61600ff24b39ac 6816-6861
+src/common/core/zstd/README.fr.md
+  s_5d7ab565167ba6::t_4bb80aa1d2ac6a 15-20
+  s_5d7ab565167ba6::t_9159c9a14d0c67 23,26,29
+  s_5d7ab565167ba6::t_b501db05485aec 1-14,21-22,24-25,27-28,30-41
+tests/unit/gen/test_zstd.py
+  s_4f6db4e86c6ae2::t_ea67e5b66a9c32 1-58
+src/deps/src/zstd-nginx-module/.cppcheck-suppressions
+  s_4f6db4e86c6ae2::t_eff4fa2b712225 1-16
+src/deps/src/zstd-nginx-module/.gitattributes
+  s_4f6db4e86c6ae2::t_c8cbc937a204b8 1
+src/deps/src/zstd-nginx-module/.gitignore
+  s_4f6db4e86c6ae2::t_a14bb4de29114c 1-60
+src/deps/src/zstd-nginx-module/LICENSE
+  s_4f6db4e86c6ae2::t_6714d5e2a627bd 1-25
+src/deps/src/zstd-nginx-module/Makefile
+  s_4f6db4e86c6ae2::t_46f9f601758f82 1-72
+src/deps/src/zstd-nginx-module/NOTICE
+  s_4f6db4e86c6ae2::t_6d8264c1badaba 1-18
+src/deps/src/zstd-nginx-module/README.md
+  s_4f6db4e86c6ae2::t_6755f4db0a8e79 1-172
+src/deps/src/zstd-nginx-module/config
+  s_4f6db4e86c6ae2::t_c7ed07a9ae92dc 1-80
+src/deps/src/zstd-nginx-module/filter/config
+  s_4f6db4e86c6ae2::t_1e7deaf2200de2 1-47
+src/deps/src/zstd-nginx-module/filter/ngx_http_zstd_filter.c
+  s_4f6db4e86c6ae2::t_c882689cc0ba78 1-614
+src/deps/src/zstd-nginx-module/filter/ngx_http_zstd_filter_module.c
+  s_4f6db4e86c6ae2::t_3808ea87fcf3eb 1-447
+src/deps/src/zstd-nginx-module/filter/ngx_http_zstd_filter_module.h
+  s_4f6db4e86c6ae2::t_9e5214301f8be9 1-75
+src/deps/src/zstd-nginx-module/ngx_http_zstd_accept_encoding.h
+  s_4f6db4e86c6ae2::t_f6e7eb6b9b69d7 1-417
+src/deps/src/zstd-nginx-module/static/config
+  s_4f6db4e86c6ae2::t_5bb1853efa7495 1-14
+src/deps/src/zstd-nginx-module/static/ngx_http_zstd_static_module.c
+  s_4f6db4e86c6ae2::t_46b0d3a5fcbc70 1-356
+src/deps/src/zstd-nginx-module/valgrind.suppress
+  s_4f6db4e86c6ae2::t_dbdd703dccefb2 1-218
+src/deps/src/zstd/.buckconfig
+  s_4f6db4e86c6ae2::t_8ceaaa37207ebc 1-9
+src/deps/src/zstd/.buckversion
+  s_4f6db4e86c6ae2::t_99af567919f924 1
+src/deps/src/zstd/.cirrus.yml
+  s_4f6db4e86c6ae2::t_34c466b7988b55 1-9
+src/deps/src/zstd/.gitattributes
+  s_4f6db4e86c6ae2::t_1ec31ffbc4e646 1-21
+src/deps/src/zstd/.gitignore
+  s_4f6db4e86c6ae2::t_78283781a66020 1-63
+src/deps/src/zstd/CHANGELOG
+  s_4f6db4e86c6ae2::t_d2f3369dea7426 1-863
+src/deps/src/zstd/CODE_OF_CONDUCT.md
+  s_4f6db4e86c6ae2::t_8f4dafe303b850 1-5
+src/deps/src/zstd/CONTRIBUTING.md
+  s_4f6db4e86c6ae2::t_00c22762c22f2e 1-489
+src/deps/src/zstd/COPYING
+  s_4f6db4e86c6ae2::t_af86a45a8df405 1-339
+src/deps/src/zstd/LICENSE
+  s_4f6db4e86c6ae2::t_ccd4d2a38cdea7 1-30
+src/deps/src/zstd/Makefile
+  s_4f6db4e86c6ae2::t_cff3eb7e46446e 1-471
+src/deps/src/zstd/Package.swift
+  s_4f6db4e86c6ae2::t_432f20c4d13f5a 1-36
+src/deps/src/zstd/README.md
+  s_4f6db4e86c6ae2::t_052db005426ee4 1-237
+src/deps/src/zstd/SECURITY.md
+  s_4f6db4e86c6ae2::t_ebd875745f810d 1-15
+src/deps/src/zstd/TESTING.md
+  s_4f6db4e86c6ae2::t_55f561f77d878b 1-43
+src/deps/src/zstd/lib/.gitignore
+  s_4f6db4e86c6ae2::t_e3c07a79855f7e 1-3
+src/deps/src/zstd/lib/BUCK
+  s_4f6db4e86c6ae2::t_f70bf1967549de 1-232
+src/deps/src/zstd/lib/Makefile
+  s_4f6db4e86c6ae2::t_0dfadf56eaddc3 1-389
+src/deps/src/zstd/lib/README.md
+  s_4f6db4e86c6ae2::t_f39954fc73c1ef 1-248
+src/deps/src/zstd/lib/common/allocations.h
+  s_4f6db4e86c6ae2::t_5db3ced22b740a 1-55
+src/deps/src/zstd/lib/common/bits.h
+  s_4f6db4e86c6ae2::t_0473e129ce7795 1-205
+src/deps/src/zstd/lib/common/bitstream.h
+  s_4f6db4e86c6ae2::t_2eb5016f6d5e52 1-454
+src/deps/src/zstd/lib/common/compiler.h
+  s_4f6db4e86c6ae2::t_148abc7aecfba7 1-464
+src/deps/src/zstd/lib/common/cpu.h
+  s_4f6db4e86c6ae2::t_fa0bed4ef99fc4 1-249
+src/deps/src/zstd/lib/common/debug.c
+  s_4f6db4e86c6ae2::t_b3f6e8e06b0538 1-30
+src/deps/src/zstd/lib/common/debug.h
+  s_4f6db4e86c6ae2::t_18e7183ee41373 1-107
+src/deps/src/zstd/lib/common/entropy_common.c
+  s_4f6db4e86c6ae2::t_ca854e2fe447ec 1-340
+src/deps/src/zstd/lib/common/error_private.c
+  s_4f6db4e86c6ae2::t_0512af972839f9 1-64
+src/deps/src/zstd/lib/common/error_private.h
+  s_4f6db4e86c6ae2::t_37c0387ec5272e 1-158
+src/deps/src/zstd/lib/common/fse.h
+  s_4f6db4e86c6ae2::t_aca245176569f2 1-625
+src/deps/src/zstd/lib/common/fse_decompress.c
+  s_4f6db4e86c6ae2::t_f462eba9e1dfec 1-315
+src/deps/src/zstd/lib/common/huf.h
+  s_4f6db4e86c6ae2::t_cdf455f00077ae 1-277
+src/deps/src/zstd/lib/common/mem.h
+  s_4f6db4e86c6ae2::t_c574dca4869fc8 1-422
+src/deps/src/zstd/lib/common/pool.c
+  s_4f6db4e86c6ae2::t_45310fb1590afd 1-371
+src/deps/src/zstd/lib/common/pool.h
+  s_4f6db4e86c6ae2::t_74d0f228377f38 1-81
+src/deps/src/zstd/lib/common/portability_macros.h
+  s_4f6db4e86c6ae2::t_7b7c332c314ee0 1-171
+src/deps/src/zstd/lib/common/threading.c
+  s_4f6db4e86c6ae2::t_0a29434a392075 1-182
+src/deps/src/zstd/lib/common/threading.h
+  s_4f6db4e86c6ae2::t_ae92e1ada07a22 1-142
+src/deps/src/zstd/lib/common/xxhash.c
+  s_4f6db4e86c6ae2::t_9e7bc3362feaf9 1-18
+src/deps/src/zstd/lib/common/xxhash.h
+  s_4f6db4e86c6ae2::t_61e27e01fa02f9 1-7094
+src/deps/src/zstd/lib/common/zstd_common.c
+  s_4f6db4e86c6ae2::t_e035e135090ccd 1-48
+src/deps/src/zstd/lib/common/zstd_deps.h
+  s_4f6db4e86c6ae2::t_a0cec6f0ace6f9 1-123
+src/deps/src/zstd/lib/common/zstd_internal.h
+  s_4f6db4e86c6ae2::t_0a1ef627ee93e9 1-324
+src/deps/src/zstd/lib/common/zstd_trace.h
+  s_4f6db4e86c6ae2::t_3367b877068d1f 1-156
+src/deps/src/zstd/lib/compress/clevels.h
+  s_4f6db4e86c6ae2::t_48a17ca8525217 1-134
+src/deps/src/zstd/lib/compress/fse_compress.c
+  s_4f6db4e86c6ae2::t_27f50a09f8a183 1-625
+src/deps/src/zstd/lib/compress/hist.c
+  s_4f6db4e86c6ae2::t_c11b58c4f7b2e0 1-191
+src/deps/src/zstd/lib/compress/hist.h
+  s_4f6db4e86c6ae2::t_8e45f777df60ff 1-82
+src/deps/src/zstd/lib/compress/huf_compress.c
+  s_4f6db4e86c6ae2::t_9d6ebcfba5a2f0 1-1464
+src/deps/src/zstd/lib/compress/zstd_compress.c
+  s_4f6db4e86c6ae2::t_cbbc5973116651 1-7843
+src/deps/src/zstd/lib/compress/zstd_compress_internal.h
+  s_4f6db4e86c6ae2::t_1d6d6b6ee7c63f 1-1636
+src/deps/src/zstd/lib/compress/zstd_compress_literals.c
+  s_4f6db4e86c6ae2::t_3a4ff7acd03c81 1-235
+src/deps/src/zstd/lib/compress/zstd_compress_literals.h
+  s_4f6db4e86c6ae2::t_28dcc994976a2f 1-39
+src/deps/src/zstd/lib/compress/zstd_compress_sequences.c
+  s_4f6db4e86c6ae2::t_644169fcc81eb2 1-442
+src/deps/src/zstd/lib/compress/zstd_compress_sequences.h
+  s_4f6db4e86c6ae2::t_5870bcfb301918 1-55
+src/deps/src/zstd/lib/compress/zstd_compress_superblock.c
+  s_4f6db4e86c6ae2::t_fc84550119936a 1-688
+src/deps/src/zstd/lib/compress/zstd_compress_superblock.h
+  s_4f6db4e86c6ae2::t_835d5ec8eaa866 1-32
+src/deps/src/zstd/lib/compress/zstd_cwksp.h
+  s_4f6db4e86c6ae2::t_85f65d7427771a 1-765
+src/deps/src/zstd/lib/compress/zstd_double_fast.c
+  s_4f6db4e86c6ae2::t_2a57c64e7eb699 1-778
+src/deps/src/zstd/lib/compress/zstd_double_fast.h
+  s_4f6db4e86c6ae2::t_7915bb7feb7406 1-42
+src/deps/src/zstd/lib/compress/zstd_fast.c
+  s_4f6db4e86c6ae2::t_a02286b23246c1 1-985
+src/deps/src/zstd/lib/compress/zstd_fast.h
+  s_4f6db4e86c6ae2::t_24abb78036fafb 1-30
+src/deps/src/zstd/lib/compress/zstd_lazy.c
+  s_4f6db4e86c6ae2::t_5f1b065f80f326 1-2199
+src/deps/src/zstd/lib/compress/zstd_lazy.h
+  s_4f6db4e86c6ae2::t_cddc266b05e90f 1-193
+src/deps/src/zstd/lib/compress/zstd_ldm.c
+  s_4f6db4e86c6ae2::t_48564764f8f2ba 1-745
+src/deps/src/zstd/lib/compress/zstd_ldm.h
+  s_4f6db4e86c6ae2::t_46d5da067c3ba5 1-109
+src/deps/src/zstd/lib/compress/zstd_ldm_geartab.h
+  s_4f6db4e86c6ae2::t_ae1bd2be8d5c5b 1-106
+src/deps/src/zstd/lib/compress/zstd_opt.c
+  s_4f6db4e86c6ae2::t_da0801b71eb52b 1-1580
+src/deps/src/zstd/lib/compress/zstd_opt.h
+  s_4f6db4e86c6ae2::t_9f38a6cf7a1f72 1-72
+src/deps/src/zstd/lib/compress/zstd_preSplit.c
+  s_4f6db4e86c6ae2::t_88caad7a31abe2 1-238
+src/deps/src/zstd/lib/compress/zstd_preSplit.h
+  s_4f6db4e86c6ae2::t_d867321bc366f4 1-33
+src/deps/src/zstd/lib/compress/zstdmt_compress.c
+  s_4f6db4e86c6ae2::t_dc2e80bacf0087 1-1923
+src/deps/src/zstd/lib/compress/zstdmt_compress.h
+  s_4f6db4e86c6ae2::t_8c40cc965b172b 1-102
+src/deps/src/zstd/lib/decompress/huf_decompress.c
+  s_4f6db4e86c6ae2::t_02da13e3f41f0e 1-1944
+src/deps/src/zstd/lib/decompress/huf_decompress_amd64.S
+  s_4f6db4e86c6ae2::t_36d40e2b57a832 1-602
+src/deps/src/zstd/lib/decompress/zstd_ddict.c
+  s_4f6db4e86c6ae2::t_a23ed3fedb371d 1-244
+src/deps/src/zstd/lib/decompress/zstd_ddict.h
+  s_4f6db4e86c6ae2::t_6b30416289b3fd 1-44
+src/deps/src/zstd/lib/decompress/zstd_decompress.c
+  s_4f6db4e86c6ae2::t_6751f9674cbe17 1-2410
+src/deps/src/zstd/lib/decompress/zstd_decompress_block.c
+  s_4f6db4e86c6ae2::t_fae43832c951c3 1-2209
+src/deps/src/zstd/lib/decompress/zstd_decompress_block.h
+  s_4f6db4e86c6ae2::t_8db5ce36361055 1-73
+src/deps/src/zstd/lib/decompress/zstd_decompress_internal.h
+  s_4f6db4e86c6ae2::t_48a56c3fe5d021 1-240
+src/deps/src/zstd/lib/deprecated/zbuff.h
+  s_4f6db4e86c6ae2::t_fadcea78fe3640 1-214
+src/deps/src/zstd/lib/deprecated/zbuff_common.c
+  s_4f6db4e86c6ae2::t_8d87f13781fc9f 1-26
+src/deps/src/zstd/lib/deprecated/zbuff_compress.c
+  s_4f6db4e86c6ae2::t_b8dab4080c5e28 1-167
+src/deps/src/zstd/lib/deprecated/zbuff_decompress.c
+  s_4f6db4e86c6ae2::t_96a31a07fba36e 1-77
+src/deps/src/zstd/lib/dictBuilder/cover.c
+  s_4f6db4e86c6ae2::t_28cf92a934e642 1-1302
+src/deps/src/zstd/lib/dictBuilder/cover.h
+  s_4f6db4e86c6ae2::t_f037cbeb3663a3 1-152
+src/deps/src/zstd/lib/dictBuilder/divsufsort.c
+  s_4f6db4e86c6ae2::t_eceee95af60da4 1-1913
+src/deps/src/zstd/lib/dictBuilder/divsufsort.h
+  s_4f6db4e86c6ae2::t_bf5f87f97b9443 1-57
+src/deps/src/zstd/lib/dictBuilder/fastcover.c
+  s_4f6db4e86c6ae2::t_bc63530bf03b1f 1-766
+src/deps/src/zstd/lib/dictBuilder/zdict.c
+  s_4f6db4e86c6ae2::t_0c725c6bb72f36 1-1133
+src/deps/src/zstd/lib/dll/example/Makefile
+  s_4f6db4e86c6ae2::t_6bf892308e4336 1-48
+src/deps/src/zstd/lib/dll/example/README.md
+  s_4f6db4e86c6ae2::t_3661d8214d3e96 1-63
+src/deps/src/zstd/lib/dll/example/build_package.bat
+  s_4f6db4e86c6ae2::t_0052c47a931389 1-20
+src/deps/src/zstd/lib/dll/example/fullbench-dll.sln
+  s_4f6db4e86c6ae2::t_3811b2ccf107e7 1-25
+src/deps/src/zstd/lib/dll/example/fullbench-dll.vcxproj
+  s_4f6db4e86c6ae2::t_ad50bfd5b935f6 1-181
+src/deps/src/zstd/lib/legacy/zstd_legacy.h
+  s_4f6db4e86c6ae2::t_1346bd24c680ce 1-452
+src/deps/src/zstd/lib/legacy/zstd_v01.c
+  s_4f6db4e86c6ae2::t_4e499cf4643a54 1-2127
+src/deps/src/zstd/lib/legacy/zstd_v01.h
+  s_4f6db4e86c6ae2::t_f2d354a3a81db4 1-94
+src/deps/src/zstd/lib/legacy/zstd_v02.c
+  s_4f6db4e86c6ae2::t_ded693cbe65d5f 1-3465
+src/deps/src/zstd/lib/legacy/zstd_v02.h
+  s_4f6db4e86c6ae2::t_7753358f8a1e92 1-93
+src/deps/src/zstd/lib/legacy/zstd_v03.c
+  s_4f6db4e86c6ae2::t_a43e8081918eee 1-3105
+src/deps/src/zstd/lib/legacy/zstd_v03.h
+  s_4f6db4e86c6ae2::t_c460a8211eaab4 1-93
+src/deps/src/zstd/lib/legacy/zstd_v04.c
+  s_4f6db4e86c6ae2::t_aa2f4d4ba08ee7 1-3598
+src/deps/src/zstd/lib/legacy/zstd_v04.h
+  s_4f6db4e86c6ae2::t_dabd90e006f35d 1-142
+src/deps/src/zstd/lib/legacy/zstd_v05.c
+  s_4f6db4e86c6ae2::t_672b3809161af4 1-4005
+src/deps/src/zstd/lib/legacy/zstd_v05.h
+  s_4f6db4e86c6ae2::t_ddfdb6bc1598fb 1-162
+src/deps/src/zstd/lib/legacy/zstd_v06.c
+  s_4f6db4e86c6ae2::t_52692ba892cb0a 1-4110
+src/deps/src/zstd/lib/legacy/zstd_v06.h
+  s_4f6db4e86c6ae2::t_2458ba06d790c1 1-172
+src/deps/src/zstd/lib/legacy/zstd_v07.c
+  s_4f6db4e86c6ae2::t_c841ecf0ea3299 1-4490
+src/deps/src/zstd/lib/legacy/zstd_v07.h
+  s_4f6db4e86c6ae2::t_3388f64ff4e0b5 1-187
+src/deps/src/zstd/lib/libzstd.mk
+  s_4f6db4e86c6ae2::t_199e4831fdcc4c 1-235
+src/deps/src/zstd/lib/libzstd.pc.in
+  s_4f6db4e86c6ae2::t_5307ac7e5b6bed 1-16
+src/deps/src/zstd/lib/module.modulemap
+  s_4f6db4e86c6ae2::t_37a237b697239a 1-35
+src/deps/src/zstd/lib/zdict.h
+  s_4f6db4e86c6ae2::t_1aec81512e8de3 1-481
+src/deps/src/zstd/lib/zstd.h
+  s_4f6db4e86c6ae2::t_20d3c78e269cf5 1-3198
+src/deps/src/zstd/lib/zstd_errors.h
+  s_4f6db4e86c6ae2::t_54e72004eda0f1 1-107
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "c0a5755a2e88a36e1044db46744562d1db1f7c6c",
+  "prompts": {},
+  "sessions": {
+    "s_4f6db4e86c6ae2": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1bfa8-c469-7233-a0e0-b25e7a2c5d62",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_5d7ab565167ba6": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "5c80ecac-dc0d-4382-82f1-87633d7e6193",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_8957b83407cdf6": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "f0ed5bf7-382f-48ad-b7ad-d9883e810768",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

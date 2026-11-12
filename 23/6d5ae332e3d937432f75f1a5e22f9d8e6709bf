@@ -1,0 +1,154 @@
+src/common/core/modsecurity/README.zh.md
+  s_f6ae8d3f1c0215::t_1bdb77f625c390 63
+src/common/core/modsecurity/files/coreruleset-v4/rules/REQUEST-932-APPLICATION-ATTACK-RCE.conf
+  s_f6ae8d3f1c0215::t_d89b1969ff73b5 2,17-18,124,140,186,202,235,253,269,297,313,344,360,384,400,423,439,506,522,567,583,629,645,665,681,722,753,774,800,816,834-837,839,855,857,933,949,970,986,992-993,1006,1022,1067,1083,1116,1172,1211,1254,1296,1320,1336,1385,1401,1429,1445,1483,1519,1548,1563,1581,1596,1616,1631,1679,1695,1743,1759,1794,1819,1835,1841-1842,1887,1903,1946,1962,2005,2021,2055,2096,2141,2157,2176,2191,2225,2259,2277,2293,2299-2300
+  s_f6ae8d3f1c0215::t_3cc139ebb3bec8 858
+src/common/core/modsecurity/files/coreruleset-v4/rules/REQUEST-942-APPLICATION-ATTACK-SQLI.conf
+  s_f6ae8d3f1c0215::t_d89b1969ff73b5 2,17-18,62,93,126,170,196,222,251,277,303,329,350,376,402,431,457,496,537,574,604,634,640-641,674,715,751,788,831,860,892,918,944,970,1004,1033,1058,1088,1120,1146,1172,1198,1229,1258,1287,1333,1392,1428,1480,1507,1540,1568,1606,1638,1668,1675-1676,1708,1732,1777,1811,1853,1906,1935,1941-1942,1974,2008
+src/common/core/modsecurity/files/coreruleset-v4/crs-linter.toml
+  s_f6ae8d3f1c0215::t_d89b1969ff73b5 1-204
+src/common/core/modsecurity/misc/versions.json
+  s_f6ae8d3f1c0215::t_a8f02af76f8811 12,14
+src/common/core/modsecurity/files/crs-setup-v4.conf
+  s_f6ae8d3f1c0215::t_3cc139ebb3bec8 2,190,218,244,279,340,401,433,454,492,522,562,581,584-610,626,650,706,732,751,777,791,805,819,833,847,887,911,933,954-955
+src/common/core/modsecurity/files/coreruleset-v4/regex-assembly/include/932180-substring-matches.ra
+  s_f6ae8d3f1c0215::t_d89b1969ff73b5 1-416
+src/common/core/modsecurity/files/coreruleset-v4/regex-assembly/932180.ra
+  s_f6ae8d3f1c0215::t_d89b1969ff73b5 1-13
+src/common/core/modsecurity/files/coreruleset-v4/rules/REQUEST-931-APPLICATION-ATTACK-RFI.conf
+  s_f6ae8d3f1c0215::t_d89b1969ff73b5 2,20-21,63,89,110,117-118,150,182,187-188,195-196
+src/common/core/modsecurity/files/coreruleset-v4/rules/restricted-files.data
+  s_f6ae8d3f1c0215::t_d89b1969ff73b5 22,767-787
+src/common/core/modsecurity/files/coreruleset-v4/regex-assembly/932270.ra
+  s_f6ae8d3f1c0215::t_d89b1969ff73b5 7-17
+src/common/core/modsecurity/files/coreruleset-v4/rules/REQUEST-911-METHOD-ENFORCEMENT.conf
+  s_f6ae8d3f1c0215::t_d89b1969ff73b5 2,17-18,42,49-50,57-58,65-66
+src/common/core/modsecurity/files/coreruleset-v4/regex-assembly/include/unix-shell-4andup.ra
+  s_f6ae8d3f1c0215::t_d89b1969ff73b5 30-31,33,36,80-81,90-91,170,173,184,188,190,199,219,252,293,327,374,401,403-405,422,424,434,440-452,454,456-457,460,463-464,526
+src/common/core/modsecurity/files/coreruleset-v4/rules/REQUEST-901-INITIALIZATION.conf
+  s_f6ae8d3f1c0215::t_d89b1969ff73b5 2,29,63,82,92,102,112,122,132,142,152,161,170,179,189,199,209,219,229,239,249,268,278,288,298,316,358,384,396,401-454,490,501,526,545
+src/common/core/modsecurity/files/coreruleset-v4/rules/RESPONSE-952-DATA-LEAKAGES-JAVA.conf
+  s_f6ae8d3f1c0215::t_d89b1969ff73b5 2,15-16,47,53-54,61-62,69-70
+src/common/core/modsecurity/files/coreruleset-v4/rules/REQUEST-913-SCANNER-DETECTION.conf
+  s_f6ae8d3f1c0215::t_d89b1969ff73b5 2,17-18,54,59-60,67-68,75-76
+src/common/core/modsecurity/files/coreruleset-v4/rules/REQUEST-999-COMMON-EXCEPTIONS-AFTER.conf
+  s_f6ae8d3f1c0215::t_d89b1969ff73b5 2,105
+docs/fr/features.md
+  s_f6ae8d3f1c0215::t_1bdb77f625c390 4361
+src/common/core/modsecurity/files/coreruleset-v4/rules/REQUEST-941-APPLICATION-ATTACK-XSS.conf
+  s_f6ae8d3f1c0215::t_d89b1969ff73b5 2,17-18,66,99,127,170,201,236,270,301,329,362,385,415,443,466,489,517,540,563,586,609,637,704,734,776,809,843,879,885-886,911,938,967,1060,1087,1112,1145,1152-1153,1160-1161
+src/common/core/modsecurity/files/coreruleset-v4/regex-assembly/934200.ra
+  s_f6ae8d3f1c0215::t_d89b1969ff73b5 39-58
+src/common/core/modsecurity/README.md
+  s_f6ae8d3f1c0215::t_1bdb77f625c390 63
+docs/zh/features.md
+  s_f6ae8d3f1c0215::t_1bdb77f625c390 4471
+src/common/core/modsecurity/files/coreruleset-v4/regex-assembly/include/932180-non-substring-matches.ra
+  s_f6ae8d3f1c0215::t_d89b1969ff73b5 1-118,129,158,174
+src/common/core/modsecurity/files/coreruleset-v4/regex-assembly/include/windows-commands.ra
+  s_f6ae8d3f1c0215::t_d89b1969ff73b5 60,82-89,140,180
+src/common/core/modsecurity/files/coreruleset-v4/rules/RESPONSE-955-WEB-SHELLS.conf
+  s_f6ae8d3f1c0215::t_d89b1969ff73b5 2,15-16,38,58,78,98,118,138,158,178,198,218,238,258,278,298,318,338,360,380,400,420,442,462,482,502,522,542,548-549,571,576-577,585-586
+src/common/core/modsecurity/files/coreruleset-v4/rules/RESPONSE-980-CORRELATION.conf
+  s_f6ae8d3f1c0215::t_d89b1969ff73b5 2,31,44,47,50,53-54,57,60-61,64,67,70,99,104-105,112-113,120-121,128-129
+src/common/core/modsecurity/files/coreruleset-v4/rules/RESPONSE-959-BLOCKING-EVALUATION.conf
+  s_f6ae8d3f1c0215::t_d89b1969ff73b5 2,21-22,40,50,60,70,80,90,100,110,122,132,146,156,166,176,186,196,206,216,232,245,247-248,255-256,263-264,271-272
+src/common/core/modsecurity/files/coreruleset-v4/rules/REQUEST-934-APPLICATION-ATTACK-GENERIC.conf
+  s_f6ae8d3f1c0215::t_d89b1969ff73b5 2,17-18,70,106,135,175,208,240,271,287,303,308-309,337,390,423,451,485,490-491,531,535-536
+src/common/core/modsecurity/files/coreruleset-v4/regex-assembly/generators/REQUEST-932-APPLICATION-ATTACK-RCE/932180.sh
+  s_f6ae8d3f1c0215::t_d89b1969ff73b5 1-27
+src/common/core/modsecurity/files/coreruleset-v4/rules/REQUEST-921-PROTOCOL-ATTACK.conf
+  s_f6ae8d3f1c0215::t_d89b1969ff73b5 2,17-18,55,93,115,150,179,206,234,273,306,333,361,366-367,395,431,436-437,468,506,523,567,574-575,618
+CHANGELOG.md
+  s_175dfb7646d720::t_d2556b3cac811c 9
+docs/de/features.md
+  s_f6ae8d3f1c0215::t_1bdb77f625c390 4409
+src/common/core/modsecurity/files/coreruleset-v4/rules/RESPONSE-956-DATA-LEAKAGES-RUBY.conf
+  s_f6ae8d3f1c0215::t_d89b1969ff73b5 2,15-16,40,45-46,71,75-76,83-84
+src/common/core/modsecurity/files/coreruleset-v4/rules/REQUEST-922-MULTIPART-ATTACK.conf
+  s_f6ae8d3f1c0215::t_d89b1969ff73b5 2,25-29,31-42,49,58,61-66,89,102,127,150,174
+  s_f6ae8d3f1c0215::t_3cc139ebb3bec8 67
+src/common/core/modsecurity/files/coreruleset-v4/rules/REQUEST-949-BLOCKING-EVALUATION.conf
+  s_f6ae8d3f1c0215::t_d89b1969ff73b5 2,27,37,47,57,67,77,87,97,109,119,131,141,151,161,171,181,191,201,220,233,235-236,243-244,251-252,259-260
+docs/features.md
+  s_f6ae8d3f1c0215::t_1bdb77f625c390 4477
+src/common/core/modsecurity/files/coreruleset-v4/rules/REQUEST-943-APPLICATION-ATTACK-SESSION-FIXATION.conf
+  s_f6ae8d3f1c0215::t_d89b1969ff73b5 2,17-18,52,79,112,123-124,131-132,139-140
+src/common/core/modsecurity/files/coreruleset-v4/CONTRIBUTING.md
+  s_f6ae8d3f1c0215::t_d89b1969ff73b5 95
+src/common/core/modsecurity/files/coreruleset-v4/SECURITY.md
+  s_f6ae8d3f1c0215::t_d89b1969ff73b5 30
+src/common/core/modsecurity/files/coreruleset-v4/rules/RESPONSE-951-DATA-LEAKAGES-SQL.conf
+  s_f6ae8d3f1c0215::t_d89b1969ff73b5 2,15-16,40,64,90,116,142,163,184,205,231,257,283,309,335,345,361,387,413,439,447-448,455-456,463-464
+src/common/core/modsecurity/files/coreruleset-v4/rules/RESPONSE-950-DATA-LEAKAGES.conf
+  s_f6ae8d3f1c0215::t_d89b1969ff73b5 2,24-36,44,47-49,55-57,59-60,84,116,139,144-145,169,175-176,183-184
+src/common/core/modsecurity/files/coreruleset-v4/rules/REQUEST-933-APPLICATION-ATTACK-PHP.conf
+  s_f6ae8d3f1c0215::t_d89b1969ff73b5 2,17-18,69,88-89,96,112,142,167,199,241,278,348,404,460,521,569,632,637-638,683,711,739,745-746,789,834,877,907,943,949-950
+src/common/core/modsecurity/README.es.md
+  s_f6ae8d3f1c0215::t_1bdb77f625c390 63
+src/common/core/modsecurity/files/coreruleset-v4/rules/REQUEST-920-PROTOCOL-ENFORCEMENT.conf
+  s_f6ae8d3f1c0215::t_d89b1969ff73b5 2,26-27,67,123,153,188,214,255,286,325,370,400,429,474,531,563,583,624,650,684,726,771,804,830,858,883,909,936,976,999,1016,1027,1054,1095,1120,1143,1171,1225,1259,1292,1307,1331,1354,1387,1392-1393,1433,1458,1480,1503,1530,1553,1576,1605,1654,1664-1665,1691,1725,1759,1813,1844,1848-1849,1873,1901,1923,1950,1995
+src/common/core/modsecurity/files/coreruleset-v4/rules/RESPONSE-999-EXCLUSION-RULES-AFTER-CRS.conf.example
+  s_f6ae8d3f1c0215::t_d89b1969ff73b5 2,39-44
+  s_f6ae8d3f1c0215::t_295c593b9a885d 45
+src/common/core/modsecurity/files/coreruleset-v4/rules/REQUEST-905-COMMON-EXCEPTIONS.conf
+  s_f6ae8d3f1c0215::t_d89b1969ff73b5 2,28,49
+src/common/core/modsecurity/files/coreruleset-v4/regex-assembly/exclude/unix-shell-fps-pl1.ra
+  s_f6ae8d3f1c0215::t_d89b1969ff73b5 587-589
+src/common/core/modsecurity/files/coreruleset-v4/rules/REQUEST-944-APPLICATION-ATTACK-JAVA.conf
+  s_f6ae8d3f1c0215::t_d89b1969ff73b5 2,16-17,49,81,111,143,162-164,169,185,233,239-240,271,303,324,350,374,404,410-411,444,450-451,480
+src/common/core/modsecurity/files/coreruleset-v4/rules/ruby-errors.data
+  s_f6ae8d3f1c0215::t_d89b1969ff73b5 89
+src/common/core/modsecurity/README.de.md
+  s_f6ae8d3f1c0215::t_1bdb77f625c390 63
+src/common/core/modsecurity/files/coreruleset-v4/rules/lfi-os-files.data
+  s_f6ae8d3f1c0215::t_d89b1969ff73b5 33,1202-1222
+src/common/core/modsecurity/files/coreruleset-v4/rules/scanners-user-agents.data
+  s_f6ae8d3f1c0215::t_d89b1969ff73b5 13-16,145
+src/common/core/modsecurity/README.fr.md
+  s_f6ae8d3f1c0215::t_1bdb77f625c390 63
+src/common/core/modsecurity/files/coreruleset-v4/rules/REQUEST-930-APPLICATION-ATTACK-LFI.conf
+  s_f6ae8d3f1c0215::t_d89b1969ff73b5 2,17-18,51,89,120,147,177,183-184,214,220-221,228-229
+src/common/core/modsecurity/files/coreruleset-v4/.coderabbit.yaml
+  s_f6ae8d3f1c0215::t_d89b1969ff73b5 1-149
+src/common/core/modsecurity/files/coreruleset-v4/rules/unix-shell.data
+  s_f6ae8d3f1c0215::t_d89b1969ff73b5 40-42,59,68-74,77,124-125,133-134,138,178,226,229,243,247,249,263,284,325,372,410,469,487,505,507-509,527-532,539,546-550,552-559,561,563-564,567,569-570,606-607,644,650
+docs/es/features.md
+  s_f6ae8d3f1c0215::t_1bdb77f625c390 4461
+src/common/core/modsecurity/files/coreruleset-v4/CONTRIBUTORS.md
+  s_f6ae8d3f1c0215::t_d89b1969ff73b5 81
+src/common/core/modsecurity/files/coreruleset-v4/CHANGES.md
+  s_f6ae8d3f1c0215::t_d89b1969ff73b5 8-42
+src/common/core/modsecurity/files/coreruleset-v4/rules/RESPONSE-953-DATA-LEAKAGES-PHP.conf
+  s_f6ae8d3f1c0215::t_d89b1969ff73b5 2,15-16,40,65,91,96-97,130,135-136,143-144
+src/common/core/modsecurity/files/coreruleset-v4/regex-assembly/toolchain.yaml
+  s_f6ae8d3f1c0215::t_d89b1969ff73b5 53
+src/common/core/modsecurity/files/coreruleset-v4/rules/RESPONSE-954-DATA-LEAKAGES-IIS.conf
+  s_f6ae8d3f1c0215::t_d89b1969ff73b5 2,15-16,40,61,85,107,117-118,143,148-149,156-157
+src/common/core/modsecurity/files/coreruleset-v4/rules/REQUEST-900-EXCLUSION-RULES-BEFORE-CRS.conf.example
+  s_f6ae8d3f1c0215::t_d89b1969ff73b5 2,75-91,123-125,172-174
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "236d5ae332e3d937432f75f1a5e22f9d8e6709bf",
+  "prompts": {},
+  "sessions": {
+    "s_175dfb7646d720": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "6287d9cf-9a0e-4d8a-a3c0-5a6e08f44cfe",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_f6ae8d3f1c0215": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "f98f1d97-ebaf-44f3-8efb-d863e37db116",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

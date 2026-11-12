@@ -1,0 +1,46 @@
+tests/unit/common/test_letsencrypt_operator_outcomes.py
+  s_d1456e3067f8ca::t_bfc605f18f9604 1-119
+tests/unit/gen/test_configurator_validation_outcomes.py
+  s_d1456e3067f8ca::t_179193d86f5e28 129
+  s_d1456e3067f8ca::t_babd37445bb15a 215-217,233-235
+  s_d1456e3067f8ca::t_36361ebf459d05 1-128,130-196,198-214,218-232,236-247
+  s_d1456e3067f8ca::t_57c795016e41c0 197
+tests/unit/common/test_system_utility_outcomes.py
+  s_605fa9ac805fe4::t_73cc072accb4c0 112-118,170-178,242-244
+  s_d1456e3067f8ca::t_bdc42dd6183d0d 1-12,14-111,119-169,179-192,213-241,245-259,265-281
+  s_d1456e3067f8ca::t_9612db58c870e0 13,193-212
+  s_d1456e3067f8ca::t_a349bc253fd6b2 260-264
+tests/unit/common/test_cache_recovery_failure_outcomes.py
+  s_605fa9ac805fe4::t_73cc072accb4c0 194-199
+  s_d1456e3067f8ca::t_9ce047807941b2 1-193,200
+tests/unit/cli/test_cli_failure_and_bundle_outcomes.py
+  s_d1456e3067f8ca::t_179193d86f5e28 76-77,84
+  s_d1456e3067f8ca::t_2d461707e2620b 1-75,85-121,125-130,140-170,186-245
+  s_605fa9ac805fe4::t_9f55cfe89140ed 78-83,122-124,131-139,171-185
+tests/unit/backup/test_backup_list_outcomes.py
+  s_d1456e3067f8ca::t_9ce047807941b2 1-58
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "5a10c1faa0b8ec9cb668e551297e977381784f5c",
+  "prompts": {},
+  "sessions": {
+    "s_605fa9ac805fe4": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a18da6-cb79-7de1-a4e4-554da012dff4",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_d1456e3067f8ca": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a18da6-c184-7e43-8110-5af35e09359a",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

@@ -1,0 +1,19 @@
+tests/unit/common/test_authbasic_location_regex_lua.py
+  s_641591f051daa3::t_42b2b9abaeca96 1-76
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "1eb5794cf6a0d3ac2a5eac55b132d17ec81f1a95",
+  "prompts": {},
+  "sessions": {
+    "s_641591f051daa3": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1b09f-2c84-7a21-af6d-5bd1d80a1603",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

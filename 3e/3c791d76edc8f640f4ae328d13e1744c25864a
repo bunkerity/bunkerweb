@@ -1,0 +1,31 @@
+tests/unit/common/test_api_bans_coverage_lua.py
+  s_ee56129963133e::t_64784b08c87258 30
+  s_ee56129963133e::t_b7845fb22a752e 1-29,31-107,109-253
+  s_7b33def00b42bc::t_db1598b5146e41 108
+src/bw/lua/bunkerweb/api.lua
+  s_7b33def00b42bc::t_30cb01905d3db2 1000-1002
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "3e3c791d76edc8f640f4ae328d13e1744c25864a",
+  "prompts": {},
+  "sessions": {
+    "s_7b33def00b42bc": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a18dce-1c11-79a3-bdb5-d322d5c23b59",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_ee56129963133e": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a18dc7-65ab-7942-8dcb-39e1c0ca12ca",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

@@ -1,0 +1,29 @@
+src/common/gen/Templator.py
+  s_9b72a24114dc24::t_cf536a8dc069c4 758-771
+tests/unit/gen/test_proxy_cache_buffering_warning.py
+  s_5ed793c745ae55::t_671cad700767ed 1-127
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "c7bf467d5bf5fa9c228120549e5f20a9996ad32d",
+  "prompts": {},
+  "sessions": {
+    "s_5ed793c745ae55": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "148d3a95-15a4-4e21-be97-31de65000a7f",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_9b72a24114dc24": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "cc5a1ca8-e952-421b-979b-0d94c0aab861",
+        "model": "unknown"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

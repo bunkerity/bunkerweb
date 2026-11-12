@@ -1,0 +1,67 @@
+src/ui/app/static/js/utils.js
+  s_6976efd9134b35::t_46335dafdab272 427
+src/ui/app/static/locales/ar.json
+  s_6976efd9134b35::t_b20a431f66c6cc 53,1158
+src/ui/app/static/locales/bn.json
+  s_6976efd9134b35::t_fa1c40afbcc4ad 53,1158
+src/ui/app/static/locales/br.json
+  s_6976efd9134b35::t_7ec819cccd5362 53,1158
+src/ui/app/static/locales/de.json
+  s_6976efd9134b35::t_2b760e0b38cd69 53,1158
+src/ui/app/static/locales/en.json
+  s_6976efd9134b35::t_2877b7526a2aa7 53,1158
+src/ui/app/static/locales/es.json
+  s_6976efd9134b35::t_636d218304e80f 53,1158
+src/ui/app/static/locales/fr.json
+  s_6976efd9134b35::t_f1fd693f26950c 53,1158
+src/ui/app/static/locales/hi.json
+  s_6976efd9134b35::t_d98e89a84ed900 53,1158
+src/ui/app/static/locales/id.json
+  s_6976efd9134b35::t_bce2d0fa54c034 53,1158
+src/ui/app/static/locales/it.json
+  s_6976efd9134b35::t_c814b5de97d2b9 53,1158
+src/ui/app/static/locales/ko.json
+  s_6976efd9134b35::t_24f3249447861d 53,1158
+src/ui/app/static/locales/pl.json
+  s_6976efd9134b35::t_b9327aae08d6f0 53,1158
+src/ui/app/static/locales/pt.json
+  s_6976efd9134b35::t_4a7e6605c9124c 53,1158
+src/ui/app/static/locales/ru.json
+  s_6976efd9134b35::t_94c019fea308e0 53,1158
+src/ui/app/static/locales/tl.json
+  s_6976efd9134b35::t_7d415d89ab1bfb 53,1158
+src/ui/app/static/locales/tr.json
+  s_6976efd9134b35::t_f469691d8c0f5f 53,1158
+src/ui/app/static/locales/tw.json
+  s_6976efd9134b35::t_bf9a5b868907b9 53,1158
+src/ui/app/static/locales/ur.json
+  s_6976efd9134b35::t_cb41acf1ca58c2 53,1158
+src/ui/app/static/locales/zh.json
+  s_6976efd9134b35::t_1ef7814f47ec58 53,1158
+src/ui/app/templates/home.html
+  s_6976efd9134b35::t_96b9475436e3e0 306
+src/ui/app/templates/loading.html
+  s_6976efd9134b35::t_0fb7cbd7775de2 16
+src/ui/app/templates/pro.html
+  s_6976efd9134b35::t_9a8b5838496d3a 117
+src/ui/app/templates/setup.html
+  s_6976efd9134b35::t_dc0b2b73034c40 1673
+src/ui/app/templates/starting.html
+  s_6976efd9134b35::t_335b3faf97489b 17
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "83c37849b28e923f8c052ae0dc6108f512a1b38e",
+  "prompts": {},
+  "sessions": {
+    "s_6976efd9134b35": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1a7fb-1309-7560-a9cd-665a30a14cde",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

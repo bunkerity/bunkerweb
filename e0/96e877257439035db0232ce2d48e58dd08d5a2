@@ -1,0 +1,33 @@
+tests/unit/common/test_utils_net_bans_coverage_lua.py
+  s_6cf7826d8f448d::t_307e554e7be764 49
+  s_a93873b098dfeb::t_2154778b629071 12-18
+tests/unit/api/test_crowdsec_router.py
+  s_6cf7826d8f448d::t_1d0c08bf0cde5d 6
+  s_6cf7826d8f448d::t_36fad0db307506 137-145,148
+tests/unit/common/test_utils_helpers_coverage_lua.py
+  s_a93873b098dfeb::t_ab6b27d1eaceb1 327
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "e096e877257439035db0232ce2d48e58dd08d5a2",
+  "prompts": {},
+  "sessions": {
+    "s_6cf7826d8f448d": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "2544db41-0e8a-4997-96f9-990d65ebd3b8",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_a93873b098dfeb": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "0cd1d6bf-148c-4fa6-86b9-5646018aa76b",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

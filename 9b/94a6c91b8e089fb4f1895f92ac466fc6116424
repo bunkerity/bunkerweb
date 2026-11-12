@@ -1,0 +1,70 @@
+src/common/core/grpc/README.md
+  s_3bbf100260ba00::t_ccf1af8f3fff11 75
+docs/zh/features.md
+  s_3bbf100260ba00::t_ccf1af8f3fff11 120-130,3002
+  s_3bbf100260ba00::t_6b074b4ae2e7ae 131
+src/common/README.de.md
+  s_3bbf100260ba00::t_6b074b4ae2e7ae 121
+  s_3bbf100260ba00::t_ccf1af8f3fff11 110-120
+src/common/settings.json
+  s_3bbf100260ba00::t_c0b3321bd25985 104,113,115
+src/common/confs/server-http/server.conf
+  s_3bbf100260ba00::t_7f5896fda5e685 40,42-43,45
+  s_3bbf100260ba00::t_c0b3321bd25985 41,44,46
+docs/features.md
+  s_3bbf100260ba00::t_ccf1af8f3fff11 118-128,3007
+  s_3bbf100260ba00::t_6b074b4ae2e7ae 129
+src/common/README.md
+  s_3bbf100260ba00::t_6b074b4ae2e7ae 121
+  s_3bbf100260ba00::t_ccf1af8f3fff11 110-120
+CHANGELOG.md
+  s_3bbf100260ba00::t_6b074b4ae2e7ae 30
+src/common/gen/Templator.py
+  s_3bbf100260ba00::t_7f5896fda5e685 777-778
+docs/de/features.md
+  s_3bbf100260ba00::t_6b074b4ae2e7ae 129
+  s_3bbf100260ba00::t_ccf1af8f3fff11 118-128,2949
+src/common/core/grpc/README.fr.md
+  s_3bbf100260ba00::t_ccf1af8f3fff11 75
+docs/es/features.md
+  s_3bbf100260ba00::t_6b074b4ae2e7ae 129
+  s_3bbf100260ba00::t_ccf1af8f3fff11 118-128,2992
+src/common/README.es.md
+  s_3bbf100260ba00::t_ccf1af8f3fff11 110-120
+  s_3bbf100260ba00::t_6b074b4ae2e7ae 121
+tests/unit/gen/test_client_timeouts.py
+  s_3bbf100260ba00::t_1c190015497fdc 20,45-46,49-79,83-84
+  s_3bbf100260ba00::t_0433b6744ce789 102-103
+  s_3bbf100260ba00::t_8943c64bddc5a8 1-19,21-44,47-48,80-82,85-101
+src/common/README.zh.md
+  s_3bbf100260ba00::t_6b074b4ae2e7ae 123
+  s_3bbf100260ba00::t_ccf1af8f3fff11 112-122
+src/common/core/grpc/README.de.md
+  s_3bbf100260ba00::t_ccf1af8f3fff11 75
+docs/fr/features.md
+  s_3bbf100260ba00::t_ccf1af8f3fff11 118-128,2912
+  s_3bbf100260ba00::t_6b074b4ae2e7ae 129
+src/common/core/grpc/README.es.md
+  s_3bbf100260ba00::t_ccf1af8f3fff11 75
+src/common/README.fr.md
+  s_3bbf100260ba00::t_6b074b4ae2e7ae 121
+  s_3bbf100260ba00::t_ccf1af8f3fff11 110-120
+src/common/core/grpc/README.zh.md
+  s_3bbf100260ba00::t_ccf1af8f3fff11 75
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "9b94a6c91b8e089fb4f1895f92ac466fc6116424",
+  "prompts": {},
+  "sessions": {
+    "s_3bbf100260ba00": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1c0d7-1491-7041-bd94-d30ffc9ba309",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

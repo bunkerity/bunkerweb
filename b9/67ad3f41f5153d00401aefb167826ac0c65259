@@ -1,0 +1,40 @@
+src/common/core/letsencrypt/jobs/letsencrypt_utils.py
+  s_cf7bdf9584ace7::t_45cf0b7855a1cd 555-560,566-567,572-576,581-582,591-594,597-600
+tests/unit/letsencrypt/test_stale_account_detection.py
+  s_cf7bdf9584ace7::t_ba4ebfd2975f06 28-35,45-64,85-99
+  s_d087726b174ec7::t_f2ac48218a6e9b 100
+CHANGELOG.md
+  s_a93873b098dfeb::t_e94ab01c0ff4e6 45
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "b967ad3f41f5153d00401aefb167826ac0c65259",
+  "prompts": {},
+  "sessions": {
+    "s_a93873b098dfeb": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "0cd1d6bf-148c-4fa6-86b9-5646018aa76b",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_cf7bdf9584ace7": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "f961d4c6-a457-47c4-92a8-295456c5c19e",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_d087726b174ec7": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "98762f60-a4bb-4f35-8baa-827ecbf1e2db",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

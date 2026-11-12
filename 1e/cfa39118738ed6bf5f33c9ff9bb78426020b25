@@ -1,0 +1,21 @@
+tests/core/ipv6.yml
+  s_7ce270b89c4bc6::t_25c9c31f14efdc 311-353
+tests/core/ipv6/check.py
+  s_7ce270b89c4bc6::t_5a9f72ce39784c 9,68-72,76-77,82,149-179,273-274
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "1ecfa39118738ed6bf5f33c9ff9bb78426020b25",
+  "prompts": {},
+  "sessions": {
+    "s_7ce270b89c4bc6": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1a592-d0cf-7672-bed4-c171c145ac36",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

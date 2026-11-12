@@ -1,0 +1,41 @@
+CHANGELOG.md
+  s_280faf029c25ed::t_baa5ab502512a7 5
+src/common/core/db/README.de.md
+  s_b80b2f00fb3ccc::t_311a9867c2ddf0 37-38
+src/common/core/db/README.es.md
+  s_b80b2f00fb3ccc::t_b690b93de87aaa 37-38
+src/common/core/db/README.fr.md
+  s_b80b2f00fb3ccc::t_7d8429a6c31e1f 37-38
+src/common/core/db/README.md
+  s_b80b2f00fb3ccc::t_9612698f8ac7e5 37-38
+src/common/core/db/README.zh.md
+  s_b80b2f00fb3ccc::t_8fa9d6effa190e 37-38
+src/common/core/db/plugin.json
+  s_b80b2f00fb3ccc::t_275323be32a93a 118-135
+src/common/db/Database.py
+  s_b80b2f00fb3ccc::t_0755d158907bb7 12,100-103,362-378,405,457,470,703-730,744
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "62056020f06e3c8b6c6e825db26ac126cc58e0cc",
+  "prompts": {},
+  "sessions": {
+    "s_280faf029c25ed": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "2ac450d0-131f-4a1e-81b9-f04c2a982d5a",
+        "model": "unknown"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_b80b2f00fb3ccc": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a14428-4e2d-7500-ae0b-bad7b110d1f4",
+        "model": "unknown"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

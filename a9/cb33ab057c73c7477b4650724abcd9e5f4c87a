@@ -1,0 +1,29 @@
+src/ui/main.py
+  s_3c7b8a04a40dae::t_52e01696a83138 284-299,301-305,347-381,386-390,392-396,401-402,407-410,414-438,676
+tests/unit/ui/test_plugin_blueprint_reload.py
+  s_ca0205ac1993a0::t_3547810812da46 1-140
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "a9cb33ab057c73c7477b4650724abcd9e5f4c87a",
+  "prompts": {},
+  "sessions": {
+    "s_3c7b8a04a40dae": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "d94cb216-0806-4bc0-99af-cb021ee068d3",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_ca0205ac1993a0": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "ef330e5c-e0cf-4ad9-8d06-c7217b905097",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

@@ -1,0 +1,831 @@
+tests/AGENTS.md
+  s_3fc5c1190405ad::t_bf79922593094d 1-59
+tests/CLAUDE.md
+  s_852611de8de6fb::t_b152a429f64f39 1-3
+tests/README.md
+  s_3fc5c1190405ad::t_bf67c9334f3f96 1-424
+tests/api.py
+  s_3fc5c1190405ad::t_49962fc78afdc7 1-245
+tests/api/acl.yml
+  s_852611de8de6fb::t_689146ca85e73a 1-57
+tests/api/auth.yml
+  s_852611de8de6fb::t_99effcc13c9a9e 1-96
+tests/api/cache.yml
+  s_0336666c2740d2::t_94d0be3b710deb 1-35
+tests/api/conf.yml
+  s_7e6fa1f9d939c0::t_1c7aa03ac4c8f7 1-77
+tests/api/customcert.yml
+  s_852611de8de6fb::t_a66dce43b9b9f4 1-17
+tests/api/limit.yml
+  s_852611de8de6fb::t_ec03ae85f75514 1-23
+tests/api/redis.yml
+  s_852611de8de6fb::t_c6289c14ebec3d 1-134
+tests/core.py
+  s_3fc5c1190405ad::t_45c5df2a468930 1-248
+tests/core/api.yml
+  s_852611de8de6fb::t_81a4a4a49b9d70 1-126
+tests/core/api/health_during_reload.sh
+  s_852611de8de6fb::t_39d7686a3ad75f 1-107
+tests/core/authbasic.yml
+  s_0336666c2740d2::t_bbd4245497b00f 1-101
+tests/core/backup.yml
+  s_3fc5c1190405ad::t_d508e4649abc84 1-185
+tests/core/backup/wait_for_writers_idle.py
+  s_852611de8de6fb::t_b77ce552ff5bfa 1-68
+tests/core/badbehavior.yml
+  s_0336666c2740d2::t_12e5e3b9693acd 1-487
+tests/core/bans_tls_drop.yml
+  s_ff46d69271f39b::t_7b9e73970781ef 1-70
+tests/core/bans_tls_drop/probe.py
+  s_852611de8de6fb::t_76aeb4f128c0b3 1-72
+tests/core/blacklist.yml
+  s_8eda2e60bab752::t_889ef7e15e9907 1-234
+tests/core/brotli.yml
+  s_852611de8de6fb::t_1ca4a8ba4f70e4 1-48
+tests/core/bunkernet.yml
+  s_8eda2e60bab752::t_296d3ecad52097 1-98
+tests/core/bwcli.yml
+  s_8eda2e60bab752::t_d3e26358a780ba 1-69
+tests/core/clientcache.yml
+  s_852611de8de6fb::t_886bc9bf9defbf 1-49
+tests/core/cors.yml
+  s_7e6fa1f9d939c0::t_639234ed7c0558 1-518
+tests/core/cors/browser_credentials.py
+  s_7e6fa1f9d939c0::t_17119db2910a0a 1-59
+tests/core/cors/www/app1.example.com/credentials.php
+  s_8ffbf4a559663c::t_45d8d8f744bb86 1-4
+tests/core/country.yml
+  s_2057a477db9ef9::t_c85125973d44c1 1-168
+tests/core/crowdsec/fixtures/appsec-default-only.yaml
+  s_852611de8de6fb::t_2d8382bd4bf47d 1-12
+tests/core/customcert.yml
+  s_2057a477db9ef9::t_c160c762a7224c 1-49
+tests/core/db.yml
+  s_2057a477db9ef9::t_018d00643cf2a0 1-305
+tests/core/dnsbl.yml
+  s_852611de8de6fb::t_2328c17680f0ee 1-56
+tests/core/errors.yml
+  s_852611de8de6fb::t_58fdd3886a6090 1-40
+tests/core/example-autoconf-configs.yml
+  s_852611de8de6fb::t_108c8c5411c497 1-36
+tests/core/example-behind-reverse-proxy.yml
+  s_852611de8de6fb::t_b3ca17256005f5 1-20
+tests/core/example-docker-configs.yml
+  s_852611de8de6fb::t_5499c7fd83c16d 1-45
+tests/core/example-ghost.yml
+  s_852611de8de6fb::t_df7981f2bdb463 1-19
+tests/core/example-gogs.yml
+  s_852611de8de6fb::t_ca1a58f9346015 1-20
+tests/core/example-hardened.yml
+  s_12ab3b028a3437::t_ada0fa6b2058e0 1-18
+tests/core/example-joomla.yml
+  s_852611de8de6fb::t_317326d9d52182 1-22
+tests/core/example-kubernetes-configs.yml
+  s_852611de8de6fb::t_ec3ea499be8b5b 1-63
+tests/core/example-kubernetes-ingress.yml
+  s_852611de8de6fb::t_ea20fbe3b844ef 1-36
+tests/core/example-kubernetes-tls.yml
+  s_852611de8de6fb::t_44f16b35820607 1-36
+tests/core/example-load-balancer.yml
+  s_12ab3b028a3437::t_f9b0ca70635129 1-18
+tests/core/example-mattermost.yml
+  s_852611de8de6fb::t_461574d5520fee 1-19
+tests/core/example-mongo-express.yml
+  s_852611de8de6fb::t_bfc46c1146307e 1-17
+tests/core/example-nextcloud.yml
+  s_852611de8de6fb::t_fe83484827d8f9 1-30
+tests/core/example-passbolt.yml
+  s_852611de8de6fb::t_bf2a6d2dcaadef 1-18
+tests/core/example-php-multisite.yml
+  s_12ab3b028a3437::t_857edd6d8b4a5a 1-29
+tests/core/example-php-singlesite.yml
+  s_ec03421cf7b93b::t_0abf012df411b4 1-20
+tests/core/example-proxy-protocol.yml
+  s_ec03421cf7b93b::t_fbc84d8653f500 1-21
+tests/core/example-radarr.yml
+  s_852611de8de6fb::t_3d1412e81c0546 1-19
+tests/core/example-redmine.yml
+  s_852611de8de6fb::t_279487c9b8cb4b 1-19
+tests/core/example-reverse-proxy-multisite.yml
+  s_852611de8de6fb::t_0536b55d930f5c 1-29
+tests/core/example-reverse-proxy-singlesite.yml
+  s_852611de8de6fb::t_4396f2fa82c4d9 1-28
+tests/core/example-tomcat.yml
+  s_852611de8de6fb::t_b5d385e52ea02f 1-19
+tests/core/example-wordpress.yml
+  s_852611de8de6fb::t_6ad91751c75b6f 1-38
+tests/core/general.yml
+  s_852611de8de6fb::t_5fa5992cbec7de 1-27
+tests/core/greylist.yml
+  s_8eda2e60bab752::t_9d293fe03fe754 1-154
+tests/core/grpc.yml
+  s_8eda2e60bab752::t_6bb2d07c45eddc 1-181
+tests/core/grpc/probe.py
+  s_852611de8de6fb::t_97cd165eefed6a 1-109
+tests/core/gzip.yml
+  s_8eda2e60bab752::t_84039ca076d710 1-48
+tests/core/headers.yml
+  s_8eda2e60bab752::t_cf4a75b8abda10 1-212
+tests/core/inject.yml
+  s_852611de8de6fb::t_edc521ae25657a 1-31
+tests/core/letsencrypt.yml
+  s_0336666c2740d2::t_a209bba4ce469a 1-36
+tests/core/limit.yml
+  s_2057a477db9ef9::t_da8cb1246b9405 1-150
+tests/core/misc.yml
+  s_8eda2e60bab752::t_153b3806b942d4 1-122
+tests/core/modsecurity.yml
+  s_852611de8de6fb::t_4e03da7b6e25fc 1-123
+tests/core/mtls.yml
+  s_852611de8de6fb::t_734c966ce58dbe 1-194
+tests/core/realip.yml
+  s_0336666c2740d2::t_03199b20ad7f98 1-82
+tests/core/redirect.yml
+  s_8eda2e60bab752::t_2039e43110339d 1-74
+tests/core/redis.yml
+  s_2057a477db9ef9::t_e9d450b91e47e8 1-830
+tests/core/reverseproxy.yml
+  s_4a5e844589df3d::t_ed0cd841ca25a4 1-183
+tests/core/reversescan.yml
+  s_0336666c2740d2::t_e2bea45a3411d0 1-32
+tests/core/robotstxt.yml
+  s_852611de8de6fb::t_25896a9a532135 1-111
+tests/core/scheduler.yml
+  s_b8568a0c6424bb::t_b9730a7df78f1d 1-22
+tests/core/scheduler_change_claim/slowjob/jobs/slow.py
+  s_b8568a0c6424bb::t_28b73b09aadaf2 1-14
+tests/core/scheduler_change_claim/test.sh
+  s_2057a477db9ef9::t_314a282df7848d 1-138
+tests/core/securitytxt.yml
+  s_852611de8de6fb::t_8143ff1218d353 1-80
+tests/core/selfsigned.yml
+  s_0336666c2740d2::t_7e8bdd55e72738 1-59
+tests/core/sessions.yml
+  s_2057a477db9ef9::t_c782fae544b5b5 1-69
+tests/core/ssl.yml
+  s_852611de8de6fb::t_2af2b20e136260 1-141
+tests/core/stream.yml
+  s_2057a477db9ef9::t_362f608f06cbdc 1-83
+tests/core/templates.yml
+  s_0336666c2740d2::t_6e821966eaf348 1-28
+tests/core/test.yml.example
+  s_852611de8de6fb::t_0b1c07afe0e46b 1-24
+tests/core/upgrade.yml
+  s_8eda2e60bab752::t_91d04259a50f09 1-133
+tests/core/valkey.yml
+  s_852611de8de6fb::t_eab9f5f2d2526f 1-356
+tests/core/whitelist.yml
+  s_6ab3d634dbf417::t_53695995dfa990 1-144
+tests/core_handlers/__init__.py
+  s_852611de8de6fb::t_bd163e03bca64a 1-23
+tests/core_handlers/bwcli_handler.py
+  s_852611de8de6fb::t_c175b777a7c1d4 1-43
+tests/core_handlers/database_handler.py
+  s_852611de8de6fb::t_642b7e0ac983f0 1-27
+tests/core_handlers/export_handler.py
+  s_852611de8de6fb::t_f8423d96c284e0 1-80
+tests/core_handlers/http_common.py
+  s_852611de8de6fb::t_7aa9fe791d4f6d 1-89
+tests/core_handlers/http_header_handler.py
+  s_852611de8de6fb::t_e9b6909521cd20 1-38
+tests/core_handlers/http_path_handler.py
+  s_852611de8de6fb::t_18db9ceefb6db2 1-23
+tests/core_handlers/http_ssl_handler.py
+  s_852611de8de6fb::t_4c5454f72aec70 1-156
+tests/core_handlers/http_status_handler.py
+  s_852611de8de6fb::t_ff27e21b84658a 1-30
+tests/core_handlers/http_string_handler.py
+  s_852611de8de6fb::t_0ba8962f8a4783 1-34
+tests/core_handlers/limit_handler.py
+  s_852611de8de6fb::t_7f6006324f3a0e 1-280
+tests/core_handlers/redis_handler.py
+  s_852611de8de6fb::t_9531fb162c43e8 1-202
+tests/core_handlers/script_handler.py
+  s_852611de8de6fb::t_600114ed3621f4 1-52
+tests/core_handlers/selenium_common.py
+  s_852611de8de6fb::t_240a06981486ed 1-36
+tests/core_handlers/selenium_cookie_handler.py
+  s_852611de8de6fb::t_a0407450a8ebc5 1-55
+tests/core_handlers/selenium_xpath_handler.py
+  s_852611de8de6fb::t_9573f1d97a40e1 1-42
+tests/core_handlers/tool_handler.py
+  s_852611de8de6fb::t_0f359f81ad6477 1-51
+tests/docker/docker-compose.all-in-one.yml
+  s_3fc5c1190405ad::t_9edeb1aae590f4 1-54
+tests/docker/docker-compose.api.yml
+  s_3fc5c1190405ad::t_9c9b5a2349d486 1-30
+tests/docker/docker-compose.autoconf.yml
+  s_3fc5c1190405ad::t_91a79071e673f4 1-31
+tests/docker/docker-compose.bunkerweb.yml
+  s_3fc5c1190405ad::t_203ede5033b955 1-47
+tests/docker/docker-compose.scheduler.yml
+  s_3fc5c1190405ad::t_db80e9f4c3f469 1-32
+tests/docker/docker-compose.ui.yml
+  s_3fc5c1190405ad::t_8efc074ee0661d 1-28
+tests/generate.py
+  s_c239c6a7bf33fc::t_2ab7f54060229a 1-856
+tests/k8s/bunkerweb-api.yml
+  s_852611de8de6fb::t_5922efb6929b0d 1-76
+tests/k8s/bunkerweb-ui.yml
+  s_852611de8de6fb::t_220f7460da1b0b 1-76
+tests/k8s/bunkerweb.yml
+  s_3fc5c1190405ad::t_7da1478fa1589e 1-306
+tests/k8s/edit_coredns.py
+  s_852611de8de6fb::t_53e80f0e5f9138 1-34
+tests/linux/docker-compose.yml
+  s_3fc5c1190405ad::t_cc87dc4777de76 1-28
+tests/linux/utils/rocky-10.repo
+  s_852611de8de6fb::t_d7aaa975750ecc 1-13
+tests/linux/utils/rocky-8.repo
+  s_852611de8de6fb::t_02213ec860f4c7 1-13
+tests/linux/utils/rocky-9.repo
+  s_852611de8de6fb::t_c115da32e53e1e 1-13
+tests/misc/api/Dockerfile
+  s_852611de8de6fb::t_4c176dd63efdf5 1-16
+tests/misc/api/main.py
+  s_4a5e844589df3d::t_0b00af4f75ae90 1-142
+tests/misc/api/requirements.in
+  s_852611de8de6fb::t_bb82c09da3ab15 1-2
+tests/misc/api/requirements.txt
+  s_852611de8de6fb::t_c3875c4a6f8920 1-540
+tests/misc/conf/acquis.yaml
+  s_852611de8de6fb::t_0e511b03262fb5 1-6
+tests/misc/conf/all-in-one-redis.conf
+  s_852611de8de6fb::t_ac47038af58762 1-11
+tests/misc/conf/appsec.yaml
+  s_ff46d69271f39b::t_adf9656ea40b41 1-12
+tests/misc/conf/coredns.conf
+  s_852611de8de6fb::t_97b93d5ab12761 1-45
+tests/misc/conf/syslog-ng.conf
+  s_852611de8de6fb::t_c8efa7f650c1df 1-35
+tests/misc/docker/crowdsec.yml
+  s_3fc5c1190405ad::t_7f97a542db9dd7 1-41
+tests/misc/docker/custom-api.yml
+  s_852611de8de6fb::t_899d1e75a4f804 1-20
+tests/misc/docker/dnsmasq.yml
+  s_852611de8de6fb::t_f5dba6ae264df7 1-38
+tests/misc/docker/docker-socket-proxy.yml
+  s_852611de8de6fb::t_e039494046b50b 1-16
+tests/misc/docker/mariadb.yml
+  s_852611de8de6fb::t_3b649fe22c547e 1-31
+tests/misc/docker/mysql.yml
+  s_852611de8de6fb::t_1b286b35145f20 1-31
+tests/misc/docker/oracle.yml
+  s_852611de8de6fb::t_8057760573ea6d 1-30
+tests/misc/docker/php.yml
+  s_3fc5c1190405ad::t_a9a1d777c982a8 1-26
+tests/misc/docker/postgresql.yml
+  s_80f1da85912d1b::t_2582900d7f3e4a 1-35
+tests/misc/docker/redis-cluster.yml
+  s_852611de8de6fb::t_4a0d5ab13dc37c 1-102
+tests/misc/docker/redis-master.yml
+  s_852611de8de6fb::t_1fb8146cc5e074 1-35
+tests/misc/docker/redis.yml
+  s_3fc5c1190405ad::t_80c5dcac333e2c 1-32
+tests/misc/docker/sentinel.yml
+  s_852611de8de6fb::t_cb9f715cc6614a 1-122
+tests/misc/docker/services.yml
+  s_852611de8de6fb::t_26340478c04686 1-20
+tests/misc/docker/syslog.yml
+  s_3fc5c1190405ad::t_467097b52b83b6 1-30
+tests/misc/docker/valkey-sentinel.yml
+  s_852611de8de6fb::t_0d49289082e35c 1-143
+tests/misc/docker/valkey.yml
+  s_852611de8de6fb::t_4a86668a6fad3b 1-46
+tests/misc/index.php
+  s_852611de8de6fb::t_c23a2f516c7eef 1-13
+tests/misc/k8s/custom-api.yml
+  s_852611de8de6fb::t_05647662a37bdc 1-61
+tests/misc/k8s/lb.yml
+  s_852611de8de6fb::t_4ecbb117764c6b 1-31
+tests/misc/k8s/mariadb.yml
+  s_852611de8de6fb::t_143b5481572038 1-91
+tests/misc/k8s/mysql.yml
+  s_852611de8de6fb::t_17253b9fb2c12f 1-91
+tests/misc/k8s/oracle.yml
+  s_852611de8de6fb::t_e1ce469a8efcfa 1-89
+tests/misc/k8s/postgresql.yml
+  s_852611de8de6fb::t_4a3c0a25a78a29 1-91
+tests/misc/k8s/redis-master-secrets.yml
+  s_852611de8de6fb::t_697cae212616df 1-6
+tests/misc/k8s/redis-master.yml
+  s_852611de8de6fb::t_9eb54a24b22639 1-100
+tests/misc/k8s/redis-sentinel-secrets.yml
+  s_852611de8de6fb::t_b35fe51fbe0ab4 1-6
+tests/misc/k8s/redis-sentinel.yml
+  s_852611de8de6fb::t_18b24e2b622e63 1-217
+tests/misc/k8s/redis-slave-secrets.yml
+  s_852611de8de6fb::t_2f70a1e4613935 1-6
+tests/misc/k8s/secrets-api.yml
+  s_852611de8de6fb::t_a8a14358a768ba 1-6
+tests/misc/k8s/secrets-ui.yml
+  s_852611de8de6fb::t_a4221de34f28ec 1-6
+tests/misc/k8s/secrets.yml
+  s_852611de8de6fb::t_a47182c3b84ed9 1-6
+tests/misc/k8s/services.deployment.yml
+  s_852611de8de6fb::t_0c51f177e9f074 1-26
+tests/misc/k8s/services.ingress.yml
+  s_852611de8de6fb::t_12b8657c3f5724 1-5
+tests/misc/k8s/services.namespace.yml
+  s_852611de8de6fb::t_03e4abcf94cdfc 1-4
+tests/misc/k8s/services.svc.yml
+  s_852611de8de6fb::t_e094e462bc9afb 1-12
+tests/misc/k8s/valkey-secrets.yml
+  s_852611de8de6fb::t_58955736d23944 1-6
+tests/misc/k8s/valkey-sentinel-secrets.yml
+  s_852611de8de6fb::t_2f48feebe6de66 1-23
+tests/misc/k8s/valkey-sentinel.yml
+  s_852611de8de6fb::t_4914d4d9531afe 1-198
+tests/misc/k8s/valkey-slave-secrets.yml
+  s_852611de8de6fb::t_6902aac5479d73 1-6
+tests/misc/k8s/valkey.yml
+  s_852611de8de6fb::t_a4a0675f90463f 1-122
+tests/misc/scripts/healthcheck-crowdsec.sh
+  s_852611de8de6fb::t_39f037f07bc959 1-9
+tests/misc/scripts/redis-cluster-init.sh
+  s_852611de8de6fb::t_572f9c1c9dfc40 1-29
+tests/misc/scripts/redis-entrypoint.sh
+  s_852611de8de6fb::t_379028db0b6fc8 1-76
+tests/misc/scripts/redis-sentinel-entrypoint.sh
+  s_852611de8de6fb::t_fc61456027032a 1-40
+tests/misc/scripts/valkey-entrypoint.sh
+  s_852611de8de6fb::t_1b90d705608c62 1-78
+tests/misc/scripts/valkey-healthcheck.sh
+  s_852611de8de6fb::t_40f3beedd7f3f3 1-12
+tests/misc/stream/probe.py
+  s_2057a477db9ef9::t_407809cf117931 1-192
+tests/misc/ui/uie2e/plugin.json
+  s_80f1da85912d1b::t_35c0e2cf94b54c 1-8
+tests/misc/ui/uie2e/ui/actions.py
+  s_80f1da85912d1b::t_8685dd9012b0e7 1-6
+tests/misc/ui/uie2e/ui/blueprints/uie2e.py
+  s_80f1da85912d1b::t_646c1ba754f2df 1-10
+tests/misc/ui/uie2e/ui/template.html
+  s_80f1da85912d1b::t_e09a52b1bd6cdd 1
+tests/models/__init__.py
+  s_852611de8de6fb::t_8851eda5fa79d2 1-21
+tests/models/action.py
+  s_8eda2e60bab752::t_b6c87cf65677e3 1-163
+tests/models/bwcli.py
+  s_852611de8de6fb::t_d26f3c2c85bb6f 1-55
+tests/models/cookie.py
+  s_852611de8de6fb::t_b1f43d5ea95829 1-48
+tests/models/database.py
+  s_852611de8de6fb::t_d18dd4b56854d7 1-35
+tests/models/export.py
+  s_852611de8de6fb::t_211b4bce60346b 1-26
+tests/models/header.py
+  s_852611de8de6fb::t_dc2c9026b93f2d 1-34
+tests/models/limit.py
+  s_852611de8de6fb::t_cff376a555d165 1-85
+tests/models/path.py
+  s_852611de8de6fb::t_4d7847b3bcd8a4 1-24
+tests/models/redis.py
+  s_852611de8de6fb::t_c5dc21a27192d0 1-85
+tests/models/script.py
+  s_852611de8de6fb::t_77b608da7507ac 1-39
+tests/models/selenium_action.py
+  s_852611de8de6fb::t_d8c96dec818151 1-37
+tests/models/ssl.py
+  s_852611de8de6fb::t_8a21394460fe37 1-36
+tests/models/status.py
+  s_852611de8de6fb::t_f2cad4924bd1a7 1-30
+tests/models/string.py
+  s_852611de8de6fb::t_791ec7bf2c8658 1-34
+tests/models/tool.py
+  s_852611de8de6fb::t_9e690fdad816d7 1-67
+tests/models/ui/__init__.py
+  s_4a5e844589df3d::t_73b2143e117515 1-75
+tests/models/ui/access.py
+  s_852611de8de6fb::t_3203486e39a378 1-42
+tests/models/ui/close_tab.py
+  s_852611de8de6fb::t_7ee01d99487282 1-11
+tests/models/ui/count.py
+  s_f2ef22612d7aa2::t_53629d4ec62d4a 1-17
+tests/models/ui/create/__init__.py
+  s_852611de8de6fb::t_6c9e4fb5352375 1-25
+tests/models/ui/create/config.py
+  s_852611de8de6fb::t_908627aa4717f8 1-30
+tests/models/ui/create/instance.py
+  s_852611de8de6fb::t_a4040bfd14406e 1-12
+tests/models/ui/create/service.py
+  s_852611de8de6fb::t_adb5867cd98148 1-27
+tests/models/ui/custom/__init__.py
+  s_852611de8de6fb::t_28a163b44e4c4e 1-25
+tests/models/ui/custom/access_page.py
+  s_852611de8de6fb::t_aded4366d17186 1-12
+tests/models/ui/custom/click.py
+  s_852611de8de6fb::t_5e7693eb7a56e1 1-10
+tests/models/ui/custom/del_data.py
+  s_852611de8de6fb::t_c53b8f84e7ff4c 1-12
+tests/models/ui/custom/find.py
+  s_852611de8de6fb::t_1dbdcce3669903 1-11
+tests/models/ui/custom/refresh.py
+  s_852611de8de6fb::t_d12e4faf05e6a7 1-11
+tests/models/ui/custom/save_data.py
+  s_852611de8de6fb::t_3ded071aeaea18 1-22
+tests/models/ui/custom/send_keys.py
+  s_852611de8de6fb::t_256939924ed120 1-12
+tests/models/ui/delete/__init__.py
+  s_852611de8de6fb::t_05dd91a78fbdd6 1-24
+tests/models/ui/delete/config.py
+  s_852611de8de6fb::t_94e5bb79b8c234 1-17
+tests/models/ui/delete/instance.py
+  s_852611de8de6fb::t_bae5f6a3f005f2 1-11
+tests/models/ui/delete/service.py
+  s_852611de8de6fb::t_f6b3edced3b6b6 1-17
+tests/models/ui/fetch.py
+  s_f2ef22612d7aa2::t_3ec5b3a02a6b99 1-17
+tests/models/ui/login.py
+  s_852611de8de6fb::t_86b645784c9a77 1-18
+tests/models/ui/read/__init__.py
+  s_852611de8de6fb::t_18e172985de87f 1-24
+tests/models/ui/read/config.py
+  s_852611de8de6fb::t_8563b019b9ae28 1-31
+tests/models/ui/read/global_config.py
+  s_852611de8de6fb::t_06ff5128600a3e 1-20
+tests/models/ui/read/service.py
+  s_852611de8de6fb::t_6e5ed6b307f98c 1-27
+tests/models/ui/setup.py
+  s_852611de8de6fb::t_528452fdac238d 1-94
+tests/models/ui/step_base.py
+  s_852611de8de6fb::t_bcebf3b50aefcd 1-6
+tests/models/ui/switch_tab.py
+  s_852611de8de6fb::t_a9cffba4ba7e85 1-11
+tests/models/ui/update/__init__.py
+  s_852611de8de6fb::t_c621b0f6963dcf 1-24
+tests/models/ui/update/config.py
+  s_852611de8de6fb::t_af83be7fad758e 1-60
+tests/models/ui/update/global_config.py
+  s_852611de8de6fb::t_cd4e5b45c0fac7 1-20
+tests/models/ui/update/service.py
+  s_852611de8de6fb::t_224b2a941b1c8f 1-27
+tests/models/ui/upload.py
+  s_f2ef22612d7aa2::t_54766f03fb5dcd 1-14
+tests/models/ui/utils.py
+  s_852611de8de6fb::t_740d4eff1107d3 1-11
+tests/models/url.py
+  s_852611de8de6fb::t_3f4c77bb1f30e7 1-22
+tests/models/xpath.py
+  s_852611de8de6fb::t_9769cafd751639 1-31
+tests/parse.py
+  s_3fc5c1190405ad::t_fade3ea9deb6f5 1-184
+tests/parse_packages.py
+  s_852611de8de6fb::t_0ed2227ad0cecc 1-28
+tests/scripts/after/crowdsec.sh
+  s_ff46d69271f39b::t_d3e5eed5d00ae6 1-11
+tests/scripts/after/instances.sh
+  s_36cff8fad440d1::t_835a8033db3a95 1-9
+tests/scripts/before/acl.sh
+  s_852611de8de6fb::t_3ebb671055a811 1-45
+tests/scripts/before/blacklist.sh
+  s_852611de8de6fb::t_e1e5e4810beea8 1-16
+tests/scripts/before/customcert.sh
+  s_fa705db5039af8::t_41813137051344 1-66
+tests/scripts/before/docker-instances.yml
+  s_3fc5c1190405ad::t_6a8118e43c6ff5 1-15
+tests/scripts/before/errors.sh
+  s_865ad2db28e50b::t_b2a14b28cd6ab0 1-52
+tests/scripts/before/instances.sh
+  s_36cff8fad440d1::t_76a015052e2dc8 1-11
+tests/scripts/before/instances.yml
+  s_852611de8de6fb::t_1c3d06758424d3 1-74
+tests/scripts/before/latest_prerelease.py
+  s_852611de8de6fb::t_1040f071c6ba68 1-68
+tests/scripts/before/latest_stable.py
+  s_852611de8de6fb::t_e479f19cce04aa 1-55
+tests/scripts/before/mtls.sh
+  s_852611de8de6fb::t_0c8f9910fd2ce1 1-74
+tests/scripts/before/redis.sh
+  s_2057a477db9ef9::t_351879173f86d1 1-31
+tests/scripts/before/reversescan.sh
+  s_2057a477db9ef9::t_e39b5dd2a4e63d 1-19
+tests/scripts/before/upgrade.sh
+  s_852611de8de6fb::t_df902487d76232 1-33
+tests/scripts/before/valkey.sh
+  s_852611de8de6fb::t_907ffe1e487709 1-93
+tests/scripts/log.sh
+  s_852611de8de6fb::t_c492fb5ba93a3e 1-37
+tests/scripts/minikube-ports.sh
+  s_852611de8de6fb::t_5ddccbd16d453a 1-20
+tests/scripts/restart.sh
+  s_852611de8de6fb::t_8022c0b3059b4a 1-17
+tests/scripts/run.sh
+  s_7e6fa1f9d939c0::t_fe1cb672558c1b 1-316
+tests/scripts/start.sh
+  s_3fc5c1190405ad::t_14271ce39b2ff9 1-777
+tests/scripts/stop.sh
+  s_852611de8de6fb::t_e76f9ac3e00e5a 1-25
+tests/scripts/test-example-hook.sh
+  s_852611de8de6fb::t_8eafcf5a79c80d 1-56
+tests/scripts/test.sh
+  s_852611de8de6fb::t_3eaf80f58ac849 1-34
+tests/scripts/utils.sh
+  s_d25bba7717a9cb::t_d47a1d4474b545 1-2052
+tests/scripts/wait.sh
+  s_0bf82062f9947a::t_50fa58e4dbd844 1-280
+tests/ui.py
+  s_4a5e844589df3d::t_1d0e22f80866b9 1-194
+tests/ui/bans.yml
+  s_6ab3d634dbf417::t_98aa431bed0ae6 1-107
+tests/ui/configs.yml
+  s_3a0d104ac187ed::t_aaa7be1cbbc184 1-166
+tests/ui/global-config.yml
+  s_3a0d104ac187ed::t_b67205d838de40 1-76
+tests/ui/home.yml
+  s_c9ab2d8a7dbcc5::t_fd826622c80b27 1-56
+tests/ui/instances.yml
+  s_3a0d104ac187ed::t_a299340cdd3d99 1-208
+tests/ui/jobs.yml
+  s_6ab3d634dbf417::t_52fcc323f14438 1-79
+tests/ui/plugins.yml
+  s_6ab3d634dbf417::t_12478007c648ec 1-136
+tests/ui/profile.yml
+  s_3fc5c1190405ad::t_09b8c348d23fa2 1-183
+tests/ui/services.yml
+  s_0921de540c1292::t_2b91222f2222c9 1-209
+tests/ui_handlers/__init__.py
+  s_4a5e844589df3d::t_9c23d075706440 1-40
+tests/ui_handlers/access.py
+  s_852611de8de6fb::t_306d4035d8cd25 1-28
+tests/ui_handlers/actions.py
+  s_0921de540c1292::t_3b55b9a31a97c0 1-40
+tests/ui_handlers/common.py
+  s_0921de540c1292::t_fe6efbec838a4a 1-75
+tests/ui_handlers/configs.py
+  s_0921de540c1292::t_087b6acb313276 1-114
+tests/ui_handlers/count.py
+  s_4a5e844589df3d::t_a958c4f30a18f3 1-35
+tests/ui_handlers/fetch.py
+  s_4a5e844589df3d::t_621f47ddf7c453 1-35
+tests/ui_handlers/find_and_data.py
+  s_852611de8de6fb::t_8d4fbc260ca385 1-60
+tests/ui_handlers/instances.py
+  s_0921de540c1292::t_2491d5fe9188f5 1-76
+tests/ui_handlers/login.py
+  s_0921de540c1292::t_0aacf74bb84cc2 1-66
+tests/ui_handlers/services.py
+  s_0921de540c1292::t_d2a7c91f512212 1-229
+tests/ui_handlers/setup.py
+  s_7e6fa1f9d939c0::t_4f4f6a3510b439 1-337
+tests/ui_handlers/tabs.py
+  s_852611de8de6fb::t_4090ea40ee0762 1-35
+tests/ui_handlers/upload.py
+  s_4a5e844589df3d::t_592184ca096826 1-29
+tests/utils/__init__.py
+  s_3fc5c1190405ad::t_bacea5f7d1237b 1-183
+tests/utils/action.py
+  s_3fc5c1190405ad::t_4930e72b5e2cb2 1-103
+tests/utils/config.yml
+  s_98d9a3ca7ee803::t_ea76c477051065 1-39
+tests/utils/docker.py
+  s_3fc5c1190405ad::t_b674bbe8554f20 1-166
+tests/utils/example.py
+  s_c9ab2d8a7dbcc5::t_8f04e7e42e3336 1-270
+tests/utils/integrations.yml
+  s_3fc5c1190405ad::t_8646472f89715d 1-69
+tests/utils/k8s.py
+  s_852611de8de6fb::t_5575606f0133ed 1-89
+tests/utils/logger.py
+  s_852611de8de6fb::t_c14c512b0d1656 1-17
+tests/utils/packages.yml
+  s_3fc5c1190405ad::t_e04d0accfe575c 1-44
+tests/utils/tools.json
+  s_852611de8de6fb::t_cd6b4b50047a16 1
+tests/utils/ui.py
+  s_852611de8de6fb::t_f3f94f01669ab2 1-307
+tests/core/antibot.yml
+  s_b0f56a3e4100d3::t_1ebbfad6d3a14e 1-667
+tests/core/bans_tls_drop/test.sh
+  s_b0f56a3e4100d3::t_f6de180d435af9 1-244
+tests/core/crowdsec.yml
+  s_80f1da85912d1b::t_4e7c24024d957f 1-265
+tests/core/scheduler_change_claim/slowjob/plugin.json
+  s_80f1da85912d1b::t_1fe8241fcd4ed9 1-21
+tests/scripts/build.sh
+  s_7b20533a2ddbd2::t_79c2e691e3b6ff 1-511
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "ac61c7e77806f3744dcf7232f884213401100ca4",
+  "prompts": {},
+  "sessions": {
+    "s_0336666c2740d2": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "e656b95a-9641-4f74-a026-1eefcd0b18ba",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_0921de540c1292": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "fb8cb1a5-1eeb-4356-98af-c3c32abaf04c",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_0bf82062f9947a": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "2c17ecf2-1ff4-4f18-ad06-7a2b92bad02d",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_12ab3b028a3437": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "a3530ff9-24b3-46fa-ac80-cf1e4939ad23",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_2057a477db9ef9": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "0d133dbc-9088-4e9e-83e6-bcf5edb1844b",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_36cff8fad440d1": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "9e7b0240-ab8b-4374-b9b3-c0f8bb66b3ef",
+        "model": "unknown"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_3a0d104ac187ed": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "665a81c7-29f0-4399-b9b2-a400b766d858",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_3fc5c1190405ad": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "e870c9ef-5a99-4a62-b7be-5a545e80b82e",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_4a5e844589df3d": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "34aadfd2-de77-4454-90ab-a11edd18fcf7",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_6ab3d634dbf417": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "82e5d48c-da5a-41ea-b1b9-42b5f56110ad",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_7b20533a2ddbd2": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "0df6b4ae-01fd-4676-9532-0e55a420ef56",
+        "model": "unknown"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_7e6fa1f9d939c0": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "e7925bb4-10dd-4c57-819a-ab0b984717e2",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_80f1da85912d1b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "48f28331-3ce2-4fa3-b959-69d5d1238c0a",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_852611de8de6fb": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b54ae077-17bd-4fe0-be11-5c4ea6212bee",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_865ad2db28e50b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "04f28163-eece-49ae-b8fa-c0252fa15eae",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_8eda2e60bab752": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "a146bd44-31ab-4cf8-b4a8-4e2be5101ec6",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_8ffbf4a559663c": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b91e220f-3232-4713-83cb-a70ce7dbcb8b",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_98d9a3ca7ee803": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "8e75bf5b-f214-45e7-8c96-43ba06dc2e64",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_b0f56a3e4100d3": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "a276bd92-df94-4df5-a456-aa6d81253025",
+        "model": "unknown"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_b8568a0c6424bb": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "069b794e-7f4c-4642-909b-9f402f7901e9",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_c239c6a7bf33fc": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "9cb626c4-466f-492c-85e6-45701d984908",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_c9ab2d8a7dbcc5": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "6c9ece05-17e5-4b62-aebd-eb2c45f1b299",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_d25bba7717a9cb": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "70421a52-d626-489d-88d7-97735efa4463",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_ec03421cf7b93b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "e9eddf14-a4f4-40dc-ac1c-d051973473f1",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_f2ef22612d7aa2": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a182b0-a182-72e3-9fc7-af6fc7ddbcb7",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_fa705db5039af8": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a18349-739c-7843-8dc3-827090422899",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_ff46d69271f39b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b6e2d218-d655-4a3f-bb6f-e87d0e355c05",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

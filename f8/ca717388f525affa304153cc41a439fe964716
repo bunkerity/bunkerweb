@@ -1,0 +1,43 @@
+src/common/core/metrics/metrics.lua
+  s_7fd1d8bcd2fb4a::t_d64d8ac4af8f51 1474-1475,1480-1488
+tests/unit/common/test_metrics_phases_coverage_lua.py
+  s_a89174d66b8a1e::t_8356d79b567f7f 33
+  s_a89174d66b8a1e::t_cb0ba98c179f29 1-17,20-26,28-32,34-93,96-138,140-154,171-198,200-271,277-283,286-291,296-307,310-313,319-372
+  s_a89174d66b8a1e::t_f4ca73b7658aea 139
+  s_a89174d66b8a1e::t_e0be81b12c0dae 94-95,373-376,379-388,394-407,410-422,426-438
+  s_0823e44898e57e::t_f50cc4f246d571 199,272-276,284-285,292-295,308-309,314-318,377-378,389-393,408-409,423-425
+  s_7fd1d8bcd2fb4a::t_7491e0adf4a1d4 155-170
+  s_a89174d66b8a1e::t_bc13b7b952de9f 18-19,27
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "f8ca717388f525affa304153cc41a439fe964716",
+  "prompts": {},
+  "sessions": {
+    "s_0823e44898e57e": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a18dd3-8495-7c11-bad6-d1532bf76a77",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_7fd1d8bcd2fb4a": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a18dd9-8af1-7453-a081-6bf8f2697e84",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_a89174d66b8a1e": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a18dd2-f9db-7732-ac92-7b7f9ea61c5f",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

@@ -1,0 +1,22 @@
+CHANGELOG.md
+  s_cdfb44d05f9f77::t_20c75f521e73fd 78
+docs/advanced.md
+  s_cdfb44d05f9f77::t_20c75f521e73fd 3155-3157,3197-3201,3218-3219,3275
+  s_cdfb44d05f9f77::t_c59e4c53ff7e06 3276
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "419489c86accb4ef83738ce6a4eb26dd44ece958",
+  "prompts": {},
+  "sessions": {
+    "s_cdfb44d05f9f77": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "6d0d18b7-dce6-42f2-b682-fcd01cc05637",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

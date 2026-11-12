@@ -1,0 +1,20 @@
+tests/core/ipv6-only/test_sockets.py
+  s_7ad8b94e9cfb60::t_117f3ab44050e3 102
+  s_7ad8b94e9cfb60::t_7c3feae2944326 1-101,103-121
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "2e23a935766e3ee11c9b8345d59471dbfff829a4",
+  "prompts": {},
+  "sessions": {
+    "s_7ad8b94e9cfb60": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1a7cf-ecde-7963-b006-29d1fbc36d9b",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

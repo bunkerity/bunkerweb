@@ -1,0 +1,19 @@
+tests/core/templates.yml
+  s_55a288931b194f::t_485b9835a83a57 29-33
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "9504704ebd51c714d389a5c3d7006f4f445c31f1",
+  "prompts": {},
+  "sessions": {
+    "s_55a288931b194f": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "f6bdd7bf-cb08-467c-9651-8ed6a3b8f349",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

@@ -1,0 +1,31 @@
+tests/unit/backup/test_private_temp_files.py
+  s_063426bcb4f29a::t_dc0fe64686d173 1-103
+src/common/core/backup/backup.py
+  s_06e96c821ea634::t_3b9c431811a4e8 7,263-268
+src/common/core/backup/bwcli/restore.py
+  s_06e96c821ea634::t_3b9c431811a4e8 8,58-62
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "72e69a0b039e5db08c4432ceacdddef5b5af74f3",
+  "prompts": {},
+  "sessions": {
+    "s_063426bcb4f29a": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "efffd834-e25f-4ca3-9a4c-a059847417df",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_06e96c821ea634": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "e27ccd4e-cfc1-4404-9bc3-91f5632c425d",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

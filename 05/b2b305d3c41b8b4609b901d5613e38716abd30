@@ -1,0 +1,26 @@
+src/autoconf/controllers/SwarmController.py
+  s_60628c795bd662::t_3d357bf949bac8 108-110
+CHANGELOG.md
+  s_60628c795bd662::t_ca75087ded9417 16
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "05b2b305d3c41b8b4609b901d5613e38716abd30",
+  "prompts": {},
+  "humans": {
+    "h_a33a1e80933106": {
+      "author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  },
+  "sessions": {
+    "s_60628c795bd662": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1869d-2e49-7ff2-8e88-cfcf2fe9cb0c",
+        "model": "unknown"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

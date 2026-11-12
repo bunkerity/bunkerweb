@@ -1,0 +1,34 @@
+CHANGELOG.md
+  s_6eb8415ca8ec94::t_df8f26640986d5 13
+src/bw/lua/bunkerweb/utils.lua
+  s_517496b2cd6183::t_884da892556964 793-809,811
+  s_517496b2cd6183::t_1d0985a56d5c7b 833-834,868,886,890-891,895-896,898-900,907-908
+  s_517496b2cd6183::t_ea68de4acf251e 893-894,897
+src/common/core/whitelist/whitelist.lua
+  s_517496b2cd6183::t_c9bba514a59eee 355-356
+  s_517496b2cd6183::t_4dbcda7b4fe744 16,357-358
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "0cb063eb31b7fdc17ff3a90558f782c082fa7cf5",
+  "prompts": {},
+  "sessions": {
+    "s_517496b2cd6183": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0d7f3-9bed-7511-93d2-9fa3dd3119de",
+        "model": "gpt-6-luna"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_6eb8415ca8ec94": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "3573e073-64a9-4811-ac95-dafc07248a0a",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

@@ -1,0 +1,32 @@
+tests/unit/test_lua_cluster_tryagain_retry.lua
+  s_cabea18a787221::t_af6083564cdf95 1-47,53-140
+  s_cabea18a787221::t_f186ef800a734d 48-52
+src/bw/lua/bunkerweb/utils.lua
+  s_cabea18a787221::t_2f27f9a7da5597 1246-1250,1473
+  s_cabea18a787221::t_5a4d3451a049b8 1251-1281,1469-1471,1474-1475
+tests/unit/test_lua_cluster_tryagain_lookup.lua
+  s_cabea18a787221::t_91d32618144e61 359
+  s_cabea18a787221::t_f8cb8cc6f366a2 1-358,360-412,421,428-429,431,468,470
+  s_cabea18a787221::t_0d5dcd3fa3db24 413-420,422-427,430,432-467,469,471-535
+src/bw/lua/bunkerweb/clusterstore.lua
+  s_cabea18a787221::t_2f27f9a7da5597 364-366
+  s_cabea18a787221::t_5073accac469d6 387
+  s_cabea18a787221::t_37d6f7514f14e2 369-372,382-386,388-392
+  s_cabea18a787221::t_999f019a3bba55 367-368
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "e7ea204a42d0f4fef64cae3f74059df6225f039f",
+  "prompts": {},
+  "sessions": {
+    "s_cabea18a787221": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "a3bb01c2-cb2b-4066-b665-1b5935928d43",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

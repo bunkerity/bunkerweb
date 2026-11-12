@@ -1,0 +1,17 @@
+CHANGELOG.md
+  h_a33a1e80933106 45,51
+src/ui/app/routes/plugins.py
+  h_a33a1e80933106 2,9,162-170
+  h_a33a1e80933106 171
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "68ec383562dc82fdb2ff43d243bf4b63275fb75e",
+  "prompts": {},
+  "humans": {
+    "h_a33a1e80933106": {
+      "author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

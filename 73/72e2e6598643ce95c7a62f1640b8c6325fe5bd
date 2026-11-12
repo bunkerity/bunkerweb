@@ -1,0 +1,21 @@
+CHANGELOG.md
+  s_36cff8fad440d1::t_b5c6566d9d60a5 22
+src/common/core/modsecurity/confs/http/modsecurity-rules-global-crs.conf.modsec
+  s_36cff8fad440d1::t_c048d703b45ec5 2-3,120-148,178-199
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "7372e2e6598643ce95c7a62f1640b8c6325fe5bd",
+  "prompts": {},
+  "sessions": {
+    "s_36cff8fad440d1": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "9e7b0240-ab8b-4374-b9b3-c0f8bb66b3ef",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}
