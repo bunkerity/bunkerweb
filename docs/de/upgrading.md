@@ -19,8 +19,8 @@ Aktualisieren Sie alle Web-UI-Replikate gemeinsam: Der Wiederholungsschutz für 
 
         ```bash
         # Skript und Prüfsumme herunterladen
-        curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.18-rc3/install-bunkerweb.sh
-        curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.18-rc3/install-bunkerweb.sh.sha256
+        curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.18-rc4/install-bunkerweb.sh
+        curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.18-rc4/install-bunkerweb.sh.sha256
 
         # Prüfsumme überprüfen
         sha256sum -c install-bunkerweb.sh.sha256
@@ -104,16 +104,16 @@ Aktualisieren Sie alle Web-UI-Replikate gemeinsam: Der Wiederholungsschutz für 
                     ```yaml
                     services:
                         bunkerweb:
-                            image: bunkerity/bunkerweb:1.6.18-rc3
+                            image: bunkerity/bunkerweb:1.6.18-rc4
                             ...
                         bw-scheduler:
-                            image: bunkerity/bunkerweb-scheduler:1.6.18-rc3
+                            image: bunkerity/bunkerweb-scheduler:1.6.18-rc4
                             ...
                         bw-autoconf:
-                            image: bunkerity/bunkerweb-autoconf:1.6.18-rc3
+                            image: bunkerity/bunkerweb-autoconf:1.6.18-rc4
                             ...
                         bw-ui:
-                            image: bunkerity/bunkerweb-ui:1.6.18-rc3
+                            image: bunkerity/bunkerweb-ui:1.6.18-rc4
                             ...
                     ```
 
@@ -169,7 +169,7 @@ Aktualisieren Sie alle Web-UI-Replikate gemeinsam: Der Wiederholungsschutz für 
 
             4. **Laden Sie das neue Image herunter**:
                 ```bash
-                docker pull bunkerity/bunkerweb-all-in-one:1.6.18-rc3
+                docker pull bunkerity/bunkerweb-all-in-one:1.6.18-rc4
                 ```
 
             5. **Erstellen Sie den Container neu** mit denselben Optionen und verwenden Sie dasselbe `/data`-Volume, dieselben Ports und dieselben Umgebungsvariablen wie zuvor:
@@ -180,7 +180,7 @@ Aktualisieren Sie alle Web-UI-Replikate gemeinsam: Der Wiederholungsschutz für 
                 -p 80:8080/tcp \
                 -p 443:8443/tcp \
                 -p 443:8443/udp \
-                bunkerity/bunkerweb-all-in-one:1.6.18-rc3
+                bunkerity/bunkerweb-all-in-one:1.6.18-rc4
                 ```
 
         === "Docker Compose"
@@ -189,7 +189,7 @@ Aktualisieren Sie alle Web-UI-Replikate gemeinsam: Der Wiederholungsschutz für 
                 ```yaml
                 services:
                     bunkerweb-aio:
-                        image: bunkerity/bunkerweb-all-in-one:1.6.18-rc3
+                        image: bunkerity/bunkerweb-all-in-one:1.6.18-rc4
                         ...
                 ```
 
@@ -228,8 +228,8 @@ Aktualisieren Sie alle Web-UI-Replikate gemeinsam: Der Wiederholungsschutz für 
 
             ```bash
             # Download the script and its checksum
-            curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.18-rc3/install-bunkerweb.sh
-            curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.18-rc3/install-bunkerweb.sh.sha256
+            curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.18-rc4/install-bunkerweb.sh
+            curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.18-rc4/install-bunkerweb.sh.sha256
 
             # Verify the checksum
             sha256sum -c install-bunkerweb.sh.sha256
@@ -306,20 +306,20 @@ Aktualisieren Sie alle Web-UI-Replikate gemeinsam: Der Wiederholungsschutz für 
             Beispiele:
 
             ```bash
-            # Interaktiv auf 1.6.18~rc3 aktualisieren (fragt nach Sicherung)
-            sudo ./install-bunkerweb.sh --version 1.6.18~rc3
+            # Interaktiv auf 1.6.18~rc4 aktualisieren (fragt nach Sicherung)
+            sudo ./install-bunkerweb.sh --version 1.6.18~rc4
 
             # Nicht-interaktives Upgrade mit automatischer Sicherung in ein benutzerdefiniertes Verzeichnis
-            sudo ./install-bunkerweb.sh -v 1.6.18~rc3 --backup-dir /var/backups/bw-2025-01 -y
+            sudo ./install-bunkerweb.sh -v 1.6.18~rc4 --backup-dir /var/backups/bw-2025-01 -y
 
             # Stilles unbeaufsichtigtes Upgrade (Protokolle unterdrückt) – verlässt sich auf die standardmäßige automatische Sicherung
-            sudo ./install-bunkerweb.sh -v 1.6.18~rc3 -y -q
+            sudo ./install-bunkerweb.sh -v 1.6.18~rc4 -y -q
 
             # Einen Probelauf (Plan) durchführen, ohne Änderungen anzuwenden
-            sudo ./install-bunkerweb.sh -v 1.6.18~rc3 --dry-run
+            sudo ./install-bunkerweb.sh -v 1.6.18~rc4 --dry-run
 
             # Upgrade unter Überspringen der automatischen Sicherung (NICHT empfohlen)
-            sudo ./install-bunkerweb.sh -v 1.6.18~rc3 --no-auto-backup -y
+            sudo ./install-bunkerweb.sh -v 1.6.18~rc4 --no-auto-backup -y
             ```
 
             !!! warning "Überspringen von Sicherungen"
@@ -399,7 +399,7 @@ Aktualisieren Sie alle Web-UI-Replikate gemeinsam: Der Wiederholungsschutz für 
 
                         ```shell
                         sudo apt update && \
-                        sudo apt install -y --allow-downgrades bunkerweb=1.6.18~rc3
+                        sudo apt install -y --allow-downgrades bunkerweb=1.6.18~rc4
                         ```
 
                         Um zu verhindern, dass das BunkerWeb-Paket bei der Ausführung von `apt upgrade` aktualisiert wird, können Sie den folgenden Befehl verwenden:
@@ -425,7 +425,7 @@ Aktualisieren Sie alle Web-UI-Replikate gemeinsam: Der Wiederholungsschutz für 
 
                         ```shell
                         sudo dnf makecache && \
-                        sudo dnf install -y --allowerasing bunkerweb-1.6.18~rc3
+                        sudo dnf install -y --allowerasing bunkerweb-1.6.18~rc4
                         ```
 
                         Um zu verhindern, dass das BunkerWeb-Paket bei der Ausführung von `dnf upgrade` aktualisiert wird, können Sie den folgenden Befehl verwenden:
@@ -901,16 +901,16 @@ Wir haben eine **Namespace**-Funktion zu den Autoconf-Integrationen hinzugefügt
                 ```yaml
                 services:
                     bunkerweb:
-                        image: bunkerity/bunkerweb:1.6.18-rc3
+                        image: bunkerity/bunkerweb:1.6.18-rc4
                         ...
                     bw-scheduler:
-                        image: bunkerity/bunkerweb-scheduler:1.6.18-rc3
+                        image: bunkerity/bunkerweb-scheduler:1.6.18-rc4
                         ...
                     bw-autoconf:
-                        image: bunkerity/bunkerweb-autoconf:1.6.18-rc3
+                        image: bunkerity/bunkerweb-autoconf:1.6.18-rc4
                         ...
                     bw-ui:
-                        image: bunkerity/bunkerweb-ui:1.6.18-rc3
+                        image: bunkerity/bunkerweb-ui:1.6.18-rc4
                         ...
                 ```
 
@@ -945,7 +945,7 @@ Wir haben eine **Namespace**-Funktion zu den Autoconf-Integrationen hinzugefügt
 
                     ```shell
                     sudo apt update && \
-                    sudo apt install -y --allow-downgrades bunkerweb=1.6.18~rc3
+                    sudo apt install -y --allow-downgrades bunkerweb=1.6.18~rc4
                     ```
 
                     Um zu verhindern, dass das BunkerWeb-Paket bei der Ausführung von `apt upgrade` aktualisiert wird, können Sie den folgenden Befehl verwenden:
@@ -971,7 +971,7 @@ Wir haben eine **Namespace**-Funktion zu den Autoconf-Integrationen hinzugefügt
 
                     ```shell
                     sudo dnf makecache && \
-                    sudo dnf install -y --allowerasing bunkerweb-1.6.18~rc3
+                    sudo dnf install -y --allowerasing bunkerweb-1.6.18~rc4
                     ```
 
                     Um zu verhindern, dass das BunkerWeb-Paket bei der Ausführung von `dnf upgrade` aktualisiert wird, können Sie den folgenden Befehl verwenden:
@@ -1204,7 +1204,7 @@ Attestierungen sind schlüssellos: Sie nutzen [Sigstore](https://www.sigstore.de
 Die Befehle verwenden zwei gemeinsame Variablen. Setzen Sie sie auf die Version, die Sie prüfen möchten:
 
 ```bash
-VERSION=1.6.18~rc3
+VERSION=1.6.18~rc4
 TAG="v${VERSION//\~/-}"
 ```
 

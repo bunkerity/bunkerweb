@@ -1,6 +1,6 @@
 # Changelog
 
-## v1.6.18~rc4 - ????/??/??
+## v1.6.18~rc4 - 2026/11/13
 
 - [SECURITY] `api`, `ui`: restrict sensitive job-cache content (core private keys, credentials) to API admin credentials and UI super administrators.
 - [SECURITY] `autoconf`: secret setting values (keys, credentials, tokens, passwords) are no longer written to the logs, whatever the log level.
@@ -42,6 +42,7 @@
 - [BUGFIX] `letsencrypt`: Route53 certificates are no longer reissued at every scheduler restart. (Fixes #4144)
 - [BUGFIX] `dnsbl`: a clean verdict is cached for 60 seconds instead of a day when a DNSBL provider failed to answer.
 - [BUGFIX] `reversescan`: a cache write failure for one port no longer prevents caching the results of the other ports.
+- [BUGFIX] `ui`: remove ANSI escape sequences from the update-check alert box. (Fixes #4121, PR #4134) Thanks to @Mohit20057 for the fix.
 - [BUGFIX] `ui`: renaming the admin user through `ADMIN_USERNAME` now applies at startup instead of failing with "User ... doesn't exist".
 - [BUGFIX] `ui`: a client resuming the log stream from a far-behind offset gets the tail instead of the whole file.
 - [BUGFIX] `ui`: users with the reader role can now load the Let's Encrypt certificate list.
