@@ -75,7 +75,7 @@
 - [DOCS] `linux`: the custom configuration section says where NGINX includes each type and how to check a file is live.
 - [DOCS] `reverseproxy`: `REVERSE_PROXY_KEEPALIVE` does not pool backend connections by itself; the docs show how to pool with a named upstream.
 - [DOCS] `modsecurity`: document response-body inspection limits for upstream-compressed content and how to request uncompressed content for one reverse-proxy location.
-- [DOCS] `core`: a new section shows how to send the access, error and ModSecurity audit logs to Splunk, with a `key=value` access log and a JSON audit log.
+- [DOCS] `core`: a new section shows how to send the access, error and ModSecurity audit logs to Splunk, with a `key=value` access log and a JSON audit log. The Splunk side uses the official BunkerWeb Add-on for Splunk from Splunkbase.
 - [MISC] `headers`: the default `PERMISSIONS_POLICY` also denies `semantic-embedder` and drops `browsing-topics`, which Chromium removed.
 - [DEPS] Updated lua-resty-session to v4.3.0
 
