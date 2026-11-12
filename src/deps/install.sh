@@ -40,6 +40,21 @@ do_and_check_cmd ./configure --prefix=/usr/share/bunkerweb/deps --libdir=/usr/sh
 do_and_check_cmd make -j "$NTASK"
 do_and_check_cmd make install
 
+# RHEL 10 has no system YAJL package. Keep the PIC archive private to the build.
+YAJL_ARGS=""
+if [ "${OS:-}" = "rhel" ] && [ "${OS_VERSION:-}" = "10" ]; then
+	echo "ℹ️ Compiling and installing YAJL"
+	export CHANGE_DIR="/tmp/bunkerweb/deps/src/yajl"
+	do_and_check_cmd cmake -S . -B build -DCMAKE_INSTALL_PREFIX=/tmp/bunkerweb/yajl -DCMAKE_POSITION_INDEPENDENT_CODE=ON
+	do_and_check_cmd cmake --build build --target yajl_s -j "$NTASK"
+	do_and_check_cmd mkdir -p /tmp/bunkerweb/yajl/lib/pkgconfig /usr/share/bunkerweb/deps/licenses
+	do_and_check_cmd cp -r build/yajl-2.1.1/include /tmp/bunkerweb/yajl/
+	do_and_check_cmd cp build/yajl-2.1.1/lib/libyajl_s.a /tmp/bunkerweb/yajl/lib/libyajl.a
+	do_and_check_cmd cp build/yajl-2.1.1/share/pkgconfig/yajl.pc /tmp/bunkerweb/yajl/lib/pkgconfig/
+	do_and_check_cmd cp COPYING /usr/share/bunkerweb/deps/licenses/yajl.LICENSE
+	YAJL_ARGS="--with-yajl=/tmp/bunkerweb/yajl"
+fi
+
 # Compiling and installing ModSecurity
 echo "ℹ️ Compiling and installing ModSecurity"
 # temp fix : Debian run it twice
@@ -51,7 +66,7 @@ export CXXFLAGS="${CXXFLAGS} -include cstdint"
 do_and_check_cmd chmod +x "build.sh"
 do_and_check_cmd ./build.sh
 do_and_check_cmd sh build.sh
-ARGS="--disable-dependency-tracking --disable-static --disable-examples --disable-doxygen-doc --disable-doxygen-html --disable-valgrind-memcheck --disable-valgrind-helgrind --prefix=/usr/share/bunkerweb/deps --with-maxmind=/usr/share/bunkerweb/deps --with-pcre2"
+ARGS="--disable-dependency-tracking --disable-static --disable-examples --disable-doxygen-doc --disable-doxygen-html --disable-valgrind-memcheck --disable-valgrind-helgrind --prefix=/usr/share/bunkerweb/deps --with-maxmind=/usr/share/bunkerweb/deps --with-pcre2 $YAJL_ARGS"
 # shellcheck disable=SC2086
 do_and_check_cmd ./configure $ARGS
 do_and_check_cmd make -j "$NTASK"

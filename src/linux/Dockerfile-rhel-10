@@ -19,7 +19,7 @@ RUN dnf install -y wget make yum-utils dnf-plugins-core && \
   dnf install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-10.noarch.rpm && \
   rpm -e --nodeps openssl-fips-provider-so || true && \
   dnf config-manager --set-enabled crb || true && \
-  dnf install -y --skip-broken --setopt=install_weak_deps=False openssl-libs openssl-devel readline-devel python3.12 python3.12-devel brotli brotli-devel gperftools-devel perl libxslt-devel libxml2 yajl libxslt bash gd gd-devel gcc-c++ gawk libtool pcre2 pcre2-devel automake autoconf gcc make git zlib-devel libxml2-devel pkgconf libcurl-devel libmaxminddb lmdb-devel ssdeep-devel cargo patch && \
+  dnf install -y --skip-broken --setopt=install_weak_deps=False openssl-libs openssl-devel readline-devel python3.12 python3.12-devel brotli brotli-devel gperftools-devel perl libxslt-devel libxml2 libxslt bash gd gd-devel gcc-c++ gawk libtool pcre2 pcre2-devel automake autoconf gcc make cmake git zlib-devel libxml2-devel pkgconf libcurl-devel libmaxminddb lmdb-devel ssdeep-devel cargo patch && \
   dnf install -y https://nginx.org/packages/rhel/10/$(uname -m)/RPMS/nginx-${NGINX_VERSION}-1.el10.ngx.$(uname -m).rpm
 
 WORKDIR /tmp/bunkerweb/deps

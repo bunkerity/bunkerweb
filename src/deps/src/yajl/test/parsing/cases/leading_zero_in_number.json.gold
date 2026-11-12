@@ -1,0 +1,5 @@
+map open '{'
+key: 'bad thing'
+integer: 0
+parse error: after key and value, inside map, I expect ',' or '}'
+memory leaks:	0

@@ -1,0 +1,8 @@
+map open '{'
+key: 'CoreletAPIVersion'
+integer: 2
+key: 'CoreletType'
+string: 'standalone'
+key: 'documentation'
+lexical error: invalid bytes in UTF8 string.
+memory leaks:	0

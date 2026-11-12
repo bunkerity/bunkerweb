@@ -291,6 +291,13 @@
       "post_install": "rm -r src/deps/src/stream-lua-nginx-module/t"
     },
     {
+      "id": "yajl",
+      "name": "YAJL v2.1.1 + Debian 2.1.0-7 security fixes",
+      "url": "https://github.com/lloyd/yajl.git",
+      "commit": "5e3a7856e643b4d6410ddc3f84bc2f38174f2872",
+      "post_install": "for cve in CVE-2017-16516 CVE-2022-24795 CVE-2023-33460; do patch --batch --forward --fuzz=0 --no-backup-if-mismatch -p1 -d src/deps/src/yajl < src/deps/misc/yajl-$cve.patch || exit; done"
+    },
+    {
       "id": "zlib",
       "name": "zlib v1.3.2",
       "url": "https://github.com/madler/zlib.git",
