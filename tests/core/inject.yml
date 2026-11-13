@@ -14,6 +14,35 @@ actions:
     config:
       INJECT_HEAD: "BunkerWeb Forever!"
 
+  # The antibot challenge page sends a nonce-based CSP that blocks injected markup, so the
+  # server-level injection must not reach it (#3234). Split in two actions because
+  # http_string_handler checks `string` or `not_string`, not both.
+  challenge_page_renders:
+    type: string
+    url: "http://www.example.com/challenge"
+    method: "POST"
+    body: "captcha=wrong"
+    headers:
+      Content-Type: "application/x-www-form-urlencoded"
+    string: 'name="captcha"'
+    config:
+      USE_ANTIBOT: "captcha"
+      INJECT_HEAD: "BunkerWeb Forever!"
+      INJECT_BODY: "BunkerWeb Forever!"
+    restart_stack: false
+  challenge_page_not_injected:
+    type: string
+    url: "http://www.example.com/challenge"
+    method: "POST"
+    body: "captcha=wrong"
+    headers:
+      Content-Type: "application/x-www-form-urlencoded"
+    not_string: "BunkerWeb Forever!"
+    config:
+      USE_ANTIBOT: "captcha"
+      INJECT_HEAD: "BunkerWeb Forever!"
+      INJECT_BODY: "BunkerWeb Forever!"
+
 config:
   REMOTE_PHP: "php-fpm"
   REMOTE_PHP_PATH: "/var/www/html"
