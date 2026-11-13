@@ -77,6 +77,7 @@
 - [DOCS] `modsecurity`: document response-body inspection limits for upstream-compressed content and how to request uncompressed content for one reverse-proxy location.
 - [DOCS] `core`: a new section shows how to send the access, error and ModSecurity audit logs to Splunk, with a `key=value` access log and a JSON audit log. The Splunk side uses the official BunkerWeb Add-on for Splunk from Splunkbase.
 - [MISC] `headers`: the default `PERMISSIONS_POLICY` also denies `semantic-embedder` and drops `browsing-topics`, which Chromium removed.
+- [MISC] `antibot`: the JavaScript challenge status line reads "computing proof" instead of "searching nonce". (Refs #4172)
 - [DEPS] Updated lua-resty-session to v4.3.0
 - [DEPS] Updated zlib to v1.4
 - [DEPS] Updated LuaJIT to v2.1-20261107
