@@ -18,7 +18,7 @@ def load(name):
 
 class PslWizardText(unittest.TestCase):
     def test_every_locale_has_both_values(self):
-        self.assertEqual(len(LOCALES), 19)
+        self.assertEqual(len(LOCALES), 20)
         for path in LOCALES:
             data = json.loads(path.read_text(encoding="utf-8"))
             self.assertTrue(data["form"]["label"].get(KEY, "").strip(), path.name)
