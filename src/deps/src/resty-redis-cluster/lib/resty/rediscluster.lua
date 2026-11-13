@@ -43,6 +43,17 @@ local DEFAULT_KEEPALIVE_CONS = 1000
 local DEFAULT_CONNECTION_TIMEOUT = 1000
 local DEFAULT_SEND_TIMEOUT = 1000
 local DEFAULT_READ_TIMEOUT = 1000
+-- Upper bound for one refresh of the slot cache. A refresh walks every address
+-- with three connect attempts each, and a network that drops packets costs the
+-- full connect timeout per attempt. A Redis 7 cluster that announces hostnames
+-- lists an IP and a hostname per node, so a six node cluster has twelve
+-- addresses. Bound the walk so one failed refresh cannot hold the caller for
+-- minutes. The first fetch has no bound: a client that cannot read the slots
+-- once cannot start at all.
+local DEFAULT_MAX_CONNECTION_TIMEOUT = 10000
+-- A failed scan refresh is skipped for this long. Two seconds is shorter than the
+-- usual sync interval, so one failure does not make the next tick skip as well.
+local SCAN_REFRESH_BACKOFF = 2
 
 local LEFT_BRACKET = "{"
 local RIGHT_BRACKET = "}"
@@ -60,6 +71,10 @@ local ask_ip_by_host = {}
 
 local slot_cache = {}
 local master_nodes = {}
+-- Time of the last failed refresh, for each cluster name. A failed scan refreshes
+-- at most once per window, so a cluster that is down does not cost one walk of
+-- the whole address list per call.
+local refresh_failed_at = {}
 
 local cmds_for_all_master = {
     ["flushall"] = true,
@@ -70,6 +85,39 @@ local cluster_invalid_cmds = {
     ["config"] = true,
     ["shutdown"] = true
 }
+
+-- Commands that take more than one key. `keys` says where the keys are in the
+-- argument list. A command with `split = true` sends one part for each slot and
+-- combines the parts. A command with `split = false` is sent unchanged when all
+-- keys are in one slot, and returns an error when the keys span slots.
+local multi_key_cmds = {
+    mget    = { keys = "all",     split = true,  combine = "array" },
+    del     = { keys = "all",     split = true,  combine = "sum"   },
+    unlink  = { keys = "all",     split = true,  combine = "sum"   },
+    exists  = { keys = "all",     split = true,  combine = "sum"   },
+    touch   = { keys = "all",     split = true,  combine = "sum"   },
+
+    mset     = { keys = "stride2", split = false },
+    msetnx   = { keys = "stride2", split = false },
+    sinter   = { keys = "all",     split = false },
+    sunion   = { keys = "all",     split = false },
+    sdiff    = { keys = "all",     split = false },
+    pfcount  = { keys = "all",     split = false },
+    rename   = { keys = "all",     split = false, args = 2 },
+    renamenx = { keys = "all",     split = false, args = 2 },
+    smove    = { keys = "first2",  split = false, args = 3 },
+}
+
+
+-- Use the same text for a key and for its slot. resty.redis converts a
+-- non-string argument with tostring() before it sends the argument.
+local function normalize_key(arg)
+    if type(arg) == "string" then
+        return arg
+    end
+
+    return tostring(arg)
+end
 
 
 local CACHED_SHA256
@@ -585,6 +633,34 @@ local function is_auth_rejected(err)
 end
 
 
+-- Redis replies to these with "-ERR <text>", which resty.redis reports as
+-- `false, err`, the same shape as a malformed command. They mean the cluster view
+-- may be stale, so a scan must refresh the slot cache before it gives up. A
+-- syntax error or a WRONGTYPE does not: the cluster is healthy, and a caller that
+-- repeats the bad call must not pay a CLUSTER SLOTS walk every time.
+local CLUSTER_LEVEL_ERRORS = {
+    "CLUSTERDOWN",
+    "MASTERDOWN",
+    "TRYAGAIN",
+    "READONLY",
+}
+
+
+local function is_cluster_level_error(err)
+    if type(err) ~= "string" then
+        return false
+    end
+
+    for i = 1, #CLUSTER_LEVEL_ERRORS do
+        if string_find(err, CLUSTER_LEVEL_ERRORS[i], 1, true) then
+            return true
+        end
+    end
+
+    return false
+end
+
+
 -- `ngx.log` rejects a table without `__tostring`, a function and a thread. A hook can
 -- raise those, and the log call must not raise a second error.
 local function to_string(value)
@@ -641,10 +717,11 @@ local function check_auth_with_retry(self, redis_client)
 end
 
 
-local function try_hosts_slots(self, serv_list)
+local function try_hosts_slots(self, serv_list, max_connection_timeout)
     local start_time = ngx.now()
     local errors = {}
     local config = self.config
+    local timeout = max_connection_timeout or config.max_connection_timeout
     if #serv_list < 1 then
         return nil, "failed to fetch slots, serv_list config is empty"
     end
@@ -670,10 +747,9 @@ local function try_hosts_slots(self, serv_list)
             end
             table_insert(errors, err)
 
-            -- Kong currently does not configure 'max_connection_timeout'
             local total_connection_time_ms = (ngx.now() - start_time) * 1000
-            if (config.max_connection_timeout and total_connection_time_ms > config.max_connection_timeout) then
-                max_connection_timeout_err = "max_connection_timeout of " .. config.max_connection_timeout .. "ms reached."
+            if timeout and total_connection_time_ms > timeout then
+                max_connection_timeout_err = "max_connection_timeout of " .. timeout .. "ms reached."
                 ngx_log(NGX_ERR, max_connection_timeout_err)
                 table_insert(errors, max_connection_timeout_err)
                 return nil, errors
@@ -735,7 +811,9 @@ local function try_hosts_slots(self, serv_list)
 end
 
 
-function _M.fetch_slots(self)
+-- `opts.max_connection_timeout` bounds the whole walk over the address list.
+-- A refresh passes one; the first fetch leaves it nil.
+function _M.fetch_slots(self, opts)
     local serv_list = self.config.serv_list
     local serv_list_cached = slot_cache[self.config.name .. "serv_list"]
 
@@ -765,7 +843,8 @@ function _M.fetch_slots(self)
     -- important!
     serv_list_cached = nil -- luacheck: ignore
 
-    local _, errors = try_hosts_slots(self, serv_list_combined)
+    local _, errors = try_hosts_slots(self, serv_list_combined,
+                                      opts and opts.max_connection_timeout)
     if errors then
         local err = "failed to fetch slots: " .. table_concat(errors, ";")
         ngx_log(NGX_ERR, err)
@@ -817,11 +896,18 @@ function _M.refresh_slots(self)
         return nil,  err
     end
 
-    local _, fetch_err = self:fetch_slots()
+    local _, fetch_err = self:fetch_slots({
+        max_connection_timeout = self.config.max_connection_timeout
+                                 or DEFAULT_MAX_CONNECTION_TIMEOUT,
+    })
     unlock(self, lock, "refreshing")
     if fetch_err then
+        ngx.update_time()
+        refresh_failed_at[self.config.name] = ngx.now()
         return nil, fetch_err
     end
+
+    refresh_failed_at[self.config.name] = nil
 end
 
 
@@ -1056,7 +1142,7 @@ local function handle_command_with_retry(self, target_ip, target_port, asking, c
     local config = self.config
 
     -- key will be passed to resty.redis
-    local slot = redis_slot(tostring(key))
+    local slot = redis_slot(normalize_key(key))
 
     local magic_random_seed = generate_magic_seed(self)
     local loop_counter = config.max_redirection or DEFAULT_MAX_REDIRECTION
@@ -1257,25 +1343,15 @@ local function _do_cmd_master(self, cmd, key, ...)
     return true, nil
 end
 
-local function _do_cmd(self, cmd, key, ...)
-    if cluster_invalid_cmds[cmd] == true then
-        return nil, "command not supported"
+-- A pipeline result holds { false, message } for a command that Redis rejected.
+-- A string, or a string inside an array, is a value that a caller stored: it must
+-- not be read as a redirect or a cluster failure, or a stored value could send the
+-- client to another host.
+local function pipeline_error(result)
+    if type(result) == "table" and result[1] == false
+       and type(result[2]) == "string" then
+        return result[2]
     end
-
-    local _reqs = rawget(self, "_reqs")
-    if _reqs then
-        local args = { ... }
-        local t = { cmd = cmd, key = key, args = args }
-        table_insert(_reqs, t)
-        return
-    end
-
-    if cmds_for_all_master[cmd] then
-        return _do_cmd_master(self, cmd, key, ...)
-    end
-
-    local res, err = handle_command_with_retry(self, nil, nil, false, cmd, key, ...)
-    return res, err
 end
 
 
@@ -1287,8 +1363,10 @@ local function construct_final_pipeline_resp(self, node_res_map, node_req_map)
         local res = v
         local need_to_fetch_slots = true
         for i = 1, #reqs do
-            --deal with redis cluster ask redirection
-            local ask_host, ask_port = parse_ask_signal(res[i])
+            -- Read a redirect from the error reply only. A value in the reply is
+            -- caller data, not a signal.
+            local reply_err = pipeline_error(res[i])
+            local ask_host, ask_port = parse_ask_signal(reply_err)
             if ask_host ~= nil and ask_port ~= nil then
                 ngx_log(NGX_DEBUG, "handle ask signal for cmd:", reqs[i]["cmd"], " key:", reqs[i]["key"], " target host:", ask_host, " target port:", ask_port)
                 local askres, err = handle_command_with_retry(self, ask_host, ask_port, true, reqs[i]["cmd"], reqs[i]["key"], unpack(reqs[i]["args"]))
@@ -1297,7 +1375,7 @@ local function construct_final_pipeline_resp(self, node_res_map, node_req_map)
                 else
                     finalret[reqs[i].origin_index] = askres
                 end
-            elseif has_moved_signal(res[i]) then
+            elseif has_moved_signal(reply_err) then
                 ngx_log(NGX_DEBUG, "handle moved signal for cmd:", reqs[i]["cmd"], " key:", reqs[i]["key"])
                 if need_to_fetch_slots then
                     -- if there is multiple signal for moved, we just need to fetch slot cache once, and do retry.
@@ -1321,13 +1399,10 @@ end
 
 local function has_cluster_fail_signal_in_pipeline(res)
     for i = 1, #res do
-        if res[i] ~= ngx.null and type(res[i]) == "table" then
-            for j = 1, #res[i] do
-                if type(res[i][j]) == "string" and string_sub(res[i][j], 1, 11) == "CLUSTERDOWN" then
-                    ngx_log(NGX_INFO, res[i][j])
-                    return true
-                end
-            end
+        local reply_err = pipeline_error(res[i])
+        if reply_err and string_sub(reply_err, 1, 11) == "CLUSTERDOWN" then
+            ngx_log(NGX_INFO, reply_err)
+            return true
         end
     end
     return false
@@ -1339,13 +1414,10 @@ function _M.init_pipeline(self)
 end
 
 
-function _M.commit_pipeline(self)
-    local _reqs = rawget(self, "_reqs")
-
-    if not _reqs or #_reqs == 0 then return nil, "no pipeline"
-    end
-
-    self._reqs = nil
+-- Send pre-built requests to the nodes that own their keys. Return the results in the
+-- order of `reqs`. This function does not touch `self._reqs`, so a caller can use it
+-- while another coroutine uses the same instance.
+local function run_requests(self, reqs)
     local config = self.config
 
     local slots = slot_cache[config.name]
@@ -1358,12 +1430,14 @@ function _M.commit_pipeline(self)
     local node_req_map = {}
 
     --construct req to real node mapping
-    for i = 1, #_reqs do
+    for i = 1, #reqs do
         -- Because we will forward req to different nodes, so the result will not be the origin order,
         -- we need to record the original index and finally we can construct the result with origin order
-        _reqs[i].origin_index = i
-        local key = _reqs[i].key
-        local slot = redis_slot(tostring(key))
+        reqs[i].origin_index = i
+        local key = reqs[i].key
+        -- commit_pipeline builds its requests without a slot, so keep the lookup
+        -- for that path.
+        local slot = reqs[i].slot or redis_slot(normalize_key(key))
         if slots[slot] == nil then
             self:refresh_slots()
             return nil, "not slots information present, nginx might have never successfully executed cluster(\"slots\")"
@@ -1376,7 +1450,7 @@ function _M.commit_pipeline(self)
             node_res_map[node] = {}
         end
         local ins_req = node_req_map[node].reqs
-        ins_req[#ins_req + 1] = _reqs[i]
+        ins_req[#ins_req + 1] = reqs[i]
     end
 
     -- We must empty local reference to slots cache, otherwise there will be memory issue while
@@ -1386,7 +1460,7 @@ function _M.commit_pipeline(self)
     local magic_random_seed = generate_magic_seed(self)
 
     for k, v in pairs(node_req_map) do
-        local reqs = v.reqs
+        local node_reqs = v.reqs
 
         local ip, port, slave
         local redis_client
@@ -1432,8 +1506,8 @@ function _M.commit_pipeline(self)
         end
 
         redis_client:init_pipeline()
-        for i = 1, #reqs do
-            local req = reqs[i]
+        for i = 1, #node_reqs do
+            local req = node_reqs[i]
             if #req.args > 0 then
                 if req.cmd == "eval" or req.cmd == "evalsha" then
                     redis_client[req.cmd](redis_client, unpack(req.args))
@@ -1471,6 +1545,415 @@ function _M.commit_pipeline(self)
     else
         return nil, err .. " failed to construct final pipeline result "
     end
+end
+
+
+local function group_keys_by_slot(keys)
+    local groups = {}
+    local order = {}
+
+    for i = 1, #keys do
+        local slot = redis_slot(normalize_key(keys[i]))
+        local group = groups[slot]
+        if not group then
+            group = new_tab(2, 0)
+            groups[slot] = group
+            order[#order + 1] = slot
+        end
+        group[#group + 1] = { index = i, key = keys[i] }
+    end
+
+    return order, groups
+end
+
+
+-- Build one request for each slot. Each request holds the first key of the slot
+-- and the remaining keys of that slot.
+local function build_slot_requests(cmd, order, groups)
+    local reqs = new_tab(#order, 0)
+
+    for i = 1, #order do
+        local slot = order[i]
+        local group = groups[slot]
+        local args = new_tab(#group - 1, 0)
+        for j = 2, #group do
+            args[j - 1] = group[j].key
+        end
+        -- The slot is known here. Carrying it spares run_requests a second hash
+        -- tag parse and CRC16 pass over the same key.
+        reqs[i] = { cmd = cmd, key = group[1].key, args = args, slot = slot }
+    end
+
+    return reqs
+end
+
+
+-- True when all keys land in one slot. Check before grouping: the common case
+-- is a batch of related keys, and grouping builds a record for every key.
+local function keys_share_one_slot(keys)
+    if #keys < 2 then
+        return true
+    end
+
+    local slot = redis_slot(normalize_key(keys[1]))
+    for i = 2, #keys do
+        if redis_slot(normalize_key(keys[i])) ~= slot then
+            return false
+        end
+    end
+
+    return true
+end
+
+
+-- MGET-like commands: the reply is one value for each key, in the order of the
+-- keys. Send one part for each slot, then put the values back in that order.
+local function split_array_command(self, cmd, keys)
+    if keys_share_one_slot(keys) then
+        return handle_command_with_retry(self, nil, nil, false, cmd, unpack(keys))
+    end
+
+    local order, groups = group_keys_by_slot(keys)
+
+    ngx_log(NGX_DEBUG, "split ", cmd, ": ", #keys, " keys in ", #order, " slots")
+
+    local results, err = run_requests(self, build_slot_requests(cmd, order, groups))
+    if not results then
+        return nil, err
+    end
+
+    local values = new_tab(#keys, 0)
+    for i = 1, #order do
+        local group = groups[order[i]]
+        local part = results[i]
+        local part_err = pipeline_error(part)
+        if part_err then
+            return nil, cmd .. " failed for slot " .. order[i] .. ": " .. tostring(part_err)
+        end
+
+        if type(part) ~= "table" then
+            return nil, "unexpected " .. cmd .. " reply for slot " .. order[i]
+        end
+
+        for j = 1, #group do
+            values[group[j].index] = part[j]
+        end
+    end
+
+    return values
+end
+
+
+-- DEL-like commands: the reply is a count. Send one part for each slot and add
+-- the counts.
+local function split_sum_command(self, cmd, keys)
+    if keys_share_one_slot(keys) then
+        return handle_command_with_retry(self, nil, nil, false, cmd, unpack(keys))
+    end
+
+    local order, groups = group_keys_by_slot(keys)
+
+    ngx_log(NGX_DEBUG, "split ", cmd, ": ", #keys, " keys in ", #order, " slots")
+
+    local results, err = run_requests(self, build_slot_requests(cmd, order, groups))
+    if not results then
+        return nil, err
+    end
+
+    local total = 0
+    for i = 1, #order do
+        local count = results[i]
+        local count_err = pipeline_error(count)
+        if count_err then
+            return nil, cmd .. " failed for slot " .. order[i] .. ": " .. tostring(count_err)
+        end
+
+        if type(count) ~= "number" then
+            return nil, "unexpected " .. cmd .. " reply for slot " .. order[i]
+        end
+
+        total = total + count
+    end
+
+    return total
+end
+
+
+-- Validate the arguments and return the keys that take part in the slot check.
+-- A nil argument is an error: `{ ... }` truncates at the first hole, so a length
+-- check on the table cannot see it.
+local function collect_command_keys(cmd, spec, key, ...)
+    local rest = select("#", ...)
+    local nargs = key == nil and rest or rest + 1
+    local args = { key, ... }
+    local step = spec.keys == "stride2" and 2 or 1
+
+    if spec.args then
+        if nargs ~= spec.args then
+            return nil, "wrong number of arguments for '" .. cmd .. "' command"
+        end
+    elseif nargs == 0 or nargs % step ~= 0 then
+        return nil, "wrong number of arguments for '" .. cmd .. "' command"
+    end
+    for i = 1, nargs do
+        if args[i] == nil then
+            return nil, "nil argument for '" .. cmd .. "' command"
+        end
+    end
+
+    if spec.keys == "stride2" then
+        local keys = new_tab(math.ceil(nargs / 2), 0)
+        for i = 1, nargs, 2 do
+            keys[#keys + 1] = args[i]
+        end
+
+        return keys
+    end
+
+    -- SMOVE takes two keys and a member.
+    if spec.keys == "first2" then
+        local keys = new_tab(2, 0)
+        keys[1] = args[1]
+        keys[2] = args[2]
+
+        return keys
+    end
+
+    return args
+end
+
+
+-- A command that cannot be split only works when all of its keys share a slot.
+local function check_keys_in_one_slot(cmd, keys)
+    if keys_share_one_slot(keys) then
+        return true
+    end
+
+    return nil, "command '" .. cmd .. "' needs all keys in one slot; " ..
+                "use a hash tag or split the call"
+end
+
+
+-- A cluster-wide SCAN uses a cursor with four parts: the index of the master to
+-- visit, the number of masters seen when the iteration started, a fingerprint of
+-- that master list, and the cursor of that master. "0" means that the whole
+-- iteration is complete.
+local SCAN_CURSOR_PATTERN = "^(%d+):(%d+):(%d+):(%d+)$"
+
+-- One scan_all call stops when it reaches the key budget or the round-trip cap,
+-- whichever comes first, so a sparse MATCH cannot scan the whole keyspace.
+local SCAN_ALL_DEFAULT_COUNT = 100
+local SCAN_ALL_MAX_ROUNDS = 16
+
+
+local function scan_master_list(self)
+    local list = master_nodes[self.config.name .. "master_list"]
+    if not list or #list == 0 then
+        local ok, err = self:init_slots()
+        if not ok then
+            return nil, err
+        end
+
+        list = master_nodes[self.config.name .. "master_list"]
+        if not list or #list == 0 then
+            return nil, "no master nodes in the slot cache"
+        end
+    end
+
+    -- One master can own several slot ranges, so the list can hold duplicates.
+    local seen = {}
+    local masters = new_tab(#list, 0)
+    for i = 1, #list do
+        local node = list[i]
+        local id = tostring(node.ip) .. ":" .. tostring(node.port)
+        if not seen[id] then
+            seen[id] = true
+            masters[#masters + 1] = node
+        end
+    end
+
+    -- Sort by address. The index in a cursor keeps its meaning when CLUSTER SLOTS
+    -- returns the same nodes in a different order.
+    table.sort(masters, function(a, b)
+        local ka = tostring(a.ip) .. ":" .. tostring(a.port)
+        local kb = tostring(b.ip) .. ":" .. tostring(b.port)
+        return ka < kb
+    end)
+
+    return masters
+end
+
+
+-- A fingerprint of the sorted master list. The cursor carries it, so a changed
+-- set of masters with the same count is detected as well.
+local function scan_master_fingerprint(masters)
+    local ids = new_tab(#masters, 0)
+    for i = 1, #masters do
+        ids[i] = tostring(masters[i].ip) .. ":" .. tostring(masters[i].port)
+    end
+
+    return ngx.crc32_long(table_concat(ids, ","))
+end
+
+
+-- Refresh from the scan path. A plain command must refresh at once, or recovery
+-- waits for the window; a scan runs on a timer, so one walk per window is enough.
+local function scan_refresh_slots(self)
+    ngx.update_time()
+    local now = ngx.now()
+    local last = refresh_failed_at[self.config.name]
+    if last and now - last < SCAN_REFRESH_BACKOFF then
+        return nil, "slot refresh is in backoff, retry later"
+    end
+
+    return self:refresh_slots()
+end
+
+
+-- SCAN on one master. This path cannot use handle_command_with_retry, because
+-- that function uses the cursor as the routing key.
+local function scan_one_master(self, master, cursor, ...)
+    local config = self.config
+    local redis_client = redis:new()
+    redis_client:set_timeouts(config.connect_timeout or DEFAULT_CONNECTION_TIMEOUT,
+                              config.send_timeout or DEFAULT_SEND_TIMEOUT,
+                              config.read_timeout or DEFAULT_READ_TIMEOUT)
+
+    local ok, err = connect_with_pool(redis_client, master.ip, master.port, config)
+    if not ok then
+        -- The cached master list can still name a node that failed over. Every
+        -- other command path refreshes the slot cache on a connection error.
+        scan_refresh_slots(self)
+        return nil, "failed to connect to " .. tostring(master.ip) .. ":" ..
+                    tostring(master.port) .. ": " .. tostring(err)
+    end
+
+    local _, auth_err = check_auth_with_retry(self, redis_client)
+    if auth_err then
+        redis_client:close()
+        return nil, auth_err
+    end
+
+    local res, scan_err = redis_client:scan(cursor, ...)
+    if not res then
+        -- `nil` is a socket or connection error. `false` is a reply from Redis: a
+        -- cluster level error still means the topology may be stale, but a
+        -- rejected command does not justify a walk over the address list.
+        if res == nil or is_cluster_level_error(scan_err) then
+            redis_client:close()
+            scan_refresh_slots(self)
+        else
+            -- The connection answered, so it is healthy. Return it to the pool.
+            release_connection(redis_client, config)
+        end
+
+        return nil, scan_err
+    end
+
+    release_connection(redis_client, config)
+
+    return res
+end
+
+
+-- Return the COUNT option of SCAN, so one call does not return the keys of many
+-- masters at the same time. The options are pairs of a keyword and a value, so
+-- walk them in pairs: a MATCH value that reads "COUNT" is a value, not a keyword.
+-- An unusable COUNT is an error: a silent fall back to the default page size
+-- hides a caller mistake.
+local function scan_count(...)
+    local total = select("#", ...)
+    local i = 1
+
+    while i + 1 <= total do
+        local option = select(i, ...)
+        if type(option) ~= "string" then
+            return nil
+        end
+
+        local value = select(i + 1, ...)
+        if string.upper(option) == "COUNT" then
+            local count = tonumber(value)
+            if not count then
+                return nil, "COUNT needs a number, got " .. tostring(value)
+            end
+
+            return count
+        end
+
+        i = i + 2
+    end
+end
+
+
+local function _do_cmd(self, raw_cmd, key, ...)
+    -- Redis takes a command name in any case, and the metatable builds a method
+    -- for any field name, so red:DEL(...) reaches here too. The tables below
+    -- hold lower case names: normalize once, or an upper case call skips the
+    -- slot check, the split and the blocklist.
+    local cmd = string.lower(raw_cmd)
+
+    if cluster_invalid_cmds[cmd] == true then
+        return nil, "command not supported"
+    end
+
+    local spec = multi_key_cmds[cmd]
+    local keys
+
+    if spec then
+        local kerr
+        keys, kerr = collect_command_keys(cmd, spec, key, ...)
+        if not keys then
+            return nil, kerr
+        end
+    end
+
+    local _reqs = rawget(self, "_reqs")
+    if _reqs then
+        if spec and not check_keys_in_one_slot(cmd, keys) then
+            return nil, "command '" .. cmd .. "' needs one slot inside a pipeline; " ..
+                        "call it directly or use a hash tag"
+        end
+
+        local args = { ... }
+        local t = { cmd = cmd, key = key, args = args }
+        table_insert(_reqs, t)
+        return
+    end
+
+    if spec then
+        if spec.split then
+            if spec.combine == "array" then
+                return split_array_command(self, cmd, keys)
+            end
+
+            return split_sum_command(self, cmd, keys)
+        end
+
+        local ok, err = check_keys_in_one_slot(cmd, keys)
+        if not ok then
+            return nil, err
+        end
+    end
+
+    if cmds_for_all_master[cmd] then
+        return _do_cmd_master(self, cmd, key, ...)
+    end
+
+    local res, err = handle_command_with_retry(self, nil, nil, false, cmd, key, ...)
+    return res, err
+end
+
+
+function _M.commit_pipeline(self)
+    local _reqs = rawget(self, "_reqs")
+
+    if not _reqs or #_reqs == 0 then return nil, "no pipeline"
+    end
+
+    self._reqs = nil
+
+    return run_requests(self, _reqs)
 end
 
 
@@ -1514,6 +1997,135 @@ local function eval_route_key(keys_num, ...)
 end
 _M.eval_route_key = eval_route_key
 
+--- Scan every master of the cluster.
+-- Pass the same options on every call, as with the Redis SCAN command. The
+-- result has the same shape as the single-node `scan`: `{ cursor, keys }`.
+--
+-- One call is bounded: it returns after `COUNT` keys (default 100) or after 16
+-- SCAN round trips, whichever comes first. Call again until the cursor is "0".
+-- @tparam string|number cursor The cursor of the previous call, or "0" to start.
+-- @treturn table|nil `{ cursor, keys }`. `cursor` is `"0"` at the end.
+-- @treturn string|nil The error message. On a failure the first value is nil.
+function _M.scan_all(self, cursor, ...)
+    local masters, err = scan_master_list(self)
+    if not masters then
+        return nil, err
+    end
+
+    local total = #masters
+    local fingerprint = scan_master_fingerprint(masters)
+    local index, node_cursor
+
+    if cursor == "0" or cursor == 0 then
+        index, node_cursor = 1, "0"
+    else
+        local i, seen_total, seen_fingerprint, node =
+            string.match(tostring(cursor), SCAN_CURSOR_PATTERN)
+        if not i then
+            return nil, "invalid scan cursor: " .. tostring(cursor)
+        end
+
+        i, seen_total = tonumber(i), tonumber(seen_total)
+        -- The pattern captures the fingerprint as a string; the current one is a number.
+        if seen_total ~= total or seen_fingerprint ~= tostring(fingerprint) then
+            return nil, "scan cursor is stale: the set of masters changed; " ..
+                       "restart with cursor 0"
+        end
+
+        if i < 1 or i > total then
+            return nil, "invalid scan cursor: " .. tostring(cursor)
+        end
+
+        index, node_cursor = i, node
+    end
+
+    local budget, budget_err = scan_count(...)
+    if budget_err then
+        return nil, budget_err
+    end
+    budget = budget or SCAN_ALL_DEFAULT_COUNT
+
+    local keys = {}
+    local rounds = 0
+
+    while index <= total do
+        rounds = rounds + 1
+        local res, scan_err = scan_one_master(self, masters[index], node_cursor, ...)
+        if not res then
+            return nil, scan_err
+        end
+
+        node_cursor = tostring(res[1])
+        local page = res[2] or {}
+        for i = 1, #page do
+            keys[#keys + 1] = page[i]
+        end
+
+        if node_cursor == "0" then
+            index = index + 1
+            node_cursor = "0"
+        end
+
+        if #keys >= budget or rounds >= SCAN_ALL_MAX_ROUNDS then
+            break
+        end
+    end
+
+    if index > total then
+        return { "0", keys }, nil
+    end
+
+    return { index .. ":" .. total .. ":" .. fingerprint .. ":" .. node_cursor, keys }, nil
+end
+
+
+--- The library returns each connection to the pool after its command.
+-- This method exists so that a caller can use one code path for a single-node
+-- client and a cluster client.
+function _M.set_keepalive(self)
+    ngx_log(NGX_DEBUG, "set_keepalive() is a no-op on a cluster client")
+    return 1
+end
+
+
+--- Drop a pipeline that the caller started and abandoned.
+-- A multi-key command that spans slots is rejected when it is queued, so it does
+-- not add a request. Check the return value of every queued call: `commit_pipeline`
+-- returns one result for each request that was queued.
+-- Pooled connections stay open: the library releases each connection after its
+-- command.
+function _M.close(self)
+    ngx_log(NGX_DEBUG, "close() does not close pooled cluster connections")
+    if rawget(self, "_reqs") then
+        self._reqs = nil
+    end
+
+    return 1
+end
+
+
+--- Return the number of times the current connection was reused.
+-- A cluster client keeps one pool for each node, so it cannot answer this for a
+-- single connection. Zero tells the caller not to skip the first command.
+function _M.get_reused_times(self)
+    return 0
+end
+
+
+--- Convert a flat array of field and value pairs to a table.
+-- resty.redis provides this helper. The cluster client needs its own copy,
+-- because it does not inherit from resty.redis.
+function _M.array_to_hash(self, t)
+    local n = #t
+    local h = new_tab(0, n / 2)
+    for i = 1, n, 2 do
+        h[t[i]] = t[i + 1]
+    end
+
+    return h
+end
+
+
 local function _do_eval_cmd(self, cmd, ...)
 --[[
 eval command usage:
@@ -1526,13 +2138,17 @@ eval(script, 0, arg1, arg2 ...)
     end
     return _do_cmd(self, cmd, key, ...)
 end
+
 -- dynamic cmd
 setmetatable(_M, {
     __index = function(_, cmd)
         local method =
         function(self, ...)
-            if cmd == "eval" or cmd == "evalsha" then
-                return _do_eval_cmd(self, cmd, ...)
+            -- A command name is matched without regard to case, so EVAL must take
+            -- this path too. _do_eval_cmd and _do_cmd compare the lower case name.
+            local lower = string.lower(cmd)
+            if lower == "eval" or lower == "evalsha" then
+                return _do_eval_cmd(self, lower, ...)
             else
                 return _do_cmd(self, cmd, ...)
             end

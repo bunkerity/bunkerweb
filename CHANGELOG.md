@@ -80,6 +80,7 @@
 - [DEPS] Updated lua-resty-session to v4.3.0
 - [DEPS] Updated zlib to v1.4
 - [DEPS] Updated LuaJIT to v2.1-20261107
+- [DEPS] Updated resty-redis-cluster to v1.8.0
 
 ## v1.6.18~rc3 - 2026/11/05
 

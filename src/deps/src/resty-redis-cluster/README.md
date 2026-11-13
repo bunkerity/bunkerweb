@@ -21,6 +21,8 @@ While building the client, thanks for https://github.com/cuiweixie/lua-resty-red
 
 4. Support hashtag. Just give your key like name{tag}
 
+   `mget`, `del`, `unlink`, `exists` and `touch` accept keys in different slots: the keys are split by slot, one command is sent per slot and the replies are merged in the original order. A split `del`, `unlink` or `touch` is not atomic, so an error on one part leaves the other parts applied. Other multi-key commands, including `mset`, return an error when their keys are in different slots; see "Multi-key commands" below for the full list. Inside a pipeline a multi-key command still needs all keys in one slot (use a hash tag).
+
 5. Support read from slave node by readonly mode, both usual command and pipeline. While enable slave node read, resty-redis-cluster will randomly pickup a node which is mapped to the request key, no matter it's master or slave.
 
 6. Support online resharding of redis cluster(both for usual command and pipeline. resty-redis-cluster will handle the #MOVED signal by re-cache the slot mapping and retrying. resty-redis-cluster will handle the #ASK signal by retrying with asking to redirection target nodes
@@ -81,7 +83,8 @@ local config = {
     connect_timeout = 1000,                 --timeout while connecting
     lock_timeout = 5,                       --timeout acquiring resty lock
     max_redirection = 5,                    --maximum retry attempts for redirection
-    max_connection_attempts = 1             --maximum retry attempts for connection
+    max_connection_attempts = 1,            --maximum retry attempts for connection
+    max_connection_timeout = 10000          --upper bound for one refresh of the slot cache, in ms
 }
 
 local redis_cluster = require "rediscluster"
@@ -411,34 +414,165 @@ end
 other masters and returns an error that lists the failed nodes. Both commands are idempotent, so a
 later call can finish the work.
 
+### Multi-key commands
+
+Some commands take more than one key. Redis rejects such a command with `CROSSSLOT` when its keys
+are in different slots. The client sends one part for each slot, then combines the parts:
+
+| Command | Result |
+| --- | --- |
+| `MGET` | The values, in the order of the keys |
+| `DEL`, `UNLINK`, `EXISTS`, `TOUCH` | The sum of the counts |
+
+A split `DEL`, `UNLINK` or `TOUCH` is not atomic. The client sends one part to each node, one node
+at a time and in no fixed order, so an error on any part leaves the other parts applied: a
+connection failure, an auth failure, a failed redirect retry or a failed commit all return an error
+while the parts that already ran stay applied. The call does not report how many keys it changed,
+and it does not report which slots ran. A retry can therefore return a count different from the
+number of keys the caller asked to delete. To act on several keys as one unit, use a hash tag so
+that the keys share a slot.
+
+`EXISTS` and `MGET` are reads, so a failure on one part changes nothing.
+
+A command that cannot be split keeps its normal behavior when all of its keys share a slot:
+
+| Command | Keys in one slot | Keys in different slots |
+| --- | --- | --- |
+| `MSET`, `MSETNX` | Sent unchanged | Returns an error |
+| `SINTER`, `SUNION`, `SDIFF`, `PFCOUNT`, `RENAME`, `RENAMENX`, `SMOVE` | Sent unchanged | Returns an error |
+
+`MSET` is not split. A split `MSET` is not atomic, and an error on a later slot leaves the earlier
+slots written. A cross-slot `MSET` returns
+`command 'mset' needs all keys in one slot; use a hash tag or split the call`. To write several
+related keys, use a hash tag: `red_c:mset("{plugin-1}:a", 1, "{plugin-1}:b", 2)`.
+
+Command names are matched without regard to case: `red_c:DEL(...)` takes the same path as
+`red_c:del(...)`.
+
+A multi-key command inside a pipeline must use one slot. A command that spans slots returns an
+error; call it directly, or use a hash tag. A command with a `nil` argument, or with an argument
+count that does not match the command, also returns an error.
+
+A command that is not in the tables above is sent the way it always was, so a cross-slot
+`SINTERSTORE`, `SUNIONSTORE`, `SDIFFSTORE`, `PFMERGE`, `LMOVE`, `RPOPLPUSH`, `COPY`, `BITOP`,
+`ZUNIONSTORE` or `ZINTERSTORE` still returns `CROSSSLOT` from Redis.
+
+To keep related keys in one slot, use a hash tag. For example, `entitlement:{plugin-id}:subject`
+puts every key of one plugin instance in one slot.
+
+This client rejects a multi-key command that it cannot run safely, and it does so before the
+command reaches Redis. Some other cluster clients send the command and let the server answer
+`CROSSSLOT`. The earlier error names the command and suggests a hash tag, which is easier to act
+on from a plugin log.
+
+### Pipelines
+
+A multi-key command that spans slots is rejected when it is queued, so the caller must check the
+return value of each call that it adds to a pipeline. `commit_pipeline` returns one result for
+each command that was queued, so a command that was rejected does not occupy a position.
+
+This client does not send `MULTI`/`EXEC`: `commit_pipeline` sends one plain pipeline to each node.
+The one-slot rule above is therefore stricter than the non-transactional `Pipeline` of some other
+clients, where a single command may span nodes. It matches what a transaction would require.
+
+### Scanning the whole cluster
+
+`SCAN` takes its cursor as the first argument, and the client routes a command by its first
+argument. A plain `SCAN` therefore reads one master only. Use `scan_all` to read every master:
+
+```lua
+local cursor = "0"
+local res, err = red_c:scan_all(cursor, "MATCH", "prefix:*", "COUNT", 1000)
+if not res then
+    return nil, err
+end
+cursor, keys = res[1], res[2]
+-- use keys, then call again until the cursor is "0"
+```
+
+`scan_all` returns the same shape as `scan`: `{ cursor, keys }, nil` on success and `nil, err` on
+failure. You can replace `scan` with `scan_all` and keep the rest of the loop. The cursor is
+opaque; compare it with `"0"` to stop, and pass the same options on every call.
+
+The options are read as pairs of a keyword and a value, as Redis reads them. `COUNT` must carry a
+number: `COUNT "abc"` returns an error instead of falling back to the default page size.
+
+One call is bounded. It stops after the SCAN page that takes the total to `COUNT` keys (default
+100), or after 16 SCAN round trips, whichever comes first, and returns a continuation cursor. A
+page from Redis can hold more keys than `COUNT` asks for, so one call can return more keys than
+`COUNT`. A sparse `MATCH` cannot scan the whole keyspace in one call. Call again until the cursor
+is `"0"`.
+
+The cursor also carries a fingerprint of the master list. When the cached master list changes
+during the iteration, `scan_all` returns an error that starts with `scan cursor is stale` and asks
+you to start again from cursor `0`. A change in the order of the same masters does not affect the
+cursor.
+
+`scan_all` uses the master list from the slot cache. The list changes only when a refresh runs, and
+a refresh happens when another command hits `MOVED` or a connection error, or when you call
+`refresh_slots()` yourself. A scan alone never refreshes it. If the cluster gains a master or
+replaces one, and nothing else refreshes the cache, `scan_all` keeps walking the old list and misses
+the keys on the new master. Call `refresh_slots()` before a full walk when the topology may have
+changed.
+
+`scan_all` reads masters only. It ignores `enable_slave_read`, because a replica can hold keys
+that its master does not have yet and can lag behind. Do not use `scan_all` to count keys for a
+migration decision.
+
+A retry can repeat a page. When one master fails, the call returns an error and does not keep the
+page. If the caller starts again with the same cursor, the keys of that page can appear twice. Drop
+duplicates if the result feeds a destructive step.
+
+A large keyspace takes many calls. A `MATCH` that finds few keys also takes many calls, because
+one call stops at 16 SCAN round trips even when it has found fewer keys than `COUNT`.
+
+`scan_all` sends the commands directly, so it does not use the `auth_providers` wrapper. A caller
+that rotates credentials during an iteration must call `scan_all` again with the new client.
+
 ### Limitation
 
-1. Doesn't support MSET, MGET operations yet
+1. `MSET`, `MSETNX`, `SINTER`, `SUNION`, `SDIFF`, `PFCOUNT`, `RENAME`, `RENAMENX` and `SMOVE` are not split across slots. They return an error when their keys are in different slots. Other multi-key commands (`SINTERSTORE`, `SUNIONSTORE`, `SDIFFSTORE`, `PFMERGE`, `LMOVE`, `RPOPLPUSH`, `COPY`, `BITOP`, `ZUNIONSTORE`, `ZINTERSTORE`) are not guarded either, so a cross-slot call returns `CROSSSLOT` from Redis.
 
-2. Doesn't support transactions operations: MULTI DISCARD EXEC WATCH
+2. A split `DEL`, `UNLINK` or `TOUCH` is not atomic; see Multi-key commands above.
 
-3. Doesn't support pub sub. Actually redis cluster didn't check slot for pub sub commands, so using normal resty redis client to conenct with specific node in a cluster still works.
+3. Doesn't support transactions operations: MULTI DISCARD EXEC WATCH
 
-4. Limitation only for turn on enable slave read: If we need to discover new slave node(but without adding new master), must retrigger new slot mapping cache refresh, otherwise slot mapping still record the last version of node tables.(easiest way is rebooting nginx nodes)
+4. Doesn't support pub sub. Actually redis cluster didn't check slot for pub sub commands, so using normal resty redis client to conenct with specific node in a cluster still works.
 
-5. Limitation only for turn on enable slave read: If slave -> master link is down(maybe still under sync and recovery), resty-redis-cluster will not filter these nodes out. Thus, read from slave may return unexpected response. Suggest always catch the response parsing exception while enable slave read.
+5. Limitation only for turn on enable slave read: If we need to discover new slave node(but without adding new master), must retrigger new slot mapping cache refresh, otherwise slot mapping still record the last version of node tables.(easiest way is rebooting nginx nodes)
+
+6. Limitation only for turn on enable slave read: If slave -> master link is down(maybe still under sync and recovery), resty-redis-cluster will not filter these nodes out. Thus, read from slave may return unexpected response. Suggest always catch the response parsing exception while enable slave read.
    This is because client depends on cluster slots command.
 
-6. An instance is not reentrant for pipelines. `init_pipeline()` stores the queue on the instance, and every command on that instance joins the queue until `commit_pipeline()` or `cancel_pipeline()`. Do not let two coroutines start a pipeline on the same instance. Simple commands are safe to run from several coroutines on one instance while no pipeline is active on it.
+7. An instance is not reentrant for pipelines. `init_pipeline()` stores the queue on the instance, and every command on that instance joins the queue until `commit_pipeline()` or `cancel_pipeline()`. Do not let two coroutines start a pipeline on the same instance. Simple commands are safe to run from several coroutines on one instance while no pipeline is active on it.
 
-7. The client reads the IP of a node from `CLUSTER SLOTS`, which lists only the nodes that hold a slot. When a slot moves to a new node that holds no slot yet, the client reaches the ASK target by hostname only.
+8. The client reads the IP of a node from `CLUSTER SLOTS`, which lists only the nodes that hold a slot. When a slot moves to a new node that holds no slot yet, the client reaches the ASK target by hostname only.
 
-8. The client reads an `ASK` or `MOVED` address as `host:port`. An IPv6 literal such as `[::1]:6379` does not parse.
+9. The client reads an `ASK` or `MOVED` address as `host:port`. An IPv6 literal such as `[::1]:6379` does not parse.
 
 ### Compatibilty
 
-Currently, this library is tested with Redis `6.2` and `7.2`. CI runs the same suite on both versions. It leaves out only `t/z-recover.t`, which starts its own fixture.
+Currently, this library is tested with Redis `6.2` and `7.2`. CI runs the same suite on both
+versions. It leaves out `t/z-recover.t`, which starts its own fixture. It also leaves out
+`t/z-failover.t`, which stops a master and needs `Z_FAILOVER=1`; run it by hand against a local
+cluster.
 
 ### Changelog
 
 #### Unreleased
 
 1. TBD
+
+#### 1.8.0
+
+1. Split `MGET`, `DEL`, `UNLINK`, `EXISTS` and `TOUCH` by slot, and combine the parts. A cross-slot command no longer fails with `CROSSSLOT`. A split `DEL`, `UNLINK` or `TOUCH` is not atomic: an error on one part leaves the other parts applied, and the call does not report how many keys it changed.
+2. A command that cannot be split returns a clear error when its keys are in different slots. This covers `MSET`, `MSETNX`, `SINTER`, `SUNION`, `SDIFF`, `PFCOUNT`, `RENAME`, `RENAMENX` and `SMOVE`. `MSET` is not split, because a split `MSET` is not atomic.
+3. A multi-key command inside a pipeline can use one slot. A command that spans slots returns an error. A `nil` argument, a wrong argument count, or a wrong count for `SMOVE`/`RENAME`/`RENAMENX` also returns an error.
+4. Add `scan_all()` to scan every master. It returns `{ cursor, keys }`, like `scan`. One call is bounded, and its cursor carries a fingerprint of the master list.
+5. Add `set_keepalive()`, `close()`, `get_reused_times()` and `array_to_hash()`, so a caller can use one code path for a single-node client and a cluster client. `set_keepalive()` and `close()` do nothing: the library returns each connection to the pool after its command.
+6. A refresh of the slot cache stops after `max_connection_timeout`, default 10 seconds. Before, a cluster that dropped packets could hold the caller for minutes.
+7. A failed refresh from `scan_all` is skipped for two seconds, so an outage does not walk the address list on every call. A plain command still refreshes at once.
+8. A command name is matched without regard to case, so `DEL` takes the same split path as `del`.
 
 #### 1.7.0
 
