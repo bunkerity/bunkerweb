@@ -1,0 +1,23 @@
+tests/unit/test_ui_psl_wizard_text.py
+  s_91ca07d7c0f91e::t_7ae52587526fe1 21
+tests/unit/test_ui_support_bundle.py
+  s_91ca07d7c0f91e::t_caff307a9abc2b 764
+tests/unit/test_ui_support_config_mask.py
+  s_91ca07d7c0f91e::t_06c281401675f4 261
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "65ed2fe8745ec2dc4b4f0d78c81808a13a906c2c",
+  "prompts": {},
+  "sessions": {
+    "s_91ca07d7c0f91e": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "446b938b-605a-4ee3-9217-64976177613a",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}
