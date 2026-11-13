@@ -75,6 +75,7 @@ certbot==5.9.0 \
     #   certbot-dns-godaddy
     #   certbot-dns-google
     #   certbot-dns-hetzner
+    #   certbot-dns-hosttech
     #   certbot-dns-infomaniak
     #   certbot-dns-ionos
     #   certbot-dns-linode
@@ -679,9 +680,9 @@ idna==3.20 \
     #   httpx
     #   requests
     #   tldextract
-importlib-metadata==10.1.0 \
-    --hash=sha256:82b04047fa09792c1a8cfeddfe08bec79e4b13c29c8469b0d3949860f61017e8 \
-    --hash=sha256:cf45ce66a929c64e994185a809c04840d0501db17e663810d993d0f4829265c7
+importlib-metadata==10.2.0 \
+    --hash=sha256:9413a2029fd9ca5669d27f1386071bbfe3c7ebca0545692ec975088241fe1d79 \
+    --hash=sha256:c7a4bf1c7479601f6b8e437cfc14f4f77028ba62a8f34ae95cd93d9774dfba51
     # via -r requirements.in
 jmespath==1.1.0 \
     --hash=sha256:472c87d80f36026ae83c6ddd0f1d05d4e510134ed462851fd5f754c8c3cbb88d \
@@ -699,6 +700,10 @@ jsonpickle==4.1.4 \
     --hash=sha256:8adf24cca611809b55ff5ed2ace850e1a3e4370dad5d363df71569b8f46c9645 \
     --hash=sha256:c46024ba4acd8adb9a8b8485d074e141cbfacafe334c2aa982e5b32efabc2f0e
     # via python-digitalocean
+lazy-importer==0.1.0 \
+    --hash=sha256:b2e296716ce015c0cd80e57b940e52727c5b934b34b8656d5ce06bdd0ee5fbdd \
+    --hash=sha256:bd93fab7bef18e842eea02b839410954d37889140dc64ca4d9680aec6880c739
+    # via importlib-metadata
 maxminddb==3.2.0 \
     --hash=sha256:01418f7282badf3a90257e21554f594e767263ddf2c69c3c2cf9fb299c9e4620 \
     --hash=sha256:03728e46da92f0463fd65be373e10a45961d9c712b4d2c495b416e465ac8bd9e \
@@ -1123,6 +1128,7 @@ requests==2.34.2 \
     #   certbot-dns-duckdns
     #   certbot-dns-dynu
     #   certbot-dns-gandi
+    #   certbot-dns-hosttech
     #   certbot-dns-infomaniak
     #   certbot-dns-ionos
     #   certbot-dns-scaleway
@@ -1158,15 +1164,6 @@ s3transfer==0.19.3 \
 schedule==1.2.2 \
     --hash=sha256:15fe9c75fe5fd9b9627f3f19cc0ef1420508f9f9a46f45cd0769ef75ede5f0b7 \
     --hash=sha256:5bef4a2a0183abf44046ae0d164cadcac21b1db011bdd8102e4a0c1e91e06a7d
-    # via
-    #   certbot-dns-cloudns
-    #   certbot-dns-domainoffensive
-    #   certbot-dns-domeneshop
-
-# The following packages are considered to be unsafe in a requirements file:
-setuptools==84.2.1 \
-    --hash=sha256:3ff8b3b5492a0aa66960f4419365a86b84e013070d4313e4d4a6894f5d64d6bc \
-    --hash=sha256:ca140b45d5325a9478f880e351484f62fef15f336462e449ca0c03c873d589c2
     # via -r requirements.in
 six==1.17.0 \
     --hash=sha256:4721f391ed90541fddacab5acf947aa0d3dc7d27b2e1e8eda2be8970586c3274 \
@@ -1271,6 +1268,15 @@ zope-interface==8.7 \
     --hash=sha256:eeec8bb03f69706876a2bfdfa93b6f70c23230f9c655f8d14726b5bad1319b68 \
     --hash=sha256:f23736eda7fbd9125b41e41e437217c6328dddb303be522b1938a70eeb6eaf1e \
     --hash=sha256:f70a3af6efb813b8d406a449a8afc800ef8e9e32a62d6d52e37e8cb10674b70f
+    # via
+    #   certbot-dns-cloudns
+    #   certbot-dns-domainoffensive
+    #   certbot-dns-domeneshop
+
+# The following packages are considered to be unsafe in a requirements file:
+setuptools==84.2.1 \
+    --hash=sha256:3ff8b3b5492a0aa66960f4419365a86b84e013070d4313e4d4a6894f5d64d6bc \
+    --hash=sha256:ca140b45d5325a9478f880e351484f62fef15f336462e449ca0c03c873d589c2
     # via
     #   -r requirements.in
     #   certbot-dns-bunny
