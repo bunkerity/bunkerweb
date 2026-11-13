@@ -79,6 +79,7 @@
 - [MISC] `headers`: the default `PERMISSIONS_POLICY` also denies `semantic-embedder` and drops `browsing-topics`, which Chromium removed.
 - [DEPS] Updated lua-resty-session to v4.3.0
 - [DEPS] Updated zlib to v1.4
+- [DEPS] Updated LuaJIT to v2.1-20261107
 
 ## v1.6.18~rc3 - 2026/11/05
 

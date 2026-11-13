@@ -983,7 +983,8 @@ static void asm_snap_alloc1(ASMState *as, IRRef ref)
       }
     } else {
       RegSet allow;
-      if (ir->o == IR_CONV && ir->op2 == IRCONV_NUM_INT) {
+      if (ir->o == IR_CONV && ir->op2 == IRCONV_NUM_INT &&
+	  (as->flags & JIT_F_OPT_DCE)) {
 	IRIns *irc;
 	for (irc = IR(as->curins); irc > ir; irc--)
 	  if ((irc->op1 == ref || irc->op2 == ref) &&
