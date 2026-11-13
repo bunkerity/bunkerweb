@@ -30,8 +30,8 @@
         <input type="hidden" id="base_flags_url" value="{{ base_flags_url }}" />
         <textarea type="hidden"
                   id="columns_preferences_defaults"
-                  class="visually-hidden">{{ columns_preferences_defaults['bans']|tojson }}</textarea>
-        <textarea type="hidden" id="columns_preferences" class="visually-hidden">{{ columns_preferences|tojson }}</textarea>
+                  class="visually-hidden" hidden aria-hidden="true">{{ columns_preferences_defaults['bans']|tojson }}</textarea>
+        <textarea type="hidden" id="columns_preferences" class="visually-hidden" hidden aria-hidden="true">{{ columns_preferences|tojson }}</textarea>
         <input type="hidden"
                id="csrf_token"
                name="csrf_token"

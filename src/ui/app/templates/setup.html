@@ -58,9 +58,10 @@
                                    aria-pressed="true"
                                    href="https://panel.bunkerweb.io/store/support?utm_campaign=self&utm_source=ui"
                                    target="_blank"
-                                   rel="noopener">
-                                    <span class="bx bx-help-circle me-0 me-md-2"></span>
-                                    <span class="d-none d-md-inline" data-i18n="button.need_help">Need Help?</span>
+                                   rel="noopener"
+                                   aria-labelledby="setup-need-help-label">
+                                    <span class="bx bx-help-circle me-0 me-md-2" aria-hidden="true"></span>
+                                    <span id="setup-need-help-label" class="d-none d-md-inline" data-i18n="button.need_help">Need Help?</span>
                                 </a>
                             </li>
                             <li class="position-relative">
@@ -70,21 +71,23 @@
                                         aria-pressed="true"
                                         data-bs-toggle="offcanvas"
                                         data-bs-target="#side-offcanvas-news"
-                                        aria-controls="side-offcanvas-news">
+                                        aria-controls="side-offcanvas-news"
+                                        aria-labelledby="setup-news-label">
                                     <span class="bx bx-news me-0 me-md-2"></span>
-                                    <span class="d-none d-md-inline" data-i18n="button.news">News</span>
+                                    <span id="setup-news-label" class="d-none d-md-inline" data-i18n="button.news">News</span>
                                 </button>
                             </li>
                         </ul>
                     </div>
                 </div>
-                <div class="authentication-wrapper authentication-basic container-p-y">
+                <div class="authentication-wrapper authentication-basic container-p-y" role="main">
                     <div class="authentication-inner w-100">
                         <!-- Setup -->
                         <div class="card px-sm-6 px-0">
                             <div class="card-header d-flex justify-content-between align-items-center mw-100">
                                 <div class="pt-1">
-                                    <h4 class="card-title d-inline border fw-bold p-2 don-jose"
+                                    <h4 role="heading" aria-level="1"
+                                        class="card-title d-inline border fw-bold p-2 don-jose"
                                         data-i18n="setup.title">Setup Wizard</h4>
                                     <p class="card-subtitle text-muted text-truncate mt-3"
                                        data-i18n="setup.subtitle">Follow the steps to complete the setup wizard.</p>
@@ -1844,9 +1847,11 @@
                             </div>
                             <div class="d-flex justify-content-between mt-2 position-relative">
                                 <button id="previous-step"
-                                        class="btn btn-primary btn-prev previous-step disabled">
+                                        class="btn btn-primary btn-prev previous-step disabled"
+                                        aria-labelledby="setup-previous-label">
                                     <i class="bx bx-chevron-left bx-sm ms-sm-n2"></i>
-                                    <span class="align-middle d-sm-inline-block d-none"
+                                    <span id="setup-previous-label"
+                                          class="align-middle d-sm-inline-block d-none"
                                           data-i18n="step.previous">Previous</span>
                                 </button>
                                 <div class="join-newsletter position-absolute bottom-0 start-50 translate-middle-x">

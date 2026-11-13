@@ -403,6 +403,11 @@ a.text-white-80:hover {
   text-decoration: underline;
 }
 
+/* A link inside running text must not rely on colour alone to stand out. */
+#banner-text .light-href {
+  text-decoration: underline;
+}
+
 .w-70 {
   width: 70% !important;
 }
