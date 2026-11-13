@@ -30,6 +30,7 @@
 - [FEATURE] `core`: `CLIENT_HEADER_TIMEOUT` and `CLIENT_BODY_TIMEOUT` now support per-service overrides.
 - [FEATURE] `modsecurity`: new `MODSECURITY_SEC_AUDIT_LOG_FORMAT` setting (`Native` or `JSON`) writes the audit log as one JSON object per entry.
 - [BUGFIX] `inject`: quotes and backslashes in `INJECT_HEAD` and `INJECT_BODY` no longer break the generated config; remove hand-added `\'` workaround escapes.
+- [BUGFIX] `antibot`, `inject`: `INJECT_HEAD` and `INJECT_BODY` are no longer applied to the antibot challenge page. (Fixes #3234)
 - [BUGFIX] `modsecurity`: response body rules now inspect Brotli-compressed responses too; ModSecurity used to see the compressed bytes when `USE_BROTLI=yes`. A response-body deny after headers were sent can leave the client with an incomplete response, as with gzip.
 - [BUGFIX] `linux`: RHEL 9 and 10 packages now build ModSecurity with yajl, so JSON request bodies are parsed for CRS and `SecAuditLogFormat JSON` works.
 - [BUGFIX] `limit`: `LIMIT_CONN_MAX_*` settings now accept only values NGINX supports (1 to 65535).
@@ -82,6 +83,8 @@
 - [DEPS] Updated zlib to v1.4
 - [DEPS] Updated LuaJIT to v2.1-20261107
 - [DEPS] Updated resty-redis-cluster to v1.8.0
+- [CONTRIBUTION] Thank you [gaurav0107](https://github.com/gaurav0107) for keeping `INJECT_HEAD` and `INJECT_BODY` off the antibot challenge page. (#4153)
+- [CONTRIBUTION] Thank you [rakku5555](https://github.com/rakku5555) for your contribution regarding the `Japanese` translation of the web UI. (#4154)
 
 ## v1.6.18~rc3 - 2026/11/05
 
