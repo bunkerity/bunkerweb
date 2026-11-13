@@ -81,7 +81,7 @@
     !!! danger "安全提示"
         在执行脚本之前，请务必使用提供的校验和验证脚本的完整性。
 
-    #### Easy Install 亮点
+    ### Easy Install 亮点
 
     - 在更改系统之前，会预先检测您的 Linux 发行版和 CPU 架构，并在超出支持矩阵时发出警告。
     - 交互提示采用由 [gum](https://github.com/charmbracelet/gum) 提供的内联 TUI —— 支持方向键菜单（带 `❯` 光标）、掩码密码字段。首次进入交互模式时，脚本会从 [GitHub 发布页](https://github.com/charmbracelet/gum/releases)下载官方 `gum` 二进制（SHA256 已固定校验；若已安装 cosign，则额外校验 cosign 签名），从临时目录运行，并在脚本退出时删除该临时目录 —— **不会安装任何系统包，不会添加 apt/dnf 源，不会在系统上残留任何二进制**。若无法获取 gum，安装器会使用系统中已存在的 `whiptail`；二者都不可用时退化到纯文本提示。

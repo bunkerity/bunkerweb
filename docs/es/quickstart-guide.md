@@ -81,7 +81,7 @@ Ayúdame a configurar BunkerWeb <versión> con <integración> para proteger mi a
     !!! danger "Aviso de seguridad"
         Verifica siempre la integridad del script con la suma de comprobación proporcionada antes de ejecutarlo.
 
-    #### Aspectos destacados del Easy Install
+    ### Aspectos destacados del Easy Install
 
     - Detecta tu distribución de Linux y la arquitectura de CPU por adelantado y avisa si estás fuera de la matriz soportada antes de aplicar cambios.
     - Las indicaciones interactivas usan una TUI en línea mediante [gum](https://github.com/charmbracelet/gum) — menús con flechas y cursor `❯`, campos de contraseña enmascarados. En la primera ejecución interactiva, el script descarga el binario `gum` oficial desde la [release de GitHub](https://github.com/charmbracelet/gum/releases) (SHA256 fijado, verificación de firma cosign cuando cosign está instalado), lo ejecuta desde un directorio temporal y elimina ese directorio al salir — **no se instala ningún paquete del sistema, no se añade ninguna fuente apt/dnf, no queda ningún binario**. Si gum no puede obtenerse, el instalador usa un `whiptail` ya instalado en el sistema; si ninguno está disponible, usa indicaciones de texto plano.

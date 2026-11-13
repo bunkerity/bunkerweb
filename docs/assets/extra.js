@@ -1,5 +1,12 @@
-mediumZoom(document.querySelectorAll('figure > img'));
-mediumZoom(document.querySelectorAll('figure > p > img'));
+/* medium-zoom is loaded with defer, so it exists once the document is parsed, not before. */
+function initImageZoom() {
+  if (!window.mediumZoom) return;
+  mediumZoom(document.querySelectorAll('figure > img'));
+  mediumZoom(document.querySelectorAll('figure > p > img'));
+}
+
+if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initImageZoom);
+else initImageZoom();
 
 (function () {
   var KNOWN_LANGS = ['en', 'fr', 'de', 'es', 'zh'];
@@ -405,10 +412,31 @@ mediumZoom(document.querySelectorAll('figure > p > img'));
     if (cta) paragraph.appendChild(cta);
   }
 
+  /* A chip, a value or a table wrapper that overflows scrolls inside itself. A
+     scrolling region a keyboard cannot reach hides the rest of its content from
+     it, so each one that really overflows becomes a tab stop. Measured after the
+     web fonts load, since the brand face is wider than the fallback, and again
+     when the viewport changes, since a table only overflows on a narrow one. */
+  var scrollTimer = null;
+
+  function focusOverflowing() {
+    Array.prototype.forEach.call(document.querySelectorAll('.bw-settings code, .md-typeset__scrollwrap'), function (box) {
+      if (box.scrollWidth > box.clientWidth) box.tabIndex = 0;
+      else if (box.getAttribute('tabindex') === '0') box.removeAttribute('tabindex');
+    });
+  }
+
+  window.addEventListener('resize', function () {
+    clearTimeout(scrollTimer);
+    scrollTimer = setTimeout(focusOverflowing, 150);
+  });
+
   /* The page holds several .md-typeset roots (banner, footer, content), so the
      content ones are matched document wide rather than through the first hit. */
   function enhance() {
     Array.prototype.forEach.call(document.querySelectorAll('.md-typeset table'), enhanceTable);
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(focusOverflowing);
+    else focusOverflowing();
     Array.prototype.forEach.call(document.querySelectorAll('.md-typeset p > img.twemoji, .md-typeset p > span.twemoji'), function (icon) {
       enhanceStreamLine(icon.parentNode);
     });
@@ -582,4 +610,47 @@ mediumZoom(document.querySelectorAll('figure > p > img'));
   else enhance();
 
   if (window.document$ && window.document$.subscribe) window.document$.subscribe(enhance);
+})();
+
+/* The theme builds the version picker once versions.json arrives and labels its button
+   "Select version" while the button shows "v1.6.17". The visible text has to be part of
+   the accessible name (WCAG 2.5.3), so it is put in front of the theme's label. */
+(function () {
+  function label() {
+    var button = document.querySelector('.md-version__current');
+    if (!button) return false;
+    var shown = (button.textContent || '').trim();
+    var name = button.getAttribute('aria-label') || '';
+    if (shown && name.indexOf(shown) === -1) button.setAttribute('aria-label', shown + ', ' + name);
+    return true;
+  }
+
+  function onReady() {
+    if (label() || !window.MutationObserver) return;
+    var header = document.querySelector('.md-header');
+    if (!header) return;
+    var observer = new MutationObserver(function () {
+      if (label()) observer.disconnect();
+    });
+    observer.observe(header, { childList: true, subtree: true });
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', onReady);
+  else onReady();
+})();
+
+/* Each code block gets a <nav class="md-code__nav"> from the theme that only holds its copy
+   button. Dozens of identical, unnamed navigation landmarks per page are noise to a screen
+   reader, so they are left as plain containers. */
+(function () {
+  function plain() {
+    Array.prototype.forEach.call(document.querySelectorAll('nav.md-code__nav:not([role])'), function (nav) {
+      nav.setAttribute('role', 'none');
+    });
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', plain);
+  else plain();
+
+  if (window.document$ && window.document$.subscribe) window.document$.subscribe(plain);
 })();
