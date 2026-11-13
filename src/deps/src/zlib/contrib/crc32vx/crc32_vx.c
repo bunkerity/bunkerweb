@@ -79,10 +79,10 @@ local uint32_t crc32_le_vgfm_16(uint32_t crc, const unsigned char *buf, size_t l
     v0 = (uv2di)vec_insert(crc, (uv4si)v0, 3);
 
     /* Load a 64-byte data chunk and XOR with CRC */
-    uv2di v1 = vec_perm(((uv2di *)buf)[0], ((uv2di *)buf)[0], perm_le2be);
-    uv2di v2 = vec_perm(((uv2di *)buf)[1], ((uv2di *)buf)[1], perm_le2be);
-    uv2di v3 = vec_perm(((uv2di *)buf)[2], ((uv2di *)buf)[2], perm_le2be);
-    uv2di v4 = vec_perm(((uv2di *)buf)[3], ((uv2di *)buf)[3], perm_le2be);
+    uv2di v1 = vec_perm(((const uv2di *)buf)[0], ((const uv2di *)buf)[0], perm_le2be);
+    uv2di v2 = vec_perm(((const uv2di *)buf)[1], ((const uv2di *)buf)[1], perm_le2be);
+    uv2di v3 = vec_perm(((const uv2di *)buf)[2], ((const uv2di *)buf)[2], perm_le2be);
+    uv2di v4 = vec_perm(((const uv2di *)buf)[3], ((const uv2di *)buf)[3], perm_le2be);
 
     v1 ^= v0;
     buf += 64;
@@ -90,10 +90,10 @@ local uint32_t crc32_le_vgfm_16(uint32_t crc, const unsigned char *buf, size_t l
 
     while (len >= 64) {
         /* Load the next 64-byte data chunk */
-        uv16qi part1 = vec_perm(((uv16qi *)buf)[0], ((uv16qi *)buf)[0], perm_le2be);
-        uv16qi part2 = vec_perm(((uv16qi *)buf)[1], ((uv16qi *)buf)[1], perm_le2be);
-        uv16qi part3 = vec_perm(((uv16qi *)buf)[2], ((uv16qi *)buf)[2], perm_le2be);
-        uv16qi part4 = vec_perm(((uv16qi *)buf)[3], ((uv16qi *)buf)[3], perm_le2be);
+        uv16qi part1 = vec_perm(((const uv16qi *)buf)[0], ((const uv16qi *)buf)[0], perm_le2be);
+        uv16qi part2 = vec_perm(((const uv16qi *)buf)[1], ((const uv16qi *)buf)[1], perm_le2be);
+        uv16qi part3 = vec_perm(((const uv16qi *)buf)[2], ((const uv16qi *)buf)[2], perm_le2be);
+        uv16qi part4 = vec_perm(((const uv16qi *)buf)[3], ((const uv16qi *)buf)[3], perm_le2be);
 
         /*
          * Perform a GF(2) multiplication of the doublewords in V1 with
@@ -122,7 +122,7 @@ local uint32_t crc32_le_vgfm_16(uint32_t crc, const unsigned char *buf, size_t l
 
     while (len >= 16) {
         /* Load next data chunk */
-        v2 = vec_perm(*(uv2di *)buf, *(uv2di *)buf, perm_le2be);
+        v2 = vec_perm(*(const uv2di *)buf, *(const uv2di *)buf, perm_le2be);
 
         /* Fold next data chunk */
         v1 = (uv2di)vec_gfmsum_accum_128(r4r3, v1, (uv16qi)v2);

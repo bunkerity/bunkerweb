@@ -1,11 +1,15 @@
-@PACKAGE_INIT@
-
 set(_MINIZIP_supported_components "shared" "static")
 include(CMakeFindDependencyMacro)
 
-if(@MINIZIP_ENABLE_BZIP2@)
+set(minizip_HAS_BZIP2
+    "@MINIZIP_ENABLE_BZIP2@"
+    CACHE
+    BOOL
+    "Indicates if minizip was compiled with bzip2 support")
+
+if(minizip_HAS_BZIP2)
     find_dependency(BZip2)
-endif(@MINIZIP_ENABLE_BZIP2@)
+endif(minizip_HAS_BZIP2)
 
 if(minizip_FIND_COMPONENTS)
     find_dependency(ZLIB CONFIG COMPONENTS ${minizip_FIND_COMPONENTS})
@@ -16,12 +20,36 @@ if(minizip_FIND_COMPONENTS)
             set(minizip_NOT_FOUND_MESSAGE "Unsupported component: ${_comp}")
         endif(NOT _comp IN_LIST _MINIZIP_supported_components)
 
-        include("${CMAKE_CURRENT_LIST_DIR}/minizip-${_comp}.cmake")
-    endforeach(_comp ${ZLIB_FIND_COMPONENTS})
+        include("${CMAKE_CURRENT_LIST_DIR}/minizip-${_comp}.cmake"
+            OPTIONAL
+            RESULT_VARIABLE _comp_loaded)
+
+        if(NOT _comp_loaded)
+            set(minizip_FOUND False)
+            set(minizip_NOT_FOUND_MESSAGE "Component ${_comp} not found.")
+        else(NOT _comp_loaded)
+            set(minizip_${_comp}_FOUND TRUE)
+        endif(NOT _comp_loaded)
+    endforeach(_comp ${minizip_FIND_COMPONENTS})
 else(minizip_FIND_COMPONENTS)
     find_dependency(ZLIB CONFIG)
 
     foreach(_component_config IN LISTS _MINIZIP_supported_components)
-        include("${CMAKE_CURRENT_LIST_DIR}/minizip-${_component_config}.cmake")
+        include("${CMAKE_CURRENT_LIST_DIR}/minizip-${_component_config}.cmake"
+                OPTIONAL)
     endforeach(_component_config IN LISTS _MINIZIP_supported_components)
+
+    if(NOT TARGET MINIZIP::minizip)
+        set(minizip_FOUND False)
+        set(minizip_NOT_FOUND_MESSAGE "Target ZLIB::ZLIB not created\n")
+        string(APPEND minizip_NOT_FOUND_MESSAGE "build minizip with support for shared libs or\n")
+        string(APPEND minizip_NOT_FOUND_MESSAGE "specify COMPONENTS static in your find_package call")
+    endif(NOT TARGET MINIZIP::minizip)
+
+    if(NOT TARGET MINIZIP::minizipstatic)
+        set(minizip_FOUND False)
+        set(minizip_NOT_FOUND_MESSAGE "Target ZLIB::ZLIBSTATIC not created\n")
+        string(APPEND minizip_NOT_FOUND_MESSAGE "build minizip with support for static libs or\n")
+        string(APPEND minizip_NOT_FOUND_MESSAGE "specify COMPONENTS shared in your find_package call")
+    endif(NOT TARGET MINIZIP::minizipstatic)
 endif(minizip_FIND_COMPONENTS)

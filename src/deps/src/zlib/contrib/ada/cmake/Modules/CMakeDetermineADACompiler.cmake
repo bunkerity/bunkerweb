@@ -21,11 +21,11 @@ endif(NOT CMAKE_ADA_COMPILER)
 
 mark_as_advanced(CMAKE_ADA_COMPILER)
 set(CMAKE_ADA_COMPILER_ID "GNU")
-set(CMAKE_ADA_BINDER_HELPER "${CMAKE_COMMAND} -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/binder_helper.cmake")
-set(CMAKE_ADA_COMPILER_HELPER "${CMAKE_COMMAND} -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/compile_helper.cmake")
-set(CMAKE_ADA_EXE_LINK_HELPER "${CMAKE_COMMAND} -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/exe_link_helper.cmake")
-set(CMAKE_ADA_SHARED_LINK_HELPER "${CMAKE_COMMAND} -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/shared_link_helper.cmake")
-set(CMAKE_ADA_STATIC_LINK_HELPER "${CMAKE_COMMAND} -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/static_link_helper.cmake")
+set(CMAKE_ADA_BINDER_HELPER "${CMAKE_COMMAND} -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/binder_helper.cmake --")
+set(CMAKE_ADA_COMPILER_HELPER "${CMAKE_COMMAND} -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/compile_helper.cmake --")
+set(CMAKE_ADA_EXE_LINK_HELPER "${CMAKE_COMMAND} -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/exe_link_helper.cmake --")
+set(CMAKE_ADA_SHARED_LINK_HELPER "${CMAKE_COMMAND} -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/shared_link_helper.cmake --")
+set(CMAKE_ADA_STATIC_LINK_HELPER "${CMAKE_COMMAND} -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/static_link_helper.cmake --")
 
 configure_file(
     ${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules/CMakeADACompiler.cmake.in

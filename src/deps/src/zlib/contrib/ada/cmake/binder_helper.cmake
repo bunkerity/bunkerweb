@@ -1,18 +1,21 @@
 #CMAKE_ARGV0 = /path/to/cmake
 #CMAKE_ARGV1 = -P
 #CMAKE_ARGV2 = path/to/this/file
-#CMAKE_ARGV3 = binder
-#CMAKE_ARGV4 = ali
+#CMAKE_ARGV3 = --
+#CMAKE_ARGV4 = binder
+#CMAKE_ARGV5 = ali
 
-if(NOT CMAKE_ARGV3)
+if(NOT CMAKE_ARGV4)
     message(FATAL_ERROR "binder not set")
-endif(NOT CMAKE_ARGV3)
+endif(NOT CMAKE_ARGV4)
 
-string(REPLACE ".o" ".ali" ALI ${CMAKE_ARGV4})
+string(REPLACE ".o" ".ali" ALIPATH ${CMAKE_ARGV5})
+cmake_path(GET ALIPATH FILENAME ALI)
+cmake_path(REMOVE_FILENAME ALIPATH OUTPUT_VARIABLE ALI_SEARCH_PATH)
 
 set (REACHED_FLAGS FALSE)
 #iterate over additional objects, only the main one is needed
-foreach(arg RANGE 5 ${CMAKE_ARGC})
+foreach(arg RANGE 6 ${CMAKE_ARGC})
     if(CMAKE_ARGV${arg} STREQUAL FLAGS)
         set(REACHED_FLAGS TRUE)
         continue()
@@ -27,16 +30,18 @@ foreach(arg RANGE 5 ${CMAKE_ARGC})
     if(REACHED_FLAGS)
         list(APPEND FLAGS ${CMAKE_ARGV${arg}})
     endif(REACHED_FLAGS)
-endforeach(arg RANGE 5 CMAKE_ARGC)
+endforeach(arg RANGE 6 CMAKE_ARGC)
+
+list(APPEND FLAGS "-aO${ALI_SEARCH_PATH}")
 
 #first see if there is a main function
-execute_process(COMMAND ${CMAKE_ARGV3} bind ${ALI} ${FLAGS}
+execute_process(COMMAND ${CMAKE_ARGV4} bind ${ALI} ${FLAGS}
                 RESULT_VARIABLE MAIN_RESULT
                 OUTPUT_VARIABLE dont_care
                 ERROR_VARIABLE ERROR)
 
 if(MAIN_RESULT)
-    execute_process(COMMAND ${CMAKE_ARGV3} bind -n ${ALI} ${FLAGS}
+    execute_process(COMMAND ${CMAKE_ARGV4} bind -n ${ALI} ${FLAGS}
                     RESULT_VARIABLE RESULT
                     OUTPUT_VARIABLE dont_care
                     ERROR_VARIABLE ERROR)
@@ -45,3 +50,5 @@ endif(MAIN_RESULT)
 if(RESULT)
     message(FATAL_ERROR ${RESULT} ${ERROR})
 endif(RESULT)
+
+execute_process(COMMAND ${CMAKE_ARGV0} -E touch "${CMAKE_ARGV5}")

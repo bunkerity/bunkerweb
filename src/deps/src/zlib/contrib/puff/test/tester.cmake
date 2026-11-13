@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.12...3.31)
+cmake_minimum_required(VERSION 3.15...3.31)
 
 #CMAKE_ARGV0 = ${CMAKE_COMMAND}
 #CMAKE_ARGV1 = -P

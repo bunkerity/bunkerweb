@@ -38,6 +38,10 @@ function(zlib_add_contrib_feature name description dir)
     endif(ZLIB_WITH_${name})
 endfunction(zlib_add_contrib_feature name description dir)
 
+set(WORK_DIR ${zlib_BINARY_DIR}/test)
+set(ZLIB_CONTRIB_PREFIX "zlib_")
+set(inst_setup zlib_install)
+
 zlib_add_contrib_feature("GVMAT64"
     "of an optimized longest_match for 32 bits x86_64"
     gcc_gvmat64)

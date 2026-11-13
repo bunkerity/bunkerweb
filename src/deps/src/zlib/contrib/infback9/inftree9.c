@@ -9,7 +9,7 @@
 #define MAXBITS 15
 
 const char inflate9_copyright[] =
-   " inflate9 1.3.2 Copyright 1995-2026 Mark Adler ";
+   " inflate9 1.4 Copyright 1995-2026 Mark Adler ";
 /*
   If you use the zlib library in a product, an acknowledgment is welcome
   in the documentation of your product. If for some reason you cannot
@@ -49,7 +49,7 @@ int inflate_table9(codetype type, unsigned short FAR *lens, unsigned codes,
     code FAR *next;             /* next available space in table */
     const unsigned short FAR *base;     /* base value table to use */
     const unsigned short FAR *extra;    /* extra bits table to use */
-    int end;                    /* use base and extra for symbol > end */
+    unsigned match;             /* use base and extra for symbol >= match */
     unsigned short count[MAXBITS+1];    /* number of codes of each length */
     unsigned short offs[MAXBITS+1];     /* offsets in table for each length */
     static const unsigned short lbase[31] = { /* Length codes 257..285 base */
@@ -59,7 +59,7 @@ int inflate_table9(codetype type, unsigned short FAR *lens, unsigned codes,
     static const unsigned short lext[31] = { /* Length codes 257..285 extra */
         128, 128, 128, 128, 128, 128, 128, 128, 129, 129, 129, 129,
         130, 130, 130, 130, 131, 131, 131, 131, 132, 132, 132, 132,
-        133, 133, 133, 133, 144, 199, 75};
+        133, 133, 133, 133, 144, 71, 77};
     static const unsigned short dbase[32] = { /* Distance codes 0..31 base */
         1, 2, 3, 4, 5, 7, 9, 13, 17, 25, 33, 49,
         65, 97, 129, 193, 257, 385, 513, 769, 1025, 1537, 2049, 3073,
@@ -170,19 +170,17 @@ int inflate_table9(codetype type, unsigned short FAR *lens, unsigned codes,
     switch (type) {
     case CODES:
         base = extra = work;    /* dummy value--not used */
-        end = 19;
+        match = 20;
         break;
     case LENS:
         base = lbase;
-        base -= 257;
         extra = lext;
-        extra -= 257;
-        end = 256;
+        match = 257;
         break;
     default:            /* DISTS */
         base = dbase;
         extra = dext;
-        end = -1;
+        match = 0;
     }
 
     /* initialize state for loop */
@@ -205,13 +203,13 @@ int inflate_table9(codetype type, unsigned short FAR *lens, unsigned codes,
     for (;;) {
         /* create table entry */
         this.bits = (unsigned char)(len - drop);
-        if ((int)(work[sym]) < end) {
+        if ((unsigned)(work[sym]) + 1 < match) {
             this.op = (unsigned char)0;
             this.val = work[sym];
         }
-        else if ((int)(work[sym]) > end) {
-            this.op = (unsigned char)(extra[work[sym]]);
-            this.val = base[work[sym]];
+        else if ((work[sym]) >= match) {
+            this.op = (unsigned char)(extra[work[sym]- match]);
+            this.val = base[work[sym]- match];
         }
         else {
             this.op = (unsigned char)(32 + 64);         /* end of block */

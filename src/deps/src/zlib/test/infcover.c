@@ -298,7 +298,7 @@ local void inf(char *hex, char *what, unsigned step, int win, unsigned len,
         mem_done(&strm, what);
         return;
     }
-    out = malloc(len);                          assert(out != NULL);
+    out = malloc(len ? len : 1);                assert(out != NULL);
     if (win == 47) {
         head.extra = out;
         head.extra_max = len;
@@ -360,6 +360,9 @@ local void cover_support(void)
     ret = inflatePrime(&strm, 5, 31);           assert(ret == Z_OK);
     ret = inflatePrime(&strm, -1, 0);           assert(ret == Z_OK);
     ret = inflateSetDictionary(&strm, Z_NULL, 0);
+                                                assert(ret == Z_STREAM_ERROR);
+    ret = inflateReset2(&strm, -15);            assert(ret == Z_OK);
+    ret = inflateSetDictionary(&strm, Z_NULL, 1);
                                                 assert(ret == Z_STREAM_ERROR);
     ret = inflateEnd(&strm);                    assert(ret == Z_OK);
     mem_done(&strm, "prime");

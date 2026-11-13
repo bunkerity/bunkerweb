@@ -45,7 +45,7 @@ $(IMPLIB): $(SHAREDLIB)
 
 $(SHAREDLIB): $(TOP)/win32/zlib.def $(OBJS) $(OBJA) zlib1.res
 	$(LD) $(LDFLAGS) -def:$(TOP)/win32/zlib.def -dll -implib:$(IMPLIB) \
-	  -out:$@ -base:0x5A4C0000 $(OBJS) $(OBJA) zlib1.res
+	  -out:$@ $(OBJS) $(OBJA) zlib1.res
 	if exist $@.manifest \
 	  mt -nologo -manifest $@.manifest -outputresource:$@;2
 

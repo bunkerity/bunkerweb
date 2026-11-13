@@ -26,7 +26,7 @@ if test $SRCDIR = "."; then
     SRCDIR=""
 else
     ZINC='-I. -include zconf.h'
-    ZINCOUT='-I. -I$(SRCDIR)'
+    ZINCOUT='-I. -I$(SRCDIR) -include zconf.h'
     SRCDIR="$SRCDIR/"
 fi
 
@@ -321,7 +321,9 @@ if test "$gcc" -eq 1 && ($cc -c $test.c) >> configure.log 2>&1; then
         esac ;;
   AIX*)
         LDSHARED=${LDSHARED-"$cc -shared"}
-        LDFLAGS="${LDFLAGS} -Wl,-brtl" ;;
+        LDFLAGS="${LDFLAGS} -Wl,-brtl"
+        SHAREDEXP=libz.exp
+        SHAREDEXPFLAG=-Wl,-bE:libz.exp ;;
   Darwin* | darwin* | *-darwin*)
         shared_ext='.dylib'
         SHAREDLIB=libz$shared_ext
@@ -403,6 +405,7 @@ else
          fi
          if test -n "$ZINC"; then
              ZINC='-I- -I. -I$(SRCDIR)'
+             ZINCOUT='-I- -I. -I$(SRCDIR)'
          fi
          ;;
   SunOS\ 4*) SFLAGS=${CFLAGS-"-O2 -PIC"}
@@ -507,6 +510,29 @@ else
   leave 1
 fi
 
+# turn off useless GCC 5 warning about PowerPC vector type alignments.
+if test "$gcc" -eq 1; then
+  cat > $test.c << EOF
+typedef int zvec __attribute__((vector_size(8)));
+struct zstruct { char c; zvec v; };
+int zfunc(struct zstruct *s) { return s->c; }
+EOF
+  echo "Checking for gcc vector ABI notes..." >> configure.log
+  show $CC -c $CFLAGS $test.c
+  got=`( $CC -c $CFLAGS $test.c ) 2>&1`
+  if test "$got" != ""; then
+    printf "%s\n" "$got" >> configure.log
+  fi
+  case "$got" in
+  *"changed in GCC 5"*)
+    if tryboth $CC -c $CFLAGS -Wno-psabi $test.c; then
+      echo "... turning the notes off with -Wno-psabi" >> configure.log
+      CFLAGS="${CFLAGS} -Wno-psabi"
+      SFLAGS="${SFLAGS} -Wno-psabi"
+    fi ;;
+  esac
+fi
+
 echo >> configure.log
 
 # see if shared library build supported
@@ -517,8 +543,15 @@ EOF
 if test $shared -eq 1; then
   echo Checking for shared library support... | tee -a configure.log
   # we must test in two steps (cc then ld), required at least on SunOS 4.x
+  # the second link test is for linkers like lld that by default reject a
+  # version script naming symbols that the test object doesn't define -- if
+  # that's needed, keep the option, since some builds (e.g. --solo) don't
+  # define all of the symbols in zlib.map
   if try $CC -c $SFLAGS $test.c &&
-     try $LDSHARED $SFLAGS $LDFLAGS -o $test$shared_ext $test.o; then
+     { try $LDSHARED $SFLAGS $LDFLAGS -o $test$shared_ext $test.o ||
+       { try $LDSHARED $SFLAGS $LDFLAGS -Wl,--undefined-version \
+             -o $test$shared_ext $test.o &&
+         LDSHARED="$LDSHARED -Wl,--undefined-version"; }; }; then
     echo Building shared library $SHAREDLIBV with $CC. | tee -a configure.log
   elif test -z "$old_cc" -a -z "$old_cflags"; then
     echo No shared library support. | tee -a configure.log
@@ -1024,6 +1057,7 @@ sed < ${SRCDIR}Makefile.in "
 /^LDFLAGS *=/s#=.*#=$LDFLAGS#
 /^LDSHARED *=/s#=.*#=$LDSHARED#
 /^CPP *=/s#=.*#=$CPP#
+/^VGFMAFLAG *=/s#=.*#=$VGFMAFLAG#
 /^STATICLIB *=/s#=.*#=$STATICLIB#
 /^SHAREDLIB *=/s#=.*#=$SHAREDLIB#
 /^SHAREDLIBV *=/s#=.*#=$SHAREDLIBV#
@@ -1033,6 +1067,8 @@ sed < ${SRCDIR}Makefile.in "
 /^RANLIB *=/s#=.*#=$RANLIB#
 /^LDCONFIG *=/s#=.*#=$LDCONFIG#
 /^LDSHAREDLIBC *=/s#=.*#=$LDSHAREDLIBC#
+/^SHAREDEXP *=/s#=.*#=$SHAREDEXP#
+/^SHAREDEXPFLAG *=/s#=.*#=$SHAREDEXPFLAG#
 /^EXE *=/s#=.*#=$EXE#
 /^SRCDIR *=/s#=.*#=$SRCDIR#
 /^ZINC *=/s#=.*#=$ZINC#
@@ -1054,6 +1090,7 @@ sed < ${SRCDIR}zlib.pc.in "
 /^CC *=/s#=.*#=$CC#
 /^CFLAGS *=/s#=.*#=$CFLAGS#
 /^CPP *=/s#=.*#=$CPP#
+/^VGFMAFLAG *=/s#=.*#=$VGFMAFLAG#
 /^LDSHARED *=/s#=.*#=$LDSHARED#
 /^STATICLIB *=/s#=.*#=$STATICLIB#
 /^SHAREDLIB *=/s#=.*#=$SHAREDLIB#

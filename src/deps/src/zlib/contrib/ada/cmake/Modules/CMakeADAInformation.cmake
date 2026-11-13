@@ -68,7 +68,7 @@ endif(NOT CMAKE_ADA_COMPILE_OBJECT)
 if(NOT CMAKE_ADA_LINK_EXECUTABLE)
     set(CMAKE_ADA_LINK_EXECUTABLE
         "${CMAKE_ADA_BINDER_HELPER} <CMAKE_ADA_COMPILER> <OBJECTS> FLAGS <FLAGS> <LINK_FLAGS>"
-        "${CMAKE_ADA_EXE_LINK_HELPER} <CMAKE_ADA_COMPILER> <TARGET> <FLAGS> <CMAKE_C_LINK_FLAGS> <LINK_FLAGS> OBJ <OBJECTS> LIBS <LINK_LIBRARIES>")
+        "${CMAKE_ADA_EXE_LINK_HELPER} <CMAKE_ADA_COMPILER> <TARGET> <FLAGS> <LINK_FLAGS> OBJ <OBJECTS> LIBS <LINK_LIBRARIES>")
 endif(NOT CMAKE_ADA_LINK_EXECUTABLE)
 
 function(ada_add_executable)
@@ -90,6 +90,7 @@ function(ada_add_executable)
         set_target_properties(${ARGV0}
             PROPERTIES
                 ADDITIONAL_CLEAN_FILES "${CLEAN_FILES}")
+        target_link_options(${ARGV0} PRIVATE "-aOCMakeFiles/${ARGV0}.dir/")
     endif(ARGC GREATER 1)
 endfunction(ada_add_executable)
 
@@ -113,6 +114,7 @@ function(ada_add_library)
             PROPERTIES
                 ADDITIONAL_CLEAN_FILES "${CLEAN_FILES};dummylib.adb;dummylib.ali;dummylib.o"
                 ALI_FLAG "-aO${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/${ARGV0}.dir/")
+        target_link_options(${ARGV0} PRIVATE "-aOCMakeFiles/${ARGV0}.dir/")
     endif(ARGC GREATER 2)
 endfunction(ada_add_library)
 

@@ -27,6 +27,7 @@ libminizip_la_LDFLAGS = $(AM_LDFLAGS) -version-info 1:0:0 -lz
 minizip_includedir = $(includedir)/minizip
 minizip_include_HEADERS = \
 	crypt.h \
+	ints.h \
 	ioapi.h \
 	mztools.h \
 	unzip.h \
@@ -39,7 +40,7 @@ pkgconfig_DATA = minizip.pc
 EXTRA_PROGRAMS = miniunzip minizip
 
 miniunzip_SOURCES = miniunz.c
-miniunzip_LDADD = libminizip.la
+miniunzip_LDADD = libminizip.la -lz
 
 minizip_SOURCES = minizip.c
 minizip_LDADD = libminizip.la -lz

@@ -78,6 +78,7 @@
 - [DOCS] `core`: a new section shows how to send the access, error and ModSecurity audit logs to Splunk, with a `key=value` access log and a JSON audit log. The Splunk side uses the official BunkerWeb Add-on for Splunk from Splunkbase.
 - [MISC] `headers`: the default `PERMISSIONS_POLICY` also denies `semantic-embedder` and drops `browsing-topics`, which Chromium removed.
 - [DEPS] Updated lua-resty-session to v4.3.0
+- [DEPS] Updated zlib to v1.4
 
 ## v1.6.18~rc3 - 2026/11/05
 

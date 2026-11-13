@@ -1,0 +1,6 @@
+@PACKAGE_INIT@
+
+include("${CMAKE_CURRENT_LIST_DIR}/ZLIB1DLLTargets.cmake"
+        OPTIONAL)
+
+check_required_components(ZLIB1-DLL)
