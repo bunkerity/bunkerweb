@@ -200,19 +200,17 @@ idna==3.20 \
     --hash=sha256:a7db850025b95ded1eae8a46181a1a6c56c92c96f0e2b005d9ff8dc0210cab44 \
     --hash=sha256:ab7ae7122974553370f0bdb919e1a960b2cd1bc1ef0276416d896db81c14582c
     # via requests
-importlib-metadata==10.1.0 \
-    --hash=sha256:82b04047fa09792c1a8cfeddfe08bec79e4b13c29c8469b0d3949860f61017e8 \
-    --hash=sha256:cf45ce66a929c64e994185a809c04840d0501db17e663810d993d0f4829265c7
+importlib-metadata==10.2.0 \
+    --hash=sha256:9413a2029fd9ca5669d27f1386071bbfe3c7ebca0545692ec975088241fe1d79 \
+    --hash=sha256:c7a4bf1c7479601f6b8e437cfc14f4f77028ba62a8f34ae95cd93d9774dfba51
     # via -r requirements-deps.in
+lazy-importer==0.1.0 \
+    --hash=sha256:b2e296716ce015c0cd80e57b940e52727c5b934b34b8656d5ce06bdd0ee5fbdd \
+    --hash=sha256:bd93fab7bef18e842eea02b839410954d37889140dc64ca4d9680aec6880c739
+    # via importlib-metadata
 packaging==26.3 \
     --hash=sha256:94edc256424af38762eb31306eed28beb9f0efc50a8837492c9d6fd6004aed79 \
     --hash=sha256:d7193f7c8e4e93f444fde0262bf90af30e16fa0ad0ad44cb553c87339b23cd1c
-    # via importlib-metadata
-
-# The following packages are considered to be unsafe in a requirements file:
-pip==26.3 \
-    --hash=sha256:6c36ae7da8695be67e3cd9f7d87919667ced53f57ce2ede75d89b5912ed2bc4c \
-    --hash=sha256:f3b60b20ffaadd4415ed7957212a38ac63fa4c5fa375bd0f4a797777940fad13
     # via
     #   build
     #   pip-upgrader
@@ -248,12 +246,6 @@ questionary==2.1.1 \
 requests==2.34.2 \
     --hash=sha256:2a0d60c172f83ac6ab31e4554906c0f3b3588d37b5cb939b1c061f4907e278e0 \
     --hash=sha256:f288924cae4e29463698d6d60bc6a4da69c89185ad1e0bcc4104f584e960b9ed
-    # via
-    #   -r requirements-deps.in
-    #   pip-tools
-setuptools==84.2.1 \
-    --hash=sha256:3ff8b3b5492a0aa66960f4419365a86b84e013070d4313e4d4a6894f5d64d6bc \
-    --hash=sha256:ca140b45d5325a9478f880e351484f62fef15f336462e449ca0c03c873d589c2
     # via pip-upgrader
 tomli==2.5.0 \
     --hash=sha256:069435bd5480429b98c5e5afb02ab21c219b6f0064680671c6dc0d46817346ea \
@@ -370,6 +362,18 @@ wheel==0.48.0 \
 zipp==4.1.2 \
     --hash=sha256:b30cb6cd253122169c47de245ca24a86bac2a5d3802ba15bf7ba6414eb9e144d \
     --hash=sha256:cf474b90b07ea932637e17c6b9479de2b2882900b0d311bdaf4f5c000a15a97f
+    # via importlib-metadata
+
+# The following packages are considered to be unsafe in a requirements file:
+pip==26.3 \
+    --hash=sha256:6c36ae7da8695be67e3cd9f7d87919667ced53f57ce2ede75d89b5912ed2bc4c \
+    --hash=sha256:f3b60b20ffaadd4415ed7957212a38ac63fa4c5fa375bd0f4a797777940fad13
+    # via
+    #   -r requirements-deps.in
+    #   pip-tools
+setuptools==84.2.1 \
+    --hash=sha256:3ff8b3b5492a0aa66960f4419365a86b84e013070d4313e4d4a6894f5d64d6bc \
+    --hash=sha256:ca140b45d5325a9478f880e351484f62fef15f336462e449ca0c03c873d589c2
     # via
     #   -r requirements-deps.in
     #   pip-tools
