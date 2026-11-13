@@ -66,6 +66,7 @@
 - [BUGFIX] `linux`: RHEL packages now require logrotate.
 - [BUGFIX] `crowdsec`: start stream-mode decision synchronisation during worker initialisation, so an NGINX reload no longer leaves the poller dormant on quiet or whitelisted instances. (Fixes #4151)
 - [BUGFIX] `badbehavior`: match status codes exactly, so aborted requests (status 0) no longer count toward bans. (Refs #4162)
+- [BUGFIX] `errors`: the default error page no longer overflows narrow screens, and its text and links have readable contrast.
 - [PERF] `core`: in a 2-worker lab test, request-path CPU drops 14.2% for HTTP proxying and 33.3% for TLS proxying with the community blacklists.
 - [PERF] `blacklist`: reuse downloaded lists between requests instead of copying and deduplicating them each time.
 - [PERF] `core`: build the reserved-address matcher once per worker and cache successful plugin module lookups.
@@ -73,12 +74,16 @@
 - [PERF] `sessions`: stop reading the random cookie name and secret from shared memory on every request.
 - [PERF] `errors`: the default error page is 44% lighter (a 403 drops from about 69 KB to 39 KB), with no visible change (Refs #3892).
 - [PERF] `antibot`: the challenge pages are about 30% lighter once minified (about 20% with gzip or Brotli), with no visible change.
+- [UI] The web UI is more accessible (zoomable viewport, named icon buttons and fields), and news images load at 768 px instead of full size.
 - [DOCS] `linux`: the custom configuration section says where NGINX includes each type and how to check a file is live.
 - [DOCS] `reverseproxy`: `REVERSE_PROXY_KEEPALIVE` does not pool backend connections by itself; the docs show how to pool with a named upstream.
 - [DOCS] `modsecurity`: document response-body inspection limits for upstream-compressed content and how to request uncompressed content for one reverse-proxy location.
 - [DOCS] `core`: a new section shows how to send the access, error and ModSecurity audit logs to Splunk, with a `key=value` access log and a JSON audit log. The Splunk side uses the official BunkerWeb Add-on for Splunk from Splunkbase.
+- [DOCS] The docs site is more accessible (link contrast, focus rings, a pause button for the banner) and no longer shifts while loading.
+- [DOCS] The docs pages declare absolute `hreflang` alternates, so search engines serve each visitor the right language.
 - [MISC] `headers`: the default `PERMISSIONS_POLICY` also denies `semantic-embedder` and drops `browsing-topics`, which Chromium removed.
 - [MISC] `antibot`: the JavaScript challenge status line reads "computing proof" instead of "searching nonce". (Refs #4172)
+- [MISC] `antibot`: the challenge pages gain a named footer link, a visible captcha field border and no autocapitalisation of the captcha code.
 - [DEPS] Updated lua-resty-session to v4.3.0
 - [DEPS] Updated zlib to v1.4
 - [DEPS] Updated LuaJIT to v2.1-20261107
