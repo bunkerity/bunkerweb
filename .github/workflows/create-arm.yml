@@ -45,6 +45,7 @@ jobs:
         id: availabilities
         uses: scaleway/action-scw@2e34a1eb35cf3cac627f24643a101fea269cbd83
         with:
+          version: v2.65.1 # newer CLIs print a deprecation line before the JSON of `server-type get`
           args: instance server-type get zone=fr-par-2
           export-config: true
           access-key: ${{ secrets.SCW_ACCESS_KEY }}
@@ -62,6 +63,7 @@ jobs:
         id: scw
         uses: scaleway/action-scw@2e34a1eb35cf3cac627f24643a101fea269cbd83
         with:
+          version: v2.65.1
           args: instance server create zone=fr-par-2 type=${{ env.TYPE }} root-volume=block:100GB
       - name: Get info
         id: getinfo
@@ -71,6 +73,7 @@ jobs:
       - name: Wait for VM
         uses: scaleway/action-scw@2e34a1eb35cf3cac627f24643a101fea269cbd83
         with:
+          version: v2.65.1
           args: instance server wait ${{ fromJson(steps.scw.outputs.json).ID }} zone=fr-par-2
       - name: Wait for SSH
         uses: iFaxity/wait-on-action@a7d13170ec542bdca4ef8ac4b15e9c6aa00a6866
