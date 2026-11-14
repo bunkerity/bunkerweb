@@ -1392,16 +1392,20 @@ $(document).ready(() => {
     return form;
   };
 
+  // Saved global values the form is compared against: the RAW config in raw mode,
+  // the advanced inputs' data-original otherwise.
+  const getOriginalGlobalValues = (predicates = makeRawKeyPredicates()) =>
+    currentMode === "raw"
+      ? new Map(
+          parseRawSettings($("#raw-entire-config").val(), predicates).map(
+            ({ key, value }) => [key, value],
+          ),
+        )
+      : originalGlobalValues;
+
   const hasChangedGlobalSettings = (form) => {
     const predicates = makeRawKeyPredicates();
-    const originals =
-      currentMode === "raw"
-        ? new Map(
-            parseRawSettings($("#raw-entire-config").val(), predicates).map(
-              ({ key, value }) => [key, value],
-            ),
-          )
-        : originalGlobalValues;
+    const originals = getOriginalGlobalValues(predicates);
 
     return form
       .find("input, textarea")
@@ -1420,17 +1424,50 @@ $(document).ready(() => {
       });
   };
 
-  const confirmGlobalOverride = ($trigger) =>
+  // PROXY protocol makes NGINX refuse every connection that does not start with a
+  // PROXY header, the web UI included when nothing in front of BunkerWeb sends one.
+  const enablesProxyProtocol = (form) => {
+    const key = "USE_PROXY_PROTOCOL";
+    const $setting = form.find(`[name='${key}']`);
+    if (!$setting.length || $setting.val() !== "yes") return false;
+    // A draft keeps its value without applying it, so saving one changes nothing.
+    // savedGlobalDrafts is the page-load snapshot of the saved drafts, rawDraftSettings
+    // the live set the RAW editor updates (both start from #raw-draft-settings).
+    if (
+      currentMode === "raw"
+        ? rawDraftSettings.has(key)
+        : savedGlobalDrafts.has(key)
+    )
+      return false;
+    // RAW mode activating a saved draft: until now the default applied, not the draft's value.
+    if (currentMode === "raw" && savedGlobalDrafts.has(key)) {
+      const defaults = parseRawSettings(
+        $("#raw-config-defaults").val(),
+        makeRawKeyPredicates(),
+      );
+      return defaults.find((entry) => entry.key === key)?.value !== "yes";
+    }
+    return getOriginalGlobalValues().get(key) !== "yes";
+  };
+
+  const confirmWithModal = (modalSelector, confirmSelector, $trigger) =>
     new Promise((resolve) => {
-      const $modal = $("#modal-apply-all-services").appendTo("body");
-      const $confirm = $modal.find("#confirm-apply-all-services");
+      const $modal = $(modalSelector).appendTo("body");
+      const $confirm = $modal.find(confirmSelector);
       let confirmed = false;
-      $confirm.one("click", () => {
+      let shown = false;
+      $modal.one("shown.bs.modal", () => {
+        shown = true;
+      });
+      $confirm.on("click.confirm-modal", () => {
+        // Bootstrap ignores hide() during the fade-in: a click then would leave the
+        // modal open with the save already accepted, whatever the user does next.
+        if (!shown) return;
         confirmed = true;
         $modal.modal("hide");
       });
       $modal.one("hidden.bs.modal", () => {
-        $confirm.off("click");
+        $confirm.off("click.confirm-modal");
         $trigger.trigger("focus");
         resolve(confirmed);
       });
@@ -2299,9 +2336,24 @@ $(document).ready(() => {
     }
 
     if (
+      $("#modal-confirm-proxy-protocol").length &&
+      enablesProxyProtocol(form) &&
+      !(await confirmWithModal(
+        "#modal-confirm-proxy-protocol",
+        "#confirm-enable-proxy-protocol",
+        $(this),
+      ))
+    )
+      return;
+
+    if (
       isOverrideNonGlobalEnabled() &&
       hasChangedGlobalSettings(form) &&
-      !(await confirmGlobalOverride($(this)))
+      !(await confirmWithModal(
+        "#modal-apply-all-services",
+        "#confirm-apply-all-services",
+        $(this),
+      ))
     )
       return;
 
