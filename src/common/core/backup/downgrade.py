@@ -467,6 +467,7 @@ IRREPRESENTABLE_TABLES = (
     "bw_bans",
     "bw_certificates",
     "bw_ui_user_webauthn_credentials",
+    "bw_ui_login_failures",
     "bw_blob_chunks",
 )
 # `bw_resources` also holds certificates, which 1.6.x does have somewhere to put, so it is

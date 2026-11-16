@@ -212,7 +212,7 @@ EOL
                 fi
 
                 # Stamp the database with the determined revision
-                if $PYTHON_BIN -m alembic stamp "$REVISION"; then
+                if $PYTHON_BIN -m alembic stamp --purge "$REVISION"; then
                     # Run database migration
                     log "SYSTEMCTL" "ℹ️" "Running database migration..."
                     if ! $PYTHON_BIN -m alembic upgrade head; then
@@ -222,9 +222,11 @@ EOL
                     log "SYSTEMCTL" "✅" "Database migration completed successfully"
                 else
                     log "SYSTEMCTL" "❌" "Failed to stamp database with revision: $REVISION, migration aborted"
+                    exit 1
                 fi
             else
                 log "SYSTEMCTL" "❌" "Failed to update version locations in configuration, migration aborted"
+                exit 1
             fi
         else
             # Create temporary Python script to update version

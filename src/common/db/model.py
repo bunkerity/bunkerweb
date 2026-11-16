@@ -1009,6 +1009,18 @@ class UserSessions(Base):
     user: Mapped["Users"] = relationship("Users", back_populates="sessions")
 
 
+class UserLoginFailures(Base):
+    """Failed Web UI logins, the state behind the login throttle. Same table, columns and indexes as 1.6.18~rc3."""
+
+    __tablename__ = "bw_ui_login_failures"
+
+    id: Mapped[int] = mapped_column(Integer, Identity(start=1, increment=1), primary_key=True)
+    # No foreign key on purpose: a failed login for an unknown username is counted too, so a lock never tells whether the user exists
+    username: Mapped[str] = mapped_column(String(256), nullable=False, index=True)
+    ip: Mapped[str] = mapped_column(String(45), nullable=False, index=True)
+    failure_date: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, index=True)
+
+
 class UserPreferences(Base):
     """Per-user key/value store for the web UI.
 

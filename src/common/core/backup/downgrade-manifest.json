@@ -1,68 +1,18 @@
 {
   "$comment": [
-    "Compatibility manifest for the controlled downgrade (see the controlled-downgrade conception, lot A).",
-    "The CLI READS this file and never infers compatibility from a version number, so a release that is",
-    "not described here can only ever be told to restore from a backup -- which is the safe direction.",
-    "",
-    "THREE targets are offered, all measured: 1.6.16 (the newest stable 1.6 release, published 2026-10-14), 1.6.15 (published",
-    "2026-09-21) and 1.6.14. A pair is looked up on (from, to, engine), so `bwcli plugin backup downgrade 1.6.16`,",
-    "`... 1.6.15` and `... 1.6.14` each pick their own row. 1.6.16 is the shortest path -- two revisions (the 1.7.0~alpha head and",
-    "1.6.17~rc1) instead of eight to 1.6.15 and twelve to 1.6.14 -- and the one to prefer; see the notes on the 1.6.14 rows for what the extra revisions cost.",
-    "",
-    "'from' is matched against /usr/share/bunkerweb/VERSION verbatim. BUMP IT WITH src/VERSION: a stale",
-    "'from' makes every pair unmatched and pins the product to restore_only. tests/unit/backup/",
-    "test_downgrade_manifest.py fails when the two disagree, so the bump cannot be forgotten silently.",
-    "",
-    "MEASURED, per engine, by an executed upgrade+downgrade: `mode`, `data_loss`, every `fingerprint`",
-    "field, and each `restore_only` reason. The main run carries sentinel data; the same probe is also re-run with NO sentinel",
-    "rows, so a structural blocker is measured even where a data-dependent one would abort first. Each reason names the artefact it was read from.",
-    "built from `git show v<target>:src/common/db/model.py`, seeded, upgraded to the 1.7 head, seeded again",
-    "with 1.7-only rows and then downgraded back. 1.6.14: .cache/results-2026-09-06-wave13/report-DG-AD.md",
-    "and dgad-probe-*.json. 1.6.15: .cache/wave21-2026-09-21/report-DG-1615.md and dg1615-probe-*.json.",
-    "",
-    "`generated_at` is the date of the most recent measurement in this file, which is what the staleness",
-    "guard in tests/unit/backup/test_downgrade_manifest.py compares against the head's Create Date. It is NOT",
-    "a claim that every row was re-taken on that date: the 1.6.14 fingerprints are wave 13's (2026-09-06),",
-    "re-confirmed on the post-1.6.16~rc1 chain for the landing revision and version on SQLITE ONLY (dg1615-drafts-1614.json); the other three engines' 1.6.14 fingerprints were NOT re-run this wave.",
-    "The 1.6.15 rows were measured on all four engines on 2026-09-21. On 2026-09-25 the 1.7 heads were regenerated as 1.7.0~alpha and the same probe was",
-    "re-run against them for both targets on all four engines (regen-probe-*.json, lane REGEN): sqlite and postgresql are reversible with outcomes",
-    "identical to 2026-09-21, and mariadb/mysql abort on the error-1553 blocker alone, with or without sentinel rows.",
-    "On 2026-10-05 the heads were regenerated again, on top of 1.6.16~rc2 (the METRICS_REDIS_TTL normalisation) and 1.6.16~rc3 (the bw_blob_chunks table), and the same probe was",
-    "re-run for both targets on all four engines (sqlite, PostgreSQL, MariaDB 11, MySQL 8.4; with and without sentinel rows): the outcomes did not move -- sqlite and postgresql reversible,",
-    "mariadb/mysql abort on the error-1553 blocker -- but two figures did: the 1.7-only table count (bw_blob_chunks) and the version a failed attempt leaves in bw_metadata (1.6.16~rc3).",
-    "A third run set one bw_plugins row to the new `download` method before the downgrade: sqlite and postgresql ran to completion and left a schema 1.6.x cannot read (SELECT on bw_plugins",
-    "raises LookupError on the unknown label), mariadb/mysql aborted on error 1265. The preflight therefore answers restore_only while any `download` plugin or any bw_blob_chunks row exists (checks",
-    "`download_plugins` and `irrepresentable_data`); no conversion is offered. Probe, logs and JSON: .cache/wave24-2026-10-05/proofs/L4c/probe/.",
-    "On 2026-10-14 the heads were regenerated a third time, on top of 1.6.16~rc4 and the final 1.6.16 (both only set bw_metadata.version and clear last_pro_check; no schema operation), and the same probe",
-    "was re-run for both targets and the `download` row run on all four engines (sqlite, PostgreSQL 16, MariaDB 11, MySQL 8.4; with and without sentinel rows). The outcomes did not move: sqlite and postgresql",
-    "reversible, mariadb/mysql abort on the error-1553 blocker, the `download` row still ends in a schema 1.6.x cannot read (sqlite/postgresql) or error 1265 (mariadb/mysql). What moved: the head ids, the",
-    "number of revisions the path runs (seven to 1.6.15, eleven to 1.6.14: 1.6.16 and 1.6.16~rc4 are new), and the version a failed attempt leaves in bw_metadata (now 1.6.16). The 14 leftover 1.7 tables and",
-    "the empty list of missing tables of a failed mariadb/mysql attempt were measured again and are unchanged. Probe, logs and JSON: .cache/wave24-2026-10-05/proofs/L4d/probe/.",
-    "",
-    "On 2026-10-15 the heads were regenerated a fourth time, on top of dev's 1.6.17~rc1 (it only sets bw_metadata.version and clears last_pro_check; no schema operation), and the same probe",
-    "was re-run for both targets and the `download` row run on all four engines (sqlite, PostgreSQL 16, MariaDB 11, MySQL 8.4.11; with and without sentinel rows). The outcomes did not move: sqlite and postgresql",
-    "reversible, mariadb/mysql abort on the error-1553 blocker, the `download` row still ends in a schema 1.6.x cannot read (sqlite/postgresql) or error 1265 (mariadb/mysql). What moved: the head ids, the",
-    "number of revisions the path runs (eight to 1.6.15, twelve to 1.6.14: 1.6.17~rc1 is new), and the version a failed attempt leaves in bw_metadata (now 1.6.17~rc1). The 14 leftover 1.7 tables and",
-    "the empty list of missing tables of a failed mariadb/mysql attempt were measured again and are unchanged. Probe, logs and JSON: .cache/wave25-2026-10-15/proofs/W25-D5/probe/.",
-    "",
-    "On 2026-10-16 the 1.6.16 target was added (PO decision D21; no Alembic revision was created or edited: the chain already carries the 1.6.16 revision of every engine). Its four pairs were measured with the same probe, started",
-    "from the real 1.6.16 install instead of 1.6.15 (the model of tag v1.6.16, create_all, stamped at the 1.6.16 revision, seeded, upgraded to the 1.7.0~alpha head, seeded again with 1.7-only rows, downgraded to the 1.6.16",
-    "revision), on all four engines (sqlite, PostgreSQL 16, MariaDB 11, MySQL 8.4.11; with and without sentinel rows, plus the `download` row). The outcomes match the 1.6.15 pairs: sqlite and postgresql reversible with an empty",
-    "schema diff and bw_metadata.version = 1.6.16 afterwards, mariadb/mysql abort on the error-1553 blocker (error 1265 first when a `download` row exists) and leave bw_metadata.version at 1.6.17~rc1. Three figures are specific",
-    "to this target: the path runs two revisions, bw_blob_chunks is part of the target schema and its row survives the downgrade on all four engines (the 1.6.15 and 1.6.14 paths drop the table), and a failed mariadb/mysql",
-    "attempt leaves 13 tables from 1.7 (14 on the 1.6.15 path, which counts bw_blob_chunks among them). The 1.6.15 and 1.6.14 rows were not re-run. Probe, logs and JSON: .cache/wave26-2026-10-16/proofs/W26-DG/probe/.",
-    "",
-    "DERIVED, not measured: the `artifacts` map. It comes from reading the tree (src/common/helpers/data.sh",
-    "is byte-identical between v1.6.14, v1.6.15, v1.6.16 and 1.7, so the /data layout cannot have moved) and from what",
-    "each job regenerates, not from a downgrade run. Treat those values as a documented expectation.",
-    "",
-    "`setting_drafts` says what the path does to individual setting drafts (is_draft = 1 on bw_global_values or",
-    "bw_services_settings): \"kept\" when the target still declares the flag (1.6.15 and 1.6.16), \"refused\" when the path runs",
-    "1.6.15~rc3's downgrade(), which refuses while a draft row exists. The preflight counts the drafts and refuses",
-    "the same way; a row without the field is treated as unproven (restore_only) whenever drafts exist."
+    "Compatibility manifest for controlled downgrade. The CLI reads exact (from, to, engine) rows and never infers support from version ordering.",
+    "All twelve pairs were remeasured 2026-11-05 against the alpha heads parented on 1.6.18~rc3, on SQLite, PostgreSQL 16, MariaDB 11 and MySQL 8.4.",
+    "Three measured rollback targets remain offered: 1.6.16, 1.6.15 and 1.6.14. This is not a claim that 1.6.16 is the newest stable release. The completed paths run 7, 12 and 16 revisions respectively.",
+    "Each pair has sentinel, empty and download-row probes. Targets 1.6.14 and 1.6.15 start from the tagged 1.6.15 model; target 1.6.16 starts from its own tagged model. All are stamped, upgraded, seeded with new-table rows, then downgraded.",
+    "Full subprocess logs and JSON of every probe were kept outside the repository. SQLite/PostgreSQL complete with no target schema delta. MariaDB/MySQL abort inside the alpha head with 1553, or 1265 for download rows, leaving metadata version 1.6.18~rc3 and the alpha stamp.",
+    "New-table counts are relative to each probe baseline: 17 for the 1.6.15 baseline, 16 for 1.6.16. They include login-throttle history introduced by 1.6.18~rc3. Completed older downgrades drop that history; the preflight counts it as certain loss and refuses while rows remain.",
+    "The download variant on SQLite/PostgreSQL completes but leaves a plugin method label the older model cannot read. Download plugins and populated blob chunks remain preflight blockers.",
+    "'from' must match src/VERSION verbatim. generated_at records the measurement date; all twelve rows were measured on that date.",
+    "DERIVED, not measured: artifact compatibility comes from the unchanged data layout and job regeneration behavior, not an image boot after downgrade.",
+    "setting_drafts is kept for 1.6.15/1.6.16 and refused for 1.6.14: that path executes the 1.6.15~rc3 refusal while draft rows remain. Prior draft-specific evidence is retained in the row notes."
   ],
   "schema_version": 1,
-  "generated_at": "2026-10-16",
+  "generated_at": "2026-11-05",
   "releases": [
     {
       "from": "1.7.0~alpha",
@@ -74,7 +24,7 @@
       "required_backup": true,
       "plugin_api_target": "1.6.14",
       "alembic": {
-        "from_revision": "66114d1192c5",
+        "from_revision": "a94dab85c4e3",
         "to_revision": "a526ccfe44b4"
       },
       "artifacts": {
@@ -89,13 +39,13 @@
         "instance_credential_file": "rebuild"
       },
       "fingerprint": {
-        "method": "1.6.14 create_all -> stamp -> sentinel rows -> alembic upgrade head -> 1.7-only sentinel rows -> alembic downgrade to 1.6.14 (twelve revisions run: the 1.7.0~alpha head, 1.6.17~rc1, 1.6.16, 1.6.16~rc4, 1.6.16~rc3, 1.6.16~rc2, the METRICS_REDIS_TTL normalisation, 1.6.16~rc1, 1.6.15, 1.6.15~rc3, 1.6.15~rc2, 1.6.15~rc1)",
+        "method": "1.6.15 tagged model create_all -> stamp -> sentinel rows -> upgrade head -> new-table sentinel rows -> downgrade to 1.6.14; 16 revision(s) attempted; measured 2026-11-05 on sqlite with the sentinel, empty and download-row probes",
         "baseline_tables": 29,
         "baseline_rows_before_upgrade": 28,
         "baseline_rows_after_downgrade": 29,
         "baseline_rows_preserved": true,
         "baseline_row_delta_explained": "+1: bw_ui_user_preferences is renamed back into bw_ui_user_columns_preferences rather than dropped",
-        "one_seven_tables_before_downgrade": 16,
+        "one_seven_tables_before_downgrade": 17,
         "one_seven_tables_after_downgrade": 0,
         "schema_matches_target_model": true,
         "alembic_version_after": "a526ccfe44b4",
@@ -106,7 +56,8 @@
       "notes": [
         "Every table and column the 1.6.14 model declares is present after the downgrade, with no extras.",
         "Non-column user preferences (theme_mode, whats_new, onboarding, walkthrough) reappear in 1.6.14 as bogus per-table column layouts: the downgrade renames bw_ui_user_preferences to bw_ui_user_columns_preferences wholesale instead of filtering the column-layout keys. Expected to be cosmetic rather than a crash, because every writer in src/ui/app/routes/ stores a JSON document -- but that is read off the callers, NOT measured: the probe's own sentinel was not JSON and did raise JSONDecodeError through the 1.6.14 model.",
-        "MEASURED 2026-09-21 on SQLite (dg1615-drafts-1614.json), and NOT reflected in `mode`. Engine-independent by construction: the refusal is a Python RuntimeError raised inside the migration, before any DDL is emitted, and the four engines' 1.6.15~rc3 revisions are byte-identical Python. It is since the 1.6.15/1.6.16~rc1 chain landed, this path runs 1.6.15~rc3's downgrade(), which REFUSES with \"Cannot downgrade individual setting drafts while bw_global_values contains draft rows\" when bw_global_values or bw_services_settings still holds is_draft = 1 -- dropping the flag would silently activate the retained value. The run then stops stamped at the 1.6.15~rc3 revision with bw_metadata.version = '1.6.15~rc3'; `bwcli plugin backup downgrade --execute` catches that and restores its own pre-downgrade backup, so nothing is lost -- but the preflight now refuses before that point: it counts the draft rows, and this row's setting_drafts is \"refused\". 1.7 creates and clears individual setting drafts itself (the RAW editor, PUT /global_settings/config draft_settings), and an upgrade from 1.6.15~rc3 or later carries them over, so any installation can hold them. Activate or delete them before a downgrade to 1.6.14; the 1.6.15 target stops above that revision and keeps them -- prefer it."
+        "MEASURED 2026-09-21 on SQLite (dg1615-drafts-1614.json), and NOT reflected in `mode`. Engine-independent by construction: the refusal is a Python RuntimeError raised inside the migration, before any DDL is emitted, and the four engines' 1.6.15~rc3 revisions are byte-identical Python. It is since the 1.6.15/1.6.16~rc1 chain landed, this path runs 1.6.15~rc3's downgrade(), which REFUSES with \"Cannot downgrade individual setting drafts while bw_global_values contains draft rows\" when bw_global_values or bw_services_settings still holds is_draft = 1 -- dropping the flag would silently activate the retained value. The run then stops stamped at the 1.6.15~rc3 revision with bw_metadata.version = '1.6.15~rc3'; `bwcli plugin backup downgrade --execute` catches that and restores its own pre-downgrade backup, so nothing is lost -- but the preflight now refuses before that point: it counts the draft rows, and this row's setting_drafts is \"refused\". 1.7 creates and clears individual setting drafts itself (the RAW editor, PUT /global_settings/config draft_settings), and an upgrade from 1.6.15~rc3 or later carries them over, so any installation can hold them. Activate or delete them before a downgrade to 1.6.14; the 1.6.15 target stops above that revision and keeps them -- prefer it.",
+        "MEASURED 2026-11-05: this path runs 16 revisions, including the rc3 revision that drops bw_ui_login_failures. Its seeded login-failure row is lost; the preflight now refuses while any login-failure records remain. The download-row variant completes but the target model cannot read the download method label; that installation remains restore_only."
       ]
     },
     {
@@ -119,7 +70,7 @@
       "required_backup": true,
       "plugin_api_target": "1.6.14",
       "alembic": {
-        "from_revision": "771093deaf74",
+        "from_revision": "f1115a603604",
         "to_revision": "827a0053a73e"
       },
       "artifacts": {
@@ -135,13 +86,13 @@
         "enum_types": "rebuild"
       },
       "fingerprint": {
-        "method": "1.6.14 create_all -> stamp -> sentinel rows -> alembic upgrade head -> 1.7-only sentinel rows -> alembic downgrade to 1.6.14 (twelve revisions run: the 1.7.0~alpha head, 1.6.17~rc1, 1.6.16, 1.6.16~rc4, 1.6.16~rc3, 1.6.16~rc2, the METRICS_REDIS_TTL normalisation, 1.6.16~rc1, 1.6.15, 1.6.15~rc3, 1.6.15~rc2, 1.6.15~rc1)",
+        "method": "1.6.15 tagged model create_all -> stamp -> sentinel rows -> upgrade head -> new-table sentinel rows -> downgrade to 1.6.14; 16 revision(s) attempted; measured 2026-11-05 on postgresql with the sentinel, empty and download-row probes",
         "baseline_tables": 29,
         "baseline_rows_before_upgrade": 28,
         "baseline_rows_after_downgrade": 29,
         "baseline_rows_preserved": true,
         "baseline_row_delta_explained": "+1: bw_ui_user_preferences is renamed back into bw_ui_user_columns_preferences rather than dropped",
-        "one_seven_tables_before_downgrade": 16,
+        "one_seven_tables_before_downgrade": 17,
         "one_seven_tables_after_downgrade": 0,
         "schema_matches_target_model": true,
         "alembic_version_after": "827a0053a73e",
@@ -152,7 +103,8 @@
       "notes": [
         "Two enum TYPES the 1.7 upgrade creates are not dropped by the downgrade (instance_tls_mode_enum, resource_kinds_enum), and the values added to api_resource_enum and settings_types_enum cannot be removed at all -- PostgreSQL has no ALTER TYPE ... DROP VALUE. Measured harmless: 1.6.14 never references them, the one SELECT failure the probe recorded is its own non-JSON sentinel (see target_model_select_failures_detail) and not these types, and a later re-upgrade is idempotent (CREATE TYPE ... EXCEPTION WHEN duplicate_object, ADD VALUE IF NOT EXISTS).",
         "Those leftover values are also what SAVES PostgreSQL where MariaDB/MySQL fail: bw_ui_users.method keeps 'api' as a legal label instead of having the enum narrowed under it.",
-        "MEASURED 2026-09-21 on SQLite (dg1615-drafts-1614.json), and NOT reflected in `mode`. Engine-independent by construction: the refusal is a Python RuntimeError raised inside the migration, before any DDL is emitted, and the four engines' 1.6.15~rc3 revisions are byte-identical Python. It is since the 1.6.15/1.6.16~rc1 chain landed, this path runs 1.6.15~rc3's downgrade(), which REFUSES with \"Cannot downgrade individual setting drafts while bw_global_values contains draft rows\" when bw_global_values or bw_services_settings still holds is_draft = 1 -- dropping the flag would silently activate the retained value. The run then stops stamped at the 1.6.15~rc3 revision with bw_metadata.version = '1.6.15~rc3'; `bwcli plugin backup downgrade --execute` catches that and restores its own pre-downgrade backup, so nothing is lost -- but the preflight now refuses before that point: it counts the draft rows, and this row's setting_drafts is \"refused\". 1.7 creates and clears individual setting drafts itself (the RAW editor, PUT /global_settings/config draft_settings), and an upgrade from 1.6.15~rc3 or later carries them over, so any installation can hold them. Activate or delete them before a downgrade to 1.6.14; the 1.6.15 target stops above that revision and keeps them -- prefer it."
+        "MEASURED 2026-09-21 on SQLite (dg1615-drafts-1614.json), and NOT reflected in `mode`. Engine-independent by construction: the refusal is a Python RuntimeError raised inside the migration, before any DDL is emitted, and the four engines' 1.6.15~rc3 revisions are byte-identical Python. It is since the 1.6.15/1.6.16~rc1 chain landed, this path runs 1.6.15~rc3's downgrade(), which REFUSES with \"Cannot downgrade individual setting drafts while bw_global_values contains draft rows\" when bw_global_values or bw_services_settings still holds is_draft = 1 -- dropping the flag would silently activate the retained value. The run then stops stamped at the 1.6.15~rc3 revision with bw_metadata.version = '1.6.15~rc3'; `bwcli plugin backup downgrade --execute` catches that and restores its own pre-downgrade backup, so nothing is lost -- but the preflight now refuses before that point: it counts the draft rows, and this row's setting_drafts is \"refused\". 1.7 creates and clears individual setting drafts itself (the RAW editor, PUT /global_settings/config draft_settings), and an upgrade from 1.6.15~rc3 or later carries them over, so any installation can hold them. Activate or delete them before a downgrade to 1.6.14; the 1.6.15 target stops above that revision and keeps them -- prefer it.",
+        "MEASURED 2026-11-05: this path runs 16 revisions, including the rc3 revision that drops bw_ui_login_failures. Its seeded login-failure row is lost; the preflight now refuses while any login-failure records remain. The download-row variant completes but the target model cannot read the download method label; that installation remains restore_only."
       ]
     },
     {
@@ -165,7 +117,7 @@
       "required_backup": true,
       "plugin_api_target": "1.6.14",
       "alembic": {
-        "from_revision": "bddf0fbfac2d",
+        "from_revision": "b8da3e7aac02",
         "to_revision": "31d990845df6"
       },
       "artifacts": {
@@ -179,14 +131,14 @@
         "external_plugins": "conditional",
         "instance_credential_file": "rebuild"
       },
-      "reason": "The 1.7 head's downgrade() does not run to completion on MariaDB. One blocker, structural and data-independent, MEASURED 2026-10-15 on the regenerated 1.7.0~alpha head, with and without sentinel rows (.cache/wave25-2026-10-15/proofs/W25-D5/probe/probe-1.6.14-mariadb.json, probe-1.6.14-empty-mariadb.json): DROP INDEX ix_bw_resource_group_usages_plugin_id fails with error 1553, 'needed in a foreign key constraint', on an index drop_table makes redundant. The abort is inside the 1.7 head's own downgrade(), which both targets execute in full. The former data-dependent blocker, error 1265 on ALTER TABLE bw_ui_users MODIFY method ENUM(...) for a row holding 'api', is gone: 1.6.15~rc2 already adds 'api' to method and its downgrade() keeps it, so the regenerated head no longer narrows the column (the same probe, with an 'api' row, now gets past it). Worse than a plain refusal: the failure is partial. The first statement of downgrade() commits the bw_metadata version bump under MariaDB's non-transactional DDL, so a failed attempt leaves bw_metadata.version at 1.6.17~rc1 while alembic_version still names the 1.7 head and the schema is a hybrid -- a state the preflight refuses and the scheduler entrypoint cannot recover from. Restore from backup is the only path. A plugin row labelled `download` (the label the 1.7.0~alpha head adds) brings a 1265 class back: with one present the narrowing MODIFY of bw_plugins.method fails with error 1265 before the 1553 above (MEASURED 2026-10-15, probe-1.6.15-download-*.json); the preflight refuses such an installation before it gets that far.",
+      "reason": "MEASURED 2026-11-05 on mariadb, target 1.6.14, with the sentinel, empty and download-row probes. With and without sentinel rows, the alpha head's downgrade aborts on DROP INDEX ix_bw_resource_group_usages_plugin_id with error 1553 (needed in a foreign key constraint). A download-labelled plugin instead triggers error 1265 while narrowing bw_plugins.method, before the index failure; the preflight refuses download rows. Non-transactional DDL has already committed bw_metadata.version = 1.6.18~rc3, while alembic_version remains b8da3e7aac02; the schema is a hybrid. Restore from backup is required. No revision was hand-edited to bypass either blocker.",
       "fingerprint": {
-        "method": "same probe as sqlite/postgresql; the downgrade aborted mid-way",
+        "method": "1.6.15 tagged model create_all -> stamp -> sentinel rows -> upgrade head -> new-table sentinel rows -> downgrade to 1.6.14; 1 revision(s) attempted; measured 2026-11-05 on mariadb with the sentinel, empty and download-row probes",
         "downgrade_completed": false,
         "state_after_failure": {
-          "alembic_version": "bddf0fbfac2d",
-          "bw_metadata_version": "1.6.17~rc1",
-          "tables_left_from_1_7": 14,
+          "alembic_version": "b8da3e7aac02",
+          "bw_metadata_version": "1.6.18~rc3",
+          "tables_left_from_1_7": 15,
           "tables_missing_for_1_6_14": []
         }
       }
@@ -201,7 +153,7 @@
       "required_backup": true,
       "plugin_api_target": "1.6.14",
       "alembic": {
-        "from_revision": "3262a37cf54c",
+        "from_revision": "820dea21bc01",
         "to_revision": "85241481d5a4"
       },
       "artifacts": {
@@ -215,14 +167,14 @@
         "external_plugins": "conditional",
         "instance_credential_file": "rebuild"
       },
-      "reason": "The 1.7 head's downgrade() does not run to completion on MySQL 8 either. One blocker, MEASURED 2026-10-15 on a real MySQL 8 (8.4) against the regenerated 1.7.0~alpha head, with and without sentinel rows (probe-1.6.14-mysql.json, probe-1.6.14-empty-mysql.json): DROP INDEX ix_bw_resource_group_usages_plugin_id fails with error 1553, 'needed in a foreign key constraint', exactly as on MariaDB. The former data-dependent blocker, error 1265 on ALTER TABLE bw_ui_users MODIFY method ENUM(...) for a row holding 'api', is gone: 1.6.15~rc2 already adds 'api' to method and its downgrade() keeps it, so the regenerated head no longer narrows the column (the same probe, with an 'api' row, now gets past it). The version bump in bw_metadata has already committed when it aborts, so the database is left claiming 1.6.17~rc1 on a hybrid schema. Restore from backup is the only path. A plugin row labelled `download` (the label the 1.7.0~alpha head adds) brings a 1265 class back: with one present the narrowing MODIFY of bw_plugins.method fails with error 1265 before the 1553 above (MEASURED 2026-10-15, probe-1.6.15-download-*.json); the preflight refuses such an installation before it gets that far.",
+      "reason": "MEASURED 2026-11-05 on mysql, target 1.6.14, with the sentinel, empty and download-row probes. With and without sentinel rows, the alpha head's downgrade aborts on DROP INDEX ix_bw_resource_group_usages_plugin_id with error 1553 (needed in a foreign key constraint). A download-labelled plugin instead triggers error 1265 while narrowing bw_plugins.method, before the index failure; the preflight refuses download rows. Non-transactional DDL has already committed bw_metadata.version = 1.6.18~rc3, while alembic_version remains 820dea21bc01; the schema is a hybrid. Restore from backup is required. No revision was hand-edited to bypass either blocker.",
       "fingerprint": {
-        "method": "same probe as sqlite/postgresql; the downgrade aborted mid-way",
+        "method": "1.6.15 tagged model create_all -> stamp -> sentinel rows -> upgrade head -> new-table sentinel rows -> downgrade to 1.6.14; 1 revision(s) attempted; measured 2026-11-05 on mysql with the sentinel, empty and download-row probes",
         "downgrade_completed": false,
         "state_after_failure": {
-          "alembic_version": "3262a37cf54c",
-          "bw_metadata_version": "1.6.17~rc1",
-          "tables_left_from_1_7": 14,
+          "alembic_version": "820dea21bc01",
+          "bw_metadata_version": "1.6.18~rc3",
+          "tables_left_from_1_7": 15,
           "tables_missing_for_1_6_14": []
         }
       }
@@ -237,7 +189,7 @@
       "required_backup": true,
       "plugin_api_target": "1.6.15",
       "alembic": {
-        "from_revision": "66114d1192c5",
+        "from_revision": "a94dab85c4e3",
         "to_revision": "92cc379052ad"
       },
       "artifacts": {
@@ -252,13 +204,13 @@
         "instance_credential_file": "rebuild"
       },
       "fingerprint": {
-        "method": "1.6.15 create_all -> stamp -> sentinel rows -> alembic upgrade head -> 1.7-only sentinel rows -> alembic downgrade to 1.6.15 (eight revisions run: the 1.7.0~alpha head, 1.6.17~rc1, 1.6.16, 1.6.16~rc4, 1.6.16~rc3, 1.6.16~rc2, the METRICS_REDIS_TTL normalisation, 1.6.16~rc1)",
+        "method": "1.6.15 tagged model create_all -> stamp -> sentinel rows -> upgrade head -> new-table sentinel rows -> downgrade to 1.6.15; 12 revision(s) attempted; measured 2026-11-05 on sqlite with the sentinel, empty and download-row probes",
         "baseline_tables": 29,
         "baseline_rows_before_upgrade": 28,
         "baseline_rows_after_downgrade": 29,
         "baseline_rows_preserved": true,
         "baseline_row_delta_explained": "+1: bw_ui_user_preferences is renamed back into bw_ui_user_columns_preferences rather than dropped",
-        "one_seven_tables_before_downgrade": 16,
+        "one_seven_tables_before_downgrade": 17,
         "one_seven_tables_after_downgrade": 0,
         "schema_matches_target_model": true,
         "alembic_version_after": "92cc379052ad",
@@ -270,7 +222,8 @@
         "Every table and column the 1.6.15 model declares is present after the downgrade, with no extras.",
         "Three columns the 1.6.14 target loses SURVIVE here, because the revisions that drop them are not reached: bw_ui_users.totp_last_counter (dropped by 1.6.15~rc2's downgrade) and the is_draft flag on bw_global_values and bw_services_settings (dropped by 1.6.15~rc3's). data_loss_detail.columns is the union for the 1.6.14 target and therefore over-states bw_ui_users for this pair by that one column.",
         "A second reason to prefer this target on every engine: 1.6.15~rc3's downgrade() REFUSES outright (RuntimeError) when bw_global_values or bw_services_settings still holds a draft row, because dropping is_draft would silently activate the retained value. The path to 1.6.15 stops above that revision, so an installation with individual setting drafts can take this rollback and cannot take the 1.6.14 one.",
-        "Non-column user preferences (theme_mode, whats_new, onboarding, walkthrough) reappear in 1.6.15 as bogus per-table column layouts: the downgrade renames bw_ui_user_preferences to bw_ui_user_columns_preferences wholesale instead of filtering the column-layout keys. Expected to be cosmetic rather than a crash, because every writer in src/ui/app/routes/ stores a JSON document -- but that is read off the callers, NOT measured: the probe's own sentinel was not JSON and did raise JSONDecodeError through the 1.6.15 model."
+        "Non-column user preferences (theme_mode, whats_new, onboarding, walkthrough) reappear in 1.6.15 as bogus per-table column layouts: the downgrade renames bw_ui_user_preferences to bw_ui_user_columns_preferences wholesale instead of filtering the column-layout keys. Expected to be cosmetic rather than a crash, because every writer in src/ui/app/routes/ stores a JSON document -- but that is read off the callers, NOT measured: the probe's own sentinel was not JSON and did raise JSONDecodeError through the 1.6.15 model.",
+        "MEASURED 2026-11-05: this path runs 12 revisions, including the rc3 revision that drops bw_ui_login_failures. Its seeded login-failure row is lost; the preflight now refuses while any login-failure records remain. The download-row variant completes but the target model cannot read the download method label; that installation remains restore_only."
       ]
     },
     {
@@ -283,7 +236,7 @@
       "required_backup": true,
       "plugin_api_target": "1.6.15",
       "alembic": {
-        "from_revision": "771093deaf74",
+        "from_revision": "f1115a603604",
         "to_revision": "dafb358e2ae1"
       },
       "artifacts": {
@@ -299,13 +252,13 @@
         "enum_types": "rebuild"
       },
       "fingerprint": {
-        "method": "1.6.15 create_all -> stamp -> sentinel rows -> alembic upgrade head -> 1.7-only sentinel rows -> alembic downgrade to 1.6.15 (eight revisions run: the 1.7.0~alpha head, 1.6.17~rc1, 1.6.16, 1.6.16~rc4, 1.6.16~rc3, 1.6.16~rc2, the METRICS_REDIS_TTL normalisation, 1.6.16~rc1)",
+        "method": "1.6.15 tagged model create_all -> stamp -> sentinel rows -> upgrade head -> new-table sentinel rows -> downgrade to 1.6.15; 12 revision(s) attempted; measured 2026-11-05 on postgresql with the sentinel, empty and download-row probes",
         "baseline_tables": 29,
         "baseline_rows_before_upgrade": 28,
         "baseline_rows_after_downgrade": 29,
         "baseline_rows_preserved": true,
         "baseline_row_delta_explained": "+1: bw_ui_user_preferences is renamed back into bw_ui_user_columns_preferences rather than dropped",
-        "one_seven_tables_before_downgrade": 16,
+        "one_seven_tables_before_downgrade": 17,
         "one_seven_tables_after_downgrade": 0,
         "schema_matches_target_model": true,
         "alembic_version_after": "dafb358e2ae1",
@@ -318,7 +271,8 @@
         "Two enum TYPES the 1.7 upgrade creates are still not dropped (instance_tls_mode_enum, resource_kinds_enum) and the values added to api_resource_enum and settings_types_enum cannot be removed at all. Measured here against 1.6.15's own model: the same two orphans, no SELECT failure caused by them.",
         "Those leftover values are also what SAVES PostgreSQL where MariaDB/MySQL fail: bw_ui_users.method keeps 'api' as a legal label instead of having the enum narrowed under it.",
         "Three columns the 1.6.14 target loses SURVIVE here, because the revisions that drop them are not reached: bw_ui_users.totp_last_counter (dropped by 1.6.15~rc2's downgrade) and the is_draft flag on bw_global_values and bw_services_settings (dropped by 1.6.15~rc3's). data_loss_detail.columns is the union for the 1.6.14 target and therefore over-states bw_ui_users for this pair by that one column.",
-        "A second reason to prefer this target on every engine: 1.6.15~rc3's downgrade() REFUSES outright (RuntimeError) when bw_global_values or bw_services_settings still holds a draft row, because dropping is_draft would silently activate the retained value. The path to 1.6.15 stops above that revision, so an installation with individual setting drafts can take this rollback and cannot take the 1.6.14 one."
+        "A second reason to prefer this target on every engine: 1.6.15~rc3's downgrade() REFUSES outright (RuntimeError) when bw_global_values or bw_services_settings still holds a draft row, because dropping is_draft would silently activate the retained value. The path to 1.6.15 stops above that revision, so an installation with individual setting drafts can take this rollback and cannot take the 1.6.14 one.",
+        "MEASURED 2026-11-05: this path runs 12 revisions, including the rc3 revision that drops bw_ui_login_failures. Its seeded login-failure row is lost; the preflight now refuses while any login-failure records remain. The download-row variant completes but the target model cannot read the download method label; that installation remains restore_only."
       ]
     },
     {
@@ -331,7 +285,7 @@
       "required_backup": true,
       "plugin_api_target": "1.6.15",
       "alembic": {
-        "from_revision": "bddf0fbfac2d",
+        "from_revision": "b8da3e7aac02",
         "to_revision": "087f746b707b"
       },
       "artifacts": {
@@ -345,14 +299,14 @@
         "external_plugins": "conditional",
         "instance_credential_file": "rebuild"
       },
-      "reason": "The 1.7 head's downgrade() does not run to completion on MariaDB 11, and stopping at 1.6.15 instead of 1.6.14 changes nothing: the blocker lives in the head's own downgrade(), which this path still executes in full. MEASURED 2026-10-15 on this engine, for this target, against the regenerated 1.7.0~alpha head, with and without sentinel rows (probe-1.6.15-mariadb.json, probe-1.6.15-empty-mariadb.json): DROP INDEX ix_bw_resource_group_usages_plugin_id fails with error 1553, 'needed in a foreign key constraint', on an index drop_table makes redundant. The former data-dependent blocker, error 1265 on ALTER TABLE bw_ui_users MODIFY method ENUM(...) for a row holding 'api', is gone: 1.6.15~rc2 already adds 'api' to method and its downgrade() keeps it, so the regenerated head no longer narrows the column (the same probe, with an 'api' row, now gets past it). Worse than a plain refusal: the failure is partial. The head's downgrade() commits the bw_metadata version bump under non-transactional DDL before the DROP INDEX runs, so a failed attempt leaves bw_metadata.version at 1.6.17~rc1 while alembic_version still names bddf0fbfac2d and the schema is a hybrid -- a state the preflight refuses and the scheduler entrypoint cannot recover from. Restore from backup is the only path. A plugin row labelled `download` (the label the 1.7.0~alpha head adds) brings a 1265 class back: with one present the narrowing MODIFY of bw_plugins.method fails with error 1265 before the 1553 above (MEASURED 2026-10-15, probe-1.6.15-download-*.json); the preflight refuses such an installation before it gets that far.",
+      "reason": "MEASURED 2026-11-05 on mariadb, target 1.6.15, with the sentinel, empty and download-row probes. With and without sentinel rows, the alpha head's downgrade aborts on DROP INDEX ix_bw_resource_group_usages_plugin_id with error 1553 (needed in a foreign key constraint). A download-labelled plugin instead triggers error 1265 while narrowing bw_plugins.method, before the index failure; the preflight refuses download rows. Non-transactional DDL has already committed bw_metadata.version = 1.6.18~rc3, while alembic_version remains b8da3e7aac02; the schema is a hybrid. Restore from backup is required. No revision was hand-edited to bypass either blocker.",
       "fingerprint": {
-        "method": "same probe as sqlite/postgresql; the downgrade aborted mid-way",
+        "method": "1.6.15 tagged model create_all -> stamp -> sentinel rows -> upgrade head -> new-table sentinel rows -> downgrade to 1.6.15; 1 revision(s) attempted; measured 2026-11-05 on mariadb with the sentinel, empty and download-row probes",
         "downgrade_completed": false,
         "state_after_failure": {
-          "alembic_version": "bddf0fbfac2d",
-          "bw_metadata_version": "1.6.17~rc1",
-          "tables_left_from_1_7": 14,
+          "alembic_version": "b8da3e7aac02",
+          "bw_metadata_version": "1.6.18~rc3",
+          "tables_left_from_1_7": 15,
           "tables_missing_for_1_6_15": []
         }
       }
@@ -367,7 +321,7 @@
       "required_backup": true,
       "plugin_api_target": "1.6.15",
       "alembic": {
-        "from_revision": "3262a37cf54c",
+        "from_revision": "820dea21bc01",
         "to_revision": "9f5c8bc80fe0"
       },
       "artifacts": {
@@ -381,14 +335,14 @@
         "external_plugins": "conditional",
         "instance_credential_file": "rebuild"
       },
-      "reason": "The 1.7 head's downgrade() does not run to completion on MySQL 8, and stopping at 1.6.15 instead of 1.6.14 changes nothing: the blocker lives in the head's own downgrade(), which this path still executes in full. MEASURED 2026-10-15 on this engine (MySQL 8.4), for this target, against the regenerated 1.7.0~alpha head, with and without sentinel rows (probe-1.6.15-mysql.json, probe-1.6.15-empty-mysql.json): DROP INDEX ix_bw_resource_group_usages_plugin_id fails with error 1553, 'needed in a foreign key constraint', on an index drop_table makes redundant. The former data-dependent blocker, error 1265 on ALTER TABLE bw_ui_users MODIFY method ENUM(...) for a row holding 'api', is gone: 1.6.15~rc2 already adds 'api' to method and its downgrade() keeps it, so the regenerated head no longer narrows the column (the same probe, with an 'api' row, now gets past it). Worse than a plain refusal: the failure is partial. The head's downgrade() commits the bw_metadata version bump under non-transactional DDL before the DROP INDEX runs, so a failed attempt leaves bw_metadata.version at 1.6.17~rc1 while alembic_version still names 3262a37cf54c and the schema is a hybrid -- a state the preflight refuses and the scheduler entrypoint cannot recover from. Restore from backup is the only path. A plugin row labelled `download` (the label the 1.7.0~alpha head adds) brings a 1265 class back: with one present the narrowing MODIFY of bw_plugins.method fails with error 1265 before the 1553 above (MEASURED 2026-10-15, probe-1.6.15-download-*.json); the preflight refuses such an installation before it gets that far.",
+      "reason": "MEASURED 2026-11-05 on mysql, target 1.6.15, with the sentinel, empty and download-row probes. With and without sentinel rows, the alpha head's downgrade aborts on DROP INDEX ix_bw_resource_group_usages_plugin_id with error 1553 (needed in a foreign key constraint). A download-labelled plugin instead triggers error 1265 while narrowing bw_plugins.method, before the index failure; the preflight refuses download rows. Non-transactional DDL has already committed bw_metadata.version = 1.6.18~rc3, while alembic_version remains 820dea21bc01; the schema is a hybrid. Restore from backup is required. No revision was hand-edited to bypass either blocker.",
       "fingerprint": {
-        "method": "same probe as sqlite/postgresql; the downgrade aborted mid-way",
+        "method": "1.6.15 tagged model create_all -> stamp -> sentinel rows -> upgrade head -> new-table sentinel rows -> downgrade to 1.6.15; 1 revision(s) attempted; measured 2026-11-05 on mysql with the sentinel, empty and download-row probes",
         "downgrade_completed": false,
         "state_after_failure": {
-          "alembic_version": "3262a37cf54c",
-          "bw_metadata_version": "1.6.17~rc1",
-          "tables_left_from_1_7": 14,
+          "alembic_version": "820dea21bc01",
+          "bw_metadata_version": "1.6.18~rc3",
+          "tables_left_from_1_7": 15,
           "tables_missing_for_1_6_15": []
         }
       }
@@ -403,7 +357,7 @@
       "required_backup": true,
       "plugin_api_target": "1.6.16",
       "alembic": {
-        "from_revision": "66114d1192c5",
+        "from_revision": "a94dab85c4e3",
         "to_revision": "b76ecb679304"
       },
       "artifacts": {
@@ -418,13 +372,13 @@
         "instance_credential_file": "rebuild"
       },
       "fingerprint": {
-        "method": "1.6.16 create_all -> stamp -> sentinel rows -> alembic upgrade head -> 1.7-only sentinel rows -> alembic downgrade to 1.6.16 (two revisions run: the 1.7.0~alpha head and 1.6.17~rc1)",
+        "method": "1.6.16 tagged model create_all -> stamp -> sentinel rows -> upgrade head -> new-table sentinel rows -> downgrade to 1.6.16; 7 revision(s) attempted; measured 2026-11-05 on sqlite with the sentinel, empty and download-row probes",
         "baseline_tables": 30,
         "baseline_rows_before_upgrade": 29,
         "baseline_rows_after_downgrade": 30,
         "baseline_rows_preserved": true,
         "baseline_row_delta_explained": "+1: bw_ui_user_preferences is renamed back into bw_ui_user_columns_preferences rather than dropped",
-        "one_seven_tables_before_downgrade": 15,
+        "one_seven_tables_before_downgrade": 16,
         "one_seven_tables_after_downgrade": 0,
         "schema_matches_target_model": true,
         "alembic_version_after": "b76ecb679304",
@@ -434,10 +388,10 @@
       },
       "notes": [
         "Every table and column the 1.6.16 model declares is present after the downgrade, with no extras (schema_diff empty, with and without sentinel rows). 1.7 adds fifteen tables to the 1.6.16 schema; all fifteen are gone afterwards.",
-        "The shortest rollback: this path runs two revisions, the 1.7.0~alpha head and 1.6.17~rc1 (which only records the version), against eight to 1.6.15 and twelve to 1.6.14. It stops above 1.6.16~rc1 to 1.6.16, so it reaches none of the revisions the 1.6.15 and 1.6.14 targets run: the model of tag v1.6.16 is the 1.6.15 model plus the bw_blob_chunks table and a version default, and the columns bw_ui_users.totp_last_counter and the is_draft flags survive here as they do on the 1.6.15 target. data_loss_detail.columns is the union for the 1.6.14 target and therefore over-states bw_ui_users for this pair by that one column.",
         "bw_blob_chunks belongs to the 1.6.16 schema (added by 1.6.16~rc3), so unlike the 1.6.15 and 1.6.14 targets this path does not drop it: the probe seeded one chunk row before the upgrade and found it after the downgrade, on all four engines (1 -> 1). The probe's chunk row has no owner row behind it, so what is measured is the table and its rows, not a chunked value. The preflight does not know that: it counts bw_blob_chunks and answers restore_only while a row exists, whatever the target, so it is stricter than this target needs (the safe direction). Whether a 1.6.16 reader reassembles a chunked value after the round trip is NOT measured here.",
         "Non-column user preferences (theme_mode, whats_new, onboarding, walkthrough) reappear in 1.6.16 as bogus per-table column layouts: the downgrade renames bw_ui_user_preferences to bw_ui_user_columns_preferences wholesale instead of filtering the column-layout keys. Expected to be cosmetic rather than a crash, because every writer in src/ui/app/routes/ stores a JSON document -- but that is read off the callers, NOT measured: the probe's own sentinel was not JSON and did raise JSONDecodeError through the 1.6.16 model.",
-        "A plugin row labelled `download` (the label the 1.7.0~alpha head adds) is not converted: MEASURED 2026-10-16 (probe-1.6.16-download-sqlite.json), the downgrade runs to completion and the 1.6.16 model then raises LookupError on SELECT bw_plugins. The preflight refuses such an installation before it gets that far (check `download_plugins`)."
+        "A plugin row labelled `download` (the label the 1.7.0~alpha head adds) is not converted: MEASURED 2026-10-16 (probe-1.6.16-download-sqlite.json), the downgrade runs to completion and the 1.6.16 model then raises LookupError on SELECT bw_plugins. The preflight refuses such an installation before it gets that far (check `download_plugins`).",
+        "MEASURED 2026-11-05: this path runs 7 revisions, including the rc3 revision that drops bw_ui_login_failures. Its seeded login-failure row is lost; the preflight now refuses while any login-failure records remain. The download-row variant completes but the target model cannot read the download method label; that installation remains restore_only."
       ]
     },
     {
@@ -450,7 +404,7 @@
       "required_backup": true,
       "plugin_api_target": "1.6.16",
       "alembic": {
-        "from_revision": "771093deaf74",
+        "from_revision": "f1115a603604",
         "to_revision": "0a235724ffd7"
       },
       "artifacts": {
@@ -466,13 +420,13 @@
         "enum_types": "rebuild"
       },
       "fingerprint": {
-        "method": "1.6.16 create_all -> stamp -> sentinel rows -> alembic upgrade head -> 1.7-only sentinel rows -> alembic downgrade to 1.6.16 (two revisions run: the 1.7.0~alpha head and 1.6.17~rc1)",
+        "method": "1.6.16 tagged model create_all -> stamp -> sentinel rows -> upgrade head -> new-table sentinel rows -> downgrade to 1.6.16; 7 revision(s) attempted; measured 2026-11-05 on postgresql with the sentinel, empty and download-row probes",
         "baseline_tables": 30,
         "baseline_rows_before_upgrade": 29,
         "baseline_rows_after_downgrade": 30,
         "baseline_rows_preserved": true,
         "baseline_row_delta_explained": "+1: bw_ui_user_preferences is renamed back into bw_ui_user_columns_preferences rather than dropped",
-        "one_seven_tables_before_downgrade": 15,
+        "one_seven_tables_before_downgrade": 16,
         "one_seven_tables_after_downgrade": 0,
         "schema_matches_target_model": true,
         "alembic_version_after": "0a235724ffd7",
@@ -484,10 +438,10 @@
         "Every table and column the 1.6.16 model declares is present after the downgrade, with no extras (schema_diff empty, with and without sentinel rows). 1.7 adds fifteen tables to the 1.6.16 schema; all fifteen are gone afterwards.",
         "Two enum TYPES the 1.7 upgrade creates are still not dropped (instance_tls_mode_enum, resource_kinds_enum) and the values added to api_resource_enum and settings_types_enum cannot be removed at all. Measured here against 1.6.16's own model: the same two orphans, no SELECT failure caused by them.",
         "Those leftover values are also what SAVES PostgreSQL where MariaDB/MySQL fail: bw_ui_users.method keeps 'api' as a legal label instead of having the enum narrowed under it.",
-        "The shortest rollback: this path runs two revisions, the 1.7.0~alpha head and 1.6.17~rc1 (which only records the version), against eight to 1.6.15 and twelve to 1.6.14. It stops above 1.6.16~rc1 to 1.6.16, so it reaches none of the revisions the 1.6.15 and 1.6.14 targets run: the model of tag v1.6.16 is the 1.6.15 model plus the bw_blob_chunks table and a version default, and the columns bw_ui_users.totp_last_counter and the is_draft flags survive here as they do on the 1.6.15 target. data_loss_detail.columns is the union for the 1.6.14 target and therefore over-states bw_ui_users for this pair by that one column.",
         "bw_blob_chunks belongs to the 1.6.16 schema (added by 1.6.16~rc3), so unlike the 1.6.15 and 1.6.14 targets this path does not drop it: the probe seeded one chunk row before the upgrade and found it after the downgrade, on all four engines (1 -> 1). The probe's chunk row has no owner row behind it, so what is measured is the table and its rows, not a chunked value. The preflight does not know that: it counts bw_blob_chunks and answers restore_only while a row exists, whatever the target, so it is stricter than this target needs (the safe direction). Whether a 1.6.16 reader reassembles a chunked value after the round trip is NOT measured here.",
         "Non-column user preferences (theme_mode, whats_new, onboarding, walkthrough) reappear in 1.6.16 as bogus per-table column layouts: the downgrade renames bw_ui_user_preferences to bw_ui_user_columns_preferences wholesale instead of filtering the column-layout keys. Expected to be cosmetic rather than a crash, because every writer in src/ui/app/routes/ stores a JSON document -- but that is read off the callers, NOT measured: the probe's own sentinel was not JSON and did raise JSONDecodeError through the 1.6.16 model.",
-        "A plugin row labelled `download` (the label the 1.7.0~alpha head adds) is not converted: MEASURED 2026-10-16 (probe-1.6.16-download-postgresql.json), the downgrade runs to completion and the 1.6.16 model then raises LookupError on SELECT bw_plugins. The preflight refuses such an installation before it gets that far (check `download_plugins`)."
+        "A plugin row labelled `download` (the label the 1.7.0~alpha head adds) is not converted: MEASURED 2026-10-16 (probe-1.6.16-download-postgresql.json), the downgrade runs to completion and the 1.6.16 model then raises LookupError on SELECT bw_plugins. The preflight refuses such an installation before it gets that far (check `download_plugins`).",
+        "MEASURED 2026-11-05: this path runs 7 revisions, including the rc3 revision that drops bw_ui_login_failures. Its seeded login-failure row is lost; the preflight now refuses while any login-failure records remain. The download-row variant completes but the target model cannot read the download method label; that installation remains restore_only."
       ]
     },
     {
@@ -500,7 +454,7 @@
       "required_backup": true,
       "plugin_api_target": "1.6.16",
       "alembic": {
-        "from_revision": "bddf0fbfac2d",
+        "from_revision": "b8da3e7aac02",
         "to_revision": "4205feb82ee7"
       },
       "artifacts": {
@@ -514,14 +468,14 @@
         "external_plugins": "conditional",
         "instance_credential_file": "rebuild"
       },
-      "reason": "The 1.7 head's downgrade() does not run to completion on MariaDB 11, and stopping at 1.6.16 instead of 1.6.15 changes nothing: the blocker lives in the head's own downgrade(), which this path executes first and in full. MEASURED 2026-10-16 on this engine (MariaDB 11), for this target, against the 1.7.0~alpha head, with and without sentinel rows (probe-1.6.16-mariadb.json, probe-1.6.16-empty-mariadb.json): DROP INDEX ix_bw_resource_group_usages_plugin_id fails with error 1553, 'needed in a foreign key constraint', on an index drop_table makes redundant. Worse than a plain refusal: the failure is partial. The head's downgrade() commits the bw_metadata version bump under non-transactional DDL before the DROP INDEX runs, so a failed attempt leaves bw_metadata.version at 1.6.17~rc1 while alembic_version still names bddf0fbfac2d and the schema is a hybrid -- a state the preflight refuses and the scheduler entrypoint cannot recover from. Restore from backup is the only path. A plugin row labelled `download` (the label the 1.7.0~alpha head adds) brings a 1265 class back: with one present the narrowing MODIFY of bw_plugins.method fails with error 1265 before the 1553 above (MEASURED 2026-10-16, probe-1.6.16-download-mariadb.json); the preflight refuses such an installation before it gets that far.",
+      "reason": "MEASURED 2026-11-05 on mariadb, target 1.6.16, with the sentinel, empty and download-row probes. With and without sentinel rows, the alpha head's downgrade aborts on DROP INDEX ix_bw_resource_group_usages_plugin_id with error 1553 (needed in a foreign key constraint). A download-labelled plugin instead triggers error 1265 while narrowing bw_plugins.method, before the index failure; the preflight refuses download rows. Non-transactional DDL has already committed bw_metadata.version = 1.6.18~rc3, while alembic_version remains b8da3e7aac02; the schema is a hybrid. Restore from backup is required. No revision was hand-edited to bypass either blocker.",
       "fingerprint": {
-        "method": "same probe as sqlite/postgresql; the downgrade aborted mid-way",
+        "method": "1.6.16 tagged model create_all -> stamp -> sentinel rows -> upgrade head -> new-table sentinel rows -> downgrade to 1.6.16; 1 revision(s) attempted; measured 2026-11-05 on mariadb with the sentinel, empty and download-row probes",
         "downgrade_completed": false,
         "state_after_failure": {
-          "alembic_version": "bddf0fbfac2d",
-          "bw_metadata_version": "1.6.17~rc1",
-          "tables_left_from_1_7": 13,
+          "alembic_version": "b8da3e7aac02",
+          "bw_metadata_version": "1.6.18~rc3",
+          "tables_left_from_1_7": 14,
           "tables_missing_for_1_6_16": []
         }
       }
@@ -536,7 +490,7 @@
       "required_backup": true,
       "plugin_api_target": "1.6.16",
       "alembic": {
-        "from_revision": "3262a37cf54c",
+        "from_revision": "820dea21bc01",
         "to_revision": "65dd66768041"
       },
       "artifacts": {
@@ -550,14 +504,14 @@
         "external_plugins": "conditional",
         "instance_credential_file": "rebuild"
       },
-      "reason": "The 1.7 head's downgrade() does not run to completion on MySQL 8, and stopping at 1.6.16 instead of 1.6.15 changes nothing: the blocker lives in the head's own downgrade(), which this path executes first and in full. MEASURED 2026-10-16 on this engine (MySQL 8.4), for this target, against the 1.7.0~alpha head, with and without sentinel rows (probe-1.6.16-mysql.json, probe-1.6.16-empty-mysql.json): DROP INDEX ix_bw_resource_group_usages_plugin_id fails with error 1553, 'needed in a foreign key constraint', on an index drop_table makes redundant. Worse than a plain refusal: the failure is partial. The head's downgrade() commits the bw_metadata version bump under non-transactional DDL before the DROP INDEX runs, so a failed attempt leaves bw_metadata.version at 1.6.17~rc1 while alembic_version still names 3262a37cf54c and the schema is a hybrid -- a state the preflight refuses and the scheduler entrypoint cannot recover from. Restore from backup is the only path. A plugin row labelled `download` (the label the 1.7.0~alpha head adds) brings a 1265 class back: with one present the narrowing MODIFY of bw_plugins.method fails with error 1265 before the 1553 above (MEASURED 2026-10-16, probe-1.6.16-download-mysql.json); the preflight refuses such an installation before it gets that far.",
+      "reason": "MEASURED 2026-11-05 on mysql, target 1.6.16, with the sentinel, empty and download-row probes. With and without sentinel rows, the alpha head's downgrade aborts on DROP INDEX ix_bw_resource_group_usages_plugin_id with error 1553 (needed in a foreign key constraint). A download-labelled plugin instead triggers error 1265 while narrowing bw_plugins.method, before the index failure; the preflight refuses download rows. Non-transactional DDL has already committed bw_metadata.version = 1.6.18~rc3, while alembic_version remains 820dea21bc01; the schema is a hybrid. Restore from backup is required. No revision was hand-edited to bypass either blocker.",
       "fingerprint": {
-        "method": "same probe as sqlite/postgresql; the downgrade aborted mid-way",
+        "method": "1.6.16 tagged model create_all -> stamp -> sentinel rows -> upgrade head -> new-table sentinel rows -> downgrade to 1.6.16; 1 revision(s) attempted; measured 2026-11-05 on mysql with the sentinel, empty and download-row probes",
         "downgrade_completed": false,
         "state_after_failure": {
-          "alembic_version": "3262a37cf54c",
-          "bw_metadata_version": "1.6.17~rc1",
-          "tables_left_from_1_7": 13,
+          "alembic_version": "820dea21bc01",
+          "bw_metadata_version": "1.6.18~rc3",
+          "tables_left_from_1_7": 14,
           "tables_missing_for_1_6_16": []
         }
       }
@@ -577,6 +531,7 @@
       "bw_resource_group_usages": "certain",
       "bw_resource_groups": "certain",
       "bw_resources": "certain",
+      "bw_ui_login_failures": "certain",
       "bw_ui_user_preferences": "conditional",
       "bw_ui_user_webauthn_credentials": "certain",
       "bw_upstream_servers": "certain",
@@ -586,6 +541,7 @@
     "why": {
       "bw_bans": "regenerable by the sync-bans job, which relearns from the instances' shared dicts and Redis; ban durations and tombstones are lost",
       "bw_blob_chunks": "the pieces of every plugin archive, plugin page and job cache stored in chunks (MySQL/MariaDB when larger than one statement can carry; any engine when the content begins with the bytes BunkerWeb uses to flag a chunked value); the owner row keeps an 80-byte marker, so dropping the table leaves the owners pointing at nothing. Counted by the preflight, which answers restore_only while any row exists; plugins labelled `download` are refused by their own check",
+      "bw_ui_login_failures": "login-throttle history introduced in 1.6.18~rc3; rollback to every measured older target drops the table and resets retained failure records, so the preflight refuses while any remain",
       "bw_ui_user_preferences": "renamed back into bw_ui_user_columns_preferences rather than dropped, so the rows survive; only their meaning is lost (every key becomes a per-table column layout)",
       "bw_ui_user_webauthn_credentials": "every registered passkey; a passkey-only user must fall back to password + TOTP",
       "bw_certificates": "every centrally stored certificate and private key",

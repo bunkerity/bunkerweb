@@ -291,6 +291,18 @@ class TestOperatorBuiltResourceGroups:
 
 
 class TestTheLossMap:
+    def test_login_failure_history_blocks_a_lossy_rollback(self, db):
+        from model import UserLoginFailures  # noqa: PLC0415 - product model is on the test path
+
+        with db._db_session() as session:
+            session.add(UserLoginFailures(username="admin", ip="192.0.2.1", failure_date=NOW))
+            session.commit()
+
+        counts = downgrade.count_irrepresentable(db)
+        assert counts["bw_ui_login_failures"] == 1
+        assert loss_classes(MANIFEST)["bw_ui_login_failures"] == "certain"
+        assert check_irrepresentable(counts, loss_classes(MANIFEST)).verdict == RESTORE_ONLY
+
     def test_every_table_the_preflight_counts_is_classified(self):
         classes = loss_classes(MANIFEST)
         for table in downgrade.IRREPRESENTABLE_TABLES:

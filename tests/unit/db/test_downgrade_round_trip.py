@@ -46,7 +46,6 @@ from contextlib import contextmanager
 from datetime import datetime, timezone
 from json import loads
 from pathlib import Path
-from shutil import which
 
 import pytest
 from alembic import command
@@ -68,23 +67,9 @@ from db.alembic_baseline import (  # noqa: E402
     wipe,
 )
 
-# `backup_database` picks its dump binary from the URI's drivername and `restore_database` its
-# restore binary the same way, so an engine missing either has nothing to prove here and skips --
-# the same treatment an unconfigured or unreachable engine already gets. Each entry is the
-# alternative (dump, restore) PAIRS the product accepts: `mysql_client_command` prefers the MariaDB
-# client and falls back to the MySQL one, and a host with `mysqldump` but no `mysql` can dump and
-# not restore, so the pair has to be checked together rather than binary by binary.
-CLIENT_BINARIES = {
-    "sqlite": (("sqlite3", "sqlite3"),),
-    "postgresql": (("pg_dump", "psql"),),
-    "mariadb": (("mariadb-dump", "mariadb"), ("mysqldump", "mysql")),
-    "mysql": (("mysqldump", "mysql"), ("mariadb-dump", "mariadb")),
-}
-
-
-def _clients_present(db_engine):
-    return any(all(which(binary) for binary in pair) for pair in CLIENT_BINARIES[db_engine])
-
+# The client-binary table (which dump/restore pairs the product accepts) lives in `fixtures/db_clients.py`,
+# shared with every other test that runs `backup_database`.
+from fixtures.db_clients import clients_present, missing_clients_message  # noqa: E402
 
 FIXED_DT = datetime(2024, 1, 1, 12, 0, 0, tzinfo=timezone.utc)
 
@@ -432,12 +417,8 @@ def _run_round_trip(db_engine, tmp_path, quiet_logger, monkeypatch):
     # anyone, and a runner image that drops one would leave the matrix green and the downgrade
     # promise unproven.
     uri = product_uri(db_engine, tmp_path)
-    if not _clients_present(db_engine):
-        return {
-            "fail": f"{db_engine} is reachable but none of its client binaries are installed "
-            f"({' / '.join(' + '.join(pair) for pair in CLIENT_BINARIES[db_engine])}); "
-            f"backup_database and restore_database shell out to them, so this is a broken environment, not an absent engine",
-        }
+    if not clients_present(db_engine):
+        return {"fail": missing_clients_message(db_engine)}
 
     import backup  # noqa: E402 -- on sys.path via the fixture below
 
