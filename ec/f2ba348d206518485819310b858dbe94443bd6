@@ -1,0 +1,149 @@
+src/ui/app/static/locales/zh.json
+  s_6189ae7958809e::t_59d424548456b7 265,1446-1448,1499-1500,1571,1903-1904,2107-2109,3113,4633,4851-4853
+  s_c0c5d5b16541aa::t_a7ab07c9f1eb7d 121,4854
+tests/unit/ui/test_i18n_catalogs.py
+  s_3535bd787ed7ee::t_759923169c2aa5 215-216,219
+  s_3535bd787ed7ee::t_91423324bd3ab1 220
+  s_208835457c1976::t_6095108cc7e1fc 224-225
+  s_40b667ffed1040::t_75e4b657b58746 221-222
+  s_b167dbd10b0b55::t_a0bfc3d98fa9c1 223
+  s_ecb26d6f7f328f::t_8c5922cfa2c67b 226
+src/ui/app/static/locales/ar.json
+  s_c0c5d5b16541aa::t_b3c58fb42703a7 121,265,1446-1448,1499-1500,1571,1903-1904,2107-2109,3113,4633,4851-4854
+src/ui/app/static/locales/bn.json
+  s_c0c5d5b16541aa::t_244a57c67b5be4 121,265,1446-1448,1499-1500,1571,1903-1904,2107-2109,3113,4633,4851-4854
+src/ui/app/static/locales/br.json
+  s_c0c5d5b16541aa::t_6efdfe2c12df8e 121,265,1475-1477,1523-1524,1595,1970-1971,2174-2176,3180,4804,5022-5025
+src/ui/app/static/locales/de.json
+  s_c0c5d5b16541aa::t_aabec3c8524b8a 121,265,1475-1477,1523-1524,1595,1970-1971,2174-2176,3180,4804,5022-5025
+src/ui/app/static/locales/en.json
+  s_ecb26d6f7f328f::t_dfafab0cb317c8 121,265,1475-1477,1523-1524,1595,1970-1971,2442,2660-2663,2834-2836,3840
+src/ui/app/static/locales/es.json
+  s_c0c5d5b16541aa::t_58a01929022abf 121,265,1475-1477,1523-1524,1595,1970-1971,2174-2176,3180,4804,5022-5025
+src/ui/app/static/locales/fr.json
+  s_c0c5d5b16541aa::t_f25e6578cc2133 121,265,1475-1477,1523-1524,1595,1970-1971,2174-2176,3180,4804,5022-5025
+src/ui/app/static/locales/hi.json
+  s_c0c5d5b16541aa::t_8b752b4f7ad120 121,265,1446-1448,1499-1500,1571,1903-1904,2107-2109,3113,4633,4851-4854
+src/ui/app/static/locales/id.json
+  s_c0c5d5b16541aa::t_febfb6a8fbd557 121,265,1475-1477,1523-1524,1595,1970-1971,2442,2660-2663,2834-2836,3840
+src/ui/app/static/locales/it.json
+  s_c0c5d5b16541aa::t_81e765c0e65e41 121,265,1475-1477,1523-1524,1595,1970-1971,2174-2176,3180,4804,5022-5025
+src/ui/app/static/locales/ko.json
+  s_c0c5d5b16541aa::t_107dc06e4e9bfb 121,265,1475-1477,1523-1524,1595,1970-1971,2442,2660-2663,2834-2836,3840
+src/ui/app/static/locales/pl.json
+  s_c0c5d5b16541aa::t_bd047ef97c940e 121,265,1475-1477,1523-1524,1595,1970-1971,2442,2660-2663,2834-2836,3840
+src/ui/app/static/locales/pt.json
+  s_c0c5d5b16541aa::t_d6b38d28e05944 121,265,1475-1477,1523-1524,1595,1970-1971,2174-2176,3180,4804,5022-5025
+src/ui/app/static/locales/ru.json
+  s_c0c5d5b16541aa::t_568e957cb19a7e 121,265,1475-1477,1523-1524,1595,1970-1971,2442,2660-2663,2834-2836,3840
+src/ui/app/static/locales/tl.json
+  s_c0c5d5b16541aa::t_e5d2a476f36bf1 121,265,1475-1477,1523-1524,1595,1970-1971,2442,2660-2663,2834-2836,3840
+src/ui/app/static/locales/tr.json
+  s_c0c5d5b16541aa::t_c93b32f8ae49bd 121,265,1475-1477,1523-1524,1595,1970-1971,2442,2660-2663,2834-2836,3840
+src/ui/app/static/locales/tw.json
+  s_c0c5d5b16541aa::t_729ed69297136f 121,265,1446-1448,1499-1500,1571,1903-1904,2107-2109,3113,4633,4851-4854
+src/ui/app/static/locales/ur.json
+  s_c0c5d5b16541aa::t_3e0867a5bb630b 121,265,1446-1448,1499-1500,1571,1903-1904,2107-2109,3113,4633,4851-4854
+src/ui/translations/ar/LC_MESSAGES/messages.po
+  s_c0c5d5b16541aa::t_8d9c6aa79f96c1 305,631-633,4387-4392,4412,4921-4926,5077-5082,5299-5301,6118-6120,6726-6728,6744-6746,10055-10057
+src/ui/translations/bn/LC_MESSAGES/messages.po
+  s_c0c5d5b16541aa::t_348eabff766959 305,631-633,4387-4392,4412,4921-4926,5077-5082,5275-5277,6094-6096,6694-6696,6712-6714,10003-10005
+src/ui/translations/de/LC_MESSAGES/messages.po
+  s_c0c5d5b16541aa::t_d46df089e14f62 305,631-633,4387-4392,4412,4921-4926,5077-5082,5275-5277,6094-6096,6694-6696,6712-6714,10003-10005
+src/ui/translations/en/LC_MESSAGES/messages.po
+  s_c0c5d5b16541aa::t_727585d8542201 305,631-633,4387-4392,4412,4921-4926,5077-5082,5275-5277,6094-6096,6694-6696,6712-6714,10003-10005
+src/ui/translations/es/LC_MESSAGES/messages.po
+  s_c0c5d5b16541aa::t_23b67fd9487c4d 305,631-633,4387-4392,4412,4921-4926,5077-5082,5275-5277,6094-6096,6694-6696,6712-6714,10003-10005
+src/ui/translations/fil_PH/LC_MESSAGES/messages.po
+  s_c0c5d5b16541aa::t_1dba015931079e 305,631-633,4387-4392,4412,4921-4926,5077-5082,5275-5277,6094-6096,6694-6696,6712-6714,10003-10005
+src/ui/translations/fr/LC_MESSAGES/messages.po
+  s_c0c5d5b16541aa::t_ed84ba7e2ee49e 305,631-633,4387-4392,4412,4921-4926,5077-5082,5275-5277,6094-6096,6694-6696,6712-6714,10003-10005
+src/ui/translations/hi/LC_MESSAGES/messages.po
+  s_c0c5d5b16541aa::t_854bc74f24ba31 305,631-633,4387-4392,4412,4921-4926,5077-5082,5275-5277,6094-6096,6694-6696,6712-6714,10003-10005
+src/ui/translations/id/LC_MESSAGES/messages.po
+  s_c0c5d5b16541aa::t_898fd624f9d97c 305,631-633,4387-4392,4412,4921-4926,5077-5082,5275-5277,6094-6096,6694-6696,6712-6714,10003-10005
+src/ui/translations/it/LC_MESSAGES/messages.po
+  s_c0c5d5b16541aa::t_53888e17d2b1e0 305,631-633,4387-4392,4412,4921-4926,5077-5082,5275-5277,6094-6096,6694-6696,6712-6714,10003-10005
+src/ui/translations/ko/LC_MESSAGES/messages.po
+  s_c0c5d5b16541aa::t_19157509e07333 305,631-633,4387-4392,4412,4921-4926,5077-5082,5269-5271,6088-6090,6686-6688,6704-6706,9990-9992
+src/ui/translations/pl/LC_MESSAGES/messages.po
+  s_c0c5d5b16541aa::t_de52eb431f2594 305,631-633,4387-4392,4412,4921-4926,5077-5082,5281-5283,6100-6102,6702-6704,6720-6722,10016-10018
+src/ui/translations/pt/LC_MESSAGES/messages.po
+  s_c0c5d5b16541aa::t_f95e7d4265c96b 305,631-633,4387-4392,4412,4921-4926,5077-5082,5275-5277,6094-6096,6694-6696,6712-6714,10003-10005
+src/ui/translations/pt_BR/LC_MESSAGES/messages.po
+  s_c0c5d5b16541aa::t_d374c1d3cae4b4 305,631-633,4387-4392,4412,4921-4926,5077-5082,5275-5277,6094-6096,6694-6696,6712-6714,10003-10005
+src/ui/translations/ru/LC_MESSAGES/messages.po
+  s_c0c5d5b16541aa::t_1fbfcf60c7633e 305,631-633,4387-4392,4412,4921-4926,5077-5082,5281-5283,6100-6102,6702-6704,6720-6722,10016-10018
+src/ui/translations/tr/LC_MESSAGES/messages.po
+  s_c0c5d5b16541aa::t_e2fa14242187f3 305,631-633,4387-4392,4412,4921-4926,5077-5082,5269-5271,6088-6090,6686-6688,6704-6706,9990-9992
+src/ui/translations/ur/LC_MESSAGES/messages.po
+  s_c0c5d5b16541aa::t_6b3350061523c6 305,631-633,4387-4392,4412,4921-4926,5077-5082,5275-5277,6094-6096,6694-6696,6712-6714,10003-10005
+src/ui/translations/zh/LC_MESSAGES/messages.po
+  s_c0c5d5b16541aa::t_95249d0e40d3f7 305,631-633,4387-4392,4412,4921-4926,5077-5082,5269-5271,6088-6090,6686-6688,6704-6706,9990-9992
+src/ui/translations/zh_Hant/LC_MESSAGES/messages.po
+  s_c0c5d5b16541aa::t_c5d966464988e9 305,631-633,4387-4392,4412,4921-4926,5077-5082,5269-5271,6088-6090,6686-6688,6704-6706,9990-9992
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "ecf2ba348d206518485819310b858dbe94443bd6",
+  "prompts": {},
+  "sessions": {
+    "s_208835457c1976": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "3d8f7777-bb59-4590-ace2-c0672a83ceb1",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_3535bd787ed7ee": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1ab9d-6772-7e22-92cd-7c07fb269100",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_40b667ffed1040": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1abfc-c7ce-7891-8be4-2ff2291e4871",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_6189ae7958809e": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "1049effa-f503-404c-8e04-c0d58dae63c9",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_b167dbd10b0b55": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1acb5-69be-7823-ac36-290b853e7213",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_c0c5d5b16541aa": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1ad7f-a1d5-7b23-998e-6ac55cc7af16",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_ecb26d6f7f328f": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1ad36-38d8-7ef1-94a8-30b163817431",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}
