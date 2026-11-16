@@ -1,0 +1,24 @@
+# A reload signal (docker kill -s HUP) must not restart the all-in-one services in the middle of a
+# configuration install. The install marks itself with a sentinel before it replaces the first file; the
+# HUP waits while it exists, then updates and restarts supervisord's services.
+integrations:
+  - "All-in-one"
+
+config:
+  USE_BLACKLIST: "yes"
+  BLACKLIST_COMMUNITY_LISTS: ""
+  BLACKLIST_IP_URLS: ""
+  BLACKLIST_USER_AGENT_URLS: ""
+  BLACKLIST_USER_AGENT: "BWReloadProbe"
+  USE_BAD_BEHAVIOR: "no"
+  USE_LIMIT_REQ: "no"
+  USE_LIMIT_REQ_GLOBAL: "no"
+  API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24 192.168.0.1/32"
+
+actions:
+  hup_waits_for_an_install_in_progress:
+    type: script
+    retries: 1
+    restart_stack: false
+    result: "hup-waits: the services were left alone until the install ended"
+    script: ["python3", "tests/core/aio-reload-wait/probe.py"]

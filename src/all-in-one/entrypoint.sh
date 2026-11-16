@@ -54,9 +54,14 @@ elif [[ $(echo "$AUTOCONF_MODE" | awk '{print tolower($0)}') == "yes" ]] ; then
 	echo "Autoconf" > /usr/share/bunkerweb/INTEGRATION
 fi
 
+# A stop requested while a reload waits ends that reload, see trap_reload
+stop_requested="no"
+
 # trap SIGTERM and SIGINT
 # shellcheck disable=SC2329
 function trap_exit() {
+	# shellcheck disable=SC2317
+	stop_requested="yes"
 	# shellcheck disable=SC2317
 	log "ENTRYPOINT" "ℹ️" "Caught stop operation, stopping services..."
 	# Use -s to send signal to all processes in supervisord
@@ -94,6 +99,131 @@ function trap_exit() {
 }
 trap trap_exit TERM INT QUIT
 
+# Marks a configuration install in progress: created before the first file is replaced and removed once
+# the install is complete, so an interrupted one leaves it behind. Keep this name in step with
+# pushswap.lua and gen/sync_tree.py.
+install_sentinel="/etc/nginx/.bw-install-incomplete"
+
+# Longest a reload waits for a configuration install to end, in seconds
+reload_install_timeout=300
+
+# Waits, within reload_install_timeout, while a configuration install is in progress.
+# This is not a lock: an install can still begin right after the check and the services be restarted in
+# the middle of it. That is safe because the install marks itself first: the restarted bunkerweb service
+# finds the marker, never keeps the half-installed tree and renders the loading configuration, which the
+# scheduler replaces with its next push.
+# Returns 0 when no install is in progress, 1 on timeout, 2 when a stop was requested meanwhile.
+# shellcheck disable=SC2329
+function wait_for_install() {
+	local waited=0
+	# shellcheck disable=SC2317
+	while [ -e "$install_sentinel" ]; do
+		# shellcheck disable=SC2317
+		[ "$stop_requested" == "yes" ] && return 2
+		# shellcheck disable=SC2317
+		[ "$waited" -ge "$reload_install_timeout" ] && return 1
+		# shellcheck disable=SC2317
+		[ "$waited" -eq 0 ] && log "ENTRYPOINT" "ℹ️" "A configuration install is in progress, waiting for it before reloading ..."
+		# shellcheck disable=SC2317
+		sleep 1
+		# shellcheck disable=SC2317
+		waited=$((waited+1))
+	done
+	return 0
+}
+
+# Longest the reload waits, in seconds, for the enabled services to settle after the restart, and the
+# interval between two checks. The longest startsecs of the ini files is 10 (bunkerweb): a service still
+# STARTING well past it is stuck.
+reload_services_timeout=30
+reload_services_poll=1
+
+# Where supervisord listens (the serverurl of supervisord.conf) and the interpreter that runs supervisorctl:
+# the Debian supervisor package ships its Python modules for /usr/bin/python3.
+supervisor_socket="/var/run/bunkerweb/supervisor.sock"
+supervisor_python="/usr/bin/python3"
+
+# Prints "<name> <state> <exitstatus>" for every program, read from supervisord over XML-RPC on its unix
+# socket. `supervisorctl status` prints no exit status. Fails when supervisord cannot be reached.
+# shellcheck disable=SC2329
+function supervisor_process_info() {
+	# shellcheck disable=SC2317
+	"$supervisor_python" -c '
+import sys
+import xmlrpc.client
+from supervisor.xmlrpc import SupervisorTransport
+
+proxy = xmlrpc.client.ServerProxy("http://127.0.0.1", transport=SupervisorTransport(None, None, "unix://" + sys.argv[1]))
+for info in proxy.supervisor.getAllProcessInfo():
+    print(info["name"], info["statename"], info["exitstatus"])
+' "$supervisor_socket" 2>/dev/null
+}
+
+# Prints "<name> pending" or "<name> failed" for each enabled service (autostart=true in the ini files
+# configured above) that is not RUNNING after the restart. Pending: STARTING, STOPPING or BACKOFF, supervisord
+# is still at it. Failed: anything else (FATAL, STOPPED, EXITED, absent from the process info). A disabled
+# service is never listed, whatever its state. When supervisord cannot be read, "supervisord failed" is listed.
+# EXITED is accepted for a program whose own ini declares its exit intentional (autorestart=unexpected and
+# exitcodes=) and only when its real exit status is one of those codes. Supervisord records every other exit
+# of such a program as EXITED too, just before it restarts it: that one is pending. The exit status comes from
+# supervisord, the declaration from the ini.
+# shellcheck disable=SC2329
+function enabled_service_problems() {
+	local process_info name kind codes state exitstatus
+	if ! process_info="$(supervisor_process_info)"; then
+		echo "supervisord failed"
+		return 0
+	fi
+	# shellcheck disable=SC2317
+	awk '
+		function flush() { if (name != "" && enabled == "true") print name, (restart == "unexpected" && codes != "" ? "intentional " codes : "required") }
+		FNR == 1 { flush(); name = "" }
+		/^\[program:/ { flush(); name = $0; sub(/^\[program:/, "", name); sub(/\]$/, "", name); enabled = restart = codes = "" }
+		/^autostart=/ { enabled = substr($0, 11) }
+		/^autorestart=/ { restart = substr($0, 13) }
+		/^exitcodes=/ { codes = substr($0, 11); gsub(/ /, "", codes) }
+		END { flush() }
+	' /etc/supervisor.d/*.ini | while read -r name kind codes; do
+		# shellcheck disable=SC2317
+		read -r state exitstatus < <(awk -v n="$name" '$1 == n { print $2, $3 }' <<< "$process_info")
+		# shellcheck disable=SC2317
+		case "$state" in
+			RUNNING) ;;
+			STARTING|STOPPING|BACKOFF) echo "$name pending" ;;
+			EXITED)
+				# shellcheck disable=SC2317
+				if [ "$kind" != "intentional" ]; then
+					echo "$name failed"
+				elif [[ ",$codes," != *",$exitstatus,"* ]]; then
+					echo "$name pending"
+				fi
+				;;
+			*) echo "$name failed" ;;
+		esac
+	done
+}
+
+# Prints the enabled services that are not RUNNING once they settled: it checks again every
+# reload_services_poll seconds while one is pending, up to reload_services_timeout, and a service still
+# pending then counts as failed.
+# shellcheck disable=SC2329
+function failed_enabled_services() {
+	local deadline=$((SECONDS + reload_services_timeout)) problems
+	while true; do
+		problems="$(enabled_service_problems)"
+		# shellcheck disable=SC2317
+		case "$problems" in
+			*" pending"*) ;;
+			*) break ;;
+		esac
+		# shellcheck disable=SC2317
+		[ "$SECONDS" -ge "$deadline" ] && break
+		# shellcheck disable=SC2317
+		sleep "$reload_services_poll"
+	done
+	awk 'NF { print $1 }' <<< "$problems"
+}
+
 # trap SIGHUP
 # shellcheck disable=SC2329
 function trap_reload() {
@@ -103,18 +233,48 @@ function trap_reload() {
 	# Check if supervisord is running before attempting reload
 	# shellcheck disable=SC2317
 	if pgrep -f "supervisord" > /dev/null; then
+		# Never restart the services in the middle of a configuration install
+		# shellcheck disable=SC2317
+		wait_for_install
+		# shellcheck disable=SC2317
+		case $? in
+			1)
+				# shellcheck disable=SC2317
+				log "ENTRYPOINT" "❌" "A configuration install is still in progress after ${reload_install_timeout} seconds (or was interrupted and left $install_sentinel behind), keeping the running services"
+				# shellcheck disable=SC2317
+				return 1
+				;;
+			2)
+				# shellcheck disable=SC2317
+				log "ENTRYPOINT" "ℹ️" "Reload cancelled by a stop request"
+				# shellcheck disable=SC2317
+				return 0
+				;;
+		esac
 		# Reload supervisord configuration
 		# shellcheck disable=SC2317
-		if supervisorctl update all; then
-			# Restart all services to apply changes
+		if ! supervisorctl update all; then
 			# shellcheck disable=SC2317
-			supervisorctl restart all
+			log "ENTRYPOINT" "❌" "Failed to update supervisord configuration, keeping the running services"
 			# shellcheck disable=SC2317
-			log "ENTRYPOINT" "✅" "Reload successful"
-		else
-			# shellcheck disable=SC2317
-			log "ENTRYPOINT" "❌" "Failed to update supervisord configuration"
+			return 1
 		fi
+		# Restart all services to apply changes. Its status is not a verdict: supervisorctl exits nonzero as soon
+		# as one listed program is not running, and every disabled service (autostart=false) is one.
+		# The verdict is the state of each enabled service (autostart=true) once they settled: all RUNNING.
+		# shellcheck disable=SC2317
+		supervisorctl restart all
+		# shellcheck disable=SC2317
+		failed_services="$(failed_enabled_services | tr '\n' ' ')"
+		# shellcheck disable=SC2317
+		if [ -n "$failed_services" ]; then
+			# shellcheck disable=SC2317
+			log "ENTRYPOINT" "❌" "Reload failed, the enabled service(s) did not come back after the restart: ${failed_services% }"
+			# shellcheck disable=SC2317
+			return 1
+		fi
+		# shellcheck disable=SC2317
+		log "ENTRYPOINT" "✅" "Reload successful"
 	else
 		# shellcheck disable=SC2317
 		log "ENTRYPOINT" "❌" "Supervisord is not running"
