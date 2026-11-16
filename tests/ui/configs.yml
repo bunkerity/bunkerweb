@@ -121,6 +121,7 @@ actions:
         type: access
         url: "http://www.example.com/hello"
         new_tab: true
+        sleep: 15.0
       switch_to_service_config_tab_non_existent:
         type: switch_tab
         tab: 1
