@@ -82,7 +82,7 @@
     "ANTIBOT_IGNORE_URI": {
       "context": "multisite",
       "default": "",
-      "help": "List of PCRE regex patterns (separated by spaces) for URIs that should be excluded from antibot challenge. Patterns are checked against the path and the full request URI with query string.",
+      "help": "List of PCRE regex patterns (separated by spaces) for URIs that should be excluded from antibot challenge. Patterns are matched against the normalized path, alone or followed by ? and the query string.",
       "id": "antibot-ignore-uri",
       "label": "Ignored URI",
       "regex": "^.*$",
@@ -94,7 +94,7 @@
       "help": "List of IP/network, separated with spaces, to ignore antibot challenge.",
       "id": "antibot-ignore-ip",
       "label": "Ignored IP/network",
-      "regex": "^(?! +$) *(?:(?=(((\\b25[0-5]|\\b2[0-4]\\d|\\b[01]?\\d\\d?)(\\.(25[0-5]|2[0-4]\\d|[01]?\\d\\d?)){3})(\\/([1-2][0-9]?|3[0-2]?|[04-9]))?|(([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]Z{0,4}){0,4}%[0-9a-zA-Z]+|::(ffff(:0{1,4})?:)?((25[0-5]|(2[0-4]|1?\\d)?\\d)\\.){3}(25[0-5]|(2[0-4]|1?\\d)?\\d)|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1?\\d)?\\d)\\.){3}(25[0-5]|(2[0-4]|1?\\d)?\\d))(\\/(12[0-8]|1[01][0-9]|[0-9][0-9]?))?)(?: |$))[^ \\n]+(?: +|$))*$",
+      "regex": "^(?! +$) *(?:(?=(((\\b25[0-5]|\\b2[0-4]\\d|\\b[01]?\\d\\d?)(\\.(25[0-5]|2[0-4]\\d|[01]?\\d\\d?)){3})(\\/([1-2][0-9]?|3[0-2]?|[04-9]))?|(([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|::(ffff(:0{1,4})?:)?((25[0-5]|(2[0-4]|1?\\d)?\\d)\\.){3}(25[0-5]|(2[0-4]|1?\\d)?\\d)|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1?\\d)?\\d)\\.){3}(25[0-5]|(2[0-4]|1?\\d)?\\d)|(([0-9a-fA-F]{1,4}:){6}|::([0-9a-fA-F]{1,4}:){0,5}|(?!(?:[0-9a-fA-F]*:){7})([0-9a-fA-F]{1,4}:){1,5}:([0-9a-fA-F]{1,4}:){0,4})((25[0-5]|(2[0-4]|1?[0-9])?[0-9])\\.){3}(25[0-5]|(2[0-4]|1?[0-9])?[0-9]))(\\/(12[0-8]|1[01][0-9]|[0-9][0-9]?))?)(?: |$))[^ \\n]+(?: +|$))*$",
       "type": "multivalue"
     },
     "ANTIBOT_IGNORE_RDNS": {
@@ -888,7 +888,7 @@
       "help": "Public origin the browser loads the Cap.js widget from (e.g. https://cap.example.com). Origin only, no path.",
       "id": "antibot-capjs-frontend-url",
       "label": "Cap.js frontend URL",
-      "regex": "^(https?://[A-Za-z0-9.\\-]+(:[0-9]+)?)?$",
+      "regex": "^(https?://(?:[A-Za-z0-9.\\-]+|\\[(?:(?:[0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}|(?:[0-9a-fA-F]{1,4}:){1,7}:|(?:[0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|(?:[0-9a-fA-F]{1,4}:){1,5}(?::[0-9a-fA-F]{1,4}){1,2}|(?:[0-9a-fA-F]{1,4}:){1,4}(?::[0-9a-fA-F]{1,4}){1,3}|(?:[0-9a-fA-F]{1,4}:){1,3}(?::[0-9a-fA-F]{1,4}){1,4}|(?:[0-9a-fA-F]{1,4}:){1,2}(?::[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:(?:(?::[0-9a-fA-F]{1,4}){1,6})|:(?:(?::[0-9a-fA-F]{1,4}){1,7}|:)|(?:(?:[0-9a-fA-F]{1,4}:){6}|::(?:[0-9a-fA-F]{1,4}:){0,5}|(?!(?:[0-9a-fA-F]*:){7})(?:[0-9a-fA-F]{1,4}:){1,5}:(?:[0-9a-fA-F]{1,4}:){0,4})(?:(?:25[0-5]|(?:2[0-4]|1?[0-9])?[0-9])\\.){3}(?:25[0-5]|(?:2[0-4]|1?[0-9])?[0-9]))\\])(:[0-9]+)?)?$",
       "type": "text"
     },
     "ANTIBOT_CAPJS_BACKEND_URL": {
@@ -897,7 +897,7 @@
       "help": "Internal origin BunkerWeb calls for /siteverify (e.g. http://cap-server:3000). Origin only, no path. Falls back to the frontend URL when empty.",
       "id": "antibot-capjs-backend-url",
       "label": "Cap.js backend URL",
-      "regex": "^(https?://[A-Za-z0-9.\\-]+(:[0-9]+)?)?$",
+      "regex": "^(https?://(?:[A-Za-z0-9.\\-]+|\\[(?:(?:[0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}|(?:[0-9a-fA-F]{1,4}:){1,7}:|(?:[0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|(?:[0-9a-fA-F]{1,4}:){1,5}(?::[0-9a-fA-F]{1,4}){1,2}|(?:[0-9a-fA-F]{1,4}:){1,4}(?::[0-9a-fA-F]{1,4}){1,3}|(?:[0-9a-fA-F]{1,4}:){1,3}(?::[0-9a-fA-F]{1,4}){1,4}|(?:[0-9a-fA-F]{1,4}:){1,2}(?::[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:(?:(?::[0-9a-fA-F]{1,4}){1,6})|:(?:(?::[0-9a-fA-F]{1,4}){1,7}|:)|(?:(?:[0-9a-fA-F]{1,4}:){6}|::(?:[0-9a-fA-F]{1,4}:){0,5}|(?!(?:[0-9a-fA-F]*:){7})(?:[0-9a-fA-F]{1,4}:){1,5}:(?:[0-9a-fA-F]{1,4}:){0,4})(?:(?:25[0-5]|(?:2[0-4]|1?[0-9])?[0-9])\\.){3}(?:25[0-5]|(?:2[0-4]|1?[0-9])?[0-9]))\\])(:[0-9]+)?)?$",
       "type": "text"
     },
     "ANTIBOT_CAPJS_SITEKEY": {

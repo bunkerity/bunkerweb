@@ -1,0 +1,30 @@
+{% if USE_MODSECURITY == "yes" and USE_MODSECURITY_CRS == "yes" and USE_MODSECURITY_GLOBAL_CRS == "yes" and SERVER_NAME != "" %}
+	{% set re = import("re") %}
+	{% set ip_hosts = [] %}
+	{% if MULTISITE == "yes" %}
+		{% set service_names = [] %}
+		{% for service in SERVER_NAME.split() %}
+			{% set _ = service_names.extend((all.get(service + "_SERVER_NAME") or service).split()) %}
+		{% endfor %}
+	{% else %}
+		{% set service_names = SERVER_NAME.split() %}
+	{% endif %}
+	{% for host in service_names %}
+		{% if re.match("^(?:\\d{1,3}\\.){3}\\d{1,3}$", host) %}
+			{% set escaped = re.escape(host.lower()) %}
+		{% elif ":" in host %}
+			{% set escaped = "\\[" ~ re.escape(host.lower()) ~ "\\]" %}
+		{% else %}
+			{% set escaped = "" %}
+		{% endif %}
+		{% if escaped and escaped not in ip_hosts %}
+			{% set _ = ip_hosts.append(escaped) %}
+		{% endif %}
+	{% endfor %}
+	{% if ip_hosts %}
+# CRS 920350 flags a numeric Host header, which is the normal Host of a service named by an IP address.
+# One rule for the literals of every service (NGINX routes by Host): any other numeric Host stays enforced.
+SecRule REQUEST_HEADERS:Host "@rx ^(?:{{ ip_hosts | join('|') }})(?::\d+)?$" \
+    "id:1007783,phase:1,pass,t:none,t:lowercase,nolog,ctl:ruleRemoveById=920350"
+	{% endif %}
+{% endif %}

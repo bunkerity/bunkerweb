@@ -1,0 +1,70 @@
+# A service named by an IPv4 literal (`SERVER_NAME=192.0.2.10`) on a real nginx.
+#
+# Unit tests render the templates; this proves what the rendered config does:
+#   - HTTP: a request whose Host is the literal reaches the service, multisite and single site, with the
+#     per-service CRS and with the global CRS;
+#   - ModSecurity: CRS 920350 ("Host header is a numeric IP address") is removed for the service's own
+#     literal only, another numeric Host is still scored (920350 + 920330 refuse it);
+#   - stream: a stream service named by a literal proxies to its upstream (no "invalid port in upstream").
+#
+# The IPv6 literals of the same feature need a dual-stack Docker network this spec does not assume.
+# The asserting code is `tests/core/server-name-ip-literal/check.py`.
+integrations:
+  - "Docker"
+
+config:
+  USE_BAD_BEHAVIOR: "no"
+  USE_LIMIT_REQ: "no"
+  USE_MODSECURITY: "yes"
+  USE_REVERSE_PROXY: "yes"
+  REVERSE_PROXY_HOST: "http://app1.bw-services:8080"
+
+actions:
+  multisite_per_service_crs:
+    type: script
+    script:
+      ["python3", "tests/core/server-name-ip-literal/check.py", "multisite"]
+    result: "IP_LITERAL_OK multisite"
+    config:
+      MULTISITE: "yes"
+      SERVER_NAME: "192.0.2.10 192.0.2.11"
+      USE_MODSECURITY_GLOBAL_CRS: "no"
+
+  multisite_global_crs:
+    type: script
+    script:
+      ["python3", "tests/core/server-name-ip-literal/check.py", "multisite"]
+    result: "IP_LITERAL_OK multisite"
+    config:
+      MULTISITE: "yes"
+      SERVER_NAME: "192.0.2.10 192.0.2.11"
+      USE_MODSECURITY_GLOBAL_CRS: "yes"
+
+  single_site_per_service_crs:
+    type: script
+    script: ["python3", "tests/core/server-name-ip-literal/check.py", "single"]
+    result: "IP_LITERAL_OK single"
+    config:
+      MULTISITE: "no"
+      SERVER_NAME: "192.0.2.10"
+      USE_MODSECURITY_GLOBAL_CRS: "no"
+
+  single_site_global_crs:
+    type: script
+    script: ["python3", "tests/core/server-name-ip-literal/check.py", "single"]
+    result: "IP_LITERAL_OK single"
+    config:
+      MULTISITE: "no"
+      SERVER_NAME: "192.0.2.10"
+      USE_MODSECURITY_GLOBAL_CRS: "yes"
+
+  stream_service_named_by_a_literal:
+    type: script
+    script: ["python3", "tests/core/server-name-ip-literal/check.py", "stream"]
+    result: "IP_LITERAL_OK stream"
+    config:
+      MULTISITE: "yes"
+      SERVER_NAME: "www.example.com 192.0.2.20"
+      "192.0.2.20_SERVER_TYPE": "stream"
+      "192.0.2.20_LISTEN_STREAM_PORT": "10000"
+      "192.0.2.20_REVERSE_PROXY_HOST": "192.168.0.254:8080"

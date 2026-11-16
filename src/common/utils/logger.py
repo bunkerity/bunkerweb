@@ -4,6 +4,7 @@ from logging import (
     ERROR,
     FileHandler,
     INFO,
+    NOTSET,
     WARNING,
     Logger,
     StreamHandler,
@@ -25,14 +26,15 @@ DATE_FORMAT = "[%Y-%m-%d %H:%M:%S %z]"
 
 # Regex patterns for validation
 FILE_PATH_PATTERN = r"^(/[\w\-./]+|[A-Za-z]:\\[\w\-./\\]+)$"
-SYSLOG_ADDRESS_PATTERN = r"^((udp|tcp)://)?(/[\w\-./]+|[\w\-.]+(:\d{1,5})?)$"
+SYSLOG_ADDRESS_PATTERN = r"^((udp|tcp)://)?(/[\w\-./]+|([\w\-.]+|\[[\da-fA-F:.]+\])(:\d{1,5})?)$"
 
 
 class BWLogger(Logger):
     """Custom logger class inheriting from the standard Logger."""
 
     def __init__(self, name, level=INFO):
-        super().__init__(name, level)
+        # SQLAlchemy children inherit DATABASE_LOG_LEVEL from their namespace logger.
+        super().__init__(name, NOTSET if name.startswith("sqlalchemy.") else level)
 
 
 # Set the custom logger class as the default
@@ -74,7 +76,12 @@ if "syslog" in env_log_types:
             address = syslog_address[6:]  # Remove "tcp://"
 
         # Resolve the handler address: network (host, port) or Unix socket path
-        if ":" in address and not address.startswith("/"):
+        if address.startswith("["):
+            host, _, port = address[1:].partition("]")
+            handler_address = (host, int(port[1:]) if port else 514)
+            if not port and socktype is None:
+                socktype = SOCK_DGRAM
+        elif ":" in address and not address.startswith("/"):
             host, port = address.rsplit(":", 1)
             handler_address = (host, int(port))
         elif not address.startswith("/"):
@@ -110,18 +117,9 @@ if not log_types or "stderr" in env_log_types:
 
 basicConfig(format=LOG_FORMAT, datefmt=DATE_FORMAT, level=default_level, handlers=[handler["handler"] for handler in log_types.values()], force=True)
 
-# Set the default logging level for specific SQLAlchemy components
+# Set the default logging level for every SQLAlchemy logger.
 database_default_level = _nameToLevel.get(getenv("DATABASE_LOG_LEVEL", "WARNING").upper(), WARNING)
-sqlalchemy_loggers = (
-    "sqlalchemy.orm.mapper.Mapper",
-    "sqlalchemy.orm.relationships.RelationshipProperty",
-    "sqlalchemy.orm.strategies.LazyLoader",
-    "sqlalchemy.pool.impl.QueuePool",
-    "sqlalchemy.pool.impl.SingletonThreadPool",
-    "sqlalchemy.engine.Engine",
-)
-for logger_name in sqlalchemy_loggers:
-    logging_getLogger(logger_name).setLevel(database_default_level)
+logging_getLogger("sqlalchemy").setLevel(database_default_level)
 
 # Suppress noisy HTTP client logs (urllib3 retry warnings, connection pool debug, requests)
 for logger_name in ("urllib3", "urllib3.connectionpool", "urllib3.util.retry", "requests", "docker.utils.config", "docker.auth"):
