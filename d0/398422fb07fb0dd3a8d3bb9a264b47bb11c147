@@ -1,0 +1,253 @@
+src/common/core/db/locales/hi.json
+  s_558c2c9f236371::t_39e1eb66aea199 55-62
+src/common/db/Database.py
+  s_558c2c9f236371::t_f194fd5fdda7b1 12,261-266,274,306,324,327,413,415,420
+  s_558c2c9f236371::t_6ef8c8b3f0599e 452-455,457,465,484-487
+  s_558c2c9f236371::t_da3e8722408d5b 159-162,206-214,216
+  s_558c2c9f236371::t_456afffaf41f1c 71-74
+  s_558c2c9f236371::t_59a0c950352ed0 6,60,369-385,411,459,471,629-656,670
+src/common/core/db/locales/bn.json
+  s_558c2c9f236371::t_39e1eb66aea199 55-62
+src/common/core/db/locales/ar.json
+  s_558c2c9f236371::t_39e1eb66aea199 56-63
+src/common/core/db/locales/ko.json
+  s_558c2c9f236371::t_39e1eb66aea199 56-63
+src/common/core/db/locales/zh.json
+  s_558c2c9f236371::t_39e1eb66aea199 56-63
+src/common/core/db/locales/ru.json
+  s_558c2c9f236371::t_39e1eb66aea199 56-63
+src/ui/app/models/secret_settings.py
+  s_558c2c9f236371::t_fa238af1227a7b 16,19-20
+src/common/core/db/locales/id.json
+  s_558c2c9f236371::t_39e1eb66aea199 56-63
+src/common/core/db/README.zh.md
+  s_558c2c9f236371::t_4c98fb39cb8d48 37-38
+tests/unit/cli/test_custom_configs_command.py
+  s_558c2c9f236371::t_4ab3d257bd9d96 331
+src/common/core/db/locales/pl.json
+  s_558c2c9f236371::t_39e1eb66aea199 56-63
+src/common/core/db/locales/de.json
+  s_558c2c9f236371::t_39e1eb66aea199 56-63
+tests/unit/ui/test_secret_settings.py
+  s_751421a72d1da7::t_7236af4e97fb53 252
+tests/core/support/test.sh
+  s_a53efcebd5d5eb::t_b0514b785fe028 1-50,57-80,89-97
+  s_a53efcebd5d5eb::t_1def0ce9bfdea8 51-56,81-84
+  s_a53efcebd5d5eb::t_57032a6cc22490 85
+  s_a53efcebd5d5eb::t_ed6ecc17999a1b 86-88
+src/common/cli/main.py
+  s_558c2c9f236371::t_006b143906961c 15,72-78,125-132,143-144
+  s_558c2c9f236371::t_e9a7b41f8c9bbd 133
+src/common/core/db/README.es.md
+  s_558c2c9f236371::t_4c98fb39cb8d48 37-38
+src/common/core/db/locales/it.json
+  s_558c2c9f236371::t_39e1eb66aea199 56-63
+src/common/core/db/locales/es.json
+  s_558c2c9f236371::t_39e1eb66aea199 56-63
+src/common/utils/support_common.py
+  s_40b667ffed1040::t_95242093a749c3 182
+  s_558c2c9f236371::t_b05d20a20fa0af 1-181,183-559
+tests/unit/cli/test_ipv6_cli_ban_identity.py
+  s_6189ae7958809e::t_40c62dc2313959 1-41
+src/common/core/db/README.md
+  s_558c2c9f236371::t_4c98fb39cb8d48 37-38
+src/common/helpers/bwcli
+  s_bac151182f49d9::t_e1986bba8869fc 3-4,6
+src/common/core/db/locales/tw.json
+  s_558c2c9f236371::t_39e1eb66aea199 56-63
+tests/unit/ui/test_support_redaction_parity.py
+  s_558c2c9f236371::t_e8c43faae285f8 1-170
+src/common/core/db/README.de.md
+  s_558c2c9f236371::t_4c98fb39cb8d48 37-38
+src/common/core/db/locales/tr.json
+  s_558c2c9f236371::t_39e1eb66aea199 56-63
+tests/unit/cli/test_support_command.py
+  s_f4d1d8fb491ff2::t_7fc42d716ca34d 320
+  s_a2e9583b15aa03::t_f1920c937412db 64-125,199,202-207,209-223,237-238
+  s_68a0cb39985b13::t_b66d256201e813 524-527
+  s_7d4f9254f8cab8::t_c413fc30c14700 512
+  s_52e22c90761ce5::t_fe621c0e611e1a 239-316
+  s_f4d1d8fb491ff2::t_614002f2f5fb53 317-319,321-330,332-341,348,350-362,365,367-370,373-379,541-543,548-564
+  s_68a0cb39985b13::t_5edfb869b8641e 342-343
+  s_a2e9583b15aa03::t_09c3544c2d282a 126-160,162,164-167,170-198,200-201,208,224-236
+  s_17e5b58cdb8e73::t_b70dedb0d95565 505-507
+  s_68a0cb39985b13::t_811b4127590a57 349
+  s_a2e9583b15aa03::t_c303dab4697237 161,163,168-169
+  s_558c2c9f236371::t_f1a0f032205f4d 1-5,7,9-28,30-63,565-653
+  s_17e5b58cdb8e73::t_b5f609c9d96756 344-347,364,366,371-372,401-429,439,475,477,483-484,520,544-547
+  s_f4d1d8fb491ff2::t_4b5bfc665b7bec 363
+  s_f4d1d8fb491ff2::t_70376559a83776 6
+  s_68a0cb39985b13::t_5c3183fe000194 453-457
+  s_f4d1d8fb491ff2::t_be7b95f20182e3 331
+  s_7d4f9254f8cab8::t_83f0f6ef7b6a87 380-400,430-438,440-452,458-474,476,478-482,485-504,508-511,513-519,521,523,528-540
+  s_7d4f9254f8cab8::t_b4e1c44d34aaff 522
+  s_558c2c9f236371::t_a1cb5be8f7e4a3 29
+  s_f4d1d8fb491ff2::t_43c9002a864216 8
+src/ui/app/routes/support.py
+  s_558c2c9f236371::t_fa238af1227a7b 12,32,84-86,94,101
+tests/unit/cli/test_bwcli_interpreter.py
+  s_bac151182f49d9::t_7957f582c00e02 1-24
+tests/core/support.yml
+  s_a53efcebd5d5eb::t_0367b2aa78ebe1 1-35
+src/common/cli/CLI.py
+  s_a2e9583b15aa03::t_2be41b100059f7 1854,1862
+  s_a2e9583b15aa03::t_208b3b52418a97 406-409,415,542-545,575-576
+  s_f4d1d8fb491ff2::t_f9581a5de2c909 430-432,437,441-444,446-447,452-477,488-489
+  s_52e22c90761ce5::t_08489745c08eb0 20,525-540,549,556-563,577,583-584,586,589-596,1856-1861,1865-1867
+  s_52e22c90761ce5::t_ee79a1494c9dfd 12
+  s_558c2c9f236371::t_ba1ff6934897d1 1755,1757,1759-1761
+  s_f4d1d8fb491ff2::t_c20a42ba632984 13
+  s_17e5b58cdb8e73::t_009833fa9d0759 433-436,438-440
+  s_7d4f9254f8cab8::t_c413fc30c14700 478-482,486-487,493-496
+  s_6189ae7958809e::t_85772d95259051 34,936-939,1013-1016
+  s_a2e9583b15aa03::t_eb8bf739b59ced 110
+  s_68a0cb39985b13::t_279ecfde2a8f26 445,448-451
+  s_52e22c90761ce5::t_affe748ae854a4 399-405,414,416-429,483-485,490-492,497-517,569
+  s_558c2c9f236371::t_0bfb4222216da3 3,16-18,32,36-53,654,666,673-674,676-707,755
+  s_a2e9583b15aa03::t_cb504583e71cab 611-612
+  s_558c2c9f236371::t_ad717943f1cfd5 74-83,87-109,112-176,362-398,580-581,585,587-588,597-610,613-624,1677-1754,1756,1758,1762-1849,1851-1853,1863-1864,1868-1903
+  s_558c2c9f236371::t_151f19a52468ce 84-86,1850
+  s_a2e9583b15aa03::t_ec4f85a9596ea0 111
+  s_a2e9583b15aa03::t_cf25f1a76aaf11 550-552
+  s_17e5b58cdb8e73::t_987f1c561dd001 410-413,518-524,541,546-548,553-555,564-568,570-574,578-579,582,625,1855
+src/common/core/db/locales/br.json
+  s_558c2c9f236371::t_39e1eb66aea199 56-63
+tests/unit/db/test_exit_on_error.py
+  s_558c2c9f236371::t_f1a0f032205f4d 1-35
+src/common/core/db/plugin.json
+  s_558c2c9f236371::t_4c98fb39cb8d48 118-135
+tests/unit/ui/test_support_bundle.py
+  s_40b667ffed1040::t_95242093a749c3 23,323,328,332-334
+src/common/core/db/locales/ur.json
+  s_558c2c9f236371::t_39e1eb66aea199 56-63
+src/common/core/db/locales/tl.json
+  s_558c2c9f236371::t_39e1eb66aea199 56-63
+src/common/core/db/locales/fr.json
+  s_558c2c9f236371::t_39e1eb66aea199 56-63
+tests/unit/db/test_driver_timeouts.py
+  s_558c2c9f236371::t_810025ec4d6638 1-77,81-96,98-106
+  s_558c2c9f236371::t_261e290fde4761 78-80
+  s_558c2c9f236371::t_456afffaf41f1c 97
+src/common/core/db/locales/pt.json
+  s_558c2c9f236371::t_39e1eb66aea199 56-63
+src/ui/app/support_bundle.py
+  s_558c2c9f236371::t_13715dbdc5e24d 168
+  s_40b667ffed1040::t_95242093a749c3 252-254
+  s_40b667ffed1040::t_8f43a4d3983c3f 3,7-8,10-29
+src/common/core/db/README.fr.md
+  s_558c2c9f236371::t_4c98fb39cb8d48 37-38
+src/ui/app/templates/support.html
+  s_3535bd787ed7ee::t_e5eae44abb06d6 34
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "d0398422fb07fb0dd3a8d3bb9a264b47bb11c147",
+  "prompts": {},
+  "sessions": {
+    "s_17e5b58cdb8e73": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "04826bce-9dce-42ed-8de9-1f0daf256ea3",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_3535bd787ed7ee": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1ab9d-6772-7e22-92cd-7c07fb269100",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_40b667ffed1040": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1abfc-c7ce-7891-8be4-2ff2291e4871",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_52e22c90761ce5": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "fc828870-fb05-4bd8-84a6-0cbaeb49dcc7",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_558c2c9f236371": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "0eb8d38a-b99d-4cab-8edb-a24ae8d61026",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_6189ae7958809e": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "1049effa-f503-404c-8e04-c0d58dae63c9",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_68a0cb39985b13": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "cd36ce0b-8389-4cf4-a80c-bdbc8b1fb6cc",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_751421a72d1da7": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "a1cd49cb-bc02-4f73-9b72-c088e5f0245c",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_7d4f9254f8cab8": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "d788157b-7351-4299-aab1-1c461166739f",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_a2e9583b15aa03": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "241be1ce-291d-40fc-9ca6-9ad01a0cfe45",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_a53efcebd5d5eb": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "91d63c6b-6a52-4608-9896-62aeb94f06a7",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_bac151182f49d9": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1ac7b-b1fa-7f11-b240-82ee85373c30",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_f4d1d8fb491ff2": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "88f75472-80ea-4426-8f90-a3737c9bbd58",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}
