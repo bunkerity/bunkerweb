@@ -20,15 +20,15 @@
       
       
         
-          <link rel="alternate" href="../../api/" hreflang="en">
+          <link rel="alternate" href="https://docs.bunkerweb.io/latest/api/" hreflang="en"><link rel="alternate" href="https://docs.bunkerweb.io/latest/api/" hreflang="x-default">
         
-          <link rel="alternate" href="./" hreflang="fr">
+          <link rel="alternate" href="https://docs.bunkerweb.io/latest/fr/api/" hreflang="fr">
         
-          <link rel="alternate" href="../../de/api/" hreflang="de">
+          <link rel="alternate" href="https://docs.bunkerweb.io/latest/de/api/" hreflang="de">
         
-          <link rel="alternate" href="../../es/api/" hreflang="es">
+          <link rel="alternate" href="https://docs.bunkerweb.io/latest/es/api/" hreflang="es">
         
-          <link rel="alternate" href="../../zh/api/" hreflang="zh">
+          <link rel="alternate" href="https://docs.bunkerweb.io/latest/zh/api/" hreflang="zh">
         
       
       
@@ -66,94 +66,81 @@
       })
     </script>
 
-    <script src="https://cdn.jsdelivr.net/npm/medium-zoom/dist/medium-zoom.min.js"></script>
+    <script defer
+            src="https://cdn.jsdelivr.net/npm/medium-zoom@1.1.2/dist/medium-zoom.min.js"
+            integrity="sha384-kRRREbu8lthVytGQVverh9PZPe8fRyg3vK2wO1w0kyeSqE7UfEdXhV/fWfaW/h3A"
+            crossorigin="anonymous"></script>
 
-    <script defer>
+    <script>
   // Lazy load images and embed youtube videos
   window.addEventListener("load", () => {
     document.querySelectorAll("[data-src]").forEach((el) => {
       el.setAttribute("src", el.getAttribute("data-src"));
     });
   });
-  // Add missing label
-  try {
-    document
-      .querySelector('div.md-search[data-md-component="search"][role="dialog"]')
-      .setAttribute("aria-label", "Rechercher dans la documentation");
-  } catch (err) {}
+  // Add missing label: this script sits in <head>, so the search dialog only exists once the DOM is parsed
+  window.addEventListener("DOMContentLoaded", () => {
+    const search = document.querySelector('div.md-search[data-md-component="search"][role="dialog"]');
+    if (search) search.setAttribute("aria-label", "Rechercher dans la documentation");
+  });
     </script>
 
-    <script defer>
+    <script>
       window.addEventListener('DOMContentLoaded', () => {
-        const bannerEl = document.querySelector('aside.md-banner');
-        let defaultContent = [{ "content" : "\u003cp\u003eProfitez d\u2019un essai gratuit de 30 jours de BunkerWeb PRO depuis le \u003ca style=\"text-decoration:underline; color :  white;\" href=\"https://panel.bunkerweb.io/store/bunkerweb-pro?language=french\u0026amp;utm_campaign=self\u0026amp;utm_source=doc\"\u003eBunkerWeb Panel\u003c/a\u003e : commandez une offre, puis gardez \u00ab Free 30 Days Trial \u00bb comme mode de paiement lors de la commande. (\u003ca style=\"text-decoration:underline; color :  white;\" href=\"../#pro-version\"\u003eguide pas \u00e0 pas\u003c/a\u003e)\u003c/p\u003e" },
-        { "content" : "\u003cp\u003eBesoin d\u2019une assistance premium ou de conseils personnalis\u00e9s sur BunkerWeb ? D\u00e9couvrez nos \u003ca style=\"text-decoration:underline; color :  white;\" href=\"https://panel.bunkerweb.io/?utm_campaign=self\u0026utm_source=doc#services\"\u003eservices professionnels\u003c/a\u003e.\u003c/p\u003e" },
-        { "content" : "\u003cp\u003eRejoignez la communaut\u00e9 Bunker en participant au \u003ca style=\"text-decoration:underline; color: white;\" href=\"https://discord.bunkerweb.io\"\u003esalon Discord\u003c/a\u003e et en nous suivant sur \u003ca style=\"text-decoration:underline; color: white;\" href=\"https://www.linkedin.com/company/bunkerity/\"\u003eLinkedIn\u003c/a\u003e.\u003c/p\u003e" }
-        ]
-
-      function setBannerStyle() {
-        const bannerItem = bannerEl.querySelector('.md-banner__inner');
-        bannerEl.style.backgroundColor = "#2eac68";
-        bannerItem.style.textAlign = "center";
-        bannerItem.style.transition = "all 0.5s ease-out";
-      }
-
-      function setDefault() {
-        const bannerItem = bannerEl.querySelector('.md-banner__inner');
-        const clone = bannerItem.cloneNode(true);
-        clone.innerHTML = defaultContent[0]["content"];
-        bannerEl.replaceChild(clone, bannerItem);
-      }
-
-      function startBannerLoop() {
+        const bannerEl = document.querySelector('aside.md-banner:not(.md-banner--warning)');
+        if (!bannerEl) return;
+        const messages = ["\u003cp\u003eProfitez d\u2019un essai gratuit de 30 jours de BunkerWeb PRO depuis le \u003ca href=\"https://panel.bunkerweb.io/store/bunkerweb-pro?language=french\u0026utm_campaign=self\u0026utm_source=doc\"\u003eBunkerWeb Panel\u003c/a\u003e : commandez une offre, puis gardez \u00ab Free 30 Days Trial \u00bb comme mode de paiement lors de la commande. (\u003ca href=\"../#pro-version\"\u003eguide pas \u00e0 pas\u003c/a\u003e)\u003c/p\u003e", "\u003cp\u003eBesoin d\u2019une assistance premium ou de conseils personnalis\u00e9s sur BunkerWeb ? D\u00e9couvrez nos \u003ca href=\"https://panel.bunkerweb.io/?utm_campaign=self\u0026utm_source=doc#services\"\u003eservices professionnels\u003c/a\u003e.\u003c/p\u003e", "\u003cp\u003eRejoignez la communaut\u00e9 Bunker en participant au \u003ca href=\"https://discord.bunkerweb.io\"\u003esalon Discord\u003c/a\u003e et en nous suivant sur \u003ca href=\"https://www.linkedin.com/company/bunkerity/\"\u003eLinkedIn\u003c/a\u003e.\u003c/p\u003e"];
         const switchDelay = 7000;
         let i = 0;
 
-        setInterval(() => {
-          // Update or reset index
-          if(i + 1 === defaultContent.length) {
-            i = 0;
-          } else {
-            i++;
-          }
-
-          // Prepare data with next el with opacity 0 too
+        // the first message is already in the page; the others rotate in
+        function show(next) {
           const currItem = bannerEl.querySelector('.md-banner__inner');
           currItem.style.opacity = 0;
           const clone = currItem.cloneNode(true);
-          clone.innerHTML = defaultContent[i]["content"];
+          clone.innerHTML = messages[next];
           setTimeout(() => {
             bannerEl.replaceChild(clone, currItem);
             setTimeout(() => {
-              const newItem = bannerEl.querySelector('.md-banner__inner');
-              newItem.style.opacity = 1;
+              bannerEl.querySelector('.md-banner__inner').style.opacity = 1;
             }, 20);
           }, 600);
+        }
 
+        // moving text that outlasts five seconds has to be stoppable (WCAG 2.2.2): it holds
+        // still on hover and focus, never starts when the visitor asks for reduced motion, and
+        // a pause button stops it for the rest of the session
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+        const KEY = 'bw-banner-paused';
+        let paused = false;
+        try { paused = sessionStorage.getItem(KEY) === '1'; } catch (e) {}
+
+        // outside .md-banner__inner: show() swaps that element
+        const toggle = document.createElement('button');
+        toggle.type = 'button';
+        toggle.className = 'bw-banner-toggle';
+        toggle.setAttribute('aria-label', "Mettre en pause les annonces d\u00e9filantes");
+        const icons = {
+          pause: '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg>',
+          play: '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M7 4.5v15l12-7.5z"/></svg>'
+        };
+        function render() {
+          toggle.setAttribute('aria-pressed', paused ? 'true' : 'false');
+          toggle.innerHTML = paused ? icons.play : icons.pause;
+        }
+        render();
+        toggle.addEventListener('click', () => {
+          paused = !paused;
+          try { sessionStorage.setItem(KEY, paused ? '1' : '0'); } catch (e) {}
+          render();
+        });
+        bannerEl.appendChild(toggle);
+
+        setInterval(() => {
+          if (paused || bannerEl.matches(':hover, :focus-within')) return;
+          i = (i + 1) % messages.length;
+          show(i);
         }, switchDelay);
-      }
-
-      function runBanner() {
-        startBannerLoop();
-        // Try to get dynamic content
-        // Else keep static ones
-        // fetch("https://www.bunkerweb.io/api/bw-ui-news")
-        // .then((res) => {
-        //   return res.json();
-        // })
-        // .then((res) => {
-        //   defaultContent = res.data[0].data;
-        //   startBannerLoop();
-        // })
-        // .catch((e) => {
-        //   startBannerLoop();
-        // });
-      }
-
-        setBannerStyle();
-        setDefault();
-        runBanner()
-
       })
     </script>
 
@@ -170,6 +157,9 @@
     
     
     
+    
+    <link rel="preload" href="../../assets/fonts/PublicSans-Regular.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="../../assets/fonts/DonJose-Black.woff2" as="font" type="font/woff2" crossorigin>
     
 
   
@@ -208,11 +198,7 @@
           <div class="md-banner__inner md-grid md-typeset">
             
             
-    📢 Vous recherchez BunkerWeb CLOUD, la version PRO, une assistance technique ou des services sur mesure ? Consultez le
-    <a href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc"
-       style="color: #3f6ec6;
-              text-decoration: underline">BunkerWeb Panel</a>
-    pour en savoir plus sur nos offres aux entreprises.
+    <p>Profitez d’un essai gratuit de 30 jours de BunkerWeb PRO depuis le <a href="https://panel.bunkerweb.io/store/bunkerweb-pro?language=french&utm_campaign=self&utm_source=doc">BunkerWeb Panel</a> : commandez une offre, puis gardez « Free 30 Days Trial » comme mode de paiement lors de la commande. (<a href="../#pro-version">guide pas à pas</a>)</p>
 
           </div>
           
@@ -245,7 +231,7 @@
   <nav class="md-header__inner md-grid" aria-label="En-tête">
     <a href="../" title="Documentation BunkerWeb" class="md-header__button md-logo" aria-label="Documentation BunkerWeb" data-md-component="logo">
       
-  <img src="../../assets/logo.png" alt="logo">
+  <img src="../../assets/logo.png" alt="logo" width="273" height="77">
 
     </a>
     <label class="md-header__button md-icon" for="__drawer">
@@ -660,7 +646,7 @@
   <label class="md-nav__title" for="__drawer">
     <a href="../" title="Documentation BunkerWeb" class="md-nav__button md-logo" aria-label="Documentation BunkerWeb" data-md-component="logo">
       
-  <img src="../../assets/logo.png" alt="logo">
+  <img src="../../assets/logo.png" alt="logo" width="273" height="77">
 
     </a>
     Documentation BunkerWeb

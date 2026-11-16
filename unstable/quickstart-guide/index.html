@@ -20,15 +20,15 @@
       
       
         
-          <link rel="alternate" href="./" hreflang="en">
+          <link rel="alternate" href="https://docs.bunkerweb.io/latest/quickstart-guide/" hreflang="en"><link rel="alternate" href="https://docs.bunkerweb.io/latest/quickstart-guide/" hreflang="x-default">
         
-          <link rel="alternate" href="../fr/quickstart-guide/" hreflang="fr">
+          <link rel="alternate" href="https://docs.bunkerweb.io/latest/fr/quickstart-guide/" hreflang="fr">
         
-          <link rel="alternate" href="../de/quickstart-guide/" hreflang="de">
+          <link rel="alternate" href="https://docs.bunkerweb.io/latest/de/quickstart-guide/" hreflang="de">
         
-          <link rel="alternate" href="../es/quickstart-guide/" hreflang="es">
+          <link rel="alternate" href="https://docs.bunkerweb.io/latest/es/quickstart-guide/" hreflang="es">
         
-          <link rel="alternate" href="../zh/quickstart-guide/" hreflang="zh">
+          <link rel="alternate" href="https://docs.bunkerweb.io/latest/zh/quickstart-guide/" hreflang="zh">
         
       
       
@@ -66,94 +66,81 @@
       })
     </script>
 
-    <script src="https://cdn.jsdelivr.net/npm/medium-zoom/dist/medium-zoom.min.js"></script>
+    <script defer
+            src="https://cdn.jsdelivr.net/npm/medium-zoom@1.1.2/dist/medium-zoom.min.js"
+            integrity="sha384-kRRREbu8lthVytGQVverh9PZPe8fRyg3vK2wO1w0kyeSqE7UfEdXhV/fWfaW/h3A"
+            crossorigin="anonymous"></script>
 
-    <script defer>
+    <script>
   // Lazy load images and embed youtube videos
   window.addEventListener("load", () => {
     document.querySelectorAll("[data-src]").forEach((el) => {
       el.setAttribute("src", el.getAttribute("data-src"));
     });
   });
-  // Add missing label
-  try {
-    document
-      .querySelector('div.md-search[data-md-component="search"][role="dialog"]')
-      .setAttribute("aria-label", "Search in documentation");
-  } catch (err) {}
+  // Add missing label: this script sits in <head>, so the search dialog only exists once the DOM is parsed
+  window.addEventListener("DOMContentLoaded", () => {
+    const search = document.querySelector('div.md-search[data-md-component="search"][role="dialog"]');
+    if (search) search.setAttribute("aria-label", "Search in documentation");
+  });
     </script>
 
-    <script defer>
+    <script>
       window.addEventListener('DOMContentLoaded', () => {
-        const bannerEl = document.querySelector('aside.md-banner');
-        let defaultContent = [{ "content" : "\u003cp\u003eStart a 30-day BunkerWeb PRO free trial from the \u003ca style=\"text-decoration:underline; color :  white;\" href=\"https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self\u0026amp;utm_source=doc\"\u003eBunkerWeb Panel\u003c/a\u003e: order a plan, then keep \u201cFree 30 Days Trial\u201d as the payment method at checkout. (\u003ca style=\"text-decoration:underline; color :  white;\" href=\"..#pro-version\"\u003estep-by-step guide\u003c/a\u003e)\u003c/p\u003e" },
-        { "content" : "\u003cp\u003eNeed premium support or tailored consulting around BunkerWeb? Check out our \u003ca style=\"text-decoration:underline; color :  white;\" href=\"https://panel.bunkerweb.io/?utm_campaign=self\u0026utm_source=doc#services\"\u003eprofessional services\u003c/a\u003e.\u003c/p\u003e" },
-        { "content" : "\u003cp\u003eBe part of the Bunker community by joining the \u003ca style=\"text-decoration:underline; color: white;\" href=\"https://discord.bunkerweb.io\"\u003eDiscord chat\u003c/a\u003e and following us on \u003ca style=\"text-decoration:underline; color: white;\" href=\"https://www.linkedin.com/company/bunkerity/\"\u003eLinkedIn\u003c/a\u003e.\u003c/p\u003e" }
-        ]
-
-      function setBannerStyle() {
-        const bannerItem = bannerEl.querySelector('.md-banner__inner');
-        bannerEl.style.backgroundColor = "#2eac68";
-        bannerItem.style.textAlign = "center";
-        bannerItem.style.transition = "all 0.5s ease-out";
-      }
-
-      function setDefault() {
-        const bannerItem = bannerEl.querySelector('.md-banner__inner');
-        const clone = bannerItem.cloneNode(true);
-        clone.innerHTML = defaultContent[0]["content"];
-        bannerEl.replaceChild(clone, bannerItem);
-      }
-
-      function startBannerLoop() {
+        const bannerEl = document.querySelector('aside.md-banner:not(.md-banner--warning)');
+        if (!bannerEl) return;
+        const messages = ["\u003cp\u003eStart a 30-day BunkerWeb PRO free trial from the \u003ca href=\"https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self\u0026utm_source=doc\"\u003eBunkerWeb Panel\u003c/a\u003e: order a plan, then keep \u201cFree 30 Days Trial\u201d as the payment method at checkout. (\u003ca href=\"..#pro-version\"\u003estep-by-step guide\u003c/a\u003e)\u003c/p\u003e", "\u003cp\u003eNeed premium support or tailored consulting around BunkerWeb? Check out our \u003ca href=\"https://panel.bunkerweb.io/?utm_campaign=self\u0026utm_source=doc#services\"\u003eprofessional services\u003c/a\u003e.\u003c/p\u003e", "\u003cp\u003eBe part of the Bunker community by joining the \u003ca href=\"https://discord.bunkerweb.io\"\u003eDiscord chat\u003c/a\u003e and following us on \u003ca href=\"https://www.linkedin.com/company/bunkerity/\"\u003eLinkedIn\u003c/a\u003e.\u003c/p\u003e"];
         const switchDelay = 7000;
         let i = 0;
 
-        setInterval(() => {
-          // Update or reset index
-          if(i + 1 === defaultContent.length) {
-            i = 0;
-          } else {
-            i++;
-          }
-
-          // Prepare data with next el with opacity 0 too
+        // the first message is already in the page; the others rotate in
+        function show(next) {
           const currItem = bannerEl.querySelector('.md-banner__inner');
           currItem.style.opacity = 0;
           const clone = currItem.cloneNode(true);
-          clone.innerHTML = defaultContent[i]["content"];
+          clone.innerHTML = messages[next];
           setTimeout(() => {
             bannerEl.replaceChild(clone, currItem);
             setTimeout(() => {
-              const newItem = bannerEl.querySelector('.md-banner__inner');
-              newItem.style.opacity = 1;
+              bannerEl.querySelector('.md-banner__inner').style.opacity = 1;
             }, 20);
           }, 600);
+        }
 
+        // moving text that outlasts five seconds has to be stoppable (WCAG 2.2.2): it holds
+        // still on hover and focus, never starts when the visitor asks for reduced motion, and
+        // a pause button stops it for the rest of the session
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+        const KEY = 'bw-banner-paused';
+        let paused = false;
+        try { paused = sessionStorage.getItem(KEY) === '1'; } catch (e) {}
+
+        // outside .md-banner__inner: show() swaps that element
+        const toggle = document.createElement('button');
+        toggle.type = 'button';
+        toggle.className = 'bw-banner-toggle';
+        toggle.setAttribute('aria-label', "Pause rotating announcements");
+        const icons = {
+          pause: '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg>',
+          play: '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M7 4.5v15l12-7.5z"/></svg>'
+        };
+        function render() {
+          toggle.setAttribute('aria-pressed', paused ? 'true' : 'false');
+          toggle.innerHTML = paused ? icons.play : icons.pause;
+        }
+        render();
+        toggle.addEventListener('click', () => {
+          paused = !paused;
+          try { sessionStorage.setItem(KEY, paused ? '1' : '0'); } catch (e) {}
+          render();
+        });
+        bannerEl.appendChild(toggle);
+
+        setInterval(() => {
+          if (paused || bannerEl.matches(':hover, :focus-within')) return;
+          i = (i + 1) % messages.length;
+          show(i);
         }, switchDelay);
-      }
-
-      function runBanner() {
-        startBannerLoop();
-        // Try to get dynamic content
-        // Else keep static ones
-        // fetch("https://www.bunkerweb.io/api/bw-ui-news")
-        // .then((res) => {
-        //   return res.json();
-        // })
-        // .then((res) => {
-        //   defaultContent = res.data[0].data;
-        //   startBannerLoop();
-        // })
-        // .catch((e) => {
-        //   startBannerLoop();
-        // });
-      }
-
-        setBannerStyle();
-        setDefault();
-        runBanner()
-
       })
     </script>
 
@@ -170,6 +157,9 @@
     
     
     
+    
+    <link rel="preload" href="../assets/fonts/PublicSans-Regular.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="../assets/fonts/DonJose-Black.woff2" as="font" type="font/woff2" crossorigin>
     
 
   
@@ -208,11 +198,7 @@
           <div class="md-banner__inner md-grid md-typeset">
             
             
-    📢 Looking for BunkerWeb CLOUD, PRO version, technical support or tailored services? Visit the
-    <a href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc"
-       style="color: #3f6ec6;
-              text-decoration: underline">BunkerWeb Panel</a>
-    for more information on our enterprise offers.
+    <p>Start a 30-day BunkerWeb PRO free trial from the <a href="https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc">BunkerWeb Panel</a>: order a plan, then keep “Free 30 Days Trial” as the payment method at checkout. (<a href="..#pro-version">step-by-step guide</a>)</p>
 
           </div>
           
@@ -245,7 +231,7 @@
   <nav class="md-header__inner md-grid" aria-label="Header">
     <a href=".." title="BunkerWeb documentation" class="md-header__button md-logo" aria-label="BunkerWeb documentation" data-md-component="logo">
       
-  <img src="../assets/logo.png" alt="logo">
+  <img src="../assets/logo.png" alt="logo" width="273" height="77">
 
     </a>
     <label class="md-header__button md-icon" for="__drawer">
@@ -660,7 +646,7 @@
   <label class="md-nav__title" for="__drawer">
     <a href=".." title="BunkerWeb documentation" class="md-nav__button md-logo" aria-label="BunkerWeb documentation" data-md-component="logo">
       
-  <img src="../assets/logo.png" alt="logo">
+  <img src="../assets/logo.png" alt="logo" width="273" height="77">
 
     </a>
     BunkerWeb documentation
@@ -874,6 +860,23 @@
       
     </span>
   </a>
+  
+    <nav class="md-nav" aria-label="Basic setup">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#easy-install-highlights" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Easy Install Highlights
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -1302,7 +1305,7 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
 <p class="admonition-title">Security Notice</p>
 <p>Always verify the script integrity with the provided checksum before executing it.</p>
 </div>
-<h4 id="easy-install-highlights">Easy Install Highlights<a class="headerlink" href="#easy-install-highlights" title="Permanent link">&para;</a></h4>
+<h3 id="easy-install-highlights">Easy Install Highlights<a class="headerlink" href="#easy-install-highlights" title="Permanent link">&para;</a></h3>
 <ul>
 <li>Detects your Linux distribution and CPU architecture up front and warns if you are outside the supported matrix before making any change.</li>
 <li>Interactive prompts use an inline TUI via <a href="https://github.com/charmbracelet/gum">gum</a> — arrow-key menus with a <code>❯</code> cursor, masked password fields. On first interactive run the installer downloads the official <code>gum</code> binary from the <a href="https://github.com/charmbracelet/gum/releases">GitHub release</a> (SHA256-pinned, with optional cosign signature verification when cosign is installed), runs it from a tempdir, and removes the tempdir on exit — <strong>no system package is installed, no apt/dnf source is added, no binary is left behind</strong>. If gum cannot be obtained, the installer uses any pre-installed <code>whiptail</code> for boxed dialogs; if neither is available it falls back to plain text prompts.</li>
@@ -1712,7 +1715,7 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
 <h3 id="create-an-administrator-account">Create an Administrator account<a class="headerlink" href="#create-an-administrator-account" title="Permanent link">&para;</a></h3>
 <p>You should see a setup page just like this one:</p>
 <figure>
-<p><img align="center" alt="Setup Wizard landing page" src="../assets/img/ui-wizard-step1.png" />
+<p><img align="center" alt="Setup Wizard landing page" src="../assets/img/ui-wizard-step1.png" width="1904" height="1064" />
   </p>
 <figcaption>Setup Wizard landing page</figcaption>
 </figure>
@@ -1724,7 +1727,7 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
 <p>The next step will ask you to enter the <strong>server name</strong> (domain/FQDN) that the web UI will use.</p>
 <p>You can also choose to enable <a href="../features/#lets-encrypt">Let's Encrypt</a></p>
 <p><figure markdown>
-  <img align="center" alt="Setup Wizard step 2" src="../assets/img/ui-wizard-step2.png" />
+  <img align="center" alt="Setup Wizard step 2" src="../assets/img/ui-wizard-step2.png" width="1904" height="1064" loading="lazy" decoding="async" />
   <figcaption>Setup Wizard step 2</figcaption>
 </figure></p>
 </div>
@@ -1738,7 +1741,7 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
 <li><a href="../features/#custom-ssl-certificate"><strong>Custom Certificate</strong></a>: Upload a custom TLS certificate if you don't want to use Let's Encrypt.</li>
 </ul>
 <p><figure markdown>
-  <img align="center" alt="Setup Wizard step 2" src="../assets/img/ui-wizard-step2-advanced.png" />
+  <img align="center" alt="Setup Wizard step 2" src="../assets/img/ui-wizard-step2-advanced.png" width="1904" height="1658" loading="lazy" decoding="async" />
   <figcaption>Setup Wizard step 2 (advanced)</figcaption>
 </figure></p>
 </div>
@@ -1747,27 +1750,27 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
 <h3 id="pro-activation">PRO activation<a class="headerlink" href="#pro-activation" title="Permanent link">&para;</a></h3>
 <p>If you have a PRO license, you can activate it by entering your license key in the <code>Upgrade to PRO</code> section. This will enable the PRO features of BunkerWeb.</p>
 <figure>
-<p><img align="center" alt="Setup Wizard PRO step" src="../assets/img/ui-wizard-step3.png" />
+<p><img align="center" alt="Setup Wizard PRO step" src="../assets/img/ui-wizard-step3.png" width="1904" height="1059" loading="lazy" decoding="async" />
   </p>
 <figcaption>Setup Wizard PRO step</figcaption>
 </figure>
 <h3 id="overview-of-your-settings">Overview of your settings<a class="headerlink" href="#overview-of-your-settings" title="Permanent link">&para;</a></h3>
 <p>The last step will give you an overview of the settings you've entered. You can click on the "Setup" button to complete the setup.</p>
 <figure>
-<p><img align="center" alt="Setup Wizard final step" src="../assets/img/ui-wizard-step4.png" />
+<p><img align="center" alt="Setup Wizard final step" src="../assets/img/ui-wizard-step4.png" width="1904" height="1032" loading="lazy" decoding="async" />
   </p>
 <figcaption>Setup Wizard final step</figcaption>
 </figure>
 <h2 id="accessing-the-web-interface">Accessing the web interface<a class="headerlink" href="#accessing-the-web-interface" title="Permanent link">&para;</a></h2>
 <p>You can now access the web interface by browsing to the domain you configured in the previous step and the URI if you changed it (default is <code>https://your-domain/</code>).</p>
 <figure>
-<p><img align="center" alt="Web interface login page" src="../assets/img/ui-login.png" />
+<p><img align="center" alt="Web interface login page" src="../assets/img/ui-login.png" width="1904" height="1032" loading="lazy" decoding="async" />
   </p>
 <figcaption>Web interface login page</figcaption>
 </figure>
 <p>You can now log in with the administrator account you created during the setup wizard.</p>
 <figure>
-<p><img align="center" alt="Web interface home" src="../assets/img/ui-home.png" />
+<p><img align="center" alt="Web interface home" src="../assets/img/ui-home.png" width="1904" height="1032" loading="lazy" decoding="async" />
   </p>
 <figcaption>Web interface home</figcaption>
 </figure>
@@ -1791,7 +1794,7 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
 <div class="tabbed-block">
 <p>In this mode, you can choose among the available templates and fill in the required fields.</p>
 <p><figure markdown>
-  <img align="center" alt="Web interface create service easy" src="../assets/img/ui-create-service-easy.png" />
+  <img align="center" alt="Web interface create service easy" src="../assets/img/ui-create-service-easy.png" width="1904" height="1032" loading="lazy" decoding="async" />
   <figcaption>Web interface create service easy</figcaption>
 </figure></p>
 <ul>
@@ -1802,7 +1805,7 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
 <div class="tabbed-block">
 <p>In this mode, you can configure the service with more options while seeing all the available settings from all the different plugins.</p>
 <p><figure markdown>
-  <img align="center" alt="Web interface create service advanced" src="../assets/img/ui-create-service-advanced.png" />
+  <img align="center" alt="Web interface create service advanced" src="../assets/img/ui-create-service-advanced.png" width="1904" height="1032" loading="lazy" decoding="async" />
   <figcaption>Web interface create service advanced</figcaption>
 </figure></p>
 <ul>
@@ -1814,7 +1817,7 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
 <div class="tabbed-block">
 <p>In this mode, you can enter the configuration directly like editing the <code>variables.env</code> file.</p>
 <p><figure markdown>
-  <img align="center" alt="Web interface create service RAW" src="../assets/img/ui-create-service-raw.png" />
+  <img align="center" alt="Web interface create service RAW" src="../assets/img/ui-create-service-raw.png" width="1904" height="1032" loading="lazy" decoding="async" />
   <figcaption>Web interface create service RAW</figcaption>
 </figure></p>
 <p>At the start of a setting line, press <code>#</code> to toggle its draft state. Draft entries show a muted visual <code>#</code> prefix; press <strong>Backspace</strong> at the start of the line to activate them again. The prefix is editor metadata and does not alter the setting value. Click <strong>Save</strong> to persist the change. While a setting is draft, its inherited or default value applies. Draft settings are managed only in RAW mode and are preserved when saving in Simple or Advanced mode. This is separate from making the whole service a draft. Locked settings and service identity controls cannot be drafted.</p>
@@ -1826,7 +1829,7 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
 </div>
 <p>🚀 Once you've saved the configuration, you should see your new service in the list of services.</p>
 <p><figure markdown>
-  <img align="center" alt="Web interface services page" src="../assets/img/ui-services.png" />
+  <img align="center" alt="Web interface services page" src="../assets/img/ui-services.png" width="1904" height="1032" loading="lazy" decoding="async" />
   <figcaption>Web interface services page</figcaption>
 </figure></p>
 <p>If you wish to edit the service, you can click on the service name or the <code>📝 Edit</code> button.</p>

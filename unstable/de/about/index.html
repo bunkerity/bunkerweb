@@ -18,15 +18,15 @@
       
       
         
-          <link rel="alternate" href="../../about/" hreflang="en">
+          <link rel="alternate" href="https://docs.bunkerweb.io/latest/about/" hreflang="en"><link rel="alternate" href="https://docs.bunkerweb.io/latest/about/" hreflang="x-default">
         
-          <link rel="alternate" href="../../fr/about/" hreflang="fr">
+          <link rel="alternate" href="https://docs.bunkerweb.io/latest/fr/about/" hreflang="fr">
         
-          <link rel="alternate" href="./" hreflang="de">
+          <link rel="alternate" href="https://docs.bunkerweb.io/latest/de/about/" hreflang="de">
         
-          <link rel="alternate" href="../../es/about/" hreflang="es">
+          <link rel="alternate" href="https://docs.bunkerweb.io/latest/es/about/" hreflang="es">
         
-          <link rel="alternate" href="../../zh/about/" hreflang="zh">
+          <link rel="alternate" href="https://docs.bunkerweb.io/latest/zh/about/" hreflang="zh">
         
       
       
@@ -64,94 +64,81 @@
       })
     </script>
 
-    <script src="https://cdn.jsdelivr.net/npm/medium-zoom/dist/medium-zoom.min.js"></script>
+    <script defer
+            src="https://cdn.jsdelivr.net/npm/medium-zoom@1.1.2/dist/medium-zoom.min.js"
+            integrity="sha384-kRRREbu8lthVytGQVverh9PZPe8fRyg3vK2wO1w0kyeSqE7UfEdXhV/fWfaW/h3A"
+            crossorigin="anonymous"></script>
 
-    <script defer>
+    <script>
   // Lazy load images and embed youtube videos
   window.addEventListener("load", () => {
     document.querySelectorAll("[data-src]").forEach((el) => {
       el.setAttribute("src", el.getAttribute("data-src"));
     });
   });
-  // Add missing label
-  try {
-    document
-      .querySelector('div.md-search[data-md-component="search"][role="dialog"]')
-      .setAttribute("aria-label", "In der Dokumentation suchen");
-  } catch (err) {}
+  // Add missing label: this script sits in <head>, so the search dialog only exists once the DOM is parsed
+  window.addEventListener("DOMContentLoaded", () => {
+    const search = document.querySelector('div.md-search[data-md-component="search"][role="dialog"]');
+    if (search) search.setAttribute("aria-label", "In der Dokumentation suchen");
+  });
     </script>
 
-    <script defer>
+    <script>
       window.addEventListener('DOMContentLoaded', () => {
-        const bannerEl = document.querySelector('aside.md-banner');
-        let defaultContent = [{ "content" : "\u003cp\u003eStarten Sie \u00fcber das \u003ca style=\"text-decoration:underline; color :  white;\" href=\"https://panel.bunkerweb.io/store/bunkerweb-pro?language=german\u0026amp;utm_campaign=self\u0026amp;utm_source=doc\"\u003eBunkerWeb Panel\u003c/a\u003e eine kostenlose 30-t\u00e4gige Testversion von BunkerWeb PRO: Bestellen Sie einen Tarif und lassen Sie beim Bestellabschluss \u201eFree 30 Days Trial\u201c als Zahlungsmethode ausgew\u00e4hlt. (\u003ca style=\"text-decoration:underline; color :  white;\" href=\"../#pro-version\"\u003eSchritt-f\u00fcr-Schritt-Anleitung\u003c/a\u003e)\u003c/p\u003e" },
-        { "content" : "\u003cp\u003eBen\u00f6tigen Sie Premium-Support oder eine individuelle Beratung zu BunkerWeb? Informieren Sie sich \u00fcber unsere \u003ca style=\"text-decoration:underline; color :  white;\" href=\"https://panel.bunkerweb.io/?utm_campaign=self\u0026utm_source=doc#services\"\u003eprofessionellen Dienstleistungen\u003c/a\u003e.\u003c/p\u003e" },
-        { "content" : "\u003cp\u003eWerden Sie Teil der Bunker-Community und treten Sie dem \u003ca style=\"text-decoration:underline; color: white;\" href=\"https://discord.bunkerweb.io\"\u003eDiscord-Chat\u003c/a\u003e bei. Folgen Sie uns auch auf \u003ca style=\"text-decoration:underline; color: white;\" href=\"https://www.linkedin.com/company/bunkerity/\"\u003eLinkedIn\u003c/a\u003e.\u003c/p\u003e" }
-        ]
-
-      function setBannerStyle() {
-        const bannerItem = bannerEl.querySelector('.md-banner__inner');
-        bannerEl.style.backgroundColor = "#2eac68";
-        bannerItem.style.textAlign = "center";
-        bannerItem.style.transition = "all 0.5s ease-out";
-      }
-
-      function setDefault() {
-        const bannerItem = bannerEl.querySelector('.md-banner__inner');
-        const clone = bannerItem.cloneNode(true);
-        clone.innerHTML = defaultContent[0]["content"];
-        bannerEl.replaceChild(clone, bannerItem);
-      }
-
-      function startBannerLoop() {
+        const bannerEl = document.querySelector('aside.md-banner:not(.md-banner--warning)');
+        if (!bannerEl) return;
+        const messages = ["\u003cp\u003eStarten Sie \u00fcber das \u003ca href=\"https://panel.bunkerweb.io/store/bunkerweb-pro?language=german\u0026utm_campaign=self\u0026utm_source=doc\"\u003eBunkerWeb Panel\u003c/a\u003e eine kostenlose 30-t\u00e4gige Testversion von BunkerWeb PRO: Bestellen Sie einen Tarif und lassen Sie beim Bestellabschluss \u201eFree 30 Days Trial\u201c als Zahlungsmethode ausgew\u00e4hlt. (\u003ca href=\"../#pro-version\"\u003eSchritt-f\u00fcr-Schritt-Anleitung\u003c/a\u003e)\u003c/p\u003e", "\u003cp\u003eBen\u00f6tigen Sie Premium-Support oder eine individuelle Beratung zu BunkerWeb? Informieren Sie sich \u00fcber unsere \u003ca href=\"https://panel.bunkerweb.io/?utm_campaign=self\u0026utm_source=doc#services\"\u003eprofessionellen Dienstleistungen\u003c/a\u003e.\u003c/p\u003e", "\u003cp\u003eWerden Sie Teil der Bunker-Community und treten Sie dem \u003ca href=\"https://discord.bunkerweb.io\"\u003eDiscord-Chat\u003c/a\u003e bei. Folgen Sie uns auch auf \u003ca href=\"https://www.linkedin.com/company/bunkerity/\"\u003eLinkedIn\u003c/a\u003e.\u003c/p\u003e"];
         const switchDelay = 7000;
         let i = 0;
 
-        setInterval(() => {
-          // Update or reset index
-          if(i + 1 === defaultContent.length) {
-            i = 0;
-          } else {
-            i++;
-          }
-
-          // Prepare data with next el with opacity 0 too
+        // the first message is already in the page; the others rotate in
+        function show(next) {
           const currItem = bannerEl.querySelector('.md-banner__inner');
           currItem.style.opacity = 0;
           const clone = currItem.cloneNode(true);
-          clone.innerHTML = defaultContent[i]["content"];
+          clone.innerHTML = messages[next];
           setTimeout(() => {
             bannerEl.replaceChild(clone, currItem);
             setTimeout(() => {
-              const newItem = bannerEl.querySelector('.md-banner__inner');
-              newItem.style.opacity = 1;
+              bannerEl.querySelector('.md-banner__inner').style.opacity = 1;
             }, 20);
           }, 600);
+        }
 
+        // moving text that outlasts five seconds has to be stoppable (WCAG 2.2.2): it holds
+        // still on hover and focus, never starts when the visitor asks for reduced motion, and
+        // a pause button stops it for the rest of the session
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+        const KEY = 'bw-banner-paused';
+        let paused = false;
+        try { paused = sessionStorage.getItem(KEY) === '1'; } catch (e) {}
+
+        // outside .md-banner__inner: show() swaps that element
+        const toggle = document.createElement('button');
+        toggle.type = 'button';
+        toggle.className = 'bw-banner-toggle';
+        toggle.setAttribute('aria-label', "Wechselnde Hinweise anhalten");
+        const icons = {
+          pause: '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg>',
+          play: '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M7 4.5v15l12-7.5z"/></svg>'
+        };
+        function render() {
+          toggle.setAttribute('aria-pressed', paused ? 'true' : 'false');
+          toggle.innerHTML = paused ? icons.play : icons.pause;
+        }
+        render();
+        toggle.addEventListener('click', () => {
+          paused = !paused;
+          try { sessionStorage.setItem(KEY, paused ? '1' : '0'); } catch (e) {}
+          render();
+        });
+        bannerEl.appendChild(toggle);
+
+        setInterval(() => {
+          if (paused || bannerEl.matches(':hover, :focus-within')) return;
+          i = (i + 1) % messages.length;
+          show(i);
         }, switchDelay);
-      }
-
-      function runBanner() {
-        startBannerLoop();
-        // Try to get dynamic content
-        // Else keep static ones
-        // fetch("https://www.bunkerweb.io/api/bw-ui-news")
-        // .then((res) => {
-        //   return res.json();
-        // })
-        // .then((res) => {
-        //   defaultContent = res.data[0].data;
-        //   startBannerLoop();
-        // })
-        // .catch((e) => {
-        //   startBannerLoop();
-        // });
-      }
-
-        setBannerStyle();
-        setDefault();
-        runBanner()
-
       })
     </script>
 
@@ -168,6 +155,9 @@
     
     
     
+    
+    <link rel="preload" href="../../assets/fonts/PublicSans-Regular.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="../../assets/fonts/DonJose-Black.woff2" as="font" type="font/woff2" crossorigin>
     
 
   
@@ -206,11 +196,7 @@
           <div class="md-banner__inner md-grid md-typeset">
             
             
-    📢 Suchen Sie BunkerWeb CLOUD, die PRO-Version, technischen Support oder maßgeschneiderte Dienstleistungen? Besuchen Sie das
-    <a href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc"
-       style="color: #3f6ec6;
-              text-decoration: underline">BunkerWeb Panel</a>
-    und erfahren Sie mehr über unsere Angebote für Unternehmen.
+    <p>Starten Sie über das <a href="https://panel.bunkerweb.io/store/bunkerweb-pro?language=german&utm_campaign=self&utm_source=doc">BunkerWeb Panel</a> eine kostenlose 30-tägige Testversion von BunkerWeb PRO: Bestellen Sie einen Tarif und lassen Sie beim Bestellabschluss „Free 30 Days Trial“ als Zahlungsmethode ausgewählt. (<a href="../#pro-version">Schritt-für-Schritt-Anleitung</a>)</p>
 
           </div>
           
@@ -243,7 +229,7 @@
   <nav class="md-header__inner md-grid" aria-label="Kopfzeile">
     <a href="../" title="BunkerWeb Dokumentation" class="md-header__button md-logo" aria-label="BunkerWeb Dokumentation" data-md-component="logo">
       
-  <img src="../../assets/logo.png" alt="logo">
+  <img src="../../assets/logo.png" alt="logo" width="273" height="77">
 
     </a>
     <label class="md-header__button md-icon" for="__drawer">
@@ -658,7 +644,7 @@
   <label class="md-nav__title" for="__drawer">
     <a href="../" title="BunkerWeb Dokumentation" class="md-nav__button md-logo" aria-label="BunkerWeb Dokumentation" data-md-component="logo">
       
-  <img src="../../assets/logo.png" alt="logo">
+  <img src="../../assets/logo.png" alt="logo" width="273" height="77">
 
     </a>
     BunkerWeb Dokumentation

@@ -1,6 +1,8 @@
-/* Enable smooth scrolling for anchor links */
-html {
-  scroll-behavior: smooth;
+/* Enable smooth scrolling for anchor links, unless the visitor asked for less motion */
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
 }
 
 /* zoom on image, custom z-index */
@@ -94,6 +96,18 @@ html {
   --bw-row-hover: #f6fafc;
 
   --md-primary-fg-color: var(--bw-primary);
+  /* the mobile drawer's repository row reads this one, which stayed Material indigo */
+  --md-primary-fg-color--dark: var(--bw-primary);
+  /* Material's indigo accent colors hover states and the highlighted search term, 3.75:1 on
+     the result list; the brand blue is 8.1:1 */
+  --md-accent-fg-color: var(--bw-blue);
+  --md-accent-fg-color--transparent: rgb(11 85 119 / 10%);
+  /* Material paints code comments, variables, operators and punctuation with the
+     light foreground, 4.47:1 on the code background, a hair under AA */
+  --md-code-hl-comment-color: var(--bw-muted);
+  --md-code-hl-variable-color: var(--bw-muted);
+  --md-code-hl-operator-color: var(--bw-muted);
+  --md-code-hl-punctuation-color: var(--bw-muted);
   --md-text-font: "Public Sans";
   --md-code-font: "Courier Prime";
 }
@@ -119,12 +133,14 @@ html {
   background-color: var(--bw-primary);
 }
 
-/* brand link color, 8.1:1 on white */
-article a {
-  color: var(--bw-blue);
+/* brand link color, 8.1:1 on white. Material paints links from --md-typeset-a-color
+   (the primary color, navy, 1.2:1 against the body text) and its .md-typeset a rule
+   outranks a plain `article a`, so the token is what has to change. */
+:root {
+  --md-typeset-a-color: var(--bw-blue);
 }
 
-article a:hover {
+article.md-typeset a:hover {
   color: var(--bw-green-text);
 }
 
@@ -134,10 +150,72 @@ article p > a {
   text-decoration: underline;
 }
 
-/* header list links and config tabs stay default  */
-article li > a,
+/* config tab labels stay default. Links inside list items keep their underline: the
+   brand blue is only 2:1 against the body text, so color alone does not mark a link
+   inside a sentence (WCAG 1.4.1). */
 article label > a {
   text-decoration: none;
+}
+
+/* announcement banner: the brand green is a fill (2.9:1 under white text), so the
+   text is the ink color, 6:1 on it. Layout and fade live here, not in inline styles. */
+.md-banner:not(.md-banner--warning) {
+  background-color: var(--bw-green);
+  color: var(--bw-ink);
+}
+
+.md-banner:not(.md-banner--warning) {
+  position: relative;
+}
+
+.md-banner:not(.md-banner--warning) .md-banner__inner {
+  text-align: center;
+  transition: opacity 0.5s ease-out;
+  /* room for the pause button on both sides, so the text stays centered */
+  padding-inline: 36px;
+}
+
+/* pause/play for the rotating messages (created by the banner script in main.html) */
+.bw-banner-toggle {
+  position: absolute;
+  top: 50%;
+  right: 0.4rem;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+
+.bw-banner-toggle svg {
+  width: 16px;
+  height: 16px;
+  fill: currentColor;
+}
+
+.bw-banner-toggle:hover {
+  background: rgb(0 0 0 / 12%);
+}
+
+.bw-banner-toggle:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 1px;
+}
+
+.md-banner:not(.md-banner--warning) .md-banner__inner a {
+  color: inherit;
+  text-decoration: underline;
+}
+
+.md-banner:not(.md-banner--warning) .md-banner__inner a:hover {
+  text-decoration-thickness: 2px;
 }
 
 /* lighter base tab color */
@@ -242,9 +320,13 @@ nav.md-tabs ul li.md-tabs__item--active a:hover {
   list-style: none; /* Remove default arrow */
   cursor: pointer;
   position: relative;
-  outline: none; /* Remove focus outline */
   transition: color 0.25s; /* Smooth color transition */
   font-weight: 700;
+}
+
+.toc-dropdown > summary:focus-visible {
+  outline: 2px solid var(--bw-blue);
+  outline-offset: 2px;
 }
 
 .toc-dropdown > summary::-webkit-details-marker {
@@ -284,6 +366,16 @@ nav.md-tabs ul li.md-tabs__item--active a:hover {
   color: var(--bw-blue);
 }
 /* END: Custom styles for TOC dropdowns */
+
+/* toc-dropdown.js folds each heading's sub-list into a closed <details> once the page is
+   parsed; until then the sub-lists stood open and the whole sidebar collapsed under the
+   reader (layout shift). They are folded from the first paint instead, where a script
+   will run to unfold them. */
+@media (scripting: enabled) {
+  .md-nav--secondary li.md-nav__item > nav.md-nav {
+    display: none;
+  }
+}
 
 /* never split an inline code token mid-word in tables: a setting name, value or URL
    stays one selectable word, lines still wrap on spaces */
@@ -393,6 +485,13 @@ nav.md-tabs ul li.md-tabs__item--active a:hover {
 
 .md-typeset .bw-settings .bw-col-setting code::-webkit-scrollbar {
   display: none;
+}
+
+/* an overflowing chip is a tab stop (extra.js), so it has to show focus */
+.md-typeset .bw-settings code:focus-visible,
+.md-typeset__scrollwrap:focus-visible {
+  outline: 2px solid var(--bw-blue);
+  outline-offset: 1px;
 }
 
 /* copy button, revealed on row hover and on keyboard focus */
@@ -521,6 +620,15 @@ nav.md-tabs ul li.md-tabs__item--active a:hover {
   width: 0.8rem;
   height: 0.8rem;
   vertical-align: -0.1rem;
+}
+
+/* A STREAM line is 26px of text until extra.js turns it into a 30px badge row, which
+   moved everything below it (Cumulative Layout Shift 0.29 on the features page).
+   Reserving the badge height up front removes the jump. */
+.md-typeset p:has(> img.twemoji[title=":white_check_mark:"]),
+.md-typeset p:has(> img.twemoji[title=":x:"]),
+.md-typeset p:has(> img.twemoji[title=":warning:"]) {
+  min-height: 1.5rem;
 }
 
 /* the PRO "advanced usages" link, promoted to the one solid button of the section */
@@ -741,6 +849,13 @@ article.md-typeset .md-clipboard {
 article.md-typeset .md-clipboard:hover,
 article.md-typeset .md-clipboard:focus {
   color: var(--bw-blue);
+}
+
+/* The search result counter ("3 matches") and each excerpt sit on light grey or on the
+   hover tint: Material's light foreground is 4.4:1 there, a shade under AA. */
+.md-search-result__meta,
+.md-search-result__teaser {
+  color: var(--bw-body);
 }
 
 /* Heading anchors. Until permalink was turned on no section of a 545 KB page

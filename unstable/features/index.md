@@ -3316,6 +3316,7 @@ The HTML Injection plugin enables you to seamlessly add custom HTML code to your
 3. If you've configured head injection, BunkerWeb inserts your custom HTML code just before the closing `</head>` tag.
 4. The insertion happens automatically for all HTML pages served by your website.
 5. This allows you to add scripts, styles, or other elements without modifying your application's code.
+6. The antibot challenge page and BunkerWeb's error pages are left untouched: BunkerWeb generates them, and their Content Security Policy would block the injected code anyway.
 
 ### How to Use
 
@@ -6619,6 +6620,9 @@ Follow these steps to configure and use the Whitelist feature:
 
 !!! info "stream mode"
     When using stream mode, only IP, rDNS, and ASN checks are performed.
+
+!!! info "rDNS and the first request"
+    An rDNS match is only applied from the access phase, so when the whitelist cache is cold (after a reload or once an entry expires), the first request of an rDNS-whitelisted client can still be blocked by ModSecurity.
 
 ### Configuration Settings
 

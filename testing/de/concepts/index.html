@@ -20,15 +20,15 @@
       
       
         
-          <link rel="alternate" href="../../concepts/" hreflang="en">
+          <link rel="alternate" href="https://docs.bunkerweb.io/latest/concepts/" hreflang="en"><link rel="alternate" href="https://docs.bunkerweb.io/latest/concepts/" hreflang="x-default">
         
-          <link rel="alternate" href="../../fr/concepts/" hreflang="fr">
+          <link rel="alternate" href="https://docs.bunkerweb.io/latest/fr/concepts/" hreflang="fr">
         
-          <link rel="alternate" href="./" hreflang="de">
+          <link rel="alternate" href="https://docs.bunkerweb.io/latest/de/concepts/" hreflang="de">
         
-          <link rel="alternate" href="../../es/concepts/" hreflang="es">
+          <link rel="alternate" href="https://docs.bunkerweb.io/latest/es/concepts/" hreflang="es">
         
-          <link rel="alternate" href="../../zh/concepts/" hreflang="zh">
+          <link rel="alternate" href="https://docs.bunkerweb.io/latest/zh/concepts/" hreflang="zh">
         
       
       
@@ -66,94 +66,81 @@
       })
     </script>
 
-    <script src="https://cdn.jsdelivr.net/npm/medium-zoom/dist/medium-zoom.min.js"></script>
+    <script defer
+            src="https://cdn.jsdelivr.net/npm/medium-zoom@1.1.2/dist/medium-zoom.min.js"
+            integrity="sha384-kRRREbu8lthVytGQVverh9PZPe8fRyg3vK2wO1w0kyeSqE7UfEdXhV/fWfaW/h3A"
+            crossorigin="anonymous"></script>
 
-    <script defer>
+    <script>
   // Lazy load images and embed youtube videos
   window.addEventListener("load", () => {
     document.querySelectorAll("[data-src]").forEach((el) => {
       el.setAttribute("src", el.getAttribute("data-src"));
     });
   });
-  // Add missing label
-  try {
-    document
-      .querySelector('div.md-search[data-md-component="search"][role="dialog"]')
-      .setAttribute("aria-label", "In der Dokumentation suchen");
-  } catch (err) {}
+  // Add missing label: this script sits in <head>, so the search dialog only exists once the DOM is parsed
+  window.addEventListener("DOMContentLoaded", () => {
+    const search = document.querySelector('div.md-search[data-md-component="search"][role="dialog"]');
+    if (search) search.setAttribute("aria-label", "In der Dokumentation suchen");
+  });
     </script>
 
-    <script defer>
+    <script>
       window.addEventListener('DOMContentLoaded', () => {
-        const bannerEl = document.querySelector('aside.md-banner');
-        let defaultContent = [{ "content" : "\u003cp\u003eStarten Sie \u00fcber das \u003ca style=\"text-decoration:underline; color :  white;\" href=\"https://panel.bunkerweb.io/store/bunkerweb-pro?language=german\u0026amp;utm_campaign=self\u0026amp;utm_source=doc\"\u003eBunkerWeb Panel\u003c/a\u003e eine kostenlose 30-t\u00e4gige Testversion von BunkerWeb PRO: Bestellen Sie einen Tarif und lassen Sie beim Bestellabschluss \u201eFree 30 Days Trial\u201c als Zahlungsmethode ausgew\u00e4hlt. (\u003ca style=\"text-decoration:underline; color :  white;\" href=\"../#pro-version\"\u003eSchritt-f\u00fcr-Schritt-Anleitung\u003c/a\u003e)\u003c/p\u003e" },
-        { "content" : "\u003cp\u003eBen\u00f6tigen Sie Premium-Support oder eine individuelle Beratung zu BunkerWeb? Informieren Sie sich \u00fcber unsere \u003ca style=\"text-decoration:underline; color :  white;\" href=\"https://panel.bunkerweb.io/?utm_campaign=self\u0026utm_source=doc#services\"\u003eprofessionellen Dienstleistungen\u003c/a\u003e.\u003c/p\u003e" },
-        { "content" : "\u003cp\u003eWerden Sie Teil der Bunker-Community und treten Sie dem \u003ca style=\"text-decoration:underline; color: white;\" href=\"https://discord.bunkerweb.io\"\u003eDiscord-Chat\u003c/a\u003e bei. Folgen Sie uns auch auf \u003ca style=\"text-decoration:underline; color: white;\" href=\"https://www.linkedin.com/company/bunkerity/\"\u003eLinkedIn\u003c/a\u003e.\u003c/p\u003e" }
-        ]
-
-      function setBannerStyle() {
-        const bannerItem = bannerEl.querySelector('.md-banner__inner');
-        bannerEl.style.backgroundColor = "#2eac68";
-        bannerItem.style.textAlign = "center";
-        bannerItem.style.transition = "all 0.5s ease-out";
-      }
-
-      function setDefault() {
-        const bannerItem = bannerEl.querySelector('.md-banner__inner');
-        const clone = bannerItem.cloneNode(true);
-        clone.innerHTML = defaultContent[0]["content"];
-        bannerEl.replaceChild(clone, bannerItem);
-      }
-
-      function startBannerLoop() {
+        const bannerEl = document.querySelector('aside.md-banner:not(.md-banner--warning)');
+        if (!bannerEl) return;
+        const messages = ["\u003cp\u003eStarten Sie \u00fcber das \u003ca href=\"https://panel.bunkerweb.io/store/bunkerweb-pro?language=german\u0026utm_campaign=self\u0026utm_source=doc\"\u003eBunkerWeb Panel\u003c/a\u003e eine kostenlose 30-t\u00e4gige Testversion von BunkerWeb PRO: Bestellen Sie einen Tarif und lassen Sie beim Bestellabschluss \u201eFree 30 Days Trial\u201c als Zahlungsmethode ausgew\u00e4hlt. (\u003ca href=\"../#pro-version\"\u003eSchritt-f\u00fcr-Schritt-Anleitung\u003c/a\u003e)\u003c/p\u003e", "\u003cp\u003eBen\u00f6tigen Sie Premium-Support oder eine individuelle Beratung zu BunkerWeb? Informieren Sie sich \u00fcber unsere \u003ca href=\"https://panel.bunkerweb.io/?utm_campaign=self\u0026utm_source=doc#services\"\u003eprofessionellen Dienstleistungen\u003c/a\u003e.\u003c/p\u003e", "\u003cp\u003eWerden Sie Teil der Bunker-Community und treten Sie dem \u003ca href=\"https://discord.bunkerweb.io\"\u003eDiscord-Chat\u003c/a\u003e bei. Folgen Sie uns auch auf \u003ca href=\"https://www.linkedin.com/company/bunkerity/\"\u003eLinkedIn\u003c/a\u003e.\u003c/p\u003e"];
         const switchDelay = 7000;
         let i = 0;
 
-        setInterval(() => {
-          // Update or reset index
-          if(i + 1 === defaultContent.length) {
-            i = 0;
-          } else {
-            i++;
-          }
-
-          // Prepare data with next el with opacity 0 too
+        // the first message is already in the page; the others rotate in
+        function show(next) {
           const currItem = bannerEl.querySelector('.md-banner__inner');
           currItem.style.opacity = 0;
           const clone = currItem.cloneNode(true);
-          clone.innerHTML = defaultContent[i]["content"];
+          clone.innerHTML = messages[next];
           setTimeout(() => {
             bannerEl.replaceChild(clone, currItem);
             setTimeout(() => {
-              const newItem = bannerEl.querySelector('.md-banner__inner');
-              newItem.style.opacity = 1;
+              bannerEl.querySelector('.md-banner__inner').style.opacity = 1;
             }, 20);
           }, 600);
+        }
 
+        // moving text that outlasts five seconds has to be stoppable (WCAG 2.2.2): it holds
+        // still on hover and focus, never starts when the visitor asks for reduced motion, and
+        // a pause button stops it for the rest of the session
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+        const KEY = 'bw-banner-paused';
+        let paused = false;
+        try { paused = sessionStorage.getItem(KEY) === '1'; } catch (e) {}
+
+        // outside .md-banner__inner: show() swaps that element
+        const toggle = document.createElement('button');
+        toggle.type = 'button';
+        toggle.className = 'bw-banner-toggle';
+        toggle.setAttribute('aria-label', "Wechselnde Hinweise anhalten");
+        const icons = {
+          pause: '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg>',
+          play: '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M7 4.5v15l12-7.5z"/></svg>'
+        };
+        function render() {
+          toggle.setAttribute('aria-pressed', paused ? 'true' : 'false');
+          toggle.innerHTML = paused ? icons.play : icons.pause;
+        }
+        render();
+        toggle.addEventListener('click', () => {
+          paused = !paused;
+          try { sessionStorage.setItem(KEY, paused ? '1' : '0'); } catch (e) {}
+          render();
+        });
+        bannerEl.appendChild(toggle);
+
+        setInterval(() => {
+          if (paused || bannerEl.matches(':hover, :focus-within')) return;
+          i = (i + 1) % messages.length;
+          show(i);
         }, switchDelay);
-      }
-
-      function runBanner() {
-        startBannerLoop();
-        // Try to get dynamic content
-        // Else keep static ones
-        // fetch("https://www.bunkerweb.io/api/bw-ui-news")
-        // .then((res) => {
-        //   return res.json();
-        // })
-        // .then((res) => {
-        //   defaultContent = res.data[0].data;
-        //   startBannerLoop();
-        // })
-        // .catch((e) => {
-        //   startBannerLoop();
-        // });
-      }
-
-        setBannerStyle();
-        setDefault();
-        runBanner()
-
       })
     </script>
 
@@ -170,6 +157,9 @@
     
     
     
+    
+    <link rel="preload" href="../../assets/fonts/PublicSans-Regular.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="../../assets/fonts/DonJose-Black.woff2" as="font" type="font/woff2" crossorigin>
     
 
   
@@ -208,11 +198,7 @@
           <div class="md-banner__inner md-grid md-typeset">
             
             
-    📢 Suchen Sie BunkerWeb CLOUD, die PRO-Version, technischen Support oder maßgeschneiderte Dienstleistungen? Besuchen Sie das
-    <a href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc"
-       style="color: #3f6ec6;
-              text-decoration: underline">BunkerWeb Panel</a>
-    und erfahren Sie mehr über unsere Angebote für Unternehmen.
+    <p>Starten Sie über das <a href="https://panel.bunkerweb.io/store/bunkerweb-pro?language=german&utm_campaign=self&utm_source=doc">BunkerWeb Panel</a> eine kostenlose 30-tägige Testversion von BunkerWeb PRO: Bestellen Sie einen Tarif und lassen Sie beim Bestellabschluss „Free 30 Days Trial“ als Zahlungsmethode ausgewählt. (<a href="../#pro-version">Schritt-für-Schritt-Anleitung</a>)</p>
 
           </div>
           
@@ -245,7 +231,7 @@
   <nav class="md-header__inner md-grid" aria-label="Kopfzeile">
     <a href="../" title="BunkerWeb Dokumentation" class="md-header__button md-logo" aria-label="BunkerWeb Dokumentation" data-md-component="logo">
       
-  <img src="../../assets/logo.png" alt="logo">
+  <img src="../../assets/logo.png" alt="logo" width="273" height="77">
 
     </a>
     <label class="md-header__button md-icon" for="__drawer">
@@ -660,7 +646,7 @@
   <label class="md-nav__title" for="__drawer">
     <a href="../" title="BunkerWeb Dokumentation" class="md-nav__button md-logo" aria-label="BunkerWeb Dokumentation" data-md-component="logo">
       
-  <img src="../../assets/logo.png" alt="logo">
+  <img src="../../assets/logo.png" alt="logo" width="273" height="77">
 
     </a>
     BunkerWeb Dokumentation
@@ -1223,7 +1209,7 @@
 <h1 id="konzepte">Konzepte<a class="headerlink" href="#konzepte" title="Permanent link">&para;</a></h1>
 <h2 id="architektur">Architektur<a class="headerlink" href="#architektur" title="Permanent link">&para;</a></h2>
 <figure>
-<p><img align="center," alt="Übersicht" src="../../assets/img/concepts.svg" width="600" /></p>
+<p><img align="center," alt="Übersicht" src="../../assets/img/concepts.svg" width="600" height="450" /></p>
 </figure>
 <p>Innerhalb Ihrer Infrastruktur agiert BunkerWeb als Reverse-Proxy vor Ihren Webdiensten. Die typische Architektur beinhaltet den Zugriff auf BunkerWeb aus dem Internet, das dann Anfragen an den entsprechenden Anwendungsdienst in einem sicheren Netzwerk weiterleitet.</p>
 <p>Die Verwendung von BunkerWeb auf diese Weise (klassische Reverse-Proxy-Architektur) mit TLS-Offloading und zentralisierten Sicherheitsrichtlinien verbessert die Leistung durch Reduzierung des Verschlüsselungsaufwands auf den Backend-Servern und gewährleistet gleichzeitig eine konsistente Zugriffskontrolle, Bedrohungsabwehr und Einhaltung von Vorschriften für alle Dienste.</p>
@@ -1260,13 +1246,13 @@ USE_BROTLI=no
 </code></pre></div>
 <p>Bitte beachten Sie, dass bei Verwendung der Web-Benutzeroberfläche die Einstellungsnamen zusätzlich zu einem "menschenfreundlichen" Label angezeigt werden:</p>
 <figure>
-<p><img align="center," alt="Übersicht" src="../../assets/img/settings-ui1.png" width="800" />
+<p><img align="center," alt="Übersicht" src="../../assets/img/settings-ui1.png" width="800" height="171" loading="lazy" decoding="async" />
   </p>
 <figcaption>Einstellungsname in der Web-UI</figcaption>
 </figure>
 <p>Sie können auch die Suchleiste verwenden und direkt einen Einstellungsnamen angeben:</p>
 <figure>
-<p><img align="center," alt="Übersicht" src="../../assets/img/settings-ui2.png" width="600" />
+<p><img align="center," alt="Übersicht" src="../../assets/img/settings-ui2.png" width="600" height="177" loading="lazy" decoding="async" />
   </p>
 <figcaption>Einstellungssuche in der Web-UI</figcaption>
 </figure>
@@ -1295,7 +1281,7 @@ app3.example.com_USE_BAD_BEHAVIOR=no
 </code></pre></div>
 <p>Bitte beachten Sie, dass der Multisite-Modus bei Verwendung der Web-Benutzeroberfläche implizit ist. Sie haben die Möglichkeit, Konfigurationen direkt auf Ihre Dienste anzuwenden oder globale Einstellungen festzulegen, die auf alle Ihre Dienste angewendet werden (Sie können immer noch Ausnahmen direkt auf bestimmte Dienste anwenden):</p>
 <figure>
-<p><img align="center," alt="Übersicht" src="../../assets/img/ui-multisite.png" width="600" />
+<p><img align="center," alt="Übersicht" src="../../assets/img/ui-multisite.png" width="600" height="177" loading="lazy" decoding="async" />
   </p>
 <figcaption>Anwenden einer Einstellung auf alle Dienste über die Web-UI</figcaption>
 </figure>
@@ -1310,7 +1296,7 @@ app3.example.com_USE_BAD_BEHAVIOR=no
 <p>Durch die Nutzung benutzerdefinierter Konfigurationen erschließen Sie eine Welt von Möglichkeiten, um das Verhalten und die Sicherheitsmaßnahmen von BunkerWeb genau auf Ihre Bedürfnisse abzustimmen. Ob es sich um die Anpassung von NGINX-Konfigurationen oder die Feinabstimmung von ModSecurity handelt, BunkerWeb bietet die Flexibilität, um Ihre einzigartigen Herausforderungen effektiv zu meistern.</p>
 <p>Die Verwaltung benutzerdefinierter Konfigurationen über die Web-Benutzeroberfläche erfolgt über das Menü <strong>Konfigurationen</strong>:</p>
 <figure>
-<p><img align="center," alt="Übersicht" src="../../assets/img/configs-ui.png" width="800" />
+<p><img align="center," alt="Übersicht" src="../../assets/img/configs-ui.png" width="800" height="188" loading="lazy" decoding="async" />
   </p>
 <figcaption>Benutzerdefinierte Konfigurationen über die Web-UI verwalten</figcaption>
 </figure>
@@ -1413,7 +1399,7 @@ app3.example.com_USE_BAD_BEHAVIOR=no
 <li><a href="https://www.sqlite.org/download.html">SQLite Download-Seite</a></li>
 </ul>
 <figure>
-<p><img align="center," alt="Übersicht" src="../../assets/img/bunkerweb_db.svg" width="800" />
+<p><img align="center," alt="Übersicht" src="../../assets/img/bunkerweb_db.svg" width="800" height="887" loading="lazy" decoding="async" />
   </p>
 <figcaption>Datenbankschema</figcaption>
 </figure>
@@ -1438,7 +1424,7 @@ app3.example.com_USE_BAD_BEHAVIOR=no
 <p>Durch den Einsatz des Schedulers optimiert BunkerWeb die Automatisierung und Koordination wesentlicher Aufgaben und ermöglicht einen effizienten und zuverlässigen Betrieb des gesamten Systems.</p>
 <p>Wenn Sie die Web-Benutzeroberfläche verwenden, können Sie Scheduler-Jobs verwalten, indem Sie im Menü auf <strong>Jobs</strong> klicken:</p>
 <figure>
-<p><img align="center," alt="Übersicht" src="../../assets/img/jobs-ui.png" width="800" />
+<p><img align="center," alt="Übersicht" src="../../assets/img/jobs-ui.png" width="800" height="325" loading="lazy" decoding="async" />
   </p>
 <figcaption>Jobs über die Web-UI verwalten</figcaption>
 </figure>
@@ -1466,7 +1452,7 @@ app3.example.com_USE_BAD_BEHAVIOR=no
 </div>
 <p>Mit der Web-Benutzeroberfläche sind Vorlagen über den <strong>Einfachmodus</strong> verfügbar, wenn Sie einen Dienst hinzufügen oder bearbeiten:</p>
 <figure>
-<p><img align="center," alt="Übersicht" src="../../assets/img/templates-ui.png" width="800" />
+<p><img align="center," alt="Übersicht" src="../../assets/img/templates-ui.png" width="800" height="315" loading="lazy" decoding="async" />
   </p>
 <figcaption>Verwendung von Vorlagen über die Web-UI</figcaption>
 </figure>

@@ -20,15 +20,15 @@
       
       
         
-          <link rel="alternate" href="./" hreflang="en">
+          <link rel="alternate" href="https://docs.bunkerweb.io/latest/features/" hreflang="en"><link rel="alternate" href="https://docs.bunkerweb.io/latest/features/" hreflang="x-default">
         
-          <link rel="alternate" href="../fr/features/" hreflang="fr">
+          <link rel="alternate" href="https://docs.bunkerweb.io/latest/fr/features/" hreflang="fr">
         
-          <link rel="alternate" href="../de/features/" hreflang="de">
+          <link rel="alternate" href="https://docs.bunkerweb.io/latest/de/features/" hreflang="de">
         
-          <link rel="alternate" href="../es/features/" hreflang="es">
+          <link rel="alternate" href="https://docs.bunkerweb.io/latest/es/features/" hreflang="es">
         
-          <link rel="alternate" href="../zh/features/" hreflang="zh">
+          <link rel="alternate" href="https://docs.bunkerweb.io/latest/zh/features/" hreflang="zh">
         
       
       
@@ -66,94 +66,81 @@
       })
     </script>
 
-    <script src="https://cdn.jsdelivr.net/npm/medium-zoom/dist/medium-zoom.min.js"></script>
+    <script defer
+            src="https://cdn.jsdelivr.net/npm/medium-zoom@1.1.2/dist/medium-zoom.min.js"
+            integrity="sha384-kRRREbu8lthVytGQVverh9PZPe8fRyg3vK2wO1w0kyeSqE7UfEdXhV/fWfaW/h3A"
+            crossorigin="anonymous"></script>
 
-    <script defer>
+    <script>
   // Lazy load images and embed youtube videos
   window.addEventListener("load", () => {
     document.querySelectorAll("[data-src]").forEach((el) => {
       el.setAttribute("src", el.getAttribute("data-src"));
     });
   });
-  // Add missing label
-  try {
-    document
-      .querySelector('div.md-search[data-md-component="search"][role="dialog"]')
-      .setAttribute("aria-label", "Search in documentation");
-  } catch (err) {}
+  // Add missing label: this script sits in <head>, so the search dialog only exists once the DOM is parsed
+  window.addEventListener("DOMContentLoaded", () => {
+    const search = document.querySelector('div.md-search[data-md-component="search"][role="dialog"]');
+    if (search) search.setAttribute("aria-label", "Search in documentation");
+  });
     </script>
 
-    <script defer>
+    <script>
       window.addEventListener('DOMContentLoaded', () => {
-        const bannerEl = document.querySelector('aside.md-banner');
-        let defaultContent = [{ "content" : "\u003cp\u003eStart a 30-day BunkerWeb PRO free trial from the \u003ca style=\"text-decoration:underline; color :  white;\" href=\"https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self\u0026amp;utm_source=doc\"\u003eBunkerWeb Panel\u003c/a\u003e: order a plan, then keep \u201cFree 30 Days Trial\u201d as the payment method at checkout. (\u003ca style=\"text-decoration:underline; color :  white;\" href=\"..#pro-version\"\u003estep-by-step guide\u003c/a\u003e)\u003c/p\u003e" },
-        { "content" : "\u003cp\u003eNeed premium support or tailored consulting around BunkerWeb? Check out our \u003ca style=\"text-decoration:underline; color :  white;\" href=\"https://panel.bunkerweb.io/?utm_campaign=self\u0026utm_source=doc#services\"\u003eprofessional services\u003c/a\u003e.\u003c/p\u003e" },
-        { "content" : "\u003cp\u003eBe part of the Bunker community by joining the \u003ca style=\"text-decoration:underline; color: white;\" href=\"https://discord.bunkerweb.io\"\u003eDiscord chat\u003c/a\u003e and following us on \u003ca style=\"text-decoration:underline; color: white;\" href=\"https://www.linkedin.com/company/bunkerity/\"\u003eLinkedIn\u003c/a\u003e.\u003c/p\u003e" }
-        ]
-
-      function setBannerStyle() {
-        const bannerItem = bannerEl.querySelector('.md-banner__inner');
-        bannerEl.style.backgroundColor = "#2eac68";
-        bannerItem.style.textAlign = "center";
-        bannerItem.style.transition = "all 0.5s ease-out";
-      }
-
-      function setDefault() {
-        const bannerItem = bannerEl.querySelector('.md-banner__inner');
-        const clone = bannerItem.cloneNode(true);
-        clone.innerHTML = defaultContent[0]["content"];
-        bannerEl.replaceChild(clone, bannerItem);
-      }
-
-      function startBannerLoop() {
+        const bannerEl = document.querySelector('aside.md-banner:not(.md-banner--warning)');
+        if (!bannerEl) return;
+        const messages = ["\u003cp\u003eStart a 30-day BunkerWeb PRO free trial from the \u003ca href=\"https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self\u0026utm_source=doc\"\u003eBunkerWeb Panel\u003c/a\u003e: order a plan, then keep \u201cFree 30 Days Trial\u201d as the payment method at checkout. (\u003ca href=\"..#pro-version\"\u003estep-by-step guide\u003c/a\u003e)\u003c/p\u003e", "\u003cp\u003eNeed premium support or tailored consulting around BunkerWeb? Check out our \u003ca href=\"https://panel.bunkerweb.io/?utm_campaign=self\u0026utm_source=doc#services\"\u003eprofessional services\u003c/a\u003e.\u003c/p\u003e", "\u003cp\u003eBe part of the Bunker community by joining the \u003ca href=\"https://discord.bunkerweb.io\"\u003eDiscord chat\u003c/a\u003e and following us on \u003ca href=\"https://www.linkedin.com/company/bunkerity/\"\u003eLinkedIn\u003c/a\u003e.\u003c/p\u003e"];
         const switchDelay = 7000;
         let i = 0;
 
-        setInterval(() => {
-          // Update or reset index
-          if(i + 1 === defaultContent.length) {
-            i = 0;
-          } else {
-            i++;
-          }
-
-          // Prepare data with next el with opacity 0 too
+        // the first message is already in the page; the others rotate in
+        function show(next) {
           const currItem = bannerEl.querySelector('.md-banner__inner');
           currItem.style.opacity = 0;
           const clone = currItem.cloneNode(true);
-          clone.innerHTML = defaultContent[i]["content"];
+          clone.innerHTML = messages[next];
           setTimeout(() => {
             bannerEl.replaceChild(clone, currItem);
             setTimeout(() => {
-              const newItem = bannerEl.querySelector('.md-banner__inner');
-              newItem.style.opacity = 1;
+              bannerEl.querySelector('.md-banner__inner').style.opacity = 1;
             }, 20);
           }, 600);
+        }
 
+        // moving text that outlasts five seconds has to be stoppable (WCAG 2.2.2): it holds
+        // still on hover and focus, never starts when the visitor asks for reduced motion, and
+        // a pause button stops it for the rest of the session
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+        const KEY = 'bw-banner-paused';
+        let paused = false;
+        try { paused = sessionStorage.getItem(KEY) === '1'; } catch (e) {}
+
+        // outside .md-banner__inner: show() swaps that element
+        const toggle = document.createElement('button');
+        toggle.type = 'button';
+        toggle.className = 'bw-banner-toggle';
+        toggle.setAttribute('aria-label', "Pause rotating announcements");
+        const icons = {
+          pause: '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg>',
+          play: '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M7 4.5v15l12-7.5z"/></svg>'
+        };
+        function render() {
+          toggle.setAttribute('aria-pressed', paused ? 'true' : 'false');
+          toggle.innerHTML = paused ? icons.play : icons.pause;
+        }
+        render();
+        toggle.addEventListener('click', () => {
+          paused = !paused;
+          try { sessionStorage.setItem(KEY, paused ? '1' : '0'); } catch (e) {}
+          render();
+        });
+        bannerEl.appendChild(toggle);
+
+        setInterval(() => {
+          if (paused || bannerEl.matches(':hover, :focus-within')) return;
+          i = (i + 1) % messages.length;
+          show(i);
         }, switchDelay);
-      }
-
-      function runBanner() {
-        startBannerLoop();
-        // Try to get dynamic content
-        // Else keep static ones
-        // fetch("https://www.bunkerweb.io/api/bw-ui-news")
-        // .then((res) => {
-        //   return res.json();
-        // })
-        // .then((res) => {
-        //   defaultContent = res.data[0].data;
-        //   startBannerLoop();
-        // })
-        // .catch((e) => {
-        //   startBannerLoop();
-        // });
-      }
-
-        setBannerStyle();
-        setDefault();
-        runBanner()
-
       })
     </script>
 
@@ -170,6 +157,9 @@
     
     
     
+    
+    <link rel="preload" href="../assets/fonts/PublicSans-Regular.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="../assets/fonts/DonJose-Black.woff2" as="font" type="font/woff2" crossorigin>
     
 
   
@@ -208,11 +198,7 @@
           <div class="md-banner__inner md-grid md-typeset">
             
             
-    📢 Looking for BunkerWeb CLOUD, PRO version, technical support or tailored services? Visit the
-    <a href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc"
-       style="color: #3f6ec6;
-              text-decoration: underline">BunkerWeb Panel</a>
-    for more information on our enterprise offers.
+    <p>Start a 30-day BunkerWeb PRO free trial from the <a href="https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc">BunkerWeb Panel</a>: order a plan, then keep “Free 30 Days Trial” as the payment method at checkout. (<a href="..#pro-version">step-by-step guide</a>)</p>
 
           </div>
           
@@ -245,7 +231,7 @@
   <nav class="md-header__inner md-grid" aria-label="Header">
     <a href=".." title="BunkerWeb documentation" class="md-header__button md-logo" aria-label="BunkerWeb documentation" data-md-component="logo">
       
-  <img src="../assets/logo.png" alt="logo">
+  <img src="../assets/logo.png" alt="logo" width="273" height="77">
 
     </a>
     <label class="md-header__button md-icon" for="__drawer">
@@ -660,7 +646,7 @@
   <label class="md-nav__title" for="__drawer">
     <a href=".." title="BunkerWeb documentation" class="md-nav__button md-logo" aria-label="BunkerWeb documentation" data-md-component="logo">
       
-  <img src="../assets/logo.png" alt="logo">
+  <img src="../assets/logo.png" alt="logo" width="273" height="77">
 
     </a>
     BunkerWeb documentation
@@ -4639,7 +4625,7 @@ curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">"Host: bw
 </tr>
 </tbody>
 </table>
-<h2 id="anti-ddos-pro">Anti DDoS <img src='../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)<a class="headerlink" href="#anti-ddos-pro" title="Permanent link">&para;</a></h2>
+<h2 id="anti-ddos-pro">Anti DDoS <img src='../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);' loading="lazy" decoding="async"> (PRO)<a class="headerlink" href="#anti-ddos-pro" title="Permanent link">&para;</a></h2>
 <p>For a more detailed guide, see the <a href="../advanced/#anti-ddos-pro">advanced usages</a> documentation.</p>
 <p>STREAM support <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
 <p>Provides enhanced protection against DDoS attacks by analyzing and filtering suspicious traffic.</p>
@@ -5665,7 +5651,7 @@ bwcli<span class="w"> </span>plugin<span class="w"> </span>backup<span class="w"
 </div>
 </div>
 </div>
-<h2 id="backup-s3-pro">Backup S3 <img src='../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)<a class="headerlink" href="#backup-s3-pro" title="Permanent link">&para;</a></h2>
+<h2 id="backup-s3-pro">Backup S3 <img src='../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);' loading="lazy" decoding="async"> (PRO)<a class="headerlink" href="#backup-s3-pro" title="Permanent link">&para;</a></h2>
 <p>STREAM support <img alt="✅" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" title=":white_check_mark:" /></p>
 <p>Automatically backup your data to an S3 bucket</p>
 <table>
@@ -6595,7 +6581,7 @@ TrustedMonitor/\d+\.\d+
 <p><strong>Step #1: Create your CrowdSec Console account</strong></p>
 <p>Go to the <a href="https://app.crowdsec.net/signup?utm_source=external-blog&amp;utm_medium=cta&amp;utm_campaign=bunker-web-integration">CrowdSec Console</a> and register if you don’t already have an account. Once done, note the enroll key found under "Security Engines" after clicking on "Add Security Engine":</p>
 <figure>
-<p><img align="center" alt="Overview" src="../assets/img/crowdity1.png" />
+<p><img align="center" alt="Overview" src="../assets/img/crowdity1.png" width="1129" height="173" loading="lazy" decoding="async" />
   </p>
 <figcaption>Get your Crowdsec Console enroll key</figcaption>
 </figure>
@@ -6611,25 +6597,25 @@ TrustedMonitor/\d+\.\d+
 <p>Once you have your BunkerNet ID and CrowdSec Console enroll key, <a href="https://panel.bunkerweb.io/store/bunkernet?utm_campaign=self&amp;utm_source=doc">order the free product "BunkerNet / CrowdSec" on the Panel</a>. You may be prompted to create an account if you haven’t already.</p>
 <p>You can now select the "BunkerNet / CrowdSec" service and fill out the form by pasting your BunkerNet ID and CrowdSec Console enroll key:</p>
 <figure>
-<p><img align="center" alt="Overview" src="../assets/img/crowdity2.png" />
+<p><img align="center" alt="Overview" src="../assets/img/crowdity2.png" width="734" height="362" loading="lazy" decoding="async" />
   </p>
 <figcaption>Enroll your BunkerWeb instance into the CrowdSec Console</figcaption>
 </figure>
 <p><strong>Step #4: Accept the new security engine on the Console</strong></p>
 <p>Then, go back to your CrowdSec Console and accept the new Security Engine:</p>
 <figure>
-<p><img align="center" alt="Overview" src="../assets/img/crowdity3.png" />
+<p><img align="center" alt="Overview" src="../assets/img/crowdity3.png" width="1167" height="336" loading="lazy" decoding="async" />
   </p>
 <figcaption>Accept enroll into the CrowdSec Console</figcaption>
 </figure>
 <p><strong>Congratulations, your BunkerWeb instance is now enrolled in your CrowdSec Console!</strong></p>
 <p>Pro tip: When viewing your alerts, click the "columns" option and check the "context" checkbox to access BunkerWeb-specific data.</p>
 <figure>
-<p><img align="center" alt="Overview" src="../assets/img/crowdity4.png" />
+<p><img align="center" alt="Overview" src="../assets/img/crowdity4.png" width="1273" height="304" loading="lazy" decoding="async" />
   </p>
 <figcaption>BunkerWeb data shown in the context column</figcaption>
 </figure>
-<h2 id="cache-pro">Cache <img src='../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)<a class="headerlink" href="#cache-pro" title="Permanent link">&para;</a></h2>
+<h2 id="cache-pro">Cache <img src='../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);' loading="lazy" decoding="async"> (PRO)<a class="headerlink" href="#cache-pro" title="Permanent link">&para;</a></h2>
 <p>For a more detailed guide, see the <a href="../advanced/#cache-pro">advanced usages</a> documentation.</p>
 <p>STREAM support <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
 <p>Provides caching functionality at the reverse proxy level.</p>
@@ -7182,7 +7168,7 @@ TrustedMonitor/\d+\.\d+
 <h2 id="crowdsec">CrowdSec<a class="headerlink" href="#crowdsec" title="Permanent link">&para;</a></h2>
 <p>STREAM support <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
 <figure>
-<p><img align="center," alt="Overview" src="../assets/img/crowdsec.svg" width="600" /></p>
+<p><img align="center," alt="Overview" src="../assets/img/crowdsec.svg" width="600" height="366" loading="lazy" decoding="async" /></p>
 </figure>
 <p>The CrowdSec plugin integrates BunkerWeb with the CrowdSec security engine, providing an additional layer of protection against various cyber threats. This plugin acts as a <a href="https://crowdsec.net/?utm_source=external-docs&amp;utm_medium=cta&amp;utm_campaign=bunker-web-docs">CrowdSec</a> bouncer, denying requests based on decisions from the CrowdSec API.</p>
 <p>CrowdSec is a modern, open-source security engine that detects and blocks malicious IP addresses based on behavioral analysis and collective intelligence from its community. You can also configure <a href="https://docs.crowdsec.net/docs/concepts?utm_source=external-docs&amp;utm_medium=cta&amp;utm_campaign=bunker-web-docs#scenarios">scenarios</a> to automatically ban IP addresses based on suspicious behavior, benefiting from a crowdsourced blacklist.</p>
@@ -7730,7 +7716,7 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 <li>On the CrowdSec side, monitor <code>cscli metrics show</code> or the CrowdSec Console to ensure BunkerWeb decisions appear as expected.</li>
 <li>In the BunkerWeb UI, open the CrowdSec plugin page to see the status of the integration.</li>
 </ul>
-<h2 id="custom-pages-pro">Custom Pages <img src='../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)<a class="headerlink" href="#custom-pages-pro" title="Permanent link">&para;</a></h2>
+<h2 id="custom-pages-pro">Custom Pages <img src='../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);' loading="lazy" decoding="async"> (PRO)<a class="headerlink" href="#custom-pages-pro" title="Permanent link">&para;</a></h2>
 <p>For a more detailed guide, see the <a href="../advanced/#custom-pages-pro">advanced usages</a> documentation.</p>
 <p>STREAM support <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
 <p>Tweak BunkerWeb error/antibot/default/maintenance pages with custom HTML.</p>
@@ -8293,7 +8279,7 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 </div>
 </div>
 </div>
-<h2 id="easy-resolve-pro">Easy Resolve <img src='../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)<a class="headerlink" href="#easy-resolve-pro" title="Permanent link">&para;</a></h2>
+<h2 id="easy-resolve-pro">Easy Resolve <img src='../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);' loading="lazy" decoding="async"> (PRO)<a class="headerlink" href="#easy-resolve-pro" title="Permanent link">&para;</a></h2>
 <p align='center'><iframe style='display: block;' width='560' height='315' data-src='https://www.youtube-nocookie.com/embed/45vX0WJqjxo' title='Easy Resolve' frameborder='0' allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture' allowfullscreen></iframe></p>
 
 <p>For a more detailed guide, see the <a href="../advanced/#easy-resolve-pro">advanced usages</a> documentation.</p>
@@ -9567,6 +9553,7 @@ TrustedMonitor/\d+\.\d+
 <li>If you've configured head injection, BunkerWeb inserts your custom HTML code just before the closing <code>&lt;/head&gt;</code> tag.</li>
 <li>The insertion happens automatically for all HTML pages served by your website.</li>
 <li>This allows you to add scripts, styles, or other elements without modifying your application's code.</li>
+<li>The antibot challenge page and BunkerWeb's error pages are left untouched: BunkerWeb generates them, and their Content Security Policy would block the injected code anyway.</li>
 </ol>
 <h3 id="how-to-use_18">How to Use<a class="headerlink" href="#how-to-use_18" title="Permanent link">&para;</a></h3>
 <p>Follow these steps to configure and use the HTML Injection feature:</p>
@@ -9652,7 +9639,7 @@ TrustedMonitor/\d+\.\d+
 </div>
 </div>
 </div>
-<h2 id="ldap-sso-pro">LDAP SSO <img src='../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)<a class="headerlink" href="#ldap-sso-pro" title="Permanent link">&para;</a></h2>
+<h2 id="ldap-sso-pro">LDAP SSO <img src='../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);' loading="lazy" decoding="async"> (PRO)<a class="headerlink" href="#ldap-sso-pro" title="Permanent link">&para;</a></h2>
 <p>For a more detailed guide, see the <a href="../advanced/#ldap-sso-pro">advanced usages</a> documentation.</p>
 <p>STREAM support <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
 <p>LDAP-based single sign-on plugin with session-backed authentication.</p>
@@ -10787,7 +10774,7 @@ TrustedMonitor/\d+\.\d+
 </div>
 </div>
 </div>
-<h2 id="load-balancer-pro">Load Balancer <img src='../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)<a class="headerlink" href="#load-balancer-pro" title="Permanent link">&para;</a></h2>
+<h2 id="load-balancer-pro">Load Balancer <img src='../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);' loading="lazy" decoding="async"> (PRO)<a class="headerlink" href="#load-balancer-pro" title="Permanent link">&para;</a></h2>
 <p align='center'><iframe style='display: block;' width='560' height='315' data-src='https://www.youtube-nocookie.com/embed/cOVp0rAt5nw?si=iVhDio8o8S4F_uag' title='Load Balancer' frameborder='0' allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture' allowfullscreen></iframe></p>
 
 <p>For a more detailed guide, see the <a href="../advanced/#load-balancer-pro">advanced usages</a> documentation.</p>
@@ -10953,7 +10940,7 @@ TrustedMonitor/\d+\.\d+
 </tr>
 </tbody>
 </table>
-<h2 id="maintenance-pro">Maintenance <img src='../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)<a class="headerlink" href="#maintenance-pro" title="Permanent link">&para;</a></h2>
+<h2 id="maintenance-pro">Maintenance <img src='../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);' loading="lazy" decoding="async"> (PRO)<a class="headerlink" href="#maintenance-pro" title="Permanent link">&para;</a></h2>
 <p>For a more detailed guide, see the <a href="../advanced/#maintenance-pro">advanced usages</a> documentation.</p>
 <p>STREAM support <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
 <p>Serve a maintenance page instead of forwarding requests to the application.</p>
@@ -11184,7 +11171,7 @@ TrustedMonitor/\d+\.\d+
 </div>
 </div>
 </div>
-<h2 id="migration-pro">Migration <img src='../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)<a class="headerlink" href="#migration-pro" title="Permanent link">&para;</a></h2>
+<h2 id="migration-pro">Migration <img src='../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);' loading="lazy" decoding="async"> (PRO)<a class="headerlink" href="#migration-pro" title="Permanent link">&para;</a></h2>
 <p>For a more detailed guide, see the <a href="../advanced/#migration-pro">advanced usages</a> documentation.</p>
 <p>STREAM support <img alt="✅" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" title=":white_check_mark:" /></p>
 <p>Migration of BunkerWeb configuration between instances made easy via the web UI</p>
@@ -12054,7 +12041,7 @@ SecRule REQUEST_FILENAME "^/wp-json/yoast" "id:3,ctl:ruleRemoveById=930120"
 <p>Set <code>MODSECURITY_SEC_AUDIT_LOG_TYPE=Concurrent</code> and <code>MODSECURITY_SEC_AUDIT_LOG_STORAGE_DIR=/var/log/bunkerweb/audit</code>. Preprovision that directory on every BunkerWeb instance with write and search permissions for the nginx worker. Use a persistent mount for retained records. BunkerWeb rejects invalid candidates before applying them; it does not provision the directory. In global CRS mode (<code>USE_MODSECURITY_GLOBAL_CRS=yes</code>), configure both settings globally; service overrides do not select a separate writer.</p>
 <p><code>MODSECURITY_SEC_AUDIT_LOG</code> stays the regular, lockable <code>.log</code> file: it contains complete records with <code>Serial</code>, and an index pointing to per-transaction files with <code>Concurrent</code>. The existing index path and its rotation rules are unchanged. The operator must manage disk capacity, access permissions and recursive retention of the dated subdirectories. Rotating the index does not remove transaction files. Check compatibility of log readers that expect Serial records before switching.</p>
 <p>Concurrent changes how records are stored; it does not sample requests or reduce the audit data selected by <code>MODSECURITY_SEC_AUDIT_LOG_PARTS</code>. Size storage for your request rate, selected parts and retention period; measure record sizes with representative traffic instead of assuming a fixed cost per blocked request.</p>
-<h2 id="monitoring-pro">Monitoring <img src='../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)<a class="headerlink" href="#monitoring-pro" title="Permanent link">&para;</a></h2>
+<h2 id="monitoring-pro">Monitoring <img src='../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);' loading="lazy" decoding="async"> (PRO)<a class="headerlink" href="#monitoring-pro" title="Permanent link">&para;</a></h2>
 <p>STREAM support <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
 <p>BunkerWeb monitoring pro system. This plugin is a prerequisite for some other plugins.</p>
 <table>
@@ -12315,7 +12302,7 @@ SecRule REQUEST_FILENAME "^/wp-json/yoast" "id:3,ctl:ruleRemoveById=930120"
 </div>
 </div>
 </div>
-<h2 id="openapi-validator-pro">OpenAPI Validator <img src='../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)<a class="headerlink" href="#openapi-validator-pro" title="Permanent link">&para;</a></h2>
+<h2 id="openapi-validator-pro">OpenAPI Validator <img src='../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);' loading="lazy" decoding="async"> (PRO)<a class="headerlink" href="#openapi-validator-pro" title="Permanent link">&para;</a></h2>
 <p align='center'><iframe style='display: block;' width='560' height='315' data-src='https://www.youtube-nocookie.com/embed/3oZOO1XdSlc' title='OpenAPI Validator' frameborder='0' allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture' allowfullscreen></iframe></p>
 
 <p>For a more detailed guide, see the <a href="../advanced/#openapi-validator-pro">advanced usages</a> documentation.</p>
@@ -12390,7 +12377,7 @@ SecRule REQUEST_FILENAME "^/wp-json/yoast" "id:3,ctl:ruleRemoveById=930120"
 </tr>
 </tbody>
 </table>
-<h2 id="openid-connect-pro">OpenID Connect <img src='../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)<a class="headerlink" href="#openid-connect-pro" title="Permanent link">&para;</a></h2>
+<h2 id="openid-connect-pro">OpenID Connect <img src='../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);' loading="lazy" decoding="async"> (PRO)<a class="headerlink" href="#openid-connect-pro" title="Permanent link">&para;</a></h2>
 <p align='center'><iframe style='display: block;' width='560' height='315' data-src='https://www.youtube-nocookie.com/embed/0e4lcXTIIfs' title='OpenID Connect' frameborder='0' allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture' allowfullscreen></iframe></p>
 
 <p>For a more detailed guide, see the <a href="../advanced/#openid-connect-pro">advanced usages</a> documentation.</p>
@@ -12927,7 +12914,7 @@ SecRule REQUEST_FILENAME "^/wp-json/yoast" "id:3,ctl:ruleRemoveById=930120"
 <li><strong>BunkerWeb PRO Enterprise:</strong> Full access to Pro features with dedicated technical support.</li>
 </ul>
 <p>You can explore Pro features with a free 30-day trial. Start it from the <a href="https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&amp;utm_source=doc">BunkerWeb Panel</a> and learn more about flexible pricing options based on the number of services protected by BunkerWeb PRO: order a plan, then keep <strong>Free 30 Days Trial</strong> as the payment method at checkout (<a href="../#pro-version">step-by-step guide</a>).</p>
-<h2 id="prometheus-exporter-pro">Prometheus exporter <img src='../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)<a class="headerlink" href="#prometheus-exporter-pro" title="Permanent link">&para;</a></h2>
+<h2 id="prometheus-exporter-pro">Prometheus exporter <img src='../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);' loading="lazy" decoding="async"> (PRO)<a class="headerlink" href="#prometheus-exporter-pro" title="Permanent link">&para;</a></h2>
 <p>STREAM support <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
 <p>Prometheus exporter for BunkerWeb internal metrics.</p>
 <table>
@@ -13544,7 +13531,7 @@ Setting these only on <code>bunkerweb.extraEnvs</code> has <strong>no effect</st
 <li><a href="https://redis.io/topics/sentinel">Redis High Availability</a></li>
 <li><a href="https://redis.io/topics/persistence">Redis Persistence</a></li>
 </ul>
-<h2 id="reporting-pro">Reporting <img src='../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)<a class="headerlink" href="#reporting-pro" title="Permanent link">&para;</a></h2>
+<h2 id="reporting-pro">Reporting <img src='../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);' loading="lazy" decoding="async"> (PRO)<a class="headerlink" href="#reporting-pro" title="Permanent link">&para;</a></h2>
 <p>STREAM support <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
 <p>Regular reporting of important data from BunkerWeb (global, attacks, bans, requests, reasons, AS...). Monitoring pro plugin needed to work.</p>
 <table>
@@ -14716,7 +14703,7 @@ REVERSE_PROXY_CUSTOM_HOST=backend.example.com
 </code></pre></div>
 <hr />
 <p>For more information, see the <a href="https://www.robotstxt.org/robotstxt.html">robots.txt documentation</a>.</p>
-<h2 id="saml-pro">SAML <img src='../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)<a class="headerlink" href="#saml-pro" title="Permanent link">&para;</a></h2>
+<h2 id="saml-pro">SAML <img src='../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);' loading="lazy" decoding="async"> (PRO)<a class="headerlink" href="#saml-pro" title="Permanent link">&para;</a></h2>
 <p>For a more detailed guide, see the <a href="../advanced/#saml-pro">advanced usages</a> documentation.</p>
 <p>STREAM support <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
 <p>SAML 2.0 authentication, identity forwarding and attribute-based access control.</p>
@@ -15589,7 +15576,7 @@ REVERSE_PROXY_CUSTOM_HOST=backend.example.com
 </tr>
 </tbody>
 </table>
-<h2 id="ui-single-sign-on-pro">UI Single Sign-On <img src='../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)<a class="headerlink" href="#ui-single-sign-on-pro" title="Permanent link">&para;</a></h2>
+<h2 id="ui-single-sign-on-pro">UI Single Sign-On <img src='../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);' loading="lazy" decoding="async"> (PRO)<a class="headerlink" href="#ui-single-sign-on-pro" title="Permanent link">&para;</a></h2>
 <p>For a more detailed guide, see the <a href="../advanced/#ui-single-sign-on-pro">advanced usages</a> documentation.</p>
 <p>STREAM support <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
 <p>Enable SSO authentication for the BunkerWeb web interface by reading headers set by upstream authentication proxies (Authentik, Authelia, Keycloak, Traefik Forward Auth, etc.)</p>
@@ -15732,7 +15719,7 @@ REVERSE_PROXY_CUSTOM_HOST=backend.example.com
 </tr>
 </tbody>
 </table>
-<h2 id="user-manager-pro">User Manager <img src='../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)<a class="headerlink" href="#user-manager-pro" title="Permanent link">&para;</a></h2>
+<h2 id="user-manager-pro">User Manager <img src='../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);' loading="lazy" decoding="async"> (PRO)<a class="headerlink" href="#user-manager-pro" title="Permanent link">&para;</a></h2>
 <p align='center'><iframe style='display: block;' width='560' height='315' data-src='https://www.youtube-nocookie.com/embed/EIohiUf9Fg4' title='User Manager' frameborder='0' allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture' allowfullscreen></iframe></p>
 
 <p>For a more detailed guide, see the <a href="../advanced/#user-manager-pro">advanced usages</a> documentation.</p>
@@ -15782,6 +15769,10 @@ For blocking unwanted clients instead, refer to the <a href="#blacklist">Blackli
 <div class="admonition info">
 <p class="admonition-title">stream mode</p>
 <p>When using stream mode, only IP, rDNS, and ASN checks are performed.</p>
+</div>
+<div class="admonition info">
+<p class="admonition-title">rDNS and the first request</p>
+<p>An rDNS match is only applied from the access phase, so when the whitelist cache is cold (after a reload or once an entry expires), the first request of an rDNS-whitelisted client can still be blocked by ModSecurity.</p>
 </div>
 <h3 id="configuration-settings_34">Configuration Settings<a class="headerlink" href="#configuration-settings_34" title="Permanent link">&para;</a></h3>
 <p><strong>General</strong></p>
@@ -16101,7 +16092,7 @@ For blocking unwanted clients instead, refer to the <a href="#blacklist">Blackli
 (?:^|\s)FriendlyScanner(?:\s|$)
 TrustedMonitor/\d+\.\d+
 </code></pre></div>
-<h2 id="wildcard-pro">Wildcard <img src='../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)<a class="headerlink" href="#wildcard-pro" title="Permanent link">&para;</a></h2>
+<h2 id="wildcard-pro">Wildcard <img src='../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);' loading="lazy" decoding="async"> (PRO)<a class="headerlink" href="#wildcard-pro" title="Permanent link">&para;</a></h2>
 <p>For a more detailed guide, see the <a href="../advanced/#wildcard-pro">advanced usages</a> documentation.</p>
 <p>STREAM support <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
 <p>Adds wildcard server_name support (*.domain) for services, and serves the matching certificate to all sub-domains.</p>

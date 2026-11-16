@@ -20,15 +20,15 @@
       
       
         
-          <link rel="alternate" href="./" hreflang="en">
+          <link rel="alternate" href="https://docs.bunkerweb.io/latest/integrations/" hreflang="en"><link rel="alternate" href="https://docs.bunkerweb.io/latest/integrations/" hreflang="x-default">
         
-          <link rel="alternate" href="../fr/integrations/" hreflang="fr">
+          <link rel="alternate" href="https://docs.bunkerweb.io/latest/fr/integrations/" hreflang="fr">
         
-          <link rel="alternate" href="../de/integrations/" hreflang="de">
+          <link rel="alternate" href="https://docs.bunkerweb.io/latest/de/integrations/" hreflang="de">
         
-          <link rel="alternate" href="../es/integrations/" hreflang="es">
+          <link rel="alternate" href="https://docs.bunkerweb.io/latest/es/integrations/" hreflang="es">
         
-          <link rel="alternate" href="../zh/integrations/" hreflang="zh">
+          <link rel="alternate" href="https://docs.bunkerweb.io/latest/zh/integrations/" hreflang="zh">
         
       
       
@@ -66,94 +66,81 @@
       })
     </script>
 
-    <script src="https://cdn.jsdelivr.net/npm/medium-zoom/dist/medium-zoom.min.js"></script>
+    <script defer
+            src="https://cdn.jsdelivr.net/npm/medium-zoom@1.1.2/dist/medium-zoom.min.js"
+            integrity="sha384-kRRREbu8lthVytGQVverh9PZPe8fRyg3vK2wO1w0kyeSqE7UfEdXhV/fWfaW/h3A"
+            crossorigin="anonymous"></script>
 
-    <script defer>
+    <script>
   // Lazy load images and embed youtube videos
   window.addEventListener("load", () => {
     document.querySelectorAll("[data-src]").forEach((el) => {
       el.setAttribute("src", el.getAttribute("data-src"));
     });
   });
-  // Add missing label
-  try {
-    document
-      .querySelector('div.md-search[data-md-component="search"][role="dialog"]')
-      .setAttribute("aria-label", "Search in documentation");
-  } catch (err) {}
+  // Add missing label: this script sits in <head>, so the search dialog only exists once the DOM is parsed
+  window.addEventListener("DOMContentLoaded", () => {
+    const search = document.querySelector('div.md-search[data-md-component="search"][role="dialog"]');
+    if (search) search.setAttribute("aria-label", "Search in documentation");
+  });
     </script>
 
-    <script defer>
+    <script>
       window.addEventListener('DOMContentLoaded', () => {
-        const bannerEl = document.querySelector('aside.md-banner');
-        let defaultContent = [{ "content" : "\u003cp\u003eStart a 30-day BunkerWeb PRO free trial from the \u003ca style=\"text-decoration:underline; color :  white;\" href=\"https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self\u0026amp;utm_source=doc\"\u003eBunkerWeb Panel\u003c/a\u003e: order a plan, then keep \u201cFree 30 Days Trial\u201d as the payment method at checkout. (\u003ca style=\"text-decoration:underline; color :  white;\" href=\"..#pro-version\"\u003estep-by-step guide\u003c/a\u003e)\u003c/p\u003e" },
-        { "content" : "\u003cp\u003eNeed premium support or tailored consulting around BunkerWeb? Check out our \u003ca style=\"text-decoration:underline; color :  white;\" href=\"https://panel.bunkerweb.io/?utm_campaign=self\u0026utm_source=doc#services\"\u003eprofessional services\u003c/a\u003e.\u003c/p\u003e" },
-        { "content" : "\u003cp\u003eBe part of the Bunker community by joining the \u003ca style=\"text-decoration:underline; color: white;\" href=\"https://discord.bunkerweb.io\"\u003eDiscord chat\u003c/a\u003e and following us on \u003ca style=\"text-decoration:underline; color: white;\" href=\"https://www.linkedin.com/company/bunkerity/\"\u003eLinkedIn\u003c/a\u003e.\u003c/p\u003e" }
-        ]
-
-      function setBannerStyle() {
-        const bannerItem = bannerEl.querySelector('.md-banner__inner');
-        bannerEl.style.backgroundColor = "#2eac68";
-        bannerItem.style.textAlign = "center";
-        bannerItem.style.transition = "all 0.5s ease-out";
-      }
-
-      function setDefault() {
-        const bannerItem = bannerEl.querySelector('.md-banner__inner');
-        const clone = bannerItem.cloneNode(true);
-        clone.innerHTML = defaultContent[0]["content"];
-        bannerEl.replaceChild(clone, bannerItem);
-      }
-
-      function startBannerLoop() {
+        const bannerEl = document.querySelector('aside.md-banner:not(.md-banner--warning)');
+        if (!bannerEl) return;
+        const messages = ["\u003cp\u003eStart a 30-day BunkerWeb PRO free trial from the \u003ca href=\"https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self\u0026utm_source=doc\"\u003eBunkerWeb Panel\u003c/a\u003e: order a plan, then keep \u201cFree 30 Days Trial\u201d as the payment method at checkout. (\u003ca href=\"..#pro-version\"\u003estep-by-step guide\u003c/a\u003e)\u003c/p\u003e", "\u003cp\u003eNeed premium support or tailored consulting around BunkerWeb? Check out our \u003ca href=\"https://panel.bunkerweb.io/?utm_campaign=self\u0026utm_source=doc#services\"\u003eprofessional services\u003c/a\u003e.\u003c/p\u003e", "\u003cp\u003eBe part of the Bunker community by joining the \u003ca href=\"https://discord.bunkerweb.io\"\u003eDiscord chat\u003c/a\u003e and following us on \u003ca href=\"https://www.linkedin.com/company/bunkerity/\"\u003eLinkedIn\u003c/a\u003e.\u003c/p\u003e"];
         const switchDelay = 7000;
         let i = 0;
 
-        setInterval(() => {
-          // Update or reset index
-          if(i + 1 === defaultContent.length) {
-            i = 0;
-          } else {
-            i++;
-          }
-
-          // Prepare data with next el with opacity 0 too
+        // the first message is already in the page; the others rotate in
+        function show(next) {
           const currItem = bannerEl.querySelector('.md-banner__inner');
           currItem.style.opacity = 0;
           const clone = currItem.cloneNode(true);
-          clone.innerHTML = defaultContent[i]["content"];
+          clone.innerHTML = messages[next];
           setTimeout(() => {
             bannerEl.replaceChild(clone, currItem);
             setTimeout(() => {
-              const newItem = bannerEl.querySelector('.md-banner__inner');
-              newItem.style.opacity = 1;
+              bannerEl.querySelector('.md-banner__inner').style.opacity = 1;
             }, 20);
           }, 600);
+        }
 
+        // moving text that outlasts five seconds has to be stoppable (WCAG 2.2.2): it holds
+        // still on hover and focus, never starts when the visitor asks for reduced motion, and
+        // a pause button stops it for the rest of the session
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+        const KEY = 'bw-banner-paused';
+        let paused = false;
+        try { paused = sessionStorage.getItem(KEY) === '1'; } catch (e) {}
+
+        // outside .md-banner__inner: show() swaps that element
+        const toggle = document.createElement('button');
+        toggle.type = 'button';
+        toggle.className = 'bw-banner-toggle';
+        toggle.setAttribute('aria-label', "Pause rotating announcements");
+        const icons = {
+          pause: '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg>',
+          play: '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M7 4.5v15l12-7.5z"/></svg>'
+        };
+        function render() {
+          toggle.setAttribute('aria-pressed', paused ? 'true' : 'false');
+          toggle.innerHTML = paused ? icons.play : icons.pause;
+        }
+        render();
+        toggle.addEventListener('click', () => {
+          paused = !paused;
+          try { sessionStorage.setItem(KEY, paused ? '1' : '0'); } catch (e) {}
+          render();
+        });
+        bannerEl.appendChild(toggle);
+
+        setInterval(() => {
+          if (paused || bannerEl.matches(':hover, :focus-within')) return;
+          i = (i + 1) % messages.length;
+          show(i);
         }, switchDelay);
-      }
-
-      function runBanner() {
-        startBannerLoop();
-        // Try to get dynamic content
-        // Else keep static ones
-        // fetch("https://www.bunkerweb.io/api/bw-ui-news")
-        // .then((res) => {
-        //   return res.json();
-        // })
-        // .then((res) => {
-        //   defaultContent = res.data[0].data;
-        //   startBannerLoop();
-        // })
-        // .catch((e) => {
-        //   startBannerLoop();
-        // });
-      }
-
-        setBannerStyle();
-        setDefault();
-        runBanner()
-
       })
     </script>
 
@@ -170,6 +157,9 @@
     
     
     
+    
+    <link rel="preload" href="../assets/fonts/PublicSans-Regular.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="../assets/fonts/DonJose-Black.woff2" as="font" type="font/woff2" crossorigin>
     
 
   
@@ -208,11 +198,7 @@
           <div class="md-banner__inner md-grid md-typeset">
             
             
-    📢 Looking for BunkerWeb CLOUD, PRO version, technical support or tailored services? Visit the
-    <a href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc"
-       style="color: #3f6ec6;
-              text-decoration: underline">BunkerWeb Panel</a>
-    for more information on our enterprise offers.
+    <p>Start a 30-day BunkerWeb PRO free trial from the <a href="https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc">BunkerWeb Panel</a>: order a plan, then keep “Free 30 Days Trial” as the payment method at checkout. (<a href="..#pro-version">step-by-step guide</a>)</p>
 
           </div>
           
@@ -245,7 +231,7 @@
   <nav class="md-header__inner md-grid" aria-label="Header">
     <a href=".." title="BunkerWeb documentation" class="md-header__button md-logo" aria-label="BunkerWeb documentation" data-md-component="logo">
       
-  <img src="../assets/logo.png" alt="logo">
+  <img src="../assets/logo.png" alt="logo" width="273" height="77">
 
     </a>
     <label class="md-header__button md-icon" for="__drawer">
@@ -660,7 +646,7 @@
   <label class="md-nav__title" for="__drawer">
     <a href=".." title="BunkerWeb documentation" class="md-nav__button md-logo" aria-label="BunkerWeb documentation" data-md-component="logo">
       
-  <img src="../assets/logo.png" alt="logo">
+  <img src="../assets/logo.png" alt="logo" width="273" height="77">
 
     </a>
     BunkerWeb documentation
@@ -1969,7 +1955,7 @@
 <h1 id="integrations">Integrations<a class="headerlink" href="#integrations" title="Permanent link">&para;</a></h1>
 <h2 id="bunkerweb-cloud">BunkerWeb Cloud<a class="headerlink" href="#bunkerweb-cloud" title="Permanent link">&para;</a></h2>
 <figure>
-<p><img align="center," alt="Overview" src="../assets/img/bunkerweb-cloud.png" width="600" />
+<p><img align="center," alt="Overview" src="../assets/img/bunkerweb-cloud.png" width="600" height="219" />
   </p>
 <figcaption>BunkerWeb Cloud</figcaption>
 </figure>
@@ -3090,7 +3076,7 @@ openssl<span class="w"> </span>s_client<span class="w"> </span>-connect<span cla
 </ol>
 <h2 id="all-in-one-aio-image">All-In-One (AIO) Image<a class="headerlink" href="#all-in-one-aio-image" title="Permanent link">&para;</a></h2>
 <figure>
-<p><img align="center," alt="AIO Architecture Graph Placeholder" src="../assets/img/aio-graph-placeholder.png" width="600" />
+<p><img align="center," alt="AIO Architecture Graph Placeholder" src="../assets/img/aio-graph-placeholder.png" width="600" height="496" loading="lazy" decoding="async" />
   </p>
 <figcaption>BunkerWeb All-In-One Architecture (AIO)</figcaption>
 </figure>
@@ -3416,7 +3402,7 @@ cscli<span class="w"> </span>install<span class="w"> </span>parser<span class="w
 </div>
 <h2 id="docker">Docker<a class="headerlink" href="#docker" title="Permanent link">&para;</a></h2>
 <figure>
-<p><img align="center," alt="Overview" src="../assets/img/integration-docker.svg" width="600" />
+<p><img align="center," alt="Overview" src="../assets/img/integration-docker.svg" width="600" height="537" loading="lazy" decoding="async" />
   </p>
 <figcaption>Docker integration</figcaption>
 </figure>
@@ -3956,7 +3942,7 @@ docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </
 </code></pre></div>
 <h2 id="linux">Linux<a class="headerlink" href="#linux" title="Permanent link">&para;</a></h2>
 <figure>
-<p><img align="center," alt="Overview" src="../assets/img/integration-linux.svg" width="600" />
+<p><img align="center," alt="Overview" src="../assets/img/integration-linux.svg" width="600" height="537" loading="lazy" decoding="async" />
   </p>
 <figcaption>Linux integration</figcaption>
 </figure>
@@ -4797,7 +4783,7 @@ MY_SETTING_2=value2
 </code></pre></div>
 <h2 id="docker-autoconf">Docker autoconf<a class="headerlink" href="#docker-autoconf" title="Permanent link">&para;</a></h2>
 <figure>
-<p><img align="center," alt="Overview" src="../assets/img/integration-autoconf.svg" width="600" />
+<p><img align="center," alt="Overview" src="../assets/img/integration-autoconf.svg" width="600" height="537" loading="lazy" decoding="async" />
   </p>
 <figcaption>Docker autoconf integration</figcaption>
 </figure>
@@ -5283,7 +5269,7 @@ MY_SETTING_2=value2
 </div>
 <h2 id="kubernetes">Kubernetes<a class="headerlink" href="#kubernetes" title="Permanent link">&para;</a></h2>
 <figure>
-<p><img align="center," alt="Overview" src="../assets/img/integration-kubernetes.svg" width="600" />
+<p><img align="center," alt="Overview" src="../assets/img/integration-kubernetes.svg" width="600" height="537" loading="lazy" decoding="async" />
   </p>
 <figcaption>Kubernetes integration</figcaption>
 </figure>
@@ -6877,7 +6863,7 @@ kubectl<span class="w"> </span>delete<span class="w"> </span>ingress<span class=
 </table>
 <h2 id="swarm">Swarm<a class="headerlink" href="#swarm" title="Permanent link">&para;</a></h2>
 <figure>
-<p><img align="center," alt="Overview" src="../assets/img/integration-swarm.svg" width="600" />
+<p><img align="center," alt="Overview" src="../assets/img/integration-swarm.svg" width="600" height="537" loading="lazy" decoding="async" />
   </p>
 <figcaption>Docker Swarm integration</figcaption>
 </figure>
@@ -7333,7 +7319,7 @@ kubectl<span class="w"> </span>delete<span class="w"> </span>ingress<span class=
 <p>To report bugs or suggest improvements, visit the <a href="https://github.com/bunkerity/terraform-provider-bunkerweb/issues">provider's GitHub repository</a>.</p>
 <h2 id="microsoft-azure">Microsoft Azure<a class="headerlink" href="#microsoft-azure" title="Permanent link">&para;</a></h2>
 <figure>
-<p><img align="center," alt="Overview" src="../assets/img/integration-azure.webp" width="600" />
+<p><img align="center," alt="Overview" src="../assets/img/integration-azure.webp" width="600" height="375" loading="lazy" decoding="async" />
   </p>
 <figcaption>Azure integration</figcaption>
 </figure>
@@ -7367,7 +7353,7 @@ kubectl<span class="w"> </span>delete<span class="w"> </span>ingress<span class=
 To deploy a virtual machine, you need Microsoft.Compute/virtualMachines/write and Microsoft.Resources/deployments/* permissions. The what-if operation has the same permission requirements.</p>
 </div>
 <p>Deploy the ARM Template:</p>
-<p><a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fbunkerity%2Fbunkerweb%2Fmaster%2Fmisc%2Fintegrations%2Fazure-arm-template.json" target="_blank"><img alt="Deploy to Azure" src="../assets/img/integration-azure-deploy.svg" /></a></p>
+<p><a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fbunkerity%2Fbunkerweb%2Fmaster%2Fmisc%2Fintegrations%2Fazure-arm-template.json" target="_blank"><img alt="Deploy to Azure" src="../assets/img/integration-azure-deploy.svg" width="167" height="34" loading="lazy" decoding="async" /></a></p>
 </div>
 <div class="tabbed-block">
 <p>Login in <a href="https://portal.azure.com" target="_blank">Azure portal</a>.</p>
