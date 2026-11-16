@@ -93,6 +93,8 @@ jobs:
           echo "package=$PACKAGE" >> $GITHUB_OUTPUT
 
   test:
+    # Measured max of a successful `/ test` job: 76 min (Kubernetes redis, 1.7-dev run 35858109816); 115 = 1.5x, rounded up to 5. A wedged browser used to hold a runner until the 360 min default.
+    timeout-minutes: 115
     permissions:
       contents: read
       packages: read # docker/login-action pulls the -tests images from ghcr
