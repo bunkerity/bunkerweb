@@ -302,7 +302,7 @@ msgid "banner.link.here"
 msgstr "এখানে"
 
 msgid "banner.pro"
-msgstr "PRO সংস্করণে আপগ্রেড করে BunkerWeb-এর সর্বাধিক সুবিধা নিন। আরও তথ্য এবং বিনামূল্যে ট্রায়ালের জন্য <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/?utm_campaign=self&utm_source=banner#pro\">এখানে</a> ক্লিক করুন।"
+msgstr "PRO সংস্করণে আপগ্রেড করে BunkerWeb-এর সর্বাধিক সুবিধা নিন। আপনার ৩০ দিনের বিনামূল্যের ট্রায়াল শুরু করুন <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=banner\">এখানে</a>: একটি প্ল্যান অর্ডার করুন, তারপর চেকআউটের সময় পেমেন্ট পদ্ধতি হিসেবে “Free 30 Days Trial” রাখুন।"
 
 msgid "banner.support"
 msgstr "BunkerWeb-এর জন্য প্রিমিয়াম সমর্থন বা কাস্টমাইজড পরামর্শ প্রয়োজন? আমাদের <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/?utm_campaign=self&utm_source=banner#services\">পেশাদার পরিষেবাগুলি</a> দেখুন।"
@@ -627,6 +627,9 @@ msgstr "প্লাগইন যোগ করুন"
 
 msgid "button.add_plugins"
 msgstr "প্লাগইন যোগ করুন"
+
+msgid "button.apply_all_services"
+msgstr "সব পরিষেবায় প্রয়োগ করুন"
 
 msgid "button.auto_refresh"
 msgstr "স্বয়ংক্রিয় রিফ্রেশ"
@@ -4381,6 +4384,12 @@ msgstr "যে প্লাগইনগুলিকে এই সাইটের
 msgid "general.settings.PLUGINS_ORDER_SSL_CERTIFICATE.label"
 msgstr "প্লাগইন ক্রম (ssl_certificate)"
 
+msgid "general.settings.PLUGINS_ORDER_SSL_CLIENT_HELLO.help"
+msgstr "যে প্লাগইনগুলি ssl_client_hello পর্যায়ে প্রথমে চলবে (TLS ClientHello, প্রতিটি হ্যান্ডশেকে একবার, প্রতিটি পরিষেবা ও ডিফল্ট সার্ভারের জন্য)। ID স্পেস দিয়ে পৃথক করুন; বাকি প্লাগইনগুলি পরে তাদের স্বাভাবিক ক্রমে চলবে।"
+
+msgid "general.settings.PLUGINS_ORDER_SSL_CLIENT_HELLO.label"
+msgstr "প্লাগইন ক্রম (ssl_client_hello)"
+
 msgid "general.settings.PLUGINS_ORDER_TIMER.help"
 msgstr "যে প্লাগইনগুলিকে timer পর্যায়ে (ব্যাকগ্রাউন্ড টাইমার) প্রথমে চলতে হবে। ID স্পেস দিয়ে পৃথক করুন; বাকি প্লাগইনগুলি পরে তাদের স্বাভাবিক ক্রমে চলতে থাকে।"
 
@@ -4400,7 +4409,7 @@ msgid "general.settings.SEND_TIMEOUT.label"
 msgstr "সেন্ড টাইমআউট"
 
 msgid "general.settings.SERVER_NAME.help"
-msgstr "bunkerweb পরিবেশিত ভার্চুয়াল হোস্টের তালিকা। (স্পেস দিয়ে পৃথক)"
+msgstr "bunkerweb পরিবেশিত ভার্চুয়াল হোস্টের তালিকা। (স্পেস দিয়ে পৃথক) নামটি IPv4 ঠিকানাও হতে পারে, অথবা কোনো ঘিরে রাখার চিহ্ন ছাড়া ছোট হাতের অক্ষরে ও সংকুচিত রূপে লেখা IPv6 ঠিকানা হতে পারে (2001:db8::1, বর্গাকার বন্ধনী ছাড়া)।"
 
 msgid "general.settings.SERVER_NAME.label"
 msgstr "সার্ভারের নাম"
@@ -4909,6 +4918,12 @@ msgstr "আপনাকে লগ ইন করানো যায়নি, অ
 msgid "login.flash.invalid_username_password"
 msgstr "ইউজারনেম বা পাসওয়ার্ড অবৈধ"
 
+msgid "login.flash.throttle_unavailable"
+msgstr "সাইন ইন সাময়িকভাবে অনুপলব্ধ, অনুগ্রহ করে কিছুক্ষণ পরে আবার চেষ্টা করুন।"
+
+msgid "login.flash.too_many_failed_attempts"
+msgstr "অনেকবার ব্যর্থ চেষ্টা হয়েছে, %(minutes)s মিনিট পরে আবার চেষ্টা করুন।"
+
 msgid "login.notice_password_changed"
 msgstr "আপনার পাসওয়ার্ড পরিবর্তন করা হয়েছে। নতুন পাসওয়ার্ড দিয়ে লগ ইন করুন।"
 
@@ -5058,6 +5073,12 @@ msgstr "দ্বি-স্তর যাচাইকরণ সক্রিয়
 
 msgid "modal.body.add_plugin_dropzone"
 msgstr "আপনার প্লাগইন আর্কাইভটি এখানে টেনে আনুন অথবা ফাইল নির্বাচন করতে ক্লিক করুন।"
+
+msgid "modal.body.apply_all_services"
+msgstr "এইবার সংরক্ষণের সময় পরিবর্তিত বৈশ্বিক সেটিংস প্রতিটি পরিষেবা বা তার টেমপ্লেটের নির্ধারিত মান প্রতিস্থাপন করবে। অপরিবর্তিত সেটিংস রাখা হবে।"
+
+msgid "modal.body.apply_all_services_count"
+msgstr "সব পরিচিত পরিষেবা (%(count)s) যেগুলো আপডেট হতে পারে:"
 
 msgid "modal.body.ban_filtered_confirmation"
 msgstr "সব %(count)sটি মিলে যাওয়া রিপোর্টের IP ব্লক করবেন? একই লক্ষ্য একবারই প্রয়োগ হবে।"
@@ -5250,6 +5271,9 @@ msgstr "নিষেধাজ্ঞা যোগ করুন"
 
 msgid "modal.title.add_plugins"
 msgstr "প্লাগইন যোগ করুন"
+
+msgid "modal.title.apply_all_services"
+msgstr "সব পরিষেবায় প্রয়োগ করবেন?"
 
 msgid "modal.title.confirm_conversion"
 msgstr "রূপান্তর নিশ্চিত করুন"
@@ -6067,6 +6091,9 @@ msgstr "পরীক্ষা এড়িয়ে PRO প্লাগইন �
 msgid "pro.force_update.title"
 msgstr "জোর করে হালনাগাদ"
 
+msgid "pro.free_trial_hint"
+msgstr "একটি প্ল্যান অর্ডার করুন, তারপর চেকআউটের সময় পেমেন্ট পদ্ধতি হিসেবে “Free 30 Days Trial” রাখুন।"
+
 msgid "pro.key.title.activate"
 msgstr "কী সক্রিয় করুন"
 
@@ -6664,6 +6691,9 @@ msgstr "এই অনুরোধগুলি খারাপ আচরণের
 msgid "reports.bad_behavior_captured_at"
 msgstr "সংগ্রহ করা হয়েছে"
 
+msgid "reports.bad_behavior_evidence_missing"
+msgstr "ব্লকের প্রমাণ আর উপলব্ধ নেই।"
+
 msgid "reports.bad_behavior_ip"
 msgstr "আইপি ঠিকানা"
 
@@ -6678,6 +6708,9 @@ msgstr "অনুরোধ"
 
 msgid "reports.bad_behavior_server"
 msgstr "সার্ভার"
+
+msgid "reports.bad_behavior_stored_events"
+msgstr "সংরক্ষিত ইভেন্ট"
 
 msgid "reports.bad_behavior_total_requests"
 msgstr "সন্দেহজনক অনুরোধ"
@@ -9966,6 +9999,9 @@ msgstr "পিং সফল হয়েছে"
 
 msgid "toast.ip_unbanned"
 msgstr "আইপি ঠিকানা সফলভাবে নিষেধাজ্ঞা মুক্ত করা হয়েছে!"
+
+msgid "tooltip.apply_all_services"
+msgstr "এইবার সংরক্ষণের সময় পরিবর্তিত বৈশ্বিক সেটিংসই শুধু সব পরিষেবায় প্রয়োগ করে, পরিষেবা বা তার টেমপ্লেটের নির্ধারিত মান প্রতিস্থাপন করে।"
 
 msgid "tooltip.auto_lets_encrypt"
 msgstr "স্বয়ংক্রিয়ভাবে একটি Let's Encrypt শংসাপত্র অনুরোধ করতে হবে কিনা।"

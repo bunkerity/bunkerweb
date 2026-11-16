@@ -118,7 +118,7 @@
     "link": {
       "here": "這裡"
     },
-    "pro": "升級至 PRO 版本，充分利用 BunkerWeb。更多資訊和免費試用請點擊<a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/?utm_campaign=self&utm_source=banner#pro\">這裡</a>。",
+    "pro": "升級至 PRO 版本，充分利用 BunkerWeb。 從<a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=banner\">這裡</a>開始您的 30 天免費試用：訂購方案，然後在結帳時保留「Free 30 Days Trial」作為付款方式。",
     "support": "需要 BunkerWeb 的進階支援或客製化諮詢服務？查看我們的<a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/?utm_campaign=self&utm_source=banner#services\">專業服務</a>。"
   },
   "bans": {
@@ -262,6 +262,7 @@
     "add_ban_plural": "新增封鎖",
     "add_plugin_plural": "新增外掛程式",
     "add_plugins": "新增外掛程式",
+    "apply_all_services": "套用至所有服務",
     "auto_refresh": "自動重新整理",
     "ban": "封鎖",
     "ban_selected": "封鎖所選",
@@ -1442,7 +1443,9 @@
     "title": "登入",
     "flash": {
       "invalid_username_password": "使用者名稱或密碼無效",
-      "couldn_t_log_please_try_again": "無法為您登入，請再試一次"
+      "couldn_t_log_please_try_again": "無法為您登入，請再試一次",
+      "too_many_failed_attempts": "失敗次數過多，請在 {{minutes}} 分鐘後重試。",
+      "throttle_unavailable": "暫時無法登入，請稍後再試。"
     },
     "subtitle": "登入您的 BunkerWeb 帳戶",
     "or_use_password": "或使用您的密碼",
@@ -1493,6 +1496,8 @@
   "modal": {
     "body": {
       "add_plugin_dropzone": "將您的外掛程式封存拖放到此處或點擊以選取檔案。",
+      "apply_all_services": "本次儲存中變更的全域設定將取代每個服務或其範本設定的值。未變更的設定將保留。",
+      "apply_all_services_count": "可能更新的所有已知服務 ({{count}})：",
       "confirm_cache_deletion_alert": "您確定要刪除選定的快取檔案嗎？",
       "confirm_cache_deletion_alert_plural": "您確定要刪除選定的快取檔案嗎？",
       "confirm_configs_conversion": "確定要轉換所選的自訂組態嗎？",
@@ -1563,6 +1568,7 @@
     "title": {
       "add_bans": "新增封鎖",
       "add_plugins": "新增外掛程式",
+      "apply_all_services": "套用至所有服務？",
       "confirm_conversion": "確認轉換",
       "confirm_deletion": "確認刪除",
       "confirm_unban": "確認解除封鎖",
@@ -1894,7 +1900,8 @@
       "title": "免費試用",
       "description": "免費試用 <span class=\"text-primary\">BunkerWeb PRO</span> <strong>30 天</strong>。",
       "cta": "開始免費試用"
-    }
+    },
+    "free_trial_hint": "訂購方案，然後在結帳時保留「Free 30 Days Trial」作為付款方式。"
   },
   "profile": {
     "2fa": {
@@ -2097,7 +2104,9 @@
       "show_top": "違規最多的來源",
       "show_latest": "最新違規來源",
       "show_bottom": "違規最少的來源"
-    }
+    },
+    "bad_behavior_stored_events": "已儲存的事件",
+    "bad_behavior_evidence_missing": "封鎖證據已無法使用。"
   },
   "scope": {
     "all_services": "所有服務",
@@ -3101,6 +3110,7 @@
     "ip_unbanned": "IP 位址已成功解除封鎖！"
   },
   "tooltip": {
+    "apply_all_services": "僅將本次儲存中變更的全域設定套用至所有服務，取代由服務或其範本設定的值。",
     "auto_lets_encrypt": "是否自動請求 Let's Encrypt 憑證。",
     "button": {
       "ban_ip": "封鎖此 IP 位址",
@@ -4620,7 +4630,7 @@
       },
       "SERVER_NAME": {
         "label": "伺服器名稱",
-        "help": "bunkerweb 所服務的虛擬主機清單。（以空格分隔）"
+        "help": "bunkerweb 所服務的虛擬主機清單。（以空格分隔） 名稱也可以是 IPv4 位址，或不加包圍符號、以小寫字母和壓縮形式書寫的 IPv6 位址 (2001:db8::1，不含方括號)。"
       },
       "WORKER_PROCESSES": {
         "label": "工作處理程序數",
@@ -4837,6 +4847,10 @@
       "PLUGINS_ORDER_SSL_CERTIFICATE": {
         "label": "外掛程式順序（ssl_certificate）",
         "help": "應在此站台 ssl_certificate 階段（TLS 憑證選擇/簽發）最先執行的外掛程式。ID 以空格分隔；其餘外掛程式之後仍依其正常順序執行。"
+      },
+      "PLUGINS_ORDER_SSL_CLIENT_HELLO": {
+        "label": "外掛程式順序（ssl_client_hello）",
+        "help": "應在 ssl_client_hello 階段最先執行的外掛程式（TLS ClientHello，每次交握執行一次，適用於每個服務和預設伺服器）。ID 以空格分隔；其餘外掛程式之後仍依其正常順序執行。"
       },
       "PLUGINS_ORDER_HEADER": {
         "label": "外掛程式順序（header）",

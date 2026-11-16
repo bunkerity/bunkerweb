@@ -118,7 +118,7 @@
     "link": {
       "here": "这里"
     },
-    "pro": "升级至 PRO 版本，充分利用 BunkerWeb。更多信息和免费试用请点击<a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/?utm_campaign=self&utm_source=banner#pro\">这里</a>。",
+    "pro": "升级至 PRO 版本，充分利用 BunkerWeb。 从<a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=banner\">这里</a>开始您的 30 天免费试用：订购套餐，然后在结账时保留“Free 30 Days Trial”作为付款方式。",
     "support": "需要 BunkerWeb 的高级支持或定制咨询服务？查看我们的<a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/?utm_campaign=self&utm_source=banner#services\">专业服务</a>。"
   },
   "bans": {
@@ -262,6 +262,7 @@
     "add_ban_plural": "添加封禁",
     "add_plugin_plural": "添加插件",
     "add_plugins": "添加插件",
+    "apply_all_services": "应用到所有服务",
     "auto_refresh": "自动刷新",
     "ban": "封禁",
     "ban_selected": "封禁所选",
@@ -1442,7 +1443,9 @@
     "title": "登录",
     "flash": {
       "invalid_username_password": "用户名或密码无效",
-      "couldn_t_log_please_try_again": "无法为您登录，请重试"
+      "couldn_t_log_please_try_again": "无法为您登录，请重试",
+      "too_many_failed_attempts": "失败次数过多，请在 {{minutes}} 分钟后重试。",
+      "throttle_unavailable": "暂时无法登录，请稍后重试。"
     },
     "subtitle": "登录到您的 BunkerWeb 帐户",
     "or_use_password": "或使用您的密码",
@@ -1493,6 +1496,8 @@
   "modal": {
     "body": {
       "add_plugin_dropzone": "将您的插件存档拖放到此处或单击以选择文件。",
+      "apply_all_services": "本次保存中更改的全局设置将替换每个服务或其模板设置的值。未更改的设置将保留。",
+      "apply_all_services_count": "可能更新的所有已知服务 ({{count}})：",
       "confirm_cache_deletion_alert": "您确定要删除选定的缓存文件吗？",
       "confirm_cache_deletion_alert_plural": "您确定要删除选定的缓存文件吗？",
       "confirm_configs_conversion": "确定要转换所选的自定义配置吗？",
@@ -1563,6 +1568,7 @@
     "title": {
       "add_bans": "添加封禁",
       "add_plugins": "添加插件",
+      "apply_all_services": "应用到所有服务？",
       "confirm_conversion": "确认转换",
       "confirm_deletion": "确认删除",
       "confirm_unban": "确认解禁",
@@ -1894,7 +1900,8 @@
       "title": "免费试用",
       "description": "免费试用 <span class=\"text-primary\">BunkerWeb PRO</span> <strong>30 天</strong>。",
       "cta": "开始免费试用"
-    }
+    },
+    "free_trial_hint": "订购套餐，然后在结账时保留“Free 30 Days Trial”作为付款方式。"
   },
   "profile": {
     "2fa": {
@@ -2097,7 +2104,9 @@
       "show_top": "违规最多的来源",
       "show_latest": "最新违规来源",
       "show_bottom": "违规最少的来源"
-    }
+    },
+    "bad_behavior_stored_events": "已存储的事件",
+    "bad_behavior_evidence_missing": "封禁证据已不可用。"
   },
   "scope": {
     "all_services": "所有服务",
@@ -3101,6 +3110,7 @@
     "ip_unbanned": "IP 地址已成功解禁！"
   },
   "tooltip": {
+    "apply_all_services": "仅将本次保存中更改的全局设置应用到所有服务，替换由服务或其模板设置的值。",
     "auto_lets_encrypt": "是否自动请求 Let's Encrypt 证书。",
     "button": {
       "ban_ip": "封禁此 IP 地址",
@@ -4620,7 +4630,7 @@
       },
       "SERVER_NAME": {
         "label": "服务器名称",
-        "help": "bunkerweb 所服务的虚拟主机列表。（以空格分隔）"
+        "help": "bunkerweb 所服务的虚拟主机列表。（以空格分隔） 名称也可以是 IPv4 地址，或不加包围符号、以小写字母和压缩形式书写的 IPv6 地址 (2001:db8::1，不带方括号)。"
       },
       "WORKER_PROCESSES": {
         "label": "工作进程数",
@@ -4837,6 +4847,10 @@
       "PLUGINS_ORDER_SSL_CERTIFICATE": {
         "label": "插件顺序（ssl_certificate）",
         "help": "在此站点 ssl_certificate 阶段（TLS 证书选择/签发）应最先运行的插件。ID 以空格分隔；其余插件之后仍按其正常顺序运行。"
+      },
+      "PLUGINS_ORDER_SSL_CLIENT_HELLO": {
+        "label": "插件顺序（ssl_client_hello）",
+        "help": "应在 ssl_client_hello 阶段最先运行的插件（TLS ClientHello，每次握手执行一次，适用于每个服务和默认服务器）。ID 以空格分隔；其余插件之后仍按其正常顺序运行。"
       },
       "PLUGINS_ORDER_HEADER": {
         "label": "插件顺序（header）",

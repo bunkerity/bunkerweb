@@ -118,7 +118,7 @@
     "link": {
       "here": "dito"
     },
-    "pro": "Masulit ang BunkerWeb sa pamamagitan ng pag-upgrade sa PRO na bersyon. Karagdagang impormasyon at libreng pagsubok <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/?utm_campaign=self&utm_source=banner#pro\">dito</a>.",
+    "pro": "Masulit ang BunkerWeb sa pamamagitan ng pag-upgrade sa PRO na bersyon. Simulan ang iyong 30-araw na libreng pagsubok <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=banner\">dito</a>: umorder ng plano, pagkatapos ay panatilihin ang “Free 30 Days Trial” bilang paraan ng pagbabayad sa checkout.",
     "support": "Kailangan ng premium na suporta o pasadyang konsultasyon para sa BunkerWeb? Tingnan ang aming <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/?utm_campaign=self&utm_source=banner#services\">mga propesyonal na serbisyo</a>."
   },
   "bans": {
@@ -262,6 +262,7 @@
     "add_ban_plural": "Magdagdag ng ban",
     "add_plugin_plural": "Magdagdag ng plugin",
     "add_plugins": "Magdagdag ng Mga Plugin",
+    "apply_all_services": "Ilapat sa lahat ng serbisyo",
     "auto_refresh": "Awtomatikong I-refresh",
     "ban": "I-ban",
     "ban_all_filtered": "I-ban ang lahat ng tumutugmang report",
@@ -1471,7 +1472,9 @@
     "title": "Mag-login",
     "flash": {
       "invalid_username_password": "Hindi wastong username o password",
-      "couldn_t_log_please_try_again": "Hindi ka na-log in, subukan muli"
+      "couldn_t_log_please_try_again": "Hindi ka na-log in, subukan muli",
+      "too_many_failed_attempts": "Masyadong maraming nabigong pagtatangka, subukang muli pagkalipas ng {{minutes}} minuto.",
+      "throttle_unavailable": "Pansamantalang hindi magagamit ang pag-sign in, pakisubukang muli sa ilang sandali."
     }
   },
   "logs": {
@@ -1517,6 +1520,8 @@
   "modal": {
     "body": {
       "add_plugin_dropzone": "I-drag at i-drop ang iyong plugin archive dito o mag-click upang pumili ng mga file.",
+      "apply_all_services": "Papalitan ng mga pandaigdigang setting na binago sa pag-save na ito ang mga halagang itinakda ng bawat serbisyo o ng template nito. Pananatilihin ang mga setting na hindi binago.",
+      "apply_all_services_count": "Lahat ng kilalang serbisyo ({{count}}) na maaaring ma-update:",
       "confirm_cache_deletion_alert": "Sigurado ka bang gusto mong burahin ang napiling cache file?",
       "confirm_cache_deletion_alert_plural": "Sigurado ka bang gusto mong burahin ang mga napiling cache file?",
       "confirm_configs_conversion": "Sigurado ka bang gusto mong i-convert ang mga napiling custom na configuration?",
@@ -1587,6 +1592,7 @@
     "title": {
       "add_bans": "Magdagdag ng ban",
       "add_plugins": "Magdagdag ng Mga Plugin",
+      "apply_all_services": "Ilapat sa lahat ng serbisyo?",
       "confirm_conversion": "Kumpirmahin ang Conversion",
       "confirm_deletion": "Kumpirmahin ang Pagbubura",
       "confirm_unban": "Kumpirmahin ang Pag-unban",
@@ -1961,7 +1967,8 @@
       "title": "Libreng Pagsubok",
       "description": "Subukan ang <span class=\"text-primary\">BunkerWeb PRO</span> nang libre sa loob ng <strong>30 araw</strong>.",
       "cta": "Simulan ang Libreng Pagsubok"
-    }
+    },
+    "free_trial_hint": "Umorder ng plano, pagkatapos ay panatilihin ang “Free 30 Days Trial” bilang paraan ng pagbabayad sa checkout."
   },
   "profile": {
     "2fa": {
@@ -2432,7 +2439,7 @@
       },
       "SERVER_NAME": {
         "label": "Pangalan ng Server",
-        "help": "Listahan ng mga virtual host na sinisilbihan ng bunkerweb. (pinaghihiwalay ng espasyo)"
+        "help": "Listahan ng mga virtual host na sinisilbihan ng bunkerweb. (pinaghihiwalay ng espasyo) Ang pangalan ay maaari ring isang IPv4 address o isang IPv6 address na nakasulat nang walang pananda sa magkabilang dulo, sa maliliit na titik at pinaikling anyo (2001:db8::1, walang square bracket)."
       },
       "WORKER_PROCESSES": {
         "label": "Mga Worker Process",
@@ -2650,6 +2657,10 @@
         "label": "Plugin Order (ssl_certificate)",
         "help": "Mga plugin na dapat unang tumakbo sa ssl_certificate phase para sa site na ito (pagpili/pag-issue ng TLS certificate). Paghiwalayin ang mga ID ng espasyo; ang natitirang mga plugin ay tumatakbo pa rin pagkatapos sa kanilang normal na pagkakasunod-sunod."
       },
+      "PLUGINS_ORDER_SSL_CLIENT_HELLO": {
+        "label": "Pagkakasunod-sunod ng mga plugin (ssl_client_hello)",
+        "help": "Mga plugin na dapat unang tumakbo sa yugto ng ssl_client_hello (TLS ClientHello, isang beses bawat handshake, para sa bawat serbisyo at sa default na server). Paghiwalayin ang mga ID ng espasyo; tatakbo pa rin pagkatapos ang natitirang mga plugin sa kanilang normal na pagkakasunod-sunod."
+      },
       "PLUGINS_ORDER_HEADER": {
         "label": "Plugin Order (header)",
         "help": "Mga plugin na dapat unang tumakbo sa header phase para sa site na ito (pag-filter ng response header). Paghiwalayin ang mga ID ng espasyo; ang natitirang mga plugin ay tumatakbo pa rin pagkatapos sa kanilang normal na pagkakasunod-sunod."
@@ -2820,7 +2831,9 @@
       "show_top": "Pinakamaraming paglabag",
       "show_latest": "Pinakabagong lumabag",
       "show_bottom": "Pinakakaunting paglabag"
-    }
+    },
+    "bad_behavior_stored_events": "Mga nakaimbak na event",
+    "bad_behavior_evidence_missing": "Hindi na available ang ebidensya ng ban."
   },
   "scope": {
     "all_services": "Lahat ng Serbisyo",
@@ -3824,6 +3837,7 @@
     "ip_unbanned": "Matagumpay na na-unban ang IP address!"
   },
   "tooltip": {
+    "apply_all_services": "Inilalapat sa lahat ng serbisyo ang mga pandaigdigang setting lamang na binago sa pag-save na ito, at pinapalitan ang mga halagang itinakda ng serbisyo o ng template nito.",
     "auto_lets_encrypt": "Kung awtomatikong hihilingin ang isang Let's Encrypt certificate.",
     "button": {
       "ban_ip": "I-ban ang IP address na ito",

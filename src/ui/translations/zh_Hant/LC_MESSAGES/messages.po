@@ -302,7 +302,7 @@ msgid "banner.link.here"
 msgstr "這裡"
 
 msgid "banner.pro"
-msgstr "升級至 PRO 版本，充分利用 BunkerWeb。更多資訊和免費試用請點擊<a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/?utm_campaign=self&utm_source=banner#pro\">這裡</a>。"
+msgstr "升級至 PRO 版本，充分利用 BunkerWeb。 從<a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=banner\">這裡</a>開始您的 30 天免費試用：訂購方案，然後在結帳時保留「Free 30 Days Trial」作為付款方式。"
 
 msgid "banner.support"
 msgstr "需要 BunkerWeb 的進階支援或客製化諮詢服務？查看我們的<a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/?utm_campaign=self&utm_source=banner#services\">專業服務</a>。"
@@ -627,6 +627,9 @@ msgstr "新增外掛程式"
 
 msgid "button.add_plugins"
 msgstr "新增外掛程式"
+
+msgid "button.apply_all_services"
+msgstr "套用至所有服務"
 
 msgid "button.auto_refresh"
 msgstr "自動重新整理"
@@ -4381,6 +4384,12 @@ msgstr "應在此站台 ssl_certificate 階段（TLS 憑證選擇/簽發）最�
 msgid "general.settings.PLUGINS_ORDER_SSL_CERTIFICATE.label"
 msgstr "外掛程式順序（ssl_certificate）"
 
+msgid "general.settings.PLUGINS_ORDER_SSL_CLIENT_HELLO.help"
+msgstr "應在 ssl_client_hello 階段最先執行的外掛程式（TLS ClientHello，每次交握執行一次，適用於每個服務和預設伺服器）。ID 以空格分隔；其餘外掛程式之後仍依其正常順序執行。"
+
+msgid "general.settings.PLUGINS_ORDER_SSL_CLIENT_HELLO.label"
+msgstr "外掛程式順序（ssl_client_hello）"
+
 msgid "general.settings.PLUGINS_ORDER_TIMER.help"
 msgstr "應在 timer 階段（背景計時器）最先執行的外掛程式。ID 以空格分隔；其餘外掛程式之後仍依其正常順序執行。"
 
@@ -4400,7 +4409,7 @@ msgid "general.settings.SEND_TIMEOUT.label"
 msgstr "傳送逾時"
 
 msgid "general.settings.SERVER_NAME.help"
-msgstr "bunkerweb 所服務的虛擬主機清單。（以空格分隔）"
+msgstr "bunkerweb 所服務的虛擬主機清單。（以空格分隔） 名稱也可以是 IPv4 位址，或不加包圍符號、以小寫字母和壓縮形式書寫的 IPv6 位址 (2001:db8::1，不含方括號)。"
 
 msgid "general.settings.SERVER_NAME.label"
 msgstr "伺服器名稱"
@@ -4909,6 +4918,12 @@ msgstr "無法為您登入，請再試一次"
 msgid "login.flash.invalid_username_password"
 msgstr "使用者名稱或密碼無效"
 
+msgid "login.flash.throttle_unavailable"
+msgstr "暫時無法登入，請稍後再試。"
+
+msgid "login.flash.too_many_failed_attempts"
+msgstr "失敗次數過多，請在 %(minutes)s 分鐘後重試。"
+
 msgid "login.notice_password_changed"
 msgstr "您的密碼已變更。請使用新密碼登入。"
 
@@ -5058,6 +5073,12 @@ msgstr "雙重驗證已啟用，但沒有可用的復原碼，請重新整理它
 
 msgid "modal.body.add_plugin_dropzone"
 msgstr "將您的外掛程式封存拖放到此處或點擊以選取檔案。"
+
+msgid "modal.body.apply_all_services"
+msgstr "本次儲存中變更的全域設定將取代每個服務或其範本設定的值。未變更的設定將保留。"
+
+msgid "modal.body.apply_all_services_count"
+msgstr "可能更新的所有已知服務 (%(count)s)："
 
 msgid "modal.body.ban_filtered_confirmation"
 msgstr "要封鎖所有 %(count)s 份相符報告中的 IP 嗎？重複的目標只會套用一次。"
@@ -5244,6 +5265,9 @@ msgstr "新增封鎖"
 
 msgid "modal.title.add_plugins"
 msgstr "新增外掛程式"
+
+msgid "modal.title.apply_all_services"
+msgstr "套用至所有服務？"
 
 msgid "modal.title.confirm_conversion"
 msgstr "確認轉換"
@@ -6061,6 +6085,9 @@ msgstr "略過檢查並強制下載 PRO 外掛程式。若無法強制執行，�
 msgid "pro.force_update.title"
 msgstr "強制更新"
 
+msgid "pro.free_trial_hint"
+msgstr "訂購方案，然後在結帳時保留「Free 30 Days Trial」作為付款方式。"
+
 msgid "pro.key.title.activate"
 msgstr "啟用金鑰"
 
@@ -6656,6 +6683,9 @@ msgstr "這些請求超過異常行為門檻，並已合併。"
 msgid "reports.bad_behavior_captured_at"
 msgstr "擷取於"
 
+msgid "reports.bad_behavior_evidence_missing"
+msgstr "封鎖證據已無法使用。"
+
 msgid "reports.bad_behavior_ip"
 msgstr "IP 位址"
 
@@ -6670,6 +6700,9 @@ msgstr "請求"
 
 msgid "reports.bad_behavior_server"
 msgstr "伺服器"
+
+msgid "reports.bad_behavior_stored_events"
+msgstr "已儲存的事件"
 
 msgid "reports.bad_behavior_total_requests"
 msgstr "可疑請求"
@@ -9953,6 +9986,9 @@ msgstr "Ping 成功"
 
 msgid "toast.ip_unbanned"
 msgstr "IP 位址已成功解除封鎖！"
+
+msgid "tooltip.apply_all_services"
+msgstr "僅將本次儲存中變更的全域設定套用至所有服務，取代由服務或其範本設定的值。"
 
 msgid "tooltip.auto_lets_encrypt"
 msgstr "是否自動請求 Let's Encrypt 憑證。"

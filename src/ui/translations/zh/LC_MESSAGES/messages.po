@@ -302,7 +302,7 @@ msgid "banner.link.here"
 msgstr "这里"
 
 msgid "banner.pro"
-msgstr "升级至 PRO 版本，充分利用 BunkerWeb。更多信息和免费试用请点击<a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/?utm_campaign=self&utm_source=banner#pro\">这里</a>。"
+msgstr "升级至 PRO 版本，充分利用 BunkerWeb。 从<a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=banner\">这里</a>开始您的 30 天免费试用：订购套餐，然后在结账时保留“Free 30 Days Trial”作为付款方式。"
 
 msgid "banner.support"
 msgstr "需要 BunkerWeb 的高级支持或定制咨询服务？查看我们的<a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/?utm_campaign=self&utm_source=banner#services\">专业服务</a>。"
@@ -627,6 +627,9 @@ msgstr "添加插件"
 
 msgid "button.add_plugins"
 msgstr "添加插件"
+
+msgid "button.apply_all_services"
+msgstr "应用到所有服务"
 
 msgid "button.auto_refresh"
 msgstr "自动刷新"
@@ -4381,6 +4384,12 @@ msgstr "在此站点 ssl_certificate 阶段（TLS 证书选择/签发）应最�
 msgid "general.settings.PLUGINS_ORDER_SSL_CERTIFICATE.label"
 msgstr "插件顺序（ssl_certificate）"
 
+msgid "general.settings.PLUGINS_ORDER_SSL_CLIENT_HELLO.help"
+msgstr "应在 ssl_client_hello 阶段最先运行的插件（TLS ClientHello，每次握手执行一次，适用于每个服务和默认服务器）。ID 以空格分隔；其余插件之后仍按其正常顺序运行。"
+
+msgid "general.settings.PLUGINS_ORDER_SSL_CLIENT_HELLO.label"
+msgstr "插件顺序（ssl_client_hello）"
+
 msgid "general.settings.PLUGINS_ORDER_TIMER.help"
 msgstr "在 timer 阶段（后台定时器）应最先运行的插件。ID 以空格分隔；其余插件之后仍按其正常顺序运行。"
 
@@ -4400,7 +4409,7 @@ msgid "general.settings.SEND_TIMEOUT.label"
 msgstr "发送超时"
 
 msgid "general.settings.SERVER_NAME.help"
-msgstr "bunkerweb 所服务的虚拟主机列表。（以空格分隔）"
+msgstr "bunkerweb 所服务的虚拟主机列表。（以空格分隔） 名称也可以是 IPv4 地址，或不加包围符号、以小写字母和压缩形式书写的 IPv6 地址 (2001:db8::1，不带方括号)。"
 
 msgid "general.settings.SERVER_NAME.label"
 msgstr "服务器名称"
@@ -4909,6 +4918,12 @@ msgstr "无法为您登录，请重试"
 msgid "login.flash.invalid_username_password"
 msgstr "用户名或密码无效"
 
+msgid "login.flash.throttle_unavailable"
+msgstr "暂时无法登录，请稍后重试。"
+
+msgid "login.flash.too_many_failed_attempts"
+msgstr "失败次数过多，请在 %(minutes)s 分钟后重试。"
+
 msgid "login.notice_password_changed"
 msgstr "您的密码已更改。请使用新密码登录。"
 
@@ -5058,6 +5073,12 @@ msgstr "双重验证已启用，但没有可用的恢复代码，请刷新它们
 
 msgid "modal.body.add_plugin_dropzone"
 msgstr "将您的插件存档拖放到此处或单击以选择文件。"
+
+msgid "modal.body.apply_all_services"
+msgstr "本次保存中更改的全局设置将替换每个服务或其模板设置的值。未更改的设置将保留。"
+
+msgid "modal.body.apply_all_services_count"
+msgstr "可能更新的所有已知服务 (%(count)s)："
 
 msgid "modal.body.ban_filtered_confirmation"
 msgstr "要封禁所有 %(count)s 个匹配报告中的 IP 吗？重复目标只会应用一次。"
@@ -5244,6 +5265,9 @@ msgstr "添加封禁"
 
 msgid "modal.title.add_plugins"
 msgstr "添加插件"
+
+msgid "modal.title.apply_all_services"
+msgstr "应用到所有服务？"
 
 msgid "modal.title.confirm_conversion"
 msgstr "确认转换"
@@ -6061,6 +6085,9 @@ msgstr "跳过检查并强制下载 PRO 插件。如果无法强制执行，则�
 msgid "pro.force_update.title"
 msgstr "强制更新"
 
+msgid "pro.free_trial_hint"
+msgstr "订购套餐，然后在结账时保留“Free 30 Days Trial”作为付款方式。"
+
 msgid "pro.key.title.activate"
 msgstr "激活密钥"
 
@@ -6656,6 +6683,9 @@ msgstr "这些请求超过了异常行为阈值，并被组合在一起。"
 msgid "reports.bad_behavior_captured_at"
 msgstr "捕获时间"
 
+msgid "reports.bad_behavior_evidence_missing"
+msgstr "封禁证据已不可用。"
+
 msgid "reports.bad_behavior_ip"
 msgstr "IP地址"
 
@@ -6670,6 +6700,9 @@ msgstr "请求"
 
 msgid "reports.bad_behavior_server"
 msgstr "服务器"
+
+msgid "reports.bad_behavior_stored_events"
+msgstr "已存储的事件"
 
 msgid "reports.bad_behavior_total_requests"
 msgstr "可疑请求"
@@ -9953,6 +9986,9 @@ msgstr "Ping 成功"
 
 msgid "toast.ip_unbanned"
 msgstr "IP 地址已成功解禁！"
+
+msgid "tooltip.apply_all_services"
+msgstr "仅将本次保存中更改的全局设置应用到所有服务，替换由服务或其模板设置的值。"
 
 msgid "tooltip.auto_lets_encrypt"
 msgstr "是否自动请求 Let's Encrypt 证书。"

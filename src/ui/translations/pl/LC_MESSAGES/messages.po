@@ -302,7 +302,7 @@ msgid "banner.link.here"
 msgstr "tutaj"
 
 msgid "banner.pro"
-msgstr "Wykorzystaj w pełni możliwości BunkerWeb, przechodząc na wersję PRO. Więcej informacji i bezpłatna wersja próbna <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/?utm_campaign=self&utm_source=banner#pro\">tutaj</a>."
+msgstr "Wykorzystaj w pełni możliwości BunkerWeb, przechodząc na wersję PRO. Rozpocznij 30-dniowy bezpłatny okres próbny <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=banner\">tutaj</a>: zamów plan, a następnie pozostaw „Free 30 Days Trial” jako metodę płatności podczas finalizacji zamówienia."
 
 msgid "banner.support"
 msgstr "Potrzebujesz wsparcia premium lub dostosowanego doradztwa dla BunkerWeb? Sprawdź nasze <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/?utm_campaign=self&utm_source=banner#services\">profesjonalne usługi</a>."
@@ -627,6 +627,9 @@ msgstr "Dodaj wtyczkę (wtyczki)"
 
 msgid "button.add_plugins"
 msgstr "Dodaj wtyczki"
+
+msgid "button.apply_all_services"
+msgstr "Zastosuj do wszystkich usług"
 
 msgid "button.auto_refresh"
 msgstr "Automatyczne odświeżanie"
@@ -4381,6 +4384,12 @@ msgstr "Wtyczki, które powinny uruchamiać się jako pierwsze w fazie ssl_certi
 msgid "general.settings.PLUGINS_ORDER_SSL_CERTIFICATE.label"
 msgstr "Kolejność wtyczek (ssl_certificate)"
 
+msgid "general.settings.PLUGINS_ORDER_SSL_CLIENT_HELLO.help"
+msgstr "Wtyczki, które mają być uruchamiane jako pierwsze w fazie ssl_client_hello (TLS ClientHello, raz na uzgodnienie połączenia, dla każdej usługi i serwera domyślnego). Oddziel identyfikatory spacjami; pozostałe wtyczki uruchomią się później w zwykłej kolejności."
+
+msgid "general.settings.PLUGINS_ORDER_SSL_CLIENT_HELLO.label"
+msgstr "Kolejność wtyczek (ssl_client_hello)"
+
 msgid "general.settings.PLUGINS_ORDER_TIMER.help"
 msgstr "Wtyczki, które powinny uruchamiać się jako pierwsze w fazie timer (timery w tle). Oddziel identyfikatory spacjami; pozostałe wtyczki nadal uruchamiają się później w swojej normalnej kolejności."
 
@@ -4400,7 +4409,7 @@ msgid "general.settings.SEND_TIMEOUT.label"
 msgstr "Limit czasu wysyłania"
 
 msgid "general.settings.SERVER_NAME.help"
-msgstr "Lista wirtualnych hostów obsługiwanych przez bunkerweb. (oddzielona spacją)"
+msgstr "Lista wirtualnych hostów obsługiwanych przez bunkerweb. (oddzielona spacją) Nazwa może być również adresem IPv4 lub adresem IPv6 zapisanym bez ograniczników, małymi literami i w postaci skompresowanej (2001:db8::1, bez nawiasów kwadratowych)."
 
 msgid "general.settings.SERVER_NAME.label"
 msgstr "Nazwa serwera"
@@ -4909,6 +4918,12 @@ msgstr "Nie udało się zalogować, spróbuj ponownie"
 msgid "login.flash.invalid_username_password"
 msgstr "Nieprawidłowa nazwa użytkownika lub hasło"
 
+msgid "login.flash.throttle_unavailable"
+msgstr "Logowanie jest tymczasowo niedostępne, spróbuj ponownie za chwilę."
+
+msgid "login.flash.too_many_failed_attempts"
+msgstr "Zbyt wiele nieudanych prób, spróbuj ponownie za %(minutes)s min."
+
 msgid "login.notice_password_changed"
 msgstr "Twoje hasło zostało zmienione. Zaloguj się przy użyciu nowego hasła."
 
@@ -5058,6 +5073,12 @@ msgstr "Uwierzytelnianie dwuskładnikowe jest włączone, ale brak dostępnych k
 
 msgid "modal.body.add_plugin_dropzone"
 msgstr "Przeciągnij i upuść tutaj archiwum wtyczki lub kliknij, aby wybrać pliki."
+
+msgid "modal.body.apply_all_services"
+msgstr "Ustawienia globalne zmienione podczas tego zapisu zastąpią wartości ustawione przez każdą usługę lub jej szablon. Niezmienione ustawienia zostaną zachowane."
+
+msgid "modal.body.apply_all_services_count"
+msgstr "Wszystkie znane usługi (%(count)s), które mogą zostać zaktualizowane:"
 
 msgid "modal.body.ban_filtered_confirmation"
 msgstr "Zablokować adresy IP ze wszystkich pasujących raportów (liczba raportów: %(count)s)? Powtarzające się adresy zostaną zablokowane tylko raz."
@@ -5256,6 +5277,9 @@ msgstr "Dodaj blokadę (blokady)"
 
 msgid "modal.title.add_plugins"
 msgstr "Dodaj wtyczki"
+
+msgid "modal.title.apply_all_services"
+msgstr "Zastosować do wszystkich usług?"
 
 msgid "modal.title.confirm_conversion"
 msgstr "Potwierdź konwersję"
@@ -6073,6 +6097,9 @@ msgstr "Pomiń sprawdzanie i wymuś pobieranie wtyczek PRO. Jeśli wymuszenie ni
 msgid "pro.force_update.title"
 msgstr "Wymuś aktualizację"
 
+msgid "pro.free_trial_hint"
+msgstr "Zamów plan, a następnie pozostaw „Free 30 Days Trial” jako metodę płatności podczas finalizacji zamówienia."
+
 msgid "pro.key.title.activate"
 msgstr "Aktywuj klucz"
 
@@ -6672,6 +6699,9 @@ msgstr "Te żądania przekroczyły próg nieprawidłowego zachowania i zostały 
 msgid "reports.bad_behavior_captured_at"
 msgstr "Zarejestrowano o godzinie"
 
+msgid "reports.bad_behavior_evidence_missing"
+msgstr "Dowody uzasadniające bana nie są już dostępne."
+
 msgid "reports.bad_behavior_ip"
 msgstr "Adres IP"
 
@@ -6686,6 +6716,9 @@ msgstr "Żądanie"
 
 msgid "reports.bad_behavior_server"
 msgstr "Serwer"
+
+msgid "reports.bad_behavior_stored_events"
+msgstr "Zapisane zdarzenia"
 
 msgid "reports.bad_behavior_total_requests"
 msgstr "Nieprawidłowe żądania"
@@ -9979,6 +10012,9 @@ msgstr "Ping zakończony powodzeniem"
 
 msgid "toast.ip_unbanned"
 msgstr "IP został pomyślnie odblokowany!"
+
+msgid "tooltip.apply_all_services"
+msgstr "Stosuje do wszystkich usług tylko ustawienia globalne zmienione podczas tego zapisu, zastępując wartości ustawione przez usługę lub jej szablon."
 
 msgid "tooltip.auto_lets_encrypt"
 msgstr "Czy automatycznie żądać certyfikatu Let's Encrypt."

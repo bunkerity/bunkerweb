@@ -302,7 +302,7 @@ msgid "banner.link.here"
 msgstr "ici"
 
 msgid "banner.pro"
-msgstr "Tirez le meilleur parti de BunkerWeb en passant à la version PRO. Plus d'infos et essai gratuit <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/?utm_campaign=self&utm_source=banner#pro\">ici</a>."
+msgstr "Tirez le meilleur parti de BunkerWeb en passant à la version PRO. Commencez votre essai gratuit de 30 jours <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=banner\">ici</a> : commandez une offre, puis conservez « Free 30 Days Trial » comme mode de paiement lors de la validation de la commande."
 
 msgid "banner.support"
 msgstr "Besoin d'un support premium ou de conseils sur mesure pour BunkerWeb ? Consultez nos <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/?utm_campaign=self&utm_source=banner#services\">services professionnels</a>."
@@ -627,6 +627,9 @@ msgstr "Ajouter des plugins"
 
 msgid "button.add_plugins"
 msgstr "Ajouter des plugins"
+
+msgid "button.apply_all_services"
+msgstr "Appliquer à tous les services"
 
 msgid "button.auto_refresh"
 msgstr "Actualisation automatique"
@@ -4381,6 +4384,12 @@ msgstr "Plugins qui doivent s'exécuter en premier pendant la phase ssl_certific
 msgid "general.settings.PLUGINS_ORDER_SSL_CERTIFICATE.label"
 msgstr "Ordre des plugins (ssl_certificate)"
 
+msgid "general.settings.PLUGINS_ORDER_SSL_CLIENT_HELLO.help"
+msgstr "Plugins qui doivent s’exécuter en premier pendant la phase ssl_client_hello (TLS ClientHello, une fois par négociation, pour chaque service et le serveur par défaut). Séparez les identifiants par des espaces ; les autres plugins s’exécutent ensuite dans leur ordre normal."
+
+msgid "general.settings.PLUGINS_ORDER_SSL_CLIENT_HELLO.label"
+msgstr "Ordre des plugins (ssl_client_hello)"
+
 msgid "general.settings.PLUGINS_ORDER_TIMER.help"
 msgstr "Plugins qui doivent s'exécuter en premier pendant la phase timer (minuteries en arrière-plan). Séparez les identifiants par des espaces ; les autres plugins s'exécutent quand même ensuite dans leur ordre normal."
 
@@ -4400,7 +4409,7 @@ msgid "general.settings.SEND_TIMEOUT.label"
 msgstr "Délai d'expiration d'envoi"
 
 msgid "general.settings.SERVER_NAME.help"
-msgstr "Liste des hôtes virtuels servis par bunkerweb. (séparés par des espaces)"
+msgstr "Liste des hôtes virtuels servis par bunkerweb. (séparés par des espaces) Un nom peut aussi être une adresse IPv4 ou une adresse IPv6 écrite sans délimiteurs, en minuscules et sous forme compressée (2001:db8::1, sans crochets)."
 
 msgid "general.settings.SERVER_NAME.label"
 msgstr "Nom de serveur"
@@ -4909,6 +4918,12 @@ msgstr "Impossible de vous connecter, veuillez réessayer"
 msgid "login.flash.invalid_username_password"
 msgstr "Nom d'utilisateur ou mot de passe invalide"
 
+msgid "login.flash.throttle_unavailable"
+msgstr "La connexion est temporairement indisponible, veuillez réessayer dans un instant."
+
+msgid "login.flash.too_many_failed_attempts"
+msgstr "Trop de tentatives échouées, réessayez dans %(minutes)s min."
+
 msgid "login.notice_password_changed"
 msgstr "Votre mot de passe a été modifié. Connectez-vous avec votre nouveau mot de passe."
 
@@ -5058,6 +5073,12 @@ msgstr "L'authentification à deux facteurs est activée mais aucun code de réc
 
 msgid "modal.body.add_plugin_dropzone"
 msgstr "Glissez-déposez votre archive de plugin ici ou cliquez pour sélectionner des fichiers."
+
+msgid "modal.body.apply_all_services"
+msgstr "Les paramètres globaux modifiés lors de cet enregistrement remplaceront les valeurs définies par chaque service ou son modèle. Les paramètres inchangés sont conservés."
+
+msgid "modal.body.apply_all_services_count"
+msgstr "Tous les services connus (%(count)s) susceptibles d’être mis à jour :"
 
 msgid "modal.body.ban_filtered_confirmation"
 msgstr "Bannir les adresses IP issues des %(count)s signalements correspondants ? Chaque cible en double ne sera traitée qu’une fois."
@@ -5250,6 +5271,9 @@ msgstr "Ajouter des bannissements"
 
 msgid "modal.title.add_plugins"
 msgstr "Ajouter des plugins"
+
+msgid "modal.title.apply_all_services"
+msgstr "Appliquer à tous les services ?"
 
 msgid "modal.title.confirm_conversion"
 msgstr "Confirmer la conversion"
@@ -6067,6 +6091,9 @@ msgstr "Ignorer les vérifications et forcer le téléchargement des plugins PRO
 msgid "pro.force_update.title"
 msgstr "Forcer la mise à jour"
 
+msgid "pro.free_trial_hint"
+msgstr "Commandez une offre, puis conservez « Free 30 Days Trial » comme mode de paiement lors de la validation de la commande."
+
 msgid "pro.key.title.activate"
 msgstr "Activer la clé"
 
@@ -6664,6 +6691,9 @@ msgstr "Ces requêtes ont dépassé le seuil d'activité suspecte et ont été r
 msgid "reports.bad_behavior_captured_at"
 msgstr "Capturé à"
 
+msgid "reports.bad_behavior_evidence_missing"
+msgstr "Les éléments justifiant le bannissement ne sont plus disponibles."
+
 msgid "reports.bad_behavior_ip"
 msgstr "Adresse IP"
 
@@ -6678,6 +6708,9 @@ msgstr "Requête"
 
 msgid "reports.bad_behavior_server"
 msgstr "Serveur"
+
+msgid "reports.bad_behavior_stored_events"
+msgstr "Événements stockés"
 
 msgid "reports.bad_behavior_total_requests"
 msgstr "Requêtes suspectes"
@@ -9966,6 +9999,9 @@ msgstr "Ping réussi"
 
 msgid "toast.ip_unbanned"
 msgstr "Adresse IP débannie avec succès !"
+
+msgid "tooltip.apply_all_services"
+msgstr "Applique uniquement les paramètres globaux modifiés lors de cet enregistrement à tous les services, en remplaçant les valeurs définies par un service ou son modèle."
 
 msgid "tooltip.auto_lets_encrypt"
 msgstr "Indique s'il faut demander automatiquement un certificat Let's Encrypt."

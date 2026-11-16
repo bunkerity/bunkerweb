@@ -212,13 +212,18 @@ def test_the_json_to_gettext_count_delta_is_only_plural_folding():
     # 3,703 adds the 14 `bans.kind.*`, `bans.crowdsec.*` and `bans.flash.unban_crowdsec_*` keys of the
     # CrowdSec lease unban on the bans page (W25-X1F).
     # 3,704 adds `setup.flash.hostname_empty`, the setup wizard's blank-hostname refusal (W26-U1).
-    # 4,113 adds the 416 keys of the 2026-10-23 design port (shell, components, page lanes, workflows
-    # editor) and folds 7 new plural pairs (`redirects.count`, `redirects.services_count`, `upstreams.count`,
+    # 4,113 includes 416 shell, component, page and workflow editor keys, folding 7 plural pairs
+    # (`redirects.count`, `redirects.services_count`, `upstreams.count`,
     # `upstreams.servers_count`, `upstreams.services_count`, `upstreams.members_copy`,
     # `resource_groups.plugins_count`): 4,130 JSON leaves minus 17 pairs. 4,149 adds the 36 workflows
-    # editor keys of the port's part 3 (rule menu, consequence badges, whole-sentence rule summaries,
-    # action settings titles, the overview attachment filter and services dialog).
-    assert len(_catalog("en")) == len(english) - len(pairs) == 4149
+    # editor keys (rule menu, consequence badges, whole-sentence rule summaries,
+    # action settings titles, the overview attachment filter and services dialog). 4,151 adds the 2
+    # `login.flash.*` keys of the login throttle (lock message, throttle unavailable); 4,153 adds the 2
+    # `general.settings.PLUGINS_ORDER_SSL_CLIENT_HELLO` keys (label, help).
+    # 4,155 adds the shared bad-behavior stored-event and unavailable-evidence keys.
+    # 4,160 adds the 5 `apply_all_services` keys (button, tooltip, modal title, body and count) of the global override confirmation.
+    # 4,161 adds `pro.free_trial_hint` for the trial checkout payment method.
+    assert len(_catalog("en")) == len(english) - len(pairs) == 4161
 
 
 @pytest.mark.parametrize("code", CODES)

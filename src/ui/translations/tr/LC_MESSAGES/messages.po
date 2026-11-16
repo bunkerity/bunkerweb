@@ -302,7 +302,7 @@ msgid "banner.link.here"
 msgstr "burada"
 
 msgid "banner.pro"
-msgstr "BunkerWeb'den en iyi şekilde yararlanmak için PRO sürümüne yükseltin. Daha fazla bilgi ve ücretsiz deneme <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/?utm_campaign=self&utm_source=banner#pro\">burada</a>."
+msgstr "BunkerWeb'den en iyi şekilde yararlanmak için PRO sürümüne yükseltin. 30 günlük ücretsiz denemenizi <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=banner\">burada</a> başlatın: bir plan sipariş edin, ardından ödeme aşamasında ödeme yöntemi olarak “Free 30 Days Trial” seçeneğini koruyun."
 
 msgid "banner.support"
 msgstr "BunkerWeb için premium destek veya özel danışmanlık mı gerekiyor? <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/?utm_campaign=self&utm_source=banner#services\">Profesyonel hizmetlerimize</a> göz atın."
@@ -627,6 +627,9 @@ msgstr "Eklenti ekle"
 
 msgid "button.add_plugins"
 msgstr "Eklenti Ekle"
+
+msgid "button.apply_all_services"
+msgstr "Tüm hizmetlere uygula"
 
 msgid "button.auto_refresh"
 msgstr "Otomatik Yenile"
@@ -4381,6 +4384,12 @@ msgstr "Bu site için ssl_certificate aşamasında (TLS sertifikası seçimi/ver
 msgid "general.settings.PLUGINS_ORDER_SSL_CERTIFICATE.label"
 msgstr "Eklenti Sırası (ssl_certificate)"
 
+msgid "general.settings.PLUGINS_ORDER_SSL_CLIENT_HELLO.help"
+msgstr "ssl_client_hello aşamasında ilk çalışması gereken eklentiler (TLS ClientHello, her el sıkışmada bir kez, her hizmet ve varsayılan sunucu için). Kimlikleri boşluklarla ayırın; kalan eklentiler daha sonra normal sıralarında çalışır."
+
+msgid "general.settings.PLUGINS_ORDER_SSL_CLIENT_HELLO.label"
+msgstr "Eklenti Sırası (ssl_client_hello)"
+
 msgid "general.settings.PLUGINS_ORDER_TIMER.help"
 msgstr "timer aşamasında (arka plan zamanlayıcıları) ilk önce çalışması gereken eklentiler. Kimlikleri boşluklarla ayırın; kalan eklentiler yine de normal sıralarında sonra çalışır."
 
@@ -4400,7 +4409,7 @@ msgid "general.settings.SEND_TIMEOUT.label"
 msgstr "Gönderme Zaman Aşımı"
 
 msgid "general.settings.SERVER_NAME.help"
-msgstr "bunkerweb tarafından sunulan sanal ana bilgisayarların listesi. (boşlukla ayrılmış)"
+msgstr "bunkerweb tarafından sunulan sanal ana bilgisayarların listesi. (boşlukla ayrılmış) Ad, bir IPv4 adresi veya çevreleyici işaret olmadan, küçük harflerle ve sıkıştırılmış biçimde yazılmış bir IPv6 adresi de olabilir (2001:db8::1, köşeli parantezsiz)."
 
 msgid "general.settings.SERVER_NAME.label"
 msgstr "Sunucu Adı"
@@ -4909,6 +4918,12 @@ msgstr "Giriş yapılamadı, lütfen tekrar deneyin"
 msgid "login.flash.invalid_username_password"
 msgstr "Geçersiz kullanıcı adı veya parola"
 
+msgid "login.flash.throttle_unavailable"
+msgstr "Oturum açma geçici olarak kullanılamıyor, lütfen kısa bir süre sonra tekrar deneyin."
+
+msgid "login.flash.too_many_failed_attempts"
+msgstr "Çok fazla başarısız deneme, %(minutes)s dakika sonra tekrar deneyin."
+
 msgid "login.notice_password_changed"
 msgstr "Parolanız değiştirildi. Yeni parolanızla giriş yapın."
 
@@ -5058,6 +5073,12 @@ msgstr "İki faktörlü kimlik doğrulama etkin ancak kullanılabilir kurtarma k
 
 msgid "modal.body.add_plugin_dropzone"
 msgstr "Eklenti arşivinizi buraya sürükleyip bırakın veya dosya seçmek için tıklayın."
+
+msgid "modal.body.apply_all_services"
+msgstr "Bu kayıtta değiştirilen genel ayarlar, her hizmetin veya şablonunun belirlediği değerlerin yerini alacak. Değiştirilmeyen ayarlar korunur."
+
+msgid "modal.body.apply_all_services_count"
+msgstr "Güncellenebilecek bilinen tüm hizmetler (%(count)s):"
 
 msgid "modal.body.ban_filtered_confirmation"
 msgstr "Eşleşen %(count)s rapordaki IP'ler yasaklansın mı? Yinelenen hedefler yalnızca bir kez engellenir."
@@ -5244,6 +5265,9 @@ msgstr "Yasaklama ekle"
 
 msgid "modal.title.add_plugins"
 msgstr "Eklenti Ekle"
+
+msgid "modal.title.apply_all_services"
+msgstr "Tüm hizmetlere uygulansın mı?"
 
 msgid "modal.title.confirm_conversion"
 msgstr "Dönüştürmeyi Onayla"
@@ -6061,6 +6085,9 @@ msgstr "Denetimleri atlayıp PRO eklentilerini indirmeye zorlar. Bu mümkün de�
 msgid "pro.force_update.title"
 msgstr "Güncellemeyi zorla"
 
+msgid "pro.free_trial_hint"
+msgstr "Bir plan sipariş edin, ardından ödeme aşamasında ödeme yöntemi olarak “Free 30 Days Trial” seçeneğini koruyun."
+
 msgid "pro.key.title.activate"
 msgstr "Anahtarı Etkinleştir"
 
@@ -6656,6 +6683,9 @@ msgstr "Bu istekler, kötü davranış eşiğini aştı ve bir araya toplandı."
 msgid "reports.bad_behavior_captured_at"
 msgstr "Kaydedildi"
 
+msgid "reports.bad_behavior_evidence_missing"
+msgstr "Yasaklama kanıtları artık mevcut değil."
+
 msgid "reports.bad_behavior_ip"
 msgstr "IP adresi"
 
@@ -6670,6 +6700,9 @@ msgstr "İstek"
 
 msgid "reports.bad_behavior_server"
 msgstr "Sunucu"
+
+msgid "reports.bad_behavior_stored_events"
+msgstr "Saklanan olaylar"
 
 msgid "reports.bad_behavior_total_requests"
 msgstr "Şüpheli istekler"
@@ -9953,6 +9986,9 @@ msgstr "Ping başarılı"
 
 msgid "toast.ip_unbanned"
 msgstr "IP adresinin yasağı başarıyla kaldırıldı!"
+
+msgid "tooltip.apply_all_services"
+msgstr "Yalnızca bu kayıtta değiştirilen genel ayarları tüm hizmetlere uygular; hizmet veya şablonu tarafından belirlenen değerleri değiştirir."
 
 msgid "tooltip.auto_lets_encrypt"
 msgstr "Otomatik olarak Let's Encrypt sertifikası isteyip istemediği."

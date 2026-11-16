@@ -118,7 +118,7 @@
     "link": {
       "here": "tutaj"
     },
-    "pro": "Wykorzystaj w pełni możliwości BunkerWeb, przechodząc na wersję PRO. Więcej informacji i bezpłatna wersja próbna <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/?utm_campaign=self&utm_source=banner#pro\">tutaj</a>.",
+    "pro": "Wykorzystaj w pełni możliwości BunkerWeb, przechodząc na wersję PRO. Rozpocznij 30-dniowy bezpłatny okres próbny <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=banner\">tutaj</a>: zamów plan, a następnie pozostaw „Free 30 Days Trial” jako metodę płatności podczas finalizacji zamówienia.",
     "support": "Potrzebujesz wsparcia premium lub dostosowanego doradztwa dla BunkerWeb? Sprawdź nasze <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/?utm_campaign=self&utm_source=banner#services\">profesjonalne usługi</a>."
   },
   "bans": {
@@ -262,6 +262,7 @@
     "add_ban_plural": "Dodaj blokadę (blokady)",
     "add_plugin_plural": "Dodaj wtyczkę (wtyczki)",
     "add_plugins": "Dodaj wtyczki",
+    "apply_all_services": "Zastosuj do wszystkich usług",
     "auto_refresh": "Automatyczne odświeżanie",
     "ban": "Zablokuj",
     "ban_all_filtered": "Zablokuj wszystkie pasujące raporty",
@@ -1471,7 +1472,9 @@
     "title": "Zaloguj się",
     "flash": {
       "invalid_username_password": "Nieprawidłowa nazwa użytkownika lub hasło",
-      "couldn_t_log_please_try_again": "Nie udało się zalogować, spróbuj ponownie"
+      "couldn_t_log_please_try_again": "Nie udało się zalogować, spróbuj ponownie",
+      "too_many_failed_attempts": "Zbyt wiele nieudanych prób, spróbuj ponownie za {{minutes}} min.",
+      "throttle_unavailable": "Logowanie jest tymczasowo niedostępne, spróbuj ponownie za chwilę."
     }
   },
   "logs": {
@@ -1517,6 +1520,8 @@
   "modal": {
     "body": {
       "add_plugin_dropzone": "Przeciągnij i upuść tutaj archiwum wtyczki lub kliknij, aby wybrać pliki.",
+      "apply_all_services": "Ustawienia globalne zmienione podczas tego zapisu zastąpią wartości ustawione przez każdą usługę lub jej szablon. Niezmienione ustawienia zostaną zachowane.",
+      "apply_all_services_count": "Wszystkie znane usługi ({{count}}), które mogą zostać zaktualizowane:",
       "confirm_cache_deletion_alert": "Czy na pewno chcesz usunąć wybrany plik pamięci podręcznej?",
       "confirm_cache_deletion_alert_plural": "Czy na pewno chcesz usunąć wybrane pliki pamięci podręcznej?",
       "confirm_configs_conversion": "Czy na pewno przekształcić wybrane konfiguracje niestandardowe?",
@@ -1587,6 +1592,7 @@
     "title": {
       "add_bans": "Dodaj blokadę (blokady)",
       "add_plugins": "Dodaj wtyczki",
+      "apply_all_services": "Zastosować do wszystkich usług?",
       "confirm_conversion": "Potwierdź konwersję",
       "confirm_deletion": "Potwierdź usunięcie",
       "confirm_unban": "Potwierdź odblokowanie",
@@ -1961,7 +1967,8 @@
       "title": "Bezpłatny okres próbny",
       "description": "Wypróbuj <span class=\"text-primary\">BunkerWeb PRO</span> bezpłatnie przez <strong>30 dni</strong>.",
       "cta": "Rozpocznij bezpłatny okres próbny"
-    }
+    },
+    "free_trial_hint": "Zamów plan, a następnie pozostaw „Free 30 Days Trial” jako metodę płatności podczas finalizacji zamówienia."
   },
   "profile": {
     "2fa": {
@@ -2432,7 +2439,7 @@
       },
       "SERVER_NAME": {
         "label": "Nazwa serwera",
-        "help": "Lista wirtualnych hostów obsługiwanych przez bunkerweb. (oddzielona spacją)"
+        "help": "Lista wirtualnych hostów obsługiwanych przez bunkerweb. (oddzielona spacją) Nazwa może być również adresem IPv4 lub adresem IPv6 zapisanym bez ograniczników, małymi literami i w postaci skompresowanej (2001:db8::1, bez nawiasów kwadratowych)."
       },
       "WORKER_PROCESSES": {
         "label": "Procesy robocze",
@@ -2650,6 +2657,10 @@
         "label": "Kolejność wtyczek (ssl_certificate)",
         "help": "Wtyczki, które powinny uruchamiać się jako pierwsze w fazie ssl_certificate tej usługi (wybór/wystawianie certyfikatu TLS). Oddziel identyfikatory spacjami; pozostałe wtyczki nadal uruchamiają się później w swojej normalnej kolejności."
       },
+      "PLUGINS_ORDER_SSL_CLIENT_HELLO": {
+        "label": "Kolejność wtyczek (ssl_client_hello)",
+        "help": "Wtyczki, które mają być uruchamiane jako pierwsze w fazie ssl_client_hello (TLS ClientHello, raz na uzgodnienie połączenia, dla każdej usługi i serwera domyślnego). Oddziel identyfikatory spacjami; pozostałe wtyczki uruchomią się później w zwykłej kolejności."
+      },
       "PLUGINS_ORDER_HEADER": {
         "label": "Kolejność wtyczek (header)",
         "help": "Wtyczki, które powinny uruchamiać się jako pierwsze w fazie header tej usługi (filtrowanie nagłówków odpowiedzi). Oddziel identyfikatory spacjami; pozostałe wtyczki nadal uruchamiają się później w swojej normalnej kolejności."
@@ -2820,7 +2831,9 @@
       "show_top": "Najczęstsi sprawcy",
       "show_latest": "Ostatni sprawcy",
       "show_bottom": "Najrzadsi sprawcy"
-    }
+    },
+    "bad_behavior_stored_events": "Zapisane zdarzenia",
+    "bad_behavior_evidence_missing": "Dowody uzasadniające bana nie są już dostępne."
   },
   "scope": {
     "all_services": "Wszystkie usługi",
@@ -3824,6 +3837,7 @@
     "ip_unbanned": "IP został pomyślnie odblokowany!"
   },
   "tooltip": {
+    "apply_all_services": "Stosuje do wszystkich usług tylko ustawienia globalne zmienione podczas tego zapisu, zastępując wartości ustawione przez usługę lub jej szablon.",
     "auto_lets_encrypt": "Czy automatycznie żądać certyfikatu Let's Encrypt.",
     "button": {
       "ban_ip": "Zablokuj ten adres IP",

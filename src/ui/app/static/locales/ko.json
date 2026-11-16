@@ -118,7 +118,7 @@
     "link": {
       "here": "여기"
     },
-    "pro": "PRO 버전으로 업그레이드하여 BunkerWeb의 모든 기능을 활용해 보세요. 자세한 정보와 무료 체험은 <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/?utm_campaign=self&utm_source=banner#pro\">여기</a>를 클릭하세요.",
+    "pro": "PRO 버전으로 업그레이드하여 BunkerWeb의 모든 기능을 활용해 보세요. <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=banner\">여기</a>에서 30일 무료 체험을 시작하세요. 요금제를 주문한 다음, 결제 단계에서 결제 수단을 “Free 30 Days Trial”로 유지하세요.",
     "support": "BunkerWeb에 대한 프리미엄 기술 지원이나 맞춤형 컨설팅이 필요하신가요? <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/?utm_campaign=self&utm_source=banner#services\">전문 서비스</a>를 확인해 보세요."
   },
   "bans": {
@@ -262,6 +262,7 @@
     "add_ban_plural": "차단 추가",
     "add_plugin_plural": "플러그인 추가",
     "add_plugins": "플러그인 추가",
+    "apply_all_services": "모든 서비스에 적용",
     "auto_refresh": "자동 새로고침",
     "ban": "차단",
     "ban_all_filtered": "일치하는 모든 보고서 차단",
@@ -1471,7 +1472,9 @@
     "title": "로그인",
     "flash": {
       "invalid_username_password": "잘못된 사용자 이름 또는 비밀번호입니다",
-      "couldn_t_log_please_try_again": "로그인하지 못했습니다. 다시 시도해 주세요"
+      "couldn_t_log_please_try_again": "로그인하지 못했습니다. 다시 시도해 주세요",
+      "too_many_failed_attempts": "실패한 시도가 너무 많습니다. {{minutes}}분 후에 다시 시도하세요.",
+      "throttle_unavailable": "일시적으로 로그인할 수 없습니다. 잠시 후 다시 시도하세요."
     }
   },
   "logs": {
@@ -1517,6 +1520,8 @@
   "modal": {
     "body": {
       "add_plugin_dropzone": "플러그인 압축 파일을 여기에 드래그하거나 클릭하여 파일을 선택하세요.",
+      "apply_all_services": "이번 저장에서 변경한 전역 설정이 각 서비스 또는 해당 템플릿에서 설정한 값을 대체합니다. 변경하지 않은 설정은 유지됩니다.",
+      "apply_all_services_count": "업데이트될 수 있는 알려진 모든 서비스 ({{count}}):",
       "confirm_cache_deletion_alert": "선택한 캐시 파일을 삭제하시겠습니까?",
       "confirm_cache_deletion_alert_plural": "선택한 캐시 파일들을 삭제하시겠습니까?",
       "confirm_configs_conversion": "선택한 사용자 정의 설정을 전환하시겠습니까?",
@@ -1587,6 +1592,7 @@
     "title": {
       "add_bans": "차단 추가",
       "add_plugins": "플러그인 추가",
+      "apply_all_services": "모든 서비스에 적용하시겠습니까?",
       "confirm_conversion": "전환 확인",
       "confirm_deletion": "삭제 확인",
       "confirm_unban": "차단 해제 확인",
@@ -1961,7 +1967,8 @@
       "title": "무료 체험",
       "description": "<span class=\"text-primary\">BunkerWeb PRO</span>를 <strong>30일</strong>간 무료로 체험해 보세요.",
       "cta": "무료 체험 시작"
-    }
+    },
+    "free_trial_hint": "요금제를 주문한 다음, 결제 단계에서 결제 수단을 “Free 30 Days Trial”로 유지하세요."
   },
   "profile": {
     "2fa": {
@@ -2432,7 +2439,7 @@
       },
       "SERVER_NAME": {
         "label": "서버 이름",
-        "help": "bunkerweb이 제공하는 가상 호스트 목록입니다. (공백으로 구분)"
+        "help": "bunkerweb이 제공하는 가상 호스트 목록입니다. (공백으로 구분) 이름은 IPv4 주소 또는 구분 기호 없이 소문자와 압축 형식으로 작성한 IPv6 주소일 수도 있습니다 (2001:db8::1, 대괄호 없음)."
       },
       "WORKER_PROCESSES": {
         "label": "워커 프로세스",
@@ -2650,6 +2657,10 @@
         "label": "플러그인 순서 (ssl_certificate)",
         "help": "이 사이트의 ssl_certificate 단계(TLS 인증서 선택/발급)에서 먼저 실행되어야 하는 플러그인입니다. ID를 공백으로 구분하세요. 나머지 플러그인은 이후 정상적인 순서로 계속 실행됩니다."
       },
+      "PLUGINS_ORDER_SSL_CLIENT_HELLO": {
+        "label": "플러그인 순서 (ssl_client_hello)",
+        "help": "ssl_client_hello 단계에서 먼저 실행할 플러그인입니다(TLS ClientHello, 모든 서비스와 기본 서버에서 핸드셰이크당 한 번). ID는 공백으로 구분하세요. 나머지 플러그인은 이후 정상 순서로 실행됩니다."
+      },
       "PLUGINS_ORDER_HEADER": {
         "label": "플러그인 순서 (header)",
         "help": "이 사이트의 header 단계(응답 헤더 필터링)에서 먼저 실행되어야 하는 플러그인입니다. ID를 공백으로 구분하세요. 나머지 플러그인은 이후 정상적인 순서로 계속 실행됩니다."
@@ -2820,7 +2831,9 @@
       "show_top": "최다 위반자",
       "show_latest": "최근 위반자",
       "show_bottom": "최소 위반자"
-    }
+    },
+    "bad_behavior_stored_events": "저장된 이벤트",
+    "bad_behavior_evidence_missing": "차단 근거를 더 이상 사용할 수 없습니다."
   },
   "scope": {
     "all_services": "모든 서비스",
@@ -3824,6 +3837,7 @@
     "ip_unbanned": "IP 주소 차단이 성공적으로 해제되었습니다!"
   },
   "tooltip": {
+    "apply_all_services": "이번 저장에서 변경한 전역 설정만 모든 서비스에 적용하며, 서비스 또는 해당 템플릿에서 설정한 값을 대체합니다.",
     "auto_lets_encrypt": "Let's Encrypt 인증서를 자동으로 요청할지 여부입니다.",
     "button": {
       "ban_ip": "이 IP 주소 차단",

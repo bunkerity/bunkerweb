@@ -118,7 +118,7 @@
     "link": {
       "here": "burada"
     },
-    "pro": "BunkerWeb'den en iyi şekilde yararlanmak için PRO sürümüne yükseltin. Daha fazla bilgi ve ücretsiz deneme <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/?utm_campaign=self&utm_source=banner#pro\">burada</a>.",
+    "pro": "BunkerWeb'den en iyi şekilde yararlanmak için PRO sürümüne yükseltin. 30 günlük ücretsiz denemenizi <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=banner\">burada</a> başlatın: bir plan sipariş edin, ardından ödeme aşamasında ödeme yöntemi olarak “Free 30 Days Trial” seçeneğini koruyun.",
     "support": "BunkerWeb için premium destek veya özel danışmanlık mı gerekiyor? <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/?utm_campaign=self&utm_source=banner#services\">Profesyonel hizmetlerimize</a> göz atın."
   },
   "bans": {
@@ -262,6 +262,7 @@
     "add_ban_plural": "Yasaklama ekle",
     "add_plugin_plural": "Eklenti ekle",
     "add_plugins": "Eklenti Ekle",
+    "apply_all_services": "Tüm hizmetlere uygula",
     "auto_refresh": "Otomatik Yenile",
     "ban": "Yasakla",
     "ban_all_filtered": "Eşleşen tüm raporları yasakla",
@@ -1471,7 +1472,9 @@
     "title": "Giriş Yap",
     "flash": {
       "invalid_username_password": "Geçersiz kullanıcı adı veya parola",
-      "couldn_t_log_please_try_again": "Giriş yapılamadı, lütfen tekrar deneyin"
+      "couldn_t_log_please_try_again": "Giriş yapılamadı, lütfen tekrar deneyin",
+      "too_many_failed_attempts": "Çok fazla başarısız deneme, {{minutes}} dakika sonra tekrar deneyin.",
+      "throttle_unavailable": "Oturum açma geçici olarak kullanılamıyor, lütfen kısa bir süre sonra tekrar deneyin."
     }
   },
   "logs": {
@@ -1517,6 +1520,8 @@
   "modal": {
     "body": {
       "add_plugin_dropzone": "Eklenti arşivinizi buraya sürükleyip bırakın veya dosya seçmek için tıklayın.",
+      "apply_all_services": "Bu kayıtta değiştirilen genel ayarlar, her hizmetin veya şablonunun belirlediği değerlerin yerini alacak. Değiştirilmeyen ayarlar korunur.",
+      "apply_all_services_count": "Güncellenebilecek bilinen tüm hizmetler ({{count}}):",
       "confirm_cache_deletion_alert": "Seçili önbellek dosyasını silmek istediğinizden emin misiniz?",
       "confirm_cache_deletion_alert_plural": "Seçili önbellek dosyalarını silmek istediğinizden emin misiniz?",
       "confirm_configs_conversion": "Seçili özel yapılandırmaları dönüştürmek istediğinizden emin misiniz?",
@@ -1587,6 +1592,7 @@
     "title": {
       "add_bans": "Yasaklama ekle",
       "add_plugins": "Eklenti Ekle",
+      "apply_all_services": "Tüm hizmetlere uygulansın mı?",
       "confirm_conversion": "Dönüştürmeyi Onayla",
       "confirm_deletion": "Silme İşlemini Onayla",
       "confirm_unban": "Yasağı Kaldırmayı Onayla",
@@ -1961,7 +1967,8 @@
       "title": "Ücretsiz Deneme",
       "description": "<span class=\"text-primary\">BunkerWeb PRO</span>'yu <strong>30 gün</strong> boyunca ücretsiz deneyin.",
       "cta": "Ücretsiz Denemeyi Başlat"
-    }
+    },
+    "free_trial_hint": "Bir plan sipariş edin, ardından ödeme aşamasında ödeme yöntemi olarak “Free 30 Days Trial” seçeneğini koruyun."
   },
   "profile": {
     "2fa": {
@@ -2432,7 +2439,7 @@
       },
       "SERVER_NAME": {
         "label": "Sunucu Adı",
-        "help": "bunkerweb tarafından sunulan sanal ana bilgisayarların listesi. (boşlukla ayrılmış)"
+        "help": "bunkerweb tarafından sunulan sanal ana bilgisayarların listesi. (boşlukla ayrılmış) Ad, bir IPv4 adresi veya çevreleyici işaret olmadan, küçük harflerle ve sıkıştırılmış biçimde yazılmış bir IPv6 adresi de olabilir (2001:db8::1, köşeli parantezsiz)."
       },
       "WORKER_PROCESSES": {
         "label": "İşçi Süreçleri",
@@ -2650,6 +2657,10 @@
         "label": "Eklenti Sırası (ssl_certificate)",
         "help": "Bu site için ssl_certificate aşamasında (TLS sertifikası seçimi/verilmesi) ilk önce çalışması gereken eklentiler. Kimlikleri boşluklarla ayırın; kalan eklentiler yine de normal sıralarında sonra çalışır."
       },
+      "PLUGINS_ORDER_SSL_CLIENT_HELLO": {
+        "label": "Eklenti Sırası (ssl_client_hello)",
+        "help": "ssl_client_hello aşamasında ilk çalışması gereken eklentiler (TLS ClientHello, her el sıkışmada bir kez, her hizmet ve varsayılan sunucu için). Kimlikleri boşluklarla ayırın; kalan eklentiler daha sonra normal sıralarında çalışır."
+      },
       "PLUGINS_ORDER_HEADER": {
         "label": "Eklenti Sırası (header)",
         "help": "Bu site için header aşamasında (yanıt başlığı filtreleme) ilk önce çalışması gereken eklentiler. Kimlikleri boşluklarla ayırın; kalan eklentiler yine de normal sıralarında sonra çalışır."
@@ -2820,7 +2831,9 @@
       "show_top": "En sık ihlal edenler",
       "show_latest": "Son ihlal edenler",
       "show_bottom": "En az ihlal edenler"
-    }
+    },
+    "bad_behavior_stored_events": "Saklanan olaylar",
+    "bad_behavior_evidence_missing": "Yasaklama kanıtları artık mevcut değil."
   },
   "scope": {
     "all_services": "Tüm Servisler",
@@ -3824,6 +3837,7 @@
     "ip_unbanned": "IP adresinin yasağı başarıyla kaldırıldı!"
   },
   "tooltip": {
+    "apply_all_services": "Yalnızca bu kayıtta değiştirilen genel ayarları tüm hizmetlere uygular; hizmet veya şablonu tarafından belirlenen değerleri değiştirir.",
     "auto_lets_encrypt": "Otomatik olarak Let's Encrypt sertifikası isteyip istemediği.",
     "button": {
       "ban_ip": "Bu IP adresini yasakla",

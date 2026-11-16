@@ -302,7 +302,7 @@ msgid "banner.link.here"
 msgstr "هنا"
 
 msgid "banner.pro"
-msgstr "احصل على أقصى استفادة من BunkerWeb بالترقية إلى إصدار PRO. مزيد من المعلومات وتجربة مجانية <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/?utm_campaign=self&utm_source=banner#pro\">هنا</a>."
+msgstr "احصل على أقصى استفادة من BunkerWeb بالترقية إلى إصدار PRO. ابدأ تجربتك المجانية لمدة 30 يومًا <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=banner\">هنا</a>: اطلب خطة، ثم أبقِ «Free 30 Days Trial» طريقة الدفع عند إتمام الطلب."
 
 msgid "banner.support"
 msgstr "هل تحتاج إلى دعم متميز أو استشارات مخصصة لـ BunkerWeb؟ تحقق من <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/?utm_campaign=self&utm_source=banner#services\">خدماتنا الاحترافية</a>."
@@ -627,6 +627,9 @@ msgstr "إضافة إضافات"
 
 msgid "button.add_plugins"
 msgstr "إضافة الإضافات"
+
+msgid "button.apply_all_services"
+msgstr "تطبيق على جميع الخدمات"
 
 msgid "button.auto_refresh"
 msgstr "تحديث تلقائي"
@@ -4381,6 +4384,12 @@ msgstr "الإضافات التي يجب أن تعمل أولًا أثناء ط�
 msgid "general.settings.PLUGINS_ORDER_SSL_CERTIFICATE.label"
 msgstr "ترتيب الإضافات (ssl_certificate)"
 
+msgid "general.settings.PLUGINS_ORDER_SSL_CLIENT_HELLO.help"
+msgstr "الإضافات التي يجب أن تعمل أولًا أثناء طور ssl_client_hello (TLS ClientHello، مرة واحدة لكل مصافحة، لكل خدمة وللخادم الافتراضي). افصل المعرّفات بمسافات؛ تعمل الإضافات المتبقية لاحقًا حسب ترتيبها الطبيعي."
+
+msgid "general.settings.PLUGINS_ORDER_SSL_CLIENT_HELLO.label"
+msgstr "ترتيب الإضافات (ssl_client_hello)"
+
 msgid "general.settings.PLUGINS_ORDER_TIMER.help"
 msgstr "الإضافات التي يجب أن تعمل أولًا أثناء طور timer (المؤقتات في الخلفية). افصل المعرّفات بمسافات؛ تعمل الإضافات المتبقية لاحقًا حسب ترتيبها الطبيعي."
 
@@ -4400,7 +4409,7 @@ msgid "general.settings.SEND_TIMEOUT.label"
 msgstr "مهلة الإرسال"
 
 msgid "general.settings.SERVER_NAME.help"
-msgstr "قائمة المضيفات الافتراضية التي يخدمها BunkerWeb. (مفصولة بمسافة)"
+msgstr "قائمة المضيفات الافتراضية التي يخدمها BunkerWeb. (مفصولة بمسافة) يمكن أن يكون الاسم أيضًا عنوان IPv4 أو عنوان IPv6 مكتوبًا دون محددات تحيط به وبأحرف صغيرة وبالصيغة المضغوطة (2001:db8::1، دون أقواس مربعة)."
 
 msgid "general.settings.SERVER_NAME.label"
 msgstr "اسم الخادم"
@@ -4909,6 +4918,12 @@ msgstr "تعذّر تسجيل دخولك، يرجى المحاولة مرة أخ
 msgid "login.flash.invalid_username_password"
 msgstr "اسم المستخدم أو كلمة المرور غير صحيحة"
 
+msgid "login.flash.throttle_unavailable"
+msgstr "تسجيل الدخول غير متاح مؤقتًا، يرجى المحاولة مجددًا بعد قليل."
+
+msgid "login.flash.too_many_failed_attempts"
+msgstr "محاولات فاشلة كثيرة جدًا، حاول مجددًا بعد %(minutes)s دقيقة."
+
 msgid "login.notice_password_changed"
 msgstr "تم تغيير كلمة المرور الخاصة بك. سجّل الدخول باستخدام كلمة المرور الجديدة."
 
@@ -5058,6 +5073,12 @@ msgstr "المصادقة الثنائية مفعّلة ولكن لا توجد ر
 
 msgid "modal.body.add_plugin_dropzone"
 msgstr "اسحب وأفلت أرشيف الإضافة الخاص بك هنا أو انقر لتحديد الملفات."
+
+msgid "modal.body.apply_all_services"
+msgstr "ستحل الإعدادات العامة التي تغيّرت في عملية الحفظ هذه محل القيم التي ضبطتها كل خدمة أو قالبها. تُحفظ الإعدادات التي لم تتغيّر."
+
+msgid "modal.body.apply_all_services_count"
+msgstr "جميع الخدمات المعروفة (%(count)s) التي قد تُحدّث:"
 
 msgid "modal.body.ban_filtered_confirmation"
 msgstr "هل تريد حظر عناوين IP من كل التقارير المطابقة وعددها %(count)s؟ ستُطبق الأهداف المكررة مرة واحدة."
@@ -5274,6 +5295,9 @@ msgstr "إضافة عمليات حظر"
 
 msgid "modal.title.add_plugins"
 msgstr "إضافة الإضافات"
+
+msgid "modal.title.apply_all_services"
+msgstr "تطبيق على جميع الخدمات؟"
 
 msgid "modal.title.confirm_conversion"
 msgstr "تأكيد التحويل"
@@ -6091,6 +6115,9 @@ msgstr "تجاوز عمليات التحقق وفرض تنزيل إضافات PR
 msgid "pro.force_update.title"
 msgstr "فرض التحديث"
 
+msgid "pro.free_trial_hint"
+msgstr "اطلب خطة، ثم أبقِ «Free 30 Days Trial» طريقة الدفع عند إتمام الطلب."
+
 msgid "pro.key.title.activate"
 msgstr "تفعيل المفتاح"
 
@@ -6696,6 +6723,9 @@ msgstr "تم تجاوز هذه الطلبات الحد المسموح به من 
 msgid "reports.bad_behavior_captured_at"
 msgstr "تم التقاط في"
 
+msgid "reports.bad_behavior_evidence_missing"
+msgstr "لم تعد أدلة الحظر متاحة."
+
 msgid "reports.bad_behavior_ip"
 msgstr "عنوان IP"
 
@@ -6710,6 +6740,9 @@ msgstr "طلب"
 
 msgid "reports.bad_behavior_server"
 msgstr "الخادم"
+
+msgid "reports.bad_behavior_stored_events"
+msgstr "الأحداث المخزّنة"
 
 msgid "reports.bad_behavior_total_requests"
 msgstr "طلبات مشبوهة"
@@ -10018,6 +10051,9 @@ msgstr "نجح اختبار الاتصال"
 
 msgid "toast.ip_unbanned"
 msgstr "تم رفع الحظر عن عنوان IP بنجاح!"
+
+msgid "tooltip.apply_all_services"
+msgstr "يطبّق فقط الإعدادات العامة التي تغيّرت في عملية الحفظ هذه على جميع الخدمات، مستبدلًا القيم التي ضبطتها الخدمة أو قالبها."
 
 msgid "tooltip.auto_lets_encrypt"
 msgstr "هل يجب طلب شهادة Let's Encrypt تلقائيًا."

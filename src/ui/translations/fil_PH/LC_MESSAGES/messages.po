@@ -302,7 +302,7 @@ msgid "banner.link.here"
 msgstr "dito"
 
 msgid "banner.pro"
-msgstr "Masulit ang BunkerWeb sa pamamagitan ng pag-upgrade sa PRO na bersyon. Karagdagang impormasyon at libreng pagsubok <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/?utm_campaign=self&utm_source=banner#pro\">dito</a>."
+msgstr "Masulit ang BunkerWeb sa pamamagitan ng pag-upgrade sa PRO na bersyon. Simulan ang iyong 30-araw na libreng pagsubok <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=banner\">dito</a>: umorder ng plano, pagkatapos ay panatilihin ang “Free 30 Days Trial” bilang paraan ng pagbabayad sa checkout."
 
 msgid "banner.support"
 msgstr "Kailangan ng premium na suporta o pasadyang konsultasyon para sa BunkerWeb? Tingnan ang aming <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/?utm_campaign=self&utm_source=banner#services\">mga propesyonal na serbisyo</a>."
@@ -627,6 +627,9 @@ msgstr "Magdagdag ng plugin"
 
 msgid "button.add_plugins"
 msgstr "Magdagdag ng Mga Plugin"
+
+msgid "button.apply_all_services"
+msgstr "Ilapat sa lahat ng serbisyo"
 
 msgid "button.auto_refresh"
 msgstr "Awtomatikong I-refresh"
@@ -4381,6 +4384,12 @@ msgstr "Mga plugin na dapat unang tumakbo sa ssl_certificate phase para sa site 
 msgid "general.settings.PLUGINS_ORDER_SSL_CERTIFICATE.label"
 msgstr "Plugin Order (ssl_certificate)"
 
+msgid "general.settings.PLUGINS_ORDER_SSL_CLIENT_HELLO.help"
+msgstr "Mga plugin na dapat unang tumakbo sa yugto ng ssl_client_hello (TLS ClientHello, isang beses bawat handshake, para sa bawat serbisyo at sa default na server). Paghiwalayin ang mga ID ng espasyo; tatakbo pa rin pagkatapos ang natitirang mga plugin sa kanilang normal na pagkakasunod-sunod."
+
+msgid "general.settings.PLUGINS_ORDER_SSL_CLIENT_HELLO.label"
+msgstr "Pagkakasunod-sunod ng mga plugin (ssl_client_hello)"
+
 msgid "general.settings.PLUGINS_ORDER_TIMER.help"
 msgstr "Mga plugin na dapat unang tumakbo sa timer phase (mga background timer). Paghiwalayin ang mga ID ng espasyo; ang natitirang mga plugin ay tumatakbo pa rin pagkatapos sa kanilang normal na pagkakasunod-sunod."
 
@@ -4400,7 +4409,7 @@ msgid "general.settings.SEND_TIMEOUT.label"
 msgstr "Send Timeout"
 
 msgid "general.settings.SERVER_NAME.help"
-msgstr "Listahan ng mga virtual host na sinisilbihan ng bunkerweb. (pinaghihiwalay ng espasyo)"
+msgstr "Listahan ng mga virtual host na sinisilbihan ng bunkerweb. (pinaghihiwalay ng espasyo) Ang pangalan ay maaari ring isang IPv4 address o isang IPv6 address na nakasulat nang walang pananda sa magkabilang dulo, sa maliliit na titik at pinaikling anyo (2001:db8::1, walang square bracket)."
 
 msgid "general.settings.SERVER_NAME.label"
 msgstr "Pangalan ng Server"
@@ -4909,6 +4918,12 @@ msgstr "Hindi ka na-log in, subukan muli"
 msgid "login.flash.invalid_username_password"
 msgstr "Hindi wastong username o password"
 
+msgid "login.flash.throttle_unavailable"
+msgstr "Pansamantalang hindi magagamit ang pag-sign in, pakisubukang muli sa ilang sandali."
+
+msgid "login.flash.too_many_failed_attempts"
+msgstr "Masyadong maraming nabigong pagtatangka, subukang muli pagkalipas ng %(minutes)s minuto."
+
 msgid "login.notice_password_changed"
 msgstr "Nabago na ang iyong password. Mag-log in gamit ang bagong password."
 
@@ -5058,6 +5073,12 @@ msgstr "Naka-enable ang two-factor authentication ngunit walang available na rec
 
 msgid "modal.body.add_plugin_dropzone"
 msgstr "I-drag at i-drop ang iyong plugin archive dito o mag-click upang pumili ng mga file."
+
+msgid "modal.body.apply_all_services"
+msgstr "Papalitan ng mga pandaigdigang setting na binago sa pag-save na ito ang mga halagang itinakda ng bawat serbisyo o ng template nito. Pananatilihin ang mga setting na hindi binago."
+
+msgid "modal.body.apply_all_services_count"
+msgstr "Lahat ng kilalang serbisyo (%(count)s) na maaaring ma-update:"
 
 msgid "modal.body.ban_filtered_confirmation"
 msgstr "I-ban ang mga IP mula sa lahat ng %(count)s tumutugmang report? Isang beses lang ilalapat ang mga dobleng target."
@@ -5250,6 +5271,9 @@ msgstr "Magdagdag ng ban"
 
 msgid "modal.title.add_plugins"
 msgstr "Magdagdag ng Mga Plugin"
+
+msgid "modal.title.apply_all_services"
+msgstr "Ilapat sa lahat ng serbisyo?"
 
 msgid "modal.title.confirm_conversion"
 msgstr "Kumpirmahin ang Conversion"
@@ -6067,6 +6091,9 @@ msgstr "Laktawan ang mga pagsusuri at pilitin ang pag-download ng mga PRO plugin
 msgid "pro.force_update.title"
 msgstr "Pilitin ang pag-update"
 
+msgid "pro.free_trial_hint"
+msgstr "Umorder ng plano, pagkatapos ay panatilihin ang “Free 30 Days Trial” bilang paraan ng pagbabayad sa checkout."
+
 msgid "pro.key.title.activate"
 msgstr "I-activate ang Key"
 
@@ -6664,6 +6691,9 @@ msgstr "Ang mga kahilingang ito ay lumampas sa limitasyon ng hindi kanais-nais n
 msgid "reports.bad_behavior_captured_at"
 msgstr "Nakuha sa"
 
+msgid "reports.bad_behavior_evidence_missing"
+msgstr "Hindi na available ang ebidensya ng ban."
+
 msgid "reports.bad_behavior_ip"
 msgstr "Address ng IP"
 
@@ -6678,6 +6708,9 @@ msgstr "Kahilingan"
 
 msgid "reports.bad_behavior_server"
 msgstr "Server"
+
+msgid "reports.bad_behavior_stored_events"
+msgstr "Mga nakaimbak na event"
 
 msgid "reports.bad_behavior_total_requests"
 msgstr "Mga kahilingang kahina-hinala"
@@ -9966,6 +9999,9 @@ msgstr "Matagumpay ang ping"
 
 msgid "toast.ip_unbanned"
 msgstr "Matagumpay na na-unban ang IP address!"
+
+msgid "tooltip.apply_all_services"
+msgstr "Inilalapat sa lahat ng serbisyo ang mga pandaigdigang setting lamang na binago sa pag-save na ito, at pinapalitan ang mga halagang itinakda ng serbisyo o ng template nito."
 
 msgid "tooltip.auto_lets_encrypt"
 msgstr "Kung awtomatikong hihilingin ang isang Let's Encrypt certificate."

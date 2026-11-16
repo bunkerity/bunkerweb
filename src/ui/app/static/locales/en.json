@@ -118,7 +118,7 @@
     "link": {
       "here": "here"
     },
-    "pro": "Get the most out of BunkerWeb by upgrading to the PRO version. More info and free trial <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/?utm_campaign=self&utm_source=banner#pro\">here</a>.",
+    "pro": "Get the most out of BunkerWeb by upgrading to the PRO version. Start your 30-day free trial <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=banner\">here</a>: order a plan, then keep “Free 30 Days Trial” as the payment method at checkout.",
     "support": "Need premium support or tailored consulting for BunkerWeb? Check out our <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/?utm_campaign=self&utm_source=banner#services\">professional services</a>."
   },
   "bans": {
@@ -262,6 +262,7 @@
     "add_ban_plural": "Add bans",
     "add_plugin_plural": "Add plugins",
     "add_plugins": "Add Plugins",
+    "apply_all_services": "Apply to all services",
     "auto_refresh": "Auto Refresh",
     "ban": "Ban",
     "ban_all_filtered": "Ban all matching reports",
@@ -1471,7 +1472,9 @@
     "title": "Sign In",
     "flash": {
       "invalid_username_password": "Invalid username or password",
-      "couldn_t_log_please_try_again": "Couldn't log you in, please try again"
+      "couldn_t_log_please_try_again": "Couldn't log you in, please try again",
+      "too_many_failed_attempts": "Too many failed attempts, try again in {{minutes}} min.",
+      "throttle_unavailable": "Sign-in is temporarily unavailable, please try again shortly."
     }
   },
   "logs": {
@@ -1517,6 +1520,8 @@
   "modal": {
     "body": {
       "add_plugin_dropzone": "Drag and drop your plugin archive here or click to select files.",
+      "apply_all_services": "The global settings changed in this save will replace values set by each service or its template. Unchanged settings are kept.",
+      "apply_all_services_count": "All known services ({{count}}) that may be updated:",
       "confirm_cache_deletion_alert": "Are you sure you want to delete the selected cache file?",
       "confirm_cache_deletion_alert_plural": "Are you sure you want to delete the selected cache files?",
       "confirm_configs_conversion": "Are you sure you want to convert the selected custom configurations?",
@@ -1587,6 +1592,7 @@
     "title": {
       "add_bans": "Add bans",
       "add_plugins": "Add Plugins",
+      "apply_all_services": "Apply to all services?",
       "confirm_conversion": "Confirm Conversion",
       "confirm_deletion": "Confirm Deletion",
       "confirm_unban": "Confirm Unban",
@@ -1961,7 +1967,8 @@
       "title": "Free Trial",
       "description": "Test <span class=\"text-primary\">BunkerWeb PRO</span> free for <strong>30 days</strong>.",
       "cta": "Start Free Trial"
-    }
+    },
+    "free_trial_hint": "Order a plan, then keep “Free 30 Days Trial” as the payment method at checkout."
   },
   "profile": {
     "2fa": {
@@ -2432,7 +2439,7 @@
       },
       "SERVER_NAME": {
         "label": "Server name",
-        "help": "List of the virtual hosts served by bunkerweb. (separated by space)"
+        "help": "List of the virtual hosts served by bunkerweb. (separated by space) A name can also be an IPv4 address or an IPv6 address written bare, in lowercase and compressed (2001:db8::1, without brackets)."
       },
       "WORKER_PROCESSES": {
         "label": "Worker processes",
@@ -2650,6 +2657,10 @@
         "label": "Plugins order (ssl_certificate)",
         "help": "Plugins that should run first during the ssl_certificate phase for this site (TLS certificate selection/issuance). Separate IDs with spaces; remaining plugins still run afterward in their normal sequence."
       },
+      "PLUGINS_ORDER_SSL_CLIENT_HELLO": {
+        "label": "Plugins order (ssl_client_hello)",
+        "help": "Plugins that should run first during the ssl_client_hello phase (TLS ClientHello, once per handshake, every service and the default server). Separate IDs with spaces; remaining plugins still run afterward in their normal sequence."
+      },
       "PLUGINS_ORDER_HEADER": {
         "label": "Plugins order (header)",
         "help": "Plugins that should run first during the header phase for this site (response header filtering). Separate IDs with spaces; remaining plugins still run afterward in their normal sequence."
@@ -2820,7 +2831,9 @@
       "show_top": "Top offenders",
       "show_latest": "Latest offenders",
       "show_bottom": "Bottom offenders"
-    }
+    },
+    "bad_behavior_stored_events": "Stored events",
+    "bad_behavior_evidence_missing": "Ban evidence is no longer available."
   },
   "scope": {
     "all_services": "All Services",
@@ -3824,6 +3837,7 @@
     "ip_unbanned": "IP address unbanned successfully!"
   },
   "tooltip": {
+    "apply_all_services": "Applies only the global settings changed in this save to all services, replacing values set by a service or its template.",
     "auto_lets_encrypt": "Whether to automatically request a Let's Encrypt certificate.",
     "button": {
       "ban_ip": "Ban this IP address",

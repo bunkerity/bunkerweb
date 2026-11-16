@@ -118,7 +118,7 @@
     "link": {
       "here": "यहाँ"
     },
-    "pro": "PRO संस्करण में अपग्रेड करके BunkerWeb का अधिकतम लाभ उठाएं। अधिक जानकारी और निःशुल्क परीक्षण के लिए <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/?utm_campaign=self&utm_source=banner#pro\">यहाँ</a> क्लिक करें।",
+    "pro": "PRO संस्करण में अपग्रेड करके BunkerWeb का अधिकतम लाभ उठाएं। अपना 30 दिनों का निःशुल्क परीक्षण <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=banner\">यहाँ</a> शुरू करें: एक प्लान ऑर्डर करें, फिर चेकआउट के समय भुगतान विधि के रूप में “Free 30 Days Trial” बनाए रखें।",
     "support": "BunkerWeb के लिए प्रीमियम समर्थन या अनुकूलित परामर्श की आवश्यकता है? हमारी <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/?utm_campaign=self&utm_source=banner#services\">पेशेवर सेवाओं</a> की जाँच करें।"
   },
   "bans": {
@@ -262,6 +262,7 @@
     "add_ban_plural": "प्रतिबंध जोड़ें",
     "add_plugin_plural": "प्लगइन जोड़ें",
     "add_plugins": "प्लगइन्स जोड़ें",
+    "apply_all_services": "सभी सेवाओं पर लागू करें",
     "auto_refresh": "स्वतः ताज़ा करें",
     "ban": "प्रतिबंधित करें",
     "ban_selected": "चयनित को प्रतिबंधित करें",
@@ -1442,7 +1443,9 @@
     "title": "लॉग इन करें",
     "flash": {
       "invalid_username_password": "उपयोगकर्ता नाम या पासवर्ड अमान्य है",
-      "couldn_t_log_please_try_again": "आपको लॉग इन नहीं किया जा सका, कृपया पुनः प्रयास करें"
+      "couldn_t_log_please_try_again": "आपको लॉग इन नहीं किया जा सका, कृपया पुनः प्रयास करें",
+      "too_many_failed_attempts": "बहुत अधिक असफल प्रयास हुए, {{minutes}} मिनट बाद फिर कोशिश करें।",
+      "throttle_unavailable": "साइन इन अस्थायी रूप से अनुपलब्ध है, कृपया थोड़ी देर बाद फिर कोशिश करें।"
     },
     "subtitle": "अपने BunkerWeb खाते में साइन इन करें",
     "or_use_password": "या अपना पासवर्ड उपयोग करें",
@@ -1493,6 +1496,8 @@
   "modal": {
     "body": {
       "add_plugin_dropzone": "अपना प्लगइन संग्रह यहाँ खींचें और छोड़ें या फ़ाइलें चुनने के लिए क्लिक करें।",
+      "apply_all_services": "इस बार सहेजते समय बदली गई वैश्विक सेटिंग्स हर सेवा या उसके टेम्पलेट द्वारा तय किए गए मानों को बदल देंगी। अपरिवर्तित सेटिंग्स बनी रहेंगी।",
+      "apply_all_services_count": "सभी ज्ञात सेवाएँ ({{count}}) जिन्हें अपडेट किया जा सकता है:",
       "confirm_cache_deletion_alert": "क्या आप वाकई चयनित कैश फ़ाइल हटाना चाहते हैं?",
       "confirm_cache_deletion_alert_plural": "क्या आप वाकई चयनित कैश फ़ाइलें हटाना चाहते हैं?",
       "confirm_configs_conversion": "क्या आप चयनित कस्टम कॉन्फ़िगरेशन बदलना चाहते हैं?",
@@ -1563,6 +1568,7 @@
     "title": {
       "add_bans": "प्रतिबंध जोड़ें",
       "add_plugins": "प्लगइन्स जोड़ें",
+      "apply_all_services": "सभी सेवाओं पर लागू करें?",
       "confirm_conversion": "रूपांतरण की पुष्टि करें",
       "confirm_deletion": "हटाने की पुष्टि करें",
       "confirm_unban": "प्रतिबंध हटाने की पुष्टि करें",
@@ -1894,7 +1900,8 @@
       "title": "नि:शुल्क परीक्षण",
       "description": "<span class=\"text-primary\">BunkerWeb PRO</span> को <strong>30 दिनों</strong> तक मुफ़्त आज़माएं।",
       "cta": "नि:शुल्क परीक्षण शुरू करें"
-    }
+    },
+    "free_trial_hint": "एक प्लान ऑर्डर करें, फिर चेकआउट के समय भुगतान विधि के रूप में “Free 30 Days Trial” बनाए रखें।"
   },
   "profile": {
     "2fa": {
@@ -2097,7 +2104,9 @@
       "show_top": "सबसे अधिक उल्लंघन करने वाले",
       "show_latest": "नवीनतम उल्लंघनकर्ता",
       "show_bottom": "सबसे कम उल्लंघन करने वाले"
-    }
+    },
+    "bad_behavior_stored_events": "संग्रहीत ईवेंट",
+    "bad_behavior_evidence_missing": "प्रतिबंध के साक्ष्य अब उपलब्ध नहीं हैं।"
   },
   "scope": {
     "all_services": "सभी सेवाएं",
@@ -3101,6 +3110,7 @@
     "ip_unbanned": "आईपी पते का प्रतिबंध सफलतापूर्वक हटाया गया!"
   },
   "tooltip": {
+    "apply_all_services": "इस बार सहेजते समय बदली गई वैश्विक सेटिंग्स को ही सभी सेवाओं पर लागू करता है, और सेवा या उसके टेम्पलेट द्वारा तय किए गए मानों को बदल देता है।",
     "auto_lets_encrypt": "क्या स्वचालित रूप से Let's Encrypt प्रमाणपत्र का अनुरोध करना है।",
     "button": {
       "ban_ip": "इस IP पते को प्रतिबंधित करें",
@@ -4620,7 +4630,7 @@
       },
       "SERVER_NAME": {
         "label": "सर्वर का नाम",
-        "help": "bunkerweb द्वारा सेवित वर्चुअल होस्ट की सूची। (स्पेस से अलग किए गए)"
+        "help": "bunkerweb द्वारा सेवित वर्चुअल होस्ट की सूची। (स्पेस से अलग किए गए) नाम IPv4 पता भी हो सकता है या ऐसा IPv6 पता जो बिना किसी घेरने वाले चिह्न के, छोटे अक्षरों में और संक्षिप्त रूप में लिखा हो (2001:db8::1, वर्ग कोष्ठक के बिना)।"
       },
       "WORKER_PROCESSES": {
         "label": "वर्कर प्रोसेस",
@@ -4837,6 +4847,10 @@
       "PLUGINS_ORDER_SSL_CERTIFICATE": {
         "label": "प्लगइन क्रम (ssl_certificate)",
         "help": "वे प्लगइन जिन्हें इस साइट के ssl_certificate चरण (TLS प्रमाणपत्र चयन/जारी करना) के दौरान पहले चलना चाहिए। ID को स्पेस से अलग करें; शेष प्लगइन बाद में अपने सामान्य क्रम में चलते रहते हैं।"
+      },
+      "PLUGINS_ORDER_SSL_CLIENT_HELLO": {
+        "label": "प्लगइन क्रम (ssl_client_hello)",
+        "help": "वे प्लगइन जिन्हें ssl_client_hello चरण में पहले चलना चाहिए (TLS ClientHello, हर हैंडशेक में एक बार, प्रत्येक सेवा और डिफ़ॉल्ट सर्वर के लिए)। ID को स्पेस से अलग करें; शेष प्लगइन बाद में अपने सामान्य क्रम में चलते हैं।"
       },
       "PLUGINS_ORDER_HEADER": {
         "label": "प्लगइन क्रम (header)",

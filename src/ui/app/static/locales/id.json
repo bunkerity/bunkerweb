@@ -118,7 +118,7 @@
     "link": {
       "here": "di sini"
     },
-    "pro": "Dapatkan manfaat maksimal dari BunkerWeb dengan upgrade ke versi PRO. Info lebih lanjut dan uji coba gratis <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/?utm_campaign=self&utm_source=banner#pro\">di sini</a>.",
+    "pro": "Dapatkan manfaat maksimal dari BunkerWeb dengan upgrade ke versi PRO. Mulai uji coba gratis 30 hari Anda <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=banner\">di sini</a>: pesan paket, lalu pertahankan “Free 30 Days Trial” sebagai metode pembayaran saat checkout.",
     "support": "Butuh dukungan premium atau konsultasi khusus untuk BunkerWeb? Kunjungi <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/?utm_campaign=self&utm_source=banner#services\">layanan profesional</a> kami."
   },
   "bans": {
@@ -262,6 +262,7 @@
     "add_ban_plural": "Tambahkan Larangan",
     "add_plugin_plural": "Tambahkan Plugin",
     "add_plugins": "Tambahkan Plugin",
+    "apply_all_services": "Terapkan ke semua layanan",
     "auto_refresh": "Perbarui Otomatis",
     "ban": "Larang",
     "ban_all_filtered": "Larang semua laporan yang cocok",
@@ -1471,7 +1472,9 @@
     "title": "Masuk",
     "flash": {
       "invalid_username_password": "Nama pengguna atau kata sandi tidak valid",
-      "couldn_t_log_please_try_again": "Tidak dapat masuk, silakan coba lagi"
+      "couldn_t_log_please_try_again": "Tidak dapat masuk, silakan coba lagi",
+      "too_many_failed_attempts": "Terlalu banyak percobaan gagal, coba lagi dalam {{minutes}} menit.",
+      "throttle_unavailable": "Masuk untuk sementara tidak tersedia, silakan coba lagi sebentar."
     }
   },
   "logs": {
@@ -1517,6 +1520,8 @@
   "modal": {
     "body": {
       "add_plugin_dropzone": "Seret dan lepaskan arsip plugin Anda di sini atau klik untuk memilih file.",
+      "apply_all_services": "Pengaturan global yang diubah dalam penyimpanan ini akan menggantikan nilai yang ditetapkan oleh setiap layanan atau templatnya. Pengaturan yang tidak diubah tetap dipertahankan.",
+      "apply_all_services_count": "Semua layanan yang diketahui ({{count}}) yang mungkin diperbarui:",
       "confirm_cache_deletion_alert": "Apakah Anda yakin ingin menghapus file cache yang dipilih?",
       "confirm_cache_deletion_alert_plural": "Apakah Anda yakin ingin menghapus file cache yang dipilih?",
       "confirm_configs_conversion": "Apakah Anda yakin ingin mengkonversi konfigurasi kustom yang dipilih?",
@@ -1587,6 +1592,7 @@
     "title": {
       "add_bans": "Tambahkan Larangan",
       "add_plugins": "Tambahkan Plugin",
+      "apply_all_services": "Terapkan ke semua layanan?",
       "confirm_conversion": "Konfirmasi Konversi",
       "confirm_deletion": "Konfirmasi Penghapusan",
       "confirm_unban": "Konfirmasi Pembatalan Larangan",
@@ -1961,7 +1967,8 @@
       "title": "Uji Coba Gratis",
       "description": "Coba <span class=\"text-primary\">BunkerWeb PRO</span> gratis selama <strong>30 hari</strong>.",
       "cta": "Mulai Uji Coba Gratis"
-    }
+    },
+    "free_trial_hint": "Pesan paket, lalu pertahankan “Free 30 Days Trial” sebagai metode pembayaran saat checkout."
   },
   "profile": {
     "2fa": {
@@ -2432,7 +2439,7 @@
       },
       "SERVER_NAME": {
         "label": "Nama Server",
-        "help": "Daftar virtual host yang dilayani oleh bunkerweb. (dipisahkan spasi)"
+        "help": "Daftar virtual host yang dilayani oleh bunkerweb. (dipisahkan spasi) Nama juga dapat berupa alamat IPv4 atau alamat IPv6 yang ditulis tanpa pembatas, dengan huruf kecil dan bentuk terkompresi (2001:db8::1, tanpa tanda kurung siku)."
       },
       "WORKER_PROCESSES": {
         "label": "Proses Worker",
@@ -2650,6 +2657,10 @@
         "label": "Urutan Plugin (ssl_certificate)",
         "help": "Plugin yang harus berjalan lebih dulu selama fase ssl_certificate untuk situs ini (pemilihan/penerbitan sertifikat TLS). Pisahkan ID dengan spasi; plugin lainnya tetap berjalan setelahnya dalam urutan normalnya."
       },
+      "PLUGINS_ORDER_SSL_CLIENT_HELLO": {
+        "label": "Urutan Plugin (ssl_client_hello)",
+        "help": "Plugin yang harus berjalan lebih dulu selama fase ssl_client_hello (TLS ClientHello, sekali per jabat tangan, untuk setiap layanan dan server bawaan). Pisahkan ID dengan spasi; plugin lainnya tetap berjalan setelahnya dalam urutan normalnya."
+      },
       "PLUGINS_ORDER_HEADER": {
         "label": "Urutan Plugin (header)",
         "help": "Plugin yang harus berjalan lebih dulu selama fase header untuk situs ini (penyaringan header respons). Pisahkan ID dengan spasi; plugin lainnya tetap berjalan setelahnya dalam urutan normalnya."
@@ -2820,7 +2831,9 @@
       "show_top": "Pelanggar terbanyak",
       "show_latest": "Pelanggar terbaru",
       "show_bottom": "Pelanggar paling sedikit"
-    }
+    },
+    "bad_behavior_stored_events": "Peristiwa tersimpan",
+    "bad_behavior_evidence_missing": "Bukti ban tidak lagi tersedia."
   },
   "scope": {
     "all_services": "Semua Layanan",
@@ -3824,6 +3837,7 @@
     "ip_unbanned": "Alamat IP berhasil dibatalkan larangannya!"
   },
   "tooltip": {
+    "apply_all_services": "Menerapkan hanya pengaturan global yang diubah dalam penyimpanan ini ke semua layanan, menggantikan nilai yang ditetapkan oleh layanan atau templatnya.",
     "auto_lets_encrypt": "Apakah akan secara otomatis meminta sertifikat Let's Encrypt.",
     "button": {
       "ban_ip": "Larang alamat IP ini",

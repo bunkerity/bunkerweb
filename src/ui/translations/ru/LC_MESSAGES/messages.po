@@ -302,7 +302,7 @@ msgid "banner.link.here"
 msgstr "здесь"
 
 msgid "banner.pro"
-msgstr "Получите максимум от BunkerWeb, обновившись до версии PRO. Больше информации и бесплатная пробная версия <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/?utm_campaign=self&utm_source=banner#pro\">здесь</a>."
+msgstr "Получите максимум от BunkerWeb, обновившись до версии PRO. Начните бесплатный 30-дневный пробный период <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=banner\">здесь</a>: закажите тариф, затем оставьте «Free 30 Days Trial» в качестве способа оплаты при оформлении заказа."
 
 msgid "banner.support"
 msgstr "Нужна премиум-поддержка или индивидуальная консультация по BunkerWeb? Ознакомьтесь с нашими <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/?utm_campaign=self&utm_source=banner#services\">профессиональными услугами</a>."
@@ -627,6 +627,9 @@ msgstr "Добавить плагины"
 
 msgid "button.add_plugins"
 msgstr "Добавить плагины"
+
+msgid "button.apply_all_services"
+msgstr "Применить ко всем сервисам"
 
 msgid "button.auto_refresh"
 msgstr "Автообновление"
@@ -4381,6 +4384,12 @@ msgstr "Плагины, которые должны запускаться пе�
 msgid "general.settings.PLUGINS_ORDER_SSL_CERTIFICATE.label"
 msgstr "Порядок плагинов (ssl_certificate)"
 
+msgid "general.settings.PLUGINS_ORDER_SSL_CLIENT_HELLO.help"
+msgstr "Плагины, которые должны запускаться первыми на этапе ssl_client_hello (TLS ClientHello, один раз за рукопожатие, для каждой службы и сервера по умолчанию). Разделяйте идентификаторы пробелами; остальные плагины запускаются затем в обычном порядке."
+
+msgid "general.settings.PLUGINS_ORDER_SSL_CLIENT_HELLO.label"
+msgstr "Порядок плагинов (ssl_client_hello)"
+
 msgid "general.settings.PLUGINS_ORDER_TIMER.help"
 msgstr "Плагины, которые должны запускаться первыми на этапе timer (фоновые таймеры). Разделяйте идентификаторы пробелами; остальные плагины всё равно запускаются позже в обычном порядке."
 
@@ -4400,7 +4409,7 @@ msgid "general.settings.SEND_TIMEOUT.label"
 msgstr "Таймаут отправки"
 
 msgid "general.settings.SERVER_NAME.help"
-msgstr "Список виртуальных хостов, обслуживаемых bunkerweb. (через пробел)"
+msgstr "Список виртуальных хостов, обслуживаемых bunkerweb. (через пробел) Именем также может быть адрес IPv4 или адрес IPv6, записанный без разделителей, строчными буквами и в сжатом виде (2001:db8::1, без квадратных скобок)."
 
 msgid "general.settings.SERVER_NAME.label"
 msgstr "Имя сервера"
@@ -4909,6 +4918,12 @@ msgstr "Не удалось выполнить вход, попробуйте е
 msgid "login.flash.invalid_username_password"
 msgstr "Неверное имя пользователя или пароль"
 
+msgid "login.flash.throttle_unavailable"
+msgstr "Вход временно недоступен, повторите попытку чуть позже."
+
+msgid "login.flash.too_many_failed_attempts"
+msgstr "Слишком много неудачных попыток, повторите через %(minutes)s мин."
+
 msgid "login.notice_password_changed"
 msgstr "Ваш пароль изменён. Войдите с новым паролем."
 
@@ -5058,6 +5073,12 @@ msgstr "Двухфакторная аутентификация включена
 
 msgid "modal.body.add_plugin_dropzone"
 msgstr "Перетащите архив плагина сюда или нажмите, чтобы выбрать файлы."
+
+msgid "modal.body.apply_all_services"
+msgstr "Глобальные настройки, изменённые при этом сохранении, заменят значения, заданные каждым сервисом или его шаблоном. Неизменённые настройки сохранятся."
+
+msgid "modal.body.apply_all_services_count"
+msgstr "Все известные сервисы (%(count)s), которые могут быть обновлены:"
 
 msgid "modal.body.ban_filtered_confirmation"
 msgstr "Заблокировать IP из всех %(count)s подходящих отчётов? Повторяющиеся цели будут применены один раз."
@@ -5256,6 +5277,9 @@ msgstr "Добавить блокировку"
 
 msgid "modal.title.add_plugins"
 msgstr "Добавить плагины"
+
+msgid "modal.title.apply_all_services"
+msgstr "Применить ко всем сервисам?"
 
 msgid "modal.title.confirm_conversion"
 msgstr "Подтвердить конвертацию"
@@ -6073,6 +6097,9 @@ msgstr "Пропустить проверки и принудительно за
 msgid "pro.force_update.title"
 msgstr "Принудительно обновить"
 
+msgid "pro.free_trial_hint"
+msgstr "Закажите тариф, затем оставьте «Free 30 Days Trial» в качестве способа оплаты при оформлении заказа."
+
 msgid "pro.key.title.activate"
 msgstr "Активировать ключ"
 
@@ -6672,6 +6699,9 @@ msgstr "Эти запросы превысили порог подозрител
 msgid "reports.bad_behavior_captured_at"
 msgstr "Зафиксировано в"
 
+msgid "reports.bad_behavior_evidence_missing"
+msgstr "Доказательства для бана больше недоступны."
+
 msgid "reports.bad_behavior_ip"
 msgstr "IP-адрес"
 
@@ -6686,6 +6716,9 @@ msgstr "Запрос"
 
 msgid "reports.bad_behavior_server"
 msgstr "Сервер"
+
+msgid "reports.bad_behavior_stored_events"
+msgstr "Сохранённые события"
 
 msgid "reports.bad_behavior_total_requests"
 msgstr "Подозрительные запросы"
@@ -9979,6 +10012,9 @@ msgstr "Пинг успешен"
 
 msgid "toast.ip_unbanned"
 msgstr "IP-адрес успешно разбанен!"
+
+msgid "tooltip.apply_all_services"
+msgstr "Применяет ко всем сервисам только глобальные настройки, изменённые при этом сохранении, заменяя значения, заданные сервисом или его шаблоном."
 
 msgid "tooltip.auto_lets_encrypt"
 msgstr "Автоматически запрашивать сертификат Let's Encrypt."

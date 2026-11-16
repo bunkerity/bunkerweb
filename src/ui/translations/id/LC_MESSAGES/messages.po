@@ -302,7 +302,7 @@ msgid "banner.link.here"
 msgstr "di sini"
 
 msgid "banner.pro"
-msgstr "Dapatkan manfaat maksimal dari BunkerWeb dengan upgrade ke versi PRO. Info lebih lanjut dan uji coba gratis <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/?utm_campaign=self&utm_source=banner#pro\">di sini</a>."
+msgstr "Dapatkan manfaat maksimal dari BunkerWeb dengan upgrade ke versi PRO. Mulai uji coba gratis 30 hari Anda <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=banner\">di sini</a>: pesan paket, lalu pertahankan “Free 30 Days Trial” sebagai metode pembayaran saat checkout."
 
 msgid "banner.support"
 msgstr "Butuh dukungan premium atau konsultasi khusus untuk BunkerWeb? Kunjungi <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/?utm_campaign=self&utm_source=banner#services\">layanan profesional</a> kami."
@@ -627,6 +627,9 @@ msgstr "Tambahkan Plugin"
 
 msgid "button.add_plugins"
 msgstr "Tambahkan Plugin"
+
+msgid "button.apply_all_services"
+msgstr "Terapkan ke semua layanan"
 
 msgid "button.auto_refresh"
 msgstr "Perbarui Otomatis"
@@ -4381,6 +4384,12 @@ msgstr "Plugin yang harus berjalan lebih dulu selama fase ssl_certificate untuk 
 msgid "general.settings.PLUGINS_ORDER_SSL_CERTIFICATE.label"
 msgstr "Urutan Plugin (ssl_certificate)"
 
+msgid "general.settings.PLUGINS_ORDER_SSL_CLIENT_HELLO.help"
+msgstr "Plugin yang harus berjalan lebih dulu selama fase ssl_client_hello (TLS ClientHello, sekali per jabat tangan, untuk setiap layanan dan server bawaan). Pisahkan ID dengan spasi; plugin lainnya tetap berjalan setelahnya dalam urutan normalnya."
+
+msgid "general.settings.PLUGINS_ORDER_SSL_CLIENT_HELLO.label"
+msgstr "Urutan Plugin (ssl_client_hello)"
+
 msgid "general.settings.PLUGINS_ORDER_TIMER.help"
 msgstr "Plugin yang harus berjalan lebih dulu selama fase timer (timer latar belakang). Pisahkan ID dengan spasi; plugin lainnya tetap berjalan setelahnya dalam urutan normalnya."
 
@@ -4400,7 +4409,7 @@ msgid "general.settings.SEND_TIMEOUT.label"
 msgstr "Batas Waktu Kirim"
 
 msgid "general.settings.SERVER_NAME.help"
-msgstr "Daftar virtual host yang dilayani oleh bunkerweb. (dipisahkan spasi)"
+msgstr "Daftar virtual host yang dilayani oleh bunkerweb. (dipisahkan spasi) Nama juga dapat berupa alamat IPv4 atau alamat IPv6 yang ditulis tanpa pembatas, dengan huruf kecil dan bentuk terkompresi (2001:db8::1, tanpa tanda kurung siku)."
 
 msgid "general.settings.SERVER_NAME.label"
 msgstr "Nama Server"
@@ -4909,6 +4918,12 @@ msgstr "Tidak dapat masuk, silakan coba lagi"
 msgid "login.flash.invalid_username_password"
 msgstr "Nama pengguna atau kata sandi tidak valid"
 
+msgid "login.flash.throttle_unavailable"
+msgstr "Masuk untuk sementara tidak tersedia, silakan coba lagi sebentar."
+
+msgid "login.flash.too_many_failed_attempts"
+msgstr "Terlalu banyak percobaan gagal, coba lagi dalam %(minutes)s menit."
+
 msgid "login.notice_password_changed"
 msgstr "Kata sandi Anda telah diubah. Masuk dengan kata sandi baru Anda."
 
@@ -5058,6 +5073,12 @@ msgstr "Autentikasi dua faktor diaktifkan tetapi tidak ada kode pemulihan yang t
 
 msgid "modal.body.add_plugin_dropzone"
 msgstr "Seret dan lepaskan arsip plugin Anda di sini atau klik untuk memilih file."
+
+msgid "modal.body.apply_all_services"
+msgstr "Pengaturan global yang diubah dalam penyimpanan ini akan menggantikan nilai yang ditetapkan oleh setiap layanan atau templatnya. Pengaturan yang tidak diubah tetap dipertahankan."
+
+msgid "modal.body.apply_all_services_count"
+msgstr "Semua layanan yang diketahui (%(count)s) yang mungkin diperbarui:"
 
 msgid "modal.body.ban_filtered_confirmation"
 msgstr "Larang IP dari semua %(count)s laporan yang cocok? Target duplikat akan diterapkan sekali."
@@ -5250,6 +5271,9 @@ msgstr "Tambahkan Larangan"
 
 msgid "modal.title.add_plugins"
 msgstr "Tambahkan Plugin"
+
+msgid "modal.title.apply_all_services"
+msgstr "Terapkan ke semua layanan?"
 
 msgid "modal.title.confirm_conversion"
 msgstr "Konfirmasi Konversi"
@@ -6067,6 +6091,9 @@ msgstr "Lewati pengecekan dan paksa unduhan plugin PRO. Jika pemaksaan tidak mun
 msgid "pro.force_update.title"
 msgstr "Paksa pembaruan"
 
+msgid "pro.free_trial_hint"
+msgstr "Pesan paket, lalu pertahankan “Free 30 Days Trial” sebagai metode pembayaran saat checkout."
+
 msgid "pro.key.title.activate"
 msgstr "Aktifkan Kunci"
 
@@ -6664,6 +6691,9 @@ msgstr "Permintaan ini melebihi ambang batas perilaku buruk dan dikelompokkan be
 msgid "reports.bad_behavior_captured_at"
 msgstr "Ditangkap pada"
 
+msgid "reports.bad_behavior_evidence_missing"
+msgstr "Bukti ban tidak lagi tersedia."
+
 msgid "reports.bad_behavior_ip"
 msgstr "Alamat IP"
 
@@ -6678,6 +6708,9 @@ msgstr "Permintaan"
 
 msgid "reports.bad_behavior_server"
 msgstr "Server"
+
+msgid "reports.bad_behavior_stored_events"
+msgstr "Peristiwa tersimpan"
 
 msgid "reports.bad_behavior_total_requests"
 msgstr "Permintaan mencurigakan"
@@ -9966,6 +9999,9 @@ msgstr "Ping berhasil"
 
 msgid "toast.ip_unbanned"
 msgstr "Alamat IP berhasil dibatalkan larangannya!"
+
+msgid "tooltip.apply_all_services"
+msgstr "Menerapkan hanya pengaturan global yang diubah dalam penyimpanan ini ke semua layanan, menggantikan nilai yang ditetapkan oleh layanan atau templatnya."
 
 msgid "tooltip.auto_lets_encrypt"
 msgstr "Apakah akan secara otomatis meminta sertifikat Let's Encrypt."

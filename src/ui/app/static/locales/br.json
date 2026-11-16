@@ -118,7 +118,7 @@
     "link": {
       "here": "aqui"
     },
-    "pro": "Aproveite ao máximo o BunkerWeb atualizando para a versão PRO. Mais informações e teste gratuito <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/?utm_campaign=self&utm_source=banner#pro\">aqui</a>.",
+    "pro": "Aproveite ao máximo o BunkerWeb atualizando para a versão PRO. Comece seu teste gratuito de 30 dias <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=banner\">aqui</a>: peça um plano e mantenha “Free 30 Days Trial” como forma de pagamento ao finalizar o pedido.",
     "support": "Precisa de suporte premium ou consultoria personalizada para o BunkerWeb? Confira nossos <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/?utm_campaign=self&utm_source=banner#services\">serviços profissionais</a>."
   },
   "bans": {
@@ -262,6 +262,7 @@
     "add_ban_plural": "Adicionar bloqueios",
     "add_plugin_plural": "Adicionar plugins",
     "add_plugins": "Adicionar Plugins",
+    "apply_all_services": "Aplicar a todos os serviços",
     "auto_refresh": "Atualização Automática",
     "ban": "Bloquear",
     "ban_all_filtered": "Banir todos os relatórios correspondentes",
@@ -1471,7 +1472,9 @@
     "title": "Entrar",
     "flash": {
       "invalid_username_password": "Nome de usuário ou senha inválidos",
-      "couldn_t_log_please_try_again": "Não foi possível fazer login, tente novamente"
+      "couldn_t_log_please_try_again": "Não foi possível fazer login, tente novamente",
+      "too_many_failed_attempts": "Muitas tentativas malsucedidas, tente novamente em {{minutes}} min.",
+      "throttle_unavailable": "O login está temporariamente indisponível, tente novamente em instantes."
     }
   },
   "logs": {
@@ -1517,6 +1520,8 @@
   "modal": {
     "body": {
       "add_plugin_dropzone": "Arraste e solte o arquivo do seu plugin aqui ou clique para selecionar arquivos.",
+      "apply_all_services": "As configurações globais alteradas neste salvamento substituirão os valores definidos por cada serviço ou seu modelo. As configurações não alteradas serão mantidas.",
+      "apply_all_services_count": "Todos os serviços conhecidos ({{count}}) que podem ser atualizados:",
       "confirm_cache_deletion_alert": "Tem certeza de que deseja excluir o arquivo de cache selecionado?",
       "confirm_cache_deletion_alert_plural": "Tem certeza de que deseja excluir os arquivos de cache selecionados?",
       "confirm_configs_conversion": "Tem certeza de que deseja converter as configurações personalizadas selecionadas?",
@@ -1587,6 +1592,7 @@
     "title": {
       "add_bans": "Adicionar bloqueios",
       "add_plugins": "Adicionar Plugins",
+      "apply_all_services": "Aplicar a todos os serviços?",
       "confirm_conversion": "Confirmar Conversão",
       "confirm_deletion": "Confirmar Exclusão",
       "confirm_unban": "Confirmar Desbloqueio",
@@ -1961,7 +1967,8 @@
       "title": "Teste gratuito",
       "description": "Experimente o <span class=\"text-primary\">BunkerWeb PRO</span> gratuitamente por <strong>30 dias</strong>.",
       "cta": "Iniciar teste gratuito"
-    }
+    },
+    "free_trial_hint": "Peça um plano e mantenha “Free 30 Days Trial” como forma de pagamento ao finalizar o pedido."
   },
   "profile": {
     "2fa": {
@@ -2164,7 +2171,9 @@
       "show_top": "Infratores mais frequentes",
       "show_latest": "Infratores mais recentes",
       "show_bottom": "Infratores menos frequentes"
-    }
+    },
+    "bad_behavior_stored_events": "Eventos armazenados",
+    "bad_behavior_evidence_missing": "As evidências do banimento não estão mais disponíveis."
   },
   "scope": {
     "all_services": "Todos os Serviços",
@@ -3168,6 +3177,7 @@
     "ip_unbanned": "Endereço IP desbloqueado com sucesso!"
   },
   "tooltip": {
+    "apply_all_services": "Aplica a todos os serviços somente as configurações globais alteradas neste salvamento, substituindo os valores definidos por um serviço ou seu modelo.",
     "auto_lets_encrypt": "Se deve solicitar automaticamente um certificado Let's Encrypt.",
     "button": {
       "ban_ip": "Bloquear este endereço IP",
@@ -4791,7 +4801,7 @@
       },
       "SERVER_NAME": {
         "label": "Nome do servidor",
-        "help": "Lista dos hosts virtuais atendidos pelo bunkerweb. (separados por espaços)"
+        "help": "Lista dos hosts virtuais atendidos pelo bunkerweb. (separados por espaços) Um nome também pode ser um endereço IPv4 ou um endereço IPv6 escrito sem delimitadores, em minúsculas e na forma comprimida (2001:db8::1, sem colchetes)."
       },
       "WORKER_PROCESSES": {
         "label": "Processos worker",
@@ -5008,6 +5018,10 @@
       "PLUGINS_ORDER_SSL_CERTIFICATE": {
         "label": "Ordem dos plugins (ssl_certificate)",
         "help": "Plugins que devem ser executados primeiro durante a fase ssl_certificate para este site (seleção/emissão do certificado TLS). Separe os IDs com espaços; os demais plugins são executados de qualquer forma depois, em sua ordem normal."
+      },
+      "PLUGINS_ORDER_SSL_CLIENT_HELLO": {
+        "label": "Ordem dos plugins (ssl_client_hello)",
+        "help": "Plugins que devem ser executados primeiro durante a fase ssl_client_hello (TLS ClientHello, uma vez por handshake, em todos os serviços e no servidor padrão). Separe os IDs com espaços; os demais plugins são executados depois, em sua ordem normal."
       },
       "PLUGINS_ORDER_HEADER": {
         "label": "Ordem dos plugins (header)",

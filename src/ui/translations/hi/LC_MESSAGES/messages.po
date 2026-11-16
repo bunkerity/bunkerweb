@@ -302,7 +302,7 @@ msgid "banner.link.here"
 msgstr "यहाँ"
 
 msgid "banner.pro"
-msgstr "PRO संस्करण में अपग्रेड करके BunkerWeb का अधिकतम लाभ उठाएं। अधिक जानकारी और निःशुल्क परीक्षण के लिए <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/?utm_campaign=self&utm_source=banner#pro\">यहाँ</a> क्लिक करें।"
+msgstr "PRO संस्करण में अपग्रेड करके BunkerWeb का अधिकतम लाभ उठाएं। अपना 30 दिनों का निःशुल्क परीक्षण <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=banner\">यहाँ</a> शुरू करें: एक प्लान ऑर्डर करें, फिर चेकआउट के समय भुगतान विधि के रूप में “Free 30 Days Trial” बनाए रखें।"
 
 msgid "banner.support"
 msgstr "BunkerWeb के लिए प्रीमियम समर्थन या अनुकूलित परामर्श की आवश्यकता है? हमारी <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/?utm_campaign=self&utm_source=banner#services\">पेशेवर सेवाओं</a> की जाँच करें।"
@@ -627,6 +627,9 @@ msgstr "प्लगइन जोड़ें"
 
 msgid "button.add_plugins"
 msgstr "प्लगइन्स जोड़ें"
+
+msgid "button.apply_all_services"
+msgstr "सभी सेवाओं पर लागू करें"
 
 msgid "button.auto_refresh"
 msgstr "स्वतः ताज़ा करें"
@@ -4381,6 +4384,12 @@ msgstr "वे प्लगइन जिन्हें इस साइट क�
 msgid "general.settings.PLUGINS_ORDER_SSL_CERTIFICATE.label"
 msgstr "प्लगइन क्रम (ssl_certificate)"
 
+msgid "general.settings.PLUGINS_ORDER_SSL_CLIENT_HELLO.help"
+msgstr "वे प्लगइन जिन्हें ssl_client_hello चरण में पहले चलना चाहिए (TLS ClientHello, हर हैंडशेक में एक बार, प्रत्येक सेवा और डिफ़ॉल्ट सर्वर के लिए)। ID को स्पेस से अलग करें; शेष प्लगइन बाद में अपने सामान्य क्रम में चलते हैं।"
+
+msgid "general.settings.PLUGINS_ORDER_SSL_CLIENT_HELLO.label"
+msgstr "प्लगइन क्रम (ssl_client_hello)"
+
 msgid "general.settings.PLUGINS_ORDER_TIMER.help"
 msgstr "वे प्लगइन जिन्हें timer चरण (बैकग्राउंड टाइमर) के दौरान पहले चलना चाहिए। ID को स्पेस से अलग करें; शेष प्लगइन बाद में अपने सामान्य क्रम में चलते रहते हैं।"
 
@@ -4400,7 +4409,7 @@ msgid "general.settings.SEND_TIMEOUT.label"
 msgstr "सेंड टाइमआउट"
 
 msgid "general.settings.SERVER_NAME.help"
-msgstr "bunkerweb द्वारा सेवित वर्चुअल होस्ट की सूची। (स्पेस से अलग किए गए)"
+msgstr "bunkerweb द्वारा सेवित वर्चुअल होस्ट की सूची। (स्पेस से अलग किए गए) नाम IPv4 पता भी हो सकता है या ऐसा IPv6 पता जो बिना किसी घेरने वाले चिह्न के, छोटे अक्षरों में और संक्षिप्त रूप में लिखा हो (2001:db8::1, वर्ग कोष्ठक के बिना)।"
 
 msgid "general.settings.SERVER_NAME.label"
 msgstr "सर्वर का नाम"
@@ -4909,6 +4918,12 @@ msgstr "आपको लॉग इन नहीं किया जा सका
 msgid "login.flash.invalid_username_password"
 msgstr "उपयोगकर्ता नाम या पासवर्ड अमान्य है"
 
+msgid "login.flash.throttle_unavailable"
+msgstr "साइन इन अस्थायी रूप से अनुपलब्ध है, कृपया थोड़ी देर बाद फिर कोशिश करें।"
+
+msgid "login.flash.too_many_failed_attempts"
+msgstr "बहुत अधिक असफल प्रयास हुए, %(minutes)s मिनट बाद फिर कोशिश करें।"
+
 msgid "login.notice_password_changed"
 msgstr "आपका पासवर्ड बदल दिया गया है। नए पासवर्ड से लॉग इन करें।"
 
@@ -5058,6 +5073,12 @@ msgstr "दो-कारक प्रमाणीकरण सक्षम ह�
 
 msgid "modal.body.add_plugin_dropzone"
 msgstr "अपना प्लगइन संग्रह यहाँ खींचें और छोड़ें या फ़ाइलें चुनने के लिए क्लिक करें।"
+
+msgid "modal.body.apply_all_services"
+msgstr "इस बार सहेजते समय बदली गई वैश्विक सेटिंग्स हर सेवा या उसके टेम्पलेट द्वारा तय किए गए मानों को बदल देंगी। अपरिवर्तित सेटिंग्स बनी रहेंगी।"
+
+msgid "modal.body.apply_all_services_count"
+msgstr "सभी ज्ञात सेवाएँ (%(count)s) जिन्हें अपडेट किया जा सकता है:"
 
 msgid "modal.body.ban_filtered_confirmation"
 msgstr "सभी %(count)s मेल खाते रिपोर्ट के IP प्रतिबंधित करें? दोहराए गए लक्ष्य एक बार लागू होंगे।"
@@ -5250,6 +5271,9 @@ msgstr "प्रतिबंध जोड़ें"
 
 msgid "modal.title.add_plugins"
 msgstr "प्लगइन्स जोड़ें"
+
+msgid "modal.title.apply_all_services"
+msgstr "सभी सेवाओं पर लागू करें?"
 
 msgid "modal.title.confirm_conversion"
 msgstr "रूपांतरण की पुष्टि करें"
@@ -6067,6 +6091,9 @@ msgstr "जाँच छोड़कर PRO प्लगइन जबरन ड�
 msgid "pro.force_update.title"
 msgstr "जबरन अपडेट करें"
 
+msgid "pro.free_trial_hint"
+msgstr "एक प्लान ऑर्डर करें, फिर चेकआउट के समय भुगतान विधि के रूप में “Free 30 Days Trial” बनाए रखें।"
+
 msgid "pro.key.title.activate"
 msgstr "कुंजी सक्रिय करें"
 
@@ -6664,6 +6691,9 @@ msgstr "ये अनुरोध खराब व्यवहार सीम�
 msgid "reports.bad_behavior_captured_at"
 msgstr "रिकॉर्ड किया गया"
 
+msgid "reports.bad_behavior_evidence_missing"
+msgstr "प्रतिबंध के साक्ष्य अब उपलब्ध नहीं हैं।"
+
 msgid "reports.bad_behavior_ip"
 msgstr "IP पता"
 
@@ -6678,6 +6708,9 @@ msgstr "अनुरोध"
 
 msgid "reports.bad_behavior_server"
 msgstr "सर्वर"
+
+msgid "reports.bad_behavior_stored_events"
+msgstr "संग्रहीत ईवेंट"
 
 msgid "reports.bad_behavior_total_requests"
 msgstr "संदिग्ध अनुरोध"
@@ -9966,6 +9999,9 @@ msgstr "पिंग सफल"
 
 msgid "toast.ip_unbanned"
 msgstr "आईपी पते का प्रतिबंध सफलतापूर्वक हटाया गया!"
+
+msgid "tooltip.apply_all_services"
+msgstr "इस बार सहेजते समय बदली गई वैश्विक सेटिंग्स को ही सभी सेवाओं पर लागू करता है, और सेवा या उसके टेम्पलेट द्वारा तय किए गए मानों को बदल देता है।"
 
 msgid "tooltip.auto_lets_encrypt"
 msgstr "क्या स्वचालित रूप से Let's Encrypt प्रमाणपत्र का अनुरोध करना है।"

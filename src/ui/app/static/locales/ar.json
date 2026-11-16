@@ -118,7 +118,7 @@
     "link": {
       "here": "هنا"
     },
-    "pro": "احصل على أقصى استفادة من BunkerWeb بالترقية إلى إصدار PRO. مزيد من المعلومات وتجربة مجانية <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/?utm_campaign=self&utm_source=banner#pro\">هنا</a>.",
+    "pro": "احصل على أقصى استفادة من BunkerWeb بالترقية إلى إصدار PRO. ابدأ تجربتك المجانية لمدة 30 يومًا <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=banner\">هنا</a>: اطلب خطة، ثم أبقِ «Free 30 Days Trial» طريقة الدفع عند إتمام الطلب.",
     "support": "هل تحتاج إلى دعم متميز أو استشارات مخصصة لـ BunkerWeb؟ تحقق من <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/?utm_campaign=self&utm_source=banner#services\">خدماتنا الاحترافية</a>."
   },
   "bans": {
@@ -262,6 +262,7 @@
     "add_ban_plural": "إضافة عمليات حظر",
     "add_plugin_plural": "إضافة إضافات",
     "add_plugins": "إضافة الإضافات",
+    "apply_all_services": "تطبيق على جميع الخدمات",
     "auto_refresh": "تحديث تلقائي",
     "ban": "حظر",
     "ban_selected": "حظر المحدد",
@@ -1442,7 +1443,9 @@
     "title": "تسجيل الدخول",
     "flash": {
       "invalid_username_password": "اسم المستخدم أو كلمة المرور غير صحيحة",
-      "couldn_t_log_please_try_again": "تعذّر تسجيل دخولك، يرجى المحاولة مرة أخرى"
+      "couldn_t_log_please_try_again": "تعذّر تسجيل دخولك، يرجى المحاولة مرة أخرى",
+      "too_many_failed_attempts": "محاولات فاشلة كثيرة جدًا، حاول مجددًا بعد {{minutes}} دقيقة.",
+      "throttle_unavailable": "تسجيل الدخول غير متاح مؤقتًا، يرجى المحاولة مجددًا بعد قليل."
     },
     "subtitle": "تسجيل الدخول إلى حساب BunkerWeb الخاص بك",
     "or_use_password": "أو استخدم كلمة المرور",
@@ -1493,6 +1496,8 @@
   "modal": {
     "body": {
       "add_plugin_dropzone": "اسحب وأفلت أرشيف الإضافة الخاص بك هنا أو انقر لتحديد الملفات.",
+      "apply_all_services": "ستحل الإعدادات العامة التي تغيّرت في عملية الحفظ هذه محل القيم التي ضبطتها كل خدمة أو قالبها. تُحفظ الإعدادات التي لم تتغيّر.",
+      "apply_all_services_count": "جميع الخدمات المعروفة ({{count}}) التي قد تُحدّث:",
       "confirm_cache_deletion_alert": "هل أنت متأكد أنك تريد حذف ملف الذاكرة المؤقتة المحدد؟",
       "confirm_cache_deletion_alert_plural": "هل أنت متأكد أنك تريد حذف ملفات الذاكرة المؤقتة المحددة؟",
       "confirm_configs_conversion": "هل تريد بالتأكيد تحويل التكوينات المخصصة المحددة؟",
@@ -1563,6 +1568,7 @@
     "title": {
       "add_bans": "إضافة عمليات حظر",
       "add_plugins": "إضافة الإضافات",
+      "apply_all_services": "تطبيق على جميع الخدمات؟",
       "confirm_conversion": "تأكيد التحويل",
       "confirm_deletion": "تأكيد الحذف",
       "confirm_unban": "تأكيد رفع الحظر",
@@ -1894,7 +1900,8 @@
       "title": "تجربة مجانية",
       "description": "جرّب <span class=\"text-primary\">BunkerWeb PRO</span> مجانًا لمدة <strong>30 يومًا</strong>.",
       "cta": "ابدأ التجربة المجانية"
-    }
+    },
+    "free_trial_hint": "اطلب خطة، ثم أبقِ «Free 30 Days Trial» طريقة الدفع عند إتمام الطلب."
   },
   "profile": {
     "2fa": {
@@ -2097,7 +2104,9 @@
       "show_top": "الأكثر مخالفة",
       "show_latest": "أحدث المخالفين",
       "show_bottom": "الأقل مخالفة"
-    }
+    },
+    "bad_behavior_stored_events": "الأحداث المخزّنة",
+    "bad_behavior_evidence_missing": "لم تعد أدلة الحظر متاحة."
   },
   "scope": {
     "all_services": "جميع الخدمات",
@@ -3101,6 +3110,7 @@
     "ip_unbanned": "تم رفع الحظر عن عنوان IP بنجاح!"
   },
   "tooltip": {
+    "apply_all_services": "يطبّق فقط الإعدادات العامة التي تغيّرت في عملية الحفظ هذه على جميع الخدمات، مستبدلًا القيم التي ضبطتها الخدمة أو قالبها.",
     "auto_lets_encrypt": "هل يجب طلب شهادة Let's Encrypt تلقائيًا.",
     "button": {
       "ban_ip": "حظر عنوان الـIP هذا",
@@ -4620,7 +4630,7 @@
       },
       "SERVER_NAME": {
         "label": "اسم الخادم",
-        "help": "قائمة المضيفات الافتراضية التي يخدمها BunkerWeb. (مفصولة بمسافة)"
+        "help": "قائمة المضيفات الافتراضية التي يخدمها BunkerWeb. (مفصولة بمسافة) يمكن أن يكون الاسم أيضًا عنوان IPv4 أو عنوان IPv6 مكتوبًا دون محددات تحيط به وبأحرف صغيرة وبالصيغة المضغوطة (2001:db8::1، دون أقواس مربعة)."
       },
       "WORKER_PROCESSES": {
         "label": "عمليات المعالجة",
@@ -4837,6 +4847,10 @@
       "PLUGINS_ORDER_SSL_CERTIFICATE": {
         "label": "ترتيب الإضافات (ssl_certificate)",
         "help": "الإضافات التي يجب أن تعمل أولًا أثناء طور ssl_certificate لهذا الموقع (اختيار/إصدار شهادة TLS). افصل المعرّفات بمسافات؛ تعمل الإضافات المتبقية لاحقًا حسب ترتيبها الطبيعي."
+      },
+      "PLUGINS_ORDER_SSL_CLIENT_HELLO": {
+        "label": "ترتيب الإضافات (ssl_client_hello)",
+        "help": "الإضافات التي يجب أن تعمل أولًا أثناء طور ssl_client_hello (TLS ClientHello، مرة واحدة لكل مصافحة، لكل خدمة وللخادم الافتراضي). افصل المعرّفات بمسافات؛ تعمل الإضافات المتبقية لاحقًا حسب ترتيبها الطبيعي."
       },
       "PLUGINS_ORDER_HEADER": {
         "label": "ترتيب الإضافات (header)",
