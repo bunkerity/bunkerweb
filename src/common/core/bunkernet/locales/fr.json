@@ -31,6 +31,10 @@
       "BUNKERNET_STATS_RETENTION_DAYS": {
         "label": "Rétention des statistiques BunkerNet (jours)",
         "help": "Âge maximal (en jours) des statistiques d'efficacité BunkerNet persistées."
+      },
+      "BUNKERNET_FILTER_HEADERS": {
+        "label": "Filtrer les en-têtes signalés",
+        "help": "Limite le contenu d’un rapport BunkerNet. Avec yes, seuls les en-têtes de requête User-Agent, Accept, Accept-Encoding, Accept-Language, Content-Type et Content-Length sont envoyés, et les valeurs détectées par ModSecurity dans les en-têtes et les cookies sont vidées. Avec no, tous les en-têtes de requête et les valeurs détectées sont envoyés tels quels."
       }
     }
   }

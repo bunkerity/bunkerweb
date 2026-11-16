@@ -31,6 +31,10 @@
       "BUNKERNET_STATS_RETENTION_DAYS": {
         "label": "BunkerNet اعدادوشمار برقراری (دن)",
         "help": "محفوظ شدہ BunkerNet افادیت کے اعدادوشمار کی زیادہ سے زیادہ عمر (دنوں میں)۔"
+      },
+      "BUNKERNET_FILTER_HEADERS": {
+        "label": "رپورٹ کردہ ہیڈرز فلٹر کریں",
+        "help": "BunkerNet رپورٹ کے مواد کو محدود کرتا ہے۔ yes پر صرف User-Agent، Accept، Accept-Encoding، Accept-Language، Content-Type اور Content-Length درخواست ہیڈرز بھیجے جاتے ہیں، اور ہیڈرز اور کوکیز میں ModSecurity سے مماثل قدریں خالی کر دی جاتی ہیں۔ no پر تمام درخواست ہیڈرز اور مماثل قدریں اسی حالت میں بھیجی جاتی ہیں۔"
       }
     }
   }

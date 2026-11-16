@@ -20,6 +20,10 @@
       "USE_BUNKERNET_STATS": {
         "label": "Effectiveness Stats ng BunkerNet",
         "help": "I-persist ang effectiveness statistics ng BunkerNet (contribution, laki ng blocklist, connectivity) sa database."
+      },
+      "BUNKERNET_FILTER_HEADERS": {
+        "label": "I-filter ang mga iniulat na header",
+        "help": "Nililimitahan ang nilalaman ng ulat ng BunkerNet. Kapag yes, ang mga request header na User-Agent, Accept, Accept-Encoding, Accept-Language, Content-Type at Content-Length lamang ang ipinapadala, at binablangko ang mga halagang itinugma ng ModSecurity sa mga header at cookie. Kapag no, ipinapadala nang walang pagbabago ang lahat ng request header at ang mga halagang itinugma."
       }
     },
     "widgets": {

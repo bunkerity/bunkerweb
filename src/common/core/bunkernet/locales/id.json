@@ -20,6 +20,10 @@
       "USE_BUNKERNET_STATS": {
         "label": "Statistik efektivitas BunkerNet",
         "help": "Simpan statistik efektivitas BunkerNet (kontribusi, ukuran blocklist, konektivitas) secara persisten ke database."
+      },
+      "BUNKERNET_FILTER_HEADERS": {
+        "label": "Filter header yang dilaporkan",
+        "help": "Membatasi isi laporan BunkerNet. Jika yes, hanya header permintaan User-Agent, Accept, Accept-Encoding, Accept-Language, Content-Type, dan Content-Length yang dikirim, dan nilai yang dicocokkan ModSecurity dalam header serta cookie dikosongkan. Jika no, semua header permintaan dan nilai yang cocok dikirim apa adanya."
       }
     },
     "widgets": {

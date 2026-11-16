@@ -31,6 +31,10 @@
       "BUNKERNET_STATS_RETENTION_DAYS": {
         "label": "مدة الاحتفاظ بإحصاءات BunkerNet (بالأيام)",
         "help": "أقصى عمر (بالأيام) لإحصاءات فعالية BunkerNet المحفوظة."
+      },
+      "BUNKERNET_FILTER_HEADERS": {
+        "label": "تصفية الترويسات المُبلّغ عنها",
+        "help": "يحدّ من محتوى تقرير BunkerNet. عند yes، تُرسل فقط ترويسات الطلب User-Agent وAccept وAccept-Encoding وAccept-Language وContent-Type وContent-Length، وتُفرّغ القيم التي طابقها ModSecurity في الترويسات وملفات تعريف الارتباط. عند no، تُرسل جميع ترويسات الطلب والقيم المطابقة كما هي."
       }
     }
   }

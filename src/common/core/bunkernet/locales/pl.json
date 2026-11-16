@@ -20,6 +20,10 @@
       "USE_BUNKERNET_STATS": {
         "label": "Statystyki skuteczności BunkerNet",
         "help": "Zapisuj statystyki skuteczności BunkerNet (wkład, rozmiar listy blokad, łączność) w bazie danych."
+      },
+      "BUNKERNET_FILTER_HEADERS": {
+        "label": "Filtruj zgłaszane nagłówki",
+        "help": "Ogranicza zawartość raportu BunkerNet. Przy yes wysyłane są tylko nagłówki żądania User-Agent, Accept, Accept-Encoding, Accept-Language, Content-Type i Content-Length, a wartości dopasowane przez ModSecurity w nagłówkach i ciasteczkach są czyszczone. Przy no wszystkie nagłówki żądania i dopasowane wartości są wysyłane bez zmian."
       }
     },
     "widgets": {

@@ -20,6 +20,10 @@
       "USE_BUNKERNET_STATS": {
         "label": "Статистика эффективности BunkerNet",
         "help": "Сохранять статистику эффективности BunkerNet (вклад, размер списка блокировок, связность) в базе данных."
+      },
+      "BUNKERNET_FILTER_HEADERS": {
+        "label": "Фильтровать передаваемые заголовки",
+        "help": "Ограничивает содержимое отчёта BunkerNet. При yes отправляются только заголовки запроса User-Agent, Accept, Accept-Encoding, Accept-Language, Content-Type и Content-Length, а значения, обнаруженные ModSecurity в заголовках и cookie, очищаются. При no все заголовки запроса и обнаруженные значения отправляются без изменений."
       }
     },
     "widgets": {

@@ -31,6 +31,10 @@
       "BUNKERNET_STATS_RETENTION_DAYS": {
         "label": "BunkerNet 통계 보관 기간(일)",
         "help": "저장된 BunkerNet 효과 통계의 최대 보관 기간(일)입니다."
+      },
+      "BUNKERNET_FILTER_HEADERS": {
+        "label": "보고되는 헤더 필터링",
+        "help": "BunkerNet 보고서의 내용을 제한합니다. yes이면 User-Agent, Accept, Accept-Encoding, Accept-Language, Content-Type 및 Content-Length 요청 헤더만 전송하고, ModSecurity가 헤더 및 쿠키에서 일치시킨 값은 비웁니다. no이면 모든 요청 헤더와 일치한 값을 그대로 전송합니다."
       }
     }
   }

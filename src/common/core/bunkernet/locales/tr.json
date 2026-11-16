@@ -20,6 +20,10 @@
       "USE_BUNKERNET_STATS": {
         "label": "BunkerNet etkinlik istatistikleri",
         "help": "BunkerNet etkinlik istatistiklerini (katkı, engelleme listesi boyutu, bağlantı) veritabanında kalıcı hale getir."
+      },
+      "BUNKERNET_FILTER_HEADERS": {
+        "label": "Bildirilen başlıkları filtrele",
+        "help": "BunkerNet raporunun içeriğini sınırlar. yes olduğunda yalnızca User-Agent, Accept, Accept-Encoding, Accept-Language, Content-Type ve Content-Length istek başlıkları gönderilir; ModSecurity'nin başlıklarda ve çerezlerde eşleştirdiği değerler boşaltılır. no olduğunda tüm istek başlıkları ve eşleşen değerler olduğu gibi gönderilir."
       }
     },
     "widgets": {

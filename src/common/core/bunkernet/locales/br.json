@@ -31,6 +31,10 @@
       "BUNKERNET_STATS_RETENTION_DAYS": {
         "label": "Retenção de estatísticas do BunkerNet (dias)",
         "help": "Idade máxima (em dias) das estatísticas de eficácia do BunkerNet persistidas."
+      },
+      "BUNKERNET_FILTER_HEADERS": {
+        "label": "Filtrar os cabeçalhos reportados",
+        "help": "Limita o conteúdo de um relatório do BunkerNet. Com yes, apenas os cabeçalhos de requisição User-Agent, Accept, Accept-Encoding, Accept-Language, Content-Type e Content-Length são enviados, e os valores detectados pelo ModSecurity nos cabeçalhos e cookies são esvaziados. Com no, todos os cabeçalhos de requisição e os valores detectados são enviados como estão."
       }
     }
   }

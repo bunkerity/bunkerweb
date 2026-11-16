@@ -31,6 +31,10 @@
       "BUNKERNET_STATS_RETENTION_DAYS": {
         "label": "Retención de estadísticas de BunkerNet (días)",
         "help": "Antigüedad máxima (en días) de las estadísticas de eficacia de BunkerNet persistidas."
+      },
+      "BUNKERNET_FILTER_HEADERS": {
+        "label": "Filtrar los encabezados notificados",
+        "help": "Limita el contenido de un informe de BunkerNet. Con yes, solo se envían los encabezados de solicitud User-Agent, Accept, Accept-Encoding, Accept-Language, Content-Type y Content-Length, y se vacían los valores detectados por ModSecurity en encabezados y cookies. Con no, se envían todos los encabezados de solicitud y los valores detectados tal como están."
       }
     }
   }

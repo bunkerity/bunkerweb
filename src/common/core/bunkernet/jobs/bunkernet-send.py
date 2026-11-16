@@ -25,6 +25,33 @@ exit_status = 0
 
 BATCH_SIZE = 100
 MAX_CACHED_REPORTS = 10000
+# Same allowlist as REPORT_HEADERS in bunkernet.lua, applied when BUNKERNET_FILTER_HEADERS is yes.
+REPORT_HEADERS = ("user-agent", "accept", "accept-encoding", "accept-language", "content-type", "content-length")
+
+
+def is_filtered(report: dict) -> bool:
+    """BUNKERNET_FILTER_HEADERS for the report's service, the global value when the service is unknown."""
+    value = getenv("BUNKERNET_FILTER_HEADERS", "no")
+    if getenv("MULTISITE", "no") == "yes":
+        value = getenv(f"{report.get('server_name')}_BUNKERNET_FILTER_HEADERS", value)
+    return value == "yes"
+
+
+def filter_report(report: dict) -> dict:
+    """Keep only allowlisted headers and blank matched header/cookie values (see get_report_data in bunkernet.lua)."""
+    if isinstance(report.get("headers"), dict):
+        report["headers"] = {name: value for name, value in report["headers"].items() if name.lower() in REPORT_HEADERS}
+    data = report.get("data")
+    if isinstance(data, dict) and "matched_vars" in data:
+        values, names = data["matched_vars"], data.get("matched_var_names")
+        if isinstance(values, list) and isinstance(names, list) and len(values) == len(names):
+            data["matched_vars"] = [
+                "" if isinstance(name, str) and name.lstrip("&").split(":", 1)[0].upper() in ("REQUEST_HEADERS", "REQUEST_COOKIES") else value
+                for value, name in zip(values, names)
+            ]
+        else:
+            del data["matched_vars"]
+    return report
 
 
 def send_pending_reports(reports: list, force_send: bool, send, persist, logger) -> tuple:
@@ -135,6 +162,9 @@ try:
 
     # Instance inputs need not be sorted. Send oldest first; cache retains the newest.
     reports = sorted(chain(cached_data.get("reports", []), instance_reports), key=lambda x: datetime.fromisoformat(x["date"]))
+
+    # Cached reports may predate the Lua filter. Apply the current service policy before sending or persisting.
+    reports = [filter_report(report) if is_filtered(report) else report for report in reports]
 
     # Check if forced send is needed due to time
     force_send = datetime.fromisoformat(cached_data["created"]) + timedelta(hours=24) < datetime.now().astimezone()

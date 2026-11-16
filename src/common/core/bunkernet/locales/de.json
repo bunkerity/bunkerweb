@@ -31,6 +31,10 @@
       "BUNKERNET_STATS_RETENTION_DAYS": {
         "label": "Aufbewahrung der BunkerNet-Statistiken (Tage)",
         "help": "Maximales Alter (in Tagen) der dauerhaft gespeicherten BunkerNet-Wirksamkeitsstatistiken."
+      },
+      "BUNKERNET_FILTER_HEADERS": {
+        "label": "Gemeldete Header filtern",
+        "help": "Begrenzt den Inhalt eines BunkerNet-Berichts. Bei yes werden nur die Anfrageheader User-Agent, Accept, Accept-Encoding, Accept-Language, Content-Type und Content-Length gesendet; die von ModSecurity in Headern und Cookies erkannten Werte werden geleert. Bei no werden alle Anfrageheader und die erkannten Werte unverändert gesendet."
       }
     }
   }

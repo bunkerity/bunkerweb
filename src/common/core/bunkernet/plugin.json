@@ -14,6 +14,15 @@
       "regex": "^(yes|no)$",
       "type": "check"
     },
+    "BUNKERNET_FILTER_HEADERS": {
+      "context": "multisite",
+      "default": "no",
+      "help": "Limit what a BunkerNet report carries. When yes, only the User-Agent, Accept, Accept-Encoding, Accept-Language, Content-Type and Content-Length request headers are sent, and the values ModSecurity matched in headers and cookies are blanked. When no, every request header and the matched values are sent as they are.",
+      "id": "bunkernet-filter-headers",
+      "label": "Filter reported headers",
+      "regex": "^(yes|no)$",
+      "type": "check"
+    },
     "BUNKERNET_SERVER": {
       "context": "global",
       "default": "https://api.bunkerweb.io",

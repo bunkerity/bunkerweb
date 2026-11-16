@@ -31,6 +31,10 @@
       "BUNKERNET_STATS_RETENTION_DAYS": {
         "label": "BunkerNet 統計保留期(天)",
         "help": "已持久化的 BunkerNet 有效性統計資訊的最長保留時間(以天為單位)。"
+      },
+      "BUNKERNET_FILTER_HEADERS": {
+        "label": "過濾回報的標頭",
+        "help": "限制 BunkerNet 報告的內容。設為 yes 時，僅傳送 User-Agent、Accept、Accept-Encoding、Accept-Language、Content-Type 和 Content-Length 請求標頭，並清空 ModSecurity 在標頭和 Cookie 中比對到的值。設為 no 時，所有請求標頭與比對值均原樣傳送。"
       }
     }
   }

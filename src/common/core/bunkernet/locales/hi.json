@@ -31,6 +31,10 @@
       "BUNKERNET_STATS_RETENTION_DAYS": {
         "label": "BunkerNet आँकड़े प्रतिधारण (दिन)",
         "help": "सुरक्षित BunkerNet प्रभावशीलता आँकड़ों की अधिकतम आयु (दिनों में)।"
+      },
+      "BUNKERNET_FILTER_HEADERS": {
+        "label": "रिपोर्ट किए गए हेडर फ़िल्टर करें",
+        "help": "BunkerNet रिपोर्ट की सामग्री सीमित करता है। yes होने पर केवल User-Agent, Accept, Accept-Encoding, Accept-Language, Content-Type और Content-Length अनुरोध हेडर भेजे जाते हैं, और हेडर तथा कुकी में ModSecurity से मेल खाने वाले मान खाली कर दिए जाते हैं। no होने पर सभी अनुरोध हेडर और मेल खाने वाले मान जैसे हैं वैसे भेजे जाते हैं।"
       }
     }
   }
