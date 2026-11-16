@@ -113,11 +113,15 @@ local NGX_NOTICE, NGX_ERR, NGX_DEBUG = 1, 2, 3
 local ngx_log = function() end
 local redis_slot = function() return 1 end
 local generate_magic_seed = function() return 1 end
-local redis7_with_host = false
+local redis7_with_host = {bw = false}
 local slot_cache = {bw = {[1] = {serv_list = {{ip = "old", port = 7000}}}}}
 slot_cache.bw.serv_list = {}
 local pick_node = function() return "old", 7000, false end
-local connect_node = function(_, client, ip) client.ip = ip; return true end
+local connect_with_pool = function(client, ip) client.ip = ip; return true end
+local ask_targets = function(_, ip, port) return {{ip=ip,port=port}} end
+local parse_endpoint = function(s) return s:match("^(.*):(%d+)$") end
+local socket_host = function(s) return s end
+local check_auth_with_retry = function() return true end
 local check_auth = function() return true end
 local release_connection = function() end
 local has_moved_signal = function(res) return type(res) == "string" and res:sub(1,5) == "MOVED" end
@@ -217,23 +221,27 @@ def test_cluster_tls_binds_verification_to_each_node_hostname():
     import re
 
     source = (ROOT / "src/deps/src/resty-redis-cluster/lib/resty/rediscluster.lua").read_text()
-    function = re.search(r"local function set_poolname\(.*?\nend", source, re.S).group()
+    function = re.search(r"local function connect_with_pool\(.*?\nend", source, re.S).group()
     run_lua(
         """
-local ngx_log = function() end
-local NGX_DEBUG = 1
+ngx = {shared = {}}
+local new_tab = function() return {} end
+local DEFAULT_SHARED_DICT_NAME = "locks"
+local socket_host = function(ip) return ip end
+local redis_client = {connect = function(self, ip, port, options) self.options = options; return true end}
 """
         + function
         + """
 local config = {base_pool = "tls", connect_opts = {ssl = true, ssl_verify = true}}
-set_poolname("redis.example", 6380, config)
-assert(config.connect_opts.server_name == "redis.example", "TLS must verify seed DNS identity, not just certificate chain")
-local first_pool = config.connect_opts.pool
-set_poolname("node2.example", 6380, config)
-assert(config.connect_opts.server_name == "node2.example", "routed node must not reuse previous SNI")
-assert(first_pool ~= config.connect_opts.pool)
-set_poolname("[::1]", 6380, config)
-assert(config.connect_opts.server_name == "::1", "IPv6 brackets are socket syntax, not certificate identity")
+connect_with_pool(redis_client, "redis.example", 6380, config)
+assert(redis_client.options.server_name == "redis.example", "TLS must verify seed DNS identity")
+local first_pool = redis_client.options.pool
+connect_with_pool(redis_client, "node2.example", 6380, config)
+assert(redis_client.options.server_name == "node2.example", "routed node must not reuse previous SNI")
+assert(first_pool ~= redis_client.options.pool)
+connect_with_pool(redis_client, "[::1]", 6380, config)
+assert(redis_client.options.server_name == "::1", "IPv6 brackets are socket syntax, not certificate identity")
+assert(config.connect_opts.server_name == nil and config.connect_opts.pool == nil, "caller options must stay untouched")
 print("OK")
 """
     )
@@ -256,14 +264,14 @@ local attempted, closed, pooled = {}, 0, 0
 local redis = {new = function() return {
  set_timeouts = function() end,
  close = function() closed = closed + 1 end} end}
-local connect_node = function(_, client, ip) client.ip = ip; attempted[#attempted + 1] = ip; return true end
+local connect_with_pool = function(client, ip) client.ip = ip; attempted[#attempted + 1] = ip; return true end
 local function stage(name)
  return function(_, client)
   if client.ip == "paused" and name == failed_stage then return nil, "timeout" end
   return true
  end
 end
-local check_auth, check_status, check_version = stage("auth"), stage("status"), stage("version")
+local check_auth_with_retry, check_status, check_version = stage("auth"), stage("status"), stage("version")
 local parse_masters, parse_slots = stage("masters"), stage("slots")
 local release_connection = function(client) assert(client.ip == "healthy"); pooled = pooled + 1 end
 """
@@ -294,8 +302,8 @@ local REDIS_SLOTS_TOTAL = 16384
 local table_insert = table.insert
 local ngx_log = function() end
 local NGX_INFO, NGX_DEBUG = 1, 2
-local redis7_with_host = false
-local slot_cache, master_nodes = {}, {}
+local redis7_with_host = {bw = false}
+local slot_cache, master_nodes, ask_ip_by_host = {}, {}, {}
 """
         + function
         + """

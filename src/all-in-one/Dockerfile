@@ -239,7 +239,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends libssh2-1t64 &&
 #   curl (libcurl4t64) 8.14.1-2+deb13u5 -> +deb13u7: CVE-2026-8286 CVE-2026-8924 CVE-2026-8927 CVE-2026-92392
 #   redis (redis-server redis-tools) 5:8.0.2-3+deb13u2 -> +deb13u3: CVE-2026-23479 CVE-2026-23631 CVE-2026-25243
 #     CVE-2026-81934
-RUN apt-get update && apt-get install -y --no-install-recommends bsdutils libblkid1 liblastlog2-2 libmount1 libsmartcols1 libuuid1 login mount util-linux libaom3 libde265-0 libexpat1 libheif1 libheif-plugin-dav1d libheif-plugin-libde265 gzip libc-bin libc6 libpng16-16t64 liblzma5 libpcre2-8-0 libpcre2-posix3 openssl libssl3t64 openssl-provider-legacy curl libcurl4t64 redis-server redis-tools && rm -rf /var/lib/apt/lists/* # CVE-2026-33164 CVE-2026-33165
+RUN apt-get update && apt-get install -y --no-install-recommends apt libapt-pkg7.0 bsdutils libblkid1 liblastlog2-2 libmount1 libsmartcols1 libuuid1 login mount util-linux libaom3 libde265-0 libexpat1 libheif1 libheif-plugin-dav1d libheif-plugin-libde265 gzip libc-bin libc6 libpng16-16t64 liblzma5 libpcre2-8-0 libpcre2-posix3 openssl libssl3t64 openssl-provider-legacy curl libcurl4t64 redis-server redis-tools && rm -rf /var/lib/apt/lists/* # CVE-2026-33164 CVE-2026-33165
 
 COPY src/deps/requirements.txt /tmp/requirements-deps.txt
 

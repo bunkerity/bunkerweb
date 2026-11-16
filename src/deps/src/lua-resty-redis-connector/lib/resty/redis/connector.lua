@@ -377,10 +377,15 @@ function _M.connect_to_host(self, host)
             ok, err = r:connect(path)
         end
     else
+        -- BW edit: Sentinel returns bare IPv6; ngx cosockets require brackets.
+        local address = host.host
+        if str_find(address, ":", 1, true) and str_sub(address, 1, 1) ~= "[" then
+            address = "[" .. address .. "]"
+        end
         if opts then
-            ok, err = r:connect(host.host, host.port, config.connection_options)
+            ok, err = r:connect(address, host.port, config.connection_options)
         else
-            ok, err = r:connect(host.host, host.port)
+            ok, err = r:connect(address, host.port)
         end
     end
 

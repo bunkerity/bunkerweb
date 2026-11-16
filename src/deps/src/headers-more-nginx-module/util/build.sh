@@ -7,11 +7,18 @@ version=$1
 home=~
 force=$2
 
+ld_opts="${OPENSSL_LIB:+-L$OPENSSL_LIB }${PCRE_LIB:+-L$PCRE_LIB }"
+rpath="${OPENSSL_LIB:+$OPENSSL_LIB:}${PCRE_LIB:+$PCRE_LIB:}"
+rpath="${rpath}${LIBDRIZZLE_LIB:+$LIBDRIZZLE_LIB:}/usr/local/lib"
+cc_opts="-DDEBUG_MALLOC${OPENSSL_INC:+ -I$OPENSSL_INC}"
+cc_opts="${cc_opts}${PCRE_INC:+ -I$PCRE_INC}"
+
         #--with-cc=gcc46 \
 
 ngx-build $force $version \
-      --with-ld-opt="-L$PCRE_LIB -Wl,-rpath,$PCRE_LIB" \
-      --with-cc-opt="-DNGX_LUA_USE_ASSERT -I$PCRE_INC" \
+      --with-ld-opt="${ld_opts}-Wl,-rpath,$rpath" \
+      --with-cc-opt="$cc_opts" \
+      --with-http_ssl_module \
       --without-mail_pop3_module \
       --without-mail_imap_module \
       --without-mail_smtp_module \

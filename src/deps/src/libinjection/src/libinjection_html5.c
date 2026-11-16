@@ -111,10 +111,15 @@ static int h5_is_white(char ch) {
     return strchr(" \t\n\v\f\r", ch) != NULL;
 }
 
+/*
+ * Returns the next non-whitespace byte as an unsigned char value, or
+ * CHAR_EOF. Where char is signed, returning it as a plain char would
+ * sign-extend 0xFF into CHAR_EOF.
+ */
 static int h5_skip_white(h5_state_t *hs) {
-    char ch;
+    unsigned char ch;
     while (hs->pos < hs->len) {
-        ch = hs->s[hs->pos];
+        ch = (unsigned char)hs->s[hs->pos];
         switch (ch) {
         case 0x00: /* IE only */
         case 0x20:
@@ -138,7 +143,7 @@ static int h5_state_eof(h5_state_t *hs) {
     return 0;
 }
 
-static injection_result_t h5_state_data(h5_state_t *hs) {
+static int h5_state_data(h5_state_t *hs) {
     const char *idx;
 
     TRACE();

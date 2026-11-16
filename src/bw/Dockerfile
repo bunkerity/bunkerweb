@@ -132,7 +132,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends libssh2-1t64 &&
 #     CVE-2026-35189 CVE-2026-35191 CVE-2026-42772 CVE-2026-54872 CVE-2026-54873 CVE-2026-54875
 #     CVE-2026-72897 CVE-2026-75804 CVE-2026-75805 CVE-2026-75806 CVE-2026-77696 CVE-2026-84782 CVE-2026-84784
 #   curl (libcurl4t64) 8.14.1-2+deb13u5 -> +deb13u7: CVE-2026-8286 CVE-2026-8924 CVE-2026-8927 CVE-2026-92392
-RUN apt-get update && apt-get install -y --no-install-recommends bsdutils libblkid1 liblastlog2-2 libmount1 libsmartcols1 libuuid1 login mount util-linux libaom3 libde265-0 libexpat1 libheif1 libheif-plugin-dav1d libheif-plugin-libde265 gzip libc-bin libc6 libsqlite3-0 perl-base libpng16-16t64 liblzma5 libpcre2-8-0 openssl libssl3t64 openssl-provider-legacy curl libcurl4t64 && rm -rf /var/lib/apt/lists/* # CVE-2026-33164 CVE-2026-33165
+RUN apt-get update && apt-get install -y --no-install-recommends apt libapt-pkg7.0 bsdutils libblkid1 liblastlog2-2 libmount1 libsmartcols1 libuuid1 login mount util-linux libaom3 libde265-0 libexpat1 libheif1 libheif-plugin-dav1d libheif-plugin-libde265 gzip libc-bin libc6 libsqlite3-0 perl-base libpng16-16t64 liblzma5 libpcre2-8-0 openssl libssl3t64 openssl-provider-legacy curl libcurl4t64 && rm -rf /var/lib/apt/lists/* # CVE-2026-33164 CVE-2026-33165
 
 # Copy dependencies
 COPY --from=builder --chown=0:101 --chmod=550 /usr/share/bunkerweb /usr/share/bunkerweb

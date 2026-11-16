@@ -3426,6 +3426,27 @@ static void build_subroutines(BuildCtx *ctx)
   |
   |// int64_t lj_vm_num2int_check(double x)
   |->vm_num2int_check:
+  |.if P64
+  |  // Use FPU conversions for the 64-bit ABI. Return the result in CRET1.
+  |  // On success, return the int32_t result with zero extension.
+  |  // On failure, return 0x8000000080000000.
+  |  // These leaf functions use the red zone to keep sp and the stack back chain unchanged.
+  |  fctidz FARG2, FARG1		// Convert to int64_t with truncation and saturation.
+  |  stfd FARG2, -16(sp)
+  |  fcfid FARG2, FARG2		// Convert to double for comparison.
+  |  ld CRET1, -16(sp)
+  |  fcmpu cr0, FARG1, FARG2
+  |  extsw TMP1, CRET1
+  |  bne >1				// Reject an inexact result, NaN, or infinity.
+  |  cmpd TMP1, CRET1
+  |  bne >1				// Reject a result outside the int32_t range.
+  |  rldicl CRET1, CRET1, 0, 32	// Apply zero extension to the int32_t result.
+  |  blr
+  |1:
+  |  lus CRET1, 0x8000
+  |  rldicr CRET1, CRET1, 32, 32	// Set the failure value to 0x8000000080000000.
+  |  blr
+  |.else
   |.if FPU
   |  subi sp, sp, 16
   |  stfd FARG1, 0(sp)
@@ -3489,13 +3510,45 @@ static void build_subroutines(BuildCtx *ctx)
   |  addi sp, sp, 16
   |.endif
   |  blr
+  |.endif
   |
   |// int64_t lj_vm_num2i64(double x)
   |->vm_num2i64:
+  |.if P64
+  |  fctidz FARG1, FARG1		// Convert to int64_t with truncation and saturation.
+  |  stfd FARG1, -16(sp)
+  |  ld CRET1, -16(sp)
+  |  blr
+  |.else
   |// fallthrough, same as lj_vm_num2u64.
+  |.endif
   |
   |// uint64_t lj_vm_num2u64(double x)
   |->vm_num2u64:
+  |.if P64
+  |  lus TMP1, 0x43e0
+  |  sldi TMP1, TMP1, 32		// Set the double bit pattern for 2^63.
+  |  std TMP1, -16(sp)
+  |  lfd FARG2, -16(sp)
+  |  fcmpu cr0, FARG1, FARG2
+  |  blt >1				// If x < 2^63, use the signed conversion.
+  |  // Subtract 2^63. After the integer conversion, add 2^63.
+  |  fsub FARG1, FARG1, FARG2
+  |  fctidz FARG1, FARG1
+  |  stfd FARG1, -16(sp)
+  |  ld CRET1, -16(sp)
+  |  lus TMP1, 0x8000
+  |  sldi TMP1, TMP1, 32		// Set the integer value to 2^63.
+  |  add CRET1, CRET1, TMP1
+  |  blr
+  |1:
+  |  // For negative x, keep the two's complement bit pattern of the int64_t result.
+  |  // The uint64_t conversion accepts values in the signed or unsigned range.
+  |  fctidz FARG1, FARG1		// Convert to int64_t with truncation and saturation.
+  |  stfd FARG1, -16(sp)
+  |  ld CRET1, -16(sp)
+  |  blr
+  |.else
   |.if FPU
   |  subi sp, sp, 16
   |  stfd FARG1, 0(sp)
@@ -3553,11 +3606,23 @@ static void build_subroutines(BuildCtx *ctx)
   |  addi sp, sp, 16
   |.endif
   |  blr
+  |.endif
   |
   |// int32_t lj_vm_tobit(double x)
   |.if FPU
   |->vm_tobit:
   |  lus TMP0, 0x59c0			// 2^52 + 2^51 (float).
+  |.if P64
+  |  stw TMP0, -16(sp)
+  |  lfs FARG2, -16(sp)
+  |  fadd FARG1, FARG1, FARG2
+  |  stfd FARG1, -16(sp)
+  |.if ENDIAN_LE
+  |  lwa CRET1, -16(sp)		// Load the low word with sign extension for the ABI.
+  |.else
+  |  lwa CRET1, -12(sp)
+  |.endif
+  |.else
   |  subi sp, sp, 16
   |  stw TMP0, 0(sp)
   |  lfs FARG2, 0(sp)
@@ -3565,6 +3630,7 @@ static void build_subroutines(BuildCtx *ctx)
   |  stfd FARG1, 0(sp)
   |  lwz CRET1, 4(sp)
   |  addi sp, sp, 16
+  |.endif
   |  blr
   |.endif
   |

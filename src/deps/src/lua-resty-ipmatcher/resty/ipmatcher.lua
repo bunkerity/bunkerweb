@@ -137,6 +137,30 @@ local function log_info(...)
 end
 
 
+-- BunkerWeb: an IPv4-mapped IPv6 address (::ffff:a.b.c.d) is the IPv4 address a.b.c.d, like NGINX treats it in its
+-- CIDR checks. Returns the IPv4 integer of a parsed IPv6 address when it is mapped, nil otherwise.
+local function mapped_ipv4(inets_ipv6)
+    if inets_ipv6[1] == 0 and inets_ipv6[2] == 0 and inets_ipv6[3] == 0xffff then
+        return inets_ipv6[4]
+    end
+end
+
+
+-- BunkerWeb: an entry that cannot be loaded (zone id, garbage, prefix out of range) is skipped and logged once per
+-- worker instead of failing the whole list, so one bad entry never disables the valid ones around it.
+local bad_entries_logged = {}
+local bad_entries_count = 0
+local function skip_invalid_entry(ip_addr_org)
+    if bad_entries_logged[ip_addr_org] or bad_entries_count >= 100 then
+        return
+    end
+    bad_entries_logged[ip_addr_org] = true
+    bad_entries_count = bad_entries_count + 1
+    ngx_log(ngx.WARN, "[IPMATCHER] ignoring invalid IP list entry \"",
+            str_sub(tostring(ip_addr_org), 1, 64), "\"")
+end
+
+
 local function split_ip(ip_addr_org)
     local idx = find_str(ip_addr_org, "/", 1, true)
     if not idx then
@@ -211,6 +235,20 @@ local function new(ips, with_value)
         local ip_addr, ip_addr_mask = split_ip(ip_addr_org)
 
         local inet_ipv4 = parse_ipv4(ip_addr)
+        local inets_ipv6
+        if not inet_ipv4 then
+            inets_ipv6 = parse_ipv6(ip_addr)
+            -- BunkerWeb: a mapped rule of /96 or more is the IPv4 rule it carries (::ffff:192.0.2.0/120 is 192.0.2.0/24)
+            local mapped = inets_ipv6 and ip_addr_mask and ip_addr_mask >= 96 and ip_addr_mask <= 128
+                           and mapped_ipv4(inets_ipv6)
+            if mapped then
+                inet_ipv4, inets_ipv6, ip_addr_mask = mapped, nil, ip_addr_mask - 96
+            end
+        end
+        if inet_ipv4 and ip_addr_mask and ip_addr_mask > 32 then
+            skip_invalid_entry(ip_addr_org)
+            goto continue
+        end
         if inet_ipv4 then
             ip_addr_mask = ip_addr_mask or 32
             if ip_addr_mask == 32 then
@@ -231,7 +269,10 @@ local function new(ips, with_value)
             goto continue
         end
 
-        local inets_ipv6 = parse_ipv6(ip_addr)
+        if inets_ipv6 and ip_addr_mask and ip_addr_mask > 128 then
+            skip_invalid_entry(ip_addr_org)
+            goto continue
+        end
         if inets_ipv6 then
             ip_addr_mask = ip_addr_mask or 128
             if ip_addr_mask == 128 then
@@ -265,7 +306,7 @@ local function new(ips, with_value)
         end
 
         if not inet_ipv4 and not inets_ipv6 then
-            return nil, "invalid ip address: " .. ip_addr
+            skip_invalid_entry(ip_addr_org)
         end
 
         ::continue::
@@ -379,6 +420,12 @@ function _M.match(self, ip)
         return false, "invalid ip address, not ipv4 and ipv6"
     end
 
+    -- BunkerWeb: a mapped client is looked up as the IPv4 address it carries
+    local mapped = mapped_ipv4(inets_ipv6)
+    if mapped then
+        return match_ipv4(self, mapped)
+    end
+
     local ipv6s = self.ipv6
     local value = ipv6s[ip]
     if value ~= nil then
@@ -398,6 +445,11 @@ function _M.match_bin(self, bin_ip)
     local inets_ipv6 = parse_bin_ipv6(bin_ip)
     if not inets_ipv6 then
         return false, "invalid ip address, not ipv4 and ipv6"
+    end
+
+    local mapped = mapped_ipv4(inets_ipv6)
+    if mapped then
+        return match_ipv4(self, mapped)
     end
 
     return match_ipv6(self, inets_ipv6)

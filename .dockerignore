@@ -1,6 +1,8 @@
 .git
 .idea/
 .vscode/
+# Local gitignored scratch holds root-owned tool caches and tens of GB; never send it in build contexts.
+.cache/
 **/__pycache__/
 
 env/
