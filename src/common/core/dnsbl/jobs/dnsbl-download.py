@@ -30,6 +30,9 @@ def check_ip_line(line: bytes) -> bytes | None:
         return None
     # Only keep first token for non-User-Agent lists
     line = line.split(b" ")[0]
+    # A zone id ("fe80::1%eth0") names an interface of the downloading host, not an address the matcher can load
+    if b"%" in line:
+        return None
     # Validate IP or CIDR
     if b"/" in line:
         with suppress(ValueError):
@@ -81,10 +84,10 @@ try:
         for file in list(JOB.job_path.rglob("*.list")):
             if file.parent == JOB.job_path:
                 LOGGER.warning(f"Removing no longer used url file {file} ...")
-                deleted, err = JOB.del_cache(file)
+                deleted, err = JOB.del_cache(file.name)
             else:
                 LOGGER.warning(f"Removing no longer used service file {file} ...")
-                deleted, err = JOB.del_cache(file, service_id=file.parent.name)
+                deleted, err = JOB.del_cache(file.name, service_id=file.parent.name)
             if not deleted:
                 LOGGER.warning(f"Couldn't delete file {file} from cache : {err}")
         sys_exit(0)
@@ -125,9 +128,10 @@ try:
                     if cached_data:
                         for line in cached_data.split(b"\n")[1:]:
                             line = line.strip()
-                            if not line:
+                            valid = check_ip_line(line)
+                            if valid is None:
                                 continue
-                            unique_entries.add(line)
+                            unique_entries.add(valid)
                 else:
                     # Download
                     iterable = None
@@ -218,7 +222,7 @@ try:
     for url_file in JOB.job_path.glob("*.list"):
         if url_file.name not in url_cache_files:
             LOGGER.warning(f"Removing no longer used url file {url_file} ...")
-            deleted, err = JOB.del_cache(url_file)
+            deleted, err = JOB.del_cache(url_file.name)
             if not deleted:
                 LOGGER.warning(f"Couldn't delete url file {url_file} from cache : {err}")
 

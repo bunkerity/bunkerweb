@@ -146,6 +146,11 @@ class JobScheduler:
 
             name_valid = self.__compiled_regexes["name"].match(job["name"])
             file_valid = self.__compiled_regexes["file"].match(job["file"])
+            job_file = Path(job["file"])
+            jobs_path = Path(plugin_file).parent.resolve().joinpath("jobs")
+            if job_file.is_absolute() or ".." in job_file.parts or not jobs_path.joinpath(job_file).resolve().is_relative_to(jobs_path):
+                self.__logger.warning(f"Invalid job file '{job['file']}' in plugin {plugin_name}: must stay within the plugin jobs directory {jobs_path}")
+                continue
             every_valid = job["every"] in ("once", "minute", "hour", "day", "week")
             reload_valid = isinstance(job.get("reload", False), bool)
             async_valid = isinstance(job.get("async", False), bool)

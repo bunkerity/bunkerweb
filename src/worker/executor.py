@@ -23,7 +23,12 @@ class JobExecutor:
     def run(self, job_data: dict) -> int:
         self.last_error = None
         name = job_data["name"]
-        resolved = Path(job_data["path"]).joinpath("jobs", job_data["file"]).resolve()
+        job_file = Path(job_data["file"])
+        jobs_path = Path(job_data["path"]).resolve().joinpath("jobs")
+        resolved = jobs_path.joinpath(job_file).resolve()
+
+        if job_file.is_absolute() or ".." in job_file.parts or not resolved.is_relative_to(jobs_path):
+            return self._fail(f"Job file '{job_data['file']}' must stay within the plugin jobs directory {jobs_path}")
 
         if not self._is_allowed_job_path(resolved):
             return self._fail(f"Path {resolved} is outside allowed job directories")

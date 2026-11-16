@@ -23,6 +23,9 @@ from jobs import Job  # type: ignore
 
 
 def check_line(line):
+    # A zone id ("fe80::1%eth0") names an interface of the downloading host, not an address NGINX can load
+    if b"%" in line:
+        return False, b""
     with suppress(ValueError):
         if b"/" in line:
             ip_network(line.decode())
@@ -83,10 +86,10 @@ try:
         for file in list(JOB.job_path.rglob("*.list")):
             if file.parent == JOB.job_path:
                 LOGGER.warning(f"Removing no longer used url file {file} ...")
-                deleted, err = JOB.del_cache(file)
+                deleted, err = JOB.del_cache(file.name)
             else:
                 LOGGER.warning(f"Removing no longer used service file {file} ...")
-                deleted, err = JOB.del_cache(file, service_id=file.parent.name)
+                deleted, err = JOB.del_cache(file.name, service_id=file.parent.name)
 
             if not deleted:
                 LOGGER.warning(f"Couldn't delete file {file} from cache : {err}")
@@ -140,7 +143,9 @@ try:
                         for line in cached_data.split(b"\n")[1:]:
                             line = line.strip()
                             if line:
-                                unique_entries.add(line)
+                                ok, data = check_line(line)
+                                if ok:
+                                    unique_entries.add(data)
                 else:
                     LOGGER.info(f"Downloading Real IP data from {url} ...")
                     failed = False
@@ -260,7 +265,7 @@ try:
         LOGGER.debug(f"Checking if {url_file} is still in use ...")
         if url_file.name not in urls:
             LOGGER.warning(f"Removing no longer used url file {url_file} ...")
-            deleted, err = JOB.del_cache(url_file)
+            deleted, err = JOB.del_cache(url_file.name)
             if not deleted:
                 LOGGER.warning(f"Couldn't delete url file {url_file} from cache : {err}")
 
