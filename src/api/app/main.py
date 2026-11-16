@@ -81,9 +81,11 @@ def create_app() -> FastAPI:
         docs_url=api_config.docs_url,
         redoc_url=api_config.redoc_url,
         openapi_url=api_config.openapi_url,
-        root_path=api_config.API_ROOT_PATH or "",
         lifespan=lifespan,
     )
+    if api_config.API_ROOT_PATH:
+        # The constructor argument is deprecated since FastAPI 0.146.
+        app.root_path = api_config.API_ROOT_PATH
     app.add_middleware(
         CertificateUploadSizeLimitMiddleware,
         max_body_size=CERTIFICATE_UPLOAD_MAX_BODY_SIZE,

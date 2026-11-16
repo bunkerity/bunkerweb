@@ -3,6 +3,7 @@ from typing import Annotated, Any, Dict, List, Optional
 from re import sub as re_sub
 from pathlib import Path
 
+from anyio import from_thread
 from fastapi import APIRouter, Depends, UploadFile, File, Form, Path as PathParam, Query, Request
 from fastapi.responses import JSONResponse
 
@@ -341,6 +342,10 @@ def update_config_upload(
 
     Optional form fields `new_service`, `new_type`, `new_name` allow moving/renaming.
     """
+    # FastAPI 0.161 reads an omitted bool form field as False; omission must preserve the draft.
+    if new_is_draft is False and "new_is_draft" not in from_thread.run(request.form):
+        new_is_draft = None
+
     s_orig = None if service in (None, "", "global") else service
     ctype_orig = config_type  # Already normalized by Pydantic
     name_orig = name
