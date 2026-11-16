@@ -30,7 +30,7 @@
 - [FEATURE] `core`: `CLIENT_HEADER_TIMEOUT` and `CLIENT_BODY_TIMEOUT` now support per-service overrides.
 - [FEATURE] `modsecurity`: new `MODSECURITY_SEC_AUDIT_LOG_FORMAT` setting (`Native` or `JSON`) writes the audit log as one JSON object per entry.
 - [BUGFIX] `inject`: quotes and backslashes in `INJECT_HEAD` and `INJECT_BODY` no longer break the generated config; remove hand-added `\'` workaround escapes.
-- [BUGFIX] `antibot`, `inject`: `INJECT_HEAD` and `INJECT_BODY` are no longer applied to the antibot challenge page. (Fixes #3234)
+- [BUGFIX] `antibot`, `errors`, `inject`: `INJECT_HEAD` and `INJECT_BODY` are no longer applied to the antibot challenge page and BunkerWeb's error pages. (Fixes #3234)
 - [BUGFIX] `modsecurity`: response body rules now inspect Brotli-compressed responses too; ModSecurity used to see the compressed bytes when `USE_BROTLI=yes`. A response-body deny after headers were sent can leave the client with an incomplete response, as with gzip.
 - [BUGFIX] `linux`: RHEL 9 and 10 packages now build ModSecurity with yajl, so JSON request bodies are parsed for CRS and `SecAuditLogFormat JSON` works.
 - [BUGFIX] `limit`: `LIMIT_CONN_MAX_*` settings now accept only values NGINX supports (1 to 65535).
