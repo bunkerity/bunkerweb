@@ -23,7 +23,6 @@ function cors:initialize(ctx)
 	}
 	self.preflight_headers = {
 		["CORS_MAX_AGE"] = "Access-Control-Max-Age",
-		["CORS_ALLOW_CREDENTIALS"] = "Access-Control-Allow-Credentials",
 		["CORS_ALLOW_METHODS"] = "Access-Control-Allow-Methods",
 		["CORS_ALLOW_HEADERS"] = "Access-Control-Allow-Headers",
 	}
@@ -39,6 +38,21 @@ function cors:self_origin()
 	local authority =
 		public_authority(self.ctx.bw.server_name, https and "HTTPS_PORT" or "HTTP_PORT", self.ctx.bw.server_name)
 	return (https and "https://" or "http://") .. authority
+end
+
+-- One verdict for access() (deny) and header() (Allow-Origin, credentials). `self` compares the
+-- origin exactly: SERVER_NAME is a hostname, not a pattern, so a regex match would let a look-alike
+-- origin through (example.com matching exampleXcom).
+function cors:is_origin_allowed()
+	local allow_origin = self.variables["CORS_ALLOW_ORIGIN"]
+	if allow_origin == "*" then
+		return true
+	end
+	local origin = self.ctx.bw.http_origin
+	if allow_origin == "self" then
+		return origin == self:self_origin()
+	end
+	return regex_match(origin, allow_origin, nil, "CORS_ALLOW_ORIGIN") and true or false
 end
 
 function cors:header()
@@ -65,25 +79,30 @@ function cors:header()
 	end
 
 	-- Set headers
+	local origin_allowed = self:is_origin_allowed()
 	if self.variables["CORS_ALLOW_ORIGIN"] == "*" then
 		ngx_header["Access-Control-Allow-Origin"] = "*"
 	elseif self.variables["CORS_ALLOW_ORIGIN"] == "self" then
 		ngx_header["Access-Control-Allow-Origin"] = self:self_origin()
 	else
-		ngx_header["Access-Control-Allow-Origin"] = self.ctx.bw.http_origin
+		-- Regex: echo only an origin the pattern allows, and drop any value the upstream sent for the others
+		ngx_header["Access-Control-Allow-Origin"] = origin_allowed and self.ctx.bw.http_origin or nil
 	end
 	for variable, header in pairs(self.all_headers) do
 		if self.variables[variable] ~= "" then
 			ngx_header[header] = self.variables[variable]
 		end
 	end
+	-- Credentials go to an allowed origin only (preflight and real responses), never with `*`; this
+	-- also strips a credentials header the upstream set for any other origin.
+	if ngx_header["Access-Control-Allow-Origin"] == "*" or not origin_allowed then
+		ngx_header["Access-Control-Allow-Credentials"] = nil
+	elseif self.variables["CORS_ALLOW_CREDENTIALS"] == "yes" then
+		ngx_header["Access-Control-Allow-Credentials"] = "true"
+	end
 	if self.ctx.bw.request_method == "OPTIONS" then
 		for variable, header in pairs(self.preflight_headers) do
-			if variable == "CORS_ALLOW_CREDENTIALS" then
-				if self.variables["CORS_ALLOW_CREDENTIALS"] == "yes" then
-					ngx_header[header] = "true"
-				end
-			elseif self.variables[variable] ~= "" then
+			if self.variables[variable] ~= "" then
 				if variable == "CORS_MAX_AGE" then
 					-- the header carries seconds, never the suffixed setting value
 					local value = parse_duration(self.variables[variable], "s")
@@ -106,24 +125,8 @@ function cors:access()
 		return self:ret(true, "service doesn't use CORS")
 	end
 
-	-- Set the allow origin
-	local allow_origin = self.variables["CORS_ALLOW_ORIGIN"]
-	if allow_origin == "self" then
-		allow_origin = self:self_origin()
-	end
-
-	-- CORS_ALLOW_ORIGIN="self" is the default and is replaced above by SERVER_NAME, so naming
-	-- the raw setting would send the operator to a value that holds no regex at all.
-	local origin_source = self.variables["CORS_ALLOW_ORIGIN"] == "self" and "SERVER_NAME (via CORS_ALLOW_ORIGIN=self)"
-		or "CORS_ALLOW_ORIGIN"
-
 	-- Deny as soon as possible if needed
-	if
-		self.ctx.bw.http_origin
-		and self.variables["CORS_DENY_REQUEST"] == "yes"
-		and allow_origin ~= "*"
-		and not regex_match(self.ctx.bw.http_origin, allow_origin, nil, origin_source)
-	then
+	if self.ctx.bw.http_origin and self.variables["CORS_DENY_REQUEST"] == "yes" and not self:is_origin_allowed() then
 		self:set_metric("counters", "failed_cors", 1)
 		return self:ret(
 			true,
