@@ -1,4 +1,4 @@
-"""Mouse, focus and reorder regressions from the final UI-port review."""
+"""Settings dropdown placement, offender search focus and workflow reorder controls."""
 
 import json
 from pathlib import Path

@@ -62,7 +62,7 @@ import {
     return true;
   }
 
-  // The timestamp and the level tag get their own spans (OPS-24) so the terminal can dim the
+  // The timestamp and the level tag get their own spans so the terminal can dim the
   // first and weigh the second. A line the classifiers cannot split stays one plain text node:
   // every unknown format keeps rendering exactly as before. Text is only ever a text node.
   function lineEl(text) {

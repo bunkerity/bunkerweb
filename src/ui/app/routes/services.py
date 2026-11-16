@@ -694,18 +694,22 @@ def services_convert():
     if is_readonly_request(API_CLIENT.readonly):
         return handle_error(translated("flash.do_not_have_write_permission") or "You do not have the write permission", "services")
 
-    verify_data_in_form(
+    invalid = verify_data_in_form(
         data={"services": None},
         err_message=translated("services.flash.missing_services_parameter_services_convert") or "Missing services parameter on /services/convert.",
         redirect_url="services",
         next=True,
     )
-    verify_data_in_form(
+    if invalid is not True:
+        return invalid
+    invalid = verify_data_in_form(
         data={"convert_to": None},
         err_message=translated("services.flash.missing_convert_parameter_services_convert") or "Missing convert_to parameter on /services/convert.",
         redirect_url="services",
         next=True,
     )
+    if invalid is not True:
+        return invalid
 
     services = [s for s in request.form["services"].split(",") if s.strip()]
     if not services:
@@ -928,12 +932,14 @@ def services_delete():
     if is_readonly_request(API_CLIENT.readonly):
         return handle_error(translated("flash.do_not_have_write_permission") or "You do not have the write permission", "services")
 
-    verify_data_in_form(
+    invalid = verify_data_in_form(
         data={"services": None},
         err_message=translated("services.flash.missing_services_parameter_services_delete") or "Missing services parameter on /services/delete.",
         redirect_url="services",
         next=True,
     )
+    if invalid is not True:
+        return invalid
     services = [s for s in request.form["services"].split(",") if s.strip()]
     if not services:
         return handle_error(translated("services.flash.no_services_selected") or "No services selected.", "services", True)

@@ -32,12 +32,14 @@ def jobs_run():
     if is_readonly_request(API_CLIENT.readonly):
         return handle_error(translated("flash.do_not_have_write_permission") or "You do not have the write permission", "jobs")
 
-    verify_data_in_form(
+    invalid = verify_data_in_form(
         data={"jobs": None},
         err_message=translated("jobs.flash.missing_jobs_parameter_jobs_run") or "Missing jobs parameter on /jobs/run.",
         redirect_url="jobs",
         next=True,
     )
+    if invalid is not True:
+        return invalid
     jobs = request.form["jobs"]
     if not jobs:
         return handle_error(translated("jobs.flash.no_jobs_selected") or "No jobs selected.", "jobs", True)

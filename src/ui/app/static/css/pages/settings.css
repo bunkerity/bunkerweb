@@ -52,7 +52,7 @@
   justify-content: center;
 }
 
-/* ---- SET-11: settings grid driven by the CARD's width (design settings.css:9-25). ------------
+/* ---- settings grid driven by the CARD's width (design settings.css:9-25). ------------
    `.bw-settings-card` is the query container, so a narrower card (a side rail, a small window)
    reflows by its own width: 1 column, 2 from 640px, 3 from 1100px. Wide kinds span the row. */
 .bw-settings-card {
@@ -82,7 +82,7 @@
   }
 }
 
-/* ---- SET-10: help text read in place under the control (design `.bw-input-help`). -------- */
+/* ---- help text read in place under the control (design `.bw-input-help`). -------- */
 .bw-setting-frame .bw-input-help {
   margin: 0.5rem 0 0;
   font-size: 0.72rem;
@@ -90,7 +90,7 @@
   color: var(--bw-fg-3, var(--bs-secondary-color));
 }
 
-/* ---- SET-8 / PLG-21: card header with count + search (design configure.js:96-103). ---------- */
+/* ---- card header with count + search (design configure.js:96-103). ---------- */
 .bw-settings-card .bw-settings-head {
   display: flex;
   align-items: center;
@@ -139,7 +139,7 @@
   color: var(--bw-fg-3, var(--bs-secondary-color));
 }
 
-/* ---- PLG-20: Plugin / Scope selectors above the card (design `.plugin-scope-bar`). --------- */
+/* ---- Plugin / Scope selectors above the card (design `.plugin-scope-bar`). --------- */
 .bw-scope-bar {
   display: flex;
   flex-wrap: wrap;
@@ -176,7 +176,7 @@
   color: var(--bw-fg-3, var(--bs-secondary-color));
 }
 
-/* ---- PLG-24 / SET-14: the notes under the form. ----------------------------------------- */
+/* ---- the notes under the form. ----------------------------------------- */
 .bw-settings-note {
   display: flex;
   align-items: flex-start;
@@ -201,7 +201,7 @@
   background: var(--bw-bg-card);
 }
 
-/* ---- SET-6: Compose / Raw as the design's range-picker, in the page head. -------------------
+/* ---- Compose / Raw as the design's range-picker, in the page head. -------------------
    Still links (models/mode_pills.html): `.nav-link.active` marks the mode on screen. */
 .bw-mode-pills {
   display: inline-flex;
@@ -242,9 +242,9 @@
   margin: 0;
 }
 
-/* ---- SET-5: the compose shelf reads as the design's plugin table (rows only, markup untouched, so every
-   switch, picker and hidden fallback posts exactly as before). Loaded by global_settings.html and, since
-   SET-6, service_settings.html. ------------------------------------------------------------------ */
+/* ---- the compose shelf reads as the design's plugin table (rows only, markup untouched, so every
+   switch, picker and hidden fallback posts exactly as before). Loaded by global_settings.html and
+   service_settings.html. ------------------------------------------------------------------ */
 #compose-shelf {
   overflow: hidden;
 }
@@ -294,7 +294,7 @@
   text-align: start;
 }
 
-/* ---- SET-7: raw editor tiles + in-card search (design global-raw.js:75-150). ----------------- */
+/* ---- raw editor tiles + in-card search (design global-raw.js:75-150). ----------------- */
 .bw-raw-tiles {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -348,7 +348,7 @@
   max-width: 220px;
 }
 
-/* ---- SET-9 / SET-20: the design's field look over the native controls (design settings.css .bw-input-field). --
+/* ---- the design's field look over the native controls (design settings.css .bw-input-field). --
    The key is the subtitle, so the floating label (which printed it inside the control) is hidden: the controls
    keep their title (`aria-labelledby` points at the card label, not at it). A fixed 40px control, no floating pad. */
 .bw-setting-frame .bw-input-subtitle {

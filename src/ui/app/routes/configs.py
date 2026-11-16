@@ -50,13 +50,16 @@ CONFIG_TYPES = {
 
 
 def _valid_config_selection(configs: object) -> bool:
+    # The selection only names existing rows, which the API matches exactly: file and env based configs can carry names
+    # CONFIG_NAME_RX rejects (a dot, for one), and those must reach the protected-config report instead of failing the whole batch.
     if not isinstance(configs, list) or not configs:
         return False
     allowed_types = {config_type.lower() for config_type in CONFIG_TYPES}
     return all(
         isinstance(config, dict)
         and isinstance(config.get("name"), str)
-        and match(CONFIG_NAME_RX, config["name"])
+        and 0 < len(config["name"]) <= 255
+        and config["name"].isprintable()
         and isinstance(config.get("type"), str)
         and config["type"].strip().replace("-", "_").lower() in allowed_types
         and (config.get("service") is None or isinstance(config.get("service"), str))
@@ -324,18 +327,22 @@ def configs_convert():
     if is_readonly_request(API_CLIENT.readonly):
         return handle_error(translated("flash.do_not_have_write_permission") or "You do not have the write permission", "configs")
 
-    verify_data_in_form(
+    invalid = verify_data_in_form(
         data={"configs": None},
         err_message=translated("configs.flash.missing_configs_parameter_configs_convert") or "Missing configs parameter on /configs/convert.",
         redirect_url="configs",
         next=True,
     )
-    verify_data_in_form(
+    if invalid is not True:
+        return invalid
+    invalid = verify_data_in_form(
         data={"convert_to": None},
         err_message=translated("configs.flash.missing_convert_parameter_configs_convert") or "Missing convert_to parameter on /configs/convert.",
         redirect_url="configs",
         next=True,
     )
+    if invalid is not True:
+        return invalid
 
     raw_configs = request.form["configs"]
     if not raw_configs:
@@ -498,12 +505,14 @@ def configs_delete():
     if is_readonly_request(API_CLIENT.readonly):
         return handle_error(translated("flash.do_not_have_write_permission") or "You do not have the write permission", "configs")
 
-    verify_data_in_form(
+    invalid = verify_data_in_form(
         data={"configs": None},
         err_message=translated("configs.flash.missing_configs_parameter_configs_delete") or "Missing configs parameter on /configs/delete.",
         redirect_url="configs",
         next=True,
     )
+    if invalid is not True:
+        return invalid
     configs = request.form["configs"]
     if not configs:
         return handle_error(translated("configs.flash.no_configs_selected") or "No configs selected.", "configs", True)
@@ -525,8 +534,11 @@ def configs_delete():
         # Delete exactly the selected keys via the API (which routes to
         # db.delete_custom_configs) instead of the old method-wide re-save. Only UI/API
         # method configs are removable; the API reports the rest as skipped.
+        # A name CONFIG_NAME_RX refuses can only belong to a file or env based config (the API refuses to create one), and
+        # the API validates every name of a batch, so one such row would fail the whole request: report it as skipped here.
+        api_configs = [config for config in configs if match(CONFIG_NAME_RX, config["name"])]
         try:
-            resp = API_CLIENT.delete_configs(configs)
+            resp = API_CLIENT.delete_configs(api_configs) if api_configs else {"deleted": [], "skipped": []}
         except Exception as e:
             DATA["TO_FLASH"].append(
                 {
@@ -540,6 +552,11 @@ def configs_delete():
 
         deleted = resp.get("deleted", []) if isinstance(resp, dict) else []
         skipped = resp.get("skipped", []) if isinstance(resp, dict) else []
+        skipped += [
+            f"{config.get('service') or 'global'}/{config['type'].strip().replace('-', '_').lower()}/{config['name']}"
+            for config in configs
+            if config not in api_configs
+        ]
 
         for skipped_config in skipped:
             DATA["TO_FLASH"].append(
@@ -594,12 +611,14 @@ def configs_new():
         if is_readonly_request(API_CLIENT.readonly):
             return handle_error(translated("flash.do_not_have_write_permission") or "You do not have the write permission", "configs")
 
-        verify_data_in_form(
+        invalid = verify_data_in_form(
             data={"service": None},
             err_message=translated("configs.flash.missing_service_parameter_configs_new") or "Missing service parameter on /configs/new.",
             redirect_url="configs.configs_new",
             next=True,
         )
+        if invalid is not True:
+            return invalid
         service = request.form["service"]
         services = BW_CONFIG.get_config(global_only=True, with_drafts=True, methods=False, filtered_settings=("SERVER_NAME",))["SERVER_NAME"].split()
         if service != "global" and service not in services:
@@ -607,36 +626,42 @@ def configs_new():
                 translated("flash.service_does_not_exist", service=service) or f"Service {service} does not exist.", "configs.configs_new", True
             )
 
-        verify_data_in_form(
+        invalid = verify_data_in_form(
             data={"type": None},
             err_message=translated("configs.flash.missing_type_parameter_configs_new") or "Missing type parameter on /configs/new.",
             redirect_url="configs.configs_new",
             next=True,
         )
+        if invalid is not True:
+            return invalid
         config_type = request.form["type"]
         if config_type not in CONFIG_TYPES:
             return handle_error(
                 translated("configs.flash.invalid_type_parameter_configs_new") or "Invalid type parameter on /configs/new.", "configs.configs_new", True
             )
 
-        verify_data_in_form(
+        invalid = verify_data_in_form(
             data={"name": None},
             err_message=translated("configs.flash.missing_name_parameter_configs_new") or "Missing name parameter on /configs/new.",
             redirect_url="configs.configs_new",
             next=True,
         )
+        if invalid is not True:
+            return invalid
         config_name = request.form["name"]
         if not match(CONFIG_NAME_RX, config_name):
             return handle_error(
                 translated("configs.flash.invalid_name_parameter_configs_new") or "Invalid name parameter on /configs/new.", "configs.configs_new", True
             )
 
-        verify_data_in_form(
+        invalid = verify_data_in_form(
             data={"value": None},
             err_message=translated("configs.flash.missing_value_parameter_configs_new") or "Missing value parameter on /configs/new.",
             redirect_url="configs.configs_new",
             next=True,
         )
+        if invalid is not True:
+            return invalid
         config_value = request.form["value"].replace("\r\n", "\n").strip()
         is_draft = request.form.get("is_draft", "no") == "yes"
         DATA.load_from_file()
@@ -808,12 +833,14 @@ def configs_edit(service: str, config_type: str, name: str):
                 True,
             )
 
-        verify_data_in_form(
+        invalid = verify_data_in_form(
             data={"service": None},
             err_message=translated("configs.flash.missing_service_parameter_configs_new") or "Missing service parameter on /configs/new.",
             redirect_url="configs.configs_new",
             next=True,
         )
+        if invalid is not True:
+            return invalid
         new_service = request.form["service"]
         services = BW_CONFIG.get_config(global_only=True, with_drafts=True, methods=False, filtered_settings=("SERVER_NAME",))["SERVER_NAME"].split()
         if new_service != "global" and new_service not in services:
@@ -826,12 +853,14 @@ def configs_edit(service: str, config_type: str, name: str):
         if new_service == "global":
             new_service = None
 
-        verify_data_in_form(
+        invalid = verify_data_in_form(
             data={"type": None},
             err_message=translated("configs.flash.missing_type_parameter_configs_new") or "Missing type parameter on /configs/new.",
             redirect_url="configs.configs_new",
             next=True,
         )
+        if invalid is not True:
+            return invalid
         new_type = request.form["type"]
         if new_type not in CONFIG_TYPES:
             return handle_error(
@@ -839,12 +868,14 @@ def configs_edit(service: str, config_type: str, name: str):
             )
         new_type = new_type.lower()
 
-        verify_data_in_form(
+        invalid = verify_data_in_form(
             data={"name": None},
             err_message=translated("configs.flash.missing_name_parameter_configs_new") or "Missing name parameter on /configs/new.",
             redirect_url="configs.configs_new",
             next=True,
         )
+        if invalid is not True:
+            return invalid
         new_name = request.form["name"]
         if not match(CONFIG_NAME_RX, new_name):
             return handle_error(
@@ -859,12 +890,14 @@ def configs_edit(service: str, config_type: str, name: str):
                 True,
             )
 
-        verify_data_in_form(
+        invalid = verify_data_in_form(
             data={"value": None},
             err_message=translated("configs.flash.missing_value_parameter_configs_new") or "Missing value parameter on /configs/new.",
             redirect_url="configs.configs_new",
             next=True,
         )
+        if invalid is not True:
+            return invalid
         config_value = request.form["value"].replace("\r\n", "\n").strip()
         new_is_draft = request.form.get("is_draft", "no") == "yes"
         DATA.load_from_file()

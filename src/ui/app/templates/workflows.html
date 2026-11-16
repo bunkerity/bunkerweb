@@ -208,7 +208,7 @@
         </form>
     {% endcall %}
 
-    {# WF-22: the attached service names and the detach action, one dialog reachable from the row. #}
+    {# the attached service names and the detach action, one dialog reachable from the row. #}
     {% call modal(id="workflow-services-modal", title_key="workflows.port.services_title", title="Services attached to this workflow") %}
         <div class="modal-body">
             <p class="text-muted small" id="workflow-services-help">{{ _("workflows.port.services_help") }}</p>

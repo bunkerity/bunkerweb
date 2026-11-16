@@ -1,4 +1,4 @@
-// Timings: client toolbar over the rows the server already rendered (OPS-49). Search, phase filter,
+// Timings: client toolbar over the rows the server already rendered. Search, phase filter,
 // sortable headers, a Columns menu and a CSV export of what is on screen. No request is made.
 (function () {
   const body = document.getElementById("timings-body");

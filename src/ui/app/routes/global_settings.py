@@ -55,7 +55,8 @@ def update_global_config(
     # The pages render a stored secret as a placeholder (models/secret_settings.py): one that comes
     # back untouched means "keep it", so put the stored value back before anything compares.
     # The RAW page renders a draft's retained value, so a placeholder there restores from the draft.
-    variables = restore_secrets(variables, config, secret_setting_names(BW_CONFIG.get_plugins_settings()), drafted if draft_settings is not None else {})
+    plugins_settings = BW_CONFIG.get_plugins_settings()
+    variables = restore_secrets(variables, config, secret_setting_names(plugins_settings), drafted if draft_settings is not None else {})
 
     # Global settings have never had a restore pass: the page posts every key, so
     # absence meant deletion and that was fine. A per-plugin page posts only its own
@@ -101,7 +102,10 @@ def update_global_config(
 
     for variable, value in variables.items():
         # The RAW editor posts a draft's retained value, so that is what "unchanged" means for it.
-        setting = (drafted.get(variable) if draft_settings is not None else None) or config.get(variable, {"value": None, "global": True})
+        # The compact API snapshot omits untouched plugin defaults, which compose switches still post.
+        setting = (drafted.get(variable) if draft_settings is not None else None) or config.get(
+            variable, {"value": plugins_settings.get(variable, {}).get("default"), "global": True}
+        )
         if setting.get("global", True) and value == setting["value"]:
             del variables_to_check[variable]
 

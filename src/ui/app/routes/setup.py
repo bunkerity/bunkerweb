@@ -6,6 +6,7 @@ from os import environ, getenv
 # from string import ascii_letters, digits
 from re import escape, match
 from time import sleep
+from urllib.parse import urlsplit
 
 from flask import Blueprint, Response, redirect, render_template, request, url_for
 from flask_login import current_user
@@ -39,6 +40,15 @@ setup = Blueprint("setup", __name__)
 SETUP_NOTICES = {
     "session_expired": "login.notice_session_expired",
 }
+
+
+def _default_server_name(host_header: str) -> str:
+    """Server name the wizard proposes from the Host header: the host without its port, a bracketed IPv6 literal included."""
+    try:
+        server_name = urlsplit("//" + host_header).hostname or "www.example.com"
+    except ValueError:
+        server_name = ""
+    return server_name
 
 
 @setup.route("/setup", methods=["GET", "POST"])
@@ -387,9 +397,7 @@ def setup_page():
         value for key, value in chain(db_config.items(), environ.items()) if key.startswith("LETS_ENCRYPT_DNS_CREDENTIAL_ITEM")
     ]
 
-    server_name = request.headers.get("Host", "").split(":")[0]
-    if not server_name:
-        server_name = "www.example.com"
+    server_name = _default_server_name(request.headers.get("Host", ""))
 
     notice = SETUP_NOTICES.get(request.args.get("reason", ""))
 

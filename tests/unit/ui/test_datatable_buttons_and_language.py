@@ -1,4 +1,4 @@
-"""Regressions found by the W3 live UI walk: buttons and loading-page i18n."""
+"""DataTable button adapters, column defaults and loading-page language listeners."""
 
 import re
 import shutil

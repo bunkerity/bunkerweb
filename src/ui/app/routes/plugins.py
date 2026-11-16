@@ -168,12 +168,14 @@ def delete_plugin():
     if not current_user.admin:
         return Response(translated("plugins.flash.plugin_management_restricted_administrators") or "Plugin management is restricted to administrators", 403)
 
-    verify_data_in_form(
+    invalid = verify_data_in_form(
         data={"plugins": None},
         err_message=translated("plugins.flash.missing_plugins_parameter_plugins_delete") or "Missing plugins parameter on /plugins/delete.",
         redirect_url="plugins",
         next=True,
     )
+    if invalid is not True:
+        return invalid
     DATA.load_from_file()
 
     plugins = request.form["plugins"].split(",")
@@ -242,12 +244,14 @@ def enable_plugin():
     if not current_user.admin:
         return Response(translated("plugins.flash.plugin_management_restricted_administrators") or "Plugin management is restricted to administrators", 403)
 
-    verify_data_in_form(
+    invalid = verify_data_in_form(
         data={"plugin": None, "enabled": None},
         err_message=translated("plugins.flash.missing_plugin_enabled_parameter_plugins_enable") or "Missing plugin or enabled parameter on /plugins/enable.",
         redirect_url="plugins",
         next=True,
     )
+    if invalid is not True:
+        return invalid
     DATA.load_from_file()
 
     plugin = request.form["plugin"]
@@ -501,12 +505,14 @@ def plugins_refresh():
 
     tmp_ui_path = TMP_DIR.joinpath("ui")
 
-    verify_data_in_form(
+    invalid = verify_data_in_form(
         data={"csrf_token": None},
         err_message=translated("plugins.flash.missing_csrf_token_parameter_plugins") or "Missing csrf_token parameter on /plugins.",
         redirect_url="plugins",
         next=True,
     )
+    if invalid is not True:
+        return invalid
 
     # Upload plugins
     if not tmp_ui_path.exists() or not listdir(str(tmp_ui_path)):
@@ -1066,12 +1072,14 @@ def install_catalog_plugin():
     if refusal:
         return refusal
 
-    verify_data_in_form(
+    invalid = verify_data_in_form(
         data={"csrf_token": None, "id": None},
         err_message=translated("plugins.flash.missing_id_parameter_plugins_catalog_install") or "Missing id parameter on /plugins/catalog/install.",
         redirect_url="plugins",
         next=True,
     )
+    if invalid is not True:
+        return invalid
     DATA.load_from_file()
 
     plugin_id = request.form["id"].strip()
@@ -1128,12 +1136,14 @@ def update_catalog_plugin():
     if refusal:
         return refusal
 
-    verify_data_in_form(
+    invalid = verify_data_in_form(
         data={"csrf_token": None, "id": None, "version": None},
         err_message=translated("plugins.flash.missing_id_version_parameter_plugins_catalog") or "Missing id or version parameter on /plugins/catalog/update.",
         redirect_url="plugins",
         next=True,
     )
+    if invalid is not True:
+        return invalid
     DATA.load_from_file()
 
     plugin_id = request.form["id"].strip()

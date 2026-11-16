@@ -59,18 +59,22 @@ def instances_new():
         return handle_error(translated("flash.database_read_only_mode") or "Database is in read-only mode", "instances")
     if is_readonly_request(API_CLIENT.readonly):
         return handle_error(translated("flash.do_not_have_write_permission") or "You do not have the write permission", "instances")
-    verify_data_in_form(
+    invalid = verify_data_in_form(
         data={"hostname": None},
         err_message=translated("instances.flash.missing_instance_hostname_parameter_instances_new") or "Missing instance hostname parameter on /instances/new.",
         redirect_url="instances",
         next=True,
     )
-    verify_data_in_form(
+    if invalid is not True:
+        return invalid
+    invalid = verify_data_in_form(
         data={"name": None},
         err_message=translated("instances.flash.missing_instance_name_parameter_instances_new") or "Missing instance name parameter on /instances/new.",
         redirect_url="instances",
         next=True,
     )
+    if invalid is not True:
+        return invalid
 
     # Fetch API defaults, including new HTTPS-related settings
     db_config = BW_CONFIG.get_config(
@@ -205,12 +209,14 @@ def instances_action(action: Literal["ping", "reload", "stop", "delete"]):  # TO
         if is_readonly_request(API_CLIENT.readonly):
             return handle_error(translated("flash.do_not_have_write_permission") or "You do not have the write permission", "instances")
 
-    verify_data_in_form(
+    invalid = verify_data_in_form(
         data={"instances": None},
         err_message=translated(MISSING_PARAMETER_KEYS[action]) or f"Missing instances parameter on /instances/{action}.",
         redirect_url="instances",
         next=True,
     )
+    if invalid is not True:
+        return invalid
     instances = request.form["instances"].split(",")
     if not instances:
         return handle_error(

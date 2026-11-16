@@ -79,11 +79,13 @@ READ_ONLY_POST_PATH_SUFFIXES = (
 
 # biscuit-rust authorizes under a wall-clock budget defaulting to 1 ms, and reports blowing it as
 # the same AuthorizationError a policy denial raises. An honest token authorizes in ~0.01 ms, but a
-# CPU-starved host still overran 1 ms often enough to log valid sessions out. Raise the clock only:
-# max_facts and max_iterations bound the work a token's own Datalog can demand, so they keep their
-# defaults. Duplicated from the API guard rather than shared: src/ui and src/api ship as separate
-# images with no common package.
+# CPU-starved host still overran 1 ms often enough to log valid sessions out. Raise the clock and the
+# fact ceiling: a token that carries many grants derives more than the default 1000 facts and would
+# abort as a run-limit error. This token is minted server-side, so the higher ceilings are safe here;
+# max_iterations keeps its default. Duplicated from the API guard rather than shared: src/ui and
+# src/api ship as separate images with no common package, and the API must keep its stricter limits.
 AUTHORIZE_MAX_TIME = timedelta(milliseconds=100)
+AUTHORIZE_MAX_FACTS = 10000
 
 # Whole-message marker for a run-limit abort. Unlike the API, this token is never attacker-supplied
 # (it is minted server-side and kept in the signed session), so a residual abort here means the host
@@ -92,10 +94,11 @@ AUTHORIZE_MAX_TIME = timedelta(milliseconds=100)
 RUN_LIMIT_ERROR = "Reached Datalog execution limits"
 
 
-def _raise_time_budget(authorizer: AuthorizerBuilder) -> None:
+def _raise_limits(authorizer: AuthorizerBuilder) -> None:
     # limits() hands back a copy, so set_limits() is what actually applies the change.
     limits = authorizer.limits()
     limits.max_time = AUTHORIZE_MAX_TIME
+    limits.max_facts = AUTHORIZE_MAX_FACTS
     authorizer.set_limits(limits)
 
 
@@ -229,7 +232,7 @@ class BiscuitMiddleware:
                 authorizer.add_check(Check("check if client_ip({client_ip})", {"client_ip": request.remote_addr or "0.0.0.0"}))
 
             authorizer.add_policy(Policy("allow if true"))
-            _raise_time_budget(authorizer)
+            _raise_limits(authorizer)
 
             current_app.logger.debug(str(authorizer))
             authorizer.build(token).authorize()
@@ -273,7 +276,7 @@ class BiscuitMiddleware:
             authorizer.add_policy(Policy('allow if resource($resource_path), $resource_path == "/whats-new/state"'))
             authorizer.add_policy(Policy('allow if resource($resource_path), $resource_path == "/clear_notifications"'))
             authorizer.add_policy(Policy("allow if role($role_name, $permissions), operation($operation_name), $permissions.contains($operation_name)"))
-            _raise_time_budget(authorizer)
+            _raise_limits(authorizer)
 
             current_app.logger.debug(str(authorizer))
             authorizer.build(token).authorize()

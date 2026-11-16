@@ -192,6 +192,116 @@ $(document).ready(() => {
     setOverrideNonGlobalEnabled(!isOverrideNonGlobalEnabled());
   });
 
+  // BEGIN override-confirm
+  // "Apply to all services" pushes the global settings changed in THIS save onto every service
+  // (routes/global_settings.py `changed_variables`), replacing what a service or its template
+  // set. Turning it on and saving therefore asks first, listing the services
+  // (#modal-apply-all-services, rendered by models/compose_pane.html only when there are any).
+  const OVERRIDE_CONTROL_KEYS = new Set([
+    "csrf_token",
+    "OVERRIDE_NON_GLOBAL_SERVICES",
+  ]);
+
+  // `posted` and `originals` are Maps of key -> value; true when a posted setting differs from the
+  // value the page loaded with. An untouched save overrides nothing, so it never asks. A drafted
+  // value is never applied, and a saved draft that leaves the draft state in this save is.
+  const hasChangedGlobalSetting = (
+    posted,
+    originals,
+    {
+      isSetting = () => true,
+      drafted = new Set(),
+      savedDrafts = new Set(),
+    } = {},
+  ) => {
+    for (const [key, value] of posted) {
+      if (OVERRIDE_CONTROL_KEYS.has(key) || !isSetting(key)) continue;
+      if (drafted.has(key)) continue;
+      if (savedDrafts.has(key) || originals.get(key) !== value) return true;
+    }
+    return false;
+  };
+
+  // Resolves true on confirm, false on cancel, Esc or close. Always moved to <body>: its home is
+  // inside a `.tab-pane`, which is display:none while the Raw pane is the active one.
+  const confirmGlobalOverride = (trigger) =>
+    new Promise((resolve) => {
+      const modalElement = document.getElementById("modal-apply-all-services");
+      const confirmButton = document.getElementById(
+        "confirm-apply-all-services",
+      );
+      if (!modalElement || !confirmButton) return resolve(true);
+      document.body.appendChild(modalElement);
+      const modal = bootstrap.Modal.getOrCreateInstance(modalElement);
+      let confirmed = false;
+      const onConfirm = () => {
+        confirmed = true;
+        modal.hide();
+      };
+      confirmButton.addEventListener("click", onConfirm, { once: true });
+      modalElement.addEventListener(
+        "hidden.bs.modal",
+        () => {
+          confirmButton.removeEventListener("click", onConfirm);
+          if (trigger && trigger.focus) trigger.focus();
+          resolve(confirmed);
+        },
+        { once: true },
+      );
+      modal.show();
+    });
+  // END override-confirm
+  // The drafts the page loaded with: toggling one in the editor later must not move this.
+  const savedRawDrafts = new Set(rawDraftSettings);
+
+  // BEGIN compose-override-confirm
+  // The compose pane saves through a real native form (models/compose_pane.html). A capture
+  // listener holds that submit, asks, and re-submits on confirm. Capture + stopImmediatePropagation
+  // so compose-shelf.js's own submit listener, which clears its unsaved-edit guard, does not run
+  // for a submit that did not happen.
+  const composeForm = document.getElementById("compose-form");
+  if (composeForm && $("#override-non-global-settings").length) {
+    // First value wins, like `request.form.to_dict()`: a switch's checked box beats the hidden
+    // fallback that follows it.
+    const firstValues = (entries) => {
+      const values = new Map();
+      entries.forEach((value, key) => {
+        if (!values.has(key)) values.set(key, String(value));
+      });
+      return values;
+    };
+    const composeOriginals = firstValues(new FormData(composeForm));
+    let composeConfirmed = false;
+    composeForm.addEventListener(
+      "submit",
+      (event) => {
+        if (composeConfirmed) {
+          composeConfirmed = false;
+          return;
+        }
+        if (
+          !isOverrideNonGlobalEnabled() ||
+          !document.getElementById("modal-apply-all-services") ||
+          !hasChangedGlobalSetting(
+            firstValues(new FormData(composeForm)),
+            composeOriginals,
+          )
+        )
+          return;
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        const submitter = event.submitter;
+        confirmGlobalOverride(submitter).then((confirmed) => {
+          if (!confirmed) return;
+          composeConfirmed = true;
+          composeForm.requestSubmit(submitter);
+        });
+      },
+      true,
+    );
+  }
+  // END compose-override-confirm
+
   const $serviceMethodInput = $("#service-method");
 
   // The raw editor's serialiser. Was `getFormFromSettings(elem)` with easy / advanced / raw
@@ -356,6 +466,30 @@ $(document).ready(() => {
     if (form.children().length < 2 && isDraft === wasDraft) {
       alert(t("alert.no_changes_detected"));
       return;
+    }
+
+    if (isOverrideNonGlobalEnabled() && $("#modal-apply-all-services").length) {
+      const predicates = makeRawKeyPredicates();
+      const changed = hasChangedGlobalSetting(
+        new Map(
+          form
+            .find("input")
+            .add(form.find("textarea"))
+            .toArray()
+            .map(({ name, value }) => [name, value]),
+        ),
+        new Map(
+          parseRawSettings($("#raw-entire-config").val(), predicates).map(
+            ({ key, value }) => [key, value],
+          ),
+        ),
+        {
+          isSetting: predicates.isKnownSettingKey,
+          drafted: rawDraftSettings,
+          savedDrafts: savedRawDrafts,
+        },
+      );
+      if (changed && !(await confirmGlobalOverride(this))) return;
     }
 
     form.appendTo("body").submit();
@@ -620,7 +754,7 @@ $(document).ready(() => {
     refresh();
   };
 
-  // SET-7 tiles (templates/models/plugins_settings_raw.html): Modified and Problems follow the editor
+  // Raw editor tiles (templates/models/plugins_settings_raw.html): Modified and Problems follow the editor
   // text. Both use the save-time parser (`parseRawSettings`), so what counts here is what the save
   // would read: an entry is a line whose key is a known setting; any other non-blank row outside
   // a multiline value is one the save silently drops, which is the Problems count.
@@ -656,7 +790,7 @@ $(document).ready(() => {
     refresh();
   };
 
-  // SET-7 search: the design's in-card search with previous / next, on top of ACE's own finder.
+  // Raw editor search: the design's in-card search with previous / next, on top of ACE's own finder.
   const setupRawSearch = (editor) => {
     const input = document.getElementById("raw-config-search");
     if (!input) return;

@@ -5,7 +5,7 @@
           href="{{ url_for('static', filename='css/pages/settings.css') }}"
           nonce="{{ style_nonce }}" />
 {% endblock %}
-{# SET-6: the page owns its head. Compose / Raw stay real LINKS (models/mode_pills.html explains why a tab switch is forbidden:
+{# the page owns its head. Compose / Raw stay real LINKS (models/mode_pills.html explains why a tab switch is forbidden:
    it re-renders both panes from the database), restyled as the design's range-picker and placed in the head. #}
 {% block page_head %}
     {% set pane_blueprint = "global_settings" %}

@@ -237,7 +237,7 @@
 .bw-flow-rule.is-off .bw-flow-head-name {
   color: var(--bw-fg-3);
 }
-/* WF-04: title row (name + one segmented control), separated prose, then the badges. The
+/* title row (name + one segmented control), separated prose, then the badges. The
    summary stays visible while the rule is open: it is the plain reading of the editors. */
 .bw-flow-head {
   display: grid;
@@ -288,7 +288,7 @@
   gap: 8px;
   margin-top: 12px;
 }
-/* WF-05: IF / THEN come from the rule data (.sum-kw), values are .m. */
+/* IF / THEN come from the rule data (.sum-kw), values are .m. */
 .sum-kw {
   font-size: 10.5px;
   font-weight: 700;
@@ -316,7 +316,7 @@
   border-radius: 3px;
   overflow-wrap: anywhere;
 }
-/* WF-04: one top-right segmented control: reorder | rule actions. */
+/* one top-right segmented control: reorder | rule actions. */
 .bw-flow-head > .bw-flow-tools {
   grid-area: tools;
   gap: 0;
@@ -340,7 +340,7 @@
   margin: 3px 3px;
   background: var(--bw-border);
 }
-/* WF-09: below the tablet width the tool group stacks above the title instead of squeezing it. */
+/* below the tablet width the tool group stacks above the title instead of squeezing it. */
 @media (max-width: 575.98px) {
   .bw-flow-head {
     grid-template-columns: minmax(0, 1fr);
@@ -570,7 +570,7 @@
   font-size: 12.5px;
   color: var(--bw-fg-2);
 }
-/* WF-06: the add row shares the line with the combinator; children and metadata follow. */
+/* the add row shares the line with the combinator; children and metadata follow. */
 .bw-flow-group-head > .bw-flow-addrow {
   margin-top: 0;
 }
@@ -1032,7 +1032,7 @@
   cursor: default;
   opacity: 0.7;
 }
-/* WF-07: Block / Redirect / Challenge settings card, 40px controls, 3 -> 2 -> 1 columns. */
+/* Block / Redirect / Challenge settings card, 40px controls, 3 -> 2 -> 1 columns. */
 .bw-flow-params-card {
   margin-top: 12px;
   border: 1px solid var(--bw-border);
@@ -1245,7 +1245,7 @@
   opacity: 0.45;
   cursor: default;
 }
-/* WF-02: the destructive item is red at rest, not only on hover. */
+/* the destructive item is red at rest, not only on hover. */
 .bw-flow-menu button.danger,
 .bw-flow-menu button.danger .bx {
   color: var(--bs-danger);
@@ -1523,7 +1523,7 @@
   --fc-rail: 30px;
   position: relative;
   container-type: inline-size;
-  /* WF-08: a taller board, so a 360px card with its summary and badges fits above the fold. */
+  /* a taller board, so a 360px card with its summary and badges fits above the fold. */
   height: 620px;
 }
 [data-bs-theme="dark"] .fc-host {
@@ -1672,7 +1672,7 @@
   border-style: dashed;
   background: var(--bw-bg-card);
 }
-/* WF-08: the timeline rail runs above the cards, one segment per item so it ends exactly on
+/* the timeline rail runs above the cards, one segment per item so it ends exactly on
    the entry and exit dots whatever the board's width. */
 .fc-item {
   position: relative;
@@ -1810,7 +1810,7 @@
   min-width: 0;
 }
 /* The number is real text rather than a CSS counter, so it survives in static output and
-   stays addressable by the move-to-position menu. WF-08: it sits on the rail, above the
+   stays addressable by the move-to-position menu. it sits on the rail, above the
    card and detached from it, like a stop on a timeline. */
 .fc-order {
   position: absolute;
@@ -1951,7 +1951,7 @@
   border-color: var(--wf-accent);
 }
 
-/* ---------- tool group (WF-08): top right of the header, always visible ---------- */
+/* ---------- tool group: top right of the header, always visible ---------- */
 .fc-tools {
   display: flex;
   align-items: center;

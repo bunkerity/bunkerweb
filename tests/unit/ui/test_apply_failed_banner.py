@@ -7,6 +7,7 @@ that left the change flags pending on purpose (``success=True``, ``error`` prefi
 """
 
 import ast
+from contextlib import suppress
 from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import Mock
@@ -60,7 +61,8 @@ def _status_banner_branch():
         body=[outer],
         decorator_list=[],
     )
-    namespace = {"Markup": Markup}  # a module-level import of main.py the branch uses
+    # module-level names of main.py the branch uses; the failover banner links to the Logs page
+    namespace = {"Markup": Markup, "suppress": suppress, "_list_log_files": lambda: {"main": [], "letsencrypt": []}}
     exec(compile(ast.fix_missing_locations(ast.Module(body=[function], type_ignores=[])), str(MAIN), "exec"), namespace)
     return namespace["run_status_banner"]
 

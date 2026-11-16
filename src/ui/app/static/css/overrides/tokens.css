@@ -84,7 +84,7 @@ body {
 }
 
 /* ============================================================================
-   Density (SHL-6). `data-density` on <html> is set before first paint (base.html), default
+   Density. `data-density` on <html> is set before first paint (base.html), default
    "compact"; "comfortable" is the spacing the UI shipped with. Pages read these tokens, the
    shell applies them to cards, table cells and the page gutters (kit-fidelity.css).
    ========================================================================== */
@@ -110,7 +110,7 @@ body {
 }
 
 /* ============================================================================
-   Contrast (SHL-1). `data-contrast` on <html>: "high" (default) or "standard".
+   Contrast. `data-contrast` on <html>: "high" (default) or "standard".
    High clears RGAA 4.1.2: 4.5:1 for text, 3:1 for non-text UI, through tokens only, so no
    component has to know about the mode. "standard" is the brand palette above, untouched.
    --bw-border-quiet keeps the standard border for states that must NOT read as interactive

@@ -535,7 +535,7 @@
       emptyRow(list);
       return;
     }
-    // One table row per event: Time / IP / Reason / Origin / Target (OPS-43). Every value is
+    // One table row per event: Time / IP / Reason / Origin / Target. Every value is
     // set with textContent: reasons and server names are WAF- and operator-supplied strings.
     events.slice(0, CONFIG.recentLimit || 50).forEach(function (event) {
       var row = document.createElement("tr");
@@ -571,7 +571,7 @@
     });
   }
 
-  // The neutral plugin/reason chip of the shared value vocabulary (W1-COMP): icon is decorative,
+  // The neutral plugin/reason chip of the shared value vocabulary: icon is decorative,
   // the text is whatever the WAF reported.
   function chip(text, icon) {
     var span = document.createElement("span");

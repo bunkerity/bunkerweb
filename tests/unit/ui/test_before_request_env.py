@@ -14,6 +14,7 @@ a real Flask app with Babel; only their collaborators are stubbed.
 """
 
 import re
+from contextlib import suppress
 from datetime import datetime, timedelta
 from ipaddress import ip_address
 from json import loads
@@ -137,9 +138,13 @@ def _app(metadata: dict, data: _Data, flashed: list) -> Flask:
         is_newer_version_available=lambda current, latest: False,
         catalog_enabled=lambda: True,
         COLUMNS_PREFERENCES_DEFAULTS={},
+        # The failover banner links to the Logs page and preselects error.log when it is listed.
+        _list_log_files=lambda: {"main": [], "letsencrypt": []},
+        suppress=suppress,
     )
     _shipped(MAIN, ("before_request", "inject_variables"), namespace)
 
+    application.add_url_rule("/logs", "logs.logs_page", lambda: "logs")
     application.add_url_rule("/templates", "templates_page", lambda: render_template_string("{{ page_title }}|{{ current_endpoint }}"))
     application.add_url_rule("/templates/<template_id>", "template_page", lambda template_id: render_template_string("{{ page_title }}"))
     return application

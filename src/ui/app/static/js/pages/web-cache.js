@@ -1,4 +1,4 @@
-// Web cache: typed confirmation before "Purge all" (OPS-40) and the compact instances table.
+// Web cache: typed confirmation before "Purge all" and the compact instances table.
 (function () {
   const form = document.getElementById("web-cache-purge-all-form");
   if (form) {

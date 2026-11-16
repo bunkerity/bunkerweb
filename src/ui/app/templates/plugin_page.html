@@ -42,7 +42,7 @@
     {% set base_flags_url = url_for('static', filename='img/flags') %}
     <input type="hidden" id="base_flags_url" value="{{ base_flags_url }}" />
     {% if not is_used %}
-        {# PLG-15: the shipped sentence stays as the text; the kit empty state adds the icon and a title.
+        {# the shipped sentence stays as the text; the kit empty state adds the icon and a title.
            The Global settings link only shows when the plugin declares settings, like the overview cog
            (the global settings page lists every one of them, whatever its context). #}
         {% set deactivated_title = _("plugin.page.empty.deactivated_heading") %}

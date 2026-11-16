@@ -1,8 +1,6 @@
-"""Part 3 of the workflows port: the overview attachment dialog and the editor card markup.
+"""Source-level contracts for the workflow attachment dialog and editor card markup.
 
-Source-level pins. The rendered behaviour is proven in a browser against the real templates
-(.claude/ui-port/proofs/W2-WORKFLOWS/part3-check.cjs); these keep the contracts that would
-otherwise only break there.
+These catch markup drift; rendered behavior still requires browser verification.
 """
 
 import json

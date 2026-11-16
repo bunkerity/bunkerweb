@@ -1827,7 +1827,7 @@ $(document).ready(() => {
     updateMultiselectDisplay,
   });
 
-  // ---------------------------------------------------------------- SET-20 widgets
+  // ---------------------------------------------------------------- Field widgets
   // The design's field widgets, layered over the native controls instead of replacing them: the
   // native <select> / <input> STAYS in the DOM with its name, id, `data-original` / `data-default` /
   // `data-method` and `.plugin-setting` class, so the POST, the per-field reset, the submit

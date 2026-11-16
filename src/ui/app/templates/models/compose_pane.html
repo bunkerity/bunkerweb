@@ -89,9 +89,9 @@
                         aria-pressed="false"
                         data-bs-toggle="tooltip"
                         data-bs-placement="top"
-                        data-bs-original-title="When enabled, edited global settings also override service values that are not inherited from global settings.">
-                    <i class="bx bx-sm bx-toggle-left"></i>
-                    <span class="d-none d-lg-inline">&nbsp;<span>Override services</span></span>
+                        data-bs-original-title="{{ _("tooltip.apply_all_services") }}">
+                    <i class="bx bx-sm bx-toggle-left" aria-hidden="true"></i>
+                    <span class="d-none d-lg-inline">&nbsp;<span>{{ _("button.apply_all_services") }}</span></span>
                 </button>
             {% else %}
                 <div {% if current_endpoint != 'new' and not is_editable_method(service_method) %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="{{ _("tooltip.draft_toggle_disabled") }}"{% endif %}>
@@ -120,7 +120,7 @@
             </div>
         </div>
     </div>
-    {# SET-14: said once, statically. No instance / service counts: the settings routes do not load them. #}
+    {# said once, statically. No instance / service counts: the settings routes do not load them. #}
     <div class="alert alert-info bw-settings-note" role="status">
         <i class="bx bx-info-circle" aria-hidden="true"></i>
         <div>
@@ -191,6 +191,49 @@
     {# LAST: its trailing control-key fallbacks must lose first-value-wins to everything above. #}
     {% include "models/compose_shelf.html" %}
 </form>
+{% if global_page %}
+    {# The confirmation for the override toggle above, shown by pages/settings-raw.js when the save
+       would push changed globals onto the services. Outside the form on purpose: it holds nothing
+       that posts. The services come from the GLOBAL SERVER_NAME (the service list); with none
+       there is nothing to overwrite, so no modal renders and the script never asks. #}
+    {% set override_services = ((config.get("SERVER_NAME") or {}).get("value") or "").split() %}
+    {% if override_services %}
+        {# The shell of components/modal.html written out: importing the macro here would add `modal`
+           to the names this partial needs from its host, which test_compose_page_assembly.py
+           classifies one by one. #}
+        <div class="modal fade"
+             id="modal-apply-all-services"
+             data-bs-backdrop="static"
+             tabindex="-1"
+             aria-hidden="true"
+             aria-labelledby="modal-apply-all-services-title"
+             aria-describedby="apply-all-services-description"
+             role="dialog">
+            <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="modal-apply-all-services-title">{{ _("modal.title.apply_all_services") }}</h5>
+                        <button type="button"
+                                class="btn-close"
+                                data-bs-dismiss="modal"
+                                aria-label="{{ _("aria.label.close") }}"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p id="apply-all-services-description">{{ _("modal.body.apply_all_services") }}</p>
+                        <p>{{ _("modal.body.apply_all_services_count", count=override_services|length) }}</p>
+                        <ul class="text-break mb-0" id="apply-all-services-list">
+                            {% for service in override_services %}<li>{{ service }}</li>{% endfor %}
+                        </ul>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">{{ _("button.cancel") }}</button>
+                        <button type="button" class="btn btn-primary" id="confirm-apply-all-services">{{ _("settings_page.save_reload") }}</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+{% endif %}
 {% if not global_page and not service_id %}
     {# /services/new: an invalid name is refused HERE, with the field marked and every other
        input kept. Refused by the save instead, it cost the whole form (QA H6). Capture phase

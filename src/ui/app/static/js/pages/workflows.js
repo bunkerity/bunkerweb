@@ -247,7 +247,7 @@
         var attached = (table.row(dataIndex).node().dataset.services || "")
           .split(" ")
           .filter(Boolean);
-        // WF-22: attachment state first, then the exact-service filter that stays beside it.
+        // attachment state first, then the exact-service filter that stays beside it.
         if (attachment === "attached" && !attached.length) return false;
         if (attachment === "none" && attached.length) return false;
         return !service || attached.indexOf(service) !== -1;
@@ -350,7 +350,7 @@
       });
     }
 
-    /* WF-22: the attached service names and the detach action. Built from the same JSON the
+    /* the attached service names and the detach action. Built from the same JSON the
        page already carries, so an unloaded row (the 500-row cut) never shows a wrong list. */
     function openServices(flow, opener) {
       var list = document.getElementById("workflow-services-list");

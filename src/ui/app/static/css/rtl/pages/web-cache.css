@@ -91,7 +91,7 @@
   color: var(--bw-fg-3, var(--bs-secondary-color));
 }
 
-/* Status legend: the plain-language meaning sits under each status name (OPS-36), and the
+/* Status legend: the plain-language meaning sits under each status name, and the
    statuses nobody has hit stay discoverable on one compact line. */
 .wc-leg-name {
   flex-wrap: wrap;
@@ -114,7 +114,7 @@
   margin: 0.75rem 0 0;
 }
 
-/* Compact instances table (OPS-40): the wide columns collapse, nothing else does. */
+/* Compact instances table: the wide columns collapse, nothing else does. */
 .is-compact .wc-col-min {
   display: none;
 }
@@ -124,4 +124,4 @@
   color: var(--bs-danger-text-emphasis);
 }
 
-/* rtlcss@4.3.0 source=css/pages/web-cache.css sha256=539b0428e33a2f774ca57312a1c51528be00c06da4019755cdb44c406359e440 */
+/* rtlcss@4.3.0 source=css/pages/web-cache.css sha256=7d8fa9104bf6c3ef3d4e2014d47898173b1a41f79422058ea2075d167a2841c1 */

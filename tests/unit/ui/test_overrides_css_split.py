@@ -26,9 +26,10 @@ MARKER_RE = re.compile(r"/\* [a-z0-9-]+\.css \*/")
 # Re-pinned for the four tooltip lines of dev 890d8777c (`--bs-tooltip-max-width`, `.tooltip-inner { overflow-wrap }`)
 # and for the 44 lines of dev 83462ec57 (DataTables toolbar wrap) and 04330f635 (`.btn-outline-crowdsec`) in main.css;
 # re-pinned for the 2026-10-23 design port (tokens, components, kit-fidelity parts: 4477 -> 5738 lines);
+# re-pinned after removing internal ledger labels from two token comments; CSS rules are unchanged.
 # the next edit to any part re-pins it the same way.
 PRE_SPLIT_LINES = 5738
-PRE_SPLIT_SHA256 = "802f50aaa3c8e640601df02d289b4ce807064800ed8e44fbb8c5d5766b345279"
+PRE_SPLIT_SHA256 = "4604031149ef2b7f9dba4e3956ac258603d96615516eb359858f9385ac29a5ae"
 # The one line the split rewrote on purpose: a comment citing `overrides.css:4390-4398`, a line range that no longer exists.
 REFRESHED_COMMENT = ("but kit-fidelity.css's", "but overrides.css:4390-4398's")
 

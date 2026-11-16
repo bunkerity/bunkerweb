@@ -361,6 +361,36 @@ function initializeDataTable(config) {
   });
   applyTranslations();
 
+  // Headers given as `columns[].title` markup would otherwise be read out as that markup in the
+  // sort button's accessible name: use the rendered header text instead.
+  const markupHeaderColumns = new Set(
+    dataTable
+      .settings()[0]
+      .aoColumns.filter((column) => /</.test(column.ariaTitle || "")),
+  );
+  const syncHeaderAriaTitles = () => {
+    dataTable.settings()[0].aoColumns.forEach((column, index) => {
+      if (!markupHeaderColumns.has(column)) return;
+      const text = $(dataTable.column(index).header())
+        .find(".dt-column-title")
+        .text()
+        .replace(/\s+/g, " ")
+        .trim();
+      if (!text) return;
+      const sortButton = $(dataTable.column(index).header()).find(
+        ".dt-column-order[aria-label]",
+      );
+      if (sortButton.length) {
+        sortButton.attr(
+          "aria-label",
+          sortButton.attr("aria-label").replace(column.ariaTitle, () => text),
+        );
+      }
+      column.ariaTitle = text;
+    });
+  };
+  syncHeaderAriaTitles();
+
   // Rows are rebuilt on every draw, so per-trigger instances would be disposed and
   // recreated (and leaked) each time. One delegated tooltip builds an instance on
   // first hover instead; the row instances are dropped with the rows.
@@ -470,15 +500,33 @@ function initializeDataTable(config) {
     const defaultColsVisibility = JSON.parse(
       $columnsPreferenceDefaults.val().trim(),
     );
-    originalColumnsPreferences = JSON.parse($columnsPreference.val().trim());
+    // A saved mapping can name a column a release later removed, or miss one it added:
+    // the server answers 400 to unknown keys, so keep exactly the default keys.
+    const normalizeColumnsPreferences = (saved) => {
+      const source = saved && typeof saved === "object" ? saved : {};
+      return Object.fromEntries(
+        Object.entries(defaultColsVisibility).map(([key, value]) => [
+          key,
+          typeof source[key] === "boolean" ? source[key] : value,
+        ]),
+      );
+    };
+    originalColumnsPreferences = normalizeColumnsPreferences(
+      JSON.parse($columnsPreference.val().trim()),
+    );
 
     // Handle column visibility preferences
-    let columnVisibility = localStorage.getItem(`bw-${tableName}-columns`);
-    if (columnVisibility === null) {
-      columnVisibility = { ...originalColumnsPreferences };
-    } else {
-      columnVisibility = JSON.parse(columnVisibility);
+    let savedColumnVisibility = null;
+    try {
+      savedColumnVisibility = JSON.parse(
+        localStorage.getItem(`bw-${tableName}-columns`),
+      );
+    } catch (e) {
+      // Corrupt browser storage: fall back to the server preferences
     }
+    const columnVisibility = savedColumnVisibility
+      ? normalizeColumnsPreferences(savedColumnVisibility)
+      : { ...originalColumnsPreferences };
 
     // Without the second argument every call re-measures the whole table; the
     // adjust() at the end of this function does it once.
@@ -577,6 +625,8 @@ function initializeDataTable(config) {
           });
         }
 
+        syncHeaderAriaTitles();
+
         const searchPanesContainer = dataTable.searchPanes?.container?.();
         if (searchPanesContainer && $(searchPanesContainer).length) {
           updateFilterTranslations();
@@ -587,8 +637,9 @@ function initializeDataTable(config) {
     // Column visibility event
     dataTable.on("column-visibility.dt", function (e, settings, column, state) {
       if (
-        typeof columnVisibilityCondition === "function" &&
-        !columnVisibilityCondition(column)
+        (typeof columnVisibilityCondition === "function" &&
+          !columnVisibilityCondition(column)) ||
+        !(column in defaultColsVisibility)
       ) {
         return;
       }

@@ -55,8 +55,9 @@ $(document).ready(function () {
       .replace(/>/g, "&gt;");
 
   // The name of a service is also an element id (`#type-<name>`, `#method-<name>`), and a dot is
-  // not valid in one. Same substitution the template did.
-  const idFor = (name) => String(name).replace(/\./g, "-");
+  // not valid in one. Same substitution the template did. A colon (an IPv6 service name) would
+  // also break the `#id` selectors, so it is replaced too.
+  const idFor = (name) => String(name).replace(/[.:]/g, "-");
 
   function renderName(id, row) {
     const safeId = escapeAttr(id);

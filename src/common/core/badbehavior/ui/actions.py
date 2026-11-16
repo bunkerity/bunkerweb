@@ -24,11 +24,11 @@ def _format_increment_date(raw_value):
     if isinstance(raw_value, (int, float)):
         try:
             return datetime.fromtimestamp(raw_value).isoformat()
-        except (OSError, ValueError):
+        except (OSError, ValueError, OverflowError):
             return datetime.fromtimestamp(0).isoformat()
     try:
         return datetime.fromtimestamp(float(raw_value)).isoformat()
-    except (TypeError, ValueError, OSError):
+    except (TypeError, ValueError, OSError, OverflowError):
         return str(raw_value or "")
 
 

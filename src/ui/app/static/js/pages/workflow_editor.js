@@ -1018,7 +1018,7 @@
         ? translate("workflows.tree.and", "and")
         : translate("workflows.tree.or", "or");
     var canNest = childDepth + 1 <= MAX_DEPTH;
-    // WF-06: Condition / Group / Remove group sit beside the combinator, the children come
+    // Condition / Group / Remove group sit beside the combinator, the children come
     // below them and the explanatory metadata closes the group.
     var addRow = STATE.readonly
       ? ""
@@ -1325,7 +1325,7 @@
     );
   }
 
-  /* ---- WF-05: the rule's reading, built from the rule data ----------------------------
+  /* ---- the rule's reading, built from the rule data ----------------------------
      The server summary is English prose and is only used as the "has this rule been
      validated" signal. The boundaries of IF and THEN come from the model, never from
      splitting that text, so the keywords stay highlighted and localised in every language. */
@@ -1481,7 +1481,7 @@
     }
   }
 
-  /* WF-04: what happens when the rule matches, as one badge with its explanation instead of
+  /* what happens when the rule matches, as one badge with its explanation instead of
      a repeated footer row. */
   function consequenceBadge(rule) {
     var stop = rule.enabled;
@@ -1600,7 +1600,7 @@
       ) +
       '">' +
       '<i class="bx bx-chevron-down bw-flow-caret" aria-hidden="true"></i></button>';
-    // WF-04: one segmented control, top right: reorder (grip, up, down), a separator, then
+    // one segmented control, top right: reorder (grip, up, down), a separator, then
     // the rule's own actions (More, expand). A read-only database keeps only the expand button.
     var tools = STATE.readonly
       ? caret
@@ -1943,7 +1943,7 @@
         position +
         "</button>";
 
-    // WF-08: edit and More live in the top-right group of the header, not in a hover toolbar.
+    // edit and More live in the top-right group of the header, not in a hover toolbar.
     var tools = STATE.readonly
       ? ""
       : '<div class="fc-tools bw-flow-tools" role="group" aria-label="' +
@@ -3158,7 +3158,7 @@
       "aria-label",
       translate("workflows.menu.header", "Rule actions") + " " + (index + 1),
     );
-    // WF-02: headed groups, dividers and a destructive item that is red at rest, the same
+    // headed groups, dividers and a destructive item that is red at rest, the same
     // anatomy as the shared dropdown menu.
     menu.innerHTML =
       '<div class="bw-flow-menu-hd" role="presentation" data-i18n="workflows.menu.header">Rule actions</div>' +

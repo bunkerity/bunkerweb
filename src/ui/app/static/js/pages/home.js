@@ -81,7 +81,7 @@ $(async function () {
       body.textContent = "";
       const reasons = metrics.top_reasons || [];
       if (reasons.length) {
-        // Rank, neutral chip, count, share and a relative bar (OPS-11). The reason string is the
+        // Rank, neutral chip, count, share and a relative bar. The reason string is the
         // raw label the facet returned: no plugin attribution is invented for unknown reasons.
         const biggest = Math.max(...reasons.map((row) => row.count), 1);
         reasons.forEach((row, index) => {
@@ -279,7 +279,7 @@ $(async function () {
     return window.bwChartLocale.number(value);
   }
 
-  // ---- Donut legend / data table (OPS-9) --------------------------------------------------
+  // ---- Donut legend / data table --------------------------------------------------
   // Beside the chart, a table of label, count and share. From DONUT_TWO_COL_MIN px of well width
   // it is the visible legend (two columns); below that it stays in the DOM, visually hidden, so a
   // screen reader still gets every slice as text. Built with DOM APIs only: labels are status

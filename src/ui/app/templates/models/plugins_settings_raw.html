@@ -15,7 +15,7 @@
    client parser uses it to tell a real `KEY=value` line apart from a
    continuation line of a multiline value (PEM cert/key, base64 block). #}
 {% set known_keys = namespace(keys=[], bases=[], multiline=[], multiline_bases=[]) %}
-{# SET-7 tiles: how many plugins contribute at least one setting to this pane. Read only by the tiles below. #}
+{# Raw editor tiles: how many plugins contribute at least one setting to this pane. Read only by the tiles below. #}
 {% set raw_tiles = namespace(plugins=0) %}
 {# `allowed_plugins` narrows this editor to a curated subset -- the reserved default server passes
    DEFAULT_SERVER_PLUGINS (routes/services.py). Same guard as models/compose_shelf.html, and needed
@@ -105,7 +105,7 @@
 <input type="hidden"
        id="raw-known-keys"
        value='{{ {"keys": known_keys.keys | unique | list, "bases": known_keys.bases | unique | list, "multiline": known_keys.multiline | unique | list, "multilineBases": known_keys.multiline_bases | unique | list} | tojson }}'>
-{# SET-7 (design global-raw.js:75-150): four tiles over the ACE editor. Settings and Plugins are fixed by what the page declares;
+{# four tiles over the ACE editor. Settings and Plugins are fixed by what the page declares;
    Modified and Problems are recomputed from the editor text (settings-raw.js `setupRawTiles`). Display only: nothing here posts. #}
 <div class="bw-raw-tiles mt-3 mt-lg-4" role="group" aria-label="{{ _("raw_page.tiles_label") }}">
     <div class="bw-raw-tile">

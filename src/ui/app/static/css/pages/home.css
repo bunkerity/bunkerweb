@@ -877,7 +877,7 @@
   }
 }
 
-/* OPS-3: the caption highlights (kit cardSubtitle="stats") no longer paint every word. Counts that
+/* the caption highlights (kit cardSubtitle="stats") no longer paint every word. Counts that
    mean trouble keep the danger hue; good, warn and info words fall back to the muted caption. */
 .bw-kpi-caption .hl-good,
 .bw-kpi-caption .hl-warn,
@@ -889,7 +889,7 @@
   font-weight: 400;
 }
 
-/* OPS-9: chart plus visible legend. The well is the grid; the table is the legend from 340 px
+/* chart plus visible legend. The well is the grid; the table is the legend from 340 px
    up and visually hidden (still read by assistive technology) below it. */
 .donut-well {
   display: grid;
@@ -956,7 +956,7 @@
   width: 9px;
 }
 
-/* OPS-11: top reasons as ranked rows (rank, chip, count, share bar). */
+/* top reasons as ranked rows (rank, chip, count, share bar). */
 #home-top-reasons-body td {
   vertical-align: middle;
 }

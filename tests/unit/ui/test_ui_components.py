@@ -685,7 +685,7 @@ def test_reports_offenders_render_never_uses_html_sink():
     assert ".append(countryCell(o.country))" in scope
     # srcFor()'s return value must be assigned as an <img> attribute (never HTML-parsed),
     # not concatenated into a markup string.
-    assert "src: window.BWCountryFlag.srcFor(code)," in scope
+    assert "src: window.BWCountryFlag.srcFor(code, { flagBase })," in scope
     assert "window.BWCountryFlag.isNA(code)" in scope
     assert "window.BWCountryFlag.normalize(code)" in scope
     # The reusable html()-string builder is deliberately NOT used here (see file's own

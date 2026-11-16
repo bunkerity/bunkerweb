@@ -10,7 +10,7 @@
    The id scheme is frozen: `setting-<plugin>-<id>` and `multiple-setting-<plugin>-<id>-<suffix>`,
    inside a `.col-12` wrapper. The multiples cloner, file-type settings, validation anchoring and
    `.setting-highlight` all key off exactly those. #}
-{# SET-11: a container-query grid (settings.css `.bw-settings-grid`): one column, two from 640px of CARD width, three from
+{# a container-query grid (settings.css `.bw-settings-grid`): one column, two from 640px of CARD width, three from
    1100px, so a narrower card (side rail, small window) reflows by its own width and not the viewport's. `col-12` stays on every
    cell because validation anchoring and `.setting-highlight` resolve through `.closest(".col-12")`; the textarea / file /
    multivalue kinds take the full row, as the design's `is-wide`. #}

@@ -43,7 +43,7 @@
     {% set plugin_name = plugin_text(plugin, 'meta.name', plugin_data["name"]) %}
     {% set has_service_scope = (plugin_data["settings"] | default({})).values() | selectattr("context", "equalto", "multisite") | list | length > 0 %}
     {% set type_icons = {"core": "bx-shield", "pro": "bx-diamond", "ui": "bx-cloud-upload"} %}
-    {# PLG-20 + SET-16: this page owns its head. The save button is outside the form on purpose (`form=` ties it back), so the
+    {# this page owns its head. The save button is outside the form on purpose (`form=` ties it back), so the
        Plugin / Scope selectors below can sit between head and card without their hidden inputs ever being part of the POST. #}
     {% call page_head(title=plugin_name,
                       breadcrumb=([("Plugins", "navigation.plugins", url_for('plugins.plugins_page')),
@@ -69,7 +69,7 @@
             </button>
         </span>
     {% endcall %}
-    {# PLG-22: the version and description stay, as small text under the head. #}
+    {# the version and description stay, as small text under the head. #}
     <p class="bw-plugin-meta">
         <span class="fw-semibold">v{{ plugin_data["version"] }}</span>
         <span>{{ plugin_text(plugin, 'meta.description', plugin_data["description"]) }}</span>
@@ -161,12 +161,12 @@
                 </div>
             {% endif %}
         </div>
-        {# PLG-24: what saving does at this scope. #}
+        {# what saving does at this scope. #}
         <div class="alert alert-info bw-settings-note" role="status">
             <i class="bx bx-info-circle" aria-hidden="true"></i>
             <div>{{ _("settings_page.alert_service") if service_id else _("settings_page.alert_global") }}</div>
         </div>
-        {# PLG-25: the whitelist and country pages point at the groups manager rather than embedding it. #}
+        {# the whitelist and country pages point at the groups manager rather than embedding it. #}
         {% if plugin in ("whitelist", "country") %}
             <div class="bw-settings-groups-link">
                 <div>

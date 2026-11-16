@@ -96,12 +96,14 @@ def pro_key():
     if is_readonly_request(API_CLIENT.readonly):
         return handle_error(translated("flash.do_not_have_write_permission") or "You do not have the write permission", "pro")
 
-    verify_data_in_form(
+    invalid = verify_data_in_form(
         data={"PRO_LICENSE_KEY": None},
         err_message=translated("pro.flash.missing_license_key_parameter_pro_key") or "Missing license key parameter on /pro/key.",
         redirect_url="pro",
         next=True,
     )
+    if invalid is not True:
+        return invalid
     license_key = request.form["PRO_LICENSE_KEY"]
     if not license_key:
         return handle_error(translated("pro.flash.invalid_license_key") or "Invalid license key", "pro")

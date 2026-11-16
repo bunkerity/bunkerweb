@@ -1,4 +1,4 @@
-"""Regressions from the second live workflows pass (W3V-8 through W3V-11)."""
+"""Table export callbacks and workflow dialog focus, summaries and attachment actions."""
 
 import json
 from pathlib import Path
