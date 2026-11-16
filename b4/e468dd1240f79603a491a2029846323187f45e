@@ -1,0 +1,20 @@
+tests/core/cors/provision_fixture.sh
+  s_9dbf32f29222b8::t_cd59dff1bcf03f 25
+  s_9dbf32f29222b8::t_29bbbc70481a12 18-19
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "b4e468dd1240f79603a491a2029846323187f45e",
+  "prompts": {},
+  "sessions": {
+    "s_9dbf32f29222b8": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "dbeddcbb-944a-413a-b813-12c8d8fb59c3",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}
