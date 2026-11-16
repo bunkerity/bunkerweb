@@ -1,6 +1,7 @@
 """Shared bcrypt password validation and hashing helpers."""
 
 from bcrypt import checkpw, gensalt, hashpw
+from logging import getLogger
 from regex import compile as re_compile
 
 USER_PASSWORD_RX = re_compile(r"^(?=.*\p{Ll})(?=.*\p{Lu})(?=.*\d)(?=.*\P{Alnum}).{8,}$")
@@ -41,4 +42,10 @@ def bcrypt_cost(value: str) -> int:
 
 
 def check_password(password: str, hashed: bytes) -> bool:
-    return checkpw(_bcrypt_secret(password), hashed)
+    try:
+        return checkpw(_bcrypt_secret(password), hashed)
+    except ValueError:
+        getLogger(__name__).warning("Stored bcrypt hash is unusable, credential check refused")
+        # Spend normal cost-13 verification work even when the stored salt is invalid.
+        checkpw(_bcrypt_secret(password), b"$2b$13$sVeBUZx0Jw7D4gGJQf7k7O5Wh2tJReLrfhp/SdAkh7AaQ.PuzvAmC")
+        return False
