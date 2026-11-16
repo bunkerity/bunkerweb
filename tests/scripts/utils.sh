@@ -91,7 +91,50 @@ function sed_in_place() {
     fi
 }
 
-# Robust docker pull function with exponential backoff
+# Bound the process as well as each API request: delete's timeout only covers its wait.
+function k8s_kubectl() {
+    timeout --kill-after=5s 150s kubectl --request-timeout=10s "$@"
+}
+
+function k8s_delete_manifest() {
+    local manifest="$1" namespaces namespace terminating claims claim
+    if k8s_kubectl delete -f "$manifest" --ignore-not-found --wait=true --timeout=120s ; then
+        return 0
+    fi
+
+    # Only namespaces explicitly deleted by this manifest are disposable. Never force cleanup
+    # of a namespace merely because a secret or service in it failed to delete.
+    namespaces=$(k8s_kubectl get -f "$manifest" --ignore-not-found -o go-template='{{if eq .kind "Namespace"}}{{.metadata.name}}{{else}}{{range .items}}{{if eq .kind "Namespace"}}{{.metadata.name}}{{"\n"}}{{end}}{{end}}{{end}}') || return 1
+    if [ -z "$namespaces" ] ; then
+        # The namespace may have finished deleting before recovery discovery.
+        k8s_kubectl delete -f "$manifest" --ignore-not-found --wait=true --timeout=60s
+        return $?
+    fi
+    for namespace in $namespaces ; do
+        terminating=$(k8s_kubectl get namespace "$namespace" --ignore-not-found -o go-template='{{if .metadata.deletionTimestamp}}terminating{{else}}active{{end}}') || return 1
+        if [ -z "$terminating" ] ; then
+            continue
+        fi
+        if [ "$terminating" != "terminating" ] ; then
+            log "UTILS" "❌" "☸️ Refusing finalizer recovery for non-terminating namespace $namespace"
+            return 1
+        fi
+        log "UTILS" "⚠️" "☸️ Delete timed out for $manifest; forcing remaining test pods in $namespace, then clearing terminating PVC finalizers"
+        k8s_kubectl get pods,pvc -n "$namespace" -o wide || return 1
+        # PVC protection is removed only after all pods are gone; this datadir is discarded.
+        k8s_kubectl delete pod --all -n "$namespace" --ignore-not-found --force --grace-period=0 --wait=true --timeout=30s || return 1
+        claims=$(k8s_kubectl get pvc -n "$namespace" -o jsonpath='{range .items[?(@.metadata.deletionTimestamp)]}{.metadata.name}{"\n"}{end}') || return 1
+        for claim in $claims ; do
+            k8s_kubectl patch pvc "$claim" -n "$namespace" --type=merge -p '{"metadata":{"finalizers":null}}' || return 1
+        done
+    done
+    # Success means every object, including the namespace, is actually gone before re-apply.
+    if ! k8s_kubectl delete -f "$manifest" --ignore-not-found --wait=true --timeout=60s ; then
+        log "UTILS" "❌" "☸️ Cleanup still incomplete for $manifest after finalizer recovery"
+        return 1
+    fi
+}
+
 # The four database engines share ONE Kubernetes deployment (`bunkerweb-db`), one service and --
 # the part that bites -- one PersistentVolumeClaim (`pvc-bunkerweb-db`). `kubectl apply` of the
 # next engine's manifest therefore swaps the image and reports `persistentvolumeclaim/
@@ -114,7 +157,7 @@ function k8s_ensure_db() {
     # here: a copy is a thing that drifts, and the manifests are what `kubectl apply` will use.
     local wanted current
     wanted="$(awk '/^ *image: /{print $2; exit}' "$manifest")"
-    current="$(kubectl get deployment bunkerweb-db -n bunkerweb-db -o jsonpath='{.spec.template.spec.containers[0].image}' 2>/dev/null)"
+    current="$(k8s_kubectl get deployment bunkerweb-db -n bunkerweb-db --ignore-not-found -o jsonpath='{.spec.template.spec.containers[0].image}')" || return 1
 
     # Compared on the tag. Here the two raw strings WOULD match -- `.spec…containers[0].image`
     # returns exactly what was applied, digest and all -- but the Docker arm's `docker inspect
@@ -122,17 +165,17 @@ function k8s_ensure_db() {
     # survives a manifest that is later re-pinned by tag.
     if [ -n "$current" ] && [ -n "$wanted" ] && [ "${current%%@*}" != "${wanted%%@*}" ] ; then
         log "UTILS" "⚠️" "☸️ The database runs ${current%%@*} and this action wants ${wanted%%@*}: recreating it and its volume ..."
-        if ! kubectl delete deployment bunkerweb-db -n bunkerweb-db --ignore-not-found --wait=true ; then
+        if ! k8s_kubectl delete deployment bunkerweb-db -n bunkerweb-db --ignore-not-found --wait=true --timeout=120s ; then
             log "UTILS" "❌" "☸️ Failed to delete the database deployment before switching engine"
             return 1
         fi
         # `pvc-protection` keeps the claim alive while a pod still mounts it, so the pods have to
         # be gone first -- otherwise the delete below returns immediately and the claim survives
         # in Terminating, and the apply that follows binds the very datadir this is destroying.
-        kubectl wait --for=delete pod -l app=bunkerweb-db -n bunkerweb-db --timeout=120s > /dev/null 2>&1
+        k8s_kubectl wait --for=delete pod -l app=bunkerweb-db -n bunkerweb-db --timeout=120s > /dev/null 2>&1
         # `--timeout` on the delete too: without one it waits forever on a pod that will not go,
         # turning a thirty-second red into a job-level timeout -- a strictly worse CI signal.
-        if ! kubectl delete pvc pvc-bunkerweb-db -n bunkerweb-db --ignore-not-found --wait=true --timeout=120s ; then
+        if ! k8s_kubectl delete pvc pvc-bunkerweb-db -n bunkerweb-db --ignore-not-found --wait=true --timeout=120s ; then
             log "UTILS" "❌" "☸️ Failed to delete the database volume before switching engine"
             return 1
         fi
@@ -141,9 +184,9 @@ function k8s_ensure_db() {
     # and the branch above is then skipped, so the apply below would bind whatever engine's datadir
     # the survivor holds: the original bug, silently. `cleanup_stack` deletes the whole namespace on
     # the ordinary path, so this only ever fires on that failure path.
-    elif [ -z "$current" ] && kubectl get pvc pvc-bunkerweb-db -n bunkerweb-db > /dev/null 2>&1 ; then
+    elif [ -z "$current" ] && k8s_kubectl get pvc pvc-bunkerweb-db -n bunkerweb-db > /dev/null 2>&1 ; then
         log "UTILS" "⚠️" "☸️ A database volume survived with no deployment behind it: deleting it before applying $database ..."
-        if ! kubectl delete pvc pvc-bunkerweb-db -n bunkerweb-db --ignore-not-found --wait=true --timeout=120s ; then
+        if ! k8s_kubectl delete pvc pvc-bunkerweb-db -n bunkerweb-db --ignore-not-found --wait=true --timeout=120s ; then
             log "UTILS" "❌" "☸️ Failed to delete the orphaned database volume"
             return 1
         fi
@@ -359,7 +402,7 @@ find '$www' -type f -exec chmod 644 {} +"
     if [ "$(id -u)" -eq 0 ] ; then
         bash -c "$script"
     elif sudo -n true 2>/dev/null ; then
-        sudo -E bash -c "$script"
+        sudo bash -c "$script"
     else
         # No passwordless sudo on a workstation: do it as root in a throwaway container, with
         # the repository and the web root both mounted at the paths the script expects.
@@ -425,7 +468,49 @@ function example_hook() {
     if [ "$(id -u)" -eq 0 ] ; then
         runner=()
     elif sudo -n true 2>/dev/null ; then
-        runner=(sudo -E)
+        # sudo-rs ignores -E; keep the caller's kubeconfig, tool paths and Helm configuration.
+        local preserve_env=(
+            HOME
+            PATH
+            KUBECONFIG
+            MINIKUBE_HOME
+            MINIKUBE_PROFILE
+            HELM_CONFIG_HOME
+            HELM_CACHE_HOME
+            HELM_DATA_HOME
+            HELM_REPOSITORY_CONFIG
+            HELM_REPOSITORY_CACHE
+            HELM_REGISTRY_CONFIG
+            HELM_KUBECONTEXT
+            HELM_NAMESPACE
+            HELM_KUBETOKEN
+            HELM_KUBEAPISERVER
+            HELM_KUBEASUSER
+            HELM_KUBEASGROUPS
+            HELM_KUBECAFILE
+            HELM_KUBEINSECURE_SKIP_TLS_VERIFY
+            HELM_KUBETLS_SERVER_NAME
+            HELM_DRIVER
+            HELM_DRIVER_SQL_CONNECTION_STRING
+            HELM_PLUGINS
+            HELM_CONTENT_CACHE
+            HELM_MAX_HISTORY
+            HELM_BURST_LIMIT
+            HELM_QPS
+            HELM_DEBUG
+            HELM_COLOR
+            NO_COLOR
+            XDG_CONFIG_HOME
+            XDG_CACHE_HOME
+            XDG_DATA_HOME
+            http_proxy
+            https_proxy
+            no_proxy
+            HTTP_PROXY
+            HTTPS_PROXY
+            NO_PROXY
+        )
+        runner=(sudo "--preserve-env=$(IFS=,; echo "${preserve_env[*]}")")
     else
         log "UTILS" "⚠️" "📕 sudo needs a password here, running $(basename "$script") as root in a container"
         if ! docker run --rm -v "$(realpath "$stack_dir")":/stack -w /stack bash:5 bash "./$(basename "$script")" ; then
@@ -544,7 +629,7 @@ function cleanup_stack () {
     if [ -f /tmp/example_stack.txt ] && [ "$integration" == "Kubernetes" ] ; then
         example_stack="$(cat /tmp/example_stack.txt)"
         example_hook cleanup "$integration"
-        kubectl delete -f "$example_stack" --ignore-not-found
+        k8s_delete_manifest "$example_stack"
         # shellcheck disable=SC2181
         if [ $? -ne 0 ] ; then
             log "UTILS" "❌" "📕 Failed to delete the example services"
@@ -554,9 +639,9 @@ function cleanup_stack () {
 
     if [ -f /tmp/services.yml ] ; then
         if [ "$integration" == "Kubernetes" ] ; then
-            services_pods=$(kubectl get pods -n services -o jsonpath='{.items[*].metadata.name}')
-            if echo "$services_pods" | grep -q "app1" ; then
-                kubectl delete -f /tmp/services.yml
+            services_namespace=$(k8s_kubectl get namespace services --ignore-not-found -o name) || return 1
+            if [ -n "$services_namespace" ] ; then
+                k8s_delete_manifest /tmp/services.yml
                 # shellcheck disable=SC2181
                 if [ $? -ne 0 ] ; then
                     log "UTILS" "❌" "☸️ Failed to delete services"
@@ -638,9 +723,9 @@ function cleanup_stack () {
             fi
         fi
     else
-        redis_secrets=$(kubectl get secrets -n redis -o jsonpath='{.items[*].metadata.name}')
+        redis_secrets=$(k8s_kubectl get secrets -n redis -o jsonpath='{.items[*].metadata.name}') || return 1
         if echo "$redis_secrets" | grep -q "redis-master-secret" ; then
-            kubectl delete -f /tmp/redis-master-secrets.yml
+            k8s_delete_manifest /tmp/redis-master-secrets.yml
             # shellcheck disable=SC2181
             if [ $? -ne 0 ] ; then
                 log "UTILS" "❌" "☸️ Failed to delete redis-master secrets"
@@ -649,7 +734,7 @@ function cleanup_stack () {
         fi
 
         if echo "$redis_secrets" | grep -q "valkey-slave-secret" ; then
-            kubectl delete -f /tmp/valkey-slave-secrets.yml
+            k8s_delete_manifest /tmp/valkey-slave-secrets.yml
             # shellcheck disable=SC2181
             if [ $? -ne 0 ] ; then
                 log "UTILS" "❌" "☸️ Failed to delete valkey-slave secrets"
@@ -658,7 +743,7 @@ function cleanup_stack () {
         fi
 
         if echo "$redis_secrets" | grep -q "valkey-sentinel-secret" ; then
-            kubectl delete -f /tmp/valkey-sentinel-secrets.yml
+            k8s_delete_manifest /tmp/valkey-sentinel-secrets.yml
             # shellcheck disable=SC2181
             if [ $? -ne 0 ] ; then
                 log "UTILS" "❌" "☸️ Failed to delete valkey-sentinel secrets"
@@ -667,7 +752,7 @@ function cleanup_stack () {
         fi
 
         if echo "$redis_secrets" | grep -q "redis-slave-secret" ; then
-            kubectl delete -f /tmp/redis-slave-secrets.yml
+            k8s_delete_manifest /tmp/redis-slave-secrets.yml
             # shellcheck disable=SC2181
             if [ $? -ne 0 ] ; then
                 log "UTILS" "❌" "☸️ Failed to delete redis-slave secrets"
@@ -676,7 +761,7 @@ function cleanup_stack () {
         fi
 
         if echo "$redis_secrets" | grep -q "redis-sentinel-secret" ; then
-            kubectl delete -f /tmp/redis-sentinel-secrets.yml
+            k8s_delete_manifest /tmp/redis-sentinel-secrets.yml
             # shellcheck disable=SC2181
             if [ $? -ne 0 ] ; then
                 log "UTILS" "❌" "☸️ Failed to delete redis-sentinel secrets"
@@ -684,9 +769,9 @@ function cleanup_stack () {
             fi
         fi
 
-        redis_pods=$(kubectl get pods -n redis -o jsonpath='{.items[*].metadata.name}')
+        redis_pods=$(k8s_kubectl get pods -n redis -o jsonpath='{.items[*].metadata.name}') || return 1
         if echo "$redis_pods" | grep -q "redis-sentinel-" ; then
-            kubectl delete -f tests/misc/k8s/redis-sentinel.yml
+            k8s_delete_manifest tests/misc/k8s/redis-sentinel.yml
             # shellcheck disable=SC2181
             if [ $? -ne 0 ] ; then
                 log "UTILS" "❌" "🧰 Failed to delete redis-sentinel stack"
@@ -695,7 +780,7 @@ function cleanup_stack () {
         fi
 
         if echo "$redis_pods" | grep -q "redis-master-" ; then
-            kubectl delete -f tests/misc/k8s/redis-master.yml
+            k8s_delete_manifest tests/misc/k8s/redis-master.yml
             # shellcheck disable=SC2181
             if [ $? -ne 0 ] ; then
                 log "UTILS" "❌" "🧰 Failed to delete redis-master"
@@ -704,14 +789,14 @@ function cleanup_stack () {
         fi
 
         if echo "$redis_pods" | grep -q "valkey-sentinel-" ; then
-            kubectl delete -f tests/misc/k8s/valkey-sentinel.yml
+            k8s_delete_manifest tests/misc/k8s/valkey-sentinel.yml
             # shellcheck disable=SC2181
             if [ $? -ne 0 ] ; then
                 log "UTILS" "❌" "🧰 Failed to delete valkey-sentinel"
                 return 1
             fi
         elif echo "$redis_pods" | grep -q "valkey-" ; then
-            kubectl delete -f tests/misc/k8s/valkey.yml
+            k8s_delete_manifest tests/misc/k8s/valkey.yml
             # shellcheck disable=SC2181
             if [ $? -ne 0 ] ; then
                 log "UTILS" "❌" "🧰 Failed to delete valkey"
@@ -719,15 +804,15 @@ function cleanup_stack () {
             fi
         fi
 
-        db_pods=$(kubectl get pods -n bunkerweb-db -o jsonpath='{.items[*].metadata.name}')
-        if echo "$db_pods" | grep -q "bunkerweb-db-" ; then
+        db_namespace=$(k8s_kubectl get namespace bunkerweb-db --ignore-not-found -o name) || return 1
+        if [ -n "$db_namespace" ] ; then
             if [ "$database" == "error" ] ; then
-                kubectl delete -f tests/misc/k8s/mariadb.yml
-                kubectl delete -f tests/misc/k8s/mysql.yml
-                kubectl delete -f tests/misc/k8s/postgresql.yml
-                kubectl delete -f tests/misc/k8s/oracle.yml
+                k8s_delete_manifest tests/misc/k8s/mariadb.yml || return 1
+                k8s_delete_manifest tests/misc/k8s/mysql.yml || return 1
+                k8s_delete_manifest tests/misc/k8s/postgresql.yml || return 1
+                k8s_delete_manifest tests/misc/k8s/oracle.yml || return 1
             elif [ "$database" != "sqlite" ] ; then
-                kubectl delete -f tests/misc/k8s/"$database".yml
+                k8s_delete_manifest tests/misc/k8s/"$database".yml
                 # shellcheck disable=SC2181
                 if [ $? -ne 0 ] ; then
                     log "UTILS" "❌" "☸️ Failed to delete $database"
@@ -739,9 +824,9 @@ function cleanup_stack () {
 
     if [ "$exit_code" -ne 0 ] || ($trapped && [ "$exit_code" -eq 0 ] && [ "$(basename "$0")" == "run.sh" ]) ; then
         if [ "$integration" == "Kubernetes" ] ; then
-            pods=$(kubectl get pods -n misc -o jsonpath='{.items[*].metadata.name}')
+            pods=$(k8s_kubectl get pods -n misc -o jsonpath='{.items[*].metadata.name}') || return 1
             if echo "$pods" | grep -q "custom-api-" ; then
-                kubectl delete -f tests/misc/k8s/custom-api.yml
+                k8s_delete_manifest tests/misc/k8s/custom-api.yml
                 # shellcheck disable=SC2181
                 if [ $? -ne 0 ] ; then
                     log "UTILS" "❌" "🔧 Failed to delete custom-api"
@@ -995,9 +1080,9 @@ function cleanup_stack () {
             fi
         fi
     elif [ "$integration" == "Kubernetes" ] ; then
-        bw_pods=$(kubectl get pods -n bunkerweb -o jsonpath='{.items[*].metadata.name}')
-        if echo "$bw_pods" | grep -q "bunkerweb-controller-" ; then
-            kubectl delete -f tests/k8s/bunkerweb.yml
+        bw_namespace=$(k8s_kubectl get namespace bunkerweb --ignore-not-found -o name) || return 1
+        if [ -n "$bw_namespace" ] ; then
+            k8s_delete_manifest tests/k8s/bunkerweb.yml
             # shellcheck disable=SC2181
             if [ $? -ne 0 ] ; then
                 log "UTILS" "❌" "☸️ Failed to delete BunkerWeb"
@@ -1005,9 +1090,9 @@ function cleanup_stack () {
             fi
         fi
 
-        services=$(kubectl get svc -n bunkerweb -o jsonpath='{.items[*].metadata.name}')
+        services=$(k8s_kubectl get svc -n bunkerweb -o jsonpath='{.items[*].metadata.name}') || return 1
         if echo "$services" | grep -q "svc-bw-lb" ; then
-            kubectl delete -f tests/misc/k8s/lb.yml
+            k8s_delete_manifest tests/misc/k8s/lb.yml
             # shellcheck disable=SC2181
             if [ $? -ne 0 ] ; then
                 log "UTILS" "❌" "☸️ Failed to delete lb"
@@ -1015,9 +1100,9 @@ function cleanup_stack () {
             fi
         fi
 
-        secrets=$(kubectl get secrets -n bunkerweb -o jsonpath='{.items[*].metadata.name}')
+        secrets=$(k8s_kubectl get secrets -n bunkerweb -o jsonpath='{.items[*].metadata.name}') || return 1
         if echo "$secrets" | grep -q "bw-secret" ; then
-            kubectl delete -f /tmp/secrets.yml
+            k8s_delete_manifest /tmp/secrets.yml
             # shellcheck disable=SC2181
             if [ $? -ne 0 ] ; then
                 log "UTILS" "❌" "☸️ Failed to delete secrets"
@@ -1027,7 +1112,7 @@ function cleanup_stack () {
 
         if [ "$type" == "ui" ] ; then
             if echo "$secrets" | grep -q "bw-ui-secret" ; then
-                kubectl delete -f /tmp/secrets-ui.yml
+                k8s_delete_manifest /tmp/secrets-ui.yml
                 # shellcheck disable=SC2181
                 if [ $? -ne 0 ] ; then
                     log "UTILS" "❌" "☸️ Failed to delete UI secrets"
@@ -1036,7 +1121,7 @@ function cleanup_stack () {
             fi
         elif [ "$type" == "api" ] ; then
             if echo "$secrets" | grep -q "bw-api-secret" ; then
-                kubectl delete -f /tmp/secrets-api.yml
+                k8s_delete_manifest /tmp/secrets-api.yml
                 # shellcheck disable=SC2181
                 if [ $? -ne 0 ] ; then
                     log "UTILS" "❌" "☸️ Failed to delete API secrets"
@@ -1497,9 +1582,9 @@ function restart_stack () {
             fi
         fi
     elif [ "$integration" == "Kubernetes" ] ; then
-        secrets=$(kubectl get secrets -n bunkerweb -o jsonpath='{.items[*].metadata.name}')
+        secrets=$(k8s_kubectl get secrets -n bunkerweb -o jsonpath='{.items[*].metadata.name}') || return 1
         if echo "$secrets" | grep -q "bw-secret" ; then
-            kubectl delete -f /tmp/secrets.yml
+            k8s_delete_manifest /tmp/secrets.yml
             # shellcheck disable=SC2181
             if [ $? -ne 0 ] ; then
                 log "UTILS" "❌" "☸️ Failed to delete secrets"
@@ -1593,7 +1678,7 @@ function restart_stack () {
 
         if [ "$type" == "ui" ] ; then
             if echo "$secrets" | grep -q "bw-ui-secret" ; then
-                kubectl delete -f /tmp/secrets-ui.yml
+                k8s_delete_manifest /tmp/secrets-ui.yml
                 # shellcheck disable=SC2181
                 if [ $? -ne 0 ] ; then
                     log "UTILS" "❌" "☸️ Failed to delete UI secrets"
@@ -1618,7 +1703,7 @@ function restart_stack () {
 
         if [ "$type" == "api" ] ; then
             if echo "$secrets" | grep -q "bw-api-secret" ; then
-                kubectl delete -f /tmp/secrets-api.yml
+                k8s_delete_manifest /tmp/secrets-api.yml
                 # shellcheck disable=SC2181
                 if [ $? -ne 0 ] ; then
                     log "UTILS" "❌" "☸️ Failed to delete API secrets"
@@ -1642,7 +1727,7 @@ function restart_stack () {
         fi
 
         if [ -f /tmp/services.yml ] ; then
-            kubectl delete -f /tmp/services.yml
+            k8s_delete_manifest /tmp/services.yml
             # shellcheck disable=SC2181
             if [ $? -ne 0 ] ; then
                 log "UTILS" "❌" "☸️ Failed to delete services"
