@@ -5,6 +5,8 @@ from pathlib import Path
 
 import pytest
 
+pytest.importorskip("pydantic_settings")
+
 ROOT = Path(__file__).resolve().parents[3]
 SPEC = spec_from_file_location("bw_yaml_settings", ROOT / "src/api/app/yaml_base_settings.py")
 YAML = module_from_spec(SPEC)
