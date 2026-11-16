@@ -14,6 +14,37 @@ actions:
     config:
       INJECT_HEAD: "BunkerWeb Forever!"
 
+  # BunkerWeb's error pages send a nonce-based CSP too. Check the page actually rendered,
+  # then that injection is absent; the same injection must still reach a normal page.
+  error_page_renders:
+    type: string
+    url: "http://www.example.com/inject-error"
+    string: "This website is protected with"
+    raise_for_status: false
+    config:
+      BLACKLIST_URI: "^/inject-error$"
+      INJECT_HEAD: "BunkerWeb Forever!"
+      INJECT_BODY: "BunkerWeb Forever!"
+    restart_stack: false
+  error_page_not_injected:
+    type: string
+    url: "http://www.example.com/inject-error"
+    not_string: "BunkerWeb Forever!"
+    raise_for_status: false
+    config:
+      BLACKLIST_URI: "^/inject-error$"
+      INJECT_HEAD: "BunkerWeb Forever!"
+      INJECT_BODY: "BunkerWeb Forever!"
+    restart_stack: false
+  normal_page_still_injected:
+    type: string
+    url: "http://www.example.com"
+    string: "BunkerWeb Forever!"
+    config:
+      BLACKLIST_URI: "^/inject-error$"
+      INJECT_HEAD: "BunkerWeb Forever!"
+      INJECT_BODY: "BunkerWeb Forever!"
+
   # The antibot challenge page sends a nonce-based CSP that blocks injected markup, so the
   # server-level injection must not reach it (#3234). Split in two actions because
   # http_string_handler checks `string` or `not_string`, not both.
