@@ -115,7 +115,7 @@ def totp_route(route_module, monkeypatch):
     monkeypatch.setattr(module, "LOGGER", logger)
     monkeypatch.setattr(module, "flash", lambda message, *args, **kwargs: flashed.append((message, args)))
     monkeypatch.setattr(module, "handle_error", lambda message, *args, **kwargs: errors.append(message) or "ERROR")
-    monkeypatch.setattr(module, "verify_data_in_form", lambda **kwargs: None)
+    monkeypatch.setattr(module, "verify_data_in_form", lambda **kwargs: True)
     monkeypatch.setattr(module, "redirect", lambda target: "REDIRECT")
     monkeypatch.setattr(module, "url_for", lambda endpoint, **kwargs: f"/{endpoint}")
     monkeypatch.setattr(module, "session", {})

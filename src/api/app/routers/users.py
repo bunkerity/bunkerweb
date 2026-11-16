@@ -43,6 +43,25 @@ class LoginRequest(BaseModel):
     user_agent: str
 
 
+class LoginThrottleCheckRequest(BaseModel):
+    # The UI owns the policy (LOGIN_* settings live in its environment) and sends it along with the keys.
+    username: str = Field(max_length=1024)
+    ip: str = Field(max_length=45)
+    max_attempts: int = Field(ge=1)
+    window: int = Field(ge=1)
+    lockout: int = Field(ge=1)
+
+
+class LoginThrottleFailureRequest(BaseModel):
+    username: str = Field(max_length=1024)
+    ip: str = Field(max_length=45)
+    retention: int = Field(ge=1)
+
+
+class LoginThrottleClearRequest(BaseModel):
+    username: str = Field(max_length=1024)
+
+
 class RecoveryCodeUseRequest(BaseModel):
     hashed_code: str
 
@@ -124,6 +143,42 @@ def _serialize_webauthn_credential(credential: dict) -> dict:
 
 
 # ── Endpoints ───────────────────────────────────────────────────────
+
+
+# ── Login throttle ──────────────────────────────────────────────────
+#
+# State behind the Web UI's per-IP / per-username login lock (`bw_ui_login_failures`). Keys travel in
+# the body, never the path: an unknown username is counted too, and a username can hold any character.
+# Declared before the `/{username}/...` routes so a static path is never read as a username.
+
+
+@router.post("/login-throttle/check", dependencies=[Depends(guard)])
+def check_login_throttle(req: LoginThrottleCheckRequest) -> JSONResponse:
+    """Seconds the attempt stays locked (0 = not locked). A lock is a verdict, so it is a 200."""
+    try:
+        remaining = get_db().get_ui_login_lock(req.username, req.ip, max_attempts=req.max_attempts, window=req.window, lockout=req.lockout)
+    except Exception as e:
+        # Driver exceptions can embed the connection credentials: the type only.
+        return JSONResponse(status_code=500, content={"status": "error", "message": f"Couldn't read the login failures ({type(e).__name__})"})
+    return JSONResponse(status_code=200, content={"status": "success", "remaining": remaining})
+
+
+@router.post("/login-throttle/failures", dependencies=[Depends(guard)])
+def record_login_failure(req: LoginThrottleFailureRequest) -> JSONResponse:
+    """Count one failed login and prune the failures older than ``retention`` seconds."""
+    ret = get_db().add_ui_login_failure(req.username, req.ip, retention=req.retention)
+    if ret:
+        return JSONResponse(status_code=409 if "read-only" in ret else 500, content={"status": "error", "message": ret})
+    return JSONResponse(status_code=200, content={"status": "success"})
+
+
+@router.post("/login-throttle/clear", dependencies=[Depends(guard)])
+def clear_login_failures(req: LoginThrottleClearRequest) -> JSONResponse:
+    """Forget the failures of a username, once it completed a login."""
+    ret = get_db().clear_ui_login_failures(req.username)
+    if ret:
+        return JSONResponse(status_code=409 if "read-only" in ret else 500, content={"status": "error", "message": ret})
+    return JSONResponse(status_code=200, content={"status": "success"})
 
 
 @router.get("", dependencies=[Depends(guard)])

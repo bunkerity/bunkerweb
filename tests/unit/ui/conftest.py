@@ -44,6 +44,14 @@ def _real_plugin_activation_manifests(monkeypatch):
     get_activation_map.cache_clear()
 
 
+@pytest.fixture(autouse=True)
+def _login_throttle_off_by_default(monkeypatch):
+    """The login, TOTP and profile routes ask the API's login throttle before anything else. Tests of those
+    routes that stub `API_CLIENT` with a bare `Mock` are about something else, so the throttle is off for them
+    unless a test turns it back on (`test_login_throttle.py` does, against a fake client)."""
+    monkeypatch.setenv("LOGIN_THROTTLE", "no")
+
+
 @pytest.fixture
 def ui_db(db_engine, tmp_path, quiet_logger, _clean_env):
     uri = resolve_uri(db_engine, tmp_path)

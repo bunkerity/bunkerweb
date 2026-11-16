@@ -3,6 +3,7 @@ from datetime import datetime
 from flask import Blueprint, current_app, jsonify, redirect, render_template, request, session, url_for
 from flask_login import current_user, login_required
 
+from app import login_throttle
 from app.api_client import ApiClientError, ApiUnavailableError
 from app.dependencies import API_CLIENT
 from app.i18n import translated
@@ -38,13 +39,23 @@ def totp_page():
     has_credentials = bool(getattr(current_user, "webauthn_credentials_count", 0))
 
     if request.method == "POST":
-        verify_data_in_form(
+        invalid = verify_data_in_form(
             data={"totp_token": None}, err_message=translated("totp.flash.no_token_provided_totp") or "No token provided on /totp.", redirect_url="totp"
         )
+        if invalid is not True:
+            return invalid
+
+        # A wrong code or recovery code counts like a wrong password: same keys, same lock. A recovery code is a
+        # guessable secret, a security key (below) is possession and is neither counted nor locked.
+        username = current_user.get_id()
+        refused = login_throttle.refusal(API_CLIENT, username, request.remote_addr)
+        if refused:
+            return handle_error(refused.message, "totp")
 
         if not TOTP.verify_totp(request.form["totp_token"], user=current_user):
             recovery_code = TOTP.verify_recovery_code(request.form["totp_token"], user=current_user)
             if not recovery_code:
+                login_throttle.record_failure(API_CLIENT, username, request.remote_addr)
                 return handle_error(translated("totp.flash.token_invalid") or "The token is invalid.", "totp")
             # The database is the only store that can spend a code. Try to spend it first, and read
             # the refusal: 409 is the API saying the database is read-only, and a valid recovery code
@@ -56,6 +67,8 @@ def totp_page():
                 API_CLIENT.use_recovery_code(current_user.get_id(), recovery_code)
             except ApiClientError as e:
                 if e.status_code != 409:
+                    # The code matched a stored hash a moment ago and the database now calls it invalid: spent in between.
+                    login_throttle.record_failure(API_CLIENT, username, request.remote_addr)
                     return handle_error(
                         translated("totp.flash.error_occurred_while_using_recovery_code") or "An error occurred while using the recovery code.", "totp"
                     )
@@ -75,6 +88,7 @@ def totp_page():
                 )
 
         session["mfa_validated"] = True
+        login_throttle.reset(API_CLIENT, username)
         try:
             safe_next = _sanitize_internal_next(request.form.get("next"), url_for("home.home_page"))
         except ValueError:
@@ -147,6 +161,7 @@ def totp_webauthn_verify():
         return jsonify({"message": GENERIC_SECURITY_KEY_ERROR}), 401
 
     session["mfa_validated"] = True
+    login_throttle.reset(API_CLIENT, username)
 
     try:
         API_CLIENT.update_user_webauthn_credential(username, credential_id, sign_count=new_sign_count, last_used=datetime.now().astimezone().isoformat())

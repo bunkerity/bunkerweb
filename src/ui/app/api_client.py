@@ -70,6 +70,10 @@ class ApiClient(BaseApiClient):
     def get_metrics_timeseries(self, *, start: int, end: int, bucket: str = "hour", search_panes: str = ""):
         return self._get("/metrics/requests/timeseries", params={"start": start, "end": end, "bucket": bucket, "search_panes": search_panes})
 
+    def get_metrics_request_data(self, request_id: str, *, instance_hostname: str | None = None):
+        params = {"instance_hostname": instance_hostname} if instance_hostname else {}
+        return self._get(f"/metrics/requests/{quote(request_id, safe='')}/data", params=params).get("data")
+
     def get_metrics_top_offenders(self, *, start: int, end: int, limit: int = 10, search_panes: str = ""):
         return self._get("/metrics/requests/top-offenders", params={"start": start, "end": end, "limit": limit, "search_panes": search_panes})
 
@@ -684,6 +688,20 @@ class ApiClient(BaseApiClient):
     def use_totp_counter(self, username, totp_secret, counter) -> dict:
         """Spend a TOTP counter. `consumed` False means already used, or the database is `readonly`."""
         return self._post(f"/users/{username}/totp/use", json={"totp_secret": totp_secret, "counter": counter})
+
+    # ── Login throttle ──────────────────────────────────────────────────
+    # Keys go in the body, not the path: an unknown username is counted too and may hold any character.
+
+    def check_login_throttle(self, username, ip, *, max_attempts, window, lockout) -> int:
+        """Seconds the attempt stays locked, 0 when it is not."""
+        body = {"username": username, "ip": ip, "max_attempts": max_attempts, "window": window, "lockout": lockout}
+        return int(self._post("/users/login-throttle/check", json=body).get("remaining", 0))
+
+    def record_login_failure(self, username, ip, *, retention):
+        return self._post("/users/login-throttle/failures", json={"username": username, "ip": ip, "retention": retention})
+
+    def clear_login_failures(self, username):
+        return self._post("/users/login-throttle/clear", json={"username": username})
 
     # ── WebAuthn credentials ────────────────────────────────────────────
 

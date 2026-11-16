@@ -39,7 +39,7 @@ from redis_keys import is_cluster  # type: ignore
 from jobs import JOB_DEFERRAL_PREFIX  # type: ignore
 from resource_group_resolver import kind_for_key as resource_kind_for_setting  # type: ignore
 
-from app.models.biscuit import BiscuitMiddleware, render_error_page
+from app.models.biscuit import BiscuitMiddleware, _internal_error_response, render_error_page
 from app.models.plugin_catalog import catalog_enabled, fetch_catalog
 from app.models.reverse_proxied import ReverseProxied
 
@@ -93,7 +93,7 @@ from app.routes.instances import instances
 from app.routes.jobs import jobs
 from app.routes.login import login
 from app.routes.logout import logout, logout_page
-from app.routes.logs import logs
+from app.routes.logs import _list_log_files, logs
 from app.routes.onboarding import onboarding
 from app.routes.whats_new import pending_releases, whats_new
 from app import perf
@@ -437,6 +437,18 @@ def register_plugin_blueprints(app, blueprint_registry):
     app.jinja_env.loader = app.create_global_jinja_loader()
 
 
+def deny_plugin_requests(module_name):
+    """When a plugin's hooks fail to load, deny every request instead of serving without them: they may be an authorization check."""
+
+    def fail_closed_before_request():
+        LOGGER.error(f"Hooks of plugin module {module_name} failed to load, denying the request")
+        return _internal_error_response()
+
+    # Distinct module name so the dedupe of refresh_app_context keeps one stub per plugin
+    fail_closed_before_request.__module__ = module_name
+    app.config.setdefault(HOOKS["before_request"]["key"], []).append(fail_closed_before_request)
+
+
 def refresh_app_context():
     """Refresh Flask app context by loading hooks and blueprints from plugins."""
     worker_pid = str(getpid())
@@ -505,6 +517,7 @@ def refresh_app_context():
                 # Restore any prior 'hooks' module
                 if prev_hooks_mod is not None:
                     sys_modules["hooks"] = prev_hooks_mod
+                deny_plugin_requests(module_name)
                 continue
 
             hook_module = module_from_spec(spec)
@@ -518,6 +531,7 @@ def refresh_app_context():
                 else:
                     # Ensure we don't keep a plugin-specific 'hooks' leaked
                     sys_modules.pop("hooks", None)
+                deny_plugin_requests(module_name)
                 continue
 
             # Restore any prior 'hooks' module (avoid leaking current plugin 'hooks' globally)
@@ -538,6 +552,7 @@ def refresh_app_context():
                 app.hook_sys_paths.pop(module_name, None)
         except Exception as exc:
             LOGGER.error(f"Error loading potential hooks from {py_file}: {exc}")
+            deny_plugin_requests(module_name)
             # Best-effort cleanup of 'hooks'
             with suppress(Exception):
                 if "hooks" in sys_modules:
@@ -644,27 +659,17 @@ def refresh_app_context():
     # Remove blueprints for deleted plugins
     for bp_name in list(app.blueprints.keys()):
         if bp_name not in plugin_blueprints and bp_name not in app.original_blueprints:
-            # Remove blueprint and clean up
-            app.blueprints.pop(bp_name, None)
-
             # Clean up sys.path
             if bp_name in app.plugin_sys_paths and app.plugin_sys_paths[bp_name] in sys_path:
                 sys_path.remove(app.plugin_sys_paths[bp_name])
                 del app.plugin_sys_paths[bp_name]
 
-            # Remove URL rules and endpoints
+            # Remove extra pages before the blueprint's rules are dropped.
             for rule in list(app.url_map.iter_rules()):
-                if rule.endpoint.startswith(f"{bp_name}."):
-                    if str(rule) == f"/{bp_name}" and bp_name in app.config["EXTRA_PAGES"]:
-                        app.config["EXTRA_PAGES"].remove(bp_name)
+                if rule.endpoint.startswith(f"{bp_name}.") and str(rule) == f"/{bp_name}" and bp_name in app.config["EXTRA_PAGES"]:
+                    app.config["EXTRA_PAGES"].remove(bp_name)
 
-                    with suppress(ValueError):
-                        app.url_map._rules.remove(rule)
-                        app.url_map._rules_by_endpoint.pop(rule.endpoint, None)
-
-            # Remove view functions
-            for endpoint in [ep for ep in app.view_functions if ep.startswith(f"{bp_name}.")]:
-                app.view_functions.pop(endpoint, None)
+            app._remove_blueprint(bp_name)
 
             LOGGER.debug(f"Blueprint '{bp_name}' was completely removed")
 
@@ -1626,11 +1631,18 @@ def before_request():
             if nginx_failover:
                 # Wins over "changes ongoing": push-configs keeps retrying (and the *_changed flags stay set) while a
                 # refused config is in place, and NGINX's own text is what the operator needs.
+                # Preselect error.log only when the Logs page lists it, otherwise the link would 404
+                logs_args = {}
+                with suppress(OSError):
+                    if "error.log" in _list_log_files()["main"]:
+                        logs_args["file"] = "error.log"
                 flash(
-                    Markup("<p class='p-0 m-0 fst-italic'>{}</p>").format(
+                    Markup("<p class='p-0 m-0 fst-italic'>{} <a href='{}' class='alert-link'>{}</a></p>").format(
                         translated("main.flash.failover_configuration_error")
                         or "The last changes could not be applied because it creates a configuration error on NGINX, please check "
-                        "BunkerWeb's logs for more information. The configuration fell back to the last working one."
+                        "BunkerWeb's logs for more information. The configuration fell back to the last working one.",
+                        url_for("logs.logs_page", **logs_args),
+                        translated("navigation.logs") or "Logs",
                     ),
                     "error",
                     save=False,
@@ -1828,13 +1840,15 @@ def before_request():
 
         g._env = data
 
+    # A hook that raises denies the request: it may be an authorization check
     for hook in app.config["BEFORE_REQUEST_HOOKS"]:
         try:
             resp = hook()
-            if resp:
-                return resp
         except Exception:
             LOGGER.exception("Error in before_request hook")
+            return _internal_error_response()
+        if resp:
+            return resp
 
 
 def mark_user_access(user, session_id):
@@ -1905,7 +1919,7 @@ def set_security_headers(response):
     # The directive *inventory* tracks the PERMISSIONS_POLICY default in
     # src/common/core/headers/plugin.json; only those four values differ from it, on purpose.
     response.headers["Permissions-Policy"] = (
-        "accelerometer=(), ambient-light-sensor=(), aria-notify=(), attribution-reporting=(), autoplay=(), bluetooth=(), browsing-topics=(), camera=(), captured-surface-control=(), ch-device-memory=(), ch-downlink=(), ch-dpr=(), ch-ect=(), ch-prefers-color-scheme=(), ch-prefers-reduced-motion=(), ch-prefers-reduced-transparency=(), ch-rtt=(), ch-save-data=(), ch-ua-arch=(), ch-ua-bitness=(), ch-ua-form-factors=(), ch-ua-full-version-list=(), ch-ua-full-version=(), ch-ua-high-entropy-values=(), ch-ua-mobile=(), ch-ua-model=(), ch-ua-platform-version=(), ch-ua-platform=(), ch-ua-wow64=(), ch-ua=(), ch-viewport-height=(), ch-viewport-width=(), ch-width=(), compute-pressure=(), cross-origin-isolated=(), deferred-fetch-minimal=(), deferred-fetch=(), device-attributes=(), digital-credentials-create=(), digital-credentials-get=(), display-capture=(), encrypted-media=(), execution-while-not-rendered=(), execution-while-out-of-viewport=(), focus-without-user-activation=(), fullscreen=(self), gamepad=(), geolocation=(), gyroscope=(), haptics=(), hid=(), identity-credentials-get=(), idle-detection=(), interest-cohort=(), keyboard-map=(), language-detector=(), language-model=(), local-fonts=(), local-network-access=(), local-network=(), loopback-network=(), magnetometer=(), manual-text=(), media-playback-while-not-visible=(), microphone=(), midi=(), on-device-speech-recognition=(), otp-credentials=(), payment=(), picture-in-picture=(), private-state-token-issuance=(), private-state-token-redemption=(), proofreader=(), publickey-credentials-create=(self), publickey-credentials-get=(self), publickey-credentials-remote-client-data-json=(), rewriter=(), screen-wake-lock=(self), serial=(), speaker-selection=(), storage-access=(), summarizer=(), tools=(), translator=(), unload=(), usb=(), vertical-scroll=(), web-app-installation=(), web-share=(), webnn=(), window-management=(), writer=(), xr-spatial-tracking=()"
+        "accelerometer=(), ambient-light-sensor=(), aria-notify=(), attribution-reporting=(), autoplay=(), bluetooth=(), browsing-topics=(), camera=(), captured-surface-control=(), ch-device-memory=(), ch-downlink=(), ch-dpr=(), ch-ect=(), ch-prefers-color-scheme=(), ch-prefers-reduced-motion=(), ch-prefers-reduced-transparency=(), ch-rtt=(), ch-save-data=(), ch-ua-arch=(), ch-ua-bitness=(), ch-ua-form-factors=(), ch-ua-full-version-list=(), ch-ua-full-version=(), ch-ua-high-entropy-values=(), ch-ua-mobile=(), ch-ua-model=(), ch-ua-platform-version=(), ch-ua-platform=(), ch-ua-wow64=(), ch-ua=(), ch-viewport-height=(), ch-viewport-width=(), ch-width=(), compute-pressure=(), cross-origin-isolated=(), deferred-fetch-minimal=(), deferred-fetch=(), device-attributes=(), digital-credentials-create=(), digital-credentials-get=(), display-capture=(), encrypted-media=(), execution-while-not-rendered=(), execution-while-out-of-viewport=(), focus-without-user-activation=(), fullscreen=(self), gamepad=(), geolocation=(), gyroscope=(), haptics=(), hid=(), identity-credentials-get=(), idle-detection=(), interest-cohort=(), keyboard-map=(), language-detector=(), language-model=(), local-fonts=(), local-network-access=(), local-network=(), loopback-network=(), magnetometer=(), manual-text=(), media-playback-while-not-visible=(), microphone=(), midi=(), on-device-speech-recognition=(), otp-credentials=(), payment=(), picture-in-picture=(), private-state-token-issuance=(), private-state-token-redemption=(), proofreader=(), publickey-credentials-create=(self), publickey-credentials-get=(self), publickey-credentials-remote-client-data-json=(), rewriter=(), screen-wake-lock=(self), serial=(), speaker-selection=(), storage-access=(), summarizer=(), tools=(), translator=(), unbounded-element=(), unload=(), usb=(), vertical-scroll=(), web-app-installation=(), web-share=(), webnn=(), window-management=(), writer=(), xr-spatial-tracking=()"
     )
 
     # Out of search indexes. robots.txt stops a crawler fetching the page; it does not stop the URL

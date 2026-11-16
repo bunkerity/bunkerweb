@@ -8,6 +8,7 @@ from flask_babel import force_locale
 from flask_login import current_user, login_user
 from markupsafe import Markup
 
+from app import login_throttle
 from app.dependencies import API_CLIENT
 from app.api_client import ApiClientError, ApiUnavailableError
 from app.i18n import translated
@@ -144,11 +145,19 @@ def login_page():
         session["language"] = lang_hint
 
     fail = False
+    refused = None
+    error = ""
     if request.method == "POST" and "username" in request.form and "password" in request.form:
         LOGGER.warning(f"Login attempt from {request.remote_addr} with username \"{request.form['username']}\"")
 
+        # Checked before the user is looked up or the password is hashed, and answered the same whether or not
+        # the username exists: a lock is kept for an unknown username as much as for a known one.
+        refused = login_throttle.refusal(API_CLIENT, request.form["username"], request.remote_addr)
+
+        user_data = None
         try:
-            user_data = API_CLIENT.get_user_for_auth(request.form["username"])
+            if not refused:
+                user_data = API_CLIENT.get_user_for_auth(request.form["username"])
         except (ApiClientError, ApiUnavailableError):
             # `get_user_for_auth` raises on an unknown username (the API 404s) instead of
             # returning None; uncaught, that reached the client as a bare 500 -- a response
@@ -156,9 +165,11 @@ def login_page():
             # Treated the same as "no such user" from here on.
             user_data = None
 
-        password_hash = (user_data or {}).get("password") or _DUMMY_PASSWORD_HASH
-        password_bytes = request.form["password"].encode("utf-8")
-        password_matches = checkpw(password_bytes[:MAX_PASSWORD_BYTES], password_hash.encode("utf-8")) and len(password_bytes) <= MAX_PASSWORD_BYTES
+        password_matches = False
+        if not refused:
+            password_hash = (user_data or {}).get("password") or _DUMMY_PASSWORD_HASH
+            password_bytes = request.form["password"].encode("utf-8")
+            password_matches = checkpw(password_bytes[:MAX_PASSWORD_BYTES], password_hash.encode("utf-8")) and len(password_bytes) <= MAX_PASSWORD_BYTES
 
         if user_data and user_data["username"] == request.form["username"] and password_matches:
             ui_user = _user_from_auth_data(user_data)
@@ -192,6 +203,11 @@ def login_page():
             except (ApiClientError, ApiUnavailableError) as e:
                 LOGGER.error(f"Couldn't update the user {current_user.get_id()}: {e.message}")
 
+            # With a second factor the count is cleared once that is passed (totp.py): clearing it here would give
+            # someone who knows the password a fresh set of guesses at every code.
+            if not user_data.get("totp_secret") and not user_data.get("webauthn_credentials_count"):
+                login_throttle.reset(API_CLIENT, ui_user.username)
+
             LOGGER.info(f"User {ui_user.username} logged in successfully" + (" with remember me" if request.form.get("remember-me") == "on" else ""))
 
             # The 2FA reminder repeats on EVERY login until it is set up, with no way to say
@@ -218,19 +234,27 @@ def login_page():
 
             return redirect(url_for("loading", next=_safe_next()))
         else:
-            flash(translated("login.flash.invalid_username_password") or "Invalid username or password", "error", save=False)
+            invalid = translated("login.flash.invalid_username_password") or "Invalid username or password"
+            if refused is None:
+                login_throttle.record_failure(API_CLIENT, request.form["username"], request.remote_addr)
+                error = invalid
+            else:
+                # 429: still the generic message, plus the wait. 503: the throttle could not answer, so say that.
+                error = f"{invalid}. {refused.message}" if refused.status == 429 else refused.message
+            flash(error, "error", save=False)
             fail = True
 
     kwargs = {
         "is_totp": bool(current_user.totp_secret),
         "webauthn_enabled": WEBAUTHN.enabled,
-    } | ({"error": "Invalid username or password"} if fail else {})
+    } | ({"error": error} if fail else {})
 
     notice = LOGIN_NOTICES.get(request.args.get("reason", ""))
     if notice:
         kwargs["notice"] = notice
 
-    return render_template("login.html", **kwargs), 401 if fail else 200
+    headers = {"Retry-After": "60"} if refused and refused.status == 429 else {}
+    return render_template("login.html", **kwargs), refused.status if refused else 401 if fail else 200, headers
 
 
 # ── Passwordless login ──────────────────────────────────────────────
@@ -314,6 +338,10 @@ def login_webauthn_verify():
         )
     except (ApiClientError, ApiUnavailableError) as e:
         LOGGER.error(f"Couldn't update the passkey usage: {e.message}")
+
+    # A passkey is a complete login: forget the failed password guesses of that username. It is neither counted
+    # nor locked on failure -- an assertion is possession, not a guessable secret.
+    login_throttle.reset(API_CLIENT, ui_user.username)
 
     LOGGER.info(f"User {ui_user.username} logged in successfully with a passkey")
 

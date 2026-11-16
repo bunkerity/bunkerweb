@@ -46,6 +46,17 @@ REVIEWED_PASSTHROUGH_SITES = [
     ("src/ui/app/routes/jobs.py", "e.message"),
     # login.py: already-translated message re-raised as `str(exc)`.
     ("src/ui/app/routes/login.py", 'Markup(\'{} <a href="#" class="alert-link" data-dismiss-notic'),
+    # The login throttle's messages are resolved by translated() in app/login_throttle.py (lock, unavailable) and
+    # app/routes/profile.py's `_current_password_error` (wrong password) before they reach these sites.
+    ("src/ui/app/routes/login.py", "error"),
+    ("src/ui/app/routes/totp.py", "refused.message"),
+    ("src/ui/app/routes/profile.py", "password_error[0]"),
+    ("src/ui/app/routes/profile.py", "password_error[0]"),
+    ("src/ui/app/routes/profile.py", "password_error[0]"),
+    ("src/ui/app/routes/profile.py", "password_error[0]"),
+    ("src/ui/app/routes/profile.py", "password_error[0]"),
+    ("src/ui/app/routes/profile.py", "password_error[0]"),
+    ("src/ui/app/routes/profile.py", "password_error[0]"),
     # plugins.py: `message` (translated at both branches above), `str(e)` from TarError/OSError/
     # Exception (library relay), `done` (translated at both call sites), `str(e)` from `_Refusal`
     # (translated at every raise site).
@@ -117,7 +128,7 @@ REVIEWED_PASSTHROUGH_SITES = [
     ("src/ui/main.py", 'Markup(\'{}\\n<div class="mt-2 pt-2 border-top border-white">\\'),
     ("src/ui/main.py", "Markup(\"{} <a class='alert-link' href='{}'>{}</a>\").format(m"),
     ("src/ui/main.py", "Markup(\"{} <a class='alert-link' href='{}'>{}</a>\").format(m"),
-    ("src/ui/main.py", "Markup(\"<p class='p-0 m-0 fst-italic'>{}</p>\").format(transl"),
+    ("src/ui/main.py", "Markup(\"<p class='p-0 m-0 fst-italic'>{} <a href='{}' class='alert-link'>{}</a></p>\").forma"),
     ("src/ui/main.py", "Markup(\"<div class='d-flex flex-column'>\\n                  "),
     ("src/ui/main.py", "content"),
     # letsencrypt/ui/hooks.py: `Markup(text)` where `text` was resolved through `translated()`
