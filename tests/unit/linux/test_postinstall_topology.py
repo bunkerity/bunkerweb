@@ -22,7 +22,8 @@ from pathlib import Path
 import pytest
 
 ROOT = Path(__file__).resolve().parents[3]
-POSTINSTALL = ROOT / "src" / "linux" / "scripts" / "postinstall.sh"
+# POSTINSTALL_SH points the tests at another copy of the script (the unfixed one, to watch them fail).
+POSTINSTALL = Path(os.environ.get("POSTINSTALL_SH", ROOT / "src" / "linux" / "scripts" / "postinstall.sh"))
 
 FAKE_SYSTEMCTL = """#!/bin/bash
 printf '%s\\n' "$*" >> "$FAKE_SYSTEMCTL_LOG"
@@ -64,8 +65,14 @@ printf 'MANAGER_MODE=[%s] WORKER_MODE=[%s] SERVICE_BUNKERWEB=[%s] SERVICE_SCHEDU
 manage_scheduler_and_worker
 """
 
+API_DRIVER = """
+source "$BW_POSTINSTALL"
+resolve_topology
+manage_api
+"""
 
-def _run(tmp_path, *, marker=None, upgrade=True, enabled=(), active=(), unit_files=("bunkerweb-broker",), env=None):
+
+def _run(tmp_path, *, marker=None, upgrade=True, enabled=(), active=(), unit_files=("bunkerweb-broker",), env=None, driver=DRIVER):
     """Drive the real topology decision, return every recorded systemctl invocation."""
     bindir = tmp_path / "bin"
     bindir.mkdir(exist_ok=True)
@@ -101,7 +108,7 @@ def _run(tmp_path, *, marker=None, upgrade=True, enabled=(), active=(), unit_fil
         child.pop(var, None)
     child.update(env or {})
 
-    result = subprocess.run(["bash", "-c", DRIVER], capture_output=True, text=True, env=child)
+    result = subprocess.run(["bash", "-c", driver], capture_output=True, text=True, env=child)
     assert result.returncode == 0, result.stdout + result.stderr
     return log.read_text(encoding="utf-8").splitlines(), result.stdout
 
@@ -212,6 +219,64 @@ def test_explicit_manager_mode_is_unchanged(tmp_path):
     assert _enabled_now(calls) == ["bunkerweb-broker", "bunkerweb-worker", "bunkerweb-worker-heavy"]
 
 
+# --- the API: a 1.6.x install has it disabled, the 1.7 scheduler cannot run jobs without it ---
+
+
+def _run_api(tmp_path, **kwargs):
+    calls, _ = _run(tmp_path, driver=API_DRIVER, **kwargs)
+    return calls
+
+
+def test_upgrade_from_a_1_6_install_enables_and_starts_the_api(tmp_path):
+    # The 1.6.x layout: scheduler up, no API unit enabled, no install-type marker.
+    calls = _run_api(tmp_path, marker=None, enabled=("bunkerweb-scheduler",), active=("bunkerweb-scheduler",))
+    assert _enabled_now(calls) == ["bunkerweb-api"]
+
+
+def test_upgrade_enables_the_api_of_a_host_recorded_as_manager(tmp_path):
+    calls = _run_api(tmp_path, marker="manager")
+    assert _enabled_now(calls) == ["bunkerweb-api"]
+
+
+def test_an_api_that_is_already_running_is_restarted_not_re_enabled(tmp_path):
+    calls = _run_api(tmp_path, marker=None, enabled=("bunkerweb-scheduler", "bunkerweb-api"), active=("bunkerweb-scheduler", "bunkerweb-api"))
+    assert _enabled_now(calls) == []
+    assert _restarted(calls) == ["bunkerweb-api"]
+
+
+def test_an_enabled_but_stopped_api_is_left_alone(tmp_path):
+    calls = _run_api(tmp_path, marker=None, enabled=("bunkerweb-scheduler", "bunkerweb-api"), active=("bunkerweb-scheduler",))
+    assert _enabled_now(calls) == []
+    assert _restarted(calls) == []
+
+
+def test_service_api_no_keeps_the_api_off_on_upgrade(tmp_path):
+    calls = _run_api(tmp_path, marker=None, enabled=("bunkerweb-scheduler",), active=("bunkerweb-scheduler",), env={"SERVICE_API": "no"})
+    assert _enabled_now(calls) == []
+
+
+@pytest.mark.parametrize("marker", ["worker", "ui"])
+def test_upgrade_of_a_host_without_a_scheduler_does_not_gain_an_api(tmp_path, marker):
+    calls = _run_api(tmp_path, marker=marker)
+    assert _enabled_now(calls) == []
+
+
+def test_upgrade_of_a_legacy_host_without_a_scheduler_does_not_gain_an_api(tmp_path):
+    calls = _run_api(tmp_path, marker=None, active=("bunkerweb",))
+    assert _enabled_now(calls) == []
+
+
+def test_explicit_service_api_yes_enables_the_api_on_upgrade(tmp_path):
+    # The api-only topology: no scheduler on this host, the operator asked for the API.
+    calls = _run_api(tmp_path, marker=None, env={"SERVICE_API": "yes", "SERVICE_SCHEDULER": "no", "SERVICE_BUNKERWEB": "no", "SERVICE_UI": "no"})
+    assert _enabled_now(calls) == ["bunkerweb-api"]
+
+
+def test_fresh_install_still_enables_the_api(tmp_path):
+    calls = _run_api(tmp_path, marker=None, upgrade=False)
+    assert _enabled_now(calls) == ["bunkerweb-api"]
+
+
 # --- the wiring, so the functions above stay the ones the script actually runs ------------
 
 
@@ -228,6 +293,6 @@ def test_the_script_calls_the_functions_under_test(tmp_path):
     lines = POSTINSTALL.read_text(encoding="utf-8").splitlines()
     guard = lines.index('[ -n "${BW_POSTINSTALL_LIB_ONLY:-}" ] && return 0')
     body = lines[guard:]
-    assert body.index("resolve_topology") < body.index("manage_scheduler_and_worker")
+    assert body.index("resolve_topology") < body.index("manage_scheduler_and_worker") < body.index("manage_api")
     text = POSTINSTALL.read_text(encoding="utf-8")
     assert "read_recorded_install_type" in text.split("function resolve_topology() {")[1].split("\n}\n")[0]

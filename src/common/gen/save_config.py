@@ -4,10 +4,11 @@ from argparse import ArgumentParser
 from os import R_OK, X_OK, access, environ, getenv, sep
 from os.path import join
 from pathlib import Path
-from re import compile as re_compile
+from re import compile as re_compile, sub as re_sub
 from urllib.parse import urlsplit
 from sys import exit as sys_exit, path as sys_path
 from traceback import format_exc
+from typing import Optional, Tuple
 
 for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("utils",), ("api",), ("db",))]:
     if deps_path not in sys_path:
@@ -18,6 +19,8 @@ from custom_configs_validation import build_env_style_key_rx, validate as valida
 from env_file import parse_env_file  # type: ignore
 from logger import getLogger  # type: ignore
 from Database import Database  # type: ignore
+from sqlalchemy import inspect, text
+from sqlalchemy.engine import Engine
 from Configurator import Configurator
 from API import API  # type: ignore
 
@@ -26,6 +29,30 @@ from API import API  # type: ignore
 # `custom_configs_validation.build_env_style_key_rx`'s docstring).
 CUSTOM_CONF_RX = build_env_style_key_rx(with_service_prefix=True)
 LOGGER = getLogger("GENERATOR.SAVE_CONFIG")
+ALEMBIC_PATH = Path(__file__).resolve().parents[1].joinpath("db", "alembic")
+
+
+def migration_pending(stored_version: str, installed_version: str, database: str) -> bool:
+    """Keep an old scheduler from stamping new package files onto an unmigrated database."""
+    if stored_version == installed_version:
+        return False
+    normalized = re_sub(r"[.~-]", "_", installed_version)
+    return any(ALEMBIC_PATH.joinpath(f"{database}_versions").glob(f"*_upgrade_to_version_{normalized}.py"))
+
+
+def read_stored_state(engine: Engine) -> Optional[Tuple[bool, str]]:
+    """Return ``(is_initialized, version)`` from the raw ``bw_metadata`` row, or ``None`` when there is none.
+
+    Deliberately not ``Database.get_metadata()``: that one reads through the current ORM model, and the
+    ``bw_metadata`` table of the previous release lacks columns the model selects. The error is swallowed
+    there and the defaults of a fresh install come back, so a database waiting for its migration looks empty.
+    Only two columns that every release has are read. Any error is raised: it must never read as "no database".
+    """
+    with engine.connect() as conn:
+        if not inspect(conn).has_table("bw_metadata"):
+            return None
+        row = conn.execute(text("SELECT is_initialized, version FROM bw_metadata WHERE id = 1")).first()
+    return (bool(row[0]), str(row[1])) if row else None
 
 
 if __name__ == "__main__":
@@ -91,8 +118,21 @@ if __name__ == "__main__":
                 sys_exit(1)
 
         db = Database(LOGGER, sqlalchemy_string=dotenv_env.get("DATABASE_URI", getenv("DATABASE_URI", None)))
-        db_metadata = db.get_metadata()
-        db_initialized = not isinstance(db_metadata, str) and db_metadata["is_initialized"]
+        try:
+            stored_state = read_stored_state(db.sql_engine)
+        except Exception as e:
+            # Not knowing whether the database is initialized is not the same as an empty database:
+            # init_tables on a populated one would create tables its migration is about to create.
+            LOGGER.error(f"Can't read the database state, refusing to touch it: {e}")
+            sys_exit(1)
+        db_initialized, stored_version = stored_state or (False, "")
+        installed_version = get_version()
+        if db_initialized and migration_pending(stored_version, installed_version, db.database_uri.split(":")[0].split("+")[0]):
+            LOGGER.error(
+                f"The database is at version {stored_version} but version {installed_version} is installed: "
+                "the migration has not run, refusing to touch it. Restart the scheduler so that it migrates the database first."
+            )
+            sys_exit(1)
         registered_plugin_ids = (
             {plugin["id"] for plugin_type in ("external", "pro") for plugin in db.get_plugins(_type=plugin_type, with_settings=False)}
             if db_initialized
@@ -163,7 +203,7 @@ if __name__ == "__main__":
             else:
                 LOGGER.info("Database tables successfully updated")
 
-        err = db.initialize_db(version=get_version(), integration=integration)
+        err = db.initialize_db(version=installed_version, integration=integration)
 
         if err:
             LOGGER.error(f"Can't {'initialize' if not db_initialized else 'update'} database metadata : {err}")

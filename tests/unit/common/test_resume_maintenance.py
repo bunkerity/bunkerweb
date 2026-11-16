@@ -25,14 +25,14 @@ COMMON = ROOT / "src/common"
 
 
 @pytest.mark.parametrize("engine,maria_client,routines", [("mysql", True, False), ("mariadb", True, True), ("mysql", False, True)])
-def test_dump_routines_follow_server_and_client(engine, maria_client, routines, monkeypatch, tmp_path):
+def test_dump_routines_follow_server_and_client(engine, maria_client, routines, monkeypatch, tmp_path, db):
     spec = importlib.util.spec_from_file_location("resume_backup", COMMON / "core/backup/backup.py")
     backup = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(backup)
     runner = Mock(return_value=SimpleNamespace(stdout=b"SQL", stderr=b"", returncode=0))
     monkeypatch.setattr(backup, "run", runner)
     monkeypatch.setattr(backup, "mysql_client_command", lambda _: ("mariadb-dump" if maria_client else "mysqldump", maria_client))
-    db = SimpleNamespace(database_uri=f"{engine}://user:password@localhost/data")
+    db = SimpleNamespace(database_uri=f"{engine}://user:password@localhost/data", sql_engine=db.sql_engine)
     _, archive = backup.backup_database(datetime.now().astimezone(), db, tmp_path)
     cmd = runner.call_args.args[0]
     assert ("--routines" in cmd) is routines

@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+from contextlib import closing
 from datetime import datetime, timedelta
 import re
 from json import dumps, loads
@@ -7,17 +8,20 @@ from operator import itemgetter
 from os import O_DIRECTORY, O_NOFOLLOW, O_RDONLY, close as os_close, fchown, fstat, geteuid, getenv, open as os_open, replace
 from os.path import join, sep
 from pathlib import Path
-from subprocess import PIPE, run
+from subprocess import PIPE, check_output, run
 from shutil import which
+from sqlite3 import connect as sqlite_connect
 from sys import exit as sys_exit, path as sys_path
+from tempfile import TemporaryDirectory
 from typing import Literal
-from zipfile import ZIP_DEFLATED, ZipFile
+from zipfile import BadZipFile, ZIP_DEFLATED, ZipFile
+from zlib import error as zlib_error
 
 for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("utils",), ("db",))]:
     if deps_path not in sys_path:
         sys_path.append(deps_path)
 
-from sqlalchemy import MetaData
+from sqlalchemy import inspect, MetaData
 from sqlalchemy.engine.url import make_url
 
 from common_utils import acquire_db_lock as _acquire_db_lock, bytes_hash, DatabaseLockBusy, release_db_lock, safe_zip_extractall  # type: ignore  # noqa: F401
@@ -28,6 +32,10 @@ from model import Base  # type: ignore
 LOGGER = getLogger("BACKUP")
 
 BACKUP_DIR = Path(getenv("BACKUP_DIRECTORY", "/var/lib/bunkerweb/backups"))
+# Database write probes create and drop test_<uuid4 hex>; other test_ tables are user data.
+TEST_TABLE_PATTERN = re.compile(r"test_[0-9a-f]{32}")
+POSTGRESQL_TEST_TABLE_PATTERN = "test_" + "[0-9a-f]" * 32
+DUMP_ATTEMPTS = 5
 STAMP_RE = re.compile(r"(\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2})")
 STAMP_FORMAT = "%Y-%m-%d_%H-%M-%S"
 DB_LOCK_FILE = Path(sep, "var", "lib", "bunkerweb", "db.lock")
@@ -92,7 +100,18 @@ def mysql_client_command(operation: Literal["dump", "restore"]) -> tuple[str, bo
     return ("mysqldump" if operation == "dump" else "mysql"), False
 
 
-def mysql_connection_args(query_args, mariadb_client: bool) -> list[str]:
+def mysql_client_info(command: str, mariadb_client: bool) -> tuple[bool, bool]:
+    mysql8_client = False
+    if which(command):
+        version = check_output([command, "--version"], text=True)
+        mariadb_client = "MariaDB" in version
+        # Older clients report their server-compatible version after Distrib, not Ver.
+        client_version = re.search(r"\bDistrib (\d+)\.", version) or re.search(r"\bVer\s+(\d+)\.", version)
+        mysql8_client = not mariadb_client and client_version is not None and int(client_version[1]) >= 8
+    return mariadb_client, mysql8_client
+
+
+def mysql_connection_args(query_args, mariadb_client: bool, mysql8_client: bool = False) -> list[str]:
     """Translate the DATABASE_URI query string into client flags.
 
     `query_args` values arrive as a tuple when the same key appears more than once in the URI,
@@ -105,9 +124,9 @@ def mysql_connection_args(query_args, mariadb_client: bool) -> list[str]:
     ssl = str(ssl).lower() if ssl is not None else None
 
     if ssl == "true":
-        args.append("--ssl")
+        args.append("--ssl-mode=REQUIRED" if mysql8_client else "--ssl")
     elif ssl == "false":
-        args.append("--skip-ssl")
+        args.append("--ssl-mode=DISABLED" if mysql8_client else "--skip-ssl")
     elif mariadb_client:
         # MariaDB clients verify opportunistic TLS by default. MySQL's generated
         # certificate is self-signed, so keep encryption but skip verification
@@ -371,27 +390,32 @@ def backup_database(current_time: datetime, db: Database = None, backup_dir: Pat
     database: Literal["sqlite", "mariadb", "mysql", "postgresql", "oracle"] = database_url.drivername.split("+")[0]
     backup_file = backup_dir.joinpath(f"backup-{database}-{current_time.strftime('%Y-%m-%d_%H-%M-%S')}.zip")
     LOGGER.debug(f"Backup file path: {backup_file}")
-    stderr = "Table 'db.test_"
-    current_time = datetime.now().astimezone()
 
     # Get table names from the SQLAlchemy model
     model_tables = list(Base.metadata.tables.keys())
     LOGGER.info(f"Backing up {len(model_tables)} tables defined in the model")
 
-    while "Table 'db.test_" in stderr and (datetime.now().astimezone() - current_time).total_seconds() < 10:
+    for attempt in range(1, DUMP_ATTEMPTS + 1):
         if database == "sqlite":
             db_path = Path(database_url.database)
 
             LOGGER.info("Creating a backup for the SQLite database ...")
 
-            # Full SQLite database dump
-            proc = run(
-                ["sqlite3", db_path.as_posix()],
-                input=".dump\n".encode(),
-                stdout=PIPE,
-                stderr=PIPE,
-                env={"PATH": getenv("PATH", ""), "PYTHONPATH": getenv("PYTHONPATH", "")},
-            )
+            # A full snapshot preserves indexes, views, triggers and sequences while excluding probes.
+            with TemporaryDirectory() as tmp_dir:
+                snapshot = Path(tmp_dir, "snapshot.sqlite3")
+                with closing(sqlite_connect(db_path.as_posix())) as source, closing(sqlite_connect(snapshot.as_posix())) as copy:
+                    source.backup(copy)
+                    for (table,) in copy.execute("SELECT name FROM sqlite_master WHERE type = 'table'").fetchall():
+                        if TEST_TABLE_PATTERN.fullmatch(table):
+                            copy.execute(f'DROP TABLE "{table}"')
+                    copy.commit()
+                proc = run(
+                    ["sqlite3", snapshot.as_posix(), ".dump"],
+                    stdout=PIPE,
+                    stderr=PIPE,
+                    env={"PATH": getenv("PATH", ""), "PYTHONPATH": getenv("PYTHONPATH", "")},
+                )
         else:
             url = make_url(db.database_uri)
             db_user = url.username or ""
@@ -405,6 +429,8 @@ def backup_database(current_time: datetime, db: Database = None, backup_dir: Pat
                 LOGGER.info("Creating a backup for the MariaDB/MySQL database ...")
 
                 dump_bin, mariadb_client = mysql_client_command("dump")
+                mariadb_client, mysql8_client = mysql_client_info(dump_bin, mariadb_client)
+                inspector = inspect(db.sql_engine)
                 cmd = [
                     dump_bin,
                     "-h",
@@ -412,6 +438,8 @@ def backup_database(current_time: datetime, db: Database = None, backup_dir: Pat
                     "-u",
                     db_user,
                     db_database_name,
+                    # Explicit names prevent disappearing write probes from reaching the dump client.
+                    *(name for name in (*inspector.get_table_names(), *inspector.get_view_names()) if not TEST_TABLE_PATTERN.fullmatch(name)),
                 ]
                 if db_port:
                     cmd.extend(["-P", db_port])
@@ -436,9 +464,15 @@ def backup_database(current_time: datetime, db: Database = None, backup_dir: Pat
                 if not mariadb_client or database == "mariadb":
                     cmd.append("--routines")
 
-                # Avoid --set-gtid-purged for broad compatibility (MariaDB variant doesn't support it)
+                if mysql8_client:
+                    cmd.extend(
+                        [
+                            "--column-statistics=0",  # MariaDB has no information_schema.COLUMN_STATISTICS.
+                            "--set-gtid-purged=OFF",  # Avoid FLUSH privileges and global GTID statements.
+                        ]
+                    )
 
-                cmd.extend(mysql_connection_args(db_query_args, mariadb_client))
+                cmd.extend(mysql_connection_args(db_query_args, mariadb_client, mysql8_client=mysql8_client))
 
                 proc = run(
                     cmd,
@@ -470,6 +504,7 @@ def backup_database(current_time: datetime, db: Database = None, backup_dir: Pat
                         "--no-owner",  # Skip ownership commands
                         "--no-privileges",  # Skip privilege commands
                         "--format=plain",  # Plain text format
+                        f"--exclude-table={POSTGRESQL_TEST_TABLE_PATTERN}",
                         "--verbose",  # Verbose output for debugging
                     ]
                 )
@@ -491,19 +526,39 @@ def backup_database(current_time: datetime, db: Database = None, backup_dir: Pat
                 LOGGER.warning("Creating a database backup for Oracle is not supported")
                 return db
 
-        stderr = proc.stderr.decode() if hasattr(proc, "stderr") and proc.stderr else ""
-        if "Table 'db.test_" not in stderr and proc.returncode != 0:
+        if proc.returncode == 0:
+            break
+
+        # Only disappearing write probes warrant retrying; other errors fail immediately.
+        stderr = proc.stderr.decode(errors="replace") if proc.stderr else ""
+        if attempt == DUMP_ATTEMPTS or not TEST_TABLE_PATTERN.search(stderr):
             LOGGER.error(f"Failed to dump the database: {stderr}")
             sys_exit(1)
-
-    if (datetime.now().astimezone() - current_time).total_seconds() >= 10:
-        LOGGER.error("Failed to dump the database: Timeout reached")
-        sys_exit(1)
 
     write_backup_archive(backup_file, backup_file.with_suffix(".sql").name, proc.stdout)
 
     LOGGER.info(f"💾 Backup {backup_file.name} created successfully in {backup_dir}")
     return db, backup_file
+
+
+def check_backup_engine(backup_file: Path, database: str) -> str:
+    """Validate the engine tag and every archive member before clearing the database."""
+    stem = backup_file.stem.split("-")
+    source = stem[1] if len(stem) > 2 and stem[0] == "backup" else ""
+    if source != database:
+        return f"it was taken from {source or 'an unknown'} database engine, not {database}"
+
+    sql_name = backup_file.with_suffix(".sql").name
+    try:
+        with ZipFile(backup_file, "r") as zipf:
+            if sql_name not in zipf.namelist():
+                return f"it does not contain {sql_name}"
+            corrupted = zipf.testzip()
+            if corrupted:
+                return f"its member {corrupted} is corrupted"
+    except (BadZipFile, OSError, EOFError, zlib_error) as e:
+        return f"it cannot be read: {e}"
+    return ""
 
 
 def restore_database(backup_file: Path, db: Database = None) -> Database:
@@ -516,9 +571,9 @@ def restore_database(backup_file: Path, db: Database = None) -> Database:
     # feeding it the wrong one empties the database and then dies partway through the import
     # ("PRAGMA foreign_keys=OFF" is a syntax error to mysql). Backups of several engines share
     # one directory as soon as an install is migrated, so refuse before anything is destroyed.
-    archived = backup_file.name.split("-")
-    if len(archived) > 2 and archived[0] == "backup" and archived[1] != database:
-        LOGGER.error(f"Backup {backup_file.name} was taken from a {archived[1]} database, but this instance runs {database}, aborting restore")
+    refusal = check_backup_engine(backup_file, database)
+    if refusal:
+        LOGGER.error(f"Refusing to restore {backup_file}, {refusal}. The database was left untouched")
         sys_exit(1)
 
     # Oracle has no restore path -- the branch that used to say so sat *after* the clearing step,
@@ -647,11 +702,12 @@ def restore_database(backup_file: Path, db: Database = None) -> Database:
             LOGGER.info("Restoring the MariaDB/MySQL database ...")
 
             restore_bin, mariadb_client = mysql_client_command("restore")
+            mariadb_client, mysql8_client = mysql_client_info(restore_bin, mariadb_client)
             cmd = [restore_bin, "-h", db_host, "-u", db_user, db_database_name]
             if db_port:
                 cmd.extend(["-P", db_port])
 
-            cmd.extend(mysql_connection_args(db_query_args, mariadb_client))
+            cmd.extend(mysql_connection_args(db_query_args, mariadb_client, mysql8_client=mysql8_client))
 
             with ZipFile(backup_file, "r") as zipf:
                 proc = run(

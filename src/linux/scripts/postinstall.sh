@@ -196,6 +196,43 @@ function manage_scheduler_and_worker() {
     fi
 }
 
+# The scheduler dispatches every job through the API → Celery broker → worker. A scheduler
+# without a reachable API cannot run jobs (push-configs never generates NGINX config), so the
+# API is enabled wherever the scheduler runs (standalone or manager-only). An operator can
+# still opt out with SERVICE_API=no, and an explicit SERVICE_API=yes always wins (preserves the
+# api-only topology where the scheduler is disabled). Mirrors the scheduler-enable mode gating.
+# Extracted so the unit tests can drive exactly this decision.
+function manage_api() {
+    if [ "${SERVICE_API:-}" = "yes" ] || { {
+        # Standalone mode (no manager or worker specified)
+        { [ -z "$MANAGER_MODE" ] && [ -z "$WORKER_MODE" ]; } ||
+        # Manager-only mode (manager enabled, worker disabled)
+        { [ "${MANAGER_MODE:-yes}" != "no" ] && [ "${WORKER_MODE:-no}" = "no" ]; }
+    } && [ "${SERVICE_SCHEDULER:-yes}" != "no" ] && [ "${SERVICE_API:-yes}" != "no" ]; }; then
+        # Fresh installation or explicit API enablement
+        if [ ! -f "${BW_UPGRADE_FLAG}" ]; then
+            echo "🚀 Enabling and starting the BunkerWeb API service..."
+            do_and_check_cmd systemctl enable --now bunkerweb-api
+        # Upgrade: restart an API that is up, since dpkg/rpm just replaced the code under it
+        elif systemctl is-active --quiet bunkerweb-api; then
+            echo "📋 Restarting the BunkerWeb API service after upgrade..."
+            do_and_check_cmd systemctl restart bunkerweb-api
+        # The API was not part of 1.6.x installs: enable it where the scheduler runs, like the
+        # worker units, or the new scheduler waits for GET /ping forever. A bare upgrade declares
+        # nothing, so the host must really run a scheduler (upgrade_leg_runs_worker); an
+        # enabled-but-stopped API is the operator's choice and stays as it is.
+        elif ! systemctl is-enabled --quiet bunkerweb-api 2>/dev/null && { [ "${SERVICE_API:-}" = "yes" ] || upgrade_leg_runs_worker; }; then
+            echo "🚀 Enabling and starting the BunkerWeb API service..."
+            do_and_check_cmd systemctl enable --now bunkerweb-api
+        fi
+    elif systemctl is-active --quiet bunkerweb-api || { [ "$TOPOLOGY_DECLARED" = "yes" ] && systemctl is-enabled --quiet bunkerweb-api 2>/dev/null; }; then
+        echo "🛑 Disabling and stopping the BunkerWeb API service..."
+        do_and_check_cmd systemctl disable --now bunkerweb-api
+    else
+        echo "ℹ️ BunkerWeb API service is not enabled in the current configuration."
+    fi
+}
+
 # Resolve this run's topology into the globals every service branch below reads.
 function resolve_topology() {
     # Resolve whether the topology was DECLARED this run — either a fresh install or an
@@ -466,35 +503,7 @@ fi
 
 # Manage the BunkerWeb API service
 echo "Configuring BunkerWeb API service..."
-
-# The scheduler dispatches every job through the API → Celery broker → worker. A scheduler
-# without a reachable API cannot run jobs (push-configs never generates NGINX config), so the
-# API is now enabled wherever the scheduler runs (standalone or manager-only). An operator can
-# still opt out with SERVICE_API=no, and an explicit SERVICE_API=yes always wins (preserves the
-# api-only topology where the scheduler is disabled). Mirrors the scheduler-enable mode gating.
-if [ "${SERVICE_API:-}" = "yes" ] || { {
-    # Standalone mode (no manager or worker specified)
-    { [ -z "$MANAGER_MODE" ] && [ -z "$WORKER_MODE" ]; } ||
-    # Manager-only mode (manager enabled, worker disabled)
-    { [ "${MANAGER_MODE:-yes}" != "no" ] && [ "${WORKER_MODE:-no}" = "no" ]; }
-} && [ "${SERVICE_SCHEDULER:-yes}" != "no" ] && [ "${SERVICE_API:-yes}" != "no" ]; }; then
-    # Fresh installation or explicit API enablement
-    if [ ! -f "${BW_UPGRADE_FLAG}" ]; then
-        echo "🚀 Enabling and starting the BunkerWeb API service..."
-        do_and_check_cmd systemctl enable --now bunkerweb-api
-    else
-        # Restart API only if already running
-        if systemctl is-active --quiet bunkerweb-api; then
-            echo "📋 Restarting the BunkerWeb API service after upgrade..."
-            do_and_check_cmd systemctl restart bunkerweb-api
-        fi
-    fi
-elif systemctl is-active --quiet bunkerweb-api || { [ "$TOPOLOGY_DECLARED" = "yes" ] && systemctl is-enabled --quiet bunkerweb-api 2>/dev/null; }; then
-    echo "🛑 Disabling and stopping the BunkerWeb API service..."
-    do_and_check_cmd systemctl disable --now bunkerweb-api
-else
-    echo "ℹ️ BunkerWeb API service is not enabled in the current configuration."
-fi
+manage_api
 
 # Record the resolved install type so future upgrades detect it deterministically
 # instead of inferring from systemd unit state. Only written when the topology was
