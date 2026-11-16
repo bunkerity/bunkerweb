@@ -4,7 +4,7 @@ from datetime import datetime
 from sys import argv
 from typing import Any, Dict, List, Optional, Union
 
-from sqlalchemy import case, delete, func, or_, select, update
+from sqlalchemy import bindparam, case, delete, func, or_, select, update
 
 from model import Jobs, Jobs_cache, Jobs_runs  # type: ignore
 
@@ -92,8 +92,10 @@ class DatabaseJobsMixin(DatabaseMixinBase):
                 records_to_delete = session.execute(select(Jobs_runs.id).order_by(Jobs_runs.end_date.asc()).limit(rows_count - max_runs)).all()
                 ids_to_delete = [record.id for record in records_to_delete]
                 if ids_to_delete:
+                    # Per-primary-key deletes avoid MariaDB snapshot conflicts from concurrent inserts.
+                    table = Jobs_runs.__table__
                     result = session.execute(
-                        delete(Jobs_runs).where(Jobs_runs.id.in_(ids_to_delete)), execution_options={"synchronize_session": False}
+                        table.delete().where(table.c.id == bindparam("delete_id")), [{"delete_id": record_id} for record_id in ids_to_delete]
                     ).rowcount
 
                 try:

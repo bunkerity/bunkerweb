@@ -3,13 +3,53 @@
 from abc import abstractmethod
 from contextlib import suppress
 from os import getenv
-from threading import Thread
-from time import sleep, time
+from pathlib import Path
+from threading import Lock, Thread, get_ident
+from time import monotonic, sleep, time
 from traceback import format_exc
 
 from Config import Config
 
 from logger import getLogger  # type: ignore
+
+LOCK_WATCHDOG_INTERVAL = 30
+LOCK_MAX_HOLD = 600
+
+
+class HoldTimeLock:
+    """Track progress by the holder, so unrelated watches cannot conceal a stalled apply."""
+
+    def __init__(self):
+        self._lock = Lock()
+        self._last_progress_at = None
+        self._owner = None
+
+    def acquire(self, *args, **kwargs) -> bool:
+        acquired = self._lock.acquire(*args, **kwargs)
+        if acquired:
+            self._last_progress_at = monotonic()
+            self._owner = get_ident()
+        return acquired
+
+    def release(self) -> None:
+        self._last_progress_at = None
+        self._owner = None
+        self._lock.release()
+
+    def __enter__(self):
+        self.acquire()
+        return self
+
+    def __exit__(self, *_):
+        self.release()
+
+    def progress(self) -> None:
+        if self._owner == get_ident():
+            self._last_progress_at = monotonic()
+
+    def stalled_for(self) -> float:
+        last_progress_at = self._last_progress_at
+        return 0.0 if last_progress_at is None else monotonic() - last_progress_at
 
 
 class Controller(Config):
@@ -327,6 +367,24 @@ class Controller(Config):
                 if error:
                     self._logger.warning("Got exception, retrying in 10 seconds ...")
                     sleep(10)
+
+    def _check_lock_hold(self, healthy_path: Path) -> bool:
+        stalled = self._internal_lock.stalled_for()
+        if stalled <= LOCK_MAX_HOLD:
+            return False
+        if healthy_path.exists():
+            self._logger.error(f"The internal lock holder has made no progress for {int(stalled)}s: marking autoconf unhealthy")
+            with suppress(OSError):
+                healthy_path.unlink(missing_ok=True)
+        return True
+
+    def _lock_watchdog(self, healthy_path: Path) -> None:
+        while True:
+            sleep(LOCK_WATCHDOG_INTERVAL)
+            self._check_lock_hold(healthy_path)
+
+    def _start_lock_watchdog(self, healthy_path: Path) -> None:
+        Thread(target=self._lock_watchdog, args=(healthy_path,), daemon=True).start()
 
     @abstractmethod
     def process_events(self):

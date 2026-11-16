@@ -471,10 +471,10 @@ class DatabasePluginsUpdateMixin(DatabaseMixinBase):
 
                 db_values = [
                     (self._empty_if_none(sel_val.value), sel_val.order)
-                    for sel_val in session.execute(select(Selects.value, Selects.order).filter_by(setting_id=setting))
+                    for sel_val in session.execute(select(Selects.value, Selects.order).filter_by(setting_id=setting).order_by(Selects.order))
                 ]
-                select_values = enumerate(value.get("select", []), start=1)
-                different_values = any(db_value != (value, order) for db_value, (value, order) in zip(db_values, select_values))
+                select_values = [(self._empty_if_none(option), order) for order, option in enumerate(value.get("select", []), start=1)]
+                different_values = db_values != select_values
 
                 if different_values:
                     changed = True
@@ -488,7 +488,9 @@ class DatabasePluginsUpdateMixin(DatabaseMixinBase):
                 db_multiselect_values = [
                     (msel.option_id, msel.label, self._empty_if_none(msel.value), msel.order)
                     for msel in session.execute(
-                        select(Multiselects.option_id, Multiselects.label, Multiselects.value, Multiselects.order).filter_by(setting_id=setting)
+                        select(Multiselects.option_id, Multiselects.label, Multiselects.value, Multiselects.order)
+                        .filter_by(setting_id=setting)
+                        .order_by(Multiselects.order)
                     )
                 ]
                 multiselect_values = [
@@ -718,13 +720,17 @@ class DatabasePluginsUpdateMixin(DatabaseMixinBase):
                 saved_templates.add(template_id)
 
                 db_ids = [step.id for step in session.execute(select(Template_steps.id).filter_by(template_id=template_id))]
-                missing_ids = [x for x in range(1, len(template_data.get("steps", [])) + 1) if x not in db_ids]
+                missing_ids = [step_id for step_id in db_ids if step_id > len(template_data.get("steps", []))]
 
                 if missing_ids:
                     changed = True
-                    session.execute(delete(Template_settings).where(Template_settings.step_id.in_(missing_ids)))
-                    session.execute(delete(Template_custom_configs).where(Template_custom_configs.step_id.in_(missing_ids)))
-                    session.execute(delete(Template_steps).where(Template_steps.id.in_(missing_ids)))
+                    session.execute(delete(Template_settings).where(Template_settings.template_id == template_id, Template_settings.step_id.in_(missing_ids)))
+                    session.execute(
+                        delete(Template_custom_configs).where(
+                            Template_custom_configs.template_id == template_id, Template_custom_configs.step_id.in_(missing_ids)
+                        )
+                    )
+                    session.execute(delete(Template_steps).where(Template_steps.template_id == template_id, Template_steps.id.in_(missing_ids)))
 
                 steps_settings = {}
                 steps_configs = {}
@@ -746,7 +752,7 @@ class DatabasePluginsUpdateMixin(DatabaseMixinBase):
 
                         if updates:
                             changed = True
-                            session.execute(update(Template_steps).where(Template_steps.id == db_step.id).values(updates))
+                            session.execute(update(Template_steps).filter_by(id=db_step.id, template_id=template_id).values(updates))
 
                     for setting in step.get("settings", []):
                         if step_id not in steps_settings:
@@ -854,19 +860,19 @@ class DatabasePluginsUpdateMixin(DatabaseMixinBase):
 
                     order += 1
 
-                db_template_configs = [
-                    f"{config.type.replace('_', '-')}/{config.name}.conf"
+                db_template_configs = {
+                    f"{config.type.replace('_', '-')}/{config.name}.conf": config.id
                     for config in session.execute(
-                        select(Template_custom_configs.type, Template_custom_configs.name)
+                        select(Template_custom_configs.id, Template_custom_configs.type, Template_custom_configs.name)
                         .filter_by(template_id=template_id)
                         .order_by(Template_custom_configs.order)
                     )
-                ]
-                missing_ids = [config for config in template_data.get("configs", {}) if config not in db_template_configs]
+                }
+                missing_ids = [row_id for config, row_id in db_template_configs.items() if config not in template_data.get("configs", [])]
 
                 if missing_ids:
                     changed = True
-                    session.execute(delete(Template_custom_configs).where(Template_custom_configs.name.in_(missing_ids)))
+                    session.execute(delete(Template_custom_configs).where(Template_custom_configs.id.in_(missing_ids)))
 
                 order = 0
                 for config in template_data.get("configs", []):

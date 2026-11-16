@@ -111,7 +111,6 @@ class UIUsersMethodsMixin(DatabaseMixinBase):
             for role in roles:
                 if not session.execute(select(Roles.name).filter_by(name=role).limit(1)).first():
                     return f"Role {role} doesn't exist"
-                session.add(RolesUsers(user_name=username, role_name=role))
 
             current_time = datetime.now().astimezone()
             session.add(
@@ -128,6 +127,10 @@ class UIUsersMethodsMixin(DatabaseMixinBase):
                     update_date=current_time,
                 )
             )
+
+            # Validate every role before pending FK children can autoflush.
+            for role in roles:
+                session.add(RolesUsers(user_name=username, role_name=role))
 
             for code in totp_recovery_codes or []:
                 session.add(UserRecoveryCodes(user_name=username, code=hashpw(code.encode("utf-8"), gensalt(rounds=10)).decode("utf-8")))

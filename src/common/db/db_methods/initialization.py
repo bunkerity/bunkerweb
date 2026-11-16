@@ -1186,6 +1186,9 @@ class DatabaseInitTablesMixin(DatabaseMixinBase):
         for delete_op in to_delete:
             t = delete_op["type"]
             if t == "setting":
+                # SQLite does not enforce these cascades; remove dependent values explicitly.
+                for model in (Selects, Multiselects, Services_settings, Global_values, Template_settings):
+                    session.execute(delete(model).filter_by(setting_id=delete_op["filter"]["id"]))
                 session.execute(delete(Settings).filter_by(**delete_op["filter"]))
             elif t == "global_value":
                 session.execute(delete(Global_values).filter_by(**delete_op["filter"]))

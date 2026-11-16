@@ -13,7 +13,7 @@ performs before creating any engine — identical timing to the previous layout.
 from functools import wraps
 from logging import Logger
 from sqlite3 import Connection as SQLiteConnection
-from threading import Lock
+from threading import RLock
 from time import sleep
 from typing import TYPE_CHECKING, Any, Callable, Dict, List, Mapping, Optional, Tuple, TypeVar
 from warnings import filterwarnings
@@ -51,7 +51,7 @@ from sqlalchemy.exc import DatabaseError, OperationalError, SAWarning
 
 install_as_MySQLdb()
 
-LOCK = Lock()
+LOCK = RLock()
 
 
 @event.listens_for(Engine, "connect")

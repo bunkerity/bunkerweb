@@ -6,6 +6,8 @@ singleton Metadata row so the ``changed`` -> ``instances_changed`` paths are exe
 
 import base64
 import json
+import time
+from datetime import datetime
 
 import pytest
 
@@ -98,6 +100,60 @@ class TestUpdateInstances:
         assert db_init.update_instances(new, "autoconf") == ""
         # 'old' (autoconf) is cleared and replaced by 'new'.
         assert {i["hostname"] for i in db_init.get_instances()} == {"new"}
+
+
+def _spec(hostname, **extra):
+    return {"hostname": hostname, "env": {"API_HTTP_PORT": 5000, "API_SERVER_NAME": "bwapi"}} | extra
+
+
+def _seconds_from_now(value):
+    # `.timestamp()` reads a naive value as local wall clock and an aware one as itself, so both shapes compare.
+    return abs(time.time() - value.timestamp())
+
+
+def _naive(value):
+    # SQLite and MySQL/MariaDB keep the wall clock and drop the offset; PostgreSQL may hand it back aware.
+    return value.replace(tzinfo=None)
+
+
+class TestUpdateInstancesTimestamps:
+    """A roster sent back by autoconf carries ISO strings from ``GET /instances``; none may reach a DateTime column."""
+
+    ISO = "2026-03-01T10:00:00+00:00"
+    ISO_DT = datetime(2026, 3, 1, 10, 0, 0)
+
+    def test_new_row_parses_iso_strings(self, db_init):
+        spec = _spec("bw-new", creation_date=self.ISO, last_seen=self.ISO)
+        assert db_init.update_instances([spec], "autoconf") == ""
+        inst = db_init.get_instance("bw-new")
+        assert _naive(inst["creation_date"]) == self.ISO_DT
+        assert _naive(inst["last_seen"]) == self.ISO_DT
+
+    def test_update_in_place_parses_iso_string(self, db_init):
+        assert db_init.update_instances([_spec("bw-up")], "autoconf") == ""
+        before = db_init.get_instance("bw-up")["creation_date"]
+        assert db_init.update_instances([_spec("bw-up", creation_date=self.ISO, last_seen=self.ISO)], "autoconf") == ""
+        inst = db_init.get_instance("bw-up")
+        assert _naive(inst["last_seen"]) == self.ISO_DT
+        # creation_date is never rewritten on an existing row
+        assert inst["creation_date"] == before
+
+    def test_garbage_string_falls_back_to_now(self, db_init):
+        for host, creation in (("bw-new", "not a date"), ("bw-up", None)):
+            assert db_init.update_instances([_spec(host, creation_date=creation, last_seen="not a date")], "autoconf") == ""
+        assert db_init.update_instances([_spec("bw-new", last_seen="still not a date"), _spec("bw-up", last_seen=12345)], "autoconf") == ""
+        for host in ("bw-new", "bw-up"):
+            inst = db_init.get_instance(host)
+            assert _seconds_from_now(inst["last_seen"]) < 300
+            assert _seconds_from_now(inst["creation_date"]) < 300
+
+    def test_datetime_is_kept(self, db_init):
+        stamp = datetime(2026, 3, 1, 10, 0, 0)
+        assert db_init.update_instances([_spec("bw-new", creation_date=stamp, last_seen=stamp)], "autoconf") == ""
+        assert db_init.update_instances([_spec("bw-new", last_seen=datetime(2026, 4, 2, 8, 30, 0))], "autoconf") == ""
+        inst = db_init.get_instance("bw-new")
+        assert _naive(inst["creation_date"]) == stamp
+        assert _naive(inst["last_seen"]) == datetime(2026, 4, 2, 8, 30, 0)
 
 
 class TestUpdateInstance:

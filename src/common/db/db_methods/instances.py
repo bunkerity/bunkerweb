@@ -60,6 +60,23 @@ PRESERVED_CREDENTIAL_COLUMNS = ("credential_ciphertext", "credential_nonce", "cr
 ENROLLMENT_REJECTED = "invalid or expired enrollment code"
 
 
+def _as_datetime(value: Any, default: datetime, logger=None, field: str = "timestamp") -> datetime:
+    """A client-supplied timestamp as a ``datetime``, or ``default``.
+
+    `GET /instances` hands timestamps out as ISO 8601 strings, and autoconf sends its roster back
+    through `PUT /instances/bulk` with them untouched. A string must never reach a DateTime column:
+    SQLite refuses it, MariaDB/MySQL reject the offset form, only PostgreSQL swallows it.
+    """
+    if isinstance(value, datetime):
+        return value
+    if isinstance(value, str):
+        with suppress(ValueError):
+            return datetime.fromisoformat(value)
+    if value is not None and logger is not None:
+        logger.debug(f"Ignoring unusable {field} {value!r}; using the current time")
+    return default
+
+
 def hash_enrollment_code(code: str) -> str:
     """SHA-512 hex digest of a join code. The code itself is never stored."""
     return sha512(code.encode("utf-8")).hexdigest()
@@ -295,7 +312,7 @@ class DatabaseInstancesMixin(DatabaseMixinBase):
                     db_instance.type = instance.get("type", "static")
                     db_instance.status = instance.get("status", "up" if instance.get("health", True) else "down")
                     db_instance.method = instance.get("method", method)
-                    db_instance.last_seen = instance.get("last_seen", current_time)
+                    db_instance.last_seen = _as_datetime(instance.get("last_seen"), current_time, self.logger, "last_seen")
                     # Only when the caller declares them: an autoconf reconcile carries no TLS keys
                     # and must not reset a row's pinning to "off" behind the operator's back.
                     if "tls_mode" in instance:
@@ -341,8 +358,8 @@ class DatabaseInstancesMixin(DatabaseMixinBase):
                         type=instance.get("type", "static"),
                         status=instance.get("status", "up" if instance.get("health", True) else "down"),
                         method=instance.get("method", method),
-                        creation_date=instance.get("creation_date", current_time),
-                        last_seen=instance.get("last_seen", current_time),
+                        creation_date=_as_datetime(instance.get("creation_date"), current_time, self.logger, "creation_date"),
+                        last_seen=_as_datetime(instance.get("last_seen"), current_time, self.logger, "last_seen"),
                         tls_mode=instance.get("tls_mode") or "off",
                         tls_fingerprint=instance.get("tls_fingerprint") or None,
                         # A hostname the roster did not carry before: the enrollment and credential
