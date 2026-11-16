@@ -57,6 +57,7 @@ convert
 copy
 create
 cscript
+csvde
 date
 dcdiag
 dcgpofix
@@ -78,6 +79,14 @@ dispdiag
 dnscmd
 doskey
 driverquery
+dsacls
+dsadd
+dsget
+dsmgmt
+dsmod
+dsmove
+dsquery
+dsrm
 echo
 edit
 endlocal
@@ -128,6 +137,7 @@ ksetup
 ktmutil
 ktpass
 label
+ldifde
 list
 lodctr
 logman
@@ -167,6 +177,7 @@ nltest
 nslookup
 ntbackup
 ntcmdprompt
+ntdsutil
 ntfrsutl
 offline
 online

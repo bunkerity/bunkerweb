@@ -13,7 +13,6 @@ MySQL server version for the right syntax to use
 \[MySQL\]\[ODBC
 Column count doesn't match
 Table '[^']+' doesn't exist
-SQL syntax.*MySQL
 ##! Because of the bug in RE2 (golang), we cannot use {0,n} (a range started at 0), so it was replaced with (?:...{1,n})?
 Warning.{1,10}mysql_(?:[a-z_()]{1,26})?
 valid MySQL result

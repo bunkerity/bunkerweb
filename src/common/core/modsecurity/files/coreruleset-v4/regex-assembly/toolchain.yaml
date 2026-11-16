@@ -50,7 +50,7 @@ patterns:
     #
     # [<>&|),]{1,10}: anti-evasion suffix without space, limited to 10 matches
     # (?:[\w\d._-][\x5c'\"\[)]*(?:(?:(?:\|\||&&)\s*)?\$[a-z0-9_@?!#{(*-]*)?\x5c?){1,10}: non-whitespace followed by anti-evasion pattern, limited to 10 matches
-    # ['"]?[\s<>&|),}]{1,10}): anti-evasion suffix, including `}` (to match command names within expansions, e.g. `${gcc7.4}gcc7.4`), limited to 10 matches
+    # ['"]?[\s<>&|),}]{1,10}): anti-evasion suffix, including `}` (to match command names within expansions, e.g. `${gcc7.4}`), limited to 10 matches
     unix: |
       ['"]?(?:[<>&|),]{1,10}|(?:[\w\d._-][\x5c'\"\[)]*(?:(?:(?:\|\||&&)\s*)?\$[a-z0-9_@?!#{(*-]*)?\x5c?){1,10}[\s<>&|),}]{1,10})
     # This will match:

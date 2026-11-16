@@ -10,6 +10,10 @@
 # http://www.arachni-scanner.com/
 arachni
 
+# Mozilla/6.0 used by Cobaltstrike GraphStrike server
+# Technically valid user-agent, but only Mozilla/5.0 is used in practice.
+Mozilla/6.0
+
 betabot
 
 bewica-security-scan
@@ -138,7 +142,7 @@ l9tcpid
 wapiti
 
 # https://subgraph.com/vega/
-vega
+vega/
 
 # https://docs.rapid7.com/appspider/
 appspider
