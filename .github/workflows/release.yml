@@ -314,6 +314,8 @@ jobs:
     permissions:
       contents: read
       packages: write
+      id-token: write
+      attestations: write
     needs: [prepare, create-arm, push-gh]
     strategy:
       matrix:
@@ -370,6 +372,10 @@ jobs:
 
   # Push Linux packages
   push-packages:
+    permissions:
+      contents: read
+      id-token: write
+      attestations: write
     needs: [prepare, push-gh]
     strategy:
       matrix:
@@ -531,9 +537,106 @@ jobs:
       VERSION: ${{ needs.prepare.outputs.version }}
       PRERELEASE: ${{ needs.prepare.outputs.prerelease == 'true' }}
 
+  # These are the actual draft assets, including the generated installer checksum.
+  attest-assets:
+    needs: [push-gh]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      id-token: write
+      attestations: write
+    steps:
+      - name: Download draft release assets
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release download "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" --dir release-assets
+      - name: Attest draft release assets
+        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
+        with:
+          subject-path: release-assets/*
+      - name: Record draft asset checksums
+        run: sha256sum release-assets/* > assets.sha256
+      - name: Upload draft asset inventory
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: release-inventory-assets
+          path: assets.sha256
+          if-no-files-found: error
+
+  # Query public registries/packagecloud and the draft, not just build artifacts.
+  verify-release:
+    needs: [prepare, push-images, push-packages, push-gh, attest-assets]
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      attestations: read
+      packages: read
+    steps:
+      - name: Login to Docker Hub for verification
+        uses: docker/login-action@371161bbe7024a29a25c5e19bfcbc0804fe9ad2c # v4.5.2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_TOKEN }}
+      - name: Login to GHCR for verification
+        uses: docker/login-action@371161bbe7024a29a25c5e19bfcbc0804fe9ad2c # v4.5.2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ github.token }}
+      - name: Download attested publication inventory
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          pattern: release-inventory-*
+          path: inventory
+      - name: Verify every published artifact
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EXPECTED_IMAGES: "16"
+          EXPECTED_PACKAGES: "20"
+        run: |
+          set -euo pipefail
+          verify() {
+            for attempt in 1 2 3 4; do
+              if gh attestation verify "$1" --repo "$GITHUB_REPOSITORY" \
+                --signer-workflow "$GITHUB_REPOSITORY/.github/workflows/$2" \
+                --source-ref "$GITHUB_REF" --source-digest "$GITHUB_SHA" \
+                --deny-self-hosted-runners; then
+                return 0
+              fi
+              echo "Attestation verification failed on attempt $attempt/4: $1" >&2
+              sleep 10
+            done
+            return 1
+          }
+          mapfile -t images < <(cat inventory/release-inventory-image-*/images.txt | sort -u)
+          [ "${#images[@]}" -eq "$EXPECTED_IMAGES" ]
+          for image in "${images[@]}"; do
+            verify "oci://$image" push-docker.yml
+          done
+          shopt -s nullglob
+          packages=(inventory/release-inventory-package-*)
+          [ "${#packages[@]}" -eq "$EXPECTED_PACKAGES" ]
+          for package in "${packages[@]}"; do
+            curl --fail --silent --show-error --location --proto '=https' --proto-redir '=https' \
+              --retry 5 --retry-all-errors --retry-delay 10 --max-time 60 \
+              "$(cat "$package/package.url")" --output "$package/package"
+            (cd "$package" && sha256sum --check package.sha256)
+            verify "$package/package" push-packagecloud.yml
+          done
+          gh release download "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" --dir release-assets
+          # The draft currently carries the PDF, installer, and installer checksum.
+          assets=(release-assets/*)
+          [ "${#assets[@]}" -eq 3 ]
+          sha256sum --check inventory/release-inventory-assets/assets.sha256
+          for asset in "${assets[@]}"; do
+            verify "$asset" release.yml
+          done
+
   # Push doc
   push-doc:
-    needs: [prepare, push-images, push-packages]
+    needs: [prepare, verify-release]
     permissions:
       contents: write
     uses: ./.github/workflows/push-doc.yml

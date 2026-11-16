@@ -23,18 +23,6 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      # Pin the install script default to the testing channel before checksum/upload,
-      # so a script downloaded from the Testing release defaults to the testing version
-      # instead of the hardcoded stable one. Must run BEFORE the checksum step.
-      - name: Pin install script default to testing
-        if: inputs.VERSION == 'testing'
-        run: |
-          # Fail loudly if the declaration is missing or duplicated, so a future
-          # refactor cannot let sed silently rewrite the wrong/extra line.
-          count=$(grep -cE '^DEFAULT_BUNKERWEB_VERSION="' misc/install-bunkerweb.sh)
-          [ "$count" = "1" ] || { echo "expected exactly 1 DEFAULT_BUNKERWEB_VERSION line, found $count"; exit 1; }
-          sed -i -E 's/^DEFAULT_BUNKERWEB_VERSION=".*"/DEFAULT_BUNKERWEB_VERSION="testing"/' misc/install-bunkerweb.sh
-          grep -q '^DEFAULT_BUNKERWEB_VERSION="testing"$' misc/install-bunkerweb.sh
       # Generate checksum for install script
       - name: Generate checksum for install script
         run: |
@@ -164,9 +152,7 @@ jobs:
             - API : `bunkerity/bunkerweb-api:${{ steps.sanitize.outputs.version }}` or `ghcr.io/bunkerity/bunkerweb-api:${{ steps.sanitize.outputs.version }}`
             - All-in-one : `bunkerity/bunkerweb-all-in-one:${{ steps.sanitize.outputs.version }}` or `ghcr.io/bunkerity/bunkerweb-all-in-one:${{ steps.sanitize.outputs.version }}`
 
-            Linux packages : https://packagecloud.io/app/bunkerity/bunkerweb/search?q=${{ inputs.VERSION }}&filter=all&dist=
-
-            Please note that when using Linux Debian or Ubuntu integration, you will need to add the `force-bad-version` directive to your `/etc/dpkg/dpkg.cfg` file before installing the testing version of BunkerWeb.
+            Floating Linux packages are no longer published. Use a published version for Linux packages, or the Docker `testing` tag for testing builds. The installer below defaults to its bundled version; use `--docker --image-tag testing` for Docker testing builds.
           draft: false
           prerelease: ${{ inputs.PRERELEASE }}
           name: Testing

@@ -41,6 +41,10 @@ jobs:
   push:
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    permissions:
+      contents: read
+      id-token: write
+      attestations: write
     steps:
       # Prepare
       - name: Check out repository code
@@ -48,8 +52,16 @@ jobs:
         with:
           ref: ${{ github.sha }} # pin every job in a run to one commit
           persist-credentials: false
+      - name: Require a versioned package
+        env:
+          BW_VERSION: ${{ inputs.BW_VERSION }}
+        run: |
+          if [[ ! "$BW_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+([~_-](alpha|beta|rc)[0-9]*)?$ ]]; then
+            echo "::error::Only published version numbers may be sent to packagecloud; floating packages are disabled."
+            exit 1
+          fi
       - name: Install ruby
-        uses: ruby/setup-ruby@14594264cd68ce8a2345dd349bc3d138a4ef85c8 # v1.327.0
+        uses: ruby/setup-ruby@824c0e29fdfc7d689c191c27acc969d2d04b7dd8 # v1.331.0
         with:
           ruby-version: "3.0"
       - name: Install packagecloud
@@ -105,13 +117,6 @@ jobs:
         continue-on-error: true
         env:
           PACKAGECLOUD_TOKEN: ${{ secrets.PACKAGECLOUD_TOKEN }}
-      # Update name
-      - name: Rename package
-        if: inputs.BW_VERSION == '1.5'
-        run: sudo apt update && sudo apt install -y rename && rename 's/dev/1.5-dev/' /tmp/${{ inputs.LINUX }}/*.${{ inputs.PACKAGE }}
-      - name: Rename package 1.7
-        if: inputs.BW_VERSION == '1.7'
-        run: sudo apt update && sudo apt install -y rename && rename 's/dev/1.7-dev/' /tmp/${{ inputs.LINUX }}/*.${{ inputs.PACKAGE }}
       # Push package (single generic step)
       - name: Push package to packagecloud
         uses: danielmundi/upload-packagecloud@46cd0e61152bf952dbc0d1759e609d3d22649030 # v1
@@ -121,3 +126,32 @@ jobs:
           PACKAGECLOUD-REPO: ${{ inputs.REPO }}
           PACKAGECLOUD-DISTRIB: ${{ env.DIST }}
           PACKAGECLOUD-TOKEN: ${{ secrets.PACKAGECLOUD_TOKEN }}
+      - name: Attest published package
+        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
+        with:
+          subject-path: /tmp/${{ inputs.LINUX }}/*.${{ inputs.PACKAGE }}
+      - name: Record published package
+        env:
+          LINUX: ${{ inputs.LINUX }}
+          PACKAGE: ${{ inputs.PACKAGE }}
+          REPO: ${{ inputs.REPO }}
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+          files=(/tmp/"$LINUX"/*."$PACKAGE")
+          [ "${#files[@]}" -eq 1 ]
+          mkdir inventory
+          file=${files[0]}
+          filename=$(basename "$file")
+          # Packagecloud uses the metadata-derived DEB filename, not its upload name.
+          if [ "$PACKAGE" = deb ]; then
+            filename="$(dpkg-deb -f "$file" Package)_$(dpkg-deb -f "$file" Version)_$(dpkg-deb -f "$file" Architecture).deb"
+          fi
+          printf '%s  package\n' "$(sha256sum "$file" | cut -d ' ' -f1)" > inventory/package.sha256
+          printf 'https://packagecloud.io/bunkerity/%s/packages/%s/%s/download.%s\n' "$REPO" "$DIST" "$filename" "$PACKAGE" > inventory/package.url
+      - name: Upload package inventory
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: release-inventory-package-${{ inputs.LINUX }}-${{ inputs.ARCH }}
+          path: inventory/
+          if-no-files-found: error

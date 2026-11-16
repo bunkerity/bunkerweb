@@ -61,7 +61,16 @@ pushed, not the tag object's own signature, so it does not replace the guard in
 4. On approval the **draft GitHub release is created first**, before any image
    or package publishes. That draft is what stops a force-pushed tag from
    republishing later, so it has to exist before the artifacts, not after.
-5. Publish the draft release by hand when you are ready.
+5. Wait for `push-images`, `push-packages`, `attest-assets`, and `verify-release`
+   to finish. Each pushed multi-architecture index is attested for Docker Hub
+   and GHCR; each packagecloud package and each draft asset (PDF, installer,
+   installer checksum) gets keyless GitHub build-provenance attestation.
+   `verify-release` downloads the published packages and draft assets, checks
+   their recorded checksums, and verifies every attestation against this source
+   commit and tag. Documentation publication waits for this job.
+6. Publish the draft release by hand only after `verify-release` is green.
+   An attestation failure can leave already-published images or packages:
+   publication is not atomic, and a red run is not safe to announce.
 
 ## Channels
 
@@ -120,7 +129,52 @@ before approval" would be the wrong thing to claim.
 
 ## Rolling channels
 
-`dev.yml`, `1.7-dev.yml` and `staging.yml` are unchanged and still publish on
-every branch push, under the literal channels `dev`, `1.7` and `testing`.
-They never publish a semantic version, so they cannot be confused with a
-release.
+`dev.yml` runs on `dev`, `1.7-dev.yml` on `1.7`, and `staging.yml` on `staging`
+or `fix-cve`. They still build packages for same-run Linux CI artifacts and
+publish floating Docker tags (`dev`, `1.7-dev`, and `testing`, respectively).
+They no longer publish packages to packagecloud. Only the versioned tag release
+calls `push-packagecloud.yml`, which also rejects floating versions.
+
+The Linux installer rejects `dev`, `testing`, `*-dev`, and `*-testing` package
+versions, including their RPM underscore equivalents, on fresh installs and
+upgrades. Use a published version or the Docker `testing` tag. The installer
+attached to the Testing release keeps its bundled version default; Docker
+testing requires `--docker --image-tag testing`.
+
+## Attestation identity and first release checks
+
+Attestations live in GitHub's attestation store. They require no signing key
+and are separate from BuildKit's embedded image provenance. Image verification
+uses the multi-architecture index digest, covering its platform manifests.
+Use GitHub CLI `gh attestation verify` with the repository, source tag and
+commit, and the appropriate signer workflow. Authenticate to the image registry
+before verifying an OCI image; `verify-release` logs in to both registries:
+
+| Subject                            | Signer workflow                                               |
+| ---------------------------------- | ------------------------------------------------------------- |
+| Docker Hub / GHCR index            | `bunkerity/bunkerweb/.github/workflows/push-docker.yml`       |
+| Linux package                      | `bunkerity/bunkerweb/.github/workflows/push-packagecloud.yml` |
+| PDF, installer, installer checksum | `bunkerity/bunkerweb/.github/workflows/release.yml`           |
+
+The reusable workflow is the signer for images and packages, not its caller.
+The pipeline additionally refuses self-hosted attestation runners. Only the
+publisher jobs that attest and the `attest-assets` job receive OIDC and
+attestation write permissions; `verify-release` has read permissions.
+
+On the first real tag run, maintainers must check what local parsing cannot prove:
+
+- The release environment still requires approval, and no publication precedes it.
+- OIDC issuance and GitHub attestation writes succeed in both reusable workflows.
+- All eight image indexes exist with the recorded digest on both Docker Hub and
+  GHCR; all four architectures are present. `verify-release` checks 16 image subjects.
+- All 20 packages (ten distros, amd64 and arm64) download from their public
+  packagecloud URLs, match the uploaded bytes, and pass attestation verification.
+- All three draft assets download, match the attested checksums, and verify.
+  Linux packages are published to packagecloud, not attached to the draft.
+- `verify-release` is green before `push-doc` and before manually publishing the
+  draft. A missing or foreign attestation fails the run; never bypass that job.
+- A default Linux package installation and upgrade succeed without CI's injected
+  API configuration. Static workflow checks do not prove package runtime behavior.
+
+The inventory counts are checked by `tests/unit/integrations/test_release_attestations.py`;
+update them together with any future release matrix or asset change.
