@@ -36,7 +36,7 @@ done"
 if [ "$(id -u)" -eq 0 ] ; then
     bash -c "$script"
 elif sudo -n true 2>/dev/null ; then
-    sudo -E bash -c "$script"
+    sudo bash -c "$script"
 else
     docker run --rm -v "$www":"$www" -v "$error_page":"$error_page":ro bash:5 bash -c "$script"
 fi
