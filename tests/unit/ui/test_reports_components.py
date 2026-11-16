@@ -435,7 +435,7 @@ def test_reports_offenders_render_never_uses_html_sink():
     assert ".append(countryCell(o.country))" in scope
     # srcFor()'s return value must be assigned as an <img> attribute (never HTML-parsed),
     # not concatenated into a markup string.
-    assert "src: window.BWCountryFlag.srcFor(code)," in scope
+    assert "src: window.BWCountryFlag.srcFor(code, { flagBase })," in scope
     assert "window.BWCountryFlag.isNA(code)" in scope
     assert "window.BWCountryFlag.normalize(code)" in scope
     # The reusable html()-string builder is deliberately NOT used here (see file's own
@@ -489,8 +489,8 @@ def test_every_toggleable_event_log_column_has_a_visibility_default():
     block = re.search(r'"reports": \{(.*?)\n    \}', source, re.S)
     assert block
     defaults = {int(index) for index in re.findall(r'"(\d+)":', block.group(1))}
-    # index 2 is the date column, which the toolbar never offers to hide
-    assert defaults == set(range(3, len(_js_event_log_columns())))
+    # Date at index 2 is toggleable, so it needs a persisted visibility default too.
+    assert defaults == set(range(2, len(_js_event_log_columns())))
 
 
 def test_stream_only_columns_are_hidden_by_default():

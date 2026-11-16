@@ -5,6 +5,14 @@
       "description": "Belirli bir sürede çok fazla 'kötü' HTTP durum kodu üreten bir IP'yi yasaklar."
     },
     "settings": {
+      "BAD_BEHAVIOR_REPORT_MAX_EVENTS": {
+        "label": "En fazla rapor olayı",
+        "help": "Raporlarda yasaklama kanıtı olarak saklanan son olayların en yüksek sayısı (1 ile 10000); yasaklama eşiğiyle de sınırlıdır. Artırmak, yasaklamaların ne zaman uygulanacağını değiştirmeden rapor depolama kullanımını artırır."
+      },
+      "BAD_BEHAVIOR_REPORT_MAX_STRING_SIZE": {
+        "label": "Raporlardaki istek dizelerinin en yüksek boyutu",
+        "help": "Raporlarda yasaklama kanıtı olarak saklanan her URL veya yöntemin, kesme işareti dahil bayt cinsinden en yüksek boyutu (4 ile 65536). Artırmak rapor depolama kullanımını artırır."
+      },
       "BAD_BEHAVIOR_BAN_SCOPE": {
         "label": "Yasaklama kapsamı",
         "help": "Yasaklamanın düzeyini belirler. 'service' IP'yi yalnızca ilgili hizmet için, 'global' IP'yi tüm sistem için yasaklar."

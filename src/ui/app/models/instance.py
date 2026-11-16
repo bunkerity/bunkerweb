@@ -13,7 +13,7 @@ from traceback import format_exc
 from re import fullmatch
 from typing import Any, List, Literal, Optional, Tuple, Union
 
-from urllib.parse import quote
+from urllib.parse import quote, unquote
 
 from API import API  # type: ignore
 from ApiCaller import ApiCaller  # type: ignore
@@ -36,6 +36,21 @@ _HOME_AGG_CACHE_TTL = 30.0
 # Serializes cache misses so concurrent /home loads compute the aggregation once
 # (single-flight) instead of each running the full Redis scan in parallel.
 _HOME_AGG_LOCK = Lock()
+
+
+def encode_search_panes(panes: dict[str, list[str]]) -> str:
+    """Encode pane values before joining them with the protocol separators."""
+    return ";".join(f"{field}:{','.join(quote(value, safe='') for value in values)}" for field, values in panes.items())
+
+
+def decode_search_panes(search_panes: str) -> dict[str, list[str]]:
+    """Split the pane protocol before decoding individual values."""
+    pane_filters: dict[str, list[str]] = {}
+    for field_filter in search_panes.split(";"):
+        if ":" in field_filter:
+            field, values = field_filter.split(":", 1)
+            pane_filters[field] = [unquote(value) for value in values.split(",")]
+    return pane_filters
 
 
 def _copy_home_aggregates(agg: dict) -> dict:
@@ -611,6 +626,21 @@ class InstancesUtils:
         if not report_id:
             return None
 
+        api_client = getattr(self, "_InstancesUtils__api_client", None)
+        if api_client is not None:
+            try:
+                data = api_client.get_metrics_request_data(report_id, instance_hostname=hostname)
+                if isinstance(data, (dict, list, str)):
+                    if not isinstance(data, dict) or "ban_id" not in data:
+                        return data
+                    # Complete persisted snapshots do not depend on either live storage tier.
+                    if "events" in data:
+                        return self._resolve_ban_evidence(data, None, instances=[])
+                    return self._resolve_ban_evidence(data, get_redis_client(), instances=instances)
+            except (ApiClientError, ApiUnavailableError) as err:
+                if getattr(err, "status_code", None) != 404:
+                    LOGGER.warning(f"Failed to fetch persisted report data: {err}")
+
         redis_client = get_redis_client()
 
         # A cap of 0 keeps reports out of Redis entirely; it does not mean there are none.
@@ -631,7 +661,7 @@ class InstancesUtils:
                         matched_date = report_date
                         matched_report = report
                 if matched_report is not None:
-                    return matched_report.get("data", {})
+                    return self._resolve_ban_evidence(matched_report.get("data", {}), redis_client, instances=instances)
             except Exception as e:
                 LOGGER.warning(f"Failed to fetch report data from Redis: {e}")
 
@@ -670,7 +700,53 @@ class InstancesUtils:
 
         if best_match is None:
             return None
-        return best_match.get("data", {})
+        return self._resolve_ban_evidence(best_match.get("data", {}), redis_client, instances=target_instances)
+
+    def _resolve_ban_evidence(self, data: Any, redis_client, *, instances: Optional[List[Instance]] = None) -> Any:
+        if not isinstance(data, dict) or "ban_id" not in data:
+            return data
+        ban_id = data.get("ban_id")
+        missing = {**data, "evidence_missing": True}
+        missing.pop("events", None)
+        if not isinstance(ban_id, str) or not fullmatch(r"http:[A-Za-z0-9]{32}", ban_id):
+            return missing
+
+        def resolved(evidence):
+            if (
+                not isinstance(evidence, dict)
+                or evidence.get("ban_id") != ban_id
+                or not isinstance(evidence.get("events"), list)
+                or len(evidence["events"]) != data.get("event_count")
+                or len(evidence["events"]) > 10000
+                or any(not isinstance(event, dict) for event in evidence["events"])
+            ):
+                return None
+            summary = {key: value for key, value in data.items() if key not in ("events", "server_name", "evidence_missing")}
+            if not evidence["events"]:
+                return {**summary, "events": []}
+            return [{**event, **summary} for event in evidence["events"]]
+
+        snapshot = resolved(data)
+        if snapshot is not None:
+            return snapshot
+        if redis_client:
+            try:
+                payload = redis_client.get(f"{requests_key(is_cluster(redis_client))}:ban_evidence:{ban_id}")
+                result = resolved(loads(payload)) if payload else None
+                if result is not None:
+                    return result
+            except Exception as err:
+                LOGGER.warning(f"Failed to fetch ban evidence from Redis: {err}")
+        targets = instances if instances is not None else self.get_instances(status="up")
+        for instance in targets:
+            try:
+                ok, response = instance.metrics(f"badbehavior/ban/{ban_id}")
+                result = resolved(response.get(instance.hostname, {}).get("msg")) if ok else None
+                if result is not None:
+                    return result
+            except Exception as err:
+                LOGGER.warning(f"Failed to fetch ban evidence from {instance.hostname}: {err}")
+        return missing
 
     def get_reports_pane_counts(
         self,
@@ -730,16 +806,6 @@ class InstancesUtils:
 
         redis_client = get_redis_client()
 
-        def parse_search_panes(search_panes_value: str) -> dict[str, list[str]]:
-            pane_filters: dict[str, list[str]] = {}
-            if not search_panes_value:
-                return pane_filters
-            for field_filter in search_panes_value.split(";"):
-                if ":" in field_filter:
-                    field, values = field_filter.split(":", 1)
-                    pane_filters[field] = values.split(",")
-            return pane_filters
-
         def matches_filters(report: dict[str, Any], search_value: str, pane_filters: dict[str, list[str]]) -> bool:
             if search_value:
                 search_lower = search_value.lower()
@@ -763,7 +829,7 @@ class InstancesUtils:
         # If Redis is available, use it for optimized queries
         if redis_client and max_redis_requests > 0 and not hostname:
             try:
-                pane_filters = parse_search_panes(search_panes)
+                pane_filters = decode_search_panes(search_panes)
                 pane_fields = self._REPORT_PANE_FIELDS
                 selected_pane_values = {field: set(values) for field, values in pane_filters.items()}
                 max_pane_values = max(0, self._REPORT_PANE_MAX_VALUES)
@@ -937,13 +1003,7 @@ class InstancesUtils:
 
         # Search panes filters (format: field1:value1,value2;field2:value3)
         if search_panes:
-            pane_filters = {}
-            for field_filter in search_panes.split(";"):
-                if ":" in field_filter:
-                    field, values = field_filter.split(":", 1)
-                    pane_filters[field] = values.split(",")
-
-            for field, allowed_values in pane_filters.items():
+            for field, allowed_values in decode_search_panes(search_panes).items():
                 filtered = [r for r in filtered if str(r.get(field, "N/A")) in allowed_values]
 
         return filtered
@@ -1224,8 +1284,8 @@ class InstancesUtils:
             # Track status distribution in the selected window.
             request_statuses[status] = request_statuses.get(status, 0) + 1
 
-            # Check if blocked (403, 429, 444)
-            if status in (403, 429, 444):
+            # Stored reports were blocked regardless of status, except detect-mode reports.
+            if request.get("security_mode") != "detect":
                 if country not in request_countries:
                     request_countries[country] = {"blocked": 0}
                 request_countries[country]["blocked"] += 1

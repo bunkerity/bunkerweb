@@ -32,6 +32,9 @@ class _Client:
     def get_global_settings(self, **_):
         return {"METRICS_MAX_BLOCKED_REQUESTS_REDIS": self.cap}
 
+    def get_metrics_request_data(self, *_args, **_kwargs):
+        return None
+
 
 class _Redis:
     """A live, reachable Redis holding a trimmed-away (hence empty) list."""

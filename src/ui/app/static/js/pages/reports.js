@@ -927,8 +927,12 @@ $(document).ready(function () {
               }
 
               const reportId = row.request_id || row.id || "";
+              const summary =
+                data && typeof data === "object" && data.ban_id
+                  ? `<div class="small text-muted mb-1">${escapeHtml(String(data.counter))} ${escapeHtml(t("reports.bad_behavior_total_requests", "Suspicious requests"))} · ${escapeHtml(String(data.event_count))} ${escapeHtml(t("reports.bad_behavior_stored_events", "Stored events"))}</div>`
+                  : "";
 
-              return `<a href="#"
+              return `${summary}<a href="#"
                         class="text-decoration-underline"
                         data-bs-toggle="modal"
                         data-bs-target="#dataModal"
@@ -1115,7 +1119,10 @@ $(document).ready(function () {
     const reportId =
       button.attr("data-report-id") ||
       (rowData ? rowData.request_id || rowData.id : "");
-    const hostname = button.attr("data-hostname") || "";
+    const hostname =
+      button.attr("data-hostname") ||
+      (rowData && rowData.instance_hostname) ||
+      "";
 
     const baseTitle = `
       <span class="tf-icons bx bx-shield-alt-2 me-2"></span>Security Report Details - ${escapeHtml(
@@ -1207,6 +1214,7 @@ $(document).ready(function () {
       rowData &&
       rowData.has_data &&
       rowData.data &&
+      !rowData.data.ban_id &&
       rowData.data !== "available"
     ) {
       showReportData(rowData.data);
@@ -1413,7 +1421,7 @@ $(document).ready(function () {
       (!normalizedReason && badBehaviorEntries.length > 0);
 
     if (shouldFormatBadBehavior) {
-      if (!filteredBadBehaviorEntries.length) {
+      if (!filteredBadBehaviorEntries.length && !data.ban_id) {
         return `
           <div class="alert alert-info" data-i18n="status.no_data">
             ${escapeHtml(
@@ -1426,7 +1434,10 @@ $(document).ready(function () {
           ${createRawDataFallback(data)}
         `;
       }
-      return formatBadBehaviorData(filteredBadBehaviorEntries);
+      return formatBadBehaviorData(
+        filteredBadBehaviorEntries,
+        data.ban_id ? data : {},
+      );
     }
 
     // The CrowdSec verdict leads with the sentence, then the raw fields underneath: an operator
@@ -1470,6 +1481,8 @@ $(document).ready(function () {
     } else if (typeof data === "object") {
       if (Array.isArray(data.events)) {
         entries = data.events.filter((entry) => isBadBehaviorEntry(entry));
+      } else if (data.ban_id) {
+        entries = [];
       } else {
         const numericKeys = Object.keys(data).filter((key) =>
           /^\d+$/.test(key),
@@ -1538,11 +1551,19 @@ $(document).ready(function () {
     );
   }
 
-  function formatBadBehaviorData(entries) {
-    if (!entries || entries.length === 0) {
+  function formatBadBehaviorData(entries, summary = {}) {
+    summary = entries.find((entry) => entry.ban_id) || summary;
+    if (entries.length === 0 && !summary.ban_id) {
       return '<div class="alert alert-info" data-i18n="status.no_data">No bad behavior activity recorded</div>';
     }
 
+    const totalRequests = entries.reduce(
+      (total, entry) =>
+        Number.isFinite(entry.counter) ? Math.max(total, entry.counter) : total,
+      Number.isFinite(summary.counter)
+        ? Math.max(summary.counter, entries.length)
+        : entries.length,
+    );
     const title = escapeHtml(
       t(
         "reports.bad_behavior_activity_detected",
@@ -1611,13 +1632,20 @@ $(document).ready(function () {
           </div>
           <span class="bad-behavior-summary__total badge bg-label-warning text-warning">
             <span class="bad-behavior-summary__total-count">${escapeHtml(
-              String(entries.length),
+              String(totalRequests),
             )}</span>
             <span class="bad-behavior-summary__total-label">${totalLabel}</span>
           </span>
         </div>
       </div>
     `;
+
+    if (summary.ban_id) {
+      html += `<p class="text-muted">${escapeHtml(t("reports.bad_behavior_stored_events", "Stored events"))}: ${escapeHtml(String(summary.event_count))}</p>`;
+    }
+    if (summary.evidence_missing) {
+      html += `<div class="alert alert-warning">${escapeHtml(t("reports.bad_behavior_evidence_missing", "Ban evidence is no longer available."))}</div>`;
+    }
 
     if (statusBadges) {
       html += `<div class="bad-behavior-statuses d-flex flex-wrap gap-2 mb-4">${statusBadges}</div>`;

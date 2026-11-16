@@ -5,6 +5,14 @@
       "description": "Nagba-ban ng IP na gumagawa ng masyadong maraming 'masamang' HTTP status code sa loob ng isang takdang panahon."
     },
     "settings": {
+      "BAD_BEHAVIOR_REPORT_MAX_EVENTS": {
+        "label": "Maximum na mga event sa ulat",
+        "help": "Maximum na bilang ng mga kamakailang event na itinatago bilang ebidensya ng ban sa mga ulat (1 hanggang 10000), na nililimitahan din ng threshold ng ban. Ang pagtaas nito ay nagpapalaki ng imbakan ng mga ulat nang hindi binabago kung kailan ipinapatupad ang mga ban."
+      },
+      "BAD_BEHAVIOR_REPORT_MAX_STRING_SIZE": {
+        "label": "Maximum na laki ng string ng request sa ulat",
+        "help": "Maximum na laki sa byte ng bawat URL o method na itinatago bilang ebidensya ng ban sa mga ulat, kasama ang pananda ng pagputol (4 hanggang 65536). Ang pagtaas nito ay nagpapalaki ng imbakan ng mga ulat."
+      },
       "BAD_BEHAVIOR_BAN_SCOPE": {
         "label": "Saklaw ng Ban",
         "help": "Tinutukoy ang antas ng ban. Ba-ban-nin ng 'service' ang IP para sa service lang, ba-ban-nin ng 'global' ang IP para sa buong sistema."

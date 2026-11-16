@@ -5,6 +5,14 @@
       "description": "Blokuje adres IP generujący zbyt wiele „złych” kodów statusu HTTP w danym okresie."
     },
     "settings": {
+      "BAD_BEHAVIOR_REPORT_MAX_EVENTS": {
+        "label": "Maksymalna liczba zdarzeń w raporcie",
+        "help": "Maksymalna liczba ostatnich zdarzeń zachowywanych jako dowody uzasadniające bana w raportach (od 1 do 10000), ograniczona również progiem bana. Zwiększenie wartości zwiększa zajętość pamięci raportów bez zmiany momentu nakładania banów."
+      },
+      "BAD_BEHAVIOR_REPORT_MAX_STRING_SIZE": {
+        "label": "Maksymalny rozmiar ciągów żądania w raportach",
+        "help": "Maksymalny rozmiar w bajtach każdego adresu URL lub metody zachowywanej jako dowód uzasadniający bana w raportach, wliczając znacznik obcięcia (od 4 do 65536). Zwiększenie wartości zwiększa zajętość pamięci raportów."
+      },
       "BAD_BEHAVIOR_BAN_SCOPE": {
         "label": "Zakres bana",
         "help": "Określa poziom bana. 'service' zbanuje IP tylko dla danej usługi, 'global' zbanuje IP w całym systemie."

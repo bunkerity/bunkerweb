@@ -2,7 +2,6 @@ from collections import Counter, defaultdict
 from contextlib import suppress
 from datetime import datetime
 from io import BytesIO, StringIO
-from ipaddress import ip_address as validate_ip_address
 from json import JSONDecodeError, loads
 from math import floor
 from time import time
@@ -14,8 +13,10 @@ from flask_login import login_required
 
 from common_utils import parse_duration_int  # type: ignore
 from db_methods.bans import KIND_BAN, KIND_LEASE, ban_kind  # type: ignore
+from ip_identity import normalize_ip  # type: ignore
 
 from app.api_client import ApiClientError, ApiUnavailableError
+from app.models.instance import encode_search_panes
 from app.dependencies import API_CLIENT, BW_CONFIG, BW_INSTANCES_UTILS
 from app.i18n import translated
 from app.utils import LOGGER, RESERVED_SERVICE_NAMES, csv_safe, csv_writer, flash, is_readonly_request
@@ -25,7 +26,6 @@ from app.routes.utils import (
     get_default_ban_time,
     get_remain,
     handle_error,
-    parse_search_panes,
     parse_search_panes_dict,
 )
 
@@ -55,7 +55,10 @@ _BAN_COLUMNS = (
 def _identity(ban):
     """(ip, scope, service): the key a ban lives under. A global ban has no service."""
     scope = ban.get("ban_scope") or "global"
-    return str(ban.get("ip", "")), scope, (ban.get("service") or "") if scope == "service" else ""
+    ip = str(ban.get("ip", ""))
+    with suppress(ValueError):
+        ip = normalize_ip(ip)  # a ban an older version stored under another spelling is the same ban
+    return ip, scope, (ban.get("service") or "") if scope == "service" else ""
 
 
 def _merge_runtime_leases(bans_list):
@@ -233,7 +236,13 @@ def _filter_and_sort_bans(all_bans, search_value, search_panes, order_column_ind
 
     if 0 <= order_column_index < len(_BAN_COLUMNS):
         sort_key = _BAN_COLUMNS[order_column_index]
-        if sort_key in ("end_date", "time_left"):
+        if sort_key == "time_left":
+            # By remaining seconds (`exp`), permanent bans last in both directions: no ban carries a `time_left` key.
+            filtered_bans.sort(
+                key=lambda x: float("-inf" if order_direction == "desc" else "inf") if x.get("permanent", False) else _to_float(x.get("exp", 0)),
+                reverse=(order_direction == "desc"),
+            )
+        elif sort_key == "end_date":
             filtered_bans.sort(
                 key=lambda x: ("0" if order_direction == "desc" else "z") if x.get("permanent", False) else x.get(sort_key, ""),
                 reverse=(order_direction == "desc"),
@@ -271,7 +280,7 @@ def _get_filtered_report_bans(source):
         search=source.get("search", "").lower(),
         order_column="date",
         order_dir="desc",
-        search_panes=parse_search_panes(source),
+        search_panes=encode_search_panes(parse_search_panes_dict(source)),
         count_only=False,
         include_pane_counts=False,
     )
@@ -577,7 +586,7 @@ def bans_fetch():
         search_panes_options["service"].append(
             {
                 "label": display_name,
-                "value": escape(str(name)),
+                "value": str(name),
                 "total": counts["total"],
                 "count": counts["count"],
             }
@@ -612,8 +621,8 @@ def bans_fetch():
         {
             "label": '<span data-i18n="searchpane.future_30d">More than 30 days</span>',
             "value": "future_30d",
-            "total": sum(1 for ban in bans if not ban.get("permanent", False) and ban.get("exp", 0) >= 2592000),
-            "count": sum(1 for ban in filtered_bans if not ban.get("permanent", False) and ban.get("exp", 0) >= 2592000),
+            "total": sum(1 for ban in bans if ban.get("permanent", False) or ban.get("exp", 0) >= 2592000),
+            "count": sum(1 for ban in filtered_bans if ban.get("permanent", False) or ban.get("exp", 0) >= 2592000),
         },
     ]
 
@@ -623,7 +632,7 @@ def bans_fetch():
             search_panes_options[field] = [
                 {
                     "label": escape(str(value)),
-                    "value": escape(str(value)),
+                    "value": str(value),
                     "total": counts["total"],
                     "count": counts["count"],
                 }
@@ -876,7 +885,7 @@ def bans_ban():
 
         # Validate IP address
         try:
-            validate_ip_address(ip)
+            ip = normalize_ip(ip)  # one address is one ban, whatever its spelling
         except ValueError:
             flash(translated("bans.flash.invalid_ip", ip=ip) or f"Invalid IP address: {ip}", "error")
             continue
@@ -959,7 +968,7 @@ def bans_unban():
 
         # Validate IP address
         try:
-            validate_ip_address(ip)
+            ip = normalize_ip(ip)  # one address is one ban, whatever its spelling
         except ValueError:
             flash(translated("bans.flash.invalid_ip", ip=str(ip)) or f"Invalid IP address: {ip}", "error")
             continue
@@ -1046,7 +1055,7 @@ def bans_crowdsec_unban():
             return _json_error(translated("bans.flash.invalid_ips_parameter_bans_unban") or "Invalid ips parameter on /bans/unban.", 400)
         ip = item["ip"]
         try:
-            validate_ip_address(ip)
+            ip = normalize_ip(ip)  # one address is one ban, whatever its spelling
         except ValueError:
             return _json_error(translated("bans.flash.invalid_ip", ip=str(ip)) or f"Invalid IP address: {ip}", 400)
         payload = {"ip": ip}
@@ -1157,7 +1166,7 @@ def bans_update_duration():
 
         # Validate IP address
         try:
-            validate_ip_address(ip)
+            ip = normalize_ip(ip)  # one address is one ban, whatever its spelling
         except ValueError:
             flash(translated("bans.flash.invalid_ip", ip=ip) or f"Invalid IP address: {ip}", "error")
             continue

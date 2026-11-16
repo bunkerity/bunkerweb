@@ -25,6 +25,14 @@
         "label": "Durata del blocco (in secondi)",
         "help": "Durata (in secondi) di un blocco quando l'IP corrispondente ha raggiunto la soglia. (Impostare su 0 per bloccare in modo permanente) Accetta un suffisso di tempo (ms, s, m, h, d, w, M, y); un numero senza suffisso è espresso in secondi."
       },
+      "BAD_BEHAVIOR_REPORT_MAX_EVENTS": {
+        "label": "Numero massimo di eventi nei report",
+        "help": "Numero massimo di eventi recenti conservati come prove di blocco nei report (da 1 a 10000), limitato anche dalla soglia di blocco. Aumentarlo incrementa lo spazio occupato dai report senza cambiare quando vengono applicati i blocchi."
+      },
+      "BAD_BEHAVIOR_REPORT_MAX_STRING_SIZE": {
+        "label": "Dimensione massima delle stringhe di richiesta nei report",
+        "help": "Dimensione massima in byte di ogni URL o metodo conservato come prova di blocco nei report, incluso il marcatore di troncamento (da 4 a 65536). Aumentarla incrementa lo spazio occupato dai report."
+      },
       "BAD_BEHAVIOR_BAN_SCOPE": {
         "label": "Ambito del blocco",
         "help": "Determina il livello del blocco. «service» bloccherà l'IP solo per il servizio, «global» bloccherà l'IP per l'intero sistema."

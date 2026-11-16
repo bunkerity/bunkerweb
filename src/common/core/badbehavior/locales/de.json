@@ -25,6 +25,14 @@
         "label": "Sperrdauer (in Sekunden)",
         "help": "Dauer (in Sekunden) einer Sperre, wenn die entsprechende IP den Schwellenwert erreicht hat. (Auf 0 setzen, um dauerhaft zu sperren) Akzeptiert ein Zeitsuffix (ms, s, m, h, d, w, M, y); eine Zahl ohne Suffix gilt in Sekunden."
       },
+      "BAD_BEHAVIOR_REPORT_MAX_EVENTS": {
+        "label": "Maximale Berichtsereignisse",
+        "help": "Maximale Anzahl neuerer Ereignisse, die in Berichten als Sperrnachweis gespeichert werden (1 bis 10000), zusätzlich durch den Sperrschwellenwert begrenzt. Ein höherer Wert erhöht den Speicherbedarf der Berichte, ohne den Zeitpunkt der Sperren zu ändern."
+      },
+      "BAD_BEHAVIOR_REPORT_MAX_STRING_SIZE": {
+        "label": "Maximale Anfragezeichenfolgengröße in Berichten",
+        "help": "Maximale Größe in Bytes jeder URL oder Methode, die in Berichten als Sperrnachweis gespeichert wird, einschließlich Kürzungsmarkierung (4 bis 65536). Ein höherer Wert erhöht den Speicherbedarf der Berichte."
+      },
       "BAD_BEHAVIOR_BAN_SCOPE": {
         "label": "Sperrbereich",
         "help": "Bestimmt die Ebene der Sperre. „service“ sperrt die IP nur für den Dienst, „global“ sperrt die IP für das gesamte System."

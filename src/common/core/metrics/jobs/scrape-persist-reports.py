@@ -4,6 +4,8 @@ from os import getenv, sep
 from os.path import join
 from sys import exit as sys_exit, path as sys_path
 from traceback import format_exc
+from re import fullmatch
+from urllib.parse import urlsplit
 
 for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("utils",), ("api",), ("db",))]:
     if deps_path not in sys_path:
@@ -52,7 +54,9 @@ try:
     # Scrape every instance's existing Lua reports endpoint (length=-1 returns all filtered records).
     # The instance endpoint already applies the report filter (status 4xx OR detect) and dedup is on the
     # DB side by (instance_hostname, request_id), so re-scraping overlapping windows is idempotent.
-    caller = ApiCaller([API.from_instance(instance) for instance in instances])
+    apis = [API.from_instance(instance) for instance in instances]
+    evidence_callers = {urlsplit(api.endpoint).hostname: ApiCaller([api]) for api in apis}
+    caller = ApiCaller(apis)
     resp, instances_data = caller.send_to_apis("GET", "/metrics/requests/query?start=0&length=-1&count_only=false", response=True)
 
     if not instances_data:
@@ -72,6 +76,33 @@ try:
         records = payload.get("data") or []
         if not records:
             continue
+        evidence_cache = {}
+        for record in records:
+            summary = record.get("data")
+            if record.get("reason") != "bad behavior" or not isinstance(summary, dict) or "ban_id" not in summary:
+                continue
+            ban_id = summary["ban_id"]
+            evidence = None
+            if isinstance(ban_id, str) and fullmatch(r"http:[A-Za-z0-9]{32}", ban_id):
+                if ban_id not in evidence_cache:
+                    try:
+                        _, responses = evidence_callers[hostname].send_to_apis("GET", f"/metrics/badbehavior/ban/{ban_id}", response=True)
+                        response = (responses or {}).get(hostname, {})
+                        evidence_cache[ban_id] = response.get("msg") if response.get("status") == "success" else None
+                    except Exception as err:
+                        LOGGER.warning(f"Could not fetch ban evidence from {hostname}: {err}")
+                        evidence_cache[ban_id] = None
+                evidence = evidence_cache[ban_id]
+            events = evidence.get("events") if isinstance(evidence, dict) and evidence.get("ban_id") == ban_id else None
+            if (
+                isinstance(events, list)
+                and len(events) == summary.get("event_count")
+                and len(events) <= 10000
+                and all(isinstance(event, dict) for event in events)
+            ):
+                record["data"] = {**summary, "events": events}
+            else:
+                record["data"] = {**summary, "evidence_missing": True}
         err = JOB.db.batch_upsert_metrics_requests(records, instance_hostname=hostname)
         if err:
             LOGGER.error(f"Failed to persist reports from {hostname}: {err}")

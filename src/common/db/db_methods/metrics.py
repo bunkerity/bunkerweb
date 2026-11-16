@@ -3,9 +3,10 @@ from contextlib import suppress
 from datetime import datetime, timedelta, timezone
 from json import dumps, loads
 from operator import itemgetter
+from re import fullmatch
 from typing import Any, Dict, List, Optional
 
-from sqlalchemy import and_, delete, func, or_, select
+from sqlalchemy import and_, delete, func, or_, select, update
 from sqlalchemy.exc import IntegrityError
 
 from model import Baseline, Requests  # type: ignore
@@ -324,7 +325,54 @@ class DatabaseMetricsMixin(DatabaseMixinBase):
         The periodic scrape job is the single writer per instance; a rare concurrent insert that races
         the existence check is absorbed by re-querying and re-inserting only the still-missing remainder
         (rather than aborting the whole batch on the unique-constraint violation)."""
-        return self._batch_upsert_by_request_id(Requests, _build_request_row, records, instance_hostname, "metrics")
+        err = self._batch_upsert_by_request_id(Requests, _build_request_row, records, instance_hostname, "metrics")
+        if err:
+            return err
+        snapshots = {}
+        for record in records:
+            data = record.get("data")
+            if (
+                record.get("reason") == "bad behavior"
+                and isinstance(data, dict)
+                and fullmatch(r"http:[A-Za-z0-9]{32}", str(data.get("ban_id", "")))
+                and not data.get("evidence_missing")
+                and isinstance(data.get("events"), list)
+                and len(data["events"]) == data.get("event_count")
+                and len(data["events"]) <= 10000
+                and all(isinstance(event, dict) for event in data["events"])
+            ):
+                snapshots[str(record.get("id") or record.get("request_id") or "")] = data
+        if snapshots:
+            try:
+                with self._db_session() as session:
+                    if self.readonly:
+                        return "The database is read-only, the changes will not be saved"
+                    for chunk in _chunked(list(snapshots)):
+                        rows = session.scalars(
+                            select(Requests).where(
+                                Requests.instance_hostname == instance_hostname, Requests.request_id.in_(chunk), Requests.reason == "bad behavior"
+                            )
+                        ).all()
+                        for row in rows:
+                            old = loads(row.data) if row.data else None
+                            new = snapshots[row.request_id]
+                            if isinstance(old, dict) and old.get("evidence_missing") is True and old.get("ban_id") == new["ban_id"]:
+                                # Compare the original JSON too: a concurrent repair must never be overwritten.
+                                session.execute(update(Requests).where(Requests.id == row.id, Requests.data == row.data).values(data=dumps(new)))
+                    session.commit()
+            except Exception as err:
+                return str(err)
+        return ""
+
+    @retry_on_transient_db_errors
+    def get_metrics_request_data(self, request_id: str, *, instance_hostname: Optional[str] = None) -> Any:
+        """Read an exact report's durable JSON without relying on an instance buffer."""
+        with self._db_session() as session:
+            query = select(Requests.data).where(Requests.request_id == request_id, _report_clause())
+            if instance_hostname is not None:
+                query = query.where(Requests.instance_hostname == instance_hostname)
+            data = session.scalar(query.order_by(Requests.date.desc(), Requests.id.desc()).limit(1))
+            return loads(data) if data else None
 
     @retry_on_transient_db_errors
     def batch_upsert_metrics_baseline(self, records: List[Dict[str, Any]], *, instance_hostname: str = "") -> str:

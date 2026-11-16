@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 from typing import Any, Dict, List
+from re import fullmatch
+from urllib.parse import unquote
 
 from fastapi import APIRouter, Depends
 from fastapi.responses import JSONResponse
@@ -42,6 +44,9 @@ def _number(value: Any) -> float:
 def _parse_search_panes(raw: str) -> Dict[str, List[str]]:
     """Parse the UI search-panes string ``field1:v1,v2;field2:v3`` into a ``{field: [values]}`` filter dict.
 
+    Values are percent-encoded individually before joining; encode a literal ``%`` as ``%25``.
+    Split before decoding so escaped commas and semicolons remain inside their values.
+
     ``protocol`` doubles as the HTTP/TCP/UDP filter on every endpoint here — it is an ordinary
     facet field, so it needs no parameter of its own. ``protocol:stream`` is expanded to the two
     L4 protocols, which is how a caller asks for "everything that is not HTTP" in one term.
@@ -52,7 +57,7 @@ def _parse_search_panes(raw: str) -> Dict[str, List[str]]:
         if not separator:
             continue
         field = field.strip()
-        selected = [value for value in values.split(",") if value]
+        selected = [unquote(value) for value in values.split(",") if value]
         if field == "protocol" and "stream" in selected:
             selected = [value for value in selected if value != "stream"] + ["tcp", "udp"]
             selected = list(dict.fromkeys(selected))
@@ -141,6 +146,19 @@ def query_metrics_requests(
     if include_pane_counts:
         result["pane_counts"] = db.get_metrics_facets(search=search, filters=filters)
     return JSONResponse(status_code=200, content={"status": "success", **result})
+
+
+@router.get("/requests/{request_id}/data", dependencies=[Depends(guard)])
+def query_metrics_request_data(request_id: str, instance_hostname: str | None = None) -> JSONResponse:
+    """Exact durable detail; the shared metrics guard resolves to metrics_read."""
+    if not fullmatch(r"[A-Za-z0-9_-]{1,64}", request_id) or (
+        instance_hostname is not None and not fullmatch(r"[A-Za-z0-9_.:\[\]~-]{1,256}", instance_hostname)
+    ):
+        return JSONResponse(status_code=400, content={"status": "error", "message": "Invalid report identifier or instance hostname"})
+    data = get_db().get_metrics_request_data(request_id, instance_hostname=instance_hostname)
+    if data is None:
+        return JSONResponse(status_code=404, content={"status": "error", "message": "Report data not found"})
+    return JSONResponse(status_code=200, content={"status": "success", "data": data})
 
 
 @router.get("/requests/timeseries", dependencies=[Depends(guard)])

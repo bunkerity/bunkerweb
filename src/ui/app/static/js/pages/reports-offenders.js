@@ -8,6 +8,7 @@
   // input) so this tab's ban action respects read-only mode exactly like the Event log
   // tab's "Ban selected" / per-row .ban-single actions it mirrors below.
   const isReadOnly = $("#is-read-only").val().trim() === "True";
+  const flagBase = $("#base_flags_url").val();
 
   // Mirrors reports.js:1846-1874's .ban-single click handler (same form-POST-to-/bans/ban
   // mechanism) -- this tab's plain HTML table isn't a DataTables row, so there is no
@@ -69,7 +70,7 @@
       .append(
         $("<img>")
           .attr({
-            src: window.BWCountryFlag.srcFor(code),
+            src: window.BWCountryFlag.srcFor(code, { flagBase }),
             height: 17,
             alt: "",
             "aria-hidden": "true",

@@ -5,6 +5,14 @@
       "description": "Memblokir IP yang menghasilkan terlalu banyak kode status HTTP 'buruk' dalam periode waktu tertentu."
     },
     "settings": {
+      "BAD_BEHAVIOR_REPORT_MAX_EVENTS": {
+        "label": "Jumlah maksimum peristiwa laporan",
+        "help": "Jumlah maksimum peristiwa terbaru yang disimpan sebagai bukti ban dalam laporan (1 hingga 10000), juga dibatasi oleh ambang ban. Menaikkannya menambah penggunaan penyimpanan laporan tanpa mengubah kapan ban diterapkan."
+      },
+      "BAD_BEHAVIOR_REPORT_MAX_STRING_SIZE": {
+        "label": "Ukuran maksimum string permintaan laporan",
+        "help": "Ukuran maksimum dalam byte untuk setiap URL atau metode yang disimpan sebagai bukti ban dalam laporan, termasuk penanda pemotongan (4 hingga 65536). Menaikkannya menambah penggunaan penyimpanan laporan."
+      },
       "BAD_BEHAVIOR_BAN_SCOPE": {
         "label": "Cakupan ban",
         "help": "Menentukan tingkat ban. 'service' akan mem-ban IP hanya untuk layanan tersebut, 'global' akan mem-ban IP untuk seluruh sistem."

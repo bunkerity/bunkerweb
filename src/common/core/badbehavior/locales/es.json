@@ -25,6 +25,14 @@
         "label": "Duración del bloqueo (en segundos)",
         "help": "Duración (en segundos) de un bloqueo cuando la IP correspondiente ha alcanzado el umbral. (Establecer en 0 para bloquear de forma permanente) Acepta un sufijo de tiempo (ms, s, m, h, d, w, M, y); un número sin sufijo se interpreta en segundos."
       },
+      "BAD_BEHAVIOR_REPORT_MAX_EVENTS": {
+        "label": "Máximo de eventos por informe",
+        "help": "Número máximo de eventos recientes conservados como pruebas de bloqueo en los informes (1 a 10000), limitado también por el umbral de bloqueo. Aumentarlo incrementa el almacenamiento de informes sin cambiar cuándo se aplican los bloqueos."
+      },
+      "BAD_BEHAVIOR_REPORT_MAX_STRING_SIZE": {
+        "label": "Tamaño máximo de las cadenas de solicitud en informes",
+        "help": "Tamaño máximo en bytes de cada URL o método conservado como prueba de bloqueo en los informes, incluido el marcador de truncamiento (4 a 65536). Aumentarlo incrementa el almacenamiento de informes."
+      },
       "BAD_BEHAVIOR_BAN_SCOPE": {
         "label": "Alcance del bloqueo",
         "help": "Determina el nivel del bloqueo. «service» bloqueará la IP solo para el servicio, «global» bloqueará la IP para todo el sistema."

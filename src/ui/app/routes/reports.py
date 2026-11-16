@@ -15,7 +15,8 @@ from app.dependencies import API_CLIENT, BW_CONFIG, BW_INSTANCES_UTILS
 from app.api_client import ApiClientError, ApiUnavailableError
 from app.utils import LOGGER, csv_safe, csv_writer
 
-from app.routes.utils import cors_required, get_default_ban_time, parse_search_panes
+from app.models.instance import encode_search_panes
+from app.routes.utils import cors_required, get_default_ban_time, parse_search_panes_dict
 
 _PERSIST_TO_DB_CACHE = {"enabled": True, "expires_at": 0.0}
 _PERSIST_TO_DB_TTL_SECONDS = 30.0
@@ -136,7 +137,7 @@ def build_search_panes_options(pane_counts_backend: dict) -> dict:
                 search_panes_options["server_name"].append(
                     {
                         "label": f'<code class="language-dns">{escape("default server" if name == "_" else name)}</code>',
-                        "value": escape(name),
+                        "value": name,
                         "total": counts["total"],
                         "count": counts["count"],
                     }
@@ -145,7 +146,7 @@ def build_search_panes_options(pane_counts_backend: dict) -> dict:
             search_panes_options[field] = [
                 {
                     "label": escape(str(value)),
-                    "value": escape(str(value)),
+                    "value": str(value),
                     "total": counts["total"],
                     "count": counts["count"],
                 }
@@ -274,7 +275,7 @@ def reports_fetch():
     ]
 
     # Build search panes string for backend (format: field1:value1,value2;field2:value3)
-    search_panes_str = ";".join(f"{field}:{','.join(values)}" for field, values in search_panes.items()) if search_panes else ""
+    search_panes_str = encode_search_panes(search_panes)
     include_pane_counts = False
 
     # Determine order column name
@@ -330,11 +331,18 @@ def reports_fetch():
 
             request_id = str(report.get("id", "N/A"))
             server_name = str(report.get("server_name", "N/A"))
+            if isinstance(data_field, dict) and data_field.get("ban_id"):
+                data_field = {
+                    key: value
+                    for key, value in data_field.items()
+                    if key in ("ban_id", "counter", "threshold", "count_time", "ban_time", "event_count", "ban_scope", "server_name", "evidence_expires_at")
+                }
 
             return {
-                "date": datetime.fromtimestamp(report.get("date", 0)).isoformat() if report.get("date") else "N/A",
+                "date": datetime.fromtimestamp(report.get("date", 0)).astimezone().isoformat() if report.get("date") else "N/A",
                 "id": escape(request_id),
                 "request_id": request_id,
+                "instance_hostname": str(report.get("instance_hostname") or ""),
                 "ip": escape(str(report.get("ip", "N/A"))),
                 "country": escape(str(report.get("country", "N/A"))),
                 # HTTP-only fields are None on a stream session. Passed through as null so the
@@ -414,7 +422,7 @@ def reports_filters():
             field = key.split("[")[1].split("]")[0]
             search_panes[field].append(value)
 
-    search_panes_str = ";".join(f"{field}:{','.join(sorted(values))}" for field, values in sorted(search_panes.items())) if search_panes else ""
+    search_panes_str = encode_search_panes({field: sorted(values) for field, values in sorted(search_panes.items())})
     has_active_panes = any(values for values in search_panes.values())
 
     force_refresh = request.form.get("force", "").strip().lower() in ("1", "true", "yes")
@@ -515,7 +523,7 @@ def reports_export_csv():
         search_value = request.args.get("search", "").lower()
         order_column = request.args.get("order_column", "date")
         order_dir = request.args.get("order_dir", "desc")
-        search_panes_str = parse_search_panes(request.args)
+        search_panes_str = encode_search_panes(parse_search_panes_dict(request.args))
 
         # Get all reports (no pagination)
         if BW_INSTANCES_UTILS:
@@ -572,7 +580,7 @@ def reports_export_csv():
 
             writer.writerow(
                 [
-                    datetime.fromtimestamp(report.get("date", 0)).isoformat() if report.get("date") else "N/A",
+                    datetime.fromtimestamp(report.get("date", 0)).astimezone().isoformat() if report.get("date") else "N/A",
                     str(report.get("id", "N/A")),
                     str(report.get("ip", "N/A")),
                     str(report.get("country", "N/A")),
@@ -617,7 +625,7 @@ def reports_export_excel():
         search_value = request.args.get("search", "").lower()
         order_column = request.args.get("order_column", "date")
         order_dir = request.args.get("order_dir", "desc")
-        search_panes_str = parse_search_panes(request.args)
+        search_panes_str = encode_search_panes(parse_search_panes_dict(request.args))
 
         # Get all reports (no pagination)
         if BW_INSTANCES_UTILS:
@@ -688,7 +696,7 @@ def reports_export_excel():
 
             ws.append(
                 [
-                    csv_safe(datetime.fromtimestamp(report.get("date", 0)).isoformat() if report.get("date") else "N/A"),
+                    csv_safe(datetime.fromtimestamp(report.get("date", 0)).astimezone().isoformat() if report.get("date") else "N/A"),
                     csv_safe(report.get("id", "N/A")),
                     csv_safe(report.get("ip", "N/A")),
                     csv_safe(report.get("country", "N/A")),

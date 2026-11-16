@@ -13,7 +13,8 @@ LUA = shutil.which("lua") or shutil.which("luajit")
 pytestmark = pytest.mark.skipif(LUA is None, reason="requires Lua")
 
 PRELUDE = r"""
-local metrics = {}
+-- Evidence recovery has its own real-Lua tests; these cases isolate metric synchronization.
+local metrics = {recover_ban_evidence = function() end}
 local ERR, WARN, INFO = 3, 4, 6
 local subsystem = "http"
 local stream_requests, stream_restore_pending = {}, false
