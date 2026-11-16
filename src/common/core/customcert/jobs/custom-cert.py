@@ -417,6 +417,8 @@ try:
                 continue
 
             LOGGER.info(f"Service {first_server} is using custom SSL certificates, checking ...")
+            # Rejected replacements still use the previously managed certificate.
+            managed_servers.append(first_server)
 
             cert_priority = getenv(f"{first_server}_CUSTOM_SSL_CERT_PRIORITY", "file") if multisite else getenv("CUSTOM_SSL_CERT_PRIORITY", "file")
             cert_file_path = getenv(f"{first_server}_CUSTOM_SSL_CERT", "") if multisite else getenv("CUSTOM_SSL_CERT", "")
@@ -437,7 +439,6 @@ try:
                     "Variables (CUSTOM_SSL_CERT or CUSTOM_SSL_CERT_DATA) and (CUSTOM_SSL_KEY or CUSTOM_SSL_KEY_DATA) "
                     f"have to be set and valid to use custom certificates for {first_server}"
                 )
-                skipped_servers.append(first_server)
                 status = 2
                 continue
 
@@ -445,17 +446,14 @@ try:
             need_reload, err = check_cert(cert_file, key_file, first_server)
             if isinstance(err, BaseException):
                 LOGGER.error(f"Exception while checking {first_server}'s certificate, skipping ... \n{err}")
-                skipped_servers.append(first_server)
                 status = 2
                 continue
             elif err:
                 LOGGER.warning(f"Error while checking {first_server}'s certificate : {err}")
-                skipped_servers.append(first_server)
                 status = 2
                 continue
             # Mirror the material into the central inventory so the certificate is visible and
             # manageable from the certificates page, which this provider has no UI of its own for.
-            managed_servers.append(first_server)
             # In the file-priority branch these are still Paths — check_cert() reads them into
             # bytes only inside its own scope — and the inventory API takes PEM bytes.
             import_err, _ = JOB.db.import_certificate(

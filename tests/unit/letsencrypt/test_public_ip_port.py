@@ -102,3 +102,15 @@ def test_incompatible_ip_does_not_block_dns_names(module, monkeypatch):
     names, config = module.build_service_config("example.com")
     assert names == ["example.com"]
     assert config["activated"] is True
+
+
+def test_an_ipv6_server_name_is_skipped_with_its_own_message(module, monkeypatch):
+    module.IS_MULTISITE = False
+    for key, value in {"SERVER_NAME": "app.example.com 2001:db8::1 localhost", "AUTO_LETS_ENCRYPT": "yes"}.items():
+        monkeypatch.setenv(key, value)
+    module.LOGGER.warning.reset_mock()
+    names, config = module.build_service_config("app.example.com")
+    messages = [call.args[0] for call in module.LOGGER.warning.call_args_list]
+    assert names == ["app.example.com"] and config["activated"]
+    assert any("Certificates for IPv6 addresses are not supported yet: 2001:db8::1" in m for m in messages), messages
+    assert any("No public CA issues certificates for localhost" in m and "2001" not in m for m in messages), messages
