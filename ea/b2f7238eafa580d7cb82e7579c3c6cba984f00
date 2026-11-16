@@ -1,0 +1,22 @@
+.github/workflows/rm-arm.yml
+  s_f6bca556b64fdb::t_ecbca4e0ecbc7e 35
+.github/workflows/create-arm.yml
+  s_f6bca556b64fdb::t_df8ceb33829b01 48
+  s_f6bca556b64fdb::t_dd69ec080b5c78 66,76
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "eab2f7238eafa580d7cb82e7579c3c6cba984f00",
+  "prompts": {},
+  "sessions": {
+    "s_f6bca556b64fdb": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "4b6b44e0-9c9d-4331-960b-d79e82b4a21c",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

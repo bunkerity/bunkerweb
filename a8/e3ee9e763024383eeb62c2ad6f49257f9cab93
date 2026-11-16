@@ -1,0 +1,53 @@
+src/autoconf/controllers/KubernetesController.py
+  s_06e96c821ea634::t_1042b1c70a83cf 18,241,243-245,247-248
+src/autoconf/Config.py
+  s_06e96c821ea634::t_1042b1c70a83cf 12-25,27-50,140,183,187,191,195,200-204,300,308,317
+  s_0a8cd9856036ac::t_3eb64ddfc645bc 26
+tests/unit/autoconf/test_config_environment_and_readonly.py
+  s_8957b83407cdf6::t_de102e3ebfe769 71
+tests/unit/autoconf/test_kubernetes_multi_ingress_merge.py
+  s_8957b83407cdf6::t_de102e3ebfe769 181-206,208-209,212-215,217,219-221
+tests/unit/autoconf/test_config_log_redaction.py
+  s_0a8cd9856036ac::t_1bfcef10775f3f 3,5,11-12,52-75
+  s_395a177d18bef3::t_ea6835ff4fde90 1-2,4,6-10,13-51
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "a8e3ee9e763024383eeb62c2ad6f49257f9cab93",
+  "prompts": {},
+  "sessions": {
+    "s_06e96c821ea634": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "e27ccd4e-cfc1-4404-9bc3-91f5632c425d",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_0a8cd9856036ac": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "5db0d217-5dac-43f5-a91a-df8538960151",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_395a177d18bef3": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "df8d2e05-fc92-468a-8717-05e2c39ee6f6",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_8957b83407cdf6": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "f0ed5bf7-382f-48ad-b7ad-d9883e810768",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

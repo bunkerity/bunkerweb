@@ -1,0 +1,19 @@
+tests/unit/requirements.txt
+  s_15bb079e29f178::t_26fd9224e3f6fa 1629-1631
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "8a5a5d7ce104779340736f45e30b363ca3445141",
+  "prompts": {},
+  "sessions": {
+    "s_15bb079e29f178": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1bf49-876c-77a3-a307-ab84a967c1c1",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}
