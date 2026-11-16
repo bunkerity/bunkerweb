@@ -1,0 +1,35 @@
+# `bwcli support` on a live stack: the bundle must carry no credential.
+#
+# The unit tests (`tests/unit/ui/test_support_redaction_parity.py`) pin the redaction against a
+# fake database; this runs the real command inside the scheduler container, against a real
+# database, real instances and the settings the stack was started with, and greps the whole zip for
+# the secrets. The asserting code is `tests/core/support/test.sh`.
+#
+# Docker only: the command is `docker exec <scheduler> bwcli support -o -`.
+integrations:
+  - "Docker"
+
+# The API password and token are secrets the harness injects; the script looks for both.
+api:
+  API_USERNAME: "admin"
+  API_PASSWORD: "P@ssw0rd"
+
+config:
+  USE_REVERSE_PROXY: "yes"
+  REVERSE_PROXY_HEADERS: "Authorization Bearer integ-bearer-7f3c9a"
+  CUSTOM_HEADER: "X-Api-Key: integ-customkey-91ab"
+  USE_REDIS: "no"
+  REDIS_PASSWORD: "integ-redis-pw-5d2e"
+
+actions:
+  bundle_is_redacted_and_anonymized:
+    type: script
+    script: ["./tests/core/support/test.sh", "docker", "default"]
+    result: "support default: all checks passed"
+    restart_stack: false
+
+  bundle_without_anonymization_still_redacts_credentials:
+    type: script
+    script: ["./tests/core/support/test.sh", "docker", "plain"]
+    result: "support plain: all checks passed"
+    restart_stack: false

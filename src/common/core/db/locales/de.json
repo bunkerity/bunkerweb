@@ -53,6 +53,14 @@
         "label": "Datenbank-Wiederholungs-Timeout",
         "help": "Die maximale Anzahl an Sekunden, die beim Start auf die Verfügbarkeit der Datenbank gewartet wird. Akzeptiert ein Zeitsuffix (ms, s, m, h, d, w, M, y); eine Zahl ohne Suffix gilt in Sekunden."
       },
+      "DATABASE_CONNECT_TIMEOUT": {
+        "label": "Datenbank-Verbindungs-Timeout",
+        "help": "Die maximale Wartezeit beim Aufbau einer Verbindung zu einem MySQL-, MariaDB- oder PostgreSQL-Server. Der Wert muss größer als 0 sein: Die Treiber kommen nicht ohne aus, und 0 fällt mit einer Warnung auf den Standardwert zurück. Ein in der Query-String von DATABASE_URI gesetztes Timeout hat Vorrang. Akzeptiert ein Zeitsuffix (ms, s, m, h, d, w, M, y); eine Zahl ohne Suffix gilt in Sekunden."
+      },
+      "DATABASE_READ_TIMEOUT": {
+        "label": "Datenbank-Lese-Timeout",
+        "help": "Die maximale Wartezeit auf die Antwort oder Datenannahme eines MySQL- oder MariaDB-Servers, bevor der Aufruf fehlschlägt, damit ein verschwundener Peer nicht endlos blockiert. PostgreSQL nutzt stattdessen TCP-Keepalives. 0 deaktiviert es. Ein in der Query-String von DATABASE_URI gesetztes Timeout hat Vorrang. Akzeptiert ein Zeitsuffix (ms, s, m, h, d, w, M, y); eine Zahl ohne Suffix gilt in Sekunden."
+      },
       "DATABASE_REQUEST_RETRY_ATTEMPTS": {
         "label": "Wiederholungsversuche für Datenbankanfragen",
         "help": "Die Anzahl der Wiederholungsversuche für vorübergehende Datenbankfehler."

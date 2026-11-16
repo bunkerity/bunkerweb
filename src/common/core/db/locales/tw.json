@@ -53,6 +53,14 @@
         "label": "資料庫重試逾時",
         "help": "啟動時等待資料庫可用的最長秒數。支援時間後綴(ms、s、m、h、d、w、M、y);無後綴的數字單位為秒。"
       },
+      "DATABASE_CONNECT_TIMEOUT": {
+        "label": "資料庫連線逾時",
+        "help": "開啟與 MySQL、MariaDB 或 PostgreSQL 伺服器的連線時的最長等待時間。必須大於 0:驅動程式不能沒有該逾時,0 會發出警告並回退到預設值。DATABASE_URI 查詢字串中設定的逾時優先。支援時間後綴(ms、s、m、h、d、w、M、y);無後綴的數字單位為秒。"
+      },
+      "DATABASE_READ_TIMEOUT": {
+        "label": "資料庫讀取逾時",
+        "help": "等待 MySQL 或 MariaDB 伺服器回應或接收資料的最長時間,逾時後呼叫失敗,避免對端消失導致永久阻塞。PostgreSQL 改用 TCP keepalive。0 表示停用。DATABASE_URI 查詢字串中設定的逾時優先。支援時間後綴(ms、s、m、h、d、w、M、y);無後綴的數字單位為秒。"
+      },
       "DATABASE_REQUEST_RETRY_ATTEMPTS": {
         "label": "資料庫請求重試次數",
         "help": "針對暫時性資料庫錯誤的重試次數。"

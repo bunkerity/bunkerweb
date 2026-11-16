@@ -3,12 +3,13 @@
 from contextlib import contextmanager, suppress
 from datetime import datetime
 from logging import Logger
+from math import ceil
 from os import _exit, getenv, sep
 from os.path import join as os_join
 from pathlib import Path
 from re import IGNORECASE, Match, compile as re_compile
 from sys import path as sys_path
-from typing import Any, Dict, Optional, Tuple
+from typing import Any, Dict, NoReturn, Optional, Tuple
 from time import sleep
 from uuid import uuid4
 
@@ -56,6 +57,7 @@ from db_methods.metrics import DatabaseMetricsMixin
 from db_methods.bans import DatabaseBansMixin
 
 from sqlalchemy import create_engine, text
+from sqlalchemy.engine import Engine
 from sqlalchemy.engine.url import make_url
 from sqlalchemy.exc import (
     ArgumentError,
@@ -65,6 +67,10 @@ from sqlalchemy.exc import (
 )
 from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy.pool import QueuePool
+
+# Driver-level timeouts, in seconds. Without them a connection whose peer vanishes without a reset blocks the caller forever.
+DEFAULT_CONNECT_TIMEOUT = 10
+DEFAULT_READ_TIMEOUT = 300
 
 # Greedy to the last "@" of the authority so an unencoded "@" inside the password is
 # covered too, but stopping at "/", "?" and "#" so an "@" in the path or query does not
@@ -150,6 +156,10 @@ def scrub_db_secret(text: str, db_string: str) -> str:
     return text
 
 
+class DatabaseInitError(Exception):
+    """Raised instead of exiting the process by Database(exit_on_error=False)"""
+
+
 class Database(
     DatabaseMetadataMixin,
     DatabaseInitTablesMixin,
@@ -193,9 +203,17 @@ class Database(
     SUFFIX_RX = re_compile(r"(?P<setting>.+)_(?P<suffix>\d+)$")
 
     def __init__(
-        self, logger: Logger, sqlalchemy_string: Optional[str] = None, *, external: bool = False, pool: Optional[bool] = None, log: bool = True, **kwargs
+        self,
+        logger: Logger,
+        sqlalchemy_string: Optional[str] = None,
+        *,
+        external: bool = False,
+        pool: Optional[bool] = None,
+        log: bool = True,
+        exit_on_error: bool = True,
+        **kwargs,
     ) -> None:
-        """Initialize the database"""
+        """Initialize the database. A failure exits the process, or raises DatabaseInitError without retrying a connection error when exit_on_error is False."""
         self.logger = logger
         self.readonly = False
         self.last_connection_retry = None
@@ -240,6 +258,12 @@ class Database(
                 if log:
                     self.logger.warning("The database connection is set to read-only, the changes will not be saved")
 
+        def fail(message: str) -> NoReturn:
+            self.logger.error(message)
+            if not exit_on_error:
+                raise DatabaseInitError(message)
+            _exit(1)
+
         def validate_and_update_db_string(db_string: str) -> Tuple[str, Optional[Match]]:
             """Validate and update database connection string."""
             if not db_string:
@@ -247,8 +271,7 @@ class Database(
 
             match = self.DB_STRING_RX.search(db_string)
             if not match:
-                self.logger.error(f"Invalid database string provided: {mask_db_uri(db_string)}, exiting...")
-                _exit(1)
+                fail(f"Invalid database string provided: {mask_db_uri(db_string)}, exiting...")
 
             db_type = match.group("database")
             db_path = match.group("path")
@@ -280,8 +303,7 @@ class Database(
                 # walk straight past this handler -- the process died on a traceback instead of the
                 # message below.
                 except (ArgumentError, ValueError):
-                    self.logger.error(f"Invalid database string provided: {mask_db_uri(db_string)}, exiting...")
-                    _exit(1)
+                    fail(f"Invalid database string provided: {mask_db_uri(db_string)}, exiting...")
                 if "+" not in url.drivername:
                     url = url.set(drivername=f"{url.drivername}+{recommended_driver}")
                     return url.render_as_string(hide_password=False), match
@@ -294,19 +316,15 @@ class Database(
 
         self.database_uri = "" if sqlalchemy_string == sqlalchemy_string_readonly else sqlalchemy_string
         self.database_uri_readonly = sqlalchemy_string_readonly
-        error = False
-
         match = main_match
         if self.database_uri_readonly and not self.database_uri and readonly_match:
             match = readonly_match
 
         if main_match and main_match.group("database") == "oracle":
-            self.logger.error("Oracle database is not supported yet")
-            _exit(1)
+            fail("Oracle database is not supported yet")
 
         if readonly_match and readonly_match.group("database") == "oracle":
-            self.logger.error("Oracle database is not supported yet")
-            _exit(1)
+            fail("Oracle database is not supported yet")
 
         # Pool size
         pool_size = getenv("DATABASE_POOL_SIZE", str(DEFAULT_POOL_SIZE))
@@ -348,6 +366,23 @@ class Database(
         # Pool pre-ping
         pool_pre_ping = getenv("DATABASE_POOL_PRE_PING", "yes" if DEFAULT_POOL_PRE_PING else "no").lower() in ("yes", "true", "1")
 
+        # Driver timeouts: the drivers reject a zero connect timeout, so only the read timeout can be 0 (disabled)
+        driver_timeouts = {}
+        for env_name, default, minimum in (
+            ("DATABASE_CONNECT_TIMEOUT", DEFAULT_CONNECT_TIMEOUT, 1),
+            ("DATABASE_READ_TIMEOUT", DEFAULT_READ_TIMEOUT, 0),
+        ):
+            value = getenv(env_name, str(default))
+            try:
+                driver_timeouts[env_name] = ceil(parse_duration(value, "s"))
+                if driver_timeouts[env_name] < minimum:
+                    raise ValueError("too low")
+            except ValueError:
+                self.logger.warning(f"Invalid {env_name} value: {value}, using default value ({default})")
+                driver_timeouts[env_name] = default
+        self._connect_timeout = driver_timeouts["DATABASE_CONNECT_TIMEOUT"]
+        self._read_timeout = driver_timeouts["DATABASE_READ_TIMEOUT"]
+
         self.logger.debug(
             f"Database pool configuration: pool_size={pool_size}, max_overflow={max_overflow}, pool_timeout={pool_timeout}, pool_recycle={pool_recycle}, pool_pre_ping={pool_pre_ping}"
         )
@@ -373,22 +408,16 @@ class Database(
                 self._engine_kwargs["pool_reset_on_return"] = default_pool_reset
 
         try:
-            self.sql_engine = create_engine(sqlalchemy_string, **self._engine_kwargs)
+            self.sql_engine = self._create_engine(sqlalchemy_string)
         except ArgumentError:
-            self.logger.error(f"Invalid database URI: {mask_db_uri(sqlalchemy_string)}")
-            error = True
+            fail(f"Invalid database URI: {mask_db_uri(sqlalchemy_string)}")
         except SQLAlchemyError as e:
-            self.logger.error(f"Error when trying to create the engine: {scrub_db_secret(str(e), sqlalchemy_string)}")
-            error = True
-        finally:
-            if error:
-                _exit(1)
+            fail(f"Error when trying to create the engine: {scrub_db_secret(str(e), sqlalchemy_string)}")
 
         try:
             assert self.sql_engine is not None
         except AssertionError:
-            self.logger.error("The database engine is not initialized")
-            _exit(1)
+            fail("The database engine is not initialized")
 
         DATABASE_RETRY_TIMEOUT = getenv("DATABASE_RETRY_TIMEOUT", "60")
         try:
@@ -420,30 +449,26 @@ class Database(
 
                 not_connected = False
             except (OperationalError, DatabaseError) as e:
-                if (datetime.now().astimezone() - current_time).total_seconds() > DATABASE_RETRY_TIMEOUT:
+                # Without exit_on_error only a first read-only error is worth waiting for: the engine is switched to read-only below
+                give_up = not exit_on_error and (self.readonly or not any(error in str(e) for error in (*self.READONLY_ERROR, "Unknown table")))
+                waited = f" after {DATABASE_RETRY_TIMEOUT} seconds" if exit_on_error else ""
+                if give_up or (datetime.now().astimezone() - current_time).total_seconds() > DATABASE_RETRY_TIMEOUT:
                     if not fallback and self.database_uri_readonly:
-                        self.logger.error(
-                            f"Can't connect to database {connection_target} after {DATABASE_RETRY_TIMEOUT} seconds. "
-                            "Falling back to read-only database connection"
-                        )
+                        self.logger.error(f"Can't connect to database {connection_target}{waited}. Falling back to read-only database connection")
                         self.sql_engine.dispose(close=True)
-                        self.sql_engine = create_engine(self.database_uri_readonly, **self._engine_kwargs)
+                        self.sql_engine = self._create_engine(self.database_uri_readonly)
                         self.readonly = True
                         fallback = True
                         connection_target = mask_db_uri(self.database_uri_readonly)
                         reason_logged = False
                         continue
-                    self.logger.error(
-                        f"Can't connect to database {connection_target} after {DATABASE_RETRY_TIMEOUT} seconds: "
-                        f"{scrub_db_secret(str(e), sqlalchemy_string)}"
-                    )
-                    _exit(1)
+                    fail(f"Can't connect to database {connection_target}{waited}: {scrub_db_secret(str(e), sqlalchemy_string)}")
 
                 if any(error in str(e) for error in self.READONLY_ERROR):
                     if log:
                         self.logger.warning("The database is read-only. Retrying in read-only mode in 5 seconds ...")
                     self.sql_engine.dispose(close=True)
-                    self.sql_engine = create_engine(sqlalchemy_string, **self._engine_kwargs)
+                    self.sql_engine = self._create_engine(sqlalchemy_string)
                     self.readonly = True
                 if "Unknown table" in str(e):
                     not_connected = False
@@ -456,7 +481,10 @@ class Database(
                     self.logger.warning(f"Can't connect to database {connection_target}, retrying in 5 seconds ...{detail}")
                 sleep(5)
             except BaseException as e:
-                self.logger.error(f"Error when trying to connect to the database: {scrub_db_secret(str(e), sqlalchemy_string)}")
+                message = f"Error when trying to connect to the database: {scrub_db_secret(str(e), sqlalchemy_string)}"
+                self.logger.error(message)
+                if not exit_on_error and isinstance(e, Exception):
+                    raise DatabaseInitError(message) from e
                 exit(1)
 
         if log:
@@ -598,6 +626,34 @@ class Database(
 
         return any(hint in error_text for hint in self.TRANSIENT_CONNECTION_ERROR_HINTS)
 
+    def _driver_connect_args(self, uri: str) -> Dict[str, Any]:
+        """Driver timeouts for a network database, leaving out any option the URI query string already sets"""
+        url = make_url(uri)
+        backend = url.get_backend_name()
+        if backend in ("mysql", "mariadb"):
+            defaults = {"connect_timeout": self._connect_timeout, "read_timeout": self._read_timeout, "write_timeout": self._read_timeout}
+        elif backend == "postgresql":
+            defaults = {
+                "connect_timeout": self._connect_timeout,
+                "keepalives": 1,
+                "keepalives_idle": 30,
+                "keepalives_interval": 10,
+                "keepalives_count": 3,
+                "tcp_user_timeout": 60000,
+            }
+        else:
+            return {}
+        # A zero read timeout means "do not set it": the drivers reject a zero timeout and wait forever when none is set.
+        return {key: value for key, value in defaults.items() if value and key not in url.query}
+
+    def _create_engine(self, uri: str, **kwargs) -> Engine:
+        """Create an engine from the shared kwargs, with driver timeout defaults a caller's own connect_args override"""
+        options = self._engine_kwargs | kwargs
+        connect_args = self._driver_connect_args(uri)
+        if connect_args:
+            options["connect_args"] = connect_args | options.get("connect_args", {})
+        return create_engine(uri, **options)
+
     def retry_connection(self, *, readonly: bool = False, fallback: bool = False, log: bool = True, **kwargs) -> None:
         """Retry the connection to the database"""
         self.last_connection_retry = datetime.now().astimezone()
@@ -611,7 +667,7 @@ class Database(
             raise ValueError("The fallback parameter is set to True but the read-only database URI is not set")
 
         self.sql_engine.dispose(close=True)
-        self.sql_engine = create_engine(self.database_uri_readonly if fallback else self.database_uri, **self._engine_kwargs | kwargs)
+        self.sql_engine = self._create_engine(self.database_uri_readonly if fallback else self.database_uri, **kwargs)
 
         with LOCK:
             if self._session_factory is not None:

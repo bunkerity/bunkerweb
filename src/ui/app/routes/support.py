@@ -9,12 +9,12 @@ from flask_login import current_user, login_required
 
 from common_utils import get_integration  # type: ignore
 from logger import getLogger  # type: ignore
+from support_common import mask_config, service_domains as config_service_domains  # type: ignore
 
 from app.dependencies import API_CLIENT, BW_CONFIG
 from app.api_client import ApiClientError, ApiUnavailableError
 from app.i18n import translated
 from app.models.biscuit import render_error_page
-from app.models.secret_settings import REDACTED, mask_uri_settings, redact_secrets, secret_setting_names
 from app.support_bundle import RING_HANDLER, Anonymizer, build_environment, build_plugins_report, build_support_bundle, install_ring_handler
 
 support = Blueprint("support", __name__)
@@ -29,8 +29,7 @@ def _may_download() -> bool:
 
 
 def service_domains() -> set:
-    config = BW_CONFIG.get_config(methods=False, with_drafts=True, filtered_settings=("SERVER_NAME",))
-    return {domain for key, value in config.items() if key == "SERVER_NAME" or key.endswith("_SERVER_NAME") for domain in value.split()}
+    return config_service_domains(BW_CONFIG.get_config(methods=False, with_drafts=True, filtered_settings=("SERVER_NAME",)))
 
 
 def _api(call, default):
@@ -82,8 +81,9 @@ def support_config():
     if not _may_download():
         return render_error_page(403, translated("flash.do_not_have_write_permission") or "You do not have the write permission")
 
-    # Meant to be attached to a support request: no secret value leaves, whoever downloads it.
-    secrets = secret_setting_names(BW_CONFIG.get_plugins_settings())
+    # Meant to be attached to a support request: no secret value leaves, whoever downloads it. Same masking as `bwcli support`:
+    # password settings, tokens and private keys, credential headers and database URIs.
+    settings = BW_CONFIG.get_plugins_settings()
     service = request.args.get("service")
 
     if service:
@@ -91,14 +91,14 @@ def support_config():
             return "Service not found", 404
 
         try:
-            service_config = mask_uri_settings(redact_secrets(API_CLIENT.get_service(service, full=True, methods=True), secrets, REDACTED))
+            service_config = mask_config(API_CLIENT.get_service(service, full=True, methods=True), settings)
         except (ApiClientError, ApiUnavailableError):
             return "Could not retrieve service config", 500
         return send_file(
             BytesIO(dumps(service_config, indent=2).encode()), mimetype="application/json", as_attachment=True, download_name=f"{service}_config.json"
         )
 
-    db_config = mask_uri_settings(redact_secrets(BW_CONFIG.get_config(methods=True, with_drafts=True), secrets, REDACTED))
+    db_config = mask_config(BW_CONFIG.get_config(methods=True, with_drafts=True), settings)
     return send_file(BytesIO(dumps(db_config, indent=2).encode()), mimetype="application/json", as_attachment=True, download_name="bunkerweb_config.json")
 
 

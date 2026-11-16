@@ -53,6 +53,14 @@
         "label": "Limit czasu ponawiania bazy danych",
         "help": "Maksymalna liczba sekund oczekiwania na dostępność bazy danych przy starcie. Akceptuje przyrostek czasu (ms, s, m, h, d, w, M, y); liczba bez przyrostka oznacza sekundy."
       },
+      "DATABASE_CONNECT_TIMEOUT": {
+        "label": "Limit czasu połączenia z bazą danych",
+        "help": "Maksymalny czas oczekiwania przy otwieraniu połączenia z serwerem MySQL, MariaDB lub PostgreSQL. Musi być większy niż 0: sterowniki nie działają bez niego, a 0 wraca do wartości domyślnej z ostrzeżeniem. Limit ustawiony w query string DATABASE_URI ma pierwszeństwo. Akceptuje przyrostek czasu (ms, s, m, h, d, w, M, y); liczba bez przyrostka oznacza sekundy."
+      },
+      "DATABASE_READ_TIMEOUT": {
+        "label": "Limit czasu odczytu z bazy danych",
+        "help": "Maksymalny czas oczekiwania, aż serwer MySQL lub MariaDB odpowie albo przyjmie dane, zanim wywołanie zakończy się błędem, aby zniknięty partner nie blokował w nieskończoność. PostgreSQL korzysta zamiast tego z keepalive TCP. Ustaw 0, aby wyłączyć. Limit ustawiony w query string DATABASE_URI ma pierwszeństwo. Akceptuje przyrostek czasu (ms, s, m, h, d, w, M, y); liczba bez przyrostka oznacza sekundy."
+      },
       "DATABASE_URI": {
         "label": "URI bazy danych",
         "help": "URI bazy danych, zgodny z formatem sqlalchemy."

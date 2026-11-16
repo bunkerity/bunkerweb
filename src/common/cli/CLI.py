@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+from concurrent.futures import ThreadPoolExecutor
 from contextlib import suppress
 from datetime import datetime, timedelta, timezone
 from importlib.util import find_spec
@@ -8,12 +9,15 @@ from operator import itemgetter
 from os import W_OK, access, environ, get_terminal_size, getenv, sep
 from os.path import join
 from pathlib import Path
+from posixpath import normpath
+from re import DOTALL, IGNORECASE, compile as re_compile, escape as re_escape
 from shutil import which
 from socket import create_connection
-from subprocess import DEVNULL, STDOUT, run
-from sys import argv as sys_argv, exit as sys_exit, path as sys_path
+from stat import S_ISREG
+from subprocess import DEVNULL, PIPE, STDOUT, SubprocessError, run
+from sys import argv as sys_argv, exit as sys_exit, path as sys_path, stdout as sys_stdout
 from traceback import format_exc
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Collection, Dict, Iterable, Iterator, List, Optional, Set, Tuple, Union
 
 for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("utils",), ("api",), ("db",))]:
     if deps_path not in sys_path:
@@ -25,9 +29,28 @@ from base_api_client import ApiClientError, ApiUnavailableError, BaseApiClient  
 from custom_configs_validation import TYPE_ERROR_MESSAGE, normalize_type as normalize_custom_config_type, validate_name as validate_custom_config_name  # type: ignore
 from logger import getLogger  # type: ignore
 
-from common_utils import bytes_hash, get_redis_client, handle_docker_secrets, parse_host  # type: ignore
+from common_utils import bytes_hash, get_integration, get_os_info, get_redis_client, handle_docker_secrets, parse_host  # type: ignore
 from env_file import parse_env_file  # type: ignore
+from ip_identity import normalize_ip  # type: ignore
 from redis_keys import ban_ip, is_cluster, unescape  # type: ignore
+from support_common import (  # type: ignore
+    FILE_TAIL_CAP,
+    LOG_DIR,
+    REDACTED,
+    TOTAL_CAP,
+    TRUNCATED_MARK,
+    Anonymizer,
+    BundleZip,
+    alembic_revision,
+    build_environment,
+    build_plugins_report,
+    cut_text,
+    is_secret_header,
+    mask_config,
+    pseudonym,
+    read_log_tail,
+    service_domains,
+)
 
 # bwcli has to resolve the database the running scheduler resolved, so it reads the operator's
 # files the way the scheduler's unit exports them: variables.env then the per-service file, later
@@ -46,6 +69,109 @@ OPERATOR_VARIABLES_PATHS = (Path(sep, "etc", "bunkerweb", "variables.env"), Path
 GENERATED_VARIABLES_PATHS = (Path(sep, "etc", "nginx", "variables.env"),)
 
 VARIABLES_PATHS = OPERATOR_VARIABLES_PATHS + GENERATED_VARIABLES_PATHS
+
+
+# Present where the scheduler is shipped (scheduler, all-in-one, Linux), absent from the BunkerWeb instance and autoconf images
+SCHEDULER_PATH = Path(sep, "usr", "share", "bunkerweb", "scheduler")
+
+# Present only in the all-in-one image
+ALL_IN_ONE_PATH = Path(sep, "usr", "share", "bunkerweb", "all-in-one")
+
+# Written by the Linux packages' postinstall.sh when the topology is declared, absent on legacy hosts
+INSTALL_TYPE_PATH = Path(sep, "usr", "share", "bunkerweb", "INSTALL_TYPE")
+INSTALL_TYPES = ("full", "manager", "worker", "scheduler", "ui", "api")
+
+# Where `bwcli support` reads the generated NGINX configuration
+NGINX_PATH = Path(sep, "etc", "nginx")
+
+# `bwcli support` caps: each JSON file is cut at SUPPORT_JSON_CAP, the generated NGINX configuration as a whole at SUPPORT_NGINX_CAP
+SUPPORT_JSON_CAP = 5 * 1024 * 1024
+SUPPORT_NGINX_CAP = 2 * 1024 * 1024
+# nginx directives that carry a credential without a `=` or `:`: `set $variable value;`, `Name value [always];` headers and the quoted `'Name: value'` arguments
+# of more_set_headers. They are read as nginx reads them (whitespace and comments across lines, quotes with backslash escapes), not line by line.
+SUPPORT_NGINX_DIRECTIVES = frozenset(
+    (
+        "proxy_set_header",
+        "grpc_set_header",
+        "add_header",
+        "add_trailer",
+        "fastcgi_param",
+        "uwsgi_param",
+        "scgi_param",
+        "more_set_headers",
+        "more_set_input_headers",
+        "set",
+    )
+)
+SUPPORT_NGINX_SECRET_VARIABLE = re_compile(r"\$\w*(?:token|key|secret|password|passwd|session|csrf|cookie|authorization)\w*", IGNORECASE)
+SUPPORT_NGINX_MORE_ARGUMENT = re_compile(r"\s*(?P<name>[\w\-]+)\s*:\s*")
+# A lone variable (`$http_authorization`) is a reference, not a credential
+SUPPORT_NGINX_VARIABLE = re_compile(r"\$(?:\w+|\{\w+\})(?:[ \t]+always)?")
+SUPPORT_NGINX_VARIABLE_NAME = re_compile(r"\$(?:(\w+)|\{(\w+)\})")
+SUPPORT_NGINX_ESCAPE = re_compile(r"\\([\"'\\trn])")
+SUPPORT_LIBRARIES = ("sqlalchemy", "alembic", "requests", "redis", "schedule")
+SUPPORT_METADATA_KEYS = (
+    "is_initialized",
+    "first_config_saved",
+    "failover",
+    "failover_message",
+    "scheduler_first_start",
+    "autoconf_loaded",
+    "pro_overlapped",
+    "last_pro_check",
+    "last_instances_change",
+    "last_custom_configs_change",
+    "last_external_plugins_change",
+    "last_pro_plugins_change",
+)
+SUPPORT_LOG_COMMANDS = {
+    "Kubernetes": ("kubectl logs <bunkerweb pod>", "kubectl logs <scheduler pod>"),
+    "Linux": ("journalctl -u bunkerweb -u bunkerweb-scheduler -u bunkerweb-ui",),
+}
+SUPPORT_DOCKER_LOG_COMMANDS = ("docker logs <bunkerweb container>", "docker logs <scheduler container>")
+
+
+def systemctl_state(verb: str) -> str:
+    """Output of `systemctl <verb> bunkerweb-scheduler`, empty when systemctl gives no answer."""
+    try:
+        return run(["systemctl", verb, "bunkerweb-scheduler"], stdout=PIPE, stderr=DEVNULL, text=True, timeout=5).stdout.strip()
+    except (OSError, SubprocessError):
+        return ""
+
+
+def support_refusal() -> Optional[str]:
+    """Message refusing `bwcli support` where the scheduler does not run, None where it can.
+
+    A stopped or crashed scheduler is not a refusal: the bundle matters most then. Without an answer from systemctl the command is allowed.
+    """
+    integration = get_integration()
+
+    if not SCHEDULER_PATH.exists():
+        exec_command = "kubectl exec <scheduler pod> --" if integration == "Kubernetes" else "docker exec <scheduler container>"
+        return f"bwcli support does not run on a BunkerWeb instance or the autoconf controller, run it where the scheduler runs: {exec_command} bwcli support -o - > bundle.zip"
+
+    # The all-in-one image ships the scheduler's code whether or not its entrypoint starts it, and starts it only when SERVICE_SCHEDULER is exactly "yes"
+    if ALL_IN_ONE_PATH.exists() and getenv("SERVICE_SCHEDULER") != "yes":
+        return "bwcli support does not run here, the scheduler is disabled (SERVICE_SCHEDULER is not yes): run it where the scheduler runs, or enable SERVICE_SCHEDULER"
+
+    if integration != "Linux":
+        return None
+
+    # The install-type marker is authoritative when valid, like the installer reads it
+    try:
+        install_type = INSTALL_TYPE_PATH.read_text().strip()
+    except (OSError, ValueError):
+        install_type = ""
+    if install_type in INSTALL_TYPES:
+        if install_type in ("worker", "ui", "api"):
+            return f"bwcli support does not run on a host installed as {install_type}, run it on the host where the scheduler runs"
+        return None
+
+    # Legacy host without a marker: a worker has the scheduler disabled and stopped
+    if systemctl_state("is-enabled") in ("disabled", "masked") and systemctl_state("is-active") == "inactive":
+        return "bwcli support does not run on a worker host, run it on the host where the scheduler runs (the manager), or start bunkerweb-scheduler here"
+
+    return None
 
 
 def resolve_variables(
@@ -233,6 +359,270 @@ class CustomConfigsApiClient(BaseApiClient):
         self._patch(f"/configs/{service or 'global'}/{config_type}/{name}", json={"service": service, "data": data, "is_draft": is_draft})
 
 
+def nginx_statement(text: str, pos: int) -> Tuple[List[Tuple[int, int]], int]:
+    """Spans of the words of the statement starting at pos (directive name first), and the index after the `;`, `{` or `}` that ends it.
+
+    Comments are skipped, quoted words end at their closing quote and a bare word ends at whitespace, `;` or a `{` that does not open a `${variable}`.
+    """
+    spans = []
+    size = len(text)
+    while pos < size:
+        char = text[pos]
+        if char.isspace():
+            pos += 1
+        elif char == "#":
+            pos = text.find("\n", pos)
+            pos = size if pos < 0 else pos
+        elif char in ";{}":
+            return spans, pos + 1
+        else:
+            start = pos
+            if char in "\"'":
+                pos += 1
+                while pos < size and text[pos] != char:
+                    pos += 2 if text[pos] == "\\" else 1
+                pos += 1
+            else:
+                while pos < size and not text[pos].isspace() and text[pos] != ";" and not (text[pos] == "{" and text[pos - 1] != "$"):
+                    pos += 2 if text[pos] == "\\" else 1
+            spans.append((start, min(pos, size)))
+    return spans, size
+
+
+def nginx_word(raw: str) -> str:
+    """Value nginx gives a raw word: surrounding quotes dropped, backslash escapes decoded."""
+    if raw[:1] in ("'", '"'):
+        raw = raw[1:-1] if len(raw) > 1 and raw[-1] == raw[0] else raw[1:]
+    return SUPPORT_NGINX_ESCAPE.sub(lambda match: {"t": "\t", "r": "\r", "n": "\n"}.get(match[1], match[1]), raw)
+
+
+def nginx_statements(text: str, included_under: Collection[str] = ()) -> Iterator[Tuple[List[Tuple[int, int]], Tuple[str, ...], bool]]:
+    """The statements of the text as (word spans, map outputs, inline).
+
+    The outputs (no `$`) are the output variables of the `map` the statement is an entry of: the block it sits in (inline is True), or, for a statement
+    outside any block, the maps that `include` this text (`included_under`, inline False: the statement may still be a plain directive when the include
+    could only be a glob over-match). Statements that open a block have no outputs.
+    """
+    pos = 0
+    block = None
+    while pos < len(text):
+        spans, pos = nginx_statement(text, pos)
+        ending = text[pos - 1]
+        if ending == "{":
+            first = nginx_word(text[spans[0][0] : spans[0][1]]) if spans else ""  # noqa: E203
+            block = nginx_word(text[spans[2][0] : spans[2][1]]).removeprefix("$") if first == "map" and len(spans) == 3 else None  # noqa: E203
+            yield spans, (), False
+            continue
+        yield spans, (block,) if block is not None else tuple(sorted(included_under)), block is not None
+        if ending == "}":
+            block = None
+
+
+def nginx_include_statements(text: str) -> List[Tuple[str, Tuple[str, ...]]]:
+    """The `include` statements of the text as (path pattern, the outputs of the `map` block it sits in, empty outside one)."""
+    return [
+        (nginx_word(text[spans[1][0] : spans[1][1]]), outputs if inline else ())  # noqa: E203
+        for spans, outputs, inline in nginx_statements(text)
+        if len(spans) == 2 and nginx_word(text[spans[0][0] : spans[0][1]]) == "include"  # noqa: E203
+    ]
+
+
+def nginx_glob_class(pattern: str, start: int) -> Optional[Tuple[str, int]]:
+    """The regex of the `[...]` class opening at `pattern[start]` and the index after it, None when it is not read with certainty as glob(3) reads it.
+
+    `[!x]` negates, a `]` right after the opening is a member. A class opening with `^` (glibc negates it, but not under POSIXLY_CORRECT, and FreeBSD
+    reads it as a literal member), a nested `[` (POSIX classes `[:alpha:]`, `[.x.]`, `[=x=]`), a backslash, any range (`[a-z]`, ASCII or not, negated
+    or not: in a UTF-8 locale glibc orders it by collation, not by code point, so no translation is provably a superset across locales and libcs) and a
+    class that never closes are left to the caller. A `^` that is not first is a literal member everywhere.
+    """
+    if pattern.startswith("^", start + 1):
+        return None
+    negate = pattern.startswith("!", start + 1)
+    first = start + 1 + negate
+    end = pattern.find("]", first + 1)
+    if end < 0:
+        return None
+    members, regex = pattern[first:end], ""
+    if "[" in members or "\\" in members:
+        return None
+    for index, member in enumerate(members):
+        if member == "-" and 0 < index < len(members) - 1:
+            return None
+        regex += re_escape(member)
+    return f"[{'^' if negate else ''}{regex}]", end + 1
+
+
+def nginx_glob_regex(pattern: str):
+    """The regex an `include` glob names, read like glob(3) except that `*` and `?` cross `/` (a superset).
+
+    Syntax it does not translate with certainty (see nginx_glob_class(), and backslash escapes) stops the translation there: the rest of the pattern is
+    `.*`, so the regex matches every path that could match under the literal prefix, never fewer than glob(3).
+    """
+    regex, index = "", 0
+    while index < len(pattern):
+        char = pattern[index]
+        if char == "[":
+            translated = nginx_glob_class(pattern, index)
+            if translated is None:
+                return re_compile(regex + ".*", DOTALL)
+            piece, index = translated
+            regex += piece
+            continue
+        if char == "\\":
+            return re_compile(regex + ".*", DOTALL)
+        regex += ".*" if char == "*" else "." if char == "?" else re_escape(char)
+        index += 1
+    return re_compile(regex, DOTALL)
+
+
+def nginx_byte_view(text: str) -> str:
+    """The UTF-8 bytes of the text, one character per byte (latin-1), so that nginx_glob_regex() reads `?` and classes per byte like glob(3) in the C locale."""
+    return text.encode("utf-8", "surrogateescape").decode("latin-1")
+
+
+def nginx_include_matches(pattern: str, files: Iterable[str], root: str) -> List[str]:
+    """The exported files (posix paths) an `include` pattern could name, relative paths being read from the nginx prefix `root` the export mirrors.
+
+    It fails closed: the pattern is also read as the tail of a path, in case the nginx prefix is not `root`, it is read per character (a UTF-8 locale) and
+    per byte (nginx runs glob(3) in the C locale, where `é` is two bytes, nginx_byte_view()), `*` crosses directories and glob syntax
+    that is not translated with certainty (nginx_glob_regex()) matches every path under its literal prefix, so it may name more files than nginx
+    would, never fewer.
+    """
+    if not pattern:
+        return []
+    candidates = (normpath(join(root, pattern)), "*/" + normpath(pattern).lstrip("/"))
+    matchers = [nginx_glob_regex(candidate).fullmatch for candidate in candidates]
+    byte_matchers = [nginx_glob_regex(nginx_byte_view(candidate)).fullmatch for candidate in candidates]
+    return [path for path in files if any(matcher(path) for matcher in matchers) or any(matcher(nginx_byte_view(path)) for matcher in byte_matchers)]
+
+
+def nginx_included_outputs(includes: Dict[str, List[Tuple[str, Tuple[str, ...]]]], root: str) -> Dict[str, Set[str]]:
+    """For each exported file (posix path), the output variables of the `map` blocks that include it, directly or through other included files.
+
+    `includes` maps every exported file to the result of nginx_include_statements() over its text.
+    """
+    included: Dict[str, Set[str]] = {}
+    todo = list(includes)
+    while todo:
+        path = todo.pop()
+        for pattern, outputs in includes[path]:
+            reached = set(outputs) or included.get(path, set())
+            if not reached:
+                continue
+            for target in nginx_include_matches(pattern, includes, root):
+                new = reached - included.setdefault(target, set())
+                if new:
+                    included[target] |= new
+                    todo.append(target)
+    return included
+
+
+def nginx_map_value_spans(text: str, spans: List[Tuple[int, int]]) -> List[Tuple[int, int]]:
+    """The value words of a `map` entry (`key value;`): none for `hostnames;`, `volatile;` and the `include` of another file."""
+    return spans[1:] if len(spans) > 1 and nginx_word(text[spans[0][0] : spans[0][1]]) != "include" else []  # noqa: E203
+
+
+def nginx_variable_links(text: str, included_under: Collection[str] = ()) -> Tuple[Set[str], Dict[str, Set[str]]]:
+    """What the text says about credential variables, names without the `$`.
+
+    Returns the variables used inside the value of a credential header (any directive of SUPPORT_NGINX_DIRECTIVES) and, for every variable
+    assigned by a `set` or a `map` entry, the variables its value references. `included_under` are the output variables of the `map` blocks
+    that include this text: its statements are entries of those maps.
+    """
+    used = set()
+    links: Dict[str, Set[str]] = {}
+    for spans, outputs, inline in nginx_statements(text, included_under):
+        name = nginx_word(text[spans[0][0] : spans[0][1]]) if spans else ""  # noqa: E203
+        assigned = [(output, nginx_map_value_spans(text, spans)) for output in outputs]
+        if inline:
+            pass
+        elif name == "set" and len(spans) > 2:
+            assigned.append((nginx_word(text[spans[1][0] : spans[1][1]]).removeprefix("$"), spans[2:]))  # noqa: E203
+        elif name in SUPPORT_NGINX_DIRECTIVES and name.startswith("more_set_"):
+            for start, end in spans[1:]:
+                argument = text[start:end]
+                header = SUPPORT_NGINX_MORE_ARGUMENT.match(argument, 1 if argument[0] in "\"'" else 0)
+                if header and is_secret_header(header["name"]):
+                    used.update(match[1] or match[2] for match in SUPPORT_NGINX_VARIABLE_NAME.finditer(argument[header.end() :]))  # noqa: E203
+        elif name in SUPPORT_NGINX_DIRECTIVES and len(spans) > 2 and is_secret_header(nginx_word(text[spans[1][0] : spans[1][1]])):  # noqa: E203
+            used.update(match[1] or match[2] for start, end in spans[2:] for match in SUPPORT_NGINX_VARIABLE_NAME.finditer(text[start:end]))
+        for target, values in assigned:
+            links.setdefault(target, set()).update(
+                match[1] or match[2] for start, end in values for match in SUPPORT_NGINX_VARIABLE_NAME.finditer(text[start:end])
+            )
+    return used, links
+
+
+def nginx_secret_variables(texts: Iterable[Union[str, Tuple[str, Collection[str]]]], seeds: Collection[str] = ()) -> Set[str]:
+    """Names (no `$`) of the variables that carry a credential across all the texts (each a text, or a text and the outputs of the maps that include it): those used as the value of a credential header, those named like
+    a secret that are assigned, the `seeds`, and, to a fixpoint, every variable the value of one of them references.
+    """
+    secret = set(seeds)
+    links: Dict[str, Set[str]] = {}
+    for item in texts:
+        used, found = nginx_variable_links(*((item,) if isinstance(item, str) else item))
+        secret |= used
+        for variable, references in found.items():
+            links.setdefault(variable, set()).update(references)
+    secret |= {variable for variable in links if SUPPORT_NGINX_SECRET_VARIABLE.fullmatch(f"${variable}")}
+    todo = list(secret)
+    while todo:
+        for reference in links.get(todo.pop(), ()):
+            if reference not in secret:
+                secret.add(reference)
+                todo.append(reference)
+    return secret
+
+
+def redact_nginx(text: str, secret_variables: Collection[str] = (), included_under: Collection[str] = ()) -> str:
+    """Redact the credentials nginx directives carry without a `=` or `:`: variables named like a secret, credential header values, and the values
+    of a `map` block whose output variable is a secret.
+
+    The text is walked statement by statement the way nginx reads it, so a directive name inside a comment or a quoted value is never taken for a directive.
+    The `set` of a variable used as a credential header value, and what a secret variable references in turn, is redacted wherever it sits: in this text, or
+    in another one when the caller passes the names nginx_secret_variables() found over all the texts as `secret_variables`. A text that a `map` block
+    includes (`included_under` holds that block's output variable) is read as the entries of that map.
+    """
+    secret_variables = nginx_secret_variables(((text, included_under),), secret_variables)
+    out = []
+    done = 0
+    for spans, outputs, inline in nginx_statements(text, included_under):
+        values = nginx_map_value_spans(text, spans) if any(output in secret_variables for output in outputs) else []
+        if values:
+            out.append(text[done : values[0][0]] + REDACTED)  # noqa: E203
+            done = values[-1][1]
+            continue
+        if inline:
+            continue
+        name = nginx_word(text[spans[0][0] : spans[0][1]]) if spans else ""  # noqa: E203
+        if name not in SUPPORT_NGINX_DIRECTIVES:
+            continue
+        spans = spans[1:]
+        edits = []
+        if name.startswith("more_set_"):
+            for start, end in spans:
+                argument = text[start:end]
+                quote = argument[0] if argument[0] in "\"'" else ""
+                closing = quote if quote and len(argument) > 1 and argument[-1] == quote else ""
+                header = SUPPORT_NGINX_MORE_ARGUMENT.match(argument, len(quote))
+                if header and is_secret_header(header["name"]):
+                    edits.append((start, end, f"{argument[:header.end()]}{REDACTED}{closing}"))
+        elif name == "set":
+            variable = nginx_word(text[spans[0][0] : spans[0][1]]) if spans else ""  # noqa: E203
+            if len(spans) > 1 and variable.removeprefix("$") in secret_variables:
+                edits.append((spans[1][0], spans[-1][1], REDACTED))
+        elif len(spans) > 1:
+            header_name = nginx_word(text[spans[0][0] : spans[0][1]])  # noqa: E203
+            value = " ".join(nginx_word(text[start:end]) for start, end in spans[1:])
+            if is_secret_header(header_name) and not SUPPORT_NGINX_VARIABLE.fullmatch(value):
+                edits.append((spans[1][0], spans[-1][1], REDACTED))
+        for start, end, replacement in edits:
+            out.append(text[done:start] + replacement)
+            done = end
+    out.append(text[done:])
+    return "".join(out)
+
+
 class CLI(ApiCaller):
     # ANSI color and style constants
     RESET = "\033[0m"
@@ -261,7 +651,7 @@ class CLI(ApiCaller):
     ICON_SERVER = "🖧"
     ICON_CLOCK = "⏱"
 
-    def __init__(self):
+    def __init__(self, tolerant_db: bool = False):
         self.__logger = getLogger("CLI")
 
         # Handle Docker secrets first
@@ -273,27 +663,48 @@ class CLI(ApiCaller):
 
         self.__variables = resolve_variables()
         self.__db = None
+        self.__db_error = None
 
         if Path(sep, "usr", "share", "bunkerweb", "db").exists():
             from Database import Database  # type: ignore
 
             self.__logger.info("Getting variables from database")
 
-            self.__db = Database(self.__logger, sqlalchemy_string=self.__get_variable("DATABASE_URI", None))
+            if tolerant_db:
+                from Database import DatabaseInitError, mask_db_uri  # type: ignore
 
-            # SQLAlchemy creates a SQLite file on connect, so an unresolved DATABASE_URI gives a
-            # connection that succeeds against an empty database and a traceback on the first
-            # query. Say which database is missing its schema instead.
-            metadata = self.__db.get_metadata()
-            if metadata.get("default") or not metadata.get("is_initialized"):
-                self.__logger.error(
-                    "The database has no BunkerWeb schema. Check that DATABASE_URI is set in "
-                    f"{' or '.join(path.as_posix() for path in VARIABLES_PATHS)} or in the environment, "
-                    "and that the scheduler has already initialized it."
-                )
-                sys_exit(1)
+                # Database() exits the process on any failure, bwcli support builds it to raise and keeps going without it
+                try:
+                    self.__db = Database(self.__logger, sqlalchemy_string=self.__get_variable("DATABASE_URI", None), exit_on_error=False)
+                except Exception as e:
+                    self.__db_error = (
+                        str(e) if isinstance(e, DatabaseInitError) else f"Cannot initialize the database: {type(e).__name__}: {mask_db_uri(str(e))}"
+                    )
+                    self.__logger.warning(self.__db_error)
+            else:
+                self.__db = Database(self.__logger, sqlalchemy_string=self.__get_variable("DATABASE_URI", None))
 
-            self.__variables = self.__db.get_config()
+            if self.__db:
+                # SQLAlchemy creates a SQLite file on connect, so an unresolved DATABASE_URI gives a
+                # connection that succeeds against an empty database and a traceback on the first
+                # query. Say which database is missing its schema instead.
+                metadata = self.__db.get_metadata()
+                if metadata.get("default") or not metadata.get("is_initialized"):
+                    message = (
+                        "The database has no BunkerWeb schema. Check that DATABASE_URI is set in "
+                        f"{' or '.join(path.as_posix() for path in VARIABLES_PATHS)} or in the environment, "
+                        "and that the scheduler has already initialized it."
+                    )
+                    if not tolerant_db:
+                        self.__logger.error(message)
+                        sys_exit(1)
+
+                    # bwcli support still has logs, nginx and environment to export: it records this in the manifest
+                    self.__logger.warning(message)
+                    self.__db_error = message
+                    self.__db = None
+                else:
+                    self.__variables = self.__db.get_config()
 
         assert isinstance(self.__variables, dict), "Failed to get variables from database"
 
@@ -341,6 +752,7 @@ class CLI(ApiCaller):
         # credential (`instance.get("credential") or token`), so an instance that carries its
         # own keeps using it.
         api_token = self.__get_variable("API_TOKEN") or None
+        self.__api_token = api_token
         api_url = (getenv("BWCLI_API_URL") or "").strip() or None
 
         if api_url:
@@ -521,6 +933,10 @@ class CLI(ApiCaller):
         A CrowdSec ban (a lease) also has CrowdSec decisions behind it: without `confirm` the CLI prints what would be
         deleted and changes nothing; with it, the unban is applied through `crowdsec_unban`, like the API does.
         """
+        try:
+            ip = normalize_ip(ip)  # one address is one ban, whatever its spelling
+        except ValueError:
+            return False, self.__format_error(f"Failed to unban {ip}: not a valid IP address")
         ban_scope = "service" if service else "global"
         failures = []
         tools = self.__lease_tools()
@@ -594,6 +1010,10 @@ class CLI(ApiCaller):
 
     def ban(self, ip: str, exp: float, reason: str, service: str = "bwcli") -> Tuple[bool, str]:
         """Ban an IP address globally or from a specific service"""
+        try:
+            ip = normalize_ip(ip)  # one address is one ban, whatever its spelling
+        except ValueError:
+            return False, self.__format_error(f"Failed to ban {ip}: not a valid IP address")
         # Auto-set scope to service if a non-default service is specified
         ban_scope = "global"
         if service != "bwcli" and service:
@@ -1254,3 +1674,230 @@ class CLI(ApiCaller):
             )
 
         return True, self.__format_success(f"Command {self.BOLD}{command}{self.RESET} for plugin {self.CYAN}{plugin_id}{self.RESET} executed successfully")
+
+    def support(self, output: Optional[str] = None, anonymize: bool = True) -> Tuple[bool, str]:
+        """Write the support bundle: credentials are always redacted, IP addresses and service domains are anonymized unless anonymize is False.
+
+        A failing section is listed in the manifest and the rest of the bundle is still written, so this only fails when the archive cannot be.
+        """
+        to_stdout = output == "-"
+        if to_stdout and sys_stdout.isatty():
+            return False, self.__format_error("Refusing to write a zip to the terminal: redirect stdout to a file or use -o <path>")
+
+        now = datetime.now(timezone.utc)
+        db = self.__db
+        integration = get_integration()
+        unavailable: List[Dict[str, str]] = []
+        domains = set()
+        if db:
+            try:
+                domains = service_domains(db.get_config(methods=False, with_drafts=True, filtered_settings=("SERVER_NAME",)))
+            except Exception as e:
+                unavailable.append({"item": "service domains", "reason": f"{type(e).__name__}: {e}, domains are not anonymized"})
+        anonymizer = Anonymizer(domains, anonymize)
+        if self.__db_error:
+            unavailable.append({"item": "database", "reason": anonymizer.redact(self.__db_error)})
+        bundle = BundleZip(TOTAL_CAP)
+
+        def add_text(name: str, text: str, cap: int, note: str = "") -> None:
+            """Add text cut to its own cap and to what is left of the total budget, keeping the beginning."""
+            room = max(bundle.room, 0)
+            limit = min(cap, room)
+            cut = len(text.encode("utf-8")) > limit
+            if cut:
+                text, _ = cut_text(text, max(limit - len(TRUNCATED_MARK), 0))
+                if len(text.encode("utf-8")) > limit:
+                    text = ""
+            if cut and not text:
+                unavailable.append({"item": name, "reason": "total size cap reached"})
+                return
+            bundle.add(name, text, note=note)
+            if cut:
+                bundle.files[-1]["truncated"] = f"kept the first {limit} bytes, " + ("total size cap reached" if limit == room else "file size cap reached")
+
+        def add_json(name: str, data: Any, note: str = "") -> None:
+            add_text(name, dumps(anonymizer.scrub(data), indent=2, default=str), SUPPORT_JSON_CAP, note)
+
+        def section(name: str, build) -> None:
+            try:
+                add_json(name, build())
+            except Exception as e:
+                self.__logger.debug(format_exc())
+                unavailable.append({"item": name, "reason": anonymizer.redact(f"{type(e).__name__}: {e}")})
+
+        def require_db() -> None:
+            if not db:
+                raise RuntimeError(self.__db_error or "The database module is not installed on this host")
+
+        def environment() -> Dict[str, Any]:
+            metadata = db.get_metadata() if db else {}
+            report = build_environment(
+                metadata=metadata,
+                integration=integration,
+                instances=db.get_instances() if db else [],
+                service_count=len(db.get_services()) if db else 0,
+                db_dialect=db.sql_engine.dialect.name if db else "unknown",
+                db_revision=alembic_revision(db) if db else None,
+                library_names=SUPPORT_LIBRARIES,
+                pseudonymize_hosts=anonymize,
+            )
+            report["os"] = get_os_info()
+            report["metadata"] = {key: metadata.get(key) for key in SUPPORT_METADATA_KEYS}
+            return report
+
+        def health(api: API) -> Dict[str, Any]:
+            sent, err, status, response = api.request("GET", "/health", timeout=(3, 5))
+            return {"reachable": sent, "status": status, "response": response, "error": None if sent else err}
+
+        def instances() -> List[Dict[str, Any]]:
+            if db:
+                targets: List[Tuple[Dict[str, Any], Any]] = []
+                for row in db.get_instances(with_credential=True):
+                    try:
+                        api = API.from_instance(row, token=self.__api_token)
+                    except ValueError as e:
+                        api = e
+                    # The decrypted per-instance credential dials the instance and goes no further
+                    targets.append(({key: value for key, value in row.items() if key != "credential"}, api))
+            else:
+                targets = [({"hostname": api.endpoint}, api) for api in self.apis]
+            with ThreadPoolExecutor(max_workers=8) as pool:
+                results = list(
+                    pool.map(lambda target: {"reachable": False, "error": str(target[1])} if isinstance(target[1], ValueError) else health(target[1]), targets)
+                )
+            report = []
+            for (row, _), result in zip(targets, results):
+                if anonymize and db:
+                    hostname = str(row["hostname"])
+                    row = {**row, "hostname": pseudonym(hostname)}
+                    result = {**result, "error": result["error"].replace(hostname, row["hostname"]) if result.get("error") else None}
+                report.append({**row, "health": result})
+            return report
+
+        def config() -> Dict[str, Any]:
+            require_db()
+            settings = {name: setting for plugin in db.get_plugins(_type="all") for name, setting in plugin.get("settings", {}).items()}
+            with suppress(OSError, ValueError):
+                settings.update(loads(Path(sep, "usr", "share", "bunkerweb", "settings.json").read_text(encoding="utf-8")))
+            return mask_config(db.get_config(methods=True, with_drafts=True), settings)
+
+        def plugins() -> Dict[str, Any]:
+            require_db()
+            roots = {
+                "core": Path(sep, "usr", "share", "bunkerweb", "core"),
+                "external": Path(sep, "etc", "bunkerweb", "plugins"),
+                "pro": Path(sep, "etc", "bunkerweb", "pro", "plugins"),
+            }
+            return build_plugins_report(db.get_plugins(_type="all"), roots)
+
+        def jobs() -> Dict[str, Any]:
+            require_db()
+            report = db.get_jobs()
+            for job in report.values():
+                job["last_run"] = job["history"][0] if job["history"] else None
+                job.pop("cache")
+            cache_files = []
+            for cache in db.get_jobs_cache_files(with_data=False):
+                # Read one file at a time, a chunked blob is only sized once reassembled and the data is dropped right away
+                data = db.get_job_cache_file(cache["job_name"], cache["file_name"], service_id=cache["service_id"] or "")
+                cache_files.append({**cache, "service_id": anonymizer.pseudonymize(cache["service_id"] or ""), "bytes": len(data) if data else 0})
+            return {"jobs": report, "cache_files": cache_files}
+
+        def custom_configs() -> List[Dict[str, Any]]:
+            require_db()
+            return [
+                {
+                    "name": custom_config["name"],
+                    "type": custom_config["type"],
+                    "service": anonymizer.pseudonymize(custom_config["service_id"] or ""),
+                    "method": custom_config["method"],
+                    "checksum": custom_config["checksum"],
+                    "is_draft": custom_config["is_draft"],
+                    "content": "[REDACTED]",
+                }
+                for custom_config in db.get_custom_configs(with_drafts=True, with_data=False)
+            ]
+
+        section("environment.json", environment)
+        section("instances.json", instances)
+        section("config.json", config)
+        section("plugins.json", plugins)
+        section("jobs.json", jobs)
+        section("custom_configs.json", custom_configs)
+
+        logs = []
+        for path in sorted(Path(LOG_DIR).glob("*.log")):
+            report = {"path": path.as_posix()}
+            logs.append(report)
+            try:
+                # A FIFO without a writer blocks open() forever
+                if not S_ISREG(path.stat().st_mode):
+                    report["status"] = "skipped: not a regular file (stream or device)"
+                    continue
+                text, size = read_log_tail(path.as_posix(), FILE_TAIL_CAP)
+            except OSError as e:
+                report["status"] = f"unreadable: {e.strerror or type(e).__name__}"
+                continue
+            text = anonymizer.redact(text)
+            report.update({"status": "included", "file_bytes": size, "cut_to_last_bytes": FILE_TAIL_CAP if size > FILE_TAIL_CAP else None})
+            bundle.add(f"logs/{path.name}", text, note=path.as_posix())
+        if not any(report["status"] == "included" for report in logs):
+            commands = SUPPORT_LOG_COMMANDS.get(integration, SUPPORT_DOCKER_LOG_COMMANDS)
+            unavailable.append(
+                {"item": "logs", "reason": f"no log file in {LOG_DIR}, the logs go to stdout and stderr, collect them with: " + "; ".join(commands)}
+            )
+
+        nginx_path = NGINX_PATH
+        if nginx_path.is_dir():
+            try:
+                parts, size = [], 0
+                conf_files = [path for path in sorted(nginx_path.rglob("*.conf")) if not path.is_symlink() and path.is_file()]
+                # A `set` or a `map` can sit in another file than the credential header that uses its variable, so the variables are collected over every file first
+                # and a file that a `map` block includes holds the entries of that map, so which maps include each file is resolved first, the way nginx does
+                includes = {path.as_posix(): nginx_include_statements(path.read_text(encoding="utf-8", errors="replace")) for path in conf_files}
+                included = nginx_included_outputs(includes, nginx_path.as_posix())
+                secret_variables = nginx_secret_variables(
+                    (path.read_text(encoding="utf-8", errors="replace"), included.get(path.as_posix(), ())) for path in conf_files
+                )
+                for path in conf_files:
+                    if size >= SUPPORT_NGINX_CAP:
+                        break
+                    content = anonymizer.redact(
+                        redact_nginx(path.read_text(encoding="utf-8", errors="replace"), secret_variables, included.get(path.as_posix(), ()))
+                    )
+                    parts.append(f"# ---- {anonymizer.redact(path.as_posix())} ----\n{content}\n")
+                    size += len(parts[-1])
+                add_text("nginx/etc-nginx-conf.txt", "".join(parts), SUPPORT_NGINX_CAP, f"the *.conf files of {nginx_path.as_posix()}")
+            except OSError as e:
+                unavailable.append({"item": "nginx/etc-nginx-conf.txt", "reason": f"unreadable: {e.strerror or type(e).__name__}"})
+        else:
+            unavailable.append({"item": "nginx/etc-nginx-conf.txt", "reason": f"{nginx_path.as_posix()} does not exist on this host"})
+
+        data = bundle.finish(
+            {
+                "generated_at": now.isoformat(),
+                "command": "bwcli support",
+                "integration": integration,
+                "anonymization": {
+                    "mode": "anonymized" if anonymize else "not anonymized (--no-anonymize)",
+                    "credentials": "always redacted, the license key and the database password are never collected",
+                    "ip_addresses_and_domains": "replaced by placeholders" if anonymize else "kept as they are",
+                },
+                "caps": {"file_tail_bytes": FILE_TAIL_CAP, "json_bytes": SUPPORT_JSON_CAP, "nginx_config_bytes": SUPPORT_NGINX_CAP, "total_bytes": TOTAL_CAP},
+                "logs": logs,
+                "unavailable": unavailable,
+            }
+        )
+
+        if to_stdout:
+            sys_stdout.buffer.write(data)
+            sys_stdout.buffer.flush()
+            return True, f"Support bundle written to stdout ({len(data)} bytes)"
+
+        path = Path(output or f"bunkerweb-support-{now.strftime('%Y%m%dT%H%M%SZ')}.zip")
+        try:
+            path.write_bytes(data)
+        except OSError as e:
+            return False, self.__format_error(f"Failed to write {path}: {e.strerror or e}")
+        print(path.resolve())
+        return True, f"Support bundle written to {path.resolve()} ({len(data)} bytes)"

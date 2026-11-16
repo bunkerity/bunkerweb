@@ -53,6 +53,14 @@
         "label": "Tiempo de espera de reintento de la base de datos",
         "help": "El número máximo de segundos que se esperará a que la base de datos esté disponible al iniciar. Acepta un sufijo de tiempo (ms, s, m, h, d, w, M, y); un número sin sufijo se interpreta en segundos."
       },
+      "DATABASE_CONNECT_TIMEOUT": {
+        "label": "Tiempo de espera de conexión de la base de datos",
+        "help": "El tiempo máximo de espera al abrir una conexión con un servidor MySQL, MariaDB o PostgreSQL. Debe ser mayor que 0: los controladores no pueden funcionar sin él, y 0 vuelve al valor por defecto con una advertencia. Un tiempo definido en la query string de DATABASE_URI tiene prioridad. Acepta un sufijo de tiempo (ms, s, m, h, d, w, M, y); un número sin sufijo se interpreta en segundos."
+      },
+      "DATABASE_READ_TIMEOUT": {
+        "label": "Tiempo de espera de lectura de la base de datos",
+        "help": "El tiempo máximo de espera a que un servidor MySQL o MariaDB responda o acepte datos antes de que la llamada falle, para que un par desaparecido no bloquee indefinidamente. PostgreSQL usa keepalives TCP en su lugar. 0 lo desactiva. Un tiempo definido en la query string de DATABASE_URI tiene prioridad. Acepta un sufijo de tiempo (ms, s, m, h, d, w, M, y); un número sin sufijo se interpreta en segundos."
+      },
       "DATABASE_REQUEST_RETRY_ATTEMPTS": {
         "label": "Intentos de reintento de solicitudes de la base de datos",
         "help": "El número de intentos de reintento para errores transitorios de la base de datos."

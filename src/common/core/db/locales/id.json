@@ -53,6 +53,14 @@
         "label": "Timeout percobaan ulang database",
         "help": "Jumlah detik maksimum untuk menunggu database tersedia saat startup. Menerima akhiran waktu (ms, s, m, h, d, w, M, y); angka tanpa akhiran dihitung dalam detik."
       },
+      "DATABASE_CONNECT_TIMEOUT": {
+        "label": "Timeout koneksi database",
+        "help": "Waktu maksimum menunggu saat membuka koneksi ke server MySQL, MariaDB, atau PostgreSQL. Harus lebih besar dari 0: driver tidak dapat berjalan tanpanya, dan 0 kembali ke nilai bawaan dengan peringatan. Timeout yang diatur di query string DATABASE_URI diutamakan. Menerima akhiran waktu (ms, s, m, h, d, w, M, y); angka tanpa akhiran dihitung dalam detik."
+      },
+      "DATABASE_READ_TIMEOUT": {
+        "label": "Timeout baca database",
+        "help": "Waktu maksimum menunggu server MySQL atau MariaDB menjawab atau menerima data sebelum pemanggilan gagal, agar peer yang menghilang tidak memblokir selamanya. PostgreSQL menggunakan TCP keepalive sebagai gantinya. Setel ke 0 untuk menonaktifkan. Timeout yang diatur di query string DATABASE_URI diutamakan. Menerima akhiran waktu (ms, s, m, h, d, w, M, y); angka tanpa akhiran dihitung dalam detik."
+      },
       "DATABASE_URI": {
         "label": "URI database",
         "help": "URI database, mengikuti format sqlalchemy."

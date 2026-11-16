@@ -53,6 +53,14 @@
         "label": "Veritabanı yeniden deneme zaman aşımı",
         "help": "Başlangıçta veritabanının kullanılabilir olmasını beklemek için maksimum saniye sayısı. Zaman son eki kabul eder (ms, s, m, h, d, w, M, y); son eksiz sayı saniye olarak yorumlanır."
       },
+      "DATABASE_CONNECT_TIMEOUT": {
+        "label": "Veritabanı bağlantı zaman aşımı",
+        "help": "MySQL, MariaDB veya PostgreSQL sunucusuna bağlantı açarken beklenecek azami süre. 0'dan büyük olmalıdır: sürücüler bu değer olmadan çalışamaz ve 0 bir uyarıyla varsayılana döner. DATABASE_URI sorgu dizesinde belirlenen zaman aşımı önceliklidir. Zaman son eki kabul eder (ms, s, m, h, d, w, M, y); son eksiz sayı saniye olarak yorumlanır."
+      },
+      "DATABASE_READ_TIMEOUT": {
+        "label": "Veritabanı okuma zaman aşımı",
+        "help": "Bir MySQL veya MariaDB sunucusunun yanıt vermesi ya da veri kabul etmesi için çağrı başarısız olmadan önce beklenecek azami süre; kaybolan bir karşı uç sonsuza dek engellemesin diye. PostgreSQL bunun yerine TCP keepalive kullanır. Devre dışı bırakmak için 0 yapın. DATABASE_URI sorgu dizesinde belirlenen zaman aşımı önceliklidir. Zaman son eki kabul eder (ms, s, m, h, d, w, M, y); son eksiz sayı saniye olarak yorumlanır."
+      },
       "DATABASE_URI": {
         "label": "Veritabanı URI'si",
         "help": "sqlalchemy biçimini izleyen veritabanı URI'si."

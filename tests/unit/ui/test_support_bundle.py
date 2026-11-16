@@ -20,6 +20,7 @@ import pytest
 # Skip, never fail collection, when the UI dependencies are not installed (src/ui on path via the ui conftest)
 pytest.importorskip("flask")
 support_bundle = pytest.importorskip("app.support_bundle")
+support_common = pytest.importorskip("support_common")  # the redaction moved to src/common/utils, shared with `bwcli support`
 
 from flask import Flask  # noqa: E402
 
@@ -319,18 +320,18 @@ STRUCTURED = {
 @pytest.mark.parametrize("name", STRUCTURED)
 def test_redact_structured_replaces_the_value_after_a_secret_key(name):
     text, expected = STRUCTURED[name]
-    assert support_bundle._redact_structured(text) == expected
+    assert support_common._redact_structured(text) == expected
 
 
 def test_redact_structured_keeps_a_structure_after_a_non_secret_key():
     text = "hosts: [a, b] user={'name': 'bob'} port=(80, 443) host%20name=[1, 2]"
-    assert support_bundle._redact_structured(text) == text
+    assert support_common._redact_structured(text) == text
 
 
 def test_structure_end_returns_the_index_after_the_closing_bracket():
-    assert support_bundle._structure_end("x=[1, [2]] rest", 2) == 10
-    assert support_bundle._structure_end('x=["]"] rest', 2) == 7
-    assert support_bundle._structure_end("x=[1, 2", 2) == 7
+    assert support_common._structure_end("x=[1, [2]] rest", 2) == 10
+    assert support_common._structure_end('x=["]"] rest', 2) == 7
+    assert support_common._structure_end("x=[1, 2", 2) == 7
 
 
 # W25-FIXRED: three leaks the final review reproduced. SQLAlchemy is the oracle for what a database URI password is.

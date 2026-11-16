@@ -53,6 +53,14 @@
         "label": "Délai d'attente de nouvelle tentative de la base de données",
         "help": "Le nombre maximal de secondes à attendre que la base de données soit disponible au démarrage. Accepte un suffixe de durée (ms, s, m, h, d, w, M, y) ; un nombre sans suffixe est en secondes."
       },
+      "DATABASE_CONNECT_TIMEOUT": {
+        "label": "Délai de connexion de la base de données",
+        "help": "Durée maximale d'attente à l'ouverture d'une connexion vers un serveur MySQL, MariaDB ou PostgreSQL. Il doit être supérieur à 0 : les pilotes ne peuvent pas s'en passer, et 0 revient à la valeur par défaut avec un avertissement. Un délai défini dans la query string de DATABASE_URI est prioritaire. Accepte un suffixe de durée (ms, s, m, h, d, w, M, y) ; un nombre sans suffixe est en secondes."
+      },
+      "DATABASE_READ_TIMEOUT": {
+        "label": "Délai de lecture de la base de données",
+        "help": "Durée maximale d'attente d'une réponse (ou de l'acceptation de données) d'un serveur MySQL ou MariaDB avant l'échec de l'appel, pour qu'un pair disparu ne bloque pas indéfiniment. PostgreSQL s'appuie sur les keepalives TCP. 0 le désactive. Un délai défini dans la query string de DATABASE_URI est prioritaire. Accepte un suffixe de durée (ms, s, m, h, d, w, M, y) ; un nombre sans suffixe est en secondes."
+      },
       "DATABASE_REQUEST_RETRY_ATTEMPTS": {
         "label": "Tentatives de nouvelle tentative des requêtes de la base de données",
         "help": "Le nombre de tentatives de nouvelle tentative pour les erreurs transitoires de la base de données."

@@ -53,6 +53,14 @@
         "label": "Timeout ng Pagsubok Muli ng Database",
         "help": "Maximum na bilang ng segundong hihintayin para maging available ang database sa startup. Tumatanggap ng suffix ng oras (ms, s, m, h, d, w, M, y); ang numerong walang suffix ay itinuturing na segundo."
       },
+      "DATABASE_CONNECT_TIMEOUT": {
+        "label": "Timeout ng Koneksyon ng Database",
+        "help": "Ang maximum na oras ng paghihintay sa pagbubukas ng koneksyon sa isang MySQL, MariaDB o PostgreSQL server. Dapat itong mas malaki sa 0: hindi gumagana ang mga driver kung wala nito, at ang 0 ay bumabalik sa default na may babala. Mas pinapaboran ang timeout na itinakda sa query string ng DATABASE_URI. Tumatanggap ng suffix ng oras (ms, s, m, h, d, w, M, y); ang numerong walang suffix ay itinuturing na segundo."
+      },
+      "DATABASE_READ_TIMEOUT": {
+        "label": "Timeout ng Pagbasa ng Database",
+        "help": "Ang maximum na oras ng paghihintay na sumagot o tumanggap ng data ang isang MySQL o MariaDB server bago pumalya ang tawag, para hindi mag-block nang walang katapusan ang isang peer na nawala. Gumagamit ang PostgreSQL ng TCP keepalive bilang kapalit. Itakda sa 0 para i-disable. Mas pinapaboran ang timeout na itinakda sa query string ng DATABASE_URI. Tumatanggap ng suffix ng oras (ms, s, m, h, d, w, M, y); ang numerong walang suffix ay itinuturing na segundo."
+      },
       "DATABASE_URI": {
         "label": "URI ng Database",
         "help": "URI ng database, sumusunod sa format ng sqlalchemy."

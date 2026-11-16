@@ -12,7 +12,7 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
 
 from common_utils import parse_duration_int  # type: ignore
 from logger import getLogger  # type: ignore
-from CLI import CLI, backup_preflight, render_capabilities
+from CLI import CLI, backup_preflight, render_capabilities, support_refusal
 
 if __name__ == "__main__":
     logger = getLogger("CLI")
@@ -69,6 +69,13 @@ if __name__ == "__main__":
         # Capabilities subparser
         subparsers.add_parser("capabilities", help="show detected API, database client and backup volume capabilities")
 
+        # Support subparser
+        parser_support = subparsers.add_parser("support", help="export a support bundle (version, configuration, plugins, jobs, logs) for BunkerWeb support")
+        parser_support.add_argument(
+            "-o", "--output", type=str, help="zip path (default: bunkerweb-support-<UTC timestamp>.zip, - writes it to stdout)", default=None
+        )
+        parser_support.add_argument("--no-anonymize", action="store_true", help="keep IP addresses and service domains, credentials are always redacted")
+
         # Plugin subparser
         parser_plugin = subparsers.add_parser("plugin", help="execute a custom command from a plugin")
         parser_plugin.add_argument("plugin_id", type=str, help="the plugin id that you want to execute the command on")
@@ -115,8 +122,15 @@ if __name__ == "__main__":
                 logger.error(error)
                 sys_exit(1)
 
-        # Instantiate CLI
-        cli = CLI()
+        # The bundle needs the scheduler's code and database access, which only the scheduler host ships and runs
+        if args.command == "support":
+            refusal = support_refusal()
+            if refusal:
+                logger.error(refusal)
+                sys_exit(1)
+
+        # Instantiate CLI, support still writes a bundle when the database has no schema
+        cli = CLI(tolerant_db=True) if args.command == "support" else CLI()
 
         # Execute command
         ret, err = False, "unknown command"
@@ -126,6 +140,8 @@ if __name__ == "__main__":
             ret, err = cli.ban(args.ip, args.exp, args.reason, args.service)
         elif args.command == "bans":
             ret, err = cli.bans()
+        elif args.command == "support":
+            ret, err = cli.support(args.output, not args.no_anonymize)
         elif args.command == "plugin_list":
             ret, err = cli.plugin_list()
         elif args.command == "plugin":

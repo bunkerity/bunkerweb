@@ -249,7 +249,7 @@ def pro():
     module.flash = Mock()
     # No logged-in user here: the permission half of the gate is pinned by test_configs_write_permission.py.
     module.is_readonly_request = lambda api_readonly: False
-    module.verify_data_in_form = Mock()
+    module.verify_data_in_form = Mock(return_value=True)
     app = Flask(__name__)
     app.secret_key = "test"  # nosec B105 - unit test
     app.add_url_rule("/pro", endpoint="pro.pro_page", view_func=module.pro_page.__wrapped__)

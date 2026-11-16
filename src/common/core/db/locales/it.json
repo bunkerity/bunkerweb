@@ -53,6 +53,14 @@
         "label": "Timeout di ritentativo del database",
         "help": "Il numero massimo di secondi di attesa affinché il database sia disponibile all'avvio. Accetta un suffisso di tempo (ms, s, m, h, d, w, M, y); un numero senza suffisso è espresso in secondi."
       },
+      "DATABASE_CONNECT_TIMEOUT": {
+        "label": "Timeout di connessione del database",
+        "help": "Il tempo massimo di attesa all'apertura di una connessione a un server MySQL, MariaDB o PostgreSQL. Deve essere maggiore di 0: i driver non possono funzionare senza, e 0 torna al valore predefinito con un avviso. Un timeout impostato nella query string di DATABASE_URI ha la precedenza. Accetta un suffisso di tempo (ms, s, m, h, d, w, M, y); un numero senza suffisso è espresso in secondi."
+      },
+      "DATABASE_READ_TIMEOUT": {
+        "label": "Timeout di lettura del database",
+        "help": "Il tempo massimo di attesa che un server MySQL o MariaDB risponda o accetti dati prima che la chiamata fallisca, in modo che un peer scomparso non blocchi per sempre. PostgreSQL usa invece i keepalive TCP. Imposta 0 per disattivarlo. Un timeout impostato nella query string di DATABASE_URI ha la precedenza. Accetta un suffisso di tempo (ms, s, m, h, d, w, M, y); un numero senza suffisso è espresso in secondi."
+      },
       "DATABASE_REQUEST_RETRY_ATTEMPTS": {
         "label": "Tentativi di ritentativo delle richieste del database",
         "help": "Il numero di tentativi di ritentativo per gli errori transitori del database."

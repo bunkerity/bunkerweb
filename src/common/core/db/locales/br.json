@@ -53,6 +53,14 @@
         "label": "Tempo limite de nova tentativa do banco de dados",
         "help": "Número máximo de segundos a esperar para que o banco de dados fique disponível na inicialização. Aceita um sufixo de tempo (ms, s, m, h, d, w, M, y); um número sem sufixo é interpretado em segundos."
       },
+      "DATABASE_CONNECT_TIMEOUT": {
+        "label": "Tempo limite de conexão do banco de dados",
+        "help": "Tempo máximo de espera ao abrir uma conexão com um servidor MySQL, MariaDB ou PostgreSQL. Deve ser maior que 0: os drivers não funcionam sem ele, e 0 volta ao padrão com um aviso. Um tempo limite definido na query string de DATABASE_URI tem precedência. Aceita um sufixo de tempo (ms, s, m, h, d, w, M, y); um número sem sufixo é interpretado em segundos."
+      },
+      "DATABASE_READ_TIMEOUT": {
+        "label": "Tempo limite de leitura do banco de dados",
+        "help": "Tempo máximo de espera para um servidor MySQL ou MariaDB responder ou aceitar dados antes que a chamada falhe, para que um par desaparecido não bloqueie para sempre. O PostgreSQL usa keepalives TCP no lugar. Use 0 para desativar. Um tempo limite definido na query string de DATABASE_URI tem precedência. Aceita um sufixo de tempo (ms, s, m, h, d, w, M, y); um número sem sufixo é interpretado em segundos."
+      },
       "DATABASE_REQUEST_RETRY_ATTEMPTS": {
         "label": "Tentativas de repetição de requisição do banco de dados",
         "help": "Número de tentativas de repetição para erros transitórios do banco de dados."

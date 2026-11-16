@@ -328,6 +328,7 @@ class TestMainDefaults:
         fake_cli_module.CLI = FakeCLI
         fake_cli_module.backup_preflight = lambda directory: (True, "")
         fake_cli_module.render_capabilities = lambda: ""
+        fake_cli_module.support_refusal = lambda: None
         monkeypatch.setitem(sys.modules, "CLI", fake_cli_module)
         monkeypatch.setattr(sys, "argv", ["main.py", "custom-configs", "import", str(tmp_path)])
         monkeypatch.setattr(os, "_exit", lambda code: (_ for _ in ()).throw(SystemExit(code)))
