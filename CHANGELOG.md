@@ -68,6 +68,7 @@
 - [BUGFIX] `crowdsec`: start stream-mode decision synchronisation during worker initialisation, so an NGINX reload no longer leaves the poller dormant on quiet or whitelisted instances. (Fixes #4151)
 - [BUGFIX] `badbehavior`: match status codes exactly, so aborted requests (status 0) no longer count toward bans. (Refs #4162)
 - [BUGFIX] `errors`: the default error page no longer overflows narrow screens, and its text and links have readable contrast.
+- [BUGFIX] `whitelist`: IP, network, ASN, URI and User-Agent matches now bypass ModSecurity on the first request after a reload; rDNS applies from the second.
 - [PERF] `core`: in a 2-worker lab test, request-path CPU drops 14.2% for HTTP proxying and 33.3% for TLS proxying with the community blacklists.
 - [PERF] `blacklist`: reuse downloaded lists between requests instead of copying and deduplicating them each time.
 - [PERF] `core`: build the reserved-address matcher once per worker and cache successful plugin module lookups.

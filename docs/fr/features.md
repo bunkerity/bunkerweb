@@ -6473,6 +6473,9 @@ Suivez ces étapes pour configurer et utiliser la fonctionnalité Whitelist :
 !!! info "mode stream"
     En mode stream, seuls les contrôles IP, rDNS et ASN sont effectués.
 
+!!! info "rDNS et première requête"
+    Une correspondance rDNS n'est appliquée qu'à partir de la phase d'accès : lorsque le cache de la whitelist est vide (après un rechargement ou l'expiration d'une entrée), la première requête d'un client placé en whitelist par rDNS peut donc encore être bloquée par ModSecurity.
+
 ### Paramètres de configuration
 
 **Général**

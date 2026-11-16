@@ -6667,6 +6667,9 @@ Follow these steps to configure and use the Whitelist feature:
 !!! info "stream mode"
     When using stream mode, only IP, rDNS, and ASN checks are performed.
 
+!!! info "rDNS and the first request"
+    An rDNS match is only applied from the access phase, so when the whitelist cache is cold (after a reload or once an entry expires), the first request of an rDNS-whitelisted client can still be blocked by ModSecurity.
+
 ### Configuration Settings
 
 **General**
