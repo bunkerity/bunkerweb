@@ -208,6 +208,15 @@ local function redis_command(name, ...)
             redis_kv[key], redis_ttl[key] = nil, nil
         end
         return n
+    elseif name == "scan" then
+        -- one page holds every match: SCAN cursor MATCH <glob> COUNT n, only "*" is a wildcard here
+        local pattern
+        for i = 2, #a do if tostring(a[i]):upper() == "MATCH" then pattern = a[i + 1] end end
+        local lua_pattern = "^" .. tostring(pattern or "*"):gsub("[%^%$%(%)%%%.%[%]%+%-%?]", "%%%0"):gsub("%*", ".*") .. "$"
+        local found = {}
+        for key in pairs(redis_kv) do if key:find(lua_pattern) then found[#found + 1] = key end end
+        table.sort(found)
+        return { "0", found }
     elseif name == "set" then
         local nx, ex = false, nil
         local i = 3
@@ -958,6 +967,8 @@ local utils = {
 }
 local is_ipv4 = function(ip) return ip:find("^%d+%.%d+%.%d+%.%d+$") ~= nil end
 local is_ipv6 = function(ip) return ip:find(":", 1, true) ~= nil end
+-- the handler validates with utils.normalize_ip (the real normalizer is covered by test_ipv6_api_ban_handlers_lua.py)
+local normalize_ip = function(ip) if type(ip) == "string" and (is_ipv4(ip) or is_ipv6(ip)) then return ip end end
 local body
 local read_body = function() end
 local get_body_data = function() return body end

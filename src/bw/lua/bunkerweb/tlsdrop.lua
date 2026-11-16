@@ -1,9 +1,11 @@
 local clogger = require "bunkerweb.logger"
+local ip_key = require("bunkerweb.ipaddr").key
 local utils = require "bunkerweb.utils"
 
 local logger = clogger:new("TLS-DROP")
 
 local ngx = ngx
+local ERR = ngx.ERR
 local WARN = ngx.WARN
 local byte = string.byte
 local char = string.char
@@ -92,11 +94,9 @@ function tlsdrop.format_raw_addr(packed, family)
 	if family ~= "inet6" or #packed ~= 16 then
 		return nil, "unsupported address family"
 	end
-	-- a socket address from a dual-stack listener: judged as its IPv4 client
-	if packed:sub(1, 12) == string.rep("\0", 10) .. "\255\255" then
-		return format("%d.%d.%d.%d", byte(packed, 13, 16))
-	end
-	return inet6_ntop(packed)
+	-- nginx prints an IPv4-mapped peer of a dual-stack listener as ::ffff:a.b.c.d, but every ban key names that client
+	-- by its IPv4 address (bunkerweb.ipaddr), so the ClientHello judges the same identity as the HTTP phases.
+	return ip_key(inet6_ntop(packed))
 end
 
 -- Port of ngx_inet_addr, which ngx_parse_addr tries before IPv6: unlike inet_pton it takes leading zeros and
@@ -130,7 +130,7 @@ end
 tlsdrop.inet_addr = inet_addr
 
 -- The PROXY source address spelled exactly as nginx's realip module leaves it in $remote_addr, which every ban and
--- whitelist key uses: ngx_parse_addr, then ngx_sock_ntop. An IPv4-mapped address stays IPv6 there.
+-- whitelist key uses: ngx_parse_addr, then ngx_sock_ntop. An IPv4-mapped address is then its IPv4 address (ipaddr.key).
 function tlsdrop.canonical_addr(text)
 	local v4 = inet_addr(text)
 	if v4 then
@@ -138,6 +138,15 @@ function tlsdrop.canonical_addr(text)
 	end
 	if text:find("[", 1, true) then
 		return nil -- resty.ipmatcher strips brackets, nginx does not
+	end
+	-- ngx_inet6_addr reads an embedded IPv4 tail with ngx_inet_addr (leading zeros, empty octets), inet_pton does not
+	local head, tail = text:match("^(.*:)(%d%d?%d?%d?%.[%d%.]*)$")
+	if head then
+		tail = inet_addr(tail)
+		if not tail then
+			return nil
+		end
+		text = head .. tail
 	end
 	local v6 = require("resty.ipmatcher").parse_ipv6(text)
 	if not v6 then
@@ -148,7 +157,7 @@ function tlsdrop.canonical_addr(text)
 		local n = v6[i]
 		bytes[#bytes + 1] = char(floor(n / 16777216) % 256, floor(n / 65536) % 256, floor(n / 256) % 256, n % 256)
 	end
-	return inet6_ntop(concat(bytes))
+	return ip_key(inet6_ntop(concat(bytes)))
 end
 
 local trusted_matchers = {}
@@ -281,24 +290,153 @@ local function should_warn(ip)
 	return true
 end
 
+-- Plugins that export a module-level client_hello(hello), in PLUGINS_ORDER_SSL_CLIENT_HELLO order. Built once per
+-- worker, on its first handshake: nothing is required, built or looked up per handshake after that.
+tlsdrop.CLIENT_HELLO_PLUGIN_HOOK = 1 -- capability flag, the way plugins detect the hook
+local hello_plugins, hello_plugin_ids = {}, {}
+local hello_registered = false
+
+-- Keeps the plugins of the order whose main module exports a client_hello function and returns their ids.
+function tlsdrop.register_client_hello_plugins(plugin_ids)
+	local list, ids, registered = {}, {}, {}
+	for _, id in ipairs(plugin_ids or {}) do
+		if not ids[id] then
+			local ok, module = pcall(require, id .. "/" .. id)
+			if ok and type(module) == "table" and type(module.client_hello) == "function" then
+				list[#list + 1] = { id = id, fn = module.client_hello }
+				ids[id] = true
+				registered[#registered + 1] = id
+			elseif not ok and not tostring(module):find("not found", 1, true) then
+				logger:log(WARN, "can't load plugin " .. id .. " for the ClientHello hook : " .. tostring(module))
+			end
+		end
+	end
+	hello_plugins, hello_plugin_ids = list, ids
+	return registered
+end
+
+-- True when the plugin is called through client_hello(): the default server's legacy loop skips it.
+function tlsdrop.is_client_hello_plugin(id)
+	return hello_plugin_ids[id] == true
+end
+
+-- A worker that starts while the order is not published yet (loading) tries again on its next handshake.
+local function ensure_registered()
+	if hello_registered then
+		return
+	end
+	local order = require("bunkerweb.datastore"):new(ngx.shared.internalstore):get("plugins_order", true)
+	if not order then
+		return
+	end
+	hello_registered = true
+	if type(order.ssl_client_hello) == "table" and #order.ssl_client_hello > 0 then
+		local registered = tlsdrop.register_client_hello_plugins(order.ssl_client_hello)
+		if #registered > 0 then
+			logger:log(ngx.INFO, "plugins called at the TLS ClientHello : " .. concat(registered, " "))
+		end
+	end
+end
+
+local function plain_reason(reason)
+	if type(reason) ~= "string" then
+		return ""
+	end
+	return (reason:sub(1, 256):gsub("%c", " "))
+end
+
+-- Nothing below may yield either (same rule as decide): ngx.ssl and the plugins' own functions. Any error, or any
+-- verdict but "drop" and "detect", means "do not drop". Returns true when a plugin dropped the handshake.
+local function run_client_hello_plugins(service, proxy_protocol, real_ip, trusted)
+	local packed, family = require("ngx.ssl").raw_client_addr()
+	if not packed then
+		return false
+	end
+	local quic, quic_err = require("ngx.ssl.clienthello").get_client_hello_ext(57)
+	if quic_err then
+		return false
+	end
+	-- Behind a PROXY protocol header or a header based real IP the peer is not the client, unless its networks are
+	-- trusted and nginx's own rule picks the PROXY address
+	local ip
+	if trusted or not (proxy_protocol or real_ip) then
+		ip = tlsdrop.format_raw_addr(packed, family)
+		if ip and trusted then
+			ip = tlsdrop.proxy_protocol_client_ip(ip, trusted)
+		end
+	end
+	local hello = {
+		service = service,
+		ip = ip,
+		raw = packed,
+		family = family,
+		quic = quic and true or false,
+		proxy_protocol = proxy_protocol and true or false,
+		real_ip = real_ip and true or false,
+		trusted = trusted,
+	}
+	local who = ip or "an unknown address"
+	for _, plugin in ipairs(hello_plugins) do
+		local ok, verdict, reason = pcall(plugin.fn, hello)
+		if not ok then
+			if should_warn("error_" .. plugin.id) then
+				logger:log(ERR, "plugin " .. plugin.id .. " client_hello() failed : " .. tostring(verdict))
+			end
+		elseif verdict == "detect" then
+			if should_warn("detect_" .. plugin.id .. "_" .. who) then
+				logger:log(
+					WARN,
+					"detect mode: plugin "
+						.. plugin.id
+						.. " would drop "
+						.. who
+						.. " at the TLS ClientHello : "
+						.. plain_reason(reason)
+				)
+			end
+		elseif verdict == "drop" then
+			if should_warn("drop_" .. plugin.id .. "_" .. who) then
+				logger:log(
+					WARN,
+					"plugin " .. plugin.id .. " dropped " .. who .. " at the TLS ClientHello : " .. plain_reason(reason)
+				)
+			end
+			return true
+		end
+	end
+	return false
+end
+
 -- Called from ssl_client_hello_by_lua. Returns true after closing the handshake, nothing otherwise.
 function tlsdrop.hook(service, proxy_protocol, real_ip, trusted)
 	local verdict, id, ip = tlsdrop.decide(service, proxy_protocol, real_ip, trusted)
-	if not verdict then
-		return
-	end
-	local warn = should_warn(ip)
-	if verdict == "detect" then
-		if warn then
-			logger:log(WARN, "detect mode: would drop banned IP " .. ip .. " (" .. id .. ") at the TLS ClientHello")
+	if verdict then
+		local warn = should_warn(ip)
+		if verdict == "detect" then
+			if warn then
+				logger:log(WARN, "detect mode: would drop banned IP " .. ip .. " (" .. id .. ") at the TLS ClientHello")
+			end
+		else
+			if warn then
+				logger:log(WARN, "dropped banned IP " .. ip .. " (" .. id .. ") at the TLS ClientHello")
+			end
+			ngx.exit(ngx.ERROR)
+			return true
 		end
+	end
+	-- Not dropped by the core, in both modes and whatever BANS_TLS_DROP_REASONS says: the plugins get their turn
+	local registered, register_err = pcall(ensure_registered)
+	if not registered and should_warn("register") then
+		logger:log(ERR, "can't register the ClientHello plugins : " .. tostring(register_err))
+	end
+	if #hello_plugins == 0 then
 		return
 	end
-	if warn then
-		logger:log(WARN, "dropped banned IP " .. ip .. " (" .. id .. ") at the TLS ClientHello")
+	local ok, dropped = pcall(run_client_hello_plugins, service, proxy_protocol, real_ip, trusted)
+	if ok and dropped then
+		ngx.exit(ngx.ERROR)
+		return true
 	end
-	ngx.exit(ngx.ERROR)
-	return true
 end
 
 return tlsdrop

@@ -404,6 +404,8 @@ def _is_exempt(request: Request) -> bool:
 
 
 def _build_storage(cfg: Dict[str, Any]) -> Tuple[str, Dict[str, Any]]:
+    from common_utils import parse_redis_endpoint  # type: ignore
+
     # Optional storage options (JSON), can be augmented by Redis settings
     storage_options: Dict[str, Any] = {}
     so_raw = api_config.API_RATE_LIMIT_STORAGE_OPTIONS
@@ -483,9 +485,15 @@ def _build_storage(cfg: Dict[str, Any]) -> Tuple[str, Dict[str, Any]]:
             # these credentials to Sentinel too. Keep Sentinel and Redis auth separate.
             # ensure ports on sentinels (default 26379)
             parts = []
-            for item in sentinels.split():
-                host, _, port = item.partition(":")
-                parts.append(f"{host}:{port or '26379'}")
+            try:
+                for item in sentinels.split():
+                    host, port = parse_redis_endpoint(item, 26379)
+                    parts.append(f"[{host}]:{port}" if ":" in host else f"{host}:{port}")
+            except ValueError as exc:
+                LOGGER.error(f"Invalid Redis configuration, API rate limiting uses local memory: {exc}")
+                return "memory://", storage_options
+            # urlsplit requires a bracketed IPv6 literal first in the authority.
+            parts.sort(key=lambda item: not item.startswith("["))
             hostlist = ",".join(parts)
             storage = f"redis+sentinel://{hostlist}/{sentinel_master}"
             # pass SSL and auth to sentinel via options.
@@ -525,6 +533,13 @@ def _build_storage(cfg: Dict[str, Any]) -> Tuple[str, Dict[str, Any]]:
             if username or password:
                 auth = f"{username}:{password}@"
             if host:
+                try:
+                    host = parse_redis_endpoint(host)[0]
+                except ValueError as exc:
+                    LOGGER.error(f"Invalid Redis configuration, API rate limiting uses local memory: {exc}")
+                    return "memory://", storage_options
+                if ":" in host:
+                    host = f"[{host}]"
                 storage = f"{scheme}://{auth}{host}:{port}/{db}"
 
     # Final fallback

@@ -1,0 +1,31 @@
+# A plugin's `client_hello(hello)` runs at the TLS ClientHello of a NAMED service.
+#
+# 1.7 only ran the default server's ClientHello block for plugins; the per-service block ran `tlsdrop`
+# alone. The unit tests execute the rendered block against stub plugins. Whether nginx runs the per-service
+# `ssl_client_hello_by_lua_block` for an SNI-selected service is a property of nginx and lua-nginx-module,
+# so this proves it on the real image: the asserting code is `tests/core/client-hello/check.py`.
+#
+# Docker only: the plugin is installed through the instance API on 127.0.0.1:5001 with the harness token.
+integrations:
+  - "Docker"
+
+config:
+  GENERATE_SELF_SIGNED_SSL: "yes"
+  USE_BAD_BEHAVIOR: "no"
+  USE_LIMIT_REQ: "no"
+  USE_LIMIT_CONN: "no"
+  USE_MODSECURITY: "no"
+  USE_REDIS: "no"
+  # The runner reaches the instance API through the Docker gateway of bw-services (192.168.0.1), not from 127.0.0.1.
+  API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24 192.168.0.1/32"
+
+actions:
+  plugin_runs_on_a_named_service:
+    type: script
+    script: ["python3", "tests/core/client-hello/check.py"]
+    result: "CLIENT_HELLO_OK named service"
+    timeout: 240
+    config:
+      MULTISITE: "yes"
+      SERVER_NAME: "www.example.com drop.example.com"
+      PLUGINS_ORDER_SSL_CLIENT_HELLO: "hellotest"

@@ -86,10 +86,10 @@ include /etc/bunkerweb/configs/modsec/*.conf
   {% if MULTISITE == "yes" and is_custom_conf("/etc/bunkerweb/configs/modsec/" + service_id) %}
 include /etc/bunkerweb/configs/modsec/{{ service_id }}/*.conf
   {% endif %}
-  {% if is_custom_conf("/etc/nginx/modsec") %}
+  {% if MULTISITE != "yes" and "modsec" in plugin_conf_contexts %}
 include /etc/nginx/modsec/*.conf
   {% endif %}
-  {% if MULTISITE == "yes" and is_custom_conf("/etc/nginx/" + service_id + "/modsec") %}
+  {% if MULTISITE == "yes" and "modsec" in plugin_conf_contexts %}
 include /etc/nginx/{{ service_id }}/modsec/*.conf
   {% endif %}
 {% endif %}

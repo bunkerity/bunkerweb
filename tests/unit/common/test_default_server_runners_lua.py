@@ -130,6 +130,7 @@ _G.ngx = {
     HTTP_BAD_REQUEST = 400,
     HTTP_TOO_MANY_REQUESTS = 429,
     HTTP_NOT_ALLOWED = 405,
+    ctx = {},
     shared = { internalstore = {} },
     var = { server_name = "_" },
     req = { is_internal = function() return false end },

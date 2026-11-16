@@ -35,6 +35,7 @@ PHASES = [
     "rewrite",
     "access",
     "content",
+    "ssl_client_hello",
     "ssl_client_hello_default",
     "ssl_certificate",
     "ssl_certificate_default",

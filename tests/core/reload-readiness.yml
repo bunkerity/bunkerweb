@@ -1,0 +1,74 @@
+integrations:
+  - "Docker"
+
+config:
+  USE_BLACKLIST: "yes"
+  BLACKLIST_COMMUNITY_LISTS: ""
+  BLACKLIST_IP_URLS: ""
+  BLACKLIST_USER_AGENT_URLS: ""
+  BLACKLIST_USER_AGENT: "BWReloadProbe"
+  USE_BAD_BEHAVIOR: "no"
+  USE_LIMIT_REQ: "no"
+  USE_LIMIT_REQ_GLOBAL: "no"
+  API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24 192.168.0.1/32"
+
+actions:
+  rejected_init_retains_access_controls:
+    type: script
+    retries: 1
+    restart_stack: false
+    result: "reload_readiness: rejected init failed; previous policy stayed enforced"
+    script:
+      - python3
+      - -c
+      - |
+        import io
+        import subprocess
+        import tarfile
+        import requests
+
+        session = requests.Session()
+        session.trust_env = False
+        api = "http://127.0.0.1:5001"
+        headers = {"Host": "bwapi", "Authorization": "Bearer tests-secret-token"}
+
+        def request(method, path, **kwargs):
+            response = session.request(method, api + path, headers=headers, timeout=(5, 30), **kwargs)
+            print(method, path, response.status_code, response.text, flush=True)
+            return response
+
+        def policy():
+            for agent, expected in (("ordinary-client", 200), ("BWReloadProbe", 403)):
+                response = session.get("http://127.0.0.1/", headers={"Host": "www.example.com", "User-Agent": agent}, timeout=10)
+                print("policy", agent, response.status_code, flush=True)
+                assert response.status_code == expected, response.status_code
+
+        def plugins(corrupt):
+            archive = io.BytesIO()
+            with tarfile.open(fileobj=archive, mode="w:gz") as bundle:
+                if corrupt:
+                    content = b"{invalid-json"
+                    entry = tarfile.TarInfo("reload-probe/plugin.json")
+                    entry.size = len(content)
+                    entry.mode = 0o640
+                    bundle.addfile(entry, io.BytesIO(content))
+            archive.seek(0)
+            response = request("POST", "/plugins", files={"archive.tar.gz": ("archive.tar.gz", archive, "application/gzip")})
+            assert response.status_code == 200, response.text
+
+        policy()
+        try:
+            plugins(True)
+            check = subprocess.run(["docker", "exec", "bunkerweb", "/usr/sbin/nginx", "-t", "-e", "/var/log/bunkerweb/error.log", "-c", "/etc/nginx/nginx.conf"], capture_output=True, text=True)
+            print("nginx -t", check.returncode, check.stdout, check.stderr, flush=True)
+            assert check.returncode == 0 and "test is successful" in check.stderr
+            for mode in ("yes", "no"):
+                response = request("POST", "/reload?test=" + mode)
+                assert response.status_code == 500 and response.json()["status"] == "error", response.text
+                policy()
+        finally:
+            plugins(False)
+            response = request("POST", "/reload?test=yes")
+            assert response.status_code == 200 and response.json()["status"] == "success", response.text
+        policy()
+        print("reload_readiness: rejected init failed; previous policy stayed enforced", flush=True)

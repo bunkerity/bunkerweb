@@ -1,6 +1,7 @@
 local cjson = require "cjson"
 local class = require "middleclass"
 local plugin = require "bunkerweb.plugin"
+local redisendpoints = require "bunkerweb.redisendpoints"
 local rediskeys = require "bunkerweb.rediskeys"
 local session = require "resty.session"
 local utils = require "bunkerweb.utils"
@@ -164,16 +165,11 @@ function sessions:init()
 			config.redis.sentinel_password = redis_vars["REDIS_SENTINEL_PASSWORD"]
 			config.redis.sentinels = {}
 			for sentinel_host in redis_vars["REDIS_SENTINEL_HOSTS"]:gmatch("%S+") do
-				local shost, sport = sentinel_host:match("([^:]+):?(%d*)")
-				if sport == "" then
-					sport = 26379
-				else
-					sport = tonumber(sport)
-				end
+				local shost, sport = redisendpoints.parse_endpoint(sentinel_host, 26379)
 				table.insert(config.redis.sentinels, { host = shost, port = sport })
 			end
 		else
-			config.redis.host = redis_vars["REDIS_HOST"]
+			config.redis.host = redisendpoints.socket_host(redis_vars["REDIS_HOST"])
 			config.redis.port = tonumber(redis_vars["REDIS_PORT"])
 		end
 	end

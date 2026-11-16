@@ -409,7 +409,7 @@ A plugin may declare where it wants to sit inside a phase. The key is optional; 
 }
 ```
 
-- Phase names are `init`, `init_worker`, `set`, `rewrite`, `access`, `content`, `ssl_client_hello_default`, `ssl_certificate`, `ssl_certificate_default`, `header`, `log`, `preread`, `log_stream`, `log_default`, `timer` and `init_workers`. `headers` is accepted as an alias of `header`, as in `order.json`.
+- Phase names are `init`, `init_worker`, `set`, `rewrite`, `access`, `content`, `ssl_client_hello`, `ssl_client_hello_default`, `ssl_certificate`, `ssl_certificate_default`, `header`, `log`, `preread`, `log_stream`, `log_default`, `timer` and `init_workers`. `headers` is accepted as an alias of `header`, as in `order.json`.
 - `before` / `after` are lists of plugin ids. An unavailable plugin, or one that does not implement the phase, is ignored with a warning in the BunkerWeb error log. At most five such ids are named per plugin and per phase; the rest are summarised in a single `… more unknown order id(s) for phase <phase>` line, so a long list cannot flood the log.
 - Mutually contradictory declarations (a cycle) are dropped with a warning: the declarations of the plugins on the cycle are skipped and the order is recomputed with every other plugin's constraints still applied; only if that retry fails too is the default order kept. A malformed `order` block is also warned about and dropped; the plugin still loads. The check is all-or-nothing and identical in the configuration generator and in the runtime: a single invalid entry — a value that is not a string, an id that is not `[A-Za-z0-9_.-]{1,64}` or `"*"`, an unknown phase name, an unknown key next to `before`/`after`, a `before`/`after` that is not a list — drops **the whole `order` key**, including the phases that were well formed. Fix the reported entry and the rest of the declaration comes back. An empty `before`/`after` list, an empty phase object and an empty `order` are all accepted and mean "no constraint".
 - `before` / `after` may contain the wildcard `"*"`, meaning every other plugin implementing this phase that is not itself constrained relative to me. `"before": ["*"]` puts a plugin ahead of every plugin that does not pin itself and `"after": ["*"]` puts it last. Plugins with the same wildcard keep their default-list order; an explicit plugin id wins over another plugin's wildcard.
@@ -642,6 +642,21 @@ The declared functions are automatically called during specific contexts. Here a
 | `log_default` |           [log_by_lua](https://github.com/openresty/lua-nginx-module#log_by_lua)            | Same as `log` but only called on the default server.                                                                                                      | `ret`, `msg`<ul><li>`ret` (boolean) : true if no error or else false</li><li>`msg` (string) : success or error message</li></ul>                                                                                                                                                                                                                                      |
 |   `preread`   | [preread_by_lua](https://github.com/openresty/stream-lua-nginx-module#preread_by_lua_block) | Similar to the `access` function but for stream mode.                                                                                                     | `ret`, `msg`,`status`<ul><li>`ret` (boolean) : true if no error or else false</li><li>`msg` (string) : success or error message</li><li>`status` (number) : interrupt current process and return [status](https://github.com/openresty/lua-nginx-module#http-status-constants)</li></ul>                                                                              |
 | `log_stream`  |     [log_by_lua](https://github.com/openresty/stream-lua-nginx-module#log_by_lua_block)     | Similar to the `log` function but for stream mode.                                                                                                        | `ret`, `msg`<ul><li>`ret` (boolean) : true if no error or else false</li><li>`msg` (string) : success or error message</li></ul>                                                                                                                                                                                                                                      |
+
+**TLS ClientHello hook.** A plugin can also see every TLS handshake before the certificate is chosen, for the default server and for each service, by exporting a module-level function (not a method, so no plugin object is built per handshake) from its main Lua module:
+
+```lua
+-- in myplugin/myplugin.lua
+function myplugin.client_hello(hello)
+    -- hello (read-only): service (nil on the default server), ip (nil when the client address is unknown), raw and family
+    -- (packed peer address from ngx.ssl.raw_client_addr()), quic, proxy_protocol, real_ip, trusted
+    return nil -- or "drop" / "detect" and a reason
+end
+```
+
+Return `"drop"` to abort the handshake, `"detect"` to only log that it would be dropped, or nothing to let it through. An error or any other value lets the handshake through. The function runs for every handshake, exactly once, and **must not yield**: no Redis, no cosocket, no `ngx.var`, no `resty.lock`, no sleep. Shared dictionary calls and `ngx.timer.at(0, ...)` are fine. The order of the plugins that export it follows `PLUGINS_ORDER_SSL_CLIENT_HELLO`. A plugin that exports `client_hello` is not called through its `ssl_client_hello_default` method on the default server. Plugins can detect support with `require("bunkerweb.tlsdrop").CLIENT_HELLO_PLUGIN_HOOK == 1`.
+
+A plugin that bans from the ClientHello can pass `{ if_absent = true }` as the last argument of `utils.add_ban`: the ban is written only when none exists for that address and scope, in the shared dictionary and in Redis, and an existing ban is never replaced or extended. The first result is then `"added"`, `"exists"` or `"error"` (followed by a message) instead of a boolean. Plugins can detect support with `utils.ADD_BAN_IF_ABSENT == 1`.
 
 #### Libraries
 

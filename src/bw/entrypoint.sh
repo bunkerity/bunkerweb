@@ -29,9 +29,14 @@ fi
 
 export LOG_SYSLOG_TAG="${LOG_SYSLOG_TAG:-bunkerweb-entrypoint}"
 
+# A stop requested while nginx starts is no failed start, see start_nginx
+stop_requested="no"
+
 # trap SIGTERM and SIGINT
 # shellcheck disable=SC2329
 function trap_exit() {
+	# shellcheck disable=SC2317
+	stop_requested="yes"
 	# shellcheck disable=SC2317
 	log "ENTRYPOINT" "ℹ️" "Caught stop operation, stopping nginx ..."
 	# shellcheck disable=SC2317
@@ -75,6 +80,9 @@ IS_LOADING=yes
 USE_BUNKERNET=no
 SEND_ANONYMOUS_REPORT=no
 SERVER_NAME=
+USE_IPV6=${USE_IPV6:-no}
+API_LISTEN_IP=${API_LISTEN_IP:-0.0.0.0}
+DNS_RESOLVERS=${DNS_RESOLVERS:-127.0.0.11}
 MODSECURITY_CRS_VERSION=${MODSECURITY_CRS_VERSION:-4}
 API_LISTEN_HTTP=${API_LISTEN_HTTP:-yes}
 API_HTTP_PORT=${API_HTTP_PORT:-5000}
@@ -127,10 +135,15 @@ KEEP_CONFIG_ON_RESTART=${KEEP_CONFIG_ON_RESTART:-yes}
 
 # generate "temp" config
 tmp_env_path="/tmp/variables.env"
+# Keep this name in step with pushswap.lua and gen/sync_tree.py.
+install_sentinel="/etc/nginx/.bw-install-incomplete"
 tmp_env_content="$(generate_tmp_env_content)"
 regenerate_temp_config=false
 
 if [[ "$KEEP_CONFIG_ON_RESTART" == "no" ]] || [[ ! -f "$tmp_env_path" ]] ; then
+	regenerate_temp_config=true
+elif [ -e "$install_sentinel" ] ; then
+	log "ENTRYPOINT" "⚠️" "Interrupted configuration install, regenerating the loading configuration"
 	regenerate_temp_config=true
 else
 	log "ENTRYPOINT" "ℹ️" "Preserving current config on restart, asking the scheduler for the latest one ..."
@@ -144,14 +157,62 @@ fi
 
 printf "%s\n" "$tmp_env_content" > "$tmp_env_path"
 
-if [[ "$regenerate_temp_config" == "true" ]] ; then
-  python3 /usr/share/bunkerweb/gen/main.py --variables "$tmp_env_path"
-fi
+# Renders the loading configuration, which the scheduler replaces with its push. Used on a regular start
+# and when a preserved configuration fails to start. The generator publishes a complete render only and
+# clears the install sentinel itself.
+function render_temp_config() {
+	rm -f "/var/tmp/bunkerweb_needs_config"
+	if ! python3 /usr/share/bunkerweb/gen/main.py --variables "$tmp_env_path" ; then
+		# A render cut short by the stop that was requested meanwhile is a stop, not a failure
+		if [ "$stop_requested" == "yes" ] ; then
+			log "ENTRYPOINT" "ℹ️" "BunkerWeb stopped"
+			exit 0
+		fi
+		log "ENTRYPOINT" "❌" "Error while generating config from $tmp_env_path, refusing to start nginx"
+		return 1
+	fi
+}
+
+# Starts nginx once. Succeeds when the master is running: it writes its pid file only after it parsed the
+# configuration and ran init_by_lua, which nginx -t never does. Also succeeds when a stop was requested
+# meanwhile. Otherwise it fails with nginx stopped and its exit status in nginx_rc.
+function start_nginx() {
+	nginx_rc=""
+	python3 /usr/share/bunkerweb/utils/modsecurity_audit.py /etc/nginx/variables.env
+	audit_rc=$?
+	# The trap runs once the render or the audit is over: a stop requested by then ends the start, whatever
+	# they said, and is neither a failed start nor a reason to fall back
+	if [ "$stop_requested" == "yes" ] ; then
+		log "ENTRYPOINT" "ℹ️" "BunkerWeb stopped"
+		exit 0
+	fi
+	if [ "$audit_rc" -ne 0 ] ; then
+		log "ENTRYPOINT" "❌" "Invalid ModSecurity audit storage, refusing to start nginx"
+		return 1
+	fi
+	# An unclean stop (SIGKILL, host crash) or a start that failed half way leaves the internal API socket
+	# behind, and nginx refuses to bind over it. A pid file left by a killed run could carry the pid the new
+	# master gets
+	rm -f /var/run/bunkerweb/api-internal.sock /var/run/bunkerweb/nginx.pid
+	log "ENTRYPOINT" "ℹ️" "Starting nginx ..."
+	nginx -g "daemon off;" &
+	pid="$!"
+	while kill -0 "$pid" 2>/dev/null ; do
+		if [ "$stop_requested" == "yes" ] ; then
+			# nginx -s stop cannot find the master before its pid file exists
+			kill -TERM "$pid" 2>/dev/null
+			return 0
+		fi
+		[ "$(cat /var/run/bunkerweb/nginx.pid 2>/dev/null)" == "$pid" ] && return 0
+		sleep 0.2
+	done
+	wait "$pid"
+	nginx_rc=$?
+	[ "$stop_requested" == "yes" ]
+}
 
 if [[ "$regenerate_temp_config" == "true" ]] ; then
-	# Regenerating means this really is a startup: IS_LOADING already covers it, and a marker left
-	# by a previous run would keep asking for a push that startup handles anyway.
-	rm -f "/var/tmp/bunkerweb_needs_config"
+	render_temp_config || exit 1
 fi
 
 if [ -f /var/tmp/bunkerweb_reloading ] ; then
@@ -169,17 +230,21 @@ for dir in client_temp proxy_temp fastcgi_temp uwsgi_temp scgi_temp; do
 	fi
 done
 
-# An unclean stop (SIGKILL, host crash) leaves the internal API socket behind, and nginx refuses to bind over it
-rm -f /var/run/bunkerweb/api-internal.sock
-
 # start nginx
-if ! python3 /usr/share/bunkerweb/utils/modsecurity_audit.py /etc/nginx/variables.env ; then
-	log "ENTRYPOINT" "❌" "Invalid ModSecurity audit storage, refusing to start nginx"
+start_nginx
+started=$?
+if [ "$started" -ne 0 ] && [[ "$regenerate_temp_config" != "true" ]] ; then
+	# At most once: the loading configuration that follows is the one every other start runs
+	log "ENTRYPOINT" "⚠️" "The preserved configuration failed to start nginx${nginx_rc:+ (exit status $nginx_rc)}, falling back to the loading configuration until the scheduler pushes the latest one ..."
+	regenerate_temp_config=true
+	render_temp_config || exit 1
+	start_nginx
+	started=$?
+fi
+if [ "$started" -ne 0 ] ; then
+	log "ENTRYPOINT" "❌" "Failed to start nginx${nginx_rc:+ (exit status $nginx_rc)}"
 	exit 1
 fi
-log "ENTRYPOINT" "ℹ️" "Starting nginx ..."
-nginx -g "daemon off;" &
-pid="$!"
 
 # wait while nginx is running
 wait "$pid"

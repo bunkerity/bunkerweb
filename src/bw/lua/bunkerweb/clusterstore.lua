@@ -2,6 +2,7 @@ local ngx = ngx
 local class = require "middleclass"
 local clogger = require "bunkerweb.logger"
 local rc = require "resty.redis.connector"
+local redisendpoints = require "bunkerweb.redisendpoints"
 local rediskeys = require "bunkerweb.rediskeys"
 local utils = require "bunkerweb.utils"
 local rediscluster
@@ -102,7 +103,7 @@ local function build_options(variables, pool)
 			ssl = variables["REDIS_SSL"] == "yes",
 			ssl_verify = variables["REDIS_SSL_VERIFY"] == "yes",
 		},
-		host = variables["REDIS_HOST"],
+		host = redisendpoints.socket_host(variables["REDIS_HOST"]),
 		port = tonumber(variables["REDIS_PORT"]),
 		db = tonumber(variables["REDIS_DATABASE"]),
 		username = variables["REDIS_USERNAME"],
@@ -118,12 +119,7 @@ local function build_options(variables, pool)
 	end
 	if variables["REDIS_SENTINEL_HOSTS"] ~= "" then
 		for sentinel_host in variables["REDIS_SENTINEL_HOSTS"]:gmatch("%S+") do
-			local shost, sport = sentinel_host:match("([^:]+):?(%d*)")
-			if sport == "" then
-				sport = 26379
-			else
-				sport = tonumber(sport)
-			end
+			local shost, sport = redisendpoints.parse_endpoint(sentinel_host, 26379)
 			local data = { host = shost, port = sport }
 			if options.sentinel_username ~= "" then
 				data.username = options.sentinel_username
@@ -332,7 +328,7 @@ local function node_client(self, host, port)
 	red:set_timeouts(self.options.connect_timeout, self.options.send_timeout, self.options.read_timeout)
 	-- No keepalive pool: DBSIZE is rare, and a pooled socket would skip AUTH after a
 	-- credential or TLS change.
-	local ok, err = red:connect(host, port, {
+	local ok, err = red:connect(redisendpoints.socket_host(host), port, {
 		ssl = self.options.connect_opts.ssl,
 		ssl_verify = self.options.connect_opts.ssl_verify,
 		server_name = host:gsub("^%[(.*)%]$", "%1"),
@@ -457,6 +453,9 @@ function clusterstore:scan_primaries(pattern, limit)
 	return keys
 end
 
+-- Bounded backoff for commands refused while a Cluster slot migrates.
+local TRYAGAIN_DELAYS = { 0.02, 0.05, 0.1 }
+
 -- The client can also *raise* : reading a reply off a desynced stream reached string.byte
 -- with a non-string and killed the whole access phase (reversescan, run 32834226362), leaving
 -- `healthy` true and the poisoned socket eligible for the keepalive pool. A redis call is I/O,
@@ -476,6 +475,20 @@ function clusterstore:call(method, ...)
 		target = self
 	end
 	local ok, res, err = pcall(command, target, ...)
+	local attempt = 1
+	local retries = math.min(self.tryagain_retries or #TRYAGAIN_DELAYS, #TRYAGAIN_DELAYS)
+	while
+		ok
+		and self.cluster_mode
+		and type(err) == "string"
+		and err:sub(1, 8) == "TRYAGAIN"
+		and attempt <= retries
+		and is_cosocket_available()
+	do
+		ngx.sleep(TRYAGAIN_DELAYS[attempt])
+		ok, res, err = pcall(command, target, ...)
+		attempt = attempt + 1
+	end
 	if not ok then
 		self.healthy = false
 		return nil, "redis client raised : " .. tostring(res)

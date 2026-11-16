@@ -13,6 +13,7 @@ local NOTICE = ngx.NOTICE
 local get_phase = ngx.get_phase
 local spawn = ngx.thread.spawn
 local wait = ngx.thread.wait
+local unpack = unpack or table.unpack -- luacheck: ignore 143
 local arpa_str = resolver.arpa_str
 local get_ips = utils.get_ips
 local has_variable = utils.has_variable
@@ -264,6 +265,8 @@ function dnsbl:access()
 	local ret_threads = nil
 	local ret_err = nil
 	local ret_server = nil
+	local has_answer = false
+	local had_error = false
 	while true do
 		-- Compute threads to wait
 		local wait_threads = {}
@@ -287,7 +290,10 @@ function dnsbl:access()
 		threads[server] = nil
 		-- DNS error
 		if result == nil then
+			had_error = true
 			self.logger:log(ERR, "error while sending DNS request to " .. server .. " : " .. err)
+		else
+			has_answer = true
 		end
 		-- IP is in DNSBL
 		if result then
@@ -299,7 +305,7 @@ function dnsbl:access()
 	end
 	if ret_threads ~= nil then
 		-- Kill other threads
-		if #threads > 0 then
+		if next(threads) then
 			local wait_threads = {}
 			for _, thread in pairs(threads) do
 				table.insert(wait_threads, thread)
@@ -312,6 +318,7 @@ function dnsbl:access()
 			if not ok then
 				return self:ret(false, "error while adding element to cache : " .. err)
 			end
+			self:set_metric("counters", "failed_dnsbl", 1)
 			return self:ret(
 				true,
 				"IP is blacklisted by " .. ret_server,
@@ -323,10 +330,13 @@ function dnsbl:access()
 		-- Error case
 		return self:ret(false, ret_err)
 	end
-	-- IP is not in DNSBL
-	local ok, err = self:add_to_cache(self.ctx.bw.remote_addr, "ok")
-	if not ok then
-		return self:ret(false, "IP is not in DNSBL (error = " .. err .. ")")
+	-- IP is not in DNSBL : a clean verdict is cached only when every provider answered, otherwise a
+	-- provider that failed now would never be asked again for a day
+	if has_answer and not had_error then
+		local ok, err = self:add_to_cache(self.ctx.bw.remote_addr, "ok")
+		if not ok then
+			return self:ret(false, "IP is not in DNSBL (error = " .. err .. ")")
+		end
 	end
 	return self:ret(true, "IP is not in DNSBL")
 end

@@ -2,6 +2,7 @@ local ngx = ngx
 local base = require "resty.core.base"
 local bwctx = require "bunkerweb.ctx"
 local cjson = require "cjson"
+local ip_key = require("bunkerweb.ipaddr").key
 local utils = require "bunkerweb.utils"
 
 local open = io.open
@@ -42,15 +43,27 @@ local geo_city_warned = false
 -- and keeps call_plugin from hitting the datastore on every plugin call.
 local collect_timings = nil
 
+-- Phases a plugin exports under another name than the phase: ssl_client_hello is the module-level
+-- client_hello(hello) function, called once per handshake without building the plugin object
+local PHASE_METHODS = { ssl_client_hello = "client_hello" }
+
 helpers.load_plugin = function(json)
 	-- Open file
 	local file, err, nb = open(json, "r")
 	if not file then
+		-- Directories without a manifest are not plugins; other I/O errors reject init.
+		if nb == 2 then
+			return nil, "no plugin.json at " .. json
+		end
 		return false, "can't load JSON at " .. json .. " : " .. err .. " (nb = " .. tostring(nb) .. ")"
 	end
-	-- Decode JSON
-	local ok, plugin = pcall(decode, file:read("*a"))
+	local content, read_err = file:read("*a")
 	file:close()
+	if not content then
+		return false, "can't read JSON at " .. json .. " : " .. tostring(read_err)
+	end
+	-- Decode JSON
+	local ok, plugin = pcall(decode, content)
 	if not ok then
 		-- `plugin` holds pcall's error message here, not `err` (that's the earlier io.open result,
 		-- already nil on this path) -- concatenating `err` crashed on every malformed JSON file.
@@ -261,6 +274,11 @@ helpers.load_plugin = function(json)
 					.. at_json
 		end
 	end
+	-- Keep HTTP-only settings in the stream VM without importing HTTP-only code.
+	if subsystem == "stream" and plugin.stream == "no" then
+		plugin.phases = {}
+		return true, plugin
+	end
 	-- Try require
 	local plugin_lua, err = helpers.require_plugin(plugin.id)
 	if plugin_lua == false then
@@ -271,7 +289,7 @@ helpers.load_plugin = function(json)
 	plugin.phases = {}
 	if plugin_lua then
 		for _, phase in ipairs(phases) do
-			if plugin_lua[phase] ~= nil then
+			if plugin_lua[PHASE_METHODS[phase] or phase] ~= nil then
 				table.insert(plugin.phases, phase)
 			end
 		end
@@ -1007,7 +1025,9 @@ helpers.fill_ctx = function(no_ref)
 			if subsystem == "stream" then
 				data.kind = "stream"
 			end
-			data.remote_addr = var.remote_addr
+			-- Canonical identity of the client: an IPv4-mapped IPv6 address is its IPv4 address, so every plugin that
+			-- keys on the client (bans, rate limits, bad behavior, country, DNSBL...) sees one address.
+			data.remote_addr = ip_key(var.remote_addr)
 			data.server_name = var.server_name
 			data.time_local = var.time_local
 			if data.kind == "http" then

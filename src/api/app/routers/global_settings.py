@@ -90,16 +90,20 @@ def read_global_settings(
         # `get_config(methods=True)` then reduce, NOT `get_non_default_settings`: the latter reports
         # stored rows only, so a value a TEMPLATE supplies never appeared even though the generator
         # renders it. See `reportable_config`.
-        conf = reportable_config(
-            db.get_config(
-                global_only=global_only,
-                methods=True,
-                with_drafts=with_drafts,
-                filtered_settings=fs,
-                with_setting_drafts=with_setting_drafts,
-            ),
-            methods=methods,
+        resolved = db.get_config(
+            global_only=global_only,
+            methods=True,
+            with_drafts=with_drafts,
+            filtered_settings=fs,
+            with_setting_drafts=with_setting_drafts,
         )
+        conf = reportable_config(resolved, methods=methods)
+        # A service's name comes from its row even without a SERVER_NAME override. The UI
+        # round-trips this snapshot; dropping that identity files its settings under another service.
+        for service in str(resolved.get("SERVER_NAME", {}).get("value", "")).split():
+            key = f"{service}_SERVER_NAME"
+            if key in resolved:
+                conf[key] = resolved[key] if methods else resolved[key]["value"]
     return JSONResponse(status_code=200, content={"status": "success", "settings": conf})
 
 

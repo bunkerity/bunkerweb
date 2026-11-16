@@ -1,4 +1,3 @@
-from ipaddress import ip_address
 from pydantic import (
     BaseModel,
     ConfigDict,
@@ -10,6 +9,8 @@ from pydantic import (
     StrictBool,
 )
 from typing import Optional, List, Dict, Union, Literal, Annotated, Any
+
+from ip_identity import normalize_ip  # type: ignore
 from urllib.parse import urlsplit
 
 from custom_configs_validation import (  # type: ignore  # noqa: F401
@@ -74,10 +75,10 @@ class BanRequest(BaseModel):
     @field_validator("ip")
     @classmethod
     def validate_ip(cls, v):
-        # Normalize, don't just validate: the runtime keys its bans on nginx's $remote_addr, which
-        # is always the compressed form. Storing "2001:0DB8::1" verbatim would create a ban that can
-        # never match the request it was meant to block.
-        return str(ip_address(v.strip()))  # Raises ValueError for invalid IPs
+        # Normalize, don't just validate: one address is one ban whatever its spelling (expanded, upper case,
+        # IPv4-mapped). Storing "2001:0DB8::1" verbatim would create a ban that can never match the request it
+        # was meant to block.
+        return normalize_ip(v)  # Raises ValueError for anything but a bare IP address
 
     @field_validator("exp")
     @classmethod
@@ -97,10 +98,10 @@ class UnbanRequest(BaseModel):
     @field_validator("ip")
     @classmethod
     def validate_ip(cls, v):
-        # Normalize, don't just validate: the runtime keys its bans on nginx's $remote_addr, which
-        # is always the compressed form. Storing "2001:0DB8::1" verbatim would create a ban that can
-        # never match the request it was meant to block.
-        return str(ip_address(v.strip()))  # Raises ValueError for invalid IPs
+        # Normalize, don't just validate: one address is one ban whatever its spelling (expanded, upper case,
+        # IPv4-mapped). Storing "2001:0DB8::1" verbatim would create a ban that can never match the request it
+        # was meant to block.
+        return normalize_ip(v)  # Raises ValueError for anything but a bare IP address
 
 
 # Instances

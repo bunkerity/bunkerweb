@@ -31,7 +31,7 @@ SecRule REQUEST_HEADERS:Content-Type "application/json" \
 
 # Be strict with multipart/form-data body
 SecRule MULTIPART_STRICT_ERROR "!@eq 0" \
-  "id:'200003',phase:2,t:none,log,deny,status:400, \
+  "id:'200003',phase:2,t:none,log,deny,setvar:'tx.bunkerweb_reason=modsecurity-body-200003',status:400, \
   msg:'Multipart request body failed strict validation: \
   PE %{REQBODY_PROCESSOR_ERROR}, \
   BQ %{MULTIPART_BOUNDARY_QUOTED}, \
@@ -46,7 +46,7 @@ SecRule MULTIPART_STRICT_ERROR "!@eq 0" \
   IH %{MULTIPART_INVALID_HEADER_FOLDING}, \
   FL %{MULTIPART_FILE_LIMIT_EXCEEDED}'"
 SecRule MULTIPART_UNMATCHED_BOUNDARY "@eq 1" \
-  "id:'200004',phase:2,t:none,log,deny,msg:'Multipart parser detected a possible unmatched boundary.'"
+  "id:'200004',phase:2,t:none,log,deny,setvar:'tx.bunkerweb_reason=modsecurity-body-200004',msg:'Multipart parser detected a possible unmatched boundary.'"
 
 # Reject the RFC 2231 filename* parameter in multipart parts. ModSecurity reads
 # filename= only, while RFC 7578 parsers (Werkzeug, Starlette, busboy, Go, Spring)
@@ -54,7 +54,7 @@ SecRule MULTIPART_UNMATCHED_BOUNDARY "@eq 1" \
 # malicious one. RFC 7578 section 4.2 forbids RFC 2231 encoding here, so refusing it
 # costs nothing for a compliant client.
 SecRule MULTIPART_PART_HEADERS "@rx ^content-disposition\s*:.*;\s*filename\s*\*\s*=" \
-  "id:'200006',phase:2,t:none,t:lowercase,log,deny,status:400, \
+  "id:'200006',phase:2,t:none,t:lowercase,log,deny,setvar:'tx.bunkerweb_reason=modsecurity-body-200006',status:400, \
   msg:'Multipart Content-Disposition uses the RFC 2231 filename* parameter',logdata:'%{MATCHED_VAR}'"
 
 # Enable response body checks
@@ -114,7 +114,7 @@ include /usr/share/bunkerweb/core/modsecurity/files/crs-setup-v4.conf
       {% if is_custom_conf("/etc/bunkerweb/configs/crs-plugins-before") %}
 include /etc/bunkerweb/configs/crs-plugins-before/*.conf
       {% endif %}
-      {% if is_custom_conf("/etc/nginx/crs-plugins-before") %}
+      {% if MULTISITE != "yes" and "crs-plugins-before" in plugin_conf_contexts %}
 include /etc/nginx/crs-plugins-before/*.conf
       {% endif %}
 
@@ -159,7 +159,7 @@ include {{ before_file }}
     {% if is_custom_conf("/etc/bunkerweb/configs/modsec-crs") %}
 include /etc/bunkerweb/configs/modsec-crs/*.conf
     {% endif %}
-    {% if is_custom_conf("/etc/nginx/modsec-crs") %}
+    {% if MULTISITE != "yes" and "modsec-crs" in plugin_conf_contexts %}
 include /etc/nginx/modsec-crs/*.conf
     {% endif %}
 include /etc/nginx/http/*.modsec-crs
@@ -176,10 +176,10 @@ include /usr/share/bunkerweb/core/modsecurity/files/coreruleset-v4/rules/*.conf
 
     {% if USE_MODSECURITY_CRS_PLUGINS == "yes" and effective_crs_version != "3" %}
 # custom CRS plugins configurations after loading plugins
-      {%- if is_custom_conf("/etc/bunkerweb/configs/crs-plugins-after") %}
+      {% if is_custom_conf("/etc/bunkerweb/configs/crs-plugins-after") %}
 include /etc/bunkerweb/configs/crs-plugins-after/*.conf
-      {%- endif %}
-      {% if is_custom_conf("/etc/nginx/crs-plugins-after") %}
+      {% endif %}
+      {% if MULTISITE != "yes" and "crs-plugins-after" in plugin_conf_contexts %}
 include /etc/nginx/crs-plugins-after/*.conf
       {% endif %}
 

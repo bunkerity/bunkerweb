@@ -430,7 +430,7 @@ def _mark_reload_owed(broker_url: str, logger, client=None) -> None:
 
 
 def _push_configs_in_flight(client, logger) -> bool:
-    """Whether push-configs holds its lease, i.e. a render may be rewriting the live config tree.
+    """Whether a config push is running or its generation is still awaiting a retry.
 
     Fails OPEN, deliberately the opposite way round from `_reload_is_owed` below. A broker we
     cannot read is not evidence of a push in flight, and holding on a read error would turn a
@@ -438,9 +438,20 @@ def _push_configs_in_flight(client, logger) -> bool:
     and the instance still refuses a reload that overlaps the /confs swap on its own.
     """
     try:
-        return bool(client.exists(PUSH_CONFIGS_LOCK_KEY))
+        if client.exists(PUSH_CONFIGS_LOCK_KEY):
+            return True
     except BaseException as exc:
         logger.error(f"Could not check whether a configuration push is in flight: {exc}")
+    try:
+        db = get_worker_db()
+        metadata = db.get_metadata() if db is not None else {}
+        # Certificates use this very cache/reload path to acknowledge delivery; holding them deadlocks it.
+        return isinstance(metadata, dict) and any(
+            metadata.get(flag)
+            for flag in ("pro_plugins_changed", "external_plugins_changed", "custom_configs_changed", "plugins_config_changed", "instances_changed")
+        )
+    except Exception as exc:
+        logger.error(f"Could not check whether configuration generation is pending: {exc}")
         return False
 
 
@@ -550,7 +561,7 @@ def _request_reload_debounced(apis, broker_url: str, logger) -> None:
         # cache tree, but it may already have pushed /cache before this job wrote its files -- the
         # lease covers the reload too -- so the durable marker is what guarantees the next run
         # carries them. Same marker and same reasoning as the no-instance branch in `execute_job`.
-        logger.info("A configuration push is in flight; leaving the reload to it and recording the cache push as owed")
+        logger.info("A configuration push is running or pending; leaving the reload to it and recording the cache push as owed")
         _mark_reload_owed(broker_url, logger, client=client)
         return
 
@@ -567,6 +578,10 @@ def _request_reload_debounced(apis, broker_url: str, logger) -> None:
     released = False
     try:
         for _ in range(MAX_RELOAD_ROUNDS):
+            # A failed render releases its lease but leaves the generation flags raised between retries.
+            if _push_configs_in_flight(client, logger):
+                logger.info("Configuration generation is pending; holding job publication")
+                return
             # Claim every flag raised so far: those jobs wrote their files before flagging, so
             # this push carries them. Anything raised from here on earns another round.
             client.delete(RELOAD_DIRTY_KEY)

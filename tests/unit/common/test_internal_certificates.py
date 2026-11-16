@@ -133,14 +133,16 @@ def test_startup_is_fail_closed_and_tls_rendering_is_unconditional():
     linux_start = (ROOT / "src" / "linux" / "scripts" / "start.sh").read_text()
     api_template = (ROOT / "src" / "common" / "confs" / "api.conf").read_text()
 
-    assert entrypoint.index("generate_default_server_cert") < entrypoint.index("gen/main.py")
-    assert entrypoint.index("generate_api_server_cert") < entrypoint.index("gen/main.py")
+    # The render lives in render_temp_config(), called after the certificates exist
+    first_render = entrypoint.index("render_temp_config || exit 1")
+    assert entrypoint.index("generate_default_server_cert") < first_render
+    assert entrypoint.index("generate_api_server_cert") < first_render
     assert "if ! generate_default_server_cert; then" in entrypoint
     assert "if ! generate_api_server_cert; then" in entrypoint
     assert "Continuing without a freshly generated" not in entrypoint
 
     generation = linux_start.index("generate_default_server_cert && generate_api_server_cert")
-    render = linux_start.index("gen/main.py", generation)
+    render = linux_start.index("render_temp_config || exit 1", generation)
     assert linux_start.rfind("if ! run_as_nginx", 0, generation) != -1
     assert generation < render
     assert "exit 1" in linux_start[generation:render]

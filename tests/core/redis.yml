@@ -453,6 +453,14 @@ actions:
       - "Autoconf"
       - "All-in-one"
     restart_stack: false
+  # Exercise ASK/MOVED and TRYAGAIN with Redis-only bans under continuous traffic.
+  cluster_slot_migration:
+    type: script
+    script: ["./tests/core/redis/cluster_migrate.sh", "docker"]
+    result: "cluster_migrate: all checks passed"
+    integrations:
+      - "Docker"
+    restart_stack: false
   clear_keys_cluster:
     type: redis
     cluster: true

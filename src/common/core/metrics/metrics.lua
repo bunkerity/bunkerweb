@@ -259,6 +259,8 @@ local synced_tables, synced_counters = {}, {}
 local legacy_cursor, legacy_due, legacy_failures = "0", 0, 0
 local legacy_done = false
 local REDIS_BATCH = 500
+local BAN_EVIDENCE_PENDING = "ban_evidence_pending"
+local BAN_EVIDENCE_RECOVERY_BATCH = 32
 
 -- A lost reply may replay the append. Accept that exact batch at the expected
 -- offset instead of appending it again; a lost/changed list forces a full sync.
@@ -1009,6 +1011,106 @@ function metrics:redis_call(method, ...)
 	return res, call_err
 end
 
+local function sync_ban_evidence(self, ban_id, payload, ttl)
+	local key = request_redis_key(self, ":ban_evidence:" .. ban_id)
+	if ttl > 0 then
+		return self:redis_call("set", key, payload, "NX", "EX", math.ceil(ttl))
+	end
+	return self:redis_call("set", key, payload, "NX")
+end
+
+function metrics:store_ban_evidence(events, summary)
+	summary.ban_id = "http:" .. utils.rand(32)
+	summary.event_count = #events
+	local ttl = parse_duration(self.variables["METRICS_REDIS_TTL"], "s") or 2592000
+	local ban_time = tonumber(summary.ban_time) or 0
+	ttl = ttl > 0 and ban_time > 0 and ttl + ban_time or 0
+	summary.evidence_expires_at = ttl > 0 and time() + ttl or 0
+	local evidence = { events = events }
+	for key, value in pairs(summary) do
+		evidence[key] = value
+	end
+	local payload = encode(evidence)
+	local stored, err =
+		self.metrics_datastore:set_with_retries("ban_evidence:" .. summary.ban_id .. ":data", payload, ttl)
+	if not stored then
+		self:log_throttled(ERR, "ban_evidence_local", "Can't save ban evidence locally: " .. tostring(err))
+	end
+	if self.use_redis then
+		self.redis_ok, err = self.clusterstore:connect()
+		local ok = self.redis_ok
+		if ok then
+			ok, err = sync_ban_evidence(self, summary.ban_id, payload, ttl)
+		end
+		self.clusterstore:close()
+		if not ok then
+			self:log_throttled(ERR, "ban_evidence_redis", "Can't save ban evidence in Redis: " .. tostring(err))
+			if stored then
+				local queued, queue_err = self.metrics_datastore.dict:lpush(BAN_EVIDENCE_PENDING, summary.ban_id)
+				if not queued then
+					self:log_throttled(
+						ERR,
+						"ban_evidence_pending",
+						"Can't queue ban evidence recovery: " .. tostring(queue_err)
+					)
+				end
+			end
+		end
+	end
+	return summary
+end
+
+function metrics:recover_ban_evidence()
+	for _ = 1, BAN_EVIDENCE_RECOVERY_BATCH do
+		local ban_id = self.metrics_datastore.dict:rpop(BAN_EVIDENCE_PENDING)
+		if not ban_id then
+			break
+		end
+		local key = "ban_evidence:" .. ban_id .. ":data"
+		local payload = self.metrics_datastore:get(key)
+		if payload then
+			local ok, ttl = self.metrics_datastore:ttl(key)
+			local err
+			if ok then
+				ok, err = sync_ban_evidence(self, ban_id, payload, ttl)
+			end
+			if not ok then
+				self:log_throttled(ERR, "ban_evidence_recovery", "Can't recover ban evidence: " .. tostring(err or ttl))
+				local queued, queue_err = self.metrics_datastore.dict:rpush(BAN_EVIDENCE_PENDING, ban_id)
+				if not queued then
+					self:log_throttled(
+						ERR,
+						"ban_evidence_pending",
+						"Can't requeue ban evidence: " .. tostring(queue_err)
+					)
+				end
+				break
+			end
+		end
+	end
+end
+
+function metrics:api_ban_evidence(ban_id)
+	if #ban_id ~= 37 or not ban_id:match("^http:[A-Za-z0-9]+$") then
+		return self:ret(true, "invalid ban ID", HTTP_BAD_REQUEST)
+	end
+	local payload = self.metrics_datastore:get("ban_evidence:" .. ban_id .. ":data")
+	if not payload and self.use_redis then
+		self.redis_ok = self.clusterstore:connect()
+		if self.redis_ok then
+			payload = self:redis_call("get", request_redis_key(self, ":ban_evidence:" .. ban_id))
+		end
+		self.clusterstore:close()
+	end
+	if payload and payload ~= null then
+		local ok, evidence = pcall(decode, payload)
+		if ok and type(evidence) == "table" and evidence.ban_id == ban_id and type(evidence.events) == "table" then
+			return self:ret(true, evidence, HTTP_OK)
+		end
+	end
+	return self:ret(true, { ban_id = ban_id, evidence_missing = true }, HTTP_OK)
+end
+
 -- Writing the stream buffer through to its SHM is the only thing that makes a report survive
 -- the worker that produced it: a reload disables the recurrent timer (premature) instead of
 -- letting it flush, so anything still Lua-local at that moment dies with the worker. Called
@@ -1585,6 +1687,10 @@ function metrics:timer()
 		end
 	end
 
+	if subsystem == "http" and worker_id() == 0 and self.redis_ok then
+		self:recover_ban_evidence()
+	end
+
 	-- Loop on all keys, coldest first. get_keys() hands them back hottest first and lru:get()
 	-- promotes what it reads, so walking forward reverses the whole queue on every cycle and
 	-- the next insertion evicts the hottest key instead of the coldest. Walking backwards
@@ -2068,6 +2174,9 @@ function metrics:api()
 	if filter == "requests/query" then
 		return self:api_requests_query()
 	end
+	if filter:sub(1, 16) == "badbehavior/ban/" then
+		return self:api_ban_evidence(filter:sub(17))
+	end
 
 	-- Timing aggregates are keyed <plugin>_timer_<phase>, so the prefix filter below can only
 	-- reach one plugin at a time. An operator wants the whole picture at once, hence a
@@ -2159,23 +2268,33 @@ end
 function metrics:api_requests_query()
 	-- Parse query parameters from request args
 	local args = ngx.req.get_uri_args()
-	local start_idx = tonumber(args.start) or 0
-	local length = tonumber(args.length) or 10
+	local start_idx = tonumber(tostring(args.start or "0"))
+	local length = tonumber(tostring(args.length or "10"))
 	local search = unescape_uri(args.search or "")
 	local order_column = args.order_column or "date"
 	local order_dir = args.order_dir or "desc"
 	local count_only = args.count_only == "true"
+	if not start_idx or start_idx < 0 or start_idx % 1 ~= 0 then
+		return self:ret(true, "invalid page start", ngx.HTTP_BAD_REQUEST)
+	end
+	if not length or length < -1 or length % 1 ~= 0 then
+		return self:ret(true, "invalid page length", ngx.HTTP_BAD_REQUEST)
+	end
+	if order_dir ~= "asc" and order_dir ~= "desc" then
+		return self:ret(true, "invalid sort direction", ngx.HTTP_BAD_REQUEST)
+	end
 
 	-- Parse search panes filters (format: field1:value1,value2;field2:value3)
 	local search_panes = {}
-	local search_panes_raw = unescape_uri(args.search_panes or "")
-	if search_panes_raw and search_panes_raw ~= "" then
+	-- Split separators before decoding values that may contain commas or semicolons.
+	local search_panes_raw = args.search_panes or ""
+	if search_panes_raw ~= "" then
 		for field_filter in search_panes_raw:gmatch("[^;]+") do
 			local field, values = field_filter:match("^([^:]+):(.+)$")
 			if field and values then
 				search_panes[field] = {}
 				for value in values:gmatch("[^,]+") do
-					table_insert(search_panes[field], value)
+					table_insert(search_panes[field], unescape_uri(value))
 				end
 			end
 		end

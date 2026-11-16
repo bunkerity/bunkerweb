@@ -387,7 +387,8 @@ def test_internal_deadline_validation_is_finite_and_passed_to_locked_mutations()
     assert 'utils.remove_ban(ip["ip"], service, ban_scope, not_after)' in api
     assert "ban.reason_data, not_after" in api
 
-    add_ban = utils.partition("utils.add_ban = function")[2].partition("utils.remove_ban = function")[0]
+    # the write itself lives in write_ban (utils.add_ban only parses the options and shapes the result)
+    add_ban = utils.partition("local function write_ban")[2].partition("utils.remove_ban = function")[0]
     remove_ban = utils.partition("utils.remove_ban = function")[2].partition("utils.new_cachestore = function")[0]
     assert add_ban.index("with_ban_snapshot_lock(function()") < add_ban.index("wall_time() > not_after")
     assert remove_ban.index("with_ban_snapshot_lock(function()") < remove_ban.index("wall_time() > not_after")
@@ -853,7 +854,7 @@ assert(next(main_store) == nil)
 local scan_count, deleted_global, deleted_smtp, deleted_imap = 0, false, false, false
 for _, arguments in ipairs(redis_calls) do
     if arguments[1] == "scan" then
-        assert(arguments[4] == "bans_service_*_ip_192.0.2.50")
+        assert(arguments[4] == "bans_*ip_*")
         scan_count = scan_count + 1
     elseif arguments[1] == "del" then
         for i = 2, #arguments do

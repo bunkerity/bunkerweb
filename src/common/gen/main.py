@@ -4,11 +4,11 @@ from argparse import ArgumentParser
 from os import R_OK, W_OK, X_OK, access, getenv, sep
 from os.path import join
 from pathlib import Path
-from shutil import rmtree
 from ssl import PROTOCOL_TLS_CLIENT, SSLContext, SSLError
 from sys import exit as sys_exit, path as sys_path
 from traceback import format_exc
 from typing import Any, Dict, Optional
+from tempfile import TemporaryDirectory
 
 for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("utils",), ("api",))]:
     if deps_path not in sys_path:
@@ -23,6 +23,7 @@ from redirect_resolver import expand_service_redirects  # type: ignore
 from upstream_resolver import expand_service_upstreams  # type: ignore
 from plugin_extensions import run_config_extensions  # type: ignore
 from modsecurity_audit import validate_audit_log_settings  # type: ignore
+from sync_tree import RESERVED_PREFIX, sync_tree
 
 DB_PATH = Path(sep, "usr", "share", "bunkerweb", "db")
 
@@ -257,34 +258,26 @@ if __name__ == "__main__":
         # raises: nothing is written and the previous push stays live on every instance.
         config, full_config = run_config_extensions(db, config, full_config, LOGGER)
 
-        # Remove old files. iterdir(), not glob("*"), so dotfiles go too: a regenerated output
-        # directory must not keep an entry of the previous render that a glob cannot see.
-        LOGGER.info("Removing old files ...")
-        for file in Path(args.output).iterdir():
-            if file.is_symlink() or file.is_file():
-                file.unlink()
-            elif file.is_dir():
-                rmtree(file.as_posix(), ignore_errors=True)
-
-        # After the wipe (which would delete it) and before the render (which needs it to exist
-        # by the time http.conf/stream.conf name it). A failure here exits non-zero, so nothing
-        # is rendered and nothing is pushed.
-        write_lua_trusted_ca_bundle(config.get("REDIS_SSL_CA", ""), output_path)
-
-        # Render the templates
-        LOGGER.info("Rendering templates ...")
-        templator = Templator(
-            templates_path.as_posix(),
-            core_path.as_posix(),
-            plugins_path.as_posix(),
-            pro_plugins_path.as_posix(),
-            output_path.as_posix(),
-            target_path.as_posix(),
-            config,
-            default_config,
-            full_config,
-        )
-        templator.render()
+        # Staging shares the output filesystem, so publication can replace files atomically.
+        with TemporaryDirectory(prefix=f"{RESERVED_PREFIX}gen.", dir=output_path) as staging:
+            staging_path = Path(staging)
+            write_lua_trusted_ca_bundle(config.get("REDIS_SSL_CA", ""), staging_path)
+            LOGGER.info("Rendering templates ...")
+            templator = Templator(
+                templates_path.as_posix(),
+                core_path.as_posix(),
+                plugins_path.as_posix(),
+                pro_plugins_path.as_posix(),
+                staging_path.as_posix(),
+                target_path.as_posix(),
+                config,
+                default_config,
+                full_config,
+            )
+            templator.render()
+            LOGGER.info("Removing old files ...")
+            LOGGER.info("Installing rendered files ...")
+            sync_tree(staging_path, output_path)
     except SystemExit as e:
         raise e
     except:

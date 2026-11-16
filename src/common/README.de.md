@@ -36,7 +36,7 @@ Dieses Muster ermöglicht es Ihnen, mehrere Konfigurationen für Funktionen wie 
 
 Sie können die Reihenfolge mit durch Leerzeichen getrennten Listen steuern:
 
-- Globale Phasen: `PLUGINS_ORDER_INIT`, `PLUGINS_ORDER_INIT_WORKER`, `PLUGINS_ORDER_TIMER`.
+- Globale Phasen: `PLUGINS_ORDER_INIT`, `PLUGINS_ORDER_INIT_WORKER`, `PLUGINS_ORDER_SSL_CLIENT_HELLO`, `PLUGINS_ORDER_TIMER`.
 - Seitenspezifische Phasen: `PLUGINS_ORDER_SET`, `PLUGINS_ORDER_ACCESS`, `PLUGINS_ORDER_SSL_CERTIFICATE`, `PLUGINS_ORDER_HEADER`, `PLUGINS_ORDER_LOG`, `PLUGINS_ORDER_PREREAD`, `PLUGINS_ORDER_LOG_STREAM`, `PLUGINS_ORDER_LOG_DEFAULT`.
 - Semantik: aufgelistete Plugins laufen zuerst in der Phase; alle übrigen laufen danach in ihrer normalen Reihenfolge. IDs nur mit Leerzeichen trennen.
 

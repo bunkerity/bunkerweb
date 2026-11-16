@@ -1,6 +1,7 @@
 local cdatastore = require "bunkerweb.datastore"
 local cjson = require "cjson"
 local internal_api = require "bunkerweb.internal_api"
+local ipaddr = require "bunkerweb.ipaddr"
 local rediskeys = require "bunkerweb.rediskeys"
 local resty_lock = require "resty.lock"
 
@@ -36,6 +37,7 @@ local function build_snapshot(payload)
 
 	local now = wall_time()
 	local bans = {}
+	local spellings = {}
 	local count = 0
 	for _, ban in ipairs(payload.data) do
 		if type(ban) ~= "table" or type(ban.ip) ~= "string" or ban.ip == "" then
@@ -45,19 +47,28 @@ local function build_snapshot(payload)
 			return nil, "invalid ban scope in /bans response"
 		end
 
-		local key = "bans_ip_" .. ban.ip
+		-- A row stored under another spelling of an address (expanded, upper case, IPv4-mapped) is the same ban: the
+		-- key is the canonical identity the request path looks up. A string that is no address keeps its own text.
+		local ip = ipaddr.normalize(ban.ip) or ban.ip
+		local key = "bans_ip_" .. ip
 		local service = ban.service or "unknown"
 		if ban.ban_scope == "service" then
 			if type(ban.service) ~= "string" or ban.service == "" then
 				return nil, "invalid service ban in /bans response"
 			end
-			key = "bans_service_" .. ban.service .. "_ip_" .. ban.ip
+			key = "bans_service_" .. ban.service .. "_ip_" .. ip
 		end
 		-- Snapshots belong to the local datastore, even when Redis uses tagged keys.
 		key = rediskeys.ban(key, false)
 		if bans[key] ~= nil then
-			return nil, "duplicate ban in /bans response"
+			-- The same text twice is a corrupt payload; two spellings of one address are one ban, the first one
+			-- (the database lists the newest first) stands.
+			if spellings[key] == ban.ip then
+				return nil, "duplicate ban in /bans response"
+			end
+			goto continue
 		end
+		spellings[key] = ban.ip
 
 		local permanent = ban.permanent == true
 		local expires_at = tonumber(ban.expires_at)
@@ -82,6 +93,7 @@ local function build_snapshot(payload)
 			}
 			count = count + 1
 		end
+		::continue::
 	end
 
 	return {
@@ -175,5 +187,8 @@ function ban_sync.reconcile()
 	end
 	return true, "synchronized " .. tostring(count) .. " bans"
 end
+
+-- Exposed for the unit tests: the pure part of the reconciliation
+ban_sync._build_snapshot = build_snapshot
 
 return ban_sync

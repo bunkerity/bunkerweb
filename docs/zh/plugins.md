@@ -403,7 +403,7 @@ cd myplugin
 }
 ```
 
-- 阶段名称包括 `init`、`init_worker`、`set`、`rewrite`、`access`、`content`、`ssl_client_hello_default`、`ssl_certificate`、`ssl_certificate_default`、`header`、`log`、`preread`、`log_stream`、`log_default`、`timer` 和 `init_workers`。`headers` 被接受为 `header` 的别名，与 `order.json` 中一致。
+- 阶段名称包括 `init`、`init_worker`、`set`、`rewrite`、`access`、`content`、`ssl_client_hello`、`ssl_client_hello_default`、`ssl_certificate`、`ssl_certificate_default`、`header`、`log`、`preread`、`log_stream`、`log_default`、`timer` 和 `init_workers`。`headers` 被接受为 `header` 的别名，与 `order.json` 中一致。
 - `before` / `after` 是插件 ID 列表。不可用的插件，或未实现该阶段的插件，会被忽略并在 BunkerWeb 错误日志中记录一条警告。每个插件、每个阶段最多按名称列出五个这样的 ID；其余的会被汇总为一行 `… more unknown order id(s) for phase <phase>`，因此过长的列表不会刷屏日志。
 - 相互矛盾的声明（形成循环）会被丢弃并记录警告：循环中各插件的声明会被跳过，顺序会在保留其余所有插件约束的情况下重新计算；只有当这次重试也失败时，才会保留默认顺序。格式错误的 `order` 块同样会被警告并丢弃；插件仍会正常加载。该检查是全有或全无的，配置生成器和运行时的行为完全一致：只要有一个条目无效——值不是字符串、ID 不匹配 `[A-Za-z0-9_.-]{1,64}` 或 `"*"`、阶段名称未知、`before`/`after` 旁出现未知键、`before`/`after` 不是列表——就会丢弃**整个 `order` 键**，包括其中格式正确的阶段。修复被报告的条目后，声明的其余部分就会恢复生效。空的 `before`/`after` 列表、空的阶段对象和空的 `order` 均被接受，表示"无约束"。
 - `before` / `after` 可以包含通配符 `"*"`，表示实现该阶段且未相对于自身受约束的所有其他插件。`"before": ["*"]` 会将插件排在所有未自我固定位置的插件之前，`"after": ["*"]` 则将其排在最后。共享同一通配符的插件保持其默认列表顺序；显式的插件 ID 优先于另一个插件的通配符。
@@ -635,6 +635,21 @@ return myplugin
 | `log_default` |           [log_by_lua](https://github.com/openresty/lua-nginx-module#log_by_lua)            | 与 `log` 相同，但仅在默认服务器上调用。                                              | `ret`, `msg`<ul><li>`ret` (布尔值)：如果没有错误则为 true，否则为 false</li><li>`msg` (字符串)：成功或错误消息</li></ul>                                                                                                                                                                                                           |
 |   `preread`   | [preread_by_lua](https://github.com/openresty/stream-lua-nginx-module#preread_by_lua_block) | 与 `access` 函数类似，但用于流模式。                                                 | `ret`, `msg`,`status`<ul><li>`ret` (布尔值)：如果没有错误则为 true，否则为 false</li><li>`msg` (字符串)：成功或错误消息</li><li>`status` (数字)：中断当前进程并返回 [status](https://github.com/openresty/lua-nginx-module#http-status-constants)</li></ul>                                                                        |
 | `log_stream`  |     [log_by_lua](https://github.com/openresty/stream-lua-nginx-module#log_by_lua_block)     | 与 `log` 函数类似，但用于流模式。                                                    | `ret`, `msg`<ul><li>`ret` (布尔值)：如果没有错误则为 true，否则为 false</li><li>`msg` (字符串)：成功或错误消息</li></ul>                                                                                                                                                                                                           |
+
+**TLS ClientHello 钩子。** 插件还可以在选择证书之前看到每一次 TLS 握手（默认服务器和每个服务均适用），方法是从其主 Lua 模块导出一个模块级函数（不是方法，因此每次握手都不会创建插件对象）：
+
+```lua
+-- 位于 myplugin/myplugin.lua
+function myplugin.client_hello(hello)
+    -- hello（只读）：service（默认服务器上为 nil）、ip（客户端地址未知时为 nil）、raw 和 family
+    --（ngx.ssl.raw_client_addr() 返回的二进制对端地址）、quic、proxy_protocol、real_ip、trusted
+    return nil -- 或 "drop" / "detect" 以及原因
+end
+```
+
+返回 `"drop"` 将中止握手，返回 `"detect"` 仅记录该握手将被丢弃，不返回任何值则放行。出错或返回任何其他值都会放行握手。该函数对每次握手恰好运行一次，并且**不得让出（yield）**：不得使用 Redis、cosocket、`ngx.var`、`resty.lock` 或 sleep。可以调用共享字典和 `ngx.timer.at(0, ...)`。导出该函数的插件的顺序遵循 `PLUGINS_ORDER_SSL_CLIENT_HELLO`。导出 `client_hello` 的插件在默认服务器上不会再通过其 `ssl_client_hello_default` 方法被调用。插件可以通过 `require("bunkerweb.tlsdrop").CLIENT_HELLO_PLUGIN_HOOK == 1` 检测是否支持。
+
+从 ClientHello 阶段封禁的插件可以把 `{ if_absent = true }` 作为 `utils.add_ban` 的最后一个参数：仅当该地址和范围尚无封禁时才写入（共享字典和 Redis 中均如此），已有的封禁不会被替换或延长。此时第一个返回值是 `"added"`、`"exists"` 或 `"error"`（后跟一条消息），而不是布尔值。插件可以通过 `utils.ADD_BAN_IF_ABSENT == 1` 检测是否支持。
 
 #### 库
 

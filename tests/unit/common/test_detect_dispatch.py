@@ -63,6 +63,7 @@ ngx = {
     HTTP_BAD_REQUEST = 400,
     HTTP_TOO_MANY_REQUESTS = 429,
     HTTP_NOT_ALLOWED = 405,
+    ctx = {},
     req = { is_internal = function() return false end },
     var = { server_name = "example.test" },
     shared = { internalstore = {}, internalstore_stream = {} },

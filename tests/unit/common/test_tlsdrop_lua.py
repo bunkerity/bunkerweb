@@ -343,11 +343,12 @@ client.addr, client.family = "\32\1\13\184" .. string.rep("\0", 11) .. "\1", "in
 local verdict, _, ip = tlsdrop.decide("www", false, false, nil)
 assert(verdict == "drop" and ip == "2001:db8::1", tostring(ip))
 
--- a dual-stack listener reports an IPv4 client as ::ffff:a.b.c.d: the ban key is the dotted text
+-- a dual-stack listener reports an IPv4 client as ::ffff:a.b.c.d, and an IPv4-mapped address is its IPv4 address in
+-- every ban key: the ClientHello judges the same identity as the HTTP phases
 ban("bans_ip_192.0.2.1", "manual", {})
 client.addr, client.family = string.rep("\0", 10) .. "\255\255\192\0\2\1", "inet6"
 local v2, _, ip2 = tlsdrop.decide("www", false, false, nil)
-assert(v2 == "drop" and ip2 == IP, tostring(ip2))
+assert(v2 == "drop" and ip2 == "192.0.2.1", tostring(ip2))
 """)
 
 
@@ -480,11 +481,13 @@ GOLDEN = [
     ("::1", "::1"),
     ("::", "::"),
     ("1::", "1::"),
-    ("::ffff:192.0.2.1", "::ffff:192.0.2.1"),  # stays IPv6
-    ("::ffff:c000:201", "::ffff:192.0.2.1"),
+    ("::ffff:192.0.2.1", "192.0.2.1"),  # an IPv4-mapped address is its IPv4 address (bunkerweb.ipaddr)
+    ("::ffff:010.001.002.003", "10.1.2.3"),  # the IPv4 tail is read by ngx_inet_addr: leading zeros accepted
+    ("::ffff:1.2.3.04", "1.2.3.4"),
+    ("::ffff:c000:201", "192.0.2.1"),
     ("::192.0.2.1", "::192.0.2.1"),
     ("::1.2.3.4", "::1.2.3.4"),
-    ("::ffff:0.0.0.1", "::ffff:0.0.0.1"),
+    ("::ffff:0.0.0.1", "0.0.0.1"),
     ("64:ff9b::192.0.2.33", "64:ff9b::c000:221"),
     ("2001:db8:0:1:0:0:0:1", "2001:db8:0:1::1"),
     ("2001:0:0:1:0:0:0:1", "2001:0:0:1::1"),
@@ -512,7 +515,6 @@ GOLDEN = [
 # the table above because the harness stand-in cannot pin libc:
 #   "1:2:3:4:5:6:7::"            nginx refuses; inet_pton takes it (canonical_addr answers 1:2:3:4:5:6:7:0)
 #   "::2:3:4:5:6:7:8"            nginx answers 0:2:3:4:5:6:7:8 (no compression of a lone leading zero word)
-#   "::ffff:010.001.002.003"     nginx answers ::ffff:10.1.2.3; inet_pton refuses leading zeros (nil, fail open)
 # None can come from a PROXY protocol sender (proxies write the canonical form), and each ends in a
 # fail-open or a ban lookup on an address that is not the client's.
 

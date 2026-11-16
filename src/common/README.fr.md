@@ -36,7 +36,7 @@ Ce modèle permet de gérer plusieurs configurations pour des fonctionnalités c
 
 Vous pouvez définir l’ordre d’exécution via des listes séparées par des espaces :
 
-- Phases globales : `PLUGINS_ORDER_INIT`, `PLUGINS_ORDER_INIT_WORKER`, `PLUGINS_ORDER_TIMER`.
+- Phases globales : `PLUGINS_ORDER_INIT`, `PLUGINS_ORDER_INIT_WORKER`, `PLUGINS_ORDER_SSL_CLIENT_HELLO`, `PLUGINS_ORDER_TIMER`.
 - Phases par site : `PLUGINS_ORDER_SET`, `PLUGINS_ORDER_ACCESS`, `PLUGINS_ORDER_SSL_CERTIFICATE`, `PLUGINS_ORDER_HEADER`, `PLUGINS_ORDER_LOG`, `PLUGINS_ORDER_PREREAD`, `PLUGINS_ORDER_LOG_STREAM`, `PLUGINS_ORDER_LOG_DEFAULT`.
 - Sémantique : les plugins listés s’exécutent en premier pour la phase ; les autres s’exécutent ensuite dans leur séquence normale. Séparez les IDs uniquement par des espaces.
 

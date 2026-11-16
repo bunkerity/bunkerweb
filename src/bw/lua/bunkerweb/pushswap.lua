@@ -12,6 +12,9 @@ local pushswap = {}
 -- filesystems fails with EXDEV. They are dot-prefixed so no wildcard include or
 -- glob picks them up, and the stale-entry sweep skips anything with this prefix.
 pushswap.RESERVED_PREFIX = ".bw-"
+-- Same name as gen/sync_tree.py and the startup scripts; never archive or sweep it.
+pushswap.INSTALL_SENTINEL = pushswap.RESERVED_PREFIX .. "install-incomplete"
+pushswap.SENTINEL_DESTINATION = "/etc/nginx"
 
 local function quote(path)
 	return "'" .. path:gsub("'", "'\\''") .. "'"
@@ -145,6 +148,22 @@ end
 -- rename, so a consumer resolving a path either sees the old entry or the new
 -- one, never a partially copied tree.
 function pushswap.swap(destination, staging)
+	local sentinel, sentinel_is_ours
+	if destination == pushswap.SENTINEL_DESTINATION then
+		sentinel = destination .. "/" .. pushswap.INSTALL_SENTINEL
+		if not run("test -e " .. quote(sentinel)) then
+			local file, err = io.open(sentinel, "w")
+			if not file then
+				return false, "cannot create " .. sentinel .. ": " .. tostring(err), false
+			end
+			local closed, close_err = file:close()
+			if not closed then
+				return false, "cannot close " .. sentinel .. ": " .. tostring(close_err), false
+			end
+			sentinel_is_ours = true
+		end
+	end
+
 	local existing = {}
 	for _, name in ipairs(list_entries(destination)) do
 		existing[name] = true
@@ -230,6 +249,12 @@ function pushswap.swap(destination, staging)
 		if incomplete then
 			return false, message .. " (" .. incomplete .. ")", true
 		end
+		if sentinel_is_ours then
+			local removed, err = os.remove(sentinel)
+			if not removed then
+				return false, message .. " (cannot clear install sentinel: " .. tostring(err) .. ")", false
+			end
+		end
 		return false, message, false
 	end
 
@@ -271,6 +296,12 @@ function pushswap.swap(destination, staging)
 		end
 	end
 
+	if sentinel then
+		local removed, err = os.remove(sentinel)
+		if not removed then
+			return abort("cannot clear install sentinel: " .. tostring(err))
+		end
+	end
 	execute("rm -rf " .. quote(trash) .. " " .. quote(staging))
 	return true
 end

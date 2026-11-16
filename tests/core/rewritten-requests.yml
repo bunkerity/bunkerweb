@@ -1,0 +1,48 @@
+# A request that a custom config rewrites must still go through the Lua access phase.
+#
+# `rewrite` sets `r->internal`, and the access phase used to return early for every internal request,
+# so a `rewrite ... last;` in a `server-http` custom config switched every access-phase protection
+# off for the rewritten request (bans, lists, rate limit, antibot, authentication, ModSecurity reason
+# handling). The unit tests (`tests/unit/common/test_access_rewritten_requests.py`) execute the
+# rendered `set` and `access` blocks; this spec proves it on a real nginx.
+#
+# The probe uses a protection that does not look at the URI: ctx.bw.uri is the URI the client sent,
+# not the rewritten one. A blacklisted User-Agent is checked by the blacklist plugin in the access
+# phase, so a 403 on the REWRITTEN path can only come from that phase having run.
+#
+# Docker only: the custom config is passed as a `CUSTOM_CONF_SERVER_HTTP_*` variable of the scheduler.
+# The value has no `$`, which compose would try to interpolate in an env file.
+integrations:
+  - "Docker"
+
+config:
+  USE_BLACKLIST: "yes"
+  BLACKLIST_COMMUNITY_LISTS: ""
+  BLACKLIST_IP_URLS: ""
+  BLACKLIST_USER_AGENT_URLS: ""
+  BLACKLIST_USER_AGENT: "BWRewriteProbe"
+  CUSTOM_CONF_SERVER_HTTP_rewrite_probe: "rewrite ^/rewrite-probe / last;"
+
+actions:
+  # The protection works on the path the client asked for ...
+  blacklisted_agent_on_a_plain_path:
+    type: status
+    url: "http://www.example.com/"
+    status: 403
+    headers:
+      User-Agent: "BWRewriteProbe"
+  # ... the rewrite itself works for a client the blacklist does not match ...
+  rewrite_serves_an_ordinary_client:
+    type: status
+    url: "http://www.example.com/rewrite-probe"
+    status: 200
+    restart_stack: false
+  # ... and the same blacklisted client is still refused once the request is rewritten. Before the
+  # fix this was 200: the rewritten request skipped the whole access phase.
+  blacklisted_agent_on_a_rewritten_path:
+    type: status
+    url: "http://www.example.com/rewrite-probe"
+    status: 403
+    restart_stack: false
+    headers:
+      User-Agent: "BWRewriteProbe"

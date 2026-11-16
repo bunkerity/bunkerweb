@@ -123,6 +123,7 @@ local utils = { get_variable = function(name)
 end }
 package.loaded["bunkerweb.utils"] = utils
 local rediskeys = require "bunkerweb.rediskeys"
+local ip_key = require("bunkerweb.ipaddr").key
 """
 
 

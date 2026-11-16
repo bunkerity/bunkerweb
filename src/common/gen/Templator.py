@@ -320,13 +320,6 @@ def create_custom_undefined_class(default_config: Dict[str, Any]):
     return ConfigurableCustomUndefined
 
 
-def _ensure_fork_start_method() -> None:
-    """Force fork start method when available so child processes inherit globals."""
-    with suppress(RuntimeError):
-        if mp.get_start_method(allow_none=True) != "fork":
-            mp.set_start_method("fork")
-
-
 class Templator:
     """A class to render configuration files using Jinja2 templates."""
 
@@ -582,6 +575,7 @@ class Templator:
 
         self._base_template_vars = {
             "is_custom_conf": Templator.is_custom_conf,
+            "plugin_conf_contexts": self._plugin_conf_contexts(),
             "has_variable": Templator.has_variable,
             "has_service_with": Templator.has_service_with,
             "random": Templator.random,
@@ -597,7 +591,6 @@ class Templator:
         """Render the templates based on the provided configuration."""
         global _ssl_ecdh_curve_resolution_logged
 
-        _ensure_fork_start_method()
         _ssl_ecdh_curve_resolution_logged = False
         if self._uses_auto_ssl_ecdh_curve():
             resolve_ssl_ecdh_curve("auto")
@@ -625,7 +618,7 @@ class Templator:
         batch_size = max(1, ceil(len(servers) / max_workers))
 
         server_start = perf_counter()
-        with ProcessPoolExecutor(max_workers=max_workers) as executor:
+        with ProcessPoolExecutor(max_workers=max_workers, mp_context=mp.get_context("fork")) as executor:
             future_to_batch = {}
             for i in range(0, len(servers), batch_size):
                 batch = servers[i : i + batch_size]  # noqa: E203
@@ -849,15 +842,8 @@ class Templator:
         `*.conf` rule picks it up, and `gen/main.py` wipes whatever is left on the next render
         (its `iterdir()` is deliberately dotfile-inclusive).
 
-        Not `cache_restore.write_atomic`, which does the same job for cache entries, for one
-        reason that holds on shipped code: it RAISES on failure, and `gen/main.py`'s bare `except:`
-        turns any raise into `sys_exit(1)` -- so a `variables.env` that could not be written would
-        stop the whole render, and push-configs would then ship nothing to anyone. Logging and
-        continuing degrades one file instead of the fleet's configuration. (Secondarily, its
-        `_check_path` rejects a target whose path traverses a symlink; no shipped image symlinks
-        `/etc/nginx`, so that one is hypothetical. Its mode preservation is moot either way: the
-        wipe above means this file is created fresh under the process umask every render --
-        `UMask=027` in the systemd units -- so both spellings produce the same mode.)
+        Failure aborts generation: shipping a tree without variables.env would remove the
+        settings the Lua access controls depend on.
         """
         real_path = self._output / "variables.env"
         tmp_path = real_path.with_name(".variables.env.tmp")
@@ -871,6 +857,7 @@ class Templator:
             with suppress(OSError):
                 tmp_path.unlink()
             logger.error(f"Error writing configuration to {real_path}: {e}")
+            raise
 
     def _get_server_config(self, server: str, global_only_config: Dict[str, Any], server_specific_config: Dict[str, Any]) -> Dict[str, Any]:
         """Get the configuration for a specific server.
@@ -1115,6 +1102,28 @@ class Templator:
             real_path.write_text(rendered_content)
         except Exception as e:
             logger.error(f"Error rendering template {template}: {e}")
+            raise
+
+    def _plugin_conf_contexts(self) -> frozenset:
+        """The template contexts that render at least one ``*.conf`` file into every tree of a generation.
+
+        The ModSecurity rules files ``include`` the ``modsec``, ``modsec-crs``, ``crs-plugins-before``
+        and ``crs-plugins-after`` directories that plugins fill through ``confs/<context>/``. Whether
+        such a directory will exist is decided here, from the templates this generation renders, and
+        not by globbing ``/etc/nginx`` on the rendering host: that path is the INSTANCE's tree, and
+        the host that renders (the worker, or any render into a private directory) either has none
+        or has the previous generation's, so a glob there answers about another machine or another
+        run. Every template of a context is rendered for every service whatever its content, so
+        the answer does not depend on the render order either.
+
+        Returns:
+            frozenset: Context names, e.g. ``{"modsec", "modsec-crs"}``.
+        """
+        return frozenset(
+            context
+            for context, templates in self._categorized_templates.items()
+            if context != "global" and any(not basename(template).startswith(".") and basename(template).endswith(".conf") for template in templates)
+        )
 
     @staticmethod
     def is_custom_conf(path: str) -> bool:

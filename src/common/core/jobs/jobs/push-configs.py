@@ -21,7 +21,7 @@ from tempfile import TemporaryDirectory
 from traceback import format_exc
 from uuid import uuid4
 
-for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("utils",), ("api",), ("db",))]:
+for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("utils",), ("api",), ("db",), ("gen",))]:
     if deps_path not in sys_path:
         sys_path.append(deps_path)
 
@@ -440,7 +440,7 @@ def _materialize_caches(db: Database) -> bool:
     return True
 
 
-def _render_nginx_configs() -> bool:
+def _render_nginx_configs(output_path: Path = CONFIG_PATH) -> bool:
     cmd_env = {
         "PATH": getenv("PATH", ""),
         "PYTHONPATH": getenv("PYTHONPATH", ""),
@@ -465,7 +465,7 @@ def _render_nginx_configs() -> bool:
             "--templates",
             BUNKERWEB_PATH.joinpath("confs").as_posix(),
             "--output",
-            CONFIG_PATH.as_posix(),
+            output_path.as_posix(),
         ],
         stdin=DEVNULL,
         stderr=STDOUT,
@@ -540,8 +540,8 @@ def _push_configs(instances, src: Path = CONFIG_PATH) -> bool:
     return ok
 
 
-def _push_all(api_caller: ApiCaller, instances) -> bool:
-    ok = _push_configs(instances)
+def _push_all(api_caller: ApiCaller, instances, config_path: Path | None = None) -> bool:
+    ok = _push_configs(instances) if config_path is None else _push_configs(instances, config_path)
     for src, endpoint in (
         (CACHE_PATH, "/cache"),
         (CUSTOM_CONFIGS_PATH, "/custom_configs"),
@@ -572,13 +572,16 @@ def _record_failover(db: Database, responses: dict, *, fleet: bool = True) -> No
 
 
 def _snapshot_failover() -> Path | None:
-    if not CONFIG_PATH.is_dir():
+    # Split workers retain accepted output here; co-located instances can use their live tree.
+    accepted = FAILOVER_PATH.parent.joinpath("generated")
+    source = accepted if accepted.is_dir() else CONFIG_PATH
+    if not source.is_dir() or source.joinpath(".bw-install-incomplete").exists():
         return None
     FAILOVER_PATH.mkdir(parents=True, exist_ok=True)
     snapshot = FAILOVER_PATH.joinpath(datetime.now().astimezone().strftime("%Y%m%dT%H%M%S"))
     try:
         snapshot.mkdir(parents=True, exist_ok=True)
-        copytree(CONFIG_PATH, snapshot.joinpath("nginx"), dirs_exist_ok=True, symlinks=True)
+        copytree(source, snapshot.joinpath("nginx"), dirs_exist_ok=True, symlinks=True)
         if CACHE_PATH.is_dir():
             # A job's `cache_file` writes through a temporary file that vanishes on rename, which a
             # concurrent copy trips over (and then the whole snapshot is lost): copy under the lock.
@@ -592,6 +595,17 @@ def _snapshot_failover() -> Path | None:
     for old in snapshots[:-FAILOVER_KEEP]:
         rmtree(old, ignore_errors=True)
     return snapshot
+
+
+def _remember_rendered_config(source: Path) -> None:
+    from sync_tree import sync_tree
+
+    accepted = FAILOVER_PATH.parent.joinpath("generated")
+    accepted.parent.mkdir(parents=True, exist_ok=True)
+    with TemporaryDirectory(prefix="bw-accepted-", dir=accepted.parent) as tmp:
+        staging = Path(tmp, "nginx")
+        copytree(source, staging, symlinks=True)
+        sync_tree(staging, accepted)
 
 
 def _restore_from_snapshot(snapshot: Path, api_caller: ApiCaller, instances) -> bool:
@@ -624,6 +638,7 @@ def _mark_failover(db: Database, instances) -> None:
 status = 0
 lock_acquired = False
 client = None
+render_dir = None
 
 try:
     target_hostnames_env = getenv("PUSH_CONFIGS_TARGETS", "").strip()
@@ -692,27 +707,28 @@ try:
     _materialize_plugins(db, PRO_PLUGINS_PATH, pro=True)
     caches_materialized = _materialize_caches(db)
 
-    if not _render_nginx_configs():
+    # Runtime output is private even on Linux/AIO, where /etc/nginx is shared with nginx.
+    render_dir = TemporaryDirectory(prefix="bw-render-")
+    rendered_path = Path(render_dir.name)
+    if not _render_nginx_configs(rendered_path):
         LOGGER.error("Aborting push: NGINX config rendering failed")
         sys_exit(2)
 
     api_caller = _build_api_caller(instances)
 
-    push_ok = _push_all(api_caller, instances)
+    push_ok = _push_all(api_caller, instances, rendered_path)
     if not push_ok:
         LOGGER.error("One or more artifact pushes failed (see per-instance logs above)")
+        # A failed install may have left a mixed tree; keep the old workers and retry delivery.
+        sys_exit(2)
 
     reload_ok, reload_responses = _trigger_reload(api_caller)
     _record_failover(db, reload_responses, fleet=not target_hostnames)
     if reload_ok:
         LOGGER.info("Push and reload completed successfully")
-        # Only here. Gating on the exit code instead would acknowledge four paths that reach
-        # exit 0 having pushed nothing (the lease skip, no live instances, no target match, and
-        # a failed push whose reload still succeeded), and `Jobs_runs.success` is likewise true
-        # for all of them -- neither is a statement that instances took the new configuration.
-        if not push_ok:
-            LOGGER.warning("Not acknowledging the changes: at least one artifact push failed, so a re-push is still owed")
-        elif not caches_materialized:
+        _remember_rendered_config(rendered_path)
+        # Exit 0 also covers lease skips and deferrals; only confirmed delivery can acknowledge changes.
+        if not caches_materialized:
             # The cache publication lock was not free within its budget, so the cache pushed above is
             # the previous disk tree, not the database's. Acknowledging would clear the flag with
             # nothing left to re-raise it; leave it raised so the next run rewrites the cache.
@@ -731,14 +747,14 @@ try:
             acknowledge_changes(db, metadata_snapshot, "pushed and reloaded")
     else:
         LOGGER.error("Reload failed on at least one instance")
+        status = 2
         if snapshot is not None and _restore_from_snapshot(snapshot, api_caller, instances):
             LOGGER.warning("Successfully restored previous configuration after reload failure")
         else:
             LOGGER.error("Failover restore failed; marking instances as failover")
             _mark_failover(db, instances)
-            status = 2
 
-    # Always return 0 unless we hit a catastrophic failure: the legacy
+    # Return 2 on a failed apply, even if failover restored service. Never return 1: the legacy
     # ret==1 / _request_reload_debounced path in worker.tasks would otherwise
     # double-fire a cache push + reload that we already performed here.
     if status == 0:
@@ -750,6 +766,11 @@ except BaseException as e:
     LOGGER.error(f"push-configs crashed: {e}\n{format_exc()}")
     sys_exit(2)
 finally:
+    if render_dir is not None:
+        try:
+            render_dir.cleanup()
+        except OSError as exc:
+            LOGGER.warning(f"Could not remove the temporary render: {exc}")
     if lock_acquired and client is not None:
         with suppress(BaseException):
             client.delete(LOCK_KEY)

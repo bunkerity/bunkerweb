@@ -1,0 +1,8 @@
+{
+  "id": "hellotest",
+  "name": "Hello test",
+  "description": "Test plugin: exports client_hello(hello) to prove the per-service TLS ClientHello hook runs for a named service.",
+  "version": "1.0",
+  "stream": "no",
+  "settings": {}
+}

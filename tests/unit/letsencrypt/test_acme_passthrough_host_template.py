@@ -4,9 +4,9 @@
 name (``tests/unit/letsencrypt/test_acme_passthrough.py``). It can only do that through an nginx
 variable, and the variable has to exist exactly when the Lua side touches it:
 
-  * ``LETS_ENCRYPT_PASSTHROUGH=yes`` and a LITERAL ``REVERSE_PROXY_CUSTOM_HOST``: the template declares
-    ``set $bw_reverse_proxy_host "<custom host>"`` once in the server block and the ``Host`` header of
-    every location reads it;
+  * ``LETS_ENCRYPT_PASSTHROUGH=yes`` and a LITERAL ``REVERSE_PROXY_CUSTOM_HOST``: ``server-http/server.conf``
+    declares ``set $bw_reverse_proxy_host "<custom host>"`` once (it must precede the set phase, which
+    now runs before every plugin include) and the ``Host`` header of every location reads it;
   * anything else renders exactly what it rendered before: a fixed host, or ``$host``, or a host built
     from nginx variables (a server-scope ``set`` would evaluate those before ``auth_request_set`` ran).
 """
@@ -41,12 +41,14 @@ def host_lines(output):
 
 
 def test_a_literal_custom_host_with_passthrough_reads_the_variable():
+    """The server block declares it (``server-http/server.conf``, before the set phase, see
+    ``tests/unit/common/test_access_rewritten_requests.py``): this template only reads it."""
     output = render(LETS_ENCRYPT_PASSTHROUGH="yes", REVERSE_PROXY_CUSTOM_HOST="backend.local")
-    assert output.count('set $bw_reverse_proxy_host "backend.local";') == 1
+    assert "set $bw_reverse_proxy_host" not in output
     assert host_lines(output) == ["proxy_set_header Host $bw_reverse_proxy_host;"]
 
 
-def test_the_variable_is_declared_once_for_every_location():
+def test_every_location_reads_the_variable():
     output = render(
         LETS_ENCRYPT_PASSTHROUGH="yes",
         REVERSE_PROXY_CUSTOM_HOST="backend.local",
@@ -54,7 +56,7 @@ def test_the_variable_is_declared_once_for_every_location():
         REVERSE_PROXY_HOST_1="http://other:8080",
         REVERSE_PROXY_URL_1="/api",
     )
-    assert output.count("set $bw_reverse_proxy_host ") == 1
+    assert "set $bw_reverse_proxy_host" not in output
     assert host_lines(output) == ["proxy_set_header Host $bw_reverse_proxy_host;"] * 2
 
 
@@ -87,9 +89,3 @@ def test_a_custom_host_header_still_wins():
     """``REVERSE_PROXY_HEADERS`` naming ``Host`` replaces the generated header, variable or not: only the user's line remains."""
     output = render(LETS_ENCRYPT_PASSTHROUGH="yes", REVERSE_PROXY_CUSTOM_HOST="backend.local", REVERSE_PROXY_HEADERS="Host fixed.example")
     assert host_lines(output) == ["proxy_set_header Host fixed.example;"]
-
-
-def test_the_directive_is_alone_on_its_line():
-    output = render(LETS_ENCRYPT_PASSTHROUGH="yes", REVERSE_PROXY_CUSTOM_HOST="backend.local")
-    line = next(line for line in output.splitlines() if "set $bw_reverse_proxy_host" in line)
-    assert line == 'set $bw_reverse_proxy_host "backend.local";'

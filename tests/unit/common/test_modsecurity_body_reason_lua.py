@@ -6,7 +6,7 @@ tell a malformed body from any other BunkerWeb refusal. The conf now stamps
 ``modsecurity-body-<id>`` and ``get_reason`` turns it into the reason ``modsecurity-body`` with the
 rule id as data. Two properties matter:
 
-* only 200002 and 200005 map; any other ``modsecurity_reason`` value keeps today's behaviour, so a
+* only 200002 through 200006 map; any other ``modsecurity_reason`` value keeps today's behaviour, so a
   client cannot pick its own reason through a crafted value;
 * the BunkerNet plugin must not push such a denial to the shared database (a parser error is not
   evidence of an attack).
@@ -54,6 +54,7 @@ VAR = {}
 ngx = { var = VAR, status = 200 }
 local var = VAR
 local utils = {}
+local ip_key = require("bunkerweb.ipaddr").key
 utils.get_security_mode = function() return "block" end
 utils.get_deny_status = function() return 403 end
 local decode = function(s) return {} end
@@ -101,7 +102,7 @@ print(reason, #data.ids, data.ids[1], mode)
 """)
         assert out == f"modsecurity-body\t1\t{rule_id}\tblock"
 
-    @pytest.mark.parametrize("value", ["modsecurity-body-200003", "modsecurity-body-2000020", "modsecurity-body-", "xmodsecurity-body-200002"])
+    @pytest.mark.parametrize("value", ["modsecurity-body-200007", "modsecurity-body-2000020", "modsecurity-body-", "xmodsecurity-body-200002"])
     def test_any_other_value_keeps_the_unmapped_behaviour(self, value):
         # not a mapped id: falls through to the unknown-denial arm (status == deny status)
         out = run_get_reason(f"""

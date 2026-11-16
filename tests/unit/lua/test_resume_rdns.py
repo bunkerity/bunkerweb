@@ -28,8 +28,9 @@ def function_source(path, signature):
 PREAMBLE = r"""
 local utils, cache, encoded, queries, logs = {}, {}, {}, {}, {}
 local ERR, WARN = 'ERR', 'WARN'
+local ip_key = require('bunkerweb.ipaddr').key
 local logger = {log = function(_, level, message) table.insert(logs, {level, message}) end}
-local use_ipv6, setup_error, query_error = 'no', false, false
+local use_ipv6, setup_error, query_error, a_nxdomain = 'no', false, false, false
 local ipv4, ipv6 = '192.0.2.1', '2001:db8::1'
 local ptrs = {'bot.example.com'}
 local function encode(value)
@@ -54,6 +55,7 @@ local resolver = {new = function()
         query = function(_, fqdn, options)
             table.insert(queries, {fqdn, options.qtype})
             if query_error then return nil, 'timeout' end
+            if a_nxdomain and options.qtype == 1 then return {errcode = 3, errstr = 'name error'} end
             local address = options.qtype == 28 and ipv6 or ipv4
             if not address then return {} end
             return {{address = address}}
@@ -145,19 +147,23 @@ def test_negative_dns_cache_is_family_specific(tmp_path):
     run_lua(
         tmp_path,
         """
-query_error = true
+a_nxdomain = true
 assert(#utils.get_ips('bot.example.com', false, ctx, true) == 0)
 assert(#queries == 1)
-query_error = false
+a_nxdomain = false
 assert(#utils.get_ips('bot.example.com', false, ctx, true) == 0)
 assert(#queries == 1, 'negative A cache must avoid another query')
 assert(utils.rdns_forward_confirmed(ptrs, {'.example.com'}, ctx, ctx.bw.remote_addr, logger) == '.example.com')
 assert(#queries == 3, 'negative A cache must not suppress AAAA')
 cache = {}; queries = {}; query_error = true
-assert(#utils.get_ips('bot.example.com', nil, ctx, true, true) == 0)
+local ips, err = utils.get_ips('bot.example.com', nil, ctx, true, true)
+assert(ips == false and err, 'resolver failure must return false and an error')
+assert(#queries == 2)
 query_error = false
-assert(#utils.get_ips('bot.example.com', nil, ctx, true, true) == 0)
-assert(#queries == 2, 'negative dual-stack cache must avoid another query')
+assert(#utils.get_ips('bot.example.com', nil, ctx, true, true) == 2)
+assert(#queries == 4, 'resolver failure must be retried')
+assert(#utils.get_ips('bot.example.com', nil, ctx, true, true) == 2)
+assert(#queries == 4, 'successful retry must be cached')
 """,
     )
 

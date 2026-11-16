@@ -177,7 +177,8 @@ ngx = {
     config = { subsystem = "http" },
     shared = { internalstore = {}, internalstore_stream = {} },
 }
-io.open = function()
+io.open = function(path)
+    if path == "/var/tmp/bunkerweb_reloading" then return nil, "No such file", 2 end
     return { read = function() return "invalid" end, close = function() end }
 end
 os.execute = function() return true, "exit", 0 end

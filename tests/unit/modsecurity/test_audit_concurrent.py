@@ -295,7 +295,8 @@ class TestEveryStartAndReloadPathRunsThePreflight:
         start = text.index('nginx -g "daemon off;"')
         check = text.rfind(PREFLIGHT, 0, start)
         assert check != -1, "the start path never runs the audit preflight"
-        assert "exit 1" in text[check:start], "an invalid audit configuration must refuse to start nginx"
+        # start_nginx() reports the refusal through its status, the caller exits on it
+        assert "refusing to start nginx" in text[check:start] and "return 1" in text[check:start], "an invalid audit configuration must refuse to start nginx"
         assert "/etc/nginx/variables.env" in text[check:start]
 
     def test_container_entrypoint_checks_before_it_reloads_nginx(self):
@@ -316,7 +317,7 @@ class TestEveryStartAndReloadPathRunsThePreflight:
         check = text.rfind(PREFLIGHT, 0, start)
         assert check != -1, "the Linux / FreeBSD start path never runs the audit preflight"
         assert "run_as_nginx" in text[text.rfind("\n", 0, check) : check + len(PREFLIGHT)], "the directory must be created by the nginx user"
-        assert "exit 1" in text[check:start]
+        assert "return 1" in text[check:start]
 
     def test_linux_reload_checks_before_it_reloads_nginx(self):
         text = read("src/linux/scripts/start.sh")

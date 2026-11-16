@@ -1,0 +1,53 @@
+# The startup half of reload safety (QAR Q2/Q3), proved on a running stack. Each action drives the
+# bunkerweb container through a boundary the action runner cannot express: a render that fails in the
+# worker, a restart over an interrupted install, a restart over a kept configuration that nginx rejects
+# at init. The same blacklisted request must be denied before, during and after each one.
+integrations:
+  - "Docker"
+
+config:
+  # tests/utils/config.yml pins 3600 for every other spec. The scheduler's loading re-push, which is
+  # what ends the loading configuration these actions boot into, rides on that pass: see healthcheck.yml.
+  HEALTHCHECK_INTERVAL: "30"
+  USE_BLACKLIST: "yes"
+  BLACKLIST_COMMUNITY_LISTS: ""
+  BLACKLIST_IP_URLS: ""
+  BLACKLIST_USER_AGENT_URLS: ""
+  BLACKLIST_USER_AGENT: "BWReloadProbe"
+  USE_BAD_BEHAVIOR: "no"
+  USE_LIMIT_REQ: "no"
+  USE_LIMIT_REQ_GLOBAL: "no"
+  API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24 192.168.0.1/32"
+
+actions:
+  failed_render_ships_nothing:
+    type: script
+    retries: 1
+    restart_stack: false
+    result: "failed-render: the failed render shipped nothing"
+    script:
+      ["python3", "tests/core/reload-startup-safety/probe.py", "failed-render"]
+
+  interrupted_install_boots_the_loading_configuration:
+    type: script
+    retries: 1
+    restart_stack: false
+    result: "interrupted-install: the interrupted tree was not kept"
+    script:
+      [
+        "python3",
+        "tests/core/reload-startup-safety/probe.py",
+        "interrupted-install",
+      ]
+
+  kept_configuration_that_fails_to_start_falls_back_once:
+    type: script
+    retries: 1
+    restart_stack: false
+    result: "kept-config-failure: the failing kept configuration fell back once"
+    script:
+      [
+        "python3",
+        "tests/core/reload-startup-safety/probe.py",
+        "kept-config-failure",
+      ]

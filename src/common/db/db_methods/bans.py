@@ -9,6 +9,7 @@ from typing import Any, Dict, List, Optional, Tuple
 from sqlalchemy import and_, delete, func, or_, select, update
 from sqlalchemy.exc import IntegrityError
 
+from ip_identity import normalize_ip as _canonical_ip  # type: ignore
 from model import Bans  # type: ignore
 
 from .common import DatabaseMixinBase, retry_on_transient_db_errors
@@ -25,14 +26,27 @@ TOMBSTONE_RETENTION_DAYS = 30
 
 
 def normalize_ip(value: Any) -> str:
-    """Canonical text form of an IP, matching what NGINX puts in ``$remote_addr``.
+    """Canonical identity of a ban target (``ip_identity.normalize_ip``), "" when it is not a bare IP address.
 
-    The runtime builds its shm key from that form, so an uncompressed ``2001:0DB8::1`` stored here
-    would never match the ban the instance is actually enforcing. Returns "" when unparseable.
+    The runtime builds its shared dict and Redis keys from that text, so one address stored under another spelling
+    (expanded, upper case, IPv4-mapped) would never match the ban the instance is actually enforcing.
     """
+    try:
+        return _canonical_ip(value)
+    except (ValueError, TypeError):
+        return ""
+
+
+def _spellings(ip: str) -> Tuple[str, ...]:
+    """The canonical address and the spellings an older version may have stored it under: the one ``str(ip_address())``
+    gives (a mapped IPv6 address, an address with an IPv4 tail) and, for an IPv4 address, its mapped IPv6 forms."""
+    found = {ip}
     with suppress(ValueError):
-        return str(ip_address(str(value).strip()))
-    return ""
+        address = ip_address(ip)
+        found.add(str(address))
+        if address.version == 4:
+            found.update((f"::ffff:{ip}", f"::ffff:{int(address) >> 16:x}:{int(address) & 0xFFFF:x}"))
+    return tuple(found)
 
 
 def _now() -> datetime:
@@ -178,7 +192,8 @@ def _row_to_dict(row: Bans, now: datetime) -> Dict[str, Any]:
         with suppress(ValueError, TypeError):
             reason_data = loads(row.reason_data)
     return {
-        "ip": row.ip,
+        # A row an older version stored under another spelling is listed under its canonical identity
+        "ip": normalize_ip(row.ip) or row.ip,
         "reason": row.reason,
         "service": row.service_id or "unknown",
         "date": int(_utc(row.created_at).timestamp()),
@@ -260,7 +275,16 @@ class DatabaseBansMixin(DatabaseMixinBase):
             if self.readonly:
                 return "The database is read-only, the changes will not be saved"
 
-            row = session.execute(select(Bans).where(Bans.ip == ip, Bans.ban_scope == scope, Bans.service_id == service)).scalar_one_or_none()
+            rows = session.scalars(select(Bans).where(Bans.ip.in_(_spellings(ip)), Bans.ban_scope == scope, Bans.service_id == service)).all()
+            row = next((r for r in rows if r.ip == ip), None)
+            # The same address stored under another spelling by an older version is this ban: reuse its row under the
+            # canonical text, and drop any further duplicate (``get_bans`` and ban_sync must see one row per identity)
+            legacy = [r for r in rows if r is not row]
+            if row is None and legacy:
+                row = legacy.pop(0)
+                row.ip = ip
+            for extra in legacy:
+                session.delete(extra)
             if row is None:
                 session.add(
                     Bans(
@@ -312,7 +336,7 @@ class DatabaseBansMixin(DatabaseMixinBase):
             if self.readonly:
                 return "The database is read-only, the changes will not be saved"
 
-            conditions = [Bans.ip == ip, Bans.revoked_at.is_(None)]
+            conditions = [Bans.ip.in_(_spellings(ip)), Bans.revoked_at.is_(None)]
             if scope == "service":
                 conditions += [Bans.ban_scope == "service", Bans.service_id == service]
             try:
@@ -346,9 +370,15 @@ class DatabaseBansMixin(DatabaseMixinBase):
             if self.readonly:
                 return "The database is read-only, the changes will not be saved"
 
-            row = session.execute(
-                select(Bans).where(Bans.ip == ip, Bans.ban_scope == scope, Bans.service_id == service, Bans.revoked_at.is_(None), Bans.reason == "crowdsec")
-            ).scalar_one_or_none()
+            row = (
+                session.execute(
+                    select(Bans).where(
+                        Bans.ip.in_(_spellings(ip)), Bans.ban_scope == scope, Bans.service_id == service, Bans.revoked_at.is_(None), Bans.reason == "crowdsec"
+                    )
+                )
+                .scalars()
+                .first()
+            )
             if row is None or lease_id_of({"reason_data": row.reason_data}) != lease_id:
                 return ""
             try:
@@ -379,7 +409,10 @@ class DatabaseBansMixin(DatabaseMixinBase):
         if not include_revoked:
             stmt = stmt.where(_active_clause(now))
         with self._db_session() as session:
-            return [_row_to_dict(row, now) for row in session.scalars(stmt.order_by(Bans.created_at.desc())).all()]
+            rows = [_row_to_dict(row, now) for row in session.scalars(stmt.order_by(Bans.created_at.desc())).all()]
+        # Two spellings of one address are one ban: the newest row stands (ban_sync refuses duplicate keys)
+        seen = set()
+        return [ban for ban in rows if (key := (ban["ip"], ban["ban_scope"], ban["service"])) not in seen and not seen.add(key)]
 
     @retry_on_transient_db_errors
     def get_bans_timeseries(self, *, start: int, end: int, bucket: str = "hour") -> Dict[str, Any]:
@@ -492,7 +525,7 @@ class DatabaseBansMixin(DatabaseMixinBase):
                 # A tombstone produced from a lease names it, so the replay removes that lease only.
                 tombstone = identity | {"lease_id": reported_lease_id} if reported_lease and reported_lease_id else identity
 
-                rows = session.scalars(select(Bans).where(Bans.ip == ip, or_(Bans.ban_scope == "global", Bans.service_id == service))).all()
+                rows = session.scalars(select(Bans).where(Bans.ip.in_(_spellings(ip)), or_(Bans.ban_scope == "global", Bans.service_id == service))).all()
                 own = next((r for r in rows if r.ban_scope == scope and r.service_id == service), None)
                 covering = next((r for r in rows if _covers(r, seen_at, reported["reason"], reported_lease_id)), None)
 
@@ -592,7 +625,7 @@ class DatabaseBansMixin(DatabaseMixinBase):
                 except IntegrityError:
                     # Another writer inserted the same identity between the SELECT and here. Its
                     # row wins; re-read it so a revoke that just landed is honoured.
-                    existing = session.execute(select(Bans).where(Bans.ip == ip, Bans.ban_scope == scope, Bans.service_id == service)).scalar_one_or_none()
+                    existing = session.scalars(select(Bans).where(Bans.ip.in_(_spellings(ip)), Bans.ban_scope == scope, Bans.service_id == service)).first()
                     existing_revoked_at = _utc(existing.revoked_at) if existing is not None else None
                     if existing_revoked_at is not None and existing_revoked_at >= seen_at:
                         tombstoned.append(tombstone)

@@ -22,8 +22,7 @@ local logger = clogger:new("API")
 local get_country = utils.get_country
 local get_variable = utils.get_variable
 local is_ip_in_networks = utils.is_ip_in_networks
-local is_ipv4 = utils.is_ipv4
-local is_ipv6 = utils.is_ipv6
+local normalize_ip = utils.normalize_ip
 
 local RESERVED_SERVICE_NAMES = {
 	["unknown"] = true,
@@ -80,10 +79,8 @@ local SWAP_WAIT_TIMEOUT = 10
 -- and the scheduler retries a 503 three times two seconds apart (ApiCaller BUSY_ATTEMPTS), so a
 -- loser is not reported as a failed push.
 local PUSH_LOCK_WAIT = 10
--- How long POST /reload waits for proof that NGINX adopted the new cycle before it stops
--- believing the signal and asks `nginx -t` instead. A refusal is immediate (the [emerg] is
--- logged in the same second as the SIGHUP), so this only ever expires on a slow success.
-local RELOAD_CONFIRM_TIMEOUT = 2
+-- New workers publish readiness from a timer delayed by five seconds.
+local RELOAD_CONFIRM_TIMEOUT = 10
 local kill = rsignal.kill
 local get_master_pid = process.get_master_pid
 local execute = os.execute
@@ -242,33 +239,43 @@ local function test_nginx_conf()
 	return false, result
 end
 
--- Decide whether the reload we just signalled actually happened.
---
--- A SIGHUP that lands is not a reload that took : NGINX parses the new configuration in the
--- master AFTER the signal, and when it refuses it logs [emerg] and keeps serving the old cycle.
--- The signal still succeeded, which is why a refused reload used to answer 200 "reload
--- successful" -- and why DISABLE_CONFIGURATION_TESTING masked it outright: the pre-test was the
--- only thing on this path that ever produced a verdict, so skipping it left nothing to fail.
---
--- Cheap signal first : a master that accepted the new cycle forks fresh workers and immediately
--- tells the old ones -- us, this request is served by one -- to shut down, so
--- ngx.worker.exiting() flips within milliseconds. The wait expiring is NOT proof of failure: a
--- refusal is immediate while a success can be slow, because init_by_lua rebuilds the whole
--- BunkerWeb runtime in the master on a large configuration. So an unconfirmed reload falls back
--- to `nginx -t`, which answers for real, and which only runs on the path that needed it.
-local function confirm_reload()
+local function read_reload_marker()
+	local file = open("/var/tmp/bunkerweb_reloading", "r")
+	if not file then
+		return nil
+	end
+	local token = file:read("*a")
+	file:close()
+	return token
+end
+
+local function clear_reload_marker(token)
+	if read_reload_marker() == token then
+		remove("/var/tmp/bunkerweb_reloading")
+	end
+end
+
+-- Neither worker rotation nor nginx -t proves this reload's init_by_lua succeeded.
+local function confirm_reload(token)
+	ngx.update_time()
 	local deadline = ngx.now() + RELOAD_CONFIRM_TIMEOUT
-	while not ngx.worker.exiting() do
-		if ngx.now() >= deadline then
-			local ok, output = test_nginx_conf()
-			if not ok then
-				return false, output
+	local ready_key = "misc_ready_" .. token
+	while true do
+		if shared.internalstore:get(ready_key) == "ok" then
+			return true, "new workers confirmed readiness"
+		end
+		if read_reload_marker() ~= token then
+			-- Readiness can land between the first read and the marker's removal.
+			if shared.internalstore:get(ready_key) == "ok" then
+				return true, "new workers confirmed readiness"
 			end
-			return true, "unconfirmed after " .. RELOAD_CONFIRM_TIMEOUT .. "s but the configuration tests clean"
+			return false, "initialization did not confirm readiness"
+		end
+		if ngx.now() >= deadline then
+			return false, "timed out waiting for new workers after " .. RELOAD_CONFIRM_TIMEOUT .. "s"
 		end
 		ngx.sleep(0.05)
 	end
-	return true, "workers rotated"
 end
 
 api.global = { GET = {}, POST = {}, PUT = {}, DELETE = {} }
@@ -585,17 +592,19 @@ local function reload_locked(test_arg)
 		logger:log(NOTICE, "Nginx configuration is valid")
 	end
 
-	-- Create the reconfiguration marker BEFORE signalling: the entity that removes it is the NEW
-	-- cycle's worker init (init-worker-lua.conf), and confirm_reload() below only returns once
-	-- those workers are already up -- a marker created after it would never be cleared and /health
-	-- would answer "reloading" forever. On a refused reload the marker stays until the next
-	-- successful reload clears it, which is what /health should say about a wedged instance.
+	-- Init captures this token before the new workers fork; old workers cannot confirm it.
+	local token = new_swap_token()
 	local file, ferr = open("/var/tmp/bunkerweb_reloading", "w")
-	if file then
-		file:write(tostring(os.time()))
-		file:close()
-	else
-		logger:log(ERR, "Failed to create reload indicator file: " .. ferr)
+	if not file then
+		return HTTP_INTERNAL_SERVER_ERROR, "error", "reload failed: can't create reload marker: " .. tostring(ferr)
+	end
+	local written, write_err = file:write(token)
+	local closed, close_err = file:close()
+	if not written or not closed then
+		clear_reload_marker(token)
+		return HTTP_INTERNAL_SERVER_ERROR,
+			"error",
+			"reload failed: can't write reload marker: " .. tostring(write_err or close_err)
 	end
 
 	-- Reload Nginx
@@ -609,15 +618,17 @@ local function reload_locked(test_arg)
 			rc = execute("sudo -n /usr/sbin/service bunkerweb reload >/dev/null 2>&1")
 		end
 		if rc ~= 0 and rc ~= true then
+			clear_reload_marker(token)
 			return HTTP_INTERNAL_SERVER_ERROR, "error", "err = " .. err
 		end
 	end
 
 	-- The signal landing says nothing about the reload succeeding : see confirm_reload().
-	local reloaded, detail = confirm_reload()
+	local reloaded, detail = confirm_reload(token)
 	if not reloaded then
-		logger:log(ERR, "Nginx refused the reload and is still serving the previous configuration : " .. detail)
-		return HTTP_INTERNAL_SERVER_ERROR, "error", "reload refused by nginx: " .. detail
+		clear_reload_marker(token)
+		logger:log(ERR, "Nginx reload was not confirmed : " .. detail)
+		return HTTP_INTERNAL_SERVER_ERROR, "error", "reload failed: " .. detail
 	end
 	logger:log(NOTICE, "Nginx reloaded (" .. detail .. ")")
 
@@ -984,10 +995,12 @@ api.global.POST["^/unban$"] = function(self)
 		return self:response(HTTP_INTERNAL_SERVER_ERROR, "error", "can't decode JSON : " .. ip)
 	end
 
-	-- Validate IP address
-	if not ip["ip"] or (not is_ipv4(ip["ip"]) and not is_ipv6(ip["ip"])) then
+	-- Validate the address and keep its canonical spelling: one address is one ban
+	local canonical_ip = type(ip) == "table" and normalize_ip(ip["ip"])
+	if not canonical_ip then
 		return self:response(HTTP_BAD_REQUEST, "error", "invalid IP address")
 	end
+	ip["ip"] = canonical_ip
 
 	local ban_scope = ip["ban_scope"] or "global"
 	local service = ip["service"]
@@ -1061,6 +1074,9 @@ api.global.POST["^/ban$"] = function(self)
 	if not ok then
 		return self:response(HTTP_INTERNAL_SERVER_ERROR, "error", "can't decode JSON : " .. ip)
 	end
+	if type(ip) ~= "table" then
+		return self:response(HTTP_BAD_REQUEST, "error", "request body must be a JSON object")
+	end
 	local not_after
 	if self.ctx.bw.remote_addr == "unix:" and ip["not_after"] ~= nil then
 		not_after = ip["not_after"]
@@ -1096,10 +1112,12 @@ api.global.POST["^/ban$"] = function(self)
 		ban.reason_data = ip["reason_data"]
 	end
 
-	-- Validate IP address
-	if not ban.ip or (not is_ipv4(ban.ip) and not is_ipv6(ban.ip)) then
+	-- Validate the address and keep its canonical spelling: one address is one ban
+	ban.ip = normalize_ip(ban.ip)
+	if not ban.ip then
 		return self:response(HTTP_BAD_REQUEST, "error", "invalid IP address")
 	end
+	ip["ip"] = ban.ip
 
 	-- Validate expiration
 	if ban.exp and (type(ban.exp) ~= "number" or ban.exp < 0) then
