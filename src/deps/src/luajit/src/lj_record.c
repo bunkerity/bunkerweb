@@ -2040,7 +2040,7 @@ static void rec_varg(jit_State *J, BCReg dst, ptrdiff_t nresults)
       TRef tridx = getslot(J, dst-1);
       TRef tr = TREF_NIL;
       ptrdiff_t idx = lj_ffrecord_select_mode(J, tridx, &J->L->base[dst-1]);
-      if (idx < 0) goto nyivarg;
+      if (idx < 0 || idx > LUAI_MAXSTACK) goto nyivarg;
       if (idx != 0 && !tref_isinteger(tridx)) {
 	if (tref_isstr(tridx))
 	  tridx = emitir(IRTG(IR_STRTO, IRT_NUM), tridx, 0);
@@ -2059,15 +2059,8 @@ static void rec_varg(jit_State *J, BCReg dst, ptrdiff_t nresults)
 	  tridx = emitir(IRTI(IR_ADD), tridx, lj_ir_kint(J, -1));
 	  rec_idx_abc(J, tr, tridx, (uint32_t)nvararg);
 	}
-      } else {
-	TRef tmp = lj_ir_kint(J, frofs);
-	if (idx != 0) {
-	  TRef tmp2 = emitir(IRTI(IR_BSHL), tridx, lj_ir_kint(J, 3));
-	  tmp = emitir(IRTI(IR_ADD), tmp2, tmp);
-	} else {
-	  tr = lj_ir_kint(J, 0);
-	}
-	emitir(IRTGI(IR_LT), fr, tmp);
+      } else {  /* Indexing beyond nvararg. */
+	goto nyivarg;  /* Uncommon and pointless to compile it. */
       }
       if (idx != 0 && idx <= nvararg) {
 	IRType t;

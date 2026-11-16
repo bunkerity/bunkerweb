@@ -258,7 +258,7 @@ class TemplateAndLocalesTest(unittest.TestCase):
 
     def test_locale_keys_exist_everywhere(self):
         locales = sorted(REPO_ROOT.joinpath("src/ui/app/static/locales").glob("*.json"))
-        self.assertEqual(len(locales), 19)
+        self.assertEqual(len(locales), 20)
         for path in locales:
             card = json.loads(path.read_text(encoding="utf-8"))["support"]["card"]["extract_config"]
             for key in ("hide_passwords", "hide_passwords_warning"):

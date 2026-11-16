@@ -3,7 +3,7 @@
 <nav class="layout-navbar navbar navbar-expand-xl navbar-detached align-items-center bg-navbar-theme"
      id="layout-navbar">
     <div class="layout-menu-toggle navbar-nav align-items-xl-center me-4 me-xl-0 d-xl-none">
-        <a class="nav-item nav-link px-0 me-xl-6" href="javascript:void(0)">
+        <a class="nav-item nav-link px-0 me-xl-6" href="javascript:void(0)" aria-label="Menu">
             <i class="bx bx-menu bx-md"></i>
         </a>
     </div>
@@ -51,12 +51,14 @@
                    target="_blank"
                    rel="noopener"
                    data-endpoint="{{ documentation_endpoint }}"
-                   data-fragment="{{ documentation_fragment or '' }}">
+                   data-fragment="{{ documentation_fragment or '' }}"
+                   aria-labelledby="documentation-link-label">
                     <span class="tf-icons bx bx-file me-md-2"></span>
-                    <span class="d-none d-lg-inline" data-i18n="navbar.link.documentation">Documentation</span>
+                    <span id="documentation-link-label" class="d-none d-lg-inline" data-i18n="navbar.link.documentation">Documentation</span>
                 </a>
                 <a role="button"
                    class="btn btn-outline-github p-1 p-md-2 ms-1 ms-md-2"
+                   aria-label="Github"
                    aria-pressed="true"
                    href="https://github.com/bunkerity/bunkerweb/?utm_campaign=self&utm_source=ui"
                    target="_blank"
@@ -66,6 +68,7 @@
                 </a>
                 <a role="button"
                    class="btn btn-outline-discord p-1 p-md-2 ms-1 ms-md-2"
+                   aria-label="Discord"
                    aria-pressed="true"
                    href="https://discord.bunkerity.com/?utm_campaign=self&utm_source=ui"
                    target="_blank"

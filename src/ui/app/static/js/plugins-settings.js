@@ -751,15 +751,19 @@ $(document).ready(() => {
         $inputGroup.append($input);
         $inputGroup.append(
           `<button type="button"
-                    class="btn btn-outline-success add-multivalue-item">
-              <i class="bx bx-plus"></i>
+                    class="btn btn-outline-success add-multivalue-item"
+                    aria-label="Add value"
+                    data-i18n="template.editor.multivalue_add">
+              <i class="bx bx-plus" aria-hidden="true"></i>
             </button>`,
         );
         if (index > 0 || values.length > 1) {
           $inputGroup.append(
             `<button type="button"
-                    class="btn btn-outline-danger remove-multivalue-item">
-              <i class="bx bx-x"></i>
+                    class="btn btn-outline-danger remove-multivalue-item"
+                    aria-label="Delete"
+                    data-i18n="button.delete">
+              <i class="bx bx-x" aria-hidden="true"></i>
             </button>`,
           );
         }
@@ -2464,15 +2468,19 @@ $(document).ready(() => {
                 $inputGroup.append($input);
                 $inputGroup.append(
                   `<button type="button"
-                            class="btn btn-outline-success add-multivalue-item">
-                      <i class="bx bx-plus"></i>
+                            class="btn btn-outline-success add-multivalue-item"
+                    aria-label="Add value"
+                    data-i18n="template.editor.multivalue_add">
+                      <i class="bx bx-plus" aria-hidden="true"></i>
                     </button>`,
                 );
                 if (index > 0 || values.length > 1) {
                   $inputGroup.append(
                     `<button type="button"
-                            class="btn btn-outline-danger remove-multivalue-item">
-                      <i class="bx bx-x"></i>
+                            class="btn btn-outline-danger remove-multivalue-item"
+                    aria-label="Delete"
+                    data-i18n="button.delete">
+                      <i class="bx bx-x" aria-hidden="true"></i>
                     </button>`,
                   );
                 }
@@ -3324,15 +3332,19 @@ $(document).ready(() => {
         $inputGroup.append($input);
         $inputGroup.append(
           `<button type="button"
-                    class="btn btn-outline-success add-multivalue-item">
-              <i class="bx bx-plus"></i>
+                    class="btn btn-outline-success add-multivalue-item"
+                    aria-label="Add value"
+                    data-i18n="template.editor.multivalue_add">
+              <i class="bx bx-plus" aria-hidden="true"></i>
             </button>`,
         );
         if (index > 0 || values.length > 1) {
           $inputGroup.append(
             `<button type="button"
-                    class="btn btn-outline-danger remove-multivalue-item">
-              <i class="bx bx-x"></i>
+                    class="btn btn-outline-danger remove-multivalue-item"
+                    aria-label="Delete"
+                    data-i18n="button.delete">
+              <i class="bx bx-x" aria-hidden="true"></i>
             </button>`,
           );
         }
@@ -3634,12 +3646,16 @@ $(document).ready(() => {
     $innerGroup.append($input);
     $innerGroup.append(
       `<button type="button"
-                class="btn btn-outline-success add-multivalue-item">
-            <i class="bx bx-plus"></i>
+                class="btn btn-outline-success add-multivalue-item"
+                    aria-label="Add value"
+                    data-i18n="template.editor.multivalue_add">
+            <i class="bx bx-plus" aria-hidden="true"></i>
           </button>
           <button type="button"
-                class="btn btn-outline-danger remove-multivalue-item">
-            <i class="bx bx-x"></i>
+                class="btn btn-outline-danger remove-multivalue-item"
+                    aria-label="Delete"
+                    data-i18n="button.delete">
+            <i class="bx bx-x" aria-hidden="true"></i>
           </button>`,
     );
     $inputGroup.append($innerGroup);

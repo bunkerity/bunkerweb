@@ -3281,6 +3281,7 @@ Das HTML-Injection-Plugin ermöglicht es Ihnen, nahtlos benutzerdefinierten HTML
 3.  Wenn Sie die Head-Injection konfiguriert haben, fügt BunkerWeb Ihren benutzerdefinierten HTML-Code direkt vor dem schließenden `</head>`-Tag ein.
 4.  Das Einfügen erfolgt automatisch für alle HTML-Seiten, die von Ihrer Website ausgeliefert werden.
 5.  Dies ermöglicht es Ihnen, Skripte, Stile oder andere Elemente hinzuzufügen, ohne den Code Ihrer Anwendung ändern zu müssen.
+6.  Die Antibot-Challenge-Seite und die Fehlerseiten von BunkerWeb bleiben unverändert: Sie werden von BunkerWeb erzeugt, und ihre Content Security Policy würde den eingefügten Code ohnehin blockieren.
 
 ### Wie man es benutzt
 
@@ -6575,6 +6576,9 @@ Führen Sie die folgenden Schritte aus, um die Whitelist-Funktion zu konfigurier
 
 !!! info "Stream-Modus"
     Im Stream-Modus werden nur IP-, rDNS- und ASN-Prüfungen durchgeführt.
+
+!!! info "rDNS und die erste Anfrage"
+    Ein rDNS-Treffer wird erst in der Access-Phase angewendet, daher kann bei leerem Whitelist-Cache (nach einem Reload oder Ablauf eines Eintrags) die erste Anfrage eines per rDNS auf die Whitelist gesetzten Clients noch von ModSecurity blockiert werden.
 
 ### Konfigurationseinstellungen
 

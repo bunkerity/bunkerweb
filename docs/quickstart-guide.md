@@ -81,7 +81,7 @@ Help me configure BunkerWeb <version> with <integration> to protect my applicati
     !!! danger "Security Notice"
         Always verify the script integrity with the provided checksum before executing it.
 
-    #### Easy Install Highlights
+    ### Easy Install Highlights
 
     - Detects your Linux distribution and CPU architecture up front and warns if you are outside the supported matrix before making any change.
     - Interactive prompts use an inline TUI via [gum](https://github.com/charmbracelet/gum) — arrow-key menus with a `❯` cursor, masked password fields. On first interactive run the installer downloads the official `gum` binary from the [GitHub release](https://github.com/charmbracelet/gum/releases) (SHA256-pinned, with optional cosign signature verification when cosign is installed), runs it from a tempdir, and removes the tempdir on exit — **no system package is installed, no apt/dnf source is added, no binary is left behind**. If gum cannot be obtained, the installer uses any pre-installed `whiptail` for boxed dialogs; if neither is available it falls back to plain text prompts.

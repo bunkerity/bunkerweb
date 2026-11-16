@@ -3334,6 +3334,7 @@ El complemento de Inyección de HTML le permite agregar sin problemas código HT
 3.  Si ha configurado la inyección en la cabecera (head), BunkerWeb inserta su código HTML personalizado justo antes de la etiqueta de cierre `</head>`.
 4.  La inserción se realiza automáticamente para todas las páginas HTML servidas por su sitio web.
 5.  Esto le permite agregar scripts, estilos u otros elementos sin modificar el código de su aplicación.
+6.  La página de desafío antibot y las páginas de error de BunkerWeb no se modifican: las genera BunkerWeb y su Content Security Policy bloquearía de todos modos el código inyectado.
 
 ### Cómo usar
 
@@ -6652,6 +6653,9 @@ Siga estos pasos para configurar y usar la función de Lista Blanca:
 
 !!! info "modo stream"
     Cuando se utiliza el modo stream, solo se realizan las comprobaciones de IP, DNS inverso y ASN.
+
+!!! info "DNS inverso y la primera solicitud"
+    Una coincidencia de DNS inverso solo se aplica desde la fase de acceso, por lo que, con la caché de la lista blanca vacía (tras una recarga o al caducar una entrada), la primera solicitud de un cliente incluido en la lista blanca por DNS inverso aún puede ser bloqueada por ModSecurity.
 
 ### Ajustes de Configuración
 

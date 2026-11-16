@@ -143,9 +143,10 @@
                                             aria-pressed="true"
                                             data-bs-toggle="offcanvas"
                                             data-bs-target="#side-offcanvas-notifications"
-                                            aria-controls="side-offcanvas-notifications">
+                                            aria-controls="side-offcanvas-notifications"
+                                            aria-labelledby="notifications-button-label">
                                         <span class="bx bx-bell me-0 me-md-2"></span>
-                                        <span class="d-none d-md-inline" data-i18n="button.notifications">Notifications</span>
+                                        <span id="notifications-button-label" class="d-none d-md-inline" data-i18n="button.notifications">Notifications</span>
                                     </button>
                                     {% if flash_messages %}
                                         <span id="unread-notifications"
@@ -162,9 +163,10 @@
                                             aria-pressed="true"
                                             data-bs-toggle="offcanvas"
                                             data-bs-target="#side-offcanvas-news"
-                                            aria-controls="side-offcanvas-news">
+                                            aria-controls="side-offcanvas-news"
+                                            aria-labelledby="news-button-label">
                                         <span class="bx bx-news me-0 me-md-2"></span>
-                                        <span class="d-none d-md-inline" data-i18n="button.news">News</span>
+                                        <span id="news-button-label" class="d-none d-md-inline" data-i18n="button.news">News</span>
                                     </button>
                                 </li>
                             </ul>

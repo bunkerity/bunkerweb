@@ -164,7 +164,13 @@ class News {
       const articleTags = this.extractTerms(news);
       const formattedDate = this.formatDate(news.date);
       const featuredMedia = news._embedded?.["wp:featuredmedia"]?.[0] ?? null;
-      const featuredImg = featuredMedia?.source_url ?? null;
+      // The cards show the image at card width: take the 768px rendition instead of the
+      // multi-megabyte original (which is the fallback when WordPress lists no sizes).
+      const featuredSizes = featuredMedia?.media_details?.sizes;
+      const featuredImg =
+        featuredSizes?.medium_large?.source_url ??
+        featuredMedia?.source_url ??
+        null;
       const featuredAlt =
         featuredMedia?.alt_text ||
         featuredMedia?.title?.rendered ||

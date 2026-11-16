@@ -1,11 +1,10 @@
-cmake_minimum_required(VERSION 3.12...3.31)
+cmake_minimum_required(VERSION 3.15...3.31)
 
 project(
     zlib_find_package_test
     LANGUAGES C
     VERSION @zlib_VERSION@)
 
-enable_testing()
 option(ZLIB_BUILD_TESTING "" OFF)
 option(ZLIB_BUILD_SHARED "" @ZLIB_BUILD_SHARED@)
 option(ZLIB_BUILD_STATIC "" @ZLIB_BUILD_STATIC@)

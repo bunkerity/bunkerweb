@@ -81,7 +81,7 @@ Aide-moi à configurer BunkerWeb <version> avec <intégration> pour protéger mo
     !!! danger "Avis de sécurité"
         Vérifiez toujours l'intégrité du script avec la somme de contrôle fournie avant de l'exécuter.
 
-    #### Points forts d'Easy Install
+    ### Points forts d'Easy Install
 
     - Détecte votre distribution Linux et l'architecture CPU en amont et avertit si vous sortez de la matrice supportée avant toute modification.
     - Les invites interactives utilisent une TUI en ligne via [gum](https://github.com/charmbracelet/gum) — menus à flèches avec curseur `❯`, champs de mot de passe masqués. À la première exécution interactive, le script télécharge le binaire `gum` officiel depuis la [release GitHub](https://github.com/charmbracelet/gum/releases) (SHA256 épinglé, signature cosign vérifiée si cosign est installé), l'exécute depuis un répertoire temporaire et supprime ce répertoire à la fin du script — **aucun paquet système n'est installé, aucune source apt/dnf n'est ajoutée, aucun binaire ne reste sur le système**. Si gum ne peut pas être obtenu, l'installateur utilise un `whiptail` déjà présent sur le système ; à défaut, il utilise des invites en texte brut.

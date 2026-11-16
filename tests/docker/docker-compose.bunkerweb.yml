@@ -30,7 +30,7 @@ services:
       driver: syslog
       options:
         tag: "bunkerweb"
-        syslog-address: "udp://10.20.30.254:514"
+        syslog-address: "${BW_TESTS_SYSLOG_ADDRESS:-udp://10.20.30.254:514}"
 
 networks:
   bw-universe:

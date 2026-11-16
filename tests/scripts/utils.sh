@@ -454,7 +454,24 @@ function stack_has_worker() {
 # Add network overrides only for the opt-in IPv6 spec, through startup and teardown.
 function docker_compose() {
     local compose_file="$1" overlay="" fixture=ipv6
+    local BW_TESTS_SYSLOG_ADDRESS="udp://10.20.30.254:514"
+    # Only CrowdSec runs start the receiver; TCP keeps debug bursts from losing access logs.
+    if [ -f /tmp/crowdsec.env ] ; then
+        BW_TESTS_SYSLOG_ADDRESS="tcp://10.20.30.254:601"
+    fi
+    export BW_TESTS_SYSLOG_ADDRESS
     shift
+    # Docker's TCP log driver connects at startup; detached syslog startup may still be binding.
+    if [ "$BW_TESTS_SYSLOG_ADDRESS" == "tcp://10.20.30.254:601" ] && [ "$compose_file" == "tests/docker/docker-compose.bunkerweb.yml" ] ; then
+        case "${1:-}" in
+            up|start|restart|create|run)
+                if ! timeout 60 bash -c 'until echo > /dev/tcp/10.20.30.254/601; do sleep 1; done' > /dev/null 2>&1 ; then
+                    log "UTILS" "❌" "💬 syslog TCP listener 10.20.30.254:601 unavailable after 60s; ensure the syslog fixture is running"
+                    return 1
+                fi
+                ;;
+        esac
+    fi
     if [ "${BW_TESTS_IPV6:-}" == "yes" ] || [ "${BW_TESTS_IPV6:-}" == "only" ] ; then
         [ "$BW_TESTS_IPV6" != "only" ] || fixture=ipv6-only
         case "$compose_file" in
