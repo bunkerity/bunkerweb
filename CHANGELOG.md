@@ -20,6 +20,7 @@
 - [SECURITY] `linux`: packaged Python code, migrations included, is no longer group-writable after install or upgrade.
 - [SECURITY] `linux`: packaged logs are created with mode 0640, and upgrades tighten existing logs and rotated archives to 0640.
 - [SECURITY] `docker`: update the Alpine `zlib` package to 1.4-r0, fixing CVE-2026-4738 (its Deflate64 code is not built, so BunkerWeb was not exposed).
+- [SECURITY] `docker`: update the Alpine `libpq` and `postgresql18-client` packages to 18.7-r0 in the API, autoconf, scheduler, UI and all-in-one images, fixing CVE-2026-6467 and 51 other PostgreSQL CVEs.
 - [FEATURE] `bwcli`: `bwcli bans --json` prints the bans as JSON for scripts and monitoring.
 - [FEATURE] `docker`: new floating image tags `1.6-edge` (newest release candidate or release), `1.6-rc`, `1.6-beta` and `1.6-alpha`, listed in the Docker docs.
 - [FEATURE] `blacklist`, `greylist`, `whitelist`: new `*_URLS_REFRESH_INTERVAL` settings set how often URL lists are refreshed (default `1h`) (Refs #3994).
