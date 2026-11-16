@@ -45,6 +45,14 @@
         "label": "Kedaluwarsa cache CrowdSec",
         "help": "Waktu kedaluwarsa cache, dalam detik, untuk IP yang disimpan bouncer dalam cache pada mode live. Menerima akhiran waktu (ms, s, m, h, d, w, M, y); angka tanpa akhiran dihitung dalam detik."
       },
+      "CROWDSEC_CACHE_SIZE": {
+        "label": "Ukuran cache keputusan CrowdSec",
+        "help": "Memori keputusan bersama untuk semua layanan, minimal 1m dalam megabita bulat (m/M). Mode stream memerlukan dua snapshot. Setelah perubahan ukuran, pemuatan ulang, atau mulai ulang kontainer yang sama, ban/captcha yang diketahui dipulihkan dari disk hingga kedaluwarsa atau direkonsiliasi. Kueri awal dan jeda percobaan ulang berlaku per kredensial/kebijakan. IP yang tidak dikenal diizinkan jika LAPI tidak tersedia; sistem berkas kontainer baru dimulai dalam keadaan kosong."
+      },
+      "CROWDSEC_METADATA_CACHE_SIZE": {
+        "label": "Ukuran cache metadata CrowdSec",
+        "help": "Memori bersama untuk metadata laporan CrowdSec opsional di semua layanan. Gunakan jumlah megabita (m/M) berupa bilangan bulat positif, minimal 1m. Metadata tidak dapat mengeluarkan catatan keputusan dari cache. Perubahan ukuran saat pemuatan ulang menghapus metadata opsional ini. Sediakan sekitar 1m per 1000 keputusan stream, ditambah ruang cadangan."
+      },
       "CROWDSEC_CAPTCHA_PROVIDER": {
         "label": "Tantangan captcha CrowdSec",
         "help": "Tantangan antibot yang ditampilkan ketika CrowdSec meminta captcha. Antibot harus diaktifkan pada layanan ini (USE_ANTIBOT diatur ke selain \"no\"), jika tidak permintaan akan di-ban. Penyedia pihak ketiga mengambil kunci mereka dari pengaturan ANTIBOT_*. Hindari \"cookie\": ini tidak membuktikan apa pun untuk keputusan yang berarti \"buktikan bahwa Anda manusia\". \"no\" mengabaikan keputusan captcha, seperti sebelumnya; cache keputusan dibagikan per Local API, jadi setiap layanan pada Local API tersebut harus diatur ke \"no\" untuk sepenuhnya memulihkan perilaku lama."

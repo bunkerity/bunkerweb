@@ -1,0 +1,24 @@
+# CROWDSEC_CACHE_SIZE and CROWDSEC_METADATA_CACHE_SIZE render into the nginx `lua_shared_dict` lines and
+# validate: whole megabytes of at least 1m, bad values are refused. Unit tests cover the template, the
+# plugin.json regex and the catalogs; this reads the configuration a real instance loaded and asks the
+# real validator. The asserting code is `tests/core/crowdsec-cache-size/check.py`.
+#
+# No CrowdSec daemon is needed: the plugin only has to be enabled for its `http` template to render.
+integrations:
+  - "Docker"
+
+api:
+  API_USERNAME: "admin"
+  API_PASSWORD: "P@ssw0rd"
+
+actions:
+  cache_sizes_render_and_validate:
+    type: script
+    script: ["python3", "tests/core/crowdsec-cache-size/check.py"]
+    result: "CROWDSEC_CACHE_SIZE_OK"
+    config:
+      USE_CROWDSEC: "yes"
+      CROWDSEC_API: "http://crowdsec:8080"
+      CROWDSEC_API_KEY: "s3cr3tb0unc3rk3y"
+      CROWDSEC_CACHE_SIZE: "50m"
+      CROWDSEC_METADATA_CACHE_SIZE: "12m"

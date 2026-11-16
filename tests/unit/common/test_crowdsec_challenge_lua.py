@@ -526,8 +526,8 @@ class TestExcludeLocationPrefixArm:
     def test_the_prefix_arm_is_what_does_it(self):
         """Mutation: drop the `return` and the prefix entry stops excluding anything."""
         mutated = SOURCE.replace(
-            '        ngx.log(ngx.ERR,  "whitelisted location: " .. uri_to_check)\n' '        return true, "whitelisted " .. uri_to_check\n',
-            '        ngx.log(ngx.ERR,  "whitelisted location: " .. uri_to_check)\n',
+            '        ngx.log(ngx.DEBUG,  "whitelisted location: " .. uri_to_check)\n' '        return true, "whitelisted " .. uri_to_check\n',
+            '        ngx.log(ngx.DEBUG,  "whitelisted location: " .. uri_to_check)\n',
         )
         assert mutated != SOURCE, "the prefix arm no longer reads as expected -- update this mutation"
         out = run(ALLOW, source=mutated, uri="/api/v1/things", conf={"EXCLUDE_LOCATION": ["/api"]})

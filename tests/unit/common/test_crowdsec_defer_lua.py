@@ -35,6 +35,7 @@ package.loaded["middleclass"] = function(_, parent)
     setmetatable(klass, { __index = parent })
     return klass
 end
+package.loaded["crowdsec.lib.config"] = { loadConfig = function() return nil end }
 package.loaded["crowdsec.cache_partition"] = {}
 package.loaded["bunkerweb.plugin"] = {
     initialize = function(self) self.logger = { log = function() end } end,

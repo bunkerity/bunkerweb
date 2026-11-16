@@ -45,6 +45,14 @@
         "label": "Wygaśnięcie cache CrowdSec",
         "help": "Czas wygaśnięcia cache (w sekundach) dla adresów IP, które bouncer przechowuje w cache w trybie live. Akceptuje przyrostek czasu (ms, s, m, h, d, w, M, y); liczba bez przyrostka oznacza sekundy."
       },
+      "CROWDSEC_CACHE_SIZE": {
+        "label": "Rozmiar pamięci podręcznej decyzji CrowdSec",
+        "help": "Wspólna pamięć decyzji dla wszystkich usług, minimum 1m w pełnych megabajtach (m/M). Tryb stream wymaga dwóch migawek. Po zmianie rozmiaru, przeładowaniu lub ponownym uruchomieniu tego samego kontenera znane bany/captcha są przywracane z dysku do wygaśnięcia lub uzgodnienia. Zapytania początkowe i odstępy ponowień są osobne dla poświadczeń/polityki. Nieznane IP są dozwolone, gdy LAPI jest niedostępne; system plików nowego kontenera jest początkowo pusty."
+      },
+      "CROWDSEC_METADATA_CACHE_SIZE": {
+        "label": "Rozmiar pamięci podręcznej metadanych CrowdSec",
+        "help": "Pamięć współdzielona na opcjonalne metadane raportów CrowdSec wszystkich usług. Użyj dodatniej całkowitej liczby megabajtów (m/M), minimum 1m. Metadane nie mogą wypierać rekordów decyzji. Zmiana rozmiaru przy przeładowaniu usuwa te opcjonalne metadane. Przeznacz około 1m na 1000 decyzji stream oraz zapas."
+      },
       "CROWDSEC_CAPTCHA_PROVIDER": {
         "label": "Wyzwanie captcha CrowdSec",
         "help": "Wyzwanie antibot wyświetlane, gdy CrowdSec prosi o captchę. Antibot musi być włączony dla tej usługi (USE_ANTIBOT ustawione na cokolwiek innego niż \"no\"), w przeciwnym razie żądanie zostanie zbanowane. Dostawcy zewnętrzni pobierają swoje klucze z ustawień ANTIBOT_*. Unikaj \"cookie\": nie dowodzi to niczego w przypadku decyzji, która ma znaczyć \"udowodnij, że jesteś człowiekiem\". \"no\" ignoruje decyzje captcha, tak jak wcześniej; cache decyzji jest współdzielony dla każdego Local API, więc każda usługa na tym Local API musi mieć ustawione \"no\", aby w pełni przywrócić poprzednie zachowanie."

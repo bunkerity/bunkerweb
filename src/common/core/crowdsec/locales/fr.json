@@ -58,6 +58,14 @@
         "label": "Expiration du cache CrowdSec",
         "help": "L'expiration du cache, en secondes, pour les IP que le bouncer stocke en cache en mode live. Accepte un suffixe de durée (ms, s, m, h, d, w, M, y) ; un nombre sans suffixe est en secondes."
       },
+      "CROWDSEC_CACHE_SIZE": {
+        "label": "Taille du cache des décisions CrowdSec",
+        "help": "Mémoire des décisions partagée par tous les services, au minimum 1m en mégaoctets entiers (m/M). Le mode stream nécessite deux instantanés. Après redimensionnement, rechargement ou redémarrage du même conteneur, les bannissements/captchas connus sont restaurés depuis le disque jusqu’à expiration ou réconciliation. Les requêtes d’amorçage et les délais de réessai sont propres à chaque couple identifiants/politique. Les IP inconnues sont autorisées si la LAPI est indisponible ; le système de fichiers d’un nouveau conteneur est initialement vide."
+      },
+      "CROWDSEC_METADATA_CACHE_SIZE": {
+        "label": "Taille du cache des métadonnées CrowdSec",
+        "help": "Mémoire partagée pour les métadonnées facultatives des rapports CrowdSec de tous les services. Utilisez un nombre entier positif de mégaoctets (m/M), au minimum 1m. Les métadonnées ne peuvent pas évincer les décisions. Un redimensionnement au rechargement efface ces métadonnées facultatives. Prévoyez environ 1m pour 1000 décisions stream, plus une marge."
+      },
       "CROWDSEC_UPDATE_FREQUENCY": {
         "label": "Délai d'attente des requêtes CrowdSec",
         "help": "La fréquence de mise à jour, en secondes, pour récupérer les IP nouvelles/anciennes depuis l'API locale de CrowdSec. Accepte un suffixe de durée (ms, s, m, h, d, w, M, y) ; un nombre sans suffixe est en secondes."

@@ -58,6 +58,14 @@
         "label": "CrowdSec 快取過期時間",
         "help": "bouncer 在 live 模式下快取 IP 的快取過期時間(以秒為單位)。支援時間後綴(ms、s、m、h、d、w、M、y);無後綴的數字單位為秒。"
       },
+      "CROWDSEC_CACHE_SIZE": {
+        "label": "CrowdSec 決策快取大小",
+        "help": "所有服務共用的決策記憶體，以整數百萬位元組 (m/M) 為單位，最小為 1m。stream 模式需要兩個快照。調整大小、重新載入或重新啟動同一容器後，已知的封鎖/captcha 會從磁碟還原，直到到期或完成協調。初始化查詢與重試退避依認證資訊/原則分別處理。LAPI 無法使用時允許未知 IP；新容器的檔案系統初始為空。"
+      },
+      "CROWDSEC_METADATA_CACHE_SIZE": {
+        "label": "CrowdSec 中繼資料快取大小",
+        "help": "所有服務共用的記憶體，用於選用的 CrowdSec 報告中繼資料。使用正整數百萬位元組 (m/M)，最小為 1m。中繼資料不能逐出決策記錄。重新載入時調整大小會清除此選用的中繼資料。每 1,000 筆 stream 決策預留約 1m，另加餘裕。"
+      },
       "CROWDSEC_UPDATE_FREQUENCY": {
         "label": "CrowdSec 請求逾時",
         "help": "從 CrowdSec 本地 API 拉取新增/失效 IP 的更新頻率(以秒為單位)。支援時間後綴(ms、s、m、h、d、w、M、y);無後綴的數字單位為秒。"

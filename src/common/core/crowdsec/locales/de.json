@@ -58,6 +58,14 @@
         "label": "CrowdSec-Cache-Ablauf",
         "help": "Der Cache-Ablauf in Sekunden für IPs, die der Bouncer im Live-Modus im Cache speichert. Akzeptiert ein Zeitsuffix (ms, s, m, h, d, w, M, y); eine Zahl ohne Suffix gilt in Sekunden."
       },
+      "CROWDSEC_CACHE_SIZE": {
+        "label": "Größe des CrowdSec-Entscheidungscaches",
+        "help": "Gemeinsamer Entscheidungsspeicher für alle Dienste, mindestens 1m in ganzen Megabytes (m/M). Der Stream-Modus benötigt zwei Snapshots. Nach Größenänderung, Neuladen oder Neustart desselben Containers werden bekannte Sperren/Captchas bis zum Ablauf oder Abgleich von der Festplatte wiederhergestellt. Startabfragen und Wiederholungsabstände gelten je Zugangsdaten/Richtlinie. Unbekannte IPs werden bei nicht verfügbarer LAPI zugelassen; das Dateisystem eines neuen Containers beginnt leer."
+      },
+      "CROWDSEC_METADATA_CACHE_SIZE": {
+        "label": "Größe des CrowdSec-Metadatencaches",
+        "help": "Gemeinsamer Speicher für optionale CrowdSec-Berichtsmetadaten aller Dienste. Verwenden Sie eine positive ganze Anzahl Megabytes (m/M), mindestens 1m. Metadaten können keine Entscheidungsdatensätze verdrängen. Eine Größenänderung beim Neuladen löscht diese optionalen Metadaten. Planen Sie etwa 1m je 1000 Stream-Entscheidungen plus Reserve ein."
+      },
       "CROWDSEC_UPDATE_FREQUENCY": {
         "label": "CrowdSec-Anfrage-Timeout",
         "help": "Die Aktualisierungshäufigkeit in Sekunden, um neue/alte IPs von der lokalen CrowdSec-API abzurufen. Akzeptiert ein Zeitsuffix (ms, s, m, h, d, w, M, y); eine Zahl ohne Suffix gilt in Sekunden."

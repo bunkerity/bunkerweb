@@ -29,7 +29,7 @@ DECISION_CACHE = LIB / "decision_cache.lua"
 pytestmark = pytest.mark.skipif(shutil.which("lua") is None, reason="the lua interpreter is not installed")
 
 HARNESS = r"""
-local LOGS, REQUESTS, LOCKS = {}, {}, {}
+local LOGS, REQUESTS, LOCKS, TIMERS = {}, {}, {}, {}
 local NOW = 1000
 
 -- cjson: a registry. encode() hands back a token, decode() the table behind it, so the decision cache
@@ -58,7 +58,7 @@ package.loaded["cjson.safe"] = cjson
 ngx = { ERR = "ERR", DEBUG = "DEBUG", ALERT = "ALERT", NOTICE = "NOTICE", HTTP_FORBIDDEN = 403,
   time = function() return NOW end, -- sleeping moves the clock, or the lock-retry deadline of RefreshIp would never be reached
   sleep = function(seconds) NOW = NOW + seconds end, now = function() return NOW end,
-  worker = { id = function() return 0 end }, timer = { at = function() return true end },
+  worker = { id = function() return 0 end }, timer = { at = function(delay, fn) TIMERS[#TIMERS + 1] = { delay, fn }; return true end },
   log = function(level, ...) LOGS[#LOGS + 1] = level .. " " .. table.concat({ ... }, "") end,
   req = { is_internal = function() return false end } }
 
@@ -73,12 +73,31 @@ local function dict()
     safe_set = function(_, key, value) values[key] = value; return true end,
     delete = function(_, key) values[key] = nil end,
     incr = function(_, key, by, initial) values[key] = (values[key] or initial) + by; return values[key] end,
+    add = function(_, key, value) if values[key] ~= nil then return nil, "exists" end values[key] = value; return true end,
+    safe_add = function(_, key, value) if values[key] ~= nil then return nil, "exists" end values[key] = value; return true end,
   }
 end
 CACHE, METADATA = dict(), dict()
 ngx.shared = { crowdsec_cache = CACHE, crowdsec_metadata = METADATA }
 
-package.loaded["crowdsec.cache_partition"] = { hash = function(value) return value end }
+package.loaded["crowdsec.cache_partition"] = { hash = function(value) return value end,
+  fingerprint = function() return "policy" end }
+-- A semaphore that runs the timer queued with delay 0, as OpenResty would before the waiter resumes.
+package.loaded["ngx.semaphore"] = { new = function()
+  local posted = false
+  return { post = function() posted = true end, wait = function()
+    for i = #TIMERS, 1, -1 do
+      if TIMERS[i][1] == 0 then local timer = table.remove(TIMERS, i); timer[2](false); break end
+    end
+    return posted
+  end }
+end }
+-- The checkpoint files have their own real-Lua suite (test_crowdsec_enforcement_state_lua.py); here it is an
+-- in-memory boundary so these tests keep asserting what the shared cache does.
+package.loaded["crowdsec.enforcement_state"] = { new = function()
+  return { changed = function() return false end, refresh = function() return true end, get = function() end,
+    prepare = function() return {} end, save = function() return true end }
+end }
 package.loaded["crowdsec.lib.config"] = { loadConfig = function() return CONF end }
 package.loaded["crowdsec.lib.stream_lock"] = { run = function(path, callback)
   LOCKS[#LOCKS + 1] = path
@@ -307,7 +326,8 @@ print("ALLOWED_AFTER=" .. tostring(allowed))
         res = run("""
 lapi({})
 csmod.allowIp("1.2.3.4")
-local marker = "v2_allowed_ipv4_4294967295_16909060"
+-- Live markers sit in the per-policy bootstrap namespace (the harness fingerprint is "policy").
+local marker = "bootstrap_policy|v2_allowed_ipv4_4294967295_16909060"
 print("MARKED=" .. tostring(CACHE.values["v2|a|" .. marker]))
 lapi({ decision(1, "1.2.3.4", "ban") })
 local data = csmod.RefreshIp({ ip = "1.2.3.4" })
@@ -374,10 +394,11 @@ print("KEYS2=" .. #cached_keys())
         assert field(res.stdout, "HTTP") == "Local API returned HTTP 500|502"
         assert field(res.stdout, "KEYS2") == "1"
 
-    def test_live_mode_does_not_take_the_stream_lock(self):
+    def test_live_mode_also_runs_under_the_poller_lock(self):
+        """The checkpoint write is serialised with the poller in every mode."""
         res = run("lapi({})\ncsmod.RefreshIp({ ip = '1.2.3.4' })\nprint('LOCKS=' .. #LOCKS)")
         assert res.returncode == 0, res.stderr
-        assert field(res.stdout, "LOCKS") == "0"
+        assert field(res.stdout, "LOCKS") == "1"
 
     def test_stream_mode_runs_under_the_poller_lock(self):
         res = run(

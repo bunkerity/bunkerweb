@@ -45,6 +45,14 @@
         "label": "CrowdSec önbellek süresi",
         "help": "Bouncer'ın live modda önbellekte tuttuğu IP'ler için önbellek süresi (saniye). Zaman son eki kabul eder (ms, s, m, h, d, w, M, y); son eksiz sayı saniye olarak yorumlanır."
       },
+      "CROWDSEC_CACHE_SIZE": {
+        "label": "CrowdSec karar önbelleği boyutu",
+        "help": "Tüm hizmetlerin ortak karar belleği; tam megabayt (m/M) cinsinden en az 1m. Stream modu iki anlık görüntü gerektirir. Boyut değişikliği, yeniden yükleme veya aynı konteynerin yeniden başlatılması sonrasında bilinen yasaklamalar/captcha'lar, süreleri dolana veya uzlaştırılana kadar diskten geri yüklenir. Başlangıç sorguları ve yeniden deneme beklemeleri kimlik bilgileri/politika başınadır. LAPI kullanılamıyorsa bilinmeyen IP'lere izin verilir; yeni konteynerin dosya sistemi boş başlar."
+      },
+      "CROWDSEC_METADATA_CACHE_SIZE": {
+        "label": "CrowdSec meta veri önbelleği boyutu",
+        "help": "Tüm hizmetlerin isteğe bağlı CrowdSec rapor meta verileri için paylaşılan bellek. Pozitif tam megabayt (m/M) değeri kullanın; en az 1m. Meta veriler karar kayıtlarını önbellekten çıkaramaz. Yeniden yüklemede boyut değiştirmek bu isteğe bağlı meta verileri temizler. Her 1000 stream kararı için yaklaşık 1m ve ek pay ayırın."
+      },
       "CROWDSEC_CAPTCHA_PROVIDER": {
         "label": "CrowdSec captcha sorgusu",
         "help": "CrowdSec bir captcha istediğinde gösterilen antibot sorgusu. Antibot bu hizmette etkinleştirilmiş olmalıdır (USE_ANTIBOT, \"no\" dışında bir değere ayarlanmış), aksi takdirde istek yasaklanır. Üçüncü taraf sağlayıcılar anahtarlarını ANTIBOT_* ayarlarından alır. \"cookie\"den kaçının: \"insan olduğunu kanıtla\" anlamına gelen bir karar için hiçbir şey kanıtlamaz. \"no\", öncekiyle aynı şekilde captcha kararlarını yoksayar; karar önbelleği her Local API için paylaşılır, bu nedenle eski davranışı tam olarak geri getirmek için o Local API'deki her hizmetin \"no\" olarak ayarlanması gerekir."

@@ -127,6 +127,11 @@ end
 --- @return boolean true if IPv4 address, false otherwise
 function _M.parseIPAddress(ip)
     ip = tostring(ip)
+    -- A raw parse: an IPv4-mapped address stays IPv6 here. bouncer.lua's item_to_string maps it to its IPv4
+    -- address first (ipaddr.key), so decisions and clients share the identity of the rest of the core.
+    if ip:find(":", 1, true) then
+        return parseIP6Address(ip), false
+    end
     local address = parseIP4Address(ip)
     if address == nil then
         return parseIP6Address(ip), false
@@ -139,7 +144,7 @@ end
 --- @return address in uint32 format or nil if invalid address
 function parseIP4Address(ip)
     ip = tostring(ip)
-    local bytes = {string.match(ip, '(%d+)%.(%d+)%.(%d+)%.(%d+)')}
+    local bytes = {string.match(ip, '^(%d+)%.(%d+)%.(%d+)%.(%d+)$')}
     if bytes == nil then
         return
     end

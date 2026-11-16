@@ -58,6 +58,14 @@
         "label": "CrowdSec 缓存过期时间",
         "help": "bouncer 在 live 模式下缓存 IP 的缓存过期时间(以秒为单位)。支持时间后缀(ms、s、m、h、d、w、M、y);无后缀的数字单位为秒。"
       },
+      "CROWDSEC_CACHE_SIZE": {
+        "label": "CrowdSec 决策缓存大小",
+        "help": "所有服务共享的决策内存，以整数兆字节 (m/M) 为单位，最小为 1m。stream 模式需要两个快照。调整大小、重新加载或重启同一容器后，已知的封禁/captcha 会从磁盘恢复，直至到期或完成协调。初始化查询和重试退避按凭据/策略分别处理。LAPI 不可用时允许未知 IP；新容器的文件系统初始为空。"
+      },
+      "CROWDSEC_METADATA_CACHE_SIZE": {
+        "label": "CrowdSec 元数据缓存大小",
+        "help": "所有服务共享的内存，用于可选的 CrowdSec 报告元数据。使用正整数兆字节 (m/M)，最小为 1m。元数据不能逐出决策记录。重新加载时调整大小会清除此可选元数据。每 1,000 条 stream 决策预留约 1m，另加余量。"
+      },
       "CROWDSEC_UPDATE_FREQUENCY": {
         "label": "CrowdSec 请求超时",
         "help": "从 CrowdSec 本地 API 拉取新增/失效 IP 的更新频率(以秒为单位)。支持时间后缀(ms、s、m、h、d、w、M、y);无后缀的数字单位为秒。"

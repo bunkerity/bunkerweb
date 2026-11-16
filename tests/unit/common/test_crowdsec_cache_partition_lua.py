@@ -33,6 +33,14 @@ HARNESS = """
 -- The digest is the fixture, not the subject. HASH = identity makes a prefix legible; HASH =
 -- constant is what makes two distinct Local APIs land in one namespace, which is the only way to
 -- reach the collision arm.
+-- cjson boundary: fingerprint() only encodes a flat list of strings.
+package.preload["cjson"] = function()
+  return { encode = function(list)
+    local parts = {}
+    for i, value in ipairs(list) do parts[i] = '"' .. tostring(value) .. '"' end
+    return "[" .. table.concat(parts, ",") .. "]"
+  end }
+end
 package.preload["resty.sha256"] = function()
   local sha = {}
   sha.__index = sha
@@ -261,3 +269,76 @@ class TestTheApiUrlIsReadOffTheRenderedConfiguration:
 
     def test_the_first_local_api_line_wins(self):
         assert self._read("API_URL=http://one:8080\nAPI_URL=http://two:8080\n") == "http://one:8080"
+
+
+class TestThePolicyFingerprint:
+    """A stream snapshot is reused across a reload only while this fingerprint is unchanged."""
+
+    BASE = 'API_URL = "http://lapi:8080", API_KEY = "k1", BOUNCING_ON_TYPE = "all", FALLBACK_REMEDIATION = "ban", MODE = "stream", CACHE_EXPIRATION = 1'
+
+    def _print(self, **overrides) -> str:
+        values = {
+            "API_URL": "http://lapi:8080",
+            "API_KEY": "k1",
+            "BOUNCING_ON_TYPE": "all",
+            "FALLBACK_REMEDIATION": "ban",
+            "MODE": "stream",
+            "CACHE_EXPIRATION": 1,
+        }
+        values.update(overrides)
+        lua = ", ".join(f"{key} = {value!r}" if isinstance(value, int) else f'{key} = "{value}"' for key, value in values.items())
+        res = run(f"print('F=' .. cache_partition.fingerprint({{ {lua} }}))")
+        assert res.returncode == 0, res.stderr
+        return field(res.stdout, "F")
+
+    def test_the_same_policy_gives_the_same_fingerprint(self):
+        assert self._print() == self._print()
+
+    @pytest.mark.parametrize(
+        "override",
+        [
+            {"API_KEY": "k2"},
+            {"API_URL": "http://other:8080"},
+            {"BOUNCING_ON_TYPE": "ban"},
+            {"FALLBACK_REMEDIATION": "captcha"},
+            {"MODE": "live"},
+            {"CACHE_EXPIRATION": 2},
+        ],
+        ids=lambda override: next(iter(override)),
+    )
+    def test_a_changed_policy_input_changes_it(self, override):
+        assert self._print(**override) != self._print()
+
+    def test_a_trailing_slash_on_the_api_is_not_a_policy_change(self):
+        assert self._print(API_URL="http://lapi:8080/") == self._print()
+
+    def test_the_fingerprint_never_carries_the_api_key(self):
+        """The key is hashed first: the fingerprint ends up in shared-dict keys and logs."""
+        res = run(
+            "print('F=' .. cache_partition.fingerprint({ API_URL = 'http://lapi:8080', API_KEY = 'secret-key' }))",
+            hash_fn='function(raw) return "h(" .. raw .. ")" end',
+        )
+        assert res.returncode == 0, res.stderr
+        fingerprint = field(res.stdout, "F")
+        assert "h(secret-key)" in fingerprint
+        assert fingerprint.count("secret-key") == 1
+
+    def test_bouncers_sharing_an_api_share_one_fingerprint_whatever_their_order(self):
+        res = run("""
+local a = { API_URL = "http://lapi:8080", API_KEY = "k1", MODE = "stream" }
+local b = { API_URL = "http://lapi:8080/", API_KEY = "k2", MODE = "live" }
+local c = { API_URL = "http://other:8080", API_KEY = "k1", MODE = "stream" }
+local forward = cache_partition.fingerprints({ a, b, c })
+local reverse = cache_partition.fingerprints({ c, b, a })
+local api = "http://lapi:8080"
+print("SAME=" .. tostring(forward[api] == reverse[api] and forward["http://other:8080"] == reverse["http://other:8080"]))
+print("SHARED=" .. tostring(forward[api] ~= nil))
+print("ALONE=" .. tostring(forward[api] ~= cache_partition.fingerprints({ a })[api]))
+print("OTHER=" .. tostring(forward["http://other:8080"] ~= forward[api]))
+""")
+        assert res.returncode == 0, res.stderr
+        assert field(res.stdout, "SAME") == "true"
+        assert field(res.stdout, "SHARED") == "true"
+        # Adding a second policy for the same API changes the shared hash, so every worker moves together.
+        assert field(res.stdout, "ALONE") == "true"
+        assert field(res.stdout, "OTHER") == "true"

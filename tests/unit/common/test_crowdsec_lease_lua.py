@@ -62,7 +62,10 @@ package.loaded["middleclass"] = function(_, parent)
   setmetatable(klass, { __index = parent })
   return klass
 end
+package.loaded["crowdsec.lib.config"] = { loadConfig = function() return nil end }
 package.loaded["crowdsec.cache_partition"] = {
+  normalize = function(url) return (url:gsub("/+$", "")) end,
+  fingerprints = function() return {} end,
   hash = function() return string.rep("a", 64) end,
   api_url = function(content) return content:match("API_URL=(%S*)") or "" end,
   prefixes = function(api_urls)

@@ -40,10 +40,9 @@ actions:
     # CrowdSec creates the decision asynchronously after the third qualifying access-log event.
     delay: 5
     retries: 1
-    # full_clean is load-bearing for not_yet_blocked_stream: live_query cached this ban in
-    # lua_shared_dict crowdsec_cache, which SURVIVES reloads -- only the `down -v` behind
-    # full_clean clears it. Drop this line and the not-yet assertion turns deterministically
-    # 403 for a reason no log will point at.
+    # full_clean clears the decision this case created (CrowdSec database and the bouncer's
+    # crowdsec_cache shared dict, which SURVIVES reloads) so the stream arm provokes and learns
+    # its own ban instead of inheriting this one.
     full_clean: true
 
   admin_interface_probe_stream:
@@ -73,39 +72,36 @@ actions:
             list(executor.map(probe, paths))
     config:
       CROWDSEC_MODE: "stream"
-      # An hour away: nothing the bouncer does can interfere with the scan, and the decision
-      # cannot reach it before the next action asserts that it has not. The next action lowers
-      # this, and the stack restart between the two is what applies it -- which is why this
-      # action no longer carries `restart_stack: false`.
+      # An hour away: no pull can interfere with the scan or deliver the decision, so the next
+      # action proves the bootstrap lookup alone. The action after it lowers this value, and the
+      # restart that applies it is the reload under test.
       CROWDSEC_UPDATE_FREQUENCY: "3600"
-  not_yet_blocked_stream:
-    type: status
-    url: "http://www.example.com"
-    status: 200
-    config:
-      # Re-stated because the stack restarts here and the spec-level default is `live`.
-      CROWDSEC_MODE: "stream"
-      CROWDSEC_UPDATE_FREQUENCY: "10"
-    # This assertion used to be a race against a wall clock: a 60s window opened by the end of
-    # admin_interface_probe_stream and closed by the bouncer's next pull, which the harness lost
-    # outright when it spent 4min11s between the two actions. It is a property now. The bouncer
-    # arms its stream timer on the FIRST request that reaches crowdsec:access() after a reload (bouncer.lua:505
-    # SetupStream -> :488 `ngx.timer.at(UPDATE_FREQUENCY, stream_query)`), and measurement says
-    # nothing else reaches it -- the instance API and the healthcheck never do. The restart the
-    # previous action now triggers reloads the bouncer, so THIS request is what starts the
-    # clock and the pull it schedules is 10s behind it. A 200 cannot lose a race it starts
-    # itself, however slow the harness is.
-    restart_stack: false
   blocked_stream:
     type: status
     url: "http://www.example.com"
     status: 403
-    # ...and the decision does arrive. No config and no restart here, both on purpose: a restart
-    # would re-arm the timer and make THIS request the one that starts the clock, i.e. a
-    # guaranteed 200 -- measured, that is what the first request after a restart returns, with
-    # the 403 only 11s behind it. The timer the previous action armed keeps firing every 10s
-    # instead, so one bounded delay covers it three times over. The retries are free because
-    # nothing restarts between them.
+    config:
+      # Re-stated because the stack restarts before this action and the spec-level default is `live`.
+      CROWDSEC_MODE: "stream"
+      CROWDSEC_UPDATE_FREQUENCY: "3600"
+    # The pull is an hour away, so only the bootstrap lookup can deny this request: a stream-mode
+    # request that arrives before the first pull asks the Local API about its own IP, learns the
+    # fresh ban at once and keeps it in a bootstrap cache that never touches a stream slot. The
+    # former `not_yet_blocked_stream` asserted a 200 here, the delayed-pull timing of the bouncer
+    # before the bootstrap existed. The decision itself still arrives asynchronously, so one
+    # bounded delay with retries covers it; nothing restarts between the retries.
+    delay: 30
+    retries: 2
+  blocked_stream_after_reload:
+    type: status
+    url: "http://www.example.com"
+    status: 403
+    config:
+      CROWDSEC_MODE: "stream"
+      # Lowered, and the restart that applies it is the reload under test: the ban learned
+      # above must keep denying through the reload (the snapshot or the checkpoint is reused) and
+      # through the first real pull ten seconds later, which reconciles it instead of dropping it.
+      CROWDSEC_UPDATE_FREQUENCY: "10"
     delay: 30
     retries: 2
 
@@ -836,6 +832,80 @@ actions:
         print("crowdsec lease unban: all checks passed")
     result: "crowdsec lease unban: all checks passed"
 
+  # A client that reaches nginx as an IPv4-mapped IPv6 address (`::ffff:a.b.c.d`) is the same client as
+  # `a.b.c.d`, so a decision for the IPv4 address must block it. A PROXY protocol header carries the mapped
+  # spelling without any IPv6 network, which is what makes this runnable on an IPv4-only Docker host: the
+  # runner announces its own source in the PROXY line. The runner is a trusted peer through REAL_IP_FROM.
+  ipv4_decision_blocks_the_ipv4_mapped_client:
+    integrations: ["Docker"]
+    config:
+      CROWDSEC_MODE: "live"
+      USE_PROXY_PROTOCOL: "yes"
+      USE_REAL_IP: "yes"
+      REAL_IP_HEADER: "proxy_protocol"
+      # The Docker gateways the runner connects from.
+      REAL_IP_FROM: "10.0.0.0/8 172.16.0.0/12 192.168.0.0/16"
+    type: script
+    script:
+      - "python3"
+      - "-c"
+      - |
+        import socket
+        import subprocess
+        import sys
+        import time
+
+        BANNED = "192.0.2.50"
+        CLEAN = "192.0.2.51"
+
+        def cscli(*args):
+            return subprocess.run(["docker", "exec", "crowdsec", "cscli", *args], capture_output=True, text=True, timeout=60)
+
+        def fetch(announced, family="TCP4"):
+            """Status of GET / as the client `announced` in a PROXY protocol v1 header."""
+            line = f"PROXY {family} {announced} {'::ffff:127.0.0.1' if family == 'TCP6' else '127.0.0.1'} 40000 80\r\n"
+            request = "GET / HTTP/1.1\r\nHost: www.example.com\r\nUser-Agent: mapped-probe\r\nConnection: close\r\n\r\n"
+            with socket.create_connection(("127.0.0.1", 80), timeout=10) as sock:
+                sock.sendall((line + request).encode())
+                data = b""
+                while chunk := sock.recv(4096):
+                    data += chunk
+            status = int(data.split(b" ", 2)[1]) if data.startswith(b"HTTP/") else 0
+            print(f"{family} {announced} -> {status}", flush=True)
+            return status
+
+        def fail(message):
+            print(f"crowdsec mapped client: {message}", file=sys.stderr)
+            sys.exit(1)
+
+        added = cscli("decisions", "add", "--ip", BANNED, "--duration", "10m", "--type", "ban", "--reason", "mapped-client-spec")
+        print(added.stdout, added.stderr, flush=True)
+        if added.returncode != 0:
+            fail("cscli decisions add failed")
+        try:
+            deadline = time.time() + 30
+            while fetch(BANNED) != 403:
+                if time.time() > deadline:
+                    fail(f"the IPv4 client {BANNED} is not blocked by its own decision: the control of this check is broken")
+                time.sleep(2)
+            for announced in (f"::ffff:{BANNED}", "::ffff:c000:232", "::FFFF:192.0.2.50", "0:0:0:0:0:ffff:192.0.2.50"):
+                got = fetch(announced, "TCP6")
+                if got != 403:
+                    fail(f"the mapped client {announced} must be blocked by the decision for {BANNED}, got {got}")
+            for announced, family in ((CLEAN, "TCP4"), (f"::ffff:{CLEAN}", "TCP6")):
+                got = fetch(announced, family)
+                if got != 200:
+                    fail(f"the clean client {announced} must be served, got {got}")
+            # The probe is vacuous if nginx hands the plugin the dotted spelling already: the access log must show
+            # the mapped one.
+            logs = subprocess.run(["docker", "logs", "--since", "5m", "bunkerweb"], capture_output=True, text=True, errors="replace", timeout=60)
+            if f"::ffff:{BANNED}" not in logs.stdout + logs.stderr:
+                fail(f"nginx never reported the client as ::ffff:{BANNED}: the check does not exercise the mapped spelling")
+        finally:
+            cscli("decisions", "delete", "--ip", BANNED)
+        print("crowdsec mapped client: all checks passed")
+    result: "crowdsec mapped client: all checks passed"
+
 config:
   USE_MODSECURITY: "no"
   USE_BAD_BEHAVIOR: "no"
@@ -850,7 +920,7 @@ config:
   CROWDSEC_EXCLUDE_LOCATION: ""
   CROWDSEC_CACHE_EXPIRATION: "1"
   # CROWDSEC_UPDATE_FREQUENCY is deliberately absent here: it only means something in stream
-  # mode, and the two stream actions each set the value their own assertion depends on.
+  # mode, and the stream actions each set the value their own assertion depends on.
   CROWDSEC_APPSEC_URL: "http://crowdsec:7422"
   CROWDSEC_APPSEC_FAILURE_ACTION: "passthrough"
   CROWDSEC_APPSEC_CONNECT_TIMEOUT: "100"

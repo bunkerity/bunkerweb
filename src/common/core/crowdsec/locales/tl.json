@@ -45,6 +45,14 @@
         "label": "Pag-expire ng Cache ng CrowdSec",
         "help": "Ang pag-expire ng cache, sa segundo, para sa mga IP na iniimbak ng bouncer sa cache sa live mode. Tumatanggap ng suffix ng oras (ms, s, m, h, d, w, M, y); ang numerong walang suffix ay itinuturing na segundo."
       },
+      "CROWDSEC_CACHE_SIZE": {
+        "label": "Laki ng cache ng mga desisyon ng CrowdSec",
+        "help": "Memorya ng mga desisyon na pinagsasaluhan ng lahat ng serbisyo, minimum na 1m sa buong megabyte (m/M). Kailangan ng stream mode ang dalawang snapshot. Pagkatapos baguhin ang laki, mag-reload o mag-restart ng parehong container, ibinabalik mula sa disk ang mga kilalang ban/captcha hanggang mag-expire o mareconcile. Ang mga paunang lookup at pagitan ng muling pagsubok ay ayon sa credentials/patakaran. Pinapayagan ang mga di-kilalang IP kapag hindi available ang LAPI; walang laman sa simula ang file system ng bagong container."
+      },
+      "CROWDSEC_METADATA_CACHE_SIZE": {
+        "label": "Laki ng cache ng metadata ng CrowdSec",
+        "help": "Pinagsasaluhang memorya para sa opsyonal na metadata ng mga ulat ng CrowdSec sa lahat ng serbisyo. Gumamit ng positibong buong bilang ng megabyte (m/M), minimum na 1m. Hindi maaaring magpaalis ng mga rekord ng desisyon ang metadata. Binubura ng pagbabago ng laki sa pag-reload ang opsyonal na metadata na ito. Maglaan ng humigit-kumulang 1m sa bawat 1,000 desisyon sa stream, at dagdag na puwang."
+      },
       "CROWDSEC_CAPTCHA_PROVIDER": {
         "label": "Hamon na Captcha ng CrowdSec",
         "help": "Hamon ng antibot na ipinapakita kapag humihingi ng captcha ang CrowdSec. Dapat naka-enable ang antibot sa service na ito (USE_ANTIBOT naka-set sa kahit ano maliban sa \"no\"), kung hindi ay ba-ban-nin na lang ang request. Kinukuha ng third-party provider ang kanilang mga key mula sa mga setting na ANTIBOT_*. Iwasan ang \"cookie\": walang napapatunayan ito para sa desisyong ang ibig sabihin ay \"patunayan na tao ka\". Hindi pinapansin ng \"no\" ang mga desisyon sa captcha, tulad ng dati; shared ang decision cache kada Local API, kaya kailangang i-set sa \"no\" ang bawat service sa Local API na iyon para ibalik nang buo ang lumang behavior."
