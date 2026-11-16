@@ -217,6 +217,7 @@ actions:
 config:
   USE_BUNKERNET: "yes"
   USE_WHITELIST: "no"
+  USE_DNSBL: "no"
   BUNKERNET_SERVER: "http://custom-api:8000/bunkernet"
   USE_REAL_IP: "yes"
   REAL_IP_FROM: "0.0.0.0/0"
