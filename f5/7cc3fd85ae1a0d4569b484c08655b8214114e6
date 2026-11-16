@@ -1,0 +1,100 @@
+tests/unit/common/test_cors_origin_policy_lua.py
+  s_4dcced49cc80b3::t_d2dfd300aeb887 42-47,86
+  s_4dcced49cc80b3::t_eaae5320706ef9 1-41,48-85,87-228
+  s_4dcced49cc80b3::t_cd70c27e3fab34 229
+src/common/core/templates/templates/high.json
+  s_7db872cc24d44a::t_753e0898fc963d 40
+src/common/core/limit/confs/server-stream/limitconn.conf
+  s_7db872cc24d44a::t_753e0898fc963d 2
+src/common/core/limit/confs/server-http/limitconn.conf
+  s_7db872cc24d44a::t_753e0898fc963d 2
+src/common/core/antibot/files/capjs_frame.html
+  s_0a7c25ebde2361::t_a5154e978e749c 13-15
+src/common/core/antibot/antibot.lua
+  s_0a7c25ebde2361::t_88584f4aa934b9 117-137,1186-1194,1352,1397-1398,1400-1401,1406
+src/common/core/errors/errors.lua
+  s_7db872cc24d44a::t_753e0898fc963d 162
+src/common/core/country/country.lua
+  s_0a7c25ebde2361::t_88584f4aa934b9 76-79,84
+tests/core/cors/browser_credentials.py
+  s_4dcced49cc80b3::t_e7d61377995a32 1-59
+tests/unit/common/test_ignore_uri_normalized_lua.py
+  s_0a7c25ebde2361::t_64bba2a0b6f802 109-111
+  s_d72353fd39298e::t_4b51c2eb423ebf 3
+  s_0a7c25ebde2361::t_b1f1cd54407a46 48,117
+  s_0a7c25ebde2361::t_d93483af577456 1-2,4-47,49-108,112-116,118-166,168-170,175-179,183-189
+  s_0a7c25ebde2361::t_d86c7e2cae8b4e 167,171-174,180-182
+tests/core/cors/www/app1.example.com/credentials.php
+  s_4dcced49cc80b3::t_e7d61377995a32 1-4
+src/common/core/misc/confs/default-server-http/page.conf
+  s_7db872cc24d44a::t_753e0898fc963d 49
+src/common/core/templates/templates/medium.json
+  s_7db872cc24d44a::t_753e0898fc963d 40
+tests/core/cors.yml
+  s_a53efcebd5d5eb::t_e0913588ea206a 35-47
+  s_a53efcebd5d5eb::t_311e470e48749c 58-63
+  s_4dcced49cc80b3::t_e7d61377995a32 48-57,64-490,496-497
+src/common/core/cors/cors.lua
+  s_4dcced49cc80b3::t_b2fb8754e3de51 43-57,82,88-89,96-102,105,129
+src/common/core/templates/templates/low.json
+  s_7db872cc24d44a::t_753e0898fc963d 45,155
+tests/unit/common/test_small_core_ports.py
+  s_7db872cc24d44a::t_cceab008718a71 2-35,41-123
+  s_7db872cc24d44a::t_1c202731013dc5 36-40
+  s_d72353fd39298e::t_974111526d8e87 1
+tests/core/cors/provision_fixture.sh
+  s_a53efcebd5d5eb::t_480d98a5bac42b 28-30,33-35
+  s_a53efcebd5d5eb::t_85169832762552 43
+  s_a53efcebd5d5eb::t_b62abb36904842 2-3
+  s_a53efcebd5d5eb::t_f04b65681e4ad0 1,4-27,31-32,36-42,44-47
+src/common/core/misc/misc.lua
+  s_4dcced49cc80b3::t_b2fb8754e3de51 26-34
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "f57cc3fd85ae1a0d4569b484c08655b8214114e6",
+  "prompts": {},
+  "sessions": {
+    "s_0a7c25ebde2361": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "dd997fa7-1d53-48f3-bb5d-5df3e25b0998",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_4dcced49cc80b3": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "3f0cb566-7690-4566-85e5-c51ce0dfa60b",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_7db872cc24d44a": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1ac53-82bd-7021-8474-9868afc6fad4",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_a53efcebd5d5eb": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "91d63c6b-6a52-4608-9896-62aeb94f06a7",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_d72353fd39298e": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "4437749e-3180-4354-af98-7b7f50c5ea72",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}
