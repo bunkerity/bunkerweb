@@ -1,6 +1,6 @@
 # Changelog
 
-## v1.6.18~rc4 - 2026/11/16
+## v1.6.18~rc4 - 2026/11/17
 
 - [SECURITY] `api`, `ui`: restrict sensitive job-cache content (core private keys, credentials) to API admin credentials and UI super administrators.
 - [SECURITY] `autoconf`: secret setting values (keys, credentials, tokens, passwords) are no longer written to the logs, whatever the log level.
