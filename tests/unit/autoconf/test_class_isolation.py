@@ -14,6 +14,7 @@ from test_lb_address_call_sites import _GATEWAY, _INGRESS, _K8S_ENTRY  # noqa: E
 
 def _base_init(self, *, api_client):
     self._logger = Mock()
+    self._api_client = Mock()
     self._corev1 = Mock()
     self._namespaces = []
     self._should_ignore_annotation = lambda annotation: False
@@ -48,7 +49,7 @@ def _ingress_controller(monkeypatch, flag="yes", selected=""):
             _ingress("precedence", "owned", "foreign"),
         ]
     )
-    monkeypatch.setattr(_INGRESS.client, "NetworkingV1Api", lambda: api, raising=False)
+    monkeypatch.setattr(_INGRESS.client, "NetworkingV1Api", lambda **kwargs: api, raising=False)
     return _INGRESS.IngressController(api_client=Mock()), api
 
 
@@ -88,23 +89,23 @@ def _gateway_controller(monkeypatch, flag="yes", selected=""):
     api.list_cluster_custom_object.side_effect = lambda group, version, plural, **kwargs: {
         "items": {"gatewayclasses": classes, "gateways": gateways, "httproutes": routes}.get(plural, [])
     }
-    monkeypatch.setattr(_GATEWAY.client, "CustomObjectsApi", lambda: api, raising=False)
+    monkeypatch.setattr(_GATEWAY.client, "CustomObjectsApi", lambda **kwargs: api, raising=False)
     return _GATEWAY.GatewayController(api_client=Mock()), api
 
 
 @pytest.mark.parametrize(
-    "flag,selected,expected",
+    "flag,selected,expected,expected_status",
     [
-        ("yes", "", {"owned", "unknown"}),
-        ("no", "", {"owned", "foreign", "unknown"}),
-        ("yes", "foreign", {"foreign"}),
+        ("yes", "", {"owned", "unknown"}, {"owned"}),
+        ("no", "", {"owned", "foreign", "unknown"}, {"owned"}),
+        ("yes", "foreign", {"foreign"}, set()),
     ],
 )
-def test_gateway_routes_and_status_share_class_scope(monkeypatch, flag, selected, expected):
+def test_gateway_status_requires_ownership_even_when_serving_other_classes(monkeypatch, flag, selected, expected, expected_status):
     controller, api = _gateway_controller(monkeypatch, flag, selected)
     assert {r["metadata"]["name"] for r in controller._get_controller_services()} == expected
     controller._patch_controller_status(["192.0.2.1"])
-    assert {c.args[4] for c in api.patch_namespaced_custom_object_status.call_args_list} == expected
+    assert {c.args[4] for c in api.patch_namespaced_custom_object_status.call_args_list} == expected_status
 
 
 @pytest.mark.parametrize("family", ["ingress", "gateway"])

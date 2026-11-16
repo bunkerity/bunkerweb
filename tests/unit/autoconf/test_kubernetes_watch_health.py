@@ -27,6 +27,7 @@ def _load_controller():
     kubernetes = ModuleType("kubernetes")
     kubernetes.client = ModuleType("kubernetes.client")
     kubernetes.client.Configuration = object
+    kubernetes.client.ApiClient = object
     kubernetes.config = Mock()
     kubernetes.watch = Mock()
     exceptions = ModuleType("kubernetes.client.exceptions")
@@ -43,6 +44,7 @@ def _load_controller():
     controllers = ModuleType("controllers")
     controller_mod = ModuleType("controllers.Controller")
     controller_mod.Controller = type("Controller", (), {})
+    controller_mod.HoldTimeLock = object
     controllers.Controller = controller_mod
 
     stubs = {
@@ -187,7 +189,7 @@ class TestWatchFailureIsLoud:
             closes["count"] += 1
             if closes["count"] > 3:
                 raise ApiException(status=500, reason="boom")
-            clock["now"] += MODULE.WATCH_ESTABLISHED_SECONDS + 1
+            clock["now"] += MODULE.WATCH_TIMEOUT_SECONDS + 1
             return iter(())
 
         with patch.object(MODULE.watch, "Watch") as watcher:

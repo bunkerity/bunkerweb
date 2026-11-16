@@ -101,7 +101,10 @@ try:
     controller.initial_apply()
 
     # Process events
-    Path(sep, "var", "tmp", "bunkerweb", "autoconf.healthy").write_text("ok")
+    healthy_path = Path(sep, "var", "tmp", "bunkerweb", "autoconf.healthy")
+    healthy_path.write_text("ok")
+    if kubernetes:
+        controller._start_lock_watchdog(healthy_path)
     LOGGER.info("Processing events ...")
     controller.process_events()
 except Exception:

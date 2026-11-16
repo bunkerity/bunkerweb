@@ -33,6 +33,7 @@ def _load(name: str, extra: dict):
     kubernetes = ModuleType("kubernetes")
     kubernetes.client = ModuleType("kubernetes.client")
     kubernetes.client.Configuration = object
+    kubernetes.client.ApiClient = object
     kubernetes.config = Mock()
     kubernetes.watch = Mock()
     exceptions = ModuleType("kubernetes.client.exceptions")
@@ -49,6 +50,7 @@ def _load(name: str, extra: dict):
     controllers = ModuleType("controllers")
     base = ModuleType("controllers.Controller")
     base.Controller = type("Controller", (), {})
+    base.HoldTimeLock = object
     controllers.Controller = base
 
     stubs = {
@@ -74,6 +76,7 @@ def _load(name: str, extra: dict):
 _K8S = _load("KubernetesController", {})
 _K8S_ENTRY = ModuleType("controllers.KubernetesController")
 _K8S_ENTRY.KubernetesController = _K8S.KubernetesController
+_K8S_ENTRY.API_REQUEST_TIMEOUT = _K8S.API_REQUEST_TIMEOUT
 _INGRESS = _load("IngressController", {"controllers.KubernetesController": _K8S_ENTRY})
 _GATEWAY = _load("GatewayController", {"controllers.KubernetesController": _K8S_ENTRY})
 

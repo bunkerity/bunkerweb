@@ -7,13 +7,13 @@ from typing import List, Optional, Set, Tuple
 from kubernetes import client
 from kubernetes.client.exceptions import ApiException
 
-from controllers.KubernetesController import KubernetesController
+from controllers.KubernetesController import API_REQUEST_TIMEOUT, KubernetesController
 
 
 class IngressController(KubernetesController):
     def __init__(self, *, api_client):
         super().__init__(api_client=api_client)
-        self._networkingv1 = client.NetworkingV1Api()
+        self._networkingv1 = client.NetworkingV1Api(api_client=self._api_client)
 
         self._ingress_class = getenv("KUBERNETES_INGRESS_CLASS", "")
         if self._ingress_class:
@@ -40,7 +40,7 @@ class IngressController(KubernetesController):
         if not self._ingress_classes_readable:
             return None
         try:
-            classes = self._networkingv1.list_ingress_class().items
+            classes = self._networkingv1.list_ingress_class(_request_timeout=API_REQUEST_TIMEOUT).items
         except Exception as e:
             message = f"Cannot verify IngressClass ownership ({e}); reconciliation and status publication aborted. Grant get/list/watch on ingressclasses."
             self._logger.error(message)
@@ -55,7 +55,7 @@ class IngressController(KubernetesController):
 
     def _get_controller_services(self) -> list:
         services = []
-        ingresses = self._networkingv1.list_ingress_for_all_namespaces(watch=False).items
+        ingresses = self._networkingv1.list_ingress_for_all_namespaces(watch=False, _request_timeout=API_REQUEST_TIMEOUT).items
         foreign = self._foreign_ingress_classes()
         self._last_foreign_ingress_classes = foreign
         for ingress in ingresses:
@@ -120,6 +120,7 @@ class IngressController(KubernetesController):
                     namespace,
                     watch=False,
                     field_selector=f"metadata.name={path.backend.service.name}",
+                    _request_timeout=API_REQUEST_TIMEOUT,
                 ).items
 
                 if not service_list:
@@ -130,10 +131,15 @@ class IngressController(KubernetesController):
                 port = 80
                 if path.backend.service.port.name:
                     k8s_service = service_list[0]
-                    for svc_port in k8s_service.spec.ports:
+                    for svc_port in k8s_service.spec.ports or []:
                         if svc_port.name == path.backend.service.port.name:
                             port = svc_port.port
                             break
+                    else:
+                        self._logger.warning(
+                            f"Ingress {namespace}/{controller_service.metadata.name}: named port {path.backend.service.port.name} "
+                            f"not found on Service {namespace}/{path.backend.service.name}, falling back to port 80."
+                        )
                 else:
                     port = path.backend.service.port.number
 
@@ -172,14 +178,20 @@ class IngressController(KubernetesController):
                     if service.get(f"{server_name}_SERVER_TYPE", service.get("SERVER_TYPE", "http")) == "stream":
                         reverse_proxy_found = False
                         warned = False
+                        # The host derived from the Ingress is unprefixed; one set by annotation is prefixed with the server name and wins.
+                        prefix = f"{server_name}_" if any(key.startswith(f"{server_name}_REVERSE_PROXY_HOST") for key in service) else ""
                         for setting in service.copy():
-                            if setting.startswith(f"{server_name}_REVERSE_PROXY_HOST"):
+                            if setting.startswith(f"{prefix}REVERSE_PROXY_HOST"):
                                 if not reverse_proxy_found:
                                     reverse_proxy_found = True
-                                    suffix = setting.removeprefix(f"{server_name}_REVERSE_PROXY_HOST").removeprefix("_")
-                                    service[f"{server_name}_REVERSE_PROXY_HOST"] = service.pop(setting).replace(f"{self._service_protocol}://", "", 1)
-                                    service[f"{server_name}_REVERSE_PROXY_URL"] = service.pop(
-                                        f"{server_name}_REVERSE_PROXY_URL_{suffix}" if suffix else f"{server_name}_REVERSE_PROXY_URL", "/"
+                                    suffix = setting.removeprefix(f"{prefix}REVERSE_PROXY_HOST").removeprefix("_")
+                                    stream_host = service.pop(setting).replace(f"{self._service_protocol}://", "", 1)
+                                    # A stream upstream has no default port: nginx refuses "no port in upstream".
+                                    if not stream_host.rpartition(":")[2].isdigit():
+                                        stream_host += ":80"
+                                    service[f"{prefix}REVERSE_PROXY_HOST"] = stream_host
+                                    service[f"{prefix}REVERSE_PROXY_URL"] = service.pop(
+                                        f"{prefix}REVERSE_PROXY_URL_{suffix}" if suffix else f"{prefix}REVERSE_PROXY_URL", "/"
                                     )
                                     continue
 
@@ -190,7 +202,7 @@ class IngressController(KubernetesController):
                                     )
 
                                 del service[setting]
-                            elif setting.startswith(f"{server_name}_REVERSE_PROXY_URL") and setting in service:
+                            elif setting.startswith(f"{prefix}REVERSE_PROXY_URL") and setting in service:
                                 del service[setting]
 
         if controller_service.spec.tls:
@@ -203,6 +215,7 @@ class IngressController(KubernetesController):
                                     namespace,
                                     watch=False,
                                     field_selector=f"metadata.name={tls.secret_name}",
+                                    _request_timeout=API_REQUEST_TIMEOUT,
                                 ).items
 
                                 if not secrets_tls:
@@ -271,7 +284,9 @@ class IngressController(KubernetesController):
                 patch_body["status"]["loadBalancer"]["ingress"].append({"hostname": ip})
 
         try:
-            self._networkingv1.patch_namespaced_ingress_status(name=ingress_name, namespace=ingress_namespace, body=patch_body)
+            self._networkingv1.patch_namespaced_ingress_status(
+                name=ingress_name, namespace=ingress_namespace, body=patch_body, _request_timeout=API_REQUEST_TIMEOUT
+            )
             self._logger.info(f"Successfully patched status of ingress {ingress_name} in namespace {ingress_namespace} with {len(ips)} address(es)")
             return True
         except ApiException as e:
