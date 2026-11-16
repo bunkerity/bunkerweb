@@ -1,4 +1,4 @@
-"""The ModSecurity rules file probes the tree the SAME render is writing -- pin that.
+"""The ModSecurity rules file includes the plugin fragments the SAME render writes -- pin that.
 
 ``modsecurity-rules.conf.modsec`` emits two families of ``include`` lines, and only the first one
 is about the operator's custom configs:
@@ -11,29 +11,17 @@ is about the operator's custom configs:
   ``ui/confs/modsec/ui.conf``, ``ui/confs/modsec-crs/ui.conf``), which this very render writes into
   its own output directory.
 
-The second family only works because of an ordering contract inside ``_render_server``: the
-``modsec`` and ``modsec-crs`` contexts come before ``server-http`` in the list handed to
-``_find_templates``, so the fragments are on disk by the time the rules file globs for them.
-Reorder that list and every one of those includes silently disappears -- no error, no log line,
-and the UI's CRS exclusions (``ui.conf``) plus the antibot challenge allow-rule stop loading.
+The second family used to be guarded by a glob of ``/etc/nginx`` on the rendering host, which made it
+depend on the render order and on the render host's filesystem, and which a worker (no ``/etc/nginx``)
+never satisfied. It now follows the templates of the context (``Templator._plugin_conf_contexts``), so
+neither the order of the contexts handed to ``_find_templates`` nor the host matters any more.
+``test_modsec_plugin_conf_includes.py`` pins that with an empty ``/etc/nginx`` on the rendering host;
+the tests below keep the other shape, a host whose ``/etc/nginx`` IS the output directory, and the
+separation of the two families.
 
-``is_custom_conf`` globs the literal ``/etc/nginx``, so the probe is only self-consistent while
-``gen/main.py`` renders with ``--output /etc/nginx`` -- which every call site does
-(``push-configs.py:374`` on the worker, and the default for ``bw/entrypoint.sh:140`` /
-``linux/scripts/start.sh:228``). The tests below redirect that literal onto the sandbox output
-directory, which is exactly what a real deployment does by making the two paths the same.
-
-**Scope, stated so it is not over-read: this file pins the ORDER, not that coupling.** The redirect
-above is precisely the output-relative probe a fix for the coupling would install, so a render that
-moved ``--output`` elsewhere -- the staging-directory idea in ``report-W1.md`` -- would keep every
-test here green while production silently emitted none of these includes. Pinning the coupling needs
-the probe itself to become output-relative first.
-
-Second uncovered break vector, same contract: ``_find_templates`` memoises on
-``frozenset(contexts)`` (``Templator.py:752-778``) while promising its result "in the same order as
-contexts". Inert today -- the two call sites pass disjoint context sets -- but a third one passing
-these same six in another order would serve the first caller's ordering to both, and nothing here
-would notice.
+``_find_templates`` memoises on ``frozenset(contexts)`` (``Templator.py``) while promising its result "in
+the same order as contexts". Inert today -- the two call sites pass disjoint context sets -- but a third
+one passing the same contexts in another order would serve the first caller's ordering to both.
 """
 
 import logging

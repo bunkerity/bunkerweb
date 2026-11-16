@@ -79,3 +79,14 @@ def test_the_default_server_id_stays_excluded():
     )
     assert host_patterns(rendered) == {r"ui\.example\.com"}
     assert "ghost" not in rendered
+
+
+def test_a_bare_ipv6_name_is_matched_bracketed_in_the_ip_rule():
+    rendered = render(**ctx({"ui": {"USE_UI": "yes", "SERVER_NAME": "ui.example.com 2001:db8::1"}}))
+    ip_rules = [line for line in rendered.splitlines() if line.startswith(HOST_RULE) and "2001" in line]
+    assert ip_rules and all(r"\[2001:db8::1\]" in rule and "ui" not in rule.split('"@rx')[1] for rule in ip_rules)
+    assert not any("2001" in rule for rule in rendered.splitlines() if line_is_ui_host_rule(rule))
+
+
+def line_is_ui_host_rule(line: str) -> bool:
+    return line.startswith(HOST_RULE) and r"ui\.example\.com" in line
