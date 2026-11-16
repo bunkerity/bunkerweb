@@ -85,7 +85,7 @@ BunkerWeb 中的某些设置支持同一功能的多个配置。要定义多组�
 
     | 设置                  | 默认值            | 上下文    | 多个 | 描述                                                               |
     | --------------------- | ----------------- | --------- | ---- | ------------------------------------------------------------------ |
-    | `SERVER_NAME`         | `www.example.com` | multisite | 否   | **主域名：** 此站点的主域名。在多站点模式下为必需。                |
+    | `SERVER_NAME`         | `www.example.com` | multisite | 否   | **主域名：** 此站点的主域名（或 IP 地址）。在多站点模式下为必需。  |
     | `BUNKERWEB_INSTANCES` | `127.0.0.1`       | global    | 否   | **BunkerWeb 实例：** 以空格分隔的 BunkerWeb 实例列表。             |
     | `MULTISITE`           | `no`              | global    | 否   | **多站点：** 设置为 `yes` 以启用托管具有不同配置的多个网站。       |
     | `SECURITY_MODE`       | `block`           | multisite | 否   | **安全级别：** 控制安全强制执行的级别。选项：`detect` 或 `block`。 |
@@ -407,7 +407,7 @@ BunkerWeb 允许您指定某些用户、IP 或请求应完全绕过 antibot 挑�
 
 | 设置                          | 默认值 | 上下文    | 多个 | 描述                                                                                                               |
 | ----------------------------- | ------ | --------- | ---- | ------------------------------------------------------------------------------------------------------------------ |
-| `ANTIBOT_IGNORE_URI`          |        | multisite | 否   | **排除的 URL：** 应绕过挑战的以空格分隔的 URI 正则表达式模式列表。模式会同时匹配路径和带查询字符串的完整请求 URI。 |
+| `ANTIBOT_IGNORE_URI`          |        | multisite | 否   | **排除的 URL：** 应绕过挑战的以空格分隔的 URI 正则表达式模式列表。模式会匹配规范化后的路径，既可单独匹配，也可匹配路径后接 `?` 和查询字符串的形式。 |
 | `ANTIBOT_IGNORE_IP`           |        | multisite | 否   | **排除的 IP：** 应绕过挑战的以空格分隔的 IP 地址或 CIDR 范围列表。                                                 |
 | `ANTIBOT_IGNORE_RDNS`         |        | multisite | 否   | **排除的反向 DNS：** 应绕过挑战的以空格分隔的反向 DNS 后缀列表。                                                   |
 | `ANTIBOT_RDNS_GLOBAL`         | `yes`  | multisite | 否   | **仅限全局 IP：** 如果设置为 `yes`，则仅对公共 IP 地址执行反向 DNS 检查。                                          |
@@ -637,6 +637,7 @@ BunkerWeb 允许您指定某些用户、IP 或请求应完全绕过 antibot 挑�
         - 在 Cap.js 站点密钥上配置 CORS，以允许受保护的来源。
         - 将 `ANTIBOT_CAPJS_FRONTEND_URL` 和 `ANTIBOT_CAPJS_BACKEND_URL` 都设置为仅 origin：scheme、host 和可选端口，不包含路径。
         - 请使用 Cap.js 小组件 **0.1.48 或更高版本**。BunkerWeb 下发严格的基于 nonce 的 CSP；较旧的小组件会破坏 instrumentation 挑战，因为隔离 `srcdoc` iframe 内注入的内联 `<script>` 不会传递 nonce。如果您自托管 `tiago2/cap`，请固定到较新的标签（如 `tiago2/cap:3.1.2` 或更高），或将 `WIDGET_VERSION` 设置为 `0.1.48` 或更高。
+        - 在严格的 CSP 下自行托管 `hashwx.wasm` 需要 Cap.js 小组件 **0.1.58 或更高版本**。
         - Cap.js **instrumentation 挑战**（默认开启）通过 `eval` 执行服务器提供的 JavaScript，nonce 无法对其授权。BunkerWeb 在同源隔离 iframe 中运行小组件，由该 iframe 携带所需的 `'unsafe-eval'`，因此主挑战页面保持严格的、无 `eval` 的 CSP——无需任何配置。
 
     有关其他配置选项，请参阅[通用设置](#通用设置)。
@@ -924,6 +925,8 @@ bwcli plugin backup restore /path/to/backup/backup-sqlite-2023-08-15_12-34-56.zi
 
     备份只能恢复到它所来自的同一种数据库引擎——引擎名是文件名的一部分（`backup-mariadb-…`），恢复到其他引擎会在改动任何内容之前被拒绝。如果您在引擎之间做过迁移，两套备份都会留在该目录中：不带参数的 `restore` 会取任意引擎中最新的那个文件，因此请显式给出路径，才能恢复当前引擎的某个较旧备份。
 
+    恢复操作在删除任何表之前，会检查文件名中的引擎标记（MariaDB 和 MySQL 视为不同引擎）、预期 SQL 文件是否存在，以及归档中每个文件的完整性。缺失、重命名或损坏的归档会被拒绝，数据库保持不变。
+
 ### 受控降级
 
 回退到较旧的 BunkerWeb 版本**并不是**升级的逆操作。某些 1.7 的表在 1.6.x 中无处安放，而在某些数据库引擎
@@ -1124,6 +1127,13 @@ STREAM 支持 :white_check_mark:
 | `BAD_BEHAVIOR_COUNT_TIME`   | `1m`                          | multisite | 否   | **计数周期：** 计算不良状态码以达到阈值的时间窗口（以秒为单位）。 支持时间后缀（ms、s、m、h、d、w、M、y）；无后缀的数字单位为秒。  |
 | `BAD_BEHAVIOR_BAN_TIME`     | `1d`                          | multisite | 否   | **封禁持续时间：** 一个 IP 超过阈值后将被封禁的时间（以秒为单位）。默认为 24 小时（86400 秒）。设置为 `0` 表示永不解封的永久封禁。 支持时间后缀（ms、s、m、h、d、w、M、y）；无后缀的数字单位为秒。 |
 | `BAD_BEHAVIOR_BAN_SCOPE`    | `service`                     | global    | 否   | **封禁范围：** 决定封禁是仅适用于当前服务 (`service`) 还是所有服务 (`global`)。命中默认服务器（`_`）时，封禁始终为全局。          |
+| `BAD_BEHAVIOR_REPORT_MAX_EVENTS` | `100` | multisite | 否 | 报告中作为封禁依据保留的最近事件数量上限，同时受 `BAD_BEHAVIOR_THRESHOLD` 限制。 范围：`1` 至 `10000`。 |
+| `BAD_BEHAVIOR_REPORT_MAX_STRING_SIZE` | `512` | multisite | 否 | 报告依据中每个 URL 或方法的最大字节数，包含 `...` 标记。范围：`4` 至 `65536`。 |
+
+封禁依据保留最新的匹配事件。这些限制仅影响已存储的依据，不改变封禁逻辑或 `MAX_LRU_HISTORY`。截断时不会拆分 UTF-8 字符。提高任一限制都会增加报告的存储占用。即使保留的事件较少，请求总数仍显示实际封禁计数器的值。
+
+HTTP 子系统创建的封禁仅保存一份实时依据，报告按需加载详情。Stream 子系统创建的封禁仍在每份报告中内嵌有上限的依据。持久化报告保存有上限的快照；若保存前依据已丢失，详情会明确说明不可用。
+
 
 !!! warning "误报"
     在设置阈值和计数时间时要小心。将这些值设置得太低可能会无意中封禁在浏览您网站时遇到错误的合法用户。
@@ -1532,7 +1542,7 @@ BunkerNet 插件通过 BunkerWeb 实例之间的集体威胁情报共享，创�
 **工作原理：**
 
 1.  您的 BunkerWeb 实例会自动向 BunkerNet API 注册，以获取一个唯一标识符。
-2.  当您的实例检测并阻止了恶意 IP 地址或行为时，它会匿名地向 BunkerNet 报告该威胁。
+2.  当您的实例检测并阻止了恶意 IP 地址或行为时，它会向 BunkerNet 报告该威胁。报告包含的字段见下文“报告包含的内容”。
 3.  BunkerNet 聚合来自所有参与实例的威胁情报，并分发整合后的数据库。
 4.  您的实例会定期从 BunkerNet 下载更新的已知威胁数据库。
 5.  这种集体情报使您的实例能够主动阻止在其他 BunkerWeb 实例上表现出恶意行为的 IP 地址。
@@ -1541,9 +1551,9 @@ BunkerNet 插件通过 BunkerWeb 实例之间的集体威胁情报共享，创�
 
       1. **集体防御：** 利用全球成千上万个其他 BunkerWeb 实例的安全发现。
       2. **主动防护：** 根据恶意行为者在别处的行为，在他们攻击您的网站之前就将其阻止。
-      3. **社区贡献：** 通过分享关于攻击者的匿名威胁数据，帮助保护其他 BunkerWeb 用户。
+      3. **社区贡献：** 通过分享关于攻击者的威胁数据，帮助保护其他 BunkerWeb 用户。
       4. **零配置：** 开箱即用，带有合理的默认值，只需最少的设置。
-      5. **注重隐私：** 只分享必要的威胁信息，不损害您或您用户的隐私。
+      5. **受控分享：** 报告包含一组固定的字段，`BUNKERNET_FILTER_HEADERS` 可将其请求头限制为一份简短的白名单（见下文）。
 
 ### 如何使用
 
@@ -1557,18 +1567,29 @@ BunkerNet 插件通过 BunkerWeb 实例之间的集体威胁情报共享，创�
 
 ### 配置设置
 
-| 设置               | 默认值                     | 上下文    | 多个 | 描述                                                                 |
-| ------------------ | -------------------------- | --------- | ---- | -------------------------------------------------------------------- |
-| `USE_BUNKERNET`    | `yes`                      | multisite | 否   | **启用 BunkerNet：** 设置为 `yes` 以启用 BunkerNet 威胁情报共享。    |
-| `BUNKERNET_SERVER` | `https://api.bunkerweb.io` | global    | 否   | **BunkerNet 服务器：** 用于共享威胁情报的 BunkerNet API 服务器地址。 |
+| 设置                       | 默认值                     | 上下文    | 多个 | 描述                                                                                                                                                                  |
+| -------------------------- | -------------------------- | --------- | ---- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `USE_BUNKERNET`            | `yes`                      | multisite | 否   | **启用 BunkerNet：** 设置为 `yes` 以启用 BunkerNet 威胁情报共享。                                                                                                     |
+| `BUNKERNET_FILTER_HEADERS` | `no`                       | multisite | 否   | **过滤上报的请求头：** 设置为 `yes` 时，只发送一份简短的请求头白名单，并清空 ModSecurity 在请求头和 Cookie 中命中的值。设置为 `no` 时，报告包含所有请求头和命中的值。 |
+| `BUNKERNET_SERVER`         | `https://api.bunkerweb.io` | global    | 否   | **BunkerNet 服务器：** 用于共享威胁情报的 BunkerNet API 服务器地址。                                                                                                  |
 | `USE_BUNKERNET_STATS` | `yes` | global | no | **BunkerNet 效果统计：** 将贡献、封禁列表大小、连接状态等统计持久化到数据库。 |
 | `BUNKERNET_STATS_RETENTION_DAYS` | `30` | global | no | **统计保留期：** 已存 BunkerNet 效果统计的最长保留天数。 |
 
 !!! tip "网络保护"
     当 BunkerNet 检测到某个 IP 地址在多个 BunkerWeb 实例中参与了恶意活动时，它会将该 IP 添加到集体黑名单中。这提供了一个主动的防御层，在威胁直接攻击您之前就保护您的网站。
 
-!!! info "匿名报告"
-    在向 BunkerNet 报告威胁信息时，您的实例只分享识别威胁所需的数据：IP 地址、阻止原因和最少的上下文数据。不会分享有关您的用户的个人信息或有关您网站的敏感详细信息。
+!!! info "报告包含的内容"
+    发送给 BunkerNet 的每份报告包含以下字段，仅此而已：
+
+    - 每次请求发送的实例元数据：BunkerNet 实例 ID、BunkerWeb 版本、集成方式，以及操作系统名称、版本、版本 ID、代号、ID 和架构；
+    - 客户端 IP 地址、阻止原因和日期；
+    - HTTP 方法、**包含查询字符串的** URL，以及服务名称（`server_name`）；
+    - 请求头及其值：收到的所有请求头（最多 `MAX_HEADERS` 个），或在 `BUNKERNET_FILTER_HEADERS` 为 `yes` 时仅包含 `User-Agent`、`Accept`、`Accept-Encoding`、`Accept-Language`、`Content-Type` 和 `Content-Length`；
+    - 与阻止原因相关的详细信息。根据阻止该客户端的插件不同，可能包含命中的 ModSecurity 规则 ID 和消息，以及触发这些规则的请求值（参数、请求体、请求头或 Cookie 的片段，每项截断为 512 字节；`BUNKERNET_FILTER_HEADERS` 为 `yes` 时，在请求头和 Cookie 中命中的值会被清空，只发送变量名）；对于 Bad Behavior，则是导致封禁的近期请求的方法和 URL。
+
+    默认情况下（`BUNKERNET_FILTER_HEADERS` 为 `no`），报告包含收到的所有请求头（最多 `MAX_HEADERS` 个，包括 Cookie 和 `Authorization`），以及 ModSecurity 命中的原始值。将 `BUNKERNET_FILTER_HEADERS` 设置为 `yes`，则只发送上面列出的六个请求头，并清空在请求头和 Cookie 中命中的值。仍在队列中的报告在 `yes` 时也会在发送前以同样方式过滤。
+
+    URL 以及命中的值均来自请求，因此包含客户端发送的任何内容。对于 URL 中带有敏感值的服务，请将 `USE_BUNKERNET` 设置为 `no`。
 
 !!! info "效果统计"
     启用 `USE_BUNKERNET_STATS` 时，`bunkernet-stats` 每次运行都会把部署级贡献和健康指标（封禁列表大小、待发送报告、注册状态）保存到数据库，`bunkernet-cleanup-stats` 删除超过 `BUNKERNET_STATS_RETENTION_DAYS` 的行。设置为 `no` 时，两个任务完全跳过并记录原因。
@@ -1797,7 +1818,7 @@ CORS 插件为您的网站启用跨源资源共享，允许从不同域受控地
 | `CORS_ALLOW_ORIGIN`            | `self`                                                                               | multisite | 否   | **允许的来源：** 表示允许来源的 PCRE 正则表达式；使用 `*` 表示任何来源，或 `self` 表示仅限同源。 |
 | `CORS_ALLOW_METHODS`           | `GET, POST, OPTIONS`                                                                 | multisite | 否   | **允许的方法：** 可在跨源请求中使用的 HTTP 方法。                                                |
 | `CORS_ALLOW_HEADERS`           | `DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range` | multisite | 否   | **允许的标头：** 可在跨源请求中使用的 HTTP 标头。                                                |
-| `CORS_ALLOW_CREDENTIALS`       | `no`                                                                                 | multisite | 否   | **允许凭据：** 设置为 `yes` 以允许在 CORS 请求中使用凭据（cookie、HTTP 身份验证）。              |
+| `CORS_ALLOW_CREDENTIALS`       | `no`                                                                                 | multisite | 否   | **允许凭据：** 设置为 `yes` 以允许在 CORS 请求中使用凭据（cookie、HTTP 身份验证）。该标头仅在预检和实际响应中发送给允许的来源，且当 `CORS_ALLOW_ORIGIN` 为 `*` 时从不发送。              |
 | `CORS_EXPOSE_HEADERS`          | `Content-Length,Content-Range`                                                       | multisite | 否   | **公开的标头：** 浏览器允许从跨源响应中访问的 HTTP 标头。                                        |
 | `CROSS_ORIGIN_OPENER_POLICY`   | `same-origin`                                                                        | multisite | 否   | **跨源打开器策略：** 控制浏览上下文之间的通信。                                                  |
 | `CROSS_ORIGIN_EMBEDDER_POLICY` | `require-corp`                                                                       | multisite | 否   | **跨源嵌入器策略：** 控制文档是否可以加载来自其他来源的资源。                                    |
@@ -1821,6 +1842,8 @@ CORS 插件为您的网站启用跨源资源共享，允许从不同域受控地
 - **`^https://.+\.example\.com$`**：允许来自以 `.example.com` 结尾的任何子域的请求。
 - **`^https://(www\.example1\.com|www\.example2\.com)$`**：允许来自 `https://www.example1.com` 或 `https://www.example2.com` 的请求。
 - **`^https?://www\.example\.com$`**：允许来自 `https://www.example.com` 和 `http://www.example.com` 的请求。
+
+在正则模式下，请使用 `^` 和 `$` 锚定模式以匹配完整来源；仅当请求的 `Origin` 匹配时，响应才会在 `Access-Control-Allow-Origin` 中返回它，不匹配的来源不会收到 `Access-Control-Allow-Origin` 标头。使用 `self` 时，`Origin` 必须与服务自身的来源完全一致，不会被当作正则模式处理。
 
 === "基本配置"
 
@@ -1921,7 +1944,7 @@ STREAM 支持 :white_check_mark:
 | ----------------------------- | ------ | --------- | ---- | --------------------------------------------------------------------------------------------------------------------------------- |
 | `WHITELIST_COUNTRY`           |        | multisite | 否   | **国家/地区白名单：** 以空格分隔的国家/地区代码和/或分组 token 列表。只允许这些国家/地区。                                        |
 | `BLACKLIST_COUNTRY`           |        | multisite | 否   | **国家/地区黑名单：** 以空格分隔的国家/地区代码和/或分组 token 列表。这些国家/地区将被阻止。                                      |
-| `COUNTRY_IGNORE_URI`          |        | multisite | 否   | **忽略的 URI：** 以空格分隔的 PCRE 正则表达式列表，匹配的 URI 将跳过国家/地区检查。规则同时匹配路径和带查询字符串的完整请求 URI。 |
+| `COUNTRY_IGNORE_URI`          |        | multisite | 否   | **忽略的 URI：** 以空格分隔的 PCRE 正则表达式列表，匹配的 URI 将跳过国家/地区检查。规则会匹配规范化后的路径，既可单独匹配，也可匹配路径后接 `?` 和查询字符串的形式。 |
 | `COUNTRY_IGNORE_HEADER_NAME`  |        | multisite | 是   | **请求头名称：** 使请求绕过国家检查的请求头名称。成对编号：`_NAME_1` 与 `_VALUE_1` 配对。                                         |
 | `COUNTRY_IGNORE_HEADER_VALUE` |        | multisite | 是   | **请求头值：** 请求头值必须匹配的 PCRE 正则表达式。留空则仅检查该请求头是否存在。                                                 |
 
@@ -2071,7 +2094,15 @@ CrowdSec 是一种现代的开源安全引擎，它基于行为分析和社区�
 
 请原样使用返回的连接 ID。它包含实例身份，因此不同实例上相同的 localhost URL 仍会被区分。API 管理员可以使用这些操作。委派的 API 用户需要在现有 `bans` 资源下获得独立的 `crowdsec_read` 或 `crowdsec_delete` 权限，权限范围为返回的连接 ID 或 `*`。使用 `GET /crowdsec` 列出连接需要将权限授予 `*`。普通的 `ban_delete` 权限不允许移除 CrowdSec 决策。无需进行数据库迁移。
 
-运行时按目标保留各条独立决策，因此移除一条决策不会抹去同一 IP 或范围上的其他封禁。可选的报告元数据使用独立的 5 MiB 缓存，不会逐出用于执行封禁的条目。流刷新使用 `/var/run/bunkerweb` 中的非阻塞进程锁，锁会一直保持到更新发布完成，并在 worker 退出时自动释放。
+运行时按目标保留各条独立决策，因此移除一条决策不会抹去同一 IP 或范围上的其他封禁。可选的报告元数据使用独立的 24 MiB (`CROWDSEC_METADATA_CACHE_SIZE=24m`) 缓存，不会逐出用于执行封禁的条目。流刷新使用 `/var/run/bunkerweb` 中的非阻塞进程锁，锁会一直保持到更新发布完成，并在 worker 退出时自动释放。
+
+流模式最多保留两个快照槽位，仅在完整快照存储成功后切换。配置未变的 nginx 重载会保留当前快照并请求增量更新。快照缺失、决策配置改变、上次启动未完成，或距离上次成功同步超过 300 秒与 `CROWDSEC_UPDATE_FREQUENCY` 的 30 倍两者中的较大值时，会强制获取完整快照。每个缓存前缀每分钟最多记录一次同步错误，恢复后记录一次通知。决策缓存已满时，请增大 `CROWDSEC_CACHE_SIZE` 以容纳两个快照并重载 BunkerWeb。重载时调整决策内存区大小会创建空缓存并触发完整同步；仅调整元数据内存区大小会清空可选元数据。
+
+从早期版本原地升级时，旧版本的有效记录保留原始 TTL，因此即使新的关闭超时更短，正在退出的旧工作进程仍可继续执行这些决策。分配快照前会清理过时的代际记录。除两个快照槽位外，还应为这些旧记录预留缓存空间；分配失败时保留原有防护，并报告同步错误。请按以下数据确定决策缓存大小，这些数据使用合成的互不相同的 IPv4 目标和一小时 TTL 测得：稳定状态（两个快照槽位）下约为每条决策 1.1 KiB，升级期间旧记录仍有效时约为每条决策 1.4 KiB，二者均已向上取整以留有余量。例如，100,000 条决策在稳定状态下约需 `120m`，升级期间约需 `150m`。按这些数据，默认值 `100m` 在稳定状态下可容纳约 90,000 条决策，升级期间约 70,000 条。IPv6 或网段等其他目标类型可能占用更多，因此请按列表规模设置 `CROWDSEC_CACHE_SIZE`，最好在升级前完成。
+
+流请求被中断或失败后，下次轮询会强制获取完整快照。距离上次成功完整同步超过 3600 秒时，也会执行一次完整校准。初始化期间，本地 API 的直接查询结果按有效凭据和策略使用独立缓存。查询失败后，仅该策略暂停查询 `CROWDSEC_UPDATE_FREQUENCY`；故障期间未知 IP 会被放行。已知的封禁和验证码决策仍执行至各自到期。初始化查询结果和恢复的决策都不会覆盖更新的已发布快照。
+
+流模式将每个完整快照和有变更的增量保存至 `/var/lib/bunkerweb/crowdsec-state-*.json`，记录各决策的绝对到期时间，并在 `crowdsec-binding-*.json` 中保存服务关联。这些文件不受调度器缓存推送影响，可在缓存区调整大小、策略变更（包括 API URL 或密钥轮换）、nginx 重载，以及保留文件系统的同一容器重启后继续使用。新快照发布前，继续使用旧的已发布快照或恢复的检查点执行决策。初始化时恢复检查点。工作进程共享检查点版本；版本过期的工作进程会先通过定时器重新读取文件，再用于故障期间的回退。文件写入也仅在定时器中进行。若检查点无法读取或已损坏（包括工作进程启动时或更新被中断之后），回退检查会拒绝请求，直到其重新可读或成功同步将其重写。变更立即保存，但写入期间发生崩溃（包括断电）可能导致检查点丢失。属于其他配置的检查点会被忽略；两种情况都会记录限频错误。使用全新文件系统重新创建容器时，初始决策为空；若 LAPI 不可用，未知 IP 仍会被放行。
 
 ### CrowdSec 封禁
 
@@ -2368,6 +2399,8 @@ CrowdSec 是一种现代的开源安全引擎，它基于行为分析和社区�
 
 应用以下环境变量（或通过调度器设置的值），让 BunkerWeb 实例能够与 CrowdSec 本地 API 通信。至少需要设置 `USE_CROWDSEC`、`CROWDSEC_API` 和 `CROWDSEC_API_KEY`，并使用通过 `cscli bouncers add` 生成的有效密钥。
 
+连接设置为 `multisite`：无前缀的值适用于所有服务，带服务器名前缀的值仅覆盖该服务。`CROWDSEC_CACHE_SIZE` 和 `CROWDSEC_METADATA_CACHE_SIZE` 为 `global`，请勿添加服务器名前缀。
+
 | 设置                        | 默认值                 | 上下文    | 多个 | 描述                                                                                                  |
 | --------------------------- | ---------------------- | --------- | ---- | ----------------------------------------------------------------------------------------------------- |
 | `USE_CROWDSEC`              | `no`                   | multisite | 否   | **启用 CrowdSec：** 设置为 `yes` 以启用 CrowdSec 拦截器。                                             |
@@ -2377,6 +2410,8 @@ CrowdSec 是一种现代的开源安全引擎，它基于行为分析和社区�
 | `CROWDSEC_ENABLE_INTERNAL`  | `no`                   | multisite    | 否   | **内部流量：** 设置为 `yes` 以根据 CrowdSec 决策检查内部流量。                                        |
 | `CROWDSEC_REQUEST_TIMEOUT`  | `1s`                   | multisite | 否   | **请求超时：** 在实时模式下向 CrowdSec 本地 API 发出 HTTP 请求的超时时间（以毫秒为单位）。 支持时间后缀（ms、s、m、h、d、w、M、y）；无后缀的数字单位为毫秒。 |
 | `CROWDSEC_EXCLUDE_LOCATION` |                        | multisite    | 否   | **排除的位置：** 从 CrowdSec 检查中排除的位置（URI）列表，以逗号分隔。                                |
+| `CROWDSEC_CACHE_SIZE`          | `100m`                 | global    | 否   | **决策缓存大小：** 所有服务共享的内存；流模式需要两个快照。使用正整数兆字节（`m`/`M`），最小 `1m`。调整大小会清空缓存区；已知决策从磁盘恢复并执行至完成校准。未知 IP 查询 LAPI，故障时放行未知 IP。                                                                                      |
+| `CROWDSEC_METADATA_CACHE_SIZE` | `24m`                  | global    | 否   | **元数据缓存大小：** 所有服务的可选报告元数据使用的独立共享内存。使用正整数兆字节（`m`/`M`），最小值为 `1m`；重载时调整大小会清空此内存区。                                                                                                                                              |
 | `CROWDSEC_CACHE_EXPIRATION` | `1s`                   | multisite | 否   | **缓存过期时间：** 在实时模式下，IP 决策的缓存过期时间（以秒为单位）。 支持时间后缀（ms、s、m、h、d、w、M、y）；无后缀的数字单位为秒。 |
 | `CROWDSEC_UPDATE_FREQUENCY` | `10s`                  | multisite | 否   | **更新频率：** 在流模式下，从 CrowdSec API 拉取新的/过期的决策的频率（以秒为单位）。 支持时间后缀（ms、s、m、h、d、w、M、y）；无后缀的数字单位为秒。 |
 | `CROWDSEC_BAN_REFRESH` | `0`                    | multisite | 否   | **CrowdSec 封禁续期：** 将 CrowdSec 的拦截转为短期 BunkerWeb 封禁，并在 CrowdSec 决策持续期间续期。该值是再次询问 CrowdSec 之前封禁最长持续的时间。0 表示禁用。设置了 `CROWDSEC_EXCLUDE_LOCATION` 的服务不会获得 CrowdSec 封禁。支持时间后缀（ms、s、m、h、d、w、M、y）；无后缀的数字单位为秒。 |
@@ -2398,7 +2433,7 @@ CrowdSec 是一种现代的开源安全引擎，它基于行为分析和社区�
 
 !!! info "关于操作模式"
     - **实时模式**会为每个传入的请求查询 CrowdSec API，提供实时的保护，但会增加延迟。
-    - **流模式**会定期从 CrowdSec API 下载所有决策并将其本地缓存，从而减少延迟，但应用新决策会略有延迟。
+    - **流模式**先下载初始快照，再轮询新增和删除的决策以更新本地缓存，从而减少延迟，但应用新决策会略有延迟。
 
 #### 按服务的端点
 
@@ -2773,6 +2808,8 @@ STREAM 支持 :white_check_mark:
 | `DATABASE_POOL_PRE_PING`          | `yes`                                     | global | 否   | **连接池预检测：** 每次从连接池取出连接时是否测试其活性。                                                                                       |
 | `DATABASE_POOL_RESET_ON_RETURN`   |                                           | global | 否   | **归还时重置：** 连接归还连接池时的重置方式。留空为自动（MySQL/MariaDB 用 `none`，其他用 `rollback`）。选项：`rollback`、`commit`、`none`。       |
 | `DATABASE_RETRY_TIMEOUT`        | `1m`                                      | global | 否   | **重试超时：** 启动时等待数据库可用的最大秒数。 支持时间后缀（ms、s、m、h、d、w、M、y）；无后缀的数字单位为秒。 |
+| `DATABASE_CONNECT_TIMEOUT` | `10s` | global | 否   | **连接超时：** 打开到 MySQL、MariaDB 或 PostgreSQL 服务器的连接时的最长等待时间。 必须大于 `0`：驱动程序不能没有该超时，`0` 会发出警告并回退到默认值。 `DATABASE_URI` 查询字符串中设置的超时优先。 支持时间后缀（ms、s、m、h、d、w、M、y）；无后缀的数字单位为秒。 |
+| `DATABASE_READ_TIMEOUT` | `5m` | global | 否   | **读取超时：** 等待 MySQL 或 MariaDB 服务器响应或接收数据的最长时间，超时后调用失败，避免对端消失导致永久阻塞。 PostgreSQL 改用 TCP keepalive。 `0` 表示禁用。 `DATABASE_URI` 查询字符串中设置的超时优先。 支持时间后缀（ms、s、m、h、d、w、M、y）；无后缀的数字单位为秒。 |
 | `DATABASE_REQUEST_RETRY_ATTEMPTS` | `2`                                       | global | 否   | **请求重试次数：** 操作中遇到瞬态数据库错误时的重试次数。                                                                                       |
 | `DATABASE_REQUEST_RETRY_DELAY`  | `250ms`                                   | global | 否   | **请求重试延迟：** 瞬态数据库错误重试之间的延迟秒数。 支持时间后缀（ms、s、m、h、d、w、M、y）；无后缀的数字单位为秒。 |
 
@@ -2998,6 +3035,12 @@ STREAM 支持 :x:
     ```yaml
     INTERCEPTED_ERROR_CODES: "404 500"
     ```
+
+### 保留上游 API 的错误响应体
+
+默认情况下，BunkerWeb 会用自己的错误页面替换上游返回的 400 响应，这可能会破坏 JSON API 或 OIDC 客户端。要为某个服务放行上游错误，可以从该服务的列表中移除相应状态码，例如 `app.example.com_INTERCEPTED_ERROR_CODES=401 403 404 405 413 429 500 501 502 503 504`（保留您仍希望拦截的状态码），或者设置 `app.example.com_REVERSE_PROXY_INTERCEPT_ERRORS=no` 以放行所有上游错误。由 BunkerWeb 自身生成的错误（例如 WAF 拒绝）仍由 BunkerWeb 处理。
+
+若只想在某个 location 中保留上游错误，请创建一个内容为 `proxy_intercept_errors off;` 的文件，并将其列入该 location 的 `REVERSE_PROXY_INCLUDES` 设置中（例如 `app.example.com_REVERSE_PROXY_INCLUDES=/opt/keep-errors.conf`，数字后缀与该 location 的 `REVERSE_PROXY_HOST` 相同）。该文件必须存在于 BunkerWeb 容器内。该服务的其他 location 仍会拦截错误。
 
 ## GeoIP
 
@@ -3633,6 +3676,7 @@ STREAM 支持 :x:
         -   在强制执行 CSP 之前，在 `Report-Only` 模式下进行测试，以避免破坏功能。
         -   在 `Report-Only` 模式下，上游发送的 `Content-Security-Policy` 或 `Content-Security-Policy-Report-Only` 标头默认会被保留（`KEEP_UPSTREAM_HEADERS`）；从该设置中移除相应的标头名称，BunkerWeb 自身的策略才会生效。
         -   默认的 `PERMISSIONS_POLICY` 也会阻止客户端提示（`ch-*` 指令）；如果某个服务依赖 `Accept-CH`（例如基于客户端提示的响应式图片或通过 `Sec-CH-Prefers-Color-Scheme` 进行的深色模式检测），请覆盖 `PERMISSIONS_POLICY` 以重新允许所需的 `ch-*` 功能（例如 `ch-dpr=(self)`）。
+        - 默认的 `PERMISSIONS_POLICY` 禁止 `unbounded-element`。
 
 === "Cookie 设置"
 
@@ -4163,6 +4207,8 @@ BunkerWeb 中的限制插件提供了强大的功能来对您的网站强制执�
     | `LIMIT_CONN_MAX_HTTP3`  | `100`  | multisite | 否   | **HTTP/3 流数：** 每个 IP 地址的最大并发 HTTP/3 流数。         |
     | `LIMIT_CONN_MAX_STREAM` | `10`   | multisite | 否   | **流连接数：** 每个 IP 地址的最大并发流连接数。                |
 
+当 `SECURITY_MODE` 为 `detect` 时，连接限制会被评估并记录（`limiting connections, dry run`），但不会被强制执行。
+
 !!! info "连接限制与请求限制"
     - **连接限制** 限制单个 IP 地址可以维持的并发连接数。
     - **请求速率限制** 限制一个 IP 地址在定义的时间段内可以发出的请求数。
@@ -4638,7 +4684,7 @@ STREAM 支持 :warning:
     | `ALLOWED_METHODS` | `GET\|POST\|HEAD\|QUERY` | multisite | no   | **HTTP 方法：** 允许的 HTTP 方法列表，用竖线字符分隔。自定义大写方法可以包含下划线和连字符。 |
 
     !!! abstract "CORS 和预检请求"
-        如果您的应用程序支持[跨源资源共享 (CORS)](#cors)，您应该在 `ALLOWED_METHODS` 设置中包含 `OPTIONS` 方法以处理预检请求。这确保了浏览器发出跨源请求时的正常功能。
+        当 `USE_CORS` 为 `yes` 时，CORS 预检请求（带有 `Origin` 和 `Access-Control-Request-Method` 标头的 `OPTIONS` 请求）即使 `OPTIONS` 不在 `ALLOWED_METHODS` 中，也会到达 [CORS](#cors) 插件。其他任何 `OPTIONS` 请求仍需在此列表中包含 `OPTIONS`。
 
     !!! danger "安全注意事项"
         - **避免启用 `TRACE` 或 `CONNECT`：** 这些方法很少需要，并且可能引入重大的安全风险，例如启用跨站跟踪 (XST) 或隧道攻击。
@@ -4913,7 +4959,7 @@ ModSecurity 插件将功能强大的 [ModSecurity](https://modsecurity.org) Web 
 选择一个 CRS 版本以最符合您的安全需求：
 
 - **`3`**：稳定版 [v3.3.10](https://github.com/coreruleset/coreruleset/releases/tag/v3.3.10)。
-- **`4`**：稳定版 [v4.29.0](https://github.com/coreruleset/coreruleset/releases/tag/v4.29.0) (**默认**)。
+- **`4`**：稳定版 [v4.30.0](https://github.com/coreruleset/coreruleset/releases/tag/v4.30.0) (**默认**)。
 
 !!! warning "每日构建版已弃用"
     `MODSECURITY_CRS_VERSION` 的 `nightly` 选项已弃用，因为 OWASP 核心规则集项目已停止每日构建发布。如果您的配置仍使用 `nightly`，将改为使用 CRS v4。请将您的配置更新为 `MODSECURITY_CRS_VERSION=4`。
@@ -5421,7 +5467,7 @@ Pro 插件为 BunkerWeb 的企业部署捆绑了高级功能和增强功能。�
 
 请按照以下步骤配置和使用 Pro 功能：
 
-1.  **获取许可证密钥：** 从 [BunkerWeb 面板](https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc) 购买 Pro 许可证。
+1.  **获取许可证密钥：** 从 [BunkerWeb 面板](https://panel.bunkerweb.io/store/bunkerweb-pro?language=chinese&utm_campaign=self&utm_source=doc)开始 30 天免费试用或购买 Pro 许可证（[分步指南](index.md#pro-version)）。
 2.  **配置您的许可证密钥：** 使用 `PRO_LICENSE_KEY` 设置来配置您的许可证。
 3.  **让 BunkerWeb 处理其余部分：** 一旦配置了有效的许可证，Pro 插件将自动下载并激活。
 4.  **监控您的 Pro 状态：** 在 [Web UI](web-ui.md) 中检查健康指示器，以确认您的 Pro 订阅状态。
@@ -5458,7 +5504,7 @@ Pro 插件为 BunkerWeb 的企业部署捆绑了高级功能和增强功能。�
 - **BunkerWeb PRO Standard：** 完全访问 Pro 功能，但不提供技术支持。
 - **BunkerWeb PRO Enterprise：** 完全访问 Pro 功能，并提供专属技术支持。
 
-您可以免费试用 BunkerWeb PRO 的全部 Pro 功能 30 天。请前往 [BunkerWeb 面板](https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc)开始试用，并了解根据受 BunkerWeb PRO 保护的服务数量灵活定价的方案。
+您可以免费试用 BunkerWeb PRO 的全部 Pro 功能 30 天。请前往 [BunkerWeb 面板](https://panel.bunkerweb.io/store/bunkerweb-pro?language=chinese&utm_campaign=self&utm_source=doc)开始试用，并了解根据受 BunkerWeb PRO 保护的服务数量灵活定价的方案：订购一个方案，然后在结账时保持选中 **Free 30 Days Trial** 作为付款方式（[分步指南](index.md#pro-version)）。
 
 ## Prometheus exporter <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 
@@ -5540,7 +5586,7 @@ Real IP 插件可确保 BunkerWeb 即使在代理后面也能正确识别客户�
     仅在您的配置中包含受信任的代理 IP。添加不受信任的源可能会允许 IP 欺骗攻击，恶意行为者可以通过操纵标头来伪造客户端 IP。
 
 !!! info "多个 IP 地址"
-    当 `REAL_IP_RECURSIVE` 启用并且标头包含多个 IP（例如，`X-Forwarded-For: client, proxy1, proxy2`）时，BunkerWeb 会将不在您受信任代理列表中的最左侧 IP 识别为客户端 IP。
+    当 `REAL_IP_RECURSIVE` 启用并且标头包含多个 IP（例如，`X-Forwarded-For: client, proxy1, proxy2`）时，BunkerWeb 会将不在您受信任代理列表中的最右侧 IP 识别为客户端 IP。
 
 ### 配置示例
 
@@ -6044,7 +6090,7 @@ STREAM 支持 :warning:
     | `REVERSE_PROXY_KEEPALIVE`         | `no`   | multisite | 是   | **保持连接：** 启用或禁用与代理资源的保持连接。                                                                                                    |
     | `REVERSE_PROXY_HTTP_VERSION`      | `1.1`  | multisite | 是   | **HTTP 版本：** 用于与上游通信的 HTTP 协议版本（`1.0`、`1.1` 或 `2`）。设为 `2` 可在上游连接上启用 HTTP/2 多路复用。WebSocket 位置始终固定为 1.1。 |
     | `REVERSE_PROXY_CUSTOM_HOST`       |        | multisite | 否   | **自定义主机：** 覆盖发送到上游服务器的 Host 标头。                                                                                                |
-    | `REVERSE_PROXY_INTERCEPT_ERRORS`  | `yes`  | multisite | 否   | **拦截错误：** 是否拦截和重写来自后端的错误响应。                                                                                                  |
+    | `REVERSE_PROXY_INTERCEPT_ERRORS`  | `yes`  | multisite | 否   | **拦截错误：** 是否拦截和重写来自后端的错误响应。 参见[保留上游 API 的错误响应体](#errors)。                                                                                                  |
 
     !!! tip "最佳实践"
         - 始终在 `REVERSE_PROXY_HOST` 中指定完整的 URL，包括协议（http:// 或 https://）
@@ -7082,6 +7128,8 @@ SSL 插件为您的 BunkerWeb 保护的网站提供强大的 SSL/TLS 加密功�
 STREAM 支持 :white_check_mark:
 
 Templates 插件用于安装可复用的服务模板——一组设置、自定义配置和默认值，可以一步应用到某个服务上。模板可随 BunkerWeb 一同提供，也可以来自社区目录，或通过 Web UI 和 API 导出/导入；该插件唯一的设置在启动时直接从 URL 下载模板。
+
+`low` 模板将 `CROSS_ORIGIN_EMBEDDER_POLICY` 设置为 `unsafe-none`，允许跨源资源而无需明确选择加入。
 
 ### 配置项
 

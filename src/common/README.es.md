@@ -74,7 +74,7 @@ Límites que conviene conocer:
 
     | Parámetro             | Valor por defecto | Contexto  | Múltiple | Descripción                                                                                                                     |
     | --------------------- | ----------------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------- |
-    | `SERVER_NAME`         | `www.example.com` | multisite | No       | **Dominio Principal:** El nombre de dominio principal para este sitio. Requerido en modo multisitio.                            |
+    | `SERVER_NAME`         | `www.example.com` | multisite | No       | **Dominio Principal:** El nombre de dominio principal (o dirección IP) para este sitio. Requerido en modo multisitio.           |
     | `BUNKERWEB_INSTANCES` | `127.0.0.1`       | global    | No       | **Instancias de BunkerWeb:** Lista de instancias de BunkerWeb separadas por espacios.                                           |
     | `MULTISITE`           | `no`              | global    | No       | **Múltiples Sitios:** Establécelo en `yes` para permitir el alojamiento de múltiples sitios web con diferentes configuraciones. |
     | `SECURITY_MODE`       | `block`           | multisite | No       | **Nivel de Seguridad:** Controla el nivel de aplicación de la seguridad. Opciones: `detect` o `block`.                          |

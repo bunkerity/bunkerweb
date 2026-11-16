@@ -83,7 +83,7 @@ Límites que conviene conocer:
 
     | Parámetro             | Valor por defecto | Contexto  | Múltiple | Descripción                                                                                                                     |
     | --------------------- | ----------------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------- |
-    | `SERVER_NAME`         | `www.example.com` | multisite | No       | **Dominio Principal:** El nombre de dominio principal para este sitio. Requerido en modo multisitio.                            |
+    | `SERVER_NAME`         | `www.example.com` | multisite | No       | **Dominio Principal:** El nombre de dominio principal (o dirección IP) para este sitio. Requerido en modo multisitio.           |
     | `BUNKERWEB_INSTANCES` | `127.0.0.1`       | global    | No       | **Instancias de BunkerWeb:** Lista de instancias de BunkerWeb separadas por espacios.                                           |
     | `MULTISITE`           | `no`              | global    | No       | **Múltiples Sitios:** Establécelo en `yes` para permitir el alojamiento de múltiples sitios web con diferentes configuraciones. |
     | `SECURITY_MODE`       | `block`           | multisite | No       | **Nivel de Seguridad:** Controla el nivel de aplicación de la seguridad. Opciones: `detect` o `block`.                          |
@@ -405,7 +405,7 @@ BunkerWeb le permite especificar ciertos usuarios, IP o solicitudes que deben om
 
 | Configuración                 | Valor por defecto | Contexto  | Múltiple | Descripción                                                                                                                                                                                         |
 | ----------------------------- | ----------------- | --------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `ANTIBOT_IGNORE_URI`          |                   | multisite | no       | **URL excluidas:** Lista de patrones regex de URI separados por espacios que deben omitir el desafío. Los patrones se comprueban contra la ruta y la URI completa de la solicitud con query string. |
+| `ANTIBOT_IGNORE_URI`          |                   | multisite | no       | **URL excluidas:** Lista de patrones regex de URI separados por espacios que deben omitir el desafío. Los patrones se comprueban contra la ruta normalizada, sola o seguida de `?` y la query string. |
 | `ANTIBOT_IGNORE_IP`           |                   | multisite | no       | **IP excluidas:** Lista de direcciones IP o rangos CIDR separados por espacios que deben omitir el desafío.                                                                                         |
 | `ANTIBOT_IGNORE_RDNS`         |                   | multisite | no       | **DNS inverso excluido:** Lista de sufijos de DNS inverso separados por espacios que deben omitir el desafío.                                                                                       |
 | `ANTIBOT_RDNS_GLOBAL`         | `yes`             | multisite | no       | **Solo IP globales:** Si se establece en `yes`, solo realiza comprobaciones de DNS inverso en direcciones IP públicas.                                                                              |
@@ -631,6 +631,7 @@ BunkerWeb le permite especificar ciertos usuarios, IP o solicitudes que deben om
         - Configure CORS en la clave de sitio de Cap.js para permitir el origen protegido.
         - Defina `ANTIBOT_CAPJS_FRONTEND_URL` y `ANTIBOT_CAPJS_BACKEND_URL` solo como orígenes: esquema, host y puerto opcional, sin ruta.
         - Use el widget de Cap.js **0.1.48 o posterior**. BunkerWeb sirve una CSP estricta basada en nonce; los widgets anteriores rompen los desafíos de instrumentación porque el `<script>` inline del iframe `srcdoc` aislado no propaga el nonce. Si autoaloja `tiago2/cap`, fije una etiqueta reciente (p. ej. `tiago2/cap:3.1.2` o posterior) o establezca `WIDGET_VERSION` en `0.1.48` o posterior.
+        - Alojar `hashwx.wasm` en un servidor propio con una CSP estricta requiere el widget de Cap.js **0.1.58 o posterior**.
         - Los **desafíos de instrumentación** de Cap.js (activados por defecto) ejecutan JavaScript proporcionado por el servidor mediante `eval`, que un nonce no puede autorizar. BunkerWeb ejecuta el widget en un iframe aislado del mismo origen que incluye el `'unsafe-eval'` necesario, de modo que la página de desafío principal mantiene una CSP estricta y sin `eval` — sin configuración necesaria.
 
     Consulte los [Ajustes comunes](#configuraciones-comunes) para opciones de configuración adicionales.
@@ -918,6 +919,8 @@ bwcli plugin backup restore /ruta/a/copia/de/seguridad/backup-sqlite-2023-08-15_
 
     Una copia de seguridad solo puede restaurarse en el mismo motor de base de datos del que se tomó — el motor forma parte del nombre del archivo (`backup-mariadb-…`), y una restauración en otro distinto se rechaza antes de tocar nada. Si migró entre motores, ambos conjuntos de copias permanecen en el directorio: `restore` sin argumento toma el archivo más reciente de cualquier motor, así que indique la ruta explícitamente para restaurar una copia más antigua de su motor actual.
 
+    Antes de vaciar las tablas, la restauración comprueba el motor indicado en el nombre (MariaDB y MySQL se consideran distintos), el archivo SQL esperado y la integridad de todos los archivos del ZIP. Los archivos ausentes, renombrados o dañados se rechazan sin modificar la base de datos.
+
 ### Regresión controlada
 
 Volver a una versión anterior de BunkerWeb **no** es lo inverso de una actualización. Algunas tablas
@@ -1179,6 +1182,13 @@ Siga estos pasos para configurar y utilizar la función de Mal Comportamiento:
 | `BAD_BEHAVIOR_COUNT_TIME`   | `1m`                          | multisite | no       | **Período de conteo:** La ventana de tiempo (en segundos) durante la cual se cuentan los códigos de estado malos para alcanzar el umbral. Acepta un sufijo de tiempo (ms, s, m, h, d, w, M, y); un número sin sufijo se interpreta en segundos. |
 | `BAD_BEHAVIOR_BAN_TIME`     | `1d`                          | multisite | no       | **Duración del bloqueo:** Cuánto tiempo (en segundos) permanecerá bloqueada una IP después de exceder el umbral. El valor por defecto es de 24 horas (86400 segundos). Establezca en `0` para bloqueos permanentes que nunca expiran. Acepta un sufijo de tiempo (ms, s, m, h, d, w, M, y); un número sin sufijo se interpreta en segundos. |
 | `BAD_BEHAVIOR_BAN_SCOPE`    | `service`                     | global    | no       | **Ámbito del bloqueo:** Determina si los bloqueos se aplican solo al servicio actual (`service`) o a todos los servicios (`global`). En el servidor predeterminado (`_`), los bloqueos son siempre globales.                                                              |
+| `BAD_BEHAVIOR_REPORT_MAX_EVENTS` | `100` | multisite | no | Número máximo de eventos recientes conservados como evidencia del bloqueo en los informes, también limitado por `BAD_BEHAVIOR_THRESHOLD`. Rango: de `1` a `10000`. |
+| `BAD_BEHAVIOR_REPORT_MAX_STRING_SIZE` | `512` | multisite | no | Máximo de bytes por URL o método en la evidencia del informe, incluido el marcador `...`. Rango: de `4` a `65536`. |
+
+La evidencia del bloqueo conserva los eventos coincidentes más recientes. Estos límites solo afectan a la evidencia almacenada, sin cambiar los bloqueos ni `MAX_LRU_HISTORY`. Las cadenas UTF-8 se truncan sin dividir caracteres. Aumentar cualquiera de los límites incrementa el almacenamiento de los informes. El total de solicitudes sigue siendo el contador real del bloqueo, aunque se conserven menos eventos.
+
+Los bloqueos creados en HTTP almacenan una sola copia de la evidencia activa; los informes cargan los detalles bajo demanda. Los bloqueos creados en Stream conservan evidencia limitada dentro de cada informe. Los informes persistentes conservan instantáneas limitadas. Si la evidencia se pierde antes de guardarse, los detalles indican explícitamente que no está disponible.
+
 
 !!! warning "Falsos positivos"
     Tenga cuidado al establecer el umbral y el tiempo de conteo. Establecer estos valores demasiado bajos puede bloquear inadvertidamente a usuarios legítimos que encuentren errores mientras navegan por su sitio.
@@ -1609,7 +1619,7 @@ El complemento BunkerNet permite el intercambio colectivo de inteligencia sobre 
 **Cómo funciona:**
 
 1.  Su instancia de BunkerWeb se registra automáticamente con la API de BunkerNet para recibir un identificador único.
-2.  Cuando su instancia detecta y bloquea una dirección IP o comportamiento malicioso, informa anónimamente la amenaza a BunkerNet.
+2.  Cuando su instancia detecta y bloquea una dirección IP o comportamiento malicioso, informa de la amenaza a BunkerNet. Los campos de un informe se enumeran en la nota «Contenido de un informe» más abajo.
 3.  BunkerNet agrega la inteligencia sobre amenazas de todas las instancias participantes y distribuye la base de datos consolidada.
 4.  Su instancia descarga regularmente una base de datos actualizada de amenazas conocidas desde BunkerNet.
 5.  Esta inteligencia colectiva permite que su instancia bloquee proactivamente las direcciones IP que han exhibido comportamiento malicioso en otras instancias de BunkerWeb.
@@ -1618,9 +1628,9 @@ El complemento BunkerNet permite el intercambio colectivo de inteligencia sobre 
 
       1. **Defensa Colectiva:** Aproveche los hallazgos de seguridad de miles de otras instancias de BunkerWeb a nivel mundial.
       2. **Protección Proactiva:** Bloquee a los actores maliciosos antes de que puedan atacar su sitio basándose en su comportamiento en otros lugares.
-      3. **Contribución a la Comunidad:** Ayude a proteger a otros usuarios de BunkerWeb compartiendo datos de amenazas anónimos sobre los atacantes.
+      3. **Contribución a la Comunidad:** Ayude a proteger a otros usuarios de BunkerWeb compartiendo datos de amenazas sobre los atacantes.
       4. **Cero Configuración:** Funciona desde el primer momento con valores predeterminados sensatos, requiriendo una configuración mínima.
-      5. **Enfoque en la Privacidad:** Solo comparte la información de amenazas necesaria sin comprometer su privacidad ni la de sus usuarios.
+      5. **Intercambio controlado:** Un informe contiene un conjunto fijo de campos, y `BUNKERNET_FILTER_HEADERS` puede limitar sus cabeceras de petición a una lista corta permitida (véase más abajo).
 
 ### Cómo usar
 
@@ -1634,18 +1644,29 @@ Siga estos pasos para configurar y usar la función BunkerNet:
 
 ### Ajustes de configuración
 
-| Ajuste             | Valor por defecto          | Contexto  | Múltiple | Descripción                                                                                                             |
-| ------------------ | -------------------------- | --------- | -------- | ----------------------------------------------------------------------------------------------------------------------- |
-| `USE_BUNKERNET`    | `yes`                      | multisite | no       | **Habilitar BunkerNet:** Establezca en `yes` para habilitar el intercambio de inteligencia sobre amenazas de BunkerNet. |
-| `BUNKERNET_SERVER` | `https://api.bunkerweb.io` | global    | no       | **Servidor BunkerNet:** La dirección del servidor de la API de BunkerNet para compartir inteligencia sobre amenazas.    |
+| Ajuste                     | Valor por defecto          | Contexto  | Múltiple | Descripción                                                                                                                                                                                                                                                                         |
+| -------------------------- | -------------------------- | --------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `USE_BUNKERNET`            | `yes`                      | multisite | no       | **Habilitar BunkerNet:** Establezca en `yes` para habilitar el intercambio de inteligencia sobre amenazas de BunkerNet.                                                                                                                                                             |
+| `BUNKERNET_FILTER_HEADERS` | `no`                       | multisite | no       | **Filtrar las cabeceras notificadas:** Establezca en `yes` para enviar solo una lista corta de cabeceras de petición y vaciar los valores que ModSecurity encontró en cabeceras y cookies. Con `no`, un informe contiene todas las cabeceras de petición y los valores encontrados. |
+| `BUNKERNET_SERVER`         | `https://api.bunkerweb.io` | global    | no       | **Servidor BunkerNet:** La dirección del servidor de la API de BunkerNet para compartir inteligencia sobre amenazas.                                                                                                                                                                |
 | `USE_BUNKERNET_STATS` | `yes` | global | no | **Estadísticas de eficacia:** Guarda en la base de datos estadísticas de contribución, tamaño de listas y conectividad de BunkerNet. |
 | `BUNKERNET_STATS_RETENTION_DAYS` | `30` | global | no | **Retención:** Antigüedad máxima, en días, de las estadísticas de eficacia guardadas. |
 
 !!! tip "Protección de Red"
     Cuando BunkerNet detecta que una dirección IP ha estado involucrada en actividades maliciosas en múltiples instancias de BunkerWeb, añade esa IP a una lista negra colectiva. Esto proporciona una capa de defensa proactiva, protegiendo su sitio de amenazas antes de que puedan atacarlo directamente.
 
-!!! info "Informes Anónimos"
-    Al informar sobre amenazas a BunkerNet, su instancia solo comparte los datos necesarios para identificar la amenaza: la dirección IP, el motivo del bloqueo y datos contextuales mínimos. No se comparte información personal sobre sus usuarios ni detalles sensibles sobre su sitio.
+!!! info "Contenido de un informe"
+    Cada informe enviado a BunkerNet contiene estos campos y nada más:
+
+    - los metadatos de la instancia enviados con cada petición: el ID de la instancia BunkerNet, la versión de BunkerWeb, la integración, y el nombre, la versión, el ID de versión, el nombre en clave, el ID y la arquitectura del sistema operativo;
+    - la dirección IP del cliente, el motivo del bloqueo y la fecha;
+    - el método HTTP, la URL **incluida su cadena de consulta** y el nombre del servicio (`server_name`);
+    - las cabeceras de petición, con sus valores: todas las recibidas (hasta `MAX_HEADERS`) o, si `BUNKERNET_FILTER_HEADERS` es `yes`, solo `User-Agent`, `Accept`, `Accept-Encoding`, `Accept-Language`, `Content-Type` y `Content-Length`;
+    - los detalles asociados al motivo del bloqueo. Según el plugin que bloqueó al cliente, pueden incluir los ID y mensajes de las reglas de ModSecurity que coincidieron junto con los valores de la petición que las activaron (partes de argumentos, cuerpo, cabeceras o cookies, cada una recortada a 512 bytes; con `BUNKERNET_FILTER_HEADERS` en `yes`, los valores hallados en cabeceras y cookies se vacían y solo se envía el nombre de la variable) o, para Bad Behavior, el método y la URL de las peticiones recientes que provocaron el bloqueo.
+
+    De forma predeterminada (`BUNKERNET_FILTER_HEADERS` en `no`), un informe contiene todas las cabeceras de petición recibidas (hasta `MAX_HEADERS`), incluidas las cookies y `Authorization`, y los valores encontrados por ModSecurity tal cual. Establezca `BUNKERNET_FILTER_HEADERS` en `yes` para enviar solo las seis cabeceras indicadas arriba y vaciar los valores hallados en cabeceras y cookies. Los informes aún sin enviar se filtran igual antes de enviarse cuando vale `yes`.
+
+    La URL y los valores coincidentes proceden de la petición, por lo que contienen todo lo que envió el cliente. Establezca `USE_BUNKERNET` en `no` en los servicios cuyas URL contengan valores sensibles.
 
 !!! info "Estadísticas de eficacia"
     Con `USE_BUNKERNET_STATS` habilitado, `bunkernet-stats` guarda una vez por ejecución las métricas
@@ -1877,7 +1898,7 @@ Siga estos pasos para configurar y usar la función CORS:
 | `CORS_ALLOW_ORIGIN`            | `self`                                                                               | multisite | no       | **Orígenes Permitidos:** Expresión regular PCRE que representa los orígenes permitidos; use `*` para cualquier origen, o `self` solo para el mismo origen. |
 | `CORS_ALLOW_METHODS`           | `GET, POST, OPTIONS`                                                                 | multisite | no       | **Métodos Permitidos:** Métodos HTTP que se pueden usar en solicitudes de origen cruzado.                                                                  |
 | `CORS_ALLOW_HEADERS`           | `DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range` | multisite | no       | **Encabezados Permitidos:** Encabezados HTTP que se pueden usar en solicitudes de origen cruzado.                                                          |
-| `CORS_ALLOW_CREDENTIALS`       | `no`                                                                                 | multisite | no       | **Permitir Credenciales:** Establezca en `yes` para permitir credenciales (cookies, autenticación HTTP) en solicitudes CORS.                               |
+| `CORS_ALLOW_CREDENTIALS`       | `no`                                                                                 | multisite | no       | **Permitir Credenciales:** Establezca en `yes` para permitir credenciales (cookies, autenticación HTTP) en solicitudes CORS. El encabezado se envía en respuestas preflight y reales, solo a un origen permitido, y nunca con `CORS_ALLOW_ORIGIN` en `*`.                               |
 | `CORS_EXPOSE_HEADERS`          | `Content-Length,Content-Range`                                                       | multisite | no       | **Encabezados Expuestos:** Encabezados HTTP a los que los navegadores pueden acceder desde respuestas de origen cruzado.                                   |
 | `CROSS_ORIGIN_OPENER_POLICY`   | `same-origin`                                                                        | multisite | no       | **Cross-Origin-Opener-Policy:** Controla la comunicación entre contextos de navegación.                                                                    |
 | `CROSS_ORIGIN_EMBEDDER_POLICY` | `require-corp`                                                                       | multisite | no       | **Cross-Origin-Embedder-Policy:** Controla si un documento puede cargar recursos de otros orígenes.                                                        |
@@ -1901,6 +1922,8 @@ Aquí hay ejemplos de posibles valores para el ajuste `CORS_ALLOW_ORIGIN`, junto
 - **`^https://.+\.example\.com$`**: Permite solicitudes de cualquier subdominio que termine en `.example.com`.
 - **`^https://(www\.example1\.com|www\.example2\.com)$`**: Permite solicitudes de `https://www.example1.com` o `https://www.example2.com`.
 - **`^https?://www\.example\.com$`**: Permite solicitudes tanto de `https://www.example.com` como de `http://www.example.com`.
+
+En modo regex, ancle el patrón con `^` y `$` para que coincida con el origen completo; la respuesta refleja el `Origin` de la solicitud en `Access-Control-Allow-Origin` solo cuando coincide, y un origen que no coincide no recibe el encabezado `Access-Control-Allow-Origin`. Con `self`, el `Origin` debe ser exactamente el origen propio del servicio; no se trata como un patrón.
 
 === "Configuración Básica"
 
@@ -2001,7 +2024,7 @@ Siga estos pasos para configurar y utilizar la función de País:
 | ----------------------------- | ----------------- | --------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `WHITELIST_COUNTRY`           |                   | multisite | no       | **Lista Blanca de Países:** Lista de códigos de país y/o tokens de grupo separados por espacios. Solo se permiten estos países.                                                                                                                           |
 | `BLACKLIST_COUNTRY`           |                   | multisite | no       | **Lista Negra de Países:** Lista de códigos de país y/o tokens de grupo separados por espacios. Estos países están bloqueados.                                                                                                                            |
-| `COUNTRY_IGNORE_URI`          |                   | multisite | no       | **URI ignorada:** Lista de patrones de expresiones regulares PCRE separados por espacios para las URI que deben excluirse de la comprobación de país. Los patrones se comprueban contra la ruta y la URI de solicitud completa con la cadena de consulta. |
+| `COUNTRY_IGNORE_URI`          |                   | multisite | no       | **URI ignorada:** Lista de patrones de expresiones regulares PCRE separados por espacios para las URI que deben excluirse de la comprobación de país. Los patrones se comprueban contra la ruta normalizada, sola o seguida de `?` y la cadena de consulta. |
 | `COUNTRY_IGNORE_HEADER_NAME`  |                   | multisite | sí       | **Nombre de cabecera:** Nombre de una cabecera de petición que hace que la petición omitir la comprobación de país. Pares numerados: `_NAME_1` va con `_VALUE_1`.                                                                                         |
 | `COUNTRY_IGNORE_HEADER_VALUE` |                   | multisite | sí       | **Valor de cabecera:** Expresión regular PCRE que debe coincidir con el valor de la cabecera. Déjelo vacío para comprobar solo su presencia.                                                                                                              |
 
@@ -2151,7 +2174,15 @@ La API pública ofrece las mismas operaciones:
 
 Utilice el identificador de conexión devuelto sin modificarlo. Incluye la identidad de la instancia, por lo que las URL localhost idénticas en distintas instancias permanecen separadas. Los administradores de la API pueden usar estas operaciones. Los usuarios delegados de la API necesitan el permiso independiente `crowdsec_read` o `crowdsec_delete` en el recurso existente `bans`, para un identificador de conexión devuelto o para `*`. Para listar conexiones con `GET /crowdsec`, se requiere el permiso para `*`. Un permiso ordinario `ban_delete` no autoriza la eliminación de decisiones de CrowdSec. No se requiere ninguna migración de base de datos.
 
-El entorno de ejecución conserva las decisiones individuales por objetivo, de modo que eliminar una no puede borrar otro baneo sobre la misma IP o rango. Los metadatos opcionales de los informes utilizan una caché independiente de 5 MiB y no pueden desalojar las entradas que aplican los bloqueos. Las actualizaciones del flujo utilizan un bloqueo de proceso no bloqueante en `/var/run/bunkerweb`, mantenido hasta publicar la actualización y liberado automáticamente si el worker termina.
+El entorno de ejecución conserva las decisiones individuales por objetivo, de modo que eliminar una no puede borrar otro baneo sobre la misma IP o rango. Los metadatos opcionales de los informes utilizan una caché independiente de 24 MiB (`CROWDSEC_METADATA_CACHE_SIZE=24m`) y no pueden desalojar las entradas que aplican los bloqueos. Las actualizaciones del flujo utilizan un bloqueo de proceso no bloqueante en `/var/run/bunkerweb`, mantenido hasta publicar la actualización y liberado automáticamente si el worker termina.
+
+El modo stream conserva como máximo dos ranuras de instantáneas y cambia solo cuando cabe una instantánea completa. Una recarga de nginx sin cambios conserva la instantánea y solicita diferencias. Una instantánea ausente, cambios en la configuración de decisiones, un inicio incompleto o una última sincronización correcta anterior al máximo de 300 segundos y 30 veces `CROWDSEC_UPDATE_FREQUENCY` fuerzan una instantánea completa. Los fallos generan como máximo un error por minuto y prefijo de caché, seguido de un aviso de recuperación. Si se llena la caché de decisiones, aumente `CROWDSEC_CACHE_SIZE` para albergar dos instantáneas y recargue BunkerWeb. Redimensionar la zona de decisiones durante una recarga crea una zona vacía e inicia una sincronización completa; redimensionar solo la zona de metadatos borra los metadatos opcionales.
+
+Durante una actualización in situ desde una versión anterior, los registros heredados activos conservan su TTL original para que los workers antiguos en cierre sigan aplicándolos, aunque el nuevo tiempo de cierre sea menor. Las generaciones obsoletas se liberan antes de asignar una instantánea. Reserve espacio adicional para los registros heredados activos junto a las dos ranuras; si falla la asignación, se mantiene la protección anterior y la sincronización informa de un error. Dimensione la caché de decisiones con estas cifras, medidas con destinos IPv4 distintos sintéticos y TTL de una hora: prevea unos 1,1 KiB por decisión en régimen estable (dos ranuras de instantáneas) y unos 1,4 KiB por decisión durante una actualización mientras haya registros heredados activos, ambos redondeados al alza como margen. Por ejemplo, 100 000 decisiones necesitan unos `120m` en régimen estable y `150m` durante una actualización. Con estas cifras, el valor predeterminado `100m` permite albergar unas 90 000 decisiones en régimen estable y unas 70 000 durante una actualización. Otros tipos de destino, como IPv6 o rangos, pueden ocupar más; ajuste `CROWDSEC_CACHE_SIZE` al tamaño de su lista, idealmente antes de actualizar.
+
+Una petición del flujo interrumpida o fallida fuerza una instantánea completa en el siguiente sondeo. También se realiza una reconciliación completa tras 3600 segundos desde la última sincronización completa correcta. Durante el arranque, las respuestas directas de la API local usan una caché separada por credenciales y política efectivas. Si falla una consulta, solo esa política suspende sus consultas durante `CROWDSEC_UPDATE_FREQUENCY`; las IP desconocidas se permiten durante la caída. Los baneos y captchas conocidos siguen aplicándose hasta su propia caducidad. Ni las respuestas de arranque ni las decisiones restauradas sustituyen una instantánea publicada más reciente.
+
+El modo stream guarda cada instantánea completa y cada diferencia modificada en `/var/lib/bunkerweb/crowdsec-state-*.json`, con caducidades absolutas y asociaciones de servicios en `crowdsec-binding-*.json`. Los archivos sobreviven a los envíos de caché del scheduler, cambios de tamaño o política (incluida la rotación de URL o clave API), recargas de nginx y reinicios del mismo contenedor conservando su sistema de archivos. Hasta publicar una nueva instantánea, siguen aplicándose la anterior o su copia restaurada. La restauración ocurre al inicializar. Los workers comparten una revisión de la copia; un worker desactualizado vuelve a leerla en un temporizador antes de usarla durante una caída. Las escrituras también se realizan solo en temporizadores. Si no se puede leer una copia o está corrupta, también al iniciar un worker o tras una actualización interrumpida, la protección de respaldo deniega las solicitudes hasta que vuelva a ser legible o una sincronización correcta la reescriba. Las copias se guardan inmediatamente, pero un fallo durante una escritura puede hacer que se pierda la copia, incluso por un corte de energía. Una copia que pertenece a otra configuración se ignora; ambos casos se notifican con errores limitados en frecuencia. Recrear un contenedor con un sistema de archivos nuevo empieza sin decisiones; las IP desconocidas siguen permitidas si LAPI no está disponible.
 
 ### Bloqueos de CrowdSec
 
@@ -2444,6 +2475,8 @@ Una concesión es un bloqueo ordinario de BunkerWeb: tiene el motivo `crowdsec`,
 
 Aplica las siguientes variables de entorno (o valores del scheduler) para que la instancia de BunkerWeb pueda comunicarse con la API local de CrowdSec. Como mínimo necesitas `USE_CROWDSEC`, `CROWDSEC_API` y `CROWDSEC_API_KEY` con una clave válida creada mediante `cscli bouncers add`.
 
+Los ajustes de conexión son `multisite`: un valor sin prefijo se aplica a todos los servicios y un prefijo de nombre de servidor lo sustituye para ese servicio. `CROWDSEC_CACHE_SIZE` y `CROWDSEC_METADATA_CACHE_SIZE` son `global`; configúrelos sin prefijo de servidor.
+
 | Ajuste                      | Valor por defecto      | Contexto  | Múltiple | Descripción                                                                                                                                   |
 | --------------------------- | ---------------------- | --------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
 | `USE_CROWDSEC`              | `no`                   | multisite | no       | **Habilitar CrowdSec:** Establezca en `yes` para habilitar el bouncer de CrowdSec.                                                            |
@@ -2453,6 +2486,8 @@ Aplica las siguientes variables de entorno (o valores del scheduler) para que la
 | `CROWDSEC_ENABLE_INTERNAL`  | `no`                   | multisite    | no       | **Tráfico Interno:** Establezca en `yes` para verificar el tráfico interno contra las decisiones de CrowdSec.                                 |
 | `CROWDSEC_REQUEST_TIMEOUT`  | `1s`                   | multisite | no       | **Tiempo de Espera de la Solicitud:** Tiempo de espera en milisegundos para las solicitudes HTTP a la API Local de CrowdSec en modo `live`. Acepta un sufijo de tiempo (ms, s, m, h, d, w, M, y); un número sin sufijo se interpreta en milisegundos. |
 | `CROWDSEC_EXCLUDE_LOCATION` |                        | multisite    | no       | **Ubicaciones Excluidas:** Lista de ubicaciones (URI) separadas por comas para excluir de las verificaciones de CrowdSec.                     |
+| `CROWDSEC_CACHE_SIZE`          | `100m`                 | global    | no       | **Tamaño de caché de decisiones:** Memoria compartida entre servicios; dos instantáneas en modo stream. Megabytes enteros positivos (`m`/`M`), mínimo `1m`. Cambiar el tamaño vacía la zona; se restauran las decisiones conocidas hasta reconciliar. Las IP desconocidas consultan LAPI y se permiten si falla.                                                                                                          |
+| `CROWDSEC_METADATA_CACHE_SIZE` | `24m`                  | global    | no       | **Tamaño de caché de metadatos:** Memoria compartida independiente para los metadatos opcionales de informes de todos los servicios. Número entero positivo de megabytes (`m`/`M`), mínimo `1m`. Redimensionar durante la recarga borra estos metadatos.                                                                                                                                                                  |
 | `CROWDSEC_CACHE_EXPIRATION` | `1s`                   | multisite | no       | **Expiración de la Caché:** El tiempo de expiración de la caché en segundos para las decisiones de IP en modo `live`. Acepta un sufijo de tiempo (ms, s, m, h, d, w, M, y); un número sin sufijo se interpreta en segundos. |
 | `CROWDSEC_UPDATE_FREQUENCY` | `10s`                  | multisite | no       | **Frecuencia de Actualización:** Con qué frecuencia (en segundos) obtener decisiones nuevas/expiradas de la API de CrowdSec en modo `stream`. Acepta un sufijo de tiempo (ms, s, m, h, d, w, M, y); un número sin sufijo se interpreta en segundos. |
 | `CROWDSEC_BAN_REFRESH` | `0`                    | multisite | no       | **Renovación de bloqueo CrowdSec:** Convierte los bloqueos de CrowdSec en bloqueos cortos de BunkerWeb que se renuevan mientras dure la decisión de CrowdSec. El valor es lo máximo que dura un bloqueo antes de volver a consultar a CrowdSec. 0 lo desactiva. Un servicio con `CROWDSEC_EXCLUDE_LOCATION` nunca recibe bloqueos de CrowdSec. Acepta un sufijo de tiempo (ms, s, m, h, d, w, M, y); un número sin sufijo se interpreta en segundos. |
@@ -2474,7 +2509,7 @@ Aplica las siguientes variables de entorno (o valores del scheduler) para que la
 
 !!! info "Sobre los Modos de Operación"
     - **Modo `live`** consulta la API de CrowdSec para cada solicitud entrante, proporcionando protección en tiempo real a costa de una mayor latencia.
-    - **Modo `stream`** descarga periódicamente todas las decisiones de la API de CrowdSec y las almacena en caché localmente, reduciendo la latencia con un ligero retraso en la aplicación de nuevas decisiones.
+    - **Modo `stream`** descarga una instantánea inicial y después consulta decisiones nuevas y eliminadas para actualizar su caché local, reduciendo la latencia con un ligero retraso en la aplicación de nuevas decisiones.
 
 #### Endpoints por servicio
 
@@ -2853,6 +2888,8 @@ Siga estos pasos para configurar y utilizar la función de Base de Datos:
 | `DATABASE_POOL_PRE_PING`          | `yes`                                     | global   | no       | **Pre-Ping del Pool:** Si se prueba la conexión al extraerla del pool.                                                                                                                               |
 | `DATABASE_POOL_RESET_ON_RETURN`   |                                           | global   | no       | **Reinicio al Devolver:** Cómo se reinician las conexiones al devolverlas al pool. Vacío = auto (`none` para MySQL/MariaDB, `rollback` para otros). Opciones: `rollback`, `commit`, `none`.          |
 | `DATABASE_RETRY_TIMEOUT`        | `1m`                                      | global   | no       | **Tiempo de Reintento:** El número máximo de segundos a esperar la disponibilidad de la base de datos al iniciar. Acepta un sufijo de tiempo (ms, s, m, h, d, w, M, y); un número sin sufijo se interpreta en segundos. |
+| `DATABASE_CONNECT_TIMEOUT` | `10s` | global   | no       | **Tiempo de Conexión:** El tiempo máximo de espera al abrir una conexión con un servidor MySQL, MariaDB o PostgreSQL. Debe ser mayor que `0`: los controladores no pueden funcionar sin él, y `0` vuelve al valor por defecto con una advertencia. Un tiempo definido en la query string de `DATABASE_URI` tiene prioridad. Acepta un sufijo de tiempo (ms, s, m, h, d, w, M, y); un número sin sufijo son segundos. |
+| `DATABASE_READ_TIMEOUT` | `5m` | global   | no       | **Tiempo de Lectura:** El tiempo máximo de espera a que un servidor MySQL o MariaDB responda o acepte datos antes de que la llamada falle, para que un par desaparecido no bloquee indefinidamente. PostgreSQL usa keepalives TCP en su lugar. `0` lo desactiva. Un tiempo definido en la query string de `DATABASE_URI` tiene prioridad. Acepta un sufijo de tiempo (ms, s, m, h, d, w, M, y); un número sin sufijo son segundos. |
 | `DATABASE_REQUEST_RETRY_ATTEMPTS` | `2`                                       | global   | no       | **Intentos de Reintento:** El número de reintentos en caso de errores transitorios durante las operaciones.                                                                                          |
 | `DATABASE_REQUEST_RETRY_DELAY`  | `250ms`                                   | global   | no       | **Retraso entre Reintentos:** El retraso en segundos entre reintentos en caso de errores transitorios. Acepta un sufijo de tiempo (ms, s, m, h, d, w, M, y); un número sin sufijo se interpreta en segundos. |
 
@@ -3078,6 +3115,12 @@ Siga estos pasos para configurar y usar la función de Errores:
     ```yaml
     INTERCEPTED_ERROR_CODES: "404 500"
     ```
+
+### Conservar los cuerpos de error de las API de origen
+
+Por defecto, BunkerWeb sustituye las respuestas 400 del servidor de origen por su propia página de error, lo que puede romper los clientes de API JSON u OIDC. Para dejar pasar los errores del origen en un servicio, quite el código de la lista de ese servicio, por ejemplo `app.example.com_INTERCEPTED_ERROR_CODES=401 403 404 405 413 429 500 501 502 503 504` (conserve los códigos que aún quiera interceptar), o defina `app.example.com_REVERSE_PROXY_INTERCEPT_ERRORS=no` para dejar pasar todos los errores del origen. Los errores generados por el propio BunkerWeb (por ejemplo, una denegación del WAF) siguen siendo gestionados por BunkerWeb.
+
+Para conservar los errores del origen solo en una ubicación, añada un archivo que contenga `proxy_intercept_errors off;` y enumérelo en el ajuste `REVERSE_PROXY_INCLUDES` de esa ubicación (por ejemplo `app.example.com_REVERSE_PROXY_INCLUDES=/opt/keep-errors.conf`, con el mismo sufijo numérico que el `REVERSE_PROXY_HOST` de la ubicación). El archivo debe existir dentro de los contenedores de BunkerWeb. Las demás ubicaciones del servicio siguen interceptando los errores.
 
 ## GeoIP
 
@@ -3728,6 +3771,7 @@ Siga estos pasos para configurar y usar la función de Cabeceras:
         - Pruebe el CSP en modo `Report-Only` antes de aplicarlo para evitar romper la funcionalidad.
         - En modo `Report-Only`, una cabecera `Content-Security-Policy` o `Content-Security-Policy-Report-Only` enviada por el origen se conserva de forma predeterminada (`KEEP_UPSTREAM_HEADERS`); elimine el nombre de la cabecera de ese ajuste para que la propia política de BunkerWeb tenga prioridad.
         - La `PERMISSIONS_POLICY` predeterminada también bloquea los client hints (directivas `ch-*`); si un servicio depende de `Accept-CH` (por ejemplo, imágenes responsivas basadas en client hints o la detección del modo oscuro mediante `Sec-CH-Prefers-Color-Scheme`), anule `PERMISSIONS_POLICY` para volver a permitir las funciones `ch-*` necesarias (por ejemplo, `ch-dpr=(self)`).
+        - La `PERMISSIONS_POLICY` predeterminada deniega `unbounded-element`.
 
 === "Configuración de Cookies"
 
@@ -4269,6 +4313,8 @@ El complemento de Límite en BunkerWeb proporciona capacidades robustas para apl
     | `LIMIT_CONN_MAX_HTTP3`  | `100`             | multisite | no       | **Flujos HTTP/3:** Número máximo de flujos HTTP/3 concurrentes por dirección IP.                                   |
     | `LIMIT_CONN_MAX_STREAM` | `10`              | multisite | no       | **Conexiones de Flujo:** Número máximo de conexiones de flujo concurrentes por dirección IP.                       |
 
+Cuando `SECURITY_MODE` es `detect`, los límites de conexiones se evalúan y se registran (`limiting connections, dry run`) pero no se aplican.
+
 !!! info "Limitación de Conexiones vs. Solicitudes"
     - **La limitación de conexiones** restringe el número de conexiones simultáneas que una sola dirección IP puede mantener.
     - **La limitación de tasa de solicitudes** restringe el número de solicitudes que una dirección IP puede hacer dentro de un período de tiempo definido.
@@ -4751,7 +4797,7 @@ Ya sea que necesite restringir los métodos HTTP, gestionar los tamaños de las 
 | `ALLOWED_METHODS` | `GET\|POST\|HEAD\|QUERY` | multisite | no       | **Métodos HTTP:** Lista de métodos HTTP permitidos, separados por caracteres de barra vertical. Los métodos personalizados en mayúsculas pueden contener guiones bajos y guiones. |
 
     !!! abstract "CORS y Solicitudes de Pre-vuelo"
-        Si su aplicación admite [Intercambio de Recursos de Origen Cruzado (CORS)](#cors), debe incluir el método `OPTIONS` en el ajuste `ALLOWED_METHODS` para manejar las solicitudes de pre-vuelo. Esto garantiza la funcionalidad adecuada para los navegadores que realizan solicitudes de origen cruzado.
+        Cuando `USE_CORS` es `yes`, las solicitudes de pre-vuelo CORS (una solicitud `OPTIONS` con los encabezados `Origin` y `Access-Control-Request-Method`) llegan al plugin [CORS](#cors) aunque `OPTIONS` no esté en `ALLOWED_METHODS`. Cualquier otra solicitud `OPTIONS` sigue necesitando `OPTIONS` en esta lista.
 
     !!! danger "Consideraciones de Seguridad"
         -   **Evite habilitar `TRACE` o `CONNECT`:** Estos métodos rara vez se necesitan y pueden introducir riesgos de seguridad significativos, como habilitar el Rastreo entre Sitios (XST) o ataques de túnel.
@@ -5026,7 +5072,7 @@ Siga estos pasos para configurar y usar ModSecurity:
 Seleccione una versión de CRS que se ajuste mejor a sus necesidades de seguridad:
 
 - **`3`**: Estable [v3.3.10](https://github.com/coreruleset/coreruleset/releases/tag/v3.3.10).
-- **`4`**: Estable [v4.29.0](https://github.com/coreruleset/coreruleset/releases/tag/v4.29.0) (**predeterminada**).
+- **`4`**: Estable [v4.30.0](https://github.com/coreruleset/coreruleset/releases/tag/v4.30.0) (**predeterminada**).
 
 !!! warning "Compilación Nocturna Obsoleta"
     La opción `nightly` para `MODSECURITY_CRS_VERSION` está obsoleta ya que el proyecto OWASP Core Rule Set ha descontinuado las versiones nocturnas. Si su configuración aún utiliza `nightly`, se usará CRS v4 en su lugar. Por favor, actualice su configuración para usar `MODSECURITY_CRS_VERSION=4`.
@@ -5534,7 +5580,7 @@ El complemento Pro agrupa características avanzadas y mejoras para implementaci
 
 Siga estos pasos para configurar y usar las características Pro:
 
-1.  **Obtenga una clave de licencia:** Compre una licencia Pro en el [Panel de BunkerWeb](https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc).
+1.  **Obtenga una clave de licencia:** Inicie una prueba gratuita de 30 días o compre una licencia Pro en el [Panel de BunkerWeb](https://panel.bunkerweb.io/store/bunkerweb-pro?language=spanish&utm_campaign=self&utm_source=doc) ([guía paso a paso](index.md#pro-version)).
 2.  **Configure su clave de licencia:** Use el ajuste `PRO_LICENSE_KEY` para configurar su licencia.
 3.  **Deje que BunkerWeb se encargue del resto:** Una vez configurado con una licencia válida, los complementos Pro se descargan y activan automáticamente.
 4.  **Supervise su estado Pro:** Verifique los indicadores de salud en la [interfaz de usuario web](web-ui.md) para confirmar el estado de su suscripción Pro.
@@ -5571,7 +5617,7 @@ Siga estos pasos para configurar y usar las características Pro:
 - **BunkerWeb PRO Standard:** Acceso completo a las características Pro sin soporte técnico.
 - **BunkerWeb PRO Enterprise:** Acceso completo a las características Pro con soporte técnico dedicado.
 
-Puede explorar las características Pro con una prueba gratuita de 30 días. Iníciela desde el [Panel de BunkerWeb](https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc) y obtenga más información sobre las opciones de precios flexibles basadas en el número de servicios protegidos por BunkerWeb PRO.
+Puede explorar las características Pro con una prueba gratuita de 30 días. Iníciela desde el [Panel de BunkerWeb](https://panel.bunkerweb.io/store/bunkerweb-pro?language=spanish&utm_campaign=self&utm_source=doc) y obtenga más información sobre las opciones de precios flexibles basadas en el número de servicios protegidos por BunkerWeb PRO: pida un plan y mantenga **Free 30 Days Trial** como método de pago al finalizar la compra ([guía paso a paso](index.md#pro-version)).
 
 ## Prometheus exporter <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 
@@ -5653,7 +5699,7 @@ Siga estos pasos para configurar y usar la función de IP Real:
     Solo incluya las IP de los proxies de confianza en su configuración. Agregar fuentes no confiables podría permitir ataques de suplantación de IP, donde los actores maliciosos podrían falsificar la IP del cliente manipulando los encabezados.
 
 !!! info "Múltiples Direcciones IP"
-    Cuando `REAL_IP_RECURSIVE` está habilitado y un encabezado contiene múltiples IP (p. ej., `X-Forwarded-For: cliente, proxy1, proxy2`), BunkerWeb identificará como la IP del cliente la IP más a la izquierda que no esté en su lista de proxies de confianza.
+    Cuando `REAL_IP_RECURSIVE` está habilitado y un encabezado contiene múltiples IP (p. ej., `X-Forwarded-For: cliente, proxy1, proxy2`), BunkerWeb identificará como la IP del cliente la IP más a la derecha que no esté en su lista de proxies de confianza.
 
 ### Configuraciones de Ejemplo
 
@@ -6173,7 +6219,7 @@ Esto es independiente del complemento `mtls`, que autentica *a los clientes que 
 | `REVERSE_PROXY_KEEPALIVE`         | `no`              | multisite | yes      | **Keep-Alive:** Habilite o deshabilite las conexiones keepalive con el recurso al que se hace proxy.                                                                                                                                            |
 | `REVERSE_PROXY_HTTP_VERSION`      | `1.1`             | multisite | yes      | **Versión HTTP:** Versión del protocolo HTTP utilizada para hablar con el upstream (`1.0`, `1.1` o `2`). Establezca a `2` para multiplexación HTTP/2 en la conexión upstream. Las ubicaciones WebSocket están fijadas a 1.1 independientemente. |
 | `REVERSE_PROXY_CUSTOM_HOST`       |                   | multisite | no       | **Host Personalizado:** Anule el encabezado Host enviado al servidor upstream.                                                                                                                                                                  |
-| `REVERSE_PROXY_INTERCEPT_ERRORS`  | `yes`             | multisite | no       | **Interceptar Errores:** Si se deben interceptar y reescribir las respuestas de error del backend.                                                                                                                                              |
+| `REVERSE_PROXY_INTERCEPT_ERRORS`  | `yes`             | multisite | no       | **Interceptar Errores:** Si se deben interceptar y reescribir las respuestas de error del backend. Consulte [Conservar los cuerpos de error de las API de origen](#errors).                                                                                                                                              |
 
     !!! tip "Mejores Prácticas"
         - Siempre especifique la URL completa en `REVERSE_PROXY_HOST`, incluido el protocolo (http:// o https://)
@@ -7235,6 +7281,8 @@ Siga estos pasos para configurar y usar la función SSL:
 Compatibilidad con STREAM :white_check_mark:
 
 El plugin Templates permite instalar plantillas de servicio reutilizables — un conjunto de ajustes, configuraciones personalizadas y valores predeterminados que se pueden aplicar a un servicio en un solo paso. Las plantillas vienen con BunkerWeb, provienen del catálogo comunitario, o se pueden exportar e importar desde la interfaz web y la API; el único ajuste de este plugin descarga plantillas directamente desde una URL al iniciar.
+
+La plantilla `low` establece `CROSS_ORIGIN_EMBEDDER_POLICY` en `unsafe-none` para permitir recursos de otros orígenes sin autorización explícita.
 
 ### Ajustes de configuración
 

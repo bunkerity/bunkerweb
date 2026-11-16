@@ -57,6 +57,8 @@ bwcli plugin backup restore /path/to/backup/backup-sqlite-2023-08-15_12-34-56.zi
 
     Une sauvegarde ne peut être restaurée que dans le moteur de base de données depuis lequel elle a été prise — le moteur fait partie du nom de fichier (`backup-mariadb-…`), et une restauration vers un autre moteur est refusée avant que quoi que ce soit ne soit touché. Si vous avez migré d'un moteur à un autre, les deux jeux de sauvegardes restent dans le répertoire : `restore` sans argument prend le fichier le plus récent, quel que soit son moteur, donc indiquez le chemin explicitement pour restaurer une sauvegarde plus ancienne de votre moteur actuel.
 
+    Avant de supprimer une table, la restauration vérifie le moteur indiqué dans le nom (MariaDB et MySQL sont distincts), la présence du fichier SQL attendu et l’intégrité de chaque fichier de l’archive. Une archive absente, renommée ou endommagée est refusée sans modifier la base de données.
+
 ### Retour arrière contrôlé
 
 Revenir à une version antérieure de BunkerWeb n'est **pas** l'inverse d'une mise à niveau. Certaines

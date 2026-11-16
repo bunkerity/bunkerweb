@@ -70,9 +70,9 @@ Docker and Swarm share one debounce/batch/apply loop, `Controller._run_event_loo
 
 ### Kubernetes
 
-- **KubernetesController** (base): watches Pods, ConfigMaps, Services and Secrets; `get_configs()` returns both extra settings (from `settings`-type ConfigMaps) and custom configs; detects the LoadBalancer IP for status patching; threaded watchers retry on `410 Gone` (expired resource version).
+- **KubernetesController** (base): watches Pods, ConfigMaps, Services and Secrets; `get_configs()` returns both extra settings (from `settings`-type ConfigMaps) and custom configs; detects the LoadBalancer IP for status patching. Watches request a 45-second server timeout, retain resource versions across reconnects and reset them on `410 Gone`. Calls use 10-second connect and 60-second read timeouts plus TCP keepalives.
 - **IngressController**: translates Ingress rules into `REVERSE_PROXY_HOST_N`/`REVERSE_PROXY_URL_N`, handles TLS secrets, supports `KUBERNETES_INGRESS_CLASS` filtering.
-- **GatewayController**: Gateway API with HTTPRoute, GRPCRoute, TLSRoute, TCPRoute and UDPRoute. Auto-detects the available CRD versions, resolves listeners for hostname/port/protocol/TLS, caches gateways per cycle, patches Gateway status with LoadBalancer addresses.
+- **GatewayController**: Gateway API with HTTPRoute, GRPCRoute, TLSRoute, TCPRoute and UDPRoute. Auto-detects the available CRD versions, resolves listeners for hostname/port/protocol/TLS and caches gateways per cycle. A separate worker publishes GatewayClass/Gateway conditions, listeners, route parents and LoadBalancer addresses outside the apply lock. Status requires class ownership even when routing accepts other classes; namespace and annotation filters still apply. It needs `get/list/watch` on `gatewayclasses` and `patch` on Gateway API status subresources. Status-only watch echoes do not trigger configuration writes.
 
 ### API interaction
 
@@ -87,6 +87,7 @@ The endpoints used are plugins/services/instances reads, the bulk instance and c
 - **Docker**: single-threaded loop on `client.events()`, with an internal lock for the debounce.
 - **Swarm**: two threads, one for `service` events and one for `config` events, sharing a lock.
 - **Kubernetes**: one thread per watcher type (pod, configmap, service, secret, ingress/gateway routes), all sharing `_internal_lock`.
+- The pending-backend worker also retries applies deferred while the scheduler was busy, without waiting for a fresh watch event.
 
 ## Build and Run
 
@@ -106,7 +107,7 @@ Multi-stage Dockerfile; the final image runs as the `autoconf` user (UID 101). T
 - **Swarm: a task's `Status.State == "running"` is already gated on the container HEALTHCHECK** by swarmkit, in both directions. Do not add a container-inspect tier — it cannot work off-node anyway.
 - `API_ERROR_TIMEOUT` controls when repeated API failures escalate warnings to errors in `wait_applying()`.
 - All controllers use a `_first_start` flag to apply unconditionally on the first cycle, and `_set_autoconf_loaded()` sets the `autoconf_loaded` metadata **once**, after the first successful apply.
-- Health: `/var/tmp/bunkerweb/autoconf.healthy` is written when the event loop starts and removed on exit.
+- Health: `/var/tmp/bunkerweb/autoconf.healthy` is written when the event loop starts and removed on exit. Kubernetes starts a 30-second watchdog that removes it after a lock holder makes no progress for over 600 seconds. Completed Kubernetes and BunkerWeb API requests refresh only their holder's progress; no database access is involved.
 
 ## Environment
 

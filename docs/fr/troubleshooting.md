@@ -827,6 +827,18 @@ Si vous avez oublié vos informations d'identification de l'interface utilisateu
     - Vous pouvez également télécharger les journaux : les journaux exportés sont automatiquement anonymisés (les adresses IPv4 et IPv6, les domaines, les jetons, les mots de passe et les identifiants contenus dans les URL sont masqués).
     - Réservé aux administrateurs : la carte **Diagnostic de la Web UI** télécharge un paquet contenant les journaux récents de la Web UI, les versions des plugins vues par la base de données, le disque et la Web UI en cours d’exécution, l’environnement et les dernières erreurs. La même anonymisation s’applique ; la clé de licence et l’URI de la base de données ne sont jamais collectées.
 
+=== "Exporter un paquet de support avec bwcli"
+
+    Exécutez `bwcli support` là où tourne le scheduler (conteneur du scheduler, image all-in-one ou hôte Linux) pour construire une seule archive destinée au support BunkerWeb : version et environnement, configuration, plugins, jobs, état des instances, métadonnées des configurations personnalisées, journaux et configuration NGINX générée. Sur une instance BunkerWeb, le contrôleur autoconf ou un hôte Linux worker, la commande refuse de s'exécuter et renvoie vers le scheduler.
+
+    ```shell
+    docker exec <scheduler container> bwcli support -o - > bundle.zip
+    ```
+
+    - Sans `-o`, l’archive `bunkerweb-support-<horodatage UTC>.zip` est écrite dans le répertoire courant. `-o -` l’écrit sur stdout.
+    - Les identifiants sont toujours masqués. Les adresses IP et les domaines des services sont anonymisés : ajoutez `--no-anonymize` pour les conserver.
+    - Une section illisible est listée dans `manifest.json` et le reste du paquet est tout de même écrit. Lorsque les journaux vont sur stdout, le manifeste donne la commande pour les récupérer (`docker logs`, `kubectl logs`, `journalctl`).
+
 ### Téléversement de plugin
 
 Il peut ne pas être possible de télécharger un plugin à partir de l'interface utilisateur dans certaines situations :

@@ -1718,6 +1718,9 @@ services:
 !!! tip "Beschriftete Container überspringen"
     Wenn ein Container von autoconf ignoriert werden soll, setzen Sie `DOCKER_IGNORE_LABELS` auf dem Controller. Geben Sie eine durch Leerzeichen oder Kommas getrennte Liste von Label-Schlüsseln an (zum Beispiel `bunkerweb.SERVER_NAME`) oder nur das Suffix (`SERVER_NAME`). Jeder Container oder jede benutzerdefinierte Konfigurationsquelle mit einem übereinstimmenden Label wird bei der Erkennung übersprungen, und das Label wird bei der Übersetzung der Einstellungen ignoriert.
 
+!!! info "KEEP_CONFIG_ON_RESTART"
+    Anders als die obigen Einstellungen wird `KEEP_CONFIG_ON_RESTART` direkt vom Entrypoint des `bunkerweb`-Containers aus dessen Prozessumgebung gelesen, nicht vom Scheduler oder der Datenbank, und muss daher am `bunkerweb`-Container selbst gesetzt werden. Mit `yes` (Standard) behält ein Neustart des Containers die zuvor generierte Konfiguration, sodass die Instanz ihre Zugriffskontrollen weiter durchsetzt, während sie den Scheduler um die neueste Konfiguration bittet. Startet die beibehaltene Konfiguration nicht, greift die Instanz einmalig auf die Lade-Konfiguration zurück, bis der Scheduler die neueste Konfiguration überträgt. Eine abgebrochene Installation der Konfiguration (Container beendet, Speichermangel) wird nie beibehalten: Der nächste Start rendert stattdessen die Lade-Konfiguration. Mit `no` wird bei jedem Neustart die Lade-Konfiguration gerendert.
+
 ### Verwendung von Docker-Secrets
 
 Anstatt sensible Einstellungen über Umgebungsvariablen zu übergeben, können Sie sie als Docker-Secrets speichern. Erstellen Sie für jede Einstellung, die Sie sichern möchten, ein Docker-Secret mit dem Namen, der dem Einstellungsschlüssel entspricht (in Großbuchstaben). Die Einstiegsskripte von BunkerWeb laden Secrets automatisch aus `/run/secrets` und exportieren sie als Umgebungsvariablen.
@@ -2212,6 +2215,20 @@ sudo ./install-bunkerweb.sh
 
     Wenn die Überprüfung der Prüfsumme fehlschlägt, **führen Sie das Skript nicht aus** – es könnte unsicher sein.
 
+#### Hinter einem Proxy
+
+Exportieren Sie `HTTP_PROXY` und `HTTPS_PROXY` (oder `http_proxy` und `https_proxy`), bevor Sie das Installationsskript ausführen, um Downloads, die Repository-Einrichtung, das Abrufen von Signaturschlüsseln und Anfragen des Paketmanagers über Ihren Forward-Proxy zu leiten. Optional gibt `NO_PROXY` (oder `no_proxy`) Hosts an, die den Proxy umgehen. Sind beide Schreibweisen gesetzt, haben die kleingeschriebenen Werte Vorrang. Behalten Sie diese Variablen beim Erhöhen der Berechtigungen bei, zum Beispiel:
+
+```bash
+export HTTP_PROXY=http://proxy.example.com:3128
+export HTTPS_PROXY=http://proxy.example.com:3128
+sudo --preserve-env=HTTP_PROXY,HTTPS_PROXY,NO_PROXY,http_proxy,https_proxy,no_proxy ./install-bunkerweb.sh
+```
+
+Ihre sudo-Richtlinie muss das Beibehalten dieser Variablen erlauben. Diese Einstellungen gelten für das Installationsskript; konfigurieren Sie die Proxy-Einstellungen für den laufenden Betrieb separat in `/etc/bunkerweb/variables.env`.
+
+Für Docker-Image-Pulls muss außerdem ein Proxy für den Docker-Daemon konfiguriert sein, zum Beispiel über das systemd-Drop-in `/etc/systemd/system/docker.service.d/http-proxy.conf`.
+
 #### Wie es funktioniert
 
 Das einfache Installationsskript ist ein leistungsstarkes Werkzeug, das entwickelt wurde, um die Einrichtung von BunkerWeb auf einem frischen Linux-System zu optimieren. Es automatisiert die folgenden wichtigen Schritte:
@@ -2523,6 +2540,32 @@ Dies bietet eine nahtlose, sofort einsatzbereite Integration für einen leistung
 
     Dies ist erforderlich, damit der BunkerWeb-Scheduler eine Verbindung zu Ihrer externen Datenbank herstellen kann.
 
+#### PostgreSQL-Sicherungen unter Debian/Ubuntu {#debian-ubuntu-postgresql-backups}
+
+!!! warning "Hauptversion des PostgreSQL-Clients"
+    Debian 12 (Bookworm) liefert PostgreSQL-Client 15; Debian 13 (Trixie), 17; Ubuntu 22.04 (Jammy), 14; Ubuntu 24.04 (Noble), 16; Ubuntu 26.04 (Resolute), 18. Ist die Hauptversion des externen PostgreSQL-Servers neuer, schlagen geplante Sicherungen und `bwcli plugin backup save` mit `server version mismatch` von `pg_dump` fehl. Installieren Sie den passenden `postgresql-client-<N>` manuell aus dem [offiziellen PGDG-Repository für Debian](https://www.postgresql.org/download/linux/debian/) oder [Ubuntu](https://www.postgresql.org/download/linux/ubuntu/) auf dem Host, der den Celery-Worker für geplante Sicherungen oder den manuellen Sicherungsbefehl ausführt. Setzen Sie `PG_MAJOR` unten auf die Hauptversion Ihres Servers (`18` ist ein Beispiel); diese Befehle installieren nur den Client, keinen Datenbankserver.
+
+    ```bash
+    sudo apt install curl ca-certificates
+    sudo install -d /usr/share/postgresql-common/pgdg
+    sudo curl -o /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc --fail https://www.postgresql.org/media/keys/ACCC4CF8.asc
+    . /etc/os-release
+    sudo tee /etc/apt/sources.list.d/pgdg.sources > /dev/null <<EOF
+    Types: deb
+    URIs: https://apt.postgresql.org/pub/repos/apt
+    Suites: ${VERSION_CODENAME}-pgdg
+    Architectures: $(dpkg --print-architecture)
+    Components: main
+    Signed-By: /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc
+    EOF
+    sudo apt update
+    PG_MAJOR=18
+    sudo apt install "postgresql-client-${PG_MAJOR}"
+    pg_dump --version
+    ```
+
+    Prüfen Sie vor Sicherungen, ob `pg_dump --version` den passenden Client meldet. Das Installationsskript zeigt nur diesen Hinweis an; es richtet weder PGDG ein noch installiert es einen neueren Client.
+
 #### Nach der Installation
 
 Abhängig von Ihren Entscheidungen während der Installation:
@@ -2607,12 +2650,8 @@ Bitte stellen Sie sicher, dass Sie **NGINX 1.30.6 installiert haben, bevor Sie B
     sudo apt install -y --allow-downgrades nginx=1.30.6-1~$(lsb_release -cs)
     ```
 
-    !!! warning "Testing/dev-Version"
-        Wenn Sie die `testing`- oder `dev`-Version verwenden, müssen Sie die Direktive `force-bad-version` zu Ihrer `/etc/dpkg/dpkg.cfg`-Datei hinzufügen, bevor Sie BunkerWeb installieren.
-
-        ```shell
-        echo "force-bad-version" | sudo tee -a /etc/dpkg/dpkg.cfg
-        ```
+    !!! info "Versionierte Linux-Pakete"
+        Es werden nur versionierte Linux-Pakete veröffentlicht. Die Paketkanäle dev, testing, *-dev und *-testing sind nicht mehr verfügbar. Wählen Sie eine veröffentlichte Version oder verwenden Sie den Docker-Tag testing für Entwicklung und Tests. Die dpkg-Konfiguration muss nicht geändert werden.
 
     !!! example "Einrichtungsassistenten deaktivieren"
         Wenn Sie den Einrichtungsassistenten der Web-UI bei der Installation von BunkerWeb nicht verwenden möchten, exportieren Sie die folgende Variable:
@@ -2655,12 +2694,8 @@ Bitte stellen Sie sicher, dass Sie **NGINX 1.30.6 installiert haben, bevor Sie B
     sudo apt install -y --allow-downgrades nginx=1.30.6-1~$(lsb_release -cs)
     ```
 
-    !!! warning "Testing/dev-Version"
-        Wenn Sie die `testing`- oder `dev`-Version verwenden, müssen Sie die Direktive `force-bad-version` zu Ihrer `/etc/dpkg/dpkg.cfg`-Datei hinzufügen, bevor Sie BunkerWeb installieren.
-
-        ```shell
-        echo "force-bad-version" | sudo tee -a /etc/dpkg/dpkg.cfg
-        ```
+    !!! info "Versionierte Linux-Pakete"
+        Es werden nur versionierte Linux-Pakete veröffentlicht. Die Paketkanäle dev, testing, *-dev und *-testing sind nicht mehr verfügbar. Wählen Sie eine veröffentlichte Version oder verwenden Sie den Docker-Tag testing für Entwicklung und Tests. Die dpkg-Konfiguration muss nicht geändert werden.
 
     !!! example "Einrichtungsassistenten deaktivieren"
         Wenn Sie den Einrichtungsassistenten der Web-UI bei der Installation von BunkerWeb nicht verwenden möchten, exportieren Sie die folgende Variable:
@@ -2685,9 +2720,6 @@ Bitte stellen Sie sicher, dass Sie **NGINX 1.30.6 installiert haben, bevor Sie B
 
 === "Fedora"
 
-    !!! warning "Fedora liefert NGINX 1.30.5"
-        Fedora 43 und 44 stellen NGINX 1.30.6 noch nicht bereit, daher sind die BunkerWeb-Pakete für Fedora gegen NGINX 1.30.5 gebaut und erwarten `nginx-1.30.5`. Installieren Sie auf Fedora diese Version; die Vorgabe wechselt auf 1.30.6, sobald Fedora es veröffentlicht.
-
     !!! info "Fedora Update Testing"
         Wenn Sie die NGINX-Version nicht im stabilen Repository finden können, können Sie das `updates-testing`-Repository aktivieren:
 
@@ -2695,10 +2727,10 @@ Bitte stellen Sie sicher, dass Sie **NGINX 1.30.6 installiert haben, bevor Sie B
         sudo dnf config-manager setopt updates-testing.enabled=1
         ```
 
-    Fedora stellt bereits NGINX 1.30.5 zur Verfügung, das wir unterstützen
+    Fedora stellt bereits NGINX 1.30.6 zur Verfügung, das wir unterstützen
 
     ```shell
-    sudo dnf install -y --allowerasing nginx-1.30.5
+    sudo dnf install -y --allowerasing nginx-1.30.6
     ```
 
     !!! example "Einrichtungsassistenten deaktivieren"
@@ -2786,6 +2818,8 @@ MEINE_EINSTELLUNG_2=wert2
 Bei der Installation wird BunkerWeb mit drei Diensten `bunkerweb`, `bunkerweb-scheduler` und `bunkerweb-ui` geliefert, die Sie mit `systemctl` verwalten können.
 
 Wenn Sie die BunkerWeb-Konfiguration manuell über `/etc/bunkerweb/variables.env` bearbeiten, reicht ein Neustart des `bunkerweb-scheduler`-Dienstes aus, um die Konfiguration ohne Ausfallzeit zu generieren und neu zu laden. In bestimmten Fällen (z. B. bei Änderung der lauschenden Ports) müssen Sie jedoch möglicherweise den `bunkerweb`-Dienst neu starten.
+
+`KEEP_CONFIG_ON_RESTART` wird vom Dienst `bunkerweb` aus dessen Umgebung oder aus `/etc/bunkerweb/variables.env` gelesen, niemals aus der Datenbank. Mit `yes` (Standard) behält ein Neustart die zuvor generierte Konfiguration, sodass die Instanz ihre Zugriffskontrollen weiter durchsetzt, während sie den Scheduler um die neueste Konfiguration bittet. Startet die beibehaltene Konfiguration nicht, greift der Dienst einmalig auf die Lade-Konfiguration zurück, bis der Scheduler die neueste Konfiguration überträgt. Eine abgebrochene Installation der Konfiguration (Stromausfall, `kill -9`, Speichermangel) wird nie beibehalten: Der nächste Start rendert stattdessen die Lade-Konfiguration. Mit `no` wird bei jedem Neustart die Lade-Konfiguration gerendert.
 
 ### Hochverfügbarkeit
 
@@ -3227,6 +3261,28 @@ für benutzerdefinierte Konfigurationen.
     Die Unterstützung für `GRPCRoute` ist in BunkerWeb derzeit **experimentell**.
 
     Wenn Ihr Service nicht `bunkerweb` heißt, setzen Sie `BUNKERWEB_SERVICE_NAME`, damit das Status-Patching den richtigen Service verwendet.
+
+### Gateway API: RBAC und Status {#gateway-api-rbac-status}
+
+Das Dienstkonto von Autoconf benötigt diese zusätzlichen ClusterRole-Regeln. `GatewayClass` und dessen Status gelten clusterweit. Behalten Sie bestehende `get`/`list`/`watch`-Berechtigungen für Gateways und die fünf Routentypen bei; die Wiederherstellung nach Routenkonflikten verwendet auch das gewöhnliche `get` für Routen. Prüfen Sie diese Berechtigungen in Ihrer Bereitstellung; die Helm-Chart-Anpassung wird separat im Repository `bunkerweb-helm` verfolgt.
+
+```yaml
+- apiGroups: ["gateway.networking.k8s.io"]
+  resources: ["gatewayclasses"]
+  verbs: ["get", "list", "watch"]
+- apiGroups: ["gateway.networking.k8s.io"]
+  resources:
+    - gatewayclasses/status
+    - gateways/status
+    - httproutes/status
+    - grpcroutes/status
+    - tlsroutes/status
+    - tcproutes/status
+    - udproutes/status
+  verbs: ["patch"]
+```
+
+Der Status wird nur für eigene Ressourcen veröffentlicht: `GatewayClass.spec.controllerName` muss `KUBERNETES_GATEWAY_CONTROLLER` entsprechen; ein gesetztes `KUBERNETES_GATEWAY_CLASS` schränkt die Auswahl weiter ein. Namespace-Filter und Filter für ignorierte Annotationen gelten weiterhin. Wird ein Status-Patch verweigert, protokolliert Autoconf eine Warnung und wendet die Konfiguration weiterhin an. Fehlgeschlagene erforderliche Klassenabfragen stoppen weiterhin den Abgleich und behalten die zuletzt angewendete Konfiguration bei. Autoconf erkennt die Statusverfügbarkeit und Leserechte beim Start; starten Sie Autoconf nach RBAC-Änderungen neu, um die Statusveröffentlichung zu aktivieren.
 
 !!! info "ConfigMap-Abgleich"
     - Der Ingress-Controller verwaltet nur ConfigMaps, die die Annotation `bunkerweb.io/CONFIG_TYPE` enthalten.

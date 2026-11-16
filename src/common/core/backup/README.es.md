@@ -57,6 +57,8 @@ bwcli plugin backup restore /ruta/a/copia/de/seguridad/backup-sqlite-2023-08-15_
 
     Una copia de seguridad solo puede restaurarse en el mismo motor de base de datos del que se tomó — el motor forma parte del nombre del archivo (`backup-mariadb-…`), y una restauración en otro distinto se rechaza antes de tocar nada. Si migró entre motores, ambos conjuntos de copias permanecen en el directorio: `restore` sin argumento toma el archivo más reciente de cualquier motor, así que indique la ruta explícitamente para restaurar una copia más antigua de su motor actual.
 
+    Antes de vaciar las tablas, la restauración comprueba el motor indicado en el nombre (MariaDB y MySQL se consideran distintos), el archivo SQL esperado y la integridad de todos los archivos del ZIP. Los archivos ausentes, renombrados o dañados se rechazan sin modificar la base de datos.
+
 ### Regresión controlada
 
 Volver a una versión anterior de BunkerWeb **no** es lo inverso de una actualización. Algunas tablas

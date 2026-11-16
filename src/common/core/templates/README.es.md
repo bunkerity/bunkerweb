@@ -1,5 +1,7 @@
 El plugin Templates permite instalar plantillas de servicio reutilizables — un conjunto de ajustes, configuraciones personalizadas y valores predeterminados que se pueden aplicar a un servicio en un solo paso. Las plantillas vienen con BunkerWeb, provienen del catálogo comunitario, o se pueden exportar e importar desde la interfaz web y la API; el único ajuste de este plugin descarga plantillas directamente desde una URL al iniciar.
 
+La plantilla `low` establece `CROSS_ORIGIN_EMBEDDER_POLICY` en `unsafe-none` para permitir recursos de otros orígenes sin autorización explícita.
+
 ### Ajustes de configuración
 
 | Ajuste                    | Valor por defecto | Contexto | Múltiple | Descripción                                                                                                                                                                                                                                                                                     |

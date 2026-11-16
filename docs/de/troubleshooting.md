@@ -926,6 +926,18 @@ Falls Sie Ihre UI-Anmeldeinformationen vergessen haben oder Probleme mit 2FA hab
     - Laden Sie optional Protokolle herunter: Die exportierten Protokolle werden automatisch anonymisiert (IPv4- und IPv6-Adressen, Domains, Token, Passwörter und die Zugangsdaten in URLs werden maskiert).
     - Nur für Administratoren: Die Karte **Web-UI-Diagnose** lädt ein Paket mit den letzten Web-UI-Protokollen, den Plugin-Versionen aus Sicht der Datenbank, des Datenträgers und der laufenden Web-UI, der Umgebung und den letzten Fehlern herunter. Es gilt dieselbe Anonymisierung; der Lizenzschlüssel und die Datenbank-URI werden nie erfasst.
 
+=== "Support-Paket mit bwcli exportieren"
+
+    Führen Sie `bwcli support` dort aus, wo der Scheduler läuft (Scheduler-Container, All-in-One-Image oder Linux-Host), um ein einziges Archiv für den BunkerWeb-Support zu erstellen: Version und Umgebung, Konfiguration, Plugins, Jobs, Zustand der Instanzen, Metadaten der benutzerdefinierten Konfigurationen, Protokolle und die generierte NGINX-Konfiguration. Auf einer BunkerWeb-Instanz, dem Autoconf-Controller oder einem Linux-Worker-Host verweigert der Befehl die Ausführung und verweist auf den Scheduler.
+
+    ```shell
+    docker exec <scheduler container> bwcli support -o - > bundle.zip
+    ```
+
+    - Ohne `-o` wird das Archiv `bunkerweb-support-<UTC-Zeitstempel>.zip` im aktuellen Verzeichnis erstellt. `-o -` schreibt es nach stdout.
+    - Zugangsdaten werden immer geschwärzt. IP-Adressen und Domains der Services werden anonymisiert: Mit `--no-anonymize` bleiben sie erhalten.
+    - Ein Abschnitt, der nicht gelesen werden kann, wird in `manifest.json` aufgeführt, und der Rest des Pakets wird trotzdem geschrieben. Wenn die Protokolle nach stdout gehen, nennt das Manifest den Befehl zum Abrufen (`docker logs`, `kubectl logs`, `journalctl`).
+
 ### Plugin hochladen
 
 Es ist möglicherweise nicht möglich, ein Plugin in bestimmten Situationen von der Benutzeroberfläche hochzuladen:

@@ -7,7 +7,7 @@
 
 !!! info "Qué bases de datos 1.6 pueden actualizarse"
 
-    Una base de datos escrita por 1.6.16, por cualquiera de sus candidatas a versión (1.6.16~rc1 a 1.6.16~rc4) o por 1.6.17~rc1, se actualiza a 1.7 como cualquier otra base 1.6: la cadena de migraciones contiene cada una de esas revisiones, y las migraciones se ejecutan en el primer arranque. 1.6.16 es la versión estable desde la que se actualiza.
+    Una base de datos escrita por 1.6.16, cualquiera de sus candidatas a versión (1.6.16~rc1 a 1.6.16~rc4), 1.6.17~rc1, 1.6.17~rc2, 1.6.17 o 1.6.18~rc1 a 1.6.18~rc3 se actualiza a 1.7 como cualquier otra base 1.6: la cadena de migraciones contiene cada una de esas revisiones, y las migraciones se ejecutan en el primer arranque. 1.6.17 es la última versión estable desde la que se puede actualizar; 1.6.18~rc3 es la última versión preliminar compatible.
 
 ### Cambios importantes {#breaking-changes}
 
@@ -662,7 +662,7 @@ también.
             5. Eliminación de bloqueos de paquetes
                 * Elimina temporalmente `apt-mark hold` / `dnf versionlock` en `bunkerweb` y `nginx` para que se pueda instalar la versión de destino.
             6. Ejecución de la actualización
-                * Instala la nueva versión del paquete de BunkerWeb. NGINX solo se reinstala cuando la versión de BunkerWeb de destino ancla una versión distinta: 1.6.13 y 1.6.14 anclan NGINX 1.30.4, y 1.6.15 y 1.6.16 anclan 1.30.5, mientras que 1.7.0 exige 1.30.6 (1.30.5 en Fedora 43/44). Actualizar desde cualquiera de esas versiones sube NGINX y lo reinicia, salvo desde 1.6.15 o 1.6.16 en Fedora 43/44, donde NGINX permanece en 1.30.5.
+                * Instala la nueva versión del paquete de BunkerWeb. NGINX solo se reinstala cuando la versión de BunkerWeb de destino ancla una versión distinta: 1.6.13 y 1.6.14 anclan NGINX 1.30.4, y 1.6.15 y 1.6.16 anclan 1.30.5, mientras que 1.7.0 exige 1.30.6. Actualizar desde cualquiera de esas versiones sube NGINX y lo reinicia.
                 * Vuelve a aplicar los bloqueos/versionlocks para congelar las versiones actualizadas.
             7. Finalización y estado
                 * Muestra el estado de systemd para los servicios principales y los próximos pasos.
@@ -1151,6 +1151,10 @@ Aunque las configuraciones se declaran ahora en el contenedor del Programador, *
 
 Hicimos nuestro mejor esfuerzo para no cambiar el valor predeterminado, pero hemos añadido muchas otras configuraciones. Se recomienda encarecidamente leer las secciones de [ajuste de seguridad](advanced.md#security-tuning) y [configuraciones](features.md) de la documentación.
 
+!!! warning "`MODSECURITY_CRS_PLUGIN_URLS` se renombró a `MODSECURITY_CRS_PLUGINS`"
+
+    Si configuró `MODSECURITY_CRS_PLUGIN_URLS` y actualizó a 1.6 con PostgreSQL, MariaDB o MySQL antes de la 1.6.18, el valor almacenado se perdió. Compruebe `MODSECURITY_CRS_PLUGINS` y vuelva a configurarlo si está vacío. Desde la 1.6.18, los valores se conservan al actualizar.
+
 #### Plantillas
 
 Hemos añadido una nueva característica llamada **plantillas**. Las plantillas proporcionan un enfoque estructurado y estandarizado para definir configuraciones y configuraciones personalizadas, consulta la sección [conceptos/plantillas](concepts.md#templates) para obtener más información.
@@ -1589,3 +1593,30 @@ Hemos añadido una característica de **espacio de nombres** a las integraciones
 
     8. **Retrocede la versión de BunkerWeb**.
         - Retrocede BunkerWeb a la versión anterior siguiendo los mismos pasos que al actualizar BunkerWeb en la [página de integración con Linux](integrations.md#linux)
+
+## Verificar una versión
+
+Las versiones numeradas de 1.7 incluyen atestaciones de procedencia de compilación de GitHub sin claves para los índices de imágenes de Docker Hub y GHCR, los paquetes Linux de packagecloud y el PDF, el instalador y su suma de comprobación adjuntos a la versión de GitHub. Las etiquetas flotantes de Docker no ofrecen esta garantía. Autentíquese en el registro antes de verificar una imagen.
+
+Use GitHub CLI para verificar el archivo descargado o el digest del índice de imagen frente a la etiqueta y al commit de origen esperados. El flujo firmante es push-docker.yml para imágenes, push-packagecloud.yml para paquetes y release.yml para archivos de la versión de GitHub. Verifique el digest que desplegará; el nombre y la suma de comprobación del archivo no prueban su origen.
+
+Los comandos siguientes son ejemplos: sustituya la versión, el digest, el nombre de archivo y el commit de origen antes de usarlos.
+
+```bash
+gh attestation verify 'oci://docker.io/bunkerity/bunkerweb@sha256:<index-digest>' \
+  --repo bunkerity/bunkerweb \
+  --signer-workflow bunkerity/bunkerweb/.github/workflows/push-docker.yml \
+  --source-ref refs/tags/v1.7.1 --source-digest '<source-commit>'
+
+gh attestation verify './bunkerweb_1.7.1_amd64.deb' \
+  --repo bunkerity/bunkerweb \
+  --signer-workflow bunkerity/bunkerweb/.github/workflows/push-packagecloud.yml \
+  --source-ref refs/tags/v1.7.1 --source-digest '<source-commit>'
+
+gh attestation verify './install-bunkerweb.sh' \
+  --repo bunkerity/bunkerweb \
+  --signer-workflow bunkerity/bunkerweb/.github/workflows/release.yml \
+  --source-ref refs/tags/v1.7.1 --source-digest '<source-commit>'
+```
+
+Para GHCR, cambie solo el registro OCI a `ghcr.io`; conserve `push-docker.yml`. Use el mismo firmante de paquetes para los archivos RPM. Use el firmante de los archivos de la versión para el PDF y la suma de comprobación del instalador.

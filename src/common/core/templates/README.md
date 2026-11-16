@@ -1,5 +1,7 @@
 The Templates plugin lets you install reusable service templates — a bundle of settings, custom configs and default values you can apply to a service in one step. Templates ship with BunkerWeb, come from the community catalogue, or can be exported and imported through the web UI and the API; this plugin's only setting downloads templates straight from a URL at startup.
 
+The `low` template sets `CROSS_ORIGIN_EMBEDDER_POLICY` to `unsafe-none` to allow cross-origin resources without explicit opt-in.
+
 ### Configuration Settings
 
 | Setting                  | Default | Context | Multiple | Description                                                                                                                                                                                                                                                                     |

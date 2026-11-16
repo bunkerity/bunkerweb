@@ -26,7 +26,7 @@ Siga estos pasos para configurar y usar la función CORS:
 | `CORS_ALLOW_ORIGIN`            | `self`                                                                               | multisite | no       | **Orígenes Permitidos:** Expresión regular PCRE que representa los orígenes permitidos; use `*` para cualquier origen, o `self` solo para el mismo origen. |
 | `CORS_ALLOW_METHODS`           | `GET, POST, OPTIONS`                                                                 | multisite | no       | **Métodos Permitidos:** Métodos HTTP que se pueden usar en solicitudes de origen cruzado.                                                                  |
 | `CORS_ALLOW_HEADERS`           | `DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range` | multisite | no       | **Encabezados Permitidos:** Encabezados HTTP que se pueden usar en solicitudes de origen cruzado.                                                          |
-| `CORS_ALLOW_CREDENTIALS`       | `no`                                                                                 | multisite | no       | **Permitir Credenciales:** Establezca en `yes` para permitir credenciales (cookies, autenticación HTTP) en solicitudes CORS.                               |
+| `CORS_ALLOW_CREDENTIALS`       | `no`                                                                                 | multisite | no       | **Permitir Credenciales:** Establezca en `yes` para permitir credenciales (cookies, autenticación HTTP) en solicitudes CORS. El encabezado se envía en respuestas preflight y reales, solo a un origen permitido, y nunca con `CORS_ALLOW_ORIGIN` en `*`.                               |
 | `CORS_EXPOSE_HEADERS`          | `Content-Length,Content-Range`                                                       | multisite | no       | **Encabezados Expuestos:** Encabezados HTTP a los que los navegadores pueden acceder desde respuestas de origen cruzado.                                   |
 | `CROSS_ORIGIN_OPENER_POLICY`   | `same-origin`                                                                        | multisite | no       | **Cross-Origin-Opener-Policy:** Controla la comunicación entre contextos de navegación.                                                                    |
 | `CROSS_ORIGIN_EMBEDDER_POLICY` | `require-corp`                                                                       | multisite | no       | **Cross-Origin-Embedder-Policy:** Controla si un documento puede cargar recursos de otros orígenes.                                                        |
@@ -50,6 +50,8 @@ Aquí hay ejemplos de posibles valores para el ajuste `CORS_ALLOW_ORIGIN`, junto
 - **`^https://.+\.example\.com$`**: Permite solicitudes de cualquier subdominio que termine en `.example.com`.
 - **`^https://(www\.example1\.com|www\.example2\.com)$`**: Permite solicitudes de `https://www.example1.com` o `https://www.example2.com`.
 - **`^https?://www\.example\.com$`**: Permite solicitudes tanto de `https://www.example.com` como de `http://www.example.com`.
+
+En modo regex, ancle el patrón con `^` y `$` para que coincida con el origen completo; la respuesta refleja el `Origin` de la solicitud en `Access-Control-Allow-Origin` solo cuando coincide, y un origen que no coincide no recibe el encabezado `Access-Control-Allow-Origin`. Con `self`, el `Origin` debe ser exactamente el origen propio del servicio; no se trata como un patrón.
 
 === "Configuración Básica"
 

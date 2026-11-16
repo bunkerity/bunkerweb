@@ -65,3 +65,9 @@ Siga estos pasos para configurar y usar la función de Errores:
     ```yaml
     INTERCEPTED_ERROR_CODES: "404 500"
     ```
+
+### Conservar los cuerpos de error de las API de origen
+
+Por defecto, BunkerWeb sustituye las respuestas 400 del servidor de origen por su propia página de error, lo que puede romper los clientes de API JSON u OIDC. Para dejar pasar los errores del origen en un servicio, quite el código de la lista de ese servicio, por ejemplo `app.example.com_INTERCEPTED_ERROR_CODES=401 403 404 405 413 429 500 501 502 503 504` (conserve los códigos que aún quiera interceptar), o defina `app.example.com_REVERSE_PROXY_INTERCEPT_ERRORS=no` para dejar pasar todos los errores del origen. Los errores generados por el propio BunkerWeb (por ejemplo, una denegación del WAF) siguen siendo gestionados por BunkerWeb.
+
+Para conservar los errores del origen solo en una ubicación, añada un archivo que contenga `proxy_intercept_errors off;` y enumérelo en el ajuste `REVERSE_PROXY_INCLUDES` de esa ubicación (por ejemplo `app.example.com_REVERSE_PROXY_INCLUDES=/opt/keep-errors.conf`, con el mismo sufijo numérico que el `REVERSE_PROXY_HOST` de la ubicación). El archivo debe existir dentro de los contenedores de BunkerWeb. Las demás ubicaciones del servicio siguen interceptando los errores.

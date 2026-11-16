@@ -24,7 +24,7 @@ One directory per plugin, `ls` for the current set. External and PRO plugins use
 | `bwcli/`                        | Optional `bwcli` subcommands                                                        |
 | `README.md`                     | **Also the published documentation** — see the docs trap below                      |
 
-`order.json` at this level defines the execution order per phase: `init`, `init_worker`, `set`, `ssl_client_hello_default`, `ssl_certificate`, `access`, `headers`, `log`, `preread`, `log_stream`, `log_default`, `timer`, `init_workers`.
+`order.json` at this level defines the execution order per phase: `init`, `init_worker`, `set`, `ssl_client_hello`, `ssl_client_hello_default`, `ssl_certificate`, `access`, `headers`, `log`, `preread`, `log_stream`, `log_default`, `timer`, `init_workers`.
 
 ## `plugin.json`
 

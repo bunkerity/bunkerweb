@@ -1706,6 +1706,9 @@ services:
 !!! info "完整列表"
     有关环境变量的完整列表，请参阅文档的[设置部分](features.md)。
 
+!!! info "KEEP_CONFIG_ON_RESTART"
+    与上述设置不同，`KEEP_CONFIG_ON_RESTART` 由 `bunkerweb` 容器自身的入口点直接从其进程环境中读取，而不是从调度器或数据库读取，因此必须在 `bunkerweb` 容器本身上设置。设置为 `yes`（默认值）时，容器重启会保留之前生成的配置，实例在向调度器请求最新配置期间继续执行其访问控制。如果保留的配置无法启动，实例会回退到加载配置（仅一次），直到调度器推送最新配置。被中断的配置安装（容器被终止、内存不足）不会被保留：下次启动时会改为渲染加载配置。设置为 `no` 则每次重启都渲染加载配置。
+
 ### 使用 Docker secrets
 
 与其通过环境变量传递敏感设置，不如将它们存储为 Docker secrets。对于每个您想要保护的设置，创建一个名称与设置键（大写）匹配的 Docker secret。BunkerWeb 的入口点脚本会自动从 `/run/secrets` 加载 secrets 并将它们导出为环境变量。
@@ -2185,6 +2188,20 @@ sudo ./install-bunkerweb.sh
 
     如果校验和验证失败，**请不要执行该脚本**——它可能不安全。
 
+#### 通过代理安装
+
+运行安装程序前，请导出 `HTTP_PROXY` 和 `HTTPS_PROXY`（或 `http_proxy` 和 `https_proxy`），以通过正向代理进行下载、仓库配置、签名密钥获取以及软件包管理器请求。可选的 `NO_PROXY`（或 `no_proxy`）列出绕过代理的主机。两种形式都设置时，小写变量的值优先。提升权限时请保留这些变量，例如：
+
+```bash
+export HTTP_PROXY=http://proxy.example.com:3128
+export HTTPS_PROXY=http://proxy.example.com:3128
+sudo --preserve-env=HTTP_PROXY,HTTPS_PROXY,NO_PROXY,http_proxy,https_proxy,no_proxy ./install-bunkerweb.sh
+```
+
+您的 sudo 策略必须允许保留这些变量。这些设置仅适用于安装程序；请在 `/etc/bunkerweb/variables.env` 中单独配置 BunkerWeb 运行时使用的代理设置。
+
+拉取 Docker 镜像还需要为 Docker 守护进程配置代理，例如通过 systemd 配置片段 `/etc/systemd/system/docker.service.d/http-proxy.conf`。
+
 #### 工作原理
 
 简易安装脚本是一个强大的工具，旨在简化在全新的 Linux 系统上设置 BunkerWeb 的过程。它会自动执行以下关键步骤：
@@ -2475,6 +2492,32 @@ sudo ./install-bunkerweb.sh --manager --instances "192.168.1.10 192.168.1.11" --
 
     这是 BunkerWeb 调度器连接到您的外部数据库所必需的。
 
+#### Debian/Ubuntu 上的 PostgreSQL 备份 {#debian-ubuntu-postgresql-backups}
+
+!!! warning "PostgreSQL 客户端主版本"
+    Debian 12（Bookworm）提供 PostgreSQL 客户端 15；Debian 13（Trixie）为 17；Ubuntu 22.04（Jammy）为 14；Ubuntu 24.04（Noble）为 16；Ubuntu 26.04（Resolute）为 18。如果外部 PostgreSQL 服务器的主版本更新，计划备份和 `bwcli plugin backup save` 会因 `pg_dump` 的 `server version mismatch` 错误而失败。请在运行计划备份的 Celery 工作进程或手动备份命令的主机上，从 [Debian 的 PGDG 官方仓库](https://www.postgresql.org/download/linux/debian/)或 [Ubuntu 的 PGDG 官方仓库](https://www.postgresql.org/download/linux/ubuntu/)手动安装匹配的 `postgresql-client-<N>`。将下方的 `PG_MAJOR` 设置为服务器的主版本（`18` 仅为示例）；这些命令只安装客户端，不安装数据库服务器。
+
+    ```bash
+    sudo apt install curl ca-certificates
+    sudo install -d /usr/share/postgresql-common/pgdg
+    sudo curl -o /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc --fail https://www.postgresql.org/media/keys/ACCC4CF8.asc
+    . /etc/os-release
+    sudo tee /etc/apt/sources.list.d/pgdg.sources > /dev/null <<EOF
+    Types: deb
+    URIs: https://apt.postgresql.org/pub/repos/apt
+    Suites: ${VERSION_CODENAME}-pgdg
+    Architectures: $(dpkg --print-architecture)
+    Components: main
+    Signed-By: /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc
+    EOF
+    sudo apt update
+    PG_MAJOR=18
+    sudo apt install "postgresql-client-${PG_MAJOR}"
+    pg_dump --version
+    ```
+
+    运行备份前，请检查 `pg_dump --version` 是否显示匹配的客户端版本。安装脚本仅显示此警告，不会配置 PGDG 或安装更新的客户端。
+
 #### 安装后
 
 根据您在安装过程中的选择：
@@ -2535,12 +2578,8 @@ sudo ./install-bunkerweb.sh --manager --instances "192.168.1.10 192.168.1.11" --
     sudo apt install -y --allow-downgrades nginx=1.30.6-1~$(lsb_release -cs)
     ```
 
-    !!! warning "测试/开发版本"
-        如果您使用 `testing` 或 `dev` 版本，您需要在安装 BunkerWeb 之前将 `force-bad-version` 指令添加到您的 `/etc/dpkg/dpkg.cfg` 文件中。
-
-        ```shell
-        echo "force-bad-version" | sudo tee -a /etc/dpkg/dpkg.cfg
-        ```
+    !!! info "带版本号的 Linux 软件包"
+        仅发布带版本号的 Linux 软件包。dev、testing、*-dev 和 *-testing 软件包渠道已停止发布。请选择已发布的版本，或使用 Docker testing 标签进行开发和测试。无需修改 dpkg 配置。
 
     !!! example "禁用设置向导"
         如果您不希望在安装 BunkerWeb 时使用 Web UI 的设置向导，请导出以下变量：
@@ -2583,12 +2622,8 @@ sudo ./install-bunkerweb.sh --manager --instances "192.168.1.10 192.168.1.11" --
     sudo apt install -y --allow-downgrades nginx=1.30.6-1~$(lsb_release -cs)
     ```
 
-    !!! warning "测试/开发版本"
-        如果您使用 `testing` 或 `dev` 版本，您需要在安装 BunkerWeb 之前将 `force-bad-version` 指令添加到您的 `/etc/dpkg/dpkg.cfg` 文件中。
-
-        ```shell
-        echo "force-bad-version" | sudo tee -a /etc/dpkg/dpkg.cfg
-        ```
+    !!! info "带版本号的 Linux 软件包"
+        仅发布带版本号的 Linux 软件包。dev、testing、*-dev 和 *-testing 软件包渠道已停止发布。请选择已发布的版本，或使用 Docker testing 标签进行开发和测试。无需修改 dpkg 配置。
 
     !!! example "禁用设置向导"
         如果您不希望在安装 BunkerWeb 时使用 Web UI 的设置向导，请导出以下变量：
@@ -2613,9 +2648,6 @@ sudo ./install-bunkerweb.sh --manager --instances "192.168.1.10 192.168.1.11" --
 
 === "Fedora"
 
-    !!! warning "Fedora 提供的是 NGINX 1.30.5"
-        Fedora 43 和 44 尚未提供 NGINX 1.30.6，因此 Fedora 的 BunkerWeb 软件包基于 NGINX 1.30.5 构建并依赖 `nginx-1.30.5`。请在 Fedora 上安装该版本；Fedora 发布 1.30.6 后，依赖将随之更新。
-
     !!! info "Fedora 更新测试"
         如果您在稳定仓库中找不到列出的 NGINX 版本，可以启用 `updates-testing` 仓库：
 
@@ -2623,10 +2655,10 @@ sudo ./install-bunkerweb.sh --manager --instances "192.168.1.10 192.168.1.11" --
         sudo dnf config-manager setopt updates-testing.enabled=1
         ```
 
-    Fedora 已经提供了我们支持的 NGINX 1.30.5
+    Fedora 已经提供了我们支持的 NGINX 1.30.6
 
     ```shell
-    sudo dnf install -y --allowerasing nginx-1.30.5
+    sudo dnf install -y --allowerasing nginx-1.30.6
     ```
 
     !!! example "禁用设置向导"
@@ -2714,6 +2746,8 @@ MY_SETTING_2=value2
 安装后，BunkerWeb 带有三个服务 `bunkerweb`、`bunkerweb-scheduler` 和 `bunkerweb-ui`，您可以使用 `systemctl` 来管理它们。
 
 如果您手动编辑了 BunkerWeb 的配置（使用 `/etc/bunkerweb/variables.env`），重启 `bunkerweb-scheduler` 服务就足以生成并重新加载配置，而不会有任何停机时间。但在某些情况下（例如更改监听端口），您可能需要重启 `bunkerweb` 服务。
+
+`KEEP_CONFIG_ON_RESTART` 由 `bunkerweb` 服务从其环境变量或 `/etc/bunkerweb/variables.env` 读取，绝不从数据库读取。设置为 `yes`（默认值）时，重启会保留之前生成的配置，实例在向调度器请求最新配置期间继续执行其访问控制。如果保留的配置无法启动，服务会回退到加载配置（仅一次），直到调度器推送最新配置。被中断的配置安装（断电、`kill -9`、内存不足）不会被保留：下次启动时会改为渲染加载配置。设置为 `no` 则每次重启都渲染加载配置。
 
 ### 高可用性
 
@@ -3150,6 +3184,28 @@ autoconf 服务充当一个 [Ingress 控制器](https://kubernetes.io/docs/conce
     BunkerWeb 对 `GRPCRoute` 的支持目前为 **实验性**。
 
     如果你的 Service 名称不是 `bunkerweb`，请设置 `BUNKERWEB_SERVICE_NAME` 以便状态补丁读取正确的 Service。
+
+### Gateway API RBAC 和状态 {#gateway-api-rbac-status}
+
+autoconf 服务账户需要以下附加 ClusterRole 规则。`GatewayClass` 及其状态属于集群范围。请保留对 Gateway 和五种路由资源现有的 `get`/`list`/`watch` 权限；路由冲突恢复还需要对普通路由资源执行 `get`。请检查部署中的这些权限；Helm chart 的更新在 `bunkerweb-helm` 仓库中单独跟踪。
+
+```yaml
+- apiGroups: ["gateway.networking.k8s.io"]
+  resources: ["gatewayclasses"]
+  verbs: ["get", "list", "watch"]
+- apiGroups: ["gateway.networking.k8s.io"]
+  resources:
+    - gatewayclasses/status
+    - gateways/status
+    - httproutes/status
+    - grpcroutes/status
+    - tlsroutes/status
+    - tcproutes/status
+    - udproutes/status
+  verbs: ["patch"]
+```
+
+仅为归属本控制器的资源发布状态：`GatewayClass.spec.controllerName` 必须与 `KUBERNETES_GATEWAY_CONTROLLER` 相同；设置 `KUBERNETES_GATEWAY_CLASS` 后会进一步限制选择范围。命名空间和忽略注解过滤器仍然生效。如果状态补丁被拒绝，autoconf 会记录警告，并继续应用配置。必需的类查询失败时，仍会停止协调并保留上次应用的配置。autoconf 在启动时检测状态可用性和读取权限；更改 RBAC 后，请重启 autoconf 以启用状态发布。
 
 !!! info "ConfigMap 同步"
     - Ingress 控制器仅管理带有 `bunkerweb.io/CONFIG_TYPE` 注解的 ConfigMap。

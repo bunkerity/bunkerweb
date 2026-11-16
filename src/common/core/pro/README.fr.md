@@ -18,7 +18,7 @@ Comment ça marche :
 
 ### Comment l’utiliser
 
-1. Obtenir une licence : achetez une licence Pro depuis le [BunkerWeb Panel](https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc).
+1. **Obtenir une clé de licence :** démarrez un essai gratuit de 30 jours ou achetez une licence Pro depuis le [BunkerWeb Panel](https://panel.bunkerweb.io/store/bunkerweb-pro?language=french&utm_campaign=self&utm_source=doc) ([guide pas à pas](index.md#pro-version)).
 2. Configurer la licence : définissez `PRO_LICENSE_KEY` avec votre clé.
 3. Laissez BunkerWeb faire le reste : les plugins Pro sont téléchargés et activés automatiquement.
 4. Surveiller le statut Pro : vérifiez les indicateurs de santé dans l’interface [web UI](web-ui.md).
@@ -55,4 +55,4 @@ R : Oui. Deux offres existent :
 - BunkerWeb PRO Standard : accès complet, sans support technique.
 - BunkerWeb PRO Enterprise : accès complet, avec support dédié.
 
-Essayez gratuitement BunkerWeb PRO pendant 30 jours depuis le [Panel BunkerWeb](https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc).
+Essayez gratuitement BunkerWeb PRO pendant 30 jours depuis le [Panel BunkerWeb](https://panel.bunkerweb.io/store/bunkerweb-pro?language=french&utm_campaign=self&utm_source=doc) : commandez une offre, puis gardez **Free 30 Days Trial** comme mode de paiement lors de la commande ([guide pas à pas](index.md#pro-version)).

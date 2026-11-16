@@ -7,7 +7,7 @@ BunkerWeb 由 [Bunkerity](https://www.bunkerity.com/?utm_campaign=self&utm_sourc
 ## 你们有专业版吗？
 
 !!! tip "BunkerWeb PRO 免费试用"
-    通过 [BunkerWeb 面板](https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc)开始 BunkerWeb PRO 的 30 天免费试用。
+    通过 [BunkerWeb 面板](https://panel.bunkerweb.io/store/bunkerweb-pro?language=chinese&utm_campaign=self&utm_source=doc)开始 BunkerWeb PRO 的 30 天免费试用：订购一个方案，然后在结账时保持选中 **Free 30 Days Trial** 作为付款方式（[分步指南](index.md#pro-version)）。
 
 是的，我们提供名为“BunkerWeb PRO”的专业版本，其中包含额外的功能和（可选的）技术支持。
 

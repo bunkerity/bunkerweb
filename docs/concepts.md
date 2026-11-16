@@ -47,7 +47,7 @@ If you think a new integration should be supported, do not hesitate to open a [n
 ## Settings
 
 !!! tip "BunkerWeb PRO settings"
-    Some plugins are reserved for the **PRO version**. Start a 30-day BunkerWeb PRO free trial from the [BunkerWeb panel](https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc).
+    Some plugins are reserved for the **PRO version**. Start a 30-day BunkerWeb PRO free trial from the [BunkerWeb panel](https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc): order a plan, then keep **Free 30 Days Trial** as the payment method at checkout ([step-by-step guide](index.md#pro-version)).
 
 Once BunkerWeb is integrated into your environment, you will need to configure it to serve and protect your web applications.
 
@@ -192,7 +192,7 @@ By specifying the appropriate database URI in the configuration, you can seamles
 
 !!! info "Notes"
     - **PostgreSQL**: the container images ship the `v18` client, taken from the [PostgreSQL project's own apt repository](https://www.postgresql.org/download/linux/) rather than from Debian (which stops at `v17`). `pg_dump` refuses a server newer than itself but handles older ones, so the same client backs up `v13` through `v18` servers — no action is needed for an existing `v16` or `v17` deployment. **This applies to the 64-bit images only** (`linux/amd64`, `linux/arm64`): the PostgreSQL project publishes no 32-bit packages, so the `linux/386` and `linux/arm/v7` images keep Debian's `v17` client and cannot back up a `v18` server. Use a 64-bit deployment if you run PostgreSQL 18.
-    - **Linux**: Support depends on your distribution's packages. The `.deb` packages ask for `postgresql-client-18` and fall back to your distribution's `postgresql-client` when the PostgreSQL repository is not configured — Debian and Ubuntu ship `v14` to `v17` depending on the release, and backing up a `v18` server requires adding the [PostgreSQL apt repository](https://www.postgresql.org/download/linux/) and installing `postgresql-client-18` on the host. Fedora already ships a `v18` client; on RHEL the client is not installed by the package at all and must be added by hand (see the [PostgreSQL yum repository](https://www.postgresql.org/download/linux/redhat/)). The same applies to the MariaDB/MySQL clients.
+    - **Linux**: Support depends on your distribution's packages. The `.deb` packages ask for `postgresql-client-18` and fall back to your distribution's `postgresql-client` when the PostgreSQL repository is not configured — Debian and Ubuntu ship `v14` to `v17` depending on the release, and backing up a `v18` server requires adding the [PostgreSQL apt repository](https://www.postgresql.org/download/linux/) and installing `postgresql-client-18` on the host. Fedora already ships a `v18` client; on RHEL the client is not installed by the package at all and must be added by hand (see the [PostgreSQL yum repository](https://www.postgresql.org/download/linux/redhat/)). The same applies to the MariaDB/MySQL clients. If the PostgreSQL server major is newer than the Linux `pg_dump` client, backups fail with `server version mismatch`; install a matching client from the [PGDG repository](integrations.md#debian-ubuntu-postgresql-backups).
     - **SQLite**: Ships with the packages and is ready to use.
 
 Helpful external resources for installing database clients:

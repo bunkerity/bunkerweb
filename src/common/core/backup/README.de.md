@@ -57,6 +57,8 @@ bwcli plugin backup restore /pfad/zum/backup/backup-sqlite-2023-08-15_12-34-56.z
 
     Ein Backup kann nur in die Datenbank-Engine zurückgespielt werden, aus der es stammt — die Engine ist Teil des Dateinamens (`backup-mariadb-…`), und eine Wiederherstellung in eine andere wird abgelehnt, bevor irgendetwas angefasst wird. Wenn Sie zwischen Engines migriert sind, bleiben beide Backup-Sätze im Verzeichnis: `restore` ohne Argument nimmt die neueste Datei jeder beliebigen Engine, geben Sie den Pfad also ausdrücklich an, um ein älteres Backup Ihrer aktuellen Engine wiederherzustellen.
 
+    Vor dem Löschen einer Tabelle prüft die Wiederherstellung die Engine im Dateinamen (MariaDB und MySQL gelten als verschieden), die erwartete SQL-Datei und die Integrität aller Archivdateien. Fehlende, umbenannte oder beschädigte Archive werden ohne Datenbankänderung abgelehnt.
+
 ### Kontrolliertes Downgrade
 
 Auf eine ältere BunkerWeb-Version zurückzugehen ist **nicht** die Umkehrung eines Upgrades. Manche

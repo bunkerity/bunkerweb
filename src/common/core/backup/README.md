@@ -57,6 +57,8 @@ bwcli plugin backup restore /path/to/backup/backup-sqlite-2023-08-15_12-34-56.zi
 
     A backup can only be restored into the same database engine it was taken from — the engine is part of the file name (`backup-mariadb-…`), and a restore into a different one is refused before anything is touched. If you migrated between engines, both sets of backups stay in the directory: `restore` without an argument takes the most recent file of any engine, so pass the path explicitly to restore an older backup of your current one.
 
+    Before clearing any table, restore checks the engine tag (MariaDB and MySQL are distinct), the expected SQL member and the integrity of every archive member. Missing, renamed or damaged archives are refused without changing the database.
+
 ### Controlled Downgrade
 
 Going back to an older BunkerWeb release is **not** the reverse of an upgrade. Some 1.7 tables have

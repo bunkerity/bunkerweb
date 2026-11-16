@@ -7,7 +7,7 @@
 
 !!! info "哪些 1.6 数据库可以升级"
 
-    由 1.6.16、其任一候选版本（1.6.16~rc1 至 1.6.16~rc4）或 1.6.17~rc1 写入的数据库，可以像其他 1.6 数据库一样升级到 1.7：迁移链包含上述每一个修订版本，迁移会在首次启动时运行。升级的稳定起点版本为 1.6.16。
+    由 1.6.16、其任一候选版本（1.6.16~rc1 至 1.6.16~rc4）、1.6.17~rc1、1.6.17~rc2、1.6.17 或 1.6.18~rc1 至 1.6.18~rc3 写入的数据库，可以像其他 1.6 数据库一样升级到 1.7：迁移链包含上述每一个修订版本，迁移会在首次启动时运行。可升级的最新稳定版本为 1.6.17，最新受支持的预发布版本为 1.6.18~rc3。
 
 ### 重大变更 {#breaking-changes}
 
@@ -516,7 +516,7 @@ Encrypt 状态以及备份归档在两个版本之间保持不变。需要 1.7 �
             5.  移除软件包锁定
                 *   临时移除 `bunkerweb` 和 `nginx` 上的 `apt-mark hold` / `dnf versionlock`，以便可以安装目标版本。
             6.  执行升级
-                *   安装新的 BunkerWeb 软件包版本。只有当目标 BunkerWeb 固定了不同的 NGINX 版本时才会重新安装 NGINX：1.6.13 和 1.6.14 固定 NGINX 1.30.4，1.6.15 和 1.6.16 固定 1.30.5，而 1.7.0 要求 1.30.6（Fedora 43/44 上为 1.30.5）。因此，从这些版本升级时会提升 NGINX 并重启它，但从 Fedora 43/44 上的 1.6.15 或 1.6.16 升级时，NGINX 保持 1.30.5 不变。
+                *   安装新的 BunkerWeb 软件包版本。只有当目标 BunkerWeb 固定了不同的 NGINX 版本时才会重新安装 NGINX：1.6.13 和 1.6.14 固定 NGINX 1.30.4，1.6.15 和 1.6.16 固定 1.30.5，而 1.7.0 要求 1.30.6。因此，从这些版本升级时会提升 NGINX 并重启它。
                 *   重新应用锁定/版本锁定以冻结升级后的版本。
             7.  完成与状态
                 *   显示核心服务的 systemd 状态和后续步骤。
@@ -1005,6 +1005,10 @@ Encrypt 状态以及备份归档在两个版本之间保持不变。需要 1.7 �
 
 我们尽力不更改默认值，但我们添加了许多其他设置。强烈建议阅读文档的[安全调整](advanced.md#security-tuning)和[设置](features.md)部分。
 
+!!! warning "`MODSECURITY_CRS_PLUGIN_URLS` 已重命名为 `MODSECURITY_CRS_PLUGINS`"
+
+    如果您设置了 `MODSECURITY_CRS_PLUGIN_URLS`，并在 1.6.18 之前于 PostgreSQL、MariaDB 或 MySQL 上升级到 1.6，则已存储的值会丢失。请检查 `MODSECURITY_CRS_PLUGINS`，如果为空，请重新设置。从 1.6.18 起，升级时会保留这些值。
+
 #### 模板
 
 我们添加了一个名为**模板**的新功能。模板提供了一种结构化和标准化的方法来定义设置和自定义配置，有关更多信息，请查看[概念/模板](concepts.md#templates)部分。
@@ -1443,3 +1447,30 @@ Encrypt 状态以及备份归档在两个版本之间保持不变。需要 1.7 �
 
     8.  **降级 BunkerWeb**。
         -   按照[Linux 集成页面](integrations.md#linux)中升级 BunkerWeb 的相同步骤，将 BunkerWeb 降级到以前的版本。
+
+## 验证发布版本
+
+带版本号的 1.7 发布提供无密钥的 GitHub 构建来源证明，涵盖 Docker Hub 和 GHCR 的镜像索引、packagecloud 的 Linux 软件包，以及 GitHub 发布附带的文档 PDF、安装脚本及其校验和。浮动 Docker 标签不保证具有发布来源证明。验证镜像前，请先登录对应的镜像仓库。
+
+使用 GitHub CLI，将下载文件或镜像索引摘要与预期的源标签和提交进行核验。镜像的签名工作流为 push-docker.yml，软件包为 push-packagecloud.yml，GitHub 发布文件为 release.yml。请验证实际部署的摘要；仅凭文件名和校验和无法证明来源。
+
+以下命令仅为示例：使用前请替换版本、摘要、文件名和源提交。
+
+```bash
+gh attestation verify 'oci://docker.io/bunkerity/bunkerweb@sha256:<index-digest>' \
+  --repo bunkerity/bunkerweb \
+  --signer-workflow bunkerity/bunkerweb/.github/workflows/push-docker.yml \
+  --source-ref refs/tags/v1.7.1 --source-digest '<source-commit>'
+
+gh attestation verify './bunkerweb_1.7.1_amd64.deb' \
+  --repo bunkerity/bunkerweb \
+  --signer-workflow bunkerity/bunkerweb/.github/workflows/push-packagecloud.yml \
+  --source-ref refs/tags/v1.7.1 --source-digest '<source-commit>'
+
+gh attestation verify './install-bunkerweb.sh' \
+  --repo bunkerity/bunkerweb \
+  --signer-workflow bunkerity/bunkerweb/.github/workflows/release.yml \
+  --source-ref refs/tags/v1.7.1 --source-digest '<source-commit>'
+```
+
+对于 GHCR，仅将 OCI 仓库改为 `ghcr.io`；保留 `push-docker.yml`。RPM 文件使用相同的软件包签名工作流。PDF 和安装脚本校验和使用发布文件的签名工作流。

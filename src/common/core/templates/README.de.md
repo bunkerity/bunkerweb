@@ -1,5 +1,7 @@
 Das Templates-Plugin installiert wiederverwendbare Dienstvorlagen — ein Bündel aus Settings, benutzerdefinierten Konfigurationen und Standardwerten, das sich in einem Schritt auf einen Dienst anwenden lässt. Vorlagen werden mit BunkerWeb ausgeliefert, stammen aus dem Community-Katalog, oder lassen sich über die Web-UI und die API exportieren und importieren; das einzige Setting dieses Plugins lädt Vorlagen beim Start direkt von einer URL herunter.
 
+Die Vorlage `low` setzt `CROSS_ORIGIN_EMBEDDER_POLICY` auf `unsafe-none`, um ursprungsübergreifende Ressourcen ohne ausdrückliche Zustimmung zu erlauben.
+
 ### Konfigurationseinstellungen
 
 | Setting                  | Standard | Kontext | Mehrfach | Beschreibung                                                                                                                                                                                                                                                                                       |

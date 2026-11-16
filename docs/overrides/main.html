@@ -1,4 +1,38 @@
 {% extends "base.html" %}
+{% set trial_translations = {
+    "en": {
+        "trial_before": "Start a 30-day BunkerWeb PRO free trial from the",
+        "trial_after": ": order a plan, then keep “Free 30 Days Trial” as the payment method at checkout.",
+        "trial_guide": "step-by-step guide",
+        "panel_language": ""
+    },
+    "fr": {
+        "trial_before": "Profitez d’un essai gratuit de 30 jours de BunkerWeb PRO depuis le",
+        "trial_after": " : commandez une offre, puis gardez « Free 30 Days Trial » comme mode de paiement lors de la commande.",
+        "trial_guide": "guide pas à pas",
+        "panel_language": "french"
+    },
+    "de": {
+        "trial_before": "Starten Sie über das",
+        "trial_after": " eine kostenlose 30-tägige Testversion von BunkerWeb PRO: Bestellen Sie einen Tarif und lassen Sie beim Bestellabschluss „Free 30 Days Trial“ als Zahlungsmethode ausgewählt.",
+        "trial_guide": "Schritt-für-Schritt-Anleitung",
+        "panel_language": "german"
+    },
+    "es": {
+        "trial_before": "Inicia una prueba gratuita de 30 días de BunkerWeb PRO desde el",
+        "trial_after": ": pide un plan y mantén “Free 30 Days Trial” como método de pago al finalizar la compra.",
+        "trial_guide": "guía paso a paso",
+        "panel_language": "spanish"
+    },
+    "zh": {
+        "trial_before": "通过",
+        "trial_after": "开启 BunkerWeb PRO 30 天免费试用：订购一个方案，然后在结账时保持选中“Free 30 Days Trial”作为付款方式。",
+        "trial_guide": "分步指南",
+        "panel_language": "chinese"
+    }
+} %}
+{% set trial = trial_translations.get(config.theme.language, trial_translations["en"]) %}
+{% set trial_store_url = "https://panel.bunkerweb.io/store/bunkerweb-pro?" ~ ("language=" ~ trial.panel_language ~ "&" if trial.panel_language else "") ~ "utm_campaign=self&utm_source=doc" %}
 {% block outdated %}
     You're not viewing the
     documentation of the latest version.
@@ -52,7 +86,7 @@
     <script defer>
       window.addEventListener('DOMContentLoaded', () => {
         const bannerEl = document.querySelector('aside.md-banner');
-        let defaultContent = [{ "content" : '<p>Start a 30-day BunkerWeb PRO free trial from the <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc">BunkerWeb Panel</a>.</p>'},
+        let defaultContent = [{ "content" : {{ ('<p>'|safe ~ trial.trial_before|e ~ ' <a style="text-decoration:underline; color :  white;" href="'|safe ~ trial_store_url|e ~ '">BunkerWeb Panel</a>'|safe ~ trial.trial_after|e ~ ' (<a style="text-decoration:underline; color :  white;" href="'|safe ~ ((nav.homepage.url|url) ~ '#pro-version')|e ~ '">'|safe ~ trial.trial_guide|e ~ '</a>)</p>'|safe)|tojson }} },
         { "content" : '<p>Need premium support or tailored consulting around BunkerWeb ? Check out our <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc#services">professional services</a>.</p>'},
         { "content" : '<p>Be part of the Bunker community by joining the <a style="text-decoration:underline; color: white;" href="https://discord.bunkerweb.io">Discord chat</a> and following us on <a style="text-decoration:underline; color: white;" href="https://www.linkedin.com/company/bunkerity/">LinkedIn</a>.</p>'}
         ]

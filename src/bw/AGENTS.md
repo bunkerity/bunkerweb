@@ -124,7 +124,7 @@ Lua style is configured at the repo root: `.luacheckrc` (declared globals and ig
 ## Runtime Gotchas
 
 - `utils.is_cosocket_available()` is the authoritative cosocket check; do not infer availability from a phase list.
-- `KEEP_CONFIG_ON_RESTART=yes` skips temporary-config regeneration and preserves the existing NGINX config across restarts.
+- `KEEP_CONFIG_ON_RESTART=yes` preserves the NGINX config across restarts; a kept config that fails to start falls back once to the loading config. An interrupted install (`/etc/nginx/.bw-install-incomplete`) is never kept. A stop request during startup never starts nginx again. All-in-one HUP waits up to 300 s for an install in progress.
 - Logs are redirected to `/proc/1/fd/{1,2}` (container stdout/stderr).
 - The entrypoint traps SIGTERM (stop) and SIGHUP (reload) and waits on the NGINX process.
 - Container layout: code under `/usr/share/bunkerweb/` (`lua/`, `core/`, `confs/`, `gen/`, `helpers/`, `utils/`), persistent volume at `/data/` (cache, lib, www, configs, plugins, pro), generated config in `/etc/nginx/`.

@@ -52,6 +52,7 @@ Siga estos pasos para configurar y usar la función de Cabeceras:
         - Pruebe el CSP en modo `Report-Only` antes de aplicarlo para evitar romper la funcionalidad.
         - En modo `Report-Only`, una cabecera `Content-Security-Policy` o `Content-Security-Policy-Report-Only` enviada por el origen se conserva de forma predeterminada (`KEEP_UPSTREAM_HEADERS`); elimine el nombre de la cabecera de ese ajuste para que la propia política de BunkerWeb tenga prioridad.
         - La `PERMISSIONS_POLICY` predeterminada también bloquea los client hints (directivas `ch-*`); si un servicio depende de `Accept-CH` (por ejemplo, imágenes responsivas basadas en client hints o la detección del modo oscuro mediante `Sec-CH-Prefers-Color-Scheme`), anule `PERMISSIONS_POLICY` para volver a permitir las funciones `ch-*` necesarias (por ejemplo, `ch-dpr=(self)`).
+        - La `PERMISSIONS_POLICY` predeterminada deniega `unbounded-element`.
 
 === "Configuración de Cookies"
 

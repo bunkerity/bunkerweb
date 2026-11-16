@@ -26,7 +26,7 @@ Führen Sie die folgenden Schritte aus, um die CORS-Funktion zu konfigurieren un
 | `CORS_ALLOW_ORIGIN`            | `self`                                                                               | multisite | nein     | **Erlaubte Ursprünge:** PCRE-regulärer Ausdruck für erlaubte Ursprünge; `*` für jeden Ursprung, `self` nur für denselben Ursprung.        |
 | `CORS_ALLOW_METHODS`           | `GET, POST, OPTIONS`                                                                 | multisite | nein     | **Erlaubte Methoden:** HTTP-Methoden, die bei Cross-Origin-Anfragen verwendet werden können.                                              |
 | `CORS_ALLOW_HEADERS`           | `DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range` | multisite | nein     | **Erlaubte Header:** HTTP-Header, die bei Cross-Origin-Anfragen verwendet werden können.                                                  |
-| `CORS_ALLOW_CREDENTIALS`       | `no`                                                                                 | multisite | nein     | **Anmeldeinformationen erlauben:** Auf `yes` setzen, um Anmeldeinformationen (Cookies, HTTP-Auth) in CORS-Anfragen zu erlauben.           |
+| `CORS_ALLOW_CREDENTIALS`       | `no`                                                                                 | multisite | nein     | **Anmeldeinformationen erlauben:** Auf `yes` setzen, um Anmeldeinformationen (Cookies, HTTP-Auth) in CORS-Anfragen zu erlauben. Der Header wird bei Preflight- und regulären Antworten gesendet, nur an einen erlaubten Ursprung und nie mit `CORS_ALLOW_ORIGIN` auf `*`.           |
 | `CORS_EXPOSE_HEADERS`          | `Content-Length,Content-Range`                                                       | multisite | nein     | **Verfügbar gemachte Header:** HTTP-Header, auf die Browser von Cross-Origin-Antworten zugreifen dürfen.                                  |
 | `CROSS_ORIGIN_OPENER_POLICY`   | `same-origin`                                                                        | multisite | nein     | **Cross-Origin-Opener-Policy:** Steuert die Kommunikation zwischen Browser-Kontexten.                                                     |
 | `CROSS_ORIGIN_EMBEDDER_POLICY` | `require-corp`                                                                       | multisite | nein     | **Cross-Origin-Embedder-Policy:** Steuert, ob ein Dokument Ressourcen von anderen Ursprüngen laden kann.                                  |
@@ -50,6 +50,8 @@ Hier sind Beispiele für mögliche Werte der Einstellung `CORS_ALLOW_ORIGIN` und
 - **`^https://.+\.example\.com$`**: Erlaubt Anfragen von jeder Subdomain, die auf `.example.com` endet.
 - **`^https://(www\.example1\.com|www\.example2\.com)$`**: Erlaubt Anfragen entweder von `https://www.example1.com` oder `https://www.example2.com`.
 - **`^https?://www\.example\.com$`**: Erlaubt Anfragen sowohl von `https://www.example.com` als auch von `http://www.example.com`.
+
+Verankern Sie im Regex-Modus das Muster mit `^` und `$`, damit es den gesamten Ursprung abgleicht; die Antwort gibt den `Origin` der Anfrage nur dann in `Access-Control-Allow-Origin` zurück, wenn er passt, und ein nicht passender Ursprung erhält keinen `Access-Control-Allow-Origin`-Header. Bei `self` muss der `Origin` exakt dem eigenen Ursprung des Dienstes entsprechen; er wird nicht als Muster behandelt.
 
 === "Grundlegende Konfiguration"
 

@@ -825,6 +825,18 @@ In case you forgot your UI credentials or are experiencing 2FA issues, you can c
     - Optionally download logs: the exported logs are automatically anonymized (IPv4 and IPv6 addresses, domains, tokens, passwords and the credentials inside URLs are masked).
     - Administrators only: the **Web UI Diagnostics** card downloads a bundle with the recent Web UI logs, the plugin versions as the database, the disk and the running Web UI see them, the environment and the latest errors. The same anonymization applies; the license key and the database URI are never collected.
 
+=== "Export a support bundle with bwcli"
+
+    Run `bwcli support` where the scheduler runs (scheduler container, all-in-one image or Linux host) to build one archive for BunkerWeb support: version and environment, configuration, plugins, jobs, instance health, custom config metadata, logs and the generated NGINX configuration. On a BunkerWeb instance, the autoconf controller or a Linux worker host the command refuses and points to the scheduler.
+
+    ```shell
+    docker exec <scheduler container> bwcli support -o - > bundle.zip
+    ```
+
+    - Without `-o`, the archive `bunkerweb-support-<UTC timestamp>.zip` is written in the current directory. `-o -` writes it to stdout.
+    - Credentials are always redacted. IP addresses and service domains are anonymized: add `--no-anonymize` to keep them.
+    - A section that cannot be read is listed in `manifest.json` and the rest of the bundle is still written. Where the logs go to stdout, the manifest gives the command to collect them (`docker logs`, `kubectl logs`, `journalctl`).
+
 ### Upload plugin
 
 It may not be possible to upload a plugin from the UI in certain situations:

@@ -39,7 +39,7 @@ BunkerWeb 允许您指定某些用户、IP 或请求应完全绕过 antibot 挑�
 
 | 设置                          | 默认值 | 上下文    | 多个 | 描述                                                                                                               |
 | ----------------------------- | ------ | --------- | ---- | ------------------------------------------------------------------------------------------------------------------ |
-| `ANTIBOT_IGNORE_URI`          |        | multisite | 否   | **排除的 URL：** 应绕过挑战的以空格分隔的 URI 正则表达式模式列表。模式会同时匹配路径和带查询字符串的完整请求 URI。 |
+| `ANTIBOT_IGNORE_URI`          |        | multisite | 否   | **排除的 URL：** 应绕过挑战的以空格分隔的 URI 正则表达式模式列表。模式会匹配规范化后的路径，既可单独匹配，也可匹配路径后接 `?` 和查询字符串的形式。 |
 | `ANTIBOT_IGNORE_IP`           |        | multisite | 否   | **排除的 IP：** 应绕过挑战的以空格分隔的 IP 地址或 CIDR 范围列表。                                                 |
 | `ANTIBOT_IGNORE_RDNS`         |        | multisite | 否   | **排除的反向 DNS：** 应绕过挑战的以空格分隔的反向 DNS 后缀列表。                                                   |
 | `ANTIBOT_RDNS_GLOBAL`         | `yes`  | multisite | 否   | **仅限全局 IP：** 如果设置为 `yes`，则仅对公共 IP 地址执行反向 DNS 检查。                                          |
@@ -269,6 +269,7 @@ BunkerWeb 允许您指定某些用户、IP 或请求应完全绕过 antibot 挑�
         - 在 Cap.js 站点密钥上配置 CORS，以允许受保护的来源。
         - 将 `ANTIBOT_CAPJS_FRONTEND_URL` 和 `ANTIBOT_CAPJS_BACKEND_URL` 都设置为仅 origin：scheme、host 和可选端口，不包含路径。
         - 请使用 Cap.js 小组件 **0.1.48 或更高版本**。BunkerWeb 下发严格的基于 nonce 的 CSP；较旧的小组件会破坏 instrumentation 挑战，因为隔离 `srcdoc` iframe 内注入的内联 `<script>` 不会传递 nonce。如果您自托管 `tiago2/cap`，请固定到较新的标签（如 `tiago2/cap:3.1.2` 或更高），或将 `WIDGET_VERSION` 设置为 `0.1.48` 或更高。
+        - 在严格的 CSP 下自行托管 `hashwx.wasm` 需要 Cap.js 小组件 **0.1.58 或更高版本**。
         - Cap.js **instrumentation 挑战**（默认开启）通过 `eval` 执行服务器提供的 JavaScript，nonce 无法对其授权。BunkerWeb 在同源隔离 iframe 中运行小组件，由该 iframe 携带所需的 `'unsafe-eval'`，因此主挑战页面保持严格的、无 `eval` 的 CSP——无需任何配置。
 
     有关其他配置选项，请参阅[通用设置](#通用设置)。

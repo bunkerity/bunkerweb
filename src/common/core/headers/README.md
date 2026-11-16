@@ -52,6 +52,7 @@ Follow these steps to configure and use the Headers feature:
         - Test CSP in `Report-Only` mode before enforcing it to avoid breaking functionality.
         - In `Report-Only` mode, an upstream `Content-Security-Policy` or `Content-Security-Policy-Report-Only` header is preserved by default (`KEEP_UPSTREAM_HEADERS`); remove the header name from that setting for BunkerWeb's own policy to take precedence.
         - The default `PERMISSIONS_POLICY` also blocks client hints (`ch-*` directives); if a service relies on `Accept-CH` (for example client-hint responsive images or `Sec-CH-Prefers-Color-Scheme` dark-mode detection), override `PERMISSIONS_POLICY` to re-allow the needed `ch-*` features (for example `ch-dpr=(self)`).
+        - The default `PERMISSIONS_POLICY` denies `unbounded-element`.
 
 === "Cookie Settings"
 

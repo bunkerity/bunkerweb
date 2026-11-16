@@ -260,6 +260,7 @@ UI 需要能够访问 BunkerWeb API；控制平面堆栈还需要调度器、任
     通行密钥是替代登录方式，不是额外关卡。注册后不会要求密码登录再提供通行密钥，因为它没有恢复代码，丢失设备可能永久锁定帐户。密码和 TOTP 保持原有行为；需要强制第二因素时，请使用带恢复代码的 TOTP。
 - 会话：默认空闲时长 12 小时（`SESSION_LIFETIME_HOURS`），每次请求刷新。`SESSION_ABSOLUTE_HOURS`（默认 `168` = 7 天）设定绝对上限——无论是否活跃，超过即强制登出。可选的会话 ID 轮换（`SESSION_ROLLING_HOURS`，默认 `0` = 关闭）按该间隔重新生成会话 ID。会话绑定 IP 与 User-Agent；`CHECK_PRIVATE_IP=no` 仅对私网放宽 IP 检查。`ALWAYS_REMEMBER=yes` 始终启用持久 Cookie。
 - 会话存储：当 `USE_REDIS` 为 `yes` 且 Redis 有响应时，会话保存在 Redis 中，否则保存在本地文件存储中。如果 Web UI 启动后 Redis 停止响应或拒绝写入，受影响的会话会回退到该主机的本地存储，并在 Redis 恢复后回到 Redis，而不是让每个请求一直失败直到 worker 重启。存在多个 Web UI 副本时，其他副本看不到已转移到本地存储的会话，并会要求重新登录。Redis 的静默淘汰不在覆盖范围内。在 Redis 不可用期间被撤销的会话仍保持撤销状态：撤销标记同时保存在本地存储中。在 Web UI 的环境中设置 `UI_USE_REDIS=no`（Linux 安装为 `/etc/bunkerweb/ui.env`），即可仅在该实例上让 Web UI 的会话不使用 Redis；`USE_REDIS` 仍然适用于其他所有组件。默认 `yes`。
+- 登录限流：失败的登录（密码、TOTP 验证码或恢复码错误）按客户端 IP 和用户名在数据库中计数，因此所有 worker 和 UI 副本共享同一个计数。在 `LOGIN_WINDOW_MINUTES` 分钟（默认 `15`）内失败 `LOGIN_MAX_ATTEMPTS` 次（默认 `5`），该 IP 或该用户名会被锁定，直到最后一次失败后的 `LOGIN_LOCKOUT_MINUTES` 分钟（默认 `15`）。被锁定的尝试会收到 `429`，附带通用的凭据无效提示和等待时间，且不会校验密码。完整登录成功后会清除该用户名的计数。不存在的用户名也会计数，因此锁定不会泄露账户是否存在；代价是任何人都可以通过对已知用户名反复失败来锁定它。客户端 IP 是通过 `PROXY_NUMBERS` 从 `X-Forwarded-*` 解析出的 IP：如果用户直接访问 UI、前面没有代理，请设置 `PROXY_NUMBERS=0`，否则客户端可以伪造自己的 IP，只有按用户名的限制仍然有效。`LOGIN_THROTTLE=no` 可关闭限流。数据库为只读时无法记录失败，因此不会产生新的锁定。 个人资料页面上的*当前密码*输入（修改密码、管理 2FA 与 passkey、清除其他会话）使用同一组计数并受同一锁定约束，因此被盗的会话无法在那里猜测密码。passkey 或安全密钥属于持有物而非可猜测的密钥：它们既不计数也不被阻止，使用 passkey 登录会清除该用户名的计数。这些设置从 Web UI 自身的环境中读取。限流采用故障关闭策略：如果 Web UI 无法访问 API 的限流端点，它会返回 `503` 且不检查密码，而不是放行未计数的尝试。若被锁定，请等待锁定结束，或在 Web UI 的环境中（Linux 安装为 `/etc/bunkerweb/ui.env`）设置 `LOGIN_THROTTLE=no` 并重启。每次记录新的失败时都会清理旧记录；遗留的记录（例如关闭限流之后）由每日任务 `cleanup-expired-ui-sessions` 在 `DATABASE_MAX_SESSION_AGE_DAYS` 之后删除。
 - 若多级代理附加 `X-Forwarded-*`，请设置 `PROXY_NUMBERS`。
 
 !!! tip "预哈希管理员密码"
@@ -325,6 +326,10 @@ UI 需要能够访问 BunkerWeb API；控制平面堆栈还需要调度器、任
 | `CHECK_PRIVATE_IP`                          | 绑定会话到 IP（`no` 时放宽私网变更）                                              | `yes` 或 `no`                | `yes`          |
 | `UI_USE_REDIS` | 仅在该实例上让 Web UI 会话不使用 Redis（`USE_REDIS` 仍适用于其他所有组件） | `yes` 或 `no` | `yes` |
 | `PROXY_NUMBERS`                             | 信任的 `X-Forwarded-*` 代理层数                                                   | 整数                         | `1`            |
+| `LOGIN_THROTTLE` | 统计失败的登录，并锁定失败过多的 IP 或用户名 | `yes` 或 `no` | `yes` |
+| `LOGIN_MAX_ATTEMPTS` | 窗口内触发锁定 IP 或用户名的失败次数 | 整数 | `5` |
+| `LOGIN_WINDOW_MINUTES` | 统计失败次数的时间窗口 | 整数（分钟） | `15` |
+| `LOGIN_LOCKOUT_MINUTES` | 锁定时长，从最后一次失败起算 | 整数（分钟） | `15` |
 | `UI_WEBAUTHN_RP_ID` | WebAuthn 依赖方 ID，不带协议或端口；默认取唯一非通配 `UI_ALLOWED_HOSTS` 条目 | 域名 | 可推导则使用，否则关闭 |
 | `UI_WEBAUTHN_ORIGINS` | 认证流程接受的精确来源 | 空格或逗号分隔的 URL | `https://<RP ID>` |
 
@@ -618,7 +623,7 @@ Reader 首次访问这四个页面时会各获得一条简短提示；点击**�
 ## 升级到 PRO {#upgrade-to-pro}
 
 !!! tip "BunkerWeb PRO 免费试用"
-    通过 [BunkerWeb 面板](https://panel.bunkerweb.io/store/bunkerweb-pro?language=chinese&utm_campaign=self&utm_source=doc)开始 BunkerWeb PRO 的 30 天免费试用。
+    通过 [BunkerWeb 面板](https://panel.bunkerweb.io/store/bunkerweb-pro?language=chinese&utm_campaign=self&utm_source=doc)开始 BunkerWeb PRO 的 30 天免费试用：订购一个方案，然后在结账时保持选中 **Free 30 Days Trial** 作为付款方式（[分步指南](index.md#pro-version)）。
 
 将 PRO 许可证粘贴到 UI 的 **PRO** 页面（或预先设置 `PRO_LICENSE_KEY` 供向导使用）。升级由 scheduler 在后台下载；应用后在 UI 中查看到期时间和服务上限。
 

@@ -43,7 +43,7 @@ Worker 和任务代理是 1.7 的新组件。API 在 1.6 已经提供，但当�
 ## 设置
 
 !!! tip "BunkerWeb PRO 设置"
-    某些插件是为 **PRO 版本**保留的。通过 [BunkerWeb 面板](https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc)开始 BunkerWeb PRO 的 30 天免费试用。
+    某些插件是为 **PRO 版本**保留的。通过 [BunkerWeb 面板](https://panel.bunkerweb.io/store/bunkerweb-pro?language=chinese&utm_campaign=self&utm_source=doc)开始 BunkerWeb PRO 的 30 天免费试用：订购一个方案，然后在结账时保持选中 **Free 30 Days Trial** 作为付款方式（[分步指南](index.md#pro-version)）。
 
 一旦 BunkerWeb 集成到您的环境中，您将需要配置它来服务和保护您的 Web 应用程序。
 
@@ -188,7 +188,7 @@ BunkerWeb 将其当前配置安全地存储在后端数据库中，该数据库�
 
 !!! info "说明"
     - **PostgreSQL**: 容器镜像内置 `v18` 客户端，来自 [PostgreSQL 项目自己的 apt 仓库](https://www.postgresql.org/download/linux/)，而非 Debian（Debian 仅到 `v17`）。`pg_dump` 拒绝比自身更新的服务端，但可以处理更旧的版本，因此同一个客户端可以备份 `v13` 到 `v18` 的服务端——已有的 `v16` 或 `v17` 部署无需任何改动。**这仅适用于 64 位镜像**（`linux/amd64`、`linux/arm64`）：PostgreSQL 项目不发布 32 位软件包，因此 `linux/386` 与 `linux/arm/v7` 镜像仍使用 Debian 的 `v17` 客户端，无法备份 `v18` 服务端。如果运行 PostgreSQL 18，请使用 64 位部署。
-    - **Linux**: 支持情况取决于您的发行版软件包。`.deb` 软件包请求 `postgresql-client-18`，在未配置 PostgreSQL 仓库时回退到发行版自带的 `postgresql-client`——Debian 与 Ubuntu 依版本提供 `v14` 到 `v17`，备份 `v18` 服务端需要在主机上添加 [PostgreSQL apt 仓库](https://www.postgresql.org/download/linux/)并安装 `postgresql-client-18`。Fedora 已经提供 `v18` 客户端；在 RHEL 上软件包根本不安装该客户端，必须手动添加（参见 [PostgreSQL yum 仓库](https://www.postgresql.org/download/linux/redhat/)）。MariaDB/MySQL 客户端同理。
+    - **Linux**: 支持情况取决于您的发行版软件包。`.deb` 软件包请求 `postgresql-client-18`，在未配置 PostgreSQL 仓库时回退到发行版自带的 `postgresql-client`——Debian 与 Ubuntu 依版本提供 `v14` 到 `v17`，备份 `v18` 服务端需要在主机上添加 [PostgreSQL apt 仓库](https://www.postgresql.org/download/linux/)并安装 `postgresql-client-18`。Fedora 已经提供 `v18` 客户端；在 RHEL 上软件包根本不安装该客户端，必须手动添加（参见 [PostgreSQL yum 仓库](https://www.postgresql.org/download/linux/redhat/)）。MariaDB/MySQL 客户端同理。 如果 PostgreSQL 服务器的主版本比 Linux `pg_dump` 客户端更新，备份会因 `server version mismatch` 而失败；请从 [PGDG 仓库](integrations.md#debian-ubuntu-postgresql-backups)安装匹配的客户端。
     - **SQLite**: 随软件包一起提供，可立即使用。
 
 有助于安装数据库客户端的外部资源：

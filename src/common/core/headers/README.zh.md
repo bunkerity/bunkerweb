@@ -52,6 +52,7 @@
         -   在强制执行 CSP 之前，在 `Report-Only` 模式下进行测试，以避免破坏功能。
         -   在 `Report-Only` 模式下，上游发送的 `Content-Security-Policy` 或 `Content-Security-Policy-Report-Only` 标头默认会被保留（`KEEP_UPSTREAM_HEADERS`）；从该设置中移除相应的标头名称，BunkerWeb 自身的策略才会生效。
         -   默认的 `PERMISSIONS_POLICY` 也会阻止客户端提示（`ch-*` 指令）；如果某个服务依赖 `Accept-CH`（例如基于客户端提示的响应式图片或通过 `Sec-CH-Prefers-Color-Scheme` 进行的深色模式检测），请覆盖 `PERMISSIONS_POLICY` 以重新允许所需的 `ch-*` 功能（例如 `ch-dpr=(self)`）。
+        - 默认的 `PERMISSIONS_POLICY` 禁止 `unbounded-element`。
 
 === "Cookie 设置"
 

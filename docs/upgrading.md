@@ -7,7 +7,7 @@
 
 !!! info "Which 1.6 databases can upgrade"
 
-    A database written by 1.6.16, by any of its release candidates (1.6.16~rc1 to 1.6.16~rc4), or by 1.6.17~rc1, upgrades to 1.7 like any other 1.6 database: the migration chain contains every one of those revisions, and the migrations run at the first start. 1.6.16 is the stable release to upgrade from.
+    A database written by 1.6.16, any of its release candidates (1.6.16~rc1 to 1.6.16~rc4), 1.6.17~rc1, 1.6.17~rc2, 1.6.17, or 1.6.18~rc1 to 1.6.18~rc3 upgrades to 1.7 like any other 1.6 database: the migration chain contains every one of those revisions, and the migrations run at the first start. 1.6.17 is the latest stable release to upgrade from; 1.6.18~rc3 is the latest supported prerelease.
 
 ### Breaking changes
 
@@ -629,7 +629,7 @@ Before starting, stop or firewall anything that writes to the API directly. The 
             5. Package locks removal
                 * Temporarily removes `apt-mark hold` / `dnf versionlock` on `bunkerweb` and `nginx` so the targeted version can be installed.
             6. Upgrade execution
-                * Installs the new BunkerWeb package version. NGINX is reinstalled only when the target BunkerWeb pins a different version: 1.6.13 and 1.6.14 pin NGINX 1.30.4, and 1.6.15 and 1.6.16 pin 1.30.5, while 1.7.0 requires 1.30.6 (1.30.5 on Fedora 43/44). Upgrading from any of those releases therefore bumps NGINX and restarts it, except from 1.6.15 or 1.6.16 on Fedora 43/44, where NGINX stays at 1.30.5.
+                * Installs the new BunkerWeb package version. NGINX is reinstalled only when the target BunkerWeb pins a different version: 1.6.13 and 1.6.14 pin NGINX 1.30.4, and 1.6.15 and 1.6.16 pin 1.30.5, while 1.7.0 requires 1.30.6. Upgrading from any of those releases therefore bumps NGINX and restarts it.
                 * Re‑applies holds/versionlocks to freeze the upgraded versions.
             7. Finalization & status
                 * Displays systemd status for core services and next steps.
@@ -1119,6 +1119,10 @@ While the settings are now declared on the Scheduler container, **you'll still n
 
 We tried our best not to change default value but we have added many other settings. It's highly recommended to read the [security tuning](advanced.md#security-tuning) and [settings](features.md) sections of the documentation.
 
+!!! warning "`MODSECURITY_CRS_PLUGIN_URLS` was renamed to `MODSECURITY_CRS_PLUGINS`"
+
+    If you set `MODSECURITY_CRS_PLUGIN_URLS` and upgraded to 1.6 on PostgreSQL, MariaDB or MySQL before 1.6.18, the stored value was lost. Check `MODSECURITY_CRS_PLUGINS` and set it again if it is empty. From 1.6.18, the values are kept on upgrade.
+
 #### Templates
 
 We added a new feature called **templates**. Templates provide a structured and standardized approach to defining settings and custom configurations, check the [concepts/templates](concepts.md#templates) section for more information.
@@ -1557,3 +1561,30 @@ We added a **namespace** feature to the autoconf integrations. Namespaces allow 
 
     8. **Downgrade BunkerWeb**.
         - Downgrade BunkerWeb to the previous version by following the same steps as when upgrading BunkerWeb in the [integration Linux page](integrations.md#linux)
+
+## Verify a release
+
+Versioned 1.7 releases provide keyless GitHub build-provenance attestations for image indexes on Docker Hub and GHCR, Linux packages on packagecloud, and the documentation PDF, installer and installer checksum attached to the GitHub release. Floating Docker tags have no release-attestation guarantee. Authenticate to the image registry before verification.
+
+Use GitHub CLI to verify the downloaded artifact or image index digest against the expected source tag and commit. The signer is push-docker.yml for images, push-packagecloud.yml for packages, and release.yml for GitHub release assets. Verify the digest you will deploy; package filename and checksum alone do not prove origin.
+
+The commands below are examples: replace the version, digest, filename and source commit before use.
+
+```bash
+gh attestation verify 'oci://docker.io/bunkerity/bunkerweb@sha256:<index-digest>' \
+  --repo bunkerity/bunkerweb \
+  --signer-workflow bunkerity/bunkerweb/.github/workflows/push-docker.yml \
+  --source-ref refs/tags/v1.7.1 --source-digest '<source-commit>'
+
+gh attestation verify './bunkerweb_1.7.1_amd64.deb' \
+  --repo bunkerity/bunkerweb \
+  --signer-workflow bunkerity/bunkerweb/.github/workflows/push-packagecloud.yml \
+  --source-ref refs/tags/v1.7.1 --source-digest '<source-commit>'
+
+gh attestation verify './install-bunkerweb.sh' \
+  --repo bunkerity/bunkerweb \
+  --signer-workflow bunkerity/bunkerweb/.github/workflows/release.yml \
+  --source-ref refs/tags/v1.7.1 --source-digest '<source-commit>'
+```
+
+For GHCR, change only the OCI registry to `ghcr.io`; retain `push-docker.yml`. Use the same package signer for RPM files. Use the asset signer for the PDF and installer checksum.

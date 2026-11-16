@@ -1,5 +1,7 @@
 Le plugin Templates permet d'installer des modèles de service réutilisables — un ensemble de paramètres, de configurations personnalisées et de valeurs par défaut applicables à un service en une seule étape. Les modèles sont fournis avec BunkerWeb, proviennent du catalogue communautaire, ou peuvent être exportés et importés depuis l'interface web et l'API ; le seul paramètre de ce plugin télécharge des modèles directement depuis une URL au démarrage.
 
+Le modèle `low` définit `CROSS_ORIGIN_EMBEDDER_POLICY` sur `unsafe-none` pour autoriser les ressources interorigines sans accord explicite.
+
 ### Paramètres de configuration
 
 | Paramètre                | Défaut | Contexte | Multiple | Description                                                                                                                                                                                                                                                                                             |
