@@ -1,0 +1,108 @@
+tests/unit/gen/test_save_config_pending_migration_regression.py
+  s_87e9ed000d8bea::t_07aee8c779102a 29
+  s_95046ef4eeb2cd::t_b085e25d2b9622 1-28,30-47
+tests/unit/linux/test_postinstall_topology.py
+  s_87e9ed000d8bea::t_b521fab3015561 296
+  s_87e9ed000d8bea::t_8b65d0003f891e 222-277
+  s_87e9ed000d8bea::t_6b50fdbb06870f 25-26
+  s_87e9ed000d8bea::t_3b15c67dfae10d 68-73,75
+  s_87e9ed000d8bea::t_5b9c2b29973f65 111
+  s_d82ef25aa168da::t_6eb20accdf8157 278-279
+tests/unit/backup/test_dump_probe_commands.py
+  s_7a119b78f2f74f::t_c2f16f18874eab 1-113,129-139
+  s_95046ef4eeb2cd::t_4b9736612cd7a9 114-128
+tests/unit/backup/test_mysql8_client_args.py
+  s_7a119b78f2f74f::t_c2f16f18874eab 34
+  s_95046ef4eeb2cd::t_de7a33ebb2ebc5 1-33,35-103
+src/common/core/backup/backup.py
+  s_95046ef4eeb2cd::t_b624219ee71101 3,11,13,15,17-18,24,35-38,103-114,127,129,398,404-418,432-433,441-442,467-473,475,507,529-534,544-563,574-576,705,710
+src/linux/scripts/postinstall.sh
+  s_87e9ed000d8bea::t_fc52b986b77c22 506
+  s_87e9ed000d8bea::t_fae593d5cd59ff 199-235
+src/common/gen/save_config.py
+  s_95046ef4eeb2cd::t_b624219ee71101 7,32-42,129,131,133-135,206
+  s_87e9ed000d8bea::t_10f65b55a2395f 22-23
+  s_87e9ed000d8bea::t_e9ff11b50d4cb6 121-128,130,132
+  s_87e9ed000d8bea::t_e596ae4ea09dfc 43-55
+  s_87e9ed000d8bea::t_9a4df5bc10f41d 11
+tests/unit/gen/test_save_config_old_schema_guard.py
+  s_87e9ed000d8bea::t_6bc500b012b996 24
+  s_87e9ed000d8bea::t_f6e8aaca8986aa 232-233
+  s_87e9ed000d8bea::t_ae114ac2ac96ce 1-23,25-231,234-257
+tests/unit/backup/test_restore_archive_validation.py
+  s_95046ef4eeb2cd::t_625a6724c6f058 15-16,39,44
+  s_95046ef4eeb2cd::t_efdf958e5d1ef8 1-14,17-38,40-43,45-46
+tests/unit/gen/test_save_config_version_stamp.py
+  s_95046ef4eeb2cd::t_de7a33ebb2ebc5 2-98
+  s_d72353fd39298e::t_4b51c2eb423ebf 1
+tests/unit/backup/test_dump_probe_tables.py
+  s_38c3dac08701a7::t_da655bfe1e6410 19-23
+  s_95046ef4eeb2cd::t_efdf958e5d1ef8 1-7,9,12-18,24-42
+  s_38c3dac08701a7::t_deff588604dff9 8,10-11
+tests/unit/common/test_resume_maintenance.py
+  s_2060c9b676a4a5::t_712b18eef935dc 28,35
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "f83ad17184250a9a3b897bd21b0ccbe3c332e9e5",
+  "prompts": {},
+  "sessions": {
+    "s_2060c9b676a4a5": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1acf4-93fa-72f0-8f98-9523854ba275",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_38c3dac08701a7": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "9fd71762-abca-46fd-9ae1-d09650ec932b",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_7a119b78f2f74f": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1acd7-605f-7112-aa00-b2957bbb7806",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_87e9ed000d8bea": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "929c9cc5-cbed-4baf-837d-b50bf36748fd",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_95046ef4eeb2cd": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1acd7-7ba3-79c3-a5ca-fd0444cb8c69",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_d72353fd39298e": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "4437749e-3180-4354-af98-7b7f50c5ea72",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_d82ef25aa168da": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "25a17eb5-07f1-4bab-83ec-9cfe90c24c09",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

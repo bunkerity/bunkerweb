@@ -1,0 +1,611 @@
+tests/unit/db/test_ipv6_db_ban_identity.py
+  s_7a119b78f2f74f::t_0649b7ff75d1d8 1-80
+src/common/confs/init-stream-lua.conf
+  s_dfd54f297022ed::t_d808560d0ebf51 89-90,126-130,143-144,156-157,164-165,168-170,178-182,188,198,204,210,258
+  s_7a119b78f2f74f::t_790925dfafe2bc 70-88,98,103,108,217
+docs/es/plugins.md
+  s_751421a72d1da7::t_05fd373807ff6e 406,641-643
+  s_c0c5d5b16541aa::t_fe8cde9d6504be 644-655
+src/worker/tasks.py
+  s_7a119b78f2f74f::t_75da90bb6dc5d2 433,441-442,445-454,564,581-584
+src/common/db/db_methods/bans.py
+  s_208835457c1976::t_f0d14afff80aa8 195-196,412-415
+  s_208835457c1976::t_6edf94a2ef53d4 373-381
+  s_6189ae7958809e::t_4afdc9c4d68fcf 12,29,31-32,34-43,45-49
+  s_6189ae7958809e::t_ef493b5893e7be 278-287,339,528,628
+tests/unit/letsencrypt/test_acme_passthrough_host_template.py
+  s_f486941e38f50d::t_5973ff8a882973 44-45,47,51,59
+  s_f486941e38f50d::t_5e09d9002376db 7-9
+tests/unit/common/test_ipv6_reversescan_lua.py
+  s_3f0bb5d0aea65e::t_5d125388335eda 1-120
+src/common/core/sessions/sessions.lua
+  s_88d0e35c9a97bd::t_e2b4c319c75d37 4,168,172
+src/bw/lua/bunkerweb/redisendpoints.lua
+  s_88d0e35c9a97bd::t_e2b4c319c75d37 1-19
+src/common/confs/init-lua.conf
+  s_dfd54f297022ed::t_d808560d0ebf51 89-90,126-130,143-144,156-157,164-165,168-170,178-182,188,198,204,210,258
+  s_7a119b78f2f74f::t_790925dfafe2bc 70-88,98,103,108,217
+tests/unit/common/test_remove_ban_cluster_slots_lua.py
+  s_39024781aca194::t_4b3cc9676e2696 1-112
+tests/core/rewritten-requests.yml
+  s_f486941e38f50d::t_4f54ad7751f89b 1-48
+tests/unit/common/test_detect_dispatch.py
+  s_f486941e38f50d::t_44e4cb26666b40 66
+tests/core/client-hello.yml
+  s_d72353fd39298e::t_4b51c2eb423ebf 1
+  s_d72353fd39298e::t_b236e5d6ebc371 2-31
+tests/unit/common/test_ipv6_api_ban_handlers_lua.py
+  s_3f0bb5d0aea65e::t_57f4952b58a8ad 1-201
+src/common/settings.json
+  s_4f460a2e940aa9::t_e6a79c70d8dc22 52,55
+  s_4f460a2e940aa9::t_bda213e9bcdc96 298
+  s_0b4385e250c4b0::t_fe74f47fcd8f1a 563-568
+  s_4f460a2e940aa9::t_4d976aaf0cdf20 569-571
+tests/unit/common/test_reload_readiness_lua.py
+  s_7a119b78f2f74f::t_9be8d435c6e405 1-30,32-54,56-59,61-95,97-104,106-128,130-145,147
+  s_b167dbd10b0b55::t_9f12a39055818e 129
+  s_b167dbd10b0b55::t_b8d74e1d522ba9 31,55,60,96,105,146
+src/bw/lua/bunkerweb/clusterstore.lua
+  s_88d0e35c9a97bd::t_e2b4c319c75d37 5,106,122,331,456-458,478-479,488-491
+  s_88d0e35c9a97bd::t_81ec0b00bfb3c7 480-487
+tests/unit/linux/test_startup_fallback.py
+  s_75786a4c16c387::t_d08b9a60359ef6 1-153
+tests/unit/gen/test_empty_directive_arguments.py
+  s_dfd54f297022ed::t_7493c38ee8d86e 121
+src/common/core/whitelist/whitelist.lua
+  s_0a7c25ebde2361::t_88584f4aa934b9 450
+tests/unit/lua/test_resume_rdns.py
+  s_8ae66289376f9b::t_793d7f7ad6d244 33,58,150,153,159-161,163-166
+  s_6189ae7958809e::t_ad302dfcab5514 31
+src/common/confs/server-http/access-lua.conf
+  s_cd2c72503a0aee::t_1ccd971e67e9af 41-44,46-47
+  s_f486941e38f50d::t_f3aab973dc0c33 77-78
+src/bw/lua/bunkerweb/utils.lua
+  s_39024781aca194::t_30f93a661e5513 2139-2167
+  s_2c088d574e15f2::t_0859374ea419c2 449,463,1190,1200-1208,1210,1217-1219
+  s_0b4385e250c4b0::t_c5faa899bf7c80 1854-1864,1867-1869,1879-1881,1898-1900,1906,1912-1943,2358
+  s_88d0e35c9a97bd::t_e2b4c319c75d37 1632-1633,1635,1642-1667
+  s_39024781aca194::t_93aa654bd79078 866-872,874-881,884
+  s_9a14bb3f138d31::t_5148900606bdc5 649
+  s_88d0e35c9a97bd::t_81ec0b00bfb3c7 1636-1641
+  s_208835457c1976::t_6edf94a2ef53d4 2073
+  s_6189ae7958809e::t_fa1cf4fef05263 2107-2110
+  s_6189ae7958809e::t_71bd726d6c6bb8 1220,1958-1966,2057-2058,2063-2066,2086-2088,2119-2122
+  s_6189ae7958809e::t_b015fc12530e4b 4,30,639-642,648,898,947,1093,1246,1281,1298,1316,1471,1711,1757-1759,1946-1948,2192-2193
+  s_6189ae7958809e::t_175befbf189e77 1953-1956,1991-1998,2013-2019,2022-2028
+  s_0b4385e250c4b0::t_af3c1dab374903 1754-1756,1771-1774
+  s_7db872cc24d44a::t_b69873baeabf01 784-802,830,913
+  s_e5ff392af6ea89::t_09a0f70c2bf6d5 1944,1957
+tests/core/reload-readiness.yml
+  s_7a119b78f2f74f::t_af6311d0648cba 13
+  s_7a119b78f2f74f::t_a598d208451517 1-10,14-61,63-74
+  s_7a119b78f2f74f::t_beea38b9326a61 62
+  s_7a119b78f2f74f::t_00dfaf3b8eaca6 11-12
+src/common/core/blacklist/blacklist.lua
+  s_0a7c25ebde2361::t_88584f4aa934b9 612
+src/common/gen/Configurator.py
+  s_4f460a2e940aa9::t_0fbc2a6f5d56c9 584-586
+  s_8ae66289376f9b::t_793d7f7ad6d244 132
+  s_4f460a2e940aa9::t_4ee904b33237b0 7,510-511,563-583,587
+tests/unit/gen/test_staged_install.py
+  s_2af599938e6811::t_b0b98fae286b69 1-27,30,32-36,48-53,55-97
+  s_2af599938e6811::t_6460de4081493e 28-29,31,37-47,54
+  s_2af599938e6811::t_05c2e8f6ac6cc4 98-112
+tests/unit/api/test_ipv6_api_ban_identity.py
+  s_7a119b78f2f74f::t_0649b7ff75d1d8 1-28
+src/common/gen/main.py
+  s_2af599938e6811::t_9be519252a29f6 11,26,261-277,279-280
+  s_2af599938e6811::t_24f6fc2df27560 278
+src/common/confs/partials/default-server-access-lua.conf
+  s_39024781aca194::t_a13441128c6532 86
+  s_39024781aca194::t_aa6bf59ba4b19a 48-50,52-53
+src/api/app/routers/global_settings.py
+  s_3535bd787ed7ee::t_9cc63bb7a6a238 93-98,100-106
+tests/unit/common/test_add_ban_if_absent_lua.py
+  s_d72353fd39298e::t_4b51c2eb423ebf 1
+  s_0b4385e250c4b0::t_17dd40e5f020af 2-186
+src/common/core/modsecurity/confs/http/modsecurity-rules-global-crs.conf.modsec
+  s_7db872cc24d44a::t_b69873baeabf01 34,49,57
+  s_8a5284817c7f0d::t_0270ed10592ed0 117,162,182
+  s_8a5284817c7f0d::t_861b14a4fdab35 179,181
+docs/fr/plugins.md
+  s_751421a72d1da7::t_05fd373807ff6e 406,641-643
+  s_c0c5d5b16541aa::t_899932cacc995d 644-655
+tests/unit/test_ipv6_redis_lua.lua
+  s_88d0e35c9a97bd::t_b991cb5c349702 1-28,32-135
+  s_88d0e35c9a97bd::t_81ec0b00bfb3c7 29-31
+docs/plugins.md
+  s_751421a72d1da7::t_05fd373807ff6e 412,646-660
+src/bw/lua/bunkerweb/pushswap.lua
+  s_2af599938e6811::t_9be519252a29f6 15-17,151-166,252-257,299-304
+src/bw/lua/bunkerweb/ipaddr.lua
+  s_6189ae7958809e::t_fd2f5cda743b6d 1-193
+tests/core/client-hello/check.py
+  s_d72353fd39298e::t_4b51c2eb423ebf 1
+  s_d72353fd39298e::t_c5996e875defad 2-98
+tests/unit/common/test_order_plugins.py
+  s_8ae66289376f9b::t_793d7f7ad6d244 38
+src/bw/lua/bunkerweb/helpers.lua
+  s_0b4385e250c4b0::t_c5faa899bf7c80 46-49,292
+  s_2c088d574e15f2::t_0859374ea419c2 277-280
+  s_dfd54f297022ed::t_86dcc6e9b99816 54-57,60,62-66,281
+  s_6189ae7958809e::t_fe9011b1d861df 1028-1030
+  s_6189ae7958809e::t_3ec3e60899100d 5
+src/bw/lua/bunkerweb/tlsdrop.lua
+  s_0b4385e250c4b0::t_7bff0874defd87 429
+  s_cd2c72503a0aee::t_cbf30484e514cc 373
+  s_7a119b78f2f74f::t_9d558efd44a341 2,97-99,133,160
+  s_0b4385e250c4b0::t_b840e480944c32 8,142-150,293-372,374-409,413-424,426-428,430-432,435-438
+tests/unit/jobs/test_push_configs_reload_failure.py
+  s_2af599938e6811::t_af86087e4fdf02 30-31
+  s_7a119b78f2f74f::t_885b8b6cfebf06 1-29,32-52
+src/common/core/modsecurity/confs/server-http/modsecurity-rules.conf.modsec
+  s_7db872cc24d44a::t_b69873baeabf01 96,111,119
+  s_8a5284817c7f0d::t_861b14a4fdab35 223,225
+  s_8a5284817c7f0d::t_0270ed10592ed0 153,156,193,196,229,232,265,268
+src/api/app/schemas.py
+  s_6189ae7958809e::t_a61513b31aa85f 78-81,101-104
+  s_6189ae7958809e::t_4afdc9c4d68fcf 12-13
+src/api/app/rate_limit.py
+  s_88d0e35c9a97bd::t_c07b520e384bd7 407-408,488-496,536-542
+src/linux/scripts/start.sh
+  s_75786a4c16c387::t_c4c0e109d99f83 33,62-118,177
+  s_2af599938e6811::t_d4d228ff1e8e8f 233-234,242-243
+  s_75786a4c16c387::t_55cc5dc08219f8 244,290-293,295,314-323,325,340,349-352
+tests/unit/common/test_api_reload_verdict_lua.py
+  s_b167dbd10b0b55::t_9f12a39055818e 17-18,42,59,68-72,90,112-113,116-117,123-127,130,132,143,160
+docs/zh/plugins.md
+  s_751421a72d1da7::t_05fd373807ff6e 406,639-641
+  s_c0c5d5b16541aa::t_694d16c647ea85 642-653
+tests/unit/linux/test_interrupted_config_install.py
+  s_2af599938e6811::t_94fd5e59c6b105 1-14,16-17,23-28,40-41,44,46,50
+  s_75786a4c16c387::t_62861aac7237c5 15,18-22,29-39,51-66
+  s_75786a4c16c387::t_45c293cbd659e0 42-43,45,47-49,67-68
+tests/unit/common/test_client_hello_hook_lua.py
+  s_0b4385e250c4b0::t_70d90c49304d79 255-260,263-265,267-268,270,273-278,280-282,284-286
+  s_6189ae7958809e::t_e776cc1ac5d960 261-262,266,269,271-272,279,283
+  s_d72353fd39298e::t_4b51c2eb423ebf 1
+  s_0b4385e250c4b0::t_866f153bf2c63f 2-254,287-374,376-394
+  s_0b4385e250c4b0::t_843a490b9edd57 375
+tests/unit/common/test_init_rejects_invalid_config_lua.py
+  s_dfd54f297022ed::t_9b5bba8c723895 21,24,27,36,116,120-123
+  s_dfd54f297022ed::t_9e0daeef80cb85 1-20,22-23,25-26,28-35,37-115,117-119,124-130
+docs/de/plugins.md
+  s_751421a72d1da7::t_05fd373807ff6e 405,640-644
+  s_c0c5d5b16541aa::t_55913a6b69c017 645-654
+src/common/core/modsecurity/confs/server-http/modsecurity-rules-global-crs.conf.modsec
+  s_8a5284817c7f0d::t_0270ed10592ed0 89,92
+src/common/core/jobs/jobs/push-configs.py
+  s_7a119b78f2f74f::t_2475d8837f0aa9 750,757
+  s_2af599938e6811::t_640348bb15ac69 770-773
+  s_2af599938e6811::t_a3d231ef2887d9 722-723
+  s_2af599938e6811::t_ffe7c9300856c1 576-577,603-605,608
+  s_2af599938e6811::t_3662853aa6a029 729,731
+  s_2af599938e6811::t_72dd1cefef355a 24,443,468,543-544,575,578,584,600-602,606-607,609-610,641,710-713,719,769
+  s_2af599938e6811::t_8bbe8d0f63145a 730
+src/common/core/robotstxt/robotstxt.lua
+  s_2c088d574e15f2::t_0859374ea419c2 58-59,64-65
+src/common/confs/partials/default-server-set-lua.conf
+  s_39024781aca194::t_89c2f5f999da84 50-53
+tests/unit/linux/_startup_sandbox.py
+  s_75786a4c16c387::t_efbbb3dae87822 41-47,49-50,60-63,73-76,79-80,83-84,86-88
+  s_75786a4c16c387::t_265f601952dd96 166
+  s_75786a4c16c387::t_fd667db168c4ad 144-149,161,168
+  s_75786a4c16c387::t_c8662f62eda2d5 1-40,48,51-59,64-72,77-78,81-82,85,89-143,150-160,162-165,167,169-191
+src/common/core/dnsbl/dnsbl.lua
+  s_2c088d574e15f2::t_0859374ea419c2 16,268,295-296,308,321,336-339
+  s_290994a367e80e::t_115ebb90f940bb 269,293,333-335
+tests/unit/common/test_tlsdrop_lua.py
+  s_6189ae7958809e::t_dac7fcd8348312 346-347,351,484-487,490
+tests/unit/gen/test_templator_fork_context.py
+  s_c32d3d7a053777::t_27cc330396968e 1-48
+src/bw/lua/bunkerweb/api.lua
+  s_b167dbd10b0b55::t_b8d74e1d522ba9 605-607
+  s_3f0bb5d0aea65e::t_a5cbf46b54ab57 25,998-1000,1003,1115-1117,1120
+  s_2c088d574e15f2::t_0859374ea419c2 1077-1078
+  s_7a119b78f2f74f::t_71d13409bac175 82-83,242-260,262-270,272-275,595-596,598-604,621,627,629-631,1079
+tests/core/redis.yml
+  s_88d0e35c9a97bd::t_ba44a33b9afc85 456-463
+src/common/core/redis/redis.lua
+  s_2c088d574e15f2::t_0859374ea419c2 85
+src/common/confs/default-server-http.conf
+  s_87b148a97f23ad::t_e6f29c86c231e4 174,177
+  s_0b4385e250c4b0::t_fe74f47fcd8f1a 160-161,173,175-176,178-182
+  s_7db872cc24d44a::t_753e0898fc963d 312
+tests/unit/common/test_ban_sync.py
+  s_0b4385e250c4b0::t_e7377107ee18c6 390-391
+  s_6189ae7958809e::t_9be362c6a9ab40 857
+tests/unit/common/test_denial_reason_ports_lua.py
+  s_7db872cc24d44a::t_1c202731013dc5 1-65,106-113
+  s_39024781aca194::t_1961cc26977c99 66-105
+tests/unit/common/test_core_lua_regressions.py
+  s_290994a367e80e::t_7588396e2360da 242,248,254-255,261,271-273
+  s_2c088d574e15f2::t_a1ccb4d3d63168 1-241,243-247,249-253,256-260,262-270,274-291
+tests/unit/common/test_cluster_tryagain_lookup_lua.py
+  s_88d0e35c9a97bd::t_37c9be2baf030f 1-108
+tests/unit/common/test_ban_lookup_single_eval_lua.py
+  s_6189ae7958809e::t_148acc03f64f92 126
+src/common/gen/Templator.py
+  s_8a5284817c7f0d::t_0270ed10592ed0 578,1106-1126
+  s_dfd54f297022ed::t_9d883c77a56d7c 845-846,860,1105
+  s_dfd54f297022ed::t_7493c38ee8d86e 621
+tests/unit/common/test_modsecurity_body_reason_lua.py
+  s_7db872cc24d44a::t_b69873baeabf01 9,57,105
+src/common/README.md
+  s_4f460a2e940aa9::t_e39f07d8df8aba 39
+src/common/README.de.md
+  s_4f460a2e940aa9::t_e39f07d8df8aba 39
+src/common/core/metrics/metrics.lua
+  s_c32d3d7a053777::t_27cc330396968e 1034-1035,1051-1055,1081-1085
+  s_b167dbd10b0b55::t_47b6fc3296233b 262-263,1014-1033,1036-1050,1056-1080,1086-1113,1690-1693,2177-2178
+  s_ba95831e009b1c::t_760502c2c723cf 2289-2291,2297
+  s_2c088d574e15f2::t_0859374ea419c2 2179,2271-2272,2277-2285
+src/common/utils/ip_identity.py
+  s_6189ae7958809e::t_fd2f5cda743b6d 1-32
+src/common/confs/init-worker-lua.conf
+  s_7a119b78f2f74f::t_3217b12b9cb9e7 28-48,59-66,117-119,237,244,308-310,318-319,321
+tests/unit/common/test_default_server_runners_lua.py
+  s_39024781aca194::t_f9c2ff386b4804 133
+src/common/confs/server-http/set-lua.conf
+  s_f486941e38f50d::t_bc5a0ba1f8996c 66-69
+tests/core/redis/cluster_migrate.sh
+  s_88d0e35c9a97bd::t_5006045f8fc70e 47,62,81-83,190-194
+  s_88d0e35c9a97bd::t_ba44a33b9afc85 1-46,48-61,63-80,84-189,195-359
+tests/unit/common/test_ipv6_redis_endpoints.py
+  s_88d0e35c9a97bd::t_b991cb5c349702 1-116
+tests/unit/worker/test_reload_holds_pending_generation.py
+  s_7a119b78f2f74f::t_bf507e0d45f9dd 1-52
+src/common/core/reversescan/reversescan.lua
+  s_2c088d574e15f2::t_0859374ea419c2 15,73,102,117-122,132
+  s_3f0bb5d0aea65e::t_05112efbc9d832 168-170,174-176,178-181,184
+tests/unit/gen/test_render_failures.py
+  s_dfd54f297022ed::t_13128b9c201d35 92
+  s_2af599938e6811::t_af86087e4fdf02 97,101-102
+  s_dfd54f297022ed::t_513e5ac8d26d95 4,8,74,94-96,98-100,103-113
+  s_dfd54f297022ed::t_7a819f80cd9c6b 80-81
+  s_dfd54f297022ed::t_28d326788eb010 3,78-79
+  s_dfd54f297022ed::t_9b5bba8c723895 47-55
+  s_dfd54f297022ed::t_ce1dac026e4256 1-2,5-7,9-46,56-73,75-77,82-91,93
+tests/unit/common/test_internal_api_transport.py
+  s_7a119b78f2f74f::t_b412373d7938da 180-181
+tests/unit/common/test_default_server_client_hello_lua.py
+  s_d72353fd39298e::t_4b51c2eb423ebf 1
+  s_751421a72d1da7::t_68f79fbb5b80b7 11,18-20,66,68
+  s_0b4385e250c4b0::t_aab6ad32ee8de2 2-10,12-17,21-65,67,69-117
+tests/unit/common/test_init_reload_token_lua.py
+  s_b167dbd10b0b55::t_b8d74e1d522ba9 10-12,19,21,28
+  s_7a119b78f2f74f::t_1511cea5306b96 1-9,13-15,17-18,20,22-27,29-33
+  s_7a119b78f2f74f::t_dd23ca91ed5a4d 16
+tests/unit/gen/test_configurator_client_hello_order.py
+  s_8ae66289376f9b::t_7e1a639f76c10a 1-21
+src/common/confs/server-http/server.conf
+  s_4f460a2e940aa9::t_c03c2880d90069 25-26
+  s_f486941e38f50d::t_7ff69163961840 60-64
+  s_f486941e38f50d::t_d199c3b0564ce8 18-22
+src/common/README.zh.md
+  s_87b148a97f23ad::t_cffb2fb67af219 41
+src/common/utils/common_utils.py
+  s_7db872cc24d44a::t_753e0898fc963d 1312-1322,1325
+  s_88d0e35c9a97bd::t_81ec0b00bfb3c7 1265
+  s_88d0e35c9a97bd::t_e2b4c319c75d37 1129-1136,1236-1246
+tests/unit/push_configs/test_staged_publication.py
+  s_2af599938e6811::t_ca4920398cc7f6 1-3,5-14,25-44
+  s_2af599938e6811::t_328078b44a334d 15-23,64-68,71-84,91-108
+  s_2af599938e6811::t_18ad0cedc5bb39 4,24
+  s_2af599938e6811::t_af86087e4fdf02 45-63,69-70,85-90
+  s_2af599938e6811::t_bc9bc404459bdc 109-123
+  s_2af599938e6811::t_657ea4c692a2d7 124-138
+src/bw/lua/bunkerweb/ban_sync.lua
+  s_6189ae7958809e::t_018728b7ab6f00 4,40,50-53,59,64-69,71
+  s_6189ae7958809e::t_93e6ab199991c9 96,191-193
+src/common/README.es.md
+  s_4f460a2e940aa9::t_e39f07d8df8aba 39
+src/bw/entrypoint.sh
+  s_75786a4c16c387::t_835d8fae0c8401 32-34,38-39,147,160-212,215,234-245
+  s_75786a4c16c387::t_c4c0e109d99f83 83-85
+  s_75786a4c16c387::t_c5cdac778a68ed 138-139,145-146
+tests/unit/common/test_ban_lease_lua.py
+  s_3f0bb5d0aea65e::t_12d2f606ea4ec9 970-971
+  s_6189ae7958809e::t_bd54ec6fa29866 211-219
+tests/core/reload-startup-safety/probe.py
+  s_75786a4c16c387::t_a820fef897fc76 1-142,148-200,204-218,220-233
+  s_75786a4c16c387::t_2f9b3be7f2b599 201-203,219
+  s_75786a4c16c387::t_2aa60ea01e471d 143-147
+src/common/core/order.json
+  s_0b4385e250c4b0::t_fe74f47fcd8f1a 30
+docs/zh/features.md
+  s_87b148a97f23ad::t_cffb2fb67af219 50
+tests/unit/common/test_pushswap_install_sentinel_lua.py
+  s_2af599938e6811::t_b0b98fae286b69 1-35,37-51,53-60
+  s_2af599938e6811::t_6460de4081493e 36,52
+  s_2af599938e6811::t_2ccfa96b5c5f3a 61-68
+src/common/gen/sync_tree.py
+  s_2af599938e6811::t_41ff3f2fc09448 25
+  s_2af599938e6811::t_9be519252a29f6 1-24,26-45
+src/common/core/greylist/greylist.lua
+  s_0a7c25ebde2361::t_88584f4aa934b9 363
+src/common/README.fr.md
+  s_4f460a2e940aa9::t_e39f07d8df8aba 39
+tests/core/reload-startup-safety.yml
+  s_4f460a2e940aa9::t_4f822b3c20dfbf 1-8,12-27,30-35,42-47
+  s_75786a4c16c387::t_4f237d22c7c4d1 9-11
+  s_75786a4c16c387::t_2f9b3be7f2b599 28-29,36-41,48-53
+tests/unit/common/test_geo_context_ipmatcher_luajit.py
+  s_9a14bb3f138d31::t_457ba57a2a248a 23,25
+  s_9a14bb3f138d31::t_82a98273ac925e 1-22,24,26-78
+tests/unit/common/test_ipv6_ban_identity_lua.py
+  s_6189ae7958809e::t_184f8a8dd6ee74 1-168
+  s_6189ae7958809e::t_e4c4f642b6061d 169-172
+docs/de/features.md
+  s_942b69daf4d90c::t_92cf5a171a5243 48
+docs/es/features.md
+  s_942b69daf4d90c::t_2f98d7ab41dc01 48
+docs/features.md
+  s_942b69daf4d90c::t_8b39d0dd0d47d4 48
+docs/fr/features.md
+  s_942b69daf4d90c::t_5821c913278d9d 48
+tests/core/client-hello/plugin/hellotest/hellotest.lua
+  s_c0c5d5b16541aa::t_db1bca635a226d 1-22
+tests/core/client-hello/plugin/hellotest/plugin.json
+  s_c0c5d5b16541aa::t_58306baa17cca4 1-8
+tests/unit/common/test_internal_certificates.py
+  s_75786a4c16c387::t_fd6e0217d25ef0 136-139,145
+tests/unit/common/test_ipv6_ip_identity.py
+  s_7a119b78f2f74f::t_d61b01370dc1ec 1-56
+tests/unit/common/test_whitelist_and_has_variable_inheritance_lua.py
+  s_6189ae7958809e::t_ee7ba0f2834d52 54
+tests/unit/conftest.py
+  s_6189ae7958809e::t_c24e7b378e2867 37-45
+tests/unit/modsecurity/test_audit_concurrent.py
+  s_75786a4c16c387::t_0c6d0203f0d09e 298-299,320
+tests/unit/test_lua_ipaddr.lua
+  s_7a119b78f2f74f::t_ed64381882c9bb 1-105
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "ffe286b82859dfe29747bcffddac33fc207c89b3",
+  "prompts": {},
+  "sessions": {
+    "s_0a7c25ebde2361": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "dd997fa7-1d53-48f3-bb5d-5df3e25b0998",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_0b4385e250c4b0": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "04b0b907-d5fe-44c9-9d2f-f04197f3642a",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_208835457c1976": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "3d8f7777-bb59-4590-ace2-c0672a83ceb1",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_290994a367e80e": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "1719079e-f494-49a1-b046-dd527df4f2e7",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_2af599938e6811": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1acf6-e549-7013-91cd-4ff73f34a6b8",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_2c088d574e15f2": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1abc0-da00-7e53-bf11-d2eb9c39ac95",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_3535bd787ed7ee": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1ab9d-6772-7e22-92cd-7c07fb269100",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_39024781aca194": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "a9c3f222-76af-4eca-bb11-aecc6b88a168",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_3f0bb5d0aea65e": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "fb03ca83-e12e-4c4f-82d2-488b6be756c9",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_4f460a2e940aa9": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "1801373c-868e-412b-b538-cb2f1f5efe59",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_6189ae7958809e": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "1049effa-f503-404c-8e04-c0d58dae63c9",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_751421a72d1da7": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "a1cd49cb-bc02-4f73-9b72-c088e5f0245c",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_75786a4c16c387": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "9cc95f88-03a2-4505-922a-07c984713caa",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_7a119b78f2f74f": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1acd7-605f-7112-aa00-b2957bbb7806",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_7db872cc24d44a": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1ac53-82bd-7021-8474-9868afc6fad4",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_87b148a97f23ad": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1abd5-1e4b-7b40-8125-8bcaa53912ec",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_88d0e35c9a97bd": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1ad02-4ce8-7e93-959d-926b904798f0",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_8a5284817c7f0d": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "a7303916-b85a-4244-98f8-30fd450ab62c",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_8ae66289376f9b": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1abf1-80a0-7151-867d-6e689986600a",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_942b69daf4d90c": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1adaf-7ad9-78a3-be25-657092c967be",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_9a14bb3f138d31": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1aff6-221d-7f50-bd6b-da4a3f423fe0",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_b167dbd10b0b55": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1acb5-69be-7823-ac36-290b853e7213",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_ba95831e009b1c": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1ac9a-531a-73b3-be58-795493b1ffdb",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_c0c5d5b16541aa": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1ad7f-a1d5-7b23-998e-6ac55cc7af16",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_c32d3d7a053777": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1acbf-b3c7-78e2-8243-f6954fd6510e",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_cd2c72503a0aee": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1abb1-9c7f-7360-8932-485c9165e954",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_d72353fd39298e": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "4437749e-3180-4354-af98-7b7f50c5ea72",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_dfd54f297022ed": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1acc6-ce29-7653-b2c2-5d47851f3c23",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_e5ff392af6ea89": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1d515-d3bb-7a63-a920-78c52fdbfb2c",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_f486941e38f50d": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "a4f0debe-3051-45bb-b7c8-5be98fe667fc",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}
