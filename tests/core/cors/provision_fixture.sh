@@ -15,12 +15,14 @@ www="/var/www/html"
 if [ "$(id -u)" -eq 0 ]; then
 	runner=(bash -c)
 elif sudo -n true 2>/dev/null; then
-	runner=(sudo -E bash -c)
+	# sudo-rs ignores -E and drops the environment, so SRC and WWW travel as arguments of env
+	runner=(sudo env "SRC=$here/www" "WWW=$www" bash -c)
 else
 	runner=()
 fi
 
 script='set -e
+: "${SRC:?}" "${WWW:?}"
 for dir in "$SRC"/*/ ; do
     host="$(basename "$dir")"
     mkdir -p "$WWW/$host"
