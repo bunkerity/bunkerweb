@@ -1,4 +1,4 @@
-FROM redhat/ubi9:9.8@sha256:87f66688da4e206d5a1877088626c542288a5ccd97898cf363b588d57817e6be AS builder
+FROM redhat/ubi9:9.9@sha256:1e9f0ed9fceafb40878bc1705ff124aa150e3fed873f18c42cdc2dded319e0a8 AS builder
 
 ENV OS=rhel
 ENV NGINX_VERSION=1.30.6
@@ -146,7 +146,7 @@ RUN if [ "$SKIP_MINIFY" != "yes" ] && [ "$SKIP_MINIFY_HTML" != "yes" ]; then \
     echo "Skipping HTML minification"; \
     fi
 
-FROM redhat/ubi9:9.8@sha256:87f66688da4e206d5a1877088626c542288a5ccd97898cf363b588d57817e6be
+FROM redhat/ubi9:9.9@sha256:1e9f0ed9fceafb40878bc1705ff124aa150e3fed873f18c42cdc2dded319e0a8
 
 # Install fpm
 RUN dnf install -y wget redhat-rpm-config rpm-build yum-utils gcc make && \
