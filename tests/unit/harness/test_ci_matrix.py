@@ -88,3 +88,9 @@ def test_empty_suite_fails(matrix):
     with pytest.raises(SystemExit) as failed:
         matrix(specs={})
     assert failed.value.code == 1
+
+
+@pytest.mark.parametrize("dev", [False, True])
+def test_kubernetes_runner(matrix, dev):
+    result = matrix(dev=dev, specs={"smoke": {"integrations": ["Kubernetes"]}})
+    assert result["Kubernetes"] == ['Kubernetes;amd64;["ubuntu-24.04"];smoke']

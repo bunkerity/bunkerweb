@@ -2,6 +2,7 @@
 # Values are JSON (fromJSON() in .github/workflows/integration-tests.yml feeds them
 # straight to runs-on), so they must be valid JSON — single-quoted arrays are not.
 # The monorepo has no self-hosted fleet: everything runs on GitHub-hosted runners.
+# Ubuntu 26.04's runc AppArmor profile breaks minikube pod kills; return once containerd accepts signals from peer=runc.
 staging:
   Linux:
     x86_64:
@@ -46,7 +47,7 @@ staging:
     arm64: "TODO"
   Kubernetes:
     386: "TODO"
-    amd64: '["ubuntu-latest"]'
+    amd64: '["ubuntu-24.04"]'
     arm/v7: "TODO"
     arm64: "TODO"
   All_in_one:
@@ -65,6 +66,6 @@ dev:
   Autoconf:
     amd64: '["ubuntu-latest"]'
   Kubernetes:
-    amd64: '["ubuntu-latest"]'
+    amd64: '["ubuntu-24.04"]'
   All_in_one:
     amd64: '["ubuntu-latest"]'
