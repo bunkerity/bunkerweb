@@ -1,0 +1,23 @@
+tests/ui_handlers/common.py
+  s_4260b33bff1bc6::t_e06cc1dbad203a 5,8,17-36,61
+tests/core_handlers/selenium_common.py
+  s_4260b33bff1bc6::t_e06cc1dbad203a 5,8,15-34,48
+.github/workflows/integration-tests.yml
+  s_4260b33bff1bc6::t_7c9b8bc18ecd48 96-97
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "a840a794723907784affed3bf5b7674a32750005",
+  "prompts": {},
+  "sessions": {
+    "s_4260b33bff1bc6": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "02251e57-6f24-4854-a1af-27335bfa9338",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}
