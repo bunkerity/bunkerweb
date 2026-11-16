@@ -23,6 +23,10 @@ actions:
     raise_for_status: false
     config:
       BLACKLIST_URI: "^/inject-error$"
+      USE_BLACKLIST: "yes"
+      BLACKLIST_COMMUNITY_LISTS: ""
+      BLACKLIST_IP_URLS: ""
+      BLACKLIST_USER_AGENT_URLS: ""
       INJECT_HEAD: "BunkerWeb Forever!"
       INJECT_BODY: "BunkerWeb Forever!"
     restart_stack: false
@@ -33,6 +37,10 @@ actions:
     raise_for_status: false
     config:
       BLACKLIST_URI: "^/inject-error$"
+      USE_BLACKLIST: "yes"
+      BLACKLIST_COMMUNITY_LISTS: ""
+      BLACKLIST_IP_URLS: ""
+      BLACKLIST_USER_AGENT_URLS: ""
       INJECT_HEAD: "BunkerWeb Forever!"
       INJECT_BODY: "BunkerWeb Forever!"
     restart_stack: false
@@ -42,6 +50,10 @@ actions:
     string: "BunkerWeb Forever!"
     config:
       BLACKLIST_URI: "^/inject-error$"
+      USE_BLACKLIST: "yes"
+      BLACKLIST_COMMUNITY_LISTS: ""
+      BLACKLIST_IP_URLS: ""
+      BLACKLIST_USER_AGENT_URLS: ""
       INJECT_HEAD: "BunkerWeb Forever!"
       INJECT_BODY: "BunkerWeb Forever!"
 
