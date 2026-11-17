@@ -1,0 +1,446 @@
+.github/workflows/create-arm.yml
+  h_a33a1e80933106 48,66,76
+.github/workflows/integration-tests.yml
+  h_a33a1e80933106 81,193,199,210
+.github/workflows/rm-arm.yml
+  h_a33a1e80933106 35
+CHANGELOG.md
+  h_a33a1e80933106 3,23,34,70-71,79,84-85,87-88,90-94
+docs/assets/extra.css
+  h_a33a1e80933106 1-5,99-110,136-140,143,153-155,160-220,327-331,370-379,490-496,625-633,854-860
+docs/assets/extra.js
+  h_a33a1e80933106 1-9,415-433,438-439,614-656
+docs/assets/preserve-version-on-language-switch.js
+  h_a33a1e80933106 140-143
+docs/de/features.md
+  h_a33a1e80933106 3284,6594-6596
+docs/de/quickstart-guide.md
+  h_a33a1e80933106 84
+docs/es/features.md
+  h_a33a1e80933106 3337,6671-6673
+docs/es/quickstart-guide.md
+  h_a33a1e80933106 84
+docs/features.md
+  h_a33a1e80933106 3352,6684-6686
+docs/fr/features.md
+  h_a33a1e80933106 3247,6490-6492
+docs/fr/plugins.md
+  h_a33a1e80933106 483
+docs/fr/quickstart-guide.md
+  h_a33a1e80933106 84
+docs/hooks/hreflang.py
+  h_a33a1e80933106 1-27
+docs/hooks/imgsize.py
+  h_a33a1e80933106 1-127
+docs/overrides/main.html
+  h_a33a1e80933106 4-6,17,36,55,74,93,116-119,121,142-145,147,154-158,161,163-165,169-170,174,178,181,183-189,191-210,212-216
+docs/quickstart-guide.md
+  h_a33a1e80933106 84
+docs/zh/features.md
+  h_a33a1e80933106 3347,6679-6681
+docs/zh/quickstart-guide.md
+  h_a33a1e80933106 84
+mkdocs.yml
+  h_a33a1e80933106 191-192
+publiccode.yml
+  h_a33a1e80933106 5
+src/all-in-one/Dockerfile
+  h_a33a1e80933106 179
+src/api/Dockerfile
+  h_a33a1e80933106 48
+src/autoconf/Dockerfile
+  h_a33a1e80933106 47
+src/common/core/antibot/confs/server-http/antibot.conf
+  h_a33a1e80933106 5-10
+src/common/core/antibot/files/capjs.html
+  h_a33a1e80933106 75,539
+src/common/core/antibot/files/captcha.html
+  h_a33a1e80933106 77,218,451-453,468
+src/common/core/antibot/files/hcaptcha.html
+  h_a33a1e80933106 75,567
+src/common/core/antibot/files/javascript.html
+  h_a33a1e80933106 74,425,458
+src/common/core/antibot/files/mcaptcha.html
+  h_a33a1e80933106 77,579
+src/common/core/antibot/files/recaptcha.html
+  h_a33a1e80933106 79,349-352,602
+src/common/core/antibot/files/turnstile.html
+  h_a33a1e80933106 75,565
+src/common/core/errors/confs/server-http/errors.conf
+  h_a33a1e80933106 55-60
+src/common/core/errors/files/error.html
+  h_a33a1e80933106 28,31,33,78,142,148,155-160,190,258-261,350,408
+src/common/core/inject/README.de.md
+  h_a33a1e80933106 10
+src/common/core/inject/README.es.md
+  h_a33a1e80933106 10
+src/common/core/inject/README.fr.md
+  h_a33a1e80933106 10
+src/common/core/inject/README.md
+  h_a33a1e80933106 10
+src/common/core/inject/README.zh.md
+  h_a33a1e80933106 10
+src/common/core/whitelist/README.de.md
+  h_a33a1e80933106 26-28
+src/common/core/whitelist/README.es.md
+  h_a33a1e80933106 26-28
+src/common/core/whitelist/README.fr.md
+  h_a33a1e80933106 26-28
+src/common/core/whitelist/README.md
+  h_a33a1e80933106 26-28
+src/common/core/whitelist/README.zh.md
+  h_a33a1e80933106 26-28
+src/common/core/whitelist/whitelist.lua
+  h_a33a1e80933106 184,194-195,203-223,344,346,355,370
+src/deps/deps.json
+  h_a33a1e80933106 156,158,204,206,302,304
+src/deps/src/luajit/dynasm/dasm_arm64.h
+  h_a33a1e80933106 475
+src/deps/src/luajit/src/lj_asm.c
+  h_a33a1e80933106 986-987
+src/deps/src/luajit/src/lj_asm_x86.h
+  h_a33a1e80933106 847,911,1120-1125,1675,1679-1682,1694-1704,1706-1707,2767-2768,2770-2777,2779
+src/deps/src/luajit/src/lj_opt_fold.c
+  h_a33a1e80933106 183-186
+src/deps/src/luajit/src/lj_record.c
+  h_a33a1e80933106 2043,2062-2063
+src/deps/src/resty-redis-cluster/README.md
+  h_a33a1e80933106 24-25,86-87,417-531,534-536,538,540,542,544,547,549,551,555-558,566-576
+src/deps/src/resty-redis-cluster/kong-redis-cluster-1.8.0-0.rockspec
+  h_a33a1e80933106 2,5
+src/deps/src/resty-redis-cluster/lib/resty/rediscluster.lua
+  h_a33a1e80933106 46-56,74-77,89-121,636-663,720,724,751-752,814-816,846-847,899-902,905-906,909-910,1145,1346-1353,1366-1369,1378,1402-1405,1417-1420,1433,1436-1440,1453,1463,1509-1510,1551-1959,2000-2128,2141,2147-2151
+src/deps/src/zlib/CMakeLists.txt
+  h_a33a1e80933106 1,6,26-27,38,47-51,56,78-144,155,186-196,199-200,243-246,248,257,261-263,266-268,271-283,287-288,293,297-298,313,317-337,348-351,375-376
+src/deps/src/zlib/ChangeLog
+  h_a33a1e80933106 4-34
+src/deps/src/zlib/Makefile.in
+  h_a33a1e80933106 34,43-44,290-291,297-304
+src/deps/src/zlib/README
+  h_a33a1e80933106 3,34
+src/deps/src/zlib/README-cmake.md
+  h_a33a1e80933106 1,69-70,74-75
+src/deps/src/zlib/compress.c
+  h_a33a1e80933106 31-32
+src/deps/src/zlib/configure
+  h_a33a1e80933106 29,324-326,408,513-535,546-549,551-554,1060,1070-1071,1093
+src/deps/src/zlib/contrib/CMakeLists.txt
+  h_a33a1e80933106 41-44
+src/deps/src/zlib/contrib/ada/CMakeLists.txt
+  h_a33a1e80933106 1,12-18,83-84
+src/deps/src/zlib/contrib/ada/cmake/Modules/CMakeADAInformation.cmake
+  h_a33a1e80933106 71,93,117
+src/deps/src/zlib/contrib/ada/cmake/Modules/CMakeDetermineADACompiler.cmake
+  h_a33a1e80933106 24-28
+src/deps/src/zlib/contrib/ada/cmake/binder_helper.cmake
+  h_a33a1e80933106 4-6,8,10,12-14,18,33-35,38,44,53-54
+src/deps/src/zlib/contrib/ada/cmake/compile_helper.cmake
+  h_a33a1e80933106 4-7,10,14,17-21,23,25-26
+src/deps/src/zlib/contrib/ada/cmake/exe_link_helper.cmake
+  h_a33a1e80933106 4-7,11,13,17,37-38,46,48
+src/deps/src/zlib/contrib/ada/cmake/shared_link_helper.cmake
+  h_a33a1e80933106 4-7,11,13,16,31,39,42,46
+src/deps/src/zlib/contrib/ada/cmake/static_link_helper.cmake
+  h_a33a1e80933106 4-7,9,11,13,17,19
+src/deps/src/zlib/contrib/ada/test/CMakeLists.txt
+  h_a33a1e80933106 1-153
+src/deps/src/zlib/contrib/blast/CMakeLists.txt
+  h_a33a1e80933106 1,10-16,26,32,36,39,45,52,56,58,61,65,72,74,78,85,95,97,100
+src/deps/src/zlib/contrib/blast/blastConfig.cmake.in
+  h_a33a1e80933106 10-19,23-24,26-39
+src/deps/src/zlib/contrib/blast/test/CMakeLists.txt
+  h_a33a1e80933106 2-3,9-13,18,22,26,30,35,40,51,56-58,62-66,68,73,75-78,90-92,96-100,102,107,109,124-126,130-134,136,142,159-163,165-169,171,173-175,184,189-193,195-199,201
+src/deps/src/zlib/contrib/blast/test/add_subdirectory_exclude_test.cmake.in
+  h_a33a1e80933106 1
+src/deps/src/zlib/contrib/blast/test/add_subdirectory_test.cmake.in
+  h_a33a1e80933106 1
+src/deps/src/zlib/contrib/blast/test/find_package_no_components_test.cmake.in
+  h_a33a1e80933106 1
+src/deps/src/zlib/contrib/blast/test/find_package_test.cmake.in
+  h_a33a1e80933106 1
+src/deps/src/zlib/contrib/blast/test/find_package_wrong_components_test.cmake.in
+  h_a33a1e80933106 1
+src/deps/src/zlib/contrib/blast/test/tester.cmake
+  h_a33a1e80933106 1
+src/deps/src/zlib/contrib/crc32vx/crc32_vx.c
+  h_a33a1e80933106 82-85,93-96,125
+src/deps/src/zlib/contrib/delphi/ZLib.pas
+  h_a33a1e80933106 155
+src/deps/src/zlib/contrib/dotzlib/DotZLib/UnitTests.cs
+  h_a33a1e80933106 159
+src/deps/src/zlib/contrib/gcc_gvmat64/CMakeLists.txt
+  h_a33a1e80933106 2-8,11-13,15,19
+src/deps/src/zlib/contrib/infback9/inftree9.c
+  h_a33a1e80933106 12,52,62,173,178,183,206,210-212
+src/deps/src/zlib/contrib/iostream3/CMakeLists.txt
+  h_a33a1e80933106 1,10-16,38,40,44,48-49,52,58,63,68,73,75,78,81-82,87,89,93,100-101,111,140-144
+src/deps/src/zlib/contrib/iostream3/iostream3Config.cmake.in
+  h_a33a1e80933106 13-22,28-29,31-44
+src/deps/src/zlib/contrib/iostream3/test/CMakeLists.txt
+  h_a33a1e80933106 2-3,9-13,18,22,26,30,35,40,58,62-66,68,73,92,96-98,100,102,107,112,124-128,130-134,136,142,154,159-163,165-169,171,184,189-193,195-199,201
+src/deps/src/zlib/contrib/iostream3/test/add_subdirectory_exclude_test.cmake.in
+  h_a33a1e80933106 1
+src/deps/src/zlib/contrib/iostream3/test/add_subdirectory_test.cmake.in
+  h_a33a1e80933106 1
+src/deps/src/zlib/contrib/iostream3/test/find_package_no_components_test.cmake.in
+  h_a33a1e80933106 1
+src/deps/src/zlib/contrib/iostream3/test/find_package_test.cmake.in
+  h_a33a1e80933106 1
+src/deps/src/zlib/contrib/iostream3/test/find_package_wrong_components_test.cmake.in
+  h_a33a1e80933106 1
+src/deps/src/zlib/contrib/minizip/CMakeLists.txt
+  h_a33a1e80933106 1,24,38,67,72,105-110,112-119,121-124,126-131,133-137,147-149,153,157-203,206-230,234-272,275-277,280-309,315-318,323-326,335,345-348,351-353,355-356,376,378
+src/deps/src/zlib/contrib/minizip/Makefile.am
+  h_a33a1e80933106 30,43
+src/deps/src/zlib/contrib/minizip/configure.ac
+  h_a33a1e80933106 4
+src/deps/src/zlib/contrib/minizip/crypt.h
+  h_a33a1e80933106 81-83,94-96,101-102,104,106-107,112
+src/deps/src/zlib/contrib/minizip/ioapi.h
+  h_a33a1e80933106 24
+src/deps/src/zlib/contrib/minizip/miniunz.c
+  h_a33a1e80933106 187-239,323,361,396-397,399-400,405,409,411-412,414-415,461,463-476
+src/deps/src/zlib/contrib/minizip/minizipConfig.cmake.in
+  h_a33a1e80933106 4-10,12,23-33,38-39,41-54
+src/deps/src/zlib/contrib/minizip/mztools.c
+  h_a33a1e80933106 19
+src/deps/src/zlib/contrib/minizip/skipset.h
+  h_a33a1e80933106 2-56,69-72,74-77,79-83,89-90,95,100-102,105-106,121,132,137-140,158,161-162,171,180,186,193-197,213,222,234-239,247,255-256,262,264-265,272,278,281-284,310-313,316-319,333-337,345,350,366
+src/deps/src/zlib/contrib/minizip/test/CMakeLists.txt
+  h_a33a1e80933106 2-3,9-13,18,22,26,31,36,40,51,56-60,62-68,73,75-78,80-82,85,90-94,96-106,109-111,115,120-124,126-134,145-149,151-156,161,163-166,168-170,178-182,184-190,196,198-201,204-205
+src/deps/src/zlib/contrib/minizip/test/add_subdirectory_exclude_test.cmake.in
+  h_a33a1e80933106 1
+src/deps/src/zlib/contrib/minizip/test/add_subdirectory_test.cmake.in
+  h_a33a1e80933106 1
+src/deps/src/zlib/contrib/minizip/test/find_package_no_components_test.cmake.in
+  h_a33a1e80933106 1
+src/deps/src/zlib/contrib/minizip/test/find_package_test.cmake.in
+  h_a33a1e80933106 1,17-20,26-29
+src/deps/src/zlib/contrib/minizip/test/find_package_wrong_components_test.cmake.in
+  h_a33a1e80933106 1
+src/deps/src/zlib/contrib/minizip/unzip.c
+  h_a33a1e80933106 329,365,382-383,386-388,390,392-395,398,402-403,450,483-487,492,741-742,813-823,887-889,891-893,895-899,901-905,908,910-916,919,921-927,930,932-938,941,943-949,953-960,1170-1175,1244
+src/deps/src/zlib/contrib/minizip/unzip.h
+  h_a33a1e80933106 318-321
+src/deps/src/zlib/contrib/minizip/zip.c
+  h_a33a1e80933106 131-132,290-301,309-310,312,362,372,384,395,411-412,414,428,430-432,447-449,451,461,468-469,471-473,487,493-494,507,512-513,515,584,708,744,760-762,764-766,770-773,776,780-781,821,838-843,846,905,990-992,1017-1021,1086,1089-1090,1095-1098,1309-1314,1371-1372,1871,1873,1875-1880,1884-1889,1916-1917,2180,2183-2185,2192,2194-2196,2199,2201-2210,2212-2218,2226,2231-2237
+src/deps/src/zlib/contrib/minizip/zip.h
+  h_a33a1e80933106 184-191
+src/deps/src/zlib/contrib/nuget/nuget.csproj
+  h_a33a1e80933106 10
+src/deps/src/zlib/contrib/pascal/zlibpas.pas
+  h_a33a1e80933106 13-14
+src/deps/src/zlib/contrib/puff/CMakeLists.txt
+  h_a33a1e80933106 1,10-17,39,41,45-46,59-60,70-71,75,79,83,86,93,100,104,106,109,115,128,138
+src/deps/src/zlib/contrib/puff/puffConfig.cmake.in
+  h_a33a1e80933106 10-19,23-24,26-39
+src/deps/src/zlib/contrib/puff/test/CMakeLists.txt
+  h_a33a1e80933106 2-3,9-13,18,21,25-26,28,31,35,40,42,44-46,48,50,57,61-63,66,70,75,78,81-89,95,99,103,108,113,124,131,135-137,139,141,146,163-165,169-173,175,180,185,197-201,203-207,209,215,227,232-236,238-242,244,246-248,257,262-266,268-272,274
+src/deps/src/zlib/contrib/puff/test/add_subdirectory_exclude_test.cmake.in
+  h_a33a1e80933106 1
+src/deps/src/zlib/contrib/puff/test/add_subdirectory_test.cmake.in
+  h_a33a1e80933106 1
+src/deps/src/zlib/contrib/puff/test/find_package_no_components_test.cmake.in
+  h_a33a1e80933106 1
+src/deps/src/zlib/contrib/puff/test/find_package_test.cmake.in
+  h_a33a1e80933106 1
+src/deps/src/zlib/contrib/puff/test/find_package_wrong_components_test.cmake.in
+  h_a33a1e80933106 1
+src/deps/src/zlib/contrib/puff/test/tester-cov.cmake
+  h_a33a1e80933106 1
+src/deps/src/zlib/contrib/puff/test/tester.cmake
+  h_a33a1e80933106 1
+src/deps/src/zlib/contrib/testzlib/CMakeLists.txt
+  h_a33a1e80933106 1,10-17,23-36,38,44,51-53,55,61
+src/deps/src/zlib/contrib/zlib1-dll/CMakeLists.txt
+  h_a33a1e80933106 1,6,14-16,18,20-32,36,42-45,50,70-71,74-76,78,83,95,125-132,138,179-188,190,192-196,203,208-251,255-262,265-304,306-308,310-313,315-318
+src/deps/src/zlib/contrib/zlib1-dll/test/CMakeLists.txt
+  h_a33a1e80933106 1-135
+src/deps/src/zlib/contrib/zlib1-dll/test/add_subdirectory_exclude_test.cmake.in
+  h_a33a1e80933106 1-23
+src/deps/src/zlib/contrib/zlib1-dll/test/add_subdirectory_test.cmake.in
+  h_a33a1e80933106 1-21
+src/deps/src/zlib/contrib/zlib1-dll/test/find_package_test.cmake.in
+  h_a33a1e80933106 1-23
+src/deps/src/zlib/contrib/zlib1-dll/zlib1.rc
+  h_a33a1e80933106 1-45
+src/deps/src/zlib/contrib/zlib1-dll/zlib1dllConfig.cmake.in
+  h_a33a1e80933106 1-6
+src/deps/src/zlib/contrib/zlib1-dll/zlibwapi.rc
+  h_a33a1e80933106 1-45
+src/deps/src/zlib/crc32.c
+  h_a33a1e80933106 689
+src/deps/src/zlib/deflate.c
+  h_a33a1e80933106 55,570-571,674-687,699,762,766,768-777,1339-1340,1346-1349,1355-1359,1361-1364,1367-1372,1375-1380,1673-1676,1711,1726,1731-1733,1741,1747,2052-2053
+src/deps/src/zlib/gzguts.h
+  h_a33a1e80933106 95-98,133,141-154,233-239
+src/deps/src/zlib/gzlib.c
+  h_a33a1e80933106 71,195-202,205,207-209,220,229,263,265,307,374,392-399,402-404,413-414,417-418,421,424,438
+src/deps/src/zlib/gzread.c
+  h_a33a1e80933106 36,128-134,163,258-262,291-304,311-312,315-319,321,325-330,378-380,382,435-439,441-442,445-446,448-449,486-490,492-493,495-496,499-501,526-530,532-533,565-570,572-573,595-596,632-636,638-639,651-653,677,694,696-697
+src/deps/src/zlib/gzwrite.c
+  h_a33a1e80933106 45,82,117,159-163,183-188,190,256-258,260,262,389-392,402-403,463,499-506,580,621-628
+src/deps/src/zlib/inflate.c
+  h_a33a1e80933106 130-137,176-177,548,553-554,711,924,1203-1204,1314-1325,1352,1354-1357,1363-1366,1374,1420-1423
+src/deps/src/zlib/inflate.h
+  h_a33a1e80933106 88,97-98
+src/deps/src/zlib/inftrees.c
+  h_a33a1e80933106 26,74
+src/deps/src/zlib/inftrees.h
+  h_a33a1e80933106 49-56
+src/deps/src/zlib/os400/README400
+  h_a33a1e80933106 1
+src/deps/src/zlib/os400/zlibfixed.rpgle
+  h_a33a1e80933106 4,25-26,28,30
+src/deps/src/zlib/os400/zlibfree.rpgle
+  h_a33a1e80933106 5,26-27,29-30
+src/deps/src/zlib/qnx/package.qpg
+  h_a33a1e80933106 28-31,66
+src/deps/src/zlib/test/CMakeLists.txt
+  h_a33a1e80933106 20,45,61-62,64,67,69-70,72-73,83-84,94-95,111-113,117-118,121-127,133-136,143,147,151,155,159,169,174-178,180-185,190,195,197-200,202-205,207-211,214,219-223,225-228,230,232-234,237-239,243,248-252,254-257,259,261-264,272-276,278-283,288,293,295-298,300-303,305-309,317-321,323-328,334,340-356
+src/deps/src/zlib/test/add_subdirectory_exclude_test.cmake.in
+  h_a33a1e80933106 1
+src/deps/src/zlib/test/add_subdirectory_test.cmake.in
+  h_a33a1e80933106 1,27
+src/deps/src/zlib/test/find_package_no_components_test.cmake.in
+  h_a33a1e80933106 1
+src/deps/src/zlib/test/find_package_test.cmake.in
+  h_a33a1e80933106 1
+src/deps/src/zlib/test/find_package_wrong_components_test.cmake.in
+  h_a33a1e80933106 1
+src/deps/src/zlib/test/infcover.c
+  h_a33a1e80933106 301,364-366
+src/deps/src/zlib/test/minigzip.c
+  h_a33a1e80933106 40-42,343,353-354
+src/deps/src/zlib/treebuild.xml
+  h_a33a1e80933106 2-3
+src/deps/src/zlib/trees.c
+  h_a33a1e80933106 230
+src/deps/src/zlib/uncompr.c
+  h_a33a1e80933106 36-37
+src/deps/src/zlib/win32/Makefile.msc
+  h_a33a1e80933106 48
+src/deps/src/zlib/win32/README-WIN32.txt
+  h_a33a1e80933106 3,25
+src/deps/src/zlib/win32/zlib-cmake.rc
+  h_a33a1e80933106 1-45
+src/deps/src/zlib/zconf.h
+  h_a33a1e80933106 502-505,523,538-542
+src/deps/src/zlib/zconf.h.in
+  h_a33a1e80933106 502-505,523,538-542
+src/deps/src/zlib/zlib.3
+  h_a33a1e80933106 1,108
+src/deps/src/zlib/zlib.h
+  h_a33a1e80933106 2,44-45,47-48,699-701,774-784,794,874,984-986,1101-1104,1401-1402,1508-1513,1579,1687-1689,1790-1791,1985-1986,2043
+src/deps/src/zlib/zlib.pc.cmakein
+  h_a33a1e80933106 2-5
+src/deps/src/zlib/zlibConfig.cmake.in
+  h_a33a1e80933106 10-19,23-24,26-39
+src/deps/src/zlib/zutil.c
+  h_a33a1e80933106 230-234
+src/scheduler/Dockerfile
+  h_a33a1e80933106 60
+src/ui/Dockerfile
+  h_a33a1e80933106 89
+src/ui/app/lang_config.py
+  h_a33a1e80933106 16
+src/ui/app/static/css/overrides/base.css
+  h_a33a1e80933106 406-410
+src/ui/app/static/js/i18n.js
+  h_a33a1e80933106 35-50
+src/ui/app/static/js/pages/cache.js
+  h_a33a1e80933106 371-372
+src/ui/app/static/js/pages/jobs.js
+  h_a33a1e80933106 254-255
+src/ui/app/static/js/pages/services.js
+  h_a33a1e80933106 528-529
+src/ui/app/static/js/plugins-settings.js
+  h_a33a1e80933106 754-757,763-766,2471-2474,2480-2483,3335-3338,3344-3347,3649-3652,3655-3658
+src/ui/app/static/js/utils.js
+  h_a33a1e80933106 167-173
+src/ui/app/static/locales/README.md
+  h_a33a1e80933106 17
+src/ui/app/static/locales/ja.json
+  h_a33a1e80933106 1-2010
+src/ui/app/templates/bans.html
+  h_a33a1e80933106 33-34
+src/ui/app/templates/base.html
+  h_a33a1e80933106 32,157
+src/ui/app/templates/cache.html
+  h_a33a1e80933106 29-30
+src/ui/app/templates/configs.html
+  h_a33a1e80933106 23-24
+src/ui/app/templates/dashboard.html
+  h_a33a1e80933106 146-147,149,166-167,169
+src/ui/app/templates/instances.html
+  h_a33a1e80933106 34-35
+src/ui/app/templates/jobs.html
+  h_a33a1e80933106 17-18
+src/ui/app/templates/menu.html
+  h_a33a1e80933106 133,139-141,144-146,166,168,172,178-180,183,185,206,208
+src/ui/app/templates/models/multivalue_setting.html
+  h_a33a1e80933106 29-33,36-40
+src/ui/app/templates/models/plugins_settings.html
+  h_a33a1e80933106 284,441
+src/ui/app/templates/models/plugins_settings_easy.html
+  h_a33a1e80933106 218
+src/ui/app/templates/navbar.html
+  h_a33a1e80933106 6,54-55,57,61,71
+src/ui/app/templates/plugins.html
+  h_a33a1e80933106 18-19
+src/ui/app/templates/reports.html
+  h_a33a1e80933106 16,18
+src/ui/app/templates/services.html
+  h_a33a1e80933106 21-22
+src/ui/app/templates/setup.html
+  h_a33a1e80933106 61-64,74-75,77,83,89-90,1850-1851,1853-1854
+src/ui/app/templates/support.html
+  h_a33a1e80933106 6,34,63-66,145
+src/ui/app/templates/templates.html
+  h_a33a1e80933106 17-18
+tests/core/bunkernet.yml
+  h_a33a1e80933106 219
+tests/core/inject.yml
+  h_a33a1e80933106 17-88
+tests/docker/docker-compose.bunkerweb.yml
+  h_a33a1e80933106 33
+tests/misc/conf/syslog-ng.conf
+  h_a33a1e80933106 8-11
+tests/scripts/before/errors.sh
+  h_a33a1e80933106 39
+tests/scripts/test-example-hook.sh
+  h_a33a1e80933106 18,48-66
+tests/scripts/test-k8s-cleanup.sh
+  h_a33a1e80933106 1-128
+tests/scripts/utils.sh
+  h_a33a1e80933106 94-137,160,168,175,178,187,189,405,471-513,542-547,549-559,632,642-644,726,728,737,746,755,764,772,774,783,792,799,807-808,810-813,815,827,829,1083-1085,1093,1095,1103,1105,1115,1124,1585,1587,1681,1706,1730
+tests/ui/configs.yml
+  h_a33a1e80933106 124
+tests/unit/common/test_whitelist_coverage_lua.py
+  h_a33a1e80933106 13-19,35-36,101-191
+tests/unit/gen/test_antibot_challenge_location.py
+  h_a33a1e80933106 48-75
+tests/unit/gen/test_errors_injection.py
+  h_a33a1e80933106 1-59
+tests/unit/harness/test_ci_matrix.py
+  h_a33a1e80933106 91-96
+tests/unit/test_ui_psl_wizard_text.py
+  h_a33a1e80933106 21
+tests/unit/test_ui_support_bundle.py
+  h_a33a1e80933106 764
+tests/unit/test_ui_support_config_mask.py
+  h_a33a1e80933106 261
+tests/utils/integrations.yml
+  h_a33a1e80933106 5,50,69
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "30d99d196cda8e60f8814f7e31135abf66b41701",
+  "prompts": {},
+  "humans": {
+    "h_a33a1e80933106": {
+      "author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}
