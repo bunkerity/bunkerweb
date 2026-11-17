@@ -57,6 +57,7 @@ RUN apk add --no-cache bash unzip curl libgcc libstdc++ libpq openssl libmagic m
 
 # Fix CVEs
 RUN apk add --no-cache "zlib>=1.4-r0" # CVE-2026-4738
+RUN apk add --no-cache "libpq>=18.7-r0" "postgresql18-client>=18.7-r0" # CVE-2026-6467 and 51 more PostgreSQL 18.6 CVEs
 
 # Copy dependencies
 COPY --from=builder --chown=0:101 --chmod=550 /usr/share/bunkerweb /usr/share/bunkerweb

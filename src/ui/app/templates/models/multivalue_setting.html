@@ -26,12 +26,18 @@
                            id="{{ setting_id_prefix }}{{ setting_data['id'] }}{{ setting_id_suffix if setting_id_suffix is defined else '' }}_{{ loop.index }}"
                            {% if disabled %}disabled{% endif %}>
                     {% if not disabled %}
-                        <button type="button" class="btn btn-outline-success add-multivalue-item">
-                            <i class="bx bx-plus"></i>
+                        <button type="button"
+                                class="btn btn-outline-success add-multivalue-item"
+                                aria-label="Add value"
+                                data-i18n="template.editor.multivalue_add">
+                            <i class="bx bx-plus" aria-hidden="true"></i>
                         </button>
                         {% if loop.index > 1 %}
-                            <button type="button" class="btn btn-outline-danger remove-multivalue-item">
-                                <i class="bx bx-x"></i>
+                            <button type="button"
+                                    class="btn btn-outline-danger remove-multivalue-item"
+                                    aria-label="Delete"
+                                    data-i18n="button.delete">
+                                <i class="bx bx-x" aria-hidden="true"></i>
                             </button>
                         {% endif %}
                     {% endif %}

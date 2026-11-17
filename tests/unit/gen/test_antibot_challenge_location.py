@@ -45,3 +45,31 @@ def test_a_service_without_the_flag_at_all_is_treated_as_absent():
     """The compiler emits the flag for every server, but a stale config may not have it."""
     rendered = _render(CONFS / "server-http" / "antibot.conf", USE_ANTIBOT="no")
     assert "location /challenge" not in rendered
+
+
+@pytest.mark.parametrize(
+    ("inject_head", "inject_body"),
+    [
+        ("<style>head</style>", ""),
+        ("", "<script>body</script>"),
+        ("<style>head</style>", "<script>body</script>"),
+    ],
+)
+def test_the_challenge_page_is_not_rewritten_by_html_injection(inject_head, inject_body):
+    """INJECT_HEAD/INJECT_BODY are server-level sub_filter rules that every location inherits (#3234).
+
+    The challenge page sends a nonce-based CSP that blocks whatever they inject, so the location
+    defines its own no-op rule: NGINX only inherits sub_filter rules into a location that has none.
+    """
+    rendered = _render(CONFS / "server-http" / "antibot.conf", USE_ANTIBOT="captcha", INJECT_HEAD=inject_head, INJECT_BODY=inject_body)
+    location = rendered.split("location /challenge", 1)[1]
+
+    assert "sub_filter '</head>' '</head>';" in location
+    # The override must not carry the injected markup itself.
+    assert "head</style>" not in location and "body</script>" not in location
+
+
+def test_no_sub_filter_is_added_when_html_injection_is_unset():
+    rendered = _render(CONFS / "server-http" / "antibot.conf", USE_ANTIBOT="captcha", INJECT_HEAD="", INJECT_BODY="")
+    assert "location /challenge" in rendered
+    assert "sub_filter" not in rendered

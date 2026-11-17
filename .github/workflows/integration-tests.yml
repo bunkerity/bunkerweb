@@ -78,7 +78,7 @@ jobs:
 
             export NEEDRESTART_SUSPEND=1
             export DEBIAN_FRONTEND=noninteractive
-            sudo apt install -y jq
+            sudo --preserve-env=DEBIAN_FRONTEND,NEEDRESTART_SUSPEND,http_proxy,https_proxy,no_proxy,HTTP_PROXY,HTTPS_PROXY,NO_PROXY apt install -y jq
 
             packages_info=$(cat /tmp/packages/packages_info.json)
             export LINUX_NAME="$(echo "$packages_info" | jq -r --arg specs "$SPECS" '.[$specs].name')"
@@ -190,13 +190,13 @@ jobs:
           }
           ppa_update() {
             local policy
-            sudo apt update -y || return 1
+            sudo --preserve-env=DEBIAN_FRONTEND,NEEDRESTART_SUSPEND,http_proxy,https_proxy,no_proxy,HTTP_PROXY,HTTPS_PROXY,NO_PROXY apt update -y || return 1
             policy="$(apt-cache policy firefox)" || return 1
             grep -qF "ppa.launchpadcontent.net/mozillateam/ppa" <<< "$policy"
           }
           retry ppa_update
 
-          sudo apt purge -y firefox
+          sudo --preserve-env=DEBIAN_FRONTEND,NEEDRESTART_SUSPEND,http_proxy,https_proxy,no_proxy,HTTP_PROXY,HTTPS_PROXY,NO_PROXY apt purge -y firefox
           echo '
           Package: *
           Pin: release o=LP-PPA-mozillateam
@@ -207,7 +207,7 @@ jobs:
           Pin-Priority: -1
           ' | sudo tee /etc/apt/preferences.d/mozilla-firefox
 
-          retry sudo -E apt install --no-install-recommends -y \
+          retry sudo --preserve-env=DEBIAN_FRONTEND,NEEDRESTART_SUSPEND,http_proxy,https_proxy,no_proxy,HTTP_PROXY,HTTPS_PROXY,NO_PROXY apt install --no-install-recommends -y \
             openssl git tar bzip2 wget curl grep libx11-xcb1 libappindicator3-1 \
             libasound2t64 libdbus-glib-1-2 libxtst6 libxt6 unzip firefox sed jq \
             dnsutils coreutils redis

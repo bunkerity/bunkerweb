@@ -74,6 +74,7 @@
       body {
         margin: 0;
         min-height: 100vh;
+        min-height: 100dvh;
         display: flex;
         flex-direction: column;
         background-color: var(--bw-ground);
@@ -214,7 +215,7 @@
         min-width: 0;
         height: 44px;
         padding: 0 12px;
-        border: 1px solid var(--bw-border);
+        border: 1px solid var(--bw-ink-soft);
         border-radius: 4px;
         background: var(--bw-status-bg);
         color: var(--bw-ink);
@@ -447,6 +448,9 @@
                 type="text"
                 name="captcha"
                 autocomplete="off"
+                autocapitalize="off"
+                autocorrect="off"
+                spellcheck="false"
                 required
               />
               <button type="submit" class="bw-submit">VERIFY</button>
@@ -461,6 +465,7 @@
         target="_blank"
         rel="noopener noreferrer"
         class="bw-footer-logo"
+        aria-label="BunkerWeb"
         ><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 213.09 59.68">
           <path d="M76.5 40.6h73.2v19H76.5z" class="bunker-cls-4" />
           <path

@@ -1,19 +1,20 @@
 #CMAKE_ARGV0 = /path/to/cmake
 #CMAKE_ARGV1 = -P
 #CMAKE_ARGV2 = path/to/this/file
-#CMAKE_ARGV3 = linker
-#CMAKE_ARGV4 = output-name
-#CMAKE_ARGV5...CMAKE_AGVN = OBJECTS
+#CMAKE_ARGV3 = --
+#CMAKE_ARGV4 = linker
+#CMAKE_ARGV5 = output-name
+#CMAKE_ARGV6...CMAKE_AGVN = OBJECTS
 #CMAKE_ARGVN+1 = LIBS
 #CMAKE_ARGVN+2...CMAKE_ARGVM libraries
 
-if(NOT CMAKE_ARGV3)
+if(NOT CMAKE_ARGV4)
     message(FATAL_ERROR "linker not set")
-endif(NOT CMAKE_ARGV3)
+endif(NOT CMAKE_ARGV4)
 
 set(REACHED_LIBS FALSE)
 set(REACHED_OBJ FALSE)
-foreach(arg RANGE 5 ${CMAKE_ARGC})
+foreach(arg RANGE 6 ${CMAKE_ARGC})
     if(CMAKE_ARGV${arg} STREQUAL LIBS)
         set(REACHED_LIBS TRUE)
         set(REACHED_OBJ FALSE)
@@ -33,7 +34,8 @@ foreach(arg RANGE 5 ${CMAKE_ARGC})
     if(REACHED_LIBS)
         list(APPEND LIBS "${CMAKE_ARGV${arg}}")
     elseif(REACHED_OBJ AND NOT ALI)
-        string(REPLACE ".o" ".ali" ALI "${CMAKE_ARGV${arg}}")
+        string(REPLACE ".o" ".ali" ALIPATH "${CMAKE_ARGV${arg}}")
+        string(REPLACE "__/" "" ALI "${ALIPATH}")
     else(REACHED_LIBS)
         string(SUBSTRING "${CMAKE_ARGV${arg}}" 0 3 start)
 
@@ -41,9 +43,9 @@ foreach(arg RANGE 5 ${CMAKE_ARGC})
             list(APPEND FLAGS "${CMAKE_ARGV${arg}}")
         endif(NOT start STREQUAL -aO)
     endif(REACHED_LIBS)
-endforeach(arg RANGE 5 ${CMAKE_ARGC})
+endforeach(arg RANGE 6 ${CMAKE_ARGC})
 
-execute_process(COMMAND ${CMAKE_ARGV3} link ${ALI} -o ${CMAKE_ARGV4} ${FLAGS} ${OTHER_OBJECTS} ${LIBS}
+execute_process(COMMAND ${CMAKE_ARGV4} link ${ALI} -o ${CMAKE_ARGV5} ${FLAGS} ${OTHER_OBJECTS} ${LIBS}
                 RESULT_VARIABLE RESULT
                 OUTPUT_VARIABLE dont_care
                 ERROR_VARIABLE ERROR)

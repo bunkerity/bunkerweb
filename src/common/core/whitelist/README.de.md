@@ -23,6 +23,9 @@ Führen Sie die folgenden Schritte aus, um die Whitelist-Funktion zu konfigurier
 !!! info "Stream-Modus"
     Im Stream-Modus werden nur IP-, rDNS- und ASN-Prüfungen durchgeführt.
 
+!!! info "rDNS und die erste Anfrage"
+    Ein rDNS-Treffer wird erst in der Access-Phase angewendet, daher kann bei leerem Whitelist-Cache (nach einem Reload oder Ablauf eines Eintrags) die erste Anfrage eines per rDNS auf die Whitelist gesetzten Clients noch von ModSecurity blockiert werden.
+
 ### Konfigurationseinstellungen
 
 **Allgemein**

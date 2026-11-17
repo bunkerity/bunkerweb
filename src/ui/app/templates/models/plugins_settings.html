@@ -281,7 +281,7 @@
                                         </label>
                                         <div class="d-flex align-items-center">
                                             {% if (current_endpoint == "global-config" or current_endpoint == "global-settings") and setting_data["context"] == "multisite" %}
-                                                <a role="badge"
+                                                <a aria-label="Multisite setting"
                                                    href='{{ docs_url("/concepts", "#multisite-mode") }}'
                                                    class="badge badge-center rounded-pill bg-secondary d-flex align-items-center justify-content-center p-1 me-1 docs-link"
                                                    data-endpoint="/concepts"
@@ -438,7 +438,7 @@
                                                                     </label>
                                                                     <div class="d-flex align-items-center">
                                                                         {% if (current_endpoint == "global-config" or current_endpoint == "global-settings") and setting_data["context"] == "multisite" %}
-                                                                            <a role="badge"
+                                                                            <a aria-label="Multisite setting"
                                                                                href='{{ docs_url("/concepts", "#multisite-mode") }}'
                                                                                class="badge badge-center rounded-pill bg-secondary d-flex align-items-center justify-content-center p-1 me-1 docs-link"
                                                                                data-endpoint="/concepts"

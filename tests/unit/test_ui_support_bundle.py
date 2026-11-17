@@ -761,7 +761,7 @@ class TemplateAndLocalesTest(unittest.TestCase):
 
     def test_keys_in_every_locale(self):
         locales = sorted(REPO_ROOT.joinpath("src/ui/app/static/locales").glob("*.json"))
-        self.assertEqual(len(locales), 19)
+        self.assertEqual(len(locales), 20)
         for locale in locales:
             card = json.loads(locale.read_text(encoding="utf-8"))["support"]["card"]["ui_bundle"]
             self.assertEqual(set(card), {"button", "help", "title"}, locale.name)

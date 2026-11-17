@@ -14,8 +14,8 @@
         <input type="hidden" id="templates_number" value="{{ templates|length }}" />
         <textarea type="hidden"
                   id="columns_preferences_defaults"
-                  class="visually-hidden">{{ columns_preferences_defaults['templates']|tojson }}</textarea>
-        <textarea type="hidden" id="columns_preferences" class="visually-hidden">{{ columns_preferences|tojson }}</textarea>
+                  class="visually-hidden" hidden aria-hidden="true">{{ columns_preferences_defaults['templates']|tojson }}</textarea>
+        <textarea type="hidden" id="columns_preferences" class="visually-hidden" hidden aria-hidden="true">{{ columns_preferences|tojson }}</textarea>
         <textarea type="hidden" id="templates-usage" class="visually-hidden">{{ template_usage|default({})|tojson }}</textarea>
         <input type="hidden"
                id="csrf_token"

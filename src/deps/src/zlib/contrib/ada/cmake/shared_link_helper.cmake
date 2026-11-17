@@ -1,18 +1,19 @@
 #CMAKE_ARGV0 = /path/to/cmake
 #CMAKE_ARGV1 = -P
 #CMAKE_ARGV2 = path/to/this/file
-#CMAKE_ARGV3 = linker
-#CMAKE_ARGV4 = output-name
-#CMAKE_ARGV5...CMAKE_AGVN = OBJECTS
+#CMAKE_ARGV3 = --
+#CMAKE_ARGV4 = linker
+#CMAKE_ARGV5 = output-name
+#CMAKE_ARGV6...CMAKE_AGVN = OBJECTS
 #CMAKE_ARGVN+1 = LIBS
 #CMAKE_ARGVN+2...CMAKE_ARGVM libraries
 
-if(NOT CMAKE_ARGV3)
+if(NOT CMAKE_ARGV4)
     message(FATAL_ERROR "linker not set")
-endif(NOT CMAKE_ARGV3)
+endif(NOT CMAKE_ARGV4)
 
 set(REACHED_FILES FALSE)
-foreach(arg RANGE 5 ${CMAKE_ARGC})
+foreach(arg RANGE 6 ${CMAKE_ARGC})
     if(CMAKE_ARGV${arg} STREQUAL "LIBS")
         set(REACHED_FILES TRUE)
         continue()
@@ -27,7 +28,7 @@ foreach(arg RANGE 5 ${CMAKE_ARGC})
     else(REACHED_LIBS)
         list(APPEND OBJECT_FILES "${CMAKE_ARGV${arg}}")
     endif(REACHED_LIBS)
-endforeach(arg RANGE 5 ${CMAKE_ARGC})
+endforeach(arg RANGE 6 ${CMAKE_ARGC})
 
 file(WRITE dummylib.adb
     "procedure dummylib is\n"
@@ -35,14 +36,14 @@ file(WRITE dummylib.adb
     "   null;\n"
     "end;\n")
 
-execute_process(COMMAND ${CMAKE_ARGV3} compile -fPIC dummylib.adb
+execute_process(COMMAND ${CMAKE_ARGV4} compile -fPIC dummylib.adb
                 OUTPUT_VARIABLE dont_care
                 ERROR_VARIABLE ERROR)
-execute_process(COMMAND ${CMAKE_ARGV3} bind -n dummylib.ali
+execute_process(COMMAND ${CMAKE_ARGV4} bind -n dummylib.ali
                 OUTPUT_VARIABLE dont_care
                 ERROR_VARIABLE ERROR)
 
-execute_process(COMMAND ${CMAKE_ARGV3} link -shared dummylib.ali -o ${CMAKE_ARGV4} ${OBJECT_FILES} ${LIBS}
+execute_process(COMMAND ${CMAKE_ARGV4} link -shared dummylib.ali -o ${CMAKE_ARGV5} ${OBJECT_FILES} ${LIBS}
                 RESULT_VARIABLE RESULT
                 OUTPUT_VARIABLE dont_care
                 ERROR_VARIABLE ERROR)

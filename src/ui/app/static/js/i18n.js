@@ -32,6 +32,22 @@ function applyTranslations() {
       element.attr("title", translation);
     } else if (element.is("[data-bs-original-title]")) {
       element.attr("data-bs-original-title", translation);
+      // An icon-only button or link has no text: its tooltip is its accessible name.
+      const $named = element.is("button, a")
+        ? element
+        : element.children("button, a").first();
+      if (
+        $named.length &&
+        !$named.text().trim() &&
+        !$named.is("[aria-labelledby]")
+      ) {
+        // DOMParser builds an inert document: no handler or resource of the markup runs
+        $named.attr(
+          "aria-label",
+          new DOMParser().parseFromString(translation, "text/html").body
+            .textContent,
+        );
+      }
     } else if (element.is("[aria-label]")) {
       element.attr("aria-label", translation);
     } else {

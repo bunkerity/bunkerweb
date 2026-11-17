@@ -137,7 +137,10 @@
           var img = document.createElement('img');
           img.src = logoPath;
           img.alt = MORPHAIUS_CREDIT.logoAlt || 'Morphaius';
-          // Keep aspect ratio for a 4797x1436 logo; scale via height only
+          // intrinsic size of logo-morphaius.webp, so the menu row does not resize when it loads
+          img.width = 480;
+          img.height = 144;
+          // Keep the logo's aspect ratio (10:3); scale via height only
           img.style.height = '1.25em';
           img.style.width = 'auto';
           img.style.maxWidth = '8em';

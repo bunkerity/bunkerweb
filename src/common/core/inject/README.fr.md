@@ -7,6 +7,7 @@ Comment ça marche :
 3. Si l’injection « head » est configurée, il insère votre HTML juste avant `</head>`.
 4. L’insertion s’applique automatiquement à toutes les pages HTML servies.
 5. Cela permet d’ajouter scripts, styles ou autres éléments sans modifier le code de votre application.
+6. La page de challenge antibot et les pages d’erreur de BunkerWeb ne sont pas modifiées : elles sont générées par BunkerWeb et leur Content Security Policy bloquerait de toute façon le code injecté.
 
 ### Comment l’utiliser
 

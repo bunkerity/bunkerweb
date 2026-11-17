@@ -71,6 +71,7 @@
       body {
         margin: 0;
         min-height: 100vh;
+        min-height: 100dvh;
         display: flex;
         flex-direction: column;
         background-color: var(--bw-ground);
@@ -421,7 +422,7 @@
               id="bw-status-decor"
               aria-hidden="true"
               ><span id="bw-status-text"
-                >&gt; searching nonce &middot;
+                >&gt; computing proof &middot;
                 <span id="bw-pow-count">0</span> tried<span class="bw-caret"
                   >_</span
                 ></span
@@ -454,6 +455,7 @@
         target="_blank"
         rel="noopener noreferrer"
         class="bw-footer-logo"
+        aria-label="BunkerWeb"
         ><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 213.09 59.68">
           <path d="M76.5 40.6h73.2v19H76.5z" class="bunker-cls-4" />
           <path

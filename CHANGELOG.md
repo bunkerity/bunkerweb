@@ -1,6 +1,6 @@
 # Changelog
 
-## v1.6.18~rc4 - 2026/11/13
+## v1.6.18~rc4 - 2026/11/17
 
 - [SECURITY] `api`, `ui`: restrict sensitive job-cache content (core private keys, credentials) to API admin credentials and UI super administrators.
 - [SECURITY] `autoconf`: secret setting values (keys, credentials, tokens, passwords) are no longer written to the logs, whatever the log level.
@@ -20,6 +20,7 @@
 - [SECURITY] `linux`: packaged Python code, migrations included, is no longer group-writable after install or upgrade.
 - [SECURITY] `linux`: packaged logs are created with mode 0640, and upgrades tighten existing logs and rotated archives to 0640.
 - [SECURITY] `docker`: update the Alpine `zlib` package to 1.4-r0, fixing CVE-2026-4738 (its Deflate64 code is not built, so BunkerWeb was not exposed).
+- [SECURITY] `docker`: update the Alpine `libpq` and `postgresql18-client` packages to 18.7-r0 in the API, autoconf, scheduler, UI and all-in-one images, fixing CVE-2026-6467 and 51 other PostgreSQL CVEs.
 - [FEATURE] `bwcli`: `bwcli bans --json` prints the bans as JSON for scripts and monitoring.
 - [FEATURE] `docker`: new floating image tags `1.6-edge` (newest release candidate or release), `1.6-rc`, `1.6-beta` and `1.6-alpha`, listed in the Docker docs.
 - [FEATURE] `blacklist`, `greylist`, `whitelist`: new `*_URLS_REFRESH_INTERVAL` settings set how often URL lists are refreshed (default `1h`) (Refs #3994).
@@ -30,6 +31,7 @@
 - [FEATURE] `core`: `CLIENT_HEADER_TIMEOUT` and `CLIENT_BODY_TIMEOUT` now support per-service overrides.
 - [FEATURE] `modsecurity`: new `MODSECURITY_SEC_AUDIT_LOG_FORMAT` setting (`Native` or `JSON`) writes the audit log as one JSON object per entry.
 - [BUGFIX] `inject`: quotes and backslashes in `INJECT_HEAD` and `INJECT_BODY` no longer break the generated config; remove hand-added `\'` workaround escapes.
+- [BUGFIX] `antibot`, `errors`, `inject`: `INJECT_HEAD` and `INJECT_BODY` are no longer applied to the antibot challenge page and BunkerWeb's error pages. (Fixes #3234)
 - [BUGFIX] `modsecurity`: response body rules now inspect Brotli-compressed responses too; ModSecurity used to see the compressed bytes when `USE_BROTLI=yes`. A response-body deny after headers were sent can leave the client with an incomplete response, as with gzip.
 - [BUGFIX] `linux`: RHEL 9 and 10 packages now build ModSecurity with yajl, so JSON request bodies are parsed for CRS and `SecAuditLogFormat JSON` works.
 - [BUGFIX] `limit`: `LIMIT_CONN_MAX_*` settings now accept only values NGINX supports (1 to 65535).
@@ -65,6 +67,8 @@
 - [BUGFIX] `linux`: RHEL packages now require logrotate.
 - [BUGFIX] `crowdsec`: start stream-mode decision synchronisation during worker initialisation, so an NGINX reload no longer leaves the poller dormant on quiet or whitelisted instances. (Fixes #4151)
 - [BUGFIX] `badbehavior`: match status codes exactly, so aborted requests (status 0) no longer count toward bans. (Refs #4162)
+- [BUGFIX] `errors`: the default error page no longer overflows narrow screens, and its text and links have readable contrast.
+- [BUGFIX] `whitelist`: IP, network, ASN, URI and User-Agent matches now bypass ModSecurity on the first request after a reload; rDNS applies from the second.
 - [PERF] `core`: in a 2-worker lab test, request-path CPU drops 14.2% for HTTP proxying and 33.3% for TLS proxying with the community blacklists.
 - [PERF] `blacklist`: reuse downloaded lists between requests instead of copying and deduplicating them each time.
 - [PERF] `core`: build the reserved-address matcher once per worker and cache successful plugin module lookups.
@@ -72,12 +76,22 @@
 - [PERF] `sessions`: stop reading the random cookie name and secret from shared memory on every request.
 - [PERF] `errors`: the default error page is 44% lighter (a 403 drops from about 69 KB to 39 KB), with no visible change (Refs #3892).
 - [PERF] `antibot`: the challenge pages are about 30% lighter once minified (about 20% with gzip or Brotli), with no visible change.
+- [UI] The web UI is more accessible (zoomable viewport, named icon buttons and fields), and news images load at 768 px instead of full size.
 - [DOCS] `linux`: the custom configuration section says where NGINX includes each type and how to check a file is live.
 - [DOCS] `reverseproxy`: `REVERSE_PROXY_KEEPALIVE` does not pool backend connections by itself; the docs show how to pool with a named upstream.
 - [DOCS] `modsecurity`: document response-body inspection limits for upstream-compressed content and how to request uncompressed content for one reverse-proxy location.
 - [DOCS] `core`: a new section shows how to send the access, error and ModSecurity audit logs to Splunk, with a `key=value` access log and a JSON audit log. The Splunk side uses the official BunkerWeb Add-on for Splunk from Splunkbase.
+- [DOCS] The docs site is more accessible (link contrast, focus rings, a pause button for the banner) and no longer shifts while loading.
+- [DOCS] The docs pages declare absolute `hreflang` alternates, so search engines serve each visitor the right language.
 - [MISC] `headers`: the default `PERMISSIONS_POLICY` also denies `semantic-embedder` and drops `browsing-topics`, which Chromium removed.
+- [MISC] `antibot`: the JavaScript challenge status line reads "computing proof" instead of "searching nonce". (Refs #4172)
+- [MISC] `antibot`: the challenge pages gain a named footer link, a visible captcha field border and no autocapitalisation of the captcha code.
 - [DEPS] Updated lua-resty-session to v4.3.0
+- [DEPS] Updated zlib to v1.4
+- [DEPS] Updated LuaJIT to v2.1-20261107
+- [DEPS] Updated resty-redis-cluster to v1.8.0
+- [CONTRIBUTION] Thank you [gaurav0107](https://github.com/gaurav0107) for keeping `INJECT_HEAD` and `INJECT_BODY` off the antibot challenge page. (#4153)
+- [CONTRIBUTION] Thank you [rakku5555](https://github.com/rakku5555) for your contribution regarding the `Japanese` translation of the web UI. (#4154)
 
 ## v1.6.18~rc3 - 2026/11/05
 

@@ -15,6 +15,7 @@ if [ -f /tmp/example_stack.txt ] ; then
     cp /tmp/example_stack.txt "$marker_backup"
 fi
 
+# shellcheck disable=SC2329 # Invoked by the EXIT trap.
 cleanup() {
     rm -rf "$tmp_dir"
     if [ -n "$marker_backup" ] ; then
@@ -42,6 +43,25 @@ fi
 if ! example_hook setup Kubernetes ; then
     echo "❌ example_hook failed on a missing script instead of skipping it"
     failures=$((failures+1))
+fi
+
+# Exercise the real sudo boundary when available; the container fallback has no kubeconfig.
+if [ "$(id -u)" -eq 0 ] || sudo -n true 2>/dev/null ; then
+    cat > "$tmp_dir/setup-kubernetes.sh" <<'SH'
+#!/bin/bash
+printf '%s\n' "$HOME" "$PATH" "${KUBECONFIG:-}" "${HELM_KUBECONTEXT:-}" "${HELM_NAMESPACE:-}" "${HELM_KUBETOKEN:-}" > ./context.txt
+test "$(id -u)" -eq 0 && grep -qx 'dummy kubeconfig' "${KUBECONFIG:-$HOME/.kube/config}"
+SH
+    if ! (
+        export KUBECONFIG="$tmp_dir/kubeconfig"
+        export HELM_KUBECONTEXT='example context' HELM_NAMESPACE='example-namespace' HELM_KUBETOKEN='dummy token'
+        printf 'dummy kubeconfig\n' > "$KUBECONFIG"
+        printf '%s\n' "$HOME" "$PATH" "$KUBECONFIG" "$HELM_KUBECONTEXT" "$HELM_NAMESPACE" "$HELM_KUBETOKEN" > "$tmp_dir/expected-context.txt"
+        example_hook setup Kubernetes && cmp "$tmp_dir/expected-context.txt" "$tmp_dir/context.txt"
+    ) ; then
+        echo "❌ example_hook lost HOME, PATH, KUBECONFIG or Helm context, namespace or token across sudo"
+        failures=$((failures+1))
+    fi
 fi
 
 printf '#!/bin/bash\nexit 3\n' > "$tmp_dir/cleanup-docker.sh"

@@ -81,7 +81,7 @@ Helfen Sie mir, BunkerWeb <Version> mit <Integration> zum Schutz meiner Anwendun
     !!! danger "Sicherheitshinweis"
         Überprüfen Sie immer die Integrität des Skripts mit der bereitgestellten Prüfsumme, bevor Sie es ausführen.
 
-    #### Highlights des Easy-Install-Skripts
+    ### Highlights des Easy-Install-Skripts
 
     - Erkennt Ihre Linux-Distribution und CPU-Architektur im Voraus und warnt, wenn Sie sich außerhalb der unterstützten Matrix befinden, bevor Änderungen vorgenommen werden.
     - Interaktive Eingabeaufforderungen verwenden eine Inline-TUI via [gum](https://github.com/charmbracelet/gum) — Pfeiltastenmenüs mit `❯`-Cursor und maskierte Passwortfelder. Beim ersten interaktiven Lauf lädt das Skript das offizielle `gum`-Binary aus der [GitHub-Release](https://github.com/charmbracelet/gum/releases) herunter (SHA256-gepinnt, optionale cosign-Signaturprüfung, sofern cosign installiert ist), führt es aus einem Temp-Verzeichnis aus und entfernt das Temp-Verzeichnis beim Beenden — **es wird kein Systempaket installiert, keine apt/dnf-Quelle hinzugefügt und kein Binary auf dem System hinterlassen**. Kann gum nicht bezogen werden, verwendet der Installer ein bereits vorhandenes `whiptail`; ist auch das nicht verfügbar, fällt er auf einfache Texteingaben zurück.

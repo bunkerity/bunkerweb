@@ -13,9 +13,9 @@
     <div class="card table-responsive text-nowrap p-4 pb-8 min-vh-70">
         {% set base_flags_url = url_for('static', filename='img/flags') %}
         <input type="hidden" id="base_flags_url" value="{{ base_flags_url }}" />
-        <textarea type="hidden" id="columns_preferences_defaults" class="visually-hidden">
+        <textarea type="hidden" id="columns_preferences_defaults" class="visually-hidden" hidden aria-hidden="true">
 {{ columns_preferences_defaults['reports']|tojson }}</textarea>
-        <textarea type="hidden" id="columns_preferences" class="visually-hidden">
+        <textarea type="hidden" id="columns_preferences" class="visually-hidden" hidden aria-hidden="true">
 {{ columns_preferences|tojson }}</textarea>
         <input type="hidden"
                id="csrf_token"

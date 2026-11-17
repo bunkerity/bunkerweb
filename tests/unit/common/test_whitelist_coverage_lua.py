@@ -10,6 +10,13 @@ KINDS = ("IP", "RDNS", "ASN", "USER_AGENT", "URI")
 PREAMBLE = r"""
 ENV = {}
 package.loaded["resty.env"] = { set = function(k, v) ENV[k] = v end }
+IPM_CALLS, REGEX_CALLS = 0, 0
+local ipmatcher = package.loaded["resty.ipmatcher"]
+local ipmatcher_new = ipmatcher.new
+ipmatcher.new = function(...) IPM_CALLS = IPM_CALLS + 1 return ipmatcher_new(...) end
+local utils = package.loaded["bunkerweb.utils"]
+local regex_match = utils.regex_match
+utils.regex_match = function(...) REGEX_CALLS = REGEX_CALLS + 1 return regex_match(...) end
 """
 SETUP = "VARIABLES = " + to_lua({"USE_WHITELIST": "yes", "WHITELIST_RDNS_GLOBAL": "no", **{f"WHITELIST_{k}": "" for k in KINDS}})
 
@@ -25,7 +32,8 @@ STORE["plugin_whitelist_lists_{SERVER}"] = {to_lua(lists or {})}
 local p = new_plugin(PLUGIN, {to_lua(context or {})})
 local r = p:{method}()
 emit({{ result = summary(r), flags = {{ ngx.var.is_whitelisted, p.ctx.bw.is_whitelisted, ENV.is_whitelisted }},
-        metrics = METRICS, cache = CACHE, ttl = CACHE_TTL, logs = LOGS }})
+        metrics = METRICS, cache = CACHE, ttl = CACHE_TTL, logs = LOGS,
+        calls = {{ rdns = RDNS_CALLS or 0, asn = ASN_CALLS or 0, ipm = IPM_CALLS, regex = REGEX_CALLS }} }})
 """)
 
 
@@ -88,6 +96,97 @@ def test_cached_pass_sets_all_three_whitelist_flags(method):
     assert out["flags"] == ["yes", "yes", "yes"]
     assert out["result"]["msg"] == "IP is in cached whitelist (info : ip)"
     assert out["metrics"] == ({"passed_whitelist": 1} if method == "access" else {})
+
+
+@pytest.mark.parametrize(
+    "lists,context,setup,info,cached",
+    [
+        ({"IP": ["1.2.3.4"]}, {}, "", "IP is whitelisted (info : ip)", "ip1.2.3.4"),
+        ({"IP": ["1.2.3.0/24"]}, {}, "", "IP is whitelisted (info : ip)", "ip1.2.3.4"),
+        ({"URI": ["^/health"]}, {"uri": "/health/live"}, "", "URI is whitelisted (info : URI ^/health)", "uri/health/live"),
+        ({"USER_AGENT": ["Monitor"]}, {"http_user_agent": "Monitor/1"}, "", "UA is whitelisted (info : UA Monitor)", "uaMonitor/1"),
+        ({"ASN": ["64496"]}, {"ip_is_global": True}, "ASN = 64496", "IP is whitelisted (info : ASN 64496)", "ip1.2.3.4"),
+    ],
+)
+def test_set_on_cold_cache_whitelists_without_waiting_for_the_access_phase(lists, context, setup, info, cached):
+    # ModSecurity phase 1 reads ENV right after set() and freezes it: the verdict has to exist by then.
+    out = access(lists, context=context, setup=setup, method="set")
+    assert out["result"] == {"ret": True, "msg": info}
+    assert out["flags"] == ["yes", "yes", "yes"]
+    assert out["cache"][f"plugin_whitelist_{SERVER}{cached}"] != "ok"
+    assert out["ttl"] == 86400
+    assert out["metrics"] == {}  # access() counts the pass once it replays the cache.
+
+
+@pytest.mark.parametrize(
+    "lists,context,setup",
+    [
+        ({"IP": ["1.2.4.0/24"]}, {}, ""),
+        ({"URI": ["^/health"], "USER_AGENT": ["Monitor"]}, {"http_user_agent": "curl"}, ""),
+        ({"ASN": ["64496"]}, {"ip_is_global": True}, "ASN = 64511"),
+        ({"ASN": ["64496"]}, {"ip_is_global": False}, "ASN = 64496"),
+        ({}, {}, ""),
+    ],
+)
+def test_set_on_cold_cache_leaves_other_clients_unwhitelisted_and_uncached(lists, context, setup):
+    out = access(lists, context=context, setup=setup, method="set")
+    assert out["result"] == {"ret": True, "msg": "not in whitelist cache"}
+    assert out["flags"] == ["no", "no", "no"]
+    assert out["cache"] == {}  # access() still has to look at rDNS for this client.
+
+
+def test_set_never_resolves_rdns_and_access_still_applies_it_afterwards():
+    out = run(f"""
+STORE["plugin_whitelist_lists_{SERVER}"] = {{ RDNS = {{ ".trusted.example" }} }}
+RDNS = {{ "bot.trusted.example" }}; FCRDNS = true
+local p = new_plugin(PLUGIN)
+local s = p:set()
+local after_set = {{ ngx.var.is_whitelisted, ENV.is_whitelisted, RDNS_CALLS or 0, next(CACHE) == nil }}
+local a = p:access()
+emit({{ set = s.msg, after_set = after_set, access = summary(a), flags = {{ ngx.var.is_whitelisted, ENV.is_whitelisted }} }})
+""")
+    assert out["set"] == "not in whitelist cache"
+    assert out["after_set"] == ["no", "no", 0, True]
+    assert out["access"] == {"ret": True, "msg": "IP is whitelisted (info : rDNS .trusted.example)", "status": "OK"}
+    assert out["flags"] == ["yes", "yes"]
+
+
+def test_set_then_access_reuses_the_verdict_set_wrote():
+    out = run(f"""
+STORE["plugin_whitelist_lists_{SERVER}"] = {{ IP = {{ "1.2.3.4" }} }}
+local p = new_plugin(PLUGIN)
+p:set()
+local calls = IPM_CALLS
+local a = p:access()
+emit({{ access = summary(a), extra_matches = IPM_CALLS - calls }})
+""")
+    assert out["access"] == {"ret": True, "msg": "IP is in cached whitelist (info : ip)", "status": "OK"}
+    assert out["extra_matches"] == 0
+
+
+@pytest.mark.parametrize("cached", ["ip", "ok"])
+def test_set_on_warm_cache_does_no_list_matching(cached):
+    out = access(
+        {"IP": ["1.2.3.4"], "URI": ["^/"], "USER_AGENT": ["x"]},
+        context={"http_user_agent": "x"},
+        setup=f'CACHE["plugin_whitelist_{SERVER}ip1.2.3.4"] = "{cached}"; CACHE["plugin_whitelist_{SERVER}ua" .. "x"] = "ok"; '
+        f'CACHE["plugin_whitelist_{SERVER}uri/"] = "ok"',
+        method="set",
+    )
+    assert out["calls"] == {"rdns": 0, "asn": 0, "ipm": 0, "regex": 0}
+
+
+def test_set_reports_list_errors_like_access_without_granting():
+    out = access({"IP": ["bad-address"]}, method="set")
+    assert out["result"]["msg"] == "not in whitelist cache"
+    assert ["ERR", "error while checking if IP is whitelisted : invalid address bad-address"] in out["logs"]
+    assert out["flags"] == ["no", "no", "no"]
+
+
+def test_set_keeps_a_cache_write_failure_from_losing_the_verdict():
+    out = access({"IP": ["1.2.3.4"]}, setup='CACHE_SET_ERROR = "full"', method="set")
+    assert out["flags"] == ["yes", "yes", "yes"]
+    assert ["ERR", "error while adding element to cache : full"] in out["logs"]
 
 
 def test_cached_negative_skips_a_now_matching_ip():

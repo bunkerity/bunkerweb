@@ -525,6 +525,8 @@ $(document).ready(function () {
           render: DataTable.render.select(),
           targets: 1,
         },
+        // Keep the row's identity visible when Responsive collapses the other columns on a phone
+        { responsivePriority: 1, targets: 2 },
         { orderable: false, targets: -1 },
         {
           targets: [7, 8],
