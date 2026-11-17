@@ -1,0 +1,448 @@
+docs/plugins.md
+  s_751421a72d1da7::t_05fd373807ff6e 909
+  s_751421a72d1da7::t_32c7904792990e 910
+src/common/core/backup/README.de.md
+  s_95046ef4eeb2cd::t_b085e25d2b9622 60-61
+src/common/core/modsecurity/README.zh.md
+  s_227ee560164867::t_e9889f3c1726d8 61
+docs/es/troubleshooting.md
+  s_558c2c9f236371::t_2fa0741678e816 918-929
+src/common/core/country/README.md
+  s_0a7c25ebde2361::t_23f38190deed49 26
+src/common/core/bunkernet/README.md
+  s_5ae1f71d7cd3de::t_2e5611a441c5cc 6,15,17,31-35,42-53
+docs/integrations.md
+  s_cd2c72503a0aee::t_d0e4e7b4729817 2721,2724
+  s_942b69daf4d90c::t_c7d95a4cb5b68c 1725-1727,2219-2232,2531-2556,2644-2645,2688-2689,2813-2814,3250-3271
+src/common/README.fr.md
+  s_4f460a2e940aa9::t_e39f07d8df8aba 77
+src/common/core/templates/README.es.md
+  s_7db872cc24d44a::t_eeea136cbbfad9 3-4
+docs/es/upgrading.md
+  s_cd2c72503a0aee::t_d0e4e7b4729817 665
+  s_942b69daf4d90c::t_4d3a538597b296 10,1154-1157,1596-1622
+docs/fr/troubleshooting.md
+  s_558c2c9f236371::t_2fa0741678e816 830-841
+src/common/core/headers/README.md
+  s_7db872cc24d44a::t_eeea136cbbfad9 55
+docs/es/plugins.md
+  s_751421a72d1da7::t_05fd373807ff6e 902
+  s_c0c5d5b16541aa::t_b5897563eef898 903
+src/common/core/AGENTS.md
+  s_8ae66289376f9b::t_793d7f7ad6d244 27
+src/common/core/templates/README.zh.md
+  s_7db872cc24d44a::t_eeea136cbbfad9 3-4
+docs/upgrading.md
+  s_cd2c72503a0aee::t_d0e4e7b4729817 632
+  s_942b69daf4d90c::t_67a39eafa035fc 10,1122-1125,1564-1590
+src/autoconf/AGENTS.md
+  s_bac151182f49d9::t_fa89ef101ba550 73,75,90,110
+src/common/core/limit/README.es.md
+  s_7db872cc24d44a::t_eeea136cbbfad9 62-63
+src/common/core/country/README.de.md
+  s_0a7c25ebde2361::t_23f38190deed49 24
+src/common/core/country/README.es.md
+  s_0a7c25ebde2361::t_23f38190deed49 26
+docs/es/web-ui.md
+  s_e62a58e33c485b::t_50caa15f0a7b02 267,333-336
+  s_942b69daf4d90c::t_9d5263d1796195 688
+src/common/core/country/README.zh.md
+  s_0a7c25ebde2361::t_23f38190deed49 26
+src/common/core/backup/README.zh.md
+  s_95046ef4eeb2cd::t_b085e25d2b9622 60-61
+src/common/core/templates/README.md
+  s_7db872cc24d44a::t_eeea136cbbfad9 3-4
+src/common/core/backup/README.fr.md
+  s_95046ef4eeb2cd::t_b085e25d2b9622 60-61
+src/common/core/bunkernet/README.fr.md
+  s_5ae1f71d7cd3de::t_2e5611a441c5cc 6,14,16,30-34,41-52
+src/common/core/templates/README.de.md
+  s_7db872cc24d44a::t_eeea136cbbfad9 3-4
+docs/zh/integrations.md
+  s_cd2c72503a0aee::t_d0e4e7b4729817 2658,2661
+  s_942b69daf4d90c::t_15193c51d18edb 1709-1711,2191-2204,2495-2520,2581-2582,2625-2626,2750-2751,3188-3209
+src/common/README.de.md
+  s_4f460a2e940aa9::t_e39f07d8df8aba 77
+src/common/core/modsecurity/README.md
+  s_227ee560164867::t_e9889f3c1726d8 61
+docs/zh/web-ui.md
+  s_e62a58e33c485b::t_50caa15f0a7b02 263,329-332
+  s_942b69daf4d90c::t_8e7880e4535fc0 626
+src/common/core/templates/README.fr.md
+  s_7db872cc24d44a::t_eeea136cbbfad9 3-4
+docs/fr/integrations.md
+  s_cd2c72503a0aee::t_d0e4e7b4729817 2672,2675
+  s_942b69daf4d90c::t_256a200ea897de 1722-1724,2204-2217,2506-2531,2595-2596,2639-2640,2764-2765,3202-3223
+src/common/core/bunkernet/README.zh.md
+  s_5ae1f71d7cd3de::t_2e5611a441c5cc 6,15,17,31-35,42-53
+src/common/core/crowdsec/README.md
+  s_564cb5d692c049::t_59a0dc9d832cd3 71-79,378,389-390,412
+docs/zh/plugins.md
+  s_751421a72d1da7::t_05fd373807ff6e 900
+  s_c0c5d5b16541aa::t_08fea8ee2c9abb 901
+src/common/core/limit/README.fr.md
+  s_7db872cc24d44a::t_eeea136cbbfad9 62-63
+src/common/core/crowdsec/README.fr.md
+  s_564cb5d692c049::t_59a0dc9d832cd3 71-79,376-377,387-388,410
+src/common/core/headers/README.zh.md
+  s_7db872cc24d44a::t_eeea136cbbfad9 55
+src/common/core/antibot/README.zh.md
+  s_0a7c25ebde2361::t_23f38190deed49 42
+  s_c0c5d5b16541aa::t_72fcec87e6830a 272
+src/common/core/country/README.fr.md
+  s_0a7c25ebde2361::t_23f38190deed49 24
+src/common/core/modsecurity/README.de.md
+  s_227ee560164867::t_e9889f3c1726d8 61
+docs/fr/upgrading.md
+  s_cd2c72503a0aee::t_d0e4e7b4729817 578
+  s_942b69daf4d90c::t_232b46e0aac42f 10,1067-1070,1509-1535
+src/common/core/bunkernet/README.es.md
+  s_5ae1f71d7cd3de::t_2e5611a441c5cc 6,15,17,31-35,42-53
+docs/troubleshooting.md
+  s_558c2c9f236371::t_2fa0741678e816 828-839
+docs/de/upgrading.md
+  s_cd2c72503a0aee::t_d0e4e7b4729817 656
+  s_942b69daf4d90c::t_605f3cdc29278b 10,1145-1148,1587-1613
+src/common/core/limit/README.de.md
+  s_7db872cc24d44a::t_eeea136cbbfad9 62-63
+src/common/README.md
+  s_4f460a2e940aa9::t_e39f07d8df8aba 77
+docs/fr/plugins.md
+  s_751421a72d1da7::t_05fd373807ff6e 902
+  s_c0c5d5b16541aa::t_53475fc89af2f4 903
+docs/de/plugins.md
+  s_751421a72d1da7::t_05fd373807ff6e 900
+  s_c0c5d5b16541aa::t_dd4b07ba3eaeb6 901
+src/common/core/backup/README.md
+  s_95046ef4eeb2cd::t_b085e25d2b9622 60-61
+src/common/README.es.md
+  s_4f460a2e940aa9::t_e39f07d8df8aba 77
+src/common/core/crowdsec/README.es.md
+  s_564cb5d692c049::t_59a0dc9d832cd3 71-79,372-373,383-384,406
+docs/zh/upgrading.md
+  s_cd2c72503a0aee::t_d0e4e7b4729817 519
+  s_942b69daf4d90c::t_b0141faa4d6dc2 10,1008-1011,1450-1476
+src/common/core/backup/README.es.md
+  s_95046ef4eeb2cd::t_b085e25d2b9622 60-61
+src/common/core/modsecurity/README.fr.md
+  s_227ee560164867::t_e9889f3c1726d8 61
+src/common/core/headers/README.de.md
+  s_7db872cc24d44a::t_eeea136cbbfad9 55
+docs/de/integrations.md
+  s_cd2c72503a0aee::t_d0e4e7b4729817 2730,2733
+  s_942b69daf4d90c::t_8848ec4500b4ad 1721-1723,2218-2231,2543-2568,2653-2654,2697-2698,2822-2823,3265-3286
+src/common/core/modsecurity/README.es.md
+  s_227ee560164867::t_e9889f3c1726d8 61
+src/common/core/limit/README.zh.md
+  s_7db872cc24d44a::t_eeea136cbbfad9 62-63
+src/common/core/crowdsec/README.de.md
+  s_564cb5d692c049::t_59a0dc9d832cd3 71-79,374-375,385-386,408
+docs/de/troubleshooting.md
+  s_558c2c9f236371::t_2fa0741678e816 929-940
+docs/zh/troubleshooting.md
+  s_558c2c9f236371::t_2fa0741678e816 825-836
+src/common/core/limit/README.md
+  s_7db872cc24d44a::t_eeea136cbbfad9 62-63
+src/common/core/headers/README.es.md
+  s_7db872cc24d44a::t_eeea136cbbfad9 55
+src/common/core/bunkernet/README.de.md
+  s_5ae1f71d7cd3de::t_2e5611a441c5cc 6,15,17,31-35,42-53
+docs/es/integrations.md
+  s_cd2c72503a0aee::t_d0e4e7b4729817 2614,2617
+  s_942b69daf4d90c::t_fdb47b12c3f56d 1720-1722,2216-2229,2446-2471,2537-2538,2581-2582,2706-2707,3148-3169
+src/common/core/antibot/README.fr.md
+  s_0a7c25ebde2361::t_23f38190deed49 42
+  s_c0c5d5b16541aa::t_3efa72282d05e5 272
+src/common/core/headers/README.fr.md
+  s_7db872cc24d44a::t_eeea136cbbfad9 55
+src/common/core/antibot/README.md
+  s_0a7c25ebde2361::t_23f38190deed49 42
+  s_ecb26d6f7f328f::t_f33a0bec54ef7c 272
+src/common/core/crowdsec/README.zh.md
+  s_564cb5d692c049::t_59a0dc9d832cd3 71-79,376-377,387-388,410
+src/common/core/antibot/README.es.md
+  s_0a7c25ebde2361::t_23f38190deed49 42
+  s_c0c5d5b16541aa::t_509dfcac763a5f 268
+docs/de/web-ui.md
+  s_e62a58e33c485b::t_50caa15f0a7b02 267,333-336
+  s_942b69daf4d90c::t_dfe625d4ae0c11 749
+src/common/README.zh.md
+  s_4f460a2e940aa9::t_e39f07d8df8aba 79
+src/common/core/antibot/README.de.md
+  s_0a7c25ebde2361::t_23f38190deed49 42
+  s_c0c5d5b16541aa::t_a1ccb1c3ce1eaf 272
+README.md
+  s_ecb26d6f7f328f::t_4811239ac930e8 127,135,137-142
+docs/about.md
+  s_ecb26d6f7f328f::t_f5c2989c0f6cf1 10
+docs/advanced.md
+  s_ecb26d6f7f328f::t_0be68834a09644 243,2652,2654,2656,2658,2660,2662,2664,2666,2673,2683,2717-2805
+docs/concepts.md
+  s_ecb26d6f7f328f::t_c712d7bd17b870 50,195
+docs/de/about.md
+  s_ecb26d6f7f328f::t_c02d939ff413e0 10
+docs/de/advanced.md
+  s_4f460a2e940aa9::t_9aa7866ca33e8d 2644,2646,2648,2650,2652,2654,2656,2658,2665,2675,2709-2797
+docs/de/concepts.md
+  s_ecb26d6f7f328f::t_7d258f46484c31 50,195
+docs/de/features.md
+  s_942b69daf4d90c::t_9da0b2eedeb79c 86,409,639,913-914,1176-1182,1615,1624,1626,1640-1644,1651-1662,1894,1919-1920,2018,2160-2168,2463-2464,2474-2475,2497,2866-2867,3086-3091,3736,4277-4278,4764,5039,5547,5584,5664,6185,7233-7234
+docs/de/index.md
+  s_ecb26d6f7f328f::t_a2535caa1c28b8 92,95,103,105-110
+docs/de/quickstart-guide.md
+  s_ecb26d6f7f328f::t_e83529e024682e 484
+docs/es/about.md
+  s_ecb26d6f7f328f::t_d10233a951ca3d 10
+docs/es/advanced.md
+  s_ecb26d6f7f328f::t_66fd3f3f298132 243,2644,2646,2648,2650,2652,2654,2656,2658,2665,2675,2709-2797
+docs/es/concepts.md
+  s_ecb26d6f7f328f::t_1b48d0bbfe2fda 49,199
+docs/es/features.md
+  s_942b69daf4d90c::t_f073fb65d195ff 86,408,634,922-923,1185-1191,1622,1631,1633,1647-1651,1658-1669,1901,1926-1927,2027,2177-2185,2478-2479,2489-2490,2512,2891-2892,3119-3124,3774,4316-4317,4800,5075,5583,5620,5702,6222,7285-7286
+docs/es/index.md
+  s_ecb26d6f7f328f::t_c47c118b18b0a4 92,95,103,105-110
+docs/es/quickstart-guide.md
+  s_ecb26d6f7f328f::t_874124bc1cc130 484
+docs/features.md
+  s_942b69daf4d90c::t_358ecb74a1ba43 86,479,709,997-998,1247-1253,1692,1701,1703,1717-1721,1728-1739,1968,1993-1994,2094,2246-2254,2553,2564-2565,2587,2964-2965,3192-3197,3851,4383-4384,4860,5135,5643,5680,5762,6267,7306-7307
+docs/fr/about.md
+  s_ecb26d6f7f328f::t_7a8092494f12f7 10
+docs/fr/advanced.md
+  s_ecb26d6f7f328f::t_88dbb92dbe1cc2 243,2643,2645,2647,2649,2651,2653,2655,2657,2664,2674,2708-2796
+docs/fr/concepts.md
+  s_ecb26d6f7f328f::t_43d58f2610fb9c 46,191
+docs/fr/features.md
+  s_942b69daf4d90c::t_191029132001db 86,408,638,904-905,1168-1174,1567,1575,1577,1591-1595,1602-1613,1832,1857-1858,1946,2088-2096,2393-2394,2404-2405,2427,2792-2793,3012-3017,3643,4164-4165,4639,4914,5409,5446,5526,6006,7005-7006
+docs/fr/index.md
+  s_ecb26d6f7f328f::t_f004c8e4b9dc11 92,95,103,105-110
+docs/fr/quickstart-guide.md
+  s_ecb26d6f7f328f::t_3ab1222c2f64c8 484
+docs/fr/web-ui.md
+  s_942b69daf4d90c::t_19a13e8dc26e71 265,331-334,632
+docs/index.md
+  s_ecb26d6f7f328f::t_170a4797626167 92,95,103,105-110
+docs/overrides/main.html
+  s_942b69daf4d90c::t_c6b28ba54b7b8b 2-35,89
+docs/quickstart-guide.md
+  s_ecb26d6f7f328f::t_aaaa04dc218bb6 484
+docs/web-ui.md
+  s_942b69daf4d90c::t_bc66bcebba48ec 264,336-339,661
+docs/zh/about.md
+  s_ecb26d6f7f328f::t_c73171614f6570 10
+docs/zh/advanced.md
+  s_ecb26d6f7f328f::t_523ce55f01253e 243,2642,2644,2646,2648,2650,2652,2654,2656,2663,2673,2707-2795
+docs/zh/concepts.md
+  s_ecb26d6f7f328f::t_570493a453bec9 46,191
+docs/zh/features.md
+  s_942b69daf4d90c::t_2866dff9bbab95 88,410,640,928-929,1130-1136,1545,1554,1556,1570-1574,1581-1592,1821,1846-1847,1947,2097-2105,2402-2403,2413-2414,2436,2811-2812,3039-3044,3679,4210-4211,4687,4962,5470,5507,5589,6093,7132-7133
+docs/zh/index.md
+  s_ecb26d6f7f328f::t_af35040cb59ba9 92,95,103,105-110
+docs/zh/quickstart-guide.md
+  s_ecb26d6f7f328f::t_b4e5940ca8abe7 484
+src/bw/AGENTS.md
+  s_cc0f00f1cad254::t_f24ed0bd9f22b4 127
+src/common/core/cors/README.de.md
+  s_cd2c72503a0aee::t_79605b29e4adce 29,54-55
+src/common/core/cors/README.es.md
+  s_cd2c72503a0aee::t_d291e75de648e8 29,54-55
+src/common/core/cors/README.fr.md
+  s_cd2c72503a0aee::t_1d84e55a31974c 27,52-53
+src/common/core/cors/README.md
+  s_cd2c72503a0aee::t_23310d7849456b 29,54-55
+src/common/core/cors/README.zh.md
+  s_cd2c72503a0aee::t_d960bac474eda3 29,54-55
+src/common/core/errors/README.de.md
+  s_ecb26d6f7f328f::t_80c53d79b8669a 60-65
+src/common/core/errors/README.es.md
+  s_ecb26d6f7f328f::t_0fe30f63899c43 68-73
+src/common/core/errors/README.fr.md
+  s_ecb26d6f7f328f::t_e7e1f8e1f8ce26 60-65
+src/common/core/errors/README.md
+  s_ecb26d6f7f328f::t_996695fdb8f970 68-73
+src/common/core/errors/README.zh.md
+  s_ecb26d6f7f328f::t_b20d332a62fc2d 68-73
+src/common/core/misc/README.de.md
+  s_cd2c72503a0aee::t_1261ad42d1ca77 148
+src/common/core/misc/README.es.md
+  s_cd2c72503a0aee::t_1ce376b804b396 146
+src/common/core/misc/README.fr.md
+  s_cd2c72503a0aee::t_7fae34cdb6982b 137
+src/common/core/misc/README.md
+  s_cd2c72503a0aee::t_ce7c377d20492d 139
+src/common/core/misc/README.zh.md
+  s_cd2c72503a0aee::t_f930d412f9e1eb 139
+src/common/core/pro/README.de.md
+  s_ecb26d6f7f328f::t_04e16d41d02197 23,60
+src/common/core/pro/README.es.md
+  s_ecb26d6f7f328f::t_b44a76fe223d43 23,60
+src/common/core/pro/README.fr.md
+  s_ecb26d6f7f328f::t_08668fd5c587c1 21,58
+src/common/core/pro/README.md
+  s_ecb26d6f7f328f::t_d31e3e894086a7 23,60
+src/common/core/pro/README.zh.md
+  s_ecb26d6f7f328f::t_3a34b85cdfb277 23,60
+src/common/core/realip/README.de.md
+  s_ecb26d6f7f328f::t_215f3f6388c2c0 46
+src/common/core/realip/README.es.md
+  s_ecb26d6f7f328f::t_4179de3f2ed2f5 48
+src/common/core/realip/README.fr.md
+  s_ecb26d6f7f328f::t_a37c728c8264e6 46
+src/common/core/realip/README.md
+  s_ecb26d6f7f328f::t_a5a312d1ec9834 48
+src/common/core/realip/README.zh.md
+  s_ecb26d6f7f328f::t_24b4c3d902686b 48
+src/common/core/reverseproxy/README.de.md
+  s_ecb26d6f7f328f::t_a5b3020669993e 78
+src/common/core/reverseproxy/README.es.md
+  s_ecb26d6f7f328f::t_7448bee684fa95 78
+src/common/core/reverseproxy/README.fr.md
+  s_ecb26d6f7f328f::t_4c2581e3497cd6 78
+src/common/core/reverseproxy/README.md
+  s_ecb26d6f7f328f::t_112dbd653a1f81 78
+src/common/core/reverseproxy/README.zh.md
+  s_ecb26d6f7f328f::t_d7550220732ccd 78
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "c41a947cb6989d26ecde2a1f35c0250955904684",
+  "prompts": {},
+  "sessions": {
+    "s_0a7c25ebde2361": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "dd997fa7-1d53-48f3-bb5d-5df3e25b0998",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_227ee560164867": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1abd5-c91a-7621-bf85-b470c554c254",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_4f460a2e940aa9": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "1801373c-868e-412b-b538-cb2f1f5efe59",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_558c2c9f236371": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "0eb8d38a-b99d-4cab-8edb-a24ae8d61026",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_564cb5d692c049": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "30be49c2-4dfb-4455-b47e-f6fb6c5fb7fd",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_5ae1f71d7cd3de": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1ad6b-5280-7590-87bb-93f1a597ae67",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_751421a72d1da7": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "a1cd49cb-bc02-4f73-9b72-c088e5f0245c",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_7db872cc24d44a": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1ac53-82bd-7021-8474-9868afc6fad4",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_8ae66289376f9b": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1abf1-80a0-7151-867d-6e689986600a",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_942b69daf4d90c": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1adaf-7ad9-78a3-be25-657092c967be",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_95046ef4eeb2cd": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1acd7-7ba3-79c3-a5ca-fd0444cb8c69",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_bac151182f49d9": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1ac7b-b1fa-7f11-b240-82ee85373c30",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_c0c5d5b16541aa": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1ad7f-a1d5-7b23-998e-6ac55cc7af16",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_cc0f00f1cad254": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1ad54-47e5-7081-abbb-00a748225399",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_cd2c72503a0aee": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1abb1-9c7f-7360-8932-485c9165e954",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_e62a58e33c485b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "9a68abd8-c6b9-40d9-9318-b43a9efa40c0",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_ecb26d6f7f328f": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1ad36-38d8-7ef1-94a8-30b163817431",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

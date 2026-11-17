@@ -1,0 +1,24 @@
+src/scheduler/main.py
+  s_29c5c5c0683384::t_53f710a925c2ad 1953,1956-1958
+  s_29c5c5c0683384::t_c1dad9cb8dcb91 1952,1954-1955,1959
+tests/unit/scheduler/test_lxq_failover_recovery.py
+  s_29c5c5c0683384::t_dc59f0f0156df8 1-12,14,16,18-56,61-62,64-80
+  s_29c5c5c0683384::t_53320ed2769d70 13,15,17,63
+  s_29c5c5c0683384::t_e85c4acc99ad00 57-60
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "6098f724c889d62b0e246a2e036b8407288bdd76",
+  "prompts": {},
+  "sessions": {
+    "s_29c5c5c0683384": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1b133-30a1-7872-af63-bcd7da5ddc3c",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

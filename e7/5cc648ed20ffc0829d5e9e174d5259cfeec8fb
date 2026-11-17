@@ -1,0 +1,40 @@
+.github/workflows/ui.yml
+  s_ae9d57c2e9d0c8::t_251b7bac84471c 39-41
+  s_23c2492ec1f2c7::t_6c1c03809bf7b4 106-107
+tests/core/general.yml
+  s_23c2492ec1f2c7::t_38ed34633819da 2
+tests/parse.py
+  s_23c2492ec1f2c7::t_c23484adacd91b 70-79
+  s_23c2492ec1f2c7::t_1b833c1bff729f 80-81
+tests/core/upgrade.yml
+  s_23c2492ec1f2c7::t_4788485e3dad5a 6
+tests/README.md
+  s_23c2492ec1f2c7::t_825db8f3e271ac 374-384
+  s_23c2492ec1f2c7::t_9a4f2c83d7ddeb 393-394
+.github/workflows/dev.yml
+  s_23c2492ec1f2c7::t_6c1c03809bf7b4 142-161,176-177,190-191,204-205,218-219,230-241,253,255-256
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "e75cc648ed20ffc0829d5e9e174d5259cfeec8fb",
+  "prompts": {},
+  "sessions": {
+    "s_23c2492ec1f2c7": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "917a77ff-2f5b-495b-8716-f27b91a5aee3",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_ae9d57c2e9d0c8": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "abac0865-cd6f-4109-9da9-c872b272c25a",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

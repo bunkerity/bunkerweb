@@ -1,0 +1,21 @@
+src/scheduler/main.py
+  s_0acf78da78d316::t_f4ec60b7acb885 106-109,119-121,302-305,1185-1188
+  s_0acf78da78d316::t_cc67ed50f39677 110-118
+  s_0acf78da78d316::t_99072cec6d6d39 1189-1190
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "29df1164aaa39a9a4373cce8f7ac272e10c39604",
+  "prompts": {},
+  "sessions": {
+    "s_0acf78da78d316": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "af4926eb-0229-44fa-94ea-477e9b630b54",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

@@ -1,0 +1,30 @@
+tests/core/redis.yml
+  s_a0aa310011367c::t_8abfafd4b81d60 629-638
+tests/core/redis/cluster_migrate.sh
+  s_a0aa310011367c::t_0391fca961a8eb 1-291,297
+  s_cabea18a787221::t_421ec01f0f514f 292-296,298-357
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "60c1c1ce75ca0da629fdd38f2ea07c1bbc7981b6",
+  "prompts": {},
+  "sessions": {
+    "s_a0aa310011367c": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "af4b3b7a-aa14-420c-8c61-262ac76c578e",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_cabea18a787221": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "a3bb01c2-cb2b-4066-b665-1b5935928d43",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

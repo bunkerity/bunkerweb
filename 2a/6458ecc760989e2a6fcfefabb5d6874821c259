@@ -1,0 +1,49 @@
+src/deps/requirements-deps.in
+  s_ff20fc71fc9551::t_8ab8248dccda44 2
+src/scheduler/requirements.txt
+  s_ff20fc71fc9551::t_8ab8248dccda44 5,47-49,51-53,210-212,619-621,694-696,1147-1149,1216-1266
+src/api/requirements.in
+  s_ff20fc71fc9551::t_8ab8248dccda44 4,6,9
+src/common/db/requirements.arm.txt
+  s_ff20fc71fc9551::t_8ab8248dccda44 5,331-333,335-336,350-422
+docs/requirements.in
+  s_ff20fc71fc9551::t_8ab8248dccda44 5
+src/api/requirements.txt
+  s_ff20fc71fc9551::t_8ab8248dccda44 5,259-261,270-272,582-584,809-811,823,935-1089,1091-1192
+src/ui/requirements.in
+  s_ff20fc71fc9551::t_8ab8248dccda44 1,13
+src/common/db/requirements.in
+  s_ff20fc71fc9551::t_8ab8248dccda44 4,6
+src/common/db/requirements.arm.in
+  s_ff20fc71fc9551::t_8ab8248dccda44 4,6
+src/deps/requirements.txt
+  s_ff20fc71fc9551::t_8ab8248dccda44 5,25-27
+src/deps/requirements-deps.txt
+  s_ff20fc71fc9551::t_8ab8248dccda44 5,11-13,213-215,333-362
+src/common/db/requirements.txt
+  s_ff20fc71fc9551::t_8ab8248dccda44 5,331-333,335-401,415-487
+docs/requirements.txt
+  s_ff20fc71fc9551::t_8ab8248dccda44 5,28-30,342-344,353-355,667,670-672,682-684,798-800,831-833
+src/deps/requirements.in
+  s_ff20fc71fc9551::t_8ab8248dccda44 2
+src/autoconf/requirements.txt
+  s_ff20fc71fc9551::t_8ab8248dccda44 5,192-194,514-641
+src/common/gen/requirements.txt
+  s_ff20fc71fc9551::t_8ab8248dccda44 5,11-13,189-316
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "2a6458ecc760989e2a6fcfefabb5d6874821c259",
+  "prompts": {},
+  "sessions": {
+    "s_ff20fc71fc9551": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "162362c5-42b6-46e1-83a0-29f8b51592ba",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

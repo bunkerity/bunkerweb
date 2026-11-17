@@ -1,0 +1,40 @@
+src/deps/src/brotli/CHANGELOG.md
+  s_631a4aa5ed93ec::t_1ed88f8ee41847 10-14
+src/deps/src/brotli/c/include/brotli/decode.h
+  s_631a4aa5ed93ec::t_1ed88f8ee41847 88
+src/deps/src/brotli/c/common/version.h
+  s_631a4aa5ed93ec::t_1ed88f8ee41847 22,36
+src/deps/src/brotli/c/dec/decode.c
+  s_631a4aa5ed93ec::t_1ed88f8ee41847 1179,1190,1200-1202,1206,1222,1259,1261-1263,1266,1269-1271,1274,1281,1283-1285,1288,1291-1293,1296-1297,1303,1305-1307,1312,1315-1317,1320,1951-1953,1966-1981,2021,2166,2360,2582-2583
+src/deps/src/lua-resty-dns/lib/resty/dns/resolver.lua
+  s_631a4aa5ed93ec::t_1ed88f8ee41847 61,288-291,305-308,379-382,415-417,419-421,423-427,441,492,523,539,557-560,563,583,599,616,623,627-629
+  s_631a4aa5ed93ec::t_90b00357ef9779 630
+CHANGELOG.md
+  s_175dfb7646d720::t_09d3df76e4bbc5 33-34
+src/deps/deps.json
+  s_631a4aa5ed93ec::t_7f86fed9b7e298 13,15,81,83
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "060da16e85f385e476b94b699b2aa9b52df61b17",
+  "prompts": {},
+  "sessions": {
+    "s_175dfb7646d720": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "6287d9cf-9a0e-4d8a-a3c0-5a6e08f44cfe",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_631a4aa5ed93ec": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "d02cf770-58e7-4822-a83c-28215f564016",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

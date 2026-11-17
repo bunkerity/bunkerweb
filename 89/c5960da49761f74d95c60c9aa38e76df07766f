@@ -1,0 +1,29 @@
+src/api/Dockerfile
+  s_83bd8faaada4a3::t_c561d086d66a78 48
+src/all-in-one/Dockerfile
+  s_83bd8faaada4a3::t_c561d086d66a78 179
+src/autoconf/Dockerfile
+  s_83bd8faaada4a3::t_c561d086d66a78 47
+src/ui/Dockerfile
+  s_83bd8faaada4a3::t_c561d086d66a78 89
+CHANGELOG.md
+  s_83bd8faaada4a3::t_c561d086d66a78 23
+src/scheduler/Dockerfile
+  s_83bd8faaada4a3::t_c561d086d66a78 60
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "89c5960da49761f74d95c60c9aa38e76df07766f",
+  "prompts": {},
+  "sessions": {
+    "s_83bd8faaada4a3": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1e342-7eef-7652-b2db-d5ac52b40866",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

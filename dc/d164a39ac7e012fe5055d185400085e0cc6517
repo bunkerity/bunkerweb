@@ -1,0 +1,19 @@
+tests/core/redis.yml
+  s_6664a575e2a5bc::t_65588bd0dfc458 656-657
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "dcd164a39ac7e012fe5055d185400085e0cc6517",
+  "prompts": {},
+  "sessions": {
+    "s_6664a575e2a5bc": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1c0a5-fa74-7a63-b885-1e321e30cd90",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

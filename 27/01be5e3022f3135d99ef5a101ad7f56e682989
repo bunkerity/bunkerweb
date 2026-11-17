@@ -1,0 +1,19 @@
+tests/linux/Dockerfile-rhel-8
+  s_a578a391081c8e::t_268ad5c7c543c2 1
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "2701be5e3022f3135d99ef5a101ad7f56e682989",
+  "prompts": {},
+  "sessions": {
+    "s_a578a391081c8e": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1a5b9-8481-7622-b8b5-86163ed02484",
+        "model": "unknown"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

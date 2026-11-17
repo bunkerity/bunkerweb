@@ -1,0 +1,27 @@
+docs/de/plugins.md
+  s_5765503030423a::t_4d09ee5313eceb 11-22,30
+docs/es/plugins.md
+  s_5765503030423a::t_0582cf5b10a0af 11-22,30
+docs/fr/plugins.md
+  s_5765503030423a::t_727dd037fb154d 11-22,30
+docs/plugins.md
+  s_5765503030423a::t_295047790cf3f2 11-22,30
+docs/zh/plugins.md
+  s_5765503030423a::t_0333ff5925c295 11-22,30
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "4128411a0c790597d2a177507429db3564d2d91f",
+  "prompts": {},
+  "sessions": {
+    "s_5765503030423a": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "8115552a-34c2-4993-ba26-6ba9cf0ff251",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

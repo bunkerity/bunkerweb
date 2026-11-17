@@ -1,0 +1,41 @@
+docs/es/integrations.md
+  s_80f1da85912d1b::t_55912a35564cf3 2292-2317
+CHANGELOG.md
+  s_80f1da85912d1b::t_55912a35564cf3 9
+docs/zh/integrations.md
+  s_80f1da85912d1b::t_55912a35564cf3 2291-2316
+docs/de/integrations.md
+  s_80f1da85912d1b::t_55912a35564cf3 2291-2316
+docs/fr/concepts.md
+  s_80f1da85912d1b::t_55912a35564cf3 175
+misc/install-bunkerweb.sh
+  s_80f1da85912d1b::t_55912a35564cf3 5626-5678,9484,9502
+docs/es/concepts.md
+  s_80f1da85912d1b::t_55912a35564cf3 175
+docs/integrations.md
+  s_80f1da85912d1b::t_55912a35564cf3 2387-2412
+docs/de/concepts.md
+  s_80f1da85912d1b::t_55912a35564cf3 175
+docs/concepts.md
+  s_80f1da85912d1b::t_55912a35564cf3 177
+docs/zh/concepts.md
+  s_80f1da85912d1b::t_55912a35564cf3 175
+docs/fr/integrations.md
+  s_80f1da85912d1b::t_55912a35564cf3 2294-2319
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "8aa966311a36af3fb32e20d05fe640c2b12efd0d",
+  "prompts": {},
+  "sessions": {
+    "s_80f1da85912d1b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "48f28331-3ce2-4fa3-b959-69d5d1238c0a",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

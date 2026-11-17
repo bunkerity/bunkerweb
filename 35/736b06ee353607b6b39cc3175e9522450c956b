@@ -1,0 +1,258 @@
+src/common/core/badbehavior/locales/fr.json
+  s_ba95831e009b1c::t_22a2dd7058ff64 28-35
+src/common/core/badbehavior/locales/bn.json
+  s_ba95831e009b1c::t_22a2dd7058ff64 28-35
+tests/unit/ui/test_bans_time_left_sort_and_30d_pane.py
+  s_cd2c72503a0aee::t_6c64410c0f1e42 1-110
+tests/unit/common/test_badbehavior_shared_evidence_lua.py
+  s_dfd54f297022ed::t_eb9842380028f6 11-12,37-39,44,51
+  s_b167dbd10b0b55::t_34851b0f8bb26d 1-10,13-36,40-43,45-50
+tests/unit/common/test_reports_filter_value_encoding_lua.py
+  s_ba95831e009b1c::t_49609401051504 1-40
+src/common/db/db_methods/metrics.py
+  s_b167dbd10b0b55::t_47b6fc3296233b 6,9,328-345,365-375
+  s_b167dbd10b0b55::t_763587551c16ef 346-364
+src/common/core/badbehavior/README.fr.md
+  s_ba95831e009b1c::t_792a6ffea0dc45 42-44,48
+  s_b167dbd10b0b55::t_30f860ba81b30b 45-47
+tests/unit/ui/test_reports_blocked_counts.py
+  s_ba95831e009b1c::t_3777fadd40ab5d 1-32
+src/common/core/badbehavior/README.es.md
+  s_b167dbd10b0b55::t_30f860ba81b30b 47-49
+  s_ba95831e009b1c::t_792a6ffea0dc45 44-46,50
+tests/unit/metrics/test_metrics_instance_sync.py
+  s_b167dbd10b0b55::t_a0bfc3d98fa9c1 16-17
+tests/unit/common/test_badbehavior_service_evidence_lua.py
+  s_ba95831e009b1c::t_35cdc699beaad9 16,23
+  s_ba95831e009b1c::t_b23b1c80060f47 1-15,17-22,24-36
+tests/unit/api/test_metrics_filter_value_encoding.py
+  s_ba95831e009b1c::t_49609401051504 1-37
+src/common/core/badbehavior/README.md
+  s_ba95831e009b1c::t_792a6ffea0dc45 44-46,50
+  s_b167dbd10b0b55::t_30f860ba81b30b 47-49
+tests/unit/common/test_badbehavior_report_limits_lua.py
+  s_ba95831e009b1c::t_d0e9dec2b2815c 1-82
+src/common/core/badbehavior/locales/zh.json
+  s_ba95831e009b1c::t_22a2dd7058ff64 28-35
+src/ui/app/utils.py
+  s_4f93320f8a3c5e::t_7f4eec4b9f74cb 149
+src/common/core/badbehavior/locales/ur.json
+  s_ba95831e009b1c::t_22a2dd7058ff64 28-35
+tests/unit/ui/test_reports_components.py
+  s_3535bd787ed7ee::t_a6a388936493fb 438
+  s_4f93320f8a3c5e::t_1aea81f9ef31cb 492-493
+src/common/core/badbehavior/README.de.md
+  s_b167dbd10b0b55::t_30f860ba81b30b 47-49
+  s_ba95831e009b1c::t_792a6ffea0dc45 44-46,50
+src/ui/app/routes/reports.py
+  s_ba95831e009b1c::t_760502c2c723cf 18-19,140,149,278,425,526,628
+  s_87b148a97f23ad::t_12b51a5b396045 342,583,699
+  s_b167dbd10b0b55::t_cf17e01695360a 334-339,345
+src/common/core/badbehavior/README.zh.md
+  s_ba95831e009b1c::t_792a6ffea0dc45 44-46,50
+  s_b167dbd10b0b55::t_30f860ba81b30b 47-49
+tests/unit/ui/test_reports_shared_ban_evidence.py
+  s_dfd54f297022ed::t_eb9842380028f6 68-72,83-87,91-93,99-103
+  s_c32d3d7a053777::t_c79c8952a55c73 1-13,18-55,65-67,73-82,88-90,94-98,104
+  s_b167dbd10b0b55::t_d8151f90edca4f 14-17
+  s_b167dbd10b0b55::t_c50ee4fbe431af 56-64
+src/common/core/badbehavior/locales/de.json
+  s_ba95831e009b1c::t_22a2dd7058ff64 28-35
+src/common/core/badbehavior/locales/tr.json
+  s_ba95831e009b1c::t_22a2dd7058ff64 8-15
+src/common/core/badbehavior/locales/tw.json
+  s_ba95831e009b1c::t_22a2dd7058ff64 28-35
+src/api/app/routers/metrics.py
+  s_ba95831e009b1c::t_5f862976c6c547 47-49
+  s_b167dbd10b0b55::t_47b6fc3296233b 3,151-161
+  s_ba95831e009b1c::t_760502c2c723cf 4,60
+  s_40ce55291c832b::t_f09fe6884cceaa 162-163
+tests/unit/common/test_reports_url_cap_lua.py
+  s_ba95831e009b1c::t_e8d09519809ee8 1-31
+src/common/core/badbehavior/locales/ar.json
+  s_ba95831e009b1c::t_22a2dd7058ff64 28-35
+src/common/core/metrics/jobs/scrape-persist-reports.py
+  s_dfd54f297022ed::t_eb9842380028f6 97-102
+  s_b167dbd10b0b55::t_cf17e01695360a 7-8,57-59,79-96,103-105
+src/common/core/badbehavior/locales/pl.json
+  s_ba95831e009b1c::t_22a2dd7058ff64 8-15
+src/ui/app/routes/bans.py
+  s_ba95831e009b1c::t_760502c2c723cf 19,283,589,635
+  s_6189ae7958809e::t_f7334a39b1e30c 16,58,60-61,888,971,1058,1169
+  s_751421a72d1da7::t_788f3618510811 239-245,624-625
+  s_6189ae7958809e::t_6e03fbd0c087ad 59
+tests/unit/ui/test_reports_evidence_counter.py
+  s_ba95831e009b1c::t_d0e9dec2b2815c 1-27,32-40
+  s_ba95831e009b1c::t_35cdc699beaad9 31
+  s_ba95831e009b1c::t_2114666189cdc2 28-30
+tests/unit/ui/test_reports_cap_zero_falls_back.py
+  s_b167dbd10b0b55::t_a0bfc3d98fa9c1 35-37
+src/common/core/badbehavior/plugin.json
+  s_ba95831e009b1c::t_792a6ffea0dc45 124-141
+tests/unit/common/test_shared_ban_evidence_lua.py
+  s_b167dbd10b0b55::t_608819b1c1f063 1-22,24-56,62-66,68-77,79-82,84-87,89-91,93-101,103-105,107-117,119-121,123-132
+  s_dfd54f297022ed::t_eb9842380028f6 23,57-61,67,78,83,88,92,102,106,118,122,133
+src/ui/app/static/js/pages/reports.js
+  s_ba95831e009b1c::t_35cdc699beaad9 1560-1562,1566,1635
+  s_dfd54f297022ed::t_eb9842380028f6 1123-1125,1437-1440
+  s_b167dbd10b0b55::t_cf17e01695360a 930-933,935,1122,1217,1424,1484-1485,1554-1556,1563-1565,1643-1648
+  s_b167dbd10b0b55::t_c63ff130a0d061 1649
+src/common/core/badbehavior/badbehavior.lua
+  s_b167dbd10b0b55::t_c5afe98e9b00c8 405,410-423,429-430,438
+  s_c32d3d7a053777::t_27cc330396968e 424-428
+  s_ba95831e009b1c::t_35cdc699beaad9 29-40,102-113,379-403
+  s_b167dbd10b0b55::t_d8151f90edca4f 406-409
+  s_ba95831e009b1c::t_c9d51d74754c51 355-362,404
+  s_ba95831e009b1c::t_3baf9f3615b695 287-298
+src/ui/app/models/instance.py
+  s_ba95831e009b1c::t_a834415c8a9262 1287-1288
+  s_b167dbd10b0b55::t_bc1540f87e695d 634-635,637
+  s_ba95831e009b1c::t_760502c2c723cf 16,41-55,832,1006
+  s_b167dbd10b0b55::t_cf17e01695360a 629-633,636,638-643,664,703-749
+tests/unit/jobs/test_scrape_shared_ban_evidence.py
+  s_b167dbd10b0b55::t_cf17e01695360a 6,38
+  s_c32d3d7a053777::t_c79c8952a55c73 1-5,7-37,39-55
+src/common/core/badbehavior/locales/br.json
+  s_ba95831e009b1c::t_22a2dd7058ff64 28-35
+src/common/core/badbehavior/locales/pt.json
+  s_ba95831e009b1c::t_22a2dd7058ff64 28-35
+tests/unit/api/test_metrics_report_detail.py
+  s_b167dbd10b0b55::t_608819b1c1f063 1-46
+src/common/core/badbehavior/locales/ru.json
+  s_ba95831e009b1c::t_22a2dd7058ff64 8-15
+src/common/core/badbehavior/locales/it.json
+  s_ba95831e009b1c::t_22a2dd7058ff64 28-35
+tests/unit/db/test_metrics_shared_ban_evidence.py
+  s_b167dbd10b0b55::t_608819b1c1f063 1-3,5-24,28-29,31,33,35,37-43
+  s_b167dbd10b0b55::t_cc0c9dc0981f0e 4,44-58
+  s_b167dbd10b0b55::t_3bed63e31e7b6d 25-27,30,32,34,36
+src/ui/app/static/js/pages/reports-offenders.js
+  s_3535bd787ed7ee::t_0eb007e4f5df80 11,73
+tests/unit/ui/test_reports_offender_flags.py
+  s_3535bd787ed7ee::t_e2c46d1843d3ac 21
+  s_3535bd787ed7ee::t_d1588f2350c902 1-20,22-25,27,29-45,49-50
+  s_a228d0819ca8c3::t_045ffa7035ba6f 46-48
+  s_3535bd787ed7ee::t_a0383001c33220 26,28
+src/common/core/badbehavior/locales/es.json
+  s_ba95831e009b1c::t_22a2dd7058ff64 28-35
+src/common/core/badbehavior/locales/id.json
+  s_ba95831e009b1c::t_22a2dd7058ff64 8-15
+tests/unit/ui/test_reports_date_offsets.py
+  s_87b148a97f23ad::t_12b51a5b396045 40-42,46,125
+  s_751421a72d1da7::t_2d611293c1bc5c 1-39,43-45,47-124,126-137
+src/common/core/badbehavior/locales/ko.json
+  s_ba95831e009b1c::t_22a2dd7058ff64 28-35
+tests/unit/ui/test_reports_filter_value_encoding.py
+  s_ba95831e009b1c::t_209bd15a6ac8a2 10-11,14-17,69
+  s_ba95831e009b1c::t_4336493b2bdeb2 12,61,66-68,70-77
+  s_ba95831e009b1c::t_120bdca19abb2c 34
+  s_ba95831e009b1c::t_49609401051504 1-9,13,18-33,35-60,62-65
+src/common/core/badbehavior/locales/hi.json
+  s_ba95831e009b1c::t_22a2dd7058ff64 28-35
+src/common/core/badbehavior/locales/tl.json
+  s_ba95831e009b1c::t_22a2dd7058ff64 8-15
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "35736b06ee353607b6b39cc3175e9522450c956b",
+  "prompts": {},
+  "sessions": {
+    "s_3535bd787ed7ee": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1ab9d-6772-7e22-92cd-7c07fb269100",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_40ce55291c832b": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1acae-f650-7fb3-bb3e-895448d76c27",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_4f93320f8a3c5e": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1acab-574c-7e51-a634-b24ccc2b96d8",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_6189ae7958809e": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "1049effa-f503-404c-8e04-c0d58dae63c9",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_751421a72d1da7": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "a1cd49cb-bc02-4f73-9b72-c088e5f0245c",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_87b148a97f23ad": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1abd5-1e4b-7b40-8125-8bcaa53912ec",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_a228d0819ca8c3": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b5d1c41d-de7e-4522-9988-02fdf16b262a",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_b167dbd10b0b55": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1acb5-69be-7823-ac36-290b853e7213",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_ba95831e009b1c": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1ac9a-531a-73b3-be58-795493b1ffdb",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_c32d3d7a053777": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1acbf-b3c7-78e2-8243-f6954fd6510e",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_cd2c72503a0aee": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1abb1-9c7f-7360-8932-485c9165e954",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_dfd54f297022ed": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1acc6-ce29-7653-b2c2-5d47851f3c23",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

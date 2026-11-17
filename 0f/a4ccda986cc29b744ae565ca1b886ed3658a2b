@@ -1,0 +1,53 @@
+CHANGELOG.md
+  s_c8abfbb1754dd6::t_7e497e8c925a7b 22
+  s_c8abfbb1754dd6::t_2d02d7349bf9f1 23
+src/common/core/cors/cors.lua
+  s_c8abfbb1754dd6::t_7e497e8c925a7b 86-89
+  s_c8abfbb1754dd6::t_48b6ffc2ded6a5 14-33,77,90-91,94,117
+src/common/core/cors/README.de.md
+  s_069d6f94f53eac::t_0a9f08365bc351 29
+src/common/core/cors/README.es.md
+  s_069d6f94f53eac::t_93ceee202f117a 29
+src/common/core/cors/README.fr.md
+  s_069d6f94f53eac::t_bdf4717bd666ae 27
+src/common/core/cors/README.md
+  s_069d6f94f53eac::t_58649788d7ef95 29
+src/common/core/cors/README.zh.md
+  s_069d6f94f53eac::t_f43c45280c435d 29
+src/common/core/misc/README.de.md
+  s_069d6f94f53eac::t_f756ec19a2d884 89
+src/common/core/misc/README.es.md
+  s_069d6f94f53eac::t_2fa2515702ca3e 89
+src/common/core/misc/README.fr.md
+  s_069d6f94f53eac::t_16e4cf9f216565 89
+src/common/core/misc/README.md
+  s_069d6f94f53eac::t_59536f133793e2 89
+src/common/core/misc/README.zh.md
+  s_069d6f94f53eac::t_3c0d351fef00b3 89
+src/common/core/misc/misc.lua
+  s_069d6f94f53eac::t_0606ecb6272c0f 26-34
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "0fa4ccda986cc29b744ae565ca1b886ed3658a2b",
+  "prompts": {},
+  "sessions": {
+    "s_069d6f94f53eac": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "3762d5b3-c52f-4bdd-b37c-693d69046f89",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_c8abfbb1754dd6": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a177c9-639e-70b2-8103-c983f13884ed",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

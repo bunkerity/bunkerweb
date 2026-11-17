@@ -1,0 +1,31 @@
+src/common/confs/nginx.conf
+  s_4f6db4e86c6ae2::t_56a4d094e4b875 18
+CHANGELOG.md
+  s_8957b83407cdf6::t_a429038993a3a9 30
+tests/unit/gen/test_compression_module_order.py
+  s_4f6db4e86c6ae2::t_2ea58ed59f7f22 1-10
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "3fd45fe2bc480796214741a043c491fc87e6d619",
+  "prompts": {},
+  "sessions": {
+    "s_4f6db4e86c6ae2": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1bfa8-c469-7233-a0e0-b25e7a2c5d62",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_8957b83407cdf6": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "f0ed5bf7-382f-48ad-b7ad-d9883e810768",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

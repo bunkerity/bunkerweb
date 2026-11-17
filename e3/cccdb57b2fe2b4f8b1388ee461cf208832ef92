@@ -1,0 +1,24 @@
+CHANGELOG.md
+  h_a33a1e80933106 7
+src/scheduler/main.py
+  h_a33a1e80933106 462-466,948,954,992-993,1018-1024,1180,1303-1304,1679,1686,1789-1819,1821,1823-1825,1827-1829,1862-1865,1901-1904,1925
+src/ui/main.py
+  h_a33a1e80933106 1395
+tests/unit/scheduler/test_main_healthcheck.py
+  h_a33a1e80933106 75-95
+tests/unit/scheduler/test_main_loop.py
+  h_a33a1e80933106 358-366,392,448-499,514-530
+tests/unit/ui/core/test_main_request_pipeline.py
+  h_a33a1e80933106 223-231
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "e3cccdb57b2fe2b4f8b1388ee461cf208832ef92",
+  "prompts": {},
+  "humans": {
+    "h_a33a1e80933106": {
+      "author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

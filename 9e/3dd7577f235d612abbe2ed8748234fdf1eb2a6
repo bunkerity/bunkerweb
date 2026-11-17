@@ -1,0 +1,33 @@
+src/common/core/misc/confs/default-server-http/page.conf
+  s_b437edb4625a20::t_fc43df23dff728 49
+src/common/core/templates/templates/medium.json
+  s_b437edb4625a20::t_fc43df23dff728 40
+src/ui/main.py
+  s_b437edb4625a20::t_fc43df23dff728 1539
+src/common/confs/default-server-http.conf
+  s_b437edb4625a20::t_fc43df23dff728 232
+src/common/core/headers/plugin.json
+  s_b437edb4625a20::t_fc43df23dff728 93
+src/common/core/errors/errors.lua
+  s_b437edb4625a20::t_fc43df23dff728 162
+src/common/core/templates/templates/high.json
+  s_b437edb4625a20::t_fc43df23dff728 40
+CHANGELOG.md
+  s_b437edb4625a20::t_41654b94f5d207 3-6
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "9e3dd7577f235d612abbe2ed8748234fdf1eb2a6",
+  "prompts": {},
+  "sessions": {
+    "s_b437edb4625a20": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "8c02b261-1e5e-4d64-847d-df9b2930d1b1",
+        "model": "unknown"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

@@ -1,0 +1,67 @@
+src/ui/app/static/css/overrides/base.css
+  s_f4d1d8fb491ff2::t_c24ba7fcf3e45d 406-410
+src/ui/app/static/js/i18n.js
+  s_f4d1d8fb491ff2::t_04372572321a88 35-50
+src/ui/app/static/js/pages/cache.js
+  s_f4d1d8fb491ff2::t_8f72aa66089a71 371-372
+src/ui/app/static/js/pages/jobs.js
+  s_f4d1d8fb491ff2::t_dc7144d5386079 254-255
+src/ui/app/static/js/pages/services.js
+  s_f4d1d8fb491ff2::t_a20ca652598ae8 528-529
+src/ui/app/static/js/plugins-settings.js
+  s_f4d1d8fb491ff2::t_88367926e62e4e 754-757,763-766,2471-2474,2480-2483,3335-3338,3344-3347,3649-3652,3655-3658
+src/ui/app/static/js/utils.js
+  s_f4d1d8fb491ff2::t_0330236641d750 167-173
+src/ui/app/templates/bans.html
+  s_f4d1d8fb491ff2::t_8814976af9e3dc 33-34
+src/ui/app/templates/base.html
+  s_f4d1d8fb491ff2::t_03d96220700678 32,157
+src/ui/app/templates/cache.html
+  s_f4d1d8fb491ff2::t_764e362006f0cf 29-30
+src/ui/app/templates/configs.html
+  s_f4d1d8fb491ff2::t_458d11b003d298 23-24
+src/ui/app/templates/dashboard.html
+  s_f4d1d8fb491ff2::t_3d6cb59b6567ce 146-147,149,166-167,169
+src/ui/app/templates/instances.html
+  s_f4d1d8fb491ff2::t_f90da8d442dad4 34-35
+src/ui/app/templates/jobs.html
+  s_f4d1d8fb491ff2::t_8b9d5ca7369841 17-18
+src/ui/app/templates/menu.html
+  s_f4d1d8fb491ff2::t_6738830b7c8c87 133,139-141,144-146,166,168,172,178-180,183,185,206,208
+src/ui/app/templates/models/multivalue_setting.html
+  s_f4d1d8fb491ff2::t_07c5c5d970ca04 29-33,36-40
+src/ui/app/templates/models/plugins_settings.html
+  s_f4d1d8fb491ff2::t_1de1fe24756820 284,441
+src/ui/app/templates/models/plugins_settings_easy.html
+  s_f4d1d8fb491ff2::t_5f9f1b57380291 218
+src/ui/app/templates/navbar.html
+  s_f4d1d8fb491ff2::t_6f05de4697727e 6,54-55,57,61,71
+src/ui/app/templates/plugins.html
+  s_f4d1d8fb491ff2::t_edf3509512212d 18-19
+src/ui/app/templates/reports.html
+  s_f4d1d8fb491ff2::t_10419fc866caae 16,18
+src/ui/app/templates/services.html
+  s_f4d1d8fb491ff2::t_f70b0bf9f66485 21-22
+src/ui/app/templates/setup.html
+  s_f4d1d8fb491ff2::t_0f6cfc8f8e995c 61-64,74-75,77,83,89-90,1850-1851,1853-1854
+src/ui/app/templates/support.html
+  s_f4d1d8fb491ff2::t_19bcf27e00b361 6,34,63-66,145
+src/ui/app/templates/templates.html
+  s_f4d1d8fb491ff2::t_cca2e7f313f144 17-18
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "c571e4f908e676caa15be1dbadf747eac55965b0",
+  "prompts": {},
+  "sessions": {
+    "s_f4d1d8fb491ff2": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "88f75472-80ea-4426-8f90-a3737c9bbd58",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

@@ -1,0 +1,31 @@
+src/common/db/alembic/mysql_versions/d10f1615a002_upgrade_to_version_1_6_15_rc2.py
+  s_2f6535d796688f::t_040e707075007c 7,33-38
+src/common/db/alembic/mariadb_versions/d10f1615a003_upgrade_to_version_1_6_15_rc2.py
+  s_2f6535d796688f::t_040e707075007c 7,33-38
+CHANGELOG.md
+  s_a72b07b4a46bb1::t_0cac9ec2fdf4dc 15
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "cc1e3cc8f3352eeba82b2e8dcb6622104ce5713c",
+  "prompts": {},
+  "sessions": {
+    "s_2f6535d796688f": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a167a6-91bc-7903-b961-ec461218f505",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_a72b07b4a46bb1": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a167af-cfff-7591-8390-0d4952f39ca3",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

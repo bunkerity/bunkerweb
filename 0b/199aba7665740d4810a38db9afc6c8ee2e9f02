@@ -1,0 +1,38 @@
+src/scheduler/requirements.txt
+  s_bd72be527087dc::t_18c1a7c7a42446 1172-1177
+  s_1b07318f797d79::t_ac0b6e3fd135e1 47-49,51-53,322-494,496-498,504-506,512-571,603-605,619-621,623-625,627-629,631-633,639-641,643-645,651-653,694-696,809-811,821-823,846-848,850-852,856-993,1003-1005,1007-1009,1178-1180,1212-1214
+docs/requirements.txt
+  s_1b07318f797d79::t_b89b7a6a1ba2a4 11-18,138-310,342-345,353-355,360-511,669-671,673-675,681-683,685-687,699-701,830-832
+src/deps/requirements-deps.txt
+  s_1b07318f797d79::t_d379084c8ddae6 224-226,258-323
+src/deps/requirements.txt
+  s_1b07318f797d79::t_3a80792f058cb6 31-33
+src/scheduler/requirements.in
+  s_bd72be527087dc::t_d138ce99b63967 38,41,47
+src/ui/requirements.txt
+  s_bd72be527087dc::t_b4613c9b13f13a 11-103,395-567,573-575,581-640,725-876,882-964,1086-1088,1094-1096,1108-1238,1256-1257,1267-1269
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "0b199aba7665740d4810a38db9afc6c8ee2e9f02",
+  "prompts": {},
+  "sessions": {
+    "s_1b07318f797d79": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "652d2662-1e4e-45e6-9e15-d654c7057cfe",
+        "model": "unknown"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_bd72be527087dc": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "3432c310-97d5-424b-9200-1db1b00f3731",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

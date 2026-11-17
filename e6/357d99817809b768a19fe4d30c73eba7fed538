@@ -1,0 +1,24 @@
+tests/unit/gen/test_empty_directive_arguments.py
+  s_80f59cf2d488de::t_e84f129d233d9b 121
+tests/unit/gen/test_templator_fork_context.py
+  s_80f59cf2d488de::t_86d7a767b3eb5a 1-10,13,15,17-20,22-46
+  s_80f59cf2d488de::t_7b98e7391b3ef8 11-12,14,16,21,47-48
+src/common/gen/Templator.py
+  s_80f59cf2d488de::t_e84f129d233d9b 470
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "e6357d99817809b768a19fe4d30c73eba7fed538",
+  "prompts": {},
+  "sessions": {
+    "s_80f59cf2d488de": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a18db8-8746-7662-8183-af6e7a7d3e28",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}
