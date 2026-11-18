@@ -243,11 +243,29 @@ class TestEmptyInternalstore:
 
     def test_a_value_written_as_bw_b64_is_decoded_before_it_is_used(self, tmp_path):
         """`env_file.format_env_line` encodes a value that begins with `bw-b64:`; the fallback must undo it."""
-        path = _variables(tmp_path, "API_WHITELIST_IP=127.0.0.1\nAPI_TOKEN=bw-b64:YnctYjY0OnJlYWwtdG9rZW4=\n")
+        path = _variables(tmp_path, "#bw-env-format:2\nAPI_WHITELIST_IP=127.0.0.1\nAPI_TOKEN=bw-b64:YnctYjY0OnJlYWwtdG9rZW4=\n")
         out = run(CHECK_TOKEN, variables_path=path, store={}, headers={"authorization": "Bearer bw-b64:real-token"})
         assert out == "true|ok"
 
     def test_a_malformed_bw_b64_value_is_kept_as_written(self, tmp_path):
-        path = _variables(tmp_path, "API_WHITELIST_IP=127.0.0.1\nAPI_TOKEN=bw-b64:***\n")
+        path = _variables(tmp_path, "#bw-env-format:2\nAPI_WHITELIST_IP=127.0.0.1\nAPI_TOKEN=bw-b64:***\n")
         out = run(CHECK_TOKEN, variables_path=path, store={}, headers={"authorization": "Bearer bw-b64:***"})
         assert out == "true|ok"
+
+    @pytest.mark.parametrize(
+        "text",
+        [
+            "API_WHITELIST_IP=127.0.0.1\nAPI_TOKEN=bw-b64:eA==\n",  # an rc4 or operator file
+            "\n#bw-env-format:2\nAPI_WHITELIST_IP=127.0.0.1\nAPI_TOKEN=bw-b64:eA==\n",  # marker not on the first line
+            "# bw-env-format:2\nAPI_WHITELIST_IP=127.0.0.1\nAPI_TOKEN=bw-b64:eA==\n",  # not the exact marker
+        ],
+    )
+    def test_a_file_without_the_format_marker_is_never_decoded(self, tmp_path, text):
+        """A retained rc4 file may hold a literal `bw-b64:` token: the bearer is that text, not its decoding."""
+        path = _variables(tmp_path, text)
+        assert run(CHECK_TOKEN, variables_path=path, store={}, headers={"authorization": "Bearer bw-b64:eA=="}) == "true|ok"
+        assert run(CHECK_TOKEN, variables_path=path, store={}, headers={"authorization": "Bearer x"}) == "false|invalid API token"
+
+    def test_a_crlf_marker_line_still_marks_the_file(self, tmp_path):
+        path = _variables(tmp_path, "#bw-env-format:2\r\nAPI_WHITELIST_IP=127.0.0.1\nAPI_TOKEN=bw-b64:eA==\n")
+        assert run(CHECK_TOKEN, variables_path=path, store={}, headers={"authorization": "Bearer x"}) == "true|ok"

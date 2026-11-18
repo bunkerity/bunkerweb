@@ -333,7 +333,7 @@ for _, name in ipairs(confs) do
 	case("a bw-b64 value is loaded as the exact text it encodes, a plain value is left alone", function()
 		write(
 			variables,
-			"SERVER_NAME=www.example.com\nSAML_IDP_CERT=bw-b64:"
+			"#bw-env-format:2\nSERVER_NAME=www.example.com\nSAML_IDP_CERT=bw-b64:"
 				.. PEM_B64
 				.. "\nREVERSE_PROXY_HOST=http://a/?x=1\nUSE_ANTIBOT=\nOTHER=bw-b64:YnctYjY0OnJlYWwtdG9rZW4=\n"
 		)
@@ -344,11 +344,36 @@ for _, name in ipairs(confs) do
 			"a plain value changed"
 		)
 		assert(seen.USE_ANTIBOT == "", "an empty value changed")
+		for variable in pairs(seen) do
+			assert(not variable:find("^#"), "the format marker line was read as a setting: " .. variable)
+		end
 		assert(seen.OTHER == "bw-b64:real-token", "a value that begins with the marker is decoded once, not twice")
 	end)
 
+	case("a file without the format marker is never decoded, whatever its values look like", function()
+		for _, text in ipairs({
+			"SERVER_NAME=www.example.com\nKEY=bw-b64:eA==\n", -- an rc4 or operator file
+			"\n#bw-env-format:2\nKEY=bw-b64:eA==\n", -- the marker is not on the first line
+			"# bw-env-format:2\nKEY=bw-b64:eA==\n", -- not the exact marker
+			"#bw-env-format:2 \nKEY=bw-b64:eA==\n",
+		}) do
+			write(variables, text)
+			local seen = loaded_variables()
+			assert(seen.KEY == "bw-b64:eA==", "an unmarked file was decoded: " .. tostring(seen.KEY))
+		end
+	end)
+
+	case("a CRLF marker line still marks the file, and is never a setting", function()
+		write(variables, "#bw-env-format:2\r\nKEY=bw-b64:eA==\n")
+		local seen = loaded_variables()
+		assert(seen.KEY == "x", "a CRLF-marked file was not decoded: " .. tostring(seen.KEY))
+		for variable in pairs(seen) do
+			assert(not variable:find("^#"), "the format marker line was read as a setting: " .. variable)
+		end
+	end)
+
 	case("a malformed bw-b64 value is kept as written and warned about without printing it", function()
-		write(variables, "SERVER_NAME=www.example.com\nSAML_IDP_CERT=bw-b64:***not base64***\n")
+		write(variables, "#bw-env-format:2\nSERVER_NAME=www.example.com\nSAML_IDP_CERT=bw-b64:***not base64***\n")
 		local seen = loaded_variables()
 		assert(seen.SAML_IDP_CERT == "bw-b64:***not base64***", "kept value: " .. tostring(seen.SAML_IDP_CERT))
 		assert(logged("SAML_IDP_CERT"), "the malformed encoding was not logged")

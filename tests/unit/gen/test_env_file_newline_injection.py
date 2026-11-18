@@ -18,6 +18,7 @@ from env_file import make_key_predicate, parse_env_file, parse_env_lines
 
 # getattr: the behavioural tests below must run, and fail, against a tree that has no encoder yet.
 ENV_B64_PREFIX = getattr(env_file, "ENV_B64_PREFIX", "bw-b64:")
+MARKER = getattr(env_file, "ENV_FORMAT_MARKER", "#bw-env-format:2")
 
 ROOT = Path(__file__).resolve().parents[3]
 CONFS = ROOT / "src" / "common" / "confs"
@@ -116,7 +117,7 @@ def test_format_env_line_leaves_single_line_values_alone():
 def test_format_env_line_is_one_line_and_reversible(value):
     line = env_file.format_env_line("KEY", value)
     assert "\n" not in line and "\r" not in line
-    assert parse_env_lines([line])["KEY"] == value
+    assert parse_env_lines([MARKER, line])["KEY"] == value
 
 
 def test_a_file_written_by_rc4_still_reads_the_same():
@@ -136,12 +137,12 @@ def test_a_file_written_by_rc4_still_reads_the_same():
 
 
 def test_a_malformed_encoded_value_is_kept_as_written():
-    assert parse_env_lines([f"KEY={ENV_B64_PREFIX}***not base64***"])["KEY"] == f"{ENV_B64_PREFIX}***not base64***"
+    assert parse_env_lines([MARKER, f"KEY={ENV_B64_PREFIX}***not base64***"])["KEY"] == f"{ENV_B64_PREFIX}***not base64***"
 
 
 def test_predicate_helpers_still_see_the_encoded_key():
     parsed = parse_env_lines(
-        [env_file.format_env_line("CUSTOM_SSL_CERT_DATA", "a\nAPI_TOKEN=evil"), "API_TOKEN=real"],
+        [MARKER, env_file.format_env_line("CUSTOM_SSL_CERT_DATA", "a\nAPI_TOKEN=evil"), "API_TOKEN=real"],
         make_key_predicate({"CUSTOM_SSL_CERT_DATA"}),
         make_key_predicate({"API_TOKEN", "CUSTOM_SSL_CERT_DATA"}),
     )
