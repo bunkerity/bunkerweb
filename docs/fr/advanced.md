@@ -3663,6 +3663,8 @@ Nous fournissons également un [tableau de bord Grafana](https://grafana.com/gra
 | `PROMETHEUS_EXPORTER_URL`      | `/metrics`                                            | global   | Non      | URL HTTP de l'exportateur Prometheus.                                                                    |
 | `PROMETHEUS_EXPORTER_ALLOW_IP` | `127.0.0.0/8 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16` | global   | Non      | Liste des adresses IP/réseaux autorisés à contacter le point de terminaison de l'exportateur Prometheus. |
 
+Activez `USE_MONITORING=yes` et `USE_PROMETHEUS_EXPORTER=yes`. Configurez la collecte sur le port `9113` et le chemin `/metrics`, ou utilisez vos propres valeurs. Limitez `PROMETHEUS_EXPORTER_ALLOW_IP` aux adresses de collecte. Pour une collecte HTTPS authentifiée, définissez `PROMETHEUS_EXPORTER_TOKEN` et `PROMETHEUS_EXPORTER_SSL=yes`, fournissez un certificat et sa clé, puis configurez le serveur de collecte pour qu'il fasse confiance à l'autorité de certification.
+
 ### Reporting <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
 
 Prise en charge de STREAM :x:
@@ -3836,7 +3838,7 @@ Vous pouvez également spécifier un fichier de sauvegarde personnalisé pour la
 === "Docker"
 
     ```bash
-    docker exec -it <scheduler_container> bwcli plugin backup restore s3_backup_file.zip
+    docker exec -it <scheduler_container> bwcli plugin backup_s3 restore s3_backup_file.zip
     ```
 
 !!! example "En cas de panne"
@@ -3986,43 +3988,26 @@ Pour la documentation complète, visitez le [dépôt BunkerWeb MCP](https://gith
 
 ## Migration <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO) {#migration-pro}
 
-Prise en charge STREAM :white_check_mark:
+STREAM support :white_check_mark:
 
-Le plug-in de migration **révolutionne les transferts de** configuration BunkerWeb entre les instances grâce à son **interface Web conviviale**, simplifiant ainsi l'ensemble du parcours de migration. Que vous mettiez à niveau des systèmes, que vous fassiez évoluer une infrastructure ou que vous transformiez d'environnement, cet outil vous permet de transférer sans effort les **paramètres, les préférences et les données** avec une facilité et une confiance inégalées. Dites adieu aux processus manuels fastidieux et bonjour à une expérience de **migration transparente et sans tracas**.
-
-**Liste des fonctionnalités**
-
-- **Migration sans effort :** Transférez facilement les configurations BunkerWeb entre les instances sans les complexités des procédures manuelles.
-
-- **Interface Web intuitive :** Naviguez sans effort dans le processus de migration grâce à une interface Web conviviale conçue pour un fonctionnement intuitif.
-
-- **Compatibilité entre bases de données :** profitez d'une migration transparente sur diverses plates-formes de bases de données, notamment SQLite, MySQL, MariaDB et PostgreSQL, garantissant la compatibilité avec votre environnement de base de données préféré.
+Utilisez Migration pour transférer la configuration et les données BunkerWeb d'une installation à une autre, avec SQLite, MySQL, MariaDB ou PostgreSQL. Dans l'interface web, connectez-vous en tant que **super administrateur** pour télécharger ou restaurer une sauvegarde depuis la page **Migration**. L'archive contient des données sensibles. Réservez son accès aux personnes qui effectuent la migration.
 
 ### Créer un fichier de migration
 
-Pour créer manuellement un fichier de migration, exécutez la commande suivante :
+Passez un répertoire à `create`. La commande y écrit le fichier `backup.zip`.
 
 === "Linux"
 
     ```bash
-    bwcli plugin migration create /path/to/migration/file
+    bwcli plugin migration create /path/to/backup-dir
     ```
 
 === "Docker"
 
-    1. Créez un fichier de migration :
-
-        ```bash
-        docker exec -it <scheduler_container> bwcli plugin migration create /path/to/migration/file
-        ```
-
-    2. Copiez le fichier de migration sur votre ordinateur local :
-
-        ```bash
-        docker cp <scheduler_container>:/path/to/migration/file /path/to/migration/file
-        ```
-
-Cette commande créera une sauvegarde de votre base de données et la stockera dans le répertoire de sauvegarde spécifié dans la commande.
+    ```bash
+    docker exec <scheduler_container> bwcli plugin migration create /tmp/bunkerweb-migration
+    docker cp <scheduler_container>:/tmp/bunkerweb-migration/backup.zip ./backup.zip
+    ```
 
 !!! note "Compatibilité du client MariaDB/MySQL"
 
@@ -4030,43 +4015,27 @@ Cette commande créera une sauvegarde de votre base de données et la stockera d
 
 ### Initialiser une migration
 
-Pour initialiser manuellement une migration, exécutez la commande suivante :
+Sauvegardez l'installation de destination avant la restauration. Sur cette installation, passez le fichier ZIP à `migrate`. Une fois la configuration appliquée, vérifiez le routage des services et l'accès administrateur. Les utilisateurs doivent reconfigurer l'authentification à deux facteurs.
 
 === "Linux"
 
     ```bash
-    bwcli plugin migration migrate /path/to/migration/file
+    bwcli plugin migration migrate /path/to/backup-dir/backup.zip
     ```
 
 === "Docker"
 
-    1. Copiez le fichier de migration dans le conteneur :
+    ```bash
+    docker cp ./backup.zip <scheduler_container>:/tmp/backup.zip
+    docker exec <scheduler_container> bwcli plugin migration migrate /tmp/backup.zip
+    ```
 
-        ```bash
-        docker cp /path/to/migration/file <scheduler_container>:/path/to/migration/file
-        ```
+=== "All-in-one"
 
-    2. Initialisez la migration :
-
-        ```bash
-        docker exec -it <scheduler_container> bwcli plugin migration migrate /path/to/migration/file
-        ```
-
-=== "Tout-en-un"
-
-    1. Copiez le fichier de migration dans le conteneur :
-
-        ```bash
-        docker cp /path/to/migration/file bunkerweb-aio:/path/to/migration/file
-        ```
-
-    2. Initialisez la migration :
-
-        ```bash
-        docker exec -it bunkerweb-aio bwcli plugin migration migrate /path/to/migration/file
-        ```
-
-Cette commande migre de manière transparente vos données BunkerWeb pour qu'elles correspondent précisément à la configuration décrite dans le fichier de migration.
+    ```bash
+    docker cp ./backup.zip bunkerweb-aio:/tmp/backup.zip
+    docker exec bunkerweb-aio bwcli plugin migration migrate /tmp/backup.zip
+    ```
 
 ## Anti DDoS <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO) {#anti-ddos-pro}
 
@@ -4155,9 +4124,7 @@ Le plugin **UI Single Sign-On** permet l'authentification SSO pour l'interface w
 Au lieu de gérer des identifiants distincts pour BunkerWeb, les administrateurs peuvent déléguer l'authentification à un fournisseur d'identité existant. Le proxy d'authentification gère la connexion des utilisateurs et injecte des en-têtes d'identité avant de transmettre les requêtes à l'interface web de BunkerWeb.
 
 !!! danger "Risque d'usurpation d'en-têtes"
-    Les en-têtes SSO peuvent être facilement falsifiés par n'importe quel client. Vous **devez** restreindre `UI_SSO_TRUSTED_IPS` aux adresses IP de votre proxy d'authentification. Si ce paramètre est mal configuré, n'importe quel client peut envoyer de faux en-têtes et obtenir un accès non autorisé, y compris un accès administrateur.
-
-    La valeur par défaut `127.0.0.1,::1` ne fait confiance qu'au localhost. Dans les déploiements **Docker, Swarm ou Kubernetes**, le proxy d'authentification s'exécute dans un conteneur séparé avec sa propre adresse IP. Définissez `UI_SSO_TRUSTED_IPS` sur l'adresse IP ou le CIDR réel du conteneur du proxy d'authentification (par ex. `10.20.30.5` ou `172.18.0.0/16`). Ne le définissez jamais à `0.0.0.0/0`.
+    Limitez `UI_SSO_TRUSTED_IPS` aux adresses du proxy d'authentification. Configurez le proxy pour supprimer les en-têtes d'identité reçus et définir les siens après authentification. Réservez l'accès direct au serveur de l'interface web au réseau privé. Par défaut, `127.0.0.1,::1` limite la confiance à la boucle locale. Sous Docker, Swarm ou Kubernetes, utilisez l'adresse IP du proxy ou un bloc CIDR qui lui est réservé. N'autorisez jamais `0.0.0.0/0` ni `::/0`.
 
 ### Fonctionnalités
 
@@ -4185,9 +4152,11 @@ Au lieu de gérer des identifiants distincts pour BunkerWeb, les administrateurs
 | `UI_SSO_GROUP_WRITER`         |                     | global   | non      | Nom du groupe accordant le rôle writer.                                                                                |
 | `UI_SSO_GROUP_READER`         |                     | global   | non      | Nom du groupe accordant le rôle reader.                                                                                |
 | `UI_SSO_FALLBACK_TO_LOGIN`    | `yes`               | global   | non      | Permettre aux utilisateurs de se rabattre sur la connexion classique lorsque les en-têtes SSO sont absents.            |
-| `UI_SSO_UPDATE_USER_ON_LOGIN` | `yes`               | global   | non      | Mettre à jour les informations utilisateur (e-mail, rôle) depuis les en-têtes SSO à chaque connexion.                  |
+| `UI_SSO_UPDATE_USER_ON_LOGIN` | `yes`               | global   | non      | Mettre à jour l'adresse e-mail du compte à la connexion à partir des en-têtes SSO. |
 | `UI_SSO_ACCOUNT_LINKING`      | `username_or_email` | global   | non      | Mode de correspondance des utilisateurs SSO entrants avec les comptes locaux (`username_only` ou `username_or_email`). |
 | `UI_SSO_LOGOUT_REDIRECT_URL`  |                     | global   | non      | URL de redirection après déconnexion (par ex. endpoint de déconnexion du fournisseur SSO).                             |
+
+Consultez [tous les réglages UI SSO](features.md#ui-single-sign-on-pro) pour les profils de fournisseurs et la synchronisation des rôles.
 
 ### Démarrage rapide
 
@@ -4200,8 +4169,8 @@ Au lieu de gérer des identifiants distincts pour BunkerWeb, les administrateurs
 ### Conseils d'utilisation
 
 - Définissez `UI_SSO_FALLBACK_TO_LOGIN=no` en production pour imposer un accès exclusivement SSO. Lorsque la valeur est laissée à `yes` (par défaut), les utilisateurs peuvent contourner le SSO et se connecter avec des identifiants locaux, ignorant ainsi les politiques MFA ou de session imposées par votre fournisseur d'identité.
-- Conservez `UI_SSO_UPDATE_USER_ON_LOGIN` à sa valeur par défaut (`yes`) pour garantir la synchronisation des rôles avec les modifications de groupes de l'IdP.
-- Avec `UI_SSO_ACCOUNT_LINKING=username_or_email`, les comptes locaux existants sont automatiquement liés lors de la première connexion SSO si le nom d'utilisateur ou l'e-mail correspond. Utilisez `username_only` si votre IdP permet aux utilisateurs de définir des adresses e-mail arbitraires, afin de prévenir la prise de contrôle de comptes par usurpation d'e-mail.
+- `UI_SSO_UPDATE_USER_ON_LOGIN` met à jour les adresses e-mail. Pour synchroniser les rôles, activez `UI_SSO_SYNC_ROLES=yes`, transmettez l'en-tête des groupes et configurez au moins une correspondance de groupe. Pour un compte préexistant, la synchronisation peut uniquement réduire les privilèges. `UI_SSO_SYNC_ROLES_PROTECT_ADMIN=yes` empêche aussi de rétrograder les administrateurs.
+- Avec `UI_SSO_ACCOUNT_LINKING=username_or_email`, la première connexion SSO recherche d'abord le nom d'utilisateur, puis l'adresse e-mail. Les comptes administrateur existants sans enregistrement SSO doivent utiliser la connexion locale. Utilisez `username_only` si votre fournisseur d'identité permet de changer d'adresse e-mail sans la vérifier.
 
 ## Easy Resolve <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO) {#easy-resolve-pro}
 
@@ -5390,7 +5359,7 @@ Le plugin **OpenAPI Validator** applique votre contrat d'API en validant les req
 
 ### Fonctionnement
 
-1. Un job planifié (`openapi-download.py`) récupère le document OpenAPI à partir d'une URL ou d'un fichier et le met en cache sur le disque (toutes les heures par défaut).
+1. La tâche `openapi-download.py` s'exécute toutes les heures. Elle récupère et met en cache le document si le cache est absent ou si la source ou le chemin de base a changé.
 2. Au moment de l'initialisation de NGINX, le plugin compile les routes à partir de la spécification mise en cache et les stocke dans un espace de stockage interne partagé.
 3. Pendant le traitement de la requête, le plugin fait correspondre la requête aux routes compilées et applique la validation.
 
@@ -5401,7 +5370,7 @@ Le plugin **OpenAPI Validator** applique votre contrat d'API en validant les req
 - Surcharge du chemin de base via `OPENAPI_BASE_PATH` ou déduction automatique à partir de la spécification.
 - Autoriser ou refuser les requêtes vers des chemins non listés dans la spécification.
 - Liste d'ignorés configurable pour les points de terminaison tels que la documentation ou les fichiers de spécification.
-- La spécification mise en cache est actualisée toutes les heures sans bloquer les requêtes.
+- Les requêtes utilisent les routes en cache sans récupérer la spécification.
 
 ### Configuration
 
@@ -5435,6 +5404,10 @@ Autorisez éventuellement les chemins inconnus pendant le déploiement :
 
 - `OPENAPI_ALLOW_UNSPECIFIED=yes`
 
+En `SECURITY_MODE=block`, le validateur refuse les requêtes soumises à validation tant qu'aucune route n'est chargée et que `OPENAPI_ALLOW_UNSPECIFIED=no`. Une erreur de décodage ou de compilation de la spécification en cache entraîne un refus même avec `OPENAPI_ALLOW_UNSPECIFIED=yes`. Si un téléchargement échoue, le plugin conserve la spécification précédente en cache. Consultez la tâche `openapi-download` sur la page **Tâches**.
+
+La tâche horaire `openapi-download` réutilise la spécification en cache tant que `OPENAPI_SPEC` et `OPENAPI_BASE_PATH` sont inchangés. Pour charger une nouvelle version, indiquez une nouvelle URL ou un nouveau chemin dans `OPENAPI_SPEC`.
+
 ## Cache <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO) {#cache-pro}
 
 Prise en charge de STREAM :x:
@@ -5466,7 +5439,7 @@ Le plugin Cache PRO active la mise en cache des réponses au niveau du reverse p
 | `CACHE_BACKGROUND_UPDATE`   | `no`                              | multisite | non      | Active ou désactive la mise à jour du cache en arrière-plan.               |
 | `CACHE_BYPASS`              |                                   | multisite | non      | Liste de variables déterminant si le cache doit être contourné.            |
 | `CACHE_NO_CACHE`            | `$http_pragma$http_authorization` | multisite | non      | Désactive le stockage en cache si des variables sont définies.             |
-| `CACHE_KEY`                 | `$scheme$proxy_host$request_uri`  | multisite | non      | Clé utilisée pour identifier les éléments mis en cache.                    |
+| `CACHE_KEY`                 | `$scheme$host$request_uri`  | multisite | non      | Clé utilisée pour identifier les éléments mis en cache.                    |
 | `CACHE_CONVERT_HEAD_TO_GET` | `yes`                             | multisite | non      | Convertit les requêtes HEAD en GET lors de la mise en cache.               |
 | `CACHE_LOCK`                | `no`                              | multisite | non      | Verrouille les requêtes concurrentes lors du remplissage du cache.         |
 | `CACHE_LOCK_AGE`            | `5s`                              | multisite | non      | Envoie la requête à l'upstream si le cache est verrouillé depuis ce délai. |
@@ -5521,7 +5494,7 @@ STREAM support :white_check_mark:
 Le plugin **ACME** fournit une gestion avancée des certificats via le protocole ACME avec prise en charge d'autorités de certification personnalisées (Step CA, Vault PKI, Sectigo, Google Trust Services, etc.). Il complète le plugin Let's Encrypt intégré en ajoutant la prise en charge de CA personnalisées, les challenges DNS-01 et TLS-ALPN-01, les certificats wildcard, la surveillance des certificats avec alertes d'expiration, la surveillance des logs Certificate Transparency et un OCSP stapling amélioré.
 
 !!! tip "Quand utiliser ACME ou le plugin Let's Encrypt intégré"
-    Si vous avez uniquement besoin de certificats Let's Encrypt avec des challenges HTTP-01, le plugin Let's Encrypt intégré (`AUTO_LETS_ENCRYPT=yes`) est suffisant. Utilisez le plugin ACME lorsque vous avez besoin de CA personnalisées, de challenges DNS-01 ou TLS-ALPN-01, de certificats wildcard, ou de surveillance des certificats avec alertes.
+    Utilisez le plugin Let's Encrypt intégré pour les certificats Let's Encrypt, y compris avec DNS-01 et les certificats wildcard. Choisissez ACME PRO pour une autorité personnalisée, TLS-ALPN-01, ou le tableau de bord et les alertes de certificats.
 
 ### Fonctionnalités
 
@@ -5583,7 +5556,7 @@ Les plugins externes/PRO non listés dans les paramètres `PLUGINS_ORDER_*` sont
 | `ACME_CHALLENGE`       | `http`  | multisite | non      | Type de challenge ACME : `http`, `dns` ou `alpn`.                                                             |
 | `ACME_KEY_TYPE`        | `ecdsa` | multisite | non      | Type de clé pour le certificat : `ecdsa` ou `rsa`.                                                            |
 | `ACME_KEY_SIZE`        | `256`   | multisite | non      | Taille de la clé en bits. ECDSA : `256` ou `384`. RSA : `2048` ou `4096`.                                     |
-| `ACME_RENEWAL_DAYS`    | `30`    | multisite | non      | Renouveler le certificat lorsqu'il reste moins de ce nombre de jours avant l'expiration.                      |
+| `ACME_RENEWAL_DAYS`    | `30`    | multisite | non      | Seuil de renouvellement en jours pour TLS-ALPN-01. Certbot suit son propre calendrier. |
 | `ACME_SSL_VERIFY`      | `yes`   | multisite | non      | Vérifier les certificats SSL lors de la communication avec le serveur ACME.                                   |
 | `ACME_WILDCARD`        | `no`    | multisite | non      | Demander un certificat wildcard (nécessite le challenge DNS-01).                                              |
 | `ACME_MUST_STAPLE`     | `no`    | multisite | non      | Demander l'extension OCSP Must-Staple dans le certificat.                                                     |
@@ -5602,7 +5575,7 @@ Les plugins externes/PRO non listés dans les paramètres `PLUGINS_ORDER_*` sont
 
 | Paramètre                           | Défaut    | Contexte  | Multiple | Description                                                                                                                                                                                                                                     |
 | ----------------------------------- | --------- | --------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `ACME_DNS_PROVIDER`                 |           | multisite | non      | Fournisseur DNS pour les challenges DNS-01.                                                                                                                                                                                                     |
+| `ACME_DNS_PROVIDER`                 |           | multisite | non      | Fournisseur DNS pour DNS-01. Hosttech nécessite BunkerWeb 1.6.18~rc4 ou une version ultérieure. |
 | `ACME_DNS_CREDENTIAL_ITEM`          |           | multisite | oui      | Identifiant du fournisseur DNS au format `key value` (par ex. `cloudflare_api_token YOUR_TOKEN`). Utilisez des suffixes numériques pour plusieurs éléments (par ex. `ACME_DNS_CREDENTIAL_ITEM_1`). Les valeurs peuvent être encodées en base64. |
 | `ACME_DNS_CREDENTIAL_DECODE_BASE64` | `yes`     | multisite | oui      | Décoder automatiquement les identifiants DNS encodés en base64. Désactivez si vos identifiants sont du texte brut qui se trouve être du base64 valide.                                                                                          |
 | `ACME_DNS_PROPAGATION`              | `default` | multisite | non      | Temps d'attente pour la propagation DNS en secondes (`default` ou un nombre).                                                                                                                                                                   |
@@ -5697,7 +5670,7 @@ app2.example.com_AUTO_LETS_ENCRYPT: "yes"
 - **Échec du challenge HTTP-01** : vérifiez que `LETS_ENCRYPT_PASSTHROUGH=yes` est défini -- sans cela, le bloc location intégré de BunkerWeb intercepte les requêtes de challenge avant que le plugin ACME PRO ne puisse les servir. Vérifiez également que le port 80 est accessible depuis le serveur ACME et que `AUTO_LETS_ENCRYPT` n'est pas également activé pour le même service.
 - **Échec du challenge TLS-ALPN-01** : vérifiez que le port 443 est accessible depuis le serveur ACME et qu'aucun autre plugin ne sert de certificat avant ACME dans la phase `ssl_certificate`. Vérifiez `PLUGINS_ORDER_SSL_CERTIFICATE` en cas de doute.
 - **Échec du challenge DNS-01** : vérifiez les identifiants du fournisseur DNS dans `ACME_DNS_CREDENTIAL_ITEM` et ajustez `ACME_DNS_PROPAGATION` si votre fournisseur est lent à propager les enregistrements.
-- **Certificat non renouvelé** : vérifiez `ACME_RENEWAL_DAYS` et les logs du scheduler. Le job `acme-renew` s'exécute quotidiennement et renouvelle les certificats qui se trouvent dans le seuil configuré.
+- **Certificat non renouvelé** : Consultez les journaux de `acme-renew`. Pour TLS-ALPN-01, vérifiez aussi `ACME_RENEWAL_DAYS`. Certbot suit son propre calendrier.
 
 ## Wildcard <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO) {#wildcard-pro}
 

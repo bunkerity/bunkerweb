@@ -3661,6 +3661,8 @@ Prometheus 导出器插件在您的 BunkerWeb 实例上添加了一个 [Promethe
 | `PROMETHEUS_EXPORTER_URL`      | `/metrics`                                            | 全局   | 否   | Prometheus 导出器的 HTTP URL。                 |
 | `PROMETHEUS_EXPORTER_ALLOW_IP` | `127.0.0.0/8 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16` | 全局   | 否   | 允许联系 Prometheus 导出器端点的 IP/网络列表。 |
 
+启用 `USE_MONITORING=yes` 和 `USE_PROMETHEUS_EXPORTER=yes`。采集端默认使用端口 `9113` 和路径 `/metrics`，也可使用自定义值。将 `PROMETHEUS_EXPORTER_ALLOW_IP` 限制为采集端地址。要使用带身份验证的 HTTPS 采集，请设置 `PROMETHEUS_EXPORTER_TOKEN` 和 `PROMETHEUS_EXPORTER_SSL=yes`，提供证书及私钥，并让采集端信任签发 CA。
+
 ### 报告 <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
 
 STREAM 支持 :x:
@@ -3834,7 +3836,7 @@ S3 备份工具可以无缝地自动化数据保护，类似于社区备份插�
 === "Docker"
 
     ```bash
-    docker exec -it <scheduler_container> bwcli plugin backup restore s3_backup_file.zip
+    docker exec -it <scheduler_container> bwcli plugin backup_s3 restore s3_backup_file.zip
     ```
 
 !!! example "如果失败"
@@ -3984,43 +3986,26 @@ kubectl port-forward svc/mcp-bunkerweb 8080:8080
 
 ## 迁移 <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO) {#migration-pro}
 
-STREAM 支持 :white_check_mark:
+STREAM support :white_check_mark:
 
-迁移插件通过其**用户友好的 Web 界面**，彻底改变了 BunkerWeb 实例之间的配置传输，简化了整个迁移过程。无论您是升级系统、扩展基础设施还是转换环境，此工具都能让您轻松自信地传输**设置、首选项和数据**。告别繁琐的手动流程，迎接**无缝、无忧的迁移体验**。
-
-**功能列表**
-
-- **轻松迁移：** 轻松在实例之间传输 BunkerWeb 配置，无需复杂的手动操作。
-
-- **直观的 Web 界面：** 通过为直观操作设计的用户友好 Web 界面，轻松导航迁移过程。
-
-- **跨数据库兼容性：** 在各种数据库平台之间实现无缝迁移，包括 SQLite、MySQL、MariaDB 和 PostgreSQL，确保与您首选的数据库环境兼容。
+使用迁移插件在 BunkerWeb 实例之间转移配置和数据，支持 SQLite、MySQL、MariaDB 和 PostgreSQL。以**超级管理员**身份登录 Web 界面后，可在**迁移**页面下载或恢复备份。 归档中包含敏感数据，只应允许执行迁移的人员访问。
 
 ### 创建迁移文件
 
-要手动创建迁移文件，请执行以下命令：
+向 `create` 传入一个目录。命令会在该目录中写入 `backup.zip`。
 
 === "Linux"
 
     ```bash
-    bwcli plugin migration create /path/to/migration/file
+    bwcli plugin migration create /path/to/backup-dir
     ```
 
 === "Docker"
 
-    1.  创建迁移文件：
-
-        ```bash
-        docker exec -it <scheduler_container> bwcli plugin migration create /path/to/migration/file
-        ```
-
-    2.  将迁移文件复制到您的本地计算机：
-
-        ```bash
-        docker cp <scheduler_container>:/path/to/migration/file /path/to/migration/file
-        ```
-
-此命令将创建您的数据库备份，并将其存储在命令中指定的备份目录中。
+    ```bash
+    docker exec <scheduler_container> bwcli plugin migration create /tmp/bunkerweb-migration
+    docker cp <scheduler_container>:/tmp/bunkerweb-migration/backup.zip ./backup.zip
+    ```
 
 !!! note "MariaDB/MySQL 客户端兼容性"
 
@@ -4028,43 +4013,27 @@ STREAM 支持 :white_check_mark:
 
 ### 初始化迁移
 
-要手动初始化迁移，请执行以下命令：
+恢复前请先备份目标实例，然后在目标实例上将 ZIP 文件传给 `migrate`。应用配置后，检查服务路由和管理员访问权限。用户需要重新设置双因素认证。
 
 === "Linux"
 
     ```bash
-    bwcli plugin migration migrate /path/to/migration/file
+    bwcli plugin migration migrate /path/to/backup-dir/backup.zip
     ```
 
 === "Docker"
 
-    1.  将迁移文件复制到容器中：
-
-        ```bash
-        docker cp /path/to/migration/file <scheduler_container>:/path/to/migration/file
-        ```
-
-    2.  初始化迁移：
-
-        ```bash
-        docker exec -it <scheduler_container> bwcli plugin migration migrate /path/to/migration/file
-        ```
+    ```bash
+    docker cp ./backup.zip <scheduler_container>:/tmp/backup.zip
+    docker exec <scheduler_container> bwcli plugin migration migrate /tmp/backup.zip
+    ```
 
 === "All-in-one"
 
-    1.  将迁移文件复制到容器中：
-
-        ```bash
-        docker cp /path/to/migration/file bunkerweb-aio:/path/to/migration/file
-        ```
-
-    2.  初始化迁移：
-
-        ```bash
-        docker exec -it bunkerweb-aio bwcli plugin migration migrate /path/to/migration/file
-        ```
-
-此命令将您的 BunkerWeb 数据无缝迁移，以精确匹配迁移文件中概述的配置。
+    ```bash
+    docker cp ./backup.zip bunkerweb-aio:/tmp/backup.zip
+    docker exec bunkerweb-aio bwcli plugin migration migrate /tmp/backup.zip
+    ```
 
 ## Anti DDoS <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO) {#anti-ddos-pro}
 
@@ -4153,9 +4122,7 @@ STREAM 支持 :x:
 管理员无需为 BunkerWeb 单独管理凭据，可以将认证委托给现有的身份提供方。认证代理完成用户登录后，在将请求转发到 BunkerWeb Web UI 之前注入身份头信息。
 
 !!! danger "请求头伪造风险"
-    SSO 请求头可以被任何客户端轻松伪造。您**必须**将 `UI_SSO_TRUSTED_IPS` 限制为认证代理的 IP 地址。如果此设置配置不正确，任何客户端都可以发送伪造的请求头并获取未授权访问——包括管理员权限。
-
-    默认值 `127.0.0.1,::1` 仅信任本地回环地址。在 **Docker、Swarm 或 Kubernetes** 部署中，认证代理运行在具有独立 IP 的单独容器中。请将 `UI_SSO_TRUSTED_IPS` 设置为认证代理容器的实际 IP 或 CIDR（例如 `10.20.30.5` 或 `172.18.0.0/16`）。切勿设为 `0.0.0.0/0`。
+    将 `UI_SSO_TRUSTED_IPS` 限制为认证代理的地址。配置代理移除客户端传入的身份请求头，并在认证后写入自己的身份请求头。请勿公开 Web 界面后端的直接访问入口。 默认值 `127.0.0.1,::1` 仅信任环回地址。在 Docker、Swarm 或 Kubernetes 中，请使用代理的 IP 地址或专用 CIDR 网段。切勿信任 `0.0.0.0/0` 或 `::/0`。
 
 ### 功能
 
@@ -4183,9 +4150,11 @@ STREAM 支持 :x:
 | `UI_SSO_GROUP_WRITER`         |                     | 全局   | 否   | 授予 writer 角色的分组名称。                                                |
 | `UI_SSO_GROUP_READER`         |                     | 全局   | 否   | 授予 reader 角色的分组名称。                                                |
 | `UI_SSO_FALLBACK_TO_LOGIN`    | `yes`               | 全局   | 否   | 当 SSO 请求头不存在时，允许用户回退到普通登录。                             |
-| `UI_SSO_UPDATE_USER_ON_LOGIN` | `yes`               | 全局   | 否   | 每次登录时从 SSO 请求头更新用户信息（邮箱、角色）。                         |
+| `UI_SSO_UPDATE_USER_ON_LOGIN` | `yes`               | 全局   | 否   | 登录时根据 SSO 请求头更新账户的邮箱地址。 |
 | `UI_SSO_ACCOUNT_LINKING`      | `username_or_email` | 全局   | 否   | 将 SSO 用户与本地帐户匹配的方式（`username_only` 或 `username_or_email`）。 |
 | `UI_SSO_LOGOUT_REDIRECT_URL`  |                     | 全局   | 否   | 登出后重定向的 URL（例如 SSO 提供方的登出端点）。                           |
+
+有关提供方预设和角色同步，请参阅 [UI SSO 完整设置](features.md#ui-single-sign-on-pro)。
 
 ### 快速开始
 
@@ -4198,8 +4167,8 @@ STREAM 支持 :x:
 ### 使用提示
 
 - 在生产环境中设置 `UI_SSO_FALLBACK_TO_LOGIN=no` 以强制仅通过 SSO 访问。当保持默认值 `yes` 时，用户可以绕过 SSO 使用本地凭据登录，从而跳过身份提供方强制执行的 MFA 或会话策略。
-- 保持 `UI_SSO_UPDATE_USER_ON_LOGIN` 的默认值（`yes`），以确保角色与 IdP 分组变更保持同步。
-- 使用 `UI_SSO_ACCOUNT_LINKING=username_or_email` 时，首次 SSO 登录会自动关联用户名或邮箱匹配的现有本地帐户。如果您的 IdP 允许用户设置任意邮箱地址，请使用 `username_only` 以防止通过邮箱伪造接管帐户。
+- `UI_SSO_UPDATE_USER_ON_LOGIN` 用于更新邮箱地址。要同步角色，请启用 `UI_SSO_SYNC_ROLES=yes`、转发用户组请求头，并至少配置一条组映射。对于绑定前已存在的账户，同步只能降低角色权限。`UI_SSO_SYNC_ROLES_PROTECT_ADMIN=yes` 还会阻止管理员被降级。
+- 使用 `UI_SSO_ACCOUNT_LINKING=username_or_email` 时，首次 SSO 登录会先匹配用户名，再匹配邮箱。没有 SSO 记录的现有管理员帐户必须使用本地登录。如果身份提供方允许用户更改邮箱地址而无需验证，请使用 `username_only`。
 
 ## Easy Resolve <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO) {#easy-resolve-pro}
 
@@ -5388,7 +5357,7 @@ STREAM 支持 :x:
 
 ### 工作原理
 
-1. 计划任务 (`openapi-download.py`) 从 URL 或文件获取 OpenAPI 文档并将其缓存到磁盘（默认每小时一次）。
+1. `openapi-download.py` 任务每小时运行一次。缓存缺失、来源变更或基础路径变更时，任务获取并缓存文档。
 2. 在 NGINX 初始化时，插件从缓存的规范中编译路由并将其存储在共享的内部存储中。
 3. 在请求处理期间，插件将请求与编译的路由进行匹配并执行验证。
 
@@ -5399,7 +5368,7 @@ STREAM 支持 :x:
 - 通过 `OPENAPI_BASE_PATH` 覆盖基础路径或从规范中自动推导。
 - 允许或拒绝指向规范中未列出路径的请求。
 - 可配置的忽略列表，用于文档或规范文件等端点。
-- 缓存的规范每小时刷新一次，不会阻塞请求。
+- 请求使用缓存的路由，无需获取规范。
 
 ### 配置
 
@@ -5433,6 +5402,10 @@ STREAM 支持 :x:
 
 - `OPENAPI_ALLOW_UNSPECIFIED=yes`
 
+在 `SECURITY_MODE=block` 模式下，如果尚未加载路由且 `OPENAPI_ALLOW_UNSPECIFIED=no`，验证器会拒绝需要验证的请求。如果缓存中的规范解码或编译时出错，即使设置了 `OPENAPI_ALLOW_UNSPECIFIED=yes`，验证器也会拒绝请求。下载失败时，插件会保留上一次缓存的规范。请在**任务**页面查看 `openapi-download` 任务。
+
+每小时运行的 `openapi-download` 任务在 `OPENAPI_SPEC` 和 `OPENAPI_BASE_PATH` 保持不变时会复用缓存。要载入新版规范，请在 `OPENAPI_SPEC` 中设置新的 URL 或文件路径。
+
 ## Cache <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO) {#cache-pro}
 
 STREAM 支持 :x:
@@ -5464,7 +5437,7 @@ Cache PRO 插件使用 NGINX `proxy_cache*` 指令在反向代理层启用响应
 | `CACHE_BACKGROUND_UPDATE`   | `no`                              | multisite | 否   | 启用或禁用后台缓存更新。                             |
 | `CACHE_BYPASS`              |                                   | multisite | 否   | 用于判断是否绕过缓存的变量列表。                     |
 | `CACHE_NO_CACHE`            | `$http_pragma$http_authorization` | multisite | 否   | 当变量被设置时，不将响应写入缓存。                   |
-| `CACHE_KEY`                 | `$scheme$proxy_host$request_uri`  | multisite | 否   | 用于标识缓存对象的键。                               |
+| `CACHE_KEY`                 | `$scheme$host$request_uri`  | multisite | 否   | 用于标识缓存对象的键。                               |
 | `CACHE_CONVERT_HEAD_TO_GET` | `yes`                             | multisite | 否   | 缓存时将 HEAD 请求转换为 GET。                       |
 | `CACHE_LOCK`                | `no`                              | multisite | 否   | 填充缓存时锁定并发请求。                             |
 | `CACHE_LOCK_AGE`            | `5s`                              | multisite | 否   | 缓存锁持续该时间后，将请求转发到上游。               |
@@ -5519,7 +5492,7 @@ STREAM 支持 :white_check_mark:
 **ACME** 插件通过 ACME 协议提供高级证书管理功能，支持自定义证书颁发机构（Step CA、Vault PKI、Sectigo、Google Trust Services 等）。它作为内置 Let's Encrypt 插件的补充，增加了自定义 CA 支持、DNS-01 和 TLS-ALPN-01 挑战、通配符证书、带过期告警的证书监控、证书透明度日志监控以及增强的 OCSP Stapling。
 
 !!! tip "何时使用 ACME 而非内置 Let's Encrypt 插件"
-    如果您只需要使用 HTTP-01 挑战的 Let's Encrypt 证书，内置的 Let's Encrypt 插件（`AUTO_LETS_ENCRYPT=yes`）即可满足需求。当您需要自定义 CA、DNS-01 或 TLS-ALPN-01 挑战、通配符证书，或需要带告警的证书监控时，请使用 ACME 插件。
+    使用内置 Let's Encrypt 插件申请 Let's Encrypt 证书，包括使用 DNS-01 验证和通配符证书。需要自定义 CA、TLS-ALPN-01 或证书面板和告警时，请使用 ACME PRO。
 
 ### 功能
 
@@ -5581,7 +5554,7 @@ PLUGINS_ORDER_INIT=sessions whitelist blacklist greylist bunkernet limit authbas
 | `ACME_CHALLENGE`       | `http`  | multisite | 否   | ACME 挑战类型：`http`、`dns` 或 `alpn`。                          |
 | `ACME_KEY_TYPE`        | `ecdsa` | multisite | 否   | 证书的密钥类型：`ecdsa` 或 `rsa`。                                |
 | `ACME_KEY_SIZE`        | `256`   | multisite | 否   | 密钥大小（位）。ECDSA：`256` 或 `384`。RSA：`2048` 或 `4096`。    |
-| `ACME_RENEWAL_DAYS`    | `30`    | multisite | 否   | 当证书距过期天数少于此值时进行续期。                              |
+| `ACME_RENEWAL_DAYS`    | `30`    | multisite | 否   | TLS-ALPN-01 的续期阈值，以天为单位。Certbot 按自己的计划续期。 |
 | `ACME_SSL_VERIFY`      | `yes`   | multisite | 否   | 与 ACME 服务器通信时验证 SSL 证书。                               |
 | `ACME_WILDCARD`        | `no`    | multisite | 否   | 请求通配符证书（需要 DNS-01 挑战）。                              |
 | `ACME_MUST_STAPLE`     | `no`    | multisite | 否   | 在证书中请求 OCSP Must-Staple 扩展。                              |
@@ -5600,7 +5573,7 @@ PLUGINS_ORDER_INIT=sessions whitelist blacklist greylist bunkernet limit authbas
 
 | 设置                                | 默认      | 上下文    | 多个 | 描述                                                                                                                                                            |
 | ----------------------------------- | --------- | --------- | ---- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `ACME_DNS_PROVIDER`                 |           | multisite | 否   | DNS-01 挑战使用的 DNS 提供商。                                                                                                                                  |
+| `ACME_DNS_PROVIDER`                 |           | multisite | 否   | DNS-01 使用的 DNS 提供商。Hosttech 需要 BunkerWeb 1.6.18~rc4 或更高版本。 |
 | `ACME_DNS_CREDENTIAL_ITEM`          |           | multisite | 是   | DNS 提供商凭据，格式为 `key value`（例如 `cloudflare_api_token YOUR_TOKEN`）。多项时使用数字后缀（例如 `ACME_DNS_CREDENTIAL_ITEM_1`）。值可以进行 base64 编码。 |
 | `ACME_DNS_CREDENTIAL_DECODE_BASE64` | `yes`     | multisite | 是   | 自动解码 base64 编码的 DNS 提供商凭据。如果您的凭据是恰好为有效 base64 的明文，请禁用此选项。                                                                   |
 | `ACME_DNS_PROPAGATION`              | `default` | multisite | 否   | 等待 DNS 传播的时间（秒）（`default` 或数字）。                                                                                                                 |
@@ -5695,7 +5668,7 @@ app2.example.com_AUTO_LETS_ENCRYPT: "yes"
 - **HTTP-01 挑战失败**：确保设置了 `LETS_ENCRYPT_PASSTHROUGH=yes`——否则 BunkerWeb 的核心 location 块会在 ACME PRO 能够处理之前拦截挑战请求。同时确认 ACME 服务器可访问端口 80，且同一服务未同时启用 `AUTO_LETS_ENCRYPT`。
 - **TLS-ALPN-01 挑战失败**：确保 ACME 服务器可访问端口 443，且在 `ssl_certificate` 阶段没有其他插件在 ACME 之前提供证书。如有疑问，请检查 `PLUGINS_ORDER_SSL_CERTIFICATE`。
 - **DNS-01 挑战失败**：验证 `ACME_DNS_CREDENTIAL_ITEM` 中的 DNS 提供商凭据，如果您的提供商传播记录较慢，请调整 `ACME_DNS_PROPAGATION`。
-- **证书未续期**：检查 `ACME_RENEWAL_DAYS` 和调度器日志。`acme-renew` 作业每天运行，续期处于配置阈值内的证书。
+- **证书未续期**：请查看 `acme-renew` 的调度器日志。对于 TLS-ALPN-01，还需检查 `ACME_RENEWAL_DAYS`。Certbot 按自己的计划续期。
 
 ## Wildcard <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO) {#wildcard-pro}
 

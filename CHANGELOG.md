@@ -30,6 +30,7 @@
 - [DOCS] `splunk`: container integrations send the three logs to a Universal Forwarder as parsable `bunkerweb:*` sourcetypes, with rotation guidance.
 - [DOCS] `scheduler`: the custom configuration section explains the `.bw-managed` marker, manual deletion and restore, and retained inactive service CRS files.
 - [DOCS] `linux`: recommend `madvise` for transparent huge pages, since `always` can add hundreds of MB per reload. (Refs #4164)
+- [DOCS] `pro`: the PRO plugin pages have current settings tables and corrected Migration, S3 restore, UI SSO, ACME and OpenAPI Validator guidance.
 - [DEPS] Updated lua-resty-openssl version to v1.10.0
 - [DEPS] Updated PyMySQL version to v1.2.4
 - [DEPS] Updated pydantic-settings version to v2.16.3
