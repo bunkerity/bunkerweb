@@ -1,0 +1,85 @@
+tests/requirements.in
+  s_2692a6fddb176d::t_58534c714aeb4e 5,10,12
+.github/workflows/plumber.yml
+  s_2692a6fddb176d::t_325631e3b8dfd0 25
+src/deps/requirements.in
+  s_2692a6fddb176d::t_325631e3b8dfd0 1
+tests/unit/requirements.in
+  s_2692a6fddb176d::t_58534c714aeb4e 23,47,49-50
+src/scheduler/requirements.in
+  s_2692a6fddb176d::t_325631e3b8dfd0 40
+src/common/db/requirements.txt
+  s_2692a6fddb176d::t_325631e3b8dfd0 411-413
+  s_2692a6fddb176d::t_752adeee4a9261 331-333,335-401
+.github/workflows/container-build.yml
+  s_2692a6fddb176d::t_325631e3b8dfd0 201
+tests/misc/api/requirements.in
+  s_2692a6fddb176d::t_58534c714aeb4e 1
+src/scheduler/requirements.txt
+  s_2692a6fddb176d::t_325631e3b8dfd0 78,683-685,703-706,1131
+tests/unit/api_app/requirements.in
+  s_2692a6fddb176d::t_58534c714aeb4e 11-12
+src/common/db/requirements.arm.txt
+  s_2692a6fddb176d::t_325631e3b8dfd0 346-348
+  s_2692a6fddb176d::t_752adeee4a9261 331-333,335-336
+tests/misc/api/requirements.txt
+  s_2692a6fddb176d::t_58534c714aeb4e 25-27
+  s_2692a6fddb176d::t_ff536e864b541e 82-85
+src/api/requirements.txt
+  s_2692a6fddb176d::t_752adeee4a9261 19,271-273
+  s_2692a6fddb176d::t_325631e3b8dfd0 586-588
+.github/workflows/push-packagecloud.yml
+  s_2692a6fddb176d::t_325631e3b8dfd0 71
+src/deps/requirements.txt
+  s_2692a6fddb176d::t_325631e3b8dfd0 15-17,19-22
+src/deps/requirements-deps.txt
+  s_2692a6fddb176d::t_325631e3b8dfd0 203-205,207-210
+tests/requirements.txt
+  s_2692a6fddb176d::t_58534c714aeb4e 443-445,1060-1126,1132-1134,1279-1281
+  s_2692a6fddb176d::t_ff536e864b541e 1042-1045
+src/common/db/requirements.arm.in
+  s_2692a6fddb176d::t_752adeee4a9261 4
+  s_2692a6fddb176d::t_325631e3b8dfd0 5
+.github/workflows/scorecards-analysis.yml
+  s_2692a6fddb176d::t_325631e3b8dfd0 28
+.github/workflows/codeql.yml
+  s_2692a6fddb176d::t_325631e3b8dfd0 41,47
+tests/unit/requirements.txt
+  s_2692a6fddb176d::t_58534c714aeb4e 987-989,1880-1882,1884-1950,2121-2123,2129-2131
+CHANGELOG.md
+  s_de2ef45e1eda85::t_fe72f0f9fbfcca 33-37
+tests/unit/api_app/requirements.txt
+  s_2692a6fddb176d::t_58534c714aeb4e 18-20,179-181
+src/common/db/requirements.in
+  s_2692a6fddb176d::t_752adeee4a9261 4
+  s_2692a6fddb176d::t_325631e3b8dfd0 5
+src/api/requirements.in
+  s_2692a6fddb176d::t_77fae93500ac39 6
+  s_2692a6fddb176d::t_325631e3b8dfd0 9
+src/deps/requirements-deps.in
+  s_2692a6fddb176d::t_325631e3b8dfd0 1
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "b43a69e9a9151173b4d6669db0a76475ebee046f",
+  "prompts": {},
+  "sessions": {
+    "s_2692a6fddb176d": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1ea4e-62dc-7790-b940-c536701425bd",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_de2ef45e1eda85": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "7998fc02-66d1-45db-87b6-193d7973a9cb",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}
