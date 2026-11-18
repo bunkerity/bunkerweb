@@ -1878,8 +1878,8 @@ function restart_stack () {
 # Linux upgrade arm: bring the package inside the systemd container to the version the current action
 # names (BW_VERSION). "tests" is the package built from this checkout, which the workflow stages as
 # /opt/bunkerweb.deb; anything else is a release from the public repository (a GitHub tag spells a
-# prerelease X.Y.Z-rcN, apt spells it X.Y.Z~rcN). Installing a release starts from nothing: the
-# installed package is removed and the data it left is wiped. Installing "tests" over a release is the
+# prerelease X.Y.Z-rcN, apt spells it X.Y.Z~rcN). For a release, clear the previous package's dpkg
+# state and data while keeping the generated test config. Installing "tests" over a release is the
 # upgrade under test, so the data stays. A no-op while the installed package already is the wanted one,
 # which is every spec but upgrade. Debian-family only: an rpm distro has no arm that names a release.
 function linux_install_version() {
@@ -1934,6 +1934,20 @@ function linux_install_version() {
     else
         if [ -n "$installed" ] ; then
             docker exec -u 0 bunkerweb-linux apt-get remove -y bunkerweb || return 1
+        fi
+        if [ -n "$installed" ] || [[ "$status_version" == ?c* ]] ; then
+            # The remove hook has run. Clear residual dpkg state without the purge hook, which
+            # recursively deletes the bind-mounted config and data directories.
+            docker exec -u 0 bunkerweb-linux bash -ec '
+                postrm=/var/lib/dpkg/info/bunkerweb.postrm
+                if [ -f "$postrm" ]; then
+                    mv "$postrm" "$postrm.ci-backup"
+                    trap '\''mv "$postrm.ci-backup" "$postrm"'\'' EXIT
+                fi
+                dpkg --purge bunkerweb
+                trap - EXIT
+                rm -f "$postrm.ci-backup"
+            ' || return 1
         fi
         docker exec -u 0 bunkerweb-linux sh -c 'rm -rf /var/lib/bunkerweb/* /var/backups/bunkerweb /var/tmp/bunkerweb_upgrade' || return 1
         if ! docker exec -u 0 bunkerweb-linux test -f /etc/apt/sources.list.d/bunkerity_bunkerweb.list ; then
