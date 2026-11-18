@@ -1954,7 +1954,14 @@ function linux_install_version() {
             docker exec -u 0 bunkerweb-linux sh -c 'curl -fsSL https://repo.bunkerweb.io/install/script.deb.sh | bash' || return 1
         fi
         docker exec -u 0 bunkerweb-linux apt-get update || return 1
-        docker exec "${apt_env[@]}" -u 0 bunkerweb-linux apt-get install -y --allow-downgrades "bunkerweb=$target" || return 1
+        # A release depends on the exact NGINX it was built with, and the test image carries a newer one.
+        # apt never downgrades a dependency on its own, so name the version in the same transaction.
+        local depends nginx_pin
+        depends="$(docker exec -u 0 bunkerweb-linux apt-cache show "bunkerweb=$target" | sed -n 's/^Depends: //p')" || return 1
+        [ -n "$depends" ] || return 1
+        nginx_pin="$(printf '%s\n' "$depends" | tr ',' '\n' | sed -n 's/^ *nginx (= \([^)]*\)).*$/nginx=\1/p' | head -n 1)"
+        # shellcheck disable=SC2086 # an empty pin must vanish, not become an empty argument
+        docker exec "${apt_env[@]}" -u 0 bunkerweb-linux apt-get install -y --allow-downgrades "bunkerweb=$target" $nginx_pin || return 1
     fi
 
     # The package starts the units it installs. Wait until they have applied their first configuration,
