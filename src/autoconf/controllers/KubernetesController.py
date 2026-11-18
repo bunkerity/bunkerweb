@@ -392,13 +392,13 @@ class KubernetesController(Controller):
         pod_ip = status.pod_ip if status else None
         pod_name = controller_instance.metadata.name
         namespace = controller_instance.metadata.namespace
+        if not pod_ip:
+            self._logger.debug(f"Skipping pod {namespace}/{pod_name} because it has no IP")
+            return []
+
         instance = {
             "name": pod_name,
-            "hostname": (
-                f"{(pod_ip.replace('.', '-').replace(':', '-') if pod_ip else pod_name)}.{namespace}.pod.{self._domain_name}"
-                if self._use_fqdn
-                else (pod_ip or pod_name)
-            ),
+            "hostname": f"{pod_ip.replace('.', '-').replace(':', '-')}.{namespace}.pod.{self._domain_name}" if self._use_fqdn else pod_ip,
             "health": False,
             "type": "pod",
             "env": {},
@@ -413,14 +413,12 @@ class KubernetesController(Controller):
         if not pod:
             self._logger.warning(f"Missing container bunkerweb in pod {controller_instance.metadata.name}")
             # Preserve discovery behavior for legacy deployments with a different container name.
-            instance["health"] = bool(status and any(c.type == "Ready" and c.status == "True" for c in status.conditions or []))
+            instance["health"] = any(c.type == "Ready" and c.status == "True" for c in status.conditions or [])
         else:
             # Readiness gates traffic, not configuration delivery: a loading container needs
             # configuration before it can become Ready. The scheduler checks API reachability.
-            instance["health"] = bool(
-                status
-                and status.phase == "Running"
-                and pod_ip
+            instance["health"] = (
+                status.phase == "Running"
                 and not controller_instance.metadata.deletion_timestamp
                 and any(c.name == pod.name and c.state and c.state.running is not None for c in status.container_statuses or [])
             )

@@ -174,13 +174,13 @@ def test_pod_hostname_uses_the_ip_without_fqdn(k8s_env):
     c = K8s()
 
     assert c._to_instances(pod())[0]["hostname"] == "10.0.0.5"
-    assert c._to_instances(pod(ip=None))[0]["hostname"] == "bw-0"
+    assert c._to_instances(pod(ip=None)) == []
 
 
 @pytest.mark.parametrize(
     "kwargs",
-    [{"phase": "Pending"}, {"ip": None}, {"deleting": True}, {"running": False}],
-    ids=["pending", "no-ip", "terminating", "container-not-running"],
+    [{"phase": "Pending"}, {"deleting": True}, {"running": False}],
+    ids=["pending", "terminating", "container-not-running"],
 )
 def test_pod_that_cannot_serve_yet_is_unhealthy(ctrl, kwargs):
     assert ctrl._to_instances(pod(**kwargs))[0]["health"] is False
@@ -197,11 +197,24 @@ def test_pod_without_a_bunkerweb_container_uses_the_ready_condition(ctrl):
     assert log.has("Missing container bunkerweb in pod bw-0", logging.WARNING)
 
 
-def test_pod_without_status_is_unhealthy(ctrl):
+def test_pod_without_status_is_skipped(ctrl):
     p = pod()
     p.status = None
 
-    assert ctrl._to_instances(p)[0]["health"] is False
+    assert ctrl._to_instances(p) == []
+
+
+@pytest.mark.parametrize("fqdn", ["yes", "no"])
+@pytest.mark.parametrize("container_name", ["bunkerweb", "sidecar"])
+@pytest.mark.parametrize("ip", [None, ""])
+def test_pod_without_ip_is_skipped(k8s_env, fqdn, container_name, ip):
+    k8s_env.setenv("USE_KUBERNETES_FQDN", fqdn)
+    c = K8s()
+    log = attach_log(c)
+    p = pod(ip=ip, containers=[k.V1Container(name=container_name)])
+
+    assert c._to_instances(p) == []
+    assert log.has("Skipping pod prod/bw-0 because it has no IP", logging.DEBUG)
 
 
 def test_service_annotations_become_instance_env(ctrl):
