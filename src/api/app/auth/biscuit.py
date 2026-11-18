@@ -11,7 +11,7 @@ from common_utils import get_version  # type: ignore
 
 from ..config import api_config
 from ..utils import BISCUIT_PUBLIC_KEY_FILE
-from .common import get_auth_header, is_under_url, parse_bearer_token
+from .common import get_auth_header, parse_bearer_token
 
 OPERATION_BY_METHOD = {
     "GET": "read",
@@ -445,17 +445,14 @@ class BiscuitGuard:
             raise RuntimeError(f"Failed to load Biscuit public key: {e}")
 
     def __call__(self, request: Request) -> None:
-        # Skip auth for health, login, and OpenAPI/docs endpoints
+        # Skip auth for health, ping and login (the documentation pages are FastAPI routes outside this dependency)
         # Strip root_path prefix if configured (handles proxy/gateway scenarios)
         path = request.scope.get("path", request.url.path)
         root_path = api_config.API_ROOT_PATH
         if root_path and path.startswith(root_path):
             path = path[len(root_path) :] or "/"  # noqa: E203
         self._logger.debug(f"Biscuit start: {request.method} {path} from {request.client.host if request.client else 'unknown'}")
-        openapi_match = api_config.openapi_url and path == api_config.openapi_url
-        docs_match = is_under_url(path, api_config.docs_url)
-        redoc_match = is_under_url(path, api_config.redoc_url)
-        if path in ("/health", "/ping") or bool(openapi_match) or docs_match or path.startswith("/auth") or redoc_match:
+        if path in ("/health", "/ping") or path.startswith("/auth"):
             self._logger.debug(f"Biscuit skip for path: {path}")
             return
 

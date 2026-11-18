@@ -28,7 +28,7 @@ def request(path="/services/example", token=None, ip="127.0.0.1"):
 
 @pytest.fixture
 def admin_guard(monkeypatch):
-    config = SimpleNamespace(API_ROOT_PATH=None, API_TOKEN=ADMIN_TOKEN, docs_url="/docs", openapi_url="/openapi.json", redoc_url="/redoc")
+    config = SimpleNamespace(API_ROOT_PATH=None, API_TOKEN=ADMIN_TOKEN)
     monkeypatch.setattr(auth, "api_config", config)
     database = Mock()
     database.get_api_user.return_value = {"admin": True, "password": hashpw(b"correct", gensalt(rounds=4))}
@@ -41,7 +41,7 @@ def call(guard, req, username=None, password="correct"):
     return asyncio.run(guard(req, credentials))
 
 
-@pytest.mark.parametrize("path", ["/health", "/ping", "/auth", "/docs/oauth2-redirect", "/redoc", "/openapi.json"])
+@pytest.mark.parametrize("path", ["/health", "/ping", "/auth"])
 def test_public_endpoints_skip_credentials(admin_guard, path):
     guard, database = admin_guard
     req = request(path)
@@ -50,32 +50,16 @@ def test_public_endpoints_skip_credentials(admin_guard, path):
     database.get_api_user.assert_not_called()
 
 
-DOCS_CASES = [
-    ("/docs", "/docs", True),
-    ("/docs", "/docs/", True),
-    ("/docs", "/docs/oauth2-redirect", True),
-    ("/docs/", "/docs", True),
-    ("/docs/", "/docs/oauth2-redirect", True),
-    ("/docs", "/docsify", False),
-    ("/docs", "/docs-admin/users", False),
-    ("/s", "/services/example", False),
-    ("/s", "/s", True),
-    ("/", "/services/example", False),
-]
+# FastAPI serves these from its own routes, so a guard that exempted them could only ever exempt a management route.
+DOCUMENTATION_PATHS = ["/docs", "/docs/oauth2-redirect", "/redoc", "/openapi.json", "/services/example"]
 
 
-@pytest.mark.parametrize("url,path,public", DOCS_CASES)
-@pytest.mark.parametrize("kind", ["docs_url", "redoc_url"])
-def test_guard_documentation_skip_needs_exact_path_or_subresource(admin_guard, kind, url, path, public):
+@pytest.mark.parametrize("path", DOCUMENTATION_PATHS)
+def test_guard_exempts_no_documentation_path(admin_guard, path):
     guard, database = admin_guard
-    auth.api_config.docs_url = auth.api_config.redoc_url = None
-    setattr(auth.api_config, kind, url)
-    if public:
-        assert call(guard, request(path)) is None
-    else:
-        with pytest.raises(HTTPException) as caught:
-            call(guard, request(path))
-        assert caught.value.status_code == 401
+    with pytest.raises(HTTPException) as caught:
+        call(guard, request(path))
+    assert caught.value.status_code == 401
     database.get_api_user.assert_not_called()
 
 
@@ -140,7 +124,7 @@ def test_missing_or_forged_bearer_is_refused_by_real_biscuit(admin_guard, token)
 
 @pytest.fixture
 def biscuit_config(monkeypatch):
-    config = SimpleNamespace(API_ROOT_PATH=None, docs_url=None, openapi_url=None, redoc_url=None, biscuit_ttl_seconds=60, check_private_ip=True)
+    config = SimpleNamespace(API_ROOT_PATH=None, biscuit_ttl_seconds=60, check_private_ip=True)
     monkeypatch.setattr(biscuit, "api_config", config)
     return config
 
@@ -152,16 +136,11 @@ def token(*, issued=None, ip="127.0.0.1", version=VERSION, grant=True):
     return BiscuitBuilder(facts, {"issued": issued or datetime.now(timezone.utc), "ip": ip, "version": version}).build(_KEYPAIR.private_key).to_base64()
 
 
-@pytest.mark.parametrize("url,path,public", DOCS_CASES)
-@pytest.mark.parametrize("kind", ["docs_url", "redoc_url"])
-def test_biscuit_documentation_skip_needs_exact_path_or_subresource(biscuit_config, kind, url, path, public):
-    setattr(biscuit_config, kind, url)
-    if public:
-        assert biscuit.guard(request(path)) is None
-    else:
-        with pytest.raises(HTTPException) as caught:
-            biscuit.guard(request(path))
-        assert caught.value.status_code == 401
+@pytest.mark.parametrize("path", DOCUMENTATION_PATHS)
+def test_biscuit_exempts_no_documentation_path(biscuit_config, path):
+    with pytest.raises(HTTPException) as caught:
+        biscuit.guard(request(path))
+    assert caught.value.status_code == 401
 
 
 def test_biscuit_scoped_grant_reaches_only_matching_resource(biscuit_config):
