@@ -2539,6 +2539,30 @@ Der Entrypoint des `bunkerweb`-Dienstes liest außerdem direkt die folgende Vari
 | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------- | -------- |
 | `KEEP_CONFIG_ON_RESTART` | Behält beim Neustart des `bunkerweb`-Dienstes die zuvor generierte Konfiguration anstatt die Lade-Konfiguration zu rendern. Startet die beibehaltene Konfiguration nicht, greift die Instanz auf die Lade-Konfiguration zurück, bis der Scheduler die neueste Konfiguration überträgt. Wird aus der Umgebung oder `/etc/bunkerweb/variables.env` gelesen, niemals aus der Datenbank. | `yes` oder `no` | `no`     |
 
+### Transparente Huge Pages {#linux-transparent-huge-pages}
+
+Sind transparente Huge Pages (THP) auf `always` gesetzt, dem Standard bei einigen Distributionen, kann der Kernel Speicher, den die NGINX-Worker mit dem Master-Prozess teilen, in private 2-MB-Seiten umwandeln. Nach einem Reload können die neuen Worker dann mit Hunderten MB mehr privatem Speicher starten (ein Bericht maß unter Debian 12 rund 800 MB mehr pro Reload), und der Scheduler kann Speicher behalten, den seine Jobs nicht mehr nutzen, denn eine 2-MB-Seite bleibt belegt, solange irgendetwas darin noch verwendet wird. Die Einstellung gehört zum Kernel des Hosts und gilt für alle Container auf dem Host, betrifft also auch Docker-Hosts.
+
+Setzen Sie sie auf `madvise`, damit nur Programme Huge Pages erhalten, die sie anfordern. Prüfen Sie den aktuellen Wert (der aktive steht in eckigen Klammern):
+
+```shell
+cat /sys/kernel/mm/transparent_hugepage/enabled
+```
+
+Ändern Sie ihn bis zum nächsten Neustart:
+
+```shell
+echo madvise | sudo tee /sys/kernel/mm/transparent_hugepage/enabled
+```
+
+Behalten Sie ihn über Neustarts hinweg mit einem systemd-`tmpfiles.d`-Eintrag:
+
+```shell
+echo 'w /sys/kernel/mm/transparent_hugepage/enabled - - - - madvise' | sudo tee /etc/tmpfiles.d/thp.conf
+```
+
+oder fügen Sie `transparent_hugepage=madvise` zur Kernel-Kommandozeile hinzu (zum Beispiel in `GRUB_CMDLINE_LINUX` in `/etc/default/grub`, danach die GRUB-Konfiguration neu erzeugen).
+
 ### Hochverfügbarkeit
 
 Der Scheduler kann von der BunkerWeb-Instanz getrennt werden, um eine hohe Verfügbarkeit zu gewährleisten. In diesem Fall wird der Scheduler auf einem separaten Server installiert und kann mehrere BunkerWeb-Instanzen verwalten.

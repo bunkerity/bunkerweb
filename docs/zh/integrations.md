@@ -2540,6 +2540,30 @@ MY_SETTING_2=value2
 | ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------- | ------------- | ------ |
 | `KEEP_CONFIG_ON_RESTART` | 重启 `bunkerweb` 服务时保留之前生成的配置，而不是重新渲染加载配置。如果保留的配置无法启动，实例会回退到加载配置，直到调度器推送最新配置。从环境变量或 `/etc/bunkerweb/variables.env` 读取，绝不从数据库读取。 | `yes` 或 `no` | `no`   |
 
+### 透明大页 {#linux-transparent-huge-pages}
+
+当透明大页（THP）设置为 `always`（部分发行版的默认值）时，内核可以把 NGINX worker 与主进程共享的内存转换成私有的 2 MB 页。重新加载后，新的 worker 启动时可能多出数百 MB 私有内存（有报告在 Debian 12 上测得每次重新加载约多出 800 MB），调度器也可能保留其任务已不再使用的内存，因为只要 2 MB 页中仍有内容在使用，该页就保持分配状态。该设置属于主机内核，并由主机上的所有容器共享，因此同样适用于 Docker 主机。
+
+请将其设置为 `madvise`，这样只有主动请求大页的程序才会获得大页。查看当前值（生效的值带方括号）：
+
+```shell
+cat /sys/kernel/mm/transparent_hugepage/enabled
+```
+
+修改至下次重启之前：
+
+```shell
+echo madvise | sudo tee /sys/kernel/mm/transparent_hugepage/enabled
+```
+
+使用 systemd 的 `tmpfiles.d` 条目让它在重启后保持：
+
+```shell
+echo 'w /sys/kernel/mm/transparent_hugepage/enabled - - - - madvise' | sudo tee /etc/tmpfiles.d/thp.conf
+```
+
+或者在内核命令行中加入 `transparent_hugepage=madvise`（例如写入 `/etc/default/grub` 的 `GRUB_CMDLINE_LINUX`，然后重新生成 GRUB 配置）。
+
 ### 高可用性
 
 调度器可以与 BunkerWeb 实例分离，以提供高可用性。在这种情况下，调度器将安装在一台独立的服务器上，并能够管理多个 BunkerWeb 实例。

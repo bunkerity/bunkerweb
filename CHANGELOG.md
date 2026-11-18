@@ -28,6 +28,7 @@
 - [BUGFIX] `metrics`, `ui`: the Reports page keeps stored requests of any status, counts each request once in the panes and reads Redis in smaller batches. (Refs #4084)
 - [DOCS] `splunk`: container integrations send the three logs to a Universal Forwarder as parsable `bunkerweb:*` sourcetypes, with rotation guidance.
 - [DOCS] `scheduler`: the custom configuration section explains the `.bw-managed` marker, manual deletion and restore, and retained inactive service CRS files.
+- [DOCS] `linux`: recommend `madvise` for transparent huge pages, since `always` can add hundreds of MB per reload. (Refs #4164)
 
 ## v1.6.18~rc4 - 2026/11/17
 

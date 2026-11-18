@@ -2541,6 +2541,30 @@ El entrypoint del servicio `bunkerweb` también lee directamente la siguiente va
 | ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------- | -------------- |
 | `KEEP_CONFIG_ON_RESTART` | Mantiene la configuración generada previamente al reiniciar el servicio `bunkerweb` en lugar de renderizar la configuración de carga. Si la configuración conservada no arranca, la instancia recurre a la configuración de carga hasta que el scheduler envíe la más reciente. Se lee desde el entorno o `/etc/bunkerweb/variables.env`, nunca desde la base de datos. | `yes` o `no`      | `no`           |
 
+### Páginas enormes transparentes {#linux-transparent-huge-pages}
+
+Con las páginas enormes transparentes (THP) en `always`, el valor por defecto en algunas distribuciones, el kernel puede convertir la memoria que los workers de NGINX comparten con el proceso maestro en páginas privadas de 2 MB. Tras una recarga, los nuevos workers pueden arrancar con cientos de MB más de memoria privada (un informe midió unos 800 MB más por recarga en Debian 12), y el scheduler puede conservar memoria que sus tareas ya no usan, porque una página de 2 MB sigue asignada mientras algo en ella siga en uso. Este ajuste pertenece al kernel del host y lo comparten todos los contenedores del host, así que también afecta a los hosts Docker.
+
+Configúrelo en `madvise`, para que solo los programas que piden páginas enormes las reciban. Compruebe el valor actual (el activo aparece entre corchetes):
+
+```shell
+cat /sys/kernel/mm/transparent_hugepage/enabled
+```
+
+Cámbielo hasta el próximo reinicio:
+
+```shell
+echo madvise | sudo tee /sys/kernel/mm/transparent_hugepage/enabled
+```
+
+Consérvelo tras los reinicios con una entrada de systemd `tmpfiles.d`:
+
+```shell
+echo 'w /sys/kernel/mm/transparent_hugepage/enabled - - - - madvise' | sudo tee /etc/tmpfiles.d/thp.conf
+```
+
+o añada `transparent_hugepage=madvise` a la línea de comandos del kernel (por ejemplo en `GRUB_CMDLINE_LINUX` de `/etc/default/grub` y regenere después la configuración de GRUB).
+
 ### Alta disponibilidad
 
 El programador puede separarse de la instancia de BunkerWeb para proporcionar alta disponibilidad. En este caso, el programador se instalará en un servidor separado y podrá gestionar múltiples instancias de BunkerWeb.
