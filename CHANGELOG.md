@@ -20,6 +20,7 @@
 - [BUGFIX] `integrations`: fix the Web UI database URIs in the PostgreSQL and MariaDB Kubernetes manifests.
 - [BUGFIX] `modsecurity`: separate active CRS after-plugin includes are kept in per-service and global CRS modes.
 - [BUGFIX] `core`: generated ModSecurity fragments are included on the first configuration render.
+- [BUGFIX] `core`: IPv6 service settings and custom configurations given through environment files and variables are kept.
 - [DOCS] `scheduler`: the custom configuration section explains the `.bw-managed` marker, manual deletion and restore, and retained inactive service CRS files.
 
 ## v1.6.18~rc4 - 2026/11/17

@@ -30,7 +30,8 @@ from typing import Callable, Dict, Iterable, Optional
 # The token before the first "=" on a line that genuinely declares a setting. Service
 # prefixes make the key `www.example.com_CUSTOM_SSL_CERT_DATA`, hence the dot and dash.
 # Base64 lines carry "+" and "/" and fail this, so they cannot be mistaken for a key.
-KEY_RX = re_compile(r"^[A-Za-z0-9_.-]+$")
+# Colons belong only to a bare IPv6 service prefix, before the setting name.
+KEY_RX = re_compile(r"^(?:(?:[0-9a-f]{0,4}:){2,7}[0-9a-f]{0,4}_)?[A-Za-z0-9_.-]+$")
 
 PEM_BEGIN = "-----BEGIN"
 PEM_END = "-----END"
