@@ -1610,46 +1610,43 @@ function metrics:api_requests_query()
 	-- Filter requests
 	local filtered_requests = {}
 	for _, request in ipairs(all_requests) do
-		-- Filter: status 400-499 or detect mode
-		if (request.status and request.status >= 400 and request.status < 500) or request.security_mode == "detect" then
-			local matches = true
+		local matches = true
 
-			-- Apply search filter
-			if search ~= "" then
-				local search_lower = search:lower()
-				matches = false
-				for _, value in pairs(request) do
-					if type(value) == "string" and value:lower():find(search_lower, 1, true) then
-						matches = true
-						break
-					elseif type(value) == "number" and tostring(value):find(search_lower, 1, true) then
-						matches = true
+		-- Apply search filter
+		if search ~= "" then
+			local search_lower = search:lower()
+			matches = false
+			for _, value in pairs(request) do
+				if type(value) == "string" and value:lower():find(search_lower, 1, true) then
+					matches = true
+					break
+				elseif type(value) == "number" and tostring(value):find(search_lower, 1, true) then
+					matches = true
+					break
+				end
+			end
+		end
+
+		-- Apply search panes filters
+		if matches then
+			for field, allowed_values in pairs(search_panes) do
+				local field_value = tostring(request[field] or "N/A")
+				local field_matches = false
+				for _, allowed in ipairs(allowed_values) do
+					if field_value == allowed then
+						field_matches = true
 						break
 					end
 				end
-			end
-
-			-- Apply search panes filters
-			if matches then
-				for field, allowed_values in pairs(search_panes) do
-					local field_value = tostring(request[field] or "N/A")
-					local field_matches = false
-					for _, allowed in ipairs(allowed_values) do
-						if field_value == allowed then
-							field_matches = true
-							break
-						end
-					end
-					if not field_matches then
-						matches = false
-						break
-					end
+				if not field_matches then
+					matches = false
+					break
 				end
 			end
+		end
 
-			if matches then
-				table_insert(filtered_requests, request)
-			end
+		if matches then
+			table_insert(filtered_requests, request)
 		end
 	end
 
@@ -1705,16 +1702,14 @@ function metrics:api_requests_query()
 	end
 
 	for _, request in ipairs(all_requests) do
-		if (request.status and request.status >= 400 and request.status < 500) or request.security_mode == "detect" then
-			for _, field in ipairs(pane_fields) do
-				local value = tostring(request[field] or "N/A")
-				if not pane_counts[field][value] then
-					pane_counts[field][value] = { total = 0, count = 0 }
-				end
-				pane_counts[field][value].total = pane_counts[field][value].total + 1
-				if filtered_ids[request.id] then
-					pane_counts[field][value].count = pane_counts[field][value].count + 1
-				end
+		for _, field in ipairs(pane_fields) do
+			local value = tostring(request[field] or "N/A")
+			if not pane_counts[field][value] then
+				pane_counts[field][value] = { total = 0, count = 0 }
+			end
+			pane_counts[field][value].total = pane_counts[field][value].total + 1
+			if filtered_ids[request.id] then
+				pane_counts[field][value].count = pane_counts[field][value].count + 1
 			end
 		end
 	end
