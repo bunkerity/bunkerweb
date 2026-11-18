@@ -133,11 +133,13 @@ local function control_plane_variables_from_disk()
 		return {}
 	end
 	local found = {}
+	-- Only a file the writers generated (src/common/utils/env_file.py ENV_FORMAT_MARKER) holds bw-b64:<base64>
+	-- values; any other file, an rc4 or operator one, keeps such text as written. Like Python, one "\r" is dropped.
+	local decode_values = contents:match("^([^\n]*)\n"):gsub("\r$", "") == "#bw-env-format:2"
 	for line in contents:gmatch("([^\n]*)\n") do
 		local key, raw = line:match("^([^=]+)=(.*)$")
 		if key == "API_WHITELIST_IP" or key == "API_TOKEN" then
-			-- A value with a line break, or one that starts with the marker, is written as bw-b64:<base64>
-			local encoded = raw:match("^bw%-b64:(.*)$")
+			local encoded = decode_values and raw:match("^bw%-b64:(.*)$")
 			if encoded then
 				local decoded = ngx.decode_base64(encoded)
 				if decoded then

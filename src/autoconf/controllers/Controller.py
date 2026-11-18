@@ -76,6 +76,8 @@ class Controller(Config):
         self._logger = getLogger(f"{self._type.upper()}-CONTROLLER")
         self._namespaces = None
         self._first_start = True
+        # Set by _to_instances() when an instance exists but cannot be addressed yet (a Kubernetes pod without an IP).
+        self._instances_pending = False
 
         # Periodic re-check interval (seconds) for the settings recheck worker. <= 0 disables it.
         recheck_interval = getenv("AUTOCONF_SETTINGS_RECHECK_INTERVAL", "300").strip()
@@ -130,10 +132,13 @@ class Controller(Config):
 
     def get_instances(self):
         instances = []
+        self._instances_pending = False
         for controller_instance in self._get_controller_instances():
             instances.extend(self._to_instances(controller_instance))
 
-        if not instances and self._first_start:
+        # An instance still waiting for its address must not be replaced by stale database rows: wait() would accept
+        # a dead instance from before an upgrade and the scheduler would push the first configuration to it.
+        if not instances and self._first_start and not self._instances_pending:
             for db_instance in self._db.get_instances(autoconf=True):
                 if not any(db_instance["hostname"] == instance["hostname"] for instance in instances):
                     instances.append(db_instance)
