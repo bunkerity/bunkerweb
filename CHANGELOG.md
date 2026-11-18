@@ -19,6 +19,7 @@
 - [BUGFIX] `scheduler`: jobs close their own database connections when they end, so MariaDB and MySQL no longer log them as `Aborted connection`.
 - [BUGFIX] `scheduler`: each scheduled job runs once per due slot, plugins in parallel, ending the `Failed to reload cached module` warnings.
 - [BUGFIX] `scheduler`: scheduled jobs wait out a read-only database, its recovery keeps retrying, and every failed job of a batch is recorded.
+- [BUGFIX] `scheduler`: a job's own error and exit code are kept when the scheduler closes the database connections the job opened.
 - [BUGFIX] `autoconf`: Gateway routing and class isolation survive Kubernetes API list failures; transient discovery errors fail startup.
 - [BUGFIX] `autoconf`: Kubernetes retries a failed configuration save or apply after 10 s, and Docker, Swarm and Kubernetes keep the last saved configuration as the baseline, so a failed save is written again. (Refs #4107)
 - [BUGFIX] `autoconf`: Kubernetes pods without an IP yet are no longer registered under a name that never resolves, sparing a second pass on scale-up.

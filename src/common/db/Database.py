@@ -17,7 +17,7 @@ from re import DOTALL, IGNORECASE, Match, compile as re_compile, escape, error a
 from sys import argv, path as sys_path
 from threading import RLock, local
 from traceback import format_exc
-from typing import Any, Callable, Dict, Iterator, List, Literal, NoReturn, Optional, Sequence, Set, Tuple, TypeVar, Union
+from typing import Any, Callable, Dict, List, Literal, NoReturn, Optional, Sequence, Set, Tuple, TypeVar, Union
 from time import sleep
 from uuid import uuid4
 from warnings import filterwarnings
@@ -113,26 +113,31 @@ BLOB_CHUNK_MAX = 4 * 1024 * 1024
 _CREATED = local()
 
 
-@contextmanager
-def close_created_databases() -> Iterator[None]:
+class close_created_databases:
     """Close every Database this thread builds inside the block when the block ends, however it ends.
 
     The scheduler runs jobs in-process and drops their modules afterwards. Whatever a job built then lives in
     a reference cycle and is only finalised by the cyclic GC, which has already cleared the weakrefs a TLS
     socket depends on, so the COM_QUIT written by ``__del__`` fails and MariaDB logs "Aborted connection".
     A Database that was passed in, rather than built here, is never touched.
+
+    A class, not a ``@contextmanager``: that wrapper writes ``exc.__traceback__`` on the way out, which an
+    exception that rejects attribute writes (a frozen dataclass) turns into a different exception. ``__exit__``
+    here never reads, writes or replaces the exception leaving the block.
     """
-    if not hasattr(_CREATED, "stack"):
-        _CREATED.stack = []  # one list per active scope on this thread, outermost first
-    stack = _CREATED.stack
-    created: List["Database"] = []
-    stack.append(created)
-    try:
-        yield
-    finally:
+
+    def __enter__(self) -> "close_created_databases":
+        if not hasattr(_CREATED, "stack"):
+            _CREATED.stack = []  # one list per active scope on this thread, outermost first
+        self._created: List["Database"] = []
+        _CREATED.stack.append(self._created)
+        return self
+
+    def __exit__(self, exc_type, exc, tb) -> bool:
         # Drop this scope's own list (by identity), whatever order scopes end in.
-        stack[:] = [scope for scope in stack if scope is not created]
-        _close_all(created)
+        _CREATED.stack[:] = [scope for scope in _CREATED.stack if scope is not self._created]
+        _close_all(self._created)
+        return False
 
 
 def _close_all(databases: List["Database"]) -> None:

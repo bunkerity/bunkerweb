@@ -284,3 +284,57 @@ def test_a_fatal_init_exit_without_a_scope_only_exits(tracked, monkeypatch):
     with pytest.raises(SystemExit) as exc:
         tracked.module.Database(tracked.logger, sqlalchemy_string="bogus://nowhere", log=False)
     assert exc.value.code == 1
+
+
+FROZEN_HEAD = """
+from dataclasses import dataclass
+
+from Database import Database
+from os import getenv
+import logging
+
+DB = Database(logging.getLogger("bw-job-under-test"), sqlalchemy_string=getenv("DATABASE_URI"), log=False)
+
+@dataclass(frozen=True)
+class {cls}({base}):
+    {field}: {kind}
+
+raise {cls}({arg})
+"""
+
+FROZEN_JOBS = {
+    "frozen-error": (FROZEN_HEAD.format(cls="Boom", base="Exception", field="detail", kind="str", arg="'frozen boom detail'"), False, "frozen boom detail"),
+    "frozen-exit-0": (FROZEN_HEAD.format(cls="Quit", base="SystemExit", field="code", kind="int", arg="0"), True, None),
+    "frozen-exit-2": (
+        FROZEN_HEAD.format(cls="Quit", base="SystemExit", field="code", kind="int", arg="2"),
+        False,
+        "Error while executing job 'work' from plugin 'plug'",
+    ),
+}
+
+
+@pytest.mark.parametrize("mode", ["run_once", "run_single"])
+@pytest.mark.parametrize("kind", list(FROZEN_JOBS))
+def test_a_frozen_exception_leaves_the_job_scope_untouched(make_scheduler, tracked, caplog, mode, kind):
+    """contextlib's generator __exit__ writes exc.__traceback__, which a frozen exception rejects and which replaced the job's own outcome."""
+    import logging
+
+    body, success, text = FROZEN_JOBS[kind]
+    sched = make_scheduler([("plug", [job("work", "work.py")], {"work.py": body})])
+    built_before = len(tracked.created)
+
+    with caplog.at_level(logging.ERROR):
+        assert (sched.run_once() if mode == "run_once" else sched.run_single("work")) is success
+
+    jobs.wait_until(lambda: len(sched.fake_db.job_runs) >= 1)
+    assert sched.fake_db.job_runs == [("work", success)]
+    errors = [r.getMessage() for r in caplog.records if r.levelno >= logging.ERROR and "'work'" in r.getMessage()]
+    assert not any("FrozenInstanceError" in line or "__traceback__" in line for line in errors), errors
+    if kind == "frozen-exit-2":
+        # A plain nonzero exit, not an exception run: the wrapper's own ret >= 2 line, and no "Exception while executing job".
+        assert not any("Exception while executing job" in line for line in errors), errors
+    if text:
+        assert len(errors) == 1 and text in errors[0], errors
+    built = tracked.created[built_before:]
+    assert len(built) == 1
+    assert is_closed(tracked, built[0])
