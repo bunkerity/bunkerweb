@@ -406,6 +406,7 @@ class JobScheduler(ApiCaller):
                     ("modsecurity", "download-crs-plugins"),
                     ("grpc", "grpc-trusted-cert"),
                     ("reverseproxy", "trusted-cert"),
+                    ("realip", "realip-download"),
                 ):
                     self.__job_regenerate = True
                     # A render kept from before a failed push predates this job's change, and

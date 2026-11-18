@@ -287,9 +287,16 @@ def test_status_three_still_fails_when_an_earlier_job_already_failed(make_schedu
 
 
 @pytest.mark.parametrize(
-    "plugin, name", [("mtls", "client-cert"), ("modsecurity", "download-crs-plugins"), ("grpc", "grpc-trusted-cert"), ("reverseproxy", "trusted-cert")]
+    "plugin, name",
+    [
+        ("mtls", "client-cert"),
+        ("modsecurity", "download-crs-plugins"),
+        ("grpc", "grpc-trusted-cert"),
+        ("reverseproxy", "trusted-cert"),
+        ("realip", "realip-download"),
+    ],
 )
-def test_certificate_jobs_that_changed_something_ask_for_a_new_render(make_scheduler, plugin, name):
+def test_jobs_whose_output_is_rendered_into_the_config_ask_for_a_new_render(make_scheduler, plugin, name):
     sched = make_scheduler([(plugin, [job(name, "j.py")], {"j.py": EXIT.format(code=1)})])
     assert sched.run_single(name) is True
     assert sched.consume_pending_publication() == (True, True)

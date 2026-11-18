@@ -50,6 +50,35 @@ def test_public_endpoints_skip_credentials(admin_guard, path):
     database.get_api_user.assert_not_called()
 
 
+DOCS_CASES = [
+    ("/docs", "/docs", True),
+    ("/docs", "/docs/", True),
+    ("/docs", "/docs/oauth2-redirect", True),
+    ("/docs/", "/docs", True),
+    ("/docs/", "/docs/oauth2-redirect", True),
+    ("/docs", "/docsify", False),
+    ("/docs", "/docs-admin/users", False),
+    ("/s", "/services/example", False),
+    ("/s", "/s", True),
+    ("/", "/services/example", False),
+]
+
+
+@pytest.mark.parametrize("url,path,public", DOCS_CASES)
+@pytest.mark.parametrize("kind", ["docs_url", "redoc_url"])
+def test_guard_documentation_skip_needs_exact_path_or_subresource(admin_guard, kind, url, path, public):
+    guard, database = admin_guard
+    auth.api_config.docs_url = auth.api_config.redoc_url = None
+    setattr(auth.api_config, kind, url)
+    if public:
+        assert call(guard, request(path)) is None
+    else:
+        with pytest.raises(HTTPException) as caught:
+            call(guard, request(path))
+        assert caught.value.status_code == 401
+    database.get_api_user.assert_not_called()
+
+
 def test_bearer_admin_sets_audit_subject_without_database(admin_guard, monkeypatch):
     guard, database = admin_guard
     monkeypatch.setattr(auth.api_config, "API_ROOT_PATH", "/api")
@@ -121,6 +150,18 @@ def token(*, issued=None, ip="127.0.0.1", version=VERSION, grant=True):
     if grant:
         facts += 'api_perm("services", "example", "service_read");'
     return BiscuitBuilder(facts, {"issued": issued or datetime.now(timezone.utc), "ip": ip, "version": version}).build(_KEYPAIR.private_key).to_base64()
+
+
+@pytest.mark.parametrize("url,path,public", DOCS_CASES)
+@pytest.mark.parametrize("kind", ["docs_url", "redoc_url"])
+def test_biscuit_documentation_skip_needs_exact_path_or_subresource(biscuit_config, kind, url, path, public):
+    setattr(biscuit_config, kind, url)
+    if public:
+        assert biscuit.guard(request(path)) is None
+    else:
+        with pytest.raises(HTTPException) as caught:
+            biscuit.guard(request(path))
+        assert caught.value.status_code == 401
 
 
 def test_biscuit_scoped_grant_reaches_only_matching_resource(biscuit_config):

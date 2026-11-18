@@ -6,6 +6,7 @@
 - [SECURITY] `api`: the internal HTTPS client falls back to HTTP only when the peer does not speak TLS, never after a reset, timeout or certificate error.
 - [SECURITY] `support`: `bwcli support` and the UI redact JSON ModSecurity audit logs and URL credentials in the masked configuration export.
 - [SECURITY] `database`: SQL bound parameters no longer appear in logged persistence errors.
+- [SECURITY] `api`: only the docs path itself skips authentication, so `API_DOCS_URL` can no longer expose other routes; `/` is refused.
 - [SECURITY] `deps`: update NGINX to 1.30.7, fixing nine CVEs including HTTP/2 and HTTP/3. Fedora stays on 1.30.6 until 1.30.7 ships there.
 - [FEATURE] `dnsbl`: `DNSBL_LIST` can be set per service; services without an override keep the global list. (Fixes #4018)
 - [BUGFIX] `linux`: reinstalling a package keeps the data and starts the services; absent units are tolerated, stop failures still abort.
@@ -29,6 +30,7 @@
 - [BUGFIX] `core`: IPv6 service settings and custom configurations given through environment files and variables are kept.
 - [BUGFIX] `reverseproxy`, `grpc`, `redirect`: quoted location operands and regex braces work again after upgrades.
 - [BUGFIX] `core`: bare IPv4-mapped host entries in IP lists match both mapped and plain IPv4 clients.
+- [BUGFIX] `realip`: downloaded trusted proxy lists now regenerate the configuration, so new ranges take effect.
 - [BUGFIX] `misc`: the release version check requires exact version pins and rejects stale RC tokens that share the current version prefix.
 - [BUGFIX] `ui`: Web UI workers restart after 200 requests by default instead of 1000, to release memory sooner; `UI_MAX_REQUESTS` is now documented. (Fixes #4163)
 - [BUGFIX] `metrics`, `ui`: the Reports page keeps stored requests of any status, counts each request once in the panes and reads Redis in smaller batches. (Refs #4084)

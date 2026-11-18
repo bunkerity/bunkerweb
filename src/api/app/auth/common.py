@@ -15,3 +15,9 @@ def parse_bearer_token(auth_header: str) -> Optional[str]:
         return auth_header.split(" ", 1)[1].strip()
     except Exception:
         return None
+
+
+def is_under_url(path: str, url: Optional[str]) -> bool:
+    """True for the URL itself or a sub-resource of it, never a sibling route that merely shares the prefix."""
+    base = (url or "").rstrip("/")
+    return bool(base) and (path == base or path.startswith(f"{base}/"))
