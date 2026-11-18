@@ -26,6 +26,7 @@
 - [BUGFIX] `misc`: the release version check requires exact version pins and rejects stale RC tokens that share the current version prefix.
 - [BUGFIX] `ui`: Web UI workers restart after 200 requests by default instead of 1000, to release memory sooner; `UI_MAX_REQUESTS` is now documented. (Fixes #4163)
 - [BUGFIX] `metrics`, `ui`: the Reports page keeps stored requests of any status, counts each request once in the panes and reads Redis in smaller batches. (Refs #4084)
+- [DOCS] `splunk`: container integrations send the three logs to a Universal Forwarder as parsable `bunkerweb:*` sourcetypes, with rotation guidance.
 - [DOCS] `scheduler`: the custom configuration section explains the `.bw-managed` marker, manual deletion and restore, and retained inactive service CRS files.
 
 ## v1.6.18~rc4 - 2026/11/17

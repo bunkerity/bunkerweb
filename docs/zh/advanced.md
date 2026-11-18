@@ -3259,10 +3259,137 @@ time=2026-11-10T08:11:02+00:00 host=www.example.com client=10.77.52.1 request_id
     - **审计日志既不是请求日志，也不是拦截证明。** 默认的 `MODSECURITY_SEC_AUDIT_ENGINE`（`RelevantOnly`）也可能记录被放行的事务：规则记录命中时（包括 `DetectionOnly` 模式或分数低于拦截阈值时），或者状态码匹配 `SecAuditLogRelevantStatus` 时。在上面的测试中，只有 ModSecurity 的拒绝产生了记录。
     - **`C` 部分包含请求正文**，其中有表单字段和凭据。除非需要正文，否则请使用 `BFH`，并限制谁可以读取该索引。
 
-!!! info "Docker、Autoconf、Swarm 和 Kubernetes"
-    这些镜像把 `access.log`、`error.log` 和 `modsec_audit.log` 链接到容器自身的日志流（参见[日志文件保留策略](#log-file-retention)），因此 forwarder 没有文件可读；由 `ACCESS_LOG_1` 写入的文件留在容器内，没有任何机制轮转它。请像其他设置一样，在调度器上设置 `MODSECURITY_SEC_AUDIT_LOG_FORMAT=JSON`，而不是使用文件。JSON 记录随后会出现在 `bunkerweb` 容器的 `docker logs` 中，每条一行，夹杂在错误日志行之间：以 `{` 开头的行就是审计记录。
+**容器：Docker、Autoconf、Swarm、Kubernetes 和 All-in-one**
 
-    要把日志流发送到 Splunk，请使用 [Docker `splunk` 日志驱动](https://docs.docker.com/engine/logging/drivers/splunk/)和 HTTP Event Collector 令牌。该驱动会把访问、错误和审计行一起以同一个 sourcetype 发送，因此只能根据内容区分它们。请把 `key=value` 格式设置在 `LOG_FORMAT`（不带后缀）上，使发送的访问行采用该格式。这会替换 `access.log` 中的默认格式。
+上面的步骤写入的是真实文件。容器镜像 `bunkerweb` 不是这样：`access.log`、`error.log` 和 `modsec_audit.log` 是指向容器标准输出和标准错误的符号链接（参见[日志文件保留策略](#log-file-retention)），转发器无法监控它们。因此，请把三条 Splunk 数据流写入**各自独立的文件**，放在 `bunkerweb` 容器与 Splunk Universal Forwarder 共享的卷上。默认的数据流保持不变，`docker logs` 和 `kubectl logs` 仍然可用。[BunkerWeb Add-on for Splunk](https://splunkbase.splunk.com/app/10342) 只解析 `bunkerweb:access`、`bunkerweb:error` 和 `bunkerweb:modsec_audit`。
+
+BunkerWeb 可以写入该卷：`/var/log/bunkerweb` 属于 `root:nginx`，权限为 `770`，容器以 `nginx`（UID 和 GID 均为 `101`）身份运行。如果根文件系统是只读的，请把该卷挂载到 `/var/log/bunkerweb`：这个挂载点就成为那里唯一可写的路径。
+
+与其他设置一样，请在 **scheduler** 上设置以下内容。它负责生成 NGINX 配置并推送给各实例：
+
+```conf
+ACCESS_LOG_1=/var/log/bunkerweb/access-splunk.log
+LOG_FORMAT_1=time=$time_iso8601 host=$host client=$remote_addr request_id=$request_id method=$request_method uri="$request_uri" status=$status bytes=$body_bytes_sent ua="$http_user_agent" reason=$reason modsec_rules="$modsecurity_rules" modsec_score=$modsecurity_anomaly_score modsec_id=$modsecurity_unique_id
+ERROR_LOG_1=/var/log/bunkerweb/error-splunk.log
+MODSECURITY_SEC_AUDIT_LOG=/var/log/bunkerweb/modsec_audit-splunk.log
+MODSECURITY_SEC_AUDIT_LOG_FORMAT=JSON
+```
+
+`ERROR_LOG_1` 在默认错误日志之外再增加一个错误日志。`MODSECURITY_SEC_AUDIT_LOG` 必须是以 `.log` 结尾、直接位于 `/var/log/bunkerweb/` 下的文件，并且名称要不同于默认的 `modsec_audit.log`（它是符号链接）。在 Compose 文件中，请把 `LOG_FORMAT_1` 里的每个 `$` 写成 `$$`。1.6.18 之前的版本，请用步骤 3 中类型为 `modsec` 的自定义配置代替 `MODSECURITY_SEC_AUDIT_LOG_FORMAT`。
+
+转发器监控这些文件，每个文件对应一个 sourcetype。这些文件属于 `nginx`（UID 和 GID 均为 `101`）：请让转发器容器使用能够读取它们的用户或组运行，并在卷上用 `ls -ln` 确认：
+
+```conf
+[monitor:///var/log/bunkerweb/access-splunk.log]
+sourcetype = bunkerweb:access
+
+[monitor:///var/log/bunkerweb/error-splunk.log]
+sourcetype = bunkerweb:error
+
+[monitor:///var/log/bunkerweb/modsec_audit-splunk.log]
+sourcetype = bunkerweb:modsec_audit
+```
+
+插件仓库为每种集成方式提供了一个设置示例：[BunkerWeb Add-on for Splunk, Setup](https://github.com/bunkerity/bunkerweb-splunk-addon#setup)。
+
+=== "Docker / Autoconf / Swarm"
+
+    在 `bunkerweb` 容器和转发器上挂载同一个卷，并在 scheduler 上设置这些变量：
+
+    ```yaml
+    services:
+      bunkerweb:
+        image: bunkerity/bunkerweb:1.6.18-rc4
+        volumes:
+          - bw-splunk-logs:/var/log/bunkerweb
+
+      bw-scheduler:
+        image: bunkerity/bunkerweb-scheduler:1.6.18-rc4
+        environment:
+          ACCESS_LOG_1: "/var/log/bunkerweb/access-splunk.log"
+          LOG_FORMAT_1: 'time=$$time_iso8601 host=$$host client=$$remote_addr request_id=$$request_id method=$$request_method uri="$$request_uri" status=$$status bytes=$$body_bytes_sent ua="$$http_user_agent" reason=$$reason modsec_rules="$$modsecurity_rules" modsec_score=$$modsecurity_anomaly_score modsec_id=$$modsecurity_unique_id'
+          ERROR_LOG_1: "/var/log/bunkerweb/error-splunk.log"
+          MODSECURITY_SEC_AUDIT_LOG: "/var/log/bunkerweb/modsec_audit-splunk.log"
+          MODSECURITY_SEC_AUDIT_LOG_FORMAT: "JSON"
+
+      splunk-uf:
+        image: "<your Splunk Universal Forwarder image>"
+        volumes:
+          - bw-splunk-logs:/var/log/bunkerweb:ro
+          # plus your inputs.conf and outputs.conf
+
+    volumes:
+      bw-splunk-logs:
+    ```
+
+    在 Swarm 中，命名卷只在其所在节点本地可见：请把 BunkerWeb 和转发器都作为 `global` 服务运行，使同一节点上的两个任务共享该节点的卷。
+
+    **这些文件由您负责轮转。** 镜像不带 `logrotate`，容器运行时只限制标准输出和标准错误的数据流。参见下文“轮转这些文件”。
+
+=== "Kubernetes"
+
+    BunkerWeb 的 Pod 在 `bunkerweb` 容器和同一 Pod 内的转发器容器之间共享一个 `emptyDir` 卷。Helm chart 为该卷提供了 `bunkerweb.volumes` 和 `bunkerweb.volumeMounts`，但没有用于额外容器的键。在 Kubernetes 1.29 或更高版本上，请在 `bunkerweb.initContainers` 中声明转发器并设置 `restartPolicy: Always`，Kubernetes 会把它作为 sidecar 运行。在更旧的集群上，请用 Kustomize 补丁添加该容器。
+
+    ```yaml
+    bunkerweb:
+      volumes:
+        - name: bw-splunk-logs
+          emptyDir: {}
+      volumeMounts:
+        - name: bw-splunk-logs
+          mountPath: /var/log/bunkerweb
+      initContainers:
+        - name: splunk-uf
+          image: "<your Splunk Universal Forwarder image>"
+          restartPolicy: Always
+          volumeMounts:
+            - name: bw-splunk-logs
+              mountPath: /var/log/bunkerweb
+              readOnly: true
+    ```
+
+    读取这些设置的是 scheduler，而不是 BunkerWeb 的 Pod。使用 Helm chart 时，请在 `scheduler.extraEnvs` 上设置：
+
+    ```yaml
+    scheduler:
+      extraEnvs:
+        - name: ACCESS_LOG_1
+          value: "/var/log/bunkerweb/access-splunk.log"
+        - name: LOG_FORMAT_1
+          value: 'time=$time_iso8601 host=$host client=$remote_addr request_id=$request_id method=$request_method uri="$request_uri" status=$status bytes=$body_bytes_sent ua="$http_user_agent" reason=$reason modsec_rules="$modsecurity_rules" modsec_score=$modsecurity_anomaly_score modsec_id=$modsecurity_unique_id'
+        - name: ERROR_LOG_1
+          value: "/var/log/bunkerweb/error-splunk.log"
+        - name: MODSECURITY_SEC_AUDIT_LOG
+          value: "/var/log/bunkerweb/modsec_audit-splunk.log"
+        - name: MODSECURITY_SEC_AUDIT_LOG_FORMAT
+          value: "JSON"
+    ```
+
+    **这些文件由您负责轮转。** BunkerWeb 镜像中没有任何组件会处理它们。请用同样的方式再添加一个 sidecar：它挂载该卷（不带 `readOnly`），并像 All-in-one 镜像那样循环运行 `logrotate`（`while :; do logrotate ...; sleep 3600; done`）。参见下文“轮转这些文件”。
+
+=== "All-in-one"
+
+    All-in-one 镜像把 `access.log`、`error.log` 和 `modsec_audit.log` 保留为 `/var/log/bunkerweb/` 下的真实文件。请通过卷把该目录共享给转发器，并且只设置改变格式的两项：步骤 1 中的 `ACCESS_LOG_1` 与 `LOG_FORMAT_1`，以及 `MODSECURITY_SEC_AUDIT_LOG_FORMAT=JSON`。使用步骤 7 中的 `inputs.conf`。内置的 CrowdSec 也会读取 `modsec_audit.log`，格式切换对该文件同样生效。
+
+    **BunkerWeb 负责轮转这些文件。** 镜像在 supervisor 下每小时运行一次 `logrotate`，使用 Linux 软件包的策略（`/etc/logrotate.d/bunkerweb`）。该策略匹配 `/var/log/bunkerweb/*.log`，因此也覆盖 `access-splunk.log`，并且使用 `copytruncate`，所以转发器在轮转前后都能继续读取。参见[日志文件保留策略](#log-file-retention)。
+
+**轮转这些文件（Docker、Autoconf、Swarm、Kubernetes）。** 轮转必须使用 `copytruncate`。ModSecurity 只在启动时打开一次审计日志，之后不会再重新打开：如果轮转时重命名文件，ModSecurity 会继续写入归档文件，而当前文件保持为空。只匹配 Splunk 的文件，因为同一个卷上的 `access.log`、`error.log` 和 `modsec_audit.log` 可能是符号链接。下面的配置保留七代压缩归档，每个文件最大 100 MB：
+
+```conf
+/path/to/the/volume/*-splunk.log {
+    size 100M
+    rotate 7
+    compress
+    copytruncate
+    missingok
+    notifempty
+}
+```
+
+在 Docker 主机上，请使用 `docker volume inspect` 给出的该卷的 `Mountpoint` 作为路径，并运行主机的 `logrotate`。在轮转容器中，请使用 `/var/log/bunkerweb/*-splunk.log`。`logrotate` 只在运行时才检查 `size`，而大多数主机每天只运行一次：如果文件增长得更快，请更频繁地运行它。
+
+!!! info "日志驱动（备用方案）"
+    如果无法共享卷，可以使用 [Docker `splunk` 日志驱动](https://docs.docker.com/engine/logging/drivers/splunk/)和 HTTP Event Collector 令牌发送容器的数据流。该驱动会把访问、错误和审计行一起以同一个 sourcetype 发送，因此只能根据内容区分它们。该插件只解析 `bunkerweb:access`、`bunkerweb:error` 和 `bunkerweb:modsec_audit`：以 `bunkerweb:docker` 发送的事件既没有字段提取，也没有 CIM 映射。请把 `key=value` 格式设置在 `LOG_FORMAT`（不带后缀）上，使发送的访问行采用该格式。这会替换 `access.log` 中的默认格式。请在 scheduler 上设置 `MODSECURITY_SEC_AUDIT_LOG_FORMAT=JSON`：审计条目随后会出现在 `docker logs` 中，夹在错误日志行之间，以 `{` 开头的行就是审计条目。
 
     ```yaml
     services:

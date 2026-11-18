@@ -3262,10 +3262,137 @@ Die erste Anfrage liefert `404`, weil der Teststack kein Backend hat. Der passen
     - **Das Audit-Log ist weder ein Anfrageprotokoll noch ein Beleg für eine Blockierung.** Der Standardwert von `MODSECURITY_SEC_AUDIT_ENGINE` (`RelevantOnly`) kann auch erlaubte Transaktionen erfassen, wenn eine Regel einen Treffer protokolliert (auch bei `DetectionOnly` oder unterhalb des Blockierungsschwellwerts) oder der Status auf `SecAuditLogRelevantStatus` zutrifft. Im obigen Test erzeugten nur die ModSecurity-Ablehnungen Einträge.
     - **Teil `C` enthält Anfragekörper**, einschließlich Formularfeldern und Zugangsdaten. Verwenden Sie `BFH`, sofern Sie die Körper nicht benötigen, und beschränken Sie, wer den Index lesen darf.
 
-!!! info "Docker, Autoconf, Swarm und Kubernetes"
-    Die Images verlinken `access.log`, `error.log` und `modsec_audit.log` mit dem eigenen Log-Stream des Containers (siehe [Aufbewahrung der Protokolldateien](#log-file-retention)). Ein Forwarder findet dafür keine Datei, und eine von `ACCESS_LOG_1` geschriebene Datei bleibt im Container, wo sie nichts rotiert. Setzen Sie `MODSECURITY_SEC_AUDIT_LOG_FORMAT=JSON` am Scheduler wie jede andere Einstellung, statt eine Datei zu verwenden. Die JSON-Einträge erscheinen dann in `docker logs` des Containers `bunkerweb`, einer pro Zeile, zwischen den Zeilen des Fehlerprotokolls: Die Zeilen, die mit `{` beginnen, sind die Audit-Einträge.
+**Container: Docker, Autoconf, Swarm, Kubernetes und All-in-one**
 
-    Um den Stream an Splunk zu senden, verwenden Sie den [Docker-Logging-Treiber `splunk`](https://docs.docker.com/engine/logging/drivers/splunk/) mit einem HTTP-Event-Collector-Token. Der Treiber sendet Zugriffs-, Fehler- und Audit-Zeilen gemeinsam unter einem Sourcetype, sodass sie sich nur am Inhalt unterscheiden lassen. Setzen Sie das Format `key=value` auf `LOG_FORMAT` (ohne Suffix), damit die gestreamten Zugriffszeilen es tragen. Das ersetzt das Standardformat in `access.log`.
+Die obigen Schritte schreiben echte Dateien. Das Container-Image `bunkerweb` tut das nicht: `access.log`, `error.log` und `modsec_audit.log` sind symbolische Links auf die Standardausgabe und die Fehlerausgabe des Containers (siehe [Aufbewahrung der Protokolldateien](#log-file-retention)), die ein Forwarder nicht überwachen kann. Schreiben Sie die drei Splunk-Datenströme deshalb in **eigene Dateien** auf einem Volume, das der Container `bunkerweb` mit einem Splunk Universal Forwarder teilt. Die Standardströme bleiben bestehen, und `docker logs` bzw. `kubectl logs` funktionieren weiter. Nur `bunkerweb:access`, `bunkerweb:error` und `bunkerweb:modsec_audit` werden vom [BunkerWeb Add-on for Splunk](https://splunkbase.splunk.com/app/10342) ausgewertet.
+
+BunkerWeb kann auf dieses Volume schreiben: `/var/log/bunkerweb` gehört `root:nginx` mit dem Modus `770`, und der Container läuft als `nginx` (UID und GID `101`). Mounten Sie das Volume bei einem schreibgeschützten Root-Dateisystem auf `/var/log/bunkerweb`: Dieser Mount ist dort dann der einzige beschreibbare Pfad.
+
+Setzen Sie diese Einstellungen wie jede andere auf dem **Scheduler**. Er erzeugt die NGINX-Konfiguration und schickt sie an die Instanzen:
+
+```conf
+ACCESS_LOG_1=/var/log/bunkerweb/access-splunk.log
+LOG_FORMAT_1=time=$time_iso8601 host=$host client=$remote_addr request_id=$request_id method=$request_method uri="$request_uri" status=$status bytes=$body_bytes_sent ua="$http_user_agent" reason=$reason modsec_rules="$modsecurity_rules" modsec_score=$modsecurity_anomaly_score modsec_id=$modsecurity_unique_id
+ERROR_LOG_1=/var/log/bunkerweb/error-splunk.log
+MODSECURITY_SEC_AUDIT_LOG=/var/log/bunkerweb/modsec_audit-splunk.log
+MODSECURITY_SEC_AUDIT_LOG_FORMAT=JSON
+```
+
+`ERROR_LOG_1` fügt neben dem Standard ein zweites Fehlerprotokoll hinzu. `MODSECURITY_SEC_AUDIT_LOG` muss eine Datei sein, die auf `.log` endet und direkt unter `/var/log/bunkerweb/` liegt, und sie braucht einen anderen Namen als das standardmäßige `modsec_audit.log`, das ein symbolischer Link ist. Schreiben Sie in einer Compose-Datei jedes `$` von `LOG_FORMAT_1` als `$$`. Vor 1.6.18 ersetzen Sie `MODSECURITY_SEC_AUDIT_LOG_FORMAT` durch die benutzerdefinierte Konfiguration `modsec` aus Schritt 3.
+
+Der Forwarder überwacht diese Dateien, jeweils mit einem Sourcetype. Die Dateien gehören `nginx` (UID und GID `101`): Starten Sie den Forwarder-Container mit einem Benutzer oder einer Gruppe, die sie lesen kann, und prüfen Sie das mit `ls -ln` auf dem Volume:
+
+```conf
+[monitor:///var/log/bunkerweb/access-splunk.log]
+sourcetype = bunkerweb:access
+
+[monitor:///var/log/bunkerweb/error-splunk.log]
+sourcetype = bunkerweb:error
+
+[monitor:///var/log/bunkerweb/modsec_audit-splunk.log]
+sourcetype = bunkerweb:modsec_audit
+```
+
+Das Repository des Add-ons enthält pro Integration ein Einrichtungsbeispiel: [BunkerWeb Add-on for Splunk, Setup](https://github.com/bunkerity/bunkerweb-splunk-addon#setup).
+
+=== "Docker / Autoconf / Swarm"
+
+    Mounten Sie dasselbe Volume im Container `bunkerweb` und im Forwarder, und setzen Sie die Variablen auf dem Scheduler:
+
+    ```yaml
+    services:
+      bunkerweb:
+        image: bunkerity/bunkerweb:1.6.18-rc4
+        volumes:
+          - bw-splunk-logs:/var/log/bunkerweb
+
+      bw-scheduler:
+        image: bunkerity/bunkerweb-scheduler:1.6.18-rc4
+        environment:
+          ACCESS_LOG_1: "/var/log/bunkerweb/access-splunk.log"
+          LOG_FORMAT_1: 'time=$$time_iso8601 host=$$host client=$$remote_addr request_id=$$request_id method=$$request_method uri="$$request_uri" status=$$status bytes=$$body_bytes_sent ua="$$http_user_agent" reason=$$reason modsec_rules="$$modsecurity_rules" modsec_score=$$modsecurity_anomaly_score modsec_id=$$modsecurity_unique_id'
+          ERROR_LOG_1: "/var/log/bunkerweb/error-splunk.log"
+          MODSECURITY_SEC_AUDIT_LOG: "/var/log/bunkerweb/modsec_audit-splunk.log"
+          MODSECURITY_SEC_AUDIT_LOG_FORMAT: "JSON"
+
+      splunk-uf:
+        image: "<your Splunk Universal Forwarder image>"
+        volumes:
+          - bw-splunk-logs:/var/log/bunkerweb:ro
+          # plus your inputs.conf and outputs.conf
+
+    volumes:
+      bw-splunk-logs:
+    ```
+
+    Unter Swarm ist ein benanntes Volume lokal auf seinem Knoten: Betreiben Sie BunkerWeb und den Forwarder als `global`-Dienste, damit die beiden Tasks eines Knotens das Volume dieses Knotens teilen.
+
+    **Sie rotieren diese Dateien.** Die Images enthalten kein `logrotate`, und die Container-Laufzeit begrenzt nur die Datenströme von Standardausgabe und Fehlerausgabe. Siehe „Die Dateien rotieren“ weiter unten.
+
+=== "Kubernetes"
+
+    Die BunkerWeb-Pods teilen ein `emptyDir`-Volume zwischen dem Container `bunkerweb` und einem Forwarder-Container im selben Pod. Das Helm-Chart bietet `bunkerweb.volumes` und `bunkerweb.volumeMounts` für das Volume, aber keinen Schlüssel für einen zusätzlichen Container. Deklarieren Sie den Forwarder ab Kubernetes 1.29 in `bunkerweb.initContainers` mit `restartPolicy: Always`, dann führt Kubernetes ihn als Sidecar aus. Auf älteren Clustern fügen Sie den Container mit einem Kustomize-Patch hinzu.
+
+    ```yaml
+    bunkerweb:
+      volumes:
+        - name: bw-splunk-logs
+          emptyDir: {}
+      volumeMounts:
+        - name: bw-splunk-logs
+          mountPath: /var/log/bunkerweb
+      initContainers:
+        - name: splunk-uf
+          image: "<your Splunk Universal Forwarder image>"
+          restartPolicy: Always
+          volumeMounts:
+            - name: bw-splunk-logs
+              mountPath: /var/log/bunkerweb
+              readOnly: true
+    ```
+
+    Der Scheduler liest die Einstellungen, nicht die BunkerWeb-Pods. Setzen Sie sie mit dem Helm-Chart über `scheduler.extraEnvs`:
+
+    ```yaml
+    scheduler:
+      extraEnvs:
+        - name: ACCESS_LOG_1
+          value: "/var/log/bunkerweb/access-splunk.log"
+        - name: LOG_FORMAT_1
+          value: 'time=$time_iso8601 host=$host client=$remote_addr request_id=$request_id method=$request_method uri="$request_uri" status=$status bytes=$body_bytes_sent ua="$http_user_agent" reason=$reason modsec_rules="$modsecurity_rules" modsec_score=$modsecurity_anomaly_score modsec_id=$modsecurity_unique_id'
+        - name: ERROR_LOG_1
+          value: "/var/log/bunkerweb/error-splunk.log"
+        - name: MODSECURITY_SEC_AUDIT_LOG
+          value: "/var/log/bunkerweb/modsec_audit-splunk.log"
+        - name: MODSECURITY_SEC_AUDIT_LOG_FORMAT
+          value: "JSON"
+    ```
+
+    **Sie rotieren diese Dateien.** Nichts im BunkerWeb-Image übernimmt das. Fügen Sie auf dieselbe Weise einen zweiten Sidecar hinzu, der das Volume ohne `readOnly` mountet und `logrotate` in einer Schleife ausführt, wie es das All-in-one-Image tut (`while :; do logrotate ...; sleep 3600; done`). Siehe „Die Dateien rotieren“ weiter unten.
+
+=== "All-in-one"
+
+    Das All-in-one-Image behält `access.log`, `error.log` und `modsec_audit.log` als echte Dateien unter `/var/log/bunkerweb/`. Teilen Sie dieses Verzeichnis über ein Volume mit dem Forwarder, und setzen Sie nur die beiden Einstellungen, die das Format ändern: `ACCESS_LOG_1` mit `LOG_FORMAT_1` aus Schritt 1 und `MODSECURITY_SEC_AUDIT_LOG_FORMAT=JSON`. Verwenden Sie die `inputs.conf` aus Schritt 7. Das mitgelieferte CrowdSec liest ebenfalls `modsec_audit.log`, und die Formatumstellung gilt für diese Datei.
+
+    **BunkerWeb rotiert diese Dateien.** Das Image führt `logrotate` stündlich unter Supervisor aus, mit der Richtlinie der Linux-Pakete (`/etc/logrotate.d/bunkerweb`). Sie erfasst `/var/log/bunkerweb/*.log`, also auch `access-splunk.log`, und nutzt `copytruncate`, sodass der Forwarder über eine Rotation hinweg weiterliest. Siehe [Aufbewahrung der Protokolldateien](#log-file-retention).
+
+**Die Dateien rotieren (Docker, Autoconf, Swarm, Kubernetes).** Die Rotation muss `copytruncate` verwenden. ModSecurity öffnet sein Audit-Log nur einmal und öffnet es nie erneut: Eine Rotation, die die Datei umbenennt, lässt ModSecurity ins Archiv schreiben, und die aktive Datei bleibt leer. Erfassen Sie nur die Splunk-Dateien, denn `access.log`, `error.log` und `modsec_audit.log` können auf demselben Volume symbolische Links sein. Diese Regel behält sieben komprimierte Generationen mit jeweils höchstens 100 MB:
+
+```conf
+/path/to/the/volume/*-splunk.log {
+    size 100M
+    rotate 7
+    compress
+    copytruncate
+    missingok
+    notifempty
+}
+```
+
+Verwenden Sie auf einem Docker-Host den `Mountpoint` des Volumes (aus `docker volume inspect`) als Pfad und das `logrotate` des Hosts. In einem Rotations-Container verwenden Sie `/var/log/bunkerweb/*-splunk.log`. `logrotate` prüft `size` nur, wenn es läuft, und die meisten Hosts starten es einmal am Tag: Starten Sie es öfter, wenn die Dateien schneller wachsen.
+
+!!! info "Logging-Treiber (Ausweichlösung)"
+    Wenn Sie kein Volume teilen können, sendet der [Docker-Logging-Treiber `splunk`](https://docs.docker.com/engine/logging/drivers/splunk/) mit einem HTTP-Event-Collector-Token die Datenströme des Containers. Er sendet Zugriffs-, Fehler- und Audit-Zeilen gemeinsam unter einem Sourcetype, sodass sie sich nur am Inhalt unterscheiden lassen. Das Add-on wertet nur `bunkerweb:access`, `bunkerweb:error` und `bunkerweb:modsec_audit` aus: Als `bunkerweb:docker` gesendete Ereignisse erhalten daher weder Feldextraktion noch CIM-Zuordnung. Setzen Sie das Format `key=value` auf `LOG_FORMAT` (ohne Suffix), damit die gestreamten Zugriffszeilen es tragen. Das ersetzt das Standardformat in `access.log`. Setzen Sie `MODSECURITY_SEC_AUDIT_LOG_FORMAT=JSON` auf dem Scheduler: Die Audit-Einträge erscheinen dann in `docker logs` zwischen den Zeilen des Fehlerprotokolls, und die Zeilen, die mit `{` beginnen, sind die Audit-Einträge.
 
     ```yaml
     services:
