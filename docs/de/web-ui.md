@@ -261,7 +261,8 @@ Der RAW-Editor eines Dienstes oder der globalen Einstellungen kann eine Einstell
 | Setting                         | Beschreibung                                                      | Erlaubte Werte                              | Standard                                              |
 | ------------------------------- | ----------------------------------------------------------------- | ------------------------------------------- | ----------------------------------------------------- |
 | `MAX_WORKERS`, `MAX_THREADS`    | Gunicorn-Worker/Threads                                           | Integer                                     | `cpu_count()-1` (min 1), `workers*2`                  |
-| `MAX_REQUESTS`                  | Anfragen vor Gunicorn-Worker-Recycling (verhindert Speicherbloat) | Integer                                     | `1000`                                                |
+| `MAX_REQUESTS`                  | Anfragen vor Gunicorn-Worker-Recycling (verhindert Speicherbloat) | Integer                                     | `200`                                                 |
+| `UI_MAX_REQUESTS`               | Dasselbe, nur für die Weboberfläche (hat Vorrang vor `MAX_REQUESTS`) | Integer                                     | `200`                                                 |
 | `ENABLE_HEALTHCHECK`            | `GET /healthcheck` bereitstellen                                  | `yes` oder `no`                             | `no`                                                  |
 | `FORWARDED_ALLOW_IPS`           | Alias für Proxy-Allowlist                                         | IPs/CIDRs                                   | `127.0.0.0/8,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16` |
 | `PROXY_ALLOW_IPS`               | Alias für PROXY-Allowlist                                         | IPs/CIDRs                                   | `FORWARDED_ALLOW_IPS`                                 |

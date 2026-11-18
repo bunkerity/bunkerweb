@@ -261,7 +261,8 @@ L'éditeur RAW d'un service ou des paramètres globaux peut conserver un paramè
 | Paramètre                       | Description                                                          | Valeurs acceptées                           | Défaut                                                |
 | ------------------------------- | -------------------------------------------------------------------- | ------------------------------------------- | ----------------------------------------------------- |
 | `MAX_WORKERS`, `MAX_THREADS`    | Workers/threads Gunicorn                                             | Entier                                      | `cpu_count()-1` (min 1), `workers*2`                  |
-| `MAX_REQUESTS`                  | Requêtes avant recyclage du worker Gunicorn (évite la fuite mémoire) | Entier                                      | `1000`                                                |
+| `MAX_REQUESTS`                  | Requêtes avant recyclage du worker Gunicorn (évite la fuite mémoire) | Entier                                      | `200`                                                 |
+| `UI_MAX_REQUESTS`               | Idem, pour l'interface web seule (prioritaire sur `MAX_REQUESTS`)    | Entier                                      | `200`                                                 |
 | `ENABLE_HEALTHCHECK`            | Exposer `GET /healthcheck`                                           | `yes` ou `no`                               | `no`                                                  |
 | `FORWARDED_ALLOW_IPS`           | Alias pour la liste des proxies                                      | IP/CIDR                                     | `127.0.0.0/8,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16` |
 | `PROXY_ALLOW_IPS`               | Alias pour la liste PROXY                                            | IP/CIDR                                     | `FORWARDED_ALLOW_IPS`                                 |

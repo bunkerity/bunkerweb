@@ -282,7 +282,8 @@ The RAW editor of a service or of the global settings can keep a setting as a **
 | Setting                         | Description                                                           | Accepted values                          | Default                                               |
 | ------------------------------- | --------------------------------------------------------------------- | ---------------------------------------- | ----------------------------------------------------- |
 | `MAX_WORKERS`, `MAX_THREADS`    | Gunicorn workers/threads                                              | Integer                                  | `cpu_count()-1` (min 1), `workers*2`                  |
-| `MAX_REQUESTS`                  | Requests before a Gunicorn worker is recycled (prevents memory bloat) | Integer                                  | `1000`                                                |
+| `MAX_REQUESTS`                  | Requests before a Gunicorn worker is recycled (prevents memory bloat) | Integer                                  | `200`                                                 |
+| `UI_MAX_REQUESTS`               | Same, for the web UI only (takes precedence over `MAX_REQUESTS`)      | Integer                                  | `200`                                                 |
 | `ENABLE_HEALTHCHECK`            | Expose `GET /healthcheck`                                             | `yes` or `no`                            | `no`                                                  |
 | `FORWARDED_ALLOW_IPS`           | Alias for proxy allowlist                                             | IPs/CIDRs                                | `127.0.0.0/8,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16` |
 | `PROXY_ALLOW_IPS`               | Alias for PROXY allowlist                                             | IPs/CIDRs                                | `FORWARDED_ALLOW_IPS`                                 |

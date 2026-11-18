@@ -24,6 +24,7 @@
 - [BUGFIX] `reverseproxy`, `grpc`, `redirect`: quoted location operands and regex braces work again after upgrades.
 - [BUGFIX] `core`: bare IPv4-mapped host entries in IP lists match both mapped and plain IPv4 clients.
 - [BUGFIX] `misc`: the release version check requires exact version pins and rejects stale RC tokens that share the current version prefix.
+- [BUGFIX] `ui`: Web UI workers restart after 200 requests by default instead of 1000, to release memory sooner; `UI_MAX_REQUESTS` is now documented. (Fixes #4163)
 - [DOCS] `scheduler`: the custom configuration section explains the `.bw-managed` marker, manual deletion and restore, and retained inactive service CRS files.
 
 ## v1.6.18~rc4 - 2026/11/17
