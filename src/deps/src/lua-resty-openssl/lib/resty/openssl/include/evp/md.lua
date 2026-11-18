@@ -20,6 +20,7 @@ ffi.cdef [[
 
   EVP_MD_CTX *EVP_MD_CTX_new(void);
   void EVP_MD_CTX_free(EVP_MD_CTX *ctx);
+  void EVP_MD_CTX_set_pkey_ctx(EVP_MD_CTX *ctx, EVP_PKEY_CTX *pctx);
 
   typedef void* fake_openssl_md_list_fn(const EVP_MD *ciph, const char *from,
                                         const char *to, void *x);

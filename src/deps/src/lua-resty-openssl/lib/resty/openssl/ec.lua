@@ -1,10 +1,14 @@
 local ffi = require "ffi"
 local C = ffi.C
 local ffi_gc = ffi.gc
+local ffi_new = ffi.new
+local ffi_str = ffi.string
+local setmetatable = setmetatable
 
 require "resty.openssl.include.ec"
 local bn_lib = require "resty.openssl.bn"
 local objects_lib = require "resty.openssl.objects"
+local ctypes = require "resty.openssl.auxiliary.ctypes"
 
 local format_error = require("resty.openssl.err").format_error
 
@@ -73,6 +77,77 @@ function _M.get_parameters(ec_key_st)
       end
       return bn_lib.dup(bn)
     end
+  }), nil
+end
+
+function _M.get_provider_parameters(evp_pkey_st)
+  if evp_pkey_st == nil then
+    return nil, "ec.get_provider_parameters: EVP_PKEY is required"
+  end
+  return setmetatable({}, {
+    __index = function(_, k)
+      if k == "group" then
+        local length = ctypes.ptr_of_size_t()
+        if C.EVP_PKEY_get_utf8_string_param(evp_pkey_st, "group",
+                                            nil, 0, length) ~= 1 then
+          C.ERR_clear_error()
+          return nil
+        end
+
+        local buf = ffi_new("char[?]", length[0] + 1)
+        if C.EVP_PKEY_get_utf8_string_param(evp_pkey_st, "group", buf,
+                                            length[0] + 1, length) ~= 1 then
+          C.ERR_clear_error()
+          return nil
+        end
+        return objects_lib.txt2nid(ffi_str(buf, length[0]))
+      end
+
+      if k == "public" or k == "pub_key" then
+        local length = ctypes.ptr_of_size_t()
+        local param_name = "pub"
+        if C.EVP_PKEY_get_octet_string_param(evp_pkey_st, param_name,
+                                             nil, 0, length) ~= 1 then
+          C.ERR_clear_error()
+          param_name = "encoded-pub-key"
+          if C.EVP_PKEY_get_octet_string_param(evp_pkey_st, param_name,
+                                               nil, 0, length) ~= 1 then
+            C.ERR_clear_error()
+            return nil
+          end
+        end
+
+        local buf = ctypes.uchar_array(length[0])
+        if C.EVP_PKEY_get_octet_string_param(evp_pkey_st, param_name, buf,
+                                             length[0], length) ~= 1 then
+          C.ERR_clear_error()
+          return nil
+        end
+        return bn_lib.from_binary(ffi_str(buf, length[0]))
+      end
+
+      local param_name
+      if k == "private" or k == "priv_key" then
+        param_name = "priv"
+      elseif k == "x" then
+        param_name = "qx"
+      elseif k == "y" then
+        param_name = "qy"
+      else
+        return nil, "ec.get_provider_parameters: unknown parameter \"" .. k .. "\" for EC key"
+      end
+
+      local bn_ptr = ffi_new("BIGNUM*[1]")
+      if C.EVP_PKEY_get_bn_param(evp_pkey_st, param_name, bn_ptr) ~= 1 or
+          bn_ptr[0] == nil then
+        C.ERR_clear_error()
+        return nil
+      end
+
+      local value, err = bn_lib.dup(bn_ptr[0])
+      C.BN_free(bn_ptr[0])
+      return value, err
+    end,
   }), nil
 end
 

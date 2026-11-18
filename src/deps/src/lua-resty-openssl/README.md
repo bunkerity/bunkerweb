@@ -872,6 +872,10 @@ The second parameter `opts` accepts an optional table to constrain key-loading b
 When loading a PEM encoded RSA key, it can either be a PKCS#8 encoded
 `SubjectPublicKeyInfo`/`PrivateKeyInfo` or a PKCS#1 encoded `RSAPublicKey`/`RSAPrivateKey`.
 
+On OpenSSL 1.1.1, an EC key on the SM2 curve is treated as an SM2 key after
+loading. Its `sign()` and `verify()` operations use SM2 signatures rather than
+ECDSA signatures over the same curve.
+
 When loading an encrypted PEM encoded key, the `passphrase` to decrypt it can either be set
 in `opts.passphrase` or `opts.passphrase_cb`:
 
@@ -947,6 +951,9 @@ provider-native key types.
 
 It's also possible to pass a PEM-encoded EC or DH parameters to `config.param` for key generation:
 
+For SM2, `config.param` must contain a named-curve SM2 EC parameters block.
+Explicit EC parameter encodings are not supported.
+
 ```lua
 local dhparam = pkey.paramgen({
   type = 'DH',
@@ -991,6 +998,9 @@ Compose a public or private key using existing parameters. To see
 list of parameters for each key, refer to [pkey:set_parameters](#pkeyset_parameters).
 
 Only `type` and `params` should exist in `config` table, all other keys will be ignored.
+
+`type = "SM2"` composes an SM2 key from the same EC style parameters, and
+`params.group` must then be the SM2 curve.
 
 ```lua
 local private_bn = require "resty.openssl.bn".new("7F48282CCA4C1A65D589C06DBE9C42AE50FBFFDF3A18CBB48498E1DE47F11BE1A3486CD8FA950D68F111970F922279D8", 16)
@@ -1237,12 +1247,14 @@ instance or a string. Returns the signed text and error if any.
 
 When passing a [digest](#restyopenssldigest) instance as first parameter, it should not
 have been called [final()](#digestfinal); users should only use [update()](#digestupdate).
-This mode only supports RSA and EC keys.
+This mode only supports RSA and ECDSA keys. For SM2, pass the original message as a
+string so the implementation can include the distinguishing ID when calculating the digest.
 
 When passing a string as first parameter, `md_alg` parameter will specify the name
-to use when signing. When `md_alg` is undefined, for RSA and EC keys, this function does SHA256
+to use when signing. When `md_alg` is undefined, for RSA and non-SM2 EC keys, this function does SHA256
 by default. For Ed25519 or Ed448 keys, this function does a PureEdDSA signing,
 no message digest should be specified and will not be used.
+For SM2 keys, omitting `md_alg` uses SM3.
 
 For RSA key, it's also possible to specify `padding` scheme with following choices:
 
@@ -1276,8 +1288,21 @@ This is useful for example to send the signature as JWS.
   pss_saltlen, -- For PSS mode only this option specifies the salt length.
   mgf1_md, -- For PSS and OAEP padding sets the MGF1 digest. If the MGF1 digest is not explicitly set in PSS mode then the signing digest is used.
   oaep_md, -- The digest used for the OAEP hash function. If not explicitly set then SHA1 is used.
+  distid, -- SM2 sign/verify only. Defaults to the GM/T 0009-2012 value "1234567812345678".
 }
 ```
+
+OpenSSL versions do not consistently choose the same implicit SM2 ID. Set
+`opts.distid` explicitly on both sides when interoperating with another
+implementation. In particular, pass the matching `-sigopt distid:...` option
+to the OpenSSL CLI. The ID is a byte string and may contain NUL bytes. Omitting
+`opts.distid` uses the default above. On OpenSSL versions before 4.0,
+`distid = ""` explicitly selects an empty ID; OpenSSL 4.0 rejects an empty ID.
+
+Upstream OpenSSL 1.1.1k and earlier are affected by the SM2 decryption buffer
+overflow described in [CVE-2021-3711](https://www.openssl.org/news/secadv/20210824.txt).
+Use OpenSSL 1.1.1l or later, or a vendor build with that fix backported, when
+decrypting untrusted SM2 ciphertext.
 
 It's also possible to pass raw pkeyopt control strings as used in the `pkeyutl` CLI program. This lets users pass in options that
 are not explicitly supported as parameters above.
@@ -1313,12 +1338,14 @@ with OpenSSL 1.1.1 or lower.
 
 When passing [digest](#restyopenssldigest) instances as second parameter, it should not
 have been called [final()](#digestfinal); users should only use [update()](#digestupdate).
-This mode only supports RSA and EC keys.
+This mode only supports RSA and ECDSA keys. For SM2, pass the original message as a
+string so the implementation can include the distinguishing ID when calculating the digest.
 
 When passing a string as second parameter, `md_alg` parameter will specify the name
-to use when verifying. When `md_alg` is undefined, for RSA and EC keys, this function does SHA256
+to use when verifying. When `md_alg` is undefined, for RSA and non-SM2 EC keys, this function does SHA256
 by default. For Ed25519 or Ed448 keys, this function does a PureEdDSA verification,
 no message digest should be specified and will not be used.
+For SM2 keys, omitting `md_alg` uses SM3.
 
 When key is a RSA key, the function accepts an optional argument `padding` which choices
 of values are same as those in [pkey:sign](#pkeysign). When `padding` is `RSA_PKCS1_PSS_PADDING`, it's
@@ -4328,7 +4355,12 @@ Module to interact with SSL connection.
 
 **This module is currently considered experimental.**
 
-**Note: to use this module in production, users are encouraged to compile [lua-resty-openssl-aux-module](https://github.com/fffonion/lua-resty-openssl-aux-module).**
+This module prefers lua-resty-core APIs when available: `ngx.ssl.get_req_ssl_pointer()`
+and `ngx.ssl.get_req_ssl_ctx()` for downstream SSL connections and session contexts,
+and `tcpsock:getsslpointer()` / `tcpsock:getsslctx()` for cosockets, in both HTTP
+and stream subsystems. Unavailable APIs fall back to [lua-resty-openssl-aux-module](https://github.com/fffonion/lua-resty-openssl-aux-module)
+or the existing compatibility implementation. The auxiliary module is still
+recommended for production when a lua-resty-core API is unavailable.
 
 [Back to TOC](#table-of-contents)
 
@@ -4573,7 +4605,12 @@ Module to interact with SSL_CTX context.
 
 **This module is currently considered experimental.**
 
-**Note: to use this module in production, users are encouraged to compile [lua-resty-openssl-aux-module](https://github.com/fffonion/lua-resty-openssl-aux-module).**
+This module prefers lua-resty-core APIs when available: `ngx.ssl.get_req_ssl_pointer()`
+and `ngx.ssl.get_req_ssl_ctx()` for downstream SSL connections and session contexts,
+and `tcpsock:getsslpointer()` / `tcpsock:getsslctx()` for cosockets, in both HTTP
+and stream subsystems. Unavailable APIs fall back to [lua-resty-openssl-aux-module](https://github.com/fffonion/lua-resty-openssl-aux-module)
+or the existing compatibility implementation. The auxiliary module is still
+recommended for production when a lua-resty-core API is unavailable.
 
 [Back to TOC](#table-of-contents)
 
