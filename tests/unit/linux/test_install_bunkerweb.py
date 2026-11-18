@@ -7,6 +7,7 @@ from pathlib import Path
 import pytest
 
 SCRIPT = Path(__file__).resolve().parents[3] / "misc" / "install-bunkerweb.sh"
+RC_LINE = "1.6.18"
 
 
 @pytest.mark.parametrize(
@@ -20,8 +21,11 @@ SCRIPT = Path(__file__).resolve().parents[3] / "misc" / "install-bunkerweb.sh"
         ("1.6.14", "1.30.4"),
         ("1.6.15", "1.30.5"),
         ("1.6.16", "1.30.5"),
-        # Unknown/future version falls back to DEFAULT_NGINX_VERSION (bumped to 1.30.6).
-        ("9.9.9", "1.30.6"),
+        ("1.6.17", "1.30.6"),
+        (f"v{RC_LINE}-rc4", "1.30.6"),
+        (f"{RC_LINE}~rc5", "1.30.7"),
+        # Unknown/future version falls back to DEFAULT_NGINX_VERSION.
+        ("9.9.9", "1.30.7"),
     ],
 )
 def test_dry_run_resolves_nginx_version(version, nginx):

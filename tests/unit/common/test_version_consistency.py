@@ -59,6 +59,42 @@ def test_consistent_tree_passes(tree):
     assert f"All version pins agree with {VERSION}" in result.stdout
 
 
+@pytest.fixture
+def nginx_trees(tree):
+    for name, version in [("nginx", "1.30.7"), ("nginx-1.30.6", "1.30.6")]:
+        header = tree / "src/deps/src" / name / "src/core/nginx.h"
+        header.parent.mkdir(parents=True)
+        header.write_text(f'#define NGINX_VERSION "{version}"\n')
+    (tree / "src/deps/install.sh").write_text(
+        'case "$OS" in\n'
+        '    fedora) NGINX_SRC_DIR="/tmp/bunkerweb/deps/src/nginx-1.30.6" ;;\n'
+        '    *) NGINX_SRC_DIR="/tmp/bunkerweb/deps/src/nginx" ;;\n'
+        "esac\n"
+    )
+    (tree / "src/linux").mkdir()
+    return tree
+
+
+@pytest.mark.parametrize(
+    "os_name,os_version,pin,expected",
+    [
+        ("fedora", "43", "1.30.6", 0),
+        ("fedora", "44", "1.30.6", 0),
+        ("fedora", "45", "1.30.6", 0),
+        ("fedora", "45", "1.30.7", 1),
+        ("debian", "", "1.30.6", 1),
+        ("debian", "", "1.30.7", 0),
+    ],
+)
+def test_linux_nginx_pin_matches_selected_tree(nginx_trees, os_name, os_version, pin, expected):
+    name = f"src/linux/Dockerfile-{os_name}"
+    (nginx_trees / name).write_text(f"ENV OS={os_name}\nENV OS_VERSION={os_version}\nENV NGINX_VERSION={pin}\n")
+    result = check(nginx_trees)
+    assert result.returncode == expected, result.stdout + result.stderr
+    if expected:
+        assert f"{name}: NGINX_VERSION={pin}" in result.stdout
+
+
 @pytest.mark.parametrize("name", PINS)
 @pytest.mark.parametrize("expected,wrong", [(VERSION, VERSION + "0"), ("1.6.18", VERSION)])
 def test_pin_must_equal_version(tree, name, expected, wrong):
@@ -71,7 +107,7 @@ def test_pin_must_equal_version(tree, name, expected, wrong):
     assert f"{name}: pin is" in result.stdout
 
 
-@pytest.mark.parametrize("stale", [VERSION + "0", VERSION.replace("~", "-") + "0", "1.6.18~rc3", VERSION + "-extra"])
+@pytest.mark.parametrize("stale", [VERSION + "0", VERSION.replace("~", "-") + "0", VERSION.split("~")[0] + "~rc3", VERSION + "-extra"])
 @pytest.mark.parametrize("same_line", [False, True])
 def test_stale_token_cannot_hide_behind_current_version(tree, stale, same_line):
     prefix = f"current={VERSION} " if same_line else ""

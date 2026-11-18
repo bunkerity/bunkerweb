@@ -2350,7 +2350,7 @@ Dependiendo de tus elecciones durante la instalación:
 
 ### Instalación mediante el gestor de paquetes
 
-Asegúrate de tener **NGINX 1.30.6 instalado antes de instalar BunkerWeb**. Para todas las distribuciones, es obligatorio usar los paquetes precompilados del [repositorio oficial de NGINX](https://nginx.org/en/linux_packages.html). Compilar NGINX desde el código fuente o usar paquetes de diferentes repositorios no funcionará con los paquetes precompilados oficiales de BunkerWeb. Sin embargo, tienes la opción de compilar BunkerWeb desde el código fuente.
+En Debian, Ubuntu y RHEL, instala **NGINX 1.30.7 antes de instalar BunkerWeb**. Usa los paquetes precompilados del [repositorio oficial de NGINX](https://nginx.org/en/linux_packages.html). Compilar NGINX desde el código fuente o usar paquetes de diferentes repositorios no funcionará con los paquetes precompilados oficiales de BunkerWeb. Sin embargo, tienes la opción de compilar BunkerWeb desde el código fuente.
 
 === "Debian Bookworm/Trixie"
 
@@ -2365,11 +2365,11 @@ Asegúrate de tener **NGINX 1.30.6 instalado antes de instalar BunkerWeb**. Para
     | sudo tee /etc/apt/sources.list.d/nginx.list
     ```
 
-    Ahora deberías poder instalar NGINX 1.30.6:
+    Ahora deberías poder instalar NGINX 1.30.7:
 
     ```shell
     sudo apt update && \
-    sudo apt install -y --allow-downgrades nginx=1.30.6-1~$(lsb_release -cs)
+    sudo apt install -y --allow-downgrades nginx=1.30.7-1~$(lsb_release -cs)
     ```
 
     !!! example "Deshabilitar el asistente de configuración"
@@ -2406,11 +2406,11 @@ Asegúrate de tener **NGINX 1.30.6 instalado antes de instalar BunkerWeb**. Para
     | sudo tee /etc/apt/sources.list.d/nginx.list
     ```
 
-    Ahora deberías poder instalar NGINX 1.30.6:
+    Ahora deberías poder instalar NGINX 1.30.7:
 
     ```shell
     sudo apt update && \
-    sudo apt install -y --allow-downgrades nginx=1.30.6-1~$(lsb_release -cs)
+    sudo apt install -y --allow-downgrades nginx=1.30.7-1~$(lsb_release -cs)
     ```
 
     !!! example "Deshabilitar el asistente de configuración"
@@ -2443,7 +2443,7 @@ Asegúrate de tener **NGINX 1.30.6 instalado antes de instalar BunkerWeb**. Para
         sudo dnf config-manager setopt updates-testing.enabled=1
         ```
 
-    Fedora ya proporciona NGINX 1.30.6 que soportamos
+    Los paquetes de BunkerWeb para Fedora 43, 44 y 45 requieren NGINX 1.30.6 de los repositorios de Fedora hasta que Fedora publique la versión 1.30.7.
 
     ```shell
     sudo dnf install -y --allowerasing nginx-1.30.6
@@ -2493,10 +2493,10 @@ Asegúrate de tener **NGINX 1.30.6 instalado antes de instalar BunkerWeb**. Para
     module_hotfixes=true
     ```
 
-    Ahora deberías poder instalar NGINX 1.30.6:
+    Ahora deberías poder instalar NGINX 1.30.7:
 
     ```shell
-    sudo dnf install --allowerasing nginx-1.30.6
+    sudo dnf install --allowerasing nginx-1.30.7
     ```
 
     !!! example "Deshabilitar el asistente de configuración"
