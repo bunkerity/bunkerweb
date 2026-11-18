@@ -731,6 +731,7 @@ class Database:
     def _create_engine(self, uri: str, **kwargs) -> Engine:
         """Create an engine from the shared kwargs, with driver timeout defaults a caller's own connect_args override"""
         options = self._engine_kwargs | kwargs
+        options["hide_parameters"] = True
         connect_args = self._driver_connect_args(uri)
         if connect_args:
             options["connect_args"] = connect_args | options.get("connect_args", {})
