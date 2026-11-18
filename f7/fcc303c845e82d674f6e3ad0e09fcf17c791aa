@@ -1,0 +1,128 @@
+CHANGELOG.md
+  s_da7dbab577ff72::t_b755e8c0e57546 13,25,49-51
+tests/unit/gen/test_server_name_ip_literals.py
+  s_cca63056ca5a77::t_f21c5be57d9393 107
+  s_e24eeb0977986f::t_a915bcc6e06b80 205-231,233-244
+  s_e24eeb0977986f::t_5dac95a2b37170 232
+  s_cca63056ca5a77::t_00cd95a480e7f6 177-183,187-192
+  s_cca63056ca5a77::t_03d7edd57d5f01 1-24,26-35,37-50,53-55,58-106,108-128,135-176,184-186,193-204
+  s_cca63056ca5a77::t_69e6dff83b46d2 25,36,51-52,56-57
+  s_cca63056ca5a77::t_feac2eea2f9a2b 129-134
+docs/zh/advanced.md
+  s_cca63056ca5a77::t_bde739a2a64018 2730-2738
+  s_a6feea008b86c1::t_9eaf1155798b34 2649,2739
+src/common/core/modsecurity/confs/modsec-crs/ip-host.conf
+  s_e24eeb0977986f::t_c9682bf4604b3e 14
+  s_cca63056ca5a77::t_d8fd878bf64e59 1-13,15-17
+docs/de/features.md
+  s_cca63056ca5a77::t_6ec113aa7e5531 80
+docs/advanced.md
+  s_cca63056ca5a77::t_bde739a2a64018 2733-2741
+  s_a6feea008b86c1::t_df970c5c7f82a3 2652,2742
+docs/es/features.md
+  s_cca63056ca5a77::t_6ec113aa7e5531 80
+src/common/README.fr.md
+  s_cca63056ca5a77::t_6ec113aa7e5531 72
+src/common/README.md
+  s_cca63056ca5a77::t_6ec113aa7e5531 72
+docs/de/advanced.md
+  s_cca63056ca5a77::t_bde739a2a64018 2732-2740
+  s_a6feea008b86c1::t_17e0273c8cff0d 2651,2741
+src/common/core/letsencrypt/jobs/certbot-new.py
+  s_cca63056ca5a77::t_5066b4f03fb85f 561-567
+src/ui/app/static/js/pages/services.js
+  s_cca63056ca5a77::t_dfead0d5f831ae 61,399
+src/common/confs/server-http/server.conf
+  s_cca63056ca5a77::t_27f13c563dc522 14-15
+docs/features.md
+  s_cca63056ca5a77::t_6ec113aa7e5531 80
+src/common/core/ui/confs/http/ui.modsec-crs
+  s_cca63056ca5a77::t_b1b1d290ad8f35 10-12
+src/common/README.de.md
+  s_cca63056ca5a77::t_6ec113aa7e5531 72
+src/common/confs/stream.conf
+  s_e24eeb0977986f::t_53b9cac9f6f110 72,80
+tests/unit/gen/test_antibot_modsec_crs_hosts.py
+  s_cca63056ca5a77::t_8d52cbdb63f252 4,9-10
+  s_cca63056ca5a77::t_00cd95a480e7f6 28-33
+  s_cca63056ca5a77::t_f456548e39b888 1-3,5-8,11-27,34-35
+docs/zh/features.md
+  s_cca63056ca5a77::t_6ec113aa7e5531 82
+src/common/core/reverseproxy/confs/server-stream/reverse-proxy.conf
+  s_e24eeb0977986f::t_53b9cac9f6f110 52,54
+  s_e24eeb0977986f::t_4f1b93fc44084f 53
+src/common/settings.json
+  s_e24eeb0977986f::t_c9682bf4604b3e 52,55
+src/ui/app/templates/services.html
+  s_cca63056ca5a77::t_dfead0d5f831ae 106,112,119
+docs/fr/features.md
+  s_cca63056ca5a77::t_6ec113aa7e5531 80
+src/common/README.es.md
+  s_cca63056ca5a77::t_6ec113aa7e5531 72
+src/common/core/modsecurity/confs/http/ip-host.modsec-crs
+  s_cca63056ca5a77::t_d8fd878bf64e59 1-30
+src/common/core/antibot/confs/http/antibot.modsec-crs
+  s_cca63056ca5a77::t_b1b1d290ad8f35 6-7,13
+tests/unit/test_lua_server_name_ip_variables.lua
+  s_cca63056ca5a77::t_e84fb63f289788 1-38,40-41,48-50,52-95
+  s_cca63056ca5a77::t_69e6dff83b46d2 39,51
+  s_cca63056ca5a77::t_00cd95a480e7f6 42-47
+tests/unit/ui/routes/test_ipv6_setup_host.py
+  s_cca63056ca5a77::t_d1551eaeda2fa3 1,9-11,14
+docs/fr/advanced.md
+  s_cca63056ca5a77::t_bde739a2a64018 2731-2739
+  s_a6feea008b86c1::t_2868eff48fd9ff 2650,2740
+tests/unit/letsencrypt/test_certbot_jobs_execution.py
+  s_cca63056ca5a77::t_5066b4f03fb85f 808-818
+docs/es/advanced.md
+  s_cca63056ca5a77::t_bde739a2a64018 2732-2740
+  s_a6feea008b86c1::t_4a51b8bda2712f 2651,2741
+src/common/README.zh.md
+  s_cca63056ca5a77::t_6ec113aa7e5531 74
+tests/unit/test_ui_modsec_crs_hosts.py
+  s_cca63056ca5a77::t_f456548e39b888 60-70
+src/common/gen/Configurator.py
+  s_cca63056ca5a77::t_00cd95a480e7f6 7,342-343,371-381,383-394
+  s_cca63056ca5a77::t_74ba7d47773e4e 382
+  s_a6feea008b86c1::t_59bda60ef5680e 395
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "f7fcc303c845e82d674f6e3ad0e09fcf17c791aa",
+  "prompts": {},
+  "sessions": {
+    "s_a6feea008b86c1": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "d777bd6a-c454-44a3-9638-1a7c9632f003",
+        "model": "unknown"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_cca63056ca5a77": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "f8842302-fa84-48cf-ad02-b740935a4c41",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_da7dbab577ff72": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1a534-54ad-7930-b3f6-288880646a4e",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_e24eeb0977986f": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "cc29ae87-e593-4ae0-b5b3-04dedc8e711e",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

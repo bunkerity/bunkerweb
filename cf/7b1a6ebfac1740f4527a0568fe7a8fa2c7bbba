@@ -1,0 +1,272 @@
+tests/unit/ui/test_pro_trial_checkout_copy.py
+  s_ecb26d6f7f328f::t_5e71858ceb8f42 1-20
+src/ui/app/static/css/rtl/pages/home.css
+  s_3535bd787ed7ee::t_15136bffc0ca3a 880,892,959,969
+tests/unit/ui/test_form_field_missing_redirects.py
+  s_9b72a24114dc24::t_cf6bf3130b00e8 1-120
+src/common/core/badbehavior/ui/actions.py
+  s_751421a72d1da7::t_6999de34c4b951 27,31
+tests/unit/ui/test_table_accessibility_ports.py
+  s_4f93320f8a3c5e::t_bd84d73f0fd418 1-82,85-91,93-165
+  s_4f93320f8a3c5e::t_7d1df789f60b4c 83
+  s_4f93320f8a3c5e::t_4a52e3b3eb0f16 84,92
+src/ui/app/routes/services.py
+  s_751421a72d1da7::t_e337ce0a2f724d 697,703-705,711-712,935,941-942
+src/ui/app/routes/global_settings.py
+  s_3535bd787ed7ee::t_9cc63bb7a6a238 58-59,105-108
+src/ui/app/routes/pro.py
+  s_751421a72d1da7::t_e337ce0a2f724d 99,105-106
+tests/unit/ui/test_ipv6_ui_ban_identity.py
+  s_208835457c1976::t_0c1b238152137a 8,20,22
+  s_6189ae7958809e::t_b867a2eee19724 1-7,9-19,21,23-38
+tests/unit/ui/test_ui_workflows_editor_visuals.py
+  s_c1162cb2aea681::t_7f8fd2888e062a 1,3
+tests/unit/ui/test_ui_components.py
+  s_3535bd787ed7ee::t_a6a388936493fb 688
+src/common/core/authbasic/ui/actions.py
+  s_751421a72d1da7::t_6999de34c4b951 27,31
+src/ui/app/routes/jobs.py
+  s_751421a72d1da7::t_e337ce0a2f724d 35,41-42
+tests/unit/ui/test_plugin_hooks_fail_closed.py
+  s_751421a72d1da7::t_b908b0a3949422 1-11,13,19-21,24-95,100-105,114-172
+  s_227ee560164867::t_5ef1a67b5ef208 12,14-18,22-23,96-99,106-113,173-201
+src/ui/app/static/js/pages/services.js
+  s_4f460a2e940aa9::t_bc76e4c1ff5848 58-60
+src/ui/app/routes/instances.py
+  s_751421a72d1da7::t_e337ce0a2f724d 62,68-70,76-77,212,218-219
+src/ui/app/static/js/dataTableInit.js
+  s_4f93320f8a3c5e::t_7f4eec4b9f74cb 364-393,503-516,519-525,527-529,628-629,640-642
+tests/unit/ui/test_table_exports_and_workflow_dialogs.py
+  s_3535bd787ed7ee::t_969ea54ee6cba6 1
+src/ui/app/routes/plugins.py
+  s_751421a72d1da7::t_e337ce0a2f724d 171,177-178,247,253-254,508,514-515,1075,1081-1082,1139,1145-1146
+tests/unit/ui/test_datatable_buttons_and_language.py
+  s_3535bd787ed7ee::t_969ea54ee6cba6 1
+tests/unit/ui/test_biscuit_authorizer_limits.py
+  s_751421a72d1da7::t_7171464dd6cbe0 9-10
+  s_751421a72d1da7::t_07b2158d18f73e 1-8,11-16,24-71
+  s_751421a72d1da7::t_dc5ba9b76737bb 17-23
+tests/unit/ui/test_apply_failed_banner.py
+  s_0b4385e250c4b0::t_843a490b9edd57 10,64-65
+src/ui/app/routes/configs.py
+  s_751421a72d1da7::t_e84628f83625fd 53-54,61-62
+  s_751421a72d1da7::t_83ab955e5efe7a 555-559
+  s_751421a72d1da7::t_838cd7ab4ce8ca 537-539,541
+  s_751421a72d1da7::t_e337ce0a2f724d 330,336-338,344-345,508,514-515,614,620-621,629,635-636,643,649-650,657,663-664,836,842-843,856,862-863,871,877-878,893,899-900
+src/ui/app/static/js/pages/logs.js
+  s_4f93320f8a3c5e::t_7f4eec4b9f74cb 319-360
+src/ui/app/routes/setup.py
+  s_4f460a2e940aa9::t_bc76e4c1ff5848 51
+  s_6189ae7958809e::t_eb3dfa7b42a932 45-50,52-53
+  s_6189ae7958809e::t_cbb2eb38a5d2c1 9,400
+tests/unit/ui/test_global_override_confirm.py
+  s_208835457c1976::t_36c69f3a2c42f4 183,194,241,267,271,291
+  s_6189ae7958809e::t_742aa068f08817 99,110,125,132,136
+  s_208835457c1976::t_1447c97d42b5d0 1-23,25-98,100-109,111-124,129-130,133-135,137-182,184-193,195-240,242-266,268-270,272-290,292-298
+  s_208835457c1976::t_44d98b0c1d7287 24,126-128,131
+tests/unit/ui/test_dropdown_focus_and_reorder.py
+  s_3535bd787ed7ee::t_969ea54ee6cba6 1
+src/ui/app/static/css/rtl/overrides.css
+  s_3535bd787ed7ee::t_15136bffc0ca3a 96,122,6563
+tests/unit/ui/test_plugin_dashboard_oversized_timestamps.py
+  s_751421a72d1da7::t_94b7fdedc1b3c2 1-51
+src/ui/app/templates/models/compose_pane.html
+  s_208835457c1976::t_946982f07e0f94 201-232,234
+  s_208835457c1976::t_05d5f34db156ea 92-94,123,194-200,233,235-236
+src/ui/app/static/css/rtl/pages/web-cache.css
+  s_3535bd787ed7ee::t_15136bffc0ca3a 94,117,127
+tests/unit/ui/test_pro_key_save_flash_type.py
+  s_751421a72d1da7::t_7236af4e97fb53 54
+src/ui/app/models/biscuit.py
+  s_751421a72d1da7::t_98617e79f0e123 235,279
+  s_751421a72d1da7::t_cd4dc8c879ae6c 82-86,88
+  s_751421a72d1da7::t_2d85d29dddc622 97,101
+tests/unit/ui/test_configs_dotted_selection.py
+  s_751421a72d1da7::t_7dca2dc6bfcdec 77-134
+  s_751421a72d1da7::t_fc2e67b3f8127d 1-76
+tests/unit/ui/test_ipv6_setup_host.py
+  s_6189ae7958809e::t_eb3dfa7b42a932 2-46
+  s_4f460a2e940aa9::t_c30b5cba3343d0 1
+tests/unit/ui/test_overrides_css_split.py
+  s_3535bd787ed7ee::t_a6a388936493fb 29,32
+tests/unit/ui/test_global_settings_roundtrip.py
+  s_3535bd787ed7ee::t_988f239e2f53a6 1-13,15-20,46-63,65-76,79-105,109-133
+  s_3535bd787ed7ee::t_3f01a8037f4209 14,64,77-78
+  s_a228d0819ca8c3::t_045ffa7035ba6f 21-45,106-108
+src/ui/app/static/js/pages/settings-raw.js
+  s_208835457c1976::t_e93f9c08a172eb 254-255,471-475,478-492
+  s_9b72a24114dc24::t_e8b7665e2e9f05 476-477
+  s_208835457c1976::t_7277b40c76838c 195-210,216-229,233-253,256-304,493,757,793
+  s_208835457c1976::t_36c69f3a2c42f4 211-215,230-232
+  s_9b72a24114dc24::t_0e38a75b1bfb24 494
+src/ui/app/static/css/overrides/tokens.css
+  s_3535bd787ed7ee::t_494f669d6c24cd 87,113
+src/ui/app/static/css/pages/home.css
+  s_3535bd787ed7ee::t_50afdbda21b747 880,892,959
+src/ui/app/static/css/pages/operate.css
+  s_3535bd787ed7ee::t_990311bd9522ea 5,15,80,149,159
+src/ui/app/static/css/pages/settings.css
+  s_3535bd787ed7ee::t_615c4738fb944f 55,85,93,142,179,204,245-247,297,351
+src/ui/app/static/css/pages/web-cache.css
+  s_3535bd787ed7ee::t_4ba06d8dfab854 94,117
+src/ui/app/static/css/pages/workflow_editor.css
+  s_3535bd787ed7ee::t_c7b734a82f0095 240,291,319,343,573,1035,1248,1526,1675,1813,1954
+src/ui/app/static/js/components/compose-shelf.js
+  s_3535bd787ed7ee::t_76dea1a4b1e085 124
+src/ui/app/static/js/components/settings-widgets.js
+  s_3535bd787ed7ee::t_a5553714bed8f6 1830
+src/ui/app/static/js/pages/home.js
+  s_3535bd787ed7ee::t_3ce8ff9f64d8cb 84,282
+src/ui/app/static/js/pages/logs-live.js
+  s_3535bd787ed7ee::t_155402b938f811 65
+src/ui/app/static/js/pages/threatmap.js
+  s_3535bd787ed7ee::t_35ad96df54e49f 538,574
+src/ui/app/static/js/pages/timings.js
+  s_3535bd787ed7ee::t_550232dfaf2382 1
+src/ui/app/static/js/pages/web-cache.js
+  s_3535bd787ed7ee::t_18bbec96925c00 1
+src/ui/app/static/js/pages/workflow_editor.js
+  s_3535bd787ed7ee::t_9fe34f13546644 1021,1328,1484,1603,1946,3161
+src/ui/app/static/js/pages/workflows.js
+  s_3535bd787ed7ee::t_717537e24894b3 250,353
+src/ui/app/static/js/utils.js
+  s_ecb26d6f7f328f::t_dae9e0e7815cca 482
+src/ui/app/templates/about.html
+  s_3535bd787ed7ee::t_2d774a1932222f 266
+src/ui/app/templates/global_settings.html
+  s_3535bd787ed7ee::t_15020097c567cc 8
+src/ui/app/templates/loading.html
+  s_ecb26d6f7f328f::t_d3f40cdb431798 16
+src/ui/app/templates/logs.html
+  s_3535bd787ed7ee::t_252073854d0559 282
+src/ui/app/templates/models/plugin_setting_field.html
+  s_3535bd787ed7ee::t_450722aaddde48 122,142
+src/ui/app/templates/models/plugin_settings_body.html
+  s_3535bd787ed7ee::t_0e806c8fdf8e5e 13
+src/ui/app/templates/models/plugins_settings_raw.html
+  s_3535bd787ed7ee::t_7eddd61a352075 18,108
+src/ui/app/templates/plugin_page.html
+  s_3535bd787ed7ee::t_ea10328751c955 45
+src/ui/app/templates/plugin_settings_page.html
+  s_3535bd787ed7ee::t_430b9c4653c01d 46,72,164,169
+src/ui/app/templates/pro.html
+  s_ecb26d6f7f328f::t_6281db97aa4dd9 140
+src/ui/app/templates/service_settings.html
+  s_3535bd787ed7ee::t_9591615a43f051 5
+src/ui/app/templates/setup.html
+  s_ecb26d6f7f328f::t_af3c7830e8736d 657
+src/ui/app/templates/starting.html
+  s_ecb26d6f7f328f::t_aa5356a4187e7f 17
+src/ui/app/templates/workflows.html
+  s_3535bd787ed7ee::t_400fd617b2a879 211
+tests/unit/ui/test_before_request_env.py
+  s_9b72a24114dc24::t_05924ee52e32e2 17,141-143,147
+tests/unit/ui/test_failover_banner_logs_link.py
+  s_751421a72d1da7::t_b1e43893dcb516 1-65
+tests/unit/ui/test_services_ipv6_ids.py
+  s_4f460a2e940aa9::t_bd542e2f148177 1-48
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "cf7b1a6ebfac1740f4527a0568fe7a8fa2c7bbba",
+  "prompts": {},
+  "sessions": {
+    "s_0b4385e250c4b0": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "04b0b907-d5fe-44c9-9d2f-f04197f3642a",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_208835457c1976": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "3d8f7777-bb59-4590-ace2-c0672a83ceb1",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_227ee560164867": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1abd5-c91a-7621-bf85-b470c554c254",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_3535bd787ed7ee": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1ab9d-6772-7e22-92cd-7c07fb269100",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_4f460a2e940aa9": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "1801373c-868e-412b-b538-cb2f1f5efe59",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_4f93320f8a3c5e": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1acab-574c-7e51-a634-b24ccc2b96d8",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_6189ae7958809e": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "1049effa-f503-404c-8e04-c0d58dae63c9",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_751421a72d1da7": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "a1cd49cb-bc02-4f73-9b72-c088e5f0245c",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_9b72a24114dc24": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "cc5a1ca8-e952-421b-979b-0d94c0aab861",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_a228d0819ca8c3": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b5d1c41d-de7e-4522-9988-02fdf16b262a",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_c1162cb2aea681": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "f0a51d9a-456d-4c4c-aab4-7b9bc257d235",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_ecb26d6f7f328f": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1ad36-38d8-7ef1-94a8-30b163817431",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

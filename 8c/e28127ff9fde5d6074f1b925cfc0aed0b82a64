@@ -1,0 +1,55 @@
+CHANGELOG.md
+  s_da7dbab577ff72::t_b755e8c0e57546 61
+tests/unit/letsencrypt/test_certbot_concurrency_storage.py
+  s_52ffed4b892461::t_e55ae8e8490dd8 136-159
+tests/unit/letsencrypt/test_certbot_jobs_execution.py
+  s_52ffed4b892461::t_e49fd5e68ee57a 370-420
+  s_52ffed4b892461::t_cb119d2941d30d 3-4
+  s_a93873b098dfeb::t_36dd0a2db68bfd 421-422
+src/common/core/letsencrypt/jobs/certbot-new.py
+  s_52ffed4b892461::t_732e767e1f52ce 1212,1214
+  s_52ffed4b892461::t_17421726e06d39 941-943
+  s_52ffed4b892461::t_fd7b4620508f43 1231-1238
+  s_52ffed4b892461::t_e721f063e56916 952-953
+  s_52ffed4b892461::t_c63f12365005c0 1263
+src/common/core/letsencrypt/jobs/certbot_concurrency.py
+  s_52ffed4b892461::t_2dfebd04223465 427,430
+  s_52ffed4b892461::t_ae6b0409eb896e 338-339
+  s_52ffed4b892461::t_2c294e9132d39e 289-290,292
+  s_52ffed4b892461::t_db90cded98c5e2 331
+  s_52ffed4b892461::t_f71ac18b98adcf 469
+  s_52ffed4b892461::t_a1d8de62bfbc59 419
+  s_52ffed4b892461::t_b759031f6397e0 476-477
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "8ce28127ff9fde5d6074f1b925cfc0aed0b82a64",
+  "prompts": {},
+  "sessions": {
+    "s_52ffed4b892461": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "0665b9e1-b406-4dcf-8ebd-28eecd4a5444",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_a93873b098dfeb": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "0cd1d6bf-148c-4fa6-86b9-5646018aa76b",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_da7dbab577ff72": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1a534-54ad-7930-b3f6-288880646a4e",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

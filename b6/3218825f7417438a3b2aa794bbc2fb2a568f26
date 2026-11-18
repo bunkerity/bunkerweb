@@ -1,0 +1,21 @@
+CHANGELOG.md
+  s_4547f49864268d::t_c262576ddb5adb 41
+src/common/db/Database.py
+  s_4547f49864268d::t_b345e1c11e9519 2141-2142,2196-2198
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "b63218825f7417438a3b2aa794bbc2fb2a568f26",
+  "prompts": {},
+  "sessions": {
+    "s_4547f49864268d": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "d16b9e3b-5ea0-43b7-85a0-c4e213a3226c",
+        "model": "unknown"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

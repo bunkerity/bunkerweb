@@ -1,0 +1,21 @@
+src/common/core/letsencrypt/jobs/certbot-new.py
+  s_2adad82a505d27::t_d524d6ffc8e929 239-244
+tests/unit/letsencrypt/test_certbot_jobs_execution.py
+  s_2adad82a505d27::t_2d100124cfcf35 307-340
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "32ef3e02570b4a8fd8ca36567e34e4fbe777a5a2",
+  "prompts": {},
+  "sessions": {
+    "s_2adad82a505d27": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1b017-22e8-77b0-8978-3bad268ce710",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

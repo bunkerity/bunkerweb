@@ -1,0 +1,23 @@
+CHANGELOG.md
+  s_795e2ccdb6801b::t_da0da78b394385 195
+  s_795e2ccdb6801b::t_854bf5c31d431f 109
+  s_795e2ccdb6801b::t_8c6655c41dcfd2 42
+  s_795e2ccdb6801b::t_e327ae9cf9db0a 212
+  s_795e2ccdb6801b::t_f49b40a81c5b7e 53-58,108
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "753fc006aa1d26ce9b76e42ebd0f35bdf6d7be36",
+  "prompts": {},
+  "sessions": {
+    "s_795e2ccdb6801b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "71804b16-900c-4824-8bbc-5e7434803315",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

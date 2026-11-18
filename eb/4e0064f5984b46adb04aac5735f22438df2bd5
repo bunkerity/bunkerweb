@@ -1,0 +1,39 @@
+docs/de/features.md
+  s_9b72a24114dc24::t_acfc2d1d86c8ca 118-127
+docs/es/features.md
+  s_9b72a24114dc24::t_90acd34e8004e0 118-127
+docs/features.md
+  s_9b72a24114dc24::t_a869a588bac388 118-127
+docs/fr/features.md
+  s_9b72a24114dc24::t_bf3ab795011e9a 118-127
+docs/zh/features.md
+  s_9b72a24114dc24::t_644417f01d63e3 120-129
+src/common/README.de.md
+  s_9b72a24114dc24::t_cf8cb0305573b6 110-119
+src/common/README.es.md
+  s_9b72a24114dc24::t_fbcfe3eefad1ac 110-119
+src/common/README.fr.md
+  s_9b72a24114dc24::t_4ae4c00994a667 110-119
+src/common/README.md
+  s_9b72a24114dc24::t_e15cfd8ed70394 110-119
+src/common/README.zh.md
+  s_9b72a24114dc24::t_8d79be3dd0e12a 112-121
+src/common/settings.json
+  s_9b72a24114dc24::t_4f437d69b01abf 115
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "eb4e0064f5984b46adb04aac5735f22438df2bd5",
+  "prompts": {},
+  "sessions": {
+    "s_9b72a24114dc24": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "cc5a1ca8-e952-421b-979b-0d94c0aab861",
+        "model": "unknown"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

@@ -1,0 +1,43 @@
+tests/misc/conf/dnsmasq.hosts
+  s_18e1cfb5402ed1::t_2bf33a335a5d5d 18-20
+tests/generate.py
+  s_18e1cfb5402ed1::t_67a4cdaa9571af 624-637
+tests/scripts/start.sh
+  s_18e1cfb5402ed1::t_8156fd8a854542 124-169
+tests/misc/scripts/redis-entrypoint.sh
+  s_18e1cfb5402ed1::t_069c0da5018766 49-50
+  s_18e1cfb5402ed1::t_46eec9b2c10387 40-48,51-55
+tests/scripts/utils.sh
+  s_18e1cfb5402ed1::t_8156fd8a854542 822-830
+tests/core_handlers/redis_handler.py
+  s_18e1cfb5402ed1::t_5227c25f1c1bb4 8,12-19,21-63,65-67
+  s_18e1cfb5402ed1::t_e90a9b87d08447 20
+tests/models/redis.py
+  s_18e1cfb5402ed1::t_5227c25f1c1bb4 29-35,55-62
+  s_18e1cfb5402ed1::t_2c0e470f40b1cb 63
+tests/misc/scripts/redis-cluster-init.sh
+  s_18e1cfb5402ed1::t_2bf33a335a5d5d 1-29
+tests/core/redis.yml
+  s_18e1cfb5402ed1::t_639f9b08a72490 467-468,475,481,485-486,494,510,521-522,527,530-531,537,548,558,565,570,577-578,585,591,602,618
+  s_18e1cfb5402ed1::t_a9fa211ad90898 412-466,469-474,476-480,482-484,487-493,495-509,511-520,523-526,528-529,532-536,538-547,549-557,559-564,566-569,571-576,579-584,586-590,592-601,603-617,619-628
+tests/misc/docker/redis-cluster.yml
+  s_18e1cfb5402ed1::t_2bf33a335a5d5d 1-102
+tests/README.md
+  s_18e1cfb5402ed1::t_3ef11f53e2ed11 308-317
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "524ce1745b44737efbbabc2a267b3d9ec31e1f89",
+  "prompts": {},
+  "sessions": {
+    "s_18e1cfb5402ed1": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "087a9dfe-326f-41fb-b619-845867a497da",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

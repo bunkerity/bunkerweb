@@ -1,0 +1,23 @@
+src/deps/requirements-deps.in
+  s_5bf07aee179e4f::t_41ea873b2e99d5 3
+src/deps/requirements.txt
+  s_5bf07aee179e4f::t_41ea873b2e99d5 53-55
+src/deps/requirements-deps.txt
+  s_5bf07aee179e4f::t_41ea873b2e99d5 15-187,220-222,315-344,352-354
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "1f71368167a8b86c75953aa5f5fa089404fb88a4",
+  "prompts": {},
+  "sessions": {
+    "s_5bf07aee179e4f": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "61f4b95d-8691-40d7-941c-85c5710efd76",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

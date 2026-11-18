@@ -1,0 +1,92 @@
+src/common/core/crowdsec/ui/actions.py
+  s_e3ca7405e5fc88::t_bf048bb50fb32c 4-5,15-17
+src/common/core/crowdsec/README.md
+  s_e3ca7405e5fc88::t_e32d0f2794ef10 55,69
+  s_e3ca7405e5fc88::t_60ff4eaf3c2ce9 38-54,56-68,70-72
+src/common/core/crowdsec/misc/crowdsec.conf
+  s_e3ca7405e5fc88::t_bf048bb50fb32c 3-4
+src/common/core/crowdsec/README.zh.md
+  s_e3ca7405e5fc88::t_e32d0f2794ef10 55,69
+  s_e3ca7405e5fc88::t_60ff4eaf3c2ce9 38-54,56-68,70-72
+tests/unit/api/test_api_permissions.py
+  s_e3ca7405e5fc88::t_5652654912093c 71-72,75
+src/api/app/routers/core.py
+  s_e3ca7405e5fc88::t_bc0510fed9e68f 15,56
+src/common/core/crowdsec/jobs/crowdsec_conf_utils.py
+  s_e3ca7405e5fc88::t_bf048bb50fb32c 15-16
+src/common/core/crowdsec/plugin.json
+  s_e3ca7405e5fc88::t_bf048bb50fb32c 35-52
+src/common/core/crowdsec/README.fr.md
+  s_e3ca7405e5fc88::t_60ff4eaf3c2ce9 38-54,56-68,70-72
+  s_e3ca7405e5fc88::t_e32d0f2794ef10 55,69
+src/common/utils/CrowdSec.py
+  s_e3ca7405e5fc88::t_a583ee14395e7a 2-4,6-36,38-43,45-66,69-75,79-176
+  s_e3ca7405e5fc88::t_d2a020bfe6fb7e 1,37,67-68,76-78
+  s_e3ca7405e5fc88::t_a930c6b251522d 5
+  s_377e4c49e945c6::t_7251880270947f 44
+src/api/app/auth/biscuit.py
+  s_e3ca7405e5fc88::t_b15f49ac3160b9 8,713-717
+  s_e3ca7405e5fc88::t_a543bcf002bb0e 487,490
+  s_e3ca7405e5fc88::t_813de24e9bb6b1 488-489
+tests/unit/common/test_crowdsec_client.py
+  s_e3ca7405e5fc88::t_845004e3d38c0a 1-8,11-54,56-72,74-77,95-107
+  s_e3ca7405e5fc88::t_d53354920d992a 9-10
+  s_e3ca7405e5fc88::t_bd40bd3ba3e183 55,73,78-94
+tests/unit/api/test_crowdsec_router.py
+  s_e3ca7405e5fc88::t_127ecc4e50bf27 116-118,122
+  s_e3ca7405e5fc88::t_dbcddcd28e87d1 80,100
+  s_e3ca7405e5fc88::t_64adc3210a9229 123-140
+  s_e3ca7405e5fc88::t_38a671d7e3641f 104
+  s_e3ca7405e5fc88::t_49b8da4b0b05ef 29-39,41-46,48-79,81-86
+  s_377e4c49e945c6::t_7251880270947f 47
+  s_e3ca7405e5fc88::t_3f8c147a563c9e 23
+  s_e3ca7405e5fc88::t_e26675f0fc8070 11-12,101-103,105-115,119-121
+  s_e3ca7405e5fc88::t_845004e3d38c0a 1-10,13-22,24-28,40,87-99
+src/common/db/model.py
+  s_795e2ccdb6801b::t_3cfaeac3e3a967 1058-1061
+src/common/core/crowdsec/README.de.md
+  s_e3ca7405e5fc88::t_e32d0f2794ef10 55,69
+  s_e3ca7405e5fc88::t_60ff4eaf3c2ce9 38-54,56-68,70-72
+src/common/core/crowdsec/confs/http/crowdsec.conf
+  s_e3ca7405e5fc88::t_bf048bb50fb32c 3
+src/api/app/auth/guard.py
+  s_e3ca7405e5fc88::t_bc0510fed9e68f 87,96
+src/common/core/crowdsec/README.es.md
+  s_e3ca7405e5fc88::t_60ff4eaf3c2ce9 38-54,56-68,70-72
+  s_e3ca7405e5fc88::t_e32d0f2794ef10 55,69
+src/api/app/routers/crowdsec.py
+  s_e3ca7405e5fc88::t_e32d0f2794ef10 105,114
+  s_e3ca7405e5fc88::t_b85386990c6aa5 1-104,106-113,115-116
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "49e1660ef1a5830bdc929d7263a620397abd291e",
+  "prompts": {},
+  "sessions": {
+    "s_377e4c49e945c6": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0cd23-ecf1-7f42-907e-dab692557c1c",
+        "model": "gpt-6-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_795e2ccdb6801b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "71804b16-900c-4824-8bbc-5e7434803315",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_e3ca7405e5fc88": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0cd18-b905-70b1-901b-73a053ab86fd",
+        "model": "gpt-6-luna"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

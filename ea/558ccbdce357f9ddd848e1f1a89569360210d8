@@ -1,0 +1,19 @@
+examples/mcp-stack/AGENTS.md
+  s_977009582ea0f0::t_02174ee438de49 1-96
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "ea558ccbdce357f9ddd848e1f1a89569360210d8",
+  "prompts": {},
+  "sessions": {
+    "s_977009582ea0f0": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a159c7-35c2-7851-9c73-943cfa280a40",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

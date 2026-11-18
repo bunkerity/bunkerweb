@@ -1,0 +1,38 @@
+docs/de/features.md
+  h_a33a1e80933106 3284
+docs/es/features.md
+  h_a33a1e80933106 3337
+docs/features.md
+  h_a33a1e80933106 3352
+docs/fr/features.md
+  h_a33a1e80933106 3247
+docs/zh/features.md
+  h_a33a1e80933106 3347
+src/common/core/errors/confs/server-http/errors.conf
+  h_a33a1e80933106 55-60
+src/common/core/inject/README.de.md
+  h_a33a1e80933106 10
+src/common/core/inject/README.es.md
+  h_a33a1e80933106 10
+src/common/core/inject/README.fr.md
+  h_a33a1e80933106 10
+src/common/core/inject/README.md
+  h_a33a1e80933106 10
+src/common/core/inject/README.zh.md
+  h_a33a1e80933106 10
+tests/core/inject.yml
+  h_a33a1e80933106 17-47
+tests/unit/gen/test_errors_injection.py
+  h_a33a1e80933106 1-59
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "cc47e421d67dfa0f0d2d7b36b51151e496a880fe",
+  "prompts": {},
+  "humans": {
+    "h_a33a1e80933106": {
+      "author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

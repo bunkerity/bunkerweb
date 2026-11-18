@@ -1,0 +1,40 @@
+src/deps/src/luajit/dynasm/dasm_arm64.h
+  s_b8cce5bb89b2f2::t_ce50220f672da4 475
+src/deps/src/luajit/src/lj_asm.c
+  s_b8cce5bb89b2f2::t_ce50220f672da4 986-987
+src/deps/src/luajit/src/lj_record.c
+  s_b8cce5bb89b2f2::t_ce50220f672da4 2043,2062-2063
+CHANGELOG.md
+  s_b8cce5bb89b2f2::t_06e62747c6543b 82
+src/deps/src/luajit/src/lj_asm_x86.h
+  s_b8cce5bb89b2f2::t_ce50220f672da4 847,911,1120-1125,1675,1679-1682,1694-1704,1706-1707,2767-2768,2770-2777,2779
+src/deps/deps.json
+  s_b8cce5bb89b2f2::t_ce50220f672da4 204
+  s_7ef4934e73b1b5::t_594b7bf919147b 206
+src/deps/src/luajit/src/lj_opt_fold.c
+  s_b8cce5bb89b2f2::t_ce50220f672da4 183-186
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "3f27cd0ee1e069fcfe5f07fd8081c0388de2a8f5",
+  "prompts": {},
+  "sessions": {
+    "s_7ef4934e73b1b5": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "e8981a50-417c-4ac7-a794-2f09a026fea5",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_b8cce5bb89b2f2": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "852b7205-05a9-4d00-9237-59c7987f3318",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

@@ -1,0 +1,49 @@
+CHANGELOG.md
+  s_0bf82062f9947a::t_3c05c40f635cb9 21
+src/common/core/reverseproxy/README.de.md
+  s_0bf82062f9947a::t_351b6b4c89819e 35-45,57-82
+src/common/core/reverseproxy/README.es.md
+  s_0bf82062f9947a::t_4382c8cc690d13 35-45,57-82
+src/common/core/reverseproxy/README.fr.md
+  s_0bf82062f9947a::t_5183106f33caa9 35-45,57-82
+src/common/core/reverseproxy/README.md
+  s_0bf82062f9947a::t_5322a2e94c8db7 35-45,57-82
+src/common/core/reverseproxy/README.zh.md
+  s_0bf82062f9947a::t_8b9b9ae571e9c5 35-45,57-82
+src/common/core/reverseproxy/plugin.json
+  s_0bf82062f9947a::t_4f0ff2094fea4f 70
+docs/de/features.md
+  s_9b72a24114dc24::t_3bc19a6d68269b 5481-5491,5503-5528
+docs/es/features.md
+  s_9b72a24114dc24::t_0db7696769110b 5540-5550,5562-5587
+docs/features.md
+  s_9b72a24114dc24::t_d3c1d5078c0404 5553-5563,5575-5600
+docs/fr/features.md
+  s_9b72a24114dc24::t_8088f13e021d2a 5399-5409,5421-5446
+docs/zh/features.md
+  s_9b72a24114dc24::t_9e2fd3f2ab8628 5548-5558,5570-5595
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "ffb651e9039284a2949f4fdaaf5de9c09b901c29",
+  "prompts": {},
+  "sessions": {
+    "s_0bf82062f9947a": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "2c17ecf2-1ff4-4f18-ad06-7a2b92bad02d",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_9b72a24114dc24": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "cc5a1ca8-e952-421b-979b-0d94c0aab861",
+        "model": "unknown"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

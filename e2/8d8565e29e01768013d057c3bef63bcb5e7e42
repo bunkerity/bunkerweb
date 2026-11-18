@@ -1,0 +1,21 @@
+src/common/core/robotstxt/robotstxt.lua
+  s_60628c795bd662::t_725b95eaeb6b0c 58-59,64-65
+CHANGELOG.md
+  s_60628c795bd662::t_ffcfbe519f7eb8 45
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "e28d8565e29e01768013d057c3bef63bcb5e7e42",
+  "prompts": {},
+  "sessions": {
+    "s_60628c795bd662": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1869d-2e49-7ff2-8e88-cfcf2fe9cb0c",
+        "model": "unknown"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

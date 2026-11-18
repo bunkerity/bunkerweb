@@ -1,0 +1,31 @@
+CHANGELOG.md
+  s_42dfddf59267cc::t_a1be2db6d3d1aa 27
+src/ui/app/templates/models/plugins_settings.html
+  s_2ad06a8466523a::t_0498463ced0c51 216-219
+src/ui/app/templates/plugin_page.html
+  s_2ad06a8466523a::t_aaafd7c284b9f6 29-32
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "2c5bef26c7e693b3a1b3e3ab56e82ceabae17148",
+  "prompts": {},
+  "sessions": {
+    "s_2ad06a8466523a": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "8efabd41-58be-458f-9641-8ab672dc16b1",
+        "model": "unknown"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_42dfddf59267cc": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0f7e8-b2f8-7d22-96d0-7ced682c4928",
+        "model": "unknown"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

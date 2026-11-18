@@ -1,0 +1,925 @@
+.github/ISSUE_TEMPLATE/bug_report.yml
+  s_12c83c551f0749::t_c74609c3357b59 74
+.github/scripts/secrets-check.sh
+  s_12c83c551f0749::t_c9ce4f4cb6e4be 1-19,22-66,68-110,112-145,148-188,191-199,202-225,228-247,250-263,266-273,276-286,289-313,315-328,330-443,445-466,468-489,491-508,510-586,588-620,622-629,631-667,669-679,681-693,695-749,751-767,769-790,792-807,809-858
+.github/workflows/codeql.yml
+  s_12c83c551f0749::t_1ea121dba31ece 11,41,47
+.github/workflows/container-build.yml
+  s_12c83c551f0749::t_14a03647d5dd3d 54,195-197,201,224-226,248
+.github/workflows/create-arm.yml
+  s_12c83c551f0749::t_59cee3a668632a 32
+.github/workflows/dev-update-mmdb.yml
+  s_12c83c551f0749::t_f1e4fcbe67946a 13
+.github/workflows/dev.yml
+  s_12c83c551f0749::t_d0e32ce6954d7f 182
+.github/workflows/doc-to-pdf.yml
+  s_12c83c551f0749::t_e81ad795d683ba 15,33,54
+.github/workflows/linux-build.yml
+  s_12c83c551f0749::t_b2b782fe7eb1f3 44,161,176
+.github/workflows/plumber.yml
+  s_12c83c551f0749::t_3baacf8689a022 11,25
+.github/workflows/pullfrog.yml
+  s_12c83c551f0749::t_42ebae0652ab78 19,30
+.github/workflows/push-doc.yml
+  s_12c83c551f0749::t_dba79d2383b8f2 26
+.github/workflows/push-docker.yml
+  s_12c83c551f0749::t_55d2e6790c0aab 35
+.github/workflows/push-github.yml
+  s_12c83c551f0749::t_a5a435a6ac105d 29
+.github/workflows/push-packagecloud.yml
+  s_12c83c551f0749::t_3969b24e63944d 46-47,71
+.github/workflows/release.yml
+  s_12c83c551f0749::t_ef823d66e3f29e 23,348,378,389,408
+.github/workflows/rm-arm.yml
+  s_12c83c551f0749::t_5c2a6014e65482 23
+.github/workflows/scorecards-analysis.yml
+  s_12c83c551f0749::t_05bea84c784ddb 15,22,28
+.github/workflows/secrets-check.yml
+  s_12c83c551f0749::t_e577b384946978 1-87
+.github/workflows/staging-create-infra.yml
+  s_12c83c551f0749::t_f938647af1d480 20,33,60
+.github/workflows/staging-delete-infra.yml
+  s_12c83c551f0749::t_a2a6318cfb6481 21,52
+.github/workflows/staging-tests.yml
+  s_12c83c551f0749::t_b0fbd57b6bc027 115
+.github/workflows/staging.yml
+  s_12c83c551f0749::t_716b3e71cf09b9 105,150-151,184
+.github/workflows/test-core-linux.yml
+  s_12c83c551f0749::t_20b35f9d852a54 19
+.github/workflows/test-core.yml
+  s_12c83c551f0749::t_cdf554cef841ed 19
+.github/workflows/tests-ui-linux.yml
+  s_12c83c551f0749::t_a2a5f97aa4108d 19
+.github/workflows/tests-ui.yml
+  s_12c83c551f0749::t_0fb4aa4ea5e837 18
+.github/workflows/ui.yml
+  s_12c83c551f0749::t_8888cbf4e77ee3 68
+AGENTS.md
+  s_12c83c551f0749::t_1c9753032bcdeb 1-3,11,28-211
+CHANGELOG.md
+  s_12c83c551f0749::t_9fa9be9091410a 3-55
+CLAUDE.md
+  s_12c83c551f0749::t_3e05ab7c2113c9 1,3
+README.md
+  s_12c83c551f0749::t_75b14ee9276f64 2,88,108,113,115,142,177,183,216,219,227-232,262,271,302,312,326,331,342,347,354,359,366,371,374,376,381,386,388,392,396,398,406,425,442,466,482,505
+docs/advanced.md
+  s_12c83c551f0749::t_2a737ae88c6c0c 3,5,88,99,107,124,132,179,187,252,263,273,291,301,353,363,488-489,593,612,698,1135,1163,1174,1291,1331,1354,1397,1467,1713,1736,1751,1802,2032,2162,2206,2221,2315,2328,2343,2583,2682,2845,2858,2875,3047,3156,3167,3186,3229,3498,3503,4327,4331,4414
+docs/api.md
+  s_12c83c551f0749::t_583f3cf3b93238 45,58,80,147
+docs/assets/webmcp.js
+  s_12c83c551f0749::t_03300386c5e3c3 1-25,28-29,32-41,44-47,50-66,68-77,79,81-84,87-127,129-312,314-317
+docs/concepts.md
+  s_12c83c551f0749::t_fa643fdd995f84 108,129
+docs/de/advanced.md
+  s_12c83c551f0749::t_9440bee90c4b59 3,5,88,99,107,124,132,179,187,252,263,273,291,301,353,363,488-489,591,610,696,1133,1161,1172,1289,1329,1352,1395,1465,1712,1735,1750,1801,2031,2161,2205,2220,2314,2327,2342,2582,2681,2844,2857,2874,3046,3155,3166,3185,3228,3497,3502,4326,4330,4413
+docs/de/api.md
+  s_12c83c551f0749::t_0bca4507e97466 45,58,80,147
+docs/de/concepts.md
+  s_12c83c551f0749::t_87419e8706db25 108,129
+docs/de/features.md
+  s_12c83c551f0749::t_bf748ef0d5b353 78-85,277,365-368,370,467-470,873,969-980,1104-1109,1145-1150,1596-1604,1606-1608,1871-1879,1970,1987,2158-2173,2177-2180,2184-2185,2189,2276,2419-2436,2487-2488,2490,2653-2658,2813,2817-2818,2821-2829,3015,3138-3148,3420-3422,3428-3467,3473,3490,3492,3710-3711,3825-3847,3955-3963,4376-4392,4409,4573-4576,5042,5281-5298,5431,5440,5491,5814,5847-5850,6166-6169,6171,6531,6536-6539,6547-6551,6556-6559,6564-6567,6572-6575
+docs/de/integrations.md
+  s_12c83c551f0749::t_6a7fbeb1739ced 1271,1287,1365,1373,1460,1519,1541,1563,1602,1634,1640,1650,1660,1676,1707,1728,1737,1755,1903,1916,1949,1962,2029-2030,2047-2060,2133,2200,2345,2350,2393,2398,2416,2419,2429,2434,2479,2484,2511,2582,2596,2611,2626,2798,2834,2840,2913,3028,3198,3242,3524,3676,3857,3861,3869,3873,4495,4509,4538,4559,4711,4723
+docs/de/plugins.md
+  s_12c83c551f0749::t_d6b0dccf6a8b26 98,133,176,223,263,487,568
+docs/de/quickstart-guide.md
+  s_12c83c551f0749::t_f815c82a2359b8 21,52,70-71,112,125,142,212,228,246,269,367,397,415,444,670,692
+docs/de/troubleshooting.md
+  s_12c83c551f0749::t_b08a9091780032 726-737
+docs/de/upgrading.md
+  s_12c83c551f0749::t_0df901419fa028 22-23,107,110,113,116,172,183,192,231-232,309-310,313,316,319,322,402,428,900,903,906,909,944,970
+docs/de/web-ui.md
+  s_12c83c551f0749::t_1edd0071a79f21 55,66,86
+docs/es/advanced.md
+  s_12c83c551f0749::t_78f85c88bb5c4b 3,5,88,99,107,124,132,179,187,252,263,273,291,301,353,363,488-489,591,610,696,1133,1161,1172,1289,1329,1352,1395,1465,1712,1735,1750,1801,2031,2161,2205,2220,2314,2327,2342,2582,2681,2844,2857,2874,3046,3155,3166,3185,3228,3497,3502,4326,4330,4413
+docs/es/api.md
+  s_12c83c551f0749::t_6c361c761defa0 45,58,80,147
+docs/es/concepts.md
+  s_12c83c551f0749::t_7799d8a1794207 108,129
+docs/es/features.md
+  s_12c83c551f0749::t_0c56977c9a4c36 78-85,276,364-366,368-369,462-465,882,978-989,1113-1118,1154-1159,1613-1623,1625,1898-1906,1993,2010,2183-2198,2202-2205,2209-2210,2214,2301,2454-2471,2522-2523,2525,2696-2701,2856,2860-2861,2864-2872,3058,3191-3201,3473-3475,3481-3520,3526,3543,3545,3763-3764,3877-3899,4007-4012,4014-4015,4428-4444,4461,4625-4628,5096,5337-5344,5346-5354,5490,5499,5550,5873,5906-5909,6227-6230,6232,6608,6613-6616,6624-6628,6633-6636,6641-6644,6649-6652
+docs/es/integrations.md
+  s_12c83c551f0749::t_18fe7399d7fa46 1271,1287,1365,1373,1460,1520,1542,1564,1603,1635,1641,1651,1661,1677,1708,1729,1738,1756,1904,1917,1950,1963,2030-2031,2048-2061,2134,2201,2346,2351,2394,2399,2417,2420,2430,2435,2480,2485,2513,2584,2598,2613,2628,2800,2836,2842,2914,3029,3199,3243,3525,3677,3858,3862,3870,3874,4496,4510,4539,4560,4712,4724
+docs/es/plugins.md
+  s_12c83c551f0749::t_b047bd47055ad2 98,134,177,224,264,569
+docs/es/quickstart-guide.md
+  s_12c83c551f0749::t_075b31d9e9d726 21,52,70-71,112,125,142,212,228,246,269,367,397,415,444,671,693
+docs/es/troubleshooting.md
+  s_12c83c551f0749::t_ff7473907591c9 726-737
+docs/es/upgrading.md
+  s_12c83c551f0749::t_b867b20f88596f 21-22,106,109,112,115,171,182,191,230-231,312-313,316,319,322,325,405,431,903,906,909,912,947,973
+docs/es/web-ui.md
+  s_12c83c551f0749::t_506deac8478cdc 55,66,86
+docs/features.md
+  s_12c83c551f0749::t_4b24bb20911a51 78-85,276,364-366,368-369,466-469,886,982-993,1117-1122,1158-1163,1617-1625,1627-1629,1904-1912,2005,2022,2195-2210,2214-2215,2226,2314,2468-2485,2536-2537,2539,2710-2715,2871,2875-2876,2879-2887,3073,3206-3216,3488-3490,3496-3535,3541,3558,3560,3779-3780,3893-3915,4023-4031,4444-4460,4477,4641-4644,5112,5353-5370,5503,5512,5563,5886,5919-5922,6240-6243,6245,6621,6626-6629,6637-6641,6646-6649,6654-6657,6662-6665
+docs/fr/advanced.md
+  s_12c83c551f0749::t_c61d746148d4cc 3,5,88,99,107,124,132,179,187,252,263,273,291,301,353,363,488-489,591,610,696,1133,1161,1172,1289,1329,1352,1395,1465,1711,1734,1749,1800,2030,2160,2204,2219,2313,2326,2341,2581,2680,2843,2856,2873,3045,3154,3165,3184,3227,3496,3501,4325,4329,4412
+docs/fr/api.md
+  s_12c83c551f0749::t_107780cf693331 45,58,80,147
+docs/fr/concepts.md
+  s_12c83c551f0749::t_b6f7182c2284bd 108,129
+docs/fr/features.md
+  s_12c83c551f0749::t_6e5b74c913bdc8 78-85,276,466-468,832-837,864,958-969,1085-1090,1126-1131,1566-1573,1575-1578,1831-1839,1930,1947,2120-2135,2139-2142,2146-2147,2151,2238,2381-2398,2449-2450,2452,2615-2620,2658-2659,2665-2667,2676-2678,2680,2688-2690,2696-2697,2699,2704-2706,2776,2780-2781,2784-2792,2978,3101-3111,3373-3375,3381-3420,3426,3443,3445,3663-3664,3777-3799,3907-3915,4328-4344,4361,4524-4527,4981,5201-5218,5349,5358,5409,5732,5763-5766,6062-6065,6067,6427,6432-6435,6443-6447,6452-6455,6460-6463,6468-6471
+docs/fr/integrations.md
+  s_12c83c551f0749::t_62f8ac1c0cd951 1278,1293,1372,1380,1467,1527,1548,1570,1609,1643,1649,1659,1669,1685,1716,1737,1746,1764,1912,1925,1958,1971,2038-2039,2056-2069,2139,2206,2348,2353,2396,2401,2419,2422,2432,2437,2482,2487,2515,2586,2600,2615,2630,2802,2838,2844,2915,3030,3200,3244,3301,3527,3679,3860,3864,3872,3876,4497,4511,4540,4561,4713,4725
+docs/fr/plugins.md
+  s_12c83c551f0749::t_54bef47df66b49 98,134,177,224,264,569
+docs/fr/quickstart-guide.md
+  s_12c83c551f0749::t_00d4a59767f272 21,52,70-71,112,125,142,212,228,246,269,367,397,415,444,671,693
+docs/fr/troubleshooting.md
+  s_12c83c551f0749::t_932f88e4ab9a57 726-737
+docs/fr/upgrading.md
+  s_12c83c551f0749::t_8f3e5855c13b46 21-22,106,109,112,115,171,182,191,230-231,312-313,316,319,322,325,405,431,903,906,909,912,947,973
+docs/fr/web-ui.md
+  s_12c83c551f0749::t_bd1860876735dc 55,66,86
+docs/hooks/llmstxt.py
+  s_12c83c551f0749::t_a4652506f6cb58 3,5,8-10,65-67,108-209,231-232,242-250,299-308
+docs/integrations.md
+  s_12c83c551f0749::t_a94da2e41680d0 1278,1305,1377,1385,1472,1532,1554,1576,1615,1649,1655,1665,1675,1691,1722,1743,1752,1770,1918,1931,1964,1977,2044-2045,2062-2075,2152,2264,2460,2465,2508,2513,2531,2534,2544,2549,2594,2599,2627,2698,2712,2727,2742,2913,2949,2955,3035,3152,3322,3366,3648,3800,3981,3985,3993,3997,4618,4632,4661,4682,4834,4846
+docs/overrides/main.html
+  s_12c83c551f0749::t_b58d4d63a424af 2-7
+docs/plugins.md
+  s_12c83c551f0749::t_44e39f612de36e 98,134,177,224,264,572
+docs/quickstart-guide.md
+  s_12c83c551f0749::t_ee94522cd074fd 21,52,70-71,112,125,142,212,228,246,269,367,397,415,444,671,693
+docs/requirements.in
+  s_12c83c551f0749::t_92eec9f5ea409b 5
+docs/requirements.txt
+  s_12c83c551f0749::t_806c3be317bab4 5,28-30,342-344,353-355,667,670-672,674-676,682-684,798-800,831-833
+docs/troubleshooting.md
+  s_12c83c551f0749::t_cc3c1f29bcc130 726-737
+docs/upgrading.md
+  s_12c83c551f0749::t_b76e675e15785d 21-22,105,108,111,114,170,181,190,229-230,311-312,315,318,321,324,404,430,903,906,909,912,947,973
+docs/web-ui.md
+  s_12c83c551f0749::t_e285f23dd6d71f 50,65,89
+docs/zh/advanced.md
+  s_12c83c551f0749::t_7e4e522708bcf9 3,5,88,99,107,124,132,179,187,252,263,273,291,301,353,363,488-489,591,610,696,1133,1161,1172,1289,1329,1352,1395,1465,1710,1733,1748,1799,2029,2159,2203,2218,2312,2325,2340,2580,2679,2841,2854,2871,3043,3152,3163,3182,3225,3494,3499,4323,4327,4410
+docs/zh/api.md
+  s_12c83c551f0749::t_7f07ca33569fbc 45,58,80,147
+docs/zh/concepts.md
+  s_12c83c551f0749::t_30d6eca9ba6a3f 108,129
+docs/zh/features.md
+  s_12c83c551f0749::t_d25a91cb06b9b0 80-87,278,366-369,371,468-471,888,984-995,1119-1124,1160-1165,1619-1627,1629-1631,1904-1912,2003,2020,2193-2208,2212-2213,2224,2311,2464-2481,2532-2533,2535,2541,2544,2706-2711,2806-2809,2866,2870-2871,2874-2882,3068,3201-3211,3483-3485,3491-3530,3533-3557,3773-3774,3887-3909,4017-4025,4438-4454,4471,4635-4638,5106,5347-5364,5498,5507,5558,5881,5914-5917,6235-6238,6240,6616,6621-6624,6632-6636,6641-6644,6649-6652,6657-6660
+docs/zh/integrations.md
+  s_12c83c551f0749::t_6bcfa33643e0a2 1271,1287,1365,1373,1460,1520,1542,1564,1603,1637,1643,1653,1663,1676,1707,1728,1737,1755,1903,1916,1949,1962,2029-2030,2047-2060,2133,2200,2345,2350,2393,2398,2416,2419,2429,2434,2479,2484,2512,2583,2597,2612,2627,2799,2835,2841,2910,3025,3195,3239,3521,3673,3854,3858,3866,3870,4492,4506,4535,4556,4705,4717
+docs/zh/plugins.md
+  s_12c83c551f0749::t_8a6eff20346d7b 98,134,177,224,264,569
+docs/zh/quickstart-guide.md
+  s_12c83c551f0749::t_0c652d620fe0d3 21,52,70-71,112,125,142,212,228,246,269,367,397,415,444,671,693
+docs/zh/troubleshooting.md
+  s_12c83c551f0749::t_b5d648c5e5e6e3 725-736
+docs/zh/upgrading.md
+  s_12c83c551f0749::t_8dbf7b3e3a4a6d 21-22,105,108,111,114,170,181,190,229-230,311-312,315,318,321,324,404,430,902,905,908,911,946,972
+docs/zh/web-ui.md
+  s_12c83c551f0749::t_874a5300f1891a 55,66,86
+examples/authelia/docker-compose.yml
+  s_12c83c551f0749::t_4f8e2090d9ee03 3,17
+examples/authentik/docker-compose.yml
+  s_12c83c551f0749::t_d29203b7f582c0 3,17
+examples/behind-reverse-proxy/docker-compose.yml
+  s_12c83c551f0749::t_6d635f207014e2 9,20
+examples/bigbluebutton/docker-compose.yml
+  s_12c83c551f0749::t_74035ee10ceeaa 28,43
+examples/cors/docker-compose.yml
+  s_12c83c551f0749::t_1e03c177c8403c 3,25
+examples/dns-cloudflare/docker-compose.yml
+  s_12c83c551f0749::t_684030bd31a1ad 3,17
+examples/dns-desec/docker-compose.yml
+  s_12c83c551f0749::t_fc95b5c4e62edc 3,17
+examples/dns-digitalocean/docker-compose.yml
+  s_12c83c551f0749::t_783df7dd79dcf7 3,17
+examples/dns-dnsimple/docker-compose.yml
+  s_12c83c551f0749::t_ceeb7df515adb0 3,17
+examples/dns-dnsmadeeasy/docker-compose.yml
+  s_12c83c551f0749::t_ff13ca912b3620 3,17
+examples/dns-gehirn/docker-compose.yml
+  s_12c83c551f0749::t_28b7e1f1bbabd6 3,17
+examples/dns-google/docker-compose.yml
+  s_12c83c551f0749::t_af6d0a536752c6 3,17
+examples/dns-linode/docker-compose.yml
+  s_12c83c551f0749::t_b4e1e8cc4b4b25 3,17
+examples/dns-luadns/docker-compose.yml
+  s_12c83c551f0749::t_ca2993ed797d58 3,17
+examples/dns-nsone/docker-compose.yml
+  s_12c83c551f0749::t_71702496c81dee 3,17
+examples/dns-ovh/docker-compose.yml
+  s_12c83c551f0749::t_f69054bbc1f40f 3,17
+examples/dns-rfc2136/docker-compose.yml
+  s_12c83c551f0749::t_f2641586c9ee42 3,17
+examples/dns-route53/docker-compose.yml
+  s_12c83c551f0749::t_7df7273a6b7982 3,17
+examples/dns-sakuracloud/docker-compose.yml
+  s_12c83c551f0749::t_1ceb561457e887 3,17
+examples/dns-scaleway/docker-compose.yml
+  s_12c83c551f0749::t_2109b05f193e72 3,17
+examples/docker-configs/docker-compose.yml
+  s_12c83c551f0749::t_2fada1e698b66e 3,17
+examples/drupal/docker-compose.yml
+  s_12c83c551f0749::t_408a67ccf0d12a 3,17
+examples/ghost/docker-compose.yml
+  s_12c83c551f0749::t_0158788157dd0f 3,17
+examples/gogs/docker-compose.yml
+  s_12c83c551f0749::t_7fc268f1ef7734 3,17
+examples/hardened/docker-compose.yml
+  s_12c83c551f0749::t_404d795aff377b 3,36
+examples/jellyfin/docker-compose.yml
+  s_12c83c551f0749::t_18e04310f24eb7 3,17
+examples/joomla/docker-compose.yml
+  s_12c83c551f0749::t_ce37c8737e041d 3,17
+examples/load-balancer/docker-compose.yml
+  s_12c83c551f0749::t_1d6fd5e5c06a1b 3,17
+examples/magento/docker-compose.yml
+  s_12c83c551f0749::t_5a1a7d195e87f7 3,17
+examples/mattermost/docker-compose.yml
+  s_12c83c551f0749::t_4c684a9066e515 3,17
+examples/mcp-stack/AGENTS.md
+  s_12c83c551f0749::t_11416ecea8ad48 1,3,5,7,9-11,13,15,17-25,27,29,31-36,38,40,42-43,45-46,48-49,51-96
+examples/mcp-stack/CLAUDE.md
+  s_12c83c551f0749::t_08a5deb231c797 1,3
+examples/mcp-stack/docker-compose.yml
+  s_12c83c551f0749::t_b47e2339bea978 12,25,47
+examples/mongo-express/docker-compose.yml
+  s_12c83c551f0749::t_1fdab5b3669021 3,17
+examples/moodle/docker-compose.yml
+  s_12c83c551f0749::t_7f8d067c97e5e4 3,17
+examples/nextcloud/docker-compose.yml
+  s_12c83c551f0749::t_514b5355f75e7a 3,17
+examples/passbolt/docker-compose.yml
+  s_12c83c551f0749::t_7269a1485acdd9 3,17
+examples/php-cookie-flags/docker-compose.yml
+  s_12c83c551f0749::t_6dc3b6878a6061 3,25
+examples/php-multisite/docker-compose.yml
+  s_12c83c551f0749::t_01d337b9ba0d46 3,26
+examples/php-singlesite/docker-compose.yml
+  s_12c83c551f0749::t_a196e90b4741ed 3,25
+examples/prestashop/docker-compose.yml
+  s_12c83c551f0749::t_b5be5035bc94c8 3,17
+examples/proxy-protocol/docker-compose.yml
+  s_12c83c551f0749::t_8991d5a64486f0 11,22
+examples/radarr/docker-compose.yml
+  s_12c83c551f0749::t_9e5b9b34e4c555 3,17
+examples/redmine/docker-compose.yml
+  s_12c83c551f0749::t_c4915f3f2d1b16 3,17
+examples/reverse-proxy-multisite/docker-compose.yml
+  s_12c83c551f0749::t_3440296f3db9b2 3,17
+examples/reverse-proxy-singlesite/docker-compose.yml
+  s_12c83c551f0749::t_00153cee9abd4f 3,17
+examples/reverse-proxy-websocket/docker-compose.yml
+  s_12c83c551f0749::t_d4b43daa14206c 3,17
+examples/stream-multisite/docker-compose.yml
+  s_12c83c551f0749::t_b032944b2270da 3,19
+examples/syslog/docker-compose.yml
+  s_12c83c551f0749::t_654fbe2a2c572a 3,24
+examples/tomcat/docker-compose.yml
+  s_12c83c551f0749::t_e3a594229a06cf 3,17
+examples/tor-hidden-service/docker-compose.yml
+  s_12c83c551f0749::t_a32f88c9cedd26 13,24
+examples/web-ui/docker-compose.wizard.yml
+  s_12c83c551f0749::t_9d611a6366a32e 6,20,43
+examples/web-ui/docker-compose.yml
+  s_12c83c551f0749::t_80d1d1c09d1abf 6,20,46
+examples/wordpress/docker-compose.yml
+  s_12c83c551f0749::t_c93fd64da41755 3,17
+misc/install-bunkerweb.sh
+  s_12c83c551f0749::t_285f9c69d1c04d 11-19,117
+misc/integrations/all-in-one.mariadb.ui.yml
+  s_12c83c551f0749::t_f328fe30886e62 3
+misc/integrations/all-in-one.mariadb.yml
+  s_12c83c551f0749::t_b9caa2f57c23c1 3
+misc/integrations/all-in-one.mysql.ui.yml
+  s_12c83c551f0749::t_f4f103cb013bae 3
+misc/integrations/all-in-one.mysql.yml
+  s_12c83c551f0749::t_af7859668c89f3 3
+misc/integrations/all-in-one.oracle.ui.yml
+  s_12c83c551f0749::t_367306a7976bac 3
+misc/integrations/all-in-one.oracle.yml
+  s_12c83c551f0749::t_4bce41c9f45aab 3
+misc/integrations/all-in-one.postgres.ui.yml
+  s_12c83c551f0749::t_860ddb189b0929 3
+misc/integrations/all-in-one.postgres.yml
+  s_12c83c551f0749::t_a66466560394c9 3
+misc/integrations/all-in-one.yml
+  s_12c83c551f0749::t_33f1ee4b41edaa 3
+misc/integrations/autoconf.mariadb.ui.yml
+  s_12c83c551f0749::t_255110710898b8 7,21,34,50
+misc/integrations/autoconf.mariadb.yml
+  s_12c83c551f0749::t_1dc08c5fabacd2 7,21,34
+misc/integrations/autoconf.mysql.ui.yml
+  s_12c83c551f0749::t_e61d6e2d562714 7,21,34,50
+misc/integrations/autoconf.mysql.yml
+  s_12c83c551f0749::t_dfe1a0296ca855 7,21,34
+misc/integrations/autoconf.oracle.ui.yml
+  s_12c83c551f0749::t_146b5bf9a54f29 7,21,34,50
+misc/integrations/autoconf.oracle.yml
+  s_12c83c551f0749::t_e6a5c9b72aa2ca 7,21,34
+misc/integrations/autoconf.postgres.ui.yml
+  s_12c83c551f0749::t_9363f9db50976b 7,21,34,50
+misc/integrations/autoconf.postgres.yml
+  s_12c83c551f0749::t_4bc39f5ff8fd2c 7,21,34
+misc/integrations/docker.mariadb.ui.yml
+  s_12c83c551f0749::t_c4e5c01564de65 6,20,44
+misc/integrations/docker.mariadb.yml
+  s_12c83c551f0749::t_b36407ade680d9 7,20
+misc/integrations/docker.mysql.ui.yml
+  s_12c83c551f0749::t_33687613ed7555 6,20,44
+misc/integrations/docker.mysql.yml
+  s_12c83c551f0749::t_52c1d1e2bd3d17 7,20
+misc/integrations/docker.oracle.ui.yml
+  s_12c83c551f0749::t_c24b5d14d6aac2 6,20,44
+misc/integrations/docker.oracle.yml
+  s_12c83c551f0749::t_360506766698ed 7,20
+misc/integrations/docker.postgres.ui.yml
+  s_12c83c551f0749::t_ff22e813d57a5c 6,19,43
+misc/integrations/docker.postgres.yml
+  s_12c83c551f0749::t_c0349e9138d59c 7,20
+misc/integrations/docker.yml
+  s_12c83c551f0749::t_d2e5c1ac941b11 6,19
+misc/integrations/k8s.mariadb.ui.yml
+  s_12c83c551f0749::t_40919815c6b3ad 117,177,214,325
+misc/integrations/k8s.mariadb.yml
+  s_12c83c551f0749::t_2955fcd313797e 127,187,224
+misc/integrations/k8s.mysql.ui.yml
+  s_12c83c551f0749::t_4117ea207387df 117,177,214,325
+misc/integrations/k8s.mysql.yml
+  s_12c83c551f0749::t_2f2e2c3c3d1e18 127,187,224
+misc/integrations/k8s.oracle.ui.yml
+  s_12c83c551f0749::t_2df2d62417c653 117,177,214,321
+misc/integrations/k8s.oracle.yml
+  s_12c83c551f0749::t_df6a3db595dceb 127,187,224
+misc/integrations/k8s.postgres.ui.yml
+  s_12c83c551f0749::t_f8fea0d94c6a9d 117,177,214,321
+misc/integrations/k8s.postgres.yml
+  s_12c83c551f0749::t_72022cfa29f863 127,187,224
+misc/migration/Dockerfile
+  s_12c83c551f0749::t_795dd944b5f640 1
+misc/requirements-ansible.txt
+  s_12c83c551f0749::t_84fd8e83d29471 5,339-341
+misc/requirements-mmdb.txt
+  s_12c83c551f0749::t_80f94909ccbdd1 5
+mkdocs.yml
+  s_12c83c551f0749::t_460d68e76cb324 56,81-82
+publiccode.yml
+  s_12c83c551f0749::t_2235032263cf53 4-6
+pyproject.toml
+  s_12c83c551f0749::t_8a6469a1360462 4
+src/VERSION
+  s_12c83c551f0749::t_4b0b4e90f59af4 1
+src/all-in-one/Dockerfile
+  s_12c83c551f0749::t_4175d9b4a3ecca 1,130,168,174,177-178,246
+src/all-in-one/deps/go.json
+  s_12c83c551f0749::t_a0fa749521cacd 2,5-8
+src/api/Dockerfile
+  s_12c83c551f0749::t_0bdbc2274981fa 1,31,42,47,65
+src/api/app/main.py
+  s_12c83c551f0749::t_607134b36aadc6 57-59
+src/api/app/routers/configs.py
+  s_12c83c551f0749::t_2424ec43f0fb7b 100,307-310
+src/api/app/routers/instances.py
+  s_12c83c551f0749::t_36d96a0a58469b 5,36,71
+src/api/requirements.in
+  s_12c83c551f0749::t_5d6243db0a6dad 4,6,9
+src/api/requirements.txt
+  s_12c83c551f0749::t_7cf262ab5452db 5,259-261,270-272,432-434,582-584,809-811,823,935-1089,1091-1192
+src/autoconf/Dockerfile
+  s_12c83c551f0749::t_1fe58770ab48f0 1,35,41,46,69
+src/autoconf/controllers/KubernetesController.py
+  s_12c83c551f0749::t_58b6cf11a6663e 24-28,666,673-681,685,701-702
+src/autoconf/requirements.txt
+  s_12c83c551f0749::t_90d069803ae823 5,192-194,514-641
+src/bw/Dockerfile
+  s_12c83c551f0749::t_7321d8400bfc78 1,54,72,78,81-82,112
+src/bw/entrypoint.sh
+  s_12c83c551f0749::t_f9985394f044ab 32-34,38-39,296-342,344,359-372
+src/bw/lua/bunkerweb/api.lua
+  s_12c83c551f0749::t_ea5aa2fda7bbf0 310-311,313,563-591,594-610,619-621,626-628,643,648-650
+src/bw/lua/bunkerweb/utils.lua
+  s_12c83c551f0749::t_e2ded2b700af1e 598,1452
+src/common/cli/CLI.py
+  s_12c83c551f0749::t_7fc3a9b0a0b5a6 3,5-6,11-14,26,31-48,68-168,219-293,322,334,336-337,341-351,353-373,1018-1234
+src/common/cli/main.py
+  s_12c83c551f0749::t_ed5005c83088b9 15,71-77,84-92,102-103
+src/common/confs/default-server-http.conf
+  s_12c83c551f0749::t_6cd63204893423 232
+src/common/confs/init-worker-lua.conf
+  s_12c83c551f0749::t_13eb3af573d511 68-73
+src/common/confs/server-stream/preread-stream-lua.conf
+  s_12c83c551f0749::t_dadae9d865b033 52,67
+src/common/core/antibot/antibot.lua
+  s_12c83c551f0749::t_49f9381f3f9570 119-139,1100-1108
+src/common/core/backup/README.de.md
+  s_12c83c551f0749::t_02b595fc398aba 55
+src/common/core/backup/README.es.md
+  s_12c83c551f0749::t_34ff06e02f2542 55
+src/common/core/backup/README.fr.md
+  s_12c83c551f0749::t_39099e4eb55c4d 55
+src/common/core/backup/README.md
+  s_12c83c551f0749::t_2995a7437b9dff 55
+src/common/core/backup/README.zh.md
+  s_12c83c551f0749::t_e824daadc68119 55
+src/common/core/backup/backup.py
+  s_12c83c551f0749::t_8491c02f4cbd54 16-17,254-278,285-291
+src/common/core/badbehavior/README.de.md
+  s_12c83c551f0749::t_60de784bb9b85c 44-47
+src/common/core/badbehavior/README.es.md
+  s_12c83c551f0749::t_9762a25729cf5c 44-47
+src/common/core/badbehavior/README.fr.md
+  s_12c83c551f0749::t_9a582b68cfd28d 42-45
+src/common/core/badbehavior/README.md
+  s_12c83c551f0749::t_cf7546d5298d98 44-47
+src/common/core/badbehavior/README.zh.md
+  s_12c83c551f0749::t_5f5867f891aef4 44-47
+src/common/core/badbehavior/badbehavior.lua
+  s_12c83c551f0749::t_05b66dc78f04c6 29-40,108-119,293-304,361-368,385-420
+src/common/core/badbehavior/plugin.json
+  s_12c83c551f0749::t_7e5adc4579e4ca 124-141
+src/common/core/cors/README.de.md
+  s_12c83c551f0749::t_cd7f40b886ce9b 54-55
+src/common/core/cors/README.es.md
+  s_12c83c551f0749::t_eeca6871b220f6 54-55
+src/common/core/cors/README.fr.md
+  s_12c83c551f0749::t_f005888c99b256 52-53
+src/common/core/cors/README.md
+  s_12c83c551f0749::t_74ce07bc1b498e 54-55
+src/common/core/cors/README.zh.md
+  s_12c83c551f0749::t_0d55435d528a7b 54-55
+src/common/core/cors/cors.lua
+  s_12c83c551f0749::t_b6a64429ee129d 114-120
+src/common/core/crowdsec/README.de.md
+  s_12c83c551f0749::t_86fc7622441e2c 76-84,175,192,363-378,394
+src/common/core/crowdsec/README.es.md
+  s_12c83c551f0749::t_34c22c1589bdde 76-84,171,188,361-376,392
+src/common/core/crowdsec/README.fr.md
+  s_12c83c551f0749::t_e6ff6e32d09c31 76-84,175,192,365-380,396
+src/common/core/crowdsec/README.md
+  s_12c83c551f0749::t_5878ffed933315 76-84,177,194,367-382,398
+src/common/core/crowdsec/README.zh.md
+  s_12c83c551f0749::t_ea1d4aeaa782bd 76-84,175,192,365-380,396
+src/common/core/crowdsec/cache_partition.lua
+  s_12c83c551f0749::t_e11a8dfe54f6e9 18,45-74
+src/common/core/crowdsec/confs/http/crowdsec.conf
+  s_12c83c551f0749::t_f3831faad1e5e0 2-3
+src/common/core/crowdsec/control.lua
+  s_12c83c551f0749::t_a71c1fc5ff9b3f 219-223,356-359
+src/common/core/crowdsec/crowdsec.lua
+  s_12c83c551f0749::t_036757e3d00c98 3,165-166,180-200,202-203,215-220,233-239
+src/common/core/crowdsec/enforcement_state.lua
+  s_12c83c551f0749::t_bb675f5824053e 1-381
+src/common/core/crowdsec/jobs/crowdsec_conf_utils.py
+  s_12c83c551f0749::t_5a4799c886cc50 4,9
+src/common/core/crowdsec/lib/bouncer.lua
+  s_12c83c551f0749::t_29414f6eb979cd 6,8,63-64,66-74,78-90,92-93,109-117,170-171,173,199,201,279-280,283-293,297-299,312-314,319,337,342,346-354,363,367-375,388-390,392-395,397-401,407-409,415-431,439-447,458-514,518-529,531,535,539,543-569,575-576,590-595,664-672,674-676,686-711,826-827,968,974,984,992-996,1002,1004,1012-1015,1017,1019-1023
+src/common/core/crowdsec/lib/decision_cache.lua
+  s_12c83c551f0749::t_3142560db295d5 42-44,46,51,53,58,62-63,66,69,80-82,93,97-100,103-110,120-121,131-146
+src/common/core/crowdsec/plugin.json
+  s_12c83c551f0749::t_1398075095db7a 91-108
+src/common/core/errors/README.de.md
+  s_12c83c551f0749::t_70e6833522bd5b 60-65
+src/common/core/errors/README.es.md
+  s_12c83c551f0749::t_b9b84837edfe50 68-73
+src/common/core/errors/README.fr.md
+  s_12c83c551f0749::t_9661f50ef47562 60-65
+src/common/core/errors/README.md
+  s_12c83c551f0749::t_df780f74224acb 68-73
+src/common/core/errors/README.zh.md
+  s_12c83c551f0749::t_c1d914787f2262 68-73
+src/common/core/errors/errors.lua
+  s_12c83c551f0749::t_5e04253dce6042 162
+src/common/core/greylist/README.de.md
+  s_12c83c551f0749::t_1d18312e72e6d2 151,155-156,159-167
+src/common/core/greylist/README.es.md
+  s_12c83c551f0749::t_e44e302e89e68e 151,155-156,159-167
+src/common/core/greylist/README.fr.md
+  s_12c83c551f0749::t_3afd0e437cf561 152,156-157,160-168
+src/common/core/greylist/README.md
+  s_12c83c551f0749::t_f29b28c0d356c2 152,156-157,160-168
+src/common/core/greylist/README.zh.md
+  s_12c83c551f0749::t_f00a9c84cab3be 151,155-156,159-167
+src/common/core/headers/plugin.json
+  s_12c83c551f0749::t_0d16c63eabf712 93
+src/common/core/letsencrypt/jobs/certbot-deploy.py
+  s_12c83c551f0749::t_c81dadb6979c3f 14,74
+src/common/core/limit/README.de.md
+  s_12c83c551f0749::t_f31a4f81a2ca45 65-66
+src/common/core/limit/README.es.md
+  s_12c83c551f0749::t_34e706a4d2dd7f 65-66
+src/common/core/limit/README.fr.md
+  s_12c83c551f0749::t_50a04bdf193f6b 65-66
+src/common/core/limit/README.md
+  s_12c83c551f0749::t_37c6a5131c9503 65-66
+src/common/core/limit/README.zh.md
+  s_12c83c551f0749::t_29a25d1335cf42 65-66
+src/common/core/limit/confs/server-http/limitconn.conf
+  s_12c83c551f0749::t_c9374eb0d57172 2
+src/common/core/limit/confs/server-stream/limitconn.conf
+  s_12c83c551f0749::t_9fa4f8e636c8fc 2
+src/common/core/metrics/metrics.lua
+  s_12c83c551f0749::t_8e3cf6bec084f9 38-39,113,831-840,842-874,876,919-970,993-1001,1008,1145-1181,1386-1405
+src/common/core/misc/confs/default-server-http/page.conf
+  s_12c83c551f0749::t_7612df3ff73610 49
+src/common/core/modsecurity/README.de.md
+  s_12c83c551f0749::t_72f4ba55889dcb 63
+src/common/core/modsecurity/README.es.md
+  s_12c83c551f0749::t_9e9d1bc8e80f4a 63
+src/common/core/modsecurity/README.fr.md
+  s_12c83c551f0749::t_a44fe24c9a3f9c 63
+src/common/core/modsecurity/README.md
+  s_12c83c551f0749::t_6cc385f9e48318 63
+src/common/core/modsecurity/README.zh.md
+  s_12c83c551f0749::t_276d103271eeca 63
+src/common/core/modsecurity/files/coreruleset-v4/.coderabbit.yaml
+  s_12c83c551f0749::t_0b1476ac03fd86 1-149
+src/common/core/modsecurity/files/coreruleset-v4/CHANGES.md
+  s_12c83c551f0749::t_5eec80c93d8a25 8-42
+src/common/core/modsecurity/files/coreruleset-v4/CONTRIBUTING.md
+  s_12c83c551f0749::t_c1be885c457cea 95
+src/common/core/modsecurity/files/coreruleset-v4/CONTRIBUTORS.md
+  s_12c83c551f0749::t_6df9e66aa22d8a 81
+src/common/core/modsecurity/files/coreruleset-v4/SECURITY.md
+  s_12c83c551f0749::t_e4af88bf379268 30
+src/common/core/modsecurity/files/coreruleset-v4/crs-linter.toml
+  s_12c83c551f0749::t_cf4616fb06b028 1-204
+src/common/core/modsecurity/files/coreruleset-v4/regex-assembly/932180.ra
+  s_12c83c551f0749::t_6da817816a11fc 1-2,4-5,7-8,10,12-13
+src/common/core/modsecurity/files/coreruleset-v4/regex-assembly/932270.ra
+  s_12c83c551f0749::t_8535de06fc4309 7-17
+src/common/core/modsecurity/files/coreruleset-v4/regex-assembly/934200.ra
+  s_12c83c551f0749::t_0ece17eb4289ad 39-58
+src/common/core/modsecurity/files/coreruleset-v4/regex-assembly/exclude/unix-shell-fps-pl1.ra
+  s_12c83c551f0749::t_b87b248aa7d5e6 587-589
+src/common/core/modsecurity/files/coreruleset-v4/regex-assembly/generators/REQUEST-932-APPLICATION-ATTACK-RCE/932180.sh
+  s_12c83c551f0749::t_ef2ce59f6285f1 1-3,5-6,8-9,11-12,14-18,20-22,24-27
+src/common/core/modsecurity/files/coreruleset-v4/regex-assembly/include/932180-non-substring-matches.ra
+  s_12c83c551f0749::t_afa2c97bd15b6a 1-118,129,158,174
+src/common/core/modsecurity/files/coreruleset-v4/regex-assembly/include/932180-substring-matches.ra
+  s_12c83c551f0749::t_b1fe933de9135c 1-416
+src/common/core/modsecurity/files/coreruleset-v4/regex-assembly/include/unix-shell-4andup.ra
+  s_12c83c551f0749::t_268aa45edbe8c4 30-31,33,36,80-81,90-91,170,173,184,188,190,199,219,252,293,327,374,401,403-405,422,424,434,440-452,454,456-457,460,463-464,526
+src/common/core/modsecurity/files/coreruleset-v4/regex-assembly/include/windows-commands.ra
+  s_12c83c551f0749::t_35b349e7a1c072 60,82-89,140,180
+src/common/core/modsecurity/files/coreruleset-v4/regex-assembly/toolchain.yaml
+  s_12c83c551f0749::t_ee92176a7f3b0b 53
+src/common/core/modsecurity/files/coreruleset-v4/rules/REQUEST-900-EXCLUSION-RULES-BEFORE-CRS.conf.example
+  s_12c83c551f0749::t_176143c04e326d 2,75-91,123-125,172-174
+src/common/core/modsecurity/files/coreruleset-v4/rules/REQUEST-901-INITIALIZATION.conf
+  s_12c83c551f0749::t_2e6b5daf4b3ea9 2,29,63,82,92,102,112,122,132,142,152,161,170,179,189,199,209,219,229,239,249,268,278,288,298,316,358,384,396,401-454,490,501,526,545
+src/common/core/modsecurity/files/coreruleset-v4/rules/REQUEST-905-COMMON-EXCEPTIONS.conf
+  s_12c83c551f0749::t_13dbe0593caf71 2,28,49
+src/common/core/modsecurity/files/coreruleset-v4/rules/REQUEST-911-METHOD-ENFORCEMENT.conf
+  s_12c83c551f0749::t_7337330ce8535b 2,17-18,42,49-50,57-58,65-66
+src/common/core/modsecurity/files/coreruleset-v4/rules/REQUEST-913-SCANNER-DETECTION.conf
+  s_12c83c551f0749::t_4070a99bd4ad58 2,17-18,54,59-60,67-68,75-76
+src/common/core/modsecurity/files/coreruleset-v4/rules/REQUEST-920-PROTOCOL-ENFORCEMENT.conf
+  s_12c83c551f0749::t_d01df25cb83979 2,26-27,67,123,153,188,214,255,286,325,370,400,429,474,531,563,583,624,650,684,726,771,804,830,858,883,909,936,976,999,1016,1027,1054,1095,1120,1143,1171,1225,1259,1292,1307,1331,1354,1387,1392-1393,1433,1458,1480,1503,1530,1553,1576,1605,1654,1664-1665,1691,1725,1759,1813,1844,1848-1849,1873,1901,1923,1950,1995
+src/common/core/modsecurity/files/coreruleset-v4/rules/REQUEST-921-PROTOCOL-ATTACK.conf
+  s_12c83c551f0749::t_d5834928928e49 2,17-18,55,93,115,150,179,206,234,273,306,333,361,366-367,395,431,436-437,468,506,523,567,574-575,618
+src/common/core/modsecurity/files/coreruleset-v4/rules/REQUEST-922-MULTIPART-ATTACK.conf
+  s_12c83c551f0749::t_acce87a1b58b14 2,25-29,31-42,49,58,61-67,89,102,127,150,174
+src/common/core/modsecurity/files/coreruleset-v4/rules/REQUEST-930-APPLICATION-ATTACK-LFI.conf
+  s_12c83c551f0749::t_2cc2bf5dca63e5 2,17-18,51,89,120,147,177,183-184,214,220-221,228-229
+src/common/core/modsecurity/files/coreruleset-v4/rules/REQUEST-931-APPLICATION-ATTACK-RFI.conf
+  s_12c83c551f0749::t_d60bd2fc766aa0 2,20-21,63,89,110,117-118,150,182,187-188,195-196
+src/common/core/modsecurity/files/coreruleset-v4/rules/REQUEST-932-APPLICATION-ATTACK-RCE.conf
+  s_12c83c551f0749::t_fe7bee13425334 2,17-18,124,140,186,202,235,253,269,297,313,344,360,384,400,423,439,506,522,567,583,629,645,665,681,722,753,774,800,816,834-837,839,855,857-858,933,949,970,986,992-993,1006,1022,1067,1083,1116,1172,1211,1254,1296,1320,1336,1385,1401,1429,1445,1483,1519,1548,1563,1581,1596,1616,1631,1679,1695,1743,1759,1794,1819,1835,1841-1842,1887,1903,1946,1962,2005,2021,2055,2096,2141,2157,2176,2191,2225,2259,2277,2293,2299-2300
+src/common/core/modsecurity/files/coreruleset-v4/rules/REQUEST-933-APPLICATION-ATTACK-PHP.conf
+  s_12c83c551f0749::t_289e18ea834a0f 2,17-18,69,88-89,96,112,142,167,199,241,278,348,404,460,521,569,632,637-638,683,711,739,745-746,789,834,877,907,943,949-950
+src/common/core/modsecurity/files/coreruleset-v4/rules/REQUEST-934-APPLICATION-ATTACK-GENERIC.conf
+  s_12c83c551f0749::t_340bbebb060f8a 2,17-18,70,106,135,175,208,240,271,287,303,308-309,337,390,423,451,485,490-491,531,535-536
+src/common/core/modsecurity/files/coreruleset-v4/rules/REQUEST-941-APPLICATION-ATTACK-XSS.conf
+  s_12c83c551f0749::t_25a8ab4d6a1ef5 2,17-18,66,99,127,170,201,236,270,301,329,362,385,415,443,466,489,517,540,563,586,609,637,704,734,776,809,843,879,885-886,911,938,967,1060,1087,1112,1145,1152-1153,1160-1161
+src/common/core/modsecurity/files/coreruleset-v4/rules/REQUEST-942-APPLICATION-ATTACK-SQLI.conf
+  s_12c83c551f0749::t_d45b84c2554878 2,17-18,62,93,126,170,196,222,251,277,303,329,350,376,402,431,457,496,537,574,604,634,640-641,674,715,751,788,831,860,892,918,944,970,1004,1033,1058,1088,1120,1146,1172,1198,1229,1258,1287,1333,1392,1428,1480,1507,1540,1568,1606,1638,1668,1675-1676,1708,1732,1777,1811,1853,1906,1935,1941-1942,1974,2008
+src/common/core/modsecurity/files/coreruleset-v4/rules/REQUEST-943-APPLICATION-ATTACK-SESSION-FIXATION.conf
+  s_12c83c551f0749::t_98cef2b06d6ddb 2,17-18,52,79,112,123-124,131-132,139-140
+src/common/core/modsecurity/files/coreruleset-v4/rules/REQUEST-944-APPLICATION-ATTACK-JAVA.conf
+  s_12c83c551f0749::t_c284d77f3a8db4 2,16-17,49,81,111,143,162-164,169,185,233,239-240,271,303,324,350,374,404,410-411,444,450-451,480
+src/common/core/modsecurity/files/coreruleset-v4/rules/REQUEST-949-BLOCKING-EVALUATION.conf
+  s_12c83c551f0749::t_3bb1ed42e4ada2 2,27,37,47,57,67,77,87,97,109,119,131,141,151,161,171,181,191,201,220,233,235-236,243-244,251-252,259-260
+src/common/core/modsecurity/files/coreruleset-v4/rules/REQUEST-999-COMMON-EXCEPTIONS-AFTER.conf
+  s_12c83c551f0749::t_803c7f0a40c25e 2,105
+src/common/core/modsecurity/files/coreruleset-v4/rules/RESPONSE-950-DATA-LEAKAGES.conf
+  s_12c83c551f0749::t_52211c6b2b456f 2,24-36,44,47-49,55-57,59-60,84,116,139,144-145,169,175-176,183-184
+src/common/core/modsecurity/files/coreruleset-v4/rules/RESPONSE-951-DATA-LEAKAGES-SQL.conf
+  s_12c83c551f0749::t_6fe970ed94b9c9 2,15-16,40,64,90,116,142,163,184,205,231,257,283,309,335,345,361,387,413,439,447-448,455-456,463-464
+src/common/core/modsecurity/files/coreruleset-v4/rules/RESPONSE-952-DATA-LEAKAGES-JAVA.conf
+  s_12c83c551f0749::t_815e8e95194040 2,15-16,47,53-54,61-62,69-70
+src/common/core/modsecurity/files/coreruleset-v4/rules/RESPONSE-953-DATA-LEAKAGES-PHP.conf
+  s_12c83c551f0749::t_b18f33107b1606 2,15-16,40,65,91,96-97,130,135-136,143-144
+src/common/core/modsecurity/files/coreruleset-v4/rules/RESPONSE-954-DATA-LEAKAGES-IIS.conf
+  s_12c83c551f0749::t_2d3dbb578b3e29 2,15-16,40,61,85,107,117-118,143,148-149,156-157
+src/common/core/modsecurity/files/coreruleset-v4/rules/RESPONSE-955-WEB-SHELLS.conf
+  s_12c83c551f0749::t_eed88e028879ca 2,15-16,38,58,78,98,118,138,158,178,198,218,238,258,278,298,318,338,360,380,400,420,442,462,482,502,522,542,548-549,571,576-577,585-586
+src/common/core/modsecurity/files/coreruleset-v4/rules/RESPONSE-956-DATA-LEAKAGES-RUBY.conf
+  s_12c83c551f0749::t_bc85183d031571 2,15-16,40,45-46,71,75-76,83-84
+src/common/core/modsecurity/files/coreruleset-v4/rules/RESPONSE-959-BLOCKING-EVALUATION.conf
+  s_12c83c551f0749::t_1ebea83b71b367 2,21-22,40,50,60,70,80,90,100,110,122,132,146,156,166,176,186,196,206,216,232,245,247-248,255-256,263-264,271-272
+src/common/core/modsecurity/files/coreruleset-v4/rules/RESPONSE-980-CORRELATION.conf
+  s_12c83c551f0749::t_bb69debc2e9124 2,31,44,47,50,53-54,57,60-61,64,67,70,99,104-105,112-113,120-121,128-129
+src/common/core/modsecurity/files/coreruleset-v4/rules/RESPONSE-999-EXCLUSION-RULES-AFTER-CRS.conf.example
+  s_12c83c551f0749::t_6ff977874e6ac0 2,39-45
+src/common/core/modsecurity/files/coreruleset-v4/rules/lfi-os-files.data
+  s_12c83c551f0749::t_90735ccf9875bb 33,1202-1222
+src/common/core/modsecurity/files/coreruleset-v4/rules/restricted-files.data
+  s_12c83c551f0749::t_1b3ad55f8f2031 22,767-787
+src/common/core/modsecurity/files/coreruleset-v4/rules/ruby-errors.data
+  s_12c83c551f0749::t_ad9455c05d4f77 89
+src/common/core/modsecurity/files/coreruleset-v4/rules/scanners-user-agents.data
+  s_12c83c551f0749::t_ab0b36aed493f3 13-16,145
+src/common/core/modsecurity/files/coreruleset-v4/rules/unix-shell.data
+  s_12c83c551f0749::t_daf42601b4088c 40-42,59,68-74,77,124-125,133-134,138,178,226,229,243,247,249,263,284,325,372,410,469,487,505,507-509,527-532,539,546-550,552-559,561,563-564,567,569-570,606-607,644,650
+src/common/core/modsecurity/files/crs-setup-v4.conf
+  s_12c83c551f0749::t_e530887ea78cf5 2,190,218,244,279,340,401,433,454,492,522,562,581,584-610,626,650,706,732,751,777,791,805,819,833,847,887,911,933,954-955
+src/common/core/modsecurity/misc/versions.json
+  s_12c83c551f0749::t_2f065533bbaba5 12,14
+src/common/core/reverseproxy/README.de.md
+  s_12c83c551f0749::t_efa9587d3e30ae 45
+src/common/core/reverseproxy/README.es.md
+  s_12c83c551f0749::t_2be00f81db1a74 45
+src/common/core/reverseproxy/README.fr.md
+  s_12c83c551f0749::t_ec6bf6baff72aa 45
+src/common/core/reverseproxy/README.md
+  s_12c83c551f0749::t_0d0dcc381c2514 45
+src/common/core/reverseproxy/README.zh.md
+  s_12c83c551f0749::t_67f0efbbdb66dd 45
+src/common/core/templates/templates/high.json
+  s_12c83c551f0749::t_3671763a9d67b5 40
+src/common/core/templates/templates/medium.json
+  s_12c83c551f0749::t_a77b79ee24670b 40
+src/common/db/Database.py
+  s_12c83c551f0749::t_3da70127f442b3 20,92-95,221-229,231,270-275,283,311,329,332,419,421,426,456-459,461,469,488-491,906,940
+src/common/db/alembic/mariadb_versions/2f4621324c8c_upgrade_to_version_1_6_17.py
+  s_12c83c551f0749::t_73185a4782f0c2 1-5,14-15,21-24,28-29
+src/common/db/alembic/mariadb_versions/5005ba753754_upgrade_to_version_1_6_16_rc2.py
+  s_12c83c551f0749::t_4bff90609bf3ff 4,9,13,17,21-23,26-38
+src/common/db/alembic/mariadb_versions/8c3c7a90ada7_upgrade_to_version_1_6_18_rc1.py
+  s_12c83c551f0749::t_9e5e01a7599f45 1-5,14-15,21-24,28-29
+src/common/db/alembic/mariadb_versions/d10f1615a003_upgrade_to_version_1_6_15_rc2.py
+  s_12c83c551f0749::t_4d4ca51c8bf4e1 7,33-38
+src/common/db/alembic/mysql_versions/7b7a101de004_upgrade_to_version_1_6_16_rc2.py
+  s_12c83c551f0749::t_38b4773b59f26a 4,9,13,17,21-23,26-38
+src/common/db/alembic/mysql_versions/cf125a63069d_upgrade_to_version_1_6_18_rc1.py
+  s_12c83c551f0749::t_984ec636cbba24 1-5,14-15,21-24,28-29
+src/common/db/alembic/mysql_versions/d10f1615a002_upgrade_to_version_1_6_15_rc2.py
+  s_12c83c551f0749::t_00283a0031288c 7,33-38
+src/common/db/alembic/mysql_versions/fd7656b2e096_upgrade_to_version_1_6_17.py
+  s_12c83c551f0749::t_db7af7b9550c49 1-5,14-15,21-24,28-29
+src/common/db/alembic/postgresql_versions/6786f9e200c0_upgrade_to_version_1_6_18_rc1.py
+  s_12c83c551f0749::t_d5997f934ac22d 1-29
+src/common/db/alembic/postgresql_versions/e8a90b5d846a_upgrade_to_version_1_6_17.py
+  s_12c83c551f0749::t_169245f704905d 1-29
+src/common/db/alembic/postgresql_versions/f39324749273_upgrade_to_version_1_6_16_rc2.py
+  s_12c83c551f0749::t_537c22bf2bc574 4,9,13,17,21-23,26-38
+src/common/db/alembic/sqlite_versions/65d55c915e56_upgrade_to_version_1_6_16_rc2.py
+  s_12c83c551f0749::t_d233f454ecbf4f 4,9,13,17,21-23,26-38
+src/common/db/alembic/sqlite_versions/98601421d101_upgrade_to_version_1_6_17.py
+  s_12c83c551f0749::t_a73ad454c906d8 1-29
+src/common/db/alembic/sqlite_versions/a7f28527241a_upgrade_to_version_1_6_18_rc1.py
+  s_12c83c551f0749::t_bcd597066ee815 1-29
+src/common/db/model.py
+  s_12c83c551f0749::t_89ed6ce2798483 374
+src/common/db/requirements.arm.in
+  s_12c83c551f0749::t_46880a3787fe3b 1,4,6
+src/common/db/requirements.arm.txt
+  s_12c83c551f0749::t_f5e4d77ef2919d 5,7-9,331-333,335-336,342-344,350-422
+src/common/db/requirements.in
+  s_12c83c551f0749::t_8c930c12c0b827 1,4,6
+src/common/db/requirements.txt
+  s_12c83c551f0749::t_3c5ee742da9266 5,7-9,331-333,335-401,407-409,415-487
+src/common/gen/requirements.txt
+  s_12c83c551f0749::t_1e8d7d45152f99 5,11-13,189-316
+src/common/utils/ApiCaller.py
+  s_12c83c551f0749::t_10df0188ba1c1a 32
+src/common/utils/common_utils.py
+  s_12c83c551f0749::t_7467640b53019c 970-980,983
+src/common/utils/logger.py
+  s_12c83c551f0749::t_e908d176def2df 7,36-37,115,117
+src/common/utils/support_common.py
+  s_12c83c551f0749::t_982f613ac430e8 1-290,292-295,297-315,317-324,326-332,336-382,384-536
+src/deps/deps.json
+  s_12c83c551f0749::t_e737c7f4f90daa 13,15,20,22,48,50,81,83,125,142,144,159,204,206
+src/deps/install.sh
+  s_12c83c551f0749::t_640f634b94151c 226
+src/deps/misc/mlcache-ipc-event-ttl.patch
+  s_12c83c551f0749::t_66961601ae521e 1-116
+src/deps/misc/mlcache-l1-flush-on-ipc-loss.patch
+  s_12c83c551f0749::t_8b7727941071bb 1-15
+src/deps/requirements-deps.in
+  s_12c83c551f0749::t_9cfc1914e661e4 1-2
+src/deps/requirements-deps.txt
+  s_12c83c551f0749::t_2e431eaa17be56 5,11-13,203-205,213-215,333-362,370-372
+src/deps/requirements.in
+  s_12c83c551f0749::t_a6ec8c9091ce8d 1-2
+src/deps/requirements.txt
+  s_12c83c551f0749::t_25cf7393d7d63b 5,15-17,25-27,53-55
+src/deps/src/brotli/CHANGELOG.md
+  s_12c83c551f0749::t_abeb982b13cdc5 10-14
+src/deps/src/brotli/c/common/version.h
+  s_12c83c551f0749::t_0fc1bafcbe47c1 22,36
+src/deps/src/brotli/c/dec/decode.c
+  s_12c83c551f0749::t_b2f547358ef4c3 1179,1190,1200-1202,1206,1222,1259,1261-1263,1266,1269-1271,1274,1281,1283-1285,1288,1291-1293,1296-1297,1303,1305-1307,1312,1315-1317,1320,1951-1953,1966-1981,2021,2166,2360,2582-2583
+src/deps/src/brotli/c/include/brotli/decode.h
+  s_12c83c551f0749::t_cacb308f01c557 88
+src/deps/src/headers-more-nginx-module/src/ngx_http_headers_more_filter_module.c
+  s_12c83c551f0749::t_dc1a211206b9a1 119,129,136-137
+src/deps/src/headers-more-nginx-module/src/ngx_http_headers_more_headers_in.c
+  s_12c83c551f0749::t_c0c274c0f272dc 492,507,512-513,515-523
+src/deps/src/headers-more-nginx-module/src/ngx_http_headers_more_headers_out.c
+  s_12c83c551f0749::t_2ae81730a1392b 111,143-147,589
+src/deps/src/headers-more-nginx-module/src/ngx_http_headers_more_headers_out.h
+  s_12c83c551f0749::t_5520aaf2708870 17
+src/deps/src/headers-more-nginx-module/util/build.sh
+  s_12c83c551f0749::t_2c6c0ae0cfc31c 10-15,19-21
+src/deps/src/lua-cjson/README.md
+  s_12c83c551f0749::t_fe038cccf07d7b 20,232-242
+src/deps/src/lua-cjson/lua_cjson.c
+  s_12c83c551f0749::t_ce7fa00a355816 97,162-203,218-221,232,557-577,585-586,629,700-701,714,716,725-738,873-874,877-878,888,893,922-1023,1029-1035,1043-1075,1077-1080,1082-1085,1088-1092,1094-1123,1125,1127-1165,1167-1169,1192,1297-1305,1314-1319,2012
+src/deps/src/lua-cjson/runtests.sh
+  s_12c83c551f0749::t_28c12d18b7b08a 62-65,71-74
+src/deps/src/lua-cjson/tests/test.lua
+  s_12c83c551f0749::t_9ef511b546d684 400-494
+src/deps/src/lua-resty-dns/lib/resty/dns/resolver.lua
+  s_12c83c551f0749::t_c298c1753e26f9 61,288-291,305-308,379-382,415-417,419-421,423-427,441,492,523,539,557-560,563,583,599,616,623,627-630
+src/deps/src/lua-resty-mlcache/lib/resty/mlcache.lua
+  s_12c83c551f0749::t_e9ac03a6f705f1 365-371
+src/deps/src/lua-resty-mlcache/lib/resty/mlcache/ipc.lua
+  s_12c83c551f0749::t_e8a74f00fefa5f 9-11,27,30-31,110-115,121,181-183,192-202,223-226,254-257,269,300-306
+src/deps/src/lua-resty-redis/README.markdown
+  s_12c83c551f0749::t_ea26734113103e 25,34,101-103,191-200,267-285,334-335,409-421,570-580,636-637,714-731
+src/deps/src/lua-resty-redis/lib/resty/redis.lua
+  s_12c83c551f0749::t_da6f173e6ad9cd 6-7,32-33,36,44,70-71,101,187-234,236,242-243,262-302,317-320,443-451,476,754-818,821,827,839-841,861-864
+src/deps/src/luajit/doc/extensions.html
+  s_12c83c551f0749::t_4eb3fa863b526c 429-430
+src/deps/src/luajit/src/lib_os.c
+  s_12c83c551f0749::t_0cc4eca4923946 79
+src/deps/src/luajit/src/lj_ccallback.c
+  s_12c83c551f0749::t_a5bc33787eecfd 126,132
+src/deps/src/luajit/src/lj_errmsg.h
+  s_12c83c551f0749::t_b7ee5b7acb2fd4 152
+src/deps/src/luajit/src/lj_lex.c
+  s_12c83c551f0749::t_2c7af6a2999a4f 192,292-342,370-373,453-456,458,511-524
+src/deps/src/luajit/src/lj_lex.h
+  s_12c83c551f0749::t_057a819c285aac 77
+src/deps/src/luajit/src/lj_mcode.c
+  s_12c83c551f0749::t_8234c1acd1cd99 300-302,304,329-336
+src/deps/src/luajit/src/lj_opt_fold.c
+  s_12c83c551f0749::t_8c2b4848a7067f 2371-2382
+src/deps/src/luajit/src/lj_opt_mem.c
+  s_12c83c551f0749::t_c11d97dc8965c3 404,408-413
+src/deps/src/luajit/src/lj_parse.c
+  s_12c83c551f0749::t_aca39ed99e4825 147-148,155,205,208,433-438,455,1569,1578,1580,1707,1711,1996,2007-2012,2127,2654,2873,2951,3111,3117,3128-3129
+src/deps/src/luajit/src/vm_ppc.dasc
+  s_12c83c551f0749::t_69aeab684e4f8c 3429-3449,3513,3517-3522,3524,3528-3551,3609,3615-3625,3633
+src/linux/Dockerfile-debian-bookworm
+  s_12c83c551f0749::t_f5ecb8691265e3 1,152
+src/linux/Dockerfile-debian-trixie
+  s_12c83c551f0749::t_b31f1a1a62c0fe 1,147
+src/linux/Dockerfile-fedora-43
+  s_12c83c551f0749::t_e0dff16ef58a26 5,11
+src/linux/Dockerfile-fedora-44
+  s_12c83c551f0749::t_ed92ce49e553bc 5,11
+src/linux/Dockerfile-rhel-10
+  s_12c83c551f0749::t_7e5a74e3858a1c 1,151
+src/linux/Dockerfile-rhel-8
+  s_12c83c551f0749::t_bbdff4aa95b6e5 1,148
+src/linux/Dockerfile-rhel-9
+  s_12c83c551f0749::t_6a98a58d8d8fdc 1,149
+src/linux/Dockerfile-ubuntu
+  s_12c83c551f0749::t_88f9c74edcc14c 1,146
+src/linux/Dockerfile-ubuntu-jammy
+  s_12c83c551f0749::t_2c62b5bed813e9 1,151
+src/linux/Dockerfile-ubuntu-noble
+  s_12c83c551f0749::t_8201966ce29924 1,151
+src/linux/fpm-fedora-43
+  s_12c83c551f0749::t_5f2d555d7037a3 6
+src/linux/fpm-fedora-44
+  s_12c83c551f0749::t_5385b551af247b 6
+src/linux/scripts/bunkerweb-scheduler.sh
+  s_12c83c551f0749::t_8cedbd6fbbf6ed 215,225,229
+src/linux/scripts/start.sh
+  s_12c83c551f0749::t_dc5e929c1b015a 60-90,235,250-260,262
+src/scheduler/Dockerfile
+  s_12c83c551f0749::t_a9322665c852c5 1,48,54,59-60,89
+src/scheduler/JobScheduler.py
+  s_12c83c551f0749::t_adb76456b77888 33,85,268,508-510
+src/scheduler/entrypoint.sh
+  s_12c83c551f0749::t_0132ea9be4b0fb 117,127,131
+src/scheduler/main.py
+  s_12c83c551f0749::t_319e2fc23b9f18 64,152-153,1627-1633,1637-1638,1649,1656,1689-1699,1707,1833
+src/scheduler/requirements.in
+  s_12c83c551f0749::t_2185086ac715b5 39
+src/scheduler/requirements.txt
+  s_12c83c551f0749::t_67887e6e78679d 5,47-49,51-53,210-212,619-621,623-625,643-645,678-680,694-696,846-848,1147-1149,1212-1214,1216-1266
+src/ui/Dockerfile
+  s_12c83c551f0749::t_47dabde1cd9ea5 1,50,71,83,88,110
+src/ui/app/models/instance.py
+  s_12c83c551f0749::t_6719f95dbc1720 19,153-157,704,743-782,1367-1369
+src/ui/app/routes/global_settings.py
+  s_12c83c551f0749::t_ac24df97e1de47 166-167
+src/ui/app/routes/reports.py
+  s_12c83c551f0749::t_191c0b050b1bbc 209-216,233
+src/ui/app/routes/services.py
+  s_12c83c551f0749::t_076f296de0c315 627-628
+src/ui/app/routes/support.py
+  s_12c83c551f0749::t_5ac88a8230ec0f 11-20,23,29,33,71
+src/ui/app/static/js/dataTableInit.js
+  s_12c83c551f0749::t_feca3651c8efc5 455-468,471-477,479-481,592-594
+src/ui/app/static/js/pages/logs.js
+  s_12c83c551f0749::t_d563efd46c303c 408-449
+src/ui/app/static/js/pages/reports.js
+  s_12c83c551f0749::t_24012e8356521d 1082-1085,1087,1501,1514-1517,1545-1546,1615-1621,1625-1631,1700,1708-1714
+src/ui/app/static/js/plugins-settings.js
+  s_12c83c551f0749::t_e7874a90390393 430-437,1384-1428,2290-2296
+src/ui/app/static/libs/purify/purify.min.js
+  s_12c83c551f0749::t_89f3716f51d9c0 1-6
+src/ui/app/static/locales/ar.json
+  s_12c83c551f0749::t_1bf241c458b33d 88,971-972,1038,1226-1228,1701
+src/ui/app/static/locales/bn.json
+  s_12c83c551f0749::t_a86a815ce11759 88,971-972,1038,1226-1228,1701
+src/ui/app/static/locales/br.json
+  s_12c83c551f0749::t_2ddb0c83df8e8f 88,971-972,1038,1226-1228,1701
+src/ui/app/static/locales/de.json
+  s_12c83c551f0749::t_d2337d99922a10 88,971-972,1038,1226-1228,1701
+src/ui/app/static/locales/en.json
+  s_12c83c551f0749::t_7b4453b15530bf 88,971-972,1038,1226-1228,1701
+src/ui/app/static/locales/es.json
+  s_12c83c551f0749::t_28a1ed187ef2f9 88,971-972,1038,1226-1228,1701
+src/ui/app/static/locales/fr.json
+  s_12c83c551f0749::t_6b6a50df37bfe5 88,971-972,1038,1226-1228,1701
+src/ui/app/static/locales/hi.json
+  s_12c83c551f0749::t_f0edadf02adcf8 88,971-972,1038,1226-1228,1701
+src/ui/app/static/locales/id.json
+  s_12c83c551f0749::t_2dcf71db3ba560 88,971-972,1038,1226-1228,1701
+src/ui/app/static/locales/it.json
+  s_12c83c551f0749::t_0a2736199658bc 88,971-972,1038,1226-1228,1701
+src/ui/app/static/locales/ko.json
+  s_12c83c551f0749::t_3b2e9b834fb46b 88,971-972,1038,1226-1228,1701
+src/ui/app/static/locales/pl.json
+  s_12c83c551f0749::t_6b10921397c735 88,971-972,1038,1226-1228,1701
+src/ui/app/static/locales/pt.json
+  s_12c83c551f0749::t_9e30b10845843f 88,971-972,1038,1226-1228,1701
+src/ui/app/static/locales/ru.json
+  s_12c83c551f0749::t_ff069e869f8510 88,971-972,1038,1226-1228,1701
+src/ui/app/static/locales/tl.json
+  s_12c83c551f0749::t_a6a9f810c40241 88,971-972,1038,1226-1228,1701
+src/ui/app/static/locales/tr.json
+  s_12c83c551f0749::t_dccc76e5830b21 88,971-972,1038,1226-1228,1701
+src/ui/app/static/locales/tw.json
+  s_12c83c551f0749::t_202e8332ee0f21 88,971-972,1038,1226-1228,1701
+src/ui/app/static/locales/ur.json
+  s_12c83c551f0749::t_19f95f255b5491 88,971-972,1038,1226-1228,1701
+src/ui/app/static/locales/zh.json
+  s_12c83c551f0749::t_83fdebdd1b071f 88,971-972,1038,1226-1228,1701
+src/ui/app/support_bundle.py
+  s_12c83c551f0749::t_c5215bb2ce7434 3,7-8,10-25,157
+src/ui/app/templates/global_settings.html
+  s_12c83c551f0749::t_984a0f6c56dc03 21-63
+src/ui/app/templates/models/plugins_settings.html
+  s_12c83c551f0749::t_c199a30bd053b5 54-57,97-100
+src/ui/app/utils.py
+  s_12c83c551f0749::t_989e8ba1a04a18 133
+src/ui/main.py
+  s_12c83c551f0749::t_0fbebab5c7d0b5 92,1393-1398,1401-1402,1545
+src/ui/requirements.in
+  s_12c83c551f0749::t_0110f233352f21 1,4,13,15
+src/ui/requirements.txt
+  s_12c83c551f0749::t_ae706b975dc8a5 5,104-106,179-322,334-336,766-768,1019-1102,1127-1129
+tests/linux/Dockerfile-debian-bookworm
+  s_12c83c551f0749::t_0ae2a8cad369a4 1
+tests/linux/Dockerfile-debian-trixie
+  s_12c83c551f0749::t_b7518097e98de3 1
+tests/linux/Dockerfile-fedora-43
+  s_12c83c551f0749::t_887ae6205e1ae3 4
+tests/linux/Dockerfile-fedora-44
+  s_12c83c551f0749::t_f5321d5bd6fc9a 4
+tests/linux/Dockerfile-rhel-10
+  s_12c83c551f0749::t_58756d6cccd043 1
+tests/linux/Dockerfile-rhel-8
+  s_12c83c551f0749::t_c29c0b37093b07 1
+tests/linux/Dockerfile-rhel-9
+  s_12c83c551f0749::t_7861a43e1bce40 1
+tests/linux/Dockerfile-ubuntu
+  s_12c83c551f0749::t_d53f36ffbc3a7c 1
+tests/linux/Dockerfile-ubuntu-jammy
+  s_12c83c551f0749::t_8177e9e96f0eb2 1
+tests/linux/Dockerfile-ubuntu-noble
+  s_12c83c551f0749::t_d91bf9672e2e7d 1
+tests/terraform/k8s.tf
+  s_12c83c551f0749::t_f732b44688c027 7-15,19,27,37-38,55,62
+tests/terraform/templates/lb.yml.tftpl
+  s_12c83c551f0749::t_5d3799ea20acc2 7-9
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "d5af36c9c238d875c4c4d364e9f1840b827986a2",
+  "prompts": {},
+  "sessions": {
+    "s_12c83c551f0749": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "28457611-9edd-4ea8-829c-731fdff4b72d",
+        "model": "unknown"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

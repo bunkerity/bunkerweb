@@ -1,0 +1,37 @@
+docs/fr/advanced.md
+  s_72134a4efbb495::t_db72f41c48b249 3264,3266-3394
+docs/de/advanced.md
+  s_72134a4efbb495::t_db72f41c48b249 3265,3267-3395
+docs/es/advanced.md
+  s_72134a4efbb495::t_db72f41c48b249 3265,3267-3395
+docs/advanced.md
+  s_72134a4efbb495::t_db72f41c48b249 3266,3268-3396
+docs/zh/advanced.md
+  s_72134a4efbb495::t_11b800b616e8cc 3262,3264-3392
+CHANGELOG.md
+  s_1b70f33988bd46::t_15293a39be04f5 29
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "27334d64638586eec8ca94f9a002f3ed6b22b97d",
+  "prompts": {},
+  "sessions": {
+    "s_1b70f33988bd46": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "12c22024-0497-4dc5-8d2f-379645fdb9d5",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_72134a4efbb495": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "d89819c2-e674-4f7e-95eb-6e4841b46958",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

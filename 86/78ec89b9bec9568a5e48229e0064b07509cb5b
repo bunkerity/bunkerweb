@@ -1,0 +1,31 @@
+tests/unit/letsencrypt/test_certbot_hooks_api_reply.py
+  s_18e1cfb5402ed1::t_f7a5cf0ccdd06f 1-64
+src/common/core/letsencrypt/jobs/certbot-cleanup.py
+  s_0d857e428365be::t_86316d3273636f 24-29,45
+src/common/core/letsencrypt/jobs/certbot-auth.py
+  s_0d857e428365be::t_86316d3273636f 24-29,47
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "8678ec89b9bec9568a5e48229e0064b07509cb5b",
+  "prompts": {},
+  "sessions": {
+    "s_0d857e428365be": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "be1fa2ec-acc5-4554-a1b8-815f7c3b4965",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_18e1cfb5402ed1": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "087a9dfe-326f-41fb-b619-845867a497da",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

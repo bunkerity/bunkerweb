@@ -1,0 +1,29 @@
+src/ui/app/static/js/pages/logs.js
+  s_a7eb133c59f9b4::t_dc1097bb681529 408-449
+CHANGELOG.md
+  s_a72b07b4a46bb1::t_0cac9ec2fdf4dc 22
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "30d84642743dfcd03e863050e350e24515c8c376",
+  "prompts": {},
+  "sessions": {
+    "s_a72b07b4a46bb1": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a167af-cfff-7591-8390-0d4952f39ca3",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_a7eb133c59f9b4": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "160a5fd8-dbc5-4bb4-af80-b1a79858155a",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

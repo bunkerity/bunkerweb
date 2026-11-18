@@ -1,0 +1,126 @@
+tests/linux/Dockerfile-alma-10
+  s_684ceb33d6804a::t_5469ad5d10e17d 3
+tests/linux/Dockerfile-ubuntu-noble
+  s_684ceb33d6804a::t_5469ad5d10e17d 7
+src/linux/fpm-debian-trixie
+  s_684ceb33d6804a::t_bf026c5a93e087 6
+src/linux/Dockerfile-debian-trixie
+  s_684ceb33d6804a::t_5469ad5d10e17d 10
+tests/linux/Dockerfile-debian-bookworm
+  s_684ceb33d6804a::t_5469ad5d10e17d 7
+tests/linux/Dockerfile-debian-trixie
+  s_684ceb33d6804a::t_5469ad5d10e17d 7
+docs/es/integrations.md
+  s_684ceb33d6804a::t_a194f0c79fb13a 2470,2485,2489,2533,2537,2577,2580,2627,2630
+src/linux/fpm-rhel-9
+  s_684ceb33d6804a::t_bf026c5a93e087 6
+src/linux/Dockerfile-fedora-43
+  s_684ceb33d6804a::t_5469ad5d10e17d 5
+src/linux/fpm-ubuntu
+  s_684ceb33d6804a::t_bf026c5a93e087 6
+src/deps/src/nginx/src/core/nginx.h
+  s_795e2ccdb6801b::t_01b6873e074aef 12-13
+src/linux/Dockerfile-debian-bookworm
+  s_684ceb33d6804a::t_5469ad5d10e17d 15
+src/linux/Dockerfile-rhel-9
+  s_684ceb33d6804a::t_5469ad5d10e17d 4
+src/linux/fpm-fedora-43
+  s_684ceb33d6804a::t_bf026c5a93e087 6
+tests/linux/Dockerfile-fedora-43
+  s_684ceb33d6804a::t_5469ad5d10e17d 4
+tests/linux/Dockerfile-fedora-44
+  s_684ceb33d6804a::t_5469ad5d10e17d 4
+tests/linux/Dockerfile-ubuntu
+  s_684ceb33d6804a::t_5469ad5d10e17d 7
+src/linux/Dockerfile-rhel-8
+  s_684ceb33d6804a::t_5469ad5d10e17d 4
+tests/linux/Dockerfile-ubuntu-jammy
+  s_684ceb33d6804a::t_5469ad5d10e17d 7
+src/all-in-one/Dockerfile
+  s_684ceb33d6804a::t_6e97e122f8ef84 1,7,189,220
+src/linux/Dockerfile-ubuntu-noble
+  s_684ceb33d6804a::t_5469ad5d10e17d 14
+CHANGELOG.md
+  s_795e2ccdb6801b::t_101f8dd87bf029 5
+tests/linux/Dockerfile-rhel-10
+  s_684ceb33d6804a::t_5469ad5d10e17d 3
+src/linux/fpm-debian-bookworm
+  s_684ceb33d6804a::t_bf026c5a93e087 6
+src/linux/fpm-ubuntu-noble
+  s_684ceb33d6804a::t_bf026c5a93e087 6
+src/linux/fpm-rhel-8
+  s_684ceb33d6804a::t_bf026c5a93e087 6
+docs/de/integrations.md
+  s_684ceb33d6804a::t_a194f0c79fb13a 2586,2601,2605,2649,2653,2693,2696,2743,2746
+docs/fr/integrations.md
+  s_684ceb33d6804a::t_a194f0c79fb13a 2528,2543,2547,2591,2595,2635,2638,2685,2688
+src/deps/src/nginx/src/http/modules/ngx_http_ssl_module.c
+  s_795e2ccdb6801b::t_01b6873e074aef 1379-1381,1426-1444,1456,1460,1463-1465,1538,1541-1544
+src/linux/fpm-ubuntu-jammy
+  s_684ceb33d6804a::t_bf026c5a93e087 6
+docs/integrations.md
+  s_684ceb33d6804a::t_a701103ecf22a2 2579,2594,2598,2642,2646,2686,2689,2736,2739
+src/linux/fpm-fedora-44
+  s_684ceb33d6804a::t_bf026c5a93e087 6
+src/deps/src/nginx/misc/GNUmakefile
+  s_795e2ccdb6801b::t_01b6873e074aef 9,11
+src/linux/Dockerfile-ubuntu
+  s_684ceb33d6804a::t_5469ad5d10e17d 9
+src/deps/src/nginx/src/event/quic/ngx_event_quic_openssl_compat.h
+  s_795e2ccdb6801b::t_01b6873e074aef 41-42
+src/linux/Dockerfile-rhel-10
+  s_684ceb33d6804a::t_5469ad5d10e17d 5
+src/bw/Dockerfile
+  s_684ceb33d6804a::t_6e97e122f8ef84 1,4,100
+  s_684ceb33d6804a::t_9495606e01cfed 114
+tests/linux/Dockerfile-rhel-8
+  s_684ceb33d6804a::t_5469ad5d10e17d 3
+src/common/utils/ports.py
+  s_795e2ccdb6801b::t_101f8dd87bf029 9
+src/linux/fpm-rhel-10
+  s_684ceb33d6804a::t_bf026c5a93e087 6
+misc/install-bunkerweb.sh
+  s_795e2ccdb6801b::t_101f8dd87bf029 138
+  s_684ceb33d6804a::t_6e97e122f8ef84 116
+  s_795e2ccdb6801b::t_ecddf05b01067d 133
+tests/unit/linux/test_install_bunkerweb.py
+  s_795e2ccdb6801b::t_101f8dd87bf029 18-22
+src/bw/AGENTS.md
+  s_795e2ccdb6801b::t_101f8dd87bf029 12
+docs/zh/integrations.md
+  s_684ceb33d6804a::t_a194f0c79fb13a 2514,2529,2533,2577,2581,2621,2624,2671,2674
+src/linux/Dockerfile-fedora-44
+  s_684ceb33d6804a::t_5469ad5d10e17d 5
+tests/linux/Dockerfile-rhel-9
+  s_684ceb33d6804a::t_5469ad5d10e17d 3
+src/deps/deps.json
+  s_684ceb33d6804a::t_6e97e122f8ef84 253,255
+src/deps/src/nginx/src/event/quic/ngx_event_quic_openssl_compat.c
+  s_795e2ccdb6801b::t_01b6873e074aef 73-74,77-78,80-82,349
+src/linux/Dockerfile-ubuntu-jammy
+  s_684ceb33d6804a::t_5469ad5d10e17d 14
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "8de9c88080db13ad4503acce9fd69c545d5df4bd",
+  "prompts": {},
+  "sessions": {
+    "s_684ceb33d6804a": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0c431-5854-7590-81f2-d808140ab1a0",
+        "model": "gpt-5.6-terra"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_795e2ccdb6801b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "71804b16-900c-4824-8bbc-5e7434803315",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

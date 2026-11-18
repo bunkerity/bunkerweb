@@ -1,0 +1,142 @@
+tests/unit/autoconf/test_ingress_stream_host_port.py
+  s_5daa137f33b738::t_1dc49b56751cc7 1-36
+tests/unit/autoconf/test_kubernetes_watch_health.py
+  s_bac151182f49d9::t_dc62c72879e9b4 30,47,192
+tests/unit/autoconf/_port_helpers.py
+  s_bac151182f49d9::t_0dcffbbd48a7c4 1-24,28-72
+  s_38c3dac08701a7::t_9de129f837049b 25-27
+tests/unit/gen/test_stream_upstream_resolve.py
+  s_8ea0b591e9a806::t_4c7a4344f60dd4 12,15,17
+  s_8ea0b591e9a806::t_de05b3746d1822 1-6,9-11,13-14,16,18-42,44-47,50,52-53,56,70,74-75,78-79
+  s_8ea0b591e9a806::t_cf2f0af6611d9d 7-8,43,48-49,51,76-77,80-83
+  s_8ea0b591e9a806::t_d2b0d524f8d158 54-55,57-69,71-73
+tests/unit/autoconf/test_gateway_status_conditions.py
+  s_14f68f321a8060::t_c314288d123f56 31-32
+  s_e8308ee8758758::t_8e93d2d327a48d 94,99-163
+  s_14f68f321a8060::t_703e12d9b5db95 1-30,33-93,95-98
+tests/unit/autoconf/test_ipv6_pod_dns.py
+  s_bac151182f49d9::t_7957f582c00e02 1-29
+src/autoconf/controllers/IngressController.py
+  s_bac151182f49d9::t_16ef23a4bee7bd 10,16
+  s_5daa137f33b738::t_46140675a6b310 188-191
+  s_bac151182f49d9::t_e1986bba8869fc 134,138-142
+  s_14f68f321a8060::t_06383538f3f3e2 181-182,184,187,192-194,205
+  s_bac151182f49d9::t_7b3f8371b31a6c 43,58,123,218,287-289
+src/autoconf/controllers/GatewayController.py
+  s_e8308ee8758758::t_ef995c6a039897 238-239,242-244
+  s_5daa137f33b738::t_037d34fb2f00f6 941-942
+  s_bac151182f49d9::t_16ef23a4bee7bd 13,285
+  s_bac151182f49d9::t_7b3f8371b31a6c 346,375-377,404,610,1149
+  s_5daa137f33b738::t_2693a3990ff1e3 981-982
+  s_e8308ee8758758::t_2f9c2e385f98b4 168-169
+  s_14f68f321a8060::t_06383538f3f3e2 1020-1021,1023,1026,1033-1035,1047,1271,1273-1274,1277-1288,1292-1300,1310,1327
+  s_bac151182f49d9::t_9d89fe481e477a 3,6,8,16-63,65-89,104-115,117-158,164-166,170-180,192-194,215-224,232-235,240-241,245-264,266-273,275-277,1177-1244,1260-1261,1264,1270,1272,1301-1302,1307-1309,1311-1326,1328-1357
+  s_e8308ee8758758::t_e5da1d4bb25edf 274
+  s_5daa137f33b738::t_7518f5ef4bea33 848-849
+  s_e8308ee8758758::t_419d5d98dacb67 265
+  s_5daa137f33b738::t_16b56ebc6a7103 1030-1032
+  s_e8308ee8758758::t_97d937ad8a69f0 195-214
+  s_e8308ee8758758::t_82cb74b1014c1e 1289-1291
+  s_bac151182f49d9::t_68eba75997e20b 64,1245-1259,1262-1263,1265-1269,1303-1306
+  s_bac151182f49d9::t_285f3c508a9fc8 281-282,287-293,313-315,341,495,1065,1102,1111-1112,1136-1140,1172-1176
+  s_e8308ee8758758::t_c69a19abe6e6de 1275-1276
+  s_14f68f321a8060::t_171d7f9f181151 90-103,116,159-163,167,181-191,225-231,236-237
+tests/unit/autoconf/test_stream_derived_host.py
+  s_14f68f321a8060::t_250c8f5a16e8b1 1-97
+src/common/core/reverseproxy/confs/stream/upstreams.conf
+  s_8ea0b591e9a806::t_b6120498e0e681 20-22,29
+tests/unit/autoconf/test_quiet_watch_reconnect.py
+  s_bac151182f49d9::t_32038cf1073770 1-71
+tests/unit/autoconf/test_deferred_apply_retry.py
+  s_bac151182f49d9::t_7957f582c00e02 1-47
+tests/unit/autoconf/test_ingress_missing_ports.py
+  s_bac151182f49d9::t_7957f582c00e02 1-27
+src/autoconf/main.py
+  s_bac151182f49d9::t_16ef23a4bee7bd 104-107
+src/autoconf/controllers/KubernetesController.py
+  s_bac151182f49d9::t_38b9e017775579 376,454,905,1008,1020
+  s_bac151182f49d9::t_16ef23a4bee7bd 9,19,30-53,60,80-81,93-95
+  s_bac151182f49d9::t_285f3c508a9fc8 57-58,549-551,553-555,787,978,1125-1127,1129-1135,1138
+  s_bac151182f49d9::t_dc62c72879e9b4 27-28,681,688-696,698,700,716-717
+  s_bac151182f49d9::t_e1986bba8869fc 61,409-411,944,950-957,981,984-985
+  s_f3addd857c7bc7::t_5a124663d6404c 29
+tests/unit/autoconf/test_lb_address_call_sites.py
+  s_bac151182f49d9::t_dc62c72879e9b4 36,53,79
+tests/unit/autoconf/test_kubernetes_api_timeouts.py
+  s_bac151182f49d9::t_0dcffbbd48a7c4 1-99
+tests/unit/autoconf/test_gateway_status.py
+  s_bac151182f49d9::t_73cc75c5d51a8b 4,196,199,213,218-245
+  s_bac151182f49d9::t_7daf4e84224312 1-3,5-195,197-198,200-212,214-217
+tests/unit/autoconf/test_class_isolation.py
+  s_bac151182f49d9::t_dc62c72879e9b4 17,52,92
+  s_bac151182f49d9::t_e1986bba8869fc 97,99-101,104,108
+tests/unit/autoconf/test_gateway_stream_backend_port.py
+  s_5daa137f33b738::t_1dc49b56751cc7 68-87
+  s_14f68f321a8060::t_34878fdeec5799 56
+  s_5daa137f33b738::t_56b7ded64975fb 1-37,39-55,57-67
+  s_5daa137f33b738::t_9603e0e1c74eb3 38
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "7bca2b4c07cbcfc9c751c32d1aeba98e3c530440",
+  "prompts": {},
+  "sessions": {
+    "s_14f68f321a8060": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "e7bb9676-225e-4d71-aa5a-2a621a7275fa",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_38c3dac08701a7": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "9fd71762-abca-46fd-9ae1-d09650ec932b",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_5daa137f33b738": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "e21f1feb-4690-44aa-b99d-d9edb52a6eac",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_8ea0b591e9a806": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "4c26001d-e7c4-480d-ac03-d908a1d42663",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_bac151182f49d9": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1ac7b-b1fa-7f11-b240-82ee85373c30",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_e8308ee8758758": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "0b11ce41-68e5-40b3-a5c0-c45df358bc7c",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_f3addd857c7bc7": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "09b38094-84cf-4ad2-88e3-b788bbb37519",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

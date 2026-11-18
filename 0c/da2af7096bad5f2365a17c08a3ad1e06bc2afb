@@ -1,0 +1,43 @@
+docs/assets/extra.css
+  s_b45ffb073ddbad::t_d0651dbe4e9202 1-5,99-110,136-140,143,153-155,160-220,327-331,370-379,490-496,625-633,854-860
+docs/assets/extra.js
+  s_b45ffb073ddbad::t_cd7a5047892609 1-9,415-433,438-439,614-656
+docs/assets/preserve-version-on-language-switch.js
+  s_b45ffb073ddbad::t_edaebb0816b3be 140-143
+docs/de/quickstart-guide.md
+  s_b45ffb073ddbad::t_b8272c6d921efe 84
+docs/es/quickstart-guide.md
+  s_b45ffb073ddbad::t_99efbb3dcb33a1 84
+docs/fr/plugins.md
+  s_b45ffb073ddbad::t_18d7811dd1051a 483
+docs/fr/quickstart-guide.md
+  s_b45ffb073ddbad::t_a77c5c3465b6ba 84
+docs/hooks/hreflang.py
+  s_b45ffb073ddbad::t_7fea123d08c0fe 1-27
+docs/hooks/imgsize.py
+  s_b45ffb073ddbad::t_f11515e8b3eb6b 1-127
+docs/overrides/main.html
+  s_b45ffb073ddbad::t_7c8ed2cd375468 4-6,17,36,55,74,93,116-119,121,142-145,147,154-158,161,163-165,169-170,174,178,181,183-189,191-210,212-216
+docs/quickstart-guide.md
+  s_b45ffb073ddbad::t_c964a6f307d70b 84
+docs/zh/quickstart-guide.md
+  s_b45ffb073ddbad::t_c21d2bf68bbabf 84
+mkdocs.yml
+  s_b45ffb073ddbad::t_5647d6a5ec45c0 191-192
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "0cda2af7096bad5f2365a17c08a3ad1e06bc2afb",
+  "prompts": {},
+  "sessions": {
+    "s_b45ffb073ddbad": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "f4265c2d-353f-4f48-9041-f31c4907417b",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

@@ -1,0 +1,16 @@
+CHANGELOG.md
+  h_a33a1e80933106 3
+publiccode.yml
+  h_a33a1e80933106 5
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "47f998829871422b013d6bcb621071350139438b",
+  "prompts": {},
+  "humans": {
+    "h_a33a1e80933106": {
+      "author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

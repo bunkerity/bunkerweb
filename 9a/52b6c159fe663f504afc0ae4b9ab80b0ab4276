@@ -1,0 +1,37 @@
+CHANGELOG.md
+  s_a199269d9dd323::t_38581926ae9aa5 5
+docs/advanced.md
+  s_a199269d9dd323::t_b4ce85a2eb62bf 1653-1656
+docs/de/advanced.md
+  s_a199269d9dd323::t_94e8b0fefb34c5 1652-1655
+docs/es/advanced.md
+  s_a199269d9dd323::t_6ac28ccaca6ed0 1652-1655
+docs/fr/advanced.md
+  s_a199269d9dd323::t_1e5bfb0f8dfaf5 1651-1654
+docs/zh/advanced.md
+  s_a199269d9dd323::t_7ca08b6fe6d72b 1650-1653
+src/common/cli/CLI.py
+  s_a199269d9dd323::t_912bdf66eb05c2 707,712-713,718-719,721-722,736-737,742-744
+src/common/cli/main.py
+  s_a199269d9dd323::t_e5f24d4ca3a356 6,19,62,82,104,114-117,131-134
+tests/unit/cli/test_ban_reporting.py
+  s_a199269d9dd323::t_a3f876b5083707 3,101-123
+tests/unit/cli/test_main_command_dispatch.py
+  s_a199269d9dd323::t_f4189a60f19077 4,77-129
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "9a52b6c159fe663f504afc0ae4b9ab80b0ab4276",
+  "prompts": {},
+  "sessions": {
+    "s_a199269d9dd323": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b4175093-308c-4691-a6b6-6beeb5d3a65a",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

@@ -1,0 +1,21 @@
+.github/workflows/doc-to-pdf.yml
+  s_2aef6f5737deb7::t_ff1f3198352c40 7-12,42,59
+  s_2aef6f5737deb7::t_8d641eba6c73ac 36,62-63
+  s_2aef6f5737deb7::t_4fc13f6b55b9a1 60-61,64
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "1e5bf701ed55fd1b643e86b81dd23b3b52073b05",
+  "prompts": {},
+  "sessions": {
+    "s_2aef6f5737deb7": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1ab8d-eadb-70a1-b19b-6ebf8931e34b",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

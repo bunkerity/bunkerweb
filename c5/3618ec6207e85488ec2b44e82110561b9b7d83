@@ -1,0 +1,32 @@
+tests/unit/common/test_securitytxt_order_render.py
+  s_3fba2b46119505::t_7538c85181ada3 1-11,13-24,26-32,34-66
+  s_8957b83407cdf6::t_622cd952aac4b9 12,25,33
+src/common/core/securitytxt/securitytxt.lua
+  s_3fba2b46119505::t_4d276d0eebdfa3 108-117
+src/common/core/securitytxt/files/security.txt
+  s_3fba2b46119505::t_4d276d0eebdfa3 11-12,14-20,24-25,27
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "c53618ec6207e85488ec2b44e82110561b9b7d83",
+  "prompts": {},
+  "sessions": {
+    "s_3fba2b46119505": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1b12b-c539-7e02-922b-13cb4bbd7739",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_8957b83407cdf6": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "f0ed5bf7-382f-48ad-b7ad-d9883e810768",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

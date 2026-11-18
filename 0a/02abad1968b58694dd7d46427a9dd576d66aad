@@ -1,0 +1,21 @@
+tests/unit/harness/test_ci_matrix.py
+  s_d9e9d37ba87bde::t_e5fb607bd6c269 91-96
+tests/utils/integrations.yml
+  s_d9e9d37ba87bde::t_a298c1704eeea3 5,50,69
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "0a02abad1968b58694dd7d46427a9dd576d66aad",
+  "prompts": {},
+  "sessions": {
+    "s_d9e9d37ba87bde": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1e4b3-52f5-7ec2-8f67-82a2636252f5",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

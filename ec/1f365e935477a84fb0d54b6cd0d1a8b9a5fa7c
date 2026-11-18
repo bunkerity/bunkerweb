@@ -1,0 +1,31 @@
+src/common/core/cors/README.md
+  s_ff20fc71fc9551::t_8ab8248dccda44 54-55
+src/common/core/cors/cors.lua
+  s_ff20fc71fc9551::t_8ab8248dccda44 114-120
+src/common/core/cors/README.es.md
+  s_ff20fc71fc9551::t_8ab8248dccda44 54-55
+CHANGELOG.md
+  s_ff20fc71fc9551::t_ae0ddb2c079dff 5
+src/common/core/cors/README.fr.md
+  s_ff20fc71fc9551::t_8ab8248dccda44 52-53
+src/common/core/cors/README.zh.md
+  s_ff20fc71fc9551::t_8ab8248dccda44 54-55
+src/common/core/cors/README.de.md
+  s_ff20fc71fc9551::t_8ab8248dccda44 54-55
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "ec1f365e935477a84fb0d54b6cd0d1a8b9a5fa7c",
+  "prompts": {},
+  "sessions": {
+    "s_ff20fc71fc9551": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "162362c5-42b6-46e1-83a0-29f8b51592ba",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}
