@@ -6,6 +6,7 @@
 - [SECURITY] `api`: the internal HTTPS client falls back to HTTP only when the peer does not speak TLS, never after a reset, timeout or certificate error.
 - [SECURITY] `support`: `bwcli support` and the UI redact JSON ModSecurity audit logs and URL credentials in the masked configuration export.
 - [SECURITY] `database`: SQL bound parameters no longer appear in logged persistence errors.
+- [FEATURE] `dnsbl`: `DNSBL_LIST` can be set per service; services without an override keep the global list. (Fixes #4018)
 - [BUGFIX] `ui`: a long login username can no longer stall UI workers; the logged username is bounded and the diagnostics redactor runs in linear time.
 - [BUGFIX] `jobs`: the API server certificate job keeps the previous certificate, so a restarted scheduler or UI still reaches instances that have not reloaded.
 

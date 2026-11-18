@@ -2547,7 +2547,7 @@ DNSBL（域名系统黑名单）插件通过对照外部 DNSBL 服务器检查�
 | 设置         | 默认值                                              | 上下文    | 多个 | 描述                                                                |
 | ------------ | --------------------------------------------------- | --------- | ---- | ------------------------------------------------------------------- |
 | `USE_DNSBL`  | `yes`                                               | multisite | 否   | DNSBL 默认启用；将 `USE_DNSBL` 设置为 `no` 可禁用对传入连接的检查。 |
-| `DNSBL_LIST` | `bl.blocklist.de sbl.spamhaus.org xbl.spamhaus.org` | global    | 否   | DNSBL 服务器：要检查的 DNSBL 服务器域名列表，以空格分隔。           |
+| `DNSBL_LIST` | `bl.blocklist.de sbl.spamhaus.org xbl.spamhaus.org`     | multisite | 否   | DNSBL 服务器：要检查的 DNSBL 服务器域名列表，以空格分隔。 |
 
 **忽略列表**
 

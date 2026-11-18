@@ -2464,7 +2464,7 @@ Suivez ces étapes pour configurer et utiliser la fonctionnalité DNSBL :
 | Paramètre    | Défaut                                              | Contexte  | Multiple | Description                                                                                                                        |
 | ------------ | --------------------------------------------------- | --------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------- |
 | `USE_DNSBL`  | `yes`                                               | multisite | non      | La fonction DNSBL est activée par défaut ; réglez `USE_DNSBL` sur `no` pour désactiver les vérifications des connexions entrantes. |
-| `DNSBL_LIST` | `bl.blocklist.de sbl.spamhaus.org xbl.spamhaus.org` | global    | non      | Serveurs DNSBL : liste des domaines de serveurs DNSBL à vérifier, séparés par des espaces.                                         |
+| `DNSBL_LIST` | `bl.blocklist.de sbl.spamhaus.org xbl.spamhaus.org`     | multisite | non      | Serveurs DNSBL : liste des domaines de serveurs DNSBL à vérifier, séparés par des espaces.         |
 
 **Listes d’exception**
 

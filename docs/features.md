@@ -2551,7 +2551,7 @@ Follow these steps to configure and use the DNSBL feature:
 | Setting      | Default                                             | Context   | Multiple | Description                                                                                      |
 | ------------ | --------------------------------------------------- | --------- | -------- | ------------------------------------------------------------------------------------------------ |
 | `USE_DNSBL`  | `yes`                                               | multisite | no       | DNSBL is enabled by default; set `USE_DNSBL` to `no` to disable checks for incoming connections. |
-| `DNSBL_LIST` | `bl.blocklist.de sbl.spamhaus.org xbl.spamhaus.org` | global    | no       | DNSBL servers: list of DNSBL server domains to check, separated by spaces.                       |
+| `DNSBL_LIST` | `bl.blocklist.de sbl.spamhaus.org xbl.spamhaus.org`     | multisite | no       | DNSBL servers: list of DNSBL server domains to check, separated by spaces.  |
 
 **Ignore Lists**
 
