@@ -26,7 +26,8 @@ LIBRARIES = ("flask", "werkzeug", "flask-login", "flask-session", "flask-wtf", "
 REDACTED = "[REDACTED]"
 _KEYWORDS = r"(?:token|key|secret|password|passwd|session|csrf|cookie|authorization)"
 _KEY = rf"[\w.\-]*{_KEYWORDS}[\w.\-]*"
-_URI_USERINFO = re_compile(r"(?P<scheme>[A-Za-z][A-Za-z0-9+.\-]*://)[^\s/@]+@")
+# Anchored at the start of the scheme run (lookbehind), so a long run of scheme characters is scanned once and not from every position
+_URI_USERINFO = re_compile(r"(?<![A-Za-z0-9+.\-])(?P<scheme>[A-Za-z0-9+.\-]+://)[^\s/@]+@")
 _AUTH_QUOTED = r"\"(?:\\.|[^\"\\\r\n])*\"|'[^'\r\n]*'"
 _AUTH_ITEM = rf"(?:{_AUTH_QUOTED}|[^\s&,\"'])+"
 _AUTH_NAME = rf"(?:{_AUTH_QUOTED}|[^\s&,\"'=])+"

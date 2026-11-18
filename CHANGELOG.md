@@ -4,6 +4,7 @@
 
 - [SECURITY] `ui`: service names, instance hostnames and ban services are inserted as text in the bulk-action modals, fixing a stored XSS.
 - [SECURITY] `api`: the internal HTTPS client falls back to HTTP only when the peer does not speak TLS, never after a reset, timeout or certificate error.
+- [BUGFIX] `ui`: a long login username can no longer stall UI workers; the logged username is bounded and the diagnostics redactor runs in linear time.
 - [BUGFIX] `jobs`: the API server certificate job keeps the previous certificate, so a restarted scheduler or UI still reaches instances that have not reloaded.
 
 ## v1.6.18~rc4 - 2026/11/17

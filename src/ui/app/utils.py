@@ -24,6 +24,8 @@ from logger import DATE_FORMAT, LOG_FORMAT, getLogger  # type: ignore
 
 from app.support_bundle import RING_HANDLER
 
+from support_common import Anonymizer  # type: ignore
+
 TMP_DIR = Path(sep, "var", "tmp", "bunkerweb")
 LIB_DIR = Path(sep, "var", "lib", "bunkerweb")
 
@@ -31,6 +33,22 @@ LOGGER = getLogger("UI")
 RING_HANDLER.setFormatter(Formatter(LOG_FORMAT, DATE_FORMAT))
 if RING_HANDLER not in LOGGER.handlers:
     LOGGER.addHandler(RING_HANDLER)
+
+MAX_LOGGED_USERNAME = 64
+_USERNAME_GUARD = Anonymizer(anonymize=False)
+
+
+def loggable_username(username: str) -> str:
+    """A submitted username that is safe to log: credentials masked first, then cut to MAX_LOGGED_USERNAME characters, control characters escaped.
+
+    The scan is bounded too (a cut never leaves a credential fragment, since the scan reads far more than what is shown), so an attacker-sized
+    username costs a fixed amount of work.
+    """
+    shown = _USERNAME_GUARD.redact(username[: MAX_LOGGED_USERNAME * 16])
+    if len(shown) <= MAX_LOGGED_USERNAME and len(username) <= MAX_LOGGED_USERNAME * 16:
+        return repr(shown)
+    return f"{shown[:MAX_LOGGED_USERNAME]!r} (truncated, {len(username)} characters)"
+
 
 RESERVED_SERVICE_NAMES = frozenset({"unknown", "Web UI", "bwcli", "default server", ""})
 
