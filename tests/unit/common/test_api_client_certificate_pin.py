@@ -9,7 +9,7 @@ hostname check cannot work.
 
 A refused pin returns the failure and sends nothing over plain HTTP: the retry would hand the bearer
 token and the payload to whoever forced the mismatch. A plain connection failure (an instance that
-is not up yet) still retries over HTTP. Every test here handshakes with a real local TLS server, so
+is not up yet) is not retried over HTTP either; only a peer that is not speaking TLS is. Every test here handshakes with a real local TLS server, so
 the pin is checked by urllib3 and not by a mock.
 """
 
@@ -358,8 +358,12 @@ def test_the_pin_holds_with_a_write_timeout_through_a_proxy(server, certs, pin, 
     assert "did not match the pinned API server certificate" in logger.warnings[0]
 
 
-def test_a_connection_failure_with_a_pin_still_retries_over_http(server, certs, pin, logger):
-    """Only a refused pin ends the call: an instance that has no TLS yet is still reached in plain HTTP."""
+def test_a_connection_failure_with_a_pin_is_not_retried_over_http(server, certs, pin, logger):
+    """A reset is not "the peer is not speaking TLS" (S05A-F4): the token and the payload never go out in plain HTTP.
+
+    This used to assert the opposite, the HTTP retry after a reset. The retry now needs a peer that answers the TLS
+    handshake with plaintext, covered in test_api_client_tls_fallback.py.
+    """
     _publish(pin, certs, "a")
     real = server.finish_request
 
@@ -373,6 +377,6 @@ def test_a_connection_failure_with_a_pin_still_retries_over_http(server, certs, 
 
     ok, _, status, _ = _call(server)
 
-    assert (ok, status) == (True, 200)
-    assert server.hits == ["plain"]
-    assert "trying HTTP" in logger.warnings[0]
+    assert (ok, status) == (False, None)
+    assert server.hits == []
+    assert not any("trying HTTP" in w for w in logger.warnings)

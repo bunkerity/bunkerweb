@@ -4,7 +4,7 @@ from contextlib import suppress
 from copy import deepcopy
 from hashlib import sha256
 from pathlib import Path
-from ssl import PEM_cert_to_DER_cert
+from ssl import PEM_cert_to_DER_cert, SSLError as TlsError
 from threading import Lock
 from time import monotonic
 from typing import Callable, Literal, Optional, Union
@@ -92,6 +92,28 @@ _PIN = _CertPin()
 
 def _is_pin_mismatch(exc: BaseException) -> bool:
     return "ingerprint" in str(exc)
+
+
+# What OpenSSL reports when the bytes answering our ClientHello are not TLS at all. The reason depends on the answer and on
+# the version: an HTTP reply is WRONG_VERSION_NUMBER on 1.1.x and 3.0, HTTP_REQUEST on some builds, RECORD_LAYER_FAILURE on
+# 3.5 (which gives the same reason for any other plaintext too), and a reply that starts with a TLS-looking header reads
+# differently again. The message text is matched as well for builds that do not expose `reason`.
+# Not in the list on purpose: UNEXPECTED_EOF_WHILE_READING and a reset (the peer said nothing), certificate or fingerprint
+# errors, and a TLS alert (the peer does speak TLS).
+_NOT_TLS_REASONS = frozenset(
+    {"WRONG_VERSION_NUMBER", "HTTP_REQUEST", "HTTPS_PROXY_REQUEST", "UNKNOWN_PROTOCOL", "RECORD_LAYER_FAILURE", "PACKET_LENGTH_TOO_LONG"}
+)
+_NOT_TLS_TEXT = tuple(reason.replace("_", " ").lower() for reason in _NOT_TLS_REASONS)
+
+
+def _peer_is_not_speaking_tls(exc: Optional[BaseException], depth: int = 6) -> bool:
+    """Whether the handshake failed because what answered is not TLS (urllib3 and requests nest the ssl error in args)."""
+    if exc is None or depth < 0:
+        return False
+    if isinstance(exc, TlsError) and (getattr(exc, "reason", None) in _NOT_TLS_REASONS or any(text in str(exc).lower() for text in _NOT_TLS_TEXT)):
+        return True
+    nested = (exc.__cause__, exc.__context__, getattr(exc, "reason", None), *getattr(exc, "args", ()))
+    return any(isinstance(item, BaseException) and _peer_is_not_speaking_tls(item, depth - 1) for item in nested)
 
 
 class _BodyWriteTimeout(TimeoutError):
@@ -318,7 +340,16 @@ class API:
                     message = f"Certificate of {self.__endpoint} did not match the pinned API server certificate, not sending {url} over HTTP: {e}"
                     self.__logger.warning(message)
                     return False, message, None, None
-                self.__logger.warning(f"SSL connection error when contacting {self.__endpoint}{url}, trying HTTP: {e}")
+                # Only a peer that is not speaking TLS gets the plain HTTP retry: an instance that has no
+                # certificate yet serves plain HTTP on this port (confs/api.conf). A reset, a refused or
+                # dropped connection, a timeout and a certificate error never do, or whoever caused them would
+                # receive the bearer token and the payload in cleartext. The criterion is "the peer is not
+                # speaking TLS", not "the peer is BunkerWeb": nothing here proves who answered, and an active
+                # on-path attacker who answers the handshake with plaintext still gets the retry. That is the
+                # accepted limit until the strict mode (no fallback) planned for 1.6.19.
+                if not _peer_is_not_speaking_tls(e):
+                    return False, f"Connection error: {e}", None, None
+                self.__logger.warning(f"{self.__endpoint}{url} answered the TLS handshake without speaking TLS, trying HTTP: {e}")
                 # replace(..., 1) strips the scheme prefix. lstrip takes a character set, so it
                 # also ate any leading hostname character in {h, t, p, s, :, /}: an IP endpoint
                 # came through intact while a named one lost its first letters and the retry
