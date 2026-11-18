@@ -4,7 +4,7 @@ cryptography==50.0.2
 deprecated<2
 email-validator==2.3.0
 fastapi==0.162.7
-gunicorn[gthread,http2]==26.2.0
+gunicorn[gthread,http2]==27.0.1
 pydantic==2.14.3
 pydantic_settings==2.16.3
 python-multipart==0.0.33
