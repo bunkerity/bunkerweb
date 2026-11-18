@@ -67,13 +67,15 @@ $(document).ready(function () {
       const listItem = $(`
         <li class="list-group-item" style="flex: 1 0;">
           <div class="ms-2 me-auto">
-            <div class="fw-bold">${service}</div>
+            <div class="fw-bold"></div>
           </div>
         </li>
       `);
+      // A service name is user-controlled: insert it as text, never as markup.
+      listItem.find(".fw-bold").text(service);
       serviceList.append(listItem);
 
-      const typeClone = $(`#type-${sanitizedService}`)
+      const typeClone = $(document.getElementById(`type-${sanitizedService}`))
         .clone()
         .removeClass("highlight");
       const typeListItem = $(`
@@ -397,9 +399,9 @@ $(document).ready(function () {
       }
 
       const filteredServices = services.filter((service) => {
-        const serviceType = $(`#type-${service.replace(/[.:]/g, "-")}`).data(
-          "value",
-        );
+        const serviceType = $(
+          document.getElementById(`type-${service.replace(/[.:]/g, "-")}`),
+        ).data("value");
         return serviceType !== conversionType;
       });
 
@@ -452,7 +454,9 @@ $(document).ready(function () {
     $list.empty();
     services.forEach((service) => {
       $list.append(
-        `<span class="badge rounded-pill bg-label-primary me-1 mb-1">${service}</span>`,
+        $(
+          '<span class="badge rounded-pill bg-label-primary me-1 mb-1"></span>',
+        ).text(service),
       );
     });
     $("#services-export-include-configs").prop("checked", false);

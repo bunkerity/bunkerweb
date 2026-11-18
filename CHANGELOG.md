@@ -1,5 +1,9 @@
 # Changelog
 
+## v1.6.18~rc5 - ????/??/??
+
+- [SECURITY] `ui`: service names, instance hostnames and ban services are inserted as text in the bulk-action modals, fixing a stored XSS.
+
 ## v1.6.18~rc4 - 2026/11/17
 
 - [SECURITY] `api`, `ui`: restrict sensitive job-cache content (core private keys, credentials) to API admin credentials and UI super administrators.

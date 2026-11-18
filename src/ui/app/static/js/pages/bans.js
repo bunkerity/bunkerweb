@@ -454,7 +454,7 @@ $(document).ready(function () {
           </li>
           <li class="list-group-item" style="flex: 1 0;">
             <div class="ms-2 me-auto">
-              ${scopeText}${serviceText}
+              <span class="ban-scope-label"></span>
             </div>
           </li>
           <li class="list-group-item" style="flex: 1 0;">
@@ -464,6 +464,8 @@ $(document).ready(function () {
           </li>
         </ul>
       `);
+      // The service name is user-controlled: insert it as text, never as markup.
+      $row.find(".ban-scope-label").text(`${scopeText}${serviceText}`);
       $modalBody.append($row);
     });
 
@@ -557,7 +559,7 @@ $(document).ready(function () {
           </li>
           <li class="list-group-item" style="flex: 1 0;">
             <div class="ms-2 me-auto">
-              ${scopeText}${serviceText}
+              <span class="ban-scope-label"></span>
             </div>
           </li>
           <li class="list-group-item" style="flex: 1 0;">
@@ -567,6 +569,8 @@ $(document).ready(function () {
           </li>
         </ul>
       `);
+      // The service name is user-controlled: insert it as text, never as markup.
+      $row.find(".ban-scope-label").text(`${scopeText}${serviceText}`);
       $modalBody.append($row);
     });
 
