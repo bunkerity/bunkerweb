@@ -67,7 +67,7 @@
 - [FEATURE] `core`: `CLIENT_HEADER_TIMEOUT` and `CLIENT_BODY_TIMEOUT` now support per-service overrides.
 - [FEATURE] `modsecurity`: new `MODSECURITY_SEC_AUDIT_LOG_FORMAT` setting (`Native` or `JSON`) writes the audit log as one JSON object per entry.
 - [BUGFIX] `inject`: quotes and backslashes in `INJECT_HEAD` and `INJECT_BODY` no longer break the generated config; remove hand-added `\'` workaround escapes.
-- [BUGFIX] `antibot`, `errors`, `inject`: `INJECT_HEAD` and `INJECT_BODY` are no longer applied to the antibot challenge page and BunkerWeb's error pages. (Fixes #3234)
+- [BUGFIX] `antibot`, `errors`, `inject`: `INJECT_HEAD` and `INJECT_BODY` are no longer applied to the antibot challenge page and BunkerWeb's error pages. (Refs #3234)
 - [BUGFIX] `modsecurity`: response body rules now inspect Brotli-compressed responses too; ModSecurity used to see the compressed bytes when `USE_BROTLI=yes`. A response-body deny after headers were sent can leave the client with an incomplete response, as with gzip.
 - [BUGFIX] `linux`: RHEL 9 and 10 packages now build ModSecurity with yajl, so JSON request bodies are parsed for CRS and `SecAuditLogFormat JSON` works.
 - [BUGFIX] `limit`: `LIMIT_CONN_MAX_*` settings now accept only values NGINX supports (1 to 65535).
@@ -141,7 +141,7 @@
 - [FEATURE] `core`: plugins can run code at the TLS ClientHello of every service through the new `ssl_client_hello` phase (`PLUGINS_ORDER_SSL_CLIENT_HELLO`).
 - [FEATURE] `core`: `utils.add_ban` accepts `opts.if_absent` for insert-only bans that never replace an existing ban, locally or in Redis.
 - [FEATURE] `bunkernet`: `BUNKERNET_FILTER_HEADERS` (`no`, per service) limits a report to the User-Agent, Accept, Accept-Encoding, Accept-Language, Content-Type and Content-Length request headers and blanks the values matched in request headers and cookies, also for reports queued before the upgrade. By default a report carries every request header, as before; the plugin documentation lists what each value sends.
-- [FEATURE] `core`: a service can be named by an IPv4 or an IPv6 address (`SERVER_NAME=2001:db8::1`, bare, lowercase, compressed). NGINX also matches the bracketed `Host` form, and a name written another way logs a warning with its canonical spelling. (#4120)
+- [FEATURE] `core`: a service can be named by an IPv4 or an IPv6 address (`SERVER_NAME=2001:db8::1`, bare, lowercase, compressed). NGINX also matches the bracketed `Host` form, and a name written another way logs a warning with its canonical spelling. (Refs #4120)
 - [BUGFIX] `backup`: MySQL 8+ clients, including on Fedora, can now back up and restore MySQL and MariaDB databases without the RELOAD privilege.
 - [BUGFIX] `bwcli`: use the Linux package's Python interpreter, fixing startup crashes on RHEL 9.
 - [BUGFIX] `core`: stream services no longer abort NGINX init when an HTTP-only plugin (PRO included) is installed, a regression in 1.6.17.
@@ -211,7 +211,7 @@
 - [SECURITY] `core`: archives over the extraction size or member limits are refused, so a hostile download source can no longer fill the scheduler disk.
 - [SECURITY] `jobs`: an empty JSON selector term in a list download is rejected instead of widening the IP trust lists.
 - [BUGFIX] `all-in-one`: NGINX and service log lines reach the container logs promptly.
-- [BUGFIX] `antibot`: the Cap.js frame loads `hashwx.wasm` from the Cap.js server, so a strict CSP no longer blocks it (needs Cap.js widget 0.1.58 or later).
+- [BUGFIX] `antibot`: the Cap.js frame loads `hashwx.wasm` from the Cap.js server, so a strict CSP no longer blocks it (needs Cap.js widget 0.1.58 or later). (Fixes #4119)
 - [BUGFIX] `api`: cache files of a folder (Let's Encrypt `etc.tgz`) download again, and YAML files with lowercase setting names load.
 - [BUGFIX] `api`: a malformed stored bcrypt credential is refused instead of raising an authentication error.
 - [BUGFIX] `api`: rate limiting falls back to in-memory counters when Redis is unreachable or rejects the credentials, instead of answering 500
