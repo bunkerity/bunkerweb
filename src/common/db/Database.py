@@ -15,7 +15,7 @@ from os.path import join as os_join
 from pathlib import Path
 from re import DOTALL, IGNORECASE, Match, compile as re_compile, escape, error as RegexError, search
 from sys import argv, path as sys_path
-from threading import RLock
+from threading import RLock, local
 from traceback import format_exc
 from typing import Any, Callable, Dict, List, Literal, NoReturn, Optional, Sequence, Set, Tuple, TypeVar, Union
 from time import sleep
@@ -109,6 +109,50 @@ DEFAULT_READ_TIMEOUT = 300
 # cannot raise) is stored in bw_blob_chunks and its owner column holds this marker followed by the sha256.
 BLOB_CHUNK_MARKER = b"\x00bw-blob-chunks\x00"
 BLOB_CHUNK_MAX = 4 * 1024 * 1024
+
+_CREATED = local()
+
+
+class close_created_databases:
+    """Close every Database this thread builds inside the block when the block ends, however it ends.
+
+    The scheduler runs jobs in-process and drops their modules afterwards. Whatever a job built then lives in
+    a reference cycle and is only finalised by the cyclic GC, which has already cleared the weakrefs a TLS
+    socket depends on, so the COM_QUIT written by ``__del__`` fails and MariaDB logs "Aborted connection".
+    A Database that was passed in, rather than built here, is never touched.
+
+    A class, not a ``@contextmanager``: that wrapper writes ``exc.__traceback__`` on the way out, which an
+    exception that rejects attribute writes (a frozen dataclass) turns into a different exception. ``__exit__``
+    here never reads, writes or replaces the exception leaving the block.
+    """
+
+    def __enter__(self) -> "close_created_databases":
+        if not hasattr(_CREATED, "stack"):
+            _CREATED.stack = []  # one list per active scope on this thread, outermost first
+        self._created: List["Database"] = []
+        _CREATED.stack.append(self._created)
+        return self
+
+    def __exit__(self, exc_type, exc, tb) -> bool:
+        # Drop this scope's own list (by identity), whatever order scopes end in.
+        _CREATED.stack[:] = [scope for scope in _CREATED.stack if scope is not self._created]
+        _close_all(self._created)
+        return False
+
+
+def _close_all(databases: List["Database"]) -> None:
+    """Close and forget every Database in the list, ignoring errors."""
+    while databases:
+        with suppress(Exception):
+            databases.pop().close()
+
+
+def _exit_closing_created() -> NoReturn:
+    """``_exit`` skips the ``finally`` of every close_created_databases() scope, so close what this thread built in all of them, innermost first."""
+    for scope in reversed(getattr(_CREATED, "stack", [])):
+        _close_all(scope)
+    _exit(1)
+
 
 # Methods that mean "a human edited this through a first-class interface". They overwrite
 # one another freely. "wizard" belongs here: the setup wizard creates its service with that
@@ -230,6 +274,9 @@ class Database:
     ) -> None:
         """Initialize the database. A failure exits the process, or raises DatabaseInitError without retrying a connection error when exit_on_error is False."""
         self.logger = logger
+        # close() tolerates a half-built instance, so register before anything below can exit.
+        if getattr(_CREATED, "stack", None):
+            _CREATED.stack[-1].append(self)
         self.readonly = False
         self.last_connection_retry = None
         self.__ignore_regex_check = getenv("IGNORE_REGEX_CHECK", "no").lower() == "yes"
@@ -271,7 +318,7 @@ class Database:
             self.logger.error(message)
             if not exit_on_error:
                 raise DatabaseInitError(message)
-            _exit(1)
+            _exit_closing_created()
 
         def validate_and_update_db_string(db_string: str) -> Tuple[str, Optional[Match]]:
             """Validate and update database connection string."""
@@ -731,6 +778,7 @@ class Database:
     def _create_engine(self, uri: str, **kwargs) -> Engine:
         """Create an engine from the shared kwargs, with driver timeout defaults a caller's own connect_args override"""
         options = self._engine_kwargs | kwargs
+        options["hide_parameters"] = True
         connect_args = self._driver_connect_args(uri)
         if connect_args:
             options["connect_args"] = connect_args | options.get("connect_args", {})
@@ -772,7 +820,7 @@ class Database:
             assert self.sql_engine is not None
         except AssertionError:
             self.logger.error("The database engine is not initialized")
-            _exit(1)
+            _exit_closing_created()
 
         session = None
         try:
@@ -906,7 +954,7 @@ class Database:
                 metadata = session.query(Metadata).with_entities(Metadata.version).filter_by(id=1).first()
                 if metadata:
                     return metadata.version
-                return "1.6.18~rc4"
+                return "1.6.18~rc5"
             except BaseException as e:
                 return f"Error: {e}"
 
@@ -940,7 +988,7 @@ class Database:
             "last_instances_change": None,
             "reload_ui_plugins": False,
             "integration": "unknown",
-            "version": "1.6.18~rc4",
+            "version": "1.6.18~rc5",
             "database_version": "Unknown",  # ? Extracted from the database
             "default": True,  # ? Extra field to know if the returned data is the default one
         }
@@ -3256,6 +3304,7 @@ class Database:
         changed: Optional[bool] = True,
         *,
         disable_cleanup: bool = False,
+        allow_empty_manual: bool = False,
     ) -> str:
         """Save the custom configs in the database"""
         message = ""
@@ -3276,11 +3325,12 @@ class Database:
                 # them. An empty incoming list with existing rows almost always means
                 # the caller built an incomplete payload (route exception, form rebuild
                 # race, missing in-memory state) or, for the manual method, a configs
-                # folder that is missing or unreadable at scan time. Genuine "remove all
-                # custom configs" actions delete rows individually through the UI/API, so
+                # folder that is missing or unreadable at scan time. Only a complete scan
+                # of a marked manual folder may explicitly authorize an empty payload.
+                # Genuine "remove all" actions delete rows individually through the UI/API, so
                 # by the time an empty payload reaches save_custom_configs there is
                 # nothing left to wipe and this guard is a no-op.
-                if method in ("ui", "api", "manual") and not custom_configs:
+                if method in ("ui", "api", "manual") and not custom_configs and not (method == "manual" and allow_empty_manual):
                     existing_count = session.query(Custom_configs).filter(Custom_configs.method == method).count()
                     if existing_count > 0:
                         self.logger.warning(

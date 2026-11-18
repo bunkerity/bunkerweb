@@ -1,0 +1,7 @@
+{%- macro unquote_location_operand(value) -%}
+    {%- if value|length >= 2 and value[0] in ("'", '"') and value[-1] == value[0] -%}
+        {{- value[1:-1] -}}
+    {%- else -%}
+        {{- value -}}
+    {%- endif -%}
+{%- endmacro -%}

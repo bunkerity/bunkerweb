@@ -17,7 +17,13 @@ def render(context, files=(), **settings):
     defaults.update(REVERSE_PROXY_SSL_PROTOCOLS="", REVERSE_PROXY_SSL_CIPHERS="", REVERSE_PROXY_SSL_CRL="", REVERSE_PROXY_SSL_CRL_DATA="")
     defaults.update(USE_REVERSE_PROXY="yes", SERVER_NAME="example.com alias.example.com", REVERSE_PROXY_HOST="http://backend:8080")
     defaults.update(settings)
-    environment = jinja2.Environment(undefined=jinja2.ChainableUndefined, lstrip_blocks=True, trim_blocks=True, keep_trailing_newline=True)
+    environment = jinja2.Environment(
+        loader=jinja2.FileSystemLoader([ROOT / "src/common/confs", *ROOT.glob("src/common/core/*/confs")]),
+        undefined=jinja2.ChainableUndefined,
+        lstrip_blocks=True,
+        trim_blocks=True,
+        keep_trailing_newline=True,
+    )
     fake_pathlib = SimpleNamespace(Path=lambda path: SimpleNamespace(is_file=lambda: Path(path).name in files))
     environment.globals["import"] = lambda name: fake_pathlib if name == "pathlib" else import_module(name)
     return environment.from_string((PLUGIN / f"confs/server-{context}/reverse-proxy.conf").read_text()).render(all=defaults, **defaults)

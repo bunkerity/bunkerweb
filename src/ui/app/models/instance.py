@@ -471,7 +471,7 @@ class InstancesUtils:
         seen_ids: set = set()
         scan_start_idx, scan_total = self._get_redis_scan_window(redis_client, max_requests)
 
-        for report in self._iter_redis_requests(redis_client, chunk_size=2000, start_index=scan_start_idx, total=scan_total):
+        for report in self._iter_redis_requests(redis_client, chunk_size=256, pipeline_batch=1, start_index=scan_start_idx, total=scan_total):
             report_id = report.get("id")
             if report_id is not None:
                 if report_id in seen_ids:
@@ -937,7 +937,7 @@ class InstancesUtils:
                 is_desc = order_dir == "desc"
 
                 scan_start_idx, scan_total = self._get_redis_scan_window(redis_client, max_redis_requests)
-                for report in self._iter_redis_requests(redis_client, chunk_size=2000, start_index=scan_start_idx, total=scan_total):
+                for report in self._iter_redis_requests(redis_client, chunk_size=256, pipeline_batch=1, start_index=scan_start_idx, total=scan_total):
                     report_id = report.get("id")
                     if report_id is not None:
                         if report_id in seen_ids:
@@ -1423,7 +1423,13 @@ class InstancesUtils:
         for field in pane_fields:
             pane_counts[field] = {}
 
+        seen_ids: set = set()
         for report in all_reports:
+            report_id = report.get("id")
+            if report_id is not None:
+                if report_id in seen_ids:
+                    continue
+                seen_ids.add(report_id)
             for field in pane_fields:
                 value = str(report.get(field, "N/A"))
                 if value not in pane_counts[field]:

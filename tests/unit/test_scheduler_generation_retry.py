@@ -82,8 +82,8 @@ class FailedGenerationIsNotAppliedTest(unittest.TestCase):
         guard = find(ast.If, lambda n: segment(n.test) == "generation_failed" and "success = False" in segment(n.body[-1]), "the generation_failed guard")
         # The cache push and the reload live in the branch that only runs when the guard did not fire.
         self.assertIsInstance(guard.orelse[0], ast.If)
-        self.assertIn("/reload", segment(guard.orelse[0]))
-        self.assertNotIn("/reload", "\n".join(segment(b) for b in guard.body))
+        self.assertIn("publish_configuration(", segment(guard.orelse[0]))
+        self.assertNotIn("publish_configuration(", "\n".join(segment(b) for b in guard.body))
 
     def test_a_failed_generation_skips_the_failover_and_success_branches(self):
         guard = find(

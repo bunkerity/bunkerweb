@@ -15,7 +15,7 @@
       "type": "check"
     },
     "DNSBL_LIST": {
-      "context": "global",
+      "context": "multisite",
       "default": "bl.blocklist.de sbl.spamhaus.org xbl.spamhaus.org",
       "help": "List of DNSBL servers.",
       "id": "dnsbl-list",

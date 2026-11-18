@@ -4,7 +4,7 @@ from contextlib import suppress
 from copy import deepcopy
 from hashlib import sha256
 from pathlib import Path
-from ssl import PEM_cert_to_DER_cert
+from ssl import PEM_cert_to_DER_cert, SSLError as TlsError
 from threading import Lock
 from time import monotonic
 from typing import Callable, Literal, Optional, Union
@@ -29,6 +29,9 @@ if getenv("API_SUPPRESS_INSECURE_WARNING", "1").lower() in ("1", "true", "yes", 
 
 # The certificate the api-server-cert job generates and the instances serve (confs/api.conf).
 API_SERVER_CERT = Path("/var/cache/bunkerweb/jobs/api-server-cert.pem")
+# The one certificate the job replaced at its last renewal, kept next to the current one (same cache, same job). An
+# instance that has not reloaded yet still serves it, and a client process that started after the renewal never saw it.
+API_SERVER_PREVIOUS_CERT_NAME = "api-server-cert-previous.pem"
 # How long a read of the certificate is trusted, and how soon a mismatch may force another one.
 _PIN_TTL = 30.0
 _PIN_FORCED_TTL = 2.0
@@ -45,6 +48,9 @@ class _CertPin:
 
     The source is the file the scheduler restores on disk, or the loader a caller that has a
     database registers (the web UI, the API service, bwcli): the file is stored in the job cache.
+    The previous certificate comes from the same two places, as the one file the job itself wrote
+    when it renewed, so a client restarted after a renewal still reaches an instance that has not
+    reloaded. Nothing else is ever accepted: no older history, only that single file.
     """
 
     def __init__(self):
@@ -52,15 +58,17 @@ class _CertPin:
         self.fingerprints: list[str] = []
         self.checked = float("-inf")
         self.loader: Optional[Callable[[], Optional[bytes]]] = None
+        self.previous_loader: Optional[Callable[[], Optional[bytes]]] = None
         self.warned = False
 
-    def _read(self) -> Optional[str]:
+    @staticmethod
+    def _read(path: Path, loader: Optional[Callable[[], Optional[bytes]]]) -> Optional[str]:
         data = None
         with suppress(Exception):
-            data = API_SERVER_CERT.read_bytes()
-        if not data and self.loader is not None:
+            data = path.read_bytes()
+        if not data and loader is not None:
             with suppress(Exception):
-                data = self.loader()
+                data = loader()
         if not data:
             return None
         with suppress(Exception):
@@ -72,10 +80,14 @@ class _CertPin:
             now = monotonic()
             if now - self.checked >= (_PIN_FORCED_TTL if force else _PIN_TTL):
                 self.checked = now
-                current = self._read()
+                current = self._read(API_SERVER_CERT, self.loader)
+                previous = self._read(API_SERVER_CERT.with_name(API_SERVER_PREVIOUS_CERT_NAME), self.previous_loader)
                 # A source that cannot be read this time keeps the fingerprints already known.
-                if current is not None and current != (self.fingerprints[0] if self.fingerprints else None):
-                    self.fingerprints = [current] + [fp for fp in self.fingerprints if fp != current][:1]
+                if current is not None:
+                    # The recorded previous certificate wins over what this process happened to see (an upgrade
+                    # from a version that does not record it falls back to that, as before).
+                    older = previous if previous not in (None, current) else next((fp for fp in self.fingerprints if fp != current), None)
+                    self.fingerprints = [current] + ([older] if older else [])
             return self.fingerprints.copy()
 
     def warn_missing(self, logger) -> None:
@@ -92,6 +104,28 @@ _PIN = _CertPin()
 
 def _is_pin_mismatch(exc: BaseException) -> bool:
     return "ingerprint" in str(exc)
+
+
+# What OpenSSL reports when the bytes answering our ClientHello are not TLS at all. The reason depends on the answer and on
+# the version: an HTTP reply is WRONG_VERSION_NUMBER on 1.1.x and 3.0, HTTP_REQUEST on some builds, RECORD_LAYER_FAILURE on
+# 3.5 (which gives the same reason for any other plaintext too), and a reply that starts with a TLS-looking header reads
+# differently again. The message text is matched as well for builds that do not expose `reason`.
+# Not in the list on purpose: UNEXPECTED_EOF_WHILE_READING and a reset (the peer said nothing), certificate or fingerprint
+# errors, and a TLS alert (the peer does speak TLS).
+_NOT_TLS_REASONS = frozenset(
+    {"WRONG_VERSION_NUMBER", "HTTP_REQUEST", "HTTPS_PROXY_REQUEST", "UNKNOWN_PROTOCOL", "RECORD_LAYER_FAILURE", "PACKET_LENGTH_TOO_LONG"}
+)
+_NOT_TLS_TEXT = tuple(reason.replace("_", " ").lower() for reason in _NOT_TLS_REASONS)
+
+
+def _peer_is_not_speaking_tls(exc: Optional[BaseException], depth: int = 6) -> bool:
+    """Whether the handshake failed because what answered is not TLS (urllib3 and requests nest the ssl error in args)."""
+    if exc is None or depth < 0:
+        return False
+    if isinstance(exc, TlsError) and (getattr(exc, "reason", None) in _NOT_TLS_REASONS or any(text in str(exc).lower() for text in _NOT_TLS_TEXT)):
+        return True
+    nested = (exc.__cause__, exc.__context__, getattr(exc, "reason", None), *getattr(exc, "args", ()))
+    return any(isinstance(item, BaseException) and _peer_is_not_speaking_tls(item, depth - 1) for item in nested)
 
 
 class _BodyWriteTimeout(TimeoutError):
@@ -318,7 +352,16 @@ class API:
                     message = f"Certificate of {self.__endpoint} did not match the pinned API server certificate, not sending {url} over HTTP: {e}"
                     self.__logger.warning(message)
                     return False, message, None, None
-                self.__logger.warning(f"SSL connection error when contacting {self.__endpoint}{url}, trying HTTP: {e}")
+                # Only a peer that is not speaking TLS gets the plain HTTP retry: an instance that has no
+                # certificate yet serves plain HTTP on this port (confs/api.conf). A reset, a refused or
+                # dropped connection, a timeout and a certificate error never do, or whoever caused them would
+                # receive the bearer token and the payload in cleartext. The criterion is "the peer is not
+                # speaking TLS", not "the peer is BunkerWeb": nothing here proves who answered, and an active
+                # on-path attacker who answers the handshake with plaintext still gets the retry. That is the
+                # accepted limit until the strict mode (no fallback) planned for 1.6.19.
+                if not _peer_is_not_speaking_tls(e):
+                    return False, f"Connection error: {e}", None, None
+                self.__logger.warning(f"{self.__endpoint}{url} answered the TLS handshake without speaking TLS, trying HTTP: {e}")
                 # replace(..., 1) strips the scheme prefix. lstrip takes a character set, so it
                 # also ate any leading hostname character in {h, t, p, s, :, /}: an IP endpoint
                 # came through intact while a named one lost its first letters and the retry
@@ -341,6 +384,7 @@ class API:
         Takes the Database object rather than importing it: the core image has no SQLAlchemy.
         """
         _PIN.loader = lambda: db.get_job_cache_file("api-server-cert", "api-server-cert.pem", plugin_id="jobs")
+        _PIN.previous_loader = lambda: db.get_job_cache_file("api-server-cert", API_SERVER_PREVIOUS_CERT_NAME, plugin_id="jobs")
 
     @staticmethod
     def __default_http_port() -> int:

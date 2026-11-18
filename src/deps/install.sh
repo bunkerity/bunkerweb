@@ -244,7 +244,11 @@ fi
 # Set CFALGS
 export CFLAGS="$CFLAGS -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=1"
 
-NGINX_SRC_DIR="/tmp/bunkerweb/deps/src/nginx"
+# Fedora ships 1.30.6. Its dynamic modules need that exact source version.
+case "$OS" in
+	fedora) NGINX_SRC_DIR="/tmp/bunkerweb/deps/src/nginx-1.30.6" ;;
+	*) NGINX_SRC_DIR="/tmp/bunkerweb/deps/src/nginx" ;;
+esac
 export CHANGE_DIR="$NGINX_SRC_DIR"
 do_and_check_cmd mv auto/configure ./
 echo '#!/bin/bash' > "${CHANGE_DIR}/configure-fix.sh"

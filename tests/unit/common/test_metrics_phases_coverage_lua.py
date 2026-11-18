@@ -113,9 +113,9 @@ def test_query_default_selection_paging_and_facets():
     out = run(ROWS + "ARGS = {start = '1', length = '1'}; emit(self:api())")
     assert out["status"] == 200
     result = out["message"]
-    assert (result["total"], result["filtered"]) == (5, 3)
-    assert [row["id"] for row in result["data"]] == ["c"]
-    assert result["pane_counts"]["country"] == {"FR": {"total": 2, "count": 2}, "GB": {"total": 1, "count": 1}}
+    assert (result["total"], result["filtered"]) == (5, 5)
+    assert [row["id"] for row in result["data"]] == ["d"]
+    assert result["pane_counts"]["country"] == {"FR": {"total": 2, "count": 2}, "GB": {"total": 1, "count": 1}, "US": {"total": 2, "count": 2}}
 
 
 @pytest.mark.parametrize(
@@ -127,10 +127,10 @@ def test_query_default_selection_paging_and_facets():
         ({"search_panes": "country:FR;method:GET", "order_dir": "asc"}, ["a", "c"]),
         ({"search_panes": "country:FR,GB;status:404"}, ["b"]),
         ({"search_panes": "url:%2Fa%2Cb%3Bc%3Ad"}, ["a"]),
-        ({"search_panes": "reason:N/A"}, ["b", "c", "a"]),
-        ({"order_column": "country", "order_dir": "desc"}, ["b", "a", "c"]),
-        ({"order_column": "method", "order_dir": "asc"}, ["a", "c", "b"]),
-        ({"length": "-1", "order_dir": "asc"}, ["a", "c", "b"]),
+        ({"search_panes": "reason:N/A"}, ["e", "d", "b", "c", "a"]),
+        ({"order_column": "country", "order_dir": "desc"}, ["d", "e", "b", "a", "c"]),
+        ({"order_column": "method", "order_dir": "asc"}, ["d", "e", "a", "c", "b"]),
+        ({"length": "-1", "order_dir": "asc"}, ["a", "c", "b", "d", "e"]),
         ({"start": "99"}, []),
         ({"length": "0"}, []),
     ],
@@ -141,7 +141,10 @@ def test_query_filters_order_and_page_boundaries(args, ids):
     # Ties have no defined ordering.
     actual = [row["id"] for row in data] if data else []
     if args.get("order_column"):
-        assert actual[0 if args.get("order_dir") == "desc" else -1] == "b"
+        if args["order_column"] == "country":
+            assert [row["country"] for row in data] == ["US", "US", "GB", "FR", "FR"]
+        else:
+            assert actual[-1] == "b"
         assert set(actual) == set(ids)
     else:
         assert actual == ids

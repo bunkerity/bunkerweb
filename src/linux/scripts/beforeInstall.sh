@@ -44,6 +44,10 @@ do_and_check_cmd chown root:root "$backup_dir"
 do_and_check_cmd chmod 0700 "$backup_dir"
 stage=$(mktemp -d "$backup_dir/.transaction.XXXXXX") || exit 1
 echo "$upgrade" > "$stage/upgrade" || exit 1
+# A reinstall keeps data snapshots but starts services like a fresh installation.
+if [ "${1:-}" = install ] && [ -n "${2:-}" ]; then
+    do_and_check_cmd touch "$stage/reinstall"
+fi
 
 if [ "$upgrade" = yes ]; then
     # Record all states before stopping any unit; stop wrappers may stop sibling units.
@@ -54,6 +58,7 @@ if [ "$upgrade" = yes ]; then
             fi
         done
         for service in bunkerweb bunkerweb-scheduler bunkerweb-ui bunkerweb-api; do
+            [ "$(systemctl show --property=LoadState --value "$service")" = not-found ] && continue
             do_and_check_cmd systemctl stop "$service"
         done
     fi

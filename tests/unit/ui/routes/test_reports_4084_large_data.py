@@ -81,7 +81,7 @@ def test_large_report_is_counted_returned_and_lazy_loaded(h, query_redis, large_
     assert details.status_code == 200 and details.get_json()["data"] == large_report["data"]
 
 
-@pytest.mark.xfail(strict=True, reason="#4084: balanced per-IP facet drift needs reconciliation in unowned app/models/instance.py / metrics writer")
+@pytest.mark.xfail(strict=True, reason="#4084: exact facet reconciliation deferred to 1.6.19 (writer-side design, no per-request scan)")
 def test_balanced_stale_ip_facets_match_the_retained_list(h, query_redis, large_report):
     """#4084's 46-vs-42 drift survives aggregate validation when another IP loses four counts."""
     large_reports = [large_report | {"id": f"{i:032x}"} for i in range(42)]
@@ -96,3 +96,16 @@ def test_balanced_stale_ip_facets_match_the_retained_list(h, query_redis, large_
     assert (rows["recordsTotal"], rows["recordsFiltered"], len(rows["data"])) == (148, 42, 42)
     affected = next(option for option in options if option["value"] == IP)
     assert affected["total"] == affected["count"] == 42
+
+
+@pytest.mark.parametrize("size", [49999, 50000, 65535, 65536])
+def test_report_data_size_boundaries_do_not_hide_rows(h, query_redis, large_report, size):
+    large_report["data"] = {"matched_vars": ["x" * size]}
+    seed(query_redis, [large_report])
+    client = h.client()
+
+    rows = client.post("/reports/fetch", headers=CORS, data={"searchPanes[ip][0]": IP}).get_json()
+    details = client.post("/reports/data", headers=CORS, data={"report_id": large_report["id"]}).get_json()
+
+    assert (rows["recordsTotal"], rows["recordsFiltered"], len(rows["data"])) == (1, 1, 1)
+    assert details["data"] == large_report["data"]

@@ -223,9 +223,9 @@ include /usr/share/bunkerweb/core/modsecurity/files/coreruleset-v4/rules/*.conf
 
     {% if USE_MODSECURITY_CRS_PLUGINS == "yes" and effective_crs_version != "3" %}
 # custom CRS plugins configurations after loading plugins
-      {%- if is_custom_conf("/etc/bunkerweb/configs/crs-plugins-after") %}
+      {% if is_custom_conf("/etc/bunkerweb/configs/crs-plugins-after") %}
 include /etc/bunkerweb/configs/crs-plugins-after/*.conf
-      {%- endif %}
+      {% endif %}
       {% if MULTISITE == "yes" and is_custom_conf("/etc/bunkerweb/configs/crs-plugins-after/" + service_id) %}
 include /etc/bunkerweb/configs/crs-plugins-after/{{ service_id }}/*.conf
       {% endif %}

@@ -1,0 +1,158 @@
+"""Execute the release pin checker against isolated trees, with read-only git responses."""
+
+import os
+import subprocess
+from pathlib import Path
+
+import pytest
+
+ROOT = Path(__file__).resolve().parents[3]
+VERSION = "1.6.18~rc5"
+PINS = {
+    "src/bw/Dockerfile": 'LABEL version="{version}"\n',
+    "misc/install-bunkerweb.sh": 'DEFAULT_BUNKERWEB_VERSION="{version}"\n',
+    "publiccode.yml": "softwareVersion: {version}\n",
+    "pyproject.toml": 'version = "{version}"\n',
+    ".github/ISSUE_TEMPLATE/bug_report.yml": "      value: {version}\n",
+}
+
+
+@pytest.fixture
+def tree(tmp_path):
+    for name, template in PINS.items():
+        path = tmp_path / name
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(template.format(version=VERSION))
+    (tmp_path / "src/VERSION").write_text(VERSION + "\n")
+    bindir = tmp_path / "bin"
+    bindir.mkdir()
+    git = bindir / "git"
+    # Only the checker's two read operations are stubbed; grep runs on actual fixture files.
+    git.write_text(
+        "#!/usr/bin/env bash\nset -euo pipefail\n"
+        'case "$1" in\n'
+        'rev-parse) printf "%s\\n" "$FIXTURE_ROOT" ;;\n'
+        'grep) shopt -s globstar nullglob; grep -nE "$3" src/bw/Dockerfile publiccode.yml pyproject.toml '
+        ".github/ISSUE_TEMPLATE/bug_report.yml literals.txt docs/**/*.md ;;\n"
+        "*) exit 2 ;;\nesac\n"
+    )
+    git.chmod(0o755)
+    (tmp_path / "literals.txt").write_text(f"image: bunkerweb:{VERSION.replace('~', '-')}\n")
+    return tmp_path
+
+
+def check(tree):
+    return subprocess.run(
+        ["bash", str(ROOT / "misc/check-version-consistency.sh")],
+        cwd=tree,
+        env={**os.environ, "FIXTURE_ROOT": str(tree), "PATH": str(tree / "bin") + os.pathsep + os.environ["PATH"]},
+        capture_output=True,
+        text=True,
+        timeout=30,
+        check=False,
+    )
+
+
+def test_consistent_tree_passes(tree):
+    result = check(tree)
+    assert result.returncode == 0, result.stdout + result.stderr
+    assert f"All version pins agree with {VERSION}" in result.stdout
+
+
+@pytest.fixture
+def nginx_trees(tree):
+    for name, version in [("nginx", "1.30.7"), ("nginx-1.30.6", "1.30.6")]:
+        header = tree / "src/deps/src" / name / "src/core/nginx.h"
+        header.parent.mkdir(parents=True)
+        header.write_text(f'#define NGINX_VERSION "{version}"\n')
+    (tree / "src/deps/install.sh").write_text(
+        'case "$OS" in\n'
+        '    fedora) NGINX_SRC_DIR="/tmp/bunkerweb/deps/src/nginx-1.30.6" ;;\n'
+        '    *) NGINX_SRC_DIR="/tmp/bunkerweb/deps/src/nginx" ;;\n'
+        "esac\n"
+    )
+    (tree / "src/linux").mkdir()
+    return tree
+
+
+@pytest.mark.parametrize(
+    "os_name,os_version,pin,expected",
+    [
+        ("fedora", "43", "1.30.6", 0),
+        ("fedora", "44", "1.30.6", 0),
+        ("fedora", "45", "1.30.6", 0),
+        ("fedora", "45", "1.30.7", 1),
+        ("debian", "", "1.30.6", 1),
+        ("debian", "", "1.30.7", 0),
+    ],
+)
+def test_linux_nginx_pin_matches_selected_tree(nginx_trees, os_name, os_version, pin, expected):
+    name = f"src/linux/Dockerfile-{os_name}"
+    (nginx_trees / name).write_text(f"ENV OS={os_name}\nENV OS_VERSION={os_version}\nENV NGINX_VERSION={pin}\n")
+    result = check(nginx_trees)
+    assert result.returncode == expected, result.stdout + result.stderr
+    if expected:
+        assert f"{name}: NGINX_VERSION={pin}" in result.stdout
+
+
+@pytest.mark.parametrize("name", PINS)
+@pytest.mark.parametrize("expected,wrong", [(VERSION, VERSION + "0"), ("1.6.18", VERSION)])
+def test_pin_must_equal_version(tree, name, expected, wrong):
+    (tree / "src/VERSION").write_text(expected + "\n")
+    for pin, template in PINS.items():
+        (tree / pin).write_text(template.format(version=wrong if pin == name else expected))
+    (tree / "literals.txt").write_text("")
+    result = check(tree)
+    assert result.returncode == 1, result.stdout + result.stderr
+    assert f"{name}: pin is" in result.stdout
+
+
+@pytest.mark.parametrize("stale", [VERSION + "0", VERSION.replace("~", "-") + "0", VERSION.split("~")[0] + "~rc3", VERSION + "-extra"])
+@pytest.mark.parametrize("same_line", [False, True])
+def test_stale_token_cannot_hide_behind_current_version(tree, stale, same_line):
+    prefix = f"current={VERSION} " if same_line else ""
+    (tree / "literals.txt").write_text(f"{prefix}stale={stale}\n")
+    result = check(tree)
+    assert result.returncode == 1, result.stdout + result.stderr
+    assert "literals.txt:1:" in result.stdout
+
+
+@pytest.mark.parametrize("path", ["docs/features.md", "docs/fr/features.md"])
+@pytest.mark.parametrize("prose", ["Requires ({rc} or later).", "Cores before {rc} differ. {rc} or later also helps.", "Requires a fix before {rc}."])
+def test_features_accept_version_bounds(tree, path, prose):
+    page = tree / path
+    page.parent.mkdir(parents=True)
+    page.write_text(prose.format(rc=VERSION.split("~")[0] + "~rc2") + "\n")
+    result = check(tree)
+    assert result.returncode == 0, result.stdout + result.stderr
+
+
+@pytest.mark.parametrize(
+    "path,line",
+    [
+        ("docs/features.md", "image: bunkerweb:{tag}"),
+        ("docs/fr/features.md", "Requires {rc} or later. Use image: bunkerweb:{tag}"),
+        ("docs/fr/features.md", "Requires {rc} or later. Install with version={rc}"),
+        ("docs/features.md", "Use image: bunkerweb:{rc} or later"),
+        ("docs/features.md", "Cores before {rc}-extra differ."),
+        ("docs/features.md", "Cores before {rc}:amd64 differ."),
+        ("docs/guide.md", "Requires {rc} or later."),
+    ],
+)
+def test_version_bounds_do_not_hide_stale_pins(tree, path, line):
+    page = tree / path
+    page.parent.mkdir(parents=True)
+    stale = VERSION.split("~")[0] + "~rc2"
+    page.write_text(line.format(rc=stale, tag=stale.replace("~", "-")) + "\n")
+    result = check(tree)
+    assert result.returncode == 1, result.stdout + result.stderr
+    assert f"{path}:1:" in result.stdout
+
+
+def test_final_release_rejects_stale_rc_literal(tree):
+    (tree / "src/VERSION").write_text("1.6.18\n")
+    for name, template in PINS.items():
+        (tree / name).write_text(template.format(version="1.6.18"))
+    result = check(tree)
+    assert result.returncode == 1, result.stdout + result.stderr
+    assert "literals.txt:1:" in result.stdout

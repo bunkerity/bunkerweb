@@ -21,7 +21,7 @@ from Configurator import Configurator
 from API import API  # type: ignore
 
 CUSTOM_CONF_RX = re_compile(
-    r"^(?P<service>[0-9a-z\.-]*)_?CUSTOM_CONF_(?P<type>HTTP|SERVER_STREAM|STREAM|DEFAULT_SERVER_HTTP|SERVER_HTTP|MODSEC_CRS|MODSEC|CRS_PLUGINS_BEFORE|CRS_PLUGINS_AFTER)_(?P<name>.+)$"
+    r"^(?P<service>(?:[0-9a-z\.-]+|(?:[0-9a-f]{0,4}:){2,7}[0-9a-f]{0,4})?)_?CUSTOM_CONF_(?P<type>HTTP|SERVER_STREAM|STREAM|DEFAULT_SERVER_HTTP|SERVER_HTTP|MODSEC_CRS|MODSEC|CRS_PLUGINS_BEFORE|CRS_PLUGINS_AFTER)_(?P<name>.+)$"
 )
 LOGGER = getLogger("GENERATOR.SAVE_CONFIG")
 ALEMBIC_PATH = Path(__file__).resolve().parents[1].joinpath("db", "alembic")

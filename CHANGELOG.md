@@ -1,5 +1,51 @@
 # Changelog
 
+## v1.6.18~rc5 - 2026/11/18
+
+- [SECURITY] `ui`: service names, instance hostnames and ban services are inserted as text in the bulk-action modals, fixing a stored XSS.
+- [SECURITY] `api`: the internal HTTPS client falls back to HTTP only when the peer does not speak TLS, never after a reset, timeout or certificate error.
+- [SECURITY] `support`: `bwcli support` and the UI redact JSON ModSecurity audit logs and URL credentials in the masked configuration export.
+- [SECURITY] `database`: SQL bound parameters no longer appear in logged persistence errors.
+- [SECURITY] `core`: multi-line file settings are encoded in variables.env, so their content can no longer add other settings.
+- [SECURITY] `api`: only the docs path itself skips authentication, so `API_DOCS_URL` can no longer expose other routes; `/` is refused.
+- [SECURITY] `deps`: update NGINX to 1.30.7, fixing nine CVEs including HTTP/2 and HTTP/3. Fedora stays on 1.30.6 until 1.30.7 ships there.
+- [FEATURE] `dnsbl`: `DNSBL_LIST` can be set per service; services without an override keep the global list. (Fixes #4018)
+- [BUGFIX] `linux`: reinstalling a package keeps the data and starts the services; absent units are tolerated, stop failures still abort.
+- [BUGFIX] `ui`: a long login username can no longer stall UI workers; the logged username is bounded and the diagnostics redactor runs in linear time.
+- [BUGFIX] `jobs`: the API server certificate job keeps the previous certificate, so a restarted scheduler or UI still reaches instances that have not reloaded.
+- [BUGFIX] `scheduler`: the deletion of the last manual custom config is honored only after a complete scan of the managed folders.
+- [BUGFIX] `scheduler`: inactive service CRS custom configs and manual source files are kept when generation fails or global CRS is enabled.
+- [BUGFIX] `scheduler`: down instances are no longer publication recipients and receive the current configuration when they return.
+- [BUGFIX] `scheduler`: busy or failed custom config and plugin uploads are retried until each instance has received them.
+- [BUGFIX] `scheduler`: an accepted reload is confirmed before any retry, and instances that already confirmed it are not reloaded again.
+- [BUGFIX] `scheduler`: jobs close their own database connections when they end, so MariaDB and MySQL no longer log them as `Aborted connection`.
+- [BUGFIX] `scheduler`: each scheduled job runs once per due slot, plugins in parallel, ending the `Failed to reload cached module` warnings.
+- [BUGFIX] `scheduler`: scheduled jobs wait out a read-only database, its recovery keeps retrying, and every failed job of a batch is recorded.
+- [BUGFIX] `scheduler`: a job's own error and exit code are kept when the scheduler closes the database connections the job opened.
+- [BUGFIX] `autoconf`: Gateway routing and class isolation survive Kubernetes API list failures; transient discovery errors fail startup.
+- [BUGFIX] `autoconf`: Kubernetes retries a failed configuration save or apply after 10 s, and Docker, Swarm and Kubernetes keep the last saved configuration as the baseline, so a failed save is written again. (Refs #4107)
+- [BUGFIX] `autoconf`: Kubernetes pods without an IP yet are no longer registered under a name that never resolves, sparing a second pass on scale-up.
+- [BUGFIX] `integrations`: fix the Web UI database URIs in the PostgreSQL and MariaDB Kubernetes manifests.
+- [BUGFIX] `modsecurity`: separate active CRS after-plugin includes are kept in per-service and global CRS modes.
+- [BUGFIX] `core`: generated ModSecurity fragments are included on the first configuration render.
+- [BUGFIX] `core`: IPv6 service settings and custom configurations given through environment files and variables are kept.
+- [BUGFIX] `reverseproxy`, `grpc`, `redirect`: quoted location operands and regex braces work again after upgrades.
+- [BUGFIX] `core`: bare IPv4-mapped host entries in IP lists match both mapped and plain IPv4 clients.
+- [BUGFIX] `realip`: downloaded trusted proxy lists now regenerate the configuration, so new ranges take effect.
+- [BUGFIX] `misc`: the release version check requires exact version pins and rejects stale RC tokens that share the current version prefix.
+- [BUGFIX] `ui`: Web UI workers restart after 200 requests by default instead of 1000, to release memory sooner; `UI_MAX_REQUESTS` is now documented. (Fixes #4163)
+- [BUGFIX] `metrics`, `ui`: the Reports page keeps stored requests of any status, counts each request once in the panes and reads Redis in smaller batches. (Refs #4084)
+- [DOCS] `splunk`: container integrations send the three logs to a Universal Forwarder as parsable `bunkerweb:*` sourcetypes, with rotation guidance.
+- [DOCS] `scheduler`: the custom configuration section explains the `.bw-managed` marker, manual deletion and restore, and retained inactive service CRS files.
+- [DOCS] `linux`: recommend `madvise` for transparent huge pages, since `always` can add hundreds of MB per reload. (Refs #4164)
+- [DOCS] `pro`: the PRO plugin pages have current settings tables and corrected Migration, S3 restore, UI SSO, ACME and OpenAPI Validator guidance.
+- [DEPS] Updated lua-resty-openssl version to v1.10.0
+- [DEPS] Updated PyMySQL version to v1.2.4
+- [DEPS] Updated pydantic-settings version to v2.16.3
+- [DEPS] Updated FastAPI version to v0.162.7
+- [DEPS] Updated psycopg version to v3.3.9
+- [DEPS] Updated importlib-metadata version to v10.2.0
+
 ## v1.6.18~rc4 - 2026/11/17
 
 - [SECURITY] `api`, `ui`: restrict sensitive job-cache content (core private keys, credentials) to API admin credentials and UI super administrators.
@@ -31,7 +77,7 @@
 - [FEATURE] `core`: `CLIENT_HEADER_TIMEOUT` and `CLIENT_BODY_TIMEOUT` now support per-service overrides.
 - [FEATURE] `modsecurity`: new `MODSECURITY_SEC_AUDIT_LOG_FORMAT` setting (`Native` or `JSON`) writes the audit log as one JSON object per entry.
 - [BUGFIX] `inject`: quotes and backslashes in `INJECT_HEAD` and `INJECT_BODY` no longer break the generated config; remove hand-added `\'` workaround escapes.
-- [BUGFIX] `antibot`, `errors`, `inject`: `INJECT_HEAD` and `INJECT_BODY` are no longer applied to the antibot challenge page and BunkerWeb's error pages. (Fixes #3234)
+- [BUGFIX] `antibot`, `errors`, `inject`: `INJECT_HEAD` and `INJECT_BODY` are no longer applied to the antibot challenge page and BunkerWeb's error pages. (Refs #3234)
 - [BUGFIX] `modsecurity`: response body rules now inspect Brotli-compressed responses too; ModSecurity used to see the compressed bytes when `USE_BROTLI=yes`. A response-body deny after headers were sent can leave the client with an incomplete response, as with gzip.
 - [BUGFIX] `linux`: RHEL 9 and 10 packages now build ModSecurity with yajl, so JSON request bodies are parsed for CRS and `SecAuditLogFormat JSON` works.
 - [BUGFIX] `limit`: `LIMIT_CONN_MAX_*` settings now accept only values NGINX supports (1 to 65535).
@@ -105,7 +151,7 @@
 - [FEATURE] `core`: plugins can run code at the TLS ClientHello of every service through the new `ssl_client_hello` phase (`PLUGINS_ORDER_SSL_CLIENT_HELLO`).
 - [FEATURE] `core`: `utils.add_ban` accepts `opts.if_absent` for insert-only bans that never replace an existing ban, locally or in Redis.
 - [FEATURE] `bunkernet`: `BUNKERNET_FILTER_HEADERS` (`no`, per service) limits a report to the User-Agent, Accept, Accept-Encoding, Accept-Language, Content-Type and Content-Length request headers and blanks the values matched in request headers and cookies, also for reports queued before the upgrade. By default a report carries every request header, as before; the plugin documentation lists what each value sends.
-- [FEATURE] `core`: a service can be named by an IPv4 or an IPv6 address (`SERVER_NAME=2001:db8::1`, bare, lowercase, compressed). NGINX also matches the bracketed `Host` form, and a name written another way logs a warning with its canonical spelling. (#4120)
+- [FEATURE] `core`: a service can be named by an IPv4 or an IPv6 address (`SERVER_NAME=2001:db8::1`, bare, lowercase, compressed). NGINX also matches the bracketed `Host` form, and a name written another way logs a warning with its canonical spelling. (Refs #4120)
 - [BUGFIX] `backup`: MySQL 8+ clients, including on Fedora, can now back up and restore MySQL and MariaDB databases without the RELOAD privilege.
 - [BUGFIX] `bwcli`: use the Linux package's Python interpreter, fixing startup crashes on RHEL 9.
 - [BUGFIX] `core`: stream services no longer abort NGINX init when an HTTP-only plugin (PRO included) is installed, a regression in 1.6.17.
@@ -175,7 +221,7 @@
 - [SECURITY] `core`: archives over the extraction size or member limits are refused, so a hostile download source can no longer fill the scheduler disk.
 - [SECURITY] `jobs`: an empty JSON selector term in a list download is rejected instead of widening the IP trust lists.
 - [BUGFIX] `all-in-one`: NGINX and service log lines reach the container logs promptly.
-- [BUGFIX] `antibot`: the Cap.js frame loads `hashwx.wasm` from the Cap.js server, so a strict CSP no longer blocks it (needs Cap.js widget 0.1.58 or later).
+- [BUGFIX] `antibot`: the Cap.js frame loads `hashwx.wasm` from the Cap.js server, so a strict CSP no longer blocks it (needs Cap.js widget 0.1.58 or later). (Fixes #4119)
 - [BUGFIX] `api`: cache files of a folder (Let's Encrypt `etc.tgz`) download again, and YAML files with lowercase setting names load.
 - [BUGFIX] `api`: a malformed stored bcrypt credential is refused instead of raising an authentication error.
 - [BUGFIX] `api`: rate limiting falls back to in-memory counters when Redis is unreachable or rejects the credentials, instead of answering 500

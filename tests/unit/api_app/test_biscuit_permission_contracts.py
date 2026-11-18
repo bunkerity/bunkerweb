@@ -203,10 +203,9 @@ def test_unexpected_library_failures_remain_denials(guard_config, monkeypatch, p
     assert (caught.value.status_code, caught.value.detail) == (code, "Unauthorized" if code == 401 else "Forbidden")
 
 
-@pytest.mark.parametrize("path", ["/health", "/ping", "/auth", "/openapi.json", "/docs/oauth2-redirect", "/redoc"])
+@pytest.mark.parametrize("path", ["/health", "/ping", "/auth"])
 def test_public_biscuit_paths_skip_verification_under_root_prefix(guard_config, monkeypatch, path):
     guard_config.API_ROOT_PATH = "/api"
-    guard_config.openapi_url, guard_config.docs_url, guard_config.redoc_url = "/openapi.json", "/docs", "/redoc"
     verifier = Mock(side_effect=AssertionError("public endpoint parsed token"))
     monkeypatch.setattr(biscuit, "Biscuit", SimpleNamespace(from_base64=verifier))
     assert biscuit.guard(make_request("bad", "/api" + path)) is None

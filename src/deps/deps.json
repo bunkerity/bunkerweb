@@ -126,9 +126,9 @@
     },
     {
       "id": "lua-resty-openssl",
-      "name": "lua-resty-openssl v1.9.0",
+      "name": "lua-resty-openssl v1.10.0",
       "url": "https://github.com/fffonion/lua-resty-openssl.git",
-      "commit": "4ebee84ec3d829ef610005db1978ae591ed77a31",
+      "commit": "532e753201edf68274a3da33664fe8d7bccc5418",
       "post_install": "rm -r src/deps/src/lua-resty-openssl/t"
     },
     {
@@ -257,10 +257,17 @@
     },
     {
       "id": "nginx",
+      "name": "Nginx v1.30.7",
+      "url": "https://github.com/nginx/nginx.git",
+      "commit": "2df4366ef5e380dd7d30f2ff5261ef6bc47252c8",
+      "post_install": "rm -r src/deps/src/nginx/docs"
+    },
+    {
+      "id": "nginx-1.30.6",
       "name": "Nginx v1.30.6",
       "url": "https://github.com/nginx/nginx.git",
       "commit": "fb0e979c6dd63c018958b41eeb844947c5c21264",
-      "post_install": "rm -r src/deps/src/nginx/docs"
+      "post_install": "rm -r src/deps/src/nginx-1.30.6/docs"
     },
     {
       "id": "nginx_cookie_flag_module",

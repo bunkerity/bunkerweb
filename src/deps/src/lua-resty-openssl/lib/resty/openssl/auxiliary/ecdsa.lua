@@ -8,6 +8,7 @@ require "resty.openssl.include.ecdsa"
 local bn_lib = require "resty.openssl.bn"
 local format_error = require("resty.openssl.err").format_error
 local ceil = math.ceil
+local type = type
 
 local _M = {}
 
@@ -26,25 +27,21 @@ SEQUENCE {
   The binary form is typically 64 bytes.
 ]]
 
-local function group_size(ec_key)
-  local group = C.EC_KEY_get0_group(ec_key)
-  if group == nil then
-    assert("failed to get EC group", 2)
+-- A DER ECDSA signature carries (r, s) without any width, so the raw form has
+-- to be padded to the size of the curve. The caller passes the bit size of the
+-- key, which both legacy and provider backed keys can report.
+local function sig_size(bits)
+  if type(bits) ~= "number" or bits <= 0 then
+    return nil, "invalid EC group bits"
   end
-
-  local sz = C.EC_GROUP_order_bits(group)
-  if sz <= 0 then
-    assert("failed to get EC group order bits", 2)
-  end
-
-  return ceil(sz / 8)
+  return ceil(bits / 8)
 end
 
-_M.sig_der2raw = function(der, ec_key)
-  if ec_key == nil then
-    error("ec_key is required", 2)
+_M.sig_der2raw = function(der, bits)
+  local psize, err = sig_size(bits)
+  if not psize then
+    return nil, err
   end
-  local psize = group_size(ec_key)
 
   local buf = ffi.new("const unsigned char*", der)
   local buf_ptr = ffi.new("const unsigned char*[1]", buf)
@@ -83,12 +80,11 @@ _M.sig_der2raw = function(der, ec_key)
   return rbin .. sbin
 end
 
-_M.sig_raw2der = function(bin, ec_key)
-  if ec_key == nil then
-    error("ec_key is required", 2)
+_M.sig_raw2der = function(bin, bits)
+  local psize, err = sig_size(bits)
+  if not psize then
+    return nil, err
   end
-
-  local psize = group_size(ec_key)
 
   if #bin ~= psize * 2 then
     return nil, "invalid signature length, expect " .. (psize * 2) .. " but got " .. #bin

@@ -108,6 +108,7 @@ function migrate_file() {
 
 if [ "$UPGRADE" = yes ] && [ -f "$transaction/upgrade" ] && [ ! -f "$transaction/restored" ]; then
     for service in bunkerweb bunkerweb-scheduler bunkerweb-ui bunkerweb-api; do
+        [ "$(systemctl show --property=LoadState --value "$service")" = not-found ] && continue
         do_and_check_cmd systemctl stop "$service"
     done
     if [ -f "$transaction/db.sqlite3" ]; then
@@ -120,6 +121,11 @@ if [ "$UPGRADE" = yes ] && [ -f "$transaction/upgrade" ] && [ ! -f "$transaction
     migrate_file "$transaction/db.sqlite3" /var/lib/bunkerweb/db.sqlite3
     # A failed service restart may be retried after services have already written new data.
     do_and_check_cmd touch "$transaction/restored"
+fi
+
+# Snapshot restoration and service enablement have different reinstall policies.
+if [ -f "$transaction/reinstall" ]; then
+    do_and_check_cmd rm -f /var/tmp/bunkerweb_upgrade
 fi
 
 # Create /var/www/html if needed

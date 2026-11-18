@@ -61,6 +61,22 @@ end
 
 HARNESS = """
 ngx = { NOTICE = 1, ERR = 2, WARN = 3 }
+-- ngx.decode_base64: nil on invalid input, as in OpenResty
+ngx.decode_base64 = function(text)
+    if #text %% 4 ~= 0 or text:find("[^A-Za-z0-9+/=]") or text:find("=[^=]") then return nil end
+    local alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
+    local out = {}
+    for i = 1, #text, 4 do
+        local n, pad = 0, 0
+        for j = i, i + 3 do
+            local c = text:sub(j, j)
+            n = n * 64
+            if c == "=" then pad = pad + 1 else n = n + alphabet:find(c, 1, true) - 1 end
+        end
+        out[#out + 1] = string.char((n >> 16) & 255, (n >> 8) & 255, n & 255):sub(1, 3 - pad)
+    end
+    return table.concat(out)
+end
 ERR = ngx.ERR
 NOTICE = ngx.NOTICE
 WARN = ngx.WARN
@@ -224,3 +240,14 @@ class TestEmptyInternalstore:
         path = _variables(tmp_path, "API_WHITELIST_IP=127.0.0.1\n")
         out = run(CHECK_IP, variables_path=path, store={"API_WHITELIST_IP": "10.0.0.1"})
         assert out == "false|IP is not in API_WHITELIST_IP"
+
+    def test_a_value_written_as_bw_b64_is_decoded_before_it_is_used(self, tmp_path):
+        """`env_file.format_env_line` encodes a value that begins with `bw-b64:`; the fallback must undo it."""
+        path = _variables(tmp_path, "API_WHITELIST_IP=127.0.0.1\nAPI_TOKEN=bw-b64:YnctYjY0OnJlYWwtdG9rZW4=\n")
+        out = run(CHECK_TOKEN, variables_path=path, store={}, headers={"authorization": "Bearer bw-b64:real-token"})
+        assert out == "true|ok"
+
+    def test_a_malformed_bw_b64_value_is_kept_as_written(self, tmp_path):
+        path = _variables(tmp_path, "API_WHITELIST_IP=127.0.0.1\nAPI_TOKEN=bw-b64:***\n")
+        out = run(CHECK_TOKEN, variables_path=path, store={}, headers={"authorization": "Bearer bw-b64:***"})
+        assert out == "true|ok"

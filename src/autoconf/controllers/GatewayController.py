@@ -299,11 +299,11 @@ class GatewayController(KubernetesController):
                         break
                     self._logger.error(f"Error while probing {plural} in Gateway API {version}: {e.status} - {e.reason}")
                     self._logger.debug(format_exc())
-                    break
+                    raise
                 except Exception as e:
                     self._logger.error(f"Unexpected error while probing {plural} in Gateway API {version}: {e}")
                     self._logger.debug(format_exc())
-                    break
+                    raise
 
         if (self._skip_foreign_classes and not self._gateway_class) or "gateways" in resource_versions:
             found = False
@@ -317,9 +317,9 @@ class GatewayController(KubernetesController):
                     found = True
                     break
                 except ApiException as e:
+                    if e.status not in (403, 404):
+                        raise
                     last_error = f"{e.status} - {e.reason}"
-                except Exception as e:
-                    last_error = str(e)
             if not found:
                 if self._skip_foreign_classes and not self._gateway_class:
                     self._warn_gateway_classes(last_error)
@@ -370,9 +370,12 @@ class GatewayController(KubernetesController):
         except ApiException as e:
             self._logger.error(f"API error listing {plural}: {e.status} - {e.reason}")
             self._logger.debug(format_exc())
+            if e.status != 404:
+                raise
         except Exception as e:
             self._logger.error(f"Unexpected error listing {plural}: {e}")
             self._logger.debug(format_exc())
+            raise
         return []
 
     def _get_gateways(self) -> Dict[Tuple[str, str], Dict[str, Any]]:

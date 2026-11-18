@@ -25,7 +25,13 @@ def render(plugin="grpc", files=(), **settings):
         REVERSE_PROXY_HOST="http://backend:8080",
     )
     defaults.update(settings)
-    environment = jinja2.Environment(undefined=jinja2.ChainableUndefined, lstrip_blocks=True, trim_blocks=True, keep_trailing_newline=True)
+    environment = jinja2.Environment(
+        loader=jinja2.FileSystemLoader([ROOT / "src/common/confs", *ROOT.glob("src/common/core/*/confs")]),
+        undefined=jinja2.ChainableUndefined,
+        lstrip_blocks=True,
+        trim_blocks=True,
+        keep_trailing_newline=True,
+    )
     fake_pathlib = SimpleNamespace(
         Path=lambda path: SimpleNamespace(is_file=lambda: path in {f"/var/cache/bunkerweb/reverseproxy/example.com/{name}" for name in files})
     )

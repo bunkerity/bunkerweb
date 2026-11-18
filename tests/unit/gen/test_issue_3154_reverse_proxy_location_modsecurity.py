@@ -22,7 +22,11 @@ TEMPLATE = ROOT / "src" / "common" / "core" / "reverseproxy" / "confs" / "server
 
 def _locations(use_modsecurity: str, **overrides: str) -> dict:
     """Render the template and return {url: location block body}."""
-    environment = jinja2.Environment(undefined=jinja2.ChainableUndefined, keep_trailing_newline=True)
+    environment = jinja2.Environment(
+        loader=jinja2.FileSystemLoader([ROOT / "src/common/confs", *ROOT.glob("src/common/core/*/confs")]),
+        undefined=jinja2.ChainableUndefined,
+        keep_trailing_newline=True,
+    )
     environment.globals["import"] = import_module
     config = {
         "REVERSE_PROXY_HOST": "http://backend:8080",
