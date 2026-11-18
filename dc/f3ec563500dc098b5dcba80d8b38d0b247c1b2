@@ -1,0 +1,16 @@
+misc/check-version-consistency.sh
+  h_a33a1e80933106 43-44,49,61-77
+tests/unit/common/test_version_consistency.py
+  h_a33a1e80933106 35-36,84-115
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "dcf3ec563500dc098b5dcba80d8b38d0b247c1b2",
+  "prompts": {},
+  "humans": {
+    "h_a33a1e80933106": {
+      "author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}
