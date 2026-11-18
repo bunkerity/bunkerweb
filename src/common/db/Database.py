@@ -3257,6 +3257,7 @@ class Database:
         changed: Optional[bool] = True,
         *,
         disable_cleanup: bool = False,
+        allow_empty_manual: bool = False,
     ) -> str:
         """Save the custom configs in the database"""
         message = ""
@@ -3277,11 +3278,12 @@ class Database:
                 # them. An empty incoming list with existing rows almost always means
                 # the caller built an incomplete payload (route exception, form rebuild
                 # race, missing in-memory state) or, for the manual method, a configs
-                # folder that is missing or unreadable at scan time. Genuine "remove all
-                # custom configs" actions delete rows individually through the UI/API, so
+                # folder that is missing or unreadable at scan time. Only a complete scan
+                # of a marked manual folder may explicitly authorize an empty payload.
+                # Genuine "remove all" actions delete rows individually through the UI/API, so
                 # by the time an empty payload reaches save_custom_configs there is
                 # nothing left to wipe and this guard is a no-op.
-                if method in ("ui", "api", "manual") and not custom_configs:
+                if method in ("ui", "api", "manual") and not custom_configs and not (method == "manual" and allow_empty_manual):
                     existing_count = session.query(Custom_configs).filter(Custom_configs.method == method).count()
                     if existing_count > 0:
                         self.logger.warning(

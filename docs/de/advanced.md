@@ -1206,6 +1206,15 @@ Die Methode zum Anwenden benutzerdefinierter Konfigurationen hängt von der verw
 
 Einige Integrationen bieten bequemere Möglichkeiten zum Anwenden von Konfigurationen, wie z. B. die Verwendung von [Configs](https://docs.docker.com/engine/swarm/configs/) in Docker Swarm oder [ConfigMap](https://kubernetes.io/docs/concepts/configuration/configmap/) in Kubernetes. Diese Optionen bieten einfachere Ansätze zur Verwaltung und Anwendung von Konfigurationen.
 
+!!! info "Manuelle Dateien und die Markierung `.bw-managed`"
+    Der Scheduler speichert die `.conf`-Dateien aus dem manuellen Quellordner (`/etc/bunkerweb/configs`) in der Datenbank und legt in diesem Ordner die versteckte Markierungsdatei `.bw-managed` an. Bewahren Sie die Markierung zusammen mit dem Ordner oder Volume auf:
+
+    - Mit der Markierung löscht ein vollständiger Scan, der keine `.conf`-Datei findet, die letzte manuelle benutzerdefinierte Konfiguration aus der Datenbank: Das manuelle Löschen der letzten Datei funktioniert.
+    - Ohne die Markierung gilt ein leerer oder fehlender Ordner nicht als Löschung: Der Scheduler stellt die Dateien aus der Datenbank wieder her.
+    - Ein Scan, der fehlschlägt oder einen Teil des Ordners nicht lesen kann, ändert nichts: Dateien und Datenbankzeilen bleiben unverändert.
+
+    Bei `USE_MODSECURITY_GLOBAL_CRS=yes` werden `modsec-crs`-, `crs-plugins-before`- und `crs-plugins-after`-Dateien in einem Service-Unterordner nicht geladen. Der Scheduler behält sie auf dem Datenträger und in der Datenbank, inaktiv, und lädt sie wieder, sobald Sie das globale CRS deaktivieren.
+
 === "Web-UI"
 
     Navigieren Sie zur Seite **Konfigurationen**, klicken Sie auf **Neue benutzerdefinierte Konfiguration erstellen**, Sie können dann wählen, ob es sich um eine globale oder eine für einen Dienst spezifische Konfiguration handelt, den Konfigurationstyp und den Konfigurationsnamen:

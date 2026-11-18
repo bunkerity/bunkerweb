@@ -1208,6 +1208,15 @@ The method for applying custom configurations depends on the integration being u
 
 Some integrations provide more convenient ways to apply configurations, such as using [Configs](https://docs.docker.com/engine/swarm/configs/) in Docker Swarm or [ConfigMap](https://kubernetes.io/docs/concepts/configuration/configmap/) in Kubernetes. These options offer simpler approaches for managing and applying configurations.
 
+!!! info "Manual files and the `.bw-managed` marker"
+    The scheduler stores the `.conf` files it finds in the manual source folder (`/etc/bunkerweb/configs`) in the database and creates a hidden `.bw-managed` marker file in that folder. Keep the marker with the folder or volume:
+
+    - With the marker, a complete scan that finds no `.conf` file deletes the last manual custom configuration from the database, so removing the last file by hand works.
+    - Without the marker, an empty or missing folder is not read as a deletion: the scheduler restores the files from the database.
+    - A scan that fails or cannot read part of the folder changes nothing: the files and the database rows stay as they are.
+
+    When `USE_MODSECURITY_GLOBAL_CRS=yes`, `modsec-crs`, `crs-plugins-before` and `crs-plugins-after` files in a service subfolder are not loaded. The scheduler keeps them on disk and in the database, inactive, and loads them again when you turn global CRS off.
+
 === "Web UI"
 
     Navigate to the **Configs** page, click on **Create new custom config**, you can then choose if it's a global one or specific to a service, the configuration type and the configuration name :

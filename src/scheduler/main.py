@@ -9,7 +9,7 @@ from gc import collect
 from io import BytesIO
 from json import load as json_load
 from logging import Logger
-from os import _exit, environ, getenv, getpid, sep, access, R_OK
+from os import _exit, environ, getenv, getpid, sep, access, R_OK, walk
 from os.path import join
 from pathlib import Path
 from shutil import copy, rmtree, copytree
@@ -475,23 +475,34 @@ def send_file_to_bunkerweb(file_path: Path, endpoint: str, logger: Logger = LOGG
     return success
 
 
+def custom_config_path(root: Path, config: Dict[str, Any]) -> Path:
+    return root.joinpath(config["type"].replace("_", "-"), config.get("service_id") or "", f"{Path(config['name']).stem}.conf")
+
+
 def generate_custom_configs(configs: Optional[List[Dict[str, Any]]] = None, *, original_path: Union[Path, str] = CUSTOM_CONFIGS_PATH, send: bool = True):
     if not isinstance(original_path, Path):
         original_path = Path(original_path)
 
+    if configs is None:
+        assert SCHEDULER is not None
+        configs = SCHEDULER.db.get_custom_configs()
+    assert configs is not None, "Couldn't get custom configs from database"
+
+    # Keep manual sources until atomic replacement succeeds; a write failure must not look like a deletion on the next scan.
+    preserved = {custom_config_path(original_path, config) for config in configs if config.get("method") == "manual" and not config.get("is_draft")}
+
     # Remove old custom configs files
     LOGGER.info("Removing old custom configs files ...")
     if original_path.is_dir():
-        for file in original_path.glob("*/*"):
+        for file in sorted(original_path.rglob("*"), reverse=True):
+            if len(file.relative_to(original_path).parts) < 2 or file in preserved:
+                continue
             if file.is_symlink() or file.is_file():
                 with suppress(OSError):
                     file.unlink()
             elif file.is_dir():
-                rmtree(file, ignore_errors=True)
-
-    if configs is None:
-        assert SCHEDULER is not None
-        configs = SCHEDULER.db.get_custom_configs()
+                with suppress(OSError):
+                    file.rmdir()
 
     if configs:
         LOGGER.info("Generating new custom configs ...")
@@ -511,13 +522,11 @@ def generate_custom_configs(configs: Optional[List[Dict[str, Any]]] = None, *, o
                             f"Ignoring incompatible custom config \"{custom_config['name']}\""
                             f"{' for service ' + custom_config['service_id'] if custom_config['service_id'] else ''}: {compatibility_error}"
                         )
-                        continue
-                if custom_config["data"]:
-                    tmp_path = original_path.joinpath(
-                        custom_config["type"].replace("_", "-"),
-                        custom_config["service_id"] or "",
-                        f"{Path(custom_config['name']).stem}.conf",
-                    )
+                        # Preserve existing manual sources and restore missing ones, still inactive in global CRS mode.
+                        if custom_config.get("method") != "manual" or custom_config_path(original_path, custom_config).is_file():
+                            continue
+                if custom_config["data"] or custom_config.get("method") == "manual":
+                    tmp_path = custom_config_path(original_path, custom_config)
                     tmp_path.parent.mkdir(parents=True, exist_ok=True)
                     _write_atomic(tmp_path, custom_config["data"])
                     desired_perms = S_IRUSR | S_IWUSR | S_IRGRP  # 0o640
@@ -1049,44 +1058,78 @@ def custom_configs_save_failed(err: str) -> bool:
     return any(not (line.startswith("Service ") and line.endswith(" not found, please check your config")) for line in err.splitlines() if line.strip())
 
 
+def mark_custom_configs_managed() -> None:
+    try:
+        CUSTOM_CONFIGS_PATH.joinpath(".bw-managed").touch(exist_ok=True)
+    except OSError as e:
+        LOGGER.warning(f"Couldn't mark the manual custom configs folder as managed: {e}")
+
+
 def check_configs_changes(*, generate: bool = True) -> Optional[bool]:
     # Checking if any custom config has been created by the user
     assert SCHEDULER is not None, "SCHEDULER is not defined"
     LOGGER.info("Checking if there are any changes in custom configs ...")
     custom_configs = []
-    db_configs = SCHEDULER.db.get_custom_configs()
+    db_configs = cast(List[Dict[str, Any]], SCHEDULER.db.get_custom_configs())
     changes = False
-    for file in list(CUSTOM_CONFIGS_PATH.rglob("*.conf")):
-        if len(file.parts) > len(CUSTOM_CONFIGS_PATH.parts) + 3:
-            LOGGER.warning(f"Custom config file {file} is not in the correct path, skipping ...")
-            continue
 
-        content = file.read_text(encoding="utf-8")
-        service_id = file.parent.name if file.parent.name not in CUSTOM_CONFIGS_DIRS else None
-        config_type = file.parent.parent.name if service_id else file.parent.name
+    def scan_error(error: OSError) -> None:
+        raise error
 
-        saving = True
-        in_db = False
-        from_template = False
-        for db_conf in db_configs:
-            if db_conf["service_id"] == service_id and db_conf["name"] == file.stem:
-                in_db = True
-                if db_conf["template"]:
-                    from_template = True
+    try:
+        CUSTOM_CONFIGS_PATH.mkdir(parents=True, exist_ok=True)
+        for root, _, names in walk(CUSTOM_CONFIGS_PATH, onerror=scan_error):
+            for name in names:
+                if not name.endswith(".conf"):
+                    continue
+                file = Path(root, name)
+                if len(file.parts) > len(CUSTOM_CONFIGS_PATH.parts) + 3:
+                    LOGGER.warning(f"Custom config file {file} is not in the correct path, skipping ...")
+                    continue
 
-        if from_template or (not in_db and content.startswith("# CREATED BY ENV")):
-            saving = False
-            changes = not from_template
+                content = file.read_text(encoding="utf-8")
+                service_id = file.parent.name if file.parent.name not in CUSTOM_CONFIGS_DIRS else None
+                config_type = file.parent.parent.name if service_id else file.parent.name
 
-        if saving:
-            custom_configs.append({"value": content, "exploded": (service_id, config_type, file.stem), "is_draft": False})
+                saving = True
+                in_db = False
+                from_template = False
+                for db_conf in db_configs:
+                    if db_conf["service_id"] == service_id and db_conf["name"] == file.stem:
+                        in_db = True
+                        if db_conf["template"]:
+                            from_template = True
+
+                if from_template or (not in_db and content.startswith("# CREATED BY ENV")):
+                    saving = False
+                    changes = not from_template
+
+                if saving:
+                    custom_configs.append({"value": content, "exploded": (service_id, config_type, file.stem), "is_draft": False})
+    except (OSError, UnicodeError) as e:
+        LOGGER.warning(f"Couldn't completely scan manual custom configs; keeping database rows and source files unchanged: {e}")
+        return False
+
+    manual_configs = [config for config in db_configs if config.get("method") == "manual"]
+    if not custom_configs and manual_configs and not CUSTOM_CONFIGS_PATH.joinpath(".bw-managed").is_file():
+        LOGGER.warning("Empty manual custom configs folder has no management marker; keeping database rows and restoring files from the database")
+        generate_custom_configs(db_configs, send=generate)
+        # A failed restore must not authorize an empty scan on the next restart.
+        if all(custom_config_path(CUSTOM_CONFIGS_PATH, config).is_file() for config in manual_configs):
+            mark_custom_configs_managed()
+        return False
 
     changes = changes or {hash(dict_to_frozenset(d)) for d in custom_configs} != {hash(dict_to_frozenset(d)) for d in db_configs}
 
     if changes:
         saved = True
         try:
-            err = SCHEDULER.db.save_custom_configs(custom_configs, "manual")
+            if not custom_configs and manual_configs:
+                err = SCHEDULER.db.save_custom_configs(custom_configs, "manual", allow_empty_manual=True)
+                if not err:
+                    LOGGER.info("Managed custom configs folder is empty; removed the last manual custom configs from the database")
+            else:
+                err = SCHEDULER.db.save_custom_configs(custom_configs, "manual")
             if err:
                 LOGGER.error(f"Couldn't save some manually created custom configs to database: {err}")
                 saved = not custom_configs_save_failed(err)
@@ -1103,6 +1146,7 @@ def check_configs_changes(*, generate: bool = True) -> Optional[bool]:
     if generate:
         generate_custom_configs(SCHEDULER.db.get_custom_configs())
 
+    mark_custom_configs_managed()
     return changes
 
 

@@ -1206,6 +1206,15 @@ systemctl status systemd-resolved
 
 某些集成提供了更方便的应用配置方式，例如在 Docker Swarm 中使用 [Configs](https://docs.docker.com/engine/swarm/configs/) 或在 Kubernetes 中使用 [ConfigMap](https://kubernetes.io/docs/concepts/configuration/configmap/)。这些选项为管理和应用配置提供了更简单的方法。
 
+!!! info "手动文件与 `.bw-managed` 标记"
+    Scheduler 会把在手动源文件夹（`/etc/bunkerweb/configs`）中找到的 `.conf` 文件保存到数据库，并在该文件夹中创建隐藏的标记文件 `.bw-managed`。请让标记文件与该文件夹或卷一起保留：
+
+    - 有标记时，一次完整扫描若未发现任何 `.conf` 文件，就会从数据库中删除最后一个手动自定义配置，因此手动删除最后一个文件是有效的。
+    - 没有标记时，空文件夹或缺失的文件夹不会被视为删除：Scheduler 会从数据库恢复这些文件。
+    - 扫描失败或无法读取文件夹的某一部分时，不会改动任何内容：文件和数据库记录保持原样。
+
+    当 `USE_MODSECURITY_GLOBAL_CRS=yes` 时，服务子文件夹中的 `modsec-crs`、`crs-plugins-before` 和 `crs-plugins-after` 文件不会被加载。Scheduler 会将它们保留在磁盘和数据库中（处于未激活状态），并在您关闭全局 CRS 后重新加载。
+
 === "Web UI"
 
     导航到**配置**页面，点击**创建新的自定义配置**，然后您可以选择是全局设置还是特定于服务的配置，以及配置类型和配置名称：

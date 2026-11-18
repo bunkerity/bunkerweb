@@ -10,6 +10,9 @@
 - [BUGFIX] `linux`: reinstalling a package keeps the data and starts the services; absent units are tolerated, stop failures still abort.
 - [BUGFIX] `ui`: a long login username can no longer stall UI workers; the logged username is bounded and the diagnostics redactor runs in linear time.
 - [BUGFIX] `jobs`: the API server certificate job keeps the previous certificate, so a restarted scheduler or UI still reaches instances that have not reloaded.
+- [BUGFIX] `scheduler`: the deletion of the last manual custom config is honored only after a complete scan of the managed folders.
+- [BUGFIX] `scheduler`: inactive service CRS custom configs and manual source files are kept when generation fails or global CRS is enabled.
+- [DOCS] `scheduler`: the custom configuration section explains the `.bw-managed` marker, manual deletion and restore, and retained inactive service CRS files.
 
 ## v1.6.18~rc4 - 2026/11/17
 

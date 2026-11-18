@@ -1206,6 +1206,15 @@ El método para aplicar configuraciones personalizadas depende de la integració
 
 Algunas integraciones proporcionan formas más convenientes de aplicar configuraciones, como el uso de [Configs](https://docs.docker.com/engine/swarm/configs/) en Docker Swarm o [ConfigMap](https://kubernetes.io/docs/concepts/configuration/configmap/) en Kubernetes. Estas opciones ofrecen enfoques más sencillos para gestionar y aplicar configuraciones.
 
+!!! info "Archivos manuales y el marcador `.bw-managed`"
+    El scheduler guarda en la base de datos los archivos `.conf` que encuentra en la carpeta de origen manual (`/etc/bunkerweb/configs`) y crea en ella el archivo marcador oculto `.bw-managed`. Conserve el marcador junto con la carpeta o el volumen:
+
+    - Con el marcador, un análisis completo que no encuentra ningún archivo `.conf` elimina de la base de datos la última configuración personalizada manual: borrar a mano el último archivo funciona.
+    - Sin el marcador, una carpeta vacía o ausente no se interpreta como un borrado: el scheduler restaura los archivos desde la base de datos.
+    - Un análisis que falla o que no puede leer una parte de la carpeta no cambia nada: los archivos y las filas de la base de datos se mantienen.
+
+    Cuando `USE_MODSECURITY_GLOBAL_CRS=yes`, los archivos `modsec-crs`, `crs-plugins-before` y `crs-plugins-after` de una subcarpeta de servicio no se cargan. El scheduler los conserva en disco y en la base de datos, inactivos, y los vuelve a cargar cuando desactiva el CRS global.
+
 === "Interfaz de usuario web"
 
     Navega a la página de **Configuraciones**, haz clic en **Crear nueva configuración personalizada**, luego puedes elegir si es global o específica para un servicio, el tipo de configuración y el nombre de la configuración:
