@@ -120,7 +120,11 @@ def drive(sched_main, sandbox, fake_sched, fake_api, monkeypatch, tmp_path):
     monkeypatch.setattr(sched_main, "_exit", stop)
     monkeypatch.setattr(sched_main, "sleep", lambda s: h.sleeps.append(s))
     monkeypatch.setattr(sched_main, "run_pending", lambda: None)
-    monkeypatch.setattr(sched_main, "schedule_every", lambda n: SimpleNamespace(seconds=SimpleNamespace(do=lambda fn: schedule_calls.append((n, fn)))))
+    monkeypatch.setattr(
+        sched_main,
+        "schedule_every",
+        lambda n: SimpleNamespace(seconds=SimpleNamespace(do=lambda fn: schedule_calls.append((n, fn)) or SimpleNamespace(tag=lambda tag: None))),
+    )
     monkeypatch.setattr(sched_main, "subprocess_run", lambda cmd, **kw: h.saver_calls.append(cmd) or SimpleNamespace(returncode=h.saver_rc))
     monkeypatch.setattr(sched_main, "Database", lambda logger, sqlalchemy_string=None: h.database_args.append(sqlalchemy_string) or fake_sched.db)
     monkeypatch.setattr(sched_main, "JobScheduler", lambda logger, db=None, generate_configs=None: fake_sched)

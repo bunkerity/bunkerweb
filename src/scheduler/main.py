@@ -30,7 +30,7 @@ for deps_path in [BUNKERWEB_PATH.joinpath(*paths).as_posix() for paths in (("dep
     if deps_path not in sys_path:
         sys_path.append(deps_path)
 
-from schedule import every as schedule_every, run_pending
+from schedule import clear as schedule_clear, every as schedule_every, run_pending
 
 from common_utils import (  # type: ignore
     acquire_db_lock,
@@ -1300,6 +1300,22 @@ def check_configs_changes(*, generate: bool = True) -> Optional[bool]:
     return changes
 
 
+HEALTHCHECK_TAG = "healthcheck"
+
+
+def schedule_healthcheck() -> None:
+    """Register the one healthcheck on the default registry. Cleared first, so a reload can never leave two."""
+    schedule_clear(HEALTHCHECK_TAG)
+    schedule_every(HEALTHCHECK_INTERVAL).seconds.do(healthcheck_job).tag(HEALTHCHECK_TAG)
+
+
+def scheduler_tick(generation_pending: bool) -> None:
+    """One main-loop pass over the schedules: the healthcheck on the default registry, then the plugin jobs."""
+    run_pending()  # the library: the default registry only holds the healthcheck
+    SCHEDULER.generation_pending = generation_pending
+    SCHEDULER.run_pending()  # every plugin job, through the job runner
+
+
 def healthcheck_job():
     if HEALTHCHECK_EVENT.is_set():
         HEALTHCHECK_LOGGER.warning("Healthcheck job is already running, skipping execution ...")
@@ -2207,7 +2223,7 @@ def main() -> None:
             APPLYING_CHANGES.clear()
             if not healthcheck_job_run:
                 LOGGER.debug("Scheduling healthcheck job ...")
-                schedule_every(HEALTHCHECK_INTERVAL).seconds.do(healthcheck_job)
+                schedule_healthcheck()
                 healthcheck_job_run = True
 
             # infinite schedule for the jobs
@@ -2250,9 +2266,7 @@ def main() -> None:
                         break
 
                     sleep(3 if SCHEDULER.db.readonly else 1)
-                    run_pending()
-                    SCHEDULER.generation_pending = CONFIG_NEED_GENERATION
-                    SCHEDULER.run_pending()
+                    scheduler_tick(CONFIG_NEED_GENERATION)
                     _gc_counter += 1
                     if _gc_counter >= 10:
                         collect()

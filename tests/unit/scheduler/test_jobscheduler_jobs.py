@@ -228,7 +228,7 @@ def test_setup_registers_periodic_jobs_but_not_once_jobs(make_scheduler):
         ]
     )
     sched.setup()
-    assert sorted(j.unit for j in schedule.jobs) == ["days", "hours", "minutes", "weeks"]
+    assert sorted(j.unit for j in sched.scheduler.jobs) == ["days", "hours", "minutes", "weeks"]
 
 
 def test_setup_survives_a_job_that_cannot_be_scheduled(make_scheduler, caplog):
@@ -237,14 +237,14 @@ def test_setup_survives_a_job_that_cannot_be_scheduled(make_scheduler, caplog):
     with caplog.at_level(logging.ERROR):
         sched.setup()
     assert "Exception while scheduling job 'weird' for plugin 'plug'" in caplog.text
-    assert len(schedule.jobs) == 1
+    assert len(sched.scheduler.jobs) == 1
 
 
 def test_clear_drops_every_scheduled_job(make_scheduler):
     sched = make_scheduler([("plug", [job("j", "a.py", "day")], {})])
     sched.setup()
     sched.clear()
-    assert schedule.jobs == []
+    assert sched.scheduler.jobs == []
 
 
 # --- run_single and job outcomes ------------------------------------------------------------------
@@ -427,20 +427,15 @@ def test_a_cached_job_module_is_reloaded_with_its_new_code(make_scheduler, tmp_p
     assert marker.read_text() == "xx"
 
 
-def test_a_failing_reload_of_a_cached_module_falls_back_to_a_fresh_import(make_scheduler, job_scheduler_module, monkeypatch, tmp_path, caplog):
+def test_a_cached_module_is_rebuilt_from_source_without_a_reload_warning(make_scheduler, tmp_path, caplog):
     marker = tmp_path / "count"
     marker.write_text("")
     body = f"with open({str(marker)!r}, 'a') as f: f.write('x')\n"
     sched = make_scheduler([("plug", [job("a", "a.py")], {"a.py": body})])
     sched.run_single("a")
-
-    def refuse(module):
-        raise ImportError("cannot reload")
-
-    monkeypatch.setattr(job_scheduler_module, "importlib_reload", refuse)
     with caplog.at_level(logging.WARNING):
         assert sched.run_single("a") is True
-    assert "Failed to reload cached module a, re-importing" in caplog.text
+    assert "Failed to reload" not in caplog.text
     assert marker.read_text() == "xx"
 
 
@@ -504,7 +499,7 @@ def test_a_cache_walk_error_is_logged_and_does_not_fail_the_batch(make_scheduler
 
 
 def due(sched):
-    for scheduled in schedule.jobs:
+    for scheduled in sched.scheduler.jobs:
         scheduled.next_run = datetime.now() - timedelta(seconds=1)
 
 
@@ -728,7 +723,7 @@ def test_reload_applies_the_env_runs_once_jobs_then_registers_periodic_jobs(make
     sched = make_scheduler([("plug", [job("once", "a.py"), job("daily", "a.py", "day")], {"a.py": body})])
     assert sched.reload({"MY_SETTING": "hello"}, [SimpleNamespace(endpoint="http://x/")]) is True
     assert marker.read_text() == "hello"
-    assert len(schedule.jobs) == 1
+    assert len(sched.scheduler.jobs) == 1
     assert [a.endpoint for a in sched.apis] == ["http://x/"]
 
 
@@ -743,7 +738,7 @@ def test_reload_drops_stale_scheduled_jobs(make_scheduler):
     sched = make_scheduler([("plug", [job("daily", "a.py", "day")], {"a.py": EXIT.format(code=0)})])
     sched.reload({})
     sched.reload({})
-    assert len(schedule.jobs) == 1
+    assert len(sched.scheduler.jobs) == 1
 
 
 def test_reload_turns_an_exception_into_a_failed_reload(make_scheduler, caplog):
@@ -826,10 +821,19 @@ def test_the_fallback_uri_is_tried_when_the_read_only_retry_fails_too(make_sched
 def test_a_read_only_database_is_not_probed_again_within_the_retry_window(make_scheduler):
     db = RoDb()
     db.readonly = True
-    db.last_connection_retry = datetime.now().astimezone() - timedelta(seconds=60)
+    db.last_connection_retry = datetime.now().astimezone() - timedelta(seconds=5)
     sched = make_scheduler(db=db)
     assert sched.try_database_readonly() is True
     assert db.calls == []
+
+
+def test_a_read_only_database_is_probed_again_once_the_retry_window_passed(make_scheduler):
+    db = RoDb()
+    db.readonly = True
+    db.last_connection_retry = datetime.now().astimezone() - timedelta(seconds=60)
+    sched = make_scheduler(db=db)
+    assert sched.try_database_readonly() is False
+    assert db.calls
 
 
 def test_force_probes_a_read_only_database_regardless_of_the_retry_window(make_scheduler):
