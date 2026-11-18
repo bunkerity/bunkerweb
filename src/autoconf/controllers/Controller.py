@@ -205,13 +205,13 @@ class Controller(Config):
         Thread(target=self._settings_recheck_worker, daemon=True).start()
 
     def _settings_recheck_worker(self):
-        """Periodically re-apply the current labels when the set of valid settings changed.
+        """Periodically re-apply labels when valid settings change or an apply needs a retry.
 
         AUTOCONF only reacts to orchestrator events, so a PRO license becoming valid (or any other
         out-of-band settings change) would otherwise never trigger a re-evaluation of labels that
         were dropped while invalid. This worker fills that gap. It is cheap in steady state: each
-        tick is a single get_plugins() read plus a set comparison; the orchestrator queries and the
-        forced apply only run when the settings set actually changed.
+        tick is a single get_plugins() read plus signature and pending-work checks; the orchestrator
+        queries and forced apply only run when settings changed or work remains pending.
         """
         while True:
             sleep(self._settings_recheck_interval)
@@ -220,10 +220,10 @@ class Controller(Config):
                     if self.have_to_wait():
                         continue
                     self._update_settings()
-                    if not self.settings_changed():
+                    if not self.settings_changed() and not self.has_pending_work():
                         continue
 
-                    self._logger.info("Available settings changed (e.g. PRO license now valid), re-checking autoconf labels...")
+                    self._logger.info("Available settings changed or configuration retry pending, re-checking autoconf labels...")
                     self._instances = self.get_instances()
                     self._services = self.get_services()
                     configs_result = self.get_configs()
