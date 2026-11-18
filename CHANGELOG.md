@@ -12,6 +12,9 @@
 - [BUGFIX] `jobs`: the API server certificate job keeps the previous certificate, so a restarted scheduler or UI still reaches instances that have not reloaded.
 - [BUGFIX] `scheduler`: the deletion of the last manual custom config is honored only after a complete scan of the managed folders.
 - [BUGFIX] `scheduler`: inactive service CRS custom configs and manual source files are kept when generation fails or global CRS is enabled.
+- [BUGFIX] `scheduler`: down instances are no longer publication recipients and receive the current configuration when they return.
+- [BUGFIX] `scheduler`: busy or failed custom config and plugin uploads are retried until each instance has received them.
+- [BUGFIX] `scheduler`: an accepted reload is confirmed before any retry, and instances that already confirmed it are not reloaded again.
 - [DOCS] `scheduler`: the custom configuration section explains the `.bw-managed` marker, manual deletion and restore, and retained inactive service CRS files.
 
 ## v1.6.18~rc4 - 2026/11/17
