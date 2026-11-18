@@ -17,6 +17,7 @@
 - [BUGFIX] `scheduler`: an accepted reload is confirmed before any retry, and instances that already confirmed it are not reloaded again.
 - [BUGFIX] `autoconf`: Gateway routing and class isolation survive Kubernetes API list failures; transient discovery errors fail startup.
 - [BUGFIX] `autoconf`: Kubernetes retries a failed configuration save or apply after 10 s, and Docker, Swarm and Kubernetes keep the last saved configuration as the baseline, so a failed save is written again. (Refs #4107)
+- [BUGFIX] `integrations`: fix the Web UI database URIs in the PostgreSQL and MariaDB Kubernetes manifests.
 - [DOCS] `scheduler`: the custom configuration section explains the `.bw-managed` marker, manual deletion and restore, and retained inactive service CRS files.
 
 ## v1.6.18~rc4 - 2026/11/17

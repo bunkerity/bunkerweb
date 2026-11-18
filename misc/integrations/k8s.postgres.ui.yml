@@ -329,7 +329,7 @@ spec:
                   name: bunkerweb-api
                   key: token
             - name: DATABASE_URI
-              value: "mysql+pymysql://bunkerweb:testor@svc-bunkerweb-db:3306/db"
+              value: "postgresql://bunkerweb:changeme@svc-bunkerweb-db:5432/db"
             - name: ADMIN_USERNAME
               value: "changeme"
             - name: ADMIN_PASSWORD
