@@ -57,6 +57,9 @@ _STRUCTURED_HEAD = re_compile(
 _BLOCK_HEAD = re_compile(rf"(?<![\w.\-])[\"']?{_KEY}[\"']?[ \t]*[:=][ \t\r]*$", IGNORECASE)
 # A secret key whose value is a YAML block scalar (`|`, `>-`, `|2+`, optional comment): the value is the indented lines below the marker
 _BLOCK_SCALAR_HEAD = re_compile(rf"(?<![\w.\-])[\"']?{_KEY}[\"']?[ \t]*[:=][ \t]*[|>][+\-]?[0-9]?[+\-]?[ \t]*(?:#.*)?[ \t\r]*$", IGNORECASE)
+# The request or response body of a JSON audit record, for a line that does not parse (cut, corrupt): the escaped body cannot be scanned
+_JSON_BODY = re_compile(r"(?P<head>\"body\"[ \t]*:[ \t]*)\"(?:\\.|[^\"\\])*(?:\"|$)", IGNORECASE)
+_JSON_DEPTH = 4
 _CLOSERS = {"[": "]", "{": "}", "(": ")"}
 _IPV6_CANDIDATE = re_compile(r"(?<![\w:.])[0-9A-Fa-f:.]*:[0-9A-Fa-f:.]*(?:%[\w.\-]+)?")
 _IPV4 = re_compile(r"(?<![\w.])(?:\d{1,3}\.){3}\d{1,3}(?!\.?\d)")
@@ -83,6 +86,41 @@ def _json_pair_sub(m) -> str:
 
 def _decoded_key_sub(m) -> str:
     return f"{m.group('key')}{m.group('head')}{REDACTED}" if _is_secret_key(m.group("key")) else m.group(0)
+
+
+def _scrub_json(value: Any, depth: int = 0) -> Any:
+    """Decoded copy of a JSON value: the value of every secret key redacted, and every string holding a JSON document (an audit log body) decoded and
+    scrubbed in turn. A string that looks like JSON and does not parse, or nests too deep, is dropped, since its escaped keys cannot be scanned."""
+    if isinstance(value, dict):
+        return {key: REDACTED if isinstance(key, str) and _is_secret_key(key) else _scrub_json(item, depth) for key, item in value.items()}
+    if isinstance(value, list):
+        return [_scrub_json(item, depth) for item in value]
+    if isinstance(value, str) and value.lstrip()[:1] in ("{", "["):
+        if depth >= _JSON_DEPTH:
+            return REDACTED
+        try:
+            return dumps(_scrub_json(loads(value), depth + 1), ensure_ascii=False, separators=(",", ":"))
+        except (ValueError, RecursionError):
+            return REDACTED
+    return value
+
+
+def _redact_json_lines(text: str) -> str:
+    """Scrub each line that is a JSON object (the JSON ModSecurity audit log keeps the request body as an escaped string) on its decoded form."""
+    if "{" not in text:
+        return text
+    lines = text.split("\n")
+    for index, line in enumerate(lines):
+        if not line.lstrip().startswith("{"):
+            continue
+        try:
+            record = loads(line)
+        except (ValueError, RecursionError):
+            lines[index] = _JSON_BODY.sub(rf'\g<head>"{REDACTED}"', line)
+            continue
+        if isinstance(record, dict):
+            lines[index] = dumps(_scrub_json(record), ensure_ascii=False, separators=(",", ":"))
+    return "\n".join(lines)
 
 
 def _structure_end(text: str, start: int) -> int:
@@ -189,6 +227,7 @@ class Anonymizer:
         self._anonymize = anonymize
 
     def redact(self, text: str) -> str:
+        text = _redact_json_lines(text)
         text = _URI_USERINFO.sub(rf"\g<scheme>{REDACTED}@", text)
         # Before the header and cookie passes, which would turn the block scalar marker into the whole value
         text = _redact_blocks(text, _BLOCK_SCALAR_HEAD)

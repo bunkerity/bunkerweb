@@ -1,5 +1,6 @@
 """Tests for the support redaction shared by the Web UI diagnostics and `bwcli support` (src/common/utils/support_common.py, UI login route)."""
 
+import json
 import sys
 import unittest
 from pathlib import Path
@@ -77,6 +78,59 @@ class TestLoginUsernameLog(unittest.TestCase):
         username = "https://admin:" + "S3CRETVALUE" * 20 + "@host.example/path"
         shown = loggable_username(username)
         self.assertNotIn("S3CRET", shown)
+
+
+class TestJsonAuditLogBodies(unittest.TestCase):
+    """L08-F2: a JSON audit record holds the request body as an escaped JSON string."""
+
+    @staticmethod
+    def audit_line(body):
+        record = {
+            "transaction": {
+                "client_ip": "192.0.2.10",
+                "request": {"request_line": "POST /login HTTP/1.1", "headers": {"Host": "app.example", "Content-Type": "application/json"}, "body": body},
+                "response": {"http_code": 403},
+            }
+        }
+        return json.dumps(record, separators=(",", ":"))
+
+    def test_json_body_credentials_are_redacted(self):
+        body = json.dumps({"user": "bob", "password": "P4ssw0rd-LEAK", "nested": {"token": "T0kenLEAK"}, "list": [{"api_key": "KeyLEAK"}]})
+        out = Anonymizer(anonymize=False).redact(self.audit_line(body))
+        for leak in ("P4ssw0rd-LEAK", "T0kenLEAK", "KeyLEAK"):
+            self.assertNotIn(leak, out)
+        decoded = json.loads(out)  # still one valid JSON record
+        self.assertEqual(decoded["transaction"]["request"]["request_line"], "POST /login HTTP/1.1")
+        self.assertIn("bob", out)
+
+    def test_double_encoded_body_is_decoded_recursively(self):
+        inner = json.dumps({"password": "DeepLEAK"})
+        body = json.dumps({"payload": inner})
+        out = Anonymizer(anonymize=False).redact(self.audit_line(body))
+        self.assertNotIn("DeepLEAK", out)
+
+    def test_form_body_still_redacted(self):
+        out = Anonymizer(anonymize=False).redact(self.audit_line("user=bob&password=FormLEAK&x=1"))
+        self.assertNotIn("FormLEAK", out)
+
+    def test_unparsable_line_drops_the_body(self):
+        line = self.audit_line(json.dumps({"password": "CutLEAK"}))
+        broken = line[: line.index("CutLEAK") + 3]  # cut inside the escaped body, no closing quote
+        out = Anonymizer(anonymize=False).redact(broken + "\nnext line password=Other1")
+        self.assertNotIn("CutLEAK", out)
+        self.assertNotIn("Other1", out)
+        self.assertIn("POST /login", out)
+
+    def test_other_lines_are_untouched(self):
+        text = "[2026-11-17 10:00:00] - UI - INFO - something happened\n"
+        self.assertEqual(Anonymizer(anonymize=False).redact(text), text)
+
+    def test_multiple_lines_each_scrubbed(self):
+        lines = [self.audit_line(json.dumps({"password": f"Leak{i}"})) for i in range(3)]
+        out = Anonymizer(anonymize=False).redact("\n".join(lines))
+        for i in range(3):
+            self.assertNotIn(f"Leak{i}", out)
+        self.assertEqual(len(out.splitlines()), 3)
 
 
 if __name__ == "__main__":
