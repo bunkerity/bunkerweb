@@ -428,7 +428,7 @@ class Templator:
         self._stream_reuseport_ports = self._stream_reuseport_owners()
 
         self._base_template_vars = {
-            "is_custom_conf": Templator.is_custom_conf,
+            "is_custom_conf": self.is_custom_conf,
             "has_variable": Templator.has_variable,
             "has_service_with": Templator.has_service_with,
             "random": Templator.random,
@@ -831,8 +831,7 @@ class Templator:
             return False
         return True
 
-    @staticmethod
-    def is_custom_conf(path: str) -> bool:
+    def is_custom_conf(self, path: str) -> bool:
         """Check if the path contains any .conf files.
 
         Args:
@@ -841,6 +840,10 @@ class Templator:
         Returns:
             bool: True if .conf files are found, False otherwise.
         """
+        # Generated fragments belong to this render; operator configs keep their literal root.
+        generated_path = Path(path)
+        if generated_path.is_relative_to("/etc/nginx"):
+            path = str(self._output / generated_path.relative_to("/etc/nginx"))
         return bool(glob(join(path, "*.conf")))
 
     @staticmethod
