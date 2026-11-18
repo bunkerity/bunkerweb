@@ -15,6 +15,7 @@
 - [BUGFIX] `scheduler`: down instances are no longer publication recipients and receive the current configuration when they return.
 - [BUGFIX] `scheduler`: busy or failed custom config and plugin uploads are retried until each instance has received them.
 - [BUGFIX] `scheduler`: an accepted reload is confirmed before any retry, and instances that already confirmed it are not reloaded again.
+- [BUGFIX] `autoconf`: Gateway routing and class isolation survive Kubernetes API list failures; transient discovery errors fail startup.
 - [DOCS] `scheduler`: the custom configuration section explains the `.bw-managed` marker, manual deletion and restore, and retained inactive service CRS files.
 
 ## v1.6.18~rc4 - 2026/11/17

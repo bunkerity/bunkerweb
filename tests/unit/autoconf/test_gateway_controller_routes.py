@@ -93,14 +93,17 @@ def test_only_missing_standard_routes_get_no_hint(gateway_build):
         (RuntimeError("tls"), "Unexpected error while probing gateways in Gateway API v1: tls"),
     ],
 )
-def test_probe_errors_are_reported_and_the_resource_stays_unavailable(gateway_build, error, fragment):
+def test_probe_errors_are_reported_and_transient_errors_abort(gateway_build, caplog, error, fragment):
     table = crds()
     table["gateways"] = error
 
-    ctrl = gateway_build(table)
-
-    assert ctrl._gateway_api_available is False
-    assert ctrl.init_log.has(fragment, logging.ERROR)
+    if isinstance(error, ApiException) and error.status == 403:
+        ctrl = gateway_build(table)
+        assert ctrl._gateway_api_available is False
+    else:
+        with pytest.raises(type(error)):
+            gateway_build(table)
+    assert any(fragment in record.getMessage() and record.levelno == logging.ERROR for record in caplog.records)
 
 
 def test_gateway_classes_are_read_when_gateways_exist_and_flag_status_support(gateway_build):
@@ -138,17 +141,19 @@ def test_foreign_classes_are_those_of_other_controllers(gateway_build):
     assert ctrl._foreign_gateway_classes() == {"istio"}
 
 
-def test_listing_errors_are_logged_and_yield_nothing(gateway_build):
+def test_listing_errors_are_logged_and_propagated(gateway_build):
     ctrl = gateway_build()
     ctrl.api.crds["gateways"] = (("v1",), [])
     log = attach_log(ctrl)
 
     ctrl.api.list_cluster_custom_object = MagicMock(side_effect=ApiException(status=500, reason="boom"))
-    assert ctrl._list_custom_objects("gateways") == []
+    with pytest.raises(ApiException):
+        ctrl._list_custom_objects("gateways")
     assert log.has("API error listing gateways: 500 - boom", logging.ERROR)
 
     ctrl.api.list_cluster_custom_object = MagicMock(side_effect=RuntimeError("x"))
-    assert ctrl._list_custom_objects("gateways") == []
+    with pytest.raises(RuntimeError):
+        ctrl._list_custom_objects("gateways")
     assert log.has("Unexpected error listing gateways: x", logging.ERROR)
 
     ctrl.api.list_cluster_custom_object = MagicMock(return_value=["not", "a", "dict"])
