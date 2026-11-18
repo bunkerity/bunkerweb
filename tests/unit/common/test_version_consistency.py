@@ -32,8 +32,8 @@ def tree(tmp_path):
         "#!/usr/bin/env bash\nset -euo pipefail\n"
         'case "$1" in\n'
         'rev-parse) printf "%s\\n" "$FIXTURE_ROOT" ;;\n'
-        'grep) grep -nE "$3" src/bw/Dockerfile publiccode.yml pyproject.toml '
-        ".github/ISSUE_TEMPLATE/bug_report.yml literals.txt ;;\n"
+        'grep) shopt -s globstar nullglob; grep -nE "$3" src/bw/Dockerfile publiccode.yml pyproject.toml '
+        ".github/ISSUE_TEMPLATE/bug_report.yml literals.txt docs/**/*.md ;;\n"
         "*) exit 2 ;;\nesac\n"
     )
     git.chmod(0o755)
@@ -79,6 +79,38 @@ def test_stale_token_cannot_hide_behind_current_version(tree, stale, same_line):
     result = check(tree)
     assert result.returncode == 1, result.stdout + result.stderr
     assert "literals.txt:1:" in result.stdout
+
+
+@pytest.mark.parametrize("path", ["docs/features.md", "docs/fr/features.md"])
+@pytest.mark.parametrize("prose", ["Requires ({rc} or later).", "Cores before {rc} differ. {rc} or later also helps.", "Requires a fix before {rc}."])
+def test_features_accept_version_bounds(tree, path, prose):
+    page = tree / path
+    page.parent.mkdir(parents=True)
+    page.write_text(prose.format(rc=VERSION.split("~")[0] + "~rc2") + "\n")
+    result = check(tree)
+    assert result.returncode == 0, result.stdout + result.stderr
+
+
+@pytest.mark.parametrize(
+    "path,line",
+    [
+        ("docs/features.md", "image: bunkerweb:{tag}"),
+        ("docs/fr/features.md", "Requires {rc} or later. Use image: bunkerweb:{tag}"),
+        ("docs/fr/features.md", "Requires {rc} or later. Install with version={rc}"),
+        ("docs/features.md", "Use image: bunkerweb:{rc} or later"),
+        ("docs/features.md", "Cores before {rc}-extra differ."),
+        ("docs/features.md", "Cores before {rc}:amd64 differ."),
+        ("docs/guide.md", "Requires {rc} or later."),
+    ],
+)
+def test_version_bounds_do_not_hide_stale_pins(tree, path, line):
+    page = tree / path
+    page.parent.mkdir(parents=True)
+    stale = VERSION.split("~")[0] + "~rc2"
+    page.write_text(line.format(rc=stale, tag=stale.replace("~", "-")) + "\n")
+    result = check(tree)
+    assert result.returncode == 1, result.stdout + result.stderr
+    assert f"{path}:1:" in result.stdout
 
 
 def test_final_release_rejects_stale_rc_literal(tree):

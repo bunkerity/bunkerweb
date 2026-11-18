@@ -40,12 +40,13 @@ check_pin pyproject.toml '^version = "([^"]*)".*'
 check_pin .github/ISSUE_TEMPLATE/bug_report.yml '^      value: (1\.[0-9][^ ]*).*'
 
 # --- 2. No stale literal from the current release line. ---
-# Historical references to older lines (1.5.9, 1.6.5, 1.6.0-beta) are legitimate;
-# a leftover from *this* line is always rot. These paths carry it on purpose:
+# Historical references to older lines (1.5.9, 1.6.5, 1.6.0-beta) are legitimate.
+# These paths also carry intentional references to the current release line:
 #   CHANGELOG.md                      released history
 #   src/common/db/alembic/            revision ids and down_revision chains
 #   .github/RELEASING.md              worked examples of the tag convention
 #   misc/install-bunkerweb.sh         ~rc vs -rc comparison examples in comments
+#   docs/{<locale>/}features.md       version bounds in generated prose
 CORE="${VERSION%%[~-]*}"
 mapfile -t stale < <(
     git grep -nE "${CORE//./\\.}[~-]rc[0-9]+" -- \
@@ -57,12 +58,23 @@ mapfile -t stale < <(
         ':!misc/install-bunkerweb.sh' \
         ':!misc/check-version-consistency.sh' 2>/dev/null |
         grep -vE '^(tests/unit/gen/test_save_config_cli_outcomes\.py:[0-9]+:\ \ \ \ \ \ \ \ \("1\.6\.17",\ "1\.6\.18\~rc3",\ "sqlite",\ True\),|tests/unit/gen/test_save_config_cli_outcomes\.py:[0-9]+:\ \ \ \ \ \ \ \ \("1\.6\.17",\ "1\.6\.18\~rc3",\ "postgresql",\ False\),|tests/unit/gen/test_save_config_cli_outcomes\.py:[0-9]+:\ \ \ \ \ \ \ \ \("1\.6\.17",\ "1\.6\.18\-rc3",\ "sqlite",\ True\),|tests/unit/gen/test_save_config_cli_outcomes\.py:[0-9]+:\ \ \ \ \(tmp_path\ /\ "sqlite_versions/abc_upgrade_to_version_1_6_18_rc3\.py"\)\.touch\(\)|tests/unit/common/test_system_utility_outcomes\.py:[0-9]+:\ \ \ \ version\.write_text\("1\.6\.18\~rc3\\n"\)|tests/unit/common/test_system_utility_outcomes\.py:[0-9]+:\ \ \ \ assert\ utils\.get_version\(\)\ ==\ "1\.6\.18\~rc3"|tests/unit/common/test_system_utility_outcomes\.py:[0-9]+:\ \ \ \ assert\ utils\.is_newer_version_available\("v1\.6\.18\~rc3",\ "1\.6\.18"\)|tests/unit/linux/test_lxp_package_lifecycle\.py:[0-9]+:\ \ \ \ \ \ \ \ \(root\ /\ "usr/share/bunkerweb/VERSION"\)\.write_text\("1\.6\.18\~rc3\\n"\)|tests/unit/linux/test_lxp_package_lifecycle\.py:[0-9]+:\ \ \ \ \ \ \ \ host\.ok\("beforeInstall\.sh",\ \*\(\("2",\)\ if\ rpm\ else\ \("upgrade",\ "1\.6\.18\~rc3"\)\)\)|tests/unit/linux/test_lxp_package_lifecycle\.py:[0-9]+:@pytest\.mark\.parametrize\("old_revision",\ \["v1\.6\.18\-rc3",\ "3a9c1381f84f248cbb6c5210d22bafebdf0ab941"\]\)|tests/unit/linux/test_lxp_package_lifecycle\.py:[0-9]+:\ \ \ \ \ \ \ \ host\.ok\("beforeInstall\.sh",\ \*\(\("2",\)\ if\ rpm\ else\ \("upgrade",\ "1\.6\.18\~rc3"\)\)\)|tests/unit/linux/test_lxp_package_lifecycle\.py:[0-9]+:\ \ \ \ \ \ \ \ host\.ok\("postinstall\.sh",\ \*\(\("1",\)\ if\ rpm\ else\ \("configure",\ "1\.6\.18\~rc3"\)\)\)|tests/unit/linux/test_lxp_package_lifecycle\.py:[0-9]+:\ \ \ \ host\.ok\("postinstall\.sh",\ "configure",\ "1\.6\.18\~rc3"\)|tests/unit/linux/test_lxp_package_lifecycle\.py:[0-9]+:\ \ \ \ host\.ok\("postinstall\.sh",\ "configure",\ "1\.6\.18\~rc3"\)|tests/unit/linux/test_lxp_package_lifecycle\.py:[0-9]+:\ \ \ \ host\.ok\("postinstall\.sh",\ "configure",\ "1\.6\.18\~rc3"\)|tests/unit/linux/test_lxp_package_lifecycle\.py:[0-9]+:\ \ \ \ result\ =\ host\.run\("postinstall\.sh",\ "configure",\ "1\.6\.18\~rc3"\)|tests/unit/linux/test_lxp_package_lifecycle\.py:[0-9]+:\ \ \ \ host\.ok\("postinstall\.sh",\ "configure",\ "1\.6\.18\~rc3"\)|tests/unit/linux/test_lxp_package_lifecycle\.py:[0-9]+:\ \ \ \ host\.ok\("beforeInstall\.sh",\ "upgrade",\ "1\.6\.18\~rc3"\)|tests/unit/linux/test_lxp_package_lifecycle\.py:[0-9]+:\ \ \ \ result\ =\ host\.run\("postinstall\.sh",\ "configure",\ "1\.6\.18\~rc3"\)|tests/unit/linux/test_lxp_package_lifecycle\.py:[0-9]+:\ \ \ \ result\ =\ host\.run\("beforeInstall\.sh",\ "upgrade",\ "1\.6\.18\~rc3"\)|tests/unit/linux/test_lxp_package_lifecycle\.py:[0-9]+:\ \ \ \ host\.ok\("beforeInstall\.sh",\ "upgrade",\ "1\.6\.18\~rc3"\)|tests/unit/linux/test_lxp_package_lifecycle\.py:[0-9]+:\ \ \ \ host\.ok\("postinstall\.sh",\ "configure",\ "1\.6\.18\~rc3"\)|tests/unit/linux/test_lxp_package_lifecycle\.py:[0-9]+:\ \ \ \ host\.ok\("beforeInstall\.sh",\ "upgrade",\ "1\.6\.18\~rc3"\)|tests/unit/linux/test_lxp_package_lifecycle\.py:[0-9]+:\ \ \ \ host\.ok\("postinstall\.sh",\ "configure",\ "1\.6\.18\~rc3",\ SERVICE_API="no"\)|tests/unit/linux/test_lxp_package_lifecycle\.py:[0-9]+:\ \ \ \ host\.ok\("beforeInstall\.sh",\ \*\(\("2",\)\ if\ rpm\ else\ \("upgrade",\ "1\.6\.18\~rc3"\)\)\)|tests/unit/linux/test_lxp_package_lifecycle\.py:[0-9]+:\ \ \ \ host\.ok\("postinstall\.sh",\ \*\(\("1",\)\ if\ rpm\ else\ \("configure",\ "1\.6\.18\~rc3"\)\),\ \*\*\{setting:\ "no"\}\)|tests/unit/linux/test_lxp_package_lifecycle\.py:[0-9]+:\ \ \ \ host\.ok\("beforeInstall\.sh",\ "upgrade",\ "1\.6\.18\~rc3"\)|tests/unit/linux/test_lxp_package_lifecycle\.py:[0-9]+:\ \ \ \ result\ =\ host\.run\("postinstall\.sh",\ "configure",\ "1\.6\.18\~rc3",\ FAIL_RESTART="bunkerweb\-ui"\)|tests/unit/linux/test_lxp_package_lifecycle\.py:[0-9]+:\ \ \ \ host\.ok\("postinstall\.sh",\ "configure",\ "1\.6\.18\~rc3"\))$' |
-        while IFS= read -r line; do
-            if grep -oE "${CORE//./\\.}[~-]rc[[:alnum:].~+-]+" <<< "$line" |
-                grep -vxF -e "$VERSION" -e "$TAG_VERSION" > /dev/null; then
-                printf '%s\n' "$line"
-            fi
-        done || true
+        awk -v token="${CORE//./[.]}[~-]rc[[:alnum:].~+-]+" -v version="$VERSION" -v tag_version="$TAG_VERSION" '
+            {
+                rest = $0
+                features = sub(/^docs\/([a-z][a-z]\/)?features[.]md:[0-9]+:/, "", rest)
+                while (match(rest, token)) {
+                    prefix = substr(rest, 1, RSTART - 1)
+                    literal = substr(rest, RSTART, RLENGTH)
+                    rest = substr(rest, RSTART + RLENGTH)
+                    if (literal == version || literal == tag_version) continue
+                    # A version bound excuses only its own token, even on a line with other pins.
+                    if (features && literal ~ /~rc[0-9]+[.]?$/ && prefix ~ /(^|[[:space:](])before $/ && rest ~ /^([[:space:],);!?|]|$)/) continue
+                    if (features && literal ~ /~rc[0-9]+$/ && prefix ~ /(^|[[:space:](])$/ && rest ~ /^ or later([[:space:].,);!?|]|$)/) continue
+                    print
+                    break
+                }
+            }
+        ' || true
 )
 if [ ${#stale[@]} -gt 0 ]; then
     echo "Stale ${CORE} literals (expected $VERSION or $TAG_VERSION):"
