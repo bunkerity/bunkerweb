@@ -25,6 +25,7 @@ if deps_path not in sys_path:
     sys_path.append(deps_path)
 
 from common_utils import effective_cpu_count  # type: ignore
+from env_file import format_env_lines  # type: ignore
 from logger import getLogger  # type: ignore
 
 from jinja2 import Environment, FileSystemBytecodeCache, FileSystemLoader, Undefined
@@ -632,8 +633,7 @@ class Templator:
             # Instances skip a push whose archive matches the one already applied, and
             # dict insertion order here varies between runs, which alone was enough to
             # make every /confs push look like a change.
-            config_lines = [f"{k}={v}\n" for k, v in sorted(self._full_config.items())]
-            tmp_path.write_text("".join(config_lines))
+            tmp_path.write_text(format_env_lines(dict(sorted(self._full_config.items()))))
             tmp_path.replace(real_path)
         except IOError as e:
             with suppress(OSError):

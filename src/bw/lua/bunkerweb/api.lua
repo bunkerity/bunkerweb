@@ -136,6 +136,23 @@ local function control_plane_variables_from_disk()
 	for line in contents:gmatch("([^\n]*)\n") do
 		local key, raw = line:match("^([^=]+)=(.*)$")
 		if key == "API_WHITELIST_IP" or key == "API_TOKEN" then
+			-- A value with a line break, or one that starts with the marker, is written as bw-b64:<base64>
+			local encoded = raw:match("^bw%-b64:(.*)$")
+			if encoded then
+				local decoded = ngx.decode_base64(encoded)
+				if decoded then
+					raw = decoded
+				else
+					logger:log(
+						ngx.WARN,
+						"the value of "
+							.. key
+							.. " in "
+							.. VARIABLES_PATH
+							.. " is not valid base64, keeping it as written"
+					)
+				end
+			end
 			found[key] = raw
 		end
 	end

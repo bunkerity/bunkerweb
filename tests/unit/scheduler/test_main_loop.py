@@ -838,3 +838,18 @@ def test_the_job_scheduler_is_told_while_a_generation_is_pending(drive):
     drive.on_iteration[1] = watch
     drive.run()
     assert seen == [False]
+
+
+def test_the_saver_variables_file_carries_a_multiline_value_on_one_line(drive):
+    """SEC-03: the environment dump the config saver reads must not let a value declare other settings."""
+    from env_file import parse_env_file
+
+    payload = "-----BEGIN CERTIFICATE-----\nQUJDRA==\nAPI_TOKEN=evil\n-----END CERTIFICATE-----"
+    drive.main.environ["CUSTOM_SSL_CERT_DATA"] = payload
+    drive.main.environ["API_TOKEN"] = "real"
+    drive.run()
+    path = drive.sandbox.NGINX_TMP_VARIABLES_PATH
+    assert "API_TOKEN=evil" not in path.read_text().split("\n")
+    parsed = parse_env_file(path)
+    assert parsed["CUSTOM_SSL_CERT_DATA"] == payload
+    assert parsed["API_TOKEN"] == "real"

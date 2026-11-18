@@ -6,6 +6,7 @@
 - [SECURITY] `api`: the internal HTTPS client falls back to HTTP only when the peer does not speak TLS, never after a reset, timeout or certificate error.
 - [SECURITY] `support`: `bwcli support` and the UI redact JSON ModSecurity audit logs and URL credentials in the masked configuration export.
 - [SECURITY] `database`: SQL bound parameters no longer appear in logged persistence errors.
+- [SECURITY] `core`: multi-line file settings are encoded in variables.env, so their content can no longer add other settings.
 - [SECURITY] `api`: only the docs path itself skips authentication, so `API_DOCS_URL` can no longer expose other routes; `/` is refused.
 - [SECURITY] `deps`: update NGINX to 1.30.7, fixing nine CVEs including HTTP/2 and HTTP/3. Fedora stays on 1.30.6 until 1.30.7 ships there.
 - [FEATURE] `dnsbl`: `DNSBL_LIST` can be set per service; services without an override keep the global list. (Fixes #4018)

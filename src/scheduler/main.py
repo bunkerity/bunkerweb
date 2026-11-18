@@ -44,7 +44,7 @@ from common_utils import (  # type: ignore
     release_db_lock,
     safe_tar_extractall,
 )
-from env_file import parse_env_file  # type: ignore
+from env_file import format_env_lines, parse_env_file  # type: ignore
 from logger import getLogger  # type: ignore
 from Database import Database  # type: ignore
 from Configurator import Configurator  # type: ignore
@@ -1618,8 +1618,7 @@ def main() -> None:
             if args.variables:
                 env_file_path = deepcopy(tmp_variables_path)
             else:
-                env_content = "\n".join(f"{key}={value}" for key, value in environ.items() if "CUSTOM_CONF" not in key)
-                env_file_path.write_text(env_content + "\n", encoding="utf-8")
+                env_file_path.write_text(format_env_lines({key: value for key, value in environ.items() if "CUSTOM_CONF" not in key}), encoding="utf-8")
 
             cmd_env = build_cmd_env()
 
@@ -1682,10 +1681,8 @@ def main() -> None:
             if args.variables:
                 env_file_path = deepcopy(tmp_variables_path)
             else:
-                env_content = "\n".join(
-                    f"{key}={value}" for key, value in (env | {k: v for k, v in environ.items() if k in env}).items() if "CUSTOM_CONF" not in key
-                )
-                env_file_path.write_text(env_content + "\n", encoding="utf-8")
+                merged = env | {k: v for k, v in environ.items() if k in env}
+                env_file_path.write_text(format_env_lines({key: value for key, value in merged.items() if "CUSTOM_CONF" not in key}), encoding="utf-8")
 
             cmd_env = build_cmd_env()
 

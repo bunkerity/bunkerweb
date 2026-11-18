@@ -23,15 +23,26 @@ reassembled, PEM or wrapped base64. Callers that do not still get PEM blocks rea
 because a value that opens `-----BEGIN` is followed to its `-----END` whatever the key is.
 """
 
+from base64 import b64decode, b64encode
+from binascii import Error as Base64Error
 from pathlib import Path
 from re import compile as re_compile
-from typing import Callable, Dict, Iterable, Optional
+from typing import Callable, Dict, Iterable, Mapping, Optional
 
 # The token before the first "=" on a line that genuinely declares a setting. Service
 # prefixes make the key `www.example.com_CUSTOM_SSL_CERT_DATA`, hence the dot and dash.
 # Base64 lines carry "+" and "/" and fail this, so they cannot be mistaken for a key.
 # Colons belong only to a bare IPv6 service prefix, before the setting name.
 KEY_RX = re_compile(r"^(?:(?:[0-9a-f]{0,4}:){2,7}[0-9a-f]{0,4}_)?[A-Za-z0-9_.-]+$")
+
+# A value with a line break cannot stay on its own line: the Lua readers (init_by_lua, api.lua) and
+# the shell readers match one `KEY=value` per physical line, and the Python reader ends a value at any
+# key it knows, so an extra line of a `file` setting would declare another setting (SEC-03). Writers
+# put such a value on one line as `<prefix><base64 of its UTF-8 bytes>` and `parse_env_lines` undoes
+# it. A value that already starts with the prefix is encoded too, so a decoded value is never read
+# twice. The prefix cannot begin a PEM or base64 payload (`:` is outside both alphabets).
+# Files written before this existed (rc4) hold the raw lines and are still folded by the rules below.
+ENV_B64_PREFIX = "bw-b64:"
 
 PEM_BEGIN = "-----BEGIN"
 PEM_END = "-----END"
@@ -47,6 +58,33 @@ PEM_END = "-----END"
 # padding". Only lines that could be read as a declaration are tested against it; see
 # `parse_env_lines`.
 B64_LINE_RX = re_compile(r"^[A-Za-z0-9+/_-]+={0,2}$")
+
+
+def format_env_line(key: str, value: object) -> str:
+    """Return `key=value` for a variables file, on a single line whatever the value holds."""
+    if not isinstance(value, str):
+        value = str(value)
+    # Trailing line breaks stay raw, as they always were: the reader strips a single-line value, so a
+    # ConfigMap block scalar's final newline never reaches the setting. Only an interior one can split.
+    interior = value.rstrip("\r\n")
+    if "\n" in interior or "\r" in interior or value.startswith(ENV_B64_PREFIX):
+        value = ENV_B64_PREFIX + b64encode(value.encode("utf-8")).decode("ascii")
+    return f"{key}={value}"
+
+
+def format_env_lines(variables: Mapping[str, object]) -> str:
+    """Return one `key=value` line per variable, each ended by a newline."""
+    return "".join(f"{format_env_line(key, value)}\n" for key, value in variables.items())
+
+
+def _decode_value(value: str) -> str:
+    """Undo `format_env_line`. Anything that is not a well-formed encoding is returned untouched."""
+    if not value.startswith(ENV_B64_PREFIX):
+        return value
+    try:
+        return b64decode(value.removeprefix(ENV_B64_PREFIX).strip(), validate=True).decode("utf-8")
+    except (Base64Error, UnicodeDecodeError, ValueError):
+        return value
 
 
 def parse_env_lines(
@@ -90,7 +128,7 @@ def parse_env_lines(
     def flush() -> None:
         if key is None:
             return
-        variables[key] = "\n".join(parts) if len(parts) > 1 else parts[0].strip()
+        variables[key] = "\n".join(parts) if len(parts) > 1 else _decode_value(parts[0].strip())
 
     for raw_line in lines:
         line = raw_line.rstrip("\r\n")
