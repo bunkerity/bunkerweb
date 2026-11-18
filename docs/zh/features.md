@@ -284,7 +284,7 @@ Advanced ACME certificate management with custom CA support, certificate monitor
 | `ACME_EAB_HMAC_KEY`                  |             | multisite | 否     | External Account Binding HMAC key (base64-encoded, required when EAB Key ID is set).                                                                                                                                                                                                                                                                                                                                                                                                             |
 | `ACME_CA_CERT_PATH`                  |             | multisite | 否     | File path to the root CA certificate for private ACME servers (Step CA, Vault PKI). Required when the CA root is not in the system trust store.                                                                                                                                                                                                                                                                                                                                                  |
 | `ACME_CHALLENGE`                     | `http`      | multisite | 否     | ACME challenge type. HTTP-01 is simplest; DNS-01 is required for wildcard certificates; TLS-ALPN-01 works when port 80 is unavailable but needs a core with the ClientHello plugin hook (1.6.18~rc3 or later).                                                                                                                                                                                                                                                                                   |
-| `ACME_DNS_PROVIDER`                  |             | multisite | 否     | DNS provider for DNS-01 challenges. Hosttech requires BunkerWeb core 1.6.18~rc4 or newer.                                                                                                                                                                                                                                                                                                                                                                                                        |
+| `ACME_DNS_PROVIDER`                  |             | multisite | 否     | DNS provider for DNS-01 challenges. Hosttech requires BunkerWeb core 1.6.18~rc5 or newer.                                                                                                                                                                                                                                                                                                                                                                                                        |
 | `ACME_DNS_CREDENTIAL_ITEM`           |             | multisite | 是     | Configuration item for the DNS provider credentials (e.g. 'cloudflare_api_token 123456'). Values can be base64 encoded.                                                                                                                                                                                                                                                                                                                                                                          |
 | `ACME_DNS_CREDENTIAL_DECODE_BASE64`  | `yes`       | multisite | 是     | Automatically decode base64 encoded DNS provider credentials.                                                                                                                                                                                                                                                                                                                                                                                                                                    |
 | `ACME_DNS_PROPAGATION`               | `default`   | multisite | 否     | DNS-01 propagation wait in seconds. 'default': 120s for most providers, Hosttech's 600s default, or Route53's sync polling. Set a number to override.                                                                                                                                                                                                                                                                                                                                            |
@@ -2025,7 +2025,7 @@ CrowdSec 是一种现代的开源安全引擎，它基于行为分析和社区�
     services:
       bunkerweb:
         # 这是将用于在调度器中识别实例的名称
-        image: bunkerity/bunkerweb:1.6.18-rc4
+        image: bunkerity/bunkerweb:1.6.18-rc5
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -2042,7 +2042,7 @@ CrowdSec 是一种现代的开源安全引擎，它基于行为分析和社区�
             syslog-address: "udp://10.20.30.254:514" # syslog 服务的 IP 地址
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.18-rc4
+        image: bunkerity/bunkerweb-scheduler:1.6.18-rc5
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb" # 确保设置正确的实例名称
@@ -4500,7 +4500,7 @@ ModSecurity 插件将功能强大的 [ModSecurity](https://modsecurity.org) Web 
     为了在绕过 ModSecurity 后仍保护上传内容，请将其与文件扫描插件配合使用，例如 [ClamAV](https://github.com/bunkerity/bunkerweb-plugins/tree/main/clamav) 或 [VirusTotal](https://github.com/bunkerity/bunkerweb-plugins/tree/main/virustotal)——它们检查上传文件本身，而不是原始请求体。
 
 !!! warning "响应体阻断与压缩响应"
-    如果响应体阻断规则在响应头发送后才触发，客户端可能先收到原始状态码（如 `200`），随后出现响应体不完整或分块传输错误，而不是完整的 `403` 响应。BunkerWeb 应用 gzip、Brotli 或 zstd 压缩时都可能出现这种情况。从 `1.6.18~rc4` 开始，Brotli 的行为与 gzip 已有的行为一致。请检查 ModSecurity 审计日志和错误日志，确定触发的规则，并用范围严格受限的排除规则处理已确认的误报。
+    如果响应体阻断规则在响应头发送后才触发，客户端可能先收到原始状态码（如 `200`），随后出现响应体不完整或分块传输错误，而不是完整的 `403` 响应。BunkerWeb 应用 gzip、Brotli 或 zstd 压缩时都可能出现这种情况。从 `1.6.18~rc5` 开始，Brotli 的行为与 gzip 已有的行为一致。请检查 ModSecurity 审计日志和错误日志，确定触发的规则，并用范围严格受限的排除规则处理已确认的误报。
 
 !!! warning "上游压缩的响应体"
     CRS v4 不检查上游已经压缩的响应体（`gzip`、`br` 或 `zstd`）。BunkerWeb 不会为检查而解压这些响应体。如果需要检查响应体，请配置上游返回未压缩的内容。对于遵循此请求头的上游，可以仅在受影响的服务和 location 中移除转发请求的 `Accept-Encoding` 头，以请求未压缩的响应：
