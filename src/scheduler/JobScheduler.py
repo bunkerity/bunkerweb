@@ -28,7 +28,7 @@ for deps_path in [os.path.join(os.sep, "usr", "share", "bunkerweb", *paths) for 
 
 from cache_restore import cache_tree  # type: ignore
 from common_utils import effective_cpu_count, file_hash, parse_duration  # type: ignore
-from Database import Database, DEFAULT_POOL_MAX_OVERFLOW, DEFAULT_POOL_SIZE  # type: ignore
+from Database import Database, DEFAULT_POOL_MAX_OVERFLOW, DEFAULT_POOL_SIZE, close_created_databases  # type: ignore
 from logger import getLogger  # type: ignore
 from ApiCaller import ApiCaller, MIN_RELOAD_TIMEOUT, folder_push_timeout  # type: ignore
 from reload_utils import RELOAD_CONFIRM_MIN_WAIT, RELOAD_CONFIRM_MAX_WAIT, wait_for_reload  # type: ignore
@@ -356,7 +356,9 @@ class JobScheduler(ApiCaller):
         ret = -1
         start_date = datetime.now().astimezone()
         try:
-            self.__exec_plugin_module(os.path.join(path, "jobs", file), name)
+            # The job's own Database objects are closed here, not left to the GC (see close_created_databases).
+            with close_created_databases():
+                self.__exec_plugin_module(os.path.join(path, "jobs", file), name)
             ret = 1
         except SystemExit as e:
             ret = e.code if isinstance(e.code, int) else 1

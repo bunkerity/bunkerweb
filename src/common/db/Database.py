@@ -15,9 +15,9 @@ from os.path import join as os_join
 from pathlib import Path
 from re import DOTALL, IGNORECASE, Match, compile as re_compile, escape, error as RegexError, search
 from sys import argv, path as sys_path
-from threading import RLock
+from threading import RLock, local
 from traceback import format_exc
-from typing import Any, Callable, Dict, List, Literal, NoReturn, Optional, Sequence, Set, Tuple, TypeVar, Union
+from typing import Any, Callable, Dict, Iterator, List, Literal, NoReturn, Optional, Sequence, Set, Tuple, TypeVar, Union
 from time import sleep
 from uuid import uuid4
 from warnings import filterwarnings
@@ -109,6 +109,45 @@ DEFAULT_READ_TIMEOUT = 300
 # cannot raise) is stored in bw_blob_chunks and its owner column holds this marker followed by the sha256.
 BLOB_CHUNK_MARKER = b"\x00bw-blob-chunks\x00"
 BLOB_CHUNK_MAX = 4 * 1024 * 1024
+
+_CREATED = local()
+
+
+@contextmanager
+def close_created_databases() -> Iterator[None]:
+    """Close every Database this thread builds inside the block when the block ends, however it ends.
+
+    The scheduler runs jobs in-process and drops their modules afterwards. Whatever a job built then lives in
+    a reference cycle and is only finalised by the cyclic GC, which has already cleared the weakrefs a TLS
+    socket depends on, so the COM_QUIT written by ``__del__`` fails and MariaDB logs "Aborted connection".
+    A Database that was passed in, rather than built here, is never touched.
+    """
+    if not hasattr(_CREATED, "stack"):
+        _CREATED.stack = []  # one list per active scope on this thread, outermost first
+    stack = _CREATED.stack
+    created: List["Database"] = []
+    stack.append(created)
+    try:
+        yield
+    finally:
+        # Drop this scope's own list (by identity), whatever order scopes end in.
+        stack[:] = [scope for scope in stack if scope is not created]
+        _close_all(created)
+
+
+def _close_all(databases: List["Database"]) -> None:
+    """Close and forget every Database in the list, ignoring errors."""
+    while databases:
+        with suppress(Exception):
+            databases.pop().close()
+
+
+def _exit_closing_created() -> NoReturn:
+    """``_exit`` skips the ``finally`` of every close_created_databases() scope, so close what this thread built in all of them, innermost first."""
+    for scope in reversed(getattr(_CREATED, "stack", [])):
+        _close_all(scope)
+    _exit(1)
+
 
 # Methods that mean "a human edited this through a first-class interface". They overwrite
 # one another freely. "wizard" belongs here: the setup wizard creates its service with that
@@ -230,6 +269,9 @@ class Database:
     ) -> None:
         """Initialize the database. A failure exits the process, or raises DatabaseInitError without retrying a connection error when exit_on_error is False."""
         self.logger = logger
+        # close() tolerates a half-built instance, so register before anything below can exit.
+        if getattr(_CREATED, "stack", None):
+            _CREATED.stack[-1].append(self)
         self.readonly = False
         self.last_connection_retry = None
         self.__ignore_regex_check = getenv("IGNORE_REGEX_CHECK", "no").lower() == "yes"
@@ -271,7 +313,7 @@ class Database:
             self.logger.error(message)
             if not exit_on_error:
                 raise DatabaseInitError(message)
-            _exit(1)
+            _exit_closing_created()
 
         def validate_and_update_db_string(db_string: str) -> Tuple[str, Optional[Match]]:
             """Validate and update database connection string."""
@@ -773,7 +815,7 @@ class Database:
             assert self.sql_engine is not None
         except AssertionError:
             self.logger.error("The database engine is not initialized")
-            _exit(1)
+            _exit_closing_created()
 
         session = None
         try:

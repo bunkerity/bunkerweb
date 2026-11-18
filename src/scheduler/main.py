@@ -313,6 +313,11 @@ def stop(status):
     Path(sep, "var", "run", "bunkerweb", "scheduler.pid").unlink(missing_ok=True)
     HEALTHY_PATH.unlink(missing_ok=True)
     SCHEDULER_TASKS_EXECUTOR.shutdown(wait=False)
+    # _exit skips every finaliser: a connection still open here reaches MariaDB as "Aborted connection".
+    # handle_stop already closed it on SIGTERM; the error paths that call stop(1) did not.
+    if SCHEDULER is not None:
+        with suppress(Exception):
+            SCHEDULER.db.close()
     _exit(status)
 
 
