@@ -59,7 +59,11 @@ IDS = [f"{setting}" if "default-server" not in t else f"{setting}-default-server
 
 
 def _render(template: str, base: dict, **overrides) -> str:
-    environment = jinja2.Environment(undefined=jinja2.ChainableUndefined, keep_trailing_newline=True)
+    environment = jinja2.Environment(
+        loader=jinja2.FileSystemLoader([ROOT / "src/common/confs", *ROOT.glob("src/common/core/*/confs")]),
+        undefined=jinja2.ChainableUndefined,
+        keep_trailing_newline=True,
+    )
     environment.globals["import"] = import_module  # Templator exposes this; real-ip.conf uses it for pathlib
     return environment.from_string((CORE / template).read_text(encoding="utf-8")).render(**dict(base, **overrides))
 

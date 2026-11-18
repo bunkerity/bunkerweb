@@ -30,7 +30,13 @@ def render(**settings):
     defaults["LETS_ENCRYPT_PASSTHROUGH"] = json.loads((LE_PLUGIN / "plugin.json").read_text())["settings"]["LETS_ENCRYPT_PASSTHROUGH"]["default"]
     defaults.update(USE_REVERSE_PROXY="yes", SERVER_NAME="example.com", REVERSE_PROXY_HOST="http://backend:8080")
     defaults.update(settings)
-    environment = jinja2.Environment(undefined=jinja2.ChainableUndefined, lstrip_blocks=True, trim_blocks=True, keep_trailing_newline=True)
+    environment = jinja2.Environment(
+        loader=jinja2.FileSystemLoader([ROOT / "src/common/confs", *ROOT.glob("src/common/core/*/confs")]),
+        undefined=jinja2.ChainableUndefined,
+        lstrip_blocks=True,
+        trim_blocks=True,
+        keep_trailing_newline=True,
+    )
     fake_pathlib = SimpleNamespace(Path=lambda _path: SimpleNamespace(is_file=lambda: False))
     environment.globals["import"] = lambda name: fake_pathlib if name == "pathlib" else import_module(name)
     return environment.from_string((PLUGIN / "confs/server-http/reverse-proxy.conf").read_text()).render(all=defaults, **defaults)
