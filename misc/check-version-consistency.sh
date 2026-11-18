@@ -19,25 +19,25 @@ note() {
     fail=1
 }
 
-# --- 1. Anchored pins. Each of these is a single line that must carry VERSION. ---
+# --- 1. Anchored pins. Each captured value must equal VERSION. ---
 check_pin() {
     local file="$1" pattern="$2" found
-    found="$(grep -oE "$pattern" "$file" 2>/dev/null | head -1 || true)"
+    found="$(sed -nE "s/$pattern/\\1/p" "$file" 2>/dev/null | head -1 || true)"
     if [ -z "$found" ]; then
         note "$file: expected a version pin matching /$pattern/, found none"
-    elif [[ "$found" != *"$VERSION"* ]]; then
+    elif [[ "$found" != "$VERSION" ]]; then
         note "$file: pin is '$found', expected $VERSION"
     fi
 }
 
 echo "Checking version pins against src/VERSION ($VERSION)"
 for df in src/*/Dockerfile; do
-    check_pin "$df" 'LABEL version="[^"]*"'
+    check_pin "$df" '.*LABEL version="([^"]*)".*'
 done
-check_pin misc/install-bunkerweb.sh '^DEFAULT_BUNKERWEB_VERSION="[^"]*"'
-check_pin publiccode.yml '^softwareVersion: .*'
-check_pin pyproject.toml '^version = "[^"]*"'
-check_pin .github/ISSUE_TEMPLATE/bug_report.yml '^      value: 1\.[0-9][^ ]*'
+check_pin misc/install-bunkerweb.sh '^DEFAULT_BUNKERWEB_VERSION="([^"]*)".*'
+check_pin publiccode.yml '^softwareVersion: (.*)'
+check_pin pyproject.toml '^version = "([^"]*)".*'
+check_pin .github/ISSUE_TEMPLATE/bug_report.yml '^      value: (1\.[0-9][^ ]*).*'
 
 # --- 2. No stale literal from the current release line. ---
 # Historical references to older lines (1.5.9, 1.6.5, 1.6.0-beta) are legitimate;
@@ -57,7 +57,12 @@ mapfile -t stale < <(
         ':!misc/install-bunkerweb.sh' \
         ':!misc/check-version-consistency.sh' 2>/dev/null |
         grep -vE '^(tests/unit/gen/test_save_config_cli_outcomes\.py:[0-9]+:\ \ \ \ \ \ \ \ \("1\.6\.17",\ "1\.6\.18\~rc3",\ "sqlite",\ True\),|tests/unit/gen/test_save_config_cli_outcomes\.py:[0-9]+:\ \ \ \ \ \ \ \ \("1\.6\.17",\ "1\.6\.18\~rc3",\ "postgresql",\ False\),|tests/unit/gen/test_save_config_cli_outcomes\.py:[0-9]+:\ \ \ \ \ \ \ \ \("1\.6\.17",\ "1\.6\.18\-rc3",\ "sqlite",\ True\),|tests/unit/gen/test_save_config_cli_outcomes\.py:[0-9]+:\ \ \ \ \(tmp_path\ /\ "sqlite_versions/abc_upgrade_to_version_1_6_18_rc3\.py"\)\.touch\(\)|tests/unit/common/test_system_utility_outcomes\.py:[0-9]+:\ \ \ \ version\.write_text\("1\.6\.18\~rc3\\n"\)|tests/unit/common/test_system_utility_outcomes\.py:[0-9]+:\ \ \ \ assert\ utils\.get_version\(\)\ ==\ "1\.6\.18\~rc3"|tests/unit/common/test_system_utility_outcomes\.py:[0-9]+:\ \ \ \ assert\ utils\.is_newer_version_available\("v1\.6\.18\~rc3",\ "1\.6\.18"\)|tests/unit/linux/test_lxp_package_lifecycle\.py:[0-9]+:\ \ \ \ \ \ \ \ \(root\ /\ "usr/share/bunkerweb/VERSION"\)\.write_text\("1\.6\.18\~rc3\\n"\)|tests/unit/linux/test_lxp_package_lifecycle\.py:[0-9]+:\ \ \ \ \ \ \ \ host\.ok\("beforeInstall\.sh",\ \*\(\("2",\)\ if\ rpm\ else\ \("upgrade",\ "1\.6\.18\~rc3"\)\)\)|tests/unit/linux/test_lxp_package_lifecycle\.py:[0-9]+:@pytest\.mark\.parametrize\("old_revision",\ \["v1\.6\.18\-rc3",\ "3a9c1381f84f248cbb6c5210d22bafebdf0ab941"\]\)|tests/unit/linux/test_lxp_package_lifecycle\.py:[0-9]+:\ \ \ \ \ \ \ \ host\.ok\("beforeInstall\.sh",\ \*\(\("2",\)\ if\ rpm\ else\ \("upgrade",\ "1\.6\.18\~rc3"\)\)\)|tests/unit/linux/test_lxp_package_lifecycle\.py:[0-9]+:\ \ \ \ \ \ \ \ host\.ok\("postinstall\.sh",\ \*\(\("1",\)\ if\ rpm\ else\ \("configure",\ "1\.6\.18\~rc3"\)\)\)|tests/unit/linux/test_lxp_package_lifecycle\.py:[0-9]+:\ \ \ \ host\.ok\("postinstall\.sh",\ "configure",\ "1\.6\.18\~rc3"\)|tests/unit/linux/test_lxp_package_lifecycle\.py:[0-9]+:\ \ \ \ host\.ok\("postinstall\.sh",\ "configure",\ "1\.6\.18\~rc3"\)|tests/unit/linux/test_lxp_package_lifecycle\.py:[0-9]+:\ \ \ \ host\.ok\("postinstall\.sh",\ "configure",\ "1\.6\.18\~rc3"\)|tests/unit/linux/test_lxp_package_lifecycle\.py:[0-9]+:\ \ \ \ result\ =\ host\.run\("postinstall\.sh",\ "configure",\ "1\.6\.18\~rc3"\)|tests/unit/linux/test_lxp_package_lifecycle\.py:[0-9]+:\ \ \ \ host\.ok\("postinstall\.sh",\ "configure",\ "1\.6\.18\~rc3"\)|tests/unit/linux/test_lxp_package_lifecycle\.py:[0-9]+:\ \ \ \ host\.ok\("beforeInstall\.sh",\ "upgrade",\ "1\.6\.18\~rc3"\)|tests/unit/linux/test_lxp_package_lifecycle\.py:[0-9]+:\ \ \ \ result\ =\ host\.run\("postinstall\.sh",\ "configure",\ "1\.6\.18\~rc3"\)|tests/unit/linux/test_lxp_package_lifecycle\.py:[0-9]+:\ \ \ \ result\ =\ host\.run\("beforeInstall\.sh",\ "upgrade",\ "1\.6\.18\~rc3"\)|tests/unit/linux/test_lxp_package_lifecycle\.py:[0-9]+:\ \ \ \ host\.ok\("beforeInstall\.sh",\ "upgrade",\ "1\.6\.18\~rc3"\)|tests/unit/linux/test_lxp_package_lifecycle\.py:[0-9]+:\ \ \ \ host\.ok\("postinstall\.sh",\ "configure",\ "1\.6\.18\~rc3"\)|tests/unit/linux/test_lxp_package_lifecycle\.py:[0-9]+:\ \ \ \ host\.ok\("beforeInstall\.sh",\ "upgrade",\ "1\.6\.18\~rc3"\)|tests/unit/linux/test_lxp_package_lifecycle\.py:[0-9]+:\ \ \ \ host\.ok\("postinstall\.sh",\ "configure",\ "1\.6\.18\~rc3",\ SERVICE_API="no"\)|tests/unit/linux/test_lxp_package_lifecycle\.py:[0-9]+:\ \ \ \ host\.ok\("beforeInstall\.sh",\ \*\(\("2",\)\ if\ rpm\ else\ \("upgrade",\ "1\.6\.18\~rc3"\)\)\)|tests/unit/linux/test_lxp_package_lifecycle\.py:[0-9]+:\ \ \ \ host\.ok\("postinstall\.sh",\ \*\(\("1",\)\ if\ rpm\ else\ \("configure",\ "1\.6\.18\~rc3"\)\),\ \*\*\{setting:\ "no"\}\)|tests/unit/linux/test_lxp_package_lifecycle\.py:[0-9]+:\ \ \ \ host\.ok\("beforeInstall\.sh",\ "upgrade",\ "1\.6\.18\~rc3"\)|tests/unit/linux/test_lxp_package_lifecycle\.py:[0-9]+:\ \ \ \ result\ =\ host\.run\("postinstall\.sh",\ "configure",\ "1\.6\.18\~rc3",\ FAIL_RESTART="bunkerweb\-ui"\)|tests/unit/linux/test_lxp_package_lifecycle\.py:[0-9]+:\ \ \ \ host\.ok\("postinstall\.sh",\ "configure",\ "1\.6\.18\~rc3"\))$' |
-        grep -vF "$VERSION" | grep -vF "$TAG_VERSION" || true
+        while IFS= read -r line; do
+            if grep -oE "${CORE//./\\.}[~-]rc[[:alnum:].~+-]+" <<< "$line" |
+                grep -vxF -e "$VERSION" -e "$TAG_VERSION" > /dev/null; then
+                printf '%s\n' "$line"
+            fi
+        done || true
 )
 if [ ${#stale[@]} -gt 0 ]; then
     echo "Stale ${CORE} literals (expected $VERSION or $TAG_VERSION):"
