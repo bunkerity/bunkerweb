@@ -75,6 +75,7 @@ certbot==5.9.0 \
     #   certbot-dns-godaddy
     #   certbot-dns-google
     #   certbot-dns-hetzner
+    #   certbot-dns-hosttech
     #   certbot-dns-infomaniak
     #   certbot-dns-ionos
     #   certbot-dns-linode
@@ -679,9 +680,9 @@ idna==3.20 \
     #   httpx
     #   requests
     #   tldextract
-importlib-metadata==10.1.0 \
-    --hash=sha256:82b04047fa09792c1a8cfeddfe08bec79e4b13c29c8469b0d3949860f61017e8 \
-    --hash=sha256:cf45ce66a929c64e994185a809c04840d0501db17e663810d993d0f4829265c7
+importlib-metadata==10.2.0 \
+    --hash=sha256:9413a2029fd9ca5669d27f1386071bbfe3c7ebca0545692ec975088241fe1d79 \
+    --hash=sha256:c7a4bf1c7479601f6b8e437cfc14f4f77028ba62a8f34ae95cd93d9774dfba51
     # via -r requirements.in
 jmespath==1.1.0 \
     --hash=sha256:472c87d80f36026ae83c6ddd0f1d05d4e510134ed462851fd5f754c8c3cbb88d \
@@ -699,6 +700,10 @@ jsonpickle==4.1.4 \
     --hash=sha256:8adf24cca611809b55ff5ed2ace850e1a3e4370dad5d363df71569b8f46c9645 \
     --hash=sha256:c46024ba4acd8adb9a8b8485d074e141cbfacafe334c2aa982e5b32efabc2f0e
     # via python-digitalocean
+lazy-importer==0.1.0 \
+    --hash=sha256:b2e296716ce015c0cd80e57b940e52727c5b934b34b8656d5ce06bdd0ee5fbdd \
+    --hash=sha256:bd93fab7bef18e842eea02b839410954d37889140dc64ca4d9680aec6880c739
+    # via importlib-metadata
 maxminddb==3.2.0 \
     --hash=sha256:01418f7282badf3a90257e21554f594e767263ddf2c69c3c2cf9fb299c9e4620 \
     --hash=sha256:03728e46da92f0463fd65be373e10a45961d9c712b4d2c495b416e465ac8bd9e \
@@ -1123,6 +1128,7 @@ requests==2.34.2 \
     #   certbot-dns-duckdns
     #   certbot-dns-dynu
     #   certbot-dns-gandi
+    #   certbot-dns-hosttech
     #   certbot-dns-infomaniak
     #   certbot-dns-ionos
     #   certbot-dns-scaleway

@@ -30,6 +30,11 @@
 - [DOCS] `scheduler`: the custom configuration section explains the `.bw-managed` marker, manual deletion and restore, and retained inactive service CRS files.
 - [DOCS] `linux`: recommend `madvise` for transparent huge pages, since `always` can add hundreds of MB per reload. (Refs #4164)
 - [DEPS] Updated lua-resty-openssl version to v1.10.0
+- [DEPS] Updated PyMySQL version to v1.2.4
+- [DEPS] Updated pydantic-settings version to v2.16.3
+- [DEPS] Updated FastAPI version to v0.162.7
+- [DEPS] Updated psycopg version to v3.3.9
+- [DEPS] Updated importlib-metadata version to v10.2.0
 
 ## v1.6.18~rc4 - 2026/11/17
 

@@ -2,14 +2,14 @@ Brotli==1.1.0
 cryptography==46.0.3
 dnspython==2.8.0
 docker==7.1.0
-fastapi==0.120.0
+fastapi==0.162.7
 httpx[http2, socks, brotli]==0.28.1
 kubernetes==33.1.0
 lxml==6.0.2
 maxminddb==3.0.0
-psycopg[binary,pool]==3.2.11
+psycopg[binary,pool]==3.3.9
 pydantic==2.12.3
-PyMySQL==1.1.2
+PyMySQL==1.2.4
 pyotp==2.9.0
 pytest==8.4.2
 python-dotenv==1.1.1
