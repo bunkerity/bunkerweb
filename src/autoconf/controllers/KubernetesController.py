@@ -393,6 +393,7 @@ class KubernetesController(Controller):
         pod_name = controller_instance.metadata.name
         namespace = controller_instance.metadata.namespace
         if not pod_ip:
+            self._instances_pending = True
             self._logger.debug(f"Skipping pod {namespace}/{pod_name} because it has no IP")
             return []
 

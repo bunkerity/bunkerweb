@@ -217,6 +217,25 @@ def test_pod_without_ip_is_skipped(k8s_env, fqdn, container_name, ip):
     assert log.has("Skipping pod prod/bw-0 because it has no IP", logging.DEBUG)
 
 
+def test_stale_database_instance_is_not_used_while_a_pod_waits_for_its_ip(ctrl, fake_db):
+    # Upgrade: the old pod is gone but its row is still in the database; the new pod has no IP yet.
+    # Falling back to that row lets wait() succeed on a dead instance and the scheduler then pushes to it.
+    fake_db.db_instances = [{"hostname": "10-0-0-9.prod.pod.cluster.local", "name": "old", "health": True}]
+    ctrl._get_controller_instances = lambda: [pod(ip=None)]
+
+    assert ctrl.get_instances() == []
+
+    ctrl._get_controller_instances = lambda: [pod()]
+    assert [i["hostname"] for i in ctrl.get_instances()] == ["10-0-0-5.prod.pod.cluster.local"]
+
+
+def test_database_fallback_still_applies_when_there_is_no_pod_at_all(ctrl, fake_db):
+    fake_db.db_instances = [{"hostname": "db-bw"}]
+    ctrl._get_controller_instances = lambda: []
+
+    assert ctrl.get_instances() == [{"hostname": "db-bw"}]
+
+
 def test_service_annotations_become_instance_env(ctrl):
     ctrl._get_controller_services = lambda: [ns(metadata=meta(annotations={"bunkerweb.io/USE_ANTIBOT": "captcha", "other.io/x": "y"})), ns(metadata=None)]
 
