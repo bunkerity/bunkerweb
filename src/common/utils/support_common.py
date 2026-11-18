@@ -491,6 +491,10 @@ SECRET_HEADER = re_compile(r"auth|token|secret|key|passw|cookie|session|credenti
 HEADER_ITEM = re_compile(r"(?P<head>\s*(?P<name>[\w\-]+)(?:\s*:\s*|\s+))(?=\S)", DOTALL)
 
 
+# Name excludes `?` so each `?` or `&` only scans to the next delimiter
+_URL_QUERY_PARAM = re_compile(r"(?P<head>[?&](?P<name>[^=&?#\s]+)=)[^&#\s]*")
+
+
 def setting_names(key: str, names) -> set:
     """Return every known setting name a config key (``[service_]SETTING[_N]``) can stand for.
 
@@ -515,6 +519,20 @@ def mask_uri(uri: str) -> str:
     end = max(parsed.end(), uri.rfind("@", parsed.end() - 1, authority_end) + 1)
     prefix, suffix = uri[: parsed.start("password")], uri[end - 1 :]  # noqa: E203
     return f"{prefix}{REDACTED}{suffix}"
+
+
+def _query_param_sub(m) -> str:
+    return f"{m['head']}{REDACTED}" if _is_secret_key(m["name"]) else m[0]
+
+
+def mask_url_secrets(text: str, userinfo: bool = True) -> str:
+    """Redact the userinfo and the secret query parameters (password, token, secret, key, ...) of every URL in a setting value.
+
+    userinfo=False keeps the userinfo, for a database URI that mask_uri has already masked down to its password.
+    """
+    if userinfo:
+        text = _URI_USERINFO.sub(rf"\g<scheme>{REDACTED}@", text)
+    return _URL_QUERY_PARAM.sub(_query_param_sub, text)
 
 
 def is_secret_header(name: str) -> bool:
@@ -550,12 +568,15 @@ def mask_config(config: dict, settings: Mapping[str, Any]) -> dict:
             content = data.get(field)
             if not content or not isinstance(content, str):
                 continue
-            if is_uri and not is_secret:
-                data[field] = mask_uri(content)
-            elif is_secret:
+            if is_secret:
                 data[field] = REDACTED
+                continue
+            if is_uri:
+                content = mask_uri(content)
             elif is_header:
-                data[field] = mask_header_values(content)
+                content = mask_header_values(content)
+            # Any other setting can carry a URL with credentials (EXTERNAL_PLUGIN_URLS, REVERSE_PROXY_HOST, ...)
+            data[field] = mask_url_secrets(content, userinfo=not is_uri)
     return config
 
 

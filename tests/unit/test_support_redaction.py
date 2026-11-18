@@ -9,7 +9,19 @@ from time import perf_counter
 REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path[:0] = [str(REPO_ROOT / "src/ui"), str(REPO_ROOT / "src/common/utils")]
 
-from support_common import REDACTED, Anonymizer  # noqa: E402
+from support_common import REDACTED, Anonymizer, mask_config  # noqa: E402
+
+SETTINGS = {
+    "EXTERNAL_PLUGIN_URLS": {"type": "text", "context": "global"},
+    "REVERSE_PROXY_HOST": {"type": "text", "context": "multisite"},
+    "REVERSE_PROXY_HEADERS": {"type": "text", "context": "multisite"},
+    "DATABASE_URI": {"type": "text", "context": "global"},
+    "USE_ANTIBOT": {"type": "select", "context": "multisite"},
+}
+
+
+def entry(value, default=""):
+    return {"value": value, "global": True, "method": "ui", "default": default, "template": None}
 
 
 def best_time(function, text, runs=3):
@@ -131,6 +143,53 @@ class TestJsonAuditLogBodies(unittest.TestCase):
         for i in range(3):
             self.assertNotIn(f"Leak{i}", out)
         self.assertEqual(len(out.splitlines()), 3)
+
+
+class TestMaskConfigUrls(unittest.TestCase):
+    """FT7-F2: credentials in URLs of non-secret settings."""
+
+    def mask(self, **values):
+        return mask_config({key: entry(value) for key, value in values.items()}, SETTINGS)
+
+    def test_userinfo_in_url_list_is_masked(self):
+        config = self.mask(EXTERNAL_PLUGIN_URLS="https://dl:FT7_SECRET@plugins.example/p.zip https://plain.example/q.zip")
+        value = config["EXTERNAL_PLUGIN_URLS"]["value"]
+        self.assertNotIn("FT7_SECRET", value)
+        self.assertIn("https://plain.example/q.zip", value)
+        self.assertIn("@plugins.example/p.zip", value)
+
+    def test_token_only_userinfo_is_masked(self):
+        value = self.mask(REVERSE_PROXY_HOST="https://ghp_TOKENLEAK@backend.example:8080")["REVERSE_PROXY_HOST"]["value"]
+        self.assertNotIn("TOKENLEAK", value)
+
+    def test_query_parameters_are_masked(self):
+        value = self.mask(EXTERNAL_PLUGIN_URLS="https://h.example/p.zip?version=2&token=QLEAK&api_key=KLEAK&Password=PLEAK#frag")["EXTERNAL_PLUGIN_URLS"][
+            "value"
+        ]
+        for leak in ("QLEAK", "KLEAK", "PLEAK"):
+            self.assertNotIn(leak, value)
+        self.assertIn("version=2", value)
+        self.assertTrue(value.endswith("#frag"))
+
+    def test_default_is_masked_too(self):
+        config = {"EXTERNAL_PLUGIN_URLS": entry("", default="https://dl:DEFLEAK@h.example/p.zip")}
+        self.assertNotIn("DEFLEAK", mask_config(config, SETTINGS)["EXTERNAL_PLUGIN_URLS"]["default"])
+
+    def test_database_uri_query_password_is_masked_and_username_kept(self):
+        value = self.mask(DATABASE_URI="postgresql://db-user@db.example/bunkerweb?sslmode=require&password=QUERYLEAK")["DATABASE_URI"]["value"]
+        self.assertNotIn("QUERYLEAK", value)
+        self.assertIn("db-user@db.example", value)
+        value = self.mask(DATABASE_URI="mariadb+pymysql://bunkerweb:s3cr@t!@db:3306/db")["DATABASE_URI"]["value"]
+        self.assertEqual(value, f"mariadb+pymysql://bunkerweb:{REDACTED}@db:3306/db")
+
+    def test_header_setting_url_is_masked(self):
+        value = self.mask(REVERSE_PROXY_HEADERS="X-Forwarded-For https://u:HDRLEAK@h.example/x;X-Api-Key abc")["REVERSE_PROXY_HEADERS"]["value"]
+        self.assertNotIn("HDRLEAK", value)
+
+    def test_plain_values_unchanged(self):
+        config = self.mask(REVERSE_PROXY_HOST="http://backend:8080/path?a=1&b=2", USE_ANTIBOT="captcha")
+        self.assertEqual(config["REVERSE_PROXY_HOST"]["value"], "http://backend:8080/path?a=1&b=2")
+        self.assertEqual(config["USE_ANTIBOT"]["value"], "captcha")
 
 
 if __name__ == "__main__":
