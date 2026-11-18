@@ -1,10 +1,14 @@
-"""The API client retries over plain HTTP only when the peer is not speaking TLS.
+"""The API client retries over plain HTTP only when the peer is not speaking TLS, and keeps the previous certificate.
 
 S05A-F4: ``API.request`` retried over HTTP, bearer token and archive included, on any ``ConnectionError`` that was not a
 pin mismatch, so whoever reset, dropped or let a handshake time out received both in cleartext. The retry is kept for the
 one case it exists for, an instance that has no certificate yet and serves plain HTTP on the HTTPS port
 (``confs/api.conf``): the TLS handshake then fails because what answers is not TLS. The test instance below behaves like
 the real gate: it closes a plain request that carries no bearer token without answering.
+
+S05A-F5: the pin kept the previous fingerprint only in memory, so a client process started after a renewal refused an
+instance that had not reloaded yet. The job now records the certificate it replaces next to the new one and the client
+reads both from the same sources. Everything runs on 127.0.0.1 sockets.
 """
 
 import os
@@ -178,6 +182,7 @@ def pin(tmp_path, monkeypatch):
     monkeypatch.setattr(state, "checked", float("-inf"))
     monkeypatch.setattr(state, "warned", False)
     monkeypatch.setattr(state, "loader", None)
+    monkeypatch.setattr(state, "previous_loader", None, raising=False)
     return tmp_path
 
 
@@ -315,3 +320,71 @@ def test_a_pin_mismatch_is_refused_and_nothing_goes_over_http(tls_server_factory
 
     assert not ok and "did not match the pinned API server certificate" in err
     assert server.hits == []
+
+
+# ---------------------------------------------------------------- S05A-F5
+
+
+def _publish(pin_dir: Path, current: Path, previous=None):
+    (pin_dir / "api-server-cert.pem").write_bytes(current.read_bytes())
+    if previous is not None:
+        (pin_dir / "api-server-cert-previous.pem").write_bytes(previous if isinstance(previous, bytes) else previous.read_bytes())
+
+
+def test_a_restarted_client_still_reaches_an_instance_serving_the_previous_certificate(tls_server_factory, pin, logger):
+    old, new = _make_cert(pin, "old"), _make_cert(pin, "new")
+    server = tls_server_factory(old)  # the instance has not reloaded since the renewal
+    _publish(pin, new, previous=old)  # the job renewed: current is new, previous is what it replaced
+
+    ok, _, status, _ = _api(server.server_address[1]).request("GET", "ping")  # fresh _PIN: a restarted process
+
+    assert (ok, status) == (True, 200)
+    assert server.hits == ["/ping"]
+    assert logger.warnings == []
+
+
+def test_a_restarted_client_reads_the_previous_certificate_from_the_database(tls_server_factory, pin, logger):
+    old, new = _make_cert(pin, "old"), _make_cert(pin, "new")
+    stored = {"api-server-cert.pem": new.read_bytes(), "api-server-cert-previous.pem": old.read_bytes()}
+    asked = []
+
+    class _Db:
+        def get_job_cache_file(self, job_name, file_name, *, plugin_id=""):
+            asked.append((job_name, file_name, plugin_id))
+            return stored.get(file_name)
+
+    API.pin_from_database(_Db())
+    server = tls_server_factory(old)
+
+    assert _api(server.server_address[1]).request("GET", "ping")[0]
+    assert ("api-server-cert", "api-server-cert-previous.pem", "jobs") in asked
+
+
+def test_a_certificate_outside_the_recorded_pair_is_still_refused(tls_server_factory, pin, logger):
+    old, new = _make_cert(pin, "old"), _make_cert(pin, "new")
+    server = tls_server_factory(_make_cert(pin, "older"))
+    _publish(pin, new, previous=old)
+
+    ok, err, _, _ = _api(server.server_address[1]).request("GET", "ping")
+
+    assert not ok and "did not match the pinned API server certificate" in err
+    assert server.hits == []
+
+
+def test_without_a_recorded_previous_certificate_the_current_one_is_the_only_pin(tls_server_factory, pin, logger):
+    """Fresh install, or an upgrade from a version that does not record it: nothing else is accepted."""
+    old, new = _make_cert(pin, "old"), _make_cert(pin, "new")
+    server = tls_server_factory(old)
+    _publish(pin, new)
+
+    ok, err, _, _ = _api(server.server_address[1]).request("GET", "ping")
+
+    assert not ok and "did not match the pinned API server certificate" in err
+
+
+def test_an_unreadable_previous_file_is_ignored(tls_server_factory, pin, logger):
+    current = _make_cert(pin, "current")
+    server = tls_server_factory(current)
+    _publish(pin, current, previous=b"not a certificate")
+
+    assert _api(server.server_address[1]).request("GET", "ping")[0]

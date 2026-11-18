@@ -144,6 +144,7 @@ def pin(tmp_path, monkeypatch):
         monkeypatch.setattr(state, "checked", float("-inf"))
         monkeypatch.setattr(state, "warned", False)
         monkeypatch.setattr(state, "loader", None)
+        monkeypatch.setattr(state, "previous_loader", None, raising=False)
     return tmp_path / "api-server-cert.pem"
 
 

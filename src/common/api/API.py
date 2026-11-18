@@ -29,6 +29,9 @@ if getenv("API_SUPPRESS_INSECURE_WARNING", "1").lower() in ("1", "true", "yes", 
 
 # The certificate the api-server-cert job generates and the instances serve (confs/api.conf).
 API_SERVER_CERT = Path("/var/cache/bunkerweb/jobs/api-server-cert.pem")
+# The one certificate the job replaced at its last renewal, kept next to the current one (same cache, same job). An
+# instance that has not reloaded yet still serves it, and a client process that started after the renewal never saw it.
+API_SERVER_PREVIOUS_CERT_NAME = "api-server-cert-previous.pem"
 # How long a read of the certificate is trusted, and how soon a mismatch may force another one.
 _PIN_TTL = 30.0
 _PIN_FORCED_TTL = 2.0
@@ -45,6 +48,9 @@ class _CertPin:
 
     The source is the file the scheduler restores on disk, or the loader a caller that has a
     database registers (the web UI, the API service, bwcli): the file is stored in the job cache.
+    The previous certificate comes from the same two places, as the one file the job itself wrote
+    when it renewed, so a client restarted after a renewal still reaches an instance that has not
+    reloaded. Nothing else is ever accepted: no older history, only that single file.
     """
 
     def __init__(self):
@@ -52,15 +58,17 @@ class _CertPin:
         self.fingerprints: list[str] = []
         self.checked = float("-inf")
         self.loader: Optional[Callable[[], Optional[bytes]]] = None
+        self.previous_loader: Optional[Callable[[], Optional[bytes]]] = None
         self.warned = False
 
-    def _read(self) -> Optional[str]:
+    @staticmethod
+    def _read(path: Path, loader: Optional[Callable[[], Optional[bytes]]]) -> Optional[str]:
         data = None
         with suppress(Exception):
-            data = API_SERVER_CERT.read_bytes()
-        if not data and self.loader is not None:
+            data = path.read_bytes()
+        if not data and loader is not None:
             with suppress(Exception):
-                data = self.loader()
+                data = loader()
         if not data:
             return None
         with suppress(Exception):
@@ -72,10 +80,14 @@ class _CertPin:
             now = monotonic()
             if now - self.checked >= (_PIN_FORCED_TTL if force else _PIN_TTL):
                 self.checked = now
-                current = self._read()
+                current = self._read(API_SERVER_CERT, self.loader)
+                previous = self._read(API_SERVER_CERT.with_name(API_SERVER_PREVIOUS_CERT_NAME), self.previous_loader)
                 # A source that cannot be read this time keeps the fingerprints already known.
-                if current is not None and current != (self.fingerprints[0] if self.fingerprints else None):
-                    self.fingerprints = [current] + [fp for fp in self.fingerprints if fp != current][:1]
+                if current is not None:
+                    # The recorded previous certificate wins over what this process happened to see (an upgrade
+                    # from a version that does not record it falls back to that, as before).
+                    older = previous if previous not in (None, current) else next((fp for fp in self.fingerprints if fp != current), None)
+                    self.fingerprints = [current] + ([older] if older else [])
             return self.fingerprints.copy()
 
     def warn_missing(self, logger) -> None:
@@ -372,6 +384,7 @@ class API:
         Takes the Database object rather than importing it: the core image has no SQLAlchemy.
         """
         _PIN.loader = lambda: db.get_job_cache_file("api-server-cert", "api-server-cert.pem", plugin_id="jobs")
+        _PIN.previous_loader = lambda: db.get_job_cache_file("api-server-cert", API_SERVER_PREVIOUS_CERT_NAME, plugin_id="jobs")
 
     @staticmethod
     def __default_http_port() -> int:
