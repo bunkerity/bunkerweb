@@ -8,6 +8,7 @@ esac
 
 if command -v systemctl >/dev/null 2>&1; then
     for service in bunkerweb bunkerweb-scheduler bunkerweb-ui bunkerweb-api; do
+        [ "$(systemctl show --property=LoadState --value "$service")" = not-found ] && continue
         if ! systemctl stop "$service"; then
             echo "❌ Could not stop $service; aborting removal." >&2
             exit 1
