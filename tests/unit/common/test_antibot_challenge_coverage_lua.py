@@ -224,9 +224,9 @@ emit({ display = display, dm = dm, check = check == nil, cm = cm, renders = #REN
     "kind,args,difficulty,expected,message",
     [
         ("captcha", {"captcha": "AAAAAA"}, 8, True, "resolved"),
-        ("captcha", {"captcha": "wrong"}, 8, False, "wrong value, expected AAAAAA"),
+        ("captcha", {"captcha": "wrong"}, 8, False, "wrong value"),
         ("captcha", {"captcha": ["AAAAAA", "wrong"]}, 8, True, "resolved"),
-        ("captcha", {"captcha": ["wrong", "AAAAAA"]}, 8, False, "wrong value, expected AAAAAA"),
+        ("captcha", {"captcha": ["wrong", "AAAAAA"]}, 8, False, "wrong value"),
         ("javascript", {"challenge": "970"}, 8, True, "resolved"),
         ("javascript", {"challenge": "2"}, 8, False, "wrong value"),
         ("javascript", {"challenge": "112697"}, 17, False, "solution below configured difficulty, challenge page may be outdated"),
@@ -249,6 +249,7 @@ emit({{ ok = ok, msg = msg, target = target, session = a.session_data, saves = a
 """)
     assert out["ok"] is expected
     assert out["msg"] == message
+    assert "AAAAAA" not in out["msg"], "the expected answer must never reach the logs"
     assert out["session"]["prepared"] is False
     assert out["updated"] is True
     assert out["session"]["resolved"] is expected

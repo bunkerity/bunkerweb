@@ -788,7 +788,7 @@ function antibot:check_challenge()
 			return false, "missing or invalid challenge arg", nil
 		end
 		if self.session_data.captcha ~= args["captcha"] then
-			return false, "wrong value, expected " .. self.session_data.captcha, nil
+			return false, "wrong value", nil
 		end
 		self.session_data.resolved = true
 		self.session_data.time_valid = now()
