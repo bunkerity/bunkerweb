@@ -4,7 +4,7 @@ PO decision (2026-08-14): globals apply everywhere. A per-service label still wi
 that label falls back to the global -- never to the plugin default.
 
 The observed symptom is one integration spec: `tests/core/misc.yml`'s large_body_size returns 200
-on Docker and 400 (ModSecurity 200002) on Autoconf, i.e. the Scheduler's global did not reach the
+on Docker and 400 (ModSecurity 9800200) on Autoconf, i.e. the Scheduler's global did not reach the
 discovered service. These tests pin the two DB-layer mechanisms that could produce that, so the
 search can move on to the Autoconf controller and the generator instead of coming back here:
 

@@ -16,7 +16,7 @@
         {% endfor %}
     {% endif %}
     {% if hosts %}
-SecRule REQUEST_FILENAME "@rx ^{{ ANTIBOT_URI }}$" "nolog,phase:4,allow,id:1010,chain"
+SecRule REQUEST_FILENAME "@rx ^{{ ANTIBOT_URI }}$" "nolog,phase:4,allow,id:9801500,chain"
 SecRule REQUEST_HEADERS:Host "@rx ^(?:{{ hosts | join('|') }})(?::\d+)?$" "t:lowercase,nolog"
     {% endif %}
 {% endif %}

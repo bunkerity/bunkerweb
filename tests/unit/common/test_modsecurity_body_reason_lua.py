@@ -1,4 +1,4 @@
-"""Request-body parser denials (ModSecurity rules 200002 / 200005) keep their own reason (port of dev 2c950f757).
+"""Request-body parser denials (ModSecurity rules 9800200 / 9800203) keep their own reason (port of dev 2c950f757).
 
 The two rules deny a request whose body the parser rejected. They set no ``tx.bunkerweb_reason`` of
 their own, so ``utils.get_reason`` fell through to the generic "unknown" denial and Reports could not
@@ -6,7 +6,7 @@ tell a malformed body from any other BunkerWeb refusal. The conf now stamps
 ``modsecurity-body-<id>`` and ``get_reason`` turns it into the reason ``modsecurity-body`` with the
 rule id as data. Two properties matter:
 
-* only 200002 and 200005 map; any other ``modsecurity_reason`` value keeps today's behaviour, so a
+* only 9800200 and 9800203 map; any other ``modsecurity_reason`` value keeps today's behaviour, so a
   client cannot pick its own reason through a crafted value;
 * the BunkerNet plugin must not push such a denial to the shared database (a parser error is not
   evidence of an attack).
@@ -93,7 +93,7 @@ def run_bunkernet_log(reason: str) -> str:
 
 @needs_lua
 class TestGetReason:
-    @pytest.mark.parametrize("rule_id", ["200002", "200005"])
+    @pytest.mark.parametrize("rule_id", ["9800200", "9800203"])
     def test_body_parser_denial_is_named_with_its_rule_id(self, rule_id):
         out = run_get_reason(f"""
 VAR.modsecurity_reason = "modsecurity-body-{rule_id}"
@@ -102,7 +102,9 @@ print(reason, #data.ids, data.ids[1], mode)
 """)
         assert out == f"modsecurity-body\t1\t{rule_id}\tblock"
 
-    @pytest.mark.parametrize("value", ["modsecurity-body-2000020", "modsecurity-body-", "xmodsecurity-body-200002"])
+    @pytest.mark.parametrize(
+        "value", ["modsecurity-body-2000020", "modsecurity-body-98002000", "modsecurity-body-200002", "modsecurity-body-", "xmodsecurity-body-9800200"]
+    )
     def test_any_other_value_keeps_the_unmapped_behaviour(self, value):
         # not a mapped id: falls through to the unknown-denial arm (status == deny status)
         out = run_get_reason(f"""
@@ -139,7 +141,7 @@ class TestConfStampsTheReason:
     """The nginx variable comes from ``tx.bunkerweb_reason``; a rule that never sets it reports nothing."""
 
     @pytest.mark.parametrize("conf", MODSEC_CONFS, ids=lambda p: p.name)
-    @pytest.mark.parametrize("rule_id", ["200002", "200005"])
+    @pytest.mark.parametrize("rule_id", ["9800200", "9800203"])
     def test_each_parser_rule_has_an_update_action_with_status_and_reason(self, conf, rule_id):
         text = conf.read_text(encoding="utf-8")
         match = re.search(rf'^SecRuleUpdateActionById {rule_id} "([^"]*)"$', text, re.M)

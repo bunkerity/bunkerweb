@@ -138,7 +138,7 @@ ngx.var.modsecurity_rules = 'none'
 ngx.var.modsecurity_unique_id = nil
 reason, data = utils.get_reason()
 assert(reason == 'modsecurity' and next(data) == nil)
-for _, id in ipairs({'200002','200003','200004','200005','200006'}) do
+for _, id in ipairs({'9800200','9800201','9800202','9800203','9800204'}) do
     ngx.var.modsecurity_reason = 'modsecurity-body-' .. id
     reason, data = utils.get_reason()
     assert(reason == 'modsecurity-body' and #data.ids == 1 and data.ids[1] == id)

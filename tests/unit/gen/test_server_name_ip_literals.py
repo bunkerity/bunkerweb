@@ -157,7 +157,7 @@ def test_per_service_rule_matches_only_the_services_own_literals(names, expected
     out = ip_host("modsec-crs/ip-host.conf", SERVER_NAME=names)
     assert len(rules(out)) == 1
     assert f'"@rx {expected}"' in out
-    assert "id:1007783" in out and "ctl:ruleRemoveById=920350" in out and "phase:1" in out
+    assert "id:9800100" in out and "ctl:ruleRemoveById=920350" in out and "phase:1" in out
 
 
 @pytest.mark.parametrize("names", ["www.example.com", ""])
@@ -195,7 +195,7 @@ def global_rule(services, **variables):
 def test_global_mode_emits_one_rule_with_the_union_of_every_literal():
     out = global_rule({"192.0.2.10": "192.0.2.10", "2001:db8::1": "2001:db8::1", "www.example.com": "www.example.com 198.51.100.7"})
     assert len(rules(out)) == 1
-    assert out.count("id:1007783") == 1
+    assert out.count("id:9800100") == 1
     assert r"^(?:192\.0\.2\.10|\[2001:db8::1\]|198\.51\.100\.7)(?::\d+)?$" in out
 
 

@@ -604,7 +604,7 @@ utils.get_reason = function(ctx)
 	local modsecurity_reason = ngx.var.modsecurity_reason
 	-- Keep parser IDs separate from CRS's accumulated IDs and matched request data.
 	-- A later CRS summary takes precedence in DetectionOnly without mixing metadata.
-	local body_rule_id = modsecurity_reason and modsecurity_reason:match("^modsecurity%-body%-(20000[2-6])$")
+	local body_rule_id = modsecurity_reason and modsecurity_reason:match("^modsecurity%-body%-(980020[0-4])$")
 	if body_rule_id then
 		return "modsecurity-body", { ids = { body_rule_id } }, security_mode
 	end
