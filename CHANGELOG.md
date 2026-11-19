@@ -11,6 +11,7 @@
 - [SECURITY] `deps`: update NGINX to 1.30.7, fixing nine CVEs including HTTP/2 and HTTP/3. Fedora stays on 1.30.6 until 1.30.7 ships there.
 - [SECURITY] `api`: Basic and login authentication check passwords off the event loop and leak less timing about which usernames exist.
 - [SECURITY] `api`: deleting sensitive job cache files is restricted to API administrators, like reading them.
+- [SECURITY] `ui`: deleting sensitive job cache files from the cache page is restricted to administrators, like viewing them.
 - [FEATURE] `dnsbl`: `DNSBL_LIST` can be set per service; services without an override keep the global list. (Fixes #4018)
 - [BUGFIX] `linux`: reinstalling a package keeps the data and starts the services; absent units are tolerated, stop failures still abort.
 - [BUGFIX] `ui`: a long login username can no longer stall UI workers; the logged username is bounded and the diagnostics redactor runs in linear time.

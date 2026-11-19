@@ -395,18 +395,16 @@ def test_cache_view_classifies_the_name_after_sanitising_it(h):
     h.db.get_job_cache_file.assert_not_called()
 
 
-def test_cache_list_and_delete_still_reach_non_super_admins(h):
+def test_cache_list_and_delete_still_reach_non_super_admins(h, delete_rows):
     h.db.get_jobs_cache_files.return_value = [{"file_name": "secret"}]
     h.config.get_config.return_value = {"SERVER_NAME": ""}
-    h.db.delete_job_cache.return_value = ""
-    h.db.checked_changes.return_value = ""
     client = h.client(admin=False)
 
     assert client.get("/cache").status_code == 200
     assert h.renders[-1][1]["caches"] == [{"file_name": "secret"}]
-    files = json.dumps([{"fileName": "secret", "jobName": "j", "service": "global", "plugin": "p"}])
+    files = json.dumps([{"fileName": "notes.txt", "jobName": "j", "service": "global", "plugin": "p"}])
     assert client.post("/cache/delete", data={"cache_files": files}).status_code == 302
-    assert h.db.delete_job_cache.call_args.args == ("secret",)
+    assert delete_rows.call_args.args == ("notes.txt",)
 
 
 # Rework 1: the database compares plugin id, job name and file name with its collation (MariaDB/MySQL `_ci`: case-insensitive,
@@ -490,9 +488,66 @@ def test_a_collation_variant_of_an_ordinary_entry_stays_readable(h, path):
     assert response.status_code == 200 and response.get_data() == b"hello"
 
 
-def test_cache_bulk_delete_reports_each_outcome(h):
-    h.db.delete_job_cache.side_effect = ["", None, "disk error"]
+def _delete(h, client, path, service="global"):
+    plugin, job, token = path.split("/")
+    files = json.dumps([{"fileName": token, "jobName": job, "service": service, "plugin": plugin}])
+    return client.post("/cache/delete", data={"cache_files": files})
+
+
+@pytest.fixture
+def delete_rows(h, monkeypatch):
+    """The route's one database call, replaced: what it is called with decides what the route does before and after it."""
+    module = h.routes.cache
+    mock = MagicMock(return_value="")
+    monkeypatch.setattr(module, "_delete_cache_rows", mock)
     h.db.checked_changes.return_value = ""
+    return mock
+
+
+@pytest.mark.parametrize("user", NON_SUPER_ADMINS, ids=["reader", "writer", "assigned-admin"])
+@pytest.mark.parametrize("path,name", SENSITIVE_CACHE_URLS)
+def test_cache_bulk_delete_refuses_sensitive_entries_to_everyone_but_the_super_admin(h, delete_rows, user, path, name):
+    client = h.client(**user)
+
+    response = _delete(h, client, path)
+
+    assert response.status_code == 302
+    delete_rows.assert_not_called()
+    h.db.checked_changes.assert_not_called()
+    assert "Deleted 0 files with 1 errors: " in _flashed(h, client)[0] and "restricted to administrators" in _flashed(h, client)[0]
+
+
+@pytest.mark.parametrize("path,name", SENSITIVE_CACHE_URLS)
+def test_cache_bulk_delete_still_deletes_sensitive_entries_for_the_super_admin(h, delete_rows, path, name):
+    _delete(h, h.client(admin=True), path)
+
+    assert delete_rows.call_args.args == (name,) and delete_rows.call_args.kwargs["admin"] is True
+
+
+def test_cache_bulk_delete_reports_a_stored_sensitive_row_as_restricted(h, delete_rows):
+    delete_rows.return_value = h.routes.cache.RESTRICTED
+    client = h.client(admin=False)
+
+    _delete(h, client, "p/j/notes.txt")
+
+    assert delete_rows.call_args.kwargs["admin"] is False
+    h.db.checked_changes.assert_not_called()
+    assert "Deleted 0 files with 1 errors: Cache file notes.txt is restricted to administrators" in _flashed(h, client)
+
+
+def test_cache_bulk_delete_keeps_going_after_a_refused_entry(h, delete_rows):
+    files = [
+        {"fileName": "token.secret", "jobName": "j", "service": "global", "plugin": "p"},
+        {"fileName": "notes.txt", "jobName": "j", "service": "global", "plugin": "p"},
+    ]
+
+    h.client(admin=False).post("/cache/delete", data={"cache_files": json.dumps(files)})
+
+    assert [call.args for call in delete_rows.call_args_list] == [("notes.txt",)]
+
+
+def test_cache_bulk_delete_reports_each_outcome(h, delete_rows):
+    delete_rows.side_effect = ["", None, "disk error"]
     files = [
         {"fileName": "a", "jobName": "j", "service": "global", "plugin": "p1"},
         {"fileName": "b", "jobName": "j", "service": "s", "plugin": "p2"},
@@ -508,9 +563,7 @@ def test_cache_bulk_delete_reports_each_outcome(h):
     assert "Deleted 1 files with 2 errors: Cache file b not found; Error deleting c: disk error" in _flashed(h, client)
 
 
-def test_cache_bulk_delete_success_message(h):
-    h.db.delete_job_cache.return_value = ""
-    h.db.checked_changes.return_value = ""
+def test_cache_bulk_delete_success_message(h, delete_rows):
     client = h.client()
 
     client.post("/cache/delete", data={"cache_files": json.dumps([{"fileName": "a", "jobName": "j", "plugin": "p"}])})
@@ -518,14 +571,121 @@ def test_cache_bulk_delete_success_message(h):
     assert "Successfully deleted 1 cache file" in _flashed(h, client)
 
 
-def test_cache_bulk_delete_commit_failure_is_reported(h):
-    h.db.delete_job_cache.return_value = ""
+def test_cache_bulk_delete_commit_failure_is_reported(h, delete_rows):
     h.db.checked_changes.return_value = "nope"
     client = h.client()
 
     client.post("/cache/delete", data={"cache_files": json.dumps([{"fileName": "a", "jobName": "j", "plugin": "p"}])})
 
     assert any("Changes were not committed to the database" in message for message in _flashed(h, client))
+
+
+# The rows are resolved, authorized and deleted by id in one transaction, on a real database. SQLite compares `=` as binary unless the
+# column says otherwise, so the cache table is rebuilt with the NOCASE collation MariaDB/MySQL give every string column.
+@pytest.fixture
+def nocase_db(h, db, monkeypatch):
+    from sqlalchemy import text
+
+    from fixtures.seed import add_jobs_cache_row, session
+
+    from model import Jobs, Plugins  # type: ignore
+
+    with session(db) as s:
+        s.add(Plugins(id="ui_sso", name="SSO", description="d", version="1.0"))
+        s.add(Plugins(id="p", name="P", description="d", version="1.0"))
+        s.flush()
+        s.add_all(
+            [Jobs(name="ui-sso-secret", plugin_id="ui_sso", file_name="x.py", every="hour"), Jobs(name="j", plugin_id="p", file_name="j.py", every="hour")]
+        )
+    with db.sql_engine.begin() as connection:
+        connection.execute(text("DROP TABLE bw_jobs_cache"))
+        connection.execute(
+            text(
+                "CREATE TABLE bw_jobs_cache (id INTEGER PRIMARY KEY AUTOINCREMENT, job_name VARCHAR(128) NOT NULL, service_id VARCHAR(256), "
+                "file_name VARCHAR(256) COLLATE NOCASE NOT NULL, data BLOB, last_update DATETIME, checksum VARCHAR(128))"
+            )
+        )
+    monkeypatch.setattr(h.routes.cache, "DB", db)
+    db.add_row = add_jobs_cache_row
+    return db
+
+
+def _names(db):
+    from sqlalchemy import text
+
+    with db.sql_engine.connect() as connection:
+        return sorted(row[0] for row in connection.execute(text("SELECT file_name FROM bw_jobs_cache")))
+
+
+def test_a_collation_match_cannot_carry_a_sensitive_row_along(h, nocase_db):
+    # The request names `Secret` (not sensitive: the classifier is exact), the NOCASE column matches `secret` too, which is.
+    nocase_db.add_row(nocase_db, job_name="ui-sso-secret", file_name="Secret", data=b"public")
+    nocase_db.add_row(nocase_db, job_name="ui-sso-secret", file_name="secret", data=b"PLACEHOLDER-BYTES")
+
+    result = h.routes.cache._delete_cache_rows("Secret", job_name="ui-sso-secret", service_id=None, plugin_id="ui_sso", admin=False)
+
+    assert result is h.routes.cache.RESTRICTED
+    assert _names(nocase_db) == ["Secret", "secret"]
+
+
+def test_the_super_admin_deletes_every_collation_match(h, nocase_db):
+    nocase_db.add_row(nocase_db, job_name="ui-sso-secret", file_name="Secret", data=b"public")
+    nocase_db.add_row(nocase_db, job_name="ui-sso-secret", file_name="secret", data=b"PLACEHOLDER-BYTES")
+
+    assert h.routes.cache._delete_cache_rows("Secret", job_name="ui-sso-secret", service_id=None, plugin_id="ui_sso", admin=True) == ""
+
+    assert _names(nocase_db) == []
+
+
+def test_an_ordinary_collation_match_is_deleted_for_a_non_admin(h, nocase_db):
+    nocase_db.add_row(nocase_db, job_name="j", file_name="Notes.txt", data=b"x")
+    nocase_db.add_row(nocase_db, job_name="j", file_name="notes.txt", data=b"x")
+    nocase_db.add_row(nocase_db, job_name="j", file_name="other.txt", data=b"x")
+
+    assert h.routes.cache._delete_cache_rows("NOTES.TXT", job_name="j", service_id=None, plugin_id="p", admin=False) == ""
+
+    assert _names(nocase_db) == ["other.txt"]
+
+
+def test_delete_rows_reports_a_missing_row_and_a_wrong_plugin(h, nocase_db):
+    nocase_db.add_row(nocase_db, job_name="j", file_name="notes.txt", data=b"x")
+
+    assert h.routes.cache._delete_cache_rows("zzz", job_name="j", service_id=None, plugin_id="p", admin=False) is None
+    assert h.routes.cache._delete_cache_rows("notes.txt", job_name="j", service_id=None, plugin_id="other", admin=False) is None
+    assert _names(nocase_db) == ["notes.txt"]
+
+
+def test_delete_rows_refuses_in_read_only_mode(h, nocase_db):
+    nocase_db.add_row(nocase_db, job_name="j", file_name="notes.txt", data=b"x")
+    nocase_db.readonly = True
+
+    assert "read-only" in h.routes.cache._delete_cache_rows("notes.txt", job_name="j", service_id=None, plugin_id="p", admin=True)
+    assert _names(nocase_db) == ["notes.txt"]
+
+
+def test_a_row_replaced_between_the_check_and_the_delete_is_not_deleted(h, nocase_db, monkeypatch):
+    from sqlalchemy import text
+
+    nocase_db.add_row(nocase_db, job_name="ui-sso-secret", file_name="notes.txt", data=b"public")
+    real = h.routes.cache.is_sensitive_job_cache_file
+
+    def classify(*args, **kwargs):
+        # SQLite reuses the id: another connection swaps in a sensitive row right after the check read the benign one.
+        result = real(*args, **kwargs)
+        with nocase_db.sql_engine.begin() as connection:
+            row_id = connection.execute(text("SELECT id FROM bw_jobs_cache WHERE file_name = 'notes.txt'")).scalar_one()
+            connection.execute(text("DELETE FROM bw_jobs_cache WHERE id = :i"), {"i": row_id})
+            connection.execute(
+                text("INSERT INTO bw_jobs_cache (id, job_name, service_id, file_name, data) VALUES (:i, 'ui-sso-secret', NULL, 'token.secret', :d)"),
+                {"i": row_id, "d": b"PLACEHOLDER-BYTES"},
+            )
+        monkeypatch.setattr(h.routes.cache, "is_sensitive_job_cache_file", real)
+        return result
+
+    monkeypatch.setattr(h.routes.cache, "is_sensitive_job_cache_file", classify)
+
+    assert h.routes.cache._delete_cache_rows("notes.txt", job_name="ui-sso-secret", service_id=None, plugin_id="ui_sso", admin=False) is None
+    assert _names(nocase_db) == ["token.secret"]
 
 
 @pytest.mark.parametrize(
