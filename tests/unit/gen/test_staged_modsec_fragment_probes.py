@@ -1,6 +1,8 @@
 """Generated fragments are discovered in staging; operator configs keep their own root."""
 
 import logging
+import re
+import shutil
 from glob import glob
 from pathlib import Path
 
@@ -13,6 +15,7 @@ ROOT = Path(__file__).resolve().parents[3]
 CONFS = ROOT / "src/common/confs"
 CORE = ROOT / "src/common/core"
 SETTINGS = ROOT / "src/common/settings.json"
+GLOBAL_CONTEXTS = ("global", "http", "stream", "default-server-http")
 CONTEXTS = ("modsec", "modsec-crs", "crs-plugins-before", "crs-plugins-after")
 
 
@@ -133,3 +136,57 @@ def test_after_include_condition_matrix_preserves_lines(staged, global_crs, mult
     lines = (output / template).read_text().splitlines()
     assert "# custom CRS plugins configurations after loading plugins" in lines
     assert [line for line in lines if "crs-plugins-after/" in line] == [f"include {path}/*.conf" for path in present]
+
+
+def test_global_crs_single_site_includes_plugin_fragments_on_every_render(staged):
+    build, final, output, _ = staged
+    expected = [f"include /etc/nginx/{context}/*.conf" for context in ("crs-plugins-before", "modsec-crs", "crs-plugins-after")]
+    for render in range(2):
+        assert build("no", "yes").render() == []
+        rules = (output / "http/modsecurity-rules-global-crs.conf.modsec").read_text().splitlines()
+        assert [line for line in rules if line.startswith("include /etc/nginx/") and "/http/" not in line] == expected, f"render {render}"
+        # Publish this render, like the generator's directory swap, then render again over it.
+        shutil.copytree(output, final, dirs_exist_ok=True)
+        shutil.rmtree(output)
+        output.mkdir()
+
+
+def test_global_crs_single_site_drops_fragments_a_plugin_stopped_shipping(staged, tmp_path):
+    build, final, output, _ = staged
+    for context in ("modsec-crs", "crs-plugins-before", "crs-plugins-after"):
+        # Previous render published the fragment, the plugin no longer ships it.
+        stale = final / context / "fixture.conf"
+        stale.parent.mkdir()
+        stale.touch()
+        (tmp_path / "plugins/fixture/confs" / context / "fixture.conf").unlink()
+    assert build("no", "yes").render() == []
+    rules = (output / "http/modsecurity-rules-global-crs.conf.modsec").read_text()
+    assert "include /etc/nginx/crs-plugins-" not in rules
+    # Core plugins still ship modsec-crs fragments, so only the plugin-shipped file leaves the staged folder.
+    assert not (output / "modsec-crs/fixture.conf").exists()
+    assert "include /etc/nginx/modsec-crs/*.conf" in rules
+
+
+def test_server_templates_probe_the_global_output_of_the_same_render(staged, tmp_path):
+    build, _, output, _ = staged
+    probe = tmp_path / "plugins/fixture/confs/server-http/fixture-probe.conf"
+    probe.parent.mkdir(parents=True, exist_ok=True)
+    probe.write_text('{{ "global output present" if is_custom_conf("/etc/nginx/http") else "global output missing" }}\n')
+    assert build("no").render() == []
+    assert (output / "server-http/fixture-probe.conf").read_text() == "global output present\n"
+
+
+def _core_global_templates_probing_staged_folders():
+    """Global-context templates under the core confs that probe a staged /etc/nginx folder."""
+    probing = set()
+    for confs in (CONFS, *CORE.glob("*/confs")):
+        for template in confs.rglob("*"):
+            relative = template.relative_to(confs).as_posix()
+            context = relative.split("/", 1)[0] if "/" in relative else "global"
+            if template.is_file() and context in GLOBAL_CONTEXTS and re.search(r'is_custom_conf\(\s*["\']/etc/nginx/', template.read_text(errors="ignore")):
+                probing.add(relative)
+    return probing
+
+
+def test_global_templates_probing_staged_folders_are_deferred():
+    assert _core_global_templates_probing_staged_folders() == T.DEFERRED_GLOBAL_TEMPLATES

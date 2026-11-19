@@ -163,6 +163,7 @@ def test_an_empty_server_name_renders_no_server_at_all(monkeypatch, server_name,
     instance._config = {"SERVER_NAME": server_name, "MULTISITE": multisite}
     monkeypatch.setattr(instance, "_uses_auto_ssl_ecdh_curve", lambda: False)
     monkeypatch.setattr(instance, "_render_global", lambda: [])
+    monkeypatch.setattr(instance, "_render_deferred_global", lambda: [])
     monkeypatch.setattr(instance, "_render_server_batch", lambda servers: batches.extend(servers) or [])
 
     instance.render()

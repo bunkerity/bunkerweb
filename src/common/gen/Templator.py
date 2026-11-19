@@ -32,6 +32,8 @@ from jinja2 import Environment, FileSystemBytecodeCache, FileSystemLoader, Undef
 
 logger = getLogger("TEMPLATOR")
 _ssl_ecdh_curve_resolution_logged = False
+# Global templates that probe the plugin fragment folders the server phase stages, so they render after it.
+DEFERRED_GLOBAL_TEMPLATES = frozenset({"http/modsecurity-rules-global-crs.conf.modsec"})
 
 
 @lru_cache(maxsize=1)
@@ -452,7 +454,6 @@ class Templator:
         _ssl_ecdh_curve_resolution_logged = False
         if self._uses_auto_ssl_ecdh_curve():
             resolve_ssl_ecdh_curve("auto")
-        failures = self._render_global()
         server_name = self._config.get("SERVER_NAME", "www.example.com").strip()
         # an empty SERVER_NAME renders no server at all, like multisite already does, instead of an empty server_name directive
         servers = [server_name] if server_name else []
@@ -467,6 +468,7 @@ class Templator:
         max_workers = min(worker_target, len(servers)) or 1
         batch_size = max(1, ceil(len(servers) / max_workers))
 
+        failures = self._render_global()
         server_start = perf_counter()
         with ProcessPoolExecutor(max_workers=max_workers, mp_context=mp.get_context("fork")) as executor:
             future_to_batch = {}
@@ -485,7 +487,7 @@ class Templator:
                     elapsed = perf_counter() - server_start
                     logger.info(f"Progress: {completed_servers}/{len(servers)} servers ({progress_pct:.1f}%) in {elapsed:.1f}s")
 
-        return failures
+        return failures + self._render_deferred_global()
 
     def __getstate__(self) -> Dict[str, Any]:
         state = self.__dict__.copy()
@@ -694,27 +696,28 @@ class Templator:
         return owners
 
     def _render_global(self) -> List[str]:
-        """Render global templates. Returns what failed."""
-        global_start = perf_counter()
-
+        """Write variables.env and render the global templates the server phase may read. Returns what failed."""
         failures = [] if self._write_config() else ["variables.env"]
-        templates = self._find_templates(
-            [
-                "global",
-                "http",
-                "stream",
-                "default-server-http",
-            ]
-        )
+        return failures + self._render_global_templates(deferred=False)
+
+    def _render_deferred_global(self) -> List[str]:
+        """Render the global templates that need what the server phase staged. Returns what failed."""
+        return self._render_global_templates(deferred=True)
+
+    def _render_global_templates(self, deferred: bool) -> List[str]:
+        global_start = perf_counter()
+        templates = [
+            template
+            for template in self._find_templates(["global", "http", "stream", "default-server-http"])
+            if (template in DEFERRED_GLOBAL_TEMPLATES) == deferred
+        ]
 
         template_vars = self._base_template_vars.copy()
         template_vars["all"] = self._full_config
         template_vars.update(self._config)
 
-        for template in templates:
-            if not self._render_template(template, template_vars):
-                failures.append(template)
-        logger.debug(f"Global rendering completed in {perf_counter() - global_start:.3f}s")
+        failures = [template for template in templates if not self._render_template(template, template_vars)]
+        logger.debug(f"Global rendering ({'deferred' if deferred else 'main'}) completed in {perf_counter() - global_start:.3f}s")
         return failures
 
     def _render_server_batch(self, servers: List[str]) -> List[str]:
