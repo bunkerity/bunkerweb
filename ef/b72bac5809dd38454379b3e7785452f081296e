@@ -1,0 +1,18 @@
+CHANGELOG.md
+  h_a33a1e80933106 57
+src/scheduler/main.py
+  h_a33a1e80933106 1248-1252
+tests/unit/scheduler/test_main_files.py
+  h_a33a1e80933106 159-174
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "efb72bac5809dd38454379b3e7785452f081296e",
+  "prompts": {},
+  "humans": {
+    "h_a33a1e80933106": {
+      "author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}
