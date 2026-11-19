@@ -59,6 +59,7 @@
 - [BUGFIX] `docker`: the scheduler, Web UI, API and autoconf containers finish their graceful shutdown before they stop.
 - [BUGFIX] `core`: an unusable log file no longer stops the shared Python logger from starting; it keeps logging to its other outputs.
 - [BUGFIX] `installer`: database, Web UI admin and Redis passwords set through environment variables are validated like the flag values.
+- [BUGFIX] `jobs`: removed DNSBL, RealIP and robots.txt feed entries are dropped on reload and stay removed after restart.
 - [DOCS] `splunk`: container integrations send the three logs to a Universal Forwarder as parsable `bunkerweb:*` sourcetypes, with rotation guidance.
 - [DOCS] `scheduler`: the custom configuration section explains the `.bw-managed` marker, manual deletion and restore, and retained inactive service CRS files.
 - [DOCS] `linux`: recommend `madvise` for transparent huge pages, since `always` can add hundreds of MB per reload. (Refs #4164)

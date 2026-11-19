@@ -72,7 +72,7 @@ def test_no_urls_purges_global_and_service_cache(tmp_path, monkeypatch):
     cache.cache_file("source.list", b"old")
     cache.cache_file("IGNORE_IP.list", b"old", service_id="app.example")
     _, status = load_job(monkeypatch, tmp_path, JOB, cache=cache)
-    assert status == 0
+    assert status == 1
     assert cache.data == {}
     assert list(cache.job_path.rglob("*.list")) == []
 

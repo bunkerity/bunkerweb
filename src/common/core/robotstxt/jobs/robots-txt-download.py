@@ -87,14 +87,18 @@ try:
         for file in list(JOB.job_path.rglob("*.list")):
             if file.parent == JOB.job_path:
                 LOGGER.warning(f"Removing no longer used url file {file} ...")
-                deleted, err = JOB.del_cache(file)
-            else:
+                deleted, err = JOB.del_cache(file.name)
+            elif file.name == "rules.list":
                 LOGGER.warning(f"Removing no longer used service file {file} ...")
-                deleted, err = JOB.del_cache(file, service_id=file.parent.name)
+                deleted, err = JOB.del_cache(file.name, service_id=file.parent.name)
+            else:
+                continue
 
             if not deleted:
                 LOGGER.warning(f"Couldn't delete file {file} from cache : {err}")
-        sys_exit(0)
+            elif file.name == "rules.list":
+                status |= 1
+        sys_exit(status)
 
     urls = set()
     failed_urls = set()
@@ -116,6 +120,8 @@ try:
                 deleted, err = JOB.del_cache("rules.list", service_id=service)
                 if not deleted:
                     LOGGER.warning(f"Couldn't delete {service} rules.list from cache : {err}")
+                else:
+                    status |= 1
             continue
 
         aggregated_recap["total_services"].add(service)
@@ -261,7 +267,7 @@ try:
         LOGGER.debug(f"Checking if {url_file} is still in use ...")
         if url_file.name not in urls:
             LOGGER.warning(f"Removing no longer used url file {url_file} ...")
-            deleted, err = JOB.del_cache(url_file)
+            deleted, err = JOB.del_cache(url_file.name)
             if not deleted:
                 LOGGER.warning(f"Couldn't delete url file {url_file} from cache : {err}")
 except SystemExit as e:

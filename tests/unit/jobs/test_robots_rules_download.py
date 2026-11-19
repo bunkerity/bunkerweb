@@ -64,7 +64,7 @@ def test_no_urls_removes_both_source_and_service_files(tmp_path, monkeypatch):
     cache.cache_file("old.list", b"old")
     cache.cache_file("rules.list", b"old", service_id="app.example")
     _, status = load_job(monkeypatch, tmp_path, JOB, cache=cache, env={"USE_ROBOTSTXT": "yes"})
-    assert status == 0
+    assert status == 1
     assert cache.data == {}
 
 

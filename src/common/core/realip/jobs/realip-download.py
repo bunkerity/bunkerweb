@@ -86,14 +86,16 @@ try:
         for file in list(JOB.job_path.rglob("*.list")):
             if file.parent == JOB.job_path:
                 LOGGER.warning(f"Removing no longer used url file {file} ...")
-                deleted, err = JOB.del_cache(file)
+                deleted, err = JOB.del_cache(file.name)
             else:
                 LOGGER.warning(f"Removing no longer used service file {file} ...")
-                deleted, err = JOB.del_cache(file, service_id=file.parent.name)
+                deleted, err = JOB.del_cache(file.name, service_id=file.parent.name)
 
             if not deleted:
                 LOGGER.warning(f"Couldn't delete file {file} from cache : {err}")
-        sys_exit(0)
+            elif file.name == "combined.list":
+                status |= 1
+        sys_exit(status)
 
     urls = set()
     failed_urls = set()
@@ -109,6 +111,17 @@ try:
     }
 
     for service, urls_list in services_realip_urls.items():
+        service_id = "" if service == "global" else service
+        if not urls_list:
+            if JOB.job_path.joinpath(service_id, "combined.list").is_file():
+                LOGGER.warning(f"{service} combined.list is cached but no URL is configured, removing from cache...")
+                deleted, err = JOB.del_cache("combined.list", service_id=service_id)
+                if not deleted:
+                    LOGGER.warning(f"Couldn't delete {service} combined.list from cache : {err}")
+                else:
+                    status |= 1
+            continue
+
         # Track that this service provided URLs for the current kind
         if service != "global":
             aggregated_recap["total_services"].add(service)
@@ -227,7 +240,7 @@ try:
 
         # Check if file has changed
         new_hash = bytes_hash(content)
-        old_hash = JOB.cache_hash("combined.list", service_id="" if service == "global" else service)
+        old_hash = JOB.cache_hash("combined.list", service_id=service_id)
         if new_hash == old_hash:
             LOGGER.debug(f"{service} file combined.list is identical to cache file, reload is not needed")
             continue
@@ -237,7 +250,7 @@ try:
             LOGGER.debug(f"New {service} file combined.list is not in cache, reload is needed")
 
         # Put file in cache
-        cached, err = JOB.cache_file("combined.list", content, service_id="" if service == "global" else service, checksum=new_hash)
+        cached, err = JOB.cache_file("combined.list", content, service_id=service_id, checksum=new_hash)
         if not cached:
             LOGGER.error(f"Error while caching combined list for {service} : {err}")
             status = 2
@@ -265,7 +278,7 @@ try:
         LOGGER.debug(f"Checking if {url_file} is still in use ...")
         if url_file.name not in urls:
             LOGGER.warning(f"Removing no longer used url file {url_file} ...")
-            deleted, err = JOB.del_cache(url_file)
+            deleted, err = JOB.del_cache(url_file.name)
             if not deleted:
                 LOGGER.warning(f"Couldn't delete url file {url_file} from cache : {err}")
 except SystemExit as e:

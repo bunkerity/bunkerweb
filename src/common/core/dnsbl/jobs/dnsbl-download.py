@@ -84,13 +84,15 @@ try:
         for file in list(JOB.job_path.rglob("*.list")):
             if file.parent == JOB.job_path:
                 LOGGER.warning(f"Removing no longer used url file {file} ...")
-                deleted, err = JOB.del_cache(file)
+                deleted, err = JOB.del_cache(file.name)
             else:
                 LOGGER.warning(f"Removing no longer used service file {file} ...")
-                deleted, err = JOB.del_cache(file, service_id=file.parent.name)
+                deleted, err = JOB.del_cache(file.name, service_id=file.parent.name)
             if not deleted:
                 LOGGER.warning(f"Couldn't delete file {file} from cache : {err}")
-        sys_exit(0)
+            elif file.name == "IGNORE_IP.list":
+                status |= 1
+        sys_exit(status)
 
     processed_urls: set[str] = set()
     failed_urls: set[str] = set()
@@ -104,6 +106,8 @@ try:
                 deleted, err = JOB.del_cache("IGNORE_IP.list", service_id=service)
                 if not deleted:
                     LOGGER.warning(f"Couldn't delete {service} IGNORE_IP.list from cache : {err}")
+                else:
+                    status |= 1
             continue
 
         unique_entries: set[bytes] = set()
@@ -222,7 +226,7 @@ try:
     for url_file in JOB.job_path.glob("*.list"):
         if url_file.name not in url_cache_files:
             LOGGER.warning(f"Removing no longer used url file {url_file} ...")
-            deleted, err = JOB.del_cache(url_file)
+            deleted, err = JOB.del_cache(url_file.name)
             if not deleted:
                 LOGGER.warning(f"Couldn't delete url file {url_file} from cache : {err}")
 

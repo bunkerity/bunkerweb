@@ -565,6 +565,64 @@ def test_feed_changed_url_removes_stale_url_cache_row_and_file(runtime, plugin):
     _assert_file(job, new_file, b"# Downloaded from https://feeds.invalid/new\n203.0.113.8\n")
 
 
+@pytest.mark.parametrize(
+    "script,enabled,setting,name,service,line",
+    [
+        ("dnsbl/jobs/dnsbl-download.py", "USE_DNSBL", "DNSBL_IGNORE_IP_URLS", "IGNORE_IP.list", "app.example", b"203.0.113.8"),
+        ("realip/jobs/realip-download.py", "USE_REAL_IP", "REAL_IP_FROM_URLS", "combined.list", "", b"203.0.113.8"),
+        ("robotstxt/jobs/robots-txt-download.py", "USE_ROBOTSTXT", "ROBOTSTXT_URLS", "rules.list", "app.example", b"Disallow: /a"),
+    ],
+)
+@pytest.mark.parametrize("replacement", [False, True])
+def test_removed_feed_deletes_cache_rows_and_files(runtime, script, enabled, setting, name, service, line, replacement):
+    job, run = runtime(script)
+    assert job.cache_file("obsolete.list", b"old\n")[0]
+    assert job.cache_file(name, b"old\n", service_id=service)[0]
+    env = {enabled: "yes", setting: "https://feeds.invalid/new" if replacement else ""}
+    assert run(env=env, get=Mock(return_value=_response(line + b"\n")))[1] == 1
+    assert not (job.job_path / "obsolete.list").exists()
+    with session(job.db) as s:
+        assert s.query(Jobs_cache).filter_by(file_name="obsolete.list").count() == 0
+        if not replacement:
+            assert s.query(Jobs_cache).count() == 0
+    if replacement:
+        _assert_file(job, name, line + b"\n", service)
+    else:
+        assert not (job.job_path / service / name).exists()
+
+
+@pytest.mark.parametrize(
+    "script,enabled,setting,name,line",
+    [
+        ("dnsbl/jobs/dnsbl-download.py", "USE_DNSBL", "DNSBL_IGNORE_IP_URLS", "IGNORE_IP.list", b"203.0.113.8"),
+        ("realip/jobs/realip-download.py", "USE_REAL_IP", "REAL_IP_FROM_URLS", "combined.list", b"203.0.113.8"),
+        ("robotstxt/jobs/robots-txt-download.py", "USE_ROBOTSTXT", "ROBOTSTXT_URLS", "rules.list", b"Disallow: /a"),
+    ],
+)
+def test_feed_removal_reloads_with_unchanged_sibling(runtime, script, enabled, setting, name, line):
+    job, run = runtime(script)
+    url = "https://feeds.invalid/current"
+    for service in ("app.example", "alias.example"):
+        assert job.cache_file(name, line + b"\n", service_id=service)[0]
+    if enabled == "USE_REAL_IP":
+        assert job.cache_file(name, line + b"\n")[0]
+    env = {
+        "MULTISITE": "yes",
+        "SERVER_NAME": "app.example alias.example",
+        f"app.example_{enabled}": "yes",
+        f"alias.example_{enabled}": "yes",
+        f"alias.example_{setting}": url,
+    }
+    remote = Mock(return_value=_response(line + b"\n"))
+    assert run(env=env, get=remote)[1] == 1
+    for service in ("", "app.example"):
+        assert not (job.job_path / service / name).exists()
+    _assert_file(job, name, line + b"\n", "alias.example")
+    with session(job.db) as s:
+        assert [row.service_id for row in s.query(Jobs_cache).filter_by(file_name=name)] == ["alias.example"]
+    assert run(env=env, get=remote)[1] == 0
+
+
 def _backup_module(monkeypatch, tmp_path):
     module = _module(ROOT / "src/common/core/backup/backup.py")
     monkeypatch.setattr(module, "DB_LOCK_FILE", tmp_path / "db.lock")
