@@ -32,8 +32,8 @@ def clock(sched_main, monkeypatch):
     sched_main.HEALTHCHECK_RELOADS.clear()
 
 
-def scripted_api(outcome, initial=False, clock=None):
-    api = SimpleNamespace(endpoint="http://bw1:5000/", calls=[], ready=False)
+def scripted_api(outcome, initial=False, clock=None, host="bw1"):
+    api = SimpleNamespace(endpoint=f"http://{host}:5000/", calls=[], ready=False)
     states = [checks.state("loading")] if initial else []
     states += [RELOADING, OK] if outcome == "confirmed" else [RELOADING]
 
@@ -127,3 +127,31 @@ def test_pending_healthcheck_does_not_erase_a_later_configuration_rejection(heal
     assert checks.statuses(health)[-1] == ("bw1", "failover")
     assert not any(method == "POST" for method, _, _ in api.calls)
     assert health.sends.renders == 0
+
+
+def test_healthcheck_confirmation_wait_is_bounded_per_pass_across_instances(health, clock, monkeypatch):
+    """Stuck reloads share one budget; later healthchecks can confirm them independently."""
+    hosts = [f"bw{i}" for i in range(1, 41)]
+    apis = {host: scripted_api("pending", initial=True, host=host) for host in hosts}
+    count = len(apis)
+    health.sched.db.instances = [instance(host) for host in apis]
+    monkeypatch.setattr(health.main.API, "from_instance", lambda inst: apis[inst["hostname"]])
+    monkeypatch.setattr(health.main, "ApiCaller", ApiCaller)
+    health.main.healthcheck_job()
+    assert clock[0] <= reload_utils.RELOAD_CONFIRM_TICK_WAIT
+    assert all(len(apis[host].calls) == 2 for host in hosts[1:])  # regular health and reload only
+    assert set(health.main.HEALTHCHECK_RELOADS) == set(apis)
+    assert {host for host, status in checks.statuses(health)} == set(apis)
+    assert all(status == "loading" for _, status in checks.statuses(health))
+    assert sum(method == "POST" for api in apis.values() for method, _, _ in api.calls) == count
+    for host in hosts[1:]:
+        apis[host].ready = True
+    health.main.healthcheck_job()
+    assert checks.statuses(health)[-count:] == [(hosts[0], "loading"), *((host, "up") for host in hosts[1:])]
+    assert set(health.main.HEALTHCHECK_RELOADS) == {hosts[0]}
+
+    apis[hosts[0]].ready = True
+    health.main.healthcheck_job()
+    assert checks.statuses(health)[-count:] == [(host, "up") for host in hosts]
+    assert health.main.HEALTHCHECK_RELOADS == {}
+    assert sum(method == "POST" for api in apis.values() for method, _, _ in api.calls) == count

@@ -63,7 +63,7 @@ from cache_restore import (  # type: ignore
 from API import API  # type: ignore
 
 from ApiCaller import ApiCaller, MIN_RELOAD_TIMEOUT, folder_push_timeout  # type: ignore
-from reload_utils import RELOAD_CONFIRM_MIN_WAIT, RELOAD_CONFIRM_MAX_WAIT, wait_for_reload  # type: ignore
+from reload_utils import RELOAD_CONFIRM_MIN_WAIT, RELOAD_CONFIRM_MAX_WAIT, tick_deadline, wait_for_reload  # type: ignore
 
 APPLYING_CHANGES = Event()
 BACKING_UP_FAILOVER = Event()
@@ -1334,6 +1334,7 @@ def healthcheck_job():
             return
 
         env = None
+        confirm_deadline = tick_deadline()
 
         for db_instance in SCHEDULER.db.get_instances():
             bw_instance = API.from_instance(db_instance)
@@ -1376,7 +1377,11 @@ def healthcheck_job():
                 state = resp["msg"]
                 pending_status = "failover" if db_instance["status"] == "failover" else "loading"
                 if hostname in HEALTHCHECK_RELOADS:
-                    pending, failed = wait_for_reload([bw_instance], HEALTHCHECK_RELOADS[hostname], RELOAD_CONFIRM_MIN_WAIT)
+                    # This health response can confirm an earlier reload even after the polling budget is spent.
+                    if state == "ok" and resp.get("status") == "success":
+                        pending, failed = {}, {}
+                    else:
+                        pending, failed = wait_for_reload([bw_instance], HEALTHCHECK_RELOADS[hostname], deadline=confirm_deadline)
                     if pending:
                         HEALTHCHECK_LOGGER.warning(f"Reload confirmation still pending for instance {bw_instance.endpoint}: {pending}")
                         ret = SCHEDULER.db.update_instance(hostname, pending_status)
@@ -1498,7 +1503,7 @@ def healthcheck_job():
                         timeout=max(RELOAD_MIN_TIMEOUT, 3 * len(env.get("SERVER_NAME", "www.example.com").split())),
                         response=True,
                     )
-                    pending, failed = wait_for_reload([bw_instance], responses or {}, RELOAD_CONFIRM_MIN_WAIT)
+                    pending, failed = wait_for_reload([bw_instance], responses or {}, deadline=confirm_deadline)
                     if pending:
                         HEALTHCHECK_RELOADS[hostname] = responses or {}
                         HEALTHCHECK_LOGGER.warning(f"Reload signalled to instance {bw_instance.endpoint}, confirmation still pending: {pending}")
