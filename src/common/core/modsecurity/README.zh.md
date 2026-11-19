@@ -122,14 +122,14 @@ SecAction \
 - 该操作在**阶段 1**（请求生命周期的早期）执行。
 - 它通过设置变量 `tx.crs_exclusions_wordpress` 来启用 WordPress 特定的 CRS 排除项。
 
-#### 使用 `modsec` 更新 CRS 规则
+#### 使用 `modsec-crs` 更新 CRS 规则
 
-要微调已加载的 CRS 规则，您可以使用 `modsec` 类型的自定义配置。例如，您可以为某些请求路径删除特定的规则或标签：
+要微调已加载的 CRS 规则，您可以使用 `modsec-crs` 类型的自定义配置。例如，您可以为某些请求路径删除特定的规则或标签。`ctl:ruleRemove*` 操作只影响在它之后执行的规则，因此下面的规则在 `phase:1` 中执行，并且该配置在 CRS 之前加载：
 
 ```conf
-SecRule REQUEST_FILENAME "/wp-admin/admin-ajax.php" "id:1,ctl:ruleRemoveByTag=attack-xss,ctl:ruleRemoveByTag=attack-rce"
-SecRule REQUEST_FILENAME "/wp-admin/options.php" "id:2,ctl:ruleRemoveByTag=attack-xss"
-SecRule REQUEST_FILENAME "^/wp-json/yoast" "id:3,ctl:ruleRemoveById=930120"
+SecRule REQUEST_FILENAME "/wp-admin/admin-ajax.php" "id:1,phase:1,pass,t:none,nolog,ctl:ruleRemoveByTag=attack-xss,ctl:ruleRemoveByTag=attack-rce"
+SecRule REQUEST_FILENAME "/wp-admin/options.php" "id:2,phase:1,pass,t:none,nolog,ctl:ruleRemoveByTag=attack-xss"
+SecRule REQUEST_FILENAME "^/wp-json/yoast" "id:3,phase:1,pass,t:none,nolog,ctl:ruleRemoveById=930120"
 ```
 
 在此示例中：
@@ -137,6 +137,8 @@ SecRule REQUEST_FILENAME "^/wp-json/yoast" "id:3,ctl:ruleRemoveById=930120"
 - **规则 1**：为对 `/wp-admin/admin-ajax.php` 的请求删除标记为 `attack-xss` 和 `attack-rce` 的规则。
 - **规则 2**：为对 `/wp-admin/options.php` 的请求删除标记为 `attack-xss` 的规则。
 - **规则 3**：为匹配 `/wp-json/yoast` 的请求删除特定规则（ID `930120`）。
+
+在加载配置时生效的 `SecRuleRemoveById`、`SecRuleRemoveByTag`、`SecRuleUpdateTargetById` 和 `SecRuleUpdateTargetByTag` 指令，应放在 `modsec` 类型的自定义配置中（位于 CRS 之后）。
 
 !!! info "执行顺序"
     BunkerWeb 中 ModSecurity 的执行顺序如下，确保了规则应用的清晰和逻辑性：

@@ -37,7 +37,7 @@ services:
         - bunkerweb.REVERSE_PROXY_HOST=https://mypassbolt
         - |
           bunkerweb.CUSTOM_CONF_MODSEC_CRS_passbolt=
-          SecRule REQUEST_FILENAME "@rx ^/locales" "id:1000000,ctl:ruleRemoveById=953100,nolog"
+          SecRule REQUEST_FILENAME "@rx ^/locales" "id:1004,phase:1,pass,t:none,nolog,ctl:ruleRemoveById=953100"
 
   mydb:
     image: mariadb:11

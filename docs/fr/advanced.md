@@ -1607,6 +1607,70 @@ Certaines intégrations offrent des moyens plus pratiques d'appliquer des config
 
     Il n'y a pas de mécanisme de mise à jour : l'alternative est de supprimer une configuration existante à l'aide puis de `docker config rm` la recréer.
 
+### Identifiants des règles ModSecurity {#modsecurity-rule-ids}
+
+Chaque règle ModSecurity porte un identifiant numérique, et ModSecurity refuse de charger deux règles de même identifiant : le rechargement s'arrête avec `Rule id: N is duplicated`. BunkerWeb, l'OWASP Core Rule Set (CRS), les plugins CRS et vos propres règles partagent un même espace d'identifiants, donc chaque propriétaire a une plage réservée.
+
+**Plages réservées par d'autres**
+
+| Plage               | Propriétaire                                                                                         |
+| ------------------- | ---------------------------------------------------------------------------------------------------- |
+| 1-99 999            | Usage local uniquement. N'utilisez jamais cette plage pour des règles que vous distribuez à d'autres |
+| 900 000-999 999     | OWASP CRS                                                                                            |
+| 1 000 000-1 009 999 | Red Hat                                                                                              |
+| 1 010 000-1 999 999 | Kemp                                                                                                 |
+| 2 000 000-2 999 999 | Trustwave SpiderLabs                                                                                 |
+| 9 500 000-9 999 999 | Plugins CRS, par blocs de 1 000 identifiants. L'incubator a 9 900 000-9 999 999                      |
+
+Sources : l'[action `id` du manuel de référence ModSecurity](https://modsecurity.org/docs/3-reference-manual/3-5-actions/), le [registre des plugins CRS](https://github.com/coreruleset/plugin-registry) et le [plugin modèle CRS](https://github.com/coreruleset/template-plugin).
+
+**Plage BunkerWeb : 9 800 000-9 899 999**
+
+BunkerWeb livre ses propres règles dans la partie 9 800 000-9 899 999 de la plage des plugins CRS, qu'aucun plugin enregistré n'utilise. Le cœur de BunkerWeb vient en premier, puis les plugins PRO, les plugins externes et les modèles de la communauté :
+
+| Plage               | Utilisée par                                                                                       |
+| ------------------- | -------------------------------------------------------------------------------------------------- |
+| 9 800 000-9 809 999 | Cœur OSS de BunkerWeb                                                                              |
+| 9 810 000-9 839 999 | Plugins PRO de BunkerWeb                                                                           |
+| 9 840 000-9 849 999 | Plugins externes ([bunkerweb-plugins](https://github.com/bunkerity/bunkerweb-plugins))             |
+| 9 850 000-9 899 999 | Modèles de la communauté ([bunkerweb-templates](https://github.com/bunkerity/bunkerweb-templates)) |
+
+Chaque composant a un bloc de 1 000 identifiants. Dans un bloc, `000`-`099` sert aux règles d'initialisation, `100`-`499` aux règles de requête et `500`-`999` aux règles de réponse. Les nouveaux blocs sont pris dans l'ordre. Blocs attribués :
+
+| Bloc                  | Composant                                  | Type                    |
+| --------------------- | ------------------------------------------ | ----------------------- |
+| 9 800 000             | `modsecurity`                              | Cœur OSS                |
+| 9 801 000             | `antibot`                                  | Cœur OSS                |
+| 9 802 000             | `ui`                                       | Cœur OSS                |
+| 9 803 000             | `templates` (modèle API)                   | Cœur OSS                |
+| 9 810 000             | `custom_pages`                             | Plugin PRO              |
+| 9 811 000             | `saml`                                     | Plugin PRO              |
+| 9 840 000             | `coraza`                                   | Plugin externe          |
+| À partir de 9 850 000 | Un bloc par modèle, par ordre alphabétique | Modèle de la communauté |
+
+Le projet [bunkerweb-templates](https://github.com/bunkerity/bunkerweb-templates) attribue les blocs des modèles.
+
+**Que faire dans vos configurations**
+
+- Donnez à vos propres règles un identifiant de 1 à 99 999 qu'aucune autre de vos configurations personnalisées n'utilise. BunkerWeb ne livre aucune règle dans cette plage.
+- Écrivez les exclusions à l'exécution (`ctl:ruleRemoveById`, `ctl:ruleRemoveByTag`, `ctl:ruleRemoveTargetById` et similaires) dans une configuration personnalisée de type `modsec-crs`, chargée avant le CRS, avec `phase:1,pass,t:none,nolog`. Une exclusion à l'exécution doit s'exécuter au plus tard avant la règle qu'elle vise.
+- Écrivez les exclusions au démarrage (`SecRuleRemoveById`, `SecRuleRemoveByTag`, `SecRuleUpdateTargetById` et `SecRuleUpdateTargetByTag`) dans une configuration personnalisée de type `modsec`, chargée après le CRS.
+- Ne redéfinissez pas une règle de configuration du CRS que BunkerWeb définit déjà : `900200` (méthodes autorisées, depuis le paramètre `ALLOWED_METHODS`) et `900230` (versions HTTP autorisées, définie avec HTTP/3 sur la version 3 du CRS). Une seconde règle de même identifiant arrête le rechargement avec `Rule id: N is duplicated`.
+
+**Identifiants modifiés dans la 1.6.18~rc5**
+
+Les versions précédentes utilisaient des identifiants de plages appartenant à d'autres. Si l'une de vos configurations référence un ancien identifiant, par exemple `SecRuleRemoveById 200002`, remplacez-le par le nouveau :
+
+| Ancien identifiant                          | Nouvel identifiant                          |
+| ------------------------------------------- | ------------------------------------------- |
+| 1000                                        | 9800000                                     |
+| 200000, 200001                              | 9800010, 9800011                            |
+| 1007783                                     | 9800100                                     |
+| 200002 - 200006                             | 9800200 - 9800204                           |
+| 1010                                        | 9801500                                     |
+| 1007770 - 1007782                           | 9802100 - 9802112                           |
+| 2007771, 2007772, 2007773, 2007775, 2007778 | 9803100, 9803101, 9803102, 9803103, 9803104 |
+
 ## Exécution de nombreux services en production {#running-many-services-in-production}
 
 ### CRS mondial
@@ -1619,7 +1683,7 @@ Si vous utilisez BunkerWeb en production avec un grand nombre de services, et qu
 La solution de contournement consiste à charger les règles CRS globalement plutôt que par service. Ce comportement n'est pas activé par défaut pour des raisons de compatibilité descendante et parce qu'il présente un inconvénient : si vous activez le chargement des règles CRS globales, **il ne sera plus possible de définir des règles modsec-crs** (exécutées avant les règles CRS) par service. Cependant, cette limitation peut être contournée en écrivant des règles d'exclusion globales `modsec-crs` comme suit :
 
 ```
-SecRule REQUEST_FILENAME "@rx ^/somewhere$" "nolog,phase:4,allow,id:1010,chain"
+SecRule REQUEST_FILENAME "@rx ^/somewhere$" "nolog,phase:4,allow,id:100,chain"
 SecRule REQUEST_HEADERS:Host "@rx ^app1\.example\.com$" "nolog"
 ```
 

@@ -1609,6 +1609,70 @@ Some integrations provide more convenient ways to apply configurations, such as 
 
     There is no update mechanism : the alternative is to remove an existing config using `docker config rm` and then recreate it.
 
+### ModSecurity rule IDs {#modsecurity-rule-ids}
+
+Every ModSecurity rule has a numeric ID, and ModSecurity refuses to load two rules with the same ID: the reload stops with `Rule id: N is duplicated`. BunkerWeb, the OWASP Core Rule Set (CRS), the CRS plugins and your own rules share one ID space, so each owner has a reserved range.
+
+**Ranges reserved by others**
+
+| Range               | Owner                                                                      |
+| ------------------- | -------------------------------------------------------------------------- |
+| 1-99,999            | Local use only. Never use this range for rules you distribute to others    |
+| 900,000-999,999     | OWASP CRS                                                                  |
+| 1,000,000-1,009,999 | Red Hat                                                                    |
+| 1,010,000-1,999,999 | Kemp                                                                       |
+| 2,000,000-2,999,999 | Trustwave SpiderLabs                                                       |
+| 9,500,000-9,999,999 | CRS plugins, in blocks of 1,000 IDs. The incubator has 9,900,000-9,999,999 |
+
+Sources: the [`id` action in the ModSecurity reference manual](https://modsecurity.org/docs/3-reference-manual/3-5-actions/), the [CRS plugin registry](https://github.com/coreruleset/plugin-registry) and the [CRS template plugin](https://github.com/coreruleset/template-plugin).
+
+**BunkerWeb range: 9,800,000-9,899,999**
+
+BunkerWeb ships its own rules in the 9,800,000-9,899,999 part of the CRS plugin range, which no registered plugin uses. The BunkerWeb core comes first, then the PRO plugins, the external plugins and the community templates:
+
+| Range               | Used by                                                                                       |
+| ------------------- | --------------------------------------------------------------------------------------------- |
+| 9,800,000-9,809,999 | BunkerWeb OSS core                                                                            |
+| 9,810,000-9,839,999 | BunkerWeb PRO plugins                                                                         |
+| 9,840,000-9,849,999 | External plugins ([bunkerweb-plugins](https://github.com/bunkerity/bunkerweb-plugins))        |
+| 9,850,000-9,899,999 | Community templates ([bunkerweb-templates](https://github.com/bunkerity/bunkerweb-templates)) |
+
+Each component has one block of 1,000 IDs. Inside a block, `000`-`099` is for initialization rules, `100`-`499` for request rules and `500`-`999` for response rules. New blocks are taken in order. Allocated blocks:
+
+| Block          | Component                                     | Kind               |
+| -------------- | --------------------------------------------- | ------------------ |
+| 9,800,000      | `modsecurity`                                 | OSS core           |
+| 9,801,000      | `antibot`                                     | OSS core           |
+| 9,802,000      | `ui`                                          | OSS core           |
+| 9,803,000      | `templates` (API template)                    | OSS core           |
+| 9,810,000      | `custom_pages`                                | PRO plugin         |
+| 9,811,000      | `saml`                                        | PRO plugin         |
+| 9,840,000      | `coraza`                                      | External plugin    |
+| From 9,850,000 | One block per template, in alphabetical order | Community template |
+
+The [bunkerweb-templates](https://github.com/bunkerity/bunkerweb-templates) project assigns the template blocks.
+
+**What to do in your configurations**
+
+- Give your own rules an ID from 1 to 99,999 that no other custom configuration of yours uses. BunkerWeb ships no rule in that range.
+- Write runtime exclusions (`ctl:ruleRemoveById`, `ctl:ruleRemoveByTag`, `ctl:ruleRemoveTargetById` and the like) in a `modsec-crs` custom configuration, which is loaded before the CRS, with `phase:1,pass,t:none,nolog`. A runtime exclusion must run no later than the rule it targets.
+- Write startup exclusions (`SecRuleRemoveById`, `SecRuleRemoveByTag`, `SecRuleUpdateTargetById` and `SecRuleUpdateTargetByTag`) in a `modsec` custom configuration, which is loaded after the CRS.
+- Do not redefine a CRS setup rule that BunkerWeb already sets: `900200` (allowed methods, from the `ALLOWED_METHODS` setting) and `900230` (allowed HTTP versions, set with HTTP/3 on CRS version 3). A second rule with the same ID stops the reload with `Rule id: N is duplicated`.
+
+**IDs changed in 1.6.18~rc5**
+
+Earlier versions used IDs from ranges owned by others. If one of your configurations refers to an old ID, for example `SecRuleRemoveById 200002`, replace it with the new one:
+
+| Old ID                                      | New ID                                      |
+| ------------------------------------------- | ------------------------------------------- |
+| 1000                                        | 9800000                                     |
+| 200000, 200001                              | 9800010, 9800011                            |
+| 1007783                                     | 9800100                                     |
+| 200002 - 200006                             | 9800200 - 9800204                           |
+| 1010                                        | 9801500                                     |
+| 1007770 - 1007782                           | 9802100 - 9802112                           |
+| 2007771, 2007772, 2007773, 2007775, 2007778 | 9803100, 9803101, 9803102, 9803103, 9803104 |
+
 ## Running many services in production {#running-many-services-in-production}
 
 ### Global CRS
@@ -1621,7 +1685,7 @@ If you use BunkerWeb in production with a large number of services, and you enab
 The workaround is to load the CRS rules globally rather than per service. This behavior is not enabled by default for backward compatibility reasons and because it has a drawback: if you enable global CRS rule loading, **it will no longer be possible to define modsec-crs rules** (executed before the CRS rules) on a per-service basis. However, this limitation can be bypassed by writing global `modsec-crs` exclusion rules like this:
 
 ```
-SecRule REQUEST_FILENAME "@rx ^/somewhere$" "nolog,phase:4,allow,id:1010,chain"
+SecRule REQUEST_FILENAME "@rx ^/somewhere$" "nolog,phase:4,allow,id:100,chain"
 SecRule REQUEST_HEADERS:Host "@rx ^app1\.example\.com$" "nolog"
 ```
 

@@ -1606,6 +1606,70 @@ systemctl status systemd-resolved
 
     没有更新机制：替代方法是使用 `docker config rm` 删除现有配置，然后重新创建它。
 
+### ModSecurity 规则 ID {#modsecurity-rule-ids}
+
+每条 ModSecurity 规则都有一个数字 ID，ModSecurity 不会加载两条 ID 相同的规则：重新加载会以 `Rule id: N is duplicated` 中止。BunkerWeb、OWASP 核心规则集（CRS）、CRS 插件和您自己的规则共用同一个 ID 空间，因此每个所有者都有一个保留范围。
+
+**其他方保留的范围**
+
+| 范围                | 所有者                                                                    |
+| ------------------- | ------------------------------------------------------------------------- |
+| 1-99,999            | 仅供本地使用。切勿将此范围用于分发给他人的规则                            |
+| 900,000-999,999     | OWASP CRS                                                                 |
+| 1,000,000-1,009,999 | Red Hat                                                                   |
+| 1,010,000-1,999,999 | Kemp                                                                      |
+| 2,000,000-2,999,999 | Trustwave SpiderLabs                                                      |
+| 9,500,000-9,999,999 | CRS 插件，每个插件 1,000 个 ID 的区块。incubator 使用 9,900,000-9,999,999 |
+
+来源：[ModSecurity 参考手册中的 `id` 操作](https://modsecurity.org/docs/3-reference-manual/3-5-actions/)、[CRS 插件注册表](https://github.com/coreruleset/plugin-registry)和 [CRS 模板插件](https://github.com/coreruleset/template-plugin)。
+
+**BunkerWeb 范围：9,800,000-9,899,999**
+
+BunkerWeb 在 CRS 插件范围的 9,800,000-9,899,999 部分发布自己的规则，该部分没有任何已注册的插件使用。顺序为 BunkerWeb 核心、PRO 插件、外部插件，最后是社区模板：
+
+| 范围                | 使用者                                                                              |
+| ------------------- | ----------------------------------------------------------------------------------- |
+| 9,800,000-9,809,999 | BunkerWeb OSS 核心                                                                  |
+| 9,810,000-9,839,999 | BunkerWeb PRO 插件                                                                  |
+| 9,840,000-9,849,999 | 外部插件（[bunkerweb-plugins](https://github.com/bunkerity/bunkerweb-plugins)）     |
+| 9,850,000-9,899,999 | 社区模板（[bunkerweb-templates](https://github.com/bunkerity/bunkerweb-templates)） |
+
+每个组件有一个 1,000 个 ID 的区块。在区块内，`000`-`099` 用于初始化规则，`100`-`499` 用于请求规则，`500`-`999` 用于响应规则。新区块按顺序分配。已分配的区块：
+
+| 区块            | 组件                         | 类型     |
+| --------------- | ---------------------------- | -------- |
+| 9,800,000       | `modsecurity`                | OSS 核心 |
+| 9,801,000       | `antibot`                    | OSS 核心 |
+| 9,802,000       | `ui`                         | OSS 核心 |
+| 9,803,000       | `templates`（API 模板）      | OSS 核心 |
+| 9,810,000       | `custom_pages`               | PRO 插件 |
+| 9,811,000       | `saml`                       | PRO 插件 |
+| 9,840,000       | `coraza`                     | 外部插件 |
+| 从 9,850,000 起 | 每个模板一个区块，按字母顺序 | 社区模板 |
+
+模板区块由 [bunkerweb-templates](https://github.com/bunkerity/bunkerweb-templates) 项目分配。
+
+**在您的配置中应该怎么做**
+
+- 为您自己的规则使用 1 到 99,999 之间的 ID，且不与您其他自定义配置中的 ID 重复。BunkerWeb 在此范围内不发布任何规则。
+- 将运行时排除项（`ctl:ruleRemoveById`、`ctl:ruleRemoveByTag`、`ctl:ruleRemoveTargetById` 等）写入 `modsec-crs` 类型的自定义配置（在 CRS 之前加载），并使用 `phase:1,pass,t:none,nolog`。运行时排除项必须不晚于它所针对的规则执行。
+- 将启动时排除项（`SecRuleRemoveById`、`SecRuleRemoveByTag`、`SecRuleUpdateTargetById` 和 `SecRuleUpdateTargetByTag`）写入 `modsec` 类型的自定义配置（在 CRS 之后加载）。
+- 不要重新定义 BunkerWeb 已经设置的 CRS 设置规则：`900200`（允许的方法，来自 `ALLOWED_METHODS` 设置）和 `900230`（允许的 HTTP 版本，在 CRS 版本 3 上启用 HTTP/3 时设置）。使用相同 ID 的第二条规则会使重新加载以 `Rule id: N is duplicated` 中止。
+
+**1.6.18~rc5 中更改的 ID**
+
+早期版本使用了属于其他方的范围内的 ID。如果您的某个配置引用了旧 ID，例如 `SecRuleRemoveById 200002`，请将其替换为新 ID：
+
+| 旧 ID                                       | 新 ID                                       |
+| ------------------------------------------- | ------------------------------------------- |
+| 1000                                        | 9800000                                     |
+| 200000, 200001                              | 9800010, 9800011                            |
+| 1007783                                     | 9800100                                     |
+| 200002 - 200006                             | 9800200 - 9800204                           |
+| 1010                                        | 9801500                                     |
+| 1007770 - 1007782                           | 9802100 - 9802112                           |
+| 2007771, 2007772, 2007773, 2007775, 2007778 | 9803100, 9803101, 9803102, 9803103, 9803104 |
+
 ## 在生产环境中运行大量服务 {#running-many-services-in-production}
 
 ### 全局 CRS
@@ -1618,7 +1682,7 @@ systemctl status systemd-resolved
 解决方法是全局加载 CRS 规则，而不是按服务加载。出于向后兼容性的原因，此行为默认未启用，并且因为它有一个缺点：如果您启用全局 CRS 规则加载，**将不再可能按服务定义 modsec-crs 规则**（在 CRS 规则之前执行）。然而，这个限制可以通过编写如下所示的全局 `modsec-crs` 排除规则来绕过：
 
 ```
-SecRule REQUEST_FILENAME "@rx ^/somewhere$" "nolog,phase:4,allow,id:1010,chain"
+SecRule REQUEST_FILENAME "@rx ^/somewhere$" "nolog,phase:4,allow,id:100,chain"
 SecRule REQUEST_HEADERS:Host "@rx ^app1\.example\.com$" "nolog"
 ```
 

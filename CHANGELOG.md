@@ -78,6 +78,7 @@
 - [DEPS] Updated psycopg version to v3.3.9
 - [DEPS] Updated importlib-metadata version to v10.2.0
 - [DEPS] Updated LuaJIT to v2.1-20261117
+- [DOCUMENTATION] `modsecurity`: document the rule ID ledger and where runtime exclusions go; examples use IDs from the local range.
 
 ## v1.6.18~rc4 - 2026/11/17
 

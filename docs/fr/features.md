@@ -4455,14 +4455,14 @@ Dans cet exemple :
 - L'action est exécutée en **Phase 1** (tôt dans le cycle de vie de la requête).
 - Elle active les exclusions spécifiques à WordPress du CRS en définissant la variable `tx.crs_exclusions_wordpress`.
 
-#### Mise à jour des règles CRS avec `modsec`
+#### Mise à jour des règles CRS avec `modsec-crs`
 
-Pour affiner les règles CRS chargées, vous pouvez utiliser une configuration personnalisée de type `modsec`. Par exemple, vous pouvez supprimer des règles ou des balises spécifiques pour certains chemins de requête :
+Pour affiner les règles CRS chargées, vous pouvez utiliser une configuration personnalisée de type `modsec-crs`. Par exemple, vous pouvez supprimer des règles ou des balises spécifiques pour certains chemins de requête. Une action `ctl:ruleRemove*` n'affecte que les règles exécutées après elle : les règles ci-dessous s'exécutent donc en `phase:1` et la configuration est chargée avant le CRS :
 
 ```conf
-SecRule REQUEST_FILENAME "/wp-admin/admin-ajax.php" "id:1,ctl:ruleRemoveByTag=attack-xss,ctl:ruleRemoveByTag=attack-rce"
-SecRule REQUEST_FILENAME "/wp-admin/options.php" "id:2,ctl:ruleRemoveByTag=attack-xss"
-SecRule REQUEST_FILENAME "^/wp-json/yoast" "id:3,ctl:ruleRemoveById=930120"
+SecRule REQUEST_FILENAME "/wp-admin/admin-ajax.php" "id:1,phase:1,pass,t:none,nolog,ctl:ruleRemoveByTag=attack-xss,ctl:ruleRemoveByTag=attack-rce"
+SecRule REQUEST_FILENAME "/wp-admin/options.php" "id:2,phase:1,pass,t:none,nolog,ctl:ruleRemoveByTag=attack-xss"
+SecRule REQUEST_FILENAME "^/wp-json/yoast" "id:3,phase:1,pass,t:none,nolog,ctl:ruleRemoveById=930120"
 ```
 
 Dans cet exemple :
@@ -4470,6 +4470,8 @@ Dans cet exemple :
 - **Règle 1** : Supprime les règles avec les balises `attack-xss` et `attack-rce` pour les requêtes vers `/wp-admin/admin-ajax.php`.
 - **Règle 2** : Supprime les règles avec la balise `attack-xss` pour les requêtes vers `/wp-admin/options.php`.
 - **Règle 3** : Supprime une règle spécifique (ID `930120`) pour les requêtes correspondant à `/wp-json/yoast`.
+
+Placez les directives `SecRuleRemoveById`, `SecRuleRemoveByTag`, `SecRuleUpdateTargetById` et `SecRuleUpdateTargetByTag`, qui s'appliquent au chargement de la configuration, dans une configuration personnalisée de type `modsec` (après le CRS).
 
 !!! info "Ordre d'exécution"
     L'ordre d'exécution pour ModSecurity dans BunkerWeb est le suivant, assurant une progression claire et logique de l'application des règles :

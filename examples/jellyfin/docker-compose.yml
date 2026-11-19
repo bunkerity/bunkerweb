@@ -45,7 +45,7 @@ services:
       REVERSE_PROXY_HOST_1: "http://jellyfin:8096"
       REVERSE_PROXY_WS_1: "yes"
       CUSTOM_CONF_MODSEC_CRS_jellyfin: |
-        SecRule REQUEST_FILENAME "/web/config.json" "id:1000000,ctl:ruleRemoveById=930130,ctl:ruleRemoveById=949110,nolog"
+        SecRule REQUEST_FILENAME "/web/config.json" "id:1002,phase:1,pass,t:none,nolog,ctl:ruleRemoveById=930130,ctl:ruleRemoveById=949110"
     restart: "unless-stopped"
     networks:
       - bw-universe

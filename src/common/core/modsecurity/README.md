@@ -122,14 +122,14 @@ In this example:
 - The action is executed in **Phase 1** (early in the request lifecycle).
 - It enables WordPress-specific CRS exclusions by setting the variable `tx.crs_exclusions_wordpress`.
 
-#### Updating CRS Rules with `modsec`
+#### Updating CRS Rules with `modsec-crs`
 
-To fine-tune the loaded CRS rules, you can use a custom configuration of type `modsec`. For example, you can remove specific rules or tags for certain request paths:
+To fine-tune the loaded CRS rules, you can use a custom configuration of type `modsec-crs`. For example, you can remove specific rules or tags for certain request paths. A `ctl:ruleRemove*` action only affects rules that run after it, so the rules below run in `phase:1` and the configuration is loaded before the CRS:
 
 ```conf
-SecRule REQUEST_FILENAME "/wp-admin/admin-ajax.php" "id:1,ctl:ruleRemoveByTag=attack-xss,ctl:ruleRemoveByTag=attack-rce"
-SecRule REQUEST_FILENAME "/wp-admin/options.php" "id:2,ctl:ruleRemoveByTag=attack-xss"
-SecRule REQUEST_FILENAME "^/wp-json/yoast" "id:3,ctl:ruleRemoveById=930120"
+SecRule REQUEST_FILENAME "/wp-admin/admin-ajax.php" "id:1,phase:1,pass,t:none,nolog,ctl:ruleRemoveByTag=attack-xss,ctl:ruleRemoveByTag=attack-rce"
+SecRule REQUEST_FILENAME "/wp-admin/options.php" "id:2,phase:1,pass,t:none,nolog,ctl:ruleRemoveByTag=attack-xss"
+SecRule REQUEST_FILENAME "^/wp-json/yoast" "id:3,phase:1,pass,t:none,nolog,ctl:ruleRemoveById=930120"
 ```
 
 In this example:
@@ -137,6 +137,8 @@ In this example:
 - **Rule 1**: Removes rules tagged as `attack-xss` and `attack-rce` for requests to `/wp-admin/admin-ajax.php`.
 - **Rule 2**: Removes rules tagged as `attack-xss` for requests to `/wp-admin/options.php`.
 - **Rule 3**: Removes a specific rule (ID `930120`) for requests matching `/wp-json/yoast`.
+
+Keep the `SecRuleRemoveById`, `SecRuleRemoveByTag`, `SecRuleUpdateTargetById` and `SecRuleUpdateTargetByTag` directives, which apply when the configuration loads, in a custom configuration of type `modsec` (after the CRS).
 
 !!! info "Order of execution"
     The execution order for ModSecurity in BunkerWeb is as follows, ensuring a clear and logical progression of rule application:

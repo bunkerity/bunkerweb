@@ -60,7 +60,7 @@ services:
       - bunkerweb.REVERSE_PROXY_INTERCEPT_ERRORS=no
       - |
         bunkerweb.CUSTOM_CONF_MODSEC_remove-false-positives=
-        SecRule REQUEST_FILENAME "/" "id:1000000,ctl:ruleRemoveByTag=attack-lfi,nolog"
+        SecRule REQUEST_FILENAME "/" "id:1001,phase:1,pass,t:none,nolog,ctl:ruleRemoveByTag=attack-lfi"
 
   redis:
     image: redis:7-alpine
