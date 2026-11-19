@@ -784,6 +784,26 @@ def test_a_metadata_error_that_persists_stops_the_scheduler_with_status_one(driv
     assert "An error occurred when checking for changes in the database" in caplog.text
 
 
+def test_isolated_metadata_errors_between_good_ticks_never_stop_the_scheduler(drive, monkeypatch):
+    """The limit counts consecutive failures: a good tick in between resets it."""
+    drive.iterations = 2
+    ticks = []
+
+    def tick(*args):
+        ticks.append(1)
+        if len(ticks) >= 20:
+            drive.main.RUN = False
+
+    def flaky():
+        monkeypatch.setattr(drive.main, "scheduler_tick", tick)
+        drive.db.metadata_script = ["OperationalError: server closed the connection" if i % 2 == 0 else dict(drive.db.metadata) for i in range(14)]
+
+    drive.on_iteration[1] = flaky
+    drive.run()
+    assert drive.stops == []
+    assert drive.sleeps.count(5) == 7
+
+
 def test_a_read_only_database_ignores_an_unchanged_snapshot(drive):
     drive.iterations = 3
     drive.db.readonly = True

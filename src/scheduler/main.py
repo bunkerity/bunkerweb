@@ -2289,6 +2289,8 @@ def main() -> None:
                     if isinstance(db_metadata, str):
                         raise Exception(f"An error occurred when checking for changes in the database : {db_metadata}")
 
+                    errors = 0  # the stop limit counts consecutive failed ticks
+
                     changes = {
                         "pro_plugins_changed": db_metadata["pro_plugins_changed"],
                         "last_pro_plugins_change": db_metadata["last_pro_plugins_change"],

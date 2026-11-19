@@ -53,6 +53,7 @@
 - [BUGFIX] `antibot`: a wrong captcha answer no longer writes the expected answer to the error log.
 - [BUGFIX] `core`: blacklist, greylist and whitelist no longer fail on every request when one of their list settings is missing.
 - [BUGFIX] `scheduler`: waiting for a recovering instance's reload no longer stalls scheduled jobs; confirmation resumes on the next healthcheck.
+- [BUGFIX] `scheduler`: isolated database errors spread over its uptime no longer stop the scheduler; only consecutive failures do.
 - [DOCS] `splunk`: container integrations send the three logs to a Universal Forwarder as parsable `bunkerweb:*` sourcetypes, with rotation guidance.
 - [DOCS] `scheduler`: the custom configuration section explains the `.bw-managed` marker, manual deletion and restore, and retained inactive service CRS files.
 - [DOCS] `linux`: recommend `madvise` for transparent huge pages, since `always` can add hundreds of MB per reload. (Refs #4164)
