@@ -2,6 +2,7 @@ from hmac import compare_digest
 from time import time
 from fastapi import HTTPException, Request, Depends
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
+from starlette.concurrency import run_in_threadpool
 from ..utils import LOGGER
 from ..config import api_config
 from .biscuit import guard as biscuit_guard
@@ -9,6 +10,9 @@ from ..utils import check_password, get_api_db
 from .common import get_auth_header, parse_bearer_token
 
 security = HTTPBasic(auto_error=False)
+
+# Verified instead of the stored hash when the user is unknown or not an admin, so every Basic attempt costs one cost-13 bcrypt check.
+DUMMY_PASSWORD_HASH = b"$2b$13$tvTjiRNUOvSz/mQh0av.6epeYmbZgQa5sk3qnKChgsb3LwtfavBL."
 
 
 class BiscuitWithAdminBearer:
@@ -57,8 +61,7 @@ class BiscuitWithAdminBearer:
                 is_admin, pwd_hash, _exp = hit
                 self._logger.debug(f"Admin cache hit for user={username}, expires_in={int(hit[2] - now)}s")
             else:
-                db = get_api_db(log=False)
-                user = db.get_api_user(username=username, as_dict=True)
+                user = await run_in_threadpool(lambda: get_api_db(log=False).get_api_user(username=username, as_dict=True))
                 is_admin = bool(user.get("admin")) if user else False
                 raw_hash = (user.get("password") if user else b"") or b""
                 if not isinstance(raw_hash, (bytes, bytearray)):
@@ -72,11 +75,13 @@ class BiscuitWithAdminBearer:
                 self._logger.debug(f"Admin cache {'populate' if user else 'miss'} for user={username}, is_admin={is_admin}")
 
             if not is_admin:
+                await run_in_threadpool(check_password, password, DUMMY_PASSWORD_HASH)
                 self._logger.warning(
                     f"Auth failed (basic user not admin or not found): user={username} {request.method} {path} from {request.client.host if request.client else 'unknown'}"
                 )
                 raise HTTPException(status_code=401, detail="Unauthorized")
-            if not pwd_hash or not check_password(password, pwd_hash):
+            password_ok = await run_in_threadpool(check_password, password, pwd_hash or DUMMY_PASSWORD_HASH)
+            if not pwd_hash or not password_ok:
                 self._logger.warning(
                     f"Auth failed (basic password mismatch): user={username} {request.method} {path} from {request.client.host if request.client else 'unknown'}"
                 )
