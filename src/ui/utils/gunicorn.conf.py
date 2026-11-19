@@ -500,10 +500,18 @@ def on_starting(server):
         if invalid_totp_encryption_keys:
             LOGGER.warning("The TOTP encryption key(s) have changed, removing admin TOTP secrets ...")
             err = DB.update_ui_user(
-                ADMIN_USER["username"], ADMIN_USER["password"], None, theme=ADMIN_USER["theme"], method=ADMIN_USER["method"], language=ADMIN_USER["language"]
+                ADMIN_USER["username"],
+                ADMIN_USER["password"],
+                None,
+                email=ADMIN_USER["email"],
+                theme=ADMIN_USER["theme"],
+                method=ADMIN_USER["method"],
+                language=ADMIN_USER["language"],
             )
             if err:
                 LOGGER.error(f"Couldn't update the admin user in the database: {err}")
+            # the secret is gone: the credential override below must not write the old, undecryptable one back
+            ADMIN_USER["totp_secret"] = None
 
         if env_admin_username or env_admin_password:
             override_admin_creds = getenv("OVERRIDE_ADMIN_CREDS", "no").lower() == "yes"
@@ -552,6 +560,7 @@ def on_starting(server):
                         ADMIN_USER["username"],
                         ADMIN_USER["password"],
                         ADMIN_USER["totp_secret"],
+                        email=ADMIN_USER["email"],
                         theme=ADMIN_USER["theme"],
                         old_username=old_admin_username,
                         method="manual",

@@ -88,3 +88,33 @@ def test_a_rename_through_the_environment_updates_the_stored_user(ui_db, start, 
     assert ui_db.get_ui_user(username="admin") is None
     renamed = ui_db.get_ui_user(username="root2")
     assert renamed is not None and renamed.check_password(PASSWORD)
+
+
+def test_a_totp_key_change_keeps_the_admin_email(ui_db, start):
+    password = hashpw(PASSWORD.encode(), gensalt(rounds=4))
+    assert ui_db.create_ui_user("admin", password, [], "ops@example.com", admin=True, method="manual", totp_secret="OLD-KEY-SECRET") == ""
+
+    start()  # no key file yet: the TOTP keys are regenerated and the stored secret is dropped
+
+    admin = ui_db.get_ui_user(username="admin")
+    assert admin.totp_secret is None and admin.email == "ops@example.com"
+
+
+def test_a_totp_key_change_with_an_admin_override_does_not_bring_the_old_secret_back(ui_db, start):
+    password = hashpw(PASSWORD.encode(), gensalt(rounds=4))
+    assert ui_db.create_ui_user("admin", password, [], "ops@example.com", admin=True, method="manual", totp_secret="OLD-KEY-SECRET") == ""
+
+    start(ADMIN_USERNAME="root2")
+
+    admin = ui_db.get_ui_user(username="root2")
+    assert admin is not None and admin.totp_secret is None and admin.email == "ops@example.com"
+
+
+def test_an_admin_override_keeps_the_admin_email(ui_db, start):
+    password = hashpw(PASSWORD.encode(), gensalt(rounds=4))
+    assert ui_db.create_ui_user("admin", password, [], "ops@example.com", admin=True, method="manual") == ""
+
+    start(ADMIN_USERNAME="root2")
+
+    admin = ui_db.get_ui_user(username="root2")
+    assert admin is not None and admin.email == "ops@example.com"

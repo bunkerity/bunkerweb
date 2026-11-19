@@ -161,7 +161,13 @@ def totp_disable():
         return handle_error("The totp token is invalid.", "profile")
 
     ret = DB.update_ui_user(
-        current_user.get_id(), current_user.password.encode("utf-8"), None, theme=current_user.theme, method=current_user.method, language=current_user.language
+        current_user.get_id(),
+        current_user.password.encode("utf-8"),
+        None,
+        email=current_user.email,
+        theme=current_user.theme,
+        method=current_user.method,
+        language=current_user.language,
     )
     if ret:
         return handle_error(f"Couldn't disable the two-factor authentication in the database: {ret}", "profile")

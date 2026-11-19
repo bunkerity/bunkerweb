@@ -39,6 +39,7 @@
 - [BUGFIX] `ui`: Web UI workers restart after 200 requests by default instead of 1000, to release memory sooner; `UI_MAX_REQUESTS` is now documented. (Fixes #4163)
 - [BUGFIX] `metrics`, `ui`: the Reports page keeps stored requests of any status, counts each request once in the panes and reads Redis in smaller batches. (Refs #4084)
 - [BUGFIX] `autoconf`: Swarm no longer keeps the IDs of removed services, so their events stop triggering needless reconfigurations.
+- [BUGFIX] `ui`: disabling 2FA or overriding the admin from the environment keeps the email, and a TOTP key change no longer locks the admin out.
 - [DOCS] `splunk`: container integrations send the three logs to a Universal Forwarder as parsable `bunkerweb:*` sourcetypes, with rotation guidance.
 - [DOCS] `scheduler`: the custom configuration section explains the `.bw-managed` marker, manual deletion and restore, and retained inactive service CRS files.
 - [DOCS] `linux`: recommend `madvise` for transparent huge pages, since `always` can add hundreds of MB per reload. (Refs #4164)

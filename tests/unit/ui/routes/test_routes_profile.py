@@ -265,6 +265,15 @@ def test_totp_disable_clears_the_secret(h, profile):
         assert sess["totp_validated"] is False
 
 
+def test_totp_disable_keeps_the_email(h, profile):
+    h.totp.verify_totp.return_value = True
+    client = h.client("alice", totp_secret="S", email="alice@example.com")
+
+    client.post("/profile/totp-disable", data={"password": CURRENT, "totp_token": "123456"})
+
+    assert h.db.update_ui_user.call_args.kwargs["email"] == "alice@example.com"
+
+
 @pytest.mark.parametrize(
     "user, form, verify, message",
     [
