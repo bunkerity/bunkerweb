@@ -174,54 +174,43 @@ $(document).ready(function () {
     layout.bottomEnd.paging = true;
   }
 
+  // Read a cache file from its row data: unlike the cells, it does not move when a column is hidden.
+  const cacheFileFromRowData = (rowData) => {
+    const $serviceCell = $("<div>").html(rowData[5]);
+    const $serviceLink = $serviceCell.find("a");
+    const $serviceSpan = $serviceCell.find("span");
+    let service;
+    if ($serviceLink.length > 0) {
+      service = $serviceLink.text().trim();
+    } else if (
+      $serviceSpan.length &&
+      $serviceSpan.attr("data-i18n") === "scope.global"
+    ) {
+      service = "global"; // Normalize translated global to actual value
+    } else {
+      service = $serviceCell.text().trim();
+    }
+
+    return {
+      fileName: $("<div>").html(rowData[2]).find("a").text().trim(),
+      jobName: $("<div>").html(rowData[3]).text().trim(),
+      plugin: $("<div>").html(rowData[4]).text().trim(),
+      service,
+      fileNameHtml: rowData[2],
+      jobNameHtml: rowData[3],
+      pluginHtml: rowData[4],
+      serviceHtml: rowData[5],
+    };
+  };
+
   const getSelectedCacheFiles = () => {
     const cacheFiles = [];
     if (!$.fn.dataTable.isDataTable("#cache")) return cacheFiles;
     $("#cache")
       .DataTable()
       .rows({ selected: true })
-      .nodes()
-      .to$()
-      .each(function () {
-        const $row = $(this);
-        const fileNameHtml = $row.find("td:eq(2)").html();
-        const jobNameHtml = $row.find("td:eq(3)").html();
-        const pluginHtml = $row.find("td:eq(4)").html();
-        const serviceHtml = $row.find("td:eq(5)").html();
-
-        // Also get text content for backend submission
-        const fileName = $row.find("td:eq(2)").find("a").text().trim();
-        const jobName = $row.find("td:eq(3)").text().trim();
-        const plugin = $row.find("td:eq(4)").text().trim();
-        let service;
-        const $serviceCell = $row.find("td:eq(5)");
-        const $serviceLink = $serviceCell.find("a");
-        if ($serviceLink.length > 0) {
-          service = $serviceLink.text().trim();
-        } else {
-          const $serviceSpan = $serviceCell.find("span");
-          if (
-            $serviceSpan.length &&
-            $serviceSpan.attr("data-i18n") === "scope.global"
-          ) {
-            service = "global"; // Normalize translated global to actual value
-          } else {
-            service = $serviceSpan.length
-              ? $serviceSpan.text().trim()
-              : $serviceCell.text().trim();
-          }
-        }
-
-        cacheFiles.push({
-          fileName,
-          jobName,
-          plugin,
-          service,
-          fileNameHtml,
-          jobNameHtml,
-          pluginHtml,
-          serviceHtml,
-        });
+      .every(function () {
+        cacheFiles.push(cacheFileFromRowData(this.data()));
       });
     return cacheFiles;
   };
@@ -514,44 +503,12 @@ $(document).ready(function () {
     }
 
     const $row = $(this).closest("tr");
-    const fileNameHtml = $row.find("td:eq(2)").html();
-    const jobNameHtml = $row.find("td:eq(3)").html();
-    const pluginHtml = $row.find("td:eq(4)").html();
-    const serviceHtml = $row.find("td:eq(5)").html();
-
-    // Also get text content for backend submission
-    const fileName = $row.find("td:eq(2)").find("a").text().trim();
-    const jobName = $row.find("td:eq(3)").text().trim();
-    const plugin = $row.find("td:eq(4)").text().trim();
-    let service;
-    const $serviceCell = $row.find("td:eq(5)");
-    const $serviceLink = $serviceCell.find("a");
-    if ($serviceLink.length > 0) {
-      service = $serviceLink.text().trim();
-    } else {
-      const $serviceSpan = $serviceCell.find("span");
-      if (
-        $serviceSpan.length &&
-        $serviceSpan.attr("data-i18n") === "scope.global"
-      ) {
-        service = "global"; // Normalize translated global to actual value
-      } else {
-        service = $serviceSpan.length
-          ? $serviceSpan.text().trim()
-          : $serviceCell.text().trim();
-      }
-    }
-
-    const cacheFile = {
-      fileName,
-      jobName,
-      plugin,
-      service,
-      fileNameHtml,
-      jobNameHtml,
-      pluginHtml,
-      serviceHtml,
-    };
+    const cacheFile = cacheFileFromRowData(
+      $("#cache")
+        .DataTable()
+        .row($row.hasClass("child") ? $row.prev() : $row)
+        .data(),
+    );
     setupDeletionModal([cacheFile]);
   });
 });

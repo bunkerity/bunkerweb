@@ -44,6 +44,7 @@
 - [BUGFIX] `ui`: uploading several plugins when some already exist no longer overwrites them or drops the new ones.
 - [BUGFIX] `ui`: unsupported instance actions are refused with a 404 instead of being sent to the instance.
 - [BUGFIX] `ui`: a request without a Host header no longer fails with an internal server error.
+- [BUGFIX] `ui`: bulk unban, duration change and config or cache delete no longer act on the wrong row after hiding a table column.
 - [DOCS] `splunk`: container integrations send the three logs to a Universal Forwarder as parsable `bunkerweb:*` sourcetypes, with rotation guidance.
 - [DOCS] `scheduler`: the custom configuration section explains the `.bw-managed` marker, manual deletion and restore, and retained inactive service CRS files.
 - [DOCS] `linux`: recommend `madvise` for transparent huge pages, since `always` can add hundreds of MB per reload. (Refs #4164)
