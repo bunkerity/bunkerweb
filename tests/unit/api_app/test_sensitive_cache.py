@@ -130,8 +130,9 @@ class FakeDB:
             out.append(item)
         return out
 
-    def delete_job_cache(self, file_name, *, job_name, service_id=None, plugin_id=""):
-        self.deletes.append((file_name, job_name, plugin_id))
+    def delete_cache_rows(self, _db, file_name, *, job_name, service_id=None, plugin_id="", admin=False):
+        """Stands for `cache_mod._delete_cache_rows`; the stored-row check is covered on a real database in test_cache_delete_sensitive.py."""
+        self.deletes.append((file_name, job_name, plugin_id, admin))
         return ""
 
     def checked_changes(self, **_kwargs):
@@ -149,6 +150,7 @@ def db(monkeypatch):
     rows.append(_row("blob.bin", "p", "j", ORDINARY_BINARY))
     fake = FakeDB(rows)
     monkeypatch.setattr(cache_mod, "get_db", lambda: fake)
+    monkeypatch.setattr(cache_mod, "_delete_cache_rows", fake.delete_cache_rows)
     database = SimpleNamespace(get_api_user=lambda **_: {"admin": True, "password": hashpw(BASIC_PASSWORD.encode(), gensalt(rounds=4))})
     monkeypatch.setattr(guard_mod, "get_api_db", lambda **_: database)
     monkeypatch.setattr(guard_mod, "api_config", SimpleNamespace(API_TOKEN=ADMIN_TOKEN, API_ROOT_PATH=None, openapi_url=None, docs_url=None, redoc_url=None))
@@ -274,17 +276,53 @@ def test_authentication_failures_keep_their_original_status(client):
     assert client.get("/cache", params={"with_data": "true"}, headers=_bearer(NO_CACHE)).status_code == 403
 
 
-def test_delete_acl_is_unchanged_for_sensitive_entries(client, db):
-    assert client.delete("/cache/global/p/j/token.secret", headers=_bearer(READER)).status_code == 403
+def _bulk_delete(client, name, headers=None, auth=None, plugin="p", job="j"):
+    body = {"cache_files": [{"service": "global", "plugin": plugin, "jobName": job, "fileName": name}]}
+    return client.request("DELETE", "/cache", json=body, headers=headers, auth=auth)
+
+
+@pytest.mark.parametrize("name,plugin,job", SENSITIVE)
+@pytest.mark.parametrize("headers", [_bearer(DELETER), _bearer(ADMIN_BISCUIT)])
+def test_cache_delete_biscuit_cannot_delete_sensitive_entries(client, db, name, plugin, job, headers):
+    single = client.delete(f"/cache/global/{plugin}/{job}/{quote(_encode(name), safe='')}", headers=headers)
+    bulk = _bulk_delete(client, name, headers=headers, plugin=plugin, job=job)
+
+    assert single.status_code == 403 and bulk.status_code == 403
+    assert bulk.json()["errors"] == [f"{name}: Forbidden"]
     assert db.deletes == []
 
-    single = client.delete("/cache/global/p/j/token.secret", headers=_bearer(DELETER))
-    bulk = client.request(
-        "DELETE", "/cache", json={"cache_files": [{"service": "global", "plugin": "p", "jobName": "j", "fileName": "secret"}]}, headers=_bearer(DELETER)
-    )
+
+def test_cache_delete_biscuit_still_deletes_ordinary_entries(client, db):
+    single = client.delete("/cache/global/p/j/notes.txt", headers=_bearer(DELETER))
+    bulk = _bulk_delete(client, "blob.bin", headers=_bearer(DELETER))
 
     assert single.status_code == 200 and bulk.status_code == 200
-    assert db.deletes == [("token.secret", "j", "p"), ("secret", "j", "p")]
+    assert db.deletes == [("notes.txt", "j", "p", False), ("blob.bin", "j", "p", False)]
+
+
+def test_cache_delete_with_a_mix_deletes_the_ordinary_one_and_refuses_the_sensitive_one(client, db):
+    body = {
+        "cache_files": [
+            {"service": "global", "plugin": "p", "jobName": "j", "fileName": "token.secret"},
+            {"service": "global", "plugin": "p", "jobName": "j", "fileName": "notes.txt"},
+        ]
+    }
+
+    response = client.request("DELETE", "/cache", json=body, headers=_bearer(DELETER))
+
+    assert response.status_code == 207 and response.json()["deleted"] == 1 and response.json()["errors"] == ["token.secret: Forbidden"]
+    assert db.deletes == [("notes.txt", "j", "p", False)]
+
+
+@pytest.mark.parametrize("who", ["token", "basic"])
+def test_api_admin_credentials_delete_sensitive_entries(client, db, who):
+    kwargs = {"headers": _bearer(ADMIN_TOKEN)} if who == "token" else {"auth": (BASIC_USER, BASIC_PASSWORD)}
+
+    single = client.delete("/cache/global/p/j/token.secret", **kwargs)
+    bulk = _bulk_delete(client, "secret", plugin="ui_sso", job="ui-sso-secret", **kwargs)
+
+    assert single.status_code == 200 and bulk.status_code == 200
+    assert db.deletes == [("token.secret", "j", "p", True), ("secret", "ui-sso-secret", "ui_sso", True)]
 
 
 def test_a_folder_token_is_normalised_before_classification_and_lookup(client, db):

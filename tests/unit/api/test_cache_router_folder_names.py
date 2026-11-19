@@ -164,13 +164,21 @@ def test_fetch_cache_file_quotes_download_filename(monkeypatch):
 
 def test_delete_cache_files_reaches_the_db_with_the_stored_name(monkeypatch):
     # The /cache page sends the RAW stored name (anchor text, slashes intact); it must reach
-    # `delete_job_cache` unchanged so the row really goes -- before the prefix fix this call
-    # deleted nothing while the UI still reported success.
+    # the row deletion unchanged so the row really goes -- before the prefix fix this call
+    # deleted nothing while the UI still reported success. The transaction itself is covered on a
+    # real database in tests/unit/api_app/test_cache_delete_sensitive.py.
     db = _FakeDB({STORED_NAME: b"tarball-bytes"})
     monkeypatch.setattr(ROUTER, "get_db", lambda: db)
+
+    def delete_rows(_db, file_name, *, job_name, service_id, plugin_id, admin):
+        db.calls.append({"op": "delete", "job_name": job_name, "file_name": file_name, "service_id": service_id, "plugin_id": plugin_id})
+        db.stored.pop(file_name, None)
+        return ""
+
+    monkeypatch.setattr(ROUTER, "_delete_cache_rows", delete_rows)
     payload = schemas.CacheFilesDeleteRequest(cache_files=[{"service": "global", "plugin": "letsencrypt", "jobName": "certbot-renew", "fileName": STORED_NAME}])
 
-    response = ROUTER.delete_cache_files(payload)
+    response = ROUTER.delete_cache_files(ADMIN_REQUEST, payload)
 
     assert response.status_code == 200
     assert response.content["deleted"] == 1
