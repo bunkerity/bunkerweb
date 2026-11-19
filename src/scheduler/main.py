@@ -1245,7 +1245,11 @@ def check_configs_changes(*, generate: bool = True) -> Optional[bool]:
                 in_db = False
                 from_template = False
                 for db_conf in db_configs:
-                    if db_conf["service_id"] == service_id and db_conf["name"] == file.stem:
+                    if (
+                        db_conf["service_id"] == service_id
+                        and db_conf["name"] == file.stem
+                        and db_conf["type"].replace("-", "_") == config_type.replace("-", "_")
+                    ):
                         in_db = True
                         if db_conf["template"]:
                             from_template = True
