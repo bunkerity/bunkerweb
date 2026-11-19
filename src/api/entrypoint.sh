@@ -28,11 +28,15 @@ function trap_exit() {
 		# Log that the API process has been stopped.
 		# shellcheck disable=SC2317
 		log "ENTRYPOINT" "ℹ️ " "API stopped"
+	# The child may not have written its PID file yet: signal it directly.
+	elif [ -n "${pid:-}" ]; then
+		# shellcheck disable=SC2317
+		kill -s TERM "$pid" 2> /dev/null
 	fi
 }
 
 # Register the trap_exit function to handle SIGTERM, SIGINT, and SIGQUIT signals.
-trap "trap_exit" TERM INT QUIT
+trap 'wait_interrupted=yes; stop_requested=yes; trap_exit' TERM INT QUIT
 
 # Remove any existing PID file for the API to avoid stale state issues.
 if [ -f /var/run/bunkerweb/api.pid ]; then
@@ -65,15 +69,29 @@ fi
 export LOG_SYSLOG_TAG="${LOG_SYSLOG_TAG:-bw-api}"
 
 # Start the main Gunicorn process with the standard logger configuration.
+# A stop received before the child exists: do not start it.
+if [ "${stop_requested:-no}" = yes ]; then
+	log "ENTRYPOINT" "ℹ️" "Stopped before the API started"
+	exit 143
+fi
 python3 -m gunicorn --logger-class utils.logger.APILogger --config utils/gunicorn.conf.py &
 pid="$!"
+# A stop received while the child was being started.
+if [ "${stop_requested:-no}" = yes ]; then
+	kill -s TERM "$pid" 2> /dev/null
+fi
 
 # Wait for the main API process to exit and capture its exit code.
-wait "$pid"
-exit_code=$?
+# A stop trap interrupts wait before the child has finished shutting down.
+while :; do
+	wait_interrupted=no
+	wait "$pid"
+	exit_code=$?
+	[ "$wait_interrupted" = yes ] || break
+done
 
 # Log the exit status of the main API process for debugging purposes.
 log "ENTRYPOINT" "ℹ️" "API stopped with exit code $exit_code"
 
 # Exit the script with the same exit code as the main API process.
-exit $exit_code
+exit "$exit_code"
