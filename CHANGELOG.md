@@ -40,6 +40,7 @@
 - [BUGFIX] `metrics`, `ui`: the Reports page keeps stored requests of any status, counts each request once in the panes and reads Redis in smaller batches. (Refs #4084)
 - [BUGFIX] `autoconf`: Swarm no longer keeps the IDs of removed services, so their events stop triggering needless reconfigurations.
 - [BUGFIX] `ui`: disabling 2FA or overriding the admin from the environment keeps the email, and a TOTP key change no longer locks the admin out.
+- [BUGFIX] `ui`: uploading several plugins when some already exist no longer overwrites them or drops the new ones.
 - [DOCS] `splunk`: container integrations send the three logs to a Universal Forwarder as parsable `bunkerweb:*` sourcetypes, with rotation guidance.
 - [DOCS] `scheduler`: the custom configuration section explains the `.bw-managed` marker, manual deletion and restore, and retained inactive service CRS files.
 - [DOCS] `linux`: recommend `madvise` for transparent huge pages, since `always` can add hundreds of MB per reload. (Refs #4164)

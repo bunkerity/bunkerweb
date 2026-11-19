@@ -262,6 +262,22 @@ def test_refresh_does_not_overwrite_an_existing_ui_plugin(h, plug):
     assert h.data["RELOADING"] is False
 
 
+@pytest.mark.parametrize("stored", [["plug-a", "plug-b"], ["plug-b", "plug-a"], ["plug-b", "plug-c"], ["plug-c", "plug-a"], ["plug-c", "plug-b"]])
+def test_refresh_stores_only_the_plugins_that_do_not_exist_yet(h, plug, stored):
+    uploaded = {"plug-a", "plug-b", "plug-c"}
+    for plugin_id in uploaded:
+        _stage(h, f"{plugin_id}.zip", _zip({"plugin.json": json.dumps(PLUGIN_JSON | {"id": plugin_id})}))
+    h.config.get_plugins.return_value = {plugin_id: {} for plugin_id in stored}
+    h.db.update_external_plugins.return_value = ""
+
+    _refresh(h)
+
+    sent = sorted(plugin["id"] for plugin in h.db.update_external_plugins.call_args.args[0])
+    assert sent == sorted(uploaded - set(stored))
+    flashed = [flash["content"] for flash in h.data["TO_FLASH"]]
+    assert all(f"Plugin {plugin_id} already exists" in flashed for plugin_id in stored)
+
+
 def test_refresh_reports_a_database_error(h, plug):
     _stage(h, "myplugin.zip", _zip({"plugin.json": json.dumps(PLUGIN_JSON)}))
     h.config.get_plugins.return_value = {}
