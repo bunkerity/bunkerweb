@@ -3268,6 +3268,10 @@ $(document).ready(() => {
     }, 200)();
   });
 
+  // The tooltip text is translated, so the template's data-i18n key tells which value the button resets to.
+  const isResetToGlobal = ($button) =>
+    $button.attr("data-i18n") === "tooltip.button.reset_global";
+
   // Reset setting handler
   $(document).on("click", ".reset-setting", function (e) {
     e.preventDefault();
@@ -3276,7 +3280,7 @@ $(document).ready(() => {
     // Find the associated input/select/checkbox/multivalue
     const $settingField = $(this).closest("div").find(".plugin-setting");
     const settingType = $settingField.attr("type");
-    const isGlobal = $(this).attr("data-bs-original-title").includes("global");
+    const isGlobal = isResetToGlobal($(this));
 
     // Get default or global value depending on the button tooltip
     const valueToSet = isGlobal
