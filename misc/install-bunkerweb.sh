@@ -3142,6 +3142,8 @@ validate_ui_admin_password() {
     [[ "$pw" =~ [A-Z] ]] || return 1
     [[ "$pw" =~ [0-9] ]] || return 1
     [[ "$pw" =~ [^A-Za-z0-9] ]] || return 1
+    # CR/LF would split the line-oriented files the password is written to.
+    [[ "$pw" == *$'\n'* || "$pw" == *$'\r'* ]] && return 1
     return 0
 }
 
@@ -3157,6 +3159,8 @@ validate_db_password() {
     if [[ "$pw" == *\'* ]] || [[ "$pw" == *\"* ]] || [[ "$pw" == *\\* ]] || [[ "$pw" == *\`* ]]; then
         return 1
     fi
+    # CR/LF would split the line-oriented files the password is written to.
+    [[ "$pw" == *$'\n'* || "$pw" == *$'\r'* ]] && return 1
     return 0
 }
 
@@ -8537,7 +8541,7 @@ while [[ $# -gt 0 ]]; do
             require_value "$1" "$2" "password value"
             DB_PASSWORD_INPUT="$2"
             if ! validate_db_password "$DB_PASSWORD_INPUT"; then
-                print_error "--db-password fails validation: 8+ chars, no quotes/backslashes."
+                print_error "--db-password fails validation: 8+ chars, no quotes/backslashes, single line."
                 exit 1
             fi
             shift 2
@@ -8557,7 +8561,7 @@ while [[ $# -gt 0 ]]; do
             UI_ADMIN_PASSWORD_INPUT="$2"
             UI_ADMIN_CREATE="yes"
             if ! validate_ui_admin_password "$UI_ADMIN_PASSWORD_INPUT"; then
-                print_error "--ui-admin-password fails BunkerWeb rules: 8+ chars, one lowercase, one uppercase, one digit, one special."
+                print_error "--ui-admin-password fails BunkerWeb rules: 8+ chars, one lowercase, one uppercase, one digit, one special, single line."
                 exit 1
             fi
             shift 2
@@ -8718,9 +8722,26 @@ done
 # suppressed around the reads so values never leak into a trace log (mirrors tui_password).
 _bw_xtrace_was_on=no
 case $- in *x*) _bw_xtrace_was_on=yes; set +x ;; esac
-DB_PASSWORD_INPUT="${DB_PASSWORD_INPUT:-${BW_DB_PASSWORD:-}}"
-UI_ADMIN_PASSWORD_INPUT="${UI_ADMIN_PASSWORD_INPUT:-${BW_UI_ADMIN_PASSWORD:-}}"
+if [ -z "$DB_PASSWORD_INPUT" ] && [ -n "${BW_DB_PASSWORD:-}" ]; then
+    if ! validate_db_password "$BW_DB_PASSWORD"; then
+        print_error "BW_DB_PASSWORD fails validation: 8+ chars, no quotes/backslashes, single line."
+        exit 1
+    fi
+    DB_PASSWORD_INPUT="$BW_DB_PASSWORD"
+fi
+if [ -z "$UI_ADMIN_PASSWORD_INPUT" ] && [ -n "${BW_UI_ADMIN_PASSWORD:-}" ]; then
+    if ! validate_ui_admin_password "$BW_UI_ADMIN_PASSWORD"; then
+        print_error "BW_UI_ADMIN_PASSWORD fails BunkerWeb rules: 8+ chars, one lowercase, one uppercase, one digit, one special, single line."
+        exit 1
+    fi
+    UI_ADMIN_PASSWORD_INPUT="$BW_UI_ADMIN_PASSWORD"
+fi
 REDIS_PASSWORD_INPUT="${REDIS_PASSWORD_INPUT:-${BW_REDIS_PASSWORD:-}}"
+# Existing Redis passwords go into a single variables.env record.
+if [[ "$REDIS_PASSWORD_INPUT" == *$'\n'* || "$REDIS_PASSWORD_INPUT" == *$'\r'* ]]; then
+    print_error "Redis password must be a single line (--redis-password or BW_REDIS_PASSWORD)."
+    exit 1
+fi
 DOCKER_API_TOKEN_GENERATED="${DOCKER_API_TOKEN_GENERATED:-${BW_API_TOKEN:-}}"
 DOCKER_DATABASE_URI="${DOCKER_DATABASE_URI:-${BW_DATABASE_URI:-}}"
 if [ "$_bw_xtrace_was_on" = yes ]; then set -x; fi
