@@ -48,7 +48,7 @@ class Cache:
         data = self.data.get((service_id, name))
         return bytes_hash(data) if data is not None else None
 
-    def del_cache(self, name, service_id=""):
+    def del_cache(self, name, service_id="", *, db_first=False):
         path = name if isinstance(name, Path) else self.job_path / service_id / name
         self.data.pop((service_id, path.name), None)
         path.unlink(missing_ok=True)
@@ -99,14 +99,15 @@ def test_filtered_job_exact_entries_distinct_fragment_caches(plugin, url_server,
 
 
 @pytest.mark.parametrize("plugin", PLUGINS)
-def test_http_failure_retains_previous_service_cache(plugin, url_server, tmp_path, monkeypatch):
+def test_http_failure_after_url_replacement(plugin, url_server, tmp_path, monkeypatch):
     url_server.routes["/list"] = (200, b"192.0.2.1\n", {})
     cache = Cache(tmp_path / "cache")
     assert run_job(plugin, url_server.http("/list"), cache, monkeypatch) == 1
     name = "combined.list" if plugin == "realip" else "IP.list"
     url_server.routes["/error"] = (503, b"error", {})
-    assert run_job(plugin, url_server.http("/error"), cache, monkeypatch) == 2
-    assert cache.data["" if plugin == "realip" else "lists.example", name] == b"192.0.2.1\n"
+    expected_status, expected_cache = (3, None) if plugin == "realip" else (2, b"192.0.2.1\n")
+    assert run_job(plugin, url_server.http("/error"), cache, monkeypatch) == expected_status
+    assert cache.data.get(("" if plugin == "realip" else "lists.example", name)) == expected_cache
 
 
 def test_ignore_user_agent_keeps_whole_line(url_server, tmp_path, monkeypatch):

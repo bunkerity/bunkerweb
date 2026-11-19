@@ -319,14 +319,14 @@ class Job:
 
         return self.cache_file(file_name, content.getvalue(), job_name=job_name, service_id=service_id)
 
-    def del_cache(self, name: Union[str, Path], *, job_name: str = "", service_id: str = "") -> Tuple[bool, str]:
+    def del_cache(self, name: Union[str, Path], *, job_name: str = "", service_id: str = "", db_first: bool = False) -> Tuple[bool, str]:
         """Delete cache file from database and local cache file.
 
+        With db_first, move the local file aside and restore it if the database delete fails.
         Returns (deleted, error): error is "" on success, including when no database row existed."""
         if isinstance(name, Path):
             name = str(name)
 
-        ret, err = True, "success"
         job_name = job_name or self.job_name
         job_path = self.job_path.joinpath(service_id)
         try:
@@ -334,19 +334,38 @@ class Job:
         except ValueError as error:
             return False, str(error)
 
-        if cache_path.is_file():
-            cache_path.unlink(missing_ok=True)
+        def delete_db_row():
+            try:
+                return self.db.delete_job_cache(name, job_name=job_name, service_id=service_id)  # type: ignore
+            except:
+                return f"exception :\n{format_exc()}"
 
-        if job_path.is_dir() and not list(job_path.iterdir()):
-            rmtree(job_path, ignore_errors=True)
+        if db_first:
+            pending_path = cache_path.with_name(f".{cache_path.name}.pending-delete")
+            moved = cache_path.is_file()
+            if moved:
+                cache_path.replace(pending_path)
+            if err := delete_db_row():
+                if moved:
+                    pending_path.replace(cache_path)
+                return False, err
+            cache_path = pending_path
 
         try:
-            err = self.db.delete_job_cache(name, job_name=job_name, service_id=service_id)  # type: ignore
-            if err:
-                return False, err
-        except:
-            return False, f"exception :\n{format_exc()}"
-        return ret, ""
+            if cache_path.is_file():
+                cache_path.unlink(missing_ok=True)
+
+            if job_path.is_dir() and not list(job_path.iterdir()):
+                rmtree(job_path, ignore_errors=True)
+        except OSError as error:
+            if not db_first:
+                raise
+            # The canonical file and DB row are gone. Cleanup must not suppress the reload.
+            self.logger.warning(f"Could not clean up deleted cache entry {cache_path}: {error}")
+
+        if not db_first and (err := delete_db_row()):
+            return False, err
+        return True, ""
 
     def cache_hash(self, name: Union[str, Path], *, job_name: str = "", service_id: str = "", plugin_id: str = "") -> Optional[str]:
         """Get cache file hash from database or from local cache file."""

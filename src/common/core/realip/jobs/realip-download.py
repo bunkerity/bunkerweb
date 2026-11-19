@@ -86,12 +86,13 @@ try:
         for file in list(JOB.job_path.rglob("*.list")):
             if file.parent == JOB.job_path:
                 LOGGER.warning(f"Removing no longer used url file {file} ...")
-                deleted, err = JOB.del_cache(file.name)
+                deleted, err = JOB.del_cache(file.name, db_first=True)
             else:
                 LOGGER.warning(f"Removing no longer used service file {file} ...")
-                deleted, err = JOB.del_cache(file.name, service_id=file.parent.name)
+                deleted, err = JOB.del_cache(file.name, service_id=file.parent.name, db_first=True)
 
             if not deleted:
+                status |= 2
                 LOGGER.warning(f"Couldn't delete file {file} from cache : {err}")
             elif file.name == "combined.list":
                 status |= 1
@@ -112,18 +113,8 @@ try:
 
     for service, urls_list in services_realip_urls.items():
         service_id = "" if service == "global" else service
-        if not urls_list:
-            if JOB.job_path.joinpath(service_id, "combined.list").is_file():
-                LOGGER.warning(f"{service} combined.list is cached but no URL is configured, removing from cache...")
-                deleted, err = JOB.del_cache("combined.list", service_id=service_id)
-                if not deleted:
-                    LOGGER.warning(f"Couldn't delete {service} combined.list from cache : {err}")
-                else:
-                    status |= 1
-            continue
-
         # Track that this service provided URLs for the current kind
-        if service != "global":
+        if service != "global" and urls_list:
             aggregated_recap["total_services"].add(service)
 
         # Use set to avoid duplicate entries
@@ -132,6 +123,7 @@ try:
         for url in urls_list:
             url_file = f"{bytes_hash(url, algorithm='sha1')}.list"
             cached_url = JOB.get_cache(url_file, with_info=True, with_data=True)
+            use_cached_url = False
             try:
                 # Only count URLs that haven't been processed globally
                 if url not in processed_urls:
@@ -149,16 +141,7 @@ try:
                     LOGGER.debug(f"URL {url} has already been downloaded less than 1 hour ago, skipping download...")
                     if url not in processed_urls:
                         aggregated_recap["skipped_urls"] += 1
-                    # Process cached data and add to unique_entries
-                    cached_data = cached_url.get("data", b"")
-                    if cached_data:
-                        # Skip first line (URL comment) and process entries
-                        for line in cached_data.split(b"\n")[1:]:
-                            line = line.strip()
-                            if line:
-                                ok, data = check_line(line)
-                                if ok:
-                                    unique_entries.add(data)
+                    use_cached_url = True
                 else:
                     LOGGER.info(f"Downloading Real IP data from {url} ...")
                     failed = False
@@ -168,7 +151,7 @@ try:
                         try:
                             body = Path(normpath(download_url[7:])).read_bytes()
                         except OSError as e:
-                            status = 2
+                            status |= 2
                             LOGGER.debug(format_exc())
                             LOGGER.error(f"Error while opening file {download_url[7:]} : {e}")
                             failed_urls.add(url)
@@ -190,7 +173,7 @@ try:
                                 sleep(3)
 
                         if resp.status_code != 200:
-                            status = 2
+                            status |= 2
                             LOGGER.warning(f"Got status code {resp.status_code}, skipping...")
                             failed_urls.add(url)
                             if url_file not in urls:
@@ -201,33 +184,41 @@ try:
                             content_type = resp.headers.get("Content-Type", "")
 
                     if not failed:
-                        if url not in processed_urls:
-                            aggregated_recap["downloaded_urls"] += 1
-
                         url_content = b""
                         count_lines = 0
                         for line in iter_list_entries(body, content_type=content_type, url_filter=url_filter, ip_list=True, logger=LOGGER):
                             ok, data = check_line(line)
                             if ok:
-                                unique_entries.add(data)
                                 url_content += data + b"\n"
                                 count_lines += 1
                         if not count_lines:
                             LOGGER.warning(f"No valid IP or network found in {url} (Content-Type: {content_type or 'unknown'})")
+                            status |= 2
+                            failed_urls.add(url)
+                            if url not in processed_urls:
+                                aggregated_recap["failed_count"] += 1
+                            continue
+                        unique_entries.update(url_content.splitlines())
                         if url not in processed_urls:
+                            aggregated_recap["downloaded_urls"] += 1
                             aggregated_recap["total_lines"] += count_lines
 
                         cached, err = JOB.cache_file(url_file, b"# Downloaded from " + url.encode("utf-8") + b"\n" + url_content)
                         if not cached:
                             LOGGER.error(f"Error while caching url content for {url}: {err}")
             except BaseException as e:
-                status = 2
+                status |= 2
                 LOGGER.debug(format_exc())
                 LOGGER.error(f"Exception while getting {service} realip from {url} :\n{e}")
                 failed_urls.add(url)
                 if url not in processed_urls:
                     aggregated_recap["failed_count"] += 1
             finally:
+                if (use_cached_url or url in failed_urls) and isinstance(cached_url, dict):
+                    for line in cached_url.get("data", b"").split(b"\n")[1:]:
+                        ok, data = check_line(line.strip())
+                        if ok:
+                            unique_entries.add(data)
                 # Mark URL as processed to avoid double counting
                 processed_urls.add(url)
                 urls.add(url_file)
@@ -235,12 +226,19 @@ try:
         # Build final content from unique entries, sorted for consistency
         content = b"\n".join(sorted(unique_entries)) + b"\n" if unique_entries else b""
 
+        old_hash = JOB.cache_hash("combined.list", service_id=service_id)
         if not content:
+            if old_hash:
+                deleted, err = JOB.del_cache("combined.list", service_id=service_id, db_first=True)
+                if deleted:
+                    status |= 1
+                else:
+                    status |= 2
+                    LOGGER.warning(f"Couldn't delete {service} combined.list from cache : {err}")
             continue
 
         # Check if file has changed
         new_hash = bytes_hash(content)
-        old_hash = JOB.cache_hash("combined.list", service_id=service_id)
         if new_hash == old_hash:
             LOGGER.debug(f"{service} file combined.list is identical to cache file, reload is not needed")
             continue
@@ -253,10 +251,10 @@ try:
         cached, err = JOB.cache_file("combined.list", content, service_id=service_id, checksum=new_hash)
         if not cached:
             LOGGER.error(f"Error while caching combined list for {service} : {err}")
-            status = 2
+            status |= 2
             continue
 
-        status = 1 if status != 2 else 2
+        status |= 1
 
     # Log a detailed recap per kind across services, only if there is at least one service using the kind
     service_count = len(aggregated_recap["total_services"])
@@ -278,13 +276,14 @@ try:
         LOGGER.debug(f"Checking if {url_file} is still in use ...")
         if url_file.name not in urls:
             LOGGER.warning(f"Removing no longer used url file {url_file} ...")
-            deleted, err = JOB.del_cache(url_file.name)
+            deleted, err = JOB.del_cache(url_file.name, db_first=True)
             if not deleted:
+                status |= 2
                 LOGGER.warning(f"Couldn't delete url file {url_file} from cache : {err}")
 except SystemExit as e:
     status = e.code
 except BaseException as e:
-    status = 2
+    status |= 2
     LOGGER.debug(format_exc())
     LOGGER.error(f"Exception while running realip-download.py :\n{e}")
 

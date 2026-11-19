@@ -51,7 +51,7 @@ def test_multisite_shared_url_downloaded_once_and_unused_files_removed(tmp_path,
 
 
 @pytest.mark.parametrize("failure", ["http", "connection", "missing-file"])
-def test_failed_source_keeps_previous_service_list(tmp_path, monkeypatch, failure, url_server):
+def test_failed_source_without_per_url_cache_clears_service_list(tmp_path, monkeypatch, failure, url_server):
     cache = Cache(tmp_path / "cache")
     cache.cache_file("IGNORE_IP.list", b"192.0.2.5\n", service_id="app.example")
     get = requests.get
@@ -61,8 +61,8 @@ def test_failed_source_keeps_previous_service_list(tmp_path, monkeypatch, failur
     elif failure == "missing-file":
         url = (tmp_path / "missing.list").as_uri()
     _, status = load_job(monkeypatch, tmp_path, JOB, cache=cache, get=get, env={"DNSBL_IGNORE_IP_URLS": url})
-    assert status == 2
-    assert cache.data["app.example", "IGNORE_IP.list"] == b"192.0.2.5\n"
+    assert status == 3
+    assert ("app.example", "IGNORE_IP.list") not in cache.data
     if failure == "connection":
         assert get.call_count == 3
 
