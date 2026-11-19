@@ -62,6 +62,7 @@
 - [BUGFIX] `jobs`: removed DNSBL, RealIP and robots.txt feed entries are dropped on reload and stay removed after restart.
 - [BUGFIX] `jobs`: DNSBL, RealIP and robots.txt keep the last valid entries for failed feeds and drop entries from removed feeds.
 - [BUGFIX] `letsencrypt`: newly issued certificates take effect when another service fails or the database cache write is refused.
+- [BUGFIX] `ssl`: custom and self-signed certificates keep their previous key pairs on write failure and reload after a successful retry.
 - [DOCS] `splunk`: container integrations send the three logs to a Universal Forwarder as parsable `bunkerweb:*` sourcetypes, with rotation guidance.
 - [DOCS] `scheduler`: the custom configuration section explains the `.bw-managed` marker, manual deletion and restore, and retained inactive service CRS files.
 - [DOCS] `linux`: recommend `madvise` for transparent huge pages, since `always` can add hundreds of MB per reload. (Refs #4164)

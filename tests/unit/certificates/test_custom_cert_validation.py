@@ -56,12 +56,14 @@ CUSTOM_CERT = _load_job_definitions()
 
 
 @pytest.fixture
-def job(monkeypatch):
-    """A JOB whose cache calls succeed, so a rejection can only come from the validation."""
-    monkeypatch.setattr(CUSTOM_CERT.JOB, "cache_hash", Mock(return_value=None), raising=False)
-    monkeypatch.setattr(CUSTOM_CERT.JOB, "cache_file", Mock(return_value=(True, "")), raising=False)
+def job(monkeypatch, tmp_path):
+    """Publish real staged files and mock only the database."""
+    job = Mock(job_path=tmp_path, job_name="custom-cert")
+    job.db.get_job_cache_file.return_value = None
+    job.db.upsert_job_caches.return_value = ""
+    monkeypatch.setattr(CUSTOM_CERT, "JOB", job)
     CUSTOM_CERT.LOGGER.reset_mock()
-    return CUSTOM_CERT.JOB
+    return job
 
 
 def _key(kind="ec"):
@@ -107,7 +109,7 @@ def test_a_key_that_does_not_match_the_certificate_is_refused(job):
 
     assert accepted is False, "a mismatched pair was accepted and would be pushed to the fleet"
     assert "match" in str(reason).lower(), reason
-    job.cache_file.assert_not_called()
+    job.db.upsert_job_caches.assert_not_called()
 
 
 def test_an_encrypted_private_key_is_refused_and_says_so(job):
@@ -117,7 +119,7 @@ def test_an_encrypted_private_key_is_refused_and_says_so(job):
 
     assert accepted is False
     assert "encrypted" in str(reason).lower(), reason
-    job.cache_file.assert_not_called()
+    job.db.upsert_job_caches.assert_not_called()
 
 
 def test_a_malformed_private_key_is_refused(job):
@@ -126,7 +128,7 @@ def test_a_malformed_private_key_is_refused(job):
 
     assert accepted is False
     assert str(reason), "a refusal with no reason tells the operator nothing"
-    job.cache_file.assert_not_called()
+    job.db.upsert_job_caches.assert_not_called()
 
 
 # ---------------------------------------------------------------------------------------------
@@ -137,11 +139,17 @@ def test_a_malformed_private_key_is_refused(job):
 def test_a_valid_pair_is_accepted_and_cached(job):
     """Without this, a fix that refuses everything would pass every test above."""
     key = _key()
-    accepted, reason = CUSTOM_CERT.check_cert(_cert(key), _key_pem(key), "www.example.com")
+    cert_pem, key_pem = _cert(key), _key_pem(key)
+    accepted, reason = CUSTOM_CERT.check_cert(cert_pem, key_pem, "www.example.com")
 
     assert accepted is True, reason
     assert reason == ""
-    assert job.cache_file.call_count == 2, "cert.pem and key.pem should both be cached"
+    job.db.upsert_job_caches.assert_called_once()
+    entries = job.db.upsert_job_caches.call_args.args[0]
+    assert {entry["file_name"]: entry["data"] for entry in entries} == {"cert.pem": cert_pem, "key.pem": key_pem}
+    for entry in entries:
+        assert entry["service_id"] == "www.example.com"
+        assert (job.job_path / entry["service_id"] / entry["file_name"]).read_bytes() == entry["data"]
 
 
 def test_an_rsa_pair_is_accepted_too(job):
@@ -155,7 +163,7 @@ def test_an_rsa_pair_is_accepted_too(job):
 def test_a_malformed_certificate_is_still_refused(job):
     """Non-regression: this is the one case the old openssl subprocess did catch."""
     assert _rejects(CUSTOM_CERT.check_cert(b"-----BEGIN CERTIFICATE-----\nnope\n-----END CERTIFICATE-----\n", _key_pem(_key()), "x"))
-    job.cache_file.assert_not_called()
+    job.db.upsert_job_caches.assert_not_called()
 
 
 def test_a_missing_half_is_refused_before_anything_is_parsed(job):

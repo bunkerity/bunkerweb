@@ -3,11 +3,9 @@
 from datetime import datetime, timedelta
 from os import getenv, sep
 from os.path import join
-from pathlib import Path
 from subprocess import DEVNULL, run
 from sys import exit as sys_exit, path as sys_path
 from traceback import format_exc
-from typing import Tuple
 
 for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("utils",), ("db",))]:
     if deps_path not in sys_path:
@@ -16,7 +14,8 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
 from cryptography import x509
 from cryptography.hazmat.backends import default_backend
 
-from common_utils import parse_duration_int  # type: ignore
+from cache_restore import StagedDirectory, checked_cache_path, recover_directory  # type: ignore
+from common_utils import bytes_hash, parse_duration_int  # type: ignore
 from logger import getLogger  # type: ignore
 from jobs import Job  # type: ignore
 
@@ -53,20 +52,26 @@ def normalize_algorithm_name(algorithm: str) -> str:
     return algorithm, None
 
 
-def generate_cert(first_server: str, days: str, subj: str, self_signed_path: Path) -> Tuple[bool, int]:
+def generate_cert(first_server: str, days: str, subj: str) -> int:
     try:
         days = str(parse_duration_int(days, "d"))
     except ValueError:
         LOGGER.warning(f"Invalid SELF_SIGNED_SSL_EXPIRY value: {days}, using default value (365)")
         days = "365"
-    server_path = self_signed_path.joinpath(first_server)
-    cert_path = server_path.joinpath("cert.pem")
-    key_path = server_path.joinpath("key.pem")
+    server_path = checked_cache_path(JOB.job_path, first_server)
+    recover_directory(server_path)
+    cert_path = checked_cache_path(server_path, "cert.pem")
+    key_path = checked_cache_path(server_path, "key.pem")
 
     # Get the algorithm from environment variable
     algorithm = getenv(f"{first_server}_SELF_SIGNED_SSL_ALGORITHM", "ec-prime256v1") if multisite else getenv("SELF_SIGNED_SSL_ALGORITHM", "ec-prime256v1")
 
-    if cert_path.is_file() and key_path.is_file():
+    if (
+        cert_path.is_file()
+        and key_path.is_file()
+        and (certificate_data := cert_path.read_bytes()) == JOB.db.get_job_cache_file(JOB.job_name, "cert.pem", service_id=first_server)
+        and key_path.read_bytes() == JOB.db.get_job_cache_file(JOB.job_name, "key.pem", service_id=first_server)
+    ):
         if (
             run(
                 ["openssl", "x509", "-checkend", "86400", "-noout", "-in", cert_path.as_posix()],
@@ -79,7 +84,7 @@ def generate_cert(first_server: str, days: str, subj: str, self_signed_path: Pat
         ):
             LOGGER.info(f"Self-signed certificate already present for {first_server}")
 
-            certificate = x509.load_pem_x509_certificate(JOB.get_cache("cert.pem", service_id=first_server), default_backend())
+            certificate = x509.load_pem_x509_certificate(certificate_data, default_backend())
 
             try:
                 not_valid_after = certificate.not_valid_after_utc
@@ -120,10 +125,9 @@ def generate_cert(first_server: str, days: str, subj: str, self_signed_path: Pat
                 LOGGER.warning(f"Self-signed certificate for {first_server} has expired, regenerating ...")
             else:
                 LOGGER.info(f"Self-signed certificate for {first_server} is valid")
-                return True, 0
+                return 0
 
     LOGGER.info(f"Generating self-signed certificate for {first_server}")
-    server_path.mkdir(parents=True, exist_ok=True)
 
     # Prepare openssl command based on the selected algorithm
     openssl_cmd = [
@@ -142,50 +146,38 @@ def generate_cert(first_server: str, days: str, subj: str, self_signed_path: Pat
         bits = algorithm.split("-")[1]
         openssl_cmd.extend(["rsa", "-pkeyopt", f"rsa_keygen_bits:{bits}"])
 
-    # Add the rest of the common options
-    openssl_cmd.extend(
-        [
-            "-keyout",
-            key_path.as_posix(),
-            "-out",
-            cert_path.as_posix(),
-            "-days",
-            days,
-            "-subj",
-            subj,
-        ]
-    )
-
-    if (
-        run(
-            openssl_cmd,
-            stdin=DEVNULL,
-            stderr=DEVNULL,
-            check=False,
-            env={"PATH": getenv("PATH", ""), "PYTHONPATH": getenv("PYTHONPATH", "")},
-        ).returncode
-        != 0
-    ):
-        LOGGER.error(f"Self-signed certificate generation failed for {first_server}")
-        return False, 2
-
-    # Update db
-    cached, err = JOB.cache_file("cert.pem", self_signed_path.joinpath(first_server, "cert.pem"), service_id=first_server, overwrite_file=False)
-    if not cached:
-        LOGGER.error(f"Error while caching self-signed cert.pem file for {first_server} : {err}")
-
-    cached, err = JOB.cache_file("key.pem", self_signed_path.joinpath(first_server, "key.pem"), service_id=first_server, overwrite_file=False)
-    if not cached:
-        LOGGER.error(f"Error while caching self-signed {first_server}.key file : {err}")
+    published = False
+    try:
+        with StagedDirectory(server_path) as staged:
+            staged_key = staged.path.joinpath("key.pem")
+            staged_cert = staged.path.joinpath("cert.pem")
+            openssl_cmd.extend(["-keyout", staged_key.as_posix(), "-out", staged_cert.as_posix(), "-days", days, "-subj", subj])
+            result = run(openssl_cmd, stdin=DEVNULL, stderr=DEVNULL, check=False, env={"PATH": getenv("PATH", ""), "PYTHONPATH": getenv("PYTHONPATH", "")})
+            if result.returncode != 0:
+                LOGGER.error(f"Self-signed certificate generation failed for {first_server}")
+                return 2
+            entries = []
+            for name in ("cert.pem", "key.pem"):
+                data = staged.path.joinpath(name).read_bytes()
+                entries.append({"job_name": JOB.job_name, "service_id": first_server, "file_name": name, "data": data, "checksum": bytes_hash(data)})
+            staged.publish()
+            err = JOB.db.upsert_job_caches(entries)
+            if err:
+                LOGGER.error(f"Error while caching the self-signed certificate and key for {first_server}: {err}")
+                return 2
+            published = True
+            staged.commit()
+    except Exception as e:
+        LOGGER.error(f"Error while publishing the self-signed certificate and key for {first_server}: {e}")
+        return 3 if published else 2
 
     LOGGER.info(f"Successfully generated self-signed certificate for {first_server}")
-    return True, 1
+    return 1
 
 
 status = 0
 
 try:
-    self_signed_path = Path(sep, "var", "cache", "bunkerweb", "selfsigned")
     servers = getenv("SERVER_NAME", "www.example.com") or []
 
     if isinstance(servers, str):
@@ -210,15 +202,20 @@ try:
 
             LOGGER.info(f"Service {first_server} is using self-signed SSL certificates, checking ...")
 
-            ret, ret_status = generate_cert(
-                first_server,
-                getenv(f"{first_server}_SELF_SIGNED_SSL_EXPIRY", "365") if multisite else getenv("SELF_SIGNED_SSL_EXPIRY", "365"),
-                getenv(f"{first_server}_SELF_SIGNED_SSL_SUBJ", "/CN=www.example.com/") if multisite else getenv("SELF_SIGNED_SSL_SUBJ", "/CN=www.example.com/"),
-                self_signed_path,
-            )
-            if not ret:
-                skipped_servers.append(first_server)
-            status = ret_status
+            try:
+                status |= generate_cert(
+                    first_server,
+                    getenv(f"{first_server}_SELF_SIGNED_SSL_EXPIRY", "365") if multisite else getenv("SELF_SIGNED_SSL_EXPIRY", "365"),
+                    (
+                        getenv(f"{first_server}_SELF_SIGNED_SSL_SUBJ", "/CN=www.example.com/")
+                        if multisite
+                        else getenv("SELF_SIGNED_SSL_SUBJ", "/CN=www.example.com/")
+                    ),
+                )
+            except Exception as e:
+                status |= 2
+                LOGGER.debug(format_exc())
+                LOGGER.error(f"Error while checking the self-signed certificate and key for {first_server}: {e}")
 
     for first_server in skipped_servers:
         JOB.del_cache("cert.pem", service_id=first_server)
@@ -226,7 +223,7 @@ try:
 except SystemExit as e:
     status = e.code
 except BaseException as e:
-    status = 2
+    status |= 2
     LOGGER.debug(format_exc())
     LOGGER.error(f"Exception while running self-signed.py :\n{e}")
 
