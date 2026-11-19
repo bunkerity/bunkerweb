@@ -446,14 +446,17 @@ function antibot:access()
 		for k, _ in pairs(checks) do
 			-- Skip URI ignore checks if current path is the challenge URI
 			if not already_cached[k] and not (k == "URI" and self.ctx.bw.uri == self.variables["ANTIBOT_URI"]) then
-				local ok, ignored = self:is_ignored(k)
+				local ok, ignored, incomplete = self:is_ignored(k)
 				if ok == nil then
 					self.logger:log(ERR, "error while checking if " .. k .. " is ignored : " .. ignored)
 				else
-					-- luacheck: ignore 421
-					local ok, err = self:add_to_cache(self:kind_to_ele(k), ignored)
-					if not ok then
-						self.logger:log(ERR, "error while adding element to cache : " .. err)
+					-- A negative verdict taken without the rDNS check (resolver error) is not cached: the next request retries it
+					if ignored ~= "ko" or not incomplete then
+						-- luacheck: ignore 421
+						local ok, err = self:add_to_cache(self:kind_to_ele(k), ignored)
+						if not ok then
+							self.logger:log(ERR, "error while adding element to cache : " .. err)
+						end
 					end
 					if ignored ~= "ko" then
 						return self:ret(true, k .. " is ignored (info : " .. ignored .. ")")
@@ -1271,6 +1274,7 @@ function antibot:is_ignored_ip()
 	end
 
 	-- Check if rDNS is needed
+	local rdns_failed = false
 	local check_rdns = self.lists["IGNORE_RDNS"] and #self.lists["IGNORE_RDNS"] > 0
 	if self.variables["ANTIBOT_RDNS_GLOBAL"] == "yes" and not self.ctx.bw.ip_is_global then
 		check_rdns = false
@@ -1292,6 +1296,7 @@ function antibot:is_ignored_ip()
 				return true, "rDNS " .. rdns_suffix
 			end
 		else
+			rdns_failed = true
 			self.logger:log(ERR, "error while getting rdns : " .. err)
 		end
 	end
@@ -1310,8 +1315,8 @@ function antibot:is_ignored_ip()
 		end
 	end
 
-	-- Not ignored
-	return false, "ko"
+	-- Not ignored (third value: the rDNS check could not run)
+	return false, "ko", rdns_failed
 end
 
 function antibot:is_ignored_uri()

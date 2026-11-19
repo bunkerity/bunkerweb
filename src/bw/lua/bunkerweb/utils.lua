@@ -891,18 +891,22 @@ utils.get_rdns = function(ip, ctx, pool)
 	local ret_err = "success"
 	-- Do rDNS query
 	local answers, err = rdns:reverse_query(ip)
+	-- Resolver failures (timeout, SERVFAIL...) are not negative answers: do not cache them, retry next time
 	if not answers then
 		logger:log(WARN, "error while doing reverse DNS query for " .. ip .. " : " .. err)
-		ret_err = err
-	else
-		if answers.errcode then
-			ret_err = answers.errstr
+		return false, err
+	end
+	if answers.errcode then
+		ret_err = answers.errstr or tostring(answers.errcode)
+		if answers.errcode ~= 3 then
+			logger:log(WARN, "error while doing reverse DNS query for " .. ip .. " : " .. ret_err)
+			return false, ret_err
 		end
-		-- Extract all PTR
-		for _, answer in ipairs(answers) do
-			if answer.ptrdname then
-				table.insert(ptrs, answer.ptrdname)
-			end
+	end
+	-- Extract all PTR
+	for _, answer in ipairs(answers) do
+		if answer.ptrdname then
+			table.insert(ptrs, answer.ptrdname)
 		end
 	end
 	-- Save to cache

@@ -174,6 +174,25 @@ emit({{ status = result.status, errors = errors }})
         assert out["status"] == 403
         assert out["errors"] == ["error while getting rdns : rdns lookup failed"]
 
+    def test_an_rdns_outage_is_not_cached_so_the_recovered_lookup_greylists_the_next_request(self):
+        body = f"""
+VARIABLES = {to_lua(variables())}
+STORE["plugin_greylist_lists_{SERVER}"] = {{ RDNS = {{ ".good.example" }} }}
+local KEY = "plugin_greylist_{SERVER}ip1.2.3.4"
+FCRDNS = true
+RDNS = nil
+local first = new_plugin(PLUGIN):access()
+local after_outage = CACHE[KEY]
+RDNS = {{ "crawler.good.example" }}
+local second = new_plugin(PLUGIN):access()
+emit({{ first = summary(first), after_outage = after_outage, second = summary(second), cached = CACHE[KEY] }})
+"""
+        out = run_plugin(MODULE, body)
+        assert out["first"]["status"] == 403
+        assert out.get("after_outage") is None
+        assert (out["second"].get("status"), out["second"]["msg"]) == (None, "IP is in greylist")
+        assert out["cached"] == "rDNS .good.example"
+
 
 class TestStream:
     def test_preread_applies_the_same_decision_as_access(self):

@@ -179,6 +179,10 @@ emit({result = result, second = second, err = err, cache = CACHE, ip = REVERSE_I
         assert out["result"] is False and out["err"] == "resolver unavailable"
     else:
         assert out["ip"] == "192.0.2.1"
+        if failure == "PTRS = nil":
+            # a resolver failure is not a negative answer: nothing cached, the caller sees the error
+            assert out["result"] is False and out["err"] == "reverse timeout" and out["cache"] == {}
+            return
         assert out["result"] == (["bot.example"] if not failure or "CACHE_GET" in failure else {})
         if "CACHE_GET" in failure:
             assert out["logs"] and out["cache"] == {}

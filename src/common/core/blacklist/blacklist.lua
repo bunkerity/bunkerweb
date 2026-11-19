@@ -247,14 +247,17 @@ function blacklist:access()
 	-- Perform checks
 	for k, _ in pairs(checks) do
 		if not already_cached[k] then
-			local ok, blacklisted = self:is_blacklisted(k)
+			local ok, blacklisted, incomplete = self:is_blacklisted(k)
 			if ok == nil then
 				self.logger:log(ERR, "error while checking if " .. k .. " is blacklisted : " .. blacklisted)
 			else
-				-- luacheck: ignore 421
-				local ok, err = self:add_to_cache(self:kind_to_ele(k), blacklisted)
-				if not ok then
-					self.logger:log(ERR, "error while adding element to cache : " .. err)
+				-- A negative verdict taken without the rDNS check (resolver error) is not cached: the next request retries it
+				if blacklisted ~= "ok" or not incomplete then
+					-- luacheck: ignore 421
+					local ok, err = self:add_to_cache(self:kind_to_ele(k), blacklisted)
+					if not ok then
+						self.logger:log(ERR, "error while adding element to cache : " .. err)
+					end
 				end
 				if blacklisted ~= "ok" then
 					local data = self:get_data(blacklisted)
@@ -342,6 +345,7 @@ function blacklist:is_blacklisted_ip()
 	end
 
 	-- Check if rDNS is needed
+	local rdns_failed = false
 	local check_rdns = self.lists["RDNS"] and #self.lists["RDNS"] > 0
 	if self.variables["BLACKLIST_RDNS_GLOBAL"] == "yes" and not self.ctx.bw.ip_is_global then
 		check_rdns = false
@@ -370,6 +374,7 @@ function blacklist:is_blacklisted_ip()
 				end
 			end
 		else
+			rdns_failed = true
 			self.logger:log(ERR, "error while getting rdns : " .. err)
 		end
 	end
@@ -398,8 +403,8 @@ function blacklist:is_blacklisted_ip()
 		end
 	end
 
-	-- Not blacklisted
-	return false, "ok"
+	-- Not blacklisted (third value: the rDNS check could not run)
+	return false, "ok", rdns_failed
 end
 
 function blacklist:is_blacklisted_uri()
