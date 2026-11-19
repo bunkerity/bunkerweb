@@ -1,0 +1,43 @@
+src/autoconf/Dockerfile
+  s_2a8b7e6e55d236::t_81a8bb129ff389 41
+  s_80f1da85912d1b::t_85e372a7326186 46
+src/ui/Dockerfile
+  s_80f1da85912d1b::t_311b3a251a9afa 88
+  s_2a8b7e6e55d236::t_ad2f4897b69b14 83
+src/api/Dockerfile
+  s_2a8b7e6e55d236::t_02b0286a8cc7a9 42
+  s_80f1da85912d1b::t_25badd57740ea8 47
+src/scheduler/Dockerfile
+  s_2a8b7e6e55d236::t_7cb532f9455973 54
+  s_80f1da85912d1b::t_901c463c700042 59
+src/all-in-one/Dockerfile
+  s_2a8b7e6e55d236::t_716c5922f574a5 174
+  s_80f1da85912d1b::t_9f16d55d0012a0 177
+src/bw/Dockerfile
+  s_80f1da85912d1b::t_903181d75517ea 81
+  s_2a8b7e6e55d236::t_fba630c19a1390 78
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "b5cb09534311bbeaff65fed848ded499457797e1",
+  "prompts": {},
+  "sessions": {
+    "s_2a8b7e6e55d236": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "7240790c-8d8a-404e-a61a-9f904953ed68",
+        "model": "unknown"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_80f1da85912d1b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "48f28331-3ce2-4fa3-b959-69d5d1238c0a",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": null
+    }
+  }
+}

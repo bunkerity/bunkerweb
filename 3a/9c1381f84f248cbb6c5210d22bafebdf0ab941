@@ -1,0 +1,44 @@
+tests/unit/linux/test_deb_postrm_lifecycle.py
+  s_30dc02f461e642::t_0b5c601a2f32d9 34
+  s_8c45e4f50c0adf::t_e178d73b1a1cc6 113
+  s_8c45e4f50c0adf::t_90b783c4559d19 1-5,7-9,11-31,33,35-39,41-44,47-48,58-69,71-73,75-77,79-90,94-98,100-103
+  s_8c45e4f50c0adf::t_6fba3820493264 114-115
+  s_8c45e4f50c0adf::t_a4e62cab8d1e39 6,10,32,40,45-46,49-57,70,74,78,91-93,99,104-112
+src/linux/scripts/afterRemoveDEB.sh
+  s_8c45e4f50c0adf::t_1a60fe5697f755 201-206
+  s_8c45e4f50c0adf::t_721623528c3787 165-166,200
+CHANGELOG.md
+  s_8957b83407cdf6::t_4acdc20d505675 35
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "3a9c1381f84f248cbb6c5210d22bafebdf0ab941",
+  "prompts": {},
+  "sessions": {
+    "s_30dc02f461e642": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1b09e-f363-7890-8c31-73c4c9efaa0b",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_8957b83407cdf6": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "f0ed5bf7-382f-48ad-b7ad-d9883e810768",
+        "model": "unknown"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_8c45e4f50c0adf": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1b09f-78cb-7db0-bdd9-389f859d3b6b",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

@@ -1,0 +1,19 @@
+CHANGELOG.md
+  s_de2ef45e1eda85::t_fe72f0f9fbfcca 70,144,214
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "0840e7779cf628ff5729798e714aa013861979f0",
+  "prompts": {},
+  "sessions": {
+    "s_de2ef45e1eda85": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "7998fc02-66d1-45db-87b6-193d7973a9cb",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

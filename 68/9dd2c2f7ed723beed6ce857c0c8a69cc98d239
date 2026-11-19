@@ -1,0 +1,140 @@
+tests/unit/gen/test_server_name_ip_literals.py
+  s_4f460a2e940aa9::t_e8d9963600378d 1-244
+src/common/confs/stream.conf
+  s_8ea0b591e9a806::t_77c3fd5801d83a 110-114,117-118
+  s_4f460a2e940aa9::t_c03c2880d90069 116,125
+  s_8ea0b591e9a806::t_bb060ce01cecb9 126-127
+src/common/utils/logger.py
+  s_7db872cc24d44a::t_753e0898fc963d 7,36-37,120,122
+  s_6189ae7958809e::t_bdd5ce9c11aa03 29,79-84
+tests/unit/test_lua_server_name_ip_variables.lua
+  s_4f460a2e940aa9::t_0eabc36e0597fb 1-95
+src/api/utils/gunicorn.conf.py
+  s_6189ae7958809e::t_bdd5ce9c11aa03 127
+src/common/core/realip/plugin.json
+  s_4f460a2e940aa9::t_bda213e9bcdc96 32,59
+tests/unit/gen/test_ipv6_setting_regexes.py
+  s_4f460a2e940aa9::t_0fbc2a6f5d56c9 181
+  s_4f460a2e940aa9::t_a57e7f2d02de2f 179-180,182-204
+  s_4f460a2e940aa9::t_393528d1ae6dbc 1-30,33-55,57-59,62-65,68-71,73,75-178
+  s_75786a4c16c387::t_63b79eff296272 31-32,56,60-61,66-67,72,74
+src/common/core/reverseproxy/confs/server-stream/reverse-proxy.conf
+  s_4f460a2e940aa9::t_09a737e2fdb567 62-64
+src/common/core/blacklist/plugin.json
+  s_75786a4c16c387::t_66be5ead59ce28 54,128,203,212,221,230,239,248,257,266,275,284
+src/common/core/modsecurity/confs/http/ip-host.modsec-crs
+  s_4f460a2e940aa9::t_bc76e4c1ff5848 1-30
+src/common/core/modsecurity/confs/modsec-crs/ip-host.conf
+  s_4f460a2e940aa9::t_bc76e4c1ff5848 1-17
+tests/core/server-name-ip-literal.yml
+  s_a53efcebd5d5eb::t_40241cf3f72251 25-26,35-36
+  s_a53efcebd5d5eb::t_5f5754f1a94bf1 1-24,27-34,37-70
+src/common/core/headers/plugin.json
+  s_7db872cc24d44a::t_753e0898fc963d 93
+src/common/core/reverseproxy/plugin.json
+  s_4f460a2e940aa9::t_bda213e9bcdc96 389
+src/common/core/whitelist/plugin.json
+  s_4f460a2e940aa9::t_bda213e9bcdc96 23,107,116,125,134,143
+src/common/core/dnsbl/plugin.json
+  s_75786a4c16c387::t_66be5ead59ce28 32,61
+tests/core/server-name-ip-literal/check.py
+  s_a53efcebd5d5eb::t_40241cf3f72251 30
+  s_a53efcebd5d5eb::t_c62b4da69d3993 107,116
+  s_a53efcebd5d5eb::t_5f5754f1a94bf1 1-25,37-106,108-115,117-131
+  s_a53efcebd5d5eb::t_90dd0e97114953 26-29,31-36
+tests/unit/gen/test_setting_regexes.py
+  s_4f460a2e940aa9::t_8283ee86f7974b 23,59-95,127,145-147,149-153,195-197,226-275,287-310,540-549
+tests/unit/gen/test_ipv6_api_listeners.py
+  s_6189ae7958809e::t_59d424548456b7 15-16,48-49
+  s_6189ae7958809e::t_ccedec9431b91d 1-14,17-26,28-41,43-47
+  s_6189ae7958809e::t_b5e1ac42278f54 27,42
+src/ui/utils/gunicorn.conf.py
+  s_6189ae7958809e::t_bdd5ce9c11aa03 129
+src/common/core/grpc/plugin.json
+  s_75786a4c16c387::t_66be5ead59ce28 342
+tests/unit/common/test_ipv6_gunicorn_listeners.py
+  s_6189ae7958809e::t_ccedec9431b91d 1-34
+tests/unit/common/test_ipv6_syslog.py
+  s_6189ae7958809e::t_ccedec9431b91d 1-66
+src/common/core/country/plugin.json
+  s_0a7c25ebde2361::t_23f38190deed49 348
+src/common/core/greylist/plugin.json
+  s_75786a4c16c387::t_66be5ead59ce28 23,107,116,125,134,143
+src/common/confs/api.conf
+  s_6189ae7958809e::t_59d424548456b7 23,25,39
+src/common/core/antibot/plugin.json
+  s_0a7c25ebde2361::t_23f38190deed49 85
+  s_75786a4c16c387::t_66be5ead59ce28 97,891,900
+src/common/core/misc/plugin.json
+  s_75786a4c16c387::t_66be5ead59ce28 189
+src/common/core/robotstxt/plugin.json
+  s_4f460a2e940aa9::t_bda213e9bcdc96 44
+src/ui/utils/tmp-gunicorn.conf.py
+  s_6189ae7958809e::t_bdd5ce9c11aa03 71
+src/common/core/templates/plugin.json
+  s_4f460a2e940aa9::t_ef452a8eafb778 14
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "689dd2c2f7ed723beed6ce857c0c8a69cc98d239",
+  "prompts": {},
+  "sessions": {
+    "s_0a7c25ebde2361": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "dd997fa7-1d53-48f3-bb5d-5df3e25b0998",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_4f460a2e940aa9": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "1801373c-868e-412b-b538-cb2f1f5efe59",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_6189ae7958809e": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "1049effa-f503-404c-8e04-c0d58dae63c9",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_75786a4c16c387": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "9cc95f88-03a2-4505-922a-07c984713caa",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_7db872cc24d44a": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1ac53-82bd-7021-8474-9868afc6fad4",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_8ea0b591e9a806": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "4c26001d-e7c4-480d-ac03-d908a1d42663",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_a53efcebd5d5eb": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "91d63c6b-6a52-4608-9896-62aeb94f06a7",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

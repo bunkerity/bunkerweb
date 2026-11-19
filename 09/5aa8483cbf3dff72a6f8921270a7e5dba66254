@@ -1,0 +1,38 @@
+src/common/core/errors/confs/server-http/errors.conf
+  s_bacf63c7c05573::t_dedfe026e945bd 6-7,20-24
+  s_6e79ec600ea07b::t_d6bbd8d59e2c53 5
+CHANGELOG.md
+  s_1fda42dec74980::t_c36fa83fe558fc 22
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "095aa8483cbf3dff72a6f8921270a7e5dba66254",
+  "prompts": {},
+  "sessions": {
+    "s_1fda42dec74980": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "1f1a83de-6a6c-4ffe-9821-b2f8e8c7b92a",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_6e79ec600ea07b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "7703ea00-a437-44b6-8708-7d912ec83af0",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_bacf63c7c05573": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0fb77-bd8b-7203-9985-8b1965d456d2",
+        "model": "gpt-6-astra"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

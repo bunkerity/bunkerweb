@@ -1,0 +1,22 @@
+CHANGELOG.md
+  h_a33a1e80933106 42
+src/ui/app/routes/profile.py
+  h_a33a1e80933106 164-170
+src/ui/utils/gunicorn.conf.py
+  h_a33a1e80933106 503-509,513-514,563
+tests/unit/ui/routes/test_routes_profile.py
+  h_a33a1e80933106 268-276
+tests/unit/ui/test_admin_rename_from_env.py
+  h_a33a1e80933106 91-120
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "b35a3368e9c4fafb6ef9381b28a955c42cc26e55",
+  "prompts": {},
+  "humans": {
+    "h_a33a1e80933106": {
+      "author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

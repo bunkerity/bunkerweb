@@ -1,0 +1,26 @@
+tests/unit/harness/test_ci_linux_logs.py
+  s_0b2ff51b084483::t_050f58fc46fe04 36-43
+  s_0b2ff51b084483::t_b67e08338ca542 28-29,44,50,76
+  s_0b2ff51b084483::t_25ad263a943dfc 8-9,35,45-49,51-75,77-92
+  s_0b2ff51b084483::t_1b02151825b5cc 93-94
+tests/utils/docker.py
+  s_0b2ff51b084483::t_42e77d273f8af3 160-167,172,174-175
+tests/utils/__init__.py
+  s_0b2ff51b084483::t_42e77d273f8af3 113-121
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "4c5f830a23fc37a49e46e2af1fb0f0d15c52d3e9",
+  "prompts": {},
+  "sessions": {
+    "s_0b2ff51b084483": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1c0cc-c14a-72f1-aaa1-05e834938dd6",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

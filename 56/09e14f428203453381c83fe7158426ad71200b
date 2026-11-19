@@ -1,0 +1,1122 @@
+CHANGELOG.md
+  h_a33a1e80933106 9
+docs/de/integrations.md
+  h_a33a1e80933106 2352,2367,2371,2408,2412,2445,2495,2498
+docs/es/integrations.md
+  h_a33a1e80933106 2353,2368,2372,2409,2413,2446,2496,2499
+docs/fr/integrations.md
+  h_a33a1e80933106 2355,2370,2374,2411,2415,2448,2498,2501
+docs/integrations.md
+  h_a33a1e80933106 2467,2482,2486,2523,2527,2560,2610,2613
+docs/zh/integrations.md
+  h_a33a1e80933106 2352,2367,2371,2408,2412,2445,2495,2498
+misc/check-version-consistency.sh
+  h_a33a1e80933106 91,97-111
+misc/install-bunkerweb.sh
+  h_a33a1e80933106 126,145,154-155,5688-5692
+src/all-in-one/Dockerfile
+  h_a33a1e80933106 1,168
+src/bw/Dockerfile
+  h_a33a1e80933106 1,72
+src/deps/deps.json
+  h_a33a1e80933106 260-266,270
+src/deps/install.sh
+  h_a33a1e80933106 247-251
+src/deps/src/nginx-1.30.6/.gitignore
+  h_a33a1e80933106 1-3
+src/deps/src/nginx-1.30.6/CODE_OF_CONDUCT.md
+  h_a33a1e80933106 1-126
+src/deps/src/nginx-1.30.6/CONTRIBUTING.md
+  h_a33a1e80933106 1-128
+src/deps/src/nginx-1.30.6/LICENSE
+  h_a33a1e80933106 1-24
+src/deps/src/nginx-1.30.6/README.md
+  h_a33a1e80933106 1-232
+src/deps/src/nginx-1.30.6/SECURITY.md
+  h_a33a1e80933106 1-103
+src/deps/src/nginx-1.30.6/SUPPORT.md
+  h_a33a1e80933106 1-48
+src/deps/src/nginx-1.30.6/auto/cc/acc
+  h_a33a1e80933106 1-14
+src/deps/src/nginx-1.30.6/auto/cc/bcc
+  h_a33a1e80933106 1-71
+src/deps/src/nginx-1.30.6/auto/cc/ccc
+  h_a33a1e80933106 1-46
+src/deps/src/nginx-1.30.6/auto/cc/clang
+  h_a33a1e80933106 1-90
+src/deps/src/nginx-1.30.6/auto/cc/conf
+  h_a33a1e80933106 1-254
+src/deps/src/nginx-1.30.6/auto/cc/gcc
+  h_a33a1e80933106 1-171
+src/deps/src/nginx-1.30.6/auto/cc/icc
+  h_a33a1e80933106 1-109
+src/deps/src/nginx-1.30.6/auto/cc/msvc
+  h_a33a1e80933106 1-167
+src/deps/src/nginx-1.30.6/auto/cc/name
+  h_a33a1e80933106 1-103
+src/deps/src/nginx-1.30.6/auto/cc/owc
+  h_a33a1e80933106 1-103
+src/deps/src/nginx-1.30.6/auto/cc/sunc
+  h_a33a1e80933106 1-156
+src/deps/src/nginx-1.30.6/auto/configure
+  h_a33a1e80933106 1-121
+src/deps/src/nginx-1.30.6/auto/define
+  h_a33a1e80933106 1-12
+src/deps/src/nginx-1.30.6/auto/endianness
+  h_a33a1e80933106 1-50
+src/deps/src/nginx-1.30.6/auto/feature
+  h_a33a1e80933106 1-123
+src/deps/src/nginx-1.30.6/auto/have
+  h_a33a1e80933106 1-12
+src/deps/src/nginx-1.30.6/auto/have_headers
+  h_a33a1e80933106 1-12
+src/deps/src/nginx-1.30.6/auto/headers
+  h_a33a1e80933106 1-13
+src/deps/src/nginx-1.30.6/auto/include
+  h_a33a1e80933106 1-58
+src/deps/src/nginx-1.30.6/auto/init
+  h_a33a1e80933106 1-53
+src/deps/src/nginx-1.30.6/auto/install
+  h_a33a1e80933106 1-220
+src/deps/src/nginx-1.30.6/auto/lib/conf
+  h_a33a1e80933106 1-54
+src/deps/src/nginx-1.30.6/auto/lib/geoip/conf
+  h_a33a1e80933106 1-114
+src/deps/src/nginx-1.30.6/auto/lib/google-perftools/conf
+  h_a33a1e80933106 1-78
+src/deps/src/nginx-1.30.6/auto/lib/libatomic/conf
+  h_a33a1e80933106 1-43
+src/deps/src/nginx-1.30.6/auto/lib/libatomic/make
+  h_a33a1e80933106 1-21
+src/deps/src/nginx-1.30.6/auto/lib/libgd/conf
+  h_a33a1e80933106 1-112
+src/deps/src/nginx-1.30.6/auto/lib/libxslt/conf
+  h_a33a1e80933106 1-165
+src/deps/src/nginx-1.30.6/auto/lib/make
+  h_a33a1e80933106 1-24
+src/deps/src/nginx-1.30.6/auto/lib/openssl/conf
+  h_a33a1e80933106 1-196
+src/deps/src/nginx-1.30.6/auto/lib/openssl/make
+  h_a33a1e80933106 1-79
+src/deps/src/nginx-1.30.6/auto/lib/openssl/makefile.bcc
+  h_a33a1e80933106 1-18
+src/deps/src/nginx-1.30.6/auto/lib/openssl/makefile.msvc
+  h_a33a1e80933106 1-21
+src/deps/src/nginx-1.30.6/auto/lib/pcre/conf
+  h_a33a1e80933106 1-235
+src/deps/src/nginx-1.30.6/auto/lib/pcre/make
+  h_a33a1e80933106 1-171
+src/deps/src/nginx-1.30.6/auto/lib/pcre/makefile.bcc
+  h_a33a1e80933106 1-27
+src/deps/src/nginx-1.30.6/auto/lib/pcre/makefile.msvc
+  h_a33a1e80933106 1-23
+src/deps/src/nginx-1.30.6/auto/lib/pcre/makefile.owc
+  h_a33a1e80933106 1-25
+src/deps/src/nginx-1.30.6/auto/lib/perl/conf
+  h_a33a1e80933106 1-83
+src/deps/src/nginx-1.30.6/auto/lib/perl/make
+  h_a33a1e80933106 1-46
+src/deps/src/nginx-1.30.6/auto/lib/zlib/conf
+  h_a33a1e80933106 1-79
+src/deps/src/nginx-1.30.6/auto/lib/zlib/make
+  h_a33a1e80933106 1-135
+src/deps/src/nginx-1.30.6/auto/lib/zlib/makefile.bcc
+  h_a33a1e80933106 1-17
+src/deps/src/nginx-1.30.6/auto/lib/zlib/makefile.msvc
+  h_a33a1e80933106 1-17
+src/deps/src/nginx-1.30.6/auto/lib/zlib/makefile.owc
+  h_a33a1e80933106 1-14
+src/deps/src/nginx-1.30.6/auto/make
+  h_a33a1e80933106 1-674
+src/deps/src/nginx-1.30.6/auto/module
+  h_a33a1e80933106 1-178
+src/deps/src/nginx-1.30.6/auto/modules
+  h_a33a1e80933106 1-1556
+src/deps/src/nginx-1.30.6/auto/nohave
+  h_a33a1e80933106 1-12
+src/deps/src/nginx-1.30.6/auto/options
+  h_a33a1e80933106 1-653
+src/deps/src/nginx-1.30.6/auto/os/conf
+  h_a33a1e80933106 1-144
+src/deps/src/nginx-1.30.6/auto/os/darwin
+  h_a33a1e80933106 1-136
+src/deps/src/nginx-1.30.6/auto/os/freebsd
+  h_a33a1e80933106 1-105
+src/deps/src/nginx-1.30.6/auto/os/linux
+  h_a33a1e80933106 1-298
+src/deps/src/nginx-1.30.6/auto/os/solaris
+  h_a33a1e80933106 1-61
+src/deps/src/nginx-1.30.6/auto/os/win32
+  h_a33a1e80933106 1-39
+src/deps/src/nginx-1.30.6/auto/sources
+  h_a33a1e80933106 1-261
+src/deps/src/nginx-1.30.6/auto/stubs
+  h_a33a1e80933106 1-8
+src/deps/src/nginx-1.30.6/auto/summary
+  h_a33a1e80933106 1-82
+src/deps/src/nginx-1.30.6/auto/threads
+  h_a33a1e80933106 1-21
+src/deps/src/nginx-1.30.6/auto/types/sizeof
+  h_a33a1e80933106 1-76
+src/deps/src/nginx-1.30.6/auto/types/typedef
+  h_a33a1e80933106 1-82
+src/deps/src/nginx-1.30.6/auto/types/uintptr_t
+  h_a33a1e80933106 1-50
+src/deps/src/nginx-1.30.6/auto/types/value
+  h_a33a1e80933106 1-12
+src/deps/src/nginx-1.30.6/auto/unix
+  h_a33a1e80933106 1-1034
+src/deps/src/nginx-1.30.6/conf/fastcgi.conf
+  h_a33a1e80933106 1-26
+src/deps/src/nginx-1.30.6/conf/fastcgi_params
+  h_a33a1e80933106 1-25
+src/deps/src/nginx-1.30.6/conf/koi-utf
+  h_a33a1e80933106 1-109
+src/deps/src/nginx-1.30.6/conf/koi-win
+  h_a33a1e80933106 1-103
+src/deps/src/nginx-1.30.6/conf/mime.types
+  h_a33a1e80933106 1-99
+src/deps/src/nginx-1.30.6/conf/nginx.conf
+  h_a33a1e80933106 1-115
+src/deps/src/nginx-1.30.6/conf/scgi_params
+  h_a33a1e80933106 1-17
+src/deps/src/nginx-1.30.6/conf/uwsgi_params
+  h_a33a1e80933106 1-17
+src/deps/src/nginx-1.30.6/conf/win-utf
+  h_a33a1e80933106 1-126
+src/deps/src/nginx-1.30.6/contrib/README
+  h_a33a1e80933106 1-21
+src/deps/src/nginx-1.30.6/contrib/geo2nginx.pl
+  h_a33a1e80933106 1-58
+src/deps/src/nginx-1.30.6/contrib/unicode2nginx/koi-utf
+  h_a33a1e80933106 1-131
+src/deps/src/nginx-1.30.6/contrib/unicode2nginx/unicode-to-nginx.pl
+  h_a33a1e80933106 1-48
+src/deps/src/nginx-1.30.6/contrib/unicode2nginx/win-utf
+  h_a33a1e80933106 1-130
+src/deps/src/nginx-1.30.6/contrib/vim/ftdetect/nginx.vim
+  h_a33a1e80933106 1-4
+src/deps/src/nginx-1.30.6/contrib/vim/ftplugin/nginx.vim
+  h_a33a1e80933106 1
+src/deps/src/nginx-1.30.6/contrib/vim/indent/nginx.vim
+  h_a33a1e80933106 1-11
+src/deps/src/nginx-1.30.6/contrib/vim/syntax/nginx.vim
+  h_a33a1e80933106 1-1979
+src/deps/src/nginx-1.30.6/misc/GNUmakefile
+  h_a33a1e80933106 1-149
+src/deps/src/nginx-1.30.6/misc/README
+  h_a33a1e80933106 1-13
+src/deps/src/nginx-1.30.6/src/core/nginx.c
+  h_a33a1e80933106 1-1676
+src/deps/src/nginx-1.30.6/src/core/nginx.h
+  h_a33a1e80933106 1-26
+src/deps/src/nginx-1.30.6/src/core/ngx_array.c
+  h_a33a1e80933106 1-141
+src/deps/src/nginx-1.30.6/src/core/ngx_array.h
+  h_a33a1e80933106 1-53
+src/deps/src/nginx-1.30.6/src/core/ngx_bpf.c
+  h_a33a1e80933106 1-143
+src/deps/src/nginx-1.30.6/src/core/ngx_bpf.h
+  h_a33a1e80933106 1-43
+src/deps/src/nginx-1.30.6/src/core/ngx_buf.c
+  h_a33a1e80933106 1-314
+src/deps/src/nginx-1.30.6/src/core/ngx_buf.h
+  h_a33a1e80933106 1-167
+src/deps/src/nginx-1.30.6/src/core/ngx_conf_file.c
+  h_a33a1e80933106 1-1486
+src/deps/src/nginx-1.30.6/src/core/ngx_conf_file.h
+  h_a33a1e80933106 1-295
+src/deps/src/nginx-1.30.6/src/core/ngx_config.h
+  h_a33a1e80933106 1-145
+src/deps/src/nginx-1.30.6/src/core/ngx_connection.c
+  h_a33a1e80933106 1-1661
+src/deps/src/nginx-1.30.6/src/core/ngx_connection.h
+  h_a33a1e80933106 1-239
+src/deps/src/nginx-1.30.6/src/core/ngx_core.h
+  h_a33a1e80933106 1-121
+src/deps/src/nginx-1.30.6/src/core/ngx_cpuinfo.c
+  h_a33a1e80933106 1-139
+src/deps/src/nginx-1.30.6/src/core/ngx_crc.h
+  h_a33a1e80933106 1-39
+src/deps/src/nginx-1.30.6/src/core/ngx_crc32.c
+  h_a33a1e80933106 1-129
+src/deps/src/nginx-1.30.6/src/core/ngx_crc32.h
+  h_a33a1e80933106 1-79
+src/deps/src/nginx-1.30.6/src/core/ngx_crypt.c
+  h_a33a1e80933106 1-270
+src/deps/src/nginx-1.30.6/src/core/ngx_crypt.h
+  h_a33a1e80933106 1-20
+src/deps/src/nginx-1.30.6/src/core/ngx_cycle.c
+  h_a33a1e80933106 1-1482
+src/deps/src/nginx-1.30.6/src/core/ngx_cycle.h
+  h_a33a1e80933106 1-149
+src/deps/src/nginx-1.30.6/src/core/ngx_file.c
+  h_a33a1e80933106 1-1128
+src/deps/src/nginx-1.30.6/src/core/ngx_file.h
+  h_a33a1e80933106 1-164
+src/deps/src/nginx-1.30.6/src/core/ngx_hash.c
+  h_a33a1e80933106 1-1013
+src/deps/src/nginx-1.30.6/src/core/ngx_hash.h
+  h_a33a1e80933106 1-125
+src/deps/src/nginx-1.30.6/src/core/ngx_inet.c
+  h_a33a1e80933106 1-1499
+src/deps/src/nginx-1.30.6/src/core/ngx_inet.h
+  h_a33a1e80933106 1-132
+src/deps/src/nginx-1.30.6/src/core/ngx_list.c
+  h_a33a1e80933106 1-63
+src/deps/src/nginx-1.30.6/src/core/ngx_list.h
+  h_a33a1e80933106 1-83
+src/deps/src/nginx-1.30.6/src/core/ngx_log.c
+  h_a33a1e80933106 1-752
+src/deps/src/nginx-1.30.6/src/core/ngx_log.h
+  h_a33a1e80933106 1-271
+src/deps/src/nginx-1.30.6/src/core/ngx_md5.c
+  h_a33a1e80933106 1-283
+src/deps/src/nginx-1.30.6/src/core/ngx_md5.h
+  h_a33a1e80933106 1-28
+src/deps/src/nginx-1.30.6/src/core/ngx_module.c
+  h_a33a1e80933106 1-360
+src/deps/src/nginx-1.30.6/src/core/ngx_module.h
+  h_a33a1e80933106 1-288
+src/deps/src/nginx-1.30.6/src/core/ngx_murmurhash.c
+  h_a33a1e80933106 1-52
+src/deps/src/nginx-1.30.6/src/core/ngx_murmurhash.h
+  h_a33a1e80933106 1-19
+src/deps/src/nginx-1.30.6/src/core/ngx_open_file_cache.c
+  h_a33a1e80933106 1-1253
+src/deps/src/nginx-1.30.6/src/core/ngx_open_file_cache.h
+  h_a33a1e80933106 1-129
+src/deps/src/nginx-1.30.6/src/core/ngx_output_chain.c
+  h_a33a1e80933106 1-820
+src/deps/src/nginx-1.30.6/src/core/ngx_palloc.c
+  h_a33a1e80933106 1-430
+src/deps/src/nginx-1.30.6/src/core/ngx_palloc.h
+  h_a33a1e80933106 1-92
+src/deps/src/nginx-1.30.6/src/core/ngx_parse.c
+  h_a33a1e80933106 1-283
+src/deps/src/nginx-1.30.6/src/core/ngx_parse.h
+  h_a33a1e80933106 1-21
+src/deps/src/nginx-1.30.6/src/core/ngx_parse_time.c
+  h_a33a1e80933106 1-277
+src/deps/src/nginx-1.30.6/src/core/ngx_parse_time.h
+  h_a33a1e80933106 1-22
+src/deps/src/nginx-1.30.6/src/core/ngx_proxy_protocol.c
+  h_a33a1e80933106 1-614
+src/deps/src/nginx-1.30.6/src/core/ngx_proxy_protocol.h
+  h_a33a1e80933106 1-37
+src/deps/src/nginx-1.30.6/src/core/ngx_queue.c
+  h_a33a1e80933106 1-106
+src/deps/src/nginx-1.30.6/src/core/ngx_queue.h
+  h_a33a1e80933106 1-115
+src/deps/src/nginx-1.30.6/src/core/ngx_radix_tree.c
+  h_a33a1e80933106 1-488
+src/deps/src/nginx-1.30.6/src/core/ngx_radix_tree.h
+  h_a33a1e80933106 1-55
+src/deps/src/nginx-1.30.6/src/core/ngx_rbtree.c
+  h_a33a1e80933106 1-404
+src/deps/src/nginx-1.30.6/src/core/ngx_rbtree.h
+  h_a33a1e80933106 1-87
+src/deps/src/nginx-1.30.6/src/core/ngx_regex.c
+  h_a33a1e80933106 1-804
+src/deps/src/nginx-1.30.6/src/core/ngx_regex.h
+  h_a33a1e80933106 1-78
+src/deps/src/nginx-1.30.6/src/core/ngx_resolver.c
+  h_a33a1e80933106 1-4741
+src/deps/src/nginx-1.30.6/src/core/ngx_resolver.h
+  h_a33a1e80933106 1-242
+src/deps/src/nginx-1.30.6/src/core/ngx_rwlock.c
+  h_a33a1e80933106 1-117
+src/deps/src/nginx-1.30.6/src/core/ngx_rwlock.h
+  h_a33a1e80933106 1-22
+src/deps/src/nginx-1.30.6/src/core/ngx_sha1.c
+  h_a33a1e80933106 1-294
+src/deps/src/nginx-1.30.6/src/core/ngx_sha1.h
+  h_a33a1e80933106 1-28
+src/deps/src/nginx-1.30.6/src/core/ngx_shmtx.c
+  h_a33a1e80933106 1-310
+src/deps/src/nginx-1.30.6/src/core/ngx_shmtx.h
+  h_a33a1e80933106 1-49
+src/deps/src/nginx-1.30.6/src/core/ngx_slab.c
+  h_a33a1e80933106 1-817
+src/deps/src/nginx-1.30.6/src/core/ngx_slab.h
+  h_a33a1e80933106 1-72
+src/deps/src/nginx-1.30.6/src/core/ngx_spinlock.c
+  h_a33a1e80933106 1-53
+src/deps/src/nginx-1.30.6/src/core/ngx_string.c
+  h_a33a1e80933106 1-2130
+src/deps/src/nginx-1.30.6/src/core/ngx_string.h
+  h_a33a1e80933106 1-239
+src/deps/src/nginx-1.30.6/src/core/ngx_syslog.c
+  h_a33a1e80933106 1-410
+src/deps/src/nginx-1.30.6/src/core/ngx_syslog.h
+  h_a33a1e80933106 1-36
+src/deps/src/nginx-1.30.6/src/core/ngx_thread_pool.c
+  h_a33a1e80933106 1-641
+src/deps/src/nginx-1.30.6/src/core/ngx_thread_pool.h
+  h_a33a1e80933106 1-36
+src/deps/src/nginx-1.30.6/src/core/ngx_times.c
+  h_a33a1e80933106 1-460
+src/deps/src/nginx-1.30.6/src/core/ngx_times.h
+  h_a33a1e80933106 1-52
+src/deps/src/nginx-1.30.6/src/event/modules/ngx_devpoll_module.c
+  h_a33a1e80933106 1-561
+src/deps/src/nginx-1.30.6/src/event/modules/ngx_epoll_module.c
+  h_a33a1e80933106 1-1051
+src/deps/src/nginx-1.30.6/src/event/modules/ngx_eventport_module.c
+  h_a33a1e80933106 1-650
+src/deps/src/nginx-1.30.6/src/event/modules/ngx_iocp_module.c
+  h_a33a1e80933106 1-379
+src/deps/src/nginx-1.30.6/src/event/modules/ngx_iocp_module.h
+  h_a33a1e80933106 1-22
+src/deps/src/nginx-1.30.6/src/event/modules/ngx_kqueue_module.c
+  h_a33a1e80933106 1-731
+src/deps/src/nginx-1.30.6/src/event/modules/ngx_poll_module.c
+  h_a33a1e80933106 1-416
+src/deps/src/nginx-1.30.6/src/event/modules/ngx_select_module.c
+  h_a33a1e80933106 1-433
+src/deps/src/nginx-1.30.6/src/event/modules/ngx_win32_poll_module.c
+  h_a33a1e80933106 1-436
+src/deps/src/nginx-1.30.6/src/event/modules/ngx_win32_select_module.c
+  h_a33a1e80933106 1-408
+src/deps/src/nginx-1.30.6/src/event/ngx_event.c
+  h_a33a1e80933106 1-1373
+src/deps/src/nginx-1.30.6/src/event/ngx_event.h
+  h_a33a1e80933106 1-533
+src/deps/src/nginx-1.30.6/src/event/ngx_event_accept.c
+  h_a33a1e80933106 1-589
+src/deps/src/nginx-1.30.6/src/event/ngx_event_acceptex.c
+  h_a33a1e80933106 1-229
+src/deps/src/nginx-1.30.6/src/event/ngx_event_connect.c
+  h_a33a1e80933106 1-435
+src/deps/src/nginx-1.30.6/src/event/ngx_event_connect.h
+  h_a33a1e80933106 1-85
+src/deps/src/nginx-1.30.6/src/event/ngx_event_connectex.c
+  h_a33a1e80933106 1-206
+src/deps/src/nginx-1.30.6/src/event/ngx_event_openssl.c
+  h_a33a1e80933106 1-6609
+src/deps/src/nginx-1.30.6/src/event/ngx_event_openssl.h
+  h_a33a1e80933106 1-416
+src/deps/src/nginx-1.30.6/src/event/ngx_event_openssl_cache.c
+  h_a33a1e80933106 1-1267
+src/deps/src/nginx-1.30.6/src/event/ngx_event_openssl_stapling.c
+  h_a33a1e80933106 1-2830
+src/deps/src/nginx-1.30.6/src/event/ngx_event_pipe.c
+  h_a33a1e80933106 1-1143
+src/deps/src/nginx-1.30.6/src/event/ngx_event_pipe.h
+  h_a33a1e80933106 1-107
+src/deps/src/nginx-1.30.6/src/event/ngx_event_posted.c
+  h_a33a1e80933106 1-60
+src/deps/src/nginx-1.30.6/src/event/ngx_event_posted.h
+  h_a33a1e80933106 1-50
+src/deps/src/nginx-1.30.6/src/event/ngx_event_timer.c
+  h_a33a1e80933106 1-126
+src/deps/src/nginx-1.30.6/src/event/ngx_event_timer.h
+  h_a33a1e80933106 1-90
+src/deps/src/nginx-1.30.6/src/event/ngx_event_udp.c
+  h_a33a1e80933106 1-590
+src/deps/src/nginx-1.30.6/src/event/ngx_event_udp.h
+  h_a33a1e80933106 1-66
+src/deps/src/nginx-1.30.6/src/event/quic/bpf/bpfgen.sh
+  h_a33a1e80933106 1-113
+src/deps/src/nginx-1.30.6/src/event/quic/bpf/makefile
+  h_a33a1e80933106 1-30
+src/deps/src/nginx-1.30.6/src/event/quic/bpf/ngx_quic_reuseport_helper.c
+  h_a33a1e80933106 1-140
+src/deps/src/nginx-1.30.6/src/event/quic/ngx_event_quic.c
+  h_a33a1e80933106 1-1522
+src/deps/src/nginx-1.30.6/src/event/quic/ngx_event_quic.h
+  h_a33a1e80933106 1-145
+src/deps/src/nginx-1.30.6/src/event/quic/ngx_event_quic_ack.c
+  h_a33a1e80933106 1-1456
+src/deps/src/nginx-1.30.6/src/event/quic/ngx_event_quic_ack.h
+  h_a33a1e80933106 1-31
+src/deps/src/nginx-1.30.6/src/event/quic/ngx_event_quic_bpf.c
+  h_a33a1e80933106 1-657
+src/deps/src/nginx-1.30.6/src/event/quic/ngx_event_quic_bpf_code.c
+  h_a33a1e80933106 1-93
+src/deps/src/nginx-1.30.6/src/event/quic/ngx_event_quic_connection.h
+  h_a33a1e80933106 1-326
+src/deps/src/nginx-1.30.6/src/event/quic/ngx_event_quic_connid.c
+  h_a33a1e80933106 1-502
+src/deps/src/nginx-1.30.6/src/event/quic/ngx_event_quic_connid.h
+  h_a33a1e80933106 1-29
+src/deps/src/nginx-1.30.6/src/event/quic/ngx_event_quic_frames.c
+  h_a33a1e80933106 1-895
+src/deps/src/nginx-1.30.6/src/event/quic/ngx_event_quic_frames.h
+  h_a33a1e80933106 1-45
+src/deps/src/nginx-1.30.6/src/event/quic/ngx_event_quic_migration.c
+  h_a33a1e80933106 1-1007
+src/deps/src/nginx-1.30.6/src/event/quic/ngx_event_quic_migration.h
+  h_a33a1e80933106 1-45
+src/deps/src/nginx-1.30.6/src/event/quic/ngx_event_quic_openssl_compat.c
+  h_a33a1e80933106 1-657
+src/deps/src/nginx-1.30.6/src/event/quic/ngx_event_quic_openssl_compat.h
+  h_a33a1e80933106 1-52
+src/deps/src/nginx-1.30.6/src/event/quic/ngx_event_quic_output.c
+  h_a33a1e80933106 1-1406
+src/deps/src/nginx-1.30.6/src/event/quic/ngx_event_quic_output.h
+  h_a33a1e80933106 1-40
+src/deps/src/nginx-1.30.6/src/event/quic/ngx_event_quic_protection.c
+  h_a33a1e80933106 1-1268
+src/deps/src/nginx-1.30.6/src/event/quic/ngx_event_quic_protection.h
+  h_a33a1e80933106 1-118
+src/deps/src/nginx-1.30.6/src/event/quic/ngx_event_quic_socket.c
+  h_a33a1e80933106 1-237
+src/deps/src/nginx-1.30.6/src/event/quic/ngx_event_quic_socket.h
+  h_a33a1e80933106 1-28
+src/deps/src/nginx-1.30.6/src/event/quic/ngx_event_quic_ssl.c
+  h_a33a1e80933106 1-1000
+src/deps/src/nginx-1.30.6/src/event/quic/ngx_event_quic_ssl.h
+  h_a33a1e80933106 1-19
+src/deps/src/nginx-1.30.6/src/event/quic/ngx_event_quic_streams.c
+  h_a33a1e80933106 1-1828
+src/deps/src/nginx-1.30.6/src/event/quic/ngx_event_quic_streams.h
+  h_a33a1e80933106 1-44
+src/deps/src/nginx-1.30.6/src/event/quic/ngx_event_quic_tokens.c
+  h_a33a1e80933106 1-265
+src/deps/src/nginx-1.30.6/src/event/quic/ngx_event_quic_tokens.h
+  h_a33a1e80933106 1-34
+src/deps/src/nginx-1.30.6/src/event/quic/ngx_event_quic_transport.c
+  h_a33a1e80933106 1-2215
+src/deps/src/nginx-1.30.6/src/event/quic/ngx_event_quic_transport.h
+  h_a33a1e80933106 1-398
+src/deps/src/nginx-1.30.6/src/event/quic/ngx_event_quic_udp.c
+  h_a33a1e80933106 1-420
+src/deps/src/nginx-1.30.6/src/http/modules/ngx_http_access_module.c
+  h_a33a1e80933106 1-463
+src/deps/src/nginx-1.30.6/src/http/modules/ngx_http_addition_filter_module.c
+  h_a33a1e80933106 1-254
+src/deps/src/nginx-1.30.6/src/http/modules/ngx_http_auth_basic_module.c
+  h_a33a1e80933106 1-433
+src/deps/src/nginx-1.30.6/src/http/modules/ngx_http_auth_request_module.c
+  h_a33a1e80933106 1-450
+src/deps/src/nginx-1.30.6/src/http/modules/ngx_http_autoindex_module.c
+  h_a33a1e80933106 1-1072
+src/deps/src/nginx-1.30.6/src/http/modules/ngx_http_browser_module.c
+  h_a33a1e80933106 1-712
+src/deps/src/nginx-1.30.6/src/http/modules/ngx_http_charset_filter_module.c
+  h_a33a1e80933106 1-1694
+src/deps/src/nginx-1.30.6/src/http/modules/ngx_http_chunked_filter_module.c
+  h_a33a1e80933106 1-343
+src/deps/src/nginx-1.30.6/src/http/modules/ngx_http_dav_module.c
+  h_a33a1e80933106 1-1190
+src/deps/src/nginx-1.30.6/src/http/modules/ngx_http_degradation_module.c
+  h_a33a1e80933106 1-243
+src/deps/src/nginx-1.30.6/src/http/modules/ngx_http_empty_gif_module.c
+  h_a33a1e80933106 1-140
+src/deps/src/nginx-1.30.6/src/http/modules/ngx_http_fastcgi_module.c
+  h_a33a1e80933106 1-3969
+src/deps/src/nginx-1.30.6/src/http/modules/ngx_http_flv_module.c
+  h_a33a1e80933106 1-261
+src/deps/src/nginx-1.30.6/src/http/modules/ngx_http_geo_module.c
+  h_a33a1e80933106 1-1705
+src/deps/src/nginx-1.30.6/src/http/modules/ngx_http_geoip_module.c
+  h_a33a1e80933106 1-925
+src/deps/src/nginx-1.30.6/src/http/modules/ngx_http_grpc_module.c
+  h_a33a1e80933106 1-5256
+src/deps/src/nginx-1.30.6/src/http/modules/ngx_http_gunzip_filter_module.c
+  h_a33a1e80933106 1-697
+src/deps/src/nginx-1.30.6/src/http/modules/ngx_http_gzip_filter_module.c
+  h_a33a1e80933106 1-1185
+src/deps/src/nginx-1.30.6/src/http/modules/ngx_http_gzip_static_module.c
+  h_a33a1e80933106 1-335
+src/deps/src/nginx-1.30.6/src/http/modules/ngx_http_headers_filter_module.c
+  h_a33a1e80933106 1-918
+src/deps/src/nginx-1.30.6/src/http/modules/ngx_http_image_filter_module.c
+  h_a33a1e80933106 1-1676
+src/deps/src/nginx-1.30.6/src/http/modules/ngx_http_index_module.c
+  h_a33a1e80933106 1-551
+src/deps/src/nginx-1.30.6/src/http/modules/ngx_http_limit_conn_module.c
+  h_a33a1e80933106 1-758
+src/deps/src/nginx-1.30.6/src/http/modules/ngx_http_limit_req_module.c
+  h_a33a1e80933106 1-1102
+src/deps/src/nginx-1.30.6/src/http/modules/ngx_http_log_module.c
+  h_a33a1e80933106 1-2024
+src/deps/src/nginx-1.30.6/src/http/modules/ngx_http_map_module.c
+  h_a33a1e80933106 1-589
+src/deps/src/nginx-1.30.6/src/http/modules/ngx_http_memcached_module.c
+  h_a33a1e80933106 1-740
+src/deps/src/nginx-1.30.6/src/http/modules/ngx_http_mirror_module.c
+  h_a33a1e80933106 1-264
+src/deps/src/nginx-1.30.6/src/http/modules/ngx_http_mp4_module.c
+  h_a33a1e80933106 1-3987
+src/deps/src/nginx-1.30.6/src/http/modules/ngx_http_not_modified_filter_module.c
+  h_a33a1e80933106 1-266
+src/deps/src/nginx-1.30.6/src/http/modules/ngx_http_proxy_module.c
+  h_a33a1e80933106 1-5414
+src/deps/src/nginx-1.30.6/src/http/modules/ngx_http_proxy_module.h
+  h_a33a1e80933106 1-127
+src/deps/src/nginx-1.30.6/src/http/modules/ngx_http_proxy_v2_module.c
+  h_a33a1e80933106 1-4271
+src/deps/src/nginx-1.30.6/src/http/modules/ngx_http_random_index_module.c
+  h_a33a1e80933106 1-317
+src/deps/src/nginx-1.30.6/src/http/modules/ngx_http_range_filter_module.c
+  h_a33a1e80933106 1-999
+src/deps/src/nginx-1.30.6/src/http/modules/ngx_http_realip_module.c
+  h_a33a1e80933106 1-621
+src/deps/src/nginx-1.30.6/src/http/modules/ngx_http_referer_module.c
+  h_a33a1e80933106 1-682
+src/deps/src/nginx-1.30.6/src/http/modules/ngx_http_rewrite_module.c
+  h_a33a1e80933106 1-1030
+src/deps/src/nginx-1.30.6/src/http/modules/ngx_http_scgi_module.c
+  h_a33a1e80933106 1-2161
+src/deps/src/nginx-1.30.6/src/http/modules/ngx_http_secure_link_module.c
+  h_a33a1e80933106 1-366
+src/deps/src/nginx-1.30.6/src/http/modules/ngx_http_slice_filter_module.c
+  h_a33a1e80933106 1-554
+src/deps/src/nginx-1.30.6/src/http/modules/ngx_http_split_clients_module.c
+  h_a33a1e80933106 1-246
+src/deps/src/nginx-1.30.6/src/http/modules/ngx_http_ssi_filter_module.c
+  h_a33a1e80933106 1-2964
+src/deps/src/nginx-1.30.6/src/http/modules/ngx_http_ssi_filter_module.h
+  h_a33a1e80933106 1-115
+src/deps/src/nginx-1.30.6/src/http/modules/ngx_http_ssl_module.c
+  h_a33a1e80933106 1-1551
+src/deps/src/nginx-1.30.6/src/http/modules/ngx_http_ssl_module.h
+  h_a33a1e80933106 1-75
+src/deps/src/nginx-1.30.6/src/http/modules/ngx_http_static_module.c
+  h_a33a1e80933106 1-297
+src/deps/src/nginx-1.30.6/src/http/modules/ngx_http_stub_status_module.c
+  h_a33a1e80933106 1-226
+src/deps/src/nginx-1.30.6/src/http/modules/ngx_http_sub_filter_module.c
+  h_a33a1e80933106 1-1022
+src/deps/src/nginx-1.30.6/src/http/modules/ngx_http_try_files_module.c
+  h_a33a1e80933106 1-419
+src/deps/src/nginx-1.30.6/src/http/modules/ngx_http_upstream_hash_module.c
+  h_a33a1e80933106 1-787
+src/deps/src/nginx-1.30.6/src/http/modules/ngx_http_upstream_ip_hash_module.c
+  h_a33a1e80933106 1-307
+src/deps/src/nginx-1.30.6/src/http/modules/ngx_http_upstream_keepalive_module.c
+  h_a33a1e80933106 1-621
+src/deps/src/nginx-1.30.6/src/http/modules/ngx_http_upstream_least_conn_module.c
+  h_a33a1e80933106 1-342
+src/deps/src/nginx-1.30.6/src/http/modules/ngx_http_upstream_random_module.c
+  h_a33a1e80933106 1-569
+src/deps/src/nginx-1.30.6/src/http/modules/ngx_http_upstream_sticky_module.c
+  h_a33a1e80933106 1-1513
+src/deps/src/nginx-1.30.6/src/http/modules/ngx_http_upstream_zone_module.c
+  h_a33a1e80933106 1-1034
+src/deps/src/nginx-1.30.6/src/http/modules/ngx_http_userid_filter_module.c
+  h_a33a1e80933106 1-924
+src/deps/src/nginx-1.30.6/src/http/modules/ngx_http_uwsgi_module.c
+  h_a33a1e80933106 1-2785
+src/deps/src/nginx-1.30.6/src/http/modules/ngx_http_xslt_filter_module.c
+  h_a33a1e80933106 1-1171
+src/deps/src/nginx-1.30.6/src/http/modules/perl/Makefile.PL
+  h_a33a1e80933106 1-35
+src/deps/src/nginx-1.30.6/src/http/modules/perl/nginx.pm
+  h_a33a1e80933106 1-140
+src/deps/src/nginx-1.30.6/src/http/modules/perl/nginx.xs
+  h_a33a1e80933106 1-1234
+src/deps/src/nginx-1.30.6/src/http/modules/perl/ngx_http_perl_module.c
+  h_a33a1e80933106 1-1165
+src/deps/src/nginx-1.30.6/src/http/modules/perl/ngx_http_perl_module.h
+  h_a33a1e80933106 1-83
+src/deps/src/nginx-1.30.6/src/http/modules/perl/typemap
+  h_a33a1e80933106 1-3
+src/deps/src/nginx-1.30.6/src/http/ngx_http.c
+  h_a33a1e80933106 1-2200
+src/deps/src/nginx-1.30.6/src/http/ngx_http.h
+  h_a33a1e80933106 1-201
+src/deps/src/nginx-1.30.6/src/http/ngx_http_cache.h
+  h_a33a1e80933106 1-210
+src/deps/src/nginx-1.30.6/src/http/ngx_http_config.h
+  h_a33a1e80933106 1-75
+src/deps/src/nginx-1.30.6/src/http/ngx_http_copy_filter_module.c
+  h_a33a1e80933106 1-433
+src/deps/src/nginx-1.30.6/src/http/ngx_http_core_module.c
+  h_a33a1e80933106 1-5445
+src/deps/src/nginx-1.30.6/src/http/ngx_http_core_module.h
+  h_a33a1e80933106 1-599
+src/deps/src/nginx-1.30.6/src/http/ngx_http_file_cache.c
+  h_a33a1e80933106 1-2807
+src/deps/src/nginx-1.30.6/src/http/ngx_http_header_filter_module.c
+  h_a33a1e80933106 1-741
+src/deps/src/nginx-1.30.6/src/http/ngx_http_huff_decode.c
+  h_a33a1e80933106 1-2714
+src/deps/src/nginx-1.30.6/src/http/ngx_http_huff_encode.c
+  h_a33a1e80933106 1-254
+src/deps/src/nginx-1.30.6/src/http/ngx_http_parse.c
+  h_a33a1e80933106 1-2469
+src/deps/src/nginx-1.30.6/src/http/ngx_http_postpone_filter_module.c
+  h_a33a1e80933106 1-259
+src/deps/src/nginx-1.30.6/src/http/ngx_http_request.c
+  h_a33a1e80933106 1-4148
+src/deps/src/nginx-1.30.6/src/http/ngx_http_request.h
+  h_a33a1e80933106 1-633
+src/deps/src/nginx-1.30.6/src/http/ngx_http_request_body.c
+  h_a33a1e80933106 1-1385
+src/deps/src/nginx-1.30.6/src/http/ngx_http_script.c
+  h_a33a1e80933106 1-2002
+src/deps/src/nginx-1.30.6/src/http/ngx_http_script.h
+  h_a33a1e80933106 1-279
+src/deps/src/nginx-1.30.6/src/http/ngx_http_special_response.c
+  h_a33a1e80933106 1-865
+src/deps/src/nginx-1.30.6/src/http/ngx_http_upstream.c
+  h_a33a1e80933106 1-7318
+src/deps/src/nginx-1.30.6/src/http/ngx_http_upstream.h
+  h_a33a1e80933106 1-464
+src/deps/src/nginx-1.30.6/src/http/ngx_http_upstream_round_robin.c
+  h_a33a1e80933106 1-1267
+src/deps/src/nginx-1.30.6/src/http/ngx_http_upstream_round_robin.h
+  h_a33a1e80933106 1-275
+src/deps/src/nginx-1.30.6/src/http/ngx_http_variables.c
+  h_a33a1e80933106 1-2891
+src/deps/src/nginx-1.30.6/src/http/ngx_http_variables.h
+  h_a33a1e80933106 1-117
+src/deps/src/nginx-1.30.6/src/http/ngx_http_write_filter_module.c
+  h_a33a1e80933106 1-371
+src/deps/src/nginx-1.30.6/src/http/v2/ngx_http_v2.c
+  h_a33a1e80933106 1-5033
+src/deps/src/nginx-1.30.6/src/http/v2/ngx_http_v2.h
+  h_a33a1e80933106 1-424
+src/deps/src/nginx-1.30.6/src/http/v2/ngx_http_v2_encode.c
+  h_a33a1e80933106 1-62
+src/deps/src/nginx-1.30.6/src/http/v2/ngx_http_v2_filter_module.c
+  h_a33a1e80933106 1-1769
+src/deps/src/nginx-1.30.6/src/http/v2/ngx_http_v2_module.c
+  h_a33a1e80933106 1-498
+src/deps/src/nginx-1.30.6/src/http/v2/ngx_http_v2_module.h
+  h_a33a1e80933106 1-28
+src/deps/src/nginx-1.30.6/src/http/v2/ngx_http_v2_table.c
+  h_a33a1e80933106 1-363
+src/deps/src/nginx-1.30.6/src/http/v3/ngx_http_v3.c
+  h_a33a1e80933106 1-111
+src/deps/src/nginx-1.30.6/src/http/v3/ngx_http_v3.h
+  h_a33a1e80933106 1-160
+src/deps/src/nginx-1.30.6/src/http/v3/ngx_http_v3_encode.c
+  h_a33a1e80933106 1-304
+src/deps/src/nginx-1.30.6/src/http/v3/ngx_http_v3_encode.h
+  h_a33a1e80933106 1-34
+src/deps/src/nginx-1.30.6/src/http/v3/ngx_http_v3_filter_module.c
+  h_a33a1e80933106 1-1002
+src/deps/src/nginx-1.30.6/src/http/v3/ngx_http_v3_module.c
+  h_a33a1e80933106 1-393
+src/deps/src/nginx-1.30.6/src/http/v3/ngx_http_v3_parse.c
+  h_a33a1e80933106 1-1944
+src/deps/src/nginx-1.30.6/src/http/v3/ngx_http_v3_parse.h
+  h_a33a1e80933106 1-147
+src/deps/src/nginx-1.30.6/src/http/v3/ngx_http_v3_request.c
+  h_a33a1e80933106 1-1741
+src/deps/src/nginx-1.30.6/src/http/v3/ngx_http_v3_table.c
+  h_a33a1e80933106 1-715
+src/deps/src/nginx-1.30.6/src/http/v3/ngx_http_v3_table.h
+  h_a33a1e80933106 1-58
+src/deps/src/nginx-1.30.6/src/http/v3/ngx_http_v3_uni.c
+  h_a33a1e80933106 1-622
+src/deps/src/nginx-1.30.6/src/http/v3/ngx_http_v3_uni.h
+  h_a33a1e80933106 1-34
+src/deps/src/nginx-1.30.6/src/mail/ngx_mail.c
+  h_a33a1e80933106 1-485
+src/deps/src/nginx-1.30.6/src/mail/ngx_mail.h
+  h_a33a1e80933106 1-425
+src/deps/src/nginx-1.30.6/src/mail/ngx_mail_auth_http_module.c
+  h_a33a1e80933106 1-1662
+src/deps/src/nginx-1.30.6/src/mail/ngx_mail_core_module.c
+  h_a33a1e80933106 1-728
+src/deps/src/nginx-1.30.6/src/mail/ngx_mail_handler.c
+  h_a33a1e80933106 1-1022
+src/deps/src/nginx-1.30.6/src/mail/ngx_mail_imap_handler.c
+  h_a33a1e80933106 1-478
+src/deps/src/nginx-1.30.6/src/mail/ngx_mail_imap_module.c
+  h_a33a1e80933106 1-258
+src/deps/src/nginx-1.30.6/src/mail/ngx_mail_imap_module.h
+  h_a33a1e80933106 1-39
+src/deps/src/nginx-1.30.6/src/mail/ngx_mail_parse.c
+  h_a33a1e80933106 1-974
+src/deps/src/nginx-1.30.6/src/mail/ngx_mail_pop3_handler.c
+  h_a33a1e80933106 1-545
+src/deps/src/nginx-1.30.6/src/mail/ngx_mail_pop3_module.c
+  h_a33a1e80933106 1-323
+src/deps/src/nginx-1.30.6/src/mail/ngx_mail_pop3_module.h
+  h_a33a1e80933106 1-38
+src/deps/src/nginx-1.30.6/src/mail/ngx_mail_proxy_module.c
+  h_a33a1e80933106 1-1412
+src/deps/src/nginx-1.30.6/src/mail/ngx_mail_realip_module.c
+  h_a33a1e80933106 1-269
+src/deps/src/nginx-1.30.6/src/mail/ngx_mail_smtp_handler.c
+  h_a33a1e80933106 1-984
+src/deps/src/nginx-1.30.6/src/mail/ngx_mail_smtp_module.c
+  h_a33a1e80933106 1-312
+src/deps/src/nginx-1.30.6/src/mail/ngx_mail_smtp_module.h
+  h_a33a1e80933106 1-45
+src/deps/src/nginx-1.30.6/src/mail/ngx_mail_ssl_module.c
+  h_a33a1e80933106 1-714
+src/deps/src/nginx-1.30.6/src/mail/ngx_mail_ssl_module.h
+  h_a33a1e80933106 1-66
+src/deps/src/nginx-1.30.6/src/misc/ngx_cpp_test_module.cpp
+  h_a33a1e80933106 1-31
+src/deps/src/nginx-1.30.6/src/misc/ngx_google_perftools_module.c
+  h_a33a1e80933106 1-126
+src/deps/src/nginx-1.30.6/src/os/unix/ngx_alloc.c
+  h_a33a1e80933106 1-90
+src/deps/src/nginx-1.30.6/src/os/unix/ngx_alloc.h
+  h_a33a1e80933106 1-45
+src/deps/src/nginx-1.30.6/src/os/unix/ngx_atomic.h
+  h_a33a1e80933106 1-313
+src/deps/src/nginx-1.30.6/src/os/unix/ngx_channel.c
+  h_a33a1e80933106 1-263
+src/deps/src/nginx-1.30.6/src/os/unix/ngx_channel.h
+  h_a33a1e80933106 1-34
+src/deps/src/nginx-1.30.6/src/os/unix/ngx_daemon.c
+  h_a33a1e80933106 1-71
+src/deps/src/nginx-1.30.6/src/os/unix/ngx_darwin.h
+  h_a33a1e80933106 1-23
+src/deps/src/nginx-1.30.6/src/os/unix/ngx_darwin_config.h
+  h_a33a1e80933106 1-100
+src/deps/src/nginx-1.30.6/src/os/unix/ngx_darwin_init.c
+  h_a33a1e80933106 1-204
+src/deps/src/nginx-1.30.6/src/os/unix/ngx_darwin_sendfile_chain.c
+  h_a33a1e80933106 1-206
+src/deps/src/nginx-1.30.6/src/os/unix/ngx_dlopen.c
+  h_a33a1e80933106 1-28
+src/deps/src/nginx-1.30.6/src/os/unix/ngx_dlopen.h
+  h_a33a1e80933106 1-31
+src/deps/src/nginx-1.30.6/src/os/unix/ngx_errno.c
+  h_a33a1e80933106 1-210
+src/deps/src/nginx-1.30.6/src/os/unix/ngx_errno.h
+  h_a33a1e80933106 1-80
+src/deps/src/nginx-1.30.6/src/os/unix/ngx_file_aio_read.c
+  h_a33a1e80933106 1-216
+src/deps/src/nginx-1.30.6/src/os/unix/ngx_files.c
+  h_a33a1e80933106 1-956
+src/deps/src/nginx-1.30.6/src/os/unix/ngx_files.h
+  h_a33a1e80933106 1-396
+src/deps/src/nginx-1.30.6/src/os/unix/ngx_freebsd.h
+  h_a33a1e80933106 1-25
+src/deps/src/nginx-1.30.6/src/os/unix/ngx_freebsd_config.h
+  h_a33a1e80933106 1-129
+src/deps/src/nginx-1.30.6/src/os/unix/ngx_freebsd_init.c
+  h_a33a1e80933106 1-262
+src/deps/src/nginx-1.30.6/src/os/unix/ngx_freebsd_sendfile_chain.c
+  h_a33a1e80933106 1-308
+src/deps/src/nginx-1.30.6/src/os/unix/ngx_gcc_atomic_amd64.h
+  h_a33a1e80933106 1-82
+src/deps/src/nginx-1.30.6/src/os/unix/ngx_gcc_atomic_ppc.h
+  h_a33a1e80933106 1-155
+src/deps/src/nginx-1.30.6/src/os/unix/ngx_gcc_atomic_sparc64.h
+  h_a33a1e80933106 1-82
+src/deps/src/nginx-1.30.6/src/os/unix/ngx_gcc_atomic_x86.h
+  h_a33a1e80933106 1-127
+src/deps/src/nginx-1.30.6/src/os/unix/ngx_linux.h
+  h_a33a1e80933106 1-16
+src/deps/src/nginx-1.30.6/src/os/unix/ngx_linux_aio_read.c
+  h_a33a1e80933106 1-148
+src/deps/src/nginx-1.30.6/src/os/unix/ngx_linux_config.h
+  h_a33a1e80933106 1-136
+src/deps/src/nginx-1.30.6/src/os/unix/ngx_linux_init.c
+  h_a33a1e80933106 1-60
+src/deps/src/nginx-1.30.6/src/os/unix/ngx_linux_sendfile_chain.c
+  h_a33a1e80933106 1-436
+src/deps/src/nginx-1.30.6/src/os/unix/ngx_os.h
+  h_a33a1e80933106 1-102
+src/deps/src/nginx-1.30.6/src/os/unix/ngx_posix_config.h
+  h_a33a1e80933106 1-151
+src/deps/src/nginx-1.30.6/src/os/unix/ngx_posix_init.c
+  h_a33a1e80933106 1-147
+src/deps/src/nginx-1.30.6/src/os/unix/ngx_process.c
+  h_a33a1e80933106 1-648
+src/deps/src/nginx-1.30.6/src/os/unix/ngx_process.h
+  h_a33a1e80933106 1-90
+src/deps/src/nginx-1.30.6/src/os/unix/ngx_process_cycle.c
+  h_a33a1e80933106 1-1197
+src/deps/src/nginx-1.30.6/src/os/unix/ngx_process_cycle.h
+  h_a33a1e80933106 1-61
+src/deps/src/nginx-1.30.6/src/os/unix/ngx_readv_chain.c
+  h_a33a1e80933106 1-252
+src/deps/src/nginx-1.30.6/src/os/unix/ngx_recv.c
+  h_a33a1e80933106 1-203
+src/deps/src/nginx-1.30.6/src/os/unix/ngx_send.c
+  h_a33a1e80933106 1-73
+src/deps/src/nginx-1.30.6/src/os/unix/ngx_setaffinity.c
+  h_a33a1e80933106 1-53
+src/deps/src/nginx-1.30.6/src/os/unix/ngx_setaffinity.h
+  h_a33a1e80933106 1-37
+src/deps/src/nginx-1.30.6/src/os/unix/ngx_setproctitle.c
+  h_a33a1e80933106 1-135
+src/deps/src/nginx-1.30.6/src/os/unix/ngx_setproctitle.h
+  h_a33a1e80933106 1-52
+src/deps/src/nginx-1.30.6/src/os/unix/ngx_shmem.c
+  h_a33a1e80933106 1-126
+src/deps/src/nginx-1.30.6/src/os/unix/ngx_shmem.h
+  h_a33a1e80933106 1-29
+src/deps/src/nginx-1.30.6/src/os/unix/ngx_socket.c
+  h_a33a1e80933106 1-116
+src/deps/src/nginx-1.30.6/src/os/unix/ngx_socket.h
+  h_a33a1e80933106 1-73
+src/deps/src/nginx-1.30.6/src/os/unix/ngx_solaris.h
+  h_a33a1e80933106 1-16
+src/deps/src/nginx-1.30.6/src/os/unix/ngx_solaris_config.h
+  h_a33a1e80933106 1-112
+src/deps/src/nginx-1.30.6/src/os/unix/ngx_solaris_init.c
+  h_a33a1e80933106 1-77
+src/deps/src/nginx-1.30.6/src/os/unix/ngx_solaris_sendfilev_chain.c
+  h_a33a1e80933106 1-228
+src/deps/src/nginx-1.30.6/src/os/unix/ngx_sunpro_amd64.il
+  h_a33a1e80933106 1-43
+src/deps/src/nginx-1.30.6/src/os/unix/ngx_sunpro_atomic_sparc64.h
+  h_a33a1e80933106 1-61
+src/deps/src/nginx-1.30.6/src/os/unix/ngx_sunpro_sparc64.il
+  h_a33a1e80933106 1-36
+src/deps/src/nginx-1.30.6/src/os/unix/ngx_sunpro_x86.il
+  h_a33a1e80933106 1-44
+src/deps/src/nginx-1.30.6/src/os/unix/ngx_thread.h
+  h_a33a1e80933106 1-71
+src/deps/src/nginx-1.30.6/src/os/unix/ngx_thread_cond.c
+  h_a33a1e80933106 1-76
+src/deps/src/nginx-1.30.6/src/os/unix/ngx_thread_id.c
+  h_a33a1e80933106 1-70
+src/deps/src/nginx-1.30.6/src/os/unix/ngx_thread_mutex.c
+  h_a33a1e80933106 1-165
+src/deps/src/nginx-1.30.6/src/os/unix/ngx_time.c
+  h_a33a1e80933106 1-104
+src/deps/src/nginx-1.30.6/src/os/unix/ngx_time.h
+  h_a33a1e80933106 1-66
+src/deps/src/nginx-1.30.6/src/os/unix/ngx_udp_recv.c
+  h_a33a1e80933106 1-72
+src/deps/src/nginx-1.30.6/src/os/unix/ngx_udp_send.c
+  h_a33a1e80933106 1-56
+src/deps/src/nginx-1.30.6/src/os/unix/ngx_udp_sendmsg_chain.c
+  h_a33a1e80933106 1-432
+src/deps/src/nginx-1.30.6/src/os/unix/ngx_user.c
+  h_a33a1e80933106 1-84
+src/deps/src/nginx-1.30.6/src/os/unix/ngx_user.h
+  h_a33a1e80933106 1-24
+src/deps/src/nginx-1.30.6/src/os/unix/ngx_writev_chain.c
+  h_a33a1e80933106 1-216
+src/deps/src/nginx-1.30.6/src/os/win32/nginx.rc
+  h_a33a1e80933106 1-6
+src/deps/src/nginx-1.30.6/src/os/win32/nginx_icon16.xpm
+  h_a33a1e80933106 1-24
+src/deps/src/nginx-1.30.6/src/os/win32/nginx_icon32.xpm
+  h_a33a1e80933106 1-39
+src/deps/src/nginx-1.30.6/src/os/win32/nginx_icon48.xpm
+  h_a33a1e80933106 1-55
+src/deps/src/nginx-1.30.6/src/os/win32/ngx_alloc.c
+  h_a33a1e80933106 1-44
+src/deps/src/nginx-1.30.6/src/os/win32/ngx_alloc.h
+  h_a33a1e80933106 1-27
+src/deps/src/nginx-1.30.6/src/os/win32/ngx_atomic.h
+  h_a33a1e80933106 1-69
+src/deps/src/nginx-1.30.6/src/os/win32/ngx_dlopen.c
+  h_a33a1e80933106 1-22
+src/deps/src/nginx-1.30.6/src/os/win32/ngx_dlopen.h
+  h_a33a1e80933106 1-32
+src/deps/src/nginx-1.30.6/src/os/win32/ngx_errno.c
+  h_a33a1e80933106 1-60
+src/deps/src/nginx-1.30.6/src/os/win32/ngx_errno.h
+  h_a33a1e80933106 1-72
+src/deps/src/nginx-1.30.6/src/os/win32/ngx_event_log.c
+  h_a33a1e80933106 1-99
+src/deps/src/nginx-1.30.6/src/os/win32/ngx_files.c
+  h_a33a1e80933106 1-1459
+src/deps/src/nginx-1.30.6/src/os/win32/ngx_files.h
+  h_a33a1e80933106 1-272
+src/deps/src/nginx-1.30.6/src/os/win32/ngx_os.h
+  h_a33a1e80933106 1-68
+src/deps/src/nginx-1.30.6/src/os/win32/ngx_process.c
+  h_a33a1e80933106 1-238
+src/deps/src/nginx-1.30.6/src/os/win32/ngx_process.h
+  h_a33a1e80933106 1-80
+src/deps/src/nginx-1.30.6/src/os/win32/ngx_process_cycle.c
+  h_a33a1e80933106 1-1044
+src/deps/src/nginx-1.30.6/src/os/win32/ngx_process_cycle.h
+  h_a33a1e80933106 1-44
+src/deps/src/nginx-1.30.6/src/os/win32/ngx_service.c
+  h_a33a1e80933106 1-134
+src/deps/src/nginx-1.30.6/src/os/win32/ngx_shmem.c
+  h_a33a1e80933106 1-161
+src/deps/src/nginx-1.30.6/src/os/win32/ngx_shmem.h
+  h_a33a1e80933106 1-33
+src/deps/src/nginx-1.30.6/src/os/win32/ngx_socket.c
+  h_a33a1e80933106 1-49
+src/deps/src/nginx-1.30.6/src/os/win32/ngx_socket.h
+  h_a33a1e80933106 1-255
+src/deps/src/nginx-1.30.6/src/os/win32/ngx_stat.c
+  h_a33a1e80933106 1-34
+src/deps/src/nginx-1.30.6/src/os/win32/ngx_thread.c
+  h_a33a1e80933106 1-30
+src/deps/src/nginx-1.30.6/src/os/win32/ngx_thread.h
+  h_a33a1e80933106 1-27
+src/deps/src/nginx-1.30.6/src/os/win32/ngx_time.c
+  h_a33a1e80933106 1-83
+src/deps/src/nginx-1.30.6/src/os/win32/ngx_time.h
+  h_a33a1e80933106 1-51
+src/deps/src/nginx-1.30.6/src/os/win32/ngx_udp_wsarecv.c
+  h_a33a1e80933106 1-149
+src/deps/src/nginx-1.30.6/src/os/win32/ngx_user.c
+  h_a33a1e80933106 1-23
+src/deps/src/nginx-1.30.6/src/os/win32/ngx_user.h
+  h_a33a1e80933106 1-25
+src/deps/src/nginx-1.30.6/src/os/win32/ngx_win32_config.h
+  h_a33a1e80933106 1-291
+src/deps/src/nginx-1.30.6/src/os/win32/ngx_win32_init.c
+  h_a33a1e80933106 1-329
+src/deps/src/nginx-1.30.6/src/os/win32/ngx_wsarecv.c
+  h_a33a1e80933106 1-215
+src/deps/src/nginx-1.30.6/src/os/win32/ngx_wsarecv_chain.c
+  h_a33a1e80933106 1-147
+src/deps/src/nginx-1.30.6/src/os/win32/ngx_wsasend.c
+  h_a33a1e80933106 1-185
+src/deps/src/nginx-1.30.6/src/os/win32/ngx_wsasend_chain.c
+  h_a33a1e80933106 1-296
+src/deps/src/nginx-1.30.6/src/stream/ngx_stream.c
+  h_a33a1e80933106 1-1176
+src/deps/src/nginx-1.30.6/src/stream/ngx_stream.h
+  h_a33a1e80933106 1-384
+src/deps/src/nginx-1.30.6/src/stream/ngx_stream_access_module.c
+  h_a33a1e80933106 1-453
+src/deps/src/nginx-1.30.6/src/stream/ngx_stream_core_module.c
+  h_a33a1e80933106 1-1523
+src/deps/src/nginx-1.30.6/src/stream/ngx_stream_geo_module.c
+  h_a33a1e80933106 1-1632
+src/deps/src/nginx-1.30.6/src/stream/ngx_stream_geoip_module.c
+  h_a33a1e80933106 1-814
+src/deps/src/nginx-1.30.6/src/stream/ngx_stream_handler.c
+  h_a33a1e80933106 1-389
+src/deps/src/nginx-1.30.6/src/stream/ngx_stream_limit_conn_module.c
+  h_a33a1e80933106 1-737
+src/deps/src/nginx-1.30.6/src/stream/ngx_stream_log_module.c
+  h_a33a1e80933106 1-1665
+src/deps/src/nginx-1.30.6/src/stream/ngx_stream_map_module.c
+  h_a33a1e80933106 1-588
+src/deps/src/nginx-1.30.6/src/stream/ngx_stream_pass_module.c
+  h_a33a1e80933106 1-336
+src/deps/src/nginx-1.30.6/src/stream/ngx_stream_proxy_module.c
+  h_a33a1e80933106 1-2683
+src/deps/src/nginx-1.30.6/src/stream/ngx_stream_realip_module.c
+  h_a33a1e80933106 1-401
+src/deps/src/nginx-1.30.6/src/stream/ngx_stream_return_module.c
+  h_a33a1e80933106 1-218
+src/deps/src/nginx-1.30.6/src/stream/ngx_stream_script.c
+  h_a33a1e80933106 1-1080
+src/deps/src/nginx-1.30.6/src/stream/ngx_stream_script.h
+  h_a33a1e80933106 1-142
+src/deps/src/nginx-1.30.6/src/stream/ngx_stream_set_module.c
+  h_a33a1e80933106 1-226
+src/deps/src/nginx-1.30.6/src/stream/ngx_stream_split_clients_module.c
+  h_a33a1e80933106 1-244
+src/deps/src/nginx-1.30.6/src/stream/ngx_stream_ssl_module.c
+  h_a33a1e80933106 1-1784
+src/deps/src/nginx-1.30.6/src/stream/ngx_stream_ssl_module.h
+  h_a33a1e80933106 1-75
+src/deps/src/nginx-1.30.6/src/stream/ngx_stream_ssl_preread_module.c
+  h_a33a1e80933106 1-715
+src/deps/src/nginx-1.30.6/src/stream/ngx_stream_upstream.c
+  h_a33a1e80933106 1-868
+src/deps/src/nginx-1.30.6/src/stream/ngx_stream_upstream.h
+  h_a33a1e80933106 1-165
+src/deps/src/nginx-1.30.6/src/stream/ngx_stream_upstream_hash_module.c
+  h_a33a1e80933106 1-755
+src/deps/src/nginx-1.30.6/src/stream/ngx_stream_upstream_least_conn_module.c
+  h_a33a1e80933106 1-322
+src/deps/src/nginx-1.30.6/src/stream/ngx_stream_upstream_random_module.c
+  h_a33a1e80933106 1-531
+src/deps/src/nginx-1.30.6/src/stream/ngx_stream_upstream_round_robin.c
+  h_a33a1e80933106 1-1075
+src/deps/src/nginx-1.30.6/src/stream/ngx_stream_upstream_round_robin.h
+  h_a33a1e80933106 1-232
+src/deps/src/nginx-1.30.6/src/stream/ngx_stream_upstream_zone_module.c
+  h_a33a1e80933106 1-1005
+src/deps/src/nginx-1.30.6/src/stream/ngx_stream_variables.c
+  h_a33a1e80933106 1-1340
+src/deps/src/nginx-1.30.6/src/stream/ngx_stream_variables.h
+  h_a33a1e80933106 1-113
+src/deps/src/nginx-1.30.6/src/stream/ngx_stream_write_filter_module.c
+  h_a33a1e80933106 1-306
+src/deps/src/nginx/misc/GNUmakefile
+  h_a33a1e80933106 10,93-94
+src/deps/src/nginx/src/core/nginx.h
+  h_a33a1e80933106 12-13
+src/deps/src/nginx/src/core/ngx_resolver.c
+  h_a33a1e80933106 109,574-575,577-578,596,599-601,1211,1220-1221,1223-1225,1238,1241-1243,2566-2581,2966-2981,3021-3025,4157-4163
+src/deps/src/nginx/src/event/quic/ngx_event_quic_streams.c
+  h_a33a1e80933106 734-735,742,809
+src/deps/src/nginx/src/http/modules/ngx_http_try_files_module.c
+  h_a33a1e80933106 189
+src/deps/src/nginx/src/http/ngx_http_request_body.c
+  h_a33a1e80933106 310,436
+src/deps/src/nginx/src/http/v2/ngx_http_v2.c
+  h_a33a1e80933106 2487,2493,3112-3113
+src/deps/src/nginx/src/http/v2/ngx_http_v2.h
+  h_a33a1e80933106 140
+src/deps/src/nginx/src/http/v2/ngx_http_v2_filter_module.c
+  h_a33a1e80933106 1227,1623,1758
+src/deps/src/nginx/src/http/v3/ngx_http_v3_request.c
+  h_a33a1e80933106 1354,1478
+src/deps/src/nginx/src/mail/ngx_mail_auth_http_module.c
+  h_a33a1e80933106 73,220-221,223,695-696,1129-1151
+src/deps/src/nginx/src/mail/ngx_mail_handler.c
+  h_a33a1e80933106 17,824-828,947-957
+src/deps/src/nginx/src/mail/ngx_mail_proxy_module.c
+  h_a33a1e80933106 27,169,228-244
+src/deps/src/nginx/src/mail/ngx_mail_smtp_handler.c
+  h_a33a1e80933106 20,96,164,226,329-360,386-387
+src/deps/src/nginx/src/stream/ngx_stream_ssl_module.c
+  h_a33a1e80933106 462-463
+src/deps/src/nginx/src/stream/ngx_stream_ssl_preread_module.c
+  h_a33a1e80933106 227,334,339-347,359-361,363-369,376,378-384,401,405-411,451-456,509-516
+src/linux/Dockerfile-debian-bookworm
+  h_a33a1e80933106 15
+src/linux/Dockerfile-debian-trixie
+  h_a33a1e80933106 10
+src/linux/Dockerfile-rhel-10
+  h_a33a1e80933106 5
+src/linux/Dockerfile-rhel-8
+  h_a33a1e80933106 4
+src/linux/Dockerfile-rhel-9
+  h_a33a1e80933106 4
+src/linux/Dockerfile-ubuntu
+  h_a33a1e80933106 9
+src/linux/Dockerfile-ubuntu-jammy
+  h_a33a1e80933106 14
+src/linux/Dockerfile-ubuntu-noble
+  h_a33a1e80933106 14
+src/linux/fpm-debian-bookworm
+  h_a33a1e80933106 6
+src/linux/fpm-debian-trixie
+  h_a33a1e80933106 6
+src/linux/fpm-rhel-10
+  h_a33a1e80933106 6
+src/linux/fpm-rhel-8
+  h_a33a1e80933106 6
+src/linux/fpm-rhel-9
+  h_a33a1e80933106 6
+src/linux/fpm-ubuntu
+  h_a33a1e80933106 6
+src/linux/fpm-ubuntu-jammy
+  h_a33a1e80933106 6
+src/linux/fpm-ubuntu-noble
+  h_a33a1e80933106 6
+tests/linux/Dockerfile-debian-bookworm
+  h_a33a1e80933106 7
+tests/linux/Dockerfile-debian-trixie
+  h_a33a1e80933106 7
+tests/linux/Dockerfile-rhel-10
+  h_a33a1e80933106 3
+tests/linux/Dockerfile-rhel-8
+  h_a33a1e80933106 3
+tests/linux/Dockerfile-rhel-9
+  h_a33a1e80933106 3
+tests/linux/Dockerfile-ubuntu
+  h_a33a1e80933106 7
+tests/linux/Dockerfile-ubuntu-jammy
+  h_a33a1e80933106 7
+tests/linux/Dockerfile-ubuntu-noble
+  h_a33a1e80933106 7
+tests/unit/common/test_version_consistency.py
+  h_a33a1e80933106 62-97,110
+tests/unit/linux/test_install_bunkerweb.py
+  h_a33a1e80933106 10,24-28
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "5609e14f428203453381c83fe7158426ad71200b",
+  "prompts": {},
+  "humans": {
+    "h_a33a1e80933106": {
+      "author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

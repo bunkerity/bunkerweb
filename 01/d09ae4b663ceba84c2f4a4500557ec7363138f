@@ -1,0 +1,33 @@
+src/common/core/antibot/files/capjs.html
+  s_b45ffb073ddbad::t_33f003e49baae7 75,539
+src/common/core/antibot/files/captcha.html
+  s_b45ffb073ddbad::t_568b332f24d018 77,218,451-453,468
+src/common/core/antibot/files/hcaptcha.html
+  s_b45ffb073ddbad::t_b303466c66289d 75,567
+src/common/core/antibot/files/javascript.html
+  s_b45ffb073ddbad::t_5b28c209ff0ab0 74,458
+src/common/core/antibot/files/mcaptcha.html
+  s_b45ffb073ddbad::t_141eaad13d53d2 77,579
+src/common/core/antibot/files/recaptcha.html
+  s_b45ffb073ddbad::t_4348cf3ad213c5 79,349-352,602
+src/common/core/antibot/files/turnstile.html
+  s_b45ffb073ddbad::t_24dae3f4cc6976 75,565
+src/common/core/errors/files/error.html
+  s_b45ffb073ddbad::t_5162e1c5176902 28,31,33,78,142,148,155-160,190,258-261,350,408
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "01d09ae4b663ceba84c2f4a4500557ec7363138f",
+  "prompts": {},
+  "sessions": {
+    "s_b45ffb073ddbad": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "f4265c2d-353f-4f48-9041-f31c4907417b",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

@@ -1,0 +1,23 @@
+tests/core/bunkernet.yml
+  s_75a9dad18223d8::t_0aad6845a0b2fd 55-59,87,93,100,114,122,130,148,156,164
+tests/core_handlers/http_string_handler.py
+  s_75a9dad18223d8::t_3e22a9c5ea3180 27,34
+tests/misc/api/main.py
+  s_75a9dad18223d8::t_3e22a9c5ea3180 87-88,91
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "3d1a0747b5288c0f433eb27e903b05a34934966b",
+  "prompts": {},
+  "sessions": {
+    "s_75a9dad18223d8": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1a739-4b4a-7e53-9364-c099fe3adea3",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

@@ -1,0 +1,34 @@
+tests/linux/Dockerfile-fedora-43
+  s_0f93bda8875a9e::t_8f651853ae9521 23
+tests/utils/__init__.py
+  s_0f93bda8875a9e::t_8f651853ae9521 169
+tests/scripts/utils.sh
+  s_0f93bda8875a9e::t_7a5b8c5098b081 61-62,65-71
+  s_0f93bda8875a9e::t_8f651853ae9521 52-53,55-60,63-64,72
+tests/linux/Dockerfile-rhel-9
+  s_0f93bda8875a9e::t_8f651853ae9521 18
+tests/linux/Dockerfile-fedora-44
+  s_0f93bda8875a9e::t_8f651853ae9521 23
+tests/linux/Dockerfile-rhel-8
+  s_0f93bda8875a9e::t_8f651853ae9521 18
+tests/linux/Dockerfile-rhel-10
+  s_0f93bda8875a9e::t_8f651853ae9521 18
+tests/scripts/build.sh
+  s_0f93bda8875a9e::t_8f651853ae9521 197-206
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "1c906c3f5a5a0e241eafd90215116d3591f18022",
+  "prompts": {},
+  "sessions": {
+    "s_0f93bda8875a9e": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1a721-b432-7e83-b1fe-e9b4cd132d48",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

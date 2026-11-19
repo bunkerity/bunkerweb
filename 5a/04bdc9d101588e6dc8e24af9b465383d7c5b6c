@@ -1,0 +1,61 @@
+docs/zh/features.md
+  s_dd238020e10f8b::t_dc6c032d3622e7 377-388,1752-1758
+src/common/core/antibot/README.zh.md
+  s_dd238020e10f8b::t_dc6c032d3622e7 40-51
+docs/features.md
+  s_dd238020e10f8b::t_dc6c032d3622e7 375-386,1750-1756
+docs/fr/features.md
+  s_dd238020e10f8b::t_dc6c032d3622e7 375-386,1691
+src/common/core/country/README.zh.md
+  s_dd238020e10f8b::t_dc6c032d3622e7 22-28
+docs/es/features.md
+  s_dd238020e10f8b::t_dc6c032d3622e7 375-386,1746-1752
+src/common/core/country/README.md
+  s_dd238020e10f8b::t_dc6c032d3622e7 22-28
+src/common/core/antibot/plugin.json
+  s_dd238020e10f8b::t_dc6c032d3622e7 85
+src/common/core/country/README.de.md
+  s_dd238020e10f8b::t_dc6c032d3622e7 20-26
+src/common/core/antibot/README.fr.md
+  s_dd238020e10f8b::t_dc6c032d3622e7 40-51
+src/common/core/country/README.es.md
+  s_dd238020e10f8b::t_dc6c032d3622e7 22-28
+docs/de/features.md
+  s_dd238020e10f8b::t_dc6c032d3622e7 376-387,1727-1733
+src/common/core/antibot/README.md
+  s_dd238020e10f8b::t_dc6c032d3622e7 40-51
+src/common/core/country/README.fr.md
+  s_dd238020e10f8b::t_dc6c032d3622e7 24
+src/common/core/antibot/README.de.md
+  s_dd238020e10f8b::t_dc6c032d3622e7 40-51
+src/common/core/country/plugin.json
+  s_dd238020e10f8b::t_dc6c032d3622e7 348
+src/common/core/antibot/README.es.md
+  s_dd238020e10f8b::t_dc6c032d3622e7 40-51
+CHANGELOG.md
+  s_80f1da85912d1b::t_2dd8afe605cd98 11
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "5a04bdc9d101588e6dc8e24af9b465383d7c5b6c",
+  "prompts": {},
+  "sessions": {
+    "s_80f1da85912d1b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "48f28331-3ce2-4fa3-b959-69d5d1238c0a",
+        "model": "unknown"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_dd238020e10f8b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "44be2d56-4bc5-484d-bbfe-8d9a4f888ab3",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

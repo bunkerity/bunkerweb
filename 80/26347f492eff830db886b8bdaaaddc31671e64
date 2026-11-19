@@ -1,0 +1,32 @@
+CHANGELOG.md
+  h_a33a1e80933106 63
+src/common/core/dnsbl/jobs/dnsbl-download.py
+  h_a33a1e80933106 87,90,92,107,118,129,149,163-167,169,174,179-183,187,189-195,212,215,221,223,229
+src/common/core/realip/jobs/realip-download.py
+  h_a33a1e80933106 89,92,95,117,126,144,154,176,196-201,203,210,217-221,229,231-237,254,257,279,281,286
+src/common/core/robotstxt/jobs/robots-txt-download.py
+  h_a33a1e80933106 6,29,92,95,100,120-121,129,147,156,178,194-195,197-198,202-209,211,218,225-229,235,237-243,258,261,278,280,285
+src/common/utils/jobs.py
+  h_a33a1e80933106 322,325,337-352,355-368
+tests/unit/jobs/_other_jobs_helpers.py
+  h_a33a1e80933106 55
+tests/unit/jobs/test_dnsbl_ignore_download.py
+  h_a33a1e80933106 54,64-65
+tests/unit/jobs/test_job_cache_contracts.py
+  h_a33a1e80933106 626-756
+tests/unit/jobs/test_lists_port_download.py
+  h_a33a1e80933106 51,102,108-110
+tests/unit/jobs/test_robots_rules_download.py
+  h_a33a1e80933106 72,84-85
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "8026347f492eff830db886b8bdaaaddc31671e64",
+  "prompts": {},
+  "humans": {
+    "h_a33a1e80933106": {
+      "author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

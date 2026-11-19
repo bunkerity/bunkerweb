@@ -1,0 +1,44 @@
+tests/unit/db/test_setting_renames.py
+  s_16ab91cb003261::t_bc98fc7f77ae7a 76
+  s_fa2a613aa7eef8::t_e585c38a13602f 1-8,10-17,23-72,78-96,120-127
+  s_fa2a613aa7eef8::t_9f0079deb29975 73-75,77
+  s_795e2ccdb6801b::t_8c6655c41dcfd2 18-22
+  s_16ab91cb003261::t_5210a59e85befb 9,97-119
+src/common/db/db_methods/initialization.py
+  s_16ab91cb003261::t_5a922d8715645f 98
+  s_795e2ccdb6801b::t_c14eb1645bda38 29-33
+  s_16ab91cb003261::t_bc98fc7f77ae7a 18-21
+  s_795e2ccdb6801b::t_63744e9f074160 22-28,34-35,61,78,95-97,99-100,108-110,120,803-804,823-827
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "59c1b5e4850e64244115eb2a1df54fd7b45dba67",
+  "prompts": {},
+  "sessions": {
+    "s_16ab91cb003261": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0c980-8f20-7ba1-9118-943fba79faf9",
+        "model": "gpt-5.6-terra"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_795e2ccdb6801b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "71804b16-900c-4824-8bbc-5e7434803315",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_fa2a613aa7eef8": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0c958-85f4-76c1-9ec5-591d2e34acb4",
+        "model": "gpt-6-astra"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

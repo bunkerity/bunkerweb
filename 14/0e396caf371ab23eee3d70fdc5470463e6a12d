@@ -1,0 +1,21 @@
+CHANGELOG.md
+  s_60628c795bd662::t_6a03045cb53052 44
+src/common/core/redis/redis.lua
+  s_60628c795bd662::t_92c6459a5a8d4d 114
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "140e396caf371ab23eee3d70fdc5470463e6a12d",
+  "prompts": {},
+  "sessions": {
+    "s_60628c795bd662": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1869d-2e49-7ff2-8e88-cfcf2fe9cb0c",
+        "model": "unknown"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

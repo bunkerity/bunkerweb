@@ -1,0 +1,21 @@
+CHANGELOG.md
+  s_f26aa228f2bc38::t_f81073f55b12a1 3
+publiccode.yml
+  s_f26aa228f2bc38::t_f81073f55b12a1 5
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "bcbf3c7247076e4c6c9e0bfed08c7698e9f5e995",
+  "prompts": {},
+  "sessions": {
+    "s_f26aa228f2bc38": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1e528-551c-7500-97f8-4cc84254cf8c",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

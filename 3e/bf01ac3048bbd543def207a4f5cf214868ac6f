@@ -1,0 +1,190 @@
+src/common/db/model.py
+  s_7275754f4f7c24::t_c8e0677ad78f77 190-191,222-223
+src/common/core/backup/README.de.md
+  s_7275754f4f7c24::t_c8e0677ad78f77 89-90,110-113
+  s_7275754f4f7c24::t_2a536cbc68f14b 114
+src/api/app/routers/services.py
+  s_7275754f4f7c24::t_c8e0677ad78f77 207,215-216,225,232-234
+src/common/db/alembic/postgresql_versions/7b979831b042_upgrade_to_version_1_7_0_alpha.py
+  s_7275754f4f7c24::t_c8e0677ad78f77 1,3,5,18,27
+src/ui/app/models/secret_settings.py
+  s_5e929992656741::t_84c522073c0805 51-52,57-67
+  s_2ed736688e97ec::t_08c1c7806b23f1 1-16,18-47
+  s_e741b097c0310e::t_4c40b85dff38fc 48-50
+  s_e741b097c0310e::t_9a8bddfd049e39 53-55
+  s_ec761d0ad450eb::t_657acbe113e30a 17,56
+src/common/db/alembic/mysql_versions/6b5c00e7b293_upgrade_to_version_1_7_0_alpha.py
+  s_7275754f4f7c24::t_c8e0677ad78f77 1,3,5,17,26,411-417,434-440,456-462,489-495
+src/common/core/backup/downgrade.py
+  s_7275754f4f7c24::t_c8e0677ad78f77 327-360,566-589,954
+tests/unit/db/test_alembic_reversibility.py
+  s_7275754f4f7c24::t_c8e0677ad78f77 88-91,95-121,126,128,138,161-166
+src/common/db/alembic/mariadb_versions/b1393796d0e8_upgrade_to_version_1_7_0_alpha.py
+  s_7275754f4f7c24::t_c8e0677ad78f77 1,3,5,17,26,411-417,434-440,456-462,489-495
+src/common/db/db_methods/workflows.py
+  s_7275754f4f7c24::t_c8e0677ad78f77 253-255,262-265,305-307,314-317
+tests/unit/ui/test_raw_setting_drafts.py
+  s_7275754f4f7c24::t_c8e0677ad78f77 1-194,196-225,227-372,376-399
+  s_7275754f4f7c24::t_649f9d264f9d75 373-375
+  s_7275754f4f7c24::t_3e1e95ebc68b84 195,226
+src/ui/app/raw_drafts.py
+  s_7275754f4f7c24::t_63b2e038596bcc 6,12-24,52,130,132,134,136,144,149,153
+  s_7275754f4f7c24::t_95c59891cb9266 1-5,7-11,25-51,53-129,131,133,135,137-143,145-148,150-152,154-217,221-226
+  s_7275754f4f7c24::t_9907f7c4546532 218-220
+src/common/core/backup/README.md
+  s_7275754f4f7c24::t_c8e0677ad78f77 88-89,107-109
+  s_7275754f4f7c24::t_dca36f411856ad 110
+tests/unit/db/test_upgrade_schema_parity.py
+  s_7275754f4f7c24::t_c8e0677ad78f77 354-375,677
+tests/unit/ui/test_flash_no_english_literal_left.py
+  s_7275754f4f7c24::t_3e1e95ebc68b84 91-102
+  s_795e2ccdb6801b::t_a6c43b021a5d26 19,28-32,48,84,105-106,115,124,127-133,205,210,212-214,216-217
+  s_331e8577088ca0::t_290617f7f57e62 1-18,20-25,27,33,36,39-40,45,47,49-51,60,67-69,81-82,103-104,107-109,112-114,121-122,125-126,134-204,206-209,211,215,218-224
+  s_795e2ccdb6801b::t_c7169769dbd111 116-119
+  s_1c8837b8ba5c0b::t_10cedf01b0c240 43-44,52-53
+  s_795e2ccdb6801b::t_3f9a4dab803b7a 34-35,37-38,41-42,46,54-59,61-66,70-80,83,85-90,110-111,120,123
+  s_795e2ccdb6801b::t_b8cc343f9513fb 26
+tests/unit/db/test_upgraded_open_string_types.py
+  s_9e6b82c6190bb2::t_a5cb86f9460e40 1-8,11-32,39-40,45,52,59-63,67-110
+  s_9e6b82c6190bb2::t_c80a479e0be122 33-38,41-44,46-51,53-58
+  s_9e6b82c6190bb2::t_692a3854484754 64-66
+  s_9e6b82c6190bb2::t_441b2fbd9143c3 9-10
+src/common/core/backup/README.fr.md
+  s_7275754f4f7c24::t_c8e0677ad78f77 89-90,110-113
+  s_7275754f4f7c24::t_172014f67e76f9 114
+tests/unit/db/test_certificate_migrations.py
+  s_7275754f4f7c24::t_c8e0677ad78f77 17-20
+src/common/db/db_methods/locations.py
+  s_7275754f4f7c24::t_c8e0677ad78f77 41-42,48-50,52,148-150,159-161
+src/common/core/backup/downgrade-manifest.json
+  s_7275754f4f7c24::t_c8e0677ad78f77 17-18,27-29,33-38,41,49,53,85,94,98,131,140,144,158,163,176,180,194,199,212,216,258,262,306,310,324,329,342,346,360,365,414,425,428
+tests/unit/backup/test_downgrade_execute.py
+  s_7275754f4f7c24::t_c8e0677ad78f77 43
+src/common/db/db_methods/config_save.py
+  s_7275754f4f7c24::t_c8e0677ad78f77 70-95,402,426-431,486,723-724,804,978-984,1070-1074,1494,1502,1600-1614,1623,1625,1660-1663,1704,1717-1718,1724,1743-1744,1824-1826,1828-1841,1850,1852,1861-1862,1877-1881,1893,1896-1897,1902-1907,1922-1923,2074-2076,2078,2086-2095,2109,2121,2124-2125,2128,2143-2144,2161-2187
+src/common/db/alembic/sqlite_versions/bebc25cf5351_upgrade_to_version_1_7_0_alpha.py
+  s_7275754f4f7c24::t_c8e0677ad78f77 1,3,5,17,26
+tests/unit/api/test_reportable_config.py
+  s_7275754f4f7c24::t_c8e0677ad78f77 318-345
+tests/unit/backup/test_downgrade_preflight.py
+  s_7275754f4f7c24::t_c8e0677ad78f77 504-567
+src/ui/app/static/js/pages/settings-raw.js
+  s_7275754f4f7c24::t_95c59891cb9266 88-157,237-238,262-278,568-622,773
+src/common/core/backup/README.zh.md
+  s_7275754f4f7c24::t_c8e0677ad78f77 85-86,100-102
+  s_7275754f4f7c24::t_58ce094eec9fcf 103
+tests/unit/backup/test_downgrade_manifest.py
+  s_7275754f4f7c24::t_c8e0677ad78f77 128
+src/api/app/schemas.py
+  s_7275754f4f7c24::t_c8e0677ad78f77 10,731-737
+  s_7275754f4f7c24::t_fc2f1ac7cce8a5 738
+tests/unit/db/test_setting_drafts.py
+  s_7275754f4f7c24::t_c8e0677ad78f77 1-191
+tests/unit/api/test_global_settings_validation.py
+  s_7275754f4f7c24::t_c8e0677ad78f77 594-618
+src/common/core/backup/README.es.md
+  s_7275754f4f7c24::t_c8e0677ad78f77 90-91,110-113
+  s_7275754f4f7c24::t_d0e79b95a33cfb 114
+src/common/db/db_methods/services.py
+  s_7275754f4f7c24::t_c8e0677ad78f77 47-59,72,81-83,99-101
+tests/unit/ui/test_raw_draft_secrets.py
+  s_d2f98a7662053d::t_d10e27f7b02dd0 156-201
+  s_e741b097c0310e::t_4c40b85dff38fc 153
+  s_e741b097c0310e::t_6617cf8079765c 1-152,154-155
+tests/unit/db/test_setting_drafts_upgrade.py
+  s_7275754f4f7c24::t_c8e0677ad78f77 1-132
+src/api/app/routers/global_settings.py
+  s_7275754f4f7c24::t_c8e0677ad78f77 66,76-77,87,99,205
+src/ui/app/templates/models/plugins_settings_raw.html
+  s_7275754f4f7c24::t_95c59891cb9266 1-3,12,42,46,65,70,97-100,112,147,155
+src/common/db/db_methods/config_read.py
+  s_7275754f4f7c24::t_c8e0677ad78f77 110,112-118,127-130,156,164-165,180-183,215,259,267-268,291,294-297,371,373,414
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "3ebf01ac3048bbd543def207a4f5cf214868ac6f",
+  "prompts": {},
+  "sessions": {
+    "s_1c8837b8ba5c0b": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0ebe9-4da3-7101-8706-9862de6672fb",
+        "model": "gpt-6-luna"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_2ed736688e97ec": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "a62174a3-ce71-428b-a96b-2c9777837b43",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_331e8577088ca0": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "ca4c6cb9-fd29-4274-bbc3-13f3695d0d64",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_5e929992656741": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "8f493632-36a6-4e0f-a5d7-d38b03a1f7c4",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_7275754f4f7c24": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "07c9ce59-ab0a-48bd-b0dc-de29f4a00575",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_795e2ccdb6801b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "71804b16-900c-4824-8bbc-5e7434803315",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_9e6b82c6190bb2": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "7d78d26a-a520-4ae1-8564-567876c65b1f",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_d2f98a7662053d": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "fe643b80-e681-47eb-8ae5-c692390441f8",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_e741b097c0310e": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "ed14cf01-1e42-4558-a6c1-b74f2415e3ba",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_ec761d0ad450eb": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "a288c44a-be4e-4d4b-bdcb-50440025c97c",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

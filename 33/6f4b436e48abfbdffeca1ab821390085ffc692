@@ -1,0 +1,154 @@
+tests/unit/ui/test_setup_reserved_default_server.py
+  s_795e2ccdb6801b::t_c2ec07298d649e 20,136-139
+  s_1054f09618f645::t_18b0119898153e 119-123
+  s_795e2ccdb6801b::t_ddc71373b4499b 114,124-135,140-142
+  s_795e2ccdb6801b::t_b80cdc5a1576c6 24-29,73,77,79-80,84,105-113,115-118
+src/ui/app/routes/instances.py
+  s_1054f09618f645::t_89f7ffe853fd48 10
+  s_10d9be7dc00bdd::t_91ccbc37061897 41-42,126-127,140-141,154-155,168-169
+tests/unit/ui/test_pro_key_save_flash_type.py
+  s_1054f09618f645::t_10373dcb0ee434 58-62
+tests/unit/ui/test_default_server_page.py
+  s_f984775c84a793::t_7de84f3d61b898 135-142
+src/ui/app/routes/jobs.py
+  s_1054f09618f645::t_89f7ffe853fd48 7
+  s_10d9be7dc00bdd::t_646ef869e321d0 31-32
+src/ui/app/routes/services.py
+  s_1054f09618f645::t_a0f6639d0fd7e0 2190-2191
+  s_f984775c84a793::t_fa1ec6c0c7f6e3 2069-2073,2185-2189
+  s_1054f09618f645::t_29f9a1297f1384 635-636,811-812,929-930,979-980,2344-2345
+  s_1054f09618f645::t_6181947abd426f 1763-1764
+  s_1054f09618f645::t_5781fba9a6f82a 948-951,1001-1004
+  s_10d9be7dc00bdd::t_0c909e34ed9834 2074-2075
+  s_1054f09618f645::t_162a7d1e441ff3 1759-1762
+tests/unit/ui/test_ui_workflows.py
+  s_1054f09618f645::t_10373dcb0ee434 35-39
+tests/unit/ui/test_template_settings_page.py
+  s_1054f09618f645::t_146b05754d13f8 574,593-594,638-644,646-656
+tests/unit/ui/test_ui_certificates.py
+  s_1054f09618f645::t_10373dcb0ee434 37-41
+tests/unit/ui/test_save_scope.py
+  s_1054f09618f645::t_f1ad4d50984bd0 910-911
+  s_1054f09618f645::t_f1c5d0e2dd8408 834,851-853,906-909,912-920
+tests/unit/ui/test_ui_resource_groups.py
+  s_1054f09618f645::t_10373dcb0ee434 35-39
+src/ui/app/routes/workflows.py
+  s_1054f09618f645::t_4ba73a2240001d 21-28
+  s_1054f09618f645::t_29f9a1297f1384 256
+  s_1054f09618f645::t_0e91fe4475c18b 257-259
+  s_1054f09618f645::t_89f7ffe853fd48 9
+src/ui/app/routes/configs.py
+  s_1054f09618f645::t_89f7ffe853fd48 16
+  s_f984775c84a793::t_daa242b8de8cd1 272-273,392-393,799-800
+  s_f984775c84a793::t_91742c20d482d4 262-269,460-461,605-606
+tests/unit/ui/test_pro_refresh.py
+  s_1054f09618f645::t_10373dcb0ee434 30-34
+src/ui/app/routes/redirects.py
+  s_1054f09618f645::t_4ba73a2240001d 21-28
+  s_1054f09618f645::t_89f7ffe853fd48 8
+src/ui/app/routes/certificates.py
+  s_1054f09618f645::t_89f7ffe853fd48 14
+  s_1054f09618f645::t_4ba73a2240001d 49-56
+src/ui/app/routes/global_settings.py
+  s_f984775c84a793::t_fa1ec6c0c7f6e3 262-266
+  s_10d9be7dc00bdd::t_c0acfcc18c92af 160-161,267-268
+  s_1054f09618f645::t_4404d1ac418eca 156-159
+tests/unit/ui/test_pro_online_services_count.py
+  s_1054f09618f645::t_10373dcb0ee434 34-38
+tests/unit/ui/test_ui_upstreams.py
+  s_1054f09618f645::t_10373dcb0ee434 31-35
+tests/unit/ui/test_global_settings_propagation.py
+  s_1054f09618f645::t_f1ad4d50984bd0 295-297
+  s_1054f09618f645::t_b6b0ddcd1ba374 248-291
+  s_1054f09618f645::t_3dd1e24237b104 182,207-209,292-294,298-299
+tests/unit/ui/test_ui_redirects.py
+  s_1054f09618f645::t_10373dcb0ee434 31-35
+src/ui/app/routes/web_cache.py
+  s_1054f09618f645::t_29f9a1297f1384 102-103
+  s_1054f09618f645::t_89f7ffe853fd48 6
+tests/unit/ui/test_configs_write_permission.py
+  s_795e2ccdb6801b::t_717fd383595ff7 41-46,50
+  s_1054f09618f645::t_36b9910bce3ed1 1-17,19-40,47-49,51-148
+  s_1054f09618f645::t_29eab3fc9df7fe 18
+  s_1054f09618f645::t_6554c8c91e97c3 149-161,171-172,179-195,206-208
+  s_1054f09618f645::t_0d145dfcb4721d 200
+  s_1054f09618f645::t_a3bdd5a84b2702 162-170,173-178,196-199,201-203
+  s_1054f09618f645::t_3f92222f0d5924 204-205
+tests/unit/ui/test_plugin_settings_page.py
+  s_1054f09618f645::t_146b05754d13f8 335,348,361-375
+  s_10d9be7dc00bdd::t_e30455d3e655ea 376-377
+src/ui/app/routes/cache.py
+  s_1054f09618f645::t_89f7ffe853fd48 10
+  s_10d9be7dc00bdd::t_953b5ce7c4de8c 75-76
+src/ui/app/routes/resource_groups.py
+  s_1054f09618f645::t_89f7ffe853fd48 11
+  s_1054f09618f645::t_29f9a1297f1384 88-90,119-121,142-144
+src/ui/app/routes/bans.py
+  s_1054f09618f645::t_a2e94fd07ab890 752-753,830-831,899-900
+  s_1054f09618f645::t_89f7ffe853fd48 18
+tests/unit/ui/test_ui_service_resources.py
+  s_83df8edc38f66d::t_0e57611b5d1bb6 21-25,27-28
+  s_10d9be7dc00bdd::t_6bbe93cbf90903 26
+src/ui/app/routes/upstreams.py
+  s_1054f09618f645::t_96f5d7ed26da99 26-29
+  s_1054f09618f645::t_4ba73a2240001d 23-25,30
+  s_1054f09618f645::t_89f7ffe853fd48 8
+src/ui/app/routes/setup.py
+  s_1054f09618f645::t_fda47805d38e6b 19-27
+  s_1054f09618f645::t_4c123b4d00890e 131-138
+tests/unit/ui/test_bans_flash_i18n.py
+  s_83df8edc38f66d::t_0e57611b5d1bb6 57-64
+src/ui/app/routes/pro.py
+  s_1054f09618f645::t_89f7ffe853fd48 12
+  s_1054f09618f645::t_29f9a1297f1384 76-77,164-165,183-184,203-204
+tests/unit/ui/test_web_cache.py
+  s_83df8edc38f66d::t_0e57611b5d1bb6 39-46
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "336f4b436e48abfbdffeca1ab821390085ffc692",
+  "prompts": {},
+  "sessions": {
+    "s_1054f09618f645": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "e1ba3acf-15cc-4776-a3ab-a188f93e0b17",
+        "model": "claude-opus-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_10d9be7dc00bdd": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "aeccb8db-b831-4720-9c32-a66ceaca2ae1",
+        "model": "claude-opus-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_795e2ccdb6801b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "71804b16-900c-4824-8bbc-5e7434803315",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_83df8edc38f66d": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0c537-d8ef-7ca2-861c-c26dc184faef",
+        "model": "gpt-5.6-luna"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_f984775c84a793": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "e490dca2-1329-4127-bc81-f8f834a81f1c",
+        "model": "claude-opus-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

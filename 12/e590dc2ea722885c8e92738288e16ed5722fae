@@ -1,0 +1,21 @@
+.github/workflows/doc-to-pdf.yml
+  s_350f37e4034dd1::t_110967163bbaef 27
+.github/workflows/push-doc.yml
+  s_350f37e4034dd1::t_110967163bbaef 46
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "12e590dc2ea722885c8e92738288e16ed5722fae",
+  "prompts": {},
+  "sessions": {
+    "s_350f37e4034dd1": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "971d139c-3e8a-4f6b-9de4-2c02afd5102d",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

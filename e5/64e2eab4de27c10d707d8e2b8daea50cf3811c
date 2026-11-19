@@ -1,0 +1,43 @@
+CHANGELOG.md
+  s_3dad76a2148efa::t_2553f6ee25d20d 71
+docs/de/features.md
+  s_3dad76a2148efa::t_17f9d883a90cea 6580-6582
+docs/es/features.md
+  s_3dad76a2148efa::t_2ba3f8d0e9fc8e 6657-6659
+docs/features.md
+  s_3dad76a2148efa::t_931828393610b8 6670-6672
+docs/fr/features.md
+  s_3dad76a2148efa::t_f3bff83a7a3703 6476-6478
+docs/zh/features.md
+  s_3dad76a2148efa::t_45070223f05a23 6665-6667
+src/common/core/whitelist/README.de.md
+  s_3dad76a2148efa::t_1fbdf9ce166bc2 26-28
+src/common/core/whitelist/README.es.md
+  s_3dad76a2148efa::t_01a6a132396cc8 26-28
+src/common/core/whitelist/README.fr.md
+  s_3dad76a2148efa::t_3ac08420f0d3a7 26-28
+src/common/core/whitelist/README.md
+  s_3dad76a2148efa::t_5a6f0f24c58ba9 26-28
+src/common/core/whitelist/README.zh.md
+  s_3dad76a2148efa::t_c4d6ec095183b3 26-28
+src/common/core/whitelist/whitelist.lua
+  s_3dad76a2148efa::t_317e4cd47b89b5 184,194-195,203-223,344,346,355,370
+tests/unit/common/test_whitelist_coverage_lua.py
+  s_3dad76a2148efa::t_09f2de051a4b24 13-19,35-36,101-191
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "e564e2eab4de27c10d707d8e2b8daea50cf3811c",
+  "prompts": {},
+  "sessions": {
+    "s_3dad76a2148efa": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "841b91bc-1343-4bde-85b1-df12b60c1992",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

@@ -1,0 +1,21 @@
+CHANGELOG.md
+  s_60628c795bd662::t_e02b53ad9e5db5 37
+src/ui/app/models/ui_database.py
+  s_60628c795bd662::t_e4a0fbf4fdd32a 424
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "72e48b053efead2d48a44ebdfccfc07ed5096095",
+  "prompts": {},
+  "sessions": {
+    "s_60628c795bd662": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1869d-2e49-7ff2-8e88-cfcf2fe9cb0c",
+        "model": "unknown"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

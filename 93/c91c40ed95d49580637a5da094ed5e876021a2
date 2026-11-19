@@ -1,0 +1,150 @@
+src/common/core/whitelist/jobs/whitelist-download.py
+  s_adc0bf4c8b401c::t_1799ad4dbb6057 33-35
+tests/unit/test_lua_ipv6_ban_identity.lua
+  s_adc0bf4c8b401c::t_ab8444d69be7f2 114-118,191
+  s_adc0bf4c8b401c::t_b332fe821d7c22 1-113,119-190,192-284
+src/bw/lua/bunkerweb/api.lua
+  s_adc0bf4c8b401c::t_e7c87bcb4006b8 28,875-877,880,929-930,1024-1026,1029
+src/deps/misc/ipmatcher.patch
+  s_adc0bf4c8b401c::t_fc826237dd06bd 1-5,10-109
+src/bw/lua/bunkerweb/banlease.lua
+  s_adc0bf4c8b401c::t_8ee0a1fe612627 14,16-17,43,77,101,122,147,158,523,588,613,655,749
+  s_adc0bf4c8b401c::t_0a6532ce9e1f70 2,174-178
+src/deps/src/lua-resty-ipmatcher/resty/ipmatcher.lua
+  s_adc0bf4c8b401c::t_424a76c22e2438 140-163,238-251,272-275,309,423-428,450-453
+  s_adc0bf4c8b401c::t_0f28ec6db7106a 454
+CHANGELOG.md
+  s_069d588794c2c2::t_eaa25b9f840a11 15
+  s_069d588794c2c2::t_ebd559cfe650ce 7-9
+tests/unit/test_lua_tls_drop.lua
+  s_4868bdb5544fc5::t_c943491b875c01 403-404
+  s_adc0bf4c8b401c::t_384d3dc5b76757 412,414,416-417,419-420,425,445,535-536,541-542
+src/bw/lua/bunkerweb/helpers.lua
+  s_adc0bf4c8b401c::t_999ba1eb30045e 5,314-316
+src/common/cli/CLI.py
+  s_adc0bf4c8b401c::t_0d3ad437886b6f 30,554-557
+  s_adc0bf4c8b401c::t_f01cd71b1c54a5 595-598
+src/ui/app/routes/bans.py
+  s_702299bbcac800::t_40e7673c5b103f 30,793,826,989,1100
+src/common/core/dnsbl/jobs/dnsbl-download.py
+  s_702299bbcac800::t_e59776ecb6e2bd 33-35
+src/common/core/blacklist/jobs/blacklist-download.py
+  s_adc0bf4c8b401c::t_1799ad4dbb6057 33-35
+src/bw/lua/bunkerweb/ipaddr.lua
+  s_adc0bf4c8b401c::t_065f1ee86e457e 1-120,130-131,133-137,139-142,146-150,153-163,166-170,176-179,193
+  s_adc0bf4c8b401c::t_0a6532ce9e1f70 124-126
+  s_cd40110766cde7::t_c86264de8de9ab 122-123,127-129,132,138,143-145
+  s_f8c89ef39f464e::t_968eb028e872c0 171-175,180-192
+  s_adc0bf4c8b401c::t_7395850b901bf1 121,151-152,164
+  s_adc0bf4c8b401c::t_83488411d4d08b 165
+src/common/utils/ip_identity.py
+  s_adc0bf4c8b401c::t_eef11a96f8512a 23-31
+  s_adc0bf4c8b401c::t_e5fb0c173fab5f 1-22,32
+tests/unit/common/test_ipv6_ipmatcher_luajit.py
+  s_adc0bf4c8b401c::t_d2690414530217 1-46,48-52,54-59,61-63,65-74,76-79,81-84,86-88,90-94,96-98,100-103
+  s_adc0bf4c8b401c::t_927d96ed544739 47
+  s_adc0bf4c8b401c::t_ab8444d69be7f2 53,60,64,75,80,85,89,95,99,104
+tests/unit/common/test_ipv6_reversescan_lua.py
+  s_adc0bf4c8b401c::t_ab8444d69be7f2 66,70,75,82,87,91,96,105
+  s_adc0bf4c8b401c::t_377d555a1ad492 40-45
+  s_adc0bf4c8b401c::t_8201b888b1f8ca 1-39,46-65,67-69,71-74,76-81,83-86,88-90,92-95,97-104,106
+tests/unit/test_lua_ipaddr.lua
+  s_adc0bf4c8b401c::t_1cd921377e8168 1-19,22-105
+  s_adc0bf4c8b401c::t_ab8444d69be7f2 20-21
+src/bw/lua/bunkerweb/utils.lua
+  s_adc0bf4c8b401c::t_0a6532ce9e1f70 1611-1615
+  s_adc0bf4c8b401c::t_38935898f2c8c4 376
+  s_adc0bf4c8b401c::t_39e60ab0ba3b39 798,957
+  s_adc0bf4c8b401c::t_f0bce6b2cad2f1 5,30,345-348,354-355,606,656,989,1006,1184,1452,1558,1700
+  s_adc0bf4c8b401c::t_7baecf4d6695c3 1599
+  s_adc0bf4c8b401c::t_ed0db498023866 1481-1483,1566-1568,1597-1598,1600-1602,1608-1610,1616-1624,1637-1649
+src/api/app/routers/bans.py
+  s_adc0bf4c8b401c::t_f398a9e4105902 8,21-33,74-75,78-81,83-86,105,184-187
+src/common/core/realip/jobs/realip-download.py
+  s_adc0bf4c8b401c::t_1799ad4dbb6057 26-28
+tests/unit/README.md
+  s_adc0bf4c8b401c::t_a416f3e245e9dd 176
+  s_adc0bf4c8b401c::t_ee0dfecc1a263e 205
+src/common/core/reversescan/reversescan.lua
+  s_adc0bf4c8b401c::t_bd7bc39e05b238 144-146,150-152,154-157,160
+  s_adc0bf4c8b401c::t_200f936d7ff4ae 84
+  s_adc0bf4c8b401c::t_b962f63a802e27 99-104
+src/common/core/greylist/jobs/greylist-download.py
+  s_adc0bf4c8b401c::t_1799ad4dbb6057 33-35
+tests/unit/api_app/test_ipv6_api_ban_identity.py
+  s_adc0bf4c8b401c::t_827f5defc5ef8b 1-76
+tests/unit/cli/test_ipv6_cli_ban_identity.py
+  s_adc0bf4c8b401c::t_1955461c2ef5b9 1-48
+tests/unit/common/test_ipv6_ip_identity.py
+  s_702299bbcac800::t_a039a0c541ccc8 1-56
+tests/unit/common/test_modsecurity_body_reason_lua.py
+  s_adc0bf4c8b401c::t_37893f00a0f2d6 57
+tests/unit/common/test_whitelist_and_has_variable_inheritance_lua.py
+  s_adc0bf4c8b401c::t_acff13ebebb52e 54
+tests/unit/conftest.py
+  s_adc0bf4c8b401c::t_f8b70c42ed53d6 37-45
+tests/unit/jobs/test_ipv6_feed_zone_ids.py
+  s_adc0bf4c8b401c::t_dda1e5d7ed9914 1-36
+tests/unit/lua/test_resume_rdns.py
+  s_069d588794c2c2::t_079db9c9ab51f3 31
+tests/unit/lua_lease_fakes.lua
+  s_adc0bf4c8b401c::t_d57baec4e048a7 211-213
+tests/unit/ui/test_ipv6_ui_ban_identity.py
+  s_adc0bf4c8b401c::t_66c9e0412f4165 1-43
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "93c91c40ed95d49580637a5da094ed5e876021a2",
+  "prompts": {},
+  "sessions": {
+    "s_069d588794c2c2": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "84fe7cda-2bca-4767-bd4f-5fd51bba09cf",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_4868bdb5544fc5": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a18d7e-cec0-7130-bad6-9c3732cc0029",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_702299bbcac800": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a18d6a-01d9-7ad1-931f-e30331d0f285",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_adc0bf4c8b401c": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "8fce2f0d-71b1-4d67-a69b-32b4a97ed905",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_cd40110766cde7": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a18d53-70e0-76e2-9b75-057e960ae36d",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_f8c89ef39f464e": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a18d53-5a1c-7990-a919-8ced18659c54",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

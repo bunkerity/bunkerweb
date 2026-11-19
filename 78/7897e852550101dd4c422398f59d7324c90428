@@ -1,0 +1,22 @@
+CHANGELOG.md
+  h_a33a1e80933106 69
+src/common/core/antibot/confs/http/antibot.modsec-crs
+  h_a33a1e80933106 5-10
+src/common/core/antibot/confs/modsec-crs/antibot.conf
+  h_a33a1e80933106 1
+src/common/core/modsecurity/confs/modsec-crs/http3.conf
+  h_a33a1e80933106 1
+tests/unit/gen/test_modsec_global_crs_duplicate_ids.py
+  h_a33a1e80933106 1-103
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "787897e852550101dd4c422398f59d7324c90428",
+  "prompts": {},
+  "humans": {
+    "h_a33a1e80933106": {
+      "author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

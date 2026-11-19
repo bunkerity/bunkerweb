@@ -1,0 +1,290 @@
+src/common/core/letsencrypt/README.zh.md
+  s_cdb2ca234e7b29::t_64ddab0a66305e 49-51,54
+src/common/core/sessions/README.es.md
+  s_cdb2ca234e7b29::t_64ddab0a66305e 30-32
+src/common/core/redis/README.md
+  s_cdb2ca234e7b29::t_64ddab0a66305e 31,38
+src/common/core/selfsigned/README.es.md
+  s_cdb2ca234e7b29::t_64ddab0a66305e 32
+docs/de/features.md
+  s_cdb2ca234e7b29::t_7bdf1d2653418f 3828
+  s_cdb2ca234e7b29::t_64ddab0a66305e 354-355,957-958,1583,2112,2114-2115,2123-2125,2366,2369-2370,2373,2375,3350-3352,3355,5124,5131,5672,5991,6063-6065
+src/ui/app/models/config.py
+  s_afb172fcaf154e::t_9319cfb472c076 25,38-42,119,123
+src/ui/app/routes/utils.py
+  s_cdb2ca234e7b29::t_f152121017b5f0 16
+  s_cdb2ca234e7b29::t_a68327ddaa16bd 326-327
+src/common/core/sessions/sessions.lua
+  s_848ee6b2d0b25f::t_0ae31540f52130 14,96-98,130-133
+src/common/core/antibot/README.md
+  s_cdb2ca234e7b29::t_64ddab0a66305e 32-33
+docs/es/features.md
+  s_cdb2ca234e7b29::t_7bdf1d2653418f 3880
+  s_cdb2ca234e7b29::t_64ddab0a66305e 353-354,966-967,1600,2137,2139-2140,2148-2150,2401,2404-2405,2408,2410,3403-3405,3408,5180,5187,5731,6052,6130-6132
+src/common/core/badbehavior/README.md
+  s_cdb2ca234e7b29::t_64ddab0a66305e 41-42
+src/common/core/reversescan/reversescan.lua
+  s_848ee6b2d0b25f::t_0ae31540f52130 13,49
+src/common/core/crowdsec/README.md
+  s_cdb2ca234e7b29::t_64ddab0a66305e 347,349-350,358-360
+src/common/utils/common_utils.py
+  s_cdb2ca234e7b29::t_2f0ca8d6d0a844 37,58-59
+  s_322bd7286f88dc::t_ff7e87d4265628 43-57,60
+  s_cdb2ca234e7b29::t_a68327ddaa16bd 793
+src/common/core/antibot/README.es.md
+  s_cdb2ca234e7b29::t_64ddab0a66305e 32-33
+src/common/core/cors/README.de.md
+  s_cdb2ca234e7b29::t_64ddab0a66305e 34
+src/common/core/letsencrypt/README.de.md
+  s_cdb2ca234e7b29::t_64ddab0a66305e 49-51,54
+src/common/core/cors/README.zh.md
+  s_cdb2ca234e7b29::t_64ddab0a66305e 34
+src/common/core/cors/plugin.json
+  s_848ee6b2d0b25f::t_32f0f9d25483e6 97-98,101-102
+src/common/core/metrics/README.zh.md
+  s_cdb2ca234e7b29::t_7bdf1d2653418f 96
+src/common/core/metrics/README.fr.md
+  s_cdb2ca234e7b29::t_7bdf1d2653418f 96
+docs/features.md
+  s_cdb2ca234e7b29::t_7bdf1d2653418f 3898
+  s_cdb2ca234e7b29::t_64ddab0a66305e 353-354,970-971,1604,2151,2153-2154,2162-2164,2417,2420-2421,2424,2426,3420-3422,3425,5198,5205,5746,6067,6145-6147
+src/common/core/letsencrypt/README.es.md
+  s_cdb2ca234e7b29::t_64ddab0a66305e 49-51,54
+docs/zh/features.md
+  s_cdb2ca234e7b29::t_7bdf1d2653418f 3890
+  s_cdb2ca234e7b29::t_64ddab0a66305e 355-356,972-973,1606,2147,2149-2150,2158-2160,2411,2414-2415,2418,2420,3413-3415,3418,5190,5197,5739,6060,6138-6140
+src/common/core/crowdsec/README.zh.md
+  s_cdb2ca234e7b29::t_64ddab0a66305e 343,345-346,354-356
+src/common/core/db/plugin.json
+  s_848ee6b2d0b25f::t_22f3afefaae977 47-48,51-52,74-75,78-79,83-84,87-88,111-112,115-116,129-130,133
+src/common/core/db/README.es.md
+  s_cdb2ca234e7b29::t_64ddab0a66305e 29,32-33,36,38
+src/common/core/antibot/README.zh.md
+  s_cdb2ca234e7b29::t_64ddab0a66305e 32-33
+src/common/core/redis/README.es.md
+  s_cdb2ca234e7b29::t_64ddab0a66305e 31,38
+src/common/db/alembic/sqlite_versions/a41d5e9b7c20_normalize_metrics_redis_ttl.py
+  s_322bd7286f88dc::t_ab018e0c0c8a09 1-4,6-13,15-40
+  s_322bd7286f88dc::t_3e402ca8412e31 5,14
+src/common/core/redis/README.fr.md
+  s_cdb2ca234e7b29::t_64ddab0a66305e 29,36
+src/common/core/db/README.fr.md
+  s_cdb2ca234e7b29::t_64ddab0a66305e 29,32-33,36,38
+src/scheduler/main.py
+  s_322bd7286f88dc::t_0232fc464bfe78 41,118-121,129-132,135-138
+src/common/core/sessions/README.zh.md
+  s_cdb2ca234e7b29::t_64ddab0a66305e 30-32
+docs/fr/features.md
+  s_cdb2ca234e7b29::t_7bdf1d2653418f 3780
+  s_cdb2ca234e7b29::t_64ddab0a66305e 353-354,946-947,1553,2074,2076-2077,2085-2087,2328,2331-2332,2335,2337,3303-3305,3308,5044,5051,5588,5887,5959-5961
+src/common/core/metrics/metrics.lua
+  s_848ee6b2d0b25f::t_0ae31540f52130 57,772
+src/common/db/Database.py
+  s_322bd7286f88dc::t_84a8350f220dfc 52,223,328-332,339-345,394-396,398
+  s_322bd7286f88dc::t_4c1191f2ce3403 338
+src/common/core/crowdsec/README.es.md
+  s_cdb2ca234e7b29::t_64ddab0a66305e 339,341-342,350-352
+src/common/core/antibot/plugin.json
+  s_848ee6b2d0b25f::t_32f0f9d25483e6 39-40,43,48-49,52
+src/common/core/badbehavior/README.zh.md
+  s_cdb2ca234e7b29::t_64ddab0a66305e 41-42
+src/common/core/db/README.zh.md
+  s_cdb2ca234e7b29::t_64ddab0a66305e 29,32-33,36,38
+src/common/core/db/README.de.md
+  s_cdb2ca234e7b29::t_64ddab0a66305e 29,32-33,36,38
+src/common/core/redis/plugin.json
+  s_cdb2ca234e7b29::t_cd88bbc5271470 67,130
+  s_848ee6b2d0b25f::t_f8a4c4edbb88c2 64-65,68,127-128,131
+src/common/core/selfsigned/README.fr.md
+  s_cdb2ca234e7b29::t_64ddab0a66305e 30
+src/ui/main.py
+  s_afb172fcaf154e::t_9319cfb472c076 27,35,177-183,706-707,710-729,783-784,1376,1475-1478
+  s_cdb2ca234e7b29::t_fe74ad9eeab978 708-709
+src/common/core/badbehavior/README.es.md
+  s_cdb2ca234e7b29::t_64ddab0a66305e 41-42
+src/common/core/letsencrypt/README.md
+  s_cdb2ca234e7b29::t_64ddab0a66305e 49-51,54
+src/common/core/sessions/README.fr.md
+  s_cdb2ca234e7b29::t_64ddab0a66305e 30-32
+src/common/core/selfsigned/README.de.md
+  s_cdb2ca234e7b29::t_64ddab0a66305e 30
+src/common/core/reversescan/README.zh.md
+  s_cdb2ca234e7b29::t_64ddab0a66305e 33
+docs/web-ui.md
+  s_cdb2ca234e7b29::t_e7aa3417e038d0 5
+src/common/core/selfsigned/plugin.json
+  s_848ee6b2d0b25f::t_22f3afefaae977 29-30,33-34
+src/common/core/metrics/README.md
+  s_cdb2ca234e7b29::t_7bdf1d2653418f 96
+src/common/core/antibot/antibot.lua
+  s_848ee6b2d0b25f::t_0ae31540f52130 23
+  s_cdb2ca234e7b29::t_eb96cafa900b42 548-551,558-559
+src/common/core/crowdsec/README.de.md
+  s_cdb2ca234e7b29::t_64ddab0a66305e 341,343-344,352-354
+src/common/cli/main.py
+  s_cdb2ca234e7b29::t_cd88bbc5271470 13,34-37
+src/common/core/cors/README.md
+  s_cdb2ca234e7b29::t_64ddab0a66305e 34
+src/bw/lua/bunkerweb/clusterstore.lua
+  s_848ee6b2d0b25f::t_0ae31540f52130 12,65-68
+src/common/core/crowdsec/jobs/crowdsec_conf_utils.py
+  s_cdb2ca234e7b29::t_0d83d5e575e993 6-7,11-12,21,23-24,27-29,34-43,91-96
+src/common/core/badbehavior/plugin.json
+  s_848ee6b2d0b25f::t_32f0f9d25483e6 108-109,112-113,117-118,121-122
+src/common/core/letsencrypt/plugin.json
+  s_848ee6b2d0b25f::t_22f3afefaae977 65-66,69-70,74-75,78-79,83-84,87-88,145,148
+src/common/core/selfsigned/README.zh.md
+  s_cdb2ca234e7b29::t_64ddab0a66305e 32
+src/common/core/crowdsec/plugin.json
+  s_848ee6b2d0b25f::t_bd8370e1b85244 74-75,78-79,93-94,97-98,102-103,106-107,130-131,134-135,139-140,143-144,148-149,152-153
+src/common/core/selfsigned/README.md
+  s_cdb2ca234e7b29::t_64ddab0a66305e 32
+src/common/core/metrics/plugin.json
+  s_848ee6b2d0b25f::t_f8a4c4edbb88c2 55-56,59
+src/common/db/alembic/postgresql_versions/d74a8b1e6f53_normalize_metrics_redis_ttl.py
+  s_322bd7286f88dc::t_ab018e0c0c8a09 1-4,6-13,15-40
+  s_322bd7286f88dc::t_3e402ca8412e31 5,14
+src/api/app/rate_limit.py
+  s_cdb2ca234e7b29::t_a68327ddaa16bd 18,412
+src/common/db/alembic/mariadb_versions/b52e6f8c9d31_normalize_metrics_redis_ttl.py
+  s_322bd7286f88dc::t_3e402ca8412e31 5,14
+  s_322bd7286f88dc::t_ab018e0c0c8a09 1-4,6-13,15-40
+src/common/core/badbehavior/README.fr.md
+  s_cdb2ca234e7b29::t_64ddab0a66305e 39-40
+src/bw/lua/bunkerweb/utils.lua
+  s_848ee6b2d0b25f::t_2eedd3f6d4b2e9 61-62
+src/common/core/cors/README.fr.md
+  s_cdb2ca234e7b29::t_64ddab0a66305e 32
+src/common/core/db/jobs/cleanup-expired-ui-sessions.py
+  s_322bd7286f88dc::t_0232fc464bfe78 13,21-25
+src/common/core/sessions/plugin.json
+  s_848ee6b2d0b25f::t_32f0f9d25483e6 37-38,41-42,46-47,50-51,55-56,59-60
+src/common/core/reversescan/README.es.md
+  s_cdb2ca234e7b29::t_64ddab0a66305e 33
+src/common/core/reversescan/README.fr.md
+  s_cdb2ca234e7b29::t_64ddab0a66305e 31
+src/common/core/reversescan/plugin.json
+  s_848ee6b2d0b25f::t_f8a4c4edbb88c2 28-29,32-33
+src/scheduler/JobScheduler.py
+  s_cdb2ca234e7b29::t_cd88bbc5271470 30,258-261,517-521
+src/common/core/db/README.md
+  s_cdb2ca234e7b29::t_64ddab0a66305e 29,32-33,36,38
+src/common/core/metrics/README.es.md
+  s_cdb2ca234e7b29::t_7bdf1d2653418f 96
+src/common/core/badbehavior/README.de.md
+  s_cdb2ca234e7b29::t_64ddab0a66305e 41-42
+src/common/core/sessions/README.md
+  s_cdb2ca234e7b29::t_64ddab0a66305e 30-32
+src/common/core/reversescan/README.de.md
+  s_cdb2ca234e7b29::t_64ddab0a66305e 33
+src/common/core/antibot/README.fr.md
+  s_cdb2ca234e7b29::t_64ddab0a66305e 32-33
+src/common/core/redis/README.de.md
+  s_cdb2ca234e7b29::t_64ddab0a66305e 29,36
+src/common/core/sessions/README.de.md
+  s_cdb2ca234e7b29::t_64ddab0a66305e 30-32
+src/common/core/redis/README.zh.md
+  s_cdb2ca234e7b29::t_64ddab0a66305e 31,38
+CHANGELOG.md
+  s_cdb2ca234e7b29::t_f4160df7f874d2 7-8
+  s_40eb28e1193644::t_65a403434d7035 6
+src/common/core/cors/cors.lua
+  s_848ee6b2d0b25f::t_f464e9fdee240b 78-83
+  s_848ee6b2d0b25f::t_0ae31540f52130 11-12
+src/common/core/badbehavior/badbehavior.lua
+  s_848ee6b2d0b25f::t_0ae31540f52130 21,86,92,126
+src/common/core/letsencrypt/README.fr.md
+  s_cdb2ca234e7b29::t_64ddab0a66305e 49-51,54
+src/common/core/cors/README.es.md
+  s_cdb2ca234e7b29::t_64ddab0a66305e 34
+src/common/core/antibot/README.de.md
+  s_cdb2ca234e7b29::t_64ddab0a66305e 32-33
+src/common/core/letsencrypt/jobs/certbot-new.py
+  s_cdb2ca234e7b29::t_cd88bbc5271470 369,378,387
+  s_cdb2ca234e7b29::t_9e5c50e4ef56fc 410
+  s_322bd7286f88dc::t_0232fc464bfe78 34,306-308,417-418
+src/common/db/alembic/mysql_versions/c63f7a0d5e42_normalize_metrics_redis_ttl.py
+  s_322bd7286f88dc::t_ab018e0c0c8a09 1-4,6-13,15-40
+  s_322bd7286f88dc::t_3e402ca8412e31 5,14
+src/common/core/selfsigned/jobs/self-signed.py
+  s_322bd7286f88dc::t_0232fc464bfe78 19,57,59-61
+  s_322bd7286f88dc::t_4c1191f2ce3403 58
+src/common/core/letsencrypt/jobs/certbot-deploy.py
+  s_322bd7286f88dc::t_0232fc464bfe78 15,43-46
+src/common/core/metrics/README.de.md
+  s_cdb2ca234e7b29::t_7bdf1d2653418f 96
+src/common/core/reversescan/README.md
+  s_cdb2ca234e7b29::t_64ddab0a66305e 33
+src/common/core/crowdsec/README.fr.md
+  s_cdb2ca234e7b29::t_64ddab0a66305e 343,345-346,354-356
+src/bw/lua/bunkerweb/duration.lua
+  s_848ee6b2d0b25f::t_2eedd3f6d4b2e9 1-31
+src/ui/app/templates/setup.html
+  s_cdb2ca234e7b29::t_c086eef4e8c4d5 719,753,787
+  s_cdb2ca234e7b29::t_cd88bbc5271470 723,757,791
+src/api/app/main.py
+  s_afb172fcaf154e::t_9319cfb472c076 11,116
+  s_afb172fcaf154e::t_c462a7b9ff17f8 117
+src/ui/requirements.in
+  s_40eb28e1193644::t_b4fccfa8b99eee 3,7
+src/ui/requirements.txt
+  s_cdb2ca234e7b29::t_78c6cde51f5a56 11-98,171-274,644,648-651
+src/ui/app/models/ui_data.py
+  s_778469f2729150::t_e4b0c68ed104d9 11,17-18,23-26,31
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "3075b9d165f3a0ec58e896e189c76952c09e5b12",
+  "prompts": {},
+  "sessions": {
+    "s_322bd7286f88dc": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0c489-6b4e-7332-a8a1-6b99f1c48cc9",
+        "model": "gpt-5.6-terra"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_40eb28e1193644": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0c489-6645-7943-89eb-1dfa12d1a728",
+        "model": "gpt-5.6-terra"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_778469f2729150": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0c482-037d-7832-8a88-17daac312266",
+        "model": "unknown"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_848ee6b2d0b25f": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0c489-66f7-78f0-8c73-e5e633064026",
+        "model": "gpt-5.6-terra"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_afb172fcaf154e": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0c457-cb07-7753-8a33-766215504126",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_cdb2ca234e7b29": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "2d01cf99-f3a3-406a-9198-9f6d76b8eb9f",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

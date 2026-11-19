@@ -1,0 +1,23 @@
+src/common/core/customcert/customcert.lua
+  s_60628c795bd662::t_f34db2d87c5a39 189-194,196,198-201,203,205-212
+src/common/core/letsencrypt/letsencrypt.lua
+  s_60628c795bd662::t_459412d8d20470 523-528
+src/common/core/selfsigned/selfsigned.lua
+  s_60628c795bd662::t_d63a1197e465ba 70-75,77,79-82,84,86-93
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "cfea17214b54ae5cc3aed7875acc833b0827edf3",
+  "prompts": {},
+  "sessions": {
+    "s_60628c795bd662": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1869d-2e49-7ff2-8e88-cfcf2fe9cb0c",
+        "model": "unknown"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

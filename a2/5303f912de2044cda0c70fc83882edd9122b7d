@@ -1,0 +1,28 @@
+CHANGELOG.md
+  h_a33a1e80933106 35
+src/api/app/routers/global_settings.py
+  h_a33a1e80933106 44
+src/common/db/Database.py
+  h_a33a1e80933106 58-72,106-109,1991-2056,2065,2086-2092,2132-2137,2234-2243,2317,3092-3097,3100,3112-3118,3121-3123,3141-3142,3156,3179-3180,3190-3192,3203-3205,3210,3222-3225,3231-3233,3235-3236,3246-3252,3309-3365,3386,3410
+tests/unit/api_app/test_api_jobs_global_settings_status_ub4_6.py
+  h_a33a1e80933106 52
+tests/unit/api_app/test_global_settings_partial_patch_regression.py
+  h_a33a1e80933106 3-4,31,33
+tests/unit/api_app/test_global_settings_patch_keeps_other_methods.py
+  h_a33a1e80933106 1-85
+tests/unit/api_app/test_global_settings_patch_template_and_slots.py
+  h_a33a1e80933106 1-67
+tests/unit/db/test_config_save_partial.py
+  h_a33a1e80933106 1-575
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "a25303f912de2044cda0c70fc83882edd9122b7d",
+  "prompts": {},
+  "humans": {
+    "h_a33a1e80933106": {
+      "author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

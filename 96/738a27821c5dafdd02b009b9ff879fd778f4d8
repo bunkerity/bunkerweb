@@ -1,0 +1,18 @@
+CHANGELOG.md
+  h_a33a1e80933106 61
+misc/install-bunkerweb.sh
+  h_a33a1e80933106 3145-3146,3162-3163,8544,8564,8725-8738,8740-8744
+tests/unit/linux/test_install_bunkerweb.py
+  h_a33a1e80933106 51,56,69-95
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "96738a27821c5dafdd02b009b9ff879fd778f4d8",
+  "prompts": {},
+  "humans": {
+    "h_a33a1e80933106": {
+      "author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

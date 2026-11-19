@@ -1,0 +1,22 @@
+misc/install-bunkerweb.sh
+  s_29c5c5c0683384::t_c1dad9cb8dcb91 6627-6642,6650,6690
+tests/unit/linux/test_lxq_repository_bootstrap.py
+  s_29c5c5c0683384::t_dc59f0f0156df8 1-18,21-64
+  s_29c5c5c0683384::t_3a4f12a1b89e08 19-20
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "3ab1d1c5212bf0f17766ade3b69f5066143c001a",
+  "prompts": {},
+  "sessions": {
+    "s_29c5c5c0683384": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1b133-30a1-7872-af63-bcd7da5ddc3c",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

@@ -1,0 +1,478 @@
+tests/unit/common/test_issue_556_session_check_cookie.py
+  s_f00f47447edb7e::t_f1bd973e32fe1e 34,41,50,55,62,72
+  s_7e1aa223afa859::t_640922e25f256c 1-33,35-40,42-49,51-54,56-61,63-71,73-74
+tests/unit/linux/test_issue_1589_before_install_nginx_backup.py
+  s_dcb30ee9c5d83b::t_a27ec21152aeb1 10,23,25
+  s_dcb30ee9c5d83b::t_98a073068c12e6 1-9,11-22,24,26-66
+tests/unit/common/test_issue_3841_customcert_wildcard_shadow_regression.py
+  s_f00f47447edb7e::t_269e3b4155ec1c 1-31,33-65,67-80
+  s_f00f47447edb7e::t_f1bd973e32fe1e 66
+  s_f00f47447edb7e::t_838db033ae0d26 32
+tests/unit/common/test_badbehavior_ban_clears_counter.py
+  s_14b4af2bbc6eba::t_267bf2d386532a 1-2,19-29,31-36,38-100,103-117,123-128,131-138,140-141,144-166,189-191,193-217,219-252,258-264,266-278,281-291,293-339,342-358,361-395,416-424,427-458,486-490,493-510,513-539,542-585,587-590,594-610,613-615,617-624,626-631,634-652,726-729,731-733,735-739,743-748,751,753
+  s_14b4af2bbc6eba::t_14348e68e5685b 3-18,30,37,101-102,118-122,129-130,139,142-143,167-188,192,218,253-257,265,279-280,292,340-341,359-360,396-415,425-426,459-485,491-492,511-512,540-541,586,591-593,611-612,616,625,632-633,653-725,730,734,740-742,749-750,752
+tests/unit/gen/test_issue_504_setting_regex_validation.py
+  s_dcb30ee9c5d83b::t_4b0ee1d14fd45b 6-48
+  s_dcb30ee9c5d83b::t_b8ea846b1aa0cf 1-5,49-68
+tests/unit/test_api_rate_limit_fallback.py
+  s_07e8b95f556956::t_9b7282431b758b 1-117
+tests/unit/linux/test_keep_config_sentinel_regression.py
+  s_dcb30ee9c5d83b::t_5943513b15b596 1-99
+tests/unit/common/test_badbehavior_timer_ban_reason_regression.py
+  s_14b4af2bbc6eba::t_916b5b89f89359 54-55
+  s_50fbb9cf704988::t_327ea9a3e00225 66
+  s_d25bba7717a9cb::t_dc5107e9161d9a 1-53,56-65,67-114
+tests/unit/common/test_antibot_js_minifier_length_fold_regression.py
+  s_f00f47447edb7e::t_05a250f9d5227a 1-23,25,27-55,57-94,98-117,119-121
+  s_dcb30ee9c5d83b::t_fb2811b7ce6055 56
+  s_f00f47447edb7e::t_76ffadadd57ff2 24,26,95-97,118
+tests/unit/linux/_t7_helpers.py
+  s_dcb30ee9c5d83b::t_b27f6593636c7c 1-7,9-12,14-40
+  s_9d465355a62612::t_68e8ae9e55339d 8,13,41
+tests/unit/api_app/test_ghsa_254j_biscuit_datalog_injection_regression.py
+  s_f64fec522e612b::t_0d02a25fc0f81f 1-67
+  s_f64fec522e612b::t_47f6b518d13976 68-77
+tests/unit/gen/test_issue_3153_worker_shutdown_timeout.py
+  s_6f18265bab664f::t_3fc43ae5062a13 1-42
+tests/unit/gen/test_limit_http3_v1ip_overlap_regression.py
+  s_ef59a3a906331f::t_83ee642bef7c6c 1-74
+tests/unit/api_app/test_global_settings_partial_patch_regression.py
+  s_6f18265bab664f::t_3fc43ae5062a13 1-35
+tests/unit/common/test_cors_self_origin_exact_match_regression.py
+  s_f00f47447edb7e::t_64357fbabab716 1-57
+tests/unit/common/test_issue_3650_antibot_redirect_target_regression.py
+  s_f00f47447edb7e::t_f1bd973e32fe1e 40,44,83,86,96,101
+  s_f00f47447edb7e::t_8f2f7ffd25ddaf 1-39,41-43,45-82,84-85,87-95,97-100,102-119
+tests/unit/common/test_metrics_facet_rebuild_lua_heap_regression.py
+  s_f00f47447edb7e::t_f1bd973e32fe1e 70-71
+  s_f00f47447edb7e::t_5ffd71f1e59f86 1-69,72-126
+tests/unit/gen/test_issue_3550_reverse_proxy_location_render.py
+  s_9d465355a62612::t_5e208dbb3e4343 1-61,66-71
+  s_0764058785b27f::t_bedb471904fcfd 63-65
+  s_0764058785b27f::t_1579c0ac33504d 62
+tests/unit/linux/test_issue_2743_run_as_nginx.py
+  s_dcb30ee9c5d83b::t_92869c18eccd54 1-68
+tests/unit/linux/test_issue_2663_stop_uses_bunkerweb_pid.py
+  s_dcb30ee9c5d83b::t_fc085af7a6410d 17,19
+  s_dcb30ee9c5d83b::t_549fafa7bb58d2 36
+  s_dcb30ee9c5d83b::t_189a52261dd0a4 27,34,51,55
+  s_7e1aa223afa859::t_c0904fe7862730 20-25,41-42,56,68
+  s_dcb30ee9c5d83b::t_1d1c23eff4330e 1-16,18,26,28-33,35,37-40,43-50,52-54,57-67,69-77
+tests/unit/db/test_issue_3361_database_uri_handling.py
+  s_6f18265bab664f::t_624b0d2271e2f2 9-10,88,95
+  s_6f18265bab664f::t_aa20d26be097f0 1-8,11-87,89-94
+tests/unit/common/test_metrics_reports_wipe_latched_synced_regression.py
+  s_f00f47447edb7e::t_434c059ccf6170 36-37,131
+  s_f00f47447edb7e::t_f1bd973e32fe1e 72-129,140-147
+  s_f00f47447edb7e::t_46b76cc8c774a9 14
+  s_f00f47447edb7e::t_c45f6a913b4182 1-13,15-35,38-71,130,132-139,148-149
+tests/unit/ui/core_plugins/test_issue_2100_redis_keys_count.py
+  s_f64fec522e612b::t_d77acba6e00a46 1-26
+tests/unit/common/test_certificate_provider_init.py
+  s_af747a00606fd7::t_8e34d009a6a2ea 84,89-92
+  s_af747a00606fd7::t_4a20da6e1ca626 1-83,85-88
+tests/unit/ui/routes/test_issue_3489_exports_and_service_template_regressions.py
+  s_0f1d7d012a8aa4::t_0fdd0c710c5de0 1-104,113-117,122-134,136-197
+  s_f00f47447edb7e::t_4876ec72a22b91 105-112,118-121,135
+tests/unit/ui/routes/test_issue_3046_redis_database.py
+  s_f64fec522e612b::t_b706eb712796a5 1-35
+tests/unit/cli/test_issue_3810_bwcli_api_token.py
+  s_9d465355a62612::t_bb49ef66060174 1-118
+tests/unit/jobs/test_issue_422_realip_setting_name.py
+  s_7e1aa223afa859::t_d64ff48761e92d 1-75
+tests/unit/gen/test_reverseproxy_signin_regex_regression.py
+  s_7e1aa223afa859::t_89b50735170eb9 17-19
+  s_7e1aa223afa859::t_03804638d85e26 1-16,20-54
+tests/unit/linux/test_issue_3052_upgrade_backup_install_type.py
+  s_dcb30ee9c5d83b::t_25d47d07926873 1-90
+tests/unit/gen/test_mtls_fail_open_missing_ca_regression.py
+  s_ef59a3a906331f::t_e69648a8df7758 1-87,89-96
+  s_6f18265bab664f::t_c99f7bd0db131a 88
+tests/unit/common/test_issue_4093_redis_sentinel_credentials.py
+  s_6f18265bab664f::t_0cb041d92d4eaa 59-61,67-69,75-76,82-83
+  s_6f18265bab664f::t_f4f4a1c7ee438f 1-20,24-58,62-66,70-74,77-81
+  s_6f18265bab664f::t_59add2fd8a5108 21-23
+tests/unit/common/test_ignore_uri_normalized_path_regression.py
+  s_965bcf2df76d3f::t_548a87bad3dbee 1-88
+tests/unit/gen/test_ecdh_curve_faithful_probe_regression.py
+  s_9d465355a62612::t_abaaeb502494c9 24-26,95,105,115,121,139
+  s_0764058785b27f::t_4192e7534b8bb4 1-23,27-94,96-104,106-114,116-120,122-138,140-148
+tests/unit/db/test_issue_3893_db_write_paths.py
+  s_6f18265bab664f::t_c0b7cf6878a856 36-39
+  s_6f18265bab664f::t_fc91f0b37137c4 1-35,40-145
+tests/unit/db/test_issue_2538_get_config_integer_suffixes.py
+  s_9d465355a62612::t_5e208dbb3e4343 1-40
+  s_9d465355a62612::t_1c894de77c7643 41-42
+tests/unit/common/test_utils_remove_ban_redis_regression.py
+  s_949fb6b148f461::t_60060ea82f7c58 14-15,18-20,31
+  s_50fbb9cf704988::t_e3b0aed55108dc 1-9,11-13,16-17,21-30,32-61,65-73,78-86,90-105
+  s_949fb6b148f461::t_9730ee72913db0 10,62-64,74-77,87-89
+tests/unit/linux/test_issue_3659_crowdsec_prefers_upstream.py
+  s_dcb30ee9c5d83b::t_0dfb06472c6cf7 68
+  s_dcb30ee9c5d83b::t_e2b5092992897a 1-67,69-98
+tests/unit/plugins_download/test_issue_3258_plugin_archive_is_deterministic.py
+  s_0f1d7d012a8aa4::t_ccad865488ab3e 1-69
+tests/unit/gen/test_issue_3682_modsec_bodyless_xml.py
+  s_ef59a3a906331f::t_36b46b0e0bd132 28,32
+  s_ef59a3a906331f::t_7b583595fc005c 1-27,29-31,33-61
+tests/unit/common/test_issue_3618_datastore_lru_resize.py
+  s_f00f47447edb7e::t_f1bd973e32fe1e 49,65
+  s_0f1d7d012a8aa4::t_3d26dc377a546f 1-48,50-64,66-74
+tests/unit/ui/test_service_template_switch_defaults_regression.py
+  s_50fbb9cf704988::t_8bf584264635e9 132-140
+  s_50fbb9cf704988::t_ce0985d56a0865 67-69,102-103
+  s_50fbb9cf704988::t_868c954353ee9e 1-66,70-100,104-131,141-163
+  s_50fbb9cf704988::t_9a33a54b04b879 101
+tests/unit/letsencrypt/test_zerossl_bot_api_key_env_regression.py
+  s_50fbb9cf704988::t_d9522a574a5350 1-33,35-60,62-74,76-96
+  s_50fbb9cf704988::t_b219b09a297bff 75
+  s_50fbb9cf704988::t_1a4693304e1453 34,61
+tests/unit/ui/test_raw_defaults_submit_dom.py
+  s_af747a00606fd7::t_ae94db0614a798 1-84
+tests/unit/db/test_mem_api_global_config_partial_wipe_regression.py
+  s_f64fec522e612b::t_b365f8c7af081d 30
+  s_f64fec522e612b::t_4042a7bee36ce4 3-4
+  s_f64fec522e612b::t_3a32ffebb084a8 1-2,5-29,31-51
+tests/unit/common/test_issue_3012_list_plugins_shared_reference_regression.py
+  s_f00f47447edb7e::t_a5261d927d7b4d 1-82
+tests/unit/common/test_issue_2686_atomic_cache_writes.py
+  s_9d465355a62612::t_ee5fe831ffa412 1-79
+tests/unit/ui/test_issue_3350_multiselect_template_values.py
+  s_f00f47447edb7e::t_98dbdfae53957a 1-53
+tests/unit/gen/_t4_helpers.py
+  s_f64fec522e612b::t_9abfec085c866b 1-56
+  s_f64fec522e612b::t_65082a7cb43e7f 111-112,115-117
+  s_ef59a3a906331f::t_6f31de9d165c01 57-110,113-114
+tests/unit/letsencrypt/test_issue_3021_hooks_use_api_on_every_integration.py
+  s_7e1aa223afa859::t_c5256e2c0b2405 1-77
+tests/unit/letsencrypt/test_issue_3237_credential_leaks.py
+  s_7e1aa223afa859::t_629e06780d3f3c 1-78,80-87,89-98
+  s_0764058785b27f::t_fdfbdd26ec2ed7 79,88
+tests/unit/common/test_remove_ban_clears_badbehavior_state.py
+  s_949fb6b148f461::t_2a402ddfc6904e 190-219
+  s_949fb6b148f461::t_e283096d571a32 147
+  s_949fb6b148f461::t_b71236afe2c9a2 1-146,148-189,220-277
+tests/unit/linux/test_issue_615_runtime_dirs_recreated.py
+  s_dcb30ee9c5d83b::t_ead0747d71d200 1-57
+tests/unit/common/test_issue_2584_bunkernet_stream_log_regression.py
+  s_f00f47447edb7e::t_ff8bb5dc065a7b 1-59
+tests/unit/common/_t2_helpers.py
+  s_f00f47447edb7e::t_8f2f7ffd25ddaf 240-246,250-263
+  s_f00f47447edb7e::t_ff8bb5dc065a7b 208-209
+  s_0f1d7d012a8aa4::t_35604d33749cd9 62-97,99-145
+  s_f00f47447edb7e::t_64357fbabab716 98,146-160
+  s_f00f47447edb7e::t_108b562ec1d0cf 247
+  s_f00f47447edb7e::t_5991da5d902d82 161-168,170-201,206-207,210-216,219-233,237-239,264-283
+  s_f00f47447edb7e::t_ca4af20c9b3d3b 169,202-205
+  s_dcb30ee9c5d83b::t_d9f20aade06c6c 1-61
+  s_f00f47447edb7e::t_d20a868ff92632 249
+  s_f00f47447edb7e::t_4876ec72a22b91 218
+  s_f00f47447edb7e::t_64c561acf3763c 217,234-236
+  s_f00f47447edb7e::t_54ce4b64713461 248
+tests/unit/gen/test_issue_3490_bwerror_handlers_no_short_circuit.py
+  s_ef59a3a906331f::t_e6d82500663de5 68-69
+  s_ef59a3a906331f::t_ce9e5580310124 13-14,28,35,45,54,64
+  s_ef59a3a906331f::t_f9f74279698abe 72
+  s_ef59a3a906331f::t_44cde236839d5c 29-34,36-38
+  s_6f18265bab664f::t_3fc43ae5062a13 1-12,15-27,39-44,46-53,55-63,65-67,70-71,73-74
+tests/unit/db/test_issue_3368_foreign_key_indexes.py
+  s_7e1aa223afa859::t_3e815d03a44d5c 1-75
+tests/unit/ui/_u2_helpers.py
+  s_af747a00606fd7::t_d6d98593b221c2 1-47,49-93
+  s_af747a00606fd7::t_a146a704a78460 48
+tests/unit/common/test_issue_1889_ssl_redirect_before_whitelist.py
+  s_0f1d7d012a8aa4::t_0d697ea0e348b2 1-55
+tests/unit/gen/test_issue_2525_quic_reuseport.py
+  s_ef59a3a906331f::t_f38333e79eea69 70
+  s_ef59a3a906331f::t_0ec56049d5559f 1-69,71-74
+tests/unit/backup/test_issue_2350_dump_command_options.py
+  s_7e1aa223afa859::t_29f2b16d204f45 1-67
+tests/unit/common/test_ghsa_79fm_acme_token_traversal_regression.py
+  s_0f1d7d012a8aa4::t_e37f8c47796da2 47-48
+  s_7e1aa223afa859::t_85b0dc01d4ac18 1-46,49-82
+tests/unit/db/_t3_helpers.py
+  s_6f18265bab664f::t_aa20d26be097f0 1-43
+tests/unit/ui/test_feedback_rendering_dom.py
+  s_af747a00606fd7::t_7e9243c2fbfd5a 29
+  s_af747a00606fd7::t_ae94db0614a798 1-28,30-56
+tests/unit/ui/test_setting_control_dom.py
+  s_af747a00606fd7::t_d6d98593b221c2 1-30
+tests/unit/cli/test_issue_3046_bwcli_redis_database.py
+  s_2e498528ec0a93::t_73aeae06e0aab7 1-53
+tests/unit/cli/test_issue_3222_plugin_command_dispatch.py
+  s_dcb30ee9c5d83b::t_8c11dfa072e4d6 43
+  s_9d465355a62612::t_bb49ef66060174 1-42
+tests/unit/ui/core/test_temp_ui_real_templates.py
+  s_9260fc326c2e6e::t_052b2dff1285f2 1-49
+tests/unit/db/test_issue_1946_global_suffixed_default_update.py
+  s_2e498528ec0a93::t_e7539076a95400 1-41,45,47,49-58
+  s_50fbb9cf704988::t_ce0985d56a0865 42-44,46,48
+tests/unit/common/test_issue_3324_letsencrypt_lineage_all_four.py
+  s_6f18265bab664f::t_f4f4a1c7ee438f 1-71
+tests/unit/ui/routes/test_mem_ui_digit_only_config_name_regression.py
+  s_ef59a3a906331f::t_811b75756b5a40 3
+  s_f64fec522e612b::t_20ce74e39cef79 1-2,4-30
+tests/unit/db/test_issue_4095_alembic_enum_method_upgrade.py
+  s_2e498528ec0a93::t_711bb255973463 1-5,9-23,25-44,46-48,50-67,71-85
+  s_88b3e01ba6f043::t_18d813c3abc3f0 6-8,45,68-70
+  s_2e498528ec0a93::t_d9d3322fc7151f 24,49
+tests/unit/common/test_issue_922_badbehavior_whitelist_regression.py
+  s_f00f47447edb7e::t_f1bd973e32fe1e 27
+  s_dcb30ee9c5d83b::t_fd40e7f8f37ed4 82,90,98
+  s_f00f47447edb7e::t_5991da5d902d82 1-26,28-81,83-89,91-97,99
+tests/unit/common/test_capjs_hashwx_frame.py
+  s_af747a00606fd7::t_9b9ddd728284ad 17,29,68-70,75-76
+  s_af747a00606fd7::t_388576a235af7e 1-16,18-28,30-67,71-74
+tests/unit/ui/routes/test_issue_2027_log_invalid_utf8.py
+  s_6f18265bab664f::t_c0b7cf6878a856 1-42
+tests/unit/db/test_issue_3986_service_default_edit_last_update.py
+  s_dc476044040fad::t_4925a9dbc19d7b 7,10,49-51
+  s_0f1d7d012a8aa4::t_a18f3c80d323dc 1-6,8-9,11-48,52-57
+tests/unit/db/test_issue_474_save_config_values.py
+  s_f64fec522e612b::t_b365f8c7af081d 34,69-80
+  s_f64fec522e612b::t_dd44975dc8b322 49-50,62,87,106,108
+  s_f64fec522e612b::t_809621748264a6 6,102-104,107,111
+  s_6f18265bab664f::t_b8419ce966fbc7 1-5,7-33,35-48,51-61,63-68,81-86,88-101,105,109-110,112-114
+tests/unit/gen/test_issue_3992_default_page_root_only.py
+  s_ef59a3a906331f::t_15aec0e1206dde 1-44
+tests/unit/gen/test_issue_656_redirect_keeps_acme_challenge.py
+  s_f00f47447edb7e::t_64357fbabab716 1-37,41-78
+  s_80f1da85912d1b::t_f2802e17a4837e 38-40
+tests/unit/gen/test_issue_954_templator_root_templates.py
+  s_7e1aa223afa859::t_96115080a065f7 1-46,48-54,56-65
+  s_7e1aa223afa859::t_3075a8068315f4 47,55
+tests/unit/linux/test_issue_2556_aio_redis_data_dir.py
+  s_dcb30ee9c5d83b::t_664816b0ad123b 1-58,60-64
+  s_dcb30ee9c5d83b::t_fc085af7a6410d 59
+tests/unit/common/test_issue_3107_stream_utils.py
+  s_0f1d7d012a8aa4::t_35604d33749cd9 1-37
+tests/unit/linux/test_issue_2998_dead_nginx_wait_loop.py
+  s_0f1d7d012a8aa4::t_3a653c3e678cb9 13,42,57,61
+  s_dcb30ee9c5d83b::t_f6535f2be8469d 1-12,14-41,43-55,58-60,62-63
+  s_dcb30ee9c5d83b::t_4b0ee1d14fd45b 56
+tests/unit/ui/test_raw_mode_skips_unchanged_defaults.py
+  s_f5aa805b6b665e::t_cd20522c24a6ce 40,42,58,144-145
+  s_f5aa805b6b665e::t_ce9d8d3d195657 1-39,41,43-57,59-143,146-196
+tests/unit/db/test_upgrade_alembic_rc_chain_regression.py
+  s_7e1aa223afa859::t_4e3078259b121f 1-30
+tests/unit/ui/core/test_issue_3175_main_request_edge_regressions.py
+  s_f64fec522e612b::t_d85ae972af9e5d 53-74
+  s_f64fec522e612b::t_03d258ebd56c3d 75,81
+  s_f64fec522e612b::t_f289c695c7044c 1-10,13-52
+  s_6f18265bab664f::t_3c7eef1d1f11c4 76-80
+  s_f64fec522e612b::t_1a83632176a025 11-12,82-84
+  s_f64fec522e612b::t_20c715131ee29f 85-99
+tests/unit/letsencrypt/test_issue_3251_profile_name_limit_warning.py
+  s_f00f47447edb7e::t_f12a6930309f88 1-53
+tests/unit/common/test_issue_3475_metric_keys_from_request_data_regression.py
+  s_f00f47447edb7e::t_f1bd973e32fe1e 29
+  s_f00f47447edb7e::t_092c71b9cc2cd5 1-28,30-37
+tests/unit/gen/test_issue_2452_ui_login_modsec_exclusions.py
+  s_ef59a3a906331f::t_811b75756b5a40 1-13,15-74
+  s_f64fec522e612b::t_42b11c07944e61 14,75-76
+tests/unit/jobs/test_mtls_client_cert_job_regression.py
+  s_7e1aa223afa859::t_ae4a1ceaa5f710 18
+  s_7e1aa223afa859::t_7c86307b046818 1-17,19-29
+tests/unit/ui/core/test_issue_3685_reports_page_and_filters.py
+  s_0f1d7d012a8aa4::t_976393283b07e1 28
+  s_dcb30ee9c5d83b::t_ed1bfc5a60a9d0 47
+  s_0f1d7d012a8aa4::t_c428c2eaad376f 1-27,29-46,48-91
+tests/unit/db/test_issue_4095_alembic_varchar_method_upgrade.py
+  s_9d465355a62612::t_339072730f15e7 1-80
+tests/unit/gen/_t5_helpers.py
+  s_0764058785b27f::t_89c7b96e1fbac9 1-26
+tests/unit/gen/test_stream_lua_conf_shared_dict_regression.py
+  s_50fbb9cf704988::t_a7b8ab52f1cda6 1-35
+tests/unit/ui/core/test_issue_3986_service_create_keeps_others.py
+  s_0f1d7d012a8aa4::t_844f6c75801cc5 1-65
+tests/unit/ui/routes/test_issue_2006_pro_license_key_validation.py
+  s_f64fec522e612b::t_2e5f4e104a2ea1 1-33
+tests/unit/ui/routes/test_mem_ui_session_fixation_regenerate_regression.py
+  s_6f18265bab664f::t_dbf049ce963255 1-40
+tests/unit/ui/test_mem_ui_jobs_pane_data_order_regression.py
+  s_80f1da85912d1b::t_52e14a82d733c3 1-90
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "a7f1aefd021df28f8bcab6f3a120353351759ddd",
+  "prompts": {},
+  "sessions": {
+    "s_0764058785b27f": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "6f414ea5-d895-491e-9f18-ca8c2fe592bd",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_07e8b95f556956": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "1d72ad85-3b46-439b-a130-ec8399e2b4b5",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_0f1d7d012a8aa4": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "5b70429f-d3c8-4d85-9a1d-481b43458fdd",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_14b4af2bbc6eba": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "994e1786-414c-4a12-9165-8735d623fb65",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_2e498528ec0a93": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "184f252f-b4ed-4914-bdae-c6bc175c1a32",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_50fbb9cf704988": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "917ee58a-bcd7-4c6c-8022-9e98dffacf5b",
+        "model": "unknown"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_6f18265bab664f": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "c3b9bd0e-00d0-4b30-848f-32b73ddb1b90",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_7e1aa223afa859": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "63451d7e-2dbe-4de8-81f8-db7a01af69eb",
+        "model": "unknown"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_80f1da85912d1b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "48f28331-3ce2-4fa3-b959-69d5d1238c0a",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_88b3e01ba6f043": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "bc776e5e-bf7f-47ac-8022-9b0c245aa04d",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_9260fc326c2e6e": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "31a8367a-8bdd-41d9-99f2-7a60776c9fae",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_949fb6b148f461": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "bb0dfd43-7e0c-42e4-bab7-4987922b781d",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_965bcf2df76d3f": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "4b4676a5-b632-41af-8f72-ea9c7f449645",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_9d465355a62612": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "3d6196ce-5aa2-40ff-9b80-392df9f79eb7",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_af747a00606fd7": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a182b0-8e49-7712-b052-129b2cab675b",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_d25bba7717a9cb": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "70421a52-d626-489d-88d7-97735efa4463",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_dc476044040fad": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "5f55b304-ffc5-43e4-be16-64f4e89bdd60",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_dcb30ee9c5d83b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "6dc10e6c-f663-4bdb-8f57-13f9ec61a891",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_ef59a3a906331f": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "1b290906-27db-46c9-8f56-794719b28e91",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_f00f47447edb7e": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "2404b957-9186-415a-ad0e-1fbaad77dfa5",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_f5aa805b6b665e": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "47edc19a-c7df-4be5-a763-27c4621f8b32",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_f64fec522e612b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "a01770b8-e804-4071-acb1-e5a570157500",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

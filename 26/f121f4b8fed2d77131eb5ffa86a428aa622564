@@ -1,0 +1,22 @@
+tests/unit/api_app/test_api_allowlist_invalid_entries.py
+  s_ff3fe57448790d::t_73d8f89f96d65e 8,11-12
+  s_ff3fe57448790d::t_f87e0b469e457f 1-7,9-10,13-64
+src/api/app/main.py
+  s_ff3fe57448790d::t_6058aa4fc5a5be 63,83-86,89
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "26f121f4b8fed2d77131eb5ffa86a428aa622564",
+  "prompts": {},
+  "sessions": {
+    "s_ff3fe57448790d": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1b12b-339c-7c50-ad0b-c614411074f6",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

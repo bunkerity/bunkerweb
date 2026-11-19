@@ -1,0 +1,19 @@
+src/api/app/rate_limit.py
+  s_60628c795bd662::t_ee47660bded3bb 545-548,560
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "3b642ef43ad7ba0e2c5c4022900858db522aa3df",
+  "prompts": {},
+  "sessions": {
+    "s_60628c795bd662": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1869d-2e49-7ff2-8e88-cfcf2fe9cb0c",
+        "model": "unknown"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

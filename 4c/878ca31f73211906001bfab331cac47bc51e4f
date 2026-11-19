@@ -1,0 +1,21 @@
+CHANGELOG.md
+  s_ed1458b44c458d::t_70893be51a78e4 49
+src/ui/app/static/js/pages/setup.js
+  s_ed1458b44c458d::t_ae3ee0ac09bdb4 274-289,352,629,634-636,888-903,915-917,920-921
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "4c878ca31f73211906001bfab331cac47bc51e4f",
+  "prompts": {},
+  "sessions": {
+    "s_ed1458b44c458d": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "eed1c216-b356-4ab3-917e-93a0aa3de60e",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

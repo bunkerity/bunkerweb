@@ -1,0 +1,20 @@
+CHANGELOG.md
+  h_a33a1e80933106 23
+src/autoconf/controllers/KubernetesController.py
+  h_a33a1e80933106 395-398,401,416,420-421
+tests/unit/autoconf/test_ipv6_kubernetes_instances.py
+  h_a33a1e80933106 13,17,19,32
+tests/unit/autoconf/test_kubernetes_controller_core.py
+  h_a33a1e80933106 177,182-183,200,204-217
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "7a321c3f60950e9dc4af3adc6522f18c835df5ab",
+  "prompts": {},
+  "humans": {
+    "h_a33a1e80933106": {
+      "author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}
