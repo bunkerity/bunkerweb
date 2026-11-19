@@ -55,7 +55,21 @@ for deps_path in [os_join(sep, "usr", "share", "bunkerweb", *paths) for paths in
 from common_utils import bytes_hash, create_plugin_tar_gz, has_embedded_newline, is_valid_host, parse_duration  # type: ignore
 
 from pymysql import install_as_MySQLdb
-from sqlalchemy import and_, bindparam, case, create_engine, event, MetaData as sql_metadata, func, join, select as db_select, text
+from sqlalchemy import (
+    and_,
+    bindparam,
+    case,
+    create_engine,
+    event,
+    false,
+    MetaData as sql_metadata,
+    func,
+    join,
+    select as db_select,
+    text,
+    tuple_,
+    update as db_update,
+)
 from sqlalchemy.engine import Engine
 from sqlalchemy.engine.url import make_url
 from sqlalchemy.exc import (
@@ -87,6 +101,10 @@ def set_sqlite_pragma(dbapi_connection, _):
 filterwarnings("ignore", category=SAWarning, message="DELETE statement on table .* expected to delete")
 
 T = TypeVar("T")
+
+
+class _SlotLockConflict(Exception):
+    """The locking read of a slot lost a lock wait, a deadlock or a MariaDB snapshot conflict: ``save_config`` recomputes once."""
 
 
 class DatabaseInitError(Exception):
@@ -1970,6 +1988,72 @@ class Database:
                 if owner != service:
                     self.logger.warning(f"Server name {name} is used by both services {owner} and {service}, nginx will only serve it for one of them")
 
+    @staticmethod
+    def _layer_over_stored_global_values(session, config: Dict[str, Any]) -> Dict[str, Any]:
+        """Return ``config`` layered over the stored non-draft global rows of every method.
+
+        A partial save sends only the keys it changes, yet each of them is decided against the whole
+        global configuration: the active ``USE_TEMPLATE`` supplies the defaults, and the sibling members
+        of a multiple setting decide whether a slot is anchored. Reading the rows here, in the save
+        session, keeps that context current. The result is context for decisions only: ``save_config``
+        writes just the posted keys, so a stored row that is not posted is never rewritten, re-owned,
+        recreated or deleted by this save.
+        """
+        stored = {
+            (f"{row.setting_id}_{row.suffix}" if row.suffix else row.setting_id): row.value
+            for row in session.query(Global_values).with_entities(Global_values.setting_id, Global_values.suffix, Global_values.value).filter_by(is_draft=False)
+            if row.value is not None
+        }
+        return stored | config
+
+    def _read_global_rows_locked(self, session, rows: Set[Tuple[str, int]]) -> Dict[Tuple[str, int], Tuple[Optional[str], str, bool, Optional[str]]]:
+        """Return ``(value, method, is_draft, file_name)`` of the given ``(setting_id, suffix)`` global rows (drafts included), locked until the transaction ends.
+
+        What it guarantees: when this returns, no other writer can change or delete these rows before this
+        transaction commits, and the rows returned are the committed ones of that moment. A slot decision
+        is applied only if every input it read is unchanged under the lock: the caller compares these rows,
+        the active template and its defaults, and the setting definitions with what it decided on, and
+        applies nothing on a difference. Rows are locked in one statement
+        ordered by key, so two saves never wait on each other in opposite order. SQLite has no row locks
+        and ignores ``FOR UPDATE``: a write that matches no row takes its database-wide write lock first
+        (before this read, so it also sees the latest commit).
+        """
+        keys = sorted(rows)
+        if not keys:
+            return {}
+        if self.sql_engine.dialect.name == "sqlite":
+            session.execute(db_update(Global_values).where(false()).values(value=Global_values.value))
+        query = (
+            session.query(
+                Global_values.setting_id, Global_values.suffix, Global_values.value, Global_values.method, Global_values.is_draft, Global_values.file_name
+            )
+            .filter(tuple_(Global_values.setting_id, Global_values.suffix).in_(keys))
+            .order_by(Global_values.setting_id, Global_values.suffix)
+            .with_for_update()
+        )
+        return {(row.setting_id, row.suffix or 0): (row.value, row.method, bool(row.is_draft), row.file_name) for row in query}
+
+    def _read_slot_context(
+        self, session, template: str, lock: bool = False
+    ) -> Tuple[Dict[str, Tuple[str, Optional[str]]], Dict[Tuple[str, int], Optional[str]]]:
+        """Return the setting definitions (``id -> (default, multiple group)``) and the defaults ``template`` sets (``(setting_id, suffix) -> default``).
+
+        Both feed every partial-save decision that compares a posted value with a default. ``lock`` takes row
+        locks on the template's rows, so the caller can compare what it decided on with what is committed.
+        """
+        multiple = {s.id: (self._empty_if_none(s.default), s.multiple) for s in session.query(Settings.id, Settings.default, Settings.multiple).all()}
+        defaults = {}
+        if template:
+            query = (
+                session.query(Template_settings)
+                .with_entities(Template_settings.setting_id, Template_settings.suffix, Template_settings.default)
+                .filter_by(template_id=template)
+                .order_by(Template_settings.setting_id, Template_settings.suffix)
+            )
+            for ts in query.with_for_update() if lock else query:
+                defaults[(ts.setting_id, ts.suffix or 0)] = ts.default
+        return multiple, defaults
+
     def save_config(
         self,
         config: Dict[str, Any],
@@ -1978,6 +2062,7 @@ class Database:
         file_names: Optional[Dict[str, str]] = None,
         *,
         skip_service_management: bool = False,
+        partial: bool = False,
         disable_cleanup: bool = False,
         explicit_keys: Optional[Set[str]] = None,
         draft_settings: Optional[Dict[str, Optional[bool]]] = None,
@@ -1998,6 +2083,13 @@ class Database:
                                      misleading: it does not restrict input to global
                                      settings, it only disables the service-management
                                      side-effects.
+            partial: When True, ``config`` holds only the keys the caller changes, not the
+                     whole configuration. The stored non-draft global rows are layered
+                     under it as read-only context, so each key is decided with its template
+                     and multiple-setting slot context, but only the keys in ``config`` are
+                     ever written: global rows missing from it are kept, not deleted, and an
+                     empty ``config`` saves nothing. Meant for global-only callers: pair it
+                     with ``skip_service_management``.
             explicit_keys: Raw environment/variables keys explicitly declared by the
                            caller (e.g. Configurator.explicit_keys), service-prefixed
                            and suffixed forms included. Only consulted when
@@ -2037,6 +2129,12 @@ class Database:
         changed_plugins = set()
         changed_services = False
         service_template_change = False
+        nm_multiple = {}
+        slot_candidates = []  # permitted deletes of a default member whose slot a sibling anchors, confirmed in the batch
+        posted_values = {}  # (setting_id, suffix) -> value this save leaves active (None: a draft), where it writes the row
+        seen_rows = {}  # (setting_id, suffix) -> stored row (or None) the per-key loop read, partial saves only
+        decided_rows = set()  # (setting_id, suffix) rows the loop acted on: queued a delete or update, or skipped an insert as a default
+        slot_reads = set()  # (group, suffix) slots whose anchor siblings a decision relied on
 
         db_config = {}
         if method == "autoconf":
@@ -2133,6 +2231,16 @@ class Database:
             if self.readonly:
                 return "The database is read-only, the changes will not be saved"
 
+            # Under a partial save ``config`` becomes the merged context (stored rows + posted keys):
+            # it only feeds decisions (active template, anchored slots). Every write goes through
+            # ``posted_keys``, so a stored row that was not posted is never read as a value to write.
+            posted_keys = None
+            if partial:
+                if not (config or draft_settings or rename or custom_config_changes):
+                    return changed_plugins
+                posted_keys = frozenset(config)
+                config = self._layer_over_stored_global_values(session, config)
+
             if rename:
                 try:
                     rename_error = self._rename_service_rows(session, *rename)
@@ -2206,7 +2314,7 @@ class Database:
             global_settings_to_delete = []
             global_method_total = 0
             cleanup_methods = EDITABLE_METHODS if method in EDITABLE_METHODS else {method}
-            for db_global_config in session.query(Global_values).filter(Global_values.method.in_(cleanup_methods)).all():
+            for db_global_config in [] if partial else session.query(Global_values).filter(Global_values.method.in_(cleanup_methods)).all():
                 key = db_global_config.setting_id
                 if db_global_config.suffix:
                     key = f"{key}_{db_global_config.suffix}"
@@ -2981,21 +3089,15 @@ class Database:
                     # members must still be persisted here, otherwise the whole user-declared slot would vanish.
                     # Assumes multiple-setting defaults are non-NULL strings (true for all core plugins); a NULL
                     # default would need _empty_if_none normalization to match the per-key check below.
-                    nm_multiple = {
-                        s.id: (self._empty_if_none(s.default), s.multiple) for s in session.query(Settings.id, Settings.default, Settings.multiple).all()
+                    nm_multiple, nm_template_defaults = self._read_slot_context(session, template)
+                    # (group, suffix) kept alive by the template -> must not be persisted
+                    nm_template_slots = {
+                        (nm_multiple[ts_id][1], ts_suffix)
+                        for (ts_id, ts_suffix) in nm_template_defaults
+                        if ts_suffix > 0 and ts_id in nm_multiple and nm_multiple[ts_id][1]
                     }
-                    nm_template_defaults = {}
-                    nm_template_slots = set()  # (group, suffix) kept alive by the template -> must not be persisted
-                    if template:
-                        for ts in (
-                            session.query(Template_settings)
-                            .with_entities(Template_settings.setting_id, Template_settings.suffix, Template_settings.default)
-                            .filter_by(template_id=template)
-                        ):
-                            nm_template_defaults[(ts.setting_id, ts.suffix or 0)] = ts.default
-                            if ts.suffix and ts.suffix > 0 and ts.setting_id in nm_multiple and nm_multiple[ts.setting_id][1]:
-                                nm_template_slots.add((nm_multiple[ts.setting_id][1], ts.suffix))
                     nm_anchored_slots = set()
+                    nm_posted_default_slots = set()  # partial: slots where a posted member sits at its default
                     for anchor_key, anchor_value in config.items():
                         anchor_suffix = 0
                         anchor_base = anchor_key
@@ -3007,8 +3109,18 @@ class Database:
                         anchor_default = nm_template_defaults.get((anchor_base, anchor_suffix), nm_multiple[anchor_base][0])
                         if anchor_value != anchor_default:
                             nm_anchored_slots.add((nm_multiple[anchor_base][1], anchor_suffix))
+                        elif posted_keys is not None and anchor_key in posted_keys:
+                            nm_posted_default_slots.add((nm_multiple[anchor_base][1], anchor_suffix))
+
+                    # A posted default member is deleted when a sibling anchors its slot, and that sibling was read as context
+                    # before this transaction wrote anything. Each such permitted delete is only a candidate here: the batch
+                    # below locks the slots after the plugin rows (the order of every other save) and decides it on fresh rows.
+                    nm_revalidated_slots = (nm_posted_default_slots & nm_anchored_slots) - nm_template_slots
 
                     for original_key, value in config.items():
+                        if posted_keys is not None and original_key not in posted_keys:
+                            continue  # stored context only, never written
+
                         key = deepcopy(original_key)
                         suffix = 0
                         if self.SUFFIX_RX.search(key):
@@ -3026,6 +3138,8 @@ class Database:
                             .filter_by(setting_id=key, suffix=suffix)
                             .first()
                         )
+                        if posted_keys is not None:
+                            seen_rows[(key, suffix)] = global_value
                         draft_state_posted = draft_state_is_posted(original_key, key)
                         explicit_draft_state = draft_state_for(original_key, key)
                         if draft_state_posted and explicit_draft_state is None:
@@ -3039,6 +3153,7 @@ class Database:
                                 )
                             ):
                                 to_delete.append({"model": Global_values, "filter": {"setting_id": key, "suffix": suffix}})
+                                decided_rows.add((key, suffix))
                                 changed_plugins.add(setting.plugin_id)
                             continue
 
@@ -3061,6 +3176,8 @@ class Database:
                             global_value and explicit_draft_state is not None and desired_is_draft != bool(global_value.is_draft) and method_can_update
                         )
                         target_file_name, file_name_changed = get_setting_file_name(setting.type, original_key, value_changed, current_file_name)
+                        if suffix and (not global_value or should_update_value or state_changed):  # only where this save queues a write
+                            posted_values[(key, suffix)] = None if desired_is_draft else value
 
                         template_setting = None
                         if template:
@@ -3070,7 +3187,9 @@ class Database:
                                 .filter_by(template_id=template, setting_id=key, suffix=suffix)
                                 .first()
                             )
-                            service_template_change = True
+                            # A partial save raises the signal only where a row is persisted (below): an unchanged key must not re-arm it.
+                            if not partial:
+                                service_template_change = True
 
                         nm_mult = nm_multiple.get(key, (None, None))[1]
                         nm_is_anchorless = (
@@ -3081,10 +3200,14 @@ class Database:
                         if not global_value:
                             # An anchorless slot's default member must be persisted, else the whole slot vanishes.
                             if value == nm_default and not nm_is_anchorless and not desired_is_draft:
+                                decided_rows.add((key, suffix))  # skipped as a default: the row must still be absent, the default still the same
+                                if (nm_mult, suffix) in nm_anchored_slots:
+                                    slot_reads.add((nm_mult, suffix))
                                 continue
 
                             self.logger.debug(f"Adding global setting {key}")
                             changed_plugins.add(setting.plugin_id)
+                            service_template_change = service_template_change or bool(template)
                             to_put.append(
                                 Global_values(
                                     setting_id=key,
@@ -3096,14 +3219,21 @@ class Database:
                                 )
                             )
                         elif should_update_value or file_name_changed or state_changed:
+                            # Only a permitted change writes the row: a refused one (``method_can_update`` false) rewrites nothing.
+                            service_template_change = service_template_change or (
+                                bool(template) and (should_update_value or state_changed or (file_name_changed and method_can_update))
+                            )
                             if should_update_value:
                                 changed_plugins.add(setting.plugin_id)
                             if state_changed:
                                 changed_plugins.add(setting.plugin_id)
 
-                            if (should_update_value or state_changed) and value == nm_default and not nm_is_anchorless and not desired_is_draft:
+                            delete_row = (should_update_value or state_changed) and value == nm_default and not nm_is_anchorless and not desired_is_draft
+                            delete_item = {"model": Global_values, "filter": {"setting_id": key, "suffix": suffix}}
+                            if delete_row and (nm_mult, suffix) not in nm_revalidated_slots:
                                 self.logger.debug(f"Removing global setting {key}")
-                                to_delete.append({"model": Global_values, "filter": {"setting_id": key, "suffix": suffix}})
+                                to_delete.append(delete_item)
+                                decided_rows.add((key, suffix))
                                 continue
 
                             self.logger.debug(f"Updating global setting {key}")
@@ -3113,13 +3243,13 @@ class Database:
                                 setting_values.update({"value": self._empty_if_none(value), "method": method})
                             if setting.type == "file" and method_can_update and (file_name_changed or value_changed):
                                 setting_values["file_name"] = target_file_name
-                            to_update.append(
-                                {
-                                    "model": Global_values,
-                                    "filter": {"setting_id": key, "suffix": suffix},
-                                    "values": setting_values,
-                                }
-                            )
+                            update_item = {"model": Global_values, "filter": {"setting_id": key, "suffix": suffix}, "values": setting_values}
+                            decided_rows.add((key, suffix))
+                            if delete_row:
+                                slot_candidates.append((nm_mult, suffix, key, delete_item, update_item))
+                                slot_reads.add((nm_mult, suffix))
+                            else:
+                                to_update.append(update_item)
 
             # A removed RAW line is represented by ``None`` and may not be present in the
             # effective payload. Resolve only those explicit deletions here; True/False states
@@ -3176,6 +3306,63 @@ class Database:
                         session.query(Plugins).filter(Plugins.id.in_(changed_plugins)).update({Plugins.config_changed: True}, synchronize_session=False)
 
             try:
+                if posted_keys is not None and (decided_rows or slot_reads):
+                    # A slot decision is applied only if every input it read is unchanged under the lock. Inputs: the rows it acted on,
+                    # the sibling rows of the slots it relied on, the active template, the template's defaults and the setting definitions.
+                    # Lock the rows after the plugin rows (the order of every other save), compare, and recompute the whole save on a difference.
+                    locked_rows = {}
+
+                    def locked_input(member_id, slot_suffix):  # what a sibling contributes to the slot: its active stored value
+                        locked = locked_rows.get((member_id, slot_suffix))
+                        return None if locked is None or locked[2] else locked[0]
+
+                    try:
+                        locked_rows = self._read_global_rows_locked(
+                            session,
+                            decided_rows
+                            | {
+                                (member_id, slot_suffix)
+                                for slot_group, slot_suffix in slot_reads
+                                for member_id, (_, group) in nm_multiple.items()
+                                if group == slot_group
+                            }
+                            | {("USE_TEMPLATE", 0)},
+                        )
+                        locked_template = template if "USE_TEMPLATE" in posted_keys else (locked_input("USE_TEMPLATE", 0) or "")
+                        locked_multiple, locked_template_defaults = self._read_slot_context(session, locked_template, lock=True)
+                    except DatabaseError as e:  # lock wait, deadlock or MariaDB snapshot isolation (1020)
+                        raise _SlotLockConflict(str(e)) from e
+
+                    if (locked_template, locked_multiple, locked_template_defaults) != (template, nm_multiple, nm_template_defaults):
+                        raise _SlotLockConflict("the active template, its defaults or the setting definitions changed after they were read")
+                    for row_id in decided_rows:
+                        row = seen_rows[row_id]
+                        if locked_rows.get(row_id) != (None if row is None else (row.value, row.method, bool(row.is_draft), row.file_name)):
+                            raise _SlotLockConflict(f"{row_id[0]}_{row_id[1]} changed after it was read")
+                    for slot_group, slot_suffix in slot_reads:
+                        for member_id, (_, group) in nm_multiple.items():
+                            if group != slot_group:
+                                continue
+                            if (member_id, slot_suffix) in seen_rows:  # posted: the row the loop read (owner, draft state, file), not the payload
+                                row = seen_rows[(member_id, slot_suffix)]
+                                seen = None if row is None else (row.value, row.method, bool(row.is_draft), row.file_name)
+                                if locked_rows.get((member_id, slot_suffix)) != seen:
+                                    raise _SlotLockConflict(f"{member_id}_{slot_suffix} changed after it was read")
+                            elif config.get(f"{member_id}_{slot_suffix}") != locked_input(member_id, slot_suffix):  # not posted: the stored context
+                                raise _SlotLockConflict(f"{member_id}_{slot_suffix} changed after it was read")
+                if slot_candidates:
+                    for slot_group, slot_suffix, member_key, delete_item, update_item in slot_candidates:
+                        still_anchored = any(
+                            posted_values.get((member_id, slot_suffix), locked_input(member_id, slot_suffix)) not in (None, member_default)
+                            for member_id, (member_default, group) in nm_multiple.items()
+                            if group == slot_group and member_id != member_key
+                        )
+                        if still_anchored:
+                            self.logger.debug(f"Removing global setting {member_key}")
+                            to_delete.append(delete_item)
+                        else:
+                            to_update.append(update_item)
+
                 # Apply collected deletions
                 for delete_item in to_delete:
                     session.query(delete_item["model"]).filter_by(**delete_item["filter"]).delete(synchronize_session=False)
@@ -3196,7 +3383,7 @@ class Database:
                     session.delete(service_setting)
 
                 session.commit()
-            except IntegrityError as e:
+            except (IntegrityError, _SlotLockConflict) as e:
                 session.rollback()
                 if not retry_on_conflict:
                     return str(e)
@@ -3220,6 +3407,7 @@ class Database:
                 changed,
                 file_names,
                 skip_service_management=skip_service_management,
+                partial=partial,
                 disable_cleanup=disable_cleanup,
                 explicit_keys=explicit_keys,
                 draft_settings=draft_settings,
