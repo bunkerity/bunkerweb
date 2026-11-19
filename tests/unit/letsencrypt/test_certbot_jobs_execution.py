@@ -260,7 +260,7 @@ def test_new_multisite_uses_service_settings_and_continues_after_invalid_sibling
     )
     job_run.rotate = True
     module, status = job_run.load()
-    assert status == 1
+    assert status == 3
     assert module.services["bad.example.com"]["misconfigured"]
     assert job_run.popen.call_count == 1
     assert job_run.popen.call_args.args[0][5:7] == ["-d", "alias.example.com,app.example.com"]
@@ -304,6 +304,17 @@ def test_cache_write_failure_is_logged(job_run, kind):
     job_run.job.cache_dir.return_value = (False, "db refused")
     job_run.load(kind)
     assert any("db refused" in call.args[0] for call in job_run.log.error.call_args_list)
+
+
+def test_new_cache_write_failure_preserves_issuance_reload(job_run):
+    job_run.rotate = True
+    job_run.job.cache_dir.return_value = (False, "db refused")
+
+    _, status = job_run.load()
+
+    assert (job_run.data / "live/app.example.com/fullchain.pem").read_bytes() == b"new certificate"
+    job_run.job.cache_dir.assert_called_once_with(job_run.data)
+    assert status == 3
 
 
 def test_listing_failure_keeps_live_certificate_and_skips_destructive_cleanup(job_run):
@@ -676,8 +687,11 @@ def test_credential_cleanup_keeps_current_dns_credentials(job_run):
     job_run.job.del_cache.assert_called_once_with("credentials_stale.ini")
 
 
-def test_concurrent_services_contain_process_errors_and_register_zerossl(job_run):
-    job_run.env.update(MULTISITE="yes", LETS_ENCRYPT_CONCURRENT_REQUESTS="yes", SERVER_NAME="good.example.com fail.example.com")
+@pytest.mark.parametrize("concurrent", ["no", "yes"])
+@pytest.mark.parametrize("failed_first", [False, True])
+def test_mixed_issuance_reloads_success_and_reports_failure(job_run, concurrent, failed_first):
+    names = ("fail.example.com", "good.example.com") if failed_first else ("good.example.com", "fail.example.com")
+    job_run.env.update(MULTISITE="yes", LETS_ENCRYPT_CONCURRENT_REQUESTS=concurrent, SERVER_NAME=" ".join(names))
     for name in ("good.example.com", "fail.example.com"):
         job_run.env.update({f"{name}_AUTO_LETS_ENCRYPT": "yes", f"{name}_SERVER_NAME": name})
     job_run.env.update({"good.example.com_LETS_ENCRYPT_SERVER": "zerossl", "good.example.com_LETS_ENCRYPT_ZEROSSL_API_KEY": "test-key"})
@@ -691,14 +705,18 @@ def test_concurrent_services_contain_process_errors_and_register_zerossl(job_run
     job_run.popen.side_effect = process
     job_run.rotate = True
     module, status = job_run.load()
-    assert status == 2
     assert module.services["good.example.com"]["exists"]
     assert not module.services["fail.example.com"]["exists"]
-    certbot_concurrency.ensure_zerossl_accounts.assert_called_once()
-    register_env = certbot_concurrency.ensure_zerossl_accounts.call_args.args[1]
-    assert register_env["LETS_ENCRYPT_ZEROSSL_API_KEY"] == "test-key"
-    assert register_env["CERTBOT_BIN"] == utils.CERTBOT_BIN
+    assert (job_run.data / "live/good.example.com/fullchain.pem").is_file()
+    assert not (job_run.data / "live/fail.example.com/fullchain.pem").exists()
+    assert any("process failed" in call.args[0] for call in job_run.log.error.call_args_list)
+    if concurrent == "yes":
+        certbot_concurrency.ensure_zerossl_accounts.assert_called_once()
+        register_env = certbot_concurrency.ensure_zerossl_accounts.call_args.args[1]
+        assert register_env["LETS_ENCRYPT_ZEROSSL_API_KEY"] == "test-key"
+        assert register_env["CERTBOT_BIN"] == utils.CERTBOT_BIN
     job_run.job.cache_dir.assert_called_once_with(job_run.data)
+    assert status == 3
 
 
 def test_new_stale_account_recovery_uses_canonical_tree(job_run, monkeypatch):
