@@ -48,6 +48,7 @@
 - [BUGFIX] `ui`: "Reset to global value" now restores the global value in every language instead of the default.
 - [BUGFIX] `ui`: the setup wizard no longer skips invalid fields on step 2, and shows an error when saving is refused.
 - [BUGFIX] `core`: a reverse DNS resolver outage is no longer cached as "no PTR", so RDNS lists and ignores apply again once it is back.
+- [BUGFIX] `stream`: denials from security plugins are only logged in detect mode, as on HTTP services.
 - [DOCS] `splunk`: container integrations send the three logs to a Universal Forwarder as parsable `bunkerweb:*` sourcetypes, with rotation guidance.
 - [DOCS] `scheduler`: the custom configuration section explains the `.bw-managed` marker, manual deletion and restore, and retained inactive service CRS files.
 - [DOCS] `linux`: recommend `madvise` for transparent huge pages, since `always` can add hundreds of MB per reload. (Refs #4164)
