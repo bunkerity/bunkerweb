@@ -238,8 +238,9 @@ local function new(ips, with_value)
         local inets_ipv6
         if not inet_ipv4 then
             inets_ipv6 = parse_ipv6(ip_addr)
+            ip_addr_mask = ip_addr_mask or 128
             -- BunkerWeb: a mapped rule of /96 or more is the IPv4 rule it carries (::ffff:192.0.2.0/120 is 192.0.2.0/24)
-            local mapped = inets_ipv6 and ip_addr_mask and ip_addr_mask >= 96 and ip_addr_mask <= 128
+            local mapped = inets_ipv6 and ip_addr_mask >= 96 and ip_addr_mask <= 128
                            and mapped_ipv4(inets_ipv6)
             if mapped then
                 inet_ipv4, inets_ipv6, ip_addr_mask = mapped, nil, ip_addr_mask - 96

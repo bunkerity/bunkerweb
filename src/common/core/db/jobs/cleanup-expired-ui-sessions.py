@@ -26,7 +26,7 @@ try:
     ret = DB.cleanup_expired_ui_sessions(max_age_days)
     if not ret.startswith("Removed"):
         LOGGER.error(ret)
-        sys_exit(1)
+        sys_exit(2)
     LOGGER.info(ret)
 except SystemExit as e:
     status = e.code

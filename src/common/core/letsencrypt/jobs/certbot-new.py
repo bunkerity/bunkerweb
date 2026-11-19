@@ -1256,10 +1256,8 @@ try:
                             LOGGER.error(f"Unexpected error while generating certificate(s) for {service}: {e}")
                             success = False
                         config["exists"] = success
-                        if success:
-                            status = 1 if status == 0 else status
-                        else:
-                            status = 2
+                        # Changes (1) and failures (2) both matter to the scheduler.
+                        status |= 1 if success else 2
             else:
                 for service, config in pending_services:
                     # Same containment as the concurrent branch above: one service raising must not
@@ -1269,10 +1267,7 @@ try:
                     except BaseException as e:
                         LOGGER.error(f"Unexpected error while generating certificate(s) for {service}: {e}")
                         config["exists"] = False
-                    if config["exists"]:
-                        status = 1 if status == 0 else status
-                    else:
-                        status = 2
+                    status |= 1 if config["exists"] else 2
         finally:
             stop_progress_monitor()
 
@@ -1289,11 +1284,7 @@ try:
             f"Skipped certificate generation for {len(misconfigured_services)} service(s) with an invalid "
             f"Let's Encrypt configuration: {', '.join(misconfigured_services)}"
         )
-        # Only escalate when nothing was generated. status 1 means certbot succeeded and the
-        # scheduler still owes those certificates an nginx reload, which a status >= 2 would
-        # suppress, leaving freshly issued certificates unserved.
-        if status == 0:
-            status = 2
+        status |= 2
 
     if CACHE_PATH.is_dir():
         # * Clean up unused credential files
@@ -1386,6 +1377,7 @@ try:
                     cached, err = JOB.cache_dir(DATA_PATH)
                 if not cached:
                     LOGGER.error(f"Error while saving data to db cache : {err}")
+                    status |= 2
                 else:
                     LOGGER.info("Successfully saved data to db cache")
 except SystemExit as e:

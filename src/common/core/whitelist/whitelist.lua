@@ -57,7 +57,7 @@ function whitelist:initialize(ctx)
 			if not self.lists[kind] then
 				self.lists[kind] = {}
 			end
-			for data in self.variables["WHITELIST_" .. kind]:gmatch("%S+") do
+			for data in (self.variables["WHITELIST_" .. kind] or ""):gmatch("%S+") do
 				if data ~= "" then
 					table.insert(self.lists[kind], data)
 				end
@@ -255,13 +255,17 @@ function whitelist:access()
 	local ok
 	for k, _ in pairs(already_cached) do
 		if not already_cached[k] then
-			ok, whitelisted = self:is_whitelisted(k)
+			local incomplete
+			ok, whitelisted, incomplete = self:is_whitelisted(k)
 			if ok == nil then
 				self.logger:log(ERR, "error while checking if " .. k .. " is whitelisted : " .. whitelisted)
 			else
-				ok, err = self:add_to_cache(self:kind_to_ele(k), whitelisted)
-				if not ok then
-					self.logger:log(ERR, "error while adding element to cache : " .. err)
+				-- A negative verdict taken without the rDNS check (resolver error) is not cached: the next request retries it
+				if whitelisted ~= "ok" or not incomplete then
+					ok, err = self:add_to_cache(self:kind_to_ele(k), whitelisted)
+					if not ok then
+						self.logger:log(ERR, "error while adding element to cache : " .. err)
+					end
 				end
 				if whitelisted ~= "ok" then
 					ngx_var.is_whitelisted = "yes"
@@ -367,6 +371,7 @@ function whitelist:is_whitelisted_ip(skip_rdns)
 	end
 
 	-- Check if rDNS is needed
+	local rdns_failed = false
 	local check_rdns = not skip_rdns and self.lists["RDNS"] and #self.lists["RDNS"] > 0
 	if self.variables["WHITELIST_RDNS_GLOBAL"] == "yes" and not self.ctx.bw.ip_is_global then
 		check_rdns = false
@@ -383,6 +388,7 @@ function whitelist:is_whitelisted_ip(skip_rdns)
 				return true, "rDNS " .. rdns_suffix
 			end
 		else
+			rdns_failed = true
 			self.logger:log(ERR, "error while getting rdns : " .. err)
 		end
 	end
@@ -401,8 +407,8 @@ function whitelist:is_whitelisted_ip(skip_rdns)
 		end
 	end
 
-	-- Not whitelisted
-	return false, "ok"
+	-- Not whitelisted (third value: the rDNS check could not run)
+	return false, "ok", rdns_failed
 end
 
 function whitelist:is_whitelisted_uri()

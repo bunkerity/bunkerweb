@@ -1,4 +1,4 @@
-FROM nginx:1.30.6-alpine-slim@sha256:f65ed258206d1eb6c4eb6141111715a2cf94ac0a4ec9675fc2da186f7aadb163  AS builder
+FROM nginx:1.30.7-alpine-slim@sha256:b6c9aa217a1a855d53b0fb502a9a19f356404584e0bd1fc3d62a989e8dfcb6ca  AS builder
 
 # Export var for specific actions on linux/arm/v7
 ARG TARGETPLATFORM
@@ -165,7 +165,7 @@ RUN if [ "$SKIP_MINIFY" != "yes" ] && [ "$SKIP_MINIFY_HTML" != "yes" ]; then \
     echo "Skipping HTML minification"; \
     fi
 
-FROM nginx:1.30.6-alpine-slim@sha256:f65ed258206d1eb6c4eb6141111715a2cf94ac0a4ec9675fc2da186f7aadb163
+FROM nginx:1.30.7-alpine-slim@sha256:b6c9aa217a1a855d53b0fb502a9a19f356404584e0bd1fc3d62a989e8dfcb6ca
 
 # Set default umask to prevent huge recursive chmod increasing the final image size
 RUN umask 027
@@ -176,6 +176,7 @@ RUN apk add --no-cache bash coreutils curl geoip grep libgcc libgd libmagic libp
 # Fix CVEs
 RUN apk add --no-cache "libexpat>=2.10.0-r0" # CVE-2026-117610, CVE-2026-118370, CVE-2026-113351, CVE-2026-115506
 RUN apk add --no-cache "zlib>=1.4-r0" # CVE-2026-4738
+RUN apk add --no-cache "libcrypto3>=3.5.9-r1" "libssl3>=3.5.9-r1" "openssl>=3.5.9-r1" # CVE-2026-107496, CVE-2026-88822, CVE-2026-88823, CVE-2026-95691, CVE-2026-95692
 RUN apk add --no-cache "libpq>=18.7-r0" "postgresql18-client>=18.7-r0" # CVE-2026-6467 and 51 more PostgreSQL 18.6 CVEs
 
 COPY src/deps/requirements.txt /tmp/requirements-deps.txt
@@ -244,7 +245,7 @@ COPY --chown=root:nginx --chmod=770 src/bw/misc/asn.mmdb /var/tmp/bunkerweb/asn.
 COPY --chown=root:nginx --chmod=770 src/bw/misc/country.mmdb /var/tmp/bunkerweb/country.mmdb
 
 LABEL maintainer="Bunkerity <contact@bunkerity.com>"
-LABEL version="1.6.18~rc4"
+LABEL version="1.6.18~rc5"
 LABEL url="https://www.bunkerweb.io"
 LABEL bunkerweb.type="all-in-one"
 

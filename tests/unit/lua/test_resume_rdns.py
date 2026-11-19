@@ -31,7 +31,7 @@ local ERR, WARN = 'ERR', 'WARN'
 local ip_key = require('bunkerweb.ipaddr').key
 local logger = {log = function(_, level, message) table.insert(logs, {level, message}) end}
 local use_ipv6, setup_error, query_error = 'no', false, false
-local negative_answer
+local negative_answer, reverse_answer
 local ipv4, ipv6 = '192.0.2.1', '2001:db8::1'
 local ptrs = {'bot.example.com'}
 local function encode(value)
@@ -63,6 +63,7 @@ local resolver = {new = function()
         end,
         reverse_query = function()
             if query_error then return nil, 'timeout' end
+            if reverse_answer then return reverse_answer end
             local answers = {}
             for _, ptr in ipairs(ptrs) do table.insert(answers, {ptrdname = ptr}) end
             return answers
@@ -196,13 +197,46 @@ assert(#queries == ({forced} and 6 or 3), 'recovered cache must avoid another qu
     )
 
 
-def test_negative_reverse_cache(tmp_path):
+def test_reverse_timeout_is_not_cached_and_retries(tmp_path):
     run_lua(
         tmp_path,
         """
 query_error = true
-assert(#utils.get_rdns(ctx.bw.remote_addr, ctx, true) == 0)
+local ptrs_out, err = utils.get_rdns(ctx.bw.remote_addr, ctx, true)
+assert(ptrs_out == false, 'timeout must return false')
+assert(type(err) == 'string' and #err > 0)
+assert(next(cache) == nil, 'timeout must not write rDNS cache')
 query_error = false
-assert(#utils.get_rdns(ctx.bw.remote_addr, ctx, true) == 0)
+assert(#utils.get_rdns(ctx.bw.remote_addr, ctx, true) == 1, 'recovery must query again')
+assert(next(cache) ~= nil, 'recovered answer must be cached')
+""",
+    )
+
+
+@pytest.mark.parametrize("answer", ["{errcode = 2, errstr = 'server failure'}", "{errcode = 5}"], ids=["servfail", "refused-no-errstr"])
+def test_reverse_resolver_error_is_not_cached(tmp_path, answer):
+    run_lua(
+        tmp_path,
+        f"""
+reverse_answer = {answer}
+local ptrs_out, err = utils.get_rdns(ctx.bw.remote_addr, ctx, true)
+assert(ptrs_out == false, 'resolver error must return false')
+assert(type(err) == 'string' and #err > 0)
+assert(next(cache) == nil, 'resolver error must not write rDNS cache')
+""",
+    )
+
+
+@pytest.mark.parametrize("answer", ["{}", "{errcode = 3, errstr = 'name error'}"], ids=["empty", "nxdomain"])
+def test_reverse_negative_answer_is_cached(tmp_path, answer):
+    run_lua(
+        tmp_path,
+        f"""
+reverse_answer = {answer}
+local first = utils.get_rdns(ctx.bw.remote_addr, ctx, true)
+assert(type(first) == 'table' and #first == 0)
+assert(next(cache) ~= nil, 'negative answer must be cached')
+reverse_answer = nil
+assert(#utils.get_rdns(ctx.bw.remote_addr, ctx, true) == 0, 'negative answer must stay cached')
 """,
     )

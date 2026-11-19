@@ -40,15 +40,16 @@
  local function split_ip(ip_addr_org)
      local idx = find_str(ip_addr_org, "/", 1, true)
      if not idx then
-@@ -211,6 +235,20 @@
+@@ -211,6 +235,21 @@
          local ip_addr, ip_addr_mask = split_ip(ip_addr_org)
  
          local inet_ipv4 = parse_ipv4(ip_addr)
 +        local inets_ipv6
 +        if not inet_ipv4 then
 +            inets_ipv6 = parse_ipv6(ip_addr)
++            ip_addr_mask = ip_addr_mask or 128
 +            -- BunkerWeb: a mapped rule of /96 or more is the IPv4 rule it carries (::ffff:192.0.2.0/120 is 192.0.2.0/24)
-+            local mapped = inets_ipv6 and ip_addr_mask and ip_addr_mask >= 96 and ip_addr_mask <= 128
++            local mapped = inets_ipv6 and ip_addr_mask >= 96 and ip_addr_mask <= 128
 +                           and mapped_ipv4(inets_ipv6)
 +            if mapped then
 +                inet_ipv4, inets_ipv6, ip_addr_mask = mapped, nil, ip_addr_mask - 96
@@ -61,7 +62,7 @@
          if inet_ipv4 then
              ip_addr_mask = ip_addr_mask or 32
              if ip_addr_mask == 32 then
-@@ -231,7 +269,10 @@
+@@ -231,7 +270,10 @@
              goto continue
          end
  
@@ -73,7 +74,7 @@
          if inets_ipv6 then
              ip_addr_mask = ip_addr_mask or 128
              if ip_addr_mask == 128 then
-@@ -265,7 +306,7 @@
+@@ -265,7 +307,7 @@
          end
  
          if not inet_ipv4 and not inets_ipv6 then
@@ -82,7 +83,7 @@
          end
  
          ::continue::
-@@ -379,6 +420,12 @@
+@@ -379,6 +421,12 @@
          return false, "invalid ip address, not ipv4 and ipv6"
      end
  
@@ -95,7 +96,7 @@
      local ipv6s = self.ipv6
      local value = ipv6s[ip]
      if value ~= nil then
-@@ -400,6 +447,11 @@
+@@ -400,6 +448,11 @@
          return false, "invalid ip address, not ipv4 and ipv6"
      end
  

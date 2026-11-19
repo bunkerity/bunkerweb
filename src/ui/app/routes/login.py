@@ -7,7 +7,7 @@ from flask_login import current_user, login_user
 
 from app import login_throttle
 from app.dependencies import DB
-from app.utils import BISCUIT_PRIVATE_KEY_FILE, LOGGER, flash, _sanitize_internal_next
+from app.utils import BISCUIT_PRIVATE_KEY_FILE, LOGGER, flash, loggable_username, _sanitize_internal_next
 from app.models.biscuit import BiscuitTokenFactory, PrivateKey
 
 login = Blueprint("login", __name__)
@@ -31,7 +31,7 @@ def login_page():
     fail = False
     locked = ""
     if request.method == "POST" and "username" in request.form and "password" in request.form:
-        LOGGER.warning(f"Login attempt from {request.remote_addr} with username {request.form['username']!r}")
+        LOGGER.warning(f"Login attempt from {request.remote_addr} with username {loggable_username(request.form['username'])}")
 
         # Checked before the password, and answered the same whether or not the username exists
         locked = login_throttle.locked_message(DB, request.form["username"], request.remote_addr)

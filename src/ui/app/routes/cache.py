@@ -1,17 +1,76 @@
 from io import BytesIO
 from json import JSONDecodeError, loads
+from typing import Optional
 
 from flask import Blueprint, Response, redirect, render_template, request, send_file, url_for
 from flask_login import current_user, login_required
+from sqlalchemy import select
 from werkzeug.utils import secure_filename
 
 from common_utils import is_sensitive_job_cache_file  # type: ignore
+from model import Jobs, Jobs_cache  # type: ignore
 from app.dependencies import BW_CONFIG, DB
 from app.utils import LOGGER, flash, get_printable_content
 
 cache = Blueprint("cache", __name__)
 
+RESTRICTED = object()
+
 SHOWN_FILE_TYPES = ("text/plain", "text/html", "text/css", "text/javascript", "application/json", "application/xml")
+
+
+def _delete_cache_rows(file_name: str, *, job_name: str, service_id: Optional[str], plugin_id: str, admin: bool):
+    """Delete the cache rows a request names. None: no row. RESTRICTED: a stored row is sensitive and the caller is not a super
+    administrator. "": deleted. Other strings: errors.
+
+    The lookup follows the database collation (MariaDB/MySQL: case-insensitive, trailing spaces ignored), so it can match rows the
+    request did not spell. The rows are resolved, authorized and deleted by id and stored identity in one transaction: exactly the rows that were checked.
+    """
+    if DB.readonly:
+        return "The database is read-only, the changes will not be saved"
+
+    with DB._db_session() as session:
+        if not session.query(Jobs).filter_by(name=job_name, plugin_id=plugin_id).first():
+            return None
+
+        rows = (
+            session.query(Jobs_cache.id, Jobs_cache.file_name, Jobs_cache.job_name, Jobs_cache.service_id)
+            .filter_by(file_name=file_name, service_id=service_id or None, job_name=job_name)
+            .all()
+        )
+        if not rows:
+            return None
+
+        stored_plugins = {}
+        for row in rows:
+            stored_plugins[row.id] = session.query(Jobs.plugin_id).filter_by(name=row.job_name).scalar() or ""
+            if not admin and is_sensitive_job_cache_file(row.file_name, stored_plugins[row.id], row.job_name):
+                return RESTRICTED
+
+        try:
+            # The read above holds no lock: another writer can replace a row and reuse its id before this DELETE. Every column the
+            # check read stays in the WHERE, so a replaced row matches nothing and is never deleted.
+            for row in rows:
+                deleted = (
+                    session.query(Jobs_cache)
+                    .filter(
+                        Jobs_cache.id == row.id,
+                        Jobs_cache.file_name == row.file_name,
+                        Jobs_cache.job_name == row.job_name,
+                        Jobs_cache.service_id.is_(None) if row.service_id is None else Jobs_cache.service_id == row.service_id,
+                        Jobs_cache.job_name.in_(select(Jobs.name).where(Jobs.plugin_id == stored_plugins[row.id])),
+                    )
+                    .delete(synchronize_session=False)
+                )
+                if deleted != 1:
+                    session.rollback()
+                    return None
+            DB._blob_sweep(session)
+            session.commit()
+        except BaseException as e:
+            return str(e)
+
+    return ""
 
 
 @cache.route("/cache", methods=["GET"])
@@ -101,13 +160,22 @@ def cache_delete_bulk():
         else:
             file_name = secure_filename(file_name)
 
-        # Delete the cache file
-        result = DB.delete_job_cache(
+        # Same rule as cache_view: super administrators only. The names the request sent are checked first, then the stored rows.
+        if not current_user.admin and is_sensitive_job_cache_file(file_name, plugin, job_name):
+            errors.append(f"Cache file {file_name} is restricted to administrators")
+            continue
+
+        result = _delete_cache_rows(
             file_name,
             job_name=job_name,
             service_id=service if service != "global" else None,
             plugin_id=plugin,
+            admin=current_user.admin,
         )
+
+        if result is RESTRICTED:
+            errors.append(f"Cache file {file_name} is restricted to administrators")
+            continue
 
         if result is None:
             errors.append(f"Cache file {file_name} not found")

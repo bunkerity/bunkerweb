@@ -333,3 +333,58 @@ def test_the_downloaded_list_is_ignored_once_its_url_setting_is_gone(tmp_path):
     stored = run_merge(tmp_path, '{"10.0.0.1"}', '"1.1.1.1"', urls="nil")
 
     assert stored == ["1.1.1.1"], "a retired IP.list must not be read, but the configured entry must survive"
+
+
+# --- UB6-B2: detect mode must also hold for a plugin denial in the stream preread loop -----------
+PREREAD_LOOP_HARNESS = """local DENY = 403
+local security_mode = "%s"
+local logged, reasons = {}, {}
+local ctx = { bw = { remote_addr = "1.2.3.4" } }
+local phase_order = { "blacklist" }
+local ERR, INFO, WARN, NOTICE = "ERR", "INFO", "WARN", "NOTICE"
+local logger = { log = function(_, level, msg) logged[#logged + 1] = level .. ":" .. msg end }
+local require_plugin = function() return { preread = function() end } end
+local new_plugin = function() return true, {} end
+local call_plugin = function() return true, { ret = true, msg = "denied by list", status = DENY, data = { id = "1.2.3.4" } } end
+local is_whitelisted = function() return false end
+local get_deny_status = function() return DENY end
+local set_reason = function(id) reasons[#reasons + 1] = id end
+local tostring, ipairs = tostring, ipairs
+%s
+print(tostring(status) .. "|" .. #reasons .. "|" .. table.concat(logged, "~"))
+"""
+
+
+def preread_plugin_loop() -> str:
+    body = PREREAD_CONF.read_text(encoding="utf-8")
+    start = body.index("local status = nil")
+    end = body.index('logger:log(INFO, "called preread() methods of plugins")', start)
+    return body[start:end]
+
+
+def run_preread_loop(tmp_path: Path, security_mode: str) -> tuple:
+    script = tmp_path / "preread_loop.lua"
+    script.write_text(PREREAD_LOOP_HARNESS % (security_mode, preread_plugin_loop()))
+    result = subprocess.run([LUA, str(script)], capture_output=True, text=True)
+    assert result.returncode == 0, result.stderr
+    status, reasons, logs = result.stdout.strip().split("|", 2)
+    return status, reasons, logs
+
+
+@needs_lua
+def test_stream_plugin_denial_is_enforced_in_block_mode(tmp_path):
+    """The control: without it, a loop that never denies would pass the detect-mode test."""
+    status, reasons, logs = run_preread_loop(tmp_path, "block")
+
+    assert status == "403", "block mode must deny the connection"
+    assert reasons == "1"
+    assert "denied preread from blacklist" in logs
+
+
+@needs_lua
+def test_stream_plugin_denial_is_only_logged_in_detect_mode(tmp_path):
+    status, reasons, logs = run_preread_loop(tmp_path, "detect")
+
+    assert status == "nil", "detect mode must let the connection through, as the HTTP access phase does"
+    assert reasons == "0", "detect mode must not record the plugin as the denial reason"
+    assert "detected deny preread from blacklist" in logs

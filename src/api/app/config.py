@@ -13,6 +13,9 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
 # Suppress pydantic_settings warning about missing secrets directory in dev environments
 filterwarnings("ignore", message=r'.*directory ".*" does not exist', category=UserWarning, module="pydantic_settings")
 
+from logger import getLogger  # type: ignore
+from pydantic import field_validator
+
 from .yaml_base_settings import YamlBaseSettings, YamlSettingsConfigDict  # type: ignore
 
 
@@ -59,6 +62,17 @@ class ApiConfig(YamlBaseSettings):
     API_RATE_LIMIT_RULES: Optional[Union[str, object]] = None
     API_RATE_LIMIT_KEY: str = "ip"
     API_RATE_LIMIT_EXEMPT_IPS: Optional[str] = None
+
+    @field_validator("API_DOCS_URL", "API_REDOC_URL")
+    @classmethod
+    def _refuse_root_documentation_url(cls, value: Optional[str], info) -> Optional[str]:
+        # A documentation URL of "/" would make every route a documentation route, which skips authentication.
+        if value is not None and value.strip() and not value.strip().strip("/"):
+            getLogger("API").error(
+                f"{info.field_name}={value!r} would expose every route without authentication, so the page is disabled. Use a path such as /docs."
+            )
+            return "off"
+        return value
 
     model_config = YamlSettingsConfigDict(  # type: ignore
         yaml_file=getenv("SETTINGS_YAML_FILE", "/etc/bunkerweb/api.yml"),

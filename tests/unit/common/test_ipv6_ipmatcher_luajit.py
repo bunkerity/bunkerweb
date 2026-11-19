@@ -102,3 +102,26 @@ assert(matches({"::/0"}, "10.1.1.1") == false)
 assert(matches({"2001:db8::/32"}, "2001:0DB8:0:0:0:0:0:1") == true)
 assert(matches({"2001:db8::1"}, "2001:0DB8:0:0:0:0:0:1") == true)
 """)
+
+
+@pytest.mark.parametrize("rule", ["::ffff:192.0.2.1", "::ffff:c000:201", "::ffff:0.0.0.0"])
+def test_bare_mapped_host_matches_only_its_ipv4_identity(rule):
+    run(f"""
+local rule = {rule!r}
+local zero = rule == "::ffff:0.0.0.0"
+local v4 = zero and "0.0.0.0" or "192.0.2.1"
+local mapped = zero and "::ffff:0.0.0.0" or "::ffff:192.0.2.1"
+local hex = zero and "::ffff:0:0" or "::ffff:c000:201"
+local bin4 = zero and string.char(0, 0, 0, 0) or string.char(192, 0, 2, 1)
+local bin6 = string.rep(string.char(0), 10) .. string.char(255, 255) .. bin4
+for _, m in ipairs({{matcher({{rule}}), ipmatcher.new_with_value({{[rule] = "host"}})}}) do
+    local expected = m:match(v4)
+    assert(expected == true or expected == "host", "bare mapped host lost: " .. rule)
+    assert(m:match(mapped) == expected)
+    assert(m:match(hex) == expected)
+    assert(m:match_bin(bin4) == expected)
+    assert(m:match_bin(bin6) == expected)
+    assert(m:match("192.0.2.2") == false)
+    assert(m:match("2001:db8::1") == false)
+end
+""")

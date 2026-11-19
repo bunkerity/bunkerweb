@@ -57,7 +57,7 @@ ModSecurity 插件将功能强大的 [ModSecurity](https://modsecurity.org) Web 
     为了在绕过 ModSecurity 后仍保护上传内容，请将其与文件扫描插件配合使用，例如 [ClamAV](https://github.com/bunkerity/bunkerweb-plugins/tree/main/clamav) 或 [VirusTotal](https://github.com/bunkerity/bunkerweb-plugins/tree/main/virustotal)——它们检查上传文件本身，而不是原始请求体。
 
 !!! warning "响应体阻断与压缩响应"
-    如果响应体阻断规则在响应头发送后才触发，客户端可能先收到原始状态码（如 `200`），随后出现响应体不完整或分块传输错误，而不是完整的 `403` 响应。BunkerWeb 应用 gzip、Brotli 或 zstd 压缩时都可能出现这种情况。从 `1.6.18~rc4` 开始，Brotli 的行为与 gzip 已有的行为一致。请检查 ModSecurity 审计日志和错误日志，确定触发的规则，并用范围严格受限的排除规则处理已确认的误报。
+    如果响应体阻断规则在响应头发送后才触发，客户端可能先收到原始状态码（如 `200`），随后出现响应体不完整或分块传输错误，而不是完整的 `403` 响应。BunkerWeb 应用 gzip、Brotli 或 zstd 压缩时都可能出现这种情况。从 `1.6.18~rc5` 开始，Brotli 的行为与 gzip 已有的行为一致。请检查 ModSecurity 审计日志和错误日志，确定触发的规则，并用范围严格受限的排除规则处理已确认的误报。
 
 !!! warning "上游压缩的响应体"
     CRS v4 不检查上游已经压缩的响应体（`gzip`、`br` 或 `zstd`）。BunkerWeb 不会为检查而解压这些响应体。如果需要检查响应体，请配置上游返回未压缩的内容。对于遵循此请求头的上游，可以仅在受影响的服务和 location 中移除转发请求的 `Accept-Encoding` 头，以请求未压缩的响应：
@@ -122,14 +122,14 @@ SecAction \
 - 该操作在**阶段 1**（请求生命周期的早期）执行。
 - 它通过设置变量 `tx.crs_exclusions_wordpress` 来启用 WordPress 特定的 CRS 排除项。
 
-#### 使用 `modsec` 更新 CRS 规则
+#### 使用 `modsec-crs` 更新 CRS 规则
 
-要微调已加载的 CRS 规则，您可以使用 `modsec` 类型的自定义配置。例如，您可以为某些请求路径删除特定的规则或标签：
+要微调已加载的 CRS 规则，您可以使用 `modsec-crs` 类型的自定义配置。例如，您可以为某些请求路径删除特定的规则或标签。`ctl:ruleRemove*` 操作只影响在它之后执行的规则，因此下面的规则在 `phase:1` 中执行，并且该配置在 CRS 之前加载：
 
 ```conf
-SecRule REQUEST_FILENAME "/wp-admin/admin-ajax.php" "id:1,ctl:ruleRemoveByTag=attack-xss,ctl:ruleRemoveByTag=attack-rce"
-SecRule REQUEST_FILENAME "/wp-admin/options.php" "id:2,ctl:ruleRemoveByTag=attack-xss"
-SecRule REQUEST_FILENAME "^/wp-json/yoast" "id:3,ctl:ruleRemoveById=930120"
+SecRule REQUEST_FILENAME "/wp-admin/admin-ajax.php" "id:1,phase:1,pass,t:none,nolog,ctl:ruleRemoveByTag=attack-xss,ctl:ruleRemoveByTag=attack-rce"
+SecRule REQUEST_FILENAME "/wp-admin/options.php" "id:2,phase:1,pass,t:none,nolog,ctl:ruleRemoveByTag=attack-xss"
+SecRule REQUEST_FILENAME "^/wp-json/yoast" "id:3,phase:1,pass,t:none,nolog,ctl:ruleRemoveById=930120"
 ```
 
 在此示例中：
@@ -137,6 +137,8 @@ SecRule REQUEST_FILENAME "^/wp-json/yoast" "id:3,ctl:ruleRemoveById=930120"
 - **规则 1**：为对 `/wp-admin/admin-ajax.php` 的请求删除标记为 `attack-xss` 和 `attack-rce` 的规则。
 - **规则 2**：为对 `/wp-admin/options.php` 的请求删除标记为 `attack-xss` 的规则。
 - **规则 3**：为匹配 `/wp-json/yoast` 的请求删除特定规则（ID `930120`）。
+
+在加载配置时生效的 `SecRuleRemoveById`、`SecRuleRemoveByTag`、`SecRuleUpdateTargetById` 和 `SecRuleUpdateTargetByTag` 指令，应放在 `modsec` 类型的自定义配置中（位于 CRS 之后）。
 
 !!! info "执行顺序"
     BunkerWeb 中 ModSecurity 的执行顺序如下，确保了规则应用的清晰和逻辑性：

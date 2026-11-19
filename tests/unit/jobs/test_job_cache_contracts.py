@@ -565,6 +565,195 @@ def test_feed_changed_url_removes_stale_url_cache_row_and_file(runtime, plugin):
     _assert_file(job, new_file, b"# Downloaded from https://feeds.invalid/new\n203.0.113.8\n")
 
 
+@pytest.mark.parametrize(
+    "script,enabled,setting,name,service,line",
+    [
+        ("dnsbl/jobs/dnsbl-download.py", "USE_DNSBL", "DNSBL_IGNORE_IP_URLS", "IGNORE_IP.list", "app.example", b"203.0.113.8"),
+        ("realip/jobs/realip-download.py", "USE_REAL_IP", "REAL_IP_FROM_URLS", "combined.list", "", b"203.0.113.8"),
+        ("robotstxt/jobs/robots-txt-download.py", "USE_ROBOTSTXT", "ROBOTSTXT_URLS", "rules.list", "app.example", b"Disallow: /a"),
+    ],
+)
+@pytest.mark.parametrize("replacement", [False, True])
+def test_removed_feed_deletes_cache_rows_and_files(runtime, script, enabled, setting, name, service, line, replacement):
+    job, run = runtime(script)
+    assert job.cache_file("obsolete.list", b"old\n")[0]
+    assert job.cache_file(name, b"old\n", service_id=service)[0]
+    env = {enabled: "yes", setting: "https://feeds.invalid/new" if replacement else ""}
+    assert run(env=env, get=Mock(return_value=_response(line + b"\n")))[1] == 1
+    assert not (job.job_path / "obsolete.list").exists()
+    with session(job.db) as s:
+        assert s.query(Jobs_cache).filter_by(file_name="obsolete.list").count() == 0
+        if not replacement:
+            assert s.query(Jobs_cache).count() == 0
+    if replacement:
+        _assert_file(job, name, line + b"\n", service)
+    else:
+        assert not (job.job_path / service / name).exists()
+
+
+@pytest.mark.parametrize(
+    "script,enabled,setting,name,line",
+    [
+        ("dnsbl/jobs/dnsbl-download.py", "USE_DNSBL", "DNSBL_IGNORE_IP_URLS", "IGNORE_IP.list", b"203.0.113.8"),
+        ("realip/jobs/realip-download.py", "USE_REAL_IP", "REAL_IP_FROM_URLS", "combined.list", b"203.0.113.8"),
+        ("robotstxt/jobs/robots-txt-download.py", "USE_ROBOTSTXT", "ROBOTSTXT_URLS", "rules.list", b"Disallow: /a"),
+    ],
+)
+def test_feed_removal_reloads_with_unchanged_sibling(runtime, script, enabled, setting, name, line):
+    job, run = runtime(script)
+    url = "https://feeds.invalid/current"
+    for service in ("app.example", "alias.example"):
+        assert job.cache_file(name, line + b"\n", service_id=service)[0]
+    if enabled == "USE_REAL_IP":
+        assert job.cache_file(name, line + b"\n")[0]
+    env = {
+        "MULTISITE": "yes",
+        "SERVER_NAME": "app.example alias.example",
+        f"app.example_{enabled}": "yes",
+        f"alias.example_{enabled}": "yes",
+        f"alias.example_{setting}": url,
+    }
+    remote = Mock(return_value=_response(line + b"\n"))
+    assert run(env=env, get=remote)[1] == 1
+    for service in ("", "app.example"):
+        assert not (job.job_path / service / name).exists()
+    _assert_file(job, name, line + b"\n", "alias.example")
+    with session(job.db) as s:
+        assert [row.service_id for row in s.query(Jobs_cache).filter_by(file_name=name)] == ["alias.example"]
+    assert run(env=env, get=remote)[1] == 0
+
+
+@pytest.mark.parametrize(
+    "script,enabled,setting,name,service,old,kept",
+    [
+        ("dnsbl/jobs/dnsbl-download.py", "USE_DNSBL", "DNSBL_IGNORE_IP_URLS", "IGNORE_IP.list", "app.example", b"203.0.113.8", b"203.0.113.9"),
+        ("realip/jobs/realip-download.py", "USE_REAL_IP", "REAL_IP_FROM_URLS", "combined.list", "", b"203.0.113.8", b"203.0.113.9"),
+        ("robotstxt/jobs/robots-txt-download.py", "USE_ROBOTSTXT", "ROBOTSTXT_URLS", "rules.list", "app.example", b"Disallow: /a", b"Disallow: /b"),
+    ],
+)
+@pytest.mark.parametrize("keep_source", [False, True])
+def test_removed_feed_is_excluded_when_replacement_fails(runtime, script, enabled, setting, name, service, old, kept, keep_source):
+    job, run = runtime(script)
+    old_url, new_url, kept_url = (f"https://feeds.invalid/{suffix}" for suffix in ("old", "new", "kept"))
+    other_url = f" {kept_url}" if keep_source else ""
+    env = {enabled: "yes", setting: old_url + other_url}
+    initial_download = Mock(side_effect=lambda url, **_: _response((old if url == old_url else kept) + b"\n"))
+    assert run(env=env, get=initial_download)[1] == 1
+    env[setting] = new_url + other_url
+    replacement = Mock(return_value=_response(status=503))
+
+    _, status = run(env=env, get=replacement)
+
+    replacement.assert_called_once_with(new_url, stream=True, timeout=10)
+    if keep_source:
+        _assert_file(job, name, kept + b"\n", service)
+    else:
+        assert not (job.job_path / service / name).exists()
+        assert job.db.get_job_cache_file(job.job_name, name, service_id=service) is None
+    assert status == 3
+    assert run(env=env, get=replacement)[1] == 2
+
+
+@pytest.mark.parametrize(
+    "script,enabled,setting,name,service",
+    [
+        ("dnsbl/jobs/dnsbl-download.py", "USE_DNSBL", "DNSBL_IGNORE_IP_URLS", "IGNORE_IP.list", "app.example"),
+        ("realip/jobs/realip-download.py", "USE_REAL_IP", "REAL_IP_FROM_URLS", "combined.list", ""),
+        ("robotstxt/jobs/robots-txt-download.py", "USE_ROBOTSTXT", "ROBOTSTXT_URLS", "rules.list", "app.example"),
+    ],
+)
+@pytest.mark.parametrize("replacement_fails", [False, True])
+@pytest.mark.parametrize("failure", ["database", "unlink"])
+def test_feed_delete_failure_preserves_reload_signal(runtime, monkeypatch, script, enabled, setting, name, service, replacement_fails, failure):
+    job, run = runtime(script)
+    content = b"previous\n"
+    assert job.cache_file(name, content, service_id=service)[0]
+    # A retained row elsewhere lets automatic restore sweep files absent from the DB.
+    assert job.cache_file("retained", b"other cache data", service_id="off.example")[0]
+    env = {enabled: "yes", setting: "https://feeds.invalid/new" if replacement_fails else ""}
+    remote = Mock(return_value=_response(status=503))
+    live = job.job_path / service / name
+    unlink = Path.unlink
+    failed_unlinks = []
+
+    def fail_aggregate_unlink(path, *args, **kwargs):
+        if path.parent == live.parent and path.is_file() and path.read_bytes() == content:
+            failed_unlinks.append(path)
+            raise PermissionError("unlink refused")
+        return unlink(path, *args, **kwargs)
+
+    with monkeypatch.context() as fault:
+        if failure == "database":
+            fault.setattr(job.db, "delete_job_cache", Mock(return_value="write refused"))
+        else:
+            fault.setattr(Path, "unlink", fail_aggregate_unlink)
+        _, status = run(env=env, get=remote)
+
+    failure_bit = 2 if replacement_fails else 0
+    if failure == "database":
+        _assert_file(job, name, content, service)
+        assert job.restore_cache(manual=False)
+        assert run(env=env, get=remote)[1] == 1 | failure_bit
+        assert status == 2
+    else:
+        assert len(failed_unlinks) == 1
+        live_after_failure = live.exists()
+        assert job.restore_cache(manual=False)
+        assert run(env=env, get=remote)[1] == failure_bit
+        assert status == 1 | failure_bit
+        assert not live_after_failure
+        assert not failed_unlinks[0].exists()
+    assert not live.exists()
+    assert job.db.get_job_cache_file(job.job_name, name, service_id=service) is None
+    assert job.restore_cache(manual=False)
+    assert run(env=env, get=remote)[1] == failure_bit
+
+
+@pytest.mark.parametrize(
+    "script,enabled,setting,name,previous,new",
+    [
+        ("dnsbl/jobs/dnsbl-download.py", "USE_DNSBL", "DNSBL_IGNORE_IP_URLS", "IGNORE_IP.list", b"203.0.113.8", b"203.0.113.9"),
+        ("realip/jobs/realip-download.py", "USE_REAL_IP", "REAL_IP_FROM_URLS", "combined.list", b"203.0.113.8", b"203.0.113.9"),
+        ("robotstxt/jobs/robots-txt-download.py", "USE_ROBOTSTXT", "ROBOTSTXT_URLS", "rules.list", b"Disallow: /a", b"Disallow: /b"),
+    ],
+)
+@pytest.mark.parametrize("failure", ["http", "connection", "empty", "html"])
+def test_multiple_services_reuse_stale_cache_for_failed_feed(runtime, script, enabled, setting, name, previous, new, failure):
+    job, run = runtime(script)
+    good_url, failed_url = "https://feeds.invalid/good", "https://feeds.invalid/failed"
+    failed_file = hashlib.sha1(failed_url.encode()).hexdigest() + ".list"
+    cached = b"# Downloaded from " + failed_url.encode() + b"\n" + previous + b"\n"
+    assert job.cache_file(failed_file, cached)[0]
+    with session(job.db) as s:
+        s.query(Jobs_cache).filter_by(job_name=job.job_name, file_name=failed_file).update({"last_update": FIXED_DT})
+
+    def download(url, **kwargs):
+        if url == good_url:
+            return _response(new + b"\n")
+        assert url == failed_url
+        if failure == "connection":
+            raise requests.ConnectionError("offline")
+        return _response(b"<html>error</html>\n" if failure == "html" else b"", status=503 if failure == "http" else 200)
+
+    env = {"MULTISITE": "yes", "SERVER_NAME": "app.example alias.example"}
+    for service in ("app.example", "alias.example"):
+        env[f"{service}_{enabled}"] = "yes"
+        env[f"{service}_{setting}"] = f"{good_url} {failed_url}"
+        assert job.cache_file(name, previous + b"\n", service_id=service)[0]
+    remote = Mock(side_effect=download)
+
+    _, status = run(env=env, get=remote)
+
+    for service in ("app.example", "alias.example"):
+        _assert_file(job, name, previous + b"\n" + new + b"\n", service)
+    _assert_file(job, failed_file, cached)
+    with session(job.db) as s:
+        row = s.query(Jobs_cache).filter_by(job_name=job.job_name, file_name=failed_file).one()
+        assert row.last_update.replace(tzinfo=timezone.utc) == FIXED_DT
+    assert sum(call.args[0] == failed_url for call in remote.call_args_list) == (3 if failure == "connection" else 1)
+    assert status == 3
+
+
 def _backup_module(monkeypatch, tmp_path):
     module = _module(ROOT / "src/common/core/backup/backup.py")
     monkeypatch.setattr(module, "DB_LOCK_FILE", tmp_path / "db.lock")

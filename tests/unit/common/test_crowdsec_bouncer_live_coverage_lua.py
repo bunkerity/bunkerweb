@@ -361,6 +361,23 @@ result({first=first,second=second,state=state,flags=flags,after=after,after_flag
         assert out["after_flags"] == 9
 
 
+def test_allowed_request_does_not_read_the_body_when_a_captcha_is_configured(tmp_path):
+    out = run(tmp_path, "result({a=allow(),read=BODY_READ})", conf=captcha_conf(tmp_path), setup="BODY=string.rep('x', 1024)")
+    assert out["a"]["2"] == "allow"
+    assert "read" not in out, "an allowed request must not buffer its body when no captcha is pending"
+
+
+def test_pending_captcha_reads_the_body_to_verify_the_solution(tmp_path):
+    """The control: the guard above must not stop the verify step from reading the body."""
+    out = run(
+        tmp_path,
+        "allow(); result({a=allow(),read=BODY_READ,method=METHOD})",
+        conf=captcha_conf(tmp_path),
+        setup=f"BODY='solution'; POST_ARGS={{['g-recaptcha-response']='token'}}; LAPI_BODY={to_lua(decision(type='captcha'))}",
+    )
+    assert out["read"] is True and out["method"] == 2
+
+
 @pytest.mark.parametrize("failure", ["CAPTCHA_VALID=false", "CAPTCHA_ERROR=true", "POST_ARGS={}"])
 def test_invalid_captcha_does_not_redirect_or_allow(tmp_path, failure):
     out = run(

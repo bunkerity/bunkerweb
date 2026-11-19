@@ -52,7 +52,7 @@ class Cache:
         data = self.data.get((service_id, name))
         return bytes_hash(data) if data is not None else None
 
-    def del_cache(self, name, service_id=""):
+    def del_cache(self, name, service_id="", *, db_first=False):
         path = name if isinstance(name, pathlib.Path) else self.job_path / service_id / name
         self.data.pop((service_id, path.name), None)
         path.unlink(missing_ok=True)

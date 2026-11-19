@@ -14,9 +14,13 @@ function trap_exit() {
 		log "ENTRYPOINT" "ℹ️ " "Stopping job scheduler ..."
 		# shellcheck disable=SC2317
 		kill -s TERM "$(cat /var/run/bunkerweb/scheduler.pid)"
+	# The child may not have written its PID file yet: signal it directly.
+	elif [ -n "${pid:-}" ] ; then
+		# shellcheck disable=SC2317
+		kill -s TERM "$pid" 2> /dev/null
 	fi
 }
-trap "trap_exit" TERM INT QUIT
+trap 'wait_interrupted=yes; stop_requested=yes; trap_exit' TERM INT QUIT
 
 if [ -f /var/run/bunkerweb/scheduler.pid ] ; then
 	rm -f /var/run/bunkerweb/scheduler.pid
@@ -151,15 +155,29 @@ cd - > /dev/null || exit 1
 
 # execute jobs
 log "ENTRYPOINT" "ℹ️ " "Executing scheduler ..."
+# A stop received before the child exists: do not start it.
+if [ "${stop_requested:-no}" = yes ] ; then
+	log "ENTRYPOINT" "ℹ️ " "Stopped before scheduler started"
+	exit 143
+fi
 /usr/share/bunkerweb/scheduler/main.py &
 pid="$!"
+# A stop received while the child was being started.
+if [ "${stop_requested:-no}" = yes ] ; then
+	kill -s TERM "$pid" 2> /dev/null
+fi
 
-wait "$pid"
-exit_code=$?
+# A stop trap interrupts wait before the child has finished shutting down.
+while :; do
+	wait_interrupted=no
+	wait "$pid"
+	exit_code=$?
+	[ "$wait_interrupted" = yes ] || break
+done
 
 if [ -f /var/tmp/bunkerweb/scheduler.healthy ] ; then
 	rm -f /var/tmp/bunkerweb/scheduler.healthy
 fi
 
 log "ENTRYPOINT" "ℹ️ " "Scheduler stopped"
-exit $exit_code
+exit "$exit_code"

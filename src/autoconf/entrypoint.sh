@@ -14,9 +14,13 @@ function trap_exit() {
 		log "ENTRYPOINT" "ℹ️ " "Stopping job autoconf ..."
 		# shellcheck disable=SC2317
 		kill -s TERM "$(cat /var/run/bunkerweb/autoconf.pid)"
+	# The child may not have written its PID file yet: signal it directly.
+	elif [ -n "${pid:-}" ] ; then
+		# shellcheck disable=SC2317
+		kill -s TERM "$pid" 2> /dev/null
 	fi
 }
-trap "trap_exit" TERM INT QUIT
+trap 'wait_interrupted=yes; stop_requested=yes; trap_exit' TERM INT QUIT
 
 if [ -f /var/run/bunkerweb/autoconf.pid ] ; then
 	rm -f /var/run/bunkerweb/autoconf.pid
@@ -41,15 +45,29 @@ export LOG_SYSLOG_TAG="${LOG_SYSLOG_TAG:-bw-autoconf}"
 
 # execute jobs
 log "ENTRYPOINT" "ℹ️ " "Executing autoconf ..."
+# A stop received before the child exists: do not start it.
+if [ "${stop_requested:-no}" = yes ] ; then
+	log "ENTRYPOINT" "ℹ️ " "Stopped before autoconf started"
+	exit 143
+fi
 /usr/share/bunkerweb/autoconf/main.py &
 pid="$!"
+# A stop received while the child was being started.
+if [ "${stop_requested:-no}" = yes ] ; then
+	kill -s TERM "$pid" 2> /dev/null
+fi
 
-wait "$pid"
-exit_code=$?
+# A stop trap interrupts wait before the child has finished shutting down.
+while :; do
+	wait_interrupted=no
+	wait "$pid"
+	exit_code=$?
+	[ "$wait_interrupted" = yes ] || break
+done
 
 if [ -f /var/tmp/bunkerweb/autoconf.healthy ] ; then
 	rm -f /var/tmp/bunkerweb/autoconf.healthy
 fi
 
 log "ENTRYPOINT" "ℹ️ " "Autoconf stopped"
-exit $exit_code
+exit "$exit_code"

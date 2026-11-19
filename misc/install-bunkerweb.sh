@@ -114,7 +114,7 @@ fi
 
 # Default values
 # Hardcoded default version (immutable reference)
-DEFAULT_BUNKERWEB_VERSION="1.6.18~rc4"
+DEFAULT_BUNKERWEB_VERSION="1.6.18~rc5"
 # Mutable effective version (can be overridden by --version)
 BUNKERWEB_VERSION="$DEFAULT_BUNKERWEB_VERSION"
 BUNKERWEB_VERSION_EXPLICIT="no"
@@ -123,7 +123,7 @@ NGINX_VERSION=""
 # NGINX bundled with the default BunkerWeb version; also the fallback for any
 # BunkerWeb version absent from the dictionary below (pre-1.6, the current-default
 # line, or newer-than-this-script). KEEP IN SYNC with src/linux/Dockerfile-*.
-DEFAULT_NGINX_VERSION="1.30.6"
+DEFAULT_NGINX_VERSION="1.30.7"
 
 # BunkerWeb release (X.Y.Z) -> NGINX version its packages were compiled against.
 # Each BunkerWeb Linux package ships NGINX dynamic modules built for one specific
@@ -142,6 +142,7 @@ declare -A _NGINX_VERSION_BY_BW=(
     [1.6.12]="1.30.3"
     [1.6.13]="1.30.4" [1.6.14]="1.30.4"
     [1.6.15]="1.30.5" [1.6.16]="1.30.5"
+    [1.6.17]="1.30.6"
 )
 # Fedora lagged the common pin on these releases only (Fedora repo timing).
 declare -A _NGINX_VERSION_BY_BW_FEDORA=(
@@ -150,6 +151,8 @@ declare -A _NGINX_VERSION_BY_BW_FEDORA=(
     [1.6.13]="1.30.3"
     # 1.6.17: Fedora 43/44 still lack 1.30.6, so they ship 1.30.5.
     [1.6.17]="1.30.5"
+    # 1.6.18: Fedora 43/44/45 build against the vendored 1.30.6 tree.
+    [1.6.18]="1.30.6"
 )
 ENABLE_WIZARD=""
 FORCE_INSTALL="no"
@@ -3139,6 +3142,8 @@ validate_ui_admin_password() {
     [[ "$pw" =~ [A-Z] ]] || return 1
     [[ "$pw" =~ [0-9] ]] || return 1
     [[ "$pw" =~ [^A-Za-z0-9] ]] || return 1
+    # CR/LF would split the line-oriented files the password is written to.
+    [[ "$pw" == *$'\n'* || "$pw" == *$'\r'* ]] && return 1
     return 0
 }
 
@@ -3154,6 +3159,8 @@ validate_db_password() {
     if [[ "$pw" == *\'* ]] || [[ "$pw" == *\"* ]] || [[ "$pw" == *\\* ]] || [[ "$pw" == *\`* ]]; then
         return 1
     fi
+    # CR/LF would split the line-oriented files the password is written to.
+    [[ "$pw" == *$'\n'* || "$pw" == *$'\r'* ]] && return 1
     return 0
 }
 
@@ -5682,6 +5689,11 @@ Repository instructions: ${pgdg_url}"
 # $DEFAULT_NGINX_VERSION. Safe under `set -e` (ends in printf).
 resolve_nginx_version() {
     local _bw="${BUNKERWEB_VERSION#v}"   # tolerate a leading 'v'
+    # The first four 1.6.18 release candidates predate the 1.30.7 bump.
+    if [[ "$_bw" == 1.6.18[~-]rc[1-4] ]]; then
+        printf '%s' '1.30.6'
+        return
+    fi
     _bw="${_bw%%[~-]*}"                  # 1.6.12~rc2 -> 1.6.12 ; 1.6.10-rc5 -> 1.6.10
     local _base="${_NGINX_VERSION_BY_BW[$_bw]:-$DEFAULT_NGINX_VERSION}"
     if [ "$DISTRO_ID" = "fedora" ] && [ -n "${_NGINX_VERSION_BY_BW_FEDORA[$_bw]:-}" ]; then
@@ -8529,7 +8541,7 @@ while [[ $# -gt 0 ]]; do
             require_value "$1" "$2" "password value"
             DB_PASSWORD_INPUT="$2"
             if ! validate_db_password "$DB_PASSWORD_INPUT"; then
-                print_error "--db-password fails validation: 8+ chars, no quotes/backslashes."
+                print_error "--db-password fails validation: 8+ chars, no quotes/backslashes, single line."
                 exit 1
             fi
             shift 2
@@ -8549,7 +8561,7 @@ while [[ $# -gt 0 ]]; do
             UI_ADMIN_PASSWORD_INPUT="$2"
             UI_ADMIN_CREATE="yes"
             if ! validate_ui_admin_password "$UI_ADMIN_PASSWORD_INPUT"; then
-                print_error "--ui-admin-password fails BunkerWeb rules: 8+ chars, one lowercase, one uppercase, one digit, one special."
+                print_error "--ui-admin-password fails BunkerWeb rules: 8+ chars, one lowercase, one uppercase, one digit, one special, single line."
                 exit 1
             fi
             shift 2
@@ -8710,9 +8722,26 @@ done
 # suppressed around the reads so values never leak into a trace log (mirrors tui_password).
 _bw_xtrace_was_on=no
 case $- in *x*) _bw_xtrace_was_on=yes; set +x ;; esac
-DB_PASSWORD_INPUT="${DB_PASSWORD_INPUT:-${BW_DB_PASSWORD:-}}"
-UI_ADMIN_PASSWORD_INPUT="${UI_ADMIN_PASSWORD_INPUT:-${BW_UI_ADMIN_PASSWORD:-}}"
+if [ -z "$DB_PASSWORD_INPUT" ] && [ -n "${BW_DB_PASSWORD:-}" ]; then
+    if ! validate_db_password "$BW_DB_PASSWORD"; then
+        print_error "BW_DB_PASSWORD fails validation: 8+ chars, no quotes/backslashes, single line."
+        exit 1
+    fi
+    DB_PASSWORD_INPUT="$BW_DB_PASSWORD"
+fi
+if [ -z "$UI_ADMIN_PASSWORD_INPUT" ] && [ -n "${BW_UI_ADMIN_PASSWORD:-}" ]; then
+    if ! validate_ui_admin_password "$BW_UI_ADMIN_PASSWORD"; then
+        print_error "BW_UI_ADMIN_PASSWORD fails BunkerWeb rules: 8+ chars, one lowercase, one uppercase, one digit, one special, single line."
+        exit 1
+    fi
+    UI_ADMIN_PASSWORD_INPUT="$BW_UI_ADMIN_PASSWORD"
+fi
 REDIS_PASSWORD_INPUT="${REDIS_PASSWORD_INPUT:-${BW_REDIS_PASSWORD:-}}"
+# Existing Redis passwords go into a single variables.env record.
+if [[ "$REDIS_PASSWORD_INPUT" == *$'\n'* || "$REDIS_PASSWORD_INPUT" == *$'\r'* ]]; then
+    print_error "Redis password must be a single line (--redis-password or BW_REDIS_PASSWORD)."
+    exit 1
+fi
 DOCKER_API_TOKEN_GENERATED="${DOCKER_API_TOKEN_GENERATED:-${BW_API_TOKEN:-}}"
 DOCKER_DATABASE_URI="${DOCKER_DATABASE_URI:-${BW_DATABASE_URI:-}}"
 if [ "$_bw_xtrace_was_on" = yes ]; then set -x; fi

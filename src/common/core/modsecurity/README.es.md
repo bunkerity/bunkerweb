@@ -57,7 +57,7 @@ Siga estos pasos para configurar y usar ModSecurity:
     Para mantener protegidas las cargas después de omitir ModSecurity, combínelo con un plugin de análisis de archivos como [ClamAV](https://github.com/bunkerity/bunkerweb-plugins/tree/main/clamav) o [VirusTotal](https://github.com/bunkerity/bunkerweb-plugins/tree/main/virustotal); inspeccionan el archivo cargado en sí en lugar del cuerpo bruto de la solicitud.
 
 !!! warning "Bloqueos del cuerpo de respuesta y respuestas comprimidas"
-    Si una regla de bloqueo del cuerpo de respuesta se activa después de enviar las cabeceras, el cliente puede recibir el estado original (como `200`) seguido de un error de cuerpo incompleto o de transferencia fragmentada, en lugar de una respuesta `403` completa. Esto puede ocurrir con la compresión gzip, Brotli o zstd aplicada por BunkerWeb. Desde `1.6.18~rc4`, Brotli sigue el comportamiento ya existente de gzip. Consulte los registros de auditoría y errores de ModSecurity para identificar la regla activada y ajuste los falsos positivos confirmados con exclusiones de alcance limitado.
+    Si una regla de bloqueo del cuerpo de respuesta se activa después de enviar las cabeceras, el cliente puede recibir el estado original (como `200`) seguido de un error de cuerpo incompleto o de transferencia fragmentada, en lugar de una respuesta `403` completa. Esto puede ocurrir con la compresión gzip, Brotli o zstd aplicada por BunkerWeb. Desde `1.6.18~rc5`, Brotli sigue el comportamiento ya existente de gzip. Consulte los registros de auditoría y errores de ModSecurity para identificar la regla activada y ajuste los falsos positivos confirmados con exclusiones de alcance limitado.
 
 !!! warning "Cuerpos de respuesta comprimidos por el upstream"
     CRS v4 no inspecciona cuerpos de respuesta ya comprimidos por el upstream (`gzip`, `br` o `zstd`). BunkerWeb no los descomprime para inspeccionarlos. Cuando necesite inspeccionar el cuerpo de respuesta, configure el upstream para devolver contenido sin comprimir. Para solicitarlo a un upstream que respete esta cabecera, elimine `Accept-Encoding` de la solicitud reenviada solo en el servicio y la ubicación afectados:
@@ -122,14 +122,14 @@ En este ejemplo:
 - La acción se ejecuta en la **Fase 1** (temprano en el ciclo de vida de la solicitud).
 - Habilita las exclusiones de CRS específicas de WordPress estableciendo la variable `tx.crs_exclusions_wordpress`.
 
-#### Actualizar las Reglas de CRS con `modsec`
+#### Actualizar las Reglas de CRS con `modsec-crs`
 
-Para ajustar las reglas de CRS cargadas, puede usar una configuración personalizada de tipo `modsec`. Por ejemplo, puede eliminar reglas o etiquetas específicas para ciertas rutas de solicitud:
+Para ajustar las reglas de CRS cargadas, puede usar una configuración personalizada de tipo `modsec-crs`. Por ejemplo, puede eliminar reglas o etiquetas específicas para ciertas rutas de solicitud. Una acción `ctl:ruleRemove*` solo afecta a las reglas que se ejecutan después de ella, por lo que las reglas siguientes se ejecutan en `phase:1` y la configuración se carga antes del CRS:
 
 ```conf
-SecRule REQUEST_FILENAME "/wp-admin/admin-ajax.php" "id:1,ctl:ruleRemoveByTag=attack-xss,ctl:ruleRemoveByTag=attack-rce"
-SecRule REQUEST_FILENAME "/wp-admin/options.php" "id:2,ctl:ruleRemoveByTag=attack-xss"
-SecRule REQUEST_FILENAME "^/wp-json/yoast" "id:3,ctl:ruleRemoveById=930120"
+SecRule REQUEST_FILENAME "/wp-admin/admin-ajax.php" "id:1,phase:1,pass,t:none,nolog,ctl:ruleRemoveByTag=attack-xss,ctl:ruleRemoveByTag=attack-rce"
+SecRule REQUEST_FILENAME "/wp-admin/options.php" "id:2,phase:1,pass,t:none,nolog,ctl:ruleRemoveByTag=attack-xss"
+SecRule REQUEST_FILENAME "^/wp-json/yoast" "id:3,phase:1,pass,t:none,nolog,ctl:ruleRemoveById=930120"
 ```
 
 En este ejemplo:
@@ -137,6 +137,8 @@ En este ejemplo:
 - **Regla 1**: Elimina las reglas etiquetadas como `attack-xss` y `attack-rce` para las solicitudes a `/wp-admin/admin-ajax.php`.
 - **Regla 2**: Elimina las reglas etiquetadas como `attack-xss` para las solicitudes a `/wp-admin/options.php`.
 - **Regla 3**: Elimina una regla específica (ID `930120`) para las solicitudes que coinciden con `/wp-json/yoast`.
+
+Las directivas `SecRuleRemoveById`, `SecRuleRemoveByTag`, `SecRuleUpdateTargetById` y `SecRuleUpdateTargetByTag`, que se aplican al cargar la configuración, van en una configuración personalizada de tipo `modsec` (después del CRS).
 
 !!! info "Orden de ejecución"
     El orden de ejecución de ModSecurity en BunkerWeb es el siguiente, asegurando una progresión clara y lógica de la aplicación de reglas:

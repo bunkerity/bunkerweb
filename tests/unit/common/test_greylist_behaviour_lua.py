@@ -174,6 +174,25 @@ emit({{ status = result.status, errors = errors }})
         assert out["status"] == 403
         assert out["errors"] == ["error while getting rdns : rdns lookup failed"]
 
+    def test_an_rdns_outage_is_not_cached_so_the_recovered_lookup_greylists_the_next_request(self):
+        body = f"""
+VARIABLES = {to_lua(variables())}
+STORE["plugin_greylist_lists_{SERVER}"] = {{ RDNS = {{ ".good.example" }} }}
+local KEY = "plugin_greylist_{SERVER}ip1.2.3.4"
+FCRDNS = true
+RDNS = nil
+local first = new_plugin(PLUGIN):access()
+local after_outage = CACHE[KEY]
+RDNS = {{ "crawler.good.example" }}
+local second = new_plugin(PLUGIN):access()
+emit({{ first = summary(first), after_outage = after_outage, second = summary(second), cached = CACHE[KEY] }})
+"""
+        out = run_plugin(MODULE, body)
+        assert out["first"]["status"] == 403
+        assert out.get("after_outage") is None
+        assert (out["second"].get("status"), out["second"]["msg"]) == (None, "IP is in greylist")
+        assert out["cached"] == "rDNS .good.example"
+
 
 class TestStream:
     def test_preread_applies_the_same_decision_as_access(self):
@@ -233,3 +252,14 @@ emit({{ ret = result.ret, msg = result.msg, store = STORE }})
     def test_init_reports_an_internalstore_write_failure(self, tmp_path):
         out = self._init(tmp_path, setup='STORE_SET_ERROR = "no memory"')
         assert (out["ret"], out["msg"]) == (False, f"can't store greylist {SERVER} list into internalstore : no memory")
+
+
+class TestMissingListSetting:
+    def test_a_missing_list_setting_does_not_crash_the_constructor(self):
+        body = f"""
+VARIABLES = {to_lua({"USE_GREYLIST": "yes", "GREYLIST_RDNS_GLOBAL": "no"})}
+STORE["plugin_greylist_lists_{SERVER}"] = {to_lua({"IP": ["1.2.3.4"]})}
+local result = new_plugin(PLUGIN):access()
+emit({{ msg = result.msg }})
+"""
+        assert run_plugin(MODULE, body)["msg"] == "IP is in greylist"

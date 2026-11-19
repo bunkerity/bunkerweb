@@ -397,16 +397,18 @@ def plugins_refresh():
         wait_applying()
 
         plugins = BW_CONFIG.get_plugins(_type="ui", with_data=True)
-        for plugin in plugins:
-            if plugin in new_plugins_ids:
-                DATA["TO_FLASH"].append({"content": f"Plugin {plugin} already exists", "type": "error"})
-                del new_plugins[new_plugins_ids.index(plugin)]
+        to_store = []
+        for plugin_id, plugin in zip(new_plugins_ids, new_plugins):
+            if plugin_id in plugins:
+                DATA["TO_FLASH"].append({"content": f"Plugin {plugin_id} already exists", "type": "error"})
+            else:
+                to_store.append(plugin)
 
-        if not new_plugins:
+        if not to_store:
             DATA["RELOADING"] = False
             return
 
-        err = DB.update_external_plugins(new_plugins, _type="ui", delete_missing=False)
+        err = DB.update_external_plugins(to_store, _type="ui", delete_missing=False)
         if err:
             DATA["TO_FLASH"].append({"content": f"Couldn't update ui plugins to database: {err}", "type": "error"})
         else:

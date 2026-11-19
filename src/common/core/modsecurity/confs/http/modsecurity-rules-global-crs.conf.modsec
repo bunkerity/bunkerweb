@@ -14,14 +14,14 @@ SecRequestBodyAccess On
 
 # Enable XML parsing
 SecRule REQUEST_HEADERS:Content-Type "(?:application(?:/soap\+|/)|text/)xml" \
-  "id:'200000',phase:1,t:none,t:lowercase,pass,nolog,ctl:requestBodyProcessor=XML"
+  "id:'9800010',phase:1,t:none,t:lowercase,pass,nolog,ctl:requestBodyProcessor=XML"
 
 # Enable JSON parsing
 SecRule REQUEST_HEADERS:Content-Type "application/json" \
-  "id:'200001',phase:1,t:none,t:lowercase,pass,nolog,ctl:requestBodyProcessor=JSON"
+  "id:'9800011',phase:1,t:none,t:lowercase,pass,nolog,ctl:requestBodyProcessor=JSON"
 
 # NOTE: SecRequestBodyLimit, SecRequestBodyLimitAction and the REQBODY_ERROR
-# handling rules (ids 200002 / 200005) are intentionally NOT emitted at http
+# handling rules (ids 9800200 / 9800203) are intentionally NOT emitted at http
 # scope in global CRS mode so multisite services can keep their own per-server
 # ModSecurity values. They are rendered at server scope from the matching
 # server-http template:
@@ -31,7 +31,7 @@ SecRule REQUEST_HEADERS:Content-Type "application/json" \
 
 # Be strict with multipart/form-data body
 SecRule MULTIPART_STRICT_ERROR "!@eq 0" \
-  "id:'200003',phase:2,t:none,log,deny,status:400,setvar:'tx.bunkerweb_reason=modsecurity-body-200003', \
+  "id:'9800201',phase:2,t:none,log,deny,status:400,setvar:'tx.bunkerweb_reason=modsecurity-body-9800201', \
   msg:'Multipart request body failed strict validation: \
   PE %{REQBODY_PROCESSOR_ERROR}, \
   BQ %{MULTIPART_BOUNDARY_QUOTED}, \
@@ -46,7 +46,7 @@ SecRule MULTIPART_STRICT_ERROR "!@eq 0" \
   IH %{MULTIPART_INVALID_HEADER_FOLDING}, \
   FL %{MULTIPART_FILE_LIMIT_EXCEEDED}'"
 SecRule MULTIPART_UNMATCHED_BOUNDARY "@eq 1" \
-  "id:'200004',phase:2,t:none,log,deny,setvar:'tx.bunkerweb_reason=modsecurity-body-200004',msg:'Multipart parser detected a possible unmatched boundary.'"
+  "id:'9800202',phase:2,t:none,log,deny,setvar:'tx.bunkerweb_reason=modsecurity-body-9800202',msg:'Multipart parser detected a possible unmatched boundary.'"
 
 # Reject the RFC 2231 filename* parameter in multipart parts. ModSecurity reads
 # filename= only, while RFC 7578 parsers (Werkzeug, Starlette, busboy, Go, Spring)
@@ -54,7 +54,7 @@ SecRule MULTIPART_UNMATCHED_BOUNDARY "@eq 1" \
 # malicious one. RFC 7578 section 4.2 forbids RFC 2231 encoding here, so refusing it
 # costs nothing for a compliant client.
 SecRule MULTIPART_PART_HEADERS "@rx ^content-disposition\s*:.*;\s*filename\s*\*\s*=" \
-  "id:'200006',phase:2,t:none,t:lowercase,log,deny,status:400,setvar:'tx.bunkerweb_reason=modsecurity-body-200006', \
+  "id:'9800204',phase:2,t:none,t:lowercase,log,deny,status:400,setvar:'tx.bunkerweb_reason=modsecurity-body-9800204', \
   msg:'Multipart Content-Disposition uses the RFC 2231 filename* parameter',logdata:'%{MATCHED_VAR}'"
 
 # Enable response body checks
@@ -161,7 +161,7 @@ include /etc/nginx/modsec-crs/*.conf
 include /etc/nginx/http/*.modsec-crs
 
 # Check if client is whitelisted
-SecRule ENV:is_whitelisted "yes" "id:1000,phase:1,allow,nolog,ctl:ruleEngine=Off"
+SecRule ENV:is_whitelisted "yes" "id:9800000,phase:1,allow,nolog,ctl:ruleEngine=Off"
 
 # include OWASP CRS rules
     {% if effective_crs_version == "3" %}
@@ -172,9 +172,9 @@ include /usr/share/bunkerweb/core/modsecurity/files/coreruleset-v4/rules/*.conf
 
     {% if USE_MODSECURITY_CRS_PLUGINS == "yes" and effective_crs_version != "3" %}
 # custom CRS plugins configurations after loading plugins
-      {%- if is_custom_conf("/etc/bunkerweb/configs/crs-plugins-after") %}
+      {% if is_custom_conf("/etc/bunkerweb/configs/crs-plugins-after") %}
 include /etc/bunkerweb/configs/crs-plugins-after/*.conf
-      {%- endif %}
+      {% endif %}
       {% if is_custom_conf("/etc/nginx/crs-plugins-after") %}
 include /etc/nginx/crs-plugins-after/*.conf
       {% endif %}

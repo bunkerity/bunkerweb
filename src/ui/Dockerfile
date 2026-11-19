@@ -86,6 +86,7 @@ RUN apk add --no-cache bash unzip mariadb-connector-c mariadb-client sqlite post
 
 # Fix CVEs
 RUN apk add --no-cache "zlib>=1.4-r0" # CVE-2026-4738
+RUN apk add --no-cache "libcrypto3>=3.5.9-r1" "libssl3>=3.5.9-r1" # CVE-2026-107496, CVE-2026-88822, CVE-2026-88823, CVE-2026-95691, CVE-2026-95692
 RUN apk add --no-cache "libpq>=18.7-r0" "postgresql18-client>=18.7-r0" # CVE-2026-6467 and 51 more PostgreSQL 18.6 CVEs
 
 # Copy dependencies
@@ -108,7 +109,7 @@ RUN echo "Docker" > INTEGRATION && \
   chmod 660 INTEGRATION
 
 LABEL maintainer="Bunkerity <contact@bunkerity.com>"
-LABEL version="1.6.18~rc4"
+LABEL version="1.6.18~rc5"
 LABEL url="https://www.bunkerweb.io"
 LABEL bunkerweb.type="ui"
 

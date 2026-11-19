@@ -115,7 +115,7 @@ jobs:
             tests/unit/common/test_http_phase_lazy_info_lua.py \
             tests/unit/common/test_request_work_counts_luajit.py \
             "tests/unit/legacy/test_legacy_scripts.py::test_legacy_script[test_lua_rdns_skip_empty.lua]" | tee luajit.log
-          grep -q ' 352 passed' luajit.log
+          grep -q ' 355 passed' luajit.log
           ! grep -qi 'skipped' luajit.log
       - name: Write Lua coverage reports and enforce the overall floor
         run: python tests/unit/lua_coverage.py report .cache/lua-coverage --fail-under 94

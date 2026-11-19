@@ -11,6 +11,7 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
     if deps_path not in sys_path:
         sys_path.append(deps_path)
 
+from cache_restore import StagedDirectory, checked_cache_path, recover_directory, write_atomic  # type: ignore
 from certificate_validation import normalize_pem, validate_certificate_pair  # type: ignore
 from common_utils import bytes_hash  # type: ignore
 from jobs import Job  # type: ignore
@@ -46,8 +47,8 @@ def process_ssl_data(data: str, file_path: Optional[str], data_type: Literal["ce
 
 
 def check_cert(cert_file: Union[Path, bytes], key_file: Union[Path, bytes], first_server: str) -> Tuple[bool, Union[str, BaseException]]:
+    published = False
     try:
-        ret = False
         if not cert_file or not key_file:
             return False, "Both variables CUSTOM_SSL_CERT and CUSTOM_SSL_KEY have to be set to use custom certificates"
 
@@ -74,29 +75,31 @@ def check_cert(cert_file: Union[Path, bytes], key_file: Union[Path, bytes], firs
         for warning in check["warnings"]:
             LOGGER.warning(f"{first_server}: {warning}")
 
-        cert_hash = bytes_hash(cert_file)
-        old_hash = JOB.cache_hash("cert.pem", service_id=first_server)
-        cert_path = Path(sep, "var", "cache", "bunkerweb", "customcert", first_server, "cert.pem")
-        if old_hash != cert_hash or not cert_path.is_file():
-            ret = True
-            cached, err = JOB.cache_file("cert.pem", cert_file, service_id=first_server, checksum=cert_hash, delete_file=False)
-            if not cached:
-                LOGGER.error(f"Error while caching custom-cert cert.pem file : {err}")
-                return False, err
+        service_path = checked_cache_path(JOB.job_path, first_server)
+        recover_directory(service_path)
+        files = (("cert.pem", cert_file, bytes_hash(cert_file)), ("key.pem", key_file, bytes_hash(key_file)))
+        if all(
+            (path := checked_cache_path(service_path, name)).is_file()
+            and path.read_bytes() == data == JOB.db.get_job_cache_file(JOB.job_name, name, service_id=first_server)
+            for name, data, _ in files
+        ):
+            return False, ""
 
-        key_hash = bytes_hash(key_file)
-        old_hash = JOB.cache_hash("key.pem", service_id=first_server)
-        key_path = Path(sep, "var", "cache", "bunkerweb", "customcert", first_server, "key.pem")
-        if old_hash != key_hash or not key_path.is_file():
-            ret = True
-            cached, err = JOB.cache_file("key.pem", key_file, service_id=first_server, checksum=key_hash, delete_file=False)
-            if not cached:
-                LOGGER.error(f"Error while caching custom-key key.pem file : {err}")
+        entries = [
+            {"job_name": JOB.job_name, "service_id": first_server, "file_name": name, "data": data, "checksum": checksum} for name, data, checksum in files
+        ]
+        with StagedDirectory(service_path) as staged:
+            for name, data, _ in files:
+                write_atomic(staged.path.joinpath(name), data)
+            staged.publish()
+            err = JOB.db.upsert_job_caches(entries)
+            if err:
                 return False, err
-
-        return ret, ""
+            published = True
+            staged.commit()
+        return True, ""
     except BaseException as e:
-        return False, e
+        return published, e
 
 
 status = 0
@@ -148,22 +151,23 @@ try:
                     "Variables (CUSTOM_SSL_CERT or CUSTOM_SSL_CERT_DATA) and (CUSTOM_SSL_KEY or CUSTOM_SSL_KEY_DATA) "
                     f"have to be set and valid to use custom certificates for {first_server}"
                 )
-                status = 2
+                status |= 2
                 continue
 
             LOGGER.info(f"Checking certificate for {first_server} ...")
             need_reload, err = check_cert(cert_file, key_file, first_server)
+            if need_reload:
+                status |= 1
             if isinstance(err, BaseException):
                 LOGGER.error(f"Exception while checking {first_server}'s certificate, skipping ... \n{err}")
-                status = 2
+                status |= 2
                 continue
             elif err:
                 LOGGER.warning(f"Error while checking {first_server}'s certificate : {err}")
-                status = 2
+                status |= 2
                 continue
             elif need_reload:
                 LOGGER.info(f"Detected change in {first_server}'s certificate")
-                status = 1
                 continue
 
             LOGGER.info(f"No change in {first_server}'s certificate")
@@ -174,7 +178,7 @@ try:
 except SystemExit as e:
     status = e.code
 except BaseException as e:
-    status = 2
+    status |= 2
     LOGGER.debug(format_exc())
     LOGGER.error(f"Exception while running custom-cert.py :\n{e}")
 

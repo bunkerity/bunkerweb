@@ -1,8 +1,8 @@
 """A request that declares an XML body and sends none must not be denied with a 400.
 
 ModSecurity arms its XML body processor from the ``Content-Type`` alone, and the parser then reports
-"XML: Failed to parse document." for an empty body. The "can't process the body" rules (id 200002, or
-200005 in ``ProcessPartial`` mode) denied on that error, which broke WebDAV and SOAP clients (an
+"XML: Failed to parse document." for an empty body. The "can't process the body" rules (id 9800200, or
+9800203 in ``ProcessPartial`` mode) denied on that error, which broke WebDAV and SOAP clients (an
 ``OPTIONS`` or ``PROPFIND`` with ``Content-Type: application/xml`` and no body). The deny rules are
 now chained to ``REQUEST_BODY_LENGTH`` being non-zero. Rendered for both the per-service rules and the
 global-CRS rules.
@@ -15,7 +15,7 @@ import pytest
 from _t4_helpers import full_renderer, modsec_chain
 
 BODYLESS_GUARD = ("REQUEST_BODY_LENGTH !@eq 0", "")
-RULE_ID = {"Reject": "200002", "ProcessPartial": "200005"}
+RULE_ID = {"Reject": "9800200", "ProcessPartial": "9800203"}
 
 
 @pytest.fixture(scope="module")
@@ -47,8 +47,8 @@ def test_the_body_parse_deny_only_fires_when_there_is_a_body(render, scope, acti
 
 @pytest.mark.parametrize("scope", ["service", "global"])
 def test_the_partial_mode_keeps_its_inbound_data_condition(render, scope):
-    """200005 still requires that the failure is not the truncation of an oversized body (INBOUND_DATA_ERROR)."""
-    chain = modsec_chain(rules_text(render, scope, "ProcessPartial"), "200005")
+    """9800203 still requires that the failure is not the truncation of an oversized body (INBOUND_DATA_ERROR)."""
+    chain = modsec_chain(rules_text(render, scope, "ProcessPartial"), "9800203")
     assert [link[0] for link in chain] == ["REQBODY_ERROR !@eq 0", "INBOUND_DATA_ERROR !@eq 1", "REQUEST_BODY_LENGTH !@eq 0"]
 
 

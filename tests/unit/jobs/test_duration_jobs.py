@@ -85,3 +85,18 @@ def test_session_cleanup_age_accepts_suffixes(monkeypatch, value, days):
         runpy.run_path(str(CLEANUP), run_name="__main__")
     assert exit_info.value.code in (0, None)
     assert calls == [days]
+
+
+def test_session_cleanup_db_error_does_not_request_reload(monkeypatch):
+    errors = []
+    db = types.SimpleNamespace(cleanup_expired_ui_sessions=lambda _: "database unavailable")
+    monkeypatch.setitem(sys.modules, "Database", types.SimpleNamespace(Database=lambda *args, **kwargs: db))
+    log = types.SimpleNamespace(error=errors.append, warning=lambda *_: None)
+    monkeypatch.setitem(sys.modules, "logger", types.SimpleNamespace(getLogger=lambda _: log))
+    monkeypatch.setenv("DATABASE_MAX_SESSION_AGE_DAYS", "14")
+
+    with pytest.raises(SystemExit) as exit_info:
+        runpy.run_path(str(CLEANUP), run_name="__main__")
+
+    assert errors == ["database unavailable"]
+    assert exit_info.value.code == 2

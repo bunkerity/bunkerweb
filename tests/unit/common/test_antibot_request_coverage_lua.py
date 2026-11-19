@@ -115,6 +115,40 @@ emit({ result = r, session = SESSION_DATA })
     assert out["session"] == {}
 
 
+def test_an_rdns_outage_is_not_cached_so_the_recovered_lookup_ignores_the_next_request():
+    out = run(r"""
+VARIABLES.ANTIBOT_IGNORE_RDNS = ".good.example"
+FCRDNS = true
+RDNS = nil
+local first = new_plugin(PLUGIN, { ip_is_global = true, uri = "/page", request_uri = "/page" })
+local first_result = first:access()
+local KEY = first:kind_to_ele("IP")
+local _, after_outage = first:is_in_cache(KEY)
+RDNS = { "crawler.good.example" }
+local second = new_plugin(PLUGIN, { ip_is_global = true, uri = "/page", request_uri = "/page" })
+local second_result = second:access()
+local _, cached = second:is_in_cache(KEY)
+emit({ first = first_result, after_outage = after_outage, second = second_result, cached = cached })
+""")
+    assert "redirect" in out["first"]
+    assert out.get("after_outage") is None
+    assert out["second"]["msg"] == "IP is ignored (info : rDNS .good.example)"
+    assert out["cached"] == "rDNS .good.example"
+
+
+def test_a_completed_rdns_lookup_without_a_match_is_cached_as_not_ignored():
+    out = run(r"""
+VARIABLES.ANTIBOT_IGNORE_RDNS = ".good.example"
+FCRDNS = true
+RDNS = { "host.other.example" }
+local a = new_plugin(PLUGIN, { ip_is_global = true, uri = "/page", request_uri = "/page" })
+a:access()
+local _, cached = a:is_in_cache(a:kind_to_ele("IP"))
+emit({ cached = cached })
+""")
+    assert out["cached"] == "ko"
+
+
 def test_ignored_asset_bypasses_challenge_even_when_session_unavailable():
     out = run(r"""
 VARIABLES.ANTIBOT_IGNORE_URI = "^/assets/"

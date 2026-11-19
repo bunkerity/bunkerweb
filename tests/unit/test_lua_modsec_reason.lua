@@ -75,7 +75,7 @@ local function reason_for(vars)
 	return utils.get_reason(ctx)
 end
 
-for _, id in ipairs({ "200002", "200003", "200004", "200005", "200006" }) do
+for _, id in ipairs({ "9800200", "9800201", "9800202", "9800203", "9800204" }) do
 	it("rule " .. id .. " denial is reported as modsecurity-body", function()
 		local reason, data = reason_for({ modsecurity_reason = "modsecurity-body-" .. id })
 		assert(reason == "modsecurity-body", "reason=" .. tostring(reason))
@@ -84,7 +84,7 @@ for _, id in ipairs({ "200002", "200003", "200004", "200005", "200006" }) do
 end
 
 it("an unrelated body id is not claimed as modsecurity-body", function()
-	local reason = reason_for({ modsecurity_reason = "modsecurity-body-200007" })
+	local reason = reason_for({ modsecurity_reason = "modsecurity-body-9800205" })
 	assert(reason ~= "modsecurity-body", "reason=" .. tostring(reason))
 end)
 
@@ -140,7 +140,7 @@ for _, path in ipairs({
 	"src/common/core/modsecurity/confs/http/modsecurity-rules-global-crs.conf.modsec",
 	"src/common/core/modsecurity/confs/server-http/modsecurity-rules.conf.modsec",
 }) do
-	for _, id in ipairs({ "200003", "200004", "200006" }) do
+	for _, id in ipairs({ "9800201", "9800202", "9800204" }) do
 		it(path:match("[^/]+/[^/]+$") .. " attributes rule " .. id, function()
 			local text = read(path)
 			-- the rule definition, up to the next blank line or comment

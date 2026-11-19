@@ -392,13 +392,14 @@ class KubernetesController(Controller):
         pod_ip = status.pod_ip if status else None
         pod_name = controller_instance.metadata.name
         namespace = controller_instance.metadata.namespace
+        if not pod_ip:
+            self._instances_pending = True
+            self._logger.debug(f"Skipping pod {namespace}/{pod_name} because it has no IP")
+            return []
+
         instance = {
             "name": pod_name,
-            "hostname": (
-                f"{(pod_ip.replace('.', '-').replace(':', '-') if pod_ip else pod_name)}.{namespace}.pod.{self._domain_name}"
-                if self._use_fqdn
-                else (pod_ip or pod_name)
-            ),
+            "hostname": f"{pod_ip.replace('.', '-').replace(':', '-')}.{namespace}.pod.{self._domain_name}" if self._use_fqdn else pod_ip,
             "health": False,
             "type": "pod",
             "env": {},
@@ -413,14 +414,12 @@ class KubernetesController(Controller):
         if not pod:
             self._logger.warning(f"Missing container bunkerweb in pod {controller_instance.metadata.name}")
             # Preserve discovery behavior for legacy deployments with a different container name.
-            instance["health"] = bool(status and any(c.type == "Ready" and c.status == "True" for c in status.conditions or []))
+            instance["health"] = any(c.type == "Ready" and c.status == "True" for c in status.conditions or [])
         else:
             # Readiness gates traffic, not configuration delivery: a loading container needs
             # configuration before it can become Ready. The scheduler checks API reachability.
-            instance["health"] = bool(
-                status
-                and status.phase == "Running"
-                and pod_ip
+            instance["health"] = (
+                status.phase == "Running"
                 and not controller_instance.metadata.deletion_timestamp
                 and any(c.name == pod.name and c.state and c.state.running is not None for c in status.container_statuses or [])
             )
@@ -709,10 +708,12 @@ class KubernetesController(Controller):
             locked = False
             error = False
             applied = False
+            reconciling = False
             try:
                 for event in self._get_stream_with_retries(watch_type, what):
                     self._mark_healthy(watch_type)
                     applied = False
+                    reconciling = False
                     self._internal_lock.acquire()
                     locked = True
                     if not self._process_event(event):
@@ -744,6 +745,7 @@ class KubernetesController(Controller):
                         continue
 
                     self._pending_apply = False
+                    reconciling = True
                     self._log_event_summary()
 
                     while not applied:
@@ -770,12 +772,16 @@ class KubernetesController(Controller):
                         try:
                             ret = self.apply_config()
                             if not ret:
+                                self._pending_apply = True
+                                self._apply_retry_at = time() + 10
                                 self._logger.error("Error while deploying new configuration ...")
                             else:
                                 self._logger.info("Successfully deployed new configuration")
 
                                 self._set_autoconf_load_db()
                         except BaseException as e:
+                            self._pending_apply = True
+                            self._apply_retry_at = time() + 10
                             self._logger.debug(format_exc())
                             self._logger.error(f"Exception while deploying new configuration :\n{e}")
                         applied = True
@@ -794,6 +800,9 @@ class KubernetesController(Controller):
                 error = True
             finally:
                 if locked:
+                    if reconciling and not applied:
+                        self._pending_apply = True
+                        self._apply_retry_at = time() + 10
                     with suppress(BaseException):
                         self._internal_lock.release()
                     locked = False
@@ -907,7 +916,7 @@ class KubernetesController(Controller):
             sleep(0.5)
 
     def _retry_deferred_apply(self) -> None:
-        """Run the apply that _trigger_apply_if_idle put off because the scheduler was busy.
+        """Retry an apply deferred by a busy scheduler or a failed reconciliation.
 
         No watch thread waits for it: the flag it leaves behind is only consumed by a thread that
         receives an event, so without this tick the change stays undeployed until some unrelated
@@ -926,8 +935,8 @@ class KubernetesController(Controller):
         dropped rule and no fresh watch event arrives, we would wait forever —
         so we run an apply directly here under the internal lock.
         """
-        try:
-            with self._internal_lock:
+        with self._internal_lock:
+            try:
                 if not self._pending_apply:
                     return
                 self._pending_apply = False
@@ -952,16 +961,22 @@ class KubernetesController(Controller):
                 try:
                     ret = self.apply_config()
                     if not ret:
+                        self._pending_apply = True
+                        self._apply_retry_at = time() + 10
                         self._logger.error("Backend retry worker: error while deploying new configuration")
                     else:
                         self._logger.info("Backend retry worker: successfully deployed recovered configuration")
                         self._set_autoconf_load_db()
                 except BaseException as e:
+                    self._pending_apply = True
+                    self._apply_retry_at = time() + 10
                     self._logger.debug(format_exc())
                     self._logger.error(f"Backend retry worker: exception while deploying new configuration: {e}")
-        except BaseException as e:
-            self._logger.debug(format_exc())
-            self._logger.error(f"Backend retry worker: unexpected error: {e}")
+            except BaseException as e:
+                self._pending_apply = True
+                self._apply_retry_at = time() + 10
+                self._logger.debug(format_exc())
+                self._logger.error(f"Backend retry worker: unexpected error: {e}")
 
     def _get_loadbalancer_ip(self, name: str, namespace: str) -> Optional[List[str]]:
         try:

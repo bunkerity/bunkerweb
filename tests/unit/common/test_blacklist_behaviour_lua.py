@@ -222,6 +222,33 @@ emit({{ status = result.status, errors = errors }})
         assert out.get("status") is None
         assert out["errors"] == ["error while getting rdns : rdns lookup failed"]
 
+    def test_an_rdns_outage_is_not_cached_so_the_recovered_lookup_blacklists_the_next_request(self):
+        body = f"""
+VARIABLES = {to_lua({"USE_BLACKLIST": "yes", "BLACKLIST_RDNS_GLOBAL": "no", **{f"BLACKLIST_{k}": "" for k in KINDS}})}
+STORE["plugin_blacklist_lists_{SERVER}"] = {{ RDNS = {{ ".evil.example" }} }}
+local KEY = "plugin_blacklist_{SERVER}ip1.2.3.4"
+RDNS = nil
+local first = new_plugin(PLUGIN):access()
+local after_outage = CACHE[KEY]
+RDNS = {{ "scan1.evil.example" }}
+local second = new_plugin(PLUGIN):access()
+emit({{ first = summary(first), after_outage = after_outage, second = summary(second), cached = CACHE[KEY] }})
+"""
+        out = run_plugin(MODULE, body)
+        assert out["first"].get("status") is None
+        assert out.get("after_outage") is None
+        assert (out["second"]["status"], out["second"]["msg"]) == (403, "IP is blacklisted (info : rDNS .evil.example)")
+        assert out["cached"] == "rDNS .evil.example"
+
+    def test_a_completed_rdns_lookup_without_a_match_is_still_cached_clean(self):
+        out = access({"RDNS": [".evil.example"]}, setup='RDNS = { "host.fine.example" }')
+        assert out["status"] is None
+        assert out["cache"][f"plugin_blacklist_{SERVER}ip1.2.3.4"] == "ok"
+
+    def test_an_asn_match_still_denies_while_the_rdns_lookup_fails(self):
+        out = access({"RDNS": [".evil.example"], "ASN": ["64496"]}, ctx={"ip_is_global": True}, setup="RDNS = nil; ASN = 64496")
+        assert (out["status"], out["msg"]) == (403, "IP is blacklisted (info : ASN 64496)")
+
 
 class TestStream:
     def test_preread_applies_the_same_decision_as_access(self):
@@ -431,3 +458,14 @@ emit({ unchanged = encode(stored) == before, stored = stored })
             ctx={"remote_addr": client, "uri": uri, "http_user_agent": ua},
         )
         assert out["msg"] == expected
+
+
+class TestMissingListSetting:
+    def test_a_missing_list_setting_does_not_crash_the_constructor(self):
+        body = f"""
+VARIABLES = {to_lua({"USE_BLACKLIST": "yes", "BLACKLIST_RDNS_GLOBAL": "no"})}
+STORE["plugin_blacklist_lists_{SERVER}"] = {to_lua({"IP": ["1.2.3.4"]})}
+local result = new_plugin(PLUGIN):access()
+emit({{ msg = result.msg }})
+"""
+        assert run_plugin(MODULE, body)["msg"] == "IP is blacklisted (info : ip)"

@@ -21,17 +21,19 @@
 LJ_NORET static void cconv_err_conv(CTState *cts, CType *d, CType *s,
 				    CTInfo flags)
 {
-  const char *dst = strdata(lj_ctype_repr(cts->L, ctype_typeid(cts, d), NULL));
+  lua_State *L = cts->L;
+  const char *dst = strdata(lj_ctype_repr(L, ctype_typeid(cts, d), NULL));
   const char *src;
   if ((flags & CCF_FROMTV))
     src = lj_obj_typename[1+(ctype_isnum(s->info) ? LUA_TNUMBER :
 			     ctype_isarray(s->info) ? LUA_TSTRING : LUA_TNIL)];
   else
-    src = strdata(lj_ctype_repr(cts->L, ctype_typeid(cts, s), NULL));
+    src = strdata(lj_ctype_repr(L, ctype_typeid(cts, s), NULL));
+  if (curr_funcisL(L)) L->top = curr_topL(L);
   if (CCF_GETARG(flags))
-    lj_err_argv(cts->L, CCF_GETARG(flags), LJ_ERR_FFI_BADCONV, src, dst);
+    lj_err_argv(L, CCF_GETARG(flags), LJ_ERR_FFI_BADCONV, src, dst);
   else
-    lj_err_callerv(cts->L, LJ_ERR_FFI_BADCONV, src, dst);
+    lj_err_callerv(L, LJ_ERR_FFI_BADCONV, src, dst);
 }
 
 /* Bad conversion from TValue. */
@@ -686,7 +688,7 @@ static void cconv_array_init(CTState *cts, CType *d, CTSize sz, uint8_t *dp,
   CType *dc = ctype_rawchild(cts, d);  /* Array element type. */
   CTSize ofs, esize = dc->size;
   MSize i;
-  if (len*esize > sz)
+  if (len * (uint64_t)esize > sz)
     cconv_err_initov(cts, d);
   for (i = 0, ofs = 0; i < len; i++, ofs += esize)
     lj_cconv_ct_tv(cts, dc, dp + ofs, o + i, 0);

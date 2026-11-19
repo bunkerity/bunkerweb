@@ -52,7 +52,7 @@ Die UI erwartet, dass Scheduler/(BunkerWeb-)API/Redis/DB erreichbar sind.
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.18-rc4
+        image: bunkerity/bunkerweb:1.6.18-rc5
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -63,7 +63,7 @@ Die UI erwartet, dass Scheduler/(BunkerWeb-)API/Redis/DB erreichbar sind.
         networks: [bw-universe, bw-services]
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.18-rc4
+        image: bunkerity/bunkerweb-scheduler:1.6.18-rc5
         environment:
           <<: *service-env
           BUNKERWEB_INSTANCES: "bunkerweb"
@@ -83,7 +83,7 @@ Die UI erwartet, dass Scheduler/(BunkerWeb-)API/Redis/DB erreichbar sind.
         networks: [bw-universe, bw-db]
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.6.18-rc4
+        image: bunkerity/bunkerweb-ui:1.6.18-rc5
         environment:
           <<: *service-env
           ADMIN_USERNAME: "admin"
@@ -261,7 +261,8 @@ Der RAW-Editor eines Dienstes oder der globalen Einstellungen kann eine Einstell
 | Setting                         | Beschreibung                                                      | Erlaubte Werte                              | Standard                                              |
 | ------------------------------- | ----------------------------------------------------------------- | ------------------------------------------- | ----------------------------------------------------- |
 | `MAX_WORKERS`, `MAX_THREADS`    | Gunicorn-Worker/Threads                                           | Integer                                     | `cpu_count()-1` (min 1), `workers*2`                  |
-| `MAX_REQUESTS`                  | Anfragen vor Gunicorn-Worker-Recycling (verhindert Speicherbloat) | Integer                                     | `1000`                                                |
+| `MAX_REQUESTS`                  | Anfragen vor Gunicorn-Worker-Recycling (verhindert Speicherbloat) | Integer                                     | `200`                                                 |
+| `UI_MAX_REQUESTS`               | Dasselbe, nur für die Weboberfläche (hat Vorrang vor `MAX_REQUESTS`) | Integer                                     | `200`                                                 |
 | `ENABLE_HEALTHCHECK`            | `GET /healthcheck` bereitstellen                                  | `yes` oder `no`                             | `no`                                                  |
 | `FORWARDED_ALLOW_IPS`           | Alias für Proxy-Allowlist                                         | IPs/CIDRs                                   | `127.0.0.0/8,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16` |
 | `PROXY_ALLOW_IPS`               | Alias für PROXY-Allowlist                                         | IPs/CIDRs                                   | `FORWARDED_ALLOW_IPS`                                 |

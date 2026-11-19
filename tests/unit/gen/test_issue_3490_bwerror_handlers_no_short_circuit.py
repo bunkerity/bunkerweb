@@ -72,3 +72,20 @@ def test_the_rendered_handlers_do_not_depend_on_the_denial_status(render):
     candidate = render(DENY_HTTP_STATUS="444", **variables)
     for template in ("server-http/errors.conf", "default-server-http/errors.conf"):
         assert candidate[template] == reference[template]
+
+
+def test_shared_custom_error_page_has_one_exact_location(render):
+    tree = render(
+        MULTISITE="no",
+        SERVER_NAME="app.example.com",
+        ERRORS="400=/blocked.html 401=/Blocked.html 403=/blocked.html 404=/blocked.html",
+        INTERCEPTED_ERROR_CODES=INTERCEPTED,
+    )
+    output = tree["server-http/errors.conf"]
+    assert output.count("location = /blocked.html {") == 1
+    assert output.count("location = /Blocked.html {") == 1
+    assert "internal;" in location_block(output, "= /blocked.html")
+    assert "error_page 400 /blocked.html;" in output
+    for code in (403, 404):
+        assert f"error_page {code} @bwcustomerror{code};" in output
+        assert "rewrite ^ /blocked.html break;" in location_block(output, f"@bwcustomerror{code}")

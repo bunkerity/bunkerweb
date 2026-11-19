@@ -125,6 +125,26 @@ def test_connection_retries_can_recover_and_publish(tmp_path, monkeypatch, caplo
     assert not module.TMP_DIR.exists()
 
 
+def test_database_failure_is_reported_and_next_run_retries(tmp_path, monkeypatch, caplog):
+    caplog.set_level(logging.INFO, logger="DOWNLOAD-EXTERNAL-PLUGINS")
+    database = Mock()
+    database.get_plugins.return_value = []
+    database.update_external_plugins.side_effect = ["database unavailable", ""]
+    get = Mock(return_value=_response(content=_zip()))
+    env = {"EXTERNAL_PLUGIN_URLS": "https://plugins.invalid/plugin.zip"}
+
+    module, status = load_job(monkeypatch, tmp_path, JOB, database=database, get=get, env=env)
+
+    assert status == 2
+    assert "database unavailable" in caplog.text
+    assert "External plugins downloaded and installed" not in caplog.text
+    assert not module.TMP_DIR.exists()
+
+    _, status = load_job(monkeypatch, tmp_path, JOB, database=database, get=get, env=env)
+    assert status == 1
+    assert database.update_external_plugins.call_count == 2
+
+
 @pytest.mark.parametrize("failed_first", [True, False])
 def test_one_successful_download_does_not_hide_another_failure(tmp_path, monkeypatch, caplog, failed_first):
     database = Mock()

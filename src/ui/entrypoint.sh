@@ -25,6 +25,10 @@ function trap_exit() {
 
 		# Log that the temporary web UI process has been stopped.
 		log "ENTRYPOINT" "ℹ️ " "Temporary web UI stopped"
+	# The child may not have written its PID file yet: signal it directly.
+	elif [ -n "${tmp_pid:-}" ] && kill -0 "$tmp_pid" 2> /dev/null; then
+		# shellcheck disable=SC2317
+		kill -s TERM "$tmp_pid"
 	fi
 
 	# Similarly, stop the main web UI process if it exists.
@@ -44,11 +48,15 @@ function trap_exit() {
 		# Log that the main web UI process has been stopped.
 		# shellcheck disable=SC2317
 		log "ENTRYPOINT" "ℹ️ " "Web UI stopped"
+	# The child may not have written its PID file yet: signal it directly.
+	elif [ -n "${pid:-}" ]; then
+		# shellcheck disable=SC2317
+		kill -s TERM "$pid" 2> /dev/null
 	fi
 }
 
 # Register the trap_exit function to handle SIGTERM, SIGINT, and SIGQUIT signals.
-trap "trap_exit" TERM INT QUIT
+trap 'wait_interrupted=yes; stop_requested=yes; trap_exit' TERM INT QUIT
 
 # Remove any existing PID file for the main web UI to avoid stale state issues.
 if [ -f /var/run/bunkerweb/tmp-ui.pid ]; then
@@ -85,31 +93,57 @@ export LOG_SYSLOG_TAG="${LOG_SYSLOG_TAG:-bw-ui}"
 # Start a temporary Gunicorn process with a special logger configuration.
 # Unset LOG_FILE_PATH in the tmp-ui child env so tmp-ui falls back to its own
 # per-process default (tmp-ui.log) instead of sharing the main UI's log file.
+# A stop received before the children exist: do not start them.
+if [ "${stop_requested:-no}" = yes ]; then
+	log "ENTRYPOINT" "ℹ️" "Stopped before the web UI started"
+	exit 143
+fi
 env -u LOG_FILE_PATH python3 -m gunicorn --logger-class utils.logger.TmpUiLogger --config utils/tmp-gunicorn.conf.py &
+tmp_pid="$!"
+# A stop received between the two launches: wait for the temporary child, do not start the main one.
+if [ "${stop_requested:-no}" = yes ]; then
+	log "ENTRYPOINT" "ℹ️" "Stopped before the main web UI started"
+	kill -s TERM "$tmp_pid" 2> /dev/null
+	while kill -0 "$tmp_pid" 2> /dev/null; do
+		wait "$tmp_pid"
+	done
+	exit 143
+fi
 
 # Start the main Gunicorn process with the standard logger configuration.
 python3 -m gunicorn --logger-class utils.logger.UiLogger --config utils/gunicorn.conf.py &
 pid="$!"
+# A stop received while the children were being started.
+if [ "${stop_requested:-no}" = yes ]; then
+	trap_exit
+fi
 
 # Wait for the main web UI process to exit and capture its exit code.
-wait "$pid"
-exit_code=$?
+# A stop trap interrupts wait before the child has finished shutting down.
+while :; do
+	wait_interrupted=no
+	wait "$pid"
+	exit_code=$?
+	[ "$wait_interrupted" = yes ] || break
+done
 
 # Log the exit status of the main web UI process for debugging purposes.
 log "ENTRYPOINT" "ℹ️" "Web UI stopped with exit code $exit_code"
 
 # If the temporary web UI process is still running, wait for it to stop.
-if [ -f "/var/run/bunkerweb/tmp-ui.pid" ]; then
+# It may have left no PID file yet, so also check the PID captured at launch.
+if [ -f "/var/run/bunkerweb/tmp-ui.pid" ] || kill -0 "$tmp_pid" 2> /dev/null; then
 	log "ENTRYPOINT" "ℹ️" "Waiting for temporary Web UI to stop ..."
 
 	# Wait in a loop until the temporary web UI process exits, with 60 second timeout
 	timeout=60
-	while [ -f "/var/run/bunkerweb/tmp-ui.pid" ] && [ $timeout -gt 0 ]; do
+	while { [ -f "/var/run/bunkerweb/tmp-ui.pid" ] || kill -0 "$tmp_pid" 2> /dev/null; } && [ $timeout -gt 0 ]; do
 		sleep 1
 		((timeout--))
 	done
 
-	while [ -f "/var/tmp/bunkerweb/ui.error" ]; do
+	# The error page stays up until it is dismissed, but a stop request must not wait for that.
+	while [ "${stop_requested:-no}" != yes ] && [ -f "/var/tmp/bunkerweb/ui.error" ]; do
 		sleep 1
 	done
 
@@ -121,4 +155,4 @@ if [ -f "/var/run/bunkerweb/tmp-ui.pid" ]; then
 fi
 
 # Exit the script with the same exit code as the main web UI process.
-exit $exit_code
+exit "$exit_code"

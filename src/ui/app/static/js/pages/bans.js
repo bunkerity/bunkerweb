@@ -454,7 +454,7 @@ $(document).ready(function () {
           </li>
           <li class="list-group-item" style="flex: 1 0;">
             <div class="ms-2 me-auto">
-              ${scopeText}${serviceText}
+              <span class="ban-scope-label"></span>
             </div>
           </li>
           <li class="list-group-item" style="flex: 1 0;">
@@ -464,6 +464,8 @@ $(document).ready(function () {
           </li>
         </ul>
       `);
+      // The service name is user-controlled: insert it as text, never as markup.
+      $row.find(".ban-scope-label").text(`${scopeText}${serviceText}`);
       $modalBody.append($row);
     });
 
@@ -557,7 +559,7 @@ $(document).ready(function () {
           </li>
           <li class="list-group-item" style="flex: 1 0;">
             <div class="ms-2 me-auto">
-              ${scopeText}${serviceText}
+              <span class="ban-scope-label"></span>
             </div>
           </li>
           <li class="list-group-item" style="flex: 1 0;">
@@ -567,6 +569,8 @@ $(document).ready(function () {
           </li>
         </ul>
       `);
+      // The service name is user-controlled: insert it as text, never as markup.
+      $row.find(".ban-scope-label").text(`${scopeText}${serviceText}`);
       $modalBody.append($row);
     });
 
@@ -1034,6 +1038,43 @@ $(document).ready(function () {
     actionLock = false;
   };
 
+  // The server escapes these fields with markupsafe, which only writes these five entities.
+  const decodeEntities = (value) => {
+    const entities = {
+      "&amp;": "&",
+      "&lt;": "<",
+      "&gt;": ">",
+      "&#34;": '"',
+      "&#39;": "'",
+    };
+    return String(value ?? "").replace(
+      /&(?:amp|lt|gt|#34|#39);/g,
+      (e) => entities[e],
+    );
+  };
+
+  // Read a ban from its row data: unlike the cells, it does not move when a column is hidden.
+  const banFromRowData = (rowData) => {
+    const isService = rowData.scope === "service";
+    const service = decodeEntities(rowData.service).trim();
+    return {
+      ip: String(rowData.ip ?? "").trim(),
+      time_remaining:
+        rowData.permanent || rowData.time_left === "permanent"
+          ? t("scope.permanent", "Permanent")
+          : String(rowData.time_left ?? "").trim(),
+      ban_scope: isService ? "service" : "global",
+      service: !isService
+        ? null
+        : service === "_" || service === ""
+          ? "default server"
+          : service,
+      kind: rowData.kind || "ban",
+      cs_node: rowData.cs_node || "",
+      cs_connection: rowData.cs_connection || "",
+    };
+  };
+
   const getSelectedBans = () => {
     const bans = [];
     if (!$.fn.dataTable.isDataTable("#bans")) return bans;
@@ -1041,41 +1082,7 @@ $(document).ready(function () {
       .DataTable()
       .rows({ selected: true })
       .every(function () {
-        const $row = $(this.node());
-        const rowData = this.data() || {};
-        const ip = $row.find("td:eq(3)").text().trim();
-        const time_remaining = $row.find("td:eq(9)").text().trim();
-        const scopeHtml = $row.find("td:eq(6)").html();
-        const serviceHtml = $row.find("td:eq(7)").html();
-
-        // Extract scope text, handling potential badge structure
-        const scopeText = $(scopeHtml).find("span[data-i18n]").length
-          ? $(scopeHtml).find("span[data-i18n]").text().trim()
-          : $(scopeHtml).text().trim();
-
-        // Extract service text, handling potential links or static text
-        const serviceText = $(serviceHtml).find("strong").length
-          ? $(serviceHtml).find("strong").text().trim()
-          : $(serviceHtml).find("span[data-i18n]").length
-            ? $(serviceHtml).find("span[data-i18n]").text().trim()
-            : $(serviceHtml).text().trim();
-
-        const ban_scope =
-          scopeText === t("scope.global", "Global") ? "global" : "service";
-        const service =
-          serviceText === t("scope.all_services", "All services")
-            ? null
-            : serviceText;
-
-        bans.push({
-          ip: ip,
-          time_remaining: time_remaining,
-          ban_scope: ban_scope,
-          service: service,
-          kind: rowData.kind || "ban",
-          cs_node: rowData.cs_node || "",
-          cs_connection: rowData.cs_connection || "",
-        });
+        bans.push(banFromRowData(this.data() || {}));
       });
     return bans;
   };

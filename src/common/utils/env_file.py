@@ -23,14 +23,37 @@ reassembled, PEM or wrapped base64. Callers that do not still get PEM blocks rea
 because a value that opens `-----BEGIN` is followed to its `-----END` whatever the key is.
 """
 
+from base64 import b64decode, b64encode
+from binascii import Error as Base64Error
+from contextlib import suppress
 from pathlib import Path
 from re import compile as re_compile
-from typing import Callable, Dict, Iterable, Optional
+from typing import Callable, Dict, Iterable, Mapping, Optional
 
 # The token before the first "=" on a line that genuinely declares a setting. Service
 # prefixes make the key `www.example.com_CUSTOM_SSL_CERT_DATA`, hence the dot and dash.
 # Base64 lines carry "+" and "/" and fail this, so they cannot be mistaken for a key.
-KEY_RX = re_compile(r"^[A-Za-z0-9_.-]+$")
+# Colons belong only to a bare IPv6 service prefix, before the setting name.
+KEY_RX = re_compile(r"^(?:(?:[0-9a-f]{0,4}:){2,7}[0-9a-f]{0,4}_)?[A-Za-z0-9_.-]+$")
+
+# A value with a line break cannot stay on its own line: the Lua readers (init_by_lua, api.lua) and
+# the shell readers match one `KEY=value` per physical line, and the Python reader ends a value at any
+# key it knows, so an extra line of a `file` setting would declare another setting (SEC-03). Writers
+# put such a value on one line as `<prefix><base64 of its UTF-8 bytes>`.
+#
+# That encoding is a property of a file the writers generate, not of a value: an operator's file may
+# hold the same text as plain data. So `format_env_lines` starts its file with ENV_FORMAT_MARKER, and
+# only a file that carries it is read in the encoded format: one record per physical line, no folding,
+# a value that begins with the prefix decoded. Any other file is read by the folding rules below and
+# nothing in it is ever decoded, which is how every rc4 file and every operator file is read.
+# The marker has no "=", so the Lua readers (`^([^=]+)=(.*)$`) skip it, and starts with "#" like a comment.
+ENV_B64_PREFIX = "bw-b64:"
+ENV_FORMAT_MARKER = "#bw-env-format:2"
+
+# What the writers encode: the line breaks of `str.splitlines()`. The readers split on "\n" only (as
+# Lua's io.lines does), so these cannot start a record, but `str.strip()` would also eat them from the
+# ends of a value, and a value is written the way it is read back.
+BREAK_RX = re_compile("[\n\r\v\f\x1c\x1d\x1e\x85\u2028\u2029]")
 
 PEM_BEGIN = "-----BEGIN"
 PEM_END = "-----END"
@@ -48,12 +71,64 @@ PEM_END = "-----END"
 B64_LINE_RX = re_compile(r"^[A-Za-z0-9+/_-]+={0,2}$")
 
 
+def format_env_line(key: str, value: object) -> str:
+    """Return `key=value` for a variables file, on a single line whatever the value holds."""
+    if not isinstance(value, str):
+        value = str(value)
+    # Trailing line breaks stay raw, as they always were: the reader strips a single-line value, so a
+    # ConfigMap block scalar's final newline never reaches the setting. Only an interior one can split.
+    interior = value.rstrip("\r\n")
+    if BREAK_RX.search(interior) or value.startswith(ENV_B64_PREFIX):
+        value = ENV_B64_PREFIX + b64encode(value.encode("utf-8")).decode("ascii")
+    return f"{key}={value}"
+
+
+def format_env_lines(variables: Mapping[str, object]) -> str:
+    """Return a variables file: the format marker, then one `key=value` line per variable."""
+    return ENV_FORMAT_MARKER + "\n" + "".join(f"{format_env_line(key, value)}\n" for key, value in variables.items())
+
+
+def _decode_value(value: str) -> str:
+    """Undo `format_env_line` on the text after the "=". Anything else is stripped, as a single-line value always was.
+
+    The prefix is tested before stripping, as `format_env_line` tests it: a value that starts with
+    whitespace was written raw, and is data.
+    """
+    if value.startswith(ENV_B64_PREFIX):
+        with suppress(Base64Error, UnicodeDecodeError, ValueError):
+            return b64decode(value.removeprefix(ENV_B64_PREFIX).strip(), validate=True).decode("utf-8")
+    return value.strip()
+
+
+def _physical_line(raw_line: str) -> str:
+    """Drop the line terminator: one "\n", then one "\r" so a CRLF file reads like an LF one."""
+    return raw_line.removesuffix("\n").removesuffix("\r")
+
+
+def _parse_encoded_lines(lines: Iterable[str]) -> Dict[str, str]:
+    """Read a file written by `format_env_lines`: one record per physical line, so nothing is folded."""
+    variables: Dict[str, str] = {}
+    for raw_line in lines:
+        line = _physical_line(raw_line)
+        key, equals, value = line.partition("=")
+        key = key.strip()
+        if equals and KEY_RX.match(key):
+            variables[key] = _decode_value(value)
+    return variables
+
+
 def parse_env_lines(
     lines: Iterable[str],
     is_multiline_key: Optional[Callable[[str], bool]] = None,
     is_known_key: Optional[Callable[[str], bool]] = None,
 ) -> Dict[str, str]:
     """Parse `KEY=value` lines into a dict, keeping multi-line values intact.
+
+    A file whose first line is ENV_FORMAT_MARKER was written by `format_env_lines`: every line is a
+    record, a value that begins with the `bw-b64:` prefix is decoded, and none of the folding below
+    applies, so an encoded record can neither be folded into another value nor swallow a neighbour.
+    Any other file is read by the rules below and never decoded: it may be an operator's file whose
+    text merely looks like an encoding.
 
     A physical line starts a new pair only when the token before its first "=" looks like a
     setting key. Anything else continues the value being built. Single-line values keep the
@@ -79,6 +154,10 @@ def parse_env_lines(
     which trigger is rarer, and this one needs an adjacent empty foreign variable where the other
     fires on every wrapped payload.
     """
+    lines = list(lines)
+    if lines and _physical_line(lines[0]) == ENV_FORMAT_MARKER:
+        return _parse_encoded_lines(lines[1:])
+
     fold_unmarked = is_multiline_key is not None and is_known_key is not None
     variables: Dict[str, str] = {}
     key: Optional[str] = None
@@ -92,7 +171,7 @@ def parse_env_lines(
         variables[key] = "\n".join(parts) if len(parts) > 1 else parts[0].strip()
 
     for raw_line in lines:
-        line = raw_line.rstrip("\r\n")
+        line = _physical_line(raw_line)
 
         candidate = line.split("=", 1)[0].strip() if "=" in line else None
         looks_like_key = candidate is not None and KEY_RX.match(candidate) is not None
@@ -176,8 +255,13 @@ def parse_env_file(
     is_multiline_key: Optional[Callable[[str], bool]] = None,
     is_known_key: Optional[Callable[[str], bool]] = None,
 ) -> Dict[str, str]:
-    """Read `path` and parse it with `parse_env_lines`."""
-    return parse_env_lines(path.read_text(encoding="utf-8").splitlines(), is_multiline_key, is_known_key)
+    """Read `path` and parse it with `parse_env_lines`.
+
+    Lines end at "\n" only, the boundary the Lua and shell readers use, and `newline=""` keeps a stray
+    "\r" in the text: `read_text()` or `splitlines()` would split on it and on other Unicode breaks.
+    """
+    with path.open(encoding="utf-8", newline="") as handle:
+        return parse_env_lines(handle.read().split("\n"), is_multiline_key, is_known_key)
 
 
 def make_key_predicate(setting_names: Iterable[str]) -> Callable[[str], bool]:

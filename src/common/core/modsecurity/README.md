@@ -57,7 +57,7 @@ Follow these steps to configure and use ModSecurity:
     To keep uploads protected after bypassing ModSecurity, pair this with a file-scanning plugin such as [ClamAV](https://github.com/bunkerity/bunkerweb-plugins/tree/main/clamav) or [VirusTotal](https://github.com/bunkerity/bunkerweb-plugins/tree/main/virustotal) — they inspect the uploaded file itself instead of the raw request body.
 
 !!! warning "Response-body denies and compressed responses"
-    If a response-body deny rule fires after response headers have been sent, the client can receive the original status (such as `200`) followed by an incomplete-body or chunked-encoding error instead of a clean `403` response. This can happen with gzip, Brotli or zstd compression applied by BunkerWeb. Starting with `1.6.18~rc4`, Brotli follows the established gzip behavior. Check the ModSecurity audit and error logs for the triggered rule; tune confirmed false positives with narrowly scoped exclusions.
+    If a response-body deny rule fires after response headers have been sent, the client can receive the original status (such as `200`) followed by an incomplete-body or chunked-encoding error instead of a clean `403` response. This can happen with gzip, Brotli or zstd compression applied by BunkerWeb. Starting with `1.6.18~rc5`, Brotli follows the established gzip behavior. Check the ModSecurity audit and error logs for the triggered rule; tune confirmed false positives with narrowly scoped exclusions.
 
 !!! warning "Upstream-compressed response bodies"
     CRS v4 does not inspect response bodies already compressed by the upstream (`gzip`, `br` or `zstd`). BunkerWeb does not decode these bodies for inspection. Where response-body inspection is required, configure the upstream to return uncompressed content. To ask an upstream that honors this header to do so, remove `Accept-Encoding` from the proxied request for only the affected service and location:
@@ -122,14 +122,14 @@ In this example:
 - The action is executed in **Phase 1** (early in the request lifecycle).
 - It enables WordPress-specific CRS exclusions by setting the variable `tx.crs_exclusions_wordpress`.
 
-#### Updating CRS Rules with `modsec`
+#### Updating CRS Rules with `modsec-crs`
 
-To fine-tune the loaded CRS rules, you can use a custom configuration of type `modsec`. For example, you can remove specific rules or tags for certain request paths:
+To fine-tune the loaded CRS rules, you can use a custom configuration of type `modsec-crs`. For example, you can remove specific rules or tags for certain request paths. A `ctl:ruleRemove*` action only affects rules that run after it, so the rules below run in `phase:1` and the configuration is loaded before the CRS:
 
 ```conf
-SecRule REQUEST_FILENAME "/wp-admin/admin-ajax.php" "id:1,ctl:ruleRemoveByTag=attack-xss,ctl:ruleRemoveByTag=attack-rce"
-SecRule REQUEST_FILENAME "/wp-admin/options.php" "id:2,ctl:ruleRemoveByTag=attack-xss"
-SecRule REQUEST_FILENAME "^/wp-json/yoast" "id:3,ctl:ruleRemoveById=930120"
+SecRule REQUEST_FILENAME "/wp-admin/admin-ajax.php" "id:1,phase:1,pass,t:none,nolog,ctl:ruleRemoveByTag=attack-xss,ctl:ruleRemoveByTag=attack-rce"
+SecRule REQUEST_FILENAME "/wp-admin/options.php" "id:2,phase:1,pass,t:none,nolog,ctl:ruleRemoveByTag=attack-xss"
+SecRule REQUEST_FILENAME "^/wp-json/yoast" "id:3,phase:1,pass,t:none,nolog,ctl:ruleRemoveById=930120"
 ```
 
 In this example:
@@ -137,6 +137,8 @@ In this example:
 - **Rule 1**: Removes rules tagged as `attack-xss` and `attack-rce` for requests to `/wp-admin/admin-ajax.php`.
 - **Rule 2**: Removes rules tagged as `attack-xss` for requests to `/wp-admin/options.php`.
 - **Rule 3**: Removes a specific rule (ID `930120`) for requests matching `/wp-json/yoast`.
+
+Keep the `SecRuleRemoveById`, `SecRuleRemoveByTag`, `SecRuleUpdateTargetById` and `SecRuleUpdateTargetByTag` directives, which apply when the configuration loads, in a custom configuration of type `modsec` (after the CRS).
 
 !!! info "Order of execution"
     The execution order for ModSecurity in BunkerWeb is as follows, ensuring a clear and logical progression of rule application:

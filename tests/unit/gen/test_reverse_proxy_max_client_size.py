@@ -22,7 +22,11 @@ TEMPLATE = ROOT / "src" / "common" / "core" / "reverseproxy" / "confs" / "server
 
 
 def _render(max_client_size: str = "", use_modsecurity: str = "no", location_modsecurity: str = "yes") -> str:
-    environment = jinja2.Environment(undefined=jinja2.ChainableUndefined, keep_trailing_newline=True)
+    environment = jinja2.Environment(
+        loader=jinja2.FileSystemLoader([ROOT / "src/common/confs", *ROOT.glob("src/common/core/*/confs")]),
+        undefined=jinja2.ChainableUndefined,
+        keep_trailing_newline=True,
+    )
     environment.globals["import"] = import_module  # Templator exposes this; the mTLS block uses it
     config = {"REVERSE_PROXY_HOST": "http://backend:8080"}
     if max_client_size:

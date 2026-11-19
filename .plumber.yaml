@@ -13,3 +13,4 @@ github:
         - iFaxity/wait-on-action
         - danielmundi/upload-packagecloud
         - pullfrog/pullfrog
+        - medyagh/setup-minikube

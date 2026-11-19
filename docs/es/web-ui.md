@@ -52,7 +52,7 @@ La UI requiere scheduler/API de BunkerWeb/redis/base de datos accesibles.
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.18-rc4
+        image: bunkerity/bunkerweb:1.6.18-rc5
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -63,7 +63,7 @@ La UI requiere scheduler/API de BunkerWeb/redis/base de datos accesibles.
         networks: [bw-universe, bw-services]
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.18-rc4
+        image: bunkerity/bunkerweb-scheduler:1.6.18-rc5
         environment:
           <<: *service-env
           BUNKERWEB_INSTANCES: "bunkerweb"
@@ -83,7 +83,7 @@ La UI requiere scheduler/API de BunkerWeb/redis/base de datos accesibles.
         networks: [bw-universe, bw-db]
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.6.18-rc4
+        image: bunkerity/bunkerweb-ui:1.6.18-rc5
         environment:
           <<: *service-env
           ADMIN_USERNAME: "admin"
@@ -261,7 +261,8 @@ El editor RAW de un servicio o de la configuración global puede conservar un aj
 | Ajuste                          | Descripción                                                                   | Valores aceptados                           | Predeterminado                                        |
 | ------------------------------- | ----------------------------------------------------------------------------- | ------------------------------------------- | ----------------------------------------------------- |
 | `MAX_WORKERS`, `MAX_THREADS`    | Workers/hilos de Gunicorn                                                     | Entero                                      | `cpu_count()-1` (mín 1), `workers*2`                  |
-| `MAX_REQUESTS`                  | Solicitudes antes de reciclar el worker Gunicorn (previene exceso de memoria) | Entero                                      | `1000`                                                |
+| `MAX_REQUESTS`                  | Solicitudes antes de reciclar el worker Gunicorn (previene exceso de memoria) | Entero                                      | `200`                                                 |
+| `UI_MAX_REQUESTS`               | Igual, solo para la interfaz web (tiene prioridad sobre `MAX_REQUESTS`)       | Entero                                      | `200`                                                 |
 | `ENABLE_HEALTHCHECK`            | Exponer `GET /healthcheck`                                                    | `yes` o `no`                                | `no`                                                  |
 | `FORWARDED_ALLOW_IPS`           | Alias para lista de proxies                                                   | IPs/CIDRs                                   | `127.0.0.0/8,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16` |
 | `PROXY_ALLOW_IPS`               | Alias para lista de PROXY                                                     | IPs/CIDRs                                   | `FORWARDED_ALLOW_IPS`                                 |

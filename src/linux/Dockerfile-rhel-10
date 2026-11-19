@@ -2,7 +2,7 @@ FROM redhat/ubi10:10.2@sha256:0e8ccad7d35f5fd756f4f2202f018b8d3c3e8bb9af8e627d87
 
 ENV OS=rhel
 ENV OS_VERSION=10
-ENV NGINX_VERSION=1.30.6
+ENV NGINX_VERSION=1.30.7
 
 # Copy rocky repo
 COPY src/linux/rocky-10.repo /etc/yum.repos.d/rocky.repo

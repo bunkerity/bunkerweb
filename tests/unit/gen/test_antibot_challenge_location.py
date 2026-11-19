@@ -38,7 +38,7 @@ def test_the_challenge_location_and_its_modsec_exclusion_follow_either_source(us
 
     assert ("location /challenge" in location) is expected
     # Without the allow rule, CRS inspects the challenge POST and can block the answer.
-    assert ("id:1010" in modsec) is expected
+    assert ("id:9801500" in modsec) is expected
 
 
 def test_a_service_without_the_flag_at_all_is_treated_as_absent():

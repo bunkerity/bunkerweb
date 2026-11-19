@@ -1,7 +1,7 @@
 """The HTTPS -> HTTP retry must dial the same host it failed to reach.
 
-``API.request`` retries over plaintext when an ``https`` endpoint raises ``ConnectionError`` (and
-the instance is not certificate-pinned). Building that retry URL with ``lstrip("https://")`` looked
+``API.request`` retries over plaintext when the TLS handshake of an ``https`` endpoint fails because the
+peer is not speaking TLS (S05A-F4: any other connection failure is no longer retried). Building that retry URL with ``lstrip("https://")`` looked
 right and was not: ``str.lstrip`` takes a character SET, so it removed EVERY leading character in
 {h, t, p, s, :, /}. An IP endpoint survived untouched, which is why this went unnoticed -- but
 ``https://scheduler:5000/`` retried against a host missing its leading "s", and ``https://phpsite:5000/``
@@ -13,10 +13,11 @@ Port of dev ``adaa0f3de``.
 
 import sys
 from pathlib import Path
+from ssl import SSLError
 from unittest.mock import patch
 
 import pytest
-from requests.exceptions import ConnectionError as RequestsConnectionError
+from requests.exceptions import ConnectionError as RequestsConnectionError, SSLError as RequestsSSLError
 
 ROOT = Path(__file__).resolve().parents[3]
 for _p in (ROOT / "src" / "common" / "api", ROOT / "src" / "common" / "utils"):
@@ -24,6 +25,11 @@ for _p in (ROOT / "src" / "common" / "api", ROOT / "src" / "common" / "utils"):
         sys.path.insert(0, str(_p))
 
 from API import API  # noqa: E402
+
+
+def _not_tls():
+    """What requests raises when plaintext answers the ClientHello: the ssl error nested the way urllib3 nests it."""
+    return RequestsSSLError(SSLError(1, "[SSL: WRONG_VERSION_NUMBER] wrong version number (_ssl.c:1000)"))
 
 
 class _Resp:
@@ -44,7 +50,7 @@ def _retry_url(endpoint: str, url: str = "/ping") -> str:
     def _fake(method, full_url, **kwargs):
         calls.append(full_url)
         if len(calls) == 1:
-            raise RequestsConnectionError("TLS handshake failed")
+            raise _not_tls()
         return _Resp()
 
     with patch("API.request", side_effect=_fake):
@@ -78,7 +84,7 @@ def test_only_the_scheme_changes_on_the_retry():
     def _fake(method, full_url, **kwargs):
         calls.append(full_url)
         if len(calls) == 1:
-            raise RequestsConnectionError("TLS handshake failed")
+            raise _not_tls()
         return _Resp()
 
     with patch("API.request", side_effect=_fake):
@@ -97,4 +103,13 @@ def test_a_plain_http_endpoint_is_never_retried():
     assert network.call_count == 1
     assert sent is False
     assert status is None
+    assert "Connection error" in err
+
+
+def test_a_connection_error_that_is_not_a_plaintext_peer_is_not_retried():
+    api = API("https://scheduler:5000", token="t")
+    with patch("API.request", side_effect=RequestsConnectionError("Connection reset by peer")) as network:
+        sent, err, status, _ = api.request("GET", "/ping")
+    assert network.call_count == 1
+    assert (sent, status) == (False, None)
     assert "Connection error" in err

@@ -42,7 +42,7 @@ def _fake_path_factory(files: dict, dirs: set):
         def exists(self):
             return self._parts in dirs
 
-        def open(self):
+        def open(self, *args, **kwargs):
             return StringIO(files[self._parts])
 
         def read_text(self, encoding=None):

@@ -7,6 +7,7 @@ in ``tests/unit/common/_lua_state_helpers.py``: a query name maps to the A recor
 back, and threads run to completion when they are spawned.
 """
 
+import json
 import re
 
 import pytest
@@ -43,6 +44,41 @@ emit(out)
     out = {"status": None, "data": None, "ttl": None, **run_plugin(MODULE, body)}
     out["queries"], out["errors"] = out["queries"] or [], out["errors"] or []
     return out
+
+
+@pytest.mark.parametrize("method", ["access", "preread"])
+def test_real_setting_context_selects_service_list_and_inherits_global(method):
+    from test_bw_plugin_lua import run
+
+    settings = json.loads((CORE / "dnsbl/plugin.json").read_text())["settings"]
+    values = {
+        "global": {"MULTISITE": "yes", **variables(DNSBL_LIST="global.bl")},
+        "api.example.com": {"DNSBL_LIST": "partner.bl"},
+        "www.example.com": {},
+    }
+    for server, expected in (("api.example.com", "partner.bl"), ("www.example.com", "global.bl")):
+        # Real base-plugin initialization chooses the list before DNSBL's request hook uses it.
+        selected = run("emit(new().variables.DNSBL_LIST)", settings=settings, variables=values, SERVER_NAME=server, phase=method)
+        assert selected == expected
+        out = access(extra_variables={"DNSBL_LIST": selected}, ctx={"server_name": server}, dns={Q + expected: ["127.0.0.2"]}, method=method)
+        assert out["queries"] == [Q + expected]
+        assert out["status"] == 403
+        assert out["cache"] == {f"plugin_dnsbl_{server}1.2.3.4": expected}
+
+
+def test_startup_keeps_global_probe_list_despite_service_overrides():
+    from test_bw_plugin_lua import run
+
+    settings = json.loads((CORE / "dnsbl/plugin.json").read_text())["settings"]
+    selected = run(
+        "emit(new().variables.DNSBL_LIST)",
+        settings=settings,
+        variables={"global": {"MULTISITE": "yes", **variables(DNSBL_LIST="global.bl")}, "api.example.com": {"DNSBL_LIST": "partner.bl"}},
+        SERVER_NAME="api.example.com",
+        phase="init_worker",
+    )
+    out = TestInitWorker()._init_worker({"2.0.0.127.global.bl": ["127.0.0.2"]}, extra_variables={"DNSBL_LIST": selected})
+    assert out["queries"] == ["2.0.0.127.global.bl"]
 
 
 class TestDisabledPath:

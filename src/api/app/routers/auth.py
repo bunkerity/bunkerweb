@@ -5,6 +5,7 @@ from typing import Optional, Tuple
 from fastapi import APIRouter, HTTPException, Request, Depends
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from fastapi.responses import JSONResponse
+from starlette.concurrency import run_in_threadpool
 from biscuit_auth import BiscuitBuilder, Fact, PrivateKey
 
 from common_utils import get_version  # type: ignore
@@ -13,6 +14,7 @@ from ..utils import LOGGER
 from ..utils import BISCUIT_PRIVATE_KEY_FILE, check_password, get_api_db
 from ..config import api_config
 from ..auth.common import get_auth_header
+from ..auth.guard import DUMMY_PASSWORD_HASH
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 security = HTTPBasic(auto_error=False)
@@ -72,16 +74,20 @@ async def login(request: Request, credentials: HTTPBasicCredentials | None = Dep
 
     db = get_api_db(log=False)
     if is_admin_override:
-        user = db.get_api_user(as_dict=True) or {"username": "admin", "admin": True}
+        user = await run_in_threadpool(lambda: db.get_api_user(as_dict=True)) or {"username": "admin", "admin": True}
         is_admin = True
     else:
-        user = db.get_api_user(username=username or "", as_dict=True)
+        user = await run_in_threadpool(lambda: db.get_api_user(username=username or "", as_dict=True))
         if not user:
+            # Same bcrypt work as for an existing user, so the response time does not reveal which usernames exist.
+            await run_in_threadpool(check_password, password or "", DUMMY_PASSWORD_HASH)
             raise HTTPException(status_code=401, detail="Invalid credentials")
         stored_hash = user.get("password") or b""
         if not isinstance(stored_hash, (bytes, bytearray)):
             stored_hash = str(stored_hash or "").encode("utf-8")
-        if not password or not check_password(password, stored_hash):
+        # An empty password is refused too, but only after the same bcrypt check, so every rejected path costs one.
+        password_ok = await run_in_threadpool(check_password, password or "", stored_hash)
+        if not password or not password_ok:
             raise HTTPException(status_code=401, detail="Invalid credentials")
         is_admin = bool(user.get("admin"))
 

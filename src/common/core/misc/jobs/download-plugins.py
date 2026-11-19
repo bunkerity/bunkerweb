@@ -315,6 +315,7 @@ try:
 
     if err:
         LOGGER.error(f"Couldn't update external plugins to database: {err}")
+        sys_exit(2)
 
     status = max(status, 1)
     LOGGER.info("External plugins downloaded and installed")

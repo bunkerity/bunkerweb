@@ -130,13 +130,17 @@ $(document).ready(function () {
       // Hostname item
       const $hostnameItem = $(`<li class="list-group-item" style="flex: 1 0;">
           <div class="ms-2 me-auto">
-            <div class="fw-bold">${instance}</div>
+            <div class="fw-bold"></div>
           </div>
         </li>`);
+      // A hostname is user-controlled: insert it as text, never as markup.
+      $hostnameItem.find(".fw-bold").text(instance);
       $row.append($hostnameItem);
 
       // Clone the status element and append it
-      const statusClone = $("#status-" + instance.replaceAll(".", "_")).clone(); // Ensure ID is valid
+      const statusClone = $(
+        document.getElementById("status-" + instance.replaceAll(".", "_")),
+      ).clone(); // getElementById: the hostname is not a valid selector
       const $statusListItem = $(
         `<li class="list-group-item" style="flex: 1 0;"></li>`,
       );

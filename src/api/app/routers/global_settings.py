@@ -28,23 +28,6 @@ def read_global_settings(full: bool = False, methods: bool = False) -> JSONRespo
     return JSONResponse(status_code=200, content={"status": "success", "settings": conf})
 
 
-def _current_api_global_overrides() -> Dict[str, str]:
-    """Return only current global settings that are set via method 'api'.
-
-    Values are returned as a flat dict: {setting_id: value}.
-    """
-    overrides: Dict[str, str] = {}
-    conf = get_db().get_non_default_settings(global_only=True, methods=True, with_drafts=False)
-    for key, meta in conf.items():
-        try:
-            if isinstance(meta, dict) and meta.get("method") == "api":
-                overrides[key] = str(meta.get("value", ""))
-        except Exception:
-            # Be robust to unexpected values
-            continue
-    return overrides
-
-
 @config_router.patch("", dependencies=[Depends(guard)])
 @router.patch("", dependencies=[Depends(guard)])
 def update_global_settings(payload: GlobalSettingsUpdate) -> JSONResponse:
@@ -58,9 +41,7 @@ def update_global_settings(payload: GlobalSettingsUpdate) -> JSONResponse:
     for k, v in payload.root.items():
         to_set[str(k)] = "" if v is None else str(v)
 
-    base = _current_api_global_overrides()
-    base.update(to_set)
-    ret = get_db().save_config(base, "api", changed=True, skip_service_management=True)
+    ret = get_db().save_config(to_set, "api", changed=True, skip_service_management=True, partial=True)
     if isinstance(ret, str):
         code = 400 if ret and ("read-only" in ret or "already exists" in ret or "doesn't exist" in ret) else (200 if ret == "" else 500)
         status = "success" if code == 200 else "error"

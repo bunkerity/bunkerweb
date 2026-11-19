@@ -2,6 +2,8 @@
 
 from types import SimpleNamespace
 
+import pytest
+from docker.errors import DockerException
 from kubernetes import client as k
 from test_ingress_controller_services import build, ingress, meta, path, rule  # noqa: F401
 from test_swarm_controller_labels import build as swarm_build, service as swarm_service, swarm_env  # noqa: F401
@@ -26,3 +28,31 @@ def test_swarm_instance_ids_are_remembered_once(swarm_env):  # noqa: F811
         ctrl.get_instances()
 
     assert ctrl._SwarmController__swarm_instances == ["bw1"]
+
+
+def test_swarm_service_ids_are_remembered_once_and_forgotten_when_the_service_goes(swarm_env):  # noqa: F811
+    web = swarm_service("web", {"bunkerweb.SERVER_NAME": "a.example.com"}, sid="web1")
+    services = {"bunkerweb.SERVER_NAME": [web]}
+    ctrl = swarm_build(services)
+
+    for _ in range(3):
+        ctrl.get_services()
+
+    assert ctrl._SwarmController__swarm_services == ["web1"]
+
+    services["bunkerweb.SERVER_NAME"] = []
+    ctrl.get_services()
+
+    assert ctrl._SwarmController__swarm_services == []
+
+
+def test_a_failed_service_listing_keeps_the_known_service_ids(swarm_env):  # noqa: F811
+    web = swarm_service("web", {"bunkerweb.SERVER_NAME": "a.example.com"}, sid="web1")
+    ctrl = swarm_build({"bunkerweb.SERVER_NAME": [web]})
+    ctrl.get_services()
+
+    ctrl.client.services.list.side_effect = DockerException("daemon down")
+    with pytest.raises(DockerException):
+        ctrl.get_services()
+
+    assert ctrl._SwarmController__swarm_services == ["web1"]

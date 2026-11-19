@@ -65,6 +65,17 @@ def test_documentation_urls_can_be_disabled(config_type, value, expected):
     assert cfg.openapi_url == ("/openapi.json" if value is None else expected)
 
 
+@pytest.mark.parametrize("value", ["/", " / ", "//"])
+@pytest.mark.parametrize("name", ["API_DOCS_URL", "API_REDOC_URL"])
+def test_root_documentation_url_is_disabled_and_logged(config_type, monkeypatch, name, value):
+    cls, *_ = config_type
+    errors = []
+    monkeypatch.setattr("app.config.getLogger", lambda *_: SimpleNamespace(error=errors.append))
+    cfg = cls(**{name: value})
+    assert (cfg.docs_url if name == "API_DOCS_URL" else cfg.redoc_url) is None
+    assert len(errors) == 1 and name in errors[0] and "without authentication" in errors[0]
+
+
 def test_allowed_hosts_parse_and_internal_db_fallbacks(config_type, monkeypatch):
     cls, *_ = config_type
     db = Mock()

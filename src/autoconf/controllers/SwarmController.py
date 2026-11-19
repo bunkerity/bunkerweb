@@ -113,7 +113,10 @@ class SwarmController(Controller):
         """
         Fetch Swarm services labeled as 'bunkerweb.SERVER_NAME'.
         """
-        return self._get_controller_swarm_services(label_key="bunkerweb.SERVER_NAME")
+        services = self._get_controller_swarm_services(label_key="bunkerweb.SERVER_NAME")
+        # Cleared only after a successful listing: a failed one keeps the known ids, so a later removal event is not dropped.
+        self.__swarm_services = []
+        return services
 
     def _to_instances(self, controller_instance) -> List[dict]:
         instances = []

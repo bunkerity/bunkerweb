@@ -90,6 +90,29 @@ def test_lookup_failures_are_logged_without_granting(lists, context, error):
     assert out["metrics"] == {}
 
 
+def test_an_rdns_outage_is_not_cached_so_the_recovered_lookup_whitelists_the_next_request():
+    out = run(f"""
+STORE["plugin_whitelist_lists_{SERVER}"] = {{ RDNS = {{ ".trusted.example" }} }}
+local KEY = "plugin_whitelist_{SERVER}ip1.2.3.4"
+FCRDNS = true
+RDNS = nil
+local first = new_plugin(PLUGIN):access()
+local after_outage = CACHE[KEY]
+RDNS = {{ "bot.trusted.example" }}
+local second = new_plugin(PLUGIN):access()
+emit({{ first = summary(first), after_outage = after_outage, second = summary(second), cached = CACHE[KEY] }})
+""")
+    assert out["first"] == {"ret": True, "msg": "not whitelisted"}
+    assert out.get("after_outage") is None
+    assert out["second"] == {"ret": True, "msg": "IP is whitelisted (info : rDNS .trusted.example)", "status": "OK"}
+    assert out["cached"] == "rDNS .trusted.example"
+
+
+def test_a_completed_rdns_lookup_without_a_match_is_still_cached_clean():
+    out = access({"RDNS": [".trusted.example"]}, setup='RDNS = { "host.other.example" }; FCRDNS = true')
+    assert out["cache"][f"plugin_whitelist_{SERVER}ip1.2.3.4"] == "ok"
+
+
 @pytest.mark.parametrize("method", ["set", "access"])
 def test_cached_pass_sets_all_three_whitelist_flags(method):
     out = access(setup=f'CACHE["plugin_whitelist_{SERVER}ip1.2.3.4"] = "ip"', method=method)
@@ -299,3 +322,8 @@ GETVAR = {{ SERVER_NAME = "{SERVER}" }}
 emit(summary(new_plugin(PLUGIN):init()))
 """)
     assert out == {"ret": msg == "init not needed", "msg": msg}
+
+
+def test_a_missing_list_setting_does_not_crash_the_constructor():
+    out = access({"IP": ["1.2.3.4"]}, setup="VARIABLES.WHITELIST_IP = nil; VARIABLES.WHITELIST_URI = nil")
+    assert out["result"]["status"] == "OK"

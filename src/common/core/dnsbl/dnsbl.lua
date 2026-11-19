@@ -162,7 +162,7 @@ function dnsbl:init_worker()
 	elseif not is_needed then
 		return self:ret(true, "no service uses DNSBL, skipping init_worker")
 	end
-	-- Loop on DNSBL list
+	-- Probe the global baseline only; service overrides must not multiply startup DNS traffic.
 	local threads = {}
 	for server in self.variables["DNSBL_LIST"]:gmatch("%S+") do
 		-- Create thread

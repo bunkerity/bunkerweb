@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 from contextlib import suppress
+from copy import deepcopy
 from datetime import datetime
 from os import getenv
 from time import sleep
@@ -70,8 +71,12 @@ class Config:
         self.__configs = {config_type: {} for config_type in self._supported_config_types}
         self.__config = {}
         self.__extra_config = {}
+        self._pending_changes: set[str] = set()
+        self._pending_plugins: set[str] = set()
+        self._pending_first = False
+        self._pending_force = False
 
-        # Signature (set of valid setting ids) as of the last successful apply. Used to detect when
+        # Signature (set of valid setting ids) as of the last persisted config. Used to detect when
         # the available settings change out-of-band (e.g. a PRO license became valid and its
         # settings landed in the DB, an external plugin was added, or PRO expired) so labels that
         # were previously dropped as invalid can be re-evaluated. None until the first apply.
@@ -93,16 +98,20 @@ class Config:
             self._settings.update(plugin["settings"])
 
     def settings_changed(self) -> bool:
-        """Whether the set of valid setting ids differs from the last successful apply.
+        """Whether the set of valid setting ids differs from the last persisted config.
 
         Returns False until the first apply has recorded a baseline (signature is None), so the
         recheck worker never fires before initial_apply has run.
         """
         return self._applied_settings_signature is not None and frozenset(self._settings) != self._applied_settings_signature
 
-    def __get_full_env(self) -> dict:
+    def has_pending_work(self) -> bool:
+        """Whether notifications or retained apply intent still need a retry."""
+        return bool(self._pending_changes or self._pending_plugins or self._pending_first or self._pending_force)
+
+    def __get_full_env(self, services: List[Dict[str, str]]) -> dict:
         config = {"SERVER_NAME": "", "MULTISITE": "yes"}
-        for service in self.__services:
+        for service in services:
             server_name = service["SERVER_NAME"].split(" ")[0]
             if not server_name:
                 continue
@@ -115,7 +124,7 @@ class Config:
                 continue
             db_services.append(server_name)
 
-        for service in self.__services:
+        for service in services:
             server_name = service["SERVER_NAME"].split(" ")[0]
             if not server_name:
                 continue
@@ -173,6 +182,9 @@ class Config:
     ) -> bool:
         configs = configs or {}
         extra_config = extra_config or {}
+
+        if self.has_pending_work():
+            return True
 
         # Each comparison is the same one apply() makes on the same value. A difference update_needed
         # sees but apply() cannot act on never converges: apply() is what stores the new value, so when
@@ -245,6 +257,8 @@ class Config:
         force: bool = False,
     ) -> bool:
         success = True
+        first = self._pending_first = first or self._pending_first
+        force = self._pending_force = force or self._pending_force
 
         err = self._try_database_readonly()
         if err:
@@ -257,36 +271,30 @@ class Config:
 
         changes = []
         if first or self._instance_targets(instances) != self._instance_targets(self.__instances):
-            self.__instances = instances
             changes.append("instances")
         if services != self.__services or first:
-            self.__services = services
             changes.append("services")
         if configs != self.__configs or first:
-            self.__configs = configs
             changes.append("custom_configs")
         if extra_config != self.__extra_config or first:
             changes.append("extra_config")
         # force=True re-validates labels even when instances/services are unchanged: this is how a
         # now-valid PRO label (or any label that became valid after the settings set changed) gets
         # picked up, since __get_full_env() re-checks every label against the current DB settings.
+        new_env = self.__config
         if "instances" in changes or "services" in changes or "extra_config" in changes or force:
-            old_env = self.__config.copy()
-            new_env = self.__get_full_env() | extra_config
-            if old_env != new_env or first:
-                self.__config = new_env
+            new_env = self.__get_full_env(services) | extra_config
+            if self.__config != new_env or first:
                 changes.append("config")
-            if "extra_config" in changes:
-                self.__extra_config = extra_config.copy()
 
         custom_configs = []
         if "custom_configs" in changes:
-            for config_type in self.__configs:
+            for config_type in configs:
                 if config_type not in self._supported_config_types:
                     self.__logger.warning(f"Unsupported custom config type: {config_type}")
                     continue
 
-                for file, data in self.__configs[config_type].items():
+                for file, data in configs[config_type].items():
                     site = None
                     name = file
                     if "/" in file:
@@ -295,22 +303,35 @@ class Config:
                         name = exploded[1]
                     custom_configs.append({"value": data, "exploded": [site, config_type, name.replace(".conf", "")]})
 
+        # Writes can commit before a later write or notification fails; keep their signal until acknowledged.
+        self._pending_changes.update(changes)
+
         # update instances in database
         if "instances" in changes:
-            self.__logger.debug(f"Updating instances in database: {redact_secrets(self.__instances)}")
-            err = self._db.update_instances(self.__instances, "autoconf", changed=False)
+            self.__logger.debug(f"Updating instances in database: {redact_secrets(instances)}")
+            err = self._db.update_instances(instances, "autoconf", changed=False)
             if err:
+                success = False
                 self.__logger.error(f"Failed to update instances: {err}")
+            else:
+                self.__instances = deepcopy(instances)
 
         # save config to database
-        changed_plugins = []
+        config_saved = "config" not in changes
         if "config" in changes:
-            self.__logger.debug(f"Saving config in database: {redact_secrets(self.__config)}")
-            err = self._db.save_config(self.__config, "autoconf", changed=False, disable_cleanup=self._disable_cleanup)
+            self.__logger.debug(f"Saving config in database: {redact_secrets(new_env)}")
+            err = self._db.save_config(new_env, "autoconf", changed=False, disable_cleanup=self._disable_cleanup)
             if isinstance(err, str):
                 success = False
                 self.__logger.error(f"Can't save config in database: {err}, config may not work as expected")
-            changed_plugins = err
+            else:
+                self._pending_plugins.update(err)
+                config_saved = True
+
+        if config_saved:
+            # These inputs share one settings write; signaling and other writers have separate outcomes.
+            self.__services, self.__extra_config, self.__config = deepcopy((services, extra_config, new_env))
+            self._applied_settings_signature = frozenset(self._settings)
 
         # save custom configs to database
         if "custom_configs" in changes:
@@ -319,20 +340,28 @@ class Config:
             if err:
                 success = False
                 self.__logger.error(f"Can't save autoconf custom configs in database: {err}, custom configs may not work as expected")
+            else:
+                self.__configs = deepcopy(configs)
 
         # update changes in db, only when there is something to signal: Database.checked_changes() reads an
         # empty list like None, i.e. every *_changed flag, which makes the scheduler redo its whole job batch
-        if changes:
-            ret = self._db.checked_changes(changes, plugins_changes=changed_plugins, value=True)
+        if self._pending_changes:
+            ret = self._db.checked_changes(
+                changes + sorted(self._pending_changes.difference(changes)), plugins_changes=self._pending_plugins.copy(), value=True
+            )
             if ret:
+                success = False
                 self.__logger.error(f"An error occurred when setting the changes to checked in the database : {ret}")
+            else:
+                self._pending_changes.clear()
+                self._pending_plugins.clear()
 
-            self.__logger.info("Successfully saved new configuration 🚀")
+            if success:
+                self.__logger.info("Successfully saved new configuration 🚀")
 
         if success:
-            # Record the settings baseline so the recheck worker only re-fires when the valid
-            # settings set actually changes again (not after every normal apply).
-            self._applied_settings_signature = frozenset(self._settings)
+            self._pending_first = False
+            self._pending_force = False
 
         return success
 

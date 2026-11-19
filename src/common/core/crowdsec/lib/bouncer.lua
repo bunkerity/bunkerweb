@@ -866,7 +866,8 @@ function csmod.Allow(ip, challengePrefix)
     -- we check if the IP need to validate its captcha before checking it against crowdsec local API
     local previous_uri, flags = challenge_cache:get("captcha_"..ip)
     local source, state_id, err = flag.GetFlags(flags)
-    local body = get_body()
+    -- the body is only needed to verify a solution: never buffer it for a request that has no pending captcha
+    local body = previous_uri ~= nil and state_id == flag.VERIFY_STATE and get_body() or nil
 
     -- nil body means it was likely not a post, abort here because the user hasn't provided a captcha solution
 

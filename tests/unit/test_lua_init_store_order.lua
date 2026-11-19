@@ -185,7 +185,37 @@ package.loaded["ngx.process"] = {
 		return "master"
 	end,
 }
-ngx = { INFO = 7, ERR = 4, NOTICE = 6, WARN = 5, shared = {}, config = { subsystem = "http" } }
+-- ngx.decode_base64: nil on invalid input, as in OpenResty
+local function decode_base64(text)
+	if #text % 4 ~= 0 or text:find("[^A-Za-z0-9+/=]") or text:find("=[^=]") then
+		return nil
+	end
+	local alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
+	local out = {}
+	for i = 1, #text, 4 do
+		local n, pad = 0, 0
+		for j = i, i + 3 do
+			local c = text:sub(j, j)
+			n = n * 64
+			if c == "=" then
+				pad = pad + 1
+			else
+				n = n + alphabet:find(c, 1, true) - 1
+			end
+		end
+		out[#out + 1] = string.char((n >> 16) & 255, (n >> 8) & 255, n & 255):sub(1, 3 - pad)
+	end
+	return table.concat(out)
+end
+ngx = {
+	INFO = 7,
+	ERR = 4,
+	NOTICE = 6,
+	WARN = 5,
+	shared = {},
+	config = { subsystem = "http" },
+	decode_base64 = decode_base64,
+}
 
 -- The real helpers.lua, on stubbed dependencies
 package.loaded["resty.core.base"] = { get_request = function() end }
@@ -280,6 +310,74 @@ for _, name in ipairs(confs) do
 			touched_store():find("flush_lru", 1, true) and touched_store():find("set plugins_order", 1, true),
 			touched_store()
 		)
+	end)
+
+	-- env_file.py writes a value with a line break as bw-b64:<base64>: the PRO SAML plugin reads its PEM settings
+	-- (SAML_IDP_CERT, SAML_SP_PRIVATE_KEY, ...) from the variables the init phase loads
+	local PEM = "-----BEGIN CERTIFICATE-----\nQUJDRA==\n-----END CERTIFICATE-----"
+	local PEM_B64 = "LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tClFVSkRSQT09Ci0tLS0tRU5EIENFUlRJRklDQVRFLS0tLS0="
+	local function loaded_variables()
+		local seen
+		stub_helpers.load_variables = function(all_variables)
+			seen = all_variables
+			return true, {}
+		end
+		local ok, err = run_init(name)
+		stub_helpers.load_variables = function()
+			return true, {}
+		end
+		assert(ok, tostring(err))
+		return seen
+	end
+
+	case("a bw-b64 value is loaded as the exact text it encodes, a plain value is left alone", function()
+		write(
+			variables,
+			"#bw-env-format:2\nSERVER_NAME=www.example.com\nSAML_IDP_CERT=bw-b64:"
+				.. PEM_B64
+				.. "\nREVERSE_PROXY_HOST=http://a/?x=1\nUSE_ANTIBOT=\nOTHER=bw-b64:YnctYjY0OnJlYWwtdG9rZW4=\n"
+		)
+		local seen = loaded_variables()
+		assert(seen.SAML_IDP_CERT == PEM, "decoded value: " .. tostring(seen.SAML_IDP_CERT))
+		assert(
+			seen.SERVER_NAME == "www.example.com" and seen.REVERSE_PROXY_HOST == "http://a/?x=1",
+			"a plain value changed"
+		)
+		assert(seen.USE_ANTIBOT == "", "an empty value changed")
+		for variable in pairs(seen) do
+			assert(not variable:find("^#"), "the format marker line was read as a setting: " .. variable)
+		end
+		assert(seen.OTHER == "bw-b64:real-token", "a value that begins with the marker is decoded once, not twice")
+	end)
+
+	case("a file without the format marker is never decoded, whatever its values look like", function()
+		for _, text in ipairs({
+			"SERVER_NAME=www.example.com\nKEY=bw-b64:eA==\n", -- an rc4 or operator file
+			"\n#bw-env-format:2\nKEY=bw-b64:eA==\n", -- the marker is not on the first line
+			"# bw-env-format:2\nKEY=bw-b64:eA==\n", -- not the exact marker
+			"#bw-env-format:2 \nKEY=bw-b64:eA==\n",
+		}) do
+			write(variables, text)
+			local seen = loaded_variables()
+			assert(seen.KEY == "bw-b64:eA==", "an unmarked file was decoded: " .. tostring(seen.KEY))
+		end
+	end)
+
+	case("a CRLF marker line still marks the file, and is never a setting", function()
+		write(variables, "#bw-env-format:2\r\nKEY=bw-b64:eA==\n")
+		local seen = loaded_variables()
+		assert(seen.KEY == "x", "a CRLF-marked file was not decoded: " .. tostring(seen.KEY))
+		for variable in pairs(seen) do
+			assert(not variable:find("^#"), "the format marker line was read as a setting: " .. variable)
+		end
+	end)
+
+	case("a malformed bw-b64 value is kept as written and warned about without printing it", function()
+		write(variables, "#bw-env-format:2\nSERVER_NAME=www.example.com\nSAML_IDP_CERT=bw-b64:***not base64***\n")
+		local seen = loaded_variables()
+		assert(seen.SAML_IDP_CERT == "bw-b64:***not base64***", "kept value: " .. tostring(seen.SAML_IDP_CERT))
+		assert(logged("SAML_IDP_CERT"), "the malformed encoding was not logged")
+		assert(not logged("not base64"), "the value was logged")
 	end)
 
 	case("a rejected variables file aborts before the store is touched", function()

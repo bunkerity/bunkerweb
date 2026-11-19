@@ -288,3 +288,18 @@ def test_syslog_handler_failure_warns_and_keeps_stderr(load_logging, caplog, add
     assert handler.call_count == 1
     assert set(namespace["log_types"]) == {"stderr"}
     assert "fixture syslog offline" in caplog.text
+
+
+@pytest.mark.parametrize(
+    ("log_types", "expected_handlers"),
+    [("file", {"stderr"}), ("file stderr", {"stderr"}), ("file syslog", {"syslog"})],
+)
+def test_unusable_file_destination_warns_once_and_preserves_handlers(load_logging, caplog, tmp_path, log_types, expected_handlers):
+    target = tmp_path / "missing" / "app.log"
+    namespace, configured, _ = load_logging(LOG_TYPES=log_types, LOG_FILE_PATH=str(target), LOG_SYSLOG_ADDRESS="/dev/log")
+
+    assert set(namespace["log_types"]) == expected_handlers
+    assert configured.call_args.kwargs["handlers"] == [entry["handler"] for entry in namespace["log_types"].values()]
+    (warning,) = [record.message for record in caplog.records if record.name == "LOGGER_SETUP"]
+    assert str(target) in warning
+    assert "Logs will not be written to file" in warning

@@ -120,7 +120,11 @@ def drive(sched_main, sandbox, fake_sched, fake_api, monkeypatch, tmp_path):
     monkeypatch.setattr(sched_main, "_exit", stop)
     monkeypatch.setattr(sched_main, "sleep", lambda s: h.sleeps.append(s))
     monkeypatch.setattr(sched_main, "run_pending", lambda: None)
-    monkeypatch.setattr(sched_main, "schedule_every", lambda n: SimpleNamespace(seconds=SimpleNamespace(do=lambda fn: schedule_calls.append((n, fn)))))
+    monkeypatch.setattr(
+        sched_main,
+        "schedule_every",
+        lambda n: SimpleNamespace(seconds=SimpleNamespace(do=lambda fn: schedule_calls.append((n, fn)) or SimpleNamespace(tag=lambda tag: None))),
+    )
     monkeypatch.setattr(sched_main, "subprocess_run", lambda cmd, **kw: h.saver_calls.append(cmd) or SimpleNamespace(returncode=h.saver_rc))
     monkeypatch.setattr(sched_main, "Database", lambda logger, sqlalchemy_string=None: h.database_args.append(sqlalchemy_string) or fake_sched.db)
     monkeypatch.setattr(sched_main, "JobScheduler", lambda logger, db=None, generate_configs=None: fake_sched)
@@ -780,6 +784,26 @@ def test_a_metadata_error_that_persists_stops_the_scheduler_with_status_one(driv
     assert "An error occurred when checking for changes in the database" in caplog.text
 
 
+def test_isolated_metadata_errors_between_good_ticks_never_stop_the_scheduler(drive, monkeypatch):
+    """The limit counts consecutive failures: a good tick in between resets it."""
+    drive.iterations = 2
+    ticks = []
+
+    def tick(*args):
+        ticks.append(1)
+        if len(ticks) >= 20:
+            drive.main.RUN = False
+
+    def flaky():
+        monkeypatch.setattr(drive.main, "scheduler_tick", tick)
+        drive.db.metadata_script = ["OperationalError: server closed the connection" if i % 2 == 0 else dict(drive.db.metadata) for i in range(14)]
+
+    drive.on_iteration[1] = flaky
+    drive.run()
+    assert drive.stops == []
+    assert drive.sleeps.count(5) == 7
+
+
 def test_a_read_only_database_ignores_an_unchanged_snapshot(drive):
     drive.iterations = 3
     drive.db.readonly = True
@@ -834,3 +858,18 @@ def test_the_job_scheduler_is_told_while_a_generation_is_pending(drive):
     drive.on_iteration[1] = watch
     drive.run()
     assert seen == [False]
+
+
+def test_the_saver_variables_file_carries_a_multiline_value_on_one_line(drive):
+    """SEC-03: the environment dump the config saver reads must not let a value declare other settings."""
+    from env_file import parse_env_file
+
+    payload = "-----BEGIN CERTIFICATE-----\nQUJDRA==\nAPI_TOKEN=evil\n-----END CERTIFICATE-----"
+    drive.main.environ["CUSTOM_SSL_CERT_DATA"] = payload
+    drive.main.environ["API_TOKEN"] = "real"
+    drive.run()
+    path = drive.sandbox.NGINX_TMP_VARIABLES_PATH
+    assert "API_TOKEN=evil" not in path.read_text().split("\n")
+    parsed = parse_env_file(path)
+    assert parsed["CUSTOM_SSL_CERT_DATA"] == payload
+    assert parsed["API_TOKEN"] == "real"

@@ -4,6 +4,7 @@ import importlib
 from unittest.mock import Mock
 
 from fastapi import HTTPException
+from fastapi.routing import iter_route_contexts
 from fastapi.testclient import TestClient
 import pytest
 from yaml import CSafeLoader, load
@@ -101,3 +102,22 @@ def test_lifespan_closes_each_database_even_if_one_close_fails(application, monk
         db.close.assert_not_called()
     db.close.assert_called_once_with()
     api_db.close.assert_called_once_with()
+
+
+@pytest.mark.parametrize("setting", ["API_DOCS_URL", "API_REDOC_URL", "API_OPENAPI_URL"])
+def test_documentation_url_over_management_routes_leaves_them_guarded(application, monkeypatch, setting):
+    def forbidden_backend(**_):
+        raise AssertionError("an unauthenticated request reached a backend")
+
+    monkeypatch.setattr(api_config, "API_TOKEN", None)
+    monkeypatch.setattr(api_config, setting, "/services")
+    app = application.create_app()
+    for route in iter_route_contexts(app.routes):
+        module = importlib.import_module(route.endpoint.__module__)
+        if hasattr(module, "get_db"):
+            monkeypatch.setattr(module, "get_db", forbidden_backend)
+    with TestClient(app, client=("127.0.0.1", 5000), raise_server_exceptions=False) as client:
+        # FastAPI mounts the page on its own route, outside every guard: it needs no exemption to stay public.
+        assert client.get("/services").status_code == 200
+        for method, path in (("GET", "/services/example"), ("POST", "/services"), ("PATCH", "/services/example"), ("DELETE", "/services/example")):
+            assert client.request(method, path, json={}).status_code == 401, f"{method} {path} skipped authentication"

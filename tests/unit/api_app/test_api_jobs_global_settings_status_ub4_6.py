@@ -44,13 +44,12 @@ def test_list_jobs_returns_database_metadata(monkeypatch):
 )
 def test_global_patch_maps_database_errors(monkeypatch, result, status):
     database = Mock()
-    database.get_non_default_settings.return_value = {"LOG_LEVEL": {"method": "api", "value": "info"}}
     database.save_config.return_value = result
     client = router_client(monkeypatch, global_settings, database)
     response = client.patch("/global_settings", json={"HTTP_PORT": 8080}, headers=ADMIN_HEADERS)
     assert response.status_code == status, response.text
     assert response.json() == ({"status": "error", "message": result} if status != 200 else {"status": "success"})
-    database.save_config.assert_called_once_with({"LOG_LEVEL": "info", "HTTP_PORT": "8080"}, "api", changed=True, skip_service_management=True)
+    database.save_config.assert_called_once_with({"HTTP_PORT": "8080"}, "api", changed=True, skip_service_management=True, partial=True)
 
 
 @pytest.mark.parametrize("full", [False, True])

@@ -2,6 +2,18 @@
 ## [Unreleased]
 
 
+<a name="1.10.0"></a>
+## [1.10.0] - 2026-11-17
+### bug fixes
+- **ci:** build luaossl with GNU C17 on OpenSSL 1.1.1 ([#244](https://github.com/fffonion/lua-resty-openssl/issues/244)) [f14a721](https://github.com/fffonion/lua-resty-openssl/commit/f14a721577a105e8550610a58e3c8139d59bc98b)
+- **ssl:** prefer the core request SSL_CTX getter. [19da7bf](https://github.com/fffonion/lua-resty-openssl/commit/19da7bf722402632374ee6507fd6ed02cb2d1540)
+- **ssl:** prefer lua-resty-core SSL accessors. [36a4b16](https://github.com/fffonion/lua-resty-openssl/commit/36a4b16302357760b59e5fd28fbda2ecf84412ef)
+
+### features
+- **aux:** add support for openresty 1.31.8 [0141614](https://github.com/fffonion/lua-resty-openssl/commit/0141614abd1ef52320f07efbd17bd877cfe7af56)
+- **pkey:** properly support SM2 keys [be0d4c4](https://github.com/fffonion/lua-resty-openssl/commit/be0d4c4aafb869e8c90f9058d7b417fe03cafea1)
+
+
 <a name="1.9.0"></a>
 ## [1.9.0] - 2026-08-14
 ### bug fixes
@@ -696,7 +708,8 @@
 - **x509:** export pubkey [ede4f81](https://github.com/fffonion/lua-resty-openssl/commit/ede4f817cb0fe092ad6f9ab5d6ecdcde864a9fd8)
 
 
-[Unreleased]: https://github.com/fffonion/lua-resty-openssl/compare/1.9.0...HEAD
+[Unreleased]: https://github.com/fffonion/lua-resty-openssl/compare/1.10.0...HEAD
+[1.10.0]: https://github.com/fffonion/lua-resty-openssl/compare/1.9.0...1.10.0
 [1.9.0]: https://github.com/fffonion/lua-resty-openssl/compare/1.8.0...1.9.0
 [1.8.0]: https://github.com/fffonion/lua-resty-openssl/compare/1.7.1...1.8.0
 [1.7.1]: https://github.com/fffonion/lua-resty-openssl/compare/1.7.0...1.7.1

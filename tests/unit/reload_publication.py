@@ -16,7 +16,6 @@ for directory in ("src/common/utils", "src/common/db", "src/common/api", "src/co
         sys.path.append(str(ROOT / directory))
 
 
-import schedule
 from ApiCaller import MIN_RELOAD_TIMEOUT
 from common_utils import parse_duration
 from reload_utils import RELOAD_CONFIRM_HTTP_WAIT, wait_for_reload
@@ -177,9 +176,7 @@ class PublicationChecks(unittest.TestCase):
         scheduler.generation_pending = True
         scheduler.try_database_readonly = lambda: False
         scheduler._JobScheduler__update_cache_permissions = lambda: None
-        original_jobs = schedule.jobs
-        self.addCleanup(setattr, schedule, "jobs", original_jobs)
-        schedule.jobs = [SimpleNamespace(should_run=True, run=lambda: self.effects.append(("job",)))]
+        scheduler.scheduler.jobs = [SimpleNamespace(should_run=True, run=lambda: self.effects.append(("job",)))]
         self.assertFalse(scheduler.run_pending())
         self.assertEqual([effect[0] for effect in self.effects], ["job"])
         self.assertEqual(scheduler.consume_pending_publication(), (True, False))

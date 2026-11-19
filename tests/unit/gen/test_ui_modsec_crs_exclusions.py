@@ -63,7 +63,7 @@ def test_two_ui_services_are_both_covered():
 def test_ip_server_names_go_to_the_ip_rule_only():
     rendered = render(**ctx({"ui": {"USE_UI": "yes", "SERVER_NAME": "ui.example.com 10.0.0.5"}}))
     assert host_patterns(rendered) == {r"ui\.example\.com", r"10\.0\.0\.5"}
-    assert "id:1007781" in rendered
+    assert "id:9802111" in rendered
 
 
 def test_a_service_without_server_name_falls_back_to_its_id():

@@ -64,12 +64,12 @@ def test_no_urls_removes_both_source_and_service_files(tmp_path, monkeypatch):
     cache.cache_file("old.list", b"old")
     cache.cache_file("rules.list", b"old", service_id="app.example")
     _, status = load_job(monkeypatch, tmp_path, JOB, cache=cache, env={"USE_ROBOTSTXT": "yes"})
-    assert status == 0
+    assert status == 1
     assert cache.data == {}
 
 
 @pytest.mark.parametrize("failure", ["http", "connection", "missing-file"])
-def test_failed_source_keeps_last_published_rules(tmp_path, monkeypatch, failure):
+def test_failed_source_without_per_url_cache_clears_rules(tmp_path, monkeypatch, failure):
     cache = Cache(tmp_path / "cache")
     cache.cache_file("rules.list", b"Disallow: /private\n", service_id="app.example")
     resp = requests.Response()
@@ -81,8 +81,8 @@ def test_failed_source_keeps_last_published_rules(tmp_path, monkeypatch, failure
     elif failure == "missing-file":
         url = (tmp_path / "missing").as_uri()
     _, status = load_job(monkeypatch, tmp_path, JOB, cache=cache, get=get, env={"USE_ROBOTSTXT": "yes", "ROBOTSTXT_URLS": url})
-    assert status == 2
-    assert cache.data["app.example", "rules.list"] == b"Disallow: /private\n"
+    assert status == 3
+    assert ("app.example", "rules.list") not in cache.data
     if failure == "connection":
         assert get.call_count == 3
 

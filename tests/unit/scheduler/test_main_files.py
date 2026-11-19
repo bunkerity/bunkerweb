@@ -156,6 +156,22 @@ def test_a_template_generated_file_is_never_saved_back(sched_main, sandbox, fake
     assert not [c for c in fake_sched.db.calls if c[0] == "save_custom_configs" and c[1]]
 
 
+def test_a_template_config_of_another_type_does_not_hide_a_manual_file_with_the_same_stem(sched_main, sandbox, fake_sched, regenerated):
+    write_conf(sandbox, "server-http/app.example/tpl.conf", "manual")
+    fake_sched.db.configs = [{"service_id": "app.example", "name": "tpl", "template": "low", "type": "modsec"}]
+    assert sched_main.check_configs_changes() is True
+    _, saved, method = [c for c in fake_sched.db.calls if c[0] == "save_custom_configs"][0]
+    assert method == "manual"
+    assert [c["exploded"] for c in saved] == [("app.example", "server-http", "tpl")]
+
+
+def test_a_template_config_is_matched_whatever_the_type_spelling(sched_main, sandbox, fake_sched, regenerated):
+    write_conf(sandbox, "server-http/app.example/tpl.conf")
+    fake_sched.db.configs = [{"service_id": "app.example", "name": "tpl", "template": "low", "type": "server_http"}]
+    sched_main.check_configs_changes()
+    assert not [c for c in fake_sched.db.calls if c[0] == "save_custom_configs" and c[1]]
+
+
 def test_generate_false_skips_the_regeneration(sched_main, sandbox, fake_sched, regenerated):
     write_conf(sandbox, "http/mine.conf")
     assert sched_main.check_configs_changes(generate=False) is True

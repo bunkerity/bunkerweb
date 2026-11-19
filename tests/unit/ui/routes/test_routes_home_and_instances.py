@@ -239,6 +239,20 @@ def test_instance_reload_runs_the_action_and_queues_the_result_message(h, instan
     assert h.data["RELOADING"] is False
 
 
+@pytest.mark.parametrize("action", ["restart", "start", "bans", "reports", "metrics_redis"])
+def test_an_unsupported_instance_action_is_a_404_and_runs_nothing(h, instances, action):
+    live = MagicMock()
+    instances.Instance = MagicMock()
+    instances.Instance.from_hostname.return_value = live
+
+    response = h.client().post(f"/instances/{action}", data={"instances": "live"})
+
+    assert response.status_code == 404
+    instances.Instance.from_hostname.assert_not_called()
+    assert getattr(live, action).call_count == 0
+    assert h.data["RELOADING"] is not True
+
+
 @pytest.mark.parametrize("action", ["reload", "stop", "delete", "ping"])
 def test_instance_actions_in_read_only_mode(h, instances, action):
     h.db.readonly = True
