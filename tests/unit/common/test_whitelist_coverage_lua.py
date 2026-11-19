@@ -322,3 +322,8 @@ GETVAR = {{ SERVER_NAME = "{SERVER}" }}
 emit(summary(new_plugin(PLUGIN):init()))
 """)
     assert out == {"ret": msg == "init not needed", "msg": msg}
+
+
+def test_a_missing_list_setting_does_not_crash_the_constructor():
+    out = access({"IP": ["1.2.3.4"]}, setup="VARIABLES.WHITELIST_IP = nil; VARIABLES.WHITELIST_URI = nil")
+    assert out["result"]["status"] == "OK"

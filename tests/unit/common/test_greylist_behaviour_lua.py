@@ -252,3 +252,14 @@ emit({{ ret = result.ret, msg = result.msg, store = STORE }})
     def test_init_reports_an_internalstore_write_failure(self, tmp_path):
         out = self._init(tmp_path, setup='STORE_SET_ERROR = "no memory"')
         assert (out["ret"], out["msg"]) == (False, f"can't store greylist {SERVER} list into internalstore : no memory")
+
+
+class TestMissingListSetting:
+    def test_a_missing_list_setting_does_not_crash_the_constructor(self):
+        body = f"""
+VARIABLES = {to_lua({"USE_GREYLIST": "yes", "GREYLIST_RDNS_GLOBAL": "no"})}
+STORE["plugin_greylist_lists_{SERVER}"] = {to_lua({"IP": ["1.2.3.4"]})}
+local result = new_plugin(PLUGIN):access()
+emit({{ msg = result.msg }})
+"""
+        assert run_plugin(MODULE, body)["msg"] == "IP is in greylist"

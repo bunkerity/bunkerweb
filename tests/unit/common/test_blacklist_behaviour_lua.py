@@ -458,3 +458,14 @@ emit({ unchanged = encode(stored) == before, stored = stored })
             ctx={"remote_addr": client, "uri": uri, "http_user_agent": ua},
         )
         assert out["msg"] == expected
+
+
+class TestMissingListSetting:
+    def test_a_missing_list_setting_does_not_crash_the_constructor(self):
+        body = f"""
+VARIABLES = {to_lua({"USE_BLACKLIST": "yes", "BLACKLIST_RDNS_GLOBAL": "no"})}
+STORE["plugin_blacklist_lists_{SERVER}"] = {to_lua({"IP": ["1.2.3.4"]})}
+local result = new_plugin(PLUGIN):access()
+emit({{ msg = result.msg }})
+"""
+        assert run_plugin(MODULE, body)["msg"] == "IP is blacklisted (info : ip)"

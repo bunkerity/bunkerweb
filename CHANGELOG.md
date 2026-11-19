@@ -51,6 +51,7 @@
 - [BUGFIX] `stream`: denials from security plugins are only logged in detect mode, as on HTTP services.
 - [BUGFIX] `crowdsec`: the CAPTCHA remediation reads the request body only when a solution is pending.
 - [BUGFIX] `antibot`: a wrong captcha answer no longer writes the expected answer to the error log.
+- [BUGFIX] `core`: blacklist, greylist and whitelist no longer fail on every request when one of their list settings is missing.
 - [DOCS] `splunk`: container integrations send the three logs to a Universal Forwarder as parsable `bunkerweb:*` sourcetypes, with rotation guidance.
 - [DOCS] `scheduler`: the custom configuration section explains the `.bw-managed` marker, manual deletion and restore, and retained inactive service CRS files.
 - [DOCS] `linux`: recommend `madvise` for transparent huge pages, since `always` can add hundreds of MB per reload. (Refs #4164)

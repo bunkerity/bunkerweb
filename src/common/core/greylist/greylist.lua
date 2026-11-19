@@ -55,7 +55,7 @@ function greylist:initialize(ctx)
 			if not self.lists[kind] then
 				self.lists[kind] = {}
 			end
-			for data in self.variables["GREYLIST_" .. kind]:gmatch("%S+") do
+			for data in (self.variables["GREYLIST_" .. kind] or ""):gmatch("%S+") do
 				if data ~= "" then
 					table.insert(self.lists[kind], data)
 				end

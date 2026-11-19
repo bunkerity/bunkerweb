@@ -56,7 +56,7 @@ function blacklist:initialize(ctx)
 		for kind, _ in pairs(kinds) do
 			local stored = self.lists[kind] or {}
 			local inline = {}
-			for data in self.variables["BLACKLIST_" .. kind]:gmatch("%S+") do
+			for data in (self.variables["BLACKLIST_" .. kind] or ""):gmatch("%S+") do
 				if data ~= "" then
 					table.insert(inline, data)
 				end
