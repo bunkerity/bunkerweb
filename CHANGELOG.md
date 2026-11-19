@@ -75,6 +75,7 @@
 - [DEPS] Updated FastAPI version to v0.162.7
 - [DEPS] Updated psycopg version to v3.3.9
 - [DEPS] Updated importlib-metadata version to v10.2.0
+- [DEPS] Updated LuaJIT to v2.1-20261117
 
 ## v1.6.18~rc4 - 2026/11/17
 
