@@ -1,0 +1,70 @@
+CHANGELOG.md
+  h_a33a1e80933106 81
+docs/advanced.md
+  h_a33a1e80933106 1612-1675,1688
+docs/de/advanced.md
+  h_a33a1e80933106 1611-1674,1687
+docs/de/features.md
+  h_a33a1e80933106 4506,4508,4511-4513,4522-4523
+docs/es/advanced.md
+  h_a33a1e80933106 1611-1674,1687
+docs/es/features.md
+  h_a33a1e80933106 4558,4560,4563-4565,4574-4575
+docs/features.md
+  h_a33a1e80933106 4574,4576,4579-4581,4590-4591
+docs/fr/advanced.md
+  h_a33a1e80933106 1610-1673,1686
+docs/fr/features.md
+  h_a33a1e80933106 4458,4460,4463-4465,4474-4475
+docs/zh/advanced.md
+  h_a33a1e80933106 1609-1672,1685
+docs/zh/features.md
+  h_a33a1e80933106 4568,4570,4573-4575,4584-4585
+examples/authelia/autoconf.yml
+  h_a33a1e80933106 63
+examples/authelia/configs/modsec/remove-false-positives.conf
+  h_a33a1e80933106 1
+examples/authelia/docker-compose.yml
+  h_a33a1e80933106 43
+examples/authelia/kubernetes.yml
+  h_a33a1e80933106 311
+examples/authelia/swarm.yml
+  h_a33a1e80933106 77
+examples/jellyfin/autoconf.yml
+  h_a33a1e80933106 35
+examples/jellyfin/docker-compose.yml
+  h_a33a1e80933106 48
+examples/mongo-express/autoconf.yml
+  h_a33a1e80933106 37
+examples/mongo-express/bw-data/configs/modsec/mongo-express.conf
+  h_a33a1e80933106 1
+examples/mongo-express/docker-compose.yml
+  h_a33a1e80933106 36
+examples/passbolt/autoconf.yml
+  h_a33a1e80933106 38
+examples/passbolt/docker-compose.yml
+  h_a33a1e80933106 39
+examples/passbolt/swarm.yml
+  h_a33a1e80933106 40
+src/common/core/modsecurity/README.de.md
+  h_a33a1e80933106 125,127,130-132,141-142
+src/common/core/modsecurity/README.es.md
+  h_a33a1e80933106 125,127,130-132,141-142
+src/common/core/modsecurity/README.fr.md
+  h_a33a1e80933106 125,127,130-132,141-142
+src/common/core/modsecurity/README.md
+  h_a33a1e80933106 125,127,130-132,141-142
+src/common/core/modsecurity/README.zh.md
+  h_a33a1e80933106 125,127,130-132,141-142
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "8e0bc93db9641a9457ee2fe13d2853b041ba3d80",
+  "prompts": {},
+  "humans": {
+    "h_a33a1e80933106": {
+      "author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}
