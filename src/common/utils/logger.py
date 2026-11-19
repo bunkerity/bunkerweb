@@ -56,6 +56,7 @@ default_level = _nameToLevel.get(getenv("CUSTOM_LOG_LEVEL", getenv("LOG_LEVEL", 
 env_log_types = getenv("LOG_TYPES", "stderr").split()
 log_types = {}
 warnings = []
+file_open_failed = False
 
 if "file" in env_log_types:
     log_file_path = getenv(
@@ -65,10 +66,14 @@ if "file" in env_log_types:
     # between slashes, which would let an operator set `LOG_FILE_PATH=/var/log/bunkerweb/../etc/passwd`.
     has_traversal = ".." in log_file_path.split("/")
     if not has_traversal and match(FILE_PATH_PATTERN, log_file_path):
-        log_types["file"] = {
-            "handler": FileHandler(log_file_path),
-            "file_path": log_file_path,
-        }
+        try:
+            log_types["file"] = {
+                "handler": FileHandler(log_file_path),
+                "file_path": log_file_path,
+            }
+        except OSError as e:
+            file_open_failed = True
+            warnings.append(f"Failed to set up file logging to '{log_file_path}': {e}. Logs will not be written to file.")
     else:
         warnings.append(f"The log file path '{log_file_path}' is invalid. Logs will not be written to file.")
 
@@ -121,7 +126,7 @@ if "syslog" in env_log_types:
         warnings.append(f"The syslog address '{syslog_address}' is invalid. Logs will not be sent to syslog.")
 
 if not log_types or "stderr" in env_log_types:
-    if not log_types and "stderr" not in env_log_types:
+    if not log_types and "stderr" not in env_log_types and not file_open_failed:
         warnings.append("No valid log types configured. Defaulting to stderr.")
     log_types["stderr"] = {"handler": StreamHandler()}
 

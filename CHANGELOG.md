@@ -57,6 +57,7 @@
 - [BUGFIX] `scheduler`: a manual custom config is no longer dropped when its service's template has a config of another type with the same name.
 - [BUGFIX] `errors`: several status codes can share one custom error page instead of breaking the configuration.
 - [BUGFIX] `docker`: the scheduler, Web UI, API and autoconf containers finish their graceful shutdown before they stop.
+- [BUGFIX] `core`: an unusable log file no longer stops the shared Python logger from starting; it keeps logging to its other outputs.
 - [DOCS] `splunk`: container integrations send the three logs to a Universal Forwarder as parsable `bunkerweb:*` sourcetypes, with rotation guidance.
 - [DOCS] `scheduler`: the custom configuration section explains the `.bw-managed` marker, manual deletion and restore, and retained inactive service CRS files.
 - [DOCS] `linux`: recommend `madvise` for transparent huge pages, since `always` can add hundreds of MB per reload. (Refs #4164)
