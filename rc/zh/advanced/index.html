@@ -1031,6 +1031,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="自定义配置">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#modsecurity-rule-ids" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ModSecurity 规则 ID
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -2664,8 +2681,8 @@
 
 
 <h1 id="_1">高级用法<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h1>
-<p>GitHub 仓库的 <a href="https://github.com/bunkerity/bunkerweb/tree/v1.6.18-rc4/examples">examples</a> 文件夹中提供了许多真实世界的用例示例。</p>
-<p>我们还提供了许多样板文件，例如用于各种集成和数据库类型的 YAML 文件。这些都可以在 <a href="https://github.com/bunkerity/bunkerweb/tree/v1.6.18-rc4/misc/integrations">misc/integrations</a> 文件夹中找到。</p>
+<p>GitHub 仓库的 <a href="https://github.com/bunkerity/bunkerweb/tree/v1.6.18-rc5/examples">examples</a> 文件夹中提供了许多真实世界的用例示例。</p>
+<p>我们还提供了许多样板文件，例如用于各种集成和数据库类型的 YAML 文件。这些都可以在 <a href="https://github.com/bunkerity/bunkerweb/tree/v1.6.18-rc5/misc/integrations">misc/integrations</a> 文件夹中找到。</p>
 <p>本节仅关注高级用法和安全调整，请参阅文档的<a href="../features/">功能部分</a>以查看所有可用的设置。</p>
 <div class="admonition tip">
 <p class="admonition-title">测试</p>
@@ -2733,14 +2750,14 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class=
 <span class="w">    </span>-p<span class="w"> </span><span class="m">80</span>:8080/tcp<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>-p<span class="w"> </span><span class="m">443</span>:8443/tcp<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>-p<span class="w"> </span><span class="m">443</span>:8443/udp<span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>bunkerity/bunkerweb-all-in-one:1.6.18-rc4
+<span class="w">    </span>bunkerity/bunkerweb-all-in-one:1.6.18-rc5
 </code></pre></div>
 <p>请注意，如果您的容器已经创建，您需要删除并重新创建它，以便更新新的环境变量。</p>
 </div>
 <div class="tabbed-block">
 <p>您需要将设置添加到 BunkerWeb 和调度程序容器的环境变量中：</p>
 <div class="highlight"><pre><span></span><code><span class="nt">bunkerweb</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.18-rc4</span>
+<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.18-rc5</span>
 <span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">...</span>
 <span class="w">  </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">USE_REAL_IP</span><span class="p">:</span><span class="w"> </span><span class="s">"yes"</span>
@@ -2748,7 +2765,7 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class=
 <span class="w">    </span><span class="nt">REAL_IP_HEADER</span><span class="p">:</span><span class="w"> </span><span class="s">"X-Forwarded-For"</span>
 <span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">...</span>
 <span class="nt">bw-scheduler</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.18-rc4</span>
+<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.18-rc5</span>
 <span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">...</span>
 <span class="w">  </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">USE_REAL_IP</span><span class="p">:</span><span class="w"> </span><span class="s">"yes"</span>
@@ -2761,7 +2778,7 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class=
 <div class="tabbed-block">
 <p>您需要将设置添加到 BunkerWeb 和调度程序容器的环境变量中：</p>
 <div class="highlight"><pre><span></span><code><span class="nt">bunkerweb</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.18-rc4</span>
+<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.18-rc5</span>
 <span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">...</span>
 <span class="w">  </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">USE_REAL_IP</span><span class="p">:</span><span class="w"> </span><span class="s">"yes"</span>
@@ -2769,7 +2786,7 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class=
 <span class="w">    </span><span class="nt">REAL_IP_HEADER</span><span class="p">:</span><span class="w"> </span><span class="s">"X-Forwarded-For"</span>
 <span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">...</span>
 <span class="nt">bw-scheduler</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.18-rc4</span>
+<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.18-rc5</span>
 <span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">...</span>
 <span class="w">  </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">USE_REAL_IP</span><span class="p">:</span><span class="w"> </span><span class="s">"yes"</span>
@@ -2808,7 +2825,7 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class=
 </div>
 <p>您需要将设置添加到 BunkerWeb 和调度程序服务的环境变量中：</p>
 <div class="highlight"><pre><span></span><code><span class="nt">bunkerweb</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.18-rc4</span>
+<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.18-rc5</span>
 <span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">...</span>
 <span class="w">  </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">USE_REAL_IP</span><span class="p">:</span><span class="w"> </span><span class="s">"yes"</span>
@@ -2816,7 +2833,7 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class=
 <span class="w">    </span><span class="nt">REAL_IP_HEADER</span><span class="p">:</span><span class="w"> </span><span class="s">"X-Forwarded-For"</span>
 <span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">...</span>
 <span class="nt">bw-scheduler</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.18-rc4</span>
+<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.18-rc5</span>
 <span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">...</span>
 <span class="w">  </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">USE_REAL_IP</span><span class="p">:</span><span class="w"> </span><span class="s">"yes"</span>
@@ -2872,14 +2889,14 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class=
 <span class="w">    </span>-p<span class="w"> </span><span class="m">80</span>:8080/tcp<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>-p<span class="w"> </span><span class="m">443</span>:8443/tcp<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>-p<span class="w"> </span><span class="m">443</span>:8443/udp<span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>bunkerity/bunkerweb-all-in-one:1.6.18-rc4
+<span class="w">    </span>bunkerity/bunkerweb-all-in-one:1.6.18-rc5
 </code></pre></div>
 <p>请注意，如果您的容器已经创建，您需要删除并重新创建它，以便更新新的环境变量。</p>
 </div>
 <div class="tabbed-block">
 <p>您需要将设置添加到 BunkerWeb 和调度程序容器的环境变量中：</p>
 <div class="highlight"><pre><span></span><code><span class="nt">bunkerweb</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.18-rc4</span>
+<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.18-rc5</span>
 <span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">...</span>
 <span class="w">  </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">USE_REAL_IP</span><span class="p">:</span><span class="w"> </span><span class="s">"yes"</span>
@@ -2889,7 +2906,7 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class=
 <span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">...</span>
 <span class="nn">...</span>
 <span class="nt">bw-scheduler</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.18-rc4</span>
+<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.18-rc5</span>
 <span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">...</span>
 <span class="w">  </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">USE_REAL_IP</span><span class="p">:</span><span class="w"> </span><span class="s">"yes"</span>
@@ -2903,7 +2920,7 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class=
 <div class="tabbed-block">
 <p>您需要将设置添加到 BunkerWeb 和调度程序容器的环境变量中：</p>
 <div class="highlight"><pre><span></span><code><span class="nt">bunkerweb</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.18-rc4</span>
+<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.18-rc5</span>
 <span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">...</span>
 <span class="w">  </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">USE_REAL_IP</span><span class="p">:</span><span class="w"> </span><span class="s">"yes"</span>
@@ -2913,7 +2930,7 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class=
 <span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">...</span>
 <span class="nn">...</span>
 <span class="nt">bw-scheduler</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.18-rc4</span>
+<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.18-rc5</span>
 <span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">...</span>
 <span class="w">  </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">USE_REAL_IP</span><span class="p">:</span><span class="w"> </span><span class="s">"yes"</span>
@@ -2957,7 +2974,7 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class=
 </div>
 <p>您需要将设置添加到 BunkerWeb 和调度程序服务的环境变量中。</p>
 <div class="highlight"><pre><span></span><code><span class="nt">bunkerweb</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.18-rc4</span>
+<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.18-rc5</span>
 <span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">...</span>
 <span class="w">  </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">USE_REAL_IP</span><span class="p">:</span><span class="w"> </span><span class="s">"yes"</span>
@@ -2967,7 +2984,7 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class=
 <span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">...</span>
 <span class="nn">...</span>
 <span class="nt">bw-scheduler</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.18-rc4</span>
+<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.18-rc5</span>
 <span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">...</span>
 <span class="w">  </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">USE_REAL_IP</span><span class="p">:</span><span class="w"> </span><span class="s">"yes"</span>
@@ -3092,8 +3109,8 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class=
 <li>
 <p><strong>在 Manager 主机下载并运行安装脚本</strong>：</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># 下载脚本及校验文件</span>
-curl<span class="w"> </span>-fsSL<span class="w"> </span>-O<span class="w"> </span>https://github.com/bunkerity/bunkerweb/releases/download/v1.6.18-rc4/install-bunkerweb.sh
-curl<span class="w"> </span>-fsSL<span class="w"> </span>-O<span class="w"> </span>https://github.com/bunkerity/bunkerweb/releases/download/v1.6.18-rc4/install-bunkerweb.sh.sha256
+curl<span class="w"> </span>-fsSL<span class="w"> </span>-O<span class="w"> </span>https://github.com/bunkerity/bunkerweb/releases/download/v1.6.18-rc5/install-bunkerweb.sh
+curl<span class="w"> </span>-fsSL<span class="w"> </span>-O<span class="w"> </span>https://github.com/bunkerity/bunkerweb/releases/download/v1.6.18-rc5/install-bunkerweb.sh.sha256
 
 <span class="c1"># 校验完整性</span>
 sha256sum<span class="w"> </span>-c<span class="w"> </span>install-bunkerweb.sh.sha256
@@ -3223,7 +3240,7 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
 
 <span class="nt">services</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bw-scheduler</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.18-rc4</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.18-rc5</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">&lt;&lt;</span><span class="p">:</span><span class="w"> </span><span class="nv">*bw-ui-env</span>
 <span class="w">      </span><span class="nt">BUNKERWEB_INSTANCES</span><span class="p">:</span><span class="w"> </span><span class="s">"192.168.1.11</span><span class="nv"> </span><span class="s">192.168.1.12"</span><span class="w"> </span><span class="c1"># 替换为 Worker IP</span>
@@ -3242,7 +3259,7 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-redis</span>
 
 <span class="w">  </span><span class="nt">bw-ui</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-ui:1.6.18-rc4</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-ui:1.6.18-rc5</span>
 <span class="w">    </span><span class="nt">ports</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">"7000:7000"</span><span class="w"> </span><span class="c1"># 暴露 UI 端口</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
@@ -3339,7 +3356,7 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
 <p>在每个 Worker 主机创建 <code>docker-compose.yml</code>：</p>
 <div class="highlight"><span class="filename">docker-compose.yml</span><pre><span></span><code><span class="nt">services</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bunkerweb</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.18-rc4</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.18-rc5</span>
 <span class="w">    </span><span class="nt">ports</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">"80:8080/tcp"</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">"443:8443/tcp"</span>
@@ -3750,7 +3767,7 @@ docker<span class="w"> </span>run<span class="w"> </span>-d<span class="w"> </sp
 <span class="w">    </span>-p<span class="w"> </span><span class="m">80</span>:8080/tcp<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>-p<span class="w"> </span><span class="m">443</span>:8443/tcp<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>-p<span class="w"> </span><span class="m">443</span>:8443/udp<span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>bunkerity/bunkerweb-all-in-one:1.6.18-rc4
+<span class="w">    </span>bunkerity/bunkerweb-all-in-one:1.6.18-rc5
 </code></pre></div>
 </div>
 <div class="tabbed-block">
@@ -3775,7 +3792,7 @@ docker<span class="w"> </span>run<span class="w"> </span>-d<span class="w"> </sp
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-dns</span>
 
 <span class="w">  </span><span class="nt">bunkerweb</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.18-rc4</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.18-rc5</span>
 <span class="w">    </span><span class="l l-Scalar l-Scalar-Plain">...</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">DNS_RESOLVERS</span><span class="p">:</span><span class="w"> </span><span class="s">"dnsmasq"</span>
@@ -3786,7 +3803,7 @@ docker<span class="w"> </span>run<span class="w"> </span>-d<span class="w"> </sp
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-dns</span>
 
 <span class="w">  </span><span class="nt">bw-scheduler</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.18-rc4</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.18-rc5</span>
 <span class="w">    </span><span class="l l-Scalar l-Scalar-Plain">...</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">DNS_RESOLVERS</span><span class="p">:</span><span class="w"> </span><span class="s">"dnsmasq"</span>
@@ -3820,6 +3837,16 @@ docker<span class="w"> </span>run<span class="w"> </span>-d<span class="w"> </sp
 <p>自定义配置可以全局应用，也可以针对特定服务器应用，具体取决于适用的上下文以及是否启用了<a href="../features/#multisite-mode">多站点模式</a>。</p>
 <p>应用自定义配置的方法取决于所使用的集成。然而，其底层过程涉及将带有 <code>.conf</code> 后缀的文件添加到特定文件夹中。要为特定服务器应用自定义配置，该文件应放置在以主服务器名称命名的子文件夹中。</p>
 <p>某些集成提供了更方便的应用配置方式，例如在 Docker Swarm 中使用 <a href="https://docs.docker.com/engine/swarm/configs/">Configs</a> 或在 Kubernetes 中使用 <a href="https://kubernetes.io/docs/concepts/configuration/configmap/">ConfigMap</a>。这些选项为管理和应用配置提供了更简单的方法。</p>
+<div class="admonition info">
+<p class="admonition-title">手动文件与 <code>.bw-managed</code> 标记</p>
+<p>Scheduler 会把在手动源文件夹（<code>/etc/bunkerweb/configs</code>）中找到的 <code>.conf</code> 文件保存到数据库，并在该文件夹中创建隐藏的标记文件 <code>.bw-managed</code>。请让标记文件与该文件夹或卷一起保留：</p>
+<ul>
+<li>有标记时，一次完整扫描若未发现任何 <code>.conf</code> 文件，就会从数据库中删除最后一个手动自定义配置，因此手动删除最后一个文件是有效的。</li>
+<li>没有标记时，空文件夹或缺失的文件夹不会被视为删除：Scheduler 会从数据库恢复这些文件。</li>
+<li>扫描失败或无法读取文件夹的某一部分时，不会改动任何内容：文件和数据库记录保持原样。</li>
+</ul>
+<p>当 <code>USE_MODSECURITY_GLOBAL_CRS=yes</code> 时，服务子文件夹中的 <code>modsec-crs</code>、<code>crs-plugins-before</code> 和 <code>crs-plugins-after</code> 文件不会被加载。Scheduler 会将它们保留在磁盘和数据库中（处于未激活状态），并在您关闭全局 CRS 后重新加载。</p>
+</div>
 <div class="tabbed-set tabbed-alternate" data-tabs="17:7"><input checked="checked" id="__tabbed_17_1" name="__tabbed_17" type="radio" /><input id="__tabbed_17_2" name="__tabbed_17" type="radio" /><input id="__tabbed_17_3" name="__tabbed_17" type="radio" /><input id="__tabbed_17_4" name="__tabbed_17" type="radio" /><input id="__tabbed_17_5" name="__tabbed_17" type="radio" /><input id="__tabbed_17_6" name="__tabbed_17" type="radio" /><input id="__tabbed_17_7" name="__tabbed_17" type="radio" /><div class="tabbed-labels"><label for="__tabbed_17_1">Web UI</label><label for="__tabbed_17_2">Linux</label><label for="__tabbed_17_3">All-in-one</label><label for="__tabbed_17_4">Docker</label><label for="__tabbed_17_5">Docker autoconf</label><label for="__tabbed_17_6">Kubernetes</label><label for="__tabbed_17_7">Swarm</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
@@ -3961,7 +3988,7 @@ chmod<span class="w"> </span>-R<span class="w"> </span><span class="m">770</span
 <span class="s2">      }"</span><span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>-p<span class="w"> </span><span class="m">80</span>:8080/tcp<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>-p<span class="w"> </span><span class="m">443</span>:8443/tcp<span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>bunkerity/bunkerweb-all-in-one:1.6.18-rc4
+<span class="w">    </span>bunkerity/bunkerweb-all-in-one:1.6.18-rc5
 </code></pre></div>
 <p>请注意，如果您的容器已经创建，您需要删除并重新创建它，以便应用新的环境变量。</p>
 <p><strong>使用文件</strong></p>
@@ -3987,7 +4014,7 @@ chmod<span class="w"> </span>-R<span class="w"> </span><span class="m">770</span
 <span class="w">    </span>-p<span class="w"> </span><span class="m">80</span>:8080/tcp<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>-p<span class="w"> </span><span class="m">443</span>:8443/tcp<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>-p<span class="w"> </span><span class="m">443</span>:8443/udp<span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>bunkerity/bunkerweb-all-in-one:1.6.18-rc4
+<span class="w">    </span>bunkerity/bunkerweb-all-in-one:1.6.18-rc5
 </code></pre></div>
 </div>
 <div class="tabbed-block">
@@ -4006,7 +4033,7 @@ chmod<span class="w"> </span>-R<span class="w"> </span><span class="m">770</span
 <p>这是一个使用 docker-compose 文件的示例：</p>
 <div class="highlight"><pre><span></span><code><span class="nn">...</span>
 <span class="nt">bw-scheduler</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.18-rc4</span>
+<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.18-rc5</span>
 <span class="w">  </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">|</span>
 <span class="w">      </span><span class="no">CUSTOM_CONF_SERVER_HTTP_hello-world=</span>
@@ -4036,7 +4063,7 @@ chmod<span class="w"> </span>-R<span class="w"> </span><span class="m">770</span
 </code></pre></div>
 <p>启动调度程序容器时，您需要将文件夹挂载到 /data 上：</p>
 <div class="highlight"><pre><span></span><code><span class="nt">bw-scheduler</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.18-rc4</span>
+<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.18-rc5</span>
 <span class="w">  </span><span class="nt">volumes</span><span class="p">:</span>
 <span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">./bw-data:/data</span>
 <span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">...</span>
@@ -4090,7 +4117,7 @@ chmod<span class="w"> </span>-R<span class="w"> </span><span class="m">770</span
 </code></pre></div>
 <p>启动调度程序容器时，您需要将文件夹挂载到 /data 上：</p>
 <div class="highlight"><pre><span></span><code><span class="nt">bw-scheduler</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.18-rc4</span>
+<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.18-rc5</span>
 <span class="w">  </span><span class="nt">volumes</span><span class="p">:</span>
 <span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">./bw-data:/data</span>
 <span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">...</span>
@@ -4181,6 +4208,172 @@ autoconf 的 Ingress 控制器会读取 <code>data</code> 下的每个键值对�
 </div>
 </div>
 </div>
+<h3 id="modsecurity-rule-ids">ModSecurity 规则 ID<a class="headerlink" href="#modsecurity-rule-ids" title="Permanent link">&para;</a></h3>
+<p>每条 ModSecurity 规则都有一个数字 ID，ModSecurity 不会加载两条 ID 相同的规则：重新加载会以 <code>Rule id: N is duplicated</code> 中止。BunkerWeb、OWASP 核心规则集（CRS）、CRS 插件和您自己的规则共用同一个 ID 空间，因此每个所有者都有一个保留范围。</p>
+<p><strong>其他方保留的范围</strong></p>
+<table>
+<thead>
+<tr>
+<th>范围</th>
+<th>所有者</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1-99,999</td>
+<td>仅供本地使用。切勿将此范围用于分发给他人的规则</td>
+</tr>
+<tr>
+<td>900,000-999,999</td>
+<td>OWASP CRS</td>
+</tr>
+<tr>
+<td>1,000,000-1,009,999</td>
+<td>Red Hat</td>
+</tr>
+<tr>
+<td>1,010,000-1,999,999</td>
+<td>Kemp</td>
+</tr>
+<tr>
+<td>2,000,000-2,999,999</td>
+<td>Trustwave SpiderLabs</td>
+</tr>
+<tr>
+<td>9,500,000-9,999,999</td>
+<td>CRS 插件，每个插件 1,000 个 ID 的区块。incubator 使用 9,900,000-9,999,999</td>
+</tr>
+</tbody>
+</table>
+<p>来源：<a href="https://modsecurity.org/docs/3-reference-manual/3-5-actions/">ModSecurity 参考手册中的 <code>id</code> 操作</a>、<a href="https://github.com/coreruleset/plugin-registry">CRS 插件注册表</a>和 <a href="https://github.com/coreruleset/template-plugin">CRS 模板插件</a>。</p>
+<p><strong>BunkerWeb 范围：9,800,000-9,899,999</strong></p>
+<p>BunkerWeb 在 CRS 插件范围的 9,800,000-9,899,999 部分发布自己的规则，该部分没有任何已注册的插件使用。顺序为 BunkerWeb 核心、PRO 插件、外部插件，最后是社区模板：</p>
+<table>
+<thead>
+<tr>
+<th>范围</th>
+<th>使用者</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>9,800,000-9,809,999</td>
+<td>BunkerWeb OSS 核心</td>
+</tr>
+<tr>
+<td>9,810,000-9,839,999</td>
+<td>BunkerWeb PRO 插件</td>
+</tr>
+<tr>
+<td>9,840,000-9,849,999</td>
+<td>外部插件（<a href="https://github.com/bunkerity/bunkerweb-plugins">bunkerweb-plugins</a>）</td>
+</tr>
+<tr>
+<td>9,850,000-9,899,999</td>
+<td>社区模板（<a href="https://github.com/bunkerity/bunkerweb-templates">bunkerweb-templates</a>）</td>
+</tr>
+</tbody>
+</table>
+<p>每个组件有一个 1,000 个 ID 的区块。在区块内，<code>000</code>-<code>099</code> 用于初始化规则，<code>100</code>-<code>499</code> 用于请求规则，<code>500</code>-<code>999</code> 用于响应规则。新区块按顺序分配。已分配的区块：</p>
+<table>
+<thead>
+<tr>
+<th>区块</th>
+<th>组件</th>
+<th>类型</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>9,800,000</td>
+<td><code>modsecurity</code></td>
+<td>OSS 核心</td>
+</tr>
+<tr>
+<td>9,801,000</td>
+<td><code>antibot</code></td>
+<td>OSS 核心</td>
+</tr>
+<tr>
+<td>9,802,000</td>
+<td><code>ui</code></td>
+<td>OSS 核心</td>
+</tr>
+<tr>
+<td>9,803,000</td>
+<td><code>templates</code>（API 模板）</td>
+<td>OSS 核心</td>
+</tr>
+<tr>
+<td>9,810,000</td>
+<td><code>custom_pages</code></td>
+<td>PRO 插件</td>
+</tr>
+<tr>
+<td>9,811,000</td>
+<td><code>saml</code></td>
+<td>PRO 插件</td>
+</tr>
+<tr>
+<td>9,840,000</td>
+<td><code>coraza</code></td>
+<td>外部插件</td>
+</tr>
+<tr>
+<td>从 9,850,000 起</td>
+<td>每个模板一个区块，按字母顺序</td>
+<td>社区模板</td>
+</tr>
+</tbody>
+</table>
+<p>模板区块由 <a href="https://github.com/bunkerity/bunkerweb-templates">bunkerweb-templates</a> 项目分配。</p>
+<p><strong>在您的配置中应该怎么做</strong></p>
+<ul>
+<li>为您自己的规则使用 1 到 99,999 之间的 ID，且不与您其他自定义配置中的 ID 重复。BunkerWeb 在此范围内不发布任何规则。</li>
+<li>将运行时排除项（<code>ctl:ruleRemoveById</code>、<code>ctl:ruleRemoveByTag</code>、<code>ctl:ruleRemoveTargetById</code> 等）写入 <code>modsec-crs</code> 类型的自定义配置（在 CRS 之前加载），并使用 <code>phase:1,pass,t:none,nolog</code>。运行时排除项必须不晚于它所针对的规则执行。</li>
+<li>将启动时排除项（<code>SecRuleRemoveById</code>、<code>SecRuleRemoveByTag</code>、<code>SecRuleUpdateTargetById</code> 和 <code>SecRuleUpdateTargetByTag</code>）写入 <code>modsec</code> 类型的自定义配置（在 CRS 之后加载）。</li>
+<li>不要重新定义 BunkerWeb 已经设置的 CRS 设置规则：<code>900200</code>（允许的方法，来自 <code>ALLOWED_METHODS</code> 设置）和 <code>900230</code>（允许的 HTTP 版本，在 CRS 版本 3 上启用 HTTP/3 时设置）。使用相同 ID 的第二条规则会使重新加载以 <code>Rule id: N is duplicated</code> 中止。</li>
+</ul>
+<p><strong>1.6.18~rc5 中更改的 ID</strong></p>
+<p>早期版本使用了属于其他方的范围内的 ID。如果您的某个配置引用了旧 ID，例如 <code>SecRuleRemoveById 200002</code>，请将其替换为新 ID：</p>
+<table>
+<thead>
+<tr>
+<th>旧 ID</th>
+<th>新 ID</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1000</td>
+<td>9800000</td>
+</tr>
+<tr>
+<td>200000, 200001</td>
+<td>9800010, 9800011</td>
+</tr>
+<tr>
+<td>1007783</td>
+<td>9800100</td>
+</tr>
+<tr>
+<td>200002 - 200006</td>
+<td>9800200 - 9800204</td>
+</tr>
+<tr>
+<td>1010</td>
+<td>9801500</td>
+</tr>
+<tr>
+<td>1007770 - 1007782</td>
+<td>9802100 - 9802112</td>
+</tr>
+<tr>
+<td>2007771, 2007772, 2007773, 2007775, 2007778</td>
+<td>9803100, 9803101, 9803102, 9803103, 9803104</td>
+</tr>
+</tbody>
+</table>
 <h2 id="running-many-services-in-production">在生产环境中运行大量服务<a class="headerlink" href="#running-many-services-in-production" title="Permanent link">&para;</a></h2>
 <h3 id="crs">全局 CRS<a class="headerlink" href="#crs" title="Permanent link">&para;</a></h3>
 <div class="admonition warning">
@@ -4189,7 +4382,7 @@ autoconf 的 Ingress 控制器会读取 <code>data</code> 下的每个键值对�
 </div>
 <p>如果您在生产环境中使用 BunkerWeb 并有大量服务，并且您全局启用了带有 CRS 规则的 <strong>ModSecurity 功能</strong>，那么加载 BunkerWeb 配置所需的时间可能会变得过长，从而可能导致超时。</p>
 <p>解决方法是全局加载 CRS 规则，而不是按服务加载。出于向后兼容性的原因，此行为默认未启用，并且因为它有一个缺点：如果您启用全局 CRS 规则加载，<strong>将不再可能按服务定义 modsec-crs 规则</strong>（在 CRS 规则之前执行）。然而，这个限制可以通过编写如下所示的全局 <code>modsec-crs</code> 排除规则来绕过：</p>
-<div class="highlight"><pre><span></span><code>SecRule REQUEST_FILENAME "@rx ^/somewhere$" "nolog,phase:4,allow,id:1010,chain"
+<div class="highlight"><pre><span></span><code>SecRule REQUEST_FILENAME "@rx ^/somewhere$" "nolog,phase:4,allow,id:100,chain"
 SecRule REQUEST_HEADERS:Host "@rx ^app1\.example\.com$" "nolog"
 </code></pre></div>
 <p>您可以通过将 <code>USE_MODSECURITY_GLOBAL_CRS</code> 设置为 <code>yes</code> 来启用全局 CRS 加载。</p>
@@ -4294,7 +4487,7 @@ LISTEN_STREAM_PORT_SSL_1=4344
 <span class="w">    </span>-p<span class="w"> </span><span class="m">443</span>:8443/udp<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>-p<span class="w"> </span><span class="m">10000</span>:10000/tcp<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>-p<span class="w"> </span><span class="m">20000</span>:20000/tcp<span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>bunkerity/bunkerweb-all-in-one:1.6.18-rc4
+<span class="w">    </span>bunkerity/bunkerweb-all-in-one:1.6.18-rc5
 </code></pre></div>
 <p>请注意，如果您的容器已经创建，您需要删除并重新创建它，以便应用新的环境变量。</p>
 <p>您的应用程序（<code>myapp1</code>, <code>myapp2</code>）应该在单独的容器中运行（或以其他方式可访问），并且它们的主机名/IP（例如，在 <code>_REVERSE_PROXY_HOST</code> 中使用的 <code>myapp1</code>, <code>myapp2</code>）必须可以从 <code>bunkerweb-aio</code> 容器解析和访问。这通常涉及将它们连接到共享的 Docker 网络。</p>
@@ -4313,7 +4506,7 @@ LISTEN_STREAM_PORT_SSL_1=4344
 
 <span class="nt">services</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bunkerweb</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.18-rc4</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.18-rc5</span>
 <span class="w">    </span><span class="nt">ports</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">"80:8080"</span><span class="w"> </span><span class="c1"># 如果您想在使用 http 挑战类型时使用 Let's Encrypt 自动化，请保留此项</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">"10000:10000"</span><span class="w"> </span><span class="c1"># app1</span>
@@ -4328,7 +4521,7 @@ LISTEN_STREAM_PORT_SSL_1=4344
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-services</span>
 
 <span class="w">  </span><span class="nt">bw-scheduler</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.18-rc4</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.18-rc5</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">&lt;&lt;</span><span class="p">:</span><span class="w"> </span><span class="nv">*bw-api-env</span>
 <span class="w">      </span><span class="nt">BUNKERWEB_INSTANCES</span><span class="p">:</span><span class="w"> </span><span class="s">"bunkerweb"</span><span class="w"> </span><span class="c1"># 此设置是指定 BunkerWeb 实例所必需的</span>
@@ -4376,7 +4569,7 @@ LISTEN_STREAM_PORT_SSL_1=4344
 <p>在您的机器上运行 <a href="../integrations/#docker-autoconf">Docker autoconf 集成</a>堆栈之前，您需要编辑端口：</p>
 <div class="highlight"><pre><span></span><code><span class="nt">services</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bunkerweb</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.18-rc4</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.18-rc5</span>
 <span class="w">    </span><span class="nt">ports</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">"80:8080"</span><span class="w"> </span><span class="c1"># 如果您想在使用 http 挑战类型时使用 Let's Encrypt 自动化，请保留此项</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">"10000:10000"</span><span class="w"> </span><span class="c1"># app1</span>
@@ -4581,7 +4774,7 @@ app2.example.com_LISTEN_STREAM_PORT=20000
 <p>在您的机器上运行 <a href="../integrations/#swarm">Swarm 集成</a>堆栈之前，您需要编辑端口：</p>
 <div class="highlight"><pre><span></span><code><span class="nt">services</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bunkerweb</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.18-rc4</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.18-rc5</span>
 <span class="w">    </span><span class="nt">ports</span><span class="p">:</span>
 <span class="w">      </span><span class="c1"># 如果您想在使用 http 挑战类型时使用 Let's Encrypt 自动化，请保留此项</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">published</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">80</span>
@@ -4702,7 +4895,7 @@ docker<span class="w"> </span>run<span class="w"> </span>-d<span class="w"> </sp
 <span class="w">    </span>-p<span class="w"> </span><span class="m">80</span>:8080/tcp<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>-p<span class="w"> </span><span class="m">443</span>:8443/tcp<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>-p<span class="w"> </span><span class="m">443</span>:8443/udp<span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>bunkerity/bunkerweb-all-in-one:1.6.18-rc4
+<span class="w">    </span>bunkerity/bunkerweb-all-in-one:1.6.18-rc5
 </code></pre></div>
 <p>请注意，如果您的容器已经创建，您需要删除并重新创建它，以便应用新的环境变量。</p>
 </div>
@@ -4736,7 +4929,7 @@ find<span class="w"> </span>./www<span class="w"> </span>-type<span class="w"> <
 
 <span class="nt">services</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bunkerweb</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.18-rc4</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.18-rc5</span>
 <span class="w">    </span><span class="nt">ports</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">"80:8080/tcp"</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">"443:8443/tcp"</span>
@@ -4751,7 +4944,7 @@ find<span class="w"> </span>./www<span class="w"> </span>-type<span class="w"> <
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-services</span>
 
 <span class="w">  </span><span class="nt">bw-scheduler</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.18-rc4</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.18-rc5</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">&lt;&lt;</span><span class="p">:</span><span class="w"> </span><span class="nv">*bw-api-env</span>
 <span class="w">      </span><span class="nt">BUNKERWEB_INSTANCES</span><span class="p">:</span><span class="w"> </span><span class="s">"bunkerweb"</span><span class="w"> </span><span class="c1"># 此设置是指定 BunkerWeb 实例所必需的</span>
@@ -4837,7 +5030,7 @@ find<span class="w"> </span>./www<span class="w"> </span>-type<span class="w"> <
 
 <span class="nt">services</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bunkerweb</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.18-rc4</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.18-rc5</span>
 <span class="w">    </span><span class="nt">labels</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">"bunkerweb.INSTANCE=yes"</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
@@ -4850,7 +5043,7 @@ find<span class="w"> </span>./www<span class="w"> </span>-type<span class="w"> <
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-services</span>
 
 <span class="w">  </span><span class="nt">bw-scheduler</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.18-rc4</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.18-rc5</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">&lt;&lt;</span><span class="p">:</span><span class="w"> </span><span class="nv">*bw-api-env</span>
 <span class="w">      </span><span class="nt">BUNKERWEB_INSTANCES</span><span class="p">:</span><span class="w"> </span><span class="s">""</span><span class="w"> </span><span class="c1"># 我们不需要在这里指定 BunkerWeb 实例，因为它们由 autoconf 服务自动检测</span>
@@ -4865,7 +5058,7 @@ find<span class="w"> </span>./www<span class="w"> </span>-type<span class="w"> <
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-db</span>
 
 <span class="w">  </span><span class="nt">bw-autoconf</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-autoconf:1.6.18-rc4</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-autoconf:1.6.18-rc5</span>
 <span class="w">    </span><span class="nt">depends_on</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-docker</span>
@@ -5069,7 +5262,7 @@ find<span class="w"> </span>/shared/www<span class="w"> </span>-type<span class=
 <p>当您启动 BunkerWeb 堆栈时，将 <code>/shared/www</code> 文件夹挂载到 <strong>Scheduler</strong> 容器的 <code>/var/www/html</code> 中：</p>
 <div class="highlight"><pre><span></span><code><span class="nt">services</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bunkerweb</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.18-rc4</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.18-rc5</span>
 <span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/shared/www:/var/www/html</span>
 <span class="nn">...</span>
@@ -5150,7 +5343,7 @@ find<span class="w"> </span>/shared/www<span class="w"> </span>-type<span class=
 <p>将 <code>USE_IPV6</code> 设置添加到调度器，并在 <code>bw-services</code> 网络上启用 IPv6。如果您为该网络声明了 IPv4 <code>subnet</code>，请将其保留在同一个 <code>ipam.config</code> 列表中：</p>
 <div class="highlight"><pre><span></span><code><span class="nt">services</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bw-scheduler</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.18-rc4</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.18-rc5</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">USE_IPV6</span><span class="p">:</span><span class="w"> </span><span class="s">"yes"</span>
 
@@ -5212,7 +5405,7 @@ USE_IPV6=yes
 
 <span class="nt">services</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bunkerweb</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.18-rc4</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.18-rc5</span>
 <span class="w">    </span><span class="nt">dns</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2001:db8:1::20</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
@@ -5222,7 +5415,7 @@ USE_IPV6=yes
 <span class="w">        </span><span class="nt">ipv6_address</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2001:db8:1::10</span>
 
 <span class="w">  </span><span class="nt">bw-scheduler</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.18-rc4</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.18-rc5</span>
 <span class="w">    </span><span class="nt">dns</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2001:db8:1::20</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
@@ -5389,7 +5582,7 @@ LOG_LEVEL_1=error
 <span class="nt">services</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bunkerweb</span><span class="p">:</span>
 <span class="w">    </span><span class="c1"># 这将是用于在调度程序中识别实例的名称</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.18-rc4</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.18-rc5</span>
 <span class="w">    </span><span class="nt">ports</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">"80:8080/tcp"</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">"443:8443/tcp"</span>
@@ -5402,7 +5595,7 @@ LOG_LEVEL_1=error
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-services</span>
 
 <span class="w">  </span><span class="nt">bw-scheduler</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.18-rc4</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.18-rc5</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">&lt;&lt;</span><span class="p">:</span><span class="w"> </span><span class="nv">*bw-env</span>
 <span class="w">      </span><span class="nt">BUNKERWEB_INSTANCES</span><span class="p">:</span><span class="w"> </span><span class="s">"bunkerweb"</span><span class="w"> </span><span class="c1"># 确保设置正确的实例名称</span>
@@ -5419,7 +5612,7 @@ LOG_LEVEL_1=error
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-db</span>
 
 <span class="w">  </span><span class="nt">bw-ui</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-ui:1.6.18-rc4</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-ui:1.6.18-rc5</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">&lt;&lt;</span><span class="p">:</span><span class="w"> </span><span class="nv">*bw-env</span>
 <span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
@@ -5691,13 +5884,116 @@ time=2026-11-10T08:11:02+00:00 host=www.example.com client=10.77.52.1 request_id
 <li><strong><code>C</code> 部分包含请求正文</strong>，其中有表单字段和凭据。除非需要正文，否则请使用 <code>BFH</code>，并限制谁可以读取该索引。</li>
 </ul>
 </div>
-<div class="admonition info">
-<p class="admonition-title">Docker、Autoconf、Swarm 和 Kubernetes</p>
-<p>这些镜像把 <code>access.log</code>、<code>error.log</code> 和 <code>modsec_audit.log</code> 链接到容器自身的日志流（参见<a href="#log-file-retention">日志文件保留策略</a>），因此 forwarder 没有文件可读；由 <code>ACCESS_LOG_1</code> 写入的文件留在容器内，没有任何机制轮转它。请像其他设置一样，在调度器上设置 <code>MODSECURITY_SEC_AUDIT_LOG_FORMAT=JSON</code>，而不是使用文件。JSON 记录随后会出现在 <code>bunkerweb</code> 容器的 <code>docker logs</code> 中，每条一行，夹杂在错误日志行之间：以 <code>{</code> 开头的行就是审计记录。</p>
-<p>要把日志流发送到 Splunk，请使用 <a href="https://docs.docker.com/engine/logging/drivers/splunk/">Docker <code>splunk</code> 日志驱动</a>和 HTTP Event Collector 令牌。该驱动会把访问、错误和审计行一起以同一个 sourcetype 发送，因此只能根据内容区分它们。请把 <code>key=value</code> 格式设置在 <code>LOG_FORMAT</code>（不带后缀）上，使发送的访问行采用该格式。这会替换 <code>access.log</code> 中的默认格式。</p>
+<p><strong>容器：Docker、Autoconf、Swarm、Kubernetes 和 All-in-one</strong></p>
+<p>上面的步骤写入的是真实文件。容器镜像 <code>bunkerweb</code> 不是这样：<code>access.log</code>、<code>error.log</code> 和 <code>modsec_audit.log</code> 是指向容器标准输出和标准错误的符号链接（参见<a href="#log-file-retention">日志文件保留策略</a>），转发器无法监控它们。因此，请把三条 Splunk 数据流写入<strong>各自独立的文件</strong>，放在 <code>bunkerweb</code> 容器与 Splunk Universal Forwarder 共享的卷上。默认的数据流保持不变，<code>docker logs</code> 和 <code>kubectl logs</code> 仍然可用。<a href="https://splunkbase.splunk.com/app/10342">BunkerWeb Add-on for Splunk</a> 只解析 <code>bunkerweb:access</code>、<code>bunkerweb:error</code> 和 <code>bunkerweb:modsec_audit</code>。</p>
+<p>BunkerWeb 可以写入该卷：<code>/var/log/bunkerweb</code> 属于 <code>root:nginx</code>，权限为 <code>770</code>，容器以 <code>nginx</code>（UID 和 GID 均为 <code>101</code>）身份运行。如果根文件系统是只读的，请把该卷挂载到 <code>/var/log/bunkerweb</code>：这个挂载点就成为那里唯一可写的路径。</p>
+<p>与其他设置一样，请在 <strong>scheduler</strong> 上设置以下内容。它负责生成 NGINX 配置并推送给各实例：</p>
+<div class="highlight"><pre><span></span><code>ACCESS_LOG_1=/var/log/bunkerweb/access-splunk.log
+LOG_FORMAT_1=time=$time_iso8601 host=$host client=$remote_addr request_id=$request_id method=$request_method uri="$request_uri" status=$status bytes=$body_bytes_sent ua="$http_user_agent" reason=$reason modsec_rules="$modsecurity_rules" modsec_score=$modsecurity_anomaly_score modsec_id=$modsecurity_unique_id
+ERROR_LOG_1=/var/log/bunkerweb/error-splunk.log
+MODSECURITY_SEC_AUDIT_LOG=/var/log/bunkerweb/modsec_audit-splunk.log
+MODSECURITY_SEC_AUDIT_LOG_FORMAT=JSON
+</code></pre></div>
+<p><code>ERROR_LOG_1</code> 在默认错误日志之外再增加一个错误日志。<code>MODSECURITY_SEC_AUDIT_LOG</code> 必须是以 <code>.log</code> 结尾、直接位于 <code>/var/log/bunkerweb/</code> 下的文件，并且名称要不同于默认的 <code>modsec_audit.log</code>（它是符号链接）。在 Compose 文件中，请把 <code>LOG_FORMAT_1</code> 里的每个 <code>$</code> 写成 <code>$$</code>。1.6.18 之前的版本，请用步骤 3 中类型为 <code>modsec</code> 的自定义配置代替 <code>MODSECURITY_SEC_AUDIT_LOG_FORMAT</code>。</p>
+<p>转发器监控这些文件，每个文件对应一个 sourcetype。这些文件属于 <code>nginx</code>（UID 和 GID 均为 <code>101</code>）：请让转发器容器使用能够读取它们的用户或组运行，并在卷上用 <code>ls -ln</code> 确认：</p>
+<div class="highlight"><pre><span></span><code>[monitor:///var/log/bunkerweb/access-splunk.log]
+sourcetype = bunkerweb:access
+
+[monitor:///var/log/bunkerweb/error-splunk.log]
+sourcetype = bunkerweb:error
+
+[monitor:///var/log/bunkerweb/modsec_audit-splunk.log]
+sourcetype = bunkerweb:modsec_audit
+</code></pre></div>
+<p>插件仓库为每种集成方式提供了一个设置示例：<a href="https://github.com/bunkerity/bunkerweb-splunk-addon#setup">BunkerWeb Add-on for Splunk, Setup</a>。</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="22:3"><input checked="checked" id="__tabbed_22_1" name="__tabbed_22" type="radio" /><input id="__tabbed_22_2" name="__tabbed_22" type="radio" /><input id="__tabbed_22_3" name="__tabbed_22" type="radio" /><div class="tabbed-labels"><label for="__tabbed_22_1">Docker / Autoconf / Swarm</label><label for="__tabbed_22_2">Kubernetes</label><label for="__tabbed_22_3">All-in-one</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<p>在 <code>bunkerweb</code> 容器和转发器上挂载同一个卷，并在 scheduler 上设置这些变量：</p>
 <div class="highlight"><pre><span></span><code><span class="nt">services</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bunkerweb</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.18-rc4</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.18-rc5</span>
+<span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-splunk-logs:/var/log/bunkerweb</span>
+
+<span class="w">  </span><span class="nt">bw-scheduler</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.18-rc5</span>
+<span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">ACCESS_LOG_1</span><span class="p">:</span><span class="w"> </span><span class="s">"/var/log/bunkerweb/access-splunk.log"</span>
+<span class="w">      </span><span class="nt">LOG_FORMAT_1</span><span class="p">:</span><span class="w"> </span><span class="s">'time=$$time_iso8601</span><span class="nv"> </span><span class="s">host=$$host</span><span class="nv"> </span><span class="s">client=$$remote_addr</span><span class="nv"> </span><span class="s">request_id=$$request_id</span><span class="nv"> </span><span class="s">method=$$request_method</span><span class="nv"> </span><span class="s">uri="$$request_uri"</span><span class="nv"> </span><span class="s">status=$$status</span><span class="nv"> </span><span class="s">bytes=$$body_bytes_sent</span><span class="nv"> </span><span class="s">ua="$$http_user_agent"</span><span class="nv"> </span><span class="s">reason=$$reason</span><span class="nv"> </span><span class="s">modsec_rules="$$modsecurity_rules"</span><span class="nv"> </span><span class="s">modsec_score=$$modsecurity_anomaly_score</span><span class="nv"> </span><span class="s">modsec_id=$$modsecurity_unique_id'</span>
+<span class="w">      </span><span class="nt">ERROR_LOG_1</span><span class="p">:</span><span class="w"> </span><span class="s">"/var/log/bunkerweb/error-splunk.log"</span>
+<span class="w">      </span><span class="nt">MODSECURITY_SEC_AUDIT_LOG</span><span class="p">:</span><span class="w"> </span><span class="s">"/var/log/bunkerweb/modsec_audit-splunk.log"</span>
+<span class="w">      </span><span class="nt">MODSECURITY_SEC_AUDIT_LOG_FORMAT</span><span class="p">:</span><span class="w"> </span><span class="s">"JSON"</span>
+
+<span class="w">  </span><span class="nt">splunk-uf</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="s">"&lt;your</span><span class="nv"> </span><span class="s">Splunk</span><span class="nv"> </span><span class="s">Universal</span><span class="nv"> </span><span class="s">Forwarder</span><span class="nv"> </span><span class="s">image&gt;"</span>
+<span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-splunk-logs:/var/log/bunkerweb:ro</span>
+<span class="w">      </span><span class="c1"># plus your inputs.conf and outputs.conf</span>
+
+<span class="nt">volumes</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">bw-splunk-logs</span><span class="p">:</span>
+</code></pre></div>
+<p>在 Swarm 中，命名卷只在其所在节点本地可见：请把 BunkerWeb 和转发器都作为 <code>global</code> 服务运行，使同一节点上的两个任务共享该节点的卷。</p>
+<p><strong>这些文件由您负责轮转。</strong> 镜像不带 <code>logrotate</code>，容器运行时只限制标准输出和标准错误的数据流。参见下文“轮转这些文件”。</p>
+</div>
+<div class="tabbed-block">
+<p>BunkerWeb 的 Pod 在 <code>bunkerweb</code> 容器和同一 Pod 内的转发器容器之间共享一个 <code>emptyDir</code> 卷。Helm chart 为该卷提供了 <code>bunkerweb.volumes</code> 和 <code>bunkerweb.volumeMounts</code>，但没有用于额外容器的键。在 Kubernetes 1.29 或更高版本上，请在 <code>bunkerweb.initContainers</code> 中声明转发器并设置 <code>restartPolicy: Always</code>，Kubernetes 会把它作为 sidecar 运行。在更旧的集群上，请用 Kustomize 补丁添加该容器。</p>
+<div class="highlight"><pre><span></span><code><span class="nt">bunkerweb</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">volumes</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-splunk-logs</span>
+<span class="w">      </span><span class="nt">emptyDir</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{}</span>
+<span class="w">  </span><span class="nt">volumeMounts</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-splunk-logs</span>
+<span class="w">      </span><span class="nt">mountPath</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/var/log/bunkerweb</span>
+<span class="w">  </span><span class="nt">initContainers</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">splunk-uf</span>
+<span class="w">      </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="s">"&lt;your</span><span class="nv"> </span><span class="s">Splunk</span><span class="nv"> </span><span class="s">Universal</span><span class="nv"> </span><span class="s">Forwarder</span><span class="nv"> </span><span class="s">image&gt;"</span>
+<span class="w">      </span><span class="nt">restartPolicy</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Always</span>
+<span class="w">      </span><span class="nt">volumeMounts</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-splunk-logs</span>
+<span class="w">          </span><span class="nt">mountPath</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/var/log/bunkerweb</span>
+<span class="w">          </span><span class="nt">readOnly</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+</code></pre></div>
+<p>读取这些设置的是 scheduler，而不是 BunkerWeb 的 Pod。使用 Helm chart 时，请在 <code>scheduler.extraEnvs</code> 上设置：</p>
+<div class="highlight"><pre><span></span><code><span class="nt">scheduler</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">extraEnvs</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ACCESS_LOG_1</span>
+<span class="w">      </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">"/var/log/bunkerweb/access-splunk.log"</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">LOG_FORMAT_1</span>
+<span class="w">      </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">'time=$time_iso8601</span><span class="nv"> </span><span class="s">host=$host</span><span class="nv"> </span><span class="s">client=$remote_addr</span><span class="nv"> </span><span class="s">request_id=$request_id</span><span class="nv"> </span><span class="s">method=$request_method</span><span class="nv"> </span><span class="s">uri="$request_uri"</span><span class="nv"> </span><span class="s">status=$status</span><span class="nv"> </span><span class="s">bytes=$body_bytes_sent</span><span class="nv"> </span><span class="s">ua="$http_user_agent"</span><span class="nv"> </span><span class="s">reason=$reason</span><span class="nv"> </span><span class="s">modsec_rules="$modsecurity_rules"</span><span class="nv"> </span><span class="s">modsec_score=$modsecurity_anomaly_score</span><span class="nv"> </span><span class="s">modsec_id=$modsecurity_unique_id'</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ERROR_LOG_1</span>
+<span class="w">      </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">"/var/log/bunkerweb/error-splunk.log"</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">MODSECURITY_SEC_AUDIT_LOG</span>
+<span class="w">      </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">"/var/log/bunkerweb/modsec_audit-splunk.log"</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">MODSECURITY_SEC_AUDIT_LOG_FORMAT</span>
+<span class="w">      </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">"JSON"</span>
+</code></pre></div>
+<p><strong>这些文件由您负责轮转。</strong> BunkerWeb 镜像中没有任何组件会处理它们。请用同样的方式再添加一个 sidecar：它挂载该卷（不带 <code>readOnly</code>），并像 All-in-one 镜像那样循环运行 <code>logrotate</code>（<code>while :; do logrotate ...; sleep 3600; done</code>）。参见下文“轮转这些文件”。</p>
+</div>
+<div class="tabbed-block">
+<p>All-in-one 镜像把 <code>access.log</code>、<code>error.log</code> 和 <code>modsec_audit.log</code> 保留为 <code>/var/log/bunkerweb/</code> 下的真实文件。请通过卷把该目录共享给转发器，并且只设置改变格式的两项：步骤 1 中的 <code>ACCESS_LOG_1</code> 与 <code>LOG_FORMAT_1</code>，以及 <code>MODSECURITY_SEC_AUDIT_LOG_FORMAT=JSON</code>。使用步骤 7 中的 <code>inputs.conf</code>。内置的 CrowdSec 也会读取 <code>modsec_audit.log</code>，格式切换对该文件同样生效。</p>
+<p><strong>BunkerWeb 负责轮转这些文件。</strong> 镜像在 supervisor 下每小时运行一次 <code>logrotate</code>，使用 Linux 软件包的策略（<code>/etc/logrotate.d/bunkerweb</code>）。该策略匹配 <code>/var/log/bunkerweb/*.log</code>，因此也覆盖 <code>access-splunk.log</code>，并且使用 <code>copytruncate</code>，所以转发器在轮转前后都能继续读取。参见<a href="#log-file-retention">日志文件保留策略</a>。</p>
+</div>
+</div>
+</div>
+<p><strong>轮转这些文件（Docker、Autoconf、Swarm、Kubernetes）。</strong> 轮转必须使用 <code>copytruncate</code>。ModSecurity 只在启动时打开一次审计日志，之后不会再重新打开：如果轮转时重命名文件，ModSecurity 会继续写入归档文件，而当前文件保持为空。只匹配 Splunk 的文件，因为同一个卷上的 <code>access.log</code>、<code>error.log</code> 和 <code>modsec_audit.log</code> 可能是符号链接。下面的配置保留七代压缩归档，每个文件最大 100 MB：</p>
+<div class="highlight"><pre><span></span><code>/path/to/the/volume/*-splunk.log {
+    size 100M
+    rotate 7
+    compress
+    copytruncate
+    missingok
+    notifempty
+}
+</code></pre></div>
+<p>在 Docker 主机上，请使用 <code>docker volume inspect</code> 给出的该卷的 <code>Mountpoint</code> 作为路径，并运行主机的 <code>logrotate</code>。在轮转容器中，请使用 <code>/var/log/bunkerweb/*-splunk.log</code>。<code>logrotate</code> 只在运行时才检查 <code>size</code>，而大多数主机每天只运行一次：如果文件增长得更快，请更频繁地运行它。</p>
+<div class="admonition info">
+<p class="admonition-title">日志驱动（备用方案）</p>
+<p>如果无法共享卷，可以使用 <a href="https://docs.docker.com/engine/logging/drivers/splunk/">Docker <code>splunk</code> 日志驱动</a>和 HTTP Event Collector 令牌发送容器的数据流。该驱动会把访问、错误和审计行一起以同一个 sourcetype 发送，因此只能根据内容区分它们。该插件只解析 <code>bunkerweb:access</code>、<code>bunkerweb:error</code> 和 <code>bunkerweb:modsec_audit</code>：以 <code>bunkerweb:docker</code> 发送的事件既没有字段提取，也没有 CIM 映射。请把 <code>key=value</code> 格式设置在 <code>LOG_FORMAT</code>（不带后缀）上，使发送的访问行采用该格式。这会替换 <code>access.log</code> 中的默认格式。请在 scheduler 上设置 <code>MODSECURITY_SEC_AUDIT_LOG_FORMAT=JSON</code>：审计条目随后会出现在 <code>docker logs</code> 中，夹在错误日志行之间，以 <code>{</code> 开头的行就是审计条目。</p>
+<div class="highlight"><pre><span></span><code><span class="nt">services</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">bunkerweb</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.18-rc5</span>
 <span class="w">    </span><span class="nt">logging</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">driver</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">splunk</span>
 <span class="w">      </span><span class="nt">options</span><span class="p">:</span>
@@ -5714,7 +6010,7 @@ time=2026-11-10T08:11:02+00:00 host=www.example.com client=10.77.52.1 request_id
 <p>您可以在 <code>docker-compose.yml</code> 文件中为您的服务配置日志记录驱动程序以自动轮换日志。以下是一个示例，最多保留 10 个每个 20MB 的日志文件：</p>
 <div class="highlight"><pre><span></span><code><span class="nt">services</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bunkerweb</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.18-rc4</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.18-rc5</span>
 <span class="w">    </span><span class="nt">logging</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">driver</span><span class="p">:</span><span class="w"> </span><span class="s">"json-file"</span>
 <span class="w">      </span><span class="nt">options</span><span class="p">:</span>
@@ -5770,7 +6066,7 @@ time=2026-11-10T08:11:02+00:00 host=www.example.com client=10.77.52.1 request_id
 <p class="admonition-title">NO_PROXY 对内部流量是必需的</p>
 <p>如果省略内部网段或服务名，内部流量可能会走代理并失败。请根据集成调整列表（例如 Docker 服务名、Kubernetes 集群域名或 Linux 上仅 localhost）。</p>
 </div>
-<div class="tabbed-set tabbed-alternate" data-tabs="22:6"><input checked="checked" id="__tabbed_22_1" name="__tabbed_22" type="radio" /><input id="__tabbed_22_2" name="__tabbed_22" type="radio" /><input id="__tabbed_22_3" name="__tabbed_22" type="radio" /><input id="__tabbed_22_4" name="__tabbed_22" type="radio" /><input id="__tabbed_22_5" name="__tabbed_22" type="radio" /><input id="__tabbed_22_6" name="__tabbed_22" type="radio" /><div class="tabbed-labels"><label for="__tabbed_22_1">Linux</label><label for="__tabbed_22_2">All-in-one</label><label for="__tabbed_22_3">Docker</label><label for="__tabbed_22_4">Docker autoconf</label><label for="__tabbed_22_5">Kubernetes</label><label for="__tabbed_22_6">Swarm</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="23:6"><input checked="checked" id="__tabbed_23_1" name="__tabbed_23" type="radio" /><input id="__tabbed_23_2" name="__tabbed_23" type="radio" /><input id="__tabbed_23_3" name="__tabbed_23" type="radio" /><input id="__tabbed_23_4" name="__tabbed_23" type="radio" /><input id="__tabbed_23_5" name="__tabbed_23" type="radio" /><input id="__tabbed_23_6" name="__tabbed_23" type="radio" /><div class="tabbed-labels"><label for="__tabbed_23_1">Linux</label><label for="__tabbed_23_2">All-in-one</label><label for="__tabbed_23_3">Docker</label><label for="__tabbed_23_4">Docker autoconf</label><label for="__tabbed_23_5">Kubernetes</label><label for="__tabbed_23_6">Swarm</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>将变量添加到 <code>/etc/bunkerweb/variables.env</code>。该文件会被两个服务加载，但只有 Scheduler 会使用它们：</p>
@@ -5799,14 +6095,14 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class=
 <span class="w">    </span>-p<span class="w"> </span><span class="m">80</span>:8080/tcp<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>-p<span class="w"> </span><span class="m">443</span>:8443/tcp<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>-p<span class="w"> </span><span class="m">443</span>:8443/udp<span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>bunkerity/bunkerweb-all-in-one:1.6.18-rc4
+<span class="w">    </span>bunkerity/bunkerweb-all-in-one:1.6.18-rc5
 </code></pre></div>
 <p>如果容器已存在，请重新创建以应用新的环境变量。</p>
 </div>
 <div class="tabbed-block">
 <p>将变量添加到 scheduler 容器：</p>
 <div class="highlight"><pre><span></span><code><span class="nt">bw-scheduler</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.18-rc4</span>
+<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.18-rc5</span>
 <span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">...</span>
 <span class="w">  </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">HTTP_PROXY</span><span class="p">:</span><span class="w"> </span><span class="s">"http://proxy.example.local:3128"</span>
@@ -5822,7 +6118,7 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class=
 <div class="tabbed-block">
 <p>将变量应用到 scheduler 容器：</p>
 <div class="highlight"><pre><span></span><code><span class="nt">bw-scheduler</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.18-rc4</span>
+<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.18-rc5</span>
 <span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">...</span>
 <span class="w">  </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">HTTP_PROXY</span><span class="p">:</span><span class="w"> </span><span class="s">"http://proxy.example.local:3128"</span>
@@ -5859,7 +6155,7 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class=
 </div>
 <p>将变量添加到 scheduler 服务：</p>
 <div class="highlight"><pre><span></span><code><span class="nt">bw-scheduler</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.18-rc4</span>
+<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.18-rc5</span>
 <span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">...</span>
 <span class="w">  </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">HTTP_PROXY</span><span class="p">:</span><span class="w"> </span><span class="s">"http://proxy.example.local:3128"</span>
@@ -5980,6 +6276,7 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class=
 </tr>
 </tbody>
 </table>
+<p>启用 <code>USE_MONITORING=yes</code> 和 <code>USE_PROMETHEUS_EXPORTER=yes</code>。采集端默认使用端口 <code>9113</code> 和路径 <code>/metrics</code>，也可使用自定义值。将 <code>PROMETHEUS_EXPORTER_ALLOW_IP</code> 限制为采集端地址。要使用带身份验证的 HTTPS 采集，请设置 <code>PROMETHEUS_EXPORTER_TOKEN</code> 和 <code>PROMETHEUS_EXPORTER_SSL=yes</code>，提供证书及私钥，并让采集端信任签发 CA。</p>
 <h3 id="pro_1">报告 <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);" loading="lazy" decoding="async"> (PRO)<a class="headerlink" href="#pro_1" title="Permanent link">&para;</a></h3>
 <p>STREAM 支持 <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
 <div class="admonition warning">
@@ -6096,7 +6393,7 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class=
 <details class="warning">
 <summary>给红帽企业 Linux (RHEL) 8.9 用户的信息</summary>
 <p>如果您正在使用 <strong>RHEL 8.9</strong> 并计划使用<strong>外部数据库</strong>，您需要安装 <code>mysql-community-client</code> 包以确保 <code>mysqldump</code> 命令可用。您可以通过执行以下命令来安装该包：</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="23:2"><input checked="checked" id="__tabbed_23_1" name="__tabbed_23" type="radio" /><input id="__tabbed_23_2" name="__tabbed_23" type="radio" /><div class="tabbed-labels"><label for="__tabbed_23_1">MySQL/MariaDB</label><label for="__tabbed_23_2">PostgreSQL</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="24:2"><input checked="checked" id="__tabbed_24_1" name="__tabbed_24" type="radio" /><input id="__tabbed_24_2" name="__tabbed_24" type="radio" /><div class="tabbed-labels"><label for="__tabbed_24_1">MySQL/MariaDB</label><label for="__tabbed_24_2">PostgreSQL</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <ol>
@@ -6216,7 +6513,7 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class=
 </table>
 <h4 id="_11">手动备份<a class="headerlink" href="#_11" title="Permanent link">&para;</a></h4>
 <p>要手动启动备份，请执行以下命令：</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="24:2"><input checked="checked" id="__tabbed_24_1" name="__tabbed_24" type="radio" /><input id="__tabbed_24_2" name="__tabbed_24" type="radio" /><div class="tabbed-labels"><label for="__tabbed_24_1">Linux</label><label for="__tabbed_24_2">Docker</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="25:2"><input checked="checked" id="__tabbed_25_1" name="__tabbed_25" type="radio" /><input id="__tabbed_25_2" name="__tabbed_25" type="radio" /><div class="tabbed-labels"><label for="__tabbed_25_1">Linux</label><label for="__tabbed_25_2">Docker</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code>bwcli<span class="w"> </span>plugin<span class="w"> </span>backup_s3<span class="w"> </span>save
@@ -6230,7 +6527,7 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class=
 </div>
 <p>此命令将创建您的数据库备份，并将其存储在 <code>BACKUP_S3_BUCKET</code> 设置中指定的 S3 存储桶中。</p>
 <p>您还可以在执行命令时通过提供 <code>BACKUP_S3_BUCKET</code> 环境变量来为备份指定自定义 S3 存储桶：</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="25:2"><input checked="checked" id="__tabbed_25_1" name="__tabbed_25" type="radio" /><input id="__tabbed_25_2" name="__tabbed_25" type="radio" /><div class="tabbed-labels"><label for="__tabbed_25_1">Linux</label><label for="__tabbed_25_2">Docker</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="26:2"><input checked="checked" id="__tabbed_26_1" name="__tabbed_26" type="radio" /><input id="__tabbed_26_2" name="__tabbed_26" type="radio" /><div class="tabbed-labels"><label for="__tabbed_26_1">Linux</label><label for="__tabbed_26_2">Docker</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="nv">BACKUP_S3_BUCKET</span><span class="o">=</span>your-bucket-name<span class="w"> </span>bwcli<span class="w"> </span>plugin<span class="w"> </span>backup_s3<span class="w"> </span>save
@@ -6248,7 +6545,7 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class=
 </div>
 <h4 id="_12">手动恢复<a class="headerlink" href="#_12" title="Permanent link">&para;</a></h4>
 <p>要手动启动恢复，请执行以下命令：</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="26:2"><input checked="checked" id="__tabbed_26_1" name="__tabbed_26" type="radio" /><input id="__tabbed_26_2" name="__tabbed_26" type="radio" /><div class="tabbed-labels"><label for="__tabbed_26_1">Linux</label><label for="__tabbed_26_2">Docker</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="27:2"><input checked="checked" id="__tabbed_27_1" name="__tabbed_27" type="radio" /><input id="__tabbed_27_2" name="__tabbed_27" type="radio" /><div class="tabbed-labels"><label for="__tabbed_27_1">Linux</label><label for="__tabbed_27_2">Docker</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code>bwcli<span class="w"> </span>plugin<span class="w"> </span>backup_s3<span class="w"> </span>restore
@@ -6262,14 +6559,14 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class=
 </div>
 <p>此命令将在 <code>BACKUP_S3_BUCKET</code> 设置中指定的 S3 存储桶中创建您数据库的临时备份，并将您的数据库恢复到存储桶中可用的最新备份。</p>
 <p>您还可以在执行命令时通过提供备份文件的路径作为参数来为恢复指定自定义备份文件：</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="27:2"><input checked="checked" id="__tabbed_27_1" name="__tabbed_27" type="radio" /><input id="__tabbed_27_2" name="__tabbed_27" type="radio" /><div class="tabbed-labels"><label for="__tabbed_27_1">Linux</label><label for="__tabbed_27_2">Docker</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="28:2"><input checked="checked" id="__tabbed_28_1" name="__tabbed_28" type="radio" /><input id="__tabbed_28_2" name="__tabbed_28" type="radio" /><div class="tabbed-labels"><label for="__tabbed_28_1">Linux</label><label for="__tabbed_28_2">Docker</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code>bwcli<span class="w"> </span>plugin<span class="w"> </span>backup_s3<span class="w"> </span>restore<span class="w"> </span>s3_backup_file.zip
 </code></pre></div>
 </div>
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code>docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-it<span class="w"> </span>&lt;scheduler_container&gt;<span class="w"> </span>bwcli<span class="w"> </span>plugin<span class="w"> </span>backup<span class="w"> </span>restore<span class="w"> </span>s3_backup_file.zip
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-it<span class="w"> </span>&lt;scheduler_container&gt;<span class="w"> </span>bwcli<span class="w"> </span>plugin<span class="w"> </span>backup_s3<span class="w"> </span>restore<span class="w"> </span>s3_backup_file.zip
 </code></pre></div>
 </div>
 </div>
@@ -6277,7 +6574,7 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class=
 <div class="admonition example">
 <p class="admonition-title">如果失败</p>
 <p>如果恢复失败，请不要担心，您可以随时通过再次执行命令将数据库恢复到先前的状态，因为在恢复之前会创建一个备份：</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="28:2"><input checked="checked" id="__tabbed_28_1" name="__tabbed_28" type="radio" /><input id="__tabbed_28_2" name="__tabbed_28" type="radio" /><div class="tabbed-labels"><label for="__tabbed_28_1">Linux</label><label for="__tabbed_28_2">Docker</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="29:2"><input checked="checked" id="__tabbed_29_1" name="__tabbed_29" type="radio" /><input id="__tabbed_29_2" name="__tabbed_29" type="radio" /><div class="tabbed-labels"><label for="__tabbed_29_1">Linux</label><label for="__tabbed_29_2">Docker</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code>bwcli<span class="w"> </span>plugin<span class="w"> </span>backup_s3<span class="w"> </span>restore
@@ -6303,10 +6600,10 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class=
 <li><strong>多种传输方式</strong>：Stdio、HTTP、WebSocket</li>
 </ul>
 <h3 id="docker-compose">Docker Compose 示例<a class="headerlink" href="#docker-compose" title="Permanent link">&para;</a></h3>
-<p>完整示例可在 <a href="https://github.com/bunkerity/bunkerweb/tree/v1.6.18-rc4/examples/mcp-stack"><code>examples/mcp-stack/</code></a> 中找到：</p>
+<p>完整示例可在 <a href="https://github.com/bunkerity/bunkerweb/tree/v1.6.18-rc5/examples/mcp-stack"><code>examples/mcp-stack/</code></a> 中找到：</p>
 <div class="highlight"><pre><span></span><code><span class="nt">services</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bw-api</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-api:1.6.18-rc4</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-api:1.6.18-rc5</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">API_TOKEN</span><span class="p">:</span><span class="w"> </span><span class="s">"my-bearer-token-for-mcp"</span>
 <span class="w">      </span><span class="nt">DATABASE_URI</span><span class="p">:</span><span class="w"> </span><span class="s">"mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db"</span>
@@ -6328,7 +6625,7 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class=
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-mcp</span>
 </code></pre></div>
 <h3 id="claude-code">在 Claude Code 中使用<a class="headerlink" href="#claude-code" title="Permanent link">&para;</a></h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="29:1"><input checked="checked" id="__tabbed_29_1" name="__tabbed_29" type="radio" /><div class="tabbed-labels"><label for="__tabbed_29_1">项目配置</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="30:1"><input checked="checked" id="__tabbed_30_1" name="__tabbed_30" type="radio" /><div class="tabbed-labels"><label for="__tabbed_30_1">项目配置</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>在项目根目录添加 <code>.mcp.json</code> 文件（或在 <code>~/.claude/.mcp.json</code> 中进行全局配置）：</p>
@@ -6405,88 +6702,47 @@ kubectl<span class="w"> </span>port-forward<span class="w"> </span>svc/mcp-bunke
 </div>
 <p>完整文档请访问 <a href="https://github.com/bunkerity/bunkerweb-mcp">BunkerWeb MCP 仓库</a>。</p>
 <h2 id="migration-pro">迁移 <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);" loading="lazy" decoding="async"> (PRO)<a class="headerlink" href="#migration-pro" title="Permanent link">&para;</a></h2>
-<p>STREAM 支持 <img alt="✅" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" title=":white_check_mark:" /></p>
-<p>迁移插件通过其<strong>用户友好的 Web 界面</strong>，彻底改变了 BunkerWeb 实例之间的配置传输，简化了整个迁移过程。无论您是升级系统、扩展基础设施还是转换环境，此工具都能让您轻松自信地传输<strong>设置、首选项和数据</strong>。告别繁琐的手动流程，迎接<strong>无缝、无忧的迁移体验</strong>。</p>
-<p><strong>功能列表</strong></p>
-<ul>
-<li>
-<p><strong>轻松迁移：</strong> 轻松在实例之间传输 BunkerWeb 配置，无需复杂的手动操作。</p>
-</li>
-<li>
-<p><strong>直观的 Web 界面：</strong> 通过为直观操作设计的用户友好 Web 界面，轻松导航迁移过程。</p>
-</li>
-<li>
-<p><strong>跨数据库兼容性：</strong> 在各种数据库平台之间实现无缝迁移，包括 SQLite、MySQL、MariaDB 和 PostgreSQL，确保与您首选的数据库环境兼容。</p>
-</li>
-</ul>
+<p>STREAM support <img alt="✅" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" title=":white_check_mark:" /></p>
+<p>使用迁移插件在 BunkerWeb 实例之间转移配置和数据，支持 SQLite、MySQL、MariaDB 和 PostgreSQL。以<strong>超级管理员</strong>身份登录 Web 界面后，可在<strong>迁移</strong>页面下载或恢复备份。 归档中包含敏感数据，只应允许执行迁移的人员访问。</p>
 <h3 id="_15">创建迁移文件<a class="headerlink" href="#_15" title="Permanent link">&para;</a></h3>
-<p>要手动创建迁移文件，请执行以下命令：</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="30:2"><input checked="checked" id="__tabbed_30_1" name="__tabbed_30" type="radio" /><input id="__tabbed_30_2" name="__tabbed_30" type="radio" /><div class="tabbed-labels"><label for="__tabbed_30_1">Linux</label><label for="__tabbed_30_2">Docker</label></div>
+<p>向 <code>create</code> 传入一个目录。命令会在该目录中写入 <code>backup.zip</code>。</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="31:2"><input checked="checked" id="__tabbed_31_1" name="__tabbed_31" type="radio" /><input id="__tabbed_31_2" name="__tabbed_31" type="radio" /><div class="tabbed-labels"><label for="__tabbed_31_1">Linux</label><label for="__tabbed_31_2">Docker</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code>bwcli<span class="w"> </span>plugin<span class="w"> </span>migration<span class="w"> </span>create<span class="w"> </span>/path/to/migration/file
+<div class="highlight"><pre><span></span><code>bwcli<span class="w"> </span>plugin<span class="w"> </span>migration<span class="w"> </span>create<span class="w"> </span>/path/to/backup-dir
 </code></pre></div>
 </div>
 <div class="tabbed-block">
-<ol>
-<li>
-<p>创建迁移文件：</p>
-<div class="highlight"><pre><span></span><code>docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-it<span class="w"> </span>&lt;scheduler_container&gt;<span class="w"> </span>bwcli<span class="w"> </span>plugin<span class="w"> </span>migration<span class="w"> </span>create<span class="w"> </span>/path/to/migration/file
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>&lt;scheduler_container&gt;<span class="w"> </span>bwcli<span class="w"> </span>plugin<span class="w"> </span>migration<span class="w"> </span>create<span class="w"> </span>/tmp/bunkerweb-migration
+docker<span class="w"> </span>cp<span class="w"> </span>&lt;scheduler_container&gt;:/tmp/bunkerweb-migration/backup.zip<span class="w"> </span>./backup.zip
 </code></pre></div>
-</li>
-<li>
-<p>将迁移文件复制到您的本地计算机：</p>
-<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>cp<span class="w"> </span>&lt;scheduler_container&gt;:/path/to/migration/file<span class="w"> </span>/path/to/migration/file
-</code></pre></div>
-</li>
-</ol>
 </div>
 </div>
 </div>
-<p>此命令将创建您的数据库备份，并将其存储在命令中指定的备份目录中。</p>
 <div class="admonition note">
 <p class="admonition-title">MariaDB/MySQL 客户端兼容性</p>
 <p>BunkerWeb 的 Docker 镜像包含 MySQL <code>caching_sha2_password</code> 所需的 MariaDB Connector/C 身份验证插件。在 Linux 上，如果客户端报告无法加载 <code>caching_sha2_password</code>，请安装发行版提供的 MariaDB Connector/C 身份验证插件或兼容的 MySQL 客户端。不要将数据库帐户降级为 <code>mysql_native_password</code>，因为 MySQL <code>v9</code> 已不再提供该插件。</p>
 </div>
 <h3 id="_16">初始化迁移<a class="headerlink" href="#_16" title="Permanent link">&para;</a></h3>
-<p>要手动初始化迁移，请执行以下命令：</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="31:3"><input checked="checked" id="__tabbed_31_1" name="__tabbed_31" type="radio" /><input id="__tabbed_31_2" name="__tabbed_31" type="radio" /><input id="__tabbed_31_3" name="__tabbed_31" type="radio" /><div class="tabbed-labels"><label for="__tabbed_31_1">Linux</label><label for="__tabbed_31_2">Docker</label><label for="__tabbed_31_3">All-in-one</label></div>
+<p>恢复前请先备份目标实例，然后在目标实例上将 ZIP 文件传给 <code>migrate</code>。应用配置后，检查服务路由和管理员访问权限。用户需要重新设置双因素认证。</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="32:3"><input checked="checked" id="__tabbed_32_1" name="__tabbed_32" type="radio" /><input id="__tabbed_32_2" name="__tabbed_32" type="radio" /><input id="__tabbed_32_3" name="__tabbed_32" type="radio" /><div class="tabbed-labels"><label for="__tabbed_32_1">Linux</label><label for="__tabbed_32_2">Docker</label><label for="__tabbed_32_3">All-in-one</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code>bwcli<span class="w"> </span>plugin<span class="w"> </span>migration<span class="w"> </span>migrate<span class="w"> </span>/path/to/migration/file
+<div class="highlight"><pre><span></span><code>bwcli<span class="w"> </span>plugin<span class="w"> </span>migration<span class="w"> </span>migrate<span class="w"> </span>/path/to/backup-dir/backup.zip
 </code></pre></div>
 </div>
 <div class="tabbed-block">
-<ol>
-<li>
-<p>将迁移文件复制到容器中：</p>
-<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>cp<span class="w"> </span>/path/to/migration/file<span class="w"> </span>&lt;scheduler_container&gt;:/path/to/migration/file
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>cp<span class="w"> </span>./backup.zip<span class="w"> </span>&lt;scheduler_container&gt;:/tmp/backup.zip
+docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>&lt;scheduler_container&gt;<span class="w"> </span>bwcli<span class="w"> </span>plugin<span class="w"> </span>migration<span class="w"> </span>migrate<span class="w"> </span>/tmp/backup.zip
 </code></pre></div>
-</li>
-<li>
-<p>初始化迁移：</p>
-<div class="highlight"><pre><span></span><code>docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-it<span class="w"> </span>&lt;scheduler_container&gt;<span class="w"> </span>bwcli<span class="w"> </span>plugin<span class="w"> </span>migration<span class="w"> </span>migrate<span class="w"> </span>/path/to/migration/file
-</code></pre></div>
-</li>
-</ol>
 </div>
 <div class="tabbed-block">
-<ol>
-<li>
-<p>将迁移文件复制到容器中：</p>
-<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>cp<span class="w"> </span>/path/to/migration/file<span class="w"> </span>bunkerweb-aio:/path/to/migration/file
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>cp<span class="w"> </span>./backup.zip<span class="w"> </span>bunkerweb-aio:/tmp/backup.zip
+docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>bunkerweb-aio<span class="w"> </span>bwcli<span class="w"> </span>plugin<span class="w"> </span>migration<span class="w"> </span>migrate<span class="w"> </span>/tmp/backup.zip
 </code></pre></div>
-</li>
-<li>
-<p>初始化迁移：</p>
-<div class="highlight"><pre><span></span><code>docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-it<span class="w"> </span>bunkerweb-aio<span class="w"> </span>bwcli<span class="w"> </span>plugin<span class="w"> </span>migration<span class="w"> </span>migrate<span class="w"> </span>/path/to/migration/file
-</code></pre></div>
-</li>
-</ol>
 </div>
 </div>
 </div>
-<p>此命令将您的 BunkerWeb 数据无缝迁移，以精确匹配迁移文件中概述的配置。</p>
 <h2 id="anti-ddos-pro">Anti DDoS <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);" loading="lazy" decoding="async"> (PRO)<a class="headerlink" href="#anti-ddos-pro" title="Permanent link">&para;</a></h2>
 <p>STREAM 支持 <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
 <p><strong>Anti DDoS</strong> 插件通过实时监控、分析和过滤可疑流量，提供针对分布式拒绝服务 (DDoS) 攻击的高级保护。</p>
@@ -6622,8 +6878,7 @@ kubectl<span class="w"> </span>port-forward<span class="w"> </span>svc/mcp-bunke
 <p>管理员无需为 BunkerWeb 单独管理凭据，可以将认证委托给现有的身份提供方。认证代理完成用户登录后，在将请求转发到 BunkerWeb Web UI 之前注入身份头信息。</p>
 <div class="admonition danger">
 <p class="admonition-title">请求头伪造风险</p>
-<p>SSO 请求头可以被任何客户端轻松伪造。您<strong>必须</strong>将 <code>UI_SSO_TRUSTED_IPS</code> 限制为认证代理的 IP 地址。如果此设置配置不正确，任何客户端都可以发送伪造的请求头并获取未授权访问——包括管理员权限。</p>
-<p>默认值 <code>127.0.0.1,::1</code> 仅信任本地回环地址。在 <strong>Docker、Swarm 或 Kubernetes</strong> 部署中，认证代理运行在具有独立 IP 的单独容器中。请将 <code>UI_SSO_TRUSTED_IPS</code> 设置为认证代理容器的实际 IP 或 CIDR（例如 <code>10.20.30.5</code> 或 <code>172.18.0.0/16</code>）。切勿设为 <code>0.0.0.0/0</code>。</p>
+<p>将 <code>UI_SSO_TRUSTED_IPS</code> 限制为认证代理的地址。配置代理移除客户端传入的身份请求头，并在认证后写入自己的身份请求头。请勿公开 Web 界面后端的直接访问入口。 默认值 <code>127.0.0.1,::1</code> 仅信任环回地址。在 Docker、Swarm 或 Kubernetes 中，请使用代理的 IP 地址或专用 CIDR 网段。切勿信任 <code>0.0.0.0/0</code> 或 <code>::/0</code>。</p>
 </div>
 <h3 id="_22">功能<a class="headerlink" href="#_22" title="Permanent link">&para;</a></h3>
 <ul>
@@ -6736,7 +6991,7 @@ kubectl<span class="w"> </span>port-forward<span class="w"> </span>svc/mcp-bunke
 <td><code>yes</code></td>
 <td>全局</td>
 <td>否</td>
-<td>每次登录时从 SSO 请求头更新用户信息（邮箱、角色）。</td>
+<td>登录时根据 SSO 请求头更新账户的邮箱地址。</td>
 </tr>
 <tr>
 <td><code>UI_SSO_ACCOUNT_LINKING</code></td>
@@ -6754,6 +7009,7 @@ kubectl<span class="w"> </span>port-forward<span class="w"> </span>svc/mcp-bunke
 </tr>
 </tbody>
 </table>
+<p>有关提供方预设和角色同步，请参阅 <a href="../features/#ui-single-sign-on-pro">UI SSO 完整设置</a>。</p>
 <h3 id="_24">快速开始<a class="headerlink" href="#_24" title="Permanent link">&para;</a></h3>
 <ol>
 <li>在 BunkerWeb Web UI 前放置认证代理（Authentik、Authelia、Keycloak 等）。</li>
@@ -6765,8 +7021,8 @@ kubectl<span class="w"> </span>port-forward<span class="w"> </span>svc/mcp-bunke
 <h3 id="_25">使用提示<a class="headerlink" href="#_25" title="Permanent link">&para;</a></h3>
 <ul>
 <li>在生产环境中设置 <code>UI_SSO_FALLBACK_TO_LOGIN=no</code> 以强制仅通过 SSO 访问。当保持默认值 <code>yes</code> 时，用户可以绕过 SSO 使用本地凭据登录，从而跳过身份提供方强制执行的 MFA 或会话策略。</li>
-<li>保持 <code>UI_SSO_UPDATE_USER_ON_LOGIN</code> 的默认值（<code>yes</code>），以确保角色与 IdP 分组变更保持同步。</li>
-<li>使用 <code>UI_SSO_ACCOUNT_LINKING=username_or_email</code> 时，首次 SSO 登录会自动关联用户名或邮箱匹配的现有本地帐户。如果您的 IdP 允许用户设置任意邮箱地址，请使用 <code>username_only</code> 以防止通过邮箱伪造接管帐户。</li>
+<li><code>UI_SSO_UPDATE_USER_ON_LOGIN</code> 用于更新邮箱地址。要同步角色，请启用 <code>UI_SSO_SYNC_ROLES=yes</code>、转发用户组请求头，并至少配置一条组映射。对于绑定前已存在的账户，同步只能降低角色权限。<code>UI_SSO_SYNC_ROLES_PROTECT_ADMIN=yes</code> 还会阻止管理员被降级。</li>
+<li>使用 <code>UI_SSO_ACCOUNT_LINKING=username_or_email</code> 时，首次 SSO 登录会先匹配用户名，再匹配邮箱。没有 SSO 记录的现有管理员帐户必须使用本地登录。如果身份提供方允许用户更改邮箱地址而无需验证，请使用 <code>username_only</code>。</li>
 </ul>
 <h2 id="easy-resolve-pro">Easy Resolve <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);" loading="lazy" decoding="async"> (PRO)<a class="headerlink" href="#easy-resolve-pro" title="Permanent link">&para;</a></h2>
 <p align="center">
@@ -7337,7 +7593,7 @@ kubectl<span class="w"> </span>port-forward<span class="w"> </span>svc/mcp-bunke
 <span class="p">&lt;/</span><span class="nt">script</span><span class="p">&gt;</span>
 </code></pre></div>
 <h3 id="_39">示例<a class="headerlink" href="#_39" title="Permanent link">&para;</a></h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="32:3"><input checked="checked" id="__tabbed_32_1" name="__tabbed_32" type="radio" /><input id="__tabbed_32_2" name="__tabbed_32" type="radio" /><input id="__tabbed_32_3" name="__tabbed_32" type="radio" /><div class="tabbed-labels"><label for="__tabbed_32_1">自定义错误页面</label><label for="__tabbed_32_2">自定义验证码页面</label><label for="__tabbed_32_3">自定义默认服务器页面</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="33:3"><input checked="checked" id="__tabbed_33_1" name="__tabbed_33" type="radio" /><input id="__tabbed_33_2" name="__tabbed_33" type="radio" /><input id="__tabbed_33_3" name="__tabbed_33" type="radio" /><div class="tabbed-labels"><label for="__tabbed_33_1">自定义错误页面</label><label for="__tabbed_33_2">自定义验证码页面</label><label for="__tabbed_33_3">自定义默认服务器页面</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>在 <code>/etc/bunkerweb/templates/error.html</code> 创建自定义错误页面模板：</p>
@@ -7528,7 +7784,7 @@ kubectl<span class="w"> </span>port-forward<span class="w"> </span>svc/mcp-bunke
 </div>
 </div>
 <h3 id="_40">部署示例<a class="headerlink" href="#_40" title="Permanent link">&para;</a></h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="33:3"><input checked="checked" id="__tabbed_33_1" name="__tabbed_33" type="radio" /><input id="__tabbed_33_2" name="__tabbed_33" type="radio" /><input id="__tabbed_33_3" name="__tabbed_33" type="radio" /><div class="tabbed-labels"><label for="__tabbed_33_1">Linux</label><label for="__tabbed_33_2">Docker</label><label for="__tabbed_33_3">Kubernetes</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="34:3"><input checked="checked" id="__tabbed_34_1" name="__tabbed_34" type="radio" /><input id="__tabbed_34_2" name="__tabbed_34" type="radio" /><input id="__tabbed_34_3" name="__tabbed_34" type="radio" /><div class="tabbed-labels"><label for="__tabbed_34_1">Linux</label><label for="__tabbed_34_2">Docker</label><label for="__tabbed_34_3">Kubernetes</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <ol>
@@ -7589,11 +7845,11 @@ chmod<span class="w"> </span><span class="m">770</span><span class="w"> </span>t
 <p>将模板目录挂载到<strong>调度器</strong>并在调度器上配置设置（调度器充当管理器并将配置分发给 BunkerWeb 工作器）。您可以将模板挂载到容器内的任何路径：</p>
 <div class="highlight"><pre><span></span><code><span class="nt">services</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bunkerweb</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.18-rc4</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.18-rc5</span>
 <span class="w">    </span><span class="c1"># ... 其他设置（自定义页面无需在此处设置环境变量）</span>
 
 <span class="w">  </span><span class="nt">bw-scheduler</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.18-rc4</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.18-rc5</span>
 <span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">./templates:/custom_templates:ro</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
@@ -7676,7 +7932,7 @@ chmod<span class="w"> </span><span class="m">770</span><span class="w"> </span>t
 <span class="w">    </span><span class="nt">spec</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">containers</span><span class="p">:</span>
 <span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb-scheduler</span>
-<span class="w">          </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.18-rc4</span>
+<span class="w">          </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.18-rc5</span>
 <span class="w">          </span><span class="nt">env</span><span class="p">:</span>
 <span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">CUSTOM_ERROR_PAGE</span>
 <span class="w">              </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">"/custom_templates/error.html"</span>
@@ -8713,7 +8969,7 @@ chmod<span class="w"> </span><span class="m">770</span><span class="w"> </span>t
 <p><strong>OpenAPI Validator</strong> 插件通过根据 OpenAPI / Swagger 规范验证传入请求来执行您的 API 合约。它确保请求的路径存在，HTTP 方法是被允许的，并可选地根据架构定义验证查询、请求头、cookie 和路径参数。</p>
 <h3 id="_72">工作原理<a class="headerlink" href="#_72" title="Permanent link">&para;</a></h3>
 <ol>
-<li>计划任务 (<code>openapi-download.py</code>) 从 URL 或文件获取 OpenAPI 文档并将其缓存到磁盘（默认每小时一次）。</li>
+<li><code>openapi-download.py</code> 任务每小时运行一次。缓存缺失、来源变更或基础路径变更时，任务获取并缓存文档。</li>
 <li>在 NGINX 初始化时，插件从缓存的规范中编译路由并将其存储在共享的内部存储中。</li>
 <li>在请求处理期间，插件将请求与编译的路由进行匹配并执行验证。</li>
 </ol>
@@ -8724,7 +8980,7 @@ chmod<span class="w"> </span><span class="m">770</span><span class="w"> </span>t
 <li>通过 <code>OPENAPI_BASE_PATH</code> 覆盖基础路径或从规范中自动推导。</li>
 <li>允许或拒绝指向规范中未列出路径的请求。</li>
 <li>可配置的忽略列表，用于文档或规范文件等端点。</li>
-<li>缓存的规范每小时刷新一次，不会阻塞请求。</li>
+<li>请求使用缓存的路由，无需获取规范。</li>
 </ul>
 <h3 id="_74">配置<a class="headerlink" href="#_74" title="Permanent link">&para;</a></h3>
 <table>
@@ -8814,6 +9070,8 @@ chmod<span class="w"> </span><span class="m">770</span><span class="w"> </span>t
 <ul>
 <li><code>OPENAPI_ALLOW_UNSPECIFIED=yes</code></li>
 </ul>
+<p>在 <code>SECURITY_MODE=block</code> 模式下，如果尚未加载路由且 <code>OPENAPI_ALLOW_UNSPECIFIED=no</code>，验证器会拒绝需要验证的请求。如果缓存中的规范解码或编译时出错，即使设置了 <code>OPENAPI_ALLOW_UNSPECIFIED=yes</code>，验证器也会拒绝请求。下载失败时，插件会保留上一次缓存的规范。请在<strong>任务</strong>页面查看 <code>openapi-download</code> 任务。</p>
+<p>每小时运行的 <code>openapi-download</code> 任务在 <code>OPENAPI_SPEC</code> 和 <code>OPENAPI_BASE_PATH</code> 保持不变时会复用缓存。要载入新版规范，请在 <code>OPENAPI_SPEC</code> 中设置新的 URL 或文件路径。</p>
 <h2 id="cache-pro">Cache <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);" loading="lazy" decoding="async"> (PRO)<a class="headerlink" href="#cache-pro" title="Permanent link">&para;</a></h2>
 <p>STREAM 支持 <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
 <p>Cache PRO 插件使用 NGINX <code>proxy_cache*</code> 指令在反向代理层启用响应缓存。它适合用于吸收对可缓存内容的重复读取、在流量高峰期保护上游服务，以及在后端短暂故障期间提供陈旧缓存内容。</p>
@@ -8888,7 +9146,7 @@ chmod<span class="w"> </span><span class="m">770</span><span class="w"> </span>t
 </tr>
 <tr>
 <td><code>CACHE_KEY</code></td>
-<td><code>$scheme$proxy_host$request_uri</code></td>
+<td><code>$scheme$host$request_uri</code></td>
 <td>multisite</td>
 <td>否</td>
 <td>用于标识缓存对象的键。</td>
@@ -8999,7 +9257,7 @@ chmod<span class="w"> </span><span class="m">770</span><span class="w"> </span>t
 <p><strong>ACME</strong> 插件通过 ACME 协议提供高级证书管理功能，支持自定义证书颁发机构（Step CA、Vault PKI、Sectigo、Google Trust Services 等）。它作为内置 Let's Encrypt 插件的补充，增加了自定义 CA 支持、DNS-01 和 TLS-ALPN-01 挑战、通配符证书、带过期告警的证书监控、证书透明度日志监控以及增强的 OCSP Stapling。</p>
 <div class="admonition tip">
 <p class="admonition-title">何时使用 ACME 而非内置 Let's Encrypt 插件</p>
-<p>如果您只需要使用 HTTP-01 挑战的 Let's Encrypt 证书，内置的 Let's Encrypt 插件（<code>AUTO_LETS_ENCRYPT=yes</code>）即可满足需求。当您需要自定义 CA、DNS-01 或 TLS-ALPN-01 挑战、通配符证书，或需要带告警的证书监控时，请使用 ACME 插件。</p>
+<p>使用内置 Let's Encrypt 插件申请 Let's Encrypt 证书，包括使用 DNS-01 验证和通配符证书。需要自定义 CA、TLS-ALPN-01 或证书面板和告警时，请使用 ACME PRO。</p>
 </div>
 <h3 id="_77">功能<a class="headerlink" href="#_77" title="Permanent link">&para;</a></h3>
 <ul>
@@ -9101,7 +9359,7 @@ PLUGINS_ORDER_INIT=sessions whitelist blacklist greylist bunkernet limit authbas
 <td><code>30</code></td>
 <td>multisite</td>
 <td>否</td>
-<td>当证书距过期天数少于此值时进行续期。</td>
+<td>TLS-ALPN-01 的续期阈值，以天为单位。Certbot 按自己的计划续期。</td>
 </tr>
 <tr>
 <td><code>ACME_SSL_VERIFY</code></td>
@@ -9192,7 +9450,7 @@ PLUGINS_ORDER_INIT=sessions whitelist blacklist greylist bunkernet limit authbas
 <td></td>
 <td>multisite</td>
 <td>否</td>
-<td>DNS-01 挑战使用的 DNS 提供商。</td>
+<td>DNS-01 使用的 DNS 提供商。Hosttech 需要 BunkerWeb 1.6.18~rc5 或更高版本。</td>
 </tr>
 <tr>
 <td><code>ACME_DNS_CREDENTIAL_ITEM</code></td>
@@ -9452,7 +9710,7 @@ PLUGINS_ORDER_INIT=sessions whitelist blacklist greylist bunkernet limit authbas
 <li><strong>HTTP-01 挑战失败</strong>：确保设置了 <code>LETS_ENCRYPT_PASSTHROUGH=yes</code>——否则 BunkerWeb 的核心 location 块会在 ACME PRO 能够处理之前拦截挑战请求。同时确认 ACME 服务器可访问端口 80，且同一服务未同时启用 <code>AUTO_LETS_ENCRYPT</code>。</li>
 <li><strong>TLS-ALPN-01 挑战失败</strong>：确保 ACME 服务器可访问端口 443，且在 <code>ssl_certificate</code> 阶段没有其他插件在 ACME 之前提供证书。如有疑问，请检查 <code>PLUGINS_ORDER_SSL_CERTIFICATE</code>。</li>
 <li><strong>DNS-01 挑战失败</strong>：验证 <code>ACME_DNS_CREDENTIAL_ITEM</code> 中的 DNS 提供商凭据，如果您的提供商传播记录较慢，请调整 <code>ACME_DNS_PROPAGATION</code>。</li>
-<li><strong>证书未续期</strong>：检查 <code>ACME_RENEWAL_DAYS</code> 和调度器日志。<code>acme-renew</code> 作业每天运行，续期处于配置阈值内的证书。</li>
+<li><strong>证书未续期</strong>：请查看 <code>acme-renew</code> 的调度器日志。对于 TLS-ALPN-01，还需检查 <code>ACME_RENEWAL_DAYS</code>。Certbot 按自己的计划续期。</li>
 </ul>
 <h2 id="wildcard-pro">Wildcard <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);" loading="lazy" decoding="async"> (PRO)<a class="headerlink" href="#wildcard-pro" title="Permanent link">&para;</a></h2>
 <p>STREAM 支持 <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>

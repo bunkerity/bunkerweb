@@ -4439,14 +4439,14 @@ curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">"Host: bw
 <td><code>http</code></td>
 <td>multisite</td>
 <td>no</td>
-<td>ACME challenge type. HTTP-01 is simplest; DNS-01 is required for wildcard certificates; TLS-ALPN-01 works when port 80 is unavailable.</td>
+<td>ACME challenge type. HTTP-01 is simplest; DNS-01 is required for wildcard certificates; TLS-ALPN-01 works when port 80 is unavailable but needs a core with the ClientHello plugin hook (1.6.18~rc3 or later).</td>
 </tr>
 <tr>
 <td><code>ACME_DNS_PROVIDER</code></td>
 <td></td>
 <td>multisite</td>
 <td>no</td>
-<td>DNS provider for DNS-01 challenges.</td>
+<td>DNS provider for DNS-01 challenges. Hosttech requires BunkerWeb core 1.6.18~rc5 or newer.</td>
 </tr>
 <tr>
 <td><code>ACME_DNS_CREDENTIAL_ITEM</code></td>
@@ -4467,7 +4467,7 @@ curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">"Host: bw
 <td><code>default</code></td>
 <td>multisite</td>
 <td>no</td>
-<td>Seconds to wait for DNS propagation before the CA validates a DNS-01 challenge. 'default' applies a safe 120s wait (except route53, which polls until synced); set a number to override. Raise it if your provider is slow to publish TXT records.</td>
+<td>DNS-01 propagation wait in seconds. 'default': 120s for most providers, Hosttech's 600s default, or Route53's sync polling. Set a number to override.</td>
 </tr>
 <tr>
 <td><code>ACME_DNS_ALIAS</code></td>
@@ -4502,7 +4502,7 @@ curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">"Host: bw
 <td><code>30</code></td>
 <td>multisite</td>
 <td>no</td>
-<td>Renew the certificate when it has fewer than this many days until expiry.</td>
+<td>Renew TLS-ALPN-01 certificates when this many days remain until expiry. Certbot-managed certificates renew on certbot's own schedule.</td>
 </tr>
 <tr>
 <td><code>ACME_SSL_VERIFY</code></td>
@@ -4624,6 +4624,13 @@ curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">"Host: bw
 <td>Connection type for certificate alert SMTP.</td>
 </tr>
 <tr>
+<td><code>ACME_ALERT_SMTP_VERIFY_CERTIFICATE</code></td>
+<td><code>no</code></td>
+<td>global</td>
+<td>no</td>
+<td>Verify the certificate and hostname of the SMTP relay against the system CA store when ACME_ALERT_SMTP_SSL is SSL or TLS. Off by default: the certificate is not checked and a warning is logged on each run. Turn it on once the relay presents a certificate signed by a public CA.</td>
+</tr>
+<tr>
 <td><code>USE_ACME_CT_MONITORING</code></td>
 <td><code>no</code></td>
 <td>global</td>
@@ -4702,6 +4709,69 @@ curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">"Host: bw
 <td>global</td>
 <td>no</td>
 <td>HTTP status codes treated as suspicious for DDoS analysis.</td>
+</tr>
+<tr>
+<td><code>ANTIDDOS_TLS</code></td>
+<td><code>no</code></td>
+<td>global</td>
+<td>no</td>
+<td>Count TLS handshakes and stop TLS floods. USE_ANTIDDOS must also be yes. Start with SECURITY_MODE=detect. Cores before 1.6.18~rc3 protect only handshakes without SNI, with MULTISITE=yes or DISABLE_DEFAULT_SERVER=yes; single-site has no TLS protection. 1.6.18~rc3 or later also protects every named service.</td>
+</tr>
+<tr>
+<td><code>ANTIDDOS_TLS_WINDOW_TIME</code></td>
+<td><code>10</code></td>
+<td>global</td>
+<td>no</td>
+<td>TLS counting window in seconds (5 to 999). Idle handshakes are checked after the window ends, with five extra seconds for a first request.</td>
+</tr>
+<tr>
+<td><code>ANTIDDOS_TLS_IDLE_THRESHOLD</code></td>
+<td><code>30</code></td>
+<td>global</td>
+<td>no</td>
+<td>Minimum handshakes without a first request in one fixed window before flagging an address. This rule needs no distinct-IP minimum.</td>
+</tr>
+<tr>
+<td><code>ANTIDDOS_TLS_IDLE_RATIO</code></td>
+<td><code>90</code></td>
+<td>global</td>
+<td>no</td>
+<td>Minimum percentage of handshakes without a first request (50 to 100). The idle handshake threshold must also be reached.</td>
+</tr>
+<tr>
+<td><code>ANTIDDOS_TLS_HELLO_THRESHOLD</code></td>
+<td><code>500</code></td>
+<td>global</td>
+<td>no</td>
+<td>TLS handshakes per address in a sliding window before flagging it. ANTIDDOS_DISTINCT_IP must also be reached. Set 0 to disable this volume rule.</td>
+</tr>
+<tr>
+<td><code>ANTIDDOS_TLS_IPV6_PREFIX</code></td>
+<td><code>64</code></td>
+<td>global</td>
+<td>no</td>
+<td>Group IPv6 addresses by this prefix length for TLS counting and local flags. IPv4-mapped IPv6 addresses count as IPv4.</td>
+</tr>
+<tr>
+<td><code>ANTIDDOS_TLS_BAN_TIME</code></td>
+<td><code>300</code></td>
+<td>global</td>
+<td>no</td>
+<td>How long a TLS flag or supported core ban lasts, in seconds (10 to 86400). Existing operator bans are never replaced.</td>
+</tr>
+<tr>
+<td><code>ANTIDDOS_TLS_IGNORE_IP</code></td>
+<td></td>
+<td>global</td>
+<td>no</td>
+<td>Space-separated IP addresses and CIDRs excluded from TLS counting and drops. On core 1.6.15, add monitoring addresses here because its core whitelist is unavailable at ClientHello.</td>
+</tr>
+<tr>
+<td><code>ANTIDDOS_TLS_DICT_SIZE</code></td>
+<td><code>10M</code></td>
+<td>global</td>
+<td>no</td>
+<td>Memory for TLS counters, candidate lists and local flags (for example 10M or 500k). Full storage fails open, so increase this for large address populations.</td>
 </tr>
 <tr>
 <td><code>ANTIDDOS_DISTINCT_IP</code></td>
@@ -5719,7 +5789,7 @@ bwcli<span class="w"> </span>plugin<span class="w"> </span>backup<span class="w"
 <td></td>
 <td>global</td>
 <td>no</td>
-<td>The S3 endpoint</td>
+<td>The full S3 endpoint URL, for example https://s3.example.com (https:// is added if omitted)</td>
 </tr>
 <tr>
 <td><code>BACKUP_S3_BUCKET</code></td>
@@ -5761,7 +5831,7 @@ bwcli<span class="w"> </span>plugin<span class="w"> </span>backup<span class="w"
 <td><code>6</code></td>
 <td>global</td>
 <td>no</td>
-<td>The compression level of the backup zip file</td>
+<td>Compression level of the zip uploaded to S3, from 1 (fastest) to 9 (smallest). 6 uploads the core backup unchanged.</td>
 </tr>
 </tbody>
 </table>
@@ -6702,10 +6772,10 @@ TrustedMonitor/\d+\.\d+
 </tr>
 <tr>
 <td><code>CACHE_KEY</code></td>
-<td><code>$scheme$proxy_host$request_uri</code></td>
+<td><code>$scheme$host$request_uri</code></td>
 <td>multisite</td>
 <td>no</td>
-<td>Key used to identify cached elements.</td>
+<td>Key used to identify cached elements. The default includes the client host, so services that share an upstream and a cache zone do not share entries. Keep $host (or $http_host) in a custom key.</td>
 </tr>
 <tr>
 <td><code>CACHE_CONVERT_HEAD_TO_GET</code></td>
@@ -7340,7 +7410,7 @@ log {
 <span class="nt">services</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bunkerweb</span><span class="p">:</span>
 <span class="w">    </span><span class="c1"># This is the name that will be used to identify the instance in the Scheduler</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.18-rc4</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.18-rc5</span>
 <span class="w">    </span><span class="nt">ports</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">"80:8080/tcp"</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">"443:8443/tcp"</span>
@@ -7357,7 +7427,7 @@ log {
 <span class="w">        </span><span class="nt">syslog-address</span><span class="p">:</span><span class="w"> </span><span class="s">"udp://10.20.30.254:514"</span><span class="w"> </span><span class="c1"># The IP address of the syslog service</span>
 
 <span class="w">  </span><span class="nt">bw-scheduler</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.18-rc4</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.18-rc5</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">&lt;&lt;</span><span class="p">:</span><span class="w"> </span><span class="nv">*bw-env</span>
 <span class="w">      </span><span class="nt">BUNKERWEB_INSTANCES</span><span class="p">:</span><span class="w"> </span><span class="s">"bunkerweb"</span><span class="w"> </span><span class="c1"># Make sure to set the correct instance name</span>
@@ -8187,7 +8257,7 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 <tr>
 <td><code>DNSBL_LIST</code></td>
 <td><code>bl.blocklist.de sbl.spamhaus.org xbl.spamhaus.org</code></td>
-<td>global</td>
+<td>multisite</td>
 <td>no</td>
 <td>DNSBL servers: list of DNSBL server domains to check, separated by spaces.</td>
 </tr>
@@ -9688,6 +9758,20 @@ TrustedMonitor/\d+\.\d+
 <td>multisite</td>
 <td>no</td>
 <td>Enable or disable LDAP SSO authentication.</td>
+</tr>
+<tr>
+<td><code>LDAP_IGNORE_URI</code></td>
+<td></td>
+<td>multisite</td>
+<td>no</td>
+<td>List of PCRE regex patterns (separated by spaces) for URIs excluded from LDAP authentication. Patterns are matched against the normalized path, alone or followed by ? and the query string. Takes precedence over LDAP_INCLUDE_URI.</td>
+</tr>
+<tr>
+<td><code>LDAP_INCLUDE_URI</code></td>
+<td></td>
+<td>multisite</td>
+<td>no</td>
+<td>List of PCRE regex patterns (separated by spaces) for the only URIs that require LDAP authentication; when empty, every URI does. Patterns are matched against the normalized path, alone or followed by ? and the query string. LDAP_IGNORE_URI takes precedence. Patterns are unanchored: ^/search also matches /searchengine. Example: LDAP_INCLUDE_URI=^/search(/|$) ^/login(/|$).</td>
 </tr>
 <tr>
 <td><code>LDAP_HOST</code></td>
@@ -11883,7 +11967,7 @@ TrustedMonitor/\d+\.\d+
 </div>
 <div class="admonition warning">
 <p class="admonition-title">Response-body denies and compressed responses</p>
-<p>If a response-body deny rule fires after response headers have been sent, the client can receive the original status (such as <code>200</code>) followed by an incomplete-body or chunked-encoding error instead of a clean <code>403</code> response. This can happen with gzip, Brotli or zstd compression applied by BunkerWeb. Starting with <code>1.6.18~rc4</code>, Brotli follows the established gzip behavior. Check the ModSecurity audit and error logs for the triggered rule; tune confirmed false positives with narrowly scoped exclusions.</p>
+<p>If a response-body deny rule fires after response headers have been sent, the client can receive the original status (such as <code>200</code>) followed by an incomplete-body or chunked-encoding error instead of a clean <code>403</code> response. This can happen with gzip, Brotli or zstd compression applied by BunkerWeb. Starting with <code>1.6.18~rc5</code>, Brotli follows the established gzip behavior. Check the ModSecurity audit and error logs for the triggered rule; tune confirmed false positives with narrowly scoped exclusions.</p>
 </div>
 <div class="admonition warning">
 <p class="admonition-title">Upstream-compressed response bodies</p>
@@ -11940,11 +12024,11 @@ TrustedMonitor/\d+\.\d+
 <li>The action is executed in <strong>Phase 1</strong> (early in the request lifecycle).</li>
 <li>It enables WordPress-specific CRS exclusions by setting the variable <code>tx.crs_exclusions_wordpress</code>.</li>
 </ul>
-<h4 id="updating-crs-rules-with-modsec">Updating CRS Rules with <code>modsec</code><a class="headerlink" href="#updating-crs-rules-with-modsec" title="Permanent link">&para;</a></h4>
-<p>To fine-tune the loaded CRS rules, you can use a custom configuration of type <code>modsec</code>. For example, you can remove specific rules or tags for certain request paths:</p>
-<div class="highlight"><pre><span></span><code>SecRule REQUEST_FILENAME "/wp-admin/admin-ajax.php" "id:1,ctl:ruleRemoveByTag=attack-xss,ctl:ruleRemoveByTag=attack-rce"
-SecRule REQUEST_FILENAME "/wp-admin/options.php" "id:2,ctl:ruleRemoveByTag=attack-xss"
-SecRule REQUEST_FILENAME "^/wp-json/yoast" "id:3,ctl:ruleRemoveById=930120"
+<h4 id="updating-crs-rules-with-modsec-crs">Updating CRS Rules with <code>modsec-crs</code><a class="headerlink" href="#updating-crs-rules-with-modsec-crs" title="Permanent link">&para;</a></h4>
+<p>To fine-tune the loaded CRS rules, you can use a custom configuration of type <code>modsec-crs</code>. For example, you can remove specific rules or tags for certain request paths. A <code>ctl:ruleRemove*</code> action only affects rules that run after it, so the rules below run in <code>phase:1</code> and the configuration is loaded before the CRS:</p>
+<div class="highlight"><pre><span></span><code>SecRule REQUEST_FILENAME "/wp-admin/admin-ajax.php" "id:1,phase:1,pass,t:none,nolog,ctl:ruleRemoveByTag=attack-xss,ctl:ruleRemoveByTag=attack-rce"
+SecRule REQUEST_FILENAME "/wp-admin/options.php" "id:2,phase:1,pass,t:none,nolog,ctl:ruleRemoveByTag=attack-xss"
+SecRule REQUEST_FILENAME "^/wp-json/yoast" "id:3,phase:1,pass,t:none,nolog,ctl:ruleRemoveById=930120"
 </code></pre></div>
 <p>In this example:</p>
 <ul>
@@ -11952,6 +12036,7 @@ SecRule REQUEST_FILENAME "^/wp-json/yoast" "id:3,ctl:ruleRemoveById=930120"
 <li><strong>Rule 2</strong>: Removes rules tagged as <code>attack-xss</code> for requests to <code>/wp-admin/options.php</code>.</li>
 <li><strong>Rule 3</strong>: Removes a specific rule (ID <code>930120</code>) for requests matching <code>/wp-json/yoast</code>.</li>
 </ul>
+<p>Keep the <code>SecRuleRemoveById</code>, <code>SecRuleRemoveByTag</code>, <code>SecRuleUpdateTargetById</code> and <code>SecRuleUpdateTargetByTag</code> directives, which apply when the configuration loads, in a custom configuration of type <code>modsec</code> (after the CRS).</p>
 <div class="admonition info">
 <p class="admonition-title">Order of execution</p>
 <p>The execution order for ModSecurity in BunkerWeb is as follows, ensuring a clear and logical progression of rule application:</p>
@@ -12373,7 +12458,7 @@ SecRule REQUEST_FILENAME "^/wp-json/yoast" "id:3,ctl:ruleRemoveById=930120"
 <td><code>no</code></td>
 <td>multisite</td>
 <td>no</td>
-<td>Allow requests to paths not listed in the specification (otherwise they are denied).</td>
+<td>Allow requests to paths not listed in the specification (otherwise they are denied). With no, every request is also denied while the specification cannot be loaded.</td>
 </tr>
 <tr>
 <td><code>OPENAPI_ALLOW_INSECURE_URL</code></td>
@@ -12428,6 +12513,20 @@ SecRule REQUEST_FILENAME "^/wp-json/yoast" "id:3,ctl:ruleRemoveById=930120"
 <td>multisite</td>
 <td>no</td>
 <td>Enable or disable OpenID Connect authentication.</td>
+</tr>
+<tr>
+<td><code>OPENIDC_IGNORE_URI</code></td>
+<td></td>
+<td>multisite</td>
+<td>no</td>
+<td>List of PCRE regex patterns (separated by spaces) for URIs excluded from OpenID Connect authentication. Patterns are matched against the normalized path, alone or followed by ? and the query string. Takes precedence over OPENIDC_INCLUDE_URI.</td>
+</tr>
+<tr>
+<td><code>OPENIDC_INCLUDE_URI</code></td>
+<td></td>
+<td>multisite</td>
+<td>no</td>
+<td>List of PCRE regex patterns (separated by spaces) for the only URIs that require OpenID Connect authentication; when empty, every URI does. Patterns are matched against the normalized path, alone or followed by ? and the query string. OPENIDC_IGNORE_URI takes precedence. Patterns are unanchored: ^/search also matches /searchengine. Example: OPENIDC_INCLUDE_URI=^/search(/|$) ^/login(/|$).</td>
 </tr>
 <tr>
 <td><code>OPENIDC_DISCOVERY</code></td>
@@ -12553,7 +12652,7 @@ SecRule REQUEST_FILENAME "^/wp-json/yoast" "id:3,ctl:ruleRemoveById=930120"
 <td><code>no</code></td>
 <td>multisite</td>
 <td>no</td>
-<td>Accept tokens signed with unsupported algorithms (not recommended).</td>
+<td>Setting yes disables id_token signature verification for algorithms the plugin cannot verify (ES<em>, PS</em>). Use only with a trusted token endpoint over TLS.</td>
 </tr>
 <tr>
 <td><code>OPENIDC_LOGOUT_PATH</code></td>
@@ -12968,7 +13067,7 @@ SecRule REQUEST_FILENAME "^/wp-json/yoast" "id:3,ctl:ruleRemoveById=930120"
 <td><code>0.0.0.0</code></td>
 <td>global</td>
 <td>no</td>
-<td>Listening IP of the Prometheus exporter.</td>
+<td>Listening IP of the Prometheus exporter: *, a hostname or alias, an IPv4 address, or a bracketed IPv6 address such as [::1].</td>
 </tr>
 <tr>
 <td><code>PROMETHEUS_EXPORTER_PORT</code></td>
@@ -12990,6 +13089,48 @@ SecRule REQUEST_FILENAME "^/wp-json/yoast" "id:3,ctl:ruleRemoveById=930120"
 <td>global</td>
 <td>no</td>
 <td>List of IP/networks allowed to contact the Prometheus exporter endpoint.</td>
+</tr>
+<tr>
+<td><code>PROMETHEUS_EXPORTER_TOKEN</code></td>
+<td></td>
+<td>global</td>
+<td>no</td>
+<td>Bearer token required in the Authorization header to read the Prometheus exporter. Leave empty to disable the check. Use at least 16 characters and enable TLS so the token does not travel in clear.</td>
+</tr>
+<tr>
+<td><code>PROMETHEUS_EXPORTER_SSL</code></td>
+<td><code>no</code></td>
+<td>global</td>
+<td>no</td>
+<td>Serve the Prometheus exporter over TLS with the certificate set below. The exporter never falls back to plain HTTP.</td>
+</tr>
+<tr>
+<td><code>PROMETHEUS_EXPORTER_SSL_CERT</code></td>
+<td></td>
+<td>global</td>
+<td>no</td>
+<td>Full path of the exporter certificate or bundle file (must be readable by the scheduler). Used together with the key path, it wins over the data settings.</td>
+</tr>
+<tr>
+<td><code>PROMETHEUS_EXPORTER_SSL_KEY</code></td>
+<td></td>
+<td>global</td>
+<td>no</td>
+<td>Full path of the exporter private key file (must be readable by the scheduler).</td>
+</tr>
+<tr>
+<td><code>PROMETHEUS_EXPORTER_SSL_CERT_DATA</code></td>
+<td></td>
+<td>global</td>
+<td>no</td>
+<td>Exporter certificate data encoded in base64 or plaintext PEM format.</td>
+</tr>
+<tr>
+<td><code>PROMETHEUS_EXPORTER_SSL_KEY_DATA</code></td>
+<td></td>
+<td>global</td>
+<td>no</td>
+<td>Exporter private key data encoded in base64 or plaintext PEM format.</td>
 </tr>
 </tbody>
 </table>
@@ -13665,6 +13806,13 @@ Setting these only on <code>bunkerweb.extraEnvs</code> has <strong>no effect</st
 <td>SMTP connection security: no (plain SMTP), SSL (implicit TLS, usually port 465) or TLS (STARTTLS, usually port 587). Values are case-sensitive. Set REPORTING_SMTP_PORT to match.</td>
 </tr>
 <tr>
+<td><code>REPORTING_SMTP_VERIFY_CERTIFICATE</code></td>
+<td><code>no</code></td>
+<td>global</td>
+<td>no</td>
+<td>Verify the certificate and hostname of the SMTP relay against the system CA store when REPORTING_SMTP_SSL is SSL or TLS. Off by default: the certificate is not checked and a warning is logged on each run. Turn it on once the relay presents a certificate signed by a public CA.</td>
+</tr>
+<tr>
 <td><code>REPORTING_SMTP_SUBJECT</code></td>
 <td><code>BunkerWeb Report</code></td>
 <td>global</td>
@@ -13738,7 +13886,7 @@ Setting these only on <code>bunkerweb.extraEnvs</code> has <strong>no effect</st
 <td><code>/</code></td>
 <td>multisite</td>
 <td>yes</td>
-<td><strong>Location URL:</strong> Path that will be proxied to the backend server. A value starting with <code>^</code> or ending with <code>$</code> is treated as a regex location. Optionally prefix with <code>~</code>, <code>~*</code>, <code>=</code> or <code>^~</code> followed by one space to set the nginx location modifier explicitly; no spaces, <code>;</code>, <code>{</code> or <code>}</code> are allowed elsewhere in the value.</td>
+<td><strong>Location URL:</strong> Path that will be proxied to the backend server. A value starting with <code>^</code> or ending with <code>$</code> is treated as a regex location. Optionally prefix with <code>~</code>, <code>~*</code>, <code>=</code> or <code>^~</code> followed by one space to set the nginx location modifier explicitly; no spaces or <code>;</code> are allowed elsewhere in the value. One matched pair of single or double quotes around the operand is optional, and braces are supported.</td>
 </tr>
 <tr>
 <td><code>REVERSE_PROXY_BUFFERING</code></td>
@@ -13784,7 +13932,7 @@ Setting these only on <code>bunkerweb.extraEnvs</code> has <strong>no effect</st
 </tr>
 </tbody>
 </table>
-<p>BunkerWeb quotes the path or regex operand when generating the NGINX location, preserving literal quotes, <code>#</code>, and regex backslashes. Supply the value without adding NGINX quoting yourself. Existing restrictions on whitespace, <code>;</code>, <code>{</code>, and <code>}</code> still apply.</p>
+<p>BunkerWeb strips one matched outer pair of single or double quotes from the path or regex operand, then quotes it when generating the NGINX location, preserving literal quotes, <code>#</code>, regex backslashes and braces. Adding that pair yourself is optional, for example <code>~ "^/api/[a-z]{2}/"</code>. Spaces and <code>;</code> are still refused.</p>
 <div class="admonition tip">
 <p class="admonition-title">Best Practices</p>
 <ul>
@@ -14761,6 +14909,20 @@ REVERSE_PROXY_CUSTOM_HOST=backend.example.com
 <td>Enable SAML authentication</td>
 </tr>
 <tr>
+<td><code>SAML_IGNORE_URI</code></td>
+<td></td>
+<td>multisite</td>
+<td>no</td>
+<td>List of PCRE regex patterns (separated by spaces) for URIs excluded from SAML authentication. Patterns are matched against the normalized path, alone or followed by ? and the query string. Takes precedence over SAML_INCLUDE_URI.</td>
+</tr>
+<tr>
+<td><code>SAML_INCLUDE_URI</code></td>
+<td></td>
+<td>multisite</td>
+<td>no</td>
+<td>List of PCRE regex patterns (separated by spaces) for the only URIs that require SAML authentication; when empty, every URI does. Patterns are matched against the normalized path, alone or followed by ? and the query string. SAML_IGNORE_URI takes precedence. Patterns are unanchored: ^/search also matches /searchengine. Example: SAML_INCLUDE_URI=^/search(/|$) ^/login(/|$).</td>
+</tr>
+<tr>
 <td><code>SAML_SP_ENTITY_ID</code></td>
 <td></td>
 <td>multisite</td>
@@ -14983,6 +15145,76 @@ REVERSE_PROXY_CUSTOM_HOST=backend.example.com
 <td>global</td>
 <td>no</td>
 <td>Shared-memory capacity for single-instance replay protection</td>
+</tr>
+<tr>
+<td><code>SAML_ASSERTION_ENCRYPTION</code></td>
+<td><code>off</code></td>
+<td>multisite</td>
+<td>no</td>
+<td>Accept encrypted assertions when optional; require an encrypted assertion when required.</td>
+</tr>
+<tr>
+<td><code>SAML_SP_ENCRYPTION_CERT</code></td>
+<td></td>
+<td>multisite</td>
+<td>no</td>
+<td>SP decryption certificate in PEM; register this separate encryption key with the IdP.</td>
+</tr>
+<tr>
+<td><code>SAML_SP_ENCRYPTION_PRIVATE_KEY</code></td>
+<td></td>
+<td>multisite</td>
+<td>no</td>
+<td>Unencrypted RSA private key matching the SP encryption certificate; never displayed.</td>
+</tr>
+<tr>
+<td><code>SAML_ALLOW_IDP_INITIATED</code></td>
+<td><code>no</code></td>
+<td>multisite</td>
+<td>no</td>
+<td>Allow unsolicited IdP logins without browser request correlation.</td>
+</tr>
+<tr>
+<td><code>SAML_IDP_INITIATED_RETURN_PATHS</code></td>
+<td><code>/</code></td>
+<td>multisite</td>
+<td>no</td>
+<td>Exact local return paths; first is the default when RelayState is absent.</td>
+</tr>
+<tr>
+<td><code>SAML_IDP_METADATA_SOURCE</code></td>
+<td><code>manual</code></td>
+<td>multisite</td>
+<td>no</td>
+<td>Choose manual IdP fields, imported XML, or periodically refreshed HTTPS metadata.</td>
+</tr>
+<tr>
+<td><code>SAML_IDP_METADATA_XML</code></td>
+<td></td>
+<td>multisite</td>
+<td>no</td>
+<td>IdP metadata XML contents, at most 64 KiB; select the entity with SAML_IDP_ENTITY_ID.</td>
+</tr>
+<tr>
+<td><code>SAML_IDP_METADATA_URL</code></td>
+<td></td>
+<td>multisite</td>
+<td>no</td>
+<td>HTTPS metadata URL, without credentials or fragment; redirects are refused.</td>
+</tr>
+<tr>
+<td><code>SAML_IDP_METADATA_CA_CERT</code></td>
+<td></td>
+<td>multisite</td>
+<td>no</td>
+<td>Optional PEM CA certificates added to system trust for this metadata URL.</td>
+</tr>
+<tr>
+<td><code>SAML_IDP_METADATA_ALLOW_PRIVATE_URL</code></td>
+<td><code>no</code></td>
+<td>multisite</td>
+<td>no</td>
+<td>Permit private and loopback metadata destinations; TLS verification remains required.</td>
 </tr>
 </tbody>
 </table>
