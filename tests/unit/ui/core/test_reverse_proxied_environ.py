@@ -36,6 +36,19 @@ def test_no_forwarded_headers_leaves_the_request_as_is():
     assert env["SESSION_COOKIE_DOMAIN"] == "ui:7000"
 
 
+def test_a_request_without_a_host_header_falls_back_to_the_server_name():
+    environ = {key: value for key, value in BASE.items() if key != "HTTP_HOST"}
+    seen = {}
+
+    def inner(env, start_response):
+        seen.update(env)
+        return [b""]
+
+    ReverseProxied(inner, x_for=1)(environ, lambda *a: None)
+
+    assert seen["ABSOLUTE_URI"] == "http://ui/" and seen["SESSION_COOKIE_DOMAIN"] == "ui"
+
+
 def test_originals_are_kept_aside():
     env = _run({"HTTP_X_FORWARDED_FOR": "9.9.9.9"}, x_for=1)
     assert env["werkzeug.proxy_fix.orig"] == {

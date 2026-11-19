@@ -56,7 +56,9 @@ class ReverseProxied(ProxyFix):
             environ["SCRIPT_NAME"] = x_prefix
 
         environ["PATH_INFO"] = environ["PATH_INFO"][len(environ["SCRIPT_NAME"]) :]  # noqa: E203
-        environ["ABSOLUTE_URI"] = f"{environ['wsgi.url_scheme']}://{environ['HTTP_HOST']}{environ['SCRIPT_NAME']}/"
-        environ["SESSION_COOKIE_DOMAIN"] = environ["HTTP_HOST"]
+        # HTTP/1.0 requests may carry no Host header at all
+        host = environ.get("HTTP_HOST") or environ["SERVER_NAME"]
+        environ["ABSOLUTE_URI"] = f"{environ['wsgi.url_scheme']}://{host}{environ['SCRIPT_NAME']}/"
+        environ["SESSION_COOKIE_DOMAIN"] = host
 
         return self.app(environ, start_response)
