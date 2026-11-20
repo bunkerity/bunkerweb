@@ -7,7 +7,7 @@ from pathlib import Path
 import pytest
 
 ROOT = Path(__file__).resolve().parents[3]
-VERSION = "1.6.18~rc5"
+VERSION = "1.6.18"
 PINS = {
     "src/bw/Dockerfile": 'LABEL version="{version}"\n',
     "misc/install-bunkerweb.sh": 'DEFAULT_BUNKERWEB_VERSION="{version}"\n',
