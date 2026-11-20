@@ -37,7 +37,7 @@ def health(sched_main, fake_sched, fake_api, sandbox, monkeypatch):
     monkeypatch.setattr(sched_main, "ApiCaller", Caller)
     sends = SimpleNamespace(calls=[], ok=True, renders=0, render_ok=True)
 
-    def send(path, endpoint, logger=None, *, api_caller=None):
+    def send(path, endpoint, logger=None, *, api_caller=None, failed=None):
         sends.calls.append(endpoint)
         return sends.ok
 

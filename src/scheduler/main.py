@@ -433,21 +433,25 @@ def send_file_to_bunkerweb(
     # drops every other node in the cluster.
     targeted = {api.endpoint for api in api_caller.apis} if api_caller is not None else None
 
-    if not IGNORE_FAIL_SENDING_CONFIG:
+    if failed is not None or not IGNORE_FAIL_SENDING_CONFIG:
         for db_instance in SCHEDULER.db.get_instances():
             instance_endpoint = f"{_instance_endpoint(db_instance)}/"
             if targeted is not None and instance_endpoint not in targeted:
                 continue
+
+            response = response_for(responses, db_instance["hostname"], {})
+            status = response.get("status", "down")
+            if failed is not None and instance_endpoint in targets and status != "success":
+                failed[db_instance["hostname"]] = response
+            if IGNORE_FAIL_SENDING_CONFIG:
+                continue
+
             with SCHEDULER_LOCK:
                 known = any(api.endpoint == instance_endpoint for api in SCHEDULER.apis)
 
-            response = response_for(responses, db_instance["hostname"], {"status": "down"})
-            status = response.get("status", "down")
             # The instance answered: it is busy with another change, not down. A busy 503 used to evict it, and
             # the reload that followed then reported a configuration the instance never received.
             busy = status != "success" and is_busy_message(str(response.get("msg", "")))
-            if failed is not None and instance_endpoint in targets and status != "success":
-                failed[db_instance["hostname"]] = response_for(responses, db_instance["hostname"], {})
 
             # Upload success proves reachability, not that the desired configuration is running.
             instance_status = "up" if status == "success" or busy else "down"
@@ -489,6 +493,22 @@ def send_file_to_bunkerweb(
         logger.info(f"Successfully sent {file_path} folder to reachable BunkerWeb instances")
 
     return success
+
+
+def drop_tolerated_push_failures(endpoint: str, failed: Dict[str, Any], logger: Logger = LOGGER) -> None:
+    if IGNORE_FAIL_SENDING_CONFIG and failed:
+        logger.warning(f"{endpoint} was not applied on {', '.join(sorted(failed))}, reloading without it (IGNORE_FAIL_SENDING_CONFIG is set)")
+        failed.clear()
+
+
+def finish_folder_push(endpoint: str, hosts: Set[str], failed: Dict[str, Any], future: Future, logger: Logger = LOGGER) -> None:
+    try:
+        if future.result() is False and not failed:
+            failed.update({hostname: {} for hostname in hosts})
+    except BaseException as error:
+        logger.error(f"Exception while sending {endpoint}: {error}")
+        failed.update({hostname: {} for hostname in hosts})
+    drop_tolerated_push_failures(endpoint, failed, logger)
 
 
 def custom_config_path(root: Path, config: Dict[str, Any]) -> Path:
@@ -1027,12 +1047,7 @@ def publish_configuration(env: Dict[str, Any], outcome: Dict[str, Any]) -> None:
             (endpoint, set(hosts), failed, SCHEDULER_TASKS_EXECUTOR.submit(send_file_to_bunkerweb, paths[endpoint], endpoint, api_caller=caller, failed=failed))
         )
     for endpoint, hosts, failed, future in futures:
-        try:
-            if future.result() is False and not failed:
-                failed.update({hostname: {} for hostname in hosts})
-        except BaseException as error:
-            LOGGER.error(f"Exception while sending {endpoint}: {error}")
-            failed.update({hostname: {} for hostname in hosts})
+        finish_folder_push(endpoint, hosts, failed, future)
         outcome["folders"][endpoint].difference_update(hosts - failed.keys())
         responses.update(failed)
     for hostname, message in take_busy_pushes().items():
@@ -1453,46 +1468,28 @@ def healthcheck_job():
                         HEALTHCHECK_LOGGER.error(f"Configuration generation failed for instance {bw_instance.endpoint}, catch-up remains pending")
                         continue
 
-                    tmp_futures = [
-                        SCHEDULER_TASKS_EXECUTOR.submit(
-                            send_file_to_bunkerweb,
-                            CUSTOM_CONFIGS_PATH,
-                            "/custom_configs",
-                            HEALTHCHECK_LOGGER,
-                            api_caller=api_caller,
-                        ),
-                        SCHEDULER_TASKS_EXECUTOR.submit(
-                            send_file_to_bunkerweb,
-                            EXTERNAL_PLUGINS_PATH,
-                            "/plugins",
-                            HEALTHCHECK_LOGGER,
-                            api_caller=api_caller,
-                        ),
-                        SCHEDULER_TASKS_EXECUTOR.submit(
-                            send_file_to_bunkerweb,
-                            PRO_PLUGINS_PATH,
-                            "/pro_plugins",
-                            HEALTHCHECK_LOGGER,
-                            api_caller=api_caller,
-                        ),
-                        SCHEDULER_TASKS_EXECUTOR.submit(
-                            send_file_to_bunkerweb,
-                            CONFIG_PATH,
-                            "/confs",
-                            HEALTHCHECK_LOGGER,
-                            api_caller=api_caller,
-                        ),
-                        SCHEDULER_TASKS_EXECUTOR.submit(
-                            send_file_to_bunkerweb,
-                            CACHE_PATH,
-                            "/cache",
-                            HEALTHCHECK_LOGGER,
-                            api_caller=api_caller,
-                        ),
-                    ]
+                    pushes = {
+                        "/custom_configs": CUSTOM_CONFIGS_PATH,
+                        "/plugins": EXTERNAL_PLUGINS_PATH,
+                        "/pro_plugins": PRO_PLUGINS_PATH,
+                        "/confs": CONFIG_PATH,
+                        "/cache": CACHE_PATH,
+                    }
+                    push_failures: Dict[str, Dict[str, Any]] = {endpoint: {} for endpoint in pushes}
+                    tmp_futures = {
+                        endpoint: SCHEDULER_TASKS_EXECUTOR.submit(
+                            send_file_to_bunkerweb, path, endpoint, HEALTHCHECK_LOGGER, api_caller=api_caller, failed=push_failures[endpoint]
+                        )
+                        for endpoint, path in pushes.items()
+                    }
                     # Every upload is awaited before judging: a reload on a partial push would clear the
                     # pending marker for an instance that still lacks part of its configuration.
-                    if not all([future.result() for future in tmp_futures]):
+                    blocked_pushes = False
+                    for endpoint, future in tmp_futures.items():
+                        failed_push = push_failures[endpoint]
+                        finish_folder_push(endpoint, {hostname}, failed_push, future, HEALTHCHECK_LOGGER)
+                        blocked_pushes |= bool(failed_push)
+                    if blocked_pushes:
                         HEALTHCHECK_LOGGER.error(
                             f"Error while sending the configuration to instance {bw_instance.endpoint}, reload skipped, it will be retried"
                         )
