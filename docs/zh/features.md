@@ -1113,8 +1113,12 @@ STREAM 支持 :warning:
     | ----------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
     | `ip:danmeuk-tor-exit`                     | Tor 出口节点 IP (dan.me.uk)                                                                                                                                                 | `https://www.dan.me.uk/torlist/?exit`                                                                                                 |
     | `ua:mitchellkrogza-bad-user-agents`       | Nginx 阻止不良机器人、垃圾邮件引荐来源、漏洞扫描器、用户代理、恶意软件、广告软件、勒索软件、恶意网站，具有反 DDOS、Wordpress 主题检测器阻止和针对重复违规者的 Fail2Ban Jail | `https://raw.githubusercontent.com/mitchellkrogza/nginx-ultimate-bad-bot-blocker/master/_generator_lists/bad-user-agents.list`        |
-    | `ip:laurent-minne-data-shield-aggressive` | Data-Shield IPv4 Blocklist - Laurent M. - 适用于 Web 应用, WordPress, VPS (Apache/Nginx)                                                                                    | `https://raw.githubusercontent.com/duggytuxy/Data-Shield_IPv4_Blocklist/refs/heads/main/prod_data-shield_ipv4_blocklist.txt`          |
-    | `ip:laurent-minne-data-shield-critical`   | Data-Shield IPv4 Blocklist - Laurent M. - 适用于 DMZs, SaaS, API 和关键资产                                                                                                 | `https://raw.githubusercontent.com/duggytuxy/Data-Shield_IPv4_Blocklist/refs/heads/main/prod_critical_data-shield_ipv4_blocklist.txt` |
+    | `ip:laurent-minne-data-shield-aggressive` | Data-Shield IPv4 Blocklist (Community Standard) - Laurent M.                                                                                                                | `https://raw.githubusercontent.com/duggytuxy/Data-Shield_IPv4_Blocklist/refs/heads/main/prod_data-shield_ipv4_blocklist.txt`          |
+
+    !!! info "Data-Shield Pro"
+        [Data-Shield Pro](https://data-shield.eu/?utm_source=external-docs&utm_medium=cta&utm_campaign=bunkerweb-docs) 是付费订阅，包含 Critical 配置：在 Standard 列表的基础上增加更多被阻止的来源，用于更严格的入站过滤，但误拦合法流量的风险更高。原 `ip:laurent-minne-data-shield-critical` 预设已停用，现在下载免费的 Community Standard 列表。
+
+        Pro 源需要身份验证，而 BunkerWeb 没有单独的订阅源凭据设置。嵌入 URL 设置中的凭据（`http://user:pass@url`）会保存在该设置中，并显示在 Web 界面和日志里。因此请遵循[供应商指南](https://data-shield.eu/docs/?utm_source=external-docs&utm_medium=cta&utm_campaign=bunkerweb-docs)：不要把设备令牌放进 URL，而是在您自己的网络中使用中继，即一个向上游进行身份验证、并仅向您的 BunkerWeb 实例提供该文件的服务，然后将中继 URL 添加到 `BLACKLIST_IP_URLS`。HTTP Basic 选项以设备 ID 作为用户名、令牌作为密码，但这会把令牌保存在该设置中。订阅用户可在[订阅者门户](https://feeds.data-shield.eu/?utm_source=external-docs&utm_medium=cta&utm_campaign=bunkerweb-docs)中管理设备。
 
     **配置：** 指定多个列表，以空格分隔。例如：
     ```yaml
@@ -1123,9 +1127,6 @@ STREAM 支持 :warning:
 
     !!! tip "社区与手动配置"
         社区黑名单提供了一种方便的方式来开始使用经过验证的黑名单源。您可以将它们与手动 URL 配置一起使用，以实现最大的灵活性。
-
-    !!! note "致谢"
-        感谢 Laurent Minne 贡献了 [Data-Shield 阻止列表](https://duggytuxy.github.io/#)！
 
 === "IP 地址"
     **这是做什么的：** 根据访问者的 IP 地址或网络阻止访问。

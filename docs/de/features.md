@@ -1098,8 +1098,12 @@ Befolgen Sie diese Schritte, um die Blacklist-Funktion einzurichten und zu verwe
     | :---------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | :------------------------------------------------------------------------------------------------------------------------------------ |
     | `ip:danmeuk-tor-exit`                     | IP-Adressen von Tor-Exit-Nodes (dan.me.uk)                                                                                                                                                                                | `https://www.dan.me.uk/torlist/?exit`                                                                                                 |
     | `ua:mitchellkrogza-bad-user-agents`       | Nginx Block Bad Bots, Spam Referrer Blocker, Vulnerability Scanners, User-Agents, Malware, Adware, Ransomware, Malicious Sites, mit Anti-DDOS, Wordpress Theme Detector Blocking und Fail2Ban Jail für Wiederholungstäter | `https://raw.githubusercontent.com/mitchellkrogza/nginx-ultimate-bad-bot-blocker/master/_generator_lists/bad-user-agents.list`        |
-    | `ip:laurent-minne-data-shield-aggressive` | Data-Shield IPv4 Blocklist - Laurent M. - Für Web Apps, WordPress, VPS (Apache/Nginx)                                                                                                                                     | `https://raw.githubusercontent.com/duggytuxy/Data-Shield_IPv4_Blocklist/refs/heads/main/prod_data-shield_ipv4_blocklist.txt`          |
-    | `ip:laurent-minne-data-shield-critical`   | Data-Shield IPv4 Blocklist - Laurent M. - Für DMZs, SaaS, API & Kritische Assets                                                                                                                                          | `https://raw.githubusercontent.com/duggytuxy/Data-Shield_IPv4_Blocklist/refs/heads/main/prod_critical_data-shield_ipv4_blocklist.txt` |
+    | `ip:laurent-minne-data-shield-aggressive` | Data-Shield IPv4 Blocklist (Community Standard) - Laurent M.                                                                                                                                                              | `https://raw.githubusercontent.com/duggytuxy/Data-Shield_IPv4_Blocklist/refs/heads/main/prod_data-shield_ipv4_blocklist.txt`          |
+
+    !!! info "Data-Shield Pro"
+        [Data-Shield Pro](https://data-shield.eu/?utm_source=external-docs&utm_medium=cta&utm_campaign=bunkerweb-docs) ist ein kostenpflichtiges Abonnement mit dem Critical-Profil: die Standard-Liste plus zusätzliche blockierte Quellen, für strengeres Filtern des eingehenden Datenverkehrs, mit höherem Risiko, legitimen Datenverkehr zu blockieren. Das frühere Preset `ip:laurent-minne-data-shield-critical` ist eingestellt und lädt jetzt die kostenlose Community-Standard-Liste herunter.
+
+        Der Pro-Feed erfordert eine Authentifizierung, und BunkerWeb hat keine eigene Einstellung für Feed-Zugangsdaten. In eine URL-Einstellung eingebettete Zugangsdaten (`http://user:pass@url`) werden in dieser Einstellung gespeichert und in der Web-Oberfläche und in den Logs angezeigt. Befolgen Sie daher die [Hinweise des Anbieters](https://data-shield.eu/docs/?utm_source=external-docs&utm_medium=cta&utm_campaign=bunkerweb-docs): Halten Sie das Geräte-Token aus URLs heraus und nutzen Sie ein Relay in Ihrem eigenen Netzwerk, also einen Dienst, der sich beim Anbieter authentifiziert und die Datei nur Ihren BunkerWeb-Instanzen bereitstellt. Tragen Sie dann die Relay-URL in `BLACKLIST_IP_URLS` ein. Die Option HTTP Basic nimmt die Geräte-ID als Benutzer und das Token als Passwort, legt das Token aber in der Einstellung ab. Abonnenten verwalten ihre Geräte im [Abonnentenportal](https://feeds.data-shield.eu/?utm_source=external-docs&utm_medium=cta&utm_campaign=bunkerweb-docs).
 
     **Konfiguration:** Geben Sie mehrere Listen durch Leerzeichen getrennt an. Zum Beispiel:
     ```yaml
@@ -1108,9 +1112,6 @@ Befolgen Sie diese Schritte, um die Blacklist-Funktion einzurichten und zu verwe
 
     !!! tip "Community-Listen vs. manuelle Konfiguration"
         Community-Blacklists bieten eine bequeme Möglichkeit, mit bewährten Blacklist-Quellen zu beginnen. Sie können diese parallel zu manuellen URL-Konfigurationen für maximale Flexibilität verwenden.
-
-    !!! note "Danksagung"
-        Vielen Dank an Laurent Minne für den Beitrag der [Data-Shield-Blocklisten](https://duggytuxy.github.io/#)!
 
 === "IP-Adresse"
     **Was es bewirkt:** Blockiert Besucher basierend auf ihrer IP-Adresse oder ihrem Netzwerk.

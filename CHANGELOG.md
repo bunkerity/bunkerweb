@@ -1,5 +1,9 @@
 # Changelog
 
+## v1.6.18 - ????/??/??
+
+- [MISC] `blacklist`: the Data-Shield Critical list is now the paid Data-Shield Pro feed; the old preset now downloads the free Community Standard list.
+
 ## v1.6.18~rc5 - 2026/11/19
 
 - [SECURITY] `ui`: service names, instance hostnames and ban services are inserted as text in the bulk-action modals, fixing a stored XSS.

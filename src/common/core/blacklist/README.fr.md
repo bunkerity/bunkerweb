@@ -40,8 +40,12 @@ Suivez ces étapes pour configurer et utiliser la fonctionnalité Blacklist :
     | ----------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
     | `ip:danmeuk-tor-exit`                     | Adresses IP des nœuds de sortie Tor (dan.me.uk)                                                                                                                                                                         | `https://www.dan.me.uk/torlist/?exit`                                                                                                 |
     | `ua:mitchellkrogza-bad-user-agents`       | Nginx Block Bad Bots, Spam Referrer Blocker, Vulnerability Scanners, User-Agents, Malware, Adware, Ransomware, Malicious Sites, avec anti-DDOS, Wordpress Theme Detector Blocking et Fail2Ban Jail for Repeat Offenders | `https://raw.githubusercontent.com/mitchellkrogza/nginx-ultimate-bad-bot-blocker/master/_generator_lists/bad-user-agents.list`        |
-    | `ip:laurent-minne-data-shield-aggressive` | Data-Shield IPv4 Blocklist - Laurent M. - Pour Web Apps, WordPress, VPS (Apache/Nginx)                                                                                                                                  | `https://raw.githubusercontent.com/duggytuxy/Data-Shield_IPv4_Blocklist/refs/heads/main/prod_data-shield_ipv4_blocklist.txt`          |
-    | `ip:laurent-minne-data-shield-critical`   | Data-Shield IPv4 Blocklist - Laurent M. - Pour DMZs, SaaS, API & Actifs Critiques                                                                                                                                       | `https://raw.githubusercontent.com/duggytuxy/Data-Shield_IPv4_Blocklist/refs/heads/main/prod_critical_data-shield_ipv4_blocklist.txt` |
+    | `ip:laurent-minne-data-shield-aggressive` | Data-Shield IPv4 Blocklist (Community Standard) - Laurent M.                                                                                                                                                            | `https://raw.githubusercontent.com/duggytuxy/Data-Shield_IPv4_Blocklist/refs/heads/main/prod_data-shield_ipv4_blocklist.txt`          |
+
+    !!! info "Data-Shield Pro"
+        [Data-Shield Pro](https://data-shield.eu/?utm_source=external-docs&utm_medium=cta&utm_campaign=bunkerweb-docs) est un abonnement payant qui inclut le profil Critical : la liste Standard plus des sources bloquées supplémentaires, pour un filtrage entrant plus strict avec un risque plus élevé de bloquer du trafic légitime. L'ancien preset `ip:laurent-minne-data-shield-critical` est retiré et télécharge désormais la liste gratuite Community Standard.
+
+        Le flux Pro exige une authentification, et BunkerWeb n'a pas de paramètre distinct pour les identifiants d'un flux. Les identifiants intégrés à une URL de paramètre (`http://user:pass@url`) sont stockés dans ce paramètre et affichés dans l'interface web et dans les journaux. Suivez donc les [conseils de l'éditeur](https://data-shield.eu/docs/?utm_source=external-docs&utm_medium=cta&utm_campaign=bunkerweb-docs) : gardez le jeton de l'appareil hors des URL et utilisez un relais sur votre propre réseau, c'est-à-dire un service qui s'authentifie en amont et ne sert le fichier qu'à vos instances BunkerWeb, puis ajoutez l'URL du relais à `BLACKLIST_IP_URLS`. L'option HTTP Basic prend l'ID de l'appareil comme utilisateur et le jeton comme mot de passe, mais elle place le jeton dans le paramètre. Les abonnés gèrent leurs appareils dans le [portail abonné](https://feeds.data-shield.eu/?utm_source=external-docs&utm_medium=cta&utm_campaign=bunkerweb-docs).
 
     **Configuration :** Spécifiez plusieurs listes séparées par des espaces. Par exemple :
     ```yaml
@@ -50,9 +54,6 @@ Suivez ces étapes pour configurer et utiliser la fonctionnalité Blacklist :
 
     !!! tip "Listes communautaires vs configuration manuelle"
         Les listes noires communautaires offrent un moyen pratique de démarrer avec des sources de listes noires éprouvées. Vous pouvez les utiliser en parallèle de configurations manuelles d’URL pour une flexibilité maximale.
-
-    !!! note "Remerciements"
-        Merci à Laurent Minne d'avoir contribué aux [listes de blocage Data-Shield](https://duggytuxy.github.io/#) !
 
 === "Adresse IP"
     **Ce que ça fait :** Bloque les visiteurs en fonction de leur adresse IP ou de leur réseau.
