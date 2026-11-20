@@ -16,6 +16,7 @@ anyio==4.11.0 \
     --hash=sha256:0287e96f4d26d4149305414d4e3bc32f0dcd0862365a4bddea19d7a1ec38c4fc \
     --hash=sha256:82a8d0b81e318cc5ce71a5f1f8b5c4e63619620b63141ef8c995fa0db95a57c4
     # via
+    #   fastapi
     #   httpx
     #   starlette
     #   watchfiles
@@ -1033,9 +1034,9 @@ maxminddb==3.0.0 \
     --hash=sha256:f62b55d15f796d14a58c84a853a8ae6d2728546f5c81a15a61aa45082afc21c8 \
     --hash=sha256:fde874c2af4dd4488c423b4f4bc2ec9931e5e992f382feb43d07dc4e8dda5e24
     # via -r requirements.in
-oauthlib==3.3.1 \
-    --hash=sha256:0f0f8aa759826a193cf66c12ea1af1637f87b9b4622d46e866952bb022e538c9 \
-    --hash=sha256:88119c938d2b8fb88561af5f6ee0eec8cc8d552b7bb1f712743136eb7523b7a1
+oauthlib==4.0.1 \
+    --hash=sha256:3d73febdb6faa00f277c81fb04be7b7586fb96fc3b7f0b9c772dada69a25ede7 \
+    --hash=sha256:498a298876e996301950a5b053d12c31628bb7b895db03666430c69ce182eb61
     # via
     #   kubernetes
     #   requests-oauthlib
@@ -1056,6 +1057,10 @@ packaging==25.0 \
 pluggy==1.6.0 \
     --hash=sha256:7dcc130b76258d33b90f61b658791dede3486c3e6bfb003ee5c9bfb396dd22f3 \
     --hash=sha256:e920276dd6813095e9377c0bc5566d94c932c33b27a3e3945d8389c374dd4746
+    # via pytest
+psycopg[binary,pool]==3.3.9 \
+    --hash=sha256:87c1d85c3e0e88e811d3c0b3808f947bd967c6faf34af6cd86fd021f77793d6c \
+    --hash=sha256:d2d7d04a1ce6dab4f5b27316bea3b52585cafa2f2d631e5b09dd69823f5c26f6
     # via -r requirements.in
 psycopg-binary==3.3.9 \
     --hash=sha256:0793764fac48b5f0bf4d7154e38c60def4fa0cce16caa60b737f770bd29016ac \
@@ -1128,10 +1133,6 @@ psycopg-binary==3.3.9 \
 psycopg-pool==3.2.6 \
     --hash=sha256:0f92a7817719517212fbfe2fd58b8c35c1850cdd2a80d36b581ba2085d9148e5 \
     --hash=sha256:5887318a9f6af906d041a0b1dc1c60f8f0dda8340c2572b74e10907b51ed5da7
-    # via pytest
-psycopg[binary,pool]==3.3.9 \
-    --hash=sha256:87c1d85c3e0e88e811d3c0b3808f947bd967c6faf34af6cd86fd021f77793d6c \
-    --hash=sha256:d2d7d04a1ce6dab4f5b27316bea3b52585cafa2f2d631e5b09dd69823f5c26f6
     # via psycopg
 pyasn1==0.6.1 \
     --hash=sha256:0d632f46f2ba09143da3a8afe9e33fb6f92fa2320ab7e886e2d0f7672af84629 \
@@ -1502,6 +1503,7 @@ typing-extensions==4.15.0 \
     --hash=sha256:f0fa19c6845758ab08074a0cfa8b7aecb71c999ca73d62883bc25cc018c4e548
     # via
     #   fastapi
+    #   opentelemetry-api
     #   psycopg-pool
     #   pydantic
     #   pydantic-core
@@ -1511,7 +1513,9 @@ typing-extensions==4.15.0 \
 typing-inspection==0.4.2 \
     --hash=sha256:4ed1cacbdc298c220f1bd249ed5287caa16f34d44ef4e9c3d0cbad5b521545e7 \
     --hash=sha256:ba561c48a67c5958007083d386c3295464928b01faa735ab8547c5692e87f464
-    # via pydantic
+    # via
+    #   fastapi
+    #   pydantic
 tzlocal==5.3.1 \
     --hash=sha256:cceffc7edecefea1f595541dbd6e990cb1ea3d19bf01b2809f362a03dd7921fd \
     --hash=sha256:eb1a66c3ef5847adf7a834f1be0800581b683b5608e74f86ecbcef8ab91bb85d
