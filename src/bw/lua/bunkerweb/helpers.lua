@@ -2,6 +2,7 @@ local ngx = ngx
 local base = require "resty.core.base"
 local bwctx = require "bunkerweb.ctx"
 local cjson = require "cjson"
+local ip_key = require("bunkerweb.ipaddr").key
 local utils = require "bunkerweb.utils"
 
 local open = io.open
@@ -22,6 +23,10 @@ local is_ipv6 = utils.is_ipv6
 local get_variable = utils.get_variable
 
 local helpers = {}
+
+-- Phases a plugin exports under another name than the phase: ssl_client_hello is the module-level
+-- client_hello(hello) function, called once per handshake without building the plugin object
+local PHASE_METHODS = { ssl_client_hello = "client_hello" }
 
 helpers.load_plugin = function(json)
 	-- Open file
@@ -57,6 +62,12 @@ helpers.load_plugin = function(json)
 	if #missing_fields > 0 then
 		return false, "missing field(s) " .. encode(missing_fields) .. " for JSON at " .. json
 	end
+	-- The stream VM runs no code of a plugin without stream support (an HTTP-only module may raise at require time on
+	-- the stream ngx_lua version), but its settings still have to load for the stream variables.
+	if subsystem == "stream" and plugin.stream == "no" then
+		plugin.phases = {}
+		return true, plugin
+	end
 	-- Try require
 	local plugin_lua, err = helpers.require_plugin(plugin.id)
 	if plugin_lua == false then
@@ -67,7 +78,7 @@ helpers.load_plugin = function(json)
 	plugin.phases = {}
 	if plugin_lua then
 		for _, phase in ipairs(phases) do
-			if plugin_lua[phase] ~= nil then
+			if plugin_lua[PHASE_METHODS[phase] or phase] ~= nil then
 				table.insert(plugin.phases, phase)
 			end
 		end
@@ -231,7 +242,13 @@ helpers.order_plugins = function(plugins, variables)
 	return true, result_orders, missing_plugins
 end
 
+local required_plugins = {}
+local require_messages = {}
 helpers.require_plugin = function(id)
+	local cached = required_plugins[id]
+	if cached then
+		return cached, require_messages[id]
+	end
 	-- Require call
 	local ok, plugin_lua = pcall(require, id .. "/" .. id)
 	if not ok then
@@ -245,7 +262,10 @@ helpers.require_plugin = function(id)
 		return false, "missing new() method for plugin " .. id
 	end
 	-- Return plugin
-	return plugin_lua, "require() call successful for plugin " .. id
+	local message = "require() call successful for plugin " .. id
+	required_plugins[id] = plugin_lua
+	require_messages[id] = message
+	return plugin_lua, message
 end
 
 helpers.new_plugin = function(plugin_lua, ctx)
@@ -271,14 +291,14 @@ helpers.call_plugin = function(plugin, method)
 		return false, plugin:get_id() .. ":" .. method .. "() returned nil value"
 	end
 	-- Check values
-	local missing_values = {}
-	local required_values = { "ret", "msg" }
-	for _, value in ipairs(required_values) do
-		if ret[value] == nil then
-			table.insert(missing_values, value)
+	if ret.ret == nil or ret.msg == nil then
+		local missing_values = {}
+		if ret.ret == nil then
+			table.insert(missing_values, "ret")
 		end
-	end
-	if #missing_values > 0 then
+		if ret.msg == nil then
+			table.insert(missing_values, "msg")
+		end
 		return false, "missing required return value(s) : " .. encode(missing_values)
 	end
 	-- Return
@@ -304,7 +324,9 @@ helpers.fill_ctx = function(no_ref)
 			if subsystem == "stream" then
 				data.kind = "stream"
 			end
-			data.remote_addr = var.remote_addr
+			-- Canonical identity of the client: an IPv4-mapped IPv6 address is its IPv4 address, so every plugin that
+			-- keys on the client (rate limits, bad behavior, country, DNSBL, reverse scan...) sees one address.
+			data.remote_addr = ip_key(var.remote_addr)
 			data.server_name = var.server_name
 			data.time_local = var.time_local
 			if data.kind == "http" then

@@ -1,6 +1,4 @@
 #!/bin/sh
-set -e
-cd ../tests
-pwd
-
-find . -name 'test*.txt' | xargs ${VALGRIND} ../src/testdriver
+# Golden-file tests (tokenizer, folding, SQLi, HTML5), TAP output
+# srcdir is set by the automake test harness; default for manual runs.
+exec ${VALGRIND} ./testdriver "${srcdir:-.}"/../tests/test-*.txt

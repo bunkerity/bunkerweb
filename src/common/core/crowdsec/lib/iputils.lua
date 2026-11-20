@@ -127,6 +127,14 @@ end
 --- @return boolean true if IPv4 address, false otherwise
 function _M.parseIPAddress(ip)
     ip = tostring(ip)
+    if ip:find(":", 1, true) then
+        local mapped = ip:match("^::[fF][fF][fF][fF]:(%d+%.%d+%.%d+%.%d+)$")
+        if mapped then
+            local address = parseIP4Address(mapped)
+            return address, address ~= nil
+        end
+        return parseIP6Address(ip), false
+    end
     local address = parseIP4Address(ip)
     if address == nil then
         return parseIP6Address(ip), false
@@ -139,7 +147,7 @@ end
 --- @return address in uint32 format or nil if invalid address
 function parseIP4Address(ip)
     ip = tostring(ip)
-    local bytes = {string.match(ip, '(%d+)%.(%d+)%.(%d+)%.(%d+)')}
+    local bytes = {string.match(ip, '^(%d+)%.(%d+)%.(%d+)%.(%d+)$')}
     if bytes == nil then
         return
     end

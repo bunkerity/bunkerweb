@@ -206,11 +206,19 @@ def reports_fetch():
             else:
                 has_data = data_field is not None
 
+            summary = None
+            if isinstance(data_field, dict) and data_field.get("ban_id"):
+                summary = {
+                    key: data_field[key]
+                    for key in ("ban_id", "counter", "threshold", "count_time", "ban_time", "event_count", "ban_scope", "server_name")
+                    if key in data_field
+                }
+
             request_id = str(report.get("id", "N/A"))
             server_name = str(report.get("server_name", "N/A"))
 
             return {
-                "date": datetime.fromtimestamp(report.get("date", 0)).isoformat() if report.get("date") else "N/A",
+                "date": datetime.fromtimestamp(report.get("date", 0)).astimezone().isoformat() if report.get("date") else "N/A",
                 "id": escape(request_id),
                 "request_id": request_id,
                 "ip": escape(str(report.get("ip", "N/A"))),
@@ -222,7 +230,7 @@ def reports_fetch():
                 "reason": escape(str(report.get("reason", "N/A"))),
                 "server_name": escape(server_name),
                 # Keep payloads light; details are lazy-loaded by request_id.
-                "data": "available" if has_data else "",
+                "data": summary if summary is not None else "available" if has_data else "",
                 "has_data": has_data,
                 "security_mode": escape(str(report.get("security_mode", "N/A"))),
                 # default ban duration in seconds for quick-ban action
@@ -431,7 +439,7 @@ def reports_export_csv():
 
             writer.writerow(
                 [
-                    datetime.fromtimestamp(report.get("date", 0)).isoformat() if report.get("date") else "N/A",
+                    datetime.fromtimestamp(report.get("date", 0)).astimezone().isoformat() if report.get("date") else "N/A",
                     str(report.get("id", "N/A")),
                     str(report.get("ip", "N/A")),
                     str(report.get("country", "N/A")),
@@ -533,7 +541,7 @@ def reports_export_excel():
 
             ws.append(
                 [
-                    csv_safe(datetime.fromtimestamp(report.get("date", 0)).isoformat() if report.get("date") else "N/A"),
+                    csv_safe(datetime.fromtimestamp(report.get("date", 0)).astimezone().isoformat() if report.get("date") else "N/A"),
                     csv_safe(report.get("id", "N/A")),
                     csv_safe(report.get("ip", "N/A")),
                     csv_safe(report.get("country", "N/A")),

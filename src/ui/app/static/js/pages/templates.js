@@ -49,9 +49,11 @@ $(document).ready(function () {
       // ID item
       const $idItem = $(`<li class="list-group-item" style="flex: 1 0;">
           <div class="ms-2 me-auto">
-            <div class="fw-bold">${templateId}</div>
+            <div class="fw-bold"></div>
           </div>
         </li>`);
+      // The id is user-supplied: insert it as text, never as markup
+      $idItem.find(".fw-bold").text(templateId);
       $row.append($idItem);
 
       $modalBody.append($row);

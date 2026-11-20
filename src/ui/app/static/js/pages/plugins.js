@@ -83,8 +83,8 @@ $(document).ready(function () {
       .text(
         t(
           plugins.length > 1
-            ? "modal.body.delete_confirmation_alert_plural"
-            : "modal.body.delete_confirmation_alert",
+            ? "modal.body.confirm_plugin_deletion_plural"
+            : "modal.body.confirm_plugin_deletion",
           `Are you sure you want to delete the selected plugin${"s".repeat(
             plugins.length > 1,
           )}?`,
@@ -528,6 +528,7 @@ $(document).ready(function () {
                   ? t(
                       "tooltip.readonly_user_action_disabled",
                       "Your account is readonly, action disabled.",
+                      { action: t("button.add_plugin_plural") },
                     )
                   : t(
                       "tooltip.readonly_db_action_disabled",

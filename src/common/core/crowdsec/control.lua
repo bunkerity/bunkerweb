@@ -216,6 +216,11 @@ function control.run(conf, _cache, action, params)
 		end
 		if response.status ~= 200 then
 			client:close()
+			if path == "watchers/login" and response.status == 401 then
+				return nil,
+					"CrowdSec machine authentication failed (HTTP 401); check "
+						.. "CROWDSEC_MANAGEMENT_LOGIN/PASSWORD and machine validation"
+			end
 			return nil,
 				"CrowdSec " .. method .. " " .. path:match("^[^?]+") .. " returned HTTP " .. tostring(response.status)
 		end
@@ -348,7 +353,10 @@ function control.run(conf, _cache, action, params)
 		or not conf.MANAGEMENT_PASSWORD
 		or conf.MANAGEMENT_PASSWORD == ""
 	then
-		return nil, "CrowdSec management credentials are not configured", 403
+		return nil,
+			"Set CROWDSEC_MANAGEMENT_LOGIN and CROWDSEC_MANAGEMENT_PASSWORD; "
+				.. "a bouncer API key cannot access CrowdSec management",
+			403
 	end
 	if action == "allowlists" or action == "allowlistcheck" then
 		local limit, offset = params.limit or 50, params.offset or 0

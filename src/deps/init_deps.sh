@@ -91,6 +91,6 @@ do
 
   if [ "$post_install" != "null" ]; then
     echo "ℹ️ Running post install script for ${name}"
-    bash -c "$post_install"
+    do_and_check_cmd bash -c "$post_install"
   fi
 done

@@ -30,6 +30,9 @@ def check_ip_line(line: bytes) -> bytes | None:
         return None
     # Only keep first token for non-User-Agent lists
     line = line.split(b" ")[0]
+    # A zone id ("fe80::1%eth0") names an interface of the downloading host, not an address the matcher can load
+    if b"%" in line:
+        return None
     # Validate IP or CIDR
     if b"/" in line:
         with suppress(ValueError):
@@ -81,37 +84,28 @@ try:
         for file in list(JOB.job_path.rglob("*.list")):
             if file.parent == JOB.job_path:
                 LOGGER.warning(f"Removing no longer used url file {file} ...")
-                deleted, err = JOB.del_cache(file)
+                deleted, err = JOB.del_cache(file.name, db_first=True)
             else:
                 LOGGER.warning(f"Removing no longer used service file {file} ...")
-                deleted, err = JOB.del_cache(file, service_id=file.parent.name)
+                deleted, err = JOB.del_cache(file.name, service_id=file.parent.name, db_first=True)
             if not deleted:
+                status |= 2
                 LOGGER.warning(f"Couldn't delete file {file} from cache : {err}")
-        sys_exit(0)
+            elif file.name == "IGNORE_IP.list":
+                status |= 1
+        sys_exit(status)
 
-    processed_urls: set[str] = set()
     failed_urls: set[str] = set()
     url_cache_files: set[str] = set()
 
     for service, urls in services_urls.items():
-        if not urls:
-            # Remove stale service file
-            if JOB.job_path.joinpath(service, "IGNORE_IP.list").is_file():
-                LOGGER.warning(f"{service} DNSBL IGNORE_IP is cached but no URL is configured, removing from cache...")
-                deleted, err = JOB.del_cache("IGNORE_IP.list", service_id=service)
-                if not deleted:
-                    LOGGER.warning(f"Couldn't delete {service} IGNORE_IP.list from cache : {err}")
-            continue
-
         unique_entries: set[bytes] = set()
-        total_new_lines = 0
-
         for url in urls:
             url_file = f"{bytes_hash(url, algorithm='sha1')}.list"
             url_cache_files.add(url_file)
             cached_url = JOB.get_cache(url_file, with_info=True, with_data=True)
+            use_cached_url = False
             try:
-                # If URL previously failed this run, just count failure once
                 if url in failed_urls:
                     pass
                 # If cached recently (< 1h), reuse cached data
@@ -121,13 +115,7 @@ try:
                     and cached_url["last_update"] > (datetime.now().astimezone() - timedelta(hours=1)).timestamp()
                 ):
                     LOGGER.debug(f"URL {url} cached < 1h ago, skipping download...")
-                    cached_data = cached_url.get("data", b"")
-                    if cached_data:
-                        for line in cached_data.split(b"\n")[1:]:
-                            line = line.strip()
-                            if not line:
-                                continue
-                            unique_entries.add(line)
+                    use_cached_url = True
                 else:
                     # Download
                     iterable = None
@@ -138,7 +126,7 @@ try:
                             with open(url[7:], "rb") as f:
                                 iterable = f.readlines()
                         except OSError as e:
-                            status = 2
+                            status |= 2
                             LOGGER.debug(format_exc())
                             LOGGER.error(f"Error while opening file {url[7:]} : {e}")
                             failed_urls.add(url)
@@ -158,7 +146,7 @@ try:
                                 sleep(3)
 
                         if resp.status_code != 200:
-                            status = 2
+                            status |= 2
                             LOGGER.warning(f"Got status code {resp.status_code}, skipping...")
                             failed_urls.add(url)
                             failed = True
@@ -167,36 +155,48 @@ try:
 
                     if not failed and iterable is not None:
                         url_content = b""
-                        added_lines = 0
                         for line in iterable:
                             valid = check_ip_line(line)
                             if valid is None:
                                 continue
-                            if valid not in unique_entries:
-                                added_lines += 1
-                            unique_entries.add(valid)
                             url_content += valid + b"\n"
-                        total_new_lines += added_lines
+                        if not url_content:
+                            LOGGER.warning(f"No valid DNSBL ignore IP or network found in {url}")
+                            status |= 2
+                            failed_urls.add(url)
+                            continue
 
+                        unique_entries.update(url_content.splitlines())
                         cached, err = JOB.cache_file(url_file, b"# Downloaded from " + url.encode() + b"\n" + url_content)
                         if not cached:
                             LOGGER.error(f"Error while caching url content for {url}: {err}")
             except BaseException as e:
-                status = 2
+                status |= 2
                 LOGGER.debug(format_exc())
                 LOGGER.error(f"Exception while getting {service} DNSBL ignore IPs from {url} :\n{e}")
                 failed_urls.add(url)
             finally:
-                processed_urls.add(url)
+                if (use_cached_url or url in failed_urls) and isinstance(cached_url, dict):
+                    for line in cached_url.get("data", b"").split(b"\n")[1:]:
+                        valid = check_ip_line(line)
+                        if valid is not None:
+                            unique_entries.add(valid)
 
         # Build final content
         content = b"\n".join(sorted(unique_entries)) + b"\n" if unique_entries else b""
+        old_hash = JOB.cache_hash("IGNORE_IP.list", service_id=service)
         if not content:
+            if old_hash:
+                deleted, err = JOB.del_cache("IGNORE_IP.list", service_id=service, db_first=True)
+                if deleted:
+                    status |= 1
+                else:
+                    status |= 2
+                    LOGGER.warning(f"Couldn't delete {service} IGNORE_IP.list from cache : {err}")
             continue
 
         # Check if file changed
         new_hash = bytes_hash(content)
-        old_hash = JOB.cache_hash("IGNORE_IP.list", service_id=service)
         if new_hash == old_hash:
             LOGGER.debug(f"{service} file IGNORE_IP.list is identical to cache file, reload is not needed")
             continue
@@ -209,23 +209,24 @@ try:
         cached, err = JOB.cache_file("IGNORE_IP.list", content, service_id=service, checksum=new_hash)
         if not cached:
             LOGGER.error(f"Error while caching DNSBL ignore IP list for {service} : {err}")
-            status = 2
+            status |= 2
             continue
 
-        status = 1 if status != 2 else 2
+        status |= 1
 
     # Clean old url cache files no longer referenced
     for url_file in JOB.job_path.glob("*.list"):
         if url_file.name not in url_cache_files:
             LOGGER.warning(f"Removing no longer used url file {url_file} ...")
-            deleted, err = JOB.del_cache(url_file)
+            deleted, err = JOB.del_cache(url_file.name, db_first=True)
             if not deleted:
+                status |= 2
                 LOGGER.warning(f"Couldn't delete url file {url_file} from cache : {err}")
 
 except SystemExit as e:
     status = e.code
 except BaseException as e:
-    status = 2
+    status |= 2
     LOGGER.debug(format_exc())
     LOGGER.error(f"Exception while running dnsbl-download.py :\n{e}")
 

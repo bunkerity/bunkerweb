@@ -1,0 +1,77 @@
+integrations: "all"
+
+actions:
+  # Dev mounts /auth only when an API user exists (`has_api_user()` in routers/core.py), and 1.7
+  # mounts it unconditionally: without the spec-level API_USERNAME/API_PASSWORD below this answers
+  # 404. Sending the spec's own API_TOKEN here would assert nothing about authentication anyway --
+  # a valid bearer is the admin override, so it answers 200.
+  no_auth:
+    type: status
+    url: "http://127.0.0.1:8888/auth"
+    method: POST
+    status: 401
+    restart_stack: false
+
+  docs_url:
+    type: status
+    url: "http://127.0.0.1:8888/docs"
+    status: 200
+    restart_stack: false
+  redocs_url:
+    type: status
+    url: "http://127.0.0.1:8888/redoc"
+    status: 200
+    restart_stack: false
+  openapi_json:
+    type: status
+    url: "http://127.0.0.1:8888/openapi.json"
+    status: 200
+
+  no_docs_url:
+    type: status
+    url: "http://127.0.0.1:8888/docs"
+    status: 404
+    api:
+      API_DOCS_URL: ""
+  no_redoc_url:
+    type: status
+    url: "http://127.0.0.1:8888/redoc"
+    status: 404
+    api:
+      API_REDOC_URL: ""
+  no_openapi_url:
+    type: status
+    url: "http://127.0.0.1:8888/openapi.json"
+    status: 404
+    api:
+      API_OPENAPI_URL: ""
+
+  custom_root_path:
+    type: status
+    url: "http://127.0.0.1:8888/custom/ping"
+    status: 200
+    api:
+      API_ROOT_PATH: "/custom"
+
+  custom_whitelist:
+    type: status
+    url: "http://127.0.0.1:8888/ping"
+    status: 403
+    api:
+      # The scheduler and the worker keep their access, the runner does not: its request comes
+      # through the published port and reaches the API from the bw-universe gateway
+      # (10.20.30.1). A whitelist that locks the scheduler out too leaves the stack unable to
+      # ever report healthy, and the run dies waiting instead of asserting the 403.
+      API_WHITELIST_IPS: "10.20.30.24 10.10.10.24 10.20.30.27"
+  deactivated_whitelist:
+    type: status
+    url: "http://127.0.0.1:8888/ping"
+    status: 200
+    api:
+      API_WHITELIST_ENABLED: "no"
+      API_WHITELIST_IPS: "127.1.1.1"
+
+api:
+  API_TOKEN: "secret"
+  API_USERNAME: "admin"
+  API_PASSWORD: "P@ssw0rd"

@@ -7,6 +7,7 @@ Das HTML-Injection-Plugin ermöglicht es Ihnen, nahtlos benutzerdefinierten HTML
 3.  Wenn Sie die Head-Injection konfiguriert haben, fügt BunkerWeb Ihren benutzerdefinierten HTML-Code direkt vor dem schließenden `</head>`-Tag ein.
 4.  Das Einfügen erfolgt automatisch für alle HTML-Seiten, die von Ihrer Website ausgeliefert werden.
 5.  Dies ermöglicht es Ihnen, Skripte, Stile oder andere Elemente hinzuzufügen, ohne den Code Ihrer Anwendung ändern zu müssen.
+6.  Die Antibot-Challenge-Seite und die Fehlerseiten von BunkerWeb bleiben unverändert: Sie werden von BunkerWeb erzeugt, und ihre Content Security Policy würde den eingefügten Code ohnehin blockieren.
 
 ### Wie man es benutzt
 
@@ -23,6 +24,8 @@ Führen Sie die folgenden Schritte aus, um die HTML-Injection-Funktion zu konfig
 | ------------- | -------- | --------- | -------- | ---------------------------------------------------------------------------- |
 | `INJECT_HEAD` |          | multisite | nein     | **Head-HTML-Code:** Der HTML-Code, der vor dem `</head>`-Tag eingefügt wird. |
 | `INJECT_BODY` |          | multisite | nein     | **Body-HTML-Code:** Der HTML-Code, der vor dem `</body>`-Tag eingefügt wird. |
+
+Die Werte von `INJECT_HEAD` und `INJECT_BODY` werden als wörtlicher HTML-Code eingefügt: Anführungszeichen und Backslashes benötigen kein zusätzliches NGINX-Escaping. Wenn Sie zuvor `\'` von Hand als Umgehungslösung eingefügt haben, entfernen Sie den Backslash. Behalten Sie das für Ihr Konfigurationsformat (etwa YAML) erforderliche Escaping bei; die Expansion von NGINX-Variablen (`$variable`) bleibt unverändert.
 
 !!! tip "Bewährte Praktiken"
     - Aus Leistungsgründen sollten Sie JavaScript-Dateien am Ende des Body platzieren, um das Rendern nicht zu blockieren.

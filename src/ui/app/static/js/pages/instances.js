@@ -130,13 +130,17 @@ $(document).ready(function () {
       // Hostname item
       const $hostnameItem = $(`<li class="list-group-item" style="flex: 1 0;">
           <div class="ms-2 me-auto">
-            <div class="fw-bold">${instance}</div>
+            <div class="fw-bold"></div>
           </div>
         </li>`);
+      // A hostname is user-controlled: insert it as text, never as markup.
+      $hostnameItem.find(".fw-bold").text(instance);
       $row.append($hostnameItem);
 
       // Clone the status element and append it
-      const statusClone = $("#status-" + instance.replaceAll(".", "_")).clone(); // Ensure ID is valid
+      const statusClone = $(
+        document.getElementById("status-" + instance.replaceAll(".", "_")),
+      ).clone(); // getElementById: the hostname is not a valid selector
       const $statusListItem = $(
         `<li class="list-group-item" style="flex: 1 0;"></li>`,
       );
@@ -700,7 +704,7 @@ $(document).ready(function () {
   $(document).on("click", ".ping-instance", function () {
     if (actionLock) return;
     actionLock = true;
-    const instance = $(this).data("instance");
+    const instance = $(this).attr("data-instance");
     pingInstances([instance]);
   });
 
@@ -710,7 +714,7 @@ $(document).ready(function () {
     if (actionLock) return;
     actionLock = true; // Lock action
 
-    const instance = $(this).data("instance");
+    const instance = $(this).attr("data-instance");
     const action = $(this).hasClass("reload-instance") ? "reload" : "stop";
     execForm([instance], action);
     // actionLock released by page navigation
@@ -729,7 +733,7 @@ $(document).ready(function () {
     if (actionLock) return; // Prevent overlapping actions
     actionLock = true; // Lock action
 
-    const instance = $(this).data("instance");
+    const instance = $(this).attr("data-instance");
     setupDeletionModal([instance]);
     actionLock = false; // Unlock after modal setup
   });

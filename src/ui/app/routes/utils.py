@@ -3,8 +3,9 @@ from collections import defaultdict
 from datetime import datetime
 from functools import wraps
 from io import BytesIO
+from re import error as RegexError, search as re_search
 from time import sleep, time
-from typing import Any, Dict, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional, Tuple, Union
 from uuid import uuid4
 
 from flask import Response, g, has_request_context, redirect, request, url_for
@@ -117,7 +118,7 @@ def verify_data_in_form(
         return handle_error("Invalid request", redirect_url, next, "error")
 
     LOGGER.debug(f"Verifying data in form: {data}")
-    LOGGER.debug(f"Request form: {request.form}")
+    LOGGER.debug(f"Request form keys: {list(request.form)}")
 
     # Loop on each key in data
     for key, values in (data or {}).items():
@@ -351,6 +352,41 @@ def extract_file_setting_names(variables: Dict[str, str]) -> Dict[str, str]:
         file_setting_names[setting_name] = _sanitize_filename(variables.pop(key, ""))
 
     return file_setting_names
+
+
+def reset_cleared_settings(variables: Dict[str, str], plugins_settings: Dict[str, dict]) -> List[str]:
+    """
+    Easy mode: give a field the user emptied the setting's default, as if the default had been typed.
+
+    Only a field the setting cannot hold empty is touched, and only when the setting has a non-empty
+    default. A setting whose regex accepts the empty string keeps it, so an empty CSP or cookie-flags
+    value stays reachable. A numbered field (``REVERSE_PROXY_URL_1``) is never reset: the base default
+    would duplicate the first group (a second ``location /``), so it keeps failing validation and the
+    save reports the error. Returns the names of the fields that were reset.
+    """
+    reset: List[str] = []
+    for key, value in list(variables.items()):
+        if value != "":
+            continue
+
+        setting = plugins_settings.get(key)
+        if setting is None:
+            continue
+
+        default = setting.get("default", "")
+        if not default or setting.get("type") == "file":
+            continue
+
+        try:
+            if re_search(setting.get("regex", ""), "") is not None:
+                continue
+        except RegexError:
+            continue
+
+        variables[key] = default
+        reset.append(key)
+
+    return reset
 
 
 def parse_search_panes(source, *, sort_values: bool = False) -> str:

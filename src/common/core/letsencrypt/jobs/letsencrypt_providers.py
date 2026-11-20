@@ -414,6 +414,23 @@ class HetznerProvider(Provider):
         return ["-a", "dns-hetzner"]
 
 
+class HosttechProvider(Provider):
+    """Hosttech DNS provider."""
+
+    dns_hosttech_api_token: str
+
+    _validate_aliases = alias_model_validator(
+        {
+            "dns_hosttech_api_token": ("dns_hosttech_api_token", "hosttech_api_token", "api_token"),
+        }
+    )
+
+    @staticmethod
+    def get_extra_args() -> List[str]:
+        """Return additional arguments for the provider."""
+        return ["-a", "dns-hosttech"]
+
+
 class InfomaniakProvider(Provider):
     """Infomaniak DNS provider."""
 

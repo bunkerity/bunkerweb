@@ -220,6 +220,30 @@ function datastore:set_with_retries(key, value, exptime, max_retries)
 	return false, err or "max retries reached"
 end
 
+-- Create-only twin of set_with_retries: the dict's atomic add, which never replaces a live key. Returns true, or
+-- false and "exists" when the key is live (final, no retry), or false and the error ("no memory" after the retries).
+function datastore:add_with_retries(key, value, exptime, max_retries)
+	max_retries = max_retries or 5
+	local success, err, forcible
+	for _ = 1, max_retries do
+		if exptime == nil or exptime <= 0 then
+			success, err, forcible = self.dict:add(key, value)
+		else
+			success, err, forcible = self.dict:add(key, value, exptime)
+		end
+		if success then
+			if forcible then
+				warn_forcible(self.size_setting, key)
+			end
+			return true, "success"
+		end
+		if err ~= "no memory" then
+			return false, err
+		end
+	end
+	return false, err or "max retries reached"
+end
+
 function datastore:delete(key, worker)
 	if worker then
 		if not lru then

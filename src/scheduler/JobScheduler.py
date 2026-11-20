@@ -2,12 +2,12 @@
 
 import os
 
-from concurrent.futures import ThreadPoolExecutor
+from asyncio import CancelledError
+from concurrent.futures import Future, ThreadPoolExecutor, wait as futures_wait
 from contextlib import suppress
 from datetime import datetime
 from functools import partial
 from glob import glob
-from importlib import reload as importlib_reload
 from importlib.util import module_from_spec, spec_from_file_location
 from json import loads
 from logging import Logger
@@ -18,8 +18,8 @@ from time import monotonic
 from typing import Any, Callable, Dict, List, Optional, Tuple
 import schedule
 from sys import path as sys_path
-from threading import Lock
-from stat import S_ISDIR, S_ISLNK, S_IMODE
+from threading import Lock, local as thread_local
+from stat import S_ISDIR, S_ISLNK, S_ISREG, S_IMODE
 
 # Add dependencies to sys.path
 for deps_path in [os.path.join(os.sep, "usr", "share", "bunkerweb", *paths) for paths in (("utils",), ("db",))]:
@@ -27,10 +27,29 @@ for deps_path in [os.path.join(os.sep, "usr", "share", "bunkerweb", *paths) for 
         sys_path.append(deps_path)
 
 from cache_restore import cache_tree  # type: ignore
-from common_utils import effective_cpu_count, parse_duration  # type: ignore
-from Database import Database, DEFAULT_POOL_MAX_OVERFLOW, DEFAULT_POOL_SIZE  # type: ignore
+from common_utils import effective_cpu_count, file_hash, parse_duration  # type: ignore
+from Database import Database, DEFAULT_POOL_MAX_OVERFLOW, DEFAULT_POOL_SIZE, close_created_databases  # type: ignore
 from logger import getLogger  # type: ignore
-from ApiCaller import ApiCaller, folder_push_timeout  # type: ignore
+from ApiCaller import ApiCaller, MIN_RELOAD_TIMEOUT, folder_push_timeout  # type: ignore
+from reload_utils import RELOAD_CONFIRM_MIN_WAIT, RELOAD_CONFIRM_MAX_WAIT, wait_for_reload  # type: ignore
+
+# External plugins call asyncio.run(): a cancelled task surfaces as a CancelledError, a BaseException. It is a failed run.
+# SystemExit and KeyboardInterrupt are not listed on purpose: they still propagate.
+JOB_ERRORS = (Exception, CancelledError)
+
+
+def job_error_text(error: BaseException) -> str:
+    # Never raises, always an exact str: a job controls __str__, __bool__ and even its class's __name__.
+    # str.__str__ turns a str subclass into an exact str and raises TypeError on anything else.
+    # BaseException: only job-controlled hooks (__str__, __bool__) run here, and a SystemExit from one must not escape the log line.
+    with suppress(BaseException):
+        text = str.__str__(str(error))
+        if text:
+            return text
+    try:
+        return str.__str__(type(error).__name__) or "unprintable error"
+    except BaseException:  # same reason: the class-name getter is job code
+        return "unprintable error"
 
 
 class JobScheduler(ApiCaller):
@@ -81,7 +100,10 @@ class JobScheduler(ApiCaller):
         # instead of only knowing that "at least one" did.
         self.__failed_jobs: List[str] = []
         self.__job_reload = False
+        self.__reload_pending: Optional[Tuple[bool, list, Dict[str, Any]]] = None
+        self.__reload_changed = False
         self.__job_regenerate = False
+        self.generation_pending = False
         # A push or reload failure must not re-render what generate_configs() already produced.
         self.__configs_generated = False
         self.__publish_retry_at: Optional[float] = None
@@ -94,6 +116,14 @@ class JobScheduler(ApiCaller):
         self.__module_cache: Dict[str, Any] = {}  # Cache for loaded job modules
         self.__module_cache_lock = Lock()  # Lock for module cache access
         self.__cache_permissions_updated = False  # Track if permissions were updated
+        self.__cache_state: Dict[Path, Tuple[Any, str]] = {}
+        # Scheduled jobs live on a registry of their own: the default one belongs to main.py's healthcheck, which
+        # runs through the library's run_pending(). Anything on it would run there, off this class's runner.
+        self.scheduler = schedule.Scheduler()
+        # id(schedule.Job) -> (plugin, job name, async), recorded by setup() so run_pending() can group a batch.
+        self.__job_meta: Dict[int, Tuple[str, str, bool]] = {}
+        # Set by __job_wrapper once it has recorded its job's outcome, read by __run_jobs when a callback raises.
+        self.__outcome = thread_local()
         self.update_jobs()
 
     def __resolve_max_workers(self) -> int:
@@ -228,7 +258,14 @@ class JobScheduler(ApiCaller):
                 continue
 
             name_valid = self.__compiled_regexes["name"].match(job["name"])
-            file_valid = self.__compiled_regexes["file"].match(job["file"])
+            job_file = Path(job["file"])
+            jobs_path = Path(plugin_file).parent.joinpath("jobs").resolve()
+            file_valid = (
+                self.__compiled_regexes["file"].match(job["file"])
+                and not job_file.is_absolute()
+                and ".." not in job_file.parts
+                and jobs_path.joinpath(job_file).resolve().is_relative_to(jobs_path)
+            )
             every_valid = job["every"] in ("once", "minute", "hour", "day", "week")
             reload_valid = isinstance(job.get("reload", False), bool)
             async_valid = isinstance(job.get("async", False), bool)
@@ -243,10 +280,10 @@ class JobScheduler(ApiCaller):
 
     def __str_to_schedule(self, every: str) -> schedule.Job:
         schedule_map = {
-            "minute": schedule.every().minute,
-            "hour": schedule.every().hour,
-            "day": schedule.every().day,
-            "week": schedule.every().week,
+            "minute": self.scheduler.every().minute,
+            "hour": self.scheduler.every().hour,
+            "day": self.scheduler.every().day,
+            "week": self.scheduler.every().week,
         }
         try:
             return schedule_map[every]
@@ -261,12 +298,28 @@ class JobScheduler(ApiCaller):
             self.__logger.error("RELOAD_MIN_TIMEOUT must be a duration like 30 or 30s, defaulting to 5")
             reload_min_timeout = 5
 
-        reload_success = self.send_to_apis(
-            "POST",
-            f"/reload?test={'no' if self.env.get('DISABLE_CONFIGURATION_TESTING', 'no').lower() == 'yes' else 'yes'}",
-            timeout=max(int(reload_min_timeout), 3 * len(self.env.get("SERVER_NAME", "www.example.com").split())),
-        )[0]
-        if reload_success:
+        timeout = max(MIN_RELOAD_TIMEOUT, int(reload_min_timeout), 3 * len(self.env.get("SERVER_NAME", "www.example.com").split()))
+        if self.__reload_pending is None:
+            reload_success, responses = self.send_to_apis(
+                "POST",
+                f"/reload?test={'no' if self.env.get('DISABLE_CONFIGURATION_TESTING', 'no').lower() == 'yes' else 'yes'}",
+                timeout=timeout,
+                response=True,
+            )
+            apis = self.apis.copy()
+        else:
+            reload_success, apis, responses = self.__reload_pending
+        responses = responses or {}
+        pending, failed = wait_for_reload(apis, responses, min(max(timeout, RELOAD_CONFIRM_MIN_WAIT), RELOAD_CONFIRM_MAX_WAIT))
+        if pending:
+            outstanding = {host: response for host, response in responses.items() if host.strip("[]").lower() in pending}
+            self.__reload_pending = (reload_success and not failed, apis, outstanding)
+            self.__logger.warning(f"Reload signalled, confirmation still pending: {pending}; checking health on the next publication cycle")
+            return False
+        self.__reload_pending = None
+        if failed:
+            self.__logger.error(f"Error while confirming reload readiness: {failed}")
+        if reload_success and not failed:
             self.__logger.info("Successfully reloaded nginx")
             return True
         self.__logger.error("Error while reloading nginx")
@@ -278,8 +331,8 @@ class JobScheduler(ApiCaller):
         abs_path = Path(path).resolve()
         module_dir = abs_path.parent
 
-        # Create a unique module name based on path
-        module_key = abs_path.as_posix()
+        # One cache entry per job: two job names may share one file
+        module_key = f"{abs_path.as_posix()}#{name}"
 
         # Validate path exists
         if not abs_path.exists():
@@ -291,82 +344,94 @@ class JobScheduler(ApiCaller):
                 self.__module_paths.add(module_dir.as_posix())
                 sys_path.insert(0, module_dir.as_posix())
 
-        # Check if module is already cached
+        # Every run builds the module from the current source. A cached entry (run_single() leaves one behind)
+        # is stale by definition: drop it and its sys.modules name instead of reloading it.
+        qualified_name = f"bw_job_{name}_{hash(module_key) & 0x7FFFFFFF}"
         with self.__module_cache_lock:
-            if module_key in self.__module_cache:
-                # Reload existing module to pick up any changes
-                cached_module = self.__module_cache[module_key]
-                try:
-                    importlib_reload(cached_module)
-                    return
-                except Exception as e:
-                    self.__logger.warning(f"Failed to reload cached module {name}, re-importing: {e}")
-                    # If reload fails, fall through to re-import
-                    del self.__module_cache[module_key]
+            if self.__module_cache.pop(module_key, None) is not None:
+                sys_modules.pop(qualified_name, None)
 
-        # Load the module for the first time
         spec = spec_from_file_location(name, abs_path.as_posix())
         if spec is None or spec.loader is None:
             raise ImportError(f"Failed to create module spec for {abs_path}")
 
         module = module_from_spec(spec)
+        # Compiled from the source bytes: SourceFileLoader would reuse a cached .pyc whenever the size and mtime
+        # of the file match, which a same-size rewrite that keeps its mtime satisfies.
+        code = compile(abs_path.read_bytes(), abs_path.as_posix(), "exec")
 
         # Register in sys.modules to allow proper imports
-        qualified_name = f"bw_job_{name}_{hash(module_key) & 0x7FFFFFFF}"
         module.__bw_qualified_name__ = qualified_name
         sys_modules[qualified_name] = module
 
-        # Execute the module
-        spec.loader.exec_module(module)
-
-        # Cache the module for reuse
+        # Track the module before execution: jobs commonly exit through SystemExit.
         with self.__module_cache_lock:
             self.__module_cache[module_key] = module
 
+        exec(code, module.__dict__)
+
     def __job_wrapper(self, path: str, plugin: str, name: str, file: str) -> int:
         self.__logger.info(f"Executing job '{name}' from plugin '{plugin}'...")
-        success = True
+        failed = False
         ret = -1
         start_date = datetime.now().astimezone()
         try:
-            self.__exec_plugin_module(os.path.join(path, "jobs", file), name)
+            # The job's own Database objects are closed here, not left to the GC (see close_created_databases).
+            with close_created_databases():
+                self.__exec_plugin_module(os.path.join(path, "jobs", file), name)
             ret = 1
         except SystemExit as e:
-            ret = e.code if isinstance(e.code, int) else 1
-        except Exception as e:
-            success = False
-            self.__logger.error(f"Exception while executing job '{name}' from plugin '{plugin}': {e}")
-            with self.__thread_lock:
-                self.__job_success = False
-                self.__failed_jobs.append(f"{plugin}/{name}")
+            # The job controls the code's getter, type and comparisons: only an exact int reaches the checks below.
+            # BaseException: only job hooks (code getter, __int__) run in this guard, so a SystemExit from one is a failed run, not an escape.
+            try:
+                code = e.code
+                # type(), not isinstance(): isinstance reads the code's __class__, which the job controls
+                ret = int.__int__(code) if issubclass(type(code), int) else 1
+            except BaseException as code_error:
+                failed = True
+                ret = 2
+                self.__logger.error(f"Exception while executing job '{name}' from plugin '{plugin}': {job_error_text(code_error)}")
+        except JOB_ERRORS as e:
+            failed = True
+            self.__logger.error(f"Exception while executing job '{name}' from plugin '{plugin}': {job_error_text(e)}")
         end_date = datetime.now().astimezone()
 
         if ret in (1, 3):
             with self.__thread_lock:
+                if self.__reload_pending is not None:
+                    self.__reload_changed = True
                 self.__job_reload = True
                 if (plugin, name) in (
                     ("mtls", "client-cert"),
                     ("modsecurity", "download-crs-plugins"),
                     ("grpc", "grpc-trusted-cert"),
                     ("reverseproxy", "trusted-cert"),
+                    ("realip", "realip-download"),
                 ):
                     self.__job_regenerate = True
                     # A render kept from before a failed push predates this job's change, and
                     # the retry would publish it. Every new request renders again.
                     self.__configs_generated = False
 
-        # 3 asks for the publication like 1 and is still a failed run like 2, even when another job already failed in this batch
-        if ret == 3 or (self.__job_success and (ret < 0 or ret >= 2)):
-            success = False
+        # Each job is judged on its own outcome: 3 asks for the publication like 1 and is still a failed run like 2
+        if not failed and (ret < 0 or ret >= 2):
+            failed = True
             self.__logger.error(f"Error while executing job '{name}' from plugin '{plugin}'")
-            with self.__thread_lock:
-                self.__job_success = False
-                self.__failed_jobs.append(f"{plugin}/{name}")
 
-        # Use the executor to manage threads
-        self.__executor.submit(self.__add_job_run, name, success, start_date, end_date)
+        if failed:
+            self.__record_failure(plugin, name, start_date, end_date)
+        else:
+            # Use the executor to manage threads
+            self.__executor.submit(self.__add_job_run, name, True, start_date, end_date)
+        self.__outcome.recorded = True
 
         return ret
+
+    def __record_failure(self, plugin: str, name: str, start_date: datetime, end_date: datetime) -> None:
+        with self.__thread_lock:
+            self.__job_success = False
+            self.__failed_jobs.append(f"{plugin}/{name}")
+        self.__executor.submit(self.__add_job_run, name, False, start_date, end_date)
 
     def __add_job_run(self, name: str, success: bool, start_date: datetime, end_date: Optional[datetime] = None):
         with self.__thread_lock:
@@ -413,12 +478,13 @@ class JobScheduler(ApiCaller):
                     file = job["file"]
                     every = job["every"]
                     if every != "once":
-                        self.__str_to_schedule(every).do(self.__job_wrapper, path, plugin, name, file)
+                        scheduled = self.__str_to_schedule(every).do(self.__job_wrapper, path, plugin, name, file)
+                        self.__job_meta[id(scheduled)] = (plugin, name, bool(job.get("async", False)))
                 except Exception as e:
                     self.__logger.error(f"Exception while scheduling job '{name}' for plugin '{plugin}': {e}")
 
     def run_pending(self) -> bool:
-        pending_jobs = [job for job in schedule.jobs if job.should_run]
+        pending_jobs = [job for job in self.scheduler.jobs if job.should_run]
 
         if not pending_jobs and not (self.__job_reload and self.__publish_due()):
             return True
@@ -432,12 +498,11 @@ class JobScheduler(ApiCaller):
             self.__failed_jobs = []
 
         try:
-            # Use ThreadPoolExecutor to run jobs
-            futures = [self.__executor.submit(job.run) for job in pending_jobs]
-
-            # Wait for all jobs to complete
-            for future in futures:
-                future.result()
+            entries = []
+            for job in pending_jobs:
+                plugin, name, is_async = self.__job_meta.get(id(job), ("unknown", "unknown", True))
+                entries.append((plugin, name, is_async, partial(self.__run_scheduled, job)))
+            self.__wait_for(self.__submit_jobs(entries))
 
             success = self.__job_success
             self.__job_success = True
@@ -489,6 +554,7 @@ class JobScheduler(ApiCaller):
         self.__configs_generated = False
         self.__publish_retry_at = None
         self.__publish_retry_delay = self.PUBLISH_RETRY_MIN_DELAY
+        self.__reload_changed = False
 
     def consume_pending_publication(self) -> Tuple[bool, bool]:
         """Hand the pending (reload, regenerate) state to a caller that publishes it itself.
@@ -499,11 +565,22 @@ class JobScheduler(ApiCaller):
         """
         with self.__thread_lock:
             pending = (self.__job_reload, self.__job_regenerate)
+            # The caller now owns publication of this generation, including any accepted reload.
+            self.__reload_pending = None
             self.__clear_pending_publication()
         return pending
 
     def __publish_pending(self) -> bool:
         """Only acknowledge a changed generation after every publication step succeeds."""
+        if self.__reload_pending is not None:
+            if not self.__reload():
+                return False
+            if not self.__reload_changed:
+                return True
+            self.__reload_changed = False
+        if self.generation_pending:
+            self.__logger.debug("Configuration generation is pending; holding job publication")
+            return False
         if self.__job_regenerate and not self.__configs_generated:
             # Before the API check: with no instance the flags are cleared below, and the
             # healthcheck only renders for an instance that answers "loading". One that stayed
@@ -544,6 +621,28 @@ class JobScheduler(ApiCaller):
         with self.__thread_lock:
             return self.__failed_jobs.copy()
 
+    def __cache_snapshot(self) -> Optional[Dict[Path, str]]:
+        """Reuse content hashes while cache metadata is unchanged, including across batches."""
+        state = {}
+        try:
+            for path in cache_tree(Path(os.sep, "var", "cache", "bunkerweb")):
+                info = path.lstat()
+                if S_ISLNK(info.st_mode):
+                    signature: Tuple[Any, ...] = ("link", str(path.readlink()))
+                    digest = f"link:{signature[1]}"
+                elif S_ISREG(info.st_mode):
+                    signature = ("file", info.st_size, info.st_mtime_ns, info.st_ctime_ns, info.st_ino)
+                    previous = self.__cache_state.get(path)
+                    digest = previous[1] if previous and previous[0] == signature else file_hash(path)
+                else:
+                    continue
+                state[path] = (signature, digest)
+        except Exception as error:
+            self.__logger.warning(f"Couldn't snapshot job cache; requesting publication: {error}")
+            return None
+        self.__cache_state = state
+        return {path: digest for path, (_, digest) in state.items()}
+
     def run_once(self, plugins: Optional[List[str]] = None, ignore_plugins: Optional[List[str]] = None) -> bool:
         if self.try_database_readonly():
             self.__logger.error("Database is in read-only mode, jobs will not be executed")
@@ -554,37 +653,26 @@ class JobScheduler(ApiCaller):
             self.__failed_jobs = []
 
         plugins = plugins or []
+        cache_before = self.__cache_snapshot()
 
         try:
-            futures = []
+            entries = []
             for plugin, jobs in self.__jobs.items():
-                jobs_to_run = []
                 if (plugins and plugin not in plugins) or (ignore_plugins and plugin in ignore_plugins):
                     continue
                 for job in jobs:
-                    if job.get("async", False):
-                        futures.append(self.__executor.submit(self.__job_wrapper, job["path"], plugin, job["name"], job["file"]))
-                        continue
+                    entries.append((plugin, job["name"], job.get("async", False), partial(self.__job_wrapper, job["path"], plugin, job["name"], job["file"])))
 
-                    jobs_to_run.append(
-                        partial(
-                            self.__job_wrapper,
-                            job["path"],
-                            plugin,
-                            job["name"],
-                            job["file"],
-                        )
-                    )
-
-                if jobs_to_run:
-                    futures.append(self.__executor.submit(self.__run_jobs, jobs_to_run))
-
-            # Wait for all jobs to complete
-            for future in futures:
-                future.result()
+            self.__wait_for(self.__submit_jobs(entries))
 
             return self.__job_success
         finally:
+            # Jobs can delete or rewrite cache files and still exit 0 (e.g. disabling CrowdSec).
+            cache_after = self.__cache_snapshot()
+            if cache_before is None or cache_after is None or cache_before != cache_after:
+                with self.__thread_lock:
+                    self.__job_reload = True
+
             # Reset flag for next batch
             self.__cache_permissions_updated = False
 
@@ -645,12 +733,48 @@ class JobScheduler(ApiCaller):
             if self.__lock:
                 self.__lock.release()
 
-    def __run_jobs(self, jobs):
-        for job in jobs:
-            job()
+    def __submit_jobs(self, entries: List[Tuple[str, str, bool, Callable[[], Any]]]) -> List[Future]:
+        """One task per plugin (its jobs one after another, in plugin.json order) and one task per async job."""
+        groups: Dict[str, list] = {}
+        futures = []
+        for plugin, name, is_async, run in entries:
+            if is_async:
+                futures.append(self.__executor.submit(self.__run_jobs, [(plugin, name, run)]))
+            else:
+                groups.setdefault(plugin, []).append((plugin, name, run))
+        futures.extend(self.__executor.submit(self.__run_jobs, group) for group in groups.values())
+        return futures
+
+    @staticmethod
+    def __wait_for(futures: List[Future]) -> None:
+        """Wait for every task, even when one raised, so cleanup and publication never overlap a running job."""
+        futures_wait(futures)
+        for future in futures:
+            future.result()
+
+    def __run_scheduled(self, job: schedule.Job) -> Any:
+        try:
+            return job.run()
+        except JOB_ERRORS:
+            # Job.run() only advances next_run once the callable returned: without this a raising job is due again on the next tick
+            job.last_run = datetime.now()
+            job._schedule_next_run()
+            raise
+
+    def __run_jobs(self, jobs: List[Tuple[str, str, Callable[[], Any]]]) -> None:
+        for plugin, name, run in jobs:
+            self.__outcome.recorded = False
+            try:
+                run()
+            except JOB_ERRORS as e:
+                self.__logger.error(f"Exception while running job '{name}' from plugin '{plugin}': {job_error_text(e)}")
+                if not self.__outcome.recorded:
+                    now = datetime.now().astimezone()
+                    self.__record_failure(plugin, name, now, now)
 
     def clear(self):
-        schedule.clear()
+        self.scheduler.clear()
+        self.__job_meta.clear()
 
     def cleanup_modules(self):
         """Clean up cached modules to free memory."""
@@ -701,7 +825,7 @@ class JobScheduler(ApiCaller):
             except Exception:
                 self.db.readonly = True
                 return True
-        elif not force and self.db.last_connection_retry and (datetime.now().astimezone() - self.db.last_connection_retry).total_seconds() > 30:
+        elif not force and self.db.last_connection_retry and (datetime.now().astimezone() - self.db.last_connection_retry).total_seconds() <= 30:
             return True
 
         if self.db.database_uri and self.db.readonly:

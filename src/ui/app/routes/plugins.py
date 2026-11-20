@@ -1,12 +1,12 @@
 from html import escape
-from importlib.machinery import SourceFileLoader
+from importlib.util import module_from_spec, spec_from_file_location
 from io import BytesIO
 from json import JSONDecodeError, loads as json_loads
 from os import listdir
 from os.path import basename, dirname, isabs, join, sep
 from pathlib import Path
 from shutil import move, rmtree
-from sys import path as sys_path
+from sys import modules as sys_modules, path as sys_path
 from tarfile import CompressionError, HeaderError, ReadError, TarError, open as tar_open
 from time import time
 from typing import List, Optional, Union
@@ -48,12 +48,14 @@ def delete_plugin():
     if not current_user.admin:
         return Response("Plugin management is restricted to administrators", 403)
 
-    verify_data_in_form(
+    ret = verify_data_in_form(
         data={"plugins": None},
         err_message="Missing plugins parameter on /plugins/delete.",
         redirect_url="plugins",
         next=True,
     )
+    if ret is not True:
+        return ret
     DATA.load_from_file()
 
     plugins = request.form["plugins"].split(",")
@@ -159,8 +161,16 @@ def run_action(plugin: str, function_name: str = "", *, tmp_dir: Optional[Path] 
             return {"status": "ko", "code": 404, "message": "The plugin does not have an action file"}
 
         sys_path.append(tmp_dir.as_posix())
-        loader = SourceFileLoader("actions", action_file.as_posix())
-        actions = loader.load_module()
+        spec = spec_from_file_location(f"bw_ui_actions_{plugin}", action_file)
+        if not spec or not spec.loader:
+            raise ImportError(f"Could not load actions from {action_file}")
+        actions = module_from_spec(spec)
+        sys_modules[spec.name] = actions
+        try:
+            spec.loader.exec_module(actions)
+        except BaseException:
+            sys_modules.pop(spec.name, None)
+            raise
     except BaseException as e:
         sys_path.pop()
         if function_name != "pre_render" and not str(tmp_dir).startswith((str(EXTERNAL_PLUGINS_PATH), str(PRO_PLUGINS_PATH))):
@@ -186,7 +196,6 @@ def run_action(plugin: str, function_name: str = "", *, tmp_dir: Optional[Path] 
         res = method(app=current_app, db=DB, bw_instances_utils=BW_INSTANCES_UTILS, args=queries, data=data)
     except AttributeError as e:
         if function_name == "pre_render":
-            sys_path.pop()
             return {"status": "ok", "code": 200, "message": "The plugin does not have a pre_render method"}
 
         message = "The plugin does not have a method"
@@ -228,12 +237,14 @@ def plugins_refresh():
 
     tmp_ui_path = TMP_DIR.joinpath("ui")
 
-    verify_data_in_form(
+    ret = verify_data_in_form(
         data={"csrf_token": None},
         err_message="Missing csrf_token parameter on /plugins.",
         redirect_url="plugins",
         next=True,
     )
+    if ret is not True:
+        return ret
 
     # Upload plugins
     if not tmp_ui_path.exists() or not listdir(str(tmp_ui_path)):
@@ -386,16 +397,18 @@ def plugins_refresh():
         wait_applying()
 
         plugins = BW_CONFIG.get_plugins(_type="ui", with_data=True)
-        for plugin in plugins:
-            if plugin in new_plugins_ids:
-                DATA["TO_FLASH"].append({"content": f"Plugin {plugin} already exists", "type": "error"})
-                del new_plugins[new_plugins_ids.index(plugin)]
+        to_store = []
+        for plugin_id, plugin in zip(new_plugins_ids, new_plugins):
+            if plugin_id in plugins:
+                DATA["TO_FLASH"].append({"content": f"Plugin {plugin_id} already exists", "type": "error"})
+            else:
+                to_store.append(plugin)
 
-        if not new_plugins:
+        if not to_store:
             DATA["RELOADING"] = False
             return
 
-        err = DB.update_external_plugins(new_plugins, _type="ui", delete_missing=False)
+        err = DB.update_external_plugins(to_store, _type="ui", delete_missing=False)
         if err:
             DATA["TO_FLASH"].append({"content": f"Couldn't update ui plugins to database: {err}", "type": "error"})
         else:
@@ -637,7 +650,7 @@ def custom_plugin_page(plugin: str):
                 plugin_page = '<div class="mt-2 mb-2 alert alert-danger text-center" role="alert">An error occurred while rendering the plugin page<br/>See logs for more details</div>'
 
             # Clean up temporary directories if extracted from database
-            if not str(tmp_page_dir).startswith((str(EXTERNAL_PLUGINS_PATH), str(PRO_PLUGINS_PATH))):
+            if tmp_page_dir.is_relative_to(TMP_DIR):
                 rmtree(tmp_page_dir.parent, ignore_errors=True)
 
     return render_template("plugin_page.html", plugin_page=plugin_page, plugin=plugin_data, is_used=is_used, is_metrics=is_metrics_on, pre_render=pre_render)

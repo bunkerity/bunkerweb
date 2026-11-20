@@ -7,7 +7,7 @@ BunkerWeb is maintained by [Bunkerity](https://www.bunkerity.com/?utm_campaign=s
 ## Do you have a professional version?
 
 !!! tip "BunkerWeb PRO free trial"
-    Start a 30-day BunkerWeb PRO free trial from the [BunkerWeb panel](https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc).
+    Start a 30-day BunkerWeb PRO free trial from the [BunkerWeb panel](https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc): order a plan, then keep **Free 30 Days Trial** as the payment method at checkout ([step-by-step guide](index.md#pro-version)).
 
 Yes, we do offer a professional version of BunkerWeb called "BunkerWeb PRO" with additional features and (optional) technical support.
 

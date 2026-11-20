@@ -163,7 +163,8 @@ def global_settings_page():
 
             variables = BW_CONFIG.check_variables(variables, config, validation_variables, global_config=True, threaded=True)
             invalid_draft_values = [key for key in draft_value_keys if key not in variables]
-            if invalid_draft_values:
+            # Rejected values must not reach the save, which treats missing keys as deletions.
+            if invalid_draft_values or validation_variables.keys() - variables.keys():
                 DATA.update({"RELOADING": False, "CONFIG_CHANGED": False})
                 return
 

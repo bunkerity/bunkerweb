@@ -1,0 +1,23 @@
+cmake_minimum_required(VERSION 3.15...3.31)
+
+project(
+    zlib1-dll_add_subdirectory_exclude_from_all
+    LANGUAGES C
+    VERSION @zlib1-dll_VERSION@)
+
+add_subdirectory(@zlib1-dll_SOURCE_DIR@
+                 ${CMAKE_CURRENT_BINARY_DIR}/zlib1-dll
+                 EXCLUDE_FROM_ALL)
+
+set(ZLIB1_DLL_SRCS
+    @zlib1-dll_SOURCE_DIR@/../minizip/ioapi.c
+    $<$<BOOL:${WIN32}>:@zlib1-dll_SOURCE_DIR@/../minizip/iowin32.c>
+    @zlib1-dll_SOURCE_DIR@/../minizip/minizip.c
+    @zlib1-dll_SOURCE_DIR@/../minizip/zip.c)
+
+
+add_executable(test_example ${ZLIB1_DLL_SRCS})
+target_link_libraries(test_example ZLIB1DLL::ZLIB1DLL)
+
+add_executable(test_example_wapi ${ZLIB1_DLL_SRCS})
+target_link_libraries(test_example_wapi ZLIB1DLL::ZLIBWAPI)

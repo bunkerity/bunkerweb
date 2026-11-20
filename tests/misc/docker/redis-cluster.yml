@@ -1,0 +1,102 @@
+# A 3-master Redis Cluster (no replicas) for the REDIS_CLUSTER_NODES specs. Each node announces its
+# own fixed bw-universe address, which is what CLUSTER SLOTS returns to BunkerWeb, so the nodes need
+# no hostname announcement; redis-cluster-N resolves through tests/misc/conf/dnsmasq.hosts. The
+# published ports (127.0.0.1:7001-7003) are for the runner only.
+services:
+  redis-cluster-1:
+    image: redis:8-alpine@sha256:09160599abd229764c0fb44cb6be640294e1d360a54b19985ab4843dcf2d90f1
+    container_name: redis-cluster-1
+    entrypoint:
+      - /usr/local/bin/redis-entrypoint.sh
+    ports:
+      - "127.0.0.1:7001:6379"
+    volumes:
+      - ../scripts/redis-entrypoint.sh:/usr/local/bin/redis-entrypoint.sh:ro
+    env_file:
+      - path: /tmp/redis-cluster.env
+        required: true
+    environment:
+      REDIS_CLUSTER_ANNOUNCE_IP: 10.20.30.81
+    dns:
+      - 10.20.30.20
+    networks:
+      bw-universe:
+        ipv4_address: 10.20.30.81
+        aliases:
+          - redis-cluster-1
+
+  redis-cluster-2:
+    image: redis:8-alpine@sha256:09160599abd229764c0fb44cb6be640294e1d360a54b19985ab4843dcf2d90f1
+    container_name: redis-cluster-2
+    entrypoint:
+      - /usr/local/bin/redis-entrypoint.sh
+    ports:
+      - "127.0.0.1:7002:6379"
+    volumes:
+      - ../scripts/redis-entrypoint.sh:/usr/local/bin/redis-entrypoint.sh:ro
+    env_file:
+      - path: /tmp/redis-cluster.env
+        required: true
+    environment:
+      REDIS_CLUSTER_ANNOUNCE_IP: 10.20.30.82
+    dns:
+      - 10.20.30.20
+    networks:
+      bw-universe:
+        ipv4_address: 10.20.30.82
+        aliases:
+          - redis-cluster-2
+
+  redis-cluster-3:
+    image: redis:8-alpine@sha256:09160599abd229764c0fb44cb6be640294e1d360a54b19985ab4843dcf2d90f1
+    container_name: redis-cluster-3
+    entrypoint:
+      - /usr/local/bin/redis-entrypoint.sh
+    ports:
+      - "127.0.0.1:7003:6379"
+    volumes:
+      - ../scripts/redis-entrypoint.sh:/usr/local/bin/redis-entrypoint.sh:ro
+    env_file:
+      - path: /tmp/redis-cluster.env
+        required: true
+    environment:
+      REDIS_CLUSTER_ANNOUNCE_IP: 10.20.30.83
+    dns:
+      - 10.20.30.20
+    networks:
+      bw-universe:
+        ipv4_address: 10.20.30.83
+        aliases:
+          - redis-cluster-3
+
+  # Forms the cluster, then exits; start.sh waits for cluster_state:ok.
+  redis-cluster-init:
+    image: redis:8-alpine@sha256:09160599abd229764c0fb44cb6be640294e1d360a54b19985ab4843dcf2d90f1
+    container_name: redis-cluster-init
+    entrypoint:
+      - /usr/local/bin/redis-cluster-init.sh
+    volumes:
+      - ../scripts/redis-cluster-init.sh:/usr/local/bin/redis-cluster-init.sh:ro
+    env_file:
+      - path: /tmp/redis-cluster.env
+        required: true
+    environment:
+      REDIS_CLUSTER_INIT_NODES: 10.20.30.81:6379 10.20.30.82:6379 10.20.30.83:6379
+    restart: "no"
+    depends_on:
+      - redis-cluster-1
+      - redis-cluster-2
+      - redis-cluster-3
+    dns:
+      - 10.20.30.20
+    networks:
+      bw-universe:
+        ipv4_address: 10.20.30.84
+
+networks:
+  bw-universe:
+    name: bw-universe
+    ipam:
+      driver: default
+      config:
+        - subnet: 10.20.30.0/24

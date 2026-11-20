@@ -2,6 +2,8 @@
 .idea/
 .vscode/
 **/__pycache__/
+# Local kit and scratch dir: may hold root-owned files that make `docker build .` fail
+.cache/
 
 env/
 src/deps/tmp_venv/

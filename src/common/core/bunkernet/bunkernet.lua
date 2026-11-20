@@ -34,6 +34,109 @@ local table_insert = table.insert
 
 local INSTANCE_ID_PATH = "/var/cache/bunkerweb/bunkernet/instance.id"
 
+-- Request headers a report carries when BUNKERNET_FILTER_HEADERS=yes, lowercase. Everything else (cookies,
+-- credentials, custom tokens, client addresses) stays on this instance.
+local REPORT_HEADERS = {
+	"user-agent",
+	"accept",
+	"accept-encoding",
+	"accept-language",
+	"content-type",
+	"content-length",
+}
+
+-- Request headers that carry credentials: a report never sends them, whatever BUNKERNET_FILTER_HEADERS says.
+local CREDENTIAL_HEADERS = {
+	["cookie"] = true,
+	["authorization"] = true,
+	["proxy-authorization"] = true,
+}
+
+-- Request headers of the current request (none for a stream service). With BUNKERNET_FILTER_HEADERS=yes only the
+-- allowlisted ones are kept, values untouched; otherwise every header goes out except the credential ones.
+local function get_report_headers(ctx, filter)
+	local report_headers = {}
+	if ctx.bw.kind ~= "http" then
+		return report_headers
+	end
+	local headers = ngx.req.get_headers(tonumber((utils.get_variable("MAX_HEADERS", false))) or 100)
+	if not filter then
+		for name, value in pairs(headers) do
+			if not CREDENTIAL_HEADERS[tostring(name):lower()] then
+				report_headers[name] = value
+			end
+		end
+		return report_headers
+	end
+	for _, name in ipairs(REPORT_HEADERS) do
+		local value = headers[name]
+		if value ~= nil then
+			report_headers[name] = value
+		end
+	end
+	return report_headers
+end
+
+-- With BUNKERNET_FILTER_HEADERS=yes, every request header and cookie value matched by ModSecurity is blanked.
+local function is_header_or_cookie(name)
+	if type(name) ~= "string" then
+		return false
+	end
+	local variable = name:match("^&?([^:]*)"):upper()
+	return variable == "REQUEST_HEADERS" or variable == "REQUEST_COOKIES"
+end
+
+-- Always, whatever the setting: a match on a cookie, a credential header or a whole header collection (which
+-- holds them) keeps its name but not its value. Other headers, arguments and the body keep theirs.
+local function is_credential_match(name)
+	if type(name) ~= "string" then
+		return false
+	end
+	local variable, header = name:match("^&?([^:]*):?(.*)$")
+	variable = variable:upper()
+	if variable == "REQUEST_COOKIES" then
+		return true
+	end
+	return variable == "REQUEST_HEADERS" and (header == "" or CREDENTIAL_HEADERS[header:lower()] == true)
+end
+
+-- Copy of the reason data with the values matched in credential variables blanked (every header and cookie
+-- variable with BUNKERNET_FILTER_HEADERS=yes). The two lists are index-aligned (one entry each per rule hit), so a
+-- blanked value stays "" in place. When their lengths differ (an empty matched value is dropped from one list
+-- only) the pairing is unknown: the values are removed, unless no listed name is a credential variable and the
+-- filter is off.
+local function get_report_data(data, filter)
+	if type(data) ~= "table" or data.matched_vars == nil then
+		return data
+	end
+	local is_blanked = filter and is_header_or_cookie or is_credential_match
+	local report_data = {}
+	for key, value in pairs(data) do
+		report_data[key] = value
+	end
+	local values, names = data.matched_vars, data.matched_var_names
+	if type(values) ~= "table" or type(names) ~= "table" then
+		report_data.matched_vars = nil
+		return report_data
+	end
+	if #values ~= #names then
+		local drop = filter
+		for _, name in ipairs(names) do
+			drop = drop or is_blanked(name)
+		end
+		if drop then
+			report_data.matched_vars = nil
+		end
+		return report_data
+	end
+	local kept = {}
+	for i, value in ipairs(values) do
+		kept[i] = is_blanked(names[i]) and "" or value
+	end
+	report_data.matched_vars = kept
+	return report_data
+end
+
 -- Read the BunkerNet instance ID from disk, returning nil if the file is
 -- missing or empty (an empty file would otherwise poison the internalstore
 -- with a truthy "" value).
@@ -204,6 +307,11 @@ function bunkernet:log(bypass_checks)
 	if reason == "bunkernet" or reason == "modsecurity-body" then
 		return self:ret(true, "skipping report because the reason is " .. reason)
 	end
+	-- Served challenges and redirects do not establish that the client is an attacker.
+	local action = type(reason_data) == "table" and reason_data.action
+	if action == "challenge" or action == "captcha" or action == "redirect" then
+		return self:ret(true, "skipping report : the remediation was '" .. action .. "', the client was not blocked")
+	end
 
 	-- Check if IP is global
 	if not self.ctx.bw.ip_is_global then
@@ -222,15 +330,14 @@ function bunkernet:log(bypass_checks)
 		return self:ret(false, "can't get IP from datastore : " .. err)
 	elseif err == "not found" then
 		-- Push report
+		local filter = self.variables["BUNKERNET_FILTER_HEADERS"] == "yes"
 		local report = {
 			["ip"] = self.ctx.bw.remote_addr,
 			["reason"] = reason,
-			["data"] = reason_data,
+			["data"] = get_report_data(reason_data, filter),
 			["method"] = self.ctx.bw.request_method,
 			["url"] = self.ctx.bw.request_uri,
-			["headers"] = self.ctx.bw.kind == "http" and ngx.req.get_headers(
-				tonumber((utils.get_variable("MAX_HEADERS", false))) or 100
-			) or {},
+			["headers"] = get_report_headers(self.ctx, filter),
 			["server_name"] = self.ctx.bw.server_name,
 			["date"] = os.date("!%Y-%m-%dT%H:%M:%SZ", ngx.time()),
 		}
@@ -300,7 +407,7 @@ function bunkernet:request(method, url, data)
 	local file = io.open("/etc/os-release", "r")
 	if file then
 		for line in file:lines() do
-			local key, value = line:match("^(%w+)=(.+)$")
+			local key, value = line:match("^([%w_]+)=(.+)$")
 			if key and value then
 				value = value:gsub('"', "")
 				if key == "NAME" then

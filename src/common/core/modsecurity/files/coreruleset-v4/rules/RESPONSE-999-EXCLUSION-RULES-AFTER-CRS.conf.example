@@ -1,5 +1,5 @@
 # ------------------------------------------------------------------------
-# OWASP CRS ver.4.29.0
+# OWASP CRS ver.4.30.0
 # Copyright (c) 2006-2020 Trustwave and contributors. All rights reserved.
 # Copyright (c) 2021-2026 CRS project. All rights reserved.
 #
@@ -35,6 +35,13 @@
 #
 # ModSecurity Rule Exclusion: disable sqli rules for parameter foo.
 # SecRuleUpdateTargetByTag "attack-sqli" "!ARGS:foo"
+
+# NOTE: on ModSecurity v3 (libModSecurity), SecRuleUpdateTargetById does not
+# support rule ranges (e.g. 942100-942999) -- only a single rule ID is
+# honored, the rest of the range stays fully inspected. Use
+# SecRuleUpdateTargetByTag/ByMsg (as above) instead if you need to affect
+# several rules at once on v3. See the rule-range support matrix in
+# REQUEST-900-EXCLUSION-RULES-BEFORE-CRS.conf.example.
 
 
 # -- [[ Changing the Disruptive Action for Anomaly Mode ]] --

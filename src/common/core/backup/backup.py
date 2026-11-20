@@ -4,16 +4,17 @@ from contextlib import closing
 from datetime import datetime
 import re
 from json import dumps, loads
-from os import getenv
+from os import fchmod, fdopen, getenv, open as os_open, O_CREAT, O_TRUNC, O_WRONLY
 from os.path import join, sep
 from pathlib import Path
-from subprocess import PIPE, run
+from subprocess import PIPE, check_output, run
 from shutil import which
 from sqlite3 import connect as sqlite_connect
 from sys import exit as sys_exit, path as sys_path
 from tempfile import TemporaryDirectory
 from typing import Literal
-from zipfile import ZIP_DEFLATED, ZipFile
+from zipfile import BadZipFile, ZIP_DEFLATED, ZipFile
+from zlib import error as zlib_error
 
 for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("utils",), ("db",))]:
     if deps_path not in sys_path:
@@ -45,7 +46,18 @@ def mysql_client_command(operation: Literal["dump", "restore"]) -> tuple[str, bo
     return ("mysqldump" if operation == "dump" else "mysql"), False
 
 
-def mysql_connection_args(query_args, mariadb_client: bool) -> list[str]:
+def mysql_client_info(command: str, mariadb_client: bool) -> tuple[bool, bool]:
+    mysql8_client = False
+    if which(command):
+        version = check_output([command, "--version"], text=True)
+        mariadb_client = "MariaDB" in version
+        # Older clients report their server-compatible version after Distrib, not Ver.
+        client_version = re.search(r"\bDistrib (\d+)\.", version) or re.search(r"\bVer\s+(\d+)\.", version)
+        mysql8_client = not mariadb_client and client_version is not None and int(client_version[1]) >= 8
+    return mariadb_client, mysql8_client
+
+
+def mysql_connection_args(query_args, mariadb_client: bool, mysql8_client: bool = False) -> list[str]:
     args = []
     ssl = query_args.get("ssl")
     if isinstance(ssl, tuple):
@@ -53,9 +65,9 @@ def mysql_connection_args(query_args, mariadb_client: bool) -> list[str]:
     ssl = str(ssl).lower() if ssl is not None else None
 
     if ssl == "true":
-        args.append("--ssl")
+        args.append("--ssl-mode=REQUIRED" if mysql8_client else "--ssl")
     elif ssl == "false":
-        args.append("--skip-ssl")
+        args.append("--ssl-mode=DISABLED" if mysql8_client else "--skip-ssl")
     elif mariadb_client:
         # MariaDB clients verify opportunistic TLS by default. MySQL's generated
         # certificate is self-signed, so keep encryption but skip verification
@@ -142,6 +154,7 @@ def backup_database(current_time: datetime, db: Database = None, backup_dir: Pat
                 LOGGER.info("Creating a backup for the MariaDB/MySQL database ...")
 
                 dump_bin, mariadb_client = mysql_client_command("dump")
+                mariadb_client, mysql8_client = mysql_client_info(dump_bin, mariadb_client)
                 inspector = inspect(db.sql_engine)
                 cmd = [
                     dump_bin,
@@ -176,9 +189,15 @@ def backup_database(current_time: datetime, db: Database = None, backup_dir: Pat
                 if database == "mariadb":
                     cmd.append("--routines")  # Include stored procedures and functions (MariaDB only, mariadb-dump sends MariaDB-only queries to MySQL)
 
-                # Avoid --set-gtid-purged for broad compatibility (MariaDB variant doesn't support it)
+                if mysql8_client:
+                    cmd.extend(
+                        [
+                            "--column-statistics=0",  # MariaDB has no information_schema.COLUMN_STATISTICS.
+                            "--set-gtid-purged=OFF",  # Avoid FLUSH privileges and global GTID statements for a database-only backup.
+                        ]
+                    )
 
-                cmd.extend(mysql_connection_args(db_query_args, mariadb_client))
+                cmd.extend(mysql_connection_args(db_query_args, mariadb_client, mysql8_client=mysql8_client))
 
                 proc = run(
                     cmd,
@@ -241,21 +260,54 @@ def backup_database(current_time: datetime, db: Database = None, backup_dir: Pat
             LOGGER.error(f"Failed to dump the database: {stderr}")
             sys_exit(1)
 
-    with ZipFile(backup_file, "w", compression=ZIP_DEFLATED) as zipf:
-        zipf.writestr(backup_file.with_suffix(".sql").name, proc.stdout)
-
-    backup_file.chmod(0o600)
+    # The dump holds the whole database: create the archive 0600 so it is never readable, even briefly
+    fd = os_open(backup_file, O_WRONLY | O_CREAT | O_TRUNC, 0o600)
+    with fdopen(fd, "wb") as archive:
+        fchmod(fd, 0o600)  # an archive that already existed keeps its old mode otherwise
+        with ZipFile(archive, "w", compression=ZIP_DEFLATED) as zipf:
+            zipf.writestr(backup_file.with_suffix(".sql").name, proc.stdout)
 
     LOGGER.info(f"💾 Backup {backup_file.name} created successfully in {backup_dir}")
     return db, backup_file
 
 
+def check_backup_engine(backup_file: Path, database: str) -> str:
+    """Return why the archive cannot be restored into `database`, or an empty string when it can.
+
+    A dump is only valid for the engine that wrote it (backup-<engine>-<date>.zip holding backup-<engine>-<date>.sql),
+    and this must be known before the tables are dropped.
+    """
+    stem = backup_file.stem.split("-")
+    source = stem[1] if len(stem) > 2 and stem[0] == "backup" else ""
+    if source != database:
+        return f"it was taken from {source or 'an unknown'} database engine, not {database}"
+
+    sql_name = backup_file.with_suffix(".sql").name
+    try:
+        with ZipFile(backup_file, "r") as zipf:
+            if sql_name not in zipf.namelist():
+                return f"it does not contain {sql_name}"
+            # Reads every member: a damaged payload must be found before the tables are dropped
+            corrupted = zipf.testzip()
+            if corrupted:
+                return f"its member {corrupted} is corrupted"
+    except (BadZipFile, OSError, EOFError, zlib_error) as e:
+        return f"it cannot be read: {e}"
+    return ""
+
+
 def restore_database(backup_file: Path, db: Database = None) -> Database:
     """Restore the database from a backup."""
     db = db or Database(LOGGER)
-    Base.metadata.drop_all(db.sql_engine)
     database_url = make_url(db.database_uri)
     database: Literal["sqlite", "mariadb", "mysql", "postgresql", "oracle"] = database_url.drivername.split("+")[0]
+
+    refusal = check_backup_engine(backup_file, database)
+    if refusal:
+        LOGGER.error(f"Refusing to restore {backup_file}, {refusal}. The database was left untouched")
+        sys_exit(1)
+
+    Base.metadata.drop_all(db.sql_engine)
 
     if database == "sqlite":
         db_path = Path(database_url.database)
@@ -272,7 +324,9 @@ def restore_database(backup_file: Path, db: Database = None) -> Database:
 
         tmp_file = Path(sep, "var", "tmp", "bunkerweb", backup_file.with_suffix(".sql").name)
         with ZipFile(backup_file, "r") as zipf:
-            safe_zip_extractall(zipf, tmp_file.parent)
+            # Uncapped: the database is already cleared, so refusing a large (legitimate) dump here
+            # would lose it. The file is a local backup, not a download or an upload.
+            safe_zip_extractall(zipf, tmp_file.parent, capped=False)
 
         proc = run(
             ["sqlite3", db_path.as_posix(), f".read {tmp_file.as_posix()}"],
@@ -294,11 +348,12 @@ def restore_database(backup_file: Path, db: Database = None) -> Database:
             LOGGER.info("Restoring the MariaDB/MySQL database ...")
 
             restore_bin, mariadb_client = mysql_client_command("restore")
+            mariadb_client, mysql8_client = mysql_client_info(restore_bin, mariadb_client)
             cmd = [restore_bin, "-h", db_host, "-u", db_user, db_database_name]
             if db_port:
                 cmd.extend(["-P", db_port])
 
-            cmd.extend(mysql_connection_args(db_query_args, mariadb_client))
+            cmd.extend(mysql_connection_args(db_query_args, mariadb_client, mysql8_client=mysql8_client))
 
             with ZipFile(backup_file, "r") as zipf:
                 proc = run(

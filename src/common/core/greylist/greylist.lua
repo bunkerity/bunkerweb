@@ -55,7 +55,7 @@ function greylist:initialize(ctx)
 			if not self.lists[kind] then
 				self.lists[kind] = {}
 			end
-			for data in self.variables["GREYLIST_" .. kind]:gmatch("%S+") do
+			for data in (self.variables["GREYLIST_" .. kind] or ""):gmatch("%S+") do
 				if data ~= "" then
 					table.insert(self.lists[kind], data)
 				end
@@ -198,14 +198,17 @@ function greylist:access()
 	-- Perform checks
 	for k, _ in pairs(checks) do
 		if not already_cached[k] then
-			local ok, greylisted = self:is_greylisted(k)
+			local ok, greylisted, incomplete = self:is_greylisted(k)
 			if ok == nil then
 				self.logger:log(ERR, "error while checking if " .. k .. " is greylisted : " .. greylisted)
 			else
-				-- luacheck: ignore 421
-				local ok, err = self:add_to_cache(self:kind_to_ele(k), greylisted)
-				if not ok then
-					self.logger:log(ERR, "error while adding element to cache : " .. err)
+				-- A negative verdict taken without the rDNS check (resolver error) is not cached: the next request retries it
+				if greylisted ~= "ko" or not incomplete then
+					-- luacheck: ignore 421
+					local ok, err = self:add_to_cache(self:kind_to_ele(k), greylisted)
+					if not ok then
+						self.logger:log(ERR, "error while adding element to cache : " .. err)
+					end
 				end
 				if greylisted ~= "ko" then
 					return self:ret(true, k .. " is in greylist")
@@ -259,6 +262,7 @@ function greylist:is_greylisted_ip()
 	end
 
 	-- Check if rDNS is needed
+	local rdns_failed = false
 	local check_rdns = self.lists["RDNS"] and #self.lists["RDNS"] > 0
 	if self.variables["GREYLIST_RDNS_GLOBAL"] == "yes" and not self.ctx.bw.ip_is_global then
 		check_rdns = false
@@ -275,6 +279,7 @@ function greylist:is_greylisted_ip()
 				return true, "rDNS " .. rdns_suffix
 			end
 		else
+			rdns_failed = true
 			self.logger:log(ERR, "error while getting rdns : " .. err)
 		end
 	end
@@ -293,8 +298,8 @@ function greylist:is_greylisted_ip()
 		end
 	end
 
-	-- Not greylisted
-	return false, "ko"
+	-- Not greylisted (third value: the rDNS check could not run)
+	return false, "ko", rdns_failed
 end
 
 function greylist:is_greylisted_uri()

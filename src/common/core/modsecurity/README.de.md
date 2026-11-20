@@ -37,6 +37,7 @@ Führen Sie die folgenden Schritte aus, um ModSecurity zu konfigurieren und zu v
 | `MODSECURITY_SEC_AUDIT_LOG_PARTS`     | `BCFH`                                | multisite | nein     | **Audit-Protokoll-Teile:** Welche Teile von Anfragen/Antworten in Audit-Protokolle aufgenommen werden sollen.                                                                                                                                        |
 | `MODSECURITY_SEC_AUDIT_LOG`           | `/var/log/bunkerweb/modsec_audit.log` | multisite | nein     | **Audit-Protokoll-Pfad:** Pfad der Datei, in die ModSecurity Audit-Einträge schreibt. Muss eine reguläre Datei sein: Der serielle Audit-Writer sperrt sie, was bei einer Pipe oder einem Stream nicht möglich ist. Der Pfad muss auf `.log` enden. Die Rotation über diese Endung gilt nur dort, wo logrotate installiert ist (die Linux-Pakete und das All-In-One-Image); bei Docker, Swarm und Kubernetes wird ein abweichender Name weder gestreamt noch rotiert und wächst unbegrenzt im Container, da nur `modsec_audit.log` in den Log-Stream des Containers verlinkt ist.                                   |
 | `MODSECURITY_SEC_AUDIT_LOG_TYPE` | `Serial` | multisite | nein | Schreibmodus: `Serial` (Standard) oder `Concurrent`. |
+| `MODSECURITY_SEC_AUDIT_LOG_FORMAT` | `Native` | multisite | nein | Format des Audit-Logs: `Native` (Standard) oder `JSON` (ein JSON-Objekt pro Eintrag). Im globalen CRS-Modus global setzen. |
 | `MODSECURITY_SEC_AUDIT_LOG_STORAGE_DIR` |  | multisite | nein | Standardmäßig leer; für `Concurrent` ist ein absoluter Speicherpfad erforderlich. |
 | `MODSECURITY_SEC_REQUEST_BODY_LIMIT` | | multisite | nein | Maximale Größe des geprüften Anforderungskörpers, in Bytes oder mit `k`/`m`/`g`. Leer: aus `MAX_CLIENT_SIZE` abgeleitet; NGINX erzwingt dieses Limit zuerst. `REVERSE_PROXY_MAX_CLIENT_SIZE` überschreibt den Wert für seine Location. `0` hebt das Prüflimit auf und kann den Speicher erschöpfen. |
 | `MODSECURITY_SEC_REQUEST_BODY_LIMIT_ACTION` | `Reject` | multisite | nein | `Reject` gibt oberhalb des Prüflimits HTTP 413 zurück. `ProcessPartial` prüft nur den Teil innerhalb des Limits und leitet den vollständigen Körper weiter, wodurch die WAF-Abdeckung sinkt. Das separate Limit ohne Dateien gilt weiterhin. |
@@ -55,12 +56,28 @@ Führen Sie die folgenden Schritte aus, um ModSecurity zu konfigurieren und zu v
 
     Um Uploads nach dem Umgehen von ModSecurity weiterhin zu schützen, kombinieren Sie dies mit einem Datei-Scan-Plugin wie [ClamAV](https://github.com/bunkerity/bunkerweb-plugins/tree/main/clamav) oder [VirusTotal](https://github.com/bunkerity/bunkerweb-plugins/tree/main/virustotal) — sie prüfen die hochgeladene Datei selbst statt des rohen Anforderungskörpers.
 
+!!! warning "Antwortkörper-Sperren und komprimierte Antworten"
+    Greift eine Sperrregel für den Antwortkörper erst nach dem Senden der Antwortheader, kann der Client den ursprünglichen Status (etwa `200`) und anschließend einen Fehler wegen eines unvollständigen Antwortkörpers oder einer unvollständigen Chunked-Übertragung erhalten, statt einer vollständigen `403`-Antwort. Dies kann bei gzip-, Brotli- oder zstd-Komprimierung durch BunkerWeb auftreten. Ab `1.6.18` verhält sich Brotli wie bisher gzip. Prüfen Sie die ModSecurity-Audit- und Fehlerprotokolle auf die ausgelöste Regel und behandeln Sie bestätigte Falsch-Positive mit eng begrenzten Ausschlüssen.
+
+!!! warning "Vom Upstream komprimierte Antwortkörper"
+    CRS v4 prüft keine Antwortkörper, die bereits vom Upstream komprimiert wurden (`gzip`, `br` oder `zstd`). BunkerWeb dekomprimiert diese Körper nicht zur Prüfung. Wenn eine Prüfung erforderlich ist, konfigurieren Sie den Upstream für unkomprimierte Inhalte. Entfernen Sie bei einem Upstream, der diesen Header berücksichtigt, `Accept-Encoding` aus der weitergeleiteten Anfrage, ausschließlich für den betroffenen Dienst und die betroffene Location:
+
+    ```yaml
+    REVERSE_PROXY_HOST_1: "http://app:8080"
+    REVERSE_PROXY_URL_1: "/reports/"
+    REVERSE_PROXY_HEADERS_1: 'Accept-Encoding ""'
+    ```
+
+    Ersetzen Sie Host und Pfad durch Ihre Werte und passen Sie das Suffix an die gewünschte Reverse-Proxy-Location an. Hat diese Location bereits Einträge in `REVERSE_PROXY_HEADERS_1`, behalten Sie diese bei und hängen Sie `;Accept-Encoding ""` an. Verwenden Sie diese Einstellung statt eines `proxy_set_header` auf Server-Ebene, das von den generierten Location-Headern überschrieben wird.
+
+    Prüfen Sie, ob der Upstream tatsächlich unkomprimiert antwortet. Komprimiert er weiterhin, deaktivieren Sie die Komprimierung für diese Route auf dem Upstream. Dies erhöht die Bandbreitennutzung zwischen Upstream und BunkerWeb. BunkerWeb kann die Antwort nach der Prüfung weiterhin für den Client komprimieren; die konfigurierten MIME-Typen und Größenlimits für die Antwortkörperprüfung gelten weiterhin.
+
 ### Verfügbare CRS-Versionen
 
 Wählen Sie eine CRS-Version, die Ihren Sicherheitsanforderungen am besten entspricht:
 
 - **`3`**: Stabile [v3.3.10](https://github.com/coreruleset/coreruleset/releases/tag/v3.3.10).
-- **`4`**: Stabile [v4.29.0](https://github.com/coreruleset/coreruleset/releases/tag/v4.29.0) (**Standard**).
+- **`4`**: Stabile [v4.30.0](https://github.com/coreruleset/coreruleset/releases/tag/v4.30.0) (**Standard**).
 
 !!! warning "Nightly-Build veraltet"
     Die Option `nightly` für `MODSECURITY_CRS_VERSION` ist veraltet, da das OWASP Core Rule Set-Projekt die Nightly-Releases eingestellt hat. Wenn Ihre Konfiguration noch `nightly` verwendet, wird stattdessen CRS v4 verwendet. Bitte aktualisieren Sie Ihre Konfiguration auf `MODSECURITY_CRS_VERSION=4`.
@@ -105,14 +122,14 @@ In diesem Beispiel:
 - Die Aktion wird in **Phase 1** (früh im Anfrage-Lebenszyklus) ausgeführt.
 - Sie aktiviert WordPress-spezifische CRS-Ausschlüsse, indem sie die Variable `tx.crs_exclusions_wordpress` setzt.
 
-#### Aktualisieren von CRS-Regeln mit `modsec`
+#### Aktualisieren von CRS-Regeln mit `modsec-crs`
 
-Um die geladenen CRS-Regeln zu optimieren, können Sie eine benutzerdefinierte Konfiguration vom Typ `modsec` verwenden. Sie können beispielsweise bestimmte Regeln oder Tags für bestimmte Anfragepfade entfernen:
+Um die geladenen CRS-Regeln zu optimieren, können Sie eine benutzerdefinierte Konfiguration vom Typ `modsec-crs` verwenden. Sie können beispielsweise bestimmte Regeln oder Tags für bestimmte Anfragepfade entfernen. Eine `ctl:ruleRemove*`-Aktion wirkt nur auf Regeln, die nach ihr ausgeführt werden. Deshalb laufen die folgenden Regeln in `phase:1`, und die Konfiguration wird vor dem CRS geladen:
 
 ```conf
-SecRule REQUEST_FILENAME "/wp-admin/admin-ajax.php" "id:1,ctl:ruleRemoveByTag=attack-xss,ctl:ruleRemoveByTag=attack-rce"
-SecRule REQUEST_FILENAME "/wp-admin/options.php" "id:2,ctl:ruleRemoveByTag=attack-xss"
-SecRule REQUEST_FILENAME "^/wp-json/yoast" "id:3,ctl:ruleRemoveById=930120"
+SecRule REQUEST_FILENAME "/wp-admin/admin-ajax.php" "id:1,phase:1,pass,t:none,nolog,ctl:ruleRemoveByTag=attack-xss,ctl:ruleRemoveByTag=attack-rce"
+SecRule REQUEST_FILENAME "/wp-admin/options.php" "id:2,phase:1,pass,t:none,nolog,ctl:ruleRemoveByTag=attack-xss"
+SecRule REQUEST_FILENAME "^/wp-json/yoast" "id:3,phase:1,pass,t:none,nolog,ctl:ruleRemoveById=930120"
 ```
 
 In diesem Beispiel:
@@ -120,6 +137,8 @@ In diesem Beispiel:
 - **Regel 1**: Entfernt Regeln mit den Tags `attack-xss` und `attack-rce` für Anfragen an `/wp-admin/admin-ajax.php`.
 - **Regel 2**: Entfernt Regeln mit dem Tag `attack-xss` für Anfragen an `/wp-admin/options.php`.
 - **Regel 3**: Entfernt eine bestimmte Regel (ID `930120`) für Anfragen, die auf `/wp-json/yoast` passen.
+
+Die Direktiven `SecRuleRemoveById`, `SecRuleRemoveByTag`, `SecRuleUpdateTargetById` und `SecRuleUpdateTargetByTag`, die beim Laden der Konfiguration wirken, gehören in eine benutzerdefinierte Konfiguration vom Typ `modsec` (nach dem CRS).
 
 !!! info "Reihenfolge der Ausführung"
     Die Ausführungsreihenfolge für ModSecurity in BunkerWeb ist wie folgt, um eine klare und logische Abfolge der Regelanwendung zu gewährleisten:

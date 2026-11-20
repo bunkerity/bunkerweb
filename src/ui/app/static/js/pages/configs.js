@@ -179,8 +179,8 @@ $(document).ready(function () {
 
     const alertTextKey =
       configs.length > 1
-        ? "modal.body.delete_confirmation_alert_plural"
-        : "modal.body.delete_confirmation_alert";
+        ? "modal.body.confirm_configs_deletion_alert_plural"
+        : "modal.body.confirm_configs_deletion_alert";
     delete_modal
       .find(".alert")
       .text(
@@ -376,34 +376,25 @@ $(document).ready(function () {
     importDragArea.find("i").addClass("text-primary");
   });
 
+  // Read a config from its row data: unlike the cells, it does not move when a column is hidden.
+  const configFromRowData = (rowData) => {
+    const $serviceLink = $("<div>").html(rowData[5]).find("a");
+    return {
+      name: $("<div>").html(rowData[2]).find("a").text().trim(),
+      type: $("<div>").html(rowData[3]).text().trim(),
+      // Only the global scope renders no link
+      service: $serviceLink.length ? $serviceLink.text().trim() : "global",
+    };
+  };
+
   const getSelectedConfigs = () => {
     const configs = [];
     if (!$.fn.dataTable.isDataTable("#configs")) return configs;
     $("#configs")
       .DataTable()
       .rows({ selected: true })
-      .nodes()
-      .to$()
-      .each(function () {
-        const $row = $(this);
-        const name = $row.find("td:eq(2)").find("a").text().trim();
-        const type = $row.find("td:eq(3)").text().trim();
-        let service;
-        const $serviceCell = $row.find("td:eq(5)");
-        const $serviceLink = $serviceCell.find("a");
-        if ($serviceLink.length > 0) {
-          service = $serviceLink.text().trim();
-        } else {
-          const $serviceSpan = $serviceCell.find("span[data-i18n]");
-          service = $serviceSpan.length
-            ? $serviceSpan.text().trim()
-            : $serviceCell.text().trim();
-        }
-
-        const normalizedService =
-          service === t("scope.global", "global") ? "global" : service;
-
-        configs.push({ name: name, type: type, service: normalizedService });
+      .every(function () {
+        configs.push(configFromRowData(this.data()));
       });
     return configs;
   };

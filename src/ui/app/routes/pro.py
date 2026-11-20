@@ -53,12 +53,14 @@ def pro_key():
     if DB.readonly:
         return handle_error("Database is in read-only mode", "pro")
 
-    verify_data_in_form(
+    ret = verify_data_in_form(
         data={"PRO_LICENSE_KEY": None},
         err_message="Missing license key parameter on /pro/key.",
         redirect_url="pro",
         next=True,
     )
+    if ret is not True:
+        return ret
     license_key = request.form["PRO_LICENSE_KEY"]
     if not license_key:
         return handle_error("Invalid license key", "pro")

@@ -1,0 +1,27 @@
+YAJL has been successfully built using Visual Studio 8.  CMake, a
+build file generator, is used to build the software.  CMake supports
+several different build environments, so you may either build YAJL
+using the IDE via the following steps:
+
+1. acquire cmake (http://www.cmake.org)
+2. mkdir build
+3. cd build
+4. cmake ..
+5. devenv YetAnotherJSONParser.sln /project ALL_BUILD /build Release
+6. build output is left in build/yajl-X.Y.Z
+
+Or you can build from the command line using nmake:
+
+1. Click Start > Programs > Microsoft Visual Studio > Visual Studio
+Tools > Visual Studio Command Prompt -- for your version of Visual
+Studio, which will open a command prompt.  You may verify that the
+compiler is in your path by typing "cl /?" at the prompt.
+2. cd C:\path\to\yajl\source\
+3. mkdir build
+4. cd build
+5. cmake -G"NMake Makefiles" -DCMAKE_BUILD_TYPE=Release ..
+6. nmake
+7. nmake install
+
+Earlier versions of visual studio and other build generators haven't
+been thoroughly tested, but should work without any major issues.

@@ -30,6 +30,7 @@ IS_LOADING=yes
 USE_BUNKERNET=no
 SEND_ANONYMOUS_REPORT=no
 SERVER_NAME=
+USE_IPV6=${USE_IPV6}
 DNS_RESOLVERS=${DNS_RESOLVERS}
 API_LISTEN_HTTP=${API_LISTEN_HTTP}
 API_HTTP_PORT=${API_HTTP_PORT}
@@ -55,6 +56,37 @@ function write_tmp_env_file() {
     printf "%s\n" "$tmp_env_content" > "$tmp_env_path"
     chown root:nginx "$tmp_env_path"
     chmod 660 "$tmp_env_path"
+}
+
+# Renders the loading configuration, which the scheduler replaces with its push. Used on a regular start
+# and when a preserved configuration fails to start.
+function render_temp_config() {
+    rm -f /var/tmp/bunkerweb_needs_config
+    if ! run_as_nginx env PYTHONPATH="$BW_PYTHONPATH" "$PYTHON_BIN" /usr/share/bunkerweb/gen/main.py \
+        --variables "$tmp_env_path"; then
+        log "SYSTEMCTL" "❌" "Error while generating config from $tmp_env_path"
+        return 1
+    fi
+    rm -f "$install_sentinel"
+}
+
+# Starts nginx once. nginx forks only after it parsed the configuration and ran init_by_lua (which
+# nginx -t never does), so a failure of either surfaces as its exit status.
+function start_nginx() {
+    nginx_rc=""
+    if ! run_as_nginx env PYTHONPATH="$BW_PYTHONPATH" "$PYTHON_BIN" /usr/share/bunkerweb/utils/modsecurity_audit.py /etc/nginx/variables.env; then
+        log "SYSTEMCTL" "❌" "Invalid ModSecurity audit storage, refusing to start nginx"
+        return 1
+    fi
+    log "SYSTEMCTL" "ℹ️" "Starting nginx ..."
+    if [ "$(uname)" = "FreeBSD" ]; then
+        "$NGINX_BIN" -e /var/log/bunkerweb/error.log
+        nginx_rc=$?
+    else
+        run_as_nginx "$NGINX_BIN" -e /var/log/bunkerweb/error.log
+        nginx_rc=$?
+    fi
+    [ "$nginx_rc" -eq 0 ]
 }
 
 # Start the bunkerweb service
@@ -115,6 +147,7 @@ function start() {
     # Generate temp conf for nginx
     # Default values
     declare -A defaults=(
+        [USE_IPV6]="no"
         [DNS_RESOLVERS]="9.9.9.9 149.112.112.112 8.8.8.8 8.8.4.4" # Quad9, Google
         [API_LISTEN_HTTP]="yes"
         [API_LISTEN_HTTPS]="no"
@@ -201,13 +234,7 @@ function start() {
     rm -f /var/tmp/bunkerweb_reloading 2>/dev/null || true
 
     if [[ "$regenerate_temp_config" == "true" ]] ; then
-        rm -f /var/tmp/bunkerweb_needs_config
-        if ! run_as_nginx env PYTHONPATH="$BW_PYTHONPATH" "$PYTHON_BIN" /usr/share/bunkerweb/gen/main.py \
-            --variables "$tmp_env_path"; then
-            log "SYSTEMCTL" "❌" "Error while generating config from $tmp_env_path"
-            exit 1
-        fi
-        rm -f "$install_sentinel"
+        render_temp_config || exit 1
     fi
 
     # Clean orphaned NGINX temp files from previous runs
@@ -222,19 +249,19 @@ function start() {
     done
 
     # Start nginx
-    if ! run_as_nginx env PYTHONPATH="$BW_PYTHONPATH" "$PYTHON_BIN" /usr/share/bunkerweb/utils/modsecurity_audit.py /etc/nginx/variables.env; then
-        log "SYSTEMCTL" "❌" "Invalid ModSecurity audit storage, refusing to start nginx"
-        exit 1
+    start_nginx
+    started=$?
+    if [ "$started" -ne 0 ] && [[ "$regenerate_temp_config" != "true" ]] ; then
+        # At most once: the loading configuration that follows is the one every other start runs
+        log "SYSTEMCTL" "⚠️" "The preserved configuration failed to start nginx${nginx_rc:+ (exit status $nginx_rc)}, falling back to the loading configuration until the scheduler pushes the latest one ..."
+        regenerate_temp_config=true
+        render_temp_config || exit 1
+        # The preserved trees may be what failed (a missing certificate, a broken plugin), so every push must reinstall them
+        rm -f /var/tmp/bunkerweb/pushswap/*.applied
+        start_nginx
+        started=$?
     fi
-    log "SYSTEMCTL" "ℹ️" "Starting nginx ..."
-    if [ "$(uname)" = "FreeBSD" ]; then
-        "$NGINX_BIN" -e /var/log/bunkerweb/error.log
-        nginx_rc=$?
-    else
-        run_as_nginx "$NGINX_BIN" -e /var/log/bunkerweb/error.log
-        nginx_rc=$?
-    fi
-    if [ "$nginx_rc" -ne 0 ]; then
+    if [ "$started" -ne 0 ] ; then
         log "SYSTEMCTL" "❌" "Error while executing temp nginx"
         exit 1
     fi

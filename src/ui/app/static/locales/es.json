@@ -13,7 +13,8 @@
     "no_changes_detected": "No se detectaron cambios.",
     "notice": "Aviso",
     "ping_error": "Ocurrió un error al hacer ping a las instancias.",
-    "readonly_mode": "Esta acción está deshabilitada en modo de solo lectura."
+    "readonly_mode": "Esta acción está deshabilitada en modo de solo lectura.",
+    "configs_import_invalid_file": "Por favor, suba un archivo de exportación de configuración personalizado válido (.json)."
   },
   "aria": {
     "label": {
@@ -49,7 +50,7 @@
     "link": {
       "here": "aquí"
     },
-    "pro": "Aprovecha al máximo BunkerWeb actualizando a la versión PRO. Más información y prueba gratuita <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/?utm_campaign=self&utm_source=banner#pro\">aquí</a>.",
+    "pro": "Aprovecha al máximo BunkerWeb actualizando a la versión PRO. Inicia tu prueba gratuita de 30 días <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=banner\">aquí</a>: contrata un plan y mantén «Free 30 Days Trial» como método de pago al finalizar la compra.",
     "support": "¿Necesitas soporte premium o consultoría personalizada para BunkerWeb? Consulta nuestros <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/?utm_campaign=self&utm_source=banner#services\">servicios profesionales</a>."
   },
   "breadcrumb": {
@@ -1154,6 +1155,7 @@
       "title": "Fecha de Expiración Pro",
       "unknown": "Fecha de expiración desconocida"
     },
+    "free_trial_hint": "Contrata un plan y mantén «Free 30 Days Trial» como método de pago al finalizar la compra.",
     "force_check": {
       "description": "Forzar una nueva verificación de los plugins PRO. Esto descargará nuevamente los plugins si hay versiones nuevas disponibles.",
       "title": "Forzar verificación"
@@ -1223,6 +1225,9 @@
     }
   },
   "reports": {
+    "bad_behavior_total_requests": "Solicitudes sospechosas",
+    "bad_behavior_stored_events": "Eventos almacenados",
+    "bad_behavior_evidence_missing": "Las pruebas del bloqueo ya no están disponibles.",
     "crowdsec": {
       "source_lapi": "Decisión de la API local",
       "source_appsec": "Inspección AppSec",
@@ -1237,7 +1242,16 @@
     },
     "retention_notice": "Los informes son un búfer circular en memoria: las entradas más antiguas se descartan cuando se alcanza el límite configurado. A menos que Redis esté habilitado, también se borran al reiniciar BunkerWeb.",
     "security_incident": "Incidente de Seguridad",
-    "security_report_data": "Datos del Informe de Seguridad"
+    "security_report_data": "Datos del Informe de Seguridad",
+    "bad_behavior_no_details": "No se capturaron detalles de comportamiento inapropiado para este informe.",
+    "bad_behavior_activity_detected": "Actividad de comportamiento inapropiado detectada",
+    "bad_behavior_activity_explanation": "Estas solicitudes excedieron el umbral de comportamiento inapropiado y se agruparon.",
+    "bad_behavior_request_label": "Solicitud",
+    "bad_behavior_ip": "Dirección IP",
+    "bad_behavior_server": "Servidor",
+    "bad_behavior_url": "URL",
+    "bad_behavior_captured_at": "Capturado en",
+    "bad_behavior_request_id": "ID de Solicitud"
   },
   "scope": {
     "all_services": "Todos los Servicios",
@@ -1424,7 +1438,8 @@
     "template_in_use_description": "No se permiten cambios fuera de la plantilla actual. Por favor, realiza los cambios utilizando la plantilla actual o cambia al modo Avanzado/Sin procesar.",
     "unique_server_name": "Nombre de Servidor Único",
     "up": "Activo",
-    "yes": "Sí"
+    "yes": "Sí",
+    "not_applicable": "N/D"
   },
   "step": {
     "next": "Siguiente",
@@ -1721,7 +1736,8 @@
       "show_selected_only": "Mostrar solo seleccionados",
       "stop_instance": "Detener Instancia {{hostname}}",
       "unban_ip": "Desbloquear {{ip}}",
-      "value_from_global": "Valor de los ajustes globales"
+      "value_from_global": "Valor de los ajustes globales",
+      "update_ban_duration": "Actualizar la duración del bloqueo"
     },
     "cannot_delete_original_ban": "No se puede eliminar la entrada de bloqueo original.",
     "cannot_remove_disabled": "No se puede eliminar porque una o más configuraciones están deshabilitadas.",
@@ -1959,7 +1975,8 @@
     "zerossl_api_retry": "Número de reintentos para solicitudes de API de ZeroSSL (0 desactiva los reintentos).",
     "zerossl_api_retry_delay": "Retraso en segundos entre reintentos de API de ZeroSSL.",
     "zerossl_api_connect_timeout": "Tiempo de espera de conexión en segundos para llamadas a la API de ZeroSSL.",
-    "zerossl_api_max_time": "Tiempo total máximo en segundos para cada solicitud de API de ZeroSSL."
+    "zerossl_api_max_time": "Tiempo total máximo en segundos para cada solicitud de API de ZeroSSL.",
+    "readonly_mode": "Esta acción no está permitida en modo de solo lectura."
   },
   "totp": {
     "prompt": "Por favor, introduce tu código TOTP."
@@ -1982,5 +1999,12 @@
     "required": "{{field}} es obligatorio.",
     "service_required_for_ban": "Se debe seleccionar un servicio para un bloqueo específico del servicio.",
     "zerossl_email_or_api_key_required": "ZeroSSL requiere un correo electrónico o una clave API de ZeroSSL."
+  },
+  "plugins": {
+    "multivalue": {
+      "show_less": "Mostrar menos",
+      "more_value": "más valor",
+      "more_values": "más valores"
+    }
   }
 }

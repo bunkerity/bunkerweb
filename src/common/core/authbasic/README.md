@@ -34,7 +34,7 @@ Follow these steps to enable and configure Auth Basic authentication:
     HTTP Basic Authentication transmits credentials encoded (not encrypted) in Base64. While this is acceptable when used over HTTPS, it should not be considered secure over plain HTTP. Always enable SSL/TLS when using basic authentication.
 
 !!! tip "Using Multiple Credentials"
-    You can configure multiple username/password pairs for access. Each `AUTH_BASIC_USER` setting should have a corresponding `AUTH_BASIC_PASSWORD` setting.
+    You can configure multiple username/password pairs for access. Each `AUTH_BASIC_USER` setting should have a corresponding `AUTH_BASIC_PASSWORD` setting. The default `changeme` / `changeme` pair is ignored as soon as another pair is configured; set the unsuffixed `AUTH_BASIC_USER` and `AUTH_BASIC_PASSWORD` to your own values to keep it.
 
 ### Example Configurations
 

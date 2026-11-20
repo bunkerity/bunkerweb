@@ -188,3 +188,5 @@ plugins:
 
 hooks:
   - docs/hooks/llmstxt.py
+  - docs/hooks/hreflang.py
+  - docs/hooks/imgsize.py

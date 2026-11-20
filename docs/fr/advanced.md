@@ -1,8 +1,8 @@
 # Utilisations avancées
 
-De nombreux exemples de cas d'utilisation concrets sont disponibles dans le dossier [examples](https://github.com/bunkerity/bunkerweb/tree/v1.6.17/examples) du dépôt GitHub.
+De nombreux exemples de cas d'utilisation concrets sont disponibles dans le dossier [examples](https://github.com/bunkerity/bunkerweb/tree/v1.6.18/examples) du dépôt GitHub.
 
-Nous fournissons également de nombreux modèles standard, tels que des fichiers YAML pour diverses intégrations et types de bases de données. Ceux-ci sont disponibles dans le dossier [misc/integrations](https://github.com/bunkerity/bunkerweb/tree/v1.6.17/misc/integrations).
+Nous fournissons également de nombreux modèles standard, tels que des fichiers YAML pour diverses intégrations et types de bases de données. Ceux-ci sont disponibles dans le dossier [misc/integrations](https://github.com/bunkerity/bunkerweb/tree/v1.6.18/misc/integrations).
 
 Cette section se concentre uniquement sur les utilisations avancées et le réglage de la sécurité, consultez la [section fonctionnalités](features.md) de la documentation pour voir tous les paramètres disponibles.
 
@@ -85,7 +85,7 @@ Vous trouverez plus de paramètres sur l'IP réelle dans la [section des fonctio
             -p 80:8080/tcp \
             -p 443:8443/tcp \
             -p 443:8443/udp \
-            bunkerity/bunkerweb-all-in-one:1.6.17
+            bunkerity/bunkerweb-all-in-one:1.6.18
         ```
 
         Veuillez noter que si votre conteneur existe déjà, vous devrez le supprimer et le recréer afin que les nouvelles variables d'environnement soient prises en compte.
@@ -96,7 +96,7 @@ Vous trouverez plus de paramètres sur l'IP réelle dans la [section des fonctio
 
         ```yaml
         bunkerweb:
-          image: bunkerity/bunkerweb:1.6.17
+          image: bunkerity/bunkerweb:1.6.18
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -104,7 +104,7 @@ Vous trouverez plus de paramètres sur l'IP réelle dans la [section des fonctio
             REAL_IP_HEADER: "X-Forwarded-For"
           ...
         bw-scheduler:
-          image: bunkerity/bunkerweb-scheduler:1.6.17
+          image: bunkerity/bunkerweb-scheduler:1.6.18
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -121,7 +121,7 @@ Vous trouverez plus de paramètres sur l'IP réelle dans la [section des fonctio
 
         ```yaml
         bunkerweb:
-          image: bunkerity/bunkerweb:1.6.17
+          image: bunkerity/bunkerweb:1.6.18
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -129,7 +129,7 @@ Vous trouverez plus de paramètres sur l'IP réelle dans la [section des fonctio
             REAL_IP_HEADER: "X-Forwarded-For"
           ...
         bw-scheduler:
-          image: bunkerity/bunkerweb-scheduler:1.6.17
+          image: bunkerity/bunkerweb-scheduler:1.6.18
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -176,7 +176,7 @@ Vous trouverez plus de paramètres sur l'IP réelle dans la [section des fonctio
 
         ```yaml
         bunkerweb:
-          image: bunkerity/bunkerweb:1.6.17
+          image: bunkerity/bunkerweb:1.6.18
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -184,7 +184,7 @@ Vous trouverez plus de paramètres sur l'IP réelle dans la [section des fonctio
             REAL_IP_HEADER: "X-Forwarded-For"
           ...
         bw-scheduler:
-          image: bunkerity/bunkerweb-scheduler:1.6.17
+          image: bunkerity/bunkerweb-scheduler:1.6.18
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -249,7 +249,7 @@ Vous trouverez plus de paramètres sur l'IP réelle dans la [section des fonctio
             -p 80:8080/tcp \
             -p 443:8443/tcp \
             -p 443:8443/udp \
-            bunkerity/bunkerweb-all-in-one:1.6.17
+            bunkerity/bunkerweb-all-in-one:1.6.18
         ```
 
         Veuillez noter que si votre conteneur existe déjà, vous devrez le supprimer et le recréer afin que les nouvelles variables d'environnement soient prises en compte.
@@ -260,7 +260,7 @@ Vous trouverez plus de paramètres sur l'IP réelle dans la [section des fonctio
 
         ```yaml
         bunkerweb:
-          image: bunkerity/bunkerweb:1.6.17
+          image: bunkerity/bunkerweb:1.6.18
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -270,7 +270,7 @@ Vous trouverez plus de paramètres sur l'IP réelle dans la [section des fonctio
           ...
         ...
         bw-scheduler:
-          image: bunkerity/bunkerweb-scheduler:1.6.17
+          image: bunkerity/bunkerweb-scheduler:1.6.18
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -288,7 +288,7 @@ Vous trouverez plus de paramètres sur l'IP réelle dans la [section des fonctio
 
         ```yaml
         bunkerweb:
-          image: bunkerity/bunkerweb:1.6.17
+          image: bunkerity/bunkerweb:1.6.18
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -298,7 +298,7 @@ Vous trouverez plus de paramètres sur l'IP réelle dans la [section des fonctio
           ...
         ...
         bw-scheduler:
-          image: bunkerity/bunkerweb-scheduler:1.6.17
+          image: bunkerity/bunkerweb-scheduler:1.6.18
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -350,7 +350,7 @@ Vous trouverez plus de paramètres sur l'IP réelle dans la [section des fonctio
 
         ```yaml
         bunkerweb:
-          image: bunkerity/bunkerweb:1.6.17
+          image: bunkerity/bunkerweb:1.6.18
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -360,7 +360,7 @@ Vous trouverez plus de paramètres sur l'IP réelle dans la [section des fonctio
           ...
         ...
         bw-scheduler:
-          image: bunkerity/bunkerweb-scheduler:1.6.17
+          image: bunkerity/bunkerweb-scheduler:1.6.18
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -485,8 +485,8 @@ Le Manager est le cerveau du cluster. Il exécute le Scheduler, la base de donn�
 
         ```bash
         # Télécharger le script et sa somme
-        curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.17/install-bunkerweb.sh
-        curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.17/install-bunkerweb.sh.sha256
+        curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.18/install-bunkerweb.sh
+        curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.18/install-bunkerweb.sh.sha256
 
         # Vérifier l'empreinte
         sha256sum -c install-bunkerweb.sh.sha256
@@ -588,7 +588,7 @@ Le Manager est le cerveau du cluster. Il exécute le Scheduler, la base de donn�
 
     services:
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.17
+        image: bunkerity/bunkerweb-scheduler:1.6.18
         environment:
           <<: *bw-ui-env
           BUNKERWEB_INSTANCES: "192.168.1.11 192.168.1.12" # Remplacez par les IPs de vos workers
@@ -607,7 +607,7 @@ Le Manager est le cerveau du cluster. Il exécute le Scheduler, la base de donn�
           - bw-redis
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.6.17
+        image: bunkerity/bunkerweb-ui:1.6.18
         ports:
           - "7000:7000" # Exposer le port de l'UI
         environment:
@@ -693,7 +693,7 @@ Les workers sont les nœuds qui traitent le trafic entrant.
     ```yaml title="docker-compose.yml"
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.17
+        image: bunkerity/bunkerweb:1.6.18
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -1130,7 +1130,7 @@ Pour activer systemd-resolved comme résolveur DNS dans BunkerWeb, définissez l
         -p 80:8080/tcp \
         -p 443:8443/tcp \
         -p 443:8443/udp \
-        bunkerity/bunkerweb-all-in-one:1.6.17
+        bunkerity/bunkerweb-all-in-one:1.6.18
     ```
 
 === "Docker"
@@ -1158,7 +1158,7 @@ Pour activer systemd-resolved comme résolveur DNS dans BunkerWeb, définissez l
           - bw-dns
 
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.17
+        image: bunkerity/bunkerweb:1.6.18
         ...
         environment:
           DNS_RESOLVERS: "dnsmasq"
@@ -1169,7 +1169,7 @@ Pour activer systemd-resolved comme résolveur DNS dans BunkerWeb, définissez l
           - bw-dns
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.17
+        image: bunkerity/bunkerweb-scheduler:1.6.18
         ...
         environment:
           DNS_RESOLVERS: "dnsmasq"
@@ -1205,6 +1205,15 @@ Les configurations personnalisées peuvent être appliquées globalement ou spé
 La méthode d'application des configurations personnalisées dépend de l'intégration utilisée. Cependant, le processus sous-jacent implique l'ajout de fichiers avec le `.conf` suffixe à des dossiers spécifiques. Pour appliquer une configuration personnalisée à un serveur spécifique, le fichier doit être placé dans un sous-dossier nommé d'après le nom du serveur principal.
 
 Certaines intégrations offrent des moyens plus pratiques d'appliquer des configurations, par exemple à l'aide de [Configs](https://docs.docker.com/engine/swarm/configs/) dans Docker Swarm ou de [ConfigMap](https://kubernetes.io/docs/concepts/configuration/configmap/) dans Kubernetes. Ces options offrent des approches plus simples pour la gestion et l'application des configurations.
+
+!!! info "Fichiers manuels et marqueur `.bw-managed`"
+    Le scheduler enregistre en base de données les fichiers `.conf` trouvés dans le dossier source manuel (`/etc/bunkerweb/configs`) et y crée un fichier marqueur caché `.bw-managed`. Conservez ce marqueur avec le dossier ou le volume :
+
+    - Avec le marqueur, un scan complet qui ne trouve aucun fichier `.conf` supprime de la base la dernière configuration personnalisée manuelle : supprimer à la main le dernier fichier fonctionne.
+    - Sans le marqueur, un dossier vide ou absent n'est pas interprété comme une suppression : le scheduler restaure les fichiers depuis la base de données.
+    - Un scan qui échoue ou qui ne peut pas lire une partie du dossier ne modifie rien : les fichiers et les lignes de la base restent en l'état.
+
+    Lorsque `USE_MODSECURITY_GLOBAL_CRS=yes`, les fichiers `modsec-crs`, `crs-plugins-before` et `crs-plugins-after` placés dans un sous-dossier de service ne sont pas chargés. Le scheduler les conserve sur le disque et en base de données, inactifs, et les recharge dès que vous désactivez le CRS global.
 
 === "Interface utilisateur Web"
 
@@ -1257,6 +1266,43 @@ Certaines intégrations offrent des moyens plus pratiques d'appliquer des config
     !!! info "Le rechargement relit le dossier"
         Un rechargement relit `/etc/bunkerweb/configs` : les fichiers qui y sont créés, modifiés ou supprimés sont appliqués et enregistrés en base de données. Une configuration appartenant à l'interface web ou à l'API conserve son propriétaire, seul son contenu est actualisé depuis le fichier.
 
+    **D'où NGINX inclut chaque type**
+
+    NGINX inclut les fichiers directement depuis les sous-dossiers de `/etc/bunkerweb/configs` ; BunkerWeb ne les copie pas dans `/etc/nginx`. Le Scheduler écrit dans ces mêmes dossiers les configurations créées dans l'interface web ou via l'API. En mode multisite, un fichier qui ne concerne qu'un service va dans un sous-dossier supplémentaire portant le premier nom du `SERVER_NAME` de ce service, par exemple `server-http/www.example.com/hello-world.conf`.
+
+    | Type                  | Dossier dans `/etc/bunkerweb/configs` | Inclus dans                                                                                      | Sous-dossier par service |
+    | --------------------- | ------------------------------------- | ------------------------------------------------------------------------------------------------ | ------------------------ |
+    | `http`                | `http/`                               | bloc `http` de `nginx.conf`, après les configurations du cœur et des plugins                     | Non                      |
+    | `stream`              | `stream/`                             | bloc `stream` de `nginx.conf`, après les configurations du cœur et des plugins                   | Non                      |
+    | `default-server-http` | `default-server-http/`                | serveur par défaut (`default-server-http.conf`), après les configurations du cœur et des plugins | Non                      |
+    | `server-http`         | `server-http/`                        | chaque bloc `server` HTTP (`server.conf`)                                                        | Oui                      |
+    | `server-stream`       | `server-stream/`                      | chaque bloc `server` stream (`server-stream.conf`)                                               | Oui                      |
+    | `modsec`              | `modsec/`                             | règles ModSecurity, après le Core Rule Set                                                       | Oui                      |
+    | `modsec-crs`          | `modsec-crs/`                         | règles ModSecurity, avant les règles du Core Rule Set                                            | Oui, voir la note        |
+    | `crs-plugins-before`  | `crs-plugins-before/`                 | règles ModSecurity, avant les plugins du CRS                                                     | Oui, voir la note        |
+    | `crs-plugins-after`   | `crs-plugins-after/`                  | règles ModSecurity, après les plugins du CRS                                                     | Oui, voir la note        |
+
+    `modsec-crs` n'est lu que si `USE_MODSECURITY_CRS=yes`. `crs-plugins-before` et `crs-plugins-after` exigent en plus `USE_MODSECURITY_CRS_PLUGINS=yes` et une version du Core Rule Set autre que la 3. Avec `USE_MODSECURITY_GLOBAL_CRS=yes`, ces trois types sont chargés une seule fois pour tous les services : seul le dossier de premier niveau est lu et un sous-dossier de service est ignoré. `modsec` garde son sous-dossier de service.
+
+    **Vérifier qu'un fichier est actif**
+
+    Utilisez `nginx -T` pour vérifier que NGINX inclut votre fichier depuis le disque et que les chemins d'inclusion sont corrects. Cette commande teste et affiche les fichiers de configuration actuels sur le disque, pas la configuration chargée par les processus workers en cours d'exécution. NGINX signale chaque fichier inclus par une ligne `# configuration file <chemin>:` :
+
+    ```shell
+    sudo nginx -T 2>&1 | grep -A 3 "configuration file /etc/bunkerweb/configs/server-http/hello-world.conf"
+    ```
+
+    Si rien ne s'affiche, vérifiez le dossier, le suffixe `.conf` et les permissions, puis rechargez à nouveau le Scheduler.
+
+    Pour confirmer que le fichier est appliqué, vérifiez que le journal du Scheduler (`journalctl -u bunkerweb-scheduler`) indique un rechargement réussi et que l'interface web ne signale pas d'application partielle. Envoyez ensuite une requête qui utilise cette configuration et vérifiez le résultat attendu. Pour l'exemple `/hello` ci-dessus, remplacez `www.example.com` par le nom de votre service et vérifiez que le corps de la réponse est `world` :
+
+    ```shell
+    curl -i http://www.example.com/hello
+    ```
+
+    !!! warning "Une configuration rejetée conserve la précédente"
+        Chaque nom d'`upstream` doit être unique parmi toutes les configurations personnalisées. Deux blocs `upstream` portant le même nom font que NGINX refuse la nouvelle configuration et que le rechargement échoue. Les instances qui la rejettent continuent d'exécuter la dernière configuration fonctionnelle, et l'interface web indique que les changements ont été appliqués à certaines instances seulement (ou à aucune). Les journaux du Scheduler (`journalctl -u bunkerweb-scheduler`) en donnent la cause.
+
 === "Tout-en-un"
 
     Lorsque vous utilisez l'image [Tout-en-un](integrations.md#all-in-one-aio-image), vous avez deux options pour ajouter des configurations personnalisées :
@@ -1286,7 +1332,7 @@ Certaines intégrations offrent des moyens plus pratiques d'appliquer des config
           }" \
         -p 80:8080/tcp \
         -p 443:8443/tcp \
-        bunkerity/bunkerweb-all-in-one:1.6.17
+        bunkerity/bunkerweb-all-in-one:1.6.18
     ```
 
     Veuillez noter que si votre conteneur est déjà créé, vous devrez le supprimer et le recréer pour que les nouvelles variables d'environnement soient appliquées.
@@ -1326,7 +1372,7 @@ Certaines intégrations offrent des moyens plus pratiques d'appliquer des config
         -p 80:8080/tcp \
         -p 443:8443/tcp \
         -p 443:8443/udp \
-        bunkerity/bunkerweb-all-in-one:1.6.17
+        bunkerity/bunkerweb-all-in-one:1.6.18
     ```
 
 === "Docker"
@@ -1349,7 +1395,7 @@ Certaines intégrations offrent des moyens plus pratiques d'appliquer des config
     ```yaml
     ...
     bw-scheduler:
-      image: bunkerity/bunkerweb-scheduler:1.6.17
+      image: bunkerity/bunkerweb-scheduler:1.6.18
       environment:
         - |
           CUSTOM_CONF_SERVER_HTTP_hello-world=
@@ -1392,7 +1438,7 @@ Certaines intégrations offrent des moyens plus pratiques d'appliquer des config
 
     ```yaml
     bw-scheduler:
-      image: bunkerity/bunkerweb-scheduler:1.6.17
+      image: bunkerity/bunkerweb-scheduler:1.6.18
       volumes:
         - ./bw-data:/data
       ...
@@ -1462,7 +1508,7 @@ Certaines intégrations offrent des moyens plus pratiques d'appliquer des config
 
     ```yaml
     bw-scheduler:
-      image: bunkerity/bunkerweb-scheduler:1.6.17
+      image: bunkerity/bunkerweb-scheduler:1.6.18
       volumes:
         - ./bw-data:/data
       ...
@@ -1561,6 +1607,70 @@ Certaines intégrations offrent des moyens plus pratiques d'appliquer des config
 
     Il n'y a pas de mécanisme de mise à jour : l'alternative est de supprimer une configuration existante à l'aide puis de `docker config rm` la recréer.
 
+### Identifiants des règles ModSecurity {#modsecurity-rule-ids}
+
+Chaque règle ModSecurity porte un identifiant numérique, et ModSecurity refuse de charger deux règles de même identifiant : le rechargement s'arrête avec `Rule id: N is duplicated`. BunkerWeb, l'OWASP Core Rule Set (CRS), les plugins CRS et vos propres règles partagent un même espace d'identifiants, donc chaque propriétaire a une plage réservée.
+
+**Plages réservées par d'autres**
+
+| Plage               | Propriétaire                                                                                         |
+| ------------------- | ---------------------------------------------------------------------------------------------------- |
+| 1-99 999            | Usage local uniquement. N'utilisez jamais cette plage pour des règles que vous distribuez à d'autres |
+| 900 000-999 999     | OWASP CRS                                                                                            |
+| 1 000 000-1 009 999 | Red Hat                                                                                              |
+| 1 010 000-1 999 999 | Kemp                                                                                                 |
+| 2 000 000-2 999 999 | Trustwave SpiderLabs                                                                                 |
+| 9 500 000-9 999 999 | Plugins CRS, par blocs de 1 000 identifiants. L'incubator a 9 900 000-9 999 999                      |
+
+Sources : l'[action `id` du manuel de référence ModSecurity](https://modsecurity.org/docs/3-reference-manual/3-5-actions/), le [registre des plugins CRS](https://github.com/coreruleset/plugin-registry) et le [plugin modèle CRS](https://github.com/coreruleset/template-plugin).
+
+**Plage BunkerWeb : 9 800 000-9 899 999**
+
+BunkerWeb livre ses propres règles dans la partie 9 800 000-9 899 999 de la plage des plugins CRS, qu'aucun plugin enregistré n'utilise. Le cœur de BunkerWeb vient en premier, puis les plugins PRO, les plugins externes et les modèles de la communauté :
+
+| Plage               | Utilisée par                                                                                       |
+| ------------------- | -------------------------------------------------------------------------------------------------- |
+| 9 800 000-9 809 999 | Cœur OSS de BunkerWeb                                                                              |
+| 9 810 000-9 839 999 | Plugins PRO de BunkerWeb                                                                           |
+| 9 840 000-9 849 999 | Plugins externes ([bunkerweb-plugins](https://github.com/bunkerity/bunkerweb-plugins))             |
+| 9 850 000-9 899 999 | Modèles de la communauté ([bunkerweb-templates](https://github.com/bunkerity/bunkerweb-templates)) |
+
+Chaque composant a un bloc de 1 000 identifiants. Dans un bloc, `000`-`099` sert aux règles d'initialisation, `100`-`499` aux règles de requête et `500`-`999` aux règles de réponse. Les nouveaux blocs sont pris dans l'ordre. Blocs attribués :
+
+| Bloc                  | Composant                                  | Type                    |
+| --------------------- | ------------------------------------------ | ----------------------- |
+| 9 800 000             | `modsecurity`                              | Cœur OSS                |
+| 9 801 000             | `antibot`                                  | Cœur OSS                |
+| 9 802 000             | `ui`                                       | Cœur OSS                |
+| 9 803 000             | `templates` (modèle API)                   | Cœur OSS                |
+| 9 810 000             | `custom_pages`                             | Plugin PRO              |
+| 9 811 000             | `saml`                                     | Plugin PRO              |
+| 9 840 000             | `coraza`                                   | Plugin externe          |
+| À partir de 9 850 000 | Un bloc par modèle, par ordre alphabétique | Modèle de la communauté |
+
+Le projet [bunkerweb-templates](https://github.com/bunkerity/bunkerweb-templates) attribue les blocs des modèles.
+
+**Que faire dans vos configurations**
+
+- Donnez à vos propres règles un identifiant de 1 à 99 999 qu'aucune autre de vos configurations personnalisées n'utilise. BunkerWeb ne livre aucune règle dans cette plage.
+- Écrivez les exclusions à l'exécution (`ctl:ruleRemoveById`, `ctl:ruleRemoveByTag`, `ctl:ruleRemoveTargetById` et similaires) dans une configuration personnalisée de type `modsec-crs`, chargée avant le CRS, avec `phase:1,pass,t:none,nolog`. Une exclusion à l'exécution doit s'exécuter au plus tard avant la règle qu'elle vise.
+- Écrivez les exclusions au démarrage (`SecRuleRemoveById`, `SecRuleRemoveByTag`, `SecRuleUpdateTargetById` et `SecRuleUpdateTargetByTag`) dans une configuration personnalisée de type `modsec`, chargée après le CRS.
+- Ne redéfinissez pas une règle de configuration du CRS que BunkerWeb définit déjà : `900200` (méthodes autorisées, depuis le paramètre `ALLOWED_METHODS`) et `900230` (versions HTTP autorisées, définie avec HTTP/3 sur la version 3 du CRS). Une seconde règle de même identifiant arrête le rechargement avec `Rule id: N is duplicated`.
+
+**Identifiants modifiés dans la 1.6.18**
+
+Les versions précédentes utilisaient des identifiants de plages appartenant à d'autres. Si l'une de vos configurations référence un ancien identifiant, par exemple `SecRuleRemoveById 200002`, remplacez-le par le nouveau :
+
+| Ancien identifiant                          | Nouvel identifiant                          |
+| ------------------------------------------- | ------------------------------------------- |
+| 1000                                        | 9800000                                     |
+| 200000, 200001                              | 9800010, 9800011                            |
+| 1007783                                     | 9800100                                     |
+| 200002 - 200006                             | 9800200 - 9800204                           |
+| 1010                                        | 9801500                                     |
+| 1007770 - 1007782                           | 9802100 - 9802112                           |
+| 2007771, 2007772, 2007773, 2007775, 2007778 | 9803100, 9803101, 9803102, 9803103, 9803104 |
+
 ## Exécution de nombreux services en production {#running-many-services-in-production}
 
 ### CRS mondial
@@ -1573,7 +1683,7 @@ Si vous utilisez BunkerWeb en production avec un grand nombre de services, et qu
 La solution de contournement consiste à charger les règles CRS globalement plutôt que par service. Ce comportement n'est pas activé par défaut pour des raisons de compatibilité descendante et parce qu'il présente un inconvénient : si vous activez le chargement des règles CRS globales, **il ne sera plus possible de définir des règles modsec-crs** (exécutées avant les règles CRS) par service. Cependant, cette limitation peut être contournée en écrivant des règles d'exclusion globales `modsec-crs` comme suit :
 
 ```
-SecRule REQUEST_FILENAME "@rx ^/somewhere$" "nolog,phase:4,allow,id:1010,chain"
+SecRule REQUEST_FILENAME "@rx ^/somewhere$" "nolog,phase:4,allow,id:100,chain"
 SecRule REQUEST_HEADERS:Host "@rx ^app1\.example\.com$" "nolog"
 ```
 
@@ -1648,6 +1758,10 @@ REDIS_DATABASE=0
 
 Si vous avez besoin de paramètres plus avancés, tels que l'authentification, la prise en charge SSL/TLS ou le mode Sentinel, reportez-vous à la documentation sur les paramètres du [plug-in Redis](features.md#redis) pour obtenir des conseils détaillés.
 
+### Exporter les bannissements en JSON
+
+Exécutez `bwcli bans --json` pour écrire un objet JSON unique sur la sortie standard, regroupé par instance, avec une entrée `redis` lorsque les bannissements Redis sont collectés. Chaque source contient un tableau de bannissements triés par `date`. Les enregistrements conservent les champs renvoyés par la source, notamment `ip`, `country`, `date`, `exp`, `permanent`, `reason`, `service`, `ban_scope` et `kind`. La commande renvoie le code 0 en cas de succès. En cas d'échec, elle renvoie un code non nul et écrit une erreur sur la sortie d'erreur standard. Sans `--json`, `bwcli bans` conserve son affichage formaté.
+
 ## Protéger les applications UDP/TCP
 
 !!! example "Fonctionnalité expérimentale"
@@ -1708,7 +1822,7 @@ Pour la liste complète des paramètres concernant `stream` le  mode, veuillez v
         -p 443:8443/udp \
         -p 10000:10000/tcp \
         -p 20000:20000/tcp \
-        bunkerity/bunkerweb-all-in-one:1.6.17
+        bunkerity/bunkerweb-all-in-one:1.6.18
     ```
 
     Veuillez noter que si votre conteneur existe déjà, vous devrez le supprimer et le recréer afin que les nouvelles variables d'environnement soient prises en compte.
@@ -1731,7 +1845,7 @@ Pour la liste complète des paramètres concernant `stream` le  mode, veuillez v
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.17
+        image: bunkerity/bunkerweb:1.6.18
         ports:
           - "80:8080" # Keep it if you want to use Let's Encrypt automation when using http challenge type
           - "10000:10000" # app1
@@ -1746,7 +1860,7 @@ Pour la liste complète des paramètres concernant `stream` le  mode, veuillez v
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.17
+        image: bunkerity/bunkerweb-scheduler:1.6.18
         environment:
           <<: *bw-api-env
           BUNKERWEB_INSTANCES: "bunkerweb" # This setting is mandatory to specify the BunkerWeb instance
@@ -1797,7 +1911,7 @@ Pour la liste complète des paramètres concernant `stream` le  mode, veuillez v
     ```yaml
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.17
+        image: bunkerity/bunkerweb:1.6.18
         ports:
           - "80:8080" # Keep it if you want to use Let's Encrypt automation when using http challenge type
           - "10000:10000" # app1
@@ -2027,7 +2141,7 @@ Pour la liste complète des paramètres concernant `stream` le  mode, veuillez v
     ```yaml
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.17
+        image: bunkerity/bunkerweb:1.6.18
         ports:
           # Keep it if you want to use Let's Encrypt automation when using http challenge type
           - published: 80
@@ -2157,7 +2271,7 @@ BunkerWeb prend en charge PHP en utilisant des  instances [PHP-FPM externes ou ]
         -p 80:8080/tcp \
         -p 443:8443/tcp \
         -p 443:8443/udp \
-        bunkerity/bunkerweb-all-in-one:1.6.17
+        bunkerity/bunkerweb-all-in-one:1.6.18
     ```
 
     Veuillez noter que si votre conteneur est déjà créé, vous devrez le supprimer et le recréer pour que les nouvelles variables d'environnement soient appliquées.
@@ -2201,7 +2315,7 @@ BunkerWeb prend en charge PHP en utilisant des  instances [PHP-FPM externes ou ]
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.17
+        image: bunkerity/bunkerweb:1.6.18
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -2216,7 +2330,7 @@ BunkerWeb prend en charge PHP en utilisant des  instances [PHP-FPM externes ou ]
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.17
+        image: bunkerity/bunkerweb-scheduler:1.6.18
         environment:
           <<: *bw-api-env
           BUNKERWEB_INSTANCES: "bunkerweb" # This setting is mandatory to specify the BunkerWeb instance
@@ -2310,7 +2424,7 @@ BunkerWeb prend en charge PHP en utilisant des  instances [PHP-FPM externes ou ]
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.17
+        image: bunkerity/bunkerweb:1.6.18
         labels:
           - "bunkerweb.INSTANCE=yes"
         environment:
@@ -2323,7 +2437,7 @@ BunkerWeb prend en charge PHP en utilisant des  instances [PHP-FPM externes ou ]
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.17
+        image: bunkerity/bunkerweb-scheduler:1.6.18
         environment:
           <<: *bw-api-env
           BUNKERWEB_INSTANCES: "" # We don't need to specify the BunkerWeb instance here as they are automatically detected by the autoconf service
@@ -2338,7 +2452,7 @@ BunkerWeb prend en charge PHP en utilisant des  instances [PHP-FPM externes ou ]
           - bw-db
 
       bw-autoconf:
-        image: bunkerity/bunkerweb-autoconf:1.6.17
+        image: bunkerity/bunkerweb-autoconf:1.6.18
         depends_on:
           - bunkerweb
           - bw-docker
@@ -2578,7 +2692,7 @@ BunkerWeb prend en charge PHP en utilisant des  instances [PHP-FPM externes ou ]
     ```yaml
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.17
+        image: bunkerity/bunkerweb:1.6.18
         volumes:
           - /shared/www:/var/www/html
     ...
@@ -2647,39 +2761,28 @@ BunkerWeb prend en charge PHP en utilisant des  instances [PHP-FPM externes ou ]
 
 ## IPv6
 
-!!! example "Fonctionnalité expérimentale"
+Par défaut, BunkerWeb n'écoute que sur IPv4. Définissez `USE_IPV6=yes` (le nom est sensible à la casse) pour ajouter des écouteurs IPv6 à côté des écouteurs IPv4 pour les services HTTP, HTTPS, HTTP/3 et stream, et pour que NGINX et le résolveur Lua interrogent aussi les enregistrements AAAA. Ce paramètre ne configure pas votre réseau : adresses, routage, ports publiés et règles de pare-feu restent à votre charge. L'API interne, l'interface Web et l'API publique ont leurs propres paramètres d'écoute (voir [Réseaux IPv6 uniquement](#ipv6-only)). Un service peut aussi être nommé par une adresse IP (voir [Adresses IP comme noms de service](#ip-service-names)).
 
-    Cette fonctionnalité n'est pas prête pour la production. N'hésitez pas à la tester et à nous signaler tout bug via les [issues](https://github.com/bunkerity/bunkerweb/issues) du dépôt GitHub.
+!!! info "Couverture des tests"
 
-Par défaut, BunkerWeb n'écoutera que les adresses IPv4 et n'utilisera pas IPv6 pour les communications réseau. Si vous souhaitez activer la prise en charge d'IPv6, vous devez définir `USE_IPV6=yes`. Veuillez noter que la configuration IPv6 de votre réseau et de votre environnement n'entre pas dans le champ d'application de cette documentation.
+    Les tests automatisés couvrent IPv6 sur Docker, sur un réseau double pile et sur un réseau IPv6 uniquement : écouteurs HTTP et HTTPS, IP réelle du client issue de `X-Forwarded-For`, listes d'autorisation et de blocage d'IP (formes compressée, étendue et IPv4-mappée), bannissements via l'API interne et `bwcli`, limitation de débit, ModSecurity, upstreams IPv6 et AAAA uniquement, et un Redis autonome pour les bannissements et les limites.
+
+    Non testé sur une installation IPv6 réelle : paquets Linux, All-in-one, Autoconf, Swarm, Kubernetes et Gateway API (ils nécessitent un cluster double pile, et `USE_KUBERNETES_FQDN=no` si le DNS de votre cluster ne publie pas de noms de pod IPv6), services HTTP/3 et stream, Redis Sentinel et Cluster, l'interface Web et l'API publique, les contrôles de pays, d'ASN et de DNSBL pour les clients IPv6 publics, et l'émission de certificats. Les mêmes paramètres s'appliquent dans ces cas. Testez votre installation avant de vous y fier, et signalez les problèmes via les [issues](https://github.com/bunkerity/bunkerweb/issues) du dépôt GitHub.
 
 === "Docker / Autoconf / Swarm"
 
-    Tout d'abord, vous devrez configurer le démon Docker pour activer la prise en charge d'IPv6 pour les conteneurs et utiliser ip6tables si nécessaire. Voici une configuration d'exemple pour votre fichier /etc/docker/daemon.json :
+    Docker active IPv6 par réseau. Sur les versions actuelles (testé avec Docker 29.9.2, sans aucun fichier `/etc/docker/daemon.json`), il suffit de déclarer `enable_ipv6: true` et un sous-réseau IPv6 sur le réseau qui transporte le trafic des clients : pas de drapeau `experimental` et pas de redémarrage de Docker. Les options du démon `ipv6`, `fixed-cidr-v6` et `ip6tables` concernent surtout le réseau bridge par défaut, et les anciennes versions de Docker (non testées) peuvent encore en avoir besoin pour les réseaux définis par l'utilisateur. Consultez la documentation de Docker pour votre version.
 
-    ```json
-    {
-      "experimental": true,
-      "ipv6": true,
-      "ip6tables": true,
-      "fixed-cidr-v6": "fd00:dead:beef::/48"
-    }
-    ```
+    Un sous-réseau IPv6 privé ne donne l'IPv6 qu'entre les conteneurs. L'accès à Internet, ou l'accueil de clients sur des ports publiés en IPv6, dépend du routage IPv6, du pare-feu et du NAT de votre hôte, ce qui sort du cadre de cette documentation.
 
-    Vous pouvez maintenant redémarrer le service Docker pour appliquer les modifications :
-
-    ```shell
-    systemctl restart docker
-    ```
-
-    Une fois Docker configuré pour prendre en charge IPv6, vous pouvez ajouter le paramètre `USE_IPV6` et configurer le réseau bw-services pour IPv6 :
+    Ajoutez le paramètre `USE_IPV6` au scheduler et activez IPv6 sur le réseau `bw-services`. Si vous déclarez un `subnet` IPv4 pour le réseau, conservez-le dans la même liste `ipam.config` :
 
     ```yaml
     services:
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.17
+        image: bunkerity/bunkerweb-scheduler:1.6.18
         environment:
-          USE_IPv6: "yes"
+          USE_IPV6: "yes"
 
     ...
 
@@ -2689,7 +2792,7 @@ Par défaut, BunkerWeb n'écoutera que les adresses IPv4 et n'utilisera pas IPv6
         enable_ipv6: true
         ipam:
           config:
-            - subnet: fd00:13:37::/48
+            - subnet: fd00:13:37::/64
               gateway: fd00:13:37::1
 
     ...
@@ -2722,6 +2825,95 @@ Par défaut, BunkerWeb n'écoutera que les adresses IPv4 et n'utilisera pas IPv6
     ```shell
     systemctl start bunkerweb
     ```
+
+### Vérifier le fonctionnement d'IPv6
+
+Listez les écouteurs, sur l'hôte Linux ou dans le conteneur BunkerWeb (`docker compose exec bunkerweb ss -6 -ltn`). Les ports définis par `HTTP_PORT` et `HTTPS_PORT` doivent apparaître sur `[::]` :
+
+```shell
+ss -6 -ltn
+```
+
+Envoyez ensuite une requête en IPv6 à l'adresse de BunkerWeb, avec l'en-tête `Host` de l'un de vos services (`-g` évite que curl interprète les crochets comme un motif) :
+
+```shell
+curl -g -6 -H "Host: www.example.com" "http://[<BUNKERWEB_IPV6_ADDRESS>]:<HTTP_PORT>/"
+```
+
+Le journal d'accès affiche alors l'adresse IPv6 du client.
+
+### Adresses IP comme noms de service {#ip-service-names}
+
+Un service peut être nommé par une adresse IPv4 ou IPv6 au lieu d'un nom DNS. Écrivez une adresse IPv6 sans crochets, en minuscules et compressée, comme un client l'envoie dans l'en-tête `Host` : `2001:db8::1`, et non `[2001:db8::1]`, `2001:DB8::1` ou `2001:0db8::1`. BunkerWeb ajoute lui-même la forme avec crochets au `server_name` de NGINX. Un nom écrit autrement ne correspond jamais à l'en-tête `Host`, et BunkerWeb journalise un avertissement avec l'écriture canonique. ModSecurity ne note pas la règle CRS 920350 (« Host header is a numeric IP address ») pour une requête dont le `Host` est l'une des adresses du service ; tout autre `Host` numérique reste noté.
+
+!!! warning "Paramètres par service avec Docker Compose"
+
+    Un `env_file` de Compose ne peut pas transporter les paramètres par service d'un service nommé en IPv6 : il coupe `2001:db8::1_USE_ANTIBOT=yes` au premier deux-points et perd le paramètre sans erreur. Utilisez `environment:` (forme map ou liste), l'interface web ou l'API. Le fichier `variables.env` de Linux n'est pas concerné.
+
+Let's Encrypt n'émet pas encore de certificats pour les adresses IPv6 : le job ignore un service nommé en IPv6 et le journalise.
+
+### Réseaux IPv6 uniquement {#ipv6-only}
+
+BunkerWeb fonctionne aussi lorsque ses conteneurs n'ont aucune adresse IPv4. Cela a été testé sur Docker, avec le cœur et le scheduler sur des réseaux créés avec `enable_ipv4: false` (Docker 29.9.2, Compose 5.6.1). Les deux conteneurs ont besoin des mêmes paramètres, ainsi que d'adresses fixes pour que la liste d'autorisation et `BUNKERWEB_INSTANCES` restent valides :
+
+```yaml
+x-bw-ipv6-env: &bw-ipv6-env
+  USE_IPV6: "yes"
+  API_LISTEN_IP: "::"
+  API_WHITELIST_IP: "::1/128 2001:db8:1::24/128"
+  BUNKERWEB_INSTANCES: "[2001:db8:1::10]:5000"
+  DNS_RESOLVERS: "[2001:db8:1::20]"
+
+services:
+  bunkerweb:
+    image: bunkerity/bunkerweb:1.6.18
+    dns:
+      - 2001:db8:1::20
+    environment:
+      <<: *bw-ipv6-env
+    networks:
+      bw-universe:
+        ipv6_address: 2001:db8:1::10
+
+  bw-scheduler:
+    image: bunkerity/bunkerweb-scheduler:1.6.18
+    dns:
+      - 2001:db8:1::20
+    environment:
+      <<: *bw-ipv6-env
+    networks:
+      bw-universe:
+        ipv6_address: 2001:db8:1::24
+
+networks:
+  bw-universe:
+    name: bw-universe
+    enable_ipv4: false
+    enable_ipv6: true
+    ipam:
+      config:
+        - subnet: 2001:db8:1::/64
+```
+
+| Paramètre             | Pourquoi il est nécessaire                                                                                                                                  |
+| :-------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `USE_IPV6`            | Écouteurs IPv6 et résolution des enregistrements AAAA.                                                                                                      |
+| `API_LISTEN_IP`       | L'API interne écoute par défaut sur `0.0.0.0`, c'est-à-dire en IPv4 uniquement.                                                                             |
+| `API_WHITELIST_IP`    | L'API interne n'accepte par défaut que la boucle locale : listez l'adresse IPv6 de chaque appelant (scheduler, et l'interface Web ou autoconf si utilisés). |
+| `BUNKERWEB_INSTANCES` | L'endroit où le scheduler trouve le cœur. Une adresse IPv6 nécessite des crochets et un port.                                                               |
+| `DNS_RESOLVERS`       | La valeur par défaut est le résolveur IPv4 de Docker. NGINX et Lua ont besoin d'un résolveur IPv6, entre crochets.                                          |
+
+Les entrées `dns:` comptent aussi : le scheduler et les jobs utilisent le résolveur du conteneur, pas `DNS_RESOLVERS`. Les backends sont alors joints par adresse IPv6 ou par un nom qui possède un enregistrement AAAA : un nom d'upstream qui n'a qu'un enregistrement A échoue avec une erreur `502`.
+
+Certaines fonctionnalités sortantes contactent des serveurs qui n'avaient pas d'enregistrement AAAA lors de nos vérifications (octobre 2026). Sans sortie IPv4 ni NAT64/DNS64, leurs jobs échouent ou continuent d'utiliser des données en cache, tandis que le reste de BunkerWeb continue de servir :
+
+- BunkerNet et les rapports d'utilisation anonymes (désactivez-les avec `USE_BUNKERNET=no` et `SEND_ANONYMOUS_REPORT=no`).
+- Le téléchargement des plugins PRO.
+- La vérification de la disponibilité d'une nouvelle version de BunkerWeb.
+- Les mises à jour des bases de pays et d'ASN (les bases fournies ou en cache restent utilisées).
+- Fonctionnalités optionnelles : certificats ZeroSSL, téléchargement des plugins CRS de ModSecurity depuis GitHub, hCaptcha et le serveur de démonstration mCaptcha.
+
+Limitation connue : sur un réseau IPv6 uniquement, le cœur ouvre toujours des écouteurs génériques IPv4 sur les ports TCP HTTP et HTTPS et sur le port UDP HTTPS (HTTP/3). Ils ne transportent aucun trafic lorsque le réseau n'a pas d'IPv4, mais un scanner qui rejette tout écouteur IPv4 les signalera. La boucle locale IPv4 est également toujours utilisée à l'intérieur des conteneurs (vérification de santé, écouteur local de l'API). Les tests n'ont pas couvert l'interface Web, une base de données en réseau ni les autres intégrations sur un réseau IPv6 uniquement.
 
 ## Options de configuration de journalisation
 
@@ -2840,7 +3032,7 @@ Avec la valeur par défaut `BCFH` de `MODSECURITY_SEC_AUDIT_LOG_PARTS`, la parti
     services:
       bunkerweb:
         # Ceci est le nom qui sera utilisé pour identifier l'instance dans le Scheduler
-        image: bunkerity/bunkerweb:1.6.17
+        image: bunkerity/bunkerweb:1.6.18
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -2853,7 +3045,7 @@ Avec la valeur par défaut `BCFH` de `MODSECURITY_SEC_AUDIT_LOG_PARTS`, la parti
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.17
+        image: bunkerity/bunkerweb-scheduler:1.6.18
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Assurez-vous de définir le nom d'instance correct
@@ -2870,7 +3062,7 @@ Avec la valeur par défaut `BCFH` de `MODSECURITY_SEC_AUDIT_LOG_PARTS`, la parti
           - bw-db
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.6.17
+        image: bunkerity/bunkerweb-ui:1.6.18
         environment:
           <<: *bw-env
         volumes:
@@ -3029,6 +3221,255 @@ log {
 };
 ```
 
+### Envoyer les journaux vers Splunk {#send-logs-to-splunk}
+
+BunkerWeb n'a besoin d'aucun plugin Splunk. Un Splunk Universal Forwarder lit les fichiers journaux, et trois réglages font écrire à BunkerWeb des formats que Splunk sait interpréter : un second journal d'accès au format `key=value`, le journal d'erreurs existant et un journal d'audit ModSecurity en JSON.
+
+**1. Ajouter un journal d'accès pour Splunk.** Chaque `ACCESS_LOG_N` est associé au `LOG_FORMAT_N` de même suffixe : `access.log` garde donc son format par défaut (l'interface web le lit) et le nouveau fichier reçoit le sien. Ajoutez ceci à `/etc/bunkerweb/variables.env`, avec un autre suffixe si `_1` est déjà pris :
+
+```conf
+ACCESS_LOG_1=/var/log/bunkerweb/access-splunk.log
+LOG_FORMAT_1=time=$time_iso8601 host=$host client=$remote_addr request_id=$request_id method=$request_method uri="$request_uri" status=$status bytes=$body_bytes_sent ua="$http_user_agent" reason=$reason modsec_rules="$modsecurity_rules" modsec_score=$modsecurity_anomaly_score modsec_id=$modsecurity_unique_id
+```
+
+!!! warning "Écrire les valeurs exactement comme indiqué"
+    BunkerWeb lit `variables.env` littéralement : pas de guillemets autour d'une valeur, et pas de commentaire après une valeur sur la même ligne. Un commentaire en fin de ligne devient une partie de la valeur. Le réglage est alors ignoré avec `Ignoring variable ... doesn't match regex` dans le journal du scheduler, et la valeur par défaut s'applique. Placez les commentaires sur leur propre ligne.
+
+**2. Facultatif : garder les corps de requête hors du journal d'audit.** La valeur par défaut de `MODSECURITY_SEC_AUDIT_LOG_PARTS` est `BCFH`, et la partie `C` écrit le corps de la requête dans chaque entrée d'audit. Traitez le fichier comme sensible, ou retirez cette partie :
+
+```conf
+MODSECURITY_SEC_AUDIT_LOG_PARTS=BFH
+```
+
+**3. Écrire le journal d'audit en JSON.** Ajoutez ceci à `/etc/bunkerweb/variables.env` :
+
+```conf
+MODSECURITY_SEC_AUDIT_LOG_FORMAT=JSON
+```
+
+Les versions antérieures n'ont pas ce réglage : placez à la place `SecAuditLogFormat JSON` dans une configuration personnalisée de type `modsec` (par exemple `/etc/bunkerweb/configs/modsec/audit-json.conf`, voir [Configurations personnalisées](#custom-configurations)).
+
+**4. Redémarrer les services.**
+
+```shell
+sudo systemctl restart bunkerweb && \
+sudo systemctl restart bunkerweb-scheduler
+```
+
+**5. Vérifier les fichiers.** Envoyez une requête que ModSecurity bloque, par exemple une URL avec `?q=<script>alert(1)</script>` et un `User-Agent` de type navigateur (un `User-Agent` vide est déjà bloqué par le Core Rule Set seul). Lisez ensuite la dernière ligne de chaque fichier. Le journal d'audit contient un objet JSON par ligne :
+
+```shell
+sudo tail -n 1 /var/log/bunkerweb/access-splunk.log
+sudo tail -n 1 /var/log/bunkerweb/modsec_audit.log | jq .transaction.unique_id
+```
+
+**6. Configurer le forwarder.** Les fichiers journaux de BunkerWeb appartiennent à `nginx:nginx` et les paquets en restreignent l'accès à cet utilisateur et à ce groupe : ajoutez donc l'utilisateur qui exécute le forwarder au groupe `nginx`. Surveillez ensuite les trois fichiers dans `inputs.conf`, avec un sourcetype pour chacun :
+
+```conf
+[monitor:///var/log/bunkerweb/access-splunk.log]
+sourcetype = bunkerweb:access
+
+[monitor:///var/log/bunkerweb/error.log]
+sourcetype = bunkerweb:error
+
+[monitor:///var/log/bunkerweb/modsec_audit.log]
+sourcetype = bunkerweb:modsec_audit
+```
+
+Dans `props.conf`, faites interpréter les entrées d'audit comme du JSON sur le search head, et augmentez `TRUNCATE` sur les indexeurs (ou le heavy forwarder). Les entrées sont longues : une seule sonde XSS a écrit 7,3 Ko, et une requête avec plusieurs charges d'attaque en a écrit 20, alors que le `TRUNCATE` par défaut coupe les événements à 10 000 octets.
+
+```conf
+[bunkerweb:modsec_audit]
+KV_MODE = json
+TRUNCATE = 100000
+```
+
+`access-splunk.log` correspond au motif `/var/log/bunkerweb/*.log` de la politique décrite dans [Rétention des fichiers journaux](#log-file-retention) : `logrotate` le prend donc en charge comme les autres fichiers.
+
+**Champs du journal d'accès**
+
+| Champ          | Contenu                                                                                                                                                             |
+| :------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `time`         | `$time_iso8601`                                                                                                                                                     |
+| `host`         | `$host`                                                                                                                                                             |
+| `client`       | `$remote_addr`                                                                                                                                                      |
+| `request_id`   | `$request_id`, la même valeur que le quatrième champ de la ligne par défaut de `access.log`                                                                         |
+| `method`       | `$request_method`                                                                                                                                                   |
+| `uri`          | `$request_uri`, avec la chaîne de requête                                                                                                                           |
+| `status`       | `$status`                                                                                                                                                           |
+| `bytes`        | `$body_bytes_sent`                                                                                                                                                  |
+| `ua`           | `$http_user_agent`                                                                                                                                                  |
+| `reason`       | L'identifiant du plugin lorsqu'un plugin a refusé la requête (`blacklist`, `limit`, ...). Vide sinon, **y compris lorsque ModSecurity l'a refusée**                 |
+| `modsec_rules` | Identifiants de règles exposés par l’intégration CRS de BunkerWeb, séparés et précédés d’un espace (ils peuvent se répéter). `-` si non renseignés ; liste non exhaustive des correspondances |
+| `modsec_score` | Le score d’anomalie exposé par l’intégration CRS de BunkerWeb, `-` si non renseigné |
+| `modsec_id` | L’identifiant exposé par l’intégration CRS de BunkerWeb, `-` si non renseigné. Lorsqu’il est présent, il correspond à `transaction.unique_id` de l’entrée d’audit associée |
+
+Trois requêtes telles qu'elles apparaissent dans `access-splunk.log` : une autorisée, une refusée par le plugin `blacklist` et une refusée par ModSecurity (`ua` abrégé).
+
+```text
+time=2026-11-10T08:11:02+00:00 host=www.example.com client=10.77.52.1 request_id=a1b31236225cf6d34fec07e089838f48 method=GET uri="/spl-allowed" status=404 bytes=69298 ua="Mozilla/5.0 ..." reason= modsec_rules="-" modsec_score=- modsec_id=-
+time=2026-11-10T08:11:02+00:00 host=www.example.com client=10.77.52.1 request_id=260b845a6bb21e46656c42e7a682f2a1 method=GET uri="/spl-blacklisted" status=403 bytes=69297 ua="Mozilla/5.0 ..." reason=blacklist modsec_rules="-" modsec_score=- modsec_id=-
+time=2026-11-10T08:11:02+00:00 host=www.example.com client=10.77.52.1 request_id=f3ddfff5a4652efdeb3daa645dee0827 method=GET uri="/spl-xss?q=<script>alert(1)</script>" status=403 bytes=69297 ua="Mozilla/5.0 ..." reason= modsec_rules=" 941100 941110 941160 941390" modsec_score=20 modsec_id=179429826266.143898
+```
+
+La première requête renvoie `404` parce que la pile de test n'a pas de backend. L'entrée d'audit correspondante, abrégée, commence par le même identifiant :
+
+```json
+{"transaction":{"client_ip":"10.77.52.1","time_stamp":"Tue Nov 10 08:11:02 2026","unique_id":"179429826266.143898","request":{"method":"GET","uri":"/spl-xss?q=<script>alert(1)</script>","body":""},"response":{"http_code":403},"messages":[{"message":"XSS Attack Detected via libinjection","details":{"ruleId":"941100","severity":"2"}}]}}
+```
+
+!!! warning "Limites"
+    - **Pas de journal d'accès en JSON.** `LOG_FORMAT_N` est écrit entre apostrophes dans la configuration NGINX, et il n'y a pas d'emplacement pour `escape=json`. Utilisez `key=value` pour le journal d'accès, et JSON uniquement pour le journal d'audit.
+    - **Pas d'apostrophe dans une valeur de `LOG_FORMAT_N`.** NGINX rejette la configuration. NGINX échappe un guillemet double dans une valeur journalisée sous la forme `\x22` (`ua="Mozilla/5.0 \x22quoted\x22"`).
+    - **Les métadonnées ModSecurity dépendent des règles.** Les refus pour anomalie du CRS par défaut renseignent `modsec_id`, `modsec_rules` et `modsec_score`, avec un `reason` vide. Une règle `deny` personnalisée sans les actions `setvar` correspondantes pour `tx.bunkerweb_*` peut laisser ces champs à `-`. Le journal d’accès seul ne permet alors pas d’identifier ce refus ; consultez le journal d’erreurs ou d’audit.
+    - **Le journal d’audit n’est ni un journal de requêtes ni une preuve de blocage.** La valeur par défaut de `MODSECURITY_SEC_AUDIT_ENGINE` (`RelevantOnly`) peut aussi enregistrer des transactions autorisées lorsqu’une règle journalise une correspondance (y compris en mode `DetectionOnly` ou avec un score inférieur au seuil de blocage), ou lorsque le statut correspond à `SecAuditLogRelevantStatus`. Dans le test ci-dessus, seuls les refus ModSecurity ont produit des entrées.
+    - **La partie `C` contient les corps de requête**, y compris les champs de formulaire et les identifiants de connexion. Utilisez `BFH` sauf si vous avez besoin des corps, et limitez les droits de lecture de l'index.
+
+**Conteneurs : Docker, Autoconf, Swarm, Kubernetes et All-in-one**
+
+Les étapes ci-dessus écrivent de vrais fichiers. L'image de conteneur `bunkerweb` n'en écrit pas : `access.log`, `error.log` et `modsec_audit.log` sont des liens symboliques vers la sortie standard et la sortie d'erreur du conteneur (voir [Rétention des fichiers journaux](#log-file-retention)), qu'un forwarder ne peut pas surveiller. Écrivez donc les trois flux Splunk dans **des fichiers distincts**, sur un volume que le conteneur `bunkerweb` partage avec un Splunk Universal Forwarder. Les flux par défaut restent en place, et `docker logs` ou `kubectl logs` continuent de fonctionner. Seuls `bunkerweb:access`, `bunkerweb:error` et `bunkerweb:modsec_audit` sont interprétés par le [BunkerWeb Add-on for Splunk](https://splunkbase.splunk.com/app/10342).
+
+BunkerWeb peut écrire sur ce volume : `/var/log/bunkerweb` appartient à `root:nginx` avec le mode `770`, et le conteneur s'exécute sous `nginx` (UID et GID `101`). Avec un système de fichiers racine en lecture seule, montez le volume sur `/var/log/bunkerweb` : ce montage y est alors le seul chemin accessible en écriture.
+
+Définissez ces réglages sur le **scheduler**, comme n'importe quel autre réglage. Il génère la configuration NGINX et la pousse vers les instances :
+
+```conf
+ACCESS_LOG_1=/var/log/bunkerweb/access-splunk.log
+LOG_FORMAT_1=time=$time_iso8601 host=$host client=$remote_addr request_id=$request_id method=$request_method uri="$request_uri" status=$status bytes=$body_bytes_sent ua="$http_user_agent" reason=$reason modsec_rules="$modsecurity_rules" modsec_score=$modsecurity_anomaly_score modsec_id=$modsecurity_unique_id
+ERROR_LOG_1=/var/log/bunkerweb/error-splunk.log
+MODSECURITY_SEC_AUDIT_LOG=/var/log/bunkerweb/modsec_audit-splunk.log
+MODSECURITY_SEC_AUDIT_LOG_FORMAT=JSON
+```
+
+`ERROR_LOG_1` ajoute un second journal d'erreurs à côté de celui par défaut. `MODSECURITY_SEC_AUDIT_LOG` doit être un fichier se terminant par `.log`, directement sous `/var/log/bunkerweb/`, avec un nom différent du `modsec_audit.log` par défaut, qui est un lien symbolique. Dans un fichier Compose, écrivez chaque `$` de `LOG_FORMAT_1` sous la forme `$$`. Avant la 1.6.18, remplacez `MODSECURITY_SEC_AUDIT_LOG_FORMAT` par la configuration personnalisée `modsec` de l'étape 3.
+
+Le forwarder surveille ces fichiers, un sourcetype chacun. Les fichiers appartiennent à `nginx` (UID et GID `101`) : exécutez le conteneur du forwarder avec un utilisateur ou un groupe qui peut les lire, et vérifiez-le avec `ls -ln` sur le volume :
+
+```conf
+[monitor:///var/log/bunkerweb/access-splunk.log]
+sourcetype = bunkerweb:access
+
+[monitor:///var/log/bunkerweb/error-splunk.log]
+sourcetype = bunkerweb:error
+
+[monitor:///var/log/bunkerweb/modsec_audit-splunk.log]
+sourcetype = bunkerweb:modsec_audit
+```
+
+Le dépôt de l'add-on propose un exemple de configuration par intégration : [BunkerWeb Add-on for Splunk, Setup](https://github.com/bunkerity/bunkerweb-splunk-addon#setup).
+
+=== "Docker / Autoconf / Swarm"
+
+    Montez un même volume sur le conteneur `bunkerweb` et sur le forwarder, et définissez les variables sur le scheduler :
+
+    ```yaml
+    services:
+      bunkerweb:
+        image: bunkerity/bunkerweb:1.6.18
+        volumes:
+          - bw-splunk-logs:/var/log/bunkerweb
+
+      bw-scheduler:
+        image: bunkerity/bunkerweb-scheduler:1.6.18
+        environment:
+          ACCESS_LOG_1: "/var/log/bunkerweb/access-splunk.log"
+          LOG_FORMAT_1: 'time=$$time_iso8601 host=$$host client=$$remote_addr request_id=$$request_id method=$$request_method uri="$$request_uri" status=$$status bytes=$$body_bytes_sent ua="$$http_user_agent" reason=$$reason modsec_rules="$$modsecurity_rules" modsec_score=$$modsecurity_anomaly_score modsec_id=$$modsecurity_unique_id'
+          ERROR_LOG_1: "/var/log/bunkerweb/error-splunk.log"
+          MODSECURITY_SEC_AUDIT_LOG: "/var/log/bunkerweb/modsec_audit-splunk.log"
+          MODSECURITY_SEC_AUDIT_LOG_FORMAT: "JSON"
+
+      splunk-uf:
+        image: "<your Splunk Universal Forwarder image>"
+        volumes:
+          - bw-splunk-logs:/var/log/bunkerweb:ro
+          # plus your inputs.conf and outputs.conf
+
+    volumes:
+      bw-splunk-logs:
+    ```
+
+    Sur Swarm, un volume nommé est local à son nœud : exécutez BunkerWeb et le forwarder comme services `global`, afin que les deux tâches d'un nœud partagent le volume de ce nœud.
+
+    **Vous faites tourner ces fichiers.** Les images n'embarquent pas `logrotate`, et le moteur de conteneurs ne borne que les flux de sortie standard et d'erreur. Voir « Faire tourner les fichiers » ci-dessous.
+
+=== "Kubernetes"
+
+    Les pods BunkerWeb partagent un volume `emptyDir` entre le conteneur `bunkerweb` et un conteneur forwarder du même Pod. Le chart Helm propose `bunkerweb.volumes` et `bunkerweb.volumeMounts` pour le volume, mais aucune clé pour un conteneur supplémentaire. Sur Kubernetes 1.29 ou plus récent, déclarez le forwarder dans `bunkerweb.initContainers` avec `restartPolicy: Always` : Kubernetes l'exécute alors comme un sidecar. Sur un cluster plus ancien, ajoutez le conteneur avec un patch Kustomize.
+
+    ```yaml
+    bunkerweb:
+      volumes:
+        - name: bw-splunk-logs
+          emptyDir: {}
+      volumeMounts:
+        - name: bw-splunk-logs
+          mountPath: /var/log/bunkerweb
+      initContainers:
+        - name: splunk-uf
+          image: "<your Splunk Universal Forwarder image>"
+          restartPolicy: Always
+          volumeMounts:
+            - name: bw-splunk-logs
+              mountPath: /var/log/bunkerweb
+              readOnly: true
+    ```
+
+    Le scheduler lit les réglages, pas les pods BunkerWeb. Avec le chart Helm, définissez-les sur `scheduler.extraEnvs` :
+
+    ```yaml
+    scheduler:
+      extraEnvs:
+        - name: ACCESS_LOG_1
+          value: "/var/log/bunkerweb/access-splunk.log"
+        - name: LOG_FORMAT_1
+          value: 'time=$time_iso8601 host=$host client=$remote_addr request_id=$request_id method=$request_method uri="$request_uri" status=$status bytes=$body_bytes_sent ua="$http_user_agent" reason=$reason modsec_rules="$modsecurity_rules" modsec_score=$modsecurity_anomaly_score modsec_id=$modsecurity_unique_id'
+        - name: ERROR_LOG_1
+          value: "/var/log/bunkerweb/error-splunk.log"
+        - name: MODSECURITY_SEC_AUDIT_LOG
+          value: "/var/log/bunkerweb/modsec_audit-splunk.log"
+        - name: MODSECURITY_SEC_AUDIT_LOG_FORMAT
+          value: "JSON"
+    ```
+
+    **Vous faites tourner ces fichiers.** Rien dans l'image BunkerWeb ne s'en charge. Ajoutez un second sidecar de la même façon : il monte le volume sans `readOnly` et exécute `logrotate` en boucle, comme le fait l'image All-in-one (`while :; do logrotate ...; sleep 3600; done`). Voir « Faire tourner les fichiers » ci-dessous.
+
+=== "All-in-one"
+
+    L'image All-in-one garde `access.log`, `error.log` et `modsec_audit.log` comme de vrais fichiers sous `/var/log/bunkerweb/`. Partagez ce répertoire avec le forwarder au moyen d'un volume, et ne définissez que les deux réglages qui changent le format : `ACCESS_LOG_1` avec `LOG_FORMAT_1` de l'étape 1, et `MODSECURITY_SEC_AUDIT_LOG_FORMAT=JSON`. Utilisez le `inputs.conf` de l'étape 7. CrowdSec, inclus dans l'image, lit aussi `modsec_audit.log`, et le changement de format s'applique à ce fichier.
+
+    **BunkerWeb fait tourner ces fichiers.** L'image exécute `logrotate` toutes les heures sous supervisor, avec la politique des paquets Linux (`/etc/logrotate.d/bunkerweb`). Elle couvre `/var/log/bunkerweb/*.log`, donc `access-splunk.log` aussi, et utilise `copytruncate` : le forwarder continue donc de lire à travers une rotation. Voir [Rétention des fichiers journaux](#log-file-retention).
+
+**Faire tourner les fichiers (Docker, Autoconf, Swarm, Kubernetes).** La rotation doit utiliser `copytruncate`. ModSecurity ouvre son journal d'audit une seule fois et ne le rouvre jamais : une rotation qui renomme le fichier laisse ModSecurity écrire dans l'archive, et le fichier actif reste vide. Ne ciblez que les fichiers Splunk, car `access.log`, `error.log` et `modsec_audit.log` peuvent être des liens symboliques sur le même volume. Ce bloc conserve sept générations compressées d'au plus 100 Mo chacune :
+
+```conf
+/path/to/the/volume/*-splunk.log {
+    size 100M
+    rotate 7
+    compress
+    copytruncate
+    missingok
+    notifempty
+}
+```
+
+Sur un hôte Docker, utilisez le `Mountpoint` du volume (donné par `docker volume inspect`) comme chemin, et lancez le `logrotate` de l'hôte. Dans un conteneur de rotation, utilisez `/var/log/bunkerweb/*-splunk.log`. `logrotate` ne vérifie `size` que lorsqu'il s'exécute, et la plupart des hôtes le lancent une fois par jour : lancez-le plus souvent si les fichiers grossissent plus vite.
+
+!!! info "Pilote de journalisation (solution de repli)"
+    Si vous ne pouvez pas partager un volume, le [pilote de journalisation `splunk` de Docker](https://docs.docker.com/engine/logging/drivers/splunk/) avec un jeton HTTP Event Collector envoie les flux du conteneur. Il envoie ensemble les lignes d'accès, d'erreur et d'audit sous un seul sourcetype : seul leur contenu permet de les distinguer. L'add-on n'interprète que `bunkerweb:access`, `bunkerweb:error` et `bunkerweb:modsec_audit` : les événements envoyés sous `bunkerweb:docker` n'ont donc ni extraction de champs ni mappage CIM. Définissez le format `key=value` sur `LOG_FORMAT` (sans suffixe) pour que les lignes d'accès envoyées le portent. Cela remplace le format par défaut dans `access.log`. Définissez `MODSECURITY_SEC_AUDIT_LOG_FORMAT=JSON` sur le scheduler : les entrées d'audit apparaissent alors dans `docker logs` parmi les lignes du journal d'erreurs, et les lignes qui commencent par `{` sont les entrées d'audit.
+
+    ```yaml
+    services:
+      bunkerweb:
+        image: bunkerity/bunkerweb:1.6.18
+        logging:
+          driver: splunk
+          options:
+            splunk-url: "https://splunk.example.com:8088"
+            splunk-token: "<HEC token>"
+            splunk-format: raw
+            splunk-sourcetype: "bunkerweb:docker"
+    ```
+
 ## Meilleures pratiques de journalisation Docker {#docker-logging-best-practices}
 
 Lors de l'utilisation de Docker, il est important de gérer les journaux des conteneurs pour éviter qu'ils ne consomment un espace disque excessif. Par défaut, Docker utilise le pilote de journalisation `json-file`, ce qui peut entraîner des fichiers journaux très volumineux s'il n'est pas configuré.
@@ -3042,7 +3483,7 @@ Vous pouvez configurer le pilote de journalisation pour vos services dans votre 
 ```yaml
 services:
   bunkerweb:
-    image: bunkerity/bunkerweb:1.6.17
+    image: bunkerity/bunkerweb:1.6.18
     logging:
       driver: "json-file"
       options:
@@ -3151,7 +3592,7 @@ Les variables couramment utilisées sont :
         -p 80:8080/tcp \
         -p 443:8443/tcp \
         -p 443:8443/udp \
-        bunkerity/bunkerweb-all-in-one:1.6.17
+        bunkerity/bunkerweb-all-in-one:1.6.18
     ```
 
     Si le conteneur existe déjà, recréez-le pour appliquer le nouvel environnement.
@@ -3162,7 +3603,7 @@ Les variables couramment utilisées sont :
 
     ```yaml
     bw-scheduler:
-      image: bunkerity/bunkerweb-scheduler:1.6.17
+      image: bunkerity/bunkerweb-scheduler:1.6.18
       ...
       environment:
         HTTP_PROXY: "http://proxy.example.local:3128"
@@ -3181,7 +3622,7 @@ Les variables couramment utilisées sont :
 
     ```yaml
     bw-scheduler:
-      image: bunkerity/bunkerweb-scheduler:1.6.17
+      image: bunkerity/bunkerweb-scheduler:1.6.18
       ...
       environment:
         HTTP_PROXY: "http://proxy.example.local:3128"
@@ -3224,7 +3665,7 @@ Les variables couramment utilisées sont :
 
     ```yaml
     bw-scheduler:
-      image: bunkerity/bunkerweb-scheduler:1.6.17
+      image: bunkerity/bunkerweb-scheduler:1.6.18
       ...
       environment:
         HTTP_PROXY: "http://proxy.example.local:3128"
@@ -3285,6 +3726,8 @@ Nous fournissons également un [tableau de bord Grafana](https://grafana.com/gra
 | `PROMETHEUS_EXPORTER_PORT`     | `9113`                                                | global   | Non      | Port d'écoute de l'exportateur Prometheus.                                                               |
 | `PROMETHEUS_EXPORTER_URL`      | `/metrics`                                            | global   | Non      | URL HTTP de l'exportateur Prometheus.                                                                    |
 | `PROMETHEUS_EXPORTER_ALLOW_IP` | `127.0.0.0/8 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16` | global   | Non      | Liste des adresses IP/réseaux autorisés à contacter le point de terminaison de l'exportateur Prometheus. |
+
+Activez `USE_MONITORING=yes` et `USE_PROMETHEUS_EXPORTER=yes`. Configurez la collecte sur le port `9113` et le chemin `/metrics`, ou utilisez vos propres valeurs. Limitez `PROMETHEUS_EXPORTER_ALLOW_IP` aux adresses de collecte. Pour une collecte HTTPS authentifiée, définissez `PROMETHEUS_EXPORTER_TOKEN` et `PROMETHEUS_EXPORTER_SSL=yes`, fournissez un certificat et sa clé, puis configurez le serveur de collecte pour qu'il fasse confiance à l'autorité de certification.
 
 ### Reporting <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
 
@@ -3459,7 +3902,7 @@ Vous pouvez également spécifier un fichier de sauvegarde personnalisé pour la
 === "Docker"
 
     ```bash
-    docker exec -it <scheduler_container> bwcli plugin backup restore s3_backup_file.zip
+    docker exec -it <scheduler_container> bwcli plugin backup_s3 restore s3_backup_file.zip
     ```
 
 !!! example "En cas de panne"
@@ -3493,12 +3936,12 @@ Le **serveur MCP BunkerWeb** permet aux assistants IA comme **Claude Code** et *
 
 ### Exemple Docker Compose
 
-Un exemple complet est disponible dans [`examples/mcp-stack/`](https://github.com/bunkerity/bunkerweb/tree/v1.6.17/examples/mcp-stack) :
+Un exemple complet est disponible dans [`examples/mcp-stack/`](https://github.com/bunkerity/bunkerweb/tree/v1.6.18/examples/mcp-stack) :
 
 ```yaml
 services:
   bw-api:
-    image: bunkerity/bunkerweb-api:1.6.17
+    image: bunkerity/bunkerweb-api:1.6.18
     environment:
       API_TOKEN: "my-bearer-token-for-mcp"
       DATABASE_URI: "mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db"
@@ -3609,43 +4052,26 @@ Pour la documentation complète, visitez le [dépôt BunkerWeb MCP](https://gith
 
 ## Migration <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO) {#migration-pro}
 
-Prise en charge STREAM :white_check_mark:
+STREAM support :white_check_mark:
 
-Le plug-in de migration **révolutionne les transferts de** configuration BunkerWeb entre les instances grâce à son **interface Web conviviale**, simplifiant ainsi l'ensemble du parcours de migration. Que vous mettiez à niveau des systèmes, que vous fassiez évoluer une infrastructure ou que vous transformiez d'environnement, cet outil vous permet de transférer sans effort les **paramètres, les préférences et les données** avec une facilité et une confiance inégalées. Dites adieu aux processus manuels fastidieux et bonjour à une expérience de **migration transparente et sans tracas**.
-
-**Liste des fonctionnalités**
-
-- **Migration sans effort :** Transférez facilement les configurations BunkerWeb entre les instances sans les complexités des procédures manuelles.
-
-- **Interface Web intuitive :** Naviguez sans effort dans le processus de migration grâce à une interface Web conviviale conçue pour un fonctionnement intuitif.
-
-- **Compatibilité entre bases de données :** profitez d'une migration transparente sur diverses plates-formes de bases de données, notamment SQLite, MySQL, MariaDB et PostgreSQL, garantissant la compatibilité avec votre environnement de base de données préféré.
+Utilisez Migration pour transférer la configuration et les données BunkerWeb d'une installation à une autre, avec SQLite, MySQL, MariaDB ou PostgreSQL. Dans l'interface web, connectez-vous en tant que **super administrateur** pour télécharger ou restaurer une sauvegarde depuis la page **Migration**. L'archive contient des données sensibles. Réservez son accès aux personnes qui effectuent la migration.
 
 ### Créer un fichier de migration
 
-Pour créer manuellement un fichier de migration, exécutez la commande suivante :
+Passez un répertoire à `create`. La commande y écrit le fichier `backup.zip`.
 
 === "Linux"
 
     ```bash
-    bwcli plugin migration create /path/to/migration/file
+    bwcli plugin migration create /path/to/backup-dir
     ```
 
 === "Docker"
 
-    1. Créez un fichier de migration :
-
-        ```bash
-        docker exec -it <scheduler_container> bwcli plugin migration create /path/to/migration/file
-        ```
-
-    2. Copiez le fichier de migration sur votre ordinateur local :
-
-        ```bash
-        docker cp <scheduler_container>:/path/to/migration/file /path/to/migration/file
-        ```
-
-Cette commande créera une sauvegarde de votre base de données et la stockera dans le répertoire de sauvegarde spécifié dans la commande.
+    ```bash
+    docker exec <scheduler_container> bwcli plugin migration create /tmp/bunkerweb-migration
+    docker cp <scheduler_container>:/tmp/bunkerweb-migration/backup.zip ./backup.zip
+    ```
 
 !!! note "Compatibilité du client MariaDB/MySQL"
 
@@ -3653,43 +4079,27 @@ Cette commande créera une sauvegarde de votre base de données et la stockera d
 
 ### Initialiser une migration
 
-Pour initialiser manuellement une migration, exécutez la commande suivante :
+Sauvegardez l'installation de destination avant la restauration. Sur cette installation, passez le fichier ZIP à `migrate`. Une fois la configuration appliquée, vérifiez le routage des services et l'accès administrateur. Les utilisateurs doivent reconfigurer l'authentification à deux facteurs.
 
 === "Linux"
 
     ```bash
-    bwcli plugin migration migrate /path/to/migration/file
+    bwcli plugin migration migrate /path/to/backup-dir/backup.zip
     ```
 
 === "Docker"
 
-    1. Copiez le fichier de migration dans le conteneur :
+    ```bash
+    docker cp ./backup.zip <scheduler_container>:/tmp/backup.zip
+    docker exec <scheduler_container> bwcli plugin migration migrate /tmp/backup.zip
+    ```
 
-        ```bash
-        docker cp /path/to/migration/file <scheduler_container>:/path/to/migration/file
-        ```
+=== "All-in-one"
 
-    2. Initialisez la migration :
-
-        ```bash
-        docker exec -it <scheduler_container> bwcli plugin migration migrate /path/to/migration/file
-        ```
-
-=== "Tout-en-un"
-
-    1. Copiez le fichier de migration dans le conteneur :
-
-        ```bash
-        docker cp /path/to/migration/file bunkerweb-aio:/path/to/migration/file
-        ```
-
-    2. Initialisez la migration :
-
-        ```bash
-        docker exec -it bunkerweb-aio bwcli plugin migration migrate /path/to/migration/file
-        ```
-
-Cette commande migre de manière transparente vos données BunkerWeb pour qu'elles correspondent précisément à la configuration décrite dans le fichier de migration.
+    ```bash
+    docker cp ./backup.zip bunkerweb-aio:/tmp/backup.zip
+    docker exec bunkerweb-aio bwcli plugin migration migrate /tmp/backup.zip
+    ```
 
 ## Anti DDoS <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO) {#anti-ddos-pro}
 
@@ -3778,9 +4188,7 @@ Le plugin **UI Single Sign-On** permet l'authentification SSO pour l'interface w
 Au lieu de gérer des identifiants distincts pour BunkerWeb, les administrateurs peuvent déléguer l'authentification à un fournisseur d'identité existant. Le proxy d'authentification gère la connexion des utilisateurs et injecte des en-têtes d'identité avant de transmettre les requêtes à l'interface web de BunkerWeb.
 
 !!! danger "Risque d'usurpation d'en-têtes"
-    Les en-têtes SSO peuvent être facilement falsifiés par n'importe quel client. Vous **devez** restreindre `UI_SSO_TRUSTED_IPS` aux adresses IP de votre proxy d'authentification. Si ce paramètre est mal configuré, n'importe quel client peut envoyer de faux en-têtes et obtenir un accès non autorisé, y compris un accès administrateur.
-
-    La valeur par défaut `127.0.0.1,::1` ne fait confiance qu'au localhost. Dans les déploiements **Docker, Swarm ou Kubernetes**, le proxy d'authentification s'exécute dans un conteneur séparé avec sa propre adresse IP. Définissez `UI_SSO_TRUSTED_IPS` sur l'adresse IP ou le CIDR réel du conteneur du proxy d'authentification (par ex. `10.20.30.5` ou `172.18.0.0/16`). Ne le définissez jamais à `0.0.0.0/0`.
+    Limitez `UI_SSO_TRUSTED_IPS` aux adresses du proxy d'authentification. Configurez le proxy pour supprimer les en-têtes d'identité reçus et définir les siens après authentification. Réservez l'accès direct au serveur de l'interface web au réseau privé. Par défaut, `127.0.0.1,::1` limite la confiance à la boucle locale. Sous Docker, Swarm ou Kubernetes, utilisez l'adresse IP du proxy ou un bloc CIDR qui lui est réservé. N'autorisez jamais `0.0.0.0/0` ni `::/0`.
 
 ### Fonctionnalités
 
@@ -3808,9 +4216,11 @@ Au lieu de gérer des identifiants distincts pour BunkerWeb, les administrateurs
 | `UI_SSO_GROUP_WRITER`         |                     | global   | non      | Nom du groupe accordant le rôle writer.                                                                                |
 | `UI_SSO_GROUP_READER`         |                     | global   | non      | Nom du groupe accordant le rôle reader.                                                                                |
 | `UI_SSO_FALLBACK_TO_LOGIN`    | `yes`               | global   | non      | Permettre aux utilisateurs de se rabattre sur la connexion classique lorsque les en-têtes SSO sont absents.            |
-| `UI_SSO_UPDATE_USER_ON_LOGIN` | `yes`               | global   | non      | Mettre à jour les informations utilisateur (e-mail, rôle) depuis les en-têtes SSO à chaque connexion.                  |
+| `UI_SSO_UPDATE_USER_ON_LOGIN` | `yes`               | global   | non      | Mettre à jour l'adresse e-mail du compte à la connexion à partir des en-têtes SSO. |
 | `UI_SSO_ACCOUNT_LINKING`      | `username_or_email` | global   | non      | Mode de correspondance des utilisateurs SSO entrants avec les comptes locaux (`username_only` ou `username_or_email`). |
 | `UI_SSO_LOGOUT_REDIRECT_URL`  |                     | global   | non      | URL de redirection après déconnexion (par ex. endpoint de déconnexion du fournisseur SSO).                             |
+
+Consultez [tous les réglages UI SSO](features.md#ui-single-sign-on-pro) pour les profils de fournisseurs et la synchronisation des rôles.
 
 ### Démarrage rapide
 
@@ -3823,8 +4233,8 @@ Au lieu de gérer des identifiants distincts pour BunkerWeb, les administrateurs
 ### Conseils d'utilisation
 
 - Définissez `UI_SSO_FALLBACK_TO_LOGIN=no` en production pour imposer un accès exclusivement SSO. Lorsque la valeur est laissée à `yes` (par défaut), les utilisateurs peuvent contourner le SSO et se connecter avec des identifiants locaux, ignorant ainsi les politiques MFA ou de session imposées par votre fournisseur d'identité.
-- Conservez `UI_SSO_UPDATE_USER_ON_LOGIN` à sa valeur par défaut (`yes`) pour garantir la synchronisation des rôles avec les modifications de groupes de l'IdP.
-- Avec `UI_SSO_ACCOUNT_LINKING=username_or_email`, les comptes locaux existants sont automatiquement liés lors de la première connexion SSO si le nom d'utilisateur ou l'e-mail correspond. Utilisez `username_only` si votre IdP permet aux utilisateurs de définir des adresses e-mail arbitraires, afin de prévenir la prise de contrôle de comptes par usurpation d'e-mail.
+- `UI_SSO_UPDATE_USER_ON_LOGIN` met à jour les adresses e-mail. Pour synchroniser les rôles, activez `UI_SSO_SYNC_ROLES=yes`, transmettez l'en-tête des groupes et configurez au moins une correspondance de groupe. Pour un compte préexistant, la synchronisation peut uniquement réduire les privilèges. `UI_SSO_SYNC_ROLES_PROTECT_ADMIN=yes` empêche aussi de rétrograder les administrateurs.
+- Avec `UI_SSO_ACCOUNT_LINKING=username_or_email`, la première connexion SSO recherche d'abord le nom d'utilisateur, puis l'adresse e-mail. Les comptes administrateur existants sans enregistrement SSO doivent utiliser la connexion locale. Utilisez `username_only` si votre fournisseur d'identité permet de changer d'adresse e-mail sans la vérifier.
 
 ## Easy Resolve <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO) {#easy-resolve-pro}
 
@@ -4322,11 +4732,11 @@ Les modèles utilisent la syntaxe de modèle Lua avec les délimiteurs suivants 
         ```yaml
         services:
           bunkerweb:
-            image: bunkerity/bunkerweb:1.6.17
+            image: bunkerity/bunkerweb:1.6.18
             # ... autres paramètres (pas de variables d'environnement nécessaires ici pour les pages personnalisées)
 
           bw-scheduler:
-            image: bunkerity/bunkerweb-scheduler:1.6.17
+            image: bunkerity/bunkerweb-scheduler:1.6.18
             volumes:
               - ./templates:/custom_templates:ro
             environment:
@@ -4409,7 +4819,7 @@ Les modèles utilisent la syntaxe de modèle Lua avec les délimiteurs suivants 
             spec:
               containers:
                 - name: bunkerweb-scheduler
-                  image: bunkerity/bunkerweb-scheduler:1.6.17
+                  image: bunkerity/bunkerweb-scheduler:1.6.18
                   env:
                     - name: CUSTOM_ERROR_PAGE
                       value: "/custom_templates/error.html"
@@ -5013,7 +5423,7 @@ Le plugin **OpenAPI Validator** applique votre contrat d'API en validant les req
 
 ### Fonctionnement
 
-1. Un job planifié (`openapi-download.py`) récupère le document OpenAPI à partir d'une URL ou d'un fichier et le met en cache sur le disque (toutes les heures par défaut).
+1. La tâche `openapi-download.py` s'exécute toutes les heures. Elle récupère et met en cache le document si le cache est absent ou si la source ou le chemin de base a changé.
 2. Au moment de l'initialisation de NGINX, le plugin compile les routes à partir de la spécification mise en cache et les stocke dans un espace de stockage interne partagé.
 3. Pendant le traitement de la requête, le plugin fait correspondre la requête aux routes compilées et applique la validation.
 
@@ -5024,7 +5434,7 @@ Le plugin **OpenAPI Validator** applique votre contrat d'API en validant les req
 - Surcharge du chemin de base via `OPENAPI_BASE_PATH` ou déduction automatique à partir de la spécification.
 - Autoriser ou refuser les requêtes vers des chemins non listés dans la spécification.
 - Liste d'ignorés configurable pour les points de terminaison tels que la documentation ou les fichiers de spécification.
-- La spécification mise en cache est actualisée toutes les heures sans bloquer les requêtes.
+- Les requêtes utilisent les routes en cache sans récupérer la spécification.
 
 ### Configuration
 
@@ -5058,6 +5468,10 @@ Autorisez éventuellement les chemins inconnus pendant le déploiement :
 
 - `OPENAPI_ALLOW_UNSPECIFIED=yes`
 
+En `SECURITY_MODE=block`, le validateur refuse les requêtes soumises à validation tant qu'aucune route n'est chargée et que `OPENAPI_ALLOW_UNSPECIFIED=no`. Une erreur de décodage ou de compilation de la spécification en cache entraîne un refus même avec `OPENAPI_ALLOW_UNSPECIFIED=yes`. Si un téléchargement échoue, le plugin conserve la spécification précédente en cache. Consultez la tâche `openapi-download` sur la page **Tâches**.
+
+La tâche horaire `openapi-download` réutilise la spécification en cache tant que `OPENAPI_SPEC` et `OPENAPI_BASE_PATH` sont inchangés. Pour charger une nouvelle version, indiquez une nouvelle URL ou un nouveau chemin dans `OPENAPI_SPEC`.
+
 ## Cache <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO) {#cache-pro}
 
 Prise en charge de STREAM :x:
@@ -5089,7 +5503,7 @@ Le plugin Cache PRO active la mise en cache des réponses au niveau du reverse p
 | `CACHE_BACKGROUND_UPDATE`   | `no`                              | multisite | non      | Active ou désactive la mise à jour du cache en arrière-plan.               |
 | `CACHE_BYPASS`              |                                   | multisite | non      | Liste de variables déterminant si le cache doit être contourné.            |
 | `CACHE_NO_CACHE`            | `$http_pragma$http_authorization` | multisite | non      | Désactive le stockage en cache si des variables sont définies.             |
-| `CACHE_KEY`                 | `$scheme$proxy_host$request_uri`  | multisite | non      | Clé utilisée pour identifier les éléments mis en cache.                    |
+| `CACHE_KEY`                 | `$scheme$host$request_uri`  | multisite | non      | Clé utilisée pour identifier les éléments mis en cache.                    |
 | `CACHE_CONVERT_HEAD_TO_GET` | `yes`                             | multisite | non      | Convertit les requêtes HEAD en GET lors de la mise en cache.               |
 | `CACHE_LOCK`                | `no`                              | multisite | non      | Verrouille les requêtes concurrentes lors du remplissage du cache.         |
 | `CACHE_LOCK_AGE`            | `5s`                              | multisite | non      | Envoie la requête à l'upstream si le cache est verrouillé depuis ce délai. |
@@ -5144,7 +5558,7 @@ STREAM support :white_check_mark:
 Le plugin **ACME** fournit une gestion avancée des certificats via le protocole ACME avec prise en charge d'autorités de certification personnalisées (Step CA, Vault PKI, Sectigo, Google Trust Services, etc.). Il complète le plugin Let's Encrypt intégré en ajoutant la prise en charge de CA personnalisées, les challenges DNS-01 et TLS-ALPN-01, les certificats wildcard, la surveillance des certificats avec alertes d'expiration, la surveillance des logs Certificate Transparency et un OCSP stapling amélioré.
 
 !!! tip "Quand utiliser ACME ou le plugin Let's Encrypt intégré"
-    Si vous avez uniquement besoin de certificats Let's Encrypt avec des challenges HTTP-01, le plugin Let's Encrypt intégré (`AUTO_LETS_ENCRYPT=yes`) est suffisant. Utilisez le plugin ACME lorsque vous avez besoin de CA personnalisées, de challenges DNS-01 ou TLS-ALPN-01, de certificats wildcard, ou de surveillance des certificats avec alertes.
+    Utilisez le plugin Let's Encrypt intégré pour les certificats Let's Encrypt, y compris avec DNS-01 et les certificats wildcard. Choisissez ACME PRO pour une autorité personnalisée, TLS-ALPN-01, ou le tableau de bord et les alertes de certificats.
 
 ### Fonctionnalités
 
@@ -5206,7 +5620,7 @@ Les plugins externes/PRO non listés dans les paramètres `PLUGINS_ORDER_*` sont
 | `ACME_CHALLENGE`       | `http`  | multisite | non      | Type de challenge ACME : `http`, `dns` ou `alpn`.                                                             |
 | `ACME_KEY_TYPE`        | `ecdsa` | multisite | non      | Type de clé pour le certificat : `ecdsa` ou `rsa`.                                                            |
 | `ACME_KEY_SIZE`        | `256`   | multisite | non      | Taille de la clé en bits. ECDSA : `256` ou `384`. RSA : `2048` ou `4096`.                                     |
-| `ACME_RENEWAL_DAYS`    | `30`    | multisite | non      | Renouveler le certificat lorsqu'il reste moins de ce nombre de jours avant l'expiration.                      |
+| `ACME_RENEWAL_DAYS`    | `30`    | multisite | non      | Seuil de renouvellement en jours pour TLS-ALPN-01. Certbot suit son propre calendrier. |
 | `ACME_SSL_VERIFY`      | `yes`   | multisite | non      | Vérifier les certificats SSL lors de la communication avec le serveur ACME.                                   |
 | `ACME_WILDCARD`        | `no`    | multisite | non      | Demander un certificat wildcard (nécessite le challenge DNS-01).                                              |
 | `ACME_MUST_STAPLE`     | `no`    | multisite | non      | Demander l'extension OCSP Must-Staple dans le certificat.                                                     |
@@ -5225,7 +5639,7 @@ Les plugins externes/PRO non listés dans les paramètres `PLUGINS_ORDER_*` sont
 
 | Paramètre                           | Défaut    | Contexte  | Multiple | Description                                                                                                                                                                                                                                     |
 | ----------------------------------- | --------- | --------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `ACME_DNS_PROVIDER`                 |           | multisite | non      | Fournisseur DNS pour les challenges DNS-01.                                                                                                                                                                                                     |
+| `ACME_DNS_PROVIDER`                 |           | multisite | non      | Fournisseur DNS pour DNS-01. Hosttech nécessite BunkerWeb 1.6.18 ou une version ultérieure. |
 | `ACME_DNS_CREDENTIAL_ITEM`          |           | multisite | oui      | Identifiant du fournisseur DNS au format `key value` (par ex. `cloudflare_api_token YOUR_TOKEN`). Utilisez des suffixes numériques pour plusieurs éléments (par ex. `ACME_DNS_CREDENTIAL_ITEM_1`). Les valeurs peuvent être encodées en base64. |
 | `ACME_DNS_CREDENTIAL_DECODE_BASE64` | `yes`     | multisite | oui      | Décoder automatiquement les identifiants DNS encodés en base64. Désactivez si vos identifiants sont du texte brut qui se trouve être du base64 valide.                                                                                          |
 | `ACME_DNS_PROPAGATION`              | `default` | multisite | non      | Temps d'attente pour la propagation DNS en secondes (`default` ou un nombre).                                                                                                                                                                   |
@@ -5320,7 +5734,7 @@ app2.example.com_AUTO_LETS_ENCRYPT: "yes"
 - **Échec du challenge HTTP-01** : vérifiez que `LETS_ENCRYPT_PASSTHROUGH=yes` est défini -- sans cela, le bloc location intégré de BunkerWeb intercepte les requêtes de challenge avant que le plugin ACME PRO ne puisse les servir. Vérifiez également que le port 80 est accessible depuis le serveur ACME et que `AUTO_LETS_ENCRYPT` n'est pas également activé pour le même service.
 - **Échec du challenge TLS-ALPN-01** : vérifiez que le port 443 est accessible depuis le serveur ACME et qu'aucun autre plugin ne sert de certificat avant ACME dans la phase `ssl_certificate`. Vérifiez `PLUGINS_ORDER_SSL_CERTIFICATE` en cas de doute.
 - **Échec du challenge DNS-01** : vérifiez les identifiants du fournisseur DNS dans `ACME_DNS_CREDENTIAL_ITEM` et ajustez `ACME_DNS_PROPAGATION` si votre fournisseur est lent à propager les enregistrements.
-- **Certificat non renouvelé** : vérifiez `ACME_RENEWAL_DAYS` et les logs du scheduler. Le job `acme-renew` s'exécute quotidiennement et renouvelle les certificats qui se trouvent dans le seuil configuré.
+- **Certificat non renouvelé** : Consultez les journaux de `acme-renew`. Pour TLS-ALPN-01, vérifiez aussi `ACME_RENEWAL_DAYS`. Certbot suit son propre calendrier.
 
 ## Wildcard <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO) {#wildcard-pro}
 

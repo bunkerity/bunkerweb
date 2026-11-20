@@ -89,10 +89,10 @@ Pide tu [instancia de BunkerWeb Cloud](https://panel.bunkerweb.io/store/bunkerwe
 
 Si estás interesado en la oferta de BunkerWeb Cloud, no dudes en [contactarnos](https://panel.bunkerweb.io/contact.php?utm_campaign=self&utm_source=doc) para que podamos discutir tus necesidades.
 
-## Versión PRO
+## Versión PRO {#pro-version}
 
 !!! tip "Prueba gratuita de BunkerWeb PRO"
-    Inicia una prueba gratuita de 30 días de BunkerWeb PRO desde el [Panel de BunkerWeb](https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc).
+    Inicia una prueba gratuita de 30 días de BunkerWeb PRO desde el [Panel de BunkerWeb](https://panel.bunkerweb.io/store/bunkerweb-pro?language=spanish&utm_campaign=self&utm_source=doc): pide un plan y mantén **Free 30 Days Trial** como método de pago al finalizar la compra ([guía paso a paso](#pro-version)).
 
 Al usar BunkerWeb, tienes la opción de elegir la versión que deseas utilizar: de código abierto o PRO.
 
@@ -100,11 +100,14 @@ Ya sea para una seguridad mejorada, una experiencia de usuario enriquecida o un 
 
 En la documentación o en la interfaz de usuario, las características PRO están anotadas con una corona <img src="../../assets/img/pro-icon.svg" alt="icono de corona pro" height="32px" width="32px"> para distinguirlas de las integradas en la versión de código abierto.
 
-Puedes actualizar de la versión de código abierto a la PRO fácilmente y en cualquier momento. El proceso es sencillo:
+Puedes actualizar de la versión de código abierto a la PRO fácilmente y en cualquier momento. Para iniciar tu prueba gratuita de 30 días:
 
-- Inicia tu [prueba gratuita de 30 días de BunkerWeb PRO](https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc)
-- Una vez conectado al área de cliente, copia tu clave de licencia PRO
-- Pega tu clave privada en BunkerWeb usando la [interfaz de usuario web](web-ui.md#upgrade-to-pro) o la [configuración específica](features.md#pro)
+1. Abre la [tienda del Panel de BunkerWeb](https://panel.bunkerweb.io/store/bunkerweb-pro?language=spanish&utm_campaign=self&utm_source=doc) y haz clic en **Comprar ahora** en el plan **STANDARD** o **ENTERPRISE**.
+2. Mantén el ciclo de facturación **Mensualmente**, elige el número de servicios en **Number of services** y haz clic en **Continuar**. El resumen de configuración todavía muestra el precio completo: la prueba se aplica al finalizar la compra.
+3. En la página **Revisar y pagar**, en **Método de pago**, mantén seleccionada la opción **Free 30 Days Trial**. El **Total a abonar** mostrará entonces 0.00 €.
+4. Crea tu cuenta (o inicia sesión), acepta los términos de servicio y haz clic en **Place Order**.
+5. Una vez conectado al área de cliente, copia tu clave de licencia PRO.
+6. Pégala en BunkerWeb usando la [interfaz de usuario web](web-ui.md#upgrade-to-pro) o la [configuración específica](features.md#pro).
 
 No dudes en visitar el [panel de BunkerWeb](https://panel.bunkerweb.io/knowledgebase?utm_campaign=self&utm_source=doc) o [contactarnos](https://panel.bunkerweb.io/contact.php?utm_campaign=self&utm_source=doc) si tienes alguna pregunta sobre la versión PRO.
 

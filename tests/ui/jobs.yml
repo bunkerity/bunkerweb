@@ -1,0 +1,79 @@
+integrations: "all"
+
+actions:
+  jobs:
+    type: ui
+    steps:
+      wizard_setup:
+        type: setup
+        admin_username: "admin"
+        admin_password: "P@ssw0rd"
+        server_name: "www.example.com"
+
+      access_jobs:
+        type: access
+        url: "%BASE_URL%/jobs"
+        sleep: 2.0
+      login:
+        type: login
+        next_page: "jobs"
+        username: "admin"
+        password: "P@ssw0rd"
+
+      # The scheduler's jobs are listed
+      verify_job:
+        type: find
+        selector: '//td[text()="cleanup-expired-ui-sessions"]'
+      verify_job_1:
+        type: find
+        selector: '//td[text()="backup-data"]'
+
+      # Filter the table
+      test_search:
+        type: send_keys
+        by: "id"
+        selector: "dt-search-0"
+        clear: true
+        value: "cleanup-expired"
+        sleep: 1.0
+      check_search:
+        type: find
+        selector: '//td[text()="backup-data"]'
+        findable: false
+      check_search_1:
+        type: find
+        selector: '//td[text()="cleanup-expired-ui-sessions"]'
+      clear_search:
+        type: send_keys
+        by: "id"
+        selector: "dt-search-0"
+        value: ""
+        clear: true
+        sleep: 1.0
+      check_clear_search:
+        type: find
+        selector: '//td[text()="backup-data"]'
+
+      # Run a job from the UI: the scheduler adds a run to its history, and the newest one succeeded
+      count_runs:
+        type: count
+        selector: '//div[@id="job-cleanup-expired-ui-sessions-db-history"]//ul'
+        key: "runs"
+      run_job:
+        type: click
+        selector: '//button[@data-job="cleanup-expired-ui-sessions" and contains(@class, "run-job")]'
+        sleep: 1.0
+      access_jobs_1:
+        type: access
+        url: "%BASE_URL%/jobs"
+        sleep: 10.0
+      check_new_run:
+        type: count
+        selector: '//div[@id="job-cleanup-expired-ui-sessions-db-history"]//ul'
+        greater_than: "runs"
+      check_new_run_success:
+        type: find
+        selector: '(//div[@id="job-cleanup-expired-ui-sessions-db-history"]//ul)[2]//i[contains(@class, "bx-check")]'
+      check_last_run_column:
+        type: find
+        selector: '//td[text()="cleanup-expired-ui-sessions"]/following-sibling::td[5]//i[contains(@class, "bx-check")]'

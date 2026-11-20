@@ -3,11 +3,12 @@
 from os import chmod, getenv, sep
 from os.path import join
 from pathlib import Path
+from ssl import PEM_cert_to_DER_cert
 from stat import S_IRUSR, S_IWUSR
 from subprocess import DEVNULL, run, PIPE
 from sys import exit as sys_exit, path as sys_path
 from traceback import format_exc
-from tempfile import NamedTemporaryFile
+from tempfile import NamedTemporaryFile, TemporaryDirectory
 
 for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("utils",), ("db",))]:
     if deps_path not in sys_path:
@@ -30,6 +31,16 @@ try:
     if not JOB.is_cached_file("api-server-cert.pem", "month") or not JOB.is_cached_file("api-server-cert.key", "month"):
         LOGGER.info("Generating self-signed certificate for API server")
         cert_path.mkdir(parents=True, exist_ok=True)
+
+        # The instances keep serving the certificate they loaded until their next reload, and a client process restarted
+        # after this renewal never saw it: record the one it replaces, next to the new one, so both stay accepted.
+        replaced = None
+        try:
+            replaced = JOB.get_cache("api-server-cert.pem")
+            if replaced:
+                PEM_cert_to_DER_cert(replaced.decode())  # a certificate, not whatever the cache happens to hold
+        except Exception:
+            replaced = None
 
         # Create a temporary OpenSSL config file with enhanced security settings
         with NamedTemporaryFile(mode="w", delete=False) as config_file:
@@ -61,57 +72,67 @@ DNS.1 = www.example.org
             config_path = config_file.name
 
         try:
-            result = run(
-                [
-                    "openssl",
-                    "req",
-                    "-nodes",
-                    "-x509",
-                    "-newkey",
-                    "ec",
-                    "-pkeyopt",
-                    "ec_paramgen_curve:secp384r1",
-                    "-keyout",
-                    str(cert_path.joinpath("api-server-cert.key")),
-                    "-out",
-                    str(cert_path.joinpath("api-server-cert.pem")),
-                    "-days",
-                    "3650",
-                    "-sha512",
-                    "-config",
-                    config_path,
-                ],
-                stdin=DEVNULL,
-                stderr=PIPE,
-                stdout=PIPE,
-                text=True,
-                check=False,
-                env={"PATH": getenv("PATH", ""), "PYTHONPATH": getenv("PYTHONPATH", "")},
-            )
+            # Generate away from the live pair until its predecessor has been preserved.
+            with TemporaryDirectory(dir=cert_path) as generated:
+                generated_path = Path(generated)
+                result = run(
+                    [
+                        "openssl",
+                        "req",
+                        "-nodes",
+                        "-x509",
+                        "-newkey",
+                        "ec",
+                        "-pkeyopt",
+                        "ec_paramgen_curve:secp384r1",
+                        "-keyout",
+                        str(generated_path.joinpath("api-server-cert.key")),
+                        "-out",
+                        str(generated_path.joinpath("api-server-cert.pem")),
+                        "-days",
+                        "3650",
+                        "-sha512",
+                        "-config",
+                        config_path,
+                    ],
+                    stdin=DEVNULL,
+                    stderr=PIPE,
+                    stdout=PIPE,
+                    text=True,
+                    check=False,
+                    env={"PATH": getenv("PATH", ""), "PYTHONPATH": getenv("PYTHONPATH", "")},
+                )
 
-            if result.returncode != 0:
-                LOGGER.error("Self-signed certificate generation failed for API server")
-                LOGGER.error(f"OpenSSL error output: {result.stderr}")
-                status = 2
-            else:
-                LOGGER.info("Successfully generated self-signed certificate for API server")
-                try:
-                    chmod(str(cert_path.joinpath("api-server-cert.key")), S_IRUSR | S_IWUSR)  # 0o600 - read/write for owner only
-                except OSError as e:
-                    LOGGER.error(f"Error setting permissions on api-server-cert.key: {e}")
-                status = 1
-
-                cached, err = JOB.cache_file("api-server-cert.pem", cert_path.joinpath("api-server-cert.pem"), overwrite_file=False)
-                if not cached:
-                    LOGGER.error(f"Error while saving api-server-cert api-server-cert.pem file to db cache : {err}")
+                if result.returncode != 0:
+                    LOGGER.error("Self-signed certificate generation failed for API server")
+                    LOGGER.error(f"OpenSSL error output: {result.stderr}")
+                    status = 2
                 else:
-                    LOGGER.info("Successfully saved api-server-cert api-server-cert.pem file to db cache")
+                    LOGGER.info("Successfully generated self-signed certificate for API server")
+                    try:
+                        chmod(str(generated_path.joinpath("api-server-cert.key")), S_IRUSR | S_IWUSR)  # 0o600 - read/write for owner only
+                    except OSError as e:
+                        LOGGER.error(f"Error setting permissions on api-server-cert.key: {e}")
+                    status = 1
 
-                cached, err = JOB.cache_file("api-server-cert.key", cert_path.joinpath("api-server-cert.key"), overwrite_file=False)
-                if not cached:
-                    LOGGER.error(f"Error while saving api-server-cert api-server-cert.key file to db cache : {err}")
-                else:
-                    LOGGER.info("Successfully saved api-server-cert api-server-cert.key file to db cache")
+                    # Written before the new certificate replaces the current one, so a client never sees the new one without it.
+                    if replaced:
+                        cached, err = JOB.cache_file("api-server-cert-previous.pem", replaced)
+                        if not cached:
+                            LOGGER.error(f"Error while saving the previous API server certificate to db cache : {err}")
+                            sys_exit(2)
+
+                    cached, err = JOB.cache_file("api-server-cert.pem", generated_path.joinpath("api-server-cert.pem"))
+                    if not cached:
+                        LOGGER.error(f"Error while saving api-server-cert api-server-cert.pem file to db cache : {err}")
+                    else:
+                        LOGGER.info("Successfully saved api-server-cert api-server-cert.pem file to db cache")
+
+                    cached, err = JOB.cache_file("api-server-cert.key", generated_path.joinpath("api-server-cert.key"))
+                    if not cached:
+                        LOGGER.error(f"Error while saving api-server-cert api-server-cert.key file to db cache : {err}")
+                    else:
+                        LOGGER.info("Successfully saved api-server-cert api-server-cert.key file to db cache")
         finally:
             # Clean up the temporary config file
             try:

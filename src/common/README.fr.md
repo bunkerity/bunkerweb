@@ -36,7 +36,7 @@ Ce modèle permet de gérer plusieurs configurations pour des fonctionnalités c
 
 Vous pouvez définir l’ordre d’exécution via des listes séparées par des espaces :
 
-- Phases globales : `PLUGINS_ORDER_INIT`, `PLUGINS_ORDER_INIT_WORKER`, `PLUGINS_ORDER_TIMER`.
+- Phases globales : `PLUGINS_ORDER_INIT`, `PLUGINS_ORDER_INIT_WORKER`, `PLUGINS_ORDER_SSL_CLIENT_HELLO`, `PLUGINS_ORDER_TIMER`.
 - Phases par site : `PLUGINS_ORDER_SET`, `PLUGINS_ORDER_ACCESS`, `PLUGINS_ORDER_SSL_CERTIFICATE`, `PLUGINS_ORDER_HEADER`, `PLUGINS_ORDER_LOG`, `PLUGINS_ORDER_PREREAD`, `PLUGINS_ORDER_LOG_STREAM`, `PLUGINS_ORDER_LOG_DEFAULT`.
 - Sémantique : les plugins listés s’exécutent en premier pour la phase ; les autres s’exécutent ensuite dans leur séquence normale. Séparez les IDs uniquement par des espaces.
 
@@ -69,7 +69,7 @@ La valeur est une liste de motifs séparés par des espaces, parmi `crowdsec`, `
 
     | Paramètre             | Valeur par défaut | Contexte  | Multiple | Description                                                                                              |
     | --------------------- | ----------------- | --------- | -------- | -------------------------------------------------------------------------------------------------------- |
-    | `SERVER_NAME`         | `www.example.com` | multisite | Non      | **Domaine principal :** Nom de domaine principal pour ce site. Requis en mode multisite.                 |
+    | `SERVER_NAME`         | `www.example.com` | multisite | Non      | **Domaine principal :** Nom de domaine principal (ou adresse IP) pour ce site. Requis en mode multisite. |
     | `BUNKERWEB_INSTANCES` | `127.0.0.1`       | global    | Non      | **Instances BunkerWeb :** Liste des instances BunkerWeb séparées par des espaces.                        |
     | `MULTISITE`           | `no`              | global    | Non      | **Sites multiples :** Définir à `yes` pour héberger plusieurs sites avec des configurations différentes. |
     | `SECURITY_MODE`       | `block`           | multisite | Non      | **Niveau de sécurité :** `detect` ou `block` pour contrôler l’application de la sécurité.                |
@@ -107,16 +107,18 @@ La valeur est une liste de motifs séparés par des espaces, parmi `crowdsec`, `
 
 === "Paramètres réseau et ports"
 
-    | Paramètre               | Valeur par défaut | Contexte | Multiple | Description                                                                                        |
-    | ----------------------- | ----------------- | -------- | -------- | -------------------------------------------------------------------------------------------------- |
-    | `HTTP_PORT`             | `8080`            | global   | Oui      | **Port HTTP :** Numéro de port pour le trafic HTTP. Laisser vide pour désactiver l'écoute HTTP.    |
-    | `HTTPS_PORT`            | `8443`            | global   | Oui      | **Port HTTPS :** Numéro de port pour le trafic HTTPS. Laisser vide pour désactiver l'écoute HTTPS. |
-    | `USE_IPV6`              | `no`              | global   | Non      | **Support IPv6 :** Active la connectivité IPv6.                                                    |
-    | `DNS_RESOLVERS`         | `127.0.0.11`      | global   | Non      | **Résolveurs DNS :** Adresses des résolveurs à utiliser.                                           |
-    | `CLIENT_BODY_TIMEOUT`   | `10s`             | global   | Non      | **Timeout corps client :** Délai de lecture du corps de la requête client.                         |
-    | `CLIENT_HEADER_TIMEOUT` | `10s`             | global   | Non      | **Timeout en-têtes client :** Délai de lecture des en-têtes de la requête client.                  |
-    | `KEEPALIVE_TIMEOUT`     | `15s`             | global   | Non      | **Timeout keepalive :** Délai des connexions client en keepalive.                                  |
-    | `SEND_TIMEOUT`          | `10s`             | global   | Non      | **Timeout d'envoi :** Délai maximal de transmission de la réponse au client.                       |
+    | Paramètre               | Valeur par défaut | Contexte  | Multiple | Description                                                                                        |
+    | ----------------------- | ----------------- | --------- | -------- | -------------------------------------------------------------------------------------------------- |
+    | `HTTP_PORT`             | `8080`            | global    | Oui      | **Port HTTP :** Numéro de port pour le trafic HTTP. Laisser vide pour désactiver l'écoute HTTP.    |
+    | `HTTPS_PORT`            | `8443`            | global    | Oui      | **Port HTTPS :** Numéro de port pour le trafic HTTPS. Laisser vide pour désactiver l'écoute HTTPS. |
+    | `USE_IPV6`              | `no`              | global    | Non      | **Support IPv6 :** Active la connectivité IPv6.                                                    |
+    | `DNS_RESOLVERS`         | `127.0.0.11`      | global    | Non      | **Résolveurs DNS :** Adresses des résolveurs à utiliser.                                           |
+    | `CLIENT_BODY_TIMEOUT`   | `10s`             | multisite | Non      | **Timeout corps client :** Délai de lecture du corps de la requête client.                         |
+    | `CLIENT_HEADER_TIMEOUT` | `10s`             | multisite | Non      | **Timeout en-têtes client :** Délai de lecture des en-têtes de la requête client.                  |
+    | `KEEPALIVE_TIMEOUT`     | `15s`             | global    | Non      | **Timeout keepalive :** Délai des connexions client en keepalive.                                  |
+    | `SEND_TIMEOUT`          | `10s`             | global    | Non      | **Timeout d'envoi :** Délai maximal de transmission de la réponse au client.                       |
+
+    Réglez `CLIENT_HEADER_TIMEOUT` et `CLIENT_BODY_TIMEOUT` par service pour les flux gRPC longue durée (par exemple, `netbird.example.com_CLIENT_HEADER_TIMEOUT=1d`). Gardez une valeur globale courte pour `CLIENT_HEADER_TIMEOUT` : elle limite aussi les négociations TLS sur le serveur par défaut et la durée pendant laquelle une négociation incomplète peut maintenir un ancien worker actif après un rechargement. Les directives `client_header_timeout` ou `client_body_timeout` existantes dans les configurations personnalisées `server-http` continuent de fonctionner lorsque le service hérite de la valeur globale. Supprimez la directive personnalisée correspondante lorsque vous réglez un timeout différent par service pour éviter les directives en double.
 
 === "Paramètres serveur Stream"
 

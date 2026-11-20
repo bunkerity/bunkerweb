@@ -1,0 +1,4 @@
+["this","is","what","should","be",
+ "a happy bit of json",
+ "but someone, misspelled \"true\"", ture,
+ "who says JSON is easy for humans to generate?"]

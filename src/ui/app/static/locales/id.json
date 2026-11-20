@@ -13,7 +13,8 @@
     "no_changes_detected": "Tidak ada perubahan yang terdeteksi.",
     "notice": "Pemberitahuan",
     "ping_error": "Terjadi kesalahan saat melakukan ping ke instans.",
-    "readonly_mode": "Tindakan ini dinonaktifkan dalam mode hanya-baca."
+    "readonly_mode": "Tindakan ini dinonaktifkan dalam mode hanya-baca.",
+    "configs_import_invalid_file": "Unggah file ekspor konfigurasi khusus yang valid (.json)."
   },
   "aria": {
     "label": {
@@ -49,7 +50,7 @@
     "link": {
       "here": "di sini"
     },
-    "pro": "Dapatkan manfaat maksimal dari BunkerWeb dengan upgrade ke versi PRO. Info lebih lanjut dan uji coba gratis <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/?utm_campaign=self&utm_source=banner#pro\">di sini</a>.",
+    "pro": "Dapatkan manfaat maksimal dari BunkerWeb dengan upgrade ke versi PRO. Mulai uji coba gratis 30 hari Anda <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=banner\">di sini</a>: pesan paket, lalu pertahankan “Free 30 Days Trial” sebagai metode pembayaran saat checkout.",
     "support": "Butuh dukungan premium atau konsultasi khusus untuk BunkerWeb? Kunjungi <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/?utm_campaign=self&utm_source=banner#services\">layanan profesional</a> kami."
   },
   "breadcrumb": {
@@ -1154,6 +1155,7 @@
       "title": "Tanggal Kedaluwarsa Pro",
       "unknown": "Tanggal kedaluwarsa tidak diketahui"
     },
+    "free_trial_hint": "Pesan paket, lalu pertahankan “Free 30 Days Trial” sebagai metode pembayaran saat checkout.",
     "force_check": {
       "description": "Paksa pengecekan baru untuk plugin PRO. Ini akan memicu unduhan baru jika versi baru tersedia.",
       "title": "Paksa pengecekan"
@@ -1223,6 +1225,9 @@
     }
   },
   "reports": {
+    "bad_behavior_total_requests": "Permintaan mencurigakan",
+    "bad_behavior_stored_events": "Peristiwa tersimpan",
+    "bad_behavior_evidence_missing": "Bukti pemblokiran tidak lagi tersedia.",
     "crowdsec": {
       "source_lapi": "Keputusan API lokal",
       "source_appsec": "Pemeriksaan AppSec",
@@ -1237,7 +1242,16 @@
     },
     "retention_notice": "Laporan adalah buffer memori bergulir: entri terlama akan dihapus setelah batas yang dikonfigurasi tercapai. Kecuali Redis diaktifkan, laporan juga akan dihapus saat BunkerWeb dimulai ulang.",
     "security_incident": "Insiden Keamanan",
-    "security_report_data": "Data Laporan Keamanan"
+    "security_report_data": "Data Laporan Keamanan",
+    "bad_behavior_no_details": "Tidak ada detail perilaku buruk yang ditangkap untuk laporan ini.",
+    "bad_behavior_activity_detected": "Aktivitas perilaku buruk terdeteksi",
+    "bad_behavior_activity_explanation": "Permintaan ini melebihi ambang batas perilaku buruk dan dikelompokkan bersama.",
+    "bad_behavior_request_label": "Permintaan",
+    "bad_behavior_ip": "Alamat IP",
+    "bad_behavior_server": "Server",
+    "bad_behavior_url": "URL",
+    "bad_behavior_captured_at": "Ditangkap pada",
+    "bad_behavior_request_id": "ID Permintaan"
   },
   "scope": {
     "all_services": "Semua Layanan",
@@ -1424,7 +1438,8 @@
     "template_in_use_description": "Perubahan di luar template saat ini tidak diizinkan. Silakan buat perubahan menggunakan template saat ini atau beralih ke mode Lanjutan/Mentah.",
     "unique_server_name": "Nama Server Unik",
     "up": "Aktif",
-    "yes": "Ya"
+    "yes": "Ya",
+    "not_applicable": "T/A"
   },
   "step": {
     "next": "Berikutnya",
@@ -1721,7 +1736,8 @@
       "show_selected_only": "Tampilkan hanya yang dipilih",
       "stop_instance": "Hentikan Instans {{hostname}}",
       "unban_ip": "Batalkan larangan {{ip}}",
-      "value_from_global": "Nilai dari pengaturan global"
+      "value_from_global": "Nilai dari pengaturan global",
+      "update_ban_duration": "Perbarui durasi larangan"
     },
     "cannot_delete_original_ban": "Tidak dapat menghapus entri Larangan asli.",
     "cannot_remove_disabled": "Tidak dapat menghapus karena satu atau lebih pengaturan dinonaktifkan.",
@@ -1959,7 +1975,8 @@
     "zerossl_api_retry": "Jumlah percobaan ulang untuk permintaan API ZeroSSL (0 menonaktifkan percobaan ulang).",
     "zerossl_api_retry_delay": "Penundaan dalam detik antara percobaan ulang API ZeroSSL.",
     "zerossl_api_connect_timeout": "Batas waktu koneksi dalam detik untuk panggilan API ZeroSSL.",
-    "zerossl_api_max_time": "Waktu total maksimum dalam detik untuk setiap permintaan API ZeroSSL."
+    "zerossl_api_max_time": "Waktu total maksimum dalam detik untuk setiap permintaan API ZeroSSL.",
+    "readonly_mode": "Aksi ini tidak diizinkan dalam mode baca-saja."
   },
   "totp": {
     "prompt": "Silakan masukkan kode TOTP Anda."
@@ -1982,5 +1999,12 @@
     "required": "{{field}} diperlukan.",
     "service_required_for_ban": "Layanan harus dipilih untuk larangan spesifik layanan.",
     "zerossl_email_or_api_key_required": "ZeroSSL memerlukan email atau kunci API ZeroSSL."
+  },
+  "plugins": {
+    "multivalue": {
+      "show_less": "Tampilkan lebih sedikit",
+      "more_value": "nilai lagi",
+      "more_values": "nilai lagi"
+    }
   }
 }

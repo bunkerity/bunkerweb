@@ -6,6 +6,7 @@ from os import environ, getenv
 # from string import ascii_letters, digits
 from re import escape, match
 from time import sleep
+from urllib.parse import urlsplit
 
 from flask import Blueprint, Response, redirect, render_template, request, url_for
 from flask_login import current_user
@@ -273,7 +274,7 @@ def setup_page():
                 global_config = DB.get_config(global_only=True)
                 BW_CONFIG.edit_global_conf(global_config | {"MULTISITE": "yes"}, check_changes=False)
 
-            LOGGER.debug(f"Creating new service with base_config: {base_config} and config: {config}")
+            LOGGER.debug(f"Creating new service with base_config: {base_config} and config keys: {list(config)}")
 
             operation, error = BW_CONFIG.new_service(base_config, override_method="wizard", check_changes=False)
             if error:
@@ -296,9 +297,10 @@ def setup_page():
         value for key, value in chain(db_config.items(), environ.items()) if key.startswith("LETS_ENCRYPT_DNS_CREDENTIAL_ITEM")
     ]
 
-    server_name = request.headers.get("Host", "").split(":")[0]
-    if not server_name:
-        server_name = "www.example.com"
+    try:
+        server_name = urlsplit("//" + request.headers.get("Host", "")).hostname or "www.example.com"
+    except ValueError:
+        server_name = ""
 
     notice = SETUP_NOTICES.get(request.args.get("reason", ""))
 

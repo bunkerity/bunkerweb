@@ -8,9 +8,11 @@ local limit = class("limit", plugin)
 
 local ngx = ngx
 local ERR = ngx.ERR
+local WARN = ngx.WARN
 local HTTP_TOO_MANY_REQUESTS = ngx.HTTP_TOO_MANY_REQUESTS
 local get_phase = ngx.get_phase
 local has_variable = utils.has_variable
+local get_variable = utils.get_variable
 local get_multiple_variables = utils.get_multiple_variables
 local is_whitelisted = utils.is_whitelisted
 local regex_match = utils.regex_match
@@ -39,6 +41,30 @@ local function limit_global_delay(rate_time)
 		return 86400
 	end
 	return 1
+end
+
+-- The local counters are a read, a change and a write on a shared dict, and workers run in parallel:
+-- without a lock two workers read the same value and one write is lost, so more requests pass than the
+-- rate allows. The lock lives in the cachestore lock zone (not in the datastore, the hottest dict), is
+-- per counter key, and is only held across dict calls that never yield. The wait is a ceiling for the
+-- rare collision of one client's simultaneous requests: past it the request is counted without the
+-- lock, as before, rather than delayed any longer. The expiry only matters if a worker dies holding it.
+-- The locked section decodes, prunes and re-encodes the whole timestamp list, which is as long as the rate,
+-- so past LOCK_MAX_RATE requests per window it costs more throughput than the race it closes (one hot key
+-- across 16 workers lost up to a quarter of it). The race changes verdicts noticeably only at small rates,
+-- where the list is short: above the bound the counters stay unlocked.
+local LOCK_MAX_RATE = 100
+local LOCK_ZONE = ngx.config.subsystem == "stream" and "cachestore_locks_stream" or "cachestore_locks"
+local LOCK_WAIT = 0.02
+local LOCK_EXPIRY = 1
+local resty_lock
+
+local function get_resty_lock()
+	if resty_lock == nil then
+		local ok, lib = pcall(require, "resty.lock")
+		resty_lock = ok and lib or false
+	end
+	return resty_lock
 end
 
 local limit_req_timestamps = function(rate_max, rate_time, timestamps)
@@ -300,6 +326,57 @@ function limit:access()
 	return self:ret(true, msg)
 end
 
+-- The Cap.js challenge page loads its widget from a second GET on the same URI (?capjs_frame=1).
+-- Counted in the page's bucket, a normal solve (page, frame, POST) is 3 requests, one over the
+-- default 2r/s, so a fast solve is answered 429. The frame request gets a counter of its own and
+-- stays limited. Only that exact query on a capjs service's challenge URI is split off.
+function limit:counter_key()
+	local ctx_bw = self.ctx.bw
+	local uri = ctx_bw.uri
+	if
+		ngx.var.arg_capjs_frame == "1"
+		and get_variable("USE_ANTIBOT", true, self.ctx) == "capjs"
+		and uri == get_variable("ANTIBOT_URI", true, self.ctx)
+	then
+		uri = uri .. "?capjs_frame=1"
+	end
+	return "plugin_limit_" .. ctx_bw.server_name .. ctx_bw.remote_addr .. uri
+end
+
+-- Run method(self, key, a, b) (it returns a value and a message) while holding the lock of one counter
+-- key. The method and its arguments are passed, not a closure, so a request allocates none. The lock is
+-- released on every path, an error raised by the method included. When it cannot be taken, it runs unlocked.
+function limit:with_counter_lock(key, method, a, b)
+	local lock, err
+	local lib = get_resty_lock()
+	if lib then
+		lock, err = lib:new(LOCK_ZONE, { timeout = LOCK_WAIT, exptime = LOCK_EXPIRY })
+		if lock then
+			local elapsed
+			elapsed, err = lock:lock("plugin_limit_lock_" .. key)
+			if not elapsed then
+				lock = nil
+			end
+		end
+	else
+		err = "resty.lock is not available"
+	end
+	if not lock then
+		self:log_throttled(
+			WARN,
+			"counter_lock",
+			"cannot lock the request counter, counting without the lock : " .. tostring(err)
+		)
+		return method(self, key, a, b)
+	end
+	local ok, value, msg = pcall(method, self, key, a, b)
+	lock:unlock()
+	if not ok then
+		error(value, 0)
+	end
+	return value, msg
+end
+
 function limit:limit_req(rate_max, rate_time)
 	local timestamps = nil
 	-- Redis case
@@ -311,11 +388,8 @@ function limit:limit_req(rate_max, rate_time)
 			timestamps = redis_timestamps
 			-- Save the new timestamps
 			-- luacheck: ignore 421
-			local ok, err = self.datastore:set_with_retries(
-				"plugin_limit_" .. self.ctx.bw.server_name .. self.ctx.bw.remote_addr .. self.ctx.bw.uri,
-				encode(timestamps),
-				limit_global_delay(rate_time)
-			)
+			local ok, err =
+				self.datastore:set_with_retries(self:counter_key(), encode(timestamps), limit_global_delay(rate_time))
 			if not ok then
 				return nil, "can't update timestamps : " .. err
 			end
@@ -336,9 +410,16 @@ function limit:limit_req(rate_max, rate_time)
 end
 
 function limit:limit_req_local(rate_max, rate_time)
+	local key = self:counter_key()
+	if rate_max > LOCK_MAX_RATE then
+		return self:count_local(key, rate_max, rate_time)
+	end
+	return self:with_counter_lock(key, limit.count_local, rate_max, rate_time)
+end
+
+function limit:count_local(key, rate_max, rate_time)
 	-- Get timestamps
-	local timestamps, err =
-		self.datastore:get("plugin_limit_" .. self.ctx.bw.server_name .. self.ctx.bw.remote_addr .. self.ctx.bw.uri)
+	local timestamps, err = self.datastore:get(key)
 	if not timestamps and err ~= "not found" then
 		return nil, err
 	elseif err == "not found" then
@@ -350,11 +431,7 @@ function limit:limit_req_local(rate_max, rate_time)
 	-- Save new timestamps if needed
 	if updated then
 		-- luacheck: ignore 421
-		local ok, err = self.datastore:set_with_retries(
-			"plugin_limit_" .. self.ctx.bw.server_name .. self.ctx.bw.remote_addr .. self.ctx.bw.uri,
-			encode(new_timestamps),
-			delay
-		)
+		local ok, err = self.datastore:set_with_retries(key, encode(new_timestamps), delay)
 		if not ok then
 			return nil, err
 		end
@@ -422,7 +499,7 @@ function limit:limit_req_redis(rate_max, rate_time)
 		"eval",
 		redis_script,
 		1,
-		redis_limit_key("plugin_limit_" .. self.ctx.bw.server_name .. self.ctx.bw.remote_addr .. self.ctx.bw.uri),
+		redis_limit_key(self:counter_key()),
 		rate_max,
 		rate_time,
 		time(date("!*t"))
@@ -453,7 +530,7 @@ function limit:limit_req_global(rate_max, rate_time)
 		end
 	end
 	if count == nil then
-		local local_count, err = self:limit_req_global_local(rate_time)
+		local local_count, err = self:limit_req_global_local(rate_max, rate_time)
 		if local_count == nil then
 			return nil, "limit_req_global_local failed : " .. err
 		end
@@ -465,10 +542,17 @@ function limit:limit_req_global(rate_max, rate_time)
 	return false, "success - not limited", count
 end
 
-function limit:limit_req_global_local(rate_time)
+function limit:limit_req_global_local(rate_max, rate_time)
 	local delay = limit_global_delay(rate_time)
 	local window = math.floor(time(date("!*t")) / delay)
 	local key = "plugin_limit_global_" .. self.ctx.bw.server_name .. "_" .. tostring(window)
+	if rate_max > LOCK_MAX_RATE then
+		return self:count_global_local(key, delay)
+	end
+	return self:with_counter_lock(key, limit.count_global_local, delay)
+end
+
+function limit:count_global_local(key, delay)
 	local value, err = self.datastore:get(key)
 	if not value and err ~= "not found" then
 		return nil, err

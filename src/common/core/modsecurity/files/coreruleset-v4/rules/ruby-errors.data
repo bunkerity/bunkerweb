@@ -86,7 +86,7 @@ Oj::GeneratorError
 
 #### Network & HTTP Client Errors
 SocketError
-EOFError
+EOFError:
 OpenSSL::SSL::SSLError
 Timeout::Error
 Net::ReadTimeout

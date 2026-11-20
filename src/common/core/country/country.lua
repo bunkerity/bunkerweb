@@ -14,6 +14,7 @@ local pick_header_rules = utils.pick_header_rules
 local decode = cjson.decode
 local encode = cjson.encode
 local WARN = ngx.WARN
+local ERR = ngx.ERR
 
 -- Helper function to convert space-separated string to a set
 local COUNTRY_GROUPS = {
@@ -210,12 +211,15 @@ function country:is_ignored_uri()
 	if not uri then
 		return false
 	end
-	local request_uri = self.ctx.bw.request_uri
+	-- Only the normalized path is matched, alone and joined with the query string : the raw request
+	-- path (//x, /%78, /./x) is routed like the normalized one but must not slip past a pattern.
+	local query = (self.ctx.bw.request_uri or ""):match("%?(.*)$")
+	local uri_query = query and (uri .. "?" .. query)
 	for _, pattern in ipairs(self.ignore_uri) do
 		if regex_match(uri, pattern, nil, "COUNTRY_IGNORE_URI") then
 			return true, pattern
 		end
-		if request_uri and request_uri ~= uri and regex_match(request_uri, pattern, nil, "COUNTRY_IGNORE_URI") then
+		if uri_query and regex_match(uri_query, pattern, nil, "COUNTRY_IGNORE_URI") then
 			return true, pattern
 		end
 	end
@@ -303,10 +307,11 @@ function country:access()
 			)
 		end
 
+		-- A cache failure must not lift the denial
 		local ok
 		ok, err = self:add_to_cache(self.ctx.bw.remote_addr, country_data, "ko")
 		if not ok then
-			return self:ret(false, "error while adding item to cache : " .. err)
+			self.logger:log(ERR, "error while adding item to cache : " .. err)
 		end
 		self:set_metric("counters", "failed_country", 1)
 		return self:ret(
@@ -324,10 +329,11 @@ function country:access()
 	-- And then blacklist
 	if self.variables["BLACKLIST_COUNTRY"] ~= "" then
 		if self.blacklist[country_data] then
+			-- A cache failure must not lift the denial
 			local ok
 			ok, err = self:add_to_cache(self.ctx.bw.remote_addr, country_data, "ko")
 			if not ok then
-				return self:ret(false, "error while adding item to cache : " .. err)
+				self.logger:log(ERR, "error while adding item to cache : " .. err)
 			end
 			self:set_metric("counters", "failed_country", 1)
 			return self:ret(

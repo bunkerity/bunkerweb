@@ -1,0 +1,10 @@
+array open '['
+string: 'this'
+string: 'is'
+string: 'what'
+string: 'should'
+string: 'be'
+string: 'a happy bit of json'
+string: 'but someone, misspelled "true"'
+lexical error: invalid string in json text.
+memory leaks:	0

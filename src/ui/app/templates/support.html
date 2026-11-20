@@ -3,7 +3,7 @@
     <!-- Content -->
     {% set support_url = url_for('support') %}
     <div class="row g-3">
-        <div class="col-6 col-xl-3">
+        <div class="col-12 col-sm-6 col-xl-3">
             <div class="card p-4 position-relative h-100">
                 <i class='bx bxs-file-txt bx-sm position-absolute top-0 end-0 m-3 text-secondary'></i>
                 <div class="card-header p-2">
@@ -31,7 +31,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-6 col-xl-5">
+        <div class="col-12 col-sm-6 col-xl-5">
             <div class="card p-4 position-relative h-100">
                 <i class='bx bxs-file-json bx-sm position-absolute top-0 end-0 m-3 text-secondary'></i>
                 <div class="card-header p-2">
@@ -60,9 +60,10 @@
                                 class="btn btn-outline-primary dropdown-toggle"
                                 data-bs-toggle="dropdown"
                                 aria-haspopup="true"
-                                aria-expanded="false">
-                            <i class="bx bx-cube me-0 me-md-2"></i>
-                            <span class="d-none d-md-inline" data-i18n="button.service">Service</span>
+                                aria-expanded="false"
+                                aria-labelledby="select-service-label">
+                            <i class="bx bx-cube me-0 me-md-2" aria-hidden="true"></i>
+                            <span id="select-service-label" class="d-none d-md-inline" data-i18n="button.service">Service</span>
                         </button>
                         <ul id="services-dropdown-menu"
                             class="dropdown-menu nav-pills max-vh-60 overflow-auto pt-0"
@@ -141,7 +142,7 @@
             </div>
         </div>
         {% if user_admin %}
-            <div class="col-6 col-xl-3">
+            <div class="col-12 col-sm-6 col-xl-3">
                 <div class="card p-4 position-relative h-100">
                     <i class='bx bx-package bx-sm position-absolute top-0 end-0 m-3 text-secondary'></i>
                     <div class="card-header p-2">
@@ -150,8 +151,8 @@
                                 data-i18n="support.card.ui_bundle.title">Web UI Diagnostics</h5>
                         </div>
                     </div>
-                    <div class="card-body position-relative">
-                        <div class="d-flex align-items-center justify-content-center h-100 mb-3">
+                    <div class="card-body position-relative d-flex flex-column">
+                        <div class="d-flex align-items-center justify-content-center flex-grow-1 mb-3">
                             <div class="text-center text-primary">
                                 <a href="{{ support_url }}/ui_bundle"
                                    role="button"

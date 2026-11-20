@@ -1,5 +1,6 @@
 #!/bin/bash
 
-/usr/share/bunkerweb/cli/main.py "$@"
+# shellcheck disable=SC1091
+. /usr/share/bunkerweb/helpers/utils.sh
 
-exit $?
+exec "$(get_python_bin)" /usr/share/bunkerweb/cli/main.py "$@"

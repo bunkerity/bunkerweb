@@ -25,12 +25,15 @@ if deps_path not in sys_path:
     sys_path.append(deps_path)
 
 from common_utils import effective_cpu_count  # type: ignore
+from env_file import format_env_lines  # type: ignore
 from logger import getLogger  # type: ignore
 
 from jinja2 import Environment, FileSystemBytecodeCache, FileSystemLoader, Undefined
 
 logger = getLogger("TEMPLATOR")
 _ssl_ecdh_curve_resolution_logged = False
+# Global templates that probe the plugin fragment folders the server phase stages, so they render after it.
+DEFERRED_GLOBAL_TEMPLATES = frozenset({"http/modsecurity-rules-global-crs.conf.modsec"})
 
 
 @lru_cache(maxsize=1)
@@ -302,13 +305,6 @@ def create_custom_undefined_class(default_config: Dict[str, Any]):
     return ConfigurableCustomUndefined
 
 
-def _ensure_fork_start_method() -> None:
-    """Force fork start method when available so child processes inherit globals."""
-    with suppress(RuntimeError):
-        if mp.get_start_method(allow_none=True) != "fork":
-            mp.set_start_method("fork")
-
-
 class Templator:
     """A class to render configuration files using Jinja2 templates."""
 
@@ -432,8 +428,10 @@ class Templator:
 
         self._categorized_templates = self._categorize_templates()
 
+        self._stream_reuseport_ports = self._stream_reuseport_owners()
+
         self._base_template_vars = {
-            "is_custom_conf": Templator.is_custom_conf,
+            "is_custom_conf": self.is_custom_conf,
             "has_variable": Templator.has_variable,
             "has_service_with": Templator.has_service_with,
             "random": Templator.random,
@@ -453,11 +451,9 @@ class Templator:
         """
         global _ssl_ecdh_curve_resolution_logged
 
-        _ensure_fork_start_method()
         _ssl_ecdh_curve_resolution_logged = False
         if self._uses_auto_ssl_ecdh_curve():
             resolve_ssl_ecdh_curve("auto")
-        failures = self._render_global()
         server_name = self._config.get("SERVER_NAME", "www.example.com").strip()
         # an empty SERVER_NAME renders no server at all, like multisite already does, instead of an empty server_name directive
         servers = [server_name] if server_name else []
@@ -472,8 +468,9 @@ class Templator:
         max_workers = min(worker_target, len(servers)) or 1
         batch_size = max(1, ceil(len(servers) / max_workers))
 
+        failures = self._render_global()
         server_start = perf_counter()
-        with ProcessPoolExecutor(max_workers=max_workers) as executor:
+        with ProcessPoolExecutor(max_workers=max_workers, mp_context=mp.get_context("fork")) as executor:
             future_to_batch = {}
             for i in range(0, len(servers), batch_size):
                 batch = servers[i : i + batch_size]  # noqa: E203
@@ -490,7 +487,7 @@ class Templator:
                     elapsed = perf_counter() - server_start
                     logger.info(f"Progress: {completed_servers}/{len(servers)} servers ({progress_pct:.1f}%) in {elapsed:.1f}s")
 
-        return failures
+        return failures + self._render_deferred_global()
 
     def __getstate__(self) -> Dict[str, Any]:
         state = self.__dict__.copy()
@@ -631,15 +628,18 @@ class Templator:
     def _write_config(self) -> bool:
         """Write the configuration to a variables.env file. Returns whether it was written."""
         real_path = self._output / "variables.env"
+        tmp_path = real_path.with_name(".variables.env.tmp")
         try:
             real_path.parent.mkdir(parents=True, exist_ok=True)
             # Sorted so two runs over the same settings produce byte-identical output.
             # Instances skip a push whose archive matches the one already applied, and
             # dict insertion order here varies between runs, which alone was enough to
             # make every /confs push look like a change.
-            config_lines = [f"{k}={v}\n" for k, v in sorted(self._full_config.items())]
-            real_path.write_text("".join(config_lines))
+            tmp_path.write_text(format_env_lines(dict(sorted(self._full_config.items()))))
+            tmp_path.replace(real_path)
         except IOError as e:
+            with suppress(OSError):
+                tmp_path.unlink()
             logger.error(f"Error writing configuration to {real_path}: {e}")
             return False
         return True
@@ -666,28 +666,58 @@ class Templator:
 
         return filtered_config
 
-    def _render_global(self) -> List[str]:
-        """Render global templates. Returns what failed."""
-        global_start = perf_counter()
+    def _stream_reuseport_owners(self) -> Dict[str, set]:
+        """Elect one loaded stream block per socket; unloaded blocks keep their output."""
+        server_name = self._config.get("SERVER_NAME", "").strip()
+        if self._config.get("MULTISITE", "no") == "yes":
+            services = {
+                server: self._get_server_config(server, self._global_only_full_config, self._server_specific_full_config.get(server, {}))
+                for server in server_name.split()
+            }
+        else:
+            services = {server_name: self._full_config} if server_name else {}
 
+        owners = {}
+        claimed = set()
+        for server, config in services.items():
+            tokens = {
+                f"{proto}:{port}"
+                for key, port in config.items()
+                if key.startswith("LISTEN_STREAM_PORT") and not key.startswith("LISTEN_STREAM_PORT_SSL") and port
+                for proto, setting, default in (("tcp", "USE_TCP", "yes"), ("udp", "USE_UDP", "no"))
+                if config.get(setting, default) == "yes"
+            }
+            if config.get("LISTEN_STREAM", "yes") != "yes":
+                tokens = set()
+            owners[server] = tokens
+            if config.get("SERVER_TYPE", "http") == "stream":
+                owners[server] = tokens - claimed
+                claimed.update(tokens)
+        return owners
+
+    def _render_global(self) -> List[str]:
+        """Write variables.env and render the global templates the server phase may read. Returns what failed."""
         failures = [] if self._write_config() else ["variables.env"]
-        templates = self._find_templates(
-            [
-                "global",
-                "http",
-                "stream",
-                "default-server-http",
-            ]
-        )
+        return failures + self._render_global_templates(deferred=False)
+
+    def _render_deferred_global(self) -> List[str]:
+        """Render the global templates that need what the server phase staged. Returns what failed."""
+        return self._render_global_templates(deferred=True)
+
+    def _render_global_templates(self, deferred: bool) -> List[str]:
+        global_start = perf_counter()
+        templates = [
+            template
+            for template in self._find_templates(["global", "http", "stream", "default-server-http"])
+            if (template in DEFERRED_GLOBAL_TEMPLATES) == deferred
+        ]
 
         template_vars = self._base_template_vars.copy()
         template_vars["all"] = self._full_config
         template_vars.update(self._config)
 
-        for template in templates:
-            if not self._render_template(template, template_vars):
-                failures.append(template)
-        logger.debug(f"Global rendering completed in {perf_counter() - global_start:.3f}s")
+        failures = [template for template in templates if not self._render_template(template, template_vars)]
+        logger.debug(f"Global rendering ({'deferred' if deferred else 'main'}) completed in {perf_counter() - global_start:.3f}s")
         return failures
 
     def _render_server_batch(self, servers: List[str]) -> List[str]:
@@ -728,11 +758,28 @@ class Templator:
             full_config = self._get_server_config(server, self._global_only_full_config, self._server_specific_full_config.get(server, {}))
             default_config = self._get_server_config(server, self._global_only_default_config, self._server_specific_default_config.get(server, {}))
 
+        if full_config.get("SERVER_TYPE", "http") == "http" and full_config.get("USE_REVERSE_PROXY") == full_config.get("USE_PROXY_CACHE") == "yes":
+            for key, host in full_config.items():
+                if not key.startswith("REVERSE_PROXY_HOST") or host == "":
+                    continue
+                suffix = key[18:]
+                if suffix and not suffix.startswith("_"):
+                    continue
+                setting = f"REVERSE_PROXY_BUFFERING{suffix}"
+                if full_config.get(setting, "yes") == "no":
+                    logger.warning(
+                        f"Service {server}: {setting}=no with USE_PROXY_CACHE=yes; new responses are not cached while response buffering is off "
+                        "unless the upstream enables response buffering."
+                    )
+
         server_custom_undefined = create_custom_undefined_class(default_config)
 
         template_vars = self._base_template_vars.copy()
         template_vars["all"] = full_config
         template_vars.update(config)
+        # Derived values cannot be shadowed by a setting.
+        template_vars["global_config"] = self._global_only_full_config
+        template_vars["STREAM_REUSEPORT_PORTS"] = self._stream_reuseport_ports.get(server, set())
 
         failures = []
         for template in templates:
@@ -787,8 +834,7 @@ class Templator:
             return False
         return True
 
-    @staticmethod
-    def is_custom_conf(path: str) -> bool:
+    def is_custom_conf(self, path: str) -> bool:
         """Check if the path contains any .conf files.
 
         Args:
@@ -797,6 +843,10 @@ class Templator:
         Returns:
             bool: True if .conf files are found, False otherwise.
         """
+        # Generated fragments belong to this render; operator configs keep their literal root.
+        generated_path = Path(path)
+        if generated_path.is_relative_to("/etc/nginx"):
+            path = str(self._output / generated_path.relative_to("/etc/nginx"))
         return bool(glob(join(path, "*.conf")))
 
     @staticmethod

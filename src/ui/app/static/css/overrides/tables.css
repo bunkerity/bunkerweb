@@ -242,3 +242,34 @@ html.dark-style div.dts div.dataTables_scrollBody table {
 .dt-container > .row > .dt-layout-end .dt-buttons {
   row-gap: 0.5rem;
 }
+
+/* The search label is visually hidden, so DataTables' left margin on the input
+   only shifts it off the left edge of the action buttons once the end group
+   wraps to its own row. */
+div.dt-container div.dt-search input.form-control {
+  margin-left: 0;
+}
+
+/* When the end group wraps to its own row it spans that row and the search
+   input takes the free width. Flex-grow shares the free space of a line: with
+   both groups on one line the start group takes (almost) all of it, so nothing
+   moves; alone on its line the end group takes all of it. The start group keeps
+   its items packed on the left (Bootstrap's justify-content-between would
+   otherwise spread the bottom bar's length select and info text over the
+   wider box). */
+.dt-container > .row > .dt-layout-start {
+  flex-grow: 10000;
+  justify-content: flex-start !important;
+}
+
+.dt-container > .row > .dt-layout-end {
+  flex-grow: 1;
+}
+
+.dt-container > .row > .dt-layout-end .dt-search {
+  flex: 1 1 auto;
+}
+
+div.dt-container div.dt-search input.form-control {
+  width: 100%;
+}

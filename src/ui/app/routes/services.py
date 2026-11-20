@@ -22,7 +22,15 @@ from app.raw_drafts import (
 )
 
 from app.routes.configs import EXPORT_FORMAT_VERSION, apply_imported_configs, flash_import_results, parse_configs_export
-from app.routes.utils import CUSTOM_CONF_RX, extract_file_setting_names, handle_error, submit_config_task, verify_data_in_form, wait_applying
+from app.routes.utils import (
+    CUSTOM_CONF_RX,
+    extract_file_setting_names,
+    handle_error,
+    reset_cleared_settings,
+    submit_config_task,
+    verify_data_in_form,
+    wait_applying,
+)
 from app.utils import (
     LOGGER,
     can_delete_service,
@@ -376,6 +384,11 @@ def services_service_page(service: str):
         ):
             wait_applying()
 
+            if mode == "easy" and not BW_CONFIG._Config__ignore_regex_check:
+                # An emptied field the setting cannot hold empty takes its default, like typing the default would.
+                # Without it check_variables rejects the empty value and the whole save is dropped.
+                reset_cleared_settings(variables, BW_CONFIG.get_plugins_settings())
+
             continuity_draft_settings: Dict[str, bool] = {}
             source_draft_config: Dict[str, dict] = {}
             preserved_draft_edits: set[str] = set()
@@ -624,7 +637,8 @@ def services_service_page(service: str):
                 setting = _draft_setting_name(full_key)
                 if setting in draft_value_keys and setting not in variables:
                     invalid_draft_values.append(setting)
-            if invalid_draft_values:
+            # Rejected values must not reach the save, which treats missing keys as deletions.
+            if invalid_draft_values or validation_variables.keys() - variables.keys():
                 DATA.update({"RELOADING": False, "CONFIG_CHANGED": False})
                 return
 

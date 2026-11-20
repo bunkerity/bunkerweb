@@ -1,0 +1,66 @@
+{
+  "id": "zstd",
+  "name": "Zstandard",
+  "description": "Compress HTTP responses with the Zstandard algorithm.",
+  "version": "1.0",
+  "stream": "no",
+  "settings": {
+    "USE_ZSTD": {
+      "context": "multisite",
+      "default": "no",
+      "help": "Enable or disable Zstandard compression.",
+      "id": "use-zstd",
+      "label": "Use zstd",
+      "regex": "^(yes|no)$",
+      "type": "check"
+    },
+    "ZSTD_TYPES": {
+      "context": "multisite",
+      "default": "application/atom+xml application/javascript application/json application/rss+xml application/vnd.ms-fontobject application/x-font-opentype application/x-font-truetype application/x-font-ttf application/x-javascript application/xhtml+xml application/xml font/eot font/opentype font/otf font/truetype image/svg+xml image/vnd.microsoft.icon image/x-icon image/x-win-bitmap text/css text/javascript text/plain text/xml",
+      "help": "List of MIME types that will be compressed with zstd.",
+      "id": "zstd-types",
+      "label": "MIME types",
+      "regex": "^ *(?:[\\-\\w.]+/[\\-\\w.+]+(?: +|$))+$",
+      "type": "multivalue"
+    },
+    "ZSTD_MIN_LENGTH": {
+      "context": "multisite",
+      "default": "1000",
+      "help": "Minimum response size (in bytes) for Zstandard compression to apply.",
+      "id": "zstd-min-length",
+      "label": "Minimum length",
+      "regex": "^\\d+$",
+      "type": "number"
+    },
+    "ZSTD_COMP_LEVEL": {
+      "context": "multisite",
+      "default": "3",
+      "help": "Compression level for Zstandard (1 = fastest, 19 = highest supported level). Higher levels use more CPU and memory.",
+      "id": "zstd-comp-level",
+      "label": "Compression level",
+      "regex": "^([1-9]|1[0-9])$",
+      "type": "select",
+      "select": [
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9",
+        "10",
+        "11",
+        "12",
+        "13",
+        "14",
+        "15",
+        "16",
+        "17",
+        "18",
+        "19"
+      ]
+    }
+  }
+}

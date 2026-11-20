@@ -28,6 +28,7 @@ Siga estos pasos para configurar y usar la función de Lista Negra:
 | Ajuste                      | Valor por defecto                                       | Contexto  | Múltiple | Descripción                                                                                                                            |
 | --------------------------- | ------------------------------------------------------- | --------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------- |
 | `USE_BLACKLIST`             | `yes`                                                   | multisite | no       | **Habilitar Lista Negra:** Establezca en `yes` para habilitar la función de lista negra.                                               |
+| `BLACKLIST_URLS_REFRESH_INTERVAL` | `1h` | multisite | no | **Intervalo de actualización de URL:** Antigüedad mínima de la caché antes de volver a descargar. Acepta segundos sin unidad o sufijos de tiempo (`ms`, `s`, `m`, `h`, `d`, `w`, `M`, `y`). |
 | `BLACKLIST_COMMUNITY_LISTS` | `ip:danmeuk-tor-exit ua:mitchellkrogza-bad-user-agents` | multisite | no       | **Listas Negras de la Comunidad:** Seleccione listas negras preconfiguradas mantenidas por la comunidad para incluirlas en el bloqueo. |
 
 === "Listas Negras de la Comunidad"
@@ -39,8 +40,12 @@ Siga estos pasos para configurar y usar la función de Lista Negra:
     | ----------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------- |
     | `ip:danmeuk-tor-exit`                     | IP de nodos de salida de Tor (dan.me.uk)                                                                                                                                                                                       | `https://www.dan.me.uk/torlist/?exit`                                                                                                 |
     | `ua:mitchellkrogza-bad-user-agents`       | Nginx Block Bad Bots, Spam Referrer Blocker, Vulnerability Scanners, User-Agents, Malware, Adware, Ransomware, Malicious Sites, con anti-DDOS, Wordpress Theme Detector Blocking y Fail2Ban Jail para infractores reincidentes | `https://raw.githubusercontent.com/mitchellkrogza/nginx-ultimate-bad-bot-blocker/master/_generator_lists/bad-user-agents.list`        |
-    | `ip:laurent-minne-data-shield-aggressive` | Data-Shield IPv4 Blocklist - Laurent M. - Para Web Apps, WordPress, VPS (Apache/Nginx)                                                                                                                                         | `https://raw.githubusercontent.com/duggytuxy/Data-Shield_IPv4_Blocklist/refs/heads/main/prod_data-shield_ipv4_blocklist.txt`          |
-    | `ip:laurent-minne-data-shield-critical`   | Data-Shield IPv4 Blocklist - Laurent M. - Para DMZs, SaaS, API y Activos Críticos                                                                                                                                              | `https://raw.githubusercontent.com/duggytuxy/Data-Shield_IPv4_Blocklist/refs/heads/main/prod_critical_data-shield_ipv4_blocklist.txt` |
+    | `ip:laurent-minne-data-shield-aggressive` | Data-Shield IPv4 Blocklist (Community Standard) - Laurent M.                                                                                                                                                                   | `https://raw.githubusercontent.com/duggytuxy/Data-Shield_IPv4_Blocklist/refs/heads/main/prod_data-shield_ipv4_blocklist.txt`          |
+
+    !!! info "Data-Shield Pro"
+        [Data-Shield Pro](https://data-shield.eu/?utm_source=external-docs&utm_medium=cta&utm_campaign=bunkerweb-docs) es una suscripción de pago que incluye el perfil Critical: la lista Standard más fuentes bloqueadas adicionales, para un filtrado entrante más estricto y con mayor riesgo de bloquear tráfico legítimo. El antiguo preset `ip:laurent-minne-data-shield-critical` está retirado y ahora descarga la lista gratuita Community Standard.
+
+        El feed Pro requiere autenticación, y BunkerWeb no tiene un ajuste aparte para las credenciales del feed. Las credenciales incluidas en un ajuste de URL (`http://user:pass@url`) se guardan en ese ajuste y se muestran en la interfaz web y en los registros, así que siga la [guía del proveedor](https://data-shield.eu/docs/?utm_source=external-docs&utm_medium=cta&utm_campaign=bunkerweb-docs): mantenga el token del dispositivo fuera de las URL y use un relay en su propia red, es decir, un servicio que se autentica ante el proveedor y sirve el archivo solo a sus instancias de BunkerWeb; después añada la URL del relay a `BLACKLIST_IP_URLS`. La opción HTTP Basic toma el ID del dispositivo como usuario y el token como contraseña, pero deja el token en el ajuste. Los suscriptores gestionan sus dispositivos en el [portal de suscriptores](https://feeds.data-shield.eu/?utm_source=external-docs&utm_medium=cta&utm_campaign=bunkerweb-docs).
 
     **Configuración:** Especifique múltiples listas separadas por espacios. Por ejemplo:
     ```yaml
@@ -49,9 +54,6 @@ Siga estos pasos para configurar y usar la función de Lista Negra:
 
     !!! tip "Comunidad vs Configuración Manual"
         Las listas negras de la comunidad proporcionan una forma conveniente de empezar con fuentes de listas negras probadas. Puede usarlas junto con configuraciones de URL manuales para una máxima flexibilidad.
-
-    !!! note "Agradecimientos"
-        ¡Gracias a Laurent Minne por contribuir con las [listas de bloqueo Data-Shield](https://duggytuxy.github.io/#)!
 
 === "Dirección IP"
     **Qué hace esto:** Bloquea a los visitantes según su dirección IP o red.
@@ -136,7 +138,7 @@ Siga estos pasos para configurar y usar la función de Lista Negra:
     Todos los ajustes `*_URLS` admiten URL HTTP/HTTPS así como rutas de archivos locales usando el prefijo `file:///`. Se admite la autenticación básica usando el formato `http://usuario:contraseña@url`.
 
 !!! tip "Actualizaciones Regulares"
-    Las listas negras de las URL se descargan y actualizan automáticamente cada hora para asegurar que su protección se mantenga actualizada contra las últimas amenazas.
+    La tarea se ejecuta cada hora. `BLACKLIST_URLS_REFRESH_INTERVAL` establece la antigüedad mínima de una URL en caché antes de volver a descargarla (valor predeterminado: `1h`). Use `24h` para proveedores que permiten como máximo una descarga al día, o `0` para descargar en cada ejecución. Las cachés recientes y las descargas fallidas conservan las últimas entradas válidas. Dentro de este plugin, los servicios comparten las cachés de URL: el intervalo más corto puede provocar una descarga. Configure el mismo intervalo en todos los servicios que compartan una URL con un límite del proveedor.
 
 ### Configuraciones de Ejemplo
 

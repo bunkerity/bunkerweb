@@ -5,6 +5,41 @@
   or the CRS Google Group at
 * https://groups.google.com/a/owasp.org/g/modsecurity-core-rule-set-project
 
+## Version 4.30.0 - 2026-10-02
+
+## What's Changed
+
+### 🔒 Security
+* fix: inspect `REQUEST_FILENAME` in RCE (932) rules to close path-based command injection bypass — https://github.com/coreruleset/coreruleset/security/advisories/GHSA-575j-qr6p-9763
+* fix: lowercase the `charset` parameter name so mixed-case `CHARSET=` cannot skip the allow-list (920480) — https://github.com/coreruleset/coreruleset/security/advisories/GHSA-89h9-2j8h-9gp2
+* fix: collect every `_charset_` value so a second value cannot shadow a disallowed charset (922100) — https://github.com/coreruleset/coreruleset/security/advisories/GHSA-qmx4-jfcv-fgww
+### ⭐ Important changes
+* fix:  Skip Checking Responses feature is broken by @azurit in https://github.com/coreruleset/coreruleset/pull/4807
+### 🆕 New features and detections 🎉
+* feat(932380): detect Active Directory DS command-line tools by @fzipi in https://github.com/coreruleset/coreruleset/pull/4768
+* feat(934200): detect Velocity and FreeMarker directive syntax by @Yeagerist0 in https://github.com/coreruleset/coreruleset/pull/4774
+* feat(unix): detect common selinux command usage by @EsadCetiner in https://github.com/coreruleset/coreruleset/pull/4724
+* feat: Add Mozilla/6.0 used by scanner tools by @HackingRepo in https://github.com/coreruleset/coreruleset/pull/4784
+* feat: Add .claude into restricted files by @azurit in https://github.com/coreruleset/coreruleset/pull/4809
+* feat: Expand Restricted Files data (v3) by @HackingRepo in https://github.com/coreruleset/coreruleset/pull/4816
+### 🪦 Rule removals
+* feat: refactoring of response rules skipping by @azurit in https://github.com/coreruleset/coreruleset/pull/4806
+### 🧰 Other Changes
+* fix(913100): substring false positive with veganism.social user-agent by @EsadCetiner in https://github.com/coreruleset/coreruleset/pull/4777
+* fix(932270): require boundary before tilde expansion patterns by @zoutjebot in https://github.com/coreruleset/coreruleset/pull/4596
+* fix(956100): FP with keyword 'EOFError' inside RESPONSE_BODY by @azurit in https://github.com/coreruleset/coreruleset/pull/4752
+* fix(951230): FP with too broad regex for RESPONSE_BODY by @azurit in https://github.com/coreruleset/coreruleset/pull/4747
+* fix: close trailing-slash bypass of upload extension check (V29-260924) by @fzipi in https://github.com/coreruleset/coreruleset/pull/4815
+* fix(932180): enforce boundaries for high-risk false positives entries by @EsadCetiner in https://github.com/coreruleset/coreruleset/pull/4632
+* feat: allow application/*+json and AWS JSON content types by default by @fzipi in https://github.com/coreruleset/coreruleset/pull/4775
+* fix(901370): allow + inside the subtype before the +json suffix by @fzipi in https://github.com/coreruleset/coreruleset/pull/4828
+* fix(libmodsecurity3/coraza): substring false positive with json key named profiledata by @EsadCetiner in https://github.com/coreruleset/coreruleset/pull/4812
+
+## New Contributors
+* @Yeagerist0 made their first contribution in https://github.com/coreruleset/coreruleset/pull/4774
+
+**Full Changelog**: https://github.com/coreruleset/coreruleset/compare/v4.29.0...v4.30.0
+
 ## Version 4.29.0 - 2026-08-17
 
 ## What's Changed

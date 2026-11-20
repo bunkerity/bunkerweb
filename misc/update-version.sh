@@ -64,15 +64,6 @@ sed -i "s@github.com/bunkerity/bunkerweb/raw/v${OLD_DOCKER_VERSION}@github.com/b
 # README - other version references keep ~
 sed -i "s@${OLD_VERSION}@${NEW_VERSION}@g" README.md
 sed -i "s@${OLD_VERSION}@${NEW_VERSION}@g" src/common/core/*/README*.md
-# tests (uses Docker image tags only)
-sed -i "s@bunkerity/\([^:]*\):${OLD_DOCKER_VERSION}@bunkerity/\1:${NEW_DOCKER_VERSION}@g" tests/ui/docker-compose.yml
-shopt -s globstar
-for test in tests/core/* ; do
-    if [ -d "$test" ] ; then
-        sed -i "s@bunkerity/\([^:]*\):${OLD_DOCKER_VERSION}@bunkerity/\1:${NEW_DOCKER_VERSION}@g" "$test/docker-compose.yml"
-    fi
-done
-shopt -u globstar
 # linux
 sed -i "s@${OLD_VERSION}@${NEW_VERSION}@g" src/linux/scripts/beforeInstall.sh
 # db

@@ -72,7 +72,7 @@ Das gRPC-Plugin ermöglicht BunkerWeb, gRPC-Dienste über HTTP/2 mit `grpc_pass`
     `GRPC_SSL_VERIFY` wirkt erst, wenn ein CA-Bundle verfügbar ist. Stellen Sie es über `GRPC_SSL_TRUSTED_CERTIFICATE` (ein für den Scheduler lesbarer Pfad) oder `GRPC_SSL_TRUSTED_CERTIFICATE_DATA` (base64 oder Klartext-PEM) bereit und wählen Sie die Quelle mit `GRPC_SSL_TRUSTED_CERTIFICATE_PRIORITY`. Der Scheduler prüft das Bundle, legt es im Cache ab und verteilt es an die Instanzen. Ohne nutzbares Bundle bleibt die Prüfung deaktiviert.
 
 !!! warning "Lang laufende Streams und Core-Timeouts"
-    Lang laufende oder Streaming-RPCs benötigen eventuell höhere generische NGINX-Timeouts als die globalen Standardwerte. Am häufigsten werden `CLIENT_BODY_TIMEOUT` und `CLIENT_HEADER_TIMEOUT` in den Einstellungen des General-Plugins angepasst.
+    Lang laufende oder Streaming-RPCs benötigen eventuell höhere Werte für `CLIENT_BODY_TIMEOUT` und `CLIENT_HEADER_TIMEOUT`. Setzen Sie diese in den Einstellungen des General-Plugins für den gRPC-Dienst; halten Sie den globalen Wert von `CLIENT_HEADER_TIMEOUT` kurz, um TLS-Handshakes und die Lebensdauer alter Worker nach einem Reload zu begrenzen.
 
 !!! tip "Mehrere gRPC-Backends"
     Nutzen Sie suffixierte Einstellungen für mehrere Routen:

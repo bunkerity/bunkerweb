@@ -7,6 +7,7 @@ The HTML Injection plugin enables you to seamlessly add custom HTML code to your
 3. If you've configured head injection, BunkerWeb inserts your custom HTML code just before the closing `</head>` tag.
 4. The insertion happens automatically for all HTML pages served by your website.
 5. This allows you to add scripts, styles, or other elements without modifying your application's code.
+6. The antibot challenge page and BunkerWeb's error pages are left untouched: BunkerWeb generates them, and their Content Security Policy would block the injected code anyway.
 
 ### How to Use
 
@@ -23,6 +24,8 @@ Follow these steps to configure and use the HTML Injection feature:
 | ------------- | ------- | --------- | -------- | --------------------------------------------------------------------- |
 | `INJECT_HEAD` |         | multisite | no       | **Head HTML Code:** The HTML code to inject before the `</head>` tag. |
 | `INJECT_BODY` |         | multisite | no       | **Body HTML Code:** The HTML code to inject before the `</body>` tag. |
+
+`INJECT_HEAD` and `INJECT_BODY` values are inserted as literal HTML: quotes and backslashes need no extra NGINX escaping. If you previously added `\'` by hand as a workaround, remove the backslash. Keep any escaping required by your configuration format (such as YAML); NGINX `$variable` expansion is unchanged.
 
 !!! tip "Best Practices"
     - For performance reasons, place JavaScript files at the end of the body to prevent render blocking.

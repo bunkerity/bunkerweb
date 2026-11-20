@@ -1,0 +1,35 @@
+services:
+  redis-master:
+    image: redis:8-alpine@sha256:09160599abd229764c0fb44cb6be640294e1d360a54b19985ab4843dcf2d90f1
+    container_name: redis-master
+    ports:
+      - "127.0.0.1:6380:6379"
+    volumes:
+      - /tmp/redis-acl:/acl
+      - /tmp/redis-tls:/tls
+      - redis-data:/data
+      - ../scripts/redis-entrypoint.sh:/usr/local/bin/redis-entrypoint.sh:ro
+    env_file:
+      - path: /tmp/redis-master.env
+        required: true
+    entrypoint:
+      - "/usr/local/bin/redis-entrypoint.sh"
+    dns:
+      - 10.20.30.20
+    networks:
+      bw-universe:
+        ipv4_address: 10.20.30.51
+        aliases:
+          - redis-master
+
+volumes:
+  redis-data:
+    name: redis-data
+
+networks:
+  bw-universe:
+    name: bw-universe
+    ipam:
+      driver: default
+      config:
+        - subnet: 10.20.30.0/24

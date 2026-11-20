@@ -2,12 +2,17 @@
 
 from contextlib import suppress
 from copy import deepcopy
-from typing import Literal, Optional, Union
+from hashlib import sha256
+from pathlib import Path
+from ssl import PEM_cert_to_DER_cert, SSLError as TlsError
+from threading import Lock
+from time import monotonic
+from typing import Callable, Literal, Optional, Union
 from os import getenv
 from urllib.parse import urlsplit
 from requests import Session, request
 from requests.adapters import HTTPAdapter
-from requests.exceptions import ConnectionError
+from requests.exceptions import ConnectionError, SSLError
 from urllib3 import disable_warnings  # new
 from urllib3.connection import HTTPConnection, HTTPSConnection
 from urllib3.connectionpool import HTTPConnectionPool, HTTPSConnectionPool
@@ -20,6 +25,107 @@ from logger import getLogger  # type: ignore
 if getenv("API_SUPPRESS_INSECURE_WARNING", "1").lower() in ("1", "true", "yes", "on"):
     with suppress(Exception):
         disable_warnings(InsecureRequestWarning)
+
+
+# The certificate the api-server-cert job generates and the instances serve (confs/api.conf).
+API_SERVER_CERT = Path("/var/cache/bunkerweb/jobs/api-server-cert.pem")
+# The one certificate the job replaced at its last renewal, kept next to the current one (same cache, same job). An
+# instance that has not reloaded yet still serves it, and a client process that started after the renewal never saw it.
+API_SERVER_PREVIOUS_CERT_NAME = "api-server-cert-previous.pem"
+# How long a read of the certificate is trusted, and how soon a mismatch may force another one.
+_PIN_TTL = 30.0
+_PIN_FORCED_TTL = 2.0
+
+
+class _CertPin:
+    """The fingerprints a client accepts from an instance's API certificate, newest first.
+
+    Instances are reached by IP, service name or pod name, so the name in the certificate can never
+    match and the certificate itself is what gets pinned. It renews monthly and the instances only
+    serve the new one after the next reload, so the previous fingerprint stays accepted: a client
+    that has seen both works before and after the instances catch up. A mismatch re-reads the source
+    once, which covers an instance that is ahead of a client whose last read is still fresh.
+
+    The source is the file the scheduler restores on disk, or the loader a caller that has a
+    database registers (the web UI, the API service, bwcli): the file is stored in the job cache.
+    The previous certificate comes from the same two places, as the one file the job itself wrote
+    when it renewed, so a client restarted after a renewal still reaches an instance that has not
+    reloaded. Nothing else is ever accepted: no older history, only that single file.
+    """
+
+    def __init__(self):
+        self.lock = Lock()
+        self.fingerprints: list[str] = []
+        self.checked = float("-inf")
+        self.loader: Optional[Callable[[], Optional[bytes]]] = None
+        self.previous_loader: Optional[Callable[[], Optional[bytes]]] = None
+        self.warned = False
+
+    @staticmethod
+    def _read(path: Path, loader: Optional[Callable[[], Optional[bytes]]]) -> Optional[str]:
+        data = None
+        with suppress(Exception):
+            data = path.read_bytes()
+        if not data and loader is not None:
+            with suppress(Exception):
+                data = loader()
+        if not data:
+            return None
+        with suppress(Exception):
+            return sha256(PEM_cert_to_DER_cert(data.decode())).hexdigest()
+        return None
+
+    def refresh(self, force: bool = False) -> list[str]:
+        with self.lock:
+            now = monotonic()
+            if now - self.checked >= (_PIN_FORCED_TTL if force else _PIN_TTL):
+                self.checked = now
+                current = self._read(API_SERVER_CERT, self.loader)
+                previous = self._read(API_SERVER_CERT.with_name(API_SERVER_PREVIOUS_CERT_NAME), self.previous_loader)
+                # A source that cannot be read this time keeps the fingerprints already known.
+                if current is not None:
+                    # The recorded previous certificate wins over what this process happened to see (an upgrade
+                    # from a version that does not record it falls back to that, as before).
+                    older = previous if previous not in (None, current) else next((fp for fp in self.fingerprints if fp != current), None)
+                    self.fingerprints = [current] + ([older] if older else [])
+            return self.fingerprints.copy()
+
+    def warn_missing(self, logger) -> None:
+        """Once per process: no certificate to pin, so HTTPS is not verified as before."""
+        with self.lock:
+            if self.warned:
+                return
+            self.warned = True
+        logger.warning(f"No API server certificate to pin yet ({API_SERVER_CERT}), the instances' HTTPS certificate is not verified")
+
+
+_PIN = _CertPin()
+
+
+def _is_pin_mismatch(exc: BaseException) -> bool:
+    return "ingerprint" in str(exc)
+
+
+# What OpenSSL reports when the bytes answering our ClientHello are not TLS at all. The reason depends on the answer and on
+# the version: an HTTP reply is WRONG_VERSION_NUMBER on 1.1.x and 3.0, HTTP_REQUEST on some builds, RECORD_LAYER_FAILURE on
+# 3.5 (which gives the same reason for any other plaintext too), and a reply that starts with a TLS-looking header reads
+# differently again. The message text is matched as well for builds that do not expose `reason`.
+# Not in the list on purpose: UNEXPECTED_EOF_WHILE_READING and a reset (the peer said nothing), certificate or fingerprint
+# errors, and a TLS alert (the peer does speak TLS).
+_NOT_TLS_REASONS = frozenset(
+    {"WRONG_VERSION_NUMBER", "HTTP_REQUEST", "HTTPS_PROXY_REQUEST", "UNKNOWN_PROTOCOL", "RECORD_LAYER_FAILURE", "PACKET_LENGTH_TOO_LONG"}
+)
+_NOT_TLS_TEXT = tuple(reason.replace("_", " ").lower() for reason in _NOT_TLS_REASONS)
+
+
+def _peer_is_not_speaking_tls(exc: Optional[BaseException], depth: int = 6) -> bool:
+    """Whether the handshake failed because what answered is not TLS (urllib3 and requests nest the ssl error in args)."""
+    if exc is None or depth < 0:
+        return False
+    if isinstance(exc, TlsError) and (getattr(exc, "reason", None) in _NOT_TLS_REASONS or any(text in str(exc).lower() for text in _NOT_TLS_TEXT)):
+        return True
+    nested = (exc.__cause__, exc.__context__, getattr(exc, "reason", None), *getattr(exc, "args", ()))
+    return any(isinstance(item, BaseException) and _peer_is_not_speaking_tls(item, depth - 1) for item in nested)
 
 
 class _BodyWriteTimeout(TimeoutError):
@@ -82,16 +188,33 @@ def _connection_class(base, write_timeout: float):
     return _Connection
 
 
-class _WriteTimeoutAdapter(HTTPAdapter):
-    """Mounts connections built by _connection_class on both schemes."""
+class _ApiAdapter(HTTPAdapter):
+    """Pins the certificate the server presents and/or gives the body write its own deadline.
 
-    def __init__(self, write_timeout: float, **kwargs):
-        # init_poolmanager runs from HTTPAdapter.__init__, so the value has to exist first.
+    A fingerprint only belongs on the https mount: urllib3 hands the keyword to the connection
+    class of whichever pool it builds, and a plain HTTP connection does not take it.
+    """
+
+    def __init__(self, write_timeout: Optional[float] = None, fingerprint: Optional[str] = None, **kwargs):
+        # init_poolmanager runs from HTTPAdapter.__init__, so the values have to exist first.
         self._write_timeout = write_timeout
+        self._fingerprint = fingerprint
         super().__init__(**kwargs)
 
+    def proxy_manager_for(self, proxy, **proxy_kwargs):
+        # With HTTPS_PROXY set, requests sends the call through a ProxyManager of its own, which
+        # never sees the keyword init_poolmanager gave the PoolManager: the pin has to be handed over
+        # here too, or the TLS session through the proxy would be accepted unchecked.
+        if self._fingerprint:
+            proxy_kwargs["assert_fingerprint"] = self._fingerprint
+        return super().proxy_manager_for(proxy, **proxy_kwargs)
+
     def init_poolmanager(self, *args, **kwargs):
+        if self._fingerprint:
+            kwargs["assert_fingerprint"] = self._fingerprint
         super().init_poolmanager(*args, **kwargs)
+        if self._write_timeout is None:
+            return
         # PoolManager holds the shared module-level mapping by reference, so this rebinds the
         # attribute and never mutates the dict every other PoolManager in the process reads.
         self.poolmanager.pool_classes_by_scheme = {
@@ -162,31 +285,59 @@ class API:
         # sender, the HTTP retry and the JSON decode all sit inside the same boundary: nested
         # under the ConnectionError handler the retry would escape a sibling except, and the
         # routes that map a failure to 502 answered 500 instead.
-        session = None
-        try:
+        sessions = []
+
+        def send_to(endpoint: str, fingerprint: Optional[str] = None):
             # timeout bounds the connect and the read; write_timeout bounds the body write, which
-            # neither of them covers. Left unset the sender is the plain module-level call, so
-            # nothing about the request changes.
-            if write_timeout is not None:
+            # neither of them covers. With neither a write budget nor a pin to carry, the sender is
+            # the plain module-level call, so nothing about the request changes.
+            send = request
+            if write_timeout is not None or fingerprint:
                 session = Session()
-                adapter = _WriteTimeoutAdapter(write_timeout)
-                session.mount("http://", adapter)
-                session.mount("https://", adapter)
-            send = session.request if session is not None else request
+                sessions.append(session)
+                session.mount("http://", _ApiAdapter(write_timeout))
+                session.mount("https://", _ApiAdapter(write_timeout, fingerprint))
+                send = session.request
+            return send(
+                method,
+                f"{endpoint}{url if not url.startswith('/') else url[1:]}",
+                timeout=timeout,
+                headers=deepcopy(headers),
+                verify=False,  # self-signed certificate: pinned by fingerprint instead of verified by name
+                **deepcopy(kwargs),
+            )
+
+        try:
+            is_https = urlsplit(self.__endpoint).scheme == "https"
+            fingerprints = _PIN.refresh() if is_https else []
+            if is_https and not fingerprints:
+                _PIN.warn_missing(self.__logger)
+            pin_refused = False
 
             try:
-                resp = send(
-                    method,
-                    f"{self.__endpoint}{url if not url.startswith('/') else url[1:]}",
-                    timeout=timeout,
-                    headers=deepcopy(headers),
-                    verify=False,  # TODO: see what to do about SSL verification
-                    **deepcopy(kwargs),
-                )
+                tried = []
+                pending = fingerprints.copy() or [None]
+                while True:
+                    fingerprint = pending.pop(0)
+                    tried.append(fingerprint)
+                    try:
+                        resp = send_to(self.__endpoint, fingerprint)
+                        break
+                    except SSLError as e:
+                        if not fingerprint or not _is_pin_mismatch(e):
+                            raise
+                        # The previous certificate may still be the one served after a renewal, and
+                        # an instance can be ahead of what was read last: a mismatch tries the other
+                        # known fingerprint, then one fresh read of the source, before giving up.
+                        pin_refused = True
+                        if not pending:
+                            pending = [fp for fp in _PIN.refresh(force=True) if fp not in tried]
+                        if not pending:
+                            raise
             except ConnectionError as e:
                 # An instance that comes up before its certificate is in place stays reachable
                 # over the same port in plain HTTP; the retry is deliberate.
-                if urlsplit(self.__endpoint).scheme != "https":
+                if not is_https:
                     return False, f"Connection error: {e}", None, None
                 # A body write that ran out its own budget is not a TLS problem. Retrying it in
                 # cleartext spends the budget a second time and re-uploads the whole archive, so
@@ -196,29 +347,45 @@ class API:
                 # weaker reports every unreachable instance as a write that ran out.
                 if write_timeout is not None and _carries_write_timeout(e):
                     return False, f"Write timed out: {e}", None, None
-                self.__logger.warning(f"SSL connection error when contacting {self.__endpoint}{url}, trying HTTP: {e}")
+                if pin_refused:
+                    # Plain HTTP would hand the token and the payload to whoever forced the mismatch.
+                    message = f"Certificate of {self.__endpoint} did not match the pinned API server certificate, not sending {url} over HTTP: {e}"
+                    self.__logger.warning(message)
+                    return False, message, None, None
+                # Only a peer that is not speaking TLS gets the plain HTTP retry: an instance that has no
+                # certificate yet serves plain HTTP on this port (confs/api.conf). A reset, a refused or
+                # dropped connection, a timeout and a certificate error never do, or whoever caused them would
+                # receive the bearer token and the payload in cleartext. The criterion is "the peer is not
+                # speaking TLS", not "the peer is BunkerWeb": nothing here proves who answered, and an active
+                # on-path attacker who answers the handshake with plaintext still gets the retry. That is the
+                # accepted limit until the strict mode (no fallback) planned for 1.6.19.
+                if not _peer_is_not_speaking_tls(e):
+                    return False, f"Connection error: {e}", None, None
+                self.__logger.warning(f"{self.__endpoint}{url} answered the TLS handshake without speaking TLS, trying HTTP: {e}")
                 # replace(..., 1) strips the scheme prefix. lstrip takes a character set, so it
                 # also ate any leading hostname character in {h, t, p, s, :, /}: an IP endpoint
                 # came through intact while a named one lost its first letters and the retry
                 # failed to resolve.
-                resp = send(
-                    method,
-                    f"{self.__endpoint.replace('https://', 'http://', 1)}{url if not url.startswith('/') else url[1:]}",
-                    timeout=timeout,
-                    headers=deepcopy(headers),
-                    verify=False,
-                    **deepcopy(kwargs),
-                )
+                resp = send_to(self.__endpoint.replace("https://", "http://", 1))
                 self.__logger.debug(f"Response after retrying with HTTP: status={resp.status_code}, reason={resp.reason}, text={resp.text}")
 
             return True, "ok", resp.status_code, resp.json()
         except Exception as e:
             return False, f"Request failed: {e}", None, None
         finally:
-            if session is not None:
+            for session in sessions:
                 session.close()
 
     # ------------------ Builders ------------------
+    @staticmethod
+    def pin_from_database(db) -> None:
+        """Let a caller that has no job cache on disk read the pinned certificate from its database.
+
+        Takes the Database object rather than importing it: the core image has no SQLAlchemy.
+        """
+        _PIN.loader = lambda: db.get_job_cache_file("api-server-cert", "api-server-cert.pem", plugin_id="jobs")
+        _PIN.previous_loader = lambda: db.get_job_cache_file("api-server-cert", API_SERVER_PREVIOUS_CERT_NAME, plugin_id="jobs")
+
     @staticmethod
     def __default_http_port() -> int:
         try:

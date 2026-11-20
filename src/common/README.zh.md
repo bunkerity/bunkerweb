@@ -38,7 +38,7 @@ BunkerWeb 中的某些设置支持同一功能的多个配置。要定义多组�
 
 可以使用空格分隔的列表调整顺序：
 
-- 全局阶段：`PLUGINS_ORDER_INIT`、`PLUGINS_ORDER_INIT_WORKER`、`PLUGINS_ORDER_TIMER`。
+- 全局阶段：`PLUGINS_ORDER_INIT`、`PLUGINS_ORDER_INIT_WORKER`、`PLUGINS_ORDER_SSL_CLIENT_HELLO`、`PLUGINS_ORDER_TIMER`。
 - 按站点的阶段：`PLUGINS_ORDER_SET`、`PLUGINS_ORDER_ACCESS`、`PLUGINS_ORDER_SSL_CERTIFICATE`、`PLUGINS_ORDER_HEADER`、`PLUGINS_ORDER_LOG`、`PLUGINS_ORDER_PREREAD`、`PLUGINS_ORDER_LOG_STREAM`、`PLUGINS_ORDER_LOG_DEFAULT`。
 - 语义：列出的插件在该阶段优先执行；其余插件仍按正常顺序执行。仅使用空格分隔插件 ID。
 
@@ -71,7 +71,7 @@ BunkerWeb 中的某些设置支持同一功能的多个配置。要定义多组�
 
     | 设置                  | 默认值            | 上下文    | 多个 | 描述                                                               |
     | --------------------- | ----------------- | --------- | ---- | ------------------------------------------------------------------ |
-    | `SERVER_NAME`         | `www.example.com` | multisite | 否   | **主域名：** 此站点的主域名。在多站点模式下为必需。                |
+    | `SERVER_NAME`         | `www.example.com` | multisite | 否   | **主域名：** 此站点的主域名（或 IP 地址）。在多站点模式下为必需。  |
     | `BUNKERWEB_INSTANCES` | `127.0.0.1`       | global    | 否   | **BunkerWeb 实例：** 以空格分隔的 BunkerWeb 实例列表。             |
     | `MULTISITE`           | `no`              | global    | 否   | **多站点：** 设置为 `yes` 以启用托管具有不同配置的多个网站。       |
     | `SECURITY_MODE`       | `block`           | multisite | 否   | **安全级别：** 控制安全强制执行的级别。选项：`detect` 或 `block`。 |
@@ -109,16 +109,18 @@ BunkerWeb 中的某些设置支持同一功能的多个配置。要定义多组�
 
 === "网络和端口设置"
 
-    | 设置                    | 默认值       | 上下文 | 多个 | 描述                                                       |
-    | ----------------------- | ------------ | ------ | ---- | ---------------------------------------------------------- |
-    | `HTTP_PORT`             | `8080`       | global | 是   | **HTTP 端口：** HTTP 流量的端口号。留空以禁用HTTP监听。    |
-    | `HTTPS_PORT`            | `8443`       | global | 是   | **HTTPS 端口：** HTTPS 流量的端口号。留空以禁用HTTPS监听。 |
-    | `USE_IPV6`              | `no`         | global | 否   | **IPv6 支持：** 启用 IPv6 连接。                           |
-    | `DNS_RESOLVERS`         | `127.0.0.11` | global | 否   | **DNS 解析器：** 要使用的解析器的 DNS 地址。               |
-    | `CLIENT_BODY_TIMEOUT`   | `10s`        | global | 否   | **客户端请求体超时：** 读取客户端请求体的超时时间。        |
-    | `CLIENT_HEADER_TIMEOUT` | `10s`        | global | 否   | **客户端请求头超时：** 读取客户端请求头的超时时间。        |
-    | `KEEPALIVE_TIMEOUT`     | `15s`        | global | 否   | **Keepalive 超时：** 客户端 Keepalive 连接的超时时间。     |
-    | `SEND_TIMEOUT`          | `10s`        | global | 否   | **发送超时：** 向客户端传输响应的超时时间。                |
+    | 设置                    | 默认值       | 上下文    | 多个 | 描述                                                       |
+    | ----------------------- | ------------ | --------- | ---- | ---------------------------------------------------------- |
+    | `HTTP_PORT`             | `8080`       | global    | 是   | **HTTP 端口：** HTTP 流量的端口号。留空以禁用HTTP监听。    |
+    | `HTTPS_PORT`            | `8443`       | global    | 是   | **HTTPS 端口：** HTTPS 流量的端口号。留空以禁用HTTPS监听。 |
+    | `USE_IPV6`              | `no`         | global    | 否   | **IPv6 支持：** 启用 IPv6 连接。                           |
+    | `DNS_RESOLVERS`         | `127.0.0.11` | global    | 否   | **DNS 解析器：** 要使用的解析器的 DNS 地址。               |
+    | `CLIENT_BODY_TIMEOUT`   | `10s`        | multisite | 否   | **客户端请求体超时：** 读取客户端请求体的超时时间。        |
+    | `CLIENT_HEADER_TIMEOUT` | `10s`        | multisite | 否   | **客户端请求头超时：** 读取客户端请求头的超时时间。        |
+    | `KEEPALIVE_TIMEOUT`     | `15s`        | global    | 否   | **Keepalive 超时：** 客户端 Keepalive 连接的超时时间。     |
+    | `SEND_TIMEOUT`          | `10s`        | global    | 否   | **发送超时：** 向客户端传输响应的超时时间。                |
+
+    对于长连接 gRPC 流，请按服务设置 `CLIENT_HEADER_TIMEOUT` 和 `CLIENT_BODY_TIMEOUT`（例如 `netbird.example.com_CLIENT_HEADER_TIMEOUT=1d`）。全局 `CLIENT_HEADER_TIMEOUT` 应保持较短：它还限制默认服务器上的 TLS 握手时间，以及重新加载后未完成的握手使旧工作进程继续存活的时间。 当服务继承全局值时，`server-http` 自定义配置中已有的 `client_header_timeout` 或 `client_body_timeout` 指令仍可正常工作。为服务设置不同的超时值时，请删除对应的自定义指令，以免产生重复指令。
 
 === "流服务器设置"
 

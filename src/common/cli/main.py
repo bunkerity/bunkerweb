@@ -3,7 +3,7 @@
 from argparse import ArgumentParser
 from os import _exit, getenv, sep
 from os.path import join
-from sys import exit as sys_exit, path as sys_path
+from sys import exit as sys_exit, path as sys_path, stderr
 from traceback import format_exc
 
 for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("utils",), ("api",), ("db",))]:
@@ -12,10 +12,11 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
 
 from common_utils import parse_duration_int  # type: ignore
 from logger import getLogger  # type: ignore
-from CLI import CLI
+from CLI import CLI, support_refusal
 
 if __name__ == "__main__":
     logger = getLogger("CLI")
+    json_output = False
 
     try:
         # Global parser
@@ -58,6 +59,7 @@ if __name__ == "__main__":
 
         # Bans subparser
         parser_bans = subparsers.add_parser("bans", help="list current bans")
+        parser_bans.add_argument("--json", action="store_true", help="print bans as JSON grouped by instance and Redis")
 
         # Plugin list subparser
         parser_plugin_list = subparsers.add_parser("plugin_list", help="list all available plugins and their commands")
@@ -68,14 +70,29 @@ if __name__ == "__main__":
         parser_plugin.add_argument("plugin_command", type=str, help="the command to execute on the plugin")
         parser_plugin.add_argument("-d", "--debug", action="store_true", help="sets the LOG_LEVEL env variable to DEBUG")
 
+        # Support subparser
+        parser_support = subparsers.add_parser("support", help="export a support bundle (version, configuration, plugins, jobs, logs) for BunkerWeb support")
+        parser_support.add_argument(
+            "-o", "--output", type=str, help="zip path (default: bunkerweb-support-<UTC timestamp>.zip, - writes it to stdout)", default=None
+        )
+        parser_support.add_argument("--no-anonymize", action="store_true", help="keep IP addresses and service domains, credentials are always redacted")
+
         # Parse args
         args, unknown_args = parser.parse_known_args()
+        json_output = args.command == "bans" and args.json
 
         logger.debug(f"args : {args}")
         logger.debug(f"unknown_args : {unknown_args}")
 
-        # Instantiate CLI
-        cli = CLI()
+        # The bundle needs the scheduler's code and database access, which only the scheduler host ships and runs
+        if args.command == "support":
+            refusal = support_refusal()
+            if refusal:
+                logger.error(refusal)
+                sys_exit(1)
+
+        # Instantiate CLI, support still writes a bundle when the database has no schema
+        cli = CLI(tolerant_db=args.command == "support")
 
         # Execute command
         ret, err = False, "unknown command"
@@ -84,13 +101,19 @@ if __name__ == "__main__":
         elif args.command == "ban":
             ret, err = cli.ban(args.ip, args.exp, args.reason, args.service)
         elif args.command == "bans":
-            ret, err = cli.bans()
+            ret, err = cli.bans(json_output=True) if json_output else cli.bans()
+        elif args.command == "support":
+            ret, err = cli.support(args.output, not args.no_anonymize)
         elif args.command == "plugin_list":
             ret, err = cli.plugin_list()
         elif args.command == "plugin":
             if args.debug:
                 logger.setLevel("DEBUG")
             ret, err = cli.custom(args.plugin_id, args.plugin_command, debug=args.debug, extra_args=unknown_args)
+
+        if json_output:
+            print(err, file=None if ret else stderr, flush=True)
+            sys_exit(0 if ret else 1)
 
         if not ret:
             logger.error(f"CLI command status : ❌ (fail)\n{err}")
@@ -105,5 +128,8 @@ if __name__ == "__main__":
     except SystemExit as se:
         sys_exit(se.code)
     except:
-        logger.error(f"Error while executing bwcli :\n{format_exc()}")
+        if json_output:
+            print(f"Error while executing bwcli :\n{format_exc()}", file=stderr)
+        else:
+            logger.error(f"Error while executing bwcli :\n{format_exc()}")
         sys_exit(1)

@@ -1,0 +1,80 @@
+ngx_feature_incs="#define ZSTD_STATIC_LINKING_ONLY
+#include <zstd.h>"
+ngx_feature_test="(void) ZSTD_createCStream_advanced((ZSTD_customMem) {0});
+                  (void) ZSTD_compressStream2((ZSTD_CCtx *) 0,
+                                              (ZSTD_outBuffer *) 0,
+                                              (ZSTD_inBuffer *) 0,
+                                              ZSTD_e_continue);"
+ngx_feature_libs=
+ngx_feature_run=no
+
+ngx_zstd_opt_L=
+
+if [ -n "$ZSTD_INC" ]; then
+    ngx_feature_path=$ZSTD_INC
+fi
+
+ngx_zstd_test_library() {
+    SAVED_NGX_TEST_LD_OPT=$NGX_TEST_LD_OPT
+    NGX_TEST_LD_OPT="$ngx_zstd_opt_L $NGX_TEST_LD_OPT"
+
+    . auto/feature
+
+    NGX_TEST_LD_OPT=$SAVED_NGX_TEST_LD_OPT
+}
+
+ngx_zstd_try_shared() {
+    if [ -n "$ZSTD_LIB" ]; then
+        ngx_feature="ZStandard shared library in $ZSTD_INC and $ZSTD_LIB"
+        ngx_zstd_opt_L="-L$ZSTD_LIB -Wl,-rpath,$ZSTD_LIB -lzstd"
+    else
+        ngx_feature="ZStandard shared library"
+        ngx_zstd_opt_L="-lzstd"
+    fi
+    ngx_zstd_test_library
+}
+
+ngx_zstd_try_static() {
+    if [ -n "$ZSTD_LIB" ]; then
+        ngx_feature="ZStandard static library in $ZSTD_INC and $ZSTD_LIB"
+        ngx_zstd_opt_L="$ZSTD_LIB/libzstd.a"
+    else
+        ngx_feature="ZStandard static library"
+        ngx_zstd_opt_L="-l:libzstd.a"
+    fi
+    ngx_zstd_test_library
+}
+
+# Dynamic nginx modules should not embed a distro archive unless it was built
+# as PIC. Prefer the shared library for dynamic modules; static nginx builds
+# retain the original preference for static linkage.
+if [ "$ngx_module_link" = DYNAMIC ]; then
+    ngx_zstd_try_shared
+    if [ "$ngx_found" = no ]; then
+        ngx_zstd_try_static
+    fi
+else
+    ngx_zstd_try_static
+    if [ "$ngx_found" = no ]; then
+        ngx_zstd_try_shared
+    fi
+fi
+
+if [ "$ngx_found" = no ]; then
+    cat << END
+$0: error: ngx_zstd requires the ZStandard library. If ZSTD_INC or ZSTD_LIB
+is set, verify that it points to a usable installation.
+END
+    exit 1
+fi
+
+# Make sure the module knows it is a submodule.
+ngx_addon_name=ngx_zstd
+. $ngx_addon_dir/filter/config
+
+# Make sure the module knows it is a submodule.
+ngx_addon_name=ngx_zstd
+. $ngx_addon_dir/static/config
+
+# The final name for reporting.
+ngx_addon_name=ngx_zstd

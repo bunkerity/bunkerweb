@@ -2,6 +2,7 @@ from hmac import compare_digest
 from time import time
 from fastapi import HTTPException, Request, Depends
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
+from starlette.concurrency import run_in_threadpool
 from ..utils import LOGGER
 from ..config import api_config
 from .biscuit import guard as biscuit_guard
@@ -10,13 +11,16 @@ from .common import get_auth_header, parse_bearer_token
 
 security = HTTPBasic(auto_error=False)
 
+# Verified instead of the stored hash when the user is unknown or not an admin, so every Basic attempt costs one cost-13 bcrypt check.
+DUMMY_PASSWORD_HASH = b"$2b$13$tvTjiRNUOvSz/mQh0av.6epeYmbZgQa5sk3qnKChgsb3LwtfavBL."
+
 
 class BiscuitWithAdminBearer:
     """Authorization dependency:
     - If API_TOKEN is configured and matches Bearer token, allow full access (admin-like).
     - If HTTP Basic auth is provided and matches an admin API user, allow full access.
     - If Authorization is Bearer but doesn't match API_TOKEN (or no API_TOKEN), defer to Biscuit guard for ACL-based authorization.
-    - Skips health, ping, and docs.
+    - Skips health, ping and login. The documentation pages are plain FastAPI routes outside this dependency, so they need no exemption.
     """
 
     def __init__(self) -> None:
@@ -26,17 +30,14 @@ class BiscuitWithAdminBearer:
         self._cache_ttl = 30.0  # seconds
 
     async def __call__(self, request: Request, credentials: HTTPBasicCredentials | None = Depends(security)) -> None:
-        # Skip auth for health, login, and OpenAPI/docs endpoints
+        # Skip auth for health, ping and login
         # Strip root_path prefix if configured (handles proxy/gateway scenarios)
         path = request.scope.get("path", request.url.path)
         root_path = api_config.API_ROOT_PATH
         if root_path and path.startswith(root_path):
             path = path[len(root_path) :] or "/"  # noqa: E203
         self._logger.debug(f"Auth start: {request.method} {path} from {request.client.host if request.client else 'unknown'}")
-        openapi_match = api_config.openapi_url and path == api_config.openapi_url
-        docs_match = api_config.docs_url and path.startswith(api_config.docs_url)
-        redoc_match = api_config.redoc_url and path.startswith(api_config.redoc_url)
-        if path in ("/health", "/ping") or bool(openapi_match) or bool(docs_match) or bool(redoc_match) or path.startswith("/auth"):
+        if path in ("/health", "/ping") or path.startswith("/auth"):
             self._logger.debug(f"Auth skip for path: {path}")
             return
 
@@ -60,8 +61,7 @@ class BiscuitWithAdminBearer:
                 is_admin, pwd_hash, _exp = hit
                 self._logger.debug(f"Admin cache hit for user={username}, expires_in={int(hit[2] - now)}s")
             else:
-                db = get_api_db(log=False)
-                user = db.get_api_user(username=username, as_dict=True)
+                user = await run_in_threadpool(lambda: get_api_db(log=False).get_api_user(username=username, as_dict=True))
                 is_admin = bool(user.get("admin")) if user else False
                 raw_hash = (user.get("password") if user else b"") or b""
                 if not isinstance(raw_hash, (bytes, bytearray)):
@@ -75,11 +75,13 @@ class BiscuitWithAdminBearer:
                 self._logger.debug(f"Admin cache {'populate' if user else 'miss'} for user={username}, is_admin={is_admin}")
 
             if not is_admin:
+                await run_in_threadpool(check_password, password, DUMMY_PASSWORD_HASH)
                 self._logger.warning(
                     f"Auth failed (basic user not admin or not found): user={username} {request.method} {path} from {request.client.host if request.client else 'unknown'}"
                 )
                 raise HTTPException(status_code=401, detail="Unauthorized")
-            if not pwd_hash or not check_password(password, pwd_hash):
+            password_ok = await run_in_threadpool(check_password, password, pwd_hash or DUMMY_PASSWORD_HASH)
+            if not pwd_hash or not password_ok:
                 self._logger.warning(
                     f"Auth failed (basic password mismatch): user={username} {request.method} {path} from {request.client.host if request.client else 'unknown'}"
                 )

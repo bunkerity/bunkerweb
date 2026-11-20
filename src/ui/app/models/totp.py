@@ -1,7 +1,6 @@
 from base64 import b64encode
 from io import BytesIO
 from json import loads as json_loads
-from bcrypt import checkpw
 from typing import List, Optional
 from passlib.totp import TOTP, MalformedTokenError, TokenError, TotpMatch
 from passlib.pwd import genword
@@ -10,7 +9,7 @@ from qrcode.image.pil import PilImage
 
 from app.models.models import UiUsers
 from app.dependencies import DB
-from app.utils import LIB_DIR, LOGGER, stop
+from app.utils import LIB_DIR, LOGGER, check_password, stop
 
 # Try to load the new .totp_encryption_keys.json file first, fallback to .totp_secrets.json for backward compatibility
 encryption_keys_path = LIB_DIR.joinpath(".totp_encryption_keys.json")
@@ -53,10 +52,7 @@ class Totp:
             return
 
         for i, encrypted_code in enumerate(user.list_recovery_codes):
-            # Truncate to 72 bytes: bcrypt 5.x raises ValueError past that, and generated
-            # recovery codes are far shorter, so this only stops oversized garbage input
-            # from turning an "invalid code" into a 500.
-            if checkpw(code.encode("utf-8")[:72], encrypted_code.encode("utf-8")):
+            if check_password(code, encrypted_code.encode("utf-8")):
                 return user.list_recovery_codes.pop(i)
 
     def match_totp(self, token: str, totp_secret: str) -> Optional[TotpMatch]:

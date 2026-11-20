@@ -1,0 +1,149 @@
+# yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
+#
+# Repo-local override of the coreruleset org config
+# (https://github.com/coreruleset/coderabbit). `inheritance: true` layers
+# this on top of that config instead of replacing it.
+#
+# Labeling lives here, not in the org config, because these label names
+# (release:fix, release:ignore, release:new-feature, :book: documentation,
+# …) already exist with unrelated meanings in other org repos (go-ftw,
+# crs-toolchain, plugin-registry). There is no per-repository scoping field
+# in the CodeRabbit schema, so this is the only way to apply them to this
+# repo alone.
+inheritance: true
+
+reviews:
+  # NOTE: auto-labeling requires each label to already exist in this repo —
+  # CodeRabbit will not create them. A missing label silently no-ops.
+  suggested_labels: true
+  auto_apply_labels: true
+  # Two families of label (emoji shortcode prefix included — copy verbatim
+  # when adding more).
+  #
+  # 1. `release:*` — the changelog taxonomy. `.github/release.yml` groups the
+  #    generated release notes by these, and excludes `release:ignore`
+  #    entirely. They loosely mirror conventional-commit types, so the label
+  #    should agree with the PR title's type. Exactly one per PR (enforced by
+  #    mutually_exclusive_groups below); when nothing else fits, the answer is
+  #    `release:ignore`, not "no label".
+  # 2. Topic labels — what the PR is about, for triage and search.
+  labeling_instructions:
+    # --- release:* (changelog taxonomy, exactly one) ---
+    - label: "release:new-detection"
+      instructions: >
+        Apply when the PR makes CRS detect something it did not detect before:
+        a new `SecRule` in `rules/*.conf`, a new branch in a
+        `regex-assembly/*.ra` pattern, or a new entry in a `*.data` file that
+        widens matching. Corresponds to a `feat:` title. Do NOT apply when the
+        payload was already detected by a sibling rule at any paranoia level —
+        that is `release:fix` or `release:refactor` at best.
+    - label: "release:new-feature"
+      instructions: >
+        Apply when the PR adds a capability rather than a detection: a new
+        `crs-setup.conf.example` option, a new plugin hook, a new
+        `crs-toolchain`/`go-ftw` subcommand or flag, a new CI capability.
+        Corresponds to a `feat:` title on non-rule code.
+    - label: "release:fix"
+      instructions: >
+        Apply when the PR corrects wrong behaviour: a false positive narrowed,
+        a false negative in an existing rule closed, a broken regex, a ReDoS
+        or RE2-compatibility fix, or a bug in the Go/Python tooling.
+        Corresponds to a `fix:` title. This is the label for a rule change
+        that adjusts an existing detection rather than adding a new one.
+    - label: "release:remove-rules"
+      instructions: >
+        Apply when the PR deletes one or more rule IDs from `rules/*.conf` or
+        `plugins/*.conf`. Operators may have exclusions naming those IDs, so
+        removals get their own changelog section. This label is authoritative
+        for a plain rule-ID deletion — use it instead of `release:breaking`
+        even though a removed ID is also a breaking change for operators.
+    - label: "release:refactor"
+      instructions: >
+        Apply when the PR restructures without changing behaviour: a
+        regex-assembly reorganisation that regenerates byte-identical output,
+        a rule split or merge with equivalent coverage, an internal rewrite in
+        the tooling. Corresponds to a `refactor:` title. If matching behaviour
+        changes at all, it is not a refactor.
+    - label: "release:breaking"
+      instructions: >
+        Apply when the change breaks something a deployment or a downstream
+        tool depends on: a renumbered rule ID that operators may name in an
+        exclusion, a removed or renamed `tag:` that log pipelines filter on, a
+        `crs-setup.conf.example` key removed or renamed, or a removed/renamed
+        exported symbol, CLI flag, or config key in the Go and Python tooling.
+        A plain rule-ID deletion is `release:remove-rules`, not this label,
+        even though it is also breaking. `.github/release.yml` gives these
+        their own section, so prefer this over `release:important` when
+        callers must change something, not merely be aware of it. Pair it
+        with a "Breaking changes" section in the PR description.
+    - label: "release:important"
+      instructions: >
+        Apply when operators must act or be aware on upgrade: a changed
+        default in `crs-setup.conf.example`, a rule moved between paranoia
+        levels, or a change to the anomaly-scoring mechanism — but nothing
+        an operator must actively fix. If existing configuration stops working
+        (a renumbered rule ID, or a removed/renamed tag or config key), use
+        `release:breaking` instead; a removed rule ID is `release:remove-rules`.
+    - label: "release:ignore"
+      instructions: >
+        The default when nothing above applies. Apply for chores, CI and
+        workflow changes, dependency bumps, documentation, test-only changes,
+        typo fixes, and any small fix with no user-visible effect —
+        corresponds to `chore:`, `ci:`, `docs:`, `test:`, `style:` titles.
+        `.github/release.yml` excludes these from the release notes entirely,
+        so applying it is how a PR is deliberately kept out of the changelog.
+        Never leave a PR with no `release:` label; use this one.
+
+    # --- topic labels (triage; independent of the release: family) ---
+    - label: ":heavy_plus_sign: False Positive"
+      instructions: >
+        Apply when the PR or issue is about a CRS rule matching legitimate
+        traffic — a narrowed pattern, a new exclusion, or a report of benign
+        input being blocked.
+    - label: ":heavy_minus_sign: False Negative - Evasion"
+      instructions: >
+        Apply when the PR or issue is about an attack payload that CRS fails
+        to detect, including encoding/obfuscation bypasses of an existing
+        rule.
+    - label: ":mage: regex-assembly"
+      instructions: >
+        Apply when the PR touches files under `regex-assembly/` (`.ra`
+        sources or `regex-assembly/include/`), or regenerates a rule regex
+        with `crs-toolchain regex update`.
+    - label: ":gem: re2-compat"
+      instructions: >
+        Apply when the change involves regex constructs whose RE2
+        (Coraza/Go and Rust) compatibility is in question — lookarounds,
+        backreferences, atomic groups, possessive quantifiers — or when it
+        fixes an existing incompatibility.
+    - label: ":test_tube: testcase"
+      instructions: >
+        Apply when the PR only adds, renumbers, or corrects go-ftw regression
+        tests under `tests/regression/tests/` without changing rule logic.
+    - label: ":jigsaw: plugin"
+      instructions: >
+        Apply when the PR adds or modifies a CRS plugin (`plugins/*.conf`,
+        `*-rule-exclusions-plugin` repos, or plugin registry entries).
+    - label: ":bomb: sqli"
+      instructions: >
+        Apply when the PR touches the 942xxx rule family, libinjection
+        behaviour, or SQL injection detection patterns.
+    - label: ":book: documentation"
+      instructions: >
+        Apply when the PR only changes Markdown, docs, or comments with no
+        rule, test, or code behaviour change. Pair with `release:ignore`.
+
+  # `.github/release.yml` assigns a PR to the first matching category, so two
+  # release: labels on one PR make the changelog section arbitrary. Keep them
+  # exclusive. `release:important` is in the group too: if a change is both
+  # important and, say, a fix, the changelog wants it under ⭐ once.
+  mutually_exclusive_groups:
+    release:
+      - "release:new-detection"
+      - "release:new-feature"
+      - "release:fix"
+      - "release:remove-rules"
+      - "release:refactor"
+      - "release:breaking"
+      - "release:important"
+      - "release:ignore"

@@ -1,0 +1,136 @@
+integrations: "all"
+
+actions:
+  plugins:
+    type: ui
+    steps:
+      wizard_setup:
+        type: setup
+        admin_username: "admin"
+        admin_password: "P@ssw0rd"
+        server_name: "www.example.com"
+
+      access_plugins:
+        type: access
+        url: "%BASE_URL%/plugins"
+        sleep: 2.0
+      login:
+        type: login
+        next_page: "plugins"
+        username: "admin"
+        password: "P@ssw0rd"
+
+      # The core plugins are listed, the external one is not there yet
+      verify_core_plugin:
+        type: find
+        selector: '//td[@id="name-antibot"]'
+      verify_core_plugin_1:
+        type: find
+        selector: '//td[@id="name-authbasic"]'
+      search_uploaded_plugin:
+        type: send_keys
+        by: "id"
+        selector: "dt-search-0"
+        clear: true
+        value: "uie2e"
+        sleep: 1.0
+      verify_uploaded_plugin_absent:
+        type: find
+        selector: '//td[@id="name-uie2e"]'
+        findable: false
+
+      # `tests/misc/ui/uie2e` is zipped by the `upload` step: a plugin with a page and a blueprint
+      open_add_plugin:
+        type: click
+        selector: '//button[.//span[@data-i18n="button.add_plugin_plural"]]'
+        sleep: 1.0
+      upload_plugin:
+        type: upload
+        by: "id"
+        selector: "file-input"
+        path: "tests/misc/ui/uie2e"
+      check_upload:
+        type: find
+        selector: '//div[@id="file-list"]//span[contains(@class, "text-success") and contains(text(), "Uploaded")]'
+        sleep: 2.0
+      submit_plugin:
+        type: click
+        selector: '//button[@id="add-plugins-submit"]'
+        sleep: 1.0
+      access_plugins_1:
+        type: access
+        url: "%BASE_URL%/plugins"
+        sleep: 15.0
+      search_uploaded_plugin_1:
+        type: send_keys
+        by: "id"
+        selector: "dt-search-0"
+        clear: true
+        value: "uie2e"
+        sleep: 1.0
+      verify_uploaded_plugin:
+        type: find
+        selector: '//td[@id="name-uie2e"]'
+      verify_uploaded_plugin_version:
+        type: find
+        selector: '//td[@id="version-uie2e" and contains(., "v1.0")]'
+      # The page of an uploaded plugin is served by `custom_plugin_page` (src/ui/app/routes/plugins.py)
+      uploaded_plugin_page:
+        type: fetch
+        url: "%BASE_URL%/plugins/uie2e"
+        status: 200
+      uploaded_plugin_blueprint:
+        type: fetch
+        url: "%BASE_URL%/uie2e"
+        status: 200
+
+      # Deleting the plugin removes its blueprint through `DynamicFlask._remove_blueprint` (src/ui/main.py),
+      # so its former pages answer 404 and no longer 500
+      search_uploaded_plugin_2:
+        type: send_keys
+        by: "id"
+        selector: "dt-search-0"
+        clear: true
+        value: "uie2e"
+        sleep: 1.0
+      select_uploaded_plugin:
+        type: click
+        selector: '//button[@data-plugin-id="uie2e" and contains(@class, "delete-plugin")]'
+      confirm_plugin_deletion:
+        type: click
+        selector: '//div[@id="modal-delete-plugins"]//button[@type="submit"]'
+        sleep: 1.0
+      access_plugins_2:
+        type: access
+        url: "%BASE_URL%/plugins"
+        sleep: 15.0
+      # The table keeps its search text across page loads
+      clear_search:
+        type: send_keys
+        by: "id"
+        selector: "dt-search-0"
+        clear: true
+        value: ""
+        sleep: 1.0
+      verify_core_plugin_after:
+        type: find
+        selector: '//td[@id="name-antibot"]'
+      search_uploaded_plugin_3:
+        type: send_keys
+        by: "id"
+        selector: "dt-search-0"
+        clear: true
+        value: "uie2e"
+        sleep: 1.0
+      verify_uploaded_plugin_deleted:
+        type: find
+        selector: '//td[@id="name-uie2e"]'
+        findable: false
+      deleted_plugin_page:
+        type: fetch
+        url: "%BASE_URL%/plugins/uie2e"
+        status: 404
+      deleted_plugin_blueprint:
+        type: fetch
+        url: "%BASE_URL%/uie2e"
+        status: 404

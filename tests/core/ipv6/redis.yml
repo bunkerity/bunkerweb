@@ -1,0 +1,14 @@
+services:
+  redis:
+    mem_limit: 128m
+    networks:
+      bw-universe:
+        ipv6_address: fd42:1618:1::50
+
+networks:
+  bw-universe:
+    enable_ipv6: true
+    ipam:
+      config:
+        - subnet: 10.20.30.0/24
+        - subnet: fd42:1618:1::/64

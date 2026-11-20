@@ -751,15 +751,19 @@ $(document).ready(() => {
         $inputGroup.append($input);
         $inputGroup.append(
           `<button type="button"
-                    class="btn btn-outline-success add-multivalue-item">
-              <i class="bx bx-plus"></i>
+                    class="btn btn-outline-success add-multivalue-item"
+                    aria-label="Add value"
+                    data-i18n="template.editor.multivalue_add">
+              <i class="bx bx-plus" aria-hidden="true"></i>
             </button>`,
         );
         if (index > 0 || values.length > 1) {
           $inputGroup.append(
             `<button type="button"
-                    class="btn btn-outline-danger remove-multivalue-item">
-              <i class="bx bx-x"></i>
+                    class="btn btn-outline-danger remove-multivalue-item"
+                    aria-label="Delete"
+                    data-i18n="button.delete">
+              <i class="bx bx-x" aria-hidden="true"></i>
             </button>`,
           );
         }
@@ -1143,10 +1147,33 @@ $(document).ready(() => {
 
     // Skip default-method values the user didn't touch; submitting them would
     // create a method="ui" DB row that shadows the template/default overlay.
-    const shouldSkipUnchangedDefault = ($input, currentValue) => {
+    //
+    // A field left out of the post resolves to the template value on a new
+    // service (the stored default only when no template sets it), so the
+    // comparison point there is the template value, not data-original: a value
+    // the user set back to the global default must still be posted when the
+    // template says otherwise.
+    const isNewPlainService =
+      window.location.pathname.endsWith("/new") &&
+      !new URLSearchParams(window.location.search).get("clone");
+    const templateValueOf = ($input) => {
+      const $holder = $input
+        .parents()
+        .filter(function () {
+          return $(this).children('input[id$="-template"]').length > 0;
+        })
+        .first();
+      const $template = $holder.children('input[id$="-template"]').first();
+      return $template.length ? $template.val() : undefined;
+    };
+    const shouldSkipUnchangedDefault = ($input, currentValue, isEasy) => {
       const method = $input.attr("data-method");
       if (method !== "default") return false;
-      const original = $input.attr("data-original");
+      let original = $input.attr("data-original");
+      if (isEasy && isNewPlainService) {
+        const templateValue = templateValueOf($input);
+        if (templateValue !== undefined) original = templateValue;
+      }
       if (original === undefined) return false;
       return String(currentValue) === String(original);
     };
@@ -1175,7 +1202,7 @@ $(document).ready(() => {
         }
 
         if (isFileTextSetting) {
-          if (shouldSkipUnchangedDefault($this, settingValue)) {
+          if (shouldSkipUnchangedDefault($this, settingValue, isEasy)) {
             const lastFileName = String(
               $this.data("lastFileName") || $this.attr("data-file-name") || "",
             ).trim();
@@ -1194,7 +1221,7 @@ $(document).ready(() => {
           return;
         }
 
-        if (shouldSkipUnchangedDefault($this, settingValue)) {
+        if (shouldSkipUnchangedDefault($this, settingValue, isEasy)) {
           return;
         }
 
@@ -1214,7 +1241,9 @@ $(document).ready(() => {
           if ($hiddenInput.length && $hiddenInput.attr("name")) {
             const settingName = $hiddenInput.attr("name");
             const settingValue = $hiddenInput.val() || "";
-            if (shouldSkipUnchangedDefault($hiddenInput, settingValue)) {
+            if (
+              shouldSkipUnchangedDefault($hiddenInput, settingValue, isEasy)
+            ) {
               return;
             }
             appendHiddenInput(form, settingName, settingValue);
@@ -1229,7 +1258,7 @@ $(document).ready(() => {
         if ($hiddenInput.length && $hiddenInput.attr("name")) {
           const settingName = $hiddenInput.attr("name");
           const settingValue = $hiddenInput.val() || "";
-          if (shouldSkipUnchangedDefault($hiddenInput, settingValue)) {
+          if (shouldSkipUnchangedDefault($hiddenInput, settingValue, isEasy)) {
             return;
           }
           appendHiddenInput(form, settingName, settingValue);
@@ -1341,9 +1370,20 @@ $(document).ready(() => {
         }
       });
 
+      // Keys stored by the "default" method at their default value are left out,
+      // like easy and advanced mode do: posting them sends every default of the
+      // page, and some (PERMISSIONS_POLICY) trip the CRS on a protected UI.
+      const rawUnchangedDefaults = new Set(
+        JSON.parse($("#raw-unchanged-defaults").val() || "[]"),
+      );
+
       // Append original values if they are not already in the form and not skipped
       Object.entries(entireconfigOriginals).forEach(([key, value]) => {
-        if (!formKeys.has(key) && !skippedKeys.has(key)) {
+        if (
+          !formKeys.has(key) &&
+          !skippedKeys.has(key) &&
+          !rawUnchangedDefaults.has(key)
+        ) {
           appendHiddenInput(
             form,
             key,
@@ -2453,15 +2493,19 @@ $(document).ready(() => {
                 $inputGroup.append($input);
                 $inputGroup.append(
                   `<button type="button"
-                            class="btn btn-outline-success add-multivalue-item">
-                      <i class="bx bx-plus"></i>
+                            class="btn btn-outline-success add-multivalue-item"
+                    aria-label="Add value"
+                    data-i18n="template.editor.multivalue_add">
+                      <i class="bx bx-plus" aria-hidden="true"></i>
                     </button>`,
                 );
                 if (index > 0 || values.length > 1) {
                   $inputGroup.append(
                     `<button type="button"
-                            class="btn btn-outline-danger remove-multivalue-item">
-                      <i class="bx bx-x"></i>
+                            class="btn btn-outline-danger remove-multivalue-item"
+                    aria-label="Delete"
+                    data-i18n="button.delete">
+                      <i class="bx bx-x" aria-hidden="true"></i>
                     </button>`,
                   );
                 }
@@ -3249,6 +3293,10 @@ $(document).ready(() => {
     }, 200)();
   });
 
+  // The tooltip text is translated, so the template's data-i18n key tells which value the button resets to.
+  const isResetToGlobal = ($button) =>
+    $button.attr("data-i18n") === "tooltip.button.reset_global";
+
   // Reset setting handler
   $(document).on("click", ".reset-setting", function (e) {
     e.preventDefault();
@@ -3257,7 +3305,7 @@ $(document).ready(() => {
     // Find the associated input/select/checkbox/multivalue
     const $settingField = $(this).closest("div").find(".plugin-setting");
     const settingType = $settingField.attr("type");
-    const isGlobal = $(this).attr("data-bs-original-title").includes("global");
+    const isGlobal = isResetToGlobal($(this));
 
     // Get default or global value depending on the button tooltip
     const valueToSet = isGlobal
@@ -3313,15 +3361,19 @@ $(document).ready(() => {
         $inputGroup.append($input);
         $inputGroup.append(
           `<button type="button"
-                    class="btn btn-outline-success add-multivalue-item">
-              <i class="bx bx-plus"></i>
+                    class="btn btn-outline-success add-multivalue-item"
+                    aria-label="Add value"
+                    data-i18n="template.editor.multivalue_add">
+              <i class="bx bx-plus" aria-hidden="true"></i>
             </button>`,
         );
         if (index > 0 || values.length > 1) {
           $inputGroup.append(
             `<button type="button"
-                    class="btn btn-outline-danger remove-multivalue-item">
-              <i class="bx bx-x"></i>
+                    class="btn btn-outline-danger remove-multivalue-item"
+                    aria-label="Delete"
+                    data-i18n="button.delete">
+              <i class="bx bx-x" aria-hidden="true"></i>
             </button>`,
           );
         }
@@ -3623,12 +3675,16 @@ $(document).ready(() => {
     $innerGroup.append($input);
     $innerGroup.append(
       `<button type="button"
-                class="btn btn-outline-success add-multivalue-item">
-            <i class="bx bx-plus"></i>
+                class="btn btn-outline-success add-multivalue-item"
+                    aria-label="Add value"
+                    data-i18n="template.editor.multivalue_add">
+            <i class="bx bx-plus" aria-hidden="true"></i>
           </button>
           <button type="button"
-                class="btn btn-outline-danger remove-multivalue-item">
-            <i class="bx bx-x"></i>
+                class="btn btn-outline-danger remove-multivalue-item"
+                    aria-label="Delete"
+                    data-i18n="button.delete">
+            <i class="bx bx-x" aria-hidden="true"></i>
           </button>`,
     );
     $inputGroup.append($innerGroup);

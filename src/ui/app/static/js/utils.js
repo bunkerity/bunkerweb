@@ -28,6 +28,33 @@ const FLASH_ALLOWED_ATTR = [
   "aria-label",
 ];
 
+// Inline markup an in-page message may carry (a <code> name, a list of errors). Everything else -
+// images, scripts, event handlers, forms - is dropped by DOMPurify before the text is inserted,
+// because these messages echo template ids, config names and other values a user typed.
+const INLINE_ALLOWED_TAGS = [
+  "b",
+  "br",
+  "code",
+  "em",
+  "i",
+  "li",
+  "p",
+  "span",
+  "strong",
+  "ul",
+];
+
+function setInlineHtml(element, html) {
+  if (typeof DOMPurify === "undefined") {
+    element.textContent = html;
+    return;
+  }
+  element.innerHTML = DOMPurify.sanitize(html, {
+    ALLOWED_TAGS: INLINE_ALLOWED_TAGS,
+    ALLOWED_ATTR: ["class"],
+  });
+}
+
 function throttle(func, limit, ...throttleArgs) {
   let inThrottle;
   return function (...args) {
@@ -137,7 +164,13 @@ class News {
       const articleTags = this.extractTerms(news);
       const formattedDate = this.formatDate(news.date);
       const featuredMedia = news._embedded?.["wp:featuredmedia"]?.[0] ?? null;
-      const featuredImg = featuredMedia?.source_url ?? null;
+      // The cards show the image at card width: take the 768px rendition instead of the
+      // multi-megabyte original (which is the fallback when WordPress lists no sizes).
+      const featuredSizes = featuredMedia?.media_details?.sizes;
+      const featuredImg =
+        featuredSizes?.medium_large?.source_url ??
+        featuredMedia?.source_url ??
+        null;
       const featuredAlt =
         featuredMedia?.alt_text ||
         featuredMedia?.title?.rendered ||
@@ -397,7 +430,7 @@ $(document).ready(() => {
   ];
   // Store the original English fallbacks if needed, or rely on i18next fallbacks
   const newsItemFallbacks = {
-    "banner.pro": `Get the most of BunkerWeb by upgrading to the PRO version. More info and free trial <a class="light-href text-white-80" target="_blank" rel="noopener" href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=banner#pro">here</a>.`,
+    "banner.pro": `Get the most out of BunkerWeb by upgrading to the PRO version. Start your 30-day free trial <a class="light-href text-white-80" target="_blank" rel="noopener" href="https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=banner">here</a>: order a plan, then keep “Free 30 Days Trial” as the payment method at checkout.`,
     "banner.support": `Need premium support or tailored consulting around BunkerWeb? Check out our <a class="light-href text-white-80" target="_blank" rel="noopener" href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=banner#services">professional services</a>.`,
     "banner.community": `Be part of the Bunker community by joining the <a class="light-href text-white-80" target="_blank" rel="noopener" href="https://discord.bunkerweb.io/?utm_campaign=self&utm_source=banner">Discord chat</a> and following us on <a class="light-href text-white-80" target="_blank" rel="noopener" href="https://www.linkedin.com/company/bunkerity/">LinkedIn</a>.`,
   };

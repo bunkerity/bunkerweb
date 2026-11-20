@@ -3,6 +3,7 @@ from logging import (
     DEBUG,
     ERROR,
     FileHandler,
+    Formatter,
     INFO,
     NOTSET,
     WARNING,
@@ -17,7 +18,7 @@ from logging import (
 from logging.handlers import SysLogHandler
 from os import getenv, sep
 from os.path import join
-from re import match
+from re import compile as re_compile, match
 from socket import SOCK_DGRAM, SOCK_STREAM
 from typing import Optional, Union
 
@@ -26,7 +27,7 @@ DATE_FORMAT = "[%Y-%m-%d %H:%M:%S %z]"
 
 # Regex patterns for validation
 FILE_PATH_PATTERN = r"^(/[\w\-./]+|[A-Za-z]:\\[\w\-./\\]+)$"
-SYSLOG_ADDRESS_PATTERN = r"^((udp|tcp)://)?(/[\w\-./]+|[\w\-.]+(:\d{1,5})?)$"
+SYSLOG_ADDRESS_PATTERN = r"^((udp|tcp)://)?(/[\w\-./]+|([\w\-.]+|\[[\da-fA-F:.]+\])(:\d{1,5})?)$"
 
 
 class BWLogger(Logger):
@@ -35,6 +36,15 @@ class BWLogger(Logger):
     def __init__(self, name, level=INFO):
         # SQLAlchemy loggers inherit DATABASE_LOG_LEVEL from the "sqlalchemy" logger, whatever their class names
         super().__init__(name, NOTSET if name.startswith("sqlalchemy.") else level)
+
+
+class StripAnsiFormatter(Formatter):
+    """Format log entries stripping ANSI escape sequences for file and syslog destinations."""
+
+    ANSI_ESCAPE_RE = re_compile(r"\x1b\[[0-9;]*[a-zA-Z]")
+
+    def format(self, record):
+        return self.ANSI_ESCAPE_RE.sub("", super().format(record))
 
 
 # Set the custom logger class as the default
@@ -46,6 +56,7 @@ default_level = _nameToLevel.get(getenv("CUSTOM_LOG_LEVEL", getenv("LOG_LEVEL", 
 env_log_types = getenv("LOG_TYPES", "stderr").split()
 log_types = {}
 warnings = []
+file_open_failed = False
 
 if "file" in env_log_types:
     log_file_path = getenv(
@@ -55,10 +66,14 @@ if "file" in env_log_types:
     # between slashes, which would let an operator set `LOG_FILE_PATH=/var/log/bunkerweb/../etc/passwd`.
     has_traversal = ".." in log_file_path.split("/")
     if not has_traversal and match(FILE_PATH_PATTERN, log_file_path):
-        log_types["file"] = {
-            "handler": FileHandler(log_file_path),
-            "file_path": log_file_path,
-        }
+        try:
+            log_types["file"] = {
+                "handler": FileHandler(log_file_path),
+                "file_path": log_file_path,
+            }
+        except OSError as e:
+            file_open_failed = True
+            warnings.append(f"Failed to set up file logging to '{log_file_path}': {e}. Logs will not be written to file.")
     else:
         warnings.append(f"The log file path '{log_file_path}' is invalid. Logs will not be written to file.")
 
@@ -76,7 +91,12 @@ if "syslog" in env_log_types:
             address = syslog_address[6:]  # Remove "tcp://"
 
         # Resolve the handler address: network (host, port) or Unix socket path
-        if ":" in address and not address.startswith("/"):
+        if address.startswith("["):
+            host, _, port = address[1:].partition("]")
+            handler_address = (host, int(port[1:]) if port else 514)
+            if not port and socktype is None:
+                socktype = SOCK_DGRAM
+        elif ":" in address and not address.startswith("/"):
             host, port = address.rsplit(":", 1)
             handler_address = (host, int(port))
         elif not address.startswith("/"):
@@ -106,11 +126,17 @@ if "syslog" in env_log_types:
         warnings.append(f"The syslog address '{syslog_address}' is invalid. Logs will not be sent to syslog.")
 
 if not log_types or "stderr" in env_log_types:
-    if not log_types and "stderr" not in env_log_types:
+    if not log_types and "stderr" not in env_log_types and not file_open_failed:
         warnings.append("No valid log types configured. Defaulting to stderr.")
     log_types["stderr"] = {"handler": StreamHandler()}
 
 basicConfig(format=LOG_FORMAT, datefmt=DATE_FORMAT, level=default_level, handlers=[handler["handler"] for handler in log_types.values()], force=True)
+
+if "file" in log_types:
+    log_types["file"]["handler"].setFormatter(StripAnsiFormatter(LOG_FORMAT, DATE_FORMAT))
+
+if "syslog" in log_types:
+    log_types["syslog"]["handler"].setFormatter(StripAnsiFormatter(LOG_FORMAT, DATE_FORMAT))
 
 # Set the default logging level for every SQLAlchemy logger (BWLogger leaves their children at NOTSET)
 database_default_level = _nameToLevel.get(getenv("DATABASE_LOG_LEVEL", "WARNING").upper(), WARNING)

@@ -13,7 +13,8 @@
     "no_changes_detected": "Изменения не обнаружены.",
     "notice": "Уведомление",
     "ping_error": "Произошла ошибка при пинге экземпляров.",
-    "readonly_mode": "Это действие отключено в режиме только для чтения."
+    "readonly_mode": "Это действие отключено в режиме только для чтения.",
+    "configs_import_invalid_file": "Пожалуйста, загрузите действительный файл экспорта пользовательских настроек (.json)."
   },
   "aria": {
     "label": {
@@ -49,7 +50,7 @@
     "link": {
       "here": "здесь"
     },
-    "pro": "Получите максимум от BunkerWeb, обновившись до версии PRO. Больше информации и бесплатная пробная версия <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/?utm_campaign=self&utm_source=banner#pro\">здесь</a>.",
+    "pro": "Получите максимум от BunkerWeb, обновившись до версии PRO. Начните бесплатный 30-дневный пробный период <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=banner\">здесь</a>: закажите тариф, затем оставьте «Free 30 Days Trial» в качестве способа оплаты при оформлении заказа.",
     "support": "Нужна премиум-поддержка или индивидуальная консультация по BunkerWeb? Ознакомьтесь с нашими <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/?utm_campaign=self&utm_source=banner#services\">профессиональными услугами</a>."
   },
   "breadcrumb": {
@@ -1154,6 +1155,7 @@
       "title": "Дата истечения Pro",
       "unknown": "Неизвестная дата истечения"
     },
+    "free_trial_hint": "Закажите тариф, затем оставьте «Free 30 Days Trial» в качестве способа оплаты при оформлении заказа.",
     "force_check": {
       "description": "Force a new check for PRO plugins. This will trigger a new download of the plugins if new versions are available.",
       "title": "Force check"
@@ -1223,6 +1225,9 @@
     }
   },
   "reports": {
+    "bad_behavior_total_requests": "Подозрительные запросы",
+    "bad_behavior_stored_events": "Сохранённые события",
+    "bad_behavior_evidence_missing": "Данные, послужившие основанием для блокировки, больше недоступны.",
     "crowdsec": {
       "source_lapi": "Решение локального API",
       "source_appsec": "Проверка AppSec",
@@ -1237,7 +1242,16 @@
     },
     "retention_notice": "Отчёты хранятся в кольцевом буфере в оперативной памяти: самые старые записи удаляются при достижении заданного лимита. Если Redis не включён, они также очищаются при перезапуске BunkerWeb.",
     "security_incident": "Инцидент безопасности",
-    "security_report_data": "Данные отчета о безопасности"
+    "security_report_data": "Данные отчета о безопасности",
+    "bad_behavior_no_details": "Для этого отчета не было зафиксировано никакой подозрительной активности.",
+    "bad_behavior_activity_detected": "Обнаружена подозрительная активность",
+    "bad_behavior_activity_explanation": "Эти запросы превысили порог подозрительной активности и были объединены.",
+    "bad_behavior_request_label": "Запрос",
+    "bad_behavior_ip": "IP-адрес",
+    "bad_behavior_server": "Сервер",
+    "bad_behavior_url": "URL",
+    "bad_behavior_captured_at": "Зафиксировано в",
+    "bad_behavior_request_id": "Идентификатор запроса"
   },
   "scope": {
     "all_services": "Все сервисы",
@@ -1424,7 +1438,8 @@
     "template_in_use_description": "Изменения вне текущего шаблона не допускаются. Пожалуйста, вносите изменения с использованием текущего шаблона или переключитесь в режим Продвинутый/Исходный.",
     "unique_server_name": "Уникальное имя сервера",
     "up": "В сети",
-    "yes": "Да"
+    "yes": "Да",
+    "not_applicable": "Н/Д"
   },
   "step": {
     "next": "Далее",
@@ -1721,7 +1736,8 @@
       "show_selected_only": "Показывать только выбранные",
       "stop_instance": "Остановить экземпляр {{hostname}}",
       "unban_ip": "Разбанить {{ip}}",
-      "value_from_global": "Значение из глобальных настроек"
+      "value_from_global": "Значение из глобальных настроек",
+      "update_ban_duration": "Обновить продолжительность блокировки"
     },
     "cannot_delete_original_ban": "Невозможно удалить исходную запись бана.",
     "cannot_remove_disabled": "Невозможно удалить, так как одна или несколько настроек отключены.",
@@ -1959,7 +1975,8 @@
     "zerossl_api_retry": "Количество повторов для запросов API ZeroSSL (0 отключает повторы).",
     "zerossl_api_retry_delay": "Задержка в секундах между повторами API ZeroSSL.",
     "zerossl_api_connect_timeout": "Таймаут подключения в секундах для вызовов API ZeroSSL.",
-    "zerossl_api_max_time": "Максимальное общее время в секундах для каждого запроса API ZeroSSL."
+    "zerossl_api_max_time": "Максимальное общее время в секундах для каждого запроса API ZeroSSL.",
+    "readonly_mode": "Это действие запрещено в режиме только для чтения."
   },
   "totp": {
     "prompt": "Пожалуйста, введите ваш TOTP-код."
@@ -1982,5 +1999,12 @@
     "required": "{{field}} обязательно для заполнения.",
     "service_required_for_ban": "Для бана, специфичного для сервиса, необходимо выбрать сервис.",
     "zerossl_email_or_api_key_required": "ZeroSSL требует либо email, либо API-ключ ZeroSSL."
+  },
+  "plugins": {
+    "multivalue": {
+      "show_less": "Показать меньше",
+      "more_value": "еще значение",
+      "more_values": "еще значения"
+    }
   }
 }

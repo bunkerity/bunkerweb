@@ -1,0 +1,14 @@
+# build the ngx_http_zstd_static_module
+HTTP_ZSTD_SRCS="$ngx_addon_dir/static/ngx_http_zstd_static_module.c"
+
+ngx_addon_name=ngx_http_zstd_static_module
+ngx_module_type=HTTP
+ngx_module_name=ngx_http_zstd_static_module
+ngx_module_incs=
+ngx_module_deps=
+ngx_module_srcs=$HTTP_ZSTD_SRCS
+ngx_module_libs=
+ngx_module_order="ngx_http_brotli_static_module \
+                  $ngx_module_name"
+
+. auto/module

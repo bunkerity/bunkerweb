@@ -7,6 +7,7 @@ Comment ça marche :
 3. Si l’injection « head » est configurée, il insère votre HTML juste avant `</head>`.
 4. L’insertion s’applique automatiquement à toutes les pages HTML servies.
 5. Cela permet d’ajouter scripts, styles ou autres éléments sans modifier le code de votre application.
+6. La page de challenge antibot et les pages d’erreur de BunkerWeb ne sont pas modifiées : elles sont générées par BunkerWeb et leur Content Security Policy bloquerait de toute façon le code injecté.
 
 ### Comment l’utiliser
 
@@ -21,6 +22,8 @@ Comment ça marche :
 | ------------- | ------ | --------- | -------- | ---------------------------------- |
 | `INJECT_HEAD` |        | multisite | non      | Code HTML injecté avant `</head>`. |
 | `INJECT_BODY` |        | multisite | non      | Code HTML injecté avant `</body>`. |
+
+Les valeurs de `INJECT_HEAD` et `INJECT_BODY` sont insérées comme du HTML littéral : les guillemets et les barres obliques inverses ne nécessitent aucun échappement supplémentaire pour NGINX. Si vous aviez ajouté `\'` manuellement pour contourner le problème, retirez la barre oblique inverse. Conservez l’échappement requis par votre format de configuration (comme YAML) ; l’expansion des variables NGINX (`$variable`) reste inchangée.
 
 !!! tip "Bonnes pratiques"
     - Placez de préférence les scripts JS en fin de body pour éviter de bloquer le rendu.

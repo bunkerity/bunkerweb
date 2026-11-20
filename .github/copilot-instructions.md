@@ -17,7 +17,7 @@
 ## Developer Workflows
 
 - **Build/Run**: See `docs/quickstart-guide.md` and `README.md` for integration-specific instructions (Linux, Docker, Kubernetes, etc.).
-- **Testing**: Use scripts in `tests/` (e.g., `main.py`, `AutoconfTest.py`, `SwarmTest.py`).
+- **Testing**: Unit tests (pytest) live in `tests/unit/`; end-to-end scenarios are YAML specs in `tests/core/`, `tests/api/` and `tests/ui/`, run with `tests/scripts/test.sh` (see `tests/README.md`).
 - **Debugging**: Logs and job execution are managed by the scheduler; use the web UI for live monitoring and troubleshooting.
 - **Plugins**: Add new features by placing plugins in the appropriate directory and updating settings. See `docs/plugins.md` and the [bunkerweb-plugins repo](https://github.com/bunkerity/bunkerweb-plugins).
 

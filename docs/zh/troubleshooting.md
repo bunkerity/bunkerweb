@@ -722,6 +722,18 @@ BunkerWeb 会在 `bw_metadata` 表中跟踪实例变更
     - 点击下载所选范围的配置存档。
     - 可选地下载日志：导出的日志会自动匿名化（所有 IP 地址和域名都被屏蔽）。
 
+=== "使用 bwcli 导出支持包"
+
+    在调度器运行的位置（调度器容器、all-in-one 镜像或 Linux 主机）运行 `bwcli support`，生成一个提供给 BunkerWeb 支持团队的压缩包：版本和环境、配置、插件、作业、实例健康状态、自定义配置的元数据、日志以及生成的 NGINX 配置。在 BunkerWeb 实例、autoconf 控制器或 Linux worker 主机上，该命令会拒绝执行，并提示改在调度器上运行。
+
+    ```shell
+    docker exec <scheduler container> bwcli support -o - > bundle.zip
+    ```
+
+    - 不使用 `-o` 时，压缩包 `bunkerweb-support-<UTC 时间戳>.zip` 会写入当前目录。`-o -` 会将其写入 stdout。
+    - 凭据始终会被屏蔽。IP 地址和服务域名会被匿名化：添加 `--no-anonymize` 可保留它们。
+    - 无法读取的部分会列在 `manifest.json` 中，其余内容仍会写入支持包。如果日志输出到 stdout，清单会给出获取它们的命令（`docker logs`、`kubectl logs`、`journalctl`）。
+
 ### 上传插件
 
 在某些情况下，可能无法从 UI 上传插件：

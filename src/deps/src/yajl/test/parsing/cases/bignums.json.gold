@@ -1,0 +1,5 @@
+array open '['
+integer: 9223372036854775807
+integer: -9223372036854775807
+array close ']'
+memory leaks:	0

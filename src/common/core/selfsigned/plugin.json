@@ -30,7 +30,7 @@
       "help": "Self-signed certificate expiry in days. Accepts a time suffix (ms, s, m, h, d, w, M, y); a bare number is days.",
       "id": "self-signed-ssl-expiry",
       "label": "Certificate expiry",
-      "regex": "^\\d+(ms?|[shdwMy])?$",
+      "regex": "^[0-9]+(ms?|[shdwMy])?$",
       "type": "text"
     },
     "SELF_SIGNED_SSL_SUBJ": {

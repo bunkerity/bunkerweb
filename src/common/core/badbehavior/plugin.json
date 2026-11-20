@@ -20,7 +20,7 @@
       "help": "List of HTTP status codes considered as 'bad'.",
       "id": "bad-behavior-status-code",
       "label": "Bad status codes",
-      "regex": "^( *[1-5]\\d{2} *)+$",
+      "regex": "^ *(?:[1-5]\\d{2}(?: +|$))+$",
       "type": "multiselect",
       "multiselect": [
         { "id": "400", "label": "400 - Bad Request", "value": "400" },
@@ -100,7 +100,7 @@
       "help": "Maximum number of 'bad' HTTP status codes within the period of time before IP is banned.",
       "id": "bad-behavior-threshold",
       "label": "Threshold",
-      "regex": "^[1-9][0-9]*",
+      "regex": "^[1-9][0-9]*$",
       "type": "text"
     },
     "BAD_BEHAVIOR_COUNT_TIME": {
@@ -109,7 +109,7 @@
       "help": "Period of time (in seconds) during which we count 'bad' HTTP status codes. Accepts a time suffix (ms, s, m, h, d, w, M, y); a bare number is seconds.",
       "id": "bad-behavior-period",
       "label": "Period (in seconds)",
-      "regex": "^\\d+(ms?|[shdwMy])?$",
+      "regex": "^[0-9]+(ms?|[shdwMy])?$",
       "type": "text"
     },
     "BAD_BEHAVIOR_BAN_TIME": {
@@ -118,7 +118,7 @@
       "help": "The duration time (in seconds) of a ban when the corresponding IP has reached the threshold. (Set to 0 to ban permanently) Accepts a time suffix (ms, s, m, h, d, w, M, y); a bare number is seconds.",
       "id": "bad-behavior-ban-time",
       "label": "Ban duration (in seconds)",
-      "regex": "^\\d+(ms?|[shdwMy])?$",
+      "regex": "^[0-9]+(ms?|[shdwMy])?$",
       "type": "text"
     },
     "BAD_BEHAVIOR_REPORT_MAX_EVENTS": {

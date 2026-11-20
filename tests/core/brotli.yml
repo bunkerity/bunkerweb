@@ -1,0 +1,48 @@
+integrations: "all"
+
+actions:
+  deactivated:
+    type: header
+    url: "http://www.example.com/logo.png"
+    follow_redirects: true
+    response_headers:
+      Content-Encoding: null
+    headers:
+      Accept-Encoding: "br"
+    config:
+      USE_BROTLI: "no"
+  activated:
+    type: header
+    url: "http://www.example.com/logo.png"
+    follow_redirects: true
+    response_headers:
+      Content-Encoding: "^br$"
+    headers:
+      Accept-Encoding: "br"
+  big_size:
+    type: header
+    url: "http://www.example.com/logo.png"
+    follow_redirects: true
+    response_headers:
+      Content-Encoding: null
+    headers:
+      Accept-Encoding: "br"
+    config:
+      BROTLI_MIN_LENGTH: "100000"
+  tweaked_types_present:
+    type: header
+    url: "http://www.example.com/logo.png"
+    follow_redirects: true
+    response_headers:
+      Content-Encoding: null
+    headers:
+      Accept-Encoding: "br"
+    config:
+      BROTLI_TYPES: "text/html"
+
+config:
+  USE_BROTLI: "yes"
+  BROTLI_TYPES: "image/png"
+
+annotations:
+  bunkerweb.io/REVERSE_PROXY_URL: ""

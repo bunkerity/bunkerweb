@@ -235,6 +235,12 @@ start() {
     export_env_file /etc/bunkerweb/variables.env
     export_env_file /etc/bunkerweb/api.env
 
+    # The env files cannot change the interpreter or its search path: pin them again
+    PYTHON_BIN=$(get_python_bin)
+    export PYTHON_BIN
+    BW_PYTHONPATH=$(get_bunkerweb_pythonpath)
+    export PYTHONPATH="${BW_PYTHONPATH}:/usr/share/bunkerweb/api"
+
     if ! run_as_nginx env PYTHONPATH="$PYTHONPATH" "$PYTHON_BIN" -m gunicorn \
         --chdir /usr/share/bunkerweb/api \
         --logger-class utils.logger.APILogger \
@@ -267,8 +273,15 @@ stop() {
 
 reload() {
     echo "Reloading API service..."
-    stop
-    start
+    if [ ! -f "$API_PID_FILE" ]; then
+        echo "API service is not running or the pid file doesn't exist." >&2
+        return 1
+    fi
+    pid=$(cat "$API_PID_FILE") || return 1
+    if ! [[ "$pid" =~ ^[1-9][0-9]*$ ]] || ! kill -s HUP "$pid"; then
+        echo "Failed to signal the API service for reload." >&2
+        return 1
+    fi
 }
 
 case "$1" in

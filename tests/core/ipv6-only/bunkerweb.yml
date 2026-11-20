@@ -1,0 +1,42 @@
+services:
+  bunkerweb:
+    mem_limit: 768m
+    dns:
+      - fd42:1618:1::20
+    networks:
+      bw-universe:
+        ipv6_address: fd42:1618:1::10
+      bw-services:
+        ipv6_address: fd42:1618:2::10
+      ipv6-backend:
+        ipv6_address: fd42:1618:3::10
+    logging:
+      driver: json-file
+    ports: []
+    container_name: bunkerweb
+    restart: unless-stopped
+    image: bunkerity/bunkerweb:${BW_VERSION}
+    env_file:
+      - path: ${BW_TESTS_ETC:?use tests/scripts}/variables.env
+        required: true
+    volumes:
+      - ${BW_TESTS_WWW:?use tests/scripts}:/var/www/html
+      - /tmp/output:/tmp/output
+networks:
+  bw-universe:
+    name: bw-universe
+    enable_ipv4: false
+    enable_ipv6: true
+    ipam:
+      config:
+        - subnet: fd42:1618:1::/64
+  bw-services:
+    name: bw-services
+    enable_ipv4: false
+    enable_ipv6: true
+    ipam:
+      config:
+        - subnet: fd42:1618:2::/64
+  ipv6-backend:
+    external: true
+    name: ipv6-backend

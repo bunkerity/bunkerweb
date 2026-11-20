@@ -1,0 +1,3 @@
+array open '['
+lexical error: invalid bytes in UTF8 string.
+memory leaks:	0

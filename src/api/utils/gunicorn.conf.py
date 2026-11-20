@@ -124,7 +124,7 @@ pythonpath = join(sep, "usr", "share", "bunkerweb", "deps", "python") + "," + jo
 proxy_allow_ips = PROXY_ALLOW_IPS
 casefold_http_method = True
 workers = MAX_WORKERS
-bind = f"{LISTEN_ADDR}:{LISTEN_PORT}"
+bind = f"[{LISTEN_ADDR}]:{LISTEN_PORT}" if ":" in LISTEN_ADDR and not LISTEN_ADDR.startswith("[") else f"{LISTEN_ADDR}:{LISTEN_PORT}"
 worker_class = "utils.worker.ApiUvicornWorker"
 threads = int(getenv("MAX_THREADS", MAX_WORKERS * 2))
 max_requests = int(getenv("API_MAX_REQUESTS", getenv("MAX_REQUESTS", "1000")))
@@ -319,6 +319,7 @@ def on_starting(server):
             override_api_creds = getenv("OVERRIDE_API_CREDS", "no").lower() == "yes"
             if API_USER["method"] == "manual" or override_api_creds:
                 updated = False
+                old_api_username = API_USER["username"]
                 if env_api_username and API_USER["username"] != env_api_username:
                     API_USER["username"] = env_api_username
                     updated = True
@@ -343,6 +344,7 @@ def on_starting(server):
                     err = DB.update_api_user(
                         API_USER["username"],
                         API_USER["password"],
+                        old_username=old_api_username,
                         method="manual",
                     )
                     if err:

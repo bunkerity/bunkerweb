@@ -1,0 +1,247 @@
+integrations: ["Docker"]
+
+# A DB-seeded `reader` in a real browser stack: reads work, the query-only POSTs work, every write
+# POST is refused with 403, and an admin then finds the business state exactly as it was.
+# The write probes carry a valid CSRF token (taken from the page the reader is on), so a 403 here
+# can only come from authorization, not from the CSRF check.
+
+actions:
+  reader:
+    type: ui
+    steps:
+      wizard_setup:
+        type: setup
+        admin_username: "admin"
+        admin_password: "P@ssw0rd"
+        server_name: "www.example.com"
+
+      # The OSS UI has no user management: insert the reader the way the database holds one
+      # (the role is normally there already, IGNORE covers a stack where it is not; the hash is bcrypt of P@ssw0rd)
+      seed_reader_role:
+        type: database
+        query: "INSERT IGNORE INTO bw_ui_roles (name, description, update_datetime) VALUES ('reader', 'Readers can only read the data.', NOW())"
+      seed_reader_user:
+        type: database
+        query: "INSERT INTO bw_ui_users (username, email, password, method, admin, theme, language, creation_date, update_date) VALUES ('reader', NULL, '$2b$12$0U/KOa77KCsXslpNzfceR.7kARSL4KN4tvM2PLy09h1hyCfhLpNS2', 'manual', 0, 'light', 'en', NOW(), NOW())"
+      seed_reader_link:
+        type: database
+        query: "INSERT IGNORE INTO bw_ui_roles_users (user_name, role_name) VALUES ('reader', 'reader')"
+      verify_reader_seeded:
+        type: database
+        query: "SELECT CONCAT('reader_role=', GROUP_CONCAT(role_name)) AS seeded FROM bw_ui_roles_users WHERE user_name = 'reader'"
+        result: "reader_role=reader"
+
+      # Admin: let the first configuration settle, then freeze a value fingerprint of the business state
+      access_home_admin:
+        type: access
+        url: "%BASE_URL%/home"
+        sleep: 2.0
+      login_admin:
+        type: login
+        next_page: "home"
+        username: "admin"
+        password: "P@ssw0rd"
+      access_services_admin:
+        type: access
+        page: "services"
+        sleep: 2.0
+      verify_service_admin:
+        type: find
+        selector: '//td[contains(., "www.example.com")]'
+      # One view of per-table hashes over the ordered business VALUES (not counts), so an in-place
+      # UPDATE is caught as well as an INSERT or DELETE. Left out on purpose, because they move on their own:
+      # timestamps (creation/update/last_update/last_seen), instance status, plugin config_changed flags,
+      # jobs_cache/jobs_runs, sessions, login failures, column preferences and TOTP counters.
+      # Bans live in the Lua datastore, not in SQL: the page checks at the end cover them.
+      create_state_view:
+        type: database
+        query: >-
+          CREATE VIEW ro_state AS
+          SELECT 'global_values' AS tbl, MD5(COALESCE(GROUP_CONCAT(MD5(JSON_ARRAY(setting_id, suffix, method, is_draft, file_name, value)) ORDER BY setting_id, suffix SEPARATOR ''), '')) AS h FROM bw_global_values
+          UNION ALL SELECT 'services', MD5(COALESCE(GROUP_CONCAT(MD5(JSON_ARRAY(id, method, is_draft)) ORDER BY id SEPARATOR ''), '')) FROM bw_services
+          UNION ALL SELECT 'services_settings', MD5(COALESCE(GROUP_CONCAT(MD5(JSON_ARRAY(service_id, setting_id, suffix, method, is_draft, file_name, value)) ORDER BY service_id, setting_id, suffix SEPARATOR ''), '')) FROM bw_services_settings
+          UNION ALL SELECT 'custom_configs', MD5(COALESCE(GROUP_CONCAT(MD5(JSON_ARRAY(service_id, type, name, method, is_draft, checksum, MD5(data))) ORDER BY service_id, type, name SEPARATOR ''), '')) FROM bw_custom_configs
+          UNION ALL SELECT 'plugins', MD5(COALESCE(GROUP_CONCAT(MD5(JSON_ARRAY(id, name, version, type, method, checksum)) ORDER BY id SEPARATOR ''), '')) FROM bw_plugins
+          UNION ALL SELECT 'jobs', MD5(COALESCE(GROUP_CONCAT(MD5(JSON_ARRAY(name, plugin_id, file_name, every, reload, run_async)) ORDER BY name SEPARATOR ''), '')) FROM bw_jobs
+          UNION ALL SELECT 'templates', MD5(COALESCE(GROUP_CONCAT(MD5(JSON_ARRAY(id, name, plugin_id, method)) ORDER BY id SEPARATOR ''), '')) FROM bw_templates
+          UNION ALL SELECT 'instances', MD5(COALESCE(GROUP_CONCAT(MD5(JSON_ARRAY(hostname, name, port, listen_https, https_port, server_name, type, method)) ORDER BY hostname SEPARATOR ''), '')) FROM bw_instances
+          UNION ALL SELECT 'ui_users', MD5(COALESCE(GROUP_CONCAT(MD5(JSON_ARRAY(username, email, password, method, admin, theme, language, totp_secret)) ORDER BY username SEPARATOR ''), '')) FROM bw_ui_users
+          UNION ALL SELECT 'ui_roles', MD5(COALESCE(GROUP_CONCAT(MD5(JSON_ARRAY(name, description)) ORDER BY name SEPARATOR ''), '')) FROM bw_ui_roles
+          UNION ALL SELECT 'ui_roles_users', MD5(COALESCE(GROUP_CONCAT(MD5(JSON_ARRAY(user_name, role_name)) ORDER BY user_name, role_name SEPARATOR ''), '')) FROM bw_ui_roles_users
+          UNION ALL SELECT 'ui_roles_permissions', MD5(COALESCE(GROUP_CONCAT(MD5(JSON_ARRAY(role_name, permission_name)) ORDER BY role_name, permission_name SEPARATOR ''), '')) FROM bw_ui_roles_permissions
+      snapshot_state:
+        type: database
+        query: "SET SESSION group_concat_max_len = 67108864; CREATE TABLE ro_snapshot AS SELECT tbl, h FROM ro_state"
+      logout_admin:
+        type: access
+        url: "%BASE_URL%/logout"
+        sleep: 2.0
+
+      # Reader: the pages answer 200
+      login_reader:
+        type: login
+        next_page: "home"
+        username: "reader"
+        password: "P@ssw0rd"
+        sleep: 2.0
+      read_home:
+        type: fetch
+        url: "%BASE_URL%/home"
+        status: 200
+      read_instances:
+        type: fetch
+        url: "%BASE_URL%/instances"
+        status: 200
+      read_global_settings:
+        type: fetch
+        url: "%BASE_URL%/global-settings"
+        status: 200
+      read_services:
+        type: fetch
+        url: "%BASE_URL%/services"
+        status: 200
+      read_configs:
+        type: fetch
+        url: "%BASE_URL%/configs"
+        status: 200
+      read_plugins:
+        type: fetch
+        url: "%BASE_URL%/plugins"
+        status: 200
+      read_jobs:
+        type: fetch
+        url: "%BASE_URL%/jobs"
+        status: 200
+      read_bans:
+        type: fetch
+        url: "%BASE_URL%/bans"
+        status: 200
+      read_reports:
+        type: fetch
+        url: "%BASE_URL%/reports"
+        status: 200
+      read_logs:
+        type: fetch
+        url: "%BASE_URL%/logs"
+        status: 200
+
+      # Reader on a page that carries a CSRF token (the token is per session, any page's will do)
+      open_bans_reader:
+        type: access
+        page: "bans"
+        sleep: 2.0
+
+      # Writes, one per area: 403 with a valid CSRF token
+      write_instances_reload:
+        type: fetch
+        url: "%BASE_URL%/instances/reload"
+        method: POST
+        csrf: true
+        body: "instances=bunkerweb"
+        status: 403
+      write_global_settings:
+        type: fetch
+        url: "%BASE_URL%/global-settings"
+        method: POST
+        csrf: true
+        body: "LOG_LEVEL=debug"
+        status: 403
+      write_service_create:
+        type: fetch
+        url: "%BASE_URL%/services/new"
+        method: POST
+        csrf: true
+        body: "SERVER_NAME=reader.example.com&is_draft=no"
+        status: 403
+      write_config_create:
+        type: fetch
+        url: "%BASE_URL%/configs/new"
+        method: POST
+        csrf: true
+        body: "service=global&type=http&name=readerconf&data=%23reader"
+        status: 403
+      write_plugin_delete:
+        type: fetch
+        url: "%BASE_URL%/plugins/delete"
+        method: POST
+        csrf: true
+        body: "plugins=antibot"
+        status: 403
+      write_job_run:
+        type: fetch
+        url: "%BASE_URL%/jobs/run"
+        method: POST
+        csrf: true
+        body: "jobs=%5B%7B%22plugin%22%3A%22letsencrypt%22%2C%22name%22%3A%22certbot-renew%22%7D%5D"
+        status: 403
+      write_ban_add:
+        type: fetch
+        url: "%BASE_URL%/bans/ban"
+        method: POST
+        csrf: true
+        body: "bans=%5B%7B%22ip%22%3A%22203.0.113.20%22%2C%22exp%22%3A0%7D%5D"
+        status: 403
+
+      # The query-only POSTs a reader's pages depend on answer 200
+      read_post_bans_fetch:
+        type: fetch
+        url: "%BASE_URL%/bans/fetch"
+        method: POST
+        csrf: true
+        status: 200
+      read_post_reports_fetch:
+        type: fetch
+        url: "%BASE_URL%/reports/fetch"
+        method: POST
+        csrf: true
+        status: 200
+      read_post_letsencrypt_fetch:
+        type: fetch
+        url: "%BASE_URL%/letsencrypt/fetch"
+        method: POST
+        csrf: true
+        status: 200
+
+      logout_reader:
+        type: access
+        url: "%BASE_URL%/logout"
+        sleep: 2.0
+
+      # Admin: nothing changed
+      login_admin_again:
+        type: login
+        next_page: "home"
+        username: "admin"
+        password: "P@ssw0rd"
+        sleep: 2.0
+      verify_state_unchanged:
+        type: database
+        query: "SET SESSION group_concat_max_len = 67108864; SELECT IF(COUNT(*) = 0, 'STATE_UNCHANGED', CONCAT('STATE_CHANGED:', GROUP_CONCAT(c.tbl))) AS verdict FROM ro_state c LEFT JOIN ro_snapshot s ON s.tbl = c.tbl WHERE s.h IS NULL OR s.h <> c.h"
+        result: "STATE_UNCHANGED"
+      access_services_admin_1:
+        type: access
+        page: "services"
+        sleep: 2.0
+      verify_service_still_there:
+        type: find
+        selector: '//td[contains(., "www.example.com")]'
+      verify_no_reader_service:
+        type: find
+        selector: '//td[contains(., "reader.example.com")]'
+        findable: false
+      access_configs_admin:
+        type: access
+        page: "configs"
+        sleep: 2.0
+      verify_no_reader_config:
+        type: find
+        selector: '//td[contains(., "readerconf")]'
+        findable: false
+      access_bans_admin:
+        type: access
+        page: "bans"
+        sleep: 3.0
+      verify_no_reader_ban:
+        type: find
+        selector: '//table[@id="bans"]//td[contains(., "203.0.113.20")]'
+        findable: false

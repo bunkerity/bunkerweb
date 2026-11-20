@@ -251,6 +251,8 @@ $(document).ready(function () {
           render: DataTable.render.select(),
           targets: 1,
         },
+        // Keep the row's identity visible when Responsive collapses the other columns on a phone
+        { responsivePriority: 1, targets: 2 },
         {
           orderable: false,
           targets: -1,
@@ -409,8 +411,8 @@ $(document).ready(function () {
 
   $(document).on("click", ".show-history", function () {
     const historyModal = $("#modal-job-history");
-    const job = $(this).data("job");
-    const plugin = $(this).data("plugin");
+    const job = $(this).attr("data-job");
+    const plugin = $(this).attr("data-plugin");
 
     const history = $(`#job-${job}-${plugin}-history`).clone();
     const historyCount = history.find("ul").length - 1;

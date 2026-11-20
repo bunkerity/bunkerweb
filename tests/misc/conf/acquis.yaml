@@ -1,0 +1,6 @@
+filenames:
+  - /var/log/bunkerweb/bunkerweb.log
+  - /var/log/bunkerweb/access.log
+  - /var/log/bunkerweb/error.log
+labels:
+  type: bunkerweb

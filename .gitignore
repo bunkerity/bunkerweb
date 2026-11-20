@@ -13,7 +13,6 @@ docs/package-lock.json
 .cache/
 .pytest_cache/
 /src/*/tests/
-/tests/unit/
 /tests/lua/
 .env
 .venv/

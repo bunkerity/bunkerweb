@@ -723,6 +723,18 @@ En caso de que hayas olvidado tus credenciales de la interfaz de usuario o esté
     - Haz clic para descargar el archivo de configuración para el alcance elegido.
     - Opcionalmente descarga los registros: los registros exportados se anonimizan automáticamente (todas las direcciones IP y dominios están enmascarados).
 
+=== "Exportar un paquete de soporte con bwcli"
+
+    Ejecuta `bwcli support` donde se ejecuta el scheduler (contenedor del scheduler, imagen all-in-one o host Linux) para generar un único archivo para el soporte de BunkerWeb: versión y entorno, configuración, plugins, jobs, estado de las instancias, metadatos de las configuraciones personalizadas, registros y la configuración de NGINX generada. En una instancia de BunkerWeb, en el controlador autoconf o en un host Linux worker el comando se niega a ejecutarse y remite al scheduler.
+
+    ```shell
+    docker exec <scheduler container> bwcli support -o - > bundle.zip
+    ```
+
+    - Sin `-o`, el archivo `bunkerweb-support-<marca de tiempo UTC>.zip` se escribe en el directorio actual. `-o -` lo escribe en stdout.
+    - Las credenciales siempre se ocultan. Las direcciones IP y los dominios de los servicios se anonimizan: añade `--no-anonymize` para conservarlos.
+    - Una sección que no se puede leer se indica en `manifest.json` y el resto del paquete se escribe igualmente. Cuando los registros van a stdout, el manifiesto indica el comando para obtenerlos (`docker logs`, `kubectl logs`, `journalctl`).
+
 ### Cargar plugin
 
 Puede que no sea posible cargar un plugin desde la interfaz de usuario en ciertas situaciones:

@@ -533,6 +533,8 @@ static TRef crec_ct_ct(jit_State *J, CType *d, CType *s, TRef dp, TRef sp,
     if (st == IRT_CDATA) goto err_nyi;
     if (!LJ_64 && ssize == 8)  /* Truncate from 64 bit integer. */
       sp = emitconv(sp, IRT_U32, st, 0);
+    if (LJ_64 && ssize < 8 && dsize == 8 && !(sinfo & CTF_UNSIGNED))
+      sp = emitconv(sp, IRT_I64, IRT_INT, IRCONV_SEXT);
     goto xstore;
   case CCX(P, F):
     if (st == IRT_CDATA) goto err_nyi;

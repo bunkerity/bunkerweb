@@ -1,0 +1,21 @@
+{
+  "id": "slowjob",
+  "name": "Slow Job",
+  "description": "Test plugin: a once-job that sleeps so a second config write can land mid-cycle.",
+  "version": "1.0",
+  "stream": "no",
+  "settings": {
+    "SLOWJOB_TAG": {
+      "context": "multisite",
+      "default": "",
+      "help": "Any value; changing it makes the slow job run.",
+      "id": "slowjob-tag",
+      "label": "Slow job tag",
+      "regex": "^.*$",
+      "type": "text"
+    }
+  },
+  "jobs": [
+    { "name": "slow", "file": "slow.py", "every": "once", "reload": false }
+  ]
+}

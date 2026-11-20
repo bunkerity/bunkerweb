@@ -35,6 +35,8 @@ local synced_tables = {}
 local synced_counters = {}
 -- Values per RPUSH or EXISTS, well under LuaJIT's unpack() limit.
 local REDIS_BATCH = 500
+local BAN_EVIDENCE_RECOVERY_BATCH = 32
+local BAN_EVIDENCE_PENDING = "ban_evidence_pending"
 
 -- Redis keys carry the instance hostname next to the worker id, so instances sharing one Redis
 -- never write the same key. The UI keeps only what precedes the first ":" as the metric name.
@@ -62,8 +64,6 @@ local function metric_redis_key(key, wid)
 	return "metrics:" .. key .. ":" .. wid .. "@" .. get_instance_id()
 end
 
--- A worker-local latch cannot be evicted along with metric data.
-local restored_shm = false
 local prefilled_redis = false
 -- Stripping the TTL is a one-shot migration: in persist mode nothing re-adds one, since
 -- every writer uses bare SET/RPUSH/HINCRBY. Later cycles would be pure round trips.
@@ -110,6 +110,7 @@ local table_remove = table.remove
 -- when the branch first runs (the .luacheckrc whitelist hides bare global reads).
 local unpack = unpack
 
+local REPORT_MAX_URL_SIZE = 512
 local REQUEST_FACET_FIELDS = { "ip", "country", "method", "url", "status", "reason", "server_name", "security_mode" }
 
 local function report_keys()
@@ -803,6 +804,82 @@ local function refresh_request_ttls(self, ttl, wid)
 	end
 end
 
+-- Newest occurrence wins, including its sync state; keeps the FIFO cap. Appends newer to older.
+local function merge_requests(self, older, newer)
+	for _, request in ipairs(newer or {}) do
+		table_insert(older, request)
+	end
+	local requests, seen = {}, {}
+	local max_requests = parse_count(self.variables["METRICS_MAX_BLOCKED_REQUESTS"]) or 1000
+	for i = #older, 1, -1 do
+		if #requests >= max_requests then
+			break
+		end
+		local request = older[i]
+		local id = type(request) == "table" and request.id or encode(request)
+		if not seen[id] then
+			seen[id] = true
+			table_insert(requests, request)
+		end
+	end
+	local merged = {}
+	for i = #requests, 1, -1 do
+		table_insert(merged, requests[i])
+	end
+	return merged
+end
+
+-- Rows a previous worker of this id left in SHM. Redis may have accepted a report before that
+-- worker died without rewriting SHM, so every restored unsynced row is uncertain.
+local function restore_requests(self, stored, live)
+	for _, request in ipairs(stored) do
+		if type(request) == "table" and not request.synced then
+			request.redis_retry_json = request.redis_retry_json or encode(request)
+		end
+	end
+	return merge_requests(self, stored, live)
+end
+
+local function stored_requests(self, wid)
+	local ok, stored = pcall(decode, self.metrics_datastore:get("requests_" .. wid) or "")
+	return ok and type(stored) == "table" and stored or nil
+end
+
+-- Left by a worker that flushed on exit, read once by the next worker of the same id. A marker
+-- ("handoff:requests:<id>") says a snapshot exists; each exiting process writes its own snapshot
+-- ("handoff:requests:<id>:<pid>"), so two exits never overwrite each other. Neither shape matches what
+-- the API and init_workers() scan ("requests_*", "*_<id>").
+local HANDOFF_PREFIX = "handoff:requests:"
+local HANDOFF_TTL = 600
+
+-- The exiting worker and the one that replaces it share an id, hence the "requests_<id>" key, and the
+-- new one overwrites it with its own LRU on every tick. The exit flush can land between that tick's
+-- own lookup and its write, so the reports travel in the snapshots, not in "requests_<id>".
+local function adopt_exit_requests(self, wid)
+	local marker = HANDOFF_PREFIX .. wid
+	if not self.metrics_datastore:get(marker) then
+		return
+	end
+	-- Marker first: an exit landing during the scan writes its snapshot, then sets it again for the next tick.
+	self.metrics_datastore:delete(marker)
+	local prefix = marker .. ":"
+	local requests
+	for _, key in ipairs(self.metrics_datastore:keys()) do
+		if key:sub(1, #prefix) == prefix then
+			local value = self.metrics_datastore:get(key)
+			-- Consumed before decoding: a corrupt snapshot must not be retried every tick.
+			self.metrics_datastore:delete(key)
+			local ok, stored = pcall(decode, value or "")
+			if ok and type(stored) == "table" then
+				requests = restore_requests(self, stored, requests or lru:get("requests"))
+			end
+		end
+	end
+	if requests then
+		lru:set("requests", requests)
+	end
+end
+
 function metrics:initialize(ctx)
 	-- Call parent initialize
 	plugin.initialize(self, "metrics", ctx)
@@ -827,16 +904,50 @@ function metrics:init_workers()
 	if max_lru_history < 1 then
 		max_lru_history = DEFAULT_MAX_LRU_HISTORY
 	end
-	if max_lru_history == DEFAULT_MAX_LRU_HISTORY then
-		return self:ret(true, "metrics LRU using default size (MAX_LRU_HISTORY=" .. max_lru_history .. ")")
+	local message = "metrics LRU using default size (MAX_LRU_HISTORY=" .. max_lru_history .. ")"
+	if max_lru_history ~= DEFAULT_MAX_LRU_HISTORY then
+		local new_lru, err = lrucache.new(max_lru_history)
+		if new_lru then
+			local requests = lru:get("requests")
+			if requests then
+				new_lru:set("requests", requests)
+			end
+			lru = new_lru
+			message = "metrics LRU sized to " .. max_lru_history .. " slots"
+		else
+			self.logger:log(ERR, "failed to resize metrics LRU to " .. max_lru_history .. " slots : " .. err)
+			message = "kept default LRU size"
+		end
 	end
-	local new_lru, err = lrucache.new(max_lru_history)
-	if not new_lru then
-		self.logger:log(ERR, "failed to resize metrics LRU to " .. max_lru_history .. " slots : " .. err)
-		return self:ret(true, "kept default LRU size")
+	local wid = tostring(worker_id())
+	-- Restore SHM once, merging requests already touched by log().
+	-- Do not evict live slots just to prefill a cache: later misses recover lazily.
+	local budget = lru:capacity() - #lru:get_keys()
+	for _, key in ipairs(self.metrics_datastore:keys()) do
+		if key:match("_" .. wid .. "$") then
+			local name = key:gsub("_" .. wid .. "$", "")
+			local live = lru:get(name)
+			if name ~= "setup" and ((live == nil and budget > 0) or (name == "requests" and type(live) == "table")) then
+				local value = self.metrics_datastore:get(key)
+				if value then
+					local ok, decoded = pcall(decode, value)
+					if ok then
+						value = decoded
+					end
+					if name:find("_counter_", 1, true) then
+						value = new_counter(self, name)
+					elseif name == "requests" and type(value) == "table" then
+						value = restore_requests(self, value, live)
+					end
+					lru:set(name, value)
+					if live == nil then
+						budget = budget - 1
+					end
+				end
+			end
+		end
 	end
-	lru = new_lru
-	return self:ret(true, "metrics LRU sized to " .. max_lru_history .. " slots")
+	return self:ret(true, message)
 end
 
 -- Call Redis with one automatic reconnect attempt on connection error.
@@ -879,6 +990,58 @@ function metrics:redis_call(method, ...)
 	return res, call_err
 end
 
+local function sync_ban_evidence(self, ban_id, payload, ttl)
+	local key = report_keys()[1] .. ":ban_evidence:" .. ban_id
+	if ttl > 0 then
+		return self:redis_call("set", key, payload, "NX", "EX", math.ceil(ttl))
+	end
+	return self:redis_call("set", key, payload, "NX")
+end
+
+function metrics:store_ban_evidence(events, summary)
+	summary.ban_id = utils.rand(32) .. ":" .. tostring(worker_id()) .. "@" .. get_instance_id()
+	summary.event_count = #events
+	local evidence = { events = events }
+	for key, value in pairs(summary) do
+		evidence[key] = value
+	end
+	local payload = encode(evidence)
+	local ttl = parse_duration(self.variables["METRICS_REDIS_TTL"], "s") or 2592000
+	local ban_time = tonumber(summary.ban_time) or 0
+	ttl = ttl > 0 and ban_time > 0 and ttl + ban_time or 0
+	local ok, err = self.metrics_datastore:set_with_retries("ban_evidence:" .. summary.ban_id .. ":data", payload, ttl)
+	local stored_locally = ok
+	if not ok then
+		self:log_throttled(ERR, "ban_evidence_local", "Can't save ban evidence locally: " .. (err or "unknown error"))
+	end
+	if self.use_redis then
+		ok, err = self.clusterstore:connect()
+		if ok then
+			ok, err = sync_ban_evidence(self, summary.ban_id, payload, ttl)
+		end
+		self.clusterstore:close()
+		if not ok then
+			self:log_throttled(
+				ERR,
+				"ban_evidence_redis",
+				"Can't save ban evidence in Redis: " .. (err or "unknown error")
+			)
+			if stored_locally then
+				local pending_ok, pending_err = self.metrics_datastore.dict:lpush(BAN_EVIDENCE_PENDING, summary.ban_id)
+				if not pending_ok then
+					self:log_throttled(
+						ERR,
+						"ban_evidence_pending",
+						"Can't queue ban evidence recovery: " .. (pending_err or "unknown error")
+					)
+				end
+			end
+		end
+	end
+	-- Evidence pressure must not prevent the security ban itself.
+	return summary
+end
+
 function metrics:log(bypass_checks)
 	-- Don't go further if metrics is not enabled
 	if not bypass_checks and self.variables["USE_METRICS"] == "no" then
@@ -901,13 +1064,22 @@ function metrics:log(bypass_checks)
 		if reason == "modsecurity-body" and ngx.var.request then
 			request_method = ngx.var.request:match("^(%S+)") or request_method
 		end
+		local url = self.ctx.bw.request_uri
+		if type(url) == "string" and #url > REPORT_MAX_URL_SIZE then
+			local cut = REPORT_MAX_URL_SIZE - 3
+			-- Keep valid UTF-8 intact when appending the truncation marker.
+			while cut > 0 and url:byte(cut + 1) >= 0x80 and url:byte(cut + 1) < 0xC0 do
+				cut = cut - 1
+			end
+			url = url:sub(1, cut) .. "..."
+		end
 		local request = {
 			id = self.ctx.bw.request_id,
 			date = self.ctx.bw.start_time or time(),
 			ip = self.ctx.bw.remote_addr,
 			country = country,
 			method = request_method,
-			url = self.ctx.bw.request_uri,
+			url = url,
 			status = ngx.status,
 			user_agent = self.ctx.bw.http_user_agent or "",
 			reason = reason,
@@ -990,97 +1162,12 @@ function metrics:log_default()
 	return self:ret(true, "metrics not used")
 end
 
-function metrics:timer()
-	-- Check if metrics is used
-	local is_needed, err = has_variable("USE_METRICS", "yes")
-	if is_needed == nil then
-		return self:ret(false, "can't check USE_METRICS variable : " .. err)
-	end
-	if not is_needed then
-		return self:ret(true, "metrics not used")
-	end
-
+-- Writes the LRU of this worker to the shared dict. The Redis branches only run when the caller connected
+-- (self.redis_ok), which is what lets the exit flush share this code without touching Redis.
+local function flush_lru(self, wid, max_retries, on_exit)
 	local ret = true
 	local ret_err = "metrics updated"
-	local wid = tostring(worker_id())
-
-	-- Restore SHM once, leaving counters/requests already touched by log() intact.
-	-- Do not evict live slots just to prefill a cache: later misses recover lazily.
-	if not restored_shm then
-		local budget = lru:capacity() - #lru:get_keys()
-		for _, key in ipairs(self.metrics_datastore:keys()) do
-			if budget <= 0 then
-				break
-			end
-			if key:match("_" .. wid .. "$") then
-				local name = key:gsub("_" .. wid .. "$", "")
-				if name ~= "setup" and lru:get(name) == nil then
-					local value = self.metrics_datastore:get(key)
-					if value then
-						local ok, decoded = pcall(decode, value)
-						if ok then
-							value = decoded
-						end
-						if name:find("_counter_", 1, true) then
-							value = new_counter(self, name)
-						elseif name == "requests" and type(value) == "table" then
-							-- Redis may have accepted a report before the old worker died
-							-- without rewriting SHM. Every restored unsynced row is uncertain.
-							for _, request in ipairs(value) do
-								if type(request) == "table" and not request.synced then
-									request.redis_retry_json = request.redis_retry_json or encode(request)
-								end
-							end
-						end
-						lru:set(name, value)
-						budget = budget - 1
-					end
-				end
-			end
-		end
-		restored_shm = true
-	end
-
-	self.redis_ok = nil
-	local ttl = parse_duration(self.variables["METRICS_REDIS_TTL"], "s")
-	local redis_connected = false
-	if self.use_redis then
-		self.redis_ok, err = self.clusterstore:connect()
-		if not self.redis_ok then
-			self:log_throttled(
-				ERR,
-				"redis_connect",
-				"Can't connect to Redis server: "
-					.. (err or "unknown error")
-					.. " - requests will be stored in datastore"
-			)
-		else
-			redis_connected = true
-			if not prefilled_redis and self.variables["METRICS_SAVE_TO_REDIS"] == "yes" then
-				prefill_attempts = prefill_attempts + 1
-				prefilled_redis = prefill_counters(self, wid) or prefill_attempts >= MAX_PREFILL_ATTEMPTS
-			end
-			if self.variables["METRICS_SAVE_TO_REDIS"] == "yes" and ngx.now() >= legacy_due then
-				local legacy_ttl = ttl or 0
-				local done, failed = refresh_legacy_counters(self, wid, legacy_ttl)
-				if done then
-					legacy_failures = 0
-					legacy_due = legacy_ttl > 0 and ngx.now() + legacy_ttl / 2 or math.huge
-				elseif failed then
-					-- Never give up (Redis may recover), but back off: an ACL-denied SCAN fails forever.
-					legacy_failures = legacy_failures + 1
-					local cap = legacy_ttl > 0 and legacy_ttl / 2 or 3600
-					legacy_due = ngx.now() + math.min(60 * 2 ^ math.min(legacy_failures - 1, 10), cap)
-				end
-			end
-			self_heal_request_facets(self)
-			-- With a TTL, the per-tick EXPIRE replies already reveal lost keys.
-			if self.variables["METRICS_SAVE_TO_REDIS"] == "yes" and not (ttl and ttl > 0) then
-				check_synced_keys(self, wid)
-			end
-		end
-	end
-
+	local err
 	local lru_keys = lru:get_keys()
 	-- Built from the snapshot rather than from the writes below, so a key skipped because
 	-- the OOM breaker tripped or because it was raced out mid-loop is not taken for evicted.
@@ -1203,12 +1290,16 @@ function metrics:timer()
 					end
 				end
 			end
+			-- The next worker of this id may already have flushed rows of its own to this key.
+			if on_exit and key == "requests" then
+				value = merge_requests(self, stored_requests(self, wid) or {}, value)
+			end
 			if type(value) == "table" then
 				value = encode(value)
 			end
 			-- Push to dict (with LRU eviction if needed)
 			local ok
-			ok, err = self.metrics_datastore:set_with_retries(key .. "_" .. wid, value)
+			ok, err = self.metrics_datastore:set_with_retries(key .. "_" .. wid, value, nil, max_retries)
 			-- Shed the oldest half rather than the whole history: set_with_retries already
 			-- force-evicted, so "no memory" means the dict is undersized, and dropping every
 			-- stored entry to make one write fit loses far more than needed. The halving is
@@ -1231,7 +1322,7 @@ function metrics:timer()
 						.. #live
 						.. " entries : raise METRICS_MEMORY_SIZE"
 				)
-				ok, err = self.metrics_datastore:set_with_retries(key .. "_" .. wid, encode(live))
+				ok, err = self.metrics_datastore:set_with_retries(key .. "_" .. wid, encode(live), nil, max_retries)
 			end
 			if not ok then
 				-- Nothing left to shed : drop the key so the next cycle starts clean
@@ -1250,6 +1341,127 @@ function metrics:timer()
 			end
 		end
 	end
+	return ret, ret_err, live_keys
+end
+
+-- Called by init-worker-lua.conf when the worker exits (reload or stop), in place of the timer: whatever
+-- log() still holds in the LRU would otherwise be lost, since the next tick never comes. Local only:
+-- no Redis connection while the worker shuts down. Reports stay unsynced in the dict, and the
+-- next worker of this id restores them with a replay flag, so they still reach Redis on its first tick.
+function metrics:flush_on_exit()
+	local is_needed, err = has_variable("USE_METRICS", "yes")
+	if is_needed == nil then
+		return self:ret(false, "can't check USE_METRICS variable : " .. err)
+	end
+	if not is_needed then
+		return self:ret(true, "metrics not used")
+	end
+	self.redis_ok = nil
+	local wid = tostring(worker_id())
+	local ret, ret_err = flush_lru(self, wid, tonumber(self.variables["METRICS_MEMORY_MAX_RETRIES"]) or 5, true)
+	-- Capped like the LRU it copies (log() keeps at most METRICS_MAX_BLOCKED_REQUESTS rows) and expiring.
+	local requests = lru:get("requests")
+	if requests then
+		local snapshot = HANDOFF_PREFIX .. wid .. ":" .. ngx.worker.pid()
+		if self.metrics_datastore:set_with_retries(snapshot, encode(requests), HANDOFF_TTL, 1) then
+			self.metrics_datastore:set_with_retries(HANDOFF_PREFIX .. wid, "1", HANDOFF_TTL, 1)
+		end
+	end
+	return self:ret(ret, ret_err)
+end
+
+function metrics:timer()
+	-- Check if metrics is used
+	local is_needed, err = has_variable("USE_METRICS", "yes")
+	if is_needed == nil then
+		return self:ret(false, "can't check USE_METRICS variable : " .. err)
+	end
+	if not is_needed then
+		return self:ret(true, "metrics not used")
+	end
+
+	local wid = tostring(worker_id())
+	local max_retries = tonumber(self.variables["METRICS_MEMORY_MAX_RETRIES"]) or 5
+
+	self.redis_ok = nil
+	local ttl = parse_duration(self.variables["METRICS_REDIS_TTL"], "s")
+	local redis_connected = false
+	if self.use_redis then
+		self.redis_ok, err = self.clusterstore:connect()
+		if not self.redis_ok then
+			self:log_throttled(
+				ERR,
+				"redis_connect",
+				"Can't connect to Redis server: "
+					.. (err or "unknown error")
+					.. " - requests will be stored in datastore"
+			)
+		else
+			redis_connected = true
+			if not prefilled_redis and self.variables["METRICS_SAVE_TO_REDIS"] == "yes" then
+				prefill_attempts = prefill_attempts + 1
+				prefilled_redis = prefill_counters(self, wid) or prefill_attempts >= MAX_PREFILL_ATTEMPTS
+			end
+			if self.variables["METRICS_SAVE_TO_REDIS"] == "yes" and ngx.now() >= legacy_due then
+				local legacy_ttl = ttl or 0
+				local done, failed = refresh_legacy_counters(self, wid, legacy_ttl)
+				if done then
+					legacy_failures = 0
+					legacy_due = legacy_ttl > 0 and ngx.now() + legacy_ttl / 2 or math.huge
+				elseif failed then
+					-- Never give up (Redis may recover), but back off: an ACL-denied SCAN fails forever.
+					legacy_failures = legacy_failures + 1
+					local cap = legacy_ttl > 0 and legacy_ttl / 2 or 3600
+					legacy_due = ngx.now() + math.min(60 * 2 ^ math.min(legacy_failures - 1, 10), cap)
+				end
+			end
+			self_heal_request_facets(self)
+			-- With a TTL, the per-tick EXPIRE replies already reveal lost keys.
+			if self.variables["METRICS_SAVE_TO_REDIS"] == "yes" and not (ttl and ttl > 0) then
+				check_synced_keys(self, wid)
+			end
+		end
+	end
+
+	if worker_id() == 0 and self.redis_ok then
+		for _ = 1, BAN_EVIDENCE_RECOVERY_BATCH do
+			local ban_id, pop_err = self.metrics_datastore.dict:rpop(BAN_EVIDENCE_PENDING)
+			if not ban_id then
+				if pop_err then
+					self:log_throttled(ERR, "ban_evidence_queue", "Can't read ban evidence queue: " .. pop_err)
+				end
+				break
+			end
+			local key = "ban_evidence:" .. ban_id .. ":data"
+			local payload = self.metrics_datastore:get(key)
+			if payload then
+				local ok, remaining = self.metrics_datastore:ttl(key)
+				local sync_err = not ok and remaining or nil
+				if ok then
+					ok, sync_err = sync_ban_evidence(self, ban_id, payload, remaining)
+				end
+				if not ok then
+					self:log_throttled(
+						ERR,
+						"ban_evidence_recovery",
+						"Can't recover ban evidence: " .. (sync_err or "unknown error")
+					)
+					local pending_ok, pending_err = self.metrics_datastore.dict:rpush(BAN_EVIDENCE_PENDING, ban_id)
+					if not pending_ok then
+						self:log_throttled(
+							ERR,
+							"ban_evidence_pending",
+							"Can't requeue ban evidence recovery: " .. (pending_err or "unknown error")
+						)
+					end
+					break
+				end
+			end
+		end
+	end
+
+	adopt_exit_requests(self, wid)
+	local ret, ret_err, live_keys = flush_lru(self, wid, max_retries)
 
 	if self.redis_ok then
 		enforce_redis_requests_cap(self)
@@ -1284,6 +1496,26 @@ function metrics:api()
 	-- Handle special /metrics/requests/query endpoint for optimized queries
 	if filter == "requests/query" then
 		return self:api_requests_query()
+	end
+	if filter:sub(1, 16) == "badbehavior/ban/" then
+		local ban_id = filter:sub(17)
+		if #ban_id > 256 or not ban_id:match("^[%w:%.@_~%-]+$") then
+			return self:ret(true, "invalid ban ID", ngx.HTTP_BAD_REQUEST)
+		end
+		local key = "ban_evidence:" .. ban_id .. ":data"
+		local payload = self.metrics_datastore:get(key)
+		local other = subsystem == "http" and shared.metrics_datastore_stream or shared.metrics_datastore
+		if not payload and other then
+			payload = datastore:new(other):get(key)
+		end
+		if not payload then
+			return self:ret(true, { ban_id = ban_id, evidence_missing = true }, HTTP_OK)
+		end
+		local ok, evidence = pcall(decode, payload)
+		if not ok then
+			return self:ret(true, "invalid ban evidence", HTTP_INTERNAL_SERVER_ERROR)
+		end
+		return self:ret(true, evidence, HTTP_OK)
 	end
 
 	-- Loop on keys
@@ -1327,12 +1559,21 @@ end
 function metrics:api_requests_query()
 	-- Parse query parameters from request args
 	local args = ngx.req.get_uri_args()
-	local start_idx = tonumber(args.start) or 0
-	local length = tonumber(args.length) or 10
+	local start_idx = tonumber(tostring(args.start or "0"))
+	local length = tonumber(tostring(args.length or "10"))
 	local search = unescape_uri(args.search or "")
 	local order_column = args.order_column or "date"
 	local order_dir = args.order_dir or "desc"
 	local count_only = args.count_only == "true"
+	if not start_idx or start_idx < 0 or start_idx % 1 ~= 0 then
+		return self:ret(true, "invalid page start", ngx.HTTP_BAD_REQUEST)
+	end
+	if not length or length < -1 or length % 1 ~= 0 then
+		return self:ret(true, "invalid page length", ngx.HTTP_BAD_REQUEST)
+	end
+	if order_dir ~= "asc" and order_dir ~= "desc" then
+		return self:ret(true, "invalid sort direction", ngx.HTTP_BAD_REQUEST)
+	end
 
 	-- Parse search panes filters (format: field1:value1,value2;field2:value3)
 	local search_panes = {}
@@ -1369,46 +1610,43 @@ function metrics:api_requests_query()
 	-- Filter requests
 	local filtered_requests = {}
 	for _, request in ipairs(all_requests) do
-		-- Filter: status 400-499 or detect mode
-		if (request.status and request.status >= 400 and request.status < 500) or request.security_mode == "detect" then
-			local matches = true
+		local matches = true
 
-			-- Apply search filter
-			if search ~= "" then
-				local search_lower = search:lower()
-				matches = false
-				for _, value in pairs(request) do
-					if type(value) == "string" and value:lower():find(search_lower, 1, true) then
-						matches = true
-						break
-					elseif type(value) == "number" and tostring(value):find(search_lower, 1, true) then
-						matches = true
+		-- Apply search filter
+		if search ~= "" then
+			local search_lower = search:lower()
+			matches = false
+			for _, value in pairs(request) do
+				if type(value) == "string" and value:lower():find(search_lower, 1, true) then
+					matches = true
+					break
+				elseif type(value) == "number" and tostring(value):find(search_lower, 1, true) then
+					matches = true
+					break
+				end
+			end
+		end
+
+		-- Apply search panes filters
+		if matches then
+			for field, allowed_values in pairs(search_panes) do
+				local field_value = tostring(request[field] or "N/A")
+				local field_matches = false
+				for _, allowed in ipairs(allowed_values) do
+					if field_value == allowed then
+						field_matches = true
 						break
 					end
 				end
-			end
-
-			-- Apply search panes filters
-			if matches then
-				for field, allowed_values in pairs(search_panes) do
-					local field_value = tostring(request[field] or "N/A")
-					local field_matches = false
-					for _, allowed in ipairs(allowed_values) do
-						if field_value == allowed then
-							field_matches = true
-							break
-						end
-					end
-					if not field_matches then
-						matches = false
-						break
-					end
+				if not field_matches then
+					matches = false
+					break
 				end
 			end
+		end
 
-			if matches then
-				table_insert(filtered_requests, request)
-			end
+		if matches then
+			table_insert(filtered_requests, request)
 		end
 	end
 
@@ -1464,16 +1702,14 @@ function metrics:api_requests_query()
 	end
 
 	for _, request in ipairs(all_requests) do
-		if (request.status and request.status >= 400 and request.status < 500) or request.security_mode == "detect" then
-			for _, field in ipairs(pane_fields) do
-				local value = tostring(request[field] or "N/A")
-				if not pane_counts[field][value] then
-					pane_counts[field][value] = { total = 0, count = 0 }
-				end
-				pane_counts[field][value].total = pane_counts[field][value].total + 1
-				if filtered_ids[request.id] then
-					pane_counts[field][value].count = pane_counts[field][value].count + 1
-				end
+		for _, field in ipairs(pane_fields) do
+			local value = tostring(request[field] or "N/A")
+			if not pane_counts[field][value] then
+				pane_counts[field][value] = { total = 0, count = 0 }
+			end
+			pane_counts[field][value].total = pane_counts[field][value].total + 1
+			if filtered_ids[request.id] then
+				pane_counts[field][value].count = pane_counts[field][value].count + 1
 			end
 		end
 	end

@@ -8,6 +8,10 @@
 {% set default_settings = ["IS_DRAFT=no"] if (current_endpoint != "global-config" and current_endpoint != "global-settings") else [] %}
 {% set disabled_settings = namespace(items=[]) %}
 {% set draft_settings = namespace(keys=[]) %}
+{# Keys the raw save may leave out: stored by the `default` method at the setting default. A `ui` row
+   that equals the default (a service overriding a non-default global) is not listed, because only a
+   posted key keeps it. #}
+{% set unchanged_defaults = namespace(keys=[]) %}
 {# Canonical set of valid keys (+ multiple base-prefixes) for this editor, built
    from the SAME settings walk that produces the raw config text below. The
    client parser uses it to tell a real `KEY=value` line apart from a
@@ -34,6 +38,7 @@
             {% endif %}
             {% if setting_config.get("is_draft", false) %}{% if draft_settings.keys.append(setting) %}{% endif %}{% endif %}
             {% if entire_config.append(setting + "=" + setting_value) %}{% endif %}
+            {% if setting_method == "default" and setting_value == setting_default and setting != "SERVER_NAME" and not setting_config.get("is_draft", false) and unchanged_defaults.keys.append(setting) %}{% endif %}
             {% if known_keys.keys.append(setting) %}{% endif %}
             {% if setting_data.get("type") == "file" and known_keys.multiline.append(setting) %}{% endif %}
             {% if setting_value != setting_default or setting_config.get("is_draft", false) %}
@@ -57,6 +62,7 @@
                     {% endif %}
                     {% if setting_config.get("is_draft", false) %}{% if draft_settings.keys.append(setting) %}{% endif %}{% endif %}
             {% if entire_config.append(setting + "=" + setting_value) %}{% endif %}
+                    {% if setting_method == "default" and setting_value == setting_default and not setting_config.get("is_draft", false) and unchanged_defaults.keys.append(setting) %}{% endif %}
                     {% if known_keys.keys.append(setting) %}{% endif %}
                     {% if setting_data.get("setting_no_suffix") %}{% if known_keys.bases.append(setting_data["setting_no_suffix"]) %}{% endif %}{% endif %}
                     {% if setting_data.get("type") == "file" %}{% if known_keys.multiline.append(setting) %}{% endif %}{% if setting_data.get("setting_no_suffix") %}{% if known_keys.multiline_bases.append(setting_data["setting_no_suffix"]) %}{% endif %}{% endif %}{% endif %}
@@ -87,6 +93,7 @@
 <input type="hidden"
        id="raw-config-disabled"
        value="{{ disabled_settings.items | join('\r\n') }}">
+<input type="hidden" id="raw-unchanged-defaults" value='{{ unchanged_defaults.keys | unique | list | tojson }}'>
 <input type="hidden" id="raw-draft-settings" value='{{ draft_settings.keys | unique | list | tojson }}'>
 <input type="hidden"
        id="raw-known-keys"

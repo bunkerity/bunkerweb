@@ -47,6 +47,7 @@ from werkzeug.routing.exceptions import BuildError
 
 from common_utils import get_version, is_newer_version_available  # type: ignore
 
+from app.html_pattern import v_safe_pattern
 from app.models.biscuit import BiscuitMiddleware, _internal_error_response
 from app.models.reverse_proxied import ReverseProxied
 from app.models.session_cookie import use_per_request_cookie
@@ -89,7 +90,7 @@ from app.routes.instances import instances
 from app.routes.jobs import jobs
 from app.routes.login import login
 from app.routes.logout import logout, logout_page
-from app.routes.logs import logs
+from app.routes.logs import _list_log_files, logs
 from app.routes.plugins import plugins
 from app.routes.pro import pro
 from app.routes.profile import profile
@@ -632,27 +633,18 @@ def refresh_app_context():
     # Remove blueprints for deleted plugins
     for bp_name in list(app.blueprints.keys()):
         if bp_name not in plugin_blueprints and bp_name not in app.original_blueprints:
-            # Remove blueprint and clean up
-            app.blueprints.pop(bp_name, None)
-
             # Clean up sys.path
             if bp_name in app.plugin_sys_paths and app.plugin_sys_paths[bp_name] in sys_path:
                 sys_path.remove(app.plugin_sys_paths[bp_name])
                 del app.plugin_sys_paths[bp_name]
 
-            # Remove URL rules and endpoints
+            # Remove extra pages before the blueprint's rules are dropped.
             for rule in list(app.url_map.iter_rules()):
                 if rule.endpoint.startswith(f"{bp_name}."):
                     if str(rule) == f"/{bp_name}" and bp_name in app.config["EXTRA_PAGES"]:
                         app.config["EXTRA_PAGES"].remove(bp_name)
 
-                    with suppress(ValueError):
-                        app.url_map._rules.remove(rule)
-                        app.url_map._rules_by_endpoint.pop(rule.endpoint, None)
-
-            # Remove view functions
-            for endpoint in [ep for ep in app.view_functions if ep.startswith(f"{bp_name}.")]:
-                app.view_functions.pop(endpoint, None)
+            app._remove_blueprint(bp_name)
 
             LOGGER.debug(f"Blueprint '{bp_name}' was completely removed")
 
@@ -880,6 +872,8 @@ with app.app_context():
             except BuildError as e:
                 LOGGER.debug(f"Couldn't build the URL for {endpoint}: {e}")
         return "#"
+
+    app.jinja_env.filters["v_safe_pattern"] = v_safe_pattern
 
     # Declare functions for jinja2
     app.jinja_env.globals.update(
@@ -1390,10 +1384,16 @@ def before_request():
 
         if not request.path.startswith("/loading") and current_user.is_authenticated:
             if not changes_ongoing and metadata["failover"]:
+                # Preselect error.log only when the Logs page lists it, otherwise the link would 404
+                logs_args = {}
+                with suppress(OSError):
+                    if "error.log" in _list_log_files()["main"]:
+                        logs_args["file"] = "error.log"
+                logs_url = url_for("logs.logs_page", **logs_args)
                 flash(
                     Markup(
-                        "<p class='p-0 m-0 fst-italic'>The last changes could not be applied because it creates a configuration error on NGINX, please check BunkerWeb's logs for more information. The configuration fell back to the last working one.</p>"
-                    ),
+                        "<p class='p-0 m-0 fst-italic'>The last changes could not be applied to every instance. They were applied to some instances only (or none); the previous configuration still runs on instances that rejected the changes. Please check <a href='{}' class='text-reset text-decoration-underline'>BunkerWeb's logs</a> for more information.</p>"
+                    ).format(logs_url),
                     "error",
                     save=False,
                 )
@@ -1536,7 +1536,7 @@ def set_security_headers(response):
     # * Permissions-Policy header to prevent unwanted behavior
     # Must stay byte-identical to the PERMISSIONS_POLICY default in src/common/core/headers/plugin.json.
     response.headers["Permissions-Policy"] = (
-        "accelerometer=(), ambient-light-sensor=(), aria-notify=(), attribution-reporting=(), autoplay=(), bluetooth=(), browsing-topics=(), camera=(), captured-surface-control=(), ch-device-memory=(), ch-downlink=(), ch-dpr=(), ch-ect=(), ch-prefers-color-scheme=(), ch-prefers-reduced-motion=(), ch-prefers-reduced-transparency=(), ch-rtt=(), ch-save-data=(), ch-ua-arch=(), ch-ua-bitness=(), ch-ua-form-factors=(), ch-ua-full-version-list=(), ch-ua-full-version=(), ch-ua-high-entropy-values=(), ch-ua-mobile=(), ch-ua-model=(), ch-ua-platform-version=(), ch-ua-platform=(), ch-ua-wow64=(), ch-ua=(), ch-viewport-height=(), ch-viewport-width=(), ch-width=(), compute-pressure=(), cross-origin-isolated=(), deferred-fetch-minimal=(), deferred-fetch=(), device-attributes=(), digital-credentials-create=(), digital-credentials-get=(), display-capture=(), encrypted-media=(), execution-while-not-rendered=(), execution-while-out-of-viewport=(), focus-without-user-activation=(), fullscreen=(), gamepad=(), geolocation=(), gyroscope=(), haptics=(), hid=(), identity-credentials-get=(), idle-detection=(), interest-cohort=(), keyboard-map=(), language-detector=(), language-model=(), local-fonts=(), local-network-access=(), local-network=(), loopback-network=(), magnetometer=(), manual-text=(), media-playback-while-not-visible=(), microphone=(), midi=(), on-device-speech-recognition=(), otp-credentials=(), payment=(), picture-in-picture=(), private-state-token-issuance=(), private-state-token-redemption=(), proofreader=(), publickey-credentials-create=(), publickey-credentials-get=(), publickey-credentials-remote-client-data-json=(), rewriter=(), screen-wake-lock=(), serial=(), speaker-selection=(), storage-access=(), summarizer=(), tools=(), translator=(), unbounded-element=(), unload=(), usb=(), vertical-scroll=(), web-app-installation=(), web-share=(), webnn=(), window-management=(), writer=(), xr-spatial-tracking=()"
+        "accelerometer=(), ambient-light-sensor=(), aria-notify=(), attribution-reporting=(), autoplay=(), bluetooth=(), camera=(), captured-surface-control=(), ch-device-memory=(), ch-downlink=(), ch-dpr=(), ch-ect=(), ch-prefers-color-scheme=(), ch-prefers-reduced-motion=(), ch-prefers-reduced-transparency=(), ch-rtt=(), ch-save-data=(), ch-ua-arch=(), ch-ua-bitness=(), ch-ua-form-factors=(), ch-ua-full-version-list=(), ch-ua-full-version=(), ch-ua-high-entropy-values=(), ch-ua-mobile=(), ch-ua-model=(), ch-ua-platform-version=(), ch-ua-platform=(), ch-ua-wow64=(), ch-ua=(), ch-viewport-height=(), ch-viewport-width=(), ch-width=(), compute-pressure=(), cross-origin-isolated=(), deferred-fetch-minimal=(), deferred-fetch=(), device-attributes=(), digital-credentials-create=(), digital-credentials-get=(), display-capture=(), encrypted-media=(), execution-while-not-rendered=(), execution-while-out-of-viewport=(), focus-without-user-activation=(), fullscreen=(), gamepad=(), geolocation=(), gyroscope=(), haptics=(), hid=(), identity-credentials-get=(), idle-detection=(), interest-cohort=(), keyboard-map=(), language-detector=(), language-model=(), local-fonts=(), local-network-access=(), local-network=(), loopback-network=(), magnetometer=(), manual-text=(), media-playback-while-not-visible=(), microphone=(), midi=(), on-device-speech-recognition=(), otp-credentials=(), payment=(), picture-in-picture=(), private-state-token-issuance=(), private-state-token-redemption=(), proofreader=(), publickey-credentials-create=(), publickey-credentials-get=(), publickey-credentials-remote-client-data-json=(), rewriter=(), screen-wake-lock=(), semantic-embedder=(), serial=(), speaker-selection=(), storage-access=(), summarizer=(), tools=(), translator=(), unbounded-element=(), unload=(), usb=(), vertical-scroll=(), web-app-installation=(), web-share=(), webnn=(), window-management=(), writer=(), xr-spatial-tracking=()"
     )
 
     # * X-Robots-Tag header to stay out of search indexes: robots.txt stops crawling, not the

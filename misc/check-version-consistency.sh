@@ -19,33 +19,34 @@ note() {
     fail=1
 }
 
-# --- 1. Anchored pins. Each of these is a single line that must carry VERSION. ---
+# --- 1. Anchored pins. Each captured value must equal VERSION. ---
 check_pin() {
     local file="$1" pattern="$2" found
-    found="$(grep -oE "$pattern" "$file" 2>/dev/null | head -1 || true)"
+    found="$(sed -nE "s/$pattern/\\1/p" "$file" 2>/dev/null | head -1 || true)"
     if [ -z "$found" ]; then
         note "$file: expected a version pin matching /$pattern/, found none"
-    elif [[ "$found" != *"$VERSION"* ]]; then
+    elif [[ "$found" != "$VERSION" ]]; then
         note "$file: pin is '$found', expected $VERSION"
     fi
 }
 
 echo "Checking version pins against src/VERSION ($VERSION)"
 for df in src/*/Dockerfile; do
-    check_pin "$df" 'LABEL version="[^"]*"'
+    check_pin "$df" '.*LABEL version="([^"]*)".*'
 done
-check_pin misc/install-bunkerweb.sh '^DEFAULT_BUNKERWEB_VERSION="[^"]*"'
-check_pin publiccode.yml '^softwareVersion: .*'
-check_pin pyproject.toml '^version = "[^"]*"'
-check_pin .github/ISSUE_TEMPLATE/bug_report.yml '^      value: 1\.[0-9][^ ]*'
+check_pin misc/install-bunkerweb.sh '^DEFAULT_BUNKERWEB_VERSION="([^"]*)".*'
+check_pin publiccode.yml '^softwareVersion: (.*)'
+check_pin pyproject.toml '^version = "([^"]*)".*'
+check_pin .github/ISSUE_TEMPLATE/bug_report.yml '^      value: (1\.[0-9][^ ]*).*'
 
 # --- 2. No stale literal from the current release line. ---
-# Historical references to older lines (1.5.9, 1.6.5, 1.6.0-beta) are legitimate;
-# a leftover from *this* line is always rot. These paths carry it on purpose:
+# Historical references to older lines (1.5.9, 1.6.5, 1.6.0-beta) are legitimate.
+# These paths also carry intentional references to the current release line:
 #   CHANGELOG.md                      released history
 #   src/common/db/alembic/            revision ids and down_revision chains
 #   .github/RELEASING.md              worked examples of the tag convention
 #   misc/install-bunkerweb.sh         ~rc vs -rc comparison examples in comments
+#   docs/{<locale>/}features.md       version bounds in generated prose
 CORE="${VERSION%%[~-]*}"
 mapfile -t stale < <(
     git grep -nE "${CORE//./\\.}[~-]rc[0-9]+" -- \
@@ -56,7 +57,24 @@ mapfile -t stale < <(
         ':!docs/superpowers/**' \
         ':!misc/install-bunkerweb.sh' \
         ':!misc/check-version-consistency.sh' 2>/dev/null |
-        grep -vF "$VERSION" | grep -vF "$TAG_VERSION" || true
+        grep -vE '^(\.github/workflows/release\.yml:[0-9]+:\ \ \ \ \ \ \ \ \ \ \#\ '\`'sort\ \-V'\`'\ puts\ 1\.6\.18\-rc4\ after\ 1\.6\.18,\ so\ '\`'\-rc'\`'\ is\ mapped\ to\ '\`'\~rc'\`'\ \(sorts\ first\)\ and\ back\.|tests/unit/common/test_version_consistency\.py:[0-9]+:@pytest\.mark\.parametrize\("stale",\ \[VERSION\ \+\ "0",\ VERSION\.replace\("\~",\ "\-"\)\ \+\ "0",\ "1\.6\.18\~rc3",\ VERSION\ \+\ "\-extra"\]\)|tests/unit/linux/test_lxp_package_lifecycle\.py:[0-9]+:\ \ \ \ \ \ \ \ \ \ \ \ host\.ok\("afterRemoveDEB\.sh",\ "upgrade",\ "1\.6\.18\~rc4",\ original=old_revision\)|tests/unit/linux/test_lxp_package_lifecycle\.py:[0-9]+:\ \ \ \ \ \ \ \ \ \ \ \ host\.ok\("beforeRemove\.sh",\ "upgrade",\ "1\.6\.18\~rc4"\)|tests/unit/linux/test_lxp_package_lifecycle\.py:[0-9]+:\ \ \ \ \ \ \ \ host\.ok\("beforeInstall\.sh",\ \*\(\("2",\)\ if\ rpm\ else\ \("upgrade",\ "1\.6\.18\~rc4"\)\)\)|tests/unit/linux/test_lxp_package_lifecycle\.py:[0-9]+:\ \ \ \ \ \ \ \ host\.ok\("postinstall\.sh",\ \*\(\("1",\)\ if\ rpm\ else\ \("configure",\ "1\.6\.18\~rc4"\)\)\)|tests/unit/linux/test_lxq_migration_config\.py:[0-9]+:\ \ \ \ \(directory\.parent\.parent\ /\ "VERSION"\)\.write_text\("1\.6\.18\~rc4"\)|tests/unit/linux/test_lxq_repository_bootstrap\.py:[0-9]+:\ \ \ \ \ \ \ \ BUNKERWEB_VERSION='\''1\.6\.18\~rc4'\''|tests/unit/gen/test_save_config_cli_outcomes\.py:[0-9]+:\ \ \ \ \ \ \ \ \("1\.6\.17",\ "1\.6\.18\~rc3",\ "sqlite",\ True\),|tests/unit/gen/test_save_config_cli_outcomes\.py:[0-9]+:\ \ \ \ \ \ \ \ \("1\.6\.17",\ "1\.6\.18\~rc3",\ "postgresql",\ False\),|tests/unit/gen/test_save_config_cli_outcomes\.py:[0-9]+:\ \ \ \ \ \ \ \ \("1\.6\.17",\ "1\.6\.18\-rc3",\ "sqlite",\ True\),|tests/unit/gen/test_save_config_cli_outcomes\.py:[0-9]+:\ \ \ \ \(tmp_path\ /\ "sqlite_versions/abc_upgrade_to_version_1_6_18_rc3\.py"\)\.touch\(\)|tests/unit/common/test_system_utility_outcomes\.py:[0-9]+:\ \ \ \ version\.write_text\("1\.6\.18\~rc3\\n"\)|tests/unit/common/test_system_utility_outcomes\.py:[0-9]+:\ \ \ \ assert\ utils\.get_version\(\)\ ==\ "1\.6\.18\~rc3"|tests/unit/common/test_system_utility_outcomes\.py:[0-9]+:\ \ \ \ assert\ utils\.is_newer_version_available\("v1\.6\.18\~rc3",\ "1\.6\.18"\)|tests/unit/linux/test_lxp_package_lifecycle\.py:[0-9]+:\ \ \ \ \ \ \ \ \(root\ /\ "usr/share/bunkerweb/VERSION"\)\.write_text\("1\.6\.18\~rc3\\n"\)|tests/unit/linux/test_lxp_package_lifecycle\.py:[0-9]+:\ \ \ \ \ \ \ \ host\.ok\("beforeInstall\.sh",\ \*\(\("2",\)\ if\ rpm\ else\ \("upgrade",\ "1\.6\.18\~rc3"\)\)\)|tests/unit/linux/test_lxp_package_lifecycle\.py:[0-9]+:@pytest\.mark\.parametrize\("old_revision",\ \["v1\.6\.18\-rc3",\ "3a9c1381f84f248cbb6c5210d22bafebdf0ab941"\]\)|tests/unit/linux/test_lxp_package_lifecycle\.py:[0-9]+:\ \ \ \ \ \ \ \ host\.ok\("beforeInstall\.sh",\ \*\(\("2",\)\ if\ rpm\ else\ \("upgrade",\ "1\.6\.18\~rc3"\)\)\)|tests/unit/linux/test_lxp_package_lifecycle\.py:[0-9]+:\ \ \ \ \ \ \ \ host\.ok\("postinstall\.sh",\ \*\(\("1",\)\ if\ rpm\ else\ \("configure",\ "1\.6\.18\~rc3"\)\)\)|tests/unit/linux/test_lxp_package_lifecycle\.py:[0-9]+:\ \ \ \ host\.ok\("postinstall\.sh",\ "configure",\ "1\.6\.18\~rc3"\)|tests/unit/linux/test_lxp_package_lifecycle\.py:[0-9]+:\ \ \ \ host\.ok\("postinstall\.sh",\ "configure",\ "1\.6\.18\~rc3"\)|tests/unit/linux/test_lxp_package_lifecycle\.py:[0-9]+:\ \ \ \ host\.ok\("postinstall\.sh",\ "configure",\ "1\.6\.18\~rc3"\)|tests/unit/linux/test_lxp_package_lifecycle\.py:[0-9]+:\ \ \ \ result\ =\ host\.run\("postinstall\.sh",\ "configure",\ "1\.6\.18\~rc3"\)|tests/unit/linux/test_lxp_package_lifecycle\.py:[0-9]+:\ \ \ \ host\.ok\("postinstall\.sh",\ "configure",\ "1\.6\.18\~rc3"\)|tests/unit/linux/test_lxp_package_lifecycle\.py:[0-9]+:\ \ \ \ host\.ok\("beforeInstall\.sh",\ "upgrade",\ "1\.6\.18\~rc3"\)|tests/unit/linux/test_lxp_package_lifecycle\.py:[0-9]+:\ \ \ \ result\ =\ host\.run\("postinstall\.sh",\ "configure",\ "1\.6\.18\~rc3"\)|tests/unit/linux/test_lxp_package_lifecycle\.py:[0-9]+:\ \ \ \ result\ =\ host\.run\("beforeInstall\.sh",\ "upgrade",\ "1\.6\.18\~rc3"\)|tests/unit/linux/test_lxp_package_lifecycle\.py:[0-9]+:\ \ \ \ host\.ok\("beforeInstall\.sh",\ "upgrade",\ "1\.6\.18\~rc3"\)|tests/unit/linux/test_lxp_package_lifecycle\.py:[0-9]+:\ \ \ \ host\.ok\("postinstall\.sh",\ "configure",\ "1\.6\.18\~rc3"\)|tests/unit/linux/test_lxp_package_lifecycle\.py:[0-9]+:\ \ \ \ host\.ok\("beforeInstall\.sh",\ "upgrade",\ "1\.6\.18\~rc3"\)|tests/unit/linux/test_lxp_package_lifecycle\.py:[0-9]+:\ \ \ \ host\.ok\("postinstall\.sh",\ "configure",\ "1\.6\.18\~rc3",\ SERVICE_API="no"\)|tests/unit/linux/test_lxp_package_lifecycle\.py:[0-9]+:\ \ \ \ host\.ok\("beforeInstall\.sh",\ \*\(\("2",\)\ if\ rpm\ else\ \("upgrade",\ "1\.6\.18\~rc3"\)\)\)|tests/unit/linux/test_lxp_package_lifecycle\.py:[0-9]+:\ \ \ \ host\.ok\("postinstall\.sh",\ \*\(\("1",\)\ if\ rpm\ else\ \("configure",\ "1\.6\.18\~rc3"\)\),\ \*\*\{setting:\ "no"\}\)|tests/unit/linux/test_lxp_package_lifecycle\.py:[0-9]+:\ \ \ \ host\.ok\("beforeInstall\.sh",\ "upgrade",\ "1\.6\.18\~rc3"\)|tests/unit/linux/test_lxp_package_lifecycle\.py:[0-9]+:\ \ \ \ result\ =\ host\.run\("postinstall\.sh",\ "configure",\ "1\.6\.18\~rc3",\ FAIL_RESTART="bunkerweb\-ui"\)|tests/unit/linux/test_lxp_package_lifecycle\.py:[0-9]+:\ \ \ \ host\.ok\("postinstall\.sh",\ "configure",\ "1\.6\.18\~rc3"\))$' |
+        awk -v token="${CORE//./[.]}[~-]rc[[:alnum:].~+-]+" -v version="$VERSION" -v tag_version="$TAG_VERSION" '
+            {
+                rest = $0
+                features = sub(/^docs\/([a-z][a-z]\/)?features[.]md:[0-9]+:/, "", rest)
+                while (match(rest, token)) {
+                    prefix = substr(rest, 1, RSTART - 1)
+                    literal = substr(rest, RSTART, RLENGTH)
+                    rest = substr(rest, RSTART + RLENGTH)
+                    if (literal == version || literal == tag_version) continue
+                    # A version bound excuses only its own token, even on a line with other pins.
+                    if (features && literal ~ /~rc[0-9]+[.]?$/ && prefix ~ /(^|[[:space:](])before $/ && rest ~ /^([[:space:],);!?|]|$)/) continue
+                    if (features && literal ~ /~rc[0-9]+$/ && prefix ~ /(^|[[:space:](])$/ && rest ~ /^ or later([[:space:].,);!?|]|$)/) continue
+                    print
+                    break
+                }
+            }
+        ' || true
 )
 if [ ${#stale[@]} -gt 0 ]; then
     echo "Stale ${CORE} literals (expected $VERSION or $TAG_VERSION):"
@@ -70,30 +88,27 @@ fi
 # --- 3. NGINX: every Linux package must build its modules against the tree it runs. ---
 # nginx refuses a dynamic module compiled for another version at config load, so each
 # src/linux/Dockerfile-* NGINX_VERSION must match the vendored tree that src/deps/install.sh
-# selects for it: src/deps/src/nginx by default, src/deps/src/nginx-<version> for a distro
-# that lags (selected by OS and OS_VERSION in install.sh).
+# selects for it: src/deps/src/nginx by default, src/deps/src/nginx-<version> on Fedora.
 nginx_tree_version() {
     [ -f "$1/src/core/nginx.h" ] || return 0
     sed -n 's/^#define NGINX_VERSION[[:space:]]*"\([^"]*\)"/\1/p' "$1/src/core/nginx.h"
 }
-MAIN_NGINX="$(nginx_tree_version src/deps/src/nginx)"
 # A tree without the vendored sources (the release unit test's fixture) has nothing to check.
-for df in $([ -n "$MAIN_NGINX" ] && ls src/linux/Dockerfile-* 2>/dev/null); do
-    pin="$(sed -n 's/^ENV NGINX_VERSION=//p' "$df" | head -1)"
-    [ -z "$pin" ] && continue
-    if [ "$pin" = "$MAIN_NGINX" ]; then
-        continue
-    fi
-    if [ "$(nginx_tree_version "src/deps/src/nginx-$pin")" != "$pin" ]; then
-        note "$df: NGINX_VERSION=$pin but the vendored tree is $MAIN_NGINX and src/deps/src/nginx-$pin does not exist"
-        continue
-    fi
-    os="$(sed -n 's/^ENV OS=//p' "$df" | head -1)"
-    os_version="$(sed -n 's/^ENV OS_VERSION=//p' "$df" | head -1)"
-    if ! grep -qE "\"\\\$OS\" = \"$os\".*\"\\\$OS_VERSION\" = \"$os_version\"" src/deps/install.sh; then
-        note "$df: NGINX_VERSION=$pin needs src/deps/install.sh to select src/deps/src/nginx-$pin for OS=$os OS_VERSION=$os_version"
-    fi
-done
+if [ -d src/deps/src ]; then
+    for df in src/linux/Dockerfile-*; do
+        [ -f "$df" ] || continue
+        pin="$(sed -n 's/^ENV NGINX_VERSION=//p' "$df")"
+        [ -z "$pin" ] && continue
+        os="$(sed -n 's/^ENV OS=//p' "$df")"
+        case_pattern='\*'
+        [ "$os" != fedora ] || case_pattern=fedora
+        tree="$(sed -nE '/^case "[$]OS" in$/,/^esac$/s|^[[:space:]]*'"$case_pattern"'\) NGINX_SRC_DIR="/tmp/bunkerweb/deps/src/(nginx(-[0-9.]+)?)" ;;$|\1|p' src/deps/install.sh)"
+        selected="$(nginx_tree_version "src/deps/src/$tree")"
+        if [ "$selected" != "$pin" ]; then
+            note "$df: NGINX_VERSION=$pin but src/deps/install.sh selects ${tree:-no tree} (${selected:-no version}) for OS=$os"
+        fi
+    done
+fi
 
 if [ "$fail" -ne 0 ]; then
     cat >&2 <<EOF

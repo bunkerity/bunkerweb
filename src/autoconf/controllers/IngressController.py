@@ -148,10 +148,15 @@ class IngressController(KubernetesController):
                 port = 80
                 if path.backend.service.port.name:
                     k8s_service = service_list[0]
-                    for svc_port in k8s_service.spec.ports:
+                    for svc_port in k8s_service.spec.ports or []:
                         if svc_port.name == path.backend.service.port.name:
                             port = svc_port.port
                             break
+                    else:
+                        self._logger.warning(
+                            f"Ingress {namespace}/{controller_service.metadata.name}: named port {path.backend.service.port.name} "
+                            f"not found on Service {namespace}/{path.backend.service.name}, falling back to port 80."
+                        )
                 else:
                     port = path.backend.service.port.number
 

@@ -35,13 +35,10 @@ function blacklist:initialize(ctx)
 			self.logger:log(ERR, err)
 			self.lists = {}
 		else
-			-- Create a deep copy to avoid modifying the shared internalstore reference
+			-- Outer table is per object; the stored arrays are shared and already deduplicated, so they are only ever read.
 			self.lists = {}
 			for kind, list in pairs(internalstore_lists) do
-				self.lists[kind] = {}
-				for _, item in ipairs(list) do
-					table.insert(self.lists[kind], item)
-				end
+				self.lists[kind] = list
 			end
 		end
 		local kinds = {
@@ -57,15 +54,26 @@ function blacklist:initialize(ctx)
 			["IGNORE_URI"] = {},
 		}
 		for kind, _ in pairs(kinds) do
-			if not self.lists[kind] then
-				self.lists[kind] = {}
-			end
-			for data in self.variables["BLACKLIST_" .. kind]:gmatch("%S+") do
+			local stored = self.lists[kind] or {}
+			local inline = {}
+			for data in (self.variables["BLACKLIST_" .. kind] or ""):gmatch("%S+") do
 				if data ~= "" then
-					table.insert(self.lists[kind], data)
+					table.insert(inline, data)
 				end
 			end
-			self.lists[kind] = deduplicate_list(self.lists[kind])
+			if #inline == 0 then
+				self.lists[kind] = stored
+			else
+				-- Copy before merging: never mutate the shared stored array.
+				local merged = {}
+				for _, item in ipairs(stored) do
+					table.insert(merged, item)
+				end
+				for _, item in ipairs(inline) do
+					table.insert(merged, item)
+				end
+				self.lists[kind] = deduplicate_list(merged)
+			end
 		end
 		local header_rules = self.internalstore:get("plugin_blacklist_header_rules", true)
 		self.header_rules = pick_header_rules(header_rules, self.ctx.bw.server_name)
@@ -239,14 +247,17 @@ function blacklist:access()
 	-- Perform checks
 	for k, _ in pairs(checks) do
 		if not already_cached[k] then
-			local ok, blacklisted = self:is_blacklisted(k)
+			local ok, blacklisted, incomplete = self:is_blacklisted(k)
 			if ok == nil then
 				self.logger:log(ERR, "error while checking if " .. k .. " is blacklisted : " .. blacklisted)
 			else
-				-- luacheck: ignore 421
-				local ok, err = self:add_to_cache(self:kind_to_ele(k), blacklisted)
-				if not ok then
-					self.logger:log(ERR, "error while adding element to cache : " .. err)
+				-- A negative verdict taken without the rDNS check (resolver error) is not cached: the next request retries it
+				if blacklisted ~= "ok" or not incomplete then
+					-- luacheck: ignore 421
+					local ok, err = self:add_to_cache(self:kind_to_ele(k), blacklisted)
+					if not ok then
+						self.logger:log(ERR, "error while adding element to cache : " .. err)
+					end
 				end
 				if blacklisted ~= "ok" then
 					local data = self:get_data(blacklisted)
@@ -334,6 +345,7 @@ function blacklist:is_blacklisted_ip()
 	end
 
 	-- Check if rDNS is needed
+	local rdns_failed = false
 	local check_rdns = self.lists["RDNS"] and #self.lists["RDNS"] > 0
 	if self.variables["BLACKLIST_RDNS_GLOBAL"] == "yes" and not self.ctx.bw.ip_is_global then
 		check_rdns = false
@@ -362,6 +374,7 @@ function blacklist:is_blacklisted_ip()
 				end
 			end
 		else
+			rdns_failed = true
 			self.logger:log(ERR, "error while getting rdns : " .. err)
 		end
 	end
@@ -390,8 +403,8 @@ function blacklist:is_blacklisted_ip()
 		end
 	end
 
-	-- Not blacklisted
-	return false, "ok"
+	-- Not blacklisted (third value: the rDNS check could not run)
+	return false, "ok", rdns_failed
 end
 
 function blacklist:is_blacklisted_uri()

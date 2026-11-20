@@ -86,7 +86,7 @@ Ya sea que necesite restringir los métodos HTTP, gestionar los tamaños de las 
 | `ALLOWED_METHODS` | `GET\|POST\|HEAD\|QUERY` | multisite | no       | **Métodos HTTP:** Lista de métodos HTTP permitidos, separados por caracteres de barra vertical. Los métodos personalizados en mayúsculas pueden contener guiones bajos y guiones. |
 
     !!! abstract "CORS y Solicitudes de Pre-vuelo"
-        Si su aplicación admite [Intercambio de Recursos de Origen Cruzado (CORS)](#cors), debe incluir el método `OPTIONS` en el ajuste `ALLOWED_METHODS` para manejar las solicitudes de pre-vuelo. Esto garantiza la funcionalidad adecuada para los navegadores que realizan solicitudes de origen cruzado.
+        Cuando `USE_CORS` es `yes`, las solicitudes de pre-vuelo CORS (una solicitud `OPTIONS` con los encabezados `Origin` y `Access-Control-Request-Method`) llegan al plugin [CORS](#cors) aunque `OPTIONS` no esté en `ALLOWED_METHODS`. Cualquier otra solicitud `OPTIONS` sigue necesitando `OPTIONS` en esta lista.
 
     !!! danger "Consideraciones de Seguridad"
         -   **Evite habilitar `TRACE` o `CONNECT`:** Estos métodos rara vez se necesitan y pueden introducir riesgos de seguridad significativos, como habilitar el Rastreo entre Sitios (XST) o ataques de túnel.

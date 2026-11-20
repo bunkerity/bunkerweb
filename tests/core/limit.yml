@@ -1,0 +1,150 @@
+integrations:
+  - "Linux"
+  - "Docker"
+  - "All-in-one"
+
+actions:
+  rate_limit_basic:
+    type: limit
+    url: "http://www.example.com/test"
+    rate_limit: "2r/s"
+    expect_limited: true
+    rate_exceeded_count: 5
+    cooldown: 0.1
+    config:
+      LIMIT_REQ_URL: "^/test"
+
+  rate_limit_not_triggered:
+    type: limit
+    url: "http://www.example.com/light"
+    rate_limit: "5r/s"
+    expect_limited: false
+    rate_exceeded_count: 3
+    cooldown: 0.1
+    config:
+      LIMIT_REQ_URL: "^/light"
+      LIMIT_REQ_RATE: "5r/s"
+
+  rate_limit_recovery:
+    type: limit
+    url: "http://www.example.com/recovery"
+    rate_limit: "1r/s"
+    expect_limited: true
+    rate_exceeded_count: 3
+    test_recovery: true
+    recovery_delay: 2.0
+    cooldown: 0.1
+    config:
+      LIMIT_REQ_URL: "^/recovery"
+      LIMIT_REQ_RATE: "1r/s"
+
+  rate_limit_url_suffix:
+    # A suffixed pair is a rule of its own (limit.lua init(): every LIMIT_REQ_URL* is paired with the
+    # LIMIT_REQ_RATE* of the same suffix). The unsuffixed pair is pointed away from /custom, so only
+    # LIMIT_REQ_URL_1 / LIMIT_REQ_RATE_1 can limit it -- an ignored suffix leaves the burst at 200.
+    type: limit
+    url: "http://www.example.com/custom"
+    rate_limit: "4r/s"
+    expect_limited: true
+    rate_exceeded_count: 10
+    cooldown: 0.1
+    config:
+      LIMIT_REQ_URL: "^/not-custom"
+      LIMIT_REQ_RATE: "2r/s"
+      LIMIT_REQ_URL_1: "^/custom"
+      LIMIT_REQ_RATE_1: "4r/s"
+
+  connection_limit_no_block:
+    type: limit
+    url: "http://www.example.com/conn-ok"
+    max_connections: 5
+    connection_exceed_count: 5
+    expect_blocked: false
+    connection_hold: 1.0
+    config:
+      USE_LIMIT_REQ: "no" # differs from root
+      USE_LIMIT_CONN: "yes" # differs from root
+      LIMIT_CONN_MAX_HTTP1: "5"
+
+  connection_limit_blocked:
+    type: limit
+    url: "http://www.example.com/conn-block"
+    max_connections: 3
+    connection_exceed_count: 8
+    expect_blocked: true
+    connection_hold: 1.0
+    config:
+      USE_LIMIT_REQ: "no" # differs from root
+      USE_LIMIT_CONN: "yes" # differs from root
+      LIMIT_CONN_MAX_HTTP1: "3"
+
+  global_limit_triggered:
+    # X-Forwarded-For: random gives every request in the burst a distinct source IP,
+    # so only the aggregate/global counter (not the per-IP one) can explain a 429 here.
+    # Eight requests escape a 1r/m cap only if each occupies a distinct fixed-minute bucket,
+    # crossing seven minute boundaries. Ordinary request jitter cannot create that gap.
+    # The plugin_limit_global_<server>_<minute> counter lives 60s in the instance shared dict and
+    # survives the scheduler-only restart between actions. A future global action using the same
+    # minute window before expiry inherits it.
+    type: limit
+    url: "http://www.example.com/global-test"
+    headers:
+      X-Forwarded-For: "random"
+    rate_limit: "1r/m"
+    expect_limited: true
+    rate_exceeded_count: 8
+    config:
+      USE_LIMIT_REQ: "no" # isolate: per-IP/per-URL limiting must not be the cause
+      USE_LIMIT_REQ_GLOBAL: "yes"
+      LIMIT_REQ_GLOBAL_RATE: "1r/m"
+      USE_REAL_IP: "yes"
+      REAL_IP_FROM: "0.0.0.0/0"
+
+  global_limit_default_off_no_regression:
+    # USE_LIMIT_REQ_GLOBAL is intentionally absent here (root config doesn't set it
+    # either), so it resolves to the plugin default "no" - proves a burst of
+    # distinct-IP traffic is unaffected by this feature when left unconfigured.
+    type: limit
+    url: "http://www.example.com/global-test"
+    headers:
+      X-Forwarded-For: "random"
+    rate_limit: "5r/s"
+    expect_limited: false
+    rate_exceeded_count: 8
+    config:
+      USE_REAL_IP: "yes"
+      REAL_IP_FROM: "0.0.0.0/0"
+
+  global_limit_recovery:
+    type: limit
+    url: "http://www.example.com/global-test"
+    rate_limit: "1r/s"
+    expect_limited: true
+    test_recovery: true
+    recovery_delay: 2.0
+    config:
+      USE_LIMIT_REQ: "no"
+      USE_LIMIT_REQ_GLOBAL: "yes"
+      LIMIT_REQ_GLOBAL_RATE: "1r/s"
+
+config:
+  # Every 429 this spec provokes is bad behavior by default (429 is in
+  # BAD_BEHAVIOR_STATUS_CODES), so the runner earns a ban a few actions in -- and since 1.7
+  # stores bans in the database and restores them with sync-bans, that ban outlives the stack
+  # restart between actions. The later actions then get 403 from the ban instead of 429 from the
+  # limit, and a spec about rate limiting fails on the ban subsystem doing its job. That
+  # persistence is asserted, not just worked around: tests/core/bwcli.yml checks the DB-backed
+  # and runtime ban views agree after a ban/unban, and tests/core/bans.yml (a script, for the
+  # container-lifecycle half no ordinary action can express) restarts the instance across a ban
+  # and proves sync-bans both restores it and replays a revoke the instance missed.
+  USE_BAD_BEHAVIOR: "no"
+  USE_LIMIT_REQ: "yes"
+  LIMIT_REQ_URL: "/"
+  LIMIT_REQ_RATE: "2r/s"
+  USE_LIMIT_CONN: "no"
+  LIMIT_CONN_MAX_HTTP1: "10"
+  LIMIT_CONN_MAX_HTTP2: "100"
+  LIMIT_CONN_MAX_HTTP3: "100"
+  LIMIT_CONN_MAX_STREAM: "10"
+  USE_REVERSE_PROXY: "yes"
+  REVERSE_PROXY_HOST: "http://app1.bw-services:8080"

@@ -7,6 +7,7 @@ El complemento de Inyección de HTML le permite agregar sin problemas código HT
 3.  Si ha configurado la inyección en la cabecera (head), BunkerWeb inserta su código HTML personalizado justo antes de la etiqueta de cierre `</head>`.
 4.  La inserción se realiza automáticamente para todas las páginas HTML servidas por su sitio web.
 5.  Esto le permite agregar scripts, estilos u otros elementos sin modificar el código de su aplicación.
+6.  La página de desafío antibot y las páginas de error de BunkerWeb no se modifican: las genera BunkerWeb y su Content Security Policy bloquearía de todos modos el código inyectado.
 
 ### Cómo usar
 
@@ -23,6 +24,8 @@ Siga estos pasos para configurar y usar la función de Inyección de HTML:
 | ------------- | ----------------- | --------- | -------- | -------------------------------------------------------------------------------------------- |
 | `INJECT_HEAD` |                   | multisite | no       | **Código HTML de la Cabecera:** El código HTML para inyectar antes de la etiqueta `</head>`. |
 | `INJECT_BODY` |                   | multisite | no       | **Código HTML del Cuerpo:** El código HTML para inyectar antes de la etiqueta `</body>`.     |
+
+Los valores de `INJECT_HEAD` e `INJECT_BODY` se insertan como HTML literal: las comillas y las barras invertidas no necesitan escape adicional para NGINX. Si antes añadió `\'` manualmente como solución provisional, elimine la barra invertida. Mantenga el escape que requiera su formato de configuración (como YAML); la expansión de variables de NGINX (`$variable`) no cambia.
 
 !!! tip "Mejores Prácticas"
     - Por razones de rendimiento, coloque los archivos de JavaScript al final del cuerpo para evitar el bloqueo del renderizado.

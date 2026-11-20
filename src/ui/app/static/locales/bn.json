@@ -13,7 +13,8 @@
     "no_changes_detected": "কোনো পরিবর্তন সনাক্ত করা হয়নি।",
     "notice": "বিজ্ঞপ্তি",
     "ping_error": "ইনস্ট্যান্স পিং করার সময় একটি ত্রুটি ঘটেছে।",
-    "readonly_mode": "এই ক্রিয়াটি শুধুমাত্র পঠন মোডে নিষ্ক্রিয় করা হয়েছে।"
+    "readonly_mode": "এই ক্রিয়াটি শুধুমাত্র পঠন মোডে নিষ্ক্রিয় করা হয়েছে।",
+    "configs_import_invalid_file": "অনুগ্রহ করে একটি বৈধ কাস্টম কনফিগারেশন এক্সপোর্ট ফাইল (.json) আপলোড করুন।"
   },
   "aria": {
     "label": {
@@ -49,7 +50,7 @@
     "link": {
       "here": "এখানে"
     },
-    "pro": "PRO সংস্করণে আপগ্রেড করে BunkerWeb-এর সর্বাধিক সুবিধা নিন। আরও তথ্য এবং বিনামূল্যে ট্রায়ালের জন্য <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/?utm_campaign=self&utm_source=banner#pro\">এখানে</a> ক্লিক করুন।",
+    "pro": "PRO সংস্করণে আপগ্রেড করে BunkerWeb-এর সর্বাধিক সুবিধা নিন। আপনার ৩০ দিনের বিনামূল্যের ট্রায়াল শুরু করুন <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=banner\">এখানে</a>: একটি প্ল্যান অর্ডার করুন, তারপর চেকআউটের সময় পেমেন্ট পদ্ধতি হিসেবে “Free 30 Days Trial” রাখুন।",
     "support": "BunkerWeb-এর জন্য প্রিমিয়াম সমর্থন বা কাস্টমাইজড পরামর্শ প্রয়োজন? আমাদের <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/?utm_campaign=self&utm_source=banner#services\">পেশাদার পরিষেবাগুলি</a> দেখুন।"
   },
   "breadcrumb": {
@@ -1154,6 +1155,7 @@
       "title": "প্রো মেয়াদ শেষের তারিখ",
       "unknown": "অজানা মেয়াদ শেষের তারিখ"
     },
+    "free_trial_hint": "একটি প্ল্যান অর্ডার করুন, তারপর চেকআউটের সময় পেমেন্ট পদ্ধতি হিসেবে “Free 30 Days Trial” রাখুন।",
     "force_check": {
       "description": "Force a new check for PRO plugins. This will trigger a new download of the plugins if new versions are available.",
       "title": "Force check"
@@ -1223,6 +1225,9 @@
     }
   },
   "reports": {
+    "bad_behavior_total_requests": "সন্দেহজনক অনুরোধ",
+    "bad_behavior_stored_events": "সংরক্ষিত ইভেন্ট",
+    "bad_behavior_evidence_missing": "নিষেধাজ্ঞার প্রমাণ আর উপলব্ধ নেই।",
     "crowdsec": {
       "source_lapi": "স্থানীয় API সিদ্ধান্ত",
       "source_appsec": "AppSec পরীক্ষা",
@@ -1237,7 +1242,16 @@
     },
     "retention_notice": "রিপোর্টগুলি মেমোরিতে একটি রোলিং বাফারে রাখা হয়: নির্ধারিত সীমায় পৌঁছালে সবচেয়ে পুরোনো এন্ট্রিগুলি মুছে ফেলা হয়। Redis সক্রিয় না থাকলে, BunkerWeb পুনরায় চালু হলে সেগুলিও মুছে যায়।",
     "security_incident": "নিরাপত্তা ঘটনা",
-    "security_report_data": "নিরাপত্তা রিপোর্টের ডেটা"
+    "security_report_data": "নিরাপত্তা রিপোর্টের ডেটা",
+    "bad_behavior_no_details": "এই রিপোর্টের জন্য কোনো খারাপ আচরণের বিবরণ সংগ্রহ করা হয়নি।",
+    "bad_behavior_activity_detected": "খারাপ আচরণের কার্যকলাপ সনাক্ত করা হয়েছে",
+    "bad_behavior_activity_explanation": "এই অনুরোধগুলি খারাপ আচরণের সীমা অতিক্রম করেছে এবং একসাথে গ্রুপ করা হয়েছে।",
+    "bad_behavior_request_label": "অনুরোধ",
+    "bad_behavior_ip": "আইপি ঠিকানা",
+    "bad_behavior_server": "সার্ভার",
+    "bad_behavior_url": "URL",
+    "bad_behavior_captured_at": "সংগ্রহ করা হয়েছে",
+    "bad_behavior_request_id": "অনুরোধ আইডি"
   },
   "scope": {
     "all_services": "সকল পরিষেবা",
@@ -1424,7 +1438,8 @@
     "template_in_use_description": "বর্তমান টেমপ্লেটের বাইরে পরিবর্তন অনুমোদিত নয়। অনুগ্রহ করে বর্তমান টেমপ্লেট ব্যবহার করে পরিবর্তন করুন অথবা অ্যাডভান্সড/র মোডে স্যুইচ করুন।",
     "unique_server_name": "অনন্য সার্ভারের নাম",
     "up": "চালু",
-    "yes": "হ্যাঁ"
+    "yes": "হ্যাঁ",
+    "not_applicable": "প্রযোজ্য নয়"
   },
   "step": {
     "next": "পরবর্তী",
@@ -1721,7 +1736,8 @@
       "show_selected_only": "শুধুমাত্র নির্বাচিত দেখান",
       "stop_instance": "ইনস্ট্যান্স {{hostname}} বন্ধ করুন",
       "unban_ip": "{{ip}} থেকে নিষেধাজ্ঞা সরান",
-      "value_from_global": "গ্লোবাল সেটিংস থেকে মান"
+      "value_from_global": "গ্লোবাল সেটিংস থেকে মান",
+      "update_ban_duration": "ব্যানের সময়কাল আপডেট করুন"
     },
     "cannot_delete_original_ban": "মূল নিষেধাজ্ঞা এন্ট্রি মুছতে পারে না।",
     "cannot_remove_disabled": "অপসারণ করা যাবে না কারণ এক বা একাধিক সেটিংস নিষ্ক্রিয়।",
@@ -1959,7 +1975,8 @@
     "zerossl_api_retry": "ZeroSSL API অনুরোধের পুনরায় চেষ্টার সংখ্যা (0 দিলে পুনরায় চেষ্টা বন্ধ হবে)।",
     "zerossl_api_retry_delay": "ZeroSSL API পুনরায় চেষ্টার মধ্যে সেকেন্ডে বিলম্ব।",
     "zerossl_api_connect_timeout": "ZeroSSL API কলের জন্য সেকেন্ডে সংযোগ টাইমআউট।",
-    "zerossl_api_max_time": "প্রতি ZeroSSL API অনুরোধের জন্য সেকেন্ডে সর্বোচ্চ মোট সময়।"
+    "zerossl_api_max_time": "প্রতি ZeroSSL API অনুরোধের জন্য সেকেন্ডে সর্বোচ্চ মোট সময়।",
+    "readonly_mode": "এই কাজটি শুধুমাত্র পঠন-ক্ষম মোডে অনুমোদিত নয়।"
   },
   "totp": {
     "prompt": "অনুগ্রহ করে আপনার TOTP কোড লিখুন।"
@@ -1982,5 +1999,12 @@
     "required": "{{field}} প্রয়োজন।",
     "service_required_for_ban": "পরিষেবা-নির্দিষ্ট নিষেধাজ্ঞার জন্য একটি পরিষেবা নির্বাচন করতে হবে।",
     "zerossl_email_or_api_key_required": "ZeroSSL-এর জন্য একটি ইমেল বা ZeroSSL API কী-এর যেকোনো একটি প্রয়োজন।"
+  },
+  "plugins": {
+    "multivalue": {
+      "show_less": "কম দেখান",
+      "more_value": "আরও মান",
+      "more_values": "আরও মান"
+    }
   }
 }

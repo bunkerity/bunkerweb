@@ -1,0 +1,6 @@
+return {
+	-- Include bundled libraries here too; only src/deps is outside the measured roots.
+	include = { "src/bw/lua/", "src/common/core/" },
+	exclude = { "src/deps/" },
+	codefromstrings = false,
+}

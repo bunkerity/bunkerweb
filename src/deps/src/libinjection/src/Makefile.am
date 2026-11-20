@@ -3,6 +3,7 @@ LT_REVISION=0
 LT_AGE=0
 
 CPPCHECK=@CPPCHECK@
+CLANG_FORMAT=@CLANG_FORMAT@
 CPPCHECK_FLAGS=--quiet --enable=all --inconclusive --error-exitcode=2 \
         --inline-suppr \
         --suppress=normalCheckLevelMaxBranches \
@@ -15,24 +16,25 @@ fingerprints.txt: make_parens.py
 	./make_parens.py < fingerprints.txt > fingerprints2.txt
 	mv fingerprints2.txt fingerprints.txt
 
-fingerprints:
-	./make_parens.py < fingerprints.txt > fingerprints2.txt
-	mv fingerprints2.txt fingerprints.txt
-.PHONY: fingerprints
-
-sqlparse_data.json: sqlparse_map.py fingerprints
+sqlparse_data.json: sqlparse_map.py fingerprints.txt
 	./sqlparse_map.py > sqlparse_data.json
 
 libinjection_sqli_data.h: sqlparse2c.py sqlparse_data.json
 	./sqlparse2c.py < sqlparse_data.json > libinjection_sqli_data.h
+	@if test -n "$(CLANG_FORMAT)"; then $(CLANG_FORMAT) -i libinjection_sqli_data.h; \
+	else echo "warning: clang-format not found, libinjection_sqli_data.h left unformatted"; fi
 
-check: reader testdriver testspeedxss testspeedsqli teststackxss testerrorhandling
-	@./test-driver.sh test-unit.sh
-	@./test-driver.sh test-samples-sqli-negative.sh
-	@./test-driver.sh test-samples-sqli-positive.sh
-	@./test-driver.sh test-samples-xss-positive.sh
-	@./test-driver.sh teststackxss
-	@./test-driver.sh testerrorhandling
+# `make check` uses automake's parallel test harness; every test emits TAP.
+# Run a subset with: make check TESTS='test-unit.sh'
+TESTS = test-unit.sh test-samples-sqli-negative.sh \
+	test-samples-sqli-positive.sh test-samples-xss-positive.sh \
+	teststackxss testerrorhandling
+LOG_DRIVER = env AM_TAP_AWK='$(AWK)' $(SHELL) $(top_srcdir)/build-aux/tap-driver.sh
+EXTRA_DIST = test-unit.sh test-samples-sqli-negative.sh \
+	test-samples-sqli-positive.sh test-samples-xss-positive.sh
+# Inputs of the libinjection_sqli_data.h rules, plus the valgrind suppressions
+EXTRA_DIST += fingerprints.txt make_parens.py sqlparse_map.py sqlparse2c.py \
+	sqlparse_data.json alpine.supp
 
 analyze:
 	$(RM) /tmp/libinjection-analyze.txt

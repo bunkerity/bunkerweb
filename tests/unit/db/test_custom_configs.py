@@ -1,0 +1,374 @@
+"""DatabaseCustomConfigsMixin — global/per-service NGINX config snippets."""
+
+from unittest.mock import Mock
+
+import pytest
+
+from fixtures.seed import add_service_setting, seed_minimal, seed_multisite
+
+
+@pytest.fixture
+def cdb(db):
+    seed_minimal(db)
+    return db
+
+
+def _template_with_server_http_config(db, template_id="low", *, name="Low", cfg_name="tmplcfg", data="# from-template"):
+    """Create a template carrying one server_http custom config (http is NOT a valid
+    template config type — only the server-scoped MULTISITE_CUSTOM_CONFIG_TYPES are)."""
+    return db.create_template(
+        template_id,
+        name=name,
+        settings={"USE_REVERSE_PROXY": "yes"},
+        steps=[{"title": "S", "settings": ["USE_REVERSE_PROXY"], "configs": [f"server_http/{cfg_name}.conf"]}],
+        configs=[{"type": "server_http", "name": cfg_name, "data": data}],
+    )
+
+
+class TestSaveCustomConfigs:
+    def test_save_and_read_back(self, cdb):
+        assert cdb.save_custom_configs([{"type": "http", "name": "snippet", "data": "# hello", "method": "manual"}], "manual") == ""
+        cfg = cdb.get_custom_config("http", "snippet")
+        assert cfg["data"] == b"# hello"
+        assert cfg["method"] == "manual"
+        assert cfg["is_draft"] is False
+
+    def test_get_custom_configs_list_and_as_dict(self, cdb):
+        cdb.save_custom_configs([{"type": "http", "name": "snippet", "data": "# hi", "method": "manual"}], "manual")
+        listed = cdb.get_custom_configs()
+        assert len(listed) == 1
+        assert listed[0]["type"] == "http" and listed[0]["name"] == "snippet"
+        as_dict = cdb.get_custom_configs(as_dict=True)
+        assert "http_snippet" in as_dict
+
+    def test_type_normalization(self, cdb):
+        # hyphenated/upper type is normalized to the underscore enum form.
+        assert cdb.save_custom_configs([{"type": "Server-Http", "name": "n", "data": "# x", "method": "manual"}], "manual") == ""
+        assert cdb.get_custom_config("server_http", "n")["data"] == b"# x"
+
+    def test_an_empty_payload_with_nothing_to_lose_is_still_a_success(self, cdb):
+        """The guard only fires when there ARE rows to wipe; an empty database is a no-op, not a
+        refusal, or every first boot would report one."""
+        assert cdb.save_custom_configs([], "ui") == ""
+
+    def test_a_method_the_guard_does_not_cover_is_untouched(self, cdb):
+        """Only ui/api/manual carry this guard -- autoconf's empty payload IS a real "wipe them
+        all", because autoconf resends its whole discovered set on every reconcile."""
+        cdb.save_custom_configs([{"type": "http", "name": "x", "data": "# a", "method": "autoconf"}], "autoconf")
+
+        assert cdb.save_custom_configs([], "autoconf") == ""
+        assert cdb.get_custom_configs() == []
+
+    def test_empty_ui_payload_is_data_loss_guarded(self, cdb):
+        cdb.save_custom_configs([{"type": "http", "name": "x", "data": "# a", "method": "ui"}], "ui")
+        # An empty ui payload must NOT wipe existing ui-owned rows...
+        refusal = cdb.save_custom_configs([], "ui")
+        assert len(cdb.get_custom_configs()) == 1
+
+        # ...and it must SAY it refused. This used to return "", which every caller reads as
+        # success: `PUT /configs/bulk` answered 200, the UI flashed "successfully saved" and
+        # `save_config.py` recorded a "custom_configs" change -- for a write it had just refused.
+        assert refusal, "a refused write reported itself as a successful one"
+        assert "ui" in refusal and "empty" in refusal
+        assert "1" in refusal, "the operator is not told how many rows the refusal protected"
+
+
+class TestUpsertCustomConfig:
+    def test_insert_then_update(self, cdb):
+        base = {"type": "http", "name": "c", "data": "# v1", "method": "manual"}
+        assert cdb.upsert_custom_config("http", "c", base) == ""
+        assert cdb.get_custom_config("http", "c")["data"] == b"# v1"
+        # update path replaces data
+        assert cdb.upsert_custom_config("http", "c", {**base, "data": "# v2"}) == ""
+        assert cdb.get_custom_config("http", "c")["data"] == b"# v2"
+
+    def test_new_flag_rejects_existing(self, cdb):
+        base = {"type": "http", "name": "c", "data": "# v1", "method": "manual"}
+        cdb.upsert_custom_config("http", "c", base)
+        assert cdb.upsert_custom_config("http", "c", base, new=True) == "The custom config already exists"
+
+
+class TestGetCustomConfig:
+    def test_missing_returns_empty_dict(self, cdb):
+        assert cdb.get_custom_config("http", "nope") == {}
+
+
+class TestCompatibilityError:
+    def test_non_modsec_crs_ok(self, cdb):
+        assert cdb.get_custom_config_compatibility_error("http", service_id="app1.example.com") == ""
+
+    def test_global_scope_ok(self, cdb):
+        assert cdb.get_custom_config_compatibility_error("modsec_crs", service_id="global") == ""
+
+    def test_modsec_crs_ok_when_global_crs_off(self, cdb):
+        # no USE_MODSECURITY_GLOBAL_CRS configured -> treated as off -> no error
+        assert cdb.get_custom_config_compatibility_error("modsec_crs", service_id="app1.example.com") == ""
+
+    def test_modsec_crs_blocked_when_global_crs_on(self, cdb):
+        from fixtures.seed import add_global_value, add_setting
+
+        add_setting(cdb, "USE_MODSECURITY_GLOBAL_CRS", context="global", regex="^(yes|no)$", default="no")
+        add_global_value(cdb, setting_id="USE_MODSECURITY_GLOBAL_CRS", value="yes")
+        assert cdb.get_custom_config_compatibility_error("modsec_crs", service_id="app1.example.com") != ""
+
+
+class TestSaveExplodedPayload:
+    """The UI/API submit configs in an 'exploded' shape: {"value": data, "exploded": (service_id, type, name)}."""
+
+    def test_exploded_global(self, cdb):
+        # exploded[0] falsy -> global config, no service_id.
+        assert cdb.save_custom_configs([{"value": "# g", "exploded": ("", "http", "glob")}], "ui") == ""
+        cfg = cdb.get_custom_config("http", "glob")
+        assert cfg["data"] == b"# g"
+        assert cfg["service_id"] is None
+        assert cfg["method"] == "ui"
+
+    def test_exploded_service(self, cdb):
+        # exploded[0] truthy and the service exists -> per-service config.
+        assert cdb.save_custom_configs([{"value": "# s", "exploded": ("app1.example.com", "server-http", "svc")}], "ui") == ""
+        cfg = cdb.get_custom_config("server_http", "svc", service_id="app1.example.com")
+        assert cfg["data"] == b"# s"
+        assert cfg["service_id"] == "app1.example.com"
+
+    def test_exploded_unknown_service_reports_message(self, cdb):
+        # exploded[0] points at a missing service -> the not-found message is reported
+        # (the row insert also fails the FK on PG/MariaDB, which appends the integrity error).
+        msg = cdb.save_custom_configs([{"value": "# s", "exploded": ("ghost.example.com", "http", "n")}], "ui")
+        assert "Service ghost.example.com not found" in msg
+
+
+class TestSaveCustomConfigsCrossMethodUpdate:
+    """save_custom_configs deletes only rows owned by the incoming method, then reconciles
+    surviving rows owned by OTHER methods through the compatibility rules."""
+
+    def test_manual_save_updates_surviving_ui_row(self, cdb):
+        cdb.save_custom_configs([{"type": "http", "name": "u", "data": "# ui", "method": "ui"}], "ui")
+        # manual save deletes manual-owned rows only; the ui row survives and is updated in place.
+        assert cdb.save_custom_configs([{"type": "http", "name": "u", "data": "# manual", "method": "manual"}], "manual") == ""
+        assert cdb.get_custom_config("http", "u")["data"] == b"# manual"
+
+    def test_scheduler_save_overwrites_ui_row_method(self, cdb):
+        cdb.save_custom_configs([{"type": "http", "name": "u", "data": "# ui", "method": "ui"}], "ui")
+        # scheduler is compatible-over ui -> data updated AND method reassigned to scheduler.
+        assert cdb.save_custom_configs([{"type": "http", "name": "u", "data": "# sched", "method": "scheduler"}], "scheduler") == ""
+        cfg = cdb.get_custom_config("http", "u")
+        assert cfg["data"] == b"# sched"
+        assert cfg["method"] == "scheduler"
+
+
+class TestAutoconfDisableCleanup:
+    def test_orphan_autoconf_config_marked_draft(self, cdb):
+        cdb.save_custom_configs([{"type": "http", "name": "keep", "data": "# k", "method": "autoconf"}], "autoconf")
+        # disable_cleanup: the orchestrator re-emits only "other"; the no-longer-emitted "keep"
+        # is NOT deleted but flipped to draft so it follows its service.
+        assert cdb.save_custom_configs([{"type": "http", "name": "other", "data": "# o", "method": "autoconf"}], "autoconf", disable_cleanup=True) == ""
+        kept = cdb.get_custom_config("http", "keep")
+        assert kept  # survived the cleanup-disabled save
+        assert kept["is_draft"] is True
+        assert cdb.get_custom_config("http", "other")["is_draft"] is False
+
+
+class TestGetCustomConfigsTemplateMerge:
+    """A service with USE_TEMPLATE inherits the template's custom configs (method='default',
+    template=<id>) unless a real row of the same type/name overrides it."""
+
+    def test_template_config_surfaces_for_service(self, db):
+        seed_multisite(db)
+        assert _template_with_server_http_config(db) == ""
+        add_service_setting(db, service_id="app1.example.com", setting_id="USE_TEMPLATE", value="low")
+        tmpl = [c for c in db.get_custom_configs() if c.get("template") == "low"]
+        assert len(tmpl) == 1
+        assert tmpl[0]["service_id"] == "app1.example.com"
+        assert tmpl[0]["name"] == "tmplcfg"
+        assert tmpl[0]["type"] == "server-http"  # synthesized back to hyphenated form
+        assert tmpl[0]["method"] == "default"
+        assert tmpl[0]["data"] == b"# from-template"
+
+    def test_template_merge_as_dict(self, db):
+        seed_multisite(db)
+        _template_with_server_http_config(db)
+        add_service_setting(db, service_id="app1.example.com", setting_id="USE_TEMPLATE", value="low")
+        cfgs = db.get_custom_configs(as_dict=True)
+        assert "app1.example.com_server-http_tmplcfg" in cfgs
+        assert cfgs["app1.example.com_server-http_tmplcfg"]["template"] == "low"
+
+    def test_real_row_suppresses_template_config(self, db):
+        seed_multisite(db)
+        _template_with_server_http_config(db)
+        add_service_setting(db, service_id="app1.example.com", setting_id="USE_TEMPLATE", value="low")
+        # a real per-service row for the same type/name suppresses the template-provided one.
+        db.save_custom_configs(
+            [{"service_id": "app1.example.com", "type": "server_http", "name": "tmplcfg", "data": "# real", "method": "manual"}],
+            "manual",
+        )
+        matching = [c for c in db.get_custom_configs() if c["name"] == "tmplcfg" and c["service_id"] == "app1.example.com"]
+        assert len(matching) == 1
+        assert matching[0]["template"] is None  # the real row wins
+        assert matching[0]["data"] == b"# real"
+
+    def test_services_sharing_a_template_each_get_its_configs(self, db):
+        """The template is read once and applied to every service that declares it; reading it
+        once must not mean applying it once."""
+        seed_multisite(db)
+        _template_with_server_http_config(db)
+        for service in ("app1.example.com", "app2.example.com"):
+            add_service_setting(db, service_id=service, setting_id="USE_TEMPLATE", value="low")
+
+        inherited = {config["service_id"] for config in db.get_custom_configs() if config.get("template") == "low"}
+
+        assert inherited == {"app1.example.com", "app2.example.com"}
+
+    def test_only_the_use_template_key_names_a_template(self, db):
+        """The merge used to match *any* setting key starting with `<service>_` and take its
+        value as a template id. Every service carries `IS_DRAFT`, so a template whose id happens
+        to equal another setting's value was applied to services that never asked for it — and
+        on a 500-service install the lookup alone cost 287 ms to return nothing."""
+        seed_multisite(db)
+        # `IS_DRAFT` is "no" on every service; name the template after that value.
+        assert _template_with_server_http_config(db, template_id="no", name="No", cfg_name="ghost") == ""
+
+        inherited = [config for config in db.get_custom_configs() if config.get("template")]
+
+        assert inherited == [], f"a service with no USE_TEMPLATE inherited: {inherited}"
+
+
+class TestGetCustomConfigTemplateFallback:
+    """get_custom_config (single) falls back to the service's template when no real row exists."""
+
+    def test_single_config_from_template(self, db):
+        seed_multisite(db)
+        _template_with_server_http_config(db, cfg_name="only", data="# tonly")
+        add_service_setting(db, service_id="app1.example.com", setting_id="USE_TEMPLATE", value="low")
+        cfg = db.get_custom_config("server_http", "only", service_id="app1.example.com")
+        assert cfg["template"] == "low"
+        assert cfg["method"] == "default"
+        assert cfg["data"] == b"# tonly"
+
+    def test_single_config_no_match_returns_empty(self, db):
+        seed_multisite(db)
+        add_service_setting(db, service_id="app1.example.com", setting_id="USE_TEMPLATE", value="low")
+        # USE_TEMPLATE set, but no such template/config row -> {}
+        assert db.get_custom_config("server_http", "missing", service_id="app1.example.com") == {}
+
+
+class TestGetCustomConfigsMultiTemplateMerge:
+    """Custom configs must agree with the settings overlay on LAST-WINS.
+
+    This is the one artefact where last-wins is not free. Shadowing runs through a ``provided``
+    set — the FIRST layer to claim a (service, type, name) keeps it — which is *first*-wins in
+    iteration order, the opposite of the settings overlay (where a later layer overwrites
+    because the earlier value carries method "default"). The layers are therefore walked
+    BACKWARDS so the last declared one claims the key first."""
+
+    def test_single_element_list_unchanged(self, db):
+        """THE ACCEPTANCE BAR for this artefact."""
+        seed_multisite(db)
+        _template_with_server_http_config(db, "base", name="Base", data="# from-base")
+        add_service_setting(db, service_id="app1.example.com", setting_id="USE_TEMPLATE", value="base")
+        matching = [c for c in db.get_custom_configs() if c["name"] == "tmplcfg" and c["service_id"] == "app1.example.com"]
+        assert len(matching) == 1
+        assert matching[0]["data"] == b"# from-base"
+        assert matching[0]["template"] == "base"
+
+    def test_a_real_row_still_shadows_every_layer(self, db):
+        """`provided` is pre-seeded from the real rows before any layer is considered, so the
+        reverse walk must not have disturbed that."""
+        seed_multisite(db)
+        _template_with_server_http_config(db, "base", name="Base", data="# from-base")
+        _template_with_server_http_config(db, "hardening", name="Hardening", data="# from-hardening")
+        add_service_setting(db, service_id="app1.example.com", setting_id="USE_TEMPLATE", value="base hardening")
+        db.save_custom_configs(
+            [{"service_id": "app1.example.com", "type": "server_http", "name": "tmplcfg", "data": "# real", "method": "manual"}],
+            "manual",
+        )
+        matching = [c for c in db.get_custom_configs() if c["name"] == "tmplcfg" and c["service_id"] == "app1.example.com"]
+        assert len(matching) == 1
+        assert matching[0]["template"] is None
+        assert matching[0]["data"] == b"# real"
+
+
+class TestAFailedCommitNeverReadsAsALandedWrite:
+    """The return value of ``save_custom_configs`` is the only thing every caller has to tell a
+    landed write from a refused one, and an EMPTY return is success to all of them. Since lane
+    DEV-3b it also gates ``check_configs_changes``' regeneration, which unlinks the operator's
+    on-disk custom configs -- so a commit failure that stringifies to ``""`` would delete the very
+    edit it failed to store. There is no exception whose text can be trusted to be non-empty."""
+
+    class _SilentDriverError(Exception):
+        """``str()`` is ``""`` — the shape a bare DBAPI error takes when it carries no text."""
+
+    def test_a_commit_failure_that_does_have_text_is_unchanged(self, cdb, monkeypatch):
+        monkeypatch.setattr(cdb._session_factory, "commit", Mock(side_effect=self._SilentDriverError("disk is full")))
+
+        err = cdb.save_custom_configs([{"type": "http", "name": "n", "data": "# x", "method": "manual"}], "manual")
+
+        assert err == "disk is full"
+
+    def test_a_commit_failure_with_no_text_still_reports_a_failure(self, cdb, monkeypatch):
+        monkeypatch.setattr(cdb._session_factory, "commit", Mock(side_effect=self._SilentDriverError()))
+
+        err = cdb.save_custom_configs([{"type": "http", "name": "n", "data": "# x", "method": "manual"}], "manual")
+
+        assert err, "a failed commit reported itself as a successful write"
+        assert err == "_SilentDriverError"
+
+    def test_a_commit_failure_behind_an_advisory_is_not_left_looking_like_one(self, cdb, monkeypatch):
+        """``PUT /configs/bulk`` answers 200 when every line of the message is an advisory. A
+        trailing empty exception used to leave exactly that: the advisory plus a blank line."""
+        monkeypatch.setattr(cdb._session_factory, "commit", Mock(side_effect=self._SilentDriverError()))
+
+        err = cdb.save_custom_configs([{"value": "# x", "exploded": ("nosuch.example.com", "server_http", "n")}], "manual")
+
+        assert err.splitlines() == ["Service nosuch.example.com not found, please check your config", "_SilentDriverError"]
+
+
+class TestIncompatibleMethodIsNoLongerSilent:
+    """The arbitration branch that drops a submission used to say nothing at all.
+
+    ``check_configs_changes`` re-submits every file under ``/etc/bunkerweb/configs`` as ``manual``
+    on boot and on SIGHUP. When the row it lands on was written by ``CUSTOM_CONF_*`` (method
+    ``scheduler``) or by an orchestrator (``autoconf``), ``_methods_are_compatible`` says no and
+    the loop body is skipped: no update, no log, and ``""`` returned -- which every caller reads as
+    success, right before the projection overwrites the operator's file. See ``proof-CC-A.txt``
+    proof 2.
+
+    The line is gated on the checksum, and that gate is load-bearing rather than cosmetic: the
+    same re-submission happens on EVERY boot for EVERY env-origin config, so logging the no-op
+    would put a WARNING per config per boot into an install that changed nothing (AC 6)."""
+
+    @staticmethod
+    def _env_row(cdb):
+        cdb.logger = Mock()
+        assert cdb.save_custom_configs([{"type": "http", "name": "envcfg", "data": "# CREATED BY ENV\n# from env", "method": "scheduler"}], "scheduler") == ""
+        cdb.logger.reset_mock()
+
+    @staticmethod
+    def _resubmit(cdb, content):
+        return cdb.save_custom_configs([{"value": content, "exploded": (None, "http", "envcfg"), "is_draft": False}], "manual")
+
+    def test_an_unchanged_resubmission_stays_silent(self, cdb):
+        self._env_row(cdb)
+
+        assert self._resubmit(cdb, "# CREATED BY ENV\n# from env") == ""
+        cdb.logger.warning.assert_not_called()
+
+    def test_a_dropped_edit_is_named_with_both_methods_and_both_checksums(self, cdb):
+        self._env_row(cdb)
+
+        assert self._resubmit(cdb, "# CREATED BY ENV\n# OPERATOR EDIT") == ""
+        assert cdb.get_custom_config("http", "envcfg")["data"] == b"# CREATED BY ENV\n# from env", "the drop itself is unchanged"
+
+        warnings = [call.args[0] for call in cdb.logger.warning.call_args_list]
+        assert len(warnings) == 1, f"expected exactly one warning, got {warnings}"
+        assert "envcfg" in warnings[0]
+        assert "manual" in warnings[0] and "scheduler" in warnings[0]
+
+    def test_an_autoconf_row_is_covered_too(self, cdb):
+        cdb.logger = Mock()
+        cdb.save_custom_configs([{"type": "http", "name": "acfg", "data": "# from autoconf", "method": "autoconf"}], "autoconf")
+        cdb.logger.reset_mock()
+
+        cdb.save_custom_configs([{"value": "# edited", "exploded": (None, "http", "acfg"), "is_draft": False}], "manual")
+
+        warnings = [call.args[0] for call in cdb.logger.warning.call_args_list]
+        assert len(warnings) == 1 and "acfg" in warnings[0] and "autoconf" in warnings[0]

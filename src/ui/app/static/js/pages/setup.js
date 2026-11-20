@@ -272,6 +272,22 @@ $(document).ready(() => {
   };
 
   /**
+   * Opens the collapsed section (Advanced Settings) that holds the first invalid input of a step, then focuses it.
+   * @param {jQuery} $container - The step container.
+   */
+  const revealAndFocusFirstInvalid = ($container) => {
+    const $firstInvalid = $container.find(".is-invalid").first();
+    $firstInvalid.parents(".collapse:not(.show)").each(function () {
+      $(this).addClass("show");
+      $(`[data-bs-toggle="collapse"][href="#${this.id}"]`).attr(
+        "aria-expanded",
+        "true",
+      );
+    });
+    $firstInvalid.focus();
+  };
+
+  /**
    * Validates all inputs within the current step.
    * @param {jQuery} $currentStepContainer - The container of the current step.
    * @returns {boolean} True if the step is valid, else false.
@@ -333,10 +349,7 @@ $(document).ready(() => {
       }
     });
 
-    if (!isStepValid) {
-      // Focus the first invalid input
-      $currentStepContainer.find(".is-invalid").first().focus();
-    }
+    if (!isStepValid) revealAndFocusFirstInvalid($currentStepContainer);
 
     return isStepValid;
   };
@@ -613,9 +626,13 @@ $(document).ready(() => {
                 $feedback.text(errorMsg);
               }
             }
+            revealAndFocusFirstInvalid($currentStepContainer);
             return;
           }
         }
+
+        // A field marked invalid above must stop the step whatever the DNS check says
+        if (!isStepValid) return;
 
         const result = await checkDNS();
         const modal = $("#modal-confirm-dns");
@@ -868,6 +885,22 @@ $(document).ready(() => {
       var redirect = window.location.href.replace("setup", "login");
     }
 
+    const showSaveError = () => {
+      $("#loadingModal").modal("hide");
+      setTimeout(() => {
+        const feedbackToast = $("#feedback-toast").clone(); // Clone the feedback toast
+        feedbackToast.attr("id", `feedback-toast-${toastNum++}`); // Corrected to set the ID for the failed toast
+        feedbackToast.addClass("border-danger");
+        feedbackToast.find(".toast-header").addClass("text-danger");
+        feedbackToast.find("span").text("Error");
+        feedbackToast
+          .find("div.toast-body")
+          .text("Error while setting up web UI. Please try again.");
+        feedbackToast.appendTo("#feedback-toast-container"); // Ensure the toast is appended to the container
+        feedbackToast.toast("show");
+      }, 400);
+    };
+
     // Submit the form
     fetch(window.location.href, {
       method: "POST",
@@ -879,22 +912,13 @@ $(document).ready(() => {
           setTimeout(() => {
             window.location.href = redirect;
           }, 1000);
+        } else {
+          // A refusal that is not a redirect (a WAF 403, a 413, a 500): keep the typed data and let the user retry
+          showSaveError();
         }
       })
-      .catch((err) => {
-        $("#loadingModal").modal("hide");
-        setTimeout(() => {
-          const feedbackToast = $("#feedback-toast").clone(); // Clone the feedback toast
-          feedbackToast.attr("id", `feedback-toast-${toastNum++}`); // Corrected to set the ID for the failed toast
-          feedbackToast.addClass("border-danger");
-          feedbackToast.find(".toast-header").addClass("text-danger");
-          feedbackToast.find("span").text("Error");
-          feedbackToast
-            .find("div.toast-body")
-            .text("Error while setting up web UI. Please try again.");
-          feedbackToast.appendTo("#feedback-toast-container"); // Ensure the toast is appended to the container
-          feedbackToast.toast("show");
-        }, 400);
+      .catch(() => {
+        showSaveError();
         setTimeout(() => {
           location.reload();
         }, 2500);

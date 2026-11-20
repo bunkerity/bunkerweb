@@ -1,0 +1,9 @@
+map open '{'
+key: 'boolean, true'
+bool: true
+key: 'boolean, false'
+bool: false
+key: 'null'
+null
+map close '}'
+memory leaks:	0

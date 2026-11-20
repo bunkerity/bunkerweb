@@ -116,6 +116,27 @@ local function is_safe_relative_path(p, antibot_uri)
 	if path == antibot_uri then
 		return nil
 	end
+	-- Compare the decoded, normalized path so aliases cannot redirect back to the challenge.
+	path = p:match("^[^?#]+")
+		:gsub("%%(%x%x)", function(hex)
+			return string.char(tonumber(hex, 16))
+		end)
+		:gsub("\\", "/")
+	local segments = {}
+	for segment in path:gmatch("[^/]+") do
+		if segment == ".." then
+			table.remove(segments)
+		elseif segment ~= "." then
+			table.insert(segments, segment)
+		end
+	end
+	local normalized = "/" .. table.concat(segments, "/")
+	if #segments > 0 and (path:sub(-1) == "/" or path:match("/%.%.?$")) then
+		normalized = normalized .. "/"
+	end
+	if normalized == antibot_uri then
+		return nil
+	end
 	return p
 end
 
@@ -193,7 +214,14 @@ function antibot:initialize(ctx)
 	-- Decode lists only once
 	if get_phase() ~= "init" and self.use_antibot ~= "no" then
 		self.lists = {}
-		for _, list in ipairs({ "IGNORE_URI", "IGNORE_IP", "IGNORE_RDNS", "IGNORE_ASN", "IGNORE_USER_AGENT" }) do
+		for _, list in ipairs({
+			"IGNORE_URI",
+			"INCLUDE_URI",
+			"IGNORE_IP",
+			"IGNORE_RDNS",
+			"IGNORE_ASN",
+			"IGNORE_USER_AGENT",
+		}) do
 			self.lists[list] = {}
 			local list_var = self.variables["ANTIBOT_" .. list]
 			if list_var then
@@ -418,14 +446,17 @@ function antibot:access()
 		for k, _ in pairs(checks) do
 			-- Skip URI ignore checks if current path is the challenge URI
 			if not already_cached[k] and not (k == "URI" and self.ctx.bw.uri == self.variables["ANTIBOT_URI"]) then
-				local ok, ignored = self:is_ignored(k)
+				local ok, ignored, incomplete = self:is_ignored(k)
 				if ok == nil then
 					self.logger:log(ERR, "error while checking if " .. k .. " is ignored : " .. ignored)
 				else
-					-- luacheck: ignore 421
-					local ok, err = self:add_to_cache(self:kind_to_ele(k), ignored)
-					if not ok then
-						self.logger:log(ERR, "error while adding element to cache : " .. err)
+					-- A negative verdict taken without the rDNS check (resolver error) is not cached: the next request retries it
+					if ignored ~= "ko" or not incomplete then
+						-- luacheck: ignore 421
+						local ok, err = self:add_to_cache(self:kind_to_ele(k), ignored)
+						if not ok then
+							self.logger:log(ERR, "error while adding element to cache : " .. err)
+						end
 					end
 					if ignored ~= "ko" then
 						return self:ret(true, k .. " is ignored (info : " .. ignored .. ")")
@@ -438,7 +469,8 @@ function antibot:access()
 	-- Get session data
 	local session, err = get_session(self.ctx)
 	if not session then
-		return self:ret(false, "can't get session : " .. err)
+		-- Fail closed: without a status the dispatcher would let the request through unchallenged.
+		return self:ret(false, "can't get session : " .. err, HTTP_INTERNAL_SERVER_ERROR)
 	end
 	self.session = session
 	self.session_data = session:get("antibot") or {}
@@ -756,7 +788,7 @@ function antibot:check_challenge()
 			return false, "missing or invalid challenge arg", nil
 		end
 		if self.session_data.captcha ~= args["captcha"] then
-			return false, "wrong value, expected " .. self.session_data.captcha, nil
+			return false, "wrong value", nil
 		end
 		self.session_data.resolved = true
 		self.session_data.time_valid = now()
@@ -1076,10 +1108,15 @@ function antibot:get_original_uri()
 	local antibot_uri = self.variables["ANTIBOT_URI"]
 	if self.ctx.bw.uri == antibot_uri then
 		-- Prepared at the challenge endpoint: recover the target from the ?next= hint.
-		local args = ngx.req.get_uri_args()
-		local next_arg = args and args["next"]
-		if type(next_arg) == "table" then
-			next_arg = next_arg[1]
+		local next_arg = first_value(ngx.req.get_uri_args()["next"])
+		-- The challenge form POSTs without ?next=, so a re-prepare on a failed solve reads the hidden field.
+		if not next_arg and self.ctx.bw.request_method == "POST" then
+			ngx.req.read_body()
+			next_arg = first_value((ngx.req.get_post_args(8) or {})["next"])
+			local session_uri = is_safe_relative_path(self.session_data.original_uri, antibot_uri)
+			if session_uri and next_arg and path_only(session_uri) == path_only(next_arg) then
+				next_arg = session_uri
+			end
 		end
 		return is_safe_relative_path(next_arg, antibot_uri) or "/"
 	end
@@ -1237,6 +1274,7 @@ function antibot:is_ignored_ip()
 	end
 
 	-- Check if rDNS is needed
+	local rdns_failed = false
 	local check_rdns = self.lists["IGNORE_RDNS"] and #self.lists["IGNORE_RDNS"] > 0
 	if self.variables["ANTIBOT_RDNS_GLOBAL"] == "yes" and not self.ctx.bw.ip_is_global then
 		check_rdns = false
@@ -1258,6 +1296,7 @@ function antibot:is_ignored_ip()
 				return true, "rDNS " .. rdns_suffix
 			end
 		else
+			rdns_failed = true
 			self.logger:log(ERR, "error while getting rdns : " .. err)
 		end
 	end
@@ -1276,21 +1315,40 @@ function antibot:is_ignored_ip()
 		end
 	end
 
-	-- Not ignored
-	return false, "ko"
+	-- Not ignored (third value: the rDNS check could not run)
+	return false, "ko", rdns_failed
 end
 
 function antibot:is_ignored_uri()
 	-- Check if URI is in ignore list
+	-- Only the normalized path is matched, alone and joined with the query string : the raw request
+	-- path (//x, /%78, /./x) is routed like the normalized one but must not slip past a pattern.
 	local uri = self.ctx.bw.uri
-	local request_uri = self.ctx.bw.request_uri
+	local query = (self.ctx.bw.request_uri or ""):match("%?(.*)$")
+	local uri_query = query and (uri .. "?" .. query)
 	for _, ignore_uri in ipairs(self.lists["IGNORE_URI"]) do
 		if regex_match(uri, ignore_uri, nil, "ANTIBOT_IGNORE_URI") then
 			return true, "URI " .. ignore_uri
 		end
-		if request_uri and request_uri ~= uri and regex_match(request_uri, ignore_uri, nil, "ANTIBOT_IGNORE_URI") then
+		if uri_query and regex_match(uri_query, ignore_uri, nil, "ANTIBOT_IGNORE_URI") then
 			return true, "URI " .. ignore_uri
 		end
+	end
+	if #self.lists["INCLUDE_URI"] > 0 then
+		for _, include_uri in ipairs(self.lists["INCLUDE_URI"]) do
+			local matched, err = regex_match(uri, include_uri, nil, "ANTIBOT_INCLUDE_URI")
+			-- Fail closed on regex errors; the shared helper already logs and throttles bad patterns.
+			if matched or err then
+				return false, "ko"
+			end
+			if uri_query then
+				matched, err = regex_match(uri_query, include_uri, nil, "ANTIBOT_INCLUDE_URI")
+				if matched or err then
+					return false, "ko"
+				end
+			end
+		end
+		return true, "URI not included in ANTIBOT_INCLUDE_URI"
 	end
 	-- URI is not ignored
 	return false, "ko"

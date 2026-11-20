@@ -1,0 +1,20 @@
+services:
+  app1:
+    image: nginxdemos/nginx-hello@sha256:37bc2539e8fcae31ae4a7be0a40454ae3d9077d3bdc9791bb19ee1134b35ad92
+    container_name: app1
+    ports:
+      - "8080:8080"
+    dns:
+      - 10.20.30.20
+    restart: "unless-stopped"
+    networks:
+      bw-services:
+        ipv4_address: 192.168.0.254
+
+networks:
+  bw-services:
+    name: bw-services
+    ipam:
+      driver: default
+      config:
+        - subnet: 192.168.0.0/24

@@ -1,6 +1,6 @@
 ZLIB DATA COMPRESSION LIBRARY
 
-zlib 1.3.2 is a general purpose data compression library.  All the code is
+zlib 1.4 is a general purpose data compression library.  All the code is
 thread safe.  The data format used by the zlib library is described by RFCs
 (Request for Comments) 1950 to 1952 in the files
 https://datatracker.ietf.org/doc/html/rfc1951 (zlib format), rfc1951.txt
@@ -22,7 +22,7 @@ asking for help.
 
 Manifest:
 
-The package zlib-1.3.2-win32-x86.zip will contain the following files:
+The package zlib-1.4-win32-x86.zip will contain the following files:
 
   README-WIN32.txt This document
   ChangeLog        Changes since previous zlib packages

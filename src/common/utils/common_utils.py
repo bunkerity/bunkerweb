@@ -10,6 +10,7 @@ from json import loads as json_loads
 import os
 from os import (
     O_CREAT,
+    O_RDONLY,
     O_RDWR,
     close as os_close,
     ftruncate,
@@ -42,8 +43,60 @@ import logging
 PLUGIN_TAR_COMPRESS_LEVEL: int = 3
 # Underscores are accepted because Docker/internal DNS commonly uses them in container names.
 _HOSTNAME_LABEL_RX = re_compile(r"^(?!-)[A-Za-z0-9_-]{1,63}(?<!-)$")
-_DURATION_RX = re_compile(r"^(\d+(?:\.\d+)?)(ms|[smhdwMy])?$")
+_DURATION_RX = re_compile(r"^([0-9]+(?:\.[0-9]+)?)(ms|[smhdwMy])?$")
 _DURATION_UNITS_MS = {"ms": 1, "s": 1000, "m": 60000, "h": 3600000, "d": 86400000, "w": 604800000, "M": 2592000000, "y": 31536000000}
+
+# Plugins feature-detect the job-cache restriction with `try: from common_utils import SENSITIVE_JOB_CACHE_SUPPORTED`.
+# Published only while both the API and the UI enforce it.
+SENSITIVE_JOB_CACHE_SUPPORTED: bool = True
+# Core entries that hold keys or credentials under names that cannot be renamed (readers and restore paths depend on
+# them), keyed by (plugin id, job name). Plugin-scoped on purpose: `key.pem` is public material for other plugins.
+_SENSITIVE_CORE_JOB_CACHE_RX = {
+    ("customcert", "custom-cert"): re_compile(r"key\.pem"),
+    ("selfsigned", "self-signed"): re_compile(r"key\.pem"),
+    ("misc", "default-server-cert"): re_compile(r"default-server-cert\.key"),
+    ("jobs", "api-server-cert"): re_compile(r"api-server-cert\.key"),
+    ("letsencrypt", "certbot-new"): re_compile(r"credentials_[0-9a-f]{12}\.[a-z]+|folder:/var/cache/bunkerweb/letsencrypt/etc\.tgz"),
+    ("letsencrypt", "certbot-renew"): re_compile(r"folder:/var/cache/bunkerweb/letsencrypt/etc\.tgz"),
+    ("crowdsec", "crowdsec-conf"): re_compile(r"crowdsec\.conf"),
+    # Archive of config, custom configs and the whole job cache (every key above included). Every name of the job, not only
+    # today's `folder:/var/tmp/bunkerweb/failover.tgz`, so a changed FAILOVER_PATH cannot reopen it.
+    ("jobs", "failover-backup"): re_compile(r"(?s).*"),
+    # Upstream mTLS client key, stored under the bare name (the service is a separate column). The CA, certificate and CRL are public.
+    ("reverseproxy", "trusted-cert"): re_compile(r"client-key\.pem"),
+    ("grpc", "grpc-trusted-cert"): re_compile(r"client-key\.pem"),
+}
+
+
+def is_sensitive_job_cache_file(file_name: str, plugin_id: str = "", job_name: str = "") -> bool:
+    """Tell whether a stored job-cache name holds secret material that only administrators may read.
+
+    ``file_name`` is the stored name, already normalised by the caller (never a raw URL token). The convention is the
+    final slash-separated component, minus at most one trailing ``.tgz``, being exactly ``secret`` or ending with
+    ``.secret``; it is case-sensitive. The core mapping applies when ``plugin_id`` and ``job_name`` identify one of its
+    entries. Its keys are compared case-insensitively because a database collation may match them that way.
+    """
+    if not isinstance(file_name, str):
+        return False
+    base = file_name.rsplit("/", 1)[-1].removesuffix(".tgz")
+    if base == "secret" or base.endswith(".secret"):
+        return True
+    pattern = _SENSITIVE_CORE_JOB_CACHE_RX.get((plugin_id.lower(), job_name.lower()))
+    return bool(pattern and pattern.fullmatch(file_name.lower()))
+
+
+def has_embedded_newline(value: str, setting_type: Optional[str]) -> bool:
+    """Tell whether a setting value carries a newline that would split it into several settings.
+
+    variables.env is line-oriented ("KEY=VALUE\\n" per setting), so a value with its own newline
+    defines a second setting when the file is read back. Settings of type "file" hold PEM data and
+    are exempt, and trailing newlines stay valid because a Kubernetes ConfigMap block scalar always
+    leaves one.
+    """
+    if setting_type == "file":
+        return False
+    stripped = value.rstrip("\r\n")
+    return "\n" in stripped or "\r" in stripped
 
 
 def parse_duration(value: Any, default_unit: str = "s") -> Union[int, float]:
@@ -325,6 +378,10 @@ def plugin_tar_filter(tarinfo):
         if p.name in _EXCLUDED_FILE_NAMES:
             return None
         tarinfo.mtime = 0
+        # Extraction drops group/other write and ignores directory modes.
+        tarinfo.mode &= ~0o022
+        if tarinfo.isdir():
+            tarinfo.mode = 0o755
         tarinfo.uid = 0
         tarinfo.gid = 0
         tarinfo.uname = "root"
@@ -519,6 +576,23 @@ def _verify_tar_tree(path, links, destination, members):
         raise ValueError(f"Tar member {relative!r} could not be verified: {error}") from error
 
 
+# Local CRS, PRO and backup archives fit with at least 5x byte and 45x member headroom.
+MAX_ARCHIVE_EXTRACTED_BYTES = 1 << 30  # 1 GiB
+MAX_ARCHIVE_MEMBERS = 50_000
+
+
+def _enforce_archive_budget(kind: str, sizes) -> None:
+    """Check declared expansion before extraction writes any files."""
+    count = total = 0
+    for size in sizes:
+        count += 1
+        total += size
+        if count > MAX_ARCHIVE_MEMBERS:
+            raise ValueError(f"{kind} archive has more than {MAX_ARCHIVE_MEMBERS} members")
+        if total > MAX_ARCHIVE_EXTRACTED_BYTES:
+            raise ValueError(f"{kind} archive expands to more than {MAX_ARCHIVE_EXTRACTED_BYTES} bytes")
+
+
 def safe_tar_extractall(tar, path, *, links="none", **kwargs):
     """Extract a tar archive with runtime-independent path and link containment checks."""
     if links not in ("none", "contained"):
@@ -532,6 +606,7 @@ def safe_tar_extractall(tar, path, *, links="none", **kwargs):
     if kwargs:
         name = next(iter(kwargs))
         raise TypeError(f"safe_tar_extractall() got an unexpected keyword argument {name!r}")
+    _enforce_archive_budget("Tar", (member.size if member.isreg() else 0 for member in members))
     _validate_tar_members(members, links=links)
 
     destination = os.path.realpath(path)
@@ -601,8 +676,10 @@ def safe_tar_extractall(tar, path, *, links="none", **kwargs):
             raise ValueError(f"Tar member {member.name!r} could not be finalized: {error}") from error
 
 
-def safe_zip_extractall(zf, path):
-    """Extract a zip archive safely, rejecting members with absolute paths or path traversal."""
+def safe_zip_extractall(zf, path, *, capped=True):
+    """Extract a zip safely, validating paths and optionally enforcing the expansion budget."""
+    if capped:
+        _enforce_archive_budget("Zip", (info.file_size for info in zf.infolist()))
     dest = Path(path).resolve()
     for member in zf.namelist():
         member_path = (dest / member).resolve()
@@ -645,7 +722,11 @@ def acquire_db_lock(path: Path, timeout: float = 30.0) -> int:
     no dead-owner reaper is needed here.
     """
     path.parent.mkdir(parents=True, exist_ok=True)
-    fd = os_open(str(path), O_RDWR | O_CREAT, 0o600)
+    try:
+        fd = os_open(str(path), O_RDWR | O_CREAT, 0o644)
+    except PermissionError:
+        # bwcli may create the file as root; flock needs no write access.
+        fd = os_open(str(path), O_RDONLY)
     deadline = monotonic() + timeout
     while True:
         try:
@@ -743,7 +824,7 @@ def pick_latest_line_release(releases: List[Dict[str, Any]], current_version: st
 
     best = best_version = overall = overall_version = None
     for release in releases:
-        if release.get("prerelease") or release.get("draft"):
+        if not isinstance(release, dict) or release.get("prerelease") or release.get("draft"):
             continue
         try:
             version = Version(normalize_bunkerweb_version(release["tag_name"]))
@@ -799,6 +880,14 @@ def shared_redis_pool_size() -> int:
     # + 8 for CONFIG_TASKS_EXECUTOR and PAGE_TASKS_EXECUTOR, doubled for short overlaps
     # (a thread holding a connection while another is checked out), floored at 32.
     return max(32, (max(threads, 1) + 8) * 2)
+
+
+def parse_redis_endpoint(value: str, default_port: int = 6379) -> tuple[str, int]:
+    """Return a bare host and port for Redis, Sentinel or Cluster settings."""
+    scheme, host, port = parse_host(value)
+    if scheme or "%" in host:
+        raise ValueError(f"Invalid Redis endpoint: {value}")
+    return host, port if port is not None else default_port
 
 
 def get_redis_client(
@@ -881,9 +970,17 @@ def get_redis_client(
         redis_timeout = 1000.0
         redis_keepalive_pool = 10
 
-    # Process sentinel hosts if provided as string
-    if isinstance(redis_sentinel_hosts, str):
-        redis_sentinel_hosts = [tuple(host.split(":", 1)) if ":" in host else (host, "26379") for host in redis_sentinel_hosts.split() if host]
+    try:
+        if redis_host and not redis_sentinel_hosts and not redis_cluster_nodes:
+            redis_host = parse_redis_endpoint(redis_host, redis_port)[0]
+        if isinstance(redis_sentinel_hosts, str):
+            redis_sentinel_hosts = [parse_redis_endpoint(host, 26379) for host in redis_sentinel_hosts.split()]
+        else:
+            redis_sentinel_hosts = [(parse_redis_endpoint(host)[0], int(port)) for host, port in redis_sentinel_hosts]
+    except ValueError as e:
+        if logger:
+            logger.error(f"Invalid Redis endpoint: {e}")
+        return None
 
     # Every connection parameter except the logger, so a configuration change simply
     # produces a different key.
@@ -896,7 +993,7 @@ def get_redis_client(
         redis_ssl_verify,
         redis_username,
         redis_password,
-        tuple(tuple(host) for host in redis_sentinel_hosts),
+        tuple(redis_sentinel_hosts),
         redis_sentinel_username,
         redis_sentinel_password,
         redis_sentinel_master,
@@ -943,13 +1040,8 @@ def get_redis_client(
                 logger.info(f"Connecting to Redis Cluster: {redis_cluster_nodes}")
             startup_nodes = []
             for node in redis_cluster_nodes.split():
-                if node.startswith("[") and "]:" in node:
-                    host, _, port = node[1:].partition("]:")
-                elif node.count(":") == 1:
-                    host, _, port = node.partition(":")
-                else:
-                    host, port = node, "6379"
-                startup_nodes.append(ClusterNode(host, int(port)))
+                host, port = parse_redis_endpoint(node)
+                startup_nodes.append(ClusterNode(host, port))
             redis_client = RedisCluster(
                 startup_nodes=startup_nodes,
                 username=redis_username,
@@ -967,10 +1059,20 @@ def get_redis_client(
             if logger:
                 logger.info(f"Connecting to Redis Sentinel cluster: {redis_sentinel_hosts}")
 
+            sentinel_kwargs = {
+                "ssl": redis_ssl,
+                "socket_timeout": redis_timeout / 1000,
+                "socket_connect_timeout": redis_timeout / 1000,
+                "socket_keepalive": True,
+            } | ssl_kwargs
+            if redis_sentinel_username:
+                sentinel_kwargs["username"] = redis_sentinel_username
+            if redis_sentinel_password:
+                sentinel_kwargs["password"] = redis_sentinel_password
+
             sentinel = Sentinel(
                 redis_sentinel_hosts,
-                username=redis_sentinel_username,
-                password=redis_sentinel_password,
+                sentinel_kwargs=sentinel_kwargs,
                 ssl=redis_ssl,
                 socket_timeout=redis_timeout / 1000,
                 socket_connect_timeout=redis_timeout / 1000,
@@ -1088,7 +1190,9 @@ def _json_select(node: Any, conditions: List[Tuple[str, str]], keys: Set[str]) -
 def _json_filtered_strings(documents: List[Any], url_filter: str) -> Iterator[str]:
     conditions: List[Tuple[str, str]] = []
     keys: Set[str] = set()
-    for term in filter(None, url_filter.split("&")):
+    for term in url_filter.split("&") if url_filter else ():
+        if not term:
+            return iter(())
         key, sep, wanted = term.partition("=")
         if sep:
             conditions.append((unquote(key), unquote(wanted)))

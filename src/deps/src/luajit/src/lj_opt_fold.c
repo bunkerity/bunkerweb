@@ -180,7 +180,10 @@ LJFOLDF(kfold_numarith)
 {
   lua_Number a = knumleft;
   lua_Number b = knumright;
-  lua_Number y = lj_vm_foldarith(a, b, fins->o - IR_ADD);
+  lua_Number y;
+  if (fins->o == IR_LDEXP && !lj_num2int_ok(b))
+    return NEXTFOLD;
+  y = lj_vm_foldarith(a, b, fins->o - IR_ADD);
   return lj_ir_knum(J, y);
 }
 

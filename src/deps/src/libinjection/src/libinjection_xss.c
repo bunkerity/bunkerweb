@@ -99,7 +99,7 @@ static int html_decode_char_at(const char *src, size_t len, size_t *consumed) {
         return '&';
     }
 
-    // if there's a hex prefix
+    /* if there's a hex prefix */
     if (IS_HEX_ENTITY_PREFIX(src)) {
         ch = (unsigned char)(*(src + 3));
         ch = gsHexDecodeMap[ch];
@@ -994,13 +994,13 @@ static attribute_t is_black_attr(const char *s, size_t len) {
 
         /* JavaScript on.* event handlers */
         if ((s[0] == 'o' || s[0] == 'O') && (s[1] == 'n' || s[1] == 'N')) {
-            black = BLACKATTREVENT;
             const char *s_without_on =
-                &s[2]; // start comparing from the third char
-            size_t s_without_on_len = len - 2; // temporary length variable
+                &s[2]; /* start comparing from the third char */
+            size_t s_without_on_len = len - 2; /* temporary length variable */
+            black = BLACKATTREVENT;
             while (black->name != NULL) {
                 size_t black_name_len = strlen(black->name);
-                // determine the maximum length to compare
+                /* determine the maximum length to compare */
                 size_t max_len = (s_without_on_len < black_name_len)
                                      ? s_without_on_len
                                      : black_name_len;

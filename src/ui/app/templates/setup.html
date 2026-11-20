@@ -58,9 +58,10 @@
                                    aria-pressed="true"
                                    href="https://panel.bunkerweb.io/store/support?utm_campaign=self&utm_source=ui"
                                    target="_blank"
-                                   rel="noopener">
-                                    <span class="bx bx-help-circle me-0 me-md-2"></span>
-                                    <span class="d-none d-md-inline" data-i18n="button.need_help">Need Help?</span>
+                                   rel="noopener"
+                                   aria-labelledby="setup-need-help-label">
+                                    <span class="bx bx-help-circle me-0 me-md-2" aria-hidden="true"></span>
+                                    <span id="setup-need-help-label" class="d-none d-md-inline" data-i18n="button.need_help">Need Help?</span>
                                 </a>
                             </li>
                             <li class="position-relative">
@@ -70,21 +71,23 @@
                                         aria-pressed="true"
                                         data-bs-toggle="offcanvas"
                                         data-bs-target="#side-offcanvas-news"
-                                        aria-controls="side-offcanvas-news">
+                                        aria-controls="side-offcanvas-news"
+                                        aria-labelledby="setup-news-label">
                                     <span class="bx bx-news me-0 me-md-2"></span>
-                                    <span class="d-none d-md-inline" data-i18n="button.news">News</span>
+                                    <span id="setup-news-label" class="d-none d-md-inline" data-i18n="button.news">News</span>
                                 </button>
                             </li>
                         </ul>
                     </div>
                 </div>
-                <div class="authentication-wrapper authentication-basic container-p-y">
+                <div class="authentication-wrapper authentication-basic container-p-y" role="main">
                     <div class="authentication-inner w-100">
                         <!-- Setup -->
                         <div class="card px-sm-6 px-0">
                             <div class="card-header d-flex justify-content-between align-items-center mw-100">
                                 <div class="pt-1">
-                                    <h4 class="card-title d-inline border fw-bold p-2 don-jose"
+                                    <h4 role="heading" aria-level="1"
+                                        class="card-title d-inline border fw-bold p-2 don-jose"
                                         data-i18n="setup.title">Setup Wizard</h4>
                                     <p class="card-subtitle text-muted text-truncate mt-3"
                                        data-i18n="setup.subtitle">Follow the steps to complete the setup wizard.</p>
@@ -340,7 +343,7 @@
                                                        value="{{ server_name }}"
                                                        class="form-control plugin-setting mt-1"
                                                        aria-labelledby="label-SERVER_NAME"
-                                                       pattern="{{ server_name_setting['regex'] }}"
+                                                       pattern="{{ server_name_setting['regex'] | v_safe_pattern }}"
                                                        required />
                                             </div>
                                             <h6 class="mt-2 mb-2 fw-bold"
@@ -490,7 +493,7 @@
                                                            value="{{ email_lets_encrypt }}"
                                                            class="form-control plugin-setting mt-1"
                                                            aria-labelledby="label-EMAIL_LETS_ENCRYPT"
-                                                           pattern="{{ plugins_settings.get('EMAIL_LETS_ENCRYPT', {'regex': '^.*$'})['regex'] }}" />
+                                                           pattern="{{ plugins_settings.get('EMAIL_LETS_ENCRYPT', {'regex': '^.*$'})['regex'] | v_safe_pattern }}" />
                                                 </div>
                                                 <div class="col-12 pb-3">
                                                     <div class="d-flex justify-content-between align-items-center">
@@ -645,7 +648,7 @@
                                                                            value="{{ lets_encrypt_zerossl_api_key }}"
                                                                            class="form-control plugin-setting mt-1"
                                                                            aria-labelledby="label-LETS_ENCRYPT_ZEROSSL_API_KEY"
-                                                                           pattern="{{ plugins_settings.get('LETS_ENCRYPT_ZEROSSL_API_KEY', {'regex': '^.*$'})['regex'] }}" />
+                                                                           pattern="{{ plugins_settings.get('LETS_ENCRYPT_ZEROSSL_API_KEY', {'regex': '^.*$'})['regex'] | v_safe_pattern }}" />
                                                                     <small class="text-muted d-block mt-1"
                                                                            data-i18n="setup.step2.lets_encrypt.zerossl_api_key_hint">If empty, ZeroSSL will use the configured email for account registration.</small>
                                                                 </div>
@@ -682,7 +685,7 @@
                                                                            value="{{ lets_encrypt_zerossl_api_retry }}"
                                                                            class="form-control plugin-setting mt-1"
                                                                            aria-labelledby="label-LETS_ENCRYPT_ZEROSSL_API_RETRY"
-                                                                           pattern="{{ plugins_settings.get('LETS_ENCRYPT_ZEROSSL_API_RETRY', {'regex': '^\\d+$'})['regex'] }}" />
+                                                                           pattern="{{ plugins_settings.get('LETS_ENCRYPT_ZEROSSL_API_RETRY', {'regex': '^\\d+$'})['regex'] | v_safe_pattern }}" />
                                                                 </div>
                                                                 <div class="col-sm-6 col-md-3 pb-3">
                                                                     <div class="d-flex justify-content-between align-items-center">
@@ -716,7 +719,7 @@
                                                                            value="{{ lets_encrypt_zerossl_api_retry_delay }}"
                                                                            class="form-control plugin-setting mt-1"
                                                                            aria-labelledby="label-LETS_ENCRYPT_ZEROSSL_API_RETRY_DELAY"
-                                                                           pattern="{{ plugins_settings.get('LETS_ENCRYPT_ZEROSSL_API_RETRY_DELAY', {'regex': '^\\d+(ms?|[shdwMy])?$'})['regex'] }}" />
+                                                                           pattern="{{ plugins_settings.get('LETS_ENCRYPT_ZEROSSL_API_RETRY_DELAY', {'regex': '^\\d+(ms?|[shdwMy])?$'})['regex'] | v_safe_pattern }}" />
                                                                 </div>
                                                                 <div class="col-sm-6 col-md-3 pb-3">
                                                                     <div class="d-flex justify-content-between align-items-center">
@@ -750,7 +753,7 @@
                                                                            value="{{ lets_encrypt_zerossl_api_connect_timeout }}"
                                                                            class="form-control plugin-setting mt-1"
                                                                            aria-labelledby="label-LETS_ENCRYPT_ZEROSSL_API_CONNECT_TIMEOUT"
-                                                                           pattern="{{ plugins_settings.get('LETS_ENCRYPT_ZEROSSL_API_CONNECT_TIMEOUT', {'regex': '^[1-9]\\d*(ms?|[shdwMy])?$'})['regex'] }}" />
+                                                                           pattern="{{ plugins_settings.get('LETS_ENCRYPT_ZEROSSL_API_CONNECT_TIMEOUT', {'regex': '^[1-9]\\d*(ms?|[shdwMy])?$'})['regex'] | v_safe_pattern }}" />
                                                                 </div>
                                                                 <div class="col-sm-6 col-md-3 pb-3">
                                                                     <div class="d-flex justify-content-between align-items-center">
@@ -784,7 +787,7 @@
                                                                            value="{{ lets_encrypt_zerossl_api_max_time }}"
                                                                            class="form-control plugin-setting mt-1"
                                                                            aria-labelledby="label-LETS_ENCRYPT_ZEROSSL_API_MAX_TIME"
-                                                                           pattern="{{ plugins_settings.get('LETS_ENCRYPT_ZEROSSL_API_MAX_TIME', {'regex': '^[1-9]\\d*(ms?|[shdwMy])?$'})['regex'] }}" />
+                                                                           pattern="{{ plugins_settings.get('LETS_ENCRYPT_ZEROSSL_API_MAX_TIME', {'regex': '^[1-9]\\d*(ms?|[shdwMy])?$'})['regex'] | v_safe_pattern }}" />
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -877,6 +880,7 @@
                                                             "godaddy",
                                                             "google",
                                                             "hetzner",
+                                                            "hosttech",
                                                             "infomaniak",
                                                             "ionos",
                                                             "linode",
@@ -970,7 +974,7 @@
                                                            value="{{ lets_encrypt_custom_profile }}"
                                                            class="form-control plugin-setting mt-1"
                                                            aria-labelledby="label-LETS_ENCRYPT_CUSTOM_PROFILE"
-                                                           pattern="{{ plugins_settings.get('LETS_ENCRYPT_CUSTOM_PROFILE', {'regex': '^.*$'})['regex'] }}" />
+                                                           pattern="{{ plugins_settings.get('LETS_ENCRYPT_CUSTOM_PROFILE', {'regex': '^.*$'})['regex'] | v_safe_pattern }}" />
                                                 </div>
                                                 <div class="col-sm-6 col-md-4 pb-3"
                                                      data-le-field="dns-propagation"
@@ -1006,7 +1010,7 @@
                                                            value="{{ lets_encrypt_dns_propagation }}"
                                                            class="form-control plugin-setting mt-1"
                                                            aria-labelledby="label-LETS_ENCRYPT_DNS_PROPAGATION"
-                                                           pattern="{{ plugins_settings.get('LETS_ENCRYPT_DNS_PROPAGATION', {'regex': '^(default|\\d+)$'})['regex'] }}"
+                                                           pattern="{{ plugins_settings.get('LETS_ENCRYPT_DNS_PROPAGATION', {'regex': '^(default|\\d+)$'})['regex'] | v_safe_pattern }}"
                                                            {% if lets_encrypt_challenge == 'http' %}disabled{% endif %} />
                                                 </div>
                                                 <div class="col-12 pb-3"
@@ -1081,7 +1085,7 @@
                                                                    value="{{ ui_host }}"
                                                                    class="form-control plugin-setting mt-1"
                                                                    aria-labelledby="label-REVERSE_PROXY_HOST"
-                                                                   pattern="{{ plugins_settings.get('REVERSE_PROXY_HOST', {'regex': '^.+$'})['regex'] }}"
+                                                                   pattern="{{ plugins_settings.get('REVERSE_PROXY_HOST', {'regex': '^.+$'})['regex'] | v_safe_pattern }}"
                                                                    required />
                                                         </div>
                                                         <div class="col-12 col-md-6 pb-6">
@@ -1114,7 +1118,7 @@
                                                                    value="{{ reverse_proxy_url_setting['default'] }}"
                                                                    class="form-control plugin-setting mt-1"
                                                                    aria-labelledby="label-REVERSE_PROXY_URL"
-                                                                   pattern="{{ reverse_proxy_url_setting['regex'] }}"
+                                                                   pattern="{{ reverse_proxy_url_setting['regex'] | v_safe_pattern }}"
                                                                    required />
                                                         </div>
                                                         <h6 class="mt-2 mb-2 fw-bold" data-i18n="setup.step2.section.real_ip">Real IP</h6>
@@ -1258,7 +1262,7 @@
                                                                    value="{{ real_ip_header }}"
                                                                    class="form-control plugin-setting mt-1"
                                                                    aria-labelledby="label-REAL_IP_HEADER"
-                                                                   pattern="{{ plugins_settings.get('REAL_IP_HEADER', {'regex': '^.+$'})['regex'] }}" />
+                                                                   pattern="{{ plugins_settings.get('REAL_IP_HEADER', {'regex': '^.+$'})['regex'] | v_safe_pattern }}" />
                                                         </div>
                                                         <div class="col-12 col-md-6 pb-3">
                                                             <div class="d-flex justify-content-between align-items-center">
@@ -1292,7 +1296,7 @@
                                                                    value="{{ real_ip_from }}"
                                                                    class="form-control plugin-setting mt-1"
                                                                    aria-labelledby="label-REAL_IP_FROM"
-                                                                   pattern="{{ plugins_settings.get('REAL_IP_FROM', {'regex': '^.+$'})['regex'] }}" />
+                                                                   pattern="{{ plugins_settings.get('REAL_IP_FROM', {'regex': '^.+$'})['regex'] | v_safe_pattern }}" />
                                                         </div>
                                                         <div class="col-12 pb-3">
                                                             <div class="d-flex justify-content-between align-items-center">
@@ -1326,7 +1330,7 @@
                                                                    value="{{ real_ip_from_urls }}"
                                                                    class="form-control plugin-setting mt-1"
                                                                    aria-labelledby="label-REAL_IP_FROM_URLS"
-                                                                   pattern="{{ plugins_settings.get('REAL_IP_FROM_URLS', {'regex': '^.+$'})['regex'] }}" />
+                                                                   pattern="{{ plugins_settings.get('REAL_IP_FROM_URLS', {'regex': '^.+$'})['regex'] | v_safe_pattern }}" />
                                                         </div>
                                                         <h6 class="mt-2 mb-2 fw-bold"
                                                             data-i18n="setup.step2.section.custom_certificate">
@@ -1440,7 +1444,7 @@
                                                                    value="{{ custom_ssl_cert }}"
                                                                    class="form-control plugin-setting mt-1"
                                                                    aria-labelledby="label-CUSTOM_SSL_CERT"
-                                                                   pattern="{{ plugins_settings.get('CUSTOM_SSL_CERT', {'regex': '^.*$'})['regex'] }}"
+                                                                   pattern="{{ plugins_settings.get('CUSTOM_SSL_CERT', {'regex': '^.*$'})['regex'] | v_safe_pattern }}"
                                                                    {% if use_custom_ssl == "no" %}disabled{% endif %} />
                                                         </div>
                                                         <div class="col-12 col-md-6 pb-3">
@@ -1476,7 +1480,7 @@
                                                                    value="{{ custom_ssl_key }}"
                                                                    class="form-control plugin-setting mt-1"
                                                                    aria-labelledby="label-CUSTOM_SSL_KEY"
-                                                                   pattern="{{ plugins_settings.get('CUSTOM_SSL_KEY', {'regex': '^.*$'})['regex'] }}"
+                                                                   pattern="{{ plugins_settings.get('CUSTOM_SSL_KEY', {'regex': '^.*$'})['regex'] | v_safe_pattern }}"
                                                                    {% if use_custom_ssl == "no" %}disabled{% endif %} />
                                                         </div>
                                                         <div class="col-12 col-md-6 pb-3">
@@ -1511,7 +1515,7 @@
                                                                        type="hidden"
                                                                        class="plugin-setting plugin-setting-file-text"
                                                                        aria-labelledby="label-CUSTOM_SSL_CERT_DATA"
-                                                                       pattern="{{ plugins_settings.get('CUSTOM_SSL_CERT_DATA', {'regex': '^.*$'})['regex'] }}"
+                                                                       pattern="{{ plugins_settings.get('CUSTOM_SSL_CERT_DATA', {'regex': '^.*$'})['regex'] | v_safe_pattern }}"
                                                                        value="{{ custom_ssl_cert_data }}"
                                                                        data-upload-target="#custom-ssl-cert-data-upload"
                                                                        data-manual-target="#custom-ssl-cert-data-manual"
@@ -1589,7 +1593,7 @@
                                                                        type="hidden"
                                                                        class="plugin-setting plugin-setting-file-text"
                                                                        aria-labelledby="label-CUSTOM_SSL_KEY_DATA"
-                                                                       pattern="{{ plugins_settings.get('CUSTOM_SSL_KEY_DATA', {'regex': '^.*$'})['regex'] }}"
+                                                                       pattern="{{ plugins_settings.get('CUSTOM_SSL_KEY_DATA', {'regex': '^.*$'})['regex'] | v_safe_pattern }}"
                                                                        value="{{ custom_ssl_key_data }}"
                                                                        data-upload-target="#custom-ssl-key-data-upload"
                                                                        data-manual-target="#custom-ssl-key-data-manual"
@@ -1670,7 +1674,7 @@
                                                 Start a 30-day BunkerWeb PRO free trial from the <a href="https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=ui"
     target="_blank"
     rel="noopener"
-    class="alert-link">BunkerWeb panel</a>.
+    class="alert-link">BunkerWeb panel</a>. Order a plan, then keep “Free 30 Days Trial” as the payment method at checkout.
                                             </p>
                                         </div>
                                         <div class="pt-1 pb-4">
@@ -1843,9 +1847,11 @@
                             </div>
                             <div class="d-flex justify-content-between mt-2 position-relative">
                                 <button id="previous-step"
-                                        class="btn btn-primary btn-prev previous-step disabled">
+                                        class="btn btn-primary btn-prev previous-step disabled"
+                                        aria-labelledby="setup-previous-label">
                                     <i class="bx bx-chevron-left bx-sm ms-sm-n2"></i>
-                                    <span class="align-middle d-sm-inline-block d-none"
+                                    <span id="setup-previous-label"
+                                          class="align-middle d-sm-inline-block d-none"
                                           data-i18n="step.previous">Previous</span>
                                 </button>
                                 <div class="join-newsletter position-absolute bottom-0 start-50 translate-middle-x">

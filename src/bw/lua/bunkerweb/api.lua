@@ -25,8 +25,7 @@ local logger = clogger:new("API")
 local get_country = utils.get_country
 local get_variable = utils.get_variable
 local is_ip_in_networks = utils.is_ip_in_networks
-local is_ipv4 = utils.is_ipv4
-local is_ipv6 = utils.is_ipv6
+local normalize_ip = utils.normalize_ip
 
 local RESERVED_SERVICE_NAMES = {
 	["unknown"] = true,
@@ -48,6 +47,7 @@ local kill = rsignal.kill
 local get_master_pid = process.get_master_pid
 local execute = os.execute
 local open = io.open
+local VARIABLES_PATH = "/etc/nginx/variables.env"
 local read_body = ngx_req.read_body
 local get_body_data = ngx_req.get_body_data
 local get_body_file = ngx_req.get_body_file
@@ -121,13 +121,67 @@ function api:is_allowed_token()
 	return true, "ok"
 end
 
+local function control_plane_variables_from_disk()
+	local file = open(VARIABLES_PATH, "r")
+	if not file then
+		return {}
+	end
+	local contents = file:read("*a")
+	file:close()
+	-- Rendered files end with a newline; a partial final line is not a credential snapshot.
+	if not contents or contents:sub(-1) ~= "\n" then
+		return {}
+	end
+	local found = {}
+	-- Only a file the writers generated (src/common/utils/env_file.py ENV_FORMAT_MARKER) holds bw-b64:<base64>
+	-- values; any other file, an rc4 or operator one, keeps such text as written. Like Python, one "\r" is dropped.
+	local decode_values = contents:match("^([^\n]*)\n"):gsub("\r$", "") == "#bw-env-format:2"
+	for line in contents:gmatch("([^\n]*)\n") do
+		local key, raw = line:match("^([^=]+)=(.*)$")
+		if key == "API_WHITELIST_IP" or key == "API_TOKEN" then
+			local encoded = decode_values and raw:match("^bw%-b64:(.*)$")
+			if encoded then
+				local decoded = ngx.decode_base64(encoded)
+				if decoded then
+					raw = decoded
+				else
+					logger:log(
+						ngx.WARN,
+						"the value of "
+							.. key
+							.. " in "
+							.. VARIABLES_PATH
+							.. " is not valid base64, keeping it as written"
+					)
+				end
+			end
+			found[key] = raw
+		end
+	end
+	return found
+end
+
 function api:initialize(ctx)
 	self.ctx = ctx
 	local data, err = get_variable("API_WHITELIST_IP", false)
+	local tok = get_variable("API_TOKEN", false)
+	if not data then
+		local recovered = control_plane_variables_from_disk()
+		if tok == nil then
+			tok = recovered.API_TOKEN
+		end
+		-- Missing token state must not turn recovery into a tokenless control plane.
+		if tok ~= nil then
+			data = recovered.API_WHITELIST_IP
+		end
+		if data then
+			logger:log(ERR, "API_WHITELIST_IP is missing from the internalstore, falling back to " .. VARIABLES_PATH)
+		end
+	end
 	self.ips = {}
 	self.api_token = nil
 	if not data then
-		logger:log(ERR, "can't get API_WHITELIST_IP variable : " .. err)
+		logger:log(ERR, "can't get API_WHITELIST_IP variable : " .. tostring(err))
 	else
 		for ip in data:gmatch("%S+") do
 			table.insert(self.ips, ip)
@@ -135,7 +189,6 @@ function api:initialize(ctx)
 	end
 
 	-- Load optional API token (from internalstore variables, same pattern as whitelist)
-	local tok = get_variable("API_TOKEN", false)
 	if tok and tok ~= "" then
 		self.api_token = tok
 	end
@@ -299,22 +352,18 @@ end
 --
 -- One reload is in flight at a time, from its signal to the moment its new workers are up. The
 -- marker is created exclusively and holds a token; the master keeps the token of the reload that
--- signalled it (init-lua.conf), and only the workers of that reload remove the marker (and only
+-- signalled it (init-lua.conf), and the workers of that reload remove the marker once ready (only
 -- while it still holds their token). A reload that finds a marker waits for it to go instead of
 -- sharing it: the master takes signals one after another, so a second reload's parse would
 -- otherwise run after the first one's workers had cleared the marker. A marker that never goes
--- belongs to a reload the master rejected after it parsed the configuration, and then reloads and
--- generations wait for it to clear; an orphan with a monotonic stamp is removed after five minutes.
+-- can belong to a reload the master rejected. The API clears its own token when rejection is known;
+-- otherwise an orphan with a monotonic stamp is removed after five minutes.
 local RELOADING_PATH = "/var/tmp/bunkerweb/reloading"
 local GENERATING_PATH = "/var/tmp/bunkerweb/generating"
--- How long, from the start of the request, a reload waits for the previous reload or for a
--- generator before it answers 503. A normal reload clears its marker about five seconds after the
--- signal (the new workers do it from a timer they start with a five second delay). The callers
--- (scheduler, API, UI) read for max(RELOAD_MIN_TIMEOUT, 3 * services) seconds, five by default, and
--- retry a 503 twice, two seconds apart, but a read that times out is a failed reload that is not
--- retried. So the wait stays under that default: a reload that arrives while another one runs is
--- given up after four seconds, comes back two seconds later and finds the marker gone.
+-- Queue separately from readiness: workers publish it from a timer delayed by five seconds.
+-- Scheduler callers allow at least fifteen seconds for both waits and the configuration test.
 local RELOAD_WAIT = 4
+local RELOAD_READY_WAIT = 10
 local RELOAD_POLL = 0.1
 local RELOAD_MARKER_MAX_AGE = 300
 
@@ -564,21 +613,158 @@ local function reload_checked(test_arg)
 	return HTTP_OK, "success", "reload successful"
 end
 
--- The body returns the response triple instead of sending it, so the wrapper has one
+local function read_reload_proc(path)
+	local file = open(path, "r")
+	if not file then
+		return nil
+	end
+	local content = file:read("*a")
+	file:close()
+	return content
+end
+
+local function observe_reload_master()
+	if ffi.os ~= "Linux" then
+		return nil
+	end
+	local pid = get_master_pid()
+	if not pid then
+		return nil
+	end
+	local path = "/proc/" .. pid .. "/"
+	local children_path = path .. "task/" .. pid .. "/children"
+	local children = read_reload_proc(children_path)
+	if not children then
+		return nil
+	end
+	local pids = {}
+	for child in children:gmatch("%d+") do
+		pids[child] = true
+	end
+	if not pids[tostring(ngx.worker.pid())] then
+		return nil
+	end
+	return { path = path, children_path = children_path, pids = pids }
+end
+
+local function reload_rejected(master)
+	if ngx.worker.exiting() then
+		return false
+	end
+	-- A non-exiting worker also means the master could still be parsing. Linux's master blocks HUP
+	-- outside sigsuspend: read pending signals BEFORE its wait channel to exclude an unconsumed HUP.
+	local status = read_reload_proc(master.path .. "status")
+	local pending = status and status:match("\nSigPnd:%s*(%x+)")
+	local shared_pending = status and status:match("\nShdPnd:%s*(%x+)")
+	if
+		not pending
+		or not shared_pending
+		or tonumber(pending:sub(-1), 16) % 2 ~= 0
+		or tonumber(shared_pending:sub(-1), 16) % 2 ~= 0
+	then
+		return false
+	end
+	local wchan = read_reload_proc(master.path .. "wchan")
+	if not wchan or not wchan:find("sigsuspend", 1, true) then
+		return false
+	end
+	-- A successful cycle forks before returning to sigsuspend, even if our QUIT channel is not read yet.
+	-- shortcut: hidden /proc or non-Linux keeps the marker; a portable master acknowledgement would replace this probe.
+	local children = read_reload_proc(master.children_path)
+	if not children then
+		return false
+	end
+	local worker_present = false
+	for child in children:gmatch("%d+") do
+		if not master.pids[child] then
+			return false
+		end
+		worker_present = worker_present or child == tostring(ngx.worker.pid())
+	end
+	return worker_present
+end
+
+local function wait_reload(token, seconds, no_wait_reason, master)
+	local ready_key = "misc_ready_" .. token
+	-- The blocking configuration test does not refresh nginx's cached clock.
+	ngx.update_time()
+	local deadline = ngx.now() + seconds
+	local was_rejected = false
+	while seconds > 0 do
+		if internalstore:get(ready_key) == "ok" then
+			return HTTP_OK, "success", "reload successful", true
+		end
+		if read_marker() ~= token then
+			-- A worker can publish readiness between the first read and the marker's removal.
+			if internalstore:get(ready_key) == "ok" then
+				return HTTP_OK, "success", "reload successful", true
+			end
+			return HTTP_INTERNAL_SERVER_ERROR, "error", "reload failed: initialization did not confirm readiness"
+		end
+		local rejected = master and reload_rejected(master)
+		-- Yield once so a queued graceful-shutdown channel message can mark this old worker exiting.
+		if rejected and was_rejected then
+			if read_marker() == token then
+				os.remove(RELOADING_PATH)
+			end
+			return HTTP_INTERNAL_SERVER_ERROR,
+				"error",
+				"reload failed: rejected by nginx master; no new workers started",
+				false
+		end
+		was_rejected = rejected
+		if ngx.now() >= deadline then
+			break
+		end
+		-- Never the remaining time: ngx.sleep truncates to whole milliseconds, and a zero-delay timer does not
+		-- advance the cached clock, so a sub-millisecond remainder would spin until the swap lock expires.
+		ngx.sleep(RELOAD_POLL)
+	end
+	-- Keep the in-flight marker; normal completion or existing stale-marker recovery releases it.
+	local message = "reload signalled but readiness is unconfirmed: "
+		.. (no_wait_reason or "timed out waiting for new workers")
+	logger:log(ngx.WARN, message)
+	return HTTP_OK, "success", message, false
+end
+
+-- The body returns response values instead of sending them, so the wrapper has one
 -- place to release the swap lock whichever way the reload ends.
 local function reload_locked(test_arg)
+	local shutdown_timeout = get_variable("WORKER_SHUTDOWN_TIMEOUT", false)
+	if shutdown_timeout and match(shutdown_timeout, "^%d+$") then
+		shutdown_timeout = shutdown_timeout .. "s"
+	end
+	shutdown_timeout = utils.parse_duration(shutdown_timeout, "ms")
+	-- Zero disables forced shutdown; otherwise leave a second to send the response before it closes this request.
+	local ready_wait, no_wait_reason
+	if not shutdown_timeout then
+		ready_wait, no_wait_reason = 0, "invalid or unreadable WORKER_SHUTDOWN_TIMEOUT"
+	elseif shutdown_timeout == 0 then
+		ready_wait = RELOAD_READY_WAIT
+	else
+		ready_wait = math.max(0, math.min(RELOAD_READY_WAIT, shutdown_timeout / 1000 - 1))
+		if ready_wait == 0 then
+			no_wait_reason = "WORKER_SHUTDOWN_TIMEOUT leaves no time to confirm readiness"
+		end
+	end
 	local started, status, failure = begin_reload()
 	if not started then
 		-- begin_reload took back what it published; the values are then the HTTP status and the message
 		return status, "error", failure
 	end
+	local master = observe_reload_master()
 	local ran, code, level, message = pcall(reload_checked, test_arg)
 	-- The marker stands for a reload that signalled nginx; the new workers remove it.
 	if not ran or level ~= "success" then
-		os.remove(RELOADING_PATH)
+		if read_marker() == started then
+			os.remove(RELOADING_PATH)
+		end
 	end
 	if not ran then
 		error(code, 0)
+	end
+	if level == "success" then
+		return wait_reload(started, ready_wait, no_wait_reason, master)
 	end
 	return code, level, message
 end
@@ -594,12 +780,14 @@ api.global.POST["^/reload"] = function(self)
 	end
 	-- pcall so an error inside the section still releases the lock: leaving it held costs every
 	-- later push and reload until it expires.
-	local ran, status, level, message = pcall(reload_locked, test_arg)
+	local ran, status, level, message, confirmed = pcall(reload_locked, test_arg)
 	lock:unlock()
 	if not ran then
 		return self:response(HTTP_INTERNAL_SERVER_ERROR, "error", "reload failed: " .. tostring(status))
 	end
-	return self:response(status, level, message)
+	local http_status, response = self:response(status, level, message)
+	response.confirmed = confirmed
+	return http_status, response
 end
 
 api.global.POST["^/stop$"] = function(self)
@@ -788,10 +976,12 @@ api.global.POST["^/unban$"] = function(self)
 		return self:response(HTTP_INTERNAL_SERVER_ERROR, "error", "can't decode JSON : " .. ip)
 	end
 
-	-- Validate IP address
-	if not ip["ip"] or (not is_ipv4(ip["ip"]) and not is_ipv6(ip["ip"])) then
+	-- Validate IP address and keep its canonical spelling: one address is one ban
+	local canonical_ip = type(ip) == "table" and normalize_ip(ip["ip"])
+	if not canonical_ip then
 		return self:response(HTTP_BAD_REQUEST, "error", "invalid IP address")
 	end
+	ip["ip"] = canonical_ip
 
 	local ban_scope = ip["ban_scope"] or "global"
 	local service = ip["service"]
@@ -840,7 +1030,8 @@ local function read_lease_args(self)
 		return nil, self:response(HTTP_BAD_REQUEST, "error", "can't decode JSON")
 	end
 	local ip, ban_scope, service = body["ip"], body["ban_scope"] or "global", body["service"]
-	if type(ip) ~= "string" or (not is_ipv4(ip) and not is_ipv6(ip)) then
+	ip = normalize_ip(ip)
+	if not ip then
 		return nil, self:response(HTTP_BAD_REQUEST, "error", "invalid IP address")
 	end
 	if ban_scope ~= "global" and ban_scope ~= "service" then
@@ -910,6 +1101,9 @@ api.global.POST["^/ban$"] = function(self)
 	if not ok then
 		return self:response(HTTP_INTERNAL_SERVER_ERROR, "error", "can't decode JSON : " .. ip)
 	end
+	if type(ip) ~= "table" then
+		return self:response(HTTP_BAD_REQUEST, "error", "request body must be a JSON object")
+	end
 	local ban = {
 		ip = "",
 		exp = 86400,
@@ -934,10 +1128,12 @@ api.global.POST["^/ban$"] = function(self)
 		ban.ban_scope = ip["ban_scope"]
 	end
 
-	-- Validate IP address
-	if not ban.ip or (not is_ipv4(ban.ip) and not is_ipv6(ban.ip)) then
+	-- Validate IP address and keep its canonical spelling: one address is one ban
+	ban.ip = normalize_ip(ban.ip)
+	if not ban.ip then
 		return self:response(HTTP_BAD_REQUEST, "error", "invalid IP address")
 	end
+	ip["ip"] = ban.ip
 
 	-- Validate expiration
 	if ban.exp and (type(ban.exp) ~= "number" or ban.exp < 0) then

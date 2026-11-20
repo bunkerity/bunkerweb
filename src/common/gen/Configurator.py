@@ -4,6 +4,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from contextlib import suppress
 from copy import deepcopy
 from functools import cache
+from ipaddress import AddressValueError, IPv6Address
 from json import loads
 from logging import Logger
 from os import getenv, listdir, sep
@@ -16,7 +17,7 @@ from typing import Dict, List, Literal, Optional, Set, Tuple, Union
 if join(sep, "usr", "share", "bunkerweb", "utils") not in sys_path:
     sys_path.append(join(sep, "usr", "share", "bunkerweb", "utils"))
 
-from common_utils import bytes_hash, create_plugin_tar_gz  # type: ignore
+from common_utils import bytes_hash, create_plugin_tar_gz, has_embedded_newline  # type: ignore
 from env_file import make_key_predicate, parse_env_file  # type: ignore
 from modsecurity_audit import validate_audit_log_settings  # type: ignore
 
@@ -338,6 +339,8 @@ class Configurator:
                 # into syslog / docker logs / log shippers downstream.
                 self.__logger.warning(f"Ignoring variable {variable} : {err} - value={self._redact_value(value)}")
 
+        self.__warn_non_canonical_ipv6_names(config)
+
         # Expand variables to each sites if MULTISITE=yes and if not present
         if config.get("MULTISITE", "no") == "yes":
             for server_name in config["SERVER_NAME"].strip().split():
@@ -365,16 +368,30 @@ class Configurator:
         validate_audit_log_settings(config)
         return config
 
-    @staticmethod
-    def __has_embedded_newline(value: str, setting_type: Optional[str]) -> bool:
-        # variables.env is line-oriented: Templator writes "KEY=VALUE\n" and load_variables reads
-        # every schema-known key back, so a value carrying its own newline defines a second
-        # setting. Settings of type "file" hold PEM data and are exempt, and trailing newlines
-        # stay valid because a Kubernetes ConfigMap block scalar always leaves one.
-        if setting_type == "file":
-            return False
-        stripped = value.rstrip("\r\n")
-        return "\n" in stripped or "\r" in stripped
+    def __warn_non_canonical_ipv6_names(self, config: Dict[str, str]) -> None:
+        """Warn about an IPv6 server name that is not written the way a client sends it.
+
+        A client sends the compressed lowercase form in its Host header, so another spelling of the
+        same address never matches. The value is kept: dropping the global SERVER_NAME would remove
+        every service.
+        """
+        names = {
+            name
+            for variable, value in config.items()
+            if variable == "SERVER_NAME" or variable.endswith("_SERVER_NAME")
+            for name in value.split()
+            if ":" in name
+        }
+        for name in sorted(names):
+            try:
+                canonical = IPv6Address(name).compressed
+            except AddressValueError:
+                self.__logger.warning(f"Server name {name} looks like an IPv6 address but is not a valid one, it will never match a Host header")
+                continue
+            if canonical != name:
+                self.__logger.warning(
+                    f"Server name {name} is not written in its canonical form, use {canonical}: another spelling never matches the Host header"
+                )
 
     def __check_var(self, variable: str) -> Tuple[bool, str]:
         value = self.__variables[variable]
@@ -384,7 +401,7 @@ class Configurator:
             if not where:
                 return False, f"variable name {variable} doesn't exist"
 
-            if self.__has_embedded_newline(value, where[real_var].get("type")):
+            if has_embedded_newline(value, where[real_var].get("type")):
                 return False, f"value of {variable} contains a newline"
 
             try:
@@ -406,7 +423,7 @@ class Configurator:
         elif prefixed and real_var == "SERVER_NAME" and not value.strip():
             return False, f"{variable} can't be empty"
 
-        if self.__has_embedded_newline(value, where[real_var].get("type")):
+        if has_embedded_newline(value, where[real_var].get("type")):
             return False, f"value of {variable} contains a newline"
 
         try:

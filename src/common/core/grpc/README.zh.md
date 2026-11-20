@@ -72,7 +72,7 @@ gRPC 插件允许 BunkerWeb 通过 HTTP/2 使用 `grpc_pass` 代理 gRPC 服务�
     只有在 CA 包可用时 `GRPC_SSL_VERIFY` 才会生效。可通过 `GRPC_SSL_TRUSTED_CERTIFICATE`（调度器 可读取的路径）或 `GRPC_SSL_TRUSTED_CERTIFICATE_DATA`（base64 或明文 PEM）提供，并用 `GRPC_SSL_TRUSTED_CERTIFICATE_PRIORITY` 选择来源。调度器 会校验该 CA 包、缓存并分发到各实例。若没有可用的 CA 包，校验将保持关闭。
 
 !!! warning "长连接流与核心超时"
-    长连接或流式 RPC 可能需要高于全局默认值的通用 NGINX 超时。常见需要调整的是 General 插件设置中的 `CLIENT_BODY_TIMEOUT` 和 `CLIENT_HEADER_TIMEOUT`。
+    长连接或流式 RPC 可能需要更大的 `CLIENT_BODY_TIMEOUT` 和 `CLIENT_HEADER_TIMEOUT`。请在 General 插件设置中为 gRPC 服务单独配置；全局 `CLIENT_HEADER_TIMEOUT` 应保持较短，以限制 TLS 握手时间和重新加载后旧工作进程的存活时间。
 
 !!! tip "多个 gRPC 后端"
     多路由场景请使用带后缀的配置项：

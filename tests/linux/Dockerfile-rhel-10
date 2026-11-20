@@ -1,6 +1,6 @@
-FROM redhat/ubi10-init:10.2@sha256:8a43d7a3358300d8d0e0ed3e5bc4d599bd6ffbfab883bab3c72db556665a9fa5
+FROM redhat/ubi10-init:10.2@sha256:d25797faf7a820ce60129336f6c6951ce9d92e61c40fd7912a31ecfc93650b61
 
-ENV NGINX_VERSION=1.30.6
+ENV NGINX_VERSION=1.30.7
 
 # Copy rocky repo
 COPY src/linux/rocky-10.repo /etc/yum.repos.d/rocky.repo
@@ -15,7 +15,5 @@ RUN rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-Rocky-10
 COPY src/linux/nginx.repo /etc/yum.repos.d/nginx.repo
 
 RUN dnf install https://dl.fedoraproject.org/pub/epel/epel-release-latest-10.noarch.rpm -y && \
-    dnf install php-fpm yum-utils -y && \
+    dnf install php-fpm yum-utils mariadb postgresql -y && \
     dnf install -y https://nginx.org/packages/rhel/10/$(uname -m)/RPMS/nginx-${NGINX_VERSION}-1.el10.ngx.$(uname -m).rpm
-
-COPY ./package-rhel-10/*.rpm /opt

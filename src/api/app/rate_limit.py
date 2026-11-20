@@ -15,7 +15,7 @@ from slowapi.errors import RateLimitExceeded
 from yaml import safe_load
 
 from .config import api_config
-from common_utils import parse_duration  # type: ignore
+from common_utils import parse_duration, parse_redis_endpoint  # type: ignore
 from redis_keys import cluster_config_error  # type: ignore
 from os import getenv
 from .utils import LOGGER, get_db
@@ -423,6 +423,11 @@ def _build_storage(cfg: Dict[str, Any]) -> Tuple[str, Dict[str, Any]]:
         storage_options.setdefault("socket_connect_timeout", timeout_ms / 1000.0)
         storage_options.setdefault("socket_keepalive", True)
         storage_options.setdefault("max_connections", keepalive_pool)
+        if redis_ssl:
+            # redis-py verifies unless told otherwise; only an explicit "no" turns it off, as in the Web UI.
+            ssl_verify = str(_env_or_cfg("REDIS_SSL_VERIFY", "yes") or "yes").lower() != "no"
+            ssl_cert_reqs = "required" if ssl_verify else "none"
+            storage_options.setdefault("ssl_cert_reqs", ssl_cert_reqs)
 
         cluster_nodes = str(_env_or_cfg("REDIS_CLUSTER_NODES", "") or "").strip()
         config_error = cluster_config_error(cluster_nodes, sentinels, str(_env_or_cfg("REDIS_DATABASE", "0") or "0").strip())
@@ -437,15 +442,8 @@ def _build_storage(cfg: Dict[str, Any]) -> Tuple[str, Dict[str, Any]]:
             startup_nodes = []
             try:
                 for item in cluster_nodes.split():
-                    if item.startswith("[") and "]:" in item:
-                        host, _, port = item[1:].partition("]:")
-                    elif item.count(":") == 1:
-                        host, _, port = item.partition(":")
-                    else:
-                        host, port = item, "6379"
-                    if not host or not port:
-                        raise ValueError(f"invalid node {item}")
-                    startup_nodes.append(ClusterNode(host, int(port)))
+                    host, port = parse_redis_endpoint(item)
+                    startup_nodes.append(ClusterNode(host, port))
                 if not startup_nodes:
                     raise ValueError("no cluster nodes")
             except ValueError as exc:
@@ -459,10 +457,6 @@ def _build_storage(cfg: Dict[str, Any]) -> Tuple[str, Dict[str, Any]]:
             storage = f"redis+cluster://[{first.host}]:{first.port}" if ":" in first.host else f"redis+cluster://{first.host}:{first.port}"
             storage_options["startup_nodes"] = startup_nodes
             storage_options.setdefault("ssl", redis_ssl)
-            if redis_ssl:
-                # redis-py verifies unless told otherwise; only an explicit "no" turns it off, as in the Web UI.
-                ssl_verify = str(_env_or_cfg("REDIS_SSL_VERIFY", "yes") or "yes").lower() != "no"
-                storage_options.setdefault("ssl_cert_reqs", "required" if ssl_verify else "none")
             if username:
                 storage_options.setdefault("username", username)
             if password:
@@ -472,9 +466,15 @@ def _build_storage(cfg: Dict[str, Any]) -> Tuple[str, Dict[str, Any]]:
             # these credentials to Sentinel too. Keep Sentinel and Redis auth separate.
             # ensure ports on sentinels (default 26379)
             parts = []
-            for item in sentinels.split():
-                host, _, port = item.partition(":")
-                parts.append(f"{host}:{port or '26379'}")
+            try:
+                for item in sentinels.split():
+                    host, port = parse_redis_endpoint(item, 26379)
+                    parts.append(f"[{host}]:{port}" if ":" in host else f"{host}:{port}")
+            except ValueError as exc:
+                LOGGER.error(f"Invalid Redis configuration, API rate limiting uses local memory: {exc}")
+                return "memory://", storage_options
+            # urlsplit requires a bracketed IPv6 literal to be first in the authority.
+            parts.sort(key=lambda item: not item.startswith("["))
             hostlist = ",".join(parts)
             storage = f"redis+sentinel://{hostlist}/{sentinel_master}"
             # pass SSL and auth to sentinel via options.
@@ -495,6 +495,8 @@ def _build_storage(cfg: Dict[str, Any]) -> Tuple[str, Dict[str, Any]]:
             sentinel_kwargs.setdefault("socket_connect_timeout", storage_options.get("socket_connect_timeout"))
             sentinel_kwargs.setdefault("socket_keepalive", storage_options.get("socket_keepalive"))
             sentinel_kwargs.setdefault("ssl", redis_ssl)
+            if redis_ssl:
+                sentinel_kwargs.setdefault("ssl_cert_reqs", ssl_cert_reqs)
 
             # Explicit None values prevent limits from reusing master auth
             # when Sentinel auth is intentionally unset.
@@ -505,14 +507,21 @@ def _build_storage(cfg: Dict[str, Any]) -> Tuple[str, Dict[str, Any]]:
         else:
             # Direct redis connection
             host = str(_env_or_cfg("REDIS_HOST", "") or "").strip()
-            port = str(_env_or_cfg("REDIS_PORT", "6379") or "6379").strip()
+            redis_port = str(_env_or_cfg("REDIS_PORT", "6379") or "6379").strip()
             db = str(_env_or_cfg("REDIS_DATABASE", "0") or "0").strip()
             scheme = "rediss" if redis_ssl else "redis"
             auth = ""
             if username or password:
                 auth = f"{username}:{password}@"
             if host:
-                storage = f"{scheme}://{auth}{host}:{port}/{db}"
+                try:
+                    host = parse_redis_endpoint(host)[0]
+                except ValueError as exc:
+                    LOGGER.error(f"Invalid Redis configuration, API rate limiting uses local memory: {exc}")
+                    return "memory://", storage_options
+                if ":" in host:
+                    host = f"[{host}]"
+                storage = f"{scheme}://{auth}{host}:{redis_port}/{db}"
 
     # Final fallback
     if not storage:
@@ -542,6 +551,10 @@ def _make_limiter(storage: str, storage_options: Dict[str, Any], *, key_func, de
             strategy=strategy,
             headers_enabled=headers_enabled,
             key_prefix="bwapi-rl-",
+            # Without it a storage error at request time (bad Redis password, Redis down) is raised out of slowapi and every
+            # endpoint answers 500, /ping and /health included. With it slowapi logs once, keeps enforcing the same limits in
+            # process memory and re-checks the backend with a growing delay until it answers again.
+            in_memory_fallback_enabled=True,
         )
     except Exception as exc:
         # The message is left out: URI parser errors echo pieces of the credentials.
@@ -553,6 +566,7 @@ def _make_limiter(storage: str, storage_options: Dict[str, Any], *, key_func, de
             strategy=strategy,
             headers_enabled=headers_enabled,
             key_prefix="bwapi-rl-",
+            in_memory_fallback_enabled=True,
         )
 
 

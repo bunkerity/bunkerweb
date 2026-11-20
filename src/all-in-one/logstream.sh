@@ -34,10 +34,11 @@ stream_log() {
     # Strip C0 control characters (except tab `\011` and newline `\012`) plus DEL so an
     # adversarial access/error/modsec payload (URI, User-Agent, matched_data) can't inject
     # ANSI/CSI/OSC escape sequences into `docker logs` output and spoof other services' lines.
+    # Flush both filters per line without forcing sed to read one byte at a time.
     if [ "$stream" == "stdout" ]; then
-        exec tail -F "$log_file" | tr -d '\000-\010\013-\037\177' | sed "s/^/${prefix}/"
+        exec tail -F "$log_file" | stdbuf -oL tr -d '\000-\010\013-\037\177' | stdbuf -oL sed "s/^/${prefix}/"
     else
-        exec tail -F "$log_file" | tr -d '\000-\010\013-\037\177' | sed "s/^/${prefix}/" >&2
+        exec tail -F "$log_file" | stdbuf -oL tr -d '\000-\010\013-\037\177' | stdbuf -oL sed "s/^/${prefix}/" >&2
     fi
 }
 

@@ -1,0 +1,22 @@
+array open '['
+string: 'foo'
+string: 'bar'
+string: 'baz'
+bool: true
+bool: false
+null
+map open '{'
+key: 'key'
+string: 'value'
+map close '}'
+array open '['
+null
+null
+null
+array open '['
+array close ']'
+array close ']'
+string: '
+\'
+array close ']'
+memory leaks:	0

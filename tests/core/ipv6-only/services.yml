@@ -1,0 +1,27 @@
+services:
+  app1:
+    mem_limit: 64m
+    dns:
+      - fd42:1618:1::20
+    networks:
+      bw-services:
+        ipv6_address: fd42:1618:2::80
+    image: bunkerity/bunkerweb-scheduler:tests
+    entrypoint:
+      - python3
+      - /fixtures/server.py
+    healthcheck:
+      disable: true
+    ports: []
+    volumes:
+      - ${PWD}/tests/core/ipv6/server.py:/fixtures/server.py:ro
+    container_name: app1
+    restart: unless-stopped
+networks:
+  bw-services:
+    name: bw-services
+    enable_ipv4: false
+    enable_ipv6: true
+    ipam:
+      config:
+        - subnet: fd42:1618:2::/64

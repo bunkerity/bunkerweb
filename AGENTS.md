@@ -8,7 +8,7 @@ Source lives in `src/`: `api/` (FastAPI service), `ui/` (admin UI), `linux/` (di
 
 ## Build, Test, and Development Commands
 
-Bootstrap Python deps per component, e.g. `pip install -r src/api/requirements.txt` or `pip install -r src/ui/requirements.txt`. Build a full appliance image with `docker build -f src/all-in-one/Dockerfile .`. Exercise integrations locally via `python3 tests/main.py docker`; swap `docker` for `linux`, `autoconf`, `swarm`, or `kubernetes` as needed (set the matching `TEST_DOMAIN*` env vars first). Regenerate docs with `mkdocs serve --watch` from the repo root. Run `pre-commit run --all-files` before pushing to execute the standard formatters and linters.
+Bootstrap Python deps per component, e.g. `pip install -r src/api/requirements.txt` or `pip install -r src/ui/requirements.txt`. Build a full appliance image with `docker build -f src/all-in-one/Dockerfile .`. Exercise integrations locally via `./tests/scripts/test.sh Docker core dev headers` (integration, type, release, spec name) from an activated `tests/requirements.txt` venv; swap `Docker` for `Autoconf`, `All-in-one`, `Linux` or `Kubernetes`, and `core` for `api` or `ui`. Regenerate docs with `mkdocs serve --watch` from the repo root. Run `pre-commit run --all-files` before pushing to execute the standard formatters and linters.
 
 ## Coding Style & Naming Conventions
 
@@ -16,7 +16,7 @@ Python uses Black (160 char lines) and Flake8 with ignores defined in `.pre-comm
 
 ## Testing Guidelines
 
-High-level acceptance suites live in `tests/` and orchestrate Dockerized environments—verify Docker access and required `TEST_DOMAIN*` env vars before running. Add scenario files under `examples/<use-case>/tests.json` with descriptive names; tests should assert observable behavior rather than internals. For unit-style Python additions, provide lightweight checks inside the relevant module and hook them into integration flows when feasible. Capture regressions by replicating failing requests in the automated suites.
+High-level acceptance suites live in `tests/` and orchestrate Dockerized environments—verify Docker access before running (see `tests/README.md`). Add scenarios as YAML specs under `tests/core/`, `tests/api/` or `tests/ui/`, and an example spec `tests/core/example-<name>.yml` for each `examples/<use-case>`, with descriptive names; tests should assert observable behavior rather than internals. Unit-style Python additions belong in the pytest suite under `tests/unit/` (see `tests/unit/README.md`). Capture regressions by replicating failing requests in the automated suites.
 
 ## Commit & Pull Request Guidelines
 
@@ -194,14 +194,14 @@ Set one of these to `yes`: `AUTOCONF_MODE`, `SWARM_MODE`, `KUBERNETES_MODE`
 ### Testing
 
 ```bash
-python3 tests/main.py docker              # Docker integration tests
-python3 tests/main.py autoconf            # Autoconf tests
-python3 tests/main.py swarm               # Swarm tests
-python3 tests/main.py kubernetes           # Kubernetes tests
-python3 tests/main.py linux debian         # Linux tests (with distro)
+./tests/scripts/test.sh Docker core dev headers       # Docker integration, `headers` spec
+./tests/scripts/test.sh Autoconf core dev headers     # Autoconf
+./tests/scripts/test.sh All-in-one core dev headers   # All-in-one
+./tests/scripts/test.sh Kubernetes core dev headers   # Kubernetes (minikube)
+./tests/scripts/test.sh Linux core dev headers        # Linux (systemd container, package from a CI build)
 ```
 
-- Tests scan `examples/*/tests.json` for test scenarios (type: string/status, url, expected results)
+- Specs are YAML files (`tests/core/*.yml`, `tests/api/*.yml`, `tests/ui/*.yml`, `tests/core/example-*.yml` for the examples) listing actions and expected results; `tests/parse.py` builds the CI matrix from them
 - Real Docker environments with actual HTTP requests — tests verify observable behavior, not internals
 
 ## External Resources

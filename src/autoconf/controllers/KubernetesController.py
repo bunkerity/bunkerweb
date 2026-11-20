@@ -2,7 +2,6 @@
 
 from contextlib import suppress
 from ipaddress import ip_address
-from logging import DEBUG
 from os import getenv, sep
 from pathlib import Path
 from re import match as re_match, split as re_split, sub as re_sub
@@ -16,6 +15,7 @@ from kubernetes import client, config, watch
 from kubernetes.client import Configuration
 from kubernetes.client.exceptions import ApiException
 
+from Config import REDACTED, is_sensitive_key
 from controllers.Controller import Controller, HoldTimeLock
 
 # Written by main.py once the controller starts and checked by healthcheck-autoconf.sh.
@@ -66,6 +66,7 @@ class KubernetesController(Controller):
         self._pending_apply = False
         self._last_event_time = 0.0
         self._debounce_delay = 2  # seconds
+        self._apply_retry_at: Optional[float] = None
         self._event_summary = {}
         self._event_summary_max = 8
         self._event_loggable_kinds = {"Ingress", "Gateway", "HTTPRoute", "GRPCRoute", "TLSRoute", "TCPRoute", "UDPRoute", "ConfigMap", "Secret"}
@@ -236,29 +237,15 @@ class KubernetesController(Controller):
     # cross-namespace check at the top of the merge loop short-circuits first.
     _CONFLICT_LOG_SKIP_KEYS = frozenset({"SERVER_NAME", "NAMESPACE"})
 
-    # Substrings that mark an annotation value as sensitive. Conflict logs that
-    # would otherwise echo the old/new value verbatim substitute "<redacted>"
-    # for any key matching one of these substrings, so secrets do not leak into
-    # scheduler logs that may be shipped to centralized log sinks. Operators
-    # who need the raw values for debugging can drop the controller logger to
-    # DEBUG (the most verbose level the project ships) — the redaction is
-    # bypassed in that mode.
-    _SENSITIVE_KEY_SUBSTRINGS = ("PASSWORD", "SECRET", "TOKEN", "API_KEY", "PRIVATE_KEY", "AUTH_BASIC")
-
     def _format_conflict_value(self, key: str, value) -> str:
-        """Return ``repr(value)`` unless ``key`` looks sensitive.
+        """Return ``repr(value)``, or ``'<redacted>'`` when ``key`` names a secret setting.
 
-        When the controller logger is enabled for ``DEBUG`` the original value
-        is always shown — operators on debug/trace verbosity have explicitly
-        opted into verbose output, so silent redaction would defeat the purpose
-        of turning the level up in the first place.
+        Conflict logs go to scheduler logs that may be shipped to centralized sinks, so the redaction
+        is unconditional: a secret value is never logged, whatever the logger level. The markers are
+        the shared ``SENSITIVE_KEY_SUBSTRINGS`` list of ``Config``.
         """
-        if self._logger.isEnabledFor(DEBUG):
-            return repr(value)
-        upper_key = key.upper()
-        for marker in self._SENSITIVE_KEY_SUBSTRINGS:
-            if marker in upper_key:
-                return "'<redacted>'"
+        if is_sensitive_key(key):
+            return f"'{REDACTED}'"
         return repr(value)
 
     def _merge_services_by_server_name(self, services: list) -> list:
@@ -405,11 +392,14 @@ class KubernetesController(Controller):
         pod_ip = status.pod_ip if status else None
         pod_name = controller_instance.metadata.name
         namespace = controller_instance.metadata.namespace
+        if not pod_ip:
+            self._instances_pending = True
+            self._logger.debug(f"Skipping pod {namespace}/{pod_name} because it has no IP")
+            return []
+
         instance = {
             "name": pod_name,
-            "hostname": (
-                f"{(pod_ip.replace('.', '-') if pod_ip else pod_name)}.{namespace}.pod.{self._domain_name}" if self._use_fqdn else (pod_ip or pod_name)
-            ),
+            "hostname": f"{pod_ip.replace('.', '-').replace(':', '-')}.{namespace}.pod.{self._domain_name}" if self._use_fqdn else pod_ip,
             "health": False,
             "type": "pod",
             "env": {},
@@ -424,14 +414,12 @@ class KubernetesController(Controller):
         if not pod:
             self._logger.warning(f"Missing container bunkerweb in pod {controller_instance.metadata.name}")
             # Preserve discovery behavior for legacy deployments with a different container name.
-            instance["health"] = bool(status and any(c.type == "Ready" and c.status == "True" for c in status.conditions or []))
+            instance["health"] = any(c.type == "Ready" and c.status == "True" for c in status.conditions or [])
         else:
             # Readiness gates traffic, not configuration delivery: a loading container needs
             # configuration before it can become Ready. The scheduler checks API reachability.
-            instance["health"] = bool(
-                status
-                and status.phase == "Running"
-                and pod_ip
+            instance["health"] = (
+                status.phase == "Running"
                 and not controller_instance.metadata.deletion_timestamp
                 and any(c.name == pod.name and c.state and c.state.running is not None for c in status.container_statuses or [])
             )
@@ -720,10 +708,12 @@ class KubernetesController(Controller):
             locked = False
             error = False
             applied = False
+            reconciling = False
             try:
                 for event in self._get_stream_with_retries(watch_type, what):
                     self._mark_healthy(watch_type)
                     applied = False
+                    reconciling = False
                     self._internal_lock.acquire()
                     locked = True
                     if not self._process_event(event):
@@ -755,6 +745,7 @@ class KubernetesController(Controller):
                         continue
 
                     self._pending_apply = False
+                    reconciling = True
                     self._log_event_summary()
 
                     while not applied:
@@ -781,12 +772,16 @@ class KubernetesController(Controller):
                         try:
                             ret = self.apply_config()
                             if not ret:
+                                self._pending_apply = True
+                                self._apply_retry_at = time() + 10
                                 self._logger.error("Error while deploying new configuration ...")
                             else:
                                 self._logger.info("Successfully deployed new configuration")
 
                                 self._set_autoconf_load_db()
                         except BaseException as e:
+                            self._pending_apply = True
+                            self._apply_retry_at = time() + 10
                             self._logger.debug(format_exc())
                             self._logger.error(f"Exception while deploying new configuration :\n{e}")
                         applied = True
@@ -805,6 +800,9 @@ class KubernetesController(Controller):
                 error = True
             finally:
                 if locked:
+                    if reconciling and not applied:
+                        self._pending_apply = True
+                        self._apply_retry_at = time() + 10
                     with suppress(BaseException):
                         self._internal_lock.release()
                     locked = False
@@ -910,10 +908,24 @@ class KubernetesController(Controller):
                             self._pending_backends.pop(key, None)
                     for namespace, service_name in give_up_keys:
                         self._logger.warning(f"Giving up on pending backend {namespace}/{service_name} after {self._pending_backends_max_attempts} attempts")
+
+                self._retry_deferred_apply()
             except BaseException as e:
                 self._logger.debug(format_exc())
                 self._logger.error(f"Error in pending backends worker: {e}")
             sleep(0.5)
+
+    def _retry_deferred_apply(self) -> None:
+        """Retry an apply deferred by a busy scheduler or a failed reconciliation.
+
+        No watch thread waits for it: the flag it leaves behind is only consumed by a thread that
+        receives an event, so without this tick the change stays undeployed until some unrelated
+        event arrives (#4107)."""
+        retry_at = self._apply_retry_at
+        if retry_at is None or time() < retry_at:
+            return
+        self._apply_retry_at = None
+        self._trigger_apply_if_idle()
 
     def _trigger_apply_if_idle(self) -> None:
         """Kick off an immediate apply cycle from outside the watch loop.
@@ -923,8 +935,8 @@ class KubernetesController(Controller):
         dropped rule and no fresh watch event arrives, we would wait forever —
         so we run an apply directly here under the internal lock.
         """
-        try:
-            with self._internal_lock:
+        with self._internal_lock:
+            try:
                 if not self._pending_apply:
                     return
                 self._pending_apply = False
@@ -938,24 +950,33 @@ class KubernetesController(Controller):
                     self._sync_status()
                     return
                 if self.have_to_wait():
-                    # Let the normal watch loop retry — don't busy-wait here.
+                    # Don't busy-wait under the lock: keep the apply pending and let the worker's next
+                    # ticks (_retry_deferred_apply) come back for it, since no watch loop is waiting on it.
                     self._pending_apply = True
                     self._last_event_time = time()
+                    self._apply_retry_at = time() + 1
+                    self._logger.debug("Backend retry worker: scheduler is already applying a configuration, retrying in 1 second ...")
                     return
                 self._logger.info("Backend retry worker: deploying recovered configuration...")
                 try:
                     ret = self.apply_config()
                     if not ret:
+                        self._pending_apply = True
+                        self._apply_retry_at = time() + 10
                         self._logger.error("Backend retry worker: error while deploying new configuration")
                     else:
                         self._logger.info("Backend retry worker: successfully deployed recovered configuration")
                         self._set_autoconf_load_db()
                 except BaseException as e:
+                    self._pending_apply = True
+                    self._apply_retry_at = time() + 10
                     self._logger.debug(format_exc())
                     self._logger.error(f"Backend retry worker: exception while deploying new configuration: {e}")
-        except BaseException as e:
-            self._logger.debug(format_exc())
-            self._logger.error(f"Backend retry worker: unexpected error: {e}")
+            except BaseException as e:
+                self._pending_apply = True
+                self._apply_retry_at = time() + 10
+                self._logger.debug(format_exc())
+                self._logger.error(f"Backend retry worker: unexpected error: {e}")
 
     def _get_loadbalancer_ip(self, name: str, namespace: str) -> Optional[List[str]]:
         try:

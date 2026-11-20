@@ -57,7 +57,7 @@ function whitelist:initialize(ctx)
 			if not self.lists[kind] then
 				self.lists[kind] = {}
 			end
-			for data in self.variables["WHITELIST_" .. kind]:gmatch("%S+") do
+			for data in (self.variables["WHITELIST_" .. kind] or ""):gmatch("%S+") do
 				if data ~= "" then
 					table.insert(self.lists[kind], data)
 				end
@@ -110,8 +110,12 @@ function whitelist:init()
 	local i = 0
 	for key in server_name:gmatch("%S+") do
 		for kind, _ in pairs(whitelists) do
-			local file_path = "/var/cache/bunkerweb/whitelist/" .. key .. "/" .. kind .. ".list"
-			local f = open(file_path, "r")
+			-- The download job can leave retired files in a concurrent config push.
+			local urls = get_variable("WHITELIST_" .. kind .. "_URLS", true, { bw = { server_name = key } })
+			local f
+			if urls and urls:match("%S") then
+				f = open("/var/cache/bunkerweb/whitelist/" .. key .. "/" .. kind .. ".list", "r")
+			end
 			if f then
 				for line in f:lines() do
 					if line ~= "" then
@@ -177,7 +181,7 @@ function whitelist:set()
 		return self:ret(true, "whitelist not activated")
 	end
 	-- Check cache
-	local whitelisted, err = self:check_cache()
+	local whitelisted, err, already_cached = self:check_cache()
 	if whitelisted == nil then
 		return self:ret(false, err)
 	elseif whitelisted then
@@ -187,14 +191,35 @@ function whitelist:set()
 		return self:ret(true, err)
 	end
 	-- The ModSecurity kill switch tests ENV:is_whitelisted in phase 1, which runs before the
-	-- access phase. Every other kind reaches it through the cache; the header decision is never
-	-- cached, so it has to be taken here as well or a whitelisted probe still trips the CRS.
+	-- access phase and freezes ENV for the whole transaction: a verdict taken in access() comes
+	-- too late. The header decision is never cached, so it is taken here.
 	local matched_header = match_header_rules(self.ctx, self.header_rules, "WHITELIST_HEADER_VALUE")
 	if matched_header then
 		ngx_var.is_whitelisted = "yes"
 		self.ctx.bw.is_whitelisted = "yes"
 		env_set("is_whitelisted", "yes")
 		return self:ret(true, "header " .. matched_header .. " is whitelisted")
+	end
+	-- Cold cache : decide now what needs no cosocket (IP/network, ASN, URI, User-Agent), with the
+	-- helpers access() uses. rDNS needs a DNS lookup that set_by_lua can't make, so it stays in
+	-- access() and only applies from the next request. Only a positive verdict is cached here: a
+	-- negative one would stop access() from checking rDNS for this client.
+	for k, _ in pairs(already_cached) do
+		if not already_cached[k] then
+			local ok, verdict = self:is_whitelisted(k, true)
+			if ok == nil then
+				self.logger:log(ERR, "error while checking if " .. k .. " is whitelisted : " .. verdict)
+			elseif verdict ~= "ok" then
+				local added, add_err = self:add_to_cache(self:kind_to_ele(k), verdict)
+				if not added then
+					self.logger:log(ERR, "error while adding element to cache : " .. add_err)
+				end
+				ngx_var.is_whitelisted = "yes"
+				self.ctx.bw.is_whitelisted = "yes"
+				env_set("is_whitelisted", "yes")
+				return self:ret(true, k .. " is whitelisted (info : " .. verdict .. ")")
+			end
+		end
 	end
 	return self:ret(true, "not in whitelist cache")
 end
@@ -230,13 +255,17 @@ function whitelist:access()
 	local ok
 	for k, _ in pairs(already_cached) do
 		if not already_cached[k] then
-			ok, whitelisted = self:is_whitelisted(k)
+			local incomplete
+			ok, whitelisted, incomplete = self:is_whitelisted(k)
 			if ok == nil then
 				self.logger:log(ERR, "error while checking if " .. k .. " is whitelisted : " .. whitelisted)
 			else
-				ok, err = self:add_to_cache(self:kind_to_ele(k), whitelisted)
-				if not ok then
-					self.logger:log(ERR, "error while adding element to cache : " .. err)
+				-- A negative verdict taken without the rDNS check (resolver error) is not cached: the next request retries it
+				if whitelisted ~= "ok" or not incomplete then
+					ok, err = self:add_to_cache(self:kind_to_ele(k), whitelisted)
+					if not ok then
+						self.logger:log(ERR, "error while adding element to cache : " .. err)
+					end
 				end
 				if whitelisted ~= "ok" then
 					ngx_var.is_whitelisted = "yes"
@@ -316,9 +345,9 @@ function whitelist:add_to_cache(ele, value)
 	return true
 end
 
-function whitelist:is_whitelisted(kind)
+function whitelist:is_whitelisted(kind, skip_rdns)
 	if kind == "IP" then
-		return self:is_whitelisted_ip()
+		return self:is_whitelisted_ip(skip_rdns)
 	elseif kind == "URI" then
 		return self:is_whitelisted_uri()
 	elseif kind == "UA" then
@@ -327,7 +356,7 @@ function whitelist:is_whitelisted(kind)
 	return false, "unknown kind " .. kind
 end
 
-function whitelist:is_whitelisted_ip()
+function whitelist:is_whitelisted_ip(skip_rdns)
 	-- Check if IP is in whitelist
 	local ipm, err = ipmatcher_new(self.lists["IP"])
 	if not ipm then
@@ -342,7 +371,8 @@ function whitelist:is_whitelisted_ip()
 	end
 
 	-- Check if rDNS is needed
-	local check_rdns = self.lists["RDNS"] and #self.lists["RDNS"] > 0
+	local rdns_failed = false
+	local check_rdns = not skip_rdns and self.lists["RDNS"] and #self.lists["RDNS"] > 0
 	if self.variables["WHITELIST_RDNS_GLOBAL"] == "yes" and not self.ctx.bw.ip_is_global then
 		check_rdns = false
 	end
@@ -358,6 +388,7 @@ function whitelist:is_whitelisted_ip()
 				return true, "rDNS " .. rdns_suffix
 			end
 		else
+			rdns_failed = true
 			self.logger:log(ERR, "error while getting rdns : " .. err)
 		end
 	end
@@ -376,8 +407,8 @@ function whitelist:is_whitelisted_ip()
 		end
 	end
 
-	-- Not whitelisted
-	return false, "ok"
+	-- Not whitelisted (third value: the rDNS check could not run)
+	return false, "ok", rdns_failed
 end
 
 function whitelist:is_whitelisted_uri()

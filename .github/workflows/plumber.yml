@@ -8,7 +8,7 @@ on:
 jobs:
   plumber:
     name: Analyze GitHub Actions workflows
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     permissions:
       contents: read
       security-events: write
@@ -22,7 +22,7 @@ jobs:
             .plumber.yaml
           persist-credentials: false
       - name: Run Plumber
-        uses: getplumber/plumber@de6c889e24c9147baa064db656b71c8e98595d15 # v0.5.8
+        uses: getplumber/plumber@2342834dc0b67d2c87a33ac86789e481ad869402 # v0.7.17
         with:
           verify-attestation: true
           config-file: .plumber.yaml

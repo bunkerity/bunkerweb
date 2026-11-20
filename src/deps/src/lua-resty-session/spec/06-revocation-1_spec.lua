@@ -329,3 +329,259 @@ describe("Revocation tests 1 session: configuration", function()
     assert.is_nil(s.revocation)
   end)
 end)
+
+
+describe("session: revocation cache", function()
+  local cookie_name = "session_cookie"
+  local session_cookie
+  local cookies
+  local get_count
+  local set_count
+  local revoked
+  local store
+
+  local function open_session()
+    session.__set_ngx_var({
+      ["cookie_" .. cookie_name] = session_cookie,
+    })
+
+    local s = session.new()
+    local ok, err = s:open()
+    return s, ok, err
+  end
+
+  local function initialize(cache_ttl)
+    get_count = 0
+    set_count = 0
+    revoked = false
+    store = {
+      get = function()
+        get_count = get_count + 1
+        return revoked and "1" or nil
+      end,
+      set = function()
+        set_count = set_count + 1
+        revoked = true
+        return true
+      end,
+    }
+
+    session.init({
+      cookie_name = cookie_name,
+      storage = "cookie",
+      revocation = store,
+      revocation_cache_ttl = cache_ttl,
+    })
+
+    cookies = {}
+    session.__set_ngx_header(cookies)
+    local s = session.new()
+    s:set("test_key", "test_data")
+    local ok, err = s:save()
+    assert.is_true(ok)
+    assert.is_nil(err)
+    session_cookie = extract_cookie(cookie_name, cookies["Set-Cookie"])
+    s:close()
+  end
+
+  before_each(function()
+    initialize(5)
+  end)
+
+  it("reuses a cached revocation lookup", function()
+    local s, ok, err = open_session()
+    assert.is_true(ok)
+    assert.is_nil(err)
+    s:close()
+
+    s, ok, err = open_session()
+    assert.is_true(ok)
+    assert.is_nil(err)
+    assert.equals(1, get_count)
+    s:close()
+  end)
+
+  it("updates the cache after revoking a session", function()
+    local s, ok, err = open_session()
+    assert.is_true(ok)
+    assert.is_nil(err)
+
+    session.__set_ngx_header(cookies)
+    ok, err = s:destroy()
+    assert.is_true(ok)
+    assert.is_nil(err)
+    assert.equals(1, set_count)
+
+    local reopened
+    reopened, ok, err = open_session()
+    assert.is_nil(ok)
+    assert.equals("session revoked", err)
+    assert.equals(1, get_count)
+    reopened:close()
+  end)
+
+  it("queries the revocation store after the cache entry expires", function()
+    initialize(1)
+
+    local s, ok, err = open_session()
+    assert.is_true(ok)
+    assert.is_nil(err)
+    s:close()
+
+    sleep(2)
+
+    s, ok, err = open_session()
+    assert.is_true(ok)
+    assert.is_nil(err)
+    assert.equals(2, get_count)
+    s:close()
+  end)
+
+  it("can disable the revocation cache", function()
+    initialize(0)
+
+    local s, ok, err = open_session()
+    assert.is_true(ok)
+    assert.is_nil(err)
+    s:close()
+
+    s, ok, err = open_session()
+    assert.is_true(ok)
+    assert.is_nil(err)
+    assert.equals(2, get_count)
+    s:close()
+  end)
+
+  it("caches an open fail-mode result when the store is unreachable", function()
+    get_count = 0
+    store = {
+      get = function()
+        get_count = get_count + 1
+        return nil, "connection refused"
+      end,
+      set = function()
+        return true
+      end,
+    }
+
+    session.init({
+      cookie_name = cookie_name,
+      storage = "cookie",
+      revocation = store,
+      revocation_fail_mode = "open",
+      revocation_error_cache_ttl = 5,
+    })
+
+    local s, ok, err = open_session()
+    assert.is_true(ok)
+    assert.is_nil(err)
+    s:close()
+
+    s, ok, err = open_session()
+    assert.is_true(ok)
+    assert.is_nil(err)
+    assert.equals(1, get_count)
+    s:close()
+  end)
+
+  it("caches a closed fail-mode result when the store is unreachable", function()
+    get_count = 0
+    store = {
+      get = function()
+        get_count = get_count + 1
+        return nil, "connection refused"
+      end,
+      set = function()
+        return true
+      end,
+    }
+
+    session.init({
+      cookie_name = cookie_name,
+      storage = "cookie",
+      revocation = store,
+      revocation_fail_mode = "closed",
+      revocation_error_cache_ttl = 5,
+    })
+
+    local s, ok, err = open_session()
+    assert.is_nil(ok)
+    assert.matches("unable to check session revocation", err)
+    s:close()
+
+    s, ok, err = open_session()
+    assert.is_nil(ok)
+    assert.matches("unable to check session revocation", err)
+    assert.equals(1, get_count)
+    s:close()
+  end)
+
+  it("skips the revocation write when the lookup is already revoked", function()
+    local s, ok, err = open_session()
+    assert.is_true(ok)
+    assert.is_nil(err)
+
+    local other, ook, oerr = open_session()
+    assert.is_true(ook)
+    assert.is_nil(oerr)
+    assert.equals(1, get_count)
+
+    session.__set_ngx_header(cookies)
+    ok, err = s:destroy()
+    assert.is_true(ok)
+    assert.is_nil(err)
+    assert.equals(1, set_count)
+
+    session.__set_ngx_header(cookies)
+    ook, oerr = other:destroy()
+    assert.is_true(ook)
+    assert.is_nil(oerr)
+    assert.equals(1, get_count)
+    assert.equals(1, set_count)
+  end)
+
+  it("caches a failed revocation write for later lookups", function()
+    get_count = 0
+    set_count = 0
+    store = {
+      get = function()
+        get_count = get_count + 1
+        return nil
+      end,
+      set = function()
+        set_count = set_count + 1
+        return nil, "connection refused"
+      end,
+    }
+
+    session.init({
+      cookie_name = cookie_name,
+      storage = "cookie",
+      revocation = store,
+      revocation_fail_mode = "closed",
+      revocation_error_cache_ttl = 5,
+    })
+
+    local s, ok, err = open_session()
+    assert.is_true(ok)
+    assert.is_nil(err)
+
+    session.__set_ngx_header(cookies)
+    ok, err = s:destroy()
+    assert.is_nil(ok)
+    assert.matches("unable to mark session revoked", err)
+    assert.equals(1, set_count)
+
+    ok, err = s:destroy()
+    assert.is_nil(ok)
+    assert.matches("unable to check session revocation", err)
+    assert.equals(1, set_count)
+
+    local reopened
+    reopened, ok, err = open_session()
+    assert.is_nil(ok)
+    assert.matches("unable to check session revocation", err)
+    assert.equals(1, get_count)
+    reopened:close()
+  end)
+end)

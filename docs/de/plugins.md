@@ -8,18 +8,18 @@ Hier ist die Liste der "offiziellen" Plugins, die wir pflegen (weitere Informati
 
 |      Name       | Version | Beschreibung                                                                                                                                                              |                                                 Link                                                  |
 | :-------------: | :-----: | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | :---------------------------------------------------------------------------------------------------: |
-|  **Authentik**  |  1.13   | Schützen Sie Ihre Webdienste mit der Authentik-Forward-Authentifizierung (auth_request) für Single Sign-On.                                                               |   [bunkerweb-plugins/authentik](https://github.com/bunkerity/bunkerweb-plugins/tree/main/authentik)   |
-|   **ClamAV**    |  1.13   | Scannt hochgeladene Dateien automatisch mit der ClamAV-Antiviren-Engine und lehnt die Anfrage ab, wenn eine Datei als bösartig erkannt wird.                              |      [bunkerweb-plugins/clamav](https://github.com/bunkerity/bunkerweb-plugins/tree/main/clamav)      |
-| **Cloudflare**  |  1.13   | Konfigurieren Sie die vertrauenswürdigen IPs von Cloudflare, verwalten Sie Origin-CA-Zertifikate und synchronisieren Sie BunkerWeb-Sperren mit einer Cloudflare-IP-Liste. |  [bunkerweb-plugins/cloudflare](https://github.com/bunkerity/bunkerweb-plugins/tree/main/cloudflare)  |
-|   **Coraza**    |  1.13   | Überprüft Anfragen mit der Coraza WAF (Alternative zu ModSecurity).                                                                                                       |      [bunkerweb-plugins/coraza](https://github.com/bunkerity/bunkerweb-plugins/tree/main/coraza)      |
-|   **Discord**   |  1.13   | Sendet Sicherheitsbenachrichtigungen über einen Webhook an einen Discord-Kanal.                                                                                           |     [bunkerweb-plugins/discord](https://github.com/bunkerity/bunkerweb-plugins/tree/main/discord)     |
-|   **Matrix**    |  1.13   | Sendet Sicherheitsbenachrichtigungen über die Matrix-API an einen Matrix-Raum.                                                                                            |      [bunkerweb-plugins/matrix](https://github.com/bunkerity/bunkerweb-plugins/tree/main/matrix)      |
-| **open-appsec** |  1.13   | Prüft Anfragen mit der Machine-Learning-WAF open-appsec über einen Sidecar-Agenten und blockiert, was diese ablehnt.                                                      |  [bunkerweb-plugins/openappsec](https://github.com/bunkerity/bunkerweb-plugins/tree/main/openappsec)  |
-| **SentinelOne** |  1.13   | Prüft Hashes hochgeladener Dateien und Client-IPs über die SentinelOne-API und blockiert Anfragen anhand der Hash-Reputation oder von Bedrohungsindikatoren.              | [bunkerweb-plugins/sentinelone](https://github.com/bunkerity/bunkerweb-plugins/tree/main/sentinelone) |
-|    **Slack**    |  1.13   | Sendet Sicherheitsbenachrichtigungen über einen Webhook an einen Slack-Kanal.                                                                                             |       [bunkerweb-plugins/slack](https://github.com/bunkerity/bunkerweb-plugins/tree/main/slack)       |
-|  **SysWarden**  |  1.13   | Synchronisiert BunkerWeb-Sperren mit SysWarden für nftables-Blockierung auf Kernel-Ebene und importiert SysWarden-Sperr- und Freigabelisten.                              |   [bunkerweb-plugins/syswarden](https://github.com/bunkerity/bunkerweb-plugins/tree/main/syswarden)   |
-| **VirusTotal**  |  1.13   | Prüft Hashes hochgeladener Dateien und Client-IPs über die VirusTotal-API und blockiert Anfragen, wenn konfigurierte Reputationsschwellen überschritten werden.           |  [bunkerweb-plugins/virustotal](https://github.com/bunkerity/bunkerweb-plugins/tree/main/virustotal)  |
-|   **WebHook**   |  1.13   | Sendet Sicherheitsbenachrichtigungen über einen Webhook an einen benutzerdefinierten HTTP-Endpunkt.                                                                       |     [bunkerweb-plugins/webhook](https://github.com/bunkerity/bunkerweb-plugins/tree/main/webhook)     |
+|  **Authentik**  |  1.14   | Schützen Sie Ihre Webdienste mit der Authentik-Forward-Authentifizierung (auth_request) für Single Sign-On.                                                               |   [bunkerweb-plugins/authentik](https://github.com/bunkerity/bunkerweb-plugins/tree/main/authentik)   |
+|   **ClamAV**    |  1.14   | Scannt hochgeladene Dateien automatisch mit der ClamAV-Antiviren-Engine und lehnt die Anfrage ab, wenn eine Datei als bösartig erkannt wird.                              |      [bunkerweb-plugins/clamav](https://github.com/bunkerity/bunkerweb-plugins/tree/main/clamav)      |
+| **Cloudflare**  |  1.14   | Konfigurieren Sie die vertrauenswürdigen IPs von Cloudflare, verwalten Sie Origin-CA-Zertifikate und synchronisieren Sie BunkerWeb-Sperren mit einer Cloudflare-IP-Liste. |  [bunkerweb-plugins/cloudflare](https://github.com/bunkerity/bunkerweb-plugins/tree/main/cloudflare)  |
+|   **Coraza**    |  1.14   | Überprüft Anfragen mit der Coraza WAF (Alternative zu ModSecurity).                                                                                                       |      [bunkerweb-plugins/coraza](https://github.com/bunkerity/bunkerweb-plugins/tree/main/coraza)      |
+|   **Discord**   |  1.14   | Sendet Sicherheitsbenachrichtigungen über einen Webhook an einen Discord-Kanal.                                                                                           |     [bunkerweb-plugins/discord](https://github.com/bunkerity/bunkerweb-plugins/tree/main/discord)     |
+|   **Matrix**    |  1.14   | Sendet Sicherheitsbenachrichtigungen über die Matrix-API an einen Matrix-Raum.                                                                                            |      [bunkerweb-plugins/matrix](https://github.com/bunkerity/bunkerweb-plugins/tree/main/matrix)      |
+| **open-appsec** |  1.14   | Prüft Anfragen mit der Machine-Learning-WAF open-appsec über einen Sidecar-Agenten und blockiert, was diese ablehnt.                                                      |  [bunkerweb-plugins/openappsec](https://github.com/bunkerity/bunkerweb-plugins/tree/main/openappsec)  |
+| **SentinelOne** |  1.14   | Prüft Hashes hochgeladener Dateien und Client-IPs über die SentinelOne-API und blockiert Anfragen anhand der Hash-Reputation oder von Bedrohungsindikatoren.              | [bunkerweb-plugins/sentinelone](https://github.com/bunkerity/bunkerweb-plugins/tree/main/sentinelone) |
+|    **Slack**    |  1.14   | Sendet Sicherheitsbenachrichtigungen über einen Webhook an einen Slack-Kanal.                                                                                             |       [bunkerweb-plugins/slack](https://github.com/bunkerity/bunkerweb-plugins/tree/main/slack)       |
+|  **SysWarden**  |  1.14   | Synchronisiert BunkerWeb-Sperren mit SysWarden für nftables-Blockierung auf Kernel-Ebene und importiert SysWarden-Sperr- und Freigabelisten.                              |   [bunkerweb-plugins/syswarden](https://github.com/bunkerity/bunkerweb-plugins/tree/main/syswarden)   |
+| **VirusTotal**  |  1.14   | Prüft Hashes hochgeladener Dateien und Client-IPs über die VirusTotal-API und blockiert Anfragen, wenn konfigurierte Reputationsschwellen überschritten werden.           |  [bunkerweb-plugins/virustotal](https://github.com/bunkerity/bunkerweb-plugins/tree/main/virustotal)  |
+|   **WebHook**   |  1.14   | Sendet Sicherheitsbenachrichtigungen über einen Webhook an einen benutzerdefinierten HTTP-Endpunkt.                                                                       |     [bunkerweb-plugins/webhook](https://github.com/bunkerity/bunkerweb-plugins/tree/main/webhook)     |
 
 ## Wie man ein Plugin verwendet
 
@@ -27,7 +27,7 @@ Hier ist die Liste der "offiziellen" Plugins, die wir pflegen (weitere Informati
 
 Wenn Sie externe Plugins schnell installieren möchten, können Sie die Einstellung `EXTERNAL_PLUGIN_URLS` verwenden. Sie akzeptiert eine durch Leerzeichen getrennte Liste von URLs, die jeweils auf ein komprimiertes (zip-Format) Archiv mit einem oder mehreren Plugins verweisen.
 
-Sie können den folgenden Wert verwenden, wenn Sie die offiziellen Plugins automatisch installieren möchten: `EXTERNAL_PLUGIN_URLS=https://github.com/bunkerity/bunkerweb-plugins/archive/refs/tags/v1.13.zip`
+Sie können den folgenden Wert verwenden, wenn Sie die offiziellen Plugins automatisch installieren möchten: `EXTERNAL_PLUGIN_URLS=https://github.com/bunkerity/bunkerweb-plugins/archive/refs/tags/v1.14.zip`
 
 ### Manuell
 
@@ -95,7 +95,7 @@ Der erste Schritt besteht darin, das Plugin zu installieren, indem Sie seine Dat
     services:
     ...
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.17
+        image: bunkerity/bunkerweb-scheduler:1.6.18
         volumes:
           - ./bw-data:/data
     ...
@@ -130,7 +130,7 @@ Der erste Schritt besteht darin, das Plugin zu installieren, indem Sie seine Dat
     services:
     ...
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.17
+        image: bunkerity/bunkerweb-scheduler:1.6.18
         volumes:
           - ./bw-data:/data
     ...
@@ -173,7 +173,7 @@ Der erste Schritt besteht darin, das Plugin zu installieren, indem Sie seine Dat
     services:
     ...
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.17
+        image: bunkerity/bunkerweb-scheduler:1.6.18
         volumes:
           - /shared/bw-plugins:/data/plugins
     ...
@@ -220,7 +220,7 @@ Der erste Schritt besteht darin, das Plugin zu installieren, indem Sie seine Dat
           serviceAccountName: sa-bunkerweb
           containers:
             - name: bunkerweb-scheduler
-              image: bunkerity/bunkerweb-scheduler:1.6.17
+              image: bunkerity/bunkerweb-scheduler:1.6.18
               imagePullPolicy: Always
               env:
                 - name: KUBERNETES_MODE
@@ -260,7 +260,7 @@ Der erste Schritt besteht darin, das Plugin zu installieren, indem Sie seine Dat
 
 !!! tip "Bestehende Plugins"
 
-    Wenn die Dokumentation nicht ausreicht, können Sie sich den bestehenden Quellcode der [offiziellen Plugins](https://github.com/bunkerity/bunkerweb-plugins) und der [Kern-Plugins](https://github.com/bunkerity/bunkerweb/tree/v1.6.17/src/common/core) ansehen (bereits in BunkerWeb enthalten, aber technisch gesehen sind es Plugins).
+    Wenn die Dokumentation nicht ausreicht, können Sie sich den bestehenden Quellcode der [offiziellen Plugins](https://github.com/bunkerity/bunkerweb-plugins) und der [Kern-Plugins](https://github.com/bunkerity/bunkerweb/tree/v1.6.18/src/common/core) ansehen (bereits in BunkerWeb enthalten, aber technisch gesehen sind es Plugins).
 
 Wie eine Plugin-Struktur aussieht:
 ```
@@ -482,9 +482,22 @@ Die deklarierten Funktionen werden automatisch in bestimmten Kontexten aufgerufe
 |   `preread`   | [preread_by_lua](https://github.com/openresty/stream-lua-nginx-module#preread_by_lua_block) | Ähnlich der `access`-Funktion, aber für den Stream-Modus.                                                                                                                                                                     | `ret`, `msg`,`status`<ul><li>`ret` (boolean): true, wenn kein Fehler, sonst false</li><li>`msg` (string): Erfolgs- oder Fehlermeldung</li><li>`status` (number): unterbricht den aktuellen Prozess und gibt den [Status](https://github.com/openresty/lua-nginx-module#http-status-constants) zurück</li></ul>                                                                                                |
 | `log_stream`  |     [log_by_lua](https://github.com/openresty/stream-lua-nginx-module#log_by_lua_block)     | Ähnlich der `log`-Funktion, aber für den Stream-Modus.                                                                                                                                                                        | `ret`, `msg`<ul><li>`ret` (boolean): true, wenn kein Fehler, sonst false</li><li>`msg` (string): Erfolgs- oder Fehlermeldung</li></ul>                                                                                                                                                                                                                                                                        |
 
+**TLS-ClientHello-Hook.** Ein Plugin kann außerdem jeden TLS-Handshake sehen, bevor das Zertifikat ausgewählt wird, für den Standardserver und für jeden Dienst, indem es aus seinem Haupt-Lua-Modul eine Funktion auf Modulebene exportiert (keine Methode, damit pro Handshake kein Plugin-Objekt erzeugt wird):
+
+```lua
+-- in myplugin/myplugin.lua
+function myplugin.client_hello(hello)
+    -- hello (read-only): service (nil on the default server), ip (nil when the client address is unknown), raw and family
+    -- (packed peer address from ngx.ssl.raw_client_addr()), quic, proxy_protocol, real_ip, trusted
+    return nil -- or "drop" / "detect" and a reason
+end
+```
+
+Geben Sie `"drop"` zurück, um den Handshake abzubrechen, `"detect"`, um nur zu protokollieren, dass er verworfen würde, oder nichts, um ihn durchzulassen. Ein Fehler oder jeder andere Wert lässt den Handshake durch. Die Funktion läuft für jeden Handshake genau einmal und **darf nicht yielden**: kein Redis, kein Cosocket, kein `ngx.var`, kein `resty.lock`, kein Sleep. Aufrufe von Shared Dictionaries und `ngx.timer.at(0, ...)` sind erlaubt. Die Reihenfolge der Plugins, die sie exportieren, folgt `PLUGINS_ORDER_SSL_CLIENT_HELLO`. Ein Plugin, das `client_hello` exportiert, wird auf dem Standardserver nicht über seine Methode `ssl_client_hello_default` aufgerufen. Plugins können die Unterstützung mit `pcall(require, "bunkerweb.banlease")` und `banlease.CLIENT_HELLO_PLUGIN_HOOK == 1` erkennen.
+
 #### Bibliotheken
 
-Alle Direktiven aus dem [NGINX LUA-Modul](https://github.com/openresty/lua-nginx-module) und dem [NGINX Stream LUA-Modul](https://github.com/openresty/stream-lua-nginx-module) sind verfügbar. Darüber hinaus können Sie die in BunkerWeb enthaltenen LUA-Bibliotheken verwenden: siehe [dieses Skript](https://github.com/bunkerity/bunkerweb/blob/v1.6.17/src/deps/clone.sh) für die vollständige Liste.
+Alle Direktiven aus dem [NGINX LUA-Modul](https://github.com/openresty/lua-nginx-module) und dem [NGINX Stream LUA-Modul](https://github.com/openresty/stream-lua-nginx-module) sind verfügbar. Darüber hinaus können Sie die in BunkerWeb enthaltenen LUA-Bibliotheken verwenden: siehe [dieses Skript](https://github.com/bunkerity/bunkerweb/blob/v1.6.18/src/deps/clone.sh) für die vollständige Liste.
 
 Wenn Sie zusätzliche Bibliotheken benötigen, können Sie diese in den Stammordner des Plugins legen und darauf zugreifen, indem Sie ihnen Ihre Plugin-ID voranstellen. Hier ist ein Beispiel für eine Datei namens **mylibrary.lua**:
 
@@ -565,11 +578,34 @@ end
 
 !!! tip "Weitere Beispiele"
 
-    Wenn Sie die vollständige Liste der verfügbaren Funktionen sehen möchten, können Sie sich die Dateien im [lua-Verzeichnis](https://github.com/bunkerity/bunkerweb/tree/v1.6.17/src/bw/lua/bunkerweb) des Repositorys ansehen.
+    Wenn Sie die vollständige Liste der verfügbaren Funktionen sehen möchten, können Sie sich die Dateien im [lua-Verzeichnis](https://github.com/bunkerity/bunkerweb/tree/v1.6.18/src/bw/lua/bunkerweb) des Repositorys ansehen.
 
 ### Jobs
 
 BunkerWeb verwendet einen internen Job-Scheduler für periodische Aufgaben wie die Erneuerung von Zertifikaten mit Certbot, das Herunterladen von Blacklists, das Herunterladen von MMDB-Dateien usw. Sie können Aufgaben Ihrer Wahl hinzufügen, indem Sie sie in einen Unterordner namens **jobs** legen und sie in der Metadatendatei **plugin.json** auflisten. Vergessen Sie nicht, die Ausführungsberechtigungen für alle hinzuzufügen, um Probleme zu vermeiden, wenn ein Benutzer Ihr Plugin klont und installiert.
+
+#### Sensible Job-Cache-Einträge
+
+Ein Job, der ein Geheimnis zwischenspeichert (einen installationsspezifischen Schlüssel, ein Token, Zugangsdaten), kennzeichnet den Eintrag über seinen gespeicherten Namen als sensibel:
+
+- Der Name lautet genau `secret` oder endet auf `.secret` (zum Beispiel `token.secret`). Die Prüfung unterscheidet Groß- und Kleinschreibung: `SECRET` und `token.SECRET` sind gewöhnliche Namen.
+- Ein abschließendes `.tgz` wird ignoriert. Ein mit `cache_dir` zwischengespeichertes Verzeichnis ist daher sensibel, wenn sein eigener Name der Regel folgt: `state.secret` wird als `folder:<Pfad>/state.secret.tgz` gespeichert. Nur die letzte Pfadkomponente zählt, `folder:<Pfad>/secret/other.tgz` ist ein gewöhnlicher Eintrag.
+
+Das Lesen eines sensiblen Eintrags ist dann eingeschränkt:
+
+- **API**: `GET /cache/{service}/{plugin}/{job}/{file}` liefert `403`, sofern sich der Aufrufer nicht per HTTP Basic als API-Administrator oder mit dem `API_TOKEN` authentifiziert hat. Ein Biscuit-Token wird auch dann abgelehnt, wenn er für einen Administrator ausgestellt wurde. `GET /cache?with_data=true` lässt `data` und `printable` solcher Einträge weg und behält die Metadaten (Name, Prüfsumme, letzte Aktualisierung). `DELETE` bleibt unverändert.
+- **Web-UI**: Anzeigen und Herunterladen liefern `403`, sofern der Benutzer kein Super-Administrator ist (das Flag `admin`, nicht eine zugewiesene Rolle). Die Cache-Seite listet den Eintrag weiterhin auf.
+
+Die Einschränkung gilt für das Lesen über API und Web-UI. Sie verschlüsselt die gespeicherten Bytes nicht, verbirgt weder Namen noch Prüfsumme und ändert nichts daran, wie der Scheduler die Datei wiederherstellt. Bereits vorhandene Einträge namens `secret` oder `*.secret` sowie einige Core-Einträge, die private Schlüssel oder Zugangsdaten unter festen Namen enthalten (darunter die mTLS-Client-Schlüssel für Upstreams und das Failover-Backup-Archiv, das den gesamten Job-Cache bündelt), sind ab 1.6.18 eingeschränkt, ohne Umbenennung.
+
+Wer sich auf die Einschränkung verlassen will, erkennt sie zur Laufzeit, denn ein älterer Core liefert jeden Eintrag an jeden API-Aufrufer mit einem `cache_read`-Biscuit aus:
+
+```python
+try:
+    from common_utils import SENSITIVE_JOB_CACHE_SUPPORTED  # type: ignore
+except ImportError:
+    SENSITIVE_JOB_CACHE_SUPPORTED = False
+```
 
 ### Plugin-Seite
 

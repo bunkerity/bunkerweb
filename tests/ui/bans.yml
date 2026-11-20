@@ -1,0 +1,107 @@
+integrations: "all"
+
+actions:
+  bans:
+    type: ui
+    steps:
+      wizard_setup:
+        type: setup
+        admin_username: "admin"
+        admin_password: "P@ssw0rd"
+        server_name: "www.example.com"
+        # The client address comes from X-Forwarded-For (REAL_IP_FROM covers the Docker networks by default),
+        # so the Bad Behavior ban below hits an address of its own and not the browser's
+        use_real_ip: true
+
+      access_bans:
+        type: access
+        url: "%BASE_URL%/bans"
+        sleep: 2.0
+      login:
+        type: login
+        next_page: "bans"
+        username: "admin"
+        password: "P@ssw0rd"
+
+      # Add a ban from the UI
+      verify_no_ban:
+        type: find
+        selector: '//table[@id="bans"]//td[contains(., "203.0.113.10")]'
+        findable: false
+      open_add_ban:
+        type: click
+        selector: '//button[.//span[@data-i18n="button.add_ban_plural"]]'
+        sleep: 1.0
+      fill_ban_ip:
+        type: send_keys
+        selector: '//div[@id="modal-ban-ips"]//input[@name="ip"]'
+        value: "203.0.113.10"
+      fill_ban_permanent:
+        type: click
+        selector: '//input[@id="permanentBan-1"]'
+      submit_ban:
+        type: click
+        selector: '//div[@id="modal-ban-ips"]//button[@type="submit"]'
+        sleep: 1.0
+      access_bans_1:
+        type: access
+        url: "%BASE_URL%/bans"
+        sleep: 10.0
+      verify_ban:
+        type: find
+        selector: '//table[@id="bans"]//td[contains(., "203.0.113.10")]'
+
+      # A ban BunkerWeb creates on its own: ten 404 answers within a minute trip Bad Behavior
+      trigger_bad_behavior:
+        type: fetch
+        url: "%BASE_URL%/ui-e2e-bad-behavior"
+        headers:
+          X-Forwarded-For: "203.0.113.77"
+        count: 15
+      access_bans_2:
+        type: access
+        url: "%BASE_URL%/bans"
+        sleep: 5.0
+      verify_bad_behavior_ban:
+        type: find
+        selector: '//table[@id="bans"]//td[contains(., "203.0.113.77")]'
+      verify_bad_behavior_reason:
+        type: find
+        selector: '//table[@id="bans"]//tr[td[contains(., "203.0.113.77")]]/td[contains(translate(., "BAD", "bad"), "bad behavior")]'
+
+      # Unban both
+      unban_ui_ban:
+        type: click
+        selector: '//button[contains(@class, "unban-single") and @data-ip="203.0.113.10"]'
+        sleep: 1.0
+      confirm_unban_ui_ban:
+        type: click
+        selector: '//button[@id="unban-submit"]'
+        sleep: 1.0
+      access_bans_3:
+        type: access
+        url: "%BASE_URL%/bans"
+        sleep: 10.0
+      verify_ui_ban_removed:
+        type: find
+        selector: '//table[@id="bans"]//td[contains(., "203.0.113.10")]'
+        findable: false
+      verify_bad_behavior_ban_kept:
+        type: find
+        selector: '//table[@id="bans"]//td[contains(., "203.0.113.77")]'
+      unban_bad_behavior_ban:
+        type: click
+        selector: '//button[contains(@class, "unban-single") and @data-ip="203.0.113.77"]'
+        sleep: 1.0
+      confirm_unban_bad_behavior_ban:
+        type: click
+        selector: '//button[@id="unban-submit"]'
+        sleep: 1.0
+      access_bans_4:
+        type: access
+        url: "%BASE_URL%/bans"
+        sleep: 10.0
+      verify_bad_behavior_ban_removed:
+        type: find
+        selector: '//table[@id="bans"]//td[contains(., "203.0.113.77")]'
+        findable: false

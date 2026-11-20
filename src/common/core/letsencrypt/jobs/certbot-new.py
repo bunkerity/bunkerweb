@@ -236,7 +236,12 @@ def certificate_changes(
         if server_name in zerossl_api_key_hashes and configured_api_key_hash != previous_api_key_hash:
             reasons.append(f"[Service: {server_name}] ZeroSSL API key changed, forcing renewal.")
 
-    if config["challenge"] == "dns" and bytes_hash(config["provider"].get_formatted_credentials(), algorithm="sha256") != existing_cert["credentials_hash"]:
+    # Route53 persists no credentials path in renewal confs; renewal rebuilds AWS_CONFIG_FILE from current settings.
+    if (
+        config["challenge"] == "dns"
+        and config["authenticator"] != "route53"
+        and bytes_hash(config["provider"].get_formatted_credentials(), algorithm="sha256") != existing_cert["credentials_hash"]
+    ):
         reasons.append(f"[Service: {server_name}] DNS credentials have changed, forcing renewal.")
 
     return reasons, expand_names and not reasons
@@ -369,7 +374,7 @@ def is_domain_blacklisted(domain, psl):
             # Allow subdomains
         # Block if candidate matches a PSL wildcard rule
         if f"*.{candidate}" in psl["rules"]:
-            if len(labels[i:]) == 2:
+            if i == 1 or (i == 2 and labels[0] == "*"):
                 return True  # Block foo.bar and *.foo.bar
     return False
 
@@ -558,11 +563,13 @@ def build_service_config(service: str) -> Tuple[List[str], Dict[str, Union[str, 
     if unissuable or skipped_ips:
         issuable = [name for name in issuable if name not in skipped_ips]
         if activated:
-            if unissuable:
-                LOGGER.warning(
-                    f"[Service: {service}] No public CA issues certificates for {', '.join(unissuable)}"
-                    + (", requesting one for the remaining server names." if issuable else ", skipping generation.")
-                )
+            outcome = ", requesting one for the remaining server names." if issuable else ", skipping generation."
+            ipv6_names = [name for name in unissuable if ":" in name]
+            other_names = [name for name in unissuable if ":" not in name]
+            if other_names:
+                LOGGER.warning(f"[Service: {service}] No public CA issues certificates for {', '.join(other_names)}" + outcome)
+            if ipv6_names:
+                LOGGER.warning(f"[Service: {service}] Certificates for IPv6 addresses are not supported yet: {', '.join(ipv6_names)}" + outcome)
             for ip in skipped_ips:
                 for problem in ip_problems:
                     LOGGER.warning(f"[Service: {service}] {ip} needs {problem}, skipping it.")
@@ -832,8 +839,8 @@ def certbot_new(
         if account_id:
             command.extend(["--account", account_id])
     else:
-        cmd_env["LETS_ENCRYPT_ZEROSSL_API_RETRY"] = str(config.get("zerossl_api_retry") or 3)
-        cmd_env["LETS_ENCRYPT_ZEROSSL_API_RETRY_DELAY"] = str(config.get("zerossl_api_retry_delay") or 2)
+        cmd_env["LETS_ENCRYPT_ZEROSSL_API_RETRY"] = str(3 if config.get("zerossl_api_retry") in (None, "") else config["zerossl_api_retry"])
+        cmd_env["LETS_ENCRYPT_ZEROSSL_API_RETRY_DELAY"] = str(2 if config.get("zerossl_api_retry_delay") in (None, "") else config["zerossl_api_retry_delay"])
         cmd_env["LETS_ENCRYPT_ZEROSSL_API_CONNECT_TIMEOUT"] = str(config.get("zerossl_api_connect_timeout") or 5)
         cmd_env["LETS_ENCRYPT_ZEROSSL_API_MAX_TIME"] = str(config.get("zerossl_api_max_time") or 20)
 
@@ -936,7 +943,9 @@ def certbot_new(
     return process.returncode
 
 
-def generate_certificate(service: str, config: Dict[str, Union[str, bool, int, Dict[str, str]]], cmd_env: Dict[str, str]) -> bool:
+def generate_certificate(
+    service: str, config: Dict[str, Union[str, bool, int, Dict[str, str]]], cmd_env: Dict[str, str], concurrent_requests: Optional[bool] = None
+) -> bool:
     LOGGER.info(
         f"Asking{' wildcard' if config['wildcard'] else ''} certificates for domain(s) : {config['server_names']} (email = {config['email'] or 'not provided'}){' using staging' if config['staging'] else ''} with {config['challenge']} challenge, using {config['profile']!r} profile on {config['acme_server']}..."
     )
@@ -945,7 +954,8 @@ def generate_certificate(service: str, config: Dict[str, Union[str, bool, int, D
         debug_config["zerossl_api_key"] = "***"
     LOGGER.debug(f"Service configuration: {debug_config}")
 
-    concurrent_requests = getenv("LETS_ENCRYPT_CONCURRENT_REQUESTS", "no").lower() == "yes"
+    if concurrent_requests is None:
+        concurrent_requests = getenv("LETS_ENCRYPT_CONCURRENT_REQUESTS", "no").lower() == "yes"
     paths, temp_root = prepare_certbot_paths(service, concurrent_requests, CACHE_PATH, DATA_PATH, WORK_DIR, LOGS_DIR)
     success = False
 
@@ -1204,8 +1214,9 @@ try:
                     required_accounts.add((bool(config.get("staging")), str(config.get("email") or "")))
                 else:
                     required_zerossl_accounts.add((bool(config.get("staging")), str(config.get("email") or "")))
+            registration_failed = False
             if required_accounts:
-                ensure_accounts(required_accounts, cmd_env.copy(), CERTBOT_BIN, LOG_LEVEL, DATA_PATH, WORK_DIR, LOGS_DIR, LOGGER)
+                registration_failed = not ensure_accounts(required_accounts, cmd_env.copy(), CERTBOT_BIN, LOG_LEVEL, DATA_PATH, WORK_DIR, LOGS_DIR, LOGGER)
             if required_zerossl_accounts:
                 zerossl_env = cmd_env.copy()
                 zerossl_env["CERTBOT_BIN"] = CERTBOT_BIN
@@ -1215,12 +1226,21 @@ try:
                         zerossl_api_key = str(config.get("zerossl_api_key") or "")
                         if zerossl_api_key:
                             zerossl_env["LETS_ENCRYPT_ZEROSSL_API_KEY"] = zerossl_api_key
-                        zerossl_env["LETS_ENCRYPT_ZEROSSL_API_RETRY"] = str(config.get("zerossl_api_retry") or 3)
-                        zerossl_env["LETS_ENCRYPT_ZEROSSL_API_RETRY_DELAY"] = str(config.get("zerossl_api_retry_delay") or 2)
+                        zerossl_env["LETS_ENCRYPT_ZEROSSL_API_RETRY"] = str(3 if config.get("zerossl_api_retry") in (None, "") else config["zerossl_api_retry"])
+                        zerossl_env["LETS_ENCRYPT_ZEROSSL_API_RETRY_DELAY"] = str(
+                            2 if config.get("zerossl_api_retry_delay") in (None, "") else config["zerossl_api_retry_delay"]
+                        )
                         zerossl_env["LETS_ENCRYPT_ZEROSSL_API_CONNECT_TIMEOUT"] = str(config.get("zerossl_api_connect_timeout") or 5)
                         zerossl_env["LETS_ENCRYPT_ZEROSSL_API_MAX_TIME"] = str(config.get("zerossl_api_max_time") or 20)
                         break
-                ensure_zerossl_accounts(required_zerossl_accounts, zerossl_env, ZEROSSL_BOT_SCRIPT.as_posix(), LOG_LEVEL, DATA_PATH, WORK_DIR, LOGS_DIR, LOGGER)
+                if not ensure_zerossl_accounts(
+                    required_zerossl_accounts, zerossl_env, ZEROSSL_BOT_SCRIPT.as_posix(), LOG_LEVEL, DATA_PATH, WORK_DIR, LOGS_DIR, LOGGER
+                ):
+                    registration_failed = True
+            if registration_failed:
+                # Parallel orders would each register their own account, so a real CA would see several new accounts in one run.
+                LOGGER.warning("Account registration failed, falling back to sequential certificate orders for this run to avoid creating several new accounts")
+                concurrent_requests = False
         start_progress_monitor()
         try:
             if concurrent_requests and len(pending_services) > 1:
@@ -1236,23 +1256,18 @@ try:
                             LOGGER.error(f"Unexpected error while generating certificate(s) for {service}: {e}")
                             success = False
                         config["exists"] = success
-                        if success:
-                            status = 1 if status == 0 else status
-                        else:
-                            status = 2
+                        # Changes (1) and failures (2) both matter to the scheduler.
+                        status |= 1 if success else 2
             else:
                 for service, config in pending_services:
                     # Same containment as the concurrent branch above: one service raising must not
                     # end the run for the ones after it, nor skip the cleanup and persist below.
                     try:
-                        config["exists"] = generate_certificate(service, config, cmd_env)
+                        config["exists"] = generate_certificate(service, config, cmd_env, concurrent_requests)
                     except BaseException as e:
                         LOGGER.error(f"Unexpected error while generating certificate(s) for {service}: {e}")
                         config["exists"] = False
-                    if config["exists"]:
-                        status = 1 if status == 0 else status
-                    else:
-                        status = 2
+                    status |= 1 if config["exists"] else 2
         finally:
             stop_progress_monitor()
 
@@ -1269,11 +1284,7 @@ try:
             f"Skipped certificate generation for {len(misconfigured_services)} service(s) with an invalid "
             f"Let's Encrypt configuration: {', '.join(misconfigured_services)}"
         )
-        # Only escalate when nothing was generated. status 1 means certbot succeeded and the
-        # scheduler still owes those certificates an nginx reload, which a status >= 2 would
-        # suppress, leaving freshly issued certificates unserved.
-        if status == 0:
-            status = 2
+        status |= 2
 
     if CACHE_PATH.is_dir():
         # * Clean up unused credential files
@@ -1366,6 +1377,7 @@ try:
                     cached, err = JOB.cache_dir(DATA_PATH)
                 if not cached:
                     LOGGER.error(f"Error while saving data to db cache : {err}")
+                    status |= 2
                 else:
                     LOGGER.info("Successfully saved data to db cache")
 except SystemExit as e:

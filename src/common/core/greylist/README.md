@@ -34,6 +34,7 @@ Follow these steps to configure and use the Greylist feature:
 | Setting        | Default | Context   | Multiple | Description                                              |
 | -------------- | ------- | --------- | -------- | -------------------------------------------------------- |
 | `USE_GREYLIST` | `no`    | multisite | no       | **Enable Greylist:** Set to `yes` to enable greylisting. |
+| `GREYLIST_URLS_REFRESH_INTERVAL` | `1h` | multisite | no | **URL refresh interval:** Minimum cache age before downloading again. Accepts bare seconds or time suffixes (`ms`, `s`, `m`, `h`, `d`, `w`, `M`, `y`). |
 
 === "IP Address"
     **What this does:** Greylist visitors based on their IP address or network. These visitors gain access but remain subject to security checks.
@@ -100,7 +101,7 @@ Follow these steps to configure and use the Greylist feature:
     All `*_URLS` settings support HTTP/HTTPS URLs as well as local file paths using the `file:///` prefix. Basic authentication is supported using the `http://user:pass@url` format.
 
 !!! tip "Regular Updates"
-    Greylists from URLs are automatically downloaded and updated hourly to ensure that your protection remains current with the latest trusted sources.
+    The job runs hourly. `GREYLIST_URLS_REFRESH_INTERVAL` sets the minimum age of a cached URL before downloading again (default: `1h`). Use `24h` for providers allowing at most one download per day, or `0` to download on every job run. Fresh caches and failed downloads keep their last valid entries. Within this plugin, URL caches are shared across services: the shortest interval can trigger a download, so use the same interval on every service sharing a provider-limited URL.
 
 
 ### Example Configurations
@@ -149,13 +150,22 @@ Follow these steps to configure and use the Greylist feature:
 
 === "Selective API Access"
 
-    A configuration allowing access to specific API endpoints:
+    A configuration that lets a partner network reach everything and lets every client reach one public endpoint:
 
     ```yaml
     USE_GREYLIST: "yes"
-    GREYLIST_URI: "^/api/v1/public/ ^/api/v1/status"
-    GREYLIST_IP: "203.0.113.0/24"  # External partner network
+    GREYLIST_IP: "203.0.113.0/24"
+    GREYLIST_URI: "^/api/foo$"
     ```
+
+    Greylist criteria are alternatives: a request passes the Greylist when any one of them matches. Here the listed network may reach every path, and any client may reach the exact path `/api/foo`. Other clients are denied on other paths. Other enabled security checks still apply to every request. Use `^/api/foo(/|$)` for a public subtree. The match uses the normalized path, without the query string. This cannot express different IP lists for different paths, or require both an IP and a path to match.
+
+    | Client | Path | Result |
+    | --- | --- | --- |
+    | In `203.0.113.0/24` | `/api/foo` | Passes |
+    | In `203.0.113.0/24` | any other path | Passes |
+    | Outside `203.0.113.0/24` | `/api/foo` | Passes |
+    | Outside `203.0.113.0/24` | any other path | Denied |
 
 ### Working with local list files
 

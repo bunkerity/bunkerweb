@@ -8,18 +8,18 @@ Voici la liste des plugins "officiels" que nous maintenons (voir le dépôt [bun
 
 |       Nom       | Version | Description                                                                                                                                                                                           |                                                 Lien                                                  |
 | :-------------: | :-----: | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :---------------------------------------------------------------------------------------------------: |
-|  **Authentik**  |  1.13   | Protégez vos services web avec l'authentification déléguée Authentik (auth_request) pour l'authentification unique (SSO).                                                                             |   [bunkerweb-plugins/authentik](https://github.com/bunkerity/bunkerweb-plugins/tree/main/authentik)   |
-|   **ClamAV**    |  1.13   | Analyse automatiquement les fichiers téléversés avec le moteur antivirus ClamAV et rejette la requête lorsqu'un fichier est détecté comme malveillant.                                                |      [bunkerweb-plugins/clamav](https://github.com/bunkerity/bunkerweb-plugins/tree/main/clamav)      |
-| **Cloudflare**  |  1.13   | Configurez les IP de confiance de Cloudflare, gérez les certificats Origin CA et synchronisez les bannissements BunkerWeb vers une liste d'IP Cloudflare.                                             |  [bunkerweb-plugins/cloudflare](https://github.com/bunkerity/bunkerweb-plugins/tree/main/cloudflare)  |
-|   **Coraza**    |  1.13   | Inspectez les requêtes à l'aide du WAF Coraza (alternative à ModSecurity).                                                                                                                            |      [bunkerweb-plugins/coraza](https://github.com/bunkerity/bunkerweb-plugins/tree/main/coraza)      |
-|   **Discord**   |  1.13   | Envoyez des notifications de sécurité à un canal Discord à l'aide d'un Webhook.                                                                                                                       |     [bunkerweb-plugins/discord](https://github.com/bunkerity/bunkerweb-plugins/tree/main/discord)     |
-|   **Matrix**    |  1.13   | Envoyez des notifications de sécurité à un salon Matrix à l'aide de l'API Matrix.                                                                                                                     |      [bunkerweb-plugins/matrix](https://github.com/bunkerity/bunkerweb-plugins/tree/main/matrix)      |
-| **open-appsec** |  1.13   | Inspectez les requêtes avec le WAF à apprentissage automatique open-appsec via un agent sidecar et refusez ce qu'il bloque.                                                                           |  [bunkerweb-plugins/openappsec](https://github.com/bunkerity/bunkerweb-plugins/tree/main/openappsec)  |
-| **SentinelOne** |  1.13   | Vérifiez les empreintes des fichiers téléversés et les adresses IP des clients avec l'API SentinelOne et bloquez les requêtes selon la réputation des empreintes ou les indicateurs de compromission. | [bunkerweb-plugins/sentinelone](https://github.com/bunkerity/bunkerweb-plugins/tree/main/sentinelone) |
-|    **Slack**    |  1.13   | Envoyez des notifications de sécurité à un canal Slack à l'aide d'un Webhook.                                                                                                                         |       [bunkerweb-plugins/slack](https://github.com/bunkerity/bunkerweb-plugins/tree/main/slack)       |
-|  **SysWarden**  |  1.13   | Synchronisez les bannissements BunkerWeb vers SysWarden pour un blocage nftables au niveau du noyau et importez ses listes de blocage et d'autorisation.                                              |   [bunkerweb-plugins/syswarden](https://github.com/bunkerity/bunkerweb-plugins/tree/main/syswarden)   |
-| **VirusTotal**  |  1.13   | Vérifiez les empreintes des fichiers téléversés et les adresses IP des clients avec l'API VirusTotal et bloquez les requêtes lorsque les seuils de réputation configurés sont dépassés.               |  [bunkerweb-plugins/virustotal](https://github.com/bunkerity/bunkerweb-plugins/tree/main/virustotal)  |
-|   **WebHook**   |  1.13   | Envoyez des notifications de sécurité à un point de terminaison HTTP personnalisé à l'aide d'un Webhook.                                                                                              |     [bunkerweb-plugins/webhook](https://github.com/bunkerity/bunkerweb-plugins/tree/main/webhook)     |
+|  **Authentik**  |  1.14   | Protégez vos services web avec l'authentification déléguée Authentik (auth_request) pour l'authentification unique (SSO).                                                                             |   [bunkerweb-plugins/authentik](https://github.com/bunkerity/bunkerweb-plugins/tree/main/authentik)   |
+|   **ClamAV**    |  1.14   | Analyse automatiquement les fichiers téléversés avec le moteur antivirus ClamAV et rejette la requête lorsqu'un fichier est détecté comme malveillant.                                                |      [bunkerweb-plugins/clamav](https://github.com/bunkerity/bunkerweb-plugins/tree/main/clamav)      |
+| **Cloudflare**  |  1.14   | Configurez les IP de confiance de Cloudflare, gérez les certificats Origin CA et synchronisez les bannissements BunkerWeb vers une liste d'IP Cloudflare.                                             |  [bunkerweb-plugins/cloudflare](https://github.com/bunkerity/bunkerweb-plugins/tree/main/cloudflare)  |
+|   **Coraza**    |  1.14   | Inspectez les requêtes à l'aide du WAF Coraza (alternative à ModSecurity).                                                                                                                            |      [bunkerweb-plugins/coraza](https://github.com/bunkerity/bunkerweb-plugins/tree/main/coraza)      |
+|   **Discord**   |  1.14   | Envoyez des notifications de sécurité à un canal Discord à l'aide d'un Webhook.                                                                                                                       |     [bunkerweb-plugins/discord](https://github.com/bunkerity/bunkerweb-plugins/tree/main/discord)     |
+|   **Matrix**    |  1.14   | Envoyez des notifications de sécurité à un salon Matrix à l'aide de l'API Matrix.                                                                                                                     |      [bunkerweb-plugins/matrix](https://github.com/bunkerity/bunkerweb-plugins/tree/main/matrix)      |
+| **open-appsec** |  1.14   | Inspectez les requêtes avec le WAF à apprentissage automatique open-appsec via un agent sidecar et refusez ce qu'il bloque.                                                                           |  [bunkerweb-plugins/openappsec](https://github.com/bunkerity/bunkerweb-plugins/tree/main/openappsec)  |
+| **SentinelOne** |  1.14   | Vérifiez les empreintes des fichiers téléversés et les adresses IP des clients avec l'API SentinelOne et bloquez les requêtes selon la réputation des empreintes ou les indicateurs de compromission. | [bunkerweb-plugins/sentinelone](https://github.com/bunkerity/bunkerweb-plugins/tree/main/sentinelone) |
+|    **Slack**    |  1.14   | Envoyez des notifications de sécurité à un canal Slack à l'aide d'un Webhook.                                                                                                                         |       [bunkerweb-plugins/slack](https://github.com/bunkerity/bunkerweb-plugins/tree/main/slack)       |
+|  **SysWarden**  |  1.14   | Synchronisez les bannissements BunkerWeb vers SysWarden pour un blocage nftables au niveau du noyau et importez ses listes de blocage et d'autorisation.                                              |   [bunkerweb-plugins/syswarden](https://github.com/bunkerity/bunkerweb-plugins/tree/main/syswarden)   |
+| **VirusTotal**  |  1.14   | Vérifiez les empreintes des fichiers téléversés et les adresses IP des clients avec l'API VirusTotal et bloquez les requêtes lorsque les seuils de réputation configurés sont dépassés.               |  [bunkerweb-plugins/virustotal](https://github.com/bunkerity/bunkerweb-plugins/tree/main/virustotal)  |
+|   **WebHook**   |  1.14   | Envoyez des notifications de sécurité à un point de terminaison HTTP personnalisé à l'aide d'un Webhook.                                                                                              |     [bunkerweb-plugins/webhook](https://github.com/bunkerity/bunkerweb-plugins/tree/main/webhook)     |
 
 ## Comment utiliser un plugin
 
@@ -27,7 +27,7 @@ Voici la liste des plugins "officiels" que nous maintenons (voir le dépôt [bun
 
 Si vous souhaitez installer rapidement des plugins externes, vous pouvez utiliser ce `EXTERNAL_PLUGIN_URLS` paramètre. Il prend une liste d'URL séparées par des espaces, chacune pointant vers une archive compressée (format zip) contenant un ou plusieurs plugins.
 
-Vous pouvez utiliser la valeur suivante si vous souhaitez installer automatiquement les plugins officiels : `EXTERNAL_PLUGIN_URLS=https://github.com/bunkerity/bunkerweb-plugins/archive/refs/tags/v1.13.zip`
+Vous pouvez utiliser la valeur suivante si vous souhaitez installer automatiquement les plugins officiels : `EXTERNAL_PLUGIN_URLS=https://github.com/bunkerity/bunkerweb-plugins/archive/refs/tags/v1.14.zip`
 
 ### Manuelle
 
@@ -95,7 +95,7 @@ La première étape consiste à installer le plugin en plaçant ses fichiers dan
     services:
     ...
       bw-scheduler:
-      image: bunkerity/bunkerweb-scheduler:1.6.17
+      image: bunkerity/bunkerweb-scheduler:1.6.18
       volumes:
         - ./bw-data:/data
     ...
@@ -131,7 +131,7 @@ La première étape consiste à installer le plugin en plaçant ses fichiers dan
     services:
     ...
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.17
+        image: bunkerity/bunkerweb-scheduler:1.6.18
         volumes:
           - ./bw-data:/data
     ...
@@ -174,7 +174,7 @@ La première étape consiste à installer le plugin en plaçant ses fichiers dan
     services:
     ...
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.17
+        image: bunkerity/bunkerweb-scheduler:1.6.18
         volumes:
           - /shared/bw-plugins:/data/plugins
     ...
@@ -221,7 +221,7 @@ La première étape consiste à installer le plugin en plaçant ses fichiers dan
           serviceAccountName: sa-bunkerweb
           containers:
             - name: bunkerweb-scheduler
-              image: bunkerity/bunkerweb-scheduler:1.6.17
+              image: bunkerity/bunkerweb-scheduler:1.6.18
               imagePullPolicy: Always
               env:
                 - name: KUBERNETES_MODE
@@ -261,7 +261,7 @@ La première étape consiste à installer le plugin en plaçant ses fichiers dan
 
 !!! tip "Plugins existants"
 
-    Si la documentation n'est pas suffisante, vous pouvez consulter le code source existant des [plugins officiels](https://github.com/bunkerity/bunkerweb-plugins) et des [plugins core](https://github.com/bunkerity/bunkerweb/tree/v1.6.17/src/common/core) (déjà inclus dans BunkerWeb mais ce sont des plugins, techniquement parlant).
+    Si la documentation n'est pas suffisante, vous pouvez consulter le code source existant des [plugins officiels](https://github.com/bunkerity/bunkerweb-plugins) et des [plugins core](https://github.com/bunkerity/bunkerweb/tree/v1.6.18/src/common/core) (déjà inclus dans BunkerWeb mais ce sont des plugins, techniquement parlant).
 
 À quoi ressemble la structure d'un plugin :
 ```
@@ -480,8 +480,21 @@ Les fonctions déclarées sont automatiquement appelées dans des contextes spé
 |   `access`    |         [access_by_lua](https://github.com/openresty/lua-nginx-module#access_by_lua)          | Appelé à chaque requête reçue par le serveur. Le cas d'utilisation typique consiste à effectuer les vérifications de sécurité ici et à refuser la demande si nécessaire.                                    | `ret`, `msg`,`status`,`redirect`<ul><li>`ret` (booléen) : true si pas d'erreur ou sinon false</li><li>`msg` (chaîne) : message de réussite ou d'erreur</li><li>`status` (nombre) : interrompt le processus en cours et renvoie [l'état HTTP](https://github.com/openresty/lua-nginx-module#http-status-constants)</li><li>`redirect` (URL) : si défini, redirigera vers l'URL</li></ul>  donnée |
 |     `log`     |            [log_by_lua](https://github.com/openresty/lua-nginx-module#log_by_lua)             | Appelé lorsqu'une requête est terminée (et avant qu'elle ne soit consignée dans les journaux d'accès). Le cas d'utilisation typique est de créer des statistiques ou de calculer des compteurs par exemple. | `ret`, `msg`<ul><li>`ret` (booléen) : true s'il n'y a pas d'erreur ou sinon false</li><li>`msg` (chaîne) : message de réussite ou d'erreur</li></ul>                                                                                                                                                                                                                                            |
 | `log_default` |            [log_by_lua](https://github.com/openresty/lua-nginx-module#log_by_lua)             | Identique mais `log` uniquement appelé sur le serveur par défaut.                                                                                                                                           | `ret`, `msg`<ul><li>`ret` (booléen) : true s'il n'y a pas d'erreur ou sinon false</li><li>`msg` (chaîne) : message de réussite ou d'erreur</li></ul>                                                                                                                                                                                                                                            |
-|   `preread`   | [](https://github.com/openresty/stream-lua-nginx-module#preread_by_lua_block)  preread_by_lua | Similaire à la `access` fonction mais pour le mode flux.                                                                                                                                                    | `ret`, `msg`,`status`<ul><li>`ret` (booléen) : true s'il n'y a pas d'erreur ou sinon false</li><li>`msg` (chaîne) : message de réussite ou d'erreur</li><li>`status` (nombre) : interrompre le processus en cours et [renvoyer l'état](https://github.com/openresty/lua-nginx-module#http-status-constants)</li></ul>                                                                           |
+|   `preread`   | [preread_by_lua](https://github.com/openresty/stream-lua-nginx-module#preread_by_lua_block) | Similaire à la `access` fonction mais pour le mode flux.                                                                                                                                                    | `ret`, `msg`,`status`<ul><li>`ret` (booléen) : true s'il n'y a pas d'erreur ou sinon false</li><li>`msg` (chaîne) : message de réussite ou d'erreur</li><li>`status` (nombre) : interrompre le processus en cours et [renvoyer l'état](https://github.com/openresty/lua-nginx-module#http-status-constants)</li></ul>                                                                           |
 | `log_stream`  |      [log_by_lua](https://github.com/openresty/stream-lua-nginx-module#log_by_lua_block)      | Similaire à la `log` fonction mais pour le mode flux.                                                                                                                                                       | `ret`, `msg`<ul><li>`ret` (booléen) : true s'il n'y a pas d'erreur ou sinon false</li><li>`msg` (chaîne) : message de réussite ou d'erreur</li></ul>                                                                                                                                                                                                                                            |
+
+**Hook TLS ClientHello.** Un plugin peut aussi voir chaque handshake TLS avant le choix du certificat, pour le serveur par défaut et pour chaque service, en exportant depuis son module Lua principal une fonction de niveau module (pas une méthode, afin qu'aucun objet plugin ne soit créé par handshake) :
+
+```lua
+-- in myplugin/myplugin.lua
+function myplugin.client_hello(hello)
+    -- hello (read-only): service (nil on the default server), ip (nil when the client address is unknown), raw and family
+    -- (packed peer address from ngx.ssl.raw_client_addr()), quic, proxy_protocol, real_ip, trusted
+    return nil -- or "drop" / "detect" and a reason
+end
+```
+
+Retournez `"drop"` pour interrompre le handshake, `"detect"` pour seulement journaliser qu'il serait rejeté, ou rien pour le laisser passer. Une erreur ou toute autre valeur laisse passer le handshake. La fonction s'exécute exactement une fois par handshake et **ne doit pas faire de yield** : pas de Redis, pas de cosocket, pas de `ngx.var`, pas de `resty.lock`, pas de sleep. Les appels aux dictionnaires partagés et `ngx.timer.at(0, ...)` sont permis. L'ordre des plugins qui l'exportent suit `PLUGINS_ORDER_SSL_CLIENT_HELLO`. Un plugin qui exporte `client_hello` n'est pas appelé via sa méthode `ssl_client_hello_default` sur le serveur par défaut. Les plugins peuvent détecter la prise en charge avec `pcall(require, "bunkerweb.banlease")` et `banlease.CLIENT_HELLO_PLUGIN_HOOK == 1`.
 
 #### Bibliothèques
 
@@ -566,11 +579,34 @@ end
 
 !!! tip "Plus d'exemples"
 
-    Si vous souhaitez voir la liste complète des fonctions disponibles, vous pouvez consulter les fichiers présents dans le [répertoire lua](https://github.com/bunkerity/bunkerweb/tree/v1.6.17/src/bw/lua/bunkerweb) du dépôt.
+    Si vous souhaitez voir la liste complète des fonctions disponibles, vous pouvez consulter les fichiers présents dans le [répertoire lua](https://github.com/bunkerity/bunkerweb/tree/v1.6.18/src/bw/lua/bunkerweb) du dépôt.
 
 ### Emplois
 
 BunkerWeb utilise un planificateur de tâches interne pour des tâches périodiques telles que le renouvellement des certificats avec certbot, le téléchargement de listes noires, le téléchargement de fichiers MMDB, ... Vous pouvez ajouter des tâches de votre choix en les plaçant dans un sous-dossier nommé **tâches** et en les répertoriant dans le  fichier de métadonnées **plugin.json**. N'oubliez pas d'ajouter les permissions d'exécution pour tout le monde afin d'éviter tout problème lorsqu'un utilisateur clone et installe votre plugin.
+
+#### Entrées sensibles du cache des jobs
+
+Un job qui met un secret en cache (une clé propre à l’installation, un jeton, des identifiants) marque l’entrée comme sensible par son nom stocké :
+
+- Le nom est exactement `secret`, ou se termine par `.secret` (par exemple `token.secret`). La comparaison est sensible à la casse : `SECRET` et `token.SECRET` sont des noms ordinaires.
+- Un `.tgz` final est ignoré : un répertoire mis en cache avec `cache_dir` est donc sensible si son propre nom suit la règle. `state.secret` est stocké sous `folder:<chemin>/state.secret.tgz`. Seul le dernier composant du chemin compte, `folder:<chemin>/secret/other.tgz` est une entrée ordinaire.
+
+La lecture d’une entrée sensible est alors restreinte :
+
+- **API** : `GET /cache/{service}/{plugin}/{job}/{file}` renvoie `403` sauf si l’appelant s’est authentifié en HTTP Basic comme administrateur de l’API ou avec l’`API_TOKEN`. Un jeton Biscuit est refusé même s’il a été émis pour un administrateur. `GET /cache?with_data=true` omet `data` et `printable` pour ces entrées et garde les métadonnées (nom, checksum, dernière mise à jour). `DELETE` est inchangé.
+- **Interface web** : l’affichage et le téléchargement renvoient `403` sauf pour un super administrateur (l’indicateur `admin`, pas un rôle attribué). La page du cache continue de lister l’entrée.
+
+La restriction porte sur la lecture par l’API et par l’interface web. Elle ne chiffre pas les octets stockés, ne masque ni le nom ni le checksum, et ne change pas la façon dont le scheduler restaure le fichier. Les entrées déjà nommées `secret` ou `*.secret`, et quelques entrées du cœur qui contiennent des clés privées ou des identifiants sous des noms fixes (dont les clés clientes mTLS vers l’upstream et l’archive de sauvegarde de failover, qui regroupe tout le cache des jobs), sont restreintes à partir de 1.6.18, sans renommage.
+
+Pour s’appuyer sur la restriction, détectez-la à l’exécution, car un cœur plus ancien sert toute entrée à tout appelant de l’API muni d’un Biscuit `cache_read` :
+
+```python
+try:
+    from common_utils import SENSITIVE_JOB_CACHE_SUPPORTED  # type: ignore
+except ImportError:
+    SENSITIVE_JOB_CACHE_SUPPORTED = False
+```
 
 ### Page du plugin
 

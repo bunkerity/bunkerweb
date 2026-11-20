@@ -1,0 +1,18 @@
+zstd-nginx-module
+Copyright (c) 2018, Alex Zhang
+Copyright (c) 2026, GetPageSpeed LLC
+
+This product includes software originally developed by Alex Zhang (张超,
+zchao1995@gmail.com) at UPYUN Inc. and published as:
+
+    https://github.com/tokers/zstd-nginx-module
+
+That work is licensed under the BSD 2-Clause License, reproduced in full in the
+accompanying LICENSE file. The original copyright notice is retained there and
+applies to all code inherited from it.
+
+This repository is an independent continuation of that work, maintained by
+GetPageSpeed LLC. It remains BSD 2-Clause licensed. Changes made here -- HTTP
+correctness fixes, memory-management fixes, RFC 9110 Accept-Encoding handling,
+the test suite, and the CI tooling -- are original work of GetPageSpeed LLC
+contributed under the same licence.

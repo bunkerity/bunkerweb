@@ -116,6 +116,7 @@ ngx_http_headers_more_filter(ngx_http_request_t *r)
 {
     ngx_int_t                            rc;
     ngx_uint_t                           i;
+    ngx_str_t                            initial_charset;
     ngx_http_headers_more_loc_conf_t    *conf;
     ngx_http_headers_more_cmd_t         *cmd;
 
@@ -125,13 +126,15 @@ ngx_http_headers_more_filter(ngx_http_request_t *r)
     conf = ngx_http_get_module_loc_conf(r, ngx_http_headers_more_filter_module);
 
     if (conf->cmds) {
+        initial_charset = r->headers_out.charset;
         cmd = conf->cmds->elts;
         for (i = 0; i < conf->cmds->nelts; i++) {
             if (cmd[i].is_input) {
                 continue;
             }
 
-            rc = ngx_http_headers_more_exec_cmd(r, &cmd[i]);
+            rc = ngx_http_headers_more_exec_cmd(r, &cmd[i],
+                                               &initial_charset);
 
             if (rc != NGX_OK) {
                 return rc;

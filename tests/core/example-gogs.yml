@@ -1,0 +1,20 @@
+# Example-backed spec: the stack under test is examples/gogs itself,
+# deployed the way a user would deploy it. The assertions live here so that the
+# example directory holds only what someone reading the documentation needs.
+example: gogs
+
+integrations:
+  - "Docker"
+  - "Autoconf"
+  - "Kubernetes"
+
+actions:
+  string_check:
+    type: string
+    url: "https://www.example.com"
+    verify_ssl: false
+    string: "gogs"
+    ignore_case: true
+    follow_redirects: true
+    timeout: 120
+    delay: 150

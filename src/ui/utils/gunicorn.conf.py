@@ -125,10 +125,10 @@ pythonpath = join(sep, "usr", "share", "bunkerweb", "deps", "python") + "," + jo
 proxy_allow_ips = PROXY_ALLOW_IPS
 casefold_http_method = True
 workers = MAX_WORKERS
-bind = f"{LISTEN_ADDR}:{LISTEN_PORT}"
+bind = f"[{LISTEN_ADDR}]:{LISTEN_PORT}" if ":" in LISTEN_ADDR and not LISTEN_ADDR.startswith("[") else f"{LISTEN_ADDR}:{LISTEN_PORT}"
 worker_class = "gthread"
 threads = int(getenv("MAX_THREADS", MAX_WORKERS * 2))
-max_requests = int(getenv("UI_MAX_REQUESTS", getenv("MAX_REQUESTS", "1000")))
+max_requests = int(getenv("UI_MAX_REQUESTS", getenv("MAX_REQUESTS", "200")))
 max_requests_jitter = min(50, max_requests // 10)
 graceful_timeout = 30
 http_protocols = "h1"  # TODO: add h2 when fixed and h3 when supported
@@ -500,15 +500,24 @@ def on_starting(server):
         if invalid_totp_encryption_keys:
             LOGGER.warning("The TOTP encryption key(s) have changed, removing admin TOTP secrets ...")
             err = DB.update_ui_user(
-                ADMIN_USER["username"], ADMIN_USER["password"], None, theme=ADMIN_USER["theme"], method=ADMIN_USER["method"], language=ADMIN_USER["language"]
+                ADMIN_USER["username"],
+                ADMIN_USER["password"],
+                None,
+                email=ADMIN_USER["email"],
+                theme=ADMIN_USER["theme"],
+                method=ADMIN_USER["method"],
+                language=ADMIN_USER["language"],
             )
             if err:
                 LOGGER.error(f"Couldn't update the admin user in the database: {err}")
+            # the secret is gone: the credential override below must not write the old, undecryptable one back
+            ADMIN_USER["totp_secret"] = None
 
         if env_admin_username or env_admin_password:
             override_admin_creds = getenv("OVERRIDE_ADMIN_CREDS", "no").lower() == "yes"
             if ADMIN_USER["method"] == "manual" or override_admin_creds:
                 updated = False
+                old_admin_username = ADMIN_USER["username"]
                 if env_admin_username and ADMIN_USER["username"] != env_admin_username:
                     ADMIN_USER["username"] = env_admin_username
                     updated = True
@@ -551,7 +560,9 @@ def on_starting(server):
                         ADMIN_USER["username"],
                         ADMIN_USER["password"],
                         ADMIN_USER["totp_secret"],
+                        email=ADMIN_USER["email"],
                         theme=ADMIN_USER["theme"],
+                        old_username=old_admin_username,
                         method="manual",
                         language=ADMIN_USER["language"],
                     )

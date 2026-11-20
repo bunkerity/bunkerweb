@@ -43,6 +43,7 @@ on:
 
 jobs:
   push:
+    # Requested Ruby has no prebuilt binary for the newer runner.
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     steps:
@@ -58,7 +59,7 @@ jobs:
           MANIFEST_SHA256: ${{ inputs.MANIFEST_SHA256 }}
         run: |
           case "$VERSION" in
-            dev|testing|ui|1.5) ;;
+            ui|1.5) ;;
             *) test -n "$MANIFEST_SHA256" ;;
           esac
       - name: Download candidate manifest
@@ -67,7 +68,7 @@ jobs:
         with:
           name: release-manifest
       - name: Install ruby
-        uses: ruby/setup-ruby@14594264cd68ce8a2345dd349bc3d138a4ef85c8 # v1.327.0
+        uses: ruby/setup-ruby@de492cf36cbab201753d720ce4f4e336cd688c94 # v1.336.0
         with:
           ruby-version: "3.0"
       - name: Install packagecloud

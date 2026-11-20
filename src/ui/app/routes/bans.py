@@ -2,7 +2,6 @@ from collections import defaultdict
 from contextlib import suppress
 from datetime import datetime
 from io import BytesIO, StringIO
-from ipaddress import ip_address as validate_ip_address
 from json import JSONDecodeError, loads
 from math import floor
 from time import time
@@ -28,6 +27,7 @@ from app.routes.utils import (
 )
 from CrowdSec import CrowdSecClient, CrowdSecError  # type: ignore
 from crowdsec_unban import apply as crowdsec_apply, preview as crowdsec_preview_data, revalidate as crowdsec_revalidate  # type: ignore
+from ip_identity import normalize_ip  # type: ignore
 from redis_keys import ban_ip, unescape as redis_unescape  # type: ignore
 
 bans = Blueprint("bans", __name__)
@@ -72,7 +72,7 @@ def format_ban(ban):
     """One ban as a DataTable row. Defensive: some bans may lack some fields."""
     source = _lease_source(ban)
     return {
-        "date": datetime.fromtimestamp(floor(ban.get("date", 0))).isoformat() if ban.get("date") else "N/A",
+        "date": datetime.fromtimestamp(floor(ban.get("date", 0))).astimezone().isoformat() if ban.get("date") else "N/A",
         "ip": escape(str(ban.get("ip", "N/A"))),
         "country": escape(str(ban.get("country", "N/A"))),
         "reason": escape(str(ban.get("reason", "N/A"))),
@@ -337,7 +337,12 @@ def _filter_and_sort_bans(all_bans, search_value, search_panes, order_column_ind
 
     if 0 <= order_column_index < len(_BAN_COLUMNS):
         sort_key = _BAN_COLUMNS[order_column_index]
-        if sort_key in ("end_date", "time_left"):
+        if sort_key == "time_left":
+            filtered_bans.sort(
+                key=lambda x: float("-inf" if order_direction == "desc" else "inf") if x.get("permanent", False) else _to_float(x.get("exp", 0)),
+                reverse=(order_direction == "desc"),
+            )
+        elif sort_key == "end_date":
             filtered_bans.sort(
                 key=lambda x: ("0" if order_direction == "desc" else "z") if x.get("permanent", False) else x.get(sort_key, ""),
                 reverse=(order_direction == "desc"),
@@ -579,8 +584,8 @@ def bans_fetch():
         {
             "label": '<span data-i18n="searchpane.future_30d">More than 30 days</span>',
             "value": "future_30d",
-            "total": sum(1 for ban in bans if not ban.get("permanent", False) and ban.get("exp", 0) >= 2592000),
-            "count": sum(1 for ban in filtered_bans if not ban.get("permanent", False) and ban.get("exp", 0) >= 2592000),
+            "total": sum(1 for ban in bans if ban.get("permanent", False) or ban.get("exp", 0) >= 2592000),
+            "count": sum(1 for ban in filtered_bans if ban.get("permanent", False) or ban.get("exp", 0) >= 2592000),
         },
     ]
 
@@ -790,7 +795,7 @@ def bans_ban():
 
         # Validate IP address
         try:
-            validate_ip_address(ip)
+            ip = normalize_ip(ip)  # one address is one ban, whatever its spelling
         except ValueError:
             flash(f"Invalid IP address: {ip}", "error")
             continue
@@ -823,7 +828,7 @@ def _normalize_target(ip, ban_scope, service):
     """(ip, ban_scope, service) of a CrowdSec ban as the instances store it. Raises ValueError on a malformed target."""
     if not isinstance(ip, str):
         raise ValueError("Invalid IP address")
-    validate_ip_address(ip)
+    ip = normalize_ip(ip)
     if service is not None and not isinstance(service, str):
         raise ValueError("Invalid service")
     if ban_scope not in ("global", "service"):
@@ -986,7 +991,7 @@ def bans_unban():
 
         # Validate IP address
         try:
-            validate_ip_address(ip)
+            ip = normalize_ip(ip)  # one address is one ban, whatever its spelling
         except ValueError:
             flash(f"Invalid IP address: {ip}", "error")
             continue
@@ -1097,7 +1102,7 @@ def bans_update_duration():
 
         # Validate IP address
         try:
-            validate_ip_address(ip)
+            ip = normalize_ip(ip)  # one address is one ban, whatever its spelling
         except ValueError:
             flash(f"Invalid IP address: {ip}", "error")
             continue
