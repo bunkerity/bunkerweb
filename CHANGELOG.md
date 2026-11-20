@@ -2,6 +2,7 @@
 
 ## v1.6.18 - ????/??/??
 
+- [BUGFIX] `ui`: when a template save fails, the template editor says whether the WAF or an expired session stopped it.
 - [MISC] `blacklist`: the Data-Shield Critical list is now the paid Data-Shield Pro feed; the old preset now downloads the free Community Standard list.
 
 ## v1.6.18~rc5 - 2026/11/19
