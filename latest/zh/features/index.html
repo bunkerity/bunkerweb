@@ -20,20 +20,20 @@
       
       
         
-          <link rel="alternate" href="../../features/" hreflang="en">
+          <link rel="alternate" href="https://docs.bunkerweb.io/latest/features/" hreflang="en"><link rel="alternate" href="https://docs.bunkerweb.io/latest/features/" hreflang="x-default">
         
-          <link rel="alternate" href="../../fr/features/" hreflang="fr">
+          <link rel="alternate" href="https://docs.bunkerweb.io/latest/fr/features/" hreflang="fr">
         
-          <link rel="alternate" href="../../de/features/" hreflang="de">
+          <link rel="alternate" href="https://docs.bunkerweb.io/latest/de/features/" hreflang="de">
         
-          <link rel="alternate" href="../../es/features/" hreflang="es">
+          <link rel="alternate" href="https://docs.bunkerweb.io/latest/es/features/" hreflang="es">
         
-          <link rel="alternate" href="./" hreflang="zh">
+          <link rel="alternate" href="https://docs.bunkerweb.io/latest/zh/features/" hreflang="zh">
         
       
       
       <link rel="icon" href="../../assets/favicon.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.1">
     
     
       
@@ -41,7 +41,7 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.57a0d79d.min.css">
       
       
 
@@ -66,94 +66,81 @@
       })
     </script>
 
-    <script src="https://cdn.jsdelivr.net/npm/medium-zoom/dist/medium-zoom.min.js"></script>
+    <script defer
+            src="https://cdn.jsdelivr.net/npm/medium-zoom@1.1.2/dist/medium-zoom.min.js"
+            integrity="sha384-kRRREbu8lthVytGQVverh9PZPe8fRyg3vK2wO1w0kyeSqE7UfEdXhV/fWfaW/h3A"
+            crossorigin="anonymous"></script>
 
-    <script defer>
+    <script>
   // Lazy load images and embed youtube videos
   window.addEventListener("load", () => {
     document.querySelectorAll("[data-src]").forEach((el) => {
       el.setAttribute("src", el.getAttribute("data-src"));
     });
   });
-  // Add missing label
-  try {
-    document
-      .querySelector('div.md-search[data-md-component="search"][role="dialog"]')
-      .setAttribute("aria-label", "\u5728\u6587\u6863\u4e2d\u641c\u7d22");
-  } catch (err) {}
+  // Add missing label: this script sits in <head>, so the search dialog only exists once the DOM is parsed
+  window.addEventListener("DOMContentLoaded", () => {
+    const search = document.querySelector('div.md-search[data-md-component="search"][role="dialog"]');
+    if (search) search.setAttribute("aria-label", "\u5728\u6587\u6863\u4e2d\u641c\u7d22");
+  });
     </script>
 
-    <script defer>
+    <script>
       window.addEventListener('DOMContentLoaded', () => {
-        const bannerEl = document.querySelector('aside.md-banner');
-        let defaultContent = [{ "content" : "\u003cp\u003e\u901a\u8fc7 \u003ca style=\"text-decoration:underline; color :  white;\" href=\"https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self\u0026utm_source=doc\"\u003eBunkerWeb Panel\u003c/a\u003e\u5f00\u542f BunkerWeb PRO 30 \u5929\u514d\u8d39\u8bd5\u7528\u3002\u003c/p\u003e" },
-        { "content" : "\u003cp\u003e\u9700\u8981 BunkerWeb \u9ad8\u7ea7\u652f\u6301\u6216\u5b9a\u5236\u54a8\u8be2\uff1f\u8bf7\u67e5\u770b\u6211\u4eec\u7684 \u003ca style=\"text-decoration:underline; color :  white;\" href=\"https://panel.bunkerweb.io/?utm_campaign=self\u0026utm_source=doc#services\"\u003e\u4e13\u4e1a\u670d\u52a1\u003c/a\u003e\u3002\u003c/p\u003e" },
-        { "content" : "\u003cp\u003e\u52a0\u5165 Bunker \u793e\u533a\uff0c\u53c2\u4e0e \u003ca style=\"text-decoration:underline; color: white;\" href=\"https://discord.bunkerweb.io\"\u003eDiscord \u804a\u5929\u003c/a\u003e \u5e76\u5173\u6ce8\u6211\u4eec\u7684 \u003ca style=\"text-decoration:underline; color: white;\" href=\"https://www.linkedin.com/company/bunkerity/\"\u003eLinkedIn\u003c/a\u003e\u3002\u003c/p\u003e" }
-        ]
-
-      function setBannerStyle() {
-        const bannerItem = bannerEl.querySelector('.md-banner__inner');
-        bannerEl.style.backgroundColor = "#2eac68";
-        bannerItem.style.textAlign = "center";
-        bannerItem.style.transition = "all 0.5s ease-out";
-      }
-
-      function setDefault() {
-        const bannerItem = bannerEl.querySelector('.md-banner__inner');
-        const clone = bannerItem.cloneNode(true);
-        clone.innerHTML = defaultContent[0]["content"];
-        bannerEl.replaceChild(clone, bannerItem);
-      }
-
-      function startBannerLoop() {
+        const bannerEl = document.querySelector('aside.md-banner:not(.md-banner--warning)');
+        if (!bannerEl) return;
+        const messages = ["\u003cp\u003e\u901a\u8fc7 \u003ca href=\"https://panel.bunkerweb.io/store/bunkerweb-pro?language=chinese\u0026utm_campaign=self\u0026utm_source=doc\"\u003eBunkerWeb Panel\u003c/a\u003e\u5f00\u542f BunkerWeb PRO 30 \u5929\u514d\u8d39\u8bd5\u7528\uff1a\u8ba2\u8d2d\u4e00\u4e2a\u65b9\u6848\uff0c\u7136\u540e\u5728\u7ed3\u8d26\u65f6\u4fdd\u6301\u9009\u4e2d\u201cFree 30 Days Trial\u201d\u4f5c\u4e3a\u4ed8\u6b3e\u65b9\u5f0f\u3002 (\u003ca href=\"../#pro-version\"\u003e\u5206\u6b65\u6307\u5357\u003c/a\u003e)\u003c/p\u003e", "\u003cp\u003e\u9700\u8981 BunkerWeb \u9ad8\u7ea7\u652f\u6301\u6216\u5b9a\u5236\u54a8\u8be2\uff1f\u8bf7\u67e5\u770b\u6211\u4eec\u7684 \u003ca href=\"https://panel.bunkerweb.io/?utm_campaign=self\u0026utm_source=doc#services\"\u003e\u4e13\u4e1a\u670d\u52a1\u003c/a\u003e\u3002\u003c/p\u003e", "\u003cp\u003e\u52a0\u5165 Bunker \u793e\u533a\uff0c\u53c2\u4e0e \u003ca href=\"https://discord.bunkerweb.io\"\u003eDiscord \u804a\u5929\u003c/a\u003e \u5e76\u5173\u6ce8\u6211\u4eec\u7684 \u003ca href=\"https://www.linkedin.com/company/bunkerity/\"\u003eLinkedIn\u003c/a\u003e\u3002\u003c/p\u003e"];
         const switchDelay = 7000;
         let i = 0;
 
-        setInterval(() => {
-          // Update or reset index
-          if(i + 1 === defaultContent.length) {
-            i = 0;
-          } else {
-            i++;
-          }
-
-          // Prepare data with next el with opacity 0 too
+        // the first message is already in the page; the others rotate in
+        function show(next) {
           const currItem = bannerEl.querySelector('.md-banner__inner');
           currItem.style.opacity = 0;
           const clone = currItem.cloneNode(true);
-          clone.innerHTML = defaultContent[i]["content"];
+          clone.innerHTML = messages[next];
           setTimeout(() => {
             bannerEl.replaceChild(clone, currItem);
             setTimeout(() => {
-              const newItem = bannerEl.querySelector('.md-banner__inner');
-              newItem.style.opacity = 1;
+              bannerEl.querySelector('.md-banner__inner').style.opacity = 1;
             }, 20);
           }, 600);
+        }
 
+        // moving text that outlasts five seconds has to be stoppable (WCAG 2.2.2): it holds
+        // still on hover and focus, never starts when the visitor asks for reduced motion, and
+        // a pause button stops it for the rest of the session
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+        const KEY = 'bw-banner-paused';
+        let paused = false;
+        try { paused = sessionStorage.getItem(KEY) === '1'; } catch (e) {}
+
+        // outside .md-banner__inner: show() swaps that element
+        const toggle = document.createElement('button');
+        toggle.type = 'button';
+        toggle.className = 'bw-banner-toggle';
+        toggle.setAttribute('aria-label', "\u6682\u505c\u8f6e\u64ad\u516c\u544a");
+        const icons = {
+          pause: '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg>',
+          play: '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M7 4.5v15l12-7.5z"/></svg>'
+        };
+        function render() {
+          toggle.setAttribute('aria-pressed', paused ? 'true' : 'false');
+          toggle.innerHTML = paused ? icons.play : icons.pause;
+        }
+        render();
+        toggle.addEventListener('click', () => {
+          paused = !paused;
+          try { sessionStorage.setItem(KEY, paused ? '1' : '0'); } catch (e) {}
+          render();
+        });
+        bannerEl.appendChild(toggle);
+
+        setInterval(() => {
+          if (paused || bannerEl.matches(':hover, :focus-within')) return;
+          i = (i + 1) % messages.length;
+          show(i);
         }, switchDelay);
-      }
-
-      function runBanner() {
-        startBannerLoop();
-        // Try to get dynamic content
-        // Else keep static ones
-        // fetch("https://www.bunkerweb.io/api/bw-ui-news")
-        // .then((res) => {
-        //   return res.json();
-        // })
-        // .then((res) => {
-        //   defaultContent = res.data[0].data;
-        //   startBannerLoop();
-        // })
-        // .catch((e) => {
-        //   startBannerLoop();
-        // });
-      }
-
-        setBannerStyle();
-        setDefault();
-        runBanner()
-
       })
     </script>
 
@@ -170,6 +157,9 @@
     
     
     
+    
+    <link rel="preload" href="../../assets/fonts/PublicSans-Regular.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="../../assets/fonts/DonJose-Black.woff2" as="font" type="font/woff2" crossorigin>
     
 
   
@@ -208,11 +198,7 @@
           <div class="md-banner__inner md-grid md-typeset">
             
             
-    📢 想了解 BunkerWeb CLOUD、PRO 版本、技术支持或定制服务？请访问
-    <a href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc"
-       style="color: #3f6ec6;
-              text-decoration: underline">BunkerWeb Panel</a>
-    ，了解我们的企业服务。
+    <p>通过 <a href="https://panel.bunkerweb.io/store/bunkerweb-pro?language=chinese&utm_campaign=self&utm_source=doc">BunkerWeb Panel</a>开启 BunkerWeb PRO 30 天免费试用：订购一个方案，然后在结账时保持选中“Free 30 Days Trial”作为付款方式。 (<a href="../#pro-version">分步指南</a>)</p>
 
           </div>
           
@@ -245,7 +231,7 @@
   <nav class="md-header__inner md-grid" aria-label="页眉">
     <a href="../" title="BunkerWeb 文档" class="md-header__button md-logo" aria-label="BunkerWeb 文档" data-md-component="logo">
       
-  <img src="../../assets/logo.png" alt="logo">
+  <img src="../../assets/logo.png" alt="logo" width="273" height="77">
 
     </a>
     <label class="md-header__button md-icon" for="__drawer">
@@ -660,7 +646,7 @@
   <label class="md-nav__title" for="__drawer">
     <a href="../" title="BunkerWeb 文档" class="md-nav__button md-logo" aria-label="BunkerWeb 文档" data-md-component="logo">
       
-  <img src="../../assets/logo.png" alt="logo">
+  <img src="../../assets/logo.png" alt="logo" width="273" height="77">
 
     </a>
     BunkerWeb 文档
@@ -1869,6 +1855,17 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#api" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        保留上游 API 的错误响应体
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -2358,7 +2355,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#api" class="md-nav__link">
+  <a href="#api_1" class="md-nav__link">
     <span class="md-ellipsis">
       
         API 访问
@@ -3415,6 +3412,56 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#zstandard" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Zstandard
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Zstandard">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_137" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        如何使用
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_138" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        配置设置
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_139" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        示例配置
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -3697,7 +3744,7 @@
 <h3 id="plugin-order">插件执行顺序<a class="headerlink" href="#plugin-order" title="Permanent link">&para;</a></h3>
 <p>可以使用空格分隔的列表调整顺序：</p>
 <ul>
-<li>全局阶段：<code>PLUGINS_ORDER_INIT</code>、<code>PLUGINS_ORDER_INIT_WORKER</code>、<code>PLUGINS_ORDER_TIMER</code>。</li>
+<li>全局阶段：<code>PLUGINS_ORDER_INIT</code>、<code>PLUGINS_ORDER_INIT_WORKER</code>、<code>PLUGINS_ORDER_SSL_CLIENT_HELLO</code>、<code>PLUGINS_ORDER_TIMER</code>。</li>
 <li>按站点的阶段：<code>PLUGINS_ORDER_SET</code>、<code>PLUGINS_ORDER_ACCESS</code>、<code>PLUGINS_ORDER_SSL_CERTIFICATE</code>、<code>PLUGINS_ORDER_HEADER</code>、<code>PLUGINS_ORDER_LOG</code>、<code>PLUGINS_ORDER_PREREAD</code>、<code>PLUGINS_ORDER_LOG_STREAM</code>、<code>PLUGINS_ORDER_LOG_DEFAULT</code>。</li>
 <li>语义：列出的插件在该阶段优先执行；其余插件仍按正常顺序执行。仅使用空格分隔插件 ID。</li>
 </ul>
@@ -3740,7 +3787,7 @@
 <td><code>www.example.com</code></td>
 <td>multisite</td>
 <td>否</td>
-<td><strong>主域名：</strong> 此站点的主域名。在多站点模式下为必需。</td>
+<td><strong>主域名：</strong> 此站点的主域名（或 IP 地址）。在多站点模式下为必需。</td>
 </tr>
 <tr>
 <td><code>BUNKERWEB_INSTANCES</code></td>
@@ -3912,14 +3959,14 @@ curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">"Host: bw
 <tr>
 <td><code>CLIENT_BODY_TIMEOUT</code></td>
 <td><code>10s</code></td>
-<td>global</td>
+<td>multisite</td>
 <td>否</td>
 <td><strong>客户端请求体超时：</strong> 读取客户端请求体的超时时间。</td>
 </tr>
 <tr>
 <td><code>CLIENT_HEADER_TIMEOUT</code></td>
 <td><code>10s</code></td>
-<td>global</td>
+<td>multisite</td>
 <td>否</td>
 <td><strong>客户端请求头超时：</strong> 读取客户端请求头的超时时间。</td>
 </tr>
@@ -3939,6 +3986,7 @@ curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">"Host: bw
 </tr>
 </tbody>
 </table>
+<p>对于长连接 gRPC 流，请按服务设置 <code>CLIENT_HEADER_TIMEOUT</code> 和 <code>CLIENT_BODY_TIMEOUT</code>（例如 <code>netbird.example.com_CLIENT_HEADER_TIMEOUT=1d</code>）。全局 <code>CLIENT_HEADER_TIMEOUT</code> 应保持较短：它还限制默认服务器上的 TLS 握手时间，以及重新加载后未完成的握手使旧工作进程继续存活的时间。 当服务继承全局值时，<code>server-http</code> 自定义配置中已有的 <code>client_header_timeout</code> 或 <code>client_body_timeout</code> 指令仍可正常工作。为服务设置不同的超时值时，请删除对应的自定义指令，以免产生重复指令。</p>
 </div>
 <div class="tabbed-block">
 <table>
@@ -4365,14 +4413,14 @@ curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">"Host: bw
 <td><code>http</code></td>
 <td>multisite</td>
 <td>否</td>
-<td>ACME challenge type. HTTP-01 is simplest; DNS-01 is required for wildcard certificates; TLS-ALPN-01 works when port 80 is unavailable.</td>
+<td>ACME challenge type. HTTP-01 is simplest; DNS-01 is required for wildcard certificates; TLS-ALPN-01 works when port 80 is unavailable but needs a core with the ClientHello plugin hook (1.6.18~rc3 or later).</td>
 </tr>
 <tr>
 <td><code>ACME_DNS_PROVIDER</code></td>
 <td></td>
 <td>multisite</td>
 <td>否</td>
-<td>DNS provider for DNS-01 challenges.</td>
+<td>DNS provider for DNS-01 challenges. Hosttech requires BunkerWeb core 1.6.18 or newer.</td>
 </tr>
 <tr>
 <td><code>ACME_DNS_CREDENTIAL_ITEM</code></td>
@@ -4393,7 +4441,7 @@ curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">"Host: bw
 <td><code>default</code></td>
 <td>multisite</td>
 <td>否</td>
-<td>Seconds to wait for DNS propagation before the CA validates a DNS-01 challenge. 'default' applies a safe 120s wait (except route53, which polls until synced); set a number to override. Raise it if your provider is slow to publish TXT records.</td>
+<td>DNS-01 propagation wait in seconds. 'default': 120s for most providers, Hosttech's 600s default, or Route53's sync polling. Set a number to override.</td>
 </tr>
 <tr>
 <td><code>ACME_DNS_ALIAS</code></td>
@@ -4428,7 +4476,7 @@ curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">"Host: bw
 <td><code>30</code></td>
 <td>multisite</td>
 <td>否</td>
-<td>Renew the certificate when it has fewer than this many days until expiry.</td>
+<td>Renew TLS-ALPN-01 certificates when this many days remain until expiry. Certbot-managed certificates renew on certbot's own schedule.</td>
 </tr>
 <tr>
 <td><code>ACME_SSL_VERIFY</code></td>
@@ -4550,6 +4598,13 @@ curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">"Host: bw
 <td>Connection type for certificate alert SMTP.</td>
 </tr>
 <tr>
+<td><code>ACME_ALERT_SMTP_VERIFY_CERTIFICATE</code></td>
+<td><code>no</code></td>
+<td>global</td>
+<td>否</td>
+<td>Verify the certificate and hostname of the SMTP relay against the system CA store when ACME_ALERT_SMTP_SSL is SSL or TLS. Off by default: the certificate is not checked and a warning is logged on each run. Turn it on once the relay presents a certificate signed by a public CA.</td>
+</tr>
+<tr>
 <td><code>USE_ACME_CT_MONITORING</code></td>
 <td><code>no</code></td>
 <td>global</td>
@@ -4579,7 +4634,7 @@ curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">"Host: bw
 </tr>
 </tbody>
 </table>
-<h2 id="anti-ddos-pro">Anti DDoS <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)<a class="headerlink" href="#anti-ddos-pro" title="Permanent link">&para;</a></h2>
+<h2 id="anti-ddos-pro">Anti DDoS <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);' loading="lazy" decoding="async"> (PRO)<a class="headerlink" href="#anti-ddos-pro" title="Permanent link">&para;</a></h2>
 <p>如需更详细的指南，请参阅<a href="../advanced/#anti-ddos-pro">高级用法</a>文档。</p>
 <p>STREAM 支持 <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
 <p>Provides enhanced protection against DDoS attacks by analyzing and filtering suspicious traffic.</p>
@@ -4628,6 +4683,69 @@ curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">"Host: bw
 <td>global</td>
 <td>否</td>
 <td>HTTP status codes treated as suspicious for DDoS analysis.</td>
+</tr>
+<tr>
+<td><code>ANTIDDOS_TLS</code></td>
+<td><code>no</code></td>
+<td>global</td>
+<td>否</td>
+<td>Count TLS handshakes and stop TLS floods. USE_ANTIDDOS must also be yes. Start with SECURITY_MODE=detect. Cores before 1.6.18~rc3 protect only handshakes without SNI, with MULTISITE=yes or DISABLE_DEFAULT_SERVER=yes; single-site has no TLS protection. 1.6.18~rc3 or later also protects every named service.</td>
+</tr>
+<tr>
+<td><code>ANTIDDOS_TLS_WINDOW_TIME</code></td>
+<td><code>10</code></td>
+<td>global</td>
+<td>否</td>
+<td>TLS counting window in seconds (5 to 999). Idle handshakes are checked after the window ends, with five extra seconds for a first request.</td>
+</tr>
+<tr>
+<td><code>ANTIDDOS_TLS_IDLE_THRESHOLD</code></td>
+<td><code>30</code></td>
+<td>global</td>
+<td>否</td>
+<td>Minimum handshakes without a first request in one fixed window before flagging an address. This rule needs no distinct-IP minimum.</td>
+</tr>
+<tr>
+<td><code>ANTIDDOS_TLS_IDLE_RATIO</code></td>
+<td><code>90</code></td>
+<td>global</td>
+<td>否</td>
+<td>Minimum percentage of handshakes without a first request (50 to 100). The idle handshake threshold must also be reached.</td>
+</tr>
+<tr>
+<td><code>ANTIDDOS_TLS_HELLO_THRESHOLD</code></td>
+<td><code>500</code></td>
+<td>global</td>
+<td>否</td>
+<td>TLS handshakes per address in a sliding window before flagging it. ANTIDDOS_DISTINCT_IP must also be reached. Set 0 to disable this volume rule.</td>
+</tr>
+<tr>
+<td><code>ANTIDDOS_TLS_IPV6_PREFIX</code></td>
+<td><code>64</code></td>
+<td>global</td>
+<td>否</td>
+<td>Group IPv6 addresses by this prefix length for TLS counting and local flags. IPv4-mapped IPv6 addresses count as IPv4.</td>
+</tr>
+<tr>
+<td><code>ANTIDDOS_TLS_BAN_TIME</code></td>
+<td><code>300</code></td>
+<td>global</td>
+<td>否</td>
+<td>How long a TLS flag or supported core ban lasts, in seconds (10 to 86400). Existing operator bans are never replaced.</td>
+</tr>
+<tr>
+<td><code>ANTIDDOS_TLS_IGNORE_IP</code></td>
+<td></td>
+<td>global</td>
+<td>否</td>
+<td>Space-separated IP addresses and CIDRs excluded from TLS counting and drops. On core 1.6.15, add monitoring addresses here because its core whitelist is unavailable at ClientHello.</td>
+</tr>
+<tr>
+<td><code>ANTIDDOS_TLS_DICT_SIZE</code></td>
+<td><code>10M</code></td>
+<td>global</td>
+<td>否</td>
+<td>Memory for TLS counters, candidate lists and local flags (for example 10M or 500k). Full storage fails open, so increase this for large address populations.</td>
 </tr>
 <tr>
 <td><code>ANTIDDOS_DISTINCT_IP</code></td>
@@ -4725,7 +4843,14 @@ curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">"Host: bw
 <td></td>
 <td>multisite</td>
 <td>否</td>
-<td><strong>排除的 URL：</strong> 应绕过挑战的以空格分隔的 URI 正则表达式模式列表。模式会同时匹配路径和带查询字符串的完整请求 URI。</td>
+<td><strong>排除的 URL：</strong> 应绕过挑战的以空格分隔的 URI 正则表达式模式列表。模式会匹配规范化后的路径，既可单独匹配，也可匹配路径后接 <code>?</code> 和查询字符串的形式。</td>
+</tr>
+<tr>
+<td><code>ANTIBOT_INCLUDE_URI</code></td>
+<td></td>
+<td>multisite</td>
+<td>否</td>
+<td><strong>包含的 URL：</strong> 仅对匹配这些以空格分隔的 PCRE 模式的 URI 发起挑战。留空表示所有 URI。匹配规范化路径，或路径后接 <code>?</code> 和查询字符串。<code>ANTIBOT_IGNORE_URI</code> 优先。</td>
 </tr>
 <tr>
 <td><code>ANTIBOT_IGNORE_IP</code></td>
@@ -5438,7 +5563,7 @@ curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">"Host: bw
 </div>
 <div class="admonition tip">
 <p class="admonition-title">使用多个凭据</p>
-<p>您可以为访问配置多个用户名/密码对。每个 <code>AUTH_BASIC_USER</code> 设置都应有一个对应的 <code>AUTH_BASIC_PASSWORD</code> 设置。</p>
+<p>您可以为访问配置多个用户名/密码对。每个 <code>AUTH_BASIC_USER</code> 设置都应有一个对应的 <code>AUTH_BASIC_PASSWORD</code> 设置。一旦配置了其他凭据对，默认的 <code>changeme</code> / <code>changeme</code> 凭据对就会被忽略；将不带后缀的 <code>AUTH_BASIC_USER</code> 和 <code>AUTH_BASIC_PASSWORD</code> 设置为您自己的值即可保留它。</p>
 </div>
 <h3 id="_11">示例配置<a class="headerlink" href="#_11" title="Permanent link">&para;</a></h3>
 <div class="tabbed-set tabbed-alternate" data-tabs="5:3"><input checked="checked" id="__tabbed_5_1" name="__tabbed_5" type="radio" /><input id="__tabbed_5_2" name="__tabbed_5" type="radio" /><input id="__tabbed_5_3" name="__tabbed_5" type="radio" /><div class="tabbed-labels"><label for="__tabbed_5_1">全站保护</label><label for="__tabbed_5_2">保护特定区域</label><label for="__tabbed_5_3">多个用户</label></div>
@@ -5567,7 +5692,7 @@ bwcli<span class="w"> </span>plugin<span class="w"> </span>backup<span class="w"
 </div>
 <div class="admonition warning">
 <p class="admonition-title">数据库兼容性</p>
-<p>备份插件支持 SQLite、MySQL/MariaDB 和 PostgreSQL 数据库。目前不支持 Oracle 数据库的备份和恢复操作。</p>
+<p>备份插件支持 SQLite、MySQL/MariaDB 和 PostgreSQL 数据库。目前不支持 Oracle 数据库的备份和恢复操作。恢复操作会在修改任何内容之前拒绝来自其他数据库引擎的备份（MariaDB 和 MySQL 视为不同的引擎）。</p>
 </div>
 <h3 id="_15">示例配置<a class="headerlink" href="#_15" title="Permanent link">&para;</a></h3>
 <div class="tabbed-set tabbed-alternate" data-tabs="6:3"><input checked="checked" id="__tabbed_6_1" name="__tabbed_6" type="radio" /><input id="__tabbed_6_2" name="__tabbed_6" type="radio" /><input id="__tabbed_6_3" name="__tabbed_6" type="radio" /><div class="tabbed-labels"><label for="__tabbed_6_1">每日备份，保留 7 天</label><label for="__tabbed_6_2">每周备份，延长保留期</label><label for="__tabbed_6_3">每月备份到自定义位置</label></div>
@@ -5598,7 +5723,7 @@ bwcli<span class="w"> </span>plugin<span class="w"> </span>backup<span class="w"
 </div>
 </div>
 </div>
-<h2 id="backup-s3-pro">Backup S3 <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)<a class="headerlink" href="#backup-s3-pro" title="Permanent link">&para;</a></h2>
+<h2 id="backup-s3-pro">Backup S3 <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);' loading="lazy" decoding="async"> (PRO)<a class="headerlink" href="#backup-s3-pro" title="Permanent link">&para;</a></h2>
 <p>STREAM 支持 <img alt="✅" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" title=":white_check_mark:" /></p>
 <p>Automatically backup your data to an S3 bucket</p>
 <table>
@@ -5638,7 +5763,7 @@ bwcli<span class="w"> </span>plugin<span class="w"> </span>backup<span class="w"
 <td></td>
 <td>global</td>
 <td>否</td>
-<td>The S3 endpoint</td>
+<td>The full S3 endpoint URL, for example https://s3.example.com (https:// is added if omitted)</td>
 </tr>
 <tr>
 <td><code>BACKUP_S3_BUCKET</code></td>
@@ -5680,7 +5805,7 @@ bwcli<span class="w"> </span>plugin<span class="w"> </span>backup<span class="w"
 <td><code>6</code></td>
 <td>global</td>
 <td>否</td>
-<td>The compression level of the backup zip file</td>
+<td>Compression level of the zip uploaded to S3, from 1 (fastest) to 9 (smallest). 6 uploads the core backup unchanged.</td>
 </tr>
 </tbody>
 </table>
@@ -5888,6 +6013,13 @@ bwcli<span class="w"> </span>plugin<span class="w"> </span>backup<span class="w"
 <td><strong>启用黑名单：</strong> 设置为 <code>yes</code> 以启用黑名单功能。</td>
 </tr>
 <tr>
+<td><code>BLACKLIST_URLS_REFRESH_INTERVAL</code></td>
+<td><code>1h</code></td>
+<td>multisite</td>
+<td>否</td>
+<td><strong>URL 刷新间隔：</strong> 再次下载前缓存必须达到的最短时间。接受不带单位的秒数或时间后缀（<code>ms</code>、<code>s</code>、<code>m</code>、<code>h</code>、<code>d</code>、<code>w</code>、<code>M</code>、<code>y</code>）。</td>
+</tr>
+<tr>
 <td><code>BLACKLIST_COMMUNITY_LISTS</code></td>
 <td><code>ip:danmeuk-tor-exit ua:mitchellkrogza-bad-user-agents</code></td>
 <td>multisite</td>
@@ -5922,26 +6054,22 @@ bwcli<span class="w"> </span>plugin<span class="w"> </span>backup<span class="w"
 </tr>
 <tr>
 <td><code>ip:laurent-minne-data-shield-aggressive</code></td>
-<td>Data-Shield IPv4 Blocklist - Laurent M. - 适用于 Web 应用, WordPress, VPS (Apache/Nginx)</td>
+<td>Data-Shield IPv4 Blocklist (Community Standard) - Laurent M.</td>
 <td><code>https://raw.githubusercontent.com/duggytuxy/Data-Shield_IPv4_Blocklist/refs/heads/main/prod_data-shield_ipv4_blocklist.txt</code></td>
-</tr>
-<tr>
-<td><code>ip:laurent-minne-data-shield-critical</code></td>
-<td>Data-Shield IPv4 Blocklist - Laurent M. - 适用于 DMZs, SaaS, API 和关键资产</td>
-<td><code>https://raw.githubusercontent.com/duggytuxy/Data-Shield_IPv4_Blocklist/refs/heads/main/prod_critical_data-shield_ipv4_blocklist.txt</code></td>
 </tr>
 </tbody>
 </table>
+<div class="admonition info">
+<p class="admonition-title">Data-Shield Pro</p>
+<p><a href="https://data-shield.eu/?utm_source=external-docs&amp;utm_medium=cta&amp;utm_campaign=bunkerweb-docs">Data-Shield Pro</a> 是付费订阅，包含 Critical 配置：在 Standard 列表的基础上增加更多被阻止的来源，用于更严格的入站过滤，但误拦合法流量的风险更高。原 <code>ip:laurent-minne-data-shield-critical</code> 预设已停用，现在下载免费的 Community Standard 列表。</p>
+<p>Pro 源需要身份验证，而 BunkerWeb 没有单独的订阅源凭据设置。嵌入 URL 设置中的凭据（<code>http://user:pass@url</code>）会保存在该设置中，并显示在 Web 界面和日志里。因此请遵循<a href="https://data-shield.eu/docs/?utm_source=external-docs&amp;utm_medium=cta&amp;utm_campaign=bunkerweb-docs">供应商指南</a>：不要把设备令牌放进 URL，而是在您自己的网络中使用中继，即一个向上游进行身份验证、并仅向您的 BunkerWeb 实例提供该文件的服务，然后将中继 URL 添加到 <code>BLACKLIST_IP_URLS</code>。HTTP Basic 选项以设备 ID 作为用户名、令牌作为密码，但这会把令牌保存在该设置中。订阅用户可在<a href="https://feeds.data-shield.eu/?utm_source=external-docs&amp;utm_medium=cta&amp;utm_campaign=bunkerweb-docs">订阅者门户</a>中管理设备。</p>
+</div>
 <p><strong>配置：</strong> 指定多个列表，以空格分隔。例如：
 <div class="highlight"><pre><span></span><code><span class="nt">BLACKLIST_COMMUNITY_LISTS</span><span class="p">:</span><span class="w"> </span><span class="s">"ip:danmeuk-tor-exit</span><span class="nv"> </span><span class="s">ua:mitchellkrogza-bad-user-agents"</span>
 </code></pre></div></p>
 <div class="admonition tip">
 <p class="admonition-title">社区与手动配置</p>
 <p>社区黑名单提供了一种方便的方式来开始使用经过验证的黑名单源。您可以将它们与手动 URL 配置一起使用，以实现最大的灵活性。</p>
-</div>
-<div class="admonition note">
-<p class="admonition-title">致谢</p>
-<p>感谢 Laurent Minne 贡献了 <a href="https://duggytuxy.github.io/#">Data-Shield 阻止列表</a>！</p>
 </div>
 </div>
 <div class="tabbed-block">
@@ -6242,7 +6370,7 @@ bwcli<span class="w"> </span>plugin<span class="w"> </span>backup<span class="w"
 </div>
 <div class="admonition tip">
 <p class="admonition-title">定期更新</p>
-<p>来自 URL 的黑名单会每小时自动下载和更新，以确保您的保护措施始终能应对最新的威胁。</p>
+<p>任务每小时运行一次。<code>BLACKLIST_URLS_REFRESH_INTERVAL</code> 设置再次下载前 URL 缓存必须达到的最短时间（默认：<code>1h</code>）。对于每天最多允许下载一次的提供商，请使用 <code>24h</code>；设置为 <code>0</code> 则每次任务运行时都下载。缓存仍有效或下载失败时，会保留上次的有效条目。在此插件内，各服务共享 URL 缓存：最短的间隔可能触发下载，因此对于有下载频率限制的同一 URL，请在所有使用它的服务上设置相同的间隔。</p>
 </div>
 <h3 id="_21">示例配置<a class="headerlink" href="#_21" title="Permanent link">&para;</a></h3>
 <div class="tabbed-set tabbed-alternate" data-tabs="9:3"><input checked="checked" id="__tabbed_9_1" name="__tabbed_9" type="radio" /><input id="__tabbed_9_2" name="__tabbed_9" type="radio" /><input id="__tabbed_9_3" name="__tabbed_9" type="radio" /><div class="tabbed-labels"><label for="__tabbed_9_1">基本的 IP 和用户代理保护</label><label for="__tabbed_9_2">带有自定义规则的高级保护</label><label for="__tabbed_9_3">使用本地文件</label></div>
@@ -6416,7 +6544,7 @@ TrustedMonitor/\d+\.\d+
 <p><strong>工作原理：</strong></p>
 <ol>
 <li>您的 BunkerWeb 实例会自动向 BunkerNet API 注册，以获取一个唯一标识符。</li>
-<li>当您的实例检测并阻止了恶意 IP 地址或行为时，它会匿名地向 BunkerNet 报告该威胁。</li>
+<li>当您的实例检测并阻止了恶意 IP 地址或行为时，它会向 BunkerNet 报告该威胁。报告包含的字段见下文“报告包含的内容”。</li>
 <li>BunkerNet 聚合来自所有参与实例的威胁情报，并分发整合后的数据库。</li>
 <li>您的实例会定期从 BunkerNet 下载更新的已知威胁数据库。</li>
 <li>这种集体情报使您的实例能够主动阻止在其他 BunkerWeb 实例上表现出恶意行为的 IP 地址。</li>
@@ -6426,9 +6554,9 @@ TrustedMonitor/\d+\.\d+
 <ol>
 <li><strong>集体防御：</strong> 利用全球成千上万个其他 BunkerWeb 实例的安全发现。</li>
 <li><strong>主动防护：</strong> 根据恶意行为者在别处的行为，在他们攻击您的网站之前就将其阻止。</li>
-<li><strong>社区贡献：</strong> 通过分享关于攻击者的匿名威胁数据，帮助保护其他 BunkerWeb 用户。</li>
+<li><strong>社区贡献：</strong> 通过分享关于攻击者的威胁数据，帮助保护其他 BunkerWeb 用户。</li>
 <li><strong>零配置：</strong> 开箱即用，带有合理的默认值，只需最少的设置。</li>
-<li><strong>注重隐私：</strong> 只分享必要的威胁信息，不损害您或您用户的隐私。</li>
+<li><strong>受控分享：</strong> 报告包含一组固定的字段，<code>BUNKERNET_FILTER_HEADERS</code> 可将其请求头限制为一份简短的白名单（见下文）。</li>
 </ol>
 </div>
 <h3 id="_26">如何使用<a class="headerlink" href="#_26" title="Permanent link">&para;</a></h3>
@@ -6460,6 +6588,13 @@ TrustedMonitor/\d+\.\d+
 <td><strong>启用 BunkerNet：</strong> 设置为 <code>yes</code> 以启用 BunkerNet 威胁情报共享。</td>
 </tr>
 <tr>
+<td><code>BUNKERNET_FILTER_HEADERS</code></td>
+<td><code>no</code></td>
+<td>multisite</td>
+<td>否</td>
+<td><strong>过滤上报的请求头：</strong> 设置为 <code>yes</code> 时，只发送一份简短的请求头白名单，并清空 ModSecurity 在请求头和 Cookie 中命中的值。设置为 <code>no</code> 时，报告包含除 <code>Cookie</code>、<code>Authorization</code> 和 <code>Proxy-Authorization</code> 之外的所有请求头，以及命中的值（在 Cookie 和这些请求头中命中的值除外）。</td>
+</tr>
+<tr>
 <td><code>BUNKERNET_SERVER</code></td>
 <td><code>https://api.bunkerweb.io</code></td>
 <td>global</td>
@@ -6473,8 +6608,17 @@ TrustedMonitor/\d+\.\d+
 <p>当 BunkerNet 检测到某个 IP 地址在多个 BunkerWeb 实例中参与了恶意活动时，它会将该 IP 添加到集体黑名单中。这提供了一个主动的防御层，在威胁直接攻击您之前就保护您的网站。</p>
 </div>
 <div class="admonition info">
-<p class="admonition-title">匿名报告</p>
-<p>在向 BunkerNet 报告威胁信息时，您的实例只分享识别威胁所需的数据：IP 地址、阻止原因和最少的上下文数据。不会分享有关您的用户的个人信息或有关您网站的敏感详细信息。</p>
+<p class="admonition-title">报告包含的内容</p>
+<p>发送给 BunkerNet 的每份报告包含以下字段，仅此而已：</p>
+<ul>
+<li>每次请求发送的实例元数据：BunkerNet 实例 ID、BunkerWeb 版本、集成方式，以及操作系统名称、版本、版本 ID、代号、ID 和架构；</li>
+<li>客户端 IP 地址、阻止原因和日期；</li>
+<li>HTTP 方法、<strong>包含查询字符串的</strong> URL，以及服务名称（<code>server_name</code>）；</li>
+<li>请求头及其值：收到的所有请求头（最多 <code>MAX_HEADERS</code> 个，不含 <code>Cookie</code>、<code>Authorization</code> 和 <code>Proxy-Authorization</code>），或在 <code>BUNKERNET_FILTER_HEADERS</code> 为 <code>yes</code> 时仅包含 <code>User-Agent</code>、<code>Accept</code>、<code>Accept-Encoding</code>、<code>Accept-Language</code>、<code>Content-Type</code> 和 <code>Content-Length</code>；</li>
+<li>与阻止原因相关的详细信息。根据阻止该客户端的插件不同，可能包含命中的 ModSecurity 规则 ID 和消息，以及触发这些规则的请求值（参数、请求体、请求头或 Cookie 的片段，每项截断为 512 字节；在 Cookie 以及 <code>Cookie</code>、<code>Authorization</code>、<code>Proxy-Authorization</code> 请求头中命中的值始终会被清空，<code>BUNKERNET_FILTER_HEADERS</code> 为 <code>yes</code> 时其他请求头中命中的值也会被清空，只发送变量名）；对于 Bad Behavior，则是导致封禁的近期请求的方法和 URL。</li>
+</ul>
+<p>默认情况下（<code>BUNKERNET_FILTER_HEADERS</code> 为 <code>no</code>），报告包含收到的所有请求头（最多 <code>MAX_HEADERS</code> 个），但不含从不发送的 <code>Cookie</code>、<code>Authorization</code> 和 <code>Proxy-Authorization</code>，以及 ModSecurity 命中的值（在 Cookie 和这些请求头中命中的值除外）。将 <code>BUNKERNET_FILTER_HEADERS</code> 设置为 <code>yes</code>，则只发送上面列出的六个请求头，并清空在请求头和 Cookie 中命中的值。仍在队列中的报告在发送前也会以同样方式处理（凭据始终清除，白名单在 <code>yes</code> 时应用）。</p>
+<p>URL 以及命中的值均来自请求，因此包含客户端发送的任何内容。对于 URL 中带有敏感值的服务，请将 <code>USE_BUNKERNET</code> 设置为 <code>no</code>。</p>
 </div>
 <h3 id="_28">示例配置<a class="headerlink" href="#_28" title="Permanent link">&para;</a></h3>
 <div class="tabbed-set tabbed-alternate" data-tabs="11:3"><input checked="checked" id="__tabbed_11_1" name="__tabbed_11" type="radio" /><input id="__tabbed_11_2" name="__tabbed_11" type="radio" /><input id="__tabbed_11_3" name="__tabbed_11" type="radio" /><div class="tabbed-labels"><label for="__tabbed_11_1">默认配置（推荐）</label><label for="__tabbed_11_2">禁用配置</label><label for="__tabbed_11_3">自定义服务器配置</label></div>
@@ -6505,7 +6649,7 @@ TrustedMonitor/\d+\.\d+
 <p><strong>步骤 1：创建您的 CrowdSec 控制台帐户</strong></p>
 <p>前往 <a href="https://app.crowdsec.net/signup?utm_source=external-blog&amp;utm_medium=cta&amp;utm_campaign=bunker-web-integration">CrowdSec 控制台</a>注册，如果您还没有帐户的话。完成后，记下在“安全引擎”下点击“添加安全引擎”后找到的注册密钥：</p>
 <figure>
-<p><img align="center" alt="概述" src="../../assets/img/crowdity1.png" />
+<p><img align="center" alt="概述" src="../../assets/img/crowdity1.png" width="1129" height="173" loading="lazy" decoding="async" />
   </p>
 <figcaption>获取您的 Crowdsec 控制台注册密钥</figcaption>
 </figure>
@@ -6521,25 +6665,25 @@ TrustedMonitor/\d+\.\d+
 <p>一旦您有了您的 BunkerNet ID 和 CrowdSec 控制台注册密钥，请在<a href="https://panel.bunkerweb.io/store/bunkernet?utm_campaign=self&amp;utm_source=doc">面板上订购免费产品“BunkerNet / CrowdSec”</a>。如果您还没有帐户，可能会提示您创建一个。</p>
 <p>您现在可以选择“BunkerNet / CrowdSec”服务并填写表格，粘贴您的 BunkerNet ID 和 CrowdSec 控制台注册密钥：</p>
 <figure>
-<p><img align="center" alt="概述" src="../../assets/img/crowdity2.png" />
+<p><img align="center" alt="概述" src="../../assets/img/crowdity2.png" width="734" height="362" loading="lazy" decoding="async" />
   </p>
 <figcaption>将您的 BunkerWeb 实例注册到 CrowdSec 控制台</figcaption>
 </figure>
 <p><strong>步骤 4：在控制台上接受新的安全引擎</strong></p>
 <p>然后，返回您的 CrowdSec 控制台并接受新的安全引擎：</p>
 <figure>
-<p><img align="center" alt="概述" src="../../assets/img/crowdity3.png" />
+<p><img align="center" alt="概述" src="../../assets/img/crowdity3.png" width="1167" height="336" loading="lazy" decoding="async" />
   </p>
 <figcaption>接受注册到 CrowdSec 控制台</figcaption>
 </figure>
 <p><strong>恭喜，您的 BunkerWeb 实例现已注册到您的 CrowdSec 控制台！</strong></p>
 <p>专业提示：查看警报时，点击“列”选项并勾选“上下文”复选框，以访问 BunkerWeb 特定的数据。</p>
 <figure>
-<p><img align="center" alt="概述" src="../../assets/img/crowdity4.png" />
+<p><img align="center" alt="概述" src="../../assets/img/crowdity4.png" width="1273" height="304" loading="lazy" decoding="async" />
   </p>
 <figcaption>在上下文列中显示的 BunkerWeb 数据</figcaption>
 </figure>
-<h2 id="cache-pro">Cache <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)<a class="headerlink" href="#cache-pro" title="Permanent link">&para;</a></h2>
+<h2 id="cache-pro">Cache <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);' loading="lazy" decoding="async"> (PRO)<a class="headerlink" href="#cache-pro" title="Permanent link">&para;</a></h2>
 <p>如需更详细的指南，请参阅<a href="../advanced/#cache-pro">高级用法</a>文档。</p>
 <p>STREAM 支持 <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
 <p>Provides caching functionality at the reverse proxy level.</p>
@@ -6598,10 +6742,10 @@ TrustedMonitor/\d+\.\d+
 </tr>
 <tr>
 <td><code>CACHE_KEY</code></td>
-<td><code>$scheme$proxy_host$request_uri</code></td>
+<td><code>$scheme$host$request_uri</code></td>
 <td>multisite</td>
 <td>否</td>
-<td>Key used to identify cached elements.</td>
+<td>Key used to identify cached elements. The default includes the client host, so services that share an upstream and a cache zone do not share entries. Keep $host (or $http_host) in a custom key.</td>
 </tr>
 <tr>
 <td><code>CACHE_CONVERT_HEAD_TO_GET</code></td>
@@ -7005,7 +7149,7 @@ TrustedMonitor/\d+\.\d+
 <td></td>
 <td>multisite</td>
 <td>否</td>
-<td><strong>忽略的 URI：</strong> 以空格分隔的 PCRE 正则表达式列表，匹配的 URI 将跳过国家/地区检查。规则同时匹配路径和带查询字符串的完整请求 URI。</td>
+<td><strong>忽略的 URI：</strong> 以空格分隔的 PCRE 正则表达式列表，匹配的 URI 将跳过国家/地区检查。规则会匹配规范化后的路径，既可单独匹配，也可匹配路径后接 <code>?</code> 和查询字符串的形式。</td>
 </tr>
 <tr>
 <td><code>COUNTRY_IGNORE_HEADER_NAME</code></td>
@@ -7091,7 +7235,7 @@ TrustedMonitor/\d+\.\d+
 <h2 id="crowdsec_1">CrowdSec<a class="headerlink" href="#crowdsec_1" title="Permanent link">&para;</a></h2>
 <p>STREAM 支持 <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
 <figure>
-<p><img align="center," alt="概述" src="../../assets/img/crowdsec.svg" width="600" /></p>
+<p><img align="center," alt="概述" src="../../assets/img/crowdsec.svg" width="600" height="366" loading="lazy" decoding="async" /></p>
 </figure>
 <p>CrowdSec 插件将 BunkerWeb 与 CrowdSec 安全引擎集成，为抵御各种网络威胁提供额外的保护层。此插件充当 <a href="https://crowdsec.net/?utm_source=external-docs&amp;utm_medium=cta&amp;utm_campaign=bunker-web-docs">CrowdSec</a> 拦截器，根据 CrowdSec API 的决策拒绝请求。</p>
 <p>CrowdSec 是一种现代的开源安全引擎，它基于行为分析和社区的集体情报来检测和阻止恶意 IP 地址。您还可以配置<a href="https://docs.crowdsec.net/docs/concepts?utm_source=external-docs&amp;utm_medium=cta&amp;utm_campaign=bunker-web-docs#scenarios">场景</a>来根据可疑行为自动封禁 IP 地址，从而受益于一个众包的黑名单。</p>
@@ -7156,7 +7300,11 @@ TrustedMonitor/\d+\.\d+
 <li><code>DELETE /crowdsec/{connection_id}/decisions/{decision_id}</code>：在 JSON 请求体中包含所选的 <code>scope</code>、<code>value</code> 和 <code>decision_type</code>。</li>
 </ul>
 <p>请原样使用返回的连接 ID。它包含实例身份，因此不同实例上相同的 localhost URL 仍会被区分。API 管理员可以使用这些操作。委派的 API 用户需要在现有 <code>bans</code> 资源下获得独立的 <code>crowdsec_read</code> 或 <code>crowdsec_delete</code> 权限，权限范围为返回的连接 ID 或 <code>*</code>。普通的 <code>ban_delete</code> 权限不允许移除 CrowdSec 决策。无需进行数据库迁移。</p>
-<p>运行时按目标保留各条独立决策，因此移除一条决策不会抹去同一 IP 或范围上的其他封禁。可选的报告元数据使用独立的 5 MiB 缓存，不会逐出用于执行封禁的条目。流刷新使用 <code>/var/run/bunkerweb</code> 中的非阻塞进程锁，锁会一直保持到更新发布完成，并在 worker 退出时自动释放。</p>
+<p>运行时按目标保留各条独立决策，因此移除一条决策不会抹去同一 IP 或范围上的其他封禁。可选的报告元数据使用独立的 24 MiB (<code>CROWDSEC_METADATA_CACHE_SIZE=24m</code>) 缓存，不会逐出用于执行封禁的条目。流刷新使用 <code>/var/run/bunkerweb</code> 中的非阻塞进程锁，锁会一直保持到更新发布完成，并在 worker 退出时自动释放。</p>
+<p>流模式最多保留两个快照槽位，仅在完整快照存储成功后切换。配置未变的 nginx 重载会保留当前快照并请求增量更新。快照缺失、决策配置改变、上次启动未完成，或距离上次成功同步超过 300 秒与 <code>CROWDSEC_UPDATE_FREQUENCY</code> 的 30 倍两者中的较大值时，会强制获取完整快照。每个缓存前缀每分钟最多记录一次同步错误，恢复后记录一次通知。决策缓存已满时，请增大 <code>CROWDSEC_CACHE_SIZE</code> 以容纳两个快照并重载 BunkerWeb。重载时调整决策内存区大小会创建空缓存并触发完整同步；仅调整元数据内存区大小会清空可选元数据。</p>
+<p>从早期版本原地升级时，旧版本的有效记录保留原始 TTL，因此即使新的关闭超时更短，正在退出的旧工作进程仍可继续执行这些决策。分配快照前会清理过时的代际记录。除两个快照槽位外，还应为这些旧记录预留缓存空间；分配失败时保留原有防护，并报告同步错误。请按以下数据确定决策缓存大小，这些数据使用合成的互不相同的 IPv4 目标和一小时 TTL 测得：稳定状态（两个快照槽位）下约为每条决策 1.1 KiB，升级期间旧记录仍有效时约为每条决策 1.4 KiB，二者均已向上取整以留有余量。例如，100,000 条决策在稳定状态下约需 <code>120m</code>，升级期间约需 <code>150m</code>。按这些数据，默认值 <code>100m</code> 在稳定状态下可容纳约 90,000 条决策，升级期间约 70,000 条。IPv6 或网段等其他目标类型可能占用更多，因此请按列表规模设置 <code>CROWDSEC_CACHE_SIZE</code>，最好在升级前完成。</p>
+<p>流请求被中断或失败后，下次轮询会强制获取完整快照。距离上次成功完整同步超过 3600 秒时，也会执行一次完整校准。初始化期间，本地 API 的直接查询结果按有效凭据和策略使用独立缓存。查询失败后，仅该策略暂停查询 <code>CROWDSEC_UPDATE_FREQUENCY</code>；故障期间未知 IP 会被放行。已知的封禁和验证码决策仍执行至各自到期。初始化查询结果和恢复的决策都不会覆盖更新的已发布快照。</p>
+<p>流模式将每个完整快照和有变更的增量保存至 <code>/var/lib/bunkerweb/crowdsec-state-*.json</code>，记录各决策的绝对到期时间，并在 <code>crowdsec-binding-*.json</code> 中保存服务关联。这些文件不受调度器缓存推送影响，可在缓存区调整大小、策略变更（包括 API URL 或密钥轮换）、nginx 重载，以及保留文件系统的同一容器重启后继续使用。新快照发布前，继续使用旧的已发布快照或恢复的检查点执行决策。初始化时恢复检查点。工作进程共享检查点版本；版本过期的工作进程会先通过定时器重新读取文件，再用于故障期间的回退。文件写入也仅在定时器中进行。若检查点无法读取或已损坏（包括工作进程启动时或更新被中断之后），回退检查会拒绝请求，直到其重新可读或成功同步将其重写。变更立即保存，但写入期间发生崩溃（包括断电）可能导致检查点丢失。属于其他配置的检查点会被忽略；两种情况都会记录限频错误。使用全新文件系统重新创建容器时，初始决策为空；若 LAPI 不可用，未知 IP 仍会被放行。</p>
 <h3 id="crowdsec_2">CrowdSec 封禁<a class="headerlink" href="#crowdsec_2" title="Permanent link">&para;</a></h3>
 <p>默认情况下，BunkerWeb 会针对每个请求查询 CrowdSec。将 <code>CROWDSEC_BAN_REFRESH</code> 设置为一个时长（例如 <code>5m</code>），即可把 CrowdSec 的拦截转换为 <strong>CrowdSec 封禁</strong>：一个短时的 BunkerWeb 封禁，只要 CrowdSec 决策仍然有效就会持续续期。该 IP 之后的请求会在封禁检查处被拦下，早于其他插件，也早于 CrowdSec 查询。该封禁会作为独立的一行显示在封禁页面中，并带有 <strong>调查 IP</strong> 操作。默认值 <code>0</code> 保持原有行为，不创建任何封禁。</p>
 <ul>
@@ -7230,7 +7378,7 @@ log {
 <span class="nt">services</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bunkerweb</span><span class="p">:</span>
 <span class="w">    </span><span class="c1"># 这是将用于在调度器中识别实例的名称</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.17</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.18</span>
 <span class="w">    </span><span class="nt">ports</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">"80:8080/tcp"</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">"443:8443/tcp"</span>
@@ -7247,7 +7395,7 @@ log {
 <span class="w">        </span><span class="nt">syslog-address</span><span class="p">:</span><span class="w"> </span><span class="s">"udp://10.20.30.254:514"</span><span class="w"> </span><span class="c1"># syslog 服务的 IP 地址</span>
 
 <span class="w">  </span><span class="nt">bw-scheduler</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.17</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.18</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">&lt;&lt;</span><span class="p">:</span><span class="w"> </span><span class="nv">*bw-env</span>
 <span class="w">      </span><span class="nt">BUNKERWEB_INSTANCES</span><span class="p">:</span><span class="w"> </span><span class="s">"bunkerweb"</span><span class="w"> </span><span class="c1"># 确保设置正确的实例名称</span>
@@ -7389,6 +7537,7 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 </div>
 <h3 id="2-bunkerweb">第&nbsp;2&nbsp;步 – 配置 BunkerWeb 参数<a class="headerlink" href="#2-bunkerweb" title="Permanent link">&para;</a></h3>
 <p>应用以下环境变量（或通过调度器设置的值），让 BunkerWeb 实例能够与 CrowdSec 本地 API 通信。至少需要设置 <code>USE_CROWDSEC</code>、<code>CROWDSEC_API</code> 和 <code>CROWDSEC_API_KEY</code>，并使用通过 <code>cscli bouncers add</code> 生成的有效密钥。</p>
+<p>连接设置为 <code>multisite</code>：无前缀的值适用于所有服务，带服务器名前缀的值仅覆盖该服务。<code>CROWDSEC_CACHE_SIZE</code> 和 <code>CROWDSEC_METADATA_CACHE_SIZE</code> 为 <code>global</code>，请勿添加服务器名前缀。</p>
 <table>
 <thead>
 <tr>
@@ -7448,6 +7597,20 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 <td>multisite</td>
 <td>否</td>
 <td><strong>排除的位置：</strong> 从 CrowdSec 检查中排除的位置（URI）列表，以逗号分隔。</td>
+</tr>
+<tr>
+<td><code>CROWDSEC_CACHE_SIZE</code></td>
+<td><code>100m</code></td>
+<td>global</td>
+<td>否</td>
+<td><strong>决策缓存大小：</strong> 所有服务共享的内存；流模式需要两个快照。使用正整数兆字节（<code>m</code>/<code>M</code>），最小 <code>1m</code>。调整大小会清空缓存区；已知决策从磁盘恢复并执行至完成校准。未知 IP 查询 LAPI，故障时放行未知 IP。</td>
+</tr>
+<tr>
+<td><code>CROWDSEC_METADATA_CACHE_SIZE</code></td>
+<td><code>24m</code></td>
+<td>global</td>
+<td>否</td>
+<td><strong>元数据缓存大小：</strong> 所有服务的可选报告元数据使用的独立共享内存。使用正整数兆字节（<code>m</code>/<code>M</code>），最小值为 <code>1m</code>；重载时调整大小会清空此内存区。</td>
 </tr>
 <tr>
 <td><code>CROWDSEC_CACHE_EXPIRATION</code></td>
@@ -7539,7 +7702,7 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 <p class="admonition-title">关于操作模式</p>
 <ul>
 <li><strong>实时模式</strong>会为每个传入的请求查询 CrowdSec API，提供实时的保护，但会增加延迟。</li>
-<li><strong>流模式</strong>会定期从 CrowdSec API 下载所有决策并将其本地缓存，从而减少延迟，但应用新决策会略有延迟。</li>
+<li><strong>流模式</strong>先下载初始快照，再轮询新增和删除的决策以更新本地缓存，从而减少延迟，但应用新决策会略有延迟。</li>
 </ul>
 </div>
 <h4 id="_42">按服务的端点<a class="headerlink" href="#_42" title="Permanent link">&para;</a></h4>
@@ -7618,7 +7781,7 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 <li>在 CrowdSec 端监控 <code>cscli metrics show</code> 或 CrowdSec Console，确保 BunkerWeb 的决策按预期显示。</li>
 <li>在 BunkerWeb UI 中打开 CrowdSec 插件页面查看集成状态。</li>
 </ul>
-<h2 id="custom-pages-pro">Custom Pages <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)<a class="headerlink" href="#custom-pages-pro" title="Permanent link">&para;</a></h2>
+<h2 id="custom-pages-pro">Custom Pages <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);' loading="lazy" decoding="async"> (PRO)<a class="headerlink" href="#custom-pages-pro" title="Permanent link">&para;</a></h2>
 <p>如需更详细的指南，请参阅<a href="../advanced/#custom-pages-pro">高级用法</a>文档。</p>
 <p>STREAM 支持 <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
 <p>Tweak BunkerWeb error/antibot/default/maintenance pages with custom HTML.</p>
@@ -8061,7 +8224,7 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 <tr>
 <td><code>DNSBL_LIST</code></td>
 <td><code>bl.blocklist.de sbl.spamhaus.org xbl.spamhaus.org</code></td>
-<td>global</td>
+<td>multisite</td>
 <td>否</td>
 <td>DNSBL 服务器：要检查的 DNSBL 服务器域名列表，以空格分隔。</td>
 </tr>
@@ -8181,7 +8344,7 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 </div>
 </div>
 </div>
-<h2 id="easy-resolve-pro">Easy Resolve <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)<a class="headerlink" href="#easy-resolve-pro" title="Permanent link">&para;</a></h2>
+<h2 id="easy-resolve-pro">Easy Resolve <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);' loading="lazy" decoding="async"> (PRO)<a class="headerlink" href="#easy-resolve-pro" title="Permanent link">&para;</a></h2>
 <p align='center'><iframe style='display: block;' width='560' height='315' data-src='https://www.youtube-nocookie.com/embed/45vX0WJqjxo' title='Easy Resolve' frameborder='0' allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture' allowfullscreen></iframe></p>
 
 <p>如需更详细的指南，请参阅<a href="../advanced/#easy-resolve-pro">高级用法</a>文档。</p>
@@ -8276,6 +8439,9 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 </div>
 </div>
 </div>
+<h3 id="api">保留上游 API 的错误响应体<a class="headerlink" href="#api" title="Permanent link">&para;</a></h3>
+<p>默认情况下，BunkerWeb 会用自己的错误页面替换上游返回的 400 响应，这可能会破坏 JSON API 或 OIDC 客户端。要为某个服务放行上游错误，可以从该服务的列表中移除相应状态码，例如 <code>app.example.com_INTERCEPTED_ERROR_CODES=401 403 404 405 413 429 500 501 502 503 504</code>（保留您仍希望拦截的状态码），或者设置 <code>app.example.com_REVERSE_PROXY_INTERCEPT_ERRORS=no</code> 以放行所有上游错误。由 BunkerWeb 自身生成的错误（例如 WAF 拒绝）仍由 BunkerWeb 处理。</p>
+<p>若只想在某个 location 中保留上游错误，请创建一个内容为 <code>proxy_intercept_errors off;</code> 的文件，并将其列入该 location 的 <code>REVERSE_PROXY_INCLUDES</code> 设置中（例如 <code>app.example.com_REVERSE_PROXY_INCLUDES=/opt/keep-errors.conf</code>，数字后缀与该 location 的 <code>REVERSE_PROXY_HOST</code> 相同）。该文件必须存在于 BunkerWeb 容器内。该服务的其他 location 仍会拦截错误。</p>
 <h2 id="greylist">Greylist<a class="headerlink" href="#greylist" title="Permanent link">&para;</a></h2>
 <p>STREAM 支持 <img alt="⚠" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/26a0.svg" title=":warning:" /></p>
 <p>Greylist 插件提供了一种灵活的安全方法，允许访问者访问，同时仍然保持必要的安全功能。</p>
@@ -8326,6 +8492,13 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 <td>multisite</td>
 <td>否</td>
 <td><strong>启用灰名单：</strong> 设置为 <code>yes</code> 以启用灰名单。</td>
+</tr>
+<tr>
+<td><code>GREYLIST_URLS_REFRESH_INTERVAL</code></td>
+<td><code>1h</code></td>
+<td>multisite</td>
+<td>否</td>
+<td><strong>URL 刷新间隔：</strong> 再次下载前缓存必须达到的最短时间。接受不带单位的秒数或时间后缀（<code>ms</code>、<code>s</code>、<code>m</code>、<code>h</code>、<code>d</code>、<code>w</code>、<code>M</code>、<code>y</code>）。</td>
 </tr>
 </tbody>
 </table>
@@ -8542,7 +8715,7 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 </div>
 <div class="admonition tip">
 <p class="admonition-title">定期更新</p>
-<p>来自 URL 的灰名单会每小时自动下载和更新，以确保您的保护始终与最新的受信任来源保持同步。</p>
+<p>任务每小时运行一次。<code>GREYLIST_URLS_REFRESH_INTERVAL</code> 设置再次下载前 URL 缓存必须达到的最短时间（默认：<code>1h</code>）。对于每天最多允许下载一次的提供商，请使用 <code>24h</code>；设置为 <code>0</code> 则每次任务运行时都下载。缓存仍有效或下载失败时，会保留上次的有效条目。在此插件内，各服务共享 URL 缓存：最短的间隔可能触发下载，因此对于有下载频率限制的同一 URL，请在所有使用它的服务上设置相同的间隔。</p>
 </div>
 <h3 id="_57">示例配置<a class="headerlink" href="#_57" title="Permanent link">&para;</a></h3>
 <div class="tabbed-set tabbed-alternate" data-tabs="21:4"><input checked="checked" id="__tabbed_21_1" name="__tabbed_21" type="radio" /><input id="__tabbed_21_2" name="__tabbed_21" type="radio" /><input id="__tabbed_21_3" name="__tabbed_21" type="radio" /><input id="__tabbed_21_4" name="__tabbed_21" type="radio" /><div class="tabbed-labels"><label for="__tabbed_21_1">基本配置</label><label for="__tabbed_21_2">高级配置</label><label for="__tabbed_21_3">使用本地文件</label><label for="__tabbed_21_4">选择性 API 访问</label></div>
@@ -8581,11 +8754,43 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 </code></pre></div>
 </div>
 <div class="tabbed-block">
-<p>允许访问特定 API 端点的配置：</p>
+<p>一种让合作伙伴网络访问所有路径、并让所有客户端访问某个公开端点的配置：</p>
 <div class="highlight"><pre><span></span><code><span class="nt">USE_GREYLIST</span><span class="p">:</span><span class="w"> </span><span class="s">"yes"</span>
-<span class="nt">GREYLIST_URI</span><span class="p">:</span><span class="w"> </span><span class="s">"^/api/v1/public/</span><span class="nv"> </span><span class="s">^/api/v1/status"</span>
-<span class="nt">GREYLIST_IP</span><span class="p">:</span><span class="w"> </span><span class="s">"203.0.113.0/24"</span><span class="w">  </span><span class="c1"># 外部合作伙伴网络</span>
+<span class="nt">GREYLIST_IP</span><span class="p">:</span><span class="w"> </span><span class="s">"203.0.113.0/24"</span>
+<span class="nt">GREYLIST_URI</span><span class="p">:</span><span class="w"> </span><span class="s">"^/api/foo$"</span>
 </code></pre></div>
+<p>Greylist 的各项条件是“或”的关系：只要其中任意一项匹配，请求即通过 Greylist。此处，所列网络可以访问所有路径，任何客户端都可以访问精确路径 <code>/api/foo</code>。其他客户端在其他路径上会被拒绝。其他已启用的安全检查仍然适用于每个请求。如需公开某个子路径树，请使用 <code>^/api/foo(/|$)</code>。匹配使用规范化后的路径，不包含查询字符串。该配置无法为不同路径设置不同的 IP 列表，也无法要求 IP 和路径同时匹配。</p>
+<table>
+<thead>
+<tr>
+<th>客户端</th>
+<th>路径</th>
+<th>结果</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>在 <code>203.0.113.0/24</code> 内</td>
+<td><code>/api/foo</code></td>
+<td>通过</td>
+</tr>
+<tr>
+<td>在 <code>203.0.113.0/24</code> 内</td>
+<td>任何其他路径</td>
+<td>通过</td>
+</tr>
+<tr>
+<td>在 <code>203.0.113.0/24</code> 外</td>
+<td><code>/api/foo</code></td>
+<td>通过</td>
+</tr>
+<tr>
+<td>在 <code>203.0.113.0/24</code> 外</td>
+<td>任何其他路径</td>
+<td>拒绝</td>
+</tr>
+</tbody>
+</table>
 </div>
 </div>
 </div>
@@ -8939,7 +9144,7 @@ TrustedMonitor/\d+\.\d+
 </div>
 <div class="admonition warning">
 <p class="admonition-title">长连接流与核心超时</p>
-<p>长连接或流式 RPC 可能需要高于全局默认值的通用 NGINX 超时。常见需要调整的是 General 插件设置中的 <code>CLIENT_BODY_TIMEOUT</code> 和 <code>CLIENT_HEADER_TIMEOUT</code>。</p>
+<p>长连接或流式 RPC 可能需要更大的 <code>CLIENT_BODY_TIMEOUT</code> 和 <code>CLIENT_HEADER_TIMEOUT</code>。请在 General 插件设置中为 gRPC 服务单独配置；全局 <code>CLIENT_HEADER_TIMEOUT</code> 应保持较短，以限制 TLS 握手时间和重新加载后旧工作进程的存活时间。</p>
 </div>
 <div class="admonition tip">
 <p class="admonition-title">多个 gRPC 后端</p>
@@ -9415,6 +9620,7 @@ TrustedMonitor/\d+\.\d+
 <li>如果您配置了 head 注入，BunkerWeb 会在 <code>&lt;/head&gt;</code> 结束标签之前插入您的自定义 HTML 代码。</li>
 <li>此插入操作会自动应用于您网站提供的所有 HTML 页面。</li>
 <li>这使您无需修改应用程序代码即可添加脚本、样式或其他元素。</li>
+<li>反机器人（antibot）挑战页面和 BunkerWeb 的错误页面不会被修改：这些页面由 BunkerWeb 生成，其内容安全策略（CSP）无论如何都会阻止注入的代码。</li>
 </ol>
 <h3 id="_69">如何使用<a class="headerlink" href="#_69" title="Permanent link">&para;</a></h3>
 <p>请按照以下步骤配置和使用 HTML 注入功能：</p>
@@ -9452,6 +9658,7 @@ TrustedMonitor/\d+\.\d+
 </tr>
 </tbody>
 </table>
+<p><code>INJECT_HEAD</code> 和 <code>INJECT_BODY</code> 的值按原样作为 HTML 插入：引号和反斜杠无需额外进行 NGINX 转义。如果您之前手动添加了 <code>\'</code> 作为临时解决方法，请删除其中的反斜杠。请保留配置格式（如 YAML）要求的转义；NGINX 的 <code>$variable</code> 变量展开行为保持不变。</p>
 <div class="admonition tip">
 <p class="admonition-title">最佳实践</p>
 <ul>
@@ -9499,7 +9706,7 @@ TrustedMonitor/\d+\.\d+
 </div>
 </div>
 </div>
-<h2 id="ldap-sso-pro">LDAP SSO <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)<a class="headerlink" href="#ldap-sso-pro" title="Permanent link">&para;</a></h2>
+<h2 id="ldap-sso-pro">LDAP SSO <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);' loading="lazy" decoding="async"> (PRO)<a class="headerlink" href="#ldap-sso-pro" title="Permanent link">&para;</a></h2>
 <p>如需更详细的指南，请参阅<a href="../advanced/#ldap-sso-pro">高级用法</a>文档。</p>
 <p>STREAM 支持 <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
 <p>LDAP-based single sign-on plugin with session-backed authentication.</p>
@@ -9520,6 +9727,20 @@ TrustedMonitor/\d+\.\d+
 <td>multisite</td>
 <td>否</td>
 <td>Enable or disable LDAP SSO authentication.</td>
+</tr>
+<tr>
+<td><code>LDAP_IGNORE_URI</code></td>
+<td></td>
+<td>multisite</td>
+<td>否</td>
+<td>List of PCRE regex patterns (separated by spaces) for URIs excluded from LDAP authentication. Patterns are matched against the normalized path, alone or followed by ? and the query string. Takes precedence over LDAP_INCLUDE_URI.</td>
+</tr>
+<tr>
+<td><code>LDAP_INCLUDE_URI</code></td>
+<td></td>
+<td>multisite</td>
+<td>否</td>
+<td>List of PCRE regex patterns (separated by spaces) for the only URIs that require LDAP authentication; when empty, every URI does. Patterns are matched against the normalized path, alone or followed by ? and the query string. LDAP_IGNORE_URI takes precedence. Patterns are unanchored: ^/search also matches /searchengine. Example: LDAP_INCLUDE_URI=^/search(/|$) ^/login(/|$).</td>
 </tr>
 <tr>
 <td><code>LDAP_HOST</code></td>
@@ -10201,6 +10422,13 @@ TrustedMonitor/\d+\.\d+
 <td><a href="https://github.com/ctrlaltcoop/certbot-dns-hetzner/blob/main/README.md">文档</a></td>
 </tr>
 <tr>
+<td><code>hosttech</code></td>
+<td>Hosttech</td>
+<td><code>api_token</code></td>
+<td>默认传播等待时间为 600 秒；如有需要，请增大 <code>LETS_ENCRYPT_DNS_PROPAGATION</code>。</td>
+<td><a href="https://github.com/bunkerity/certbot-dns-hosttech/blob/main/README.md">文档</a></td>
+</tr>
+<tr>
 <td><code>infomaniak</code></td>
 <td>Infomaniak</td>
 <td><code>token</code></td>
@@ -10441,6 +10669,10 @@ TrustedMonitor/\d+\.\d+
 </ul>
 <p>例如，<code>5r/m</code> 表示每个 IP 地址每分钟允许 5 个请求。</p>
 </div>
+<div class="admonition info">
+<p class="admonition-title">跨 worker 的计数精度</p>
+<p>未使用 Redis 时，对于 <code>LIMIT_REQ_RATE</code> 和 <code>LIMIT_REQ_GLOBAL_RATE</code>，每个时间窗口不超过 100 个请求时，跨 worker 的计数是精确的：同时到达的请求无法突破限制。每个时间窗口超过 100 个请求时，同时到达的请求可能略微超出限制，因为在每个请求上串行化一长串请求历史的计数器会降低吞吐量。使用 Redis 时，计数始终精确。</p>
+</div>
 </div>
 <div class="tabbed-block">
 <table>
@@ -10499,34 +10731,35 @@ TrustedMonitor/\d+\.\d+
 <td><code>10</code></td>
 <td>multisite</td>
 <td>否</td>
-<td><strong>HTTP/1.X 连接数：</strong> 每个 IP 地址的最大并发 HTTP/1.X 连接数。</td>
+<td><strong>HTTP/1.X 连接数：</strong> 每个 IP 地址的最大并发 HTTP/1.X 连接数。范围：1 至 65535。</td>
 </tr>
 <tr>
 <td><code>LIMIT_CONN_MAX_HTTP2</code></td>
 <td><code>100</code></td>
 <td>multisite</td>
 <td>否</td>
-<td><strong>HTTP/2 流数：</strong> 每个 IP 地址的最大并发 HTTP/2 流数。</td>
+<td><strong>HTTP/2 流数：</strong> 每个 IP 地址的最大并发 HTTP/2 流数。范围：1 至 65535。</td>
 </tr>
 <tr>
 <td><code>LIMIT_CONN_MAX_HTTP3</code></td>
 <td><code>100</code></td>
 <td>multisite</td>
 <td>否</td>
-<td><strong>HTTP/3 流数：</strong> 每个 IP 地址的最大并发 HTTP/3 流数。</td>
+<td><strong>HTTP/3 流数：</strong> 每个 IP 地址的最大并发 HTTP/3 流数。范围：1 至 65535。</td>
 </tr>
 <tr>
 <td><code>LIMIT_CONN_MAX_STREAM</code></td>
 <td><code>10</code></td>
 <td>multisite</td>
 <td>否</td>
-<td><strong>流连接数：</strong> 每个 IP 地址的最大并发流连接数。</td>
+<td><strong>流连接数：</strong> 每个 IP 地址的最大并发流连接数。范围：1 至 65535。</td>
 </tr>
 </tbody>
 </table>
 </div>
 </div>
 </div>
+<p>当 <code>SECURITY_MODE</code> 为 <code>detect</code> 时，连接限制会被评估并记录（<code>limiting connections, dry run</code>），但不会被强制执行。</p>
 <div class="admonition info">
 <p class="admonition-title">连接限制与请求限制</p>
 <ul>
@@ -10622,7 +10855,7 @@ TrustedMonitor/\d+\.\d+
 </div>
 </div>
 </div>
-<h2 id="load-balancer-pro">Load Balancer <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)<a class="headerlink" href="#load-balancer-pro" title="Permanent link">&para;</a></h2>
+<h2 id="load-balancer-pro">Load Balancer <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);' loading="lazy" decoding="async"> (PRO)<a class="headerlink" href="#load-balancer-pro" title="Permanent link">&para;</a></h2>
 <p align='center'><iframe style='display: block;' width='560' height='315' data-src='https://www.youtube-nocookie.com/embed/cOVp0rAt5nw?si=iVhDio8o8S4F_uag' title='Load Balancer' frameborder='0' allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture' allowfullscreen></iframe></p>
 
 <p>如需更详细的指南，请参阅<a href="../advanced/#load-balancer-pro">高级用法</a>文档。</p>
@@ -10779,9 +11012,16 @@ TrustedMonitor/\d+\.\d+
 <td>是</td>
 <td>Host header for healthchecks (useful for HTTPS).</td>
 </tr>
+<tr>
+<td><code>LOADBALANCER_HEALTHCHECK_PORT</code></td>
+<td></td>
+<td>global</td>
+<td>是</td>
+<td>TCP port probed on every peer of the group. 1-65535 as a plain decimal, with no sign, leading zero, spaces or trailing newline; an invalid value is ignored with a warning. Empty uses each peer's application port. In a Kubernetes ConfigMap quote the value ("8081") or use a |- block scalar.</td>
+</tr>
 </tbody>
 </table>
-<h2 id="maintenance-pro">Maintenance <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)<a class="headerlink" href="#maintenance-pro" title="Permanent link">&para;</a></h2>
+<h2 id="maintenance-pro">Maintenance <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);' loading="lazy" decoding="async"> (PRO)<a class="headerlink" href="#maintenance-pro" title="Permanent link">&para;</a></h2>
 <p>如需更详细的指南，请参阅<a href="../advanced/#maintenance-pro">高级用法</a>文档。</p>
 <p>STREAM 支持 <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
 <p>Serve a maintenance page instead of forwarding requests to the application.</p>
@@ -10856,7 +11096,7 @@ TrustedMonitor/\d+\.\d+
 <p><strong>插件计数器</strong>：跟踪活动和事件的各种插件特定计数器。</p>
 </li>
 </ol>
-<h3 id="api">API 访问<a class="headerlink" href="#api" title="Permanent link">&para;</a></h3>
+<h3 id="api_1">API 访问<a class="headerlink" href="#api_1" title="Permanent link">&para;</a></h3>
 <p>指标数据可以通过 BunkerWeb 的内部 API 端点访问：</p>
 <ul>
 <li><strong>端点</strong>：<code>/metrics/{filter}</code></li>
@@ -11012,7 +11252,7 @@ TrustedMonitor/\d+\.\d+
 </div>
 </div>
 </div>
-<h2 id="migration-pro">Migration <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)<a class="headerlink" href="#migration-pro" title="Permanent link">&para;</a></h2>
+<h2 id="migration-pro">Migration <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);' loading="lazy" decoding="async"> (PRO)<a class="headerlink" href="#migration-pro" title="Permanent link">&para;</a></h2>
 <p>如需更详细的指南，请参阅<a href="../advanced/#migration-pro">高级用法</a>文档。</p>
 <p>STREAM 支持 <img alt="✅" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" title=":white_check_mark:" /></p>
 <p>Migration of BunkerWeb configuration between instances made easy via the web UI</p>
@@ -11627,6 +11867,13 @@ TrustedMonitor/\d+\.\d+
 <td>写入模式：<code>Serial</code>（默认）或 <code>Concurrent</code>。</td>
 </tr>
 <tr>
+<td><code>MODSECURITY_SEC_AUDIT_LOG_FORMAT</code></td>
+<td><code>Native</code></td>
+<td>multisite</td>
+<td>否</td>
+<td>审计日志格式：<code>Native</code>（默认）或 <code>JSON</code>（每条记录一个 JSON 对象）。在全局 CRS 模式下须全局设置。</td>
+</tr>
+<tr>
 <td><code>MODSECURITY_SEC_AUDIT_LOG_STORAGE_DIR</code></td>
 <td></td>
 <td>multisite</td>
@@ -11687,11 +11934,25 @@ TrustedMonitor/\d+\.\d+
 <p>ModSecurity 会将完整请求体缓冲到内存中，并且无法为数 GB 的上传设置上限，这可能导致 worker OOM。如果——<strong>并且仅当</strong>——某个反向代理 URL <em>专门</em> 用于文件上传（例如专用的 <code>/upload</code> 端点），请在该 URL 上设置 <code>REVERSE_PROXY_MODSECURITY_N: "no"</code>，以便在其 <code>location</code> 块中生成 <code>modsecurity off;</code>。不要在混合用途的 URL 上禁用它：否则该 location 提供的所有内容都会失去 WAF 覆盖。</p>
 <p>为了在绕过 ModSecurity 后仍保护上传内容，请将其与文件扫描插件配合使用，例如 <a href="https://github.com/bunkerity/bunkerweb-plugins/tree/main/clamav">ClamAV</a> 或 <a href="https://github.com/bunkerity/bunkerweb-plugins/tree/main/virustotal">VirusTotal</a>——它们检查上传文件本身，而不是原始请求体。</p>
 </div>
+<div class="admonition warning">
+<p class="admonition-title">响应体阻断与压缩响应</p>
+<p>如果响应体阻断规则在响应头发送后才触发，客户端可能先收到原始状态码（如 <code>200</code>），随后出现响应体不完整或分块传输错误，而不是完整的 <code>403</code> 响应。BunkerWeb 应用 gzip、Brotli 或 zstd 压缩时都可能出现这种情况。从 <code>1.6.18</code> 开始，Brotli 的行为与 gzip 已有的行为一致。请检查 ModSecurity 审计日志和错误日志，确定触发的规则，并用范围严格受限的排除规则处理已确认的误报。</p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">上游压缩的响应体</p>
+<p>CRS v4 不检查上游已经压缩的响应体（<code>gzip</code>、<code>br</code> 或 <code>zstd</code>）。BunkerWeb 不会为检查而解压这些响应体。如果需要检查响应体，请配置上游返回未压缩的内容。对于遵循此请求头的上游，可以仅在受影响的服务和 location 中移除转发请求的 <code>Accept-Encoding</code> 头，以请求未压缩的响应：</p>
+<div class="highlight"><pre><span></span><code><span class="nt">REVERSE_PROXY_HOST_1</span><span class="p">:</span><span class="w"> </span><span class="s">"http://app:8080"</span>
+<span class="nt">REVERSE_PROXY_URL_1</span><span class="p">:</span><span class="w"> </span><span class="s">"/reports/"</span>
+<span class="nt">REVERSE_PROXY_HEADERS_1</span><span class="p">:</span><span class="w"> </span><span class="s">'Accept-Encoding</span><span class="nv"> </span><span class="s">""'</span>
+</code></pre></div>
+<p>请替换主机和路径，并将后缀调整为目标反向代理 location 的编号。如果该 location 的 <code>REVERSE_PROXY_HEADERS_1</code> 已有条目，请保留它们并追加 <code>;Accept-Encoding ""</code>。应使用此设置，而不是服务器级别的 <code>proxy_set_header</code>，因为生成的 location 请求头配置会覆盖后者。</p>
+<p>请验证上游确实返回未压缩的响应；如果仍然压缩，请在上游禁用该路由的压缩。这会增加上游与 BunkerWeb 之间的带宽使用量。检查完成后，BunkerWeb 仍可为客户端压缩响应；配置的响应体检查 MIME 类型和大小限制仍然适用。</p>
+</div>
 <h3 id="crs">可用的 CRS 版本<a class="headerlink" href="#crs" title="Permanent link">&para;</a></h3>
 <p>选择一个 CRS 版本以最符合您的安全需求：</p>
 <ul>
 <li><strong><code>3</code></strong>：稳定版 <a href="https://github.com/coreruleset/coreruleset/releases/tag/v3.3.10">v3.3.10</a>。</li>
-<li><strong><code>4</code></strong>：稳定版 <a href="https://github.com/coreruleset/coreruleset/releases/tag/v4.29.0">v4.29.0</a> (<strong>默认</strong>)。</li>
+<li><strong><code>4</code></strong>：稳定版 <a href="https://github.com/coreruleset/coreruleset/releases/tag/v4.30.0">v4.30.0</a> (<strong>默认</strong>)。</li>
 </ul>
 <div class="admonition warning">
 <p class="admonition-title">每日构建版已弃用</p>
@@ -11732,11 +11993,11 @@ TrustedMonitor/\d+\.\d+
 <li>该操作在<strong>阶段 1</strong>（请求生命周期的早期）执行。</li>
 <li>它通过设置变量 <code>tx.crs_exclusions_wordpress</code> 来启用 WordPress 特定的 CRS 排除项。</li>
 </ul>
-<h4 id="modsec-crs">使用 <code>modsec</code> 更新 CRS 规则<a class="headerlink" href="#modsec-crs" title="Permanent link">&para;</a></h4>
-<p>要微调已加载的 CRS 规则，您可以使用 <code>modsec</code> 类型的自定义配置。例如，您可以为某些请求路径删除特定的规则或标签：</p>
-<div class="highlight"><pre><span></span><code>SecRule REQUEST_FILENAME "/wp-admin/admin-ajax.php" "id:1,ctl:ruleRemoveByTag=attack-xss,ctl:ruleRemoveByTag=attack-rce"
-SecRule REQUEST_FILENAME "/wp-admin/options.php" "id:2,ctl:ruleRemoveByTag=attack-xss"
-SecRule REQUEST_FILENAME "^/wp-json/yoast" "id:3,ctl:ruleRemoveById=930120"
+<h4 id="modsec-crs-crs_1">使用 <code>modsec-crs</code> 更新 CRS 规则<a class="headerlink" href="#modsec-crs-crs_1" title="Permanent link">&para;</a></h4>
+<p>要微调已加载的 CRS 规则，您可以使用 <code>modsec-crs</code> 类型的自定义配置。例如，您可以为某些请求路径删除特定的规则或标签。<code>ctl:ruleRemove*</code> 操作只影响在它之后执行的规则，因此下面的规则在 <code>phase:1</code> 中执行，并且该配置在 CRS 之前加载：</p>
+<div class="highlight"><pre><span></span><code>SecRule REQUEST_FILENAME "/wp-admin/admin-ajax.php" "id:1,phase:1,pass,t:none,nolog,ctl:ruleRemoveByTag=attack-xss,ctl:ruleRemoveByTag=attack-rce"
+SecRule REQUEST_FILENAME "/wp-admin/options.php" "id:2,phase:1,pass,t:none,nolog,ctl:ruleRemoveByTag=attack-xss"
+SecRule REQUEST_FILENAME "^/wp-json/yoast" "id:3,phase:1,pass,t:none,nolog,ctl:ruleRemoveById=930120"
 </code></pre></div>
 <p>在此示例中：</p>
 <ul>
@@ -11744,6 +12005,7 @@ SecRule REQUEST_FILENAME "^/wp-json/yoast" "id:3,ctl:ruleRemoveById=930120"
 <li><strong>规则 2</strong>：为对 <code>/wp-admin/options.php</code> 的请求删除标记为 <code>attack-xss</code> 的规则。</li>
 <li><strong>规则 3</strong>：为匹配 <code>/wp-json/yoast</code> 的请求删除特定规则（ID <code>930120</code>）。</li>
 </ul>
+<p>在加载配置时生效的 <code>SecRuleRemoveById</code>、<code>SecRuleRemoveByTag</code>、<code>SecRuleUpdateTargetById</code> 和 <code>SecRuleUpdateTargetByTag</code> 指令，应放在 <code>modsec</code> 类型的自定义配置中（位于 CRS 之后）。</p>
 <div class="admonition info">
 <p class="admonition-title">执行顺序</p>
 <p>BunkerWeb 中 ModSecurity 的执行顺序如下，确保了规则应用的清晰和逻辑性：</p>
@@ -11861,7 +12123,7 @@ SecRule REQUEST_FILENAME "^/wp-json/yoast" "id:3,ctl:ruleRemoveById=930120"
 <p>设置 <code>MODSECURITY_SEC_AUDIT_LOG_TYPE=Concurrent</code> 和 <code>MODSECURITY_SEC_AUDIT_LOG_STORAGE_DIR=/var/log/bunkerweb/audit</code>。请预先在每个 BunkerWeb 实例上创建该目录，并授予 nginx worker 写入和目录访问权限。需要保留日志时请使用持久化挂载。BunkerWeb 会在应用之前拒绝无效配置，不会创建此目录。在全局 CRS 模式（<code>USE_MODSECURITY_GLOBAL_CRS=yes</code>）下，这两个设置必须在全局配置；服务级覆盖不会选择独立的写入模式。</p>
 <p><code>MODSECURITY_SEC_AUDIT_LOG</code> 仍为可加锁的普通 <code>.log</code> 文件：<code>Serial</code> 写入完整记录，<code>Concurrent</code> 写入指向各事务文件的索引。索引路径及其轮转规则保持不变。操作员负责磁盘容量、访问权限以及按日期创建的子目录的递归保留策略。轮转索引不会删除事务文件。切换之前请确认日志读取工具能够处理 Concurrent 索引，而非仅支持 Serial 记录。</p>
 <p>Concurrent 改变记录的存储方式；它不会对请求进行采样，也不会减少 <code>MODSECURITY_SEC_AUDIT_LOG_PARTS</code> 选择的审计数据。请根据请求速率、所选记录部分和保留时间规划存储容量，并使用有代表性的流量测量记录大小，而不是假设每个被阻止的请求都有固定的开销。</p>
-<h2 id="monitoring-pro">Monitoring <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)<a class="headerlink" href="#monitoring-pro" title="Permanent link">&para;</a></h2>
+<h2 id="monitoring-pro">Monitoring <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);' loading="lazy" decoding="async"> (PRO)<a class="headerlink" href="#monitoring-pro" title="Permanent link">&para;</a></h2>
 <p>STREAM 支持 <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
 <p>BunkerWeb monitoring pro system. This plugin is a prerequisite for some other plugins.</p>
 <table>
@@ -12122,7 +12384,7 @@ SecRule REQUEST_FILENAME "^/wp-json/yoast" "id:3,ctl:ruleRemoveById=930120"
 </div>
 </div>
 </div>
-<h2 id="openapi-validator-pro">OpenAPI Validator <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)<a class="headerlink" href="#openapi-validator-pro" title="Permanent link">&para;</a></h2>
+<h2 id="openapi-validator-pro">OpenAPI Validator <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);' loading="lazy" decoding="async"> (PRO)<a class="headerlink" href="#openapi-validator-pro" title="Permanent link">&para;</a></h2>
 <p align='center'><iframe style='display: block;' width='560' height='315' data-src='https://www.youtube-nocookie.com/embed/3oZOO1XdSlc' title='OpenAPI Validator' frameborder='0' allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture' allowfullscreen></iframe></p>
 
 <p>如需更详细的指南，请参阅<a href="../advanced/#openapi-validator-pro">高级用法</a>文档。</p>
@@ -12165,7 +12427,7 @@ SecRule REQUEST_FILENAME "^/wp-json/yoast" "id:3,ctl:ruleRemoveById=930120"
 <td><code>no</code></td>
 <td>multisite</td>
 <td>否</td>
-<td>Allow requests to paths not listed in the specification (otherwise they are denied).</td>
+<td>Allow requests to paths not listed in the specification (otherwise they are denied). With no, every request is also denied while the specification cannot be loaded.</td>
 </tr>
 <tr>
 <td><code>OPENAPI_ALLOW_INSECURE_URL</code></td>
@@ -12197,7 +12459,7 @@ SecRule REQUEST_FILENAME "^/wp-json/yoast" "id:3,ctl:ruleRemoveById=930120"
 </tr>
 </tbody>
 </table>
-<h2 id="openid-connect-pro">OpenID Connect <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)<a class="headerlink" href="#openid-connect-pro" title="Permanent link">&para;</a></h2>
+<h2 id="openid-connect-pro">OpenID Connect <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);' loading="lazy" decoding="async"> (PRO)<a class="headerlink" href="#openid-connect-pro" title="Permanent link">&para;</a></h2>
 <p align='center'><iframe style='display: block;' width='560' height='315' data-src='https://www.youtube-nocookie.com/embed/0e4lcXTIIfs' title='OpenID Connect' frameborder='0' allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture' allowfullscreen></iframe></p>
 
 <p>如需更详细的指南，请参阅<a href="../advanced/#openid-connect-pro">高级用法</a>文档。</p>
@@ -12220,6 +12482,20 @@ SecRule REQUEST_FILENAME "^/wp-json/yoast" "id:3,ctl:ruleRemoveById=930120"
 <td>multisite</td>
 <td>否</td>
 <td>Enable or disable OpenID Connect authentication.</td>
+</tr>
+<tr>
+<td><code>OPENIDC_IGNORE_URI</code></td>
+<td></td>
+<td>multisite</td>
+<td>否</td>
+<td>List of PCRE regex patterns (separated by spaces) for URIs excluded from OpenID Connect authentication. Patterns are matched against the normalized path, alone or followed by ? and the query string. Takes precedence over OPENIDC_INCLUDE_URI.</td>
+</tr>
+<tr>
+<td><code>OPENIDC_INCLUDE_URI</code></td>
+<td></td>
+<td>multisite</td>
+<td>否</td>
+<td>List of PCRE regex patterns (separated by spaces) for the only URIs that require OpenID Connect authentication; when empty, every URI does. Patterns are matched against the normalized path, alone or followed by ? and the query string. OPENIDC_IGNORE_URI takes precedence. Patterns are unanchored: ^/search also matches /searchengine. Example: OPENIDC_INCLUDE_URI=^/search(/|$) ^/login(/|$).</td>
 </tr>
 <tr>
 <td><code>OPENIDC_DISCOVERY</code></td>
@@ -12345,7 +12621,7 @@ SecRule REQUEST_FILENAME "^/wp-json/yoast" "id:3,ctl:ruleRemoveById=930120"
 <td><code>no</code></td>
 <td>multisite</td>
 <td>否</td>
-<td>Accept tokens signed with unsupported algorithms (not recommended).</td>
+<td>Setting yes disables id_token signature verification for algorithms the plugin cannot verify (ES<em>, PS</em>). Use only with a trusted token endpoint over TLS.</td>
 </tr>
 <tr>
 <td><code>OPENIDC_LOGOUT_PATH</code></td>
@@ -12684,7 +12960,7 @@ SecRule REQUEST_FILENAME "^/wp-json/yoast" "id:3,ctl:ruleRemoveById=930120"
 <h3 id="_96">如何使用<a class="headerlink" href="#_96" title="Permanent link">&para;</a></h3>
 <p>请按照以下步骤配置和使用 Pro 功能：</p>
 <ol>
-<li><strong>获取许可证密钥：</strong> 从 <a href="https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&amp;utm_source=doc">BunkerWeb 面板</a> 购买 Pro 许可证。</li>
+<li><strong>获取许可证密钥：</strong> 从 <a href="https://panel.bunkerweb.io/store/bunkerweb-pro?language=chinese&amp;utm_campaign=self&amp;utm_source=doc">BunkerWeb 面板</a>开始 30 天免费试用或购买 Pro 许可证（<a href="../#pro-version">分步指南</a>）。</li>
 <li><strong>配置您的许可证密钥：</strong> 使用 <code>PRO_LICENSE_KEY</code> 设置来配置您的许可证。</li>
 <li><strong>让 BunkerWeb 处理其余部分：</strong> 一旦配置了有效的许可证，Pro 插件将自动下载并激活。</li>
 <li><strong>监控您的 Pro 状态：</strong> 在 <a href="../web-ui/">Web UI</a> 中检查健康指示器，以确认您的 Pro 订阅状态。</li>
@@ -12733,8 +13009,8 @@ SecRule REQUEST_FILENAME "^/wp-json/yoast" "id:3,ctl:ruleRemoveById=930120"
 <li><strong>BunkerWeb PRO Standard：</strong> 完全访问 Pro 功能，但不提供技术支持。</li>
 <li><strong>BunkerWeb PRO Enterprise：</strong> 完全访问 Pro 功能，并提供专属技术支持。</li>
 </ul>
-<p>您可以免费试用 BunkerWeb PRO 的全部 Pro 功能 30 天。请前往 <a href="https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&amp;utm_source=doc">BunkerWeb 面板</a>开始试用，并了解根据受 BunkerWeb PRO 保护的服务数量灵活定价的方案。</p>
-<h2 id="prometheus-exporter-pro">Prometheus exporter <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)<a class="headerlink" href="#prometheus-exporter-pro" title="Permanent link">&para;</a></h2>
+<p>您可以免费试用 BunkerWeb PRO 的全部 Pro 功能 30 天。请前往 <a href="https://panel.bunkerweb.io/store/bunkerweb-pro?language=chinese&amp;utm_campaign=self&amp;utm_source=doc">BunkerWeb 面板</a>开始试用，并了解根据受 BunkerWeb PRO 保护的服务数量灵活定价的方案：订购一个方案，然后在结账时保持选中 <strong>Free 30 Days Trial</strong> 作为付款方式（<a href="../#pro-version">分步指南</a>）。</p>
+<h2 id="prometheus-exporter-pro">Prometheus exporter <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);' loading="lazy" decoding="async"> (PRO)<a class="headerlink" href="#prometheus-exporter-pro" title="Permanent link">&para;</a></h2>
 <p>STREAM 支持 <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
 <p>Prometheus exporter for BunkerWeb internal metrics.</p>
 <table>
@@ -12760,7 +13036,7 @@ SecRule REQUEST_FILENAME "^/wp-json/yoast" "id:3,ctl:ruleRemoveById=930120"
 <td><code>0.0.0.0</code></td>
 <td>global</td>
 <td>否</td>
-<td>Listening IP of the Prometheus exporter.</td>
+<td>Listening IP of the Prometheus exporter: *, a hostname or alias, an IPv4 address, or a bracketed IPv6 address such as [::1].</td>
 </tr>
 <tr>
 <td><code>PROMETHEUS_EXPORTER_PORT</code></td>
@@ -12782,6 +13058,48 @@ SecRule REQUEST_FILENAME "^/wp-json/yoast" "id:3,ctl:ruleRemoveById=930120"
 <td>global</td>
 <td>否</td>
 <td>List of IP/networks allowed to contact the Prometheus exporter endpoint.</td>
+</tr>
+<tr>
+<td><code>PROMETHEUS_EXPORTER_TOKEN</code></td>
+<td></td>
+<td>global</td>
+<td>否</td>
+<td>Bearer token required in the Authorization header to read the Prometheus exporter. Leave empty to disable the check. Use at least 16 characters and enable TLS so the token does not travel in clear.</td>
+</tr>
+<tr>
+<td><code>PROMETHEUS_EXPORTER_SSL</code></td>
+<td><code>no</code></td>
+<td>global</td>
+<td>否</td>
+<td>Serve the Prometheus exporter over TLS with the certificate set below. The exporter never falls back to plain HTTP.</td>
+</tr>
+<tr>
+<td><code>PROMETHEUS_EXPORTER_SSL_CERT</code></td>
+<td></td>
+<td>global</td>
+<td>否</td>
+<td>Full path of the exporter certificate or bundle file (must be readable by the scheduler). Used together with the key path, it wins over the data settings.</td>
+</tr>
+<tr>
+<td><code>PROMETHEUS_EXPORTER_SSL_KEY</code></td>
+<td></td>
+<td>global</td>
+<td>否</td>
+<td>Full path of the exporter private key file (must be readable by the scheduler).</td>
+</tr>
+<tr>
+<td><code>PROMETHEUS_EXPORTER_SSL_CERT_DATA</code></td>
+<td></td>
+<td>global</td>
+<td>否</td>
+<td>Exporter certificate data encoded in base64 or plaintext PEM format.</td>
+</tr>
+<tr>
+<td><code>PROMETHEUS_EXPORTER_SSL_KEY_DATA</code></td>
+<td></td>
+<td>global</td>
+<td>否</td>
+<td>Exporter private key data encoded in base64 or plaintext PEM format.</td>
 </tr>
 </tbody>
 </table>
@@ -13349,7 +13667,7 @@ Pod 环境读取这些 Redis 设置。使用官方 Helm chart 时，请在 <code
 <li><a href="https://redis.io/topics/sentinel">Redis 高可用性</a></li>
 <li><a href="https://redis.io/topics/persistence">Redis 持久性</a></li>
 </ul>
-<h2 id="reporting-pro">Reporting <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)<a class="headerlink" href="#reporting-pro" title="Permanent link">&para;</a></h2>
+<h2 id="reporting-pro">Reporting <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);' loading="lazy" decoding="async"> (PRO)<a class="headerlink" href="#reporting-pro" title="Permanent link">&para;</a></h2>
 <p>STREAM 支持 <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
 <p>Regular reporting of important data from BunkerWeb (global, attacks, bans, requests, reasons, AS...). Monitoring pro plugin needed to work.</p>
 <table>
@@ -13382,7 +13700,7 @@ Pod 环境读取这些 Redis 设置。使用官方 Helm chart 时，请在 <code
 <td><code>weekly</code></td>
 <td>global</td>
 <td>否</td>
-<td>The frequency at which reports are sent.</td>
+<td>The frequency at which reports are sent: daily, weekly or monthly (every four weeks).</td>
 </tr>
 <tr>
 <td><code>REPORTING_TOP_N</code></td>
@@ -13445,7 +13763,14 @@ Pod 环境读取这些 Redis 设置。使用官方 Helm chart 时，请在 <code
 <td><code>SSL</code></td>
 <td>global</td>
 <td>否</td>
-<td>Determine whether or not to use a secure connection for SMTP.</td>
+<td>SMTP connection security: no (plain SMTP), SSL (implicit TLS, usually port 465) or TLS (STARTTLS, usually port 587). Values are case-sensitive. Set REPORTING_SMTP_PORT to match.</td>
+</tr>
+<tr>
+<td><code>REPORTING_SMTP_VERIFY_CERTIFICATE</code></td>
+<td><code>no</code></td>
+<td>global</td>
+<td>否</td>
+<td>Verify the certificate and hostname of the SMTP relay against the system CA store when REPORTING_SMTP_SSL is SSL or TLS. Off by default: the certificate is not checked and a warning is logged on each run. Turn it on once the relay presents a certificate signed by a public CA.</td>
 </tr>
 <tr>
 <td><code>REPORTING_SMTP_SUBJECT</code></td>
@@ -13521,7 +13846,7 @@ Pod 环境读取这些 Redis 设置。使用官方 Helm chart 时，请在 <code
 <td><code>/</code></td>
 <td>multisite</td>
 <td>是</td>
-<td><strong>位置 URL：</strong> 将被代理到后端服务器的路径。以 <code>^</code> 开头或以 <code>$</code> 结尾的值将被视为正则表达式 location。可选地在前面加上 <code>~</code>、<code>~*</code>、<code>=</code> 或 <code>^~</code> 并紧跟一个空格，以显式设置 nginx location 修饰符；值的其余部分不允许包含空格、<code>;</code>、<code>{</code> 或 <code>}</code>。</td>
+<td><strong>位置 URL：</strong> 将被代理到后端服务器的路径。以 <code>^</code> 开头或以 <code>$</code> 结尾的值将被视为正则表达式 location。可选地在前面加上 <code>~</code>、<code>~*</code>、<code>=</code> 或 <code>^~</code> 并紧跟一个空格，以显式设置 nginx location 修饰符；值的其余部分不允许包含空格或 <code>;</code>。操作数两侧可选地使用一对匹配的单引号或双引号，并且支持花括号。</td>
 </tr>
 <tr>
 <td><code>REVERSE_PROXY_BUFFERING</code></td>
@@ -13542,7 +13867,7 @@ Pod 环境读取这些 Redis 设置。使用官方 Helm chart 时，请在 <code
 <td><code>no</code></td>
 <td>multisite</td>
 <td>是</td>
-<td><strong>保持连接：</strong> 启用或禁用与代理资源的保持连接。</td>
+<td><strong>保持连接：</strong> 向代理资源发送已配置的 HTTP 版本（默认 <code>1.1</code>）和空的 <code>Connection</code> 标头。它本身不会创建连接池：要复用连接，请让 <code>REVERSE_PROXY_HOST</code> 指向在 <code>http</code> 自定义配置中声明的、带 <code>keepalive</code> 的具名 <code>upstream</code>。</td>
 </tr>
 <tr>
 <td><code>REVERSE_PROXY_HTTP_VERSION</code></td>
@@ -13563,11 +13888,11 @@ Pod 环境读取这些 Redis 设置。使用官方 Helm chart 时，请在 <code
 <td><code>yes</code></td>
 <td>multisite</td>
 <td>否</td>
-<td><strong>拦截错误：</strong> 是否拦截和重写来自后端的错误响应。</td>
+<td><strong>拦截错误：</strong> 是否拦截和重写来自后端的错误响应。 参见<a href="#errors">保留上游 API 的错误响应体</a>。</td>
 </tr>
 </tbody>
 </table>
-<p>BunkerWeb 在生成 NGINX location 时会为路径或正则表达式加上引号，并保留其中的字面引号、<code>#</code> 和正则表达式反斜杠。输入设置值时不要自行添加 NGINX 引号。现有的空白字符、<code>;</code>、<code>{</code> 和 <code>}</code> 限制仍然适用。</p>
+<p>BunkerWeb 会去掉路径或正则表达式最外层一对匹配的单引号或双引号，然后在生成 NGINX location 时为其加上引号，并保留其中的字面引号、<code>#</code>、正则表达式反斜杠和花括号。自行添加这一对引号是可选的，例如 <code>~ "^/api/[a-z]{2}/"</code>。空格和 <code>;</code> 仍然会被拒绝。</p>
 <div class="admonition tip">
 <p class="admonition-title">最佳实践</p>
 <ul>
@@ -13579,6 +13904,29 @@ Pod 环境读取这些 Redis 设置。使用官方 Helm chart 时，请在 <code
 <div class="admonition warning">
 <p class="admonition-title">请求缓冲行为</p>
 <p>禁用 <code>REVERSE_PROXY_REQUEST_BUFFERING</code> 仅在 ModSecurity 被禁用时才会生效，因为否则会强制执行请求缓冲。</p>
+</div>
+<div class="admonition info">
+<p class="admonition-title">复用后端连接</p>
+<p><code>REVERSE_PROXY_KEEPALIVE=yes</code> 只会让 BunkerWeb 向后端发送已配置的 HTTP 版本（默认 <code>1.1</code>）和空的 <code>Connection</code> 标头，并不会创建连接池：使用普通的 <code>REVERSE_PROXY_HOST</code> URL 时，NGINX 会为每个请求新建一条到后端的连接。</p>
+<p>要复用后端连接，请在 <a href="../advanced/#custom-configurations"><code>http</code> 自定义配置</a>中声明一个带 <code>keepalive</code> 的具名 <code>upstream</code>，再让 <code>REVERSE_PROXY_HOST</code> 指向该组名，<strong>不带端口</strong>：端口写在 <code>upstream</code> 的 <code>server</code> 行中。</p>
+<div class="highlight"><pre><span></span><code><span class="k">upstream</span><span class="w"> </span><span class="s">app_pool</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kn">server</span><span class="w"> </span><span class="n">backend.internal</span><span class="p">:</span><span class="mi">8443</span><span class="p">;</span>
+<span class="w">    </span><span class="kn">keepalive</span><span class="w"> </span><span class="mi">32</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code>REVERSE_PROXY_HOST=https://app_pool
+REVERSE_PROXY_KEEPALIVE=yes
+# 仅 HTTPS：将源站名称作为 SNI 发送，并据此验证
+REVERSE_PROXY_SSL_SNI=yes
+REVERSE_PROXY_SSL_SNI_NAME=backend.example.com
+# 仅当后端检查 Host 标头时才需要
+REVERSE_PROXY_CUSTOM_HOST=backend.example.com
+</code></pre></div>
+<ul>
+<li><code>upstream</code> 名称必须唯一，且 <code>server</code> 行中的主机名在 NGINX 加载配置时必须能够解析。</li>
+<li>使用 HTTPS 时，只要 <code>REVERSE_PROXY_SSL_SNI_NAME</code> 为空，NGINX 就会把组名同时用作 SNI 名称和验证名称；而 <code>REVERSE_PROXY_SSL_SNI</code> 为 <code>no</code> 时，该设置会被忽略。请像上面这样同时设置两者，让后端看到其真实名称。</li>
+<li><code>Host</code> 标头仍为客户端的 <code>$host</code>；如果后端期望其他名称，请设置 <code>REVERSE_PROXY_CUSTOM_HOST</code>。</li>
+</ul>
 </div>
 </div>
 <div class="tabbed-block">
@@ -14141,6 +14489,10 @@ Pod 环境读取这些 Redis 设置。使用官方 Helm chart 时，请在 <code
 <li>监控缓存命中率并相应地调整设置</li>
 </ul>
 </div>
+<div class="admonition warning">
+<p class="admonition-title">缓存需要启用响应缓冲</p>
+<p>代理缓存只对启用了响应缓冲的位置生效。当 <code>USE_PROXY_CACHE=yes</code> 时，请为每个要缓存的位置设置 <code>REVERSE_PROXY_BUFFERING=yes</code>，带编号的设置（如 <code>REVERSE_PROXY_BUFFERING_1</code>）也一样。响应缓冲关闭期间，新的响应不会被缓存，除非上游通过 <code>X-Accel-Buffering</code> 启用它；之前已缓存的响应仍可能被返回。<code>REVERSE_PROXY_REQUEST_BUFFERING</code> 控制的是请求正文，不会启用响应缓存。当 BunkerWeb 生成的配置中某个位置启用了代理缓存但响应缓冲已关闭时，会记录一条警告。</p>
+</div>
 </div>
 </div>
 </div>
@@ -14494,7 +14846,7 @@ Pod 环境读取这些 Redis 设置。使用官方 Helm chart 时，请在 <code
 </code></pre></div>
 <hr />
 <p>更多信息，请参阅 <a href="https://www.robotstxt.org/robotstxt.html">robots.txt 文档</a>。</p>
-<h2 id="saml-pro">SAML <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)<a class="headerlink" href="#saml-pro" title="Permanent link">&para;</a></h2>
+<h2 id="saml-pro">SAML <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);' loading="lazy" decoding="async"> (PRO)<a class="headerlink" href="#saml-pro" title="Permanent link">&para;</a></h2>
 <p>如需更详细的指南，请参阅<a href="../advanced/#saml-pro">高级用法</a>文档。</p>
 <p>STREAM 支持 <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
 <p>SAML 2.0 authentication, identity forwarding and attribute-based access control.</p>
@@ -14515,6 +14867,20 @@ Pod 环境读取这些 Redis 设置。使用官方 Helm chart 时，请在 <code
 <td>multisite</td>
 <td>否</td>
 <td>Enable SAML authentication</td>
+</tr>
+<tr>
+<td><code>SAML_IGNORE_URI</code></td>
+<td></td>
+<td>multisite</td>
+<td>否</td>
+<td>List of PCRE regex patterns (separated by spaces) for URIs excluded from SAML authentication. Patterns are matched against the normalized path, alone or followed by ? and the query string. Takes precedence over SAML_INCLUDE_URI.</td>
+</tr>
+<tr>
+<td><code>SAML_INCLUDE_URI</code></td>
+<td></td>
+<td>multisite</td>
+<td>否</td>
+<td>List of PCRE regex patterns (separated by spaces) for the only URIs that require SAML authentication; when empty, every URI does. Patterns are matched against the normalized path, alone or followed by ? and the query string. SAML_IGNORE_URI takes precedence. Patterns are unanchored: ^/search also matches /searchengine. Example: SAML_INCLUDE_URI=^/search(/|$) ^/login(/|$).</td>
 </tr>
 <tr>
 <td><code>SAML_SP_ENTITY_ID</code></td>
@@ -14739,6 +15105,76 @@ Pod 环境读取这些 Redis 设置。使用官方 Helm chart 时，请在 <code
 <td>global</td>
 <td>否</td>
 <td>Shared-memory capacity for single-instance replay protection</td>
+</tr>
+<tr>
+<td><code>SAML_ASSERTION_ENCRYPTION</code></td>
+<td><code>off</code></td>
+<td>multisite</td>
+<td>否</td>
+<td>Accept encrypted assertions when optional; require an encrypted assertion when required.</td>
+</tr>
+<tr>
+<td><code>SAML_SP_ENCRYPTION_CERT</code></td>
+<td></td>
+<td>multisite</td>
+<td>否</td>
+<td>SP decryption certificate in PEM; register this separate encryption key with the IdP.</td>
+</tr>
+<tr>
+<td><code>SAML_SP_ENCRYPTION_PRIVATE_KEY</code></td>
+<td></td>
+<td>multisite</td>
+<td>否</td>
+<td>Unencrypted RSA private key matching the SP encryption certificate; never displayed.</td>
+</tr>
+<tr>
+<td><code>SAML_ALLOW_IDP_INITIATED</code></td>
+<td><code>no</code></td>
+<td>multisite</td>
+<td>否</td>
+<td>Allow unsolicited IdP logins without browser request correlation.</td>
+</tr>
+<tr>
+<td><code>SAML_IDP_INITIATED_RETURN_PATHS</code></td>
+<td><code>/</code></td>
+<td>multisite</td>
+<td>否</td>
+<td>Exact local return paths; first is the default when RelayState is absent.</td>
+</tr>
+<tr>
+<td><code>SAML_IDP_METADATA_SOURCE</code></td>
+<td><code>manual</code></td>
+<td>multisite</td>
+<td>否</td>
+<td>Choose manual IdP fields, imported XML, or periodically refreshed HTTPS metadata.</td>
+</tr>
+<tr>
+<td><code>SAML_IDP_METADATA_XML</code></td>
+<td></td>
+<td>multisite</td>
+<td>否</td>
+<td>IdP metadata XML contents, at most 64 KiB; select the entity with SAML_IDP_ENTITY_ID.</td>
+</tr>
+<tr>
+<td><code>SAML_IDP_METADATA_URL</code></td>
+<td></td>
+<td>multisite</td>
+<td>否</td>
+<td>HTTPS metadata URL, without credentials or fragment; redirects are refused.</td>
+</tr>
+<tr>
+<td><code>SAML_IDP_METADATA_CA_CERT</code></td>
+<td></td>
+<td>multisite</td>
+<td>否</td>
+<td>Optional PEM CA certificates added to system trust for this metadata URL.</td>
+</tr>
+<tr>
+<td><code>SAML_IDP_METADATA_ALLOW_PRIVATE_URL</code></td>
+<td><code>no</code></td>
+<td>multisite</td>
+<td>否</td>
+<td>Permit private and loopback metadata destinations; TLS verification remains required.</td>
 </tr>
 </tbody>
 </table>
@@ -15367,7 +15803,7 @@ Pod 环境读取这些 Redis 设置。使用官方 Helm chart 时，请在 <code
 </tr>
 </tbody>
 </table>
-<h2 id="ui-single-sign-on-pro">UI Single Sign-On <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)<a class="headerlink" href="#ui-single-sign-on-pro" title="Permanent link">&para;</a></h2>
+<h2 id="ui-single-sign-on-pro">UI Single Sign-On <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);' loading="lazy" decoding="async"> (PRO)<a class="headerlink" href="#ui-single-sign-on-pro" title="Permanent link">&para;</a></h2>
 <p>如需更详细的指南，请参阅<a href="../advanced/#ui-single-sign-on-pro">高级用法</a>文档。</p>
 <p>STREAM 支持 <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
 <p>Enable SSO authentication for the BunkerWeb web interface by reading headers set by upstream authentication proxies (Authentik, Authelia, Keycloak, Traefik Forward Auth, etc.)</p>
@@ -15510,7 +15946,7 @@ Pod 环境读取这些 Redis 设置。使用官方 Helm chart 时，请在 <code
 </tr>
 </tbody>
 </table>
-<h2 id="user-manager-pro">User Manager <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)<a class="headerlink" href="#user-manager-pro" title="Permanent link">&para;</a></h2>
+<h2 id="user-manager-pro">User Manager <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);' loading="lazy" decoding="async"> (PRO)<a class="headerlink" href="#user-manager-pro" title="Permanent link">&para;</a></h2>
 <p align='center'><iframe style='display: block;' width='560' height='315' data-src='https://www.youtube-nocookie.com/embed/EIohiUf9Fg4' title='User Manager' frameborder='0' allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture' allowfullscreen></iframe></p>
 
 <p>如需更详细的指南，请参阅<a href="../advanced/#user-manager-pro">高级用法</a>文档。</p>
@@ -15561,6 +15997,10 @@ Pod 环境读取这些 Redis 设置。使用官方 Helm chart 时，请在 <code
 <p class="admonition-title">流模式</p>
 <p>当使用流模式时，仅执行 IP、反向 DNS 和 ASN 检查。</p>
 </div>
+<div class="admonition info">
+<p class="admonition-title">反向 DNS 与首个请求</p>
+<p>反向 DNS 匹配仅在访问阶段应用，因此当白名单缓存为空时（重载后或条目过期后），通过反向 DNS 列入白名单的客户端的第一个请求仍可能被 ModSecurity 拦截。</p>
+</div>
 <h3 id="_134">配置设置<a class="headerlink" href="#_134" title="Permanent link">&para;</a></h3>
 <p><strong>通用</strong></p>
 <table>
@@ -15580,6 +16020,13 @@ Pod 环境读取这些 Redis 设置。使用官方 Helm chart 时，请在 <code
 <td>multisite</td>
 <td>否</td>
 <td><strong>启用白名单：</strong> 设置为 <code>yes</code> 以启用白名单功能。</td>
+</tr>
+<tr>
+<td><code>WHITELIST_URLS_REFRESH_INTERVAL</code></td>
+<td><code>1h</code></td>
+<td>multisite</td>
+<td>否</td>
+<td><strong>URL 刷新间隔：</strong> 再次下载前缓存必须达到的最短时间。接受不带单位的秒数或时间后缀（<code>ms</code>、<code>s</code>、<code>m</code>、<code>h</code>、<code>d</code>、<code>w</code>、<code>M</code>、<code>y</code>）。</td>
 </tr>
 </tbody>
 </table>
@@ -15792,7 +16239,7 @@ Pod 环境读取这些 Redis 设置。使用官方 Helm chart 时，请在 <code
 </div>
 <div class="admonition tip">
 <p class="admonition-title">定期更新</p>
-<p>从 URL 获取的白名单会每小时自动下载和更新，以确保您的保护与最新的受信任来源保持同步。</p>
+<p>任务每小时运行一次。<code>WHITELIST_URLS_REFRESH_INTERVAL</code> 设置再次下载前 URL 缓存必须达到的最短时间（默认：<code>1h</code>）。对于每天最多允许下载一次的提供商，请使用 <code>24h</code>；设置为 <code>0</code> 则每次任务运行时都下载。缓存仍有效或下载失败时，会保留上次的有效条目。在此插件内，各服务共享 URL 缓存：最短的间隔可能触发下载，因此对于有下载频率限制的同一 URL，请在所有使用它的服务上设置相同的间隔。</p>
 </div>
 <div class="admonition warning">
 <p class="admonition-title">安全绕过</p>
@@ -15872,7 +16319,7 @@ Pod 环境读取这些 Redis 设置。使用官方 Helm chart 时，请在 <code
 (?:^|\s)FriendlyScanner(?:\s|$)
 TrustedMonitor/\d+\.\d+
 </code></pre></div>
-<h2 id="wildcard-pro">Wildcard <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)<a class="headerlink" href="#wildcard-pro" title="Permanent link">&para;</a></h2>
+<h2 id="wildcard-pro">Wildcard <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);' loading="lazy" decoding="async"> (PRO)<a class="headerlink" href="#wildcard-pro" title="Permanent link">&para;</a></h2>
 <p>如需更详细的指南，请参阅<a href="../advanced/#wildcard-pro">高级用法</a>文档。</p>
 <p>STREAM 支持 <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
 <p>Adds wildcard server_name support (*.domain) for services, and serves the matching certificate to all sub-domains.</p>
@@ -15896,6 +16343,80 @@ TrustedMonitor/\d+\.\d+
 </tr>
 </tbody>
 </table>
+<h2 id="zstandard">Zstandard<a class="headerlink" href="#zstandard" title="Permanent link">&para;</a></h2>
+<p>STREAM 支持 <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
+<p>Zstandard 插件使用 Zstandard (zstd) 算法压缩 HTTP 响应。对于声明 <code>Accept-Encoding: zstd</code> 的客户端，它可以减少带宽使用量。</p>
+<h3 id="_137">如何使用<a class="headerlink" href="#_137" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>启用压缩：</strong> 将 <code>USE_ZSTD</code> 设置为 <code>yes</code>（默认禁用）。</li>
+<li><strong>配置 MIME 类型和最小大小：</strong> 使用 <code>ZSTD_TYPES</code> 指定要压缩的内容类型，使用 <code>ZSTD_MIN_LENGTH</code> 指定最小响应大小。</li>
+<li><strong>设置压缩级别：</strong> 将 <code>ZSTD_COMP_LEVEL</code> 设置在 <code>1</code>（最快）到 <code>19</code>（支持的最高压缩率）之间。默认值为 <code>3</code>。</li>
+</ol>
+<p>支持 zstd 的客户端会收到 <code>Content-Encoding: zstd</code> 和 <code>Vary: Accept-Encoding</code>。不支持 zstd 的客户端（包括发送 <code>zstd;q=0</code> 的客户端）在启用 Brotli 或 gzip 插件时可以使用这两种压缩方式；否则将收到未压缩的响应。</p>
+<p>启用 <code>USE_ZSTD=yes</code> 后，即使最终选择未压缩、gzip 或 Brotli 表示，符合条件的响应也可能包含 <code>Vary: Accept-Encoding</code>。缓存必须遵循此响应头，将不同表示分开存储。</p>
+<p>当启用多个压缩插件时，服务器的优先顺序为 zstd、Brotli、gzip。每种编码各自遵循自己的 <code>q=0</code>；不同压缩插件之间不会比较正权重。</p>
+<h3 id="_138">配置设置<a class="headerlink" href="#_138" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>设置</th>
+<th>默认值</th>
+<th>上下文</th>
+<th>多个</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>USE_ZSTD</code></td>
+<td><code>no</code></td>
+<td>multisite</td>
+<td>否</td>
+<td><strong>启用 Zstandard：</strong> 启用 Zstandard 响应压缩。</td>
+</tr>
+<tr>
+<td><code>ZSTD_TYPES</code></td>
+<td><code>application/atom+xml application/javascript application/json application/rss+xml application/vnd.ms-fontobject application/x-font-opentype application/x-font-truetype application/x-font-ttf application/x-javascript application/xhtml+xml application/xml font/eot font/opentype font/otf font/truetype image/svg+xml image/vnd.microsoft.icon image/x-icon image/x-win-bitmap text/css text/javascript text/plain text/xml</code></td>
+<td>multisite</td>
+<td>否</td>
+<td><strong>MIME 类型：</strong> 要压缩的 MIME 类型，<code>text/html</code> 始终包含在内。</td>
+</tr>
+<tr>
+<td><code>ZSTD_MIN_LENGTH</code></td>
+<td><code>1000</code></td>
+<td>multisite</td>
+<td>否</td>
+<td><strong>最小大小：</strong> 最小响应大小（以字节为单位）。长度未知的响应也可能被压缩。</td>
+</tr>
+<tr>
+<td><code>ZSTD_COMP_LEVEL</code></td>
+<td><code>3</code></td>
+<td>multisite</td>
+<td>否</td>
+<td><strong>压缩级别：</strong> 压缩级别从 <code>1</code> 到 <code>19</code>。较高的级别会使用更多的 CPU 和内存。</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition tip">
+<p class="admonition-title">压缩级别</p>
+<p>建议从级别 <code>3</code> 开始。较高的级别会增加每个请求的 CPU 和内存使用量；请为并发请求保留足够的容量。级别上限为 <code>19</code>，以符合 HTTP 的 8 MB zstd 窗口限制。</p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">敏感响应</p>
+<p>当响应同时包含机密信息和攻击者可控的输入时，压缩可能通过响应大小的差异泄露机密信息。请对敏感服务禁用压缩，或在应用程序中解决此风险。启用 zstd 后，即使 <code>ZSTD_TYPES</code> 中省略了 <code>text/html</code>，它也始终可被压缩。</p>
+</div>
+<div class="admonition info">
+<p class="admonition-title">上游压缩</p>
+<p>上游已压缩的响应不会被再次压缩。inject 插件需要未压缩的上游响应才能修改 HTML；同时使用这两项功能时，请相应地配置上游。</p>
+</div>
+<h3 id="_139">示例配置<a class="headerlink" href="#_139" title="Permanent link">&para;</a></h3>
+<p>启用 zstd，并以 Brotli 和 gzip 作为回退：</p>
+<div class="highlight"><pre><span></span><code><span class="nt">USE_ZSTD</span><span class="p">:</span><span class="w"> </span><span class="s">"yes"</span>
+<span class="nt">ZSTD_MIN_LENGTH</span><span class="p">:</span><span class="w"> </span><span class="s">"1000"</span>
+<span class="nt">ZSTD_COMP_LEVEL</span><span class="p">:</span><span class="w"> </span><span class="s">"3"</span>
+<span class="nt">USE_BROTLI</span><span class="p">:</span><span class="w"> </span><span class="s">"yes"</span>
+<span class="nt">USE_GZIP</span><span class="p">:</span><span class="w"> </span><span class="s">"yes"</span>
+</code></pre></div>
 
 
 
@@ -16023,10 +16544,10 @@ TrustedMonitor/\d+\.\d+
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.top", "content.tabs.link", "toc.integrate", "content.code.copy", "search.highlight"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "\u5df2\u590d\u5236", "clipboard.copy": "\u590d\u5236", "search.result.more.one": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.more.other": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 # \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.none": "\u6ca1\u6709\u627e\u5230\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.one": "\u627e\u5230 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.other": "# \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.placeholder": "\u952e\u5165\u4ee5\u5f00\u59cb\u641c\u7d22", "search.result.term.missing": "\u7f3a\u5c11", "select.version": "\u9009\u62e9\u5f53\u524d\u7248\u672c"}, "version": {"provider": "mike", "version": "latest"}}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.top", "content.tabs.link", "toc.integrate", "content.code.copy", "search.highlight"], "search": "../../assets/javascripts/workers/search.a7633da7.min.js", "tags": null, "translations": {"clipboard.copied": "\u5df2\u590d\u5236", "clipboard.copy": "\u590d\u5236", "search.result.more.one": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.more.other": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 # \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.none": "\u6ca1\u6709\u627e\u5230\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.one": "\u627e\u5230 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.other": "# \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.placeholder": "\u952e\u5165\u4ee5\u5f00\u59cb\u641c\u7d22", "search.result.term.missing": "\u7f3a\u5c11", "select.version": "\u9009\u62e9\u5f53\u524d\u7248\u672c"}, "version": {"provider": "mike", "version": "latest"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      <script src="../../assets/javascripts/bundle.a5f9d56c.min.js"></script>
       
         <script src="../../assets/extra.js"></script>
       

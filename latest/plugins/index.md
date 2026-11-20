@@ -8,18 +8,18 @@ Here is the list of "official" plugins that we maintain (see the [bunkerweb-plug
 
 |      Name       | Version | Description                                                                                                                                      |                                                 Link                                                  |
 | :-------------: | :-----: | :----------------------------------------------------------------------------------------------------------------------------------------------- | :---------------------------------------------------------------------------------------------------: |
-|  **Authentik**  |  1.13   | Protect your web services with Authentik forward authentication (auth_request) for single sign-on.                                               |   [bunkerweb-plugins/authentik](https://github.com/bunkerity/bunkerweb-plugins/tree/main/authentik)   |
-|   **ClamAV**    |  1.13   | Automatically scans uploaded files with the ClamAV antivirus engine and denies the request when a file is detected as malicious.                 |      [bunkerweb-plugins/clamav](https://github.com/bunkerity/bunkerweb-plugins/tree/main/clamav)      |
-| **Cloudflare**  |  1.13   | Configure Cloudflare's trusted IPs, manage Origin CA certificates and sync BunkerWeb bans to a Cloudflare IP List.                               |  [bunkerweb-plugins/cloudflare](https://github.com/bunkerity/bunkerweb-plugins/tree/main/cloudflare)  |
-|   **Coraza**    |  1.13   | Inspect requests using the Coraza WAF (alternative of ModSecurity).                                                                              |      [bunkerweb-plugins/coraza](https://github.com/bunkerity/bunkerweb-plugins/tree/main/coraza)      |
-|   **Discord**   |  1.13   | Send security notifications to a Discord channel using a Webhook.                                                                                |     [bunkerweb-plugins/discord](https://github.com/bunkerity/bunkerweb-plugins/tree/main/discord)     |
-|   **Matrix**    |  1.13   | Send security notifications to a Matrix room using the Matrix API.                                                                               |      [bunkerweb-plugins/matrix](https://github.com/bunkerity/bunkerweb-plugins/tree/main/matrix)      |
-| **open-appsec** |  1.13   | Inspect requests with the open-appsec machine-learning WAF through a sidecar agent and deny what it blocks.                                      |  [bunkerweb-plugins/openappsec](https://github.com/bunkerity/bunkerweb-plugins/tree/main/openappsec)  |
-| **SentinelOne** |  1.13   | Check uploaded file hashes and client IPs with the SentinelOne API and deny requests based on hash reputation or threat-intelligence indicators. | [bunkerweb-plugins/sentinelone](https://github.com/bunkerity/bunkerweb-plugins/tree/main/sentinelone) |
-|    **Slack**    |  1.13   | Send security notifications to a Slack channel using a Webhook.                                                                                  |       [bunkerweb-plugins/slack](https://github.com/bunkerity/bunkerweb-plugins/tree/main/slack)       |
-|  **SysWarden**  |  1.13   | Sync BunkerWeb bans to SysWarden for kernel-level nftables blocking and import SysWarden blocklists and whitelists.                              |   [bunkerweb-plugins/syswarden](https://github.com/bunkerity/bunkerweb-plugins/tree/main/syswarden)   |
-| **VirusTotal**  |  1.13   | Check uploaded file hashes and client IPs with the VirusTotal API and deny requests when configured reputation thresholds are exceeded.          |  [bunkerweb-plugins/virustotal](https://github.com/bunkerity/bunkerweb-plugins/tree/main/virustotal)  |
-|   **WebHook**   |  1.13   | Send security notifications to a custom HTTP endpoint using a Webhook.                                                                           |     [bunkerweb-plugins/webhook](https://github.com/bunkerity/bunkerweb-plugins/tree/main/webhook)     |
+|  **Authentik**  |  1.14   | Protect your web services with Authentik forward authentication (auth_request) for single sign-on.                                               |   [bunkerweb-plugins/authentik](https://github.com/bunkerity/bunkerweb-plugins/tree/main/authentik)   |
+|   **ClamAV**    |  1.14   | Automatically scans uploaded files with the ClamAV antivirus engine and denies the request when a file is detected as malicious.                 |      [bunkerweb-plugins/clamav](https://github.com/bunkerity/bunkerweb-plugins/tree/main/clamav)      |
+| **Cloudflare**  |  1.14   | Configure Cloudflare's trusted IPs, manage Origin CA certificates and sync BunkerWeb bans to a Cloudflare IP List.                               |  [bunkerweb-plugins/cloudflare](https://github.com/bunkerity/bunkerweb-plugins/tree/main/cloudflare)  |
+|   **Coraza**    |  1.14   | Inspect requests using the Coraza WAF (alternative of ModSecurity).                                                                              |      [bunkerweb-plugins/coraza](https://github.com/bunkerity/bunkerweb-plugins/tree/main/coraza)      |
+|   **Discord**   |  1.14   | Send security notifications to a Discord channel using a Webhook.                                                                                |     [bunkerweb-plugins/discord](https://github.com/bunkerity/bunkerweb-plugins/tree/main/discord)     |
+|   **Matrix**    |  1.14   | Send security notifications to a Matrix room using the Matrix API.                                                                               |      [bunkerweb-plugins/matrix](https://github.com/bunkerity/bunkerweb-plugins/tree/main/matrix)      |
+| **open-appsec** |  1.14   | Inspect requests with the open-appsec machine-learning WAF through a sidecar agent and deny what it blocks.                                      |  [bunkerweb-plugins/openappsec](https://github.com/bunkerity/bunkerweb-plugins/tree/main/openappsec)  |
+| **SentinelOne** |  1.14   | Check uploaded file hashes and client IPs with the SentinelOne API and deny requests based on hash reputation or threat-intelligence indicators. | [bunkerweb-plugins/sentinelone](https://github.com/bunkerity/bunkerweb-plugins/tree/main/sentinelone) |
+|    **Slack**    |  1.14   | Send security notifications to a Slack channel using a Webhook.                                                                                  |       [bunkerweb-plugins/slack](https://github.com/bunkerity/bunkerweb-plugins/tree/main/slack)       |
+|  **SysWarden**  |  1.14   | Sync BunkerWeb bans to SysWarden for kernel-level nftables blocking and import SysWarden blocklists and whitelists.                              |   [bunkerweb-plugins/syswarden](https://github.com/bunkerity/bunkerweb-plugins/tree/main/syswarden)   |
+| **VirusTotal**  |  1.14   | Check uploaded file hashes and client IPs with the VirusTotal API and deny requests when configured reputation thresholds are exceeded.          |  [bunkerweb-plugins/virustotal](https://github.com/bunkerity/bunkerweb-plugins/tree/main/virustotal)  |
+|   **WebHook**   |  1.14   | Send security notifications to a custom HTTP endpoint using a Webhook.                                                                           |     [bunkerweb-plugins/webhook](https://github.com/bunkerity/bunkerweb-plugins/tree/main/webhook)     |
 
 ## How to use a plugin
 
@@ -27,7 +27,7 @@ Here is the list of "official" plugins that we maintain (see the [bunkerweb-plug
 
 If you want to quickly install external plugins, you can use the `EXTERNAL_PLUGIN_URLS` setting. It takes a list of URLs separated by spaces, each pointing to a compressed (zip format) archive containing one or more plugins.
 
-You can use the following value if you want to automatically install the official plugins : `EXTERNAL_PLUGIN_URLS=https://github.com/bunkerity/bunkerweb-plugins/archive/refs/tags/v1.13.zip`
+You can use the following value if you want to automatically install the official plugins : `EXTERNAL_PLUGIN_URLS=https://github.com/bunkerity/bunkerweb-plugins/archive/refs/tags/v1.14.zip`
 
 ### Manual
 
@@ -35,7 +35,7 @@ The first step is to install the plugin by placing its files inside the correspo
 
 === "Docker"
 
-    When using the [Docker integration](https://docs.bunkerweb.io/1.6.17/integrations/#docker), plugins must be placed in the volume mounted on `/data/plugins` in the scheduler container.
+    When using the [Docker integration](https://docs.bunkerweb.io/1.6.18/integrations/#docker), plugins must be placed in the volume mounted on `/data/plugins` in the scheduler container.
 
     The first thing to do is to create the plugins folder :
 
@@ -95,7 +95,7 @@ The first step is to install the plugin by placing its files inside the correspo
     services:
     ...
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.17
+        image: bunkerity/bunkerweb-scheduler:1.6.18
         volumes:
           - ./bw-data:/data
     ...
@@ -103,7 +103,7 @@ The first step is to install the plugin by placing its files inside the correspo
 
 === "Docker autoconf"
 
-    When using the [Docker autoconf integration](https://docs.bunkerweb.io/1.6.17/integrations/#docker-autoconf), plugins must be placed in the volume mounted on `/data/plugins` in the scheduler container.
+    When using the [Docker autoconf integration](https://docs.bunkerweb.io/1.6.18/integrations/#docker-autoconf), plugins must be placed in the volume mounted on `/data/plugins` in the scheduler container.
 
     The first thing to do is to create the plugins folder :
 
@@ -130,7 +130,7 @@ The first step is to install the plugin by placing its files inside the correspo
     services:
     ...
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.17
+        image: bunkerity/bunkerweb-scheduler:1.6.18
         volumes:
           - ./bw-data:/data
     ...
@@ -139,11 +139,11 @@ The first step is to install the plugin by placing its files inside the correspo
 === "Swarm"
 
     !!! warning "Deprecated"
-        The Swarm integration is deprecated and will be removed in a future release. Please consider using the [Kubernetes integration](https://docs.bunkerweb.io/1.6.17/integrations/#kubernetes) instead.
+        The Swarm integration is deprecated and will be removed in a future release. Please consider using the [Kubernetes integration](https://docs.bunkerweb.io/1.6.18/integrations/#kubernetes) instead.
 
-        **More information can be found in the [Swarm integration documentation](https://docs.bunkerweb.io/1.6.17/integrations/#swarm).**
+        **More information can be found in the [Swarm integration documentation](https://docs.bunkerweb.io/1.6.18/integrations/#swarm).**
 
-    When using the [Swarm integration](https://docs.bunkerweb.io/1.6.17/integrations/#swarm), plugins must be placed in the volume mounted on `/data/plugins` in the scheduler container.
+    When using the [Swarm integration](https://docs.bunkerweb.io/1.6.18/integrations/#swarm), plugins must be placed in the volume mounted on `/data/plugins` in the scheduler container.
 
     !!! info "Swarm volume"
         Configuring a Swarm volume that will persist when the scheduler service is running on different nodes is not covered is in this documentation. We will assume that you have a shared folder mounted on `/shared` across all nodes.
@@ -173,7 +173,7 @@ The first step is to install the plugin by placing its files inside the correspo
     services:
     ...
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.17
+        image: bunkerity/bunkerweb-scheduler:1.6.18
         volumes:
           - /shared/bw-plugins:/data/plugins
     ...
@@ -181,7 +181,7 @@ The first step is to install the plugin by placing its files inside the correspo
 
 === "Kubernetes"
 
-    When using the [Kubernetes integration](https://docs.bunkerweb.io/1.6.17/integrations/#kubernetes), plugins must be placed in the volume mounted on `/data/plugins` in the scheduler container.
+    When using the [Kubernetes integration](https://docs.bunkerweb.io/1.6.18/integrations/#kubernetes), plugins must be placed in the volume mounted on `/data/plugins` in the scheduler container.
 
     The first thing to do is to declare a [PersistentVolumeClaim](https://kubernetes.io/docs/concepts/storage/persistent-volumes/) that will contain our plugins data :
 
@@ -220,7 +220,7 @@ The first step is to install the plugin by placing its files inside the correspo
           serviceAccountName: sa-bunkerweb
           containers:
             - name: bunkerweb-scheduler
-              image: bunkerity/bunkerweb-scheduler:1.6.17
+              image: bunkerity/bunkerweb-scheduler:1.6.18
               imagePullPolicy: Always
               env:
                 - name: KUBERNETES_MODE
@@ -246,7 +246,7 @@ The first step is to install the plugin by placing its files inside the correspo
 
 === "Linux"
 
-    When using the [Linux integration](https://docs.bunkerweb.io/1.6.17/integrations/#linux), plugins must be written to the `/etc/bunkerweb/plugins` folder :
+    When using the [Linux integration](https://docs.bunkerweb.io/1.6.18/integrations/#linux), plugins must be written to the `/etc/bunkerweb/plugins` folder :
 
     ```shell
     git clone https://github.com/bunkerity/bunkerweb-plugins && \
@@ -260,7 +260,7 @@ The first step is to install the plugin by placing its files inside the correspo
 
 !!! tip "Existing plugins"
 
-    If the documentation is not enough, you can have a look at the existing source code of [official plugins](https://github.com/bunkerity/bunkerweb-plugins) and the [core plugins](https://github.com/bunkerity/bunkerweb/tree/v1.6.17/src/common/core) (already included in BunkerWeb but they are plugins, technically speaking).
+    If the documentation is not enough, you can have a look at the existing source code of [official plugins](https://github.com/bunkerity/bunkerweb-plugins) and the [core plugins](https://github.com/bunkerity/bunkerweb/tree/v1.6.18/src/common/core) (already included in BunkerWeb but they are plugins, technically speaking).
 
 What a plugin structure looks like:
 ```
@@ -279,7 +279,7 @@ plugin /
     plugin.json
 ```
 
-- **conf_name.conf** : Add [custom NGINX configurations](https://docs.bunkerweb.io/1.6.17/advanced/#custom-configurations) (as Jinja2 templates).
+- **conf_name.conf** : Add [custom NGINX configurations](https://docs.bunkerweb.io/1.6.18/advanced/#custom-configurations) (as Jinja2 templates).
 
 - **actions.py** : Script to execute on the Flask server. This script runs in a Flask context, giving you access to libraries and utilities like `jinja2` and `requests`.
 
@@ -294,7 +294,7 @@ plugin /
 
 - **bwcli folder** : Python (or executable) files that extend the `bwcli` CLI through custom commands.
 
-- **my-template.json** : Add [custom templates](https://docs.bunkerweb.io/1.6.17/concepts/#templates) to override the default values of settings and apply custom configurations easily.
+- **my-template.json** : Add [custom templates](https://docs.bunkerweb.io/1.6.18/concepts/#templates) to override the default values of settings and apply custom configurations easily.
 
 - **plugin.lua** : Code executed on NGINX using the [NGINX LUA module](https://github.com/openresty/lua-nginx-module).
 
@@ -396,7 +396,7 @@ The scheduler automatically exposes the declared commands once the plugin is ins
 
 ### Configurations
 
-You can add custom NGINX configurations by adding a folder named **confs** with content similar to the [custom configurations](https://docs.bunkerweb.io/1.6.17/advanced/#custom-configurations). Each subfolder inside the **confs** will contain [jinja2](https://jinja.palletsprojects.com) templates that will be generated and loaded at the corresponding context (`http`, `server-http`, `default-server-http`, `stream`, `server-stream`, `modsec`, `modsec-crs`, `crs-plugins-before` and `crs-plugins-after`).
+You can add custom NGINX configurations by adding a folder named **confs** with content similar to the [custom configurations](https://docs.bunkerweb.io/1.6.18/advanced/#custom-configurations). Each subfolder inside the **confs** will contain [jinja2](https://jinja.palletsprojects.com) templates that will be generated and loaded at the corresponding context (`http`, `server-http`, `default-server-http`, `stream`, `server-stream`, `modsec`, `modsec-crs`, `crs-plugins-before` and `crs-plugins-after`).
 
 Here is an example for a configuration template file inside the **confs/server-http** folder named **example.conf** :
 
@@ -413,7 +413,7 @@ location /setting {
 
 ### Templates
 
-Check the [templates documentation](https://docs.bunkerweb.io/1.6.17/concepts/#templates) for more information.
+Check the [templates documentation](https://docs.bunkerweb.io/1.6.18/concepts/#templates) for more information.
 
 ### LUA
 
@@ -482,6 +482,19 @@ The declared functions are automatically called during specific contexts. Here a
 | `log_default` |           [log_by_lua](https://github.com/openresty/lua-nginx-module#log_by_lua)            | Same as `log` but only called on the default server.                                                                                                      | `ret`, `msg`<ul><li>`ret` (boolean) : true if no error or else false</li><li>`msg` (string) : success or error message</li></ul>                                                                                                                                                                                                                                      |
 |   `preread`   | [preread_by_lua](https://github.com/openresty/stream-lua-nginx-module#preread_by_lua_block) | Similar to the `access` function but for stream mode.                                                                                                     | `ret`, `msg`,`status`<ul><li>`ret` (boolean) : true if no error or else false</li><li>`msg` (string) : success or error message</li><li>`status` (number) : interrupt current process and return [status](https://github.com/openresty/lua-nginx-module#http-status-constants)</li></ul>                                                                              |
 | `log_stream`  |     [log_by_lua](https://github.com/openresty/stream-lua-nginx-module#log_by_lua_block)     | Similar to the `log` function but for stream mode.                                                                                                        | `ret`, `msg`<ul><li>`ret` (boolean) : true if no error or else false</li><li>`msg` (string) : success or error message</li></ul>                                                                                                                                                                                                                                      |
+
+**TLS ClientHello hook.** A plugin can also see every TLS handshake before the certificate is chosen, for the default server and for each service, by exporting a module-level function (not a method, so no plugin object is built per handshake) from its main Lua module:
+
+```lua
+-- in myplugin/myplugin.lua
+function myplugin.client_hello(hello)
+    -- hello (read-only): service (nil on the default server), ip (nil when the client address is unknown), raw and family
+    -- (packed peer address from ngx.ssl.raw_client_addr()), quic, proxy_protocol, real_ip, trusted
+    return nil -- or "drop" / "detect" and a reason
+end
+```
+
+Return `"drop"` to abort the handshake, `"detect"` to only log that it would be dropped, or nothing to let it through. An error or any other value lets the handshake through. The function runs for every handshake, exactly once, and **must not yield**: no Redis, no cosocket, no `ngx.var`, no `resty.lock`, no sleep. Shared dictionary calls and `ngx.timer.at(0, ...)` are fine. The order of the plugins that export it follows `PLUGINS_ORDER_SSL_CLIENT_HELLO`. A plugin that exports `client_hello` is not called through its `ssl_client_hello_default` method on the default server. Plugins can detect support with `pcall(require, "bunkerweb.banlease")` and `banlease.CLIENT_HELLO_PLUGIN_HOOK == 1`.
 
 #### Libraries
 
@@ -566,11 +579,34 @@ end
 
 !!! tip "More examples"
 
-    If you want to see the full list of available functions, you can have a look at the files present in the [lua directory](https://github.com/bunkerity/bunkerweb/tree/v1.6.17/src/bw/lua/bunkerweb) of the repository.
+    If you want to see the full list of available functions, you can have a look at the files present in the [lua directory](https://github.com/bunkerity/bunkerweb/tree/v1.6.18/src/bw/lua/bunkerweb) of the repository.
 
 ### Jobs
 
 BunkerWeb uses an internal job scheduler for periodic tasks like renewing certificates with certbot, downloading blacklists, downloading MMDB files, ... You can add tasks of your choice by putting them inside a subfolder named **jobs** and listing them in the **plugin.json** metadata file. Don't forget to add the execution permissions for everyone to avoid any problems when a user is cloning and installing your plugin.
+
+#### Sensitive job-cache entries
+
+A job that caches a secret (a per-install key, a token, credentials) marks the entry as sensitive through its stored name:
+
+- The name is exactly `secret`, or ends with `.secret` (for example `token.secret`). The match is case-sensitive: `SECRET` and `token.SECRET` are ordinary names.
+- One trailing `.tgz` is ignored, so a directory cached with `cache_dir` is sensitive when its own name follows the rule: `state.secret` is stored as `folder:<path>/state.secret.tgz`. Only the last path component counts, `folder:<path>/secret/other.tgz` is an ordinary entry.
+
+Reading a sensitive entry is then restricted:
+
+- **API**: `GET /cache/{service}/{plugin}/{job}/{file}` returns `403` unless the caller authenticated with HTTP Basic as an API administrator or with the `API_TOKEN`. A Biscuit token is refused even when it was issued to an administrator. `GET /cache?with_data=true` omits `data` and `printable` for such entries and keeps the metadata (name, checksum, last update). `DELETE` is unchanged.
+- **Web UI**: viewing and downloading return `403` unless the user is a super administrator (the `admin` flag, not an assigned role). The cache page still lists the entry.
+
+The restriction applies to reading through the API and the web UI. It does not encrypt the stored bytes, does not hide the name or the checksum, and does not change how the scheduler restores the file. Entries already named `secret` or `*.secret`, and a few core entries that hold private keys or credentials under fixed names (including the upstream mTLS client keys and the failover backup archive, which bundles the whole job cache), are restricted from 1.6.18 on, without any rename.
+
+To rely on the restriction, detect it, because an older core serves every entry to any API caller holding a `cache_read` Biscuit:
+
+```python
+try:
+    from common_utils import SENSITIVE_JOB_CACHE_SUPPORTED  # type: ignore
+except ImportError:
+    SENSITIVE_JOB_CACHE_SUPPORTED = False
+```
 
 ### Plugin page
 

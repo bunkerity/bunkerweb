@@ -20,20 +20,20 @@
       
       
         
-          <link rel="alternate" href="../../quickstart-guide/" hreflang="en">
+          <link rel="alternate" href="https://docs.bunkerweb.io/latest/quickstart-guide/" hreflang="en"><link rel="alternate" href="https://docs.bunkerweb.io/latest/quickstart-guide/" hreflang="x-default">
         
-          <link rel="alternate" href="../../fr/quickstart-guide/" hreflang="fr">
+          <link rel="alternate" href="https://docs.bunkerweb.io/latest/fr/quickstart-guide/" hreflang="fr">
         
-          <link rel="alternate" href="../../de/quickstart-guide/" hreflang="de">
+          <link rel="alternate" href="https://docs.bunkerweb.io/latest/de/quickstart-guide/" hreflang="de">
         
-          <link rel="alternate" href="./" hreflang="es">
+          <link rel="alternate" href="https://docs.bunkerweb.io/latest/es/quickstart-guide/" hreflang="es">
         
-          <link rel="alternate" href="../../zh/quickstart-guide/" hreflang="zh">
+          <link rel="alternate" href="https://docs.bunkerweb.io/latest/zh/quickstart-guide/" hreflang="zh">
         
       
       
       <link rel="icon" href="../../assets/favicon.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.1">
     
     
       
@@ -41,7 +41,7 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.57a0d79d.min.css">
       
       
 
@@ -66,94 +66,81 @@
       })
     </script>
 
-    <script src="https://cdn.jsdelivr.net/npm/medium-zoom/dist/medium-zoom.min.js"></script>
+    <script defer
+            src="https://cdn.jsdelivr.net/npm/medium-zoom@1.1.2/dist/medium-zoom.min.js"
+            integrity="sha384-kRRREbu8lthVytGQVverh9PZPe8fRyg3vK2wO1w0kyeSqE7UfEdXhV/fWfaW/h3A"
+            crossorigin="anonymous"></script>
 
-    <script defer>
+    <script>
   // Lazy load images and embed youtube videos
   window.addEventListener("load", () => {
     document.querySelectorAll("[data-src]").forEach((el) => {
       el.setAttribute("src", el.getAttribute("data-src"));
     });
   });
-  // Add missing label
-  try {
-    document
-      .querySelector('div.md-search[data-md-component="search"][role="dialog"]')
-      .setAttribute("aria-label", "Buscar en la documentaci\u00f3n");
-  } catch (err) {}
+  // Add missing label: this script sits in <head>, so the search dialog only exists once the DOM is parsed
+  window.addEventListener("DOMContentLoaded", () => {
+    const search = document.querySelector('div.md-search[data-md-component="search"][role="dialog"]');
+    if (search) search.setAttribute("aria-label", "Buscar en la documentaci\u00f3n");
+  });
     </script>
 
-    <script defer>
+    <script>
       window.addEventListener('DOMContentLoaded', () => {
-        const bannerEl = document.querySelector('aside.md-banner');
-        let defaultContent = [{ "content" : "\u003cp\u003eInicia una prueba gratuita de 30 d\u00edas de BunkerWeb PRO desde el \u003ca style=\"text-decoration:underline; color :  white;\" href=\"https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self\u0026utm_source=doc\"\u003eBunkerWeb Panel\u003c/a\u003e.\u003c/p\u003e" },
-        { "content" : "\u003cp\u003e\u00bfNecesitas asistencia pr\u00e9mium o asesoramiento personalizado sobre BunkerWeb? Consulta nuestros \u003ca style=\"text-decoration:underline; color :  white;\" href=\"https://panel.bunkerweb.io/?utm_campaign=self\u0026utm_source=doc#services\"\u003eservicios profesionales\u003c/a\u003e.\u003c/p\u003e" },
-        { "content" : "\u003cp\u003eForma parte de la comunidad de Bunker uni\u00e9ndote al \u003ca style=\"text-decoration:underline; color: white;\" href=\"https://discord.bunkerweb.io\"\u003echat de Discord\u003c/a\u003e y s\u00edguenos en \u003ca style=\"text-decoration:underline; color: white;\" href=\"https://www.linkedin.com/company/bunkerity/\"\u003eLinkedIn\u003c/a\u003e.\u003c/p\u003e" }
-        ]
-
-      function setBannerStyle() {
-        const bannerItem = bannerEl.querySelector('.md-banner__inner');
-        bannerEl.style.backgroundColor = "#2eac68";
-        bannerItem.style.textAlign = "center";
-        bannerItem.style.transition = "all 0.5s ease-out";
-      }
-
-      function setDefault() {
-        const bannerItem = bannerEl.querySelector('.md-banner__inner');
-        const clone = bannerItem.cloneNode(true);
-        clone.innerHTML = defaultContent[0]["content"];
-        bannerEl.replaceChild(clone, bannerItem);
-      }
-
-      function startBannerLoop() {
+        const bannerEl = document.querySelector('aside.md-banner:not(.md-banner--warning)');
+        if (!bannerEl) return;
+        const messages = ["\u003cp\u003eInicia una prueba gratuita de 30 d\u00edas de BunkerWeb PRO desde el \u003ca href=\"https://panel.bunkerweb.io/store/bunkerweb-pro?language=spanish\u0026utm_campaign=self\u0026utm_source=doc\"\u003eBunkerWeb Panel\u003c/a\u003e: pide un plan y mant\u00e9n \u201cFree 30 Days Trial\u201d como m\u00e9todo de pago al finalizar la compra. (\u003ca href=\"../#pro-version\"\u003egu\u00eda paso a paso\u003c/a\u003e)\u003c/p\u003e", "\u003cp\u003e\u00bfNecesitas asistencia pr\u00e9mium o asesoramiento personalizado sobre BunkerWeb? Consulta nuestros \u003ca href=\"https://panel.bunkerweb.io/?utm_campaign=self\u0026utm_source=doc#services\"\u003eservicios profesionales\u003c/a\u003e.\u003c/p\u003e", "\u003cp\u003eForma parte de la comunidad de Bunker uni\u00e9ndote al \u003ca href=\"https://discord.bunkerweb.io\"\u003echat de Discord\u003c/a\u003e y s\u00edguenos en \u003ca href=\"https://www.linkedin.com/company/bunkerity/\"\u003eLinkedIn\u003c/a\u003e.\u003c/p\u003e"];
         const switchDelay = 7000;
         let i = 0;
 
-        setInterval(() => {
-          // Update or reset index
-          if(i + 1 === defaultContent.length) {
-            i = 0;
-          } else {
-            i++;
-          }
-
-          // Prepare data with next el with opacity 0 too
+        // the first message is already in the page; the others rotate in
+        function show(next) {
           const currItem = bannerEl.querySelector('.md-banner__inner');
           currItem.style.opacity = 0;
           const clone = currItem.cloneNode(true);
-          clone.innerHTML = defaultContent[i]["content"];
+          clone.innerHTML = messages[next];
           setTimeout(() => {
             bannerEl.replaceChild(clone, currItem);
             setTimeout(() => {
-              const newItem = bannerEl.querySelector('.md-banner__inner');
-              newItem.style.opacity = 1;
+              bannerEl.querySelector('.md-banner__inner').style.opacity = 1;
             }, 20);
           }, 600);
+        }
 
+        // moving text that outlasts five seconds has to be stoppable (WCAG 2.2.2): it holds
+        // still on hover and focus, never starts when the visitor asks for reduced motion, and
+        // a pause button stops it for the rest of the session
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+        const KEY = 'bw-banner-paused';
+        let paused = false;
+        try { paused = sessionStorage.getItem(KEY) === '1'; } catch (e) {}
+
+        // outside .md-banner__inner: show() swaps that element
+        const toggle = document.createElement('button');
+        toggle.type = 'button';
+        toggle.className = 'bw-banner-toggle';
+        toggle.setAttribute('aria-label', "Pausar los anuncios rotativos");
+        const icons = {
+          pause: '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg>',
+          play: '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M7 4.5v15l12-7.5z"/></svg>'
+        };
+        function render() {
+          toggle.setAttribute('aria-pressed', paused ? 'true' : 'false');
+          toggle.innerHTML = paused ? icons.play : icons.pause;
+        }
+        render();
+        toggle.addEventListener('click', () => {
+          paused = !paused;
+          try { sessionStorage.setItem(KEY, paused ? '1' : '0'); } catch (e) {}
+          render();
+        });
+        bannerEl.appendChild(toggle);
+
+        setInterval(() => {
+          if (paused || bannerEl.matches(':hover, :focus-within')) return;
+          i = (i + 1) % messages.length;
+          show(i);
         }, switchDelay);
-      }
-
-      function runBanner() {
-        startBannerLoop();
-        // Try to get dynamic content
-        // Else keep static ones
-        // fetch("https://www.bunkerweb.io/api/bw-ui-news")
-        // .then((res) => {
-        //   return res.json();
-        // })
-        // .then((res) => {
-        //   defaultContent = res.data[0].data;
-        //   startBannerLoop();
-        // })
-        // .catch((e) => {
-        //   startBannerLoop();
-        // });
-      }
-
-        setBannerStyle();
-        setDefault();
-        runBanner()
-
       })
     </script>
 
@@ -170,6 +157,9 @@
     
     
     
+    
+    <link rel="preload" href="../../assets/fonts/PublicSans-Regular.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="../../assets/fonts/DonJose-Black.woff2" as="font" type="font/woff2" crossorigin>
     
 
   
@@ -208,11 +198,7 @@
           <div class="md-banner__inner md-grid md-typeset">
             
             
-    📢 ¿Buscas BunkerWeb CLOUD, la versión PRO, asistencia técnica o servicios a medida? Visita el
-    <a href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc"
-       style="color: #3f6ec6;
-              text-decoration: underline">BunkerWeb Panel</a>
-    para obtener más información sobre nuestras ofertas para empresas.
+    <p>Inicia una prueba gratuita de 30 días de BunkerWeb PRO desde el <a href="https://panel.bunkerweb.io/store/bunkerweb-pro?language=spanish&utm_campaign=self&utm_source=doc">BunkerWeb Panel</a>: pide un plan y mantén “Free 30 Days Trial” como método de pago al finalizar la compra. (<a href="../#pro-version">guía paso a paso</a>)</p>
 
           </div>
           
@@ -245,7 +231,7 @@
   <nav class="md-header__inner md-grid" aria-label="Cabecera">
     <a href="../" title="Documentación de BunkerWeb" class="md-header__button md-logo" aria-label="Documentación de BunkerWeb" data-md-component="logo">
       
-  <img src="../../assets/logo.png" alt="logo">
+  <img src="../../assets/logo.png" alt="logo" width="273" height="77">
 
     </a>
     <label class="md-header__button md-icon" for="__drawer">
@@ -660,7 +646,7 @@
   <label class="md-nav__title" for="__drawer">
     <a href="../" title="Documentación de BunkerWeb" class="md-nav__button md-logo" aria-label="Documentación de BunkerWeb" data-md-component="logo">
       
-  <img src="../../assets/logo.png" alt="logo">
+  <img src="../../assets/logo.png" alt="logo" width="273" height="77">
 
     </a>
     Documentación de BunkerWeb
@@ -874,6 +860,23 @@
       
     </span>
   </a>
+  
+    <nav class="md-nav" aria-label="Configuración básica">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#aspectos-destacados-del-easy-install" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Aspectos destacados del Easy Install
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -1254,7 +1257,7 @@
 </div>
 <p>Esta guía de inicio rápido te ayudará a instalar rápidamente BunkerWeb y a proteger un servicio web utilizando la interfaz de usuario web.</p>
 <p>Proteger las aplicaciones web existentes que ya son accesibles con el protocolo HTTP(S) es el objetivo principal de BunkerWeb: actuará como un <a href="https://es.wikipedia.org/wiki/Proxy_inverso">proxy inverso</a> clásico con características de seguridad adicionales.</p>
-<p>Consulta la <a href="https://github.com/bunkerity/bunkerweb/tree/v1.6.17/examples">carpeta de ejemplos</a> del repositorio para obtener ejemplos del mundo real.</p>
+<p>Consulta la <a href="https://github.com/bunkerity/bunkerweb/tree/v1.6.18/examples">carpeta de ejemplos</a> del repositorio para obtener ejemplos del mundo real.</p>
 <h2 id="usar-un-agente-de-ia">Usar un agente de IA<a class="headerlink" href="#usar-un-agente-de-ia" title="Permanent link">&para;</a></h2>
 <h3 id="habilidades-de-bunkerweb-en-skillssh">Habilidades de BunkerWeb en skills.sh<a class="headerlink" href="#habilidades-de-bunkerweb-en-skillssh" title="Permanent link">&para;</a></h3>
 <p>Si utilizas un agente de programación con IA, instala la <a href="https://skills.sh/bunkerity/bunkerweb-skills/bunkerweb">habilidad oficial de BunkerWeb en skills.sh</a> para obtener ayuda con el despliegue y la configuración. Sigue las <a href="https://github.com/bunkerity/bunkerweb-skills#installation">instrucciones de instalación</a> de tu agente.</p>
@@ -1274,7 +1277,7 @@
 <span class="w">  </span>-p<span class="w"> </span><span class="m">80</span>:8080/tcp<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>-p<span class="w"> </span><span class="m">443</span>:8443/tcp<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>-p<span class="w"> </span><span class="m">443</span>:8443/udp<span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>bunkerity/bunkerweb-all-in-one:1.6.17
+<span class="w">  </span>bunkerity/bunkerweb-all-in-one:1.6.18
 </code></pre></div>
 <p>Por defecto, el contenedor expone:</p>
 <ul>
@@ -1288,8 +1291,8 @@
 <div class="tabbed-block">
 <p>Usa el script de instalación fácil para configurar BunkerWeb en las distribuciones de Linux compatibles. Instala y configura automáticamente NGINX, añade el repositorio de BunkerWeb y configura los servicios necesarios.</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># Download the script and its checksum</span>
-curl<span class="w"> </span>-fsSL<span class="w"> </span>-O<span class="w"> </span>https://github.com/bunkerity/bunkerweb/releases/download/v1.6.17/install-bunkerweb.sh
-curl<span class="w"> </span>-fsSL<span class="w"> </span>-O<span class="w"> </span>https://github.com/bunkerity/bunkerweb/releases/download/v1.6.17/install-bunkerweb.sh.sha256
+curl<span class="w"> </span>-fsSL<span class="w"> </span>-O<span class="w"> </span>https://github.com/bunkerity/bunkerweb/releases/download/v1.6.18/install-bunkerweb.sh
+curl<span class="w"> </span>-fsSL<span class="w"> </span>-O<span class="w"> </span>https://github.com/bunkerity/bunkerweb/releases/download/v1.6.18/install-bunkerweb.sh.sha256
 
 <span class="c1"># Verify the checksum</span>
 sha256sum<span class="w"> </span>-c<span class="w"> </span>install-bunkerweb.sh.sha256
@@ -1302,7 +1305,7 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
 <p class="admonition-title">Aviso de seguridad</p>
 <p>Verifica siempre la integridad del script con la suma de comprobación proporcionada antes de ejecutarlo.</p>
 </div>
-<h4 id="aspectos-destacados-del-easy-install">Aspectos destacados del Easy Install<a class="headerlink" href="#aspectos-destacados-del-easy-install" title="Permanent link">&para;</a></h4>
+<h3 id="aspectos-destacados-del-easy-install">Aspectos destacados del Easy Install<a class="headerlink" href="#aspectos-destacados-del-easy-install" title="Permanent link">&para;</a></h3>
 <ul>
 <li>Detecta tu distribución de Linux y la arquitectura de CPU por adelantado y avisa si estás fuera de la matriz soportada antes de aplicar cambios.</li>
 <li>Las indicaciones interactivas usan una TUI en línea mediante <a href="https://github.com/charmbracelet/gum">gum</a> — menús con flechas y cursor <code>❯</code>, campos de contraseña enmascarados. En la primera ejecución interactiva, el script descarga el binario <code>gum</code> oficial desde la <a href="https://github.com/charmbracelet/gum/releases">release de GitHub</a> (SHA256 fijado, verificación de firma cosign cuando cosign está instalado), lo ejecuta desde un directorio temporal y elimina ese directorio al salir — <strong>no se instala ningún paquete del sistema, no se añade ninguna fuente apt/dnf, no queda ningún binario</strong>. Si gum no puede obtenerse, el instalador usa un <code>whiptail</code> ya instalado en el sistema; si ninguno está disponible, usa indicaciones de texto plano.</li>
@@ -1327,7 +1330,7 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
 <span class="nt">services</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bunkerweb</span><span class="p">:</span>
 <span class="w">    </span><span class="c1"># Este es el nombre que se usará para identificar la instancia en el Programador</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.17</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.18</span>
 <span class="w">    </span><span class="nt">ports</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">"80:8080/tcp"</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">"443:8443/tcp"</span>
@@ -1340,7 +1343,7 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-services</span>
 
 <span class="w">  </span><span class="nt">bw-scheduler</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.17</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.18</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">&lt;&lt;</span><span class="p">:</span><span class="w"> </span><span class="nv">*bw-env</span>
 <span class="w">      </span><span class="nt">BUNKERWEB_INSTANCES</span><span class="p">:</span><span class="w"> </span><span class="s">"bunkerweb"</span><span class="w"> </span><span class="c1"># Asegúrate de establecer el nombre de instancia correcto</span>
@@ -1357,7 +1360,7 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-db</span>
 
 <span class="w">  </span><span class="nt">bw-ui</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-ui:1.6.17</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-ui:1.6.18</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">&lt;&lt;</span><span class="p">:</span><span class="w"> </span><span class="nv">*bw-env</span>
 <span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
@@ -1424,7 +1427,7 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
 
 <span class="nt">services</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bunkerweb</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.17</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.18</span>
 <span class="w">    </span><span class="nt">ports</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">"80:8080/tcp"</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">"443:8443/tcp"</span>
@@ -1440,7 +1443,7 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-services</span>
 
 <span class="w">  </span><span class="nt">bw-scheduler</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.17</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.18</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">&lt;&lt;</span><span class="p">:</span><span class="w"> </span><span class="nv">*bw-ui-env</span>
 <span class="w">      </span><span class="nt">BUNKERWEB_INSTANCES</span><span class="p">:</span><span class="w"> </span><span class="s">""</span>
@@ -1458,7 +1461,7 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-db</span>
 
 <span class="w">  </span><span class="nt">bw-autoconf</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-autoconf:1.6.17</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-autoconf:1.6.18</span>
 <span class="w">    </span><span class="nt">depends_on</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-docker</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
@@ -1481,7 +1484,7 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-docker</span>
 
 <span class="w">  </span><span class="nt">bw-ui</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-ui:1.6.17</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-ui:1.6.18</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">&lt;&lt;</span><span class="p">:</span><span class="w"> </span><span class="nv">*bw-ui-env</span>
 <span class="w">      </span><span class="c1"># TOTP_ENCRYPTION_KEYS: "changeme" # Opcional: se genera en el volumen bw-ui-data si no se define; una clave tiene 43 caracteres</span>
@@ -1567,7 +1570,7 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
 
 <span class="nt">services</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bunkerweb</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.17</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.18</span>
 <span class="w">    </span><span class="nt">ports</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">published</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">80</span>
 <span class="w">        </span><span class="nt">target</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8080</span>
@@ -1597,7 +1600,7 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
 <span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">"bunkerweb.INSTANCE=yes"</span>
 
 <span class="w">  </span><span class="nt">bw-scheduler</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.17</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.18</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">&lt;&lt;</span><span class="p">:</span><span class="w"> </span><span class="nv">*bw-ui-env</span>
 <span class="w">      </span><span class="nt">BUNKERWEB_INSTANCES</span><span class="p">:</span><span class="w"> </span><span class="s">""</span>
@@ -1615,7 +1618,7 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-db</span>
 
 <span class="w">  </span><span class="nt">bw-autoconf</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-autoconf:1.6.17</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-autoconf:1.6.18</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">&lt;&lt;</span><span class="p">:</span><span class="w"> </span><span class="nv">*bw-ui-env</span>
 <span class="w">      </span><span class="nt">DOCKER_HOST</span><span class="p">:</span><span class="w"> </span><span class="s">"tcp://bw-docker:2375"</span>
@@ -1644,7 +1647,7 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
 <span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">"node.role</span><span class="nv"> </span><span class="s">==</span><span class="nv"> </span><span class="s">manager"</span>
 
 <span class="w">  </span><span class="nt">bw-ui</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-ui:1.6.17</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-ui:1.6.18</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">&lt;&lt;</span><span class="p">:</span><span class="w"> </span><span class="nv">*bw-ui-env</span>
 <span class="w">      </span><span class="c1"># TOTP_ENCRYPTION_KEYS: "changeme" # Opcional: se genera en el volumen bw-ui-data si no se define; una clave tiene 43 caracteres</span>
@@ -1712,7 +1715,7 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
 <h3 id="crea-una-cuenta-de-administrador">Crea una cuenta de administrador<a class="headerlink" href="#crea-una-cuenta-de-administrador" title="Permanent link">&para;</a></h3>
 <p>Deberías ver una página de configuración como esta:</p>
 <figure>
-<p><img align="center" alt="Página de inicio del Asistente de configuración" src="../../assets/img/ui-wizard-step1.png" />
+<p><img align="center" alt="Página de inicio del Asistente de configuración" src="../../assets/img/ui-wizard-step1.png" width="1904" height="1064" />
   </p>
 <figcaption>Página de inicio del Asistente de configuración</figcaption>
 </figure>
@@ -1724,7 +1727,7 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
 <p>El siguiente paso te pedirá que introduzcas el <strong>nombre del servidor</strong> (dominio/FQDN) que utilizará la interfaz de usuario web.</p>
 <p>También puedes optar por habilitar <a href="../features/#lets-encrypt">Let's Encrypt</a></p>
 <p><figure markdown>
-  <img align="center" alt="Asistente de configuración paso 2" src="../../assets/img/ui-wizard-step2.png" />
+  <img align="center" alt="Asistente de configuración paso 2" src="../../assets/img/ui-wizard-step2.png" width="1904" height="1064" loading="lazy" decoding="async" />
   <figcaption>Asistente de configuración paso 2</figcaption>
 </figure></p>
 </div>
@@ -1738,7 +1741,7 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
 <li><a href="../features/#custom-ssl-certificate"><strong>Certificado Personalizado</strong></a>: Sube un certificado TLS personalizado si no quieres usar Let's Encrypt.</li>
 </ul>
 <p><figure markdown>
-  <img align="center" alt="Asistente de configuración paso 2" src="../../assets/img/ui-wizard-step2-advanced.png" />
+  <img align="center" alt="Asistente de configuración paso 2" src="../../assets/img/ui-wizard-step2-advanced.png" width="1904" height="1658" loading="lazy" decoding="async" />
   <figcaption>Asistente de configuración paso 2 (avanzado)</figcaption>
 </figure></p>
 </div>
@@ -1747,27 +1750,27 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
 <h3 id="activacion-pro">Activación PRO<a class="headerlink" href="#activacion-pro" title="Permanent link">&para;</a></h3>
 <p>Si tienes una licencia PRO, puedes activarla introduciendo tu clave de licencia en la sección <code>Actualizar a PRO</code>. Esto habilitará las características PRO de BunkerWeb.</p>
 <figure>
-<p><img align="center" alt="Paso PRO del Asistente de configuración" src="../../assets/img/ui-wizard-step3.png" />
+<p><img align="center" alt="Paso PRO del Asistente de configuración" src="../../assets/img/ui-wizard-step3.png" width="1904" height="1059" loading="lazy" decoding="async" />
   </p>
 <figcaption>Paso PRO del Asistente de configuración</figcaption>
 </figure>
 <h3 id="resumen-de-tu-configuracion">Resumen de tu configuración<a class="headerlink" href="#resumen-de-tu-configuracion" title="Permanent link">&para;</a></h3>
 <p>El último paso te dará un resumen de la configuración que has introducido. Puedes hacer clic en el botón "Configurar" para completar la configuración.</p>
 <figure>
-<p><img align="center" alt="Paso final del Asistente de configuración" src="../../assets/img/ui-wizard-step4.png" />
+<p><img align="center" alt="Paso final del Asistente de configuración" src="../../assets/img/ui-wizard-step4.png" width="1904" height="1032" loading="lazy" decoding="async" />
   </p>
 <figcaption>Paso final del Asistente de configuración</figcaption>
 </figure>
 <h2 id="accediendo-a-la-interfaz-web">Accediendo a la interfaz web<a class="headerlink" href="#accediendo-a-la-interfaz-web" title="Permanent link">&para;</a></h2>
 <p>Ahora puedes acceder a la interfaz web navegando al dominio que configuraste en el paso anterior y a la URI si la cambiaste (el valor predeterminado es <code>https://tu-dominio/</code>).</p>
 <figure>
-<p><img align="center" alt="Página de inicio de sesión de la interfaz web" src="../../assets/img/ui-login.png" />
+<p><img align="center" alt="Página de inicio de sesión de la interfaz web" src="../../assets/img/ui-login.png" width="1904" height="1032" loading="lazy" decoding="async" />
   </p>
 <figcaption>Página de inicio de sesión de la interfaz web</figcaption>
 </figure>
 <p>Ahora puedes iniciar sesión con la cuenta de administrador que creaste durante el asistente de configuración.</p>
 <figure>
-<p><img align="center" alt="Inicio de la interfaz web" src="../../assets/img/ui-home.png" />
+<p><img align="center" alt="Inicio de la interfaz web" src="../../assets/img/ui-home.png" width="1904" height="1032" loading="lazy" decoding="async" />
   </p>
 <figcaption>Inicio de la interfaz web</figcaption>
 </figure>
@@ -1791,7 +1794,7 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
 <div class="tabbed-block">
 <p>En este modo, puedes elegir entre las plantillas disponibles y rellenar los campos obligatorios.</p>
 <p><figure markdown>
-  <img align="center" alt="Creación de servicio en modo fácil en la interfaz web" src="../../assets/img/ui-create-service-easy.png" />
+  <img align="center" alt="Creación de servicio en modo fácil en la interfaz web" src="../../assets/img/ui-create-service-easy.png" width="1904" height="1032" loading="lazy" decoding="async" />
   <figcaption>Creación de servicio en modo fácil en la interfaz web</figcaption>
 </figure></p>
 <ul>
@@ -1802,7 +1805,7 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
 <div class="tabbed-block">
 <p>En este modo, puedes configurar el servicio con más opciones mientras ves todas las configuraciones disponibles de todos los diferentes plugins.</p>
 <p><figure markdown>
-  <img align="center" alt="Creación de servicio en modo avanzado en la interfaz web" src="../../assets/img/ui-create-service-advanced.png" />
+  <img align="center" alt="Creación de servicio en modo avanzado en la interfaz web" src="../../assets/img/ui-create-service-advanced.png" width="1904" height="1032" loading="lazy" decoding="async" />
   <figcaption>Creación de servicio en modo avanzado en la interfaz web</figcaption>
 </figure></p>
 <ul>
@@ -1814,7 +1817,7 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
 <div class="tabbed-block">
 <p>En este modo, puedes introducir la configuración directamente como si editaras el archivo <code>variables.env</code>.</p>
 <p><figure markdown>
-  <img align="center" alt="Creación de servicio en modo SIN FORMATO en la interfaz web" src="../../assets/img/ui-create-service-raw.png" />
+  <img align="center" alt="Creación de servicio en modo SIN FORMATO en la interfaz web" src="../../assets/img/ui-create-service-raw.png" width="1904" height="1032" loading="lazy" decoding="async" />
   <figcaption>Creación de servicio en modo SIN FORMATO en la interfaz web</figcaption>
 </figure></p>
 <p>Al principio de una línea de parámetro, pulse <code>#</code> para alternar su estado de borrador. Los borradores muestran un prefijo visual <code>#</code> atenuado; pulse <strong>Retroceso</strong> al principio de la línea para activarlos de nuevo. El prefijo es un metadato del editor y no modifica el valor del parámetro. Pulse <strong>Guardar</strong> para guardar el cambio. Mientras un parámetro sea borrador, se aplica su valor heredado o predeterminado. Los borradores se gestionan solo en modo RAW y se conservan al guardar en modo Simple o Avanzado. Este estado es independiente del borrador del servicio completo. Los parámetros bloqueados y los de identidad del servicio no pueden marcarse como borrador.</p>
@@ -1826,7 +1829,7 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
 </div>
 <p>🚀 Una vez que hayas guardado la configuración, deberías ver tu nuevo servicio en la lista de servicios.</p>
 <p><figure markdown>
-  <img align="center" alt="Página de servicios de la interfaz web" src="../../assets/img/ui-services.png" />
+  <img align="center" alt="Página de servicios de la interfaz web" src="../../assets/img/ui-services.png" width="1904" height="1032" loading="lazy" decoding="async" />
   <figcaption>Página de servicios de la interfaz web</figcaption>
 </figure></p>
 <p>Si deseas editar el servicio, puedes hacer clic en el nombre del servicio o en el botón <code>📝 Editar</code>.</p>
@@ -1852,7 +1855,7 @@ docker<span class="w"> </span>run<span class="w"> </span>-d<span class="w"> </sp
 <span class="w">  </span>-e<span class="w"> </span><span class="s2">"www.example.com_REVERSE_PROXY_HOST=http://myapp:8080"</span><span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>-e<span class="w"> </span><span class="s2">"www.example.com_REVERSE_PROXY_URL=/"</span><span class="w"> </span><span class="se">\</span>
 <span class="w">  </span><span class="c1"># --- Incluye cualquier otra variable de entorno existente para la UI, Redis, CrowdSec, etc. ---</span>
-<span class="w">  </span>bunkerity/bunkerweb-all-in-one:1.6.17
+<span class="w">  </span>bunkerity/bunkerweb-all-in-one:1.6.18
 </code></pre></div>
 <p>Tu contenedor de aplicación (<code>myapp</code>) y el contenedor <code>bunkerweb-aio</code> deben estar en la misma red de Docker para que BunkerWeb pueda alcanzarlo usando el nombre de host <code>myapp</code>.</p>
 <p><strong>Ejemplo de configuración de red:</strong>
@@ -1871,7 +1874,7 @@ docker<span class="w"> </span>run<span class="w"> </span>-d<span class="w"> </sp
 <span class="w">  </span>-p<span class="w"> </span><span class="m">443</span>:8443/tcp<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>-p<span class="w"> </span><span class="m">443</span>:8443/udp<span class="w"> </span><span class="se">\</span>
 <span class="c1">#   ... (todas las demás variables de entorno relevantes como se muestra en el ejemplo principal anterior) ...</span>
-<span class="w">  </span>bunkerity/bunkerweb-all-in-one:1.6.17
+<span class="w">  </span>bunkerity/bunkerweb-all-in-one:1.6.18
 </code></pre></div></p>
 <p>Asegúrate de reemplazar <code>myapp</code> con el nombre o IP real de tu contenedor de aplicación y <code>http://myapp:8080</code> con su dirección y puerto correctos.</p>
 </div>
@@ -2169,10 +2172,10 @@ www.example.com_REVERSE_PROXY_HOST<span class="o">=</span>http://myapp:8080
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.top", "content.tabs.link", "toc.integrate", "content.code.copy", "search.highlight"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copiado al portapapeles", "clipboard.copy": "Copiar al portapapeles", "search.result.more.one": "1 m\u00e1s en esta p\u00e1gina", "search.result.more.other": "# m\u00e1s en esta p\u00e1gina", "search.result.none": "No se encontraron documentos", "search.result.one": "1 documento encontrado", "search.result.other": "# documentos encontrados", "search.result.placeholder": "Teclee para comenzar b\u00fasqueda", "search.result.term.missing": "Falta", "select.version": "Seleccionar versi\u00f3n"}, "version": {"provider": "mike", "version": "latest"}}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.top", "content.tabs.link", "toc.integrate", "content.code.copy", "search.highlight"], "search": "../../assets/javascripts/workers/search.a7633da7.min.js", "tags": null, "translations": {"clipboard.copied": "Copiado al portapapeles", "clipboard.copy": "Copiar al portapapeles", "search.result.more.one": "1 m\u00e1s en esta p\u00e1gina", "search.result.more.other": "# m\u00e1s en esta p\u00e1gina", "search.result.none": "No se encontraron documentos", "search.result.one": "1 documento encontrado", "search.result.other": "# documentos encontrados", "search.result.placeholder": "Teclee para comenzar b\u00fasqueda", "search.result.term.missing": "Falta", "select.version": "Seleccionar versi\u00f3n"}, "version": {"provider": "mike", "version": "latest"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      <script src="../../assets/javascripts/bundle.a5f9d56c.min.js"></script>
       
         <script src="../../assets/extra.js"></script>
       

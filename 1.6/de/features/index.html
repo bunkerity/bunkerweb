@@ -20,20 +20,20 @@
       
       
         
-          <link rel="alternate" href="../../features/" hreflang="en">
+          <link rel="alternate" href="https://docs.bunkerweb.io/latest/features/" hreflang="en"><link rel="alternate" href="https://docs.bunkerweb.io/latest/features/" hreflang="x-default">
         
-          <link rel="alternate" href="../../fr/features/" hreflang="fr">
+          <link rel="alternate" href="https://docs.bunkerweb.io/latest/fr/features/" hreflang="fr">
         
-          <link rel="alternate" href="./" hreflang="de">
+          <link rel="alternate" href="https://docs.bunkerweb.io/latest/de/features/" hreflang="de">
         
-          <link rel="alternate" href="../../es/features/" hreflang="es">
+          <link rel="alternate" href="https://docs.bunkerweb.io/latest/es/features/" hreflang="es">
         
-          <link rel="alternate" href="../../zh/features/" hreflang="zh">
+          <link rel="alternate" href="https://docs.bunkerweb.io/latest/zh/features/" hreflang="zh">
         
       
       
       <link rel="icon" href="../../assets/favicon.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.1">
     
     
       
@@ -41,7 +41,7 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.57a0d79d.min.css">
       
       
 
@@ -66,94 +66,81 @@
       })
     </script>
 
-    <script src="https://cdn.jsdelivr.net/npm/medium-zoom/dist/medium-zoom.min.js"></script>
+    <script defer
+            src="https://cdn.jsdelivr.net/npm/medium-zoom@1.1.2/dist/medium-zoom.min.js"
+            integrity="sha384-kRRREbu8lthVytGQVverh9PZPe8fRyg3vK2wO1w0kyeSqE7UfEdXhV/fWfaW/h3A"
+            crossorigin="anonymous"></script>
 
-    <script defer>
+    <script>
   // Lazy load images and embed youtube videos
   window.addEventListener("load", () => {
     document.querySelectorAll("[data-src]").forEach((el) => {
       el.setAttribute("src", el.getAttribute("data-src"));
     });
   });
-  // Add missing label
-  try {
-    document
-      .querySelector('div.md-search[data-md-component="search"][role="dialog"]')
-      .setAttribute("aria-label", "In der Dokumentation suchen");
-  } catch (err) {}
+  // Add missing label: this script sits in <head>, so the search dialog only exists once the DOM is parsed
+  window.addEventListener("DOMContentLoaded", () => {
+    const search = document.querySelector('div.md-search[data-md-component="search"][role="dialog"]');
+    if (search) search.setAttribute("aria-label", "In der Dokumentation suchen");
+  });
     </script>
 
-    <script defer>
+    <script>
       window.addEventListener('DOMContentLoaded', () => {
-        const bannerEl = document.querySelector('aside.md-banner');
-        let defaultContent = [{ "content" : "\u003cp\u003eStarten Sie \u00fcber das \u003ca style=\"text-decoration:underline; color :  white;\" href=\"https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self\u0026utm_source=doc\"\u003eBunkerWeb Panel\u003c/a\u003e eine kostenlose 30-t\u00e4gige Testversion von BunkerWeb PRO.\u003c/p\u003e" },
-        { "content" : "\u003cp\u003eBen\u00f6tigen Sie Premium-Support oder eine individuelle Beratung zu BunkerWeb? Informieren Sie sich \u00fcber unsere \u003ca style=\"text-decoration:underline; color :  white;\" href=\"https://panel.bunkerweb.io/?utm_campaign=self\u0026utm_source=doc#services\"\u003eprofessionellen Dienstleistungen\u003c/a\u003e.\u003c/p\u003e" },
-        { "content" : "\u003cp\u003eWerden Sie Teil der Bunker-Community und treten Sie dem \u003ca style=\"text-decoration:underline; color: white;\" href=\"https://discord.bunkerweb.io\"\u003eDiscord-Chat\u003c/a\u003e bei. Folgen Sie uns auch auf \u003ca style=\"text-decoration:underline; color: white;\" href=\"https://www.linkedin.com/company/bunkerity/\"\u003eLinkedIn\u003c/a\u003e.\u003c/p\u003e" }
-        ]
-
-      function setBannerStyle() {
-        const bannerItem = bannerEl.querySelector('.md-banner__inner');
-        bannerEl.style.backgroundColor = "#2eac68";
-        bannerItem.style.textAlign = "center";
-        bannerItem.style.transition = "all 0.5s ease-out";
-      }
-
-      function setDefault() {
-        const bannerItem = bannerEl.querySelector('.md-banner__inner');
-        const clone = bannerItem.cloneNode(true);
-        clone.innerHTML = defaultContent[0]["content"];
-        bannerEl.replaceChild(clone, bannerItem);
-      }
-
-      function startBannerLoop() {
+        const bannerEl = document.querySelector('aside.md-banner:not(.md-banner--warning)');
+        if (!bannerEl) return;
+        const messages = ["\u003cp\u003eStarten Sie \u00fcber das \u003ca href=\"https://panel.bunkerweb.io/store/bunkerweb-pro?language=german\u0026utm_campaign=self\u0026utm_source=doc\"\u003eBunkerWeb Panel\u003c/a\u003e eine kostenlose 30-t\u00e4gige Testversion von BunkerWeb PRO: Bestellen Sie einen Tarif und lassen Sie beim Bestellabschluss \u201eFree 30 Days Trial\u201c als Zahlungsmethode ausgew\u00e4hlt. (\u003ca href=\"../#pro-version\"\u003eSchritt-f\u00fcr-Schritt-Anleitung\u003c/a\u003e)\u003c/p\u003e", "\u003cp\u003eBen\u00f6tigen Sie Premium-Support oder eine individuelle Beratung zu BunkerWeb? Informieren Sie sich \u00fcber unsere \u003ca href=\"https://panel.bunkerweb.io/?utm_campaign=self\u0026utm_source=doc#services\"\u003eprofessionellen Dienstleistungen\u003c/a\u003e.\u003c/p\u003e", "\u003cp\u003eWerden Sie Teil der Bunker-Community und treten Sie dem \u003ca href=\"https://discord.bunkerweb.io\"\u003eDiscord-Chat\u003c/a\u003e bei. Folgen Sie uns auch auf \u003ca href=\"https://www.linkedin.com/company/bunkerity/\"\u003eLinkedIn\u003c/a\u003e.\u003c/p\u003e"];
         const switchDelay = 7000;
         let i = 0;
 
-        setInterval(() => {
-          // Update or reset index
-          if(i + 1 === defaultContent.length) {
-            i = 0;
-          } else {
-            i++;
-          }
-
-          // Prepare data with next el with opacity 0 too
+        // the first message is already in the page; the others rotate in
+        function show(next) {
           const currItem = bannerEl.querySelector('.md-banner__inner');
           currItem.style.opacity = 0;
           const clone = currItem.cloneNode(true);
-          clone.innerHTML = defaultContent[i]["content"];
+          clone.innerHTML = messages[next];
           setTimeout(() => {
             bannerEl.replaceChild(clone, currItem);
             setTimeout(() => {
-              const newItem = bannerEl.querySelector('.md-banner__inner');
-              newItem.style.opacity = 1;
+              bannerEl.querySelector('.md-banner__inner').style.opacity = 1;
             }, 20);
           }, 600);
+        }
 
+        // moving text that outlasts five seconds has to be stoppable (WCAG 2.2.2): it holds
+        // still on hover and focus, never starts when the visitor asks for reduced motion, and
+        // a pause button stops it for the rest of the session
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+        const KEY = 'bw-banner-paused';
+        let paused = false;
+        try { paused = sessionStorage.getItem(KEY) === '1'; } catch (e) {}
+
+        // outside .md-banner__inner: show() swaps that element
+        const toggle = document.createElement('button');
+        toggle.type = 'button';
+        toggle.className = 'bw-banner-toggle';
+        toggle.setAttribute('aria-label', "Wechselnde Hinweise anhalten");
+        const icons = {
+          pause: '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg>',
+          play: '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M7 4.5v15l12-7.5z"/></svg>'
+        };
+        function render() {
+          toggle.setAttribute('aria-pressed', paused ? 'true' : 'false');
+          toggle.innerHTML = paused ? icons.play : icons.pause;
+        }
+        render();
+        toggle.addEventListener('click', () => {
+          paused = !paused;
+          try { sessionStorage.setItem(KEY, paused ? '1' : '0'); } catch (e) {}
+          render();
+        });
+        bannerEl.appendChild(toggle);
+
+        setInterval(() => {
+          if (paused || bannerEl.matches(':hover, :focus-within')) return;
+          i = (i + 1) % messages.length;
+          show(i);
         }, switchDelay);
-      }
-
-      function runBanner() {
-        startBannerLoop();
-        // Try to get dynamic content
-        // Else keep static ones
-        // fetch("https://www.bunkerweb.io/api/bw-ui-news")
-        // .then((res) => {
-        //   return res.json();
-        // })
-        // .then((res) => {
-        //   defaultContent = res.data[0].data;
-        //   startBannerLoop();
-        // })
-        // .catch((e) => {
-        //   startBannerLoop();
-        // });
-      }
-
-        setBannerStyle();
-        setDefault();
-        runBanner()
-
       })
     </script>
 
@@ -170,6 +157,9 @@
     
     
     
+    
+    <link rel="preload" href="../../assets/fonts/PublicSans-Regular.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="../../assets/fonts/DonJose-Black.woff2" as="font" type="font/woff2" crossorigin>
     
 
   
@@ -208,11 +198,7 @@
           <div class="md-banner__inner md-grid md-typeset">
             
             
-    📢 Suchen Sie BunkerWeb CLOUD, die PRO-Version, technischen Support oder maßgeschneiderte Dienstleistungen? Besuchen Sie das
-    <a href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc"
-       style="color: #3f6ec6;
-              text-decoration: underline">BunkerWeb Panel</a>
-    und erfahren Sie mehr über unsere Angebote für Unternehmen.
+    <p>Starten Sie über das <a href="https://panel.bunkerweb.io/store/bunkerweb-pro?language=german&utm_campaign=self&utm_source=doc">BunkerWeb Panel</a> eine kostenlose 30-tägige Testversion von BunkerWeb PRO: Bestellen Sie einen Tarif und lassen Sie beim Bestellabschluss „Free 30 Days Trial“ als Zahlungsmethode ausgewählt. (<a href="../#pro-version">Schritt-für-Schritt-Anleitung</a>)</p>
 
           </div>
           
@@ -245,7 +231,7 @@
   <nav class="md-header__inner md-grid" aria-label="Kopfzeile">
     <a href="../" title="BunkerWeb Dokumentation" class="md-header__button md-logo" aria-label="BunkerWeb Dokumentation" data-md-component="logo">
       
-  <img src="../../assets/logo.png" alt="logo">
+  <img src="../../assets/logo.png" alt="logo" width="273" height="77">
 
     </a>
     <label class="md-header__button md-icon" for="__drawer">
@@ -660,7 +646,7 @@
   <label class="md-nav__title" for="__drawer">
     <a href="../" title="BunkerWeb Dokumentation" class="md-nav__button md-logo" aria-label="BunkerWeb Dokumentation" data-md-component="logo">
       
-  <img src="../../assets/logo.png" alt="logo">
+  <img src="../../assets/logo.png" alt="logo" width="273" height="77">
 
     </a>
     BunkerWeb Dokumentation
@@ -855,15 +841,15 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#globale-einstellungen" class="md-nav__link">
+  <a href="#globale-einstellunge" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Globale Einstellungen
+        Globale Einstellunge
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Globale Einstellungen">
+    <nav class="md-nav" aria-label="Globale Einstellunge">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -1863,6 +1849,17 @@
     <span class="md-ellipsis">
       
         Beispiele
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fehlerantworten-von-upstream-apis-beibehalten" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fehlerantworten von Upstream-APIs beibehalten
       
     </span>
   </a>
@@ -3415,6 +3412,56 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#zstandard" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Zstandard
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Zstandard">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#so-wirds-verwendet_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        So wird's verwendet
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#parameter_9" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Parameter
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#beispielkonfiguration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Beispielkonfiguration
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -3661,7 +3708,7 @@
 
 <h1 id="funktionen">Funktionen<a class="headerlink" href="#funktionen" title="Permanent link">&para;</a></h1>
 <p>Dieser Abschnitt enthält die vollständige Liste der von BunkerWeb unterstützten Einstellungen. Wenn Sie mit BunkerWeb noch nicht vertraut sind, lesen Sie zuerst den Abschnitt <a href="../concepts/">Konzepte</a> der Dokumentation. Befolgen Sie anschließend die Anweisungen für Ihre <a href="../integrations/">Integration</a>, um die Einstellungen anzuwenden.</p>
-<h2 id="globale-einstellungen">Globale Einstellungen<a class="headerlink" href="#globale-einstellungen" title="Permanent link">&para;</a></h2>
+<h2 id="globale-einstellunge">Globale Einstellunge<a class="headerlink" href="#globale-einstellunge" title="Permanent link">&para;</a></h2>
 <p>STREAM-Unterstützung <img alt="⚠" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/26a0.svg" title=":warning:" /></p>
 <p>Das Allgemein-Plugin stellt das zentrale Konfigurations-Framework für BunkerWeb bereit und ermöglicht es Ihnen, wesentliche Einstellungen zu definieren, die steuern, wie Ihre Webdienste geschützt und bereitgestellt werden. Dieses grundlegende Plugin verwaltet fundamentale Aspekte wie Sicherheitsmodi, Server-Standardeinstellungen, Protokollierungsverhalten und kritische Betriebsparameter für das gesamte BunkerWeb-Ökosystem.</p>
 <p><strong>So funktioniert es:</strong></p>
@@ -3695,7 +3742,7 @@
 <h3 id="plugin-order">Ausführungsreihenfolge der Plugins<a class="headerlink" href="#plugin-order" title="Permanent link">&para;</a></h3>
 <p>Sie können die Reihenfolge mit durch Leerzeichen getrennten Listen steuern:</p>
 <ul>
-<li>Globale Phasen: <code>PLUGINS_ORDER_INIT</code>, <code>PLUGINS_ORDER_INIT_WORKER</code>, <code>PLUGINS_ORDER_TIMER</code>.</li>
+<li>Globale Phasen: <code>PLUGINS_ORDER_INIT</code>, <code>PLUGINS_ORDER_INIT_WORKER</code>, <code>PLUGINS_ORDER_SSL_CLIENT_HELLO</code>, <code>PLUGINS_ORDER_TIMER</code>.</li>
 <li>Seitenspezifische Phasen: <code>PLUGINS_ORDER_SET</code>, <code>PLUGINS_ORDER_ACCESS</code>, <code>PLUGINS_ORDER_SSL_CERTIFICATE</code>, <code>PLUGINS_ORDER_HEADER</code>, <code>PLUGINS_ORDER_LOG</code>, <code>PLUGINS_ORDER_PREREAD</code>, <code>PLUGINS_ORDER_LOG_STREAM</code>, <code>PLUGINS_ORDER_LOG_DEFAULT</code>.</li>
 <li>Semantik: aufgelistete Plugins laufen zuerst in der Phase; alle übrigen laufen danach in ihrer normalen Reihenfolge. IDs nur mit Leerzeichen trennen.</li>
 </ul>
@@ -3738,7 +3785,7 @@
 <td><code>www.example.com</code></td>
 <td>multisite</td>
 <td>Nein</td>
-<td><strong>Primäre Domain:</strong> Der Hauptdomainname für diese Website. Im Multisite-Modus erforderlich.</td>
+<td><strong>Primäre Domain:</strong> Der Hauptdomainname (oder die IP-Adresse) für diese Website. Im Multisite-Modus erforderlich.</td>
 </tr>
 <tr>
 <td><code>BUNKERWEB_INSTANCES</code></td>
@@ -3910,14 +3957,14 @@ curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">"Host: bw
 <tr>
 <td><code>CLIENT_BODY_TIMEOUT</code></td>
 <td><code>10s</code></td>
-<td>global</td>
+<td>multisite</td>
 <td>Nein</td>
 <td><strong>Client-Body-Timeout:</strong> Timeout zum Lesen des Request-Bodys vom Client.</td>
 </tr>
 <tr>
 <td><code>CLIENT_HEADER_TIMEOUT</code></td>
 <td><code>10s</code></td>
-<td>global</td>
+<td>multisite</td>
 <td>Nein</td>
 <td><strong>Client-Header-Timeout:</strong> Timeout zum Lesen der Request-Header vom Client.</td>
 </tr>
@@ -3937,6 +3984,7 @@ curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">"Host: bw
 </tr>
 </tbody>
 </table>
+<p>Setzen Sie <code>CLIENT_HEADER_TIMEOUT</code> und <code>CLIENT_BODY_TIMEOUT</code> pro Dienst für lang laufende gRPC-Streams (zum Beispiel <code>netbird.example.com_CLIENT_HEADER_TIMEOUT=1d</code>). Halten Sie den globalen Wert von <code>CLIENT_HEADER_TIMEOUT</code> kurz: Er begrenzt auch TLS-Handshakes auf dem Standardserver und wie lange unvollständige Handshakes alte Worker nach einem Reload am Leben halten können. Vorhandene Direktiven <code>client_header_timeout</code> oder <code>client_body_timeout</code> in benutzerdefinierten <code>server-http</code>-Konfigurationen funktionieren weiterhin, wenn der Dienst den globalen Wert erbt. Entfernen Sie die passende benutzerdefinierte Direktive, wenn Sie einen abweichenden Timeout pro Dienst setzen, um doppelte Direktiven zu vermeiden.</p>
 </div>
 <div class="tabbed-block">
 <table>
@@ -4363,14 +4411,14 @@ curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">"Host: bw
 <td><code>http</code></td>
 <td>multisite</td>
 <td>nein</td>
-<td>ACME challenge type. HTTP-01 is simplest; DNS-01 is required for wildcard certificates; TLS-ALPN-01 works when port 80 is unavailable.</td>
+<td>ACME challenge type. HTTP-01 is simplest; DNS-01 is required for wildcard certificates; TLS-ALPN-01 works when port 80 is unavailable but needs a core with the ClientHello plugin hook (1.6.18~rc3 or later).</td>
 </tr>
 <tr>
 <td><code>ACME_DNS_PROVIDER</code></td>
 <td></td>
 <td>multisite</td>
 <td>nein</td>
-<td>DNS provider for DNS-01 challenges.</td>
+<td>DNS provider for DNS-01 challenges. Hosttech requires BunkerWeb core 1.6.18 or newer.</td>
 </tr>
 <tr>
 <td><code>ACME_DNS_CREDENTIAL_ITEM</code></td>
@@ -4391,7 +4439,7 @@ curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">"Host: bw
 <td><code>default</code></td>
 <td>multisite</td>
 <td>nein</td>
-<td>Seconds to wait for DNS propagation before the CA validates a DNS-01 challenge. 'default' applies a safe 120s wait (except route53, which polls until synced); set a number to override. Raise it if your provider is slow to publish TXT records.</td>
+<td>DNS-01 propagation wait in seconds. 'default': 120s for most providers, Hosttech's 600s default, or Route53's sync polling. Set a number to override.</td>
 </tr>
 <tr>
 <td><code>ACME_DNS_ALIAS</code></td>
@@ -4426,7 +4474,7 @@ curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">"Host: bw
 <td><code>30</code></td>
 <td>multisite</td>
 <td>nein</td>
-<td>Renew the certificate when it has fewer than this many days until expiry.</td>
+<td>Renew TLS-ALPN-01 certificates when this many days remain until expiry. Certbot-managed certificates renew on certbot's own schedule.</td>
 </tr>
 <tr>
 <td><code>ACME_SSL_VERIFY</code></td>
@@ -4548,6 +4596,13 @@ curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">"Host: bw
 <td>Connection type for certificate alert SMTP.</td>
 </tr>
 <tr>
+<td><code>ACME_ALERT_SMTP_VERIFY_CERTIFICATE</code></td>
+<td><code>no</code></td>
+<td>global</td>
+<td>nein</td>
+<td>Verify the certificate and hostname of the SMTP relay against the system CA store when ACME_ALERT_SMTP_SSL is SSL or TLS. Off by default: the certificate is not checked and a warning is logged on each run. Turn it on once the relay presents a certificate signed by a public CA.</td>
+</tr>
+<tr>
 <td><code>USE_ACME_CT_MONITORING</code></td>
 <td><code>no</code></td>
 <td>global</td>
@@ -4577,7 +4632,7 @@ curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">"Host: bw
 </tr>
 </tbody>
 </table>
-<h2 id="anti-ddos-pro">Anti DDoS <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)<a class="headerlink" href="#anti-ddos-pro" title="Permanent link">&para;</a></h2>
+<h2 id="anti-ddos-pro">Anti DDoS <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);' loading="lazy" decoding="async"> (PRO)<a class="headerlink" href="#anti-ddos-pro" title="Permanent link">&para;</a></h2>
 <p>Eine ausführlichere Anleitung finden Sie in der Dokumentation zur <a href="../advanced/#anti-ddos-pro">erweiterten Nutzung</a>.</p>
 <p>STREAM-Unterstützung <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
 <p>Provides enhanced protection against DDoS attacks by analyzing and filtering suspicious traffic.</p>
@@ -4626,6 +4681,69 @@ curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">"Host: bw
 <td>global</td>
 <td>nein</td>
 <td>HTTP status codes treated as suspicious for DDoS analysis.</td>
+</tr>
+<tr>
+<td><code>ANTIDDOS_TLS</code></td>
+<td><code>no</code></td>
+<td>global</td>
+<td>nein</td>
+<td>Count TLS handshakes and stop TLS floods. USE_ANTIDDOS must also be yes. Start with SECURITY_MODE=detect. Cores before 1.6.18~rc3 protect only handshakes without SNI, with MULTISITE=yes or DISABLE_DEFAULT_SERVER=yes; single-site has no TLS protection. 1.6.18~rc3 or later also protects every named service.</td>
+</tr>
+<tr>
+<td><code>ANTIDDOS_TLS_WINDOW_TIME</code></td>
+<td><code>10</code></td>
+<td>global</td>
+<td>nein</td>
+<td>TLS counting window in seconds (5 to 999). Idle handshakes are checked after the window ends, with five extra seconds for a first request.</td>
+</tr>
+<tr>
+<td><code>ANTIDDOS_TLS_IDLE_THRESHOLD</code></td>
+<td><code>30</code></td>
+<td>global</td>
+<td>nein</td>
+<td>Minimum handshakes without a first request in one fixed window before flagging an address. This rule needs no distinct-IP minimum.</td>
+</tr>
+<tr>
+<td><code>ANTIDDOS_TLS_IDLE_RATIO</code></td>
+<td><code>90</code></td>
+<td>global</td>
+<td>nein</td>
+<td>Minimum percentage of handshakes without a first request (50 to 100). The idle handshake threshold must also be reached.</td>
+</tr>
+<tr>
+<td><code>ANTIDDOS_TLS_HELLO_THRESHOLD</code></td>
+<td><code>500</code></td>
+<td>global</td>
+<td>nein</td>
+<td>TLS handshakes per address in a sliding window before flagging it. ANTIDDOS_DISTINCT_IP must also be reached. Set 0 to disable this volume rule.</td>
+</tr>
+<tr>
+<td><code>ANTIDDOS_TLS_IPV6_PREFIX</code></td>
+<td><code>64</code></td>
+<td>global</td>
+<td>nein</td>
+<td>Group IPv6 addresses by this prefix length for TLS counting and local flags. IPv4-mapped IPv6 addresses count as IPv4.</td>
+</tr>
+<tr>
+<td><code>ANTIDDOS_TLS_BAN_TIME</code></td>
+<td><code>300</code></td>
+<td>global</td>
+<td>nein</td>
+<td>How long a TLS flag or supported core ban lasts, in seconds (10 to 86400). Existing operator bans are never replaced.</td>
+</tr>
+<tr>
+<td><code>ANTIDDOS_TLS_IGNORE_IP</code></td>
+<td></td>
+<td>global</td>
+<td>nein</td>
+<td>Space-separated IP addresses and CIDRs excluded from TLS counting and drops. On core 1.6.15, add monitoring addresses here because its core whitelist is unavailable at ClientHello.</td>
+</tr>
+<tr>
+<td><code>ANTIDDOS_TLS_DICT_SIZE</code></td>
+<td><code>10M</code></td>
+<td>global</td>
+<td>nein</td>
+<td>Memory for TLS counters, candidate lists and local flags (for example 10M or 500k). Full storage fails open, so increase this for large address populations.</td>
 </tr>
 <tr>
 <td><code>ANTIDDOS_DISTINCT_IP</code></td>
@@ -4723,7 +4841,14 @@ curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">"Host: bw
 <td></td>
 <td>Multisite</td>
 <td>nein</td>
-<td>Ausgeschlossene URLs: Eine durch Leerzeichen getrennte Liste von URI-Regulären Ausdrücken, die die Herausforderung umgehen sollen. Muster werden gegen den Pfad und die vollständige Request-URI mit Query-String geprüft.</td>
+<td>Ausgeschlossene URLs: Eine durch Leerzeichen getrennte Liste von URI-Regulären Ausdrücken, die die Herausforderung umgehen sollen. Muster werden gegen den normalisierten Pfad geprüft, allein oder gefolgt von <code>?</code> und dem Query-String.</td>
+</tr>
+<tr>
+<td><code>ANTIBOT_INCLUDE_URI</code></td>
+<td></td>
+<td>Multisite</td>
+<td>nein</td>
+<td>Eingeschlossene URLs: Durch Leerzeichen getrennte PCRE-Muster für die einzigen URIs mit Herausforderung. Leer bedeutet alle URIs. Geprüft wird der normalisierte Pfad, allein oder mit <code>?</code> und Query-String. <code>ANTIBOT_IGNORE_URI</code> hat Vorrang.</td>
 </tr>
 <tr>
 <td><code>ANTIBOT_IGNORE_IP</code></td>
@@ -5429,7 +5554,7 @@ Für die neue Version erstellen Sie einen reCAPTCHA-Schlüssel in Ihrem Google C
 </div>
 <div class="admonition tip">
 <p class="admonition-title">Verwendung mehrerer Anmeldeinformationen</p>
-<p>Sie können mehrere Paare aus Benutzername/Passwort für den Zugriff konfigurieren. Jede <code>AUTH_BASIC_USER</code>-Einstellung sollte eine entsprechende <code>AUTH_BASIC_PASSWORD</code>-Einstellung haben.</p>
+<p>Sie können mehrere Paare aus Benutzername/Passwort für den Zugriff konfigurieren. Jede <code>AUTH_BASIC_USER</code>-Einstellung sollte eine entsprechende <code>AUTH_BASIC_PASSWORD</code>-Einstellung haben. Das Standardpaar <code>changeme</code> / <code>changeme</code> wird ignoriert, sobald ein weiteres Paar konfiguriert ist; setzen Sie <code>AUTH_BASIC_USER</code> und <code>AUTH_BASIC_PASSWORD</code> ohne Suffix auf eigene Werte, um es zu behalten.</p>
 </div>
 <h3 id="beispielkonfigurationen_1">Beispielkonfigurationen<a class="headerlink" href="#beispielkonfigurationen_1" title="Permanent link">&para;</a></h3>
 <div class="tabbed-set tabbed-alternate" data-tabs="5:3"><input checked="checked" id="__tabbed_5_1" name="__tabbed_5" type="radio" /><input id="__tabbed_5_2" name="__tabbed_5" type="radio" /><input id="__tabbed_5_3" name="__tabbed_5" type="radio" /><div class="tabbed-labels"><label for="__tabbed_5_1">Schutz der gesamten Website</label><label for="__tabbed_5_2">Schutz bestimmter Bereiche</label><label for="__tabbed_5_3">Mehrere Benutzer</label></div>
@@ -5558,7 +5683,7 @@ bwcli<span class="w"> </span>plugin<span class="w"> </span>backup<span class="w"
 </div>
 <div class="admonition warning">
 <p class="admonition-title">Datenbankkompatibilität</p>
-<p>Das Backup-Plugin unterstützt SQLite, MySQL/MariaDB und PostgreSQL-Datenbanken. Oracle-Datenbanken werden derzeit für Backup- und Wiederherstellungsvorgänge nicht unterstützt.</p>
+<p>Das Backup-Plugin unterstützt SQLite, MySQL/MariaDB und PostgreSQL-Datenbanken. Oracle-Datenbanken werden derzeit für Backup- und Wiederherstellungsvorgänge nicht unterstützt. Eine Wiederherstellung lehnt ein Backup aus einer anderen Datenbank-Engine ab (MariaDB und MySQL gelten als verschiedene Engines), bevor etwas geändert wird.</p>
 </div>
 <h3 id="beispielkonfigurationen_2">Beispielkonfigurationen<a class="headerlink" href="#beispielkonfigurationen_2" title="Permanent link">&para;</a></h3>
 <div class="tabbed-set tabbed-alternate" data-tabs="6:3"><input checked="checked" id="__tabbed_6_1" name="__tabbed_6" type="radio" /><input id="__tabbed_6_2" name="__tabbed_6" type="radio" /><input id="__tabbed_6_3" name="__tabbed_6" type="radio" /><div class="tabbed-labels"><label for="__tabbed_6_1">Tägliche Backups mit 7-tägiger Aufbewahrung</label><label for="__tabbed_6_2">Wöchentliche Backups mit erweiterter Aufbewahrung</label><label for="__tabbed_6_3">Monatliche Backups an einem benutzerdefinierten Speicherort</label></div>
@@ -5589,7 +5714,7 @@ bwcli<span class="w"> </span>plugin<span class="w"> </span>backup<span class="w"
 </div>
 </div>
 </div>
-<h2 id="backup-s3-pro">Backup S3 <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)<a class="headerlink" href="#backup-s3-pro" title="Permanent link">&para;</a></h2>
+<h2 id="backup-s3-pro">Backup S3 <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);' loading="lazy" decoding="async"> (PRO)<a class="headerlink" href="#backup-s3-pro" title="Permanent link">&para;</a></h2>
 <p>STREAM-Unterstützung <img alt="✅" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" title=":white_check_mark:" /></p>
 <p>Automatically backup your data to an S3 bucket</p>
 <table>
@@ -5629,7 +5754,7 @@ bwcli<span class="w"> </span>plugin<span class="w"> </span>backup<span class="w"
 <td></td>
 <td>global</td>
 <td>nein</td>
-<td>The S3 endpoint</td>
+<td>The full S3 endpoint URL, for example https://s3.example.com (https:// is added if omitted)</td>
 </tr>
 <tr>
 <td><code>BACKUP_S3_BUCKET</code></td>
@@ -5671,7 +5796,7 @@ bwcli<span class="w"> </span>plugin<span class="w"> </span>backup<span class="w"
 <td><code>6</code></td>
 <td>global</td>
 <td>nein</td>
-<td>The compression level of the backup zip file</td>
+<td>Compression level of the zip uploaded to S3, from 1 (fastest) to 9 (smallest). 6 uploads the core backup unchanged.</td>
 </tr>
 </tbody>
 </table>
@@ -5879,6 +6004,13 @@ bwcli<span class="w"> </span>plugin<span class="w"> </span>backup<span class="w"
 <td style="text-align: left;"><strong>Blacklist aktivieren:</strong> Setzen Sie auf <code>yes</code>, um die Blacklist-Funktion zu aktivieren.</td>
 </tr>
 <tr>
+<td style="text-align: left;"><code>BLACKLIST_URLS_REFRESH_INTERVAL</code></td>
+<td style="text-align: left;"><code>1h</code></td>
+<td style="text-align: left;">multisite</td>
+<td style="text-align: left;">nein</td>
+<td style="text-align: left;"><strong>URL-Aktualisierungsintervall:</strong> Mindestalter des Caches vor einem erneuten Download. Akzeptiert Sekunden ohne Einheit oder Zeitsuffixe (<code>ms</code>, <code>s</code>, <code>m</code>, <code>h</code>, <code>d</code>, <code>w</code>, <code>M</code>, <code>y</code>).</td>
+</tr>
+<tr>
 <td style="text-align: left;"><code>BLACKLIST_COMMUNITY_LISTS</code></td>
 <td style="text-align: left;"><code>ip:danmeuk-tor-exit ua:mitchellkrogza-bad-user-agents</code></td>
 <td style="text-align: left;">Multisite</td>
@@ -5913,26 +6045,22 @@ bwcli<span class="w"> </span>plugin<span class="w"> </span>backup<span class="w"
 </tr>
 <tr>
 <td style="text-align: left;"><code>ip:laurent-minne-data-shield-aggressive</code></td>
-<td style="text-align: left;">Data-Shield IPv4 Blocklist - Laurent M. - Für Web Apps, WordPress, VPS (Apache/Nginx)</td>
+<td style="text-align: left;">Data-Shield IPv4 Blocklist (Community Standard) - Laurent M.</td>
 <td style="text-align: left;"><code>https://raw.githubusercontent.com/duggytuxy/Data-Shield_IPv4_Blocklist/refs/heads/main/prod_data-shield_ipv4_blocklist.txt</code></td>
-</tr>
-<tr>
-<td style="text-align: left;"><code>ip:laurent-minne-data-shield-critical</code></td>
-<td style="text-align: left;">Data-Shield IPv4 Blocklist - Laurent M. - Für DMZs, SaaS, API &amp; Kritische Assets</td>
-<td style="text-align: left;"><code>https://raw.githubusercontent.com/duggytuxy/Data-Shield_IPv4_Blocklist/refs/heads/main/prod_critical_data-shield_ipv4_blocklist.txt</code></td>
 </tr>
 </tbody>
 </table>
+<div class="admonition info">
+<p class="admonition-title">Data-Shield Pro</p>
+<p><a href="https://data-shield.eu/?utm_source=external-docs&amp;utm_medium=cta&amp;utm_campaign=bunkerweb-docs">Data-Shield Pro</a> ist ein kostenpflichtiges Abonnement mit dem Critical-Profil: die Standard-Liste plus zusätzliche blockierte Quellen, für strengeres Filtern des eingehenden Datenverkehrs, mit höherem Risiko, legitimen Datenverkehr zu blockieren. Das frühere Preset <code>ip:laurent-minne-data-shield-critical</code> ist eingestellt und lädt jetzt die kostenlose Community-Standard-Liste herunter.</p>
+<p>Der Pro-Feed erfordert eine Authentifizierung, und BunkerWeb hat keine eigene Einstellung für Feed-Zugangsdaten. In eine URL-Einstellung eingebettete Zugangsdaten (<code>http://user:pass@url</code>) werden in dieser Einstellung gespeichert und in der Web-Oberfläche und in den Logs angezeigt. Befolgen Sie daher die <a href="https://data-shield.eu/docs/?utm_source=external-docs&amp;utm_medium=cta&amp;utm_campaign=bunkerweb-docs">Hinweise des Anbieters</a>: Halten Sie das Geräte-Token aus URLs heraus und nutzen Sie ein Relay in Ihrem eigenen Netzwerk, also einen Dienst, der sich beim Anbieter authentifiziert und die Datei nur Ihren BunkerWeb-Instanzen bereitstellt. Tragen Sie dann die Relay-URL in <code>BLACKLIST_IP_URLS</code> ein. Die Option HTTP Basic nimmt die Geräte-ID als Benutzer und das Token als Passwort, legt das Token aber in der Einstellung ab. Abonnenten verwalten ihre Geräte im <a href="https://feeds.data-shield.eu/?utm_source=external-docs&amp;utm_medium=cta&amp;utm_campaign=bunkerweb-docs">Abonnentenportal</a>.</p>
+</div>
 <p><strong>Konfiguration:</strong> Geben Sie mehrere Listen durch Leerzeichen getrennt an. Zum Beispiel:
 <div class="highlight"><pre><span></span><code><span class="nt">BLACKLIST_COMMUNITY_LISTS</span><span class="p">:</span><span class="w"> </span><span class="s">"ip:danmeuk-tor-exit</span><span class="nv"> </span><span class="s">ua:mitchellkrogza-bad-user-agents"</span>
 </code></pre></div></p>
 <div class="admonition tip">
 <p class="admonition-title">Community-Listen vs. manuelle Konfiguration</p>
 <p>Community-Blacklists bieten eine bequeme Möglichkeit, mit bewährten Blacklist-Quellen zu beginnen. Sie können diese parallel zu manuellen URL-Konfigurationen für maximale Flexibilität verwenden.</p>
-</div>
-<div class="admonition note">
-<p class="admonition-title">Danksagung</p>
-<p>Vielen Dank an Laurent Minne für den Beitrag der <a href="https://duggytuxy.github.io/#">Data-Shield-Blocklisten</a>!</p>
 </div>
 </div>
 <div class="tabbed-block">
@@ -6233,7 +6361,7 @@ bwcli<span class="w"> </span>plugin<span class="w"> </span>backup<span class="w"
 </div>
 <div class="admonition tip">
 <p class="admonition-title">Regelmäßige Updates</p>
-<p>Blacklists von URLs werden automatisch stündlich heruntergeladen und aktualisiert, um sicherzustellen, dass Ihr Schutz gegen die neuesten Bedrohungen auf dem neuesten Stand bleibt.</p>
+<p>Der Job läuft stündlich. <code>BLACKLIST_URLS_REFRESH_INTERVAL</code> legt das Mindestalter einer zwischengespeicherten URL vor einem erneuten Download fest (Standard: <code>1h</code>). Verwenden Sie <code>24h</code> für Anbieter, die höchstens einen Download pro Tag erlauben, oder <code>0</code> für einen Download bei jedem Joblauf. Bei frischen Caches oder fehlgeschlagenen Downloads bleiben die letzten gültigen Einträge erhalten. Innerhalb dieses Plugins teilen sich Dienste die URL-Caches: Das kürzeste Intervall kann einen Download auslösen. Verwenden Sie daher für eine URL mit Anbieterlimit bei allen Diensten dasselbe Intervall.</p>
 </div>
 <h3 id="konfigurationsbeispiele_1">Konfigurationsbeispiele<a class="headerlink" href="#konfigurationsbeispiele_1" title="Permanent link">&para;</a></h3>
 <div class="tabbed-set tabbed-alternate" data-tabs="9:3"><input checked="checked" id="__tabbed_9_1" name="__tabbed_9" type="radio" /><input id="__tabbed_9_2" name="__tabbed_9" type="radio" /><input id="__tabbed_9_3" name="__tabbed_9" type="radio" /><div class="tabbed-labels"><label for="__tabbed_9_1">Grundlegender Schutz durch IP und User-Agent</label><label for="__tabbed_9_2">Erweiterter Schutz mit benutzerdefinierten Regeln</label><label for="__tabbed_9_3">Verwendung lokaler Dateien</label></div>
@@ -6403,7 +6531,7 @@ TrustedMonitor/\d+\.\d+
 <p><strong>So funktioniert es:</strong></p>
 <ol>
 <li>Ihre BunkerWeb-Instanz registriert sich automatisch bei der BunkerNet-API, um eine eindeutige Kennung zu erhalten.</li>
-<li>Wenn Ihre Instanz eine bösartige IP-Adresse oder ein bösartiges Verhalten erkennt und blockiert, meldet sie die Bedrohung anonym an BunkerNet.</li>
+<li>Wenn Ihre Instanz eine bösartige IP-Adresse oder ein bösartiges Verhalten erkennt und blockiert, meldet sie die Bedrohung an BunkerNet. Die Felder einer Meldung sind im Hinweis „Inhalt einer Meldung“ weiter unten aufgeführt.</li>
 <li>BunkerNet sammelt Bedrohungsdaten von allen teilnehmenden Instanzen und verteilt die konsolidierte Datenbank.</li>
 <li>Ihre Instanz lädt regelmäßig eine aktualisierte Datenbank bekannter Bedrohungen von BunkerNet herunter.</li>
 <li>Diese kollektive Intelligenz ermöglicht es Ihrer Instanz, proaktiv IP-Adressen zu blockieren, die auf anderen BunkerWeb-Instanzen bösartiges Verhalten gezeigt haben.</li>
@@ -6413,9 +6541,9 @@ TrustedMonitor/\d+\.\d+
 <ol>
 <li><strong>Kollektive Verteidigung:</strong> Nutzen Sie die Sicherheitserkenntnisse von Tausenden anderer BunkerWeb-Instanzen weltweit.</li>
 <li><strong>Proaktiver Schutz:</strong> Blockieren Sie böswillige Akteure, bevor sie Ihre Website angreifen können, basierend auf ihrem Verhalten an anderer Stelle.</li>
-<li><strong>Beitrag zur Gemeinschaft:</strong> Helfen Sie, andere BunkerWeb-Benutzer zu schützen, indem Sie anonymisierte Bedrohungsdaten über Angreifer teilen.</li>
+<li><strong>Beitrag zur Gemeinschaft:</strong> Helfen Sie, andere BunkerWeb-Benutzer zu schützen, indem Sie Bedrohungsdaten über Angreifer teilen.</li>
 <li><strong>Keine Konfiguration erforderlich:</strong> Funktioniert standardmäßig mit sinnvollen Voreinstellungen und erfordert nur minimale Einrichtung.</li>
-<li><strong>Datenschutzorientiert:</strong> Teilt nur notwendige Bedrohungsinformationen, ohne Ihre Privatsphäre oder die Ihrer Benutzer zu gefährden.</li>
+<li><strong>Kontrollierte Weitergabe:</strong> Eine Meldung enthält eine feste Auswahl an Feldern, und <code>BUNKERNET_FILTER_HEADERS</code> kann ihre Request-Header auf eine kurze Positivliste beschränken (siehe unten).</li>
 </ol>
 </div>
 <h3 id="wie-man-es-benutzt_3">Wie man es benutzt<a class="headerlink" href="#wie-man-es-benutzt_3" title="Permanent link">&para;</a></h3>
@@ -6447,6 +6575,13 @@ TrustedMonitor/\d+\.\d+
 <td><strong>BunkerNet aktivieren:</strong> Auf <code>yes</code> setzen, um den Austausch von Bedrohungsdaten zu aktivieren.</td>
 </tr>
 <tr>
+<td><code>BUNKERNET_FILTER_HEADERS</code></td>
+<td><code>no</code></td>
+<td>multisite</td>
+<td>nein</td>
+<td><strong>Gemeldete Header filtern:</strong> Auf <code>yes</code> setzen, um nur eine kurze Positivliste von Request-Headern zu senden und die von ModSecurity in Headern und Cookies gefundenen Werte zu leeren. Bei <code>no</code> enthält eine Meldung alle Request-Header außer <code>Cookie</code>, <code>Authorization</code> und <code>Proxy-Authorization</code> sowie die gefundenen Werte, außer denen aus diesen Headern und aus Cookies.</td>
+</tr>
+<tr>
 <td><code>BUNKERNET_SERVER</code></td>
 <td><code>https://api.bunkerweb.io</code></td>
 <td>global</td>
@@ -6460,8 +6595,17 @@ TrustedMonitor/\d+\.\d+
 <p>Wenn BunkerNet feststellt, dass eine IP-Adresse an bösartigen Aktivitäten auf mehreren BunkerWeb-Instanzen beteiligt war, wird diese IP zu einer kollektiven schwarzen Liste hinzugefügt. Dies bietet eine proaktive Verteidigungsebene, die Ihre Website vor Bedrohungen schützt, bevor sie Sie direkt angreifen können.</p>
 </div>
 <div class="admonition info">
-<p class="admonition-title">Anonymes Melden</p>
-<p>Bei der Meldung von Bedrohungsinformationen an BunkerNet teilt Ihre Instanz nur die zur Identifizierung der Bedrohung erforderlichen Daten: die IP-Adresse, den Grund für die Sperrung und minimale kontextbezogene Daten. Es werden keine persönlichen Informationen über Ihre Benutzer oder sensible Details über Ihre Website weitergegeben.</p>
+<p class="admonition-title">Inhalt einer Meldung</p>
+<p>Jede an BunkerNet gesendete Meldung enthält diese Felder und nichts anderes:</p>
+<ul>
+<li>die mit jeder Anfrage gesendeten Instanzmetadaten: die BunkerNet-Instanz-ID, die BunkerWeb-Version, die Integration sowie Name, Version, Versions-ID, Codename, ID und Architektur des Betriebssystems;</li>
+<li>die IP-Adresse des Clients, den Grund für die Sperrung und das Datum;</li>
+<li>die HTTP-Methode, die URL <strong>einschließlich Query-String</strong> und den Namen des Dienstes (<code>server_name</code>);</li>
+<li>die Request-Header mit ihren Werten: alle empfangenen Header (bis zu <code>MAX_HEADERS</code>) außer <code>Cookie</code>, <code>Authorization</code> und <code>Proxy-Authorization</code> oder, wenn <code>BUNKERNET_FILTER_HEADERS</code> auf <code>yes</code> steht, nur <code>User-Agent</code>, <code>Accept</code>, <code>Accept-Encoding</code>, <code>Accept-Language</code>, <code>Content-Type</code> und <code>Content-Length</code>;</li>
+<li>die Details zum Sperrgrund. Je nach Plugin, das den Client blockiert hat, enthalten sie die IDs und Meldungen der zutreffenden ModSecurity-Regeln samt den Request-Werten, die zugetroffen haben (Teile von Argumenten, Body, Headern oder Cookies, jeweils auf 512 Bytes gekürzt; in Cookies und in den Headern <code>Cookie</code>, <code>Authorization</code> und <code>Proxy-Authorization</code> gefundene Werte werden immer geleert, mit <code>BUNKERNET_FILTER_HEADERS</code> auf <code>yes</code> auch die in allen anderen Headern gefundenen; es wird nur der Variablenname gesendet), oder bei Bad Behavior die Methode und die URL der letzten Requests, die zur Sperrung geführt haben.</li>
+</ul>
+<p>Standardmäßig (<code>BUNKERNET_FILTER_HEADERS</code> auf <code>no</code>) enthält eine Meldung jeden empfangenen Request-Header (bis zu <code>MAX_HEADERS</code>) außer <code>Cookie</code>, <code>Authorization</code> und <code>Proxy-Authorization</code>, die nie gesendet werden, sowie die von ModSecurity gefundenen Werte, außer denen aus Cookies und diesen Headern. Setzen Sie <code>BUNKERNET_FILTER_HEADERS</code> auf <code>yes</code>, um nur die oben genannten sechs Header zu senden und die in Headern und Cookies gefundenen Werte zu leeren. Noch nicht gesendete Meldungen werden vor dem Senden ebenso bereinigt (Zugangsdaten immer, die Positivliste bei <code>yes</code>).</p>
+<p>Die URL und die zugetroffenen Werte stammen aus dem Request und enthalten daher alles, was der Client gesendet hat. Setzen Sie <code>USE_BUNKERNET</code> auf <code>no</code> für Dienste, deren URLs sensible Werte enthalten.</p>
 </div>
 <h3 id="beispielkonfigurationen_4">Beispielkonfigurationen<a class="headerlink" href="#beispielkonfigurationen_4" title="Permanent link">&para;</a></h3>
 <div class="tabbed-set tabbed-alternate" data-tabs="11:3"><input checked="checked" id="__tabbed_11_1" name="__tabbed_11" type="radio" /><input id="__tabbed_11_2" name="__tabbed_11" type="radio" /><input id="__tabbed_11_3" name="__tabbed_11" type="radio" /><div class="tabbed-labels"><label for="__tabbed_11_1">Standardkonfiguration (empfohlen)</label><label for="__tabbed_11_2">Deaktivierte Konfiguration</label><label for="__tabbed_11_3">Benutzerdefinierte Serverkonfiguration</label></div>
@@ -6492,7 +6636,7 @@ TrustedMonitor/\d+\.\d+
 <p><strong>Schritt 1: Erstellen Sie Ihr CrowdSec-Konsolenkonto</strong></p>
 <p>Gehen Sie zur <a href="https://app.crowdsec.net/signup?utm_source=external-blog&amp;utm_medium=cta&amp;utm_campaign=bunker-web-integration">CrowdSec-Konsole</a> und registrieren Sie sich, falls Sie noch kein Konto haben. Notieren Sie sich anschließend den Anmeldeschlüssel, den Sie unter „Security Engines“ finden, nachdem Sie auf „Add Security Engine“ geklickt haben:</p>
 <figure>
-<p><img align="center" alt="Overview" src="../../assets/img/crowdity1.png" />
+<p><img align="center" alt="Overview" src="../../assets/img/crowdity1.png" width="1129" height="173" loading="lazy" decoding="async" />
   </p>
 <figcaption>Holen Sie sich Ihren CrowdSec-Konsolen-Anmeldeschlüssel</figcaption>
 </figure>
@@ -6508,25 +6652,25 @@ TrustedMonitor/\d+\.\d+
 <p>Sobald Sie Ihre BunkerNet-ID und den CrowdSec-Konsolen-Anmeldeschlüssel haben, <a href="https://panel.bunkerweb.io/store/bunkernet?utm_campaign=self&amp;utm_source=doc">bestellen Sie das kostenlose Produkt „BunkerNet / CrowdSec“ im Panel</a>. Möglicherweise werden Sie aufgefordert, ein Konto zu erstellen, falls Sie noch keines haben.</p>
 <p>Sie können nun den Dienst „BunkerNet / CrowdSec“ auswählen und das Formular ausfüllen, indem Sie Ihre BunkerNet-ID und den CrowdSec-Konsolen-Anmeldeschlüssel einfügen:</p>
 <figure>
-<p><img align="center" alt="Overview" src="../../assets/img/crowdity2.png" />
+<p><img align="center" alt="Overview" src="../../assets/img/crowdity2.png" width="734" height="362" loading="lazy" decoding="async" />
   </p>
 <figcaption>Registrieren Sie Ihre BunkerWeb-Instanz in der CrowdSec-Konsole</figcaption>
 </figure>
 <p><strong>Schritt 4: Akzeptieren Sie die neue Security Engine in der Konsole</strong></p>
 <p>Gehen Sie dann zurück zu Ihrer CrowdSec-Konsole und akzeptieren Sie die neue Security Engine:</p>
 <figure>
-<p><img align="center" alt="Overview" src="../../assets/img/crowdity3.png" />
+<p><img align="center" alt="Overview" src="../../assets/img/crowdity3.png" width="1167" height="336" loading="lazy" decoding="async" />
   </p>
 <figcaption>Akzeptieren Sie die Registrierung in der CrowdSec-Konsole</figcaption>
 </figure>
 <p><strong>Herzlichen Glückwunsch, Ihre BunkerWeb-Instanz ist jetzt in Ihrer CrowdSec-Konsole registriert!</strong></p>
 <p>Profi-Tipp: Wenn Sie Ihre Warnungen anzeigen, klicken Sie auf die Option „Spalten“ und aktivieren Sie das Kontrollkästchen „Kontext“, um auf BunkerWeb-spezifische Daten zuzugreifen.</p>
 <figure>
-<p><img align="center" alt="Overview" src="../../assets/img/crowdity4.png" />
+<p><img align="center" alt="Overview" src="../../assets/img/crowdity4.png" width="1273" height="304" loading="lazy" decoding="async" />
   </p>
 <figcaption>BunkerWeb-Daten werden in der Kontextspalte angezeigt</figcaption>
 </figure>
-<h2 id="cache-pro">Cache <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)<a class="headerlink" href="#cache-pro" title="Permanent link">&para;</a></h2>
+<h2 id="cache-pro">Cache <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);' loading="lazy" decoding="async"> (PRO)<a class="headerlink" href="#cache-pro" title="Permanent link">&para;</a></h2>
 <p>Eine ausführlichere Anleitung finden Sie in der Dokumentation zur <a href="../advanced/#cache-pro">erweiterten Nutzung</a>.</p>
 <p>STREAM-Unterstützung <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
 <p>Provides caching functionality at the reverse proxy level.</p>
@@ -6585,10 +6729,10 @@ TrustedMonitor/\d+\.\d+
 </tr>
 <tr>
 <td><code>CACHE_KEY</code></td>
-<td><code>$scheme$proxy_host$request_uri</code></td>
+<td><code>$scheme$host$request_uri</code></td>
 <td>multisite</td>
 <td>nein</td>
-<td>Key used to identify cached elements.</td>
+<td>Key used to identify cached elements. The default includes the client host, so services that share an upstream and a cache zone do not share entries. Keep $host (or $http_host) in a custom key.</td>
 </tr>
 <tr>
 <td><code>CACHE_CONVERT_HEAD_TO_GET</code></td>
@@ -6956,7 +7100,7 @@ TrustedMonitor/\d+\.\d+
 <td></td>
 <td>Multisite</td>
 <td>Nein</td>
-<td>Ignorierte URI: durch Leerzeichen getrennte PCRE-Regex-Muster für URIs, die von der Länderprüfung ausgenommen werden sollen. Die Muster werden gegen den Pfad und die vollständige Anfrage-URI mit Query-String geprüft.</td>
+<td>Ignorierte URI: durch Leerzeichen getrennte PCRE-Regex-Muster für URIs, die von der Länderprüfung ausgenommen werden sollen. Die Muster werden gegen den normalisierten Pfad geprüft, allein oder gefolgt von <code>?</code> und dem Query-String.</td>
 </tr>
 <tr>
 <td><code>COUNTRY_IGNORE_HEADER_NAME</code></td>
@@ -7038,7 +7182,7 @@ TrustedMonitor/\d+\.\d+
 <h2 id="crowdsec">CrowdSec<a class="headerlink" href="#crowdsec" title="Permanent link">&para;</a></h2>
 <p>STREAM-Unterstützung <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
 <figure>
-<p><img align="center," alt="Overview" src="../../assets/img/crowdsec.svg" width="600" /></p>
+<p><img align="center," alt="Overview" src="../../assets/img/crowdsec.svg" width="600" height="366" loading="lazy" decoding="async" /></p>
 </figure>
 <p>Das CrowdSec-Plugin integriert BunkerWeb mit der CrowdSec-Sicherheits-Engine und bietet eine zusätzliche Schutzschicht gegen verschiedene Cyberbedrohungen. Dieses Plugin fungiert als <a href="https://crowdsec.net/?utm_source=external-docs&amp;utm_medium=cta&amp;utm_campaign=bunker-web-docs">CrowdSec-Bouncer</a> und lehnt Anfragen basierend auf den Entscheidungen der CrowdSec-API ab.</p>
 <p>CrowdSec ist eine moderne Open-Source-Sicherheits-Engine, die bösartige IP-Adressen basierend auf Verhaltensanalyse und der kollektiven Intelligenz ihrer Community erkennt und blockiert. Sie können auch <a href="https://docs.crowdsec.net/docs/concepts?utm_source=external-docs&amp;utm_medium=cta&amp;utm_campaign=bunker-web-docs#scenarios">Szenarien</a> konfigurieren, um IP-Adressen basierend auf verdächtigem Verhalten automatisch zu sperren und so von einer partizipativen Blacklist zu profitieren.</p>
@@ -7103,7 +7247,11 @@ TrustedMonitor/\d+\.\d+
 <li><code>DELETE /crowdsec/{connection_id}/decisions/{decision_id}</code>: die ausgewählten Werte für <code>scope</code>, <code>value</code> und <code>decision_type</code> im JSON-Anfragetext angeben.</li>
 </ul>
 <p>Verwenden Sie die zurückgegebene Verbindungs-ID unverändert. Sie enthält die Identität der Instanz, damit identische localhost-URLs auf verschiedenen Instanzen getrennt bleiben. API-Administratoren können diese Operationen nutzen. Delegierte API-Benutzer benötigen die unabhängige Berechtigung <code>crowdsec_read</code> oder <code>crowdsec_delete</code> unter der bestehenden Ressource <code>bans</code>, entweder für eine zurückgegebene Verbindungs-ID oder für <code>*</code>. Eine gewöhnliche <code>ban_delete</code>-Berechtigung erlaubt keine CrowdSec-Entfernung. Eine Datenbankmigration ist nicht erforderlich.</p>
-<p>Die Laufzeit speichert einzelne Entscheidungen je Ziel, sodass das Entfernen einer Entscheidung keine andere Sperre für dieselbe IP oder denselben Bereich löschen kann. Optionale Berichtsmetadaten verwenden einen separaten Cache mit 5 MiB und können keine Einträge für die Durchsetzung von Sperren verdrängen. Stream-Aktualisierungen verwenden eine nicht blockierende Prozesssperre in <code>/var/run/bunkerweb</code>, die bis zur Veröffentlichung der Aktualisierung gehalten und beim Beenden des Workers automatisch freigegeben wird.</p>
+<p>Die Laufzeit speichert einzelne Entscheidungen je Ziel, sodass das Entfernen einer Entscheidung keine andere Sperre für dieselbe IP oder denselben Bereich löschen kann. Optionale Berichtsmetadaten verwenden einen separaten Cache mit 24 MiB (<code>CROWDSEC_METADATA_CACHE_SIZE=24m</code>) und können keine Einträge für die Durchsetzung von Sperren verdrängen. Stream-Aktualisierungen verwenden eine nicht blockierende Prozesssperre in <code>/var/run/bunkerweb</code>, die bis zur Veröffentlichung der Aktualisierung gehalten und beim Beenden des Workers automatisch freigegeben wird.</p>
+<p>Der Stream-Modus hält höchstens zwei Snapshot-Slots und schaltet erst um, wenn ein vollständiger Snapshot gespeichert wurde. Ein unverändertes nginx-Neuladen behält den Snapshot und fordert Deltas an. Ein fehlender Snapshot, geänderte Entscheidungseinstellungen, ein unvollständiger Start oder eine letzte erfolgreiche Synchronisierung vor mehr als dem Maximum aus 300 Sekunden und dem 30-Fachen von <code>CROWDSEC_UPDATE_FREQUENCY</code> erzwingt einen vollständigen Snapshot. Synchronisierungsfehler erzeugen höchstens einen Fehlerlogeintrag pro Minute und Cache-Präfix, gefolgt von einer Wiederherstellungsmeldung. Bei vollem Entscheidungscache erhöhen Sie <code>CROWDSEC_CACHE_SIZE</code> für zwei Snapshots und laden BunkerWeb neu. Eine Größenänderung der Entscheidungszone beim Neuladen erzeugt eine leere Zone und startet eine vollständige Synchronisierung; wird nur die Metadatenzone verändert, gehen optionale Metadaten verloren.</p>
+<p>Bei einem direkten Upgrade von einer früheren Version behalten aktive Altbestände ihre ursprüngliche TTL, damit auslaufende alte Worker sie auch bei verkürztem neuem Shutdown-Timeout weiter anwenden. Veraltete Generationen werden vor der Snapshot-Zuweisung freigegeben. Planen Sie neben den zwei Snapshot-Slots zusätzlichen Cache-Platz für aktive Altbestände ein. Scheitert die Zuweisung, bleibt die bisherige Durchsetzung aktiv und die Synchronisierung meldet einen Fehler. Dimensionieren Sie den Entscheidungscache anhand dieser Werte, gemessen mit synthetischen, unterschiedlichen IPv4-Zielen und einstündiger TTL: Planen Sie im Dauerbetrieb (zwei Snapshot-Slots) etwa 1,1 KiB pro Entscheidung ein und während eines Upgrades mit aktiven Altbeständen etwa 1,4 KiB pro Entscheidung, jeweils mit Reserve aufgerundet. 100.000 Entscheidungen benötigen beispielsweise etwa <code>120m</code> im Dauerbetrieb und <code>150m</code> während eines Upgrades. Bei diesen Werten fasst der Standardwert <code>100m</code> etwa 90.000 Entscheidungen im Dauerbetrieb und etwa 70.000 während eines Upgrades. Andere Zieltypen wie IPv6 oder Bereiche können mehr belegen; legen Sie <code>CROWDSEC_CACHE_SIZE</code> daher passend zur Listengröße fest, am besten vor dem Upgrade.</p>
+<p>Eine unterbrochene oder fehlgeschlagene Stream-Anfrage erzwingt beim nächsten Abruf einen vollständigen Snapshot. Ein vollständiger Abgleich erfolgt außerdem nach 3600 Sekunden seit der letzten erfolgreichen vollständigen Synchronisierung. Beim Start verwenden direkte Antworten der lokalen API einen getrennten Cache je wirksamen Zugangsdaten und Richtlinie. Bei einem Fehler pausieren nur die Abfragen dieser Richtlinie für <code>CROWDSEC_UPDATE_FREQUENCY</code>; unbekannte IPs werden während des Ausfalls zugelassen. Bekannte Sperren und Captchas bleiben bis zu ihrem jeweiligen Ablauf wirksam. Weder Startantworten noch wiederhergestellte Entscheidungen überschreiben einen neueren veröffentlichten Snapshot.</p>
+<p>Der Stream-Modus speichert jeden vollständigen Snapshot und jedes geänderte Delta unter <code>/var/lib/bunkerweb/crowdsec-state-*.json</code>, mit absoluten Ablaufzeiten und Dienstzuordnungen in <code>crowdsec-binding-*.json</code>. Diese Dateien überstehen Cache-Übertragungen des Schedulers, Größenänderungen, Richtlinienänderungen (einschließlich API-URL- und Schlüsselwechsel), nginx-Neuladen und Neustarts desselben Containers bei erhaltenem Dateisystem. Bis ein neuer Snapshot veröffentlicht ist, bleiben der bisherige veröffentlichte Snapshot oder die wiederhergestellten Daten wirksam. Die Wiederherstellung erfolgt bei der Initialisierung. Worker teilen eine Sicherungsrevision; ein veralteter Worker liest die Sicherung in einem Timer erneut, bevor er sie bei einem Ausfall verwendet. Auch Schreibzugriffe erfolgen nur in Timern. Kann eine Sicherung nicht gelesen werden oder ist sie beschädigt, auch beim Start eines Workers oder nach einer unterbrochenen Aktualisierung, verweigert die Rückfallprüfung Anfragen, bis sie wieder lesbar ist oder eine erfolgreiche Synchronisierung sie neu schreibt. Die Speicherung erfolgt sofort, aber ein Absturz während eines Schreibvorgangs kann zum Verlust der Sicherung führen, auch bei einem Stromausfall. Eine Sicherung, die zu einer anderen Konfiguration gehört, wird ignoriert; beide Fälle werden mit begrenzten Fehlermeldungen gemeldet. Ein neu erstellter Container mit frischem Dateisystem startet ohne Entscheidungen; unbekannte IPs bleiben bei nicht erreichbarer LAPI zugelassen.</p>
 <h3 id="crowdsec-sperren">CrowdSec-Sperren<a class="headerlink" href="#crowdsec-sperren" title="Permanent link">&para;</a></h3>
 <p>Standardmäßig fragt BunkerWeb bei jeder Anfrage CrowdSec ab. Setzen Sie <code>CROWDSEC_BAN_REFRESH</code> auf eine Dauer, zum Beispiel <code>5m</code>, um einen CrowdSec-Block in eine <strong>CrowdSec-Sperre</strong> umzuwandeln: eine kurze BunkerWeb-Sperre, die erneuert wird, solange die CrowdSec-Entscheidung gilt. Weitere Anfragen der IP werden bei der Sperrprüfung gestoppt, noch vor den anderen Plugins und vor der CrowdSec-Abfrage. Die Sperre erscheint auf der Seite „Sperren“ als eigene Zeile, mit der Aktion <strong>IP untersuchen</strong>. Der Standardwert <code>0</code> behält das bisherige Verhalten bei und erzeugt keine Sperre.</p>
 <ul>
@@ -7177,7 +7325,7 @@ log {
 <span class="nt">services</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bunkerweb</span><span class="p">:</span>
 <span class="w">    </span><span class="c1"># Dies ist der Name, der zur Identifizierung der Instanz im Scheduler verwendet wird</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.17</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.18</span>
 <span class="w">    </span><span class="nt">ports</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">"80:8080/tcp"</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">"443:8443/tcp"</span>
@@ -7194,7 +7342,7 @@ log {
 <span class="w">        </span><span class="nt">syslog-address</span><span class="p">:</span><span class="w"> </span><span class="s">"udp://10.20.30.254:514"</span><span class="w"> </span><span class="c1"># Die IP-Adresse des syslog-Dienstes</span>
 
 <span class="w">  </span><span class="nt">bw-scheduler</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.17</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.18</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">&lt;&lt;</span><span class="p">:</span><span class="w"> </span><span class="nv">*bw-env</span>
 <span class="w">      </span><span class="nt">BUNKERWEB_INSTANCES</span><span class="p">:</span><span class="w"> </span><span class="s">"bunkerweb"</span><span class="w"> </span><span class="c1"># Stellen Sie sicher, dass Sie den richtigen Instanznamen festlegen</span>
@@ -7336,6 +7484,7 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 </div>
 <h3 id="schritt-2-bunkerweb-einstellungen-konfigurieren">Schritt&nbsp;2 – BunkerWeb-Einstellungen konfigurieren<a class="headerlink" href="#schritt-2-bunkerweb-einstellungen-konfigurieren" title="Permanent link">&para;</a></h3>
 <p>Wenden Sie die folgenden Umgebungsvariablen (oder Scheduler-Werte) an, damit die BunkerWeb-Instanz mit der CrowdSec Local API kommunizieren kann. Mindestens <code>USE_CROWDSEC</code>, <code>CROWDSEC_API</code> und <code>CROWDSEC_API_KEY</code> mit einem gültigen per <code>cscli bouncers add</code> erzeugten Schlüssel werden benötigt.</p>
+<p>Verbindungseinstellungen sind <code>multisite</code>: Ein Wert ohne Präfix gilt für alle Dienste, ein Servernamenpräfix überschreibt ihn für diesen Dienst. <code>CROWDSEC_CACHE_SIZE</code> und <code>CROWDSEC_METADATA_CACHE_SIZE</code> sind <code>global</code>; setzen Sie sie ohne Servernamenpräfix.</p>
 <table>
 <thead>
 <tr>
@@ -7395,6 +7544,20 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 <td>multisite</td>
 <td>no</td>
 <td><strong>Ausgeschlossene Orte:</strong> Kommagetrennte Liste von Orten (URIs), die von CrowdSec-Prüfungen ausgeschlossen werden sollen.</td>
+</tr>
+<tr>
+<td><code>CROWDSEC_CACHE_SIZE</code></td>
+<td><code>100m</code></td>
+<td>global</td>
+<td>no</td>
+<td><strong>Größe des Entscheidungscaches:</strong> Gemeinsamer Speicher aller Dienste; zwei Snapshots im Stream-Modus. Positive ganze Megabyte (<code>m</code>/<code>M</code>), mindestens <code>1m</code>. Größenänderungen leeren die Zone; bekannte Entscheidungen werden bis zum Abgleich wiederhergestellt. Unbekannte IPs fragen LAPI ab und werden bei Ausfall zugelassen.</td>
+</tr>
+<tr>
+<td><code>CROWDSEC_METADATA_CACHE_SIZE</code></td>
+<td><code>24m</code></td>
+<td>global</td>
+<td>no</td>
+<td><strong>Größe des Metadatencaches:</strong> Separater gemeinsamer Speicher für optionale Berichtsmetadaten aller Dienste. Positive ganze Anzahl Megabyte (<code>m</code>/<code>M</code>), mindestens <code>1m</code>. Eine Größenänderung beim Neuladen löscht diese Metadaten.</td>
 </tr>
 <tr>
 <td><code>CROWDSEC_CACHE_EXPIRATION</code></td>
@@ -7486,7 +7649,7 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 <p class="admonition-title">Über die Betriebsmodi</p>
 <ul>
 <li>Der <strong>Live-Modus</strong> fragt die CrowdSec-API für jede eingehende Anfrage ab und bietet Echtzeitschutz auf Kosten einer höheren Latenz.</li>
-<li>Der <strong>Stream-Modus</strong> lädt periodisch alle Entscheidungen von der CrowdSec-API herunter und speichert sie lokal im Cache, wodurch die Latenz mit einer leichten Verzögerung bei der Anwendung neuer Entscheidungen reduziert wird.</li>
+<li>Der <strong>Stream-Modus</strong> lädt einen anfänglichen Snapshot und fragt danach neue und gelöschte Entscheidungen ab, um den lokalen Cache aktuell zu halten, wodurch die Latenz mit einer leichten Verzögerung bei der Anwendung neuer Entscheidungen reduziert wird.</li>
 </ul>
 </div>
 <h4 id="endpunkte-pro-dienst">Endpunkte pro Dienst<a class="headerlink" href="#endpunkte-pro-dienst" title="Permanent link">&para;</a></h4>
@@ -7565,7 +7728,7 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 <li>Überwachen Sie auf CrowdSec-Seite <code>cscli metrics show</code> oder die CrowdSec-Konsole, um sicherzugehen, dass BunkerWeb-Entscheidungen wie erwartet erscheinen.</li>
 <li>Öffnen Sie in der BunkerWeb-Oberfläche die CrowdSec-Plugin-Seite, um den Status der Integration zu sehen.</li>
 </ul>
-<h2 id="custom-pages-pro">Custom Pages <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)<a class="headerlink" href="#custom-pages-pro" title="Permanent link">&para;</a></h2>
+<h2 id="custom-pages-pro">Custom Pages <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);' loading="lazy" decoding="async"> (PRO)<a class="headerlink" href="#custom-pages-pro" title="Permanent link">&para;</a></h2>
 <p>Eine ausführlichere Anleitung finden Sie in der Dokumentation zur <a href="../advanced/#custom-pages-pro">erweiterten Nutzung</a>.</p>
 <p>STREAM-Unterstützung <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
 <p>Tweak BunkerWeb error/antibot/default/maintenance pages with custom HTML.</p>
@@ -8003,7 +8166,7 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 <tr>
 <td><code>DNSBL_LIST</code></td>
 <td><code>bl.blocklist.de sbl.spamhaus.org xbl.spamhaus.org</code></td>
-<td>global</td>
+<td>multisite</td>
 <td>nein</td>
 <td>DNSBL-Server: Liste der zu überprüfenden DNSBL-Server-Domains, durch Leerzeichen getrennt.</td>
 </tr>
@@ -8123,7 +8286,7 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 </div>
 </div>
 </div>
-<h2 id="easy-resolve-pro">Easy Resolve <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)<a class="headerlink" href="#easy-resolve-pro" title="Permanent link">&para;</a></h2>
+<h2 id="easy-resolve-pro">Easy Resolve <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);' loading="lazy" decoding="async"> (PRO)<a class="headerlink" href="#easy-resolve-pro" title="Permanent link">&para;</a></h2>
 <p align='center'><iframe style='display: block;' width='560' height='315' data-src='https://www.youtube-nocookie.com/embed/45vX0WJqjxo' title='Easy Resolve' frameborder='0' allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture' allowfullscreen></iframe></p>
 
 <p>Eine ausführlichere Anleitung finden Sie in der Dokumentation zur <a href="../advanced/#easy-resolve-pro">erweiterten Nutzung</a>.</p>
@@ -8214,6 +8377,9 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 </div>
 </div>
 </div>
+<h3 id="fehlerantworten-von-upstream-apis-beibehalten">Fehlerantworten von Upstream-APIs beibehalten<a class="headerlink" href="#fehlerantworten-von-upstream-apis-beibehalten" title="Permanent link">&para;</a></h3>
+<p>Standardmäßig ersetzt BunkerWeb 400-Antworten des Upstreams durch seine eigene Fehlerseite, was JSON-API- oder OIDC-Clients stören kann. Um Upstream-Fehler für einen Dienst durchzureichen, entfernen Sie entweder den Code aus der Liste dieses Dienstes, zum Beispiel <code>app.example.com_INTERCEPTED_ERROR_CODES=401 403 404 405 413 429 500 501 502 503 504</code> (behalten Sie die Codes, die weiterhin abgefangen werden sollen), oder setzen Sie <code>app.example.com_REVERSE_PROXY_INTERCEPT_ERRORS=no</code>, um jeden Upstream-Fehler durchzureichen. Fehler, die BunkerWeb selbst erzeugt (zum Beispiel eine WAF-Sperre), werden weiterhin von BunkerWeb behandelt.</p>
+<p>Um Upstream-Fehler nur für eine Location beizubehalten, legen Sie eine Datei mit dem Inhalt <code>proxy_intercept_errors off;</code> an und tragen Sie sie in der Einstellung <code>REVERSE_PROXY_INCLUDES</code> dieser Location ein (zum Beispiel <code>app.example.com_REVERSE_PROXY_INCLUDES=/opt/keep-errors.conf</code>, mit demselben numerischen Suffix wie <code>REVERSE_PROXY_HOST</code> der Location). Die Datei muss in den BunkerWeb-Containern vorhanden sein. Die übrigen Locations des Dienstes fangen Fehler weiterhin ab.</p>
 <h2 id="greylist">Greylist<a class="headerlink" href="#greylist" title="Permanent link">&para;</a></h2>
 <p>STREAM-Unterstützung <img alt="⚠" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/26a0.svg" title=":warning:" /></p>
 <p>Das Greylist-Plugin bietet einen flexiblen Sicherheitsansatz, der Besuchern den Zugriff ermöglicht, während wesentliche Sicherheitsfunktionen weiterhin aktiv bleiben.</p>
@@ -8264,6 +8430,13 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 <td>multisite</td>
 <td>nein</td>
 <td><strong>Greylist aktivieren:</strong> Auf <code>yes</code> setzen, um Greylisting zu aktivieren.</td>
+</tr>
+<tr>
+<td><code>GREYLIST_URLS_REFRESH_INTERVAL</code></td>
+<td><code>1h</code></td>
+<td>multisite</td>
+<td>nein</td>
+<td><strong>URL-Aktualisierungsintervall:</strong> Mindestalter des Caches vor einem erneuten Download. Akzeptiert Sekunden ohne Einheit oder Zeitsuffixe (<code>ms</code>, <code>s</code>, <code>m</code>, <code>h</code>, <code>d</code>, <code>w</code>, <code>M</code>, <code>y</code>).</td>
 </tr>
 </tbody>
 </table>
@@ -8480,7 +8653,7 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 </div>
 <div class="admonition tip">
 <p class="admonition-title">Regelmäßige Aktualisierungen</p>
-<p>Greylists von URLs werden stündlich automatisch heruntergeladen und aktualisiert, um sicherzustellen, dass Ihr Schutz mit den neuesten vertrauenswürdigen Quellen auf dem neuesten Stand bleibt.</p>
+<p>Der Job läuft stündlich. <code>GREYLIST_URLS_REFRESH_INTERVAL</code> legt das Mindestalter einer zwischengespeicherten URL vor einem erneuten Download fest (Standard: <code>1h</code>). Verwenden Sie <code>24h</code> für Anbieter, die höchstens einen Download pro Tag erlauben, oder <code>0</code> für einen Download bei jedem Joblauf. Bei frischen Caches oder fehlgeschlagenen Downloads bleiben die letzten gültigen Einträge erhalten. Innerhalb dieses Plugins teilen sich Dienste die URL-Caches: Das kürzeste Intervall kann einen Download auslösen. Verwenden Sie daher für eine URL mit Anbieterlimit bei allen Diensten dasselbe Intervall.</p>
 </div>
 <h3 id="beispielkonfigurationen_8">Beispielkonfigurationen<a class="headerlink" href="#beispielkonfigurationen_8" title="Permanent link">&para;</a></h3>
 <div class="tabbed-set tabbed-alternate" data-tabs="21:4"><input checked="checked" id="__tabbed_21_1" name="__tabbed_21" type="radio" /><input id="__tabbed_21_2" name="__tabbed_21" type="radio" /><input id="__tabbed_21_3" name="__tabbed_21" type="radio" /><input id="__tabbed_21_4" name="__tabbed_21" type="radio" /><div class="tabbed-labels"><label for="__tabbed_21_1">Grundlegende Konfiguration</label><label for="__tabbed_21_2">Erweiterte Konfiguration</label><label for="__tabbed_21_3">Verwendung lokaler Dateien</label><label for="__tabbed_21_4">Selektiver API-Zugriff</label></div>
@@ -8519,11 +8692,43 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 </code></pre></div>
 </div>
 <div class="tabbed-block">
-<p>Eine Konfiguration, die den Zugriff auf bestimmte API-Endpunkte erlaubt:</p>
+<p>Eine Konfiguration, die einem Partnernetzwerk Zugriff auf alles gewährt und jedem Client Zugriff auf einen öffentlichen Endpunkt:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">USE_GREYLIST</span><span class="p">:</span><span class="w"> </span><span class="s">"yes"</span>
-<span class="nt">GREYLIST_URI</span><span class="p">:</span><span class="w"> </span><span class="s">"^/api/v1/public/</span><span class="nv"> </span><span class="s">^/api/v1/status"</span>
-<span class="nt">GREYLIST_IP</span><span class="p">:</span><span class="w"> </span><span class="s">"203.0.113.0/24"</span><span class="w">  </span><span class="c1"># Externes Partnernetzwerk</span>
+<span class="nt">GREYLIST_IP</span><span class="p">:</span><span class="w"> </span><span class="s">"203.0.113.0/24"</span>
+<span class="nt">GREYLIST_URI</span><span class="p">:</span><span class="w"> </span><span class="s">"^/api/foo$"</span>
 </code></pre></div>
+<p>Die Greylist-Kriterien sind Alternativen: Eine Anfrage passiert die Greylist, sobald eines davon zutrifft. Hier darf das aufgeführte Netzwerk alle Pfade erreichen, und jeder Client darf den exakten Pfad <code>/api/foo</code> erreichen. Andere Clients werden auf anderen Pfaden abgewiesen. Andere aktivierte Sicherheitsprüfungen gelten weiterhin für jede Anfrage. Verwenden Sie <code>^/api/foo(/|$)</code> für einen öffentlichen Teilbaum. Der Abgleich verwendet den normalisierten Pfad ohne Query-String. Es lassen sich weder unterschiedliche IP-Listen für unterschiedliche Pfade ausdrücken noch verlangen, dass sowohl eine IP als auch ein Pfad zutreffen.</p>
+<table>
+<thead>
+<tr>
+<th>Client</th>
+<th>Pfad</th>
+<th>Ergebnis</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>In <code>203.0.113.0/24</code></td>
+<td><code>/api/foo</code></td>
+<td>Zugelassen</td>
+</tr>
+<tr>
+<td>In <code>203.0.113.0/24</code></td>
+<td>jeder andere Pfad</td>
+<td>Zugelassen</td>
+</tr>
+<tr>
+<td>Außerhalb von <code>203.0.113.0/24</code></td>
+<td><code>/api/foo</code></td>
+<td>Zugelassen</td>
+</tr>
+<tr>
+<td>Außerhalb von <code>203.0.113.0/24</code></td>
+<td>jeder andere Pfad</td>
+<td>Abgewiesen</td>
+</tr>
+</tbody>
+</table>
 </div>
 </div>
 </div>
@@ -8877,7 +9082,7 @@ TrustedMonitor/\d+\.\d+
 </div>
 <div class="admonition warning">
 <p class="admonition-title">Lang laufende Streams und Core-Timeouts</p>
-<p>Lang laufende oder Streaming-RPCs benötigen eventuell höhere generische NGINX-Timeouts als die globalen Standardwerte. Am häufigsten werden <code>CLIENT_BODY_TIMEOUT</code> und <code>CLIENT_HEADER_TIMEOUT</code> in den Einstellungen des General-Plugins angepasst.</p>
+<p>Lang laufende oder Streaming-RPCs benötigen eventuell höhere Werte für <code>CLIENT_BODY_TIMEOUT</code> und <code>CLIENT_HEADER_TIMEOUT</code>. Setzen Sie diese in den Einstellungen des General-Plugins für den gRPC-Dienst; halten Sie den globalen Wert von <code>CLIENT_HEADER_TIMEOUT</code> kurz, um TLS-Handshakes und die Lebensdauer alter Worker nach einem Reload zu begrenzen.</p>
 </div>
 <div class="admonition tip">
 <p class="admonition-title">Mehrere gRPC-Backends</p>
@@ -9348,6 +9553,7 @@ TrustedMonitor/\d+\.\d+
 <li>Wenn Sie die Head-Injection konfiguriert haben, fügt BunkerWeb Ihren benutzerdefinierten HTML-Code direkt vor dem schließenden <code>&lt;/head&gt;</code>-Tag ein.</li>
 <li>Das Einfügen erfolgt automatisch für alle HTML-Seiten, die von Ihrer Website ausgeliefert werden.</li>
 <li>Dies ermöglicht es Ihnen, Skripte, Stile oder andere Elemente hinzuzufügen, ohne den Code Ihrer Anwendung ändern zu müssen.</li>
+<li>Die Antibot-Challenge-Seite und die Fehlerseiten von BunkerWeb bleiben unverändert: Sie werden von BunkerWeb erzeugt, und ihre Content Security Policy würde den eingefügten Code ohnehin blockieren.</li>
 </ol>
 <h3 id="wie-man-es-benutzt_10">Wie man es benutzt<a class="headerlink" href="#wie-man-es-benutzt_10" title="Permanent link">&para;</a></h3>
 <p>Führen Sie die folgenden Schritte aus, um die HTML-Injection-Funktion zu konfigurieren und zu verwenden:</p>
@@ -9385,6 +9591,7 @@ TrustedMonitor/\d+\.\d+
 </tr>
 </tbody>
 </table>
+<p>Die Werte von <code>INJECT_HEAD</code> und <code>INJECT_BODY</code> werden als wörtlicher HTML-Code eingefügt: Anführungszeichen und Backslashes benötigen kein zusätzliches NGINX-Escaping. Wenn Sie zuvor <code>\'</code> von Hand als Umgehungslösung eingefügt haben, entfernen Sie den Backslash. Behalten Sie das für Ihr Konfigurationsformat (etwa YAML) erforderliche Escaping bei; die Expansion von NGINX-Variablen (<code>$variable</code>) bleibt unverändert.</p>
 <div class="admonition tip">
 <p class="admonition-title">Bewährte Praktiken</p>
 <ul>
@@ -9432,7 +9639,7 @@ TrustedMonitor/\d+\.\d+
 </div>
 </div>
 </div>
-<h2 id="ldap-sso-pro">LDAP SSO <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)<a class="headerlink" href="#ldap-sso-pro" title="Permanent link">&para;</a></h2>
+<h2 id="ldap-sso-pro">LDAP SSO <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);' loading="lazy" decoding="async"> (PRO)<a class="headerlink" href="#ldap-sso-pro" title="Permanent link">&para;</a></h2>
 <p>Eine ausführlichere Anleitung finden Sie in der Dokumentation zur <a href="../advanced/#ldap-sso-pro">erweiterten Nutzung</a>.</p>
 <p>STREAM-Unterstützung <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
 <p>LDAP-based single sign-on plugin with session-backed authentication.</p>
@@ -9453,6 +9660,20 @@ TrustedMonitor/\d+\.\d+
 <td>multisite</td>
 <td>nein</td>
 <td>Enable or disable LDAP SSO authentication.</td>
+</tr>
+<tr>
+<td><code>LDAP_IGNORE_URI</code></td>
+<td></td>
+<td>multisite</td>
+<td>nein</td>
+<td>List of PCRE regex patterns (separated by spaces) for URIs excluded from LDAP authentication. Patterns are matched against the normalized path, alone or followed by ? and the query string. Takes precedence over LDAP_INCLUDE_URI.</td>
+</tr>
+<tr>
+<td><code>LDAP_INCLUDE_URI</code></td>
+<td></td>
+<td>multisite</td>
+<td>nein</td>
+<td>List of PCRE regex patterns (separated by spaces) for the only URIs that require LDAP authentication; when empty, every URI does. Patterns are matched against the normalized path, alone or followed by ? and the query string. LDAP_IGNORE_URI takes precedence. Patterns are unanchored: ^/search also matches /searchengine. Example: LDAP_INCLUDE_URI=^/search(/|$) ^/login(/|$).</td>
 </tr>
 <tr>
 <td><code>LDAP_HOST</code></td>
@@ -10134,6 +10355,13 @@ TrustedMonitor/\d+\.\d+
 <td><a href="https://github.com/ctrlaltcoop/certbot-dns-hetzner/blob/main/README.md">Dokumentation</a></td>
 </tr>
 <tr>
+<td><code>hosttech</code></td>
+<td>Hosttech</td>
+<td><code>api_token</code></td>
+<td>Standard-Propagationszeit: 600 Sekunden; bei Bedarf <code>LETS_ENCRYPT_DNS_PROPAGATION</code> erhöhen.</td>
+<td><a href="https://github.com/bunkerity/certbot-dns-hosttech/blob/main/README.md">Dokumentation</a></td>
+</tr>
+<tr>
 <td><code>infomaniak</code></td>
 <td>Infomaniak</td>
 <td><code>token</code></td>
@@ -10374,6 +10602,10 @@ TrustedMonitor/\d+\.\d+
 </ul>
 <p>Zum Beispiel bedeutet <code>5r/m</code>, dass 5 Anfragen pro Minute von jeder IP-Adresse erlaubt sind.</p>
 </div>
+<div class="admonition info">
+<p class="admonition-title">Zählgenauigkeit über Worker hinweg</p>
+<p>Ohne Redis ist die Zählung über Worker hinweg bis zu 100 Anfragen pro Zeitfenster exakt, für <code>LIMIT_REQ_RATE</code> und für <code>LIMIT_REQ_GLOBAL_RATE</code>: gleichzeitige Anfragen können das Limit nicht umgehen. Oberhalb von 100 Anfragen pro Zeitfenster können gleichzeitige Anfragen das Limit geringfügig überschreiten, da die Serialisierung des Zählers einer langen Anfragehistorie bei jeder Anfrage Durchsatz kosten würde. Mit Redis ist die Zählung immer exakt.</p>
+</div>
 </div>
 <div class="tabbed-block">
 <table>
@@ -10432,34 +10664,35 @@ TrustedMonitor/\d+\.\d+
 <td><code>10</code></td>
 <td>multisite</td>
 <td>nein</td>
-<td><strong>HTTP/1.X-Verbindungen:</strong> Maximale Anzahl gleichzeitiger HTTP/1.X-Verbindungen pro IP-Adresse.</td>
+<td><strong>HTTP/1.X-Verbindungen:</strong> Maximale Anzahl gleichzeitiger HTTP/1.X-Verbindungen pro IP-Adresse. Bereich: 1 bis 65535.</td>
 </tr>
 <tr>
 <td><code>LIMIT_CONN_MAX_HTTP2</code></td>
 <td><code>100</code></td>
 <td>multisite</td>
 <td>nein</td>
-<td><strong>HTTP/2-Streams:</strong> Maximale Anzahl gleichzeitiger HTTP/2-Streams pro IP-Adresse.</td>
+<td><strong>HTTP/2-Streams:</strong> Maximale Anzahl gleichzeitiger HTTP/2-Streams pro IP-Adresse. Bereich: 1 bis 65535.</td>
 </tr>
 <tr>
 <td><code>LIMIT_CONN_MAX_HTTP3</code></td>
 <td><code>100</code></td>
 <td>multisite</td>
 <td>nein</td>
-<td><strong>HTTP/3-Streams:</strong> Maximale Anzahl gleichzeitiger HTTP/3-Streams pro IP-Adresse.</td>
+<td><strong>HTTP/3-Streams:</strong> Maximale Anzahl gleichzeitiger HTTP/3-Streams pro IP-Adresse. Bereich: 1 bis 65535.</td>
 </tr>
 <tr>
 <td><code>LIMIT_CONN_MAX_STREAM</code></td>
 <td><code>10</code></td>
 <td>multisite</td>
 <td>nein</td>
-<td><strong>Stream-Verbindungen:</strong> Maximale Anzahl gleichzeitiger Stream-Verbindungen pro IP-Adresse.</td>
+<td><strong>Stream-Verbindungen:</strong> Maximale Anzahl gleichzeitiger Stream-Verbindungen pro IP-Adresse. Bereich: 1 bis 65535.</td>
 </tr>
 </tbody>
 </table>
 </div>
 </div>
 </div>
+<p>Wenn <code>SECURITY_MODE</code> auf <code>detect</code> steht, werden die Verbindungsgrenzen ausgewertet und protokolliert (<code>limiting connections, dry run</code>), aber nicht durchgesetzt.</p>
 <div class="admonition info">
 <p class="admonition-title">Verbindungs- vs. Anforderungsbegrenzung</p>
 <ul>
@@ -10555,7 +10788,7 @@ TrustedMonitor/\d+\.\d+
 </div>
 </div>
 </div>
-<h2 id="load-balancer-pro">Load Balancer <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)<a class="headerlink" href="#load-balancer-pro" title="Permanent link">&para;</a></h2>
+<h2 id="load-balancer-pro">Load Balancer <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);' loading="lazy" decoding="async"> (PRO)<a class="headerlink" href="#load-balancer-pro" title="Permanent link">&para;</a></h2>
 <p align='center'><iframe style='display: block;' width='560' height='315' data-src='https://www.youtube-nocookie.com/embed/cOVp0rAt5nw?si=iVhDio8o8S4F_uag' title='Load Balancer' frameborder='0' allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture' allowfullscreen></iframe></p>
 
 <p>Eine ausführlichere Anleitung finden Sie in der Dokumentation zur <a href="../advanced/#load-balancer-pro">erweiterten Nutzung</a>.</p>
@@ -10712,9 +10945,16 @@ TrustedMonitor/\d+\.\d+
 <td>ja</td>
 <td>Host header for healthchecks (useful for HTTPS).</td>
 </tr>
+<tr>
+<td><code>LOADBALANCER_HEALTHCHECK_PORT</code></td>
+<td></td>
+<td>global</td>
+<td>ja</td>
+<td>TCP port probed on every peer of the group. 1-65535 as a plain decimal, with no sign, leading zero, spaces or trailing newline; an invalid value is ignored with a warning. Empty uses each peer's application port. In a Kubernetes ConfigMap quote the value ("8081") or use a |- block scalar.</td>
+</tr>
 </tbody>
 </table>
-<h2 id="maintenance-pro">Maintenance <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)<a class="headerlink" href="#maintenance-pro" title="Permanent link">&para;</a></h2>
+<h2 id="maintenance-pro">Maintenance <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);' loading="lazy" decoding="async"> (PRO)<a class="headerlink" href="#maintenance-pro" title="Permanent link">&para;</a></h2>
 <p>Eine ausführlichere Anleitung finden Sie in der Dokumentation zur <a href="../advanced/#maintenance-pro">erweiterten Nutzung</a>.</p>
 <p>STREAM-Unterstützung <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
 <p>Serve a maintenance page instead of forwarding requests to the application.</p>
@@ -10945,7 +11185,7 @@ TrustedMonitor/\d+\.\d+
 </div>
 </div>
 </div>
-<h2 id="migration-pro">Migration <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)<a class="headerlink" href="#migration-pro" title="Permanent link">&para;</a></h2>
+<h2 id="migration-pro">Migration <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);' loading="lazy" decoding="async"> (PRO)<a class="headerlink" href="#migration-pro" title="Permanent link">&para;</a></h2>
 <p>Eine ausführlichere Anleitung finden Sie in der Dokumentation zur <a href="../advanced/#migration-pro">erweiterten Nutzung</a>.</p>
 <p>STREAM-Unterstützung <img alt="✅" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" title=":white_check_mark:" /></p>
 <p>Migration of BunkerWeb configuration between instances made easy via the web UI</p>
@@ -11560,6 +11800,13 @@ TrustedMonitor/\d+\.\d+
 <td>Schreibmodus: <code>Serial</code> (Standard) oder <code>Concurrent</code>.</td>
 </tr>
 <tr>
+<td><code>MODSECURITY_SEC_AUDIT_LOG_FORMAT</code></td>
+<td><code>Native</code></td>
+<td>multisite</td>
+<td>nein</td>
+<td>Format des Audit-Logs: <code>Native</code> (Standard) oder <code>JSON</code> (ein JSON-Objekt pro Eintrag). Im globalen CRS-Modus global setzen.</td>
+</tr>
+<tr>
 <td><code>MODSECURITY_SEC_AUDIT_LOG_STORAGE_DIR</code></td>
 <td></td>
 <td>multisite</td>
@@ -11620,11 +11867,25 @@ TrustedMonitor/\d+\.\d+
 <p>ModSecurity puffert den vollständigen Anforderungskörper im Arbeitsspeicher und kann ihn bei Uploads mit mehreren GB nicht begrenzen, was zu einem OOM des Workers führen kann. Wenn — <strong>und nur wenn</strong> — eine Reverse-Proxy-URL <em>ausschließlich</em> für Datei-Uploads verwendet wird (z. B. ein dedizierter <code>/upload</code>-Endpunkt), setzen Sie <code>REVERSE_PROXY_MODSECURITY_N: "no"</code> für diese URL, um <code>modsecurity off;</code> in ihrem <code>location</code>-Block auszugeben. Deaktivieren Sie dies nicht für gemischt genutzte URLs: Sie würden die WAF-Abdeckung für alles verlieren, was von dieser Location bereitgestellt wird.</p>
 <p>Um Uploads nach dem Umgehen von ModSecurity weiterhin zu schützen, kombinieren Sie dies mit einem Datei-Scan-Plugin wie <a href="https://github.com/bunkerity/bunkerweb-plugins/tree/main/clamav">ClamAV</a> oder <a href="https://github.com/bunkerity/bunkerweb-plugins/tree/main/virustotal">VirusTotal</a> — sie prüfen die hochgeladene Datei selbst statt des rohen Anforderungskörpers.</p>
 </div>
+<div class="admonition warning">
+<p class="admonition-title">Antwortkörper-Sperren und komprimierte Antworten</p>
+<p>Greift eine Sperrregel für den Antwortkörper erst nach dem Senden der Antwortheader, kann der Client den ursprünglichen Status (etwa <code>200</code>) und anschließend einen Fehler wegen eines unvollständigen Antwortkörpers oder einer unvollständigen Chunked-Übertragung erhalten, statt einer vollständigen <code>403</code>-Antwort. Dies kann bei gzip-, Brotli- oder zstd-Komprimierung durch BunkerWeb auftreten. Ab <code>1.6.18</code> verhält sich Brotli wie bisher gzip. Prüfen Sie die ModSecurity-Audit- und Fehlerprotokolle auf die ausgelöste Regel und behandeln Sie bestätigte Falsch-Positive mit eng begrenzten Ausschlüssen.</p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Vom Upstream komprimierte Antwortkörper</p>
+<p>CRS v4 prüft keine Antwortkörper, die bereits vom Upstream komprimiert wurden (<code>gzip</code>, <code>br</code> oder <code>zstd</code>). BunkerWeb dekomprimiert diese Körper nicht zur Prüfung. Wenn eine Prüfung erforderlich ist, konfigurieren Sie den Upstream für unkomprimierte Inhalte. Entfernen Sie bei einem Upstream, der diesen Header berücksichtigt, <code>Accept-Encoding</code> aus der weitergeleiteten Anfrage, ausschließlich für den betroffenen Dienst und die betroffene Location:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">REVERSE_PROXY_HOST_1</span><span class="p">:</span><span class="w"> </span><span class="s">"http://app:8080"</span>
+<span class="nt">REVERSE_PROXY_URL_1</span><span class="p">:</span><span class="w"> </span><span class="s">"/reports/"</span>
+<span class="nt">REVERSE_PROXY_HEADERS_1</span><span class="p">:</span><span class="w"> </span><span class="s">'Accept-Encoding</span><span class="nv"> </span><span class="s">""'</span>
+</code></pre></div>
+<p>Ersetzen Sie Host und Pfad durch Ihre Werte und passen Sie das Suffix an die gewünschte Reverse-Proxy-Location an. Hat diese Location bereits Einträge in <code>REVERSE_PROXY_HEADERS_1</code>, behalten Sie diese bei und hängen Sie <code>;Accept-Encoding ""</code> an. Verwenden Sie diese Einstellung statt eines <code>proxy_set_header</code> auf Server-Ebene, das von den generierten Location-Headern überschrieben wird.</p>
+<p>Prüfen Sie, ob der Upstream tatsächlich unkomprimiert antwortet. Komprimiert er weiterhin, deaktivieren Sie die Komprimierung für diese Route auf dem Upstream. Dies erhöht die Bandbreitennutzung zwischen Upstream und BunkerWeb. BunkerWeb kann die Antwort nach der Prüfung weiterhin für den Client komprimieren; die konfigurierten MIME-Typen und Größenlimits für die Antwortkörperprüfung gelten weiterhin.</p>
+</div>
 <h3 id="verfugbare-crs-versionen">Verfügbare CRS-Versionen<a class="headerlink" href="#verfugbare-crs-versionen" title="Permanent link">&para;</a></h3>
 <p>Wählen Sie eine CRS-Version, die Ihren Sicherheitsanforderungen am besten entspricht:</p>
 <ul>
 <li><strong><code>3</code></strong>: Stabile <a href="https://github.com/coreruleset/coreruleset/releases/tag/v3.3.10">v3.3.10</a>.</li>
-<li><strong><code>4</code></strong>: Stabile <a href="https://github.com/coreruleset/coreruleset/releases/tag/v4.29.0">v4.29.0</a> (<strong>Standard</strong>).</li>
+<li><strong><code>4</code></strong>: Stabile <a href="https://github.com/coreruleset/coreruleset/releases/tag/v4.30.0">v4.30.0</a> (<strong>Standard</strong>).</li>
 </ul>
 <div class="admonition warning">
 <p class="admonition-title">Nightly-Build veraltet</p>
@@ -11665,11 +11926,11 @@ TrustedMonitor/\d+\.\d+
 <li>Die Aktion wird in <strong>Phase 1</strong> (früh im Anfrage-Lebenszyklus) ausgeführt.</li>
 <li>Sie aktiviert WordPress-spezifische CRS-Ausschlüsse, indem sie die Variable <code>tx.crs_exclusions_wordpress</code> setzt.</li>
 </ul>
-<h4 id="aktualisieren-von-crs-regeln-mit-modsec">Aktualisieren von CRS-Regeln mit <code>modsec</code><a class="headerlink" href="#aktualisieren-von-crs-regeln-mit-modsec" title="Permanent link">&para;</a></h4>
-<p>Um die geladenen CRS-Regeln zu optimieren, können Sie eine benutzerdefinierte Konfiguration vom Typ <code>modsec</code> verwenden. Sie können beispielsweise bestimmte Regeln oder Tags für bestimmte Anfragepfade entfernen:</p>
-<div class="highlight"><pre><span></span><code>SecRule REQUEST_FILENAME "/wp-admin/admin-ajax.php" "id:1,ctl:ruleRemoveByTag=attack-xss,ctl:ruleRemoveByTag=attack-rce"
-SecRule REQUEST_FILENAME "/wp-admin/options.php" "id:2,ctl:ruleRemoveByTag=attack-xss"
-SecRule REQUEST_FILENAME "^/wp-json/yoast" "id:3,ctl:ruleRemoveById=930120"
+<h4 id="aktualisieren-von-crs-regeln-mit-modsec-crs">Aktualisieren von CRS-Regeln mit <code>modsec-crs</code><a class="headerlink" href="#aktualisieren-von-crs-regeln-mit-modsec-crs" title="Permanent link">&para;</a></h4>
+<p>Um die geladenen CRS-Regeln zu optimieren, können Sie eine benutzerdefinierte Konfiguration vom Typ <code>modsec-crs</code> verwenden. Sie können beispielsweise bestimmte Regeln oder Tags für bestimmte Anfragepfade entfernen. Eine <code>ctl:ruleRemove*</code>-Aktion wirkt nur auf Regeln, die nach ihr ausgeführt werden. Deshalb laufen die folgenden Regeln in <code>phase:1</code>, und die Konfiguration wird vor dem CRS geladen:</p>
+<div class="highlight"><pre><span></span><code>SecRule REQUEST_FILENAME "/wp-admin/admin-ajax.php" "id:1,phase:1,pass,t:none,nolog,ctl:ruleRemoveByTag=attack-xss,ctl:ruleRemoveByTag=attack-rce"
+SecRule REQUEST_FILENAME "/wp-admin/options.php" "id:2,phase:1,pass,t:none,nolog,ctl:ruleRemoveByTag=attack-xss"
+SecRule REQUEST_FILENAME "^/wp-json/yoast" "id:3,phase:1,pass,t:none,nolog,ctl:ruleRemoveById=930120"
 </code></pre></div>
 <p>In diesem Beispiel:</p>
 <ul>
@@ -11677,6 +11938,7 @@ SecRule REQUEST_FILENAME "^/wp-json/yoast" "id:3,ctl:ruleRemoveById=930120"
 <li><strong>Regel 2</strong>: Entfernt Regeln mit dem Tag <code>attack-xss</code> für Anfragen an <code>/wp-admin/options.php</code>.</li>
 <li><strong>Regel 3</strong>: Entfernt eine bestimmte Regel (ID <code>930120</code>) für Anfragen, die auf <code>/wp-json/yoast</code> passen.</li>
 </ul>
+<p>Die Direktiven <code>SecRuleRemoveById</code>, <code>SecRuleRemoveByTag</code>, <code>SecRuleUpdateTargetById</code> und <code>SecRuleUpdateTargetByTag</code>, die beim Laden der Konfiguration wirken, gehören in eine benutzerdefinierte Konfiguration vom Typ <code>modsec</code> (nach dem CRS).</p>
 <div class="admonition info">
 <p class="admonition-title">Reihenfolge der Ausführung</p>
 <p>Die Ausführungsreihenfolge für ModSecurity in BunkerWeb ist wie folgt, um eine klare und logische Abfolge der Regelanwendung zu gewährleisten:</p>
@@ -11794,7 +12056,7 @@ SecRule REQUEST_FILENAME "^/wp-json/yoast" "id:3,ctl:ruleRemoveById=930120"
 <p>Setzen Sie <code>MODSECURITY_SEC_AUDIT_LOG_TYPE=Concurrent</code> und <code>MODSECURITY_SEC_AUDIT_LOG_STORAGE_DIR=/var/log/bunkerweb/audit</code>. Erstellen Sie das Verzeichnis vorher auf jeder BunkerWeb-Instanz mit Schreib- und Suchrechten für den nginx-Worker. Verwenden Sie für aufzubewahrende Daten ein persistentes Volume. BunkerWeb lehnt ungültige Konfigurationen vor der Anwendung ab und erstellt das Verzeichnis nicht. Im globalen CRS-Modus (<code>USE_MODSECURITY_GLOBAL_CRS=yes</code>) müssen beide Einstellungen global gesetzt werden; Dienstüberschreibungen wählen keinen eigenen Schreibmodus.</p>
 <p><code>MODSECURITY_SEC_AUDIT_LOG</code> bleibt eine normale, sperrbare <code>.log</code>-Datei: Bei <code>Serial</code> enthält sie vollständige Datensätze, bei <code>Concurrent</code> einen Index zu den Transaktionsdateien. Indexpfad und Rotationsregeln bleiben unverändert. Der Betreiber verwaltet Speicherplatz, Zugriffsrechte und die rekursive Aufbewahrung der datierten Unterverzeichnisse. Die Rotation des Index entfernt keine Transaktionsdateien. Prüfen Sie vor dem Wechsel die Kompatibilität der Protokollleser, die Serial-Datensätze erwarten.</p>
 <p>Concurrent ändert die Speicherung der Einträge; es führt keine Stichprobenauswahl von Anfragen durch und reduziert nicht die mit <code>MODSECURITY_SEC_AUDIT_LOG_PARTS</code> ausgewählten Auditdaten. Planen Sie den Speicher anhand der Anfragerate, der ausgewählten Teile und der Aufbewahrungsdauer. Messen Sie die Eintragsgrößen mit repräsentativem Datenverkehr, statt einen festen Aufwand pro blockierter Anfrage anzunehmen.</p>
-<h2 id="monitoring-pro">Monitoring <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)<a class="headerlink" href="#monitoring-pro" title="Permanent link">&para;</a></h2>
+<h2 id="monitoring-pro">Monitoring <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);' loading="lazy" decoding="async"> (PRO)<a class="headerlink" href="#monitoring-pro" title="Permanent link">&para;</a></h2>
 <p>STREAM-Unterstützung <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
 <p>BunkerWeb monitoring pro system. This plugin is a prerequisite for some other plugins.</p>
 <table>
@@ -12055,7 +12317,7 @@ SecRule REQUEST_FILENAME "^/wp-json/yoast" "id:3,ctl:ruleRemoveById=930120"
 </div>
 </div>
 </div>
-<h2 id="openapi-validator-pro">OpenAPI Validator <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)<a class="headerlink" href="#openapi-validator-pro" title="Permanent link">&para;</a></h2>
+<h2 id="openapi-validator-pro">OpenAPI Validator <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);' loading="lazy" decoding="async"> (PRO)<a class="headerlink" href="#openapi-validator-pro" title="Permanent link">&para;</a></h2>
 <p align='center'><iframe style='display: block;' width='560' height='315' data-src='https://www.youtube-nocookie.com/embed/3oZOO1XdSlc' title='OpenAPI Validator' frameborder='0' allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture' allowfullscreen></iframe></p>
 
 <p>Eine ausführlichere Anleitung finden Sie in der Dokumentation zur <a href="../advanced/#openapi-validator-pro">erweiterten Nutzung</a>.</p>
@@ -12098,7 +12360,7 @@ SecRule REQUEST_FILENAME "^/wp-json/yoast" "id:3,ctl:ruleRemoveById=930120"
 <td><code>no</code></td>
 <td>multisite</td>
 <td>nein</td>
-<td>Allow requests to paths not listed in the specification (otherwise they are denied).</td>
+<td>Allow requests to paths not listed in the specification (otherwise they are denied). With no, every request is also denied while the specification cannot be loaded.</td>
 </tr>
 <tr>
 <td><code>OPENAPI_ALLOW_INSECURE_URL</code></td>
@@ -12130,7 +12392,7 @@ SecRule REQUEST_FILENAME "^/wp-json/yoast" "id:3,ctl:ruleRemoveById=930120"
 </tr>
 </tbody>
 </table>
-<h2 id="openid-connect-pro">OpenID Connect <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)<a class="headerlink" href="#openid-connect-pro" title="Permanent link">&para;</a></h2>
+<h2 id="openid-connect-pro">OpenID Connect <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);' loading="lazy" decoding="async"> (PRO)<a class="headerlink" href="#openid-connect-pro" title="Permanent link">&para;</a></h2>
 <p align='center'><iframe style='display: block;' width='560' height='315' data-src='https://www.youtube-nocookie.com/embed/0e4lcXTIIfs' title='OpenID Connect' frameborder='0' allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture' allowfullscreen></iframe></p>
 
 <p>Eine ausführlichere Anleitung finden Sie in der Dokumentation zur <a href="../advanced/#openid-connect-pro">erweiterten Nutzung</a>.</p>
@@ -12153,6 +12415,20 @@ SecRule REQUEST_FILENAME "^/wp-json/yoast" "id:3,ctl:ruleRemoveById=930120"
 <td>multisite</td>
 <td>nein</td>
 <td>Enable or disable OpenID Connect authentication.</td>
+</tr>
+<tr>
+<td><code>OPENIDC_IGNORE_URI</code></td>
+<td></td>
+<td>multisite</td>
+<td>nein</td>
+<td>List of PCRE regex patterns (separated by spaces) for URIs excluded from OpenID Connect authentication. Patterns are matched against the normalized path, alone or followed by ? and the query string. Takes precedence over OPENIDC_INCLUDE_URI.</td>
+</tr>
+<tr>
+<td><code>OPENIDC_INCLUDE_URI</code></td>
+<td></td>
+<td>multisite</td>
+<td>nein</td>
+<td>List of PCRE regex patterns (separated by spaces) for the only URIs that require OpenID Connect authentication; when empty, every URI does. Patterns are matched against the normalized path, alone or followed by ? and the query string. OPENIDC_IGNORE_URI takes precedence. Patterns are unanchored: ^/search also matches /searchengine. Example: OPENIDC_INCLUDE_URI=^/search(/|$) ^/login(/|$).</td>
 </tr>
 <tr>
 <td><code>OPENIDC_DISCOVERY</code></td>
@@ -12278,7 +12554,7 @@ SecRule REQUEST_FILENAME "^/wp-json/yoast" "id:3,ctl:ruleRemoveById=930120"
 <td><code>no</code></td>
 <td>multisite</td>
 <td>nein</td>
-<td>Accept tokens signed with unsupported algorithms (not recommended).</td>
+<td>Setting yes disables id_token signature verification for algorithms the plugin cannot verify (ES<em>, PS</em>). Use only with a trusted token endpoint over TLS.</td>
 </tr>
 <tr>
 <td><code>OPENIDC_LOGOUT_PATH</code></td>
@@ -12617,7 +12893,7 @@ SecRule REQUEST_FILENAME "^/wp-json/yoast" "id:3,ctl:ruleRemoveById=930120"
 <h3 id="wie-man-es-benutzt_15">Wie man es benutzt<a class="headerlink" href="#wie-man-es-benutzt_15" title="Permanent link">&para;</a></h3>
 <p>Führen Sie die folgenden Schritte aus, um die Pro-Funktionen zu konfigurieren und zu verwenden:</p>
 <ol>
-<li><strong>Lizenzschlüssel erhalten:</strong> Kaufen Sie eine Pro-Lizenz im <a href="https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&amp;utm_source=doc">BunkerWeb Panel</a>.</li>
+<li><strong>Lizenzschlüssel erhalten:</strong> Starten Sie eine kostenlose 30-tägige Testversion oder kaufen Sie eine Pro-Lizenz im <a href="https://panel.bunkerweb.io/store/bunkerweb-pro?language=german&amp;utm_campaign=self&amp;utm_source=doc">BunkerWeb Panel</a> (<a href="../#pro-version">Schritt-für-Schritt-Anleitung</a>).</li>
 <li><strong>Lizenzschlüssel konfigurieren:</strong> Verwenden Sie die Einstellung <code>PRO_LICENSE_KEY</code>, um Ihre Lizenz zu konfigurieren.</li>
 <li><strong>Lassen Sie BunkerWeb den Rest erledigen:</strong> Nach der Konfiguration mit einer gültigen Lizenz werden Pro-Plugins automatisch heruntergeladen und aktiviert.</li>
 <li><strong>Überwachen Sie Ihren Pro-Status:</strong> Überprüfen Sie die Zustandsindikatoren in der <a href="../web-ui/">Web-Benutzeroberfläche</a>, um Ihren Pro-Abonnementstatus zu bestätigen.</li>
@@ -12666,8 +12942,8 @@ SecRule REQUEST_FILENAME "^/wp-json/yoast" "id:3,ctl:ruleRemoveById=930120"
 <li><strong>BunkerWeb PRO Standard:</strong> Voller Zugriff auf die Pro-Funktionen ohne technischen Support.</li>
 <li><strong>BunkerWeb PRO Enterprise:</strong> Voller Zugriff auf die Pro-Funktionen mit dediziertem technischen Support.</li>
 </ul>
-<p>Sie können die Pro-Funktionen 30 Tage lang kostenlos testen. Starten Sie Ihre Testversion im <a href="https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&amp;utm_source=doc">BunkerWeb Panel</a> und erfahren Sie mehr über flexible Preisoptionen basierend auf der Anzahl der von BunkerWeb PRO geschützten Dienste.</p>
-<h2 id="prometheus-exporter-pro">Prometheus exporter <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)<a class="headerlink" href="#prometheus-exporter-pro" title="Permanent link">&para;</a></h2>
+<p>Sie können die Pro-Funktionen 30 Tage lang kostenlos testen. Starten Sie Ihre Testversion im <a href="https://panel.bunkerweb.io/store/bunkerweb-pro?language=german&amp;utm_campaign=self&amp;utm_source=doc">BunkerWeb Panel</a> und erfahren Sie mehr über flexible Preisoptionen basierend auf der Anzahl der von BunkerWeb PRO geschützten Dienste: Bestellen Sie einen Tarif und lassen Sie beim Bestellabschluss <strong>Free 30 Days Trial</strong> als Zahlungsmethode ausgewählt (<a href="../#pro-version">Schritt-für-Schritt-Anleitung</a>).</p>
+<h2 id="prometheus-exporter-pro">Prometheus exporter <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);' loading="lazy" decoding="async"> (PRO)<a class="headerlink" href="#prometheus-exporter-pro" title="Permanent link">&para;</a></h2>
 <p>STREAM-Unterstützung <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
 <p>Prometheus exporter for BunkerWeb internal metrics.</p>
 <table>
@@ -12693,7 +12969,7 @@ SecRule REQUEST_FILENAME "^/wp-json/yoast" "id:3,ctl:ruleRemoveById=930120"
 <td><code>0.0.0.0</code></td>
 <td>global</td>
 <td>nein</td>
-<td>Listening IP of the Prometheus exporter.</td>
+<td>Listening IP of the Prometheus exporter: *, a hostname or alias, an IPv4 address, or a bracketed IPv6 address such as [::1].</td>
 </tr>
 <tr>
 <td><code>PROMETHEUS_EXPORTER_PORT</code></td>
@@ -12715,6 +12991,48 @@ SecRule REQUEST_FILENAME "^/wp-json/yoast" "id:3,ctl:ruleRemoveById=930120"
 <td>global</td>
 <td>nein</td>
 <td>List of IP/networks allowed to contact the Prometheus exporter endpoint.</td>
+</tr>
+<tr>
+<td><code>PROMETHEUS_EXPORTER_TOKEN</code></td>
+<td></td>
+<td>global</td>
+<td>nein</td>
+<td>Bearer token required in the Authorization header to read the Prometheus exporter. Leave empty to disable the check. Use at least 16 characters and enable TLS so the token does not travel in clear.</td>
+</tr>
+<tr>
+<td><code>PROMETHEUS_EXPORTER_SSL</code></td>
+<td><code>no</code></td>
+<td>global</td>
+<td>nein</td>
+<td>Serve the Prometheus exporter over TLS with the certificate set below. The exporter never falls back to plain HTTP.</td>
+</tr>
+<tr>
+<td><code>PROMETHEUS_EXPORTER_SSL_CERT</code></td>
+<td></td>
+<td>global</td>
+<td>nein</td>
+<td>Full path of the exporter certificate or bundle file (must be readable by the scheduler). Used together with the key path, it wins over the data settings.</td>
+</tr>
+<tr>
+<td><code>PROMETHEUS_EXPORTER_SSL_KEY</code></td>
+<td></td>
+<td>global</td>
+<td>nein</td>
+<td>Full path of the exporter private key file (must be readable by the scheduler).</td>
+</tr>
+<tr>
+<td><code>PROMETHEUS_EXPORTER_SSL_CERT_DATA</code></td>
+<td></td>
+<td>global</td>
+<td>nein</td>
+<td>Exporter certificate data encoded in base64 or plaintext PEM format.</td>
+</tr>
+<tr>
+<td><code>PROMETHEUS_EXPORTER_SSL_KEY_DATA</code></td>
+<td></td>
+<td>global</td>
+<td>nein</td>
+<td>Exporter private key data encoded in base64 or plaintext PEM format.</td>
 </tr>
 </tbody>
 </table>
@@ -13282,7 +13600,7 @@ gesetzt, hat dies <strong>keine Wirkung</strong>.</p>
 <li><a href="https://redis.io/topics/sentinel">Redis-Hochverfügbarkeit</a></li>
 <li><a href="https://redis.io/topics/persistence">Redis-Persistenz</a></li>
 </ul>
-<h2 id="reporting-pro">Reporting <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)<a class="headerlink" href="#reporting-pro" title="Permanent link">&para;</a></h2>
+<h2 id="reporting-pro">Reporting <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);' loading="lazy" decoding="async"> (PRO)<a class="headerlink" href="#reporting-pro" title="Permanent link">&para;</a></h2>
 <p>STREAM-Unterstützung <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
 <p>Regular reporting of important data from BunkerWeb (global, attacks, bans, requests, reasons, AS...). Monitoring pro plugin needed to work.</p>
 <table>
@@ -13315,7 +13633,7 @@ gesetzt, hat dies <strong>keine Wirkung</strong>.</p>
 <td><code>weekly</code></td>
 <td>global</td>
 <td>nein</td>
-<td>The frequency at which reports are sent.</td>
+<td>The frequency at which reports are sent: daily, weekly or monthly (every four weeks).</td>
 </tr>
 <tr>
 <td><code>REPORTING_TOP_N</code></td>
@@ -13378,7 +13696,14 @@ gesetzt, hat dies <strong>keine Wirkung</strong>.</p>
 <td><code>SSL</code></td>
 <td>global</td>
 <td>nein</td>
-<td>Determine whether or not to use a secure connection for SMTP.</td>
+<td>SMTP connection security: no (plain SMTP), SSL (implicit TLS, usually port 465) or TLS (STARTTLS, usually port 587). Values are case-sensitive. Set REPORTING_SMTP_PORT to match.</td>
+</tr>
+<tr>
+<td><code>REPORTING_SMTP_VERIFY_CERTIFICATE</code></td>
+<td><code>no</code></td>
+<td>global</td>
+<td>nein</td>
+<td>Verify the certificate and hostname of the SMTP relay against the system CA store when REPORTING_SMTP_SSL is SSL or TLS. Off by default: the certificate is not checked and a warning is logged on each run. Turn it on once the relay presents a certificate signed by a public CA.</td>
 </tr>
 <tr>
 <td><code>REPORTING_SMTP_SUBJECT</code></td>
@@ -13454,7 +13779,7 @@ gesetzt, hat dies <strong>keine Wirkung</strong>.</p>
 <td><code>/</code></td>
 <td>multisite</td>
 <td>ja</td>
-<td><strong>Standort-URL:</strong> Pfad, der zum Backend-Server weitergeleitet wird. Ein Wert, der mit <code>^</code> beginnt oder mit <code>$</code> endet, wird als Regex-Location behandelt. Optional mit <code>~</code>, <code>~*</code>, <code>=</code> oder <code>^~</code> gefolgt von einem Leerzeichen voranstellen, um den nginx-Standortmodifikator explizit festzulegen; an anderer Stelle im Wert sind keine Leerzeichen, <code>;</code>, <code>{</code> oder <code>}</code> erlaubt.</td>
+<td><strong>Standort-URL:</strong> Pfad, der zum Backend-Server weitergeleitet wird. Ein Wert, der mit <code>^</code> beginnt oder mit <code>$</code> endet, wird als Regex-Location behandelt. Optional mit <code>~</code>, <code>~*</code>, <code>=</code> oder <code>^~</code> gefolgt von einem Leerzeichen voranstellen, um den nginx-Standortmodifikator explizit festzulegen; an anderer Stelle im Wert sind keine Leerzeichen und kein <code>;</code> erlaubt. Ein passendes Paar einfacher oder doppelter Anführungszeichen um den Operanden ist optional, und geschweifte Klammern werden unterstützt.</td>
 </tr>
 <tr>
 <td><code>REVERSE_PROXY_BUFFERING</code></td>
@@ -13475,7 +13800,7 @@ gesetzt, hat dies <strong>keine Wirkung</strong>.</p>
 <td><code>no</code></td>
 <td>multisite</td>
 <td>ja</td>
-<td><strong>Keep-Alive:</strong> Aktiviert oder deaktiviert Keep-Alive-Verbindungen mit der weitergeleiteten Ressource.</td>
+<td><strong>Keep-Alive:</strong> Sendet die konfigurierte HTTP-Version (standardmäßig <code>1.1</code>) und einen leeren <code>Connection</code>-Header an die weitergeleitete Ressource. Das legt für sich allein keinen Verbindungspool an: Um Verbindungen wiederzuverwenden, lassen Sie <code>REVERSE_PROXY_HOST</code> auf einen benannten <code>upstream</code> mit <code>keepalive</code> zeigen, der in einer benutzerdefinierten <code>http</code>-Konfiguration deklariert ist.</td>
 </tr>
 <tr>
 <td><code>REVERSE_PROXY_HTTP_VERSION</code></td>
@@ -13496,11 +13821,11 @@ gesetzt, hat dies <strong>keine Wirkung</strong>.</p>
 <td><code>yes</code></td>
 <td>multisite</td>
 <td>nein</td>
-<td><strong>Fehler abfangen:</strong> Ob Fehlerantworten vom Backend abgefangen und neu geschrieben werden sollen.</td>
+<td><strong>Fehler abfangen:</strong> Ob Fehlerantworten vom Backend abgefangen und neu geschrieben werden sollen. Siehe <a href="#errors">Fehlerantworten von Upstream-APIs beibehalten</a>.</td>
 </tr>
 </tbody>
 </table>
-<p>BunkerWeb setzt den Pfad oder Regex-Ausdruck beim Erzeugen der NGINX-Location in Anführungszeichen und erhält dabei enthaltene Anführungszeichen, <code>#</code> und Regex-Backslashes. Geben Sie den Wert ohne zusätzliche NGINX-Anführungszeichen an. Die bestehenden Einschränkungen für Leerraum, <code>;</code>, <code>{</code> und <code>}</code> gelten weiterhin.</p>
+<p>BunkerWeb entfernt ein passendes äußeres Paar einfacher oder doppelter Anführungszeichen vom Pfad oder Regex-Ausdruck und setzt ihn beim Erzeugen der NGINX-Location in Anführungszeichen. Enthaltene Anführungszeichen, <code>#</code>, Regex-Backslashes und geschweifte Klammern bleiben erhalten. Das Paar selbst anzugeben ist optional, zum Beispiel <code>~ "^/api/[a-z]{2}/"</code>. Leerzeichen und <code>;</code> werden weiterhin abgelehnt.</p>
 <div class="admonition tip">
 <p class="admonition-title">Bewährte Praktiken</p>
 <ul>
@@ -13512,6 +13837,29 @@ gesetzt, hat dies <strong>keine Wirkung</strong>.</p>
 <div class="admonition warning">
 <p class="admonition-title">Verhalten der Anfrage-Pufferung</p>
 <p>Das Deaktivieren von <code>REVERSE_PROXY_REQUEST_BUFFERING</code> hat nur Wirkung, wenn ModSecurity deaktiviert ist, da die Anfrage-Pufferung ansonsten erzwungen wird.</p>
+</div>
+<div class="admonition info">
+<p class="admonition-title">Backend-Verbindungen wiederverwenden</p>
+<p><code>REVERSE_PROXY_KEEPALIVE=yes</code> sorgt nur dafür, dass BunkerWeb die konfigurierte HTTP-Version (standardmäßig <code>1.1</code>) und einen leeren <code>Connection</code>-Header an das Backend sendet. Einen Verbindungspool legt die Einstellung nicht an: Bei einer gewöhnlichen <code>REVERSE_PROXY_HOST</code>-URL öffnet NGINX für jede Anfrage eine neue Verbindung zum Backend.</p>
+<p>Um Backend-Verbindungen wiederzuverwenden, deklarieren Sie in einer <a href="../advanced/#custom-configurations">benutzerdefinierten <code>http</code>-Konfiguration</a> einen benannten <code>upstream</code> mit <code>keepalive</code> und lassen <code>REVERSE_PROXY_HOST</code> auf den Gruppennamen <strong>ohne Port</strong> zeigen: Der Port gehört in die <code>server</code>-Zeile des <code>upstream</code>.</p>
+<div class="highlight"><pre><span></span><code><span class="k">upstream</span><span class="w"> </span><span class="s">app_pool</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kn">server</span><span class="w"> </span><span class="n">backend.internal</span><span class="p">:</span><span class="mi">8443</span><span class="p">;</span>
+<span class="w">    </span><span class="kn">keepalive</span><span class="w"> </span><span class="mi">32</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code>REVERSE_PROXY_HOST=https://app_pool
+REVERSE_PROXY_KEEPALIVE=yes
+# Nur HTTPS: den Namen des Ursprungsservers als SNI senden und dagegen prüfen
+REVERSE_PROXY_SSL_SNI=yes
+REVERSE_PROXY_SSL_SNI_NAME=backend.example.com
+# nur wenn das Backend den Host-Header prüft
+REVERSE_PROXY_CUSTOM_HOST=backend.example.com
+</code></pre></div>
+<ul>
+<li>Der Name des <code>upstream</code> muss eindeutig sein, und der Hostname in der <code>server</code>-Zeile muss sich auflösen lassen, wenn NGINX die Konfiguration lädt.</li>
+<li>Bei HTTPS verwendet NGINX den Gruppennamen als SNI- und Prüfnamen, solange <code>REVERSE_PROXY_SSL_SNI_NAME</code> leer ist; diese Einstellung wird ignoriert, solange <code>REVERSE_PROXY_SSL_SNI</code> auf <code>no</code> steht. Setzen Sie wie oben beide, damit das Backend seinen echten Namen sieht.</li>
+<li>Der <code>Host</code>-Header bleibt der <code>$host</code> des Clients; setzen Sie <code>REVERSE_PROXY_CUSTOM_HOST</code>, wenn das Backend einen anderen Namen erwartet.</li>
+</ul>
 </div>
 </div>
 <div class="tabbed-block">
@@ -14074,6 +14422,10 @@ gesetzt, hat dies <strong>keine Wirkung</strong>.</p>
 <li>Überwachen Sie die Cache-Trefferquoten und passen Sie die Einstellungen entsprechend an</li>
 </ul>
 </div>
+<div class="admonition warning">
+<p class="admonition-title">Caching setzt Antwort-Pufferung voraus</p>
+<p>Das Proxy-Caching funktioniert nur an Standorten, an denen die Antwort-Pufferung aktiv ist. Setzen Sie bei <code>USE_PROXY_CACHE=yes</code> für jeden Standort, der zwischengespeichert werden soll, <code>REVERSE_PROXY_BUFFERING=yes</code>, auch bei nummerierten Einstellungen wie <code>REVERSE_PROXY_BUFFERING_1</code>. Solange die Antwort-Pufferung deaktiviert ist, werden neue Antworten nicht zwischengespeichert, es sei denn, der Upstream aktiviert sie über <code>X-Accel-Buffering</code>. Bereits zwischengespeicherte Antworten können weiterhin ausgeliefert werden. <code>REVERSE_PROXY_REQUEST_BUFFERING</code> steuert die Anfragekörper und aktiviert kein Caching von Antworten. BunkerWeb protokolliert eine Warnung, wenn es eine Konfiguration erzeugt, in der Proxy-Caching an einem Standort mit deaktivierter Antwort-Pufferung aktiviert ist.</p>
+</div>
 </div>
 </div>
 </div>
@@ -14427,7 +14779,7 @@ gesetzt, hat dies <strong>keine Wirkung</strong>.</p>
 </code></pre></div>
 <hr />
 <p>Weitere Informationen finden Sie in der <a href="https://www.robotstxt.org/robotstxt.html">robots.txt-Dokumentation</a>.</p>
-<h2 id="saml-pro">SAML <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)<a class="headerlink" href="#saml-pro" title="Permanent link">&para;</a></h2>
+<h2 id="saml-pro">SAML <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);' loading="lazy" decoding="async"> (PRO)<a class="headerlink" href="#saml-pro" title="Permanent link">&para;</a></h2>
 <p>Eine ausführlichere Anleitung finden Sie in der Dokumentation zur <a href="../advanced/#saml-pro">erweiterten Nutzung</a>.</p>
 <p>STREAM-Unterstützung <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
 <p>SAML 2.0 authentication, identity forwarding and attribute-based access control.</p>
@@ -14448,6 +14800,20 @@ gesetzt, hat dies <strong>keine Wirkung</strong>.</p>
 <td>multisite</td>
 <td>nein</td>
 <td>Enable SAML authentication</td>
+</tr>
+<tr>
+<td><code>SAML_IGNORE_URI</code></td>
+<td></td>
+<td>multisite</td>
+<td>nein</td>
+<td>List of PCRE regex patterns (separated by spaces) for URIs excluded from SAML authentication. Patterns are matched against the normalized path, alone or followed by ? and the query string. Takes precedence over SAML_INCLUDE_URI.</td>
+</tr>
+<tr>
+<td><code>SAML_INCLUDE_URI</code></td>
+<td></td>
+<td>multisite</td>
+<td>nein</td>
+<td>List of PCRE regex patterns (separated by spaces) for the only URIs that require SAML authentication; when empty, every URI does. Patterns are matched against the normalized path, alone or followed by ? and the query string. SAML_IGNORE_URI takes precedence. Patterns are unanchored: ^/search also matches /searchengine. Example: SAML_INCLUDE_URI=^/search(/|$) ^/login(/|$).</td>
 </tr>
 <tr>
 <td><code>SAML_SP_ENTITY_ID</code></td>
@@ -14672,6 +15038,76 @@ gesetzt, hat dies <strong>keine Wirkung</strong>.</p>
 <td>global</td>
 <td>nein</td>
 <td>Shared-memory capacity for single-instance replay protection</td>
+</tr>
+<tr>
+<td><code>SAML_ASSERTION_ENCRYPTION</code></td>
+<td><code>off</code></td>
+<td>multisite</td>
+<td>nein</td>
+<td>Accept encrypted assertions when optional; require an encrypted assertion when required.</td>
+</tr>
+<tr>
+<td><code>SAML_SP_ENCRYPTION_CERT</code></td>
+<td></td>
+<td>multisite</td>
+<td>nein</td>
+<td>SP decryption certificate in PEM; register this separate encryption key with the IdP.</td>
+</tr>
+<tr>
+<td><code>SAML_SP_ENCRYPTION_PRIVATE_KEY</code></td>
+<td></td>
+<td>multisite</td>
+<td>nein</td>
+<td>Unencrypted RSA private key matching the SP encryption certificate; never displayed.</td>
+</tr>
+<tr>
+<td><code>SAML_ALLOW_IDP_INITIATED</code></td>
+<td><code>no</code></td>
+<td>multisite</td>
+<td>nein</td>
+<td>Allow unsolicited IdP logins without browser request correlation.</td>
+</tr>
+<tr>
+<td><code>SAML_IDP_INITIATED_RETURN_PATHS</code></td>
+<td><code>/</code></td>
+<td>multisite</td>
+<td>nein</td>
+<td>Exact local return paths; first is the default when RelayState is absent.</td>
+</tr>
+<tr>
+<td><code>SAML_IDP_METADATA_SOURCE</code></td>
+<td><code>manual</code></td>
+<td>multisite</td>
+<td>nein</td>
+<td>Choose manual IdP fields, imported XML, or periodically refreshed HTTPS metadata.</td>
+</tr>
+<tr>
+<td><code>SAML_IDP_METADATA_XML</code></td>
+<td></td>
+<td>multisite</td>
+<td>nein</td>
+<td>IdP metadata XML contents, at most 64 KiB; select the entity with SAML_IDP_ENTITY_ID.</td>
+</tr>
+<tr>
+<td><code>SAML_IDP_METADATA_URL</code></td>
+<td></td>
+<td>multisite</td>
+<td>nein</td>
+<td>HTTPS metadata URL, without credentials or fragment; redirects are refused.</td>
+</tr>
+<tr>
+<td><code>SAML_IDP_METADATA_CA_CERT</code></td>
+<td></td>
+<td>multisite</td>
+<td>nein</td>
+<td>Optional PEM CA certificates added to system trust for this metadata URL.</td>
+</tr>
+<tr>
+<td><code>SAML_IDP_METADATA_ALLOW_PRIVATE_URL</code></td>
+<td><code>no</code></td>
+<td>multisite</td>
+<td>nein</td>
+<td>Permit private and loopback metadata destinations; TLS verification remains required.</td>
 </tr>
 </tbody>
 </table>
@@ -15291,7 +15727,7 @@ gesetzt, hat dies <strong>keine Wirkung</strong>.</p>
 </tr>
 </tbody>
 </table>
-<h2 id="ui-single-sign-on-pro">UI Single Sign-On <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)<a class="headerlink" href="#ui-single-sign-on-pro" title="Permanent link">&para;</a></h2>
+<h2 id="ui-single-sign-on-pro">UI Single Sign-On <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);' loading="lazy" decoding="async"> (PRO)<a class="headerlink" href="#ui-single-sign-on-pro" title="Permanent link">&para;</a></h2>
 <p>Eine ausführlichere Anleitung finden Sie in der Dokumentation zur <a href="../advanced/#ui-single-sign-on-pro">erweiterten Nutzung</a>.</p>
 <p>STREAM-Unterstützung <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
 <p>Enable SSO authentication for the BunkerWeb web interface by reading headers set by upstream authentication proxies (Authentik, Authelia, Keycloak, Traefik Forward Auth, etc.)</p>
@@ -15434,7 +15870,7 @@ gesetzt, hat dies <strong>keine Wirkung</strong>.</p>
 </tr>
 </tbody>
 </table>
-<h2 id="user-manager-pro">User Manager <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)<a class="headerlink" href="#user-manager-pro" title="Permanent link">&para;</a></h2>
+<h2 id="user-manager-pro">User Manager <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);' loading="lazy" decoding="async"> (PRO)<a class="headerlink" href="#user-manager-pro" title="Permanent link">&para;</a></h2>
 <p align='center'><iframe style='display: block;' width='560' height='315' data-src='https://www.youtube-nocookie.com/embed/EIohiUf9Fg4' title='User Manager' frameborder='0' allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture' allowfullscreen></iframe></p>
 
 <p>Eine ausführlichere Anleitung finden Sie in der Dokumentation zur <a href="../advanced/#user-manager-pro">erweiterten Nutzung</a>.</p>
@@ -15485,6 +15921,10 @@ Um stattdessen unerwünschte Clients zu blockieren, lesen Sie das <a href="#blac
 <p class="admonition-title">Stream-Modus</p>
 <p>Im Stream-Modus werden nur IP-, rDNS- und ASN-Prüfungen durchgeführt.</p>
 </div>
+<div class="admonition info">
+<p class="admonition-title">rDNS und die erste Anfrage</p>
+<p>Ein rDNS-Treffer wird erst in der Access-Phase angewendet, daher kann bei leerem Whitelist-Cache (nach einem Reload oder Ablauf eines Eintrags) die erste Anfrage eines per rDNS auf die Whitelist gesetzten Clients noch von ModSecurity blockiert werden.</p>
+</div>
 <h3 id="konfigurationseinstellungen_24">Konfigurationseinstellungen<a class="headerlink" href="#konfigurationseinstellungen_24" title="Permanent link">&para;</a></h3>
 <p><strong>Allgemein</strong></p>
 <table>
@@ -15504,6 +15944,13 @@ Um stattdessen unerwünschte Clients zu blockieren, lesen Sie das <a href="#blac
 <td>multisite</td>
 <td>nein</td>
 <td><strong>Whitelist aktivieren:</strong> Auf <code>yes</code> setzen, um die Whitelist-Funktion zu aktivieren.</td>
+</tr>
+<tr>
+<td><code>WHITELIST_URLS_REFRESH_INTERVAL</code></td>
+<td><code>1h</code></td>
+<td>multisite</td>
+<td>nein</td>
+<td><strong>URL-Aktualisierungsintervall:</strong> Mindestalter des Caches vor einem erneuten Download. Akzeptiert Sekunden ohne Einheit oder Zeitsuffixe (<code>ms</code>, <code>s</code>, <code>m</code>, <code>h</code>, <code>d</code>, <code>w</code>, <code>M</code>, <code>y</code>).</td>
 </tr>
 </tbody>
 </table>
@@ -15716,7 +16163,7 @@ Um stattdessen unerwünschte Clients zu blockieren, lesen Sie das <a href="#blac
 </div>
 <div class="admonition tip">
 <p class="admonition-title">Regelmäßige Aktualisierungen</p>
-<p>Whitelists von URLs werden stündlich automatisch heruntergeladen und aktualisiert, um sicherzustellen, dass Ihr Schutz mit den neuesten vertrauenswürdigen Quellen auf dem neuesten Stand bleibt.</p>
+<p>Der Job läuft stündlich. <code>WHITELIST_URLS_REFRESH_INTERVAL</code> legt das Mindestalter einer zwischengespeicherten URL vor einem erneuten Download fest (Standard: <code>1h</code>). Verwenden Sie <code>24h</code> für Anbieter, die höchstens einen Download pro Tag erlauben, oder <code>0</code> für einen Download bei jedem Joblauf. Bei frischen Caches oder fehlgeschlagenen Downloads bleiben die letzten gültigen Einträge erhalten. Innerhalb dieses Plugins teilen sich Dienste die URL-Caches: Das kürzeste Intervall kann einen Download auslösen. Verwenden Sie daher für eine URL mit Anbieterlimit bei allen Diensten dasselbe Intervall.</p>
 </div>
 <div class="admonition warning">
 <p class="admonition-title">Sicherheitsumgehung</p>
@@ -15796,7 +16243,7 @@ Um stattdessen unerwünschte Clients zu blockieren, lesen Sie das <a href="#blac
 (?:^|\s)FriendlyScanner(?:\s|$)
 TrustedMonitor/\d+\.\d+
 </code></pre></div>
-<h2 id="wildcard-pro">Wildcard <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)<a class="headerlink" href="#wildcard-pro" title="Permanent link">&para;</a></h2>
+<h2 id="wildcard-pro">Wildcard <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);' loading="lazy" decoding="async"> (PRO)<a class="headerlink" href="#wildcard-pro" title="Permanent link">&para;</a></h2>
 <p>Eine ausführlichere Anleitung finden Sie in der Dokumentation zur <a href="../advanced/#wildcard-pro">erweiterten Nutzung</a>.</p>
 <p>STREAM-Unterstützung <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
 <p>Adds wildcard server_name support (*.domain) for services, and serves the matching certificate to all sub-domains.</p>
@@ -15820,6 +16267,80 @@ TrustedMonitor/\d+\.\d+
 </tr>
 </tbody>
 </table>
+<h2 id="zstandard">Zstandard<a class="headerlink" href="#zstandard" title="Permanent link">&para;</a></h2>
+<p>STREAM-Unterstützung <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
+<p>Das Zstandard-Plugin komprimiert HTTP-Antworten mit dem Zstandard-Algorithmus (zstd). Es reduziert die Bandbreitennutzung bei Clients, die <code>Accept-Encoding: zstd</code> senden.</p>
+<h3 id="so-wirds-verwendet_1">So wird's verwendet<a class="headerlink" href="#so-wirds-verwendet_1" title="Permanent link">&para;</a></h3>
+<ol>
+<li>Aktivieren: Setzen Sie den Parameter <code>USE_ZSTD</code> auf <code>yes</code> (standardmäßig deaktiviert).</li>
+<li>MIME-Typen und Mindestgröße: Definieren Sie die zu komprimierenden Inhalte über <code>ZSTD_TYPES</code> und die Mindestgröße einer Antwort über <code>ZSTD_MIN_LENGTH</code>.</li>
+<li>Komprimierungsstufe: Setzen Sie <code>ZSTD_COMP_LEVEL</code> zwischen <code>1</code> (am schnellsten) und <code>19</code> (höchste unterstützte Komprimierung). Der Standardwert ist <code>3</code>.</li>
+</ol>
+<p>Clients mit zstd-Unterstützung erhalten <code>Content-Encoding: zstd</code> und <code>Vary: Accept-Encoding</code>. Clients ohne zstd-Unterstützung, auch solche, die <code>zstd;q=0</code> senden, können Brotli oder gzip erhalten, sofern diese Plugins aktiviert sind. Andernfalls erhalten sie unkomprimierte Antworten.</p>
+<p>Mit <code>USE_ZSTD=yes</code> können geeignete Antworten auch dann <code>Vary: Accept-Encoding</code> enthalten, wenn die gewählte Darstellung unkomprimiert ist oder gzip bzw. Brotli verwendet. Caches müssen diesen Header beachten, um die Darstellungen getrennt zu halten.</p>
+<p>Sind mehrere Komprimierungs-Plugins aktiviert, gilt die Server-Präferenz zstd, dann Brotli, dann gzip. Jede Codierung beachtet ihr eigenes <code>q=0</code>; positive Gewichtungen werden zwischen den Komprimierungs-Plugins nicht verglichen.</p>
+<h3 id="parameter_9">Parameter<a class="headerlink" href="#parameter_9" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Standard</th>
+<th>Kontext</th>
+<th>Mehrfach</th>
+<th>Beschreibung</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>USE_ZSTD</code></td>
+<td><code>no</code></td>
+<td>Multisite</td>
+<td>nein</td>
+<td>Zstandard-Komprimierung von Antworten aktivieren.</td>
+</tr>
+<tr>
+<td><code>ZSTD_TYPES</code></td>
+<td><code>application/atom+xml application/javascript application/json application/rss+xml application/vnd.ms-fontobject application/x-font-opentype application/x-font-truetype application/x-font-ttf application/x-javascript application/xhtml+xml application/xml font/eot font/opentype font/otf font/truetype image/svg+xml image/vnd.microsoft.icon image/x-icon image/x-win-bitmap text/css text/javascript text/plain text/xml</code></td>
+<td>Multisite</td>
+<td>nein</td>
+<td>Zu komprimierende MIME-Typen, zusätzlich zu <code>text/html</code>, das immer enthalten ist.</td>
+</tr>
+<tr>
+<td><code>ZSTD_MIN_LENGTH</code></td>
+<td><code>1000</code></td>
+<td>Multisite</td>
+<td>nein</td>
+<td>Mindestgröße einer Antwort in Bytes. Antworten unbekannter Länge können ebenfalls komprimiert werden.</td>
+</tr>
+<tr>
+<td><code>ZSTD_COMP_LEVEL</code></td>
+<td><code>3</code></td>
+<td>Multisite</td>
+<td>nein</td>
+<td>Komprimierungsstufe von <code>1</code> bis <code>19</code>. Höhere Stufen benötigen mehr CPU und Arbeitsspeicher.</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition tip">
+<p class="admonition-title">Komprimierungsstufe</p>
+<p>Beginnen Sie mit Stufe <code>3</code>. Höhere Stufen erhöhen den CPU- und Speicherbedarf pro Anfrage; halten Sie Kapazität für gleichzeitige Anfragen frei. Die Stufen sind auf <code>19</code> begrenzt, damit das 8-MB-zstd-Fenster-Limit für HTTP eingehalten wird.</p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Sensible Antworten</p>
+<p>Die Komprimierung kann Geheimnisse über Unterschiede in der Antwortgröße offenlegen, wenn eine Antwort sowohl Geheimnisse als auch vom Angreifer kontrollierte Eingaben enthält. Deaktivieren Sie die Komprimierung für sensible Dienste oder begegnen Sie diesem Risiko in der Anwendung. <code>text/html</code> kommt bei aktiviertem zstd immer für die Komprimierung in Frage, auch wenn es in <code>ZSTD_TYPES</code> fehlt.</p>
+</div>
+<div class="admonition info">
+<p class="admonition-title">Komprimierung durch den Upstream</p>
+<p>Antworten, die der Upstream bereits komprimiert hat, werden nicht erneut komprimiert. Das Inject-Plugin benötigt eine unkomprimierte Upstream-Antwort, um HTML zu verändern; konfigurieren Sie den Upstream entsprechend, wenn Sie beide Funktionen nutzen.</p>
+</div>
+<h3 id="beispielkonfiguration">Beispielkonfiguration<a class="headerlink" href="#beispielkonfiguration" title="Permanent link">&para;</a></h3>
+<p>Zstd mit Brotli- und gzip-Fallback aktivieren:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">USE_ZSTD</span><span class="p">:</span><span class="w"> </span><span class="s">"yes"</span>
+<span class="nt">ZSTD_MIN_LENGTH</span><span class="p">:</span><span class="w"> </span><span class="s">"1000"</span>
+<span class="nt">ZSTD_COMP_LEVEL</span><span class="p">:</span><span class="w"> </span><span class="s">"3"</span>
+<span class="nt">USE_BROTLI</span><span class="p">:</span><span class="w"> </span><span class="s">"yes"</span>
+<span class="nt">USE_GZIP</span><span class="p">:</span><span class="w"> </span><span class="s">"yes"</span>
+</code></pre></div>
 
 
 
@@ -15947,10 +16468,10 @@ TrustedMonitor/\d+\.\d+
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.top", "content.tabs.link", "toc.integrate", "content.code.copy", "search.highlight"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "In Zwischenablage kopiert", "clipboard.copy": "In Zwischenablage kopieren", "search.result.more.one": "1 weiteres Suchergebnis auf dieser Seite", "search.result.more.other": "# weitere Suchergebnisse auf dieser Seite", "search.result.none": "Keine Suchergebnisse", "search.result.one": "1 Suchergebnis", "search.result.other": "# Suchergebnisse", "search.result.placeholder": "Suchbegriff eingeben", "search.result.term.missing": "Es fehlt", "select.version": "Version ausw\u00e4hlen"}, "version": {"provider": "mike", "version": "latest"}}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.top", "content.tabs.link", "toc.integrate", "content.code.copy", "search.highlight"], "search": "../../assets/javascripts/workers/search.a7633da7.min.js", "tags": null, "translations": {"clipboard.copied": "In Zwischenablage kopiert", "clipboard.copy": "In Zwischenablage kopieren", "search.result.more.one": "1 weiteres Suchergebnis auf dieser Seite", "search.result.more.other": "# weitere Suchergebnisse auf dieser Seite", "search.result.none": "Keine Suchergebnisse", "search.result.one": "1 Suchergebnis", "search.result.other": "# Suchergebnisse", "search.result.placeholder": "Suchbegriff eingeben", "search.result.term.missing": "Es fehlt", "select.version": "Version ausw\u00e4hlen"}, "version": {"provider": "mike", "version": "latest"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      <script src="../../assets/javascripts/bundle.a5f9d56c.min.js"></script>
       
         <script src="../../assets/extra.js"></script>
       
