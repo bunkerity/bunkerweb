@@ -1,6 +1,6 @@
 Brotli==1.1.0
 cryptography==46.0.3
-dnspython==2.8.0
+dnspython==2.9.2
 docker==7.1.0
 fastapi==0.162.7
 httpx[http2, socks, brotli]==0.28.1
