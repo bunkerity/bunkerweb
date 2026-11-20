@@ -22,7 +22,15 @@ from app.raw_drafts import (
 )
 
 from app.routes.configs import EXPORT_FORMAT_VERSION, apply_imported_configs, flash_import_results, parse_configs_export
-from app.routes.utils import CUSTOM_CONF_RX, extract_file_setting_names, handle_error, submit_config_task, verify_data_in_form, wait_applying
+from app.routes.utils import (
+    CUSTOM_CONF_RX,
+    extract_file_setting_names,
+    handle_error,
+    reset_cleared_settings,
+    submit_config_task,
+    verify_data_in_form,
+    wait_applying,
+)
 from app.utils import (
     LOGGER,
     can_delete_service,
@@ -375,6 +383,11 @@ def services_service_page(service: str):
             draft_settings: Optional[Dict[str, Optional[bool]]],
         ):
             wait_applying()
+
+            if mode == "easy" and not BW_CONFIG._Config__ignore_regex_check:
+                # An emptied field the setting cannot hold empty takes its default, like typing the default would.
+                # Without it check_variables rejects the empty value and the whole save is dropped.
+                reset_cleared_settings(variables, BW_CONFIG.get_plugins_settings())
 
             continuity_draft_settings: Dict[str, bool] = {}
             source_draft_config: Dict[str, dict] = {}

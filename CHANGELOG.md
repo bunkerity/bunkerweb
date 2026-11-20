@@ -3,6 +3,8 @@
 ## v1.6.18 - ????/??/??
 
 - [BUGFIX] `ui`: when a template save fails, the template editor says whether the WAF or an expired session stopped it.
+- [BUGFIX] `ui`: easy mode keeps a value set back to the global default when a template sets another one on a new service.
+- [BUGFIX] `ui`: emptying an easy mode field that cannot be empty saves the setting default instead of rejecting the whole save.
 - [MISC] `blacklist`: the Data-Shield Critical list is now the paid Data-Shield Pro feed; the old preset now downloads the free Community Standard list.
 
 ## v1.6.18~rc5 - 2026/11/19

@@ -1147,10 +1147,33 @@ $(document).ready(() => {
 
     // Skip default-method values the user didn't touch; submitting them would
     // create a method="ui" DB row that shadows the template/default overlay.
-    const shouldSkipUnchangedDefault = ($input, currentValue) => {
+    //
+    // A field left out of the post resolves to the template value on a new
+    // service (the stored default only when no template sets it), so the
+    // comparison point there is the template value, not data-original: a value
+    // the user set back to the global default must still be posted when the
+    // template says otherwise.
+    const isNewPlainService =
+      window.location.pathname.endsWith("/new") &&
+      !new URLSearchParams(window.location.search).get("clone");
+    const templateValueOf = ($input) => {
+      const $holder = $input
+        .parents()
+        .filter(function () {
+          return $(this).children('input[id$="-template"]').length > 0;
+        })
+        .first();
+      const $template = $holder.children('input[id$="-template"]').first();
+      return $template.length ? $template.val() : undefined;
+    };
+    const shouldSkipUnchangedDefault = ($input, currentValue, isEasy) => {
       const method = $input.attr("data-method");
       if (method !== "default") return false;
-      const original = $input.attr("data-original");
+      let original = $input.attr("data-original");
+      if (isEasy && isNewPlainService) {
+        const templateValue = templateValueOf($input);
+        if (templateValue !== undefined) original = templateValue;
+      }
       if (original === undefined) return false;
       return String(currentValue) === String(original);
     };
@@ -1179,7 +1202,7 @@ $(document).ready(() => {
         }
 
         if (isFileTextSetting) {
-          if (shouldSkipUnchangedDefault($this, settingValue)) {
+          if (shouldSkipUnchangedDefault($this, settingValue, isEasy)) {
             const lastFileName = String(
               $this.data("lastFileName") || $this.attr("data-file-name") || "",
             ).trim();
@@ -1198,7 +1221,7 @@ $(document).ready(() => {
           return;
         }
 
-        if (shouldSkipUnchangedDefault($this, settingValue)) {
+        if (shouldSkipUnchangedDefault($this, settingValue, isEasy)) {
           return;
         }
 
@@ -1218,7 +1241,9 @@ $(document).ready(() => {
           if ($hiddenInput.length && $hiddenInput.attr("name")) {
             const settingName = $hiddenInput.attr("name");
             const settingValue = $hiddenInput.val() || "";
-            if (shouldSkipUnchangedDefault($hiddenInput, settingValue)) {
+            if (
+              shouldSkipUnchangedDefault($hiddenInput, settingValue, isEasy)
+            ) {
               return;
             }
             appendHiddenInput(form, settingName, settingValue);
@@ -1233,7 +1258,7 @@ $(document).ready(() => {
         if ($hiddenInput.length && $hiddenInput.attr("name")) {
           const settingName = $hiddenInput.attr("name");
           const settingValue = $hiddenInput.val() || "";
-          if (shouldSkipUnchangedDefault($hiddenInput, settingValue)) {
+          if (shouldSkipUnchangedDefault($hiddenInput, settingValue, isEasy)) {
             return;
           }
           appendHiddenInput(form, settingName, settingValue);
