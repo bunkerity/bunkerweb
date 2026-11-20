@@ -1,0 +1,21 @@
+src/common/core/reverseproxy/confs/server-stream/reverse-proxy.conf
+  s_36cff8fad440d1::t_40bd0ea0eb1173 29-34
+CHANGELOG.md
+  s_36cff8fad440d1::t_40bd0ea0eb1173 5
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "4753b697192ea5a721e0af3fcb38804e2a03430e",
+  "prompts": {},
+  "sessions": {
+    "s_36cff8fad440d1": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "9e7b0240-ab8b-4374-b9b3-c0f8bb66b3ef",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

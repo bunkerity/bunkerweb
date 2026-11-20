@@ -1,0 +1,41 @@
+docs/zh/features.md
+  s_23f0155bb8678f::t_67988dddd1cd97 1915,2216
+docs/features.md
+  s_23f0155bb8678f::t_67988dddd1cd97 1915,2218
+src/common/core/crowdsec/README.de.md
+  s_23f0155bb8678f::t_67988dddd1cd97 76,375
+src/common/core/crowdsec/README.fr.md
+  s_23f0155bb8678f::t_67988dddd1cd97 76,377
+docs/de/features.md
+  s_23f0155bb8678f::t_67988dddd1cd97 1882,2181
+src/common/core/crowdsec/README.es.md
+  s_23f0155bb8678f::t_67988dddd1cd97 76,373
+CHANGELOG.md
+  s_23f0155bb8678f::t_67988dddd1cd97 5
+src/common/core/crowdsec/README.zh.md
+  s_23f0155bb8678f::t_67988dddd1cd97 76,377
+docs/fr/features.md
+  s_23f0155bb8678f::t_67988dddd1cd97 1842,2143
+docs/es/features.md
+  s_23f0155bb8678f::t_67988dddd1cd97 1909,2206
+src/common/core/crowdsec/plugin.json
+  s_23f0155bb8678f::t_67988dddd1cd97 102-103
+src/common/core/crowdsec/README.md
+  s_23f0155bb8678f::t_67988dddd1cd97 76,379
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "1d407a7ff648825b9761f7279e719633998f489f",
+  "prompts": {},
+  "sessions": {
+    "s_23f0155bb8678f": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1a59e-9742-7703-b018-369faae73587",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

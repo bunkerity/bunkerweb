@@ -1,0 +1,60 @@
+tests/unit/common/test_ipv6_syslog.py
+  s_f8c89ef39f464e::t_94dd8bb55212be 31-41,53-62
+  s_f8c89ef39f464e::t_da99835d94408d 1-30,42-52,63-66
+tests/unit/common/test_ipv6_gunicorn_listeners.py
+  s_f8c89ef39f464e::t_94dd8bb55212be 13-16
+  s_f8c89ef39f464e::t_da99835d94408d 1-12,17-34
+tests/unit/gen/test_ipv6_api_listeners.py
+  s_f8c89ef39f464e::t_0d9413b7b3b193 4,43
+  s_80f1da85912d1b::t_fd4483f8fe76a8 1-3,5-32,42,44-53
+  s_f8c89ef39f464e::t_94dd8bb55212be 33-41
+src/common/confs/api.conf
+  s_f8c89ef39f464e::t_0d9413b7b3b193 12,14,30,36
+src/api/utils/gunicorn.conf.py
+  s_f8c89ef39f464e::t_0d9413b7b3b193 127
+tests/unit/ui/routes/test_ipv6_setup_host.py
+  s_f8c89ef39f464e::t_94dd8bb55212be 6-16
+  s_f8c89ef39f464e::t_da99835d94408d 1-5,17-24
+src/ui/app/routes/setup.py
+  s_f8c89ef39f464e::t_0d9413b7b3b193 9,300-306
+src/ui/utils/tmp-gunicorn.conf.py
+  s_f8c89ef39f464e::t_0d9413b7b3b193 71
+src/common/utils/logger.py
+  s_f8c89ef39f464e::t_0d9413b7b3b193 29,79-84
+CHANGELOG.md
+  s_069d588794c2c2::t_eaa25b9f840a11 19-21
+src/ui/utils/gunicorn.conf.py
+  s_f8c89ef39f464e::t_0d9413b7b3b193 128
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "b12cb3171e3172fe60cd13013e07aea7f7dabfa9",
+  "prompts": {},
+  "sessions": {
+    "s_069d588794c2c2": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "84fe7cda-2bca-4767-bd4f-5fd51bba09cf",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_80f1da85912d1b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "48f28331-3ce2-4fa3-b959-69d5d1238c0a",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_f8c89ef39f464e": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a18d53-5a1c-7990-a919-8ced18659c54",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

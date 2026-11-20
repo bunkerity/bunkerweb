@@ -1,0 +1,25 @@
+src/api/app/rate_limit.py
+  s_3bbf100260ba00::t_c0b3321bd25985 426-430,498-499
+tests/unit/api/test_rate_limit_rules.py
+  s_3bbf100260ba00::t_c0b3321bd25985 200,223
+tests/unit/api/test_rate_limit_redis_tls.py
+  s_3bbf100260ba00::t_8943c64bddc5a8 1-62
+CHANGELOG.md
+  s_3bbf100260ba00::t_0433b6744ce789 47
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "43d74e96997d7be6f0d5aaeb7e035105fb46d1dc",
+  "prompts": {},
+  "sessions": {
+    "s_3bbf100260ba00": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1c0d7-1491-7041-bd94-d30ffc9ba309",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

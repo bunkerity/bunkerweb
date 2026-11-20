@@ -1,0 +1,32 @@
+src/ui/app/models/ui_database.py
+  s_38642e0b272399::t_ff5b6fa78f6cea 134-136
+  s_38642e0b272399::t_51047cd0f6bd57 137
+src/common/db/Database.py
+  s_38642e0b272399::t_81279347efaaf9 18,76,1727-1736,1741-1744,1874-1876,5508,5540
+CHANGELOG.md
+  s_da7dbab577ff72::t_b755e8c0e57546 54-58
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "7d700e83a0938dac213dcf7d86301d96fa429386",
+  "prompts": {},
+  "sessions": {
+    "s_38642e0b272399": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "5becc66f-788d-482f-bd5e-19361f84e91f",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_da7dbab577ff72": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1a534-54ad-7930-b3f6-288880646a4e",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

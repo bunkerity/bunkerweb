@@ -1,0 +1,29 @@
+src/ui/app/templates/jobs.html
+  s_2ac5a123de5fbf::t_509dfe7d1111f3 93,96
+CHANGELOG.md
+  s_397d5af37cdd3e::t_08327bb686a6a1 7
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "9754f70180356c68570220d346a5a209771796ac",
+  "prompts": {},
+  "sessions": {
+    "s_2ac5a123de5fbf": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "5d38079e-06ed-4469-a917-2363b835ef0a",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_397d5af37cdd3e": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "e8e50ef8-fd32-4213-8f50-01a720e36396",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

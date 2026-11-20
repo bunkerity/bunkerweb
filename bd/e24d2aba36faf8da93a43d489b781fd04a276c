@@ -1,0 +1,32 @@
+src/common/core/backup/backup.py
+  s_b19771969ff6f5::t_7ece5fc81d373d 193-198
+  s_b19771969ff6f5::t_9967ebc7f36349 49-59,157,349,354
+tests/unit/backup/test_mysql_client_args.py
+  s_b19771969ff6f5::t_f65b6184a7fe0e 89,116,125-168
+CHANGELOG.md
+  s_ea568f8ea84788::t_5200aec887de88 16
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "bde24d2aba36faf8da93a43d489b781fd04a276c",
+  "prompts": {},
+  "sessions": {
+    "s_b19771969ff6f5": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1aab1-bef3-75f2-9bd9-d54d46519802",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_ea568f8ea84788": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1aaad-1b9c-7ee0-8191-ecaa671651c7",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

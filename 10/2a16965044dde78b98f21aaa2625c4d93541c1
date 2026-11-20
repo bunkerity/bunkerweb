@@ -1,0 +1,42 @@
+src/common/core/ui/confs/http/ui.modsec-crs
+  s_4f460a2e940aa9::t_09a737e2fdb567 10-12
+tests/unit/gen/test_modsec_plugin_conf_includes.py
+  s_8a5284817c7f0d::t_8d3958ff9e7303 90-95
+  s_8a5284817c7f0d::t_44271202fd4959 78-79
+  s_8a5284817c7f0d::t_f1c7a7f517c387 130-136
+  s_8a5284817c7f0d::t_cf8c1f71c8b315 53-55,58,108-109,111-114,187-210
+  s_8a5284817c7f0d::t_2b2ec7fda3000c 1-52,56-57,59-77,80-89,96-107,110,115-129,137-186
+  s_8a5284817c7f0d::t_9ac66779eb12dd 211
+tests/unit/gen/test_ui_modsec_crs_exclusions.py
+  s_4f460a2e940aa9::t_5febdda1d5a113 82-92
+tests/unit/gen/test_antibot_modsec_crs_hosts.py
+  s_4f460a2e940aa9::t_e8d9963600378d 1-35
+tests/unit/gen/test_modsec_plugin_fragment_includes.py
+  s_8a5284817c7f0d::t_6421014c139a13 1,14-24
+src/common/core/antibot/confs/http/antibot.modsec-crs
+  s_4f460a2e940aa9::t_09a737e2fdb567 4,17,23
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "102a16965044dde78b98f21aaa2625c4d93541c1",
+  "prompts": {},
+  "sessions": {
+    "s_4f460a2e940aa9": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "1801373c-868e-412b-b538-cb2f1f5efe59",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_8a5284817c7f0d": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "a7303916-b85a-4244-98f8-30fd450ab62c",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

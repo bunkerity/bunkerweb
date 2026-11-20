@@ -1,0 +1,19 @@
+.github/workflows/integration-tests.yml
+  s_9d3c9ff68669a4::t_28bf00a20d0518 175-197,210
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "9ca8439d8c12190bd4ee6ebaecd5b88018753f94",
+  "prompts": {},
+  "sessions": {
+    "s_9d3c9ff68669a4": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "f5c03f63-ccfb-4a9a-bf27-6aa77d610b94",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

@@ -1,0 +1,19 @@
+tests/scripts/utils.sh
+  s_05d4c85a26ac2c::t_16a9e66c05749c 1957-1964
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "02509f9268c8779a7b6b00cb4e86dc555648f7fe",
+  "prompts": {},
+  "sessions": {
+    "s_05d4c85a26ac2c": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "da372765-5e7a-44df-af3a-532a8ac6d6ce",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

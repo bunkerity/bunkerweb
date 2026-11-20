@@ -1,0 +1,29 @@
+src/all-in-one/Dockerfile
+  s_2a8b7e6e55d236::t_716c5922f574a5 174
+src/api/Dockerfile
+  s_2a8b7e6e55d236::t_02b0286a8cc7a9 42
+src/autoconf/Dockerfile
+  s_2a8b7e6e55d236::t_81a8bb129ff389 41
+src/bw/Dockerfile
+  s_2a8b7e6e55d236::t_fba630c19a1390 78
+src/scheduler/Dockerfile
+  s_2a8b7e6e55d236::t_7cb532f9455973 54
+src/ui/Dockerfile
+  s_2a8b7e6e55d236::t_ad2f4897b69b14 83
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "d3aa2713a12ed8e2aa5bad0d16b1235465b5e2fb",
+  "prompts": {},
+  "sessions": {
+    "s_2a8b7e6e55d236": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "7240790c-8d8a-404e-a61a-9f904953ed68",
+        "model": "unknown"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

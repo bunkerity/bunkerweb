@@ -1,0 +1,1366 @@
+src/deps/src/nginx-1.30.5/src/core/ngx_bpf.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-143
+src/deps/src/nginx-1.30.5/auto/lib/openssl/conf
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-196
+src/deps/src/luajit/src/lj_bc.h
+  s_f498fa489aa217::t_3c0cf6d43456ae 101,189-196
+  s_77fa5bfb272b67::t_7eb6d620bbec3d 197
+src/deps/src/nginx-1.30.5/src/event/modules/ngx_epoll_module.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-1051
+src/deps/src/nginx-1.30.5/src/event/quic/ngx_event_quic_tokens.h
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-34
+src/deps/src/nginx-1.30.5/src/event/ngx_event_openssl_stapling.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-2830
+src/deps/src/nginx-1.30.5/src/event/quic/ngx_event_quic_connid.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-502
+src/deps/src/nginx-1.30.5/src/core/ngx_hash.h
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-125
+src/deps/src/luajit/src/jit/dis_ppc.lua
+  s_f498fa489aa217::t_3c0cf6d43456ae 20,41-43,169,388,390,423,430-431,433,442-443,445-446,448-449,451-452,454,456,458-459,463,467-468,470,472-473,475-476,478-483,485-489,493-494,498-499,501-503,505,507-508,510,517,519,539,555-556
+src/linux/Dockerfile-ubuntu-noble
+  s_f498fa489aa217::t_ae3de3819da3d1 14
+  s_d920128e903ff2::t_da1517805d9b4d 1,147
+src/deps/src/nginx-1.30.5/src/core/ngx_proxy_protocol.h
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-37
+src/deps/src/nginx-1.30.5/src/http/ngx_http_copy_filter_module.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-397
+src/deps/src/nginx-1.30.5/src/http/ngx_http_core_module.h
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-599
+src/deps/src/nginx-1.30.5/src/event/quic/ngx_event_quic_socket.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-237
+src/deps/src/luajit/src/jit/dis_mips.lua
+  s_f498fa489aa217::t_3c0cf6d43456ae 18,479,485,496-497,500,502,512,514,516,518,520,522,524,526,528,530,532,534,536,539,541,543,545,547,549,551,553,555,558,561,565,569,574,578,581,584,587,618-620
+src/deps/src/nginx-1.30.5/src/core/ngx_config.h
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-145
+src/deps/src/nginx-1.30.5/src/core/ngx_conf_file.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-1486
+src/deps/src/nginx-1.30.5/src/event/quic/ngx_event_quic_connection.h
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-326
+src/deps/src/nginx-1.30.5/src/http/modules/ngx_http_geoip_module.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-925
+src/deps/src/nginx-1.30.5/src/http/modules/perl/Makefile.PL
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-35
+src/deps/src/nginx-1.30.5/src/stream/ngx_stream_script.h
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-142
+src/deps/src/nginx-1.30.5/src/http/modules/ngx_http_upstream_zone_module.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-1034
+src/deps/src/luajit/src/lj_ffrecord.c
+  s_f498fa489aa217::t_3c0cf6d43456ae 122,136-144,318-369,606-608,804,905-915,1332
+src/deps/src/nginx-1.30.5/src/event/modules/ngx_poll_module.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-416
+src/deps/src/nginx/src/http/ngx_http_script.c
+  s_d920128e903ff2::t_c6e07bc65b8c44 159-161,648,656-657,1239,1853,1870-1873,1880-1883,1889-1891
+src/deps/src/nginx-1.30.5/src/os/unix/ngx_socket.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-116
+src/deps/src/nginx-1.30.5/src/stream/ngx_stream_upstream_hash_module.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-755
+src/deps/src/nginx-1.30.5/src/core/ngx_crc32.h
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-79
+src/deps/src/nginx-1.30.5/auto/os/conf
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-144
+src/deps/src/nginx-1.30.5/src/event/quic/ngx_event_quic_streams.h
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-44
+src/deps/src/nginx-1.30.5/src/http/modules/ngx_http_scgi_module.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-2161
+src/deps/src/nginx/src/http/modules/ngx_http_xslt_filter_module.c
+  s_d920128e903ff2::t_c6e07bc65b8c44 266-269,472,482,485-494,498
+src/deps/src/nginx-1.30.5/src/core/ngx_string.h
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-239
+src/deps/src/nginx-1.30.5/src/stream/ngx_stream_variables.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-1340
+src/deps/src/nginx-1.30.5/src/stream/ngx_stream.h
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-384
+src/deps/src/nginx-1.30.5/src/stream/ngx_stream_realip_module.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-401
+src/deps/src/nginx-1.30.5/src/http/modules/ngx_http_autoindex_module.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-1072
+src/deps/src/luajit/src/lj_lex.h
+  s_f498fa489aa217::t_3c0cf6d43456ae 16,20-21,44-49,57,87
+src/deps/src/nginx-1.30.5/auto/cc/ccc
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-46
+src/linux/Dockerfile-rhel-10
+  s_f498fa489aa217::t_ae3de3819da3d1 5
+  s_d920128e903ff2::t_4511df6d4cdbcb 1,147
+src/deps/src/nginx-1.30.5/src/os/win32/ngx_win32_init.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-329
+src/deps/src/nginx/src/http/ngx_http_request.h
+  s_d920128e903ff2::t_c6e07bc65b8c44 14
+src/deps/src/nginx-1.30.5/src/event/quic/ngx_event_quic_migration.h
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-45
+src/deps/src/luajit/src/jit/dis_arm.lua
+  s_f498fa489aa217::t_3c0cf6d43456ae 18,375,429,450,452-455,458-460,464-466,469,471,473,477,482,488-490,501,503,511,519,522,524-525,527,529,534,541,543,545,547,555-556,558-559,561,563,565-566,568,580-581,589,591,596,600,604-605,608,610,612,615-617,619,622,624,626,628,630,632,634,653
+src/deps/src/nginx-1.30.5/src/event/quic/ngx_event_quic_transport.h
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-398
+src/deps/src/nginx-1.30.5/src/stream/ngx_stream_script.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-1078
+src/deps/src/nginx-1.30.5/src/event/quic/ngx_event_quic_connid.h
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-29
+src/deps/src/nginx-1.30.5/auto/unix
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-1034
+src/deps/src/nginx-1.30.5/src/os/unix/ngx_shmem.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-126
+src/deps/src/nginx-1.30.5/src/event/ngx_event_pipe.h
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-107
+src/deps/src/nginx-1.30.5/contrib/README
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-21
+src/deps/src/nginx-1.30.5/src/http/v3/ngx_http_v3.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-111
+src/deps/init_deps.sh
+  s_476e9863a1ff94::t_ee93718abe0ea1 64-68,70,80-81,84
+src/deps/src/nginx-1.30.5/src/os/unix/ngx_darwin.h
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-23
+src/deps/src/nginx-1.30.5/src/mail/ngx_mail_proxy_module.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-1411
+src/deps/src/nginx-1.30.5/src/http/modules/ngx_http_access_module.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-463
+src/deps/src/luajit/src/lj_carith.h
+  s_f498fa489aa217::t_3c0cf6d43456ae 24
+src/deps/src/nginx-1.30.5/auto/lib/zlib/make
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-135
+src/deps/src/luajit/src/vm_arm.dasc
+  s_f498fa489aa217::t_3c0cf6d43456ae 851-870,3399-3452
+  s_77fa5bfb272b67::t_86113299cf5b40 3453
+src/deps/src/nginx-1.30.5/src/mail/ngx_mail_core_module.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-728
+src/deps/src/nginx-1.30.5/auto/cc/name
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-103
+src/deps/src/nginx/src/http/modules/ngx_http_geo_module.c
+  s_d920128e903ff2::t_c6e07bc65b8c44 1520-1544
+src/deps/src/nginx-1.30.5/src/http/ngx_http_core_module.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-5439
+src/deps/src/nginx-1.30.5/src/http/modules/ngx_http_upstream_least_conn_module.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-342
+src/deps/src/nginx-1.30.5/auto/cc/icc
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-109
+src/deps/src/luajit/src/lj_crecord.h
+  s_f498fa489aa217::t_3c0cf6d43456ae 32-33,35-36
+src/deps/src/nginx-1.30.5/src/mail/ngx_mail_ssl_module.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-714
+src/deps/src/nginx-1.30.5/src/core/ngx_md5.h
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-28
+src/deps/src/nginx-1.30.5/src/stream/ngx_stream_ssl_module.h
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-75
+src/deps/src/nginx-1.30.5/src/http/ngx_http_script.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-1990
+src/deps/src/nginx/src/http/ngx_http_file_cache.c
+  s_d920128e903ff2::t_c6e07bc65b8c44 443-446,699-701,726-728
+src/deps/src/nginx-1.30.5/src/event/ngx_event_openssl.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-6626
+src/deps/src/luajit/src/vm_x64.dasc
+  s_f498fa489aa217::t_3c0cf6d43456ae 357,361,1095-1135,1777,2090,2125,2709,3021,3028,3030,3075,3090,3093,3215,3219,3473,3533-3614,3897,4023
+src/deps/src/nginx-1.30.5/src/http/v3/ngx_http_v3_request.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-1741
+src/deps/src/nginx-1.30.5/src/http/ngx_http_file_cache.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-2799
+tests/linux/Dockerfile-alma-10
+  s_f498fa489aa217::t_ae3de3819da3d1 3
+src/deps/src/nginx-1.30.5/src/http/modules/ngx_http_upstream_hash_module.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-787
+src/deps/src/nginx-1.30.5/src/core/ngx_bpf.h
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-43
+src/deps/src/nginx-1.30.5/auto/lib/openssl/make
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-79
+src/deps/src/nginx-1.30.5/src/event/ngx_event.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-1373
+src/deps/src/nginx-1.30.5/src/os/win32/ngx_errno.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-60
+src/deps/src/nginx-1.30.5/src/os/win32/ngx_dlopen.h
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-32
+src/deps/src/luajit/src/lj_lex.c
+  s_f498fa489aa217::t_3c0cf6d43456ae 100-104,107-111,330-332,364-366,369-371,374-384,388-398
+src/deps/src/nginx-1.30.5/src/core/ngx_cycle.h
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-149
+src/deps/src/nginx-1.30.5/auto/modules
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-1556
+src/deps/src/nginx/src/event/ngx_event_pipe.c
+  s_d920128e903ff2::t_c6e07bc65b8c44 256,1115
+src/deps/src/nginx-1.30.5/src/http/v3/ngx_http_v3_filter_module.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-1002
+src/deps/src/nginx-1.30.5/src/stream/ngx_stream_ssl_module.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-1784
+src/deps/src/luajit/src/lj_meta.c
+  s_f498fa489aa217::t_3c0cf6d43456ae 25-29,242-309
+  s_77fa5bfb272b67::t_c502a4b88001b2 310-311
+src/deps/src/nginx-1.30.5/src/os/unix/ngx_user.h
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-24
+src/deps/src/nginx-1.30.5/auto/lib/perl/make
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-46
+src/deps/src/nginx-1.30.5/src/os/unix/ngx_process_cycle.h
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-61
+src/deps/src/nginx-1.30.5/src/os/unix/ngx_channel.h
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-34
+src/deps/src/nginx-1.30.5/src/http/modules/ngx_http_ssl_module.h
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-75
+src/deps/src/nginx-1.30.5/src/core/ngx_radix_tree.h
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-55
+src/deps/src/nginx-1.30.5/src/event/quic/ngx_event_quic_udp.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-420
+src/deps/src/nginx-1.30.5/src/mail/ngx_mail_smtp_handler.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-983
+src/deps/src/nginx-1.30.5/src/stream/ngx_stream_handler.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-389
+src/deps/src/nginx-1.30.5/src/core/ngx_buf.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-314
+src/deps/src/nginx-1.30.5/auto/lib/openssl/makefile.msvc
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-21
+src/deps/src/nginx-1.30.5/src/event/ngx_event_openssl.h
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-416
+src/deps/src/nginx-1.30.5/src/os/unix/ngx_freebsd_config.h
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-129
+src/deps/src/nginx-1.30.5/src/os/win32/ngx_files.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-1459
+src/deps/src/nginx-1.30.5/src/http/ngx_http_upstream_round_robin.h
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-275
+src/deps/src/nginx/src/http/modules/ngx_http_slice_filter_module.c
+  s_d920128e903ff2::t_c6e07bc65b8c44 431-434
+src/deps/src/nginx-1.30.5/src/event/quic/ngx_event_quic_ack.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-1456
+src/deps/src/nginx-1.30.5/src/core/ngx_radix_tree.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-488
+src/deps/src/nginx-1.30.5/src/http/ngx_http_write_filter_module.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-371
+src/deps/src/nginx-1.30.5/src/os/unix/ngx_files.h
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-396
+src/deps/src/nginx-1.30.5/src/core/ngx_palloc.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-430
+src/deps/src/nginx-1.30.5/src/core/ngx_parse_time.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-277
+src/deps/src/nginx-1.30.5/src/http/ngx_http_postpone_filter_module.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-259
+src/deps/src/luajit/src/lj_tab.c
+  s_f498fa489aa217::t_3c0cf6d43456ae 666-673,686
+src/deps/src/nginx-1.30.5/src/http/modules/ngx_http_gzip_static_module.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-335
+src/deps/src/nginx-1.30.5/auto/module
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-178
+src/deps/src/nginx-1.30.5/src/http/ngx_http_config.h
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-75
+src/deps/src/nginx-1.30.5/src/http/modules/perl/ngx_http_perl_module.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-1135
+src/deps/src/nginx-1.30.5/src/os/unix/ngx_daemon.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-71
+src/deps/src/nginx-1.30.5/src/http/v3/ngx_http_v3_module.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-393
+src/deps/src/nginx-1.30.5/src/os/unix/ngx_send.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-73
+src/deps/src/nginx-1.30.5/src/os/unix/ngx_thread.h
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-71
+src/deps/src/nginx-1.30.5/src/os/unix/ngx_setaffinity.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-53
+src/deps/src/nginx-1.30.5/src/stream/ngx_stream_geoip_module.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-814
+src/deps/src/nginx-1.30.5/auto/os/win32
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-39
+src/deps/src/nginx-1.30.5/src/event/modules/ngx_eventport_module.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-650
+src/deps/src/nginx-1.30.5/src/http/modules/ngx_http_slice_filter_module.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-550
+src/deps/src/nginx-1.30.5/src/event/quic/ngx_event_quic_socket.h
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-28
+src/deps/src/nginx-1.30.5/src/http/ngx_http_request_body.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-1385
+src/deps/src/nginx-1.30.5/src/os/unix/ngx_darwin_config.h
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-100
+src/deps/src/nginx-1.30.5/src/os/unix/ngx_setproctitle.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-135
+src/deps/src/nginx-1.30.5/src/os/win32/ngx_wsasend.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-185
+src/deps/src/nginx-1.30.5/src/os/win32/nginx_icon32.xpm
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-39
+src/deps/src/nginx/src/event/ngx_event_openssl.c
+  s_d920128e903ff2::t_c6e07bc65b8c44 3901-3902,3963-3964,3969-3971,4004-4005,5198
+  s_77fa5bfb272b67::t_16e59721f39832 3900
+src/deps/src/nginx-1.30.5/src/http/modules/ngx_http_referer_module.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-682
+src/deps/src/nginx-1.30.5/misc/GNUmakefile
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-149
+src/deps/src/nginx-1.30.5/src/http/ngx_http_upstream.h
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-464
+src/deps/src/luajit/src/lj_bcdump.h
+  s_f498fa489aa217::t_3c0cf6d43456ae 46,48
+src/deps/src/nginx-1.30.5/src/core/ngx_queue.h
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-115
+src/deps/src/luajit/doc/extensions.html
+  s_f498fa489aa217::t_3c0cf6d43456ae 373,379,413-440
+  s_77fa5bfb272b67::t_aa79a64ca649d7 441
+src/deps/src/nginx-1.30.5/src/http/ngx_http_upstream.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-7305
+src/deps/src/nginx-1.30.5/src/os/unix/ngx_gcc_atomic_ppc.h
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-155
+src/deps/src/nginx-1.30.5/auto/lib/zlib/makefile.msvc
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-17
+src/deps/src/nginx-1.30.5/auto/os/darwin
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-136
+src/linux/Dockerfile-debian-trixie
+  s_f498fa489aa217::t_ae3de3819da3d1 10
+  s_d920128e903ff2::t_86172b7db0dee3 1,143
+src/deps/src/nginx-1.30.5/src/core/ngx_module.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-360
+src/deps/src/nginx-1.30.5/src/core/ngx_rbtree.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-404
+src/deps/src/nginx-1.30.5/src/os/unix/ngx_gcc_atomic_amd64.h
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-82
+src/linux/Dockerfile-debian-bookworm
+  s_f498fa489aa217::t_ae3de3819da3d1 15
+  s_d920128e903ff2::t_7c1a171c195a0a 1,148
+src/deps/src/nginx-1.30.5/auto/lib/openssl/makefile.bcc
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-18
+src/deps/src/nginx-1.30.5/auto/os/solaris
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-61
+src/deps/src/nginx-1.30.5/auto/types/value
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-12
+src/linux/Dockerfile-rhel-9
+  s_f498fa489aa217::t_ae3de3819da3d1 4
+  s_d920128e903ff2::t_6480fffc6812fb 1,145
+src/deps/src/nginx-1.30.5/src/http/modules/ngx_http_range_filter_module.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-999
+src/deps/src/nginx-1.30.5/contrib/vim/ftplugin/nginx.vim
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1
+src/deps/src/nginx-1.30.5/src/http/modules/ngx_http_map_module.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-589
+src/deps/src/nginx-1.30.5/src/os/unix/ngx_freebsd_sendfile_chain.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-308
+tests/linux/Dockerfile-ubuntu-jammy
+  s_f498fa489aa217::t_ae3de3819da3d1 7
+  s_d920128e903ff2::t_28dc400d29b286 1
+src/deps/src/nginx-1.30.5/src/event/ngx_event_posted.h
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-50
+src/deps/src/nginx-1.30.5/src/http/ngx_http_variables.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-2891
+src/deps/src/nginx-1.30.5/src/os/unix/ngx_alloc.h
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-45
+src/deps/src/nginx-1.30.5/src/stream/ngx_stream_upstream_random_module.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-531
+src/deps/src/nginx/src/http/ngx_http_core_module.c
+  s_d920128e903ff2::t_c6e07bc65b8c44 1939,1946-1948
+  s_77fa5bfb272b67::t_b8685c1d43b290 1949-1951
+src/deps/src/nginx-1.30.5/src/core/nginx.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-1676
+src/deps/src/nginx-1.30.5/src/os/unix/ngx_dlopen.h
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-31
+src/deps/src/nginx-1.30.5/src/core/ngx_array.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-141
+src/deps/src/luajit/src/lj_record.c
+  s_f498fa489aa217::t_3c0cf6d43456ae 20,450,452,533-535,2270-2271,2512-2549
+  s_77fa5bfb272b67::t_31005adce9a469 2550
+src/deps/src/nginx-1.30.5/src/mail/ngx_mail_pop3_handler.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-544
+src/deps/src/nginx-1.30.5/src/core/ngx_string.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-2130
+src/deps/src/nginx-1.30.5/src/core/ngx_crc32.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-129
+src/deps/src/nginx-1.30.5/src/os/unix/ngx_thread_id.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-70
+src/deps/src/nginx-1.30.5/src/core/ngx_module.h
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-288
+src/deps/src/luajit/src/jit/v.lua
+  s_f498fa489aa217::t_3c0cf6d43456ae 110,150
+src/deps/src/nginx-1.30.5/auto/lib/libatomic/conf
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-43
+tests/linux/Dockerfile-debian-trixie
+  s_f498fa489aa217::t_ae3de3819da3d1 7
+  s_d920128e903ff2::t_67c8f93c6aab99 1
+src/deps/src/nginx-1.30.5/src/os/win32/ngx_process_cycle.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-1044
+src/deps/src/nginx-1.30.5/src/os/unix/ngx_solaris.h
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-16
+src/deps/src/nginx-1.30.5/src/event/quic/ngx_event_quic_output.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-1406
+src/deps/src/luajit/src/lj_bcwrite.c
+  s_f498fa489aa217::t_3c0cf6d43456ae 343,400-401
+src/deps/src/nginx-1.30.5/src/event/quic/ngx_event_quic_openssl_compat.h
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-52
+src/deps/src/nginx-1.30.5/auto/os/freebsd
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-105
+src/deps/src/nginx/src/mail/ngx_mail_imap_handler.c
+  s_d920128e903ff2::t_c6e07bc65b8c44 51
+tests/linux/Dockerfile-ubuntu
+  s_f498fa489aa217::t_ae3de3819da3d1 7
+  s_d920128e903ff2::t_d25fe7849760cd 1
+src/deps/src/nginx-1.30.5/src/event/quic/ngx_event_quic_ack.h
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-31
+src/deps/src/nginx-1.30.5/src/os/unix/ngx_file_aio_read.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-216
+src/deps/src/nginx-1.30.5/src/os/unix/ngx_time.h
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-66
+src/deps/src/nginx-1.30.5/src/os/unix/ngx_udp_recv.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-72
+src/deps/src/nginx-1.30.5/src/os/unix/ngx_thread_cond.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-76
+src/deps/src/luajit/src/vm_arm64.dasc
+  s_f498fa489aa217::t_3c0cf6d43456ae 923-941,1106,2900-2944,3942
+src/deps/src/nginx-1.30.5/src/os/win32/ngx_atomic.h
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-69
+src/deps/src/nginx-1.30.5/src/http/modules/ngx_http_log_module.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-2024
+src/deps/src/nginx/src/http/modules/ngx_http_charset_filter_module.c
+  s_d920128e903ff2::t_c6e07bc65b8c44 1200-1206
+src/deps/src/nginx/src/os/unix/ngx_channel.c
+  s_d920128e903ff2::t_c6e07bc65b8c44 137-143,162,165,167-168,176,178-181,184,195,197-199
+src/deps/src/nginx-1.30.5/src/core/ngx_parse.h
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-21
+src/deps/src/nginx-1.30.5/src/http/modules/ngx_http_try_files_module.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-419
+tests/unit/linux/test_install_bunkerweb.py
+  s_f498fa489aa217::t_907205f8641548 21-24
+src/deps/src/luajit/src/jit/dis_x86.lua
+  s_f498fa489aa217::t_3c0cf6d43456ae 424,427,434-438,486,524,528,531,534-536,540,544,548,554,558,571,573,576,581-583,585,596-597,608-609,611-612,617-621,626,640,642,645-646,651,657,659,689,704-705,717,729,741-742,762,774,827-829,849,851,853,857-860,862-863,871,875-876,882,887,903-904,912
+src/deps/src/luajit/src/lj_asm_x86.h
+  s_f498fa489aa217::t_3c0cf6d43456ae 350,352-354
+src/deps/src/luajit/src/lib_base.c
+  s_f498fa489aa217::t_3c0cf6d43456ae 228,302,308
+src/deps/src/nginx-1.30.5/src/event/ngx_event_connect.h
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-85
+src/deps/src/nginx-1.30.5/src/http/modules/ngx_http_not_modified_filter_module.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-266
+src/deps/src/nginx-1.30.5/src/os/unix/ngx_posix_init.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-147
+src/deps/src/nginx-1.30.5/auto/have_headers
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-12
+src/deps/src/nginx-1.30.5/auto/types/typedef
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-82
+src/deps/src/nginx-1.30.5/src/os/unix/ngx_linux.h
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-16
+src/deps/src/nginx-1.30.5/src/os/unix/ngx_setaffinity.h
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-37
+src/deps/src/nginx-1.30.5/src/core/ngx_times.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-460
+src/deps/src/nginx-1.30.5/src/core/ngx_murmurhash.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-52
+src/deps/src/nginx-1.30.5/README.md
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-232
+src/all-in-one/Dockerfile
+  s_f498fa489aa217::t_1726e932e29705 1,7,192,223
+src/deps/src/nginx-1.30.5/src/http/modules/perl/nginx.xs
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-1187
+src/deps/src/nginx-1.30.5/src/os/win32/ngx_dlopen.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-22
+src/deps/src/nginx-1.30.5/src/http/modules/ngx_http_index_module.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-551
+src/deps/src/nginx-1.30.5/src/event/quic/ngx_event_quic_bpf_code.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-93
+src/deps/src/nginx-1.30.5/src/os/unix/ngx_shmem.h
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-29
+src/deps/src/nginx-1.30.5/src/event/ngx_event.h
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-533
+tests/linux/Dockerfile-debian-bookworm
+  s_f498fa489aa217::t_ae3de3819da3d1 7
+  s_d920128e903ff2::t_7796aeb689808d 1
+src/deps/src/nginx-1.30.5/src/event/quic/ngx_event_quic_openssl_compat.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-657
+src/deps/src/luajit/src/vm_ppc.dasc
+  s_f498fa489aa217::t_3c0cf6d43456ae 53-59,586-589,1404-1422,1865,2713,2717,4793-4873,5916
+src/deps/src/nginx-1.30.5/src/http/modules/ngx_http_ssi_filter_module.h
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-115
+src/deps/src/nginx-1.30.5/src/event/quic/ngx_event_quic_streams.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-1828
+src/deps/src/nginx-1.30.5/src/stream/ngx_stream_log_module.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-1665
+src/deps/src/nginx-1.30.5/src/core/ngx_md5.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-283
+src/deps/src/luajit/src/jit/bc.lua
+  s_f498fa489aa217::t_3c0cf6d43456ae 47,67-69,79-80,83-84,89,91-92,94-95,102,109-110,115,125,199,209
+src/deps/src/nginx-1.30.5/src/os/win32/nginx.rc
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-6
+src/deps/src/nginx-1.30.5/src/core/ngx_slab.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-817
+src/deps/src/nginx-1.30.5/auto/sources
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-261
+src/deps/src/nginx-1.30.5/src/stream/ngx_stream_upstream.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-868
+src/deps/src/nginx-1.30.5/src/event/quic/ngx_event_quic_transport.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-2215
+src/deps/src/nginx-1.30.5/src/stream/ngx_stream_access_module.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-453
+src/deps/src/nginx-1.30.5/contrib/vim/indent/nginx.vim
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-11
+src/deps/src/nginx-1.30.5/auto/configure
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-121
+src/deps/src/nginx-1.30.5/src/core/ngx_hash.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-1013
+docs/de/upgrading.md
+  s_f498fa489aa217::t_27330ee3ac3077 650
+docs/zh/integrations.md
+  s_f498fa489aa217::t_ae3de3819da3d1 2516,2531,2535,2579,2583,2676,2679
+  s_f498fa489aa217::t_27330ee3ac3077 2616-2618
+src/deps/src/nginx-1.30.5/auto/install
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-220
+src/deps/src/nginx-1.30.5/conf/win-utf
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-126
+src/linux/fpm-debian-bookworm
+  s_f498fa489aa217::t_ae3de3819da3d1 6
+src/deps/src/nginx-1.30.5/src/event/quic/ngx_event_quic_tokens.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-265
+src/deps/src/nginx-1.30.5/src/http/modules/ngx_http_mirror_module.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-264
+src/deps/src/nginx/auto/unix
+  s_d920128e903ff2::t_c6e07bc65b8c44 135,147,475
+src/deps/src/nginx-1.30.5/src/stream/ngx_stream_upstream_round_robin.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-1075
+src/deps/src/nginx-1.30.5/src/http/ngx_http_upstream_round_robin.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-1267
+src/deps/src/nginx-1.30.5/src/core/ngx_syslog.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-410
+src/deps/src/luajit/src/lib_jit.c
+  s_f498fa489aa217::t_3c0cf6d43456ae 726-731
+src/deps/src/luajit/src/lj_parse.c
+  s_f498fa489aa217::t_3c0cf6d43456ae 52,83-94,123,126,128-129,132-133,138,169,173,480,645,651,817-836,846-849,933-939,953-958,969-971,1022-1024,1026-1030,1032,1034-1048,1050-1053,1056,1098-1106,1111,1122-1132,1134,1138-1146,1158-1159,1162,1177-1179,1182-1185,1194-1200,1207-1252,1254,1256,1258-1260,1263-1271,1273,1285-1286,1341-1346,1370-1373,1381-1382,1426-1434,1439-1452,1602,1775,1830,1872,1882,1907-1910,1952-1953,1957,1960,1962,1976,1980,1982,1984-1985,1987-2000,2006,2012-2025,2029-2057,2062,2065,2118-2119,2122,2127,2130-2137,2139,2143-2150,2157-2161,2164-2170,2174,2176-2182,2186-2209,2214,2251-2253,2255,2280-2285,2287,2293-2295,2305-2309,2312,2315,2318,2321,2324,2330-2331,2333,2337,2342,2344,2346-2348,2352,2354-2356,2359,2363,2365-2382,2389,2397,2411-2448,2479-2480,2483,2485-2495,2514,2518,2533-2537,2557,2561-2567,2569,2572-2573,2575,2579-2580,2594-2610,2629-2630,2632,2636,2657,2662-2663,2666-2672,2674-2675,2689-2690,2712-2718,2745,2751,2790,2809,2855,2931,3021,3023-3029,3031-3032,3038-3045,3053,3060,3074,3098
+src/deps/src/nginx/src/core/nginx.h
+  s_d920128e903ff2::t_c6e07bc65b8c44 12-13
+src/deps/src/nginx/src/stream/ngx_stream_script.c
+  s_d920128e903ff2::t_c6e07bc65b8c44 160-162,524,532-533
+src/deps/src/nginx-1.30.5/src/os/win32/ngx_wsarecv.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-215
+src/deps/src/nginx-1.30.5/src/http/modules/ngx_http_proxy_v2_module.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-4259
+src/deps/src/nginx-1.30.5/src/os/win32/ngx_process.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-238
+src/deps/src/nginx-1.30.5/src/http/modules/ngx_http_addition_filter_module.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-254
+src/deps/src/nginx-1.30.5/src/http/modules/ngx_http_proxy_module.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-5414
+src/deps/src/nginx-1.30.5/src/event/ngx_event_connect.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-435
+src/deps/src/nginx-1.30.5/src/event/ngx_event_pipe.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-1146
+src/deps/src/nginx/src/http/v3/ngx_http_v3_parse.c
+  s_d920128e903ff2::t_c6e07bc65b8c44 1840-1841,1851
+docs/upgrading.md
+  s_f498fa489aa217::t_27330ee3ac3077 626
+src/deps/src/nginx-1.30.5/contrib/unicode2nginx/koi-utf
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-131
+src/deps/src/luajit/src/vm_x86.dasc
+  s_f498fa489aa217::t_3c0cf6d43456ae 447,455,1340-1386,2139,3158-3172,3189,3197-3227,4117,4203-4284
+  s_77fa5bfb272b67::t_92d5cd3fe2aa71 4285
+src/deps/src/nginx-1.30.5/src/stream/ngx_stream_return_module.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-218
+src/deps/src/nginx-1.30.5/src/http/modules/ngx_http_split_clients_module.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-246
+src/deps/src/nginx-1.30.5/src/os/win32/ngx_service.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-134
+src/deps/src/nginx-1.30.5/src/core/ngx_regex.h
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-78
+src/deps/src/luajit/src/Makefile.dep
+  s_f498fa489aa217::t_3c0cf6d43456ae 152-153,185-187
+src/deps/src/nginx/src/http/modules/ngx_http_image_filter_module.c
+  s_d920128e903ff2::t_c6e07bc65b8c44 513
+src/deps/src/nginx-1.30.5/src/stream/ngx_stream_geo_module.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-1624
+src/deps/src/nginx-1.30.5/src/http/modules/ngx_http_uwsgi_module.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-2785
+src/deps/src/nginx-1.30.5/src/core/ngx_spinlock.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-53
+src/deps/src/nginx-1.30.5/src/core/ngx_crypt.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-270
+src/deps/src/nginx-1.30.5/src/event/modules/ngx_select_module.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-424
+src/deps/src/nginx-1.30.5/src/core/ngx_cycle.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-1482
+src/deps/src/nginx-1.30.5/auto/include
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-58
+src/deps/src/nginx/src/mail/ngx_mail_smtp_handler.c
+  s_d920128e903ff2::t_c6e07bc65b8c44 343
+src/deps/src/nginx-1.30.5/LICENSE
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-24
+src/deps/src/nginx-1.30.5/auto/cc/bcc
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-71
+src/deps/src/nginx-1.30.5/src/os/win32/ngx_errno.h
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-72
+src/deps/src/nginx-1.30.5/src/http/v3/ngx_http_v3_parse.h
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-146
+src/deps/src/nginx-1.30.5/src/os/win32/ngx_process.h
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-80
+misc/install-bunkerweb.sh
+  s_f498fa489aa217::t_ae3de3819da3d1 116,134,141-142
+src/deps/src/nginx-1.30.5/src/stream/ngx_stream_upstream.h
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-165
+src/deps/src/nginx-1.30.5/.gitignore
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-3
+src/deps/src/nginx-1.30.5/src/os/win32/nginx_icon48.xpm
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-55
+src/deps/src/nginx-1.30.5/src/stream/ngx_stream_upstream_least_conn_module.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-322
+src/deps/src/nginx-1.30.5/src/event/quic/ngx_event_quic_ssl.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-991
+src/deps/src/nginx/src/mail/ngx_mail_proxy_module.c
+  s_d920128e903ff2::t_c6e07bc65b8c44 897
+src/deps/src/nginx-1.30.5/src/os/unix/ngx_user.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-84
+src/deps/src/nginx-1.30.5/src/os/unix/ngx_errno.h
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-80
+src/deps/src/nginx-1.30.5/src/core/ngx_inet.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-1499
+src/deps/src/nginx-1.30.5/src/mail/ngx_mail.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-485
+src/linux/Dockerfile-ubuntu-jammy
+  s_f498fa489aa217::t_ae3de3819da3d1 14
+  s_d920128e903ff2::t_ac35e40e82f023 1,147
+src/deps/src/luajit/src/lj_arch.h
+  s_f498fa489aa217::t_3c0cf6d43456ae 501-503
+src/deps/src/luajit/src/vm_mips.dasc
+  s_f498fa489aa217::t_3c0cf6d43456ae 984-1002,3908-3962
+  s_77fa5bfb272b67::t_56188cfa13b04f 3963
+src/deps/src/nginx-1.30.5/conf/nginx.conf
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-115
+src/deps/src/nginx-1.30.5/src/http/modules/perl/typemap
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-3
+tests/linux/Dockerfile-rhel-10
+  s_f498fa489aa217::t_ae3de3819da3d1 3
+  s_d920128e903ff2::t_f0ea1bc5e92715 1
+src/deps/src/nginx-1.30.5/src/misc/ngx_cpp_test_module.cpp
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-31
+src/deps/src/luajit/dynasm/dasm_arm64.h
+  s_f498fa489aa217::t_3c0cf6d43456ae 175-187,189-191,194-199,203-204,206-214
+src/deps/src/nginx-1.30.5/src/core/ngx_palloc.h
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-92
+src/deps/src/nginx/src/http/v2/ngx_http_v2.h
+  s_d920128e903ff2::t_c6e07bc65b8c44 83
+docs/es/integrations.md
+  s_f498fa489aa217::t_27330ee3ac3077 2572-2574
+  s_f498fa489aa217::t_ae3de3819da3d1 2472,2487,2491,2535,2539,2632,2635
+docs/es/upgrading.md
+  s_f498fa489aa217::t_27330ee3ac3077 659
+src/deps/src/nginx-1.30.5/src/core/ngx_thread_pool.h
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-36
+src/deps/src/luajit/src/lj_opt_fold.c
+  s_f498fa489aa217::t_3c0cf6d43456ae 386,1094-1095
+src/deps/src/nginx-1.30.5/auto/cc/sunc
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-156
+docs/de/integrations.md
+  s_f498fa489aa217::t_ae3de3819da3d1 2588,2603,2607,2651,2655,2748,2751
+  s_f498fa489aa217::t_27330ee3ac3077 2688-2690
+src/deps/src/nginx-1.30.5/src/os/unix/ngx_dlopen.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-28
+src/deps/src/nginx-1.30.5/auto/nohave
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-12
+src/deps/src/nginx-1.30.5/src/http/modules/ngx_http_memcached_module.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-736
+src/deps/src/nginx-1.30.5/src/http/modules/ngx_http_ssl_module.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-1551
+src/deps/install.sh
+  s_476e9863a1ff94::t_ee93718abe0ea1 226-234
+src/deps/src/nginx-1.30.5/src/http/modules/ngx_http_auth_basic_module.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-433
+src/deps/src/nginx-1.30.5/src/os/unix/ngx_gcc_atomic_x86.h
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-127
+src/deps/src/nginx-1.30.5/src/http/modules/ngx_http_static_module.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-297
+src/deps/src/nginx-1.30.5/src/os/unix/ngx_sunpro_atomic_sparc64.h
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-61
+src/deps/src/nginx-1.30.5/src/core/ngx_times.h
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-52
+src/deps/src/nginx-1.30.5/conf/scgi_params
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-17
+src/deps/src/nginx-1.30.5/src/http/modules/ngx_http_xslt_filter_module.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-1157
+src/deps/src/nginx-1.30.5/src/stream/ngx_stream_set_module.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-226
+src/linux/fpm-ubuntu
+  s_f498fa489aa217::t_ae3de3819da3d1 6
+src/deps/src/luajit/src/lj_dispatch.h
+  s_f498fa489aa217::t_3c0cf6d43456ae 52,70-99,127
+src/deps/src/nginx-1.30.5/auto/lib/pcre/makefile.owc
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-25
+src/deps/src/nginx-1.30.5/contrib/unicode2nginx/win-utf
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-130
+src/deps/src/nginx-1.30.5/src/http/modules/ngx_http_ssi_filter_module.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-2964
+src/deps/src/nginx-1.30.5/src/http/modules/ngx_http_upstream_keepalive_module.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-621
+src/deps/src/nginx-1.30.5/src/os/win32/ngx_time.h
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-51
+src/deps/src/nginx-1.30.5/src/core/ngx_regex.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-804
+src/deps/src/nginx-1.30.5/src/core/ngx_rwlock.h
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-22
+src/deps/src/nginx-1.30.5/src/core/ngx_rwlock.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-117
+src/deps/src/nginx-1.30.5/src/core/ngx_conf_file.h
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-295
+src/deps/src/nginx-1.30.5/src/os/unix/ngx_process.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-648
+src/deps/src/nginx-1.30.5/src/core/ngx_parse_time.h
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-22
+src/deps/src/nginx-1.30.5/src/core/ngx_slab.h
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-72
+src/deps/src/nginx-1.30.5/contrib/unicode2nginx/unicode-to-nginx.pl
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-48
+src/deps/src/nginx-1.30.5/auto/endianness
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-50
+src/deps/src/nginx-1.30.5/src/http/v3/ngx_http_v3_encode.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-304
+src/deps/src/nginx-1.30.5/src/os/unix/ngx_solaris_sendfilev_chain.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-228
+src/deps/src/luajit/src/lj_crecord.c
+  s_f498fa489aa217::t_3c0cf6d43456ae 1398,1887-1888,1893-1894,1897,1899,1901,1903,1915,1957-1970
+  s_77fa5bfb272b67::t_945e62691dc0ce 1971-1972
+src/deps/src/nginx-1.30.5/src/os/win32/ngx_udp_wsarecv.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-149
+src/deps/src/nginx-1.30.5/src/os/win32/ngx_user.h
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-25
+src/deps/src/nginx-1.30.5/src/core/ngx_list.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-63
+src/deps/src/nginx/src/event/modules/ngx_select_module.c
+  s_d920128e903ff2::t_c6e07bc65b8c44 149-159
+src/deps/src/nginx-1.30.5/src/core/ngx_rbtree.h
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-87
+src/deps/src/nginx-1.30.5/src/http/modules/ngx_http_limit_req_module.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-1102
+src/deps/src/nginx-1.30.5/src/mail/ngx_mail_imap_handler.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-477
+src/deps/src/nginx-1.30.5/src/os/unix/ngx_alloc.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-90
+src/deps/src/nginx-1.30.5/src/os/unix/ngx_recv.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-203
+src/deps/src/nginx-1.30.5/src/core/ngx_open_file_cache.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-1253
+src/deps/src/nginx-1.30.5/auto/cc/msvc
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-167
+src/deps/src/nginx-1.30.5/src/os/unix/ngx_thread_mutex.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-165
+docs/integrations.md
+  s_f498fa489aa217::t_ae3de3819da3d1 2579,2594,2598,2642,2646,2739,2742
+  s_f498fa489aa217::t_27330ee3ac3077 2679-2681
+src/deps/src/luajit/src/lj_meta.h
+  s_f498fa489aa217::t_3c0cf6d43456ae 29-30
+src/deps/src/nginx-1.30.5/src/http/v2/ngx_http_v2_table.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-363
+src/deps/src/nginx-1.30.5/src/event/ngx_event_timer.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-126
+src/deps/src/nginx-1.30.5/src/os/unix/ngx_sunpro_amd64.il
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-43
+src/linux/fpm-rhel-9
+  s_f498fa489aa217::t_ae3de3819da3d1 6
+src/deps/src/nginx-1.30.5/src/os/unix/ngx_darwin_sendfile_chain.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-206
+src/deps/src/nginx-1.30.5/src/mail/ngx_mail_parse.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-974
+src/deps/src/nginx-1.30.5/src/os/unix/ngx_process_cycle.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-1191
+src/deps/src/nginx-1.30.5/src/http/ngx_http_huff_decode.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-2714
+src/deps/src/nginx/auto/cc/name
+  s_d920128e903ff2::t_c6e07bc65b8c44 60
+src/deps/src/nginx-1.30.5/src/core/ngx_inet.h
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-132
+src/deps/src/nginx-1.30.5/src/event/quic/ngx_event_quic_protection.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-1268
+src/deps/src/nginx-1.30.5/auto/threads
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-21
+src/deps/src/nginx/src/http/ngx_http_upstream.c
+  s_d920128e903ff2::t_c6e07bc65b8c44 1119-1122,2615-2622,3077-3079,3168,3175,4187-4191
+  s_77fa5bfb272b67::t_69d85dff084d63 4192
+src/deps/src/nginx-1.30.5/src/http/ngx_http_header_filter_module.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-741
+src/deps/src/luajit/dynasm/dasm_x86.lua
+  s_f498fa489aa217::t_3c0cf6d43456ae 1313,1328,1532-1533
+src/deps/src/nginx-1.30.5/src/core/ngx_open_file_cache.h
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-129
+src/deps/src/nginx-1.30.5/src/http/modules/perl/nginx.pm
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-140
+src/deps/src/nginx-1.30.5/contrib/vim/ftdetect/nginx.vim
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-4
+src/deps/src/nginx/src/http/modules/ngx_http_memcached_module.c
+  s_d920128e903ff2::t_c6e07bc65b8c44 416-420
+src/deps/src/nginx-1.30.5/src/os/win32/ngx_user.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-23
+src/deps/src/nginx-1.30.5/src/stream/ngx_stream_write_filter_module.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-306
+src/deps/src/luajit/src/vm_mips64.dasc
+  s_f498fa489aa217::t_3c0cf6d43456ae 1030-1047,4134-4191
+  s_77fa5bfb272b67::t_83b0f37c38a7c0 4192
+src/deps/src/nginx-1.30.5/CONTRIBUTING.md
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-128
+src/deps/src/luajit/src/lj_opt_mem.c
+  s_f498fa489aa217::t_3c0cf6d43456ae 402,454-475
+src/deps/src/nginx-1.30.5/src/os/unix/ngx_udp_sendmsg_chain.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-432
+src/deps/src/nginx-1.30.5/src/core/ngx_crc.h
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-39
+src/deps/src/nginx-1.30.5/src/http/v2/ngx_http_v2.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-5030
+src/deps/src/nginx-1.30.5/src/os/unix/ngx_solaris_init.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-77
+src/deps/src/nginx-1.30.5/src/event/modules/ngx_iocp_module.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-379
+src/linux/fpm-rhel-8
+  s_f498fa489aa217::t_ae3de3819da3d1 6
+src/deps/src/nginx-1.30.5/auto/lib/pcre/makefile.bcc
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-27
+src/deps/src/nginx-1.30.5/auto/feature
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-123
+src/deps/src/nginx-1.30.5/src/os/unix/ngx_writev_chain.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-216
+src/deps/src/nginx-1.30.5/src/event/ngx_event_udp.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-590
+src/linux/fpm-rhel-10
+  s_f498fa489aa217::t_ae3de3819da3d1 6
+src/deps/src/nginx-1.30.5/src/mail/ngx_mail_auth_http_module.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-1662
+src/deps/src/nginx-1.30.5/src/http/ngx_http_cache.h
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-210
+src/deps/src/nginx-1.30.5/src/os/unix/ngx_posix_config.h
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-151
+src/common/utils/ports.py
+  s_f498fa489aa217::t_27330ee3ac3077 9
+src/deps/src/nginx-1.30.5/src/http/v3/ngx_http_v3_encode.h
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-34
+src/deps/src/nginx-1.30.5/src/event/quic/ngx_event_quic.h
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-145
+src/deps/src/nginx-1.30.5/auto/lib/geoip/conf
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-114
+src/deps/src/nginx-1.30.5/src/core/ngx_list.h
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-83
+src/deps/src/nginx-1.30.5/auto/types/uintptr_t
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-50
+src/deps/src/nginx/src/http/modules/perl/ngx_http_perl_module.c
+  s_d920128e903ff2::t_c6e07bc65b8c44 151-153,314-336,752-753,798
+  s_77fa5bfb272b67::t_df685a2206958d 799
+src/deps/src/nginx-1.30.5/src/core/ngx_crypt.h
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-20
+src/deps/src/nginx-1.30.5/src/event/ngx_event_connectex.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-206
+src/deps/src/nginx-1.30.5/auto/lib/libxslt/conf
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-165
+src/deps/src/nginx-1.30.5/src/event/quic/ngx_event_quic_bpf.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-657
+src/deps/src/nginx-1.30.5/src/http/ngx_http_parse.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-2469
+src/deps/src/nginx/src/http/ngx_http_parse.c
+  s_d920128e903ff2::t_c6e07bc65b8c44 2407
+src/deps/src/nginx-1.30.5/src/http/modules/ngx_http_geo_module.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-1696
+src/deps/src/nginx-1.30.5/src/http/modules/ngx_http_secure_link_module.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-366
+src/deps/deps.json
+  s_476e9863a1ff94::t_ee93718abe0ea1 204,206,260-266,270
+src/deps/src/nginx-1.30.5/misc/README
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-13
+src/deps/src/nginx-1.30.5/src/stream/ngx_stream_map_module.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-588
+src/deps/src/nginx-1.30.5/auto/lib/zlib/makefile.bcc
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-17
+src/deps/src/nginx-1.30.5/src/os/unix/ngx_linux_init.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-60
+src/deps/src/nginx-1.30.5/auto/cc/acc
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-14
+src/deps/src/nginx-1.30.5/auto/have
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-12
+tests/linux/Dockerfile-ubuntu-noble
+  s_f498fa489aa217::t_ae3de3819da3d1 7
+  s_d920128e903ff2::t_5a9f5b5d1382aa 1
+src/deps/src/nginx-1.30.5/src/os/unix/ngx_solaris_config.h
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-112
+src/deps/src/nginx-1.30.5/auto/headers
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-13
+src/deps/src/nginx-1.30.5/auto/os/linux
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-298
+src/deps/src/nginx-1.30.5/contrib/geo2nginx.pl
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-58
+src/deps/src/nginx-1.30.5/src/event/ngx_event_udp.h
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-66
+src/deps/src/nginx-1.30.5/src/core/ngx_file.h
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-164
+src/deps/src/nginx-1.30.5/src/http/modules/ngx_http_image_filter_module.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-1675
+src/deps/src/nginx-1.30.5/auto/init
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-53
+src/deps/src/nginx-1.30.5/auto/lib/pcre/make
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-171
+src/deps/src/nginx-1.30.5/src/core/ngx_log.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-752
+src/deps/src/nginx-1.30.5/src/mail/ngx_mail_handler.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-1022
+src/deps/src/luajit/src/lj_vmmath.c
+  s_f498fa489aa217::t_3c0cf6d43456ae 16-20
+src/deps/src/nginx-1.30.5/src/core/ngx_log.h
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-271
+src/deps/src/nginx-1.30.5/src/stream/ngx_stream_ssl_preread_module.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-715
+src/deps/src/nginx-1.30.5/src/os/win32/ngx_socket.h
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-255
+src/deps/src/nginx-1.30.5/conf/mime.types
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-99
+src/deps/src/nginx-1.30.5/src/core/ngx_sha1.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-294
+src/deps/src/nginx-1.30.5/src/mail/ngx_mail_ssl_module.h
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-66
+src/deps/src/nginx-1.30.5/src/http/modules/ngx_http_degradation_module.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-243
+src/deps/src/nginx/src/event/quic/ngx_event_quic_ssl.c
+  s_d920128e903ff2::t_c6e07bc65b8c44 645-653
+src/deps/src/nginx/src/mail/ngx_mail_pop3_handler.c
+  s_d920128e903ff2::t_c6e07bc65b8c44 72
+src/deps/src/nginx/src/http/modules/perl/ngx_http_perl_module.h
+  s_d920128e903ff2::t_c6e07bc65b8c44 53-58,62-64,80
+src/deps/src/nginx-1.30.5/auto/lib/make
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-24
+src/deps/src/nginx-1.30.5/src/http/modules/ngx_http_gzip_filter_module.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-1185
+src/deps/src/nginx-1.30.5/src/http/modules/ngx_http_gunzip_filter_module.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-697
+src/deps/src/nginx-1.30.5/auto/options
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-653
+src/deps/src/nginx-1.30.5/src/http/modules/ngx_http_headers_filter_module.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-918
+src/deps/src/nginx-1.30.5/src/os/win32/ngx_shmem.h
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-33
+src/deps/src/nginx-1.30.5/src/event/quic/ngx_event_quic_frames.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-895
+src/deps/src/nginx-1.30.5/src/event/quic/bpf/makefile
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-30
+src/linux/fpm-debian-trixie
+  s_f498fa489aa217::t_ae3de3819da3d1 6
+src/deps/src/nginx-1.30.5/contrib/vim/syntax/nginx.vim
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-1979
+src/deps/src/nginx-1.30.5/src/core/ngx_murmurhash.h
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-19
+src/deps/src/nginx-1.30.5/src/mail/ngx_mail_pop3_module.h
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-38
+src/deps/src/nginx-1.30.5/auto/cc/clang
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-90
+src/deps/src/luajit/src/lj_carith.c
+  s_f498fa489aa217::t_3c0cf6d43456ae 356-386
+src/deps/src/nginx-1.30.5/src/http/ngx_http_variables.h
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-117
+src/deps/src/nginx/src/http/modules/ngx_http_dav_module.c
+  s_d920128e903ff2::t_c6e07bc65b8c44 539,649,651-661
+src/deps/src/nginx-1.30.5/SUPPORT.md
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-48
+src/deps/src/nginx-1.30.5/src/http/modules/ngx_http_upstream_ip_hash_module.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-307
+src/deps/src/nginx-1.30.5/src/os/win32/ngx_stat.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-34
+src/deps/src/nginx-1.30.5/src/event/ngx_event_timer.h
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-90
+src/deps/src/nginx-1.30.5/src/http/modules/ngx_http_chunked_filter_module.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-343
+src/deps/src/nginx-1.30.5/src/os/unix/ngx_time.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-104
+src/deps/src/nginx-1.30.5/src/os/win32/ngx_os.h
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-68
+src/deps/src/nginx-1.30.5/src/os/win32/ngx_event_log.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-99
+src/deps/src/nginx-1.30.5/src/http/v2/ngx_http_v2_filter_module.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-1769
+src/deps/src/luajit/src/lj_obj.h
+  s_f498fa489aa217::t_3c0cf6d43456ae 404,1045-1062,1067
+  s_77fa5bfb272b67::t_081000e76db9b4 1068
+src/deps/src/nginx-1.30.5/src/http/modules/ngx_http_dav_module.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-1186
+src/deps/src/nginx-1.30.5/src/core/ngx_connection.h
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-239
+src/deps/src/nginx-1.30.5/src/http/ngx_http_huff_encode.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-254
+src/deps/src/nginx-1.30.5/src/misc/ngx_google_perftools_module.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-126
+src/deps/src/nginx-1.30.5/src/os/win32/ngx_alloc.h
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-27
+src/deps/src/nginx-1.30.5/src/event/modules/ngx_iocp_module.h
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-22
+src/deps/src/nginx-1.30.5/src/core/ngx_connection.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-1657
+src/deps/src/nginx-1.30.5/src/event/quic/ngx_event_quic_output.h
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-40
+src/deps/src/nginx-1.30.5/src/http/modules/perl/ngx_http_perl_module.h
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-73
+src/deps/src/nginx-1.30.5/auto/summary
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-82
+src/deps/src/nginx-1.30.5/src/http/v2/ngx_http_v2.h
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-423
+src/deps/src/nginx-1.30.5/src/os/unix/ngx_udp_send.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-56
+src/deps/src/nginx-1.30.5/src/stream/ngx_stream_upstream_zone_module.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-1005
+src/deps/src/nginx-1.30.5/src/http/ngx_http.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-2200
+src/deps/src/nginx-1.30.5/src/event/modules/ngx_win32_select_module.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-408
+src/deps/src/nginx-1.30.5/src/os/win32/ngx_shmem.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-161
+src/deps/src/nginx-1.30.5/src/http/modules/ngx_http_proxy_module.h
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-127
+src/deps/src/nginx-1.30.5/conf/uwsgi_params
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-17
+src/deps/src/nginx-1.30.5/src/core/ngx_array.h
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-53
+src/deps/src/nginx/src/http/ngx_http_copy_filter_module.c
+  s_d920128e903ff2::t_c6e07bc65b8c44 90-96,150-171,176-181
+  s_77fa5bfb272b67::t_62a7bda0697314 182
+src/deps/src/nginx-1.30.5/src/core/ngx_queue.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-106
+src/deps/src/nginx-1.30.5/src/event/modules/ngx_kqueue_module.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-731
+src/deps/src/nginx-1.30.5/src/http/modules/ngx_http_empty_gif_module.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-140
+src/deps/src/nginx-1.30.5/src/event/modules/ngx_win32_poll_module.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-436
+src/deps/src/nginx-1.30.5/src/core/ngx_resolver.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-4741
+src/linux/fpm-ubuntu-jammy
+  s_f498fa489aa217::t_ae3de3819da3d1 6
+src/deps/src/nginx-1.30.5/auto/lib/zlib/makefile.owc
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-14
+src/deps/src/nginx-1.30.5/src/event/quic/ngx_event_quic_ssl.h
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-19
+src/deps/src/nginx-1.30.5/src/core/ngx_file.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-1128
+src/deps/src/nginx-1.30.5/src/os/unix/ngx_os.h
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-102
+src/deps/src/nginx-1.30.5/src/http/v2/ngx_http_v2_encode.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-62
+src/deps/src/luajit/src/lj_ccallback.c
+  s_f498fa489aa217::t_3c0cf6d43456ae 798,805
+src/deps/src/nginx-1.30.5/src/core/ngx_output_chain.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-820
+src/bw/Dockerfile
+  s_f498fa489aa217::t_1726e932e29705 1,4,100,114
+src/deps/src/nginx-1.30.5/src/core/ngx_core.h
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-121
+src/deps/src/luajit/src/vm_s390x.dasc
+  s_f498fa489aa217::t_3c0cf6d43456ae 73,410,416,418,499,524,577,973-988,2633-2634,2639,2642-2644,2870-2919
+  s_77fa5bfb272b67::t_f7dfe5fd50d86f 2920
+src/deps/src/nginx-1.30.5/src/mail/ngx_mail_smtp_module.h
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-45
+src/deps/src/luajit/src/jit/dump.lua
+  s_f498fa489aa217::t_3c0cf6d43456ae 65,93,108-110,126,145,150,236,271-277,283-289,328-330,334,337,351,357,368-370,373,377,379,401,403,415,434,471,473,476,484-486,493-495,497,500,505,510,514,516-517,522,575,602,621,670,680,686,688-689,706
+src/deps/src/nginx-1.30.5/src/stream/ngx_stream_variables.h
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-113
+src/deps/src/nginx-1.30.5/src/http/v3/ngx_http_v3.h
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-160
+src/deps/src/luajit/src/jit/dis_arm64.lua
+  s_f498fa489aa217::t_3c0cf6d43456ae 21,783-785,790-795,797,804-805,807-808,811,821,823,825,827,832-834,839-845,860,871,880-881,883,890,897,899,908-909,911-912,914-915,917-918,924,926,928,930-933,935,941-942,950,952-954,958-960,966-969,975-977,983-984,986-988,990,996,999-1002,1015-1017,1029,1032,1036-1037,1044,1053,1064,1072,1081,1085,1090,1093,1100-1102,1110,1112,1114,1116,1118-1119,1122,1124-1125,1129-1130,1133
+src/deps/src/nginx-1.30.5/src/event/ngx_event_openssl_cache.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-1267
+src/deps/src/nginx-1.30.5/src/os/unix/ngx_linux_aio_read.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-148
+src/deps/src/nginx-1.30.5/src/core/ngx_parse.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-283
+src/deps/src/nginx-1.30.5/auto/stubs
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-8
+src/deps/src/nginx-1.30.5/src/stream/ngx_stream_limit_conn_module.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-737
+src/deps/src/nginx-1.30.5/src/os/win32/ngx_win32_config.h
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-291
+src/deps/src/nginx-1.30.5/src/mail/ngx_mail.h
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-425
+src/deps/src/nginx-1.30.5/conf/koi-win
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-103
+src/deps/src/nginx-1.30.5/src/os/unix/ngx_readv_chain.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-252
+src/deps/src/nginx-1.30.5/src/os/win32/nginx_icon16.xpm
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-24
+src/deps/src/nginx-1.30.5/src/event/quic/ngx_event_quic_protection.h
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-118
+src/deps/src/nginx-1.30.5/src/os/win32/ngx_files.h
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-272
+src/deps/src/nginx-1.30.5/src/http/modules/ngx_http_realip_module.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-621
+src/deps/src/nginx-1.30.5/src/event/quic/bpf/bpfgen.sh
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-113
+src/deps/src/nginx-1.30.5/auto/lib/pcre/makefile.msvc
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-23
+src/deps/src/luajit/src/jit/p.lua
+  s_f498fa489aa217::t_3c0cf6d43456ae 123,187,198,215,229,238,273
+src/deps/src/nginx-1.30.5/src/http/modules/ngx_http_rewrite_module.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-1030
+tests/linux/Dockerfile-rhel-8
+  s_f498fa489aa217::t_ae3de3819da3d1 3
+  s_d920128e903ff2::t_ab4150649c8aaf 1
+src/deps/src/nginx-1.30.5/src/os/win32/ngx_socket.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-49
+src/deps/src/nginx-1.30.5/src/http/v2/ngx_http_v2_module.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-498
+src/deps/src/nginx-1.30.5/src/os/unix/ngx_files.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-956
+src/deps/src/nginx-1.30.5/src/core/nginx.h
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-26
+src/deps/src/nginx-1.30.5/src/http/modules/ngx_http_sub_filter_module.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-1022
+src/deps/src/nginx-1.30.5/src/event/modules/ngx_devpoll_module.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-561
+src/deps/src/nginx-1.30.5/src/mail/ngx_mail_imap_module.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-258
+src/deps/src/nginx-1.30.5/src/http/modules/ngx_http_charset_filter_module.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-1687
+src/deps/src/nginx-1.30.5/src/core/ngx_proxy_protocol.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-614
+src/deps/src/nginx-1.30.5/src/os/unix/ngx_freebsd.h
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-25
+src/deps/src/nginx-1.30.5/src/os/win32/ngx_alloc.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-44
+src/deps/src/nginx-1.30.5/src/http/modules/ngx_http_mp4_module.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-3987
+src/deps/src/nginx-1.30.5/src/core/ngx_sha1.h
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-28
+src/deps/src/nginx-1.30.5/auto/cc/conf
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-254
+src/deps/src/nginx-1.30.5/src/os/win32/ngx_time.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-83
+src/deps/src/nginx-1.30.5/src/os/unix/ngx_errno.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-210
+src/deps/src/nginx-1.30.5/src/os/unix/ngx_linux_sendfile_chain.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-436
+src/deps/src/nginx-1.30.5/src/http/ngx_http_request.h
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-632
+src/deps/src/nginx-1.30.5/src/core/ngx_buf.h
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-167
+src/deps/src/nginx/src/os/unix/ngx_process_cycle.c
+  s_d920128e903ff2::t_c6e07bc65b8c44 1076-1081
+src/deps/src/luajit/src/lj_dispatch.c
+  s_f498fa489aa217::t_3c0cf6d43456ae 59-67,88
+src/deps/src/nginx-1.30.5/src/http/ngx_http.h
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-201
+src/deps/src/nginx-1.30.5/src/http/modules/ngx_http_stub_status_module.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-226
+src/deps/src/nginx-1.30.5/src/http/modules/ngx_http_fastcgi_module.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-3969
+src/deps/src/luajit/src/lj_ir.h
+  s_f498fa489aa217::t_3c0cf6d43456ae 56
+src/deps/src/nginx-1.30.5/src/stream/ngx_stream_pass_module.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-336
+src/deps/src/nginx-1.30.5/src/os/win32/ngx_wsasend_chain.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-296
+src/deps/src/luajit/src/lj_errmsg.h
+  s_f498fa489aa217::t_3c0cf6d43456ae 145,149-151
+src/deps/src/nginx-1.30.5/src/os/win32/ngx_thread.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-30
+src/deps/src/nginx-1.30.5/SECURITY.md
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-103
+src/deps/src/luajit/src/jit/bcsave.lua
+  s_f498fa489aa217::t_3c0cf6d43456ae 23,119,150,187,192,256-258,261,268,280-281,302,322,389-390,430,483,487,588,607,609,627,635
+src/deps/src/nginx-1.30.5/src/http/modules/ngx_http_limit_conn_module.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-758
+src/deps/src/nginx-1.30.5/src/stream/ngx_stream_core_module.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-1523
+src/deps/src/nginx-1.30.5/auto/cc/gcc
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-171
+src/deps/src/nginx-1.30.5/src/http/modules/ngx_http_random_index_module.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-317
+src/deps/src/nginx-1.30.5/src/http/v3/ngx_http_v3_parse.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-1942
+docs/fr/upgrading.md
+  s_f498fa489aa217::t_27330ee3ac3077 572
+src/linux/Dockerfile-ubuntu
+  s_f498fa489aa217::t_ae3de3819da3d1 9
+  s_d920128e903ff2::t_7e03a1798f3a55 1,142
+src/deps/src/nginx-1.30.5/src/core/ngx_thread_pool.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-641
+src/deps/src/nginx-1.30.5/src/mail/ngx_mail_realip_module.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-269
+src/deps/src/nginx-1.30.5/src/stream/ngx_stream.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-1176
+src/deps/src/nginx-1.30.5/src/os/unix/ngx_socket.h
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-73
+src/deps/src/nginx-1.30.5/src/event/quic/ngx_event_quic_migration.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-1007
+src/deps/src/nginx-1.30.5/src/event/quic/bpf/ngx_quic_reuseport_helper.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-140
+src/deps/src/nginx-1.30.5/auto/make
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-674
+src/deps/src/nginx-1.30.5/src/http/v3/ngx_http_v3_uni.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-622
+src/deps/src/nginx-1.30.5/src/os/unix/ngx_freebsd_init.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-262
+src/deps/src/nginx/src/http/v3/ngx_http_v3_parse.h
+  s_d920128e903ff2::t_c6e07bc65b8c44 124
+src/deps/src/nginx-1.30.5/conf/fastcgi.conf
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-26
+src/deps/src/nginx-1.30.5/src/http/modules/ngx_http_upstream_sticky_module.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-1513
+src/deps/src/nginx-1.30.5/src/event/quic/ngx_event_quic_frames.h
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-45
+src/deps/src/nginx-1.30.5/src/os/win32/ngx_thread.h
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-27
+tests/linux/Dockerfile-rhel-9
+  s_f498fa489aa217::t_ae3de3819da3d1 3
+  s_d920128e903ff2::t_aa958f871be5a8 1
+docs/zh/upgrading.md
+  s_f498fa489aa217::t_27330ee3ac3077 513
+src/bw/AGENTS.md
+  s_f498fa489aa217::t_27330ee3ac3077 12
+src/deps/src/nginx-1.30.5/src/core/ngx_resolver.h
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-242
+src/deps/src/nginx-1.30.5/src/os/win32/ngx_wsarecv_chain.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-147
+src/deps/src/nginx-1.30.5/src/core/ngx_cpuinfo.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-139
+src/deps/src/nginx-1.30.5/auto/lib/libatomic/make
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-21
+src/deps/src/nginx/src/stream/ngx_stream_geo_module.c
+  s_d920128e903ff2::t_c6e07bc65b8c44 1446-1470
+src/deps/src/nginx-1.30.5/src/mail/ngx_mail_smtp_module.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-312
+src/deps/src/nginx-1.30.5/src/http/ngx_http_request.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-4148
+src/deps/src/nginx-1.30.5/src/os/unix/ngx_darwin_init.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-204
+src/deps/src/nginx-1.30.5/src/os/unix/ngx_atomic.h
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-313
+src/deps/src/nginx-1.30.5/conf/koi-utf
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-109
+src/deps/src/luajit/src/lj_alloc.c
+  s_f498fa489aa217::t_3c0cf6d43456ae 222
+src/deps/src/nginx-1.30.5/src/os/unix/ngx_process.h
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-90
+src/deps/src/nginx-1.30.5/auto/types/sizeof
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-76
+src/deps/src/nginx-1.30.5/src/http/modules/ngx_http_browser_module.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-712
+src/deps/src/nginx-1.30.5/src/core/ngx_syslog.h
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-36
+src/deps/src/nginx-1.30.5/src/event/ngx_event_posted.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-60
+src/deps/src/nginx-1.30.5/src/os/unix/ngx_setproctitle.h
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-52
+src/deps/src/nginx-1.30.5/src/http/v3/ngx_http_v3_uni.h
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-34
+src/deps/src/nginx-1.30.5/auto/cc/owc
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-103
+src/deps/src/nginx-1.30.5/src/mail/ngx_mail_pop3_module.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-323
+src/deps/src/nginx-1.30.5/auto/lib/zlib/conf
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-79
+src/deps/src/nginx-1.30.5/src/stream/ngx_stream_proxy_module.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-2683
+src/deps/src/nginx/src/http/v2/ngx_http_v2.c
+  s_d920128e903ff2::t_c6e07bc65b8c44 2184-2185,2224-2225,2278-2279,2281-2282,2286-2287
+src/deps/src/nginx-1.30.5/auto/lib/google-perftools/conf
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-78
+src/deps/src/luajit/src/lj_gc.c
+  s_f498fa489aa217::t_3c0cf6d43456ae 632-635
+src/deps/src/nginx-1.30.5/src/stream/ngx_stream_upstream_round_robin.h
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-232
+src/deps/src/nginx-1.30.5/src/http/modules/ngx_http_grpc_module.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-5256
+src/deps/src/nginx-1.30.5/src/event/quic/ngx_event_quic.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-1522
+src/deps/src/nginx/src/http/modules/ngx_http_proxy_v2_module.c
+  s_d920128e903ff2::t_c6e07bc65b8c44 163,1503,4166,4177-4178,4234-4241
+  s_77fa5bfb272b67::t_bbe4e334ca72e1 4242-4244
+src/deps/src/nginx-1.30.5/src/http/modules/ngx_http_flv_module.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-261
+src/deps/src/nginx-1.30.5/src/stream/ngx_stream_split_clients_module.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-244
+src/deps/src/nginx/src/core/ngx_connection.c
+  s_d920128e903ff2::t_c6e07bc65b8c44 1102,1169-1170
+  s_77fa5bfb272b67::t_ff45c3f1703ded 1171-1172
+src/deps/src/nginx-1.30.5/src/mail/ngx_mail_imap_module.h
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-39
+src/deps/src/nginx-1.30.5/src/event/ngx_event_accept.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-589
+src/deps/src/nginx-1.30.5/src/core/ngx_shmtx.h
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-49
+src/deps/src/nginx-1.30.5/auto/define
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-12
+src/deps/src/nginx-1.30.5/src/http/modules/ngx_http_userid_filter_module.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-924
+src/deps/src/nginx-1.30.5/src/core/ngx_shmtx.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-310
+src/deps/src/nginx-1.30.5/src/http/modules/ngx_http_upstream_random_module.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-569
+src/deps/src/nginx-1.30.5/src/event/ngx_event_acceptex.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-229
+src/deps/src/nginx-1.30.5/auto/lib/perl/conf
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-83
+src/deps/src/nginx-1.30.5/src/os/unix/ngx_sunpro_x86.il
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-44
+src/deps/src/nginx-1.30.5/src/http/v3/ngx_http_v3_table.h
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-58
+src/deps/src/nginx-1.30.5/auto/lib/conf
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-54
+src/deps/src/nginx-1.30.5/src/http/ngx_http_script.h
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-279
+src/deps/src/nginx-1.30.5/src/http/modules/ngx_http_auth_request_module.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-450
+src/deps/src/nginx-1.30.5/src/os/unix/ngx_gcc_atomic_sparc64.h
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-82
+src/deps/src/nginx-1.30.5/src/http/v3/ngx_http_v3_table.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-715
+src/deps/src/nginx/misc/GNUmakefile
+  s_d920128e903ff2::t_c6e07bc65b8c44 9,11
+src/deps/src/nginx-1.30.5/src/http/v2/ngx_http_v2_module.h
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-28
+src/deps/src/nginx/src/http/modules/ngx_http_log_module.c
+  s_d920128e903ff2::t_c6e07bc65b8c44 249
+src/deps/src/nginx-1.30.5/auto/lib/pcre/conf
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-235
+src/deps/src/nginx-1.30.5/auto/lib/libgd/conf
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-112
+src/deps/src/nginx-1.30.5/src/os/unix/ngx_linux_config.h
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-136
+docs/fr/integrations.md
+  s_f498fa489aa217::t_27330ee3ac3077 2630-2632
+  s_f498fa489aa217::t_ae3de3819da3d1 2530,2545,2549,2593,2597,2690,2693
+src/deps/src/nginx-1.30.5/src/os/unix/ngx_channel.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-253
+src/linux/fpm-ubuntu-noble
+  s_f498fa489aa217::t_ae3de3819da3d1 6
+src/deps/src/nginx-1.30.5/src/os/win32/ngx_process_cycle.h
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-44
+src/linux/Dockerfile-rhel-8
+  s_f498fa489aa217::t_ae3de3819da3d1 4
+  s_d920128e903ff2::t_6d9c7a2bd1c64d 1,144
+src/deps/src/nginx/src/http/modules/perl/nginx.xs
+  s_d920128e903ff2::t_c6e07bc65b8c44 21-23,61-83,414,431-443,695,713-717,1166,1184-1196
+src/deps/src/nginx-1.30.5/CODE_OF_CONDUCT.md
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-126
+src/deps/src/nginx-1.30.5/conf/fastcgi_params
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-25
+src/deps/src/nginx-1.30.5/src/os/unix/ngx_sunpro_sparc64.il
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-36
+src/deps/src/nginx-1.30.5/src/http/ngx_http_special_response.c
+  s_77fa5bfb272b67::t_8e37a0c7b16c6a 1-865
+misc/migration/Dockerfile
+  s_d920128e903ff2::t_c7ae80e4901e52 1
+src/api/Dockerfile
+  s_d920128e903ff2::t_396d688f2816ad 1,44
+src/autoconf/Dockerfile
+  s_d920128e903ff2::t_3733a82de00e6c 1,33
+src/scheduler/Dockerfile
+  s_d920128e903ff2::t_11169b5c691584 1,43,104
+src/ui/Dockerfile
+  s_d920128e903ff2::t_bd38397d8768cd 1,95
+src/worker/Dockerfile
+  s_d920128e903ff2::t_607b0d7ac34841 1,57
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "d696e44da7b6db2dde3e953ddb5aa56caddcebb7",
+  "prompts": {},
+  "sessions": {
+    "s_476e9863a1ff94": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "7a32eb9d-6f8f-4cc1-9f81-612f2bcdbc53",
+        "model": "unknown"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_77fa5bfb272b67": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "e4d6dcd8-c3a1-419e-98ad-820b5deed5d8",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_d920128e903ff2": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "e085a21f-c455-47d7-85dc-016f6ee5a0a4",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_f498fa489aa217": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a143d5-d1fb-75c1-a845-e8f56def83ac",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

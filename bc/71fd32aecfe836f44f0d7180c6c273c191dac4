@@ -1,0 +1,35 @@
+CHANGELOG.md
+  s_390d63e68b4d15::t_902a236a215333 9,33
+src/api/app/auth/biscuit.py
+  s_390d63e68b4d15::t_79de8056b71bd8 14,456-458
+src/api/app/auth/common.py
+  s_390d63e68b4d15::t_abfd79ed3d8643 18-23
+src/api/app/auth/guard.py
+  s_390d63e68b4d15::t_767345f5eb09a3 9,37-39
+src/api/app/config.py
+  s_390d63e68b4d15::t_fd11622cd2f43f 16-18,66-76
+src/scheduler/JobScheduler.py
+  s_390d63e68b4d15::t_dde4dbfcef7ae9 409
+tests/unit/api_app/test_configuration_sources.py
+  s_390d63e68b4d15::t_43d0930271831f 68-78
+tests/unit/api_app/test_guard_authentication.py
+  s_390d63e68b4d15::t_90ad0daaf9c9dc 53-81,155-166
+tests/unit/scheduler/test_jobscheduler_jobs.py
+  s_390d63e68b4d15::t_474960b89ce18f 290-297,299
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "bc71fd32aecfe836f44f0d7180c6c273c191dac4",
+  "prompts": {},
+  "sessions": {
+    "s_390d63e68b4d15": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "c4e803fa-6a9f-4b70-b6c0-48a0da29661a",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

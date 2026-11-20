@@ -1,0 +1,25 @@
+CHANGELOG.md
+  s_81ffc7e23c740e::t_4eb3f8659fba00 32
+src/deps/deps.json
+  s_81ffc7e23c740e::t_635a36dfcdd137 129,131
+src/deps/src/lua-resty-openssl/lib/resty/openssl/auxiliary/nginx_legacy.lua
+  s_81ffc7e23c740e::t_c4408a6ea7c01b 1-376
+src/deps/src/lua-resty-openssl/lua-resty-openssl-1.10.0-1.rockspec
+  s_81ffc7e23c740e::t_a731fb838790c4 2,5,23
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "20ef3ac6558a7e83afce549e55b6fdee353b0b8d",
+  "prompts": {},
+  "sessions": {
+    "s_81ffc7e23c740e": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1ea30-5f75-7fe0-a08f-04a9caccf7d9",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

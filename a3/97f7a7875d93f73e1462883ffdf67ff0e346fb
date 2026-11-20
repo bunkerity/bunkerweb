@@ -1,0 +1,25 @@
+tests/unit/jobs/test_job_cache_contracts.py
+  s_48d8e9e364c547::t_f41daca94e07bb 835
+tests/unit/jobs/test_ub2_5_external_plugin_failures.py
+  s_48d8e9e364c547::t_9fcc48d0cce811 24,55-56,81-88,104-105
+  s_48d8e9e364c547::t_1cf58e2b4f1b4a 1-13,16-23,25-54,57-59,61-63,73-80,89-96,98-100,103,106-146
+  s_48d8e9e364c547::t_70338dd58f24ce 14-15,60,64-72,97,101-102
+src/common/core/misc/jobs/download-plugins.py
+  s_48d8e9e364c547::t_5d9d9d44eb8a68 191,231,252,257,263,281,319
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "a397f7a7875d93f73e1462883ffdf67ff0e346fb",
+  "prompts": {},
+  "sessions": {
+    "s_48d8e9e364c547": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1b12b-93db-7d72-91c7-7ff3e9d5b668",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

@@ -1,0 +1,26 @@
+tests/unit/tests_framework/test_latest_stable_fetch.py
+  s_795e2ccdb6801b::t_711ba46231ee00 11
+  s_795e2ccdb6801b::t_3a731a562360b4 1-10,12-72
+tests/scripts/before/latest_prerelease.py
+  s_795e2ccdb6801b::t_c9b2e63fcdf93b 12-14,26-35
+.github/workflows/integration-tests.yml
+  s_795e2ccdb6801b::t_3a731a562360b4 403-405
+tests/scripts/before/latest_stable.py
+  s_795e2ccdb6801b::t_3a731a562360b4 3-8,12-13,23,26-37,40-51
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "3c687e7beab554ea9ae1972222a7295c96259d18",
+  "prompts": {},
+  "sessions": {
+    "s_795e2ccdb6801b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "71804b16-900c-4824-8bbc-5e7434803315",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

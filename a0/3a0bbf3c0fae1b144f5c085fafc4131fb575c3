@@ -1,0 +1,19 @@
+tests/core/inject.yml
+  s_c99c11b0cee8f7::t_50a732a1f0bd5b 26-29,40-43,53-56
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "a03a0bbf3c0fae1b144f5c085fafc4131fb575c3",
+  "prompts": {},
+  "sessions": {
+    "s_c99c11b0cee8f7": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1e354-31f0-7572-9320-8e50819eef95",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

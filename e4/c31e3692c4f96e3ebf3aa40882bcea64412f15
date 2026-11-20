@@ -1,0 +1,26 @@
+CHANGELOG.md
+  s_36cff8fad440d1::t_030401750d6fcf 14
+src/common/gen/Templator.py
+  s_36cff8fad440d1::t_ec1dcf551bef5a 636,644-645,647-648
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "e4c31e3692c4f96e3ebf3aa40882bcea64412f15",
+  "prompts": {},
+  "humans": {
+    "h_a33a1e80933106": {
+      "author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  },
+  "sessions": {
+    "s_36cff8fad440d1": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "9e7b0240-ab8b-4374-b9b3-c0f8bb66b3ef",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

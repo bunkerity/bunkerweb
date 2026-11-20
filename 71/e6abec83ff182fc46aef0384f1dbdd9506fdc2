@@ -1,0 +1,51 @@
+src/common/core/limit/README.es.md
+  s_912601094037fd::t_f62fcde62c37de 65-66
+src/common/core/limit/README.zh.md
+  s_912601094037fd::t_f62fcde62c37de 65-66
+src/common/core/limit/README.fr.md
+  s_912601094037fd::t_f62fcde62c37de 65-66
+src/common/core/limit/README.de.md
+  s_912601094037fd::t_f62fcde62c37de 65-66
+src/common/core/limit/confs/server-http/limitconn.conf
+  s_912601094037fd::t_f62fcde62c37de 2
+src/common/core/limit/confs/server-stream/limitconn.conf
+  s_912601094037fd::t_f62fcde62c37de 2
+src/common/core/limit/README.md
+  s_912601094037fd::t_f62fcde62c37de 65-66
+CHANGELOG.md
+  s_88db3076fc1d11::t_b043f13fd916b3 21
+docs/de/features.md
+  s_88db3076fc1d11::t_18dc2c4ccee572 3695-3696
+docs/es/features.md
+  s_88db3076fc1d11::t_98c8ee0d0baccd 3748-3749
+docs/features.md
+  s_88db3076fc1d11::t_7021b8f66db3ff 3764-3765
+docs/fr/features.md
+  s_88db3076fc1d11::t_5c27e7bf43cb63 3648-3649
+docs/zh/features.md
+  s_88db3076fc1d11::t_04541f78aa98d3 3758-3759
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "71e6abec83ff182fc46aef0384f1dbdd9506fdc2",
+  "prompts": {},
+  "sessions": {
+    "s_88db3076fc1d11": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a16935-a197-70e3-85af-cce05042f30e",
+        "model": "unknown"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_912601094037fd": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "7e62caf3-2f07-4b32-a4c2-968e1f6e8579",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

@@ -1,0 +1,18 @@
+CHANGELOG.md
+  h_a33a1e80933106 14
+src/ui/app/routes/cache.py
+  h_a33a1e80933106 3,7,11,17-18,22-75,163-168,173,176-179
+tests/unit/ui/routes/test_routes_crowdsec_jobs_cache.py
+  h_a33a1e80933106 398,405,407,491-502,504-550,566,574,583-690
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "a23c115f7a61284574b673263e6fe777175e9cb2",
+  "prompts": {},
+  "humans": {
+    "h_a33a1e80933106": {
+      "author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

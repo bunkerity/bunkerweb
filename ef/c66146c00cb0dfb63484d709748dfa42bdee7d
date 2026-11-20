@@ -1,0 +1,26 @@
+CHANGELOG.md
+  h_a33a1e80933106 15
+src/all-in-one/Dockerfile
+  h_a33a1e80933106 179
+src/api/Dockerfile
+  h_a33a1e80933106 48
+src/autoconf/Dockerfile
+  h_a33a1e80933106 47
+src/bw/Dockerfile
+  h_a33a1e80933106 83
+src/scheduler/Dockerfile
+  h_a33a1e80933106 60
+src/ui/Dockerfile
+  h_a33a1e80933106 89
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "efc66146c00cb0dfb63484d709748dfa42bdee7d",
+  "prompts": {},
+  "humans": {
+    "h_a33a1e80933106": {
+      "author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

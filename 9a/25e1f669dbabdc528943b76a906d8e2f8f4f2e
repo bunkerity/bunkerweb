@@ -1,0 +1,35 @@
+src/autoconf/controllers/GatewayController.py
+  s_8506d338c9fbee::t_77a85ef6019f64 308,327-329,1153-1157,1217-1219,1233-1235
+  s_8506d338c9fbee::t_0d2e994ebf8e56 225-226,258,1024,1061,1163
+  s_8506d338c9fbee::t_d9bdd0bbf83a32 3,6,8,16-17,20-134,136-221
+  s_8506d338c9fbee::t_87ae21edb0a1b7 135,231-237,324-326,431,458,1140-1145,1147-1152,1158-1162,1164-1187,1191,1193-1216,1220-1232,1236-1261
+  s_8506d338c9fbee::t_fb42e5ae935a38 18-19,1122-1133,1135-1136,1138-1139,1146,1188-1190,1192
+CHANGELOG.md
+  s_280faf029c25ed::t_baa5ab502512a7 8
+src/autoconf/controllers/KubernetesController.py
+  s_8506d338c9fbee::t_67bed538668335 70-71,541-544,546-548,768,938,1083-1087,1089-1095,1098
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "9a25e1f669dbabdc528943b76a906d8e2f8f4f2e",
+  "prompts": {},
+  "sessions": {
+    "s_280faf029c25ed": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "2ac450d0-131f-4a1e-81b9-f04c2a982d5a",
+        "model": "unknown"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_8506d338c9fbee": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "8217c3f0-7587-4d51-abb2-1d1a487163f9",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

@@ -1,0 +1,248 @@
+src/common/core/headers/plugin.json
+  s_8450019ca36ca1::t_4463531b850f6b 24,33,51,97
+src/common/core/antibot/plugin.json
+  s_8450019ca36ca1::t_cd9f2817ec3bc6 88
+  s_8450019ca36ca1::t_4463531b850f6b 115,153,450
+src/common/core/blacklist/plugin.json
+  s_8450019ca36ca1::t_cd9f2817ec3bc6 54,128
+  s_8450019ca36ca1::t_4463531b850f6b 81,146,203,212,221,230,239,248,257,266,275,284
+src/common/core/bunkernet/plugin.json
+  s_8450019ca36ca1::t_4463531b850f6b 23
+tests/unit/push_configs/test_failover_metadata.py
+  s_1e0e51f91b35ff::t_8f1499dec72564 45
+  s_cf49812896b660::t_850d2544ae1354 1-44,46-99
+src/common/core/jobs/jobs/push-configs.py
+  s_cf49812896b660::t_bae33a272c4541 514-515,518-538,573,669-670
+src/bw/entrypoint.sh
+  s_795e2ccdb6801b::t_9b0fdb26c88466 164-166
+src/common/core/cors/plugin.json
+  s_8450019ca36ca1::t_4463531b850f6b 32,42,61
+src/common/core/badbehavior/plugin.json
+  s_8450019ca36ca1::t_4463531b850f6b 23,103,112
+tests/unit/jobs/test_selfsigned_cache_race.py
+  s_d2f98a7662053d::t_0ae54117c713d0 8,58,118
+  s_d2f98a7662053d::t_18455e0082a68e 4,16,59,68,80,119,128
+src/common/core/clientcache/plugin.json
+  s_8450019ca36ca1::t_4463531b850f6b 23
+src/common/core/ssl/plugin.json
+  s_8450019ca36ca1::t_4463531b850f6b 78
+src/linux/scripts/start.sh
+  s_795e2ccdb6801b::t_ab32aee4040fa8 256
+  s_795e2ccdb6801b::t_85b158a39066d4 251-255
+src/ui/app/html_pattern.py
+  s_04fcff294a52ce::t_baea73a88c8716 60,79
+  s_04fcff294a52ce::t_3bbe102d0c544a 23,41,91-92
+  s_04fcff294a52ce::t_b4058ea83e6cff 1-20,24,26-35,38-40,51-54,56-59,61-64,66-68,72,75-78,87-90,93-102,105-107,109,115-117,119-127,129-134
+  s_04fcff294a52ce::t_be0a54915ce60f 21-22,25,36-37,42-50,55,65,69-71,73-74,80-86,103-104,108,110-114,118,128
+src/common/core/realip/plugin.json
+  s_8450019ca36ca1::t_cd9f2817ec3bc6 32
+  s_8450019ca36ca1::t_4463531b850f6b 41,59
+src/common/core/gzip/plugin.json
+  s_8450019ca36ca1::t_4463531b850f6b 23
+src/common/core/reverseproxy/plugin.json
+  s_8450019ca36ca1::t_4463531b850f6b 103,124,389,399,486
+tests/unit/ui/test_setting_patterns_v_flag.py
+  s_04fcff294a52ce::t_e634e82f42a4a3 318
+  s_04fcff294a52ce::t_80da680eaf55e0 28-29
+  s_04fcff294a52ce::t_519be41cc726fa 210
+  s_04fcff294a52ce::t_aee9e3ffb53044 1-27,30-85,200-204,206-207,211-213,217-240,242-298,301-306,308-317,319-332
+  s_04fcff294a52ce::t_1a6ac39910f2ab 86-199
+  s_8d5911a0b4e448::t_3d72b338a0cbb7 299,307
+  s_04fcff294a52ce::t_dd42a2a2ab4d35 205,208-209,214-216
+  s_04fcff294a52ce::t_2c548e59fa8e48 241,300
+src/common/core/whitelist/plugin.json
+  s_8450019ca36ca1::t_4463531b850f6b 50,68,107,116,125,134,143
+  s_8450019ca36ca1::t_cd9f2817ec3bc6 23
+src/common/core/letsencrypt/plugin.json
+  s_8450019ca36ca1::t_4463531b850f6b 32,348
+src/common/core/reversescan/plugin.json
+  s_8450019ca36ca1::t_cd9f2817ec3bc6 23
+src/common/core/grpc/plugin.json
+  s_8450019ca36ca1::t_4463531b850f6b 52,73,342,352
+src/ui/app/static/js/components/flatpickr-locale.js
+  s_5e929992656741::t_39690f55317518 32-45
+  s_d2f98a7662053d::t_69f17fc1ab3b64 24-26
+  s_5e929992656741::t_9acb91c206c74f 1-23,27-31,46-62
+src/common/core/redirect/plugin.json
+  s_8450019ca36ca1::t_4463531b850f6b 24
+src/common/core/brotli/plugin.json
+  s_8450019ca36ca1::t_4463531b850f6b 23,32
+tests/unit/scheduler/test_failover_metadata_not_from_ping.py
+  s_98389909a16d3d::t_992b135c4478d6 10-17,20-21
+  s_cf49812896b660::t_850d2544ae1354 1-9,18-19,22-23
+src/common/core/errors/plugin.json
+  s_8450019ca36ca1::t_4463531b850f6b 14,23
+src/common/settings.json
+  s_2ed736688e97ec::t_90fc911f8d68e7 290
+  s_8450019ca36ca1::t_cd9f2817ec3bc6 298
+  s_8450019ca36ca1::t_4463531b850f6b 100
+src/ui/app/templates/models/multivalue_setting.html
+  s_04fcff294a52ce::t_0fc391b3a054bb 108
+tests/unit/scheduler/test_failover_recovery_no_retry_loop.py
+  s_d7976aa2547266::t_44997ca99e8e14 102-128
+  s_d2f98a7662053d::t_2ea1dd119a7bc6 12,99
+  s_5e929992656741::t_d42ea2fbdc4268 24
+  s_78ead45c1dfead::t_33f4ef2349eb96 1-11,13-23,25-65
+  s_d2f98a7662053d::t_6dca5ca2581c8a 66-98,100-101
+src/common/core/greylist/plugin.json
+  s_8450019ca36ca1::t_cd9f2817ec3bc6 23
+  s_8450019ca36ca1::t_4463531b850f6b 50,107,116,125,134,143
+src/common/core/misc/plugin.json
+  s_8450019ca36ca1::t_4463531b850f6b 62,189
+  s_beb5941dd6dcfb::t_df3bc751edc0d2 186
+tests/unit/ui/test_flatpickr_locale.py
+  s_d2f98a7662053d::t_12a235191d705b 7,9-10,17,19-22,59-94
+  s_5e929992656741::t_15275250d41658 1-6,8,11-15,18,23-29,35-58
+  s_5e929992656741::t_cfd9c4a9c890c5 16
+  s_5e929992656741::t_39690f55317518 30-34
+  s_d2f98a7662053d::t_0c904741968964 95-98,102-105
+  s_d2f98a7662053d::t_b4c3c61c4e3eb6 99-101
+src/common/core/country/plugin.json
+  s_8450019ca36ca1::t_4463531b850f6b 14,380
+src/common/core/dnsbl/plugin.json
+  s_8450019ca36ca1::t_4463531b850f6b 61
+  s_8450019ca36ca1::t_cd9f2817ec3bc6 32
+src/common/core/pro/jobs/download-pro-plugins.py
+  s_2ae74b792dcb04::t_5f899e63f065ac 230-233,235-239,241-246,320-322,354-357
+  s_78ead45c1dfead::t_4c5dbf2ba32757 234,240,351-353,362-367
+  s_78ead45c1dfead::t_8f8fbc6d278c8a 323
+src/common/core/robotstxt/plugin.json
+  s_8450019ca36ca1::t_4463531b850f6b 44
+src/common/core/authbasic/plugin.json
+  s_8450019ca36ca1::t_4463531b850f6b 32,42,52
+tests/unit/gen/test_setting_regexes.py
+  s_8450019ca36ca1::t_a4633c8bc300a7 1-76,84-103,106,109-152,155-332,339-345,347-351,353-355,359-435
+  s_8450019ca36ca1::t_f269215ce43fe8 77-80,82-83,104-105,107-108
+  s_8450019ca36ca1::t_cd9f2817ec3bc6 81
+  s_8450019ca36ca1::t_8966d9389d9c67 153-154
+  s_6a39e0ee83bec7::t_6b86628eab3c3b 346,352
+  s_8450019ca36ca1::t_f4338aca1ccad9 333-338,356-358
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "c1f721a75a2eb7d69fe78b2c1abca3367ef4ee35",
+  "prompts": {},
+  "sessions": {
+    "s_04fcff294a52ce": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "45f82e28-3364-4760-ac1b-498a9261a488",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_1e0e51f91b35ff": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "520f5c36-be38-4689-865f-4b96257a06d5",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_2ae74b792dcb04": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "cb552a21-8c25-4c29-99c9-12a857ec5717",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_2ed736688e97ec": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "a62174a3-ce71-428b-a96b-2c9777837b43",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_5e929992656741": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "8f493632-36a6-4e0f-a5d7-d38b03a1f7c4",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_6a39e0ee83bec7": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "e410dca3-68f8-455d-9c0d-159b7031a6e5",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_78ead45c1dfead": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "84dbb1cb-e781-48f6-9a9d-ffeb68095071",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_795e2ccdb6801b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "71804b16-900c-4824-8bbc-5e7434803315",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_8450019ca36ca1": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "9500c3f2-67e8-4548-a818-aab1916a39c8",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_8d5911a0b4e448": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "4c5db933-4812-450e-81fd-b1848f3c1830",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_98389909a16d3d": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "c731c3b8-904d-4696-a622-f368c8012356",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_beb5941dd6dcfb": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "f6ef538d-bd64-4bb6-acbb-684f21a1c93d",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_cf49812896b660": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "1a179295-4661-4ccb-ac86-4d6f002033d3",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_d2f98a7662053d": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "fe643b80-e681-47eb-8ae5-c692390441f8",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_d7976aa2547266": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "89fe6c13-a943-45db-960d-0427f4218fe5",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

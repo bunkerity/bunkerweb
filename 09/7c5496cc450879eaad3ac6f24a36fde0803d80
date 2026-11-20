@@ -1,0 +1,31 @@
+src/bw/Dockerfile
+  s_fdee9a5294ac5c::t_e3bf62c33873e3 81
+src/all-in-one/Dockerfile
+  s_fdee9a5294ac5c::t_60e7f4d5dbf498 177
+CHANGELOG.md
+  s_da7dbab577ff72::t_b755e8c0e57546 10
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "097c5496cc450879eaad3ac6f24a36fde0803d80",
+  "prompts": {},
+  "sessions": {
+    "s_da7dbab577ff72": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1a534-54ad-7930-b3f6-288880646a4e",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_fdee9a5294ac5c": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "19c0e924-1bdc-4492-9eb0-7a0595385b0b",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

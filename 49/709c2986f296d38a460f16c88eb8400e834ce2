@@ -1,0 +1,19 @@
+.github/scripts/test_release_artifacts.py
+  s_d98b833c7e45de::t_20ee873f5001f0 219-223
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "49709c2986f296d38a460f16c88eb8400e834ce2",
+  "prompts": {},
+  "sessions": {
+    "s_d98b833c7e45de": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "0826ef48-c5d3-4189-927e-a1f77544dcfc",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}
