@@ -1,0 +1,23 @@
+CHANGELOG.md
+  s_55a288931b194f::t_cd052d070ada6c 29
+tests/unit/common/test_api_wait_reload_lua.py
+  s_55a288931b194f::t_fcb46f145ed6ed 1-146
+src/bw/lua/bunkerweb/api.lua
+  s_55a288931b194f::t_09240ed7a0ad9f 617-619
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "b96b5712fb5872fa78038048c92e978b168300fd",
+  "prompts": {},
+  "sessions": {
+    "s_55a288931b194f": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "f6bdd7bf-cb08-467c-9651-8ed6a3b8f349",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

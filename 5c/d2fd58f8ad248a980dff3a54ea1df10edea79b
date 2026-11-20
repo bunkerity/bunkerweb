@@ -1,0 +1,31 @@
+misc/install-bunkerweb.sh
+  s_ff20fc71fc9551::t_8ab8248dccda44 11-19
+docs/integrations.md
+  s_ff20fc71fc9551::t_8ab8248dccda44 2062-2075
+docs/fr/integrations.md
+  s_ff20fc71fc9551::t_8ab8248dccda44 2056-2069
+docs/zh/integrations.md
+  s_ff20fc71fc9551::t_8ab8248dccda44 2047-2060
+CHANGELOG.md
+  s_ff20fc71fc9551::t_c1871ec2506ef4 5
+docs/es/integrations.md
+  s_ff20fc71fc9551::t_8ab8248dccda44 2048-2061
+docs/de/integrations.md
+  s_ff20fc71fc9551::t_8ab8248dccda44 2047-2060
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "5cd2fd58f8ad248a980dff3a54ea1df10edea79b",
+  "prompts": {},
+  "sessions": {
+    "s_ff20fc71fc9551": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "162362c5-42b6-46e1-83a0-29f8b51592ba",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

@@ -1,0 +1,18 @@
+src/autoconf/controllers/Controller.py
+  h_a33a1e80933106 79-80,135,139-141
+src/autoconf/controllers/KubernetesController.py
+  h_a33a1e80933106 396
+tests/unit/autoconf/test_kubernetes_controller_core.py
+  h_a33a1e80933106 220-238
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "63eb312eb941293fee4215fcc9c70276a6ff056b",
+  "prompts": {},
+  "humans": {
+    "h_a33a1e80933106": {
+      "author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

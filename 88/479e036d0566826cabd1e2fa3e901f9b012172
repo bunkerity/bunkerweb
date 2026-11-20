@@ -1,0 +1,20 @@
+tests/unit/api/test_gunicorn_admin_rename.py
+  s_e10b1192eac789::t_c7ecb7a3b5ed7c 62
+  s_e10b1192eac789::t_da6fbce9527d46 1-61,63-102
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "88479e036d0566826cabd1e2fa3e901f9b012172",
+  "prompts": {},
+  "sessions": {
+    "s_e10b1192eac789": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "ceb5b7ff-43d0-4aa7-a3fd-36e638348d71",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

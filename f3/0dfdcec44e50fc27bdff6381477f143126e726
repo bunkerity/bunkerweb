@@ -1,0 +1,79 @@
+src/common/core/greylist/plugin.json
+  s_10ef18feb295fa::t_e0a282e441c129 91-99
+src/common/core/blacklist/README.es.md
+  s_10ef18feb295fa::t_359688ef254661 31,140
+src/common/core/blacklist/plugin.json
+  s_10ef18feb295fa::t_e0a282e441c129 187-195
+src/common/core/blacklist/README.fr.md
+  s_10ef18feb295fa::t_359688ef254661 31,140
+src/common/core/whitelist/jobs/whitelist-download.py
+  s_10ef18feb295fa::t_e0a282e441c129 4,22,139-146,179,181
+  s_10ef18feb295fa::t_2257cc419600d2 177
+src/common/core/whitelist/README.fr.md
+  s_10ef18feb295fa::t_359688ef254661 33,97
+docs/de/features.md
+  s_10ef18feb295fa::t_359688ef254661 1076,1185,2711,2778,6563,6627
+docs/es/features.md
+  s_10ef18feb295fa::t_359688ef254661 1085,1194,2754,2821,6640,6704
+src/common/core/blacklist/jobs/blacklist-download.py
+  s_10ef18feb295fa::t_2257cc419600d2 233
+  s_10ef18feb295fa::t_e0a282e441c129 4,22,195-202,235,237
+src/common/core/greylist/README.zh.md
+  s_10ef18feb295fa::t_359688ef254661 37,104
+src/common/core/blacklist/README.zh.md
+  s_10ef18feb295fa::t_359688ef254661 31,140
+src/common/core/greylist/README.es.md
+  s_10ef18feb295fa::t_359688ef254661 37,104
+src/common/core/blacklist/README.md
+  s_10ef18feb295fa::t_359688ef254661 31,140
+src/common/core/greylist/README.de.md
+  s_10ef18feb295fa::t_359688ef254661 37,104
+src/common/core/blacklist/README.de.md
+  s_10ef18feb295fa::t_359688ef254661 31,140
+docs/zh/features.md
+  s_10ef18feb295fa::t_359688ef254661 1091,1200,2764,2831,6648,6712
+src/common/core/whitelist/README.es.md
+  s_10ef18feb295fa::t_359688ef254661 33,97
+src/common/core/greylist/README.fr.md
+  s_10ef18feb295fa::t_359688ef254661 37,104
+src/common/core/whitelist/README.md
+  s_10ef18feb295fa::t_359688ef254661 33,97
+src/common/core/whitelist/plugin.json
+  s_10ef18feb295fa::t_e0a282e441c129 91-99
+src/common/core/whitelist/README.de.md
+  s_10ef18feb295fa::t_359688ef254661 33,97
+docs/fr/features.md
+  s_10ef18feb295fa::t_359688ef254661 1057,1166,2673,2740,6459,6523
+src/common/core/greylist/README.md
+  s_10ef18feb295fa::t_359688ef254661 37,104
+tests/unit/jobs/test_list_refresh_interval_jobs.py
+  s_10ef18feb295fa::t_8f86518d2b909c 3,22-23,26-27,69
+  s_10ef18feb295fa::t_ffd478d2001942 1-2,4-10,12-21,28-44,62-68,70-75,77-181
+  s_10ef18feb295fa::t_091533bff8c01a 11
+  s_10ef18feb295fa::t_6147c6ffb7daa8 76
+  s_10ef18feb295fa::t_c899bf504145d6 25,45-61
+  s_10ef18feb295fa::t_887744a6f348d8 24
+src/common/core/greylist/jobs/greylist-download.py
+  s_10ef18feb295fa::t_e0a282e441c129 4,22,139-146,179,181
+  s_10ef18feb295fa::t_2257cc419600d2 177
+src/common/core/whitelist/README.zh.md
+  s_10ef18feb295fa::t_359688ef254661 33,97
+docs/features.md
+  s_10ef18feb295fa::t_359688ef254661 1089,1198,2768,2835,6653,6717
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "f30dfdcec44e50fc27bdff6381477f143126e726",
+  "prompts": {},
+  "sessions": {
+    "s_10ef18feb295fa": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1b12b-c1bb-7182-82c2-be0b8eb08e01",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

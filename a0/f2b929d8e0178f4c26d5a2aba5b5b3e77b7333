@@ -1,0 +1,62 @@
+tests/unit/common/test_api_client_certificate_pin.py
+  s_0b173229462e15::t_9186787c286c57 147
+src/common/core/jobs/jobs/api-server-cert.py
+  s_0b173229462e15::t_d343a739a1d9e2 6
+  s_06b84ed5019b96::t_9fbdc5f1d2e18f 11,75-78
+  s_06b84ed5019b96::t_6fcef45429a0e2 79-109,111-123,125-135
+  s_0b173229462e15::t_1bcd9f4f3e7fcc 124
+  s_0b173229462e15::t_47874811917ea3 35-44
+tests/unit/jobs/test_api_server_cert_previous.py
+  s_0b173229462e15::t_ff5ad5ea73cb8b 1-66,102-110
+  s_06b84ed5019b96::t_39c8bd233cb76b 67-96,98-101
+  s_06b84ed5019b96::t_5ab680a9aa1840 97
+CHANGELOG.md
+  s_1b70f33988bd46::t_15293a39be04f5 7
+tests/unit/common/test_api_client_tls_fallback.py
+  s_0b173229462e15::t_e45c0bc7c032e9 8-11,185,323-390
+  s_3892364a66ec51::t_84a50f951d2675 1
+src/common/api/API.py
+  s_0b173229462e15::t_0c2e89744efc30 32-34
+  s_0b173229462e15::t_a5f6343c7dac89 387
+  s_0b173229462e15::t_b25c2ab5c5da42 51-53,61,64-65,68-69,71,83-84,86-90
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "a0f2b929d8e0178f4c26d5a2aba5b5b3e77b7333",
+  "prompts": {},
+  "sessions": {
+    "s_06b84ed5019b96": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1ea81-79da-7f31-ac7e-f65e154e8620",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_0b173229462e15": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "cf216877-c4ae-4863-aff4-30721c14cc97",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_1b70f33988bd46": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "12c22024-0497-4dc5-8d2f-379645fdb9d5",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_3892364a66ec51": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "8bfb5369-020f-4666-81bd-7563027fc467",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

@@ -1,0 +1,36 @@
+tests/core/upgrade/linux-database.sh
+  s_d1b8c148709a68::t_cc3585f684f710 1-75
+  s_d1b8c148709a68::t_c1061139e32f5a 76-96
+tests/README.md
+  s_f75b3e86359674::t_ab2ee3a5356bb1 406-437
+tests/core/upgrade.yml
+  s_f75b3e86359674::t_2aea798b6ccba3 6-10,24-35,47-57,69-78,89-97,105,113,121,128,137,145,153,160,169,177,185,192
+tests/scripts/start.sh
+  s_f75b3e86359674::t_406192df4803af 632-636
+tests/scripts/utils.sh
+  s_f75b3e86359674::t_09505eea7c5d84 1627-1632,1758-1838
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "55868fc8a75fb16377c6e1f0de8069c579d67d7f",
+  "prompts": {},
+  "sessions": {
+    "s_d1b8c148709a68": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "9ae273e1-717e-421b-8ca2-577ed5c68f27",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_f75b3e86359674": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b6b0e405-7f86-4247-893c-cfc0dd742f05",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

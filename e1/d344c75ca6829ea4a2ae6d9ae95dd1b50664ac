@@ -1,0 +1,29 @@
+src/autoconf/controllers/GatewayController.py
+  s_e61bea61ba4859::t_e328a52ad8eda5 547-548
+CHANGELOG.md
+  s_47e5f855149ff2::t_7bf0f9a0254953 17
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "e1d344c75ca6829ea4a2ae6d9ae95dd1b50664ac",
+  "prompts": {},
+  "sessions": {
+    "s_47e5f855149ff2": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "e5d1e51d-0694-4cb0-bcf7-c883db8f5c4e",
+        "model": "unknown"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_e61bea61ba4859": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "87b7f36d-eb8f-46c6-87c0-6ce94da11d09",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

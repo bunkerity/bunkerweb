@@ -1,0 +1,26 @@
+CHANGELOG.md
+  h_a33a1e80933106 62
+src/common/core/dnsbl/jobs/dnsbl-download.py
+  h_a33a1e80933106 87,90,93-95,109-110,229
+src/common/core/realip/jobs/realip-download.py
+  h_a33a1e80933106 89,92,96-98,114-124,243,253,281
+src/common/core/robotstxt/jobs/robots-txt-download.py
+  h_a33a1e80933106 90-91,93-95,99-101,123-124,270
+tests/unit/jobs/test_dnsbl_ignore_download.py
+  h_a33a1e80933106 75
+tests/unit/jobs/test_job_cache_contracts.py
+  h_a33a1e80933106 568-625
+tests/unit/jobs/test_robots_rules_download.py
+  h_a33a1e80933106 67
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "3024c0709c3e35b160219651e23a134c90f3fad0",
+  "prompts": {},
+  "humans": {
+    "h_a33a1e80933106": {
+      "author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

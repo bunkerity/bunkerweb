@@ -1,0 +1,19 @@
+tests/ui_handlers/common.py
+  s_601ce4aca3cf5d::t_6204e266a0e891 35-37
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "067d0c942e1fced3ed9fe88cc37204166ce0eb19",
+  "prompts": {},
+  "sessions": {
+    "s_601ce4aca3cf5d": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "167ab332-7917-4a5c-a65d-008a146963d3",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

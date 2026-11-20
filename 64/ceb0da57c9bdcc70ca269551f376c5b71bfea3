@@ -1,0 +1,34 @@
+CHANGELOG.md
+  h_a33a1e80933106 9
+src/bw/lua/bunkerweb/api.lua
+  h_a33a1e80933106 139-155
+src/common/confs/init-lua.conf
+  h_a33a1e80933106 100-109
+src/common/confs/init-stream-lua.conf
+  h_a33a1e80933106 98-107
+src/common/gen/Templator.py
+  h_a33a1e80933106 28,636
+src/common/utils/env_file.py
+  h_a33a1e80933106 26-27,30,38-46,63-89,131
+src/scheduler/main.py
+  h_a33a1e80933106 47,1621,1684-1685
+tests/unit/common/test_api_empty_internalstore_lua.py
+  h_a33a1e80933106 64-79,243-253
+tests/unit/gen/test_env_file_newline_injection.py
+  h_a33a1e80933106 1-148
+tests/unit/scheduler/test_main_loop.py
+  h_a33a1e80933106 841-855
+tests/unit/test_lua_init_store_order.lua
+  h_a33a1e80933106 188-218,315-357
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "64ceb0da57c9bdcc70ca269551f376c5b71bfea3",
+  "prompts": {},
+  "humans": {
+    "h_a33a1e80933106": {
+      "author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

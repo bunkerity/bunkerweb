@@ -1,0 +1,21 @@
+tests/core/bunkernet.yml
+  s_517f5740f159d0::t_277f8475f69044 219
+tests/ui/configs.yml
+  s_517f5740f159d0::t_277f8475f69044 124
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "1226c3c706f789b9d47b59877eeba429a447120b",
+  "prompts": {},
+  "sessions": {
+    "s_517f5740f159d0": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1e528-7064-7f50-9f97-740b883ea400",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

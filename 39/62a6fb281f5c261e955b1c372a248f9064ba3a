@@ -1,0 +1,23 @@
+src/ui/app/static/libs/ace/src-min/worker-json.js
+  s_e5267c4ae9821f::t_9a4ba817781919 1
+src/ui/app/static/libs/ace/src-min/ace.js
+  s_e5267c4ae9821f::t_9a4ba817781919 1
+CHANGELOG.md
+  s_e5267c4ae9821f::t_9a4ba817781919 28
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "3962a6fb281f5c261e955b1c372a248f9064ba3a",
+  "prompts": {},
+  "sessions": {
+    "s_e5267c4ae9821f": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "535c3f0b-be20-42f8-a901-b7bd893faa6d",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

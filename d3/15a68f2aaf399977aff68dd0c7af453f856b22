@@ -1,0 +1,83 @@
+tests/unit/common/test_pow_port.py
+  s_a80692ccb4af3b::t_73f8cc64bcc78b 21
+  s_e09c0124348d70::t_8b51533c14a07e 35,39,45,69,74,80,84,121
+  s_a80692ccb4af3b::t_1cd78e61379f63 1-20,22-34,36-38,40-44,46-68,70-73,75-79,81-83,85-120,122-131
+src/common/core/antibot/locales/id.json
+  s_a80692ccb4af3b::t_b1b6fc64169c4c 60-63
+src/common/core/antibot/locales/fr.json
+  s_a80692ccb4af3b::t_b1b6fc64169c4c 38-41
+src/common/core/antibot/locales/ur.json
+  s_a80692ccb4af3b::t_b1b6fc64169c4c 38-41
+src/common/core/antibot/antibot.lua
+  s_a80692ccb4af3b::t_832c0b59ccb6e5 132-150,346-348,710-711,743,817-821
+src/common/core/antibot/locales/pl.json
+  s_a80692ccb4af3b::t_b1b6fc64169c4c 60-63
+src/common/core/antibot/locales/tw.json
+  s_a80692ccb4af3b::t_b1b6fc64169c4c 38-41
+src/ui/app/templates/plugin_bodies/antibot.html
+  s_e09c0124348d70::t_a4cbad52dfa183 62-63
+src/common/core/antibot/README.fr.md
+  s_a80692ccb4af3b::t_73f8cc64bcc78b 127-128,134
+src/common/core/antibot/files/javascript.html
+  s_a80692ccb4af3b::t_874e0011bf5b7d 338-442,444-573,575-578,580-583
+src/common/core/antibot/README.de.md
+  s_a80692ccb4af3b::t_73f8cc64bcc78b 127-128,134
+src/common/core/antibot/locales/zh.json
+  s_a80692ccb4af3b::t_b1b6fc64169c4c 38-41
+src/common/core/antibot/locales/es.json
+  s_a80692ccb4af3b::t_b1b6fc64169c4c 38-41
+src/common/core/antibot/locales/de.json
+  s_a80692ccb4af3b::t_b1b6fc64169c4c 38-41
+src/common/core/antibot/README.es.md
+  s_a80692ccb4af3b::t_73f8cc64bcc78b 123-124,130
+src/common/core/antibot/locales/ko.json
+  s_a80692ccb4af3b::t_b1b6fc64169c4c 38-41
+src/common/core/antibot/locales/pt.json
+  s_a80692ccb4af3b::t_b1b6fc64169c4c 38-41
+src/common/core/antibot/locales/bn.json
+  s_a80692ccb4af3b::t_b1b6fc64169c4c 38-41
+src/common/core/antibot/locales/ru.json
+  s_a80692ccb4af3b::t_b1b6fc64169c4c 60-63
+src/common/core/antibot/locales/hi.json
+  s_a80692ccb4af3b::t_b1b6fc64169c4c 38-41
+src/common/core/antibot/locales/tl.json
+  s_a80692ccb4af3b::t_b1b6fc64169c4c 60-63
+src/common/core/antibot/locales/tr.json
+  s_a80692ccb4af3b::t_b1b6fc64169c4c 60-63
+src/common/core/antibot/plugin.json
+  s_a80692ccb4af3b::t_874e0011bf5b7d 73-81
+src/common/core/antibot/locales/it.json
+  s_a80692ccb4af3b::t_b1b6fc64169c4c 38-41
+src/common/core/antibot/locales/br.json
+  s_a80692ccb4af3b::t_b1b6fc64169c4c 38-41
+src/common/core/antibot/README.md
+  s_a80692ccb4af3b::t_73f8cc64bcc78b 127-128,134
+src/common/core/antibot/README.zh.md
+  s_a80692ccb4af3b::t_73f8cc64bcc78b 127-128,134
+src/common/core/antibot/locales/ar.json
+  s_a80692ccb4af3b::t_b1b6fc64169c4c 38-41
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "d315a68f2aaf399977aff68dd0c7af453f856b22",
+  "prompts": {},
+  "sessions": {
+    "s_a80692ccb4af3b": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0fb81-f402-70d0-9a75-db3a35fa77a8",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_e09c0124348d70": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0fb76-a92b-7eb0-a387-9649f9567afc",
+        "model": "gpt-6-astra"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

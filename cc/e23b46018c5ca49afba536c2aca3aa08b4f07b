@@ -1,0 +1,50 @@
+docs/de/advanced.md
+  s_9170593b40273f::t_f7604d6df29073 2793
+  s_cca63056ca5a77::t_bde739a2a64018 2651
+  s_9170593b40273f::t_f9d7e04cc95183 2653,2655,2657,2659,2661,2663,2665,2672,2682,2716-2792
+  s_9170593b40273f::t_b4c89ba49940e3 2794
+docs/advanced.md
+  s_cca63056ca5a77::t_bde739a2a64018 2652
+  s_9170593b40273f::t_f7604d6df29073 2794
+  s_9170593b40273f::t_f9d7e04cc95183 2654,2656,2658,2660,2662,2664,2666,2673,2683,2717-2793
+  s_9170593b40273f::t_51568a8cc0f629 2795
+docs/fr/advanced.md
+  s_9170593b40273f::t_f7604d6df29073 2792
+  s_9170593b40273f::t_f9d7e04cc95183 2652,2654,2656,2658,2660,2662,2664,2671,2681,2715-2791
+  s_cca63056ca5a77::t_bde739a2a64018 2650
+  s_9170593b40273f::t_3b395885a49fdb 2793
+docs/zh/advanced.md
+  s_9170593b40273f::t_f9d7e04cc95183 2651,2653,2655,2657,2659,2661,2663,2670,2680,2714-2790
+  s_cca63056ca5a77::t_bde739a2a64018 2649
+  s_9170593b40273f::t_f7604d6df29073 2791
+  s_9170593b40273f::t_d8d7e1f3a13f18 2792
+docs/es/advanced.md
+  s_cca63056ca5a77::t_bde739a2a64018 2651
+  s_9170593b40273f::t_f9d7e04cc95183 2653,2655,2657,2659,2661,2663,2665,2672,2682,2716-2792
+  s_9170593b40273f::t_f7604d6df29073 2793
+  s_9170593b40273f::t_d839783bc6675b 2794
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "cce23b46018c5ca49afba536c2aca3aa08b4f07b",
+  "prompts": {},
+  "sessions": {
+    "s_9170593b40273f": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "3b2d9f58-1efc-481d-bf3d-ae63b3106b9f",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_cca63056ca5a77": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "f8842302-fa84-48cf-ad02-b740935a4c41",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

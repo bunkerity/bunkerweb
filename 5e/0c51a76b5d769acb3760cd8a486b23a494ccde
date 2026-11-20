@@ -1,0 +1,19 @@
+.dockerignore
+  s_cf7bdf9584ace7::t_279719ebb36bfd 5-6
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "5e0c51a76b5d769acb3760cd8a486b23a494ccde",
+  "prompts": {},
+  "sessions": {
+    "s_cf7bdf9584ace7": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "f961d4c6-a457-47c4-92a8-295456c5c19e",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

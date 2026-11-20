@@ -1,0 +1,34 @@
+src/api/app/routers/cache.py
+  s_f334b56f43408e::t_c75d33995f8028 79-80
+  s_f334b56f43408e::t_8372acadf819ad 72-75,82
+  s_795e2ccdb6801b::t_395b5a470da1be 76-78
+tests/unit/api/test_cache_router_folder_names.py
+  s_f334b56f43408e::t_00faffb8369ba6 9-15
+  s_795e2ccdb6801b::t_769c46b0754618 159
+  s_f334b56f43408e::t_d4d1391bd3ba98 1-8,16-96,107-144
+  s_795e2ccdb6801b::t_395b5a470da1be 97-106,145-158,160
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "cfa075a16692461e7f8de0ee39a31cca71c31f46",
+  "prompts": {},
+  "sessions": {
+    "s_795e2ccdb6801b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "71804b16-900c-4824-8bbc-5e7434803315",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_f334b56f43408e": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "cfd48429-1158-4dd0-8440-0c7632508e89",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

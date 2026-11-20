@@ -1,0 +1,19 @@
+src/common/core/jobs/jobs/api-server-cert.py
+  s_9c3235322a9dea::t_56dc7e6501c30a 104,110
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "699ea12f8a9834c1febef9a3f2e8938d9ec10f93",
+  "prompts": {},
+  "sessions": {
+    "s_9c3235322a9dea": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a18dbe-fba4-7433-802c-4f639ecf1800",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

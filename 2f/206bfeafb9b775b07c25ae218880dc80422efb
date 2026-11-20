@@ -1,0 +1,26 @@
+CHANGELOG.md
+  h_a33a1e80933106 54
+src/common/core/blacklist/blacklist.lua
+  h_a33a1e80933106 59
+src/common/core/greylist/greylist.lua
+  h_a33a1e80933106 58
+src/common/core/whitelist/whitelist.lua
+  h_a33a1e80933106 60
+tests/unit/common/test_blacklist_behaviour_lua.py
+  h_a33a1e80933106 461-471
+tests/unit/common/test_greylist_behaviour_lua.py
+  h_a33a1e80933106 255-265
+tests/unit/common/test_whitelist_coverage_lua.py
+  h_a33a1e80933106 325-329
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "2f206bfeafb9b775b07c25ae218880dc80422efb",
+  "prompts": {},
+  "humans": {
+    "h_a33a1e80933106": {
+      "author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

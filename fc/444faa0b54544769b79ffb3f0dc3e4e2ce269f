@@ -1,0 +1,18 @@
+CHANGELOG.md
+  h_a33a1e80933106 67
+src/common/core/db/jobs/cleanup-expired-ui-sessions.py
+  h_a33a1e80933106 29
+tests/unit/jobs/test_duration_jobs.py
+  h_a33a1e80933106 88-102
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "fc444faa0b54544769b79ffb3f0dc3e4e2ce269f",
+  "prompts": {},
+  "humans": {
+    "h_a33a1e80933106": {
+      "author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

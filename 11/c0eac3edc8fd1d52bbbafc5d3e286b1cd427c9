@@ -1,0 +1,22 @@
+docs/zh/integrations.md
+  h_a33a1e80933106 5069-5070,5086-5087,5155
+docs/de/integrations.md
+  h_a33a1e80933106 5075-5076
+docs/es/integrations.md
+  h_a33a1e80933106 5075-5076
+docs/fr/integrations.md
+  h_a33a1e80933106 5041-5042
+docs/integrations.md
+  h_a33a1e80933106 1660,2889,2927,3760,4296,4328,4444,4504,4810,5146,5163,5170,5172,5199-5200,5217,5289,5293,5325,5350,5355,5446
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "11c0eac3edc8fd1d52bbbafc5d3e286b1cd427c9",
+  "prompts": {},
+  "humans": {
+    "h_a33a1e80933106": {
+      "author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

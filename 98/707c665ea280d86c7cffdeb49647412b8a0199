@@ -1,0 +1,14 @@
+CHANGELOG.md
+  h_a33a1e80933106 33
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "98707c665ea280d86c7cffdeb49647412b8a0199",
+  "prompts": {},
+  "humans": {
+    "h_a33a1e80933106": {
+      "author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

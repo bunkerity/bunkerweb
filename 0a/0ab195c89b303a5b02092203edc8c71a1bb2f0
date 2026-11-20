@@ -1,0 +1,19 @@
+tests/unit/worker/conftest.py
+  s_7790e43ee5ae48::t_aac722df020ae7 9,11-14
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "0a0ab195c89b303a5b02092203edc8c71a1bb2f0",
+  "prompts": {},
+  "sessions": {
+    "s_7790e43ee5ae48": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0c2ec-c5e0-75d0-adca-b092d0d35ed8",
+        "model": "gpt-5.6-terra"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

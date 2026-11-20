@@ -1,0 +1,54 @@
+src/ui/app/routes/services.py
+  s_0470d62814b1ba::t_bd9f3ac42ef649 388-390
+  s_0470d62814b1ba::t_9bee3a3c0c8d7e 25-33
+  s_4949bfa8f134ea::t_9b37f4bade7778 387
+  s_06d161d6ff8a68::t_1010124b90218c 391
+src/ui/app/routes/utils.py
+  s_0470d62814b1ba::t_87f2ac47cfd199 363-365,374
+  s_0470d62814b1ba::t_3066e7ac5604e5 357-362,366-373,375-389
+  s_0470d62814b1ba::t_4fa7d66d13f97f 6,8
+  s_06d161d6ff8a68::t_dbc46e8e31ae4d 390-391
+src/ui/app/static/js/plugins-settings.js
+  s_0470d62814b1ba::t_aaede08f974117 1261
+  s_0470d62814b1ba::t_5da94c19b54ace 1205,1224
+  s_0470d62814b1ba::t_d828ba5108c9a8 1244-1246
+  s_0470d62814b1ba::t_9a5a9c7fd665c9 1150-1169,1172-1176
+tests/unit/ui/routes/test_easy_mode_cleared_fields.py
+  s_0470d62814b1ba::t_be7764e1340518 1-6,8-14,25-38,40-65,67-85,88-89,91-98,109-143
+  s_0470d62814b1ba::t_45f5bc59bc761b 15-24
+  s_0470d62814b1ba::t_35a4b30f90ff04 144-152
+  s_0470d62814b1ba::t_880e7b8b39f396 86-87,90
+  s_4949bfa8f134ea::t_78a57678ebc255 7,39,66,99-108
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "26b3b3da14905b1fdcbcfb8a77f00b6fdafa7a79",
+  "prompts": {},
+  "sessions": {
+    "s_0470d62814b1ba": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "c9ab9b2c-8e76-4de8-b64a-57d43571d7ac",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_06d161d6ff8a68": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "bc014455-ad2c-4f84-b60c-76c1e90b77a9",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_4949bfa8f134ea": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1f954-562e-73f3-ac16-c227abfbe93c",
+        "model": "gpt-6.2-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

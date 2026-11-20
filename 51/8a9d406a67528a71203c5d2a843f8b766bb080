@@ -1,0 +1,19 @@
+tests/core/crowdsec.yml
+  s_a578a391081c8e::t_6d90e7a0bf529d 44,200
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "518a9d406a67528a71203c5d2a843f8b766bb080",
+  "prompts": {},
+  "sessions": {
+    "s_a578a391081c8e": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1a5b9-8481-7622-b8b5-86163ed02484",
+        "model": "unknown"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

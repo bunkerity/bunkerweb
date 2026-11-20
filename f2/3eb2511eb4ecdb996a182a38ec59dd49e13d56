@@ -1,0 +1,33 @@
+CHANGELOG.md
+  s_1b70f33988bd46::t_15293a39be04f5 20
+misc/integrations/k8s.postgres.ui.yml
+  s_42f5af4b846cf8::t_e455c79a8b23a2 332
+tests/unit/autoconf/test_integration_database_uris.py
+  s_42f5af4b846cf8::t_f04d868fff3470 1-36
+misc/integrations/k8s.mariadb.ui.yml
+  s_42f5af4b846cf8::t_e455c79a8b23a2 336
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "f23eb2511eb4ecdb996a182a38ec59dd49e13d56",
+  "prompts": {},
+  "sessions": {
+    "s_1b70f33988bd46": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "12c22024-0497-4dc5-8d2f-379645fdb9d5",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_42f5af4b846cf8": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1e9f8-081c-7770-9b79-9bab979bd91a",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

@@ -1,0 +1,21 @@
+tests/unit/ui/routes/test_routes_plugins.py
+  s_1b80370ed8f558::t_781af98229f1d1 443-456
+src/ui/app/routes/plugins.py
+  s_1b80370ed8f558::t_56a796a9da7cbe 651
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "26ed9f3d35e99c866c93cf8d7f95d69d73ace0be",
+  "prompts": {},
+  "sessions": {
+    "s_1b80370ed8f558": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1c132-856d-7d53-a92f-c674c9aede3f",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

@@ -1,0 +1,29 @@
+src/common/core/antibot/antibot.lua
+  s_e0a1f918969ca8::t_0fb5b9aa5be24e 233
+CHANGELOG.md
+  s_903b7c72de84b7::t_2c9da31d2c1169 9
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "4edaf5a7afcb5f2c3f7a8ad89ca5ec3164b3a4ad",
+  "prompts": {},
+  "sessions": {
+    "s_903b7c72de84b7": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "0480e9ee-0210-41f9-84ad-79eac73433d7",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_e0a1f918969ca8": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0d2a4-8024-7cd3-9ad9-a7ad9d0c4bf0",
+        "model": "gpt-6-luna"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

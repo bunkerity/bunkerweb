@@ -1,0 +1,783 @@
+src/common/core/letsencrypt/README.zh.md
+  s_7e2dde75145a6e::t_806601b66226c4 50-52,55
+src/ui/app/routes/utils.py
+  s_64df9af649e6ef::t_2e1362967a5e30 21
+  s_977fed45c74c2c::t_55f4299c8eb5af 493-494
+src/common/core/badbehavior/locales/ur.json
+  s_4df45921f6cc66::t_362da85cd60af3 22,26
+src/common/core/metrics/metrics.lua
+  s_20b7a5ed3d719b::t_0eb809eff7c3e0 201,1550
+src/common/core/selfsigned/locales/zh.json
+  s_4df45921f6cc66::t_362da85cd60af3 18
+src/common/core/sessions/README.md
+  s_7e2dde75145a6e::t_fd7a22830fd517 30-32
+src/common/core/antibot/locales/ur.json
+  s_4df45921f6cc66::t_362da85cd60af3 24,28
+src/common/core/redis/locales/ur.json
+  s_4df45921f6cc66::t_362da85cd60af3 47,75,83
+src/common/core/cors/locales/br.json
+  s_4df45921f6cc66::t_362da85cd60af3 52
+src/common/core/cors/locales/ko.json
+  s_4df45921f6cc66::t_362da85cd60af3 52
+src/common/core/db/locales/tr.json
+  s_4df45921f6cc66::t_362da85cd60af3 18,30,42,50,54
+src/common/core/antibot/locales/de.json
+  s_4df45921f6cc66::t_362da85cd60af3 24,28
+src/bw/lua/bunkerweb/duration.lua
+  s_20b7a5ed3d719b::t_64b937d117eb90 1-37
+src/common/core/selfsigned/locales/tr.json
+  s_4df45921f6cc66::t_362da85cd60af3 18
+src/common/core/letsencrypt/locales/br.json
+  s_4df45921f6cc66::t_362da85cd60af3 34,38,42,54
+src/common/core/antibot/locales/tr.json
+  s_4df45921f6cc66::t_362da85cd60af3 130,134
+src/common/core/selfsigned/locales/es.json
+  s_4df45921f6cc66::t_362da85cd60af3 18
+src/common/core/sessions/locales/ar.json
+  s_4df45921f6cc66::t_362da85cd60af3 22,26,30
+src/common/core/letsencrypt/locales/pt.json
+  s_4df45921f6cc66::t_362da85cd60af3 34,38,42,54
+src/common/core/badbehavior/locales/fr.json
+  s_4df45921f6cc66::t_362da85cd60af3 22,26
+src/common/core/metrics/locales/ko.json
+  s_4df45921f6cc66::t_362da85cd60af3 30
+src/common/core/redis/README.fr.md
+  s_7e2dde75145a6e::t_fd7a22830fd517 32,35,40
+src/common/core/antibot/locales/br.json
+  s_4df45921f6cc66::t_362da85cd60af3 24,28
+src/common/core/db/locales/fr.json
+  s_4df45921f6cc66::t_362da85cd60af3 26,38,42,54,62
+src/common/core/sessions/locales/pl.json
+  s_4df45921f6cc66::t_362da85cd60af3 22,26,30
+tests/core/sessions.yml
+  s_0702ce82ba2584::t_5cf6833443eeb0 25-44
+src/common/core/redis/locales/de.json
+  s_4df45921f6cc66::t_362da85cd60af3 47,75,83
+src/common/core/selfsigned/locales/tl.json
+  s_4df45921f6cc66::t_362da85cd60af3 18
+src/common/core/db/locales/ar.json
+  s_4df45921f6cc66::t_362da85cd60af3 26,38,42,54,62
+src/common/core/antibot/antibot.lua
+  s_20b7a5ed3d719b::t_0eb809eff7c3e0 24
+  s_20b7a5ed3d719b::t_e71c35b6024baf 655-658,665-666
+src/common/core/crowdsec/README.zh.md
+  s_7e2dde75145a6e::t_806601b66226c4 342,344-345,357-359
+  s_045c651f6891e7::t_e6e182d0dd1df9 346
+src/common/core/sessions/README.de.md
+  s_7e2dde75145a6e::t_fd7a22830fd517 30-32
+src/common/core/badbehavior/locales/zh.json
+  s_4df45921f6cc66::t_362da85cd60af3 22,26
+src/common/core/reversescan/locales/pt.json
+  s_4df45921f6cc66::t_362da85cd60af3 18
+src/common/core/redis/locales/ar.json
+  s_4df45921f6cc66::t_362da85cd60af3 47,75,83
+tests/unit/common/test_duration_regex_parity.py
+  s_20b7a5ed3d719b::t_0c06b3e577f521 62-63
+  s_20b7a5ed3d719b::t_e71c35b6024baf 64-124
+  s_0702ce82ba2584::t_556073d6804935 13,128-161
+  s_0702ce82ba2584::t_507b62995b003f 1-12,14-61,125-127
+src/common/core/badbehavior/locales/de.json
+  s_4df45921f6cc66::t_362da85cd60af3 22,26
+src/common/core/db/plugin.json
+  s_4df45921f6cc66::t_d19589551cd8e1 47-48,51-52,74-75,78-79,83-84,87-88,111-112,115-116,129-130
+  s_0702ce82ba2584::t_0bc5fb154b8f35 133
+src/common/core/letsencrypt/plugin.json
+  s_4df45921f6cc66::t_d19589551cd8e1 65-66,69-70,74-75,78-79,83-84,87-88,336
+  s_0702ce82ba2584::t_ac2ee2bbf4115e 339
+src/common/core/db/locales/ko.json
+  s_4df45921f6cc66::t_362da85cd60af3 26,38,42,54,62
+src/common/core/redis/locales/id.json
+  s_4df45921f6cc66::t_362da85cd60af3 47,75,83
+src/common/core/redis/locales/hi.json
+  s_4df45921f6cc66::t_362da85cd60af3 47,75,83
+src/common/core/redis/locales/ko.json
+  s_4df45921f6cc66::t_362da85cd60af3 47,75,83
+src/common/core/reversescan/locales/tl.json
+  s_4df45921f6cc66::t_362da85cd60af3 14
+src/common/core/antibot/locales/es.json
+  s_4df45921f6cc66::t_362da85cd60af3 24,28
+src/common/core/reversescan/locales/pl.json
+  s_4df45921f6cc66::t_362da85cd60af3 14
+src/common/core/sessions/locales/id.json
+  s_4df45921f6cc66::t_362da85cd60af3 22,26,30
+src/common/core/badbehavior/locales/pt.json
+  s_4df45921f6cc66::t_362da85cd60af3 22,26
+src/common/core/redis/locales/tl.json
+  s_4df45921f6cc66::t_362da85cd60af3 47,75,83
+src/common/core/redis/locales/pl.json
+  s_4df45921f6cc66::t_362da85cd60af3 47,75,83
+src/common/core/sessions/locales/ru.json
+  s_4df45921f6cc66::t_362da85cd60af3 22,26,30
+src/common/core/redis/README.zh.md
+  s_7e2dde75145a6e::t_fd7a22830fd517 34,37,42
+src/common/core/redis/locales/br.json
+  s_4df45921f6cc66::t_362da85cd60af3 47,75,83
+src/common/core/db/locales/tl.json
+  s_4df45921f6cc66::t_362da85cd60af3 18,30,42,50,54
+src/common/core/selfsigned/locales/id.json
+  s_4df45921f6cc66::t_362da85cd60af3 18
+src/common/core/cors/plugin.json
+  s_4df45921f6cc66::t_d19589551cd8e1 97-98,101-102
+src/common/core/reversescan/locales/id.json
+  s_4df45921f6cc66::t_362da85cd60af3 14
+src/common/core/cors/README.de.md
+  s_7e2dde75145a6e::t_806601b66226c4 34
+src/common/core/badbehavior/locales/es.json
+  s_4df45921f6cc66::t_362da85cd60af3 22,26
+src/common/core/crowdsec/plugin.json
+  s_4df45921f6cc66::t_d19589551cd8e1 74-75,78-79,122-123,126-127,131-132,135-145,168-169,172-173,177-178,181-182,186-187,190-191
+src/common/core/db/locales/br.json
+  s_4df45921f6cc66::t_362da85cd60af3 26,38,42,54,62
+src/common/core/cors/README.fr.md
+  s_7e2dde75145a6e::t_806601b66226c4 32
+src/common/core/selfsigned/locales/pt.json
+  s_4df45921f6cc66::t_362da85cd60af3 18
+src/common/core/crowdsec/locales/ur.json
+  s_4df45921f6cc66::t_362da85cd60af3 43,59,63,79,83,87
+  s_045c651f6891e7::t_1043013a20950a 65-67
+  s_045c651f6891e7::t_6b3e5b33ea9f2a 64
+src/common/core/crowdsec/locales/de.json
+  s_4df45921f6cc66::t_362da85cd60af3 43,59,63,79,83,87
+  s_045c651f6891e7::t_1043013a20950a 65-67
+  s_045c651f6891e7::t_45a6089c836a71 64
+src/common/core/crowdsec/locales/pl.json
+  s_045c651f6891e7::t_1043013a20950a 84-86
+  s_4df45921f6cc66::t_362da85cd60af3 22,30,34,46,78,82
+  s_045c651f6891e7::t_3798ceaf91ff52 83
+src/common/core/metrics/locales/it.json
+  s_4df45921f6cc66::t_362da85cd60af3 30
+src/common/core/db/locales/ur.json
+  s_4df45921f6cc66::t_362da85cd60af3 26,38,42,54,62
+src/common/core/badbehavior/locales/bn.json
+  s_4df45921f6cc66::t_362da85cd60af3 22,26
+src/common/core/selfsigned/README.es.md
+  s_7e2dde75145a6e::t_fd7a22830fd517 32
+src/common/core/db/README.de.md
+  s_7e2dde75145a6e::t_806601b66226c4 29,32-33,36,38
+src/common/cli/main.py
+  s_20b7a5ed3d719b::t_6d5b54abf2708f 13,34-37
+src/common/core/db/locales/id.json
+  s_4df45921f6cc66::t_362da85cd60af3 18,30,42,50,54
+src/common/core/crowdsec/locales/zh.json
+  s_045c651f6891e7::t_1043013a20950a 65-67
+  s_4df45921f6cc66::t_362da85cd60af3 43,59,63,79,83,87
+  s_045c651f6891e7::t_3d8ab029c40cb6 64
+tests/core/antibot.yml
+  s_0702ce82ba2584::t_5cf6833443eeb0 266-298
+  s_0702ce82ba2584::t_708830eb1f223c 264-265
+src/common/core/antibot/locales/id.json
+  s_4df45921f6cc66::t_362da85cd60af3 130,134
+src/common/core/antibot/locales/hi.json
+  s_4df45921f6cc66::t_362da85cd60af3 24,28
+src/common/core/metrics/locales/tr.json
+  s_4df45921f6cc66::t_362da85cd60af3 30
+src/common/core/selfsigned/locales/fr.json
+  s_4df45921f6cc66::t_362da85cd60af3 18
+src/common/core/db/locales/zh.json
+  s_4df45921f6cc66::t_362da85cd60af3 26,38,42,54,62
+src/common/core/letsencrypt/locales/zh.json
+  s_4df45921f6cc66::t_362da85cd60af3 34,38,42,54
+src/common/core/metrics/locales/pt.json
+  s_4df45921f6cc66::t_362da85cd60af3 30
+src/common/core/letsencrypt/locales/tl.json
+  s_4df45921f6cc66::t_362da85cd60af3 34,38,42,54
+src/common/core/letsencrypt/locales/id.json
+  s_4df45921f6cc66::t_362da85cd60af3 34,38,42,54
+src/common/core/reversescan/locales/de.json
+  s_4df45921f6cc66::t_362da85cd60af3 18
+src/common/core/reversescan/README.md
+  s_7e2dde75145a6e::t_fd7a22830fd517 33
+src/common/core/selfsigned/README.zh.md
+  s_7e2dde75145a6e::t_fd7a22830fd517 32
+src/common/core/cors/README.es.md
+  s_7e2dde75145a6e::t_806601b66226c4 34
+src/bw/lua/bunkerweb/clusterstore.lua
+  s_20b7a5ed3d719b::t_6b7719b258e627 14,88-91,158-159,171
+src/common/core/selfsigned/plugin.json
+  s_4df45921f6cc66::t_d19589551cd8e1 29-30,33-34
+src/common/core/antibot/README.fr.md
+  s_7e2dde75145a6e::t_806601b66226c4 32-33
+src/common/core/letsencrypt/locales/ar.json
+  s_4df45921f6cc66::t_362da85cd60af3 34,38,42,54
+src/common/core/selfsigned/locales/br.json
+  s_4df45921f6cc66::t_362da85cd60af3 18
+src/api/app/rate_limit.py
+  s_20b7a5ed3d719b::t_35c0f6100b5fef 19,431
+src/common/core/sessions/locales/zh.json
+  s_4df45921f6cc66::t_362da85cd60af3 22,26,30
+src/common/core/metrics/locales/bn.json
+  s_4df45921f6cc66::t_362da85cd60af3 30
+tests/unit/common/test_duration_parser.py
+  s_20b7a5ed3d719b::t_3090d7a29c725b 54
+  s_20b7a5ed3d719b::t_6592b567271bd8 1-39,41-52,55-71,82-100
+  s_20b7a5ed3d719b::t_850c6fb045b50b 40
+  s_20b7a5ed3d719b::t_e71c35b6024baf 53,72-81
+src/common/core/sessions/locales/ur.json
+  s_4df45921f6cc66::t_362da85cd60af3 22,26,30
+src/common/core/cors/locales/zh.json
+  s_4df45921f6cc66::t_362da85cd60af3 52
+src/ui/app/templates/setup.html
+  s_18e1cfb5402ed1::t_aad6379e028c78 765
+  s_20b7a5ed3d719b::t_5121a4a762179c 546,549,573,576,600,603
+src/common/core/antibot/locales/tl.json
+  s_4df45921f6cc66::t_362da85cd60af3 130,134
+src/common/core/reversescan/locales/zh.json
+  s_4df45921f6cc66::t_362da85cd60af3 18
+src/common/core/sessions/locales/br.json
+  s_4df45921f6cc66::t_362da85cd60af3 22,26,30
+src/common/core/antibot/locales/pl.json
+  s_4df45921f6cc66::t_362da85cd60af3 130,134
+src/common/core/antibot/locales/it.json
+  s_4df45921f6cc66::t_362da85cd60af3 24,28
+src/common/db/Database.py
+  s_20b7a5ed3d719b::t_491a8a8013837d 19-20,220,329-333,339-346,394-396,398
+tests/unit/db/test_duration_upgrade.py
+  s_20b7a5ed3d719b::t_0fa975db253d4d 1-82
+src/common/core/metrics/locales/ur.json
+  s_4df45921f6cc66::t_362da85cd60af3 30
+tests/unit/letsencrypt/test_duration_settings.py
+  s_20b7a5ed3d719b::t_a48d28858a5111 1-37,48-54,62-71
+  s_20b7a5ed3d719b::t_e71c35b6024baf 38-47,55-61
+src/bw/lua/bunkerweb/utils.lua
+  s_20b7a5ed3d719b::t_64b937d117eb90 101
+src/common/core/sessions/locales/ko.json
+  s_4df45921f6cc66::t_362da85cd60af3 22,26,30
+src/common/core/redis/README.md
+  s_7e2dde75145a6e::t_fd7a22830fd517 34,37,42
+src/common/core/metrics/locales/tl.json
+  s_4df45921f6cc66::t_362da85cd60af3 30
+src/common/core/sessions/locales/tr.json
+  s_4df45921f6cc66::t_362da85cd60af3 22,26,30
+src/common/core/antibot/locales/tw.json
+  s_4df45921f6cc66::t_362da85cd60af3 24,28
+src/common/core/badbehavior/plugin.json
+  s_4df45921f6cc66::t_d19589551cd8e1 108-109,112-113,117-118,121-122
+src/common/core/cors/README.md
+  s_7e2dde75145a6e::t_806601b66226c4 34
+src/common/core/cors/cors.lua
+  s_20b7a5ed3d719b::t_0eb809eff7c3e0 11-12,87-93
+src/common/core/badbehavior/locales/hi.json
+  s_4df45921f6cc66::t_362da85cd60af3 22,26
+src/common/core/letsencrypt/locales/ru.json
+  s_4df45921f6cc66::t_362da85cd60af3 34,38,42,54
+src/common/core/db/locales/ru.json
+  s_4df45921f6cc66::t_362da85cd60af3 18,30,42,50,54
+src/common/core/metrics/locales/zh.json
+  s_4df45921f6cc66::t_362da85cd60af3 30
+src/common/core/reversescan/locales/it.json
+  s_4df45921f6cc66::t_362da85cd60af3 18
+src/common/core/crowdsec/locales/tw.json
+  s_045c651f6891e7::t_1043013a20950a 65-67
+  s_4df45921f6cc66::t_362da85cd60af3 43,59,63,79,83,87
+  s_045c651f6891e7::t_43c8e9552f2b7d 64
+src/common/core/reversescan/locales/ko.json
+  s_4df45921f6cc66::t_362da85cd60af3 18
+src/common/core/letsencrypt/README.md
+  s_7e2dde75145a6e::t_806601b66226c4 50-52,55
+src/common/core/antibot/locales/ru.json
+  s_4df45921f6cc66::t_362da85cd60af3 130,134
+src/common/core/antibot/locales/fr.json
+  s_4df45921f6cc66::t_362da85cd60af3 24,28
+src/common/utils/redis_keys.py
+  s_20b7a5ed3d719b::t_bf2d238e77b812 12,36,40-42,47
+src/common/core/metrics/locales/pl.json
+  s_4df45921f6cc66::t_362da85cd60af3 30
+src/common/core/metrics/locales/br.json
+  s_4df45921f6cc66::t_362da85cd60af3 30
+src/common/core/badbehavior/locales/br.json
+  s_4df45921f6cc66::t_362da85cd60af3 22,26
+src/common/core/cors/locales/it.json
+  s_4df45921f6cc66::t_362da85cd60af3 52
+src/common/core/metrics/locales/ar.json
+  s_4df45921f6cc66::t_362da85cd60af3 30
+src/common/core/selfsigned/locales/it.json
+  s_4df45921f6cc66::t_362da85cd60af3 18
+src/common/core/antibot/plugin.json
+  s_4df45921f6cc66::t_d19589551cd8e1 39-40,43,48-49
+  s_0702ce82ba2584::t_fa1b5543c0df2f 52
+src/common/core/badbehavior/locales/tl.json
+  s_4df45921f6cc66::t_362da85cd60af3 14,18
+src/common/core/selfsigned/README.de.md
+  s_7e2dde75145a6e::t_fd7a22830fd517 30
+src/common/core/crowdsec/locales/tr.json
+  s_045c651f6891e7::t_1043013a20950a 84-86
+  s_4df45921f6cc66::t_362da85cd60af3 22,30,34,46,78,82
+  s_045c651f6891e7::t_7fe0afeed34647 83
+src/common/core/db/locales/it.json
+  s_4df45921f6cc66::t_362da85cd60af3 26,38,42,54,62
+src/common/core/cors/locales/de.json
+  s_4df45921f6cc66::t_362da85cd60af3 52
+src/common/core/reversescan/locales/es.json
+  s_4df45921f6cc66::t_362da85cd60af3 18
+src/common/core/cors/locales/es.json
+  s_4df45921f6cc66::t_362da85cd60af3 52
+src/common/core/reversescan/locales/ru.json
+  s_4df45921f6cc66::t_362da85cd60af3 14
+src/common/core/crowdsec/README.fr.md
+  s_7e2dde75145a6e::t_806601b66226c4 342,344-346,357-359
+src/common/core/cors/locales/tl.json
+  s_4df45921f6cc66::t_362da85cd60af3 34
+src/common/core/badbehavior/README.md
+  s_7e2dde75145a6e::t_806601b66226c4 41-42
+src/common/core/letsencrypt/locales/tr.json
+  s_4df45921f6cc66::t_362da85cd60af3 34,38,42,54
+src/common/core/metrics/README.es.md
+  s_7e2dde75145a6e::t_806601b66226c4 100
+src/common/core/crowdsec/README.de.md
+  s_7e2dde75145a6e::t_806601b66226c4 340,342-344,355-357
+src/common/core/cors/locales/id.json
+  s_4df45921f6cc66::t_362da85cd60af3 34
+src/common/core/badbehavior/locales/pl.json
+  s_4df45921f6cc66::t_362da85cd60af3 14,18
+src/common/core/reversescan/README.de.md
+  s_7e2dde75145a6e::t_fd7a22830fd517 33
+src/common/core/metrics/locales/tw.json
+  s_4df45921f6cc66::t_362da85cd60af3 30
+src/common/core/letsencrypt/README.es.md
+  s_7e2dde75145a6e::t_806601b66226c4 50-52,55
+src/common/core/redis/locales/es.json
+  s_4df45921f6cc66::t_362da85cd60af3 47,75,83
+src/common/core/sessions/locales/it.json
+  s_4df45921f6cc66::t_362da85cd60af3 22,26,30
+src/common/core/cors/locales/tr.json
+  s_4df45921f6cc66::t_362da85cd60af3 34
+src/common/core/metrics/locales/hi.json
+  s_4df45921f6cc66::t_362da85cd60af3 30
+src/common/core/letsencrypt/locales/es.json
+  s_4df45921f6cc66::t_362da85cd60af3 34,38,42,54
+src/common/core/selfsigned/README.fr.md
+  s_7e2dde75145a6e::t_fd7a22830fd517 30
+src/common/utils/common_utils.py
+  s_18e1cfb5402ed1::t_e9f840519c7770 25
+  s_20b7a5ed3d719b::t_429609ce6d1721 19,26-52
+  s_18e1cfb5402ed1::t_6c1aa9bef6b3a6 909
+src/common/core/letsencrypt/locales/hi.json
+  s_4df45921f6cc66::t_362da85cd60af3 34,38,42,54
+src/common/core/reversescan/locales/fr.json
+  s_4df45921f6cc66::t_362da85cd60af3 18
+src/common/core/crowdsec/README.md
+  s_7e2dde75145a6e::t_806601b66226c4 346,348-350,361-363
+src/common/core/badbehavior/locales/ar.json
+  s_4df45921f6cc66::t_362da85cd60af3 22,26
+src/common/core/cors/locales/pt.json
+  s_4df45921f6cc66::t_362da85cd60af3 52
+tests/core/badbehavior.yml
+  s_0702ce82ba2584::t_2ffb7e4e06fce8 43
+  s_0702ce82ba2584::t_1f02fc1b31262a 35-42,44-83
+src/common/core/selfsigned/locales/de.json
+  s_4df45921f6cc66::t_362da85cd60af3 18
+src/common/core/letsencrypt/README.de.md
+  s_7e2dde75145a6e::t_806601b66226c4 50-52,55
+src/common/core/crowdsec/locales/ar.json
+  s_4df45921f6cc66::t_362da85cd60af3 43,59,63,79,83,87
+  s_045c651f6891e7::t_1043013a20950a 65-67
+  s_045c651f6891e7::t_efc3f39c9a6b09 64
+src/common/core/metrics/README.zh.md
+  s_7e2dde75145a6e::t_fd7a22830fd517 100
+src/common/core/letsencrypt/locales/fr.json
+  s_4df45921f6cc66::t_362da85cd60af3 34,38,42,54
+src/common/core/cors/locales/ar.json
+  s_4df45921f6cc66::t_362da85cd60af3 52
+src/common/core/badbehavior/badbehavior.lua
+  s_20b7a5ed3d719b::t_0eb809eff7c3e0 22,81,87,121
+src/common/core/badbehavior/locales/ko.json
+  s_4df45921f6cc66::t_362da85cd60af3 22,26
+src/common/core/db/locales/de.json
+  s_4df45921f6cc66::t_362da85cd60af3 26,38,42,54,62
+src/common/core/selfsigned/jobs/self-signed.py
+  s_20b7a5ed3d719b::t_2f3765d51d3358 22,126-130
+src/common/core/db/locales/hi.json
+  s_4df45921f6cc66::t_362da85cd60af3 26,38,42,54,62
+src/common/core/badbehavior/locales/tw.json
+  s_4df45921f6cc66::t_362da85cd60af3 22,26
+src/common/core/db/README.md
+  s_7e2dde75145a6e::t_806601b66226c4 29,32-33,36,38
+src/common/core/selfsigned/locales/bn.json
+  s_4df45921f6cc66::t_362da85cd60af3 18
+src/common/core/reversescan/locales/ur.json
+  s_4df45921f6cc66::t_362da85cd60af3 18
+src/common/core/redis/plugin.json
+  s_4df45921f6cc66::t_d19589551cd8e1 73-74,77,136-137,140,155
+  s_0702ce82ba2584::t_c8786c98a5e347 158
+src/common/core/antibot/README.md
+  s_7e2dde75145a6e::t_806601b66226c4 32-33
+src/common/core/redis/locales/pt.json
+  s_4df45921f6cc66::t_362da85cd60af3 47,75,83
+src/common/core/crowdsec/locales/bn.json
+  s_045c651f6891e7::t_1043013a20950a 65-67
+  s_4df45921f6cc66::t_362da85cd60af3 43,59,63,79,83,87
+  s_045c651f6891e7::t_c30e7a19b1048b 64
+src/common/core/antibot/locales/ko.json
+  s_4df45921f6cc66::t_362da85cd60af3 24,28
+src/common/core/sessions/plugin.json
+  s_4df45921f6cc66::t_d19589551cd8e1 37-38,41-42,46-47,50-51,55-56,59-60
+src/common/core/sessions/README.zh.md
+  s_7e2dde75145a6e::t_fd7a22830fd517 30-32
+src/common/core/cors/README.zh.md
+  s_7e2dde75145a6e::t_806601b66226c4 34
+src/common/core/reversescan/locales/br.json
+  s_4df45921f6cc66::t_362da85cd60af3 18
+tests/unit/cli/test_ban_time_default.py
+  s_20b7a5ed3d719b::t_0c6c17aeb41e3f 1-25
+src/common/core/reversescan/locales/tr.json
+  s_4df45921f6cc66::t_362da85cd60af3 14
+src/bw/lua/bunkerweb/rediskeys.lua
+  s_20b7a5ed3d719b::t_bf2d238e77b812 115,121-123,129,131-133,136,138-139,142
+src/common/core/cors/locales/hi.json
+  s_4df45921f6cc66::t_362da85cd60af3 52
+src/common/core/sessions/locales/tw.json
+  s_4df45921f6cc66::t_362da85cd60af3 22,26,30
+src/common/core/crowdsec/jobs/crowdsec_conf_utils.py
+  s_20b7a5ed3d719b::t_6d5b54abf2708f 6-7,11-12,21,24-25,28-30,35-44,92-97
+src/common/core/sessions/locales/hi.json
+  s_4df45921f6cc66::t_362da85cd60af3 22,26,30
+src/common/core/sessions/locales/fr.json
+  s_4df45921f6cc66::t_362da85cd60af3 22,26,30
+tests/unit/fixtures/duration_vectors.json
+  s_18e1cfb5402ed1::t_e9f840519c7770 2-89
+  s_20b7a5ed3d719b::t_6bf4c46fb621c2 1,90
+src/common/core/crowdsec/locales/ko.json
+  s_4df45921f6cc66::t_362da85cd60af3 43,59,63,79,83,87
+  s_045c651f6891e7::t_1043013a20950a 65-67
+  s_045c651f6891e7::t_2075cd0b6f0a8b 64
+src/common/core/letsencrypt/locales/it.json
+  s_4df45921f6cc66::t_362da85cd60af3 34,38,42,54
+src/common/core/cors/locales/tw.json
+  s_4df45921f6cc66::t_362da85cd60af3 52
+src/common/core/metrics/locales/id.json
+  s_4df45921f6cc66::t_362da85cd60af3 30
+src/common/core/crowdsec/locales/tl.json
+  s_4df45921f6cc66::t_362da85cd60af3 22,30,34,46,78,82
+  s_045c651f6891e7::t_1043013a20950a 84-86
+  s_045c651f6891e7::t_ce2c4a544225b7 83
+src/common/core/redis/locales/ru.json
+  s_4df45921f6cc66::t_362da85cd60af3 47,75,83
+src/common/core/cors/locales/bn.json
+  s_4df45921f6cc66::t_362da85cd60af3 52
+src/common/core/cors/locales/ru.json
+  s_4df45921f6cc66::t_362da85cd60af3 34
+src/common/core/redis/locales/bn.json
+  s_4df45921f6cc66::t_362da85cd60af3 47,75,83
+src/common/core/db/locales/bn.json
+  s_4df45921f6cc66::t_362da85cd60af3 26,38,42,54,62
+src/common/core/cors/locales/ur.json
+  s_4df45921f6cc66::t_362da85cd60af3 52
+src/common/core/sessions/sessions.lua
+  s_20b7a5ed3d719b::t_0eb809eff7c3e0 15,107-109,141-144,158
+tests/unit/common/test_duration_redis_client.py
+  s_20b7a5ed3d719b::t_9ef90c6c975aea 1-19
+src/common/core/crowdsec/locales/pt.json
+  s_045c651f6891e7::t_1043013a20950a 65-67
+  s_4df45921f6cc66::t_362da85cd60af3 43,59,63,79,83,87
+  s_045c651f6891e7::t_efd2e2d5b7d44f 64
+src/common/core/antibot/README.zh.md
+  s_7e2dde75145a6e::t_806601b66226c4 32-33
+src/common/core/crowdsec/locales/ru.json
+  s_4df45921f6cc66::t_362da85cd60af3 22,30,34,46,78,82
+  s_045c651f6891e7::t_1043013a20950a 84-86
+  s_045c651f6891e7::t_ac85862bb1d298 83
+src/common/core/badbehavior/locales/it.json
+  s_4df45921f6cc66::t_362da85cd60af3 22,26
+src/common/core/redis/README.de.md
+  s_7e2dde75145a6e::t_fd7a22830fd517 32,35,40
+src/common/core/antibot/locales/ar.json
+  s_4df45921f6cc66::t_362da85cd60af3 24,28
+src/common/core/redis/locales/tw.json
+  s_4df45921f6cc66::t_362da85cd60af3 47,75,83
+src/common/core/letsencrypt/locales/pl.json
+  s_4df45921f6cc66::t_362da85cd60af3 34,38,42,54
+src/common/core/sessions/locales/es.json
+  s_4df45921f6cc66::t_362da85cd60af3 22,26,30
+src/common/core/redis/locales/fr.json
+  s_4df45921f6cc66::t_362da85cd60af3 47,75,83
+src/common/core/metrics/plugin.json
+  s_4df45921f6cc66::t_d19589551cd8e1 55-56
+  s_0702ce82ba2584::t_e784f7b749f173 59
+src/common/core/antibot/README.es.md
+  s_7e2dde75145a6e::t_806601b66226c4 32-33
+src/common/core/reversescan/locales/hi.json
+  s_4df45921f6cc66::t_362da85cd60af3 18
+src/common/core/letsencrypt/jobs/certbot-new.py
+  s_20b7a5ed3d719b::t_2f3765d51d3358 36,429-432,486,495,504,526,530,533-534,538
+src/common/core/sessions/locales/de.json
+  s_4df45921f6cc66::t_362da85cd60af3 22,26,30
+src/common/core/cors/locales/pl.json
+  s_4df45921f6cc66::t_362da85cd60af3 34
+src/common/core/redis/README.es.md
+  s_7e2dde75145a6e::t_fd7a22830fd517 34,37,42
+src/common/core/db/README.zh.md
+  s_7e2dde75145a6e::t_806601b66226c4 29,32-33,36,38
+tests/unit/common/test_redis_cluster_nodes_default_port.py
+  s_20b7a5ed3d719b::t_6592b567271bd8 1-49,51-54,56-75,81-86
+  s_20b7a5ed3d719b::t_e71c35b6024baf 50,55,76-80
+src/common/core/crowdsec/locales/it.json
+  s_4df45921f6cc66::t_362da85cd60af3 43,59,63,79,83,87
+  s_045c651f6891e7::t_1043013a20950a 65-67
+  s_045c651f6891e7::t_25e690f7759b86 64
+src/common/core/db/locales/pt.json
+  s_4df45921f6cc66::t_362da85cd60af3 26,38,42,54,62
+src/common/core/antibot/locales/pt.json
+  s_4df45921f6cc66::t_362da85cd60af3 24,28
+src/common/core/badbehavior/README.es.md
+  s_7e2dde75145a6e::t_806601b66226c4 41-42
+src/common/core/reversescan/locales/tw.json
+  s_4df45921f6cc66::t_362da85cd60af3 18
+src/common/core/reversescan/locales/bn.json
+  s_4df45921f6cc66::t_362da85cd60af3 18
+src/common/core/metrics/README.fr.md
+  s_7e2dde75145a6e::t_806601b66226c4 100
+tests/unit/ui/test_duration_ui.py
+  s_20b7a5ed3d719b::t_9ef90c6c975aea 1-48
+src/common/core/crowdsec/locales/br.json
+  s_4df45921f6cc66::t_362da85cd60af3 43,59,63,79,83,87
+  s_045c651f6891e7::t_1043013a20950a 65-67
+  s_045c651f6891e7::t_7d7f300901b7fe 64
+src/common/core/sessions/README.es.md
+  s_7e2dde75145a6e::t_fd7a22830fd517 30-32
+src/common/core/letsencrypt/locales/bn.json
+  s_4df45921f6cc66::t_362da85cd60af3 34,38,42,54
+src/common/core/selfsigned/locales/ur.json
+  s_4df45921f6cc66::t_362da85cd60af3 18
+src/common/core/crowdsec/locales/hi.json
+  s_4df45921f6cc66::t_362da85cd60af3 43,59,63,79,83,87
+  s_045c651f6891e7::t_1043013a20950a 65-67
+  s_045c651f6891e7::t_41b339c2be065c 64
+src/common/core/letsencrypt/locales/ur.json
+  s_4df45921f6cc66::t_362da85cd60af3 34,38,42,54
+src/common/core/db/README.es.md
+  s_7e2dde75145a6e::t_806601b66226c4 29,32-33,36,38
+src/common/core/db/README.fr.md
+  s_7e2dde75145a6e::t_806601b66226c4 29,32-33,36,38
+src/common/core/selfsigned/locales/pl.json
+  s_4df45921f6cc66::t_362da85cd60af3 18
+src/common/core/badbehavior/locales/id.json
+  s_4df45921f6cc66::t_362da85cd60af3 14,18
+src/common/core/sessions/locales/bn.json
+  s_4df45921f6cc66::t_362da85cd60af3 22,26,30
+src/common/core/crowdsec/locales/es.json
+  s_4df45921f6cc66::t_362da85cd60af3 43,59,63,79,83,87
+  s_045c651f6891e7::t_1043013a20950a 65-67
+  s_045c651f6891e7::t_4babfb4fd2db42 64
+tests/unit/common/test_redis_cluster_port.py
+  s_20b7a5ed3d719b::t_200e36a8994650 82-83,90-92
+  s_20b7a5ed3d719b::t_1b23d828223bc9 93-94
+src/common/core/redis/locales/it.json
+  s_4df45921f6cc66::t_362da85cd60af3 47,75,83
+tests/unit/api/test_redis_cluster_api_port.py
+  s_20b7a5ed3d719b::t_4f29c47bdca027 68,75-78
+  s_ca0205ac1993a0::t_f14e1a1afef5db 81-86
+  s_71f509f53fb021::t_f45f7cc14d8ca6 13,33
+  s_20b7a5ed3d719b::t_e87c97f2f69499 79-80
+src/common/core/letsencrypt/locales/tw.json
+  s_4df45921f6cc66::t_362da85cd60af3 34,38,42,54
+src/common/core/letsencrypt/locales/de.json
+  s_4df45921f6cc66::t_362da85cd60af3 34,38,42,54
+src/common/core/reversescan/README.es.md
+  s_7e2dde75145a6e::t_fd7a22830fd517 33
+src/common/core/metrics/README.de.md
+  s_7e2dde75145a6e::t_806601b66226c4 100
+src/common/core/metrics/README.md
+  s_7e2dde75145a6e::t_806601b66226c4 100
+src/common/core/db/locales/pl.json
+  s_4df45921f6cc66::t_362da85cd60af3 18,30,42,50,54
+src/common/core/metrics/locales/es.json
+  s_4df45921f6cc66::t_362da85cd60af3 30
+src/common/core/selfsigned/locales/tw.json
+  s_4df45921f6cc66::t_362da85cd60af3 18
+src/common/core/badbehavior/locales/tr.json
+  s_4df45921f6cc66::t_362da85cd60af3 14,18
+src/common/core/reversescan/reversescan.lua
+  s_20b7a5ed3d719b::t_0eb809eff7c3e0 13,66
+src/common/core/selfsigned/locales/ko.json
+  s_4df45921f6cc66::t_362da85cd60af3 18
+src/common/core/reversescan/locales/ar.json
+  s_4df45921f6cc66::t_362da85cd60af3 18
+src/common/core/redis/locales/zh.json
+  s_4df45921f6cc66::t_362da85cd60af3 47,75,83
+src/common/core/reversescan/README.zh.md
+  s_7e2dde75145a6e::t_fd7a22830fd517 33
+src/scheduler/main.py
+  s_20b7a5ed3d719b::t_2face3b7e3d788 118-121,159
+  s_045c651f6891e7::t_30f5c6710b9098 34,160-162
+src/common/core/sessions/locales/tl.json
+  s_4df45921f6cc66::t_362da85cd60af3 22,26,30
+src/common/core/cors/locales/fr.json
+  s_4df45921f6cc66::t_362da85cd60af3 52
+src/common/core/metrics/locales/de.json
+  s_4df45921f6cc66::t_362da85cd60af3 30
+tests/unit/common/test_duration_readers_lua.py
+  s_18e1cfb5402ed1::t_aad6379e028c78 1-32,41-133,135-137,140-189,191-200,202-203,205-209,211-213,215-219,221-223,225-242,244-250,252,255-256,258-266,271-279
+  s_2479354394f918::t_8178fa73001176 33-40,134,138-139,190,251,253-254
+  s_7e2dde75145a6e::t_195b1c2bcc7acf 280-312,316,321-325,327-328,330
+  s_20b7a5ed3d719b::t_e71c35b6024baf 201,204,210,214,220,224,243,257,267-270,313-315,317-320,326,329
+src/common/core/selfsigned/locales/ru.json
+  s_4df45921f6cc66::t_362da85cd60af3 18
+src/common/core/sessions/locales/pt.json
+  s_4df45921f6cc66::t_362da85cd60af3 22,26,30
+src/common/core/badbehavior/README.zh.md
+  s_7e2dde75145a6e::t_806601b66226c4 41-42
+src/common/core/antibot/locales/zh.json
+  s_4df45921f6cc66::t_362da85cd60af3 24,28
+src/common/core/redis/locales/tr.json
+  s_4df45921f6cc66::t_362da85cd60af3 47,75,83
+src/common/core/crowdsec/locales/fr.json
+  s_4df45921f6cc66::t_362da85cd60af3 43,59,63,79,83,87
+  s_045c651f6891e7::t_1043013a20950a 65-67
+  s_045c651f6891e7::t_5a140a1d7731a2 64
+src/common/core/selfsigned/locales/hi.json
+  s_4df45921f6cc66::t_362da85cd60af3 18
+src/common/core/reversescan/README.fr.md
+  s_7e2dde75145a6e::t_fd7a22830fd517 31
+src/common/core/selfsigned/README.md
+  s_7e2dde75145a6e::t_fd7a22830fd517 32
+src/common/core/badbehavior/README.fr.md
+  s_7e2dde75145a6e::t_806601b66226c4 39-40
+src/common/core/antibot/README.de.md
+  s_7e2dde75145a6e::t_806601b66226c4 32-33
+src/common/core/antibot/locales/bn.json
+  s_4df45921f6cc66::t_362da85cd60af3 24,28
+src/common/core/db/locales/es.json
+  s_4df45921f6cc66::t_362da85cd60af3 26,38,42,54,62
+src/common/core/sessions/README.fr.md
+  s_7e2dde75145a6e::t_fd7a22830fd517 30-32
+src/common/core/metrics/locales/fr.json
+  s_4df45921f6cc66::t_362da85cd60af3 30
+src/common/core/badbehavior/locales/ru.json
+  s_4df45921f6cc66::t_362da85cd60af3 14,18
+src/common/core/selfsigned/locales/ar.json
+  s_4df45921f6cc66::t_362da85cd60af3 18
+src/common/core/reversescan/plugin.json
+  s_4df45921f6cc66::t_d19589551cd8e1 28-29,32-33
+src/common/core/letsencrypt/README.fr.md
+  s_7e2dde75145a6e::t_806601b66226c4 50-52,55
+tests/core/metrics.yml
+  s_64df9af649e6ef::t_61a5d7af6662f9 72-127
+src/common/core/db/jobs/cleanup-expired-ui-sessions.py
+  s_20b7a5ed3d719b::t_8b9ca643afbd8e 13,21-25
+src/common/core/letsencrypt/locales/ko.json
+  s_4df45921f6cc66::t_362da85cd60af3 34,38,42,54
+src/common/core/db/locales/tw.json
+  s_4df45921f6cc66::t_362da85cd60af3 26,38,42,54,62
+src/common/core/badbehavior/README.de.md
+  s_7e2dde75145a6e::t_806601b66226c4 41-42
+src/common/core/metrics/locales/ru.json
+  s_4df45921f6cc66::t_362da85cd60af3 30
+src/common/core/crowdsec/README.es.md
+  s_7e2dde75145a6e::t_806601b66226c4 338,340-342,353-355
+src/common/core/crowdsec/locales/id.json
+  s_045c651f6891e7::t_1043013a20950a 84-86
+  s_4df45921f6cc66::t_362da85cd60af3 22,30,34,46,78,82
+  s_045c651f6891e7::t_cd1c5749bbee22 83
+tests/unit/common/test_redis_cluster_port_lua.py
+  s_20b7a5ed3d719b::t_538a23e321bfca 30
+tests/unit/common/test_reversescan_cache_failure_lua.py
+  s_20b7a5ed3d719b::t_be97fe31287cf8 98
+tests/unit/db/test_duration_env_database.py
+  s_20b7a5ed3d719b::t_0ee18cde90f9ee 1-52
+tests/unit/jobs/test_duration_jobs.py
+  s_20b7a5ed3d719b::t_bc5ea1d277f923 1-87
+tests/unit/jobs/test_selfsigned_cache_race.py
+  s_20b7a5ed3d719b::t_42b8a475c2792f 10-11,67,128
+tests/unit/metrics/test_metrics_instance_sync.py
+  s_20b7a5ed3d719b::t_c37a8f407e2c44 23
+tests/unit/scheduler/test_duration_env_scheduler.py
+  s_20b7a5ed3d719b::t_e738a8a037c470 1-38
+tests/unit/selfsigned/test_duration_expiry.py
+  s_20b7a5ed3d719b::t_1e62acb4e2ff66 1-36
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "ee95915ab9bbe4e19132ca70466dcf21df96f3ae",
+  "prompts": {},
+  "sessions": {
+    "s_045c651f6891e7": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "bbc6d19b-feaf-4e93-a472-4a6baaf79059",
+        "model": "unknown"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_0702ce82ba2584": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "809d5db4-9bb0-42b4-bfd3-69362cac66a5",
+        "model": "unknown"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_18e1cfb5402ed1": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "087a9dfe-326f-41fb-b619-845867a497da",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_20b7a5ed3d719b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "1ff5f57f-70c6-42de-a484-47b9c5ced9ac",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_2479354394f918": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "e9ac8971-b7d8-4c29-b518-2bccecde1fd9",
+        "model": "unknown"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_4df45921f6cc66": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "27ef48b1-6813-4295-90df-7d875e1dc5f4",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_64df9af649e6ef": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "f0a4e806-8cd3-47ea-808c-cc90e2e9f65d",
+        "model": "unknown"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_71f509f53fb021": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "98488737-5166-40ba-a5c0-a9091a7a9a78",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_7e2dde75145a6e": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "4ae81896-974e-4a9a-891a-790b6e7886dc",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_977fed45c74c2c": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "7ce0fe94-e087-45a0-af3b-b484fbcc8fbd",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_ca0205ac1993a0": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "ef330e5c-e0cf-4ad9-8d06-c7217b905097",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

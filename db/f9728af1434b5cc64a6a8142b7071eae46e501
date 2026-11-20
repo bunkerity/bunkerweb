@@ -1,0 +1,106 @@
+src/common/core/whitelist/plugin.json
+  s_a3272246a30d27::t_afc7504f159a50 153
+src/common/core/jobs/plugin.json
+  s_795e2ccdb6801b::t_310b92ebbc48be 14,21,35
+src/common/core/bunkernet/plugin.json
+  s_ba79e7bf7993d6::t_e9c5a5d0780f97 50-51,57-58
+  s_795e2ccdb6801b::t_310b92ebbc48be 72,79
+  s_e65d3eabd7116f::t_d440c3081c9da7 64-65
+src/common/core/reverseproxy/plugin.json
+  s_795e2ccdb6801b::t_310b92ebbc48be 504
+src/common/core/metrics/plugin.json
+  s_795e2ccdb6801b::t_310b92ebbc48be 159,166
+src/common/core/customcert/plugin.json
+  s_795e2ccdb6801b::t_310b92ebbc48be 110
+src/common/core/realip/plugin.json
+  s_795e2ccdb6801b::t_310b92ebbc48be 69
+tests/unit/worker/test_job_requeue.py
+  s_a3272246a30d27::t_42533e84cf14f7 49-56
+  s_ba79e7bf7993d6::t_4464f8fcadeeef 91-97
+  s_a12e0254ad4a4d::t_718fe7aeedd855 48
+src/common/core/crowdsec/plugin.json
+  s_a3272246a30d27::t_a12f1cae94b35d 190-191
+src/worker/tasks.py
+  s_ba79e7bf7993d6::t_e9c5a5d0780f97 354
+tests/unit/worker/test_app.py
+  s_ba79e7bf7993d6::t_4464f8fcadeeef 102-104,120-121
+  s_a3272246a30d27::t_a12f1cae94b35d 134,137-138,142
+  s_a3272246a30d27::t_42533e84cf14f7 129-130,133,139-141,143-144
+src/common/core/geoip/plugin.json
+  s_795e2ccdb6801b::t_310b92ebbc48be 69,76,83
+tests/unit/api/test_jobs_last_run.py
+  s_ba79e7bf7993d6::t_4464f8fcadeeef 7,96-116
+src/common/core/robotstxt/plugin.json
+  s_795e2ccdb6801b::t_310b92ebbc48be 132,139
+src/common/core/letsencrypt/plugin.json
+  s_ba79e7bf7993d6::t_e9c5a5d0780f97 450-451,457-458
+src/common/utils/job_queues.py
+  s_ba79e7bf7993d6::t_ec035ed4e3d680 39-42
+  s_ba79e7bf7993d6::t_e9c5a5d0780f97 11-15,37
+src/common/core/misc/plugin.json
+  s_795e2ccdb6801b::t_310b92ebbc48be 218
+src/common/core/greylist/plugin.json
+  s_795e2ccdb6801b::t_310b92ebbc48be 153
+src/common/core/selfsigned/plugin.json
+  s_795e2ccdb6801b::t_310b92ebbc48be 52
+src/common/core/dnsbl/plugin.json
+  s_795e2ccdb6801b::t_310b92ebbc48be 71
+src/common/core/blacklist/plugin.json
+  s_795e2ccdb6801b::t_310b92ebbc48be 294
+src/common/core/db/plugin.json
+  s_795e2ccdb6801b::t_310b92ebbc48be 143,150
+src/worker/app.py
+  s_ba79e7bf7993d6::t_e9c5a5d0780f97 83
+src/common/core/certificates/plugin.json
+  s_795e2ccdb6801b::t_310b92ebbc48be 14
+src/api/app/routers/jobs.py
+  s_ba79e7bf7993d6::t_e9c5a5d0780f97 69
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "dbf9728af1434b5cc64a6a8142b7071eae46e501",
+  "prompts": {},
+  "sessions": {
+    "s_795e2ccdb6801b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "71804b16-900c-4824-8bbc-5e7434803315",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_a12e0254ad4a4d": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0c2ca-1393-7a90-b9c1-a428efc126ab",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_a3272246a30d27": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0c2f1-9c8f-7063-ba57-882473a49779",
+        "model": "gpt-5.6-terra"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_ba79e7bf7993d6": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0c2d7-c3a8-7890-a711-e0dc32aa68c7",
+        "model": "gpt-5.6-terra"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_e65d3eabd7116f": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "7766284e-2c4d-4f22-845b-dbc934ee2aef",
+        "model": "claude-opus-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

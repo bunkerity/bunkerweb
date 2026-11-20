@@ -1,0 +1,32 @@
+tests/unit/requirements.in
+  s_d158231cac335b::t_25687dd052daed 31-32
+  s_d158231cac335b::t_352b3f0e097a00 75-76
+tests/unit/requirements.txt
+  s_d158231cac335b::t_7fab1556da8610 2640-2645
+  s_d158231cac335b::t_acdbcb2238ae1a 1000,1017-1020,1182-1184,1367
+tests/unit/ui/core/_ui_core_main.py
+  s_d158231cac335b::t_bb2ddd907c765a 7-10,231
+tests/unit/ui/test_csrf_enforced.py
+  s_d158231cac335b::t_0f771877ec14ec 8
+  s_d158231cac335b::t_05127371f88c52 1-7,9-48
+tests/unit/ui/test_config_validation_rejections.py
+  s_d158231cac335b::t_05127371f88c52 1-66,68-69,71,73-79
+  s_d158231cac335b::t_087e59215a6a71 70
+  s_d158231cac335b::t_25687dd052daed 67,72
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "338d76e69ae2bb95ba70d4301aebd400bbab0535",
+  "prompts": {},
+  "sessions": {
+    "s_d158231cac335b": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1b09e-7ccd-7131-803a-df92901d1dbf",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

@@ -1,0 +1,20 @@
+CHANGELOG.md
+  h_a33a1e80933106 55
+src/common/utils/reload_utils.py
+  h_a33a1e80933106 4,14-15,18-24,29-30,41-42
+src/scheduler/main.py
+  h_a33a1e80933106 66,1337,1380-1384,1506
+tests/unit/scheduler/test_reload_callers.py
+  h_a33a1e80933106 35-36,130-157
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "0646e1d40ed1e7742647345ad21c06f32dea1fe9",
+  "prompts": {},
+  "humans": {
+    "h_a33a1e80933106": {
+      "author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

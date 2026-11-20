@@ -1,0 +1,53 @@
+tests/unit/common/test_crowdsec_bouncer_live_coverage_lua.py
+  s_1ebce3e36c4bda::t_78b57b35f6d26e 1-15,17-78,80-82,87-155,164-203,210-219,226-229,233,240-254,259-264,270-278,284-297,303-305,316,322
+  s_1ebce3e36c4bda::t_d91e418b735b8e 323-335,337,339-340,344-349,354-365,372-373,406-415,419-423,428-431,438-442,448-453,457-462,467-473,477-480,493-504,508-517,521-527,532-535,539-542,546-567
+  s_1ebce3e36c4bda::t_63a620def1b098 383,545
+  s_faa4111cc0d65a::t_a4b573a32f8eed 279-283,384-405
+  s_1ebce3e36c4bda::t_b80487d782408d 16,79
+  s_1ebce3e36c4bda::t_ce0007eceec5a1 83-86,336,338,374-376
+  s_069d588794c2c2::t_6377ea10d66689 156-163,204-209,220-225,230-232,234-239,255-258,265-269,298-302,306-315,317-321,341-343,350-353,366-371,377-382,416-418,424-427,432-437,443-447,454-456,463-466,474-476,481-492,505-507,518-520,528-531,536-538,543-544
+src/common/core/crowdsec/lib/bouncer.lua
+  s_faa4111cc0d65a::t_423d29df5dcbf7 813,821-822,865,905-909
+CHANGELOG.md
+  s_80a54b2aaf3dbe::t_0b2962bd1850ac 36-37
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "e04bcff8328968c31e6e883422d4f7784b281f55",
+  "prompts": {},
+  "sessions": {
+    "s_069d588794c2c2": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "84fe7cda-2bca-4767-bd4f-5fd51bba09cf",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_1ebce3e36c4bda": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a18dd5-2941-7952-a3cb-22aac617aaea",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_80a54b2aaf3dbe": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "aa104066-cd7c-4cd6-bfd9-8d82570506d6",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_faa4111cc0d65a": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a18ddd-c980-7c00-9214-ce952a304f65",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

@@ -1,0 +1,19 @@
+tests/core/ipv6-only/check.py
+  s_0f93bda8875a9e::t_8f651853ae9521 68
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "8ce1b2510e2ed96a3e7b2f668157f5c719c8cef3",
+  "prompts": {},
+  "sessions": {
+    "s_0f93bda8875a9e": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1a721-b432-7e83-b1fe-e9b4cd132d48",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

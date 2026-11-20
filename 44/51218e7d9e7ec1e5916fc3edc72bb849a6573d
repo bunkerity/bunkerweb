@@ -1,0 +1,104 @@
+src/common/gen/save_config.py
+  s_434d79242d831e::t_ad983c09c969f2 93-101,111
+tests/unit/scheduler/test_validate_manual_plugin.py
+  s_88325484405045::t_057b50bedc7a1c 1-157
+  s_33cd4587c25ea2::t_a39e3784ecd1de 158-201
+tests/unit/ui/test_reload_plugins_invalid_manual.py
+  s_88325484405045::t_368ed78da681ab 1-43,52-73,77-83,91-181
+  s_37a06fa33a9884::t_f67d0b358cffa7 44-51,74-76,84-90
+tests/unit/db/test_checked_changes_ui_plugins_flag.py
+  s_88325484405045::t_4f55e84bafba2c 1-50
+  s_37a06fa33a9884::t_f67d0b358cffa7 51-53
+src/scheduler/main.py
+  s_0702ce82ba2584::t_110995fcc22b9a 27,46,433-446,463,483-497,514-516,1107-1115,1117-1123,1126-1128,1177-1187
+  s_88325484405045::t_792ab1746f7dca 18,317,932,1001
+tests/unit/scheduler/test_save_config_registered_plugins.py
+  s_434d79242d831e::t_37105c73342624 1-21,23-44,55-99
+  s_18e1cfb5402ed1::t_bf0af70ad275ee 22,45-54
+tests/unit/scheduler/test_invalid_manual_plugins.py
+  s_88325484405045::t_2374faef7217c4 1-126,128-159,165-252,254-264,266-277,279-289,291-394
+  s_88325484405045::t_0359c7411b8cba 160-164,253,265,278,290
+  s_88325484405045::t_9007611b86d13e 127
+tests/unit/scheduler/test_config_saver_uses_scheduler_python.py
+  s_37a06fa33a9884::t_f67d0b358cffa7 90-94
+  s_88325484405045::t_2faf18ddd6f379 1-89,95-99
+src/common/db/db_methods/metadata.py
+  s_0702ce82ba2584::t_a792ac5b8861c9 503-509
+src/ui/app/dependencies.py
+  s_37a06fa33a9884::t_f67d0b358cffa7 135-140
+  s_88325484405045::t_90f3485ac7dff0 9,14,65-95,113-114,134,141,143,174-175
+src/common/utils/manual_plugins.py
+  s_88325484405045::t_fefe77123bb993 1-26
+src/common/gen/Configurator.py
+  s_88325484405045::t_06fe31781745fb 251,253-254,353-354,358-363,365-367,373-376
+  s_88325484405045::t_fefe77123bb993 14,238-250,252,255-279
+  s_434d79242d831e::t_ad983c09c969f2 89,92,364,368-372,377-379
+  s_df722c705ff933::t_859d91b1f33fbb 352
+  s_434d79242d831e::t_64cfcb3b1dfa9e 280,380
+tests/unit/scheduler/test_check_plugin_changes_preserves_plugins.py
+  s_88325484405045::t_b87544bf7ddd8c 16-17,27,29-34,66-70,72,84-85
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "4451218e7d9e7ec1e5916fc3edc72bb849a6573d",
+  "prompts": {},
+  "sessions": {
+    "s_0702ce82ba2584": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "809d5db4-9bb0-42b4-bfd3-69362cac66a5",
+        "model": "unknown"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_18e1cfb5402ed1": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "087a9dfe-326f-41fb-b619-845867a497da",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_33cd4587c25ea2": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "01ac58e2-ebe6-42de-81c6-ec913cac3930",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_37a06fa33a9884": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "e75ef892-b60a-429b-9e90-80884887b09e",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_434d79242d831e": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a13f29-385f-7913-aa27-9846e6473b5b",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_88325484405045": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "3799c72c-0b5c-4b93-bd79-7c807a0d7e20",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_df722c705ff933": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a13eea-64d9-7e03-97d7-4bf92f5401c4",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

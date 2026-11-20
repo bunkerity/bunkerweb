@@ -1,0 +1,19 @@
+src/common/db/Database.py
+  s_7c9fc1743d8ae3::t_3e8a8503f9bf2f 2273,4037,4199,5393
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "32deffb51bc8e0783f177c2f4670eb19a0257bb2",
+  "prompts": {},
+  "sessions": {
+    "s_7c9fc1743d8ae3": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "9be17fba-9401-4cff-b62a-b004e566960f",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

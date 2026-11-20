@@ -1,0 +1,25 @@
+.github/codecov.yml
+  s_80f1da85912d1b::t_85bd4bbd3cc283 1-10
+.github/workflows/unit-tests.yml
+  s_80f1da85912d1b::t_2150fdf4e6722e 165,168-173,175-177,179
+  s_80f1da85912d1b::t_1554ae467c2de9 174,178
+  s_80f1da85912d1b::t_5701271661644e 166-167
+README.md
+  s_80f1da85912d1b::t_e64f00cfcd257f 17-19
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "788829ce612c5822cf84b221fdbdfcab2adbdf48",
+  "prompts": {},
+  "sessions": {
+    "s_80f1da85912d1b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "48f28331-3ce2-4fa3-b959-69d5d1238c0a",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}
