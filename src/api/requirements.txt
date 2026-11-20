@@ -264,9 +264,9 @@ dnspython==2.9.2 \
     --hash=sha256:8d4d39a513e649d634004ce4d39ade2352efcea472a0247535a5c2d18a9d7ba9 \
     --hash=sha256:af15f7d385a6ae2fb35a796fde2138004c8c42c7389090e2addc83e3b3340fd8
     # via email-validator
-email-validator==2.3.0 \
-    --hash=sha256:80f13f623413e6b197ae73bb10bf4eb0908faf509ad8362c5edeb0be7fd450b4 \
-    --hash=sha256:9fc05c37f2f6cf439ff414f8fc46d917929974a82244c20eb10231ba60c54426
+email-validator==2.4.0 \
+    --hash=sha256:4454e41c4e1c6b6caee34a1dc71d5e736791562be8fd179b02e298f796522684 \
+    --hash=sha256:be487bc50bc3bd832a98515a55a15649d9bec06d954fa178663190714b6c4ee1
     # via -r requirements.in
 fastapi==0.162.7 \
     --hash=sha256:b7503029c8ef2d2d5fea9049294cf8d0f2805c6621f4677ede269fce19f01efb \
