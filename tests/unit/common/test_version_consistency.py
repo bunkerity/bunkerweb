@@ -7,7 +7,8 @@ from pathlib import Path
 import pytest
 
 ROOT = Path(__file__).resolve().parents[3]
-VERSION = "1.6.18"
+VERSION = "1.99.0~rc5"
+FINAL = VERSION.split("~")[0]
 PINS = {
     "src/bw/Dockerfile": 'LABEL version="{version}"\n',
     "misc/install-bunkerweb.sh": 'DEFAULT_BUNKERWEB_VERSION="{version}"\n',
@@ -96,7 +97,7 @@ def test_linux_nginx_pin_matches_selected_tree(nginx_trees, os_name, os_version,
 
 
 @pytest.mark.parametrize("name", PINS)
-@pytest.mark.parametrize("expected,wrong", [(VERSION, VERSION + "0"), ("1.6.18", VERSION)])
+@pytest.mark.parametrize("expected,wrong", [(VERSION, VERSION + "0"), (FINAL, VERSION)])
 def test_pin_must_equal_version(tree, name, expected, wrong):
     (tree / "src/VERSION").write_text(expected + "\n")
     for pin, template in PINS.items():
@@ -107,7 +108,7 @@ def test_pin_must_equal_version(tree, name, expected, wrong):
     assert f"{name}: pin is" in result.stdout
 
 
-@pytest.mark.parametrize("stale", [VERSION + "0", VERSION.replace("~", "-") + "0", VERSION.split("~")[0] + "~rc3", VERSION + "-extra"])
+@pytest.mark.parametrize("stale", [VERSION + "0", VERSION.replace("~", "-") + "0", FINAL + "~rc3", VERSION + "-extra"])
 @pytest.mark.parametrize("same_line", [False, True])
 def test_stale_token_cannot_hide_behind_current_version(tree, stale, same_line):
     prefix = f"current={VERSION} " if same_line else ""
@@ -122,7 +123,7 @@ def test_stale_token_cannot_hide_behind_current_version(tree, stale, same_line):
 def test_features_accept_version_bounds(tree, path, prose):
     page = tree / path
     page.parent.mkdir(parents=True)
-    page.write_text(prose.format(rc=VERSION.split("~")[0] + "~rc2") + "\n")
+    page.write_text(prose.format(rc=FINAL + "~rc2") + "\n")
     result = check(tree)
     assert result.returncode == 0, result.stdout + result.stderr
 
@@ -142,7 +143,7 @@ def test_features_accept_version_bounds(tree, path, prose):
 def test_version_bounds_do_not_hide_stale_pins(tree, path, line):
     page = tree / path
     page.parent.mkdir(parents=True)
-    stale = VERSION.split("~")[0] + "~rc2"
+    stale = FINAL + "~rc2"
     page.write_text(line.format(rc=stale, tag=stale.replace("~", "-")) + "\n")
     result = check(tree)
     assert result.returncode == 1, result.stdout + result.stderr
@@ -150,9 +151,9 @@ def test_version_bounds_do_not_hide_stale_pins(tree, path, line):
 
 
 def test_final_release_rejects_stale_rc_literal(tree):
-    (tree / "src/VERSION").write_text("1.6.18\n")
+    (tree / "src/VERSION").write_text(FINAL + "\n")
     for name, template in PINS.items():
-        (tree / name).write_text(template.format(version="1.6.18"))
+        (tree / name).write_text(template.format(version=FINAL))
     result = check(tree)
     assert result.returncode == 1, result.stdout + result.stderr
     assert "literals.txt:1:" in result.stdout
