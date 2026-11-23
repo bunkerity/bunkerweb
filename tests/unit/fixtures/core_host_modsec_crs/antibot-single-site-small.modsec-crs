@@ -1,0 +1,2 @@
+SecRule REQUEST_FILENAME "@rx ^/challenge$" "nolog,phase:4,allow,id:9801500,chain"
+SecRule REQUEST_HEADERS:Host "@rx ^(?:www\.example\.com|192\.0\.2\.10|\[2001:db8::1\])(?::\d+)?$" "t:lowercase,nolog"

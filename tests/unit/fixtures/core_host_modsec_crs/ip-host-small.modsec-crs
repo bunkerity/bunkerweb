@@ -1,0 +1,4 @@
+# CRS 920350 flags a numeric Host header, which is the normal Host of a service named by an IP address.
+# One rule for the literals of every service (NGINX routes by Host): any other numeric Host stays enforced.
+SecRule REQUEST_HEADERS:Host "@rx ^(?:10\.0\.0\.5|\[2001:db8::1\]|\[\[2001:db8::2\]\]|192\.0\.2\.7)(?::\d+)?$" \
+    "id:9800100,phase:1,pass,t:none,t:lowercase,nolog,ctl:ruleRemoveById=920350"

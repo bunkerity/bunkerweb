@@ -1,5 +1,9 @@
 # Changelog
 
+## v1.6.19 - 2026/??/??
+
+- [BUGFIX] `ui`, `antibot`, `modsecurity`: with global CRS, long server name lists no longer exceed the libModSecurity regex size limit and fail every reload.
+
 ## v1.6.18 - 2026/11/20
 
 - [BUGFIX] `ui`: when a template save fails, the template editor says whether the WAF or an expired session stopped it.

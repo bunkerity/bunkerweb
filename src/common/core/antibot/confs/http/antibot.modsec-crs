@@ -1,3 +1,21 @@
+{#- Pack regex alternatives into chunks of at most budget UTF-8 bytes. patterns: input; out: receives the chunks; skipped: receives patterns longer than budget. -#}
+{% macro chunk_into(patterns, out, skipped, budget) %}
+    {% set cur = namespace(text="", size=0) %}
+    {% for pattern in patterns %}
+        {% set size = pattern.encode() | length %}
+        {% if size > budget %}
+            {% set _ = skipped.append(pattern) %}
+        {% elif cur.text and cur.size + 1 + size > budget %}
+            {% set _ = out.append(cur.text) %}
+            {% set cur.text = pattern %}
+            {% set cur.size = size %}
+        {% else %}
+            {% set cur.size = (cur.size + 1 + size) if cur.text else size %}
+            {% set cur.text = (cur.text ~ "|" ~ pattern) if cur.text else pattern %}
+        {% endif %}
+    {% endfor %}
+    {% if cur.text %}{% set _ = out.append(cur.text) %}{% endif %}
+{% endmacro %}
 {% if SERVER_NAME != "" %}
     {% set re = import("re") %}
     {% set hosts = [] %}
@@ -18,7 +36,24 @@
         {% endfor %}
     {% endif %}
     {% if hosts %}
+        {#- Size. libModSecurity 3.0.17 (core 1.6.18) refuses to load an @rx operand whose compiled form passes PCRE2's 64 KiB link-size limit (about 1,000 host names), and the rules file then fails every reload; 3.0.16 loaded it but the rule never matched. Up to host_cap bytes the single Host regex below is kept as is. Past it, small phase-1 marker rules (IDs 9801100+, host_max_chunks at most), each holding one chunk of at most host_cap bytes, set tx.bw_antibot_host and the allow rule tests that variable instead. Hosts past the last chunk are not allowed through. -#}
+        {% set host_cap = 8192 %}
+        {% set host_max_chunks = 100 %}
+        {% set host_rx = "^(?:" ~ (hosts | join("|")) ~ ")(?::\\d+)?$" %}
+        {% set marker = (host_rx.encode() | length) > host_cap %}
+        {% set chunks = [] %}
+        {% set skipped = [] %}
+        {#- 15 = the "^(?:" and ")(?::\\d+)?$" wrapper around a chunk. -#}
+        {% if marker %}{% set _ = chunk_into(hosts, chunks, skipped, host_cap - 15) %}{% endif %}
+        {% for chunk in chunks[:host_max_chunks] %}
+SecRule REQUEST_FILENAME "@rx ^{{ ANTIBOT_URI }}$" "id:{{ 9801100 + loop.index0 }},phase:1,pass,t:none,nolog,chain"
+SecRule REQUEST_HEADERS:Host "@rx ^(?:{{ chunk }})(?::\d+)?$" "t:lowercase,nolog,setvar:tx.bw_antibot_host=1"
+        {% endfor %}
 SecRule REQUEST_FILENAME "@rx ^{{ ANTIBOT_URI }}$" "nolog,phase:4,allow,id:9801500,chain"
-SecRule REQUEST_HEADERS:Host "@rx ^(?:{{ hosts | join('|') }})(?::\d+)?$" "t:lowercase,nolog"
+        {% if marker %}
+SecRule TX:bw_antibot_host "@eq 1" "t:none,nolog"
+        {% else %}
+SecRule REQUEST_HEADERS:Host "@rx {{ host_rx }}" "t:lowercase,nolog"
+        {% endif %}
     {% endif %}
 {% endif %}
