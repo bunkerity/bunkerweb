@@ -670,6 +670,14 @@ function antibot:prepare_challenge()
 		end
 
 		self:set_session_data()
+	elseif self.ctx.bw.uri ~= self.variables["ANTIBOT_URI"] and self:is_navigation_request() then
+		-- The latest navigation wins: an abandoned challenge (e.g. a browser prerender of "/")
+		-- must not send the next solve to its page.
+		local original_uri = self:get_original_uri()
+		if original_uri ~= self.session_data.original_uri then
+			self.session_data.original_uri = original_uri
+			self:set_session_data()
+		end
 	end
 end
 
