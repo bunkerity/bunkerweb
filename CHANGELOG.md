@@ -2,6 +2,7 @@
 
 ## v1.6.19 - 2026/??/??
 
+- [SECURITY] `docker`: update the Alpine `mariadb-client` and `mariadb-common` (11.8.10-r0), `libxml2` (2.13.9-r3) and `py3-pip` (26.1.2-r1) packages, fixing 15 CVEs.
 - [BUGFIX] `ui`, `antibot`, `modsecurity`: with global CRS, long server name lists no longer exceed the libModSecurity regex size limit and fail every reload.
 - [BUGFIX] `core`: on Linux and all-in-one, the scheduler's push of unchanged custom configs to its local instance no longer fails on a folder the instance cannot write, when unpacking keeps their permissions (for example `root:nginx` 750/640).
 
