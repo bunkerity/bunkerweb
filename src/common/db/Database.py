@@ -1538,28 +1538,18 @@ class Database:
             # A plugin that stays in the database without being listed here (a PRO plugin whose files are not on disk yet, as
             # on a fresh scheduler pod) keeps its settings: deleting them cascades to every global and service value,
             # autoconf's included, and nothing writes those values back. Setting ids and names are unique across plugins, so
-            # a kept row that an incoming setting claims cannot stay as it is: a claimed id moves the row to the incoming
-            # owner (its values survive, and the row is not inserted twice), a claimed name drops the row.
+            # a kept row whose id or name an incoming setting claims is not kept: the incoming setting replaces it.
             kept_plugin_ids = {pid for pid in old_plugin_ids - new_plugin_ids if old_plugins[pid].method != "manual"}
-            incoming_key_by_id = {sk[1]: sk for sk in new_setting_keys}
-            incoming_id_by_name = {value["name"]: sk[1] for sk, value in desired_settings.items()}
-            kept_setting_keys = set()
-            moved_setting_keys = {}  # incoming key -> key of the kept row that becomes it
-            for sk in old_setting_keys - new_setting_keys:
-                if sk[0] not in kept_plugin_ids:
-                    continue
-                claimed_by = incoming_key_by_id.get(sk[1])
-                if claimed_by is None:
-                    if old_settings[sk].name not in incoming_id_by_name:
-                        kept_setting_keys.add(sk)
-                elif incoming_id_by_name.get(old_settings[sk].name, sk[1]) == sk[1]:
-                    moved_setting_keys[claimed_by] = sk
+            incoming_ids = {sk[1] for sk in new_setting_keys}
+            incoming_names = {value["name"] for value in desired_settings.values()}
+            kept_setting_keys = {
+                sk
+                for sk in old_setting_keys - new_setting_keys
+                if sk[0] in kept_plugin_ids and sk[1] not in incoming_ids and old_settings[sk].name not in incoming_names
+            }
 
             for sk in new_setting_keys - old_setting_keys:
-                if sk in moved_setting_keys:
-                    to_update.append({"type": "setting", "filter": {"plugin_id": moved_setting_keys[sk][0], "id": sk[1]}, "data": desired_settings[sk]})
-                else:
-                    to_put.append(Settings(**desired_settings[sk]))
+                to_put.append(Settings(**desired_settings[sk]))
 
             for sk in old_setting_keys & new_setting_keys:
                 old_s = old_settings[sk]
@@ -1571,9 +1561,8 @@ class Database:
 
             # Settings to delete
             kept_setting_ids = {sk[1] for sk in kept_setting_keys}
-            moved_old_keys = set(moved_setting_keys.values())
             for sk in old_setting_keys - new_setting_keys:
-                if sk in kept_setting_keys or sk in moved_old_keys:
+                if sk in kept_setting_keys:
                     continue
                 to_delete.append({"type": "setting", "filter": {"plugin_id": sk[0], "id": sk[1]}})
                 if sk[1] == "MODSECURITY_CRS_PLUGIN_URLS":
