@@ -1,0 +1,62 @@
+# CUSTOM CONFIG TYPE DIRECTORY WITHOUT GROUP WRITE (1.6.18 regression).
+#
+# On Linux and All-in-one the scheduler's configs folder and the instance's `/etc/bunkerweb/configs`
+# are the same path, and a push swaps every top-level entry of it in through a rename. A type
+# directory (`server-http`, `modsec-crs`, ...) owned `root:nginx` with mode 750, which is what a
+# hardened install or an operator's `chown -R` leaves, cannot be renamed by the `nginx` user: the
+# instance answered 500 `cannot park server-http: ... Permission denied` and, since 1.6.18, held the
+# reload back forever, so a custom config added anywhere in that tree was never applied. The pushed
+# entry was byte for byte the one on disk. `pushswap.lua` no longer parks an entry equal to its
+# staged copy.
+#
+# The framework cannot express "change the owner of a directory inside the container, then make the
+# scheduler push", so the first action is a script (`custom_config_dir_without_group_write/test.sh`):
+# it writes a `location = /cfgperm` probe into `server-http`, hands the directory to `root:nginx 750`
+# and the file to 640, signals the scheduler to rescan, waits for the probe to answer from inside the
+# container and checks the scheduler never logged `cannot park`. The second action asserts the probe
+# from the runner, through the published port.
+#
+# Docker has no arm here: the Docker scheduler pushes over the network to a bunkerweb container
+# whose `/etc/bunkerweb/configs` is its own, so the swap never runs on a directory the scheduler owns.
+# The packaged Linux arm is the other deployment where the scheduler and the instance share the path:
+# one distro is enough (the swap is Lua, the same on every package). That arm could not be run when
+# the spec was written; `systemctl reload bunkerweb-scheduler` is its rescan.
+integrations:
+  - "All-in-one"
+  - "Linux;amd64;ubuntu/noble"
+# Dev runs the All-in-one arm only; staging adds the packaged Linux arm.
+dev_integrations:
+  - "All-in-one"
+
+config:
+  # The script probes in a loop: keep the limiter and the ban out of it.
+  USE_LIMIT_REQ: "no"
+  USE_LIMIT_CONN: "no"
+  USE_BAD_BEHAVIOR: "no"
+
+actions:
+  type_directory_without_group_write_still_reloads:
+    type: script
+    script:
+      [
+        "./tests/core/custom_config_dir_without_group_write/test.sh",
+        "bunkerweb-all-in-one",
+        "aio",
+      ]
+    result: "custom_config_dir_without_group_write: all checks passed"
+    restart_stack: false
+    Linux:
+      script:
+        [
+          "./tests/core/custom_config_dir_without_group_write/test.sh",
+          "bunkerweb-linux",
+          "linux",
+        ]
+
+  custom_config_is_applied:
+    type: string
+    url: "http://127.0.0.1/cfgperm"
+    headers:
+      Host: "www.example.com"
+    string: "cfgperm-probe-ok"
+    full_clean: true

@@ -3,6 +3,7 @@
 ## v1.6.19 - 2026/??/??
 
 - [BUGFIX] `ui`, `antibot`, `modsecurity`: with global CRS, long server name lists no longer exceed the libModSecurity regex size limit and fail every reload.
+- [BUGFIX] `core`: on Linux and all-in-one, the scheduler's push of unchanged custom configs to its local instance no longer fails on a folder the instance cannot write, when unpacking keeps their permissions (for example `root:nginx` 750/640).
 
 ## v1.6.18 - 2026/11/20
 

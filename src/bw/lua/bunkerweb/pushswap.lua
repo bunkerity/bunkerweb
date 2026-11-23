@@ -98,6 +98,176 @@ local function move_entry(from, to)
 	return true
 end
 
+-- Entry type of one path, read with the shell builtin tests, readlink and stat, never by following a link:
+-- "d" or "f" plus a newline and the permission bits in octal (`stat -c %a`, special bits included) for a
+-- directory or a regular file, "o" for anything else, and "l:<target>" plus a newline for a symlink, so two
+-- links compare equal only when their target text is and a symlink's own mode is never read. nil when the
+-- path is missing or the answer is not complete, a stat that is absent or fails included. Only the tools this
+-- module already needs are used: sh, plus readlink and stat from the same coreutils (busybox on Alpine) as
+-- ls, cp, rm and test.
+local KIND_SCRIPT = [[if [ -L "$1" ]; then printf l:; readlink -- "$1"; ]]
+	.. [[elif [ -d "$1" ]; then echo d; stat -c %a "$1"; ]]
+	.. [[elif [ -f "$1" ]; then echo f; stat -c %a "$1"; elif [ -e "$1" ]; then echo o; else echo m; fi]]
+
+local function entry_kind(path)
+	local pipe = popen("sh -c '" .. KIND_SCRIPT .. "' sh " .. quote(path) .. " 2>/dev/null")
+	if not pipe then
+		return nil
+	end
+	local out = pipe:read("*a")
+	pipe:close()
+	if out and (out == "o\n" or out:find("^[df]\n[0-7]+\n$") or out:find("^l:.*\n$")) then
+		return out
+	end
+	return nil
+end
+
+-- Names inside a directory, NUL-terminated by the shell: a file name can hold anything but NUL, so splitting
+-- ls output on newlines would let {a, b, "a\nb"} and {a, b, "b\na"} list the same lines. The glob covers
+-- every name but . and .. . The directory must be readable and searchable, or the loop would see nothing and
+-- an unreadable directory would pass for an empty one. The trailing "ok" follows the last NUL, so output cut
+-- short is told apart from a finished listing. Only sh builtins are used, dash and busybox ash alike.
+local LIST_SCRIPT = [[[ -d "$1" ] && [ -r "$1" ] && [ -x "$1" ] || exit 0
+for f in "$1"/* "$1"/.[!.]* "$1"/..?*; do
+if [ -e "$f" ] || [ -L "$f" ]; then printf '%s\000' "${f##*/}"; fi
+done
+printf ok]]
+
+-- Names inside a directory, or nil when it could not be listed in full.
+local function list_checked(path)
+	local pipe = popen("sh -c " .. quote(LIST_SCRIPT) .. " sh " .. quote(path) .. " 2>/dev/null")
+	if not pipe then
+		return nil
+	end
+	local out = pipe:read("*a")
+	pipe:close()
+	if not out then
+		return nil
+	end
+	local names, start = {}, 1
+	while true do
+		local nul = out:find("\0", start, true)
+		if not nul then
+			break
+		end
+		names[#names + 1] = out:sub(start, nul - 1)
+		start = nul + 1
+	end
+	if out:sub(start) ~= "ok" then
+		return nil
+	end
+	return names
+end
+
+-- A read that fails answers nil plus a message, like the end of the file answers nil alone: an error is never
+-- taken for the end, or two files that cannot be read would compare equal.
+local function same_bytes(first, second)
+	local one = open(first, "rb")
+	if not one then
+		return false
+	end
+	local two = open(second, "rb")
+	if not two then
+		one:close()
+		return false
+	end
+	local same = true
+	while true do
+		local left, left_err = one:read(CHUNK)
+		local right, right_err = two:read(CHUNK)
+		if left_err or right_err or left ~= right then
+			same = false
+			break
+		end
+		if not left then
+			break
+		end
+	end
+	one:close()
+	two:close()
+	return same
+end
+
+local MAX_COMPARE_DEPTH = 32
+
+-- True only when both trees are proven identical: the same relative paths, the same entry type at each, the
+-- same permission bits for every directory and regular file, the same target text for every symlink, the
+-- same bytes for every regular file. Anything else, an error, an unreadable path or a type it cannot compare
+-- (device, socket, fifo) answers false, and the entry is then swapped as it always was.
+--
+-- The modes are compared as they are on disk: the staged copy was extracted under the umask of the worker
+-- (`tar xzf`), so a mode the umask would have changed shows up as a difference and the entry is swapped, never
+-- skipped. That keeps a push that only changes a mode, such as the scheduler restoring its failover copy of
+-- the same files over the same loopback connection, from being recorded as applied without having been.
+-- Owners are not compared: the extracting user owns every staged entry, so they could never match a
+-- directory owned by root, and an owner cannot be carried by the archive anyway (the scheduler sets uid and
+-- gid to 0). Symlinks have no mode of their own that matters, only their target.
+local function same_tree(first, second, depth)
+	if depth > MAX_COMPARE_DEPTH then
+		return false
+	end
+	local kind = entry_kind(first)
+	if not kind or kind ~= entry_kind(second) then
+		return false
+	end
+	local type = kind:sub(1, 1)
+	if type == "f" then
+		return same_bytes(first, second)
+	elseif type ~= "d" then
+		return kind:sub(1, 2) == "l:"
+	end
+	local names, others = list_checked(first), list_checked(second)
+	if not names or not others or #names ~= #others then
+		return false
+	end
+	local known = {}
+	for _, name in ipairs(names) do
+		known[name] = true
+	end
+	for _, name in ipairs(others) do
+		if not known[name] then
+			return false
+		end
+	end
+	for _, name in ipairs(names) do
+		if not same_tree(first .. "/" .. name, second .. "/" .. name, depth + 1) then
+			return false
+		end
+	end
+	return true
+end
+
+-- Where the shortcut is allowed: the scheduler and the instance share /etc/bunkerweb/configs, so the archive the
+-- scheduler pushes is a copy of the destination itself. All of these must hold:
+--   * the push is POST /custom_configs,
+--   * the integration is Linux, or Docker (the all-in-one image and the bunkerweb image both carry "Docker"),
+--   * the scheduler is installed on this very filesystem, which the bunkerweb image never has,
+--   * the TCP peer is loopback. `peer` is the raw peer address ($realip_remote_addr), never $remote_addr: the
+--     realip module can rewrite the latter from a header the sender controls.
+-- Anything else, and any doubt, answers false and the push is swapped entry by entry as it always was.
+pushswap.SCHEDULER_MARKER = "/usr/share/bunkerweb/scheduler/main.py"
+
+local SHARED_CONFIGS_INTEGRATIONS = { Linux = true, Docker = true }
+
+local function is_loopback(peer)
+	if type(peer) ~= "string" then
+		return false
+	end
+	peer = peer:lower():gsub("^::ffff:", "")
+	if peer == "::1" then
+		return true
+	end
+	local first, second, third, fourth = peer:match("^(%d%d?%d?)%.(%d%d?%d?)%.(%d%d?%d?)%.(%d%d?%d?)$")
+	return first == "127" and tonumber(second) <= 255 and tonumber(third) <= 255 and tonumber(fourth) <= 255
+end
+
+function pushswap.is_local_self_push(uri, integration, scheduler_present, peer)
+	return uri == "/custom_configs"
+		and SHARED_CONFIGS_INTEGRATIONS[integration] == true
+		and scheduler_present == true
+		and is_loopback(peer)
+end
+
 function pushswap.digest_file(path)
 	local fh = open(path, "rb")
 	if not fh then
@@ -157,12 +327,27 @@ function pushswap.write_applied(destination, hex)
 	return true
 end
 
+-- A skipped (unchanged) entry stays in staging with the modes it was extracted with, a directory without write
+-- permission included, and rm cannot empty such a directory: the owner gets write permission back first.
+-- Directories only: removing a file needs write and search on its parent, never on the file, and a staged file
+-- can share its inode with a published one (hard link), so chmod -R would change the published file's mode.
+-- find does not follow symlinks, and chmod never sees a file or a link here.
+local function drop_staging(staging)
+	execute("find " .. quote(staging) .. " -type d -exec chmod u+rwx {} \\; 2>/dev/null; rm -rf " .. quote(staging))
+end
+
 -- Replace the top-level entries of destination with those of staging.
 -- The destination directory itself is never renamed: it may be a mount point,
 -- and renaming a mount point fails with EBUSY. Each entry is swapped with a
 -- rename, so a consumer resolving a path either sees the old entry or the new
 -- one, never a partially copied tree.
-function pushswap.swap(destination, staging)
+--
+-- options.skip_unchanged leaves an existing top-level entry alone when its staged copy is proven identical
+-- (same_tree). Only a verified local self-push asks for it (is_local_self_push). Where the archived source
+-- is the destination (Linux package, all-in-one) that push sends back what is already there, and parking such
+-- an entry needs write permission on it for a change that does not exist. Every other push, and a custom
+-- configs push without the option, swaps each entry exactly as before.
+function pushswap.swap(destination, staging, options)
 	-- A failed swap leaves the destination between the two trees. Dropping the applied
 	-- marker before touching anything means the next push cannot be answered "already
 	-- applied" for a tree that was only half replaced; the caller rewrites it on success.
@@ -259,7 +444,7 @@ function pushswap.swap(destination, staging)
 		-- and nothing else refers to it. Left behind it is a reserved name the sweep never
 		-- clears, and where the archived source is the destination it comes back in the next
 		-- archive.
-		execute("rm -rf " .. quote(staging))
+		drop_staging(staging)
 		return false, message
 	end
 
@@ -273,19 +458,23 @@ function pushswap.swap(destination, staging)
 		if not is_reserved(name) then
 			incoming[name] = true
 			local target = destination .. "/" .. name
-			if existing[name] then
-				local parked = trash .. "/" .. name
-				local ok, err = move_entry(target, parked)
-				if not ok then
-					return abort("cannot park " .. name .. ": " .. tostring(err))
+			local unchanged = options and options.skip_unchanged and existing[name]
+			-- The unchanged entry stays as it is and its staged copy goes with staging.
+			if not (unchanged and same_tree(target, staging .. "/" .. name, 0)) then
+				if existing[name] then
+					local parked = trash .. "/" .. name
+					local ok, err = move_entry(target, parked)
+					if not ok then
+						return abort("cannot park " .. name .. ": " .. tostring(err))
+					end
+					undo[#undo + 1] = { from = parked, to = target, target = target }
 				end
-				undo[#undo + 1] = { from = parked, to = target, target = target }
+				local ok, err = move_entry(staging .. "/" .. name, target)
+				if not ok then
+					return abort("cannot place " .. name .. ": " .. tostring(err))
+				end
+				undo[#undo + 1] = { from = target, to = staging .. "/" .. name, target = target }
 			end
-			local ok, err = move_entry(staging .. "/" .. name, target)
-			if not ok then
-				return abort("cannot place " .. name .. ": " .. tostring(err))
-			end
-			undo[#undo + 1] = { from = target, to = staging .. "/" .. name, target = target }
 		end
 	end
 
@@ -304,7 +493,8 @@ function pushswap.swap(destination, staging)
 	if sentinel then
 		os.remove(sentinel)
 	end
-	execute("rm -rf " .. quote(trash) .. " " .. quote(staging))
+	execute("rm -rf " .. quote(trash))
+	drop_staging(staging)
 	return true
 end
 
