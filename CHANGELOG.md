@@ -8,6 +8,7 @@
 - [BUGFIX] `ui`, `antibot`, `modsecurity`: with global CRS, long server name lists no longer exceed the libModSecurity regex size limit and fail every reload.
 - [BUGFIX] `core`: on Linux and all-in-one, the scheduler's push of unchanged custom configs to its local instance no longer fails on a folder the instance cannot write, when unpacking keeps their permissions (for example `root:nginx` 750/640).
 - [BUGFIX] `autoconf`: a scheduler restart on Kubernetes no longer erases the PRO setting values that Ingress annotations set. (Refs #4107)
+- [BUGFIX] `deps`: sessions over 1 kB, such as OpenID Connect logins, are restored again on the Linux packages, ending a login redirect loop since 1.6.18. (Fixes #4237)
 
 ## v1.6.18 - 2026/11/20
 

@@ -36,9 +36,16 @@ do_and_check_cmd make install
 echo "ℹ️ Compiling and installing zlib"
 export CHANGE_DIR="/tmp/bunkerweb/deps/src/zlib"
 do_and_check_cmd chmod +x "configure"
+# -Bsymbolic: lua-ffi-zlib loads this copy next to the zlib nginx links. Without it the PLT binds inflateReset2() and
+# friends to that other zlib, whose inflate_state layout can differ (zlib 1.4 added fields), and inflate fails.
+# Appended at configure time, which records LDFLAGS: the build's own flags (relro, now) survive. Scoped to this block.
+ZLIB_LDFLAGS_SET="${LDFLAGS+x}"
+ZLIB_LDFLAGS="${LDFLAGS-}"
+export LDFLAGS="${LDFLAGS:+$LDFLAGS }-Wl,-Bsymbolic"
 do_and_check_cmd ./configure --prefix=/usr/share/bunkerweb/deps --libdir=/usr/share/bunkerweb/deps/lib/lua
 do_and_check_cmd make -j "$NTASK"
 do_and_check_cmd make install
+if [ -n "$ZLIB_LDFLAGS_SET" ] ; then export LDFLAGS="$ZLIB_LDFLAGS" ; else unset LDFLAGS ; fi
 
 # RHEL 10 has no system YAJL package. Keep the PIC archive private to the build.
 YAJL_ARGS=""
