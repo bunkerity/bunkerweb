@@ -2349,7 +2349,7 @@ sudo ./install-bunkerweb.sh --yes --api
 
 ### 使用软件包管理器安装
 
-在 Debian、Ubuntu 和 RHEL 上，请**先安装 NGINX 1.30.7，再安装 BunkerWeb**。请使用[官方 NGINX 仓库](https://nginx.org/en/linux_packages.html)的预构建包。从源代码编译 NGINX 或使用来自不同仓库的包将无法与 BunkerWeb 的官方预构建包一起工作。但是，您可以选择从源代码构建 BunkerWeb。
+在 Debian、Ubuntu 和 RHEL 上，请**先安装 NGINX 1.30.8，再安装 BunkerWeb**。请使用[官方 NGINX 仓库](https://nginx.org/en/linux_packages.html)的预构建包。从源代码编译 NGINX 或使用来自不同仓库的包将无法与 BunkerWeb 的官方预构建包一起工作。但是，您可以选择从源代码构建 BunkerWeb。
 
 === "Debian Bookworm/Trixie"
 
@@ -2364,11 +2364,11 @@ sudo ./install-bunkerweb.sh --yes --api
     | sudo tee /etc/apt/sources.list.d/nginx.list
     ```
 
-    您现在应该能够安装 NGINX 1.30.7：
+    您现在应该能够安装 NGINX 1.30.8：
 
     ```shell
     sudo apt update && \
-    sudo apt install -y --allow-downgrades nginx=1.30.7-1~$(lsb_release -cs)
+    sudo apt install -y --allow-downgrades nginx=1.30.8-1~$(lsb_release -cs)
     ```
 
     !!! example "禁用设置向导"
@@ -2405,11 +2405,11 @@ sudo ./install-bunkerweb.sh --yes --api
     | sudo tee /etc/apt/sources.list.d/nginx.list
     ```
 
-    您现在应该能够安装 NGINX 1.30.7：
+    您现在应该能够安装 NGINX 1.30.8：
 
     ```shell
     sudo apt update && \
-    sudo apt install -y --allow-downgrades nginx=1.30.7-1~$(lsb_release -cs)
+    sudo apt install -y --allow-downgrades nginx=1.30.8-1~$(lsb_release -cs)
     ```
 
     !!! example "禁用设置向导"
@@ -2442,7 +2442,7 @@ sudo ./install-bunkerweb.sh --yes --api
         sudo dnf config-manager setopt updates-testing.enabled=1
         ```
 
-    Fedora 44 和 45 的 BunkerWeb 软件包需要使用 Fedora 仓库中的 NGINX 1.30.7。在 Fedora 为 Fedora 43 发布 NGINX 1.30.7 之前，Fedora 43 需要使用 NGINX 1.30.6。
+    Fedora 尚未提供 NGINX 1.30.8。Fedora 44 和 45 的 BunkerWeb 软件包需要使用 Fedora 仓库中的 NGINX 1.30.7，Fedora 43 则需要使用 NGINX 1.30.6。
 
     ```shell
     # Fedora 44 和 45
@@ -2495,10 +2495,10 @@ sudo ./install-bunkerweb.sh --yes --api
     module_hotfixes=true
     ```
 
-    您现在应该能够安装 NGINX 1.30.7：
+    您现在应该能够安装 NGINX 1.30.8：
 
     ```shell
-    sudo dnf install --allowerasing nginx-1.30.7
+    sudo dnf install --allowerasing nginx-1.30.8
     ```
 
     !!! example "禁用设置向导"

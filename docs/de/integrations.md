@@ -2349,7 +2349,7 @@ Abhängig von Ihren Entscheidungen während der Installation:
 
 ### Installation mit dem Paketmanager
 
-Installieren Sie unter Debian, Ubuntu und RHEL **NGINX 1.30.7 vor BunkerWeb**. Verwenden Sie die vorgefertigten Pakete aus dem [offiziellen NGINX-Repository](https://nginx.org/en/linux_packages.html). Das Kompilieren von NGINX aus dem Quellcode oder die Verwendung von Paketen aus verschiedenen Repositories funktioniert nicht mit den offiziellen vorgefertigten Paketen von BunkerWeb. Sie haben jedoch die Möglichkeit, BunkerWeb aus dem Quellcode zu erstellen.
+Installieren Sie unter Debian, Ubuntu und RHEL **NGINX 1.30.8 vor BunkerWeb**. Verwenden Sie die vorgefertigten Pakete aus dem [offiziellen NGINX-Repository](https://nginx.org/en/linux_packages.html). Das Kompilieren von NGINX aus dem Quellcode oder die Verwendung von Paketen aus verschiedenen Repositories funktioniert nicht mit den offiziellen vorgefertigten Paketen von BunkerWeb. Sie haben jedoch die Möglichkeit, BunkerWeb aus dem Quellcode zu erstellen.
 
 === "Debian Bookworm/Trixie"
 
@@ -2364,11 +2364,11 @@ Installieren Sie unter Debian, Ubuntu und RHEL **NGINX 1.30.7 vor BunkerWeb**. V
     | sudo tee /etc/apt/sources.list.d/nginx.list
     ```
 
-    Sie sollten jetzt NGINX 1.30.7 installieren können:
+    Sie sollten jetzt NGINX 1.30.8 installieren können:
 
     ```shell
     sudo apt update && \
-    sudo apt install -y --allow-downgrades nginx=1.30.7-1~$(lsb_release -cs)
+    sudo apt install -y --allow-downgrades nginx=1.30.8-1~$(lsb_release -cs)
     ```
 
     !!! example "Einrichtungsassistenten deaktivieren"
@@ -2405,11 +2405,11 @@ Installieren Sie unter Debian, Ubuntu und RHEL **NGINX 1.30.7 vor BunkerWeb**. V
     | sudo tee /etc/apt/sources.list.d/nginx.list
     ```
 
-    Sie sollten jetzt NGINX 1.30.7 installieren können:
+    Sie sollten jetzt NGINX 1.30.8 installieren können:
 
     ```shell
     sudo apt update && \
-    sudo apt install -y --allow-downgrades nginx=1.30.7-1~$(lsb_release -cs)
+    sudo apt install -y --allow-downgrades nginx=1.30.8-1~$(lsb_release -cs)
     ```
 
     !!! example "Einrichtungsassistenten deaktivieren"
@@ -2442,7 +2442,7 @@ Installieren Sie unter Debian, Ubuntu und RHEL **NGINX 1.30.7 vor BunkerWeb**. V
         sudo dnf config-manager setopt updates-testing.enabled=1
         ```
 
-    Die BunkerWeb-Pakete für Fedora 44 und 45 benötigen NGINX 1.30.7 aus den Fedora-Repositories. Fedora 43 benötigt NGINX 1.30.6, bis Fedora 1.30.7 dafür bereitstellt.
+    Fedora stellt NGINX 1.30.8 noch nicht bereit. Die BunkerWeb-Pakete für Fedora 44 und 45 benötigen NGINX 1.30.7 aus den Fedora-Repositories, und Fedora 43 benötigt NGINX 1.30.6.
 
     ```shell
     # Fedora 44 und 45
@@ -2495,10 +2495,10 @@ Installieren Sie unter Debian, Ubuntu und RHEL **NGINX 1.30.7 vor BunkerWeb**. V
     module_hotfixes=true
     ```
 
-    Sie sollten jetzt NGINX 1.30.7 installieren können:
+    Sie sollten jetzt NGINX 1.30.8 installieren können:
 
     ```shell
-    sudo dnf install --allowerasing nginx-1.30.7
+    sudo dnf install --allowerasing nginx-1.30.8
     ```
 
     !!! example "Einrichtungsassistenten deaktivieren"

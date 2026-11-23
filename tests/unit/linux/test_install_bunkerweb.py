@@ -25,7 +25,8 @@ RC_LINE = "1.6.18"
         (f"v{RC_LINE}-rc4", "1.30.6"),
         (f"{RC_LINE}~rc5", "1.30.7"),
         # Unknown/future version falls back to DEFAULT_NGINX_VERSION.
-        ("9.9.9", "1.30.7"),
+        ("1.6.19~rc1", "1.30.8"),
+        ("9.9.9", "1.30.8"),
     ],
 )
 def test_dry_run_resolves_nginx_version(version, nginx):
