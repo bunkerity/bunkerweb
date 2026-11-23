@@ -7,6 +7,7 @@
 - [DEPS] `linux`: Fedora 44 and 45 packages require NGINX 1.30.7; Fedora 43 stays on 1.30.6 until Fedora ships 1.30.7.
 - [BUGFIX] `ui`, `antibot`, `modsecurity`: with global CRS, long server name lists no longer exceed the libModSecurity regex size limit and fail every reload.
 - [BUGFIX] `core`: on Linux and all-in-one, the scheduler's push of unchanged custom configs to its local instance no longer fails on a folder the instance cannot write, when unpacking keeps their permissions (for example `root:nginx` 750/640).
+- [BUGFIX] `autoconf`: a scheduler restart on Kubernetes no longer erases the PRO setting values that Ingress annotations set. (Refs #4107)
 
 ## v1.6.18 - 2026/11/20
 
