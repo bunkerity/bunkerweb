@@ -19,6 +19,7 @@ from threading import RLock, local
 from traceback import format_exc
 from typing import Any, Callable, Dict, List, Literal, NoReturn, Optional, Sequence, Set, Tuple, TypeVar, Union
 from time import sleep
+from unicodedata import combining, normalize
 from uuid import uuid4
 from warnings import filterwarnings
 
@@ -170,6 +171,14 @@ def _exit_closing_created() -> NoReturn:
     for scope in reversed(getattr(_CREATED, "stack", [])):
         _close_all(scope)
     _exit(1)
+
+
+def _collation_key(value: str) -> str:
+    """Over-approximate what a database collation can treat as equal, for ``bw_settings.id`` and ``bw_settings.name``.
+
+    MariaDB and MySQL defaults ignore case and accents and, with PAD SPACE, trailing spaces. Strings with the same key
+    count as the same setting, so none of them is kept next to the other."""
+    return "".join(c for c in normalize("NFKD", value) if not combining(c)).casefold().rstrip()
 
 
 # Methods that mean "a human edited this through a first-class interface". They overwrite
@@ -1540,13 +1549,12 @@ class Database:
             # autoconf's included, and nothing writes those values back. Setting ids and names are unique across plugins, so
             # a kept row whose id or name an incoming setting claims is not kept: the incoming setting replaces it.
             kept_plugin_ids = {pid for pid in old_plugin_ids - new_plugin_ids if old_plugins[pid].method != "manual"}
-            # Compared case-insensitively: MariaDB and MySQL default collations treat "Name" and "name" as the same key.
-            incoming_ids = {sk[1].casefold() for sk in new_setting_keys}
-            incoming_names = {value["name"].casefold() for value in desired_settings.values()}
+            incoming_ids = {_collation_key(sk[1]) for sk in new_setting_keys}
+            incoming_names = {_collation_key(value["name"]) for value in desired_settings.values()}
             kept_setting_keys = {
                 sk
                 for sk in old_setting_keys - new_setting_keys
-                if sk[0] in kept_plugin_ids and sk[1].casefold() not in incoming_ids and old_settings[sk].name.casefold() not in incoming_names
+                if sk[0] in kept_plugin_ids and _collation_key(sk[1]) not in incoming_ids and _collation_key(old_settings[sk].name) not in incoming_names
             }
 
             for sk in new_setting_keys - old_setting_keys:

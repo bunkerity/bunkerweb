@@ -7,7 +7,11 @@ cascade to the global and service values (including the ones autoconf wrote), an
 has no way to notice the loss (#4107).
 """
 
+import unicodedata
+
 import pytest
+from sqlalchemy import event
+from sqlalchemy.exc import IntegrityError
 
 from fixtures.seed import add_global_value, add_service, add_service_setting, make_core_plugin, make_external_plugin, make_general_settings, session
 from model import Global_values, Plugins, Selects, Services_settings, Settings
@@ -99,8 +103,8 @@ def test_preserved_setting_claimed_in_another_case_is_dropped(db, setting_id, na
     assert db.init_tables(_desired(_replacement_plugin(setting_id, name))) == (True, "")
 
     with session(db) as s:
-        assert s.query(Settings).filter_by(id="PROPLUG_MS").count() == 0
-        assert [r.plugin_id for r in s.query(Settings).filter_by(id=setting_id)] == ["replacement"]
+        # Under a case-insensitive column the lookup by the old id finds the replacement, so assert on the stored spelling and owner.
+        assert [(r.id, r.plugin_id) for r in s.query(Settings).filter(Settings.id.in_(("PROPLUG_MS", setting_id)))] == [(setting_id, "replacement")]
 
 
 _RICH_SETTING = {
@@ -120,6 +124,11 @@ _CONFLICTS = {
     "id-claimed": {"PROPLUG_MS": _BARE_SETTING},
     "name-claimed": {"OTHER_MS": {**_BARE_SETTING, "id": "proplug-ms"}},
     "id-and-name-claimed-separately": {"PROPLUG_MS": _BARE_SETTING, "OTHER_MS": {**_BARE_SETTING, "id": "proplug-ms"}},
+    # Collisions only a collation sees: SQLite treats them as distinct, MariaDB and MySQL defaults do not.
+    "name-differs-by-case": {"OTHER_MS": {**_BARE_SETTING, "id": "PROPLUG-MS"}},
+    "id-differs-by-case": {"proplug_ms": _BARE_SETTING},
+    "name-differs-by-accent": {"OTHER_MS": {**_BARE_SETTING, "id": "pr\u00f3plug-ms"}},
+    "name-differs-by-trailing-spaces": {"OTHER_MS": {**_BARE_SETTING, "id": "proplug-ms  "}},
 }
 # bw_selects, bw_global_values and bw_services_settings keep their surrogate id out of the comparison.
 _TABLES = {"settings": Settings, "selects": Selects, "global_values": Global_values, "services_settings": Services_settings}
@@ -167,9 +176,48 @@ _REFERENCE = {
     "id-claimed": _only(_setting("PROPLUG_MS", "replacement-ms", 0)),
     "name-claimed": _only(_setting("OTHER_MS", "proplug-ms", 0)),
     "id-and-name-claimed-separately": _only(_setting("OTHER_MS", "proplug-ms", 1), _setting("PROPLUG_MS", "replacement-ms", 0)),
+    "name-differs-by-case": _only(_setting("OTHER_MS", "PROPLUG-MS", 0)),
+    "id-differs-by-case": _only(_setting("proplug_ms", "replacement-ms", 0)),
+    "name-differs-by-accent": _only(_setting("OTHER_MS", "pr\u00f3plug-ms", 0)),
+    "name-differs-by-trailing-spaces": _only(_setting("OTHER_MS", "proplug-ms  ", 0)),
 }
 
 
 @pytest.mark.parametrize("shape", sorted(_CONFLICTS))
 def test_conflicting_settings_end_as_they_did_before_4107(db, shape):
     assert _conflict_rows(db, shape) == _REFERENCE[shape]
+
+
+def _fold(value):
+    # Independent of the helper in Database.py: what an accent-, case- and PAD SPACE-insensitive collation treats as equal.
+    decomposed = unicodedata.normalize("NFKD", value)
+    return "".join(c for c in decomposed if not unicodedata.combining(c)).casefold().rstrip()
+
+
+@pytest.mark.parametrize("name", ["PROPLUG-MS", "pr\u00f3plug-ms", "proplug-ms  "])
+def test_init_tables_completes_when_the_name_column_compares_like_mariadb(db, name):
+    # SQLite has no such collation built in: register one, and add a unique index that uses it next to the plain unique constraint.
+    if db.sql_engine.dialect.name != "sqlite":
+        pytest.skip("the collating index is built for SQLite; the other engines carry their own collation")
+
+    @event.listens_for(db.sql_engine, "connect")
+    def _register(dbapi_connection, _record):
+        dbapi_connection.create_collation("bw_fold", lambda a, b: (_fold(a) > _fold(b)) - (_fold(a) < _fold(b)))
+
+    db.sql_engine.dispose()  # connections opened so far do not know the collation
+    _seed_absent_pro_plugin(db)
+    with db.sql_engine.begin() as conn:
+        conn.exec_driver_sql("CREATE UNIQUE INDEX bw_settings_name_fold ON bw_settings (name COLLATE bw_fold)")
+        with pytest.raises(IntegrityError):  # the collision is real: a plain insert of the incoming name fails
+            conn.exec_driver_sql(
+                'INSERT INTO bw_settings (id, name, plugin_id, context, help, regex, type, "order") '
+                "VALUES ('OTHER_MS', ?, 'proplug', 'multisite', 'h', '^.*$', 'text', 0)",
+                (name,),
+            )
+
+    assert db.init_tables(_desired(_replacement_plugin("OTHER_MS", name))) == (True, "")
+
+    with session(db) as s:
+        assert [(r.id, r.name, r.plugin_id) for r in s.query(Settings).filter(Settings.id.in_(("PROPLUG_MS", "OTHER_MS")))] == [
+            ("OTHER_MS", name, "replacement")
+        ]
