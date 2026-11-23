@@ -1,0 +1,39 @@
+src/autoconf/Dockerfile
+  s_6a17005e79968d::t_cdd17a5e48110a 49
+src/all-in-one/Dockerfile
+  s_6a17005e79968d::t_cdd17a5e48110a 181-183
+src/scheduler/Dockerfile
+  s_6a17005e79968d::t_cdd17a5e48110a 62
+CHANGELOG.md
+  s_641fdcaff5e583::t_06dd4af9c3ae02 5
+src/ui/Dockerfile
+  s_6a17005e79968d::t_cdd17a5e48110a 91
+src/bw/Dockerfile
+  s_6a17005e79968d::t_cdd17a5e48110a 84
+src/api/Dockerfile
+  s_6a17005e79968d::t_cdd17a5e48110a 50
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.6",
+  "base_commit_sha": "2eca37148cda04262d8dd25509c72a5456e09159",
+  "prompts": {},
+  "sessions": {
+    "s_641fdcaff5e583": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "4772adb8-176c-4d86-8183-89507ca53434",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_6a17005e79968d": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a208b0-582f-7612-85a8-64ca7dfa2b46",
+        "model": "gpt-6.2-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

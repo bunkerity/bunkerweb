@@ -1,0 +1,22 @@
+CHANGELOG.md
+  h_a33a1e80933106 13
+src/api/app/routers/cache.py
+  h_a33a1e80933106 7,9,18-19,151-205,214,222-231,252,263,269,273,283
+tests/unit/api/test_cache_router_folder_names.py
+  h_a33a1e80933106 167-169,172-178,181
+tests/unit/api_app/test_cache_delete_sensitive.py
+  h_a33a1e80933106 1-112
+tests/unit/api_app/test_sensitive_cache.py
+  h_a33a1e80933106 133-135,153,279-291,294-322,325
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "7108a4719f4a5d5b097231e47cb73192f0c8ab6e",
+  "prompts": {},
+  "humans": {
+    "h_a33a1e80933106": {
+      "author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

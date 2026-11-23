@@ -1,0 +1,75 @@
+src/common/db/db_methods/common.py
+  s_40b667ffed1040::t_276849e774877e 16,54
+tests/unit/ui/test_user_creation_integrity.py
+  s_40b667ffed1040::t_5fefb35f6c0a90 6,14
+  s_40b667ffed1040::t_35913fbe4ac2c4 1-5,9-13,15-31
+  s_40b667ffed1040::t_41ebb2c69b2e83 7-8
+src/autoconf/controllers/Controller.py
+  s_bac151182f49d9::t_16ef23a4bee7bd 6-8,15-53,371-387
+  s_8745e24ddc4884::t_cf05f559d474e3 388
+src/ui/app/models/ui_db_methods/users.py
+  s_40b667ffed1040::t_276849e774877e 131-133
+  s_40b667ffed1040::t_33df485983aec3 134
+src/common/db/db_methods/initialization.py
+  s_40b667ffed1040::t_276849e774877e 1189-1191
+tests/unit/db/test_db_integrity_guards.py
+  s_40b667ffed1040::t_f6f0f4756d3fbd 4,8,13-23,105-152
+  s_40b667ffed1040::t_35913fbe4ac2c4 1-3,6-7,9-11,24-71,73-104
+  s_40b667ffed1040::t_5fefb35f6c0a90 5,72
+  s_40b667ffed1040::t_56311b37744c9e 12
+src/common/db/db_methods/plugins_update.py
+  s_40b667ffed1040::t_276849e774877e 474,476-477,491-493,723,727-733,755,863-864,866,870-871
+  s_40b667ffed1040::t_57022abb1396da 875
+tests/unit/db/test_instances.py
+  s_f4438755791303::t_cb0aab4b540b95 9,109-113,147-148
+  s_f4438755791303::t_f80a8b96546051 10,105-108,114-146,149-156
+  s_f4438755791303::t_526f6673490d62 157-158
+tests/unit/db/test_plugin_update_integrity.py
+  s_40b667ffed1040::t_3f5ce47fa1dd61 157-158,162-163
+  s_40b667ffed1040::t_4c278f4f0e6c6b 1-125,128-129,132-136,138-141,144-150,152-156,159-161
+  s_40b667ffed1040::t_8d5bb4a40d41e3 126-127,130-131,137,142-143,151
+src/common/db/db_methods/jobs.py
+  s_40b667ffed1040::t_0eddd793821a79 7,95-96,98
+src/common/db/db_methods/instances.py
+  s_f4438755791303::t_c9fef85ed2f0d5 63-79,315,361-362
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "e7dec5f77c80eb447311db345d10cf0cc663203c",
+  "prompts": {},
+  "sessions": {
+    "s_40b667ffed1040": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1abfc-c7ce-7891-8be4-2ff2291e4871",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_8745e24ddc4884": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1ac7a-da90-7e20-a9b2-cf9039d27fff",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_bac151182f49d9": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1ac7b-b1fa-7f11-b240-82ee85373c30",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_f4438755791303": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "43412dad-dee6-4444-b07c-27e86d3c4eed",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

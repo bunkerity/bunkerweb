@@ -1,0 +1,20 @@
+CHANGELOG.md
+  h_a33a1e80933106 12
+src/api/app/auth/guard.py
+  h_a33a1e80933106 5,14-16,64,78,83-84
+src/api/app/routers/auth.py
+  h_a33a1e80933106 8,17,77,80,82-83,88-90
+tests/unit/api_app/test_basic_auth_off_event_loop.py
+  h_a33a1e80933106 1-112
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "1ade80999652bef91db69134800e8b94e39eb23f",
+  "prompts": {},
+  "humans": {
+    "h_a33a1e80933106": {
+      "author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

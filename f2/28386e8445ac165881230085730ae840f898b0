@@ -1,0 +1,145 @@
+tests/unit/fixtures/db_clients.py
+  s_38c3dac08701a7::t_ccf57ae450d4c8 1-32
+tests/unit/db/test_upgrade_schema_parity.py
+  s_8745e24ddc4884::t_5da1f4d4e2f2be 678
+  s_a9a174f153eea2::t_aff8a8ac56f9a5 758-759,765-771
+tests/unit/backup/test_downgrade_manifest.py
+  s_8745e24ddc4884::t_0988ab9b89756d 294-305
+src/scheduler/entrypoint.sh
+  s_a9a174f153eea2::t_4d56b09d5968d6 117,127,131
+src/linux/scripts/bunkerweb-scheduler.sh
+  s_a9a174f153eea2::t_4d56b09d5968d6 215,225,229
+tests/unit/db/test_downgrade_round_trip.py
+  s_38c3dac08701a7::t_49fe76c7c0210e 420-421
+  s_38c3dac08701a7::t_94d3563e260abe 70-72
+tests/unit/backup/test_downgrade_execute.py
+  s_8745e24ddc4884::t_5da1f4d4e2f2be 43
+tests/unit/db/test_ui_login_failures_schema.py
+  s_e62a58e33c485b::t_ba4dec67ed37e0 1-57,65-67,74-78
+  s_e62a58e33c485b::t_60068071a110a6 58-64,68-73
+tests/unit/db/test_upgrade_replay_from_1_6_16.py
+  s_8745e24ddc4884::t_5da1f4d4e2f2be 7
+tests/unit/db/test_upgrade_replay_from_1_6_17_rc1.py
+  s_a9a174f153eea2::t_aff8a8ac56f9a5 11-13,43-44,74,76-83,92-94,101,103-105,109,113-115,197-206,214-224,231-234,236-237
+  s_a9a174f153eea2::t_cfdf04f75596cc 1-6
+  s_a9a174f153eea2::t_6d397bdcb88816 14,225-230
+  s_a9a174f153eea2::t_fa7e00f7271247 207-213,235
+src/common/core/backup/downgrade.py
+  s_8745e24ddc4884::t_4b87238302d400 470
+src/common/db/model.py
+  s_e62a58e33c485b::t_a8d3cbead5d819 1012-1023
+src/common/core/backup/downgrade-manifest.json
+  s_8745e24ddc4884::t_a23cd32c159fa7 534,544
+  s_d72353fd39298e::t_868fcbd7805669 7,42,89,134,136,170,172,207,255,302,304,338,340,375,423,471,473,507,509
+  s_8745e24ddc4884::t_a0cfa5e4e014df 3-6,8-12,15,27,48,59-60,73,95,106-107,120,139-141,156,175-177,192,213,225-226,239,261,274-275,288,307-309,324,343-345,360,381,393-394,407,429,443-444,457,476-478,493,512-514
+tests/unit/db/test_certificate_migrations.py
+  s_8745e24ddc4884::t_5da1f4d4e2f2be 17-20
+src/common/db/alembic/mariadb_versions/2f4621324c8c_upgrade_to_version_1_6_17.py
+  s_a9a174f153eea2::t_09c39221d82872 1-5,14-15,21-24,28-29
+src/common/db/alembic/mariadb_versions/5005ba753754_upgrade_to_version_1_6_16_rc2.py
+  s_a9a174f153eea2::t_5a22590da01179 4,9,13,17,21-23,26-38
+src/common/db/alembic/mariadb_versions/5462f610384b_upgrade_to_version_1_6_18_rc2.py
+  s_a9a174f153eea2::t_19e951daf75fe8 1-5,14-15,21-24,28-29
+src/common/db/alembic/mariadb_versions/8c3c7a90ada7_upgrade_to_version_1_6_18_rc1.py
+  s_a9a174f153eea2::t_1ff9def06cab73 1-5,14-15,21-24,28-29
+src/common/db/alembic/mariadb_versions/a80184d2b4fc_upgrade_to_version_1_6_18_rc3.py
+  s_a9a174f153eea2::t_885d0df03d7532 1-44
+src/common/db/alembic/mariadb_versions/b8da3e7aac02_upgrade_to_version_1_7_0_alpha.py
+  s_8745e24ddc4884::t_f00b5b971fa977 3-5,8,17-18,28-487,494-758
+src/common/db/alembic/mariadb_versions/bfc6c7ca7725_upgrade_to_version_1_6_17_rc2.py
+  s_a9a174f153eea2::t_1e5e34de9ad700 1-5,14-15,21-24,28-29
+src/common/db/alembic/mariadb_versions/d10f1615a003_upgrade_to_version_1_6_15_rc2.py
+  s_a9a174f153eea2::t_bb869044c4f7ab 7,33-38
+src/common/db/alembic/mysql_versions/7b7a101de004_upgrade_to_version_1_6_16_rc2.py
+  s_a9a174f153eea2::t_8854a688975851 4,9,13,17,21-23,26-38
+src/common/db/alembic/mysql_versions/820dea21bc01_upgrade_to_version_1_7_0_alpha.py
+  s_8745e24ddc4884::t_33db7dc0665f19 3-5,8,17-18,28-487,494-758
+src/common/db/alembic/mysql_versions/ba395a5101f5_upgrade_to_version_1_6_18_rc3.py
+  s_a9a174f153eea2::t_73a39b0795f4c0 1-44
+src/common/db/alembic/mysql_versions/cf125a63069d_upgrade_to_version_1_6_18_rc1.py
+  s_a9a174f153eea2::t_35140a6bef6123 1-29
+src/common/db/alembic/mysql_versions/d10f1615a002_upgrade_to_version_1_6_15_rc2.py
+  s_a9a174f153eea2::t_06c33ae58ebae9 7,33-38
+src/common/db/alembic/mysql_versions/f4eacc8348f6_upgrade_to_version_1_6_17_rc2.py
+  s_a9a174f153eea2::t_3372486de58538 1-29
+src/common/db/alembic/mysql_versions/f651e85df1f3_upgrade_to_version_1_6_18_rc2.py
+  s_a9a174f153eea2::t_c30319cb64888f 1-29
+src/common/db/alembic/mysql_versions/fd7656b2e096_upgrade_to_version_1_6_17.py
+  s_a9a174f153eea2::t_083379ccd69bf2 1-29
+src/common/db/alembic/postgresql_versions/60bac3901abb_upgrade_to_version_1_6_18_rc2.py
+  s_a9a174f153eea2::t_3f24b554f0fd4f 1-29
+src/common/db/alembic/postgresql_versions/6786f9e200c0_upgrade_to_version_1_6_18_rc1.py
+  s_a9a174f153eea2::t_a51124e34d7197 1-29
+src/common/db/alembic/postgresql_versions/b095e3ea89ee_upgrade_to_version_1_6_17_rc2.py
+  s_a9a174f153eea2::t_cb9502df51ba91 1-29
+src/common/db/alembic/postgresql_versions/e8a90b5d846a_upgrade_to_version_1_6_17.py
+  s_a9a174f153eea2::t_b3729af1a73637 1-29
+src/common/db/alembic/postgresql_versions/f1115a603604_upgrade_to_version_1_7_0_alpha.py
+  s_8745e24ddc4884::t_f4dbda9713cf43 3-5,8,18-19,29,31-36,46-384,391-528
+src/common/db/alembic/postgresql_versions/f34ce5d04993_upgrade_to_version_1_6_18_rc3.py
+  s_a9a174f153eea2::t_f1be88e7188506 1-44
+src/common/db/alembic/postgresql_versions/f39324749273_upgrade_to_version_1_6_16_rc2.py
+  s_a9a174f153eea2::t_28773f605fd78b 4,9,13,17,21-23,26-38
+src/common/db/alembic/sqlite_versions/1cb16b07db79_upgrade_to_version_1_6_17_rc2.py
+  s_a9a174f153eea2::t_27ddf4b0f4f564 1-29
+src/common/db/alembic/sqlite_versions/5b225ab8716e_upgrade_to_version_1_6_18_rc2.py
+  s_a9a174f153eea2::t_beebfd26ee6ebc 1-29
+src/common/db/alembic/sqlite_versions/65d55c915e56_upgrade_to_version_1_6_16_rc2.py
+  s_a9a174f153eea2::t_2bc1f81fc62679 4,9,13,17,21-23,26-38
+src/common/db/alembic/sqlite_versions/8ce60ebc52b7_upgrade_to_version_1_6_18_rc3.py
+  s_a9a174f153eea2::t_46220a4a046e4e 1-44
+src/common/db/alembic/sqlite_versions/98601421d101_upgrade_to_version_1_6_17.py
+  s_a9a174f153eea2::t_3ca2ea824cee59 1-29
+src/common/db/alembic/sqlite_versions/a7f28527241a_upgrade_to_version_1_6_18_rc1.py
+  s_a9a174f153eea2::t_6b076a253a6224 1-29
+src/common/db/alembic/sqlite_versions/a94dab85c4e3_upgrade_to_version_1_7_0_alpha.py
+  s_8745e24ddc4884::t_cb0dd5d302f32a 3-5,8,17-18,28-45,47-79,81-115,117-138,140-164,166-178,180-191,193-208,210-231,233-245,247-253,255-265,267-280,282-300,302-462,470-721
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "f228386e8445ac165881230085730ae840f898b0",
+  "prompts": {},
+  "sessions": {
+    "s_38c3dac08701a7": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "9fd71762-abca-46fd-9ae1-d09650ec932b",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_8745e24ddc4884": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1ac7a-da90-7e20-a9b2-cf9039d27fff",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_a9a174f153eea2": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1abff-73b4-72f1-87ab-67d5c8644529",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_d72353fd39298e": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "4437749e-3180-4354-af98-7b7f50c5ea72",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_e62a58e33c485b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "9a68abd8-c6b9-40d9-9318-b43a9efa40c0",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

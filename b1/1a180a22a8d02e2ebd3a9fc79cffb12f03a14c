@@ -1,0 +1,23 @@
+src/ui/app/static/js/pages/bans.js
+  s_ed1458b44c458d::t_624ffad71bf6d2 1041-1077,1085
+src/ui/app/static/js/pages/cache.js
+  s_ed1458b44c458d::t_e32e778e752f59 177-205,212-213,506-511
+src/ui/app/static/js/pages/configs.js
+  s_ed1458b44c458d::t_de9fa030a7ca43 379-389,396-397
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "b11a180a22a8d02e2ebd3a9fc79cffb12f03a14c",
+  "prompts": {},
+  "sessions": {
+    "s_ed1458b44c458d": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "eed1c216-b356-4ab3-917e-93a0aa3de60e",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

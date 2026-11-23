@@ -1,0 +1,19 @@
+tests/unit/common/test_version_consistency.py
+  s_41ff2ae9a1a0e3::t_b5fbaf46b740fc 10-11,100,111,126,146,154,156
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "eab3caa9a1bcbbe6c17ca4d1bedb9be5c9332710",
+  "prompts": {},
+  "sessions": {
+    "s_41ff2ae9a1a0e3": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1f9df-266c-7800-ab85-51ad7f968a90",
+        "model": "gpt-6.2-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

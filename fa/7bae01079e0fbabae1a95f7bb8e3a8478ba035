@@ -1,0 +1,37 @@
+src/linux/Dockerfile-rhel-10
+  s_10ef18feb295fa::t_7cf89c12130f27 174-175
+src/linux/Dockerfile-ubuntu-jammy
+  s_10ef18feb295fa::t_7cf89c12130f27 171-172
+src/linux/Dockerfile-debian-trixie
+  s_10ef18feb295fa::t_7cf89c12130f27 168-169
+src/linux/Dockerfile-rhel-9
+  s_10ef18feb295fa::t_7cf89c12130f27 173-174
+src/linux/Dockerfile-ubuntu-noble
+  s_10ef18feb295fa::t_7cf89c12130f27 172-173
+src/linux/Dockerfile-fedora-44
+  s_10ef18feb295fa::t_7cf89c12130f27 160-161
+src/linux/Dockerfile-rhel-8
+  s_10ef18feb295fa::t_7cf89c12130f27 170-171
+src/linux/Dockerfile-debian-bookworm
+  s_10ef18feb295fa::t_7cf89c12130f27 173-174
+src/linux/Dockerfile-fedora-43
+  s_10ef18feb295fa::t_7cf89c12130f27 160-161
+src/linux/Dockerfile-ubuntu
+  s_10ef18feb295fa::t_7cf89c12130f27 167-168
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "fa7bae01079e0fbabae1a95f7bb8e3a8478ba035",
+  "prompts": {},
+  "sessions": {
+    "s_10ef18feb295fa": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1b12b-c1bb-7182-82c2-be0b8eb08e01",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

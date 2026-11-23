@@ -1,0 +1,28 @@
+CHANGELOG.md
+  s_36cff8fad440d1::t_429b6c3101ac39 9,11
+src/common/utils/common_utils.py
+  s_36cff8fad440d1::t_429b6c3101ac39 328-329
+  s_36cff8fad440d1::t_ba00b34f01fe10 330
+  s_36cff8fad440d1::t_b6f2fc9d302c0a 331
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "f01bd82cb948196815a664a991091cf52d5c1b14",
+  "prompts": {},
+  "humans": {
+    "h_a33a1e80933106": {
+      "author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  },
+  "sessions": {
+    "s_36cff8fad440d1": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "9e7b0240-ab8b-4374-b9b3-c0f8bb66b3ef",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

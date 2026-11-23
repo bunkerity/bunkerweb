@@ -1,0 +1,347 @@
+.github/ISSUE_TEMPLATE/bug_report.yml
+  s_abf448b1d700bb::t_a2284044205376 74
+CHANGELOG.md
+  s_abf448b1d700bb::t_db1e87578c5c1a 3
+README.md
+  s_abf448b1d700bb::t_df2938877d1d7e 3-4,26,71,76,78,107,143,152,180,183,192-197,236,248,284-286,289-291,298,320,335,346,357,364,366,375,377,383,387,389,397,416,433,462,478,504
+docs/advanced.md
+  s_abf448b1d700bb::t_c5e82a3faa5a27 3,5,88,99,107,124,132,179,187,252,263,273,291,301,353,363,488-489,593,612,698,1135,1163,1174,1337,1377,1400,1443,1513,1763,1786,1801,1852,2082,2212,2256,2271,2365,2378,2393,2633,2721,2807,2817,2973,2986,3003,3306,3311,3401,3424,3533,3544,3563,3606,3877,3882,4673,4677,4760,5580
+docs/api.md
+  s_abf448b1d700bb::t_225d0a3a878f36 45,58,80,147
+docs/concepts.md
+  s_abf448b1d700bb::t_49119eebec7214 108,129
+docs/de/advanced.md
+  s_abf448b1d700bb::t_0b18ccfff1fd1f 3,5,88,99,107,124,132,179,187,252,263,273,291,301,353,363,488-489,591,610,696,1133,1161,1172,1335,1375,1398,1441,1511,1762,1785,1800,1851,2081,2211,2255,2270,2364,2377,2392,2632,2720,2806,2816,2972,2985,3002,3305,3310,3400,3423,3532,3543,3562,3605,3876,3881,4672,4676,4759,5579
+docs/de/api.md
+  s_abf448b1d700bb::t_070a0695328a64 45,58,80,147
+docs/de/concepts.md
+  s_abf448b1d700bb::t_11a0a70f3909d0 108,129
+docs/de/features.md
+  s_abf448b1d700bb::t_7943a4c1304e15 286,1995,2012,4441
+docs/de/integrations.md
+  s_abf448b1d700bb::t_24d2a3941a7501 1271,1287,1365,1373,1460,1519,1541,1563,1602,1634,1640,1650,1677,1724,1745,1754,1772,1920,1933,1966,1979,2046-2047,2150,2217,2381,2386,2422,2427,2458,2463,2508,2513,2635,2649,2664,2679,2851,2887,2893,2966,3081,3251,3295,3577,3729,3910,3914,3922,3926,4548,4562,4591,4612,4764,4776
+docs/de/plugins.md
+  s_abf448b1d700bb::t_e6a2f9ab85cd77 98,133,176,223,263,500,581
+docs/de/quickstart-guide.md
+  s_abf448b1d700bb::t_1aa1be65caba5b 21,52,70-71,112,125,142,212,228,246,269,367,397,415,444,670,692
+docs/de/upgrading.md
+  s_abf448b1d700bb::t_69da405f8f22df 22-23,107,110,113,116,172,183,192,231-232,309-310,313,316,319,322,402,428,904,907,910,913,948,974,1207
+docs/de/web-ui.md
+  s_abf448b1d700bb::t_5e91bd2bb9a525 55,66,86
+docs/es/advanced.md
+  s_abf448b1d700bb::t_4bbe40c9f71c75 3,5,88,99,107,124,132,179,187,252,263,273,291,301,353,363,488-489,591,610,696,1133,1161,1172,1335,1375,1398,1441,1511,1762,1785,1800,1851,2081,2211,2255,2270,2364,2377,2392,2632,2720,2806,2816,2972,2985,3002,3305,3310,3400,3423,3532,3543,3562,3605,3876,3881,4672,4676,4759,5579
+docs/es/api.md
+  s_abf448b1d700bb::t_20d130e7262e18 45,58,80,147
+docs/es/concepts.md
+  s_abf448b1d700bb::t_22f215f2bee778 108,129
+docs/es/features.md
+  s_abf448b1d700bb::t_8c72ba969db271 285,2018,2035,4493
+docs/es/integrations.md
+  s_abf448b1d700bb::t_af523906ea8e9f 1271,1287,1365,1373,1460,1520,1542,1564,1603,1635,1641,1651,1678,1725,1746,1755,1773,1921,1934,1967,1980,2047-2048,2151,2218,2382,2387,2423,2428,2459,2464,2509,2514,2637,2651,2666,2681,2853,2889,2895,2967,3082,3252,3296,3578,3730,3911,3915,3923,3927,4549,4563,4592,4613,4765,4777
+docs/es/plugins.md
+  s_abf448b1d700bb::t_61e023768b272c 98,134,177,224,264,582
+docs/es/quickstart-guide.md
+  s_abf448b1d700bb::t_d8ccfa9d62fa95 21,52,70-71,112,125,142,212,228,246,269,367,397,415,444,671,693
+docs/es/upgrading.md
+  s_abf448b1d700bb::t_840fa0b26e300b 21-22,106,109,112,115,171,182,191,230-231,312-313,316,319,322,325,405,431,907,910,913,916,951,977,1210
+docs/es/web-ui.md
+  s_abf448b1d700bb::t_9d5628d294f07f 55,66,86
+docs/features.md
+  s_abf448b1d700bb::t_5a4378f1ee3906 285,2030,2047,4509
+docs/fr/advanced.md
+  s_abf448b1d700bb::t_dd81360d949088 3,5,88,99,107,124,132,179,187,252,263,273,291,301,353,363,488-489,591,610,696,1133,1161,1172,1335,1375,1398,1441,1511,1761,1784,1799,1850,2080,2210,2254,2269,2363,2376,2391,2631,2719,2805,2815,2971,2984,3001,3304,3309,3399,3422,3531,3542,3561,3604,3875,3880,4671,4675,4758,5578
+docs/fr/api.md
+  s_abf448b1d700bb::t_dcb112dd44c4e2 45,58,80,147
+docs/fr/concepts.md
+  s_abf448b1d700bb::t_22eb5793ad3546 108,129
+docs/fr/features.md
+  s_abf448b1d700bb::t_1eedacdbfeacf2 285,1955,1972,4393
+docs/fr/integrations.md
+  s_abf448b1d700bb::t_2e18e787f89788 1278,1293,1372,1380,1467,1527,1548,1570,1609,1643,1649,1659,1686,1733,1754,1763,1781,1929,1942,1975,1988,2055-2056,2156,2223,2384,2389,2425,2430,2461,2466,2511,2516,2639,2653,2668,2683,2855,2891,2897,2968,3083,3253,3297,3354,3580,3732,3913,3917,3925,3929,4550,4564,4593,4614,4766,4778
+docs/fr/plugins.md
+  s_abf448b1d700bb::t_21e8e15ba75290 98,134,177,224,264,582
+docs/fr/quickstart-guide.md
+  s_abf448b1d700bb::t_d2b96bca580b4a 21,52,70-71,112,125,142,212,228,246,269,367,397,415,444,671,693
+docs/fr/upgrading.md
+  s_abf448b1d700bb::t_e5a59a47e6b886 21-22,106,109,112,115,171,182,191,230-231,312-313,316,319,322,325,405,431,907,910,913,916,951,977,1210
+docs/fr/web-ui.md
+  s_abf448b1d700bb::t_e2446b7e240446 55,66,86
+docs/integrations.md
+  s_abf448b1d700bb::t_47af906c82fa9e 1278,1305,1377,1385,1472,1532,1554,1576,1615,1649,1655,1665,1692,1739,1760,1769,1787,1935,1948,1981,1994,2061-2062,2169,2281,2496,2501,2537,2542,2573,2578,2623,2628,2751,2765,2780,2795,2966,3002,3008,3088,3205,3375,3419,3701,3853,4034,4038,4046,4050,4671,4685,4714,4735,4887,4899
+docs/plugins.md
+  s_abf448b1d700bb::t_4365bdd89f4161 98,134,177,224,264,585
+docs/quickstart-guide.md
+  s_abf448b1d700bb::t_acb3dcf5017974 21,52,70-71,112,125,142,212,228,246,269,367,397,415,444,671,693
+docs/upgrading.md
+  s_abf448b1d700bb::t_66de5077455e1d 21-22,105,108,111,114,170,181,190,229-230,311-312,315,318,321,324,404,430,907,910,913,916,951,977,1210
+docs/web-ui.md
+  s_abf448b1d700bb::t_b051deb13ba47e 50,65,89
+docs/zh/advanced.md
+  s_abf448b1d700bb::t_b30be3f5589039 3,5,88,99,107,124,132,179,187,252,263,273,291,301,353,363,488-489,591,610,696,1133,1161,1172,1335,1375,1398,1441,1511,1760,1783,1798,1849,2079,2209,2253,2268,2362,2375,2390,2630,2718,2804,2814,2969,2982,2999,3302,3307,3397,3420,3529,3540,3559,3602,3873,3878,4669,4673,4756,5576
+docs/zh/api.md
+  s_abf448b1d700bb::t_48b96e41901bcd 45,58,80,147
+docs/zh/concepts.md
+  s_abf448b1d700bb::t_c15ea14686b1f8 108,129
+docs/zh/features.md
+  s_abf448b1d700bb::t_99dcc2fa411c54 287,2028,2045,4503
+docs/zh/integrations.md
+  s_abf448b1d700bb::t_e4ef457a45d9b4 1271,1287,1365,1373,1460,1520,1542,1564,1603,1637,1643,1653,1680,1724,1745,1754,1772,1920,1933,1966,1979,2046-2047,2150,2217,2381,2386,2422,2427,2458,2463,2508,2513,2636,2650,2665,2680,2852,2888,2894,2963,3078,3248,3292,3574,3726,3907,3911,3919,3923,4545,4559,4588,4609,4758,4770
+docs/zh/plugins.md
+  s_abf448b1d700bb::t_b3dfad46ed7ba8 98,134,177,224,264,582
+docs/zh/quickstart-guide.md
+  s_abf448b1d700bb::t_f0dba9c43fd6f3 21,52,70-71,112,125,142,212,228,246,269,367,397,415,444,671,693
+docs/zh/upgrading.md
+  s_abf448b1d700bb::t_60ba855dbfa319 21-22,105,108,111,114,170,181,190,229-230,311-312,315,318,321,324,404,430,906,909,912,915,950,976,1209
+docs/zh/web-ui.md
+  s_abf448b1d700bb::t_ed2651357a4cda 55,66,86
+examples/authelia/docker-compose.yml
+  s_abf448b1d700bb::t_cb253ac45b3773 3,17
+examples/authentik/docker-compose.yml
+  s_abf448b1d700bb::t_9645403de1e4a1 3,17
+examples/behind-reverse-proxy/docker-compose.yml
+  s_abf448b1d700bb::t_61bf3fc2f979be 9,20
+examples/bigbluebutton/docker-compose.yml
+  s_abf448b1d700bb::t_b1418106928182 28,43
+examples/cors/docker-compose.yml
+  s_abf448b1d700bb::t_8d3f8993e31e23 3,25
+examples/dns-cloudflare/docker-compose.yml
+  s_abf448b1d700bb::t_f8ab176b3b70b0 3,17
+examples/dns-desec/docker-compose.yml
+  s_abf448b1d700bb::t_81790cf24539b1 3,17
+examples/dns-digitalocean/docker-compose.yml
+  s_abf448b1d700bb::t_d9786b89cedf28 3,17
+examples/dns-dnsimple/docker-compose.yml
+  s_abf448b1d700bb::t_3df474f54d4cc2 3,17
+examples/dns-dnsmadeeasy/docker-compose.yml
+  s_abf448b1d700bb::t_e9dec6b1895b7b 3,17
+examples/dns-gehirn/docker-compose.yml
+  s_abf448b1d700bb::t_350cdea4524f43 3,17
+examples/dns-google/docker-compose.yml
+  s_abf448b1d700bb::t_dba986b09824d9 3,17
+examples/dns-linode/docker-compose.yml
+  s_abf448b1d700bb::t_b92183e02075d8 3,17
+examples/dns-luadns/docker-compose.yml
+  s_abf448b1d700bb::t_2095f1c9606a35 3,17
+examples/dns-nsone/docker-compose.yml
+  s_abf448b1d700bb::t_cb18119c4757ce 3,17
+examples/dns-ovh/docker-compose.yml
+  s_abf448b1d700bb::t_0ef4fda4439fd6 3,17
+examples/dns-rfc2136/docker-compose.yml
+  s_abf448b1d700bb::t_4006ad28410a45 3,17
+examples/dns-route53/docker-compose.yml
+  s_abf448b1d700bb::t_963667ea38dc1a 3,17
+examples/dns-sakuracloud/docker-compose.yml
+  s_abf448b1d700bb::t_b66d7f33d651fe 3,17
+examples/dns-scaleway/docker-compose.yml
+  s_abf448b1d700bb::t_b3e8267f8049b0 3,17
+examples/docker-configs/docker-compose.yml
+  s_abf448b1d700bb::t_deb0f27f26b218 3,17
+examples/drupal/docker-compose.yml
+  s_abf448b1d700bb::t_34015c87cc34c5 3,17
+examples/ghost/docker-compose.yml
+  s_abf448b1d700bb::t_1a9be8e578523f 3,17
+examples/gogs/docker-compose.yml
+  s_abf448b1d700bb::t_bcd96ece2f0553 3,17
+examples/hardened/docker-compose.yml
+  s_abf448b1d700bb::t_1314771292cf20 3,36
+examples/jellyfin/docker-compose.yml
+  s_abf448b1d700bb::t_15127baeec3c83 3,17
+examples/joomla/docker-compose.yml
+  s_abf448b1d700bb::t_fe7737cbf9010b 3,17
+examples/load-balancer/docker-compose.yml
+  s_abf448b1d700bb::t_c9473959a8973f 3,17
+examples/magento/docker-compose.yml
+  s_abf448b1d700bb::t_02721ea0c4341c 3,17
+examples/mattermost/docker-compose.yml
+  s_abf448b1d700bb::t_51eb6f6056b85d 3,17
+examples/mcp-stack/docker-compose.yml
+  s_abf448b1d700bb::t_6ebc32fbb33330 12,25,47
+examples/mongo-express/docker-compose.yml
+  s_abf448b1d700bb::t_2d6492f083cb96 3,17
+examples/moodle/docker-compose.yml
+  s_abf448b1d700bb::t_cf80329c76f03b 3,17
+examples/nextcloud/docker-compose.yml
+  s_abf448b1d700bb::t_928382e4858413 3,17
+examples/passbolt/docker-compose.yml
+  s_abf448b1d700bb::t_60b37f54dfea1d 3,17
+examples/php-cookie-flags/docker-compose.yml
+  s_abf448b1d700bb::t_d084bb0ac0b5a2 3,25
+examples/php-multisite/docker-compose.yml
+  s_abf448b1d700bb::t_5d7ee636a32a3a 3,26
+examples/php-singlesite/docker-compose.yml
+  s_abf448b1d700bb::t_2753179d1e2343 3,25
+examples/prestashop/docker-compose.yml
+  s_abf448b1d700bb::t_59fe2924aacabf 3,17
+examples/proxy-protocol/docker-compose.yml
+  s_abf448b1d700bb::t_45fa66fb6d8756 11,22
+examples/radarr/docker-compose.yml
+  s_abf448b1d700bb::t_bb75c1c39c1f36 3,17
+examples/redmine/docker-compose.yml
+  s_abf448b1d700bb::t_2c84fd186272ab 3,17
+examples/reverse-proxy-multisite/docker-compose.yml
+  s_abf448b1d700bb::t_c9b4c5e6957eab 3,17
+examples/reverse-proxy-singlesite/docker-compose.yml
+  s_abf448b1d700bb::t_776a80d55bdd7b 3,17
+examples/reverse-proxy-websocket/docker-compose.yml
+  s_abf448b1d700bb::t_2744c0c1964f48 3,17
+examples/stream-multisite/docker-compose.yml
+  s_abf448b1d700bb::t_54f5a6f9419ea3 3,19
+examples/syslog/docker-compose.yml
+  s_abf448b1d700bb::t_e0082590d04de5 3,24
+examples/tomcat/docker-compose.yml
+  s_abf448b1d700bb::t_76bfa31b5d2a3c 3,17
+examples/tor-hidden-service/docker-compose.yml
+  s_abf448b1d700bb::t_0315a39a7ebc9e 13,24
+examples/web-ui/docker-compose.wizard.yml
+  s_abf448b1d700bb::t_c66d3e04388b13 6,20,43
+examples/web-ui/docker-compose.yml
+  s_abf448b1d700bb::t_4afadca544b334 6,20,46
+examples/wordpress/docker-compose.yml
+  s_abf448b1d700bb::t_ce3ad56677b19b 3,17
+misc/check-version-consistency.sh
+  s_abf448b1d700bb::t_440272216dc302 60
+misc/install-bunkerweb.sh
+  s_abf448b1d700bb::t_934d0a4fc9bfaa 117
+misc/integrations/all-in-one.mariadb.ui.yml
+  s_abf448b1d700bb::t_e57f6139397c48 3
+misc/integrations/all-in-one.mariadb.yml
+  s_abf448b1d700bb::t_84feb0c207f674 3
+misc/integrations/all-in-one.mysql.ui.yml
+  s_abf448b1d700bb::t_d404f06c36e121 3
+misc/integrations/all-in-one.mysql.yml
+  s_abf448b1d700bb::t_a6510a5ad217e2 3
+misc/integrations/all-in-one.oracle.ui.yml
+  s_abf448b1d700bb::t_71fc7cc3713407 3
+misc/integrations/all-in-one.oracle.yml
+  s_abf448b1d700bb::t_ca903f93ae003e 3
+misc/integrations/all-in-one.postgres.ui.yml
+  s_abf448b1d700bb::t_07551f20148bd2 3
+misc/integrations/all-in-one.postgres.yml
+  s_abf448b1d700bb::t_7eb5e013e1492b 3
+misc/integrations/all-in-one.yml
+  s_abf448b1d700bb::t_32178c2d623b1f 3
+misc/integrations/autoconf.mariadb.ui.yml
+  s_abf448b1d700bb::t_68f90c48c2bf3d 7,21,34,50
+misc/integrations/autoconf.mariadb.yml
+  s_abf448b1d700bb::t_a3e0b51c2de3ca 7,21,34
+misc/integrations/autoconf.mysql.ui.yml
+  s_abf448b1d700bb::t_42dd89b1c63a7f 7,21,34,50
+misc/integrations/autoconf.mysql.yml
+  s_abf448b1d700bb::t_19b1135d82604d 7,21,34
+misc/integrations/autoconf.oracle.ui.yml
+  s_abf448b1d700bb::t_2ecfc6fc8db74c 7,21,34,50
+misc/integrations/autoconf.oracle.yml
+  s_abf448b1d700bb::t_fd3b32c958fbbb 7,21,34
+misc/integrations/autoconf.postgres.ui.yml
+  s_abf448b1d700bb::t_735b0529d615d3 7,21,34,50
+misc/integrations/autoconf.postgres.yml
+  s_abf448b1d700bb::t_03df9147cd8434 7,21,34
+misc/integrations/docker.mariadb.ui.yml
+  s_abf448b1d700bb::t_19d07824b4e574 6,20,44
+misc/integrations/docker.mariadb.yml
+  s_abf448b1d700bb::t_8706c3ad6de136 7,20
+misc/integrations/docker.mysql.ui.yml
+  s_abf448b1d700bb::t_7ec5b5bcf73ed2 6,20,44
+misc/integrations/docker.mysql.yml
+  s_abf448b1d700bb::t_54c77e0fb9d036 7,20
+misc/integrations/docker.oracle.ui.yml
+  s_abf448b1d700bb::t_a13419749899d9 6,20,44
+misc/integrations/docker.oracle.yml
+  s_abf448b1d700bb::t_f9b72d37c450a0 7,20
+misc/integrations/docker.postgres.ui.yml
+  s_abf448b1d700bb::t_8c70b34c3494fd 6,19,43
+misc/integrations/docker.postgres.yml
+  s_abf448b1d700bb::t_70cf8dcdf98d65 7,20
+misc/integrations/docker.yml
+  s_abf448b1d700bb::t_8c71bd0dd2e303 6,19
+misc/integrations/k8s.mariadb.ui.yml
+  s_abf448b1d700bb::t_c75ac8c9f5ef0b 117,177,214,325
+misc/integrations/k8s.mariadb.yml
+  s_abf448b1d700bb::t_1ea89aed127e38 127,187,224
+misc/integrations/k8s.mysql.ui.yml
+  s_abf448b1d700bb::t_8c381c66ae4b6d 117,177,214,325
+misc/integrations/k8s.mysql.yml
+  s_abf448b1d700bb::t_73716186edb1f4 127,187,224
+misc/integrations/k8s.oracle.ui.yml
+  s_abf448b1d700bb::t_3c8e34c7e7ac86 117,177,214,321
+misc/integrations/k8s.oracle.yml
+  s_abf448b1d700bb::t_1540159aef0af5 127,187,224
+misc/integrations/k8s.postgres.ui.yml
+  s_abf448b1d700bb::t_b34e390ace74a3 117,177,214,321
+misc/integrations/k8s.postgres.yml
+  s_abf448b1d700bb::t_8b970bd3ea6277 127,187,224
+publiccode.yml
+  s_abf448b1d700bb::t_c70c6bbb9740a1 4-6
+pyproject.toml
+  s_abf448b1d700bb::t_5c66ad648cc7a8 4
+src/VERSION
+  s_abf448b1d700bb::t_ab86fa9743eaa1 1
+src/all-in-one/Dockerfile
+  s_abf448b1d700bb::t_9b50ecd9e5715d 247
+src/api/Dockerfile
+  s_abf448b1d700bb::t_e3db495e3d7a1a 66
+src/autoconf/Dockerfile
+  s_abf448b1d700bb::t_cde1b9b4a437c8 70
+src/bw/Dockerfile
+  s_abf448b1d700bb::t_18698ba4a0cdf9 112
+src/common/core/crowdsec/README.de.md
+  s_abf448b1d700bb::t_e7c8f548cd3ed3 175,192
+src/common/core/crowdsec/README.es.md
+  s_abf448b1d700bb::t_a74b40796446c7 171,188
+src/common/core/crowdsec/README.fr.md
+  s_abf448b1d700bb::t_05153f28024711 175,192
+src/common/core/crowdsec/README.md
+  s_abf448b1d700bb::t_f79de1d5705d0b 177,194
+src/common/core/crowdsec/README.zh.md
+  s_abf448b1d700bb::t_12c7fa25269bf0 175,192
+src/common/core/modsecurity/README.de.md
+  s_abf448b1d700bb::t_ebf579f1fad35d 60
+src/common/core/modsecurity/README.es.md
+  s_abf448b1d700bb::t_9f93fda17bad1d 60
+src/common/core/modsecurity/README.fr.md
+  s_abf448b1d700bb::t_3b5883809bccc2 60
+src/common/core/modsecurity/README.md
+  s_abf448b1d700bb::t_46512abf132475 60
+src/common/core/modsecurity/README.zh.md
+  s_abf448b1d700bb::t_3dd4ea6d975ce1 60
+src/common/db/Database.py
+  s_abf448b1d700bb::t_f1a267ad6cf21d 957,991
+src/common/db/alembic/mariadb_versions/1b6c8f9523a0_upgrade_to_version_1_6_18_rc5.py
+  s_abf448b1d700bb::t_f451b704b7e97e 1-29
+src/common/db/alembic/mysql_versions/389ede0425a5_upgrade_to_version_1_6_18_rc5.py
+  s_abf448b1d700bb::t_09b72347d601ec 1-29
+src/common/db/alembic/postgresql_versions/ffb5267cc741_upgrade_to_version_1_6_18_rc5.py
+  s_abf448b1d700bb::t_84628bfcff8893 1-29
+src/common/db/alembic/sqlite_versions/fb96d3f1f52c_upgrade_to_version_1_6_18_rc5.py
+  s_abf448b1d700bb::t_ef50d9decad32b 1-29
+src/common/db/model.py
+  s_abf448b1d700bb::t_ae4e561c93db8f 374
+src/scheduler/Dockerfile
+  s_abf448b1d700bb::t_8a9b8709792cae 89
+src/ui/Dockerfile
+  s_abf448b1d700bb::t_c0f52473a9a338 111
+tests/unit/common/test_version_consistency.py
+  s_abf448b1d700bb::t_ba449022efb8f8 10
+tests/unit/db/test_connection_and_metadata.py
+  s_abf448b1d700bb::t_1e9d2e8d02bc2a 289
+tests/unit/gen/test_save_config_pending_migration_regression.py
+  s_abf448b1d700bb::t_d3622414cf25df 21
+tests/unit/gen/test_save_config_version_stamp.py
+  s_abf448b1d700bb::t_c61aac50724c32 22
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "ad75019b0df3f7fdc385739e263c1643d7235f4a",
+  "prompts": {},
+  "sessions": {
+    "s_abf448b1d700bb": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "580791c7-85a4-4c3f-ad17-ea9cbea92c9a",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

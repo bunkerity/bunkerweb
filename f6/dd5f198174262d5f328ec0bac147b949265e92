@@ -1,0 +1,24 @@
+CHANGELOG.md
+  h_a33a1e80933106 59
+src/api/entrypoint.sh
+  h_a33a1e80933106 31-34,39,72-76,79-82,85-91,97
+src/autoconf/entrypoint.sh
+  h_a33a1e80933106 17-20,23,48-52,55-58,60-66,73
+src/scheduler/entrypoint.sh
+  h_a33a1e80933106 17-20,23,158-162,165-168,170-176,183
+src/ui/entrypoint.sh
+  h_a33a1e80933106 28-31,51-54,59,96-100,102-111,116-119,122-128,134-135,140,145-146,158
+tests/unit/linux/test_entrypoint_graceful_stop.py
+  h_a33a1e80933106 1-140
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "f6dd5f198174262d5f328ec0bac147b949265e92",
+  "prompts": {},
+  "humans": {
+    "h_a33a1e80933106": {
+      "author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

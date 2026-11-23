@@ -1,0 +1,23 @@
+CHANGELOG.md
+  s_ed1458b44c458d::t_7d2146c7700117 53
+src/common/core/antibot/antibot.lua
+  s_ed1458b44c458d::t_a1722d2e1b59da 791
+tests/unit/common/test_antibot_challenge_coverage_lua.py
+  s_ed1458b44c458d::t_37f8bad803e713 227,229,252
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "fd4d7831d32495528003f2a28274a861dd7f8bb9",
+  "prompts": {},
+  "sessions": {
+    "s_ed1458b44c458d": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "eed1c216-b356-4ab3-917e-93a0aa3de60e",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

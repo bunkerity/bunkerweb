@@ -1,0 +1,21 @@
+src/common/gen/save_config.py
+  s_60628c795bd662::t_edd9b25869cac4 7,27-42,145-152,178
+CHANGELOG.md
+  s_60628c795bd662::t_177fcc15c013ea 36
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "71f088a579c163f1503bc25920bc33a321bee410",
+  "prompts": {},
+  "sessions": {
+    "s_60628c795bd662": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1869d-2e49-7ff2-8e88-cfcf2fe9cb0c",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

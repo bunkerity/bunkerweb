@@ -1,0 +1,42 @@
+src/linux/scripts/bunkerweb-ui.sh
+  s_063426bcb4f29a::t_f685db3bc78413 134-139
+src/linux/scripts/bunkerweb-api.sh
+  s_063426bcb4f29a::t_f685db3bc78413 238-243
+tests/unit/linux/test_env_file_exec_keys.py
+  s_063426bcb4f29a::t_21313dac6b6ec2 1-137,139-201,206,209-210,213,218
+  s_063426bcb4f29a::t_dfa7f91006d9ec 138
+  s_063426bcb4f29a::t_f685db3bc78413 202-203
+  s_06e96c821ea634::t_00cb131eb4bcdb 216
+  s_063426bcb4f29a::t_b8122506f50bb6 204-205,207-208,211-212,214-215,217,219
+src/common/helpers/utils.sh
+  s_063426bcb4f29a::t_4a4336052c83a0 159
+  s_063426bcb4f29a::t_64d6dd6863a294 123-135,137-138,146-149,154-158,160-165
+  s_063426bcb4f29a::t_9d8426ffed3c96 166
+src/linux/scripts/bunkerweb-scheduler.sh
+  s_063426bcb4f29a::t_4a4336052c83a0 93-98,147-153,155,187-188,190,225,228,243,257-258,260,269-270
+  s_063426bcb4f29a::t_1bc0fb5fef8a1d 271
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "20aecc5a7d21aea0fefb0240337a533076683635",
+  "prompts": {},
+  "sessions": {
+    "s_063426bcb4f29a": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "efffd834-e25f-4ca3-9a4c-a059847417df",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_06e96c821ea634": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "e27ccd4e-cfc1-4404-9bc3-91f5632c425d",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

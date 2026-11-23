@@ -1,0 +1,46 @@
+tests/unit/ui/routes/test_reports_4084_large_data.py
+  s_394e3aeee18b86::t_4a9263fd5f2134 99-111
+  s_394e3aeee18b86::t_3ec6bec1cba57b 84
+CHANGELOG.md
+  s_de2ef45e1eda85::t_fe72f0f9fbfcca 28
+tests/unit/ui/core/test_reports_facet_reconciliation.py
+  s_394e3aeee18b86::t_ee1ee69f94026d 67-68,71-83
+  s_394e3aeee18b86::t_40aa2786f71751 14,17-23,69-70
+  s_394e3aeee18b86::t_3ec6bec1cba57b 27,38
+  s_394e3aeee18b86::t_c5c14c244415f5 8,44,48
+  s_394e3aeee18b86::t_533125f65e0ea6 1-7,9-13,15-16,24-26,28-37,39-43,45-47,49-66
+src/ui/app/models/instance.py
+  s_394e3aeee18b86::t_e353bc811b0c22 474,1426,1428-1432
+  s_394e3aeee18b86::t_40aa2786f71751 940
+tests/unit/common/test_reports_4084_lua.py
+  s_394e3aeee18b86::t_c5c14c244415f5 1-10,13-14,16-22,24-29
+  s_394e3aeee18b86::t_9f914bbe549daa 11-12,15,23
+tests/unit/common/test_metrics_phases_coverage_lua.py
+  s_394e3aeee18b86::t_dd7a285b6f53a5 116-118,130-133,144-147
+src/common/core/metrics/metrics.lua
+  s_394e3aeee18b86::t_381e30cb46d2be 1613-1625,1628,1630-1637,1641-1644,1646,1648-1649,1705-1712
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "d95c8bc9dcdc10424c9b2cd2e6b38ef02c41c7b2",
+  "prompts": {},
+  "sessions": {
+    "s_394e3aeee18b86": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1ea48-8f39-7183-a8f3-fb536e62a85b",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_de2ef45e1eda85": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "7998fc02-66d1-45db-87b6-193d7973a9cb",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

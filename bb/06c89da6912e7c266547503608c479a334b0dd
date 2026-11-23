@@ -1,0 +1,28 @@
+tests/scripts/utils.sh
+  s_ccd3fe4fc355c7::t_ca5c213433ae7c 1881-1882,1938-1950
+  s_c4e84ae2abefcf::t_592ad4de0b6cd4 1951
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "bb06c89da6912e7c266547503608c479a334b0dd",
+  "prompts": {},
+  "sessions": {
+    "s_c4e84ae2abefcf": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "84c729f1-150e-4cb2-b14e-ae635c619c20",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_ccd3fe4fc355c7": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1ee61-91fb-7033-8cc8-1c8ed5d6b98e",
+        "model": "gpt-6.2-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

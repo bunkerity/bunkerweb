@@ -1,0 +1,18 @@
+CHANGELOG.md
+  h_a33a1e80933106 52
+src/common/core/crowdsec/lib/bouncer.lua
+  h_a33a1e80933106 869-870
+tests/unit/common/test_crowdsec_bouncer_live_coverage_lua.py
+  h_a33a1e80933106 364-380
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "52af3802ec4e18573256d85a8a1280568644b9a8",
+  "prompts": {},
+  "humans": {
+    "h_a33a1e80933106": {
+      "author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

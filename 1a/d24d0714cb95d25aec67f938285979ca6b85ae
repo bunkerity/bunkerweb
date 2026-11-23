@@ -1,0 +1,21 @@
+.github/workflows/release.yml
+  s_2386d3db512ad9::t_03d1377745dc4d 804,806,813
+.github/workflows/doc-to-pdf.yml
+  s_2386d3db512ad9::t_5ab8483f2cda2a 48-49
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "1ad24d0714cb95d25aec67f938285979ca6b85ae",
+  "prompts": {},
+  "sessions": {
+    "s_2386d3db512ad9": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1abf8-2e48-75e0-b1c5-20e57af274de",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

@@ -1,0 +1,23 @@
+src/common/core/greylist/jobs/greylist-download.py
+  s_9c3235322a9dea::t_56dc7e6501c30a 112,115,311
+src/common/core/whitelist/jobs/whitelist-download.py
+  s_9c3235322a9dea::t_56dc7e6501c30a 112,115,311
+src/common/core/blacklist/jobs/blacklist-download.py
+  s_9c3235322a9dea::t_56dc7e6501c30a 168,171,367
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "a31c3a5bf3e4e209ee3b5a47d7c57544125d511e",
+  "prompts": {},
+  "sessions": {
+    "s_9c3235322a9dea": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a18dbe-fba4-7433-802c-4f639ecf1800",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

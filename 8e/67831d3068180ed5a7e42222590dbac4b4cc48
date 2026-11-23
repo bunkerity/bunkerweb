@@ -1,0 +1,21 @@
+src/common/core/backup/backup.py
+  s_e0fdc018f87553::t_89ada863166055 158
+  s_e0fdc018f87553::t_5ed84ae07cea0f 157
+  s_e0fdc018f87553::t_f5ffe9a034b307 159
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "8e67831d3068180ed5a7e42222590dbac4b4cc48",
+  "prompts": {},
+  "sessions": {
+    "s_e0fdc018f87553": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "516c2f4c-92e0-44c9-8252-467c6561feba",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

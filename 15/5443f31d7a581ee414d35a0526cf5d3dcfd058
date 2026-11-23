@@ -1,0 +1,21 @@
+CHANGELOG.md
+  s_60628c795bd662::t_6a229deb6aa43a 13
+src/common/core/bunkernet/bunkernet.lua
+  s_60628c795bd662::t_bfa00c52a33060 207-211
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "155443f31d7a581ee414d35a0526cf5d3dcfd058",
+  "prompts": {},
+  "sessions": {
+    "s_60628c795bd662": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1869d-2e49-7ff2-8e88-cfcf2fe9cb0c",
+        "model": "unknown"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

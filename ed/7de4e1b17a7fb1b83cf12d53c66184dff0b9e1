@@ -1,0 +1,43 @@
+CHANGELOG.md
+  s_80f1da85912d1b::t_1c6f03bf479a96 11,14
+src/deps/deps.json
+  s_80f1da85912d1b::t_d45a762a9c0fd9 156,158
+src/deps/misc/resty-redis-cluster.patch
+  s_80f1da85912d1b::t_8adf42bceae2d7 1-8,11,13,17-25,30-33,35,43,45-46,50,55-56,65,67,70,76,78,82,85,88,90,92,96-97,104,113,115-116,133-135
+src/deps/src/resty-redis-cluster/Makefile
+  s_80f1da85912d1b::t_706d6c19f29688 3,9-13,22-27,29-30
+src/deps/src/resty-redis-cluster/README.md
+  s_80f1da85912d1b::t_c4ebd371eb7d49 135-190,408-413,427-432,435,443-452
+src/deps/src/resty-redis-cluster/kong-redis-cluster-1.7.0-0.rockspec
+  s_069d588794c2c2::t_7e94b2a15719c3 2,5
+src/deps/src/resty-redis-cluster/lib/resty/rediscluster.lua
+  s_80f1da85912d1b::t_2c2574ec630299 53-59,124-136,142-144,153-160,164-168,171,173,177-191,226-233,447-450,485-488,509,532-533,540-623,645,664,757-766,783,790,815,824-825,862-867,940,958,1031-1043,1053-1058,1085-1095,1098,1107-1109,1115,1150,1155,1166,1170,1204,1225-1226,1228,1231,1233-1236,1239,1244,1384,1398,1407,1484
+tests/unit/test_lua_rediscluster_patch.lua
+  s_80f1da85912d1b::t_809bd4fd029e00 40-41,43-44,48-50,174-205
+tests/unit/test_lua_rediscluster_retry.lua
+  s_80f1da85912d1b::t_d6674aa1905163 143,158-160,168-170,194-196,198-199
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "ed7de4e1b17a7fb1b83cf12d53c66184dff0b9e1",
+  "prompts": {},
+  "sessions": {
+    "s_069d588794c2c2": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "84fe7cda-2bca-4767-bd4f-5fd51bba09cf",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_80f1da85912d1b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "48f28331-3ce2-4fa3-b959-69d5d1238c0a",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

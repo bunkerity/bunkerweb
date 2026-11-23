@@ -1,0 +1,36 @@
+tests/unit/linux/test_install_bunkerweb.py
+  s_c03c50c4b625ef::t_972c1aa725cf74 45-64
+.github/workflows/push-packagecloud.yml
+  s_c03c50c4b625ef::t_6236bab009bc94 62
+misc/install-bunkerweb.sh
+  s_c03c50c4b625ef::t_134e2bb72b00c8 8727-8735
+  s_c03c50c4b625ef::t_85ac38d04d9d75 8736
+.github/workflows/staging.yml
+  s_c03c50c4b625ef::t_6236bab009bc94 400
+CHANGELOG.md
+  s_80f1da85912d1b::t_0465998e6a3138 11
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "4af654044c48f50160e1647b14eadef4399ce1e8",
+  "prompts": {},
+  "sessions": {
+    "s_80f1da85912d1b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "48f28331-3ce2-4fa3-b959-69d5d1238c0a",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_c03c50c4b625ef": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "9ce7bfe7-2283-4281-adbe-0becc2b9c0c3",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

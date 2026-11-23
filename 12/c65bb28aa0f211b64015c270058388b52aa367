@@ -1,0 +1,56 @@
+.github/workflows/push-packagecloud.yml
+  s_54ed2deafff668::t_39b2d0b9e564ae 44-47,55-62,129-157
+  s_a0bda5d70039b2::t_6187fd44ab5443 64
+tests/unit/integrations/test_release_attestations.py
+  s_54ed2deafff668::t_d106ef8a568b36 33-36
+  s_54ed2deafff668::t_8c81da415c168d 87,128-135
+  s_54ed2deafff668::t_9351b5077a504e 3,6-7,136-223
+  s_54ed2deafff668::t_b1df01fd236cbc 61-62,73,111
+  s_54ed2deafff668::t_bfb4bd3489c109 1-2,4-5,8-32,37-60,63-72,74-86,88-110,112-127
+.github/workflows/codeql.yml
+  s_a0bda5d70039b2::t_6187fd44ab5443 41,47
+.github/workflows/push-docker.yml
+  s_54ed2deafff668::t_39b2d0b9e564ae 42-46,107,125-149
+.github/workflows/scorecards-analysis.yml
+  s_a0bda5d70039b2::t_6187fd44ab5443 28
+.github/workflows/plumber.yml
+  s_a0bda5d70039b2::t_6187fd44ab5443 27
+.github/workflows/staging.yml
+  s_54ed2deafff668::t_d5dac25ef9ae6e 311
+.github/workflows/container-build.yml
+  s_a0bda5d70039b2::t_6187fd44ab5443 175
+.github/workflows/push-github.yml
+  s_54ed2deafff668::t_d5dac25ef9ae6e 155
+.github/RELEASING.md
+  s_54ed2deafff668::t_82be9445872a19 64-73,132-149,152-180
+  s_54ed2deafff668::t_8c81da415c168d 150-151
+.github/workflows/release.yml
+  s_54ed2deafff668::t_8c81da415c168d 575,577-587
+  s_54ed2deafff668::t_716e4c5f2a7633 317-318,375-378,540-574,576,588-602,604-607,609-615,617-625,627-633,635-636,639
+  s_54ed2deafff668::t_b1df01fd236cbc 603,616,626,634
+  s_54ed2deafff668::t_9351b5077a504e 608
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "12c65bb28aa0f211b64015c270058388b52aa367",
+  "prompts": {},
+  "sessions": {
+    "s_54ed2deafff668": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1ad2e-d51e-7722-931b-d75cdbc0db77",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_a0bda5d70039b2": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1b056-fdce-7e51-8ab0-28f3d5f9101b",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

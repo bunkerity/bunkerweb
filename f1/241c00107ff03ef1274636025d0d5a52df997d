@@ -1,0 +1,14 @@
+.plumber.yaml
+  h_a33a1e80933106 16
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "f1241c00107ff03ef1274636025d0d5a52df997d",
+  "prompts": {},
+  "humans": {
+    "h_a33a1e80933106": {
+      "author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

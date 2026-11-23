@@ -1,0 +1,21 @@
+publiccode.yml
+  s_74e8f13940c1d7::t_d9fcc1e4be5c75 5
+CHANGELOG.md
+  s_74e8f13940c1d7::t_d9fcc1e4be5c75 3
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "c3fb924a07370f7b1b17b4ed582ff1c198ff7ed3",
+  "prompts": {},
+  "sessions": {
+    "s_74e8f13940c1d7": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1ab4a-98dd-7a63-acdd-dc1acbb5623c",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

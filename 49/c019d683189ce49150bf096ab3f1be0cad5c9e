@@ -1,0 +1,55 @@
+CHANGELOG.md
+  s_86270a7f00681f::t_d094ffcd711a0a 3-6
+docs/de/features.md
+  s_86270a7f00681f::t_8ac2ab14a32a53 1101-1106
+docs/es/features.md
+  s_86270a7f00681f::t_9281c0e1cc47a4 1110-1115
+docs/features.md
+  s_86270a7f00681f::t_8e9ebe0f8f3589 1114-1119
+docs/fr/features.md
+  s_86270a7f00681f::t_2414be5b617ca9 1082-1087
+docs/zh/features.md
+  s_86270a7f00681f::t_61d3bd383514f8 1116-1121
+src/common/core/blacklist/README.de.md
+  s_86270a7f00681f::t_0cef60bccb7a01 43-48
+src/common/core/blacklist/README.es.md
+  s_86270a7f00681f::t_3dfb6a9266f271 43-48
+src/common/core/blacklist/README.fr.md
+  s_86270a7f00681f::t_f6cd6aebb3d4a1 43-48
+src/common/core/blacklist/README.md
+  s_86270a7f00681f::t_5329e22d4cecdd 43-48
+src/common/core/blacklist/README.zh.md
+  s_86270a7f00681f::t_8ac0397236c676 43-48
+src/common/core/blacklist/jobs/blacklist-download.py
+  s_86270a7f00681f::t_8d60bf536781a8 60-78,81-87,97-121,154-155,173-174,191-192,210-211,237-238,252-255,261,264-278,294,296-308,310-312,315,318-322,324-325,334,342-344,347,349,371,380,383-430,432,434-435,439,443-460,462,465,467-472,474,476-484,507,510,534-535,539-540
+src/common/core/blacklist/plugin.json
+  s_86270a7f00681f::t_27e7fa06ab385f 38,43-44
+tests/unit/jobs/_other_jobs_helpers.py
+  s_86270a7f00681f::t_1c0eab28d35530 20-25
+tests/unit/jobs/test_blacklist_data_shield_alias.py
+  s_86270a7f00681f::t_bc574933dcc74f 1-117
+tests/unit/jobs/test_blacklist_data_shield_cache_transition.py
+  s_86270a7f00681f::t_bdba90bde33593 1-668
+tests/unit/jobs/test_feed_cache_recheck.py
+  s_86270a7f00681f::t_9060ee61e1c8c0 8,53,83
+tests/unit/jobs/test_job_cache_contracts.py
+  s_86270a7f00681f::t_22f4148574ec92 30,485,507,556-557,1128,1149-1150,1174
+tests/unit/jobs/test_list_refresh_interval_jobs.py
+  s_86270a7f00681f::t_2f30afc911546d 13,35-36,86,115,119-120,134,150
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "49c019d683189ce49150bf096ab3f1be0cad5c9e",
+  "prompts": {},
+  "sessions": {
+    "s_86270a7f00681f": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "bfec1477-1e22-4e74-84d3-1e61c253fc8e",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

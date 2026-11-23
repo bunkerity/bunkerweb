@@ -1,0 +1,36 @@
+CHANGELOG.md
+  h_a33a1e80933106 50
+src/bw/lua/bunkerweb/utils.lua
+  h_a33a1e80933106 894,897-903,905-909
+src/common/core/antibot/antibot.lua
+  h_a33a1e80933106 449,453-459,1277,1299,1318-1319
+src/common/core/blacklist/blacklist.lua
+  h_a33a1e80933106 250,254-260,348,377,406-407
+src/common/core/greylist/greylist.lua
+  h_a33a1e80933106 201,205-211,265,282,301-302
+src/common/core/whitelist/whitelist.lua
+  h_a33a1e80933106 258-259,263-268,374,391,410-411
+tests/unit/common/test_antibot_request_coverage_lua.py
+  h_a33a1e80933106 118-151
+tests/unit/common/test_blacklist_behaviour_lua.py
+  h_a33a1e80933106 225-251
+tests/unit/common/test_greylist_behaviour_lua.py
+  h_a33a1e80933106 177-195
+tests/unit/common/test_utils_net_bans_coverage_lua.py
+  h_a33a1e80933106 182-185
+tests/unit/common/test_whitelist_coverage_lua.py
+  h_a33a1e80933106 93-115
+tests/unit/lua/test_resume_rdns.py
+  h_a33a1e80933106 34,66,200,205-208,210-240
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "be59940aa2621f4e38643a0e26d50a73f502997b",
+  "prompts": {},
+  "humans": {
+    "h_a33a1e80933106": {
+      "author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

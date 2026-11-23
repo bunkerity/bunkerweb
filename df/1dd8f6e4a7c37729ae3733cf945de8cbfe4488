@@ -1,0 +1,23 @@
+CHANGELOG.md
+  s_60628c795bd662::t_2582a092e506b7 25
+src/common/core/letsencrypt/ui/actions.py
+  s_60628c795bd662::t_6598c78b40754e 171,187
+src/common/core/letsencrypt/ui/blueprints/letsencrypt.py
+  s_60628c795bd662::t_9da5f70c384b13 376,378
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "df1dd8f6e4a7c37729ae3733cf945de8cbfe4488",
+  "prompts": {},
+  "sessions": {
+    "s_60628c795bd662": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1869d-2e49-7ff2-8e88-cfcf2fe9cb0c",
+        "model": "unknown"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

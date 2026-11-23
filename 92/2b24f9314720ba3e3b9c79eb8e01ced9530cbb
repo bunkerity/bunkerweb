@@ -1,0 +1,21 @@
+tests/unit/db/test_init_tables_pro_settings_survive_restart.py
+  s_263a6406ec1ef8::t_81a8e9b3d31a95 94-105
+src/common/db/Database.py
+  s_263a6406ec1ef8::t_b6df75ccaa912f 1543-1545,1549
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.6",
+  "base_commit_sha": "922b24f9314720ba3e3b9c79eb8e01ced9530cbb",
+  "prompts": {},
+  "sessions": {
+    "s_263a6406ec1ef8": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "5e948458-ddce-4c4b-8ff9-115fc769df49",
+        "model": "claude-mythos-5-2"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

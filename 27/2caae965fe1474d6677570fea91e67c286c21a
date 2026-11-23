@@ -1,0 +1,30 @@
+src/bw/lua/bunkerweb/api.lua
+  h_a33a1e80933106 136-138,142
+src/common/confs/init-lua.conf
+  h_a33a1e80933106 97-98,100-105,108
+src/common/confs/init-stream-lua.conf
+  h_a33a1e80933106 95-96,98-103,106
+src/common/utils/env_file.py
+  h_a33a1e80933106 28,42-49,51-56,81,87-88,92-117,127-132,157-160,171,174,258-264
+tests/unit/cli/test_variables_paths_precedence.py
+  h_a33a1e80933106 45
+tests/unit/common/test_api_empty_internalstore_lua.py
+  h_a33a1e80933106 246,251,254-271
+tests/unit/gen/test_env_file_line_boundaries.py
+  h_a33a1e80933106 1-133
+tests/unit/gen/test_env_file_newline_injection.py
+  h_a33a1e80933106 21,120,140,145
+tests/unit/test_lua_init_store_order.lua
+  h_a33a1e80933106 336,347-349,353-374,376
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "272caae965fe1474d6677570fea91e67c286c21a",
+  "prompts": {},
+  "humans": {
+    "h_a33a1e80933106": {
+      "author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

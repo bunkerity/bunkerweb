@@ -1,0 +1,198 @@
+src/common/core/metrics/metrics.lua
+  s_c6bef50625e770::t_9950b647df240a 644-645,647-657,663-668
+  s_e639850c4e128b::t_5b91ba0856d0df 658-662
+  s_a677d0cd60c14d::t_83046230b64472 6,115-131,150,156,163,178,188,201-202,207,212,219,244,246,257,271,279,288,291,293-294,319,326,333,341,384,410,451,457,497-514,646,669-671,714-717,778-781,783,861-863,1118-1119
+src/ui/app/routes/bans.py
+  s_a677d0cd60c14d::t_83046230b64472 29,73,103
+src/deps/src/resty-redis-cluster/kong-redis-cluster-1.6.1-0.rockspec
+  s_7599a7c4ce9039::t_e59111948adac3 1-30
+src/api/app/rate_limit.py
+  s_a677d0cd60c14d::t_83046230b64472 19,427-453,458-462,516-543,642,666-668,670
+  s_c6bef50625e770::t_051e0f79552e38 454-457
+src/ui/app/models/instance.py
+  s_a677d0cd60c14d::t_83046230b64472 23-24,300,354,356-357,385,396,423,428,478-479,517,1041,1049,1063,1096,1099,1110,1497
+src/deps/src/resty-redis-cluster/lib/resty/rediscluster.lua
+  s_7599a7c4ce9039::t_e59111948adac3 1-108,116-152,174-523,525,530-651,655-663,667-685,691-696,700-924,926-935,937-947,949,954-1045,1053-1239,1241-1307,1321-1325,1350-1355,1360-1381
+  s_7599a7c4ce9039::t_ef7fa645863014 1308-1320
+  s_c6bef50625e770::t_ff22219a7f8d0f 156-159,163-166,170-173,524,936,950,953,1240
+  s_c6bef50625e770::t_9c2c383d4d478b 948
+  s_7599a7c4ce9039::t_9b9479eeba308b 1326-1349,1356-1359
+  s_c6bef50625e770::t_3eb6f955b107cf 1051
+  s_c6bef50625e770::t_e77545ac6a649f 925
+  s_c6bef50625e770::t_6d3791d0f0d1a2 951-952
+  s_c6bef50625e770::t_e1ac786f0f1910 153-155,160-162,167-169
+  s_c6bef50625e770::t_018f964e90fa21 697-699
+  s_c6bef50625e770::t_e0c7b0c7630406 526-529
+  s_0c0c3624778e8a::t_9876261aebfb00 686-690
+  s_7599a7c4ce9039::t_31d0a2cc6e569e 652-654,664-666
+  s_df3db070e6dde7::t_ee2509c7663ac9 109-115
+  s_c6bef50625e770::t_217c262253b832 1046-1050,1052
+src/common/core/redis/README.de.md
+  s_a677d0cd60c14d::t_83046230b64472 32,57-67
+  s_eee92ab0245fa0::t_9fb86f7204f76d 68
+src/deps/deps.json
+  s_a677d0cd60c14d::t_83046230b64472 155-160
+  s_eee92ab0245fa0::t_2dfb7af31a465e 154
+src/common/confs/http.conf
+  s_a677d0cd60c14d::t_83046230b64472 67
+src/bw/lua/bunkerweb/clusterstore.lua
+  s_a677d0cd60c14d::t_83046230b64472 5-6,22-24,54,69-107,165-181,234-238,269-326,372-376
+  s_c6bef50625e770::t_c6944cce442949 327,329-366,377
+  s_c6bef50625e770::t_48d13108096406 328
+src/common/utils/common_utils.py
+  s_a677d0cd60c14d::t_83046230b64472 31,753,774,785-788,837,849-865,873-898,900
+src/ui/app/models/resilient_session.py
+  s_a677d0cd60c14d::t_83046230b64472 6-13,18-24,114,153,166,177
+src/deps/src/resty-redis-cluster/Makefile
+  s_7599a7c4ce9039::t_e59111948adac3 1-18
+src/common/confs/stream.conf
+  s_a677d0cd60c14d::t_83046230b64472 37
+CHANGELOG.md
+  s_a677d0cd60c14d::t_83046230b64472 10
+src/common/core/badbehavior/badbehavior.lua
+  s_a677d0cd60c14d::t_83046230b64472 4,527-529,531-532,586-587
+src/deps/install.sh
+  s_a677d0cd60c14d::t_83046230b64472 197-201
+src/deps/src/resty-redis-cluster/.editorconfig
+  s_7599a7c4ce9039::t_e59111948adac3 1-23
+src/bw/lua/bunkerweb/utils.lua
+  s_c6bef50625e770::t_42bbd09b30e9fd 1271-1274
+  s_a677d0cd60c14d::t_83046230b64472 5,1172-1179,1280,1282,1354,1356
+  s_c6bef50625e770::t_d4f8ac01234eb5 1143-1149,1154,1182,1184
+src/deps/src/resty-redis-cluster/.luacheckrc
+  s_7599a7c4ce9039::t_e59111948adac3 1-28
+src/bw/lua/bunkerweb/rediskeys.lua
+  s_0c0c3624778e8a::t_fbefd083110e92 25
+  s_df3db070e6dde7::t_9483af402f40a5 82,87-89
+  s_1e8b8620d71c57::t_98f9531858ab59 1-13,22-24,26-68,70-81,83-86,90-101
+  s_c6bef50625e770::t_ecc295ef7cbae5 69
+  s_0c0c3624778e8a::t_0bae04cdb66ee2 14-21
+src/common/utils/redis_keys.py
+  s_0c0c3624778e8a::t_e677229fb961b8 44
+  s_7301341af51202::t_fa62fa2318dfde 1-43,45-70
+src/deps/src/resty-redis-cluster/SECURITY.md
+  s_7599a7c4ce9039::t_e59111948adac3 1-32
+src/deps/src/resty-redis-cluster/.gitignore
+  s_7599a7c4ce9039::t_e59111948adac3 1-43
+src/deps/misc/resty-redis-cluster.patch
+  s_c6bef50625e770::t_a45d604f5ad5ff 4-5,19,84,95-104,169-170,187-188
+  s_0c0c3624778e8a::t_7e709f518247e0 1-2,83,85-94
+  s_c6bef50625e770::t_d13bac7278bb42 18,20,24-27,31-34,38-44,46-52,58-59,115-123,130-131,133,136,158-166
+  s_c6bef50625e770::t_bfcf8d8813326e 45,53-57,60-62,72,82,105,114,124,140,157,167
+  s_7599a7c4ce9039::t_748ab2e2a6fd8a 63-71,73-81,168,171-186,189-233
+  s_c6bef50625e770::t_47bd2b1865bd3d 106-113,125-129,132,134-135,137-139,141-156
+  s_df3db070e6dde7::t_9bdd0e039da3b8 3,6-16
+  s_c6bef50625e770::t_f4fab8ea0e9b34 17,21-23,28-30,35-37
+src/common/core/redis/README.zh.md
+  s_a677d0cd60c14d::t_83046230b64472 34,60-70
+  s_eee92ab0245fa0::t_d18cb80d7c6af5 71
+src/common/core/redis/README.fr.md
+  s_a677d0cd60c14d::t_83046230b64472 32,56-66
+  s_eee92ab0245fa0::t_bbb4f29edd0075 67
+src/common/core/redis/plugin.json
+  s_a677d0cd60c14d::t_83046230b64472 125-133
+src/ui/app/routes/utils.py
+  s_a677d0cd60c14d::t_83046230b64472 205,229
+src/common/core/limit/limit.lua
+  s_a677d0cd60c14d::t_83046230b64472 4,17-24,425,512
+src/deps/src/resty-redis-cluster/lib/resty/xmodem.lua
+  s_7599a7c4ce9039::t_e59111948adac3 1-79
+src/common/core/redis/README.es.md
+  s_a677d0cd60c14d::t_83046230b64472 34,60-70
+  s_eee92ab0245fa0::t_e8330b0dc93ad2 71
+src/common/core/redis/README.md
+  s_a677d0cd60c14d::t_83046230b64472 34,60-70
+  s_eee92ab0245fa0::t_7964cba7d44ce1 71
+src/bw/lua/bunkerweb/cachestore.lua
+  s_a677d0cd60c14d::t_83046230b64472 6,19-26,93,162,195
+src/common/core/redis/redis.lua
+  s_a677d0cd60c14d::t_83046230b64472 35-37
+src/common/cli/CLI.py
+  s_a677d0cd60c14d::t_83046230b64472 25,181,355,359
+src/deps/src/resty-redis-cluster/README.md
+  s_7599a7c4ce9039::t_e59111948adac3 1-420
+src/common/core/sessions/sessions.lua
+  s_a677d0cd60c14d::t_83046230b64472 4,81,94-102,150-160
+src/deps/src/resty-redis-cluster/LICENSE
+  s_7599a7c4ce9039::t_e59111948adac3 1-201
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "607dbe5bdd08442f478bd87308b649d8db98851c",
+  "prompts": {},
+  "sessions": {
+    "s_0c0c3624778e8a": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "21cadb25-9807-4fc2-be83-02f3fd33b76f",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_1e8b8620d71c57": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "045922c4-6b64-4a74-b1c5-4502ee0dece0",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_7301341af51202": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "9bbf4d71-4cc4-40d7-b367-d85a05f8150a",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_7599a7c4ce9039": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "ec93b9b9-37c6-431e-91bb-dc1d642c5f06",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_a677d0cd60c14d": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0ebd6-0b9e-79a2-a833-bdbb8b5c6cfb",
+        "model": "gpt-6-luna"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_c6bef50625e770": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "f7871ffc-5071-402f-92fd-ffd13bc51248",
+        "model": "unknown"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_df3db070e6dde7": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "df10b0e9-07a8-4735-a5b5-ed185cbbecd9",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_e639850c4e128b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "c35ce1c4-baf2-47d3-8578-ebb1cdb6436c",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_eee92ab0245fa0": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0ec14-d0c1-7170-a333-fea2db34eea6",
+        "model": "gpt-6-luna"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

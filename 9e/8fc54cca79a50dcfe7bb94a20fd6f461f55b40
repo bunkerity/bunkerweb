@@ -1,0 +1,154 @@
+src/common/core/redis/README.de.md
+  s_42dfddf59267cc::t_392497a7a9bca6 36
+src/common/core/redis/README.es.md
+  s_42dfddf59267cc::t_392497a7a9bca6 38
+docs/zh/features.md
+  s_42dfddf59267cc::t_9f67a1c607b8b7 5225
+  s_42dfddf59267cc::t_392497a7a9bca6 348,1105,1111,1146,1149,1609-1611,2468,2479,2486,2489,3135-3137,4323-4326,5221,5247-5258,5318,6456,6464,6466-6467,6478,6496,6505
+src/common/core/redis/README.md
+  s_42dfddf59267cc::t_392497a7a9bca6 38
+src/common/core/redis/README.zh.md
+  s_42dfddf59267cc::t_392497a7a9bca6 38,131
+src/common/core/redis/README.fr.md
+  s_42dfddf59267cc::t_392497a7a9bca6 36
+docs/fr/features.md
+  s_42dfddf59267cc::t_9f67a1c607b8b7 5079
+  s_42dfddf59267cc::t_392497a7a9bca6 431,457,492,519,535,551,570,595,1071,1077,1112,1115,1556-1558,2385,2396,2403,2406,3035-3037,4213-4216,5075,5099-5110,6267,6275,6277-6278,6289,6307,6316
+src/common/core/modsecurity/README.zh.md
+  s_42dfddf59267cc::t_392497a7a9bca6 39-42
+src/common/core/modsecurity/README.fr.md
+  s_42dfddf59267cc::t_392497a7a9bca6 39-42
+docs/de/features.md
+  s_42dfddf59267cc::t_392497a7a9bca6 1090,1096,1131,1134,1586-1588,2423,2434,2441,2444,3072-3074,4261-4264,5155,5180-5191,6371,6379,6381-6382,6393,6411,6420
+  s_42dfddf59267cc::t_9f67a1c607b8b7 5159
+docs/es/features.md
+  s_42dfddf59267cc::t_9f67a1c607b8b7 5215
+  s_42dfddf59267cc::t_392497a7a9bca6 1099,1105,1140,1143,1603-1605,2458,2469,2476,2479,3125-3127,4313-4316,5211,5237-5248,6448,6456,6458-6459,6470,6488,6497
+docs/fr/integrations.md
+  s_42dfddf59267cc::t_392497a7a9bca6 1437,2163,2194,2218-2219,2226-2228,2242-2243,3199,3201,3218-3219,3226,3235-3236,3244-3250,3252-3299
+src/common/core/modsecurity/README.es.md
+  s_42dfddf59267cc::t_392497a7a9bca6 39-42
+docs/features.md
+  s_42dfddf59267cc::t_392497a7a9bca6 1103,1109,1144,1147,1607-1609,2474,2485,2492,2495,3142-3144,4331-4334,5229,5255-5266,6463,6471,6473-6474,6485,6503,6512
+  s_42dfddf59267cc::t_9f67a1c607b8b7 5233
+src/common/core/modsecurity/README.de.md
+  s_42dfddf59267cc::t_392497a7a9bca6 39-42
+src/common/core/modsecurity/README.md
+  s_42dfddf59267cc::t_392497a7a9bca6 39-42
+docs/de/advanced.md
+  s_4600783926e6d7::t_f5dae06267c3cb 861-992
+docs/de/api.md
+  s_4600783926e6d7::t_0cf1df97c8bff3 194-195,203
+docs/de/integrations.md
+  s_4600783926e6d7::t_08db33490c917c 2157,2215-2216,2223-2225,2240
+docs/es/advanced.md
+  s_4600783926e6d7::t_6060df58d3f695 861-992
+docs/es/api.md
+  s_4600783926e6d7::t_5695ef5d528d20 194-195,203
+docs/es/integrations.md
+  s_4600783926e6d7::t_23014dc30b59f9 1430,2158,2216-2217,2224-2226,2241,3799-3800
+docs/es/upgrading.md
+  s_4600783926e6d7::t_2d3b0d5e147a97 466
+docs/fr/advanced.md
+  s_4600783926e6d7::t_0335c00a791719 861-992
+docs/fr/api.md
+  s_4600783926e6d7::t_14c990d6d43a9e 194-195,203
+docs/fr/concepts.md
+  s_4600783926e6d7::t_b259edd7441da0 215
+docs/overrides/main.html
+  s_4600783926e6d7::t_ee4f22d77e0867 2-84,86,88,92,96,130,137-139
+docs/zh/advanced.md
+  s_4600783926e6d7::t_20a13d40cdc260 861-992
+docs/zh/api.md
+  s_4600783926e6d7::t_bbe99bc4a55671 194-195,203
+docs/zh/integrations.md
+  s_4600783926e6d7::t_9ea9d4b31f6d56 1551,2157,2215-2216,2223-2225,2240
+docs/zh/upgrading.md
+  s_4600783926e6d7::t_766245270b3ccc 465
+examples/bigbluebutton/README.md
+  s_4600783926e6d7::t_e7431f36e123cc 1,3,5,7-12,14
+examples/mattermost/README.md
+  s_4600783926e6d7::t_99c50cc2d59688 7
+mkdocs.yml
+  s_4600783926e6d7::t_47014da429a9f8 9
+mkdocs_print.yml
+  s_4600783926e6d7::t_b35db7045c0af4 9
+src/common/core/antibot/README.fr.md
+  s_4600783926e6d7::t_67460f3ae91b45 110,136,171,198,214,230,249,274
+src/common/core/antibot/README.zh.md
+  s_4600783926e6d7::t_13ba920a0a54f5 25
+src/common/core/blacklist/README.de.md
+  s_4600783926e6d7::t_9c4580b5da2807 63,69,104,107
+src/common/core/blacklist/README.es.md
+  s_4600783926e6d7::t_cdb36547a47160 63,69,104,107
+src/common/core/blacklist/README.fr.md
+  s_4600783926e6d7::t_44b6c593193652 63,69,104,107
+src/common/core/blacklist/README.md
+  s_4600783926e6d7::t_eb60725c052dfc 63,69,104,107
+src/common/core/blacklist/README.zh.md
+  s_4600783926e6d7::t_9573396a7d812f 63,69,104,107
+src/common/core/cors/README.de.md
+  s_4600783926e6d7::t_18af23ca8d4225 31-33
+src/common/core/cors/README.es.md
+  s_4600783926e6d7::t_338ee51900d7a5 31-33
+src/common/core/cors/README.fr.md
+  s_4600783926e6d7::t_04db0e722b163a 29-31
+src/common/core/cors/README.md
+  s_4600783926e6d7::t_fadb633130d86a 31-33
+src/common/core/cors/README.zh.md
+  s_4600783926e6d7::t_54bff28f6ea49a 31-33
+src/common/core/dnsbl/README.de.md
+  s_4600783926e6d7::t_e3c53eac7b8499 15,26,33,36
+src/common/core/dnsbl/README.es.md
+  s_4600783926e6d7::t_bf178209a9cc45 15,26,33,36
+src/common/core/dnsbl/README.fr.md
+  s_4600783926e6d7::t_73506db38b9488 15,26,33,36
+src/common/core/dnsbl/README.md
+  s_4600783926e6d7::t_210bb382533c23 15,26,33,36
+src/common/core/dnsbl/README.zh.md
+  s_4600783926e6d7::t_be6a7097da807c 15,26,33,36
+src/common/core/headers/README.de.md
+  s_4600783926e6d7::t_cc338b041e6037 42-44
+src/common/core/headers/README.es.md
+  s_4600783926e6d7::t_0b8c36f7012170 42-44
+src/common/core/headers/README.fr.md
+  s_4600783926e6d7::t_817390dc616a8b 42-44
+src/common/core/headers/README.md
+  s_4600783926e6d7::t_95e8df89e761d8 42-44
+src/common/core/headers/README.zh.md
+  s_4600783926e6d7::t_869fd40c87bfff 42-44
+src/common/core/whitelist/README.de.md
+  s_4600783926e6d7::t_2d9a92fe8cb9c2 10,18,20-21,32,50,59
+src/common/core/whitelist/README.es.md
+  s_4600783926e6d7::t_ad0cc0ba5e2576 10,18,20-21,32,50,59
+src/common/core/whitelist/README.fr.md
+  s_4600783926e6d7::t_a6b7b73e8bb1e4 10,18,20-21,32,50,59
+src/common/core/whitelist/README.md
+  s_4600783926e6d7::t_957b9bfd3d92cb 10,18,20-21,32,50,59
+src/common/core/whitelist/README.zh.md
+  s_4600783926e6d7::t_5db0d975085083 10,18,20-21,32,50,59
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "9e8fc54cca79a50dcfe7bb94a20fd6f461f55b40",
+  "prompts": {},
+  "sessions": {
+    "s_42dfddf59267cc": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0f7e8-b2f8-7d22-96d0-7ced682c4928",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_4600783926e6d7": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "577228b8-9e99-4afb-b5b7-0fab1e1a53d0",
+        "model": "unknown"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

@@ -1,0 +1,33 @@
+src/common/gen/Templator.py
+  s_ed5b319b24f5f5::t_b5f48fef51788f 471,490
+tests/unit/gen/test_staged_modsec_fragment_probes.py
+  s_ed5b319b24f5f5::t_7f51e674bbc980 165-167
+  s_de2ef45e1eda85::t_6a54e1cf5d689d 154,157-164
+  s_ed5b319b24f5f5::t_8425c3cbbeb947 5,18,139-153,155-156
+  s_ed5b319b24f5f5::t_be261ca0a29f72 4
+  s_ed5b319b24f5f5::t_ff62fb773acf41 168-170
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "40bbb824b6c1e541ddd9e1c2830f379d17fcab73",
+  "prompts": {},
+  "sessions": {
+    "s_de2ef45e1eda85": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "7998fc02-66d1-45db-87b6-193d7973a9cb",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_ed5b319b24f5f5": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "6e1c0106-6f22-447b-9264-17a8b913283b",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}
