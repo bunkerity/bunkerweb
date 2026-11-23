@@ -252,11 +252,10 @@ fi
 export CFLAGS="$CFLAGS -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=1"
 
 # Fedora 43 stable updates still ship 1.30.6 and Fedora 44/45 ship 1.30.7, behind the source-built target (1.30.8).
-# The Docker images (OS and OS_VERSION unset) run nginx:1.30.7-alpine-slim until 1.30.8-alpine-slim is published.
 # Dynamic modules must be compiled against the matching nginx source tree or nginx refuses to load them.
 case "$OS:$OS_VERSION" in
 	fedora:43) NGINX_SRC_DIR="/tmp/bunkerweb/deps/src/nginx-1.30.6" ;;
-	fedora:44 | fedora:45 | :) NGINX_SRC_DIR="/tmp/bunkerweb/deps/src/nginx-1.30.7" ;;
+	fedora:44 | fedora:45) NGINX_SRC_DIR="/tmp/bunkerweb/deps/src/nginx-1.30.7" ;;
 	*) NGINX_SRC_DIR="/tmp/bunkerweb/deps/src/nginx" ;;
 esac
 export CHANGE_DIR="$NGINX_SRC_DIR"
