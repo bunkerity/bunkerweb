@@ -1,0 +1,33 @@
+src/deps/install.sh
+  s_bd53e84dde356a::t_f229c1d5e0e212 39-40
+  s_2c820b29185449::t_621c46bd178aca 41-44,48
+tests/unit/linux/test_zlib_bundle_symbolic.py
+  s_bd53e84dde356a::t_9456d12433054e 27
+  s_bd53e84dde356a::t_ab7bede962976e 1-26,28-51
+CHANGELOG.md
+  s_bd53e84dde356a::t_397cf52d99cadc 11
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.6",
+  "base_commit_sha": "414265fe19471e88952ee87106308de731f94464",
+  "prompts": {},
+  "sessions": {
+    "s_2c820b29185449": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "09caf13f-ca47-45c7-9d0a-b44e94c07606",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_bd53e84dde356a": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "56492607-a664-4dac-bb5b-61fe159220ae",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}
