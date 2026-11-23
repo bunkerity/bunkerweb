@@ -1540,12 +1540,13 @@ class Database:
             # autoconf's included, and nothing writes those values back. Setting ids and names are unique across plugins, so
             # a kept row whose id or name an incoming setting claims is not kept: the incoming setting replaces it.
             kept_plugin_ids = {pid for pid in old_plugin_ids - new_plugin_ids if old_plugins[pid].method != "manual"}
-            incoming_ids = {sk[1] for sk in new_setting_keys}
-            incoming_names = {value["name"] for value in desired_settings.values()}
+            # Compared case-insensitively: MariaDB and MySQL default collations treat "Name" and "name" as the same key.
+            incoming_ids = {sk[1].casefold() for sk in new_setting_keys}
+            incoming_names = {value["name"].casefold() for value in desired_settings.values()}
             kept_setting_keys = {
                 sk
                 for sk in old_setting_keys - new_setting_keys
-                if sk[0] in kept_plugin_ids and sk[1] not in incoming_ids and old_settings[sk].name not in incoming_names
+                if sk[0] in kept_plugin_ids and sk[1].casefold() not in incoming_ids and old_settings[sk].name.casefold() not in incoming_names
             }
 
             for sk in new_setting_keys - old_setting_keys:

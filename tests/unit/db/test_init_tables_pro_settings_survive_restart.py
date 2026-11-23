@@ -91,6 +91,18 @@ def test_preserved_setting_whose_name_is_claimed_by_another_id_is_dropped(db):
         assert s.query(Settings).filter_by(id="PROPLUG_MS").count() == 0
 
 
+@pytest.mark.parametrize(("setting_id", "name"), [("OTHER_MS", "PROPLUG-MS"), ("proplug_ms", "other-ms")])
+def test_preserved_setting_claimed_in_another_case_is_dropped(db, setting_id, name):
+    # MariaDB and MySQL compare ids and names case-insensitively by default: such a claim collides there, so it counts everywhere.
+    _seed_absent_pro_plugin(db)
+
+    assert db.init_tables(_desired(_replacement_plugin(setting_id, name))) == (True, "")
+
+    with session(db) as s:
+        assert s.query(Settings).filter_by(id="PROPLUG_MS").count() == 0
+        assert [r.plugin_id for r in s.query(Settings).filter_by(id=setting_id)] == ["replacement"]
+
+
 _RICH_SETTING = {
     "id": "proplug-ms",
     "context": "multisite",
