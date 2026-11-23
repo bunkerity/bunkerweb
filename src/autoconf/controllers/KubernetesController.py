@@ -659,18 +659,40 @@ class KubernetesController(Controller):
                     self._logger.info(f"Starting Kubernetes watch for {watch_type}, attempt {attempt + 1}/{retries}")
                 ignored = False
                 for event in stream.stream(
-                    what, resource_version=stream.resource_version, timeout_seconds=WATCH_TIMEOUT_SECONDS, _request_timeout=API_REQUEST_TIMEOUT
+                    what,
+                    resource_version=stream.resource_version,
+                    timeout_seconds=WATCH_TIMEOUT_SECONDS,
+                    allow_watch_bookmarks=True,
+                    _request_timeout=API_REQUEST_TIMEOUT,
                 ):
                     # Gateway API wrappers lack the return-type metadata Watch needs to track versions.
                     raw_object = event.get("raw_object") if isinstance(event, dict) else None
                     metadata = raw_object.get("metadata") if isinstance(raw_object, dict) else None
                     if isinstance(metadata, dict) and metadata.get("resourceVersion"):
                         stream.resource_version = metadata["resourceVersion"]
+                    if isinstance(event, dict) and event.get("type") == "BOOKMARK":
+                        continue
                     yield event
             except ApiException as e:
-                if e.status == 410 and "Expired: too old resource version: " in e.reason:
+                if e.status == 410:
                     self._logger.debug(f"{e.reason} while watching {watch_type}, resetting watch stream")
                     stream.resource_version = None
+                    if callable(what):
+                        try:
+                            latest = what(watch=False, limit=1, _request_timeout=API_REQUEST_TIMEOUT)
+                            if hasattr(latest, "metadata") and getattr(latest.metadata, "resource_version", None):
+                                stream.resource_version = latest.metadata.resource_version
+                            elif isinstance(latest, dict) and latest.get("metadata", {}).get("resourceVersion"):
+                                stream.resource_version = latest["metadata"]["resourceVersion"]
+                        except Exception:
+                            try:
+                                latest = what(watch=False, _request_timeout=API_REQUEST_TIMEOUT)
+                                if hasattr(latest, "metadata") and getattr(latest.metadata, "resource_version", None):
+                                    stream.resource_version = latest.metadata.resource_version
+                                elif isinstance(latest, dict) and latest.get("metadata", {}).get("resourceVersion"):
+                                    stream.resource_version = latest["metadata"]["resourceVersion"]
+                            except Exception as refresh_err:
+                                self._logger.debug(f"Failed to refresh resourceVersion for {watch_type}: {refresh_err}")
                     ignored = True
                     attempt += 1
                     continue
