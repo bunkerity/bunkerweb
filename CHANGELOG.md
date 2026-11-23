@@ -1,6 +1,6 @@
 # Changelog
 
-## v1.6.19 - 2026/??/??
+## v1.6.19~rc1 - 2026/11/23
 
 - [SECURITY] `docker`: update the Alpine `mariadb-client` and `mariadb-common` (11.8.10-r0), `libxml2` (2.13.9-r3) and `py3-pip` (26.1.2-r1) packages, fixing 15 CVEs.
 - [SECURITY] `deps`: update NGINX to 1.30.8, fixing CVE-2026-132779 (excessive CPU usage in TLS 1.3), which only matters with `ssl_early_data on` in a custom configuration. The Docker images and Fedora stay on 1.30.7 (Fedora 43 on 1.30.6) until they ship 1.30.8. (Refs #4239)

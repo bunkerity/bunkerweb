@@ -286,26 +286,26 @@ class TestMetadata:
     def test_before_initialisation_the_defaults_are_reported(self, db):
         meta = db.get_metadata()
         assert meta["default"] is True and meta["is_initialized"] is False and meta["scheduler_first_start"] is True
-        assert db.get_version() == "1.6.18"
+        assert db.get_version() == "1.6.19~rc1"
         assert meta["database_version"] not in ("", None)
 
     def test_initialisation_stores_the_version_and_integration_and_a_second_call_updates_them(self, db):
-        assert db.initialize_db("1.6.18", "Docker") == ""
+        assert db.initialize_db("1.6.19~rc1", "Docker") == ""
         meta = db.get_metadata()
-        assert (meta["default"], meta["is_initialized"], meta["version"], meta["integration"]) == (False, True, "1.6.18", "Docker")
-        assert db.get_version() == "1.6.18"
+        assert (meta["default"], meta["is_initialized"], meta["version"], meta["integration"]) == (False, True, "1.6.19~rc1", "Docker")
+        assert db.get_version() == "1.6.19~rc1"
         assert db.initialize_db("1.7.0", "Linux") == ""
         assert (db.get_version(), db.get_metadata()["integration"]) == ("1.7.0", "Linux")
 
     def test_initialisation_is_refused_in_read_only_mode(self, db):
         db.readonly = True
-        assert db.initialize_db("1.6.18") == "The database is read-only, the changes will not be saved"
+        assert db.initialize_db("1.6.19~rc1") == "The database is read-only, the changes will not be saved"
         db.readonly = False
         assert db.get_metadata()["default"] is True
 
     def test_set_metadata_sets_known_keys_and_warns_about_unknown_ones(self, db, caplog):
         assert db.set_metadata({"is_pro": True}) == "The metadata are not set yet, try again"
-        db.initialize_db("1.6.18")
+        db.initialize_db("1.6.19~rc1")
         db.logger.propagate = True
         caplog.set_level(logging.WARNING, logger=db.logger.name)
         assert db.set_metadata({"is_pro": True, "pro_status": "active", "nonsense": 1}) == ""
@@ -319,7 +319,7 @@ class TestMetadata:
         assert db.checked_changes() == "The metadata are not set yet, try again"
 
     def test_checking_the_default_set_clears_the_change_flags_but_not_the_ui_reload_flag(self, db):
-        db.initialize_db("1.6.18")
+        db.initialize_db("1.6.19~rc1")
         with session(db) as s:
             row = s.get(Metadata, 1)
             row.custom_configs_changed = row.external_plugins_changed = row.pro_plugins_changed = row.instances_changed = row.reload_ui_plugins = True
@@ -329,7 +329,7 @@ class TestMetadata:
         assert meta["first_config_saved"] is True and meta["reload_ui_plugins"] is True
 
     def test_setting_the_default_set_raises_every_flag_including_the_ui_reload(self, db):
-        db.initialize_db("1.6.18")
+        db.initialize_db("1.6.19~rc1")
         assert db.checked_changes(value=True) == ""
         meta = db.get_metadata()
         assert (
@@ -342,7 +342,7 @@ class TestMetadata:
         assert meta["last_instances_change"] is not None and meta["last_pro_plugins_change"] is not None
 
     def test_only_the_named_flags_change(self, db):
-        db.initialize_db("1.6.18")
+        db.initialize_db("1.6.19~rc1")
         assert db.checked_changes(["instances", "ui_plugins"], value=True) == ""
         meta = db.get_metadata()
         assert meta["instances_changed"] is True and meta["reload_ui_plugins"] is True and meta["custom_configs_changed"] is False
@@ -362,7 +362,7 @@ class TestMetadata:
             assert s.get(Plugins, "general").config_changed is False
 
     def test_checking_changes_is_refused_in_read_only_mode(self, db):
-        db.initialize_db("1.6.18")
+        db.initialize_db("1.6.19~rc1")
         db.readonly = True
         assert db.checked_changes() == "The database is read-only, the changes will not be saved"
 
