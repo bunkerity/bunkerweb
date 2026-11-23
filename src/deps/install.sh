@@ -244,9 +244,10 @@ fi
 # Set CFALGS
 export CFLAGS="$CFLAGS -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=1"
 
-# Fedora ships 1.30.6. Its dynamic modules need that exact source version.
-case "$OS" in
-	fedora) NGINX_SRC_DIR="/tmp/bunkerweb/deps/src/nginx-1.30.6" ;;
+# Fedora 43 stable updates still ship 1.30.6, one patch release behind the source-built target (1.30.7).
+# Dynamic modules must be compiled against the matching nginx source tree or nginx refuses to load them.
+case "$OS:$OS_VERSION" in
+	fedora:43) NGINX_SRC_DIR="/tmp/bunkerweb/deps/src/nginx-1.30.6" ;;
 	*) NGINX_SRC_DIR="/tmp/bunkerweb/deps/src/nginx" ;;
 esac
 export CHANGE_DIR="$NGINX_SRC_DIR"

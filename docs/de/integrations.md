@@ -2442,9 +2442,12 @@ Installieren Sie unter Debian, Ubuntu und RHEL **NGINX 1.30.7 vor BunkerWeb**. V
         sudo dnf config-manager setopt updates-testing.enabled=1
         ```
 
-    Die BunkerWeb-Pakete für Fedora 43, 44 und 45 benötigen NGINX 1.30.6 aus den Fedora-Repositories, bis Fedora 1.30.7 bereitstellt.
+    Die BunkerWeb-Pakete für Fedora 44 und 45 benötigen NGINX 1.30.7 aus den Fedora-Repositories. Fedora 43 benötigt NGINX 1.30.6, bis Fedora 1.30.7 dafür bereitstellt.
 
     ```shell
+    # Fedora 44 und 45
+    sudo dnf install -y --allowerasing nginx-1.30.7
+    # Fedora 43
     sudo dnf install -y --allowerasing nginx-1.30.6
     ```
 

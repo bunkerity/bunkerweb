@@ -67,8 +67,8 @@ def nginx_trees(tree):
         header.parent.mkdir(parents=True)
         header.write_text(f'#define NGINX_VERSION "{version}"\n')
     (tree / "src/deps/install.sh").write_text(
-        'case "$OS" in\n'
-        '    fedora) NGINX_SRC_DIR="/tmp/bunkerweb/deps/src/nginx-1.30.6" ;;\n'
+        'case "$OS:$OS_VERSION" in\n'
+        '    fedora:43) NGINX_SRC_DIR="/tmp/bunkerweb/deps/src/nginx-1.30.6" ;;\n'
         '    *) NGINX_SRC_DIR="/tmp/bunkerweb/deps/src/nginx" ;;\n'
         "esac\n"
     )
@@ -80,20 +80,140 @@ def nginx_trees(tree):
     "os_name,os_version,pin,expected",
     [
         ("fedora", "43", "1.30.6", 0),
-        ("fedora", "44", "1.30.6", 0),
-        ("fedora", "45", "1.30.6", 0),
-        ("fedora", "45", "1.30.7", 1),
+        ("fedora", "43", "1.30.7", 1),
+        ("fedora", "44", "1.30.7", 0),
+        ("fedora", "44", "1.30.6", 1),
+        ("fedora", "45", "1.30.7", 0),
+        ("fedora", "45", "1.30.6", 1),
         ("debian", "", "1.30.6", 1),
         ("debian", "", "1.30.7", 0),
     ],
 )
 def test_linux_nginx_pin_matches_selected_tree(nginx_trees, os_name, os_version, pin, expected):
-    name = f"src/linux/Dockerfile-{os_name}"
-    (nginx_trees / name).write_text(f"ENV OS={os_name}\nENV OS_VERSION={os_version}\nENV NGINX_VERSION={pin}\n")
+    name = f"src/linux/Dockerfile-{os_name}" + (f"-{os_version}" if os_version else "")
+    version_line = f"ENV OS_VERSION={os_version}\n" if os_version else ""
+    (nginx_trees / name).write_text(f"ENV OS={os_name}\n{version_line}ENV NGINX_VERSION={pin}\n")
     result = check(nginx_trees)
     assert result.returncode == expected, result.stdout + result.stderr
     if expected:
         assert f"{name}: NGINX_VERSION={pin}" in result.stdout
+
+
+@pytest.mark.parametrize(
+    "os_name,os_version,pin,expected",
+    [("fedora", '"43"', "1.30.7", 1), ("fedora", '"43"', "1.30.6", 0), ("'fedora'", "'43'", "1.30.6", 0), ("fedora", "44", '"1.30.7"', 0)],
+)
+def test_linux_nginx_pin_accepts_quoted_env(nginx_trees, os_name, os_version, pin, expected):
+    release = os_version.strip("\"'")
+    (nginx_trees / f"src/linux/Dockerfile-fedora-{release}").write_text(f"ENV OS={os_name}\nENV OS_VERSION={os_version}\nENV NGINX_VERSION={pin}\n")
+    result = check(nginx_trees)
+    assert result.returncode == expected, result.stdout + result.stderr
+    if expected:
+        assert "selects nginx-1.30.6 (1.30.6)" in result.stdout
+
+
+@pytest.mark.parametrize("pin,expected", [("1.30.7", 1), ("1.30.6", 0)])
+@pytest.mark.parametrize(
+    "declaration",
+    [
+        "ENV OS_VERSION=43 OTHER=44",
+        "ENV OTHER=44 OS_VERSION=43",
+        "ENV A=1 \\\n    OS_VERSION=43",
+        "ENV A=1 \\\n    # skip this comment\n    OS_VERSION=43",
+        "env A=1 \\ \t\n\n    OS_VERSION=43",
+        "ENV OS_VER\\\nSION=43",
+    ],
+    ids=["key-first", "key-second", "continuation", "comment", "lowercase-blank-line", "split-key"],
+)
+def test_linux_nginx_pin_reads_logical_env(nginx_trees, declaration, pin, expected):
+    (nginx_trees / "src/linux/Dockerfile-fedora-43").write_text(f"ENV OS=fedora\n{declaration}\nENV NGINX_VERSION={pin}\n")
+    result = check(nginx_trees)
+    assert result.returncode == expected, result.stdout + result.stderr
+    if expected:
+        assert "selects nginx-1.30.6 (1.30.6)" in result.stdout
+
+
+def test_linux_nginx_pin_reads_all_keys_on_one_line(nginx_trees):
+    (nginx_trees / "src/linux/Dockerfile-fedora-43").write_text("ENV OS=fedora OS_VERSION=43 NGINX_VERSION=1.30.7\n")
+    result = check(nginx_trees)
+    assert result.returncode == 1, result.stdout + result.stderr
+    assert "selects nginx-1.30.6 (1.30.6)" in result.stdout
+
+
+def test_linux_nginx_pin_ignores_unrelated_env(nginx_trees):
+    (nginx_trees / "src/linux/Dockerfile-debian-bookworm").write_text(
+        "ENV RUSTUP_HOME=/rustup \\\n    CARGO_HOME=/cargo \\\n    PATH=/cargo/bin:$PATH\n"
+        'ENV OTHER="unclosed\n'
+        "ENV OTHER OS_VERSION=43\n"
+        "ENV OS=debian\nENV NGINX_VERSION=1.30.7\n"
+    )
+    result = check(nginx_trees)
+    assert result.returncode == 0, result.stdout + result.stderr
+
+
+def test_linux_nginx_pin_rejects_duplicate_env_across_stages(nginx_trees):
+    (nginx_trees / "src/linux/Dockerfile-fedora-43").write_text(
+        "FROM scratch AS builder\nENV OS=fedora\nENV OS_VERSION=43\nENV NGINX_VERSION=1.30.6\n" "FROM scratch\nENV A=1 OS_VERSION=43\n"
+    )
+    result = check(nginx_trees)
+    assert result.returncode == 1, result.stdout + result.stderr
+    assert "unsupported ENV declaration for OS_VERSION" in result.stderr
+
+
+def test_linux_nginx_pin_rejects_escape_directive(nginx_trees):
+    (nginx_trees / "src/linux/Dockerfile-fedora-43").write_text(
+        "# syntax=docker/dockerfile:1\n# EsCaPe = `\nFROM scratch\nENV OS=fedora\nENV A=1 `\n    OS_VERSION=43\nENV NGINX_VERSION=1.30.7\n"
+    )
+    result = check(nginx_trees)
+    assert result.returncode == 1, result.stdout + result.stderr
+    assert "unsupported ENV declaration" in result.stderr
+    assert "escape" in result.stderr.lower()
+
+
+@pytest.mark.parametrize(
+    "declaration",
+    [
+        "ENV OS_VERSION=43 44",
+        'ENV OS_VERSION="43 44"',
+        "ENV OS_VERSION 43",
+        'ENV OS_VERSION="43',
+        'ENV OTHER="unclosed \\\n    OS_VERSION=43',
+        "ENV OS_VERSION=${FEDORA_VERSION}",
+        "ENV OS_VERSION=",
+        'ENV OS_VERSION=""',
+    ],
+)
+def test_linux_nginx_pin_rejects_unsupported_env(nginx_trees, declaration):
+    (nginx_trees / "src/linux/Dockerfile-fedora-43").write_text(f"ENV OS=fedora\n{declaration}\nENV NGINX_VERSION=1.30.7\n")
+    result = check(nginx_trees)
+    assert result.returncode == 1, result.stdout + result.stderr
+    assert "src/linux/Dockerfile-fedora-43: unsupported ENV declaration for OS_VERSION" in result.stderr
+
+
+def test_fedora_43_pin_rejects_mismatch_with_whitespace_in_selector(nginx_trees):
+    installer = nginx_trees / "src/deps/install.sh"
+    installer.write_text(installer.read_text().replace("fedora:43) ", "fedora:43)  "))
+    (nginx_trees / "src/linux/Dockerfile-fedora-43").write_text("ENV OS=fedora\nENV OS_VERSION=43\nENV NGINX_VERSION=1.30.7\n")
+    result = check(nginx_trees)
+    assert result.returncode == 1, result.stdout + result.stderr
+    assert "selects nginx-1.30.6 (1.30.6)" in result.stdout
+
+
+@pytest.mark.parametrize(
+    "installer_text,diagnostic",
+    [
+        ("# No selector\n", "NGINX selector block is missing"),
+        ('case "$OS:$OS_VERSION" in\n    *) ;;\nesac\n', "NGINX_SRC_DIR is empty"),
+        ('case "$OS:$OS_VERSION" in\n    *) NGINX_SRC_DIR="/tmp/bunkerweb/deps/src/nginx-missing" ;;\nesac\n', "missing vendored NGINX tree"),
+    ],
+    ids=["missing-block", "empty-selection", "missing-tree"],
+)
+def test_linux_nginx_pin_rejects_invalid_selector(nginx_trees, installer_text, diagnostic):
+    (nginx_trees / "src/deps/install.sh").write_text(installer_text)
+    (nginx_trees / "src/linux/Dockerfile-fedora-43").write_text("ENV OS=fedora\nENV OS_VERSION=43\nENV NGINX_VERSION=1.30.6\n")
+    result = check(nginx_trees)
+    assert result.returncode == 1, result.stdout + result.stderr
+    assert diagnostic in result.stdout
 
 
 @pytest.mark.parametrize("name", PINS)

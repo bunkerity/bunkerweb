@@ -154,6 +154,11 @@ declare -A _NGINX_VERSION_BY_BW_FEDORA=(
     # 1.6.18: Fedora 43/44/45 build against the vendored 1.30.6 tree.
     [1.6.18]="1.30.6"
 )
+# Fedora 43 only: its stable updates repo still ships 1.30.6 while 44/45 moved to 1.30.7.
+# Drop this table once nginx 1.30.7 reaches Fedora 43 stable updates.
+declare -A _NGINX_VERSION_BY_BW_FEDORA_43=(
+    [1.6.19]="1.30.6"
+)
 ENABLE_WIZARD=""
 FORCE_INSTALL="no"
 FORCE_TYPE_CHANGE="no"
@@ -5698,6 +5703,9 @@ resolve_nginx_version() {
     local _base="${_NGINX_VERSION_BY_BW[$_bw]:-$DEFAULT_NGINX_VERSION}"
     if [ "$DISTRO_ID" = "fedora" ] && [ -n "${_NGINX_VERSION_BY_BW_FEDORA[$_bw]:-}" ]; then
         _base="${_NGINX_VERSION_BY_BW_FEDORA[$_bw]}"
+    fi
+    if [ "$DISTRO_ID" = "fedora" ] && [ "$DISTRO_VERSION" = "43" ] && [ -n "${_NGINX_VERSION_BY_BW_FEDORA_43[$_bw]:-}" ]; then
+        _base="${_NGINX_VERSION_BY_BW_FEDORA_43[$_bw]}"
     fi
     printf '%s' "$_base"
 }

@@ -88,26 +88,118 @@ fi
 # --- 3. NGINX: every Linux package must build its modules against the tree it runs. ---
 # nginx refuses a dynamic module compiled for another version at config load, so each
 # src/linux/Dockerfile-* NGINX_VERSION must match the vendored tree that src/deps/install.sh
-# selects for it: src/deps/src/nginx by default, src/deps/src/nginx-<version> on Fedora.
+# selects for it. Run the installer's case block with each Dockerfile's OS and OS_VERSION,
+# then map its build-time path to the corresponding vendored tree in the checkout.
 nginx_tree_version() {
     [ -f "$1/src/core/nginx.h" ] || return 0
     sed -n 's/^#define NGINX_VERSION[[:space:]]*"\([^"]*\)"/\1/p' "$1/src/core/nginx.h"
 }
+read_docker_env() {
+    python3 - "$1" "$2" <<'PY'
+import re
+import shlex
+import sys
+
+
+def logical_lines(dockerfile):
+    fragments = []
+    in_directives = True
+    for raw_line in dockerfile:
+        stripped = raw_line.strip()
+        if in_directives:
+            directive = re.match(r"#\s*(syntax|escape|check)\s*=", stripped, re.IGNORECASE)
+            if directive and directive[1].lower() == "escape":
+                raise ValueError("# escape= parser directives are unsupported")
+            in_directives = directive is not None
+        if not stripped or stripped.startswith("#"):
+            continue
+        line = raw_line.rstrip("\n") if fragments else raw_line.lstrip().rstrip("\n")
+        end = line.rstrip(" \t")
+        if (len(end) - len(end.rstrip("\\"))) % 2:
+            fragments.append(end[:-1])
+            continue
+        fragments.append(line)
+        yield "".join(fragments)
+        fragments.clear()
+    if fragments:
+        yield "".join(fragments)
+
+
+file, key = sys.argv[1:]
+mentions_key = re.compile(rf"\b{re.escape(key)}\b")
+value = None
+try:
+    with open(file, encoding="utf-8-sig") as dockerfile:
+        for line in logical_lines(dockerfile):
+            instruction = line.split(None, 1)
+            if len(instruction) != 2 or instruction[0].lower() != "env":
+                continue
+            args = instruction[1]
+            try:
+                tokens = shlex.split(args, posix=True)
+            except ValueError:
+                if mentions_key.search(args):
+                    raise
+                continue
+            if "=" not in tokens[0]:
+                if tokens[0] == key:
+                    raise ValueError("legacy ENV syntax")
+                continue
+            assignments = [token.partition("=") for token in tokens]
+            if any(not separator for _, separator, _ in assignments):
+                if mentions_key.search(args) or any(name == key for name, _, _ in assignments):
+                    raise ValueError("expected KEY=value for every assignment")
+                continue
+            for name, _, candidate in assignments:
+                if name != key:
+                    continue
+                if value is not None or not candidate or re.search(r"""[\s$"'\\]""", candidate):
+                    raise ValueError("expected one non-empty literal value")
+                value = candidate
+except (OSError, ValueError) as error:
+    sys.exit(f"  {file}: unsupported ENV declaration for {key} ({error})")
+
+if value is not None:
+    print(value)
+PY
+}
 # A tree without the vendored sources (the release unit test's fixture) has nothing to check.
 if [ -d src/deps/src ]; then
-    for df in src/linux/Dockerfile-*; do
-        [ -f "$df" ] || continue
-        pin="$(sed -n 's/^ENV NGINX_VERSION=//p' "$df")"
-        [ -z "$pin" ] && continue
-        os="$(sed -n 's/^ENV OS=//p' "$df")"
-        case_pattern='\*'
-        [ "$os" != fedora ] || case_pattern=fedora
-        tree="$(sed -nE '/^case "[$]OS" in$/,/^esac$/s|^[[:space:]]*'"$case_pattern"'\) NGINX_SRC_DIR="/tmp/bunkerweb/deps/src/(nginx(-[0-9.]+)?)" ;;$|\1|p' src/deps/install.sh)"
-        selected="$(nginx_tree_version "src/deps/src/$tree")"
-        if [ "$selected" != "$pin" ]; then
-            note "$df: NGINX_VERSION=$pin but src/deps/install.sh selects ${tree:-no tree} (${selected:-no version}) for OS=$os"
-        fi
-    done
+    if ! nginx_selector="$(sed -n '/^case "[$]OS:[$]OS_VERSION" in$/,/^esac$/p' src/deps/install.sh)" || [ -z "$nginx_selector" ]; then
+        note "src/deps/install.sh: NGINX selector block is missing or unreadable"
+    else
+        for df in src/linux/Dockerfile-*; do
+            [ -f "$df" ] || continue
+            if ! pin="$(read_docker_env "$df" NGINX_VERSION)" ||
+                ! os="$(read_docker_env "$df" OS)" ||
+                ! os_version="$(read_docker_env "$df" OS_VERSION)"; then
+                fail=1
+                continue
+            fi
+            [ -z "$pin" ] && continue
+            if ! source_dir="$(bash -euc '
+                OS=$1 OS_VERSION=$2 NGINX_SRC_DIR=
+                eval "$3"
+                printf "%s\n" "$NGINX_SRC_DIR"
+            ' bash "$os" "$os_version" "$nginx_selector")"; then
+                note "$df: could not evaluate the NGINX selector in src/deps/install.sh"
+                continue
+            fi
+            if [ -z "$source_dir" ]; then
+                note "$df: NGINX_SRC_DIR is empty for OS=$os OS_VERSION=$os_version"
+                continue
+            fi
+            tree="${source_dir#/tmp/bunkerweb/deps/src/}"
+            if [ "$tree" = "$source_dir" ] || [ ! -d "src/deps/src/$tree" ]; then
+                note "$df: src/deps/install.sh selects missing vendored NGINX tree '$source_dir'"
+                continue
+            fi
+            selected="$(nginx_tree_version "src/deps/src/$tree")"
+            if [ "$selected" != "$pin" ]; then
+                note "$df: NGINX_VERSION=$pin but src/deps/install.sh selects $tree (${selected:-no version}) for OS=$os OS_VERSION=$os_version"
+            fi
+        done
+    fi
 fi
 
 if [ "$fail" -ne 0 ]; then
