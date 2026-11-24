@@ -1,0 +1,19 @@
+CHANGELOG.md
+  s_b45ffb073ddbad::t_b47f3b38115ffb 69,77,82-83,86
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "c121211519b834e5adb9c0b39031fff9e5f92282",
+  "prompts": {},
+  "sessions": {
+    "s_b45ffb073ddbad": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "f4265c2d-353f-4f48-9041-f31c4907417b",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

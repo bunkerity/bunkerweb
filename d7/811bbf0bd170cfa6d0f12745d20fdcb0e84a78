@@ -1,0 +1,101 @@
+.github/AGENTS.md
+  s_7e432af609d5a7::t_678b829220ae60 5-8
+.github/CLAUDE.md
+  s_afef6a01f89ff5::t_21cd50e8f25298 1,3
+AGENTS.md
+  s_7e432af609d5a7::t_2e4a831f47a928 7-10,13
+CLAUDE.md
+  s_afef6a01f89ff5::t_6c0fc6f68fd628 1,3
+docs/AGENTS.md
+  s_7e432af609d5a7::t_77888057284cce 7
+docs/CLAUDE.md
+  s_afef6a01f89ff5::t_64096b15afc444 1,3
+examples/AGENTS.md
+  s_7e432af609d5a7::t_096cca464c84df 5-8
+examples/CLAUDE.md
+  s_afef6a01f89ff5::t_eba5a4dd6abcf6 1,3
+examples/mcp-stack/AGENTS.md
+  s_7e432af609d5a7::t_2df44a7c2d1418 7,20,77-80
+examples/mcp-stack/CLAUDE.md
+  s_afef6a01f89ff5::t_f5db01ce48e150 1,3
+misc/AGENTS.md
+  s_7e432af609d5a7::t_4c7c274986fba8 5-8
+misc/CLAUDE.md
+  s_afef6a01f89ff5::t_8107ff0b6b748c 1,3
+src/all-in-one/AGENTS.md
+  s_7e432af609d5a7::t_b2a2bbe78c4d3c 7
+src/all-in-one/CLAUDE.md
+  s_afef6a01f89ff5::t_0d829cbd9f40a2 1,3
+src/api/AGENTS.md
+  s_7e432af609d5a7::t_913af11691dc1d 7
+src/api/CLAUDE.md
+  s_afef6a01f89ff5::t_3a5fdcbb6b1596 1,3
+src/autoconf/AGENTS.md
+  s_7e432af609d5a7::t_7e9840d364d0fd 7
+src/autoconf/CLAUDE.md
+  s_afef6a01f89ff5::t_c7a40358b052eb 1,3
+src/bw/AGENTS.md
+  s_7e432af609d5a7::t_2f71a516a9dffc 7
+src/bw/CLAUDE.md
+  s_afef6a01f89ff5::t_0a3507f34d5cad 1,3
+src/common/AGENTS.md
+  s_7e432af609d5a7::t_f9fd9333e65fdc 7
+src/common/CLAUDE.md
+  s_afef6a01f89ff5::t_4374baad998db2 1,3
+src/common/core/AGENTS.md
+  s_7e432af609d5a7::t_5ae5ddf661617e 8
+src/common/core/CLAUDE.md
+  s_afef6a01f89ff5::t_9eb43f2eb4417a 1,3
+src/common/db/AGENTS.md
+  s_7e432af609d5a7::t_beb5d1cbe291a1 8
+src/common/db/CLAUDE.md
+  s_afef6a01f89ff5::t_bd36a636e7ca59 1,3
+src/deps/AGENTS.md
+  s_7e432af609d5a7::t_ecb095e89be4b4 5-8
+src/deps/CLAUDE.md
+  s_afef6a01f89ff5::t_b1649dce73befb 1,3
+src/linux/AGENTS.md
+  s_7e432af609d5a7::t_10b7daa24b058e 7
+src/linux/CLAUDE.md
+  s_afef6a01f89ff5::t_f6e305ba7a4a62 1,3
+src/scheduler/AGENTS.md
+  s_7e432af609d5a7::t_628f36f462d69b 7
+src/scheduler/CLAUDE.md
+  s_afef6a01f89ff5::t_4914958e6524b9 1,3
+src/ui/AGENTS.md
+  s_7e432af609d5a7::t_b43f65c8b04a49 7
+src/ui/CLAUDE.md
+  s_afef6a01f89ff5::t_02c86bc031366f 1,3
+src/worker/AGENTS.md
+  s_7e432af609d5a7::t_c428c7658f8a99 7
+src/worker/CLAUDE.md
+  s_afef6a01f89ff5::t_b4b3f0aecd0e29 1,3
+tests/AGENTS.md
+  s_7e432af609d5a7::t_b2463a71ce7dc2 7
+tests/CLAUDE.md
+  s_afef6a01f89ff5::t_d5452ec20daeab 1,3
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "d7811bbf0bd170cfa6d0f12745d20fdcb0e84a78",
+  "prompts": {},
+  "sessions": {
+    "s_7e432af609d5a7": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a159c7-32b0-7e31-812b-cc98b8ef5906",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_afef6a01f89ff5": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "926df218-ed72-4e5a-8331-9b179afb7c95",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

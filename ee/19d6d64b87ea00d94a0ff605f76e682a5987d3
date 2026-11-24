@@ -1,0 +1,2433 @@
+.github/ISSUE_TEMPLATE/bug_report.yml
+  s_5f95d9f26d8061::t_a67883658be52c 74
+.github/PULL_REQUEST_TEMPLATE.md
+  s_5f95d9f26d8061::t_e7cb34aff3eeba 1,3,5,7,9,11,13-19
+.github/RELEASING.md
+  s_5f95d9f26d8061::t_c20a772fd9f7e1 64-72,106-110
+.github/codecov.yml
+  s_5f95d9f26d8061::t_1c21e170ddf3c6 1-10
+.github/copilot-instructions.md
+  s_5f95d9f26d8061::t_bb0a8631a0b58e 20
+.github/scripts/release_artifacts.py
+  s_5f95d9f26d8061::t_c7b91c43105a9d 1,11,30-44,54-55,267-341,344-358,380,382-396
+.github/scripts/test_release_artifacts.py
+  s_5f95d9f26d8061::t_c28f83ee80c75e 6-7,11,98,100-101,208-209,211-218,221,336-579
+.github/workflows/dev.yml
+  s_5f95d9f26d8061::t_12d38328fbaf2a 111-140,142-200,204-213,263
+.github/workflows/integration-tests.yml
+  s_5f95d9f26d8061::t_a024ec8081b1a7 1,3-12,19-21,30-113,120-132,135,138-176,187-199,206-213,215-231,233-251,253-269,271-307,309-381,384-392,394-413
+.github/workflows/release.yml
+  s_5f95d9f26d8061::t_f09844211d9160 443,482-515,518,663-803,826-827
+.github/workflows/staging.yml
+  s_5f95d9f26d8061::t_4873bb483fe007 10,126-212,214,216-217,219-221,223-224,226,228-229,231-233,235-236,238,240-241,243-293,297-308,400-411
+.github/workflows/ui.yml
+  s_5f95d9f26d8061::t_cceee87e08fc9b 44,46,66-68,74-79,81-84,86-90,94-95,97,100-102,106-107,109
+.github/workflows/unit-tests.yml
+  s_5f95d9f26d8061::t_ee62bf0a3e15d4 1-26,31-33,36-38,43-44,46-47,49-54,56-112,114-118,120-127,129-148,150-156,158-161,163-168,170-190,192-204,206-219,221-278,280-286,288-293,295-300
+AGENTS.md
+  s_5f95d9f26d8061::t_7ae164d9c8ecf2 11,19,197-201,204
+CHANGELOG.md
+  s_5f95d9f26d8061::t_39e4ab0323c733 3-72,114
+README.md
+  s_5f95d9f26d8061::t_a516ee9eda96ed 2,22-23,90,110,115,117,144,179,185,218,221,229-234,264,273,304,314,328,333,344,349,356,361,368,373,376,378,383,388,390,394,398,400,408,427,444,468,484,507
+docs/Dockerfile
+  s_5f95d9f26d8061::t_47863cf2cd0af4 1
+docs/advanced.md
+  s_5f95d9f26d8061::t_0de15ae0d5488a 3,5,88,99,107,124,132,179,187,252,263,273,291,301,353,363,488-489,593,612,698,1135,1163,1174,1291,1331,1354,1397,1467,1713,1736,1751,1802,2032,2162,2206,2221,2315,2328,2343,2583,2682,2845,2858,2875,3047,3156,3167,3186,3229,3498,3503,4327,4331,4414
+docs/api.md
+  s_5f95d9f26d8061::t_9b37efd4240069 45,58,80,147
+docs/concepts.md
+  s_5f95d9f26d8061::t_c218257622d460 108,129
+docs/de/advanced.md
+  s_5f95d9f26d8061::t_fe4ded8053f9d3 3,5,88,99,107,124,132,179,187,252,263,273,291,301,353,363,488-489,591,610,696,1133,1161,1172,1289,1329,1352,1395,1465,1712,1735,1750,1801,2031,2161,2205,2220,2314,2327,2342,2582,2681,2844,2857,2874,3046,3155,3166,3185,3228,3497,3502,4326,4330,4413
+docs/de/api.md
+  s_5f95d9f26d8061::t_5592899865981d 45,58,80,147
+docs/de/concepts.md
+  s_5f95d9f26d8061::t_babbd6127ea479 108,129
+docs/de/features.md
+  s_5f95d9f26d8061::t_92aa619918fa85 1970,1987
+docs/de/integrations.md
+  s_5f95d9f26d8061::t_047572913f4a56 1271,1287,1365,1373,1460,1519,1541,1563,1602,1634,1640,1650,1660,1707,1728,1737,1755,1903,1916,1949,1962,2029-2030,2133,2200,2345,2350,2393,2398,2429,2434,2479,2484,2582,2596,2611,2626,2798,2834,2840,2913,3028,3198,3242,3524,3676,3857,3861,3869,3873,4495,4509,4538,4559,4711,4723
+docs/de/plugins.md
+  s_5f95d9f26d8061::t_b7d00a03d047e6 98,133,176,223,263,487,568
+docs/de/quickstart-guide.md
+  s_5f95d9f26d8061::t_4dd14882dd4915 21,52,70-71,112,125,142,212,228,246,269,367,397,415,444,670,692
+docs/de/upgrading.md
+  s_5f95d9f26d8061::t_6ee6013d05bd4e 22-23,107,110,113,116,172,183,192,231-232,309-310,313,316,319,322,402,428,900,903,906,909,944,970,1186-1260
+docs/de/web-ui.md
+  s_5f95d9f26d8061::t_5b012b6ba4813d 55,66,86
+docs/es/advanced.md
+  s_5f95d9f26d8061::t_b7236105a96269 3,5,88,99,107,124,132,179,187,252,263,273,291,301,353,363,488-489,591,610,696,1133,1161,1172,1289,1329,1352,1395,1465,1712,1735,1750,1801,2031,2161,2205,2220,2314,2327,2342,2582,2681,2844,2857,2874,3046,3155,3166,3185,3228,3497,3502,4326,4330,4413
+docs/es/api.md
+  s_5f95d9f26d8061::t_580f243b8210de 45,58,80,147
+docs/es/concepts.md
+  s_5f95d9f26d8061::t_e7159df6cb16d4 108,129
+docs/es/features.md
+  s_5f95d9f26d8061::t_be37c4d20af657 1993,2010
+docs/es/integrations.md
+  s_5f95d9f26d8061::t_2d9b3dd9704a70 1271,1287,1365,1373,1460,1520,1542,1564,1603,1635,1641,1651,1661,1708,1729,1738,1756,1904,1917,1950,1963,2030-2031,2134,2201,2346,2351,2394,2399,2430,2435,2480,2485,2584,2598,2613,2628,2800,2836,2842,2914,3029,3199,3243,3525,3677,3858,3862,3870,3874,4496,4510,4539,4560,4712,4724
+docs/es/plugins.md
+  s_5f95d9f26d8061::t_3c35555361b6ce 98,134,177,224,264,569
+docs/es/quickstart-guide.md
+  s_5f95d9f26d8061::t_20fdabb3989ecf 21,52,70-71,112,125,142,212,228,246,269,367,397,415,444,671,693
+docs/es/upgrading.md
+  s_5f95d9f26d8061::t_bf72b34a9cedf2 21-22,106,109,112,115,171,182,191,230-231,312-313,316,319,322,325,405,431,903,906,909,912,947,973,1189-1263
+docs/es/web-ui.md
+  s_5f95d9f26d8061::t_05df60235508a6 55,66,86
+docs/features.md
+  s_5f95d9f26d8061::t_1a473677b47e76 2005,2022
+docs/fr/advanced.md
+  s_5f95d9f26d8061::t_bbc42ea58f4f25 3,5,88,99,107,124,132,179,187,252,263,273,291,301,353,363,488-489,591,610,696,1133,1161,1172,1289,1329,1352,1395,1465,1711,1734,1749,1800,2030,2160,2204,2219,2313,2326,2341,2581,2680,2843,2856,2873,3045,3154,3165,3184,3227,3496,3501,4325,4329,4412
+docs/fr/api.md
+  s_5f95d9f26d8061::t_706da129b3c50d 45,58,80,147
+docs/fr/concepts.md
+  s_5f95d9f26d8061::t_b4d62422625725 108,129
+docs/fr/features.md
+  s_5f95d9f26d8061::t_4784d368048ad8 1930,1947
+docs/fr/integrations.md
+  s_5f95d9f26d8061::t_f1809be7e01909 1278,1293,1372,1380,1467,1527,1548,1570,1609,1643,1649,1659,1669,1716,1737,1746,1764,1912,1925,1958,1971,2038-2039,2139,2206,2348,2353,2396,2401,2432,2437,2482,2487,2586,2600,2615,2630,2802,2838,2844,2915,3030,3200,3244,3301,3527,3679,3860,3864,3872,3876,4497,4511,4540,4561,4713,4725
+docs/fr/plugins.md
+  s_5f95d9f26d8061::t_2118cfdd6e13d5 98,134,177,224,264,569
+docs/fr/quickstart-guide.md
+  s_5f95d9f26d8061::t_589e360fd93233 21,52,70-71,112,125,142,212,228,246,269,367,397,415,444,671,693
+docs/fr/upgrading.md
+  s_5f95d9f26d8061::t_3fe21670c99959 21-22,106,109,112,115,171,182,191,230-231,312-313,316,319,322,325,405,431,903,906,909,912,947,973,1189-1263
+docs/fr/web-ui.md
+  s_5f95d9f26d8061::t_63f76d9697a5dd 55,66,86
+docs/integrations.md
+  s_5f95d9f26d8061::t_e186f87f8b8cb1 1278,1305,1377,1385,1472,1532,1554,1576,1615,1649,1655,1665,1675,1722,1743,1752,1770,1918,1931,1964,1977,2044-2045,2152,2264,2460,2465,2508,2513,2544,2549,2594,2599,2698,2712,2727,2742,2913,2949,2955,3035,3152,3322,3366,3648,3800,3981,3985,3993,3997,4618,4632,4661,4682,4834,4846
+docs/plugins.md
+  s_5f95d9f26d8061::t_c671fda779d76d 98,134,177,224,264,572
+docs/quickstart-guide.md
+  s_5f95d9f26d8061::t_0e679b7aa59669 21,52,70-71,112,125,142,212,228,246,269,367,397,415,444,671,693
+docs/upgrading.md
+  s_5f95d9f26d8061::t_14b58cdd03c4f6 21-22,105,108,111,114,170,181,190,229-230,311-312,315,318,321,324,404,430,903,906,909,912,947,973,1189-1263
+docs/web-ui.md
+  s_5f95d9f26d8061::t_7e42b488d8ddc4 50,65,89
+docs/zh/advanced.md
+  s_5f95d9f26d8061::t_758c8c6dc41744 3,5,88,99,107,124,132,179,187,252,263,273,291,301,353,363,488-489,591,610,696,1133,1161,1172,1289,1329,1352,1395,1465,1710,1733,1748,1799,2029,2159,2203,2218,2312,2325,2340,2580,2679,2841,2854,2871,3043,3152,3163,3182,3225,3494,3499,4323,4327,4410
+docs/zh/api.md
+  s_5f95d9f26d8061::t_219d8311a34005 45,58,80,147
+docs/zh/concepts.md
+  s_5f95d9f26d8061::t_7f7abfeb9cfa30 108,129
+docs/zh/features.md
+  s_5f95d9f26d8061::t_f9633a3a668b9d 2003,2020
+docs/zh/integrations.md
+  s_5f95d9f26d8061::t_f1f81108c8eb29 1271,1287,1365,1373,1460,1520,1542,1564,1603,1637,1643,1653,1663,1707,1728,1737,1755,1903,1916,1949,1962,2029-2030,2133,2200,2345,2350,2393,2398,2429,2434,2479,2484,2583,2597,2612,2627,2799,2835,2841,2910,3025,3195,3239,3521,3673,3854,3858,3866,3870,4492,4506,4535,4556,4705,4717
+docs/zh/plugins.md
+  s_5f95d9f26d8061::t_77573d95ccaf34 98,134,177,224,264,569
+docs/zh/quickstart-guide.md
+  s_5f95d9f26d8061::t_6fbe90e7f7d0d9 21,52,70-71,112,125,142,212,228,246,269,367,397,415,444,671,693
+docs/zh/upgrading.md
+  s_5f95d9f26d8061::t_dbbfbe5e0be691 21-22,105,108,111,114,170,181,190,229-230,311-312,315,318,321,324,404,430,902,905,908,911,946,972,1188-1262
+docs/zh/web-ui.md
+  s_5f95d9f26d8061::t_433a68fdd48b83 55,66,86
+examples/authelia/docker-compose.yml
+  s_5f95d9f26d8061::t_4ad0d0568cdf68 3,17
+examples/authentik/docker-compose.yml
+  s_5f95d9f26d8061::t_066f113373ee98 3,17
+examples/behind-reverse-proxy/docker-compose.yml
+  s_5f95d9f26d8061::t_732a4d50be23a8 9,20
+examples/bigbluebutton/docker-compose.yml
+  s_5f95d9f26d8061::t_9754c0bbeceeec 28,43
+examples/cors/docker-compose.yml
+  s_5f95d9f26d8061::t_da84955dc9bb32 3,25
+examples/dns-cloudflare/docker-compose.yml
+  s_5f95d9f26d8061::t_827d59c36fb848 3,17
+examples/dns-desec/docker-compose.yml
+  s_5f95d9f26d8061::t_e51ab2b649a8d4 3,17
+examples/dns-digitalocean/docker-compose.yml
+  s_5f95d9f26d8061::t_c6d73dee92acbc 3,17
+examples/dns-dnsimple/docker-compose.yml
+  s_5f95d9f26d8061::t_23516dd586558f 3,17
+examples/dns-dnsmadeeasy/docker-compose.yml
+  s_5f95d9f26d8061::t_3cdc7fe83b141f 3,17
+examples/dns-gehirn/docker-compose.yml
+  s_5f95d9f26d8061::t_e48fc786dfe7df 3,17
+examples/dns-google/docker-compose.yml
+  s_5f95d9f26d8061::t_68a9b1b3218e41 3,17
+examples/dns-linode/docker-compose.yml
+  s_5f95d9f26d8061::t_ba4cd78b604af3 3,17
+examples/dns-luadns/docker-compose.yml
+  s_5f95d9f26d8061::t_dcf9923c23ee46 3,17
+examples/dns-nsone/docker-compose.yml
+  s_5f95d9f26d8061::t_153a8e25af293d 3,17
+examples/dns-ovh/docker-compose.yml
+  s_5f95d9f26d8061::t_99824ff4fff21d 3,17
+examples/dns-rfc2136/docker-compose.yml
+  s_5f95d9f26d8061::t_33352140d528b6 3,17
+examples/dns-route53/docker-compose.yml
+  s_5f95d9f26d8061::t_3935cbf12282fe 3,17
+examples/dns-sakuracloud/docker-compose.yml
+  s_5f95d9f26d8061::t_27f4125f8f8a8f 3,17
+examples/dns-scaleway/docker-compose.yml
+  s_5f95d9f26d8061::t_39d0be70e3ad63 3,17
+examples/docker-configs/docker-compose.yml
+  s_5f95d9f26d8061::t_34d2260dd33373 3,17
+examples/drupal/docker-compose.yml
+  s_5f95d9f26d8061::t_ac592bdd975189 3,17
+examples/ghost/docker-compose.yml
+  s_5f95d9f26d8061::t_fe0a835ce54d59 3,17
+examples/gogs/docker-compose.yml
+  s_5f95d9f26d8061::t_43cef2ed08c6e8 3,17
+examples/hardened/docker-compose.yml
+  s_5f95d9f26d8061::t_9357804f9e7624 3,36
+examples/jellyfin/docker-compose.yml
+  s_5f95d9f26d8061::t_cb93f1a024d0a0 3,17
+examples/joomla/docker-compose.yml
+  s_5f95d9f26d8061::t_627bf72b4ce0e7 3,17
+examples/load-balancer/docker-compose.yml
+  s_5f95d9f26d8061::t_e3130aae1fa17c 3,17
+examples/magento/docker-compose.yml
+  s_5f95d9f26d8061::t_dcad381c6f1cb9 3,17
+examples/mattermost/docker-compose.yml
+  s_5f95d9f26d8061::t_e73445b346f735 3,17
+examples/mcp-stack/docker-compose.yml
+  s_5f95d9f26d8061::t_2b4ddf21054e30 12,25,47
+examples/mongo-express/docker-compose.yml
+  s_5f95d9f26d8061::t_1daa518ff395a5 3,17
+examples/moodle/docker-compose.yml
+  s_5f95d9f26d8061::t_b0abfc286a02ef 3,17
+examples/nextcloud/docker-compose.yml
+  s_5f95d9f26d8061::t_ca09c079cee42a 3,17
+examples/passbolt/docker-compose.yml
+  s_5f95d9f26d8061::t_12142046ff1377 3,17
+examples/php-cookie-flags/docker-compose.yml
+  s_5f95d9f26d8061::t_5780f3a51edf8b 3,25
+examples/php-multisite/docker-compose.yml
+  s_5f95d9f26d8061::t_01dc655b12f111 3,26
+examples/php-singlesite/docker-compose.yml
+  s_5f95d9f26d8061::t_c0a601a7d02a0c 3,25
+examples/prestashop/docker-compose.yml
+  s_5f95d9f26d8061::t_3f11ca5a5ac7b5 3,17
+examples/proxy-protocol/docker-compose.yml
+  s_5f95d9f26d8061::t_17da0459ad7097 11,22
+examples/radarr/docker-compose.yml
+  s_5f95d9f26d8061::t_0803c704703872 3,17
+examples/redmine/docker-compose.yml
+  s_5f95d9f26d8061::t_94ecf9d8bf7533 3,17
+examples/reverse-proxy-multisite/docker-compose.yml
+  s_5f95d9f26d8061::t_2129d4792cd470 3,17
+examples/reverse-proxy-singlesite/docker-compose.yml
+  s_5f95d9f26d8061::t_369ae0054fab70 3,17
+examples/reverse-proxy-websocket/docker-compose.yml
+  s_5f95d9f26d8061::t_e5f107b7a09b92 3,17
+examples/stream-multisite/docker-compose.yml
+  s_5f95d9f26d8061::t_cd4584d4cf3089 3,19
+examples/syslog/docker-compose.yml
+  s_5f95d9f26d8061::t_03989a075a7a92 3,24
+examples/tomcat/docker-compose.yml
+  s_5f95d9f26d8061::t_f724940f9b606a 3,17
+examples/tor-hidden-service/docker-compose.yml
+  s_5f95d9f26d8061::t_42991b906593ad 13,24
+examples/web-ui/docker-compose.wizard.yml
+  s_5f95d9f26d8061::t_bcc4fc7258651c 6,20,43
+examples/web-ui/docker-compose.yml
+  s_5f95d9f26d8061::t_13da115fe797b2 6,20,46
+examples/wordpress/docker-compose.yml
+  s_5f95d9f26d8061::t_a28380a38a3b36 3,17
+misc/install-bunkerweb.sh
+  s_5f95d9f26d8061::t_74746ff4691e5e 117
+misc/integrations/all-in-one.mariadb.ui.yml
+  s_5f95d9f26d8061::t_f7b322873d0f68 3
+misc/integrations/all-in-one.mariadb.yml
+  s_5f95d9f26d8061::t_c75bf134ce731e 3
+misc/integrations/all-in-one.mysql.ui.yml
+  s_5f95d9f26d8061::t_37226d807fe868 3
+misc/integrations/all-in-one.mysql.yml
+  s_5f95d9f26d8061::t_bdd1cbd21fd35b 3
+misc/integrations/all-in-one.oracle.ui.yml
+  s_5f95d9f26d8061::t_00537e094bc705 3
+misc/integrations/all-in-one.oracle.yml
+  s_5f95d9f26d8061::t_78d03fdee1ef6d 3
+misc/integrations/all-in-one.postgres.ui.yml
+  s_5f95d9f26d8061::t_ec7a953d5b45b9 3
+misc/integrations/all-in-one.postgres.yml
+  s_5f95d9f26d8061::t_97dd56fb5dd147 3
+misc/integrations/all-in-one.yml
+  s_5f95d9f26d8061::t_2e2617e9e23e5b 3
+misc/integrations/autoconf.mariadb.ui.yml
+  s_5f95d9f26d8061::t_361c156f8bd793 7,21,34,50
+misc/integrations/autoconf.mariadb.yml
+  s_5f95d9f26d8061::t_a8f37d8a5a0d88 7,21,34
+misc/integrations/autoconf.mysql.ui.yml
+  s_5f95d9f26d8061::t_9a4b6c24acf7f8 7,21,34,50
+misc/integrations/autoconf.mysql.yml
+  s_5f95d9f26d8061::t_cfa4dd26dc6b3e 7,21,34
+misc/integrations/autoconf.oracle.ui.yml
+  s_5f95d9f26d8061::t_b76dc7eeeb5208 7,21,34,50
+misc/integrations/autoconf.oracle.yml
+  s_5f95d9f26d8061::t_9a3995527b8cfe 7,21,34
+misc/integrations/autoconf.postgres.ui.yml
+  s_5f95d9f26d8061::t_e5ce471d0e7bdd 7,21,34,50
+misc/integrations/autoconf.postgres.yml
+  s_5f95d9f26d8061::t_d8fa118099b94e 7,21,34
+misc/integrations/docker.mariadb.ui.yml
+  s_5f95d9f26d8061::t_a0fb95ba47b775 6,20,44
+misc/integrations/docker.mariadb.yml
+  s_5f95d9f26d8061::t_c26e7a4ffa261f 7,20
+misc/integrations/docker.mysql.ui.yml
+  s_5f95d9f26d8061::t_ce4ee1fdbd5234 6,20,44
+misc/integrations/docker.mysql.yml
+  s_5f95d9f26d8061::t_1253138ccbff32 7,20
+misc/integrations/docker.oracle.ui.yml
+  s_5f95d9f26d8061::t_21bc6e78ee43f6 6,20,44
+misc/integrations/docker.oracle.yml
+  s_5f95d9f26d8061::t_390219dc4a39b3 7,20
+misc/integrations/docker.postgres.ui.yml
+  s_5f95d9f26d8061::t_abfe73dca332a6 6,19,43
+misc/integrations/docker.postgres.yml
+  s_5f95d9f26d8061::t_58410511a22221 7,20
+misc/integrations/docker.yml
+  s_5f95d9f26d8061::t_686eb1679d78fa 6,19
+misc/integrations/k8s.mariadb.ui.yml
+  s_5f95d9f26d8061::t_6a46dedc075b28 117,177,214,325
+misc/integrations/k8s.mariadb.yml
+  s_5f95d9f26d8061::t_e563e67b842618 127,187,224
+misc/integrations/k8s.mysql.ui.yml
+  s_5f95d9f26d8061::t_7d644a3d867021 117,177,214,325
+misc/integrations/k8s.mysql.yml
+  s_5f95d9f26d8061::t_171c7b4eaf643c 127,187,224
+misc/integrations/k8s.oracle.ui.yml
+  s_5f95d9f26d8061::t_c07f0bf4c9acb2 117,177,214,321
+misc/integrations/k8s.oracle.yml
+  s_5f95d9f26d8061::t_8e717396bc63da 127,187,224
+misc/integrations/k8s.postgres.ui.yml
+  s_5f95d9f26d8061::t_8dd36537975f9f 117,177,214,321
+misc/integrations/k8s.postgres.yml
+  s_5f95d9f26d8061::t_b6a108c0ab0f89 127,187,224
+misc/migration/Dockerfile
+  s_5f95d9f26d8061::t_03f0bb6a732465 1
+publiccode.yml
+  s_5f95d9f26d8061::t_fa540e5eaf05ac 4-6
+pyproject.toml
+  s_5f95d9f26d8061::t_b46f58fe78ff9c 4,20-47
+src/VERSION
+  s_5f95d9f26d8061::t_d3232e82e7b7f5 1
+src/all-in-one/Dockerfile
+  s_5f95d9f26d8061::t_09cf5ea8a6a5e7 1,168,174,177,245
+src/all-in-one/logstream.sh
+  s_5f95d9f26d8061::t_30181f14d10ebe 37,39,41
+src/all-in-one/service-log-wrapper.sh
+  s_5f95d9f26d8061::t_81d78326cf5ca0 32
+src/api/Dockerfile
+  s_5f95d9f26d8061::t_c3efb2fe4ed835 1,31,42,47,65
+src/api/app/models/models.py
+  s_5f95d9f26d8061::t_b2a53e9c786c1e 41-43
+src/api/app/rate_limit.py
+  s_5f95d9f26d8061::t_76f24834f5a81c 545-548,560
+src/api/app/routers/cache.py
+  s_5f95d9f26d8061::t_f802e08e68e1c9 3,72-74,76,110
+src/api/app/utils.py
+  s_5f95d9f26d8061::t_0fb79d28b2005c 118-124
+src/api/app/yaml_base_settings.py
+  s_5f95d9f26d8061::t_a500997f2dfabe 119-121
+src/autoconf/Config.py
+  s_5f95d9f26d8061::t_f82578eeedf719 124-129,133,137,265-270,272
+src/autoconf/Dockerfile
+  s_5f95d9f26d8061::t_38fd7c2ecc16d1 1,35,41,46,69
+src/autoconf/controllers/IngressController.py
+  s_5f95d9f26d8061::t_868c5f82381a0b 151,155-159
+src/autoconf/controllers/KubernetesController.py
+  s_5f95d9f26d8061::t_06f089e691b1a2 69,914-915,921-932,956-957,960-961
+src/autoconf/controllers/SwarmController.py
+  s_5f95d9f26d8061::t_8a9d70082f7550 108-110
+src/bw/Dockerfile
+  s_5f95d9f26d8061::t_f894213bf0f6d5 1,72,78,81,111
+src/bw/lua/bunkerweb/api.lua
+  s_5f95d9f26d8061::t_d4584b5039b9cd 51,125-145,149-162,166,617-619
+src/bw/lua/bunkerweb/utils.lua
+  s_5f95d9f26d8061::t_ed0d295d8cca59 61-72,886,895-909,915-918,941-942,1570-1578,1583,1590-1592,1594-1596,1599-1607,1612-1615,1633-1643
+src/common/confs/default-server-http.conf
+  s_5f95d9f26d8061::t_8d11f45b33ffa6 20,70,79
+src/common/confs/http.conf
+  s_5f95d9f26d8061::t_91180f0a63956c 89-93
+src/common/confs/server-http/server.conf
+  s_5f95d9f26d8061::t_8afc023cc313f9 23
+src/common/confs/server-stream/preread-stream-lua.conf
+  s_5f95d9f26d8061::t_9dd12c971a55df 24,51-52,70,72-77,79-80
+src/common/confs/server-stream/server-stream.conf
+  s_5f95d9f26d8061::t_0f91577a69f32b 26-28,30
+src/common/core/antibot/antibot.lua
+  s_5f95d9f26d8061::t_58922751a2d6b6 1311-1312,1314-1315,1320
+src/common/core/antibot/files/capjs_frame.html
+  s_5f95d9f26d8061::t_f4f360156693a6 13-15
+src/common/core/antibot/plugin.json
+  s_5f95d9f26d8061::t_62caf33a463df6 43,52,97,124,162,459
+src/common/core/authbasic/plugin.json
+  s_5f95d9f26d8061::t_d8dd2c1a827914 32,42,52
+src/common/core/authbasic/ui/actions.py
+  s_5f95d9f26d8061::t_ea4f85afff1fea 27,31
+src/common/core/backup/backup.py
+  s_5f95d9f26d8061::t_eca6c2cf529912 307-309
+src/common/core/badbehavior/badbehavior.lua
+  s_5f95d9f26d8061::t_e4a78ae6cb2a22 425-430,539-561,724-743
+src/common/core/badbehavior/plugin.json
+  s_5f95d9f26d8061::t_0f95763425419f 23,103,112,121
+src/common/core/badbehavior/ui/actions.py
+  s_5f95d9f26d8061::t_c59422e9dcddd0 27,31
+src/common/core/blacklist/plugin.json
+  s_5f95d9f26d8061::t_25f56879df6cce 54,81,128,146,193,202,211,220,229,238,247,256,265,274
+src/common/core/brotli/plugin.json
+  s_5f95d9f26d8061::t_0106bb5807f4d8 23
+src/common/core/bunkernet/bunkernet.lua
+  s_5f95d9f26d8061::t_1327c9dab8e3d5 207-211
+src/common/core/bunkernet/plugin.json
+  s_5f95d9f26d8061::t_3102694f79c341 23
+src/common/core/clientcache/plugin.json
+  s_5f95d9f26d8061::t_6c0d70227ee8d6 23
+src/common/core/cors/README.de.md
+  s_5f95d9f26d8061::t_d7438b8a70e217 29
+src/common/core/cors/README.es.md
+  s_5f95d9f26d8061::t_815348aec4b30e 29
+src/common/core/cors/README.fr.md
+  s_5f95d9f26d8061::t_8e6125627fe78d 27
+src/common/core/cors/README.md
+  s_5f95d9f26d8061::t_c07266069c7cc6 29
+src/common/core/cors/README.zh.md
+  s_5f95d9f26d8061::t_90126a6c98e52b 29
+src/common/core/cors/cors.lua
+  s_5f95d9f26d8061::t_0993402d81f2dd 14-33,77,86-91,94,117
+src/common/core/cors/plugin.json
+  s_5f95d9f26d8061::t_f0dac72232738b 32,42,61,101
+src/common/core/country/country.lua
+  s_5f95d9f26d8061::t_74e30b91f929a0 213-216,221
+src/common/core/country/plugin.json
+  s_5f95d9f26d8061::t_64702b3e7b60c0 14,380
+src/common/core/crowdsec/README.de.md
+  s_5f95d9f26d8061::t_ce49daba623611 175,192
+src/common/core/crowdsec/README.es.md
+  s_5f95d9f26d8061::t_b5578f6691c867 171,188
+src/common/core/crowdsec/README.fr.md
+  s_5f95d9f26d8061::t_8a8613cc6caf33 175,192
+src/common/core/crowdsec/README.md
+  s_5f95d9f26d8061::t_21c97d687e9cbb 177,194
+src/common/core/crowdsec/README.zh.md
+  s_5f95d9f26d8061::t_309e8aed8df2fd 175,192
+src/common/core/crowdsec/plugin.json
+  s_5f95d9f26d8061::t_406076a480ca09 78,115,124,161,170,179
+src/common/core/customcert/customcert.lua
+  s_5f95d9f26d8061::t_32015879699153 189-194,196,198-201,203,205-212
+src/common/core/db/plugin.json
+  s_5f95d9f26d8061::t_24bd1c59306d72 51,78,87,115,151
+src/common/core/dnsbl/dnsbl.lua
+  s_5f95d9f26d8061::t_88fbddf3df752d 260,285-286,298,311,324-328
+src/common/core/dnsbl/plugin.json
+  s_5f95d9f26d8061::t_66318c44be6813 32,61
+src/common/core/errors/plugin.json
+  s_5f95d9f26d8061::t_cb0389c46858d5 14,23
+src/common/core/greylist/plugin.json
+  s_5f95d9f26d8061::t_59663d811f11bb 23,50,97,106,115,124,133
+src/common/core/grpc/plugin.json
+  s_5f95d9f26d8061::t_0ccf7c7a7b67c6 52,73,390,400
+src/common/core/gzip/confs/server-http/gzip.conf
+  s_5f95d9f26d8061::t_9fbf38694bb90f 6
+src/common/core/gzip/plugin.json
+  s_5f95d9f26d8061::t_16d86e8009107c 23
+src/common/core/headers/plugin.json
+  s_5f95d9f26d8061::t_6ca05697d11ca7 24,33,97
+src/common/core/jobs/jobs/update-check.py
+  s_5f95d9f26d8061::t_866fd1d246e06e 89-94,97,145-146
+src/common/core/letsencrypt/jobs/certbot-new.py
+  s_5f95d9f26d8061::t_9749d2aee6defa 372,835-836,1218-1221
+src/common/core/letsencrypt/letsencrypt.lua
+  s_5f95d9f26d8061::t_1c0fe7a1dd8c9b 523-528
+src/common/core/letsencrypt/plugin.json
+  s_5f95d9f26d8061::t_58683d2f6e3eb3 32,69,78,87,148,157
+src/common/core/letsencrypt/ui/actions.py
+  s_5f95d9f26d8061::t_6dff6fb32e885a 171,187
+src/common/core/letsencrypt/ui/blueprints/letsencrypt.py
+  s_5f95d9f26d8061::t_d9382752b566b4 376,378
+src/common/core/metrics/metrics.lua
+  s_5f95d9f26d8061::t_929a72e0568b20 835-838,847,853-854,871-891,894-896,1129,1335,1358
+src/common/core/metrics/plugin.json
+  s_5f95d9f26d8061::t_1f1aa96f97be83 59
+src/common/core/misc/README.de.md
+  s_5f95d9f26d8061::t_e806c5eb0d0ac7 89
+src/common/core/misc/README.es.md
+  s_5f95d9f26d8061::t_57e7191aa8f255 89
+src/common/core/misc/README.fr.md
+  s_5f95d9f26d8061::t_f6bba31859632f 89
+src/common/core/misc/README.md
+  s_5f95d9f26d8061::t_26706f959044a8 89
+src/common/core/misc/README.zh.md
+  s_5f95d9f26d8061::t_251e5b1d66ad9c 89
+src/common/core/misc/misc.lua
+  s_5f95d9f26d8061::t_8beeaea22aff3c 26-34
+src/common/core/misc/plugin.json
+  s_5f95d9f26d8061::t_66f194399cc54d 32,159
+src/common/core/modsecurity/confs/http/modsecurity-rules-global-crs.conf.modsec
+  s_5f95d9f26d8061::t_735c41c72f74bb 2-3,120-148,178-199
+src/common/core/realip/confs/default-server-http/real-ip.conf
+  s_5f95d9f26d8061::t_6552d81f9ea8b2 21
+src/common/core/realip/confs/server-http/real-ip.conf
+  s_5f95d9f26d8061::t_6cfb383cc72a2b 35
+src/common/core/realip/plugin.json
+  s_5f95d9f26d8061::t_8e40133aa3de37 32,41,59
+src/common/core/redirect/plugin.json
+  s_5f95d9f26d8061::t_48c663576d0e8e 24
+src/common/core/redis/plugin.json
+  s_5f95d9f26d8061::t_d31cc283653baf 68,140
+src/common/core/redis/redis.lua
+  s_5f95d9f26d8061::t_2aa6cb4b1b20e6 114
+src/common/core/reverseproxy/confs/server-http/reverse-proxy.conf
+  s_5f95d9f26d8061::t_a28a8965450823 70,73
+src/common/core/reverseproxy/confs/server-stream/reverse-proxy.conf
+  s_5f95d9f26d8061::t_81dce86163696c 29-34
+src/common/core/reverseproxy/plugin.json
+  s_5f95d9f26d8061::t_277167c6f1feb8 103,124,370,380,467
+src/common/core/reversescan/plugin.json
+  s_5f95d9f26d8061::t_09b679dcd947e2 23,32
+src/common/core/robotstxt/plugin.json
+  s_5f95d9f26d8061::t_e2894329f55101 44
+src/common/core/robotstxt/robotstxt.lua
+  s_5f95d9f26d8061::t_ddba86515a5c4d 58-59,64-65
+src/common/core/selfsigned/plugin.json
+  s_5f95d9f26d8061::t_b29c6ff0144472 33
+src/common/core/selfsigned/selfsigned.lua
+  s_5f95d9f26d8061::t_679278ae05073c 70-75,77,79-82,84,86-93
+src/common/core/sessions/plugin.json
+  s_5f95d9f26d8061::t_fa926d31f1030b 41,50,59
+src/common/core/ssl/plugin.json
+  s_5f95d9f26d8061::t_b5c55f0c372e6d 78
+src/common/core/whitelist/plugin.json
+  s_5f95d9f26d8061::t_2a3424e02fe293 23,50,68,97,106,115,124,133
+src/common/core/whitelist/whitelist.lua
+  s_5f95d9f26d8061::t_d5ff3aaacd60af 113-118
+src/common/db/Database.py
+  s_5f95d9f26d8061::t_b517a89219c74e 906,940,1549-1555,2141-2142,2196-2198,2863-2865,2870,2874-2883,3274-3277,3347-3355,3375-3376,3891,4274-4279,4749-4752,4754-4755,4771,4960,4964-4970,4995,5007-5010,5015-5016,5099-5100,5102,5105-5106,5110
+src/common/db/alembic/mariadb_versions/5462f610384b_upgrade_to_version_1_6_18_rc2.py
+  s_5f95d9f26d8061::t_240023c6d707dd 1-29
+src/common/db/alembic/mysql_versions/f651e85df1f3_upgrade_to_version_1_6_18_rc2.py
+  s_5f95d9f26d8061::t_5c81004ce32629 1-29
+src/common/db/alembic/postgresql_versions/60bac3901abb_upgrade_to_version_1_6_18_rc2.py
+  s_5f95d9f26d8061::t_577405db750177 1-29
+src/common/db/alembic/sqlite_versions/5b225ab8716e_upgrade_to_version_1_6_18_rc2.py
+  s_5f95d9f26d8061::t_8c8189c036ac72 1-29
+src/common/db/model.py
+  s_5f95d9f26d8061::t_1e6d988edaf2b6 374
+src/common/gen/Templator.py
+  s_5f95d9f26d8061::t_fce5eb515ec1df 435-436,636,644-645,647-648,675-703,771-772
+src/common/gen/save_config.py
+  s_5f95d9f26d8061::t_42a6d168c66d20 7,27-42,145-152,178
+src/common/settings.json
+  s_5f95d9f26d8061::t_6869ad4333ab66 100,298
+src/common/utils/common_utils.py
+  s_5f95d9f26d8061::t_478dc424454a49 13,46,329-332,527-543,557,627-630,673-677,775,1130-1132
+src/common/utils/jobs.py
+  s_5f95d9f26d8061::t_6d1570ac0a7166 58
+src/deps/deps.json
+  s_5f95d9f26d8061::t_c9ebdbd6c95118 34,36,70,77
+src/deps/src/libinjection/.gitignore
+  s_5f95d9f26d8061::t_c8a49466736928 61-62
+src/deps/src/libinjection/.release-please-manifest.json
+  s_5f95d9f26d8061::t_580ff5d5325085 2
+src/deps/src/libinjection/CHANGELOG.md
+  s_5f95d9f26d8061::t_33f0de93767d99 1-12,67,71,81,92,111,115,128,138,145,148,153,174,177,188,200,211,218,244,252,259,265,270,309,317,339
+src/deps/src/libinjection/MIGRATION.md
+  s_5f95d9f26d8061::t_15a7f5b061c9ea 79-80,82-96,110,149-150,181-184,404
+src/deps/src/libinjection/Makefile.am
+  s_5f95d9f26d8061::t_06b9247512a5c0 19-21,37,39-50
+src/deps/src/libinjection/README.md
+  s_5f95d9f26d8061::t_35a539b11b45f8 100-178
+src/deps/src/libinjection/configure.ac
+  s_5f95d9f26d8061::t_d23556e9a51d99 11,15,105
+src/deps/src/libinjection/data/xss-github-92.txt
+  s_5f95d9f26d8061::t_57045d0e4c7dcd 1-11
+src/deps/src/libinjection/release-please-config.json
+  s_5f95d9f26d8061::t_b75599b1b4ccb4 2-8,10
+src/deps/src/libinjection/src/Makefile.am
+  s_5f95d9f26d8061::t_c93938ceaeb5de 6,19,24-25,27-37
+src/deps/src/libinjection/src/fuzz/fuzzer.c
+  s_5f95d9f26d8061::t_9ce20160cc2966 9-10
+src/deps/src/libinjection/src/html5_cli.c
+  s_5f95d9f26d8061::t_8f161a471e5716 134
+src/deps/src/libinjection/src/libinjection_error.h
+  s_5f95d9f26d8061::t_d22725dadcb630 26
+src/deps/src/libinjection/src/libinjection_html5.c
+  s_5f95d9f26d8061::t_92fc893d2bc1e8 114-118,120,122,146
+src/deps/src/libinjection/src/libinjection_sqli.c
+  s_5f95d9f26d8061::t_7c3fc70f1cde80 27-30,32,99,102-130,381-383,1249-1250,1348,1633-1639,2280,2295-2296
+src/deps/src/libinjection/src/libinjection_sqli.h
+  s_5f95d9f26d8061::t_925a200b6aa8cb 40
+src/deps/src/libinjection/src/libinjection_sqli_data.h
+  s_5f95d9f26d8061::t_aea525729cf39e 9650-9651
+src/deps/src/libinjection/src/libinjection_xss.c
+  s_5f95d9f26d8061::t_e0a07442655259 102,998-1000,1003
+src/deps/src/libinjection/src/reader.c
+  s_5f95d9f26d8061::t_3699f105128bff 296-299,301-303,324-327
+src/deps/src/libinjection/src/sqli_cli.c
+  s_5f95d9f26d8061::t_37c99f6fcf2c1b 23
+src/deps/src/libinjection/src/sqlparse2c.py
+  s_5f95d9f26d8061::t_f01f88c35166bd 125-128
+src/deps/src/libinjection/src/test-samples-sqli-negative.sh
+  s_5f95d9f26d8061::t_9d381a51db96c7 2-4
+src/deps/src/libinjection/src/test-samples-sqli-positive.sh
+  s_5f95d9f26d8061::t_14b6295d0d956f 2-4
+src/deps/src/libinjection/src/test-samples-xss-positive.sh
+  s_5f95d9f26d8061::t_cd6dadedf2f494 2-4
+src/deps/src/libinjection/src/test-unit.sh
+  s_5f95d9f26d8061::t_6d864819ec1d08 2-4
+src/deps/src/libinjection/src/test_error_handling.c
+  s_5f95d9f26d8061::t_721880c5917b15 27-28,33,35,110-111,130-141,230,238-240
+src/deps/src/libinjection/src/test_stack_xss.c
+  s_5f95d9f26d8061::t_2ec0666ad7cddc 2,4,27,29,31
+src/deps/src/libinjection/src/testdriver.c
+  s_5f95d9f26d8061::t_f5214f0f1331b3 1-3,22,40,109-111,113,150-161,182-183,202-203,270-272,280-282,293-296,299-305,326,332,335,337
+src/deps/src/libinjection/version.txt
+  s_5f95d9f26d8061::t_041439e2e968cf 1
+src/linux/Dockerfile-debian-bookworm
+  s_5f95d9f26d8061::t_c4770131256e73 1,152
+src/linux/Dockerfile-debian-trixie
+  s_5f95d9f26d8061::t_c64d44c6f1d648 1,147
+src/linux/Dockerfile-rhel-8
+  s_5f95d9f26d8061::t_3eccdcfabe6924 1,148
+src/linux/Dockerfile-rhel-9
+  s_5f95d9f26d8061::t_a22a0b571efc1a 1,149
+src/linux/Dockerfile-ubuntu
+  s_5f95d9f26d8061::t_70e45b998617e9 1,146
+src/linux/Dockerfile-ubuntu-jammy
+  s_5f95d9f26d8061::t_20638ae076cd71 1,151
+src/linux/Dockerfile-ubuntu-noble
+  s_5f95d9f26d8061::t_dc557c924fe9aa 1,151
+src/linux/scripts/postinstall.sh
+  s_5f95d9f26d8061::t_7d5005a4e2c7a9 40-44
+src/scheduler/Dockerfile
+  s_5f95d9f26d8061::t_cbc88bce425f18 1,48,54,59,88
+src/scheduler/JobScheduler.py
+  s_5f95d9f26d8061::t_439ba873693e07 22,30,98,233-240,328,332-333,558-579,590,622-627
+src/scheduler/main.py
+  s_5f95d9f26d8061::t_2ec313aa6ffc62 21,107-122,303-306,481-514,541-543,884-887,941-955,1241-1246,1568,1638,1641,1648-1650,1652-1656,1675-1677,2086-2089
+src/ui/Dockerfile
+  s_5f95d9f26d8061::t_5559b3240d887f 1,71,83,88,110
+src/ui/app/html_pattern.py
+  s_5f95d9f26d8061::t_308d71d55e3688 1-134
+src/ui/app/models/models.py
+  s_5f95d9f26d8061::t_6aa9bd261be67b 41-43
+src/ui/app/models/totp.py
+  s_5f95d9f26d8061::t_5d37e431e6e866 12,55
+src/ui/app/models/ui_database.py
+  s_5f95d9f26d8061::t_fdf3b39cf247f1 424
+src/ui/app/routes/instances.py
+  s_5f95d9f26d8061::t_88cf3db409af62 34,40-42,48-49,118,124-125
+src/ui/app/routes/jobs.py
+  s_5f95d9f26d8061::t_2b93ff264e2144 25,31-32,41-42
+src/ui/app/routes/plugins.py
+  s_5f95d9f26d8061::t_51fff03a06d259 2,9,51,57-58,164-173,240,246-247
+src/ui/app/routes/pro.py
+  s_5f95d9f26d8061::t_3e736766991ebb 56,62-63
+src/ui/app/static/js/modules/setting_controls.js
+  s_5f95d9f26d8061::t_c2eac4e70fb142 37-180,256-257,273-274,723-724,780-781
+src/ui/app/static/js/pages/config_edit.js
+  s_5f95d9f26d8061::t_7434fe223f9d67 61,148,170,237
+src/ui/app/static/js/pages/configs.js
+  s_5f95d9f26d8061::t_b9d6a951bce183 182-183
+src/ui/app/static/js/pages/instances.js
+  s_5f95d9f26d8061::t_8a6739f26c2f32 703,713,732
+src/ui/app/static/js/pages/jobs.js
+  s_5f95d9f26d8061::t_d87696ff1f4141 412-413
+src/ui/app/static/js/pages/plugins.js
+  s_5f95d9f26d8061::t_dc85a97aef4a81 86-87,531
+src/ui/app/static/js/pages/reports.js
+  s_5f95d9f26d8061::t_96fc33007caad6 1225,1227
+src/ui/app/static/js/pages/template_edit.js
+  s_5f95d9f26d8061::t_da1d325be55671 2487-2490,2492
+src/ui/app/static/js/plugins-settings.js
+  s_5f95d9f26d8061::t_cfb9d5dd58c582 1344-1350,1353-1357
+src/ui/app/static/js/utils.js
+  s_5f95d9f26d8061::t_11107f0860dba9 31-57
+src/ui/app/static/locales/ar.json
+  s_5f95d9f26d8061::t_17c1b0d170853d 16-17,1244-1253,1440-1441,1738-1739,1977-1978,2001-2007
+src/ui/app/static/locales/bn.json
+  s_5f95d9f26d8061::t_d0003f1c1cb9b6 16-17,1244-1253,1440-1441,1738-1739,1977-1978,2001-2007
+src/ui/app/static/locales/br.json
+  s_5f95d9f26d8061::t_0423a52c902bda 16-17,1244-1253,1440-1441,1738-1739,1977-1978,2001-2007
+src/ui/app/static/locales/de.json
+  s_5f95d9f26d8061::t_9104d257c09787 16-17,1244-1253,1440-1441,1738-1739,1977-1978,2001-2007
+src/ui/app/static/locales/en.json
+  s_5f95d9f26d8061::t_6d905b34637e42 16-17,1244-1253,1440-1441,1738-1739,1977-1978,2001-2007
+src/ui/app/static/locales/es.json
+  s_5f95d9f26d8061::t_f649cfdaa53ad0 16-17,1244-1253,1440-1441,1738-1739,1977-1978,2001-2007
+src/ui/app/static/locales/fr.json
+  s_5f95d9f26d8061::t_8cdbf2f084eb51 16-17,1244-1253,1440-1441,1738-1739,1977-1978,2001-2007
+src/ui/app/static/locales/hi.json
+  s_5f95d9f26d8061::t_99ab1e7fc48176 16-17,1244-1253,1440-1441,1738-1739,1977-1978,2001-2007
+src/ui/app/static/locales/id.json
+  s_5f95d9f26d8061::t_990472c069bc11 16-17,1244-1253,1440-1441,1738-1739,1977-1978,2001-2007
+src/ui/app/static/locales/it.json
+  s_5f95d9f26d8061::t_56857b1d6f9774 16-17,1244-1253,1440-1441,1738-1739,1977-1978,2001-2007
+src/ui/app/static/locales/ko.json
+  s_5f95d9f26d8061::t_0cbc55cefb4d19 16-17,1244-1253,1440-1441,1738-1739,1977-1978,2001-2007
+src/ui/app/static/locales/pl.json
+  s_5f95d9f26d8061::t_f9793113f55d7c 16-17,1244-1253,1440-1441,1738-1739,1977-1978,2001-2007
+src/ui/app/static/locales/pt.json
+  s_5f95d9f26d8061::t_14a0582f562161 16-17,1244-1253,1440-1441,1738-1739,1977-1978,2001-2007
+src/ui/app/static/locales/ru.json
+  s_5f95d9f26d8061::t_60504d54a70f5e 16-17,1244-1253,1440-1441,1738-1739,1977-1978,2001-2007
+src/ui/app/static/locales/tl.json
+  s_5f95d9f26d8061::t_b7e6ed0c7497dd 16-17,1244-1253,1440-1441,1738-1739,1977-1978,2001-2007
+src/ui/app/static/locales/tr.json
+  s_5f95d9f26d8061::t_76d28175e020da 16-17,1244-1253,1440-1441,1738-1739,1977-1978,2001-2007
+src/ui/app/static/locales/tw.json
+  s_5f95d9f26d8061::t_209399d334eba0 16-17,1244-1253,1440-1441,1738-1739,1977-1978,2001-2007
+src/ui/app/static/locales/ur.json
+  s_5f95d9f26d8061::t_e08b294cf0d91e 16-17,1244-1253,1440-1441,1738-1739,1977-1978,2001-2007
+src/ui/app/static/locales/zh.json
+  s_5f95d9f26d8061::t_873399522755f7 16-17,1244-1253,1440-1441,1738-1739,1977-1978,2001-2007
+src/ui/app/templates/footer.html
+  s_5f95d9f26d8061::t_b213d62d9d4100 14
+src/ui/app/templates/macros/docs_link.html
+  s_5f95d9f26d8061::t_7eaf65c485711f 8-17
+src/ui/app/templates/models/input_setting.html
+  s_5f95d9f26d8061::t_6bedff36008843 9,93
+src/ui/app/templates/models/multivalue_setting.html
+  s_5f95d9f26d8061::t_a6db325c1c656a 18
+src/ui/app/templates/models/plugins_settings_raw.html
+  s_5f95d9f26d8061::t_0eeb2ed41140bb 11-14,41,65,96
+src/ui/app/templates/profile.html
+  s_5f95d9f26d8061::t_093d4beae196a8 278
+src/ui/app/templates/setup.html
+  s_5f95d9f26d8061::t_14f01c321ef78c 343,493,648,685,719,753,787,973,1009,1084,1117,1261,1295,1329,1443,1479,1514,1592
+src/ui/app/utils.py
+  s_5f95d9f26d8061::t_171cb05ad1d95d 367-373
+src/ui/main.py
+  s_5f95d9f26d8061::t_1a974c00850ae6 50,641,647,876-877
+src/ui/temp.py
+  s_5f95d9f26d8061::t_0ebf45b59dcb95 14,63
+tests/AGENTS.md
+  s_5f95d9f26d8061::t_a2de5e930c968f 1-59
+tests/CLAUDE.md
+  s_5f95d9f26d8061::t_835fe92b76c733 1-3
+tests/README.md
+  s_5f95d9f26d8061::t_7e829f8f8dc70f 1-424
+tests/api.py
+  s_5f95d9f26d8061::t_f880b91a814399 1-3,5-9,11-71,73,75-78,80-199,202-205,207-209,211,213-214,216-222,224-225,227-228,230-237,240-245
+tests/api/acl.yml
+  s_5f95d9f26d8061::t_59aaa7916c80f7 1-57
+tests/api/auth.yml
+  s_5f95d9f26d8061::t_69afb84912ef5d 1,3-7,9-23,25-96
+tests/api/cache.yml
+  s_5f95d9f26d8061::t_8b21d0114630a7 1-35
+tests/api/conf.yml
+  s_5f95d9f26d8061::t_e6cdc88f655c85 1-77
+tests/api/customcert.yml
+  s_5f95d9f26d8061::t_20e36f140da012 1-17
+tests/api/limit.yml
+  s_5f95d9f26d8061::t_677954cbe7ed6b 1-23
+tests/api/redis.yml
+  s_5f95d9f26d8061::t_3490904fce1d41 1,3-27,29-39,41-61,63-72,74-75,77-84,86-91,93-114,116-119,121-134
+tests/core.py
+  s_5f95d9f26d8061::t_cde33f8224a2e9 1-3,5-9,11-72,74,76-79,81-208,210-211,214-237,239-240,243,245,247-248
+tests/core/antibot.yml
+  s_5f95d9f26d8061::t_7f27114beec895 1-667
+tests/core/api.yml
+  s_5f95d9f26d8061::t_e1c83dae6e773f 1-126
+tests/core/api/health_during_reload.sh
+  s_5f95d9f26d8061::t_bb7dbd97e8b739 1-107
+tests/core/authbasic.yml
+  s_5f95d9f26d8061::t_46b662a0488221 1,3-20,22-32,34-68,70-95,97-101
+tests/core/backup.yml
+  s_5f95d9f26d8061::t_e120b4c26a600f 1-185
+tests/core/backup/wait_for_writers_idle.py
+  s_5f95d9f26d8061::t_a20149342e0454 1-68
+tests/core/badbehavior.yml
+  s_5f95d9f26d8061::t_263242043a7774 1-487
+tests/core/bans_tls_drop.yml
+  s_5f95d9f26d8061::t_73db561eecc2ff 1-70
+tests/core/bans_tls_drop/probe.py
+  s_5f95d9f26d8061::t_0d3081a80d306d 1-72
+tests/core/bans_tls_drop/test.sh
+  s_5f95d9f26d8061::t_163f87eecbca91 1-244
+tests/core/blacklist.yml
+  s_5f95d9f26d8061::t_333934ac5960f6 1-234
+tests/core/brotli.yml
+  s_5f95d9f26d8061::t_7bed16314bab00 1,3-12,14-41,43-48
+tests/core/bunkernet.yml
+  s_5f95d9f26d8061::t_1ec8899e217b27 1-98
+tests/core/bwcli.yml
+  s_5f95d9f26d8061::t_b843befe6c0ed8 1-69
+tests/core/clientcache.yml
+  s_5f95d9f26d8061::t_093d2ff453ce17 1,3-10,12-43,45-49
+tests/core/cors.yml
+  s_5f95d9f26d8061::t_f40da0ef999b9b 1-518
+tests/core/cors/browser_credentials.py
+  s_5f95d9f26d8061::t_d2f4b8e18851ae 1-17,20-37,39-40,42-59
+tests/core/cors/www/app1.example.com/credentials.php
+  s_5f95d9f26d8061::t_b7679277d6be30 2-3
+tests/core/country.yml
+  s_5f95d9f26d8061::t_1874736f909e0b 1-168
+tests/core/crowdsec.yml
+  s_5f95d9f26d8061::t_301e46beffad68 1-265
+tests/core/crowdsec/fixtures/appsec-default-only.yaml
+  s_5f95d9f26d8061::t_cfbb2a92c21f70 1-12
+tests/core/customcert.yml
+  s_5f95d9f26d8061::t_36fdd3d37f2bf1 1,3-43,46-49
+tests/core/db.yml
+  s_5f95d9f26d8061::t_dc82242c4b2333 1-305
+tests/core/dnsbl.yml
+  s_5f95d9f26d8061::t_38b1733ec58614 1,3-47,50-56
+tests/core/errors.yml
+  s_5f95d9f26d8061::t_810cf33933ef32 1-40
+tests/core/example-autoconf-configs.yml
+  s_5f95d9f26d8061::t_b686b41a25e8fe 1-36
+tests/core/example-behind-reverse-proxy.yml
+  s_5f95d9f26d8061::t_c68f4851851f0f 1-20
+tests/core/example-docker-configs.yml
+  s_5f95d9f26d8061::t_2adb0733e16097 1-45
+tests/core/example-ghost.yml
+  s_5f95d9f26d8061::t_08807b5bee2046 1-19
+tests/core/example-gogs.yml
+  s_5f95d9f26d8061::t_17fbfcc2734c33 1-20
+tests/core/example-hardened.yml
+  s_5f95d9f26d8061::t_89683fccdda3b5 1-18
+tests/core/example-joomla.yml
+  s_5f95d9f26d8061::t_a66bee744aaecd 1-22
+tests/core/example-kubernetes-configs.yml
+  s_5f95d9f26d8061::t_ffe7782c349432 1-63
+tests/core/example-kubernetes-ingress.yml
+  s_5f95d9f26d8061::t_1b17feca6c4b45 1-36
+tests/core/example-kubernetes-tls.yml
+  s_5f95d9f26d8061::t_5003b1b51e9e6a 1-36
+tests/core/example-load-balancer.yml
+  s_5f95d9f26d8061::t_9c0f10314fd6b0 1-18
+tests/core/example-mattermost.yml
+  s_5f95d9f26d8061::t_bb077c782db59d 1-19
+tests/core/example-mongo-express.yml
+  s_5f95d9f26d8061::t_5a9cdae1d50ed8 1-17
+tests/core/example-nextcloud.yml
+  s_5f95d9f26d8061::t_45e54e9aa37724 1-4,6-30
+tests/core/example-passbolt.yml
+  s_5f95d9f26d8061::t_fb1ff601628e2b 1-18
+tests/core/example-php-multisite.yml
+  s_5f95d9f26d8061::t_bf0c4ccbbbd89e 1-29
+tests/core/example-php-singlesite.yml
+  s_5f95d9f26d8061::t_b257103218e4c8 1-20
+tests/core/example-proxy-protocol.yml
+  s_5f95d9f26d8061::t_62be5c4f51c316 1-21
+tests/core/example-radarr.yml
+  s_5f95d9f26d8061::t_ae0a8ef54c7a99 1-19
+tests/core/example-redmine.yml
+  s_5f95d9f26d8061::t_0f22010dcf4194 1-19
+tests/core/example-reverse-proxy-multisite.yml
+  s_5f95d9f26d8061::t_b8dc587eaaac3b 1-29
+tests/core/example-reverse-proxy-singlesite.yml
+  s_5f95d9f26d8061::t_22e751c8d5ac94 1-28
+tests/core/example-tomcat.yml
+  s_5f95d9f26d8061::t_d3c24928b74c66 1-19
+tests/core/example-wordpress.yml
+  s_5f95d9f26d8061::t_f858498527c19d 1-38
+tests/core/general.yml
+  s_5f95d9f26d8061::t_d243a619ea23cd 1-27
+tests/core/greylist.yml
+  s_5f95d9f26d8061::t_571ff894b68025 1,3-27,29-72,74-96,98-122,124-147,149-154
+tests/core/grpc.yml
+  s_5f95d9f26d8061::t_b80b9107ac290f 1-181
+tests/core/grpc/probe.py
+  s_5f95d9f26d8061::t_9640fdff712802 1-109
+tests/core/gzip.yml
+  s_5f95d9f26d8061::t_e7b0eb4360ba45 1,3-12,14-41,43-48
+tests/core/headers.yml
+  s_5f95d9f26d8061::t_425d058f975f8b 1-212
+tests/core/inject.yml
+  s_5f95d9f26d8061::t_35cf490a7b45b1 1-31
+tests/core/letsencrypt.yml
+  s_5f95d9f26d8061::t_b6defcaebeff71 1,3-16,18,20-36
+tests/core/limit.yml
+  s_5f95d9f26d8061::t_24adf03096977a 1-4,6-15,17-26,28-52,54-128,130-150
+tests/core/misc.yml
+  s_5f95d9f26d8061::t_b6904bada3e41d 1,3-25,27-80,82-117,119-122
+tests/core/modsecurity.yml
+  s_5f95d9f26d8061::t_a50a7aa1d1c0a8 1,3-40,42-65,67-107,109-123
+tests/core/mtls.yml
+  s_5f95d9f26d8061::t_a6711541e78355 1-194
+tests/core/realip.yml
+  s_5f95d9f26d8061::t_4814eb8c7745a9 1-82
+tests/core/redirect.yml
+  s_5f95d9f26d8061::t_9a230ba5b97aac 1-74
+tests/core/redis.yml
+  s_5f95d9f26d8061::t_731bee13980f67 1-843
+tests/core/reverseproxy.yml
+  s_5f95d9f26d8061::t_d0789c73b533c0 1,3-12,14-22,24-91,93-101,103-109,111-128,131-144,146-163,165-183
+tests/core/reversescan.yml
+  s_5f95d9f26d8061::t_7a2c353ebfb04a 1,3-26,29-32
+tests/core/robotstxt.yml
+  s_5f95d9f26d8061::t_f474c414a5c317 1-111
+tests/core/scheduler.yml
+  s_5f95d9f26d8061::t_3a3b923a719abc 1-22
+tests/core/scheduler_change_claim/slowjob/jobs/slow.py
+  s_5f95d9f26d8061::t_14ec7bda143243 1,3-4,6,8,10-14
+tests/core/scheduler_change_claim/slowjob/plugin.json
+  s_5f95d9f26d8061::t_183cb1dd9e7b9a 2-15,17-19
+tests/core/scheduler_change_claim/test.sh
+  s_5f95d9f26d8061::t_b9278c2720b2f1 1-138
+tests/core/securitytxt.yml
+  s_5f95d9f26d8061::t_cd713f6d6a7a8d 1-80
+tests/core/selfsigned.yml
+  s_5f95d9f26d8061::t_df43ce6051119c 1,3-26,28-55,57-59
+tests/core/sessions.yml
+  s_5f95d9f26d8061::t_a849b3c2e9ab99 1-69
+tests/core/ssl.yml
+  s_5f95d9f26d8061::t_66263a72b2fccd 1-141
+tests/core/stream.yml
+  s_5f95d9f26d8061::t_8daed276c3941d 1-83
+tests/core/templates.yml
+  s_5f95d9f26d8061::t_03c370d38f305e 1,3-20,22-25,27-33
+tests/core/test.yml.example
+  s_5f95d9f26d8061::t_c9a436d75b222f 1-24
+tests/core/upgrade.yml
+  s_5f95d9f26d8061::t_404db48b80c912 1-133
+tests/core/valkey.yml
+  s_5f95d9f26d8061::t_a6ef1d678f47ae 1-356
+tests/core/whitelist.yml
+  s_5f95d9f26d8061::t_168c69e89fa16b 1-144
+tests/core_handlers/__init__.py
+  s_5f95d9f26d8061::t_80d29292fabc34 1-23
+tests/core_handlers/bwcli_handler.py
+  s_5f95d9f26d8061::t_6b9b1fdddf820e 1-43
+tests/core_handlers/database_handler.py
+  s_5f95d9f26d8061::t_d436ee9df45ce1 1-27
+tests/core_handlers/export_handler.py
+  s_5f95d9f26d8061::t_69314e5ccc34d2 1-3,5-7,9-10,12,15-22,25-31,33-37,39-42,45-67,69-71,73-78,80
+tests/core_handlers/http_common.py
+  s_5f95d9f26d8061::t_8eba82cd0b5019 1-89
+tests/core_handlers/http_header_handler.py
+  s_5f95d9f26d8061::t_c0f9218a7ed098 1-11,13-15,17-33,35-38
+tests/core_handlers/http_path_handler.py
+  s_5f95d9f26d8061::t_d87d64a9dc0525 1-2,4-5,7,9-23
+tests/core_handlers/http_ssl_handler.py
+  s_5f95d9f26d8061::t_d20880de71cee0 1-5,8,10-13,15,18-20,22-24,26-30,32-34,36-49,52-65,67-78,80-156
+tests/core_handlers/http_status_handler.py
+  s_5f95d9f26d8061::t_dd36d633b0578a 1-2,4-5,7,9-30
+tests/core_handlers/http_string_handler.py
+  s_5f95d9f26d8061::t_e800140be036c5 1-2,4-5,7,9,12-14,16,18-19,21,23-34
+tests/core_handlers/limit_handler.py
+  s_5f95d9f26d8061::t_9139f2f0dafb47 1-4,7-11,13,15,18-20,22-27,29,31-33,35-37,39-41,43-45,48-49,51,53-55,57-61,63-65,67,69,71-73,75-99,101-138,140-216,218-219,221,224-225,227,229-234,236-238,240-243,245-250,252,255-256,258,260-261,263-267,270-280
+tests/core_handlers/redis_handler.py
+  s_5f95d9f26d8061::t_b87022c3e9cd0f 1-32,34-56,58-59,61,64-66,68-75,77-92,95-113,115-120,122-127,129-134,136-144,147-163,166-175,178-181,183-185,187-190,192-197,200-202
+tests/core_handlers/script_handler.py
+  s_5f95d9f26d8061::t_8cf8a87764e936 1-52
+tests/core_handlers/selenium_common.py
+  s_5f95d9f26d8061::t_2683dd9343147e 1-3,5-6,8,15-17,19-21,23-24,28-32,35-36
+tests/core_handlers/selenium_cookie_handler.py
+  s_5f95d9f26d8061::t_76ed7d818924df 1-2,4-6,8,11-15,19-20,22-23,25-29,31-34,36-40,42-55
+tests/core_handlers/selenium_xpath_handler.py
+  s_5f95d9f26d8061::t_1460c2a33b315a 1-6,9-12,15-19,24-42
+tests/core_handlers/tool_handler.py
+  s_5f95d9f26d8061::t_ae20a68f2adecb 1-51
+tests/docker/docker-compose.all-in-one.yml
+  s_5f95d9f26d8061::t_617c69e25acaed 2-12,14-23,26-27,31-32,47-52,54
+tests/docker/docker-compose.api.yml
+  s_5f95d9f26d8061::t_b9817e6a8d6e3e 2-6,8-16,18-20,23,27,29
+tests/docker/docker-compose.autoconf.yml
+  s_5f95d9f26d8061::t_73e79432bc4432 2-7,9-19,21,23,26,28-31
+tests/docker/docker-compose.bunkerweb.yml
+  s_5f95d9f26d8061::t_5ed03926439872 2-10,12-25,28-33
+tests/docker/docker-compose.scheduler.yml
+  s_5f95d9f26d8061::t_8c2af35e762d50 2-4,6-14,16-22,25-26,29,31
+tests/docker/docker-compose.ui.yml
+  s_5f95d9f26d8061::t_6f92a41253d82c 2-18,20-22,25,27
+tests/generate.py
+  s_5f95d9f26d8061::t_0ce3a21013d119 1-856
+tests/k8s/bunkerweb-api.yml
+  s_5f95d9f26d8061::t_23f3388a51990e 1-76
+tests/k8s/bunkerweb-ui.yml
+  s_5f95d9f26d8061::t_a4def9a3de4269 1-76
+tests/k8s/bunkerweb.yml
+  s_5f95d9f26d8061::t_8723400fc62cee 1-306
+tests/k8s/edit_coredns.py
+  s_5f95d9f26d8061::t_49492905591e09 1-34
+tests/linux/Dockerfile-debian-bookworm
+  s_5f95d9f26d8061::t_4a7b3b0f5ade48 1
+tests/linux/Dockerfile-debian-trixie
+  s_5f95d9f26d8061::t_86607bb3199f45 1
+tests/linux/Dockerfile-rhel-8
+  s_5f95d9f26d8061::t_f19656eb28bbcc 1
+tests/linux/Dockerfile-rhel-9
+  s_5f95d9f26d8061::t_dd1a82ccd6c59e 1
+tests/linux/Dockerfile-ubuntu
+  s_5f95d9f26d8061::t_3f564db65b2761 1
+tests/linux/Dockerfile-ubuntu-jammy
+  s_5f95d9f26d8061::t_bf36251249ce3f 1
+tests/linux/Dockerfile-ubuntu-noble
+  s_5f95d9f26d8061::t_cdcb8611022f63 1
+tests/linux/docker-compose.yml
+  s_5f95d9f26d8061::t_d722d71f1cad68 1-28
+tests/linux/utils/rocky-10.repo
+  s_5f95d9f26d8061::t_57248d9e643976 1-13
+tests/linux/utils/rocky-8.repo
+  s_5f95d9f26d8061::t_1a76abcdcee908 1-13
+tests/linux/utils/rocky-9.repo
+  s_5f95d9f26d8061::t_cf5e186fa75c36 1-13
+tests/misc/api/Dockerfile
+  s_5f95d9f26d8061::t_742eec8297618b 1,7,14-16
+tests/misc/api/main.py
+  s_5f95d9f26d8061::t_614b1b152ebf90 1-2,4-5,11-43,45,50,53-54,58-59,61-62,66,71,73-74,78,83,91-138,142
+tests/misc/api/requirements.in
+  s_5f95d9f26d8061::t_679d904624d76f 1-2
+tests/misc/api/requirements.txt
+  s_5f95d9f26d8061::t_b97e5356175844 2,5,7-10,15-17,21-23,25-27,29-31,33-84,86-203,205-207,209-282,287-290,292-294,299-306,308-357,359-468,470-539
+tests/misc/conf/acquis.yaml
+  s_5f95d9f26d8061::t_7f0d5f39a841ac 1-6
+tests/misc/conf/all-in-one-redis.conf
+  s_5f95d9f26d8061::t_a9e11e1cda03d2 1-11
+tests/misc/conf/appsec.yaml
+  s_5f95d9f26d8061::t_beead6ae0d1481 1-12
+tests/misc/conf/coredns.conf
+  s_5f95d9f26d8061::t_4179c27d8df3ea 1-45
+tests/misc/conf/dnsmasq.conf
+  s_5f95d9f26d8061::t_48dd121fd5f4d9 1-45
+tests/misc/conf/dnsmasq.hosts
+  s_5f95d9f26d8061::t_7d1563a1e978f6 1-34
+tests/misc/conf/php-fpm.conf
+  s_5f95d9f26d8061::t_23fbf01a26534c 1-3,7,11,13,17-21
+tests/misc/conf/syslog-ng.conf
+  s_5f95d9f26d8061::t_2a0740102865f6 1-35
+tests/misc/docker/crowdsec.yml
+  s_5f95d9f26d8061::t_9da14523ba65f4 2-11,13-20,23-29,31-33
+tests/misc/docker/custom-api.yml
+  s_5f95d9f26d8061::t_a585b2bc842252 2-9,11-12
+tests/misc/docker/dnsmasq.yml
+  s_5f95d9f26d8061::t_7296c98fa31ee3 2-8,10-11,14-19,21-24
+tests/misc/docker/docker-socket-proxy.yml
+  s_5f95d9f26d8061::t_06011152f24de5 2-4,8-10,12,15
+tests/misc/docker/mariadb.yml
+  s_5f95d9f26d8061::t_58f0d82dc7ff29 3-6,13-16,18-19,23,28-31
+tests/misc/docker/mysql.yml
+  s_5f95d9f26d8061::t_91303523856b3e 3-6,13-16,18-19,23,28-31
+tests/misc/docker/oracle.yml
+  s_5f95d9f26d8061::t_f23edc4dd465c7 2-6,8-15,17-22,25-30
+tests/misc/docker/php.yml
+  s_5f95d9f26d8061::t_70d1cd82b677c6 2-6,8-13,16-18
+tests/misc/docker/postgresql.yml
+  s_5f95d9f26d8061::t_6eb99b6bb24b0a 1-35
+tests/misc/docker/redis-cluster.yml
+  s_5f95d9f26d8061::t_e778f7a7549c94 1-4,6-12,14-17,19-21,24-26,28-34,36-39,41-43,45-48,50-61,63-65,68-70,72-94
+tests/misc/docker/redis-master.yml
+  s_5f95d9f26d8061::t_8b042a986288a6 1-35
+tests/misc/docker/redis.yml
+  s_5f95d9f26d8061::t_fffbdeef65dcdf 1-32
+tests/misc/docker/sentinel.yml
+  s_5f95d9f26d8061::t_186c19f9d55b9c 2-8,10-16,19-21,23-29,31-42,44-61,63-66,68-85,88-90,92-114
+tests/misc/docker/services.yml
+  s_5f95d9f26d8061::t_db7a6e53934686 2-9,12,16-20
+tests/misc/docker/syslog.yml
+  s_5f95d9f26d8061::t_e0f3d158337b6a 1-30
+tests/misc/docker/valkey-sentinel.yml
+  s_5f95d9f26d8061::t_acf222389edc11 2-6,8-28,31-33,35-39,41-66,68-84,86-89,91-107,110-112,114-135
+tests/misc/docker/valkey.yml
+  s_5f95d9f26d8061::t_f4a73031274a2b 1-46
+tests/misc/index.php
+  s_5f95d9f26d8061::t_5d89e00efe2763 3-4,6-13
+tests/misc/k8s/custom-api.yml
+  s_5f95d9f26d8061::t_6265f1c87d9f6c 1-61
+tests/misc/k8s/lb.yml
+  s_5f95d9f26d8061::t_e98f832c2df17d 2,4-5,7-8,12-31
+tests/misc/k8s/mariadb.yml
+  s_5f95d9f26d8061::t_3434061920c325 1-91
+tests/misc/k8s/mysql.yml
+  s_5f95d9f26d8061::t_77a6b17dfbc33c 1-91
+tests/misc/k8s/oracle.yml
+  s_5f95d9f26d8061::t_1834f871c85d88 1-89
+tests/misc/k8s/postgresql.yml
+  s_5f95d9f26d8061::t_5de2858a3eb7eb 1-91
+tests/misc/k8s/redis-master-secrets.yml
+  s_5f95d9f26d8061::t_1a28dc55759a7e 1-6
+tests/misc/k8s/redis-master.yml
+  s_5f95d9f26d8061::t_8adaf9d40b0d01 1-100
+tests/misc/k8s/redis-sentinel-secrets.yml
+  s_5f95d9f26d8061::t_75a6329f1a9f47 1-6
+tests/misc/k8s/redis-sentinel.yml
+  s_5f95d9f26d8061::t_08295426e6fd84 1-217
+tests/misc/k8s/redis-slave-secrets.yml
+  s_5f95d9f26d8061::t_143b0eb7a4b319 1-6
+tests/misc/k8s/secrets-api.yml
+  s_5f95d9f26d8061::t_d6007e07684e26 1-6
+tests/misc/k8s/secrets-ui.yml
+  s_5f95d9f26d8061::t_4e2331841b0f5b 1-6
+tests/misc/k8s/secrets.yml
+  s_5f95d9f26d8061::t_265c5bba0e1deb 1-6
+tests/misc/k8s/services.deployment.yml
+  s_5f95d9f26d8061::t_da7a713e0ac5b7 1-26
+tests/misc/k8s/services.ingress.yml
+  s_5f95d9f26d8061::t_3ab93bc407ce64 1-5
+tests/misc/k8s/services.namespace.yml
+  s_5f95d9f26d8061::t_12d77fa374dec9 1-4
+tests/misc/k8s/services.svc.yml
+  s_5f95d9f26d8061::t_f5c9f78ae7f74c 1-12
+tests/misc/k8s/valkey-secrets.yml
+  s_5f95d9f26d8061::t_76bacc32338ef8 1-6
+tests/misc/k8s/valkey-sentinel-secrets.yml
+  s_5f95d9f26d8061::t_c1eb6ca7ac83bb 1-23
+tests/misc/k8s/valkey-sentinel.yml
+  s_5f95d9f26d8061::t_7f3c5ce88f7870 1-198
+tests/misc/k8s/valkey-slave-secrets.yml
+  s_5f95d9f26d8061::t_f7aa74df9e593d 1-6
+tests/misc/k8s/valkey.yml
+  s_5f95d9f26d8061::t_01e27ee03b5220 1-122
+tests/misc/scripts/healthcheck-crowdsec.sh
+  s_5f95d9f26d8061::t_59b3c2eef3a331 3-5,9
+tests/misc/scripts/redis-cluster-init.sh
+  s_5f95d9f26d8061::t_30f6a6ecbc2c41 1-29
+tests/misc/scripts/redis-entrypoint.sh
+  s_5f95d9f26d8061::t_f770a940cbeaa1 1-76
+tests/misc/scripts/redis-sentinel-entrypoint.sh
+  s_5f95d9f26d8061::t_a11ba9d889a826 1-40
+tests/misc/scripts/valkey-entrypoint.sh
+  s_5f95d9f26d8061::t_1b3dd8a677126b 1-78
+tests/misc/scripts/valkey-healthcheck.sh
+  s_5f95d9f26d8061::t_78f66aaa9ba33f 2,4-11
+tests/misc/stream/probe.py
+  s_5f95d9f26d8061::t_67f0307c0c0422 1-95,97-192
+tests/misc/ui/uie2e/plugin.json
+  s_5f95d9f26d8061::t_916d0e0ed9c220 2-7
+tests/misc/ui/uie2e/ui/actions.py
+  s_5f95d9f26d8061::t_de960e163c6da0 1-2,5-6
+tests/misc/ui/uie2e/ui/blueprints/uie2e.py
+  s_5f95d9f26d8061::t_7c5e32f5e2a727 1-10
+tests/misc/ui/uie2e/ui/template.html
+  s_5f95d9f26d8061::t_01d8de7fbd2a56 1
+tests/models/__init__.py
+  s_5f95d9f26d8061::t_995b857109c54e 1-21
+tests/models/action.py
+  s_5f95d9f26d8061::t_df51c8be2eee81 1-163
+tests/models/bwcli.py
+  s_5f95d9f26d8061::t_a472b81cdd4305 1-55
+tests/models/cookie.py
+  s_5f95d9f26d8061::t_9e953b7a1c8041 1-3,5,8-13,15-19,21-26,28-33,36-48
+tests/models/database.py
+  s_5f95d9f26d8061::t_c76b1b356e2bc7 1-35
+tests/models/export.py
+  s_5f95d9f26d8061::t_5533897bd1c637 1-26
+tests/models/header.py
+  s_5f95d9f26d8061::t_8b0223816089d1 1-34
+tests/models/limit.py
+  s_5f95d9f26d8061::t_2142a5a6aed64d 1-85
+tests/models/path.py
+  s_5f95d9f26d8061::t_f8a9789fb4f28c 1,3,6-9,11-24
+tests/models/redis.py
+  s_5f95d9f26d8061::t_42c84eb4ff73d3 1-85
+tests/models/script.py
+  s_5f95d9f26d8061::t_088bd102230421 1-39
+tests/models/selenium_action.py
+  s_5f95d9f26d8061::t_c0946b51fbaf7f 1-37
+tests/models/ssl.py
+  s_5f95d9f26d8061::t_4cc2131c403a9c 1-36
+tests/models/status.py
+  s_5f95d9f26d8061::t_5710544210b218 1-30
+tests/models/string.py
+  s_5f95d9f26d8061::t_781cc34854becf 1-34
+tests/models/tool.py
+  s_5f95d9f26d8061::t_f893510a9570df 1-67
+tests/models/ui/__init__.py
+  s_5f95d9f26d8061::t_822a187b496cdf 1-75
+tests/models/ui/access.py
+  s_5f95d9f26d8061::t_86e7ef7ef17850 1-42
+tests/models/ui/close_tab.py
+  s_5f95d9f26d8061::t_cc30db012891f0 1,3,6-8,11
+tests/models/ui/count.py
+  s_5f95d9f26d8061::t_5e2e62a460e6b6 1-17
+tests/models/ui/create/__init__.py
+  s_5f95d9f26d8061::t_f0b502fabede27 1-25
+tests/models/ui/create/config.py
+  s_5f95d9f26d8061::t_dc4004d8485d82 1-30
+tests/models/ui/create/instance.py
+  s_5f95d9f26d8061::t_b825609b1c00d1 1,3,6-9,12
+tests/models/ui/create/service.py
+  s_5f95d9f26d8061::t_1a57f6c6e56883 1,3,5,8-16,18-20,22-24,27
+tests/models/ui/custom/__init__.py
+  s_5f95d9f26d8061::t_b7276eb267fff9 1-25
+tests/models/ui/custom/access_page.py
+  s_5f95d9f26d8061::t_a41982390059d5 1-12
+tests/models/ui/custom/click.py
+  s_5f95d9f26d8061::t_b40ae1052ddfb8 1-10
+tests/models/ui/custom/del_data.py
+  s_5f95d9f26d8061::t_d21260bf238938 1-12
+tests/models/ui/custom/find.py
+  s_5f95d9f26d8061::t_6bed8a1d528df6 1-11
+tests/models/ui/custom/refresh.py
+  s_5f95d9f26d8061::t_33c5fd5b6949fa 1-11
+tests/models/ui/custom/save_data.py
+  s_5f95d9f26d8061::t_202bdfce6464d5 1,3,5,8-12,14-17,19-22
+tests/models/ui/custom/send_keys.py
+  s_5f95d9f26d8061::t_6a203b696a09ca 1-12
+tests/models/ui/delete/__init__.py
+  s_5f95d9f26d8061::t_b1360bd27de48a 1-24
+tests/models/ui/delete/config.py
+  s_5f95d9f26d8061::t_bf0539014d0825 1,3,5,8-10,12-14,17
+tests/models/ui/delete/instance.py
+  s_5f95d9f26d8061::t_545eac5989e4fa 1-11
+tests/models/ui/delete/service.py
+  s_5f95d9f26d8061::t_5e9ec713c79873 1,3,5,8-10,12-14,16-17
+tests/models/ui/fetch.py
+  s_5f95d9f26d8061::t_4c19837d8fa0ed 1-17
+tests/models/ui/login.py
+  s_5f95d9f26d8061::t_2d09e54736c764 1,3,6-15,18
+tests/models/ui/read/__init__.py
+  s_5f95d9f26d8061::t_fcf93ebac79154 1-24
+tests/models/ui/read/config.py
+  s_5f95d9f26d8061::t_c2f2c2f8333756 1-31
+tests/models/ui/read/global_config.py
+  s_5f95d9f26d8061::t_bde19528c338b8 1-20
+tests/models/ui/read/service.py
+  s_5f95d9f26d8061::t_ca6b2a4c8f91ba 1-27
+tests/models/ui/setup.py
+  s_5f95d9f26d8061::t_a66e9b9492883d 1-94
+tests/models/ui/step_base.py
+  s_5f95d9f26d8061::t_0f4b52e38a69fc 1-6
+tests/models/ui/switch_tab.py
+  s_5f95d9f26d8061::t_812af06ec12045 1-11
+tests/models/ui/update/__init__.py
+  s_5f95d9f26d8061::t_7fdbb8839c8ceb 1-24
+tests/models/ui/update/config.py
+  s_5f95d9f26d8061::t_b9c49c30d6b47d 1-60
+tests/models/ui/update/global_config.py
+  s_5f95d9f26d8061::t_01daa0dc83ee0a 1-20
+tests/models/ui/update/service.py
+  s_5f95d9f26d8061::t_36c450279ecefd 1-27
+tests/models/ui/upload.py
+  s_5f95d9f26d8061::t_fe85a27aeef7a0 1,3,6-11,14
+tests/models/ui/utils.py
+  s_5f95d9f26d8061::t_400efe0284bb34 1-11
+tests/models/url.py
+  s_5f95d9f26d8061::t_cdf74c4ea20e69 1,3,6-7,10-11,13-22
+tests/models/xpath.py
+  s_5f95d9f26d8061::t_9416028a56393e 1-31
+tests/parse.py
+  s_5f95d9f26d8061::t_11b989151f2e81 1-184
+tests/parse_packages.py
+  s_5f95d9f26d8061::t_b52c196285b820 1-28
+tests/requirements.in
+  s_5f95d9f26d8061::t_41f32533166393 1-22
+tests/requirements.txt
+  s_5f95d9f26d8061::t_f0520a05f755ab 2,5,7-254,256-369,371-1140,1142-1273,1275-1277,1279-1286,1288-1769
+tests/scripts/after/crowdsec.sh
+  s_5f95d9f26d8061::t_88111261bccddd 1-11
+tests/scripts/after/instances.sh
+  s_5f95d9f26d8061::t_e47b11f9a8a4ad 3,5-9
+tests/scripts/before/acl.sh
+  s_5f95d9f26d8061::t_101996b87012a0 1-45
+tests/scripts/before/blacklist.sh
+  s_5f95d9f26d8061::t_03779ddb492fe0 1-16
+tests/scripts/before/customcert.sh
+  s_5f95d9f26d8061::t_681f7fe6f85c32 1-66
+tests/scripts/before/docker-instances.yml
+  s_5f95d9f26d8061::t_23e777a7d6f744 2-9,11,14
+tests/scripts/before/errors.sh
+  s_5f95d9f26d8061::t_cc7c3c5a24d4ff 1-17,23-52
+tests/scripts/before/instances.sh
+  s_5f95d9f26d8061::t_d66e9be1b36062 3,5-7,9-11
+tests/scripts/before/instances.yml
+  s_5f95d9f26d8061::t_7acba653aa5e04 1-4,6-74
+tests/scripts/before/latest_prerelease.py
+  s_5f95d9f26d8061::t_56a593d17e0903 1-68
+tests/scripts/before/latest_stable.py
+  s_5f95d9f26d8061::t_6631c97c427b69 1-55
+tests/scripts/before/mtls.sh
+  s_5f95d9f26d8061::t_54c19fa09232a2 1-74
+tests/scripts/before/redis.sh
+  s_5f95d9f26d8061::t_b04ee001c57ac7 1-31
+tests/scripts/before/reversescan.sh
+  s_5f95d9f26d8061::t_a8910947054fba 1,3-19
+tests/scripts/before/upgrade.sh
+  s_5f95d9f26d8061::t_3c2b66bb1f18ca 1-33
+tests/scripts/before/valkey.sh
+  s_5f95d9f26d8061::t_88dc23be8170f4 1-93
+tests/scripts/build.sh
+  s_5f95d9f26d8061::t_9d6e9228537f9c 3-4,6-12,14-15,19-28,30-36,38-64,67-114,116-117,119,122-130,132-134,136-151,153-221,223-228,230-231,234-235,238,241-254,257-263,265-271,273-279,282-284,287,291-325,327-342,344-380,382-387,389-394,396-402,405-409,412-458,461,464-465,467-478,480-485,487-503,505-511
+tests/scripts/log.sh
+  s_5f95d9f26d8061::t_0de10504ea075f 1-37
+tests/scripts/minikube-ports.sh
+  s_5f95d9f26d8061::t_27da7e29de7166 1-20
+tests/scripts/restart.sh
+  s_5f95d9f26d8061::t_483122f5089ebc 4,6-10,12-14,17
+tests/scripts/run.sh
+  s_5f95d9f26d8061::t_2cf76ef01e9d51 3-4,6-12,14-15,19-24,26-92,99-104,106-113,115,117-118,120-122,124-141,143-147,149,154,158-163,165-187,189-192,194,197,201-208,210-214,218-222,225-250,253,256-260,263-264,267-268,271,273-275,278-283,285,287-294,296-301,303,305,309-316
+tests/scripts/start.sh
+  s_5f95d9f26d8061::t_6a1584da72715b 3-4,6-18,21-26,28-37,39-79,81-88,90-96,100-152,154-161,163-179,182-208,211-237,240-246,248-264,267-276,278-284,286-292,294-299,301-316,318-330,332-337,341,343-353,356-368,371-385,387-393,395-396,399-404,406,409,413-414,417,420-429,431-434,437-438,440-449,451-473,478,481-485,488,491-530,533-564,567,571-572,574,577,581-586,588-595,597-613,616-617,620-621,624,627-632,635,638-639,642,646-647,650,654,657,661-677,679-684,686-692,694-699,701-714,716-726,728-729,732,735-744,746,748-754,757-760,764,767-774,777
+tests/scripts/stop.sh
+  s_5f95d9f26d8061::t_8152677001b4cf 1-25
+tests/scripts/test-example-hook.sh
+  s_5f95d9f26d8061::t_759e31a31c137f 1-56
+tests/scripts/test.sh
+  s_5f95d9f26d8061::t_523150bce0bc7f 4,6-9,11-16,19-20,22-23,26-30,33
+tests/scripts/utils.sh
+  s_5f95d9f26d8061::t_22d75f7696717d 3-8,10-13,15-44,46-54,57-72,74,76-92,94-131,134-139,141-153,155-159,161-201,204-210,212-277,280-345,348-367,370-429,432-447,449-453,455-469,472-487,489,491-501,503-537,539-542,545-546,548-555,557-560,563-564,566-569,572-573,577-670,674-684,686-707,709-714,717-747,751-779,781-788,790-794,796-819,822-843,845-850,852-2067
+tests/scripts/wait.sh
+  s_5f95d9f26d8061::t_7b43d51200bb28 3-4,6-7,9-10,12-13,16-21,23-49,53-59,61-65,68-83,87,94-120,126-144,151-175,180-214,218,220-273,277-281
+tests/ui.py
+  s_5f95d9f26d8061::t_96449dda14d5d0 1-6,8,11-77,79-113,115-116,118-194
+tests/ui/bans.yml
+  s_5f95d9f26d8061::t_3ae90f4716ce8a 1-107
+tests/ui/configs.yml
+  s_5f95d9f26d8061::t_c4a92018ff5fe8 1-166
+tests/ui/global-config.yml
+  s_5f95d9f26d8061::t_3fe3be2dc9d00c 1-76
+tests/ui/home.yml
+  s_5f95d9f26d8061::t_10c8958aef3fc6 1-56
+tests/ui/instances.yml
+  s_5f95d9f26d8061::t_416fe247b0cfe6 1-208
+tests/ui/jobs.yml
+  s_5f95d9f26d8061::t_37e6119cce9674 1-79
+tests/ui/plugins.yml
+  s_5f95d9f26d8061::t_f6cf92e3a88f60 1-136
+tests/ui/profile.yml
+  s_5f95d9f26d8061::t_5b28627ce1144f 1-183
+tests/ui/services.yml
+  s_5f95d9f26d8061::t_a7e1a4befa28dc 1-209
+tests/ui_handlers/__init__.py
+  s_5f95d9f26d8061::t_caa4f6a818e2a3 1,3-19,21-40
+tests/ui_handlers/access.py
+  s_5f95d9f26d8061::t_eced94a8b21fc6 1-2,4-5,7,10-11,13-17,19-20,22-25,28
+tests/ui_handlers/actions.py
+  s_5f95d9f26d8061::t_b8adca38801175 1-40
+tests/ui_handlers/common.py
+  s_5f95d9f26d8061::t_6c14d3e0c8e950 1-10,13-23,25-26,28-75
+tests/ui_handlers/configs.py
+  s_5f95d9f26d8061::t_2aa5ac3f0bab45 1-4,6,11,14-15,17-18,20-35,37-39,41-44,47-49,51-56,58-61,63-64,66-70,72-77,79-80,82-83,85-86,88-92,94-95,97-98,100-105,107,109-110,112-114
+tests/ui_handlers/count.py
+  s_5f95d9f26d8061::t_feeecf2a73114a 1-35
+tests/ui_handlers/fetch.py
+  s_5f95d9f26d8061::t_7d40eafb5826c5 1-2,4-5,7-17,19-21,23-35
+tests/ui_handlers/find_and_data.py
+  s_5f95d9f26d8061::t_d0eac59eb5cf58 1-2,4-6,8-9,11,14-15,17-25,28-31,33-36,38-54,56-58,60
+tests/ui_handlers/instances.py
+  s_5f95d9f26d8061::t_9db2b575037a1a 1-3,5,7,10-11,13,16-23,25-30,32-41,43-46,48,51-54,56-57,59-60,62-67,69-74,76
+tests/ui_handlers/login.py
+  s_5f95d9f26d8061::t_4a9ddd754598d9 1-6,9,11-63,65-66
+tests/ui_handlers/services.py
+  s_5f95d9f26d8061::t_0a13c2e89e6a26 1-3,5,7,10,12-78,80-229
+tests/ui_handlers/setup.py
+  s_5f95d9f26d8061::t_cfc94ec9a3e6a0 1-3,5-6,8,12-317,319-320,322-323,325-327,330-332,335-337
+tests/ui_handlers/tabs.py
+  s_5f95d9f26d8061::t_a64f1be4b12ccb 1-35
+tests/ui_handlers/upload.py
+  s_5f95d9f26d8061::t_a5efba2fd8f893 1-2,4-8,10,13-16,19-29
+tests/unit/README.md
+  s_5f95d9f26d8061::t_22d848b4a67cb9 1-211
+tests/unit/api/conftest.py
+  s_5f95d9f26d8061::t_1f73821cd43652 1-35
+tests/unit/api/test_api_permissions.py
+  s_5f95d9f26d8061::t_b7739b1a275b1f 1-138
+tests/unit/api/test_api_users.py
+  s_5f95d9f26d8061::t_ad744e67841eda 1-49
+tests/unit/api/test_bans_timeseries.py
+  s_5f95d9f26d8061::t_9067dc316053fe 1-40
+tests/unit/api/test_cache_router_folder_names.py
+  s_5f95d9f26d8061::t_72d591dfb4f007 1-175
+tests/unit/api/test_config_name_rule_is_advertised_correctly.py
+  s_5f95d9f26d8061::t_36d60b5720e696 1-102
+tests/unit/api/test_crowdsec_router.py
+  s_5f95d9f26d8061::t_d50fc6976d01cd 1-144
+tests/unit/api/test_global_settings_acl.py
+  s_5f95d9f26d8061::t_861fccd38718b9 1-62
+tests/unit/api/test_https_retry_endpoint.py
+  s_5f95d9f26d8061::t_64d17127801349 1-100
+tests/unit/api/test_plugin_id_reserved_prefix.py
+  s_5f95d9f26d8061::t_46e2bc5b2a42dc 1-59
+tests/unit/api/test_plugins_acl.py
+  s_5f95d9f26d8061::t_0023e554656aad 1,3-5,7-9,11,14-25,27-35
+tests/unit/api/test_rate_limit_once.py
+  s_5f95d9f26d8061::t_3407d0e7fa1be5 1-145
+tests/unit/api/test_rate_limit_rules.py
+  s_5f95d9f26d8061::t_26ec677c3fb81b 1-260
+tests/unit/api/test_service_convert_permission.py
+  s_5f95d9f26d8061::t_a2654e6394f9b7 1-95
+tests/unit/api/test_ui_stored_bcrypt.py
+  s_5f95d9f26d8061::t_2c78f6f5b1cc9f 1-53
+tests/unit/api_app/README.md
+  s_5f95d9f26d8061::t_04d9d04236629c 1-62
+tests/unit/api_app/_api_http_helpers.py
+  s_5f95d9f26d8061::t_c5d2830449e9b9 1,3,5-6,8,10,12-13,16-25
+tests/unit/api_app/conftest.py
+  s_5f95d9f26d8061::t_21913efd4535dd 1-39
+tests/unit/api_app/requirements.in
+  s_5f95d9f26d8061::t_793ba99f07d351 1-13
+tests/unit/api_app/requirements.txt
+  s_5f95d9f26d8061::t_885915402247bb 1-208
+tests/unit/api_app/test_api_response_compression.py
+  s_5f95d9f26d8061::t_4ae6c0567750b0 1-113
+tests/unit/api_app/test_app_http_contract.py
+  s_5f95d9f26d8061::t_8cabdbd435d553 1-103
+tests/unit/api_app/test_auth_token_issuance.py
+  s_5f95d9f26d8061::t_8448defdcdb68e 1-113
+tests/unit/api_app/test_biscuit_run_limit.py
+  s_5f95d9f26d8061::t_cb74866247ef6b 1-292
+tests/unit/api_app/test_configs_move_authz.py
+  s_5f95d9f26d8061::t_4cefd0c8746ad7 1-222
+tests/unit/api_app/test_configuration_sources.py
+  s_5f95d9f26d8061::t_d4771580e02d05 1-121
+tests/unit/api_app/test_ghsa_254j_biscuit_datalog_injection_regression.py
+  s_5f95d9f26d8061::t_1afb1f14ebb239 1-77
+tests/unit/api_app/test_global_settings_partial_patch_regression.py
+  s_5f95d9f26d8061::t_9419c746b2cb7a 1-35
+tests/unit/api_app/test_guard_authentication.py
+  s_5f95d9f26d8061::t_b75ea064fa36ab 1-158
+tests/unit/api_app/test_plugins_archive_installation.py
+  s_5f95d9f26d8061::t_2c69fcf51f0cef 1-155
+tests/unit/api_app/test_stored_bcrypt.py
+  s_5f95d9f26d8061::t_8570c6c6c7c505 1-41
+tests/unit/autoconf/_autoconf_helpers.py
+  s_5f95d9f26d8061::t_725474f304469e 1,3-4,7-10,12-13,15-43
+tests/unit/autoconf/conftest.py
+  s_5f95d9f26d8061::t_38c46c6d72fbf9 1-245
+tests/unit/autoconf/gateway_fakes.py
+  s_5f95d9f26d8061::t_b6ab3a941736d9 1-66
+tests/unit/autoconf/test_config_apply_signal.py
+  s_5f95d9f26d8061::t_3839fae56e03d2 1-124
+tests/unit/autoconf/test_config_environment_and_readonly.py
+  s_5f95d9f26d8061::t_1abd269800133e 1-354
+tests/unit/autoconf/test_config_update_needed_order.py
+  s_5f95d9f26d8061::t_710abb7a2721a3 1-135
+tests/unit/autoconf/test_controller_base_behaviour.py
+  s_5f95d9f26d8061::t_d0822eb66a7bea 1-522
+tests/unit/autoconf/test_docker_controller_labels.py
+  s_5f95d9f26d8061::t_9799785cce513b 1-397
+tests/unit/autoconf/test_f8_autoconf_regressions.py
+  s_5f95d9f26d8061::t_308f2693f12cc6 1-64
+tests/unit/autoconf/test_gateway_controller_routes.py
+  s_5f95d9f26d8061::t_e1a4f1a8025518 1-869
+tests/unit/autoconf/test_gateway_controller_status.py
+  s_5f95d9f26d8061::t_bfb8536beadded 1-368
+tests/unit/autoconf/test_gateway_status_builders.py
+  s_5f95d9f26d8061::t_a171a214d4d95f 1-204
+tests/unit/autoconf/test_ingress_controller_services.py
+  s_5f95d9f26d8061::t_f5aba251d1d8b4 1-516
+tests/unit/autoconf/test_ingress_swarm_known_defects.py
+  s_5f95d9f26d8061::t_858a63e4f4a93b 1-28
+tests/unit/autoconf/test_k8s_event_batching.py
+  s_5f95d9f26d8061::t_a81ad3f301d7b4 1-97
+tests/unit/autoconf/test_kubernetes_controller_core.py
+  s_5f95d9f26d8061::t_aac2828716cf80 1,3-6,8-11,13-14,17-18,21-22,24-25,27-28,30-31,33-34,37-41,44-45,48,51-56,59-65,67,69-134,137-140,143,146-154,157,160-161,163-169,172-174,176-177,180-186,189-191,193,195-197,200-205,207-208,210-211,214,217-218,221-272,275-293,295,297,299-302,305,308-309,312-313,316-319,322-324,327-328,331-332,335-338,341-345,347-351,354-355,358-361,364-365,367-369,372-376,378-379,382-385,387,389,392-393,395-396,399-400,403-404,406,409,412-419,421,424-427,429,432-436,438-440,443-619,621-626,629-631,633,635-636,639-640,642,644-645,648-652,654-658,660-662,664-665,667-669,672-675,677-678,680-681,683-688,691-692,694-695,697-698,700-930,933-964,966,969-971,973-975,977-979,981-983,986-996,998-999,1002-1005,1008-1010,1013,1016-1072,1074-1075,1077-1078
+tests/unit/autoconf/test_kubernetes_multi_ingress_merge.py
+  s_5f95d9f26d8061::t_a91d0ce2676b58 1-237
+tests/unit/autoconf/test_main_controller_selection.py
+  s_5f95d9f26d8061::t_eef0a4e5f7d829 1-189
+tests/unit/autoconf/test_swarm_controller_labels.py
+  s_5f95d9f26d8061::t_06f9850db387de 1,3-6,8-9,11-13,16-17,20,23-25,28-30,33-37,40-47,50-57,59,62-64,66,69-74,76,79-84,86,89-92,94,97-100,102-103,106-109,111-112,115-118,120-122,125-132,134,136-140,143-145,147,150-156,158,160-162,165-176,178,180-183,186,189-190,193-202,204,207-208,210,213-215,217,220-222,224-225,228-234,236-239,242-248,250-251,254-256,258,261-268,270-286,289-307,310-316,318,320-324,327-330,332,334-335,338-342,344,346-347,350-352,354,356,359-364,366,368-369
+tests/unit/backup/test_db_lock_deadline.py
+  s_5f95d9f26d8061::t_5e97bd829f4cc7 1-117
+tests/unit/backup/test_db_lock_processes.py
+  s_5f95d9f26d8061::t_77e1e237c7ae7c 1-215
+tests/unit/backup/test_issue_2350_dump_command_options.py
+  s_5f95d9f26d8061::t_d646514fcdffd6 1-67
+tests/unit/backup/test_mysql_client_args.py
+  s_5f95d9f26d8061::t_94449a7bbf6e27 1-75
+tests/unit/bunkernet/test_registration_retry.py
+  s_5f95d9f26d8061::t_95a4d02c8fe120 1-96
+tests/unit/certificates/test_custom_cert_validation.py
+  s_5f95d9f26d8061::t_1f741cb2bf46be 1-198
+tests/unit/cli/test_ban_reporting.py
+  s_5f95d9f26d8061::t_6d4b1bf9186380 1-102
+tests/unit/cli/test_ban_time_default.py
+  s_5f95d9f26d8061::t_9307cac8e02580 1-25
+tests/unit/cli/test_cli_operator_actions.py
+  s_5f95d9f26d8061::t_96397779f84dc8 1-221
+tests/unit/cli/test_issue_3046_bwcli_redis_database.py
+  s_5f95d9f26d8061::t_d600d301645656 1-53
+tests/unit/cli/test_issue_3222_plugin_command_dispatch.py
+  s_5f95d9f26d8061::t_75f889eb1e7fd7 1-43
+tests/unit/cli/test_issue_3810_bwcli_api_token.py
+  s_5f95d9f26d8061::t_d65e2314cbae2f 1-118
+tests/unit/cli/test_main_command_dispatch.py
+  s_5f95d9f26d8061::t_14696cd676d52c 1-75
+tests/unit/cli/test_variables_paths_precedence.py
+  s_5f95d9f26d8061::t_97408953eb26ef 1-129
+tests/unit/common/_g5_helpers.py
+  s_5f95d9f26d8061::t_43d1d84a062425 1-17
+tests/unit/common/_lua_core_helpers.py
+  s_5f95d9f26d8061::t_2eb0826db0a308 1-68
+tests/unit/common/_lua_plugin_helpers.py
+  s_5f95d9f26d8061::t_56083ba88e4df6 1-118
+tests/unit/common/_lua_request_helpers.py
+  s_5f95d9f26d8061::t_f0348f413218b7 1-229
+tests/unit/common/_lua_state_helpers.py
+  s_5f95d9f26d8061::t_09e8e16ad866bc 1-440
+tests/unit/common/_t2_helpers.py
+  s_5f95d9f26d8061::t_c633c5220c6358 1-283
+tests/unit/common/test_antibot_js_minifier_length_fold_regression.py
+  s_5f95d9f26d8061::t_dfe72a685538d2 1-121
+tests/unit/common/test_api_audit_preflight_lua.py
+  s_5f95d9f26d8061::t_f90ce590ab8643 1-74
+tests/unit/common/test_api_caller_busy_retry.py
+  s_5f95d9f26d8061::t_2e13ee28e7292a 1-130
+tests/unit/common/test_api_disk_fallback_auth_ports.py
+  s_5f95d9f26d8061::t_b8238a75593182 1-53
+tests/unit/common/test_api_empty_internalstore_lua.py
+  s_5f95d9f26d8061::t_e4032ad6974cac 1-226
+tests/unit/common/test_api_wait_reload_lua.py
+  s_5f95d9f26d8061::t_9245d3078833b4 1-146
+tests/unit/common/test_apicaller_write_budget.py
+  s_5f95d9f26d8061::t_149e2d080ad280 1-85
+tests/unit/common/test_archive_expansion_cap.py
+  s_5f95d9f26d8061::t_a8f856889c6347 1-105
+tests/unit/common/test_authbasic_behaviour_lua.py
+  s_5f95d9f26d8061::t_05ed55aa988556 1-157
+tests/unit/common/test_badbehavior_ban_clears_counter.py
+  s_5f95d9f26d8061::t_177986e29f37ab 1-753
+tests/unit/common/test_badbehavior_timer_ban_reason_regression.py
+  s_5f95d9f26d8061::t_8fd1a652a54f89 1-114
+tests/unit/common/test_blacklist_behaviour_lua.py
+  s_5f95d9f26d8061::t_77b3d60a4837d8 1-290
+tests/unit/common/test_bunkernet_challenge_not_reported.py
+  s_5f95d9f26d8061::t_96fb5170c62b88 1-129
+tests/unit/common/test_bw_acme_lua.py
+  s_5f95d9f26d8061::t_b3c5f4d8bcb458 1-35,37-154
+tests/unit/common/test_bw_cachestore_lua.py
+  s_5f95d9f26d8061::t_fbccb9c8823d46 1-382
+tests/unit/common/test_bw_ctx_lua.py
+  s_5f95d9f26d8061::t_6cf6d91dd74239 1-135
+tests/unit/common/test_bw_logger_lua.py
+  s_5f95d9f26d8061::t_0e86342935ef47 1-65
+tests/unit/common/test_bw_mmdb_lua.py
+  s_5f95d9f26d8061::t_d37c2bf5b3a6eb 1-90
+tests/unit/common/test_bw_plugin_lua.py
+  s_5f95d9f26d8061::t_4eec03b9a44a86 1-498
+tests/unit/common/test_bw_utils_get_ips_lua.py
+  s_5f95d9f26d8061::t_41a8dbfd07e6d8 1-115
+tests/unit/common/test_capjs_hashwx_frame.py
+  s_5f95d9f26d8061::t_e62a7fb774ad82 1-76
+tests/unit/common/test_certificate_empty_name_guard_ports.py
+  s_5f95d9f26d8061::t_4e7b2bea15bf51 1-40
+tests/unit/common/test_certificate_provider_init.py
+  s_5f95d9f26d8061::t_5fd81bc89befff 1-92
+tests/unit/common/test_cli_redis_bans_pipeline.py
+  s_5f95d9f26d8061::t_4851674710f618 1-166
+tests/unit/common/test_cors_self_origin_exact_match_regression.py
+  s_5f95d9f26d8061::t_e42035be4747c3 1-57
+tests/unit/common/test_country_behaviour_lua.py
+  s_5f95d9f26d8061::t_8db1d39b168f69 1-223
+tests/unit/common/test_coverage_gate_regression.py
+  s_5f95d9f26d8061::t_d86a0248d584c6 1-116
+tests/unit/common/test_crowdsec_behaviour_lua.py
+  s_5f95d9f26d8061::t_f5918bab1b44f2 1-516
+tests/unit/common/test_crowdsec_cache_partition_lua.py
+  s_5f95d9f26d8061::t_ed1da10b89942b 1-220
+tests/unit/common/test_crowdsec_client_scope.py
+  s_5f95d9f26d8061::t_03427d1d691967 1-166
+tests/unit/common/test_crowdsec_control_already_absent_lua.py
+  s_5f95d9f26d8061::t_2d94c3dec8d066 1-200
+tests/unit/common/test_crowdsec_enforcement_state_lua.py
+  s_5f95d9f26d8061::t_3e8b96f2e48f7b 1-577
+tests/unit/common/test_customcert_empty_server_name_lua.py
+  s_5f95d9f26d8061::t_59aceab2562cc8 1-157
+tests/unit/common/test_customcert_wildcard_sni.py
+  s_5f95d9f26d8061::t_ad91b254586cc0 1-90
+tests/unit/common/test_datastore_worker_lru_exptime.py
+  s_5f95d9f26d8061::t_3281239a015fdf 1-207
+tests/unit/common/test_dnsbl_behaviour_lua.py
+  s_5f95d9f26d8061::t_ad45ee4c730636 1-345
+tests/unit/common/test_duration_parser.py
+  s_5f95d9f26d8061::t_bbd9970a76d437 1-100
+tests/unit/common/test_duration_readers_lua.py
+  s_5f95d9f26d8061::t_f2fe8acf187a97 1-326
+tests/unit/common/test_duration_redis_client.py
+  s_5f95d9f26d8061::t_cc106541ec6a4e 1,3,5-19
+tests/unit/common/test_duration_regex_parity.py
+  s_5f95d9f26d8061::t_13d438ce5ac101 1-55,57-161
+tests/unit/common/test_env_file_multiline.py
+  s_5f95d9f26d8061::t_052aea35f6d9df 1-239
+tests/unit/common/test_errors_behaviour_lua.py
+  s_5f95d9f26d8061::t_2206a56fc94044 1-180
+tests/unit/common/test_ghsa_79fm_acme_token_traversal_regression.py
+  s_5f95d9f26d8061::t_66e4273ec3ec16 1-82
+tests/unit/common/test_greylist_behaviour_lua.py
+  s_5f95d9f26d8061::t_14cadf4e92143b 1-159,161-235
+tests/unit/common/test_header_rules_lua.py
+  s_5f95d9f26d8061::t_79a24848e3b546 1-348
+tests/unit/common/test_header_rules_plugins_lua.py
+  s_5f95d9f26d8061::t_6f3e5164bcdf2b 1-62,64-78,80-134,136-393
+tests/unit/common/test_headers_behaviour_lua.py
+  s_5f95d9f26d8061::t_35ff14d6389779 1-142
+tests/unit/common/test_healthcheck_status_match.py
+  s_5f95d9f26d8061::t_f4ee37743b5ef6 1-71
+tests/unit/common/test_ignore_uri_normalized_path_regression.py
+  s_5f95d9f26d8061::t_15649781676273 1-76,78-88
+tests/unit/common/test_init_empty_server_name_guards_lua.py
+  s_5f95d9f26d8061::t_7db30107de9a4c 1-129
+tests/unit/common/test_issue_1889_ssl_redirect_before_whitelist.py
+  s_5f95d9f26d8061::t_4f20553279d901 1-55
+tests/unit/common/test_issue_2584_bunkernet_stream_log_regression.py
+  s_5f95d9f26d8061::t_75631026084d8d 1-59
+tests/unit/common/test_issue_2686_atomic_cache_writes.py
+  s_5f95d9f26d8061::t_8aa219bb0fe3b5 1,3-7,9-10,12-15,17,19,21-23,26-36,39-48,51-53,55-56,58-79
+tests/unit/common/test_issue_3012_list_plugins_shared_reference_regression.py
+  s_5f95d9f26d8061::t_5f349b1aa05626 1-82
+tests/unit/common/test_issue_3107_stream_utils.py
+  s_5f95d9f26d8061::t_96105e352d48ec 1-37
+tests/unit/common/test_issue_3324_letsencrypt_lineage_all_four.py
+  s_5f95d9f26d8061::t_6ae430d86524c5 1-71
+tests/unit/common/test_issue_3475_metric_keys_from_request_data_regression.py
+  s_5f95d9f26d8061::t_8ad6f86460e3e3 1-37
+tests/unit/common/test_issue_3618_datastore_lru_resize.py
+  s_5f95d9f26d8061::t_d939aae994a6db 1-74
+tests/unit/common/test_issue_3650_antibot_redirect_target_regression.py
+  s_5f95d9f26d8061::t_db779f8200b0b4 1-119
+tests/unit/common/test_issue_3841_customcert_wildcard_shadow_regression.py
+  s_5f95d9f26d8061::t_6930c6ef745f63 1-80
+tests/unit/common/test_issue_4093_redis_sentinel_credentials.py
+  s_5f95d9f26d8061::t_68ac334632320e 1-83
+tests/unit/common/test_issue_556_session_check_cookie.py
+  s_5f95d9f26d8061::t_22695fb39c250c 1-74
+tests/unit/common/test_issue_922_badbehavior_whitelist_regression.py
+  s_5f95d9f26d8061::t_59bb187f9ef908 1-99
+tests/unit/common/test_jobs_cache_operations.py
+  s_5f95d9f26d8061::t_c753792502522b 1-255
+tests/unit/common/test_letsencrypt_cache_recovery.py
+  s_5f95d9f26d8061::t_09dcf872652235 1-237
+tests/unit/common/test_letsencrypt_wildcard_sni.py
+  s_5f95d9f26d8061::t_b751b7bf747732 1-232
+tests/unit/common/test_limit_behaviour_lua.py
+  s_5f95d9f26d8061::t_5574ad340d3304 1-134
+tests/unit/common/test_lists_port_parser.py
+  s_5f95d9f26d8061::t_8f4657d7090a12 1-63
+tests/unit/common/test_lua_request_path_ports.py
+  s_5f95d9f26d8061::t_7ce00ee7fae5fa 1-335
+tests/unit/common/test_metrics_facet_rebuild_lua_heap_regression.py
+  s_5f95d9f26d8061::t_2f31b6d7f05bb9 1-126
+tests/unit/common/test_metrics_reports_wipe_latched_synced_regression.py
+  s_5f95d9f26d8061::t_177121aa01c085 1-149
+tests/unit/common/test_misc_behaviour_lua.py
+  s_5f95d9f26d8061::t_e676728422eef5 1-23,26-158
+tests/unit/common/test_mmdb_bundled_publication.py
+  s_5f95d9f26d8061::t_bbad4ac8f80b36 1-82
+tests/unit/common/test_mmdb_download_validation.py
+  s_5f95d9f26d8061::t_f601fb08e4a58e 1-183
+tests/unit/common/test_mmdb_runtime_recovery.py
+  s_5f95d9f26d8061::t_aa428051ecde3f 1-143
+tests/unit/common/test_modsecurity_body_reason_lua.py
+  s_5f95d9f26d8061::t_1d8fc320d74712 1-196
+tests/unit/common/test_mtls_behaviour_lua.py
+  s_5f95d9f26d8061::t_11d57540a4746f 1-118
+tests/unit/common/test_pow_port.py
+  s_5f95d9f26d8061::t_bba40eeeb3ff7e 1-112
+tests/unit/common/test_proxy_protocol_addr_patch.py
+  s_5f95d9f26d8061::t_1a00675d9d52c1 1-99
+tests/unit/common/test_redis_behaviour_lua.py
+  s_5f95d9f26d8061::t_b2cb54a57c782a 1-156
+tests/unit/common/test_redis_client_memo.py
+  s_5f95d9f26d8061::t_e2f12e08cc52fe 1-244
+tests/unit/common/test_redis_cluster_nodes_default_port.py
+  s_5f95d9f26d8061::t_d52203dcf057b2 1-62
+tests/unit/common/test_regex_match_memoize.py
+  s_5f95d9f26d8061::t_99fddddc54de48 1-146
+tests/unit/common/test_remove_ban_clears_badbehavior_state.py
+  s_5f95d9f26d8061::t_cfc7f58dfcb8ac 1-277
+tests/unit/common/test_resume_maintenance.py
+  s_5f95d9f26d8061::t_e8061fb2923786 1-108
+tests/unit/common/test_robotstxt_behaviour_lua.py
+  s_5f95d9f26d8061::t_f2f1955437ab12 1-207
+tests/unit/common/test_run_as_nginx_home.py
+  s_5f95d9f26d8061::t_efc670db5465fe 1-186
+tests/unit/common/test_securitytxt_behaviour_lua.py
+  s_5f95d9f26d8061::t_e93457136949df 1-113
+tests/unit/common/test_ssl_behaviour_lua.py
+  s_5f95d9f26d8061::t_dd264b947d7c37 1-81
+tests/unit/common/test_tar_link_validation.py
+  s_5f95d9f26d8061::t_fa506b5cccfba3 1-115
+tests/unit/common/test_tar_link_verification.py
+  s_5f95d9f26d8061::t_ccd0b562479de8 1-173
+tests/unit/common/test_ui_behaviour_lua.py
+  s_5f95d9f26d8061::t_31167bc78136e6 1,3-4,6,8-22
+tests/unit/common/test_utils_remove_ban_redis_regression.py
+  s_5f95d9f26d8061::t_744c98cd2f4675 1-26,28-105
+tests/unit/common/test_whitelist_and_has_variable_inheritance_lua.py
+  s_5f95d9f26d8061::t_e80411f0b18e74 1-188
+tests/unit/common/workflow_cases.json
+  s_5f95d9f26d8061::t_6f9c8ca1fa35ba 1-467
+tests/unit/conftest.py
+  s_5f95d9f26d8061::t_6eae0bec2ca014 1-202
+tests/unit/coverage_gate.py
+  s_5f95d9f26d8061::t_c6a0a48acb1148 1-97
+tests/unit/customcert/test_custom_cert_strip_duplicates.py
+  s_5f95d9f26d8061::t_96614b7ff34571 1-71
+tests/unit/db/_t3_helpers.py
+  s_5f95d9f26d8061::t_4afc63c73e38e1 1-43
+tests/unit/db/alembic_baseline.py
+  s_5f95d9f26d8061::t_2cf66d2e2a6a16 1-205
+tests/unit/db/test_autoconf_globals.py
+  s_5f95d9f26d8061::t_06ccbf7dd5b79e 1-80
+tests/unit/db/test_blob_integrity.py
+  s_5f95d9f26d8061::t_14632eeea4ee80 1-119
+tests/unit/db/test_checked_changes_ui_plugins_flag.py
+  s_5f95d9f26d8061::t_072d059a3f46c0 1-41
+tests/unit/db/test_config_read.py
+  s_5f95d9f26d8061::t_221d6ee506074e 1-103,106-157,159,161-166,168,171-212,214,216-223,226-228,230-235
+tests/unit/db/test_config_save_cleanup_methods.py
+  s_5f95d9f26d8061::t_db6eacb86c7d71 1,3-93,96-100,103-105,108-160,163-196
+tests/unit/db/test_config_save_does_not_drain_payload.py
+  s_5f95d9f26d8061::t_b34251397575eb 1-125
+tests/unit/db/test_config_save_session_leak.py
+  s_5f95d9f26d8061::t_dc755540e73b1c 1-127
+tests/unit/db/test_custom_configs.py
+  s_5f95d9f26d8061::t_4a09723a8cbc95 1-374
+tests/unit/db/test_default_multiple_sibling_lock.py
+  s_5f95d9f26d8061::t_4fbd4520165a85 1-498
+tests/unit/db/test_duration_env_database.py
+  s_5f95d9f26d8061::t_c01f6fe43998fc 1-52
+tests/unit/db/test_duration_upgrade.py
+  s_5f95d9f26d8061::t_56d4adfb5fd3ee 1-82
+tests/unit/db/test_external_plugin_lifecycle.py
+  s_5f95d9f26d8061::t_a0dd568a06cb23 1-280
+tests/unit/db/test_get_services_reports_inherited.py
+  s_5f95d9f26d8061::t_9f953e9f7f33eb 1-70
+tests/unit/db/test_init_tables.py
+  s_5f95d9f26d8061::t_cd5c9484e3b81b 1-74
+tests/unit/db/test_instances.py
+  s_5f95d9f26d8061::t_1021b3ba19a5a3 1-105
+tests/unit/db/test_issue_1946_global_suffixed_default_add.py
+  s_5f95d9f26d8061::t_abd61b250b04e0 1-34
+tests/unit/db/test_issue_1946_global_suffixed_default_update.py
+  s_5f95d9f26d8061::t_abda1f5a781209 1-58
+tests/unit/db/test_issue_2538_get_config_integer_suffixes.py
+  s_5f95d9f26d8061::t_5d1744ca973a85 1-42
+tests/unit/db/test_issue_3361_database_uri_handling.py
+  s_5f95d9f26d8061::t_1d53bd67190c15 1-95
+tests/unit/db/test_issue_3368_foreign_key_indexes.py
+  s_5f95d9f26d8061::t_69de46aa46fded 1-75
+tests/unit/db/test_issue_3893_db_write_paths.py
+  s_5f95d9f26d8061::t_89ca68688e8713 1-145
+tests/unit/db/test_issue_3986_service_default_edit_last_update.py
+  s_5f95d9f26d8061::t_4e77dbe7ad9056 1-57
+tests/unit/db/test_issue_4095_alembic_enum_method_upgrade.py
+  s_5f95d9f26d8061::t_d35c5da4c92b44 1-85
+tests/unit/db/test_issue_4095_alembic_varchar_method_upgrade.py
+  s_5f95d9f26d8061::t_0bbb82b617a3cb 1-80
+tests/unit/db/test_issue_474_save_config_values.py
+  s_5f95d9f26d8061::t_0969159a9b3420 1-114
+tests/unit/db/test_job_cache_transactions.py
+  s_5f95d9f26d8061::t_99055a96b38595 1-82
+tests/unit/db/test_listen_port_context.py
+  s_5f95d9f26d8061::t_cb8b9040c74a7e 1-104
+tests/unit/db/test_mem_api_global_config_partial_wipe_regression.py
+  s_5f95d9f26d8061::t_56dcac057ca832 1-51
+tests/unit/db/test_metadata.py
+  s_5f95d9f26d8061::t_8fae9d84475d7b 1-94
+tests/unit/db/test_migrations_use_one_connection.py
+  s_5f95d9f26d8061::t_2f9ab6730b10e9 1-64
+tests/unit/db/test_plugin_page_and_config_checksums.py
+  s_5f95d9f26d8061::t_e60ada67eb3616 1-27
+tests/unit/db/test_plugin_update_reconciliation.py
+  s_5f95d9f26d8061::t_a729bcf35c644a 1-35,37-48,50-113
+tests/unit/db/test_plugins.py
+  s_5f95d9f26d8061::t_c9ec5c780b880d 1-52
+tests/unit/db/test_service_server_names.py
+  s_5f95d9f26d8061::t_1d2ab722ae7e33 1-153
+tests/unit/db/test_service_view_keeps_own_settings.py
+  s_5f95d9f26d8061::t_4e0719204fae56 1,3-12,14,17-27,30-33,35,37-41,43-45,47,49-50,52-54,56,59-62,64,66-67
+tests/unit/db/test_setting_drafts.py
+  s_5f95d9f26d8061::t_eb8dabd0108e76 1-177
+tests/unit/db/test_templates.py
+  s_5f95d9f26d8061::t_57a1e4a2419fd1 1-320
+tests/unit/db/test_upgrade_alembic_rc_chain_regression.py
+  s_5f95d9f26d8061::t_9e332af5bd80fa 1-30
+tests/unit/db/test_upgrade_schema_parity.py
+  s_5f95d9f26d8061::t_9ae5e7e334ec58 1-164,166-170,172-176,178-708
+tests/unit/db/test_write_probe_primary_key.py
+  s_5f95d9f26d8061::t_d493c0bb3a8822 1-112
+tests/unit/docker-compose.test-db.yml
+  s_5f95d9f26d8061::t_0e6a63b5922ad1 1-13,15-17,19-30,32-36,38-50,52-54,56-68
+tests/unit/fixtures/__init__.py
+  s_5f95d9f26d8061::t_01215b63f95317 1
+tests/unit/fixtures/api_utils.py
+  s_5f95d9f26d8061::t_8f7c6ddb6f5496 1-35
+tests/unit/fixtures/db_factory.py
+  s_5f95d9f26d8061::t_aba12ce4be8d12 1-34
+tests/unit/fixtures/duration_vectors.json
+  s_5f95d9f26d8061::t_4817e5eb8f8c0d 1-90
+tests/unit/fixtures/engines.py
+  s_5f95d9f26d8061::t_8aa8f679d60e36 1-78
+tests/unit/fixtures/seed.py
+  s_5f95d9f26d8061::t_352298c513d182 1-8,10-11,13-16,20-21,23-25,29-30,33-34,37-41,43-44,46-100,103-105,108-110,112-122,125-149,154-175,178-181,183-273,276-281,284-290
+tests/unit/gen/_listen_helpers.py
+  s_5f95d9f26d8061::t_a8f7c825e15a44 1-47
+tests/unit/gen/_t4_helpers.py
+  s_5f95d9f26d8061::t_ab51a963d60bde 1-117
+tests/unit/gen/_t5_helpers.py
+  s_5f95d9f26d8061::t_7f0c6d3eb2ddf2 1-26
+tests/unit/gen/conftest.py
+  s_5f95d9f26d8061::t_f30529cf4f6930 1-169
+tests/unit/gen/test_antibot_challenge_location.py
+  s_5f95d9f26d8061::t_c51581a82e9ae4 1-47
+tests/unit/gen/test_api_ui_template_whitelist.py
+  s_5f95d9f26d8061::t_baee1b89185d7f 1-60
+tests/unit/gen/test_bans_tls_drop_setting.py
+  s_5f95d9f26d8061::t_3edcaae5483a1e 1-47
+tests/unit/gen/test_configurator_extensions.py
+  s_5f95d9f26d8061::t_0bf94e5d1384f3 1-132
+tests/unit/gen/test_configurator_jobs.py
+  s_5f95d9f26d8061::t_4f2c40b8bab3e1 1-60
+tests/unit/gen/test_cookie_flags_regex.py
+  s_5f95d9f26d8061::t_3a61485f7d3308 1-56
+tests/unit/gen/test_custom_error_pages.py
+  s_5f95d9f26d8061::t_5bd9a32f98d9a1 1-63
+tests/unit/gen/test_default_server_strict_sni_inert_warning.py
+  s_5f95d9f26d8061::t_8e0d10dae52c4e 1-42
+tests/unit/gen/test_ecdh_curve_faithful_probe_regression.py
+  s_5f95d9f26d8061::t_f9fc893e351b03 1-148
+tests/unit/gen/test_empty_directive_arguments.py
+  s_5f95d9f26d8061::t_29acfd98aa9667 1-167
+tests/unit/gen/test_gen_utils.py
+  s_5f95d9f26d8061::t_f99382a25eda20 1-43
+tests/unit/gen/test_generated_header_overrides.py
+  s_5f95d9f26d8061::t_7db04ef12f56c4 1-62
+tests/unit/gen/test_global_crs_plugins.py
+  s_5f95d9f26d8061::t_edc7380140b8cb 1-146
+tests/unit/gen/test_grpc_upstream_tls.py
+  s_5f95d9f26d8061::t_0538e6cc42d38a 1,3-145
+tests/unit/gen/test_has_service_with.py
+  s_5f95d9f26d8061::t_fab5b83b63612a 1-105
+tests/unit/gen/test_issue_2452_ui_login_modsec_exclusions.py
+  s_5f95d9f26d8061::t_daf325c345c56d 1-76
+tests/unit/gen/test_issue_2525_quic_reuseport.py
+  s_5f95d9f26d8061::t_fbac2b2431c9f1 1-74
+tests/unit/gen/test_issue_3153_worker_shutdown_timeout.py
+  s_5f95d9f26d8061::t_648deb56a8c31a 1,3-6,8-9,11-42
+tests/unit/gen/test_issue_3490_bwerror_handlers_no_short_circuit.py
+  s_5f95d9f26d8061::t_08498fad8d6bc6 1-74
+tests/unit/gen/test_issue_3550_reverse_proxy_location_render.py
+  s_5f95d9f26d8061::t_2fbcea04e60306 1-71
+tests/unit/gen/test_issue_3682_modsec_bodyless_xml.py
+  s_5f95d9f26d8061::t_2a354031ff198b 1-61
+tests/unit/gen/test_issue_3992_default_page_root_only.py
+  s_5f95d9f26d8061::t_aac3f1fb2387c1 1-44
+tests/unit/gen/test_issue_504_setting_regex_validation.py
+  s_5f95d9f26d8061::t_03dd67a7d747ca 1-68
+tests/unit/gen/test_issue_656_redirect_keeps_acme_challenge.py
+  s_5f95d9f26d8061::t_63a961273d66e9 1-78
+tests/unit/gen/test_issue_954_templator_root_templates.py
+  s_5f95d9f26d8061::t_cc593567d94b47 1-65
+tests/unit/gen/test_limit_http3_v1ip_overlap_regression.py
+  s_5f95d9f26d8061::t_4d3d31eb72c577 1-74
+tests/unit/gen/test_listen_ports.py
+  s_5f95d9f26d8061::t_1730c1018852dd 1-173
+tests/unit/gen/test_modsec_plugin_fragment_includes.py
+  s_5f95d9f26d8061::t_bef8c8952c43da 1-142
+tests/unit/gen/test_modsecurity_audit_render.py
+  s_5f95d9f26d8061::t_c3560a533e1b0f 1-223
+tests/unit/gen/test_mtls_fail_open_missing_ca_regression.py
+  s_5f95d9f26d8061::t_253094bb904f11 1-96
+tests/unit/gen/test_reverse_proxy_max_client_size.py
+  s_5f95d9f26d8061::t_828abddf3aa9b4 1-79
+tests/unit/gen/test_reverse_proxy_upstream_tls.py
+  s_5f95d9f26d8061::t_428bce2a255c7a 1-91
+tests/unit/gen/test_reverseproxy_signin_regex_regression.py
+  s_5f95d9f26d8061::t_806e8e61fb8f1b 1-54
+tests/unit/gen/test_save_config_cli_outcomes.py
+  s_5f95d9f26d8061::t_7888c9ec2a39bf 1-168
+tests/unit/gen/test_save_config_pending_migration_regression.py
+  s_5f95d9f26d8061::t_370cb6e39236ac 1-46
+tests/unit/gen/test_save_config_version_stamp.py
+  s_5f95d9f26d8061::t_862e659d1331f0 1-98
+tests/unit/gen/test_service_server_name.py
+  s_5f95d9f26d8061::t_b758aaf2fd62af 1-95
+tests/unit/gen/test_service_server_name_render.py
+  s_5f95d9f26d8061::t_21658abe03f939 1-50
+tests/unit/gen/test_setting_regexes.py
+  s_5f95d9f26d8061::t_8873413c3660d7 1-471
+tests/unit/gen/test_setting_value_newlines.py
+  s_5f95d9f26d8061::t_d0501cd4506eca 1-119
+tests/unit/gen/test_ssl_certificate_partial.py
+  s_5f95d9f26d8061::t_4823b9521aabbc 1-74
+tests/unit/gen/test_stream_lua_conf_shared_dict_regression.py
+  s_5f95d9f26d8061::t_2e4aa89b9f782d 1-35
+tests/unit/gen/test_sync_tree_reload_marker.py
+  s_5f95d9f26d8061::t_9a705066a58391 1-65
+tests/unit/gen/test_templator_default_values.py
+  s_5f95d9f26d8061::t_fe540ea1bb0077 1-102
+tests/unit/gen/test_templator_ssl.py
+  s_5f95d9f26d8061::t_9fbf9785546917 1-51
+tests/unit/gen/test_ui_modsec_crs_exclusions.py
+  s_5f95d9f26d8061::t_f18abf33c80a64 1-71
+tests/unit/gen/test_variables_env_atomic_write.py
+  s_5f95d9f26d8061::t_81d9c129c5c44c 1-84
+tests/unit/gen/test_xssl_ingress_strip.py
+  s_5f95d9f26d8061::t_ff3a820cc8803b 1-141
+tests/unit/integrations/test_all_in_one_log_flushing.py
+  s_5f95d9f26d8061::t_8d59c58cd5f443 1-112
+tests/unit/integrations/test_requirements_coinstall.py
+  s_5f95d9f26d8061::t_085f366156777d 1-59
+tests/unit/jobs/_other_jobs_helpers.py
+  s_5f95d9f26d8061::t_a190d634f59255 1-106
+tests/unit/jobs/conftest.py
+  s_5f95d9f26d8061::t_1ece1339ee4d0b 1-119
+tests/unit/jobs/test_crowdsec_captcha_provider_render.py
+  s_5f95d9f26d8061::t_d5542df22b1e1d 1-63
+tests/unit/jobs/test_crs_plugins_publication.py
+  s_5f95d9f26d8061::t_81bb3e843e0b1a 1-171
+tests/unit/jobs/test_dnsbl_ignore_download.py
+  s_5f95d9f26d8061::t_6c3859d7044c2f 1-103
+tests/unit/jobs/test_duration_jobs.py
+  s_5f95d9f26d8061::t_95d43d20f70a4b 1-87
+tests/unit/jobs/test_external_plugins_installation.py
+  s_5f95d9f26d8061::t_7fe6174028a59c 1-68,70-148
+tests/unit/jobs/test_issue_422_realip_setting_name.py
+  s_5f95d9f26d8061::t_93cb8147fe96b4 1-75
+tests/unit/jobs/test_lists_port_download.py
+  s_5f95d9f26d8061::t_57433d7618d4d3 1-116
+tests/unit/jobs/test_mtls_client_cert_job_regression.py
+  s_5f95d9f26d8061::t_d5b7845455a4f7 1-29
+tests/unit/jobs/test_mtls_pair_publication.py
+  s_5f95d9f26d8061::t_45956924dfbf85 1-171
+tests/unit/jobs/test_pro_plugins_installation.py
+  s_5f95d9f26d8061::t_061c9a92dca163 1-203
+tests/unit/jobs/test_robots_rules_download.py
+  s_5f95d9f26d8061::t_e52d0582e8245b 1-165
+tests/unit/jobs/test_selfsigned_generation.py
+  s_5f95d9f26d8061::t_89d3827e2b7999 1-94
+tests/unit/jobs/test_update_check_release_line.py
+  s_5f95d9f26d8061::t_3d7e49b55dc545 1-130
+tests/unit/jobs/test_upstream_cert_material.py
+  s_5f95d9f26d8061::t_56f41d2a349dbf 1-183
+tests/unit/legacy/test_legacy_scripts.py
+  s_5f95d9f26d8061::t_588a8d30a461e9 1-64
+tests/unit/letsencrypt/conftest.py
+  s_5f95d9f26d8061::t_f4febf42852cac 1-15
+tests/unit/letsencrypt/test_acme_passthrough_host_template.py
+  s_5f95d9f26d8061::t_55d52fd0ece957 1-71
+tests/unit/letsencrypt/test_certbot_concurrency_storage.py
+  s_5f95d9f26d8061::t_d68fdc23698a69 1-296
+tests/unit/letsencrypt/test_certbot_hooks_api_reply.py
+  s_5f95d9f26d8061::t_419dc16df9135e 1-64
+tests/unit/letsencrypt/test_certbot_jobs_execution.py
+  s_5f95d9f26d8061::t_034e6b4cbe4b45 1-807
+tests/unit/letsencrypt/test_certbot_retry_psl_regressions.py
+  s_5f95d9f26d8061::t_f040ef7d700b8f 1-62
+tests/unit/letsencrypt/test_issue_3021_hooks_use_api_on_every_integration.py
+  s_5f95d9f26d8061::t_bd9b8a1f386c69 1-77
+tests/unit/letsencrypt/test_issue_3237_credential_leaks.py
+  s_5f95d9f26d8061::t_ec9ed866456afa 1-98
+tests/unit/letsencrypt/test_issue_3251_profile_name_limit_warning.py
+  s_5f95d9f26d8061::t_c87e2c0b7538e3 1-53
+tests/unit/letsencrypt/test_letsencrypt_utils_runtime.py
+  s_5f95d9f26d8061::t_644f32fa097307 1-348
+tests/unit/letsencrypt/test_stale_account_detection.py
+  s_5f95d9f26d8061::t_c501b3b2da8115 1-154
+tests/unit/letsencrypt/test_wildcard_explicit_scopes.py
+  s_5f95d9f26d8061::t_0d2277668f39d3 1-150
+tests/unit/letsencrypt/test_wildcard_group_coverage.py
+  s_5f95d9f26d8061::t_f1b876e42c866c 1-123
+tests/unit/letsencrypt/test_zerossl_bot_api_key_env_regression.py
+  s_5f95d9f26d8061::t_519450d44f91bd 1-96
+tests/unit/linux/_t7_helpers.py
+  s_5f95d9f26d8061::t_0979c18d633422 1-41
+tests/unit/linux/test_db_lock_upgrade_permissions.py
+  s_5f95d9f26d8061::t_8ebddcf71a8a38 1-54
+tests/unit/linux/test_install_bunkerweb.py
+  s_5f95d9f26d8061::t_4ccc1ca84abd95 1-44
+tests/unit/linux/test_install_docker_upgrade_verification.py
+  s_5f95d9f26d8061::t_17810a3fa5d778 1-450
+tests/unit/linux/test_install_downgrade_and_backup_uri.py
+  s_5f95d9f26d8061::t_7b940f19be1e4c 1-120
+tests/unit/linux/test_issue_1589_before_install_nginx_backup.py
+  s_5f95d9f26d8061::t_aedce85cfc433c 1-66
+tests/unit/linux/test_issue_2556_aio_redis_data_dir.py
+  s_5f95d9f26d8061::t_50ab84f9e21531 1-64
+tests/unit/linux/test_issue_2663_stop_uses_bunkerweb_pid.py
+  s_5f95d9f26d8061::t_9982122c7fc63f 1-77
+tests/unit/linux/test_issue_2743_run_as_nginx.py
+  s_5f95d9f26d8061::t_07b48adae66ce0 1-68
+tests/unit/linux/test_issue_2998_dead_nginx_wait_loop.py
+  s_5f95d9f26d8061::t_a9cb43f5456ab6 1-63
+tests/unit/linux/test_issue_3052_upgrade_backup_install_type.py
+  s_5f95d9f26d8061::t_6849946a3e746e 1-90
+tests/unit/linux/test_issue_3659_crowdsec_prefers_upstream.py
+  s_5f95d9f26d8061::t_2711cd88573dc3 1-98
+tests/unit/linux/test_issue_615_runtime_dirs_recreated.py
+  s_5f95d9f26d8061::t_a356534774a8c4 1-57
+tests/unit/linux/test_keep_config_sentinel_regression.py
+  s_5f95d9f26d8061::t_d5f8a3a8497bb6 1-99
+tests/unit/linux/test_start_sh_recognises_empty_defaults.py
+  s_5f95d9f26d8061::t_0d1a04a939f7a9 1-87
+tests/unit/lua/test_resume_rdns.py
+  s_5f95d9f26d8061::t_75ae3984b37a3d 1-44,46-207
+tests/unit/lua_crowdsec_fakes.lua
+  s_5f95d9f26d8061::t_9271ba1da1ae73 1-503
+tests/unit/lua_lease_fakes.lua
+  s_5f95d9f26d8061::t_c2f839b20c9d38 1-385
+tests/unit/metrics/test_lru_resize_phase.py
+  s_5f95d9f26d8061::t_95d26b558298d4 1-54
+tests/unit/metrics/test_lru_sync_loop.py
+  s_5f95d9f26d8061::t_8f1f47994c3bf5 1-185
+tests/unit/misc/test_anonymous_report_single_site.py
+  s_5f95d9f26d8061::t_6046333a2b2a28 1-40
+tests/unit/modsecurity/crs_plugins_job_source.py
+  s_5f95d9f26d8061::t_e71b59964cb8d6 1-62
+tests/unit/modsecurity/test_audit_concurrent.py
+  s_5f95d9f26d8061::t_1218fac6014356 1-289
+tests/unit/modsecurity/test_download_crs_plugins_retry.py
+  s_5f95d9f26d8061::t_b2e4b52846cbcd 1-71
+tests/unit/plugins_download/test_issue_3258_plugin_archive_is_deterministic.py
+  s_5f95d9f26d8061::t_56be4acd003b64 1-69
+tests/unit/plugins_download/test_plugin_checksum_umask.py
+  s_5f95d9f26d8061::t_9f8ba941730070 1-90
+tests/unit/reload_publication.py
+  s_5f95d9f26d8061::t_8cb03e35d1ef91 1-123,126-140,142-193,196-313
+tests/unit/requirements.in
+  s_5f95d9f26d8061::t_9cfb1fa15848a8 1-71
+tests/unit/requirements.txt
+  s_5f95d9f26d8061::t_67215c73b0bef0 1-168,170-194,196,198-421,423-427,429-500,502-504,506-966,968-993,995-1146,1148-1164,1167,1169-1180,1182-1191,1193-1350,1352-1438,1440-1613,1615-1864,1866-1946,1948-1962,1964-2227,2229-2373,2375-2466,2468-2478,2481-2484,2487-2492,2494-2503,2505-2517,2519-2763
+tests/unit/scheduler/conftest.py
+  s_5f95d9f26d8061::t_606d7407a4995e 1-68,70,72-114
+tests/unit/scheduler/scheduler_fakes.py
+  s_5f95d9f26d8061::t_3876f0b9b44e17 1-202
+tests/unit/scheduler/test_jobscheduler_jobs.py
+  s_5f95d9f26d8061::t_282cf029d16b7f 1-850
+tests/unit/scheduler/test_main_bootstrap_regression.py
+  s_5f95d9f26d8061::t_ceddac55ad61c5 1-47
+tests/unit/scheduler/test_main_files.py
+  s_5f95d9f26d8061::t_2d9f43120fcfd5 1-477
+tests/unit/scheduler/test_main_globals.py
+  s_5f95d9f26d8061::t_2794c5f5e2bace 1-103
+tests/unit/scheduler/test_main_healthcheck.py
+  s_5f95d9f26d8061::t_306eb2edc5d5c7 1-229
+tests/unit/scheduler/test_main_helpers.py
+  s_5f95d9f26d8061::t_4658eb48089695 1-619
+tests/unit/scheduler/test_main_loop.py
+  s_5f95d9f26d8061::t_758d0541ebc5bb 1-758
+tests/unit/scheduler/test_once_job_cache_publication.py
+  s_5f95d9f26d8061::t_8a37f9fd90f929 1-213
+tests/unit/scheduler/test_once_jobs_regenerate.py
+  s_5f95d9f26d8061::t_ea029464b28d83 1-101
+tests/unit/scheduler/test_plugin_archive_errors_regression.py
+  s_5f95d9f26d8061::t_d0fcf3feff9e68 1-33
+tests/unit/scheduler/test_plugin_generation_stability.py
+  s_5f95d9f26d8061::t_cfa4e95c7c33a3 1-119
+tests/unit/scheduler/test_startup_template_configs.py
+  s_5f95d9f26d8061::t_eb71f83845c7ac 1-70
+tests/unit/test_api_bans_crowdsec_unban.py
+  s_5f95d9f26d8061::t_5568eb8751f7d9 1-422
+tests/unit/test_api_cache_delete_plugin_boundary.py
+  s_5f95d9f26d8061::t_726531d7fd76e8 1-113
+tests/unit/test_api_config_move_authorization.py
+  s_5f95d9f26d8061::t_bf2b57b5a1f3b1 1-230
+tests/unit/test_api_rate_limit_cluster.py
+  s_5f95d9f26d8061::t_2097d3d2d5aec4 1-128
+tests/unit/test_api_rate_limit_cost.py
+  s_5f95d9f26d8061::t_31aecc770af2f6 1-113
+tests/unit/test_api_rate_limit_fallback.py
+  s_5f95d9f26d8061::t_e7e48ab2744b90 1-77,80-81,83-84,88-113,116-117
+tests/unit/test_api_rate_limit_redact_reload_busy.py
+  s_5f95d9f26d8061::t_8d80934bfd1940 1-150
+tests/unit/test_api_service_rename.py
+  s_5f95d9f26d8061::t_d64e84dafc1410 1-531
+tests/unit/test_autoconf_k8s_request_timeout.py
+  s_5f95d9f26d8061::t_7a2c9808860d7a 1-130
+tests/unit/test_autoconf_lock_watchdog.py
+  s_5f95d9f26d8061::t_06f70281830df8 1-2,4-6,8-66,70
+tests/unit/test_autoconf_watchdog_slow_apply.py
+  s_5f95d9f26d8061::t_57d3d600194f6b 1-146
+tests/unit/test_backup_dump_test_tables.py
+  s_5f95d9f26d8061::t_23e340628aec6e 1-124
+tests/unit/test_backup_restore_engine_guard.py
+  s_5f95d9f26d8061::t_26d7427bf744de 1-180
+tests/unit/test_cache_restore_links.py
+  s_5f95d9f26d8061::t_d0d60b3f9ca134 1-245
+tests/unit/test_certbot_deploy_reload_busy.py
+  s_5f95d9f26d8061::t_92a8c1f2bc02eb 1-80
+tests/unit/test_certbot_hooks_error_logging.py
+  s_5f95d9f26d8061::t_e9b36e839be975 1-55
+tests/unit/test_cli_crowdsec_unban.py
+  s_5f95d9f26d8061::t_8524127b911450 1-289
+tests/unit/test_crowdsec_unban.py
+  s_5f95d9f26d8061::t_45a324a53a4539 1-447
+tests/unit/test_db_cleanup_jobs_runs_excess.py
+  s_5f95d9f26d8061::t_6ca12bf86d5a47 1-171
+tests/unit/test_db_driver_timeouts.py
+  s_5f95d9f26d8061::t_438c879f18e963 1-104
+tests/unit/test_db_lock.py
+  s_5f95d9f26d8061::t_6adc7ad974e7ab 1-123,125-210,212-249,251-252
+tests/unit/test_default_server_cert_pair.py
+  s_5f95d9f26d8061::t_dcf38e1f806041 1-92
+tests/unit/test_gateway_api_status.py
+  s_5f95d9f26d8061::t_6637ba15fe11f4 1-338
+tests/unit/test_gateway_ownership.py
+  s_5f95d9f26d8061::t_f67123cb9a3fc4 1-118
+tests/unit/test_gen_applied_digest.py
+  s_5f95d9f26d8061::t_23a66c686a6f0f 1-58
+tests/unit/test_gen_install_guard.py
+  s_5f95d9f26d8061::t_cd34deb1b74298 1-366
+tests/unit/test_gen_render_failure.py
+  s_5f95d9f26d8061::t_ee53c623ea73c4 1-198
+tests/unit/test_gen_sync_tree.py
+  s_5f95d9f26d8061::t_3d81baa0ce79bb 1-2,6-7,9-140,142,144-146,150
+tests/unit/test_ingress_ownership.py
+  s_5f95d9f26d8061::t_e34d3006da18a5 1-148
+tests/unit/test_install_sentinel_startup.sh
+  s_5f95d9f26d8061::t_5338f7e60cc156 1-96
+tests/unit/test_letsencrypt_passthrough.lua
+  s_5f95d9f26d8061::t_e3ffcb04c66d8b 1-129
+tests/unit/test_limit_conn_detect.py
+  s_5f95d9f26d8061::t_d8da884dcfa795 1-51
+tests/unit/test_lua_api_digest_lock.lua
+  s_5f95d9f26d8061::t_8845200a72a850 1-237
+tests/unit/test_lua_api_leases.lua
+  s_5f95d9f26d8061::t_2735e14d694912 1-261
+tests/unit/test_lua_api_reload_serialize.lua
+  s_5f95d9f26d8061::t_20f59515291709 1-634
+tests/unit/test_lua_banlease.lua
+  s_5f95d9f26d8061::t_cfd44275834aef 1-155
+tests/unit/test_lua_banlease_write.lua
+  s_5f95d9f26d8061::t_527ba4a2eee7c9 1-452
+tests/unit/test_lua_cors_credentials.lua
+  s_5f95d9f26d8061::t_3fed0cc23fa0c4 1-231
+tests/unit/test_lua_crowdsec_promotion.lua
+  s_5f95d9f26d8061::t_d892762b863f96 1-960
+tests/unit/test_lua_crowdsec_rewritten.lua
+  s_5f95d9f26d8061::t_064bcc4f3a1469 1-104
+tests/unit/test_lua_init_abort_marker.lua
+  s_5f95d9f26d8061::t_c54b6e64696cad 1-179
+tests/unit/test_lua_init_store_order.lua
+  s_5f95d9f26d8061::t_2283f7b346e814 1-506
+tests/unit/test_lua_init_worker_marker.lua
+  s_5f95d9f26d8061::t_982effc1a81729 1-341
+tests/unit/test_lua_is_banned_leases.lua
+  s_5f95d9f26d8061::t_6091ce00c8ef29 1-629
+tests/unit/test_lua_metrics_push_retry.py
+  s_5f95d9f26d8061::t_66c9b6ec95f3b5 1-116
+tests/unit/test_lua_metrics_search_panes.lua
+  s_5f95d9f26d8061::t_575692bdb44b23 1-135
+tests/unit/test_lua_metrics_seed.lua
+  s_5f95d9f26d8061::t_5f1737a1bb4ddc 1-240
+tests/unit/test_lua_modsec_reason.lua
+  s_5f95d9f26d8061::t_57940efe21af55 1-158
+tests/unit/test_lua_pushswap_sentinel.lua
+  s_5f95d9f26d8061::t_f8ed15076bcf58 1-190
+tests/unit/test_lua_rdns_skip_empty.lua
+  s_5f95d9f26d8061::t_6361b4a58aa223 1-187
+tests/unit/test_lua_rediscluster_patch.lua
+  s_5f95d9f26d8061::t_94a48d0ff549cb 1-171
+tests/unit/test_lua_rediscluster_retry.lua
+  s_5f95d9f26d8061::t_6586b302c4fec4 1-193
+tests/unit/test_lua_rediskeys.lua
+  s_5f95d9f26d8061::t_1607a19cddf6dd 1-117
+tests/unit/test_lua_tls_drop.lua
+  s_5f95d9f26d8061::t_5cd3918ff6cc94 1-639
+tests/unit/test_metrics_report_scripts.py
+  s_5f95d9f26d8061::t_2571e55a8d816b 1-95
+tests/unit/test_metrics_ttl_migration.py
+  s_5f95d9f26d8061::t_31cbbb3efaa1d5 1-3,5-7,9-10,12-37
+tests/unit/test_parse_duration.py
+  s_5f95d9f26d8061::t_192a083e8bcfab 1-47
+tests/unit/test_redis_cluster_factory.py
+  s_5f95d9f26d8061::t_e0a47b507cf078 1-48
+tests/unit/test_redis_keys_parity.py
+  s_5f95d9f26d8061::t_bcf2c23ac3dfb0 1-92
+tests/unit/test_resilient_session.py
+  s_5f95d9f26d8061::t_f77f084c759fbe 1-511
+tests/unit/test_scheduler_generation_retry.py
+  s_5f95d9f26d8061::t_8cfdad86a4db23 1-142
+tests/unit/test_scheduler_main_fixes.py
+  s_5f95d9f26d8061::t_2f74f4939bdbac 1-181
+tests/unit/test_ui_bans_leases.py
+  s_5f95d9f26d8061::t_fdabd640379371 1-376
+tests/unit/test_ui_bans_pane_values.py
+  s_5f95d9f26d8061::t_4334b537da459c 1-100
+tests/unit/test_ui_biscuit_read_only_post.py
+  s_5f95d9f26d8061::t_b05bda21e3239d 1-124
+tests/unit/test_ui_blueprint_reload.py
+  s_5f95d9f26d8061::t_11fbbccf626b29 1-173
+tests/unit/test_ui_column_preferences.cjs
+  s_5f95d9f26d8061::t_c741826dac19bb 1-236
+tests/unit/test_ui_config_name_lookup.py
+  s_5f95d9f26d8061::t_c5448fc0224e8b 1-153
+tests/unit/test_ui_configs_bulk_delete_dotted.py
+  s_5f95d9f26d8061::t_a66b2f71276f22 1-84
+tests/unit/test_ui_datatable_aria_language.py
+  s_5f95d9f26d8061::t_989399f2a69885 1-26
+tests/unit/test_ui_flash_serialization.py
+  s_5f95d9f26d8061::t_5ccf851a94dc47 1-72
+tests/unit/test_ui_hooks_fail_closed.py
+  s_5f95d9f26d8061::t_060967ee54631c 1-136
+tests/unit/test_ui_label_fallbacks.py
+  s_5f95d9f26d8061::t_a69652dcae4325 1-94
+tests/unit/test_ui_modsec_crs_hosts.py
+  s_5f95d9f26d8061::t_73db7f01390e43 1-62
+tests/unit/test_ui_psl_wizard_text.py
+  s_5f95d9f26d8061::t_916abc91147701 1-41
+tests/unit/test_ui_reports_pane_values.py
+  s_5f95d9f26d8061::t_97d535b1a1d5fd 1-70
+tests/unit/test_ui_static_cache.py
+  s_5f95d9f26d8061::t_81bc6e50a3ac9f 1-53
+tests/unit/test_ui_support_bundle.py
+  s_5f95d9f26d8061::t_79ebeaab43cbdd 1-772
+tests/unit/test_ui_support_config_mask.py
+  s_5f95d9f26d8061::t_2a077683878793 1-270
+tests/unit/ui/_css.py
+  s_5f95d9f26d8061::t_ff2162268e95a4 1-21
+tests/unit/ui/_jsscan.py
+  s_5f95d9f26d8061::t_5a9990e082c5c8 1-308
+tests/unit/ui/_u2_helpers.py
+  s_5f95d9f26d8061::t_b0d9bc1ed33aee 1-93
+tests/unit/ui/conftest.py
+  s_5f95d9f26d8061::t_76ed976009c1ac 1-31
+tests/unit/ui/core/_ui_core_helpers.py
+  s_5f95d9f26d8061::t_8aa766107677f1 1-149
+tests/unit/ui/core/_ui_core_main.py
+  s_5f95d9f26d8061::t_2eef9f43a2471d 1-342
+tests/unit/ui/core/conftest.py
+  s_5f95d9f26d8061::t_f185e9c62052d7 1-92
+tests/unit/ui/core/test_biscuit_middleware.py
+  s_5f95d9f26d8061::t_cce49b2751489b 1-330
+tests/unit/ui/core/test_config_service_operations.py
+  s_5f95d9f26d8061::t_89092339b130c0 1-275
+tests/unit/ui/core/test_dependencies_plugin_reload.py
+  s_5f95d9f26d8061::t_57cbb01b749632 1-264
+tests/unit/ui/core/test_instance_api_calls.py
+  s_5f95d9f26d8061::t_59b2722df839e3 1-197
+tests/unit/ui/core/test_instance_metrics_home.py
+  s_5f95d9f26d8061::t_728443416dbe7e 1-347
+tests/unit/ui/core/test_instance_redis_primitives.py
+  s_5f95d9f26d8061::t_93caca737382be 1-243
+tests/unit/ui/core/test_instance_reports_queries.py
+  s_5f95d9f26d8061::t_75b1586d1adabb 1-391
+tests/unit/ui/core/test_issue_3175_main_request_edge_regressions.py
+  s_5f95d9f26d8061::t_1b82b6586a87ff 1-99
+tests/unit/ui/core/test_issue_3685_reports_page_and_filters.py
+  s_5f95d9f26d8061::t_5a70da73d57c39 1-91
+tests/unit/ui/core/test_issue_3986_service_create_keeps_others.py
+  s_5f95d9f26d8061::t_c6ae377ddba211 1-65
+tests/unit/ui/core/test_main_blueprint_registry.py
+  s_5f95d9f26d8061::t_38fc66a7815f13 1-160
+tests/unit/ui/core/test_main_misc_routes.py
+  s_5f95d9f26d8061::t_ba9aaecc8cd0e0 1-286
+tests/unit/ui/core/test_main_plugin_refresh.py
+  s_5f95d9f26d8061::t_1a07367c315bde 1-202
+tests/unit/ui/core/test_main_request_pipeline.py
+  s_5f95d9f26d8061::t_d0ba27793193dd 1-400
+tests/unit/ui/core/test_main_smoke_routes.py
+  s_5f95d9f26d8061::t_8a3d8514e84005 1-22
+tests/unit/ui/core/test_raw_drafts_parsing.py
+  s_5f95d9f26d8061::t_fe180007f610ec 1-19,22-136
+tests/unit/ui/core/test_resilient_session_fallback.py
+  s_5f95d9f26d8061::t_0e579abbc3a158 1-268
+tests/unit/ui/core/test_reverse_proxied_environ.py
+  s_5f95d9f26d8061::t_e6d3b82be8b164 1-87
+tests/unit/ui/core/test_session_cookie_and_cache.py
+  s_5f95d9f26d8061::t_c0029338f25f6d 1-107
+tests/unit/ui/core/test_temp_ui_real_templates.py
+  s_5f95d9f26d8061::t_1ce6032578492d 1-49
+tests/unit/ui/core/test_temp_ui_wizard_app.py
+  s_5f95d9f26d8061::t_26a75243342bdc 1-91
+tests/unit/ui/core/test_ui_data_and_templates.py
+  s_5f95d9f26d8061::t_688ec34260ff52 1-87
+tests/unit/ui/core_plugins/_core_ui_helpers.py
+  s_5f95d9f26d8061::t_fc7b81e37415c5 1-3,6-34,36-45
+tests/unit/ui/core_plugins/conftest.py
+  s_5f95d9f26d8061::t_0260d4907d98aa 1-72
+tests/unit/ui/core_plugins/test_authbasic_event_tables.py
+  s_5f95d9f26d8061::t_aeba9d5920bea0 1-78
+tests/unit/ui/core_plugins/test_badbehavior_event_tables.py
+  s_5f95d9f26d8061::t_ba5acff3b50654 1-78
+tests/unit/ui/core_plugins/test_core_ui_timestamp_overflow.py
+  s_5f95d9f26d8061::t_87d0e6406d56f1 1-8
+tests/unit/ui/core_plugins/test_issue_2100_redis_keys_count.py
+  s_5f95d9f26d8061::t_201646d1704240 1-26
+tests/unit/ui/core_plugins/test_letsencrypt_blueprint_routes.py
+  s_5f95d9f26d8061::t_220e3de46c6901 1-416
+tests/unit/ui/core_plugins/test_letsencrypt_certificate_actions.py
+  s_5f95d9f26d8061::t_e390979fb31541 1-99
+tests/unit/ui/core_plugins/test_letsencrypt_orphan_hooks.py
+  s_5f95d9f26d8061::t_a0c0db47a61e5a 1-125
+tests/unit/ui/core_plugins/test_small_plugin_dashboards.py
+  s_5f95d9f26d8061::t_a7b66055bc043a 1-145
+tests/unit/ui/routes/_ui_routes_helpers.py
+  s_5f95d9f26d8061::t_e0b7863d440f3a 1-103
+tests/unit/ui/routes/conftest.py
+  s_5f95d9f26d8061::t_da560ba694c9bc 1-191
+tests/unit/ui/routes/test_issue_2006_pro_license_key_validation.py
+  s_5f95d9f26d8061::t_5c56cd107af136 1-33
+tests/unit/ui/routes/test_issue_2027_log_invalid_utf8.py
+  s_5f95d9f26d8061::t_52da86745b914d 1,3-4,6-7,9,11,13-42
+tests/unit/ui/routes/test_issue_3046_redis_database.py
+  s_5f95d9f26d8061::t_6cda2e4622bcc9 1-35
+tests/unit/ui/routes/test_issue_3489_exports_and_service_template_regressions.py
+  s_5f95d9f26d8061::t_67a7c2d1140469 1-197
+tests/unit/ui/routes/test_mem_ui_digit_only_config_name_regression.py
+  s_5f95d9f26d8061::t_1da6a1a43d31ae 1-30
+tests/unit/ui/routes/test_mem_ui_session_fixation_regenerate_regression.py
+  s_5f95d9f26d8061::t_a7c8c1a7bc7db8 1-40
+tests/unit/ui/routes/test_plugin_action_spec_regression.py
+  s_5f95d9f26d8061::t_61fb84203dfc43 1-37
+tests/unit/ui/routes/test_routes_anonymous_refused.py
+  s_5f95d9f26d8061::t_ff56606603b537 1-57
+tests/unit/ui/routes/test_routes_bans.py
+  s_5f95d9f26d8061::t_bcb46c7bc4c82e 1-630
+tests/unit/ui/routes/test_routes_configs.py
+  s_5f95d9f26d8061::t_0e41bcf62a7223 1-549
+tests/unit/ui/routes/test_routes_crowdsec_jobs_cache.py
+  s_5f95d9f26d8061::t_3bacc6130e5c62 1-351
+tests/unit/ui/routes/test_routes_f3_regressions.py
+  s_5f95d9f26d8061::t_8cacc29e2264fa 1-170
+tests/unit/ui/routes/test_routes_global_settings.py
+  s_5f95d9f26d8061::t_e4b1f9ece6e5f6 1-172
+tests/unit/ui/routes/test_routes_helpers.py
+  s_5f95d9f26d8061::t_2a876798603c1f 1-305
+tests/unit/ui/routes/test_routes_home_and_instances.py
+  s_5f95d9f26d8061::t_f75d3c47135ed4 1-250
+tests/unit/ui/routes/test_routes_login_logout_totp.py
+  s_5f95d9f26d8061::t_9aa8b6bae4cddd 1-323
+tests/unit/ui/routes/test_routes_logs.py
+  s_5f95d9f26d8061::t_b25ab5c3f1f06c 1-215
+tests/unit/ui/routes/test_routes_plugins.py
+  s_5f95d9f26d8061::t_aab02b7db8c2a7 1-510
+tests/unit/ui/routes/test_routes_pro_and_support.py
+  s_5f95d9f26d8061::t_889d659dc02a7d 1-263
+tests/unit/ui/routes/test_routes_profile.py
+  s_5f95d9f26d8061::t_8ecd04525bba1e 1-366
+tests/unit/ui/routes/test_routes_reports.py
+  s_5f95d9f26d8061::t_3409a75bb0b492 1-265
+tests/unit/ui/routes/test_routes_services.py
+  s_5f95d9f26d8061::t_9358599a75229d 1-659
+tests/unit/ui/routes/test_routes_setup.py
+  s_5f95d9f26d8061::t_b929d04857dcfa 1-47,49-293,295-297
+tests/unit/ui/routes/test_routes_templates.py
+  s_5f95d9f26d8061::t_32a197b9561a1e 1-323
+tests/unit/ui/test_ace_editor_theme_preload.py
+  s_5f95d9f26d8061::t_b8de9d5e848b2d 1-50
+tests/unit/ui/test_blocked_requests_cap.py
+  s_5f95d9f26d8061::t_1441797047f816 1-152
+tests/unit/ui/test_config_check_variables.py
+  s_5f95d9f26d8061::t_853ccfe5b10901 1-201
+tests/unit/ui/test_config_editor_xss_exclusion.py
+  s_5f95d9f26d8061::t_00488eda7a2c26 1-71
+tests/unit/ui/test_csrf_time_limit.py
+  s_5f95d9f26d8061::t_8527dd24adbd38 1-52
+tests/unit/ui/test_datatable_column_preferences_flush.py
+  s_5f95d9f26d8061::t_0aee15bb2f136e 1,3-7,9,11-12,15-16,19-22,25-34
+tests/unit/ui/test_datatable_delegated_tooltips.py
+  s_5f95d9f26d8061::t_7f729e0deb8d0e 1-104
+tests/unit/ui/test_delete_confirm_keys.py
+  s_5f95d9f26d8061::t_48c2fec890f982 1-46
+tests/unit/ui/test_docs_and_license_links.py
+  s_5f95d9f26d8061::t_297c532fe781a3 1-85
+tests/unit/ui/test_duration_ui.py
+  s_5f95d9f26d8061::t_7a1cf743a1ee00 1-48
+tests/unit/ui/test_export_formatters.py
+  s_5f95d9f26d8061::t_961f626ad280cd 1-117
+tests/unit/ui/test_favicon_root_resolves.py
+  s_5f95d9f26d8061::t_d2c68888f206ef 1-98
+tests/unit/ui/test_feedback_rendering_dom.py
+  s_5f95d9f26d8061::t_182cd1038a4c27 1-56
+tests/unit/ui/test_flash_escaping.py
+  s_5f95d9f26d8061::t_0785da0d0bcf17 1-105
+tests/unit/ui/test_flash_no_english_literal_left.py
+  s_5f95d9f26d8061::t_372c4571bbff63 1-160
+tests/unit/ui/test_gettext_placeholders.py
+  s_5f95d9f26d8061::t_8e79c49aeb0567 1-77
+tests/unit/ui/test_home_aggregates_shared_cache.py
+  s_5f95d9f26d8061::t_221bedfa5f8c6a 1-118
+tests/unit/ui/test_home_aggregates_window.py
+  s_5f95d9f26d8061::t_d8e86896adbe50 1-120
+tests/unit/ui/test_i18n_no_interpolated_words.py
+  s_5f95d9f26d8061::t_74e3d1e93cc400 1,3-4,6-26,28-136
+tests/unit/ui/test_issue_3350_multiselect_template_values.py
+  s_5f95d9f26d8061::t_711a30a7c53b47 1-53
+tests/unit/ui/test_jsscan_walker.py
+  s_5f95d9f26d8061::t_0a586cb6eb0a0e 1-330
+tests/unit/ui/test_mem_ui_jobs_pane_data_order_regression.py
+  s_5f95d9f26d8061::t_145a8086d43e56 1-90
+tests/unit/ui/test_page_script_reachability.py
+  s_5f95d9f26d8061::t_33200553836fd7 1-7,9-12,14-16,18-23,25,27,29,31,34-42,45-48,50
+tests/unit/ui/test_permissions_policy_defaults.py
+  s_5f95d9f26d8061::t_2982dfa0d29268 1-85
+tests/unit/ui/test_plugin_activation.py
+  s_5f95d9f26d8061::t_e9a3b7d784ec07 1-57
+tests/unit/ui/test_plugin_blueprint_reload.py
+  s_5f95d9f26d8061::t_67a832e0e5c696 1-140
+tests/unit/ui/test_public_wellknown_routes.py
+  s_5f95d9f26d8061::t_dad7e9dee2b1dc 1-232
+tests/unit/ui/test_raw_defaults_submit_dom.py
+  s_5f95d9f26d8061::t_da52613e3786b2 1-62,64-84
+tests/unit/ui/test_raw_mode_skips_unchanged_defaults.py
+  s_5f95d9f26d8061::t_0f0d89168dbe40 1-196
+tests/unit/ui/test_redis_scan_window.py
+  s_5f95d9f26d8061::t_6aba616befecb9 1-187
+tests/unit/ui/test_resume_identifier_strings.py
+  s_5f95d9f26d8061::t_05f1adfa50c710 1-30
+tests/unit/ui/test_resume_service_integrity.py
+  s_5f95d9f26d8061::t_5a2cb9a89ff517 1-38
+tests/unit/ui/test_route_import_cost.py
+  s_5f95d9f26d8061::t_0a1a99c01cc517 1-49
+tests/unit/ui/test_searchpane_filters.py
+  s_5f95d9f26d8061::t_57e56b48676b9f 1-20
+tests/unit/ui/test_security_headers_emitted.py
+  s_5f95d9f26d8061::t_a874fedbfb5293 1-165
+tests/unit/ui/test_service_template_switch_defaults_regression.py
+  s_5f95d9f26d8061::t_fd88395f02ce9d 1-163
+tests/unit/ui/test_session_revocation.py
+  s_5f95d9f26d8061::t_4286a2c95ba78f 1-206
+tests/unit/ui/test_session_storage_throttle.py
+  s_5f95d9f26d8061::t_e28dc9012e567d 1-134
+tests/unit/ui/test_setting_control_dom.py
+  s_5f95d9f26d8061::t_b877254febb641 1-30
+tests/unit/ui/test_setting_patterns_v_flag.py
+  s_5f95d9f26d8061::t_72cc26e8d19b38 1-332
+tests/unit/ui/test_smoke_ui_sentences.py
+  s_5f95d9f26d8061::t_8d5d8b3b17213f 1-33
+tests/unit/ui/test_static_asset_references.py
+  s_5f95d9f26d8061::t_175e72a7aa134d 1-133
+tests/unit/ui/test_static_path_exemption.py
+  s_5f95d9f26d8061::t_310460c7ba507d 1-147
+tests/unit/ui/test_support_bundle.py
+  s_5f95d9f26d8061::t_b90ed402ad2b6b 1-173
+tests/unit/ui/test_t_placeholders.py
+  s_5f95d9f26d8061::t_18c6012a800994 1-433
+tests/unit/ui/test_temp_ui_error_detail.py
+  s_5f95d9f26d8061::t_c572cd1b0616ff 1-39
+tests/unit/ui/test_temp_ui_stop_contract.py
+  s_5f95d9f26d8061::t_627399ee41ed70 1-103
+tests/unit/ui/test_theme_persistence_race.py
+  s_5f95d9f26d8061::t_ac3b8d4b3f8216 1-56
+tests/unit/ui/test_translated_key_exists_in_catalog.py
+  s_5f95d9f26d8061::t_58155fd8657ea5 1-66
+tests/unit/ui/test_ui_rbac.py
+  s_5f95d9f26d8061::t_db430dafe0b5b4 1-61
+tests/unit/ui/test_ui_users.py
+  s_5f95d9f26d8061::t_214094b942bc54 1-135
+tests/unit/ui/test_ui_utils.py
+  s_5f95d9f26d8061::t_f6af9885d0d9cf 1-223
+tests/unit/ui/test_update_release_line.py
+  s_5f95d9f26d8061::t_4369c5a96d732b 1-41
+tests/unit/ui/test_user_data_escaping.py
+  s_5f95d9f26d8061::t_d628288716ce0f 1-115
+tests/utils/__init__.py
+  s_5f95d9f26d8061::t_25d0ae903871c7 1-183
+tests/utils/action.py
+  s_5f95d9f26d8061::t_97145af71a2b00 1-103
+tests/utils/bunkerweb.yml
+  s_5f95d9f26d8061::t_fef5435f1de6db 70-72,74
+tests/utils/config.yml
+  s_5f95d9f26d8061::t_07c15873f5b849 1-39
+tests/utils/docker.py
+  s_5f95d9f26d8061::t_c4a7b9e42b682e 1-3,5-7,9,12-145,147-166
+tests/utils/example.py
+  s_5f95d9f26d8061::t_a0af861dfa3d10 1-12,14-126,128-208,211-213,216-230,233-252,254,256-260,262-265,268-270
+tests/utils/integrations.yml
+  s_5f95d9f26d8061::t_7764fa71bf6930 1-69
+tests/utils/k8s.py
+  s_5f95d9f26d8061::t_1a9ee504162727 1-89
+tests/utils/logger.py
+  s_5f95d9f26d8061::t_817f19382a4ab1 1,4-8,10-11,13-17
+tests/utils/packages.yml
+  s_5f95d9f26d8061::t_23d62dab51875e 1-44
+tests/utils/tools.json
+  s_5f95d9f26d8061::t_3fdc5400678ecd 1
+tests/utils/ui.py
+  s_5f95d9f26d8061::t_b50407a8582e78 2-3,6,12-18,22-29,35-42,44,56,62-70,76-78,82-97,100-108,110-162,164-169,172,175-176,180,183-184,187,198-200,212-214,217-228,231-242,244-246,251,255-258,260-263,268,270-272,276,279,283,286,296,302,306
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "ee19d6d64b87ea00d94a0ff605f76e682a5987d3",
+  "prompts": {},
+  "sessions": {
+    "s_5f95d9f26d8061": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "ffd75a35-381f-4392-b367-d20e0cf83780",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

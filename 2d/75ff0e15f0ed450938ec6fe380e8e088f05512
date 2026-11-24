@@ -1,0 +1,117 @@
+tests/unit/api/test_users_login_throttle_endpoint.py
+  s_e62a58e33c485b::t_4bb1539972e010 1-189
+src/ui/app/api_client.py
+  s_e62a58e33c485b::t_3af594d2a5edc9 692-704
+  s_b167dbd10b0b55::t_cf17e01695360a 73-76
+  s_c32d3d7a053777::t_ef7667814cc39b 705
+src/ui/app/routes/totp.py
+  s_751421a72d1da7::t_e337ce0a2f724d 42,45-46
+  s_751421a72d1da7::t_8248736b570a11 6,47-53,58,70-71,91,164
+src/ui/app/login_throttle.py
+  s_e62a58e33c485b::t_3af594d2a5edc9 1-120
+tests/unit/ui/test_login_throttle.py
+  s_e62a58e33c485b::t_60068071a110a6 495-499
+  s_3535bd787ed7ee::t_aa1cc7577e9350 48-60
+  s_e62a58e33c485b::t_86c1e5979716b3 1-47,61-494,500-761
+src/ui/main.py
+  s_7db872cc24d44a::t_753e0898fc963d 1922
+  s_751421a72d1da7::t_d0d67584e2586a 42,96,440-451,520,534,555,667,669-670,672,1634-1638,1640,1643-1645,1843,1849-1851
+tests/unit/ui/conftest.py
+  s_e62a58e33c485b::t_f688e44decf58e 47-54
+tests/unit/ui/test_flash_no_english_literal_left.py
+  s_751421a72d1da7::t_77f325c8b6c93a 131
+  s_751421a72d1da7::t_1e33788b46cf5f 49-59
+src/common/db/db_methods/ui_users.py
+  s_40ce55291c832b::t_f649b949886265 491-492
+  s_e62a58e33c485b::t_60068071a110a6 477-479,501-523
+  s_4f93320f8a3c5e::t_3a03c3e5072755 2-3,11,29,37-39,453-476,480-490,493-500,524-531
+tests/unit/db/test_db_ui_login_throttle.py
+  s_40ce55291c832b::t_f649b949886265 80-81
+  s_e62a58e33c485b::t_eebbfecf9afdd1 1-79,82-173
+src/api/app/routers/users.py
+  s_e62a58e33c485b::t_96a32cd600ac61 46-64,148-181
+  s_e62a58e33c485b::t_4171007f0057e6 182-183
+tests/unit/ui/test_totp_recovery_readonly.py
+  s_751421a72d1da7::t_7236af4e97fb53 118
+tests/unit/db/test_ui_login_lock_rounding.py
+  s_40ce55291c832b::t_94f3c2028245de 1-25
+src/ui/app/routes/profile.py
+  s_751421a72d1da7::t_e337ce0a2f724d 216,222-223,225-227,257,263-264,266-268,270,275-276,316,322-324,329-330,332-334,395,400-401,403-405,407,412-413,437,442-443,445-447,449,455-456,590,596-597,599-601,633-635,695,700-701,722,727-728
+  s_751421a72d1da7::t_8d71c9a832b4ec 3,8,42-59,730-732
+src/ui/app/routes/login.py
+  s_e62a58e33c485b::t_2a788e6e8954e0 157,159-160
+  s_3535bd787ed7ee::t_9cb5511169059c 11,148-149,153-156,168-172,206-210,237-244,250,256-257,342-344
+  s_e62a58e33c485b::t_133518aedd6608 345
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "2d75ff0e15f0ed450938ec6fe380e8e088f05512",
+  "prompts": {},
+  "sessions": {
+    "s_3535bd787ed7ee": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1ab9d-6772-7e22-92cd-7c07fb269100",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_40ce55291c832b": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1acae-f650-7fb3-bb3e-895448d76c27",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_4f93320f8a3c5e": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1acab-574c-7e51-a634-b24ccc2b96d8",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_751421a72d1da7": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "a1cd49cb-bc02-4f73-9b72-c088e5f0245c",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_7db872cc24d44a": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1ac53-82bd-7021-8474-9868afc6fad4",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_b167dbd10b0b55": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1acb5-69be-7823-ac36-290b853e7213",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_c32d3d7a053777": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1acbf-b3c7-78e2-8243-f6954fd6510e",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_e62a58e33c485b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "9a68abd8-c6b9-40d9-9318-b43a9efa40c0",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

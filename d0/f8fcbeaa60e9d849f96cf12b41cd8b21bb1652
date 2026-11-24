@@ -1,0 +1,83 @@
+CHANGELOG.md
+  s_6976efd9134b35::t_1d686f08eef2bf 70
+README.md
+  s_6976efd9134b35::t_a14bf469292983 137,145,147-152
+docs/about.md
+  s_6976efd9134b35::t_334f5cd1a9d41e 10
+docs/concepts.md
+  s_6976efd9134b35::t_78cf29bf261526 34
+docs/de/about.md
+  s_6976efd9134b35::t_15cd6ea16c0a70 10
+docs/de/concepts.md
+  s_6976efd9134b35::t_a723c1ac1d17b8 34
+docs/de/features.md
+  s_6976efd9134b35::t_371e2949f3a57d 4937,4974
+docs/de/index.md
+  s_6976efd9134b35::t_97c5ae06ec349c 92,95,103,105-110
+docs/de/web-ui.md
+  s_6976efd9134b35::t_a00165fb25fca3 306
+docs/es/about.md
+  s_6976efd9134b35::t_91178bc34c5efc 10
+docs/es/concepts.md
+  s_6976efd9134b35::t_1f53af0bbb6e94 34
+docs/es/features.md
+  s_6976efd9134b35::t_5c2baae6e6fa00 4989,5026
+docs/es/index.md
+  s_6976efd9134b35::t_cebac1fc86b4fa 92,95,103,105-110
+docs/es/web-ui.md
+  s_6976efd9134b35::t_0d38e2756ee09c 306
+docs/features.md
+  s_6976efd9134b35::t_51de496c2c407b 5005,5042
+docs/fr/about.md
+  s_6976efd9134b35::t_7db498b7bb57b3 10
+docs/fr/concepts.md
+  s_6976efd9134b35::t_6dda327a22492b 34
+docs/fr/features.md
+  s_6976efd9134b35::t_b163584f3b6424 4876,4913
+docs/fr/index.md
+  s_6976efd9134b35::t_1bf3b2722ed59e 92,95,103,105-110
+docs/fr/web-ui.md
+  s_6976efd9134b35::t_c4093c02dbea34 306
+docs/index.md
+  s_6976efd9134b35::t_ec3a4f427f1a2d 92,95,103,105-110
+docs/overrides/main.html
+  s_6976efd9134b35::t_523678724fb833 16-18,34-36,52-54,70-72,88-90,101,154
+docs/web-ui.md
+  s_6976efd9134b35::t_6a9f5f69bf8744 356
+docs/zh/about.md
+  s_6976efd9134b35::t_8e17aee80b1cc4 10
+docs/zh/concepts.md
+  s_6976efd9134b35::t_2bdade95ef0bf3 34
+docs/zh/features.md
+  s_6976efd9134b35::t_4535cb2477a95a 4999,5036
+docs/zh/index.md
+  s_6976efd9134b35::t_4f27083974d1a0 92,95,103,105-110
+docs/zh/web-ui.md
+  s_6976efd9134b35::t_cb39df339c4438 306
+src/common/core/pro/README.de.md
+  s_6976efd9134b35::t_5da6c43d55074e 23,60
+src/common/core/pro/README.es.md
+  s_6976efd9134b35::t_6b61a056743a73 23,60
+src/common/core/pro/README.fr.md
+  s_6976efd9134b35::t_99ff7dd7bb39e5 21,58
+src/common/core/pro/README.md
+  s_6976efd9134b35::t_65b0ec88398eff 23,60
+src/common/core/pro/README.zh.md
+  s_6976efd9134b35::t_9e019d9ad646c6 23,60
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "d0f8fcbeaa60e9d849f96cf12b41cd8b21bb1652",
+  "prompts": {},
+  "sessions": {
+    "s_6976efd9134b35": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1a7fb-1309-7560-a9cd-665a30a14cde",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

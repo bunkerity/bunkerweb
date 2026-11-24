@@ -1,0 +1,27 @@
+CHANGELOG.md
+  s_55759bea961190::t_faa93124f4d324 17
+src/linux/fpm-fedora-43
+  s_55759bea961190::t_8ad7d719888dcb 6
+src/linux/Dockerfile-fedora-43
+  s_55759bea961190::t_8ad7d719888dcb 5
+src/deps/install.sh
+  s_55759bea961190::t_8ad7d719888dcb 221
+tests/linux/Dockerfile-fedora-43
+  s_55759bea961190::t_8ad7d719888dcb 4
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "58f7d58888bc264aea5daf2b41dbb481bbd3375e",
+  "prompts": {},
+  "sessions": {
+    "s_55759bea961190": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "1bf1dfd1-f33a-4793-be75-5c4cea78083c",
+        "model": "claude-opus-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

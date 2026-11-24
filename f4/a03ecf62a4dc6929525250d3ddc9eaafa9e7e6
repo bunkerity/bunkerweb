@@ -1,0 +1,14 @@
+.github/PULL_REQUEST_TEMPLATE.md
+  h_a33a1e80933106 1-19
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "f4a03ecf62a4dc6929525250d3ddc9eaafa9e7e6",
+  "prompts": {},
+  "humans": {
+    "h_a33a1e80933106": {
+      "author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

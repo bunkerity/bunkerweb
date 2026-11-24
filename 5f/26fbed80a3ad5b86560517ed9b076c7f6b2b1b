@@ -1,0 +1,19 @@
+tests/unit/common/test_system_utility_outcomes.py
+  s_2c6b9896eaf7a8::t_2640b9991c6843 6,241-242,251-253,255-260
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "5f26fbed80a3ad5b86560517ed9b076c7f6b2b1b",
+  "prompts": {},
+  "sessions": {
+    "s_2c6b9896eaf7a8": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1c043-7476-7650-aefd-33d978791548",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

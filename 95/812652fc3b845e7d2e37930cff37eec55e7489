@@ -1,0 +1,31 @@
+CHANGELOG.md
+  s_e5267c4ae9821f::t_9a4ba817781919 24
+tests/unit/autoconf/test_ipv6_kubernetes_instances.py
+  s_4b5c84ae40522f::t_2995b5643a9592 1-32
+src/autoconf/controllers/KubernetesController.py
+  s_e5267c4ae9821f::t_9a4ba817781919 412-414
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "95812652fc3b845e7d2e37930cff37eec55e7489",
+  "prompts": {},
+  "sessions": {
+    "s_4b5c84ae40522f": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a18d53-75bf-7a80-ac26-009542da79e2",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_e5267c4ae9821f": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "535c3f0b-be20-42f8-a901-b7bd893faa6d",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

@@ -1,0 +1,57 @@
+src/common/core/bunkernet/README.md
+  s_80f1da85912d1b::t_55912a35564cf3 6,15,17,39-47
+src/common/core/bunkernet/README.de.md
+  s_80f1da85912d1b::t_55912a35564cf3 6,15,17,39-47
+CHANGELOG.md
+  s_80f1da85912d1b::t_55912a35564cf3 8
+docs/de/features.md
+  s_80f1da85912d1b::t_55912a35564cf3 1342,1351,1353,1375-1383
+src/common/core/bunkernet/README.fr.md
+  s_80f1da85912d1b::t_55912a35564cf3 6,14,16,38-46
+docs/fr/features.md
+  s_80f1da85912d1b::t_55912a35564cf3 1323,1331,1333,1355-1363
+src/common/core/bunkernet/README.zh.md
+  s_80f1da85912d1b::t_55912a35564cf3 6,15,17,39-47
+docs/es/features.md
+  s_80f1da85912d1b::t_55912a35564cf3 1359,1368,1370,1392-1400
+src/common/core/bunkernet/bunkernet.lua
+  s_80f1da85912d1b::t_55912a35564cf3 37-96,293,296
+src/common/core/bunkernet/README.es.md
+  s_80f1da85912d1b::t_55912a35564cf3 6,15,17,39-47
+docs/zh/features.md
+  s_80f1da85912d1b::t_55912a35564cf3 1365,1374,1376,1398-1406
+src/common/core/bunkernet/jobs/bunkernet-send.py
+  s_80f1da85912d1b::t_55912a35564cf3 29-48,113
+docs/features.md
+  s_80f1da85912d1b::t_55912a35564cf3 1363,1372,1374,1396-1404
+tests/unit/common/test_bunkernet_report_headers.py
+  s_832f7b53e6eaf0::t_7a0c710daca9a4 1-175
+tests/unit/common/test_bunkernet_report_redaction.py
+  s_832f7b53e6eaf0::t_6f08cf22ea1053 1-101
+tests/unit/jobs/test_bunkernet_send_filter.py
+  s_832f7b53e6eaf0::t_4f6f48c0ef9f18 1-132
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "c0ad5dd63c9aa981a36256c8b1a3e699cb63e7c8",
+  "prompts": {},
+  "sessions": {
+    "s_80f1da85912d1b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "48f28331-3ce2-4fa3-b959-69d5d1238c0a",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_832f7b53e6eaf0": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a18d0f-0df2-7e91-9ffd-d67775f14a9e",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

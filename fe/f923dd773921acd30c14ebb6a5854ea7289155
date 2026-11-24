@@ -1,0 +1,22 @@
+src/api/app/auth/biscuit.py
+  h_a33a1e80933106 14,448,455
+src/api/app/auth/guard.py
+  h_a33a1e80933106 9,19,29,36
+tests/unit/api_app/test_app_http_contract.py
+  h_a33a1e80933106 7,105-123
+tests/unit/api_app/test_biscuit_permission_contracts.py
+  h_a33a1e80933106 206
+tests/unit/api_app/test_guard_authentication.py
+  h_a33a1e80933106 31,44,53-54,57-58,60-62,127,139-143
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "fef923dd773921acd30c14ebb6a5854ea7289155",
+  "prompts": {},
+  "humans": {
+    "h_a33a1e80933106": {
+      "author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

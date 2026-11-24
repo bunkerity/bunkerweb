@@ -1,0 +1,19 @@
+.github/workflows/unit-tests.yml
+  s_9b72a24114dc24::t_dedb6c247ab973 94-95,108,112-116
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "a6cb4d82d9c5fd5eb9fd882d3a5de1bebf3b6d2b",
+  "prompts": {},
+  "sessions": {
+    "s_9b72a24114dc24": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "cc5a1ca8-e952-421b-979b-0d94c0aab861",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

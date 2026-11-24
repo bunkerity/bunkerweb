@@ -1,0 +1,46 @@
+tests/unit/jobs/test_bunkernet_cache_job_name.py
+  s_4bbbef19c04f59::t_8b4d4be9a7e5ad 31-32,45-49
+  s_4bbbef19c04f59::t_c996a9332feaf1 1-30,33-37,39-44
+  s_4bbbef19c04f59::t_a2b618ff6239d6 38
+src/common/core/selfsigned/jobs/self-signed.py
+  s_4bbbef19c04f59::t_ea650ac2f29952 9,151-165,167-203,205-207,209-210
+  s_4bbbef19c04f59::t_2a21145be19e65 204,208
+src/common/core/bunkernet/jobs/bunkernet-data.py
+  s_795e2ccdb6801b::t_72dd1b39fa582d 40
+  s_4bbbef19c04f59::t_5f9d37c774f548 47,60
+tests/unit/jobs/test_selfsigned_cache_race.py
+  s_4bbbef19c04f59::t_5bc40b35efaf90 1-19,22-31,33,38-48,50-54,56-69,129
+  s_4bbbef19c04f59::t_cf745202aabb0c 55
+  s_4bbbef19c04f59::t_5c5300d7227bad 127-128
+  s_4bbbef19c04f59::t_c996a9332feaf1 20-21,34-37,49,72-126,130-131
+  s_4bbbef19c04f59::t_8b4d4be9a7e5ad 32,70-71
+src/common/core/bunkernet/jobs/bunkernet-send.py
+  s_795e2ccdb6801b::t_72dd1b39fa582d 105
+  s_4bbbef19c04f59::t_c019870c945094 112,116-117,153
+src/common/core/bunkernet/jobs/bunkernet.py
+  s_4bbbef19c04f59::t_0e4ed811274ff5 60-61,64-65
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "73a2b1d202e6836f695556d2c347a90dda26d230",
+  "prompts": {},
+  "sessions": {
+    "s_4bbbef19c04f59": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0cd82-0159-7620-9f90-ebd26e0bfa26",
+        "model": "gpt-6-luna"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_795e2ccdb6801b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "71804b16-900c-4824-8bbc-5e7434803315",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

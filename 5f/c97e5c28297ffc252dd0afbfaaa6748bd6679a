@@ -1,0 +1,23 @@
+tests/unit/db/test_init_tables_pro_settings_survive_restart.py
+  s_54a788ed0361ed::t_793b8ffb5d4b1a 124-128,140,145-158
+  s_54a788ed0361ed::t_24c883c876038b 13,71-72,78-79,92-123,129-139,141-144,159-163
+src/common/db/Database.py
+  s_54a788ed0361ed::t_80544ef30d9647 1565
+  s_54a788ed0361ed::t_592443b4b89082 1541,1543-1549,1552
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.6",
+  "base_commit_sha": "5fc97e5c28297ffc252dd0afbfaaa6748bd6679a",
+  "prompts": {},
+  "sessions": {
+    "s_54a788ed0361ed": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "41d71582-afdf-4e90-98dd-84e77cf3cde6",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

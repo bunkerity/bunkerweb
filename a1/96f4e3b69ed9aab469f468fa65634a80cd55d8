@@ -1,0 +1,94 @@
+src/ui/app/static/css/overrides/pages.css
+  s_8e9d4210e0a0ff::t_229cae1fdd1720 283-287,302-305,350-354,403-406
+  s_9c28e71461c852::t_a0604b69b480dc 1-56,61-282,288-301,306-349,355-402,407-425
+  s_618ff243f404f0::t_bc1186a3ad8f25 57-60
+src/ui/app/static/css/overrides/raw-config.css
+  s_8e9d4210e0a0ff::t_229cae1fdd1720 101-105,117-127,148-151,183-184,190-196,205-211,221-225,242-250,257-260
+  s_618ff243f404f0::t_bc1186a3ad8f25 1-100,106-116,128-147,152-182,185-189,197-204,212-220,226-241,251-256,261-277,284-365
+  s_8e9d4210e0a0ff::t_82ca2b3d480377 278-283
+src/ui/app/static/css/overrides/pro.css
+  s_9c28e71461c852::t_a0604b69b480dc 1-11,16-32,117-126,131-267,278-282
+  s_8e9d4210e0a0ff::t_229cae1fdd1720 12-15,108-112,127-130
+  s_618ff243f404f0::t_bc1186a3ad8f25 33-107,113-116,268-277
+src/ui/app/static/css/overrides/plugins.css
+  s_9c28e71461c852::t_a0604b69b480dc 1-101,108-113,118-221,237-271,351-353
+  s_8e9d4210e0a0ff::t_229cae1fdd1720 102-107,114-117
+  s_618ff243f404f0::t_bc1186a3ad8f25 222-236,272-350
+src/ui/app/static/css/overrides/modals.css
+  s_9c28e71461c852::t_a0604b69b480dc 15,17-19,21-25,27,29-31,33-35,58-61,63,65-68,70-73,75-79,81-85,87,89-96,98-105,107,109-111,113-115
+  s_618ff243f404f0::t_bc1186a3ad8f25 1-14,16,20,26,28,32,36-57,62,64,69,74,80,86,88,97,106,108,112
+src/ui/app/static/css/overrides/layout.css
+  s_8e9d4210e0a0ff::t_229cae1fdd1720 38-45,59-61
+  s_9c28e71461c852::t_a0604b69b480dc 1-37,46-58,62-67,74-98,103-162
+  s_618ff243f404f0::t_bc1186a3ad8f25 68-73,99-102
+src/ui/app/static/css/overrides/base.css
+  s_9c28e71461c852::t_a0604b69b480dc 1-8,15-148,153-172,177-184,189-190,202-244,248-312,317-425,467-468,541-548
+  s_8e9d4210e0a0ff::t_229cae1fdd1720 9-14,149-152,173-176,185-188,245-247,313-316
+  s_618ff243f404f0::t_bc1186a3ad8f25 426-466,469-540
+  s_8e9d4210e0a0ff::t_441e276f6b7a03 191-201
+src/ui/app/static/css/overrides/forms-multiselect.css
+  s_8e9d4210e0a0ff::t_229cae1fdd1720 17-20,27-30,35-38,94-99,107-112,131-134,150-154,166-171,178-182,192-197,213-218,224-229,236-240,288-289,298-301,307-310,330-331,335-339,352-355,361-365,376
+  s_8e9d4210e0a0ff::t_82ca2b3d480377 59-66,377-390,392-397,403-406,408-423
+  s_9c28e71461c852::t_fbdc4063f7c303 1-16,21-26,31-34,39-58,67-93,100-106,113-130,135-149,155-165,172-177,183-191,198-212,219-223,230-235,241-287,290-297,302-306,311-329,332-334,340-351,356-360,366-375,391,398-402,407,424-431
+src/ui/app/static/css/overrides/forms-multivalue.css
+  s_9c28e71461c852::t_fbdc4063f7c303 1-124,129-162,173-185
+  s_8e9d4210e0a0ff::t_82ca2b3d480377 163-172
+  s_8e9d4210e0a0ff::t_229cae1fdd1720 125-128
+src/ui/app/static/css/overrides/base-colors.css
+  s_618ff243f404f0::t_c32a9a5af230a1 1-67
+src/ui/app/static/css/overrides/tables.css
+  s_8e9d4210e0a0ff::t_229cae1fdd1720 33-36,40-43,48-51
+  s_9c28e71461c852::t_a0604b69b480dc 1-32,37-39,44-47,52-183,188-244
+  s_618ff243f404f0::t_bc1186a3ad8f25 184-187
+src/ui/app/static/css/overrides/tokens.css
+  s_9c28e71461c852::t_a0604b69b480dc 1-55,125
+  s_618ff243f404f0::t_bc1186a3ad8f25 56-124
+src/ui/app/static/css/overrides/dark-generic.css
+  s_8e9d4210e0a0ff::t_82ca2b3d480377 40-43
+  s_618ff243f404f0::t_f7a4a84cb1397b 1-39
+src/ui/app/static/css/overrides/forms.css
+  s_618ff243f404f0::t_bc1186a3ad8f25 37-40
+  s_8e9d4210e0a0ff::t_229cae1fdd1720 117-122,150-153
+  s_9c28e71461c852::t_a0604b69b480dc 1-36,41-116,123-149,154-388
+src/ui/app/static/css/overrides/editors.css
+  s_9c28e71461c852::t_a0604b69b480dc 1-120
+src/ui/app/static/css/overrides.css
+  s_618ff243f404f0::t_f7a4a84cb1397b 22
+  s_618ff243f404f0::t_c32a9a5af230a1 10
+  s_9c28e71461c852::t_fbdc4063f7c303 12-13
+  s_618ff243f404f0::t_bc1186a3ad8f25 18
+  s_9c28e71461c852::t_e69859953c03f9 14
+  s_9c28e71461c852::t_a0604b69b480dc 2-5,8-9,11,15-17,19-21
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "a196f4e3b69ed9aab469f468fa65634a80cd55d8",
+  "prompts": {},
+  "sessions": {
+    "s_618ff243f404f0": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "0c782c65-de64-4e9e-8e1a-a6ac8164d278",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_8e9d4210e0a0ff": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "d4fcf219-2521-4e57-a623-7801de0e167f",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_9c28e71461c852": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "166ad2e0-8b53-43f5-bcad-f8476a5d7263",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

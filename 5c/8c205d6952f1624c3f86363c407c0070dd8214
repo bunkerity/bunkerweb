@@ -1,0 +1,64 @@
+src/bw/lua/bunkerweb/api.lua
+  s_4600783926e6d7::t_ebc49ad9c54510 198-203,207-227,430,498
+src/linux/scripts/start.sh
+  s_4600783926e6d7::t_ebc49ad9c54510 175-181,188
+src/bw/entrypoint.sh
+  s_4600783926e6d7::t_ebc49ad9c54510 105-109,116
+src/scheduler/main.py
+  s_e1fbfd3163b991::t_c040c60ca84fe9 1093-1095
+  s_4600783926e6d7::t_ebc49ad9c54510 126-143,1002-1017,1026,1033-1041,1112
+  s_55375b53971933::t_6936b32ddae242 400,1090-1092,1096-1099
+  s_0f6a13b9874c22::t_36a9f7ee4512cf 401
+docs/integrations.md
+  s_4600783926e6d7::t_ebc49ad9c54510 1691,2613
+CHANGELOG.md
+  s_1fda42dec74980::t_0479098597bd43 5
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "5c8c205d6952f1624c3f86363c407c0070dd8214",
+  "prompts": {},
+  "sessions": {
+    "s_0f6a13b9874c22": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "be174162-6b1c-4c50-9848-b0da54426933",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_1fda42dec74980": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "1f1a83de-6a6c-4ffe-9821-b2f8e8c7b92a",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_4600783926e6d7": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "577228b8-9e99-4afb-b5b7-0fab1e1a53d0",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_55375b53971933": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "be8c5286-d546-42b7-84f3-d8a7644b31fd",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_e1fbfd3163b991": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b779971c-c931-4dde-943d-eaa0f5fa2a64",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

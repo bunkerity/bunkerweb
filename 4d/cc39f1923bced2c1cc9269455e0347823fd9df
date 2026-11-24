@@ -1,0 +1,81 @@
+docs/fr/features.md
+  s_1b70f33988bd46::t_b1e2f49e36627c 5425-5437
+tests/unit/gen/test_issue_3154_reverse_proxy_location_modsecurity.py
+  s_cbef7de05acd3b::t_6da5398a1ae9ac 25-29
+docs/features.md
+  s_1b70f33988bd46::t_b1e2f49e36627c 5579-5591
+docs/es/features.md
+  s_1b70f33988bd46::t_b1e2f49e36627c 5566-5578
+tests/unit/gen/test_reverse_proxy_upstream_tls.py
+  s_cbef7de05acd3b::t_1defd7899ea0ff 20-26
+src/common/core/grpc/confs/server-http/grpc.conf
+  s_cbef7de05acd3b::t_1defd7899ea0ff 1,71,112
+tests/unit/letsencrypt/test_acme_passthrough_host_template.py
+  s_cbef7de05acd3b::t_6da5398a1ae9ac 33-39
+tests/unit/gen/test_reverse_proxy_max_client_size.py
+  s_cbef7de05acd3b::t_1defd7899ea0ff 25-29
+src/common/core/grpc/plugin.json
+  s_cbef7de05acd3b::t_1defd7899ea0ff 33
+src/common/core/redirect/plugin.json
+  s_cbef7de05acd3b::t_1defd7899ea0ff 14
+tests/unit/gen/test_empty_directive_arguments.py
+  s_cbef7de05acd3b::t_6da5398a1ae9ac 62-66
+src/common/core/reverseproxy/README.es.md
+  s_1b70f33988bd46::t_b1e2f49e36627c 35-47
+src/common/core/redirect/confs/server-http/redirect.conf
+  s_cbef7de05acd3b::t_1defd7899ea0ff 1,23
+CHANGELOG.md
+  s_1b70f33988bd46::t_15293a39be04f5 24
+src/common/core/reverseproxy/confs/server-http/reverse-proxy.conf
+  s_cbef7de05acd3b::t_1defd7899ea0ff 1,105,150
+tests/unit/gen/test_location_operand_upgrade.py
+  s_cbef7de05acd3b::t_9c74d03d78ad1d 28,32,72,113
+  s_cbef7de05acd3b::t_33e400a1653db0 79,131
+  s_cbef7de05acd3b::t_8345a25263421b 41-44,63-64,66-67,114,117
+  s_cbef7de05acd3b::t_123c154b2f0fd2 1-6,8-27,29-31,33-40,45-60,62,65,68-71,73-76,80-88
+  s_cbef7de05acd3b::t_6bf48b1de63607 78
+  s_cbef7de05acd3b::t_740b4fd2821230 7,61,77,89-111,115-116,118-130,132-137
+  s_cbef7de05acd3b::t_8d49320383de65 112
+src/common/core/reverseproxy/confs/_bunkerweb_location_operand.jinja
+  s_cbef7de05acd3b::t_1defd7899ea0ff 1-7
+src/common/core/reverseproxy/README.fr.md
+  s_1b70f33988bd46::t_b1e2f49e36627c 35-47
+src/common/core/reverseproxy/README.de.md
+  s_1b70f33988bd46::t_b1e2f49e36627c 35-47
+src/common/core/reverseproxy/plugin.json
+  s_cbef7de05acd3b::t_1defd7899ea0ff 30,33
+src/common/core/reverseproxy/README.md
+  s_1b70f33988bd46::t_b1e2f49e36627c 35-47
+src/common/core/reverseproxy/README.zh.md
+  s_1b70f33988bd46::t_b1e2f49e36627c 35-47
+docs/de/features.md
+  s_1b70f33988bd46::t_b1e2f49e36627c 5507-5519
+docs/zh/features.md
+  s_1b70f33988bd46::t_b1e2f49e36627c 5574-5586
+tests/unit/gen/test_grpc_upstream_tls.py
+  s_cbef7de05acd3b::t_1defd7899ea0ff 28-34
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "4dcc39f1923bced2c1cc9269455e0347823fd9df",
+  "prompts": {},
+  "sessions": {
+    "s_1b70f33988bd46": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "12c22024-0497-4dc5-8d2f-379645fdb9d5",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_cbef7de05acd3b": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1e9f7-fbb3-7821-aaf8-54656e11e2eb",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

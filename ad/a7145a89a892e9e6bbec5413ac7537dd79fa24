@@ -1,0 +1,57 @@
+src/common/core/letsencrypt/jobs/certbot-new.py
+  s_6a5c54ac0e56e3::t_147ec79a6b567d 411,885-886,1324-1327
+  s_4f460a2e940aa9::t_bc76e4c1ff5848 588-594
+  s_9a784d28fc3537::t_c387fc27a3736e 995-997,1006-1007,1312,1314,1331-1338,1366
+tests/unit/ui/test_letsencrypt_temp_isolation.py
+  s_6a5c54ac0e56e3::t_42da47670c893d 1-29
+src/common/core/letsencrypt/jobs/letsencrypt_utils.py
+  s_6a5c54ac0e56e3::t_147ec79a6b567d 310-315,321-322,327-331,336-337,346-349,352-355
+src/common/core/customcert/jobs/custom-cert.py
+  s_6a5c54ac0e56e3::t_aa161a103f21b0 420-421
+tests/unit/letsencrypt/test_registration_fallback.py
+  s_9a784d28fc3537::t_619184c4ec6f4a 1-110
+tests/unit/customcert/test_rejected_replacement.py
+  s_6a5c54ac0e56e3::t_06126adc2705ad 48-49
+  s_6a5c54ac0e56e3::t_42da47670c893d 1-47,50-52
+tests/unit/letsencrypt/test_public_ip_port.py
+  s_4f460a2e940aa9::t_5febdda1d5a113 105-116
+src/common/core/letsencrypt/jobs/certbot_concurrency.py
+  s_9a784d28fc3537::t_c387fc27a3736e 289-290,292,331,338-339,419,427,430,469,476-477
+tests/unit/letsencrypt/test_port_job_regressions.py
+  s_6a5c54ac0e56e3::t_06126adc2705ad 49-50
+  s_6a5c54ac0e56e3::t_42da47670c893d 1-48,51-73
+src/common/core/letsencrypt/ui/actions.py
+  s_6a5c54ac0e56e3::t_147ec79a6b567d 169,191
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "ada7145a89a892e9e6bbec5413ac7537dd79fa24",
+  "prompts": {},
+  "sessions": {
+    "s_4f460a2e940aa9": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "1801373c-868e-412b-b538-cb2f1f5efe59",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_6a5c54ac0e56e3": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1ac40-220a-7943-ae29-8dc5a6a440bc",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_9a784d28fc3537": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1ac4d-f67e-7bc3-a231-a78687142a6c",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

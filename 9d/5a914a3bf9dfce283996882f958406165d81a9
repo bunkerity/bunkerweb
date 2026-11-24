@@ -1,0 +1,19 @@
+tests/core/antibot.yml
+  s_f1a9e959ec6ad4::t_a2c8636c6b01ad 205-206
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "9d5a914a3bf9dfce283996882f958406165d81a9",
+  "prompts": {},
+  "sessions": {
+    "s_f1a9e959ec6ad4": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "4c3cd365-e13b-474a-aad1-c83061a9e059",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

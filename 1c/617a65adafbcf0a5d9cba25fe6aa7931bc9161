@@ -1,0 +1,24 @@
+CHANGELOG.md
+  h_a33a1e80933106 78
+src/deps/deps.json
+  h_a33a1e80933106 204,206
+src/deps/src/luajit/dynasm/dynasm.lua
+  h_a33a1e80933106 88
+src/deps/src/luajit/src/lj_cconv.c
+  h_a33a1e80933106 24-25,31-32,34,36,691
+src/deps/src/luajit/src/lj_crecord.c
+  h_a33a1e80933106 536-537
+src/deps/src/luajit/src/lj_parse.c
+  h_a33a1e80933106 2383,2396
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "1c617a65adafbcf0a5d9cba25fe6aa7931bc9161",
+  "prompts": {},
+  "humans": {
+    "h_a33a1e80933106": {
+      "author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

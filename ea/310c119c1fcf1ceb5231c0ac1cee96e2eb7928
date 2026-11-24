@@ -1,0 +1,21 @@
+CHANGELOG.md
+  s_60628c795bd662::t_424a2b4d29ddb9 32
+src/common/confs/server-stream/preread-stream-lua.conf
+  s_60628c795bd662::t_4596c4981a93fc 24,51-52,70,72-77,79-80
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "ea310c119c1fcf1ceb5231c0ac1cee96e2eb7928",
+  "prompts": {},
+  "sessions": {
+    "s_60628c795bd662": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1869d-2e49-7ff2-8e88-cfcf2fe9cb0c",
+        "model": "unknown"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

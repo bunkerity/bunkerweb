@@ -1,0 +1,21 @@
+tests/scripts/wait.sh
+  s_6c72b86567c2c6::t_02db08bad955ea 158-162
+tests/scripts/utils.sh
+  s_6c72b86567c2c6::t_882afc25526290 1577-1591
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "88c13b328ba1a123160aa6cbbebc3dc6aac1f543",
+  "prompts": {},
+  "sessions": {
+    "s_6c72b86567c2c6": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "36706207-56fd-490c-85d0-d1ec7595decb",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

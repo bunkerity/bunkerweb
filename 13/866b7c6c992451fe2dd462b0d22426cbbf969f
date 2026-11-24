@@ -1,0 +1,19 @@
+tests/core/headers.yml
+  s_8957b83407cdf6::t_292337223dcc70 13
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "13866b7c6c992451fe2dd462b0d22426cbbf969f",
+  "prompts": {},
+  "sessions": {
+    "s_8957b83407cdf6": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "f0ed5bf7-382f-48ad-b7ad-d9883e810768",
+        "model": "unknown"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

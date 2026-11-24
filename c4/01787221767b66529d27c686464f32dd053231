@@ -1,0 +1,65 @@
+src/api/Dockerfile
+  s_685c6ea6e2ff63::t_1f9cd2400d74ad 1,31
+src/bw/Dockerfile
+  s_685c6ea6e2ff63::t_1f9cd2400d74ad 1,72
+src/linux/Dockerfile-debian-trixie
+  s_685c6ea6e2ff63::t_1f9cd2400d74ad 1,147
+src/linux/Dockerfile-rhel-10
+  s_685c6ea6e2ff63::t_1f9cd2400d74ad 1,151
+src/scheduler/Dockerfile
+  s_685c6ea6e2ff63::t_1f9cd2400d74ad 1,48
+misc/migration/Dockerfile
+  s_685c6ea6e2ff63::t_4a1c9bb19f4597 1
+src/linux/Dockerfile-fedora-43
+  s_685c6ea6e2ff63::t_1f9cd2400d74ad 1,139
+src/linux/Dockerfile-fedora-44
+  s_685c6ea6e2ff63::t_1f9cd2400d74ad 1,139
+docs/Dockerfile
+  s_685c6ea6e2ff63::t_4a1c9bb19f4597 1
+src/linux/Dockerfile-rhel-9
+  s_685c6ea6e2ff63::t_1f9cd2400d74ad 1,149
+src/all-in-one/Dockerfile
+  s_685c6ea6e2ff63::t_4a1c9bb19f4597 1,168
+src/ui/Dockerfile
+  s_685c6ea6e2ff63::t_1f9cd2400d74ad 1,71
+src/autoconf/Dockerfile
+  s_685c6ea6e2ff63::t_1f9cd2400d74ad 1,35
+src/linux/Dockerfile-debian-bookworm
+  s_685c6ea6e2ff63::t_1f9cd2400d74ad 1,152
+tests/linux/Dockerfile-debian-bookworm
+  s_73a85b773b9052::t_f8f1bce22dfcd5 1
+tests/linux/Dockerfile-debian-trixie
+  s_73a85b773b9052::t_9fd3c4f47f3a0a 1
+tests/linux/Dockerfile-fedora-43
+  s_73a85b773b9052::t_8f0d3b08a96731 1
+tests/linux/Dockerfile-fedora-44
+  s_73a85b773b9052::t_ba1e0d5d16190f 1
+tests/linux/Dockerfile-rhel-10
+  s_73a85b773b9052::t_4d1b43ef220a74 1
+tests/linux/Dockerfile-rhel-9
+  s_73a85b773b9052::t_958aef8ebe5d9b 1
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "c401787221767b66529d27c686464f32dd053231",
+  "prompts": {},
+  "sessions": {
+    "s_685c6ea6e2ff63": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1bf4d-bef0-7c40-8dc4-0ebee4b8f645",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_73a85b773b9052": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1c081-21f6-7d21-9ccc-8c1eb28af0de",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

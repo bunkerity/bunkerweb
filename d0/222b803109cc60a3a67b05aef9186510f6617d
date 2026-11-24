@@ -1,0 +1,45 @@
+src/common/core/db/jobs/cleanup-excess-jobs-runs.py
+  s_9c3235322a9dea::t_56dc7e6501c30a 19-21,23,26
+tests/unit/jobs/test_job_cache_contracts.py
+  s_080f7f908db2b1::t_9920aeafcd395a 40,369-370,680-682,706-708
+  s_080f7f908db2b1::t_19586097925b70 234-235,237,615-620,622-624,648,916,920
+  s_080f7f908db2b1::t_4a657f29775da3 924
+  s_080f7f908db2b1::t_fb6009cc82ef4d 849-882
+  s_080f7f908db2b1::t_ca6f577f958d3b 1-11,13-15,17-28,30-39,41-55,59-233,239-344,346-348,357-368,371-392,394-404,406-446,451-547,564-614,625-647,649-657,659-679,683-697,700-701,709-717
+  s_080f7f908db2b1::t_24bb40a8abb068 921-923,925-936
+  s_9c3235322a9dea::t_a080b99b711586 548-563
+  s_080f7f908db2b1::t_5897ba212c0de8 883-915,917-919
+  s_9c3235322a9dea::t_2f1cb9ae43724f 449,621
+  s_080f7f908db2b1::t_5cd41e102f29f7 12,29,56-58,345,350-356,393,405,658
+  s_080f7f908db2b1::t_68acebc3339b78 718-848
+  s_080f7f908db2b1::t_c9146ae28fc658 447-448,450
+  s_080f7f908db2b1::t_89bb3418c2271e 16,698-699,702-705
+  s_080f7f908db2b1::t_7a8b4a16fd003e 236,238
+  s_9c3235322a9dea::t_d427823a9d6a00 349
+src/common/core/backup/jobs/backup-data.py
+  s_9c3235322a9dea::t_56dc7e6501c30a 111-112
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "d0222b803109cc60a3a67b05aef9186510f6617d",
+  "prompts": {},
+  "sessions": {
+    "s_080f7f908db2b1": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a18da6-b908-7500-8939-c98c875f6e58",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_9c3235322a9dea": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a18dbe-fba4-7433-802c-4f639ecf1800",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

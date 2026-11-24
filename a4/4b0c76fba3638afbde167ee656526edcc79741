@@ -1,0 +1,21 @@
+CHANGELOG.md
+  s_e1fbfd3163b991::t_066fe07b7b0420 28
+src/common/core/misc/confs/default-server-http/page.conf
+  s_e1fbfd3163b991::t_b0d67423da5cec 2
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "a44b0c76fba3638afbde167ee656526edcc79741",
+  "prompts": {},
+  "sessions": {
+    "s_e1fbfd3163b991": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b779971c-c931-4dde-943d-eaa0f5fa2a64",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

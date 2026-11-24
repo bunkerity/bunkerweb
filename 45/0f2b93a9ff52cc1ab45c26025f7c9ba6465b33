@@ -1,0 +1,89 @@
+tests/unit/autoconf/test_gateway_reconcile_retry.py
+  s_42f5af4b846cf8::t_95a78def4fe722 1-37,40-43,52,55-57,76-94,98-101,103-116,190-205
+  s_e6b68b00ddd0b9::t_76e16fe0b33dda 95-96,174-175
+  s_42f5af4b846cf8::t_31067f26b1caeb 39,44-46,49,51,53-54,58-60,63-64,66,97,102
+  s_e6b68b00ddd0b9::t_40566781b4e1bd 38,47-48,50,61-62,65,67-75,117-173,176-189
+tests/unit/autoconf/test_config_persist_retry.py
+  s_c2f3b99fc69e0f::t_9880513b6aa8ea 142-144,147-148,151-174,176,181-192,201,205,207,209-211,214-217,221-223,226-228,271-283,285-296
+  s_b6a005e0c6516e::t_96039a3c17850b 96,99-102,108,313-326
+  s_e6b68b00ddd0b9::t_c8ece7414820b7 309
+  s_e6b68b00ddd0b9::t_76e16fe0b33dda 297-308,310-312
+  s_c2f3b99fc69e0f::t_c8d57d6504b1d5 146,202-203,206,208,212-213,218,224-225,229-230
+  s_c2f3b99fc69e0f::t_994a17c01e1717 145,149-150
+  s_b6a005e0c6516e::t_db4f4315347afb 1,10-95,97-98,103-107,109-140,219-220,234-238,240,242-246,253,255-260,263-265,284,348-352,354
+  s_c2f3b99fc69e0f::t_07d37e812040f6 177-180,268-269
+  s_c2f3b99fc69e0f::t_46079f858deb02 141,175,193-200,204,231-233,239,241,247-252,254,261-262,266-267,270
+  s_e6b68b00ddd0b9::t_48cbffce0d4032 2-9,327-347,353,355-417
+src/autoconf/controllers/KubernetesController.py
+  s_e6b68b00ddd0b9::t_b16d00c7c8257f 776-777,965-966
+  s_42f5af4b846cf8::t_e9268b2ed7bbfa 712,749,784-785,804-806,920,939-940,972-973,976-980
+  s_42f5af4b846cf8::t_8119668b1e47eb 717
+src/autoconf/controllers/Controller.py
+  s_30f38348ec9d91::t_dc20056b79cf0e 208,213-214,223,226
+tests/unit/autoconf/test_settings_worker_retry.py
+  s_30f38348ec9d91::t_9fd3b4863fc23f 1-112
+CHANGELOG.md
+  s_e6b68b00ddd0b9::t_76d2321c6f79f5 19
+src/autoconf/Config.py
+  s_c2f3b99fc69e0f::t_ccf3ebb4e9905d 74-77,187-188,260-261,306-307,328,348-351,355-357,363-364
+  s_e6b68b00ddd0b9::t_b16d00c7c8257f 4,112,114,127,284,286-287,292,297,311-312,314,322-323,327,353,359-360
+  s_b6a005e0c6516e::t_6fc00016c18c73 79,101,316-317,320,329-334,343-344
+  s_30f38348ec9d91::t_dc20056b79cf0e 108-110,186
+  s_8f179c3ade88be::t_64e161329f076e 111,308
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "450f2b93a9ff52cc1ab45c26025f7c9ba6465b33",
+  "prompts": {},
+  "sessions": {
+    "s_30f38348ec9d91": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1eaa2-de11-7d51-8e69-75d08662c241",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_42f5af4b846cf8": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1e9f8-081c-7770-9b79-9bab979bd91a",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_8f179c3ade88be": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1edc5-23ae-7822-9e2d-59df32adf37f",
+        "model": "gpt-6.2-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_b6a005e0c6516e": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1ea98-5344-7622-a21e-525d4b88777c",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_c2f3b99fc69e0f": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1ea8c-fd62-7b00-9569-6ba621e853bf",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_e6b68b00ddd0b9": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1ea81-6691-7ad1-b1f9-909f18461dee",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

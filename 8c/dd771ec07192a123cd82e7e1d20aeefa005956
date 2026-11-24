@@ -1,0 +1,29 @@
+CHANGELOG.md
+  s_175dfb7646d720::t_d7cf8ac4e5aded 43
+src/all-in-one/deps/go.json
+  s_f6ae8d3f1c0215::t_03a0254c1bb8e6 2,5-8
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "8cdd771ec07192a123cd82e7e1d20aeefa005956",
+  "prompts": {},
+  "sessions": {
+    "s_175dfb7646d720": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "6287d9cf-9a0e-4d8a-a3c0-5a6e08f44cfe",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_f6ae8d3f1c0215": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "f98f1d97-ebaf-44f3-8efb-d863e37db116",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

@@ -1,0 +1,33 @@
+src/deps/misc/ipmatcher.patch
+  s_f0e7b479dc9dda::t_3047c498b0416f 43,50,52,65,77,86,99
+tests/unit/common/test_ipv6_ipmatcher_luajit.py
+  s_f0e7b479dc9dda::t_44a5ec4d7cf174 105-127
+src/deps/src/lua-resty-ipmatcher/resty/ipmatcher.lua
+  s_f0e7b479dc9dda::t_3047c498b0416f 241,243
+CHANGELOG.md
+  s_1b70f33988bd46::t_15293a39be04f5 25
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "3b71d6157e8e0c818f54253507c84b632dfd1b23",
+  "prompts": {},
+  "sessions": {
+    "s_1b70f33988bd46": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "12c22024-0497-4dc5-8d2f-379645fdb9d5",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_f0e7b479dc9dda": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1e9f7-ffd5-7b90-aa58-36ae4dcee48d",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

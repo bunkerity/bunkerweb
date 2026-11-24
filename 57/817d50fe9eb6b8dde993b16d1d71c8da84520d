@@ -1,0 +1,244 @@
+src/common/db/db_methods/config_read.py
+  s_b6f88e446f5df4::t_8a3a9fa722898e 130-142
+  s_e8917a61014dbb::t_86c342eb883012 100-129,284-294,392-398,560-562
+src/ui/app/static/locales/it.json
+  s_613118063b2844::t_1d75045695ecdf 2485
+tests/unit/db/test_service_server_names.py
+  s_b6f88e446f5df4::t_1b1c5d1a1956fc 1-125,133,135-136
+  s_b6f88e446f5df4::t_e4b075a4f1020e 126-132,134,137-162
+src/ui/app/static/locales/pt.json
+  s_613118063b2844::t_1d75045695ecdf 2485
+src/ui/translations/it/LC_MESSAGES/messages.po
+  s_613118063b2844::t_124004b3d6d8be 7627-7629
+src/ui/app/static/locales/ar.json
+  s_613118063b2844::t_1d75045695ecdf 2418
+tests/unit/letsencrypt/test_single_site_lineage.py
+  s_e8917a61014dbb::t_e379352966d81d 1-67
+src/ui/app/static/locales/tl.json
+  s_613118063b2844::t_1d75045695ecdf 3129
+tests/unit/letsencrypt/test_public_ip_port.py
+  s_463c85464696f5::t_32ea033724696b 83,88-89
+tests/unit/ui/test_service_operation_failures.py
+  s_b6f88e446f5df4::t_6d34ec0d40bb97 1-42,51-58,62-190
+  s_97829bd3b546d8::t_488e0dfe8bea10 43-50,59-61
+src/ui/app/static/locales/tw.json
+  s_613118063b2844::t_1d75045695ecdf 2418
+src/ui/app/static/locales/pl.json
+  s_613118063b2844::t_1d75045695ecdf 3129
+tests/unit/ui/test_setup_empty_hostname.py
+  s_613118063b2844::t_abfad829c834eb 1-12,14-62,76-82,84,86-90,93-112
+  s_613118063b2844::t_e9bb42946d5d45 63-75,83,85,113
+  s_613118063b2844::t_859ecf68ef8717 13,91-92
+src/ui/app/static/locales/br.json
+  s_613118063b2844::t_1d75045695ecdf 2485
+src/ui/translations/tr/LC_MESSAGES/messages.po
+  s_613118063b2844::t_124004b3d6d8be 7617-7619
+src/ui/app/static/locales/ru.json
+  s_613118063b2844::t_1d75045695ecdf 3129
+src/ui/app/static/locales/id.json
+  s_613118063b2844::t_1d75045695ecdf 3129
+src/ui/app/static/locales/zh.json
+  s_613118063b2844::t_1d75045695ecdf 2418
+src/ui/app/static/locales/bn.json
+  s_613118063b2844::t_1d75045695ecdf 2418
+src/ui/translations/zh/LC_MESSAGES/messages.po
+  s_613118063b2844::t_124004b3d6d8be 7617-7619
+src/ui/translations/es/LC_MESSAGES/messages.po
+  s_613118063b2844::t_124004b3d6d8be 7627-7629
+src/common/db/db_methods/config_save.py
+  s_b6f88e446f5df4::t_14d5a585167ec1 495-498
+src/ui/translations/de/LC_MESSAGES/messages.po
+  s_613118063b2844::t_124004b3d6d8be 7627-7629
+src/common/core/letsencrypt/README.md
+  s_b1a8411c08a190::t_c1ab8d21421f3a 222
+  s_c4070041008a43::t_7a352322e1b598 223
+tests/unit/gen/test_service_server_name_render.py
+  s_5eb947fde43cf2::t_3dab568f7a02fb 3-6,23,25-28,31-35,38-40,44,48
+  s_b6f88e446f5df4::t_fe8f1462eac349 1-2,7-12,16-18,20-22,29,43,45-46
+  s_b6f88e446f5df4::t_09ebc2200bc6e9 13-14,19,24,36-37,41-42,47,49-50
+  s_b6f88e446f5df4::t_def289d8671911 15,30
+tests/unit/modsecurity/test_crs_single_site_aliases.py
+  s_463c85464696f5::t_b52c9f35dee1d1 1-39,41-54
+  s_463c85464696f5::t_de7c5e6578c3c3 40
+src/ui/translations/fr/LC_MESSAGES/messages.po
+  s_613118063b2844::t_124004b3d6d8be 7627-7629
+src/common/core/reverseproxy/jobs/trusted-cert.py
+  s_463c85464696f5::t_aa67254a0ccae0 260-262
+  s_20295d7565a496::t_03d0adbebfcf99 263
+src/ui/translations/pl/LC_MESSAGES/messages.po
+  s_613118063b2844::t_124004b3d6d8be 7637-7639
+src/common/core/letsencrypt/jobs/certbot-new.py
+  s_b1a8411c08a190::t_adfc592bb97e5c 720-739,1077
+  s_e8917a61014dbb::t_abe7be23241120 201-203,630,1244-1245,1279-1283,1290
+tests/unit/gen/test_service_server_name.py
+  s_b6f88e446f5df4::t_c3ba67de03ef03 1-95
+src/ui/translations/ar/LC_MESSAGES/messages.po
+  s_613118063b2844::t_124004b3d6d8be 7667-7669
+src/common/core/letsencrypt/README.es.md
+  s_b1a8411c08a190::t_c1ab8d21421f3a 232
+  s_c4070041008a43::t_a7000176416b78 233
+src/common/gen/Configurator.py
+  s_b6f88e446f5df4::t_da1f2b27a64280 602-606
+src/ui/translations/en/LC_MESSAGES/messages.po
+  s_613118063b2844::t_124004b3d6d8be 7627-7629
+src/common/core/letsencrypt/README.de.md
+  s_b1a8411c08a190::t_c1ab8d21421f3a 231
+  s_c4070041008a43::t_4acd6c58dce0c1 232
+src/ui/app/static/locales/fr.json
+  s_613118063b2844::t_1d75045695ecdf 2485
+src/ui/translations/zh_Hant/LC_MESSAGES/messages.po
+  s_613118063b2844::t_124004b3d6d8be 7617-7619
+src/common/core/pro/jobs/download-pro-plugins.py
+  s_463c85464696f5::t_aa67254a0ccae0 277-278,283-285
+src/ui/app/static/locales/es.json
+  s_613118063b2844::t_1d75045695ecdf 2485
+src/api/app/routers/services.py
+  s_b6f88e446f5df4::t_2ccc25dcab93f5 475-477
+  s_b6f88e446f5df4::t_36b101ee85f4ca 322-335
+  s_b6f88e446f5df4::t_0159965339f4cf 417-423
+src/ui/translations/fil_PH/LC_MESSAGES/messages.po
+  s_613118063b2844::t_124004b3d6d8be 7627-7629
+tests/unit/pro/test_single_site_service_number.py
+  s_463c85464696f5::t_5f6e1277865140 1-32
+src/ui/translations/ur/LC_MESSAGES/messages.po
+  s_613118063b2844::t_124004b3d6d8be 7627-7629
+src/ui/translations/hi/LC_MESSAGES/messages.po
+  s_613118063b2844::t_124004b3d6d8be 7627-7629
+tests/unit/reverseproxy/test_trusted_cert_single_site.py
+  s_463c85464696f5::t_5f6e1277865140 1-8,10-28
+  s_463c85464696f5::t_10293b74f59002 9
+src/ui/app/static/locales/de.json
+  s_613118063b2844::t_1d75045695ecdf 2485
+src/ui/translations/id/LC_MESSAGES/messages.po
+  s_613118063b2844::t_124004b3d6d8be 7627-7629
+src/ui/translations/ru/LC_MESSAGES/messages.po
+  s_613118063b2844::t_124004b3d6d8be 7637-7639
+src/ui/translations/pt/LC_MESSAGES/messages.po
+  s_613118063b2844::t_124004b3d6d8be 7627-7629
+tests/unit/api/test_services_server_names.py
+  s_b6f88e446f5df4::t_9c8abf38cfc775 1-100
+src/common/core/letsencrypt/README.fr.md
+  s_b1a8411c08a190::t_c1ab8d21421f3a 221
+  s_c4070041008a43::t_32e8f17a4f4ca4 222
+src/ui/app/routes/services.py
+  s_b6f88e446f5df4::t_8ec40a5ee88716 112-118,124,126-128
+  s_b6f88e446f5df4::t_b2a2b11371d07e 1896,1925,1947-1951
+  s_b1a8411c08a190::t_f9b3ce4a7009fa 804,908,1033,2227,2262,2267,2483,2595,2908
+  s_b6f88e446f5df4::t_1d7c4df1b2a79e 119-123,125
+src/ui/translations/bn/LC_MESSAGES/messages.po
+  s_613118063b2844::t_124004b3d6d8be 7627-7629
+src/ui/app/static/locales/en.json
+  s_613118063b2844::t_1d75045695ecdf 3129
+src/ui/translations/pt_BR/LC_MESSAGES/messages.po
+  s_613118063b2844::t_124004b3d6d8be 7627-7629
+tests/unit/pro/test_billable_service_number.py
+  s_463c85464696f5::t_e55f1bad5c22e0 51,101,108
+tests/unit/misc/test_anonymous_report_single_site.py
+  s_463c85464696f5::t_5f6e1277865140 1-40
+src/ui/app/static/locales/ko.json
+  s_613118063b2844::t_1d75045695ecdf 3129
+src/ui/app/routes/setup.py
+  s_613118063b2844::t_2eb1e03bb724de 253
+  s_613118063b2844::t_6b39a39682ecdb 251-252,254
+src/ui/app/models/config.py
+  s_b6f88e446f5df4::t_918af6e419420a 319-325
+src/common/core/misc/jobs/anonymous-report.py
+  s_463c85464696f5::t_aa67254a0ccae0 52-53
+src/ui/app/static/locales/tr.json
+  s_613118063b2844::t_1d75045695ecdf 3129
+src/common/core/modsecurity/jobs/download-crs-plugins.py
+  s_463c85464696f5::t_5a672e930ebb43 294-295
+tests/unit/ui/test_i18n_catalogs.py
+  s_613118063b2844::t_bbf742dd01fec0 207-208
+src/ui/translations/ko/LC_MESSAGES/messages.po
+  s_613118063b2844::t_124004b3d6d8be 7617-7619
+src/common/core/letsencrypt/README.zh.md
+  s_b1a8411c08a190::t_c1ab8d21421f3a 221
+  s_c4070041008a43::t_81baf9e36aef76 222
+src/ui/app/static/locales/hi.json
+  s_613118063b2844::t_1d75045695ecdf 2418
+src/ui/app/static/locales/ur.json
+  s_613118063b2844::t_1d75045695ecdf 2418
+tests/unit/ui/test_service_mode_ui.py
+  s_b6f88e446f5df4::t_23fb3908c99f9a 21,193-201
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "57817d50fe9eb6b8dde993b16d1d71c8da84520d",
+  "prompts": {},
+  "sessions": {
+    "s_20295d7565a496": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "ce5b0a36-692f-4550-a1af-96b2483a870e",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_463c85464696f5": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a143fc-1460-7ac2-91ef-f305b57cea88",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_5eb947fde43cf2": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "36376efb-e32a-4a9d-8826-419d54136ca2",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_613118063b2844": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "41ba75dd-235f-4ecd-b053-758224c145c3",
+        "model": "unknown"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_97829bd3b546d8": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b2517ec2-7793-439c-a7d8-ce741cb4a2fd",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_b1a8411c08a190": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "f1ea583f-1a26-451c-ab8c-64d0ec4cec22",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_b6f88e446f5df4": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "92798179-02f4-4f26-b193-3b177a4f7333",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_c4070041008a43": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "8ed3d00d-b7cc-486b-b0fa-cdd4d9e562f1",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_e8917a61014dbb": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "7ff350ad-bc0b-4556-8679-17b87e179e57",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

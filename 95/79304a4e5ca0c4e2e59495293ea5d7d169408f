@@ -1,0 +1,22 @@
+CHANGELOG.md
+  h_a33a1e80933106 65
+src/common/core/customcert/jobs/custom-cert.py
+  h_a33a1e80933106 14,50,78-96,98-100,102,154,159-160,163,167,181
+src/common/core/selfsigned/jobs/self-signed.py
+  h_a33a1e80933106 17-18,55,61-64,69-74,87,128,149-172,175,205-218,226
+tests/unit/certificates/test_custom_cert_validation.py
+  h_a33a1e80933106 59-64,66,112,122,131,142-143,147-152,166
+tests/unit/jobs/test_selfsigned_generation.py
+  h_a33a1e80933106 1-4,10-11,14-16,20-21,23-34,51,74,81,108,112-310
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "9579304a4e5ca0c4e2e59495293ea5d7d169408f",
+  "prompts": {},
+  "humans": {
+    "h_a33a1e80933106": {
+      "author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

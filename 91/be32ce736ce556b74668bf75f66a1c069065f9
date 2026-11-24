@@ -1,0 +1,90 @@
+tests/core/modsecurity_global_crs_large_host_lists/check-rendered.sh
+  s_f77e78218d15a5::t_311c596ebaa970 14,32,42-43,49,55,61
+  s_980c0df0b3d6c8::t_2e025e3de6e42f 1-13,15-31,33-41,44-48,50-54,56-60,62-63
+src/common/core/ui/confs/http/ui.modsec-crs
+  s_7a3c0adeadb822::t_1c25599a21a70e 42-43
+  s_7a3c0adeadb822::t_9676886936d94f 1,3,5-6,8,11,13
+  s_f908ddee4038e2::t_17671498e03bf1 2,4,7,9-10,12,14-18,37-41,44-59,61-67,70,74,78,82,88,92,96,100,104,108,112,116,120-126,129
+tests/unit/fixtures/core_host_modsec_crs/antibot-small.modsec-crs
+  s_f908ddee4038e2::t_1ea058aaac7053 1-2
+src/common/core/modsecurity/confs/http/ip-host.modsec-crs
+  s_7a3c0adeadb822::t_50fd0ee3e8b852 1-18,43-51,54-62,64
+tests/unit/test_core_host_modsec_crs_size.py
+  s_f908ddee4038e2::t_04ed8276a5c401 250,252-256,399
+  s_7a3c0adeadb822::t_90d4a41a791f72 1,4,22,31-33,90-100
+  s_5c6d582867ff36::t_f1a429096d47ca 484-561,568-603,608-673
+  s_f908ddee4038e2::t_fa48e3bde94fa9 2-3,5-21,23-30,34-89,101-146,148-249,251,257-398,400-483
+  s_7a3c0adeadb822::t_f8a2f4c79969e1 562-567,604-606
+  s_f908ddee4038e2::t_939b1f2a3b5ef5 147
+  s_7a3c0adeadb822::t_02e08ea665a09e 607
+tests/unit/fixtures/core_host_modsec_crs/ip-host-single-site-small.modsec-crs
+  s_7a3c0adeadb822::t_d4adfe2ee5e591 1-4
+tests/unit/fixtures/core_host_modsec_crs/ip-host-small.modsec-crs
+  s_7a3c0adeadb822::t_d4adfe2ee5e591 1-4
+src/common/core/antibot/confs/http/antibot.modsec-crs
+  s_7a3c0adeadb822::t_1c25599a21a70e 43
+  s_f908ddee4038e2::t_81ba541e551a31 2,4,7,9-10,12,14-18,39-42,44-51,53-57
+  s_7a3c0adeadb822::t_9676886936d94f 1,3,5-6,8,11,13
+tests/unit/fixtures/core_host_modsec_crs/ui-small.modsec-crs
+  s_f908ddee4038e2::t_1ea058aaac7053 1-66
+tests/unit/ui/test_config_editor_xss_exclusion.py
+  s_f908ddee4038e2::t_c27207fc2f1c4d 70-74
+tests/core/modsecurity_global_crs_large_host_lists.yml
+  s_980c0df0b3d6c8::t_1921c29c4972b9 23-24,49-51,672,717
+  s_7a3c0adeadb822::t_f0a6a508fb2dfd 653
+  s_7a3c0adeadb822::t_5ef8a4c6850c42 652
+  s_980c0df0b3d6c8::t_56f52830074b28 1-22,25-48,52,391-392,644-651,654-671,673-713,716,718,724
+  s_980c0df0b3d6c8::t_633848c2b49f4f 53-390,393-643,714-715,719-723,725-729
+tests/unit/fixtures/core_host_modsec_crs/antibot-single-site-small.modsec-crs
+  s_f908ddee4038e2::t_1ea058aaac7053 1-2
+CHANGELOG.md
+  s_f77e78218d15a5::t_33c95601d1d7cc 3-6
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.6",
+  "base_commit_sha": "91be32ce736ce556b74668bf75f66a1c069065f9",
+  "prompts": {},
+  "sessions": {
+    "s_5c6d582867ff36": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "58a1850e-12f4-488d-9622-7fec39782154",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_7a3c0adeadb822": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "32c8076a-4fac-43be-8db9-6fbde2e6824b",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_980c0df0b3d6c8": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "15e5e710-716b-4705-b70c-78ea6a5bdee6",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_f77e78218d15a5": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "f03f437d-2528-4011-ab8f-09fdff814813",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_f908ddee4038e2": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "2d85e4dd-76c5-46d4-abf3-6bb552352cdd",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

@@ -1,0 +1,19 @@
+src/common/core/badbehavior/badbehavior.lua
+  s_6f80aaded4b188::t_468968a2799aca 361-368
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "d7b0199c363c39f47e729f3623b56a20887fc98f",
+  "prompts": {},
+  "sessions": {
+    "s_6f80aaded4b188": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1587c-f6f5-70d3-bdfa-f0781b924936",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

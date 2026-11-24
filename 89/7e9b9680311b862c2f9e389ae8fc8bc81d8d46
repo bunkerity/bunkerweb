@@ -1,0 +1,64 @@
+src/ui/app/templates/setup.html
+  s_60628c795bd662::t_0d58c9f0e99f7b 343,493,648,685,719,753,787,973,1009,1084,1117,1261,1295,1329,1443,1479,1514,1592
+src/ui/app/templates/models/multivalue_setting.html
+  s_60628c795bd662::t_9f781e4100b239 18
+src/ui/main.py
+  s_60628c795bd662::t_d6dbb0e0524c1d 50,876
+  s_60628c795bd662::t_33816e176b5d95 877
+src/ui/app/templates/models/input_setting.html
+  s_60628c795bd662::t_6715c28211f632 9,93
+src/ui/app/templates/profile.html
+  s_60628c795bd662::t_e5c27d06db5f16 278
+src/ui/app/static/js/modules/setting_controls.js
+  s_60628c795bd662::t_8b9a1022e5deae 37-180,256-257,273-274,723-724,780-781
+src/ui/app/html_pattern.py
+  s_e7f67111afca3f::t_71b9e7bbfe36ba 1-8,11-37,39-56,58-68,70-107,109-134
+  s_fa9a376e8fb070::t_9a4f446f5375bb 9-10
+  s_5fb50095e4a17f::t_c4b2bbac0906ea 108
+  s_e7f67111afca3f::t_b8cba1a7c58601 38,57,69
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "897e9b9680311b862c2f9e389ae8fc8bc81d8d46",
+  "prompts": {},
+  "humans": {
+    "h_a33a1e80933106": {
+      "author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  },
+  "sessions": {
+    "s_5fb50095e4a17f": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a178e3-7820-7993-b09e-f7acf5334fde",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_60628c795bd662": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1869d-2e49-7ff2-8e88-cfcf2fe9cb0c",
+        "model": "unknown"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_e7f67111afca3f": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "fcb3d403-f068-4458-bc07-ed32a60c9b6d",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_fa9a376e8fb070": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "1c118fd6-05ff-4f65-9a80-fcc449429077",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

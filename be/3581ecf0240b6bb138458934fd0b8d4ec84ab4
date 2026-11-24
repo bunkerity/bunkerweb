@@ -1,0 +1,18 @@
+CHANGELOG.md
+  h_a33a1e80933106 51
+src/common/confs/server-stream/preread-stream-lua.conf
+  h_a33a1e80933106 132-139
+tests/unit/common/test_lua_request_path_ports.py
+  h_a33a1e80933106 336-390
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "be3581ecf0240b6bb138458934fd0b8d4ec84ab4",
+  "prompts": {},
+  "humans": {
+    "h_a33a1e80933106": {
+      "author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}
