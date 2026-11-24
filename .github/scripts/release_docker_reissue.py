@@ -16,7 +16,7 @@ import release_smoke
 VERSION = "1.6.19~rc1"
 PUBLIC_TAG = "v1.6.19-rc1"
 DOCKER_TAG = "1.6.19-rc1"
-AUTH_TAG = "docker-reissue/1.6.19-rc1-nginx-1.30.8"
+AUTH_TAG = "docker-reissue/nginx-1.30.8/1.6.19-rc1"
 WORKFLOW = ".github/workflows/docker-reissue-rc1.yml"
 SIGNER = "4821439D531B030E5DCCF1F77C44E4D7742628F8"
 OLD_SOURCE = "c80b2e71cec7df3af1db0b1abfab79dfa11a4acf"

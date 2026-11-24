@@ -1,7 +1,7 @@
 name: RC1 Docker-only reissue
 on:
   push:
-    tags: ["docker-reissue/1.6.19-rc1-nginx-1.30.8"]
+    tags: ["docker-reissue/nginx-1.30.8/1.6.19-rc1"]
 
 permissions: {}
 
