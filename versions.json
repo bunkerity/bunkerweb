@@ -7,11 +7,16 @@
     ]
   },
   {
-    "version": "1.6.18~rc5",
-    "title": "1.6.18~rc5",
+    "version": "1.6.19~rc1",
+    "title": "1.6.19~rc1",
     "aliases": [
       "rc"
-    ],
+    ]
+  },
+  {
+    "version": "1.6.18~rc5",
+    "title": "1.6.18~rc5",
+    "aliases": [],
     "properties": {
       "hidden": true
     }
@@ -52,8 +57,8 @@
     "version": "1.6.18",
     "title": "1.6.18",
     "aliases": [
-      "latest",
-      "1.6"
+      "1.6",
+      "latest"
     ]
   },
   {

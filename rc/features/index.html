@@ -4446,7 +4446,7 @@ curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">"Host: bw
 <td></td>
 <td>multisite</td>
 <td>no</td>
-<td>DNS provider for DNS-01 challenges. Hosttech requires BunkerWeb core 1.6.18~rc5 or newer.</td>
+<td>DNS provider for DNS-01 challenges. Hosttech requires BunkerWeb core 1.6.18 or newer.</td>
 </tr>
 <tr>
 <td><code>ACME_DNS_CREDENTIAL_ITEM</code></td>
@@ -6080,26 +6080,22 @@ bwcli<span class="w"> </span>plugin<span class="w"> </span>backup<span class="w"
 </tr>
 <tr>
 <td><code>ip:laurent-minne-data-shield-aggressive</code></td>
-<td>Data-Shield IPv4 Blocklist - Laurent M. - For Web Apps, WordPress, VPS (Apache/Nginx)</td>
+<td>Data-Shield IPv4 Blocklist (Community Standard) - Laurent M.</td>
 <td><code>https://raw.githubusercontent.com/duggytuxy/Data-Shield_IPv4_Blocklist/refs/heads/main/prod_data-shield_ipv4_blocklist.txt</code></td>
-</tr>
-<tr>
-<td><code>ip:laurent-minne-data-shield-critical</code></td>
-<td>Data-Shield IPv4 Blocklist - Laurent M. - For DMZs, SaaS, API &amp; Critical Assets</td>
-<td><code>https://raw.githubusercontent.com/duggytuxy/Data-Shield_IPv4_Blocklist/refs/heads/main/prod_critical_data-shield_ipv4_blocklist.txt</code></td>
 </tr>
 </tbody>
 </table>
+<div class="admonition info">
+<p class="admonition-title">Data-Shield Pro</p>
+<p><a href="https://data-shield.eu/?utm_source=external-docs&amp;utm_medium=cta&amp;utm_campaign=bunkerweb-docs">Data-Shield Pro</a> is a paid subscription that includes the Critical profile: the Standard list plus additional blocked sources, for stricter inbound filtering with a higher risk of blocking legitimate traffic. The former <code>ip:laurent-minne-data-shield-critical</code> preset is retired and now downloads the free Community Standard list.</p>
+<p>The Pro feed requires authentication, and BunkerWeb has no separate setting for a feed credential. Credentials embedded in a URL setting (<code>http://user:pass@url</code>) are stored in that setting and shown in the web UI and in the logs, so follow the <a href="https://data-shield.eu/docs/?utm_source=external-docs&amp;utm_medium=cta&amp;utm_campaign=bunkerweb-docs">vendor guidance</a>: keep the device token out of URLs and use a relay on your own network, a service that authenticates upstream and serves the file only to your BunkerWeb instances, then add the relay URL to <code>BLACKLIST_IP_URLS</code>. The HTTP Basic option takes the Device ID as user and the token as password, but it puts the token in the setting. Subscribers manage their devices in the <a href="https://feeds.data-shield.eu/?utm_source=external-docs&amp;utm_medium=cta&amp;utm_campaign=bunkerweb-docs">subscriber portal</a>.</p>
+</div>
 <p><strong>Configuration:</strong> Specify multiple lists separated by spaces. For example:
 <div class="highlight"><pre><span></span><code><span class="nt">BLACKLIST_COMMUNITY_LISTS</span><span class="p">:</span><span class="w"> </span><span class="s">"ip:danmeuk-tor-exit</span><span class="nv"> </span><span class="s">ua:mitchellkrogza-bad-user-agents"</span>
 </code></pre></div></p>
 <div class="admonition tip">
 <p class="admonition-title">Community vs Manual Configuration</p>
 <p>Community blacklists provide a convenient way to get started with proven blacklist sources. You can use them alongside manual URL configurations for maximum flexibility.</p>
-</div>
-<div class="admonition note">
-<p class="admonition-title">Acknowledgements</p>
-<p>Thank you Laurent Minne for contributing the <a href="https://duggytuxy.github.io/#">Data-Shield blocklists</a>!</p>
 </div>
 </div>
 <div class="tabbed-block">
@@ -7410,7 +7406,7 @@ log {
 <span class="nt">services</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bunkerweb</span><span class="p">:</span>
 <span class="w">    </span><span class="c1"># This is the name that will be used to identify the instance in the Scheduler</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.18-rc5</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.19-rc1</span>
 <span class="w">    </span><span class="nt">ports</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">"80:8080/tcp"</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">"443:8443/tcp"</span>
@@ -7427,7 +7423,7 @@ log {
 <span class="w">        </span><span class="nt">syslog-address</span><span class="p">:</span><span class="w"> </span><span class="s">"udp://10.20.30.254:514"</span><span class="w"> </span><span class="c1"># The IP address of the syslog service</span>
 
 <span class="w">  </span><span class="nt">bw-scheduler</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.18-rc5</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.19-rc1</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">&lt;&lt;</span><span class="p">:</span><span class="w"> </span><span class="nv">*bw-env</span>
 <span class="w">      </span><span class="nt">BUNKERWEB_INSTANCES</span><span class="p">:</span><span class="w"> </span><span class="s">"bunkerweb"</span><span class="w"> </span><span class="c1"># Make sure to set the correct instance name</span>
@@ -11967,7 +11963,7 @@ TrustedMonitor/\d+\.\d+
 </div>
 <div class="admonition warning">
 <p class="admonition-title">Response-body denies and compressed responses</p>
-<p>If a response-body deny rule fires after response headers have been sent, the client can receive the original status (such as <code>200</code>) followed by an incomplete-body or chunked-encoding error instead of a clean <code>403</code> response. This can happen with gzip, Brotli or zstd compression applied by BunkerWeb. Starting with <code>1.6.18~rc5</code>, Brotli follows the established gzip behavior. Check the ModSecurity audit and error logs for the triggered rule; tune confirmed false positives with narrowly scoped exclusions.</p>
+<p>If a response-body deny rule fires after response headers have been sent, the client can receive the original status (such as <code>200</code>) followed by an incomplete-body or chunked-encoding error instead of a clean <code>403</code> response. This can happen with gzip, Brotli or zstd compression applied by BunkerWeb. Starting with <code>1.6.18</code>, Brotli follows the established gzip behavior. Check the ModSecurity audit and error logs for the triggered rule; tune confirmed false positives with narrowly scoped exclusions.</p>
 </div>
 <div class="admonition warning">
 <p class="admonition-title">Upstream-compressed response bodies</p>

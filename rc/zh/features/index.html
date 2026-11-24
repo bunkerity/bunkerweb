@@ -4448,7 +4448,7 @@ curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">"Host: bw
 <td></td>
 <td>multisite</td>
 <td>否</td>
-<td>DNS provider for DNS-01 challenges. Hosttech requires BunkerWeb core 1.6.18~rc5 or newer.</td>
+<td>DNS provider for DNS-01 challenges. Hosttech requires BunkerWeb core 1.6.18 or newer.</td>
 </tr>
 <tr>
 <td><code>ACME_DNS_CREDENTIAL_ITEM</code></td>
@@ -6082,26 +6082,22 @@ bwcli<span class="w"> </span>plugin<span class="w"> </span>backup<span class="w"
 </tr>
 <tr>
 <td><code>ip:laurent-minne-data-shield-aggressive</code></td>
-<td>Data-Shield IPv4 Blocklist - Laurent M. - 适用于 Web 应用, WordPress, VPS (Apache/Nginx)</td>
+<td>Data-Shield IPv4 Blocklist (Community Standard) - Laurent M.</td>
 <td><code>https://raw.githubusercontent.com/duggytuxy/Data-Shield_IPv4_Blocklist/refs/heads/main/prod_data-shield_ipv4_blocklist.txt</code></td>
-</tr>
-<tr>
-<td><code>ip:laurent-minne-data-shield-critical</code></td>
-<td>Data-Shield IPv4 Blocklist - Laurent M. - 适用于 DMZs, SaaS, API 和关键资产</td>
-<td><code>https://raw.githubusercontent.com/duggytuxy/Data-Shield_IPv4_Blocklist/refs/heads/main/prod_critical_data-shield_ipv4_blocklist.txt</code></td>
 </tr>
 </tbody>
 </table>
+<div class="admonition info">
+<p class="admonition-title">Data-Shield Pro</p>
+<p><a href="https://data-shield.eu/?utm_source=external-docs&amp;utm_medium=cta&amp;utm_campaign=bunkerweb-docs">Data-Shield Pro</a> 是付费订阅，包含 Critical 配置：在 Standard 列表的基础上增加更多被阻止的来源，用于更严格的入站过滤，但误拦合法流量的风险更高。原 <code>ip:laurent-minne-data-shield-critical</code> 预设已停用，现在下载免费的 Community Standard 列表。</p>
+<p>Pro 源需要身份验证，而 BunkerWeb 没有单独的订阅源凭据设置。嵌入 URL 设置中的凭据（<code>http://user:pass@url</code>）会保存在该设置中，并显示在 Web 界面和日志里。因此请遵循<a href="https://data-shield.eu/docs/?utm_source=external-docs&amp;utm_medium=cta&amp;utm_campaign=bunkerweb-docs">供应商指南</a>：不要把设备令牌放进 URL，而是在您自己的网络中使用中继，即一个向上游进行身份验证、并仅向您的 BunkerWeb 实例提供该文件的服务，然后将中继 URL 添加到 <code>BLACKLIST_IP_URLS</code>。HTTP Basic 选项以设备 ID 作为用户名、令牌作为密码，但这会把令牌保存在该设置中。订阅用户可在<a href="https://feeds.data-shield.eu/?utm_source=external-docs&amp;utm_medium=cta&amp;utm_campaign=bunkerweb-docs">订阅者门户</a>中管理设备。</p>
+</div>
 <p><strong>配置：</strong> 指定多个列表，以空格分隔。例如：
 <div class="highlight"><pre><span></span><code><span class="nt">BLACKLIST_COMMUNITY_LISTS</span><span class="p">:</span><span class="w"> </span><span class="s">"ip:danmeuk-tor-exit</span><span class="nv"> </span><span class="s">ua:mitchellkrogza-bad-user-agents"</span>
 </code></pre></div></p>
 <div class="admonition tip">
 <p class="admonition-title">社区与手动配置</p>
 <p>社区黑名单提供了一种方便的方式来开始使用经过验证的黑名单源。您可以将它们与手动 URL 配置一起使用，以实现最大的灵活性。</p>
-</div>
-<div class="admonition note">
-<p class="admonition-title">致谢</p>
-<p>感谢 Laurent Minne 贡献了 <a href="https://duggytuxy.github.io/#">Data-Shield 阻止列表</a>！</p>
 </div>
 </div>
 <div class="tabbed-block">
@@ -7410,7 +7406,7 @@ log {
 <span class="nt">services</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bunkerweb</span><span class="p">:</span>
 <span class="w">    </span><span class="c1"># 这是将用于在调度器中识别实例的名称</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.18-rc5</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.19-rc1</span>
 <span class="w">    </span><span class="nt">ports</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">"80:8080/tcp"</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">"443:8443/tcp"</span>
@@ -7427,7 +7423,7 @@ log {
 <span class="w">        </span><span class="nt">syslog-address</span><span class="p">:</span><span class="w"> </span><span class="s">"udp://10.20.30.254:514"</span><span class="w"> </span><span class="c1"># syslog 服务的 IP 地址</span>
 
 <span class="w">  </span><span class="nt">bw-scheduler</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.18-rc5</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.19-rc1</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">&lt;&lt;</span><span class="p">:</span><span class="w"> </span><span class="nv">*bw-env</span>
 <span class="w">      </span><span class="nt">BUNKERWEB_INSTANCES</span><span class="p">:</span><span class="w"> </span><span class="s">"bunkerweb"</span><span class="w"> </span><span class="c1"># 确保设置正确的实例名称</span>
@@ -11968,7 +11964,7 @@ TrustedMonitor/\d+\.\d+
 </div>
 <div class="admonition warning">
 <p class="admonition-title">响应体阻断与压缩响应</p>
-<p>如果响应体阻断规则在响应头发送后才触发，客户端可能先收到原始状态码（如 <code>200</code>），随后出现响应体不完整或分块传输错误，而不是完整的 <code>403</code> 响应。BunkerWeb 应用 gzip、Brotli 或 zstd 压缩时都可能出现这种情况。从 <code>1.6.18~rc5</code> 开始，Brotli 的行为与 gzip 已有的行为一致。请检查 ModSecurity 审计日志和错误日志，确定触发的规则，并用范围严格受限的排除规则处理已确认的误报。</p>
+<p>如果响应体阻断规则在响应头发送后才触发，客户端可能先收到原始状态码（如 <code>200</code>），随后出现响应体不完整或分块传输错误，而不是完整的 <code>403</code> 响应。BunkerWeb 应用 gzip、Brotli 或 zstd 压缩时都可能出现这种情况。从 <code>1.6.18</code> 开始，Brotli 的行为与 gzip 已有的行为一致。请检查 ModSecurity 审计日志和错误日志，确定触发的规则，并用范围严格受限的排除规则处理已确认的误报。</p>
 </div>
 <div class="admonition warning">
 <p class="admonition-title">上游压缩的响应体</p>

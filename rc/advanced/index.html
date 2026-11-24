@@ -2681,8 +2681,8 @@
 
 
 <h1 id="advanced-usages">Advanced usages<a class="headerlink" href="#advanced-usages" title="Permanent link">&para;</a></h1>
-<p>Many real-world use case examples are available in the <a href="https://github.com/bunkerity/bunkerweb/tree/v1.6.18-rc5/examples">examples</a> folder of the GitHub repository.</p>
-<p>We also provide numerous boilerplates, such as YAML files for various integrations and database types. These are available in the <a href="https://github.com/bunkerity/bunkerweb/tree/v1.6.18-rc5/misc/integrations">misc/integrations</a> folder.</p>
+<p>Many real-world use case examples are available in the <a href="https://github.com/bunkerity/bunkerweb/tree/v1.6.19-rc1/examples">examples</a> folder of the GitHub repository.</p>
+<p>We also provide numerous boilerplates, such as YAML files for various integrations and database types. These are available in the <a href="https://github.com/bunkerity/bunkerweb/tree/v1.6.19-rc1/misc/integrations">misc/integrations</a> folder.</p>
 <p>This section only focuses on advanced usages and security tuning, see the <a href="../features/">features section</a> of the documentation to see all the available settings.</p>
 <div class="admonition tip">
 <p class="admonition-title">Testing</p>
@@ -2750,14 +2750,14 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class=
 <span class="w">    </span>-p<span class="w"> </span><span class="m">80</span>:8080/tcp<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>-p<span class="w"> </span><span class="m">443</span>:8443/tcp<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>-p<span class="w"> </span><span class="m">443</span>:8443/udp<span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>bunkerity/bunkerweb-all-in-one:1.6.18-rc5
+<span class="w">    </span>bunkerity/bunkerweb-all-in-one:1.6.19-rc1
 </code></pre></div>
 <p>Please note that if your container is already created, you will need to delete it and recreate it so the new environment variables will be updated.</p>
 </div>
 <div class="tabbed-block">
 <p>You will need to add the settings to the environment variables of both the BunkerWeb and scheduler containers:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">bunkerweb</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.18-rc5</span>
+<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.19-rc1</span>
 <span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">...</span>
 <span class="w">  </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">USE_REAL_IP</span><span class="p">:</span><span class="w"> </span><span class="s">"yes"</span>
@@ -2765,7 +2765,7 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class=
 <span class="w">    </span><span class="nt">REAL_IP_HEADER</span><span class="p">:</span><span class="w"> </span><span class="s">"X-Forwarded-For"</span>
 <span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">...</span>
 <span class="nt">bw-scheduler</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.18-rc5</span>
+<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.19-rc1</span>
 <span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">...</span>
 <span class="w">  </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">USE_REAL_IP</span><span class="p">:</span><span class="w"> </span><span class="s">"yes"</span>
@@ -2778,7 +2778,7 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class=
 <div class="tabbed-block">
 <p>You will need to add the settings to the environment variables of both the BunkerWeb and scheduler containers:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">bunkerweb</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.18-rc5</span>
+<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.19-rc1</span>
 <span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">...</span>
 <span class="w">  </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">USE_REAL_IP</span><span class="p">:</span><span class="w"> </span><span class="s">"yes"</span>
@@ -2786,7 +2786,7 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class=
 <span class="w">    </span><span class="nt">REAL_IP_HEADER</span><span class="p">:</span><span class="w"> </span><span class="s">"X-Forwarded-For"</span>
 <span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">...</span>
 <span class="nt">bw-scheduler</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.18-rc5</span>
+<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.19-rc1</span>
 <span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">...</span>
 <span class="w">  </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">USE_REAL_IP</span><span class="p">:</span><span class="w"> </span><span class="s">"yes"</span>
@@ -2825,7 +2825,7 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class=
 </div>
 <p>You will need to add the settings to the environment variables of both the BunkerWeb and scheduler services:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">bunkerweb</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.18-rc5</span>
+<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.19-rc1</span>
 <span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">...</span>
 <span class="w">  </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">USE_REAL_IP</span><span class="p">:</span><span class="w"> </span><span class="s">"yes"</span>
@@ -2833,7 +2833,7 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class=
 <span class="w">    </span><span class="nt">REAL_IP_HEADER</span><span class="p">:</span><span class="w"> </span><span class="s">"X-Forwarded-For"</span>
 <span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">...</span>
 <span class="nt">bw-scheduler</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.18-rc5</span>
+<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.19-rc1</span>
 <span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">...</span>
 <span class="w">  </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">USE_REAL_IP</span><span class="p">:</span><span class="w"> </span><span class="s">"yes"</span>
@@ -2889,14 +2889,14 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class=
 <span class="w">    </span>-p<span class="w"> </span><span class="m">80</span>:8080/tcp<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>-p<span class="w"> </span><span class="m">443</span>:8443/tcp<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>-p<span class="w"> </span><span class="m">443</span>:8443/udp<span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>bunkerity/bunkerweb-all-in-one:1.6.18-rc5
+<span class="w">    </span>bunkerity/bunkerweb-all-in-one:1.6.19-rc1
 </code></pre></div>
 <p>Please note that if your container is already created, you will need to delete it and recreate it so the new environment variables will be updated.</p>
 </div>
 <div class="tabbed-block">
 <p>You will need to add the settings to the environment variables of both the BunkerWeb and scheduler containers:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">bunkerweb</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.18-rc5</span>
+<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.19-rc1</span>
 <span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">...</span>
 <span class="w">  </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">USE_REAL_IP</span><span class="p">:</span><span class="w"> </span><span class="s">"yes"</span>
@@ -2906,7 +2906,7 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class=
 <span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">...</span>
 <span class="nn">...</span>
 <span class="nt">bw-scheduler</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.18-rc5</span>
+<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.19-rc1</span>
 <span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">...</span>
 <span class="w">  </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">USE_REAL_IP</span><span class="p">:</span><span class="w"> </span><span class="s">"yes"</span>
@@ -2920,7 +2920,7 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class=
 <div class="tabbed-block">
 <p>You will need to add the settings to the environment variables of both the BunkerWeb and scheduler containers:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">bunkerweb</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.18-rc5</span>
+<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.19-rc1</span>
 <span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">...</span>
 <span class="w">  </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">USE_REAL_IP</span><span class="p">:</span><span class="w"> </span><span class="s">"yes"</span>
@@ -2930,7 +2930,7 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class=
 <span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">...</span>
 <span class="nn">...</span>
 <span class="nt">bw-scheduler</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.18-rc5</span>
+<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.19-rc1</span>
 <span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">...</span>
 <span class="w">  </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">USE_REAL_IP</span><span class="p">:</span><span class="w"> </span><span class="s">"yes"</span>
@@ -2974,7 +2974,7 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class=
 </div>
 <p>You will need to add the settings to the environment variables of both the BunkerWeb and scheduler services.</p>
 <div class="highlight"><pre><span></span><code><span class="nt">bunkerweb</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.18-rc5</span>
+<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.19-rc1</span>
 <span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">...</span>
 <span class="w">  </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">USE_REAL_IP</span><span class="p">:</span><span class="w"> </span><span class="s">"yes"</span>
@@ -2984,7 +2984,7 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class=
 <span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">...</span>
 <span class="nn">...</span>
 <span class="nt">bw-scheduler</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.18-rc5</span>
+<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.19-rc1</span>
 <span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">...</span>
 <span class="w">  </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">USE_REAL_IP</span><span class="p">:</span><span class="w"> </span><span class="s">"yes"</span>
@@ -3109,8 +3109,8 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class=
 <li>
 <p><strong>Download and run the installer</strong> on the manager host:</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># Download script and checksum</span>
-curl<span class="w"> </span>-fsSL<span class="w"> </span>-O<span class="w"> </span>https://github.com/bunkerity/bunkerweb/releases/download/v1.6.18-rc5/install-bunkerweb.sh
-curl<span class="w"> </span>-fsSL<span class="w"> </span>-O<span class="w"> </span>https://github.com/bunkerity/bunkerweb/releases/download/v1.6.18-rc5/install-bunkerweb.sh.sha256
+curl<span class="w"> </span>-fsSL<span class="w"> </span>-O<span class="w"> </span>https://github.com/bunkerity/bunkerweb/releases/download/v1.6.19-rc1/install-bunkerweb.sh
+curl<span class="w"> </span>-fsSL<span class="w"> </span>-O<span class="w"> </span>https://github.com/bunkerity/bunkerweb/releases/download/v1.6.19-rc1/install-bunkerweb.sh.sha256
 
 <span class="c1"># Verify checksum</span>
 sha256sum<span class="w"> </span>-c<span class="w"> </span>install-bunkerweb.sh.sha256
@@ -3248,7 +3248,7 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
 
 <span class="nt">services</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bw-scheduler</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.18-rc5</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.19-rc1</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">&lt;&lt;</span><span class="p">:</span><span class="w"> </span><span class="nv">*bw-ui-env</span>
 <span class="w">      </span><span class="nt">BUNKERWEB_INSTANCES</span><span class="p">:</span><span class="w"> </span><span class="s">"192.168.1.11</span><span class="nv"> </span><span class="s">192.168.1.12"</span><span class="w"> </span><span class="c1"># Replace with your worker IPs</span>
@@ -3267,7 +3267,7 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-redis</span>
 
 <span class="w">  </span><span class="nt">bw-ui</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-ui:1.6.18-rc5</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-ui:1.6.19-rc1</span>
 <span class="w">    </span><span class="nt">ports</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">"7000:7000"</span><span class="w"> </span><span class="c1"># Expose the Web UI port</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
@@ -3364,7 +3364,7 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
 <p>Create a <code>docker-compose.yml</code> file on each worker node:</p>
 <div class="highlight"><span class="filename">docker-compose.yml</span><pre><span></span><code><span class="nt">services</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bunkerweb</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.18-rc5</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.19-rc1</span>
 <span class="w">    </span><span class="nt">ports</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">"80:8080/tcp"</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">"443:8443/tcp"</span>
@@ -3775,7 +3775,7 @@ docker<span class="w"> </span>run<span class="w"> </span>-d<span class="w"> </sp
 <span class="w">    </span>-p<span class="w"> </span><span class="m">80</span>:8080/tcp<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>-p<span class="w"> </span><span class="m">443</span>:8443/tcp<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>-p<span class="w"> </span><span class="m">443</span>:8443/udp<span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>bunkerity/bunkerweb-all-in-one:1.6.18-rc5
+<span class="w">    </span>bunkerity/bunkerweb-all-in-one:1.6.19-rc1
 </code></pre></div>
 </div>
 <div class="tabbed-block">
@@ -3800,7 +3800,7 @@ docker<span class="w"> </span>run<span class="w"> </span>-d<span class="w"> </sp
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-dns</span>
 
 <span class="w">  </span><span class="nt">bunkerweb</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.18-rc5</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.19-rc1</span>
 <span class="w">    </span><span class="l l-Scalar l-Scalar-Plain">...</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">DNS_RESOLVERS</span><span class="p">:</span><span class="w"> </span><span class="s">"dnsmasq"</span>
@@ -3811,7 +3811,7 @@ docker<span class="w"> </span>run<span class="w"> </span>-d<span class="w"> </sp
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-dns</span>
 
 <span class="w">  </span><span class="nt">bw-scheduler</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.18-rc5</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.19-rc1</span>
 <span class="w">    </span><span class="l l-Scalar l-Scalar-Plain">...</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">DNS_RESOLVERS</span><span class="p">:</span><span class="w"> </span><span class="s">"dnsmasq"</span>
@@ -3996,7 +3996,7 @@ chmod<span class="w"> </span>-R<span class="w"> </span><span class="m">770</span
 <span class="s2">      }"</span><span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>-p<span class="w"> </span><span class="m">80</span>:8080/tcp<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>-p<span class="w"> </span><span class="m">443</span>:8443/tcp<span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>bunkerity/bunkerweb-all-in-one:1.6.18-rc5
+<span class="w">    </span>bunkerity/bunkerweb-all-in-one:1.6.19-rc1
 </code></pre></div>
 <p>Please note that if your container is already created, you will need to delete it and recreate it for the new environment variables to be applied.</p>
 <p><strong>Using files</strong></p>
@@ -4022,7 +4022,7 @@ chmod<span class="w"> </span>-R<span class="w"> </span><span class="m">770</span
 <span class="w">    </span>-p<span class="w"> </span><span class="m">80</span>:8080/tcp<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>-p<span class="w"> </span><span class="m">443</span>:8443/tcp<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>-p<span class="w"> </span><span class="m">443</span>:8443/udp<span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>bunkerity/bunkerweb-all-in-one:1.6.18-rc5
+<span class="w">    </span>bunkerity/bunkerweb-all-in-one:1.6.19-rc1
 </code></pre></div>
 </div>
 <div class="tabbed-block">
@@ -4041,7 +4041,7 @@ chmod<span class="w"> </span>-R<span class="w"> </span><span class="m">770</span
 <p>Here is a dummy example using a docker-compose file :</p>
 <div class="highlight"><pre><span></span><code><span class="nn">...</span>
 <span class="nt">bw-scheduler</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.18-rc5</span>
+<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.19-rc1</span>
 <span class="w">  </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">|</span>
 <span class="w">      </span><span class="no">CUSTOM_CONF_SERVER_HTTP_hello-world=</span>
@@ -4071,7 +4071,7 @@ chmod<span class="w"> </span>-R<span class="w"> </span><span class="m">770</span
 </code></pre></div>
 <p>When starting the scheduler container, you will need to mount the folder on /data :</p>
 <div class="highlight"><pre><span></span><code><span class="nt">bw-scheduler</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.18-rc5</span>
+<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.19-rc1</span>
 <span class="w">  </span><span class="nt">volumes</span><span class="p">:</span>
 <span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">./bw-data:/data</span>
 <span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">...</span>
@@ -4125,7 +4125,7 @@ chmod<span class="w"> </span>-R<span class="w"> </span><span class="m">770</span
 </code></pre></div>
 <p>When starting the scheduler container, you will need to mount the folder on /data :</p>
 <div class="highlight"><pre><span></span><code><span class="nt">bw-scheduler</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.18-rc5</span>
+<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.19-rc1</span>
 <span class="w">  </span><span class="nt">volumes</span><span class="p">:</span>
 <span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">./bw-data:/data</span>
 <span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">...</span>
@@ -4343,7 +4343,7 @@ The autoconf ingress controller reads each entry under <code>data</code> and app
 <li>Write startup exclusions (<code>SecRuleRemoveById</code>, <code>SecRuleRemoveByTag</code>, <code>SecRuleUpdateTargetById</code> and <code>SecRuleUpdateTargetByTag</code>) in a <code>modsec</code> custom configuration, which is loaded after the CRS.</li>
 <li>Do not redefine a CRS setup rule that BunkerWeb already sets: <code>900200</code> (allowed methods, from the <code>ALLOWED_METHODS</code> setting) and <code>900230</code> (allowed HTTP versions, set with HTTP/3 on CRS version 3). A second rule with the same ID stops the reload with <code>Rule id: N is duplicated</code>.</li>
 </ul>
-<p><strong>IDs changed in 1.6.18~rc5</strong></p>
+<p><strong>IDs changed in 1.6.18</strong></p>
 <p>Earlier versions used IDs from ranges owned by others. If one of your configurations refers to an old ID, for example <code>SecRuleRemoveById 200002</code>, replace it with the new one:</p>
 <table>
 <thead>
@@ -4496,7 +4496,7 @@ LISTEN_STREAM_PORT_SSL_1=4344
 <span class="w">    </span>-p<span class="w"> </span><span class="m">443</span>:8443/udp<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>-p<span class="w"> </span><span class="m">10000</span>:10000/tcp<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>-p<span class="w"> </span><span class="m">20000</span>:20000/tcp<span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>bunkerity/bunkerweb-all-in-one:1.6.18-rc5
+<span class="w">    </span>bunkerity/bunkerweb-all-in-one:1.6.19-rc1
 </code></pre></div>
 <p>Please note that if your container is already created, you will need to delete it and recreate it for the new environment variables to be applied.</p>
 <p>Your applications (<code>myapp1</code>, <code>myapp2</code>) should be running in separate containers (or be otherwise accessible) and their hostnames/IPs (e.g., <code>myapp1</code>, <code>myapp2</code> used in <code>_REVERSE_PROXY_HOST</code>) must be resolvable and reachable from the <code>bunkerweb-aio</code> container. This typically involves connecting them to a shared Docker network.</p>
@@ -4515,7 +4515,7 @@ LISTEN_STREAM_PORT_SSL_1=4344
 
 <span class="nt">services</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bunkerweb</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.18-rc5</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.19-rc1</span>
 <span class="w">    </span><span class="nt">ports</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">"80:8080"</span><span class="w"> </span><span class="c1"># Keep it if you want to use Let's Encrypt automation when using http challenge type</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">"10000:10000"</span><span class="w"> </span><span class="c1"># app1</span>
@@ -4530,7 +4530,7 @@ LISTEN_STREAM_PORT_SSL_1=4344
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-services</span>
 
 <span class="w">  </span><span class="nt">bw-scheduler</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.18-rc5</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.19-rc1</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">&lt;&lt;</span><span class="p">:</span><span class="w"> </span><span class="nv">*bw-api-env</span>
 <span class="w">      </span><span class="nt">BUNKERWEB_INSTANCES</span><span class="p">:</span><span class="w"> </span><span class="s">"bunkerweb"</span><span class="w"> </span><span class="c1"># This setting is mandatory to specify the BunkerWeb instance</span>
@@ -4578,7 +4578,7 @@ LISTEN_STREAM_PORT_SSL_1=4344
 <p>Before running the <a href="../integrations/#docker-autoconf">Docker autoconf integration</a> stack on your machine, you will need to edit the ports :</p>
 <div class="highlight"><pre><span></span><code><span class="nt">services</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bunkerweb</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.18-rc5</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.19-rc1</span>
 <span class="w">    </span><span class="nt">ports</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">"80:8080"</span><span class="w"> </span><span class="c1"># Keep it if you want to use Let's Encrypt automation when using http challenge type</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">"10000:10000"</span><span class="w"> </span><span class="c1"># app1</span>
@@ -4783,7 +4783,7 @@ app2.example.com_LISTEN_STREAM_PORT=20000
 <p>Before running the <a href="../integrations/#swarm">Swarm integration</a> stack on your machine, you will need to edit the ports :</p>
 <div class="highlight"><pre><span></span><code><span class="nt">services</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bunkerweb</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.18-rc5</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.19-rc1</span>
 <span class="w">    </span><span class="nt">ports</span><span class="p">:</span>
 <span class="w">      </span><span class="c1"># Keep it if you want to use Let's Encrypt automation when using http challenge type</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">published</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">80</span>
@@ -4904,7 +4904,7 @@ docker<span class="w"> </span>run<span class="w"> </span>-d<span class="w"> </sp
 <span class="w">    </span>-p<span class="w"> </span><span class="m">80</span>:8080/tcp<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>-p<span class="w"> </span><span class="m">443</span>:8443/tcp<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>-p<span class="w"> </span><span class="m">443</span>:8443/udp<span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>bunkerity/bunkerweb-all-in-one:1.6.18-rc5
+<span class="w">    </span>bunkerity/bunkerweb-all-in-one:1.6.19-rc1
 </code></pre></div>
 <p>Please note that if your container is already created, you will need to delete it and recreate it for the new environment variables to be applied.</p>
 </div>
@@ -4938,7 +4938,7 @@ find<span class="w"> </span>./www<span class="w"> </span>-type<span class="w"> <
 
 <span class="nt">services</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bunkerweb</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.18-rc5</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.19-rc1</span>
 <span class="w">    </span><span class="nt">ports</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">"80:8080/tcp"</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">"443:8443/tcp"</span>
@@ -4953,7 +4953,7 @@ find<span class="w"> </span>./www<span class="w"> </span>-type<span class="w"> <
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-services</span>
 
 <span class="w">  </span><span class="nt">bw-scheduler</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.18-rc5</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.19-rc1</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">&lt;&lt;</span><span class="p">:</span><span class="w"> </span><span class="nv">*bw-api-env</span>
 <span class="w">      </span><span class="nt">BUNKERWEB_INSTANCES</span><span class="p">:</span><span class="w"> </span><span class="s">"bunkerweb"</span><span class="w"> </span><span class="c1"># This setting is mandatory to specify the BunkerWeb instance</span>
@@ -5039,7 +5039,7 @@ find<span class="w"> </span>./www<span class="w"> </span>-type<span class="w"> <
 
 <span class="nt">services</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bunkerweb</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.18-rc5</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.19-rc1</span>
 <span class="w">    </span><span class="nt">labels</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">"bunkerweb.INSTANCE=yes"</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
@@ -5052,7 +5052,7 @@ find<span class="w"> </span>./www<span class="w"> </span>-type<span class="w"> <
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-services</span>
 
 <span class="w">  </span><span class="nt">bw-scheduler</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.18-rc5</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.19-rc1</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">&lt;&lt;</span><span class="p">:</span><span class="w"> </span><span class="nv">*bw-api-env</span>
 <span class="w">      </span><span class="nt">BUNKERWEB_INSTANCES</span><span class="p">:</span><span class="w"> </span><span class="s">""</span><span class="w"> </span><span class="c1"># We don't need to specify the BunkerWeb instance here as they are automatically detected by the autoconf service</span>
@@ -5067,7 +5067,7 @@ find<span class="w"> </span>./www<span class="w"> </span>-type<span class="w"> <
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-db</span>
 
 <span class="w">  </span><span class="nt">bw-autoconf</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-autoconf:1.6.18-rc5</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-autoconf:1.6.19-rc1</span>
 <span class="w">    </span><span class="nt">depends_on</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-docker</span>
@@ -5271,7 +5271,7 @@ find<span class="w"> </span>/shared/www<span class="w"> </span>-type<span class=
 <p>When you start the BunkerWeb stack, mount the <code>/shared/www</code> folder into <code>/var/www/html</code> for the <strong>Scheduler</strong> container :</p>
 <div class="highlight"><pre><span></span><code><span class="nt">services</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bunkerweb</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.18-rc5</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.19-rc1</span>
 <span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/shared/www:/var/www/html</span>
 <span class="nn">...</span>
@@ -5352,7 +5352,7 @@ find<span class="w"> </span>/shared/www<span class="w"> </span>-type<span class=
 <p>Add the <code>USE_IPV6</code> setting to the scheduler and enable IPv6 on the <code>bw-services</code> network. If you declare an IPv4 <code>subnet</code> for the network, keep it in the same <code>ipam.config</code> list:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">services</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bw-scheduler</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.18-rc5</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.19-rc1</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">USE_IPV6</span><span class="p">:</span><span class="w"> </span><span class="s">"yes"</span>
 
@@ -5414,7 +5414,7 @@ USE_IPV6=yes
 
 <span class="nt">services</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bunkerweb</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.18-rc5</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.19-rc1</span>
 <span class="w">    </span><span class="nt">dns</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2001:db8:1::20</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
@@ -5424,7 +5424,7 @@ USE_IPV6=yes
 <span class="w">        </span><span class="nt">ipv6_address</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2001:db8:1::10</span>
 
 <span class="w">  </span><span class="nt">bw-scheduler</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.18-rc5</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.19-rc1</span>
 <span class="w">    </span><span class="nt">dns</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2001:db8:1::20</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
@@ -5592,7 +5592,7 @@ ERROR_LOG_1=syslog:server=unix:/dev/log,tag=bunkerweb
 <span class="nt">services</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bunkerweb</span><span class="p">:</span>
 <span class="w">    </span><span class="c1"># This is the name that will be used to identify the instance in the Scheduler</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.18-rc5</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.19-rc1</span>
 <span class="w">    </span><span class="nt">ports</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">"80:8080/tcp"</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">"443:8443/tcp"</span>
@@ -5605,7 +5605,7 @@ ERROR_LOG_1=syslog:server=unix:/dev/log,tag=bunkerweb
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-services</span>
 
 <span class="w">  </span><span class="nt">bw-scheduler</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.18-rc5</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.19-rc1</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">&lt;&lt;</span><span class="p">:</span><span class="w"> </span><span class="nv">*bw-env</span>
 <span class="w">      </span><span class="nt">BUNKERWEB_INSTANCES</span><span class="p">:</span><span class="w"> </span><span class="s">"bunkerweb"</span><span class="w"> </span><span class="c1"># Make sure to set the correct instance name</span>
@@ -5622,7 +5622,7 @@ ERROR_LOG_1=syslog:server=unix:/dev/log,tag=bunkerweb
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-db</span>
 
 <span class="w">  </span><span class="nt">bw-ui</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-ui:1.6.18-rc5</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-ui:1.6.19-rc1</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">&lt;&lt;</span><span class="p">:</span><span class="w"> </span><span class="nv">*bw-env</span>
 <span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
@@ -5921,12 +5921,12 @@ sourcetype = bunkerweb:modsec_audit
 <p>Mount one volume on the <code>bunkerweb</code> container and on the forwarder, and set the variables on the scheduler:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">services</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bunkerweb</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.18-rc5</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.19-rc1</span>
 <span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-splunk-logs:/var/log/bunkerweb</span>
 
 <span class="w">  </span><span class="nt">bw-scheduler</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.18-rc5</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.19-rc1</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">ACCESS_LOG_1</span><span class="p">:</span><span class="w"> </span><span class="s">"/var/log/bunkerweb/access-splunk.log"</span>
 <span class="w">      </span><span class="nt">LOG_FORMAT_1</span><span class="p">:</span><span class="w"> </span><span class="s">'time=$$time_iso8601</span><span class="nv"> </span><span class="s">host=$$host</span><span class="nv"> </span><span class="s">client=$$remote_addr</span><span class="nv"> </span><span class="s">request_id=$$request_id</span><span class="nv"> </span><span class="s">method=$$request_method</span><span class="nv"> </span><span class="s">uri="$$request_uri"</span><span class="nv"> </span><span class="s">status=$$status</span><span class="nv"> </span><span class="s">bytes=$$body_bytes_sent</span><span class="nv"> </span><span class="s">ua="$$http_user_agent"</span><span class="nv"> </span><span class="s">reason=$$reason</span><span class="nv"> </span><span class="s">modsec_rules="$$modsecurity_rules"</span><span class="nv"> </span><span class="s">modsec_score=$$modsecurity_anomaly_score</span><span class="nv"> </span><span class="s">modsec_id=$$modsecurity_unique_id'</span>
@@ -6002,7 +6002,7 @@ sourcetype = bunkerweb:modsec_audit
 <p>If you cannot share a volume, the <a href="https://docs.docker.com/engine/logging/drivers/splunk/">Docker <code>splunk</code> logging driver</a> with an HTTP Event Collector token sends the container's streams. It sends access, error and audit lines together under one sourcetype, so only their content tells them apart. The add-on parses only <code>bunkerweb:access</code>, <code>bunkerweb:error</code> and <code>bunkerweb:modsec_audit</code>, so events sent as <code>bunkerweb:docker</code> get no field extraction and no CIM mapping. Set the <code>key=value</code> format on <code>LOG_FORMAT</code> (no suffix) so that the streamed access lines carry it. That replaces the default format in <code>access.log</code>. Set <code>MODSECURITY_SEC_AUDIT_LOG_FORMAT=JSON</code> on the scheduler: the audit entries then appear in <code>docker logs</code> among the error log lines, and the lines that start with <code>{</code> are the audit entries.</p>
 <div class="highlight"><pre><span></span><code><span class="nt">services</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bunkerweb</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.18-rc5</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.19-rc1</span>
 <span class="w">    </span><span class="nt">logging</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">driver</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">splunk</span>
 <span class="w">      </span><span class="nt">options</span><span class="p">:</span>
@@ -6019,7 +6019,7 @@ sourcetype = bunkerweb:modsec_audit
 <p>You can configure the logging driver for your services in your <code>docker-compose.yml</code> file to automatically rotate the logs. Here is an example that keeps up to 10 log files of 20MB each:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">services</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bunkerweb</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.18-rc5</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.19-rc1</span>
 <span class="w">    </span><span class="nt">logging</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">driver</span><span class="p">:</span><span class="w"> </span><span class="s">"json-file"</span>
 <span class="w">      </span><span class="nt">options</span><span class="p">:</span>
@@ -6104,14 +6104,14 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class=
 <span class="w">    </span>-p<span class="w"> </span><span class="m">80</span>:8080/tcp<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>-p<span class="w"> </span><span class="m">443</span>:8443/tcp<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>-p<span class="w"> </span><span class="m">443</span>:8443/udp<span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>bunkerity/bunkerweb-all-in-one:1.6.18-rc5
+<span class="w">    </span>bunkerity/bunkerweb-all-in-one:1.6.19-rc1
 </code></pre></div>
 <p>If the container already exists, recreate it to apply the new environment.</p>
 </div>
 <div class="tabbed-block">
 <p>Add the variables to the scheduler container:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">bw-scheduler</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.18-rc5</span>
+<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.19-rc1</span>
 <span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">...</span>
 <span class="w">  </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">HTTP_PROXY</span><span class="p">:</span><span class="w"> </span><span class="s">"http://proxy.example.local:3128"</span>
@@ -6127,7 +6127,7 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class=
 <div class="tabbed-block">
 <p>Apply the variables to the scheduler container:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">bw-scheduler</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.18-rc5</span>
+<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.19-rc1</span>
 <span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">...</span>
 <span class="w">  </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">HTTP_PROXY</span><span class="p">:</span><span class="w"> </span><span class="s">"http://proxy.example.local:3128"</span>
@@ -6164,7 +6164,7 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class=
 </div>
 <p>Add the variables to the scheduler service:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">bw-scheduler</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.18-rc5</span>
+<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.19-rc1</span>
 <span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">...</span>
 <span class="w">  </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">HTTP_PROXY</span><span class="p">:</span><span class="w"> </span><span class="s">"http://proxy.example.local:3128"</span>
@@ -6609,10 +6609,10 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class=
 <li><strong>Multiple transports</strong>: Stdio, HTTP, WebSocket</li>
 </ul>
 <h3 id="docker-compose-example">Docker Compose Example<a class="headerlink" href="#docker-compose-example" title="Permanent link">&para;</a></h3>
-<p>A complete example is available in <a href="https://github.com/bunkerity/bunkerweb/tree/v1.6.18-rc5/examples/mcp-stack"><code>examples/mcp-stack/</code></a>:</p>
+<p>A complete example is available in <a href="https://github.com/bunkerity/bunkerweb/tree/v1.6.19-rc1/examples/mcp-stack"><code>examples/mcp-stack/</code></a>:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">services</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bw-api</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-api:1.6.18-rc5</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-api:1.6.19-rc1</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">API_TOKEN</span><span class="p">:</span><span class="w"> </span><span class="s">"my-bearer-token-for-mcp"</span>
 <span class="w">      </span><span class="nt">DATABASE_URI</span><span class="p">:</span><span class="w"> </span><span class="s">"mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db"</span>
@@ -7854,11 +7854,11 @@ chmod<span class="w"> </span><span class="m">770</span><span class="w"> </span>t
 <p>Mount the templates directory to the <strong>scheduler</strong> and configure the settings on the scheduler (the scheduler acts as the manager and distributes the configuration to BunkerWeb workers). You can mount the templates to any path inside the container:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">services</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bunkerweb</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.18-rc5</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.19-rc1</span>
 <span class="w">    </span><span class="c1"># ... other settings (no environment variables needed here for custom pages)</span>
 
 <span class="w">  </span><span class="nt">bw-scheduler</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.18-rc5</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.19-rc1</span>
 <span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">./templates:/custom_templates:ro</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
@@ -7941,7 +7941,7 @@ chmod<span class="w"> </span><span class="m">770</span><span class="w"> </span>t
 <span class="w">    </span><span class="nt">spec</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">containers</span><span class="p">:</span>
 <span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb-scheduler</span>
-<span class="w">          </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.18-rc5</span>
+<span class="w">          </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.19-rc1</span>
 <span class="w">          </span><span class="nt">env</span><span class="p">:</span>
 <span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">CUSTOM_ERROR_PAGE</span>
 <span class="w">              </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">"/custom_templates/error.html"</span>
@@ -9459,7 +9459,7 @@ PLUGINS_ORDER_INIT=sessions whitelist blacklist greylist bunkernet limit authbas
 <td></td>
 <td>multisite</td>
 <td>no</td>
-<td>DNS provider for DNS-01. Hosttech requires BunkerWeb 1.6.18~rc5 or newer.</td>
+<td>DNS provider for DNS-01. Hosttech requires BunkerWeb 1.6.18 or newer.</td>
 </tr>
 <tr>
 <td><code>ACME_DNS_CREDENTIAL_ITEM</code></td>
