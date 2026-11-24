@@ -1,5 +1,23 @@
 # Changelog
 
+## v1.6.19~rc1 - 2026/11/23
+
+- [SECURITY] `docker`: update the Alpine `mariadb-client` and `mariadb-common` (11.8.10-r0), `libxml2` (2.13.9-r3) and `py3-pip` (26.1.2-r1) packages, fixing 15 CVEs.
+- [SECURITY] `deps`: update NGINX to 1.30.8, fixing CVE-2026-132779 (excessive CPU usage in TLS 1.3), which only matters with `ssl_early_data on` in a custom configuration. The Docker images and Fedora stay on 1.30.7 (Fedora 43 on 1.30.6) until they ship 1.30.8. (Refs #4239)
+- [DEPS] `linux`: Fedora 44 and 45 packages require NGINX 1.30.7; Fedora 43 stays on 1.30.6 until Fedora ships 1.30.7.
+- [BUGFIX] `ui`, `antibot`, `modsecurity`: with global CRS, long server name lists no longer exceed the libModSecurity regex size limit and fail every reload.
+- [BUGFIX] `core`: on Linux and all-in-one, the scheduler's push of unchanged custom configs to its local instance no longer fails on a folder the instance cannot write, when unpacking keeps their permissions (for example `root:nginx` 750/640).
+- [BUGFIX] `autoconf`: a scheduler restart on Kubernetes no longer erases the PRO setting values that Ingress annotations set. (Refs #4107)
+- [BUGFIX] `deps`: sessions over 1 kB, such as OpenID Connect logins, are restored again on the Linux packages, ending a login redirect loop since 1.6.18. (Fixes #4237)
+
+## v1.6.18 - 2026/11/20
+
+- [BUGFIX] `ui`: when a template save fails, the template editor says whether the WAF or an expired session stopped it.
+- [BUGFIX] `ui`: easy mode keeps a value set back to the global default when a template sets another one on a new service.
+- [BUGFIX] `ui`: emptying an easy mode field that cannot be empty saves the setting default instead of rejecting the whole save.
+- [BUGFIX] `scheduler`: with `IGNORE_FAIL_SENDING_CONFIG=yes`, a failed config or plugin push no longer blocks the reload. (Refs #4086)
+- [MISC] `blacklist`: the Data-Shield Critical list is now the paid Data-Shield Pro feed; the old preset now downloads the free Community Standard list.
+
 ## v1.6.18~rc5 - 2026/11/19
 
 - [SECURITY] `ui`: service names, instance hostnames and ban services are inserted as text in the bulk-action modals, fixing a stored XSS.

@@ -35,13 +35,13 @@
         },
         {
           "id": "ip:laurent-minne-data-shield-aggressive",
-          "label": "Data-Shield IPv4 Blocklist - Laurent M. - For Web Apps, WordPress, VPS (Apache/Nginx)",
+          "label": "Data-Shield IPv4 Blocklist (Community Standard) - Laurent M.",
           "value": "https://raw.githubusercontent.com/duggytuxy/Data-Shield_IPv4_Blocklist/refs/heads/main/prod_data-shield_ipv4_blocklist.txt"
         },
         {
           "id": "ip:laurent-minne-data-shield-critical",
-          "label": "Data-Shield IPv4 Blocklist - Laurent M. - For DMZs, SaaS, API & Critical Assets",
-          "value": "https://raw.githubusercontent.com/duggytuxy/Data-Shield_IPv4_Blocklist/refs/heads/main/prod_critical_data-shield_ipv4_blocklist.txt"
+          "label": "Data-Shield IPv4 Blocklist (Critical, retired: now uses Community Standard) - Laurent M.",
+          "value": "https://raw.githubusercontent.com/duggytuxy/Data-Shield_IPv4_Blocklist/refs/heads/main/prod_data-shield_ipv4_blocklist.txt"
         }
       ]
     },

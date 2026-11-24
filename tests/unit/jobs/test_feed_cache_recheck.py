@@ -5,11 +5,9 @@ from pathlib import Path
 
 import pytest
 
-from common_utils import bytes_hash
-from _other_jobs_helpers import Cache, load_job
+from _other_jobs_helpers import Cache, list_url_file, load_job
 
 URL = "https://feeds.example/list"
-URL_FILE = f"{bytes_hash(URL, algorithm='sha1')}.list"
 KINDS = {
     "realip": ("IP",),
     "blacklist": ("IP", "RDNS", "ASN", "URI", "IGNORE_IP", "IGNORE_RDNS", "IGNORE_ASN", "IGNORE_URI"),
@@ -52,7 +50,7 @@ CORPUS.update(
 def run_cached_job(plugin, kind, content, tmp_path, monkeypatch, cache=None):
     if cache is None:
         cache = Cache(tmp_path / "cache")
-        cache.cache_file(URL_FILE, b"# Downloaded from " + URL.encode() + b"\n" + content)
+        cache.cache_file(list_url_file(plugin, URL, kind), b"# Downloaded from " + URL.encode() + b"\n" + content)
     setting = "REAL_IP_FROM_URLS" if plugin == "realip" else f"{plugin.upper()}_{kind}_URLS"
     env = {
         "SERVER_NAME": "lists.example",
@@ -82,7 +80,7 @@ def test_cached_user_agent_bytes_survive_two_runs(tmp_path, monkeypatch):
     _, status, _, published = run_cached_job("blacklist", "IGNORE_USER_AGENT", content, tmp_path, monkeypatch, cache=cache)
     assert status == 0
     assert published == content
-    assert cache.data["", URL_FILE] == b"# Downloaded from " + URL.encode() + b"\n" + content
+    assert cache.data["", list_url_file("blacklist", URL, "IGNORE_USER_AGENT")] == b"# Downloaded from " + URL.encode() + b"\n" + content
 
 
 @pytest.mark.parametrize(("plugin", "kind"), RECHECKED)

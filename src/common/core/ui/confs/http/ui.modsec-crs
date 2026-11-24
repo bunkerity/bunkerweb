@@ -1,3 +1,21 @@
+{#- Pack regex alternatives into chunks of at most budget UTF-8 bytes. patterns: input; out: receives the chunks; skipped: receives patterns longer than budget. -#}
+{% macro chunk_into(patterns, out, skipped, budget) %}
+    {% set cur = namespace(text="", size=0) %}
+    {% for pattern in patterns %}
+        {% set size = pattern.encode() | length %}
+        {% if size > budget %}
+            {% set _ = skipped.append(pattern) %}
+        {% elif cur.text and cur.size + 1 + size > budget %}
+            {% set _ = out.append(cur.text) %}
+            {% set cur.text = pattern %}
+            {% set cur.size = size %}
+        {% else %}
+            {% set cur.size = (cur.size + 1 + size) if cur.text else size %}
+            {% set cur.text = (cur.text ~ "|" ~ pattern) if cur.text else pattern %}
+        {% endif %}
+    {% endfor %}
+    {% if cur.text %}{% set _ = out.append(cur.text) %}{% endif %}
+{% endmacro %}
 {% if has_variable(all, "USE_UI", "yes") and SERVER_NAME != "" %}
     {% set re = import("re") %}
     {% set ui_hosts = [] %}
@@ -16,74 +34,98 @@
             {% endfor %}
         {% endif %}
     {% endfor %}
+    {#- Size. libModSecurity 3.0.17 (core 1.6.18) refuses to load an @rx operand whose compiled form passes PCRE2's 64 KiB link-size limit (about 1,000 host names), and the rules file then fails every reload; 3.0.16 loaded it but the rule never matched. Up to host_cap bytes each Host regex below is kept as is. Past it, small phase-1 marker rules, each holding one chunk of at most host_cap bytes, set tx.bw_ui_host (IDs 9802200+) or tx.bw_ui_ip_host (IDs 9802300+), host_max_chunks of each, and the rules test that variable instead. Hosts past the last chunk lose the exceptions. -#}
+    {% set host_cap = 8192 %}
+    {% set host_max_chunks = 100 %}
+    {% set ui_host_rx = "^(?:" ~ (ui_hosts | join("|")) ~ ")(?::\\d+)?$" %}
+    {% set ip_host_rx = "^(?:" ~ (ip_hosts | join("|")) ~ ")(?::\\d+)?$" %}
+    {% set ui_marker = ui_hosts and (ui_host_rx.encode() | length) > host_cap %}
+    {% set ip_marker = ip_hosts and (ip_host_rx.encode() | length) > host_cap %}
+    {% set ui_chunks = [] %}
+    {% set ip_chunks = [] %}
+    {% set skipped = [] %}
+    {#- 15 = the "^(?:" and ")(?::\\d+)?$" wrapper around a chunk. -#}
+    {% if ui_marker %}{% set _ = chunk_into(ui_hosts, ui_chunks, skipped, host_cap - 15) %}{% endif %}
+    {% if ip_marker %}{% set _ = chunk_into(ip_hosts, ip_chunks, skipped, host_cap - 15) %}{% endif %}
+    {% if ui_marker %}
+        {% set ui_link = 'SecRule TX:bw_ui_host "@eq 1" "t:none,nolog"' %}
+    {% else %}
+        {% set ui_link = 'SecRule REQUEST_HEADERS:Host "@rx ' ~ ui_host_rx ~ '" \\\n    "t:lowercase,nolog"' %}
+    {% endif %}
+    {% if ip_marker %}
+        {% set ip_link = 'SecRule TX:bw_ui_ip_host "@eq 1" "t:none,nolog"' %}
+    {% else %}
+        {% set ip_link = 'SecRule REQUEST_HEADERS:Host "@rx ' ~ ip_host_rx ~ '" \\\n    "t:lowercase,nolog"' %}
+    {% endif %}
     {% if ui_hosts %}
+        {% if ui_marker %}
+            {% for chunk in ui_chunks[:host_max_chunks] %}
+SecRule REQUEST_HEADERS:Host "@rx ^(?:{{ chunk }})(?::\d+)?$" \
+    "id:{{ 9802200 + loop.index0 }},phase:1,pass,nolog,t:lowercase,setvar:tx.bw_ui_host=1"
+            {% endfor %}
+
+        {% endif %}
 SecRule REQUEST_FILENAME "@rx ^/" \
     "id:9802100,phase:1,ctl:ruleRemoveById=930120,nolog,chain"
-SecRule REQUEST_HEADERS:Host "@rx ^(?:{{ ui_hosts | join('|') }})(?::\d+)?$" \
-    "t:lowercase,nolog"
+{{ ui_link }}
 
 SecRule REQUEST_FILENAME "@rx /(support/config|global-(config|settings)|services/.+|templates/.+)$" \
     "id:9802101,phase:1,ctl:ruleRemoveById=932235,ctl:ruleRemoveById=941130,ctl:ruleRemoveByTag=attack-rfi,ctl:ruleRemoveByTag=attack-lfi,ctl:ruleRemoveByTag=attack-rce,ctl:ruleRemoveByTag=attack-protocol,ctl:ruleRemoveByTag=attack-ssrf,nolog,chain"
-SecRule REQUEST_HEADERS:Host "@rx ^(?:{{ ui_hosts | join('|') }})(?::\d+)?$" \
-    "t:lowercase,nolog"
+{{ ui_link }}
 
 SecRule REQUEST_FILENAME "@rx /(services|cache)/.+$" \
     "id:9802102,phase:1,ctl:ruleRemoveById=920440,nolog,chain"
-SecRule REQUEST_HEADERS:Host "@rx ^(?:{{ ui_hosts | join('|') }})(?::\d+)?$" \
-    "t:lowercase,nolog"
+{{ ui_link }}
 
 SecRule REQUEST_FILENAME "@rx /configs/.+$" \
     "id:9802103,phase:1,ctl:ruleRemoveByTag=attack-rce,ctl:ruleRemoveByTag=attack-rfi,ctl:ruleRemoveByTag=attack-lfi,ctl:ruleRemoveByTag=attack-rce,ctl:ruleRemoveByTag=attack-sqli,nolog,chain"
-SecRule REQUEST_HEADERS:Host "@rx ^(?:{{ ui_hosts | join('|') }})(?::\d+)?$" \
-    "t:lowercase,nolog"
+{{ ui_link }}
 
 # Configuration content may contain XSS rule patterns.
 SecRule REQUEST_FILENAME "@rx /configs/(?:new|[^/]+/[^/]+/[^/]+)$" \
     "id:9802112,phase:1,pass,nolog,t:none,t:normalizePath,ctl:ruleRemoveTargetById=941140;ARGS:value,ctl:ruleRemoveTargetById=941160;ARGS:value,ctl:ruleRemoveTargetById=941210;ARGS:value,chain"
 SecRule REQUEST_METHOD "@streq POST" "t:none,chain"
-SecRule REQUEST_HEADERS:Host "@rx ^(?:{{ ui_hosts | join('|') }})(?::\d+)?$" \
-    "t:lowercase,nolog"
+{{ ui_link }}
 
 SecRule REQUEST_FILENAME "@endsWith /logs" \
     "id:9802104,phase:1,ctl:ruleRemoveById=953100,ctl:ruleRemoveByTag=attack-disclosure,nolog,chain"
-SecRule REQUEST_HEADERS:Host "@rx ^(?:{{ ui_hosts | join('|') }})(?::\d+)?$" \
-    "t:lowercase,nolog"
+{{ ui_link }}
 
 SecRule REQUEST_FILENAME "@rx /plugins/.+$" \
     "id:9802105,phase:1,ctl:ruleRemoveByTag=language-java,nolog,chain"
-SecRule REQUEST_HEADERS:Host "@rx ^(?:{{ ui_hosts | join('|') }})(?::\d+)?$" \
-    "t:lowercase,nolog"
+{{ ui_link }}
 
 SecRule REQUEST_FILENAME "@rx /fonts/.+$" \
     "id:9802106,phase:1,ctl:ruleRemoveById=920440,nolog,chain"
-SecRule REQUEST_HEADERS:Host "@rx ^(?:{{ ui_hosts | join('|') }})(?::\d+)?$" \
-    "t:lowercase,nolog"
+{{ ui_link }}
 
 SecRule REQUEST_FILENAME "@rx ^/" \
     "id:9802107,phase:1,ctl:ruleRemoveByTag=language-php,nolog,chain"
-SecRule REQUEST_HEADERS:Host "@rx ^(?:{{ ui_hosts | join('|') }})(?::\d+)?$" \
-    "t:lowercase,nolog"
+{{ ui_link }}
 
 SecRule REQUEST_FILENAME "@endsWith /login" \
     "id:9802108,phase:1,ctl:ruleRemoveTargetByTag=attack-sqli;ARGS:password,ctl:ruleRemoveTargetByTag=attack-rce;ARGS:password,ctl:ruleRemoveTargetByTag=attack-rfi;ARGS:password,ctl:ruleRemoveTargetByTag=attack-lfi;ARGS:password,ctl:ruleRemoveTargetByTag=attack-protocol;ARGS:password,ctl:ruleRemoveTargetByTag=attack-ssrf;ARGS:password,ctl:ruleRemoveTargetByTag=attack-xss;ARGS:password,nolog,chain"
-SecRule REQUEST_HEADERS:Host "@rx ^(?:{{ ui_hosts | join('|') }})(?::\d+)?$" \
-    "t:lowercase,nolog"
+{{ ui_link }}
 
 SecRule REQUEST_FILENAME "@endsWith /instances/new" \
     "id:9802109,phase:1,ctl:ruleRemoveTargetById=931100;ARGS:hostname,nolog,chain"
-SecRule REQUEST_HEADERS:Host "@rx ^(?:{{ ui_hosts | join('|') }})(?::\d+)?$" \
-    "t:lowercase,nolog"
+{{ ui_link }}
 
 SecRule REQUEST_FILENAME "@endsWith /reports/fetch" \
     "id:9802110,phase:1,ctl:ruleEngine=Off,nolog,chain"
-SecRule REQUEST_HEADERS:Host "@rx ^(?:{{ ui_hosts | join('|') }})(?::\d+)?$" \
-    "t:lowercase,nolog"
+{{ ui_link }}
     {% endif %}
     {% if ip_hosts %}
 
+        {% if ip_marker %}
+            {% for chunk in ip_chunks[:host_max_chunks] %}
+SecRule REQUEST_HEADERS:Host "@rx ^(?:{{ chunk }})(?::\d+)?$" \
+    "id:{{ 9802300 + loop.index0 }},phase:1,pass,nolog,t:lowercase,setvar:tx.bw_ui_ip_host=1"
+            {% endfor %}
+
+        {% endif %}
 SecRule REQUEST_FILENAME "@rx ^/" \
     "id:9802111,phase:1,ctl:ruleRemoveById=920350,nolog,chain"
-SecRule REQUEST_HEADERS:Host "@rx ^(?:{{ ip_hosts | join('|') }})(?::\d+)?$" \
-    "t:lowercase,nolog"
+{{ ip_link }}
     {% endif %}
 {% endif %}

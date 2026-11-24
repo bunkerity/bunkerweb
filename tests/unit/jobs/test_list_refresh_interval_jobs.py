@@ -10,8 +10,7 @@ from pathlib import Path
 import pytest
 import requests
 
-from common_utils import bytes_hash
-from _other_jobs_helpers import Cache, load_job
+from _other_jobs_helpers import Cache, list_url_file, load_job
 
 ROOT = Path(__file__).resolve().parents[3]
 PLUGINS = ("blacklist", "greylist", "whitelist")
@@ -33,8 +32,8 @@ class TimedCache(Cache):
         return cached
 
 
-def seed_url(cache, url, age):
-    name = f"{bytes_hash(url, algorithm='sha1')}.list"
+def seed_url(cache, plugin, url, age):
+    name = list_url_file(plugin, url)
     cache.cache_file(name, b"# Downloaded from " + url.encode() + b"\n" + OLD)
     timestamp = time.time() - age
     os.utime(cache.job_path / name, (timestamp, timestamp))
@@ -84,7 +83,7 @@ def test_interval_controls_fetch_and_publishes_cached_entries(plugin, interval, 
     url_server.routes["/list"] = (200, NEW, {})
     url = url_server.http("/list")
     cache = TimedCache(tmp_path / "cache")
-    name = seed_url(cache, url, age)
+    name = seed_url(cache, plugin, url, age)
     env = {f"{plugin.upper()}_IP_URLS": url}
     if interval is not None:
         env[f"{plugin.upper()}_URLS_REFRESH_INTERVAL"] = interval
@@ -113,11 +112,12 @@ def test_failed_refresh_keeps_last_valid_entries(plugin, status, body, url_serve
     url_server.routes["/list"] = (status, body, {})
     url = url_server.http("/list")
     cache = TimedCache(tmp_path / "cache")
-    name = seed_url(cache, url, 25 * 3600)
+    name = seed_url(cache, plugin, url, 25 * 3600)
     timestamp = (cache.job_path / name).stat().st_mtime
     env = {f"{plugin.upper()}_IP_URLS": url, f"{plugin.upper()}_URLS_REFRESH_INTERVAL": "24h"}
 
-    assert run_list_job(plugin, cache, tmp_path, monkeypatch, env) == 2
+    # the first publish of the kept entries is a change: blacklist reports it together with the failure
+    assert run_list_job(plugin, cache, tmp_path, monkeypatch, env) == (3 if plugin == "blacklist" else 2)
     assert url_server.hits == ["/list"]
     assert cache.data["lists.example", "IP.list"] == OLD
     assert cache.data["", name].endswith(OLD)
@@ -131,7 +131,7 @@ def test_multisite_interval_override_and_global_inheritance(plugin, url_server, 
     for service in ("daily.example", "hourly.example"):
         url_server.routes[f"/{service}"] = (200, NEW, {})
         url = url_server.http(f"/{service}")
-        seed_url(cache, url, 3 * 3600)
+        seed_url(cache, plugin, url, 3 * 3600)
         env.update({f"{service}_USE_{plugin.upper()}": "yes", f"{service}_{plugin.upper()}_IP_URLS": url, f"{service}_BLACKLIST_COMMUNITY_LISTS": ""})
     env[f"hourly.example_{plugin.upper()}_URLS_REFRESH_INTERVAL"] = "1h"
 
@@ -147,7 +147,7 @@ def test_shared_url_refreshes_for_shortest_service_interval(plugin, services, ur
     url_server.routes["/list"] = (200, NEW, {})
     url = url_server.http("/list")
     cache = TimedCache(tmp_path / "cache")
-    seed_url(cache, url, 3 * 3600)
+    seed_url(cache, plugin, url, 3 * 3600)
     env = {"MULTISITE": "yes", "SERVER_NAME": services}
     for service, interval in (("daily.example", "24h"), ("hourly.example", "1h")):
         env.update(

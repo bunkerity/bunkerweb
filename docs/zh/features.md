@@ -284,7 +284,7 @@ Advanced ACME certificate management with custom CA support, certificate monitor
 | `ACME_EAB_HMAC_KEY`                  |             | multisite | 否     | External Account Binding HMAC key (base64-encoded, required when EAB Key ID is set).                                                                                                                                                                                                                                                                                                                                                                                                             |
 | `ACME_CA_CERT_PATH`                  |             | multisite | 否     | File path to the root CA certificate for private ACME servers (Step CA, Vault PKI). Required when the CA root is not in the system trust store.                                                                                                                                                                                                                                                                                                                                                  |
 | `ACME_CHALLENGE`                     | `http`      | multisite | 否     | ACME challenge type. HTTP-01 is simplest; DNS-01 is required for wildcard certificates; TLS-ALPN-01 works when port 80 is unavailable but needs a core with the ClientHello plugin hook (1.6.18~rc3 or later).                                                                                                                                                                                                                                                                                   |
-| `ACME_DNS_PROVIDER`                  |             | multisite | 否     | DNS provider for DNS-01 challenges. Hosttech requires BunkerWeb core 1.6.18~rc5 or newer.                                                                                                                                                                                                                                                                                                                                                                                                        |
+| `ACME_DNS_PROVIDER`                  |             | multisite | 否     | DNS provider for DNS-01 challenges. Hosttech requires BunkerWeb core 1.6.18 or newer.                                                                                                                                                                                                                                                                                                                                                                                                        |
 | `ACME_DNS_CREDENTIAL_ITEM`           |             | multisite | 是     | Configuration item for the DNS provider credentials (e.g. 'cloudflare_api_token 123456'). Values can be base64 encoded.                                                                                                                                                                                                                                                                                                                                                                          |
 | `ACME_DNS_CREDENTIAL_DECODE_BASE64`  | `yes`       | multisite | 是     | Automatically decode base64 encoded DNS provider credentials.                                                                                                                                                                                                                                                                                                                                                                                                                                    |
 | `ACME_DNS_PROPAGATION`               | `default`   | multisite | 否     | DNS-01 propagation wait in seconds. 'default': 120s for most providers, Hosttech's 600s default, or Route53's sync polling. Set a number to override.                                                                                                                                                                                                                                                                                                                                            |
@@ -1113,8 +1113,12 @@ STREAM 支持 :warning:
     | ----------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
     | `ip:danmeuk-tor-exit`                     | Tor 出口节点 IP (dan.me.uk)                                                                                                                                                 | `https://www.dan.me.uk/torlist/?exit`                                                                                                 |
     | `ua:mitchellkrogza-bad-user-agents`       | Nginx 阻止不良机器人、垃圾邮件引荐来源、漏洞扫描器、用户代理、恶意软件、广告软件、勒索软件、恶意网站，具有反 DDOS、Wordpress 主题检测器阻止和针对重复违规者的 Fail2Ban Jail | `https://raw.githubusercontent.com/mitchellkrogza/nginx-ultimate-bad-bot-blocker/master/_generator_lists/bad-user-agents.list`        |
-    | `ip:laurent-minne-data-shield-aggressive` | Data-Shield IPv4 Blocklist - Laurent M. - 适用于 Web 应用, WordPress, VPS (Apache/Nginx)                                                                                    | `https://raw.githubusercontent.com/duggytuxy/Data-Shield_IPv4_Blocklist/refs/heads/main/prod_data-shield_ipv4_blocklist.txt`          |
-    | `ip:laurent-minne-data-shield-critical`   | Data-Shield IPv4 Blocklist - Laurent M. - 适用于 DMZs, SaaS, API 和关键资产                                                                                                 | `https://raw.githubusercontent.com/duggytuxy/Data-Shield_IPv4_Blocklist/refs/heads/main/prod_critical_data-shield_ipv4_blocklist.txt` |
+    | `ip:laurent-minne-data-shield-aggressive` | Data-Shield IPv4 Blocklist (Community Standard) - Laurent M.                                                                                                                | `https://raw.githubusercontent.com/duggytuxy/Data-Shield_IPv4_Blocklist/refs/heads/main/prod_data-shield_ipv4_blocklist.txt`          |
+
+    !!! info "Data-Shield Pro"
+        [Data-Shield Pro](https://data-shield.eu/?utm_source=external-docs&utm_medium=cta&utm_campaign=bunkerweb-docs) 是付费订阅，包含 Critical 配置：在 Standard 列表的基础上增加更多被阻止的来源，用于更严格的入站过滤，但误拦合法流量的风险更高。原 `ip:laurent-minne-data-shield-critical` 预设已停用，现在下载免费的 Community Standard 列表。
+
+        Pro 源需要身份验证，而 BunkerWeb 没有单独的订阅源凭据设置。嵌入 URL 设置中的凭据（`http://user:pass@url`）会保存在该设置中，并显示在 Web 界面和日志里。因此请遵循[供应商指南](https://data-shield.eu/docs/?utm_source=external-docs&utm_medium=cta&utm_campaign=bunkerweb-docs)：不要把设备令牌放进 URL，而是在您自己的网络中使用中继，即一个向上游进行身份验证、并仅向您的 BunkerWeb 实例提供该文件的服务，然后将中继 URL 添加到 `BLACKLIST_IP_URLS`。HTTP Basic 选项以设备 ID 作为用户名、令牌作为密码，但这会把令牌保存在该设置中。订阅用户可在[订阅者门户](https://feeds.data-shield.eu/?utm_source=external-docs&utm_medium=cta&utm_campaign=bunkerweb-docs)中管理设备。
 
     **配置：** 指定多个列表，以空格分隔。例如：
     ```yaml
@@ -1123,9 +1127,6 @@ STREAM 支持 :warning:
 
     !!! tip "社区与手动配置"
         社区黑名单提供了一种方便的方式来开始使用经过验证的黑名单源。您可以将它们与手动 URL 配置一起使用，以实现最大的灵活性。
-
-    !!! note "致谢"
-        感谢 Laurent Minne 贡献了 [Data-Shield 阻止列表](https://duggytuxy.github.io/#)！
 
 === "IP 地址"
     **这是做什么的：** 根据访问者的 IP 地址或网络阻止访问。
@@ -2025,7 +2026,7 @@ CrowdSec 是一种现代的开源安全引擎，它基于行为分析和社区�
     services:
       bunkerweb:
         # 这是将用于在调度器中识别实例的名称
-        image: bunkerity/bunkerweb:1.6.18-rc5
+        image: bunkerity/bunkerweb:1.6.19-rc1
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -2042,7 +2043,7 @@ CrowdSec 是一种现代的开源安全引擎，它基于行为分析和社区�
             syslog-address: "udp://10.20.30.254:514" # syslog 服务的 IP 地址
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.18-rc5
+        image: bunkerity/bunkerweb-scheduler:1.6.19-rc1
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb" # 确保设置正确的实例名称
@@ -4500,7 +4501,7 @@ ModSecurity 插件将功能强大的 [ModSecurity](https://modsecurity.org) Web 
     为了在绕过 ModSecurity 后仍保护上传内容，请将其与文件扫描插件配合使用，例如 [ClamAV](https://github.com/bunkerity/bunkerweb-plugins/tree/main/clamav) 或 [VirusTotal](https://github.com/bunkerity/bunkerweb-plugins/tree/main/virustotal)——它们检查上传文件本身，而不是原始请求体。
 
 !!! warning "响应体阻断与压缩响应"
-    如果响应体阻断规则在响应头发送后才触发，客户端可能先收到原始状态码（如 `200`），随后出现响应体不完整或分块传输错误，而不是完整的 `403` 响应。BunkerWeb 应用 gzip、Brotli 或 zstd 压缩时都可能出现这种情况。从 `1.6.18~rc5` 开始，Brotli 的行为与 gzip 已有的行为一致。请检查 ModSecurity 审计日志和错误日志，确定触发的规则，并用范围严格受限的排除规则处理已确认的误报。
+    如果响应体阻断规则在响应头发送后才触发，客户端可能先收到原始状态码（如 `200`），随后出现响应体不完整或分块传输错误，而不是完整的 `403` 响应。BunkerWeb 应用 gzip、Brotli 或 zstd 压缩时都可能出现这种情况。从 `1.6.18` 开始，Brotli 的行为与 gzip 已有的行为一致。请检查 ModSecurity 审计日志和错误日志，确定触发的规则，并用范围严格受限的排除规则处理已确认的误报。
 
 !!! warning "上游压缩的响应体"
     CRS v4 不检查上游已经压缩的响应体（`gzip`、`br` 或 `zstd`）。BunkerWeb 不会为检查而解压这些响应体。如果需要检查响应体，请配置上游返回未压缩的内容。对于遵循此请求头的上游，可以仅在受影响的服务和 location 中移除转发请求的 `Accept-Encoding` 头，以请求未压缩的响应：

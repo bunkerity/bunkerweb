@@ -17,6 +17,12 @@ import certificate_validation  # noqa: F401
 import common_utils
 from common_utils import bytes_hash
 
+
+def list_url_file(plugin, url, kind="IP"):
+    """Name of a downloaded URL's parsed cache: blacklist keeps one per kind, the other list jobs one per URL."""
+    return f"{bytes_hash(f'{kind} {url}' if plugin == 'blacklist' else url, algorithm='sha1')}.list"
+
+
 ROOT = pathlib.Path(os.environ.get("BW_C2_SOURCE_ROOT", pathlib.Path(__file__).resolve().parents[3]))
 
 

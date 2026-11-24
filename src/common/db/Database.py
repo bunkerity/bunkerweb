@@ -19,6 +19,7 @@ from threading import RLock, local
 from traceback import format_exc
 from typing import Any, Callable, Dict, List, Literal, NoReturn, Optional, Sequence, Set, Tuple, TypeVar, Union
 from time import sleep
+from unicodedata import combining, normalize
 from uuid import uuid4
 from warnings import filterwarnings
 
@@ -170,6 +171,14 @@ def _exit_closing_created() -> NoReturn:
     for scope in reversed(getattr(_CREATED, "stack", [])):
         _close_all(scope)
     _exit(1)
+
+
+def _collation_key(value: str) -> str:
+    """Over-approximate what a database collation can treat as equal, for ``bw_settings.id`` and ``bw_settings.name``.
+
+    MariaDB and MySQL defaults ignore case and accents and, with PAD SPACE, trailing spaces. Strings with the same key
+    count as the same setting, so none of them is kept next to the other."""
+    return "".join(c for c in normalize("NFKD", value) if not combining(c)).casefold().rstrip()
 
 
 # Methods that mean "a human edited this through a first-class interface". They overwrite
@@ -972,7 +981,7 @@ class Database:
                 metadata = session.query(Metadata).with_entities(Metadata.version).filter_by(id=1).first()
                 if metadata:
                     return metadata.version
-                return "1.6.18~rc5"
+                return "1.6.19~rc1"
             except BaseException as e:
                 return f"Error: {e}"
 
@@ -1006,7 +1015,7 @@ class Database:
             "last_instances_change": None,
             "reload_ui_plugins": False,
             "integration": "unknown",
-            "version": "1.6.18~rc5",
+            "version": "1.6.19~rc1",
             "database_version": "Unknown",  # ? Extracted from the database
             "default": True,  # ? Extra field to know if the returned data is the default one
         }
@@ -1535,6 +1544,19 @@ class Database:
             # SETTINGS
             old_setting_keys = set(old_settings.keys())
             new_setting_keys = set(desired_settings.keys())
+            # A plugin that stays in the database without being listed here (a PRO plugin whose files are not on disk yet, as
+            # on a fresh scheduler pod) keeps its settings: deleting them cascades to every global and service value,
+            # autoconf's included, and nothing writes those values back. Setting ids and names are unique across plugins, so
+            # a kept row whose id or name an incoming setting claims is not kept: the incoming setting replaces it.
+            kept_plugin_ids = {pid for pid in old_plugin_ids - new_plugin_ids if old_plugins[pid].method != "manual"}
+            incoming_ids = {_collation_key(sk[1]) for sk in new_setting_keys}
+            incoming_names = {_collation_key(value["name"]) for value in desired_settings.values()}
+            kept_setting_keys = {
+                sk
+                for sk in old_setting_keys - new_setting_keys
+                if sk[0] in kept_plugin_ids and _collation_key(sk[1]) not in incoming_ids and _collation_key(old_settings[sk].name) not in incoming_names
+            }
+
             for sk in new_setting_keys - old_setting_keys:
                 to_put.append(Settings(**desired_settings[sk]))
 
@@ -1547,7 +1569,10 @@ class Database:
                     to_update.append({"type": "setting", "filter": {"plugin_id": sk[0], "id": sk[1]}, "data": new_s})
 
             # Settings to delete
+            kept_setting_ids = {sk[1] for sk in kept_setting_keys}
             for sk in old_setting_keys - new_setting_keys:
+                if sk in kept_setting_keys:
+                    continue
                 to_delete.append({"type": "setting", "filter": {"plugin_id": sk[0], "id": sk[1]}})
                 if sk[1] == "MODSECURITY_CRS_PLUGIN_URLS":
                     self.logger.warning("MODSECURITY_CRS_PLUGIN_URLS setting has been renamed to MODSECURITY_CRS_PLUGINS, migrating data")
@@ -1596,7 +1621,7 @@ class Database:
 
             # Delete old selects not needed (for settings not in our updated list)
             for sel in old_select_keys - desired_selects:
-                if sel[0] not in settings_being_updated:  # Only delete if not already handled above
+                if sel[0] not in settings_being_updated and sel[0] not in kept_setting_ids:  # Only delete if not already handled above
                     to_delete.append({"type": "select", "filter": {"setting_id": sel[0], "value": self._empty_if_none(sel[1]), "order": sel[2]}})
 
             # JOBS

@@ -114,7 +114,7 @@ fi
 
 # Default values
 # Hardcoded default version (immutable reference)
-DEFAULT_BUNKERWEB_VERSION="1.6.18~rc5"
+DEFAULT_BUNKERWEB_VERSION="1.6.19~rc1"
 # Mutable effective version (can be overridden by --version)
 BUNKERWEB_VERSION="$DEFAULT_BUNKERWEB_VERSION"
 BUNKERWEB_VERSION_EXPLICIT="no"
@@ -123,7 +123,7 @@ NGINX_VERSION=""
 # NGINX bundled with the default BunkerWeb version; also the fallback for any
 # BunkerWeb version absent from the dictionary below (pre-1.6, the current-default
 # line, or newer-than-this-script). KEEP IN SYNC with src/linux/Dockerfile-*.
-DEFAULT_NGINX_VERSION="1.30.7"
+DEFAULT_NGINX_VERSION="1.30.8"
 
 # BunkerWeb release (X.Y.Z) -> NGINX version its packages were compiled against.
 # Each BunkerWeb Linux package ships NGINX dynamic modules built for one specific
@@ -143,6 +143,7 @@ declare -A _NGINX_VERSION_BY_BW=(
     [1.6.13]="1.30.4" [1.6.14]="1.30.4"
     [1.6.15]="1.30.5" [1.6.16]="1.30.5"
     [1.6.17]="1.30.6"
+    [1.6.18]="1.30.7"
 )
 # Fedora lagged the common pin on these releases only (Fedora repo timing).
 declare -A _NGINX_VERSION_BY_BW_FEDORA=(
@@ -153,6 +154,13 @@ declare -A _NGINX_VERSION_BY_BW_FEDORA=(
     [1.6.17]="1.30.5"
     # 1.6.18: Fedora 43/44/45 build against the vendored 1.30.6 tree.
     [1.6.18]="1.30.6"
+    # 1.6.19: Fedora 43/44/45 lack 1.30.8, so 44/45 ship 1.30.7 (43 is overridden below).
+    [1.6.19]="1.30.7"
+)
+# Fedora 43 only: its stable updates repo still ships 1.30.6 while 44/45 moved to 1.30.7.
+# Drop this table once nginx 1.30.7 reaches Fedora 43 stable updates.
+declare -A _NGINX_VERSION_BY_BW_FEDORA_43=(
+    [1.6.19]="1.30.6"
 )
 ENABLE_WIZARD=""
 FORCE_INSTALL="no"
@@ -5698,6 +5706,9 @@ resolve_nginx_version() {
     local _base="${_NGINX_VERSION_BY_BW[$_bw]:-$DEFAULT_NGINX_VERSION}"
     if [ "$DISTRO_ID" = "fedora" ] && [ -n "${_NGINX_VERSION_BY_BW_FEDORA[$_bw]:-}" ]; then
         _base="${_NGINX_VERSION_BY_BW_FEDORA[$_bw]}"
+    fi
+    if [ "$DISTRO_ID" = "fedora" ] && [ "$DISTRO_VERSION" = "43" ] && [ -n "${_NGINX_VERSION_BY_BW_FEDORA_43[$_bw]:-}" ]; then
+        _base="${_NGINX_VERSION_BY_BW_FEDORA_43[$_bw]}"
     fi
     printf '%s' "$_base"
 }

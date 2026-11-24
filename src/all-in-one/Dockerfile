@@ -178,6 +178,9 @@ RUN apk add --no-cache "libexpat>=2.10.0-r0" # CVE-2026-117610, CVE-2026-118370,
 RUN apk add --no-cache "zlib>=1.4-r0" # CVE-2026-4738
 RUN apk add --no-cache "libcrypto3>=3.5.9-r1" "libssl3>=3.5.9-r1" "openssl>=3.5.9-r1" # CVE-2026-107496, CVE-2026-88822, CVE-2026-88823, CVE-2026-95691, CVE-2026-95692
 RUN apk add --no-cache "libpq>=18.7-r0" "postgresql18-client>=18.7-r0" # CVE-2026-6467 and 51 more PostgreSQL 18.6 CVEs
+RUN apk add --no-cache "mariadb-client>=11.8.10-r0" "mariadb-common>=11.8.10-r0" # CVE-2026-101608, CVE-2026-101614, CVE-2026-101615, CVE-2026-101617, CVE-2026-101618, CVE-2026-101619, CVE-2026-101679, CVE-2026-101725, CVE-2026-101747, CVE-2026-101775, CVE-2026-101794, CVE-2026-101796, CVE-2026-101802
+RUN apk add --no-cache "libxml2>=2.13.9-r3" # CVE-2026-86144
+RUN apk add --no-cache "py3-pip>=26.1.2-r1" "py3-pip-pyc>=26.1.2-r1" # CVE-2026-133949
 
 COPY src/deps/requirements.txt /tmp/requirements-deps.txt
 
@@ -245,7 +248,7 @@ COPY --chown=root:nginx --chmod=770 src/bw/misc/asn.mmdb /var/tmp/bunkerweb/asn.
 COPY --chown=root:nginx --chmod=770 src/bw/misc/country.mmdb /var/tmp/bunkerweb/country.mmdb
 
 LABEL maintainer="Bunkerity <contact@bunkerity.com>"
-LABEL version="1.6.18~rc5"
+LABEL version="1.6.19~rc1"
 LABEL url="https://www.bunkerweb.io"
 LABEL bunkerweb.type="all-in-one"
 

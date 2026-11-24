@@ -27,7 +27,7 @@ from cryptography.x509.oid import NameOID
 
 import mmdb
 import common_utils
-from _other_jobs_helpers import ROOT, load_job
+from _other_jobs_helpers import ROOT, list_url_file, load_job
 from fixtures.seed import FIXED_DT, seed_minimal, session
 from jobs import Job as RealJob
 from model import Jobs, Jobs_cache, Jobs_runs, Plugins, Services
@@ -482,7 +482,7 @@ def test_feed_download_persists_validated_entries_and_fresh_cache_is_idempotent(
     env = _feed_env(plugin, **{f"{plugin.upper()}_{kind}_URLS": url})
     assert run(env=env, get=remote)[1] == 1
     _assert_file(job, f"{kind}.list", expected, "app.example")
-    url_file = hashlib.sha1(url.encode()).hexdigest() + ".list"
+    url_file = list_url_file(plugin, url, kind)
     raw = (job.job_path / url_file).read_bytes()
     assert raw.startswith(b"# Downloaded from https://feeds.invalid/list\n")
     _assert_file(job, url_file, raw)
@@ -504,7 +504,7 @@ def test_feed_failure_retains_previous_service_list(runtime, plugin, failure, tm
     _, status = run(env=_feed_env(plugin, **{f"{plugin.upper()}_IP_URLS": url}), get=remote)
     assert status == 2
     _assert_file(job, "IP.list", b"203.0.113.9\n", "app.example")
-    filename = hashlib.sha1(url.encode()).hexdigest() + ".list"
+    filename = list_url_file(plugin, url)
     assert not (job.job_path / filename).exists()
     with session(job.db) as s:
         assert s.query(Jobs_cache).filter_by(job_name=job.job_name, file_name=filename).count() == 0
@@ -553,8 +553,8 @@ def test_feed_without_urls_removes_obsolete_cache_rows_and_files(runtime, plugin
 def test_feed_changed_url_removes_stale_url_cache_row_and_file(runtime, plugin):
     job, run = runtime(f"{plugin}/jobs/{plugin}-download.py")
     old_url, new_url = "https://feeds.invalid/old", "https://feeds.invalid/new"
-    old_file = hashlib.sha1(old_url.encode()).hexdigest() + ".list"
-    new_file = hashlib.sha1(new_url.encode()).hexdigest() + ".list"
+    old_file = list_url_file(plugin, old_url)
+    new_file = list_url_file(plugin, new_url)
     assert job.cache_file(old_file, b"203.0.113.9\n")[0]
     assert job.cache_file("IP.list", b"203.0.113.9\n", service_id="app.example")[0]
     assert run(env=_feed_env(plugin, **{f"{plugin.upper()}_IP_URLS": new_url}), get=Mock(return_value=_response(b"203.0.113.8\n")))[1] == 1
@@ -1125,7 +1125,7 @@ def test_cleanup_database_refusal_is_logged_and_keeps_history(runtime, monkeypat
 def test_empty_feed_retains_previous_url_cache_and_service_list(runtime, plugin, body, content_type, caplog):
     job, run = runtime(f"{plugin}/jobs/{plugin}-download.py")
     url = "https://feeds.invalid/list"
-    filename = hashlib.sha1(url.encode()).hexdigest() + ".list"
+    filename = list_url_file(plugin, url)
     previous = b"# Downloaded from https://feeds.invalid/list\n203.0.113.9\n"
     assert job.cache_file(filename, previous)[0]
     assert job.cache_file("IP.list", b"203.0.113.9\n", service_id="app.example")[0]
@@ -1146,8 +1146,8 @@ def test_empty_feed_retains_previous_url_cache_and_service_list(runtime, plugin,
 def test_mixed_feed_refresh_keeps_failed_urls_last_good_entries(runtime, plugin, failure):
     job, run = runtime(f"{plugin}/jobs/{plugin}-download.py")
     good_url, failed_url = "https://feeds.invalid/good", "https://feeds.invalid/failed"
-    good_file = hashlib.sha1(good_url.encode()).hexdigest() + ".list"
-    failed_file = hashlib.sha1(failed_url.encode()).hexdigest() + ".list"
+    good_file = list_url_file(plugin, good_url)
+    failed_file = list_url_file(plugin, failed_url)
     previous = b"# Downloaded from https://feeds.invalid/failed\n203.0.113.9\n"
     assert job.cache_file(failed_file, previous)[0]
     assert job.cache_file(good_file, b"# Downloaded from https://feeds.invalid/good\n203.0.113.7\n")[0]
@@ -1171,4 +1171,4 @@ def test_mixed_feed_refresh_keeps_failed_urls_last_good_entries(runtime, plugin,
     with session(job.db) as s:
         row = s.query(Jobs_cache).filter_by(job_name=job.job_name, file_name=failed_file).one()
         assert row.last_update.replace(tzinfo=timezone.utc) == FIXED_DT
-    assert status == 2
+    assert status == (3 if plugin == "blacklist" else 2)  # blacklist reports a changed list and a failure together

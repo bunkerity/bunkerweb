@@ -282,7 +282,7 @@ Advanced ACME certificate management with custom CA support, certificate monitor
 | `ACME_EAB_HMAC_KEY`                  |             | multisite | no       | External Account Binding HMAC key (base64-encoded, required when EAB Key ID is set).                                                                                                                                                                                                                                                                                                                                                                                                             |
 | `ACME_CA_CERT_PATH`                  |             | multisite | no       | File path to the root CA certificate for private ACME servers (Step CA, Vault PKI). Required when the CA root is not in the system trust store.                                                                                                                                                                                                                                                                                                                                                  |
 | `ACME_CHALLENGE`                     | `http`      | multisite | no       | ACME challenge type. HTTP-01 is simplest; DNS-01 is required for wildcard certificates; TLS-ALPN-01 works when port 80 is unavailable but needs a core with the ClientHello plugin hook (1.6.18~rc3 or later).                                                                                                                                                                                                                                                                                   |
-| `ACME_DNS_PROVIDER`                  |             | multisite | no       | DNS provider for DNS-01 challenges. Hosttech requires BunkerWeb core 1.6.18~rc5 or newer.                                                                                                                                                                                                                                                                                                                                                                                                        |
+| `ACME_DNS_PROVIDER`                  |             | multisite | no       | DNS provider for DNS-01 challenges. Hosttech requires BunkerWeb core 1.6.18 or newer.                                                                                                                                                                                                                                                                                                                                                                                                        |
 | `ACME_DNS_CREDENTIAL_ITEM`           |             | multisite | yes      | Configuration item for the DNS provider credentials (e.g. 'cloudflare_api_token 123456'). Values can be base64 encoded.                                                                                                                                                                                                                                                                                                                                                                          |
 | `ACME_DNS_CREDENTIAL_DECODE_BASE64`  | `yes`       | multisite | yes      | Automatically decode base64 encoded DNS provider credentials.                                                                                                                                                                                                                                                                                                                                                                                                                                    |
 | `ACME_DNS_PROPAGATION`               | `default`   | multisite | no       | DNS-01 propagation wait in seconds. 'default': 120s for most providers, Hosttech's 600s default, or Route53's sync polling. Set a number to override.                                                                                                                                                                                                                                                                                                                                            |
@@ -1111,8 +1111,12 @@ Follow these steps to configure and use the Blacklist feature:
     | ----------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------- |
     | `ip:danmeuk-tor-exit`                     | Tor Exit Nodes IPs (dan.me.uk)                                                                                                                                                                                           | `https://www.dan.me.uk/torlist/?exit`                                                                                                 |
     | `ua:mitchellkrogza-bad-user-agents`       | Nginx Block Bad Bots, Spam Referrer Blocker, Vulnerability Scanners, User-Agents, Malware, Adware, Ransomware, Malicious Sites, with anti-DDOS, Wordpress Theme Detector Blocking and Fail2Ban Jail for Repeat Offenders | `https://raw.githubusercontent.com/mitchellkrogza/nginx-ultimate-bad-bot-blocker/master/_generator_lists/bad-user-agents.list`        |
-    | `ip:laurent-minne-data-shield-aggressive` | Data-Shield IPv4 Blocklist - Laurent M. - For Web Apps, WordPress, VPS (Apache/Nginx)                                                                                                                                    | `https://raw.githubusercontent.com/duggytuxy/Data-Shield_IPv4_Blocklist/refs/heads/main/prod_data-shield_ipv4_blocklist.txt`          |
-    | `ip:laurent-minne-data-shield-critical`   | Data-Shield IPv4 Blocklist - Laurent M. - For DMZs, SaaS, API & Critical Assets                                                                                                                                          | `https://raw.githubusercontent.com/duggytuxy/Data-Shield_IPv4_Blocklist/refs/heads/main/prod_critical_data-shield_ipv4_blocklist.txt` |
+    | `ip:laurent-minne-data-shield-aggressive` | Data-Shield IPv4 Blocklist (Community Standard) - Laurent M.                                                                                                                                                             | `https://raw.githubusercontent.com/duggytuxy/Data-Shield_IPv4_Blocklist/refs/heads/main/prod_data-shield_ipv4_blocklist.txt`          |
+
+    !!! info "Data-Shield Pro"
+        [Data-Shield Pro](https://data-shield.eu/?utm_source=external-docs&utm_medium=cta&utm_campaign=bunkerweb-docs) is a paid subscription that includes the Critical profile: the Standard list plus additional blocked sources, for stricter inbound filtering with a higher risk of blocking legitimate traffic. The former `ip:laurent-minne-data-shield-critical` preset is retired and now downloads the free Community Standard list.
+
+        The Pro feed requires authentication, and BunkerWeb has no separate setting for a feed credential. Credentials embedded in a URL setting (`http://user:pass@url`) are stored in that setting and shown in the web UI and in the logs, so follow the [vendor guidance](https://data-shield.eu/docs/?utm_source=external-docs&utm_medium=cta&utm_campaign=bunkerweb-docs): keep the device token out of URLs and use a relay on your own network, a service that authenticates upstream and serves the file only to your BunkerWeb instances, then add the relay URL to `BLACKLIST_IP_URLS`. The HTTP Basic option takes the Device ID as user and the token as password, but it puts the token in the setting. Subscribers manage their devices in the [subscriber portal](https://feeds.data-shield.eu/?utm_source=external-docs&utm_medium=cta&utm_campaign=bunkerweb-docs).
 
     **Configuration:** Specify multiple lists separated by spaces. For example:
     ```yaml
@@ -1121,9 +1125,6 @@ Follow these steps to configure and use the Blacklist feature:
 
     !!! tip "Community vs Manual Configuration"
         Community blacklists provide a convenient way to get started with proven blacklist sources. You can use them alongside manual URL configurations for maximum flexibility.
-
-    !!! note "Acknowledgements"
-        Thank you Laurent Minne for contributing the [Data-Shield blocklists](https://duggytuxy.github.io/#)!
 
 === "IP Address"
     **What this does:** Blocks visitors based on their IP address or network.
@@ -2027,7 +2028,7 @@ Follow one of the environment-specific guides below so the CrowdSec agent ingest
     services:
       bunkerweb:
         # This is the name that will be used to identify the instance in the Scheduler
-        image: bunkerity/bunkerweb:1.6.18-rc5
+        image: bunkerity/bunkerweb:1.6.19-rc1
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -2044,7 +2045,7 @@ Follow one of the environment-specific guides below so the CrowdSec agent ingest
             syslog-address: "udp://10.20.30.254:514" # The IP address of the syslog service
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.18-rc5
+        image: bunkerity/bunkerweb-scheduler:1.6.19-rc1
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Make sure to set the correct instance name
@@ -4506,7 +4507,7 @@ Follow these steps to configure and use ModSecurity:
     To keep uploads protected after bypassing ModSecurity, pair this with a file-scanning plugin such as [ClamAV](https://github.com/bunkerity/bunkerweb-plugins/tree/main/clamav) or [VirusTotal](https://github.com/bunkerity/bunkerweb-plugins/tree/main/virustotal) — they inspect the uploaded file itself instead of the raw request body.
 
 !!! warning "Response-body denies and compressed responses"
-    If a response-body deny rule fires after response headers have been sent, the client can receive the original status (such as `200`) followed by an incomplete-body or chunked-encoding error instead of a clean `403` response. This can happen with gzip, Brotli or zstd compression applied by BunkerWeb. Starting with `1.6.18~rc5`, Brotli follows the established gzip behavior. Check the ModSecurity audit and error logs for the triggered rule; tune confirmed false positives with narrowly scoped exclusions.
+    If a response-body deny rule fires after response headers have been sent, the client can receive the original status (such as `200`) followed by an incomplete-body or chunked-encoding error instead of a clean `403` response. This can happen with gzip, Brotli or zstd compression applied by BunkerWeb. Starting with `1.6.18`, Brotli follows the established gzip behavior. Check the ModSecurity audit and error logs for the triggered rule; tune confirmed false positives with narrowly scoped exclusions.
 
 !!! warning "Upstream-compressed response bodies"
     CRS v4 does not inspect response bodies already compressed by the upstream (`gzip`, `br` or `zstd`). BunkerWeb does not decode these bodies for inspection. Where response-body inspection is required, configure the upstream to return uncompressed content. To ask an upstream that honors this header to do so, remove `Accept-Encoding` from the proxied request for only the affected service and location:

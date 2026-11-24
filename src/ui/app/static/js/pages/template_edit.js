@@ -3791,13 +3791,42 @@ const submitForm = async (event) => {
     const result = await response.json().catch(() => ({}));
 
     if (!response.ok || result.status !== "success") {
-      const message =
-        result.message ||
-        translate(
-          "template.editor.error_generic",
-          "Something went wrong. Please try again.",
+      const htmlForbidden =
+        response.status === 403 &&
+        !result.status &&
+        (response.headers.get("content-type") || "").includes("text/html");
+      let message = result.message;
+      // Session invalidation keeps the logout response's Location header on the 403.
+      if (
+        htmlForbidden &&
+        response.headers.get("location")?.endsWith("/login")
+      ) {
+        message = translate(
+          "template.editor.error_session_invalidated",
+          "Your session expired or was invalidated. Please log in again before saving.",
         );
-      showFeedback("danger", message);
+      } else if (htmlForbidden) {
+        message = translate(
+          "template.editor.error_waf_blocked",
+          "The web application firewall (ModSecurity) blocked this request: HTTP 403 on {{endpoint}} at {{time}}. Find the rule id in the BunkerWeb error log entry for that request.",
+          {
+            endpoint: new URL(endpoint, window.location.href).pathname.replace(
+              /[<>&"']/g,
+              "",
+            ),
+            time: new Date().toISOString(),
+            interpolation: { escapeValue: false },
+          },
+        );
+      }
+      showFeedback(
+        "danger",
+        message ||
+          translate(
+            "template.editor.error_generic",
+            "Something went wrong. Please try again.",
+          ),
+      );
       setSaving(false);
       return;
     }

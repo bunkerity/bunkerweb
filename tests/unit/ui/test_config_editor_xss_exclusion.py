@@ -67,5 +67,8 @@ def test_modsec_crs_ui_conf_xss_exclusion_scoped_to_config_editor():
 
 
 def test_http_ui_modsec_crs_exclusion_still_requires_the_ui_host():
-    block = _extract_block(HTTP_CONF.read_text())
-    assert "REQUEST_HEADERS:Host" in block, f"{HTTP_CONF}: the multisite variant must still gate on ui_hosts like every other rule here"
+    text = HTTP_CONF.read_text()
+    block = _extract_block(text)
+    # The Host gate is the shared `ui_link` (a Host regex, or the tx.bw_ui_host marker test past 8 KiB of names).
+    assert "{{ ui_link }}" in block, f"{HTTP_CONF}: the multisite variant must still gate on ui_hosts like every other rule here"
+    assert "SecRule REQUEST_HEADERS:Host" in text and "SecRule TX:bw_ui_host" in text

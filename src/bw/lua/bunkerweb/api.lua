@@ -799,6 +799,23 @@ api.global.POST["^/stop$"] = function(self)
 	return self:response(HTTP_OK, "success", "stop successful")
 end
 
+-- Whether this push is the scheduler on this host sending back its own copy of the destination. The rule lives in
+-- pushswap.is_local_self_push; the inputs are read here, and any error answers false.
+local function is_local_self_push(ctx)
+	if ctx.bw.uri ~= "/custom_configs" then
+		return false
+	end
+	local read, local_push = pcall(function()
+		return pushswap.is_local_self_push(
+			ctx.bw.uri,
+			utils.get_integration(ctx),
+			file_exists(pushswap.SCHEDULER_MARKER),
+			ngx.var.realip_remote_addr
+		)
+	end)
+	return read and local_push == true
+end
+
 api.global.POST["^/confs$"] = function(self)
 	-- Everything this request owns on disk carries the worker and the connection. A name built
 	-- from the URI alone is shared by every push to that URI, and two of them then write into one
@@ -917,7 +934,7 @@ api.global.POST["^/confs$"] = function(self)
 
 	-- pcall so an error inside the section still releases the lock: leaving it held costs every
 	-- later push and reload until it expires.
-	local ran, ok, err = pcall(pushswap.swap, destination, staging)
+	local ran, ok, err = pcall(pushswap.swap, destination, staging, { skip_unchanged = is_local_self_push(self.ctx) })
 	if ran and ok and digest then
 		local recorded, written, write_err = pcall(pushswap.write_applied, destination, digest)
 		if not recorded or not written then
