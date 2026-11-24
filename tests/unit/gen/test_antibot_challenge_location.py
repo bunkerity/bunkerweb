@@ -73,3 +73,15 @@ def test_no_sub_filter_is_added_when_html_injection_is_unset():
     rendered = _render(CONFS / "server-http" / "antibot.conf", USE_ANTIBOT="captcha", INJECT_HEAD="", INJECT_BODY="")
     assert "location /challenge" in rendered
     assert "sub_filter" not in rendered
+
+
+@pytest.mark.parametrize("service_limit,cap_needed", [("10m", True), ("0", True), ("0K", True), ("2G", True), ("16385", True), ("16K", False), ("512", False)])
+def test_altcha_caps_only_the_exact_challenge_location_and_keeps_stricter_service_limits(service_limit, cap_needed):
+    location = CONFS / "server-http" / "antibot.conf"
+    altcha = _render(location, USE_ANTIBOT="altcha", MAX_CLIENT_SIZE=service_limit)
+    assert "location = /challenge {" in altcha
+    assert ("client_max_body_size 16k;" in altcha) is cap_needed
+    assert "client_body_buffer_size 16k;" in altcha
+    captcha = _render(location, USE_ANTIBOT="captcha", MAX_CLIENT_SIZE=service_limit)
+    assert "location /challenge {" in captcha
+    assert "client_max_body_size" not in captcha

@@ -326,19 +326,22 @@ function limit:access()
 	return self:ret(true, msg)
 end
 
--- The Cap.js challenge page loads its widget from a second GET on the same URI (?capjs_frame=1).
--- Counted in the page's bucket, a normal solve (page, frame, POST) is 3 requests, one over the
--- default 2r/s, so a fast solve is answered 429. The frame request gets a counter of its own and
--- stays limited. Only that exact query on a capjs service's challenge URI is split off.
+-- Widget frames and ALTCHA proof submissions stay rate limited even when an asset redirect fetches the page again.
 function limit:counter_key()
 	local ctx_bw = self.ctx.bw
 	local uri = ctx_bw.uri
-	if
-		ngx.var.arg_capjs_frame == "1"
-		and get_variable("USE_ANTIBOT", true, self.ctx) == "capjs"
-		and uri == get_variable("ANTIBOT_URI", true, self.ctx)
-	then
-		uri = uri .. "?capjs_frame=1"
+	local capjs_frame = ngx.var.arg_capjs_frame == "1"
+	local altcha_frame = ctx_bw.request_method == "GET" and ngx.var.arg_altcha_frame == "1"
+	local post = ctx_bw.request_method == "POST"
+	if capjs_frame or altcha_frame or post then
+		local provider = get_variable("USE_ANTIBOT", true, self.ctx)
+		if (provider == "capjs" or provider == "altcha") and uri == get_variable("ANTIBOT_URI", true, self.ctx) then
+			if provider == "altcha" and post then
+				uri = uri .. "?altcha_post"
+			elseif (provider == "capjs" and capjs_frame) or (provider == "altcha" and altcha_frame) then
+				uri = uri .. "?" .. provider .. "_frame=1"
+			end
+		end
 	end
 	return "plugin_limit_" .. ctx_bw.server_name .. ctx_bw.remote_addr .. uri
 end

@@ -38,10 +38,12 @@ local match_header_rules = utils.match_header_rules
 local pick_header_rules = utils.pick_header_rules
 local regex_match = utils.regex_match
 local ipmatcher_new = ipmatcher.new
+local parse_ipv6 = ipmatcher.parse_ipv6
 local upper = string.upper
 
 local template
 local render = nil
+local altcha_template
 if subsystem == "http" then
 	template = require "resty.template"
 	render = template.render
@@ -49,6 +51,10 @@ end
 
 local antibot = class("antibot", plugin)
 local CACHE_PREFIX = "plugin_antibot_"
+local ALTCHA_FORM_MAX = 16 * 1024
+local ALTCHA_PROOF_MAX = 8 * 1024
+local ALTCHA_RESPONSE_MAX = 32 * 1024
+local ALTCHA_VERIFIER_TIMEOUT = 5
 -- Asset-like extensions used to avoid redirecting clients back to static files after solving the challenge
 local STATIC_EXTENSIONS = {
 	["avif"] = true,
@@ -200,6 +206,154 @@ local function get_http_client()
 	end
 	httpc:set_timeouts(5000, 5000, 5000)
 	return httpc
+end
+
+local function altcha_tls_name(host)
+	local name = host:gsub("%.$", "")
+	if #name > 253 then
+		return nil
+	end
+	for label in (name .. "."):gmatch("([^.]*)%.") do
+		if #label > 63 or not label:match("^[A-Za-z0-9][A-Za-z0-9%-]*$") or label:sub(-1) == "-" then
+			return nil
+		end
+	end
+	-- Numeric final labels include shorthand, octal and hexadecimal IPv4 URL forms.
+	local last_label = name:match("[^.]+$")
+	if last_label:match("^[0-9]+$") or last_label:match("^0[xX]%x*$") then
+		return nil
+	end
+	return name
+end
+
+local function parse_altcha_origin(origin, https_only)
+	local scheme, authority = (origin or ""):match("^(https?)://(.+)$")
+	if not scheme or (https_only and scheme ~= "https") then
+		return nil
+	end
+	local host, suffix = authority:match("^([A-Za-z0-9.%-]+)(.*)$")
+	if not host then
+		host, suffix = authority:match("^(%[[0-9A-Fa-f:.]+%])(.*)$")
+		if not host or not parse_ipv6(host) then
+			return nil
+		end
+	end
+	local port = scheme == "https" and 443 or 80
+	if suffix ~= "" then
+		port = tonumber(suffix:match("^:([1-9][0-9]?[0-9]?[0-9]?[0-9]?)$"))
+		if not port or port > 65535 then
+			return nil
+		end
+	end
+	local tls_name
+	if scheme == "https" then
+		tls_name = altcha_tls_name(host)
+		if not tls_name then
+			return nil
+		end
+	end
+	return { scheme = scheme, host = host, port = port, ssl_verify = true, ssl_server_name = tls_name }
+end
+
+local function altcha_endpoint(variables)
+	local sitekey = variables["ANTIBOT_ALTCHA_SITEKEY"] or ""
+	local secret = variables["ANTIBOT_ALTCHA_SECRET"] or ""
+	if #sitekey > 256 or #secret > 1024 or not sitekey:match("^[A-Za-z0-9._%-]+$") or not secret:match("^[!-~]+$") then
+		return nil
+	end
+	local frontend = parse_altcha_origin(variables["ANTIBOT_ALTCHA_FRONTEND_URL"], true)
+	if not frontend then
+		return nil
+	end
+	local backend = variables["ANTIBOT_ALTCHA_BACKEND_URL"]
+	if backend and backend ~= "" then
+		return parse_altcha_origin(backend)
+	end
+	return frontend
+end
+
+local function is_altcha_frame(ctx)
+	return ctx.bw.request_method == "GET" and ngx.var.arg_altcha_frame == "1"
+end
+
+local function get_altcha_post_args()
+	if (tonumber(ngx.var.content_length) or 0) > ALTCHA_FORM_MAX then
+		return nil
+	end
+	ngx.req.read_body()
+	local body = ngx.req.get_body_data()
+	if not body or #body > ALTCHA_FORM_MAX then
+		return nil
+	end
+	local args, err = ngx.req.get_post_args(8)
+	if not err then
+		return args
+	end
+end
+
+local function read_altcha_response(response)
+	local length = response.headers["Content-Length"]
+	if
+		length and (type(length) ~= "string" or not length:match("^[0-9]+$") or tonumber(length) > ALTCHA_RESPONSE_MAX)
+	then
+		return nil
+	end
+	local chunks, size = {}, 0
+	while true do
+		local chunk, err = response.body_reader(ALTCHA_RESPONSE_MAX - size + 1)
+		local eof = err == "closed" and not length and not response.headers["Transfer-Encoding"]
+		if err and not eof then
+			return nil
+		end
+		if chunk then
+			size = size + #chunk
+			if size > ALTCHA_RESPONSE_MAX then
+				return nil
+			end
+			chunks[#chunks + 1] = chunk
+		end
+		if eof or not chunk then
+			return table.concat(chunks)
+		end
+	end
+end
+
+local function verify_altcha(endpoint, payload, secret, sitekey)
+	local httpc = get_http_client()
+	if not httpc then
+		return false, "ALTCHA verifier unavailable"
+	end
+	local deadline = now() + ALTCHA_VERIFIER_TIMEOUT
+	-- A socket timeout applies per operation, so race the whole exchange against one timer.
+	local timeout = ngx.thread.spawn(function()
+		ngx.sleep(ALTCHA_VERIFIER_TIMEOUT)
+	end)
+	local request = ngx.thread.spawn(function()
+		if not httpc:connect(endpoint) then
+			return nil
+		end
+		local response = httpc:request({
+			method = "POST",
+			path = "/v1/verify/signature",
+			body = encode({ payload = payload, secret = secret }),
+			headers = { ["Content-Type"] = "application/json" },
+		})
+		if response and response.status == 200 then
+			return read_altcha_response(response)
+		end
+	end)
+	local ok, body = ngx.thread.wait(request, timeout)
+	ngx.thread.kill(timeout)
+	ngx.thread.kill(request)
+	httpc:close()
+	if not ok or not body or now() >= deadline then
+		return false, "ALTCHA verifier unavailable or returned an invalid response"
+	end
+	local decoded, data = pcall(decode, body)
+	if not decoded or type(data) ~= "table" or data.verified ~= true or data.apiKey ~= sitekey then
+		return false, "ALTCHA verification rejected"
+	end
+	return true
 end
 
 function antibot:initialize(ctx)
@@ -355,6 +509,23 @@ function antibot:header()
 		end
 	elseif self.session_data.type == "mcaptcha" then
 		csp_directives["frame-src"] = self.variables["ANTIBOT_MCAPTCHA_URL"]
+	elseif self.session_data.type == "altcha" then
+		csp_directives["script-src"] = "'nonce-" .. self.ctx.bw.antibot_nonce_script .. "'"
+		csp_directives["form-action"] = "'self'"
+		if is_altcha_frame(self.ctx) then
+			local origin = self.variables["ANTIBOT_ALTCHA_FRONTEND_URL"]
+			csp_directives["script-src"] = csp_directives["script-src"] .. " " .. origin
+			-- Stylesheet injected by the pinned ALTCHA 2.2.4 bundle.
+			csp_directives["style-src"] = csp_directives["style-src"]
+				.. " 'sha256-pg+oQARqMq4wCazyrsMt8HY89BJkXkEFkwNWxg2iPdg='"
+			csp_directives["connect-src"] = origin
+			csp_directives["worker-src"] = "blob:"
+			csp_directives["frame-ancestors"] = "'self'"
+			csp_directives["require-trusted-types-for"] = nil
+			hdr["X-Frame-Options"] = "SAMEORIGIN"
+		else
+			csp_directives["frame-src"] = "'self'"
+		end
 	elseif self.session_data.type == "capjs" then
 		local capjs_url = self.variables["ANTIBOT_CAPJS_FRONTEND_URL"]
 		csp_directives["style-src"] = "'self' 'nonce-" .. self.ctx.bw.antibot_nonce_style .. "'"
@@ -466,6 +637,11 @@ function antibot:access()
 		end
 	end
 
+	if self.use_antibot == "altcha" and not altcha_endpoint(self.variables) then
+		ngx.header["Cache-Control"] = "no-store"
+		return self:ret(false, "invalid or missing ALTCHA settings", HTTP_INTERNAL_SERVER_ERROR)
+	end
+
 	-- Get session data
 	local session, err = get_session(self.ctx)
 	if not session then
@@ -483,6 +659,9 @@ function antibot:access()
 	-- Don't go further if client resolved the challenge
 	if self.session_data.resolved then
 		if self.ctx.bw.uri == self.variables["ANTIBOT_URI"] then
+			if self.use_antibot == "altcha" then
+				ngx.header["Cache-Control"] = "no-store"
+			end
 			return self:ret(
 				true,
 				"client already resolved the challenge",
@@ -531,6 +710,9 @@ function antibot:access()
 
 	-- Check challenge
 	if self.ctx.bw.request_method == "POST" then
+		if self.use_antibot == "altcha" then
+			ngx.header["Cache-Control"] = "no-store"
+		end
 		-- luacheck: ignore 421
 		local ok, err, redirect = self:check_challenge()
 		if ok == nil then
@@ -588,6 +770,20 @@ function antibot:content()
 end
 
 function antibot:check_session()
+	local session_type = self.session_data.type
+	if
+		(self.use_antibot == "altcha" or session_type == "altcha")
+		and (
+			session_type ~= self.use_antibot
+			or self.session_data.altcha_service ~= self.ctx.bw.server_name
+			or self.session_data.altcha_sitekey ~= self.variables["ANTIBOT_ALTCHA_SITEKEY"]
+		)
+	then
+		self.session_data = {}
+		self:set_session_data()
+		return "ALTCHA session scope changed"
+	end
+
 	-- Get values
 	local time_resolve = self.session_data.time_resolve
 	local time_valid = self.session_data.time_valid
@@ -613,7 +809,7 @@ function antibot:check_session()
 		not resolved
 		and (time_resolve > time or time - time_resolve > parse_duration(self.variables["ANTIBOT_TIME_RESOLVE"], "s"))
 	then
-		self.session_data = {}
+		self.session_data = session_type == "altcha" and { original_uri = self.session_data.original_uri } or {}
 		self:set_session_data()
 		return "need new prepare"
 	end
@@ -662,6 +858,9 @@ function antibot:prepare_challenge()
 				or LEGACY_POW_DIFFICULTY
 		elseif session_update.type == "captcha" then
 			session_update.captcha = rand(6, true, self.variables["ANTIBOT_CAPTCHA_ALPHABET"])
+		elseif session_update.type == "altcha" then
+			session_update.altcha_service = self.ctx.bw.server_name
+			session_update.altcha_sitekey = self.variables["ANTIBOT_ALTCHA_SITEKEY"]
 		end
 
 		-- Update session data with all changes at once
@@ -727,6 +926,7 @@ function antibot:display_challenge()
 
 	-- Cap.js case
 	local template_name = self.session_data.type .. ".html"
+	local render_challenge = render
 	if self.session_data.type == "capjs" then
 		template_vars.capjs_url = self.variables["ANTIBOT_CAPJS_FRONTEND_URL"]
 		template_vars.capjs_sitekey = self.variables["ANTIBOT_CAPJS_SITEKEY"]
@@ -734,10 +934,22 @@ function antibot:display_challenge()
 		if ngx.var.arg_capjs_frame == "1" then
 			template_name = "capjs_frame.html"
 		end
+	elseif self.session_data.type == "altcha" then
+		template_vars.altcha_url = self.variables["ANTIBOT_ALTCHA_FRONTEND_URL"]
+		template_vars.altcha_sitekey = self.variables["ANTIBOT_ALTCHA_SITEKEY"]
+		template_vars.altcha_failed = self.ctx.bw.request_method == "POST"
+		if is_altcha_frame(self.ctx) then
+			template_name = "altcha_frame.html"
+		end
+		-- Older PRO custom-page roots do not contain the bundled ALTCHA views.
+		if not altcha_template then
+			altcha_template = template.new({ root = "/usr/share/bunkerweb/core/antibot/files" })
+		end
+		render_challenge = altcha_template.render_file
 	end
 
 	-- Render content
-	render(template_name, template_vars)
+	render_challenge(template_name, template_vars)
 
 	return true, "displayed challenge"
 end
@@ -746,6 +958,32 @@ function antibot:check_challenge()
 	-- Check if prepared
 	if not self.session_data.prepared then
 		return nil, "challenge not prepared"
+	end
+
+	if self.session_data.type == "altcha" then
+		local args = get_altcha_post_args()
+		local proof = args and args.altcha
+		if type(proof) ~= "string" or proof == "" or #proof > ALTCHA_PROOF_MAX then
+			return false, "missing or invalid ALTCHA payload"
+		end
+		local endpoint = altcha_endpoint(self.variables)
+		if not endpoint then
+			return false, "invalid or missing ALTCHA settings"
+		end
+		local ok, err = verify_altcha(
+			endpoint,
+			proof,
+			self.variables["ANTIBOT_ALTCHA_SECRET"],
+			self.variables["ANTIBOT_ALTCHA_SITEKEY"]
+		)
+		if not ok then
+			return false, err
+		end
+		self.session_data.prepared = false
+		self.session_data.resolved = true
+		self.session_data.time_valid = now()
+		self:set_session_data()
+		return true, "resolved", self:resolve_redirect_target(args)
 	end
 
 	local ngx_req = ngx.req
@@ -1109,6 +1347,17 @@ function antibot:get_original_uri()
 	if self.ctx.bw.uri == antibot_uri then
 		-- Prepared at the challenge endpoint: recover the target from the ?next= hint.
 		local next_arg = first_value(ngx.req.get_uri_args()["next"])
+		if self.use_antibot == "altcha" then
+			if not next_arg and self.ctx.bw.request_method == "POST" then
+				next_arg = first_value((get_altcha_post_args() or {}).next)
+			end
+			next_arg = path_only(is_safe_relative_path(next_arg, antibot_uri))
+			local session_uri = is_safe_relative_path(self.session_data.original_uri, antibot_uri)
+			if session_uri and (not next_arg or path_only(session_uri) == next_arg) then
+				return session_uri
+			end
+			return next_arg or "/"
+		end
 		-- The challenge form POSTs without ?next=, so a re-prepare on a failed solve reads the hidden field.
 		if not next_arg and self.ctx.bw.request_method == "POST" then
 			ngx.req.read_body()

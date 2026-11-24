@@ -181,6 +181,10 @@ alembic==1.20.1 \
     --hash=sha256:83490def1f723413db5096591f7609ac52544805be93849170088ed04f5a2e0b \
     --hash=sha256:9970712cfb81ea26c8658d378aaa5b8f6ff9146e5bb111d70497c164016cf598
     # via -r tests/unit/requirements.in
+altcha==2.5.0 \
+    --hash=sha256:3358f8d7ff43ba8e038c759dc70c5a90659dd45c6892c8921301c33454622b58 \
+    --hash=sha256:36aa53274436858b52399955e2008517b27dc1cd5e989affe08e8674c3023463
+    # via -r tests/unit/requirements.in
 annotated-doc==0.0.5 \
     --hash=sha256:117bac03a25ede5df5440e855b32d556049ca169ead221505badf432fed4b101 \
     --hash=sha256:c7e58ce09192557605d8bbd92836d7e1d520ac9580096042c0bfd197efacf1bb

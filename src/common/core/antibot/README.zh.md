@@ -277,6 +277,53 @@ BunkerWeb 允许您指定某些用户、IP 或请求应完全绕过 antibot 挑�
 
     有关其他配置选项，请参阅[通用设置](#通用设置)。
 
+=== "ALTCHA"
+
+    ALTCHA 提供工作量证明挑战。请在您控制的 HTTPS 源（例如 `https://altcha.example.com`）上托管浏览器组件和挑战端点，并运行自己的验证服务。将 [官方 npm 包 `altcha@2.2.4`](https://www.npmjs.com/package/altcha/v/2.2.4) 中的 `dist/altcha.js` 原样部署为 `/assets/altcha.min.js` 上的 JavaScript 模块。框架会检查模块的完整性。通过 `GET /v1/challenge?apiKey=<sitekey>` 提供标准 v1 SHA 挑战，省略 `X-Altcha-Config` 覆盖项。在模块和挑战端点的 CORS 策略中允许受保护站点的 HTTPS 源，并将挑战及挑战页面排除在反向代理或 CDN 的共享缓存之外。
+
+    浏览器访问的 HTTPS 源和所有 HTTPS 验证服务都必须使用 DNS 主机名。将 `ANTIBOT_ALTCHA_BACKEND_URL` 留空即可使用前端进行验证。内部 HTTP 验证服务可以使用 IP 地址。
+
+    | 设置                          | 默认值 | 上下文    | 多个 | 描述                                  |
+    | ----------------------------- | ------ | --------- | ---- | ------------------------------------- |
+    | `USE_ANTIBOT`                 | `no`   | multisite | 否   | 设为 `altcha` 以启用此挑战。          |
+    | `ANTIBOT_ALTCHA_FRONTEND_URL` |        | multisite | 否   | 提供浏览器组件和挑战端点的 HTTPS 源。 |
+    | `ANTIBOT_ALTCHA_BACKEND_URL`  |        | multisite | 否   | 验证服务的内部源。留空时使用前端源。  |
+    | `ANTIBOT_ALTCHA_SITEKEY`      |        | multisite | 否   | 发送到挑战端点的公开站点密钥。        |
+    | `ANTIBOT_ALTCHA_SECRET`       |        | multisite | 否   | 验证请求所需的服务端密钥。            |
+
+    两个 URL 都只填写源，即协议、主机和可选端口。验证端点应仅供 BunkerWeb 访问，即使它与前端共用同一个源。组件在受保护站点的隔离框架中运行。
+
+    挑战表单向 BunkerWeb 提交 `altcha` 和 `next`。BunkerWeb 向 `POST /v1/verify/signature` 发送 JSON，字段为 `"payload"`（表单中的 `altcha` 值）和 `"secret"`。只有响应为 HTTP 200，且 JSON 对象中包含 `"verified": true` 和与配置的站点密钥完全一致的 `"apiKey"` 字符串时，BunkerWeb 才接受验证结果。验证服务必须验证证明及其站点绑定，检查有效期，并确保每份证明只能在所有副本间原子地使用一次。
+
+    免费的开源 ALTCHA 组件和 SDK 可与运营方提供的、实现此 v1 接口约定的验证服务搭配使用。Sentinel 是独立的付费自托管产品。部署前请确认具体的 Sentinel 版本符合上述接口约定。[ALTCHA 许可与产品对比](https://altcha.org/docs/open-source-vs-paid/)
+
+    **使用 Helm 和 Kubernetes Ingress**
+
+    对于 BunkerWeb 已发现的 `app.example.com` 服务，请先配置服务端密钥。在调度器所在的命名空间创建名为 `altcha-app` 的 Secret，键名为 `secret`。在以下 Helm values 中引用它。`app.example.com_` 前缀将此设置限定在该服务。
+
+    ```yaml
+    scheduler:
+      extraEnvs:
+        - name: app.example.com_ANTIBOT_ALTCHA_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: altcha-app
+              key: secret
+    ```
+
+    将以下注解添加到现有 Ingress。为每个服务配置独立的站点密钥及其对应的服务端密钥。在此处设置前后端源和站点密钥，服务端密钥使用上面的 Secret 引用。
+
+    ```yaml
+    metadata:
+      annotations:
+        bunkerweb.io/USE_ANTIBOT: "altcha"
+        bunkerweb.io/ANTIBOT_ALTCHA_FRONTEND_URL: "https://altcha.example.com"
+        bunkerweb.io/ANTIBOT_ALTCHA_BACKEND_URL: "https://altcha-verifier.example.com"
+        bunkerweb.io/ANTIBOT_ALTCHA_SITEKEY: "app-site-key"
+    ```
+
+    回滚时，在 Ingress 中恢复之前的 `USE_ANTIBOT` 值及相应设置。等待 BunkerWeb 应用变更，并验证之前的提供方能完成挑战。随后删除不再使用的 ALTCHA 设置和 Secret 引用。
+
 ### 示例配置
 
 === "Cookie 挑战"

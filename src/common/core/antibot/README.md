@@ -277,6 +277,53 @@ BunkerWeb allows you to specify certain users, IPs, or requests that should bypa
 
     Refer to the [Common Settings](#common-settings) for additional configuration options.
 
+=== "ALTCHA"
+
+    ALTCHA adds a proof-of-work challenge. Host the browser widget and challenge endpoint on your own HTTPS origin, such as `https://altcha.example.com`, and run a verifier under your control. Serve `dist/altcha.js` from the [official `altcha@2.2.4` npm package](https://www.npmjs.com/package/altcha/v/2.2.4) unchanged as a JavaScript module at `/assets/altcha.min.js`. The frame checks its integrity. Serve baseline v1 SHA challenges from `GET /v1/challenge?apiKey=<sitekey>` and omit `X-Altcha-Config` overrides. Allow the protected site's HTTPS origin in CORS for both the module and the challenge endpoint. Configure any reverse proxy or CDN to keep challenges and challenge pages out of shared caches.
+
+    Use a DNS hostname for the browser-facing HTTPS origin and for every HTTPS verifier. Leave `ANTIBOT_ALTCHA_BACKEND_URL` empty to use the frontend for verification. A private HTTP verifier can use an IP address.
+
+    | Setting                       | Default | Context   | Multiple | Description                                                 |
+    | ----------------------------- | ------- | --------- | -------- | ----------------------------------------------------------- |
+    | `USE_ANTIBOT`                 | `no`    | multisite | no       | Select the ALTCHA challenge with `altcha`.                  |
+    | `ANTIBOT_ALTCHA_FRONTEND_URL` |         | multisite | no       | HTTPS origin for the browser widget and challenge endpoint. |
+    | `ANTIBOT_ALTCHA_BACKEND_URL`  |         | multisite | no       | Internal verifier origin. Empty uses the frontend origin.   |
+    | `ANTIBOT_ALTCHA_SITEKEY`      |         | multisite | no       | Public site key sent to the challenge endpoint.             |
+    | `ANTIBOT_ALTCHA_SECRET`       |         | multisite | no       | Required server-side secret for the verification request.   |
+
+    Use origins for both URLs. An origin consists of a scheme, host and optional port. Keep the verifier endpoint private to BunkerWeb, especially when it shares the frontend origin. The widget runs in an isolated frame on the protected site.
+
+    The challenge form submits `altcha` and `next` to BunkerWeb. BunkerWeb sends `POST /v1/verify/signature` with JSON fields `"payload"` (the `altcha` form value) and `"secret"`. It accepts only HTTP 200 with a JSON object containing `"verified": true` and an `"apiKey"` string equal to the configured site key. The verifier must validate the proof and site binding, enforce expiry, and atomically consume each proof once across all verifier replicas.
+
+    The free, open-source ALTCHA widget and SDK can be used with an operator-supplied verifier that implements this v1 contract. Sentinel is a separate paid, self-hosted product. Verify the exact Sentinel release against this contract before deployment. [ALTCHA licensing and product comparison](https://altcha.org/docs/open-source-vs-paid/)
+
+    **Helm with Kubernetes Ingress**
+
+    For an existing `app.example.com` service already discovered by BunkerWeb, configure the secret first. In the Scheduler namespace, provision a Secret named `altcha-app` with the key `secret`. Reference it from these Helm values. The `app.example.com_` prefix scopes the setting to that service.
+
+    ```yaml
+    scheduler:
+      extraEnvs:
+        - name: app.example.com_ANTIBOT_ALTCHA_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: altcha-app
+              key: secret
+    ```
+
+    Add these annotations to the existing Ingress. Give each service its own site key and matching secret. Set the frontend, backend and site key here, and keep the secret in the Secret reference above.
+
+    ```yaml
+    metadata:
+      annotations:
+        bunkerweb.io/USE_ANTIBOT: "altcha"
+        bunkerweb.io/ANTIBOT_ALTCHA_FRONTEND_URL: "https://altcha.example.com"
+        bunkerweb.io/ANTIBOT_ALTCHA_BACKEND_URL: "https://altcha-verifier.example.com"
+        bunkerweb.io/ANTIBOT_ALTCHA_SITEKEY: "app-site-key"
+    ```
+
+    To roll back, restore the previous `USE_ANTIBOT` value and its settings in the Ingress, wait for BunkerWeb to apply the change, and verify a challenge with the previous provider. Then remove the unused ALTCHA settings and Secret reference.
+
 ### Example Configurations
 
 === "Cookie Challenge"

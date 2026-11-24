@@ -5,11 +5,11 @@ import json
 from urllib.parse import parse_qs
 
 import pytest
-from _lua_plugin_helpers import CORE, LUA, run_module, to_lua
+from _lua_plugin_helpers import CORE, LUA, ROOT, run_module, to_lua
 
 pytestmark = pytest.mark.skipif(LUA is None, reason="no lua interpreter on PATH")
 MODULE = CORE / "antibot" / "antibot.lua"
-KINDS = ["cookie", "javascript", "captcha", "recaptcha", "hcaptcha", "turnstile", "mcaptcha", "capjs"]
+KINDS = ["cookie", "javascript", "captcha", "recaptcha", "hcaptcha", "turnstile", "mcaptcha", "capjs", "altcha"]
 
 PREAMBLE = r"""
 package.loaded["cjson"] = json
@@ -40,6 +40,53 @@ package.loaded["resty.sha256"] = { new = function()
 end }
 package.loaded["resty.string"] = { to_hex = function(v) return v end }
 HTTP_CALLS, CLOSED = {}, 0
+LIVE_THREADS = 0
+local function resume_thread(thread)
+    local ok, value = coroutine.resume(thread.co)
+    if coroutine.status(thread.co) == "dead" then
+        thread.result = { ok, value }
+    else
+        thread.ready = NOW + value
+    end
+end
+local function retire_thread(thread)
+    if thread.live then
+        thread.live = false
+        LIVE_THREADS = LIVE_THREADS - 1
+    end
+end
+ngx.sleep = function(seconds) coroutine.yield(seconds) end
+ngx.thread = {
+    spawn = function(fn, ...)
+        local args = { ... }
+        local thread = { live = true, co = coroutine.create(function() return fn(unpack(args)) end) }
+        LIVE_THREADS = LIVE_THREADS + 1
+        resume_thread(thread)
+        return thread
+    end,
+    wait = function(first, second)
+        while not first.result and not second.result do
+            local next_thread = first.ready < second.ready and first or second
+            NOW = next_thread.ready
+            resume_thread(next_thread)
+        end
+        local winner = first.result and first or second
+        retire_thread(winner)
+        return winner.result[1], winner.result[2]
+    end,
+    kill = retire_thread,
+}
+local function http_delay(stage)
+    local seconds = HTTP_DELAYS and HTTP_DELAYS[stage]
+    if seconds then
+        local thread, main = coroutine.running()
+        if thread and not main then
+            ngx.sleep(seconds)
+        else
+            NOW = NOW + seconds
+        end
+    end
+end
 package.loaded["resty.http"] = { new = function()
     if HTTP_NEW_ERR then return nil, HTTP_NEW_ERR end
     return {
@@ -50,9 +97,37 @@ package.loaded["resty.http"] = { new = function()
             if HTTP_ERR then return nil, HTTP_ERR end
             return { body = HTTP_BODY or "{}" }
         end,
+        connect = function(_, options)
+            CONNECT = options
+            http_delay("dns")
+            http_delay("tcp")
+            http_delay("tls")
+            if HTTP_ERR then return nil, HTTP_ERR end
+            return true
+        end,
+        request = function(_, options)
+            HTTP_CALLS[#HTTP_CALLS + 1] = options
+            http_delay("send")
+            http_delay("status")
+            http_delay("headers")
+            local body = HTTP_BODY or "{}"
+            return { status = HTTP_STATUS or 200, headers = { ["Content-Length"] = HTTP_LENGTH }, body_reader = function(limit)
+                assert(limit > 0 and limit <= 32769)
+                if HTTP_READ_ERR then return nil, HTTP_READ_ERR end
+                if #body == 0 then return nil end
+                http_delay("body")
+                local chunk = body:sub(1, limit)
+                body = body:sub(limit + 1)
+                if HTTP_CLOSE and #body == 0 then return chunk, "closed" end
+                return chunk
+            end }
+        end,
+        set_timeout = function(_, timeout) assert(timeout > 0 and timeout <= 5000) end,
     }
 end }
 package.loaded["resty.ipmatcher"] = {}
+local view = package.loaded["resty.template"]
+view.new = function() return { render_file = view.render } end
 """
 
 SELF = r"""
@@ -71,6 +146,8 @@ local function new(kind)
             ANTIBOT_MCAPTCHA_URL = "https://mcaptcha.example",
             ANTIBOT_CAPJS_FRONTEND_URL = "https://capjs.example/", ANTIBOT_CAPJS_BACKEND_URL = "",
             ANTIBOT_CAPJS_SITEKEY = "capjs-site", ANTIBOT_CAPJS_SECRET = "capjs-secret",
+            ANTIBOT_ALTCHA_FRONTEND_URL = "https://altcha.example", ANTIBOT_ALTCHA_BACKEND_URL = "",
+            ANTIBOT_ALTCHA_SITEKEY = "altcha-site", ANTIBOT_ALTCHA_SECRET = "altcha-secret",
         },
         ctx = { bw = { uri = "/challenge", remote_addr = "198.51.100.7", http_user_agent = "browser",
                        antibot_nonce_script = "script-nonce", antibot_nonce_style = "style-nonce" } },
@@ -181,6 +258,10 @@ emit({{ ok = ok, msg = msg, renders = RENDERS, captcha = CAPTCHA }})
     elif kind == "capjs":
         assert payload["capjs_url"] == "https://capjs.example/"
         assert payload["capjs_sitekey"] == "capjs-site"
+    elif kind == "altcha":
+        assert payload["altcha_url"] == "https://altcha.example"
+        assert payload["altcha_sitekey"] == "altcha-site"
+        assert "altcha-secret" not in json.dumps(payload)
 
 
 def test_capjs_frame_uses_isolated_template():
@@ -191,6 +272,192 @@ a:display_challenge()
 emit(RENDERS)
 """)
     assert out[0]["name"] == "capjs_frame.html"
+
+
+@pytest.mark.parametrize("method,template", [("GET", "altcha_frame.html"), ("POST", "altcha.html")])
+def test_altcha_frame_template_is_only_for_get(method, template):
+    out = run(f"""
+ngx.var.arg_altcha_frame = '1'
+local a = new('altcha')
+a.ctx.bw.request_method = {to_lua(method)}
+a:display_challenge()
+emit(RENDERS)
+""")
+    assert out[0]["name"] == template
+
+
+def test_altcha_bundled_views_render_with_an_older_pro_template_root(tmp_path):
+    (tmp_path / "javascript.html").write_text("<title>Custom JavaScript challenge</title>", encoding="utf-8")
+    engine = ROOT / "src/deps/src/lua-resty-template/lib/resty/template.lua"
+    out = run(f"""
+ngx.get_phase = function() return "content" end
+ngx.config.prefix = function() return "/" end
+ngx.location = {{ capture = function() error("no template_location configured") end }}
+ngx.print = function(html) SAID[#SAID + 1] = html end
+ngx.var.template_root = {to_lua(str(tmp_path))}
+local open = io.open
+io.open = function(path, ...)
+    if path:find("/usr/share/bunkerweb/core/antibot/files/", 1, true) == 1 then
+        path = {to_lua(str(CORE / "antibot" / "files"))} .. "/" .. path:match("[^/]+$")
+    end
+    return open(path, ...)
+end
+local template = dofile({to_lua(str(engine))})
+package.loaded["resty.template"] = template
+PLUGIN = dofile({to_lua(str(MODULE))})
+local a = new('altcha')
+a.ctx.bw.request_method = "GET"
+a:display_challenge()
+ngx.var.arg_altcha_frame = "1"
+a:display_challenge()
+new('javascript'):display_challenge()
+emit({{ parent = SAID[1]:find("altcha-frame", 1, true) ~= nil,
+    frame = SAID[2]:find("<altcha-widget", 1, true) ~= nil, existing = SAID[3], template_root = ngx.var.template_root,
+    shared_instance_unchanged = template.root == nil }})
+""")
+    assert out["parent"] and out["frame"]
+    assert out["existing"] == "<title>Custom JavaScript challenge</title>"
+    assert out["template_root"] == str(tmp_path)
+    assert out["shared_instance_unchanged"] is True
+
+
+@pytest.mark.parametrize(
+    "frontend,backend,scheme,host,port",
+    [
+        ("https://altcha.example", "", "https", "altcha.example", 443),
+        ("https://altcha.example", "https://verifier.example.:8443", "https", "verifier.example.", 8443),
+        ("https://altcha.example", "http://verifier:8000", "http", "verifier", 8000),
+        ("https://altcha.example", "http://192.0.2.27:8000", "http", "192.0.2.27", 8000),
+    ],
+)
+@pytest.mark.parametrize("close_delimited", [True, False])
+def test_altcha_verifies_and_resolves_the_session(frontend, backend, scheme, host, port, close_delimited):
+    out = run(f"""
+local a = new('altcha')
+a.variables.ANTIBOT_ALTCHA_FRONTEND_URL = {to_lua(frontend)}
+a.variables.ANTIBOT_ALTCHA_BACKEND_URL = {to_lua(backend)}
+BODY = 'altcha=YWJjZA%3D%3D&next=%2Fprivate'
+POST_ARGS = {{ altcha = 'YWJjZA==', next = '/private' }}
+HTTP_BODY = '{{"verified":true,"apiKey":"altcha-site"}}'
+HTTP_CLOSE = {to_lua(close_delimited)}
+local ok, _, redirect = a:check_challenge()
+emit({{ ok = ok, redirect = redirect, session = a.saved, calls = HTTP_CALLS, connection = CONNECT, closed = CLOSED, threads = LIVE_THREADS }})
+""")
+    assert out["ok"] is True
+    assert out["redirect"] == "/private?secret=value"
+    assert out["session"]["resolved"] is True
+    assert out["session"]["time_valid"] == 1000000
+    assert out["connection"]["scheme"] == scheme
+    assert out["connection"]["host"] == host
+    assert out["connection"]["port"] == port
+    assert out["connection"]["ssl_verify"] is True
+    assert out["connection"].get("ssl_server_name") == (host.removesuffix(".") if scheme == "https" else None)
+    assert out["closed"] == 1
+    assert out["threads"] == 0
+    (call,) = out["calls"]
+    assert call["path"] == "/v1/verify/signature"
+    assert call["method"] == "POST"
+    assert call["headers"]["Content-Type"] == "application/json"
+    assert json.loads(call["body"]) == {"payload": "YWJjZA==", "secret": "altcha-secret"}
+
+
+@pytest.mark.parametrize(
+    "delays,elapsed,accepted",
+    [
+        ({"dns": 8}, 5, False),
+        ({"dns": 2, "tcp": 4}, 5, False),
+        ({"tcp": 2, "tls": 4}, 5, False),
+        ({"tls": 2, "send": 4}, 5, False),
+        ({"send": 2, "status": 4}, 5, False),
+        ({"status": 2, "headers": 4}, 5, False),
+        ({"headers": 2, "body": 4}, 5, False),
+        ({"headers": 2, "body": 3}, 5, False),
+        ({"dns": 1, "tcp": 0.5, "tls": 0.5, "headers": 1, "body": 1.5}, 4.5, True),
+    ],
+)
+def test_altcha_verifier_shares_one_deadline_and_cleans_up(delays, elapsed, accepted):
+    out = run(f"""
+local a = new('altcha')
+BODY = 'altcha=YWJjZA%3D%3D'
+POST_ARGS = {{ altcha = 'YWJjZA==' }}
+HTTP_BODY = '{{"verified":true,"apiKey":"altcha-site"}}'
+HTTP_DELAYS = {to_lua(delays)}
+local start = NOW
+local ok, _, redirect = a:check_challenge()
+emit({{ ok = ok, redirect = redirect, elapsed = NOW - start, resolved = a.session_data.resolved,
+    saves = a.saves, closed = CLOSED, threads = LIVE_THREADS }})
+""")
+    assert out["elapsed"] == elapsed
+    assert out["ok"] is out["resolved"] is accepted
+    assert out.get("redirect") == ("/private?secret=value" if accepted else None)
+    assert out["saves"] == int(accepted)
+    assert out["closed"] == 1
+    assert out["threads"] == 0
+
+
+@pytest.mark.parametrize(
+    "response",
+    [
+        """HTTP_BODY = '{"verified":false,"apiKey":"altcha-site"}'""",
+        """HTTP_BODY = '{"verified":"true","apiKey":"altcha-site"}'""",
+        """HTTP_BODY = '{"verified":true,"apiKey":"other-site"}'""",
+        """HTTP_BODY = '{"verified":true,"apiKey":42}'""",
+        """HTTP_BODY = '{"verified":true}'""",
+        """HTTP_BODY = 'true'""",
+        """HTTP_BODY = '{'""",
+        """HTTP_BODY = string.rep('x', 32769)""",
+        """HTTP_BODY, HTTP_STATUS = '{"verified":true,"apiKey":"altcha-site"}', 302""",
+        """HTTP_BODY, HTTP_LENGTH = '{"verified":true,"apiKey":"altcha-site"}', '-1'""",
+        """HTTP_BODY, HTTP_LENGTH = '{"verified":true,"apiKey":"altcha-site"}', '32769'""",
+        """HTTP_BODY, HTTP_LENGTH, HTTP_CLOSE = '{"verified":true,"apiKey":"altcha-site"}', '100', true""",
+        """HTTP_ERR = 'unavailable: altcha-secret'""",
+        """HTTP_NEW_ERR = 'cannot connect: altcha-secret'""",
+        """HTTP_READ_ERR = 'timeout: altcha-secret'""",
+    ],
+)
+def test_altcha_verifier_failure_leaves_session_unresolved_for_manual_retry(response):
+    out = run(f"""
+local a = new('altcha')
+BODY = 'altcha=YWJjZA%3D%3D'
+POST_ARGS = {{ altcha = 'YWJjZA==' }}
+{response}
+local ok, msg, redirect = a:check_challenge()
+emit({{ ok = ok, msg = msg, redirect = redirect, session = a.session_data, saves = a.saves, closed = CLOSED, threads = LIVE_THREADS }})
+""")
+    assert out["ok"] is False
+    assert out["session"]["resolved"] is False and out["session"]["prepared"] is True
+    assert out["saves"] == 0
+    assert out["closed"] == (0 if response.startswith("HTTP_NEW_ERR") else 1)
+    assert out["threads"] == 0
+    assert "redirect" not in out
+    assert "altcha-secret" not in json.dumps(out)
+
+
+@pytest.mark.parametrize(
+    "request_setup",
+    [
+        "POST_ARGS.altcha = nil",
+        "POST_ARGS.altcha = true",
+        "POST_ARGS.altcha = {'first', 'second'}",
+        "POST_ARGS.altcha = ''",
+        "POST_ARGS.altcha = string.rep('a', 8193)",
+        "POST_ERR = 'truncated'",
+        "BODY = string.rep('a', 16385)",
+        "BODY = nil",
+    ],
+)
+def test_altcha_invalid_form_never_reaches_verifier(request_setup):
+    out = run(f"""
+local a = new('altcha')
+BODY = 'altcha=YWJjZA%3D%3D'
+POST_ARGS = {{ altcha = 'YWJjZA==' }}
+{request_setup}
+local ok = a:check_challenge()
+emit({{ ok = ok, calls = HTTP_CALLS, saves = a.saves }})
+""")
+    assert out["ok"] is False
+    assert not out["calls"]
+    assert out["saves"] == 0
 
 
 def test_display_legacy_difficulty_enterprise_widget_and_unsafe_next():
@@ -262,7 +529,7 @@ emit({{ ok = ok, msg = msg, target = target, session = a.session_data, saves = a
         assert "target" not in out
 
 
-@pytest.mark.parametrize("kind", KINDS[1:])
+@pytest.mark.parametrize("kind", [kind for kind in KINDS if kind not in ("cookie", "altcha")])
 @pytest.mark.parametrize("bad_args,error", [({}, None), ({"invalid": True}, None), (None, None), ({"valid": True}, "truncated")])
 def test_missing_invalid_and_truncated_answers_never_validate(kind, bad_args, error):
     field = {"javascript": "challenge", "captcha": "captcha", "mcaptcha": "mcaptcha__token"}.get(kind, "token")

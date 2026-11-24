@@ -14,6 +14,8 @@ VARIABLES = {
     ANTIBOT_TIME_VALID = "60", ANTIBOT_TIME_RESOLVE = "30",
     ANTIBOT_JAVASCRIPT_DIFFICULTY = "16", ANTIBOT_RDNS_GLOBAL = "yes",
     ANTIBOT_CAPJS_FRONTEND_URL = "https://widget.example", ANTIBOT_MCAPTCHA_URL = "https://captcha.example",
+    ANTIBOT_ALTCHA_FRONTEND_URL = "https://widget.example", ANTIBOT_ALTCHA_BACKEND_URL = "",
+    ANTIBOT_ALTCHA_SITEKEY = "public-key", ANTIBOT_ALTCHA_SECRET = "private-key",
 }
 SESSION_DATA = nil
 SESSION = {
@@ -42,6 +44,9 @@ package.loaded["resty.string"] = {
     to_hex = function(s) return (s:gsub(".", function(c) return string.format("%02x", c:byte()) end)) end,
 }
 package.loaded["resty.http"] = { new = function() error("no external challenge verification") end }
+package.loaded["resty.ipmatcher"].parse_ipv6 = function(host) return host == "[2001:db8::1]" end
+local view = package.loaded["resty.template"]
+view.new = function() return { render_file = view.render } end
 """
 
 
@@ -336,7 +341,7 @@ emit({{ result = a:content(), script = a.ctx.bw.antibot_nonce_script, style = a.
         assert out["renders"][0]["name"] == "javascript.html"
 
 
-@pytest.mark.parametrize("kind", ["javascript", "recaptcha", "hcaptcha", "turnstile", "mcaptcha", "capjs"])
+@pytest.mark.parametrize("kind", ["javascript", "recaptcha", "hcaptcha", "turnstile", "mcaptcha", "capjs", "altcha"])
 def test_header_nonce_csp_is_uncacheable_and_provider_scoped(kind):
     out = run(f"""
 local a = new_plugin(PLUGIN, {{ uri = '/challenge', scheme = 'https' }})
@@ -370,6 +375,187 @@ emit({{ result = a:header(), headers = ngx.header }})
     else:
         assert directives["script-src"] == "'nonce-script-nonce'"
         assert directives["frame-src"] == "'self'"
+        assert "worker-src" not in directives and "connect-src" not in directives
+
+
+@pytest.mark.parametrize("method", ["GET", "POST"])
+def test_altcha_frame_csp_only_relaxes_the_get_frame(method):
+    out = run(f"""
+VARIABLES.USE_ANTIBOT = 'altcha'
+ngx.var.arg_altcha_frame = "1"
+local a = new_plugin(PLUGIN, {{ uri = "/challenge", request_method = "{method}" }})
+a.ctx.bw.antibot_session_data = {{ type = "altcha" }}
+a.ctx.bw.antibot_nonce_script, a.ctx.bw.antibot_nonce_style = "s", "t"
+a.ctx.bw.antibot_display_content = true
+ngx.header['X-Frame-Options'] = 'DENY'
+a:header()
+emit(ngx.header)
+""")
+    csp = out["Content-Security-Policy"]
+    assert out["Cache-Control"] == "no-store"
+    assert "unsafe-eval" not in csp and "unsafe-inline" not in csp
+    if method == "GET":
+        assert "script-src 'nonce-s' https://widget.example;" in csp
+        assert "connect-src https://widget.example;" in csp
+        assert "worker-src blob:;" in csp
+        assert "frame-ancestors 'self';" in csp
+        assert "require-trusted-types-for" not in csp
+        assert out["X-Frame-Options"] == "SAMEORIGIN"
+    else:
+        assert "script-src 'nonce-s';" in csp
+        assert "frame-src 'self';" in csp
+        assert "frame-ancestors 'none';" in csp
+        assert "require-trusted-types-for 'script';" in csp
+        assert "https://widget.example" not in csp
+        assert out["X-Frame-Options"] == "DENY"
+
+
+@pytest.mark.parametrize(
+    "setting,value",
+    [
+        ("ANTIBOT_ALTCHA_FRONTEND_URL", ""),
+        ("ANTIBOT_ALTCHA_FRONTEND_URL", "http://widget.example"),
+        ("ANTIBOT_ALTCHA_FRONTEND_URL", "https://widget.example/"),
+        ("ANTIBOT_ALTCHA_BACKEND_URL", "https://widget.example/verify"),
+        ("ANTIBOT_ALTCHA_BACKEND_URL", "http://verifier:65536"),
+        ("ANTIBOT_ALTCHA_SITEKEY", ""),
+        ("ANTIBOT_ALTCHA_SECRET", ""),
+    ],
+)
+def test_altcha_bad_configuration_fails_closed(setting, value):
+    out = run(f"""
+VARIABLES.USE_ANTIBOT = 'altcha'
+VARIABLES[{to_lua(setting)}] = {to_lua(value)}
+local a = new_plugin(PLUGIN, {{ uri = "/page" }})
+emit({{ result = a:access(), headers = ngx.header }})
+""")
+    assert out["result"]["status"] == 500
+    assert "redirect" not in out["result"]
+    assert out["headers"]["Cache-Control"] == "no-store"
+
+
+@pytest.mark.parametrize("setting", ["ANTIBOT_ALTCHA_FRONTEND_URL", "ANTIBOT_ALTCHA_BACKEND_URL"])
+@pytest.mark.parametrize(
+    "host",
+    [
+        "192.0.2.17",
+        "192.0.2.17.",
+        "[2001:db8::1]",
+        "192.2.17",
+        "3221226001",
+        "0300.0.2.17",
+        "0xc0000211",
+        "0xc0.0.2.0x11",
+        "-verifier.example",
+        "verifier-.example",
+        ".verifier.example",
+        "verifier..example",
+        "a" * 64 + ".example",
+        ".".join(["a" * 63] * 4),
+    ],
+)
+def test_altcha_access_requires_a_dns_host_for_the_selected_https_verifier(setting, host):
+    out = run(f"""
+VARIABLES.USE_ANTIBOT = 'altcha'
+VARIABLES[{to_lua(setting)}] = {to_lua(f'https://{host}:8443')}
+local a = new_plugin(PLUGIN, {{ uri = "/page" }})
+emit({{ result = a:access(), headers = ngx.header, session = SESSION_DATA }})
+""")
+    assert out["result"]["status"] == 500
+    assert out["headers"]["Cache-Control"] == "no-store"
+    assert "session" not in out
+
+
+@pytest.mark.parametrize(
+    "frontend,backend",
+    [
+        ("https://widget.example", ""),
+        ("https://widget.example", "https://verify-1.example:8443"),
+        ("https://widget.example", "http://[2001:db8::1]:8000"),
+    ],
+)
+def test_altcha_access_preserves_browser_https_and_internal_http_origins(frontend, backend):
+    out = run(f"""
+VARIABLES.USE_ANTIBOT = 'altcha'
+VARIABLES.ANTIBOT_ALTCHA_FRONTEND_URL = {to_lua(frontend)}
+VARIABLES.ANTIBOT_ALTCHA_BACKEND_URL = {to_lua(backend)}
+local a = new_plugin(PLUGIN, {{ uri = "/page", request_uri = "/page" }})
+ngx.var.http_sec_fetch_mode = "navigate"
+emit(a:access())
+""")
+    assert out["redirect"] == "/challenge?next=%2Fpage"
+
+
+@pytest.mark.parametrize("frontend_host", ["[2001:db8::1]", "192.0.2.17"])
+def test_altcha_frontend_requires_dns_even_with_an_explicit_verifier(frontend_host):
+    out = run(f"""
+VARIABLES.USE_ANTIBOT = 'altcha'
+VARIABLES.ANTIBOT_ALTCHA_FRONTEND_URL = {to_lua(f'https://{frontend_host}')}
+VARIABLES.ANTIBOT_ALTCHA_BACKEND_URL = 'http://verifier:8000'
+emit(new_plugin(PLUGIN, {{ uri = "/page" }}):access())
+""")
+    assert out["status"] == 500
+    assert "redirect" not in out
+
+
+@pytest.mark.parametrize("provider,uri", [("altcha", "/challenge"), ("altcha", "/page"), ("javascript", "/challenge")])
+def test_altcha_already_resolved_redirect_is_uncacheable(provider, uri):
+    out = run(f"""
+VARIABLES.USE_ANTIBOT = {to_lua(provider)}
+SESSION_DATA = {{ resolved = true, time_valid = NOW, type = {to_lua(provider)}, original_uri = "/deep?q=private",
+    altcha_service = "site.example", altcha_sitekey = "public-key" }}
+local a = new_plugin(PLUGIN, {{ uri = {to_lua(uri)}, server_name = "site.example" }})
+emit({{ result = a:access(), headers = ngx.header }})
+""")
+    assert out["result"].get("redirect") == ("/deep?q=private" if uri == "/challenge" else None)
+    assert out["headers"].get("Cache-Control") == ("no-store" if provider == "altcha" and uri == "/challenge" else None)
+
+
+@pytest.mark.parametrize(
+    "previous_kind,previous_service,previous_key,accepted",
+    [
+        ("altcha", "site.example", "public-key", True),
+        ("altcha", "other.example", "public-key", False),
+        ("altcha", "site.example", "old-key", False),
+        ("cookie", "site.example", "public-key", False),
+    ],
+)
+def test_altcha_resolved_session_is_scoped_to_provider_service_and_key(previous_kind, previous_service, previous_key, accepted):
+    out = run(f"""
+VARIABLES.USE_ANTIBOT = 'altcha'
+SESSION_DATA = {{ resolved = true, time_valid = NOW, type = {to_lua(previous_kind)},
+    altcha_service = {to_lua(previous_service)}, altcha_sitekey = {to_lua(previous_key)} }}
+local a = new_plugin(PLUGIN, {{ uri = "/page", request_uri = "/page?test=1", server_name = "site.example" }})
+ngx.var.http_sec_fetch_mode = "navigate"
+emit({{ result = a:access(), session = SESSION_DATA }})
+""")
+    if accepted:
+        assert "redirect" not in out["result"]
+        assert out["session"]["resolved"] is True
+    else:
+        assert out["result"]["redirect"] == "/challenge?next=%2Fpage"
+        assert out["session"]["resolved"] is False
+        assert out["session"]["altcha_service"] == "site.example"
+        assert out["session"]["altcha_sitekey"] == "public-key"
+
+
+@pytest.mark.parametrize("elapsed", [0, 31])
+def test_altcha_rejected_post_renders_parent_for_manual_retry_and_keeps_destination(elapsed):
+    out = run(f"""
+VARIABLES.USE_ANTIBOT = 'altcha'
+SESSION_DATA = {{ prepared = true, resolved = false, time_resolve = NOW - {elapsed},
+    type = "altcha", original_uri = "/page?don't-share=true", altcha_service = "site.example", altcha_sitekey = "public-key" }}
+local a = new_plugin(PLUGIN, {{ uri = "/challenge", request_method = "POST", server_name = "site.example" }})
+local result = a:access()
+if a.ctx.bw.antibot_display_content then a:content() end
+emit({{ result = result, render = RENDERS[1], session = SESSION_DATA }})
+""")
+    assert out["result"]["status"] == "OK"
+    assert "redirect" not in out["result"]
+    assert out["render"]["name"] == "altcha.html"
+    assert out["render"]["data"]["altcha_failed"] is True
+    assert out["render"]["data"]["next"] == "/page"
+    assert out["session"]["original_uri"] == "/page?don't-share=true"
 
 
 def test_capjs_iframe_relaxes_only_widget_csp():

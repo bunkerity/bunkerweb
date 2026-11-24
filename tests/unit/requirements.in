@@ -3,6 +3,7 @@
 # DB libraries under test — pinned to match src/common/db/requirements.in so the
 # tests run the exact library versions BunkerWeb ships.
 alembic==1.20.1
+altcha==2.5.0  # official SDK for the self-hosted ALTCHA v1 verifier fixture
 backports-zstd==1.8.0 ; python_version < "3.14"
 
 # UI-layer import deps: importing UIDatabase pulls app.utils + app.models.models,

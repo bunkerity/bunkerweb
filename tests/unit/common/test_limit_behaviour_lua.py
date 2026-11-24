@@ -4,6 +4,9 @@ Runs the real plugin under plain Lua (see ``_lua_request_helpers``). The clock i
 ``NOW`` and the counters live in a fake datastore, so the windows are deterministic.
 """
 
+import json
+from pathlib import Path
+
 import pytest
 from _lua_request_helpers import requires_lua, run
 
@@ -135,10 +138,11 @@ def test_every_rate_unit_is_a_counted_window(unit):
 
 
 CAPJS = '{ USE_ANTIBOT = "capjs", ANTIBOT_URI = "/challenge" }'
+ALTCHA = '{ USE_ANTIBOT = "altcha", ANTIBOT_URI = "/challenge" }'
 
 
-def counter_key(uri, *, arg="1", getvar=CAPJS):
-    """The counter key ``limit`` uses for a request on ``uri`` with ``?capjs_frame=<arg>``."""
+def counter_key(uri, *, arg="1", getvar=CAPJS, frame="capjs", method="GET"):
+    """The counter key for a challenge frame request."""
     arg_lua = "nil" if arg is None else f'"{arg}"'
     out = run(
         "limit",
@@ -147,8 +151,8 @@ VARIABLES = {{ USE_LIMIT_REQ = "yes" }}
 STORE["plugin_limit_rules"] = {{ global = {{ ["/"] = "2r/s" }} }}
 STORE["plugin_limit_global_rules"] = {{ global = nil }}
 GETVAR = {getvar}
-ngx.var.arg_capjs_frame = {arg_lua}
-emit("key", PLUGIN:new(ctx({{ uri = "{uri}" }})):counter_key())
+ngx.var.arg_{frame}_frame = {arg_lua}
+emit("key", PLUGIN:new(ctx({{ uri = "{uri}", request_method = "{method}" }})):counter_key())
 """,
     )
     return out["key"]
@@ -157,8 +161,9 @@ emit("key", PLUGIN:new(ctx({{ uri = "{uri}" }})):counter_key())
 class TestCounterKey:
     PLAIN = "plugin_limit_www.example.com1.2.3.4"
 
-    def test_the_capjs_frame_request_gets_its_own_counter(self):
-        assert counter_key("/challenge") == f"{self.PLAIN}/challenge?capjs_frame=1"
+    @pytest.mark.parametrize("frame,provider", [("capjs", CAPJS), ("altcha", ALTCHA)])
+    def test_challenge_frame_gets_its_own_counter(self, frame, provider):
+        assert counter_key("/challenge", frame=frame, getvar=provider) == f"{self.PLAIN}/challenge?{frame}_frame=1"
 
     @pytest.mark.parametrize(
         ("uri", "arg", "getvar"),
@@ -173,22 +178,43 @@ class TestCounterKey:
     def test_every_other_request_keeps_the_plain_counter(self, uri, arg, getvar):
         assert counter_key(uri, arg=arg, getvar=getvar) == f"{self.PLAIN}{uri}"
 
-    def test_a_solve_is_not_limited_when_the_frame_has_its_own_counter(self):
+    @pytest.mark.parametrize(
+        ("uri", "arg", "method", "provider"),
+        [
+            ("/challenge", None, "GET", ALTCHA),
+            ("/challenge", "2", "GET", ALTCHA),
+            ("/other", "1", "GET", ALTCHA),
+            ("/other", "1", "POST", ALTCHA),
+            ("/challenge", "1", "GET", CAPJS),
+        ],
+    )
+    def test_other_requests_keep_plain_counter_on_altcha_frame_flag(self, uri, arg, method, provider):
+        assert counter_key(uri, arg=arg, method=method, getvar=provider, frame="altcha") == f"{self.PLAIN}{uri}"
+
+    @pytest.mark.parametrize("frame,provider", [("capjs", CAPJS), ("altcha", ALTCHA)])
+    def test_default_rate_allows_normal_solve_but_caps_each_bucket(self, frame, provider):
+        manifest = Path(__file__).resolve().parents[3] / "src/common/core/limit/plugin.json"
+        settings = json.loads(manifest.read_text(encoding="utf-8"))["settings"]
+        rate = settings["LIMIT_REQ_RATE"]["default"]
         out = run(
             "limit",
             f"""
 VARIABLES = {{ USE_LIMIT_REQ = "yes" }}
-STORE["plugin_limit_rules"] = {{ global = {{ ["/"] = "2r/s" }} }}
+STORE["plugin_limit_rules"] = {{ global = {{ ["/"] = "{rate}" }} }}
 STORE["plugin_limit_global_rules"] = {{ global = nil }}
-GETVAR = {CAPJS}
-for i, frame in ipairs({{ "0", "1", "0", "1", "0", "1" }}) do
-    ngx.var.arg_capjs_frame = frame
-    local r = PLUGIN:new(ctx({{ uri = "/challenge" }})):access()
+GETVAR = {provider}
+for i, query in ipairs({{ "0", "1", "0", "1", "0", "1", "0", "1", "0" }}) do
+    ngx.var.arg_{frame}_frame = query
+    local method = (i == 3 or i == 7 or i == 8) and "POST" or "GET"
+    local r = PLUGIN:new(ctx({{ uri = "/challenge", request_method = method }})):access()
     emit("status" .. i, r.status)
 end
 """,
         )
         # page, frame, POST: 3 requests, 2 in the page bucket and 1 in the frame bucket.
-        assert [out["status1"], out["status2"], out["status3"]] == ["nil"] * 3
-        # The 3rd page-bucket request in the same second is still limited.
-        assert out["status5"] == "429"
+        assert [out[f"status{i}"] for i in range(1, 5)] == ["nil"] * 4
+        if frame == "capjs":
+            assert out["status5"] == out["status6"] == "429"
+        else:
+            # The favicon's redirect also fetches the page. Both GET buckets and the proof POST stay bounded.
+            assert [out[f"status{i}"] for i in range(5, 10)] == ["nil", "429", "nil", "429", "429"]

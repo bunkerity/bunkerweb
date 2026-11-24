@@ -1,5 +1,9 @@
 # Changelog
 
+## v1.6.19~rc2 - ????/??/??
+
+- [FEATURE] `antibot`: add opt-in, self-hosted ALTCHA proof-of-work challenges. Thanks to @Marvo2011 for the original PR #2922. (Fixes #2675)
+
 ## v1.6.19~rc1 - 2026/11/23
 
 - [SECURITY] `docker`: update the Alpine `mariadb-client` and `mariadb-common` (11.8.10-r0), `libxml2` (2.13.9-r3) and `py3-pip` (26.1.2-r1) packages, fixing 15 CVEs.

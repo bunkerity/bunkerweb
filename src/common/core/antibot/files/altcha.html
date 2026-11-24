@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="nofollow,noarchive,noindex" />
+    <meta
+      name="description"
+      content="Verify you are human to continue to this website"
+    />
+    <title>Bot Detection</title>
+    <link rel="icon" href="data:," />
+    <style nonce="{*nonce_style*}">
+      :root {
+        color-scheme: light dark;
+        --ground: #edf2f5;
+        --card: #fff;
+        --ink: #0f2a38;
+        --accent: #17653b;
+        --danger: #a32a1a;
+        --border: #879eab;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --ground: #062433;
+          --card: #0a3346;
+          --ink: #e6f0f5;
+          --accent: #7fdea7;
+          --danger: #ffa08f;
+          --border: #698e9e;
+        }
+      }
+      body {
+        display: grid;
+        grid-template-rows: 1fr auto;
+        min-height: 100vh;
+        min-height: 100dvh;
+        margin: 0;
+        background: var(--ground);
+        color: var(--ink);
+        font:
+          1rem/1.5 system-ui,
+          sans-serif;
+      }
+      main {
+        display: grid;
+        place-items: center;
+        padding: 1rem;
+      }
+      article {
+        box-sizing: border-box;
+        width: min(100%, 26rem);
+        padding: 1rem;
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        background: var(--card);
+      }
+      header {
+        color: var(--accent);
+        font:
+          700 0.75rem/1.5 ui-monospace,
+          monospace;
+        letter-spacing: 0.05em;
+      }
+      h1 {
+        margin: 0.5rem 0;
+        font-size: 1.25rem;
+      }
+      iframe {
+        width: 100%;
+        height: 8rem;
+        border: 0;
+      }
+      #challenge-error {
+        color: var(--danger);
+      }
+      #challenge-error:empty {
+        margin: 0;
+      }
+      button {
+        min-height: 2.75rem;
+        padding: 0.25rem 0.75rem;
+        border: 1px solid var(--accent);
+        border-radius: 4px;
+        background: var(--card);
+        color: var(--accent);
+        font: inherit;
+        cursor: pointer;
+      }
+      :focus-visible {
+        outline: 2px solid currentColor;
+        outline-offset: 2px;
+      }
+      footer {
+        padding: 0 1rem 1rem;
+        text-align: center;
+        font-size: 0.875rem;
+      }
+      a {
+        color: var(--accent);
+      }
+    </style>
+  </head>
+  <body data-verification-failed="{{altcha_failed}}">
+    <main>
+      <article>
+        <header>BUNKERWEB &middot; SECURITY CHECK</header>
+        <h1>Verify you are human</h1>
+        <p id="challenge-status" role="status"></p>
+        <p id="challenge-error" role="alert"></p>
+        <button type="button" id="challenge-retry" hidden>
+          Retry verification
+        </button>
+        <form id="form" method="post" action="{{antibot_uri}}">
+          <input type="hidden" name="altcha" id="altcha" />
+          <input type="hidden" name="next" value="{{next}}" />
+        </form>
+        <iframe
+          id="altcha-frame"
+          src="{{antibot_uri}}?altcha_frame=1"
+          title="ALTCHA verification"
+        ></iframe>
+        <noscript>
+          <p>Enable JavaScript and reload this page to verify.</p>
+        </noscript>
+      </article>
+    </main>
+    <footer>
+      <p>
+        This website is protected with
+        <a
+          href="https://www.bunkerweb.io/?utm_campaign=self&amp;utm_source=bwantibot"
+          >BunkerWeb</a
+        >.
+      </p>
+    </footer>
+    <script nonce="{*nonce_script*}">
+      const frame = document.getElementById("altcha-frame");
+      const status = document.getElementById("challenge-status");
+      const error = document.getElementById("challenge-error");
+      const retry = document.getElementById("challenge-retry");
+      let state = "loading";
+      let deadline;
+
+      function fail(message) {
+        clearTimeout(deadline);
+        state = "failed";
+        status.textContent = "";
+        error.textContent = message;
+        retry.hidden = false;
+        if (document.activeElement === frame) retry.focus();
+        frame.remove();
+      }
+
+      retry.addEventListener("click", () => {
+        // Navigate with GET even when the verifier returned this page to a POST.
+        window.location.replace(window.location.href);
+      });
+      window.addEventListener("message", (event) => {
+        if (
+          event.origin !== window.location.origin ||
+          event.source !== frame.contentWindow ||
+          event.data?.channel !== "bw-altcha" ||
+          state === "failed" ||
+          state === "submitted"
+        )
+          return;
+
+        const { type, payload } = event.data;
+        if (type === "ready" && state === "loading") {
+          clearTimeout(deadline);
+          state = "ready";
+          status.textContent = "Select the checkbox to continue.";
+        } else if (
+          type === "solving" &&
+          (state === "loading" || state === "ready")
+        ) {
+          clearTimeout(deadline);
+          state = "solving";
+          status.textContent = "Verifying your browser…";
+          deadline = setTimeout(
+            () => fail("Verification took too long. Try again."),
+            30000,
+          );
+        } else if (type === "error") {
+          fail("Verification could not be completed. Try again.");
+        } else if (type === "expired") {
+          fail("Verification expired. Try again.");
+        } else if (
+          type === "verified" &&
+          state === "solving" &&
+          typeof payload === "string" &&
+          payload.length > 0
+        ) {
+          clearTimeout(deadline);
+          state = "submitted";
+          status.textContent = "Submitting verification…";
+          document.getElementById("altcha").value = payload;
+          document.getElementById("form").submit();
+        }
+      });
+
+      if (document.body.dataset.verificationFailed === "true") {
+        fail("The server could not verify your answer. Try again.");
+      } else {
+        status.textContent = "Loading verification…";
+        deadline = setTimeout(
+          () => fail("Verification could not load. Try again."),
+          15000,
+        );
+      }
+    </script>
+  </body>
+</html>

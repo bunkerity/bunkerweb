@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="nofollow,noarchive,noindex" />
+    <meta name="referrer" content="no-referrer" />
+    <title>ALTCHA verification</title>
+    <style nonce="{*nonce_style*}">
+      :root {
+        color-scheme: light dark;
+      }
+      body {
+        margin: 0;
+        padding: 0.25rem;
+        font:
+          1rem/1.5 system-ui,
+          sans-serif;
+      }
+      altcha-widget {
+        display: block;
+        max-width: 24rem;
+        margin-inline: auto;
+      }
+      altcha-widget input:focus-visible {
+        outline: 2px solid currentColor;
+        outline-offset: 2px;
+      }
+    </style>
+  </head>
+  <body>
+    <altcha-widget
+      id="widget"
+      data-origin="{{altcha_url}}"
+      data-sitekey="{{altcha_sitekey}}"
+      auto="off"
+      credentials="omit"
+      disablerefetchonexpire
+      workers="2"
+    ></altcha-widget>
+    <script nonce="{*nonce_script*}">
+      const widget = document.getElementById("widget");
+      const challenge = new URL("/v1/challenge", widget.dataset.origin);
+      challenge.searchParams.set("apiKey", widget.dataset.sitekey);
+      widget.setAttribute("challengeurl", challenge.href);
+
+      function post(type, payload) {
+        if (window.parent !== window) {
+          window.parent.postMessage(
+            { channel: "bw-altcha", type, payload },
+            window.location.origin,
+          );
+        }
+      }
+
+      widget.addEventListener("load", () => post("ready"));
+      widget.addEventListener("statechange", (event) => {
+        const { state } = event.detail;
+        if (state === "verifying") post("solving");
+        if (state === "error" || state === "expired") post(state);
+      });
+      widget.addEventListener("verified", (event) =>
+        post("verified", event.detail.payload),
+      );
+      document.addEventListener(
+        "error",
+        (event) => {
+          if (event.target.id === "altcha-module") post("error");
+        },
+        true,
+      );
+    </script>
+    <script
+      id="altcha-module"
+      type="module"
+      src="{{altcha_url}}/assets/altcha.min.js"
+      nonce="{*nonce_script*}"
+      crossorigin="anonymous"
+      integrity="sha256-e69QzdV705NYI0HMtHvYK8CKR874cT1CNi8XN6O/LmY="
+    ></script>
+  </body>
+</html>
