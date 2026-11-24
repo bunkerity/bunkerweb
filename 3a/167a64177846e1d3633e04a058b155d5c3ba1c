@@ -1,0 +1,23 @@
+tests/core/ipv6-only/check.py
+  s_400693ba48e83a::t_fecf54fb822918 19
+tests/scripts/utils.sh
+  s_400693ba48e83a::t_fecf54fb822918 34-35,939
+tests/scripts/build.sh
+  s_400693ba48e83a::t_fecf54fb822918 32-34
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "3a167a64177846e1d3633e04a058b155d5c3ba1c",
+  "prompts": {},
+  "sessions": {
+    "s_400693ba48e83a": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1a5fa-27f7-7931-b08a-25f1b9a62ff7",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

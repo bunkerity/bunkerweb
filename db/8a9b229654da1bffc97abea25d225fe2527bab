@@ -1,0 +1,45 @@
+src/common/db/Database.py
+  s_ea4c2002703843::t_85ebf841907c6d 1550,1577
+  s_ea4c2002703843::t_b84c581738f52a 1626
+  s_2c820b29185449::t_7e5916b37d534d 1538-1549,1551-1557,1559-1562,1573-1574,1576
+tests/unit/db/test_init_tables_pro_settings_survive_restart.py
+  s_ea4c2002703843::t_6f770c6f76ff13 28,30-31,66
+  s_ea4c2002703843::t_c4de2f31525a2a 44-52
+  s_263a6406ec1ef8::t_9e17ede5a66a83 42-43
+  s_ea4c2002703843::t_d99516cca1ebfc 1-27,29,32-41,67-68,77,89
+  s_2c820b29185449::t_aa2bb3d0e95791 53-65,69-76,78-88,90-91
+CHANGELOG.md
+  s_ea4c2002703843::t_61f326a4d16a92 10
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.6",
+  "base_commit_sha": "db8a9b229654da1bffc97abea25d225fe2527bab",
+  "prompts": {},
+  "sessions": {
+    "s_263a6406ec1ef8": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "5e948458-ddce-4c4b-8ff9-115fc769df49",
+        "model": "claude-mythos-5-2"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_2c820b29185449": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "09caf13f-ca47-45c7-9d0a-b44e94c07606",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_ea4c2002703843": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "0adf84e3-0ec2-4bf3-aeca-8caa90b9e901",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

@@ -1,0 +1,38 @@
+src/ui/app/routes/login.py
+  s_05ace2c1fc766d::t_3787a197955377 34
+tests/unit/ui/routes/test_ui_log_hardening.py
+  s_05ace2c1fc766d::t_aaf3b4e20c0118 1-135
+src/ui/app/static/js/pages/templates.js
+  s_05ace2c1fc766d::t_72cacf9e42f913 52,55-56
+src/ui/app/routes/setup.py
+  s_05ace2c1fc766d::t_4b2f70b2c3f7b3 277
+src/ui/app/static/js/pages/services.js
+  s_05ace2c1fc766d::t_3b688d3c4b3195 39-40
+src/ui/app/routes/utils.py
+  s_05ace2c1fc766d::t_365db7cb8c4a3e 120
+tests/unit/ui/test_admin_rename_from_env.py
+  s_05ace2c1fc766d::t_a18987e50df26f 1-90
+tests/unit/ui/test_template_id_escaping.py
+  s_05ace2c1fc766d::t_54ccade322a51e 1-37
+src/ui/utils/gunicorn.conf.py
+  s_05ace2c1fc766d::t_8c476c4b69090a 556
+  s_05ace2c1fc766d::t_822cf32b9dbba6 512
+src/ui/app/routes/logs.py
+  s_05ace2c1fc766d::t_17e45811a1e852 248-249
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "b348ed8dbf906fb553f26a6af4083a2d551dac2d",
+  "prompts": {},
+  "sessions": {
+    "s_05ace2c1fc766d": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "589c6e39-07a2-4896-a308-010a21365f54",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

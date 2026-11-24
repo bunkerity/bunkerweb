@@ -1,0 +1,25 @@
+src/deps/install.sh
+  s_263a6406ec1ef8::t_3a5edc807be508 255,259
+src/bw/Dockerfile
+  s_263a6406ec1ef8::t_3a5edc807be508 1,72
+CHANGELOG.md
+  s_263a6406ec1ef8::t_3a5edc807be508 6
+src/all-in-one/Dockerfile
+  s_263a6406ec1ef8::t_3a5edc807be508 1,168
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.6",
+  "base_commit_sha": "98f9b64f8514d15b4decec68f34c3c1aaf640ca4",
+  "prompts": {},
+  "sessions": {
+    "s_263a6406ec1ef8": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "5e948458-ddce-4c4b-8ff9-115fc769df49",
+        "model": "claude-mythos-5-2"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

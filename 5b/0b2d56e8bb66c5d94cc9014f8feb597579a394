@@ -1,0 +1,56 @@
+CHANGELOG.md
+  h_a33a1e80933106 68
+src/bw/lua/bunkerweb/utils.lua
+  h_a33a1e80933106 607
+src/common/core/antibot/confs/http/antibot.modsec-crs
+  h_a33a1e80933106 19
+src/common/core/antibot/confs/modsec-crs/antibot.conf
+  h_a33a1e80933106 2
+src/common/core/modsecurity/confs/http/ip-host.modsec-crs
+  h_a33a1e80933106 28
+src/common/core/modsecurity/confs/http/modsecurity-rules-global-crs.conf.modsec
+  h_a33a1e80933106 17,21,24,34,49,57,164
+src/common/core/modsecurity/confs/modsec-crs/ip-host.conf
+  h_a33a1e80933106 15
+src/common/core/modsecurity/confs/server-http/modsecurity-rules-global-crs.conf.modsec
+  h_a33a1e80933106 58,60,65,69,73,76,79
+src/common/core/modsecurity/confs/server-http/modsecurity-rules.conf.modsec
+  h_a33a1e80933106 19,23,70,72,77,81,85,88,91,96,111,119,214
+src/common/core/templates/templates/api/configs/modsec-crs/api.conf
+  h_a33a1e80933106 1-5
+src/common/core/ui/confs/http/ui.modsec-crs
+  h_a33a1e80933106 21,26,31,36,42,48,53,58,63,68,73,78,85
+src/common/core/ui/confs/modsec-crs/ui.conf
+  h_a33a1e80933106 2-4,7,9-14
+tests/unit/common/test_modsecurity_body_reason_lua.py
+  h_a33a1e80933106 1,9,96,105-107,144
+tests/unit/common/test_utils_helpers_coverage_lua.py
+  h_a33a1e80933106 141
+tests/unit/db/test_autoconf_globals.py
+  h_a33a1e80933106 7
+tests/unit/gen/test_antibot_challenge_location.py
+  h_a33a1e80933106 41
+tests/unit/gen/test_issue_3682_modsec_bodyless_xml.py
+  h_a33a1e80933106 4-5,18,50-51
+tests/unit/gen/test_modsec_rule_id_ledger.py
+  h_a33a1e80933106 1-93
+tests/unit/gen/test_server_name_ip_literals.py
+  h_a33a1e80933106 160,198
+tests/unit/gen/test_ui_modsec_crs_exclusions.py
+  h_a33a1e80933106 66
+tests/unit/test_lua_modsec_reason.lua
+  h_a33a1e80933106 78,87,143
+tests/unit/ui/test_config_editor_xss_exclusion.py
+  h_a33a1e80933106 8,11,13,37,43,48-51,55
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "5b0b2d56e8bb66c5d94cc9014f8feb597579a394",
+  "prompts": {},
+  "humans": {
+    "h_a33a1e80933106": {
+      "author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

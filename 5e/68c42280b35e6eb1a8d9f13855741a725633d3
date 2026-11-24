@@ -1,0 +1,18 @@
+CHANGELOG.md
+  h_a33a1e80933106 40
+src/autoconf/controllers/SwarmController.py
+  h_a33a1e80933106 116-119
+tests/unit/autoconf/test_ingress_swarm_known_defects.py
+  h_a33a1e80933106 5-6,31-58
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "5e68c42280b35e6eb1a8d9f13855741a725633d3",
+  "prompts": {},
+  "humans": {
+    "h_a33a1e80933106": {
+      "author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

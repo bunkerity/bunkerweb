@@ -1,0 +1,16 @@
+CHANGELOG.md
+  h_a33a1e80933106 80
+src/common/core/antibot/files/javascript.html
+  h_a33a1e80933106 424
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "5173313cf7734cc7049427d479c51a8afa8d3c32",
+  "prompts": {},
+  "humans": {
+    "h_a33a1e80933106": {
+      "author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

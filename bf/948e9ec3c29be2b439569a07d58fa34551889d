@@ -1,0 +1,35 @@
+src/scheduler/JobScheduler.py
+  s_fb0f9b1cc5df85::t_0fa3659667905d 347-352
+src/common/core/grpc/jobs/grpc-trusted-cert.py
+  s_fb0f9b1cc5df85::t_b3e7d0a4a0aed7 220-221,263,274,278,281,293,296,298
+  s_fb0f9b1cc5df85::t_0fa3659667905d 270,279,297,302
+src/common/core/reverseproxy/jobs/trusted-cert.py
+  s_fb0f9b1cc5df85::t_b3e7d0a4a0aed7 220-221,263,274,278,281,293,296,298
+  s_fb0f9b1cc5df85::t_0fa3659667905d 270,279,297,302
+CHANGELOG.md
+  s_47e5f855149ff2::t_fb493e2cafa9ce 23
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "bf948e9ec3c29be2b439569a07d58fa34551889d",
+  "prompts": {},
+  "sessions": {
+    "s_47e5f855149ff2": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "e5d1e51d-0694-4cb0-bcf7-c883db8f5c4e",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_fb0f9b1cc5df85": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "2ec46a29-eec7-4481-ad97-4ca9da9ae651",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": null
+    }
+  }
+}

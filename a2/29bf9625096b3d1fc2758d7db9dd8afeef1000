@@ -1,0 +1,19 @@
+tests/core/bunkernet.yml
+  s_49356566bf9c3b::t_fb595c95b2640e 219
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "a229bf9625096b3d1fc2758d7db9dd8afeef1000",
+  "prompts": {},
+  "sessions": {
+    "s_49356566bf9c3b": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1e579-7e9b-7fe1-b98e-994a635ee3c0",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

@@ -1,0 +1,32 @@
+tests/scripts/utils.sh
+  s_9df29b036b084f::t_bc070f0b5e4cf2 457-462
+  s_95f9e0f14de0cd::t_fdb932b5fc046d 464-474
+tests/docker/docker-compose.bunkerweb.yml
+  s_9df29b036b084f::t_bc070f0b5e4cf2 33
+tests/misc/conf/syslog-ng.conf
+  s_9df29b036b084f::t_9c3a6cb4be02ba 8-11
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "e9fec9198f640dbc60f4bc47d0ae007dc8dfa5ea",
+  "prompts": {},
+  "sessions": {
+    "s_95f9e0f14de0cd": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1e37e-a24c-7ca2-978e-bc4b272e46d8",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_9df29b036b084f": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1e369-f6d1-7c93-b456-7c1c2ff669bd",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

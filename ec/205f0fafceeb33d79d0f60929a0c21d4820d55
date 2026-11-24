@@ -1,0 +1,18 @@
+CHANGELOG.md
+  h_a33a1e80933106 64
+src/common/core/letsencrypt/jobs/certbot-new.py
+  h_a33a1e80933106 1259-1260,1270,1287,1380
+tests/unit/letsencrypt/test_certbot_jobs_execution.py
+  h_a33a1e80933106 263,309-319,690-694,710-717,719
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "ec205f0fafceeb33d79d0f60929a0c21d4820d55",
+  "prompts": {},
+  "humans": {
+    "h_a33a1e80933106": {
+      "author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

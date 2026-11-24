@@ -1,0 +1,19 @@
+tests/unit/api/test_yaml_lowercase_settings.py
+  s_0513f8a077a033::t_a0fb59d361f3a1 8-9
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "4d776f5c7d4f4eda5742ec616744a08228800859",
+  "prompts": {},
+  "sessions": {
+    "s_0513f8a077a033": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "d1925fdf-d1a4-4c05-9e0f-7620d56d5bf9",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

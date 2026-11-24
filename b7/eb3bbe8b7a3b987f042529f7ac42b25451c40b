@@ -1,0 +1,19 @@
+tests/core/stream/http_only_plugin.py
+  s_b78fdb755e8d93::t_735891189a765b 48-53
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "b7eb3bbe8b7a3b987f042529f7ac42b25451c40b",
+  "prompts": {},
+  "sessions": {
+    "s_b78fdb755e8d93": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a18e21-4bd1-7a03-b221-bdc0db13f116",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

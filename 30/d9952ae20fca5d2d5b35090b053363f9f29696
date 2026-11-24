@@ -1,0 +1,26 @@
+CHANGELOG.md
+  s_36cff8fad440d1::t_429b6c3101ac39 5
+src/autoconf/controllers/KubernetesController.py
+  s_36cff8fad440d1::t_429b6c3101ac39 69,914-915,921-932,956-957,960-961
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "30d9952ae20fca5d2d5b35090b053363f9f29696",
+  "prompts": {},
+  "humans": {
+    "h_a33a1e80933106": {
+      "author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  },
+  "sessions": {
+    "s_36cff8fad440d1": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "9e7b0240-ab8b-4374-b9b3-c0f8bb66b3ef",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

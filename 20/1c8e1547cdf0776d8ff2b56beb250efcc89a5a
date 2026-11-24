@@ -1,0 +1,84 @@
+src/common/utils/redirect_resolver.py
+  s_7291fb74d4a890::t_6ac11d9cb99cfa 109
+tests/unit/ui/test_session_revocation.py
+  s_7291fb74d4a890::t_f12ea948fdc6ff 71
+src/ui/app/models/plugin_catalog.py
+  s_7291fb74d4a890::t_53d07a7c319768 765,914,999
+tests/unit/ui/test_ui_components.py
+  s_7291fb74d4a890::t_3617c2f4cc7d4d 930
+tests/unit/backup/test_backup_dir_ownership.py
+  s_7291fb74d4a890::t_3977e1997d6b6b 141-147
+src/ui/app/static/js/pages/threatmap.js
+  s_7291fb74d4a890::t_3617c2f4cc7d4d 289
+src/ui/requirements.in
+  s_7291fb74d4a890::t_f12ea948fdc6ff 16
+src/common/db/db_methods/redirects.py
+  s_7291fb74d4a890::t_3617c2f4cc7d4d 199,206
+src/ui/app/models/service_attachments.py
+  s_7291fb74d4a890::t_6ac11d9cb99cfa 186
+tests/ui/instances.yml
+  s_7291fb74d4a890::t_f12ea948fdc6ff 68-70
+src/common/utils/ports.py
+  s_7291fb74d4a890::t_6ac11d9cb99cfa 41,163,552
+src/common/utils/jobs.py
+  s_7291fb74d4a890::t_6ac11d9cb99cfa 152,180,182
+  s_795e2ccdb6801b::t_947a70203214a5 256
+src/common/core/backup/backup.py
+  s_7291fb74d4a890::t_3617c2f4cc7d4d 6-7,71,198,288,318
+tests/unit/db/test_config_read.py
+  s_7291fb74d4a890::t_f12ea948fdc6ff 418
+tests/unit/common/test_datastore_worker_lru_exptime.py
+  s_7291fb74d4a890::t_f12ea948fdc6ff 131,134,145,149,156,159,162,166
+tests/unit/ui/test_workflow_editor_roundtrip.py
+  s_7291fb74d4a890::t_ddaff270b9696a 72,168,239,295
+src/common/db/db_methods/upstreams.py
+  s_7291fb74d4a890::t_6ac11d9cb99cfa 361
+src/ui/app/static/css/pages/threatmap.css
+  s_7291fb74d4a890::t_3617c2f4cc7d4d 7
+src/ui/app/system_memory.py
+  s_7291fb74d4a890::t_6ac11d9cb99cfa 13,39
+tests/swarm/stack.yml
+  s_7291fb74d4a890::t_f12ea948fdc6ff 153-163
+tests/ui/home.yml
+  s_7291fb74d4a890::t_f12ea948fdc6ff 31-35,40-44,68-72
+src/ui/app/i18n.py
+  s_7291fb74d4a890::t_6ac11d9cb99cfa 16,79
+src/ui/app/models/save_scope.py
+  s_7291fb74d4a890::t_6ac11d9cb99cfa 155
+.pre-commit-config.yaml
+  s_7291fb74d4a890::t_3617c2f4cc7d4d 78-79,96
+src/common/core/bunkernet/jobs/bunkernet-stats.py
+  s_7291fb74d4a890::t_3617c2f4cc7d4d 56-59
+src/common/core/bunkernet/api/router.py
+  s_7291fb74d4a890::t_3617c2f4cc7d4d 30
+tests/swarm/stack.secrets.yml
+  s_7291fb74d4a890::t_f12ea948fdc6ff 179-189
+src/common/utils/certificate_utils.py
+  s_7291fb74d4a890::t_6ac11d9cb99cfa 6,268
+tests/unit/common/test_stream_timer_dispatch.py
+  s_7291fb74d4a890::t_f12ea948fdc6ff 62
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "201c8e1547cdf0776d8ff2b56beb250efcc89a5a",
+  "prompts": {},
+  "sessions": {
+    "s_7291fb74d4a890": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0ce70-fbe3-7f80-ac08-79acfc0af959",
+        "model": "gpt-6-luna"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_795e2ccdb6801b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "71804b16-900c-4824-8bbc-5e7434803315",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

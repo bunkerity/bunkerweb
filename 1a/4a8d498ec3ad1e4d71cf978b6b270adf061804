@@ -1,0 +1,19 @@
+tests/ui/home.yml
+  s_0b2ff51b084483::t_42e77d273f8af3 36,38-40,43
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "1a4a8d498ec3ad1e4d71cf978b6b270adf061804",
+  "prompts": {},
+  "sessions": {
+    "s_0b2ff51b084483": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1c0cc-c14a-72f1-aaa1-05e834938dd6",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

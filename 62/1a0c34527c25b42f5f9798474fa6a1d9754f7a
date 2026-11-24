@@ -1,0 +1,18 @@
+CHANGELOG.md
+  h_a33a1e80933106 44
+src/ui/app/routes/instances.py
+  h_a33a1e80933106 4,115-117
+tests/unit/ui/routes/test_routes_home_and_instances.py
+  h_a33a1e80933106 242-255
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "621a0c34527c25b42f5f9798474fa6a1d9754f7a",
+  "prompts": {},
+  "humans": {
+    "h_a33a1e80933106": {
+      "author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

@@ -1,0 +1,18 @@
+CHANGELOG.md
+  h_a33a1e80933106 58
+src/common/core/errors/confs/server-http/errors.conf
+  h_a33a1e80933106 9,30-31,38
+tests/unit/gen/test_issue_3490_bwerror_handlers_no_short_circuit.py
+  h_a33a1e80933106 75-91
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "80061afd47b116aed88f30aa0033b942850597a2",
+  "prompts": {},
+  "humans": {
+    "h_a33a1e80933106": {
+      "author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

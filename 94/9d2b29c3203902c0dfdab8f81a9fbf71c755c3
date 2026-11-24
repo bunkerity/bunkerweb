@@ -1,0 +1,104 @@
+tests/linux/Dockerfile-fedora-45
+  s_3d231c0bd6f6e4::t_e8381803362fcb 4
+misc/check-version-consistency.sh
+  s_0736692522c585::t_faf3bb197f2c28 168
+  s_0736692522c585::t_35848555f8b1a3 91-92,169-172,179-200,202
+  s_3d231c0bd6f6e4::t_fd17df28e0103d 201
+  s_99646ee31ee52d::t_f5bfff2249c46a 97,165,173-178
+  s_861cbf1d607fd5::t_d11b00eb842e4f 98-164
+tests/unit/common/test_version_consistency.py
+  s_99646ee31ee52d::t_c2b2be52119307 108
+  s_99646ee31ee52d::t_e82bd1b0a734b4 94-95,102,105,109-114,116-120,178-179,181-189
+  s_3d231c0bd6f6e4::t_af70923913af56 70-71
+  s_99646ee31ee52d::t_1d32a93ae50261 107
+  s_99646ee31ee52d::t_8320a75db9ca6f 103-104,106,190
+  s_0736692522c585::t_b8ee0ce67c11ac 93,191-216
+  s_3d231c0bd6f6e4::t_632d7c80588f4d 83-87
+  s_861cbf1d607fd5::t_d654ded059bbe9 156
+  s_861cbf1d607fd5::t_2023089c897f9f 115,121-155,157-177,180
+  s_4821bb8176d007::t_b6c57db9e85ae0 217-218
+docs/integrations.md
+  s_3d231c0bd6f6e4::t_a67114b5a32a87 2560,2563-2565
+misc/install-bunkerweb.sh
+  s_3d231c0bd6f6e4::t_a6244f78021061 157-161
+  s_3d231c0bd6f6e4::t_5114b27d9d185f 5707-5708
+  s_4821bb8176d007::t_8eff0ef613a3b7 5709
+src/linux/fpm-fedora-44
+  s_3d231c0bd6f6e4::t_e8381803362fcb 6
+src/linux/Dockerfile-fedora-45
+  s_3d231c0bd6f6e4::t_e8381803362fcb 5
+src/deps/install.sh
+  s_3d231c0bd6f6e4::t_e8381803362fcb 247-250
+docs/es/integrations.md
+  s_3d231c0bd6f6e4::t_a38b08d3cb68e7 2446,2449-2451
+tests/linux/Dockerfile-fedora-44
+  s_3d231c0bd6f6e4::t_e8381803362fcb 4
+docs/de/integrations.md
+  s_3d231c0bd6f6e4::t_e2ac9bced26c9f 2445,2448-2450
+CHANGELOG.md
+  s_641fdcaff5e583::t_85b45b9e07494e 6
+docs/zh/integrations.md
+  s_3d231c0bd6f6e4::t_ee6c87e368ddca 2445,2448-2450
+docs/fr/integrations.md
+  s_3d231c0bd6f6e4::t_925ff8d2163fee 2448,2451-2453
+src/linux/Dockerfile-fedora-44
+  s_3d231c0bd6f6e4::t_e8381803362fcb 5
+src/linux/fpm-fedora-45
+  s_3d231c0bd6f6e4::t_e8381803362fcb 6
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.6",
+  "base_commit_sha": "949d2b29c3203902c0dfdab8f81a9fbf71c755c3",
+  "prompts": {},
+  "sessions": {
+    "s_0736692522c585": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a208ca-ddd2-7131-a0d6-4c6af0d8bb1a",
+        "model": "gpt-6.2-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_3d231c0bd6f6e4": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "824a5e67-e910-4d88-880b-e053cef01cc7",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_4821bb8176d007": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "caf19afc-137b-4654-942a-c00d2d39664d",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_641fdcaff5e583": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "4772adb8-176c-4d86-8183-89507ca53434",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_861cbf1d607fd5": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a208d4-2433-7741-baec-1e8cd91c8878",
+        "model": "gpt-6.2-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_99646ee31ee52d": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a208d0-214a-7c00-8ab1-58a35a8c069d",
+        "model": "gpt-6.2-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

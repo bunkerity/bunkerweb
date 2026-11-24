@@ -1,0 +1,33 @@
+CHANGELOG.md
+  s_6eb8415ca8ec94::t_df8f26640986d5 14
+src/common/db/Database.py
+  s_517496b2cd6183::t_be7376c77758db 2968-2980
+src/ui/app/static/js/pages/configs.js
+  s_517496b2cd6183::t_be7376c77758db 819,821-822,838,840-841
+src/ui/app/routes/configs.py
+  s_517496b2cd6183::t_be7376c77758db 45-60,279-280,392-393,399
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "71ecded62381d34da477b99a348ebb7e5336a570",
+  "prompts": {},
+  "sessions": {
+    "s_517496b2cd6183": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0d7f3-9bed-7511-93d2-9fa3dd3119de",
+        "model": "gpt-6-luna"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_6eb8415ca8ec94": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "3573e073-64a9-4811-ac95-dafc07248a0a",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

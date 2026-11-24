@@ -1,0 +1,23 @@
+CHANGELOG.md
+  s_158dbfab0c1819::t_2a696cd9c91eee 22
+src/common/db/Database.py
+  s_158dbfab0c1819::t_5a7273c0df6920 20,116,123-126,128-136,138-140
+tests/unit/scheduler/test_job_databases_closed.py
+  s_158dbfab0c1819::t_a5afc08d355cda 287-340
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "d4414df888602219f2ba5821d88f4b6c1a5c0121",
+  "prompts": {},
+  "sessions": {
+    "s_158dbfab0c1819": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "4cdc4493-55f5-4b37-a825-4d9adffe3e35",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

@@ -1,0 +1,42 @@
+CHANGELOG.md
+  s_1b70f33988bd46::t_15293a39be04f5 23
+tests/unit/gen/test_ipv6_env_file_roundtrip.py
+  s_ea61dbe619b410::t_fcc6184d3785df 1-38,40-65
+  s_ea61dbe619b410::t_1033a9990303d9 39
+src/common/gen/save_config.py
+  s_ed1458b44c458d::t_75f9959f259a84 24
+src/common/utils/env_file.py
+  s_ed1458b44c458d::t_9dc506a34bb366 33-34
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "07904aeb72b9a7d5ee4285d1aa01b49749d71dc0",
+  "prompts": {},
+  "sessions": {
+    "s_1b70f33988bd46": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "12c22024-0497-4dc5-8d2f-379645fdb9d5",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_ea61dbe619b410": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1e9f3-2e95-7053-a8b2-8582875f3ee6",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_ed1458b44c458d": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "eed1c216-b356-4ab3-917e-93a0aa3de60e",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

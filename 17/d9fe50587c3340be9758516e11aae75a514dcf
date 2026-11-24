@@ -1,0 +1,102 @@
+src/deps/requirements-deps.in
+  s_9b72a24114dc24::t_8edfa38c8c5078 6
+  s_9b72a24114dc24::t_52b0e5a50eba91 1-2
+tests/unit/api_app/test_fastapi_compatibility.py
+  s_a0bda5d70039b2::t_a1c628e38b4971 1-40,43-50
+  s_a0bda5d70039b2::t_1268e4e0ca2200 41-42
+src/scheduler/requirements.txt
+  s_47a2effa6f2752::t_6acb0479c1ce92 526-528
+  s_47a2effa6f2752::t_ee8108ca579db7 11-13,358-360,362-364,366-368,370-510,537-539,545-547
+src/deps/requirements.txt
+  s_47a2effa6f2752::t_6acb0479c1ce92 25-27,41-43
+  s_47a2effa6f2752::t_511c3ee0ca7912 15-17,53-55
+docs/requirements.in
+  s_a0bda5d70039b2::t_7e25acc5b73b69 4
+src/ui/requirements.in
+  s_a0bda5d70039b2::t_668393198ead20 18
+  s_a0bda5d70039b2::t_2a27ef52b0d2ea 4-5,9,14,16,19
+src/deps/requirements-deps.txt
+  s_47a2effa6f2752::t_6acb0479c1ce92 213-215,254-256
+  s_47a2effa6f2752::t_144579c875e701 11-13,203-205,333-362,370-372
+src/api/app/main.py
+  s_a0bda5d70039b2::t_2df814c1136257 86-88
+src/autoconf/requirements.in
+  s_a0bda5d70039b2::t_668393198ead20 5
+  s_a0bda5d70039b2::t_75f77432275fae 6
+src/api/requirements.in
+  s_a0bda5d70039b2::t_b817cd35f8ed30 5,7-9
+src/autoconf/requirements.txt
+  s_a0bda5d70039b2::t_9bcf32bb96a514 951-953
+  s_a0bda5d70039b2::t_10d52f8ec6074f 182-184,643-794,798-800,954-956
+src/api/requirements.txt
+  s_a0bda5d70039b2::t_b817cd35f8ed30 15-17,260-262,268-270,422-424,430-432,434-436,441-581,583-585,593-595,810-812,827-829,936-1090,1092-1193
+docs/requirements.txt
+  s_a0bda5d70039b2::t_3519f8b6832f7e 794-796
+  s_a0bda5d70039b2::t_7e25acc5b73b69 11-18,28-30,545-547,579-662,666-668,670-672,696-698,831-875
+src/api/app/routers/configs.py
+  s_a0bda5d70039b2::t_2a9ba982eaf18c 6,345-348
+src/deps/requirements.in
+  s_9b72a24114dc24::t_8edfa38c8c5078 4
+  s_9b72a24114dc24::t_5fe07cb91143d6 1-2
+src/scheduler/requirements.in
+  s_9b72a24114dc24::t_8edfa38c8c5078 8
+  s_9b72a24114dc24::t_19fd4f78f0f925 3-4
+src/common/db/requirements.arm.in
+  s_a0bda5d70039b2::t_7455883788d675 1,4,6
+src/common/db/requirements.arm.txt
+  s_a0bda5d70039b2::t_6bf2f990d31506 7-9,331-333,335-336,342-344,350-422
+src/common/db/requirements.in
+  s_a0bda5d70039b2::t_65d6e7ea87406b 1,4,6
+src/common/db/requirements.txt
+  s_a0bda5d70039b2::t_e65ad56b16229f 7-9,331-333,335-401,407-409,415-487
+src/common/gen/requirements.in
+  s_a0bda5d70039b2::t_ca169fcca87de5 4
+src/common/gen/requirements.txt
+  s_a0bda5d70039b2::t_0b061cd8f187d2 11-13,483-485
+src/ui/requirements.txt
+  s_a0bda5d70039b2::t_a8771ce227f84e 7-9,183-326,334-400,402-404,406-408,690-692,790-792,846-848,1099-1182,1207-1209,1217-1219,1237-1239,1416-1418
+src/worker/requirements.in
+  s_a0bda5d70039b2::t_cc266dfb232b08 1-3
+src/worker/requirements.txt
+  s_a0bda5d70039b2::t_9a525c4492c073 7-9,13-15,17-19,21-22,24-26,30-39,41-43,341-343,558-560,675-677,711-713,726-755
+tests/unit/api_app/requirements.in
+  s_a0bda5d70039b2::t_f366f6b4c8a00b 19-21
+tests/unit/api_app/requirements.txt
+  s_a0bda5d70039b2::t_ad324c7e074282 15-17,136-138,144-146,148-150,154-294,296-298,304-306,308-310,324-326
+tests/unit/requirements.in
+  s_a0bda5d70039b2::t_b66ca16d9451e5 5,13,23,28,39-40,45,61
+tests/unit/requirements.txt
+  s_a0bda5d70039b2::t_b31c0261be668f 7-9,19-21,197-340,350-416,418-420,705-824,898-900,915-917,1214-1216,1230-1232,1234-1300,1306-1308,1316-1318,1320-1322,1326-1466,1480-1482,1499-1501,1726-1798,1802-1804,1823-1825,1843-1944
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "17d9fe50587c3340be9758516e11aae75a514dcf",
+  "prompts": {},
+  "sessions": {
+    "s_47a2effa6f2752": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "fadbcfad-8516-4b5c-92d5-c9871e230d99",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_9b72a24114dc24": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "cc5a1ca8-e952-421b-979b-0d94c0aab861",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_a0bda5d70039b2": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1b056-fdce-7e51-8ab0-28f3d5f9101b",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

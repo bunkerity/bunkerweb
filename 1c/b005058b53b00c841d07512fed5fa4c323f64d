@@ -1,0 +1,21 @@
+CHANGELOG.md
+  s_f292293aca8830::t_643e7f05a28bd8 16
+src/common/helpers/bwcli
+  s_f292293aca8830::t_643e7f05a28bd8 3-4,6
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "1cb005058b53b00c841d07512fed5fa4c323f64d",
+  "prompts": {},
+  "sessions": {
+    "s_f292293aca8830": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1a721-ae35-7251-ae4d-790ec524b5f8",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

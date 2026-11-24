@@ -1,0 +1,23 @@
+src/ui/app/routes/reports.py
+  s_b59e393d15d9c7::t_24d69e1c17f628 221,442,544
+tests/unit/ui/routes/test_routes_date_offsets.py
+  s_b59e393d15d9c7::t_d33b23bd203ad9 1-49
+src/ui/app/routes/bans.py
+  s_b59e393d15d9c7::t_24d69e1c17f628 75
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "8b9df2e5df786ebbf92d25a735153e5ed1fb89e9",
+  "prompts": {},
+  "sessions": {
+    "s_b59e393d15d9c7": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a18d24-87ea-7121-ba34-33208f6256dc",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

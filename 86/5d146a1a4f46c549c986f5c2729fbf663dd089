@@ -1,0 +1,107 @@
+tests/unit/jobs/test_feed_cache_validation.py
+  s_6a5c54ac0e56e3::t_437c87afa08fc6 1-70
+src/common/core/dnsbl/jobs/dnsbl-download.py
+  s_6a5c54ac0e56e3::t_1cd21a1ded8389 87,90,131-132,134,225
+  s_3f0bb5d0aea65e::t_e0333f8405f8d9 33-35
+src/common/core/db/jobs/cleanup-excess-jobs-runs.py
+  s_87b148a97f23ad::t_0a27ef91c062da 19-21,23
+tests/unit/scheduler/test_job_path_containment.py
+  s_87b148a97f23ad::t_a1d574b72ee54f 1-42
+src/common/core/blacklist/jobs/blacklist-download.py
+  s_6a5c54ac0e56e3::t_1cd21a1ded8389 172,175,247-250,376
+  s_3f0bb5d0aea65e::t_aeffaf4cc14add 33-35
+src/common/core/backup/jobs/backup-data.py
+  s_751421a72d1da7::t_49a3b8b2f2a331 105-106
+tests/unit/common/test_plugin_checksum_setgid_stability.py
+  s_7db872cc24d44a::t_4fad87c7cc309c 23,84-86
+  s_7db872cc24d44a::t_f32b38e574be1a 1-22,24-83,87-195
+src/common/core/greylist/jobs/greylist-download.py
+  s_6a5c54ac0e56e3::t_1cd21a1ded8389 116,119,191,193-194,320
+  s_6a5c54ac0e56e3::t_f11ef2759b7aef 192
+  s_3f0bb5d0aea65e::t_8b5dbf8dd24c4c 33-35
+src/common/core/whitelist/jobs/whitelist-download.py
+  s_6a5c54ac0e56e3::t_f11ef2759b7aef 192
+  s_6a5c54ac0e56e3::t_1cd21a1ded8389 116,119,191,193-194,320
+  s_3f0bb5d0aea65e::t_b5f29fc789ddb6 33-35
+tests/unit/jobs/test_job_failure_statuses.py
+  s_2060c9b676a4a5::t_712b18eef935dc 10,29-31
+  s_87b148a97f23ad::t_a1d574b72ee54f 1-6,9,11-28,32-75
+  s_87b148a97f23ad::t_48f4aab76a0b7b 7-8,76-98
+tests/unit/worker/test_executor_path_containment.py
+  s_87b148a97f23ad::t_f860592ffc117d 1-77
+src/scheduler/main.py
+  s_7db872cc24d44a::t_ae33be8dbf4142 458-492,523-525
+src/common/core/realip/jobs/realip-download.py
+  s_6a5c54ac0e56e3::t_1cd21a1ded8389 89,92,146-148,268
+  s_3f0bb5d0aea65e::t_38e10d317a7627 26-28
+tests/unit/scheduler/test_plugin_normalized_permissions.py
+  s_7db872cc24d44a::t_afe22a20f734c4 1-24,40-50,52-55,57-60,62-80,85-89
+  s_7db872cc24d44a::t_1ede4495831f00 51,56,61,81-84
+  s_7db872cc24d44a::t_59537b7011a594 25-39
+tests/unit/jobs/test_job_inferred_path.py
+  s_87b148a97f23ad::t_a1d574b72ee54f 1-20
+tests/unit/common/test_feed_download_zone_ids.py
+  s_3f0bb5d0aea65e::t_a89ddd88e942e8 1-78
+src/common/utils/jobs.py
+  s_751421a72d1da7::t_94a1325bc9b642 314
+src/scheduler/JobScheduler.py
+  s_751421a72d1da7::t_d6925627f710b4 149-153
+src/worker/executor.py
+  s_751421a72d1da7::t_c05021595a43f3 26-31
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "865d146a1a4f46c549c986f5c2729fbf663dd089",
+  "prompts": {},
+  "sessions": {
+    "s_2060c9b676a4a5": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1acf4-93fa-72f0-8f98-9523854ba275",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_3f0bb5d0aea65e": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "fb03ca83-e12e-4c4f-82d2-488b6be756c9",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_6a5c54ac0e56e3": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1ac40-220a-7943-ae29-8dc5a6a440bc",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_751421a72d1da7": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "a1cd49cb-bc02-4f73-9b72-c088e5f0245c",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_7db872cc24d44a": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1ac53-82bd-7021-8474-9868afc6fad4",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_87b148a97f23ad": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1abd5-1e4b-7b40-8125-8bcaa53912ec",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

@@ -1,0 +1,18 @@
+CHANGELOG.md
+  h_a33a1e80933106 66
+src/common/core/misc/jobs/download-plugins.py
+  h_a33a1e80933106 318
+tests/unit/jobs/test_ub2_5_external_plugin_failures.py
+  h_a33a1e80933106 128-147
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "4b37f448fbbefdd65d5e37b755e9955f9f0ce2a7",
+  "prompts": {},
+  "humans": {
+    "h_a33a1e80933106": {
+      "author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

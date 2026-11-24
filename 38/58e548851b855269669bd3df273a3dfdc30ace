@@ -1,0 +1,36 @@
+src/common/core/bunkernet/ui/actions.py
+  s_f334b56f43408e::t_f89c1fc38c4a87 48,67
+src/common/core/backup/ui/actions.py
+  s_f334b56f43408e::t_f89c1fc38c4a87 21
+tests/unit/ui/test_core_plugin_actions_caches.py
+  s_7ffe63cfdbc05b::t_ee13211d7ae855 13,16,19-20,24,27,29-34,63,71,82,94,96,100,115,117-118,125,127,129,131-132,143,146-147,154,162,164,166-167,171
+  s_f334b56f43408e::t_665f8468ea925c 1-12,14-15,17-18,21-23,25-26,28,35-62,64-70,72-81,83-93,95,97-99,101-114,116,119-124,126,128,130,133-142,144-145,148-153,155-161,163,165,168-170,172-186
+src/common/core/letsencrypt/ui/actions.py
+  s_7ffe63cfdbc05b::t_b31de6b60f5c6b 170
+  s_f334b56f43408e::t_f89c1fc38c4a87 40,172-174,177
+  s_7ffe63cfdbc05b::t_7492883a4f0466 175-176,178-179
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "3858e548851b855269669bd3df273a3dfdc30ace",
+  "prompts": {},
+  "sessions": {
+    "s_7ffe63cfdbc05b": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0c324-be91-7e22-9854-d5bfbfafaf58",
+        "model": "gpt-5.6-terra"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_f334b56f43408e": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "cfd48429-1158-4dd0-8440-0c7632508e89",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

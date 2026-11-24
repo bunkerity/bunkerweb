@@ -1,0 +1,52 @@
+docs/zh/advanced.md
+  s_1cb302d2e1989d::t_e6f4ed445f0732 3149-3150,3152-3273
+  s_8957b83407cdf6::t_924c721580cc6c 3151
+docs/de/advanced.md
+  s_1cb302d2e1989d::t_e6f4ed445f0732 3152-3153,3155-3276
+  s_8957b83407cdf6::t_924c721580cc6c 3154
+docs/advanced.md
+  s_1cb302d2e1989d::t_90d3a9876de6a0 3223-3234
+  s_1cb302d2e1989d::t_dfb1e292939b99 3153-3154,3156-3222,3238-3277
+  s_8957b83407cdf6::t_924c721580cc6c 3155
+  s_651b8d13150886::t_12e702a526acaa 3235-3237
+docs/es/advanced.md
+  s_8957b83407cdf6::t_924c721580cc6c 3154
+  s_1cb302d2e1989d::t_e6f4ed445f0732 3152-3153,3155-3276
+docs/fr/advanced.md
+  s_8957b83407cdf6::t_924c721580cc6c 3153
+  s_1cb302d2e1989d::t_e6f4ed445f0732 3151-3152,3154-3275
+CHANGELOG.md
+  s_8957b83407cdf6::t_7dbfa51d2ae9ef 74
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "8f40bdd5db032157180631452800a9864791a459",
+  "prompts": {},
+  "sessions": {
+    "s_1cb302d2e1989d": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "bca074ea-6eb2-41c0-8b3d-5ce1b8b29d77",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_651b8d13150886": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1bfa6-50f9-72e3-88cb-ad39beb3e1a5",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_8957b83407cdf6": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "f0ed5bf7-382f-48ad-b7ad-d9883e810768",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}
