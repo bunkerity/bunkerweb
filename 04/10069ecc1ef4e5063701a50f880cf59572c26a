@@ -1,0 +1,39 @@
+.github/workflows/docker-reissue-rc1.yml
+  s_7c74bae1e9177c::t_1a048bfca10739 68-69,116
+  s_7c74bae1e9177c::t_05cf89817a99b5 1-67,70-115,117-331
+.github/scripts/release_docker_reissue.py
+  s_7c74bae1e9177c::t_e668f83f8f5dbd 9,213-220,222
+  s_7c74bae1e9177c::t_234d49a85fca66 1-8,10-212,221,223-311
+CHANGELOG.md
+  s_a83a67d401844a::t_8a81fe84b97d56 6
+src/all-in-one/Dockerfile
+  s_a83a67d401844a::t_c8049508a4db75 1,168
+src/bw/Dockerfile
+  s_a83a67d401844a::t_a9c2a01de09c3f 1,72
+src/deps/install.sh
+  s_a83a67d401844a::t_12068003c50a11 258
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.6",
+  "base_commit_sha": "0410069ecc1ef4e5063701a50f880cf59572c26a",
+  "prompts": {},
+  "sessions": {
+    "s_7c74bae1e9177c": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a20df1-70cf-7253-b9be-4a5d3d6c0b19",
+        "model": "gpt-6.2-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_a83a67d401844a": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a20d3d-1321-7f30-86a2-b4c17ba1f94e",
+        "model": "gpt-6.2-astra"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

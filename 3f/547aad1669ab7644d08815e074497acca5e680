@@ -1,0 +1,21 @@
+.github/workflows/docker-reissue-rc1.yml
+  s_a83a67d401844a::t_490ca23578ca42 4
+.github/scripts/release_docker_reissue.py
+  s_a83a67d401844a::t_490ca23578ca42 19
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.6",
+  "base_commit_sha": "3f547aad1669ab7644d08815e074497acca5e680",
+  "prompts": {},
+  "sessions": {
+    "s_a83a67d401844a": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a20d3d-1321-7f30-86a2-b4c17ba1f94e",
+        "model": "gpt-6.2-astra"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}
