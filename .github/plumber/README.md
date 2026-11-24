@@ -58,6 +58,26 @@ PBOM, the CycloneDX SBOM and the raw SARIF (`upload-artifacts: true`). The
 SARIF is redundant with Code Scanning; the PBOM and SBOM are kept as
 per-run evidence of what the pipeline consumed.
 
+## Trivy is installed by hand
+
+`container-build.yml` does not use `aquasecurity/trivy-action`. Plumber reads an
+action's `action.yml` to look for code fetched at run time, and the runner's
+`GITHUB_TOKEN` is refused by the aquasecurity organization's IP allow list (403).
+The action then stayed "could not be verified" and Plumber scored it as an attack
+path (a run-time download in the job that holds registry credentials), whatever
+the action really does. The job now downloads the Trivy release asset itself and
+checks it against a sha256 pinned in the workflow (`TRIVY_SHA256`), then runs
+`trivy image` with the same `TRIVY_*` settings the action used.
+
+To bump Trivy, change `TRIVY_VERSION` and `TRIVY_SHA256` together. Take the hash
+from the release asset digest (`gh release view vX.Y.Z -R aquasecurity/trivy --json assets`),
+download the archive and confirm it with
+`gh attestation verify <archive> -R aquasecurity/trivy`. Dependabot does not track it.
+
+If another action in an organization with an IP allow list shows up as "could not
+verify", the alternative is a `PLUMBER_METADATA_TOKEN` secret (a token with
+public-repository read) passed to the Plumber action as `metadata-token`.
+
 Note that `container-build.yml` and `linux-build.yml` cannot simply declare
 `packages: write`: a reusable workflow may only maintain or reduce the
 caller's token scope, and those two are called both by workflows that grant

@@ -174,23 +174,50 @@ jobs:
           else
             echo "SCAN_REF=local/$IMAGE" >> "$GITHUB_ENV"
           fi
+      # Install Trivy ourselves instead of through aquasecurity/trivy-action: the action fetches its installer
+      # and the binary at run time, in the job that holds the registry credentials. This step downloads one
+      # release asset and refuses it unless its sha256 equals the pin below. Every scan step runs on the
+      # x86-64 runner (an ARM image is scanned from the registry), so only the Linux-64bit asset is needed.
+      - name: Install Trivy
+        id: trivy
+        if: ${{ inputs.CANDIDATE != '' || startsWith(inputs.CACHE_SUFFIX, 'arm') == false }}
+        env:
+          TRIVY_VERSION: 0.70.0
+          # sha256 of trivy_0.70.0_Linux-64bit.tar.gz; also the release asset digest and the subject of its GitHub build attestation.
+          # To bump: change both values together, then `gh attestation verify <archive> -R aquasecurity/trivy`.
+          TRIVY_SHA256: 8b4376d5d6befe5c24d503f10ff136d9e0c49f9127a4279fd110b727929a5aa9
+        run: |
+          archive="$RUNNER_TEMP/trivy.tar.gz"
+          curl --fail --silent --show-error --location --retry 3 --output "$archive" "https://github.com/aquasecurity/trivy/releases/download/v${TRIVY_VERSION}/trivy_${TRIVY_VERSION}_Linux-64bit.tar.gz"
+          echo "${TRIVY_SHA256}  ${archive}" | sha256sum --check --strict -
+          mkdir "$RUNNER_TEMP/trivy-bin"
+          tar --extract --gzip --file "$archive" --directory "$RUNNER_TEMP/trivy-bin" trivy
+          echo "$RUNNER_TEMP/trivy-bin" >> "$GITHUB_PATH"
+          "$RUNNER_TEMP/trivy-bin/trivy" --version
+          echo "date=$(date +%Y-%m-%d)" >> "$GITHUB_OUTPUT"
+      # Same DB cache the action kept: one vulnerability DB download shared by the parallel image jobs
+      - name: Restore Trivy DB cache
+        if: ${{ inputs.CANDIDATE != '' || startsWith(inputs.CACHE_SUFFIX, 'arm') == false }}
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        with:
+          path: ${{ github.workspace }}/.cache/trivy
+          key: cache-trivy-${{ steps.trivy.outputs.date }}
+          restore-keys: cache-trivy-
       # Check vulnerabilities with Trivy — SARIF report (non-blocking, feeds the GitHub Security tab)
       - name: Trivy scan (SARIF)
         if: ${{ inputs.CANDIDATE != '' || startsWith(inputs.CACHE_SUFFIX, 'arm') == false }}
-        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
-        with:
-          scan-type: image
-          image-ref: ${{ env.SCAN_REF }}
-          scanners: vuln
-          ignore-unfixed: true
-          severity: UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL
-          skip-dirs: /root/.cargo
-          trivyignores: .trivyignore
-          ignore-policy: .github/trivy/ignore.rego # ignore pkg:pypi/* (pip/dependabot) and pkg:golang/* (manual deps/*.json pin bumps)
-          format: sarif
-          output: trivy-results.sarif
-          exit-code: "0"
+        run: trivy image "$SCAN_REF"
         env:
+          TRIVY_CACHE_DIR: ${{ github.workspace }}/.cache/trivy
+          TRIVY_SCANNERS: vuln
+          TRIVY_IGNORE_UNFIXED: "true"
+          TRIVY_SEVERITY: UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL
+          TRIVY_SKIP_DIRS: /root/.cargo
+          TRIVY_IGNOREFILE: .trivyignore
+          TRIVY_IGNORE_POLICY: .github/trivy/ignore.rego # ignore pkg:pypi/* (pip/dependabot) and pkg:golang/* (manual deps/*.json pin bumps)
+          TRIVY_FORMAT: sarif
+          TRIVY_OUTPUT: trivy-results.sarif
+          TRIVY_EXIT_CODE: "0"
           TRIVY_PLATFORM: ${{ inputs.ARCH }}
           # Priority list: Trivy falls back to the next repository on 429/5xx. Setting it overrides the defaults, so they are repeated here; ECR comes last (it was pinned alone in 2024 and now rate-limits the parallel image jobs).
           TRIVY_DB_REPOSITORY: mirror.gcr.io/aquasec/trivy-db:2,ghcr.io/aquasecurity/trivy-db:2,public.ecr.aws/aquasecurity/trivy-db:2
@@ -205,21 +232,19 @@ jobs:
       # Hard gate — fail the build on ANY matching vulnerability
       - name: Trivy gate
         if: ${{ inputs.CANDIDATE != '' || startsWith(inputs.CACHE_SUFFIX, 'arm') == false }}
-        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
-        with:
-          scan-type: image
-          image-ref: ${{ env.SCAN_REF }}
-          scanners: vuln
-          ignore-unfixed: true
-          severity: UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL
-          skip-dirs: /root/.cargo
-          trivyignores: .trivyignore
-          ignore-policy: .github/trivy/ignore.rego # ignore pkg:pypi/* (pip/dependabot) and pkg:golang/* (manual deps/*.json pin bumps)
-          format: template
-          template: "@.github/trivy/summary.tpl"
-          output: trivy-summary.md
-          exit-code: "1"
+        run: trivy image "$SCAN_REF"
         env:
+          TRIVY_CACHE_DIR: ${{ github.workspace }}/.cache/trivy
+          TRIVY_SCANNERS: vuln
+          TRIVY_IGNORE_UNFIXED: "true"
+          TRIVY_SEVERITY: UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL
+          TRIVY_SKIP_DIRS: /root/.cargo
+          TRIVY_IGNOREFILE: .trivyignore
+          TRIVY_IGNORE_POLICY: .github/trivy/ignore.rego # ignore pkg:pypi/* (pip/dependabot) and pkg:golang/* (manual deps/*.json pin bumps)
+          TRIVY_FORMAT: template
+          TRIVY_TEMPLATE: "@.github/trivy/summary.tpl"
+          TRIVY_OUTPUT: trivy-summary.md
+          TRIVY_EXIT_CODE: "1"
           TRIVY_PLATFORM: ${{ inputs.ARCH }}
           # Priority list: Trivy falls back to the next repository on 429/5xx. Setting it overrides the defaults, so they are repeated here; ECR comes last (it was pinned alone in 2024 and now rate-limits the parallel image jobs).
           TRIVY_DB_REPOSITORY: mirror.gcr.io/aquasec/trivy-db:2,ghcr.io/aquasecurity/trivy-db:2,public.ecr.aws/aquasecurity/trivy-db:2
