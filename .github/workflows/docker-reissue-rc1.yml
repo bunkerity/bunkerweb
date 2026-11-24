@@ -1,0 +1,331 @@
+name: RC1 Docker-only reissue
+on:
+  push:
+    tags: ["docker-reissue/1.6.19-rc1-nginx-1.30.8"]
+
+permissions: {}
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  prepare:
+    if: github.repository == 'bunkerity/bunkerweb'
+    runs-on: ubuntu-26.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      actions: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - name: Verify signed authorization and original release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          bash misc/check-version-consistency.sh
+          python3 .github/scripts/release_docker_reissue.py authorize
+
+  plumber:
+    needs: prepare
+    uses: ./.github/workflows/plumber.yml
+    permissions:
+      contents: read
+      security-events: write
+      id-token: write
+
+  codeql:
+    needs: prepare
+    uses: ./.github/workflows/codeql.yml
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+
+  build-x86:
+    needs: prepare
+    permissions:
+      contents: read
+      packages: write
+      security-events: write
+    strategy:
+      fail-fast: false
+      matrix:
+        image: [bunkerweb, all-in-one]
+        arch: [linux/amd64, linux/386]
+        include:
+          - image: bunkerweb
+            dockerfile: src/bw/Dockerfile
+          - image: all-in-one
+            dockerfile: src/all-in-one/Dockerfile
+          - arch: linux/amd64
+            cache_suffix: amd64
+          - arch: linux/386
+            cache_suffix: "386"
+    # The signed DEV builder pins Trivy's installer bytes. Its checkout still uses the caller SHA.
+    uses: bunkerity/bunkerweb/.github/workflows/container-build.yml@d0541dcc3437e46c873ebe29cbb9f97d2d201dfb
+    with:
+      RELEASE: rc
+      ARCH: ${{ matrix.arch }}
+      IMAGE: ${{ matrix.image }}
+      DOCKERFILE: ${{ matrix.dockerfile }}
+      CACHE: false
+      PUSH: false
+      CACHE_SUFFIX: ${{ matrix.cache_suffix }}
+      CANDIDATE: candidate-${{ github.run_id }}-${{ github.run_attempt }}
+    secrets:
+      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+      DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
+
+  create-arm:
+    needs: prepare
+    permissions:
+      contents: read
+    uses: ./.github/workflows/create-arm.yml
+    secrets:
+      SCW_ACCESS_KEY: ${{ secrets.SCW_ACCESS_KEY }}
+      SCW_SECRET_KEY: ${{ secrets.SCW_SECRET_KEY }}
+      SCW_DEFAULT_PROJECT_ID: ${{ secrets.SCW_DEFAULT_PROJECT_ID }}
+      SCW_DEFAULT_ORGANIZATION_ID: ${{ secrets.SCW_DEFAULT_ORGANIZATION_ID }}
+      ARM_SSH_KEY: ${{ secrets.ARM_SSH_KEY }}
+      ARM_SSH_CONFIG: ${{ secrets.ARM_SSH_CONFIG }}
+
+  build-arm:
+    needs: [prepare, create-arm]
+    permissions:
+      contents: read
+      packages: write
+      security-events: write
+    strategy:
+      fail-fast: false
+      matrix:
+        image: [bunkerweb, all-in-one]
+        arch: [linux/arm64, linux/arm/v7]
+        include:
+          - image: bunkerweb
+            dockerfile: src/bw/Dockerfile
+          - image: all-in-one
+            dockerfile: src/all-in-one/Dockerfile
+          - arch: linux/arm64
+            cache_suffix: arm64
+          - arch: linux/arm/v7
+            cache_suffix: armv7
+    uses: bunkerity/bunkerweb/.github/workflows/container-build.yml@d0541dcc3437e46c873ebe29cbb9f97d2d201dfb
+    with:
+      RELEASE: rc
+      ARCH: ${{ matrix.arch }}
+      IMAGE: ${{ matrix.image }}
+      DOCKERFILE: ${{ matrix.dockerfile }}
+      CACHE: false
+      PUSH: false
+      CACHE_SUFFIX: ${{ matrix.cache_suffix }}
+      CANDIDATE: candidate-${{ github.run_id }}-${{ github.run_attempt }}
+    secrets:
+      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+      DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
+      ARM_SSH_KEY: ${{ secrets.ARM_SSH_KEY }}
+      ARM_SSH_IP: ${{ needs.create-arm.outputs.ip }}
+      ARM_SSH_CONFIG: ${{ secrets.ARM_SSH_CONFIG }}
+
+  rm-arm:
+    if: ${{ always() && needs.create-arm.outputs.id != '' }}
+    needs: [create-arm, build-arm]
+    permissions:
+      contents: read
+    uses: ./.github/workflows/rm-arm.yml
+    secrets:
+      ARM_ID: ${{ needs.create-arm.outputs.id }}
+      SCW_ACCESS_KEY: ${{ secrets.SCW_ACCESS_KEY }}
+      SCW_SECRET_KEY: ${{ secrets.SCW_SECRET_KEY }}
+      SCW_DEFAULT_PROJECT_ID: ${{ secrets.SCW_DEFAULT_PROJECT_ID }}
+      SCW_DEFAULT_ORGANIZATION_ID: ${{ secrets.SCW_DEFAULT_ORGANIZATION_ID }}
+
+  candidates:
+    needs: [build-x86, build-arm]
+    runs-on: ubuntu-26.04
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      packages: write
+    outputs:
+      sha256: ${{ steps.manifest.outputs.sha256 }}
+      artifact_name: docker-reissue-manifest-${{ github.run_attempt }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+      - uses: docker/login-action@371161bbe7024a29a25c5e19bfcbc0804fe9ad2c # v4.5.2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          pattern: candidate-image-*
+          path: receipts
+          merge-multiple: true
+      - name: Freeze the two scanned indexes
+        id: manifest
+        run: |
+          python3 .github/scripts/release_docker_reissue.py assemble >> "$GITHUB_OUTPUT"
+          jq -r '.images | to_entries[] | "- \(.key) \(.value.previous) → \(.value.ref)"' docker-reissue-manifest.json >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: docker-reissue-manifest-${{ github.run_attempt }}
+          path: docker-reissue-manifest.json
+          if-no-files-found: error
+          retention-days: 90
+
+  smoke:
+    needs: candidates
+    runs-on: ubuntu-26.04
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      packages: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: docker/login-action@371161bbe7024a29a25c5e19bfcbc0804fe9ad2c # v4.5.2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: ${{ needs.candidates.outputs.artifact_name }}
+      - name: Start exact core and all-in-one candidates and load their modules
+        env:
+          MANIFEST_SHA256: ${{ needs.candidates.outputs.sha256 }}
+        run: python3 .github/scripts/release_docker_reissue.py smoke
+
+  gate:
+    needs: [candidates, plumber, codeql, smoke]
+    environment: release
+    runs-on: ubuntu-26.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      actions: read
+    outputs:
+      sha256: ${{ steps.approve.outputs.sha256 }}
+      artifact_name: ${{ needs.candidates.outputs.artifact_name }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: ${{ needs.candidates.outputs.artifact_name }}
+      - name: Bind protected approval to the candidate manifest
+        id: approve
+        env:
+          GH_TOKEN: ${{ github.token }}
+          MANIFEST_SHA256: ${{ needs.candidates.outputs.sha256 }}
+        run: python3 .github/scripts/release_docker_reissue.py approve >> "$GITHUB_OUTPUT"
+
+  attest:
+    needs: gate
+    runs-on: ubuntu-26.04
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      id-token: write
+      attestations: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: ${{ needs.gate.outputs.artifact_name }}
+      - name: Resolve approved OCI subjects
+        id: subjects
+        env:
+          MANIFEST_SHA256: ${{ needs.gate.outputs.sha256 }}
+        run: python3 .github/scripts/release_docker_reissue.py subjects >> "$GITHUB_OUTPUT"
+      - name: Attest the approved manifest
+        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
+        with:
+          subject-path: docker-reissue-manifest.json
+      - name: Attest the core OCI index
+        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
+        with:
+          subject-name: docker.io/bunkerity/bunkerweb
+          subject-digest: ${{ steps.subjects.outputs.bunkerweb }}
+      - name: Attest the all-in-one OCI index
+        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
+        with:
+          subject-name: docker.io/bunkerity/bunkerweb-all-in-one
+          subject-digest: ${{ steps.subjects.outputs.all-in-one }}
+
+  promote:
+    needs: [gate, attest]
+    runs-on: ubuntu-26.04
+    timeout-minutes: 120
+    permissions:
+      actions: read
+      contents: read
+      packages: write
+      attestations: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: ${{ needs.gate.outputs.artifact_name }}
+      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+      - uses: docker/login-action@371161bbe7024a29a25c5e19bfcbc0804fe9ad2c # v4.5.2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: docker/login-action@371161bbe7024a29a25c5e19bfcbc0804fe9ad2c # v4.5.2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_TOKEN }}
+      - uses: docker/login-action@371161bbe7024a29a25c5e19bfcbc0804fe9ad2c # v4.5.2
+        with:
+          registry: registry.gitlab.com
+          username: ${{ secrets.GITLAB_REGISTRY_USER }}
+          password: ${{ secrets.GITLAB_REGISTRY_TOKEN }}
+      - name: Install the registry copy tool used by releases
+        run: sudo apt-get update && sudo apt-get install --no-install-recommends -y skopeo
+      - name: Verify attestations and move the six version tags
+        env:
+          GH_TOKEN: ${{ github.token }}
+          MANIFEST_SHA256: ${{ needs.gate.outputs.sha256 }}
+        run: python3 .github/scripts/release_docker_reissue.py promote
+
+  verify:
+    needs: [gate, promote]
+    runs-on: ubuntu-26.04
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      attestations: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: ${{ needs.gate.outputs.artifact_name }}
+      - name: Verify all public indexes and provenance by digest
+        env:
+          GH_TOKEN: ${{ github.token }}
+          MANIFEST_SHA256: ${{ needs.gate.outputs.sha256 }}
+        run: python3 .github/scripts/release_docker_reissue.py verify
