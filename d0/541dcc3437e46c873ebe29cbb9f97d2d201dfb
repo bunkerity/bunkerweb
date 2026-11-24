@@ -1,0 +1,16 @@
+.github/plumber/README.md
+  h_a33a1e80933106 61-80
+.github/workflows/container-build.yml
+  h_a33a1e80933106 177-205,209,211-220,235,237-247
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.6",
+  "base_commit_sha": "d0541dcc3437e46c873ebe29cbb9f97d2d201dfb",
+  "prompts": {},
+  "humans": {
+    "h_a33a1e80933106": {
+      "author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}
