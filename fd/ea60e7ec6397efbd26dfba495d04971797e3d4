@@ -1,0 +1,201 @@
+tests/unit/common/test_antibot_request_coverage_lua.py
+  s_a3c0f7f08e0a3d::t_6fd0b73a78aa44 542-544,546-548,551,553
+  s_a3c0f7f08e0a3d::t_32e30088ee8a2c 48-49
+  s_e659ce1032986e::t_00da2540d27f72 47,435-472,474-486,499-511
+  s_a3c0f7f08e0a3d::t_865313569dbd6d 17-18,344,378-415,423-427,429-434,512-541,545,549-550,552,554-558
+  s_018ab5cb6ebd46::t_0eeb085d1ef81c 473,487-498
+  s_a3c0f7f08e0a3d::t_b33dd1d3d50b29 416-422,428
+src/common/core/antibot/plugin.json
+  s_018ab5cb6ebd46::t_1537951b1e5572 934,937
+  s_e659ce1032986e::t_5a4c3ab1f26d75 946
+  s_a3c0f7f08e0a3d::t_6507e593f185bd 14,25-26,930-933,935-936,938-942,944-945,947-954,956-963
+  s_018ab5cb6ebd46::t_7be1ea04276461 943,955,964-965
+tests/unit/common/test_antibot_challenge_coverage_lua.py
+  s_a3c0f7f08e0a3d::t_0af4250283cc17 114,410-411,532
+  s_e659ce1032986e::t_4445895be25f60 43-89,102-104,110-112,118,324-327,330-332,334,337,344,356,362-395,425,431
+  s_018ab5cb6ebd46::t_9d88be0297816a 328-329
+  s_e659ce1032986e::t_88418a57408c92 354
+  s_a3c0f7f08e0a3d::t_52e77551353a19 300
+  s_a3c0f7f08e0a3d::t_1b8baadafcd0c8 121,333,342,412
+  s_a3c0f7f08e0a3d::t_7fe04d9b5c71cc 8,129-130,287-299,301-321
+  s_a3c0f7f08e0a3d::t_745ae281bf56df 12,100-101,105-109,113,115-117,119-120,122-125,149-150,261-264,277-286,322-323,335-336,338-341,343,345-353,355,357-361,396-409,413-424,426-430,432-460
+  s_018ab5cb6ebd46::t_cc8f33543e3a49 461-462
+CHANGELOG.md
+  s_000280b736bb71::t_d4d9ab991b60d3 3-4,6
+  s_018ab5cb6ebd46::t_fa24fcc90dd46a 5
+src/common/core/antibot/README.de.md
+  s_018ab5cb6ebd46::t_0b1dce54962a08 284
+  s_caa357b0e6a002::t_06e2fa6431b0a6 285
+  s_0123470fef25c5::t_48f0e8d371b9f5 280-281,283,286-326
+  s_0123470fef25c5::t_f0363b3e5cea9b 282
+src/common/core/antibot/files/altcha_frame.html
+  s_d5d0aa6af1f2ce::t_181832d702c839 1
+  s_d5d0aa6af1f2ce::t_0c3edccdfd79df 2-15,19-48,53-61,72-82
+  s_d5d0aa6af1f2ce::t_b5b8d09ba66032 16-18,49-52,62-71
+src/common/core/antibot/README.md
+  s_018ab5cb6ebd46::t_0b1dce54962a08 284
+  s_caa357b0e6a002::t_06e2fa6431b0a6 285
+  s_0123470fef25c5::t_48f0e8d371b9f5 280-281,283,286-326
+  s_0123470fef25c5::t_f0363b3e5cea9b 282
+src/common/core/antibot/README.zh.md
+  s_caa357b0e6a002::t_06e2fa6431b0a6 285
+  s_0123470fef25c5::t_f0363b3e5cea9b 282
+  s_018ab5cb6ebd46::t_0b1dce54962a08 284
+  s_0123470fef25c5::t_48f0e8d371b9f5 280-281,283,286-326
+tests/unit/common/test_limit_behaviour_lua.py
+  s_018ab5cb6ebd46::t_81dff9b3cb30ea 187,206,208,216-220
+  s_a3c0f7f08e0a3d::t_276b213441f0b7 141,144-145,154-155,164-166,181-186,188-198,203,205,207,209,215
+  s_a3c0f7f08e0a3d::t_824b1d19a81a3a 7-9
+src/common/core/antibot/README.fr.md
+  s_0123470fef25c5::t_48f0e8d371b9f5 280-281,283,286-326
+  s_caa357b0e6a002::t_06e2fa6431b0a6 285
+  s_018ab5cb6ebd46::t_0b1dce54962a08 284
+  s_0123470fef25c5::t_f0363b3e5cea9b 282
+tests/unit/gen/test_altcha_settings.py
+  s_a3c0f7f08e0a3d::t_48157c00a020fa 1-4,7-17,20,22-23,28,32-45,67-71
+  s_a3c0f7f08e0a3d::t_53e8552043fcc2 5-6,72-75,94-99,101,103-110
+  s_e659ce1032986e::t_30552b0f66f416 27,29-31,47-63,65-66,82-84,86-93,100,102
+  s_a3c0f7f08e0a3d::t_1d0fadf87b8113 18-19,21,24-26,76-81
+  s_018ab5cb6ebd46::t_0eeb085d1ef81c 46,64,85
+tests/unit/common/test_altcha_fixture.py
+  s_f152a0f7f21c88::t_5cc779e2207f28 20-22,31
+  s_f152a0f7f21c88::t_68c3a0731b85ec 9,15-17,42,48
+  s_f152a0f7f21c88::t_8c6e661edc267d 1-8,10-14,18-19,23-30,32-41,43-47,49-94
+src/common/core/antibot/files/altcha.html
+  s_d5d0aa6af1f2ce::t_181832d702c839 1
+  s_d5d0aa6af1f2ce::t_8767177d580502 7-10,41-43,60-62,131-134,166-167,174-177,181-184,189-194,207-210
+  s_d5d0aa6af1f2ce::t_38ecac122fb52a 152
+  s_d5d0aa6af1f2ce::t_0c3edccdfd79df 2-6,11-40,44-59,63-130,135-151,153-165,168-173,178-180,185-188,195-206,211-214
+src/common/core/antibot/antibot.lua
+  s_a3c0f7f08e0a3d::t_f3e11b480b0f55 296-298
+  s_e659ce1032986e::t_f940cf61883d64 57,247,252-254,256-257,294,305,326-327,331-333,335-347,349,352-353,662-664
+  s_a3c0f7f08e0a3d::t_014fedbc304bb7 46,929,944-948,952
+  s_a3c0f7f08e0a3d::t_9ea75ec7619984 41,54-56,229-246,258-260,262-269,271,273-293,301-303,306-307,314,317-325,334,348,350-351,354-358,512-528,640-643,713-715,773-786,812,861-863,937-943,963-988,1350-1360
+  s_e659ce1032986e::t_cd118cdebaac87 328-330
+  s_a3c0f7f08e0a3d::t_1b2bfaeeeea2f1 304,308-313,315-316
+  s_018ab5cb6ebd46::t_1537951b1e5572 211-228,248-251,255,270,272
+  s_a3c0f7f08e0a3d::t_e8b4256bab8735 261,295,299-300
+  s_018ab5cb6ebd46::t_0d4e4e3a8dc907 644
+tests/unit/fixtures/altcha_v1.py
+  s_f152a0f7f21c88::t_7af06979a6cb4e 1-2,4-5,7-9,12-14,16-31,34-35,38,63-136
+  s_f152a0f7f21c88::t_cd7374ebb490fa 6,10-11,32-33,39,41,45-62
+  s_f152a0f7f21c88::t_eb0f50cb6a64eb 3,15,36-37
+  s_018ab5cb6ebd46::t_49fa5506cc1b75 40,42-44
+tests/unit/requirements.txt
+  s_f152a0f7f21c88::t_8c6e661edc267d 184-187
+src/common/core/limit/limit.lua
+  s_a3c0f7f08e0a3d::t_1f1b0335392e67 333-334,337,344
+  s_018ab5cb6ebd46::t_7e33d5f7fe4a42 329,335-336,338-343
+tests/unit/common/test_altcha_widget_templates.py
+  s_d5d0aa6af1f2ce::t_07bdc9f44f0458 70,82,84,93-94,98,100,110-118
+  s_d5d0aa6af1f2ce::t_0c3edccdfd79df 92
+  s_d5d0aa6af1f2ce::t_2e790c17ab1e67 1-69,71-81,83,85-91,95-97,99,101-109,119-121
+docs/features.md
+  s_0123470fef25c5::t_6beefa04097f65 624-625,627,630-670
+  s_caa357b0e6a002::t_06e2fa6431b0a6 629
+  s_0123470fef25c5::t_4467780b101d21 626
+  s_018ab5cb6ebd46::t_0b1dce54962a08 628
+docs/fr/features.md
+  s_018ab5cb6ebd46::t_0b1dce54962a08 628
+  s_0123470fef25c5::t_6beefa04097f65 624-625,627,630-670
+  s_caa357b0e6a002::t_06e2fa6431b0a6 629
+  s_0123470fef25c5::t_4467780b101d21 626
+tests/unit/gen/test_antibot_challenge_location.py
+  s_018ab5cb6ebd46::t_6710234b20f4f4 76-87
+src/common/core/antibot/confs/server-http/antibot.conf
+  s_018ab5cb6ebd46::t_b7031559d75a0c 2-11
+docs/de/features.md
+  s_caa357b0e6a002::t_06e2fa6431b0a6 630
+  s_018ab5cb6ebd46::t_0b1dce54962a08 629
+  s_0123470fef25c5::t_4467780b101d21 627
+  s_0123470fef25c5::t_6beefa04097f65 625-626,628,631-671
+docs/es/features.md
+  s_018ab5cb6ebd46::t_0b1dce54962a08 624
+  s_caa357b0e6a002::t_06e2fa6431b0a6 625
+  s_0123470fef25c5::t_6beefa04097f65 620-621,623,626-666
+  s_0123470fef25c5::t_4467780b101d21 622
+src/common/core/antibot/README.es.md
+  s_0123470fef25c5::t_f0363b3e5cea9b 278
+  s_caa357b0e6a002::t_06e2fa6431b0a6 281
+  s_018ab5cb6ebd46::t_0b1dce54962a08 280
+  s_0123470fef25c5::t_48f0e8d371b9f5 276-277,279,282-322
+docs/zh/features.md
+  s_caa357b0e6a002::t_06e2fa6431b0a6 631
+  s_0123470fef25c5::t_6beefa04097f65 626-627,629,632-672
+  s_018ab5cb6ebd46::t_0b1dce54962a08 630
+  s_0123470fef25c5::t_4467780b101d21 628
+tests/unit/requirements.in
+  s_f152a0f7f21c88::t_8c6e661edc267d 6
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.6",
+  "base_commit_sha": "fdea60e7ec6397efbd26dfba495d04971797e3d4",
+  "prompts": {},
+  "sessions": {
+    "s_000280b736bb71": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "24ad3e65-7386-451c-9ec0-0d665a65a9a0",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_0123470fef25c5": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a20d47-8b82-7202-abf3-a83ef2d9944a",
+        "model": "gpt-6.2-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_018ab5cb6ebd46": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a20d3d-4fdb-74b1-8d60-60bb8e0156e3",
+        "model": "gpt-6.2-astra"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_a3c0f7f08e0a3d": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a20d47-5957-74e2-be40-0e1fa813239c",
+        "model": "gpt-6.2-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_caa357b0e6a002": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a20da4-bde1-7c82-9953-8f47464ae3df",
+        "model": "gpt-6.2-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_d5d0aa6af1f2ce": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a20d47-6a3e-7490-82c0-285289494ca1",
+        "model": "gpt-6.2-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_e659ce1032986e": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a20da4-ae55-7b13-92b0-023601f4b905",
+        "model": "gpt-6.2-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_f152a0f7f21c88": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a20d47-7e36-72f2-a479-c3f014bf847c",
+        "model": "gpt-6.2-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}
