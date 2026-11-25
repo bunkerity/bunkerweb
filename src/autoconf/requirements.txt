@@ -646,9 +646,9 @@ idna==3.20 \
     # via
     #   requests
     #   yarl
-kubernetes==37.0.1 \
-    --hash=sha256:a313a482361506340b5972cabaf20a7ee16ec8713e73325bf699b783a40464a9 \
-    --hash=sha256:e41db0a95615c2388680a2d556df33fd0f27a5717c9b5df5857e475c196c2f10
+kubernetes==37.0.3 \
+    --hash=sha256:862069ade8490916018a0a4e303050700f96f887edb5ec25db325a5212cb3923 \
+    --hash=sha256:99a4d2154a884793e308e994a8808a64e548a17f2f525d52919eed1d9c2c58fe
     # via -r requirements.in
 multidict==7.2.1 \
     --hash=sha256:02009b402129a73e1f3da68f48eb999afbacd29f25aef0d5052b84ff5c2786a2 \
@@ -808,7 +808,9 @@ multidict==7.2.1 \
 oauthlib==4.0.1 \
     --hash=sha256:3d73febdb6faa00f277c81fb04be7b7586fb96fc3b7f0b9c772dada69a25ede7 \
     --hash=sha256:498a298876e996301950a5b053d12c31628bb7b895db03666430c69ce182eb61
-    # via requests-oauthlib
+    # via
+    #   kubernetes
+    #   requests-oauthlib
 packaging==26.3 \
     --hash=sha256:94edc256424af38762eb31306eed28beb9f0efc50a8837492c9d6fd6004aed79 \
     --hash=sha256:d7193f7c8e4e93f444fde0262bf90af30e16fa0ad0ad44cb553c87339b23cd1c
