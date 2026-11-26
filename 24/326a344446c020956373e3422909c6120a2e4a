@@ -1,0 +1,166 @@
+tests/unit/gen/test_mtls_cert_error_location.py
+  s_5c213f667b82a4::t_296bcca9b493e4 100-114
+  s_ea34bb6dd3208e::t_4dd7162c769145 71-91
+  s_5c213f667b82a4::t_d6b4b09af84899 1-70,92-99
+tests/unit/gen/test_mtls_fail_open_missing_ca_regression.py
+  s_5c213f667b82a4::t_4aec024f73af69 40-43
+docs/features.md
+  s_dd6adb35cf780b::t_e7f8fad7ada6de 4804
+  s_0d7c2b43fd6441::t_ecca024e127b06 4779,4795,4799-4800,4805-4812,4814-4820,4822-4826,4844-4853,4861,4863-4872,4888,4891,4909,4936-4937,4941-4947
+  s_8f711ebd7598d5::t_9d6d1d26bfa7d9 4821,4862
+  s_ea34bb6dd3208e::t_55d4b8cd14243a 4813,4829-4843
+src/common/core/mtls/misc/placeholder-ca.pem
+  s_5c213f667b82a4::t_2cf8f84fb6b974 2-13
+src/common/core/mtls/plugin.json
+  s_5c213f667b82a4::t_b950fda35b3843 66-84,137
+  s_8f711ebd7598d5::t_5326fc18332375 106
+  s_ea34bb6dd3208e::t_55d4b8cd14243a 59
+  s_5c213f667b82a4::t_07fe0f73b57418 49
+src/common/core/mtls/README.de.md
+  s_dd6adb35cf780b::t_e7f8fad7ada6de 34
+  s_8f711ebd7598d5::t_9d6d1d26bfa7d9 51,92
+  s_0d7c2b43fd6441::t_ecca024e127b06 171-177
+  s_0d7c2b43fd6441::t_56d8cfd68771ef 9,25,29-30,35-42,44-50,52-56,74-83,89-91,93-101,107,118,121,139,166-167
+  s_ea34bb6dd3208e::t_55d4b8cd14243a 43,59-73
+src/common/core/order.json
+  s_5c213f667b82a4::t_1f124c3ad2c873 34
+tests/unit/common/test_badbehavior_mtls_skip_lua.py
+  s_5c213f667b82a4::t_aa9865430f18d0 1-71
+src/common/core/mtls/README.fr.md
+  s_0d7c2b43fd6441::t_8109b6071129ab 5,9,14-17,21,23,25-27,29-30,35-42,44-50,52-54,56,74-83,91,93-102,118,121,127,139,150,166-167
+  s_8f711ebd7598d5::t_9d6d1d26bfa7d9 51,92
+  s_ea34bb6dd3208e::t_55d4b8cd14243a 43,59-73
+  s_dd6adb35cf780b::t_e7f8fad7ada6de 34
+  s_0d7c2b43fd6441::t_ecca024e127b06 171-177
+  s_0d7c2b43fd6441::t_317bb6740bad30 55
+docs/de/features.md
+  s_ea34bb6dd3208e::t_55d4b8cd14243a 4745,4761-4775
+  s_dd6adb35cf780b::t_e7f8fad7ada6de 4736
+  s_8f711ebd7598d5::t_9d6d1d26bfa7d9 4753,4794
+  s_0d7c2b43fd6441::t_ecca024e127b06 4711,4727,4731-4732,4737-4744,4746-4752,4754-4758,4776-4785,4791-4793,4795-4803,4809,4820,4823,4841,4868-4869,4873-4879
+docs/fr/features.md
+  s_ea34bb6dd3208e::t_55d4b8cd14243a 4696,4712-4726
+  s_8f711ebd7598d5::t_9d6d1d26bfa7d9 4704,4745
+  s_dd6adb35cf780b::t_e7f8fad7ada6de 4687
+  s_0d7c2b43fd6441::t_7ad16b6eea10ae 4708
+  s_0d7c2b43fd6441::t_ecca024e127b06 4658,4662,4667-4670,4674,4676,4678-4680,4682-4683,4688-4695,4697-4703,4705-4707,4709,4727-4736,4744,4746-4755,4771,4774,4780,4792,4803,4819-4820,4824-4830
+src/common/core/mtls/README.md
+  s_dd6adb35cf780b::t_e7f8fad7ada6de 34
+  s_0d7c2b43fd6441::t_fcbff146ae37ed 40
+  s_0d7c2b43fd6441::t_ecca024e127b06 171-177
+  s_8f711ebd7598d5::t_9d6d1d26bfa7d9 51,92
+  s_0d7c2b43fd6441::t_60255a8574616b 42
+  s_0d7c2b43fd6441::t_bbcb87efa6dcb7 9,25,29-30,35-39,41,44-50,52-56,74-83,91,93-101,139,166-167
+  s_ea34bb6dd3208e::t_55d4b8cd14243a 43,59-73
+  s_0d7c2b43fd6441::t_4e4be0536ed137 118
+  s_0d7c2b43fd6441::t_d189a91daf29ae 121
+  s_0d7c2b43fd6441::t_6469578aac7893 102
+tests/unit/common/_lua_request_helpers.py
+  s_5c213f667b82a4::t_29c6cf0f5d5d7a 204-208
+  s_5c213f667b82a4::t_0abffc860b3c82 21
+  s_5c213f667b82a4::t_5e11a542d3b898 229
+  s_5c213f667b82a4::t_a9dec34b4fd21d 228,230
+  s_5c213f667b82a4::t_318ee03e9cdf28 81
+tests/unit/common/test_mtls_request_path_lua.py
+  s_5c213f667b82a4::t_88a23a39da1c40 295,314
+  s_5c213f667b82a4::t_03a077671f8ec5 242
+  s_5c213f667b82a4::t_bfa18befadc15f 176-177
+  s_5c213f667b82a4::t_933f95ed634f1f 62
+  s_dd6adb35cf780b::t_779ed9fdd85cf7 339-398
+  s_5c213f667b82a4::t_5a4b9b17c27fdb 209
+  s_5c213f667b82a4::t_7661c0be13ad32 1-61,63-175,178-208,210-241,243-294,296-313,315-327
+  s_5c213f667b82a4::t_d1f4ad52655308 328-338
+CHANGELOG.md
+  s_0d7c2b43fd6441::t_1debc8593e8acd 5-8,10
+src/common/core/mtls/confs/http/mtls.conf
+  s_ea34bb6dd3208e::t_a7ee4a7a94e7b2 1-8
+src/common/core/mtls/README.es.md
+  s_0d7c2b43fd6441::t_ecca024e127b06 171-177
+  s_ea34bb6dd3208e::t_55d4b8cd14243a 43,59-73
+  s_8f711ebd7598d5::t_9d6d1d26bfa7d9 51,92
+  s_dd6adb35cf780b::t_e7f8fad7ada6de 34
+  s_0d7c2b43fd6441::t_3bb3a5fd5a0389 9,25,29-30,35-42,44-50,52-56,74-83,91,93-102,118,139,166-167
+src/common/core/badbehavior/badbehavior.lua
+  s_5c213f667b82a4::t_1f124c3ad2c873 22,47-57,83-87
+src/common/core/mtls/confs/server-http/mtls.conf
+  s_5c213f667b82a4::t_8166728ddfff03 20,22-34,39-46
+  s_5c213f667b82a4::t_e347bc7f680a78 21
+  s_5c213f667b82a4::t_da1a4cd06832d0 35-38
+src/common/core/mtls/README.zh.md
+  s_0d7c2b43fd6441::t_ecca024e127b06 171-177
+  s_0d7c2b43fd6441::t_0d67918f28049e 9,25,29-30,35-42,44-50,52-56,74-83,91,93-102,118,121,139,166-167
+  s_8f711ebd7598d5::t_9d6d1d26bfa7d9 51,92
+  s_ea34bb6dd3208e::t_55d4b8cd14243a 43,59-73
+  s_dd6adb35cf780b::t_e7f8fad7ada6de 34
+docs/zh/features.md
+  s_0d7c2b43fd6441::t_ecca024e127b06 4773,4789,4793-4794,4799-4806,4808-4814,4816-4820,4838-4847,4855,4857-4866,4882,4885,4903,4930-4931,4935-4941
+  s_8f711ebd7598d5::t_9d6d1d26bfa7d9 4815,4856
+  s_dd6adb35cf780b::t_e7f8fad7ada6de 4798
+  s_ea34bb6dd3208e::t_55d4b8cd14243a 4807,4823-4837
+tests/unit/common/test_mtls_behaviour_lua.py
+  s_5c213f667b82a4::t_f1185c1d337b78 37
+  s_5c213f667b82a4::t_4d6c9ff110944f 82
+  s_5c213f667b82a4::t_d4aafa08a67731 18
+src/common/settings.json
+  s_dd6adb35cf780b::t_9f86d067f99df6 554
+docs/es/features.md
+  s_ea34bb6dd3208e::t_55d4b8cd14243a 4797,4813-4827
+  s_8f711ebd7598d5::t_9d6d1d26bfa7d9 4805,4846
+  s_dd6adb35cf780b::t_e7f8fad7ada6de 4788
+  s_0d7c2b43fd6441::t_ecca024e127b06 4763,4779,4783-4784,4789-4796,4798-4804,4806-4810,4828-4837,4845,4847-4856,4872,4893,4920-4921,4925-4931
+src/common/core/mtls/mtls.lua
+  s_5c213f667b82a4::t_b950fda35b3843 314
+  s_5c213f667b82a4::t_5e11a542d3b898 1
+  s_5c213f667b82a4::t_ae1cb295ea6baa 126-209,216-221,226-230,232-234,236-259,275,283-313,315-323
+  s_5c213f667b82a4::t_d8080b3cfc59e5 11,16-17,19-23,26-28
+  s_5c213f667b82a4::t_3cab6a6745a083 29
+  s_5c213f667b82a4::t_39c6532ecafdd2 324
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.6",
+  "base_commit_sha": "24326a344446c020956373e3422909c6120a2e4a",
+  "prompts": {},
+  "sessions": {
+    "s_0d7c2b43fd6441": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "aff2e906-a531-4e55-9206-1a75de03a589",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_5c213f667b82a4": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "d71f4a59-9fe6-4b62-8a85-46cbc4836031",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_8f711ebd7598d5": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "2c4fc835-2721-47ba-a5f1-e54e906194d4",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_dd6adb35cf780b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "6ccf868d-65d0-448f-adf8-aa7740d930ec",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_ea34bb6dd3208e": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "04021c73-64da-4f21-9789-fc7ab6396dc5",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}
