@@ -390,6 +390,18 @@ function bunkernet:request(method, url, data)
 	-- UI ping or init_worker (matches the 5s timeout used in jobs/bunkernet.py).
 	httpc:set_timeout(5000)
 
+	-- Match the scheduler's outbound proxy environment (lowercase takes precedence).
+	local http_proxy = os.getenv("http_proxy") or os.getenv("HTTP_PROXY")
+	local https_proxy = os.getenv("https_proxy") or os.getenv("HTTPS_PROXY")
+	local no_proxy = os.getenv("no_proxy") or os.getenv("NO_PROXY")
+	if http_proxy or https_proxy then
+		httpc:set_proxy_options({
+			http_proxy = http_proxy ~= "" and http_proxy or nil,
+			https_proxy = https_proxy ~= "" and https_proxy or nil,
+			no_proxy = no_proxy,
+		})
+	end
+
 	local os_data = {
 		name = "Linux",
 		version = "Unknown",
