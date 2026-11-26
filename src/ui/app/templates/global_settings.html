@@ -61,6 +61,46 @@
             </div>
         </div>
     </div>
+    <div class="modal fade"
+         id="modal-confirm-proxy-protocol"
+         tabindex="-1"
+         aria-hidden="true"
+         aria-labelledby="confirm-proxy-protocol-title"
+         aria-describedby="confirm-proxy-protocol-description">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"
+                        id="confirm-proxy-protocol-title"
+                        data-i18n="modal.title.enable_proxy_protocol">Enable PROXY protocol?</h5>
+                    <button type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal"
+                            aria-label="Close"
+                            data-i18n="aria.label.close"></button>
+                </div>
+                <div class="modal-body">
+                    <p id="confirm-proxy-protocol-description"
+                       data-i18n="modal.body.enable_proxy_protocol">
+                        With PROXY protocol enabled, BunkerWeb refuses every connection that does not start with a PROXY protocol header. If no load balancer or proxy in front of BunkerWeb sends that header, all your services stop answering, including this web UI when it is reached through BunkerWeb.
+                    </p>
+                    <p class="mb-0" data-i18n="modal.body.enable_proxy_protocol_hint">
+                        Only enable it if every client reaches BunkerWeb through such a load balancer or proxy.
+                    </p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button"
+                            class="btn btn-outline-secondary"
+                            data-bs-dismiss="modal"
+                            data-i18n="button.cancel">Cancel</button>
+                    <button type="button"
+                            class="btn btn-danger"
+                            id="confirm-enable-proxy-protocol"
+                            data-i18n="button.enable_and_save">Enable and save</button>
+                </div>
+            </div>
+        </div>
+    </div>
     <!-- / Content -->
 {% endblock %}
 {% block scripts %}
