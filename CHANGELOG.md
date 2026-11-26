@@ -7,6 +7,7 @@
 - [SECURITY] `mtls`: the placeholder CA used while no client CA is configured is regenerated, and its private key is never stored.
 - [BREAKING] `mtls`: a missing or invalid client certificate no longer counts toward Bad Behavior bans and gets BunkerWeb's 400 page. `MTLS_COUNT_BAD_BEHAVIOR=yes` counts it again.
 - [FEATURE] `antibot`: add opt-in, self-hosted ALTCHA proof-of-work challenges. Thanks to @Marvo2011 for the original PR #2922. (Fixes #2675)
+- [FEATURE] `mtls`: the `client-cert` job runs hourly and reports expired, expiring or missing CRLs and expired or non-CA bundle certificates.
 - [FEATURE] `mtls`: an invalid `MTLS_URL` regex is logged at startup with the service and the pattern.
 
 ## v1.6.19~rc1 - 2026/11/23

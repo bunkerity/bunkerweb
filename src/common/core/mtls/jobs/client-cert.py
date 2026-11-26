@@ -6,9 +6,13 @@ from pathlib import Path
 from subprocess import DEVNULL, PIPE, run
 from sys import exit as sys_exit, path as sys_path
 from base64 import b64decode
+from datetime import datetime, timedelta, timezone
 from tempfile import NamedTemporaryFile
 from traceback import format_exc
 from typing import Tuple, Union, Optional
+
+from cryptography import x509
+from cryptography.hazmat.primitives import hashes
 
 for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("utils",), ("db",))]:
     if deps_path not in sys_path:
@@ -24,6 +28,10 @@ JOB = Job(LOGGER, __file__)
 
 CA_CACHE_NAME = "ca.pem"
 CRL_CACHE_NAME = "crl.pem"
+CRL_END_MARKER = b"-----END X509 CRL-----"
+# Operators get a warning this long before a CRL or a CA certificate stops being usable.
+CRL_WARNING_DAYS = 7
+CERTIFICATE_WARNING_DAYS = 30
 
 
 def process_pem_data(data: str, file_path: Optional[str], kind: str, server_name: str) -> Union[bytes, Path, None]:
@@ -109,7 +117,7 @@ def validate_pair(ca_file: bytes, crl_file: Optional[bytes], server_name: str) -
             if crl_file is not None:
                 # OpenSSL's crl command reads one PEM object. Verify every CRL in a bundle,
                 # otherwise an invalid second issuer can reach NGINX unchecked.
-                end_marker = b"-----END X509 CRL-----"
+                end_marker = CRL_END_MARKER
                 blocks = crl_file.split(end_marker)
                 if len(blocks) < 2 or blocks[-1].strip():
                     return "CRL bundle is invalid."
@@ -129,11 +137,12 @@ def validate_pair(ca_file: bytes, crl_file: Optional[bytes], server_name: str) -
                             return "CRL is invalid."
                         issuer_dn = issuer.stdout.strip().removeprefix(b"issuer=").strip()
                         if issuer_dn not in subjects:
-                            # NGINX checks the leaf only and builds the chain from the intermediates the
-                            # peer sends, so a CRL issued by a CA outside the bundle is a valid setup.
+                            # NGINX sets X509_V_FLAG_CRL_CHECK | X509_V_FLAG_CRL_CHECK_ALL and builds the chain
+                            # from the intermediates the peer sends, so a CRL issued by a CA outside the bundle
+                            # is a valid setup: it applies to the clients whose chain carries that CA.
                             LOGGER.warning(
                                 f"CRL issuer {issuer_dn.decode(errors='replace')} is not part of {server_name}'s client CA bundle; "
-                                "publishing it unverified (NGINX validates the chain with the intermediates the client presents)"
+                                "publishing it unverified (it only applies to clients whose chain includes that CA)"
                             )
                             continue
                         # `openssl crl -verify` only tries the first store entry whose subject matches the
@@ -159,6 +168,89 @@ def validate_pair(ca_file: bytes, crl_file: Optional[bytes], server_name: str) -
         return ""
     except BaseException as e:
         return e
+
+
+def describe_ca(certificate: x509.Certificate) -> str:
+    # The serial tells apart two CA certificates that share one subject (a key rollover).
+    return f"{certificate.subject.rfc4514_string()} (serial {certificate.serial_number:x})"
+
+
+def format_moment(moment: datetime) -> str:
+    return moment.strftime("%Y-%m-%d %H:%M UTC")
+
+
+def is_ca_certificate(certificate: x509.Certificate) -> bool:
+    try:
+        return certificate.extensions.get_extension_for_class(x509.BasicConstraints).value.ca
+    except x509.ExtensionNotFound:
+        return False
+
+
+def check_bundle_health(ca_file: bytes, crl_file: Optional[bytes], server_name: str) -> None:
+    """Log what would make NGINX refuse clients. The material is published either way: NGINX fails closed
+    and keeping older material is no better. Never raises and never changes the outcome of the run."""
+    try:
+        now = datetime.now(timezone.utc)
+        certificates = list({certificate.fingerprint(hashes.SHA256()): certificate for certificate in x509.load_pem_x509_certificates(ca_file)}.values())
+        prefix = f"Service {server_name}:"
+
+        for certificate in certificates:
+            expires = certificate.not_valid_after_utc
+            if expires < now:
+                LOGGER.error(
+                    f"{prefix} client CA certificate {describe_ca(certificate)} expired on {format_moment(expires)}; clients whose chain goes through it are refused"
+                )
+            elif expires - now <= timedelta(days=CERTIFICATE_WARNING_DAYS):
+                LOGGER.warning(
+                    f"{prefix} client CA certificate {describe_ca(certificate)} expires on {format_moment(expires)} "
+                    f"(within {CERTIFICATE_WARNING_DAYS} days); replace it before then or clients whose chain goes through it are refused"
+                )
+            if not is_ca_certificate(certificate):
+                LOGGER.warning(
+                    f"{prefix} client CA certificate {describe_ca(certificate)} is not a CA (basicConstraints CA:FALSE or absent); "
+                    "clients cannot chain through it"
+                )
+
+        if crl_file is None:
+            return
+
+        # A CRL covers the CA certificate whose key verifies its signature, not every certificate sharing the issuer name.
+        covered = set()
+        for block in crl_file.split(CRL_END_MARKER)[:-1]:
+            crl = x509.load_pem_x509_crl(block + CRL_END_MARKER + b"\n")
+            signers = []
+            for certificate in certificates:
+                try:
+                    if certificate.subject == crl.issuer and crl.is_signature_valid(certificate.public_key()):  # type: ignore[arg-type]  # an unsupported key type raises and is skipped below
+                        signers.append(certificate)
+                except Exception:
+                    LOGGER.debug(format_exc())
+            covered.update(certificate.fingerprint(hashes.SHA256()) for certificate in signers)
+            signer = ", ".join(describe_ca(certificate) for certificate in signers) or crl.issuer.rfc4514_string()
+
+            next_update = crl.next_update_utc
+            if next_update is None:
+                continue
+            if next_update < now:
+                LOGGER.error(
+                    f"{prefix} CRL signed by {signer} expired on {format_moment(next_update)} (nextUpdate); "
+                    "clients whose chain goes through that CA are refused until a fresh CRL is published"
+                )
+            elif next_update - now <= timedelta(days=CRL_WARNING_DAYS):
+                LOGGER.warning(
+                    f"{prefix} CRL signed by {signer} expires on {format_moment(next_update)} (nextUpdate, within {CRL_WARNING_DAYS} days); "
+                    "publish a fresh CRL before then or clients whose chain goes through that CA are refused"
+                )
+
+        for certificate in certificates:
+            if is_ca_certificate(certificate) and certificate.fingerprint(hashes.SHA256()) not in covered:
+                LOGGER.warning(
+                    f"{prefix} no CRL issued by {describe_ca(certificate)}: certificates issued by that CA cannot be checked, "
+                    "so clients whose chain includes one are refused"
+                )
+    except BaseException as e:
+        LOGGER.debug(format_exc())
+        LOGGER.warning(f"Could not check the client CA bundle and CRL of {server_name} for expiry and coverage: {e}")
 
 
 def publish_pair(ca_file: Optional[bytes], crl_file: Optional[bytes], first_server: str) -> Tuple[bool, Union[str, BaseException]]:
@@ -315,6 +407,8 @@ try:
             LOGGER.error(f"Error while checking {first_server}'s client CA bundle and CRL: {err}; {fallback}")
             failed = True
             continue
+
+        check_bundle_health(ca_file, crl_file, first_server)
 
         need_reload, err = publish_pair(ca_file, crl_file, first_server)
         changed = changed or need_reload
