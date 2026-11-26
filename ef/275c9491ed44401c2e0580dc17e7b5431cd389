@@ -1,0 +1,25 @@
+tests/unit/common/test_dispatcher_verdict_wording_lua.py
+  s_ea34bb6dd3208e::t_5b0071b1f9741b 115
+  s_ea34bb6dd3208e::t_cbc92eff5172f5 138
+  s_ea34bb6dd3208e::t_c836fb089a27fe 1-114,116-137,139-186
+src/common/confs/server-http/log-lua.conf
+  s_ea34bb6dd3208e::t_02ec498a20a64b 93-95
+src/common/confs/server-http/access-lua.conf
+  s_ea34bb6dd3208e::t_de57d981b9769e 169-172
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.6",
+  "base_commit_sha": "ef275c9491ed44401c2e0580dc17e7b5431cd389",
+  "prompts": {},
+  "sessions": {
+    "s_ea34bb6dd3208e": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "04021c73-64da-4f21-9789-fc7ab6396dc5",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}
