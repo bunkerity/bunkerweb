@@ -557,6 +557,22 @@ def test_stream_tracks_the_resource_version_and_restarts_after_a_long_clean_clos
     assert [e["id"] for e in got] == [1, 2]
     assert fake_watch.calls[1][2] == "7"
     assert fake_watch.calls[0][1]["timeout_seconds"] == module.WATCH_TIMEOUT_SECONDS
+    assert fake_watch.calls[0][1]["allow_watch_bookmarks"] is True
+
+
+def test_bookmark_event_updates_resource_version_without_yielding(ctrl, fake_watch):
+    bookmark_event = {
+        "type": "BOOKMARK",
+        "raw_object": {"metadata": {"resourceVersion": "99"}},
+    }
+    real_event = {"type": "ADDED", "id": 1, "raw_object": None}
+    fake_watch.script += [[bookmark_event, real_event], Stop()]
+
+    gen = ctrl._get_stream_with_retries("pod", "lister")
+    got = next(gen)
+
+    assert got["id"] == 1
+    assert fake_watch.calls[0][1]["allow_watch_bookmarks"] is True
 
 
 def test_expired_resource_version_resets_the_stream_without_sleeping(ctrl, fake_watch):
@@ -570,6 +586,18 @@ def test_expired_resource_version_resets_the_stream_without_sleeping(ctrl, fake_
     assert fake_watch.sleeps == [5]
     assert log.has("resetting watch stream", logging.DEBUG)
     assert fake_watch.calls[1][2] is None
+
+
+def test_expired_resource_version_refreshes_from_callable_lister(ctrl, fake_watch):
+    fake_watch.script += [ApiException(status=410, reason="Expired: too old resource version: 5 (9)"), []]
+    lister = MagicMock(return_value=SimpleNamespace(metadata=SimpleNamespace(resource_version="42")))
+
+    gen = ctrl._get_stream_with_retries("pod", lister, retries=2)
+    with pytest.raises(RuntimeError):
+        next(gen)
+
+    lister.assert_called_once_with(watch=False, limit=1, _request_timeout=module.API_REQUEST_TIMEOUT)
+    assert fake_watch.calls[1][2] == "42"
 
 
 @pytest.mark.parametrize(
