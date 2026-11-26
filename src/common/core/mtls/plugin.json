@@ -46,7 +46,7 @@
     "MTLS_VERIFY_CLIENT": {
       "context": "multisite",
       "default": "on",
-      "help": "Client verification mode. 'on' requires a valid certificate, 'optional' lets requests through when no certificate is presented, and 'optional_no_ca' skips CA validation (diagnostics only, not real protection).",
+      "help": "Client verification mode. 'on' requires a valid certificate on every HTTPS request. 'optional' asks for a certificate, refuses an invalid one and enforces nothing more unless MTLS_URL is set. 'optional_no_ca' asks for a certificate without validating it against a CA (diagnostics only, not real protection) and enforces nothing without MTLS_URL either. Plain HTTP follows MTLS_HTTP_POLICY.",
       "id": "mtls-verify-client",
       "label": "Verify client mode",
       "regex": "^(on|optional|optional_no_ca)$",
@@ -56,12 +56,31 @@
     "MTLS_URL": {
       "context": "multisite",
       "default": "",
-      "help": "Regex matched against the request URI to require a valid client certificate only on matching paths (HTTP only). Set MTLS_VERIFY_CLIENT to optional so the handshake completes for non-matching paths; enforcement runs per-request in Lua. An invalid regex fails closed (matching requests are denied and logged) instead of being silently allowed. Use numbered slots for several paths (MTLS_URL_1, MTLS_URL_2). Leave empty to enforce mTLS on the whole site.",
+      "help": "Regex on the normalized request URI, case-sensitive ((?i) to ignore case), anchored on a directory: an index redirect skips a rule anchored on a file name. Requires a valid client certificate only on matching paths (HTTP only): set MTLS_VERIFY_CLIENT to optional. Runs before the whitelist (PLUGINS_ORDER_ACCESS). An invalid regex is reported at startup and fails closed. Several paths: MTLS_URL_1, MTLS_URL_2. Empty: no per-path rule (the whole site needs MTLS_VERIFY_CLIENT=on).",
       "id": "mtls-url",
       "label": "mTLS URL",
       "regex": "^.*$",
       "type": "text",
       "multiple": "mtls"
+    },
+    "MTLS_HTTP_POLICY": {
+      "context": "multisite",
+      "default": "redirect",
+      "help": "What to do with a plain HTTP request that mTLS should have protected: every path when MTLS_VERIFY_CLIENT is on, the MTLS_URL paths otherwise (nothing under optional or optional_no_ca without MTLS_URL). 'redirect' sends it to HTTPS (denied when there is no usable Host), 'deny' refuses it, 'allow' serves it as before for server-wide mode (MTLS_URL paths stay denied). An HTTPS redirect already issued by the SSL plugin comes first, and ACME HTTP-01 challenges that a solver owns are never touched.",
+      "id": "mtls-http-policy",
+      "label": "HTTP policy",
+      "regex": "^(redirect|deny|allow)$",
+      "type": "select",
+      "select": ["redirect", "deny", "allow"]
+    },
+    "MTLS_COUNT_BAD_BEHAVIOR": {
+      "context": "multisite",
+      "default": "no",
+      "help": "Let Bad Behavior count the failures mTLS itself causes: the 400 nginx answers when the client certificate is missing or invalid, and the mTLS denials (per-path rule, HTTP policy). When no, a client without a valid certificate is never banned for that alone; other 400 errors on the service still count.",
+      "id": "mtls-count-bad-behavior",
+      "label": "Count mTLS failures in Bad Behavior",
+      "regex": "^(yes|no)$",
+      "type": "check"
     },
     "MTLS_VERIFY_DEPTH": {
       "context": "multisite",
@@ -84,7 +103,7 @@
     "MTLS_CRL": {
       "context": "multisite",
       "default": "",
-      "help": "Optional path to a certificate revocation list (PEM), readable by the Scheduler, which validates it, caches it, and distributes it to every instance (priority 'file'). Leave empty to skip CRL checks.",
+      "help": "Optional path to a certificate revocation list (PEM), readable by the Scheduler, which validates it, caches it, and distributes it to every instance (priority 'file'). nginx needs a CRL from every CA that issues a certificate of the chain, the root included, and refuses every client of a chain whose CRL is past its next update. A revoked certificate can keep resuming a TLS session saved before the CRL was published, for up to a day, until nginx is restarted. Leave empty to skip CRL checks.",
       "id": "mtls-crl",
       "label": "Client CRL path",
       "regex": "^$|^(/[\\w. \\-]+)+/?$",
@@ -115,7 +134,7 @@
     {
       "name": "client-cert",
       "file": "client-cert.py",
-      "every": "day",
+      "every": "hour",
       "reload": true,
       "async": true
     }

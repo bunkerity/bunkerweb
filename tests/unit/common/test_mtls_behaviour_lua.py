@@ -15,7 +15,7 @@ def access(urls, uri, verify=None, *, enabled="yes", scope="global"):
 VARIABLES = {{ USE_MTLS = "{enabled}" }}
 STORE["plugin_mtls_configs"] = {{ ["{scope}"] = {{ {lua_urls} }} }}
 {verify_line}
-local r = PLUGIN:new(ctx({{ uri = "{uri}" }})):access()
+local r = PLUGIN:new(ctx({{ uri = "{uri}", scheme = "https" }})):access()
 emit("msg", r.msg) emit("status", r.status) emit("id", r.data and r.data.id)
 emit("verify", r.data and r.data.verify) emit("error", r.data and r.data.error) emit("metrics", metric_keys())
 """,
@@ -34,7 +34,7 @@ def test_service_without_per_path_rules_leaves_enforcement_to_the_tls_layer():
         r"""
 VARIABLES = { USE_MTLS = "yes" }
 STORE["plugin_mtls_configs"] = {}
-local r = PLUGIN:new(ctx()):access()
+local r = PLUGIN:new(ctx({ scheme = "https" })):access()
 emit("msg", r.msg) emit("status", r.status)
 """,
     )
@@ -79,7 +79,7 @@ def test_server_rules_replace_the_global_ones():
         r"""
 VARIABLES = { USE_MTLS = "yes" }
 STORE["plugin_mtls_configs"] = { global = { "^/g" }, ["www.example.com"] = { "^/s" } }
-local r = PLUGIN:new(ctx({ uri = "/g" })):access()
+local r = PLUGIN:new(ctx({ uri = "/g", scheme = "https" })):access()
 emit("msg", r.msg) emit("status", r.status)
 """,
     )

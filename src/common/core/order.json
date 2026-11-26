@@ -31,6 +31,7 @@
   "ssl_certificate": ["customcert", "letsencrypt", "selfsigned"],
   "access": [
     "ssl",
+    "mtls",
     "whitelist",
     "letsencrypt",
     "blacklist",

@@ -18,6 +18,7 @@ import pytest
 
 ROOT = Path(__file__).resolve().parents[3]
 CORE = ROOT / "src" / "common" / "core"
+ACME = ROOT / "src" / "bw" / "lua" / "bunkerweb" / "acme.lua"
 
 LUA = shutil.which("lua") or shutil.which("lua5.4") or shutil.which("luajit")
 requires_lua = pytest.mark.skipif(LUA is None, reason="no lua interpreter on PATH")
@@ -77,7 +78,7 @@ function emit(key, value) print(key .. "\t" .. tostring(value)) end
 -- ---------------------------------------------------------------- ngx
 ngx = {
     ERR = "ERR", WARN = "WARN", INFO = "INFO", OK = 0,
-    HTTP_UNAUTHORIZED = 401, HTTP_BAD_REQUEST = 400, HTTP_NOT_ALLOWED = 405,
+    HTTP_UNAUTHORIZED = 401, HTTP_BAD_REQUEST = 400, HTTP_NOT_ALLOWED = 405, HTTP_MOVED_PERMANENTLY = 301,
     HTTP_TOO_MANY_REQUESTS = 429, HTTP_CLOSE = 444,
     var = {}, header = {},
     config = { subsystem = "__SUBSYSTEM__" },
@@ -200,6 +201,11 @@ package.loaded["resty.random"] = { bytes = function(len) return string.rep("\1",
 package.loaded["resty.template"] = { render = function(name, data) RENDERED = { name = name, data = data } end }
 package.loaded["ngx.ssl.clienthello"] = { get_client_hello_server_name = function() return SNI, SNI_ERR end }
 
+-- The real prefix check of bunkerweb.acme; whether a local solver owns a token (a file read) is the scenario's call.
+ACME_LOCAL = false
+package.loaded["bunkerweb.acme"] = dofile("__ACME__")
+package.loaded["bunkerweb.acme"].is_http_challenge = function() return ACME_LOCAL end
+
 PLUGIN = dofile("__MODULE__")
 
 -- Request context; `over` patches ctx.bw.
@@ -219,7 +225,9 @@ end
 def run(plugin: str, body: str, *, subsystem: str = "http") -> dict[str, str]:
     assert LUA is not None
     base = Path(os.environ.get("BW_UNIT_LUA_CORE_DIR") or CORE)
-    script = HARNESS.replace("__MODULE__", str(base / plugin / f"{plugin}.lua")).replace("__SUBSYSTEM__", subsystem) + "\n" + body
+    script = (
+        HARNESS.replace("__MODULE__", str(base / plugin / f"{plugin}.lua")).replace("__ACME__", str(ACME)).replace("__SUBSYSTEM__", subsystem) + "\n" + body
+    )
     result = subprocess.run([LUA, "-"], input=script, capture_output=True, text=True, check=False)
     assert result.returncode == 0, result.stdout + result.stderr
     out = {}

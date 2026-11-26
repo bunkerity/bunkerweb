@@ -19,6 +19,7 @@ local is_ip_whitelisted = utils.is_ip_whitelisted
 local is_banned = utils.is_banned
 local get_country = utils.get_country
 local get_security_mode = utils.get_security_mode
+local get_variable = utils.get_variable
 local parse_duration = utils.parse_duration
 local tostring = tostring
 local time = os.time
@@ -41,6 +42,17 @@ end
 function badbehavior:initialize(ctx)
 	-- Call parent initialize
 	plugin.initialize(self, "badbehavior", ctx)
+end
+
+-- A failure mTLS itself caused: its own denial (the access phase recorded the reason) or the 400 nginx
+-- answers for a client certificate that is missing or invalid (495/496), which the mTLS error location
+-- marks while nginx still tells that apart from any other 400.
+function badbehavior:is_mtls_failure()
+	local reason = self.ctx.bw.reason
+	if reason == nil or reason == "" then
+		reason = var.reason
+	end
+	return reason == "mtls" or var.mtls_cert_error == "yes"
 end
 
 function badbehavior:log()
@@ -67,6 +79,11 @@ function badbehavior:log()
 	local status = tostring(ngx.status)
 	if not (" " .. self.variables["BAD_BEHAVIOR_STATUS_CODES"] .. " "):find(" " .. status .. " ", 1, true) then
 		return self:ret(true, "not increasing counter")
+	end
+	-- MTLS_COUNT_BAD_BEHAVIOR (default no): the mTLS failures above do not count, so a client without a valid
+	-- certificate is not banned for that alone. Any other 400 on the same service still counts.
+	if self:is_mtls_failure() and get_variable("MTLS_COUNT_BAD_BEHAVIOR", true, self.ctx) ~= "yes" then
+		return self:ret(true, "mTLS failure, not counted (MTLS_COUNT_BAD_BEHAVIOR=no)")
 	end
 	-- Fast path: access phase already flagged this request as banned.
 	-- Reliable even when Redis cosockets are unreachable from log_by_lua*.

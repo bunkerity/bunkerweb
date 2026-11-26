@@ -37,7 +37,10 @@ def render_block(render, kind, **variables):
     if kind == "stream":
         base["SERVER_TYPE"] = "stream"
     tree = render(**(base | variables))
-    return [line.strip() for line in tree[BLOCKS[kind]].splitlines() if line.strip() and not line.strip().startswith("#")]
+    lines = [line.strip() for line in tree[BLOCKS[kind]].splitlines() if line.strip() and not line.strip().startswith("#")]
+    # The 495/496 error location that follows the verification directives has its own tests (test_mtls_cert_error_location.py).
+    cut = next((i for i, line in enumerate(lines) if line.startswith("error_page")), len(lines))
+    return lines[:cut]
 
 
 @pytest.mark.parametrize("kind", BLOCKS)
