@@ -126,9 +126,9 @@ certbot-dns-domeneshop==0.2.9 \
     --hash=sha256:9e65048c3a58ee52cbbca5af85944ff736727c43677941aaee0a0ffb9da84f30 \
     --hash=sha256:a3bb383620017db55b2eb47c224364a4cbaf82c1a890d2545e86f267aef0b8f2
     # via -r requirements.in
-certbot-dns-duckdns==1.9.0 \
-    --hash=sha256:006b194b23b1f1e77eb8842abcc42c276410b669d55b0340e001d6ec87cd4b0b \
-    --hash=sha256:0fd37d2a5cb3a636f0812fb65f60034f5dcb98a55d84c752590ab15c4b44f307
+certbot-dns-duckdns==1.10.0 \
+    --hash=sha256:8e5fe08a59c0a30c353aab3d97f56cc1fc1c369d1d7639e3e76206b56c66c93c \
+    --hash=sha256:a5345d6027d790e3bd95477056b1f641d2dbc5e4d1754262b415a2dedd81fb65
     # via -r requirements.in
 certbot-dns-dynu==0.0.6.post2502111739272536 \
     --hash=sha256:3bca6343a5e962bdc666301228dcc73c6b3ebef9f2921d8afe1a56f1450d9229
@@ -1164,15 +1164,6 @@ s3transfer==0.19.3 \
 schedule==1.2.2 \
     --hash=sha256:15fe9c75fe5fd9b9627f3f19cc0ef1420508f9f9a46f45cd0769ef75ede5f0b7 \
     --hash=sha256:5bef4a2a0183abf44046ae0d164cadcac21b1db011bdd8102e4a0c1e91e06a7d
-    # via
-    #   certbot-dns-cloudns
-    #   certbot-dns-domainoffensive
-    #   certbot-dns-domeneshop
-
-# The following packages are considered to be unsafe in a requirements file:
-setuptools==84.2.1 \
-    --hash=sha256:3ff8b3b5492a0aa66960f4419365a86b84e013070d4313e4d4a6894f5d64d6bc \
-    --hash=sha256:ca140b45d5325a9478f880e351484f62fef15f336462e449ca0c03c873d589c2
     # via -r requirements.in
 six==1.17.0 \
     --hash=sha256:4721f391ed90541fddacab5acf947aa0d3dc7d27b2e1e8eda2be8970586c3274 \
@@ -1277,6 +1268,15 @@ zope-interface==8.7 \
     --hash=sha256:eeec8bb03f69706876a2bfdfa93b6f70c23230f9c655f8d14726b5bad1319b68 \
     --hash=sha256:f23736eda7fbd9125b41e41e437217c6328dddb303be522b1938a70eeb6eaf1e \
     --hash=sha256:f70a3af6efb813b8d406a449a8afc800ef8e9e32a62d6d52e37e8cb10674b70f
+    # via
+    #   certbot-dns-cloudns
+    #   certbot-dns-domainoffensive
+    #   certbot-dns-domeneshop
+
+# The following packages are considered to be unsafe in a requirements file:
+setuptools==84.2.1 \
+    --hash=sha256:3ff8b3b5492a0aa66960f4419365a86b84e013070d4313e4d4a6894f5d64d6bc \
+    --hash=sha256:ca140b45d5325a9478f880e351484f62fef15f336462e449ca0c03c873d589c2
     # via
     #   -r requirements.in
     #   certbot-dns-bunny
