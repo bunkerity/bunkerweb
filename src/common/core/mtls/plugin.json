@@ -103,7 +103,7 @@
     "MTLS_CRL": {
       "context": "multisite",
       "default": "",
-      "help": "Optional path to a certificate revocation list (PEM), readable by the Scheduler, which validates it, caches it, and distributes it to every instance (priority 'file'). nginx needs a CRL from every CA that issues a certificate of the chain, the root included, and refuses every client of a chain whose CRL is past its next update. A revoked certificate can keep resuming a TLS session saved before the CRL was published, for up to a day, until nginx is restarted. Leave empty to skip CRL checks.",
+      "help": "Optional path to a certificate revocation list (PEM), readable by the Scheduler, which validates it, caches it, and distributes it to every instance (priority 'file'). nginx needs a CRL from every CA that issues a certificate of the chain, the root included, and refuses every client of a chain whose CRL is past its next update. A new CRL or a changed client CA bundle drops the cached TLS sessions of the instance, so a revoked certificate cannot resume one. Leave empty to skip CRL checks.",
       "id": "mtls-crl",
       "label": "Client CRL path",
       "regex": "^$|^(/[\\w. \\-]+)+/?$",

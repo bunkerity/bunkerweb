@@ -4842,8 +4842,8 @@ An HTTPS redirect already issued by the SSL plugin (`REDIRECT_HTTP_TO_HTTPS`, or
 | `MTLS_CRL`                     |            | multisite | no       | **Client CRL path:** Optional path to a PEM-encoded certificate revocation list, readable by the Scheduler. Applied only when the CA bundle is successfully loaded. NGINX needs a CRL from every CA that issues a certificate of the chain, the root included. An expired CRL refuses the clients of its CA.                                                                                                               |
 | `MTLS_CRL_DATA`                |            | multisite | no       | **Client CRL data:** Certificate revocation list supplied directly as base64 or plaintext PEM.                                                                                                                                                                                                                                                                                                                             |
 
-!!! warning "A revoked certificate keeps working until its TLS session ends"
-    Publishing a CRL does not end the TLS sessions that a revoked client saved before. NGINX lets that client resume such a session without checking the certificate again, until the session expires (`ssl_session_timeout`, one day by default) or NGINX is restarted. A reload does not clear it. Plan for that delay when you revoke a certificate, and restart NGINX if the revocation cannot wait. Only new sessions are checked against the CRL.
+!!! info "A new CRL or client CA change drops the cached TLS sessions"
+    A CRL or client CA bundle change drops every cached TLS session of the instance once, because the session cache is named after a hash of the published CA bundles and CRLs. A revoked certificate cannot resume an earlier session, and every other client does one full handshake.
 
 !!! tip "Write `MTLS_URL` rules with care"
     - The match is case-sensitive: `^/admin` does not match `/Admin`. Start the pattern with `(?i)` to ignore case.

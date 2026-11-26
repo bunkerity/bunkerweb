@@ -4836,8 +4836,8 @@ SSL 插件已经发出的 HTTPS 重定向（`REDIRECT_HTTP_TO_HTTPS`，或其检
 | `MTLS_CRL`                     |            | multisite | 否   | **客户端 CRL 路径：** 指向 PEM 编码证书吊销列表的可选路径，需 Scheduler 可读。仅在成功加载 CA 证书包时生效。NGINX 要求链中每个签发证书的 CA（包括根 CA）都提供 CRL。过期的 CRL 会导致其 CA 的客户端被拒绝。                                                                                                                            |
 | `MTLS_CRL_DATA`                |            | multisite | 否   | **客户端 CRL 数据：** 直接以 base64 或 PEM 提供的吊销列表。                                                                                                                                                                                                                                                                            |
 
-!!! warning "已吊销的证书在其 TLS 会话结束前仍然有效"
-    发布 CRL 不会终止已吊销客户端此前保存的 TLS 会话。NGINX 允许该客户端恢复这样的会话而不再检查证书，直到会话过期（`ssl_session_timeout`，默认一天）或 NGINX 重启为止。重新加载不会清除它。吊销证书时请把这一延迟考虑在内，若吊销不能等待，请重启 NGINX。只有新会话才会对照 CRL 检查。
+!!! info "新的 CRL 或客户端 CA 变更会清除已缓存的 TLS 会话"
+    CRL 或客户端 CA 证书包的变更会一次性清除实例中所有已缓存的 TLS 会话，因为会话缓存的名称包含已发布 CA 证书包和 CRL 的哈希值。已吊销的证书无法恢复之前的会话，其他客户端只需重新进行一次完整握手。
 
 !!! tip "谨慎编写 `MTLS_URL` 规则"
     - 匹配区分大小写：`^/admin` 不匹配 `/Admin`。在模式开头加上 `(?i)` 可忽略大小写。

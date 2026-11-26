@@ -37,6 +37,7 @@ DEFAULTS = {
     "resolve_ssl_ecdh_curve": lambda value: value,
     "import": import_module,
     "has_variable": Templator.has_variable,
+    "mtls_cache_digest": "",
 }
 
 

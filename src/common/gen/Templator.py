@@ -5,6 +5,7 @@ from contextlib import suppress
 from ctypes import CDLL, c_char_p, c_int, c_long, c_void_p
 from ctypes.util import find_library
 from functools import lru_cache
+from hashlib import sha256
 from importlib import import_module
 from glob import glob
 from math import ceil
@@ -13,6 +14,7 @@ from os.path import basename, join, sep
 from pathlib import Path
 from random import choice
 from ssl import PROTOCOL_TLS_SERVER, SSLContext
+from stat import S_ISDIR
 from string import ascii_letters, digits
 from re import search as re_search, escape as re_escape
 from subprocess import run
@@ -159,6 +161,49 @@ def resolve_ssl_ecdh_curve(value: str, fallback: str = "prime256v1:secp384r1") -
         logger.warning(f"Resolved ssl_ecdh_curve (fallback): {fallback}")
         _ssl_ecdh_curve_resolution_logged = True
     return fallback
+
+
+def mtls_cache_digest() -> str:
+    """Short hash of the published mTLS material of every service, "" when there is none.
+
+    The TLS session cache zone name carries it: a zone survives a reload, so a client that a new CRL
+    revokes, or whose CA left a bundle, would otherwise resume its cached session until
+    ``ssl_session_timeout``. Any change gives a new zone and drops every cached session once.
+    Each service counts as (name, CA bundle hash, CRL hash), so assigning a CRL to another service counts too.
+    Staging and backup directories start with a dot and are not published; they are skipped.
+    Raises when a published file cannot be read, so the generation keeps the previous configuration.
+    """
+    root = Path(sep, "var", "cache", "bunkerweb", "mtls")
+
+    def file_hash(path: Path) -> str:
+        try:
+            return sha256(path.read_bytes()).hexdigest()
+        except FileNotFoundError:
+            return "-"
+        except OSError as e:
+            raise RuntimeError(f"Cannot read the published mTLS file {path}: {e}") from e
+
+    def is_service_dir(path: Path) -> bool:
+        # Path.is_dir() answers False on any OSError (Python 3.14), which would silently drop the service from the digest.
+        # A vanished entry raises too: a publication renames directories, and skipping one could publish a partial digest.
+        try:
+            return S_ISDIR(path.lstat().st_mode)  # lstat: a symlink is not a service directory
+        except OSError as e:
+            raise RuntimeError(f"Cannot inspect the published mTLS entry {path}: {e}") from e
+
+    try:
+        entries = [path for path in root.iterdir() if not path.name.startswith(".")]
+    except FileNotFoundError:
+        return ""
+    except OSError as e:
+        raise RuntimeError(f"Cannot list the published mTLS directory {root}: {e}") from e
+
+    services = sorted(path for path in entries if is_service_dir(path))
+
+    entries = [(path.name, file_hash(path / "ca.pem"), file_hash(path / "crl.pem")) for path in services]
+    # A purge can leave an empty service directory behind: it holds nothing and counts for nothing.
+    entries = [entry for entry in entries if entry[1:] != ("-", "-")]
+    return sha256(repr(entries).encode()).hexdigest()[:16] if entries else ""
 
 
 class ConfigurableCustomUndefined(Undefined):
@@ -438,6 +483,8 @@ class Templator:
             "read_lines": Templator.read_lines,
             "import": import_module,
             "resolve_ssl_ecdh_curve": resolve_ssl_ecdh_curve,
+            # Read once per generation, so every zone declaration of the render carries the same name.
+            "mtls_cache_digest": mtls_cache_digest(),
             "normalize_memory_size": Templator._normalize_memory_size,
         }
 
