@@ -32,7 +32,14 @@ from magic import Magic
 from requests import get
 from requests.exceptions import ConnectionError
 
-from common_utils import bytes_hash, create_plugin_tar_gz, safe_tar_extractall, safe_zip_extractall, strip_plugin_write_bits  # type: ignore
+from common_utils import (  # type: ignore
+    bytes_hash,
+    create_plugin_tar_gz,
+    installed_plugin_matches_archive,
+    safe_tar_extractall,
+    safe_zip_extractall,
+    strip_plugin_write_bits,
+)
 from Database import Database  # type: ignore
 from logger import getLogger  # type: ignore
 
@@ -56,10 +63,15 @@ def _set_plugin_permissions(plugin_path: Path) -> None:
     strip_plugin_write_bits(plugin_path)
 
 
-def _plugin_checksum_matches_database(plugin_path: Path, checksum: str) -> bool:
+def _plugin_checksum_matches_database(plugin_path: Path, plugin: Union[str, Dict[str, Any]]) -> bool:
     try:
         plugin_content = create_plugin_tar_gz(plugin_path, arc_root=plugin_path.name)
-        return bytes_hash(plugin_content, algorithm="sha256") == checksum
+        checksum = plugin if isinstance(plugin, str) else plugin.get("checksum", "")
+        if bytes_hash(plugin_content, algorithm="sha256") == checksum:
+            return True
+        if isinstance(plugin, dict) and installed_plugin_matches_archive(plugin_content, plugin):
+            return True
+        return False
     except BaseException as e:
         LOGGER.debug(format_exc())
         LOGGER.warning(f"Could not verify plugin {plugin_path.name} integrity before skipping reinstall: {e}")
@@ -122,12 +134,14 @@ def install_plugin(plugin_path: Path, db) -> bool:
         old_version = None
         old_checksum = ""
         old_method = ""
+        old_plugin = None
 
-        for plugin in db.get_plugins(_type="external"):
+        for plugin in db.get_plugins(_type="external", with_data=True):
             if plugin["id"] == metadata["id"]:
                 old_version = plugin["version"]
                 old_checksum = plugin.get("checksum", "")
                 old_method = plugin.get("method", "")
+                old_plugin = plugin
                 break
 
         if old_version == metadata["version"]:
@@ -137,7 +151,7 @@ def install_plugin(plugin_path: Path, db) -> bool:
                 )
                 return False
 
-            if old_checksum and _plugin_checksum_matches_database(new_plugin_path, old_checksum):
+            if old_checksum and _plugin_checksum_matches_database(new_plugin_path, old_plugin or old_checksum):
                 LOGGER.warning(f"Skipping installation of plugin {metadata['id']} (version {metadata['version']} already installed)")
                 return False
 
@@ -311,7 +325,7 @@ try:
         if plugin["method"] != "scheduler" and plugin["id"] not in external_plugins_ids:
             external_plugins.append(plugin)
 
-    err = db.update_external_plugins(external_plugins, per_plugin_commit=False)
+    err = db.update_external_plugins(external_plugins, delete_missing=False, per_plugin_commit=False)
 
     if err:
         LOGGER.error(f"Couldn't update external plugins to database: {err}")

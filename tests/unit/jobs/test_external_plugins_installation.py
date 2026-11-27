@@ -94,7 +94,7 @@ def test_manual_plugin_survives_database_publication(tmp_path, monkeypatch):
     _, status = load_job(monkeypatch, tmp_path, JOB, database=db, env={"EXTERNAL_PLUGIN_URLS": source.as_uri()})
     assert status == 1
     assert db.update_external_plugins.call_args.args[0][-1] == manual
-    assert db.update_external_plugins.call_args.kwargs == {"per_plugin_commit": False}
+    assert db.update_external_plugins.call_args.kwargs == {"delete_missing": False, "per_plugin_commit": False}
 
 
 @pytest.mark.parametrize("manifest", [None, "{bad"])
@@ -124,6 +124,35 @@ def test_existing_plugin_respects_ownership_and_integrity(tmp_path, monkeypatch,
     (candidate / "new.txt").write_text("replacement")
     assert module.install_plugin(candidate, db) is (method == "scheduler" and not checksum_matches)
     assert (installed / "jobs/run.py").exists() is (method != "scheduler" or checksum_matches)
+
+
+def test_existing_plugin_content_fallback_skips_reinstall(tmp_path, monkeypatch):
+    import gzip
+    from common_utils import add_dir_to_tar_safely
+
+    source = tmp_path / "plugins.zip"
+    _archive(source, "zip")
+    db = _db()
+    module, status = load_job(monkeypatch, tmp_path, JOB, database=db, env={"EXTERNAL_PLUGIN_URLS": source.as_uri()})
+    assert status == 1
+    installed = module.EXTERNAL_PLUGINS_DIR / "sample"
+    raw_tar = BytesIO()
+    with tar_open(fileobj=raw_tar, mode="w") as tar:
+        add_dir_to_tar_safely(tar, installed, arc_root="sample")
+    stored_gz = BytesIO()
+    with gzip.GzipFile(fileobj=stored_gz, mode="wb", mtime=99999) as gz:
+        gz.write(raw_tar.getvalue())
+    stored_data = stored_gz.getvalue()
+    stored_checksum = bytes_hash(stored_data, algorithm="sha256")
+    db.get_plugins.return_value = [
+        {"id": "sample", "version": "2", "method": "scheduler", "checksum": stored_checksum, "data": stored_data}
+    ]
+    candidate = tmp_path / "candidate"
+    candidate.mkdir()
+    (candidate / "plugin.json").write_text('{"id": "sample", "version": "2"}')
+    (candidate / "new.txt").write_text("replacement")
+    assert module.install_plugin(candidate, db) is False
+    assert (installed / "jobs/run.py").exists() is True
 
 
 def test_atomic_install_restores_previous_tree_on_rename_failure(tmp_path, monkeypatch):

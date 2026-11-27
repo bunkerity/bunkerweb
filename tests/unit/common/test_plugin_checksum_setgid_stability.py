@@ -222,3 +222,29 @@ def test_reingesting_an_identical_checksum_raises_no_change_flag(db, tmp_path, m
 
     assert ingest("second") == ""
     assert db.get_metadata()[flag] is True
+
+
+def test_umask_file_mode_differences_produce_identical_checksum(tmp_path):
+    """Archives generated from trees with 0o640 vs 0o644 file modes must produce identical checksums."""
+    tree1 = tmp_path / "tree1" / PLUGIN
+    tree2 = tmp_path / "tree2" / PLUGIN
+    tree1.mkdir(parents=True)
+    tree2.mkdir(parents=True)
+
+    _write(tree1 / "plugin.json", '{"id": "sample"}', 0o644)
+    _write(tree1 / "jobs" / "job.py", "print('job')\n", 0o755)
+
+    _write(tree2 / "plugin.json", '{"id": "sample"}', 0o640)
+    _write(tree2 / "jobs" / "job.py", "print('job')\n", 0o750)
+
+    if (tree1 / "plugin.json").stat().st_mode & 0o777 == (tree2 / "plugin.json").stat().st_mode & 0o777:
+        t1 = tarfile.TarInfo("sample/plugin.json")
+        t1.mode = 0o644
+        t2 = tarfile.TarInfo("sample/plugin.json")
+        t2.mode = 0o640
+        assert common_utils.plugin_tar_filter(t1).mode == common_utils.plugin_tar_filter(t2).mode == 0o644
+        return
+
+    archive1 = _archive(tree1)
+    archive2 = _archive(tree2)
+    assert _checksum(archive1) == _checksum(archive2)
