@@ -5,4 +5,4 @@ packaging==26.3
 # Scheduler botocore requires <3; all-in-one installs both locks in one pip run; Kubernetes 37.0.2 needs >=3.
 python-dateutil<3
 pytz==2026.6
-redis[hiredis]==8.1.0
+redis[hiredis]==8.2.0
