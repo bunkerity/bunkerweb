@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- [BUGFIX] `bunkernet`: honor outbound HTTP proxy environment variables in the Lua API client, including authenticated proxies and `NO_PROXY` exclusions.
+
 ## v1.6.18 - 2026/11/20
 
 - [BUGFIX] `ui`: when a template save fails, the template editor says whether the WAF or an expired session stopped it.

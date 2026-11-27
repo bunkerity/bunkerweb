@@ -3547,20 +3547,23 @@ Pro tip: When viewing your alerts, click the "columns" option and check the "con
 
 If your environment requires outbound HTTP(S) traffic to go through a forward proxy (for example a corporate proxy or Squid), you can rely on standard proxy environment variables. There is no dedicated BunkerWeb setting for this.
 
-**NGINX itself does not use these variables for upstream traffic**, so the forward proxy configuration only matters for components that initiate outbound requests. In practice, set them on the **Scheduler**, because it handles periodic tasks like Let's Encrypt certificate renewals, external API calls, and webhooks.
+**NGINX does not use these variables for reverse-proxy upstream traffic.** The **Scheduler** uses them for periodic outbound tasks such as Let's Encrypt certificate renewals, external API calls and webhooks. The **BunkerWeb instance** also uses them for outbound BunkerNet API requests from its NGINX workers, including the status check. In deployments with separate components, configure the proxy on both.
 
 The commonly used variables are:
 
-- `HTTP_PROXY` / `HTTPS_PROXY`: proxy URL, optionally with credentials.
-- `NO_PROXY`: comma-separated list of hosts, domains, or CIDRs that must bypass the proxy (match your integration: service names in Docker/Swarm, cluster domains in Kubernetes, or just localhost on Linux).
+- `HTTP_PROXY` / `HTTPS_PROXY`: proxy URL, optionally with HTTP Basic authentication (for example `http://user:password@proxy.example.local:3128`). For BunkerNet, the proxy URL must use the `http://` scheme, even for HTTPS destinations (which use CONNECT). Percent-encode reserved characters in credentials. Lowercase variants take precedence over uppercase variants for BunkerNet.
+- `NO_PROXY`: comma-separated list of hosts, domains, IP addresses, or CIDRs that must bypass the proxy (match your integration: service names in Docker/Swarm, cluster domains in Kubernetes, or just localhost on Linux). BunkerNet also supports `*` to bypass the proxy entirely and optional ports on host entries. CIDR matching applies to literal IP destinations.
 - `REQUESTS_CA_BUNDLE` / `SSL_CERT_FILE`: optional, needed when the proxy uses a custom CA. Mount the CA bundle into the container and point both variables to it so Python requests can validate TLS (adjust the path to match your base image).
+
+!!! note "Proxy authentication and TLS trust"
+    Store real proxy credentials securely, and use the normal BunkerWeb TLS trust configuration for Lua HTTPS requests. `REQUESTS_CA_BUNDLE` and `SSL_CERT_FILE` in these examples configure Python, not the NGINX Lua client. Recreate containers or restart services when proxy environment variables change.
 
 !!! warning "NO_PROXY is required for internal traffic"
     If you omit internal ranges or service names, internal traffic can be sent to the proxy and fail. Tailor the list to your integration (for example Docker service names, Kubernetes cluster domains, or just localhost on Linux).
 
 === "Linux"
 
-    Add the variables to `/etc/bunkerweb/variables.env`. This file is loaded by both services, but only the Scheduler will use them:
+    Add the variables to `/etc/bunkerweb/variables.env`. The Scheduler and the BunkerWeb instance both load the proxy settings from this file. Use unquoted values:
 
     ```conf
     HTTP_PROXY=http://proxy.example.local:3128
@@ -3579,7 +3582,7 @@ The commonly used variables are:
 
 === "All-in-one"
 
-    Provide the variables at container creation time (and mount the CA bundle if needed). The All-in-one image includes the Scheduler, so this will cover outbound tasks:
+    Provide the variables at container creation time (and mount the CA bundle if needed). The All-in-one image includes both BunkerWeb and the Scheduler, so this covers BunkerNet requests and Scheduler outbound tasks:
 
     ```bash
     docker run -d \
@@ -3601,12 +3604,18 @@ The commonly used variables are:
 
 === "Docker"
 
-    Add the variables to the scheduler container:
+    Set the proxy variables on both the BunkerWeb and Scheduler services. The same values can be shared using a YAML anchor; the CA environment variables below apply to Python in the Scheduler.
 
     ```yaml
+    bunkerweb:
+      image: bunkerity/bunkerweb:1.6.18
+      environment:
+        HTTP_PROXY: "http://proxy.example.local:3128"
+        HTTPS_PROXY: "http://proxy.example.local:3128"
+        NO_PROXY: "localhost,127.0.0.1,bunkerweb,bw-scheduler,redis,db"
+      ...
     bw-scheduler:
       image: bunkerity/bunkerweb-scheduler:1.6.18
-      ...
       environment:
         HTTP_PROXY: "http://proxy.example.local:3128"
         HTTPS_PROXY: "http://proxy.example.local:3128"
@@ -3620,12 +3629,18 @@ The commonly used variables are:
 
 === "Docker autoconf"
 
-    Apply the variables to the scheduler container:
+    Set the proxy variables on both the BunkerWeb and Scheduler services. The same values can be shared using a YAML anchor; the CA environment variables below apply to Python in the Scheduler.
 
     ```yaml
+    bunkerweb:
+      image: bunkerity/bunkerweb:1.6.18
+      environment:
+        HTTP_PROXY: "http://proxy.example.local:3128"
+        HTTPS_PROXY: "http://proxy.example.local:3128"
+        NO_PROXY: "localhost,127.0.0.1,bunkerweb,bw-scheduler,redis,db"
+      ...
     bw-scheduler:
       image: bunkerity/bunkerweb-scheduler:1.6.18
-      ...
       environment:
         HTTP_PROXY: "http://proxy.example.local:3128"
         HTTPS_PROXY: "http://proxy.example.local:3128"
@@ -3639,9 +3654,17 @@ The commonly used variables are:
 
 === "Kubernetes"
 
-    Add the variables to the Scheduler pod using `extraEnvs`. If you need a custom CA, mount it via `extraVolumes`/`extraVolumeMounts` and point the variables to the mounted path:
+    Add the variables to both the BunkerWeb and Scheduler pods using `extraEnvs`. If the Scheduler needs a custom CA, mount it via `extraVolumes`/`extraVolumeMounts` and point the Python CA variables to the mounted path:
 
     ```yaml
+    bunkerweb:
+      extraEnvs:
+        - name: HTTP_PROXY
+          value: "http://proxy.example.local:3128"
+        - name: HTTPS_PROXY
+          value: "http://proxy.example.local:3128"
+        - name: NO_PROXY
+          value: "localhost,127.0.0.1,.svc,.cluster.local"
     scheduler:
       extraEnvs:
         - name: HTTP_PROXY
@@ -3663,12 +3686,18 @@ The commonly used variables are:
 
         **More information can be found in the [Swarm integration documentation](integrations.md#swarm).**
 
-    Add the variables to the scheduler service:
+    Set the proxy variables on both the BunkerWeb and Scheduler services. The same values can be shared using a YAML anchor; the CA environment variables below apply to Python in the Scheduler.
 
     ```yaml
+    bunkerweb:
+      image: bunkerity/bunkerweb:1.6.18
+      environment:
+        HTTP_PROXY: "http://proxy.example.local:3128"
+        HTTPS_PROXY: "http://proxy.example.local:3128"
+        NO_PROXY: "localhost,127.0.0.1,bunkerweb,bw-scheduler,redis,db"
+      ...
     bw-scheduler:
       image: bunkerity/bunkerweb-scheduler:1.6.18
-      ...
       environment:
         HTTP_PROXY: "http://proxy.example.local:3128"
         HTTPS_PROXY: "http://proxy.example.local:3128"

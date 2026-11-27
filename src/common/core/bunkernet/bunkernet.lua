@@ -381,6 +381,114 @@ function bunkernet:log_stream()
 	return self:log()
 end
 
+-- lua-resty-http expects proxy credentials separately from the proxy URI.
+-- Decode percent-encoded userinfo without treating a literal "+" as a space.
+local function parse_proxy_url(proxy)
+	local scheme, authority = proxy:match("^(%a+)://([^/?#]+)/?$")
+	if not scheme or scheme:lower() ~= "http" then
+		return nil
+	end
+	local authorization
+	if authority:find("@", 1, true) then
+		local userinfo, host = authority:match("^(.*)@([^@]+)$")
+		if not userinfo then
+			return nil
+		end
+		local username, password = userinfo:match("^([^:]*):(.*)$")
+		if not username then
+			username, password = userinfo, ""
+		end
+		local function decode_userinfo(value)
+			return (value:gsub("%%(%x%x)", function(hex)
+				return string.char(tonumber(hex, 16))
+			end))
+		end
+		authorization = "Basic " .. ngx.encode_base64(decode_userinfo(username) .. ":" .. decode_userinfo(password))
+		authority = host
+	end
+
+	local host, port = authority:match("^(%[[^%]]+%]):(%d+)$")
+	if not host then
+		host, port = authority:match("^([^:%[%]]+):(%d+)$")
+	end
+	host = host or authority:match("^(%[[^%]]+%])$") or authority:match("^([^:%[%]]+)$")
+	if not host or host:find("[%s%c@]") or (port and (tonumber(port) < 1 or tonumber(port) > 65535)) then
+		return nil
+	end
+	return "http://" .. authority, authorization
+end
+
+-- Resolve NO_PROXY before setting any proxy options. This also prevents proxy
+-- authorization and absolute-form request targets from reaching a bypassed HTTP origin.
+local function bypass_proxy(host, port, no_proxy)
+	if not no_proxy then
+		return false
+	end
+	host = host:lower():gsub("^%[(.*)%]$", "%1")
+	local ip = utils.normalize_ip(host)
+	for entry in no_proxy:gmatch("[^,]+") do
+		entry = entry:match("^%s*(.-)%s*$"):lower()
+		if entry == "*" then
+			return true
+		end
+		if ip and entry:find("/", 1, true) then
+			if is_ip_in_networks(ip, { entry }) then
+				return true
+			end
+		else
+			local name, entry_port = entry:match("^%[([^%]]+)%]:?(%d*)$")
+			if not name then
+				name, entry_port = entry:match("^([^:]+):(%d+)$")
+			end
+			name = (name or entry):gsub("^%.", "")
+			if name ~= "" and (not entry_port or entry_port == "" or tonumber(entry_port) == port) then
+				if ip then
+					if utils.normalize_ip(name) == ip then
+						return true
+					end
+				elseif host == name or host:sub(-#name - 1) == "." .. name then
+					return true
+				end
+			end
+		end
+	end
+	return false
+end
+
+local function configure_proxy(httpc, url)
+	-- Lowercase takes precedence, including an explicitly empty value.
+	local http_proxy = os.getenv("http_proxy") or os.getenv("HTTP_PROXY")
+	local https_proxy = os.getenv("https_proxy") or os.getenv("HTTPS_PROXY")
+	local no_proxy = os.getenv("no_proxy") or os.getenv("NO_PROXY")
+	if (not http_proxy or http_proxy == "") and (not https_proxy or https_proxy == "") then
+		return true
+	end
+
+	local uri = httpc:parse_uri(url)
+	if not uri then
+		return false, "invalid BunkerNet API URL"
+	end
+	local scheme = uri[1]
+	local proxy = scheme == "https" and https_proxy or nil
+	if scheme == "http" then
+		proxy = http_proxy
+	end
+	if not proxy or proxy == "" or bypass_proxy(uri[2], uri[3], no_proxy) then
+		return true
+	end
+
+	local address, authorization = parse_proxy_url(proxy)
+	if not address then
+		-- Never include the raw proxy URL (which may contain credentials) in errors.
+		return false, "invalid BunkerNet proxy URL (expected an HTTP proxy URL)"
+	end
+	httpc:set_proxy_options({
+		[scheme .. "_proxy"] = address,
+		[scheme .. "_proxy_authorization"] = authorization,
+	})
+	return true
+end
+
 function bunkernet:request(method, url, data)
 	local httpc, err = http_new()
 	if not httpc then
@@ -389,6 +497,13 @@ function bunkernet:request(method, url, data)
 	-- Bound every API call so a slow/unreachable BunkerNet API can't stall the
 	-- UI ping or init_worker (matches the 5s timeout used in jobs/bunkernet.py).
 	httpc:set_timeout(5000)
+
+	local request_url = self.variables["BUNKERNET_SERVER"] .. url
+	local proxy_ok, proxy_err = configure_proxy(httpc, request_url)
+	if not proxy_ok then
+		httpc:close()
+		return false, proxy_err
+	end
 
 	local os_data = {
 		name = "Linux",
@@ -437,7 +552,7 @@ function bunkernet:request(method, url, data)
 			all_data[k] = v
 		end
 	end
-	local res, err = httpc:request_uri(self.variables["BUNKERNET_SERVER"] .. url, {
+	local res, err = httpc:request_uri(request_url, {
 		method = method,
 		body = encode(all_data),
 		headers = {

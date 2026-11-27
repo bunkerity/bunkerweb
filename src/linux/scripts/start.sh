@@ -79,13 +79,28 @@ function start_nginx() {
         return 1
     fi
     log "SYSTEMCTL" "ℹ️" "Starting nginx ..."
-    if [ "$(uname)" = "FreeBSD" ]; then
-        "$NGINX_BIN" -e /var/log/bunkerweb/error.log
-        nginx_rc=$?
-    else
-        run_as_nginx "$NGINX_BIN" -e /var/log/bunkerweb/error.log
-        nginx_rc=$?
-    fi
+    # Forward only outbound proxy keys, without sourcing the file or exposing
+    # credentials in command-line arguments. Keep the environment local to nginx startup.
+    local key value
+    (
+        if [ -f /etc/bunkerweb/variables.env ]; then
+            while IFS='=' read -r key value || [ -n "$key" ]; do
+                key=${key#"${key%%[![:space:]]*}"}
+                key=${key%"${key##*[![:space:]]}"}
+                case "$key" in
+                    HTTP_PROXY|HTTPS_PROXY|NO_PROXY|http_proxy|https_proxy|no_proxy)
+                        export "$key=$value"
+                        ;;
+                esac
+            done < /etc/bunkerweb/variables.env
+        fi
+        if [ "$(uname)" = "FreeBSD" ]; then
+            "$NGINX_BIN" -e /var/log/bunkerweb/error.log
+        else
+            run_as_nginx "$NGINX_BIN" -e /var/log/bunkerweb/error.log
+        fi
+    )
+    nginx_rc=$?
     [ "$nginx_rc" -eq 0 ]
 }
 
